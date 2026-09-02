@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My targets - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=5">
+<style>
+.who{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 26px}
+.who button{
+  font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;
+  font-size:1.5rem;letter-spacing:.04em;
+  background:var(--white);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:18px 26px;cursor:pointer;box-shadow:var(--lift);
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.who button:nth-child(odd){transform:rotate(-1.2deg)}
+.who button:nth-child(even){transform:rotate(1deg)}
+.who button:hover{transform:rotate(0deg) translateY(-4px);box-shadow:var(--lift-hi)}
+.who button[aria-pressed="true"]{background:linear-gradient(150deg,var(--orange),var(--orange-deep))}
+.who button .sub{display:block;font-size:.6rem;letter-spacing:.16em;font-variation-settings:"wght" 600;opacity:.75;margin-top:3px}
+
+.scoreboard{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:18px 22px;margin:0 0 26px;
+  box-shadow:var(--lift);transform:rotate(-.4deg);
+}
+.scoreboard .big{
+  font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;
+  font-size:2.6rem;line-height:1;
+}
+.track{flex:1;min-width:200px;height:20px;background:var(--paper);
+  border:var(--border) solid var(--ink);border-radius:999px;overflow:hidden}
+.track span{display:block;height:100%;width:0;
+  background:linear-gradient(90deg,var(--yellow),var(--orange));
+  transition:width .45s cubic-bezier(.2,1.1,.4,1)}
+.scoreboard .said{font-size:.95rem;color:var(--body-tint);flex-basis:100%;margin:0}
+
+.tgt{
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  background:var(--white);margin:0 0 14px;overflow:hidden;
+  box-shadow:var(--lift);
+}
+.tgt>summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;gap:14px;align-items:center}
+.tgt>summary::-webkit-details-marker{display:none}
+.tgt .pill{
+  font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;
+  font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;
+  margin:0 0 5px;opacity:.85;
+}
+.tgt h2{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;
+  font-size:1.12rem;line-height:1.15;margin:0}
+.tgt .txt{flex:1;min-width:0}
+.tgt .flag{
+  flex:none;font-family:var(--display);font-size:.66rem;letter-spacing:.12em;
+  text-transform:uppercase;border:2px solid var(--ink);border-radius:999px;
+  padding:5px 11px;background:var(--white);white-space:nowrap;
+}
+.tgt .flag.go{background:var(--yellow)}
+.tgt .flag.got{background:var(--orange)}
+.tgt .chev{flex:none;transition:transform .2s ease}
+.tgt[open] .chev{transform:rotate(90deg)}
+.tgt .body{border-top:var(--border) solid var(--ink);padding:18px 20px 22px;background:var(--paper)}
+
+.states{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 16px}
+.states button{
+  font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;
+  font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--white);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:999px;
+  padding:11px 18px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.states button:hover{transform:translate(-2px,-2px);box-shadow:5px 6px 0 var(--ink)}
+.states button:active{transform:translate(1px,2px);box-shadow:1px 1px 0 var(--ink)}
+.states button[aria-pressed="true"]{background:var(--yellow)}
+.states button[data-s="2"][aria-pressed="true"]{background:var(--orange)}
+.states button[data-s="0"][aria-pressed="true"]{background:var(--line)}
+
+.whenline{font-family:var(--display);font-size:.68rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--teal);margin:0 0 14px;min-height:1em}
+
+.fl{display:block;font-family:var(--display);font-size:.66rem;
+  letter-spacing:.15em;text-transform:uppercase;opacity:.7;margin:0 0 5px}
+.tgt textarea{
+  width:100%;font-family:var(--body);font-size:.95rem;
+  border:var(--border) solid var(--ink);border-radius:14px;
+  padding:11px 13px;background:var(--white);color:var(--ink);
+  min-height:64px;resize:vertical;margin-bottom:4px;
+}
+.saved{font-size:.76rem;color:var(--teal);min-height:1.1em;margin:0}
+
+.nextup{
+  background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:20px 22px;margin:0 0 26px;box-shadow:var(--lift);transform:rotate(.5deg);
+}
+.nextup h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.nextup p{margin:0;font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>MY <span class="accent">TARGETS</span></h1>
+    <div class="line">
+      <span class="chip">Autumn 1</span>
+      <p>These are yours. <span class="hl">You decide when one is done</span>, and you say how you did it.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="who" id="who" role="group" aria-label="Who are you"></div>
+
+  <div id="main" hidden>
+
+    <div class="scoreboard">
+      <span class="big" id="bigcount">0</span>
+      <div class="track"><span id="trackfill"></span></div>
+      <span class="chip" id="ofcount">of 15</span>
+      <p class="said" id="said">Nothing here has to be done in order, and nothing has to be done today.</p>
+    </div>
+
+    <div class="nextup" id="nextup">
+      <h2>Next one up</h2>
+      <p id="nexttext">Open any target and set it to having a go.</p>
+    </div>
+
+    <div id="targets"></div>
+
+    <div class="panel panel-teal">
+      <p><strong>Where this is saved.</strong> On this device, in this browser. If you use a different computer it will look empty. Jay keeps the proper copy.</p>
+    </div>
+
+    <a class="backlink" href="/">Back to the week</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+<script src="/data/targets.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+
+var LABELS = ["Not yet","Having a go","Got it"];
+var FILLS = ["fill-teal","fill-orange","fill-plum","fill-bright","fill-yellow","fill-ink"];
+
+var data = {};
+function load(){ try{ data = JSON.parse(localStorage.getItem(BASE5_KEY)) || {} }catch(e){ data = {} } }
+function save(){ try{ localStorage.setItem(BASE5_KEY, JSON.stringify(data)) }catch(e){} }
+function rec(s,t){
+  data[s] = data[s] || {};
+  data[s][t] = data[s][t] || {state:0, at:"", snote:"", tnote:"", link:""};
+  return data[s][t];
+}
+
+var ALL = [];
+BASE5_PILLARS.forEach(function(p){
+  p.targets.forEach(function(t){ ALL.push({pillar:p.name, t:t}) });
+});
+
+function stamp(iso){
+  if(!iso) return "";
+  var d = new Date(iso);
+  var day=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
+  var mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+  return day+" "+d.getDate()+" "+mon+", "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+}
+
+var me = null;
+
+function counts(s){
+  var got=0, going=0;
+  ALL.forEach(function(x){
+    var r = (data[s]||{})[x.t.id];
+    if(r && r.state===2) got++;
+    if(r && r.state===1) going++;
+  });
+  return {got:got, going:going};
+}
+
+function renderWho(){
+  var box = document.getElementById('who');
+  box.innerHTML = "";
+  BASE5_STUDENTS.forEach(function(s){
+    var b = document.createElement('button');
+    b.setAttribute('aria-pressed', s===me ? 'true':'false');
+    var c = counts(s);
+    b.innerHTML = s + '<span class="sub">' + c.got + '/' + ALL.length + '</span>';
+    b.addEventListener('click', function(){
+      me = s;
+      document.getElementById('main').hidden = false;
+      renderWho(); renderTargets();
+    });
+    box.appendChild(b);
+  });
+}
+
+function renderScore(){
+  var c = counts(me);
+  document.getElementById('bigcount').textContent = c.got;
+  document.getElementById('ofcount').textContent = 'of ' + ALL.length;
+  document.getElementById('trackfill').style.width = (c.got/ALL.length*100) + '%';
+
+  var said = "Nothing here has to be done in order, and nothing has to be done today.";
+  if(c.got > 0 && c.got < 5) said = "That is " + c.got + " down. No rush on the rest.";
+  if(c.got >= 5 && c.got < 10) said = "Over a third. Whenever you fancy the next one.";
+  if(c.got >= 10 && c.got < ALL.length) said = "Getting close now.";
+  if(c.got === ALL.length) said = "That is the lot. Every single one.";
+  document.getElementById('said').textContent = said;
+
+  var going = ALL.filter(function(x){ return rec(me,x.t.id).state===1 });
+  document.getElementById('nexttext').textContent = going.length
+    ? going.map(function(x){ return x.t.title }).join(', ')
+    : "Nothing on the go. Open any target and set it to having a go.";
+}
+
+function renderTargets(){
+  var box = document.getElementById('targets');
+  box.innerHTML = "";
+
+  ALL.forEach(function(x, i){
+    var t = x.t, r = rec(me, t.id);
+
+    var det = document.createElement('details');
+    det.className = 'tgt';
+
+    var sum = document.createElement('summary');
+    sum.className = FILLS[i % FILLS.length];
+
+    var txt = document.createElement('div');
+    txt.className = 'txt';
+    var pill = document.createElement('p');
+    pill.className = 'pill';
+    pill.textContent = x.pillar;
+    var h = document.createElement('h2');
+    h.textContent = t.ms[me];
+    txt.appendChild(pill); txt.appendChild(h);
+
+    var flag = document.createElement('span');
+    flag.className = 'flag' + (r.state===1?' go':'') + (r.state===2?' got':'');
+    flag.textContent = LABELS[r.state];
+
+    var chev = document.createElement('span');
+    chev.className = 'chev';
+    chev.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>';
+
+    sum.appendChild(txt); sum.appendChild(flag); sum.appendChild(chev);
+    det.appendChild(sum);
+
+    var body = document.createElement('div');
+    body.className = 'body';
+
+    var states = document.createElement('div');
+    states.className = 'states';
+    var when = document.createElement('p');
+    when.className = 'whenline';
+    when.textContent = r.at ? 'Marked ' + stamp(r.at) : '';
+
+    [0,1,2].forEach(function(n){
+      var b = document.createElement('button');
+      b.dataset.s = n;
+      b.textContent = LABELS[n];
+      b.setAttribute('aria-pressed', r.state===n ? 'true':'false');
+      b.addEventListener('click', function(){
+        r.state = n;
+        r.at = n ? new Date().toISOString() : "";
+        save();
+        Array.prototype.forEach.call(states.children, function(o){
+          o.setAttribute('aria-pressed', Number(o.dataset.s)===n ? 'true':'false');
+        });
+        when.textContent = r.at ? 'Marked ' + stamp(r.at) : '';
+        flag.textContent = LABELS[n];
+        flag.className = 'flag' + (n===1?' go':'') + (n===2?' got':'');
+        renderWho(); renderScore();
+      });
+      states.appendChild(b);
+    });
+
+    body.appendChild(states);
+    body.appendChild(when);
+
+    var lab = document.createElement('label');
+    lab.className = 'fl';
+    lab.textContent = 'How I did it, or what I got stuck on';
+    body.appendChild(lab);
+
+    var ta = document.createElement('textarea');
+    ta.value = r.snote || "";
+    ta.placeholder = 'Anything you want. One line is fine. Or leave it empty.';
+    var savedP = document.createElement('p');
+    savedP.className = 'saved';
+    var tmr;
+    ta.addEventListener('input', function(){
+      r.snote = ta.value; save();
+      savedP.textContent = 'Saved';
+      clearTimeout(tmr);
+      tmr = setTimeout(function(){ savedP.textContent = '' }, 1200);
+    });
+    body.appendChild(ta);
+    body.appendChild(savedP);
+
+    det.appendChild(body);
+    box.appendChild(det);
+  });
+
+  renderScore();
+}
+
+load();
+renderWho();
+})();
+</script>
+
+</body>
+</html>
