@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebuild targets file - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=5">
+<style>
+.box{
+  background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:24px;margin:0 0 22px;
+  box-shadow:var(--lift);
+}
+.box h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.box p{margin:0 0 14px;font-size:.93rem;color:var(--body-tint);max-width:62ch}
+.box input,.box textarea{
+  font-family:var(--body);font-size:1rem;
+  border:var(--border) solid var(--ink);border-radius:14px;
+  padding:11px 13px;background:var(--paper);color:var(--ink);
+}
+.box input[type=password],.box input[type=text].wide{width:100%;max-width:420px;margin-bottom:12px}
+.pins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 18px}
+.pinrow label{display:block;font-family:var(--display);
+  font-variation-settings:"wdth" 112,"wght" 800;font-size:1.05rem;margin-bottom:5px}
+.pinrow input{width:100%;font-family:var(--display);font-size:1.2rem;letter-spacing:.3em;text-align:center}
+.msg{margin:12px 0 0;min-height:1.2em;font-size:.92rem;color:var(--teal)}
+.msg.bad{color:var(--orange-deep)}
+#editor{width:100%;min-height:340px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:.82rem;line-height:1.5;white-space:pre}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav><a href="/teacher/milestones.html">Milestones</a><a href="/">Site</a></nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>REBUILD <span class="accent">TARGETS</span></h1>
+    <div class="line">
+      <span class="chip">Staff only</span>
+      <p>Change PINs, change the staff passphrase, or edit the target wording, then download a new data file.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="box" id="step1">
+    <h2>1. Open the current file</h2>
+    <p>Enter the current staff passphrase. Nothing can be changed until the existing file is unlocked.</p>
+    <input type="password" id="oldpass" placeholder="Current staff passphrase">
+    <br><button class="btn" id="openBtn">Open</button>
+    <p class="msg" id="msg1"></p>
+  </div>
+
+  <div class="box" id="step2" hidden>
+    <h2>2. Set the PINs</h2>
+    <p>Four digits each. Changing a PIN here does not lose anything a student has already ticked, since ticks are stored separately on the device.</p>
+    <div class="pins" id="pins"></div>
+
+    <h2>Staff passphrase</h2>
+    <p>Use something long. This one protects every student's targets at once, so it should not be four digits.</p>
+    <input type="text" class="wide" id="newpass" placeholder="New staff passphrase">
+  </div>
+
+  <div class="box" id="step3" hidden>
+    <h2>3. Target wording</h2>
+    <p>This is the full set, as editable text. Change the wording if you need to, but keep the shape of it intact. If in doubt, leave it alone.</p>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <p class="msg" id="msg3"></p>
+  </div>
+
+  <div class="box" id="step4" hidden>
+    <h2>4. Download the new file</h2>
+    <p>This produces targets-enc.js. Upload it to the data folder on GitHub, replacing the old one.</p>
+    <button class="btn btn-orange" id="buildBtn">Build and download</button>
+    <p class="msg" id="msg4"></p>
+  </div>
+
+  <a class="backlink" href="/teacher/milestones.html">Back to milestones</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Student site</a>
+  </div>
+</footer>
+
+<script src="/data/targets-enc.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+
+function b64(s){var raw=atob(s),a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
+function toB64(buf){var a=new Uint8Array(buf),s="";for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
+async function deriveKey(pass,salt,iter){
+  var base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:iter,hash:"SHA-256"},
+    base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function unlockBlob(blob,pass,iter){
+  var key=await deriveKey(pass,b64(blob.salt),iter);
+  var plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(blob.iv)},key,b64(blob.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function lockBlob(obj,pass,iter){
+  var salt=crypto.getRandomValues(new Uint8Array(16));
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var key=await deriveKey(pass,salt,iter);
+  var ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,
+    new TextEncoder().encode(JSON.stringify(obj)));
+  return {salt:toB64(salt),iv:toB64(iv),ct:toB64(ct)};
+}
+
+var pillars=null;
+
+document.getElementById('openBtn').addEventListener('click', async function(){
+  var m=document.getElementById('msg1');
+  m.className='msg'; m.textContent='Opening...';
+  try{
+    pillars = await unlockBlob(BASE5_ENC.teacher, document.getElementById('oldpass').value, BASE5_ENC.iter);
+    m.textContent='Open. Nine pillars loaded.';
+    document.getElementById('step2').hidden=false;
+    document.getElementById('step3').hidden=false;
+    document.getElementById('step4').hidden=false;
+
+    var box=document.getElementById('pins');
+    box.innerHTML='';
+    BASE5_STUDENTS.forEach(function(s){
+      var d=document.createElement('div');
+      d.className='pinrow';
+      d.innerHTML='<label for="pin-'+s+'">'+s+'</label>'+
+        '<input id="pin-'+s+'" type="text" inputmode="numeric" maxlength="4" placeholder="0000">';
+      box.appendChild(d);
+    });
+
+    document.getElementById('editor').value=JSON.stringify(pillars,null,1);
+  }catch(e){
+    m.className='msg bad';
+    m.textContent='That passphrase did not open it.';
+  }
+});
+
+document.getElementById('buildBtn').addEventListener('click', async function(){
+  var m=document.getElementById('msg4');
+  m.className='msg'; m.textContent='Building...';
+
+  try{ pillars=JSON.parse(document.getElementById('editor').value) }
+  catch(e){
+    m.className='msg bad';
+    m.textContent='The target wording box is not valid any more. Undo the last edit and try again.';
+    return;
+  }
+
+  var newpass=document.getElementById('newpass').value.trim();
+  if(newpass.length<10){
+    m.className='msg bad';
+    m.textContent='The staff passphrase needs to be at least ten characters.';
+    return;
+  }
+
+  var pins={}, bad=null;
+  BASE5_STUDENTS.forEach(function(s){
+    var v=document.getElementById('pin-'+s).value.trim();
+    if(!/^[0-9]{4}$/.test(v)) bad=s;
+    pins[s]=v;
+  });
+  if(bad){
+    m.className='msg bad';
+    m.textContent='Every student needs a four digit PIN. Check '+bad+'.';
+    return;
+  }
+
+  var out={iter:BASE5_ENC.iter, students:{}, teacher:null};
+  for(var i=0;i<BASE5_STUDENTS.length;i++){
+    var s=BASE5_STUDENTS[i];
+    var mine=[];
+    pillars.forEach(function(p){
+      p.targets.forEach(function(t){
+        mine.push({pillar:p.name,id:t.id,title:t.title,statement:t.statement,me:t.ms[s]});
+      });
+    });
+    out.students[s]=await lockBlob(mine,pins[s],out.iter);
+  }
+  out.teacher=await lockBlob(pillars,newpass,out.iter);
+
+  var js='/* ==========================================================\n'+
+         '   Base 5 - Autumn 1 targets, encrypted.\n'+
+         '   Rebuilt '+new Date().toISOString().slice(0,10)+' from build-targets.html\n'+
+         '   ========================================================== */\n\n'+
+         'var BASE5_STUDENTS = '+JSON.stringify(BASE5_STUDENTS)+';\n'+
+         'var BASE5_KEY = "'+BASE5_KEY+'";\n'+
+         'var BASE5_ENC = '+JSON.stringify(out,null,1)+';\n';
+
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([js],{type:'text/javascript'}));
+  a.download='targets-enc.js';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  m.textContent='Done. Upload targets-enc.js to the data folder, then write the PINs down somewhere safe.';
+});
+
+})();
+</script>
+
+</body>
+</html>
