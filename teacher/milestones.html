@@ -87,6 +87,19 @@
   letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin-bottom:3px;
 }
 
+.gate{
+  background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:24px;max-width:420px;margin:0 0 30px;
+  box-shadow:var(--lift);transform:rotate(-.4deg);
+}
+.gate h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.gate p{margin:0 0 14px;font-size:.92rem;color:var(--body-tint)}
+.gate input{
+  width:100%;font-family:var(--body);font-size:1rem;
+  border:var(--border) solid var(--ink);border-radius:14px;
+  padding:12px 14px;background:var(--paper);color:var(--ink);margin-bottom:12px;
+}
+.gmsg{margin:12px 0 0 !important;min-height:1.2em;color:var(--orange-deep)}
 .datamsg{font-size:.85rem;color:var(--body-tint);margin:8px 0 0}
 @media print{
   .top,.toolbar,footer,.backlink,.datatools{display:none}
@@ -128,6 +141,15 @@
 
 <div class="wrap">
 
+  <div class="gate" id="gate">
+    <h2>Staff passphrase</h2>
+    <p>The records are encrypted. Enter the staff passphrase to open them.</p>
+    <input type="password" id="gpass" placeholder="Passphrase" autocomplete="current-password">
+    <button class="btn" id="gbtn">Open</button>
+    <p class="gmsg" id="gmsg"></p>
+  </div>
+
+  <div id="sheet" hidden>
   <div class="toolbar" id="students"></div>
 
   <div class="summary">
@@ -146,6 +168,8 @@
   </div>
   <p class="datamsg" id="datamsg">Records live in this browser on this device. Export a backup now and again, and before changing device.</p>
 
+  </div>
+
   <a class="backlink" href="/teacher/">Back to teacher view</a>
 
 </div>
@@ -157,14 +181,14 @@
   </div>
 </footer>
 
-<script src="/data/targets.js?v=1"></script>
+<script src="/data/targets-enc.js?v=1"></script>
 <script>
 (function(){
 "use strict";
 
 var STUDENTS = BASE5_STUDENTS;
 var KEY = BASE5_KEY;
-var PILLARS = BASE5_PILLARS;
+var PILLARS = null;
 
 /* ---------- storage ---------- */
 var data = {};
@@ -194,7 +218,6 @@ function stamp(iso){
 
 var current = STUDENTS[0];
 var allTargets = [];
-PILLARS.forEach(function(p){ p.targets.forEach(function(t){ allTargets.push(t) }) });
 
 /* ---------- student tabs ---------- */
 function doneCount(student){
@@ -410,9 +433,38 @@ document.getElementById('copyBtn').addEventListener('click', function(){
   }
 });
 
-load();
-renderTabs();
-renderPillars();
+function b64(x){var raw=atob(x),a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
+async function deriveKey(pass,salt,iter){
+  var base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:iter,hash:"SHA-256"},
+    base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function unlockBlob(blob,pass,iter){
+  var key=await deriveKey(pass,b64(blob.salt),iter);
+  var plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(blob.iv)},key,b64(blob.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+var gate=document.getElementById('gate');
+var gpass=document.getElementById('gpass');
+var gmsg=document.getElementById('gmsg');
+
+async function openStaff(){
+  gmsg.textContent='Opening...';
+  try{
+    PILLARS = await unlockBlob(BASE5_ENC.teacher, gpass.value, BASE5_ENC.iter);
+    allTargets=[];
+    PILLARS.forEach(function(p){ p.targets.forEach(function(t){ allTargets.push(t) }) });
+    gate.hidden=true;
+    document.getElementById('sheet').hidden=false;
+    load(); renderTabs(); renderPillars();
+  }catch(e){
+    gmsg.textContent='That passphrase did not open it.';
+    gpass.value='';
+  }
+}
+document.getElementById('gbtn').addEventListener('click',openStaff);
+gpass.addEventListener('keydown',function(e){ if(e.key==='Enter') openStaff() });
 
 })();
 </script>
