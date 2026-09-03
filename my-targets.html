@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=6">
+<link rel="stylesheet" href="/style.css?v=7">
 <style>
 .who{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 26px}
 .who button{
@@ -181,6 +181,8 @@
       <p><strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.</p>
     </div>
 
+    <div id="sendHost"></div>
+
     <button class="btn btn-quiet" id="lockBtn">Lock and switch user</button>
     <a class="backlink" href="/">Back to the week</a>
   </div>
@@ -195,6 +197,7 @@
 </footer>
 
 <script src="/data/targets-enc.js?v=1"></script>
+<script src="/data/send.js?v=1"></script>
 <script>
 (function(){
 "use strict";
@@ -294,6 +297,27 @@ async function tryUnlock(){
   try{
     mine=await unlock(BASE5_ENC.students[me], entry, BASE5_ENC.iter);
     msg.textContent="";
+    Base5Send.mount(document.getElementById('sendHost'),{
+      tool:"My targets",
+      filename:"targets",
+      getText:function(){
+        var L=[me+" - Autumn 1 targets",""];
+        var order=["Got it","Having a go","Not yet"];
+        [2,1,0].forEach(function(st){
+          var rows=mine.filter(function(x){ return rec(me,x.id).state===st });
+          if(!rows.length) return;
+          L.push(order[2-st].toUpperCase());
+          rows.forEach(function(x){
+            var r=rec(me,x.id);
+            L.push("  "+x.pillar+": "+x.me);
+            if(r.at) L.push("     marked "+stamp(r.at));
+            if(r.snote) L.push("     I said: "+r.snote);
+          });
+          L.push("");
+        });
+        return L.join("\n");
+      }
+    });
     document.getElementById('lock').hidden=true;
     document.getElementById('main').hidden=false;
     renderTargets();
