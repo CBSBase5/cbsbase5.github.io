@@ -14,6 +14,9 @@
 .qwrap .card{cursor:default}
 .qcount{float:right;font-size:.85rem;opacity:.65;padding-top:4px}
 .prompt{font-size:1.45rem;line-height:1.45;margin:10px 0 18px}
+.learnbody p{font-size:1.1rem;line-height:1.55;margin:14px 0 6px}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:440px;height:auto}
 .answer-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.45rem;margin-bottom:8px}
 .answer-row input[type="text"]{width:130px;font-size:1.3rem;font-family:"Atkinson Hyperlegible",Verdana,sans-serif;text-align:center;padding:10px 6px;border:2px solid rgba(5,47,58,.18);border-radius:12px 10px 14px 10px;background:#fffdfb;color:#052f3a}
 .answer-row input[type="text"]:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
@@ -78,7 +81,7 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
 
   <div class="weektheme">
     <h2>Multiplying in your head</h2>
-    <span>Everyday maths. Go at your own pace, skip anything you like, see how it went at the end.</span>
+    <span>Everyday maths. Little explainers along the way, questions in between, skip anything you like.</span>
   </div>
 
   <div class="board">
@@ -86,8 +89,8 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
     <!-- START -->
     <div class="card w12" id="startCard">
       <span class="kicker">Before you start</span>
-      <h3>Twenty four short questions</h3>
-      <p>Multiplying by 10, 100 and 1,000, working with money, and a few smart tricks. No column methods needed, this is all about spotting patterns. Nothing is timed and nothing is a test.</p>
+      <h3>Learn a bit, try a bit</h3>
+      <p>Multiplying by 10, 100 and 1,000, working with money, and a few smart tricks. Each section starts with a quick picture of the idea, then some questions to try. 25 questions in all, no column methods needed. Nothing is timed and nothing is a test.</p>
       <p>If you would like your results saved so they can be sent to Jay, pick your initials. Skipping this is completely fine too.</p>
       <div class="initials" id="initialsRow"></div>
       <div class="qnav">
@@ -96,7 +99,7 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
       </div>
     </div>
 
-    <!-- QUESTION -->
+    <!-- QUESTION / LEARN -->
     <div class="card w12 hidden" id="qCard">
       <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
       <span class="qcount" id="qCount"></span>
@@ -152,50 +155,124 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
 <script>
 (function () {
   "use strict";
-  var X = "\u00D7"; // multiplication sign
-  var STORE = "b5.practice.multiplication.v1";
+  var X = "\u00D7";
+  var STORE = "b5.practice.multiplication.v2";
   var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
   var COHORT = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+  var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
 
-  // Question types:
-  //  num -> one box, integer answer (optional pre, e.g. "= \u00A3")   ans: [n]
-  //  mc  -> multiple choice                                           ans: index, opts: []
-  var QS = [
+  // ---------- visual examples (inline SVG) ----------
+  function pvBox(x, y, label, digit, hi) {
+    return "<rect x='" + x + "' y='" + y + "' width='60' height='56' rx='8' fill='" +
+      (hi ? "rgba(239,119,36,0.12)" : "#fffdfb") + "' stroke='" + (hi ? "#ef7724" : "#052f3a") + "' stroke-width='2'/>" +
+      "<text x='" + (x + 30) + "' y='" + (y - 6) + "' text-anchor='middle' " + FF + " font-size='12' fill='#5a6a72'>" + label + "</text>" +
+      (digit === "" ? "" : "<text x='" + (x + 30) + "' y='" + (y + 37) + "' text-anchor='middle' " + FF + " font-size='24' font-weight='bold' fill='#052f3a'>" + digit + "</text>");
+  }
+  var VIS = {};
+  VIS.shift10 = "<svg viewBox='0 0 440 220' role='img' aria-label='34 times 10: the 3 and 4 slide one place left and a zero fills the ones'>" +
+    "<defs><marker id='arrM' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#007291'/></marker></defs>" +
+    "<text x='60' y='52' text-anchor='end' " + FF + " font-size='18' font-weight='bold' fill='#052f3a'>34</text>" +
+    pvBox(90, 22, "hundreds", "", false) + pvBox(160, 22, "tens", "3", false) + pvBox(230, 22, "ones", "4", false) +
+    "<path d='M190 84 Q160 112 128 138' stroke='#007291' stroke-width='2.5' fill='none' marker-end='url(#arrM)'/>" +
+    "<path d='M260 84 Q230 112 198 138' stroke='#007291' stroke-width='2.5' fill='none' marker-end='url(#arrM)'/>" +
+    "<text x='330' y='118' text-anchor='middle' " + FF + " font-size='14' fill='#007291'>everything slides left</text>" +
+    "<text x='60' y='180' text-anchor='end' " + FF + " font-size='18' font-weight='bold' fill='#052f3a'>340</text>" +
+    pvBox(90, 150, "hundreds", "3", false) + pvBox(160, 150, "tens", "4", false) + pvBox(230, 150, "ones", "0", true) +
+    "<text x='330' y='185' text-anchor='middle' " + FF + " font-size='13' fill='#b3541e'>zero holds the place</text>" +
+    "</svg>";
+  VIS.jumps = "<svg viewBox='0 0 440 150' role='img' aria-label='47 becomes 4,700 times 100 and 47,000 times 1,000'>" +
+    "<defs><marker id='arrJ' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#007291'/></marker></defs>" +
+    "<text x='50' y='66' text-anchor='middle' " + FF + " font-size='26' font-weight='bold' fill='#052f3a'>47</text>" +
+    "<path d='M85 60 L150 60' stroke='#007291' stroke-width='2.5' fill='none' marker-end='url(#arrJ)'/>" +
+    "<text x='117' y='44' text-anchor='middle' " + FF + " font-size='14' fill='#007291'>" + X + " 100</text>" +
+    "<text x='210' y='66' text-anchor='middle' " + FF + " font-size='26' font-weight='bold' fill='#052f3a'>4,700</text>" +
+    "<path d='M275 60 L340 60' stroke='#ef7724' stroke-width='2.5' fill='none' marker-end='url(#arrJ)'/>" +
+    "<text x='307' y='44' text-anchor='middle' " + FF + " font-size='14' fill='#ef7724'>" + X + " 10</text>" +
+    "<text x='398' y='66' text-anchor='middle' " + FF + " font-size='26' font-weight='bold' fill='#052f3a'>47,000</text>" +
+    "<text x='220' y='120' text-anchor='middle' " + FF + " font-size='15' fill='#052f3a'>" + X + " 100 shifts two places, " + X + " 1,000 shifts three</text>" +
+    "</svg>";
+  VIS.scale = "<svg viewBox='0 0 440 140' role='img' aria-label='3 times 4 is 12, so 3 times 40 is 120'>" +
+    "<defs><marker id='arrK' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#007291'/></marker></defs>" +
+    "<rect x='30' y='24' width='170' height='64' rx='14' fill='rgba(0,114,145,0.08)' stroke='#007291' stroke-width='2'/>" +
+    "<text x='115' y='64' text-anchor='middle' " + FF + " font-size='24' font-weight='bold' fill='#052f3a'>3 " + X + " 4 = 12</text>" +
+    "<path d='M208 56 L258 56' stroke='#007291' stroke-width='2.5' fill='none' marker-end='url(#arrK)'/>" +
+    "<text x='233' y='40' text-anchor='middle' " + FF + " font-size='13' fill='#007291'>ten times bigger</text>" +
+    "<rect x='265' y='24' width='150' height='64' rx='14' fill='rgba(239,119,36,0.1)' stroke='#ef7724' stroke-width='2'/>" +
+    "<text x='340' y='64' text-anchor='middle' " + FF + " font-size='22' font-weight='bold' fill='#052f3a'>3 " + X + " 40 = 120</text>" +
+    "<text x='220' y='122' text-anchor='middle' " + FF + " font-size='15' fill='#052f3a'>use the small fact, then bolt the zeros back on</text>" +
+    "</svg>";
+  VIS.roundfix = "<svg viewBox='0 0 440 160' role='img' aria-label='19 times 6: do 20 times 6 to reach 120, then come back 6 to 114'>" +
+    "<defs><marker id='arrR' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#007291'/></marker>" +
+    "<marker id='arrO' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#ef7724'/></marker></defs>" +
+    "<line x1='30' y1='110' x2='410' y2='110' stroke='#052f3a' stroke-width='2.5'/>" +
+    "<circle cx='60' cy='110' r='5' fill='#052f3a'/>" +
+    "<text x='60' y='138' text-anchor='middle' " + FF + " font-size='15' fill='#052f3a'>0</text>" +
+    "<circle cx='330' cy='110' r='5' fill='#2e7d4f'/>" +
+    "<text x='330' y='138' text-anchor='middle' " + FF + " font-size='15' font-weight='bold' fill='#2e7d4f'>114</text>" +
+    "<circle cx='380' cy='110' r='5' fill='#007291'/>" +
+    "<text x='380' y='138' text-anchor='middle' " + FF + " font-size='15' fill='#007291'>120</text>" +
+    "<path d='M60 105 Q220 15 380 105' stroke='#007291' stroke-width='3' fill='none' marker-end='url(#arrR)'/>" +
+    "<text x='220' y='42' text-anchor='middle' " + FF + " font-size='16' font-weight='bold' fill='#007291'>20 " + X + " 6 = 120</text>" +
+    "<path d='M380 100 Q355 76 334 100' stroke='#ef7724' stroke-width='3' fill='none' marker-end='url(#arrO)'/>" +
+    "<text x='357' y='68' text-anchor='middle' " + FF + " font-size='15' font-weight='bold' fill='#ef7724'>take back 6</text>" +
+    "</svg>";
+
+  function learn(topic, heading, vis, text) {
+    return { t: topic, learn: true, h: heading,
+      body: "<div class='learnbody'><div class='learnfig'>" + vis + "</div><p>" + text + "</p></div>" };
+  }
+
+  // Item types:
+  //  learn -> explainer card, not scored
+  //  num   -> one box, integer answer (optional pre, e.g. "= \u00A3")  ans: [n]
+  //  mc    -> multiple choice                                          ans: index, opts: []
+  var ITEMS = [
+    learn("Times 10", "Digits slide left", VIS.shift10,
+      "Multiplying by 10 does not stick a zero on \u2014 it slides every digit one place to the left, so each digit is worth ten times more. The zero just holds the empty ones place. 34 " + X + " 10: the 3 tens become 3 hundreds, the 4 ones become 4 tens. 340."),
     { t: "Times 10", type: "num", p: "Work out 23 " + X + " 10", ans: [230] },
     { t: "Times 10", type: "num", p: "Work out 6 " + X + " 10", ans: [60] },
     { t: "Times 10", type: "num", p: "Work out 58 " + X + " 10", ans: [580] },
     { t: "Times 10", type: "num", p: "Work out 130 " + X + " 10", ans: [1300] },
-
-    { t: "Times 100", type: "num", p: "Work out 7 " + X + " 100", ans: [700] },
-    { t: "Times 100", type: "num", p: "Work out 42 " + X + " 100", ans: [4200] },
-    { t: "Times 100", type: "num", p: "Work out 90 " + X + " 100", ans: [9000] },
-
-    { t: "Times 1,000", type: "num", p: "Work out 4 " + X + " 1,000", ans: [4000] },
-    { t: "Times 1,000", type: "num", p: "Work out 36 " + X + " 1,000", ans: [36000] },
-    { t: "Times 1,000", type: "num", p: "Work out 250 " + X + " 1,000", ans: [250000] },
-
     { t: "How it works", type: "mc", p: "When you work out 34 " + X + " 10, what actually happens to the digits?",
       opts: ["Each digit moves one place to the left, and a zero holds the ones place",
              "A zero appears at the front of the number",
              "The digits swap round",
              "The digits stay where they are"], ans: 0 },
+
+    learn("Times 100", "Bigger jumps, more places", VIS.jumps,
+      "Times 100 slides the digits two places left. Times 1,000 slides them three. The zeros in 10, 100 and 1,000 tell you how many places to jump: 47 " + X + " 100 = 4,700 and 47 " + X + " 1,000 = 47,000."),
+    { t: "Times 100", type: "num", p: "Work out 7 " + X + " 100", ans: [700] },
+    { t: "Times 100", type: "num", p: "Work out 42 " + X + " 100", ans: [4200] },
+    { t: "Times 100", type: "num", p: "Work out 90 " + X + " 100", ans: [9000] },
+    { t: "Times 1,000", type: "num", p: "Work out 4 " + X + " 1,000", ans: [4000] },
+    { t: "Times 1,000", type: "num", p: "Work out 36 " + X + " 1,000", ans: [36000] },
+    { t: "Times 1,000", type: "num", p: "Work out 250 " + X + " 1,000", ans: [250000] },
     { t: "How it works", type: "mc", p: "Someone says \u201Cto multiply by 100 you just add two zeros\u201D. For whole numbers that works, but what is really going on?",
       opts: ["Every digit shifts two places to the left",
              "The number gets doubled twice",
              "The digits reverse",
              "You add 100 to the number"], ans: 0 },
 
+    learn("Multiples of 10", "Scale up facts you already know", VIS.scale,
+      "You already know 3 " + X + " 4 = 12, and 40 is just 4 made ten times bigger \u2014 so 3 " + X + " 40 = 120. Do the small fact first, then bolt the zeros back on. For 20 " + X + " 30: 2 " + X + " 3 = 6, then two zeros, 600."),
     { t: "Multiples of 10", type: "num", p: "Work out 3 " + X + " 40", ans: [120] },
     { t: "Multiples of 10", type: "num", p: "Work out 20 " + X + " 30", ans: [600] },
     { t: "Multiples of 10", type: "num", p: "Work out 6 " + X + " 200", ans: [1200] },
     { t: "Multiples of 10", type: "num", p: "Work out 50 " + X + " 40", ans: [2000] },
     { t: "Multiples of 10", type: "num", p: "Work out 8 " + X + " 50", ans: [400] },
+    { t: "Multiples of 10", type: "mc", p: "Kai works out 40 " + X + " 50 and gets 200. What has gone wrong?",
+      opts: ["4 " + X + " 5 = 20, then two more zeros for the two tens \u2014 it should be 2,000. Kai lost a zero",
+             "Nothing, 200 is right",
+             "Kai should have added instead, giving 90",
+             "40 " + X + " 50 is impossible to do in your head"], ans: 0 },
 
     { t: "Money", type: "num", pre: "= \u00A3", p: "10 raffle tickets cost \u00A33 each. How much altogether?", ans: [30] },
     { t: "Money", type: "num", pre: "= \u00A3", p: "A stall sells 100 cakes at \u00A32 each. How much money does it take?", ans: [200] },
     { t: "Money", type: "num", pre: "= \u00A3", p: "20 pizzas at \u00A35 each. What is the total?", ans: [100] },
     { t: "Money", type: "num", pre: "= \u00A3", p: "A film night sells 30 tickets at \u00A310 each and 100 bags of popcorn at \u00A32 each. How much altogether?", ans: [500] },
 
+    learn("Smart moves", "Round it, then fix it", VIS.roundfix,
+      "19 is awkward, but 20 is friendly. So for 19 " + X + " 6, do 20 " + X + " 6 = 120 \u2014 that is one 6 too many, so take it back: 120 \u2212 6 = 114. Round to a friendly number, do the easy sum, then fix the difference."),
     { t: "Smart moves", type: "mc", p: "Which is a smart way to work out 19 " + X + " 6 in your head?",
       opts: ["Work out 20 " + X + " 6 = 120, then take away one 6",
              "Work out 19 " + X + " 10, then halve it",
@@ -204,6 +281,10 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
     { t: "Smart moves", type: "num", p: "Use a trick like that to work out 21 " + X + " 5", ans: [105] },
     { t: "Smart moves", type: "num", p: "Work out 39 " + X + " 2", ans: [78] }
   ];
+
+  // Question numbers (learn cards excluded)
+  var QNUM = [], TOTALQ = 0;
+  ITEMS.forEach(function (q, i) { QNUM[i] = q.learn ? 0 : ++TOTALQ; });
 
   var state = { who: "", idx: 0, answers: {}, started: false, finished: false };
 
@@ -238,20 +319,31 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
     });
   }
 
-  // ---------- question screen ----------
+  // ---------- question / learn screen ----------
   function renderQ() {
-    var q = QS[state.idx];
+    var q = ITEMS[state.idx];
     el("qTopic").textContent = q.t;
-    el("qCount").textContent = (state.idx + 1) + " of " + QS.length;
-    el("qPrompt").innerHTML = q.p;
-    el("progFill").style.width = Math.round((state.idx / QS.length) * 100) + "%";
+    el("progFill").style.width = Math.round((state.idx / ITEMS.length) * 100) + "%";
     el("backBtn").disabled = state.idx === 0;
-    el("nextBtn").textContent = (state.idx === QS.length - 1) ? "Finish" : "Next";
+    var last = state.idx === ITEMS.length - 1;
+    el("skipBtn").classList.toggle("hidden", !!q.learn);
+    el("nextBtn").textContent = last ? "Finish" : (q.learn ? "Got it" : "Next");
 
     var box = el("qAnswer");
     box.innerHTML = "";
-    var saved = state.answers[state.idx];
     var hint = "";
+
+    if (q.learn) {
+      el("qCount").textContent = "";
+      el("qPrompt").innerHTML = "<strong>" + q.h + "</strong>";
+      box.innerHTML = q.body;
+      el("qHint").textContent = "";
+      return;
+    }
+
+    el("qCount").textContent = QNUM[state.idx] + " of " + TOTALQ;
+    el("qPrompt").innerHTML = q.p;
+    var saved = state.answers[state.idx];
 
     if (q.type === "num") {
       var row = document.createElement("div");
@@ -290,8 +382,8 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
   }
 
   function storeCurrent() {
-    var q = QS[state.idx];
-    if (q.type === "mc") return;
+    var q = ITEMS[state.idx];
+    if (q.learn || q.type === "mc") return;
     var inp = el("qAnswer").querySelector("input");
     if (!inp) return;
     var v = inp.value.trim();
@@ -300,14 +392,15 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
   }
 
   function goto(i) {
-    state.idx = Math.max(0, Math.min(QS.length - 1, i));
+    state.idx = Math.max(0, Math.min(ITEMS.length - 1, i));
     save();
     renderQ();
   }
 
   // ---------- marking ----------
   function markQ(qi) {
-    var q = QS[qi];
+    var q = ITEMS[qi];
+    if (q.learn) return undefined;
     var a = state.answers[qi];
     if (a === undefined || a === null) return null; // skipped
     if (q.type === "mc") return a[0] === q.ans;
@@ -335,13 +428,14 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
 
     var topics = {};
     var right = 0;
-    QS.forEach(function (q, i) {
+    ITEMS.forEach(function (q, i) {
+      if (q.learn) return;
       if (!topics[q.t]) topics[q.t] = { right: 0, total: 0 };
       topics[q.t].total++;
       if (markQ(i) === true) { right++; topics[q.t].right++; }
     });
 
-    el("scoreLine").textContent = right + " out of " + QS.length;
+    el("scoreLine").textContent = right + " out of " + TOTALQ;
     var strong = [], again = [];
     Object.keys(topics).forEach(function (t) {
       var frac = topics[t].right / topics[t].total;
@@ -385,7 +479,8 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
 
     var list = el("reviewList");
     list.innerHTML = "";
-    QS.forEach(function (q, i) {
+    ITEMS.forEach(function (q, i) {
+      if (q.learn) return;
       var m = markQ(i);
       var d = document.createElement("div");
       d.className = "review-item";
@@ -395,7 +490,7 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
       var extra = m === true ? "" :
         " \u2014 answer: " + answerText(q) +
         (m === false ? " (you put " + givenText(q, state.answers[i]) + ")" : "");
-      d.innerHTML = "Q" + (i + 1) + " \u00B7 " + q.p + " " + tag + extra;
+      d.innerHTML = "Q" + QNUM[i] + " \u00B7 " + q.p + " " + tag + extra;
       list.appendChild(d);
     });
 
@@ -409,25 +504,26 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
     lines.push("Multiplying in your head - Base 5");
     lines.push("Student: " + (state.who || "not given"));
     lines.push("Date: " + new Date().toLocaleString("en-GB"));
-    lines.push("Score: " + right + " out of " + QS.length);
+    lines.push("Score: " + right + " out of " + TOTALQ);
     lines.push("");
     lines.push("By topic:");
     Object.keys(topics).forEach(function (t) {
       lines.push("  " + t + ": " + topics[t].right + "/" + topics[t].total);
     });
     lines.push("");
-    QS.forEach(function (q, i) {
+    ITEMS.forEach(function (q, i) {
+      if (q.learn) return;
       var m = markQ(i);
       var status = m === true ? "correct" : m === null ? "skipped" : "gave " + givenText(q, state.answers[i]) + ", answer " + answerText(q);
       var plain = q.p.replace(/<[^>]+>/g, "");
-      lines.push("Q" + (i + 1) + " [" + q.t + "] " + plain + " -> " + status);
+      lines.push("Q" + QNUM[i] + " [" + q.t + "] " + plain + " -> " + status);
     });
     return lines.join("\n");
   }
 
   function wireSend(right, topics) {
     var report = buildReport(right, topics);
-    var subj = "Multiplication practice - " + (state.who || "Base 5") + " - " + right + "/" + QS.length;
+    var subj = "Multiplication practice - " + (state.who || "Base 5") + " - " + right + "/" + TOTALQ;
     el("gmailBtn").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
       encodeURIComponent(TEACHER_EMAIL) + "&su=" + encodeURIComponent(subj) +
       "&body=" + encodeURIComponent(report);
@@ -473,11 +569,11 @@ summary{cursor:pointer;font-weight:700;color:#005a73}
   el("skipBtn").onclick = function () {
     delete state.answers[state.idx];
     save();
-    if (state.idx === QS.length - 1) { finish(); } else { goto(state.idx + 1); }
+    if (state.idx === ITEMS.length - 1) { finish(); } else { goto(state.idx + 1); }
   };
   el("nextBtn").onclick = function () {
     storeCurrent();
-    if (state.idx === QS.length - 1) { finish(); } else { goto(state.idx + 1); }
+    if (state.idx === ITEMS.length - 1) { finish(); } else { goto(state.idx + 1); }
   };
   el("againBtn").onclick = function () {
     state.answers = {}; state.idx = 0; state.finished = false; state.started = false;
