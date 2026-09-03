@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=6">
+<link rel="stylesheet" href="/style.css?v=7">
 <style>
 
 .pad{background:var(--white);border:var(--border) solid var(--ink);
@@ -68,6 +68,7 @@ canvas{width:100%;height:auto;display:block;border-radius:14px;
     <button class="btn" id="saveBtn">Save picture</button>
   </div>
   <div class="pad"><canvas id="cv" width="1100" height="700"></canvas></div>
+  <div id="sendHost"></div>
 
   <a class="backlink" href="/tools/">Back to tools</a>
 </div>
@@ -79,6 +80,7 @@ canvas{width:100%;height:auto;display:block;border-radius:14px;
   </div>
 </footer>
 
+<script src="/data/send.js?v=1"></script>
 <script>
 (function(){
   var COLOURS=["#0a2f38","#ef7724","#ffc247","#007291","#00a6c9","#7b4b8f","#c94b4b","#3f8a4b","#fffdf8"];
@@ -153,6 +155,21 @@ canvas{width:100%;height:auto;display:block;border-radius:14px;
   document.getElementById('clearBtn').addEventListener('click',function(){
     snapshot(); ctx.clearRect(0,0,cv.width,cv.height);
   });
+  function flatten(){
+    var out=document.createElement('canvas');
+    out.width=cv.width; out.height=cv.height;
+    var o=out.getContext('2d');
+    o.fillStyle='#fffdf8'; o.fillRect(0,0,out.width,out.height);
+    o.drawImage(cv,0,0);
+    return out.toDataURL('image/png');
+  }
+
+  Base5Send.mountImage(document.getElementById('sendHost'),{
+    tool:"Doodle pad",
+    filename:"doodle",
+    getImage:flatten
+  });
+
   document.getElementById('saveBtn').addEventListener('click',function(){
     var out=document.createElement('canvas');
     out.width=cv.width; out.height=cv.height;
