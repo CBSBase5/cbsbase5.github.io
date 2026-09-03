@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prediction bingo - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=6">
+<style>
+
+.card9{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 20px}
+.sq{
+  background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:16px 14px;min-height:132px;
+  display:flex;align-items:center;text-align:center;justify-content:center;
+  font-size:.94rem;cursor:pointer;box-shadow:var(--lift);
+  transition:transform .14s ease,background .14s ease;
+}
+.sq:nth-child(odd){transform:rotate(-.7deg)}
+.sq:nth-child(even){transform:rotate(.6deg)}
+.sq:hover{transform:rotate(0deg) translateY(-3px)}
+.sq[aria-pressed="true"]{
+  background:linear-gradient(150deg,var(--orange),var(--orange-deep));
+  color:var(--ink);
+}
+.sq[aria-pressed="true"]::after{
+  content:"";position:absolute;
+}
+.prize{
+  background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:24px;box-shadow:var(--lift);transform:rotate(-1deg);margin:0 0 20px;text-align:center;
+}
+.prize h2{font-variation-settings:"wdth" 124,"wght" 900;font-size:2rem;margin:0 0 8px;color:var(--yellow)}
+.prize p{margin:0;font-size:1.05rem}
+.datebar{font-family:var(--display);font-size:.76rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--body-tint);margin:0 0 14px}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/my-targets.html">My targets</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>PREDICTION <span class="accent">BINGO</span></h1>
+    <div class="line">
+      <span class="chip">New card daily</span>
+      <p>Tap one when it actually happens. <span class="hl">Three in a row is a bingo.</span></p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="datebar" id="datebar"></p>
+  <div id="prizeBox"></div>
+  <div class="card9" id="card"></div>
+  <button class="btn btn-quiet" id="resetBtn">Clear today's card</button>
+
+  <a class="backlink" href="/tools/">Back to tools</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var POOL=[
+    "Jay mentions China",
+    "Somebody says it is too hot in here",
+    "A pen goes missing",
+    "You walk more than a thousand steps",
+    "Someone laughs at something that is not funny",
+    "The printer does something stupid",
+    "Jay says the phrase have a go",
+    "Somebody talks about a dog",
+    "A door gets left open",
+    "You eat something you did not bring",
+    "Somebody mentions the weekend before eleven",
+    "A question gets answered with another question",
+    "Two people say the same thing at once",
+    "Somebody spells a word wrong on the board",
+    "A chair gets dragged loudly",
+    "Someone says nothing for a whole hour",
+    "Jay loses track of what he was saying",
+    "Somebody finds something under a table",
+    "A word of the week gets used by accident",
+    "Someone goes outside for a bit",
+    "Somebody asks what time it is",
+    "A phone buzzes and nobody owns up",
+    "Someone changes their mind twice",
+    "The Question Wall gets a new question"
+  ];
+
+  function today(){
+    var d=new Date();
+    return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
+  }
+  /* Same card for everyone on a given day, different each day. */
+  function seeded(str){
+    var h=2166136261;
+    for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619) }
+    return function(){ h+=0x6D2B79F5; var t=h;
+      t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61);
+      return ((t^t>>>14)>>>0)/4294967296; };
+  }
+  function pick(){
+    var rnd=seeded(today()), pool=POOL.slice(), out=[];
+    for(var i=0;i<9;i++){ out.push(pool.splice(Math.floor(rnd()*pool.length),1)[0]) }
+    return out;
+  }
+
+  var PRIZES=[
+    "A round of applause that lasts slightly too long",
+    "The right to pick the word of the week",
+    "One completely free opinion, no questions asked",
+    "A biscuit of your choosing, within reason",
+    "Naming rights over one thing in this room for a day",
+    "Jay has to say a word you choose, once, seriously"
+  ];
+
+  var KEY="base5.bingo."+today();
+  var items=pick();
+  var ticked=[];
+  try{ ticked=JSON.parse(localStorage.getItem(KEY))||[] }catch(e){}
+
+  document.getElementById('datebar').textContent =
+    new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+
+  var LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(ticked)) }catch(e){} }
+
+  function checkBingo(){
+    var box=document.getElementById('prizeBox');
+    var win=LINES.some(function(l){ return l.every(function(i){ return ticked.indexOf(i)>=0 }) });
+    if(!win){ box.innerHTML=""; return }
+    var rnd=seeded(today()+"prize");
+    var p=PRIZES[Math.floor(rnd()*PRIZES.length)];
+    box.innerHTML='<div class="prize"><h2>BINGO</h2><p>Today\'s stupid reward: '+p+'</p></div>';
+  }
+
+  var card=document.getElementById('card');
+  function draw(){
+    card.innerHTML="";
+    items.forEach(function(txt,i){
+      var b=document.createElement('button');
+      b.className='sq';
+      b.textContent=txt;
+      b.setAttribute('aria-pressed', ticked.indexOf(i)>=0 ? 'true':'false');
+      b.addEventListener('click',function(){
+        var at=ticked.indexOf(i);
+        if(at>=0) ticked.splice(at,1); else ticked.push(i);
+        b.setAttribute('aria-pressed', ticked.indexOf(i)>=0 ? 'true':'false');
+        save(); checkBingo();
+      });
+      card.appendChild(b);
+    });
+    checkBingo();
+  }
+
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    ticked=[]; save(); draw();
+  });
+
+  draw();
+})();
+</script>
+
+</body>
+</html>

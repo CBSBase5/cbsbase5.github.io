@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Excuse generator - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=6">
+<style>
+
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:11px;margin:0 0 20px}
+.slot{background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:15px 17px;box-shadow:var(--lift)}
+.slot:nth-child(odd){transform:rotate(-.6deg)}
+.slot:nth-child(even){transform:rotate(.5deg)}
+.slot .ask{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:1.02rem;margin:0 0 3px}
+.slot .eg{font-size:.8rem;color:var(--body-tint);margin:0 0 9px}
+.slot input{width:100%;font-family:var(--body);font-size:1rem;
+  border:var(--border) solid var(--ink);border-radius:12px;
+  padding:10px 12px;background:var(--paper);color:var(--ink)}
+.out{background:linear-gradient(150deg,var(--yellow),var(--yellow-deep));
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:24px;box-shadow:var(--lift);transform:rotate(-.8deg);margin:0 0 18px}
+.out p{margin:0;font-size:1.22rem;line-height:1.5}
+.reveal{background:var(--white);border:var(--border) dashed var(--teal);
+  border-radius:var(--r-alt);padding:18px 20px;margin:0 0 18px}
+.reveal h3{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;
+  font-size:1.02rem;margin:0 0 8px}
+.reveal ul{margin:0;padding-left:20px;font-size:.93rem}
+.reveal li{margin-bottom:5px}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/my-targets.html">My targets</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>EXCUSE <span class="accent">GENERATOR</span></h1>
+    <div class="line">
+      <span class="chip">Fill the gaps</span>
+      <p>Give it six words without knowing what they are for. <span class="hl">It builds the excuse.</span></p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="slots" id="slots"></div>
+  <button class="btn btn-orange" id="makeBtn">Make the excuse</button>
+  <button class="btn btn-quiet" id="againBtn" hidden>Different words</button>
+
+  <div id="result" hidden style="margin-top:22px">
+    <div class="out"><p id="excuse"></p></div>
+    <div class="reveal" id="reveal"></div>
+    <button class="btn btn-quiet" id="copyBtn">Copy it</button>
+    <p id="msg" style="font-size:.86rem;color:var(--teal);min-height:1.2em"></p>
+  </div>
+
+  <a class="backlink" href="/tools/">Back to tools</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var SLOTS=[
+    {key:"noun",   ask:"A thing you can hold", eg:"noun, e.g. kettle, sock, wheelbarrow"},
+    {key:"plural", ask:"More than one animal", eg:"plural noun, e.g. geese, badgers, wasps"},
+    {key:"adj",    ask:"A describing word",    eg:"adjective, e.g. damp, enormous, suspicious"},
+    {key:"verbed", ask:"Something that happened, ending in -ed", eg:"past tense verb, e.g. exploded, wobbled"},
+    {key:"place",  ask:"A place",              eg:"noun, e.g. Skegness, the loft, a bus stop"},
+    {key:"adverb", ask:"A word ending in -ly", eg:"adverb, e.g. slowly, dramatically, quietly"}
+  ];
+  var TEMPLATES=[
+    "I could not do it because my {noun} was {adverb} surrounded by {plural} and I had to deal with that first. By the time I got to {place} the whole thing had {verbed}, which was {adj} and not my fault.",
+    "You will not believe this. A {adj} {noun} appeared at {place}, closely followed by several {plural}. I {adverb} tried to sort it out but everything {verbed} instead, so here we are.",
+    "Genuinely, the {plural} got into my {noun}. I moved it {adverb} to {place} for safety and it {verbed} on the way. That is a {adj} thing to happen to anyone.",
+    "It started when my {noun} {verbed} at {place}. Then the {plural} turned up, which was {adj}, and I {adverb} decided the safest thing was to go home."
+  ];
+  var CLASSES={noun:"a noun",plural:"a plural noun",adj:"an adjective",
+               verbed:"a past tense verb",place:"a noun (a place)",adverb:"an adverb"};
+
+  var box=document.getElementById('slots');
+  SLOTS.forEach(function(s){
+    var d=document.createElement('div');
+    d.className='slot';
+    d.innerHTML='<p class="ask">'+s.ask+'</p><p class="eg">'+s.eg+'</p>'+
+                '<input type="text" id="in-'+s.key+'" autocomplete="off">';
+    box.appendChild(d);
+  });
+
+  var lastT=-1;
+  function build(){
+    var vals={}, missing=[];
+    SLOTS.forEach(function(s){
+      var v=document.getElementById('in-'+s.key).value.trim();
+      if(!v) missing.push(s.ask);
+      vals[s.key]=v||("[" + s.ask.toLowerCase() + "]");
+    });
+    var t=lastT;
+    while(t===lastT && TEMPLATES.length>1){ t=Math.floor(Math.random()*TEMPLATES.length) }
+    lastT=t;
+    var text=TEMPLATES[t].replace(/\{(\w+)\}/g,function(_,k){ return vals[k] });
+
+    document.getElementById('excuse').textContent=text;
+    var rv=document.getElementById('reveal');
+    rv.innerHTML='<h3>What you actually just did</h3><ul>'+
+      SLOTS.map(function(s){
+        var v=document.getElementById('in-'+s.key).value.trim();
+        return '<li><strong>'+(v||'(blank)')+'</strong> is '+CLASSES[s.key]+'</li>';
+      }).join('')+'</ul>';
+
+    document.getElementById('result').hidden=false;
+    document.getElementById('againBtn').hidden=false;
+    document.getElementById('msg').textContent = missing.length
+      ? 'Some gaps are still empty, so those bits are in brackets.' : '';
+  }
+
+  document.getElementById('makeBtn').addEventListener('click',build);
+  document.getElementById('againBtn').addEventListener('click',build);
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(document.getElementById('excuse').textContent).then(function(){
+        document.getElementById('msg').textContent='Copied.';
+      });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

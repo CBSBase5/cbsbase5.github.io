@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculator - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=6">
+<style>
+
+.calc{max-width:400px;background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:18px;box-shadow:var(--lift);transform:rotate(-.5deg)}
+#screen{
+  background:var(--paper);border:var(--border) solid var(--ink);border-radius:16px;
+  padding:16px 18px;margin:0 0 14px;text-align:right;
+  font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:2.3rem;line-height:1.1;overflow-x:auto;white-space:nowrap;
+}
+#sub{font-size:.85rem;opacity:.6;min-height:1.2em;font-variation-settings:"wght" 600}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.keys button{
+  font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:1.35rem;padding:16px 0;cursor:pointer;
+  background:var(--paper);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:16px;
+  box-shadow:3px 4px 0 var(--ink);
+}
+.keys button:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.keys .op{background:var(--bright);color:var(--paper)}
+.keys .eq{background:var(--orange)}
+.keys .clr{background:var(--yellow)}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/my-targets.html">My targets</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>CALCULATOR</h1>
+    <div class="line">
+      <span class="chip">Nothing clever</span>
+      <p>It is a calculator. You can also just type the numbers.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="calc">
+    <div id="screen">0<div id="sub"></div></div>
+    <div class="keys" id="keys"></div>
+  </div>
+
+  <a class="backlink" href="/tools/">Back to tools</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var cur="0", prev=null, op=null, fresh=true;
+  var screen=document.getElementById('screen');
+  var sub=document.getElementById('sub');
+
+  function show(){
+    screen.firstChild.nodeValue = cur;
+    sub.textContent = (prev!==null && op) ? (prev+" "+op) : "";
+  }
+  function num(d){
+    if(fresh){ cur = (d==='.') ? '0.' : d; fresh=false }
+    else if(d==='.'){ if(cur.indexOf('.')<0) cur+='.' }
+    else { cur = (cur==='0') ? d : cur+d }
+    show();
+  }
+  function calc(a,b,o){
+    a=parseFloat(a); b=parseFloat(b);
+    if(o==='+') return a+b;
+    if(o==='-') return a-b;
+    if(o==='x') return a*b;
+    if(o==='/') return b===0 ? 'no' : a/b;
+    return b;
+  }
+  function tidy(v){
+    if(v==='no') return 'no';
+    return String(Math.round(v*1e10)/1e10);
+  }
+  function setOp(o){
+    if(prev!==null && op && !fresh){ cur = tidy(calc(prev,cur,op)) }
+    prev = cur; op = o; fresh = true; show();
+  }
+  function equals(){
+    if(prev!==null && op){ cur = tidy(calc(prev,cur,op)); prev=null; op=null; fresh=true; show() }
+  }
+  function clear(){ cur="0"; prev=null; op=null; fresh=true; show() }
+  function back(){
+    if(fresh) return;
+    cur = cur.length>1 ? cur.slice(0,-1) : "0";
+    if(cur==="0") fresh=true;
+    show();
+  }
+
+  var LAYOUT=[
+    ["AC","clr"],["DEL","clr"],["%","op"],["/","op"],
+    ["7",""],["8",""],["9",""],["x","op"],
+    ["4",""],["5",""],["6",""],["-","op"],
+    ["1",""],["2",""],["3",""],["+","op"],
+    ["0",""],[".",""],["+/-",""],["=","eq"]
+  ];
+  var keys=document.getElementById('keys');
+  LAYOUT.forEach(function(k){
+    var b=document.createElement('button');
+    b.textContent=k[0];
+    if(k[1]) b.className=k[1];
+    b.addEventListener('click',function(){ hit(k[0]) });
+    keys.appendChild(b);
+  });
+
+  function hit(k){
+    if(/^[0-9.]$/.test(k)) return num(k);
+    if(k==='AC') return clear();
+    if(k==='DEL') return back();
+    if(k==='=') return equals();
+    if(k==='+/-'){ cur = cur.charAt(0)==='-' ? cur.slice(1) : '-'+cur; return show() }
+    if(k==='%'){ cur = tidy(parseFloat(cur)/100); return show() }
+    setOp(k);
+  }
+
+  window.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(/^[0-9.]$/.test(k)) return hit(k);
+    if(k==='+'||k==='-') return hit(k);
+    if(k==='*') return hit('x');
+    if(k==='/'){ e.preventDefault(); return hit('/') }
+    if(k==='Enter'||k==='='){ e.preventDefault(); return hit('=') }
+    if(k==='Backspace') return hit('DEL');
+    if(k==='Escape') return hit('AC');
+  });
+
+  show();
+})();
+</script>
+
+</body>
+</html>
