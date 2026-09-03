@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shuffle - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+.dealer{
+  background:linear-gradient(150deg,#123c47,var(--ink));color:var(--paper);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:26px;margin:0 0 26px;box-shadow:var(--lift);transform:rotate(-.5deg);
+}
+.dealer h2{font-variation-settings:"wdth" 122,"wght" 800;font-size:1.6rem;
+  margin:0 0 6px;color:var(--yellow)}
+.dealer .sub{margin:0 0 16px;font-size:.95rem;opacity:.9}
+#dealt{
+  background:var(--white);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:18px 20px;margin:0 0 16px;min-height:96px;
+}
+#dealt h3{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;
+  font-size:1.3rem;margin:0 0 6px}
+#dealt p{margin:0;font-size:.96rem}
+#dealt a.go{display:inline-block;margin-top:12px}
+.jig{animation:jitter .3s linear}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.filters button{
+  font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;
+  font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--white);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:999px;
+  padding:10px 17px;cursor:pointer;box-shadow:3px 4px 0 rgba(10,47,56,.18);
+}
+.filters button[aria-pressed="true"]{background:var(--orange);box-shadow:4px 5px 0 var(--ink)}
+
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
+.tag{
+  font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;
+  font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  border:2px solid currentColor;border-radius:999px;padding:3px 9px;opacity:.85;
+}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/my-targets.html">My targets</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>SHUFFLE</h1>
+    <div class="line">
+      <span class="chip">Anytime</span>
+      <p>Short things to dip into. <span class="hl">Pick one, pick none, swap halfway.</span></p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="dealer">
+    <h2>Deal me one</h2>
+    <p class="sub">If choosing is the annoying bit, let it choose. You can always ignore what it says.</p>
+    <div id="dealt">
+      <h3>Nothing dealt yet</h3>
+      <p>Press the button and it will throw one at you.</p>
+    </div>
+    <button class="btn" id="dealBtn">Deal me one</button>
+  </div>
+
+  <div class="filters" id="filters">
+    <button data-f="all" aria-pressed="true">Everything</button>
+    <button data-f="solo" aria-pressed="false">On your own</button>
+    <button data-f="pair" aria-pressed="false">With someone</button>
+    <button data-f="quick" aria-pressed="false">Quick</button>
+    <button data-f="screen" aria-pressed="false">On a screen</button>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <a class="backlink" href="/">Back to the week</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* tags: solo, pair, quick, screen */
+var ACTS = [
+  {name:"Doodle pad", tags:["solo","quick","screen"], href:"/tools/doodle.html",
+   blurb:"No brief, no marking, just draw. Save it if you want."},
+
+  {name:"Writing pad", tags:["solo","screen"], href:"/tools/write.html",
+   blurb:"A blank page that saves as you type. There are prompts if you want them, and none if you do not."},
+
+  {name:"Panic button", tags:["solo","quick","screen"], href:"/tools/panic.html",
+   blurb:"Press it. A dog appears. Leave. That is a complete activity."},
+
+  {name:"Prediction bingo", tags:["solo","quick","screen"], href:"/tools/bingo.html",
+   blurb:"Nine guesses about today. Tick them off as they happen."},
+
+  {name:"Excuse generator", tags:["solo","quick","screen"], href:"/tools/excuse.html",
+   blurb:"Six words in, one unlikely excuse out."},
+
+  {name:"Maths check", tags:["solo","screen"], href:"/practice/maths-check-foundation.html",
+   blurb:"Twenty six questions to find the gaps. No timer, skip whatever you like."},
+
+  {name:"Two truths and a lie", tags:["pair","quick"],
+   blurb:"Three things about you, one completely made up. See who spots it. You can write them down and have someone else read them out."},
+
+  {name:"This or That", tags:["pair","quick"],
+   blurb:"Someone offers two options. You pick a side and defend it, even if you do not mean it. Especially if you do not mean it."},
+
+  {name:"Would it work?", tags:["pair"],
+   blurb:"Describe a plan for something. The other person decides whether it holds up and has to say why."},
+
+  {name:"Twenty questions", tags:["pair","quick"],
+   blurb:"One person thinks of a thing. Twenty yes or no questions to find it."},
+
+  {name:"Teach someone something", tags:["pair"],
+   blurb:"Three minutes on anything you know and they do not. It does not have to be useful."},
+
+  {name:"Beat someone at something", tags:["pair","quick"],
+   blurb:"Anything. Cards, a race across the room, who can stay quiet longest. Loser picks the next one."},
+
+  {name:"Word hunt", tags:["solo","quick"],
+   blurb:"Find five words that are physically in this room and that nobody would guess were in here. Labels, spines, packaging, all counts."},
+
+  {name:"Draw the room from memory", tags:["solo","quick"],
+   blurb:"Do not look. Draw it. Then look, and find out how wrong you were. Everyone is wrong."},
+
+  {name:"Tallest thing", tags:["solo"],
+   blurb:"Build the tallest thing that stays up on its own, from whatever is on the table. No sticking it to anything."},
+
+  {name:"One horrible fact", tags:["solo","quick"],
+   blurb:"Pick an animal. Find one genuinely upsetting fact about it. Tell somebody who did not ask."},
+
+  {name:"Redesign something", tags:["solo"],
+   blurb:"Pick something in this room that is annoying. Draw a better one. It does not have to be possible."},
+
+  {name:"Read one page", tags:["solo","quick"],
+   blurb:"One page of anything, then stop. Stopping is the point. You can carry on if you want, but you were only asked for one."},
+
+  {name:"Interview someone", tags:["pair"],
+   blurb:"Find out what somebody actually cares about. Report back one sentence, no more."},
+
+  {name:"Do nothing on purpose", tags:["solo","quick"],
+   blurb:"Ten minutes of deliberately nothing. Not hiding, not in trouble, just nothing. This is a real option and it is on the list for a reason."}
+];
+
+var FILLS = ["fill-teal","fill-orange","fill-plum","fill-bright","fill-yellow","fill-ink"];
+var filter = "all";
+
+function matches(a){ return filter === "all" || a.tags.indexOf(filter) >= 0 }
+
+function draw(){
+  var board = document.getElementById('board');
+  board.innerHTML = "";
+  ACTS.forEach(function(a, i){
+    if(!matches(a)) return;
+    var el = document.createElement(a.href ? 'a' : 'div');
+    el.className = 'card w4 ' + FILLS[i % FILLS.length];
+    if(a.href) el.href = a.href;
+    el.innerHTML =
+      '<span class="kicker">' + (a.href ? 'On the site' : 'In the room') + '</span>' +
+      '<h3>' + a.name + '</h3>' +
+      '<p>' + a.blurb + '</p>' +
+      '<div class="tags">' + a.tags.map(function(t){
+        return '<span class="tag">' + ({solo:"on your own",pair:"with someone",quick:"quick",screen:"screen"}[t]) + '</span>';
+      }).join('') + '</div>';
+    board.appendChild(el);
+  });
+}
+
+document.getElementById('filters').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-f]');
+  if(!b) return;
+  filter = b.dataset.f;
+  Array.prototype.forEach.call(this.children, function(o){
+    o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
+  });
+  draw();
+});
+
+/* ---------- dealer ---------- */
+var dealt = document.getElementById('dealt');
+var dealBtn = document.getElementById('dealBtn');
+var last = -1;
+
+function show(a){
+  dealt.innerHTML =
+    '<h3>' + a.name + '</h3><p>' + a.blurb + '</p>' +
+    (a.href ? '<a class="btn btn-orange go" href="' + a.href + '">Open it</a>' : '');
+}
+
+dealBtn.addEventListener('click', function(){
+  var pool = ACTS.filter(matches);
+  if(!pool.length) return;
+
+  dealBtn.classList.remove('jig');
+  void dealBtn.offsetWidth;
+  dealBtn.classList.add('jig');
+
+  var i = last;
+  while(i === last && pool.length > 1){ i = Math.floor(Math.random() * pool.length) }
+  last = i;
+
+  var flick = 0;
+  var t = setInterval(function(){
+    dealt.innerHTML = '<h3>' + pool[Math.floor(Math.random()*pool.length)].name + '</h3><p>&nbsp;</p>';
+    if(++flick > 6){
+      clearInterval(t);
+      show(pool[i]);
+      dealBtn.textContent = 'Deal me another';
+    }
+  }, 55);
+});
+
+draw();
+})();
+</script>
+
+</body>
+</html>
