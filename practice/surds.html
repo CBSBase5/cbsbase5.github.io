@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surds - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Surds only. Everything else lives in style.css */
+.qwrap{max-width:660px;margin:0 auto}
+.qwrap .card{cursor:default}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:4px}
+.prompt{font-size:1.45rem;line-height:1.45;margin:10px 0 18px}
+.prompt .m{white-space:nowrap}
+.answer-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.45rem;margin-bottom:8px}
+.answer-row input[type="text"]{width:84px;font-size:1.3rem;font-family:"Atkinson Hyperlegible",Verdana,sans-serif;text-align:center;padding:10px 6px;border:2px solid rgba(5,47,58,.18);border-radius:12px 10px 14px 10px;background:#fffdfb;color:#052f3a}
+.answer-row input[type="text"]:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.root-sign{font-size:1.55rem}
+.hintline{font-size:.9rem;opacity:.7;margin:0 0 14px}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.15rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(5,47,58,.18);border-radius:14px 10px 14px 10px;background:#fffdfb;color:#052f3a;cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.4);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default}
+.qprogress{height:10px;border-radius:999px;background:rgba(5,47,58,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.initials{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.initials button{font-family:inherit;font-size:1.1rem;font-weight:700;padding:12px 18px;border-radius:14px 10px 14px 10px;border:2px solid rgba(5,47,58,.18);background:#fffdfb;color:#052f3a;cursor:pointer}
+.initials button.picked{border-color:#ef7724;background:rgba(239,119,36,.12)}
+.topicbar{margin:12px 0 6px}
+.topicbar .row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 175px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(5,47,58,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.65}
+details{margin-top:14px}
+summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(5,47,58,.18);font-size:1rem}
+.review-item .tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.sendgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:12px}
+.sendgrid button,.sendgrid a{font-family:inherit;font-size:1rem;font-weight:700;text-align:center;text-decoration:none;padding:12px 10px;border-radius:14px 10px 14px 10px;border:2px solid rgba(0,114,145,.4);color:#005a73;background:#fffdfb;cursor:pointer}
+.smallnote{font-size:.9rem;opacity:.7;margin-top:10px}
+.hidden{display:none}
+@media (max-width:480px){.prompt{font-size:1.25rem}.sendgrid{grid-template-columns:1fr}.topicbar .name{flex-basis:140px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap qwrap">
+
+  <div class="weektheme">
+    <h2>Surds</h2>
+    <span>GCSE maths. Go at your own pace, skip anything you like, see how it went at the end.</span>
+  </div>
+
+  <div class="board">
+
+    <!-- START -->
+    <div class="card w12" id="startCard">
+      <span class="kicker">Before you start</span>
+      <h3>Thirty short questions</h3>
+      <p>From square roots up to rationalising. Nothing is timed and nothing is a test, it just shows which bits are already solid and which might be worth another look.</p>
+      <p>If you would like your results saved so they can be sent to Jay, pick your initials. Skipping this is completely fine too.</p>
+      <div class="initials" id="initialsRow"></div>
+      <div class="qnav">
+        <button class="btn" id="beginBtn">Start when ready</button>
+        <button class="btn ghost hidden" id="resumeBtn">Carry on where I left off</button>
+      </div>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="card w12 hidden" id="qCard">
+      <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
+      <span class="qcount" id="qCount"></span>
+      <span class="kicker" id="qTopic"></span>
+      <p class="prompt" id="qPrompt"></p>
+      <div id="qAnswer"></div>
+      <p class="hintline" id="qHint"></p>
+      <div class="qnav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="skipBtn">Skip for now</button>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card w12 hidden" id="resultCard">
+      <span class="kicker">How it went</span>
+      <h3 id="scoreLine"></h3>
+      <p id="scoreNote"></p>
+      <div class="topicbar" id="topicBars"></div>
+      <details>
+        <summary>See each question</summary>
+        <div id="reviewList"></div>
+      </details>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <span class="kicker">Send to Jay</span>
+      <h3>If you would like to</h3>
+      <p>You can send your results over. Any of these work.</p>
+      <div class="sendgrid">
+        <a id="gmailBtn" target="_blank" rel="noopener">Gmail</a>
+        <a id="mailBtn">Email app</a>
+        <button id="copyBtn">Copy results</button>
+        <button id="dlBtn">Save as a file</button>
+      </div>
+      <div class="qnav" style="margin-top:16px;">
+        <button class="btn" id="againBtn">Have another go</button>
+      </div>
+      <p class="smallnote">Results also stay saved on this device.</p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var R = "\u221A"; // root sign
+  var STORE = "b5.practice.surds.v1";
+  var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+  var COHORT = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+
+  function root(n) { return '<span class="m">' + R + n + "</span>"; }
+  function kroot(k, n) { return '<span class="m">' + k + R + n + "</span>"; }
+
+  // Question types:
+  //  num    -> one box, integer answer            ans: [n]
+  //  surd   -> root(box)                          ans: [n]
+  //  ksurd  -> box root(box)                      ans: [k, n]
+  //  absurd -> box root(box) + box                ans: [k, n, c]
+  //  yn     -> two choices                        ans: "yes" | "no"
+  //  mc     -> multiple choice                    ans: index, opts: []
+  var QS = [
+    { t: "Square roots", type: "num", p: "Work out " + root(25), ans: [5] },
+    { t: "Square roots", type: "num", p: "Work out " + root(49), ans: [7] },
+    { t: "Square roots", type: "num", p: "Work out " + root(81), ans: [9] },
+    { t: "Square roots", type: "num", p: "Work out " + root(144), ans: [12] },
+
+    { t: "Spotting surds", type: "yn", p: "Is " + root(7) + " a surd?", ans: "yes" },
+    { t: "Spotting surds", type: "yn", p: "Is " + root(36) + " a surd?", ans: "no" },
+    { t: "Spotting surds", type: "yn", p: "Is " + root(10) + " a surd?", ans: "yes" },
+    { t: "Spotting surds", type: "yn", p: "Is " + root(64) + " a surd?", ans: "no" },
+
+    { t: "Multiplying surds", type: "surd", p: "Work out " + root(3) + " \u00D7 " + root(5), ans: [15] },
+    { t: "Multiplying surds", type: "surd", p: "Work out " + root(2) + " \u00D7 " + root(7), ans: [14] },
+    { t: "Multiplying surds", type: "surd", p: "Work out " + root(5) + " \u00D7 " + root(6), ans: [30] },
+
+    { t: "Squaring surds", type: "num", p: "Work out " + root(13) + " \u00D7 " + root(13), ans: [13] },
+    { t: "Squaring surds", type: "num", p: "Work out (" + root(7) + ")<sup>2</sup>", ans: [7] },
+    { t: "Squaring surds", type: "num", p: "Work out (" + root(29) + ")<sup>2</sup>", ans: [29] },
+
+    { t: "Simplifying surds", type: "ksurd", p: "Simplify " + root(28), ans: [2, 7] },
+    { t: "Simplifying surds", type: "ksurd", p: "Simplify " + root(48), ans: [4, 3] },
+    { t: "Simplifying surds", type: "ksurd", p: "Simplify " + root(63), ans: [3, 7] },
+    { t: "Simplifying surds", type: "ksurd", p: "Simplify " + root(72), ans: [6, 2] },
+    { t: "Simplifying surds", type: "ksurd", p: "Simplify " + kroot(2, 27), ans: [6, 3] },
+
+    { t: "Multiplying surds", type: "num", p: "Work out " + root(8) + " \u00D7 " + root(2), ans: [4] },
+    { t: "Multiplying surds", type: "num", p: "Work out " + root(12) + " \u00D7 " + root(3), ans: [6] },
+    { t: "Multiplying surds", type: "ksurd", p: "Simplify " + root(6) + " \u00D7 " + root(10), ans: [2, 15] },
+    { t: "Multiplying surds", type: "ksurd", p: "Simplify " + kroot(3, 2) + " \u00D7 " + kroot(2, 5), ans: [6, 10] },
+
+    { t: "Adding and subtracting", type: "ksurd", p: "Work out " + kroot(4, 3) + " + " + kroot(2, 3), ans: [6, 3] },
+    { t: "Adding and subtracting", type: "ksurd", p: "Work out " + kroot(7, 5) + " \u2212 " + kroot(2, 5), ans: [5, 5] },
+    { t: "Adding and subtracting", type: "ksurd", p: "Work out " + kroot(3, 2) + " + " + root(2), ans: [4, 2] },
+
+    { t: "Brackets", type: "absurd", p: "Expand and simplify " + root(2) + "(3 + " + root(2) + ")", ans: [3, 2, 2] },
+    { t: "Brackets", type: "num", p: "Expand and simplify (3 \u2212 " + root(2) + ")(3 + " + root(2) + ")", ans: [7] },
+    { t: "Brackets", type: "absurd", p: "Expand and simplify (2 + " + root(3) + ")<sup>2</sup>", ans: [4, 3, 7] },
+
+    { t: "Rationalising", type: "ksurd", p: "Rationalise the denominator: 10 \u00F7 " + root(5), ans: [2, 5] },
+    { t: "Rationalising", type: "ksurd", p: "Rationalise the denominator: 6 \u00F7 " + root(3), ans: [2, 3] },
+    { t: "Rationalising", type: "ksurd", p: "Rationalise and simplify: 12 \u00F7 " + root(8), ans: [3, 2] },
+
+    { t: "Rationalising", type: "mc", p: "Rationalise and simplify: 4 \u00F7 (1 + " + root(3) + ")",
+      opts: ["2" + R + "3 \u2212 2", "2 + 2" + R + "3", R + "3 \u2212 1", "4" + R + "3 \u2212 4"], ans: 0 },
+    { t: "Adding and subtracting", type: "mc", p: "Work out (8 \u00F7 " + root(2) + ") + " + root(18) + " as a single surd",
+      opts: ["5" + R + "2", "7" + R + "2", "4" + R + "2", "12" + R + "2"], ans: 1 }
+  ];
+
+  var state = { who: "", idx: 0, answers: {}, started: false, finished: false };
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) { var s = JSON.parse(raw); if (s && typeof s === "object") state = s; }
+    } catch (e) {}
+  }
+
+  function el(id) { return document.getElementById(id); }
+  function show(id, on) { el(id).classList.toggle("hidden", !on); }
+
+  // ---------- start screen ----------
+  function buildInitials() {
+    var row = el("initialsRow");
+    row.innerHTML = "";
+    COHORT.forEach(function (ini) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = ini;
+      if (state.who === ini) b.classList.add("picked");
+      b.onclick = function () {
+        state.who = (state.who === ini) ? "" : ini;
+        save();
+        buildInitials();
+      };
+      row.appendChild(b);
+    });
+  }
+
+  // ---------- question screen ----------
+  function renderQ() {
+    var q = QS[state.idx];
+    el("qTopic").textContent = q.t;
+    el("qCount").textContent = (state.idx + 1) + " of " + QS.length;
+    el("qPrompt").innerHTML = q.p;
+    el("progFill").style.width = Math.round((state.idx / QS.length) * 100) + "%";
+    el("backBtn").disabled = state.idx === 0;
+    el("nextBtn").textContent = (state.idx === QS.length - 1) ? "Finish" : "Next";
+
+    var box = el("qAnswer");
+    box.innerHTML = "";
+    var saved = state.answers[state.idx];
+    var hint = "";
+
+    function input(val) {
+      var i = document.createElement("input");
+      i.type = "text";
+      i.inputMode = "numeric";
+      i.autocomplete = "off";
+      i.maxLength = 4;
+      if (val !== undefined && val !== null) i.value = val;
+      i.addEventListener("input", storeCurrent);
+      return i;
+    }
+    function span(txt) {
+      var s = document.createElement("span");
+      s.className = "root-sign";
+      s.textContent = txt;
+      return s;
+    }
+
+    if (q.type === "num") {
+      var row = document.createElement("div");
+      row.className = "answer-row";
+      row.appendChild(document.createTextNode("= "));
+      row.appendChild(input(saved ? saved[0] : ""));
+      box.appendChild(row);
+    } else if (q.type === "surd") {
+      var row2 = document.createElement("div");
+      row2.className = "answer-row";
+      row2.appendChild(document.createTextNode("= "));
+      row2.appendChild(span(R));
+      row2.appendChild(input(saved ? saved[0] : ""));
+      box.appendChild(row2);
+      hint = "Just the number that goes under the root.";
+    } else if (q.type === "ksurd") {
+      var row3 = document.createElement("div");
+      row3.className = "answer-row";
+      row3.appendChild(document.createTextNode("= "));
+      row3.appendChild(input(saved ? saved[0] : ""));
+      row3.appendChild(span(R));
+      row3.appendChild(input(saved ? saved[1] : ""));
+      box.appendChild(row3);
+      hint = "First box is the number in front, second box goes under the root.";
+    } else if (q.type === "absurd") {
+      var row4 = document.createElement("div");
+      row4.className = "answer-row";
+      row4.appendChild(document.createTextNode("= "));
+      row4.appendChild(input(saved ? saved[0] : ""));
+      row4.appendChild(span(R));
+      row4.appendChild(input(saved ? saved[1] : ""));
+      row4.appendChild(document.createTextNode(" + "));
+      row4.appendChild(input(saved ? saved[2] : ""));
+      box.appendChild(row4);
+      hint = "Surd part first, then the whole number on its own.";
+    } else if (q.type === "yn" || q.type === "mc") {
+      var grid = document.createElement("div");
+      grid.className = "choices";
+      var opts = q.type === "yn" ? ["yes", "no"] : q.opts;
+      opts.forEach(function (o, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = q.type === "yn" ? (o === "yes" ? "Yes, it is a surd" : "No, it works out exactly") : o;
+        var pickVal = q.type === "yn" ? o : i;
+        if (saved !== undefined && saved !== null && saved[0] === pickVal) b.classList.add("picked");
+        b.onclick = function () {
+          state.answers[state.idx] = [pickVal];
+          save();
+          renderQ();
+        };
+        grid.appendChild(b);
+      });
+      box.appendChild(grid);
+    }
+    el("qHint").textContent = hint;
+    var first = box.querySelector("input");
+    if (first && window.matchMedia("(min-width: 700px)").matches) first.focus();
+  }
+
+  function storeCurrent() {
+    var q = QS[state.idx];
+    if (q.type === "yn" || q.type === "mc") return;
+    var vals = [];
+    var empty = true;
+    el("qAnswer").querySelectorAll("input").forEach(function (i) {
+      vals.push(i.value.trim());
+      if (i.value.trim() !== "") empty = false;
+    });
+    if (empty) { delete state.answers[state.idx]; } else { state.answers[state.idx] = vals; }
+    save();
+  }
+
+  function goto(i) {
+    state.idx = Math.max(0, Math.min(QS.length - 1, i));
+    save();
+    renderQ();
+  }
+
+  // ---------- marking ----------
+  function markQ(qi) {
+    var q = QS[qi];
+    var a = state.answers[qi];
+    if (a === undefined || a === null) return null; // skipped
+    if (q.type === "yn") return a[0] === q.ans;
+    if (q.type === "mc") return a[0] === q.ans;
+    if (a.length !== q.ans.length) return false;
+    for (var i = 0; i < q.ans.length; i++) {
+      if (parseInt(a[i], 10) !== q.ans[i]) return false;
+    }
+    return true;
+  }
+
+  function answerText(q) {
+    if (q.type === "yn") return q.ans === "yes" ? "yes, it is a surd" : "no";
+    if (q.type === "mc") return q.opts[q.ans];
+    if (q.type === "num") return String(q.ans[0]);
+    if (q.type === "surd") return R + q.ans[0];
+    if (q.type === "ksurd") return q.ans[0] + R + q.ans[1];
+    if (q.type === "absurd") return q.ans[0] + R + q.ans[1] + " + " + q.ans[2];
+    return "";
+  }
+  function givenText(q, a) {
+    if (a === undefined || a === null) return "skipped";
+    if (q.type === "yn") return a[0];
+    if (q.type === "mc") return q.opts[a[0]];
+    if (q.type === "num") return a[0] || "blank";
+    if (q.type === "surd") return R + (a[0] || "?");
+    if (q.type === "ksurd") return (a[0] || "?") + R + (a[1] || "?");
+    if (q.type === "absurd") return (a[0] || "?") + R + (a[1] || "?") + " + " + (a[2] || "?");
+    return "";
+  }
+
+  function finish() {
+    storeCurrent();
+    state.finished = true;
+    save();
+    show("qCard", false);
+    show("resultCard", true);
+    show("sendCard", true);
+
+    var topics = {};
+    var right = 0, done = 0;
+    QS.forEach(function (q, i) {
+      if (!topics[q.t]) topics[q.t] = { right: 0, total: 0 };
+      topics[q.t].total++;
+      var m = markQ(i);
+      if (m !== null) done++;
+      if (m === true) { right++; topics[q.t].right++; }
+    });
+
+    el("scoreLine").textContent = right + " out of " + QS.length;
+    var strong = [], again = [];
+    Object.keys(topics).forEach(function (t) {
+      var frac = topics[t].right / topics[t].total;
+      if (frac >= 0.75) strong.push(t); else again.push(t);
+    });
+    var noteTxt = "";
+    if (again.length === 0) {
+      noteTxt = "All of these look solid. Nice one.";
+    } else if (strong.length === 0) {
+      noteTxt = "Plenty here that would be worth exploring together, no rush at all.";
+    } else {
+      noteTxt = "Looking strong on " + strong.join(", ").toLowerCase() +
+        ". Might be worth another look at " + again.join(", ").toLowerCase() + " sometime.";
+    }
+    el("scoreNote").textContent = noteTxt;
+
+    var bars = el("topicBars");
+    bars.innerHTML = "";
+    Object.keys(topics).forEach(function (t) {
+      var frac = topics[t].total ? topics[t].right / topics[t].total : 0;
+      var row = document.createElement("div");
+      row.className = "row";
+      var name = document.createElement("div");
+      name.className = "name";
+      name.textContent = t;
+      var track = document.createElement("div");
+      track.className = "track";
+      var fill = document.createElement("span");
+      fill.className = "fill";
+      fill.style.width = Math.round(frac * 100) + "%";
+      fill.style.background = frac >= 0.75
+        ? "linear-gradient(90deg, #2e7d4f, #4ba36f)"
+        : "linear-gradient(90deg, #ef7724, #d55f0f)";
+      track.appendChild(fill);
+      var sc = document.createElement("div");
+      sc.className = "score";
+      sc.textContent = topics[t].right + "/" + topics[t].total;
+      row.appendChild(name); row.appendChild(track); row.appendChild(sc);
+      bars.appendChild(row);
+    });
+
+    var list = el("reviewList");
+    list.innerHTML = "";
+    QS.forEach(function (q, i) {
+      var m = markQ(i);
+      var d = document.createElement("div");
+      d.className = "review-item";
+      var tag = m === true ? '<span class="tag right">Got it</span>'
+        : m === null ? '<span class="tag diff">Skipped</span>'
+        : '<span class="tag diff">Not this time</span>';
+      var extra = m === true ? "" :
+        " \u2014 answer: " + answerText(q) +
+        (m === false ? " (you put " + givenText(q, state.answers[i]) + ")" : "");
+      d.innerHTML = "Q" + (i + 1) + " \u00B7 " + q.p + " " + tag + extra;
+      list.appendChild(d);
+    });
+
+    wireSend(right, topics);
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---------- send to Jay ----------
+  function buildReport(right, topics) {
+    var lines = [];
+    lines.push("Surds practice - Base 5");
+    lines.push("Student: " + (state.who || "not given"));
+    lines.push("Date: " + new Date().toLocaleString("en-GB"));
+    lines.push("Score: " + right + " out of " + QS.length);
+    lines.push("");
+    lines.push("By topic:");
+    Object.keys(topics).forEach(function (t) {
+      lines.push("  " + t + ": " + topics[t].right + "/" + topics[t].total);
+    });
+    lines.push("");
+    QS.forEach(function (q, i) {
+      var m = markQ(i);
+      var status = m === true ? "correct" : m === null ? "skipped" : "gave " + givenText(q, state.answers[i]) + ", answer " + answerText(q);
+      var plain = q.p.replace(/<[^>]+>/g, "");
+      lines.push("Q" + (i + 1) + " [" + q.t + "] " + plain + " -> " + status);
+    });
+    return lines.join("\n");
+  }
+
+  function wireSend(right, topics) {
+    var report = buildReport(right, topics);
+    var subj = "Surds practice - " + (state.who || "Base 5") + " - " + right + "/" + QS.length;
+    el("gmailBtn").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
+      encodeURIComponent(TEACHER_EMAIL) + "&su=" + encodeURIComponent(subj) +
+      "&body=" + encodeURIComponent(report);
+    el("mailBtn").href = "mailto:" + TEACHER_EMAIL + "?subject=" +
+      encodeURIComponent(subj) + "&body=" + encodeURIComponent(report);
+    el("copyBtn").onclick = function () {
+      var done = function () {
+        el("copyBtn").textContent = "Copied";
+        setTimeout(function () { el("copyBtn").textContent = "Copy results"; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(report).then(done, done);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = report; document.body.appendChild(ta);
+        ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta); done();
+      }
+    };
+    el("dlBtn").onclick = function () {
+      var blob = new Blob([report], { type: "text/plain" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "surds-" + (state.who || "base5") + ".txt";
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    };
+  }
+
+  // ---------- wiring ----------
+  el("beginBtn").onclick = function () {
+    state.started = true; state.finished = false;
+    state.idx = 0; state.answers = {};
+    save();
+    show("startCard", false); show("qCard", true);
+    renderQ();
+  };
+  el("resumeBtn").onclick = function () {
+    show("startCard", false);
+    if (state.finished) { finish(); } else { show("qCard", true); renderQ(); }
+  };
+  el("backBtn").onclick = function () { storeCurrent(); goto(state.idx - 1); };
+  el("skipBtn").onclick = function () {
+    delete state.answers[state.idx];
+    save();
+    if (state.idx === QS.length - 1) { finish(); } else { goto(state.idx + 1); }
+  };
+  el("nextBtn").onclick = function () {
+    storeCurrent();
+    if (state.idx === QS.length - 1) { finish(); } else { goto(state.idx + 1); }
+  };
+  el("againBtn").onclick = function () {
+    state.answers = {}; state.idx = 0; state.finished = false; state.started = false;
+    save();
+    show("resultCard", false); show("sendCard", false);
+    show("startCard", true);
+    buildInitials();
+    window.scrollTo({ top: 0 });
+  };
+
+  load();
+  buildInitials();
+  if (state.started && (Object.keys(state.answers).length > 0 || state.finished)) {
+    show("resumeBtn", true);
+  }
+})();
+</script>
+
+</body>
+</html>
