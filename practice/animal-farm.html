@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animal Farm - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Animal Farm only. Everything else lives in style.css */
+.qwrap{max-width:660px;margin:0 auto}
+.qwrap .card{cursor:default}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:4px}
+.prompt{font-size:1.35rem;line-height:1.5;margin:10px 0 18px}
+.learnbody p{font-size:1.1rem;line-height:1.55;margin:14px 0 6px}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:460px;height:auto}
+.extract{font-size:1.05rem;line-height:1.65;background:#fffdfb;border:2px solid rgba(5,47,58,.18);border-radius:16px 12px 16px 12px;padding:16px 18px;margin:12px 0}
+.extract em{opacity:.7}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.08rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(5,47,58,.18);border-radius:14px 10px 14px 10px;background:#fffdfb;color:#052f3a;cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.writebox{width:100%;min-height:170px;font-size:1.05rem;line-height:1.5;font-family:"Atkinson Hyperlegible",Verdana,sans-serif;color:#052f3a;background:#fffdfb;border:2px solid rgba(5,47,58,.18);border-radius:16px 12px 16px 12px;padding:14px 16px;box-sizing:border-box;resize:vertical}
+.writebox:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.starters{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.starters button{font-family:inherit;font-size:.92rem;padding:8px 14px;border-radius:999px;border:2px solid rgba(0,114,145,.35);background:transparent;color:#005a73;cursor:pointer}
+.starters button:hover{background:rgba(0,114,145,.08)}
+.startlabel{font-size:.88rem;opacity:.7;margin:12px 0 0}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.4);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default}
+.qprogress{height:10px;border-radius:999px;background:rgba(5,47,58,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.hintline{font-size:.9rem;opacity:.7;margin:0 0 14px}
+.initials{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.initials button{font-family:inherit;font-size:1.1rem;font-weight:700;padding:12px 18px;border-radius:14px 10px 14px 10px;border:2px solid rgba(5,47,58,.18);background:#fffdfb;color:#052f3a;cursor:pointer}
+.initials button.picked{border-color:#ef7724;background:rgba(239,119,36,.12)}
+.topicbar{margin:12px 0 6px}
+.topicbar .row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 195px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(5,47,58,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.65}
+details{margin-top:14px}
+summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(5,47,58,.18);font-size:1rem}
+.review-item .tag{font-weight:700}
+.review-item .written{white-space:pre-wrap;background:#fffdfb;border:1px dashed rgba(5,47,58,.25);border-radius:10px;padding:10px 12px;margin-top:6px;font-size:.98rem}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.tag.note{color:#005a73}
+.sendgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:12px}
+.sendgrid button,.sendgrid a{font-family:inherit;font-size:1rem;font-weight:700;text-align:center;text-decoration:none;padding:12px 10px;border-radius:14px 10px 14px 10px;border:2px solid rgba(0,114,145,.4);color:#005a73;background:#fffdfb;cursor:pointer}
+.smallnote{font-size:.9rem;opacity:.7;margin-top:10px}
+.hidden{display:none}
+@media (max-width:480px){.prompt{font-size:1.2rem}.sendgrid{grid-template-columns:1fr}.topicbar .name{flex-basis:150px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap qwrap">
+
+  <div class="weektheme">
+    <h2>Animal Farm</h2>
+    <span>GCSE English. Read an extract, dig into what it is really doing, then have a go at writing about it.</span>
+  </div>
+
+  <div class="board">
+
+    <!-- START -->
+    <div class="card w12" id="startCard">
+      <span class="kicker">Before you start</span>
+      <h3>Learn a bit, read a bit, write a bit</h3>
+      <p>This one works through a short extract from Animal Farm: what themes are, the real history hiding underneath the story, 8 quick questions on the extract, and 3 pieces of writing. The writing is not marked by the computer, it is there for you and Jay to look at together if you send it.</p>
+      <p>If you would like your work saved so it can be sent to Jay, pick your initials. Skipping this is completely fine too.</p>
+      <div class="initials" id="initialsRow"></div>
+      <div class="qnav">
+        <button class="btn" id="beginBtn">Start when ready</button>
+        <button class="btn ghost hidden" id="resumeBtn">Carry on where I left off</button>
+      </div>
+    </div>
+
+    <!-- QUESTION / LEARN -->
+    <div class="card w12 hidden" id="qCard">
+      <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
+      <span class="qcount" id="qCount"></span>
+      <span class="kicker" id="qTopic"></span>
+      <p class="prompt" id="qPrompt"></p>
+      <div id="qAnswer"></div>
+      <p class="hintline" id="qHint"></p>
+      <div class="qnav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="skipBtn">Skip for now</button>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card w12 hidden" id="resultCard">
+      <span class="kicker">How it went</span>
+      <h3 id="scoreLine"></h3>
+      <p id="scoreNote"></p>
+      <div class="topicbar" id="topicBars"></div>
+      <details>
+        <summary>See each question</summary>
+        <div id="reviewList"></div>
+      </details>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <span class="kicker">Send to Jay</span>
+      <h3>If you would like to</h3>
+      <p>Your writing goes with it, exactly as you wrote it. Any of these work.</p>
+      <div class="sendgrid">
+        <a id="gmailBtn" target="_blank" rel="noopener">Gmail</a>
+        <a id="mailBtn">Email app</a>
+        <button id="copyBtn">Copy results</button>
+        <button id="dlBtn">Save as a file</button>
+      </div>
+      <div class="qnav" style="margin-top:16px;">
+        <button class="btn" id="againBtn">Have another go</button>
+      </div>
+      <p class="smallnote">Results also stay saved on this device.</p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var STORE = "b5.practice.animal-farm.v1";
+  var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+  var COHORT = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+  var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+
+  // ============================================================
+  // JAY: paste the extract between the EXTRACT-START and
+  // EXTRACT-END markers below, replacing the placeholder line.
+  // Plain text is fine; put <br><br> between paragraphs.
+  // ============================================================
+  var EXTRACT =
+    // EXTRACT-START
+    "<em>The extract goes here. If you are reading this message, the passage has not been added yet \u2014 let Jay know and carry on with the ideas cards in the meantime.</em>"
+    // EXTRACT-END
+  ;
+
+  // ---------- visual examples (inline SVG) ----------
+  var VIS = {};
+  VIS.themes = "<svg viewBox='0 0 460 180' role='img' aria-label='A story radiating three big ideas: power, truth and lies, fairness'>" +
+    "<rect x='185' y='62' width='90' height='58' rx='10' fill='rgba(0,114,145,0.12)' stroke='#007291' stroke-width='2.5'/>" +
+    "<text x='230' y='87' text-anchor='middle' " + FF + " font-size='15' font-weight='bold' fill='#052f3a'>the</text>" +
+    "<text x='230' y='106' text-anchor='middle' " + FF + " font-size='15' font-weight='bold' fill='#052f3a'>story</text>" +
+    "<line x1='185' y1='80' x2='105' y2='46' stroke='#ef7724' stroke-width='2'/>" +
+    "<ellipse cx='72' cy='38' rx='58' ry='24' fill='rgba(239,119,36,0.1)' stroke='#ef7724' stroke-width='2'/>" +
+    "<text x='72' y='44' text-anchor='middle' " + FF + " font-size='14' font-weight='bold' fill='#052f3a'>power</text>" +
+    "<line x1='275' y1='80' x2='352' y2='46' stroke='#2e7d4f' stroke-width='2'/>" +
+    "<ellipse cx='388' cy='38' rx='64' ry='24' fill='rgba(46,125,79,0.1)' stroke='#2e7d4f' stroke-width='2'/>" +
+    "<text x='388' y='44' text-anchor='middle' " + FF + " font-size='14' font-weight='bold' fill='#052f3a'>truth and lies</text>" +
+    "<line x1='230' y1='120' x2='230' y2='142' stroke='#007291' stroke-width='2'/>" +
+    "<ellipse cx='230' cy='156' rx='58' ry='22' fill='rgba(0,114,145,0.1)' stroke='#007291' stroke-width='2'/>" +
+    "<text x='230' y='162' text-anchor='middle' " + FF + " font-size='14' font-weight='bold' fill='#052f3a'>fairness</text>" +
+    "</svg>";
+  VIS.allegory = "<svg viewBox='0 0 460 220' role='img' aria-label='The farm characters stand for real people from the Russian revolution'>" +
+    "<defs><marker id='arrA' markerWidth='10' markerHeight='10' refX='8' refY='4' orient='auto'><path d='M0 0 L8 4 L0 8 z' fill='#007291'/></marker></defs>" +
+    "<text x='105' y='24' text-anchor='middle' " + FF + " font-size='13' fill='#5a6a72'>on the farm</text>" +
+    "<text x='355' y='24' text-anchor='middle' " + FF + " font-size='13' fill='#5a6a72'>in real history</text>" +
+    (function () {
+      var rows = [
+        ["Napoleon", "Stalin"],
+        ["Snowball", "Trotsky"],
+        ["the nine dogs", "the secret police"],
+        ["Squealer", "propaganda"]
+      ];
+      var s = "", y = 42;
+      rows.forEach(function (r) {
+        s += "<rect x='20' y='" + y + "' width='170' height='34' rx='9' fill='rgba(239,119,36,0.1)' stroke='#ef7724' stroke-width='2'/>" +
+          "<text x='105' y='" + (y + 22) + "' text-anchor='middle' " + FF + " font-size='14' font-weight='bold' fill='#052f3a'>" + r[0] + "</text>" +
+          "<line x1='196' y1='" + (y + 17) + "' x2='262' y2='" + (y + 17) + "' stroke='#007291' stroke-width='2.5' marker-end='url(#arrA)'/>" +
+          "<rect x='270' y='" + y + "' width='170' height='34' rx='9' fill='rgba(0,114,145,0.1)' stroke='#007291' stroke-width='2'/>" +
+          "<text x='355' y='" + (y + 22) + "' text-anchor='middle' " + FF + " font-size='14' font-weight='bold' fill='#052f3a'>" + r[1] + "</text>";
+        y += 44;
+      });
+      return s;
+    })() +
+    "</svg>";
+  VIS.pee = "<svg viewBox='0 0 460 210' role='img' aria-label='A written answer built from a point, evidence, and an explanation'>" +
+    "<rect x='40' y='14' width='380' height='52' rx='12' fill='rgba(0,114,145,0.12)' stroke='#007291' stroke-width='2.5'/>" +
+    "<text x='60' y='36' " + FF + " font-size='14' font-weight='bold' fill='#007291'>POINT</text>" +
+    "<text x='60' y='56' " + FF + " font-size='14' fill='#052f3a'>Napoleon rules through fear.</text>" +
+    "<rect x='40' y='78' width='380' height='52' rx='12' fill='rgba(239,119,36,0.1)' stroke='#ef7724' stroke-width='2.5'/>" +
+    "<text x='60' y='100' " + FF + " font-size='14' font-weight='bold' fill='#b3541e'>EVIDENCE</text>" +
+    "<text x='60' y='120' " + FF + " font-size='14' fill='#052f3a'>The nine dogs sit in a semicircle round the pigs.</text>" +
+    "<rect x='40' y='142' width='380' height='52' rx='12' fill='rgba(46,125,79,0.1)' stroke='#2e7d4f' stroke-width='2.5'/>" +
+    "<text x='60' y='164' " + FF + " font-size='14' font-weight='bold' fill='#2e7d4f'>EXPLAIN</text>" +
+    "<text x='60' y='184' " + FF + " font-size='14' fill='#052f3a'>The threat is always on show, so nobody argues.</text>" +
+    "</svg>";
+
+  function learn(topic, heading, vis, text) {
+    return { t: topic, learn: true, h: heading,
+      body: "<div class='learnbody'>" + (vis ? "<div class='learnfig'>" + vis + "</div>" : "") + "<p>" + text + "</p></div>" };
+  }
+
+  // Item types:
+  //  learn -> explainer card, not scored
+  //  mc    -> multiple choice, scored               ans: index, opts: []
+  //  write -> open writing, saved and sent, not scored   starters: []
+  var ITEMS = [
+    learn("Big ideas", "What a theme is", VIS.themes,
+      "A theme is a big idea a story keeps coming back to \u2014 not what happens, but what it is about. Animal Farm keeps circling power, truth and lies, and fairness. Spotting a theme means asking: what is this scene really showing?"),
+    learn("Big ideas", "The story behind the story", VIS.allegory,
+      "Animal Farm is an allegory: a story where the characters stand for real people. Orwell wrote it about the Russian revolution, where a fair-shares uprising slid into one man holding all the power. Napoleon stands for Stalin, Snowball for his rival Trotsky who was driven out, the dogs for the secret police, and Squealer for propaganda \u2014 the machine that made it all sound fine."),
+    { t: "Big ideas", learn: true, h: "The extract",
+      body: "<div class='learnbody'><p>This scene comes just after Napoleon's dogs have chased Snowball off the farm. Napoleon has taken charge, and the Sunday meetings where every animal used to debate and vote have been scrapped. Read it once for the story, then once more asking: what is this scene really showing?</p><div class='extract'>" + "__EXTRACT__" + "</div><p>You can come back to this page any time with the Back button.</p></div>" },
+
+    { t: "Finding it in the text", type: "mc", p: "Where has old Major's skull been placed?",
+      opts: ["On a stump at the foot of the flagstaff",
+             "Inside the farmhouse",
+             "Buried in the orchard",
+             "On the roof of the big barn"], ans: 0 },
+    { t: "Finding it in the text", type: "mc", p: "Who now sits at the front, on the raised platform?",
+      opts: ["Napoleon, Squealer and Minimus, with the young dogs around them",
+             "All the animals together, as they used to",
+             "Boxer and Clover",
+             "The hens and the sheep"], ans: 0 },
+    { t: "Finding it in the text", type: "mc", p: "What announcement takes the animals by surprise?",
+      opts: ["The windmill is going to be built after all",
+             "Snowball is being invited back",
+             "The farm is being sold",
+             "Sunday mornings are cancelled"], ans: 0 },
+    { t: "Finding it in the text", type: "mc", p: "What warning comes along with the windmill plan?",
+      opts: ["The extra work is hard and rations might have to be reduced",
+             "The barn will be shut for a year",
+             "Only pigs will be allowed to work on it",
+             "Singing will be banned during building"], ans: 0 },
+
+    { t: "Reading between the lines", type: "mc", p: "The nine dogs sit in a semicircle around the pigs. What is that seating arrangement really doing?",
+      opts: ["Showing everyone the pigs are protected, and that challenging them would be dangerous",
+             "Keeping the dogs warm in the cold barn",
+             "Helping the dogs hear the orders better",
+             "Nothing, it is just where they happened to sit"], ans: 0 },
+    { t: "Reading between the lines", type: "mc", p: "Napoleon fought against the windmill when it was Snowball's idea. Now he announces it with no reason given for the change. What does that suggest?",
+      opts: ["He opposed it to get rid of Snowball, and now takes the plan as his own",
+             "He changed his mind after carefully explaining his thinking",
+             "He has genuinely forgotten he ever opposed it",
+             "Snowball wrote to him and persuaded him"], ans: 0 },
+    { t: "Reading between the lines", type: "mc", p: "The animals have to walk respectfully past the skull before every meeting. Why might Napoleon want that ritual?",
+      opts: ["It turns loyalty into a weekly routine and ties his rule to old Major's memory",
+             "The skull needs guarding from foxes",
+             "It keeps the entrance to the barn tidy",
+             "The animals voted for it"], ans: 0 },
+    { t: "Reading between the lines", type: "mc", p: "The animals no longer all sit together the way they used to. Which theme is that seating plan quietly showing?",
+      opts: ["Inequality growing between the pigs and everyone else",
+             "Friendship between the animals",
+             "The changing of the seasons",
+             "How to run a farm well"], ans: 0 },
+
+    learn("Your writing", "Building an answer", VIS.pee,
+      "A strong answer has three moves. Make a point: say what you think is going on. Give evidence: a detail from the extract that shows it. Explain: say what that detail does to the reader. One good point explained well beats five points listed."),
+    { t: "Your writing", type: "write",
+      p: "What is one theme you can see in this extract? A sentence or two is plenty.",
+      starters: ["One theme in this extract is...", "This scene keeps showing...", "Orwell seems interested in..."] },
+    { t: "Your writing", type: "write",
+      p: "How does Napoleon's behaviour in this extract show power being abused? Try the point, evidence, explain shape.",
+      starters: ["Napoleon abuses his power by...", "The evidence for this is...", "This shows the reader that...", "The dogs suggest that..."] },
+    { t: "Your writing", type: "write",
+      p: "Napoleon stands for Stalin. Choose two similarities between them and explain each one.",
+      starters: ["Like Stalin, Napoleon...", "Another similarity is...", "Both of them got rid of a rival by...", "Both used fear by..."] }
+  ];
+
+  ITEMS[2].body = ITEMS[2].body.replace("__EXTRACT__", EXTRACT);
+
+  // Question numbers (learn cards excluded); count scored and written separately
+  var QNUM = [], TOTALQ = 0, TOTALMC = 0, TOTALW = 0;
+  ITEMS.forEach(function (q, i) {
+    if (q.learn) { QNUM[i] = 0; return; }
+    QNUM[i] = ++TOTALQ;
+    if (q.type === "write") TOTALW++; else TOTALMC++;
+  });
+
+  var state = { who: "", idx: 0, answers: {}, started: false, finished: false };
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) { var s = JSON.parse(raw); if (s && typeof s === "object") state = s; }
+    } catch (e) {}
+  }
+
+  function el(id) { return document.getElementById(id); }
+  function show(id, on) { el(id).classList.toggle("hidden", !on); }
+
+  // ---------- start screen ----------
+  function buildInitials() {
+    var row = el("initialsRow");
+    row.innerHTML = "";
+    COHORT.forEach(function (ini) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = ini;
+      if (state.who === ini) b.classList.add("picked");
+      b.onclick = function () {
+        state.who = (state.who === ini) ? "" : ini;
+        save();
+        buildInitials();
+      };
+      row.appendChild(b);
+    });
+  }
+
+  // ---------- question / learn screen ----------
+  function renderQ() {
+    var q = ITEMS[state.idx];
+    el("qTopic").textContent = q.t;
+    el("progFill").style.width = Math.round((state.idx / ITEMS.length) * 100) + "%";
+    el("backBtn").disabled = state.idx === 0;
+    var last = state.idx === ITEMS.length - 1;
+    el("skipBtn").classList.toggle("hidden", !!q.learn);
+    el("nextBtn").textContent = last ? "Finish" : (q.learn ? "Got it" : "Next");
+
+    var box = el("qAnswer");
+    box.innerHTML = "";
+    var hint = "";
+
+    if (q.learn) {
+      el("qCount").textContent = "";
+      el("qPrompt").innerHTML = "<strong>" + q.h + "</strong>";
+      box.innerHTML = q.body;
+      el("qHint").textContent = "";
+      return;
+    }
+
+    el("qCount").textContent = QNUM[state.idx] + " of " + TOTALQ;
+    el("qPrompt").innerHTML = q.p;
+    var saved = state.answers[state.idx];
+
+    if (q.type === "mc") {
+      var grid = document.createElement("div");
+      grid.className = "choices";
+      q.opts.forEach(function (o, oi) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = o;
+        if (saved !== undefined && saved !== null && saved[0] === oi) b.classList.add("picked");
+        b.onclick = function () {
+          state.answers[state.idx] = [oi];
+          save();
+          renderQ();
+        };
+        grid.appendChild(b);
+      });
+      box.appendChild(grid);
+    } else if (q.type === "write") {
+      var ta = document.createElement("textarea");
+      ta.className = "writebox";
+      ta.setAttribute("aria-label", "Your answer");
+      if (saved) ta.value = saved[0];
+      ta.addEventListener("input", storeCurrent);
+      box.appendChild(ta);
+      if (q.starters && q.starters.length) {
+        var lab = document.createElement("p");
+        lab.className = "startlabel";
+        lab.textContent = "Stuck for a first line? Tap one to drop it in:";
+        box.appendChild(lab);
+        var st = document.createElement("div");
+        st.className = "starters";
+        q.starters.forEach(function (s) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.textContent = s;
+          b.onclick = function () {
+            var cur = ta.value;
+            ta.value = cur + (cur && !/\s$/.test(cur) ? "\n" : "") + s + " ";
+            ta.focus();
+            storeCurrent();
+          };
+          st.appendChild(b);
+        });
+        box.appendChild(st);
+      }
+      hint = "This one is not marked by the computer. It goes to Jay as you wrote it, if you choose to send.";
+    }
+    el("qHint").textContent = hint;
+  }
+
+  function storeCurrent() {
+    var q = ITEMS[state.idx];
+    if (q.learn || q.type === "mc") return;
+    var ta = el("qAnswer").querySelector("textarea");
+    if (!ta) return;
+    var v = ta.value;
+    if (v.trim() === "") { delete state.answers[state.idx]; } else { state.answers[state.idx] = [v]; }
+    save();
+  }
+
+  function goto(i) {
+    state.idx = Math.max(0, Math.min(ITEMS.length - 1, i));
+    save();
+    renderQ();
+  }
+
+  // ---------- marking ----------
+  function markQ(qi) {
+    var q = ITEMS[qi];
+    if (q.learn) return undefined;
+    var a = state.answers[qi];
+    if (a === undefined || a === null) return null; // skipped
+    if (q.type === "write") return "written";
+    return a[0] === q.ans;
+  }
+
+  function finish() {
+    storeCurrent();
+    state.finished = true;
+    save();
+    show("qCard", false);
+    show("resultCard", true);
+    show("sendCard", true);
+
+    var topics = {};
+    var right = 0, written = 0;
+    ITEMS.forEach(function (q, i) {
+      if (q.learn || q.type === "write") {
+        if (q.type === "write" && markQ(i) === "written") written++;
+        return;
+      }
+      if (!topics[q.t]) topics[q.t] = { right: 0, total: 0 };
+      topics[q.t].total++;
+      if (markQ(i) === true) { right++; topics[q.t].right++; }
+    });
+
+    el("scoreLine").textContent = right + " out of " + TOTALMC + " on the quick questions";
+    var noteTxt;
+    if (written === 0) {
+      noteTxt = "No writing this time, and that is fine. The written bits will still be here whenever you fancy them.";
+    } else {
+      noteTxt = "You also wrote " + written + " answer" + (written === 1 ? "" : "s") + ". Those are not marked by the computer \u2014 they are the interesting part, and Jay would love to read them.";
+    }
+    el("scoreNote").textContent = noteTxt;
+
+    var bars = el("topicBars");
+    bars.innerHTML = "";
+    Object.keys(topics).forEach(function (t) {
+      var frac = topics[t].total ? topics[t].right / topics[t].total : 0;
+      var row = document.createElement("div");
+      row.className = "row";
+      var name = document.createElement("div");
+      name.className = "name";
+      name.textContent = t;
+      var track = document.createElement("div");
+      track.className = "track";
+      var fill = document.createElement("span");
+      fill.className = "fill";
+      fill.style.width = Math.round(frac * 100) + "%";
+      fill.style.background = frac >= 0.75
+        ? "linear-gradient(90deg, #2e7d4f, #4ba36f)"
+        : "linear-gradient(90deg, #ef7724, #d55f0f)";
+      track.appendChild(fill);
+      var sc = document.createElement("div");
+      sc.className = "score";
+      sc.textContent = topics[t].right + "/" + topics[t].total;
+      row.appendChild(name); row.appendChild(track); row.appendChild(sc);
+      bars.appendChild(row);
+    });
+
+    var list = el("reviewList");
+    list.innerHTML = "";
+    ITEMS.forEach(function (q, i) {
+      if (q.learn) return;
+      var m = markQ(i);
+      var d = document.createElement("div");
+      d.className = "review-item";
+      if (m === "written") {
+        d.innerHTML = "Q" + QNUM[i] + " \u00B7 " + q.p + ' <span class="tag note">Written answer</span>';
+        var w = document.createElement("div");
+        w.className = "written";
+        w.textContent = state.answers[i][0];
+        d.appendChild(w);
+      } else {
+        var tag = m === true ? '<span class="tag right">Got it</span>'
+          : m === null ? '<span class="tag diff">Skipped</span>'
+          : '<span class="tag diff">Not this time</span>';
+        var extra = m === true ? "" :
+          " \u2014 answer: " + q.opts[q.ans] +
+          (m === false ? " (you picked: " + q.opts[state.answers[i][0]] + ")" : "");
+        d.innerHTML = "Q" + QNUM[i] + " \u00B7 " + q.p + " " + tag + extra;
+      }
+      list.appendChild(d);
+    });
+
+    wireSend(right, topics);
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---------- send to Jay ----------
+  function buildReport(right, topics) {
+    var lines = [];
+    lines.push("Animal Farm practice - Base 5");
+    lines.push("Student: " + (state.who || "not given"));
+    lines.push("Date: " + new Date().toLocaleString("en-GB"));
+    lines.push("Quick questions: " + right + " out of " + TOTALMC);
+    lines.push("");
+    lines.push("By topic:");
+    Object.keys(topics).forEach(function (t) {
+      lines.push("  " + t + ": " + topics[t].right + "/" + topics[t].total);
+    });
+    lines.push("");
+    ITEMS.forEach(function (q, i) {
+      if (q.learn) return;
+      var m = markQ(i);
+      var plain = q.p.replace(/<[^>]+>/g, "");
+      if (m === "written") {
+        lines.push("Q" + QNUM[i] + " [written] " + plain);
+        lines.push(state.answers[i][0]);
+        lines.push("");
+      } else {
+        var status = m === true ? "correct" : m === null ? "skipped" :
+          "picked \"" + q.opts[state.answers[i][0]] + "\", answer \"" + q.opts[q.ans] + "\"";
+        lines.push("Q" + QNUM[i] + " [" + q.t + "] " + plain + " -> " + status);
+      }
+    });
+    return lines.join("\n");
+  }
+
+  function wireSend(right, topics) {
+    var report = buildReport(right, topics);
+    var subj = "Animal Farm practice - " + (state.who || "Base 5") + " - " + right + "/" + TOTALMC;
+    el("gmailBtn").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
+      encodeURIComponent(TEACHER_EMAIL) + "&su=" + encodeURIComponent(subj) +
+      "&body=" + encodeURIComponent(report);
+    el("mailBtn").href = "mailto:" + TEACHER_EMAIL + "?subject=" +
+      encodeURIComponent(subj) + "&body=" + encodeURIComponent(report);
+    el("copyBtn").onclick = function () {
+      var done = function () {
+        el("copyBtn").textContent = "Copied";
+        setTimeout(function () { el("copyBtn").textContent = "Copy results"; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(report).then(done, done);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = report; document.body.appendChild(ta);
+        ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta); done();
+      }
+    };
+    el("dlBtn").onclick = function () {
+      var blob = new Blob([report], { type: "text/plain" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "animal-farm-" + (state.who || "base5") + ".txt";
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    };
+  }
+
+  // ---------- wiring ----------
+  el("beginBtn").onclick = function () {
+    state.started = true; state.finished = false;
+    state.idx = 0; state.answers = {};
+    save();
+    show("startCard", false); show("qCard", true);
+    renderQ();
+  };
+  el("resumeBtn").onclick = function () {
+    show("startCard", false);
+    if (state.finished) { finish(); } else { show("qCard", true); renderQ(); }
+  };
+  el("backBtn").onclick = function () { storeCurrent(); goto(state.idx - 1); };
+  el("skipBtn").onclick = function () {
+    storeCurrent();
+    if (ITEMS[state.idx].type === "mc") { delete state.answers[state.idx]; save(); }
+    if (state.idx === ITEMS.length - 1) { finish(); } else { goto(state.idx + 1); }
+  };
+  el("nextBtn").onclick = function () {
+    storeCurrent();
+    if (state.idx === ITEMS.length - 1) { finish(); } else { goto(state.idx + 1); }
+  };
+  el("againBtn").onclick = function () {
+    state.answers = {}; state.idx = 0; state.finished = false; state.started = false;
+    save();
+    show("resultCard", false); show("sendCard", false);
+    show("startCard", true);
+    buildInitials();
+    window.scrollTo({ top: 0 });
+  };
+
+  load();
+  buildInitials();
+  if (state.started && (Object.keys(state.answers).length > 0 || state.finished)) {
+    show("resumeBtn", true);
+  }
+})();
+</script>
+
+</body>
+</html>
