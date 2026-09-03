@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing pad - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+
+.padwrap{background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:18px;box-shadow:var(--lift);margin:0 0 8px}
+#sheet{
+  width:100%;min-height:44vh;resize:vertical;
+  font-family:var(--body);font-size:1.08rem;line-height:1.7;
+  border:none;outline:none;background:transparent;color:var(--ink);
+}
+#sheet::placeholder{color:var(--body-tint);opacity:.7}
+.metabar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  font-family:var(--display);font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--body-tint);margin:0 0 22px}
+.metabar .saved{color:var(--teal)}
+.promptbox{
+  background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:20px 22px;margin:0 0 18px;box-shadow:var(--lift);transform:rotate(-.6deg);
+}
+.promptbox h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.15rem;
+  margin:0 0 8px;color:var(--yellow)}
+#promptText{margin:0 0 14px;font-size:1.06rem;min-height:2.6em}
+.toolrow{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 18px}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>WRITING <span class="accent">PAD</span></h1>
+    <div class="line">
+      <span class="chip">Blank page</span>
+      <p>It saves as you type. <span class="hl">Send it to Jay only if you want to.</span></p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="promptbox">
+    <h2>Stuck for something?</h2>
+    <p id="promptText">You do not need a prompt. But there is one here if you want it.</p>
+    <button class="btn" id="promptBtn">Give me one</button>
+    <button class="btn btn-quiet" id="promptOff" hidden>Hide this</button>
+  </div>
+
+  <div class="toolrow">
+    <button class="btn btn-quiet" id="clearBtn">Clear the page</button>
+  </div>
+
+  <div class="padwrap">
+    <textarea id="sheet" placeholder="Anything. It does not have to be finished, or good, or about the prompt."></textarea>
+  </div>
+
+  <div class="metabar">
+    <span id="wc">0 words</span>
+    <span class="saved" id="savedMsg"></span>
+  </div>
+
+  <div id="sendHost"></div>
+
+  <a class="backlink" href="/tools/">Back to tools</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+<script src="/data/send.js?v=1"></script>
+<script>
+(function(){
+  var KEY="base5.writingpad.v1";
+  var sheet=document.getElementById('sheet');
+  var wc=document.getElementById('wc');
+  var savedMsg=document.getElementById('savedMsg');
+  var tmr;
+
+  var PROMPTS=[
+    "Describe a room you know well so precisely that someone could walk round it with their eyes shut.",
+    "Write the worst possible advert for something you actually like.",
+    "Somebody knocks at the door. You already know who it is and you are not answering. Why not?",
+    "Explain something you are good at to a person who has never heard of it.",
+    "Write about a smell.",
+    "Two people are arguing about something completely trivial. Write only what they say.",
+    "What is a rule you think is stupid, and what would you replace it with?",
+    "Describe the last time you were genuinely surprised.",
+    "You find a door in your house that was not there yesterday. Do not open it. Describe it.",
+    "Write instructions for something nobody needs instructions for.",
+    "What would you put in a museum about this year?",
+    "Something is missing and nobody has noticed yet except you.",
+    "Write the same short moment twice, once as a person who is happy and once as a person who is not.",
+    "Argue that something everyone likes is actually rubbish.",
+    "Describe a place you have never been to as if you go there all the time."
+  ];
+  var lastP=-1;
+
+  try{ sheet.value = localStorage.getItem(KEY) || "" }catch(e){}
+
+  function count(){
+    var t=sheet.value.trim();
+    var n=t?t.split(/\s+/).length:0;
+    wc.textContent=n+(n===1?" word":" words");
+  }
+
+  sheet.addEventListener('input',function(){
+    count();
+    try{ localStorage.setItem(KEY,sheet.value) }catch(e){}
+    savedMsg.textContent="Saved";
+    clearTimeout(tmr);
+    tmr=setTimeout(function(){ savedMsg.textContent="" },1200);
+  });
+
+  document.getElementById('promptBtn').addEventListener('click',function(){
+    var i=lastP;
+    while(i===lastP && PROMPTS.length>1){ i=Math.floor(Math.random()*PROMPTS.length) }
+    lastP=i;
+    document.getElementById('promptText').textContent=PROMPTS[i];
+    this.textContent="Another one";
+    document.getElementById('promptOff').hidden=false;
+  });
+
+  document.getElementById('promptOff').addEventListener('click',function(){
+    this.closest('.promptbox').style.display='none';
+  });
+
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    if(!sheet.value.trim()) return;
+    sheet.value="";
+    try{ localStorage.setItem(KEY,"") }catch(e){}
+    count();
+  });
+
+  Base5Send.mount(document.getElementById('sendHost'),{
+    tool:"Writing pad",
+    filename:"writing",
+    getText:function(){ return sheet.value.trim() || "(nothing written yet)" }
+  });
+
+  count();
+})();
+</script>
+
+</body>
+</html>
