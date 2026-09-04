@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personnel File - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Personnel File only. Everything else lives in style.css */
+.pwrap{max-width:720px;margin:0 auto}
+.pwrap .card{cursor:default}
+.sec p.lead{font-size:1.05rem;line-height:1.55;margin:6px 0 14px}
+.qlabel{font-weight:700;font-size:1.05rem;margin:16px 0 8px}
+.qlabel small{font-weight:400;opacity:.65}
+.rowline{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input.txt{flex:1;min-width:200px;font-size:1.05rem;font-family:"Atkinson Hyperlegible",Verdana,sans-serif;color:#052f3a;background:#fffdfb;border:2px solid rgba(5,47,58,.18);border-radius:12px 9px 12px 9px;padding:11px 14px}
+input.txt:focus-visible,button:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+button.dice{font-family:inherit;font-size:1.3rem;line-height:1;padding:10px 14px;border-radius:12px 9px 12px 9px;border:2px solid rgba(0,114,145,.4);background:#fffdfb;color:#005a73;cursor:pointer}
+button.dice:hover{border-color:#007291}
+.chips{display:flex;gap:9px;flex-wrap:wrap;margin:4px 0 4px}
+.chips button{font-family:inherit;font-size:.98rem;padding:9px 15px;border-radius:999px;border:2px solid rgba(5,47,58,.2);background:#fffdfb;color:#052f3a;cursor:pointer}
+.chips button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.chips button:hover{border-color:#007291}
+.pair{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+.pair .vs{font-size:.85rem;opacity:.6;font-weight:700}
+.slider{margin:14px 0 4px}
+.slider label{display:block;font-weight:700;margin-bottom:2px}
+.slider .ends{display:flex;justify-content:space-between;font-size:.82rem;opacity:.65;margin-bottom:4px;gap:12px}
+.slider input[type=range]{width:100%;accent-color:#007291}
+.slider .val{font-size:.85rem;color:#005a73;font-weight:700}
+.emblems{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0}
+.emblems button{width:62px;height:62px;padding:8px;border-radius:16px 12px 16px 12px;border:2px solid rgba(5,47,58,.2);background:#fffdfb;cursor:pointer}
+.emblems button.picked{border-color:#ef7724;background:rgba(239,119,36,.1)}
+.emblems svg{width:100%;height:100%}
+.swatches{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0}
+.swatches button{width:52px;height:52px;border-radius:50%;border:3px solid rgba(5,47,58,.2);cursor:pointer}
+.swatches button.picked{border-color:#052f3a;box-shadow:0 0 0 3px #fff inset}
+.bignav{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.smallnote{font-size:.9rem;opacity:.7;margin-top:10px}
+.hidden{display:none}
+/* ---- the file itself ---- */
+#fileCard{border-radius:24px 18px 22px 16px;padding:26px 24px 22px;color:#052f3a;position:relative;overflow:hidden;box-shadow:0 10px 26px rgba(5,47,58,.18);transform:rotate(-.4deg)}
+#fileCard .fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:3px solid rgba(5,47,58,.25);padding-bottom:10px;margin-bottom:14px}
+#fileCard .fhead .dept{font-size:.78rem;letter-spacing:.14em;font-weight:700;opacity:.7;text-transform:uppercase}
+#fileCard .fhead h3{margin:2px 0 0;font-size:1.7rem;line-height:1.1}
+#fileCard .fhead .call{font-size:.95rem;opacity:.75;margin-top:2px}
+#fileCard .emblembox{width:74px;height:74px;flex:0 0 74px;border-radius:16px;background:rgba(255,255,255,.55);padding:10px;border:2px solid rgba(5,47,58,.2)}
+#fileCard .frow{margin:10px 0;font-size:1rem;line-height:1.5}
+#fileCard .frow b{text-transform:uppercase;font-size:.78rem;letter-spacing:.1em;opacity:.7;display:block}
+#fileCard .fstats{margin:12px 0}
+#fileCard .fstat{display:flex;align-items:center;gap:10px;margin:7px 0}
+#fileCard .fstat .sname{flex:0 0 46%;font-size:.92rem}
+#fileCard .fstat .strack{flex:1;height:12px;background:rgba(5,47,58,.14);border-radius:999px;overflow:hidden}
+#fileCard .fstat .sfill{display:block;height:100%;border-radius:999px;background:#052f3a;opacity:.75}
+#fileCard .fstat .snum{flex:0 0 44px;text-align:right;font-size:.85rem;font-weight:700}
+#fileCard ul{margin:4px 0 0;padding-left:20px}
+#fileCard li{margin:3px 0}
+#fileCard .stamp{position:absolute;right:14px;bottom:52px;transform:rotate(-14deg);border:3px solid rgba(192,57,43,.75);color:rgba(192,57,43,.85);font-weight:700;letter-spacing:.1em;padding:6px 12px;border-radius:8px;font-size:.95rem;text-transform:uppercase;pointer-events:none}
+#fileCard .foot{margin-top:16px;padding-top:10px;border-top:2px dashed rgba(5,47,58,.25);font-size:.78rem;opacity:.65;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sendgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px}
+.sendgrid button,.sendgrid a{font-family:inherit;font-size:1rem;font-weight:700;text-align:center;text-decoration:none;padding:12px 10px;border-radius:14px 10px 14px 10px;border:2px solid rgba(0,114,145,.4);color:#005a73;background:#fffdfb;cursor:pointer}
+@media (max-width:520px){.sendgrid{grid-template-columns:1fr}#fileCard .fstat .sname{flex-basis:52%}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pwrap">
+
+  <div class="weektheme">
+    <h2>The Base 5 Personnel File</h2>
+    <span>Official documentation. Every base needs files on its people. This is yours, and you are in charge of what goes in it.</span>
+  </div>
+
+  <div class="board">
+
+    <!-- INTRO -->
+    <div class="card w12 sec">
+      <span class="kicker">Form B5-ME &middot; issued by the Department of Finding Out Who Is Here</span>
+      <h3>Read this bit, or don't</h3>
+      <p class="lead">The rules, such as they are: every single question is optional. Blank answers just don't print. You can be completely honest, completely ridiculous, or a suspicious blend of both, and nobody will know which is which. If a question is boring, the dice button will answer it for you. If typing is a lot, tap things instead. If the whole form is a lot, there is a button at the bottom that fills everything in with nonsense and you can just correct the bits it gets wrong about you.</p>
+      <p class="lead">Nothing leaves this device unless you decide to save or send your file at the end.</p>
+    </div>
+
+    <!-- SECTION 1: FILE BASICS -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 1 &middot; File basics</span>
+      <h3>Who is this file even about</h3>
+
+      <div class="qlabel">What should the file call you? <small>initials, nickname, whatever you answer to</small></div>
+      <div class="rowline">
+        <input class="txt" id="callme" maxlength="24" autocomplete="off">
+      </div>
+
+      <div class="qlabel">Official codename <small>the dice will issue you one. Reroll until it feels right, this is important government business</small></div>
+      <div class="rowline">
+        <input class="txt" id="codename" maxlength="40" autocomplete="off">
+        <button class="dice" id="codenameDice" type="button" aria-label="Reroll codename">&#x2684;</button>
+      </div>
+
+      <div class="qlabel">Species <small>be honest</small></div>
+      <div class="chips" id="speciesChips"></div>
+
+      <div class="qlabel">Choose your emblem</div>
+      <div class="emblems" id="emblemRow"></div>
+
+      <div class="qlabel">File colour</div>
+      <div class="swatches" id="swatchRow"></div>
+    </div>
+
+    <!-- SECTION 2: VITAL STATISTICS -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 2 &middot; Vital statistics</span>
+      <h3>Officially declared by you, no evidence required</h3>
+      <p class="lead">Slide these wherever you like. There are no wrong answers, only wrong socks.</p>
+      <div id="sliderBox"></div>
+    </div>
+
+    <!-- SECTION 3: QUICKFIRE -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 3 &middot; Quickfire tribunal</span>
+      <h3>Pick a side, or refuse to</h3>
+      <p class="lead">Tap one from each pair. Tapping it again un-picks it, because you are allowed to change your mind, this is not a contract.</p>
+      <div id="quickBox"></div>
+    </div>
+
+    <!-- SECTION 4: RATINGS BUREAU -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 4 &middot; The Ratings Bureau</span>
+      <h3>Things you rate, things you refuse to respect</h3>
+
+      <div class="qlabel">Up to three things you currently rate <small>tap suggestions or write your own</small></div>
+      <div class="rowline"><input class="txt" id="rate1" maxlength="40" autocomplete="off"></div>
+      <div class="rowline" style="margin-top:8px"><input class="txt" id="rate2" maxlength="40" autocomplete="off"></div>
+      <div class="rowline" style="margin-top:8px"><input class="txt" id="rate3" maxlength="40" autocomplete="off"></div>
+      <div class="chips" id="rateChips" style="margin-top:10px"></div>
+
+      <div class="qlabel">One thing you refuse to respect</div>
+      <div class="rowline">
+        <input class="txt" id="norespect" maxlength="48" autocomplete="off">
+        <button class="dice" id="norespectDice" type="button" aria-label="Suggest something to refuse to respect">&#x2684;</button>
+      </div>
+      <div class="chips" id="norespectChips"></div>
+    </div>
+
+    <!-- SECTION 5: OPERATING INSTRUCTIONS -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 5 &middot; Operating instructions</span>
+      <h3>How to approach this unit safely</h3>
+      <p class="lead">The genuinely useful bit, disguised as nonsense. Whoever reads your file will know how to not annoy you, which is frankly the foundation of civilisation.</p>
+
+      <div class="qlabel">Best way to get my attention</div>
+      <div class="chips" id="attnChips"></div>
+
+      <div class="qlabel">When I go quiet, it usually means</div>
+      <div class="chips" id="quietChips"></div>
+
+      <div class="qlabel">I am at my best when <small>finish the sentence, or tap one</small></div>
+      <div class="rowline"><input class="txt" id="best" maxlength="70" autocomplete="off"></div>
+      <div class="chips" id="bestChips"></div>
+
+      <div class="qlabel">Please do not</div>
+      <div class="rowline"><input class="txt" id="donot" maxlength="70" autocomplete="off"></div>
+      <div class="chips" id="donotChips"></div>
+    </div>
+
+    <!-- SECTION 6: CLASSIFIED EXTRAS -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 6 &middot; Classified extras</span>
+      <h3>The bits that make the file worth reading</h3>
+
+      <div class="qlabel">Registered superpower</div>
+      <div class="rowline">
+        <input class="txt" id="power" maxlength="70" autocomplete="off">
+        <button class="dice" id="powerDice" type="button" aria-label="Issue a random superpower">&#x2684;</button>
+      </div>
+
+      <div class="qlabel">Documented weakness</div>
+      <div class="rowline">
+        <input class="txt" id="flaw" maxlength="70" autocomplete="off">
+        <button class="dice" id="flawDice" type="button" aria-label="Issue a random weakness">&#x2684;</button>
+      </div>
+
+      <div class="qlabel">One fact about you <small>true or invented, the Bureau does not check</small></div>
+      <div class="rowline">
+        <input class="txt" id="fact" maxlength="80" autocomplete="off">
+        <button class="dice" id="factDice" type="button" aria-label="Invent a fact">&#x2684;</button>
+      </div>
+
+      <div class="qlabel">Walk-on music, if life had it</div>
+      <div class="chips" id="musicChips"></div>
+    </div>
+
+    <!-- SECTION 7: CONTROLS -->
+    <div class="card w12 sec">
+      <span class="kicker">Section 7 &middot; The buttons</span>
+      <h3>Finish it off</h3>
+      <p class="lead">Left anything blank? Fine, blanks don't print. Or let the nonsense button answer everything you skipped, then fix whatever it gets wrong about you.</p>
+      <div class="bignav">
+        <button class="btn ghost" id="nonsenseBtn" style="background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.4);box-shadow:none">Fill the rest with nonsense</button>
+        <button class="btn" id="generateBtn">Generate my file</button>
+      </div>
+      <p class="smallnote">Answers stay saved on this device, so wandering off and coming back later is fine.</p>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="card w12 hidden" id="outputCard">
+      <span class="kicker">Your file</span>
+      <div id="fileCard"></div>
+      <div class="sendgrid">
+        <button id="pngBtn">Save as a picture</button>
+        <button id="copyBtn">Copy as text</button>
+        <a id="gmailBtn" target="_blank" rel="noopener">Gmail it to Jay</a>
+        <a id="mailBtn">Email app</a>
+      </div>
+      <div class="bignav" style="margin-top:14px">
+        <button class="btn ghost" id="againBtn" style="background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.4);box-shadow:none">Start a fresh file</button>
+      </div>
+      <p class="smallnote">Sharing is optional. Files also make excellent wall displays and conversation starters, apparently.</p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<canvas id="pngCanvas" width="900" height="1240" class="hidden"></canvas>
+
+<script>
+(function () {
+  "use strict";
+  var STORE = "b5.tools.profile.v1";
+  var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+
+  // ---------------- word pools ----------------
+  var ADJ = ["Unbothered", "Chaotic", "Slightly Damp", "Suspicious", "Legendary", "Feral", "Polite-ish", "Turbo", "Mysterious", "Crunchy", "Unstoppable", "Gently Menacing", "Freelance", "Overqualified", "Nocturnal", "Certified", "Reluctant", "Deluxe", "Haunted", "Premium"];
+  var ANIMAL = ["Heron", "Wombat", "Pigeon", "Axolotl", "Badger", "Gecko", "Capybara", "Moth", "Otter", "Goose", "Ferret", "Newt", "Hedgehog", "Stoat", "Crow", "Llama"];
+  var SPECIES = ["human (probably)", "human (allegedly)", "three raccoons in a hoodie", "gremlin, off duty", "undisclosed", "cryptid, local"];
+  var STATS = [
+    { id: "snack", name: "Snack radar", lo: "could starve beside a buffet", hi: "hears crisps from three rooms away" },
+    { id: "wifi", name: "Wi-Fi dependency", lo: "could live in a cave", hi: "grieves at one bar" },
+    { id: "morning", name: "Morning functionality", lo: "do not perceive me before ten", hi: "annoyingly chirpy at dawn" },
+    { id: "patience", name: "Patience for nonsense", lo: "none, ever", hi: "basically a monk" },
+    { id: "remote", name: "Ability to find the remote", lo: "it is gone forever", hi: "sixth sense" },
+    { id: "chaos", name: "Personal chaos field", lo: "suspiciously tidy", hi: "socks have their own weather" }
+  ];
+  var QUICK = [
+    ["cats", "dogs"], ["sweet", "salty"], ["too hot", "too cold"],
+    ["window seat", "aisle seat"], ["texting", "calling"], ["early", "fashionably late"],
+    ["plan everything", "wing it"], ["big party", "three good people"]
+  ];
+  var RATE_POOL = ["garlic bread", "thunderstorms from indoors", "the good scissors", "fresh trainers", "dogs in jumpers", "the first crisp", "getting the aux", "rain on the window", "new socks", "a proper nap", "when the bus is on time", "cheese on things", "skipping the ad", "the smell of petrol stations, controversially"];
+  var NORESPECT_POOL = ["wet socks", "slow wi-fi", "warm orange juice", "films over three hours", "autoplaying ads", "soggy cereal", "people who spoil endings", "group projects", "itchy jumpers", "the last stair that isn't there", "queue jumpers", "loud chewing"];
+  var ATTN = ["wave from a distance", "say my name once and wait", "send me a message", "offer snacks first", "just start talking, I'll catch up", "honestly? don't"];
+  var QUIET = ["I'm thinking, leave it cooking", "I'm recharging, nothing is wrong", "I'm annoyed but it will pass", "I'm plotting", "the battery is simply empty", "I have no idea, it is a mystery to me too"];
+  var BEST_POOL = ["I've had food and nobody is rushing me", "I can do it my own way", "there's music on", "it's the afternoon, mornings are a scam", "I know what's happening next", "someone laughs at my jokes"];
+  var DONOT_POOL = ["sneak up behind me", "touch the hood of my hoodie", "ask if I'm tired, I know", "rush me, it makes everything slower", "take my chair, it is my chair", "explain the joke"];
+  var POWER_POOL = ["can hear a crisp packet from three rooms away", "instantly finds the comfiest chair in any room", "can nap through a fire drill", "summons rain by planning anything outdoors", "remembers lyrics from 2019 but not what day it is", "can tell identical dogs apart", "wins every staring contest with a cat", "makes any Wi-Fi feel judged into working"];
+  var FLAW_POOL = ["cannot whisper, biologically", "loses any pen within four minutes", "physically unable to leave a skip button unpressed", "will pet any dog regardless of schedule", "laughs at the wrong moment, every time", "cannot walk past a puddle maturely", "says 'you too' when the waiter says enjoy your meal"];
+  var FACT_POOL = ["has strong opinions about cheese", "once high-fived a lamppost to style out a trip", "is banned from Monopoly in at least one house", "can quote an entire advert from memory", "has never lost a thumb war, officially", "claims to have seen a fox do something unbelievable", "knows exactly which floorboard creaks"];
+  var MUSIC = ["menacing humming", "8-bit boss music", "full orchestra, unnecessary", "one long airhorn", "lo-fi beats to loom to", "silence, but dramatic"];
+  var STAMPS = ["APPROVED-ISH", "DO NOT LAMINATE", "FILED UNDER: LEGEND", "MOSTLY HARMLESS", "TOP SECRET (NOT REALLY)", "HANDLE WITH SNACKS"];
+  var CLEARANCE = ["Level 3: Mostly Harmless", "Level 5: Approach With Snacks", "Level 7: Licensed To Chill", "Level 8: Do Not Startle", "Level 9: Beyond Filing", "Level 11: The Scale Only Goes To Ten"];
+  var EMBLEMS = ["bolt", "star", "dice", "plant", "moon", "controller"];
+  var SCHEMES = [
+    { id: "paper", bg: "#fdf3e7", accent: "#ef7724" },
+    { id: "sea", bg: "#e3f1f4", accent: "#007291" },
+    { id: "mint", bg: "#e6f2ea", accent: "#2e7d4f" },
+    { id: "plum", bg: "#efe6f2", accent: "#7b4b94" },
+    { id: "sun", bg: "#fdf0d2", accent: "#b3541e" },
+    { id: "storm", bg: "#e8eaf0", accent: "#3d5a80" }
+  ];
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function pickNot(arr, notVal) {
+    if (arr.length < 2) return arr[0];
+    var v = pick(arr);
+    while (v === notVal) { v = pick(arr); }
+    return v;
+  }
+
+  // ---------------- state ----------------
+  var state = {
+    callme: "", codename: "", species: "", emblem: "", scheme: "sea",
+    stats: {}, quick: {}, rate: ["", "", ""], norespect: "",
+    attn: "", quiet: "", best: "", donot: "",
+    power: "", flaw: "", fact: "", music: ""
+  };
+  STATS.forEach(function (s) { state.stats[s.id] = 50; });
+
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && typeof s === "object") {
+          Object.keys(state).forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+        }
+      }
+    } catch (e) {}
+  }
+  function el(id) { return document.getElementById(id); }
+
+  // ---------------- emblem drawing (SVG string + canvas) ----------------
+  function emblemSVG(kind, colour) {
+    var c = colour || "#052f3a";
+    var open = "<svg viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'>";
+    var close = "</svg>";
+    if (kind === "bolt") return open + "<polygon points='34,4 14,34 27,34 24,56 46,24 32,24' fill='" + c + "'/>" + close;
+    if (kind === "star") return open + "<polygon points='30,4 37,22 56,22 41,34 46,53 30,42 14,53 19,34 4,22 23,22' fill='" + c + "'/>" + close;
+    if (kind === "dice") return open + "<rect x='8' y='8' width='44' height='44' rx='10' fill='none' stroke='" + c + "' stroke-width='5'/><circle cx='21' cy='21' r='4.5' fill='" + c + "'/><circle cx='39' cy='39' r='4.5' fill='" + c + "'/><circle cx='30' cy='30' r='4.5' fill='" + c + "'/>" + close;
+    if (kind === "plant") return open + "<path d='M30 54 V28' stroke='" + c + "' stroke-width='5' fill='none'/><path d='M30 34 Q12 30 10 12 Q28 14 30 32 Z' fill='" + c + "'/><path d='M30 40 Q48 36 50 20 Q33 22 30 38 Z' fill='" + c + "'/>" + close;
+    if (kind === "moon") return open + "<path d='M40 6 A26 26 0 1 0 54 40 A20 20 0 1 1 40 6 Z' fill='" + c + "'/>" + close;
+    if (kind === "controller") return open + "<rect x='6' y='18' width='48' height='26' rx='13' fill='none' stroke='" + c + "' stroke-width='5'/><path d='M20 25 v12 M14 31 h12' stroke='" + c + "' stroke-width='4'/><circle cx='40' cy='27' r='3.5' fill='" + c + "'/><circle cx='46' cy='34' r='3.5' fill='" + c + "'/>" + close;
+    return open + close;
+  }
+  function drawEmblem(ctx, kind, x, y, size, colour) {
+    var s = size / 60;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.fillStyle = colour; ctx.strokeStyle = colour;
+    if (kind === "bolt") {
+      ctx.beginPath(); ctx.moveTo(34, 4); ctx.lineTo(14, 34); ctx.lineTo(27, 34); ctx.lineTo(24, 56); ctx.lineTo(46, 24); ctx.lineTo(32, 24); ctx.closePath(); ctx.fill();
+    } else if (kind === "star") {
+      var pts = [[30,4],[37,22],[56,22],[41,34],[46,53],[30,42],[14,53],[19,34],[4,22],[23,22]];
+      ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+      pts.slice(1).forEach(function (p) { ctx.lineTo(p[0], p[1]); });
+      ctx.closePath(); ctx.fill();
+    } else if (kind === "dice") {
+      ctx.lineWidth = 5;
+      roundRect(ctx, 8, 8, 44, 44, 10); ctx.stroke();
+      [[21,21],[39,39],[30,30]].forEach(function (p) { ctx.beginPath(); ctx.arc(p[0], p[1], 4.5, 0, 7); ctx.fill(); });
+    } else if (kind === "plant") {
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(30, 54); ctx.lineTo(30, 28); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(30, 34); ctx.quadraticCurveTo(12, 30, 10, 12); ctx.quadraticCurveTo(28, 14, 30, 32); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(30, 40); ctx.quadraticCurveTo(48, 36, 50, 20); ctx.quadraticCurveTo(33, 22, 30, 38); ctx.closePath(); ctx.fill();
+    } else if (kind === "moon") {
+      ctx.beginPath(); ctx.arc(28, 32, 26, -0.6, 4.2); ctx.arc(36, 26, 20, 3.6, -0.2, true); ctx.closePath(); ctx.fill();
+    } else if (kind === "controller") {
+      ctx.lineWidth = 5;
+      roundRect(ctx, 6, 18, 48, 26, 13); ctx.stroke();
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(20, 25); ctx.lineTo(20, 37); ctx.moveTo(14, 31); ctx.lineTo(26, 31); ctx.stroke();
+      ctx.beginPath(); ctx.arc(40, 27, 3.5, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(46, 34, 3.5, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // ---------------- builders ----------------
+  function bindText(id, key) {
+    var i = el(id);
+    i.value = state[key] || "";
+    i.addEventListener("input", function () { state[key] = i.value; save(); });
+  }
+  function bindRate(id, idx) {
+    var i = el(id);
+    i.value = state.rate[idx] || "";
+    i.addEventListener("input", function () { state.rate[idx] = i.value; save(); });
+  }
+  function chipGroup(containerId, options, key) {
+    var box = el(containerId);
+    box.innerHTML = "";
+    options.forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = o;
+      if (state[key] === o) b.classList.add("picked");
+      b.onclick = function () {
+        state[key] = (state[key] === o) ? "" : o;
+        save();
+        chipGroup(containerId, options, key);
+        if (key === "best" || key === "donot") { el(key).value = state[key]; }
+      };
+      box.appendChild(b);
+    });
+  }
+  function suggestChips(containerId, options, applyFn) {
+    var box = el(containerId);
+    box.innerHTML = "";
+    options.forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = o;
+      b.onclick = function () { applyFn(o); };
+      box.appendChild(b);
+    });
+  }
+
+  function buildSliders() {
+    var box = el("sliderBox");
+    box.innerHTML = "";
+    STATS.forEach(function (s) {
+      var d = document.createElement("div");
+      d.className = "slider";
+      var lab = document.createElement("label");
+      lab.textContent = s.name;
+      lab.setAttribute("for", "sl-" + s.id);
+      var ends = document.createElement("div");
+      ends.className = "ends";
+      ends.innerHTML = "<span>" + s.lo + "</span><span>" + s.hi + "</span>";
+      var input = document.createElement("input");
+      input.type = "range"; input.min = 0; input.max = 100;
+      input.id = "sl-" + s.id;
+      input.value = state.stats[s.id];
+      var val = document.createElement("span");
+      val.className = "val";
+      val.textContent = input.value + "%";
+      input.addEventListener("input", function () {
+        state.stats[s.id] = parseInt(input.value, 10);
+        val.textContent = input.value + "%";
+        save();
+      });
+      d.appendChild(lab); d.appendChild(ends); d.appendChild(input); d.appendChild(val);
+      box.appendChild(d);
+    });
+  }
+
+  function buildQuick() {
+    var box = el("quickBox");
+    box.innerHTML = "";
+    QUICK.forEach(function (pair, pi) {
+      var row = document.createElement("div");
+      row.className = "pair chips";
+      pair.forEach(function (opt, oi) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = opt;
+        if (state.quick[pi] === opt) b.classList.add("picked");
+        b.onclick = function () {
+          state.quick[pi] = (state.quick[pi] === opt) ? "" : opt;
+          save();
+          buildQuick();
+        };
+        row.appendChild(b);
+        if (oi === 0) {
+          var vs = document.createElement("span");
+          vs.className = "vs";
+          vs.textContent = "or";
+          row.appendChild(vs);
+        }
+      });
+      box.appendChild(row);
+    });
+  }
+
+  // ---------------- nonsense fill ----------------
+  function newCodename() { return "The " + pick(ADJ) + " " + pick(ANIMAL); }
+  function fillNonsense() {
+    if (!state.codename) state.codename = newCodename();
+    if (!state.species) state.species = pick(SPECIES);
+    if (!state.emblem) state.emblem = pick(EMBLEMS);
+    if (!state.rate[0] && !state.rate[1] && !state.rate[2]) {
+      state.rate[0] = pick(RATE_POOL);
+      state.rate[1] = pickNot(RATE_POOL, state.rate[0]);
+    }
+    if (!state.norespect) state.norespect = pick(NORESPECT_POOL);
+    if (!state.attn) state.attn = pick(ATTN);
+    if (!state.quiet) state.quiet = pick(QUIET);
+    if (!state.best) state.best = pick(BEST_POOL);
+    if (!state.donot) state.donot = pick(DONOT_POOL);
+    if (!state.power) state.power = pick(POWER_POOL);
+    if (!state.flaw) state.flaw = pick(FLAW_POOL);
+    if (!state.fact) state.fact = pick(FACT_POOL);
+    if (!state.music) state.music = pick(MUSIC);
+    QUICK.forEach(function (pair, pi) { if (!state.quick[pi]) state.quick[pi] = pick(pair); });
+    save();
+    refreshAll();
+  }
+
+  function refreshAll() {
+    ["callme", "codename", "norespect", "best", "donot", "power", "flaw", "fact"].forEach(function (k) { el(k).value = state[k] || ""; });
+    el("rate1").value = state.rate[0] || "";
+    el("rate2").value = state.rate[1] || "";
+    el("rate3").value = state.rate[2] || "";
+    chipGroup("speciesChips", SPECIES, "species");
+    chipGroup("attnChips", ATTN, "attn");
+    chipGroup("quietChips", QUIET, "quiet");
+    chipGroup("bestChips", BEST_POOL, "best");
+    chipGroup("donotChips", DONOT_POOL, "donot");
+    chipGroup("musicChips", MUSIC, "music");
+    buildQuick();
+    buildEmblems();
+    buildSwatches();
+    STATS.forEach(function (s) {
+      var i = el("sl-" + s.id);
+      if (i) { i.value = state.stats[s.id]; i.nextElementSibling && (i.nextElementSibling.textContent = i.value + "%"); }
+    });
+  }
+
+  function buildEmblems() {
+    var row = el("emblemRow");
+    row.innerHTML = "";
+    EMBLEMS.forEach(function (k) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Emblem: " + k);
+      b.innerHTML = emblemSVG(k, "#052f3a");
+      if (state.emblem === k) b.classList.add("picked");
+      b.onclick = function () {
+        state.emblem = (state.emblem === k) ? "" : k;
+        save();
+        buildEmblems();
+      };
+      row.appendChild(b);
+    });
+  }
+  function buildSwatches() {
+    var row = el("swatchRow");
+    row.innerHTML = "";
+    SCHEMES.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "File colour: " + s.id);
+      b.style.background = "linear-gradient(135deg, " + s.bg + " 55%, " + s.accent + " 55%)";
+      if (state.scheme === s.id) b.classList.add("picked");
+      b.onclick = function () { state.scheme = s.id; save(); buildSwatches(); };
+      row.appendChild(b);
+    });
+  }
+
+  // ---------------- output ----------------
+  var lastStamp = "", lastClearance = "";
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function generate() {
+    lastStamp = pick(STAMPS);
+    lastClearance = pick(CLEARANCE);
+    var scheme = SCHEMES.filter(function (s) { return s.id === state.scheme; })[0] || SCHEMES[1];
+    var f = el("fileCard");
+    f.style.background = "linear-gradient(160deg, " + scheme.bg + ", #ffffff 130%)";
+    f.style.border = "3px solid " + scheme.accent;
+
+    var quickPicks = [];
+    QUICK.forEach(function (pair, pi) { if (state.quick[pi]) quickPicks.push(state.quick[pi]); });
+    var rates = state.rate.filter(function (r) { return r && r.trim(); });
+
+    var h = "";
+    h += "<div class='fhead'><div>";
+    h += "<div class='dept'>Base 5 personnel file &middot; " + esc(lastClearance) + "</div>";
+    h += "<h3>" + esc(state.codename || "Codename pending") + "</h3>";
+    if (state.callme) h += "<div class='call'>answers to: " + esc(state.callme) + "</div>";
+    h += "</div>";
+    if (state.emblem) h += "<div class='emblembox'>" + emblemSVG(state.emblem, scheme.accent) + "</div>";
+    h += "</div>";
+
+    if (state.species) h += "<div class='frow'><b>Species</b>" + esc(state.species) + "</div>";
+
+    h += "<div class='fstats'>";
+    STATS.forEach(function (s) {
+      var v = state.stats[s.id];
+      h += "<div class='fstat'><div class='sname'>" + esc(s.name) + "</div><div class='strack'><span class='sfill' style='width:" + v + "%;background:" + scheme.accent + "'></span></div><div class='snum'>" + v + "%</div></div>";
+    });
+    h += "</div>";
+
+    if (quickPicks.length) h += "<div class='frow'><b>Verdicts</b>" + esc(quickPicks.join(" &middot; ").replace(/&amp;middot;/g, "&middot;")) + "</div>";
+    if (rates.length) {
+      h += "<div class='frow'><b>Currently rates</b><ul>";
+      rates.forEach(function (r) { h += "<li>" + esc(r) + "</li>"; });
+      h += "</ul></div>";
+    }
+    if (state.norespect) h += "<div class='frow'><b>Refuses to respect</b>" + esc(state.norespect) + "</div>";
+
+    var ops = [];
+    if (state.attn) ops.push("To get my attention: " + state.attn);
+    if (state.quiet) ops.push("When I go quiet: " + state.quiet);
+    if (state.best) ops.push("At my best when: " + state.best);
+    if (state.donot) ops.push("Please do not: " + state.donot);
+    if (ops.length) {
+      h += "<div class='frow'><b>Operating instructions</b><ul>";
+      ops.forEach(function (o) { h += "<li>" + esc(o) + "</li>"; });
+      h += "</ul></div>";
+    }
+
+    if (state.power) h += "<div class='frow'><b>Registered superpower</b>" + esc(state.power) + "</div>";
+    if (state.flaw) h += "<div class='frow'><b>Documented weakness</b>" + esc(state.flaw) + "</div>";
+    if (state.fact) h += "<div class='frow'><b>On record</b>" + esc(state.fact) + "</div>";
+    if (state.music) h += "<div class='frow'><b>Walk-on music</b>" + esc(state.music) + "</div>";
+
+    h += "<div class='stamp'>" + esc(lastStamp) + "</div>";
+    h += "<div class='foot'><span>Form B5-ME</span><span>declared by the subject, verified by nobody</span></div>";
+
+    f.innerHTML = h;
+    el("outputCard").classList.remove("hidden");
+    wireSend();
+    el("outputCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---------------- text + send ----------------
+  function buildText() {
+    var lines = [];
+    lines.push("BASE 5 PERSONNEL FILE - " + lastClearance);
+    lines.push("Codename: " + (state.codename || "pending"));
+    if (state.callme) lines.push("Answers to: " + state.callme);
+    if (state.species) lines.push("Species: " + state.species);
+    lines.push("");
+    lines.push("Vital statistics (self-declared):");
+    STATS.forEach(function (s) { lines.push("  " + s.name + ": " + state.stats[s.id] + "%"); });
+    var quickPicks = [];
+    QUICK.forEach(function (pair, pi) { if (state.quick[pi]) quickPicks.push(state.quick[pi]); });
+    if (quickPicks.length) { lines.push(""); lines.push("Verdicts: " + quickPicks.join(", ")); }
+    var rates = state.rate.filter(function (r) { return r && r.trim(); });
+    if (rates.length) { lines.push(""); lines.push("Currently rates: " + rates.join("; ")); }
+    if (state.norespect) lines.push("Refuses to respect: " + state.norespect);
+    var ops = [];
+    if (state.attn) ops.push("to get my attention: " + state.attn);
+    if (state.quiet) ops.push("when I go quiet: " + state.quiet);
+    if (state.best) ops.push("at my best when: " + state.best);
+    if (state.donot) ops.push("please do not: " + state.donot);
+    if (ops.length) {
+      lines.push("");
+      lines.push("Operating instructions:");
+      ops.forEach(function (o) { lines.push("  - " + o); });
+    }
+    if (state.power) lines.push("Registered superpower: " + state.power);
+    if (state.flaw) lines.push("Documented weakness: " + state.flaw);
+    if (state.fact) lines.push("On record: " + state.fact);
+    if (state.music) lines.push("Walk-on music: " + state.music);
+    lines.push("");
+    lines.push("Stamped: " + lastStamp + ". Declared by the subject, verified by nobody.");
+    return lines.join("\n");
+  }
+
+  function wireSend() {
+    var txt = buildText();
+    var subj = "Personnel file: " + (state.codename || state.callme || "unnamed agent");
+    el("gmailBtn").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" +
+      encodeURIComponent(TEACHER_EMAIL) + "&su=" + encodeURIComponent(subj) +
+      "&body=" + encodeURIComponent(txt);
+    el("mailBtn").href = "mailto:" + TEACHER_EMAIL + "?subject=" +
+      encodeURIComponent(subj) + "&body=" + encodeURIComponent(txt);
+    el("copyBtn").onclick = function () {
+      var done = function () {
+        el("copyBtn").textContent = "Copied";
+        setTimeout(function () { el("copyBtn").textContent = "Copy as text"; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(done, done);
+      } else { done(); }
+    };
+    el("pngBtn").onclick = drawPNG;
+  }
+
+  // ---------------- PNG export ----------------
+  function drawPNG() {
+    var scheme = SCHEMES.filter(function (s) { return s.id === state.scheme; })[0] || SCHEMES[1];
+    var cv = el("pngCanvas");
+    var ctx = cv.getContext("2d");
+    var W = cv.width, PAD = 54;
+    var ink = "#052f3a";
+    var doDraw = function () {
+      ctx.clearRect(0, 0, W, cv.height);
+      var grad = ctx.createLinearGradient(0, 0, W, cv.height);
+      grad.addColorStop(0, scheme.bg); grad.addColorStop(1, "#ffffff");
+      ctx.fillStyle = grad;
+      roundRect(ctx, 6, 6, W - 12, cv.height - 12, 34); ctx.fill();
+      ctx.lineWidth = 8; ctx.strokeStyle = scheme.accent;
+      roundRect(ctx, 6, 6, W - 12, cv.height - 12, 34); ctx.stroke();
+
+      var y = PAD + 16;
+      ctx.fillStyle = ink;
+      ctx.font = "700 20px 'Atkinson Hyperlegible', Verdana, sans-serif";
+      ctx.fillText("BASE 5 PERSONNEL FILE  -  " + lastClearance.toUpperCase(), PAD, y);
+      y += 52;
+      ctx.font = "700 46px 'Atkinson Hyperlegible', Verdana, sans-serif";
+      ctx.fillText(state.codename || "Codename pending", PAD, y);
+      if (state.callme) {
+        y += 34;
+        ctx.font = "24px 'Atkinson Hyperlegible', Verdana, sans-serif";
+        ctx.fillText("answers to: " + state.callme, PAD, y);
+      }
+      if (state.emblem) drawEmblem(ctx, state.emblem, W - PAD - 110, PAD - 6, 110, scheme.accent);
+      y += 26;
+      ctx.strokeStyle = "rgba(5,47,58,.3)"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(W - PAD, y); ctx.stroke();
+      y += 40;
+
+      function label(t) {
+        ctx.font = "700 17px 'Atkinson Hyperlegible', Verdana, sans-serif";
+        ctx.fillStyle = "rgba(5,47,58,.65)";
+        ctx.fillText(t.toUpperCase(), PAD, y);
+        y += 28;
+        ctx.fillStyle = ink;
+      }
+      function line(t, indent) {
+        ctx.font = "22px 'Atkinson Hyperlegible', Verdana, sans-serif";
+        var max = W - PAD * 2 - (indent || 0);
+        var words = String(t).split(" ");
+        var cur = "";
+        words.forEach(function (w) {
+          var test = cur ? cur + " " + w : w;
+          if (ctx.measureText(test).width > max && cur) {
+            ctx.fillText(cur, PAD + (indent || 0), y); y += 30; cur = w;
+          } else { cur = test; }
+        });
+        if (cur) { ctx.fillText(cur, PAD + (indent || 0), y); y += 30; }
+      }
+
+      if (state.species) { label("Species"); line(state.species); y += 12; }
+
+      label("Vital statistics");
+      STATS.forEach(function (s) {
+        ctx.font = "20px 'Atkinson Hyperlegible', Verdana, sans-serif";
+        ctx.fillStyle = ink;
+        ctx.fillText(s.name, PAD, y);
+        var bx = PAD + 330, bw = W - PAD - bx - 70;
+        ctx.fillStyle = "rgba(5,47,58,.15)";
+        roundRect(ctx, bx, y - 14, bw, 16, 8); ctx.fill();
+        ctx.fillStyle = scheme.accent;
+        roundRect(ctx, bx, y - 14, Math.max(10, bw * state.stats[s.id] / 100), 16, 8); ctx.fill();
+        ctx.fillStyle = ink;
+        ctx.font = "700 18px 'Atkinson Hyperlegible', Verdana, sans-serif";
+        ctx.fillText(state.stats[s.id] + "%", bx + bw + 12, y);
+        y += 34;
+      });
+      y += 8;
+
+      var quickPicks = [];
+      QUICK.forEach(function (pair, pi) { if (state.quick[pi]) quickPicks.push(state.quick[pi]); });
+      if (quickPicks.length) { label("Verdicts"); line(quickPicks.join("  -  ")); y += 12; }
+
+      var rates = state.rate.filter(function (r) { return r && r.trim(); });
+      if (rates.length) { label("Currently rates"); rates.forEach(function (r) { line("- " + r, 8); }); y += 12; }
+      if (state.norespect) { label("Refuses to respect"); line(state.norespect); y += 12; }
+
+      var ops = [];
+      if (state.attn) ops.push("To get my attention: " + state.attn);
+      if (state.quiet) ops.push("When I go quiet: " + state.quiet);
+      if (state.best) ops.push("At my best when: " + state.best);
+      if (state.donot) ops.push("Please do not: " + state.donot);
+      if (ops.length) { label("Operating instructions"); ops.forEach(function (o) { line("- " + o, 8); }); y += 12; }
+
+      if (state.power) { label("Registered superpower"); line(state.power); y += 12; }
+      if (state.flaw) { label("Documented weakness"); line(state.flaw); y += 12; }
+      if (state.fact) { label("On record"); line(state.fact); y += 12; }
+      if (state.music) { label("Walk-on music"); line(state.music); y += 12; }
+
+      // stamp
+      ctx.save();
+      ctx.translate(W - 240, cv.height - 170);
+      ctx.rotate(-0.24);
+      ctx.strokeStyle = "rgba(192,57,43,.8)"; ctx.lineWidth = 5;
+      ctx.font = "700 26px 'Atkinson Hyperlegible', Verdana, sans-serif";
+      var sw = ctx.measureText(lastStamp).width;
+      roundRect(ctx, -16, -34, sw + 32, 52, 10); ctx.stroke();
+      ctx.fillStyle = "rgba(192,57,43,.85)";
+      ctx.fillText(lastStamp, 0, 0);
+      ctx.restore();
+
+      ctx.fillStyle = "rgba(5,47,58,.55)";
+      ctx.font = "16px 'Atkinson Hyperlegible', Verdana, sans-serif";
+      ctx.fillText("Form B5-ME  -  declared by the subject, verified by nobody", PAD, cv.height - 46);
+
+      var a = document.createElement("a");
+      a.download = "personnel-file-" + (state.callme || state.codename || "agent").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + ".png";
+      a.href = cv.toDataURL("image/png");
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(doDraw); } else { doDraw(); }
+  }
+
+  // ---------------- wiring ----------------
+  bindText("callme", "callme");
+  bindText("codename", "codename");
+  bindText("norespect", "norespect");
+  bindText("best", "best");
+  bindText("donot", "donot");
+  bindText("power", "power");
+  bindText("flaw", "flaw");
+  bindText("fact", "fact");
+  bindRate("rate1", 0); bindRate("rate2", 1); bindRate("rate3", 2);
+
+  el("codenameDice").onclick = function () { state.codename = newCodename(); el("codename").value = state.codename; save(); };
+  el("norespectDice").onclick = function () { state.norespect = pickNot(NORESPECT_POOL, state.norespect); el("norespect").value = state.norespect; save(); };
+  el("powerDice").onclick = function () { state.power = pickNot(POWER_POOL, state.power); el("power").value = state.power; save(); };
+  el("flawDice").onclick = function () { state.flaw = pickNot(FLAW_POOL, state.flaw); el("flaw").value = state.flaw; save(); };
+  el("factDice").onclick = function () { state.fact = pickNot(FACT_POOL, state.fact); el("fact").value = state.fact; save(); };
+
+  suggestChips("rateChips", RATE_POOL, function (o) {
+    var idx = state.rate.findIndex(function (r) { return !r || !r.trim(); });
+    if (idx === -1) idx = 2;
+    state.rate[idx] = o;
+    save();
+    el("rate1").value = state.rate[0]; el("rate2").value = state.rate[1]; el("rate3").value = state.rate[2];
+  });
+  suggestChips("norespectChips", NORESPECT_POOL.slice(0, 6), function (o) {
+    state.norespect = o; el("norespect").value = o; save();
+  });
+
+  el("nonsenseBtn").onclick = fillNonsense;
+  el("generateBtn").onclick = generate;
+  el("againBtn").onclick = function () {
+    Object.keys(state).forEach(function (k) {
+      if (k === "scheme") return;
+      if (k === "stats") { STATS.forEach(function (s) { state.stats[s.id] = 50; }); return; }
+      if (k === "rate") { state.rate = ["", "", ""]; return; }
+      if (k === "quick") { state.quick = {}; return; }
+      state[k] = "";
+    });
+    save();
+    refreshAll();
+    el("outputCard").classList.add("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  load();
+  buildSliders();
+  refreshAll();
+})();
+</script>
+
+</body>
+</html>
