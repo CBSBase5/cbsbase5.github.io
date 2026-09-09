@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Computer Systems and Architecture - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Computer systems paper only. Everything else lives in style.css */
+.metachips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.metachip{font-size:.85rem;padding:4px 12px;border-radius:14px 10px 16px 9px;background:rgba(0,0,0,.06)}
+
+.blk{background:#fff;border-radius:18px 14px 20px 12px;padding:18px 20px;margin:16px 0;box-shadow:0 2px 10px rgba(60,40,20,.08)}
+.blk h3{margin:0 0 6px}
+
+.qcard{background:#fff;border-radius:18px 14px 20px 12px;padding:18px 20px;margin:16px 0;box-shadow:0 2px 10px rgba(60,40,20,.08)}
+.qtop{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:8px}
+.qtop .qn{font-weight:700;font-size:1.15rem}
+.qtop .qm{font-size:.88rem;opacity:.7;margin-left:auto}
+.stem{font-size:.97rem;opacity:.8;margin:4px 0 8px;padding-left:12px;border-left:3px solid rgba(0,114,145,.35)}
+.qprompt{font-size:1.08rem;line-height:1.55;margin:6px 0 4px}
+.qhint{font-size:.92rem;opacity:.75;margin:2px 0 10px}
+
+.figure{background:#fbf7f2;border-radius:14px;padding:12px;margin:12px 0;text-align:center}
+.figure svg{max-width:100%;height:auto}
+.figcap{font-size:.88rem;opacity:.7;margin:6px 0 0}
+
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;padding:10px 12px;background:rgba(239,119,36,.10);border-radius:12px}
+.bank b{width:100%;font-size:.88rem;margin-bottom:2px}
+.bankword{font-size:.92rem;padding:5px 12px;border-radius:10px;background:#fffdf9;border:1px solid rgba(0,0,0,.14)}
+
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.04);cursor:pointer}
+.opt:hover{background:rgba(0,0,0,.08)}
+.opt input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:#007291}
+.opt.right{background:rgba(0,150,90,.16)}
+.opt.wrong{background:rgba(200,60,0,.14)}
+
+label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
+.sentence{margin:12px 0 4px;font-size:1.02rem;line-height:1.6}
+input.line,textarea.box,select.line{width:100%;box-sizing:border-box;font:inherit;padding:10px 13px;border:2px solid rgba(0,0,0,.2);border-radius:12px;background:#fffdf9}
+textarea.box{min-height:80px;line-height:1.55;resize:vertical}
+input.line:focus-visible,textarea.box:focus-visible,select.line:focus-visible{outline:3px solid #007291;outline-offset:2px}
+select.line.short{max-width:260px}
+
+.orderrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);margin:7px 0}
+.orderrow span{flex:1 1 240px;line-height:1.45}
+.orderrow select{flex:0 0 110px;width:110px}
+
+.matrix{width:100%;border-collapse:collapse;margin-top:10px}
+.matrix th,.matrix td{border:1px solid rgba(0,0,0,.15);padding:8px;vertical-align:top;font-size:.95rem}
+.matrix th{background:rgba(0,114,145,.10);text-align:left}
+.matrix td.given{background:rgba(0,0,0,.03);opacity:.75}
+@media (max-width:640px){
+  .matrix,.matrix tbody,.matrix tr,.matrix td,.matrix th{display:block;width:100%;box-sizing:border-box}
+  .matrix th{border-bottom:none}
+}
+
+.fb{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(0,114,145,.10)}
+.fb h4{margin:0 0 6px}
+.fb p{margin:6px 0;line-height:1.55}
+.fb .verdict{font-weight:700}
+.fbitem{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.7);margin:8px 0}
+.fbitem .lbl{font-weight:700;font-size:.92rem}
+.pointlist{margin:6px 0 0;padding-left:18px;font-size:.94rem}
+.pointlist li{margin:3px 0}
+.pointlist li.got{font-weight:700}
+.selfmark{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.selfmark span{font-size:.9rem;opacity:.8;margin-right:4px}
+.smbtn{border:2px solid rgba(0,0,0,.18);background:#fff;cursor:pointer;font:inherit;font-size:.88rem;font-weight:700;padding:6px 13px;border-radius:12px}
+.smbtn[aria-pressed="true"]{background:#007291;color:#fff;border-color:#007291}
+.smbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+
+.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.nav .spacer{margin-left:auto}
+.btnish{border:none;cursor:pointer;font:inherit;font-weight:700;padding:10px 18px;border-radius:14px 10px 16px 9px;background:#007291;color:#fff}
+.btnish.secondary{background:rgba(0,0,0,.08);color:inherit}
+.btnish:hover{filter:brightness(1.08)}
+.btnish:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.quiet{border:none;background:none;cursor:pointer;font:inherit;text-decoration:underline;opacity:.7;padding:6px}
+.quiet:hover{opacity:1}
+
+.prog{height:10px;border-radius:6px;background:rgba(0,0,0,.08);overflow:hidden;margin:10px 0 4px}
+.prog i{display:block;height:100%;background:#007291;width:0}
+.progtext{font-size:.88rem;opacity:.75}
+
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.whochip{border:2px solid rgba(0,0,0,.2);background:#fff;cursor:pointer;font:inherit;font-weight:700;padding:8px 16px;border-radius:14px 10px 16px 9px}
+.whochip[aria-pressed="true"]{background:#007291;color:#fff;border-color:#007291}
+.whochip:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+
+.scorebig{font-size:2rem;font-weight:700;margin:6px 0}
+.breakdown{width:100%;border-collapse:collapse;margin-top:10px;font-size:.95rem}
+.breakdown th,.breakdown td{text-align:left;padding:7px 8px;border-bottom:1px solid rgba(0,0,0,.12)}
+.breakdown td:last-child,.breakdown th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
+.sendrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.status{font-size:.85rem;opacity:.6;min-height:1.2em;margin-top:6px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="weektheme">
+    <h2>Computer Systems and Architecture</h2>
+    <span>Hardware and software, inside the CPU, memory, storage, and what makes a computer fast. Word banks and sentence starters are built in, so this is a supported assessment rather than a cold test.</span>
+    <div class="metachips">
+      <span class="metachip">Eight sections</span>
+      <span class="metachip">63 marks</span>
+      <span class="metachip">Marked as you go</span>
+      <span class="metachip">Skip anything</span>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h3>Who's working on this?</h3>
+    <p>Pick your initials if you want your score saved with your name on it. Skipping is fine.</p>
+    <div class="whochips" id="whoChips" role="group" aria-label="Choose your initials"></div>
+  </div>
+
+  <div class="prog"><i id="progBar"></i></div>
+  <p class="progtext" id="progText"></p>
+
+  <div id="qarea"></div>
+  <div id="results" class="hidden"></div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var KEY = "b5-cs-systems-architecture";
+var EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+var STUDENTS = ["JT","LW","EGW","LP","LC","HK"];
+
+function $(id){ return document.getElementById(id); }
+function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!==undefined) e.textContent=txt; return e; }
+function fig(markup,cap){
+  var d = el("div","figure");
+  d.innerHTML = markup;
+  if(cap) d.appendChild(el("p","figcap",cap));
+  return d;
+}
+
+/* ================= FIGURES ================= */
+var FIG = {};
+
+/* NOTE FOR JAY: the original worksheet prints the component names inside
+   boxes A, B and C, which gives question 2b away. This version shows the
+   letters and positions only, with the word bank as the support instead.
+   Say the word and I will put the names back in. */
+FIG.cpu =
+'<svg viewBox="0 0 620 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A CPU containing box A top left, box B top right, internal buses across the middle, and box C below, joined to primary memory on the right by an address bus, a data bus and a control bus">' +
+'<rect x="14" y="30" width="330" height="272" rx="14" fill="#dbeaf2" stroke="#7fa8bb" stroke-width="2"/>' +
+'<text x="30" y="56" font-size="19" font-weight="700" fill="#0b4c5c">CPU</text>' +
+'<rect x="38" y="70" width="130" height="86" rx="10" fill="#2f6f9e"/>' +
+'<circle cx="103" cy="102" r="19" fill="#fffdf9"/>' +
+'<text x="103" y="110" text-anchor="middle" font-size="22" font-weight="700" fill="#2f6f9e">A</text>' +
+'<text x="103" y="142" text-anchor="middle" font-size="12" fill="#fffdf9">component A</text>' +
+'<rect x="190" y="70" width="130" height="86" rx="10" fill="#3d8f5f"/>' +
+'<circle cx="255" cy="102" r="19" fill="#fffdf9"/>' +
+'<text x="255" y="110" text-anchor="middle" font-size="22" font-weight="700" fill="#3d8f5f">B</text>' +
+'<text x="255" y="142" text-anchor="middle" font-size="12" fill="#fffdf9">component B</text>' +
+'<rect x="38" y="182" width="282" height="30" rx="8" fill="#efa14a"/>' +
+'<text x="179" y="202" text-anchor="middle" font-size="13" font-weight="700" fill="#4a2c05">Internal buses</text>' +
+'<rect x="38" y="234" width="282" height="56" rx="10" fill="#c0453a"/>' +
+'<circle cx="179" cy="256" r="16" fill="#fffdf9"/>' +
+'<text x="179" y="263" text-anchor="middle" font-size="19" font-weight="700" fill="#c0453a">C</text>' +
+'<text x="179" y="283" text-anchor="middle" font-size="12" fill="#fffdf9">component C</text>' +
+'<path d="M103 156 L103 182" stroke="#8a6a3a" stroke-width="4"/>' +
+'<path d="M255 156 L255 182" stroke="#8a6a3a" stroke-width="4"/>' +
+'<path d="M179 212 L179 234" stroke="#8a6a3a" stroke-width="4"/>' +
+'<rect x="470" y="60" width="132" height="230" rx="12" fill="#3d8f5f"/>' +
+'<rect x="492" y="82" width="40" height="34" rx="4" fill="#1f4a32"/>' +
+'<rect x="492" y="126" width="40" height="34" rx="4" fill="#1f4a32"/>' +
+'<rect x="492" y="170" width="40" height="34" rx="4" fill="#1f4a32"/>' +
+'<text x="536" y="238" text-anchor="middle" font-size="14" font-weight="700" fill="#fffdf9">Primary</text>' +
+'<text x="536" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#fffdf9">memory</text>' +
+'<text x="536" y="274" text-anchor="middle" font-size="14" font-weight="700" fill="#fffdf9">(RAM)</text>' +
+'<path d="M344 96 L456 96" stroke="#2f8f92" stroke-width="9"/>' +
+'<path d="M452 84 L472 96 L452 108 Z" fill="#2f8f92"/>' +
+'<text x="398" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#12494b">Address bus</text>' +
+'<path d="M356 160 L462 160" stroke="#2f5f9e" stroke-width="9"/>' +
+'<path d="M360 148 L340 160 L360 172 Z" fill="#2f5f9e"/>' +
+'<path d="M458 148 L478 160 L458 172 Z" fill="#2f5f9e"/>' +
+'<text x="404" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#1b3556">Data bus</text>' +
+'<path d="M356 224 L462 224" stroke="#efa14a" stroke-width="9"/>' +
+'<path d="M360 212 L340 224 L360 236 Z" fill="#efa14a"/>' +
+'<path d="M458 212 L478 224 L458 236 Z" fill="#efa14a"/>' +
+'<text x="404" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#4a2c05">Control bus</text>' +
+'</svg>';
+
+FIG.ipo =
+'<svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The input process output model. Input on the left feeds the CPU in the middle, which feeds a box marked with a question mark on the right. Storage sits below the CPU with arrows both ways.">' +
+'<rect x="20" y="40" width="150" height="80" rx="12" fill="#2f6f9e"/>' +
+'<text x="95" y="88" text-anchor="middle" font-size="19" font-weight="700" fill="#fffdf9">Input</text>' +
+'<path d="M176 80 L228 80" stroke="#052f3a" stroke-width="9"/>' +
+'<path d="M224 66 L248 80 L224 94 Z" fill="#052f3a"/>' +
+'<rect x="250" y="40" width="150" height="80" rx="12" fill="#3d8f5f"/>' +
+'<text x="325" y="76" text-anchor="middle" font-size="18" font-weight="700" fill="#fffdf9">Process</text>' +
+'<text x="325" y="98" text-anchor="middle" font-size="15" fill="#fffdf9">(CPU)</text>' +
+'<path d="M406 80 L458 80" stroke="#052f3a" stroke-width="9"/>' +
+'<path d="M454 66 L478 80 L454 94 Z" fill="#052f3a"/>' +
+'<rect x="480" y="40" width="120" height="80" rx="12" fill="#efa14a"/>' +
+'<text x="540" y="94" text-anchor="middle" font-size="38" font-weight="700" fill="#4a2c05">?</text>' +
+'<path d="M300 126 L300 186" stroke="#052f3a" stroke-width="9"/>' +
+'<path d="M286 182 L300 206 L314 182 Z" fill="#052f3a"/>' +
+'<path d="M350 206 L350 146" stroke="#052f3a" stroke-width="9"/>' +
+'<path d="M336 150 L350 126 L364 150 Z" fill="#052f3a"/>' +
+'<rect x="230" y="208" width="190" height="70" rx="12" fill="#c0453a"/>' +
+'<text x="325" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#fffdf9">Storage</text>' +
+'<text x="325" y="262" text-anchor="middle" font-size="12" fill="#fffdf9">(secondary and RAM)</text>' +
+'</svg>';
+
+/* ================= QUESTIONS =================
+   There is no mark scheme with this worksheet, so the accepted answers
+   below are written from the subject content. See the notes at the top
+   of the results email.
+
+   Field modes:
+     choices + answer  a dropdown, marked against one right answer
+     accept            keywords, worth 1 mark
+     points + worth    ONE answer box carrying more than one mark, where
+                       each distinct point found earns a mark
+     pool              a shared bank of points, each earnable once
+     none of these     self-marked against the model answer            */
+var QS = [
+
+/* ---------- Section 1 ---------- */
+{ n:"1a", sec:"1", marks:2, skill:"Hardware and software",
+  stem:"Computer systems rely on both physical parts and program instructions.",
+  type:"fields",
+  prompt:"Complete the definitions using the words from the box.",
+  bank:["physical parts","programs and instructions"],
+  fields:[
+    { label:"Hardware refers to the ... that you can physically touch (such as the CPU or mouse).",
+      choices:["physical parts","programs and instructions"], answer:"physical parts", model:"physical parts" },
+    { label:"Software refers to the ... that tell the computer what to do.",
+      choices:["physical parts","programs and instructions"], answer:"programs and instructions", model:"programs and instructions" }
+  ] },
+
+{ n:"1b", sec:"1", marks:3, skill:"Hardware and software",
+  type:"fields",
+  prompt:"Classify each item as either hardware or software.",
+  fields:[
+    { label:"Operating System (e.g. Windows)", choices:["Hardware","Software"], answer:"Software", model:"Software" },
+    { label:"Solid-State Drive (SSD)", choices:["Hardware","Software"], answer:"Hardware", model:"Hardware" },
+    { label:"Web Browser Application", choices:["Hardware","Software"], answer:"Software", model:"Software" }
+  ] },
+
+{ n:"1c", sec:"1", marks:2, skill:"Hardware and software",
+  type:"fields",
+  prompt:"Why can software not run without hardware?",
+  sentence:"Software needs hardware because software is made of code, but it needs physical electrical circuits and the CPU to...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["run","execute","carry out","process","perform","obey","follow"], name:"actually run or carry out the instructions" },
+      { accept:["store","memory","display","output","electricity","signal","physical","nothing happens","just text","on its own","by itself"], name:"without physical parts the code is only text and nothing can happen" }
+    ],
+    model:"It needs hardware to actually run and carry out the instructions. On its own the code is only text, so without physical circuits nothing happens." }] },
+
+/* ---------- Section 2 ---------- */
+{ n:"2a", sec:"2", marks:3, skill:"Inside the CPU",
+  stem:"The diagram shows the main internal parts of a CPU connected to memory.",
+  fig:"cpu", figcap:"Inside the CPU, and how it talks to memory.",
+  type:"fields",
+  prompt:"Name the three stages of the CPU execution cycle, in order.",
+  bank:["Execute","Fetch","Decode"],
+  fields:[
+    { label:"Stage 1 (retrieves the instruction from memory)", choices:["Fetch","Decode","Execute"], answer:"Fetch", model:"Fetch" },
+    { label:"Stage 2 (understands what the instruction means)", choices:["Fetch","Decode","Execute"], answer:"Decode", model:"Decode" },
+    { label:"Stage 3 (carries out the instruction)", choices:["Fetch","Decode","Execute"], answer:"Execute", model:"Execute" }
+  ] },
+
+{ n:"2b", sec:"2", marks:3, skill:"Inside the CPU",
+  fig:"cpu",
+  type:"fields",
+  prompt:"Identify the components labelled A, B and C in the diagram, using the word bank.",
+  bank:["Control Unit (CU)","Arithmetic Logic Unit (ALU)","Registers"],
+  fields:[
+    { label:"Component A", choices:["Control Unit (CU)","Arithmetic Logic Unit (ALU)","Registers"], answer:"Control Unit (CU)", model:"Control Unit (CU)" },
+    { label:"Component B", choices:["Control Unit (CU)","Arithmetic Logic Unit (ALU)","Registers"], answer:"Arithmetic Logic Unit (ALU)", model:"Arithmetic Logic Unit (ALU)" },
+    { label:"Component C", choices:["Control Unit (CU)","Arithmetic Logic Unit (ALU)","Registers"], answer:"Registers", model:"Registers" }
+  ] },
+
+{ n:"2c", sec:"2", marks:2, skill:"Inside the CPU",
+  type:"fields",
+  prompt:"The ALU carries out two main jobs. Give an example of each.",
+  fields:[
+    { label:"1. Mathematical calculations such as...",
+      accept:["add","plus","subtract","minus","multipl","divid","times","sum","arithmetic","calculat"],
+      model:"Adding, subtracting, multiplying or dividing numbers." },
+    { label:"2. Logical decisions such as...",
+      accept:["compar","greater","less than","bigger","smaller","equal","same as","and","or","not","true","false","if","yes or no"],
+      model:"Comparing two values: is one greater than, less than or equal to the other? Also AND, OR and NOT decisions." }
+  ] },
+
+{ n:"2d", sec:"2", marks:2, skill:"Inside the CPU",
+  type:"fields",
+  prompt:"State two ways the Control Unit controls the computer.",
+  fields:[
+    { label:"It manages the timing by sending clock signals to...",
+      accept:["component","part","cpu","alu","register","memory","everything","the rest","other","system","keep them in step","synchronis","synchroniz"],
+      model:"The other components, so everything stays in step with each other." },
+    { label:"It directs the flow of data between the CPU and...",
+      accept:["memory","ram","storage","input","output","device","peripheral","rest of the computer","other parts"],
+      model:"Memory and the input and output devices." }
+  ] },
+
+{ n:"2e", sec:"2", marks:1, skill:"Inside the CPU",
+  type:"mc",
+  prompt:"What is the main job of internal CPU registers?",
+  options:[
+    "To permanently store files when the power is off.",
+    "To provide tiny, high-speed temporary storage for data currently being processed.",
+    "To display images onto the monitor."
+  ],
+  correct:1,
+  why:"Registers are the smallest and fastest storage in the whole machine, sitting right inside the CPU. They hold only what is being worked on this instant. Permanent storage is the SSD's job, and displaying images is the GPU and monitor." },
+
+/* ---------- Section 3 ---------- */
+{ n:"3a", sec:"3", marks:1, skill:"RAM and ROM",
+  stem:"Primary memory holds data and instructions that the CPU can access quickly.",
+  type:"mc",
+  prompt:"A computer is suddenly unplugged from the wall. What happens to the data inside RAM?",
+  options:[
+    "The data stays safe in RAM until the computer restarts.",
+    "The data is lost immediately because RAM is volatile (loses contents without power).",
+    "The data automatically saves itself into ROM.",
+    "The data moves directly into the monitor."
+  ],
+  correct:1,
+  why:"Volatile means it needs power to hold on to anything. Pull the plug and RAM empties instantly, which is why unsaved work disappears in a power cut." },
+
+{ n:"3b", sec:"3", marks:3, skill:"RAM and ROM",
+  type:"fields",
+  prompt:"Complete the comparison table for RAM and ROM using the word bank.",
+  bank:["Non-volatile","Read-only","Open apps and files"],
+  hint:"The other half of each row is already filled in for you: RAM is volatile, RAM is read and write, and ROM holds the startup instructions.",
+  fields:[
+    { label:"Volatility of ROM (RAM is volatile, so ROM is...)",
+      choices:["Non-volatile","Read-only","Open apps and files"], answer:"Non-volatile", model:"Non-volatile" },
+    { label:"Can data be written to ROM? (RAM is read and write, so ROM is...)",
+      choices:["Non-volatile","Read-only","Open apps and files"], answer:"Read-only", model:"Read-only" },
+    { label:"Typical contents of RAM (ROM holds startup instructions, so RAM holds...)",
+      choices:["Non-volatile","Read-only","Open apps and files"], answer:"Open apps and files", model:"Open apps and files" }
+  ] },
+
+{ n:"3c", sec:"3", marks:2, skill:"RAM and ROM",
+  type:"fields",
+  prompt:"Why does a computer need ROM when it first turns on?",
+  sentence:"When the computer turns on, RAM is completely empty. The computer needs ROM because it stores the permanent startup instructions (BIOS) which help to...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["start","boot","turn on","wake","switch on","get going"], name:"start the computer up, or boot it" },
+      { accept:["operating system","os","windows","load","find","check hardware","test","from storage","into ram"], name:"check the hardware and load the operating system into RAM" }
+    ],
+    model:"They start the computer up, check the hardware is working, and then find and load the operating system from storage into RAM." }] },
+
+/* ---------- Section 4 ---------- */
+{ n:"4a", sec:"4", marks:1, skill:"Input, process and output",
+  stem:"The Input-Process-Output model shows how data moves through a system.",
+  fig:"ipo", figcap:"The IPO model. One stage is missing.",
+  type:"fields",
+  prompt:"What is the missing stage marked by the question mark in the diagram?",
+  fields:[{ label:"Missing stage", accept:["output"], model:"Output." }] },
+
+{ n:"4b", sec:"4", marks:4, skill:"Input, process and output",
+  type:"fields",
+  prompt:"An automated security gate uses these four devices. Sort each one into input or output.",
+  hint:"Input devices send data in. Output devices show or do something.",
+  fields:[
+    { label:"Fingerprint scanner", choices:["Input","Output"], answer:"Input", model:"Input" },
+    { label:"Security camera", choices:["Input","Output"], answer:"Input", model:"Input" },
+    { label:"Barrier motor / gate", choices:["Input","Output"], answer:"Output", model:"Output" },
+    { label:"Alarm buzzer", choices:["Input","Output"], answer:"Output", model:"Output" }
+  ] },
+
+{ n:"4c", sec:"4", marks:2, skill:"Input, process and output",
+  type:"fields",
+  prompt:"A touchscreen is both an input and an output device. Explain why.",
+  fields:[
+    { label:"It is an output device because it displays...",
+      accept:["image","picture","screen","display","text","video","graphic","information","what the computer"],
+      model:"Images, text and everything else the computer wants to show you." },
+    { label:"It is an input device because it detects...",
+      accept:["touch","finger","tap","press","pressure","swipe","where you","stylus","contact"],
+      model:"Your finger touching it, and where on the screen you touched." }
+  ] },
+
+/* ---------- Section 5 ---------- */
+{ n:"5a", sec:"5", marks:2, skill:"Secondary storage",
+  stem:"Computers need secondary storage to keep files safe when powered off.",
+  type:"fields",
+  prompt:"Why do we need secondary storage (like an SSD or HDD) if we already have RAM?",
+  sentence:"We need secondary storage because RAM is volatile (loses everything when turned off), while secondary storage is non-volatile, meaning it saves our files...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["permanent","forever","keep","stay","still there","not lost","saved","after","when the power","turned off","switched off"], name:"the files stay there permanently, even with the power off" },
+      { accept:["open","use again","later","next time","come back","reopen","bigger","larger","more space","capacity","cheaper"], name:"so you can open them again next time, and there is far more space than RAM" }
+    ],
+    model:"They stay saved permanently even when the power is off, so you can open them again next time. Secondary storage is also much bigger and cheaper per gigabyte than RAM." }] },
+
+{ n:"5b", sec:"5", marks:3, skill:"Secondary storage",
+  type:"fields",
+  prompt:"Match each description with the correct storage type.",
+  bank:["Magnetic","Solid-State (Flash)","Optical"],
+  fields:[
+    { label:"Uses spinning magnetic platters and moving drive heads (e.g. traditional HDD).",
+      choices:["Magnetic","Solid-State (Flash)","Optical"], answer:"Magnetic", model:"Magnetic" },
+    { label:"Has no moving parts; uses fast flash memory chips (e.g. SSD or USB drive).",
+      choices:["Magnetic","Solid-State (Flash)","Optical"], answer:"Solid-State (Flash)", model:"Solid-State (Flash)" },
+    { label:"Uses lasers to read shiny tracks, pits and lands on a plastic disc (e.g. DVD or CD).",
+      choices:["Magnetic","Solid-State (Flash)","Optical"], answer:"Optical", model:"Optical" }
+  ] },
+
+{ n:"5c", sec:"5", marks:2, skill:"Secondary storage",
+  type:"fields",
+  prompt:"How does an optical disc drive read data? Fill in the blanks.",
+  sentence:"A laser shines light onto the spinning disc. A sensor detects how light reflects off the tiny pits and lands, turning this reflection into binary ... and ...",
+  fields:[
+    { label:"Blank 1", accept:["1","one"], model:"1 (or 'ones')" },
+    { label:"Blank 2", accept:["0","zero","nought"], model:"0 (or 'zeros')" }
+  ] },
+
+{ n:"5d", sec:"5", marks:3, skill:"Secondary storage",
+  stem:"A filmmaker travels to rugged outdoor locations to film 4K videos.",
+  type:"fields",
+  prompt:"Should they use a Solid-State Drive (SSD) or a Hard Disk Drive (HDD)?",
+  fields:[
+    { label:"Recommendation", choices:["Solid-State Drive (SSD)","Hard Disk Drive (HDD)"], answer:"Solid-State Drive (SSD)", model:"An SSD." },
+    { label:"Reason 1 (durability): it has no moving parts, which means if it is dropped outdoors, it...",
+      accept:["survive","not break","won't break","wont break","less likely","damage","safe","fine","keep working","still work","protect","no harm","lose"],
+      model:"It is far less likely to break or lose the footage, because there is no spinning platter or moving head to knock out of place." },
+    { label:"Reason 2 (speed): it has much faster read and write speeds, which allows large video files to...",
+      accept:["quick","fast","transfer","copy","save","load","open","edit","move","without waiting","less time","smooth"],
+      model:"Transfer, save and open much more quickly, so editing large 4K files does not mean waiting around." }
+  ],
+  note:"The worksheet marks this out of 4 but gives three answer spaces, so it is marked out of 3 here." },
+
+/* ---------- Section 6 ---------- */
+{ n:"6a", sec:"6", marks:1, skill:"Buses and motherboards",
+  stem:"Hardware parts connect together inside the computer.",
+  type:"fields",
+  prompt:"What is the main job of the motherboard?",
+  sentence:"The motherboard is the main printed circuit board that connects all the components (like CPU, RAM and storage) so they can...",
+  fields:[{ label:"Finish the sentence",
+    accept:["communicate","talk","work together","share","send data","exchange","connect","pass data","interact"],
+    model:"Communicate with each other and work together as one system." }] },
+
+{ n:"6b", sec:"6", marks:2, skill:"Buses and motherboards",
+  type:"fields",
+  prompt:"What are system buses on a motherboard?",
+  sentence:"System buses are parallel electrical pathways (wires or tracks) used to transmit ... and ... between components.",
+  pools:{ p:[
+    { accept:["data"], name:"data" },
+    { accept:["address"], name:"addresses" },
+    { accept:["control","signal","instruction","command"], name:"control signals or instructions" }
+  ]},
+  fields:[
+    { label:"Blank 1", pool:"p" },
+    { label:"Blank 2", pool:"p" }
+  ],
+  accepts:"Any two of: data, addresses, control signals or instructions." },
+
+{ n:"6c", sec:"6", marks:2, skill:"Buses and motherboards",
+  type:"fields",
+  prompt:"How does a wider data bus (e.g. 64-bit instead of 32-bit) improve performance?",
+  sentence:"A wider data bus can transfer more bits of data at the same time, which makes the system run...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["faster","quicker","speed","swift","better performance","smoother"], name:"faster overall" },
+      { accept:["more data","at once","same time","fewer trips","less trips","one go","twice","double","64","32","bits per","wider"], name:"because more bits move per trip, so fewer trips are needed" }
+    ],
+    model:"Faster, because twice as many bits move along the bus each time, so it takes fewer trips to move the same amount of data." }] },
+
+{ n:"6d", sec:"6", marks:4, skill:"Buses and motherboards",
+  type:"order",
+  prompt:"Put these steps in order to show what happens when you type and save a text document.",
+  hint:"Four marks, one for each step in the right place.",
+  rows:[
+    { label:"The monitor shows the newly typed text on the screen.", answer:"3" },
+    { label:"Storage loads the document into RAM when opened.", answer:"1" },
+    { label:"The CPU saves the updated document back to the SSD.", answer:"4" },
+    { label:"You press keys on the keyboard and inputs are sent to the CPU.", answer:"2" }
+  ],
+  choices:["1","2","3","4"],
+  why:"The document has to be open before you can type in it, so loading it into RAM comes first. Then your keypresses go to the CPU, the CPU sends the result to the monitor so you can see it, and only when you save does it go back to the SSD." },
+
+/* ---------- Section 7 ---------- */
+{ n:"7a", sec:"7", marks:2, skill:"Power and cooling",
+  stem:"The Power Supply Unit changes mains electricity into safe DC power.",
+  type:"fields",
+  prompt:"What could happen to internal circuits if the voltage is unstable?",
+  sentence:"If the voltage surges or is unstable, it could cause the delicate circuits to...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["damage","destroy","burn","fry","break","melt","overheat","blow","fail","ruin","short"], name:"be damaged, burnt out or destroyed" },
+      { accept:["data","lose","corrupt","crash","stop working","permanent","expensive","replace","whole computer","unusable"], name:"stop working permanently, losing or corrupting data with them" }
+    ],
+    model:"They can be damaged or burnt out completely, which crashes the machine and can corrupt or lose whatever data was being worked on." }] },
+
+{ n:"7b", sec:"7", marks:3, skill:"Power and cooling",
+  type:"fields",
+  prompt:"Why do fast modern CPUs need cooling fans and heat sinks? Fill in the three blanks.",
+  fields:[
+    { label:"1. Modern CPUs switch billions of times a second, which generates a lot of...",
+      accept:["heat","warm","thermal","energy"], model:"Heat." },
+    { label:"2. Heat sinks and fans pull heat away so the CPU doesn't...",
+      accept:["overheat","get too hot","too hot","melt","burn","cook","fry","throttle","break"], model:"Overheat." },
+    { label:"3. Without cooling, the CPU will slow down or suffer permanent...",
+      accept:["damage","harm","failure","destruction","break","death"], model:"Damage." }
+  ] },
+
+{ n:"7c", sec:"7", marks:2, skill:"Power and cooling",
+  type:"fields",
+  prompt:"What is the benefit of adding a dedicated Graphics Card (GPU) instead of using only the CPU for graphics?",
+  sentence:"A dedicated GPU handles heavy image and 3D processing, which frees up the CPU to...",
+  hint:"Two marks in one box, so try to make two separate points.",
+  fields:[{ label:"Finish the sentence", worth:2,
+    points:[
+      { accept:["other task","other job","other work","everything else","rest of","normal","general","program","application","calculation"], name:"get on with all the other tasks" },
+      { accept:["faster","quicker","smooth","better","not slow","without lag","lag","frame","performance","effici"], name:"so the whole machine runs faster and more smoothly" }
+    ],
+    model:"Get on with everything else it has to do, so the whole system runs faster and more smoothly instead of grinding to a halt during heavy graphics work." }] },
+
+/* ---------- Section 8 ---------- */
+{ n:"8", sec:"8", marks:6, skill:"Choosing hardware for a job",
+  stem:"A school is buying computers for two rooms. Room A is a general classroom for typing essays, spreadsheets and web research. Room B is a media suite for 4K video editing and 3D graphics.",
+  type:"fields",
+  prompt:"Choose the right hardware for Room B, then finish the summary.",
+  hint:"Room A is filled in for you each time: 8 GB of RAM, no dedicated GPU needed, and a standard 256 GB SSD.",
+  fields:[
+    { label:"Room B: RAM (Room A has 8 GB)", choices:["8 GB","32 GB"], answer:"32 GB", model:"32 GB" },
+    { label:"Room B: dedicated GPU? (Room A does not need one)", choices:["Yes","Not needed"], answer:"Yes", model:"Yes" },
+    { label:"Room B: secondary storage (Room A has a standard 256 GB SSD)",
+      choices:["Standard SSD","Fast Large NVMe SSD"], answer:"Fast Large NVMe SSD", model:"A fast, large NVMe SSD" },
+    { label:"Summary: Room B needs higher specs because 4K video editing requires lots of processing power. Buying simpler parts for Room A saves the school...",
+      worth:3,
+      points:[
+        { accept:["money","cost","cheap","budget","expense","spend less","afford","pound"], name:"money, because the cheaper machines cost far less each" },
+        { accept:["more computer","more machine","extra","other room","elsewhere","spend it on","reinvest","further","other equipment","more of them","class set"], name:"money that can be spent elsewhere, such as more machines or other equipment" },
+        { accept:["don't need","dont need","not need","waste","wasted","no point","never use","enough","fine for","plenty","basic","simple task","typing","essay","spreadsheet"], name:"and the extra power would be wasted, since typing and spreadsheets never use it" }
+      ],
+      model:"Money, which can go towards other things the school needs, because the extra power would simply be wasted on typing and spreadsheets." }
+  ] }
+
+];
+
+var TOTAL = QS.reduce(function(a,q){ return a+q.marks; },0);
+
+/* ================= STATE ================= */
+var state = { who:"", idx:0, answers:{}, checked:{}, awarded:{} };
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){
+      var s = JSON.parse(raw);
+      ["who","idx","answers","checked","awarded"].forEach(function(k){
+        if(s[k] !== undefined) state[k]=s[k];
+      });
+    }
+  }catch(e){}
+}
+var st=null;
+function save(){
+  clearTimeout(st);
+  st=setTimeout(function(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  },350);
+}
+
+/* ================= MARKING ================= */
+function norm(s){
+  return (s||"").toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+}
+function hits(accept, val){
+  var v = norm(val);
+  if(!v) return false;
+  for(var i=0;i<accept.length;i++){
+    if(v.indexOf(norm(accept[i])) !== -1) return true;
+  }
+  return false;
+}
+function worthOf(f){ return f.worth || 1; }
+
+/* Which of a field's points appear in the answer. */
+function pointsFound(f, val){
+  var got = [];
+  f.points.forEach(function(p,i){ if(hits(p.accept, val)) got.push(i); });
+  return got;
+}
+
+/* Automatic marks per field: a number, or null when it is self-mark only. */
+function autoFields(q){
+  var a = state.answers[q.n] || {};
+  var used = {};
+  return q.fields.map(function(f,i){
+    var val = a["f"+i];
+    if(f.choices && f.answer !== undefined){
+      return (val === f.answer) ? worthOf(f) : 0;
+    }
+    if(f.points){
+      return Math.min(pointsFound(f, val).length, worthOf(f));
+    }
+    if(f.pool && q.pools && q.pools[f.pool]){
+      var bank = q.pools[f.pool];
+      for(var j=0;j<bank.length;j++){
+        var tag = f.pool+":"+j;
+        if(used[tag]) continue;
+        if(hits(bank[j].accept, val)){ used[tag]=true; return 1; }
+      }
+      return 0;
+    }
+    if(f.accept){
+      return hits(f.accept, val) ? worthOf(f) : 0;
+    }
+    return null;
+  });
+}
+
+function markQuestion(q){
+  var a = state.answers[q.n];
+  if(q.type === "mc"){
+    return (a === q.correct) ? q.marks : 0;
+  }
+  if(q.type === "order"){
+    if(!a) return 0;
+    var right = 0;
+    q.rows.forEach(function(r,i){ if(a["r"+i] === r.answer) right++; });
+    return Math.min(right, q.marks);
+  }
+  if(q.type === "fields"){
+    var sm = state.awarded[q.n] || {};
+    var total = 0;
+    Object.keys(sm).forEach(function(k){ total += (sm[k] || 0); });
+    return Math.min(total, q.marks);
+  }
+  return 0;
+}
+
+/* ================= RENDER ================= */
+function renderQuestion(){
+  var area = $("qarea");
+  area.innerHTML = "";
+  if(state.idx >= QS.length){ renderResults(); return; }
+  $("results").classList.add("hidden");
+
+  var q = QS[state.idx];
+  var isChecked = !!state.checked[q.n];
+  var card = el("div","qcard");
+
+  var top = el("div","qtop");
+  top.appendChild(el("span","qn","Question "+q.n));
+  top.appendChild(el("span","metachip","Section "+q.sec));
+  top.appendChild(el("span","qm", q.marks + (q.marks===1 ? " mark" : " marks")));
+  card.appendChild(top);
+
+  if(q.stem) card.appendChild(el("p","stem",q.stem));
+  if(q.fig) card.appendChild(fig(FIG[q.fig], q.figcap));
+  card.appendChild(el("p","qprompt",q.prompt));
+  if(q.bank){
+    var b = el("div","bank");
+    b.appendChild(el("b",null,"Word bank"));
+    q.bank.forEach(function(w){ b.appendChild(el("span","bankword",w)); });
+    card.appendChild(b);
+  }
+  if(q.sentence) card.appendChild(el("p","sentence",q.sentence));
+  if(q.hint) card.appendChild(el("p","qhint",q.hint));
+
+  /* --- multiple choice --- */
+  if(q.type === "mc"){
+    var wrap = el("div","opts");
+    q.options.forEach(function(o,i){
+      var lab = el("label","opt");
+      var inp = document.createElement("input");
+      inp.type="radio"; inp.name="q"+q.n;
+      inp.disabled = isChecked;
+      inp.checked = (state.answers[q.n] === i);
+      inp.addEventListener("change",function(){ state.answers[q.n]=i; save(); });
+      lab.appendChild(inp);
+      lab.appendChild(el("span",null,o));
+      if(isChecked){
+        if(i === q.correct) lab.classList.add("right");
+        else if(state.answers[q.n] === i) lab.classList.add("wrong");
+      }
+      wrap.appendChild(lab);
+    });
+    card.appendChild(wrap);
+  }
+
+  /* --- ordering --- */
+  if(q.type === "order"){
+    var oa = state.answers[q.n] || {};
+    q.rows.forEach(function(r,i){
+      var row = el("div","orderrow");
+      row.appendChild(el("span",null,r.label));
+      var sel = el("select","line");
+      sel.disabled = isChecked;
+      sel.setAttribute("aria-label","Order for: "+r.label);
+      var blank = document.createElement("option");
+      blank.value=""; blank.textContent="Order";
+      sel.appendChild(blank);
+      q.choices.forEach(function(c){
+        var o=document.createElement("option"); o.value=c; o.textContent=c;
+        sel.appendChild(o);
+      });
+      sel.value = oa["r"+i] || "";
+      sel.addEventListener("change",function(){
+        var cur = state.answers[q.n] || {};
+        cur["r"+i] = sel.value;
+        state.answers[q.n] = cur;
+        save();
+      });
+      row.appendChild(sel);
+      if(isChecked){
+        var ok = (oa["r"+i] === r.answer);
+        row.style.background = ok ? "rgba(0,150,90,.16)" : "rgba(200,60,0,.14)";
+        if(!ok) row.appendChild(el("span","qhint","Should be "+r.answer));
+      }
+      card.appendChild(row);
+    });
+  }
+
+  /* --- fields --- */
+  if(q.type === "fields"){
+    var vals = state.answers[q.n] || {};
+    q.fields.forEach(function(f,i){
+      var w = worthOf(f);
+      var lab = el("label","fld", f.label + (w > 1 ? "  (" + w + " marks)" : ""));
+      lab.setAttribute("for","q"+q.n+"f"+i);
+      card.appendChild(lab);
+      if(f.choices){
+        var sel = el("select","line short");
+        sel.id="q"+q.n+"f"+i;
+        sel.disabled = isChecked;
+        var b0 = document.createElement("option");
+        b0.value=""; b0.textContent="Choose";
+        sel.appendChild(b0);
+        f.choices.forEach(function(c){
+          var o=document.createElement("option"); o.value=c; o.textContent=c;
+          sel.appendChild(o);
+        });
+        sel.value = vals["f"+i] || "";
+        sel.addEventListener("change",function(){
+          var cur = state.answers[q.n] || {};
+          cur["f"+i] = sel.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        card.appendChild(sel);
+      } else {
+        var ta = el("textarea","box");
+        ta.id="q"+q.n+"f"+i;
+        ta.value = vals["f"+i] || "";
+        ta.disabled = isChecked;
+        if(w >= 3) ta.style.minHeight = "130px";
+        else if(w === 1 && f.accept && f.accept.length <= 4) ta.style.minHeight = "52px";
+        ta.addEventListener("input",function(){
+          var cur = state.answers[q.n] || {};
+          cur["f"+i] = ta.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        card.appendChild(ta);
+      }
+    });
+  }
+
+  /* --- feedback --- */
+  if(isChecked){
+    var fb = el("div","fb");
+    fb.appendChild(el("h4",null,"How that went"));
+    fb.appendChild(el("p","verdict", markQuestion(q) + " out of " + q.marks));
+    if(q.why) fb.appendChild(el("p",null,q.why));
+    if(q.accepts) fb.appendChild(el("p",null,"What earns a mark: " + q.accepts));
+
+    if(q.type === "fields"){
+      var vals2 = state.answers[q.n] || {};
+      var aw = state.awarded[q.n] || {};
+      var autos = autoFields(q);
+      q.fields.forEach(function(f,i){
+        var w = worthOf(f);
+        var key = "f"+i;
+        var item = el("div","fbitem");
+        item.appendChild(el("div","lbl",f.label));
+        item.appendChild(el("div",null,"You put: " + ((vals2[key]||"").trim() || "nothing")));
+        if(f.points){
+          var found = pointsFound(f, vals2[key]);
+          item.appendChild(el("div",null,"Marks are for these separate points:"));
+          var ul = el("ul","pointlist");
+          f.points.forEach(function(p,pi){
+            var li = el("li",null, p.name + (found.indexOf(pi) !== -1 ? "  (found)" : ""));
+            if(found.indexOf(pi) !== -1) li.className = "got";
+            ul.appendChild(li);
+          });
+          item.appendChild(ul);
+        }
+        if(f.model) item.appendChild(el("div",null,"Looking for: " + f.model));
+
+        var sm = el("div","selfmark");
+        if(autos[i] === null) sm.appendChild(el("span",null,"You decide:"));
+        else if(autos[i] === w) sm.appendChild(el("span",null,"Marked automatically. Change it if you disagree:"));
+        else sm.appendChild(el("span",null,"Read the answer and decide:"));
+        for(var m=0;m<=w;m++){
+          (function(mm){
+            var b = el("button","smbtn", mm + (mm===1 ? " mark" : " marks"));
+            b.type="button";
+            b.setAttribute("aria-pressed", String(aw[key] === mm));
+            b.addEventListener("click",function(){
+              var cur = state.awarded[q.n] || {};
+              cur[key] = mm;
+              state.awarded[q.n] = cur;
+              save();
+              renderQuestion();
+            });
+            sm.appendChild(b);
+          })(m);
+        }
+        item.appendChild(sm);
+        fb.appendChild(item);
+      });
+    }
+    card.appendChild(fb);
+  }
+
+  /* --- nav --- */
+  var nav = el("div","nav");
+  if(state.idx > 0){
+    var back = el("button","btnish secondary","Back");
+    back.type="button";
+    back.addEventListener("click",function(){ state.idx--; save(); renderQuestion(); });
+    nav.appendChild(back);
+  }
+  if(!isChecked){
+    var check = el("button","btnish","Check this one");
+    check.type="button";
+    check.addEventListener("click",function(){
+      state.checked[q.n] = true;
+      if(q.type === "fields"){
+        var autos2 = autoFields(q);
+        var aw2 = state.awarded[q.n] || {};
+        q.fields.forEach(function(f,i){
+          if(aw2["f"+i] === undefined) aw2["f"+i] = (autos2[i] === null) ? 0 : autos2[i];
+        });
+        state.awarded[q.n] = aw2;
+      }
+      save();
+      renderQuestion();
+    });
+    nav.appendChild(check);
+    var skip = el("button","quiet","Skip for now");
+    skip.type="button";
+    skip.addEventListener("click",function(){ state.idx++; save(); renderQuestion(); });
+    nav.appendChild(skip);
+  } else {
+    var next = el("button","btnish", state.idx === QS.length-1 ? "See your results" : "Next question");
+    next.type="button";
+    next.addEventListener("click",function(){ state.idx++; save(); renderQuestion(); });
+    nav.appendChild(next);
+  }
+  nav.appendChild(el("span","spacer"));
+  var jump = el("button","quiet","Finish and see results");
+  jump.type="button";
+  jump.addEventListener("click",function(){ state.idx = QS.length; save(); renderQuestion(); });
+  nav.appendChild(jump);
+
+  card.appendChild(nav);
+  area.appendChild(card);
+  updateProgress();
+}
+
+function updateProgress(){
+  var done = 0;
+  QS.forEach(function(q){ if(state.checked[q.n]) done++; });
+  $("progBar").style.width = Math.round((done/QS.length)*100) + "%";
+  var pos = Math.min(state.idx+1, QS.length);
+  $("progText").textContent = (state.idx >= QS.length)
+    ? (done + " of " + QS.length + " questions marked")
+    : ("Question " + pos + " of " + QS.length + " - " + done + " marked so far");
+}
+
+/* ================= RESULTS ================= */
+function totals(){
+  var score=0, avail=0, bySkill={};
+  QS.forEach(function(q){
+    var got = state.checked[q.n] ? markQuestion(q) : 0;
+    if(state.checked[q.n]){ score += got; avail += q.marks; }
+    if(!bySkill[q.skill]) bySkill[q.skill] = {g:0,m:0};
+    bySkill[q.skill].m += q.marks;
+    bySkill[q.skill].g += got;
+  });
+  return { score:score, avail:avail, bySkill:bySkill };
+}
+
+function renderResults(){
+  $("qarea").innerHTML = "";
+  var r = $("results");
+  r.classList.remove("hidden");
+  r.innerHTML = "";
+  var t = totals();
+
+  var card = el("div","qcard");
+  card.appendChild(el("h3",null,"How you got on"));
+  card.appendChild(el("div","scorebig", t.score + " out of " + TOTAL));
+  if(t.avail < TOTAL){
+    card.appendChild(el("p","qhint","You marked " + t.avail + " marks' worth so far. The rest are still there if you want them."));
+  }
+
+  var tab = el("table","breakdown");
+  var head = el("tr");
+  head.appendChild(el("th",null,"Topic"));
+  head.appendChild(el("th",null,"Marks"));
+  tab.appendChild(head);
+  Object.keys(t.bySkill).forEach(function(k){
+    var tr = el("tr");
+    tr.appendChild(el("td",null,k));
+    tr.appendChild(el("td",null, t.bySkill[k].g + " / " + t.bySkill[k].m));
+    tab.appendChild(tr);
+  });
+  card.appendChild(tab);
+
+  var weak = Object.keys(t.bySkill).filter(function(k){
+    return t.bySkill[k].m >= 2 && (t.bySkill[k].g / t.bySkill[k].m) < 0.5;
+  });
+  if(weak.length){
+    card.appendChild(el("p",null,"Worth another look: " + weak.join(", ") + ". Not a problem, just where the next bit of work would pay off most."));
+  } else if(t.avail > 0){
+    card.appendChild(el("p",null,"Nothing standing out as a weak spot. Have a look back at anything you skipped."));
+  }
+
+  var nav = el("div","nav");
+  var again = el("button","btnish secondary","Go back through the questions");
+  again.type="button";
+  again.addEventListener("click",function(){ state.idx=0; save(); renderQuestion(); });
+  nav.appendChild(again);
+  card.appendChild(nav);
+  r.appendChild(card);
+
+  var send = el("div","qcard");
+  send.appendChild(el("h3",null,"Send it to Jay"));
+  send.appendChild(el("p",null,"Your answers, your score, and which ones you marked yourself."));
+  var row = el("div","sendrow");
+  [["Open in Gmail",sendGmail],["Open in email app",sendMail],["Copy it all",sendCopy],["Save as a file",sendSave]].forEach(function(p,i){
+    var b = el("button", i<2 ? "btnish" : "btnish secondary", p[0]);
+    b.type="button"; b.addEventListener("click",p[1]);
+    row.appendChild(b);
+  });
+  send.appendChild(row);
+  var stt = el("p","status"); stt.id="status"; stt.setAttribute("aria-live","polite");
+  send.appendChild(stt);
+  var clr = el("p");
+  var cb = el("button","quiet","Clear everything and start again");
+  cb.type="button";
+  cb.addEventListener("click",function(){
+    if(!window.confirm("Clear all your answers? This cannot be undone.")) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    window.location.reload();
+  });
+  clr.appendChild(cb);
+  send.appendChild(clr);
+  r.appendChild(send);
+
+  updateProgress();
+}
+
+/* ================= REPORT ================= */
+function report(){
+  var t = totals();
+  var L = [];
+  L.push("Computer Science: Computer Systems and Architecture");
+  L.push("From: " + (state.who || "(no initials picked)"));
+  L.push("Sent: " + new Date().toString());
+  L.push("Score: " + t.score + " out of " + TOTAL + " (marked so far: " + t.avail + ")");
+  L.push("");
+  L.push("Marks by topic:");
+  Object.keys(t.bySkill).forEach(function(k){
+    L.push("  " + k + ": " + t.bySkill[k].g + " / " + t.bySkill[k].m);
+  });
+  L.push("");
+  L.push("==== Answers ====");
+  QS.forEach(function(q){
+    var got = state.checked[q.n] ? markQuestion(q) : 0;
+    L.push("");
+    L.push("Q" + q.n + " (Section " + q.sec + ", " + q.skill + ") - " + (state.checked[q.n] ? got+"/"+q.marks : "not attempted"));
+    var a = state.answers[q.n];
+    if(q.type === "mc"){
+      L.push("  Chose: " + (a===undefined ? "-" : q.options[a]));
+      L.push("  Answer: " + q.options[q.correct]);
+    } else if(q.type === "order"){
+      q.rows.forEach(function(rw,i){
+        L.push("  " + rw.label);
+        L.push("    Put: " + ((a && a["r"+i]) || "-") + ", answer " + rw.answer);
+      });
+    } else if(q.type === "fields"){
+      var autos = autoFields(q);
+      var aw = state.awarded[q.n] || {};
+      q.fields.forEach(function(f,i){
+        var w = worthOf(f);
+        var key = "f"+i;
+        L.push("  " + f.label);
+        L.push("    Put: " + ((a && a[key] || "").trim() || "(blank)"));
+        L.push("    Awarded: " + (aw[key]||0) + " of " + w +
+          " (" + (autos[i] === null ? "self-marked" : (aw[key] === autos[i] ? "auto" : "self-marked")) + ")");
+      });
+    }
+  });
+  L.push("");
+  L.push("This worksheet came without a mark scheme, so the accepted answers were");
+  L.push("written from the subject content. Anything tagged 'self-marked' was judged");
+  L.push("by the student, so those are the ones worth a look.");
+  return L.join("\n");
+}
+function subject(){
+  var t = totals();
+  return "Computer Systems and Architecture" + (state.who ? " - " + state.who : "") + " - " + t.score + "/" + TOTAL;
+}
+function sendGmail(){
+  window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(EMAIL)
+    +"&su="+encodeURIComponent(subject())
+    +"&body="+encodeURIComponent(report()),"_blank");
+}
+function sendMail(){
+  window.location.href = "mailto:"+EMAIL
+    +"?subject="+encodeURIComponent(subject())
+    +"&body="+encodeURIComponent(report());
+}
+function sendCopy(){
+  var txt = report();
+  function done(){
+    var s=$("status");
+    if(s){ s.textContent="Copied, paste it anywhere"; setTimeout(function(){ s.textContent=""; },2500); }
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,function(){ fallbackCopy(txt); done(); });
+  } else { fallbackCopy(txt); done(); }
+}
+function fallbackCopy(text){
+  var ta=document.createElement("textarea");
+  ta.value=text; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+}
+function sendSave(){
+  var blob=new Blob([report()],{type:"text/plain"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="computer-systems"+(state.who?"-"+state.who:"")+".txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+/* ================= WHO ================= */
+function buildWho(){
+  var holder = $("whoChips");
+  STUDENTS.concat(["Just practising"]).forEach(function(n){
+    var val = (n === "Just practising") ? "" : n;
+    var b = el("button","whochip",n);
+    b.type="button";
+    b.dataset.val = val;
+    b.addEventListener("click",function(){ state.who = val; save(); refreshWho(); });
+    holder.appendChild(b);
+  });
+  refreshWho();
+}
+function refreshWho(){
+  var chips = document.querySelectorAll(".whochip");
+  for(var i=0;i<chips.length;i++){
+    chips[i].setAttribute("aria-pressed", String(chips[i].dataset.val === state.who));
+  }
+}
+
+/* ================= BOOT ================= */
+load();
+buildWho();
+renderQuestion();
+
+})();
+</script>
+</body>
+</html>
