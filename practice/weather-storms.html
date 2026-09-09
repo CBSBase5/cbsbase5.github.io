@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather Systems and Storm Hazards - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Weather Systems paper only. Everything else lives in style.css */
+.metachips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.metachip{font-size:.85rem;padding:4px 12px;border-radius:14px 10px 16px 9px;background:rgba(0,0,0,.06)}
+
+.blk{background:#fff;border-radius:18px 14px 20px 12px;padding:18px 20px;margin:16px 0;box-shadow:0 2px 10px rgba(60,40,20,.08)}
+.blk h3{margin:0 0 6px}
+
+.qcard{background:#fff;border-radius:18px 14px 20px 12px;padding:18px 20px;margin:16px 0;box-shadow:0 2px 10px rgba(60,40,20,.08)}
+.qtop{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:8px}
+.qtop .qn{font-weight:700;font-size:1.15rem}
+.qtop .qm{font-size:.88rem;opacity:.7;margin-left:auto}
+.stem{font-size:.97rem;opacity:.8;margin:4px 0 8px;padding-left:12px;border-left:3px solid rgba(0,114,145,.35)}
+.qprompt{font-size:1.08rem;line-height:1.55;margin:6px 0 4px}
+.qhint{font-size:.92rem;opacity:.75;margin:2px 0 10px}
+
+.figure{background:#fbf7f2;border-radius:14px;padding:12px;margin:12px 0;text-align:center}
+.figure svg{max-width:100%;height:auto}
+.figcap{font-size:.88rem;opacity:.7;margin:6px 0 0}
+
+.statement{border:2px dashed rgba(0,114,145,.45);border-radius:12px;padding:12px 16px;margin:12px 0;background:rgba(0,114,145,.06);font-size:1.05rem}
+
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.04);cursor:pointer}
+.opt:hover{background:rgba(0,0,0,.08)}
+.opt input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:#007291}
+.opt.right{background:rgba(0,150,90,.16)}
+.opt.wrong{background:rgba(200,60,0,.14)}
+
+label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
+input.line,textarea.box,select.line{width:100%;box-sizing:border-box;font:inherit;padding:10px 13px;border:2px solid rgba(0,0,0,.2);border-radius:12px;background:#fffdf9}
+textarea.box{min-height:80px;line-height:1.55;resize:vertical}
+input.line:focus-visible,textarea.box:focus-visible,select.line:focus-visible{outline:3px solid #007291;outline-offset:2px}
+select.line.short{max-width:220px}
+
+.orderrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);margin:7px 0}
+.orderrow span{flex:1 1 240px;line-height:1.45}
+.orderrow select{flex:0 0 120px;width:120px}
+
+.matrix{width:100%;border-collapse:collapse;margin-top:10px}
+.matrix th,.matrix td{border:1px solid rgba(0,0,0,.15);padding:8px;vertical-align:top}
+.matrix th{background:rgba(0,114,145,.10);text-align:left;font-size:.94rem}
+.matrix td textarea{min-height:70px}
+@media (max-width:640px){
+  .matrix,.matrix tbody,.matrix tr,.matrix td,.matrix th{display:block;width:100%;box-sizing:border-box}
+  .matrix th{border-bottom:none}
+}
+
+.levels{display:grid;gap:8px;margin:10px 0}
+.level{padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.04)}
+.level b{display:block;margin-bottom:3px}
+.level.picked{background:rgba(0,114,145,.16)}
+
+.fb{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(0,114,145,.10)}
+.fb h4{margin:0 0 6px}
+.fb p{margin:6px 0;line-height:1.55}
+.fb .verdict{font-weight:700}
+.fbitem{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.7);margin:8px 0}
+.selfmark{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.selfmark span{font-size:.9rem;opacity:.8;margin-right:4px}
+.smbtn{border:2px solid rgba(0,0,0,.18);background:#fff;cursor:pointer;font:inherit;font-size:.88rem;font-weight:700;padding:6px 13px;border-radius:12px}
+.smbtn[aria-pressed="true"]{background:#007291;color:#fff;border-color:#007291}
+.smbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+
+.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.nav .spacer{margin-left:auto}
+.btnish{border:none;cursor:pointer;font:inherit;font-weight:700;padding:10px 18px;border-radius:14px 10px 16px 9px;background:#007291;color:#fff}
+.btnish.secondary{background:rgba(0,0,0,.08);color:inherit}
+.btnish:hover{filter:brightness(1.08)}
+.btnish:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.quiet{border:none;background:none;cursor:pointer;font:inherit;text-decoration:underline;opacity:.7;padding:6px}
+.quiet:hover{opacity:1}
+
+.prog{height:10px;border-radius:6px;background:rgba(0,0,0,.08);overflow:hidden;margin:10px 0 4px}
+.prog i{display:block;height:100%;background:#007291;width:0}
+.progtext{font-size:.88rem;opacity:.75}
+
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.whochip{border:2px solid rgba(0,0,0,.2);background:#fff;cursor:pointer;font:inherit;font-weight:700;padding:8px 16px;border-radius:14px 10px 16px 9px}
+.whochip[aria-pressed="true"]{background:#007291;color:#fff;border-color:#007291}
+.whochip:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+
+.scorebig{font-size:2rem;font-weight:700;margin:6px 0}
+.breakdown{width:100%;border-collapse:collapse;margin-top:10px;font-size:.95rem}
+.breakdown th,.breakdown td{text-align:left;padding:7px 8px;border-bottom:1px solid rgba(0,0,0,.12)}
+.breakdown td:last-child,.breakdown th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
+.sendrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.status{font-size:.85rem;opacity:.6;min-height:1.2em;margin-top:6px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/projects/">Projects</a>
+      <a href="/tools/">Tools</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="weektheme">
+    <h2>Weather Systems and Storm Hazards</h2>
+    <span>Air pressure, UK depressions, tropical storms and storm surges. Twelve questions, 51 marks. Diagrams are drawn on the page, so nothing needs printing.</span>
+    <div class="metachips">
+      <span class="metachip">Four sections</span>
+      <span class="metachip">Marked as you go</span>
+      <span class="metachip">Skip anything, come back later</span>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h3>Who's working on this?</h3>
+    <p>Pick your initials if you want your score saved with your name on it. Skipping is fine.</p>
+    <div class="whochips" id="whoChips" role="group" aria-label="Choose your initials"></div>
+  </div>
+
+  <div class="prog"><i id="progBar"></i></div>
+  <p class="progtext" id="progText"></p>
+
+  <div id="qarea"></div>
+  <div id="results" class="hidden"></div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var KEY = "b5-geog-weather-storms";
+var EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+var STUDENTS = ["JT","LW","EGW","LP","LC","HK"];
+
+function $(id){ return document.getElementById(id); }
+function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!==undefined) e.textContent=txt; return e; }
+function svg(markup){
+  var d = el("div","figure");
+  d.innerHTML = markup;
+  return d;
+}
+
+/* ================= FIGURES ================= */
+var FIG = {};
+
+FIG.pressure =
+'<svg viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="High pressure with sinking air on the left, low pressure with rising air on the right, and wind blowing between them">' +
+'<ellipse cx="110" cy="160" rx="80" ry="34" fill="#cfe2e7"/>' +
+'<text x="110" y="168" text-anchor="middle" font-size="30" font-weight="700" fill="#0b4c5c">H</text>' +
+'<path d="M110 30 L110 112" stroke="#2a6f8a" stroke-width="9" stroke-linecap="round"/>' +
+'<path d="M96 100 L110 122 L124 100 Z" fill="#2a6f8a"/>' +
+'<text x="110" y="24" text-anchor="middle" font-size="13" fill="#0b4c5c">air sinks</text>' +
+'<text x="110" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="#0b4c5c">High pressure</text>' +
+'<ellipse cx="410" cy="160" rx="80" ry="34" fill="#f6d3ba"/>' +
+'<text x="410" y="168" text-anchor="middle" font-size="30" font-weight="700" fill="#8a3b0b">L</text>' +
+'<path d="M410 130 L410 48" stroke="#c85a1e" stroke-width="9" stroke-linecap="round"/>' +
+'<path d="M396 60 L410 38 L424 60 Z" fill="#c85a1e"/>' +
+'<ellipse cx="410" cy="30" rx="46" ry="20" fill="#dfe6ea"/>' +
+'<text x="410" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="#8a3b0b">Low pressure</text>' +
+'<path d="M198 152 L318 152" stroke="#ef7724" stroke-width="10" stroke-linecap="round"/>' +
+'<path d="M310 138 L334 152 L310 166 Z" fill="#ef7724"/>' +
+'<text x="258" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="#8a3b0b">Wind</text>' +
+'</svg>';
+
+FIG.depression =
+'<svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cross-section of a depression moving east, with a cold front and tall clouds behind, warm air in the middle, and a warm front with layered then wispy clouds ahead">' +
+'<rect x="0" y="212" width="640" height="34" fill="#cfe0c9"/>' +
+'<path d="M60 212 L250 60" stroke="#2a6f8a" stroke-width="5"/>' +
+'<path d="M300 212 L610 78" stroke="#b3402a" stroke-width="5"/>' +
+'<path d="M330 200 l16 -7 l0 14 Z" fill="#b3402a"/>' +
+'<path d="M420 162 l16 -7 l0 14 Z" fill="#b3402a"/>' +
+'<path d="M510 124 l16 -7 l0 14 Z" fill="#b3402a"/>' +
+'<path d="M96 184 l0 -16 l14 8 Z" fill="#2a6f8a"/>' +
+'<path d="M140 148 l0 -16 l14 8 Z" fill="#2a6f8a"/>' +
+'<path d="M184 112 l0 -16 l14 8 Z" fill="#2a6f8a"/>' +
+'<ellipse cx="150" cy="80" rx="82" ry="52" fill="#c8ccd2"/>' +
+'<ellipse cx="110" cy="110" rx="54" ry="36" fill="#c8ccd2"/>' +
+'<text x="150" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="#333">tall clouds</text>' +
+'<ellipse cx="400" cy="140" rx="72" ry="26" fill="#d7dbe0"/>' +
+'<text x="400" y="145" text-anchor="middle" font-size="12" fill="#333">layered clouds</text>' +
+'<path d="M520 78 q22 -10 44 0 M534 92 q22 -10 44 0" stroke="#aab2ba" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+'<text x="560" y="66" text-anchor="middle" font-size="12" fill="#555">high, wispy clouds</text>' +
+'<text x="40" y="200" font-size="13" font-weight="700" fill="#2a6f8a">cold air</text>' +
+'<text x="286" y="120" font-size="13" font-weight="700" fill="#b3402a">warm air</text>' +
+'<text x="566" y="200" font-size="13" font-weight="700" fill="#2f7a6a">cool air</text>' +
+'<path d="M250 22 L370 22" stroke="#052f3a" stroke-width="7" stroke-linecap="round"/>' +
+'<path d="M362 12 L386 22 L362 32 Z" fill="#052f3a"/>' +
+'<text x="300" y="14" text-anchor="middle" font-size="13" font-weight="700" fill="#052f3a">moving east</text>' +
+'</svg>';
+
+FIG.storm =
+'<svg viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tropical storm structure showing the calm eye at the centre, the eye wall around it, and outer rainbands">' +
+'<ellipse cx="260" cy="170" rx="230" ry="66" fill="#dfe6ea"/>' +
+'<ellipse cx="260" cy="150" rx="150" ry="46" fill="#c8d2d8"/>' +
+'<ellipse cx="260" cy="140" rx="52" ry="20" fill="#8fb8c9"/>' +
+'<path d="M215 140 L215 60 M305 140 L305 60" stroke="#b3402a" stroke-width="7" stroke-linecap="round"/>' +
+'<path d="M204 74 L215 50 L226 74 Z" fill="#b3402a"/>' +
+'<path d="M294 74 L305 50 L316 74 Z" fill="#b3402a"/>' +
+'<path d="M260 62 L260 130" stroke="#2a6f8a" stroke-width="7" stroke-linecap="round"/>' +
+'<path d="M249 118 L260 142 L271 118 Z" fill="#2a6f8a"/>' +
+'<ellipse cx="180" cy="60" rx="56" ry="26" fill="#e8edf0"/>' +
+'<ellipse cx="340" cy="60" rx="56" ry="26" fill="#e8edf0"/>' +
+'<text x="260" y="36" text-anchor="middle" font-size="13" font-weight="700" fill="#0b4c5c">eye</text>' +
+'<path d="M260 40 L260 122" stroke="none"/>' +
+'<text x="260" y="146" text-anchor="middle" font-size="12" fill="#083845">calm</text>' +
+'<text x="392" y="126" font-size="12" font-weight="700" fill="#b3402a">eye wall</text>' +
+'<text x="30" y="222" font-size="12" font-weight="700" fill="#2f7a6a">outer rainbands</text>' +
+'</svg>';
+
+/* ================= QUESTIONS =================
+   Marking follows the answer key printed with the worksheet.
+   pool = shared bank of accepted points, each earnable once.
+   allOf = every listed group must appear somewhere in the answer.
+   range = a number in the answer must fall inside these bounds. */
+var QS = [
+
+{ n:"1a", sec:"A", marks:1, skill:"The atmosphere and air pressure",
+  stem:"The layer of gases enveloping the Earth is held in place by gravitational pull and creates atmospheric pressure at the surface.",
+  type:"fields",
+  prompt:"State the approximate depth of Earth's atmosphere.",
+  fields:[{ label:"Depth", range:[80,120], unit:"km", model:"About 100 km. Anything from 80 km to 120 km counts." }] },
+
+{ n:"1b", sec:"A", marks:1, skill:"The atmosphere and air pressure",
+  type:"fields",
+  prompt:"State the mass of air pressing down on every square metre of the Earth's surface at sea level.",
+  fields:[{ label:"Mass per square metre", accept:["tonne","ton","1000 kg","1000kg","1 000 kg"], model:"One tonne, which is 1,000 kg." }] },
+
+{ n:"1c", sec:"A", marks:2, skill:"The atmosphere and air pressure",
+  type:"fields",
+  prompt:"Explain why human beings and animals are not crushed by the weight of atmospheric air pressing upon them.",
+  hint:"There are two separate marks here, so two separate ideas.",
+  fields:[
+    { label:"Point 1", accept:["push out","pushing out","outward","outwards","inside","internal","within","fluid","our own pressure"],
+      model:"The fluid and air pressure inside our bodies pushes outwards." },
+    { label:"Point 2", accept:["balance","equal","same","cancel","match","even out"],
+      model:"The inside and outside pressures are balanced, so they cancel out." }
+  ],
+  accepts:"1 mark for internal pressure pushing outwards, 1 mark for the inside and outside pressures being balanced." },
+
+{ n:"2a", sec:"A", marks:1, skill:"High and low pressure",
+  stem:"Air pressure differences across the Earth's surface create distinct weather conditions.",
+  type:"mc",
+  prompt:"Tick the one statement that correctly describes what happens in a high pressure system.",
+  options:[
+    "Warm air rises rapidly, condensing into thick nimbostratus clouds.",
+    "Cool air sinks towards the ground, preventing cloud formation.",
+    "Air rushes upwards in a tight spiral, causing severe gales.",
+    "Rising moisture causes torrential downpours and squalls."
+  ],
+  correct:1,
+  why:"In high pressure the air sinks. Sinking air warms and dries as it goes down, so clouds cannot form. The other three all describe rising air, which is low pressure." },
+
+{ n:"2b", sec:"A", marks:2, skill:"High and low pressure",
+  type:"fields",
+  prompt:"Describe the typical weather conditions experienced in the UK during a winter high pressure system.",
+  pools:{ p:[
+    { accept:["clear","sunny","sunshine","blue sky","no cloud","cloudless"], name:"clear skies or sunny weather" },
+    { accept:["cold","crisp","frost","frosty","icy","ice","freezing","chilly"], name:"cold, crisp, frosty or icy ground conditions" }
+  ]},
+  fields:[
+    { label:"Condition 1", pool:"p" },
+    { label:"Condition 2", pool:"p" }
+  ],
+  accepts:"1 mark for clear skies or sunshine, 1 mark for cold, crisp, frosty or icy conditions." },
+
+{ n:"3a", sec:"A", marks:1, skill:"High and low pressure",
+  fig:"pressure", figcap:"Air moving between a high pressure system and a low pressure system.",
+  type:"fields",
+  prompt:"State what causes wind to blow horizontally across the surface of the Earth.",
+  fields:[{ label:"Cause", accept:["pressure difference","difference in pressure","differences in air pressure","high to low","high pressure to low","pressure gradient","balance out"],
+    model:"Differences in air pressure. Air moves from high pressure areas to low pressure areas to balance out." }] },
+
+{ n:"3b", sec:"A", marks:1, skill:"High and low pressure",
+  fig:"pressure",
+  type:"fields",
+  prompt:"Explain what happens to the speed of the wind when the pressure difference between two areas becomes much greater.",
+  fields:[{ label:"What happens", accept:["increase","faster","stronger","fiercer","speed up","quicker","higher","rises","picks up"],
+    model:"The wind speed increases: it becomes faster, fiercer or stronger." }] },
+
+{ n:"4a", sec:"B", marks:1, skill:"UK air masses and depressions",
+  stem:"The British Isles lie beneath a zone where two contrasting air masses meet over the North Atlantic Ocean.",
+  type:"fields",
+  prompt:"Name the two contrasting air masses that collide over Britain.",
+  hint:"One mark, but you need both of them.",
+  fields:[{ label:"The two air masses",
+    allOf:[["tropical","warm"],["polar","arctic"]],
+    model:"Warm, moist tropical air and cold polar (Arctic) air." }] },
+
+{ n:"4b", sec:"B", marks:2, skill:"UK air masses and depressions",
+  type:"fields",
+  prompt:"Explain what happens when these two air masses meet along the Polar Front. Refer to air temperature and density in your answer.",
+  fields:[
+    { label:"Point 1: about density", accept:["lighter","less dense","not as dense","lower density","light"],
+      model:"The warm air is lighter, or less dense, than the cold air." },
+    { label:"Point 2: what that causes", accept:["rise","rises","rising","forced up","pushed up","upward","over the cold","condens","cloud","cool"],
+      model:"The warm air is forced upwards over the cold air wedge, so it cools, condenses and forms cloud." }
+  ],
+  accepts:"1 mark for the warm air being lighter or less dense, 1 mark for it being forced upwards leading to cooling, condensation and cloud." },
+
+{ n:"4c", sec:"B", marks:2, skill:"Hazards and impacts",
+  type:"fields",
+  prompt:"Define the term weather hazard and give one reason why hazards cause concern for local councils.",
+  fields:[
+    { label:"Definition", accept:["extreme","threat","danger","risk","damage","harm","life","property"],
+      model:"An extreme atmospheric event that threatens life, property, transport or nature." },
+    { label:"Why councils worry", accept:["road","repair","housing","transport","flood defence","emergency","cost","money","clean up","service","rescue"],
+      model:"Costly road repairs, emergency housing, blocked transport routes or flood defences." }
+  ],
+  accepts:"1 mark for a definition mentioning an extreme event that threatens life, property, transport or nature. 1 mark for a council concern such as road repairs, emergency housing, blocked transport or flood defences." },
+
+{ n:"5a", sec:"B", marks:1, skill:"Fronts and depressions",
+  stem:"The diagram shows a cross-section of a mature mid-latitude depression passing over the UK from west to east.",
+  fig:"depression", figcap:"A depression moving east. The cold front is on the left, the warm front on the right.",
+  type:"fields",
+  prompt:"Identify the type of cloud commonly found along the advancing warm front that produces steady, prolonged drizzle.",
+  fields:[{ label:"Cloud type", accept:["nimbostratus","stratus"], model:"Nimbostratus. Stratus also counts." }] },
+
+{ n:"5b", sec:"B", marks:1, skill:"Fronts and depressions",
+  fig:"depression",
+  type:"fields",
+  prompt:"Identify the weather boundary where dense, cold polar air undercuts the warm air mass.",
+  fields:[{ label:"Boundary", accept:["cold front"], model:"The cold front." }] },
+
+{ n:"5c", sec:"B", marks:2, skill:"Fronts and depressions",
+  fig:"depression",
+  type:"fields",
+  prompt:"Describe the change in rainfall and wind conditions as the cold front passes over an area.",
+  fields:[
+    { label:"Rainfall", accept:["downpour","heavy","intense","thunder","squall","sudden","torrential","shower"],
+      model:"Rainfall changes to sudden, intense downpours, thunderstorms or squalls." },
+    { label:"Wind", accept:["gust","shift","change direction","increase","stronger","faster","veer","picks up"],
+      model:"Wind becomes gusty, shifts direction, or increases in speed." }
+  ],
+  accepts:"1 mark for rainfall becoming sudden and intense (downpours, thunderstorms, squalls). 1 mark for wind becoming gusty, shifting direction or increasing." },
+
+{ n:"6a", sec:"B", marks:3, skill:"Fronts and depressions",
+  stem:"When central air pressure drops exceptionally fast, a depression becomes a deep depression.",
+  type:"order",
+  prompt:"These statements describe the formation and impact of a UK depression. Put them in the correct order, 1 to 4.",
+  hint:"Three marks: all four right earns 3, two or three right earns 2, one right earns 1.",
+  rows:[
+    { label:"A kink develops along the Polar Front as lighter warm air begins rising over cold air.", answer:"2" },
+    { label:"Warm tropical air collides with dense Arctic polar air over the North Atlantic.", answer:"1" },
+    { label:"The cold front passes, bringing squalling winds, heavy downpours, and dropping temperatures.", answer:"4" },
+    { label:"Central pressure plummets into a deep vortex, bringing gales and widespread rain across the UK.", answer:"3" }
+  ],
+  choices:["1","2","3","4"],
+  why:"The air masses have to meet first, then the front kinks, then the pressure collapses into a deep depression, and the cold front sweeping through is the last thing you feel." },
+
+{ n:"6b", sec:"B", marks:2, skill:"Hazards and impacts",
+  stem:"In February 2022, Storm Eunice struck the southern UK, recording gusts of 122 mph.",
+  type:"fields",
+  prompt:"Outline two specific physical or infrastructural hazards caused by severe gales of this intensity.",
+  pools:{ p:[
+    { accept:["tree"], name:"uprooted trees" },
+    { accept:["rail","train","track"], name:"blocked railway lines" },
+    { accept:["power line","electric","cable","pylon","power cut","snapped power"], name:"snapped power lines" },
+    { accept:["roof","building","structural","damage to home","house"], name:"structural roof damage" },
+    { accept:["road","street","bridge closed","closure"], name:"road closures" }
+  ]},
+  fields:[
+    { label:"Hazard 1", pool:"p" },
+    { label:"Hazard 2", pool:"p" }
+  ],
+  accepts:"Any two of: uprooted trees, blocked railway lines, snapped power lines, structural roof damage, road closures." },
+
+{ n:"7a", sec:"C", marks:1, skill:"Tropical storm formation",
+  stem:"Tropical storms are intense low pressure weather systems that form over equatorial ocean waters.",
+  type:"fields",
+  prompt:"State the minimum sea-surface temperature required for a tropical storm to form.",
+  fields:[{ label:"Temperature", range:[26.5,27.5], unit:"degrees C", model:"27 degrees Celsius." }] },
+
+{ n:"7b", sec:"C", marks:1, skill:"Tropical storm formation",
+  type:"fields",
+  prompt:"State why deep ocean water of this temperature is essential to the development of the storm.",
+  fields:[{ label:"Why", accept:["heat","moisture","water vapour","vapour","evaporation","fuel","energy","power"],
+    model:"Deep warm water provides a continuous supply of heat and water vapour to fuel the rising storm clouds." }] },
+
+{ n:"7c", sec:"C", marks:2, skill:"Tropical storm formation",
+  type:"fields",
+  prompt:"Explain why tropical storms lose their energy rapidly after they make landfall over a large continent.",
+  fields:[
+    { label:"Point 1", accept:["no more warm water","loses the ocean","away from the sea","no ocean","fuel","moisture","heat source","no water","cut off from"],
+      model:"They lose their fuel source: no more warm ocean water supplying heat and moisture." },
+    { label:"Point 2", accept:["friction","rough","land surface","drag","slow","obstacle","hills","buildings"],
+      model:"Friction with the land surface slows the winds down." }
+  ],
+  accepts:"1 mark for losing the warm ocean fuel source, 1 mark for friction with the land slowing the winds." },
+
+{ n:"8a", sec:"C", marks:1, skill:"Tropical storm names and places",
+  stem:"Tropical storms are known by different names depending on the ocean basin in which they develop. Hurricane goes with the Atlantic and Northeast Pacific. Cyclone goes with the Indian Ocean and South Pacific.",
+  type:"fields",
+  prompt:"Complete the table: which ocean basin or location goes with Typhoon?",
+  fields:[{ label:"Typhoon", accept:["northwest pacific","north west pacific","nw pacific","north-west pacific","asia","japan","philippines","china"],
+    model:"The Northwest Pacific Ocean, near East Asia, Japan and the Philippines." }] },
+
+{ n:"8b", sec:"C", marks:2, skill:"Tropical storm formation",
+  type:"fields",
+  /* NOTE FOR JAY: the statement box did not come through in the PDF.
+     This is reconstructed from the answer key. Replace the text in
+     `statement` below with the wording from your original worksheet. */
+  statement:"A hurricane could form in the Atlantic Ocean just off the coast of Scotland.",
+  prompt:"Is this statement true or false? Give a geographical explanation for your choice.",
+  fields:[
+    { label:"True or false?", choices:["True","False"], answer:"False", model:"False." },
+    { label:"Your explanation", accept:["too cold","not warm enough","cold water","14","16","18","27","below 27","never reaches","temperature"],
+      model:"Atlantic waters around Scotland are far too cold, rarely above 14 to 18 degrees, so they cannot reach the 27 degrees needed to generate a hurricane." }
+  ],
+  accepts:"1 mark for False. 1 mark for explaining that the sea around Scotland is far too cold to reach the 27 degree threshold." },
+
+{ n:"8c", sec:"C", marks:2, skill:"Hazards and impacts",
+  stem:"Tropical storms have sustained wind speeds exceeding 119 km/h.",
+  type:"fields",
+  prompt:"Describe two ways in which extreme tropical winds cause devastation to human settlements.",
+  pools:{ p:[
+    { accept:["tree","shred","uproot"], name:"shredding or uprooting trees" },
+    { accept:["roof","collapse","building","house","home","structure"], name:"collapsing buildings or tearing off roofs" },
+    { accept:["debris","missile","flying","projectile","thrown"], name:"turning loose debris into lethal flying missiles" },
+    { accept:["power","telecom","electric","phone","communication","cable","mast"], name:"destroying power and telecoms infrastructure" }
+  ]},
+  fields:[
+    { label:"Way 1", pool:"p" },
+    { label:"Way 2", pool:"p" }
+  ],
+  accepts:"Any two of: shredding or uprooting trees, collapsing buildings or tearing off roofs, turning debris into flying missiles, destroying power and telecoms infrastructure." },
+
+{ n:"9a", sec:"C", marks:2, skill:"Tropical storm structure",
+  fig:"storm", figcap:"The structure of a tropical storm: the calm eye, the eye wall around it, and the outer rainbands.",
+  type:"fields",
+  prompt:"Describe the conditions found inside the eye of a tropical storm.",
+  fields:[
+    { label:"Point 1", accept:["calm","still","light wind","no wind","gentle","quiet"],
+      model:"Calm, with light winds." },
+    { label:"Point 2", accept:["clear","no cloud","cloudless","sinking","descending","dry","no rain","sunny","blue sky"],
+      model:"Clear skies, with descending air and no cloud or rain." }
+  ],
+  accepts:"1 mark for calm or light winds, 1 mark for clear skies, descending air, or no cloud and rain." },
+
+{ n:"9b", sec:"C", marks:2, skill:"Tropical storm structure",
+  fig:"storm",
+  type:"fields",
+  prompt:"Explain why the eye wall produces the storm's most dangerous weather.",
+  fields:[
+    { label:"Point 1", accept:["cumulonimbus","updraft","rising","towering","tall cloud","thunder"],
+      model:"It holds dense cumulonimbus clouds with rapid updrafts." },
+    { label:"Point 2", accept:["fastest","strongest","peak","highest wind","torrential","heaviest rain","blinding"],
+      model:"It has the peak sustained wind speeds and torrential, blinding rainfall." }
+  ],
+  accepts:"1 mark for dense cumulonimbus cloud with rapid updrafts, 1 mark for peak wind speeds and torrential rainfall." },
+
+{ n:"10a", sec:"D", marks:2, skill:"Storm surges",
+  stem:"Coastal settlements face significant risk from maritime storm hazards.",
+  type:"fields",
+  prompt:"Define the term storm surge.",
+  fields:[
+    { label:"Point 1", accept:["sea level rise","rise in sea","rising sea","water level","flood","inundat","sea comes","water onto land","higher than normal tide"],
+      model:"A sudden rise in sea level above the normal tide, flooding the coast." },
+    { label:"Point 2", accept:["storm","pressure","wind","pushed","driven","forced"],
+      model:"Driven by the storm itself: its low pressure and its winds pushing the water." }
+  ],
+  accepts:"1 mark for rising sea water or coastal flooding, 1 mark for it being driven by storm forces or pressure." },
+
+{ n:"10b", sec:"D", marks:3, skill:"Storm surges",
+  type:"fields",
+  prompt:"Explain how intense low air pressure and gale-force onshore winds combine to generate a storm surge along low-lying coastlines.",
+  hint:"Three separate marks, so three separate ideas.",
+  fields:[
+    { label:"About the low pressure", accept:["dome","bulge","rise","lifts","sucks","pulls up","less weight","not pressing"],
+      model:"Extremely low pressure at the storm centre lets the sea surface dome or bulge upward." },
+    { label:"About the winds", accept:["onshore","towards the coast","towards land","push","drive","blow the water","pile"],
+      model:"Powerful onshore gales drive the surface water towards the coast." },
+    { label:"About the shape of the coast", accept:["shallow","sea floor","seabed","sea bed","piles","higher","nowhere to go","funnel","low lying"],
+      model:"Shallow coastal sea floors pile the water higher as it crashes inland." }
+  ],
+  accepts:"1 mark each for: low pressure letting the sea dome upward, onshore gales driving water at the coast, and shallow sea floors piling the water higher." },
+
+{ n:"11", sec:"D", marks:4, skill:"Comparing weather systems",
+  type:"matrix",
+  prompt:"Compare the primary characteristics of a UK deep depression with those of a tropical hurricane.",
+  hint:"One mark per box.",
+  cols:["UK Deep Depression","Tropical Hurricane"],
+  rows:[
+    { label:"Ocean water temperature required",
+      cells:[
+        { accept:["cool","cold","8","10","12","14","16","18","low temp","chilly"], model:"Cool or cold water, typically 8 to 16 degrees and rarely above 18." },
+        { accept:["27","28","warm","hot"], model:"Warm water of at least 27 degrees." }
+      ] },
+    { label:"Main source of energy or formation cause",
+      cells:[
+        { accept:["air mass","polar front","collision","collide","meet","contrasting","tropical and polar","warm and cold"], model:"The collision of contrasting warm tropical and cold polar air masses along the Polar Front." },
+        { accept:["evaporation","latent heat","warm sea","warm water","27","moisture","condensation"], model:"Rapid evaporation and latent heat release from deep 27 degree seawater." }
+      ] }
+  ] },
+
+{ n:"12", sec:"D", marks:6, skill:"Extended evaluation",
+  type:"levels",
+  /* NOTE FOR JAY: the statement to evaluate did not come through in the PDF.
+     This is reconstructed from the marking rubric. Replace the text in
+     `statement` below with the wording from your original worksheet. */
+  statement:"Tropical storm surges present a far greater danger to human life than UK deep depressions.",
+  prompt:"To what extent do you agree with this statement?",
+  bullets:[
+    "Discuss the immediate impacts of tropical storm surges on coastal communities.",
+    "Discuss the long-term disruptions and hazards caused by UK deep depressions.",
+    "Reach a clear, reasoned conclusion evaluating which hazard presents the greater overall danger."
+  ],
+  levels:[
+    { name:"Level 1", range:"1 to 2 marks", desc:"Basic or general statements about storms causing floods, wind or death. Not much specific geography, and no real comparison or conclusion.", marks:[1,2] },
+    { name:"Level 2", range:"3 to 4 marks", desc:"Both hazards described clearly with relevant examples, such as Storm Eunice or coastal flooding. Danger to life and property mentioned for both, but the evaluation leans one way or the conclusion is not fully justified.", marks:[3,4] },
+    { name:"Level 3", range:"5 to 6 marks", desc:"Balanced and thorough. Compares the fast, deadly, destructive nature of storm surges (drowning, rapid flooding, coastal collapse) against the slower, wider impacts of UK depressions (river flooding, transport chaos, damage to farming, repair costs). Reaches a justified conclusion that weighs up warning systems, evacuation time and how much area is affected.", marks:[5,6] }
+  ] }
+
+];
+
+var TOTAL = QS.reduce(function(a,q){ return a+q.marks; },0);
+
+/* ================= STATE ================= */
+var state = { who:"", idx:0, answers:{}, checked:{}, awarded:{}, levels:{} };
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){
+      var s = JSON.parse(raw);
+      ["who","idx","answers","checked","awarded","levels"].forEach(function(k){
+        if(s[k] !== undefined) state[k]=s[k];
+      });
+    }
+  }catch(e){}
+}
+var st=null;
+function save(){
+  clearTimeout(st);
+  st=setTimeout(function(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  },350);
+}
+
+/* ================= MARKING ================= */
+function norm(s){
+  return (s||"").toLowerCase().replace(/[^a-z0-9. ]/g," ").replace(/\s+/g," ").trim();
+}
+function hits(accept, val){
+  var v = norm(val);
+  if(!v) return false;
+  for(var i=0;i<accept.length;i++){
+    if(v.indexOf(norm(accept[i])) !== -1) return true;
+  }
+  return false;
+}
+function inRange(range, val){
+  var m = norm(val).match(/[0-9]+(\.[0-9]+)?/);
+  if(!m) return false;
+  var x = parseFloat(m[0]);
+  return x >= range[0] && x <= range[1];
+}
+function allOf(groups, val){
+  for(var i=0;i<groups.length;i++){
+    if(!hits(groups[i], val)) return false;
+  }
+  return true;
+}
+
+/* Verdict for each field: true, false, or null for self-mark only. */
+function autoFields(q){
+  var a = state.answers[q.n] || {};
+  var used = {};
+  var out = [];
+  q.fields.forEach(function(f,i){
+    var val = a["f"+i];
+    if(f.choices){
+      out.push(val === f.answer);
+    } else if(f.range){
+      out.push(inRange(f.range, val));
+    } else if(f.allOf){
+      out.push(allOf(f.allOf, val));
+    } else if(f.pool && q.pools && q.pools[f.pool]){
+      var bank = q.pools[f.pool];
+      var got = false;
+      for(var j=0;j<bank.length;j++){
+        var tag = f.pool+":"+j;
+        if(used[tag]) continue;
+        if(hits(bank[j].accept, val)){ used[tag]=true; got=true; break; }
+      }
+      out.push(got);
+    } else if(f.accept){
+      out.push(hits(f.accept, val));
+    } else {
+      out.push(null);
+    }
+  });
+  return out;
+}
+
+/* Matrix cells behave like fields but live in a grid. */
+function autoMatrix(q){
+  var a = state.answers[q.n] || {};
+  var out = [];
+  q.rows.forEach(function(r,ri){
+    r.cells.forEach(function(c,ci){
+      out.push(hits(c.accept, a["c"+ri+"_"+ci]));
+    });
+  });
+  return out;
+}
+function matrixCells(q){
+  var list = [];
+  q.rows.forEach(function(r,ri){
+    r.cells.forEach(function(c,ci){
+      list.push({ key:"c"+ri+"_"+ci, label:r.label + " - " + q.cols[ci], model:c.model });
+    });
+  });
+  return list;
+}
+
+function markQuestion(q){
+  var a = state.answers[q.n];
+  if(q.type === "mc"){
+    return (a === q.correct) ? q.marks : 0;
+  }
+  if(q.type === "order"){
+    if(!a) return 0;
+    var right = 0;
+    q.rows.forEach(function(r,i){ if(a["r"+i] === r.answer) right++; });
+    /* Answer key: 3 marks for all four, 2 for two or three, 1 for one. */
+    if(right === 4) return 3;
+    if(right >= 2) return 2;
+    if(right === 1) return 1;
+    return 0;
+  }
+  if(q.type === "levels"){
+    var m = state.levels[q.n];
+    return (typeof m === "number") ? m : 0;
+  }
+  if(q.type === "matrix" || q.type === "fields"){
+    var sm = state.awarded[q.n] || {};
+    var total = 0;
+    Object.keys(sm).forEach(function(k){ if(sm[k] === 1) total += 1; });
+    return Math.min(total, q.marks);
+  }
+  return 0;
+}
+
+/* ================= RENDER ================= */
+function renderQuestion(){
+  var area = $("qarea");
+  area.innerHTML = "";
+  if(state.idx >= QS.length){ renderResults(); return; }
+  $("results").classList.add("hidden");
+
+  var q = QS[state.idx];
+  var isChecked = !!state.checked[q.n];
+  var card = el("div","qcard");
+
+  var top = el("div","qtop");
+  top.appendChild(el("span","qn","Question "+q.n));
+  top.appendChild(el("span","metachip","Section "+q.sec));
+  top.appendChild(el("span","qm", q.marks + (q.marks===1 ? " mark" : " marks")));
+  card.appendChild(top);
+
+  if(q.stem) card.appendChild(el("p","stem",q.stem));
+  if(q.fig) {
+    var f = svg(FIG[q.fig]);
+    if(q.figcap) f.appendChild(el("p","figcap",q.figcap));
+    card.appendChild(f);
+  }
+  card.appendChild(el("p","qprompt",q.prompt));
+  if(q.statement) card.appendChild(el("div","statement",q.statement));
+  if(q.bullets){
+    var ul = el("ul");
+    q.bullets.forEach(function(b){ ul.appendChild(el("li",null,b)); });
+    card.appendChild(ul);
+  }
+  if(q.hint) card.appendChild(el("p","qhint",q.hint));
+
+  /* --- multiple choice --- */
+  if(q.type === "mc"){
+    var wrap = el("div","opts");
+    q.options.forEach(function(o,i){
+      var lab = el("label","opt");
+      var inp = document.createElement("input");
+      inp.type = "radio"; inp.name = "q"+q.n;
+      inp.disabled = isChecked;
+      inp.checked = (state.answers[q.n] === i);
+      inp.addEventListener("change",function(){ state.answers[q.n]=i; save(); });
+      lab.appendChild(inp);
+      lab.appendChild(el("span",null,o));
+      if(isChecked){
+        if(i === q.correct) lab.classList.add("right");
+        else if(state.answers[q.n] === i) lab.classList.add("wrong");
+      }
+      wrap.appendChild(lab);
+    });
+    card.appendChild(wrap);
+  }
+
+  /* --- ordering --- */
+  if(q.type === "order"){
+    var a = state.answers[q.n] || {};
+    q.rows.forEach(function(r,i){
+      var row = el("div","orderrow");
+      row.appendChild(el("span",null,r.label));
+      var sel = el("select","line");
+      sel.disabled = isChecked;
+      var blank = document.createElement("option");
+      blank.value=""; blank.textContent="Order";
+      sel.appendChild(blank);
+      q.choices.forEach(function(c){
+        var o=document.createElement("option");
+        o.value=c; o.textContent=c;
+        sel.appendChild(o);
+      });
+      sel.value = a["r"+i] || "";
+      sel.addEventListener("change",function(){
+        var cur = state.answers[q.n] || {};
+        cur["r"+i] = sel.value;
+        state.answers[q.n] = cur;
+        save();
+      });
+      row.appendChild(sel);
+      if(isChecked){
+        var ok = (a["r"+i] === r.answer);
+        row.style.background = ok ? "rgba(0,150,90,.16)" : "rgba(200,60,0,.14)";
+        if(!ok) row.appendChild(el("span","qhint","Should be "+r.answer));
+      }
+      card.appendChild(row);
+    });
+  }
+
+  /* --- fields --- */
+  if(q.type === "fields"){
+    var vals = state.answers[q.n] || {};
+    q.fields.forEach(function(f,i){
+      var lab = el("label","fld", f.label + (f.unit ? " (in " + f.unit + ")" : ""));
+      lab.setAttribute("for","q"+q.n+"f"+i);
+      card.appendChild(lab);
+      if(f.choices){
+        var sel = el("select","line short");
+        sel.id = "q"+q.n+"f"+i;
+        sel.disabled = isChecked;
+        var b0 = document.createElement("option");
+        b0.value=""; b0.textContent="Choose";
+        sel.appendChild(b0);
+        f.choices.forEach(function(c){
+          var o=document.createElement("option"); o.value=c; o.textContent=c;
+          sel.appendChild(o);
+        });
+        sel.value = vals["f"+i] || "";
+        sel.addEventListener("change",function(){
+          var cur = state.answers[q.n] || {};
+          cur["f"+i] = sel.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        card.appendChild(sel);
+      } else {
+        var short = !!(f.range || f.accept && f.accept.length <= 3);
+        var ta = el("textarea","box");
+        ta.id = "q"+q.n+"f"+i;
+        ta.value = vals["f"+i] || "";
+        ta.disabled = isChecked;
+        if(short) ta.style.minHeight = "52px";
+        ta.addEventListener("input",function(){
+          var cur = state.answers[q.n] || {};
+          cur["f"+i] = ta.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        card.appendChild(ta);
+      }
+    });
+  }
+
+  /* --- matrix --- */
+  if(q.type === "matrix"){
+    var mv = state.answers[q.n] || {};
+    var table = el("table","matrix");
+    var hr = el("tr");
+    hr.appendChild(el("th",null,"Characteristic"));
+    q.cols.forEach(function(c){ hr.appendChild(el("th",null,c)); });
+    table.appendChild(hr);
+    q.rows.forEach(function(r,ri){
+      var tr = el("tr");
+      tr.appendChild(el("th",null,r.label));
+      r.cells.forEach(function(c,ci){
+        var td = el("td");
+        var ta = el("textarea","box");
+        ta.value = mv["c"+ri+"_"+ci] || "";
+        ta.disabled = isChecked;
+        ta.setAttribute("aria-label", r.label + ", " + q.cols[ci]);
+        ta.addEventListener("input",function(){
+          var cur = state.answers[q.n] || {};
+          cur["c"+ri+"_"+ci] = ta.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        td.appendChild(ta);
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    });
+    card.appendChild(table);
+  }
+
+  /* --- levels --- */
+  if(q.type === "levels"){
+    var lv = state.answers[q.n] || {};
+    var ta2 = el("textarea","box");
+    ta2.style.minHeight = "260px";
+    ta2.value = lv.text || "";
+    ta2.disabled = isChecked;
+    ta2.placeholder = "Take your time. Cover all three bullet points, then say what you actually think and why.";
+    ta2.setAttribute("aria-label","Your extended answer");
+    ta2.addEventListener("input",function(){
+      var cur = state.answers[q.n] || {};
+      cur.text = ta2.value;
+      state.answers[q.n] = cur;
+      save();
+    });
+    card.appendChild(ta2);
+  }
+
+  /* --- feedback --- */
+  if(isChecked){
+    var fb = el("div","fb");
+    fb.appendChild(el("h4",null,"How that went"));
+    fb.appendChild(el("p","verdict", markQuestion(q) + " out of " + q.marks));
+    if(q.why) fb.appendChild(el("p",null,q.why));
+    if(q.accepts) fb.appendChild(el("p",null,"What earns a mark: " + q.accepts));
+
+    if(q.type === "fields" || q.type === "matrix"){
+      var items = (q.type === "fields")
+        ? q.fields.map(function(f,i){ return { key:"f"+i, label:f.label, model:f.model }; })
+        : matrixCells(q);
+      var autos = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+      var vals2 = state.answers[q.n] || {};
+      var aw = state.awarded[q.n] || {};
+      items.forEach(function(it,i){
+        var item = el("div","fbitem");
+        item.appendChild(el("div",null,it.label));
+        item.appendChild(el("div",null,"You put: " + ((vals2[it.key]||"").trim() || "nothing")));
+        if(it.model) item.appendChild(el("div",null,"Looking for: " + it.model));
+        var sm = el("div","selfmark");
+        if(autos[i] === true) sm.appendChild(el("span",null,"Marked right automatically. Change it if you disagree:"));
+        else if(autos[i] === false) sm.appendChild(el("span",null,"Not matched automatically. Read the answer and decide:"));
+        else sm.appendChild(el("span",null,"You decide: did you get this one?"));
+        [["Yes, 1 mark",1],["No mark",0]].forEach(function(pair){
+          var b = el("button","smbtn",pair[0]);
+          b.type="button";
+          b.setAttribute("aria-pressed", String(aw[it.key] === pair[1]));
+          b.addEventListener("click",function(){
+            var cur = state.awarded[q.n] || {};
+            cur[it.key] = pair[1];
+            state.awarded[q.n] = cur;
+            save();
+            renderQuestion();
+          });
+          sm.appendChild(b);
+        });
+        item.appendChild(sm);
+        fb.appendChild(item);
+      });
+    }
+
+    if(q.type === "levels"){
+      fb.appendChild(el("p",null,"Read the three levels and pick the one your answer actually reaches. Being honest here is more useful than being generous."));
+      var box = el("div","levels");
+      q.levels.forEach(function(L){
+        var d = el("div","level");
+        if(state.levels[q.n] && L.marks.indexOf(state.levels[q.n]) !== -1) d.classList.add("picked");
+        d.appendChild(el("b",null, L.name + ", " + L.range));
+        d.appendChild(el("span",null, L.desc));
+        var pick = el("div","selfmark");
+        L.marks.forEach(function(m){
+          var b = el("button","smbtn", m + (m===1 ? " mark" : " marks"));
+          b.type="button";
+          b.setAttribute("aria-pressed", String(state.levels[q.n] === m));
+          b.addEventListener("click",function(){
+            state.levels[q.n] = m;
+            save();
+            renderQuestion();
+          });
+          pick.appendChild(b);
+        });
+        d.appendChild(pick);
+        box.appendChild(d);
+      });
+      fb.appendChild(box);
+    }
+    card.appendChild(fb);
+  }
+
+  /* --- nav --- */
+  var nav = el("div","nav");
+  if(state.idx > 0){
+    var back = el("button","btnish secondary","Back");
+    back.type="button";
+    back.addEventListener("click",function(){ state.idx--; save(); renderQuestion(); });
+    nav.appendChild(back);
+  }
+  if(!isChecked){
+    var check = el("button","btnish","Check this one");
+    check.type="button";
+    check.addEventListener("click",function(){
+      state.checked[q.n] = true;
+      if(q.type === "fields" || q.type === "matrix"){
+        var keys = (q.type === "fields")
+          ? q.fields.map(function(f,i){ return "f"+i; })
+          : matrixCells(q).map(function(c){ return c.key; });
+        var autos2 = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+        var aw2 = state.awarded[q.n] || {};
+        keys.forEach(function(k,i){
+          if(aw2[k] === undefined) aw2[k] = (autos2[i] === true) ? 1 : 0;
+        });
+        state.awarded[q.n] = aw2;
+      }
+      save();
+      renderQuestion();
+    });
+    nav.appendChild(check);
+    var skip = el("button","quiet","Skip for now");
+    skip.type="button";
+    skip.addEventListener("click",function(){ state.idx++; save(); renderQuestion(); });
+    nav.appendChild(skip);
+  } else {
+    var next = el("button","btnish", state.idx === QS.length-1 ? "See your results" : "Next question");
+    next.type="button";
+    next.addEventListener("click",function(){ state.idx++; save(); renderQuestion(); });
+    nav.appendChild(next);
+  }
+  nav.appendChild(el("span","spacer"));
+  var jump = el("button","quiet","Finish and see results");
+  jump.type="button";
+  jump.addEventListener("click",function(){ state.idx = QS.length; save(); renderQuestion(); });
+  nav.appendChild(jump);
+
+  card.appendChild(nav);
+  area.appendChild(card);
+  updateProgress();
+}
+
+function updateProgress(){
+  var done = 0;
+  QS.forEach(function(q){ if(state.checked[q.n]) done++; });
+  $("progBar").style.width = Math.round((done/QS.length)*100) + "%";
+  var pos = Math.min(state.idx+1, QS.length);
+  $("progText").textContent = (state.idx >= QS.length)
+    ? (done + " of " + QS.length + " questions marked")
+    : ("Question " + pos + " of " + QS.length + " - " + done + " marked so far");
+}
+
+/* ================= RESULTS ================= */
+function totals(){
+  var score = 0, avail = 0;
+  var bySec = {}, bySkill = {};
+  QS.forEach(function(q){
+    var got = state.checked[q.n] ? markQuestion(q) : 0;
+    if(state.checked[q.n]){ score += got; avail += q.marks; }
+    if(!bySec[q.sec]) bySec[q.sec] = {g:0,m:0};
+    bySec[q.sec].m += q.marks; bySec[q.sec].g += got;
+    if(!bySkill[q.skill]) bySkill[q.skill] = {g:0,m:0};
+    bySkill[q.skill].m += q.marks; bySkill[q.skill].g += got;
+  });
+  return { score:score, avail:avail, bySec:bySec, bySkill:bySkill };
+}
+
+function renderResults(){
+  $("qarea").innerHTML = "";
+  var r = $("results");
+  r.classList.remove("hidden");
+  r.innerHTML = "";
+  var t = totals();
+
+  var card = el("div","qcard");
+  card.appendChild(el("h3",null,"How you got on"));
+  card.appendChild(el("div","scorebig", t.score + " out of " + TOTAL));
+  if(t.avail < TOTAL){
+    card.appendChild(el("p","qhint","You marked " + t.avail + " marks' worth so far. The rest are still there if you want them."));
+  }
+
+  var tab = el("table","breakdown");
+  var head = el("tr");
+  head.appendChild(el("th",null,"Topic"));
+  head.appendChild(el("th",null,"Marks"));
+  tab.appendChild(head);
+  Object.keys(t.bySkill).forEach(function(k){
+    var tr = el("tr");
+    tr.appendChild(el("td",null,k));
+    tr.appendChild(el("td",null, t.bySkill[k].g + " / " + t.bySkill[k].m));
+    tab.appendChild(tr);
+  });
+  card.appendChild(tab);
+
+  var weak = Object.keys(t.bySkill).filter(function(k){
+    return t.bySkill[k].m >= 2 && (t.bySkill[k].g / t.bySkill[k].m) < 0.5;
+  });
+  if(weak.length){
+    card.appendChild(el("p",null,"Worth another look: " + weak.join(", ") + ". Not a problem, just where the next bit of work would pay off most."));
+  } else if(t.avail > 0){
+    card.appendChild(el("p",null,"Nothing standing out as a weak spot. Have a look back at anything you skipped."));
+  }
+
+  var nav = el("div","nav");
+  var again = el("button","btnish secondary","Go back through the questions");
+  again.type="button";
+  again.addEventListener("click",function(){ state.idx=0; save(); renderQuestion(); });
+  nav.appendChild(again);
+  card.appendChild(nav);
+  r.appendChild(card);
+
+  var send = el("div","qcard");
+  send.appendChild(el("h3",null,"Send it to Jay"));
+  send.appendChild(el("p",null,"Your answers, your score, and which ones you marked yourself."));
+  var row = el("div","sendrow");
+  [["Open in Gmail",sendGmail],["Open in email app",sendMail],["Copy it all",sendCopy],["Save as a file",sendSave]].forEach(function(p,i){
+    var b = el("button", i<2 ? "btnish" : "btnish secondary", p[0]);
+    b.type="button"; b.addEventListener("click",p[1]);
+    row.appendChild(b);
+  });
+  send.appendChild(row);
+  var stt = el("p","status"); stt.id="status"; stt.setAttribute("aria-live","polite");
+  send.appendChild(stt);
+  var clr = el("p");
+  var cb = el("button","quiet","Clear everything and start again");
+  cb.type="button";
+  cb.addEventListener("click",function(){
+    if(!window.confirm("Clear all your answers? This cannot be undone.")) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    window.location.reload();
+  });
+  clr.appendChild(cb);
+  send.appendChild(clr);
+  r.appendChild(send);
+
+  updateProgress();
+}
+
+/* ================= REPORT ================= */
+function report(){
+  var t = totals();
+  var L = [];
+  L.push("Geography: Weather Systems and Storm Hazards");
+  L.push("From: " + (state.who || "(no initials picked)"));
+  L.push("Sent: " + new Date().toString());
+  L.push("Score: " + t.score + " out of " + TOTAL + " (marked so far: " + t.avail + ")");
+  L.push("");
+  L.push("Marks by topic:");
+  Object.keys(t.bySkill).forEach(function(k){
+    L.push("  " + k + ": " + t.bySkill[k].g + " / " + t.bySkill[k].m);
+  });
+  L.push("");
+  L.push("==== Answers ====");
+  QS.forEach(function(q){
+    var got = state.checked[q.n] ? markQuestion(q) : 0;
+    L.push("");
+    L.push("Q" + q.n + " (Section " + q.sec + ", " + q.skill + ") - " + (state.checked[q.n] ? got+"/"+q.marks : "not attempted"));
+    var a = state.answers[q.n];
+    if(q.type === "mc"){
+      L.push("  Chose: " + (a===undefined ? "-" : q.options[a]));
+      L.push("  Answer: " + q.options[q.correct]);
+    } else if(q.type === "order"){
+      q.rows.forEach(function(rw,i){
+        L.push("  " + rw.label);
+        L.push("    Put: " + ((a && a["r"+i]) || "-") + ", answer " + rw.answer);
+      });
+    } else if(q.type === "levels"){
+      L.push("  Self-assessed at: " + (state.levels[q.n]===undefined ? "not yet" : state.levels[q.n] + " of 6"));
+      L.push("  Answer:");
+      L.push((a && a.text || "(blank)"));
+    } else if(q.type === "fields" || q.type === "matrix"){
+      var items = (q.type === "fields")
+        ? q.fields.map(function(f,i){ return { key:"f"+i, label:f.label }; })
+        : matrixCells(q);
+      var autos = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+      var aw = state.awarded[q.n] || {};
+      items.forEach(function(it,i){
+        L.push("  " + it.label);
+        L.push("    Put: " + ((a && a[it.key] || "").trim() || "(blank)"));
+        L.push("    Awarded: " + (aw[it.key]===1 ? "1" : "0") + " (" + (autos[i]===true ? "auto" : "self-marked") + ")");
+      });
+    }
+  });
+  L.push("");
+  L.push("Marking follows the answer key printed with the worksheet. Answers tagged");
+  L.push("'self-marked' were judged by the student, so those are worth a look, and");
+  L.push("Q12 is entirely self-assessed against the levels rubric.");
+  return L.join("\n");
+}
+function subject(){
+  var t = totals();
+  return "Weather Systems and Storm Hazards" + (state.who ? " - " + state.who : "") + " - " + t.score + "/" + TOTAL;
+}
+function sendGmail(){
+  window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(EMAIL)
+    +"&su="+encodeURIComponent(subject())
+    +"&body="+encodeURIComponent(report()),"_blank");
+}
+function sendMail(){
+  window.location.href = "mailto:"+EMAIL
+    +"?subject="+encodeURIComponent(subject())
+    +"&body="+encodeURIComponent(report());
+}
+function sendCopy(){
+  var txt = report();
+  function done(){
+    var s=$("status");
+    if(s){ s.textContent="Copied, paste it anywhere"; setTimeout(function(){ s.textContent=""; },2500); }
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,function(){ fallbackCopy(txt); done(); });
+  } else { fallbackCopy(txt); done(); }
+}
+function fallbackCopy(text){
+  var ta=document.createElement("textarea");
+  ta.value=text; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+}
+function sendSave(){
+  var blob=new Blob([report()],{type:"text/plain"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="weather-storms"+(state.who?"-"+state.who:"")+".txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+/* ================= WHO ================= */
+function buildWho(){
+  var holder = $("whoChips");
+  STUDENTS.concat(["Just practising"]).forEach(function(n){
+    var val = (n === "Just practising") ? "" : n;
+    var b = el("button","whochip",n);
+    b.type="button";
+    b.dataset.val = val;
+    b.addEventListener("click",function(){ state.who = val; save(); refreshWho(); });
+    holder.appendChild(b);
+  });
+  refreshWho();
+}
+function refreshWho(){
+  var chips = document.querySelectorAll(".whochip");
+  for(var i=0;i<chips.length;i++){
+    chips[i].setAttribute("aria-pressed", String(chips[i].dataset.val === state.who));
+  }
+}
+
+/* ================= BOOT ================= */
+load();
+buildWho();
+renderQuestion();
+
+})();
+</script>
+</body>
+</html>
