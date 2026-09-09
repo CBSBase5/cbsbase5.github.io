@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=7">
 <style>
-/* Weather Systems paper only. Everything else lives in style.css */
+/* Weather systems paper only. Everything else lives in style.css */
 .metachips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
 .metachip{font-size:.85rem;padding:4px 12px;border-radius:14px 10px 16px 9px;background:rgba(0,0,0,.06)}
 
@@ -28,6 +28,10 @@
 .figure svg{max-width:100%;height:auto}
 .figcap{font-size:.88rem;opacity:.7;margin:6px 0 0}
 
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;padding:10px 12px;background:rgba(239,119,36,.10);border-radius:12px}
+.bank b{width:100%;font-size:.88rem;margin-bottom:2px}
+.bankword{font-size:.92rem;padding:5px 12px;border-radius:10px;background:#fffdf9;border:1px solid rgba(0,0,0,.14)}
+
 .statement{border:2px dashed rgba(0,114,145,.45);border-radius:12px;padding:12px 16px;margin:12px 0;background:rgba(0,114,145,.06);font-size:1.05rem}
 
 .opts{display:grid;gap:8px;margin-top:10px}
@@ -38,34 +42,27 @@
 .opt.wrong{background:rgba(200,60,0,.14)}
 
 label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
+.sentence{margin:12px 0 4px;font-size:1.02rem;line-height:1.6}
 input.line,textarea.box,select.line{width:100%;box-sizing:border-box;font:inherit;padding:10px 13px;border:2px solid rgba(0,0,0,.2);border-radius:12px;background:#fffdf9}
 textarea.box{min-height:80px;line-height:1.55;resize:vertical}
 input.line:focus-visible,textarea.box:focus-visible,select.line:focus-visible{outline:3px solid #007291;outline-offset:2px}
-select.line.short{max-width:220px}
+select.line.short{max-width:300px}
 
 .orderrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);margin:7px 0}
 .orderrow span{flex:1 1 240px;line-height:1.45}
-.orderrow select{flex:0 0 120px;width:120px}
-
-.matrix{width:100%;border-collapse:collapse;margin-top:10px}
-.matrix th,.matrix td{border:1px solid rgba(0,0,0,.15);padding:8px;vertical-align:top}
-.matrix th{background:rgba(0,114,145,.10);text-align:left;font-size:.94rem}
-.matrix td textarea{min-height:70px}
-@media (max-width:640px){
-  .matrix,.matrix tbody,.matrix tr,.matrix td,.matrix th{display:block;width:100%;box-sizing:border-box}
-  .matrix th{border-bottom:none}
-}
-
-.levels{display:grid;gap:8px;margin:10px 0}
-.level{padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.04)}
-.level b{display:block;margin-bottom:3px}
-.level.picked{background:rgba(0,114,145,.16)}
+.orderrow select{flex:0 0 110px;width:110px}
+.orderrow.given{opacity:.65}
+.orderrow.given b{flex:0 0 110px;text-align:center}
 
 .fb{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(0,114,145,.10)}
 .fb h4{margin:0 0 6px}
 .fb p{margin:6px 0;line-height:1.55}
 .fb .verdict{font-weight:700}
 .fbitem{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.7);margin:8px 0}
+.fbitem .lbl{font-weight:700;font-size:.92rem}
+.pointlist{margin:6px 0 0;padding-left:18px;font-size:.94rem}
+.pointlist li{margin:3px 0}
+.pointlist li.got{font-weight:700}
 .selfmark{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
 .selfmark span{font-size:.9rem;opacity:.8;margin-right:4px}
 .smbtn{border:2px solid rgba(0,0,0,.18);background:#fff;cursor:pointer;font:inherit;font-size:.88rem;font-weight:700;padding:6px 13px;border-radius:12px}
@@ -117,8 +114,8 @@ select.line.short{max-width:220px}
     <nav>
       <a href="/">Home</a>
       <a href="/practice/">Practice</a>
-      <a href="/projects/">Projects</a>
       <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
       <a href="/ask-jay.html">Ask Jay</a>
     </nav>
   </div>
@@ -128,11 +125,12 @@ select.line.short{max-width:220px}
 
   <div class="weektheme">
     <h2>Weather Systems and Storm Hazards</h2>
-    <span>Air pressure, UK depressions, tropical storms and storm surges. Twelve questions, 51 marks. Diagrams are drawn on the page, so nothing needs printing.</span>
+    <span>Air pressure, UK depressions, tropical storms and storm surges. Most answers are a choice or a word from a box, and the diagrams are drawn on the page, so nothing needs printing.</span>
     <div class="metachips">
       <span class="metachip">Four sections</span>
+      <span class="metachip">50 marks</span>
       <span class="metachip">Marked as you go</span>
-      <span class="metachip">Skip anything, come back later</span>
+      <span class="metachip">Skip anything</span>
     </div>
   </div>
 
@@ -167,17 +165,37 @@ var STUDENTS = ["JT","LW","EGW","LP","LC","HK"];
 
 function $(id){ return document.getElementById(id); }
 function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!==undefined) e.textContent=txt; return e; }
-function svg(markup){
+function fig(markup,cap){
   var d = el("div","figure");
   d.innerHTML = markup;
+  if(cap) d.appendChild(el("p","figcap",cap));
   return d;
 }
 
 /* ================= FIGURES ================= */
 var FIG = {};
 
+FIG.atmosphere =
+'<svg viewBox="0 0 420 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Earth with a band of atmosphere above it and space beyond, with arrows showing air pressing down on the ground">' +
+'<rect x="0" y="0" width="420" height="240" rx="12" fill="#0d1b2e"/>' +
+'<text x="20" y="28" font-size="13" font-weight="700" fill="#cfe2e7">space</text>' +
+'<circle cx="42" cy="46" r="9" fill="#c8ccd2"/>' +
+'<path d="M-40 250 A 260 260 0 0 1 460 250 Z" fill="#5a9ec9" opacity="0.55"/>' +
+'<path d="M-20 250 A 240 240 0 0 1 440 250 Z" fill="#8fc4de" opacity="0.6"/>' +
+'<path d="M10 250 A 210 210 0 0 1 410 250 Z" fill="#2f6f9e"/>' +
+'<path d="M40 250 A 180 180 0 0 1 380 250 Z" fill="#3d8f5f"/>' +
+'<text x="300" y="96" font-size="13" font-weight="700" fill="#0d1b2e">atmosphere</text>' +
+'<text x="196" y="222" font-size="14" font-weight="700" fill="#fffdf9">Earth</text>' +
+'<path d="M150 34 L150 106" stroke="#fffdf9" stroke-width="7" stroke-linecap="round"/>' +
+'<path d="M138 96 L150 122 L162 96 Z" fill="#fffdf9"/>' +
+'<path d="M210 24 L210 100" stroke="#fffdf9" stroke-width="9" stroke-linecap="round"/>' +
+'<path d="M196 90 L210 118 L224 90 Z" fill="#fffdf9"/>' +
+'<path d="M268 40 L268 112" stroke="#fffdf9" stroke-width="7" stroke-linecap="round"/>' +
+'<path d="M256 102 L268 128 L280 102 Z" fill="#fffdf9"/>' +
+'</svg>';
+
 FIG.pressure =
-'<svg viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="High pressure with sinking air on the left, low pressure with rising air on the right, and wind blowing between them">' +
+'<svg viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="High pressure with sinking air on the left, low pressure with rising air and cloud on the right, and wind blowing from the high towards the low">' +
 '<ellipse cx="110" cy="160" rx="80" ry="34" fill="#cfe2e7"/>' +
 '<text x="110" y="168" text-anchor="middle" font-size="30" font-weight="700" fill="#0b4c5c">H</text>' +
 '<path d="M110 30 L110 112" stroke="#2a6f8a" stroke-width="9" stroke-linecap="round"/>' +
@@ -193,6 +211,24 @@ FIG.pressure =
 '<path d="M198 152 L318 152" stroke="#ef7724" stroke-width="10" stroke-linecap="round"/>' +
 '<path d="M310 138 L334 152 L310 166 Z" fill="#ef7724"/>' +
 '<text x="258" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="#8a3b0b">Wind</text>' +
+'</svg>';
+
+FIG.airmasses =
+'<svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cold polar air arriving from the north and warm tropical air arriving from the south, meeting over the British Isles">' +
+'<rect x="0" y="0" width="420" height="260" rx="12" fill="#eef3f6"/>' +
+'<path d="M232 66 q34 34 30 78 q-4 42 -26 74" fill="#3d8f5f" opacity="0.85"/>' +
+'<path d="M262 96 q30 10 34 42" stroke="#3d8f5f" stroke-width="12" fill="none" stroke-linecap="round"/>' +
+'<rect x="250" y="14" width="120" height="34" rx="9" fill="#2f6f9e"/>' +
+'<text x="310" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#fffdf9">Cold polar</text>' +
+'<text x="310" y="43" text-anchor="middle" font-size="12" font-weight="700" fill="#fffdf9">air</text>' +
+'<path d="M300 52 L262 108" stroke="#2f6f9e" stroke-width="14" stroke-linecap="round"/>' +
+'<path d="M248 100 L252 130 L276 116 Z" fill="#2f6f9e"/>' +
+'<rect x="30" y="206" width="130" height="34" rx="9" fill="#efa14a"/>' +
+'<text x="95" y="222" text-anchor="middle" font-size="12" font-weight="700" fill="#4a2c05">Warm tropical</text>' +
+'<text x="95" y="235" text-anchor="middle" font-size="12" font-weight="700" fill="#4a2c05">air</text>' +
+'<path d="M150 204 L226 148" stroke="#c0453a" stroke-width="14" stroke-linecap="round"/>' +
+'<path d="M212 134 L242 138 L226 162 Z" fill="#c0453a"/>' +
+'<ellipse cx="212" cy="130" rx="46" ry="26" fill="#dfe6ea" opacity="0.95"/>' +
 '</svg>';
 
 FIG.depression =
@@ -234,313 +270,325 @@ FIG.storm =
 '<ellipse cx="180" cy="60" rx="56" ry="26" fill="#e8edf0"/>' +
 '<ellipse cx="340" cy="60" rx="56" ry="26" fill="#e8edf0"/>' +
 '<text x="260" y="36" text-anchor="middle" font-size="13" font-weight="700" fill="#0b4c5c">eye</text>' +
-'<path d="M260 40 L260 122" stroke="none"/>' +
 '<text x="260" y="146" text-anchor="middle" font-size="12" fill="#083845">calm</text>' +
 '<text x="392" y="126" font-size="12" font-weight="700" fill="#b3402a">eye wall</text>' +
 '<text x="30" y="222" font-size="12" font-weight="700" fill="#2f7a6a">outer rainbands</text>' +
 '</svg>';
 
 /* ================= QUESTIONS =================
-   Marking follows the answer key printed with the worksheet.
-   pool = shared bank of accepted points, each earnable once.
-   allOf = every listed group must appear somewhere in the answer.
-   range = a number in the answer must fall inside these bounds. */
+   Supported version of the paper. No mark scheme came with it, so the
+   accepted answers below are written from the subject content.
+
+   Field modes:
+     choices + answer   a dropdown with one right answer
+     accept             keywords, worth the field's marks
+     allOf              every listed group must appear for the mark
+     points + worth     ONE box carrying several marks, a mark per point
+     pool               a shared bank of points, each earnable once
+     none of these      self-marked against the model answer            */
 var QS = [
 
+/* ---------- Section A ---------- */
 { n:"1a", sec:"A", marks:1, skill:"The atmosphere and air pressure",
-  stem:"The layer of gases enveloping the Earth is held in place by gravitational pull and creates atmospheric pressure at the surface.",
-  type:"fields",
-  prompt:"State the approximate depth of Earth's atmosphere.",
-  fields:[{ label:"Depth", range:[80,120], unit:"km", model:"About 100 km. Anything from 80 km to 120 km counts." }] },
+  stem:"The blanket of air around Earth is held by gravity and pushes down on the ground.",
+  fig:"atmosphere", figcap:"Air pressing down on the Earth's surface.",
+  type:"mc",
+  prompt:"How thick is Earth's atmosphere?",
+  options:["About 10 km","About 100 km","About 1,000 km"],
+  correct:1,
+  why:"About 100 km. That sounds a lot, but next to the Earth itself it is a thin skin, roughly the distance of an hour's drive stood on its end." },
 
 { n:"1b", sec:"A", marks:1, skill:"The atmosphere and air pressure",
-  type:"fields",
-  prompt:"State the mass of air pressing down on every square metre of the Earth's surface at sea level.",
-  fields:[{ label:"Mass per square metre", accept:["tonne","ton","1000 kg","1000kg","1 000 kg"], model:"One tonne, which is 1,000 kg." }] },
+  type:"mc",
+  prompt:"What is the mass of air pressing on every square metre of ground?",
+  options:["1 kilogram","1 tonne (1,000 kg)","100 tonnes"],
+  correct:1,
+  why:"A whole tonne, about the weight of a small car, on every square metre. You cannot feel it because it has always been there." },
 
 { n:"1c", sec:"A", marks:2, skill:"The atmosphere and air pressure",
   type:"fields",
-  prompt:"Explain why human beings and animals are not crushed by the weight of atmospheric air pressing upon them.",
-  hint:"There are two separate marks here, so two separate ideas.",
+  prompt:"Why are humans not crushed by air pressure? Complete the sentence.",
+  sentence:"Humans are not crushed because fluids inside our bodies push ... with an equal pressure to the air pushing ...",
   fields:[
-    { label:"Point 1", accept:["push out","pushing out","outward","outwards","inside","internal","within","fluid","our own pressure"],
-      model:"The fluid and air pressure inside our bodies pushes outwards." },
-    { label:"Point 2", accept:["balance","equal","same","cancel","match","even out"],
-      model:"The inside and outside pressures are balanced, so they cancel out." }
-  ],
-  accepts:"1 mark for internal pressure pushing outwards, 1 mark for the inside and outside pressures being balanced." },
+    { label:"Blank 1: fluids inside our bodies push...", choices:["outwards","inwards"], answer:"outwards", model:"outwards" },
+    { label:"Blank 2: equal to the air pushing...", choices:["outwards","inwards"], answer:"inwards", model:"inwards" }
+  ] },
 
 { n:"2a", sec:"A", marks:1, skill:"High and low pressure",
-  stem:"Air pressure differences across the Earth's surface create distinct weather conditions.",
+  stem:"Air pressure differences make different kinds of weather.",
   type:"mc",
-  prompt:"Tick the one statement that correctly describes what happens in a high pressure system.",
+  prompt:"Tick the one box that correctly describes a high pressure system.",
   options:[
-    "Warm air rises rapidly, condensing into thick nimbostratus clouds.",
-    "Cool air sinks towards the ground, preventing cloud formation.",
-    "Air rushes upwards in a tight spiral, causing severe gales.",
-    "Rising moisture causes torrential downpours and squalls."
+    "Warm air rises quickly, making dark storm clouds.",
+    "Cool air sinks down towards the ground, stopping clouds from forming.",
+    "Air spins upwards in a circle, bringing heavy gales."
   ],
   correct:1,
-  why:"In high pressure the air sinks. Sinking air warms and dries as it goes down, so clouds cannot form. The other three all describe rising air, which is low pressure." },
+  why:"In high pressure the air sinks. Sinking air warms and dries on the way down, so clouds cannot form. The other two describe rising air, which is low pressure." },
 
 { n:"2b", sec:"A", marks:2, skill:"High and low pressure",
-  type:"fields",
-  prompt:"Describe the typical weather conditions experienced in the UK during a winter high pressure system.",
-  pools:{ p:[
-    { accept:["clear","sunny","sunshine","blue sky","no cloud","cloudless"], name:"clear skies or sunny weather" },
-    { accept:["cold","crisp","frost","frosty","icy","ice","freezing","chilly"], name:"cold, crisp, frosty or icy ground conditions" }
-  ]},
-  fields:[
-    { label:"Condition 1", pool:"p" },
-    { label:"Condition 2", pool:"p" }
-  ],
-  accepts:"1 mark for clear skies or sunshine, 1 mark for cold, crisp, frosty or icy conditions." },
+  type:"mcmulti", pick:2,
+  prompt:"What is the weather like in the UK during high pressure in winter? Choose two.",
+  options:["Clear skies","Frosty / Cold","Heavy rain","Thunderstorms"],
+  correct:[0,1],
+  why:"No cloud means no rain, but it also means no blanket to hold the heat in overnight, so winter high pressure gives you bright clear days and a hard frost by morning. Rain and thunderstorms need rising air, which is low pressure." },
 
 { n:"3a", sec:"A", marks:1, skill:"High and low pressure",
   fig:"pressure", figcap:"Air moving between a high pressure system and a low pressure system.",
   type:"fields",
-  prompt:"State what causes wind to blow horizontally across the surface of the Earth.",
-  fields:[{ label:"Cause", accept:["pressure difference","difference in pressure","differences in air pressure","high to low","high pressure to low","pressure gradient","balance out"],
-    model:"Differences in air pressure. Air moves from high pressure areas to low pressure areas to balance out." }] },
+  prompt:"Complete the sentence about which way the wind blows.",
+  sentence:"Wind blows from an area of ... pressure towards an area of ... pressure.",
+  hint:"One mark, and you need both blanks right to get it.",
+  fields:[
+    { label:"Both blanks", allOf:[["high"],["low"]],
+      choices:["high pressure to low pressure","low pressure to high pressure"],
+      answer:"high pressure to low pressure",
+      model:"From high pressure towards low pressure." }
+  ] },
 
 { n:"3b", sec:"A", marks:1, skill:"High and low pressure",
   fig:"pressure",
   type:"fields",
-  prompt:"Explain what happens to the speed of the wind when the pressure difference between two areas becomes much greater.",
-  fields:[{ label:"What happens", accept:["increase","faster","stronger","fiercer","speed up","quicker","higher","rises","picks up"],
-    model:"The wind speed increases: it becomes faster, fiercer or stronger." }] },
+  prompt:"When the pressure difference between two places gets bigger, the wind gets...",
+  fields:[{ label:"Choose one", choices:["faster","slower"], answer:"faster",
+    model:"Faster. A bigger difference in pressure means the air is pushed harder." }] },
 
-{ n:"4a", sec:"B", marks:1, skill:"UK air masses and depressions",
-  stem:"The British Isles lie beneath a zone where two contrasting air masses meet over the North Atlantic Ocean.",
+/* ---------- Section B ---------- */
+{ n:"4a", sec:"B", marks:1, skill:"UK air masses",
+  stem:"Two large bodies of air (air masses) meet over the UK.",
+  fig:"airmasses", figcap:"Cold polar air from the north, warm tropical air from the south.",
   type:"fields",
-  prompt:"Name the two contrasting air masses that collide over Britain.",
-  hint:"One mark, but you need both of them.",
-  fields:[{ label:"The two air masses",
-    allOf:[["tropical","warm"],["polar","arctic"]],
-    model:"Warm, moist tropical air and cold polar (Arctic) air." }] },
-
-{ n:"4b", sec:"B", marks:2, skill:"UK air masses and depressions",
-  type:"fields",
-  prompt:"Explain what happens when these two air masses meet along the Polar Front. Refer to air temperature and density in your answer.",
+  prompt:"Complete the names of the two air masses using words from the box.",
+  bank:["Polar (cold)","Tropical (warm)"],
+  hint:"One mark, and you need both right to get it.",
   fields:[
-    { label:"Point 1: about density", accept:["lighter","less dense","not as dense","lower density","light"],
-      model:"The warm air is lighter, or less dense, than the cold air." },
-    { label:"Point 2: what that causes", accept:["rise","rises","rising","forced up","pushed up","upward","over the cold","condens","cloud","cool"],
-      model:"The warm air is forced upwards over the cold air wedge, so it cools, condenses and forms cloud." }
+    { label:"1. Warm ... air", choices:["Polar","Tropical"], answer:"Tropical", worth:1, model:"Tropical" },
+    { label:"2. Cold ... air", choices:["Polar","Tropical"], answer:"Polar", worth:0, model:"Polar" }
   ],
-  accepts:"1 mark for the warm air being lighter or less dense, 1 mark for it being forced upwards leading to cooling, condensation and cloud." },
+  bothNeeded:true },
+
+{ n:"4b", sec:"B", marks:2, skill:"UK air masses",
+  type:"fields",
+  prompt:"When they meet, the warm air rises because it is...",
+  fields:[{ label:"Choose one", worth:2,
+    choices:["lighter (less dense)","heavier (more dense)"], answer:"lighter (less dense)",
+    model:"Lighter, which is another way of saying less dense. Lighter things float upwards over heavier ones." }] },
 
 { n:"4c", sec:"B", marks:2, skill:"Hazards and impacts",
   type:"fields",
-  prompt:"Define the term weather hazard and give one reason why hazards cause concern for local councils.",
-  fields:[
-    { label:"Definition", accept:["extreme","threat","danger","risk","damage","harm","life","property"],
-      model:"An extreme atmospheric event that threatens life, property, transport or nature." },
-    { label:"Why councils worry", accept:["road","repair","housing","transport","flood defence","emergency","cost","money","clean up","service","rescue"],
-      model:"Costly road repairs, emergency housing, blocked transport routes or flood defences." }
-  ],
-  accepts:"1 mark for a definition mentioning an extreme event that threatens life, property, transport or nature. 1 mark for a council concern such as road repairs, emergency housing, blocked transport or flood defences." },
+  prompt:"A weather hazard is dangerous weather. Give one problem it causes for local councils.",
+  sentence:"One hazard problem is...",
+  hint:"Two marks in one box, so say what the problem is and why it is a problem for the council.",
+  fields:[{ label:"Your answer", worth:2,
+    points:[
+      { accept:["road","railway","transport","tree","flood","power","block","damage","repair","pothole","bridge","closed","closure","rubbish","house","home","building","gritting","snow"],
+        name:"names a real problem, such as blocked or damaged roads, flooding, fallen trees or power cuts" },
+      { accept:["cost","money","expensive","pay","budget","fix","repair","clean","clear up","rehouse","emergency","staff","time","resource","rescue","shelter"],
+        name:"says why it matters to the council, such as the cost of repairs or having to rehouse people" }
+    ],
+    model:"Something like: flooding damages the roads, and the council has to pay to repair them and to rehouse anyone flooded out of their home." }] },
 
 { n:"5a", sec:"B", marks:1, skill:"Fronts and depressions",
-  stem:"The diagram shows a cross-section of a mature mid-latitude depression passing over the UK from west to east.",
+  stem:"The diagram shows a depression moving across the UK.",
   fig:"depression", figcap:"A depression moving east. The cold front is on the left, the warm front on the right.",
-  type:"fields",
-  prompt:"Identify the type of cloud commonly found along the advancing warm front that produces steady, prolonged drizzle.",
-  fields:[{ label:"Cloud type", accept:["nimbostratus","stratus"], model:"Nimbostratus. Stratus also counts." }] },
+  type:"mc",
+  prompt:"Which cloud along the warm front brings steady, long drizzle?",
+  options:["Nimbostratus cloud","Cirrus cloud"],
+  correct:0,
+  why:"Nimbostratus is the flat grey sheet that drizzles for hours. Cirrus is the high wispy stuff that arrives first and gives no rain at all." },
 
 { n:"5b", sec:"B", marks:1, skill:"Fronts and depressions",
   fig:"depression",
   type:"fields",
-  prompt:"Identify the weather boundary where dense, cold polar air undercuts the warm air mass.",
-  fields:[{ label:"Boundary", accept:["cold front"], model:"The cold front." }] },
+  prompt:"Name the front where cold polar air pushes under warm air.",
+  sentence:"It is the ... front.",
+  fields:[{ label:"Which front", choices:["cold","warm","occluded"], answer:"cold",
+    model:"The cold front." }] },
 
 { n:"5c", sec:"B", marks:2, skill:"Fronts and depressions",
   fig:"depression",
-  type:"fields",
-  prompt:"Describe the change in rainfall and wind conditions as the cold front passes over an area.",
-  fields:[
-    { label:"Rainfall", accept:["downpour","heavy","intense","thunder","squall","sudden","torrential","shower"],
-      model:"Rainfall changes to sudden, intense downpours, thunderstorms or squalls." },
-    { label:"Wind", accept:["gust","shift","change direction","increase","stronger","faster","veer","picks up"],
-      model:"Wind becomes gusty, shifts direction, or increases in speed." }
+  type:"mc",
+  prompt:"When the cold front passes, what happens to the rain?",
+  options:[
+    "The rain stops and the sky turns completely clear.",
+    "The rain turns into heavy, sudden downpours with strong gusty winds."
   ],
-  accepts:"1 mark for rainfall becoming sudden and intense (downpours, thunderstorms, squalls). 1 mark for wind becoming gusty, shifting direction or increasing." },
+  correct:1,
+  why:"The cold front shoves the warm air upwards fast, which builds tall clouds and dumps heavy rain in a short burst, with the wind gusting and changing direction as it goes through." },
 
 { n:"6a", sec:"B", marks:3, skill:"Fronts and depressions",
-  stem:"When central air pressure drops exceptionally fast, a depression becomes a deep depression.",
+  stem:"How a UK depression forms and moves.",
   type:"order",
-  prompt:"These statements describe the formation and impact of a UK depression. Put them in the correct order, 1 to 4.",
-  hint:"Three marks: all four right earns 3, two or three right earns 2, one right earns 1.",
+  prompt:"Put the steps in order. The first one is done for you.",
+  hint:"Three marks, one for each of the three you place.",
   rows:[
-    { label:"A kink develops along the Polar Front as lighter warm air begins rising over cold air.", answer:"2" },
-    { label:"Warm tropical air collides with dense Arctic polar air over the North Atlantic.", answer:"1" },
-    { label:"The cold front passes, bringing squalling winds, heavy downpours, and dropping temperatures.", answer:"4" },
-    { label:"Central pressure plummets into a deep vortex, bringing gales and widespread rain across the UK.", answer:"3" }
+    { label:"Warm air starts rising over cold air along the boundary.", answer:"2" },
+    { label:"Warm tropical air meets cold polar air over the North Atlantic.", given:"1" },
+    { label:"The cold front passes, bringing sudden downpours and cold temperatures.", answer:"4" },
+    { label:"Air pressure drops low, bringing strong gales and widespread rain.", answer:"3" }
   ],
-  choices:["1","2","3","4"],
-  why:"The air masses have to meet first, then the front kinks, then the pressure collapses into a deep depression, and the cold front sweeping through is the last thing you feel." },
+  choices:["2","3","4"],
+  why:"The air masses meet first. Then the warm air starts to climb over the cold. That climbing air leaves a gap underneath, so the pressure drops and the gales arrive. The cold front sweeping through is the last thing you feel." },
 
 { n:"6b", sec:"B", marks:2, skill:"Hazards and impacts",
-  stem:"In February 2022, Storm Eunice struck the southern UK, recording gusts of 122 mph.",
-  type:"fields",
-  prompt:"Outline two specific physical or infrastructural hazards caused by severe gales of this intensity.",
-  pools:{ p:[
-    { accept:["tree"], name:"uprooted trees" },
-    { accept:["rail","train","track"], name:"blocked railway lines" },
-    { accept:["power line","electric","cable","pylon","power cut","snapped power"], name:"snapped power lines" },
-    { accept:["roof","building","structural","damage to home","house"], name:"structural roof damage" },
-    { accept:["road","street","bridge closed","closure"], name:"road closures" }
-  ]},
-  fields:[
-    { label:"Hazard 1", pool:"p" },
-    { label:"Hazard 2", pool:"p" }
+  stem:"In 2022, Storm Eunice brought 122 mph winds to the UK.",
+  type:"mcmulti", pick:2,
+  prompt:"Choose two hazards caused by severe gales.",
+  options:[
+    "Fallen trees blocking roads and railways",
+    "Damage to roofs and power cuts from fallen lines",
+    "Volcanic ash covering fields"
   ],
-  accepts:"Any two of: uprooted trees, blocked railway lines, snapped power lines, structural roof damage, road closures." },
+  correct:[0,1],
+  why:"Wind knocks things down: trees across the line, tiles off the roof, cables snapped. Volcanic ash comes from volcanoes, and has nothing to do with a storm." },
 
-{ n:"7a", sec:"C", marks:1, skill:"Tropical storm formation",
-  stem:"Tropical storms are intense low pressure weather systems that form over equatorial ocean waters.",
-  type:"fields",
-  prompt:"State the minimum sea-surface temperature required for a tropical storm to form.",
-  fields:[{ label:"Temperature", range:[26.5,27.5], unit:"degrees C", model:"27 degrees Celsius." }] },
+/* ---------- Section C ---------- */
+{ n:"7a", sec:"C", marks:1, skill:"Tropical storms",
+  stem:"Tropical storms are powerful low pressure storms that form over warm oceans.",
+  type:"mc",
+  prompt:"What is the minimum sea temperature needed for a tropical storm to form?",
+  options:["15 degrees C","20 degrees C","27 degrees C"],
+  correct:2,
+  why:"27 degrees. Below that the sea simply cannot evaporate enough water fast enough to keep the storm fed." },
 
-{ n:"7b", sec:"C", marks:1, skill:"Tropical storm formation",
+{ n:"7b", sec:"C", marks:1, skill:"Tropical storms",
   type:"fields",
-  prompt:"State why deep ocean water of this temperature is essential to the development of the storm.",
-  fields:[{ label:"Why", accept:["heat","moisture","water vapour","vapour","evaporation","fuel","energy","power"],
-    model:"Deep warm water provides a continuous supply of heat and water vapour to fuel the rising storm clouds." }] },
+  prompt:"Why is warm water needed to form the storm? Fill in the blank.",
+  sentence:"The warm ocean provides ... (heat and moisture) to power the storm clouds.",
+  fields:[{ label:"The missing word", accept:["energy","fuel","power","heat","moisture"],
+    model:"Energy, or fuel. Either word works." }] },
 
-{ n:"7c", sec:"C", marks:2, skill:"Tropical storm formation",
-  type:"fields",
-  prompt:"Explain why tropical storms lose their energy rapidly after they make landfall over a large continent.",
-  fields:[
-    { label:"Point 1", accept:["no more warm water","loses the ocean","away from the sea","no ocean","fuel","moisture","heat source","no water","cut off from"],
-      model:"They lose their fuel source: no more warm ocean water supplying heat and moisture." },
-    { label:"Point 2", accept:["friction","rough","land surface","drag","slow","obstacle","hills","buildings"],
-      model:"Friction with the land surface slows the winds down." }
+{ n:"7c", sec:"C", marks:2, skill:"Tropical storms",
+  type:"mcmulti", pick:2,
+  prompt:"Why do tropical storms quickly lose power when they reach land? Choose two reasons.",
+  options:[
+    "They are cut off from their warm ocean fuel supply.",
+    "Friction with the land slows down the winds.",
+    "The land is too warm for the storm to survive."
   ],
-  accepts:"1 mark for losing the warm ocean fuel source, 1 mark for friction with the land slowing the winds." },
+  correct:[0,1],
+  why:"Over land there is no warm sea feeding it, and the rough ground drags on the wind. Land being too warm is the wrong way round: heat is what storms want." },
 
-{ n:"8a", sec:"C", marks:1, skill:"Tropical storm names and places",
-  stem:"Tropical storms are known by different names depending on the ocean basin in which they develop. Hurricane goes with the Atlantic and Northeast Pacific. Cyclone goes with the Indian Ocean and South Pacific.",
+{ n:"8a", sec:"C", marks:1, skill:"Tropical storms",
+  stem:"Tropical storms have different names in different oceans. Hurricanes happen in the Atlantic Ocean. Cyclones happen in the Indian Ocean.",
+  /* NOTE FOR JAY: the worksheet blanks one box in this table. The extraction
+     showed all three filled in, so I have blanked the Typhoon row to match
+     the harder version of this paper. Easy to switch to another row. */
   type:"fields",
-  prompt:"Complete the table: which ocean basin or location goes with Typhoon?",
-  fields:[{ label:"Typhoon", accept:["northwest pacific","north west pacific","nw pacific","north-west pacific","asia","japan","philippines","china"],
-    model:"The Northwest Pacific Ocean, near East Asia, Japan and the Philippines." }] },
+  prompt:"Where do typhoons happen?",
+  fields:[{ label:"Typhoon", choices:["Atlantic Ocean","Northwest Pacific Ocean (Asia)","Indian Ocean"],
+    answer:"Northwest Pacific Ocean (Asia)", model:"The Northwest Pacific Ocean, near Asia." }] },
 
-{ n:"8b", sec:"C", marks:2, skill:"Tropical storm formation",
+{ n:"8b", sec:"C", marks:2, skill:"Tropical storms",
   type:"fields",
-  /* NOTE FOR JAY: the statement box did not come through in the PDF.
-     This is reconstructed from the answer key. Replace the text in
-     `statement` below with the wording from your original worksheet. */
-  statement:"A hurricane could form in the Atlantic Ocean just off the coast of Scotland.",
-  prompt:"Is this statement true or false? Give a geographical explanation for your choice.",
+  statement:"Hurricanes can form in the cold seas off the coast of Scotland.",
+  prompt:"Is this statement true or false, and why?",
   fields:[
-    { label:"True or false?", choices:["True","False"], answer:"False", model:"False." },
-    { label:"Your explanation", accept:["too cold","not warm enough","cold water","14","16","18","27","below 27","never reaches","temperature"],
-      model:"Atlantic waters around Scotland are far too cold, rarely above 14 to 18 degrees, so they cannot reach the 27 degrees needed to generate a hurricane." }
+    { label:"True or false?", choices:["TRUE","FALSE"], answer:"FALSE", model:"False." },
+    { label:"Reason: the sea around Scotland is too ... because hurricanes need water that is at least ... degrees C",
+      allOf:[["cold"],["27"]],
+      model:"Too cold, because hurricanes need water of at least 27 degrees." }
   ],
-  accepts:"1 mark for False. 1 mark for explaining that the sea around Scotland is far too cold to reach the 27 degree threshold." },
+  accepts:"1 mark for FALSE. 1 mark for saying the sea is too cold and naming 27 degrees." },
 
 { n:"8c", sec:"C", marks:2, skill:"Hazards and impacts",
-  stem:"Tropical storms have sustained wind speeds exceeding 119 km/h.",
   type:"fields",
-  prompt:"Describe two ways in which extreme tropical winds cause devastation to human settlements.",
+  prompt:"Name two ways fierce hurricane winds cause damage to towns.",
   pools:{ p:[
-    { accept:["tree","shred","uproot"], name:"shredding or uprooting trees" },
-    { accept:["roof","collapse","building","house","home","structure"], name:"collapsing buildings or tearing off roofs" },
-    { accept:["debris","missile","flying","projectile","thrown"], name:"turning loose debris into lethal flying missiles" },
-    { accept:["power","telecom","electric","phone","communication","cable","mast"], name:"destroying power and telecoms infrastructure" }
+    { accept:["roof","tile","house","home","building","collapse","knock down","flatten"], name:"tearing roofs off and knocking buildings down" },
+    { accept:["tree","uproot","branch"], name:"uprooting trees" },
+    { accept:["debris","flying","missile","thrown","rubble","glass","object"], name:"turning loose objects into dangerous flying debris" },
+    { accept:["power","electric","cable","line","phone","telecom","mast","signal"], name:"bringing down power lines and phone masts" },
+    { accept:["car","vehicle","bus","lorry","van"], name:"overturning cars and lorries" },
+    { accept:["road","block","railway","transport","bridge"], name:"blocking roads and railways with wreckage" }
   ]},
   fields:[
     { label:"Way 1", pool:"p" },
     { label:"Way 2", pool:"p" }
   ],
-  accepts:"Any two of: shredding or uprooting trees, collapsing buildings or tearing off roofs, turning debris into flying missiles, destroying power and telecoms infrastructure." },
+  accepts:"Any two of: roofs torn off or buildings knocked down, trees uprooted, flying debris, power lines down, cars overturned, roads blocked." },
 
-{ n:"9a", sec:"C", marks:2, skill:"Tropical storm structure",
+{ n:"9a", sec:"C", marks:2, skill:"Inside a tropical storm",
   fig:"storm", figcap:"The structure of a tropical storm: the calm eye, the eye wall around it, and the outer rainbands.",
   type:"fields",
-  prompt:"Describe the conditions found inside the eye of a tropical storm.",
+  prompt:"What is the weather like in the eye (centre) of the storm? Complete the sentence.",
+  sentence:"The eye is very ... with ... skies and light winds.",
   fields:[
-    { label:"Point 1", accept:["calm","still","light wind","no wind","gentle","quiet"],
-      model:"Calm, with light winds." },
-    { label:"Point 2", accept:["clear","no cloud","cloudless","sinking","descending","dry","no rain","sunny","blue sky"],
-      model:"Clear skies, with descending air and no cloud or rain." }
-  ],
-  accepts:"1 mark for calm or light winds, 1 mark for clear skies, descending air, or no cloud and rain." },
+    { label:"Blank 1: the eye is very...", choices:["calm","stormy","windy"], answer:"calm", model:"calm" },
+    { label:"Blank 2: with ... skies", choices:["clear","dark","cloudy"], answer:"clear", model:"clear" }
+  ] },
 
-{ n:"9b", sec:"C", marks:2, skill:"Tropical storm structure",
+{ n:"9b", sec:"C", marks:2, skill:"Inside a tropical storm",
   fig:"storm",
   type:"fields",
-  prompt:"Explain why the eye wall produces the storm's most dangerous weather.",
+  prompt:"The eye wall right next to the eye has the most dangerous weather because it has the...",
   fields:[
-    { label:"Point 1", accept:["cumulonimbus","updraft","rising","towering","tall cloud","thunder"],
-      model:"It holds dense cumulonimbus clouds with rapid updrafts." },
-    { label:"Point 2", accept:["fastest","strongest","peak","highest wind","torrential","heaviest rain","blinding"],
-      model:"It has the peak sustained wind speeds and torrential, blinding rainfall." }
-  ],
-  accepts:"1 mark for dense cumulonimbus cloud with rapid updrafts, 1 mark for peak wind speeds and torrential rainfall." },
+    { label:"... winds", choices:["strongest","weakest"], answer:"strongest", model:"strongest" },
+    { label:"... rain", choices:["heaviest","lightest"], answer:"heaviest", model:"heaviest" }
+  ] },
 
+/* ---------- Section D ---------- */
 { n:"10a", sec:"D", marks:2, skill:"Storm surges",
-  stem:"Coastal settlements face significant risk from maritime storm hazards.",
-  type:"fields",
-  prompt:"Define the term storm surge.",
-  fields:[
-    { label:"Point 1", accept:["sea level rise","rise in sea","rising sea","water level","flood","inundat","sea comes","water onto land","higher than normal tide"],
-      model:"A sudden rise in sea level above the normal tide, flooding the coast." },
-    { label:"Point 2", accept:["storm","pressure","wind","pushed","driven","forced"],
-      model:"Driven by the storm itself: its low pressure and its winds pushing the water." }
+  stem:"Coastal hazards and storm surges.",
+  type:"mc",
+  prompt:"What is a storm surge? Choose the best definition.",
+  options:[
+    "A sudden rise in sea level where storm winds push huge amounts of seawater onto land.",
+    "A period of hot, dry weather along the coast."
   ],
-  accepts:"1 mark for rising sea water or coastal flooding, 1 mark for it being driven by storm forces or pressure." },
+  correct:0,
+  why:"A surge is the sea itself being shoved onto the land by the storm, on top of the normal tide. It is the part of a storm that drowns people, rather than the wind." },
 
 { n:"10b", sec:"D", marks:3, skill:"Storm surges",
   type:"fields",
-  prompt:"Explain how intense low air pressure and gale-force onshore winds combine to generate a storm surge along low-lying coastlines.",
-  hint:"Three separate marks, so three separate ideas.",
+  prompt:"Complete the explanation of how a storm surge happens, using the words provided.",
+  bank:["pushes","rise","flooding"],
   fields:[
-    { label:"About the low pressure", accept:["dome","bulge","rise","lifts","sucks","pulls up","less weight","not pressing"],
-      model:"Extremely low pressure at the storm centre lets the sea surface dome or bulge upward." },
-    { label:"About the winds", accept:["onshore","towards the coast","towards land","push","drive","blow the water","pile"],
-      model:"Powerful onshore gales drive the surface water towards the coast." },
-    { label:"About the shape of the coast", accept:["shallow","sea floor","seabed","sea bed","piles","higher","nowhere to go","funnel","low lying"],
-      model:"Shallow coastal sea floors pile the water higher as it crashes inland." }
-  ],
-  accepts:"1 mark each for: low pressure letting the sea dome upward, onshore gales driving water at the coast, and shallow sea floors piling the water higher." },
-
-{ n:"11", sec:"D", marks:4, skill:"Comparing weather systems",
-  type:"matrix",
-  prompt:"Compare the primary characteristics of a UK deep depression with those of a tropical hurricane.",
-  hint:"One mark per box.",
-  cols:["UK Deep Depression","Tropical Hurricane"],
-  rows:[
-    { label:"Ocean water temperature required",
-      cells:[
-        { accept:["cool","cold","8","10","12","14","16","18","low temp","chilly"], model:"Cool or cold water, typically 8 to 16 degrees and rarely above 18." },
-        { accept:["27","28","warm","hot"], model:"Warm water of at least 27 degrees." }
-      ] },
-    { label:"Main source of energy or formation cause",
-      cells:[
-        { accept:["air mass","polar front","collision","collide","meet","contrasting","tropical and polar","warm and cold"], model:"The collision of contrasting warm tropical and cold polar air masses along the Polar Front." },
-        { accept:["evaporation","latent heat","warm sea","warm water","27","moisture","condensation"], model:"Rapid evaporation and latent heat release from deep 27 degree seawater." }
-      ] }
+    { label:"1. Extremely low air pressure allows the ocean surface to ... up.",
+      choices:["pushes","rise","flooding"], answer:"rise", model:"rise" },
+    { label:"2. Powerful gale winds ... the sea water towards the coast.",
+      choices:["pushes","rise","flooding"], answer:"pushes", model:"pushes" },
+    { label:"3. The water piles up on shallow coasts, causing severe ... inland.",
+      choices:["pushes","rise","flooding"], answer:"flooding", model:"flooding" }
   ] },
 
-{ n:"12", sec:"D", marks:6, skill:"Extended evaluation",
-  type:"levels",
-  /* NOTE FOR JAY: the statement to evaluate did not come through in the PDF.
-     This is reconstructed from the marking rubric. Replace the text in
-     `statement` below with the wording from your original worksheet. */
-  statement:"Tropical storm surges present a far greater danger to human life than UK deep depressions.",
-  prompt:"To what extent do you agree with this statement?",
-  bullets:[
-    "Discuss the immediate impacts of tropical storm surges on coastal communities.",
-    "Discuss the long-term disruptions and hazards caused by UK deep depressions.",
-    "Reach a clear, reasoned conclusion evaluating which hazard presents the greater overall danger."
+{ n:"11", sec:"D", marks:3, skill:"Comparing storms",
+  stem:"Comparing a UK deep depression and a tropical hurricane. The UK depression forms over cool water of around 10 to 16 degrees.",
+  type:"fields",
+  prompt:"Fill in the missing words in the comparison.",
+  fields:[
+    { label:"Hurricane, ocean water temperature: warm water of at least ... degrees C",
+      choices:["16","20","27","35"], answer:"27", model:"27 degrees" },
+    { label:"UK deep depression, main energy source: collision of warm and ... air masses",
+      choices:["cold (polar)","warm (tropical)","dry (desert)"], answer:"cold (polar)", model:"cold, or polar" },
+    { label:"Hurricane, main energy source: evaporation of heat and moisture from warm ...",
+      choices:["oceans","mountains","forests"], answer:"oceans", model:"oceans, or warm seas" }
   ],
-  levels:[
-    { name:"Level 1", range:"1 to 2 marks", desc:"Basic or general statements about storms causing floods, wind or death. Not much specific geography, and no real comparison or conclusion.", marks:[1,2] },
-    { name:"Level 2", range:"3 to 4 marks", desc:"Both hazards described clearly with relevant examples, such as Storm Eunice or coastal flooding. Danger to life and property mentioned for both, but the evaluation leans one way or the conclusion is not fully justified.", marks:[3,4] },
-    { name:"Level 3", range:"5 to 6 marks", desc:"Balanced and thorough. Compares the fast, deadly, destructive nature of storm surges (drowning, rapid flooding, coastal collapse) against the slower, wider impacts of UK depressions (river flooding, transport chaos, damage to farming, repair costs). Reaches a justified conclusion that weighs up warning systems, evacuation time and how much area is affected.", marks:[5,6] }
+  note:"The worksheet marks this out of 4 but gives three blanks, so it is marked out of 3 here." },
+
+{ n:"12", sec:"D", marks:6, skill:"Comparing storms",
+  type:"fields",
+  prompt:"Which storm hazard is more dangerous? Use the sentence starters to write your comparison.",
+  hint:"Each part is worth 2 marks: one for the idea, one for adding some detail or an example.",
+  fields:[
+    { label:"1. Tropical storm surges are extremely dangerous because they bring sudden...", worth:2,
+      points:[
+        { accept:["flood","water","sea","drown","inundat","wave","rise","swamp","submerge"], name:"says the sea floods in suddenly" },
+        { accept:["die","death","kill","drown","danger","no time","warning","escape","evacuat","destroy","sweep","home","lose","trapped","quick","fast","minutes","hours"], name:"adds why that is so deadly, such as there being no time to get away" }
+      ],
+      model:"They bring sudden flooding from the sea, which can sweep through homes in minutes and leave people with no time to get out." },
+    { label:"2. On the other hand, UK depressions cause problems over a long time such as...", worth:2,
+      points:[
+        { accept:["flood","rain","wind","gale","river","storm","weather"], name:"names what depressions bring, such as rain, wind or river flooding" },
+        { accept:["week","long","again","repeat","travel","transport","road","railway","power","farm","crop","cost","repair","disrupt","school","work","closed","damage","month"], name:"adds a long-running effect, such as transport disruption, damage or cost" }
+      ],
+      model:"They bring days of heavy rain and gales, which floods rivers, closes roads and railways, damages crops and costs a fortune to put right." },
+    { label:"3. Overall, I think ... are more dangerous because...", worth:2,
+      points:[
+        { accept:["surge","tropical","hurricane","depression","uk","storm","they","these"], name:"says clearly which one you have picked" },
+        { accept:["because","more","less","kill","death","warn","time","area","people","affect","damage","cost","compare","whereas","although","while","however","danger"], name:"gives a reason that compares it with the other one" }
+      ],
+      model:"Either answer can get full marks. What matters is picking one clearly and giving a reason that compares it with the other, for example that surges kill more people quickly, or that depressions affect far more people over a longer time." }
   ] }
 
 ];
@@ -548,14 +596,14 @@ var QS = [
 var TOTAL = QS.reduce(function(a,q){ return a+q.marks; },0);
 
 /* ================= STATE ================= */
-var state = { who:"", idx:0, answers:{}, checked:{}, awarded:{}, levels:{} };
+var state = { who:"", idx:0, answers:{}, checked:{}, awarded:{} };
 
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
     if(raw){
       var s = JSON.parse(raw);
-      ["who","idx","answers","checked","awarded","levels"].forEach(function(k){
+      ["who","idx","answers","checked","awarded"].forEach(function(k){
         if(s[k] !== undefined) state[k]=s[k];
       });
     }
@@ -571,7 +619,7 @@ function save(){
 
 /* ================= MARKING ================= */
 function norm(s){
-  return (s||"").toLowerCase().replace(/[^a-z0-9. ]/g," ").replace(/\s+/g," ").trim();
+  return (s||"").toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
 }
 function hits(accept, val){
   var v = norm(val);
@@ -581,69 +629,55 @@ function hits(accept, val){
   }
   return false;
 }
-function inRange(range, val){
-  var m = norm(val).match(/[0-9]+(\.[0-9]+)?/);
-  if(!m) return false;
-  var x = parseFloat(m[0]);
-  return x >= range[0] && x <= range[1];
-}
 function allOf(groups, val){
-  for(var i=0;i<groups.length;i++){
-    if(!hits(groups[i], val)) return false;
-  }
+  for(var i=0;i<groups.length;i++){ if(!hits(groups[i], val)) return false; }
   return true;
 }
+function worthOf(f){ return (f.worth === undefined) ? 1 : f.worth; }
+function pointsFound(f, val){
+  var got = [];
+  f.points.forEach(function(p,i){ if(hits(p.accept, val)) got.push(i); });
+  return got;
+}
 
-/* Verdict for each field: true, false, or null for self-mark only. */
 function autoFields(q){
   var a = state.answers[q.n] || {};
   var used = {};
-  var out = [];
-  q.fields.forEach(function(f,i){
+  var out = q.fields.map(function(f,i){
     var val = a["f"+i];
-    if(f.choices){
-      out.push(val === f.answer);
-    } else if(f.range){
-      out.push(inRange(f.range, val));
-    } else if(f.allOf){
-      out.push(allOf(f.allOf, val));
-    } else if(f.pool && q.pools && q.pools[f.pool]){
+    if(f.choices && f.answer !== undefined){
+      return (val === f.answer) ? worthOf(f) : 0;
+    }
+    if(f.allOf){
+      return allOf(f.allOf, val) ? worthOf(f) : 0;
+    }
+    if(f.points){
+      return Math.min(pointsFound(f, val).length, worthOf(f));
+    }
+    if(f.pool && q.pools && q.pools[f.pool]){
       var bank = q.pools[f.pool];
-      var got = false;
       for(var j=0;j<bank.length;j++){
         var tag = f.pool+":"+j;
         if(used[tag]) continue;
-        if(hits(bank[j].accept, val)){ used[tag]=true; got=true; break; }
+        if(hits(bank[j].accept, val)){ used[tag]=true; return 1; }
       }
-      out.push(got);
-    } else if(f.accept){
-      out.push(hits(f.accept, val));
-    } else {
-      out.push(null);
+      return 0;
     }
+    if(f.accept){
+      return hits(f.accept, val) ? worthOf(f) : 0;
+    }
+    return null;
   });
-  return out;
-}
-
-/* Matrix cells behave like fields but live in a grid. */
-function autoMatrix(q){
-  var a = state.answers[q.n] || {};
-  var out = [];
-  q.rows.forEach(function(r,ri){
-    r.cells.forEach(function(c,ci){
-      out.push(hits(c.accept, a["c"+ri+"_"+ci]));
+  /* One mark for the pair: only awarded when every part is right. */
+  if(q.bothNeeded){
+    var allRight = true;
+    q.fields.forEach(function(f,i){
+      var val = a["f"+i];
+      if(f.answer !== undefined && val !== f.answer) allRight = false;
     });
-  });
+    out = out.map(function(v,i){ return (worthOf(q.fields[i]) === 0) ? 0 : (allRight ? 1 : 0); });
+  }
   return out;
-}
-function matrixCells(q){
-  var list = [];
-  q.rows.forEach(function(r,ri){
-    r.cells.forEach(function(c,ci){
-      list.push({ key:"c"+ri+"_"+ci, label:r.label + " - " + q.cols[ci], model:c.model });
-    });
-  });
-  return list;
 }
 
 function markQuestion(q){
@@ -651,24 +685,26 @@ function markQuestion(q){
   if(q.type === "mc"){
     return (a === q.correct) ? q.marks : 0;
   }
+  if(q.type === "mcmulti"){
+    if(!Array.isArray(a)) return 0;
+    var got = 0;
+    a.forEach(function(i){ if(q.correct.indexOf(i) !== -1) got++; });
+    if(a.length > q.pick) got = Math.max(0, got - (a.length - q.pick));
+    return Math.min(got, q.marks);
+  }
   if(q.type === "order"){
     if(!a) return 0;
     var right = 0;
-    q.rows.forEach(function(r,i){ if(a["r"+i] === r.answer) right++; });
-    /* Answer key: 3 marks for all four, 2 for two or three, 1 for one. */
-    if(right === 4) return 3;
-    if(right >= 2) return 2;
-    if(right === 1) return 1;
-    return 0;
+    q.rows.forEach(function(r,i){
+      if(r.given) return;
+      if(a["r"+i] === r.answer) right++;
+    });
+    return Math.min(right, q.marks);
   }
-  if(q.type === "levels"){
-    var m = state.levels[q.n];
-    return (typeof m === "number") ? m : 0;
-  }
-  if(q.type === "matrix" || q.type === "fields"){
+  if(q.type === "fields"){
     var sm = state.awarded[q.n] || {};
     var total = 0;
-    Object.keys(sm).forEach(function(k){ if(sm[k] === 1) total += 1; });
+    Object.keys(sm).forEach(function(k){ total += (sm[k] || 0); });
     return Math.min(total, q.marks);
   }
   return 0;
@@ -692,35 +728,48 @@ function renderQuestion(){
   card.appendChild(top);
 
   if(q.stem) card.appendChild(el("p","stem",q.stem));
-  if(q.fig) {
-    var f = svg(FIG[q.fig]);
-    if(q.figcap) f.appendChild(el("p","figcap",q.figcap));
-    card.appendChild(f);
-  }
+  if(q.fig) card.appendChild(fig(FIG[q.fig], q.figcap));
   card.appendChild(el("p","qprompt",q.prompt));
   if(q.statement) card.appendChild(el("div","statement",q.statement));
-  if(q.bullets){
-    var ul = el("ul");
-    q.bullets.forEach(function(b){ ul.appendChild(el("li",null,b)); });
-    card.appendChild(ul);
+  if(q.bank){
+    var b = el("div","bank");
+    b.appendChild(el("b",null,"Word choices"));
+    q.bank.forEach(function(w){ b.appendChild(el("span","bankword",w)); });
+    card.appendChild(b);
   }
+  if(q.sentence) card.appendChild(el("p","sentence",q.sentence));
   if(q.hint) card.appendChild(el("p","qhint",q.hint));
 
-  /* --- multiple choice --- */
-  if(q.type === "mc"){
+  /* --- multiple choice, single and multiple --- */
+  if(q.type === "mc" || q.type === "mcmulti"){
     var wrap = el("div","opts");
     q.options.forEach(function(o,i){
       var lab = el("label","opt");
       var inp = document.createElement("input");
-      inp.type = "radio"; inp.name = "q"+q.n;
+      inp.type = (q.type === "mc") ? "radio" : "checkbox";
+      inp.name = "q"+q.n;
       inp.disabled = isChecked;
-      inp.checked = (state.answers[q.n] === i);
-      inp.addEventListener("change",function(){ state.answers[q.n]=i; save(); });
+      if(q.type === "mc"){ inp.checked = (state.answers[q.n] === i); }
+      else { inp.checked = Array.isArray(state.answers[q.n]) && state.answers[q.n].indexOf(i) !== -1; }
+      inp.addEventListener("change",function(){
+        if(q.type === "mc"){ state.answers[q.n] = i; }
+        else {
+          var arr = Array.isArray(state.answers[q.n]) ? state.answers[q.n].slice() : [];
+          var p = arr.indexOf(i);
+          if(inp.checked && p === -1) arr.push(i);
+          if(!inp.checked && p !== -1) arr.splice(p,1);
+          state.answers[q.n] = arr;
+        }
+        save();
+      });
       lab.appendChild(inp);
       lab.appendChild(el("span",null,o));
       if(isChecked){
-        if(i === q.correct) lab.classList.add("right");
-        else if(state.answers[q.n] === i) lab.classList.add("wrong");
+        var isCorrect = (q.type==="mc") ? (i===q.correct) : (q.correct.indexOf(i)!==-1);
+        var picked = (q.type==="mc") ? (state.answers[q.n]===i)
+                   : (Array.isArray(state.answers[q.n]) && state.answers[q.n].indexOf(i)!==-1);
+        if(isCorrect) lab.classList.add("right");
+        else if(picked) lab.classList.add("wrong");
       }
       wrap.appendChild(lab);
     });
@@ -729,32 +778,37 @@ function renderQuestion(){
 
   /* --- ordering --- */
   if(q.type === "order"){
-    var a = state.answers[q.n] || {};
+    var oa = state.answers[q.n] || {};
     q.rows.forEach(function(r,i){
       var row = el("div","orderrow");
       row.appendChild(el("span",null,r.label));
-      var sel = el("select","line");
-      sel.disabled = isChecked;
-      var blank = document.createElement("option");
-      blank.value=""; blank.textContent="Order";
-      sel.appendChild(blank);
-      q.choices.forEach(function(c){
-        var o=document.createElement("option");
-        o.value=c; o.textContent=c;
-        sel.appendChild(o);
-      });
-      sel.value = a["r"+i] || "";
-      sel.addEventListener("change",function(){
-        var cur = state.answers[q.n] || {};
-        cur["r"+i] = sel.value;
-        state.answers[q.n] = cur;
-        save();
-      });
-      row.appendChild(sel);
-      if(isChecked){
-        var ok = (a["r"+i] === r.answer);
-        row.style.background = ok ? "rgba(0,150,90,.16)" : "rgba(200,60,0,.14)";
-        if(!ok) row.appendChild(el("span","qhint","Should be "+r.answer));
+      if(r.given){
+        row.classList.add("given");
+        row.appendChild(el("b",null,r.given+" (given)"));
+      } else {
+        var sel = el("select","line");
+        sel.disabled = isChecked;
+        sel.setAttribute("aria-label","Order for: "+r.label);
+        var blank = document.createElement("option");
+        blank.value=""; blank.textContent="Order";
+        sel.appendChild(blank);
+        q.choices.forEach(function(c){
+          var o=document.createElement("option"); o.value=c; o.textContent=c;
+          sel.appendChild(o);
+        });
+        sel.value = oa["r"+i] || "";
+        sel.addEventListener("change",function(){
+          var cur = state.answers[q.n] || {};
+          cur["r"+i] = sel.value;
+          state.answers[q.n] = cur;
+          save();
+        });
+        row.appendChild(sel);
+        if(isChecked){
+          var ok = (oa["r"+i] === r.answer);
+          row.style.background = ok ? "rgba(0,150,90,.16)" : "rgba(200,60,0,.14)";
+          if(!ok) row.appendChild(el("span","qhint","Should be "+r.answer));
+        }
       }
       card.appendChild(row);
     });
@@ -764,12 +818,13 @@ function renderQuestion(){
   if(q.type === "fields"){
     var vals = state.answers[q.n] || {};
     q.fields.forEach(function(f,i){
-      var lab = el("label","fld", f.label + (f.unit ? " (in " + f.unit + ")" : ""));
+      var w = worthOf(f);
+      var lab = el("label","fld", f.label + (w > 1 ? "  (" + w + " marks)" : ""));
       lab.setAttribute("for","q"+q.n+"f"+i);
       card.appendChild(lab);
       if(f.choices){
         var sel = el("select","line short");
-        sel.id = "q"+q.n+"f"+i;
+        sel.id="q"+q.n+"f"+i;
         sel.disabled = isChecked;
         var b0 = document.createElement("option");
         b0.value=""; b0.textContent="Choose";
@@ -787,12 +842,12 @@ function renderQuestion(){
         });
         card.appendChild(sel);
       } else {
-        var short = !!(f.range || f.accept && f.accept.length <= 3);
         var ta = el("textarea","box");
-        ta.id = "q"+q.n+"f"+i;
+        ta.id="q"+q.n+"f"+i;
         ta.value = vals["f"+i] || "";
         ta.disabled = isChecked;
-        if(short) ta.style.minHeight = "52px";
+        if(w >= 2) ta.style.minHeight = "110px";
+        else if(f.accept && f.accept.length <= 5) ta.style.minHeight = "52px";
         ta.addEventListener("input",function(){
           var cur = state.answers[q.n] || {};
           cur["f"+i] = ta.value;
@@ -804,55 +859,6 @@ function renderQuestion(){
     });
   }
 
-  /* --- matrix --- */
-  if(q.type === "matrix"){
-    var mv = state.answers[q.n] || {};
-    var table = el("table","matrix");
-    var hr = el("tr");
-    hr.appendChild(el("th",null,"Characteristic"));
-    q.cols.forEach(function(c){ hr.appendChild(el("th",null,c)); });
-    table.appendChild(hr);
-    q.rows.forEach(function(r,ri){
-      var tr = el("tr");
-      tr.appendChild(el("th",null,r.label));
-      r.cells.forEach(function(c,ci){
-        var td = el("td");
-        var ta = el("textarea","box");
-        ta.value = mv["c"+ri+"_"+ci] || "";
-        ta.disabled = isChecked;
-        ta.setAttribute("aria-label", r.label + ", " + q.cols[ci]);
-        ta.addEventListener("input",function(){
-          var cur = state.answers[q.n] || {};
-          cur["c"+ri+"_"+ci] = ta.value;
-          state.answers[q.n] = cur;
-          save();
-        });
-        td.appendChild(ta);
-        tr.appendChild(td);
-      });
-      table.appendChild(tr);
-    });
-    card.appendChild(table);
-  }
-
-  /* --- levels --- */
-  if(q.type === "levels"){
-    var lv = state.answers[q.n] || {};
-    var ta2 = el("textarea","box");
-    ta2.style.minHeight = "260px";
-    ta2.value = lv.text || "";
-    ta2.disabled = isChecked;
-    ta2.placeholder = "Take your time. Cover all three bullet points, then say what you actually think and why.";
-    ta2.setAttribute("aria-label","Your extended answer");
-    ta2.addEventListener("input",function(){
-      var cur = state.answers[q.n] || {};
-      cur.text = ta2.value;
-      state.answers[q.n] = cur;
-      save();
-    });
-    card.appendChild(ta2);
-  }
-
   /* --- feedback --- */
   if(isChecked){
     var fb = el("div","fb");
@@ -861,64 +867,52 @@ function renderQuestion(){
     if(q.why) fb.appendChild(el("p",null,q.why));
     if(q.accepts) fb.appendChild(el("p",null,"What earns a mark: " + q.accepts));
 
-    if(q.type === "fields" || q.type === "matrix"){
-      var items = (q.type === "fields")
-        ? q.fields.map(function(f,i){ return { key:"f"+i, label:f.label, model:f.model }; })
-        : matrixCells(q);
-      var autos = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+    if(q.type === "fields"){
       var vals2 = state.answers[q.n] || {};
       var aw = state.awarded[q.n] || {};
-      items.forEach(function(it,i){
+      var autos = autoFields(q);
+      q.fields.forEach(function(f,i){
+        var w = worthOf(f);
+        if(w === 0) return;
+        var key = "f"+i;
         var item = el("div","fbitem");
-        item.appendChild(el("div",null,it.label));
-        item.appendChild(el("div",null,"You put: " + ((vals2[it.key]||"").trim() || "nothing")));
-        if(it.model) item.appendChild(el("div",null,"Looking for: " + it.model));
-        var sm = el("div","selfmark");
-        if(autos[i] === true) sm.appendChild(el("span",null,"Marked right automatically. Change it if you disagree:"));
-        else if(autos[i] === false) sm.appendChild(el("span",null,"Not matched automatically. Read the answer and decide:"));
-        else sm.appendChild(el("span",null,"You decide: did you get this one?"));
-        [["Yes, 1 mark",1],["No mark",0]].forEach(function(pair){
-          var b = el("button","smbtn",pair[0]);
-          b.type="button";
-          b.setAttribute("aria-pressed", String(aw[it.key] === pair[1]));
-          b.addEventListener("click",function(){
-            var cur = state.awarded[q.n] || {};
-            cur[it.key] = pair[1];
-            state.awarded[q.n] = cur;
-            save();
-            renderQuestion();
+        item.appendChild(el("div","lbl",f.label));
+        item.appendChild(el("div",null,"You put: " + ((vals2[key]||"").trim() || "nothing")));
+        if(f.points){
+          var found = pointsFound(f, vals2[key]);
+          item.appendChild(el("div",null,"Marks are for these separate points:"));
+          var ul = el("ul","pointlist");
+          f.points.forEach(function(p,pi){
+            var li = el("li",null, p.name + (found.indexOf(pi) !== -1 ? "  (found)" : ""));
+            if(found.indexOf(pi) !== -1) li.className = "got";
+            ul.appendChild(li);
           });
-          sm.appendChild(b);
-        });
+          item.appendChild(ul);
+        }
+        if(f.model) item.appendChild(el("div",null,"Looking for: " + f.model));
+
+        var sm = el("div","selfmark");
+        if(autos[i] === null) sm.appendChild(el("span",null,"You decide:"));
+        else if(autos[i] === w) sm.appendChild(el("span",null,"Marked automatically. Change it if you disagree:"));
+        else sm.appendChild(el("span",null,"Read the answer and decide:"));
+        for(var m=0;m<=w;m++){
+          (function(mm){
+            var b = el("button","smbtn", mm + (mm===1 ? " mark" : " marks"));
+            b.type="button";
+            b.setAttribute("aria-pressed", String(aw[key] === mm));
+            b.addEventListener("click",function(){
+              var cur = state.awarded[q.n] || {};
+              cur[key] = mm;
+              state.awarded[q.n] = cur;
+              save();
+              renderQuestion();
+            });
+            sm.appendChild(b);
+          })(m);
+        }
         item.appendChild(sm);
         fb.appendChild(item);
       });
-    }
-
-    if(q.type === "levels"){
-      fb.appendChild(el("p",null,"Read the three levels and pick the one your answer actually reaches. Being honest here is more useful than being generous."));
-      var box = el("div","levels");
-      q.levels.forEach(function(L){
-        var d = el("div","level");
-        if(state.levels[q.n] && L.marks.indexOf(state.levels[q.n]) !== -1) d.classList.add("picked");
-        d.appendChild(el("b",null, L.name + ", " + L.range));
-        d.appendChild(el("span",null, L.desc));
-        var pick = el("div","selfmark");
-        L.marks.forEach(function(m){
-          var b = el("button","smbtn", m + (m===1 ? " mark" : " marks"));
-          b.type="button";
-          b.setAttribute("aria-pressed", String(state.levels[q.n] === m));
-          b.addEventListener("click",function(){
-            state.levels[q.n] = m;
-            save();
-            renderQuestion();
-          });
-          pick.appendChild(b);
-        });
-        d.appendChild(pick);
-        box.appendChild(d);
-      });
-      fb.appendChild(box);
     }
     card.appendChild(fb);
   }
@@ -936,14 +930,11 @@ function renderQuestion(){
     check.type="button";
     check.addEventListener("click",function(){
       state.checked[q.n] = true;
-      if(q.type === "fields" || q.type === "matrix"){
-        var keys = (q.type === "fields")
-          ? q.fields.map(function(f,i){ return "f"+i; })
-          : matrixCells(q).map(function(c){ return c.key; });
-        var autos2 = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+      if(q.type === "fields"){
+        var autos2 = autoFields(q);
         var aw2 = state.awarded[q.n] || {};
-        keys.forEach(function(k,i){
-          if(aw2[k] === undefined) aw2[k] = (autos2[i] === true) ? 1 : 0;
+        q.fields.forEach(function(f,i){
+          if(aw2["f"+i] === undefined) aw2["f"+i] = (autos2[i] === null) ? 0 : autos2[i];
         });
         state.awarded[q.n] = aw2;
       }
@@ -984,17 +975,15 @@ function updateProgress(){
 
 /* ================= RESULTS ================= */
 function totals(){
-  var score = 0, avail = 0;
-  var bySec = {}, bySkill = {};
+  var score=0, avail=0, bySkill={};
   QS.forEach(function(q){
     var got = state.checked[q.n] ? markQuestion(q) : 0;
     if(state.checked[q.n]){ score += got; avail += q.marks; }
-    if(!bySec[q.sec]) bySec[q.sec] = {g:0,m:0};
-    bySec[q.sec].m += q.marks; bySec[q.sec].g += got;
     if(!bySkill[q.skill]) bySkill[q.skill] = {g:0,m:0};
-    bySkill[q.skill].m += q.marks; bySkill[q.skill].g += got;
+    bySkill[q.skill].m += q.marks;
+    bySkill[q.skill].g += got;
   });
-  return { score:score, avail:avail, bySec:bySec, bySkill:bySkill };
+  return { score:score, avail:avail, bySkill:bySkill };
 }
 
 function renderResults(){
@@ -1072,7 +1061,7 @@ function renderResults(){
 function report(){
   var t = totals();
   var L = [];
-  L.push("Geography: Weather Systems and Storm Hazards");
+  L.push("Geography: Weather Systems and Storm Hazards (supported)");
   L.push("From: " + (state.who || "(no initials picked)"));
   L.push("Sent: " + new Date().toString());
   L.push("Score: " + t.score + " out of " + TOTAL + " (marked so far: " + t.avail + ")");
@@ -1091,32 +1080,33 @@ function report(){
     if(q.type === "mc"){
       L.push("  Chose: " + (a===undefined ? "-" : q.options[a]));
       L.push("  Answer: " + q.options[q.correct]);
+    } else if(q.type === "mcmulti"){
+      L.push("  Chose: " + (Array.isArray(a)&&a.length ? a.map(function(i){return q.options[i];}).join(" | ") : "-"));
+      L.push("  Answer: " + q.correct.map(function(i){return q.options[i];}).join(" | "));
     } else if(q.type === "order"){
       q.rows.forEach(function(rw,i){
-        L.push("  " + rw.label);
-        L.push("    Put: " + ((a && a["r"+i]) || "-") + ", answer " + rw.answer);
+        if(rw.given){ L.push("  " + rw.label + ": " + rw.given + " (given)"); }
+        else { L.push("  " + rw.label + ": put " + ((a && a["r"+i]) || "-") + ", answer " + rw.answer); }
       });
-    } else if(q.type === "levels"){
-      L.push("  Self-assessed at: " + (state.levels[q.n]===undefined ? "not yet" : state.levels[q.n] + " of 6"));
-      L.push("  Answer:");
-      L.push((a && a.text || "(blank)"));
-    } else if(q.type === "fields" || q.type === "matrix"){
-      var items = (q.type === "fields")
-        ? q.fields.map(function(f,i){ return { key:"f"+i, label:f.label }; })
-        : matrixCells(q);
-      var autos = (q.type === "fields") ? autoFields(q) : autoMatrix(q);
+    } else if(q.type === "fields"){
+      var autos = autoFields(q);
       var aw = state.awarded[q.n] || {};
-      items.forEach(function(it,i){
-        L.push("  " + it.label);
-        L.push("    Put: " + ((a && a[it.key] || "").trim() || "(blank)"));
-        L.push("    Awarded: " + (aw[it.key]===1 ? "1" : "0") + " (" + (autos[i]===true ? "auto" : "self-marked") + ")");
+      q.fields.forEach(function(f,i){
+        var w = worthOf(f);
+        var key = "f"+i;
+        L.push("  " + f.label);
+        L.push("    Put: " + ((a && a[key] || "").trim() || "(blank)"));
+        if(w > 0){
+          L.push("    Awarded: " + (aw[key]||0) + " of " + w +
+            " (" + (autos[i] === null ? "self-marked" : (aw[key] === autos[i] ? "auto" : "self-marked")) + ")");
+        }
       });
     }
   });
   L.push("");
-  L.push("Marking follows the answer key printed with the worksheet. Answers tagged");
-  L.push("'self-marked' were judged by the student, so those are worth a look, and");
-  L.push("Q12 is entirely self-assessed against the levels rubric.");
+  L.push("This is the supported version of the paper. It came without a mark scheme,");
+  L.push("so the accepted answers were written from the subject content. Anything");
+  L.push("tagged 'self-marked' was judged by the student and is worth a look.");
   return L.join("\n");
 }
 function subject(){
