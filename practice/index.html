@@ -41,12 +41,13 @@
 
   <div class="weektheme">
     <h2>Practice</h2>
-    <span>English and maths, split into GCSE and standard. Pick whatever fits today.</span>
+    <span>Maths, English and human and social, each split into GCSE and standard. Pick whatever fits today.</span>
   </div>
 
   <div class="weekbar" role="tablist" aria-label="Subjects">
     <button class="wtab" role="tab" id="tab-maths" aria-controls="panel-maths" aria-selected="true">Maths<span class="dates">GCSE and standard</span></button>
     <button class="wtab" role="tab" id="tab-english" aria-controls="panel-english" aria-selected="false" tabindex="-1">English<span class="dates">GCSE and standard</span></button>
+    <button class="wtab" role="tab" id="tab-hs" aria-controls="panel-hs" aria-selected="false" tabindex="-1">Human and social<span class="dates">GCSE and standard</span></button>
   </div>
 
   <!-- ============ MATHS ============ -->
@@ -116,11 +117,16 @@
           <h3>Animal Farm</h3>
           <p>Learn a bit, read a bit, write a bit: themes and the history underneath, 8 quick questions on an extract, and 3 pieces of writing for Jay to read.</p>
         </a>
-        <div class="card w6">
-          <span class="kicker">More to come</span>
-          <h3>What would help?</h3>
-          <p>More English is on the way. If there is a text or a skill you want in here, Jay is taking suggestions.</p>
-        </div>
+        <a class="card w6 fill-teal" href="/practice/reading-paper-6.html">
+          <span class="kicker">Reading</span>
+          <h3>Reading paper 6</h3>
+          <p>A real exam paper: three texts kept on screen beside the questions, fifteen questions, 35 marks. Marked as you go, with a breakdown of which reading skills went well.</p>
+        </a>
+        <a class="card w6 fill-orange" href="/practice/writing-paper-6.html">
+          <span class="kicker">Writing</span>
+          <h3>Writing paper 6</h3>
+          <p>The other half of the same paper: an email and an online form, with sentence starters, word counts and optional timers. Goes to Jay to read.</p>
+        </a>
       </div>
     </div>
 
@@ -140,16 +146,49 @@
           <h3>A day at school</h3>
           <p>Build a story one bit at a time, with a guide and first-line ideas for each part. Real day, made-up day, or a completely ridiculous one.</p>
         </a>
-        <a class="card w6 fill-plum" href="/practice/reading-paper-6.html">
-  <span class="kicker">English - GCSE</span>
-  <h3>Reading Practice: Paper 6</h3>
-  <p>Three texts, fifteen questions, 35 marks. Marked as you go, with a skills breakdown at the end.</p>
-</a>
-        <a class="card w6 fill-teal" href="/practice/writing-paper-6.html">
-  <span class="kicker">English - GCSE</span>
-  <h3>Writing Practice: Paper 6</h3>
-  <p>A real exam paper: an email and an online form, with starters, timers and a self-check. Goes to Jay to read.</p>
-</a>
+        <div class="card w6">
+          <span class="kicker">More to come</span>
+          <h3>What would help?</h3>
+          <p>More everyday English is on the way. If there is a text or a skill you want in here, Jay is taking suggestions.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ HUMAN AND SOCIAL ============ -->
+  <section class="wpanel" id="panel-hs" role="tabpanel" aria-labelledby="tab-hs" hidden>
+
+    <div id="hs-gcse">
+      <div class="weektheme">
+        <h2>GCSE</h2>
+        <span>Working towards exam topics, one piece at a time.</span>
+      </div>
+      <div class="board">
+        <a class="card w6 fill-bright" href="/practice/weather-storms.html">
+          <span class="kicker">Weather</span>
+          <h3>Weather systems and storm hazards</h3>
+          <p>Air pressure, UK depressions, tropical storms and storm surges. Twelve questions, 51 marks, with the diagrams drawn on the page.</p>
+        </a>
+        <div class="card w6">
+          <span class="kicker">More to come</span>
+          <h3>What would help?</h3>
+          <p>More geography and history is on the way. If there is a topic you want in here, Jay is taking suggestions.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="hs-standard">
+      <div class="weektheme">
+        <h2>Standard</h2>
+        <span>The world and the people in it, no exam pressure attached.</span>
+      </div>
+      <div class="board">
+        <div class="card w6">
+          <span class="kicker">More to come</span>
+          <h3>What would help?</h3>
+          <p>Nothing on this shelf yet. If there is something about places, people or the past you want in here, Jay is taking suggestions.</p>
+        </div>
       </div>
     </div>
 
@@ -168,6 +207,10 @@
 /* ---------- subject tabs, same behaviour as the week tabs ---------- */
 (function(){
   var tabs=Array.prototype.slice.call(document.querySelectorAll('.wtab'));
+
+  /* a tab id is always tab-<subject>, and <subject> is what the hash uses,
+     so new subjects only need a tab and a panel, not a change down here */
+  function subjectOf(tab){return tab.id.replace('tab-','')}
 
   function show(tab){
     tabs.forEach(function(t){
@@ -189,7 +232,7 @@
   tabs.forEach(function(tab,i){
     tab.addEventListener('click',function(){
       show(tab);
-      history.replaceState(null,'','#'+(tab.id==='tab-maths'?'maths':'english'));
+      history.replaceState(null,'','#'+subjectOf(tab));
     });
     tab.addEventListener('keydown',function(e){
       var next=null;
@@ -202,13 +245,18 @@
   });
 
   /* Deep links the timetable can use:
-       /practice/#maths            /practice/#english
+       /practice/#maths            /practice/#english          /practice/#hs
        /practice/#maths-gcse       /practice/#maths-standard
-       /practice/#english-gcse     /practice/#english-standard   */
+       /practice/#english-gcse     /practice/#english-standard
+       /practice/#hs-gcse          /practice/#hs-standard        */
   function fromHash(){
     var h=(location.hash||'').replace('#','');
     if(!h)return;
-    var subject=h.indexOf('english')===0?'english':h.indexOf('maths')===0?'maths':null;
+    var subject=null;
+    tabs.forEach(function(t){
+      var s=subjectOf(t);
+      if(h===s||h.indexOf(s+'-')===0)subject=s;
+    });
     if(!subject)return;
     show(document.getElementById('tab-'+subject));
     if(h!==subject){
