@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrieval and evidence - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Retrieval and evidence only. Shell, cards and tabs come from style.css */
+.re{--re-line:#e3d6cb;--re-teal:#007291;--re-orange:#ef7724;--re-green:#3f7d4e;--re-plum:#7a4b73;--re-ink:#23303a}
+.re-src{position:sticky;top:.4rem;z-index:15;border:2px solid var(--re-ink);border-radius:1rem .3rem 1rem .3rem;
+  background:#fffdfb;color:#23303a;padding:.8rem .9rem;margin-bottom:1rem;box-shadow:0 .35rem 0 rgba(35,48,58,.12)}
+.re-src>summary{font-family:Archivo,sans-serif;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:.6rem}
+.re-src>summary::-webkit-details-marker{display:none}
+.re-src>summary span{font-weight:400;font-size:.9rem;opacity:.75}
+.re-body{max-height:38vh;overflow:auto;margin-top:.7rem;padding-right:.3rem}
+.re-body p{margin:.6rem 0}
+.re-body p:first-child{margin-top:0}
+.re-mark{background:rgba(0,114,145,.14);border-radius:.3rem;padding:0 .15rem}
+.re-quotes{display:grid;gap:.5rem;margin-top:.9rem}
+.re-quote{text-align:left;padding:.6rem .7rem;border:2px solid var(--re-line);border-radius:.8rem;background:#fffdfb;
+  color:#23303a;cursor:pointer;font:inherit;font-size:.97rem}
+.re-quote[aria-pressed="true"]{border-color:var(--re-teal);background:#eaf5f7;box-shadow:inset 0 0 0 2px #cfe8ee}
+.re-rows{display:grid;gap:.6rem;margin-top:.9rem}
+.re-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border:2px solid var(--re-line);border-radius:.9rem;
+  padding:.5rem .7rem;background:#fffdfb;color:#23303a}
+.re-row b{min-width:5.5rem}
+.re-seg{display:flex;gap:.35rem;margin-left:auto}
+.re-seg button{font:inherit;font-size:.88rem;padding:.35rem .7rem;border-radius:.6rem;border:2px solid var(--re-line);
+  background:#fff;color:#23303a;cursor:pointer}
+.re-seg button[aria-pressed="true"]{background:var(--re-teal);border-color:var(--re-teal);color:#fff}
+.re-defs{counter-reset:d;margin:.9rem 0 0;padding:0;list-style:none;display:grid;gap:.4rem}
+.re-defs li{display:flex;gap:.6rem;font-size:.95rem}
+.re-defs b{font-family:Archivo,sans-serif}
+.re-mcq{display:grid;gap:.5rem;margin-top:.9rem}
+.re-opt{text-align:left;padding:.6rem .7rem;border:2px solid var(--re-line);border-radius:.8rem;background:#fffdfb;
+  color:#23303a;cursor:pointer;font:inherit;font-size:.97rem}
+.re-opt[aria-pressed="true"]{border-color:var(--re-teal);background:#eaf5f7}
+.re-acts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem;align-items:center}
+.re-quiet.re-quiet{background:#fffdfb;color:#23303a;border:2px solid var(--re-line)}
+.re-fb{margin-top:.8rem;padding:.6rem .8rem;border-radius:.8rem;font-size:.96rem;display:none;color:#23303a}
+.re-fb.show{display:block}
+.re-fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.re-fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.re-fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.re textarea,.re input[type=text]{width:100%;font:inherit;font-size:1rem;padding:.6rem .7rem;border:2px solid var(--re-line);
+  border-radius:.7rem;background:#fffdfb;color:#23303a;margin-top:.6rem}
+.re textarea{min-height:5.5rem;resize:vertical}
+.re-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
+.re-chips button{font:inherit;font-size:.88rem;padding:.32rem .7rem;border-radius:999px;border:2px solid var(--re-line);
+  background:#fffdfb;color:#23303a;cursor:pointer}
+.re-self{margin-top:.9rem;border:2px dashed var(--re-line);border-radius:.9rem;padding:.7rem .8rem;background:#fffdfb;color:#23303a}
+.re-self h4{font-family:Archivo,sans-serif;font-size:.95rem;margin:0 0 .4rem}
+.re-self label{display:flex;gap:.55rem;align-items:flex-start;font-size:.95rem;padding:.25rem 0;cursor:pointer}
+.re-self input{margin-top:.25rem;width:1.1rem;height:1.1rem;flex:0 0 auto;accent-color:#007291}
+.re-who{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.re-who button{font:inherit;font-size:.95rem;padding:.35rem .8rem;border-radius:999px;border:2px solid rgba(255,255,255,.7);
+  background:#fffdfb;color:#23303a;cursor:pointer}
+.re-who button[aria-pressed="true"]{background:var(--re-ink);border-color:var(--re-ink);color:#fff}
+.re-count{font-size:.9rem;opacity:.8;margin-top:.4rem}
+.re-tally{display:grid;gap:.45rem;margin-top:.9rem;font-size:.95rem}
+.re-tally div{display:flex;justify-content:space-between;gap:.6rem;border-bottom:2px dotted var(--re-line);padding:.35rem 0}
+.re-big{font-family:Archivo,sans-serif;font-weight:700;font-size:1.4rem}
+.re-nav{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin:1.4rem 0 .5rem}
+@media (max-width:32rem){.re-seg{margin-left:0;width:100%}.re-body{max-height:32vh}}
+@media (prefers-reduced-motion:reduce){.re *{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap re">
+
+  <div class="weektheme">
+    <h2>Retrieval and evidence</h2>
+    <span>Reading, 30 marks, four short parts. Two extracts, a cellar nobody has been in for years and a river that is not keen on visitors.</span>
+  </div>
+
+  <div class="board">
+    <div class="card w12 fill-plum">
+      <span class="kicker">Before you start</span>
+      <h3>The answers are already in the text. That is the whole game.</h3>
+      <p>Retrieval means finding the bit that is already written down. Evidence means copying that bit exactly, then saying what it proves. No guessing, no vibes, no staring at the page hoping it gives in first.</p>
+      <p>The extract stays on screen while you answer, and you tap the quote you want rather than copying it out. Some parts mark themselves. The ones about explaining are yours to mark, with the mark scheme shown, because a computer cannot tell whether your reason actually makes sense.</p>
+      <div class="re-who" id="re-who" aria-label="Your initials, if you want them saved">
+        <button type="button" data-who="JT">JT</button>
+        <button type="button" data-who="LW">LW</button>
+        <button type="button" data-who="EGW">EGW</button>
+        <button type="button" data-who="LP">LP</button>
+        <button type="button" data-who="LC">LC</button>
+        <button type="button" data-who="HK">HK</button>
+        <button type="button" data-who="">no thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="weekbar" role="tablist" aria-label="Parts">
+    <button class="wtab" role="tab" id="tab-words" aria-controls="panel-words" aria-selected="true">The words<span class="dates">7 marks</span></button>
+    <button class="wtab" role="tab" id="tab-cellar" aria-controls="panel-cellar" aria-selected="false" tabindex="-1">The cellar<span class="dates">10 marks</span></button>
+    <button class="wtab" role="tab" id="tab-river" aria-controls="panel-river" aria-selected="false" tabindex="-1">The river<span class="dates">7 marks</span></button>
+    <button class="wtab" role="tab" id="tab-big" aria-controls="panel-big" aria-selected="false" tabindex="-1">The long answer<span class="dates">6 marks</span></button>
+    <button class="wtab" role="tab" id="tab-send" aria-controls="panel-send" aria-selected="false" tabindex="-1">Marks and send<span class="dates">where you got to</span></button>
+  </div>
+
+  <!-- ============ WORDS ============ -->
+  <section class="wpanel" id="panel-words" role="tabpanel" aria-labelledby="tab-words">
+    <div class="weektheme">
+      <h2>Four words, then the method</h2>
+      <span>Section A. Vocabulary and retrieval, 7 marks.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12">
+        <span class="kicker">Question 1, 4 marks</span>
+        <h3>Match each term to its meaning</h3>
+        <p>Tap a number for each term. The lines really do need to go to the right places.</p>
+        <ol class="re-defs">
+          <li><b>1.</b><span>Stated directly in the text, with no doubt about it.</span></li>
+          <li><b>2.</b><span>Facts or details taken straight from the text to prove an idea.</span></li>
+          <li><b>3.</b><span>Words and phrases that come directly from the written passage.</span></li>
+          <li><b>4.</b><span>Moving your eyes quickly across the lines to find one specific word.</span></li>
+        </ol>
+        <div class="re-rows" id="re-match"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="match">Check these</button>
+          <button class="btn re-quiet" data-tell="match">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-match-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 2a, 1 mark</span>
+        <h3>What do you do before you start scanning?</h3>
+        <p>Something happens before your eyes hit the text. Staring at it and hoping is not it.</p>
+        <input type="text" data-save="q2a" aria-label="Your answer to question 2a" placeholder="Type your answer">
+        <div class="re-acts">
+          <button class="btn" data-check="q2a">Check this</button>
+          <button class="btn re-quiet" data-tell="q2a">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q2a-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 2b, 2 marks</span>
+        <h3>Why copy the author's exact words instead of guessing?</h3>
+        <div class="re-chips" data-for="q2b">
+          <button type="button">The answer is already</button>
+          <button type="button">Exact words prove</button>
+          <button type="button">If you guess, you</button>
+        </div>
+        <textarea data-save="q2b" aria-label="Your answer to question 2b"></textarea>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q2b">Show me the mark scheme</button></div>
+        <div class="re-fb" id="re-q2b-fb"></div>
+        <div class="re-self" data-self="q2b" data-max="2">
+          <h4>Mark your own, one tick per mark</h4>
+          <label><input type="checkbox" data-mark="q2b-1"><span>I said the real answer is already on the page, so you must not guess.</span></label>
+          <label><input type="checkbox" data-mark="q2b-2"><span>I explained that the exact words give proof, so nobody can argue with them.</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="re-nav"><span></span><button class="btn" data-go="cellar">Next part</button></div>
+  </section>
+
+  <!-- ============ CELLAR ============ -->
+  <section class="wpanel" id="panel-cellar" role="tabpanel" aria-labelledby="tab-cellar" hidden>
+    <div class="weektheme">
+      <h2>Source A, The Sunken Cellar</h2>
+      <span>Section B. Because apparently basements were not unsettling enough. 10 marks.</span>
+    </div>
+
+    <details class="re-src" open>
+      <summary>Source A, The Sunken Cellar <span>tap to fold it away</span></summary>
+      <div class="re-body">
+        <p>Bram crept down the winding stone staircase. At the very bottom of the steps, a thick oak door blocked the way into the underground room. Across the centre of the wood, a heavy lock made of black iron held the door shut.</p>
+        <p>Bram pushed the wood with both hands until it creaked open. Inside, a thick layer of grey dust covered the stone flags of the floor. No footprints showed in the dirt. Three stone chests sat side by side against the far wall. On the top of the middle chest, someone had carved a rough secret message into the cold rock.</p>
+      </div>
+    </details>
+
+    <div class="board">
+      <div class="card w12">
+        <span class="kicker">Question 3, 4 marks</span>
+        <h3>Pull four facts straight out of the text</h3>
+        <p>One word or a few will do. The cellar has already supplied all of it.</p>
+        <div id="re-q3"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q3">Check these</button>
+          <button class="btn re-quiet" data-tell="q3">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q3-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 4, 3 marks</span>
+        <h3>Prove nobody had visited that room for a long time</h3>
+        <p>Tap the quote you would use. Look at the second paragraph: dust is about to become surprisingly important.</p>
+        <div class="re-quotes" id="re-q4"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q4">Check my quote</button>
+          <button class="btn re-quiet" data-tell="q4">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q4-fb"></div>
+        <p style="margin-top:1rem">Now explain what your quote proves.</p>
+        <div class="re-chips" data-for="q4x">
+          <button type="button">This proves nobody had been there because</button>
+          <button type="button">Dust only builds up when</button>
+          <button type="button">If someone had walked in, then</button>
+        </div>
+        <textarea data-save="q4x" aria-label="Your explanation for question 4"></textarea>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q4x">Show me the mark scheme</button></div>
+        <div class="re-fb" id="re-q4x-fb"></div>
+        <div class="re-self" data-self="q4x" data-max="2">
+          <h4>Mark your own, one tick per mark</h4>
+          <label><input type="checkbox" data-mark="q4x-1"><span>I explained the clue itself: dust gathers when a place is left alone, or footprints would show if anyone had walked there.</span></label>
+          <label><input type="checkbox" data-mark="q4x-2"><span>I linked it to time passing with no visitors, not just to the room being messy.</span></label>
+        </div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 5, 3 marks</span>
+        <h3>"Bram had to use physical effort to get inside the cellar."</h3>
+        <p>Tap the phrase that supports the student's statement. Use the evidence, not vibes.</p>
+        <div class="re-quotes" id="re-q5"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q5">Check my quote</button>
+          <button class="btn re-quiet" data-tell="q5">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q5-fb"></div>
+        <p style="margin-top:1rem">Now explain how those words prove it.</p>
+        <div class="re-chips" data-for="q5x">
+          <button type="button">The word "pushed" shows</button>
+          <button type="button">Using both hands means</button>
+          <button type="button">The door also "creaked open", which tells us</button>
+        </div>
+        <textarea data-save="q5x" aria-label="Your explanation for question 5"></textarea>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q5x">Show me the mark scheme</button></div>
+        <div class="re-fb" id="re-q5x-fb"></div>
+        <div class="re-self" data-self="q5x" data-max="2">
+          <h4>Mark your own, one tick per mark</h4>
+          <label><input type="checkbox" data-mark="q5x-1"><span>I picked out words that show force or strength, such as "pushed" or "both hands".</span></label>
+          <label><input type="checkbox" data-mark="q5x-2"><span>I linked that to effort, for example that the door was heavy or stiff because it creaked open.</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="re-nav"><button class="btn re-quiet" data-go="words">Back a part</button><button class="btn" data-go="river">Next part</button></div>
+  </section>
+
+  <!-- ============ RIVER ============ -->
+  <section class="wpanel" id="panel-river" role="tabpanel" aria-labelledby="tab-river" hidden>
+    <div class="weektheme">
+      <h2>Source B, The Wild River</h2>
+      <span>Section C. Nature's way of saying absolutely not. 7 marks.</span>
+    </div>
+
+    <details class="re-src" open>
+      <summary>Source B, The Wild River Expedition <span>tap to fold it away</span></summary>
+      <div class="re-body">
+        <p>The mountain trail ended at the river bank. The wild river was dangerous. Cold water crashed against sharp, jagged rocks with great force. White foam sprayed into the air as the current rushed past.</p>
+        <p>Mark looked down at their small wooden raft. The timber was old and dry, with thin cracks running down the deck. "We cannot cross here," Mark said quietly. His hands shook as he tightened the straps of his orange life jacket. The roaring water was far too loud for him to hear his partner's reply.</p>
+      </div>
+    </details>
+
+    <div class="board">
+      <div class="card w12">
+        <span class="kicker">Question 6, 2 marks</span>
+        <h3>Tap two things the water did as it moved down the river</h3>
+        <p>First paragraph. The water is busy showing off.</p>
+        <div class="re-quotes" id="re-q6"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q6">Check these</button>
+          <button class="btn re-quiet" data-tell="q6">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q6-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 7, 2 marks</span>
+        <h3>Which quote is doing the heavy lifting?</h3>
+        <p>Both are in the text. Only one really proves the river could hurt someone.</p>
+        <div class="re-mcq" id="re-q7"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q7">Check this</button>
+          <button class="btn re-quiet" data-tell="q7">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q7-fb"></div>
+        <p style="margin-top:1rem">Now say why your choice is stronger, and why the other one is weaker.</p>
+        <div class="re-chips" data-for="q7x">
+          <button type="button">This one is stronger because</button>
+          <button type="button">The other is weaker because</button>
+          <button type="button">Cold on its own only proves</button>
+        </div>
+        <textarea data-save="q7x" aria-label="Your explanation for question 7"></textarea>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q7x">Show me the mark scheme</button></div>
+        <div class="re-fb" id="re-q7x-fb"></div>
+        <div class="re-self" data-self="q7x" data-max="2">
+          <h4>Mark your own, one tick per mark</h4>
+          <label><input type="checkbox" data-mark="q7x-1"><span>I explained that "crashed" and "sharp, jagged rocks" describe an impact that could actually cut or injure someone.</span></label>
+          <label><input type="checkbox" data-mark="q7x-2"><span>I explained that cold water is only uncomfortable, so on its own it does not prove danger.</span></label>
+        </div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 8, 3 marks</span>
+        <h3>How does the author show Mark is scared?</h3>
+        <p>Second paragraph. The poor man is having a fairly reasonable reaction.</p>
+        <div class="re-quotes" id="re-q8"></div>
+        <div class="re-acts">
+          <button class="btn" data-check="q8">Check my quote</button>
+          <button class="btn re-quiet" data-tell="q8">Just tell me</button>
+        </div>
+        <div class="re-fb" id="re-q8-fb"></div>
+        <p style="margin-top:1rem">Now explain what your quote shows.</p>
+        <div class="re-chips" data-for="q8x">
+          <button type="button">This shows fear because</button>
+          <button type="button">Shaking hands are something you cannot</button>
+          <button type="button">He is frightened of</button>
+        </div>
+        <textarea data-save="q8x" aria-label="Your explanation for question 8"></textarea>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q8x">Show me the mark scheme</button></div>
+        <div class="re-fb" id="re-q8x-fb"></div>
+        <div class="re-self" data-self="q8x" data-max="2">
+          <h4>Mark your own, one tick per mark</h4>
+          <label><input type="checkbox" data-mark="q8x-1"><span>I said how the quote reveals fear, for example that shaking hands are a physical sign you cannot control.</span></label>
+          <label><input type="checkbox" data-mark="q8x-2"><span>I connected it to what he is actually afraid of, such as drowning or the power of the river.</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="re-nav"><button class="btn re-quiet" data-go="cellar">Back a part</button><button class="btn" data-go="big">Next part</button></div>
+  </section>
+
+  <!-- ============ LONG ANSWER ============ -->
+  <section class="wpanel" id="panel-big" role="tabpanel" aria-labelledby="tab-big" hidden>
+    <div class="weektheme">
+      <h2>The long answer</h2>
+      <span>Question 9, 6 marks. The only part that wants proper paragraphs.</span>
+    </div>
+
+    <details class="re-src" open>
+      <summary>Source B, kept here while you write <span>tap to fold it away</span></summary>
+      <div class="re-body">
+        <p>The mountain trail ended at the river bank. The wild river was dangerous. Cold water crashed against sharp, jagged rocks with great force. White foam sprayed into the air as the current rushed past.</p>
+        <p>Mark looked down at their small wooden raft. The timber was old and dry, with thin cracks running down the deck. "We cannot cross here," Mark said quietly. His hands shook as he tightened the straps of his orange life jacket. The roaring water was far too loud for him to hear his partner's reply.</p>
+      </div>
+    </details>
+
+    <div class="board">
+      <div class="card w12 fill-bright">
+        <span class="kicker">The statement</span>
+        <h3>"The author makes the river crossing seem impossible for the travellers."</h3>
+        <p>How far do you agree? Give a clear answer, because "it feels a bit dodgy" is not quite analysis. Cover the river itself, then the state of the raft, and quote the text for both. Your opinion needs receipts.</p>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Plan, one</span>
+        <h3>The river</h3>
+        <p>Tap the quotes you want to use, then jot what each one proves.</p>
+        <div class="re-quotes" id="re-plan-river"></div>
+        <textarea data-save="planriver" aria-label="What the river quotes prove" placeholder="These show the river is..."></textarea>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Plan, two</span>
+        <h3>The raft</h3>
+        <p>Same again for the thing they were planning to cross in.</p>
+        <div class="re-quotes" id="re-plan-raft"></div>
+        <textarea data-save="planraft" aria-label="What the raft quotes prove" placeholder="These show the raft is..."></textarea>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 9, 6 marks</span>
+        <h3>Write your answer</h3>
+        <p>Aim for about 150 to 250 words. This one goes to Jay to read, not to a marking machine.</p>
+        <div class="re-chips" data-for="q9">
+          <button type="button">I strongly agree that the crossing seems impossible because</button>
+          <button type="button">The author describes the river as</button>
+          <button type="button">This proves the water could</button>
+          <button type="button">The raft is also a problem, because the text says</button>
+          <button type="button">Put together, these two details mean</button>
+        </div>
+        <textarea data-save="q9" id="re-q9" aria-label="Your answer to question 9" style="min-height:14rem"></textarea>
+        <p class="re-count" id="re-q9-count">0 words</p>
+        <div class="re-self" data-self="q9" data-max="6">
+          <h4>The mark scheme, for when you read it back</h4>
+          <label><input type="checkbox" data-mark="q9-1"><span>I gave a clear answer to how far I agree, not just a description.</span></label>
+          <label><input type="checkbox" data-mark="q9-2"><span>I used exact words from the text about the river.</span></label>
+          <label><input type="checkbox" data-mark="q9-3"><span>I used exact words from the text about the raft.</span></label>
+          <label><input type="checkbox" data-mark="q9-4"><span>I explained what the river quotes prove, rather than leaving them sitting there.</span></label>
+          <label><input type="checkbox" data-mark="q9-5"><span>I explained what the raft quotes prove.</span></label>
+          <label><input type="checkbox" data-mark="q9-6"><span>I put the two together and said why the crossing would fail.</span></label>
+        </div>
+        <div class="re-acts"><button class="btn re-quiet" data-tell="q9">Show me what the levels mean</button></div>
+        <div class="re-fb" id="re-q9-fb"></div>
+      </div>
+    </div>
+
+    <div class="re-nav"><button class="btn re-quiet" data-go="river">Back a part</button><button class="btn" data-go="send">Next part</button></div>
+  </section>
+
+  <!-- ============ SEND ============ -->
+  <section class="wpanel" id="panel-send" role="tabpanel" aria-labelledby="tab-send" hidden>
+    <div class="weektheme">
+      <h2>Where you got to</h2>
+      <span>Marks out of 30, plus everything you wrote. Gaps are fine.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12 fill-teal">
+        <span class="kicker">Your marks</span>
+        <h3><span class="re-big" id="re-score">0</span> out of 30</h3>
+        <p id="re-score-note">Nothing checked yet. Marks appear as you check answers and tick the self marking boxes.</p>
+        <div class="re-tally" id="re-tally"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Send to Jay</span>
+        <h3>Your answers</h3>
+        <p>Only if you want them on record. Nothing sends on its own.</p>
+        <div class="re-acts">
+          <button class="btn" id="re-gmail">Open in Gmail</button>
+          <button class="btn re-quiet" id="re-mail">Open email app</button>
+          <button class="btn re-quiet" id="re-copy">Copy the text</button>
+          <button class="btn re-quiet" id="re-download">Save as a file</button>
+        </div>
+        <div class="re-fb tell" id="re-send-fb"></div>
+        <textarea id="re-summary" readonly aria-label="A copy of your answers" style="min-height:14rem"></textarea>
+      </div>
+
+      <div class="card w6 fill-orange">
+        <span class="kicker">The one bit worth keeping</span>
+        <h3>Quote it, then say what it proves.</h3>
+        <p>Every evidence question in every English paper you will ever sit is that same move twice. Find the words. Say what they show. Everything else is decoration.</p>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Start over</span>
+        <h3>Clear everything</h3>
+        <p>Wipes every answer on this page from this device. It will ask you twice.</p>
+        <div class="re-acts"><button class="btn re-quiet" id="re-reset">Clear everything</button></div>
+      </div>
+    </div>
+
+    <div class="re-nav"><button class="btn re-quiet" data-go="big">Back a part</button><a class="btn" href="/practice/#english-standard">Back to practice</a></div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- part tabs, same behaviour as the practice hub ---------- */
+var tabs=Array.prototype.slice.call(document.querySelectorAll('.wtab'));
+function partOf(tab){return tab.id.replace('tab-','')}
+function show(part){
+  tabs.forEach(function(t){
+    var panel=document.getElementById(t.getAttribute('aria-controls'));
+    var on=(partOf(t)===part);
+    t.setAttribute('aria-selected',on?'true':'false');
+    t.tabIndex=on?0:-1;
+    panel.hidden=!on;
+    if(on){
+      panel.querySelectorAll('.card').forEach(function(c){
+        c.style.animation='none'; void c.offsetWidth; c.style.animation='';
+      });
+    }
+  });
+  if(part==='send'){drawTally();buildSummary();}
+}
+tabs.forEach(function(tab,i){
+  tab.addEventListener('click',function(){
+    show(partOf(tab));
+    history.replaceState(null,'','#'+partOf(tab));
+  });
+  tab.addEventListener('keydown',function(e){
+    var next=null;
+    if(e.key==='ArrowRight')next=tabs[(i+1)%tabs.length];
+    if(e.key==='ArrowLeft')next=tabs[(i-1+tabs.length)%tabs.length];
+    if(e.key==='Home')next=tabs[0];
+    if(e.key==='End')next=tabs[tabs.length-1];
+    if(next){e.preventDefault();show(partOf(next));next.focus()}
+  });
+});
+document.querySelectorAll('[data-go]').forEach(function(b){
+  b.addEventListener('click',function(){
+    show(b.dataset.go);
+    history.replaceState(null,'','#'+b.dataset.go);
+    document.querySelector('.weekbar').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ---------- state ---------- */
+var KEY='b5-reading-evidence-v1';
+var MAIL='jay.raine@chiltonbridgeschool.co.uk';
+var S={who:'',match:{},q4:'',q5:'',q6:[],q7:'',q8:'',planriver:[],planraft:[],text:{},marks:{},auto:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o){S[k]=o[k];}}}catch(e){}
+var saveTimer=null;
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}},250);}
+
+/* ---------- data ---------- */
+var TERMS=[{id:'evidence',term:'Evidence',ans:'2'},{id:'explicit',term:'Explicit',ans:'1'},
+ {id:'scan',term:'Scan',ans:'4'},{id:'textual',term:'Textual',ans:'3'}];
+var DEFS={'1':'stated directly, no doubt','2':'details taken from the text to prove an idea',
+ '3':'words and phrases straight from the passage','4':'moving your eyes quickly to find one word'};
+
+var Q3=[{id:'a',q:'a) What kind of door stood at the bottom of the steps?',keys:['oak'],
+   show:'A thick oak door. "Oak door" or "thick oak" is fine.'},
+ {id:'b',q:'b) What metal was the heavy lock made of?',keys:['iron'],
+   show:'Black iron. "Iron" on its own is fine.'},
+ {id:'c',q:'c) How many stone chests sat inside the cellar?',keys:['three','3'],
+   show:'Three.'},
+ {id:'d',q:'d) What covered the floor of the room?',keys:['dust'],
+   show:'A thick layer of grey dust. "Dust" or "grey dust" is fine.'}];
+
+var Q4=[{id:'dust',t:'"A thick layer of grey dust"',ok:true},
+ {id:'prints',t:'"No footprints showed in the dirt"',ok:true},
+ {id:'chests',t:'"Three stone chests sat side by side"',ok:false},
+ {id:'stairs',t:'"Bram crept down the winding stone staircase"',ok:false},
+ {id:'lock',t:'"a heavy lock made of black iron"',ok:false}];
+
+var Q5=[{id:'push',t:'"pushed the wood with both hands"',ok:true},
+ {id:'creak',t:'"until it creaked open"',ok:false,near:true},
+ {id:'crept',t:'"Bram crept down the winding stone staircase"',ok:false},
+ {id:'carved',t:'"someone had carved a rough secret message"',ok:false}];
+
+var Q6=[{id:'crash',t:'Crashed against sharp, jagged rocks',ok:true},
+ {id:'foam',t:'Sprayed white foam into the air',ok:true},
+ {id:'rush',t:'Rushed past with great force',ok:true},
+ {id:'roar',t:'Roared, loudly enough to drown out a voice',ok:true},
+ {id:'trail',t:'Ended the mountain trail at the bank',ok:false},
+ {id:'timber',t:'Cracked the timber of the raft',ok:false}];
+
+var Q7=[{id:'a',t:'Quote A: "Cold water"',ok:false},
+ {id:'b',t:'Quote B: "crashed against sharp, jagged rocks"',ok:true}];
+
+var Q8=[{id:'hands',t:'"His hands shook"',ok:true},
+ {id:'straps',t:'"tightened the straps of his orange life jacket"',ok:true},
+ {id:'quietly',t:'"Mark said quietly"',ok:true},
+ {id:'trail',t:'"The mountain trail ended at the river bank"',ok:false},
+ {id:'foam',t:'"White foam sprayed into the air"',ok:false}];
+
+var PLAN_RIVER=[{id:'p1',t:'"crashed against sharp, jagged rocks"'},{id:'p2',t:'"with great force"'},
+ {id:'p3',t:'"The roaring water"'},{id:'p4',t:'"the current rushed past"'}];
+var PLAN_RAFT=[{id:'r1',t:'"small wooden raft"'},{id:'r2',t:'"The timber was old and dry"'},
+ {id:'r3',t:'"thin cracks running down the deck"'}];
+
+/* ---------- helpers ---------- */
+function fb(id,kind,msg){var el=document.getElementById('re-'+id+'-fb');if(!el)return;
+  el.className='re-fb show '+kind;el.textContent=msg;}
+function setAuto(id,n){S.auto[id]=n;save();}
+function norm(s){return String(s||'').toLowerCase();}
+
+/* ---------- q1 matching ---------- */
+var matchWrap=document.getElementById('re-match');
+TERMS.forEach(function(it){
+  var row=document.createElement('div'); row.className='re-row';
+  row.innerHTML='<b>'+it.term+'</b>';
+  var seg=document.createElement('div'); seg.className='re-seg';
+  ['1','2','3','4'].forEach(function(n){
+    var b=document.createElement('button'); b.type='button'; b.textContent=n;
+    b.setAttribute('aria-label',it.term+', definition '+n);
+    b.setAttribute('aria-pressed',S.match[it.id]===n?'true':'false');
+    b.addEventListener('click',function(){
+      S.match[it.id]=n;save();
+      seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    });
+    seg.appendChild(b);
+  });
+  row.appendChild(seg); matchWrap.appendChild(row);
+});
+
+/* ---------- q3 retrieval boxes ---------- */
+var q3wrap=document.getElementById('re-q3');
+Q3.forEach(function(it){
+  var d=document.createElement('div'); d.style.marginTop='.9rem';
+  d.innerHTML='<label for="re-q3'+it.id+'">'+it.q+'</label>';
+  var input=document.createElement('input');
+  input.type='text'; input.id='re-q3'+it.id; input.dataset.save='q3'+it.id;
+  input.setAttribute('aria-label',it.q);
+  d.appendChild(input); q3wrap.appendChild(d);
+});
+
+/* ---------- quote pickers ---------- */
+function quotePicker(elId,items,key,multiple){
+  var wrap=document.getElementById(elId); if(!wrap)return;
+  items.forEach(function(it){
+    var b=document.createElement('button'); b.type='button'; b.className='re-quote'; b.textContent=it.t;
+    var on=multiple?(S[key].indexOf(it.id)>-1):(S[key]===it.id);
+    b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',function(){
+      if(multiple){
+        var a=S[key],i=a.indexOf(it.id);
+        if(i>-1)a.splice(i,1); else a.push(it.id);
+        b.setAttribute('aria-pressed',a.indexOf(it.id)>-1?'true':'false');
+      }else{
+        S[key]=(S[key]===it.id?'':it.id);
+        wrap.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});
+        if(S[key]===it.id)b.setAttribute('aria-pressed','true');
+      }
+      save();
+    });
+    wrap.appendChild(b);
+  });
+}
+quotePicker('re-q4',Q4,'q4',false);
+quotePicker('re-q5',Q5,'q5',false);
+quotePicker('re-q6',Q6,'q6',true);
+quotePicker('re-q8',Q8,'q8',false);
+quotePicker('re-plan-river',PLAN_RIVER,'planriver',true);
+quotePicker('re-plan-raft',PLAN_RAFT,'planraft',true);
+
+var q7wrap=document.getElementById('re-q7');
+Q7.forEach(function(it){
+  var b=document.createElement('button'); b.type='button'; b.className='re-opt'; b.textContent=it.t;
+  b.setAttribute('aria-pressed',S.q7===it.id?'true':'false');
+  b.addEventListener('click',function(){
+    S.q7=it.id;save();
+    q7wrap.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+  });
+  q7wrap.appendChild(b);
+});
+
+/* ---------- text fields, chips, self marking ---------- */
+document.querySelectorAll('[data-save]').forEach(function(el){
+  var k=el.dataset.save;
+  if(S.text[k])el.value=S.text[k];
+  el.addEventListener('input',function(){S.text[k]=el.value;save();if(k==='q9')countWords();});
+});
+document.querySelectorAll('.re-chips').forEach(function(wrap){
+  var k=wrap.dataset.for;
+  wrap.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var field=document.querySelector('[data-save="'+k+'"]'); if(!field)return;
+      var t=field.value.trim();
+      field.value=t?(t+' '+b.textContent):(b.textContent+' ');
+      S.text[k]=field.value;save();field.focus();
+      if(k==='q9')countWords();
+    });
+  });
+});
+document.querySelectorAll('[data-mark]').forEach(function(box){
+  var k=box.dataset.mark;
+  box.checked=!!S.marks[k];
+  box.addEventListener('change',function(){S.marks[k]=box.checked;save();});
+});
+function countWords(){
+  var t=(S.text.q9||'').trim();
+  var n=t?t.split(/\s+/).length:0;
+  var el=document.getElementById('re-q9-count');
+  el.textContent=n+' words'+(n>=150&&n<=250?', which is right in the range':(n>250?', a bit past the range, which is fine if it is all doing a job':''));
+}
+countWords();
+
+/* ---------- checking ---------- */
+var TELL={
+ match:'Evidence is 2, explicit is 1, textual is 3, scan is 4.',
+ q2a:'Read the question first and pull out the key words, so you know what you are scanning for.',
+ q2b:'The real answer is already on the page, so guessing throws away a mark you had. Copying the exact words gives proof that nobody can argue with.',
+ q3:'a) a thick oak door. b) black iron. c) three. d) a thick layer of grey dust.',
+ q4:'Either "A thick layer of grey dust" or "No footprints showed in the dirt".',
+ q4x:'Dust builds up only when a place is left alone, or footprints would be visible if anyone had walked there recently. Then link that to a long time passing with no visitors.',
+ q5:'"pushed the wood with both hands".',
+ q5x:'"Pushed" and "both hands" show force and strength. Link that to effort: the door was heavy or stiff, which is why it creaked open.',
+ q6:'Any two of: crashed against sharp, jagged rocks; sprayed white foam into the air; rushed past with great force; roared loudly.',
+ q7:'Quote B. "Crashed" and "sharp, jagged rocks" describe an impact that could cut or injure. Cold water is only uncomfortable on its own.',
+ q7x:'One mark for why B is stronger, one for why A is weaker.',
+ q8:'"His hands shook", or "tightened the straps of his orange life jacket", or "said quietly".',
+ q8x:'Say how it shows fear, for example shaking hands are a physical sign you cannot control, then connect it to what he fears: drowning, or the power of the river.',
+ q9:'Level 3, 5 to 6 marks: precise evidence for both the river and the raft, and a clear explanation of why the two together make crossing impossible. Level 2, 3 to 4 marks: evidence for both, with at least one quote explained. Level 1, 1 to 2 marks: mentions danger or drops in quotes without explaining them.'
+};
+var CHECK={
+ match:function(){
+   var right=0; TERMS.forEach(function(it){if(S.match[it.id]===it.ans)right++;});
+   setAuto('q1',right);
+   if(right===4)fb('match','ok','All four. ' + right + ' marks out of 4.');
+   else if(right===0)fb('match','nope','None of those line up yet. Another go, or hit just tell me.');
+   else fb('match','nope',right+' out of 4 so far. Worth another look at the others.');
+ },
+ q2a:function(){
+   var v=norm(S.text.q2a);
+   var ok=(v.indexOf('read the question')>-1||v.indexOf('key word')>-1||v.indexOf('keyword')>-1||
+           (v.indexOf('question')>-1&&(v.indexOf('read')>-1||v.indexOf('look')>-1)));
+   setAuto('q2a',ok?1:0);
+   if(ok)fb('q2a','ok','Yes. Read the question and find the key words first. 1 mark.');
+   else if(!v)fb('q2a','nope','Nothing in the box yet. What do you look at before the text?');
+   else fb('q2a','nope','Not quite what the mark scheme wants. It is about the question, not the text.');
+ },
+ q3:function(){
+   var got=0,missed=[];
+   Q3.forEach(function(it){
+     var v=norm(S.text['q3'+it.id]);
+     var ok=it.keys.some(function(k){return v.indexOf(k)>-1;});
+     if(ok)got++; else missed.push(it.id+')');
+   });
+   setAuto('q3',got);
+   if(got===4)fb('q3','ok','All four straight out of the text. 4 marks.');
+   else if(got===0)fb('q3','nope','Nothing matching yet. Every answer is sitting in the extract above.');
+   else fb('q3','nope',got+' out of 4. Still to find: '+missed.join(' ')+'.');
+ },
+ q4:function(){
+   var it=Q4.filter(function(x){return x.id===S.q4;})[0];
+   if(!it){fb('q4','nope','Tap one of the quotes first.');return;}
+   setAuto('q4',it.ok?1:0);
+   if(it.ok)fb('q4','ok','Good quote. 1 mark, and the explanation below is worth 2 more.');
+   else fb('q4','nope','That one is in the text, but it does not show that time has passed. Look again at the second paragraph.');
+ },
+ q5:function(){
+   var it=Q5.filter(function(x){return x.id===S.q5;})[0];
+   if(!it){fb('q5','nope','Tap one of the quotes first.');return;}
+   setAuto('q5',it.ok?1:0);
+   if(it.ok)fb('q5','ok','That is the one. 1 mark, and the explanation below is worth 2 more.');
+   else if(it.near)fb('q5','nope','Close. That tells you the door was stiff, but the effort itself is in what Bram did with his hands.');
+   else fb('q5','nope','Not that one. Find where Bram physically does something to the door.');
+ },
+ q6:function(){
+   var good=S.q6.filter(function(id){var it=Q6.filter(function(x){return x.id===id;})[0];return it&&it.ok;}).length;
+   if(S.q6.length!==2){fb('q6','nope','Pick exactly two, then check again.');return;}
+   setAuto('q6',good);
+   if(good===2)fb('q6','ok','Both from the first paragraph and both things the water did. 2 marks.');
+   else if(good===1)fb('q6','nope','One of those is right. The other is not something the water did.');
+   else fb('q6','nope','Neither of those is the water doing something. Read the first paragraph again.');
+ },
+ q7:function(){
+   if(!S.q7){fb('q7','nope','Pick one first.');return;}
+   var ok=(S.q7==='b');
+   setAuto('q7',0);
+   if(ok)fb('q7','ok','Right. Now the two marks come from explaining why, in the box below.');
+   else fb('q7','nope','Have another think. Which one describes something that could actually injure a person?');
+ },
+ q8:function(){
+   var it=Q8.filter(function(x){return x.id===S.q8;})[0];
+   if(!it){fb('q8','nope','Tap one of the quotes first.');return;}
+   setAuto('q8',it.ok?1:0);
+   if(it.ok)fb('q8','ok','That works. 1 mark, and the explanation below is worth 2 more.');
+   else fb('q8','nope','That is from the wrong paragraph, and it is about the river rather than Mark.');
+ }
+};
+document.querySelectorAll('[data-check]').forEach(function(b){
+  b.addEventListener('click',function(){var f=CHECK[b.dataset.check];if(f)f();});
+});
+document.querySelectorAll('[data-tell]').forEach(function(b){
+  b.addEventListener('click',function(){fb(b.dataset.tell,'tell',TELL[b.dataset.tell]||'');});
+});
+
+/* ---------- initials ---------- */
+document.querySelectorAll('[data-who]').forEach(function(b){
+  b.setAttribute('aria-pressed',(b.dataset.who!==''&&S.who===b.dataset.who)?'true':'false');
+  b.addEventListener('click',function(){
+    S.who=b.dataset.who;save();
+    document.querySelectorAll('[data-who]').forEach(function(x){
+      x.setAttribute('aria-pressed',(x===b&&b.dataset.who!=='')?'true':'false');
+    });
+  });
+});
+
+/* ---------- marks ---------- */
+function selfMarks(prefix){
+  var n=0;
+  for(var k in S.marks){if(S.marks[k]&&k.indexOf(prefix+'-')===0)n++;}
+  return n;
+}
+function auto(id){return S.auto[id]||0;}
+function tallyRows(){
+  return [
+   ['Q1 key terms',auto('q1'),4],
+   ['Q2a before you scan',auto('q2a'),1],
+   ['Q2b why exact words',selfMarks('q2b'),2],
+   ['Q3 retrieval from the cellar',auto('q3'),4],
+   ['Q4 quote and explanation',auto('q4')+selfMarks('q4x'),3],
+   ['Q5 quote and explanation',auto('q5')+selfMarks('q5x'),3],
+   ['Q6 what the water did',auto('q6'),2],
+   ['Q7 which quote is stronger',selfMarks('q7x'),2],
+   ['Q8 quote and explanation',auto('q8')+selfMarks('q8x'),3],
+   ['Q9 the long answer',selfMarks('q9'),6]
+  ];
+}
+function drawTally(){
+  var rows=tallyRows(),got=0,total=0;
+  rows.forEach(function(r){got+=r[1];total+=r[2];});
+  document.getElementById('re-score').textContent=String(got);
+  document.getElementById('re-tally').innerHTML=rows.map(function(r){
+    return '<div><span>'+r[0]+'</span><span>'+r[1]+' / '+r[2]+'</span></div>';
+  }).join('');
+  var note=document.getElementById('re-score-note');
+  if(got===0)note.textContent='Nothing checked yet. Marks appear as you check answers and tick the self marking boxes.';
+  else if(got<12)note.textContent='A start. The quickest marks left are the retrieval ones, where the answer is a word from the text.';
+  else if(got<22)note.textContent='Solid. Most of what is left is explaining what the quotes prove, rather than finding them.';
+  else note.textContent='That is a strong paper. Worth showing Jay.';
+}
+
+/* ---------- summary and send ---------- */
+function quoteText(list,id){var it=list.filter(function(x){return x.id===id;})[0];return it?it.t:'blank';}
+function buildSummary(){
+  var rows=tallyRows(),got=0;
+  rows.forEach(function(r){got+=r[1];});
+  var L=[];
+  L.push('Reading: retrieval and evidence');
+  L.push(S.who?('From: '+S.who):'From: no initials given');
+  L.push('Saved: '+new Date().toLocaleString('en-GB'));
+  L.push('Marks so far: '+got+' out of 30');
+  L.push('');
+  rows.forEach(function(r){L.push('  '+r[0]+': '+r[1]+' / '+r[2]);});
+  L.push('');
+  L.push('Section A');
+  L.push('  Q1 matches: '+TERMS.map(function(it){
+    var v=S.match[it.id];
+    return it.term+' = '+(v?DEFS[v]:'blank')+(v===it.ans?' (correct)':'');
+  }).join('; '));
+  L.push('  Q2a: '+(S.text.q2a||'blank'));
+  L.push('  Q2b: '+(S.text.q2b||'blank'));
+  L.push('');
+  L.push('Section B, the cellar');
+  Q3.forEach(function(it){L.push('  Q3'+it.id+': '+(S.text['q3'+it.id]||'blank'));});
+  L.push('  Q4 quote: '+(S.q4?quoteText(Q4,S.q4):'blank'));
+  L.push('  Q4 explanation: '+(S.text.q4x||'blank'));
+  L.push('  Q5 quote: '+(S.q5?quoteText(Q5,S.q5):'blank'));
+  L.push('  Q5 explanation: '+(S.text.q5x||'blank'));
+  L.push('');
+  L.push('Section C, the river');
+  L.push('  Q6 picked: '+(S.q6.length?S.q6.map(function(id){return quoteText(Q6,id);}).join('; '):'blank'));
+  L.push('  Q7 stronger quote: '+(S.q7?quoteText(Q7,S.q7):'blank'));
+  L.push('  Q7 explanation: '+(S.text.q7x||'blank'));
+  L.push('  Q8 quote: '+(S.q8?quoteText(Q8,S.q8):'blank'));
+  L.push('  Q8 explanation: '+(S.text.q8x||'blank'));
+  L.push('');
+  L.push('Question 9');
+  L.push('  River quotes planned: '+(S.planriver.length?S.planriver.map(function(id){return quoteText(PLAN_RIVER,id);}).join('; '):'blank'));
+  L.push('  Raft quotes planned: '+(S.planraft.length?S.planraft.map(function(id){return quoteText(PLAN_RAFT,id);}).join('; '):'blank'));
+  L.push('  River notes: '+(S.text.planriver||'blank'));
+  L.push('  Raft notes: '+(S.text.planraft||'blank'));
+  L.push('');
+  L.push(S.text.q9||'  (nothing written yet)');
+  document.getElementById('re-summary').value=L.join('\n');
+}
+function subject(){return 'Reading, retrieval and evidence'+(S.who?(' - '+S.who):'');}
+document.getElementById('re-gmail').addEventListener('click',function(){
+  buildSummary();
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(MAIL)+
+    '&su='+encodeURIComponent(subject())+'&body='+encodeURIComponent(document.getElementById('re-summary').value),
+    '_blank','noopener');
+});
+document.getElementById('re-mail').addEventListener('click',function(){
+  buildSummary();
+  window.location.href='mailto:'+MAIL+'?subject='+encodeURIComponent(subject())+
+    '&body='+encodeURIComponent(document.getElementById('re-summary').value);
+});
+document.getElementById('re-copy').addEventListener('click',function(){
+  buildSummary();
+  var ta=document.getElementById('re-summary'); ta.select();
+  var done=false;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value);done=true;}
+  else{try{done=document.execCommand('copy');}catch(e){}}
+  var el=document.getElementById('re-send-fb'); el.className='re-fb show tell';
+  el.textContent=done?'Copied. Paste it wherever you like.':'Could not copy on its own. The text is in the box below, select it and copy.';
+});
+document.getElementById('re-download').addEventListener('click',function(){
+  buildSummary();
+  var blob=new Blob([document.getElementById('re-summary').value],{type:'text/plain'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='reading-evidence-'+(S.who||'anon')+'.txt';
+  document.body.appendChild(a);a.click();a.remove();
+});
+document.getElementById('re-reset').addEventListener('click',function(){
+  var el=document.getElementById('re-send-fb');
+  if(el.dataset.armed!=='1'){
+    el.className='re-fb show nope';
+    el.textContent='That wipes every answer on this page. Press it again if you mean it.';
+    el.dataset.armed='1';return;
+  }
+  try{localStorage.removeItem(KEY);}catch(e){}
+  location.reload();
+});
+
+/* ---------- open on the right part ---------- */
+(function(){
+  var h=(location.hash||'').replace('#','');
+  var ok=false;
+  tabs.forEach(function(t){if(partOf(t)===h)ok=true;});
+  show(ok?h:'words');
+})();
+})();
+</script>
+
+</body>
+</html>
