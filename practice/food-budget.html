@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart food budgeting - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Food budgeting only. Shell, cards and tabs come from style.css */
+.fb{--fb-line:#e3d6cb;--fb-teal:#007291;--fb-orange:#ef7724;--fb-green:#3f7d4e;--fb-plum:#7a4b73;--fb-ink:#23303a}
+.fb-grid{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));margin-top:.9rem}
+.fb-pick{display:flex;flex-direction:column;align-items:center;gap:.3rem;text-align:center;padding:.7rem .45rem;
+  border:2px solid var(--fb-line);border-radius:.9rem;background:#fffdfb;color:#23303a;cursor:pointer;font:inherit;font-size:.92rem}
+.fb-pick svg{width:3.1rem;height:3.1rem}
+.fb-pick b{font-weight:700}
+.fb-pick small{opacity:.75;font-size:.85rem}
+.fb-pick[aria-pressed="true"]{border-color:var(--fb-teal);background:#eaf5f7;box-shadow:inset 0 0 0 2px #cfe8ee}
+.fb-still{cursor:default}
+.fb-rows{display:grid;gap:.6rem;margin-top:.9rem}
+.fb-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border:2px solid var(--fb-line);border-radius:.9rem;padding:.5rem .7rem;background:#fffdfb;color:#23303a}
+.fb-row svg{width:2.5rem;height:2.5rem;flex:0 0 auto}
+.fb-row b{min-width:4.5rem}
+.fb-seg{display:flex;gap:.35rem;margin-left:auto}
+.fb-seg button{font:inherit;font-size:.88rem;padding:.35rem .65rem;border-radius:.6rem;border:2px solid var(--fb-line);background:#fff;color:#23303a;cursor:pointer}
+.fb-seg button[aria-pressed="true"]{background:var(--fb-green);border-color:var(--fb-green);color:#fff}
+.fb-seg button.fb-treat[aria-pressed="true"]{background:var(--fb-plum);border-color:var(--fb-plum)}
+.fb-seg button.fb-letter[aria-pressed="true"]{background:var(--fb-teal);border-color:var(--fb-teal)}
+.fb-mcq{display:grid;gap:.5rem;margin-top:.9rem}
+.fb-opt{display:flex;gap:.6rem;align-items:center;text-align:left;padding:.6rem .7rem;border:2px solid var(--fb-line);
+  border-radius:.8rem;background:#fffdfb;color:#23303a;cursor:pointer;font:inherit;font-size:.97rem}
+.fb-opt svg{width:2.1rem;height:2.1rem;flex:0 0 auto}
+.fb-opt[aria-pressed="true"]{border-color:var(--fb-teal);background:#eaf5f7}
+.fb-acts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+.fb-quiet.fb-quiet{background:#fffdfb;color:#23303a;border:2px solid var(--fb-line)}
+.fb-fb{margin-top:.8rem;padding:.6rem .8rem;border-radius:.8rem;font-size:.96rem;display:none;color:#23303a}
+.fb-fb.show{display:block}
+.fb-fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb-fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb-fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb textarea,.fb input[type=text]{width:100%;font:inherit;font-size:1rem;padding:.6rem .7rem;border:2px solid var(--fb-line);
+  border-radius:.7rem;background:#fffdfb;color:#23303a;margin-top:.6rem}
+.fb textarea{min-height:5.5rem;resize:vertical}
+.fb-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
+.fb-chips button{font:inherit;font-size:.88rem;padding:.32rem .7rem;border-radius:999px;border:2px solid var(--fb-line);
+  background:#fffdfb;color:#23303a;cursor:pointer}
+.fb-who{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.fb-who button{font:inherit;font-size:.95rem;padding:.35rem .8rem;border-radius:999px;border:2px solid rgba(255,255,255,.7);
+  background:#fffdfb;color:#23303a;cursor:pointer}
+.fb-who button[aria-pressed="true"]{background:var(--fb-ink);border-color:var(--fb-ink);color:#fff}
+.fb-till{position:sticky;bottom:.6rem;margin-top:1rem;border:2px solid var(--fb-ink);border-radius:1rem .3rem 1rem .3rem;
+  padding:.8rem .9rem;background:#fffdfb;color:#23303a;box-shadow:0 .35rem 0 rgba(35,48,58,.14)}
+.fb-till-top{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;font-family:Archivo,sans-serif;font-weight:700}
+.fb-total{font-size:1.5rem}
+.fb-bar{height:.8rem;border-radius:999px;background:#f0e5db;margin-top:.5rem;overflow:hidden}
+.fb-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--fb-teal),#39a0b8);transition:width .25s ease}
+.fb-bar.over i{background:linear-gradient(90deg,var(--fb-orange),#d8491f)}
+.fb-till small{display:block;margin-top:.45rem;font-size:.9rem}
+.fb-slip{margin-top:.7rem;font-size:.95rem}
+.fb-slip div{display:flex;justify-content:space-between;gap:.6rem;border-bottom:2px dotted var(--fb-line);padding:.35rem 0}
+.fb-money{display:flex;gap:.45rem;align-items:center;margin-top:.7rem}
+.fb-money span{font-family:Archivo,sans-serif;font-weight:700;font-size:1.15rem}
+.fb-money input[type=text]{max-width:9rem;margin-top:0}
+.fb-viz{margin-top:.9rem}
+.fb-viz svg{width:100%;height:auto;display:block}
+.fb-nav{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin:1.4rem 0 .5rem}
+@media (max-width:32rem){.fb-pick svg{width:2.5rem;height:2.5rem}.fb-seg{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){.fb *{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/ask-jay.html">Ask Jay</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap fb">
+
+  <div class="weektheme">
+    <h2>Smart food budgeting</h2>
+    <span>Preparation for adulthood. Six short parts, one weekly shop, and two people who are about to make a poor decision.</span>
+  </div>
+
+  <div class="board">
+    <div class="card w12 fill-orange">
+      <span class="kicker">Before you start</span>
+      <h3>Supermarkets have thought about this more than you have</h3>
+      <p>That is the whole trick. The layout, the offers, the stuff at eye level: all designed by people whose job is getting your money off you. This is about thinking slightly harder back, using nothing more complicated than adding up.</p>
+      <p>Nothing here is marked and nothing is compulsory. Skip whatever you like. Every question has a "just tell me" button sitting next to the check button, and using it is not cheating, it is reading ahead.</p>
+      <div class="fb-who" id="fb-who" aria-label="Your initials, if you want them saved">
+        <button type="button" data-who="JT">JT</button>
+        <button type="button" data-who="LW">LW</button>
+        <button type="button" data-who="EGW">EGW</button>
+        <button type="button" data-who="LP">LP</button>
+        <button type="button" data-who="LC">LC</button>
+        <button type="button" data-who="HK">HK</button>
+        <button type="button" data-who="">no thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="weekbar" role="tablist" aria-label="Parts">
+    <button class="wtab" role="tab" id="tab-words" aria-controls="panel-words" aria-selected="true">Words<span class="dates">4 to match</span></button>
+    <button class="wtab" role="tab" id="tab-fuel" aria-controls="panel-fuel" aria-selected="false" tabindex="-1">Fuel or fun<span class="dates">questions 5 to 8</span></button>
+    <button class="wtab" role="tab" id="tab-base" aria-controls="panel-base" aria-selected="false" tabindex="-1">The base rule<span class="dates">questions 9 to 12</span></button>
+    <button class="wtab" role="tab" id="tab-five" aria-controls="panel-five" aria-selected="false" tabindex="-1">Five pounds<span class="dates">questions 13 to 16</span></button>
+    <button class="wtab" role="tab" id="tab-yours" aria-controls="panel-yours" aria-selected="false" tabindex="-1">Your meal<span class="dates">questions 17 to 19</span></button>
+    <button class="wtab" role="tab" id="tab-send" aria-controls="panel-send" aria-selected="false" tabindex="-1">Send<span class="dates">if you want to</span></button>
+  </div>
+
+  <!-- ============ WORDS ============ -->
+  <section class="wpanel" id="panel-words" role="tabpanel" aria-labelledby="tab-words">
+    <div class="weektheme">
+      <h2>Four words people use to sound sensible</h2>
+      <span>You will hear all four from adults. Here is what they actually mean.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12 fill-teal">
+        <span class="kicker">Learn a bit</span>
+        <h3>The words</h3>
+        <div class="fb-viz" id="fb-wordviz"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Questions 1 to 4</span>
+        <h3>Which word is which</h3>
+        <p>Tap a letter for each meaning. Change them as often as you like, nothing locks.</p>
+        <div class="fb-rows" id="fb-match"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="match">Check these</button>
+          <button class="btn fb-quiet" data-tell="match">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-match-fb"></div>
+      </div>
+    </div>
+
+    <div class="fb-nav"><span></span><button class="btn" data-go="fuel">Next part</button></div>
+  </section>
+
+  <!-- ============ FUEL OR FUN ============ -->
+  <section class="wpanel" id="panel-fuel" role="tabpanel" aria-labelledby="tab-fuel" hidden>
+    <div class="weektheme">
+      <h2>Everyday fuel and rare treats</h2>
+      <span>Nobody is telling you to never eat a biscuit. It is just that treats come out of what is left, not the other way round.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12 fill-bright">
+        <span class="kicker">Learn a bit</span>
+        <h3>Cost per meal, not cost per item</h3>
+        <p>A bag of oats looks dearer at the till than a chocolate bar. The oats are about twenty breakfasts. The bar is about four minutes.</p>
+        <div class="fb-viz" id="fb-costviz"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 5</span>
+        <h3>Tap the three healthy low cost essentials</h3>
+        <div class="fb-grid" id="fb-q5"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q5">Check these</button>
+          <button class="btn fb-quiet" data-tell="q5">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q5-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 6</span>
+        <h3>Sort these four into fuel or treat</h3>
+        <div class="fb-rows" id="fb-q6"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q6">Check these</button>
+          <button class="btn fb-quiet" data-tell="q6">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q6-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 7</span>
+        <h3>Why does a trolley full of treats wreck a weekly budget?</h3>
+        <p>One or two lines in your own words. This goes to Jay as it is, unmarked.</p>
+        <div class="fb-chips" data-for="q7">
+          <button type="button">Treat food costs more because</button>
+          <button type="button">It does not keep you full, so</button>
+          <button type="button">By Thursday you would</button>
+        </div>
+        <textarea data-save="q7" aria-label="Your answer to question 7"></textarea>
+        <div class="fb-acts"><button class="btn fb-quiet" data-tell="q7">Show me one answer</button></div>
+        <div class="fb-fb" id="fb-q7-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 8</span>
+        <h3>One cheaper swap for a bag of sweets</h3>
+        <p>Tap one of these or write your own.</p>
+        <div class="fb-chips" data-for="q8">
+          <button type="button">Apple</button>
+          <button type="button">Banana</button>
+          <button type="button">Raisins</button>
+          <button type="button">Carrot sticks</button>
+          <button type="button">Popcorn</button>
+        </div>
+        <input type="text" data-save="q8" aria-label="Your swap for a bag of sweets" placeholder="Your swap">
+      </div>
+    </div>
+
+    <div class="fb-nav"><button class="btn fb-quiet" data-go="words">Back a part</button><button class="btn" data-go="base">Next part</button></div>
+  </section>
+
+  <!-- ============ BASE RULE ============ -->
+  <section class="wpanel" id="panel-base" role="tabpanel" aria-labelledby="tab-base" hidden>
+    <div class="weektheme">
+      <h2>The base ingredient rule</h2>
+      <span>Something cheap and filling, a protein, a vegetable. That is most cooking, honestly.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12 fill-plum">
+        <span class="kicker">Learn a bit</span>
+        <h3>Base plus protein plus veg</h3>
+        <div class="fb-viz" id="fb-ruleviz"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 9</span>
+        <h3>What is the base ingredient in a pasta bake?</h3>
+        <div class="fb-mcq" id="fb-q9"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q9">Check this</button>
+          <button class="btn fb-quiet" data-tell="q9">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q9-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 11</span>
+        <h3>Why is a big bag of frozen veg often the better buy?</h3>
+        <div class="fb-mcq" id="fb-q11"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q11">Check this</button>
+          <button class="btn fb-quiet" data-tell="q11">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q11-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 10</span>
+        <h3>Tap two cheap proteins to add to a rice dish</h3>
+        <div class="fb-grid" id="fb-q10"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q10">Check these</button>
+          <button class="btn fb-quiet" data-tell="q10">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q10-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 12</span>
+        <h3>You cook double the rice and beans tonight. How does that save money tomorrow?</h3>
+        <div class="fb-chips" data-for="q12">
+          <button type="button">The extra portion means</button>
+          <button type="button">Tomorrow I would not have to</button>
+        </div>
+        <textarea data-save="q12" aria-label="Your answer to question 12"></textarea>
+        <div class="fb-acts"><button class="btn fb-quiet" data-tell="q12">Show me one answer</button></div>
+        <div class="fb-fb" id="fb-q12-fb"></div>
+      </div>
+    </div>
+
+    <div class="fb-nav"><button class="btn fb-quiet" data-go="fuel">Back a part</button><button class="btn" data-go="five">Next part</button></div>
+  </section>
+
+  <!-- ============ FIVE POUNDS ============ -->
+  <section class="wpanel" id="panel-five" role="tabpanel" aria-labelledby="tab-five" hidden>
+    <div class="weektheme">
+      <h2>Sam and Alex have five pounds</h2>
+      <span>Dinner for two. One of them is reaching for the fizzy pop.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12 fill-yellow">
+        <span class="kicker">The shelf</span>
+        <h3>Today's prices</h3>
+        <div class="fb-grid" id="fb-shelf"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 13</span>
+        <h3>Sam buys the pop at &pound;3.00. What is left of the &pound;5.00?</h3>
+        <div class="fb-money"><span>&pound;</span><input type="text" inputmode="decimal" data-save="q13" aria-label="Money left after buying the fizzy pop" placeholder="0.00"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q13">Check this</button>
+          <button class="btn fb-quiet" data-tell="q13">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q13-fb"></div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 14</span>
+        <h3>With the pop bought, can they still afford rice at &pound;1.20 and eggs at &pound;1.50?</h3>
+        <div class="fb-mcq" id="fb-q14"></div>
+        <p style="margin-top:.9rem">If they are short, by how much? Leave it blank if they are not.</p>
+        <div class="fb-money"><span>&pound;</span><input type="text" inputmode="decimal" data-save="q14short" aria-label="How much short they are" placeholder="0.00"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q14">Check this</button>
+          <button class="btn fb-quiet" data-tell="q14">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q14-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 15</span>
+        <h3>Alex puts the pop back</h3>
+        <p>Build Alex's basket instead: brown rice, frozen peas, eggs. Tap them on and watch the till.</p>
+        <div class="fb-grid" id="fb-basket"></div>
+        <div class="fb-till">
+          <div class="fb-till-top"><span>Basket total</span><span class="fb-total" id="fb-basket-total">&pound;0.00</span></div>
+          <div class="fb-bar" id="fb-basket-bar"><i></i></div>
+          <small id="fb-basket-note">Budget &pound;5.00. Nothing in the basket yet.</small>
+        </div>
+        <p style="margin-top:1rem">Write the total of Alex's three items:</p>
+        <div class="fb-money"><span>&pound;</span><input type="text" inputmode="decimal" data-save="q15" aria-label="Total cost of Alex's basket" placeholder="0.00"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q15">Check this</button>
+          <button class="btn fb-quiet" data-tell="q15">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q15-fb"></div>
+      </div>
+
+      <div class="card w12">
+        <span class="kicker">Question 16</span>
+        <h3>What hot savoury meal comes out of rice, peas and eggs?</h3>
+        <div class="fb-mcq" id="fb-q16"></div>
+        <div class="fb-acts">
+          <button class="btn" data-check="q16">Check this</button>
+          <button class="btn fb-quiet" data-tell="q16">Just tell me</button>
+        </div>
+        <div class="fb-fb" id="fb-q16-fb"></div>
+      </div>
+    </div>
+
+    <div class="fb-nav"><button class="btn fb-quiet" data-go="base">Back a part</button><button class="btn" data-go="yours">Next part</button></div>
+  </section>
+
+  <!-- ============ YOUR MEAL ============ -->
+  <section class="wpanel" id="panel-yours" role="tabpanel" aria-labelledby="tab-yours" hidden>
+    <div class="weektheme">
+      <h2>Your turn, four pounds</h2>
+      <span>Dinner for you and one other person. One base, one protein, at least one vegetable.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12">
+        <span class="kicker">Question 17</span>
+        <h3>The cupboard</h3>
+        <p>The till adds up as you go, so there is no mental arithmetic here unless you want some.</p>
+        <h3 style="margin-top:1rem">Bases</h3>
+        <div class="fb-grid" id="fb-cup-base"></div>
+        <h3 style="margin-top:1.1rem">Proteins</h3>
+        <div class="fb-grid" id="fb-cup-prot"></div>
+        <h3 style="margin-top:1.1rem">Vegetables</h3>
+        <div class="fb-grid" id="fb-cup-veg"></div>
+        <div class="fb-till">
+          <div class="fb-till-top"><span>Your shopping slip</span><span class="fb-total" id="fb-cup-total">&pound;0.00</span></div>
+          <div class="fb-bar" id="fb-cup-bar"><i></i></div>
+          <small id="fb-cup-note">Budget &pound;4.00. Pick a base to start.</small>
+          <div class="fb-slip" id="fb-cup-slip"></div>
+        </div>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 18</span>
+        <h3>What are you calling this dish?</h3>
+        <p>Give it a real name or a stupid one. Both count.</p>
+        <input type="text" data-save="q18" aria-label="The name of your dish" placeholder="Tuna and sweetcorn jacket potato, or whatever you have invented">
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Question 19</span>
+        <h3>Why does writing a list before you go actually save money?</h3>
+        <div class="fb-chips" data-for="q19">
+          <button type="button">A list means I only</button>
+          <button type="button">Without one I would</button>
+        </div>
+        <textarea data-save="q19" aria-label="Your answer to question 19"></textarea>
+        <div class="fb-acts"><button class="btn fb-quiet" data-tell="q19">Show me one answer</button></div>
+        <div class="fb-fb" id="fb-q19-fb"></div>
+      </div>
+    </div>
+
+    <div class="fb-nav"><button class="btn fb-quiet" data-go="five">Back a part</button><button class="btn" data-go="send">Next part</button></div>
+  </section>
+
+  <!-- ============ SEND ============ -->
+  <section class="wpanel" id="panel-send" role="tabpanel" aria-labelledby="tab-send" hidden>
+    <div class="weektheme">
+      <h2>Done, or done enough</h2>
+      <span>Whatever you filled in is below. Gaps are fine.</span>
+    </div>
+
+    <div class="board">
+      <div class="card w12">
+        <span class="kicker">Send to Jay</span>
+        <h3>Your answers</h3>
+        <p>Only if you want them on record. Nothing sends on its own.</p>
+        <div class="fb-acts">
+          <button class="btn" id="fb-gmail">Open in Gmail</button>
+          <button class="btn fb-quiet" id="fb-mail">Open email app</button>
+          <button class="btn fb-quiet" id="fb-copy">Copy the text</button>
+          <button class="btn fb-quiet" id="fb-download">Save as a file</button>
+        </div>
+        <div class="fb-fb tell" id="fb-send-fb"></div>
+        <textarea id="fb-summary" readonly aria-label="A copy of your answers" style="min-height:14rem"></textarea>
+      </div>
+
+      <div class="card w6 fill-teal">
+        <span class="kicker">The one bit worth keeping</span>
+        <h3>Base, protein, veg. Bought in bulk, cooked in double.</h3>
+        <p>That is not a school rule. It is how most people who are good with money actually eat, and it takes about as long as waiting for a takeaway.</p>
+      </div>
+
+      <div class="card w6">
+        <span class="kicker">Start over</span>
+        <h3>Clear everything</h3>
+        <p>Wipes every answer on this page from this device. It will ask you twice.</p>
+        <div class="fb-acts"><button class="btn fb-quiet" id="fb-reset">Clear everything</button></div>
+      </div>
+    </div>
+
+    <div class="fb-nav"><button class="btn fb-quiet" data-go="yours">Back a part</button><a class="btn" href="/practice/#pfa-standard">Back to practice</a></div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- part tabs, same behaviour as the practice hub ---------- */
+var tabs=Array.prototype.slice.call(document.querySelectorAll('.wtab'));
+function partOf(tab){return tab.id.replace('tab-','')}
+function show(part){
+  tabs.forEach(function(t){
+    var panel=document.getElementById(t.getAttribute('aria-controls'));
+    var on=(partOf(t)===part);
+    t.setAttribute('aria-selected',on?'true':'false');
+    t.tabIndex=on?0:-1;
+    panel.hidden=!on;
+    if(on){
+      panel.querySelectorAll('.card').forEach(function(c){
+        c.style.animation='none'; void c.offsetWidth; c.style.animation='';
+      });
+    }
+  });
+  if(part==='send')buildSummary();
+}
+tabs.forEach(function(tab,i){
+  tab.addEventListener('click',function(){
+    show(partOf(tab));
+    history.replaceState(null,'','#'+partOf(tab));
+  });
+  tab.addEventListener('keydown',function(e){
+    var next=null;
+    if(e.key==='ArrowRight')next=tabs[(i+1)%tabs.length];
+    if(e.key==='ArrowLeft')next=tabs[(i-1+tabs.length)%tabs.length];
+    if(e.key==='Home')next=tabs[0];
+    if(e.key==='End')next=tabs[tabs.length-1];
+    if(next){e.preventDefault();show(partOf(next));next.focus()}
+  });
+});
+document.querySelectorAll('[data-go]').forEach(function(b){
+  b.addEventListener('click',function(){
+    show(b.dataset.go);
+    history.replaceState(null,'','#'+b.dataset.go);
+    document.querySelector('.weekbar').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ---------- icons ---------- */
+var I={};
+function svg(inner){return '<svg viewBox="0 0 48 48" role="img" aria-hidden="true">'+inner+'</svg>';}
+I.oats=svg('<path d="M12 16h24v22a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="#e8cfa4"/><path d="M12 16l4-6h16l4 6z" fill="#d8b984"/><rect x="16" y="24" width="16" height="10" rx="2" fill="#fff6e6"/><path d="M20 29h8" stroke="#8a6d3b" stroke-width="2"/>');
+I.cola=svg('<path d="M20 6h8v5l4 5v22a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4V16l4-5z" fill="#4a2b1c"/><rect x="20" y="4" width="8" height="4" rx="1" fill="#c0392b"/><rect x="16" y="22" width="16" height="9" fill="#c0392b"/>');
+I.beans=svg('<rect x="13" y="12" width="22" height="28" rx="3" fill="#c94f3d"/><ellipse cx="24" cy="12" rx="11" ry="3.5" fill="#e0725f"/><rect x="13" y="20" width="22" height="12" fill="#f3e5cf"/><circle cx="19" cy="26" r="2.5" fill="#c94f3d"/><circle cx="26" cy="26" r="2.5" fill="#c94f3d"/>');
+I.biscuits=svg('<rect x="8" y="16" width="32" height="22" rx="3" fill="#8a5a2b"/><rect x="8" y="16" width="32" height="7" fill="#a8703a"/><circle cx="18" cy="30" r="5" fill="#f0d6ab"/><circle cx="30" cy="30" r="5" fill="#f0d6ab"/><circle cx="17" cy="29" r="1" fill="#5a3a18"/><circle cx="31" cy="31" r="1" fill="#5a3a18"/>');
+I.peas=svg('<path d="M12 14h24v24a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="#bfe0c4"/><path d="M12 14l5-6h14l5 6z" fill="#9ccfa6"/><circle cx="19" cy="26" r="3" fill="#3f7d4e"/><circle cx="27" cy="24" r="3" fill="#3f7d4e"/><circle cx="24" cy="32" r="3" fill="#3f7d4e"/>');
+I.carrots=svg('<path d="M24 42L16 20h16z" fill="#ef7724"/><path d="M24 20c-2-6-8-8-8-8s2 6 8 8zM24 20c2-6 8-8 8-8s-2 6-8 8z" fill="#3f7d4e"/>');
+I.eggs=svg('<rect x="8" y="20" width="32" height="16" rx="4" fill="#d9cbbb"/><ellipse cx="17" cy="20" rx="6" ry="8" fill="#f7ead9"/><ellipse cx="31" cy="20" rx="6" ry="8" fill="#f7ead9"/>');
+I.crisps=svg('<path d="M14 14l4-6h12l4 6v20a6 6 0 0 1-6 6h-8a6 6 0 0 1-6-6z" fill="#e8b23a"/><path d="M14 14h20" stroke="#c98f22" stroke-width="2"/><circle cx="24" cy="26" r="6" fill="#fff3d6"/>');
+I.sweets=svg('<ellipse cx="24" cy="24" rx="10" ry="7" fill="#d94f7a"/><path d="M14 24l-8-5v10zM34 24l8-5v10z" fill="#f08bab"/>');
+I.pasta=svg('<rect x="14" y="12" width="20" height="28" rx="4" fill="#f3e7d6" stroke="#d8c5aa" stroke-width="2"/><rect x="13" y="8" width="22" height="5" rx="2" fill="#b98a52"/><rect x="18" y="18" width="4" height="16" rx="2" fill="#e8b23a"/><rect x="24" y="18" width="4" height="16" rx="2" fill="#e8b23a"/><rect x="30" y="20" width="3" height="14" rx="1.5" fill="#e8b23a"/>');
+I.rice=svg('<path d="M14 16h20v22a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4z" fill="#e7dcc6"/><path d="M14 16l4-6h12l4 6z" fill="#d3c4a6"/><circle cx="20" cy="28" r="1.6" fill="#fff"/><circle cx="26" cy="26" r="1.6" fill="#fff"/><circle cx="24" cy="33" r="1.6" fill="#fff"/>');
+I.potato=svg('<ellipse cx="24" cy="26" rx="15" ry="11" fill="#c99b5f"/><circle cx="18" cy="23" r="1.6" fill="#8a6a3b"/><circle cx="27" cy="29" r="1.6" fill="#8a6a3b"/><circle cx="30" cy="22" r="1.4" fill="#8a6a3b"/>');
+I.tuna=svg('<ellipse cx="24" cy="30" rx="14" ry="6" fill="#9aa7ad"/><rect x="10" y="20" width="28" height="10" fill="#9aa7ad"/><ellipse cx="24" cy="20" rx="14" ry="6" fill="#bcc7cc"/><rect x="10" y="24" width="28" height="5" fill="#007291"/>');
+I.tomatoes=svg('<rect x="13" y="12" width="22" height="28" rx="3" fill="#d94f3a"/><ellipse cx="24" cy="12" rx="11" ry="3.5" fill="#ec7c69"/><rect x="13" y="21" width="22" height="11" fill="#f6e7d2"/><circle cx="19" cy="26" r="3" fill="#a8402f"/><circle cx="28" cy="27" r="2.5" fill="#7a4b2a"/>');
+I.sweetcorn=svg('<path d="M13 14h22v24a4 4 0 0 1-4 4H17a4 4 0 0 1-4-4z" fill="#fbe6a8"/><path d="M13 14l5-6h12l5 6z" fill="#f3d27a"/><circle cx="19" cy="26" r="2.2" fill="#e8a92a"/><circle cx="26" cy="24" r="2.2" fill="#e8a92a"/><circle cx="23" cy="32" r="2.2" fill="#e8a92a"/><circle cx="30" cy="31" r="2.2" fill="#e8a92a"/>');
+I.broccoli=svg('<rect x="21" y="26" width="6" height="14" rx="3" fill="#8fb96a"/><circle cx="18" cy="22" r="7" fill="#3f7d4e"/><circle cx="30" cy="22" r="7" fill="#3f7d4e"/><circle cx="24" cy="16" r="8" fill="#4e9059"/>');
+I.lentils=svg('<path d="M13 16h22v22a4 4 0 0 1-4 4H17a4 4 0 0 1-4-4z" fill="#e6b86a"/><path d="M13 16l5-6h12l5 6z" fill="#d3a253"/><circle cx="19" cy="28" r="2" fill="#a8702a"/><circle cx="26" cy="26" r="2" fill="#a8702a"/><circle cx="24" cy="34" r="2" fill="#a8702a"/>');
+I.chickpeas=svg('<rect x="13" y="12" width="22" height="28" rx="3" fill="#c9a227"/><ellipse cx="24" cy="12" rx="11" ry="3.5" fill="#ddb94a"/><rect x="13" y="21" width="22" height="11" fill="#f6eed2"/><circle cx="20" cy="26" r="2.6" fill="#c9a227"/><circle cx="28" cy="27" r="2.6" fill="#c9a227"/>');
+I.steak=svg('<path d="M10 26c0-8 8-12 16-12s12 4 12 10-6 12-14 12-14-4-14-10z" fill="#b04a4a"/><path d="M16 24c4-3 12-3 16 0" stroke="#f0d6cf" stroke-width="3" stroke-linecap="round"/>');
+I.prawns=svg('<path d="M12 20c8-6 20-4 24 4 2 4-2 10-8 10-8 0-12-6-16-6z" fill="#ef7724"/><circle cx="17" cy="22" r="1.6" fill="#fff"/>');
+I.cheese=svg('<path d="M8 30l16-12h16v12z" fill="#f0c344"/><rect x="8" y="30" width="32" height="8" fill="#e0ae2c"/><circle cx="20" cy="33" r="2" fill="#fff0c2"/><circle cx="31" cy="34" r="2.4" fill="#fff0c2"/>');
+I.tomato=svg('<circle cx="24" cy="27" r="12" fill="#d94f3a"/><path d="M20 16c2-3 6-3 8 0" stroke="#3f7d4e" stroke-width="3" stroke-linecap="round"/>');
+I.herbs=svg('<path d="M24 40V18" stroke="#3f7d4e" stroke-width="3"/><path d="M24 22c-6-2-8-8-8-8s7 0 8 8zM24 30c6-2 8-8 8-8s-7 0-8 8z" fill="#4e9059"/>');
+function paintIcons(root){
+  (root||document).querySelectorAll('[data-icon]').forEach(function(el){
+    if(el.dataset.painted)return; el.innerHTML=I[el.dataset.icon]||''; el.dataset.painted='1';
+  });
+}
+
+/* ---------- state ---------- */
+var KEY='b5-foodbudget-v1';
+var MAIL='jay.raine@chiltonbridgeschool.co.uk';
+var P='\u00a3';
+var S={who:'',match:{},q5:[],q6:{},q9:'',q10:[],q11:'',q14:'',q16:'',basket:[],cup:{base:'',prot:'',veg:[]},text:{}};
+try{var raw=localStorage.getItem(KEY); if(raw){var o=JSON.parse(raw); for(var k in o){S[k]=o[k];}}}catch(e){}
+var saveTimer=null;
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}},250);}
+
+/* ---------- data ---------- */
+var Q5=[{id:'oats',label:'Porridge oats',icon:'oats',ok:true},
+ {id:'cola',label:'Big bottle of cola',icon:'cola',ok:false},
+ {id:'beans',label:'Tin of baked beans',icon:'beans',ok:true},
+ {id:'biscuits',label:'Chocolate biscuits',icon:'biscuits',ok:false},
+ {id:'peas',label:'Frozen peas',icon:'peas',ok:true}];
+var Q6=[{id:'crisps',label:'Crisps',icon:'crisps',ans:'treat'},
+ {id:'carrots',label:'Carrots',icon:'carrots',ans:'fuel'},
+ {id:'eggs',label:'Eggs',icon:'eggs',ans:'fuel'},
+ {id:'sweets',label:'Sweets',icon:'sweets',ans:'treat'}];
+var Q9=[{id:'pasta',label:'Pasta',icon:'pasta',ok:true},{id:'cheese',label:'Cheese',icon:'cheese',ok:false},
+ {id:'tomato',label:'Tomato sauce',icon:'tomato',ok:false},{id:'herbs',label:'Herbs',icon:'herbs',ok:false}];
+var Q10=[{id:'eggs',label:'Eggs',icon:'eggs',ok:true},{id:'kidney',label:'Tinned kidney beans',icon:'beans',ok:true},
+ {id:'lentils',label:'Lentils',icon:'lentils',ok:true},{id:'chickpeas',label:'Chickpeas',icon:'chickpeas',ok:true},
+ {id:'steak',label:'Steak',icon:'steak',ok:false},{id:'prawns',label:'King prawns',icon:'prawns',ok:false}];
+var Q11=[{id:'a',label:'It keeps for months, so none of it rots in the drawer and you use only what you need',ok:true},
+ {id:'b',label:'Frozen veg has no vitamins in it at all',ok:false},
+ {id:'c',label:'Fresh veg costs more than frozen veg every time, without exception',ok:false}];
+var Q14=[{id:'yes',label:'Yes, they can afford both',ok:false},{id:'no',label:'No, they have not got enough',ok:true}];
+var Q16=[{id:'fried',label:'Egg fried rice with peas',icon:'rice',ok:true},
+ {id:'pud',label:'Chocolate pudding',icon:'biscuits',ok:false},
+ {id:'salad',label:'Prawn salad',icon:'prawns',ok:false}];
+var SHELF=[{id:'pop',label:'2 bottles of fizzy pop',sub:'Treat drink',icon:'cola',price:3.00},
+ {id:'rice',label:'Brown rice, 1 kg',sub:'Base staple',icon:'rice',price:1.20},
+ {id:'peas',label:'Frozen peas, 900 g',sub:'Vegetable',icon:'peas',price:1.10},
+ {id:'eggs',label:'6 free range eggs',sub:'Protein',icon:'eggs',price:1.50},
+ {id:'choc',label:'Large bar of chocolate',sub:'Treat snack',icon:'biscuits',price:2.20}];
+var CUP={base:[{id:'pasta',label:'Dry pasta',icon:'pasta',price:0.80},
+  {id:'jacket',label:'Jacket potatoes',icon:'potato',price:0.90},
+  {id:'rice',label:'Rice',icon:'rice',price:1.00}],
+ prot:[{id:'beans',label:'Tomatoes and kidney beans',icon:'tomatoes',price:0.90},
+  {id:'tuna',label:'Tin of tuna',icon:'tuna',price:1.10},
+  {id:'eggs',label:'Eggs',icon:'eggs',price:1.30}],
+ veg:[{id:'corn',label:'Frozen sweetcorn',icon:'sweetcorn',price:0.80},
+  {id:'broc',label:'Fresh broccoli',icon:'broccoli',price:0.90},
+  {id:'carrot',label:'Grated carrots',icon:'carrots',price:0.60}]};
+var MEANINGS=[{n:1,t:'Something you mix with other foods to cook a meal',ans:'C'},
+ {n:2,t:'A plan that stops you spending more than you have',ans:'A'},
+ {n:3,t:'A food your body genuinely needs',ans:'B'},
+ {n:4,t:'A written guide of what you will eat this week',ans:'D'}];
+
+/* ---------- helpers ---------- */
+function money(n){return P+n.toFixed(2);}
+function num(v){if(v===undefined||v===null)return NaN;var s=String(v).replace(/[^0-9.]/g,'');if(s==='')return NaN;return parseFloat(s);}
+function near(a,b){return Math.abs(a-b)<0.005;}
+function find(list,id){var r=null;list.forEach(function(x){if(x.id===id)r=x;});return r;}
+function fb(id,kind,msg){var el=document.getElementById('fb-'+id+'-fb');if(!el)return;
+  el.className='fb-fb show '+kind;el.textContent=msg;}
+
+/* ---------- learn visuals, drawn in currentColor so they sit on any card ---------- */
+document.getElementById('fb-wordviz').innerHTML=
+ '<svg viewBox="0 0 560 150" role="img" aria-label="Budget, essential, ingredient and meal plan">'+
+ '<g fill="currentColor" font-family="Archivo,sans-serif">'+
+ (function(){
+   var w=[['A','Budget','how much you','can spend'],['B','Essential','food you need','to stay well'],
+          ['C','Ingredient','one food item','in a dish'],['D','Meal plan','the meals for','the week']];
+   var s='';
+   w.forEach(function(it,i){
+     var x=4+i*140;
+     s+='<rect x="'+x+'" y="16" width="130" height="118" rx="14" fill="rgba(255,255,255,.18)" stroke="currentColor" stroke-width="2"/>';
+     s+='<text x="'+(x+16)+'" y="48" font-size="22" font-weight="800">'+it[0]+'</text>';
+     s+='<text x="'+(x+16)+'" y="76" font-size="16" font-weight="700">'+it[1]+'</text>';
+     s+='<text x="'+(x+16)+'" y="100" font-size="12" font-family="Atkinson Hyperlegible,sans-serif">'+it[2]+'</text>';
+     s+='<text x="'+(x+16)+'" y="118" font-size="12" font-family="Atkinson Hyperlegible,sans-serif">'+it[3]+'</text>';
+   });
+   return s;
+ })()+'</g></svg>';
+
+document.getElementById('fb-costviz').innerHTML=
+ '<svg viewBox="0 0 560 160" role="img" aria-label="A bag of oats is about twenty breakfasts, a chocolate bar is one snack">'+
+ '<g fill="currentColor" font-family="Archivo,sans-serif">'+
+ '<text x="4" y="22" font-size="16" font-weight="700">Bag of oats, '+P+'1.20</text>'+
+ (function(){var s='';for(var i=0;i<20;i++){s+='<circle cx="'+(14+i*27)+'" cy="46" r="8"/>';}return s;})()+
+ '<text x="4" y="78" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">about 20 breakfasts</text>'+
+ '<text x="4" y="114" font-size="16" font-weight="700">Chocolate bar, '+P+'2.20</text>'+
+ '<circle cx="14" cy="134" r="8"/>'+
+ '<text x="32" y="139" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">one snack, and you are hungry again by maths</text>'+
+ '</g></svg>';
+
+document.getElementById('fb-ruleviz').innerHTML=
+ '<svg viewBox="0 0 560 120" role="img" aria-label="Base plus protein plus vegetable makes a meal">'+
+ '<g fill="currentColor" font-family="Archivo,sans-serif" text-anchor="middle">'+
+ '<rect x="4" y="18" width="150" height="76" rx="16" fill="rgba(255,255,255,.18)" stroke="currentColor" stroke-width="2"/>'+
+ '<text x="79" y="52" font-size="17" font-weight="700">Base</text>'+
+ '<text x="79" y="76" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">pasta, rice, spuds</text>'+
+ '<text x="172" y="64" font-size="26" font-weight="800">+</text>'+
+ '<rect x="190" y="18" width="150" height="76" rx="16" fill="rgba(255,255,255,.18)" stroke="currentColor" stroke-width="2"/>'+
+ '<text x="265" y="52" font-size="17" font-weight="700">Protein</text>'+
+ '<text x="265" y="76" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">eggs, beans, lentils</text>'+
+ '<text x="358" y="64" font-size="26" font-weight="800">+</text>'+
+ '<rect x="376" y="18" width="150" height="76" rx="16" fill="rgba(255,255,255,.18)" stroke="currentColor" stroke-width="2"/>'+
+ '<text x="451" y="52" font-size="17" font-weight="700">Veg</text>'+
+ '<text x="451" y="76" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">frozen, on offer</text>'+
+ '<text x="544" y="58" font-size="22" font-weight="800">=</text>'+
+ '<text x="544" y="82" font-size="13" font-family="Atkinson Hyperlegible,sans-serif">tea</text>'+
+ '</g></svg>';
+
+/* ---------- matching ---------- */
+var matchWrap=document.getElementById('fb-match');
+MEANINGS.forEach(function(m){
+  var row=document.createElement('div'); row.className='fb-row';
+  row.innerHTML='<b>'+m.n+'.</b><span style="flex:1 1 13rem">'+m.t+'</span>';
+  var seg=document.createElement('div'); seg.className='fb-seg';
+  ['A','B','C','D'].forEach(function(L){
+    var b=document.createElement('button'); b.type='button'; b.className='fb-letter'; b.textContent=L;
+    b.setAttribute('aria-label','Meaning '+m.n+', answer '+L);
+    b.setAttribute('aria-pressed',S.match[m.n]===L?'true':'false');
+    b.addEventListener('click',function(){
+      S.match[m.n]=L; save();
+      seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    });
+    seg.appendChild(b);
+  });
+  row.appendChild(seg); matchWrap.appendChild(row);
+});
+
+/* ---------- pick grids ---------- */
+function pickGrid(elId,items,opts){
+  var wrap=document.getElementById(elId); if(!wrap)return;
+  items.forEach(function(it){
+    var b=document.createElement('button'); b.type='button'; b.className='fb-pick';
+    b.innerHTML='<span data-icon="'+it.icon+'"></span><b>'+it.label+'</b>'+
+      (it.sub?'<small>'+it.sub+'</small>':'')+(it.price!==undefined?'<small>'+money(it.price)+'</small>':'');
+    b.setAttribute('aria-pressed',opts.isOn(it.id)?'true':'false');
+    b.addEventListener('click',function(){opts.toggle(it.id,b);});
+    wrap.appendChild(b);
+  });
+  paintIcons(wrap);
+}
+function multi(name){return{
+  isOn:function(id){return S[name].indexOf(id)>-1;},
+  toggle:function(id,b){var a=S[name],i=a.indexOf(id);if(i>-1)a.splice(i,1);else a.push(id);
+    b.setAttribute('aria-pressed',a.indexOf(id)>-1?'true':'false');save();}
+};}
+pickGrid('fb-q5',Q5,multi('q5'));
+pickGrid('fb-q10',Q10,multi('q10'));
+
+function mcq(elId,items,key){
+  var wrap=document.getElementById(elId); if(!wrap)return;
+  items.forEach(function(it){
+    var b=document.createElement('button'); b.type='button'; b.className='fb-opt';
+    b.innerHTML=(it.icon?'<span data-icon="'+it.icon+'"></span>':'')+'<span>'+it.label+'</span>';
+    b.setAttribute('aria-pressed',S[key]===it.id?'true':'false');
+    b.addEventListener('click',function(){
+      S[key]=it.id;save();
+      wrap.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    });
+    wrap.appendChild(b);
+  });
+  paintIcons(wrap);
+}
+mcq('fb-q9',Q9,'q9'); mcq('fb-q11',Q11,'q11'); mcq('fb-q14',Q14,'q14'); mcq('fb-q16',Q16,'q16');
+
+/* ---------- sorter ---------- */
+var q6wrap=document.getElementById('fb-q6');
+Q6.forEach(function(it){
+  var row=document.createElement('div'); row.className='fb-row';
+  row.innerHTML='<span data-icon="'+it.icon+'"></span><b>'+it.label+'</b>';
+  var seg=document.createElement('div'); seg.className='fb-seg';
+  [['fuel','Everyday fuel'],['treat','Rare treat']].forEach(function(pair){
+    var b=document.createElement('button'); b.type='button'; b.textContent=pair[1];
+    if(pair[0]==='treat')b.className='fb-treat';
+    b.setAttribute('aria-pressed',S.q6[it.id]===pair[0]?'true':'false');
+    b.addEventListener('click',function(){
+      S.q6[it.id]=pair[0];save();
+      seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    });
+    seg.appendChild(b);
+  });
+  row.appendChild(seg); q6wrap.appendChild(row);
+});
+paintIcons(q6wrap);
+
+/* ---------- shelf and basket ---------- */
+var shelf=document.getElementById('fb-shelf');
+SHELF.forEach(function(it){
+  var d=document.createElement('div'); d.className='fb-pick fb-still';
+  d.innerHTML='<span data-icon="'+it.icon+'"></span><b>'+it.label+'</b><small>'+it.sub+'</small><small>'+money(it.price)+'</small>';
+  shelf.appendChild(d);
+});
+paintIcons(shelf);
+
+pickGrid('fb-basket',SHELF,{
+  isOn:function(id){return S.basket.indexOf(id)>-1;},
+  toggle:function(id,b){var i=S.basket.indexOf(id);if(i>-1)S.basket.splice(i,1);else S.basket.push(id);
+    b.setAttribute('aria-pressed',S.basket.indexOf(id)>-1?'true':'false');save();drawBasket();}
+});
+function drawBasket(){
+  var t=0; S.basket.forEach(function(id){var s=find(SHELF,id); if(s)t+=s.price;});
+  document.getElementById('fb-basket-total').textContent=money(t);
+  var bar=document.getElementById('fb-basket-bar');
+  bar.querySelector('i').style.width=Math.min(100,(t/5)*100)+'%';
+  bar.classList.toggle('over',t>5);
+  var note=document.getElementById('fb-basket-note');
+  if(S.basket.length===0)note.textContent='Budget '+money(5)+'. Nothing in the basket yet.';
+  else if(t>5)note.textContent='That is '+money(t-5)+' over. Something has to go back.';
+  else note.textContent=money(5-t)+' still in your pocket.';
+}
+drawBasket();
+
+/* ---------- cupboard ---------- */
+function cupGrid(elId,items,group){
+  var wrap=document.getElementById(elId);
+  items.forEach(function(it){
+    var b=document.createElement('button'); b.type='button'; b.className='fb-pick';
+    b.innerHTML='<span data-icon="'+it.icon+'"></span><b>'+it.label+'</b><small>'+money(it.price)+'</small>';
+    var on=(group==='veg')?S.cup.veg.indexOf(it.id)>-1:S.cup[group]===it.id;
+    b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',function(){
+      if(group==='veg'){var a=S.cup.veg,i=a.indexOf(it.id);if(i>-1)a.splice(i,1);else a.push(it.id);
+        b.setAttribute('aria-pressed',a.indexOf(it.id)>-1?'true':'false');}
+      else{S.cup[group]=(S.cup[group]===it.id?'':it.id);
+        wrap.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});
+        if(S.cup[group]===it.id)b.setAttribute('aria-pressed','true');}
+      save();drawCup();
+    });
+    wrap.appendChild(b);
+  });
+  paintIcons(wrap);
+}
+cupGrid('fb-cup-base',CUP.base,'base');
+cupGrid('fb-cup-prot',CUP.prot,'prot');
+cupGrid('fb-cup-veg',CUP.veg,'veg');
+function cupItems(){
+  var out=[];
+  var b=find(CUP.base,S.cup.base); if(b)out.push(['Base staple',b]);
+  var p=find(CUP.prot,S.cup.prot); if(p)out.push(['Protein',p]);
+  S.cup.veg.forEach(function(id){var v=find(CUP.veg,id); if(v)out.push(['Vegetable',v]);});
+  return out;
+}
+function drawCup(){
+  var items=cupItems(),t=0;
+  items.forEach(function(r){t+=r[1].price;});
+  document.getElementById('fb-cup-total').textContent=money(t);
+  var bar=document.getElementById('fb-cup-bar');
+  bar.querySelector('i').style.width=Math.min(100,(t/4)*100)+'%';
+  bar.classList.toggle('over',t>4);
+  document.getElementById('fb-cup-slip').innerHTML=items.map(function(r){
+    return '<div><span>'+r[1].label+' <small>('+r[0].toLowerCase()+')</small></span><span>'+money(r[1].price)+'</span></div>';
+  }).join('');
+  var note=document.getElementById('fb-cup-note'),missing=[];
+  if(!S.cup.base)missing.push('no base yet');
+  if(!S.cup.prot)missing.push('no protein yet');
+  if(S.cup.veg.length===0)missing.push('no veg yet');
+  if(t>4)note.textContent='Over by '+money(t-4)+'. Swap something for a cheaper option.';
+  else if(missing.length)note.textContent='Budget '+money(4)+', '+money(4-t)+' left. Still '+missing.join(', ')+'.';
+  else note.textContent='That works. '+money(4-t)+' left over and an actual dinner.';
+}
+drawCup();
+
+/* ---------- text fields and chips ---------- */
+document.querySelectorAll('[data-save]').forEach(function(el){
+  var k=el.dataset.save;
+  if(S.text[k])el.value=S.text[k];
+  el.addEventListener('input',function(){S.text[k]=el.value;save();});
+});
+document.querySelectorAll('.fb-chips').forEach(function(wrap){
+  var k=wrap.dataset.for;
+  wrap.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var field=document.querySelector('[data-save="'+k+'"]'); if(!field)return;
+      var t=field.value.trim();
+      field.value=t?(t+' '+b.textContent):(b.textContent+' ');
+      S.text[k]=field.value;save();field.focus();
+    });
+  });
+});
+
+/* ---------- checking ---------- */
+var TELL={
+ match:'1 is C ingredient, 2 is A budget, 3 is B essential, 4 is D meal plan.',
+ q5:'Porridge oats, tin of baked beans, frozen peas.',
+ q6:'Everyday fuel: carrots and eggs. Rare treat: crisps and sweets.',
+ q7:'Treat food costs more and does not fill you up, so the money runs out before the week does and there is nothing left for proper meals.',
+ q9:'Pasta. The cheese and the sauce sit on top of it.',
+ q10:'Any two of eggs, tinned beans, lentils or chickpeas. Steak and prawns are the expensive ones.',
+ q11:'Frozen veg keeps for months, so it does not rot in the drawer and you only use what you need.',
+ q12:'The second portion is tomorrow lunch or dinner, so you do not buy a meal deal or a takeaway.',
+ q13:P+'5.00 take away '+P+'3.00 leaves '+P+'2.00.',
+ q14:'No. Rice at '+P+'1.20 plus eggs at '+P+'1.50 is '+P+'2.70, and they only have '+P+'2.00 left, so they are 70p short.',
+ q15:P+'1.20 plus '+P+'1.10 plus '+P+'1.50 is '+P+'3.80.',
+ q16:'Egg fried rice with peas. Hot, savoury, about ten minutes.',
+ q19:'A list keeps you to the food you actually planned to cook, so you walk past the expensive things the shop put at eye level.'
+};
+var CHECK={
+ match:function(){
+   var right=0; MEANINGS.forEach(function(m){if(S.match[m.n]===m.ans)right++;});
+   if(right===4)fb('match','ok','All four. On to the interesting bit.');
+   else if(right===0)fb('match','nope','None of those match yet. Another go, or hit just tell me.');
+   else fb('match','nope',right+' of the 4 are right. Worth another look at the others.');
+ },
+ q5:function(){
+   var want=Q5.filter(function(x){return x.ok;}).map(function(x){return x.id;}).sort().join(',');
+   var got=S.q5.slice().sort().join(',');
+   if(got===want)fb('q5','ok','Yes. Oats, beans, peas. Cheap, filling, boringly good for you.');
+   else if(S.q5.length!==3)fb('q5','nope','Pick exactly three, then check again.');
+   else fb('q5','nope','Not quite. One of those three is a treat pretending to be food.');
+ },
+ q6:function(){
+   var wrong=Q6.filter(function(it){return S.q6[it.id]!==it.ans;});
+   if(wrong.length===0)fb('q6','ok','Spot on. Carrots and eggs are fuel, crisps and sweets are the fun extras.');
+   else fb('q6','nope',wrong.length+' still to change. Think about which ones would keep you going until lunch.');
+ },
+ q9:function(){S.q9==='pasta'?fb('q9','ok','Pasta. It is the cheap filling thing everything else sits on.')
+   :fb('q9','nope','Not that one. Ask what makes up most of the bowl.');},
+ q10:function(){
+   var good=S.q10.filter(function(id){var it=find(Q10,id);return it&&it.ok;}).length;
+   var bad=S.q10.filter(function(id){var it=find(Q10,id);return it&&!it.ok;}).length;
+   if(S.q10.length!==2)fb('q10','nope','Pick two, then check again.');
+   else if(good===2)fb('q10','ok','Both cheap and both work in rice. Nicely done.');
+   else if(bad)fb('q10','nope','One of those is good food and bad budgeting. Try the tins.');
+   else fb('q10','nope','Close. Have another look.');
+ },
+ q11:function(){S.q11==='a'?fb('q11','ok','That is the one. Waste is the hidden cost of fresh veg.')
+   :fb('q11','nope','Not that. Think about what happens to fresh veg you forget about.');},
+ q13:function(){var v=num(S.text.q13);
+   if(isNaN(v))fb('q13','nope','Nothing in the box yet. Five pounds, take away three.');
+   else if(near(v,2))fb('q13','ok',P+'2.00 left, which is not enough for dinner, as Sam is about to find out.');
+   else fb('q13','nope','Not quite. '+P+'5.00 take away '+P+'3.00.');},
+ q14:function(){var s=num(S.text.q14short);
+   if(S.q14!=='no'){fb('q14','nope','Add up the rice and the eggs first, then compare that with what is left.');return;}
+   if(isNaN(s))fb('q14','ok','Right, they cannot. Now work out how short they are and pop it in the box.');
+   else if(near(s,0.70))fb('q14','ok','Correct. '+P+'2.70 needed, '+P+'2.00 in hand, 70p short. The pop cost them dinner.');
+   else fb('q14','nope',P+'1.20 plus '+P+'1.50 is '+P+'2.70. Take away the '+P+'2.00 they have left.');},
+ q15:function(){var v=num(S.text.q15);
+   if(isNaN(v))fb('q15','nope','Tap the three items above and the till will do it for you.');
+   else if(near(v,3.80))fb('q15','ok',P+'3.80, and '+P+'1.20 back in the pocket. Alex is the one to shop with.');
+   else fb('q15','nope','Not yet. Add '+P+'1.20, '+P+'1.10 and '+P+'1.50.');},
+ q16:function(){S.q16==='fried'?fb('q16','ok','Egg fried rice. Ten minutes, one pan, feeds two.')
+   :fb('q16','nope','That one is not hot, not savoury, or not made of those three things.');}
+};
+document.querySelectorAll('[data-check]').forEach(function(b){
+  b.addEventListener('click',function(){var f=CHECK[b.dataset.check];if(f)f();});
+});
+document.querySelectorAll('[data-tell]').forEach(function(b){
+  b.addEventListener('click',function(){fb(b.dataset.tell,'tell',TELL[b.dataset.tell]||'');});
+});
+
+/* ---------- initials ---------- */
+document.querySelectorAll('[data-who]').forEach(function(b){
+  b.setAttribute('aria-pressed',(b.dataset.who!==''&&S.who===b.dataset.who)?'true':'false');
+  b.addEventListener('click',function(){
+    S.who=b.dataset.who;save();
+    document.querySelectorAll('[data-who]').forEach(function(x){
+      x.setAttribute('aria-pressed',(x===b&&b.dataset.who!=='')?'true':'false');
+    });
+  });
+});
+
+/* ---------- summary and send ---------- */
+function labelOf(list,id){var it=find(list,id);return it?it.label:'not answered';}
+function buildSummary(){
+  var L=[];
+  L.push('Smart food budgeting, preparation for adulthood');
+  L.push(S.who?('From: '+S.who):'From: no initials given');
+  L.push('Saved: '+new Date().toLocaleString('en-GB'));
+  L.push('');
+  L.push('Part 1, key words');
+  MEANINGS.forEach(function(m){L.push('  '+m.n+'. '+(S.match[m.n]||'blank')+(S.match[m.n]===m.ans?' (correct)':''));});
+  L.push('');
+  L.push('Part 2, fuel or fun');
+  L.push('  Q5 picked: '+(S.q5.length?S.q5.map(function(id){return labelOf(Q5,id);}).join(', '):'blank'));
+  L.push('  Q6 sorted: '+(Object.keys(S.q6).length?Q6.map(function(it){return it.label+' = '+(S.q6[it.id]||'blank');}).join('; '):'blank'));
+  L.push('  Q7: '+(S.text.q7||'blank'));
+  L.push('  Q8 swap: '+(S.text.q8||'blank'));
+  L.push('');
+  L.push('Part 3, base ingredient rule');
+  L.push('  Q9: '+(S.q9?labelOf(Q9,S.q9):'blank'));
+  L.push('  Q10: '+(S.q10.length?S.q10.map(function(id){return labelOf(Q10,id);}).join(', '):'blank'));
+  L.push('  Q11: '+(S.q11?labelOf(Q11,S.q11):'blank'));
+  L.push('  Q12: '+(S.text.q12||'blank'));
+  L.push('');
+  L.push('Part 4, five pounds');
+  L.push('  Q13: '+(S.text.q13?P+S.text.q13:'blank'));
+  L.push('  Q14: '+(S.q14?labelOf(Q14,S.q14):'blank')+', short by '+(S.text.q14short?P+S.text.q14short:'blank'));
+  L.push('  Q15 basket total: '+(S.text.q15?P+S.text.q15:'blank'));
+  L.push('  Q16 meal: '+(S.q16?labelOf(Q16,S.q16):'blank'));
+  L.push('');
+  L.push('Part 5, my meal on '+P+'4.00');
+  var items=cupItems(),t=0;
+  if(items.length){
+    items.forEach(function(r){t+=r[1].price;L.push('  '+r[0]+': '+r[1].label+' '+money(r[1].price));});
+    L.push('  Total: '+money(t)+(t<=4?' (within budget)':' (over budget)'));
+  }else L.push('  nothing chosen yet');
+  L.push('  Q18 dish name: '+(S.text.q18||'blank'));
+  L.push('  Q19: '+(S.text.q19||'blank'));
+  document.getElementById('fb-summary').value=L.join('\n');
+}
+function subject(){return 'Food budgeting'+(S.who?(' - '+S.who):'');}
+document.getElementById('fb-gmail').addEventListener('click',function(){
+  buildSummary();
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(MAIL)+
+    '&su='+encodeURIComponent(subject())+'&body='+encodeURIComponent(document.getElementById('fb-summary').value),
+    '_blank','noopener');
+});
+document.getElementById('fb-mail').addEventListener('click',function(){
+  buildSummary();
+  window.location.href='mailto:'+MAIL+'?subject='+encodeURIComponent(subject())+
+    '&body='+encodeURIComponent(document.getElementById('fb-summary').value);
+});
+document.getElementById('fb-copy').addEventListener('click',function(){
+  buildSummary();
+  var ta=document.getElementById('fb-summary'); ta.select();
+  var done=false;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value);done=true;}
+  else{try{done=document.execCommand('copy');}catch(e){}}
+  var el=document.getElementById('fb-send-fb'); el.className='fb-fb show tell';
+  el.textContent=done?'Copied. Paste it wherever you like.':'Could not copy on its own. The text is in the box below, select it and copy.';
+});
+document.getElementById('fb-download').addEventListener('click',function(){
+  buildSummary();
+  var blob=new Blob([document.getElementById('fb-summary').value],{type:'text/plain'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='food-budgeting-'+(S.who||'anon')+'.txt';
+  document.body.appendChild(a);a.click();a.remove();
+});
+document.getElementById('fb-reset').addEventListener('click',function(){
+  var el=document.getElementById('fb-send-fb');
+  if(el.dataset.armed!=='1'){
+    el.className='fb-fb show nope';
+    el.textContent='That wipes every answer on this page. Press it again if you mean it.';
+    el.dataset.armed='1';return;
+  }
+  try{localStorage.removeItem(KEY);}catch(e){}
+  location.reload();
+});
+
+/* ---------- open on the right part ---------- */
+paintIcons(document);
+(function(){
+  var h=(location.hash||'').replace('#','');
+  var ok=false;
+  tabs.forEach(function(t){if(partOf(t)===h)ok=true;});
+  show(ok?h:'words');
+})();
+})();
+</script>
+
+</body>
+</html>
