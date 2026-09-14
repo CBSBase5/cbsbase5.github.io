@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a training routine - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+.step{
+  background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:26px;margin:0 0 18px;box-shadow:var(--lift);
+}
+.steplab{
+  font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;
+  font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--paper);border:2px solid var(--ink);
+  border-radius:999px;padding:5px 12px;display:inline-block;margin:0 0 12px;
+}
+.step h2{
+  font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;
+  font-size:1.5rem;margin:0 0 8px;
+}
+.step p{max-width:62ch}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.chip-btn{
+  font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;
+  font-size:.85rem;letter-spacing:.04em;text-align:left;
+  background:var(--paper);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:999px;
+  padding:11px 18px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);
+}
+.chip-btn[aria-pressed="true"]{background:var(--yellow)}
+.chip-btn:active{transform:translate(2px,3px);box-shadow:0 0 0}
+
+.grouplab{
+  font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  margin:20px 0 8px;opacity:.75;
+}
+.picked{margin:16px 0 0}
+.pickrow{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border:2px solid var(--ink);border-radius:14px;background:var(--paper);
+  padding:10px 14px;margin:0 0 8px;
+}
+.pickrow .nm{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.95rem;min-width:170px}
+.pickrow input{
+  font-family:var(--body);font-size:1rem;width:110px;
+  border:2px solid var(--ink);border-radius:10px;padding:8px 10px;
+  background:var(--white);color:var(--ink);
+}
+.pickrow .unit{font-size:.9rem;opacity:.75}
+.pickrow .drop{margin-left:auto;background:none;border:none;cursor:pointer;
+  font-family:var(--display);font-size:.8rem;text-decoration:underline;color:var(--ink)}
+
+input[type=text].wide{
+  font-family:var(--body);font-size:1.05rem;width:min(520px,80vw);
+  border:var(--border) solid var(--ink);border-radius:12px;
+  padding:11px 14px;background:var(--paper);color:var(--ink);
+}
+
+.planout{
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  background:var(--paper);padding:22px;margin:0 0 18px;
+}
+.planout h3{
+  font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;
+  font-size:1.25rem;margin:0 0 6px;
+}
+.planout ul{margin:10px 0 0;padding-left:20px}
+.planout li{margin:0 0 6px}
+.goalline{
+  font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:1.1rem;margin:8px 0 0;
+}
+
+.track{overflow-x:auto;margin:16px 0 0}
+.tgrid{border-collapse:separate;border-spacing:6px}
+.tgrid th{
+  font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;
+  font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:0 0 2px;opacity:.7;
+}
+.tgrid td.wk{
+  font-family:var(--display);font-size:.68rem;letter-spacing:.08em;
+  text-transform:uppercase;opacity:.7;padding-right:4px;white-space:nowrap;
+}
+.day{
+  width:44px;height:44px;border:var(--border) solid var(--ink);
+  border-radius:12px;background:var(--white);cursor:pointer;
+  font-family:var(--display);font-size:1.1rem;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;padding:0;
+}
+.day[aria-pressed="true"]{background:var(--orange);color:var(--white)}
+.day.future{opacity:.35;cursor:default}
+.day.today{box-shadow:0 0 0 3px var(--teal)}
+.tally{
+  font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;
+  font-size:2.6rem;line-height:1;margin:18px 0 0;
+}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 0}
+.sentmsg{margin:12px 0 0;font-size:.9rem;color:var(--teal);min-height:1.2em}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>YOUR OWN <span class="accent">TRAINING</span> PLAN</h1>
+    <div class="line">
+      <span class="chip">PE</span>
+      <p>Pick what you are training for, build the routine yourself, then tick off the days you do it.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel panel-teal" id="introPanel">
+    <p><strong>How this works.</strong> Three parts. What you are aiming at, what you are going to do, and a grid to tick. Nothing sends anywhere unless you press the button at the bottom.</p>
+    <p>Whatever you build here is yours. You can change it any time, and days you miss are not failures. The grid is a record of what happened, not a rule about what should have.</p>
+  </div>
+
+  <!-- ============ SUMMARY (shown once a plan exists) ============ -->
+  <div id="summary" hidden>
+    <div class="planout">
+      <span class="steplab">Your plan</span>
+      <h3 id="sumTitle">My routine</h3>
+      <p class="goalline" id="sumGoal"></p>
+      <p id="sumDays" style="margin:6px 0 0"></p>
+      <ul id="sumList"></ul>
+      <div class="rowbtns">
+        <button class="btn btn-quiet" id="editBtn">Change the plan</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="steplab">Part three</span>
+      <h2>The tracker</h2>
+      <p>Tap a day when you have done your routine. Tap it again if you tapped it by mistake. Four weeks at a time, and it remembers itself on this device.</p>
+      <div class="track">
+        <table class="tgrid" id="tgrid"></table>
+      </div>
+      <p class="tally" id="tally">0</p>
+      <p id="tallyword" style="margin:4px 0 0">sessions so far</p>
+      <div class="rowbtns">
+        <button class="btn btn-orange" id="sendBtn">Send it to Jay</button>
+        <button class="btn btn-quiet" id="copyBtn">Copy it instead</button>
+      </div>
+      <p class="sentmsg" id="sentmsg"></p>
+    </div>
+  </div>
+
+  <!-- ============ BUILDER ============ -->
+  <div id="builder">
+
+    <div class="step">
+      <span class="steplab">Part one</span>
+      <h2>What are you training for?</h2>
+      <p>Pick one you could actually notice happening, so you can tell whether the training is doing anything. You can swap it later.</p>
+      <div class="chips" id="goalChips"></div>
+      <p style="margin:14px 0 6px"><strong>Or put your own:</strong></p>
+      <input type="text" class="wide" id="goalOwn" placeholder="I want to be able to ...">
+    </div>
+
+    <details class="acc acc-teal" id="sixpack">
+      <summary>
+        <div class="txt">
+          <h2>About the six pack</h2>
+          <p>Since somebody always asks.</p>
+        </div>
+        <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f7f2e9" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </summary>
+      <div class="body">
+        <p>Everyone already has the muscles. They are called the abdominals and they sit in a sheet down the front of your middle, in sections, which is where the six comes from. Training makes them stronger whether or not you can see them.</p>
+        <p>Whether they show on the outside is mostly down to things training does not control: how your body is built, what stage of growing you are at, and where your body happens to store fat. Two people can do the same routine for a year and only one of them ends up with visible abs. That is not about effort.</p>
+        <p>So it makes a poor goal, because you could do everything right and still not get it. Strength you can actually measure. Pick something like holding a plank for a minute or getting ten press-ups in a row, and train for that instead. The abs get stronger either way.</p>
+        <p>If you want to talk about this properly rather than read a box about it, Jay is around.</p>
+      </div>
+    </details>
+
+    <div class="step">
+      <span class="steplab">Part two</span>
+      <h2>Build the routine</h2>
+      <p>Tap the ones you want in it. Then put in how many or how long, starting from a number you can already manage today rather than the number you wish you could do.</p>
+
+      <p class="grouplab">Middle and core</p>
+      <div class="chips" id="grp-core"></div>
+
+      <p class="grouplab">Whole body strength</p>
+      <div class="chips" id="grp-strength"></div>
+
+      <p class="grouplab">Getting the heart going</p>
+      <div class="chips" id="grp-cardio"></div>
+
+      <div class="picked" id="picked"></div>
+
+      <p class="grouplab">Which days</p>
+      <div class="chips" id="dayChips"></div>
+      <p style="font-size:.92rem;opacity:.8;max-width:62ch">Muscles get stronger on the days off rather than the days on, so the gaps are part of the plan rather than a gap in it.</p>
+
+      <div class="rowbtns">
+        <button class="btn btn-orange" id="saveBtn">Save my plan</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p><strong>Before and after.</strong> A few minutes of moving about before you start, so nothing is cold: walking, star jumps, swinging your arms around. A few minutes of slow stretching afterwards. If something hurts in a sharp way rather than an achy way, stop. That is the whole of the safety talk.</p>
+    </div>
+
+  </div>
+
+  <a class="backlink" href="/practice/#pe">Back to practice</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+var KEY = "base5.pe.trainingplan.v1";
+
+var GOALS = [
+  "Hold a plank for a minute",
+  "Ten press-ups in a row",
+  "Run without stopping for five minutes",
+  "Touch my toes",
+  "Twenty squats without a break",
+  "Do something active three days a week"
+];
+
+var EX = {
+  core: [
+    {id:"situp",  name:"Sit-ups",          unit:"of them"},
+    {id:"plank",  name:"Plank hold",       unit:"seconds"},
+    {id:"deadbug",name:"Dead bugs",        unit:"each side"},
+    {id:"super",  name:"Superman hold",    unit:"seconds"},
+    {id:"legr",   name:"Leg raises",       unit:"of them"},
+    {id:"twist",  name:"Seated twists",    unit:"each side"}
+  ],
+  strength: [
+    {id:"press",  name:"Press-ups",        unit:"of them"},
+    {id:"knee",   name:"Press-ups on knees",unit:"of them"},
+    {id:"squat",  name:"Squats",           unit:"of them"},
+    {id:"lunge",  name:"Lunges",           unit:"each leg"},
+    {id:"bridge", name:"Glute bridges",    unit:"of them"},
+    {id:"wall",   name:"Wall sit",         unit:"seconds"},
+    {id:"dip",    name:"Chair dips",       unit:"of them"}
+  ],
+  cardio: [
+    {id:"walk",   name:"Walk",             unit:"minutes"},
+    {id:"jog",    name:"Jog",              unit:"minutes"},
+    {id:"bike",   name:"Bike",             unit:"minutes"},
+    {id:"swim",   name:"Swim",             unit:"minutes"},
+    {id:"star",   name:"Star jumps",       unit:"of them"},
+    {id:"mount",  name:"Mountain climbers",unit:"of them"},
+    {id:"skip",   name:"Skipping",         unit:"minutes"},
+    {id:"ball",   name:"Football or a sport",unit:"minutes"}
+  ]
+};
+
+var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+var state = {goal:"", goalOwn:"", items:[], days:[], ticks:{}, saved:false};
+
+function load(){
+  try{
+    var s = JSON.parse(localStorage.getItem(KEY));
+    if(s){
+      state = s;
+      state.items = state.items || [];
+      state.days = state.days || [];
+      state.ticks = state.ticks || {};
+    }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)) }catch(e){} }
+
+function findEx(id){
+  var all = EX.core.concat(EX.strength, EX.cardio);
+  for(var i=0;i<all.length;i++) if(all[i].id === id) return all[i];
+  return null;
+}
+function hasItem(id){
+  return state.items.some(function(x){ return x.id === id });
+}
+
+/* ---------- builder ---------- */
+
+function drawGoals(){
+  var box = document.getElementById('goalChips');
+  box.innerHTML = "";
+  GOALS.forEach(function(g){
+    var b = document.createElement('button');
+    b.className = 'chip-btn';
+    b.textContent = g;
+    b.setAttribute('aria-pressed', state.goal === g ? 'true':'false');
+    b.addEventListener('click', function(){
+      state.goal = (state.goal === g) ? "" : g;
+      save(); drawGoals();
+    });
+    box.appendChild(b);
+  });
+}
+
+function drawGroup(which){
+  var box = document.getElementById('grp-' + which);
+  box.innerHTML = "";
+  EX[which].forEach(function(e){
+    var b = document.createElement('button');
+    b.className = 'chip-btn';
+    b.textContent = e.name;
+    b.setAttribute('aria-pressed', hasItem(e.id) ? 'true':'false');
+    b.addEventListener('click', function(){
+      if(hasItem(e.id)){
+        state.items = state.items.filter(function(x){ return x.id !== e.id });
+      }else{
+        state.items.push({id:e.id, amount:""});
+      }
+      save(); drawGroup(which); drawPicked();
+    });
+    box.appendChild(b);
+  });
+}
+
+function drawPicked(){
+  var box = document.getElementById('picked');
+  box.innerHTML = "";
+  if(!state.items.length){
+    box.innerHTML = '<p style="opacity:.7;margin:14px 0 0">Nothing picked yet. Two or three is a real routine, so there is no need for the whole list.</p>';
+    return;
+  }
+  state.items.forEach(function(it){
+    var e = findEx(it.id);
+    if(!e) return;
+    var row = document.createElement('div');
+    row.className = 'pickrow';
+
+    var nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = e.name;
+
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.inputMode = 'numeric';
+    inp.value = it.amount || "";
+    inp.placeholder = "how many";
+    inp.addEventListener('input', function(){ it.amount = inp.value; save() });
+
+    var un = document.createElement('span');
+    un.className = 'unit';
+    un.textContent = e.unit;
+
+    var drop = document.createElement('button');
+    drop.className = 'drop';
+    drop.textContent = 'take it out';
+    drop.addEventListener('click', function(){
+      state.items = state.items.filter(function(x){ return x.id !== it.id });
+      save(); drawGroup('core'); drawGroup('strength'); drawGroup('cardio'); drawPicked();
+    });
+
+    row.appendChild(nm); row.appendChild(inp); row.appendChild(un); row.appendChild(drop);
+    box.appendChild(row);
+  });
+}
+
+function drawDays(){
+  var box = document.getElementById('dayChips');
+  box.innerHTML = "";
+  DAYS.forEach(function(d){
+    var b = document.createElement('button');
+    b.className = 'chip-btn';
+    b.textContent = d;
+    b.setAttribute('aria-pressed', state.days.indexOf(d) > -1 ? 'true':'false');
+    b.addEventListener('click', function(){
+      var at = state.days.indexOf(d);
+      if(at > -1){ state.days.splice(at,1) } else { state.days.push(d) }
+      save(); drawDays();
+    });
+    box.appendChild(b);
+  });
+}
+
+/* ---------- summary and tracker ---------- */
+
+function goalText(){
+  return (state.goalOwn && state.goalOwn.trim()) ? state.goalOwn.trim() : (state.goal || "Not decided yet");
+}
+
+function drawSummary(){
+  document.getElementById('sumGoal').textContent = "Aiming at: " + goalText();
+
+  var d = state.days.length
+    ? DAYS.filter(function(x){ return state.days.indexOf(x) > -1 }).join(", ")
+    : "any day that works";
+  document.getElementById('sumDays').textContent = "Days: " + d;
+
+  var ul = document.getElementById('sumList');
+  ul.innerHTML = "";
+  state.items.forEach(function(it){
+    var e = findEx(it.id);
+    if(!e) return;
+    var li = document.createElement('li');
+    li.textContent = e.name + (it.amount ? ": " + it.amount + " " + e.unit : "");
+    ul.appendChild(li);
+  });
+}
+
+function iso(dt){
+  return dt.getFullYear() + "-" + ("0"+(dt.getMonth()+1)).slice(-2) + "-" + ("0"+dt.getDate()).slice(-2);
+}
+function mondayOf(dt){
+  var d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  var back = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - back);
+  return d;
+}
+
+function drawTracker(){
+  var today = new Date();
+  var todayIso = iso(today);
+  var start = mondayOf(today);
+  start.setDate(start.getDate() - 21);
+
+  var t = document.getElementById('tgrid');
+  t.innerHTML = "";
+
+  var head = document.createElement('tr');
+  head.appendChild(document.createElement('th'));
+  DAYS.forEach(function(d){
+    var th = document.createElement('th');
+    th.textContent = d.slice(0,1);
+    head.appendChild(th);
+  });
+  t.appendChild(head);
+
+  for(var w = 0; w < 4; w++){
+    var tr = document.createElement('tr');
+    var lab = document.createElement('td');
+    lab.className = 'wk';
+    lab.textContent = (w === 3) ? 'this week' : (3 - w) + ' back';
+    tr.appendChild(lab);
+
+    for(var i = 0; i < 7; i++){
+      var cell = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w*7 + i);
+      var key = iso(cell);
+      var td = document.createElement('td');
+      var b = document.createElement('button');
+      b.className = 'day';
+      b.textContent = cell.getDate();
+      b.setAttribute('aria-pressed', state.ticks[key] ? 'true':'false');
+      b.setAttribute('aria-label', key);
+      if(key === todayIso) b.classList.add('today');
+      if(key > todayIso){
+        b.classList.add('future');
+        b.disabled = true;
+      }else{
+        (function(k, btn){
+          btn.addEventListener('click', function(){
+            if(state.ticks[k]){ delete state.ticks[k] } else { state.ticks[k] = true }
+            btn.setAttribute('aria-pressed', state.ticks[k] ? 'true':'false');
+            save(); drawTally();
+          });
+        })(key, b);
+      }
+      td.appendChild(b);
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  drawTally();
+}
+
+function drawTally(){
+  var n = Object.keys(state.ticks).length;
+  document.getElementById('tally').textContent = n;
+  document.getElementById('tallyword').textContent =
+    n === 0 ? "no sessions ticked yet, which is where everyone starts"
+            : (n === 1 ? "session done" : "sessions done");
+}
+
+function buildText(){
+  var L = [];
+  L.push("MY TRAINING PLAN");
+  L.push("Aiming at: " + goalText());
+  L.push("Days: " + (state.days.length ? state.days.join(", ") : "any day that works"));
+  L.push("");
+  L.push("THE ROUTINE");
+  if(!state.items.length) L.push("  Nothing in it yet.");
+  state.items.forEach(function(it){
+    var e = findEx(it.id);
+    if(e) L.push("  " + e.name + (it.amount ? ": " + it.amount + " " + e.unit : ""));
+  });
+  L.push("");
+  var keys = Object.keys(state.ticks).sort();
+  L.push("SESSIONS TICKED: " + keys.length);
+  keys.forEach(function(k){ L.push("  " + k) });
+  return L.join("\n");
+}
+
+/* ---------- wiring ---------- */
+
+function showBuilder(){
+  document.getElementById('builder').hidden = false;
+  document.getElementById('summary').hidden = true;
+  document.getElementById('introPanel').hidden = false;
+  drawGoals(); drawGroup('core'); drawGroup('strength'); drawGroup('cardio');
+  drawPicked(); drawDays();
+  document.getElementById('goalOwn').value = state.goalOwn || "";
+}
+function showPlan(){
+  document.getElementById('builder').hidden = true;
+  document.getElementById('summary').hidden = false;
+  document.getElementById('introPanel').hidden = true;
+  drawSummary(); drawTracker();
+}
+
+document.getElementById('goalOwn').addEventListener('input', function(){
+  state.goalOwn = this.value; save();
+});
+
+document.getElementById('saveBtn').addEventListener('click', function(){
+  state.saved = true; save(); showPlan(); window.scrollTo({top:0});
+});
+document.getElementById('editBtn').addEventListener('click', function(){
+  showBuilder(); window.scrollTo({top:0});
+});
+
+document.getElementById('sendBtn').addEventListener('click', function(){
+  var text = buildText();
+  var subject = "My training plan";
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(TEACHER_EMAIL) +
+    '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(text), '_blank');
+  document.getElementById('sentmsg').textContent = "Gmail should have opened in a new tab. Press send there.";
+});
+document.getElementById('copyBtn').addEventListener('click', function(){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(buildText()).then(function(){
+      document.getElementById('sentmsg').textContent = "Copied. Paste it wherever you want it.";
+    });
+  }
+});
+
+load();
+if(state.saved){ showPlan() } else { showBuilder() }
+
+})();
+</script>
+
+</body>
+</html>
