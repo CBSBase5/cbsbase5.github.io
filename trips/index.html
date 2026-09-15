@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School trips map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="/style.css?v=7">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ---- page specific styles ---- */
+:root{
+  --paper:#fef8f4;
+  --ink:#22303a;
+  --ink-soft:#5d6e78;
+  --teal:#007291;
+  --orange:#ef7724;
+  --line:#e4d8ce;
+  --card:#ffffff;
+}
+*{box-sizing:border-box}
+body.trips{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.5;
+}
+.tw{max-width:1180px;margin:0 auto;padding:20px 18px 60px}
+.thead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 24px;margin:8px 0 18px}
+.thead h1{
+  font-family:Archivo,"Atkinson Hyperlegible",system-ui,sans-serif;
+  font-weight:700;
+  font-size:clamp(28px,5vw,44px);
+  line-height:1.05;
+  letter-spacing:-0.02em;
+  margin:0;
+}
+.thead h1 .bar{
+  display:block;
+  width:74px;
+  height:7px;
+  border-radius:4px;
+  margin-bottom:12px;
+  background:linear-gradient(90deg,var(--teal),var(--orange));
+}
+.tally{margin-left:auto;text-align:right;color:var(--ink-soft);font-size:15px}
+.tally b{display:block;font-family:Archivo,sans-serif;font-size:30px;color:var(--ink);line-height:1}
+.note{
+  border:1px solid var(--line);
+  border-left:6px solid var(--orange);
+  background:#fff;
+  border-radius:12px;
+  padding:12px 16px;
+  margin:0 0 16px;
+  font-size:15px;
+}
+.note b{font-family:Archivo,sans-serif}
+.note a{color:var(--teal)}
+.note.hidden{display:none}
+.bar-tools{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px;align-items:center}
+.field{display:flex;flex-direction:column;gap:3px}
+.field span{font-size:13px;color:var(--ink-soft)}
+select,input[type=search]{
+  font:inherit;font-size:15px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;color:var(--ink);
+  min-width:150px;
+}
+.tbtn{
+  font:inherit;font-size:15px;
+  padding:9px 14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;color:var(--ink);
+  cursor:pointer;
+}
+.tbtn:hover{border-color:var(--teal)}
+.tbtn[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.mapwrap{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#dfe7e9}
+#map{height:min(70vh,620px);width:100%}
+.coordbox{
+  position:absolute;left:12px;bottom:12px;z-index:800;
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;font-size:15px;box-shadow:0 6px 18px rgba(34,48,58,.14);
+  display:none;max-width:260px;
+}
+.coordbox.on{display:block}
+.coordbox code{font-size:16px;color:var(--teal);word-break:break-all}
+.coordbox p{margin:0 0 6px;color:var(--ink-soft);font-size:14px}
+.coordbox .tbtn{margin-top:8px;padding:6px 10px;font-size:14px}
+.list{
+  border:1px solid var(--line);border-radius:18px;background:#fff;
+  max-height:min(70vh,620px);overflow:auto;padding:6px;
+}
+.trip{
+  display:block;width:100%;text-align:left;
+  font:inherit;background:none;border:0;border-bottom:1px solid var(--line);
+  padding:12px 12px;cursor:pointer;border-radius:12px;
+}
+.trip:last-child{border-bottom:0}
+.trip:hover{background:#f6fafb}
+.trip[aria-current=true]{background:#eaf5f8}
+.trip .t{font-family:Archivo,sans-serif;font-weight:600;font-size:17px;display:block}
+.trip .m{color:var(--ink-soft);font-size:14px;display:block;margin-top:2px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:baseline}
+.empty{padding:26px 16px;color:var(--ink-soft);text-align:center}
+.pin{
+  width:20px;height:20px;border-radius:50% 50% 50% 2px;
+  transform:rotate(45deg);
+  border:2px solid #fff;
+  box-shadow:0 2px 6px rgba(34,48,58,.4);
+}
+.leaflet-popup-content{font-family:"Atkinson Hyperlegible",sans-serif;margin:12px 14px;line-height:1.45}
+.leaflet-popup-content h3{font-family:Archivo,sans-serif;font-size:18px;margin:0 0 4px}
+.leaflet-popup-content .m{color:var(--ink-soft);font-size:14px;margin:0 0 6px}
+.leaflet-popup-content img{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+.leaflet-popup-content a{color:var(--teal)}
+details.help{
+  margin-top:22px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;padding:0 16px;
+}
+details.help summary{
+  cursor:pointer;padding:14px 0;font-family:Archivo,sans-serif;font-weight:600;
+}
+details.help ol{margin:0 0 16px;padding-left:22px}
+details.help li{margin-bottom:8px}
+details.help code{background:#f3ece7;padding:1px 5px;border-radius:5px;font-size:14px}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .list{max-height:400px}
+  #map{height:52vh}
+  .tally{margin-left:0;text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="trips">
+<div class="tw">
+
+  <header class="thead">
+    <h1><span class="bar"></span>Where we have been</h1>
+    <div class="tally"><b id="tallyN">0</b><span id="tallyT">trips on the map</span></div>
+  </header>
+
+  <p class="note hidden" id="note"></p>
+
+  <div class="bar-tools">
+    <label class="field"><span>Group</span>
+      <select id="fGroup"><option value="">All groups</option></select>
+    </label>
+    <label class="field"><span>School year</span>
+      <select id="fYear"><option value="">All years</option></select>
+    </label>
+    <label class="field"><span>Search</span>
+      <input type="search" id="fText" placeholder="place, trip or note">
+    </label>
+    <button class="tbtn" id="btnCoords" aria-pressed="false" style="align-self:flex-end">Coordinate finder</button>
+    <button class="tbtn" id="btnRefresh" style="align-self:flex-end">Refresh</button>
+  </div>
+
+  <div class="layout">
+    <div class="mapwrap">
+      <div id="map" role="application" aria-label="Map of school trips"></div>
+      <div class="coordbox" id="coordbox">
+        <p>Tap anywhere on the map to read its coordinates.</p>
+        <code id="coordval">waiting for a tap</code>
+        <button class="tbtn" id="coordcopy">Copy</button>
+      </div>
+    </div>
+    <div class="list" id="list" aria-label="List of trips"></div>
+  </div>
+
+  <details class="help">
+    <summary>Adding a trip</summary>
+    <ol>
+      <li>Open the trips spreadsheet and add one row per trip.</li>
+      <li>Fill in the trip name and the date. A postcode is enough to place the pin.</li>
+      <li>If there is no postcode, use the coordinate finder above, then paste the numbers into the latitude and longitude columns.</li>
+      <li>Photos need a direct image link. A link to anything else still works, it just shows as a link rather than a picture.</li>
+      <li>The map picks up new rows within a few minutes. Press Refresh if it is still showing the old list.</li>
+      <li>Please keep student names off the sheet. Trip, place, date and group only.</li>
+    </ol>
+  </details>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =====================================================================
+   SCHOOL TRIPS MAP
+   Data lives in a Google Sheet. Paste the link below. Either the normal
+   sheet link or a File, Share, Publish to web CSV link will do, though
+   the published CSV link is the one that always works.
+   ===================================================================== */
+
+var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTJGizZpawkbY9c4uETkldtzX-ymnUCxjMoVKDqtwRY6R0qU5OCVzq23qqereHxnKPrj2tYyS193WKt/pub?output=csv";
+
+/* Columns the sheet can use. Only Trip and either Postcode or
+   Latitude + Longitude are needed:
+   Trip | Date | Group | Place | Postcode | Latitude | Longitude | Notes | Photo | Show
+   ===================================================================== */
+
+var STORE = "cbs5.trips.";
+var PALETTE = ["#007291","#ef7724","#7a4fb6","#2f9e5f","#c8453b","#1f6fb2","#b8860b","#0f8c8c"];
+var map, layer, markers = [], trips = [], activeId = null, coordMode = false;
+
+/* ---------- small helpers ---------- */
+
+function el(id){ return document.getElementById(id); }
+
+function readStore(k){
+  try { var v = localStorage.getItem(STORE + k); return v ? JSON.parse(v) : null; }
+  catch(e){ return null; }
+}
+function writeStore(k, v){
+  try { localStorage.setItem(STORE + k, JSON.stringify(v)); } catch(e){}
+}
+
+function say(html){
+  var n = el("note");
+  if(!html){ n.className = "note hidden"; n.innerHTML = ""; return; }
+  n.className = "note";
+  n.innerHTML = html;
+}
+
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* ---------- CSV parsing (handles quoted fields and line breaks) ---------- */
+
+function parseCSV(text){
+  var rows = [], row = [], field = "", i = 0, q = false, c;
+  text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  while(i < text.length){
+    c = text.charAt(i);
+    if(q){
+      if(c === '"'){
+        if(text.charAt(i+1) === '"'){ field += '"'; i += 2; continue; }
+        q = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if(c === '"'){ q = true; i++; continue; }
+    if(c === ","){ row.push(field); field = ""; i++; continue; }
+    if(c === "\n"){ row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
+    field += c; i++;
+  }
+  row.push(field); rows.push(row);
+  return rows.filter(function(r){ return r.join("").trim() !== ""; });
+}
+
+function key(s){ return String(s).toLowerCase().replace(/[^a-z]/g,""); }
+
+var ALIAS = {
+  trip:"trip", tripname:"trip", name:"trip", title:"trip", visit:"trip",
+  date:"date", when:"date",
+  group:"group", classgroup:"group", cls:"group", yeargroup:"group", team:"group", base:"group",
+  place:"place", location:"place", venue:"place", destination:"place",
+  postcode:"postcode", postalcode:"postcode",
+  latitude:"lat", lat:"lat",
+  longitude:"lng", lng:"lng", lon:"lng", long:"lng",
+  notes:"notes", note:"notes", description:"notes", details:"notes",
+  photo:"photo", image:"photo", picture:"photo", link:"photo", photolink:"photo",
+  show:"show", publish:"show", live:"show"
+};
+
+function rowsToTrips(rows){
+  if(!rows.length) return [];
+  var head = rows[0].map(function(h){ return ALIAS[key(h)] || key(h); });
+  var out = [];
+  for(var r = 1; r < rows.length; r++){
+    var o = {};
+    for(var c = 0; c < head.length; c++){
+      if(head[c]) o[head[c]] = (rows[r][c] || "").trim();
+    }
+    if(!o.trip && !o.place) continue;
+    var show = (o.show || "").toLowerCase();
+    if(show === "no" || show === "false" || show === "0" || show === "hidden") continue;
+    o.id = "t" + r;
+    o.trip = o.trip || o.place;
+    out.push(o);
+  }
+  return out;
+}
+
+/* ---------- dates ---------- */
+
+var MONTHS = ["January","February","March","April","May","June",
+              "July","August","September","October","November","December"];
+
+function toDate(s){
+  if(!s) return null;
+  s = s.trim();
+  var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+  if(m){
+    var y = +m[3]; if(y < 100) y += 2000;
+    return new Date(y, +m[2]-1, +m[1]);
+  }
+  var d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function prettyDate(s){
+  var d = toDate(s);
+  if(!d) return s || "";
+  return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
+}
+
+/* School year running September to August, shown as 2026/27 */
+function schoolYear(s){
+  var d = toDate(s);
+  if(!d) return "";
+  var start = d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+  return start + "/" + String(start + 1).slice(2);
+}
+
+/* ---------- geocoding UK postcodes via postcodes.io ---------- */
+
+function cleanPostcode(p){
+  return String(p || "").toUpperCase().replace(/[^A-Z0-9]/g,"");
+}
+
+function geocode(list){
+  var cache = readStore("geo") || {};
+  var need = [];
+  list.forEach(function(t){
+    var lat = parseFloat(t.lat), lng = parseFloat(t.lng);
+    if(!isNaN(lat) && !isNaN(lng)){ t._lat = lat; t._lng = lng; return; }
+    var pc = cleanPostcode(t.postcode);
+    if(!pc) return;
+    if(cache[pc]){ t._lat = cache[pc][0]; t._lng = cache[pc][1]; return; }
+    if(need.indexOf(pc) === -1) need.push(pc);
+  });
+  if(!need.length) return Promise.resolve(list);
+
+  var batches = [];
+  for(var i = 0; i < need.length; i += 90) batches.push(need.slice(i, i + 90));
+
+  return Promise.all(batches.map(function(b){
+    return fetch("https://api.postcodes.io/postcodes", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ postcodes: b })
+    }).then(function(r){ return r.json(); }).catch(function(){ return null; });
+  })).then(function(res){
+    res.forEach(function(j){
+      if(!j || !j.result) return;
+      j.result.forEach(function(item){
+        if(item.result && item.result.latitude){
+          cache[cleanPostcode(item.query)] = [item.result.latitude, item.result.longitude];
+        }
+      });
+    });
+    writeStore("geo", cache);
+    list.forEach(function(t){
+      if(t._lat != null) return;
+      var pc = cleanPostcode(t.postcode);
+      if(cache[pc]){ t._lat = cache[pc][0]; t._lng = cache[pc][1]; }
+    });
+    return list;
+  });
+}
+
+/* ---------- map ---------- */
+
+function makeMap(){
+  map = L.map("map", { scrollWheelZoom:false }).setView([53.0, -2.2], 6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  layer = L.layerGroup().addTo(map);
+  map.on("click", function(e){
+    if(!coordMode) return;
+    var v = e.latlng.lat.toFixed(5) + ", " + e.latlng.lng.toFixed(5);
+    el("coordval").textContent = v;
+  });
+}
+
+function colourFor(group, groups){
+  var i = groups.indexOf(group || "");
+  return PALETTE[(i < 0 ? 0 : i) % PALETTE.length];
+}
+
+function popupHTML(t){
+  var bits = [];
+  bits.push("<h3>" + esc(t.trip) + "</h3>");
+  var meta = [prettyDate(t.date), t.group, t.place].filter(Boolean).map(esc).join(" &middot; ");
+  if(meta) bits.push('<p class="m">' + meta + "</p>");
+  if(t.notes) bits.push("<p>" + esc(t.notes) + "</p>");
+  if(t.photo){
+    if(/\.(jpe?g|png|gif|webp|avif)(\?|$)/i.test(t.photo)){
+      bits.push('<img src="' + esc(t.photo) + '" alt="Photo from ' + esc(t.trip) + '">');
+    } else {
+      bits.push('<p><a href="' + esc(t.photo) + '" target="_blank" rel="noopener">Open photo</a></p>');
+    }
+  }
+  return bits.join("");
+}
+
+/* ---------- rendering ---------- */
+
+function groupsIn(list){
+  var g = [];
+  list.forEach(function(t){ if(g.indexOf(t.group || "") === -1) g.push(t.group || ""); });
+  return g;
+}
+
+function fillFilters(list){
+  var groups = [], years = [];
+  list.forEach(function(t){
+    if(t.group && groups.indexOf(t.group) === -1) groups.push(t.group);
+    var y = schoolYear(t.date);
+    if(y && years.indexOf(y) === -1) years.push(y);
+  });
+  groups.sort();
+  years.sort().reverse();
+  var gs = el("fGroup"), ys = el("fYear");
+  gs.innerHTML = '<option value="">All groups</option>';
+  ys.innerHTML = '<option value="">All years</option>';
+  groups.forEach(function(g){ gs.insertAdjacentHTML("beforeend", '<option>' + esc(g) + '</option>'); });
+  years.forEach(function(y){ ys.insertAdjacentHTML("beforeend", '<option>' + esc(y) + '</option>'); });
+}
+
+function visible(){
+  var g = el("fGroup").value, y = el("fYear").value;
+  var q = el("fText").value.toLowerCase().trim();
+  return trips.filter(function(t){
+    if(t._lat == null) return false;
+    if(g && t.group !== g) return false;
+    if(y && schoolYear(t.date) !== y) return false;
+    if(q){
+      var hay = [t.trip, t.place, t.notes, t.group, t.postcode].join(" ").toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function render(fit){
+  var list = visible();
+  var allGroups = groupsIn(trips);
+  layer.clearLayers();
+  markers = [];
+
+  list.forEach(function(t){
+    var colour = colourFor(t.group, allGroups);
+    var icon = L.divIcon({
+      className:"",
+      html:'<div class="pin" style="background:' + colour + '"></div>',
+      iconSize:[20,20],
+      iconAnchor:[10,18],
+      popupAnchor:[0,-16]
+    });
+    var m = L.marker([t._lat, t._lng], { icon:icon, title:t.trip, riseOnHover:true });
+    m.bindPopup(popupHTML(t));
+    m.on("popupopen", function(){ setActive(t.id, false); });
+    m.addTo(layer);
+    markers.push({ id:t.id, marker:m });
+  });
+
+  var box = el("list");
+  if(!list.length){
+    box.innerHTML = '<p class="empty">No trips match those filters yet.</p>';
+  } else {
+    var sorted = list.slice().sort(function(a,b){
+      var da = toDate(a.date), db = toDate(b.date);
+      if(da && db) return db - da;
+      if(db) return 1;
+      if(da) return -1;
+      return 0;
+    });
+    box.innerHTML = sorted.map(function(t){
+      var colour = colourFor(t.group, allGroups);
+      var meta = [prettyDate(t.date), t.place, t.group].filter(Boolean).map(esc).join(" &middot; ");
+      return '<button class="trip" data-id="' + t.id + '">' +
+             '<span class="t"><span class="dot" style="background:' + colour + '"></span>' + esc(t.trip) + "</span>" +
+             (meta ? '<span class="m">' + meta + "</span>" : "") +
+             "</button>";
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".trip"), function(b){
+      b.addEventListener("click", function(){ setActive(b.getAttribute("data-id"), true); });
+    });
+  }
+
+  el("tallyN").textContent = list.length;
+  el("tallyT").textContent = list.length === 1 ? "trip on the map" : "trips on the map";
+
+  if(fit && markers.length){
+    var g = L.featureGroup(markers.map(function(m){ return m.marker; }));
+    map.fitBounds(g.getBounds().pad(0.2));
+  }
+}
+
+function setActive(id, fly){
+  activeId = id;
+  Array.prototype.forEach.call(document.querySelectorAll(".trip"), function(b){
+    b.setAttribute("aria-current", b.getAttribute("data-id") === id ? "true" : "false");
+  });
+  var hit = markers.filter(function(m){ return m.id === id; })[0];
+  if(hit && fly){
+    map.flyTo(hit.marker.getLatLng(), Math.max(map.getZoom(), 12), { duration:0.6 });
+    hit.marker.openPopup();
+  }
+}
+
+/* ---------- loading ---------- */
+
+function unplacedNote(list){
+  var bad = list.filter(function(t){ return t._lat == null; });
+  if(!bad.length) return "";
+  var names = bad.slice(0,4).map(function(t){ return esc(t.trip); }).join(", ");
+  return "<b>Not on the map yet:</b> " + names + (bad.length > 4 ? " and " + (bad.length - 4) + " more" : "") +
+         ". Add a postcode, or latitude and longitude, to the sheet row.";
+}
+
+function useTrips(list, msg){
+  trips = list;
+  fillFilters(trips);
+  render(true);
+  var extra = unplacedNote(trips);
+  say([msg, extra].filter(Boolean).join(" "));
+}
+
+/* A published CSV link is used as given. A normal sheet link is turned
+   into the two endpoints Google will serve CSV from, tried in order. */
+function csvCandidates(u){
+  if(!u) return [];
+  if(u.indexOf("output=csv") > -1) return [u];
+  /* A published link ending in pubhtml serves a web page, not data */
+  if(u.indexOf("/pubhtml") > -1){
+    var base = u.split("/pubhtml")[0];
+    var pg = u.match(/[#&?]gid=(\d+)/);
+    return [base + "/pub?output=csv&single=true" + (pg ? "&gid=" + pg[1] : "")];
+  }
+  if(u.indexOf("/pub") > -1) return [u + (u.indexOf("?") > -1 ? "&" : "?") + "output=csv"];
+  var m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9\-_]+)/);
+  if(!m) return [u];
+  var g = u.match(/[#&?]gid=(\d+)/);
+  var gid = g ? g[1] : "0";
+  return [
+    "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv&gid=" + gid,
+    "https://docs.google.com/spreadsheets/d/" + m[1] + "/export?format=csv&gid=" + gid
+  ];
+}
+
+function fetchFirst(urls, i){
+  i = i || 0;
+  if(i >= urls.length) return Promise.reject(new Error("no readable source"));
+  var u = urls[i] + (urls[i].indexOf("?") > -1 ? "&" : "?") + "cb=" + Date.now();
+  return fetch(u)
+    .then(function(r){
+      if(!r.ok) throw new Error("status " + r.status);
+      return r.text();
+    })
+    .then(function(text){
+      /* A sign in page comes back as HTML, not CSV */
+      if(/^\s*<(!doctype|html)/i.test(text)) throw new Error("not csv");
+      return text;
+    })
+    .catch(function(){ return fetchFirst(urls, i + 1); });
+}
+
+function load(){
+  var urls = csvCandidates(SHEET_CSV_URL);
+  if(!urls.length){
+    useTrips(demoTrips(), "<b>Sample data.</b> Paste the spreadsheet link into SHEET_CSV_URL near the top of this file and these three pins will be replaced by the real trips.");
+    return;
+  }
+  fetchFirst(urls)
+    .then(function(text){ return rowsToTrips(parseCSV(text)); })
+    .then(function(list){
+      return geocode(list).then(function(done){
+        writeStore("cache", { at: Date.now(), trips: done.map(function(t){
+          return { id:t.id, trip:t.trip, date:t.date, group:t.group, place:t.place,
+                   notes:t.notes, photo:t.photo, postcode:t.postcode, _lat:t._lat, _lng:t._lng };
+        }) });
+        useTrips(done, "");
+      });
+    })
+    .catch(function(){
+      var cached = readStore("cache");
+      if(cached && cached.trips && cached.trips.length){
+        useTrips(cached.trips, "<b>Showing a saved copy</b> from " + prettyDate(new Date(cached.at).toISOString().slice(0,10)) +
+                 ". The spreadsheet could not be reached just now. Press Refresh to try again.");
+      } else {
+        useTrips([], "<b>The trips spreadsheet could not be read.</b> In the sheet, go to File, Share, Publish to web, choose Comma separated values, then paste that link into this page in place of the current one.");
+      }
+    });
+}
+
+function demoTrips(){
+  return [
+    { id:"d1", trip:"Sample: museum visit", date:"2026-05-14", group:"Year 9",
+      place:"Bristol", notes:"Replace this row in the spreadsheet.", _lat:51.4566, _lng:-2.6045 },
+    { id:"d2", trip:"Sample: coast walk", date:"2026-03-02", group:"Year 10",
+      place:"Weston super Mare", notes:"Replace this row in the spreadsheet.", _lat:51.3458, _lng:-2.9770 },
+    { id:"d3", trip:"Sample: city day", date:"2025-11-20", group:"Year 11",
+      place:"Bath", notes:"Replace this row in the spreadsheet.", _lat:51.3811, _lng:-2.3590 }
+  ];
+}
+
+/* ---------- wiring ---------- */
+
+makeMap();
+load();
+
+el("fGroup").addEventListener("change", function(){ render(true); });
+el("fYear").addEventListener("change", function(){ render(true); });
+el("fText").addEventListener("input", function(){ render(false); });
+el("btnRefresh").addEventListener("click", function(){ say(""); load(); });
+
+el("btnCoords").addEventListener("click", function(){
+  coordMode = !coordMode;
+  this.setAttribute("aria-pressed", coordMode ? "true" : "false");
+  el("coordbox").className = coordMode ? "coordbox on" : "coordbox";
+  if(!coordMode) el("coordval").textContent = "waiting for a tap";
+});
+
+el("coordcopy").addEventListener("click", function(){
+  var v = el("coordval").textContent;
+  if(!v || v.indexOf(",") === -1) return;
+  var btn = this;
+  var done = function(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy"; }, 1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(v).then(done, function(){});
+  } else {
+    var ta = document.createElement("textarea");
+    ta.value = v; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+});
+</script>
+</body>
+</html>
