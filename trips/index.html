@@ -203,6 +203,13 @@ details.help code{background:#f3ece7;padding:1px 5px;border-radius:5px;font-size
 
 var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTJGizZpawkbY9c4uETkldtzX-ymnUCxjMoVKDqtwRY6R0qU5OCVzq23qqereHxnKPrj2tYyS193WKt/pub?output=csv";
 
+/* The sheet's own file ID, used as a second way in if the published
+   link does not answer. Needs the sheet shared as anyone with the link
+   can view. Leave it empty to rely on the published link alone. */
+var SHEET_ID = "1pX2X7whiN7dE9ZAgQNQkMmTzTAaEf_ub_JB7ifm2oHE";
+
+var lastError = "";
+
 /* Columns the sheet can use. Only Trip and either Postcode or
    Latitude + Longitude are needed:
    Trip | Date | Group | Place | Postcode | Latitude | Longitude | Notes | Photo | Show
@@ -563,19 +570,30 @@ function fetchFirst(urls, i){
   var u = urls[i] + (urls[i].indexOf("?") > -1 ? "&" : "?") + "cb=" + Date.now();
   return fetch(u)
     .then(function(r){
-      if(!r.ok) throw new Error("status " + r.status);
+      if(!r.ok) throw new Error("Google replied " + r.status);
       return r.text();
     })
     .then(function(text){
       /* A sign in page comes back as HTML, not CSV */
-      if(/^\s*<(!doctype|html)/i.test(text)) throw new Error("not csv");
+      if(/^\s*<(!doctype|html)/i.test(text)) throw new Error("a web page came back instead of data, so that tab is probably not published as CSV");
       return text;
     })
-    .catch(function(){ return fetchFirst(urls, i + 1); });
+    .catch(function(e){
+      lastError = (e && e.message) ? e.message : "the browser blocked the request";
+      if(location.protocol === "file:") lastError = "the page is open as a local file, and browsers will not let a local file fetch anything";
+      console.log("trips map: " + urls[i] + " failed, " + lastError);
+      return fetchFirst(urls, i + 1);
+    });
 }
 
 function load(){
   var urls = csvCandidates(SHEET_CSV_URL);
+  if(SHEET_ID){
+    urls = urls.concat([
+      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv",
+      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=0"
+    ]);
+  }
   if(!urls.length){
     useTrips(demoTrips(), "<b>Sample data.</b> Paste the spreadsheet link into SHEET_CSV_URL near the top of this file and these three pins will be replaced by the real trips.");
     return;
@@ -597,7 +615,8 @@ function load(){
         useTrips(cached.trips, "<b>Showing a saved copy</b> from " + prettyDate(new Date(cached.at).toISOString().slice(0,10)) +
                  ". The spreadsheet could not be reached just now. Press Refresh to try again.");
       } else {
-        useTrips([], "<b>The trips spreadsheet could not be read.</b> In the sheet, go to File, Share, Publish to web, choose Comma separated values, then paste that link into this page in place of the current one.");
+        useTrips([], "<b>The trips spreadsheet could not be read.</b> Reason given: " + esc(lastError || "unknown") +
+                 ". Full detail is in the browser console.");
       }
     });
 }
