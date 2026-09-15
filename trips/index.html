@@ -586,20 +586,76 @@ function fetchFirst(urls, i){
     });
 }
 
+/* Last resort. Google's visualization endpoint will call a function we
+   name, delivered through a script tag, so no cross origin request is
+   made and nothing can block it on that grounds. Needs the sheet set to
+   anyone with the link can view. */
+function jsonpLoad(id){
+  return new Promise(function(resolve, reject){
+    var fn = "tripsFeed" + Date.now();
+    var s = document.createElement("script");
+    var timer = setTimeout(function(){ done(); reject(new Error("the sheet did not answer")); }, 12000);
+
+    function done(){
+      clearTimeout(timer);
+      try { delete window[fn]; } catch(e){ window[fn] = undefined; }
+      if(s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    window[fn] = function(payload){
+      done();
+      try { resolve(gvizRows(payload)); }
+      catch(e){ reject(new Error("the sheet came back in an unexpected shape")); }
+    };
+
+    s.onerror = function(){
+      done();
+      reject(new Error("the sheet is not readable by link, so set sharing to anyone with the link can view"));
+    };
+    s.src = "https://docs.google.com/spreadsheets/d/" + id +
+            "/gviz/tq?tqx=out:json;responseHandler:" + fn + "&headers=1";
+    document.head.appendChild(s);
+  });
+}
+
+function gvizRows(p){
+  var t = p.table, head = [], rows = [];
+  t.cols.forEach(function(c){ head.push(c.label || c.id || ""); });
+  rows.push(head);
+  t.rows.forEach(function(r){
+    var out = [];
+    (r.c || []).forEach(function(cell){
+      if(!cell || cell.v == null){ out.push(""); return; }
+      out.push(cell.f != null ? String(cell.f) : String(cell.v));
+    });
+    rows.push(out);
+  });
+  return rows;
+}
+
 function load(){
   var urls = csvCandidates(SHEET_CSV_URL);
+  if(!urls.length && !SHEET_ID){
+    useTrips(demoTrips(), "<b>Sample data.</b> Paste the spreadsheet link into SHEET_CSV_URL near the top of this file and these three pins will be replaced by the real trips.");
+    return;
+  }
   if(SHEET_ID){
     urls = urls.concat([
       "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv",
       "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=0"
     ]);
   }
-  if(!urls.length){
-    useTrips(demoTrips(), "<b>Sample data.</b> Paste the spreadsheet link into SHEET_CSV_URL near the top of this file and these three pins will be replaced by the real trips.");
-    return;
-  }
-  fetchFirst(urls)
-    .then(function(text){ return rowsToTrips(parseCSV(text)); })
+
+  var first = urls.length
+    ? fetchFirst(urls).then(function(text){ return rowsToTrips(parseCSV(text)); })
+    : Promise.reject(new Error("no link set"));
+
+  first
+    .catch(function(){
+      if(!SHEET_ID) throw new Error(lastError || "no source");
+      console.log("trips map: falling back to the script tag feed");
+      return jsonpLoad(SHEET_ID).then(function(rows){ return rowsToTrips(rows); });
+    })
     .then(function(list){
       return geocode(list).then(function(done){
         writeStore("cache", { at: Date.now(), trips: done.map(function(t){
@@ -609,13 +665,14 @@ function load(){
         useTrips(done, "");
       });
     })
-    .catch(function(){
+    .catch(function(e){
+      var why = (e && e.message && e.message !== "no source") ? e.message : (lastError || "unknown");
       var cached = readStore("cache");
       if(cached && cached.trips && cached.trips.length){
         useTrips(cached.trips, "<b>Showing a saved copy</b> from " + prettyDate(new Date(cached.at).toISOString().slice(0,10)) +
                  ". The spreadsheet could not be reached just now. Press Refresh to try again.");
       } else {
-        useTrips([], "<b>The trips spreadsheet could not be read.</b> Reason given: " + esc(lastError || "unknown") +
+        useTrips([], "<b>The trips spreadsheet could not be read.</b> Reason given: " + esc(why) +
                  ". Full detail is in the browser console.");
       }
     });
