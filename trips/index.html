@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="/style.css?v=7">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 /* ---- page specific styles ---- */
 :root{
@@ -192,7 +192,7 @@ details.help code{background:#f3ece7;padding:1px 5px;border-radius:5px;font-size
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* =====================================================================
    SCHOOL TRIPS MAP
@@ -218,6 +218,7 @@ var lastError = "";
 var STORE = "cbs5.trips.";
 var PALETTE = ["#007291","#ef7724","#7a4fb6","#2f9e5f","#c8453b","#1f6fb2","#b8860b","#0f8c8c"];
 var map, layer, markers = [], trips = [], activeId = null, coordMode = false;
+var MAPOK = (typeof L !== "undefined");
 
 /* ---------- small helpers ---------- */
 
@@ -384,6 +385,13 @@ function geocode(list){
 /* ---------- map ---------- */
 
 function makeMap(){
+  if(!MAPOK){
+    el("map").innerHTML = '<p style="padding:24px;font-size:15px;color:#5d6e78">' +
+      "The map library did not load, so this page is showing the trips as a list only. " +
+      "That usually means leaflet on cdnjs is blocked on this network." + "</p>";
+    el("btnCoords").disabled = true;
+    return;
+  }
   map = L.map("map", { scrollWheelZoom:false }).setView([53.0, -2.2], 6);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -460,6 +468,7 @@ function visible(){
 function render(fit){
   var list = visible();
   var allGroups = groupsIn(trips);
+  if(MAPOK){
   layer.clearLayers();
   markers = [];
 
@@ -478,6 +487,7 @@ function render(fit){
     m.addTo(layer);
     markers.push({ id:t.id, marker:m });
   });
+  }
 
   var box = el("list");
   if(!list.length){
@@ -506,7 +516,7 @@ function render(fit){
   el("tallyN").textContent = list.length;
   el("tallyT").textContent = list.length === 1 ? "trip on the map" : "trips on the map";
 
-  if(fit && markers.length){
+  if(fit && MAPOK && markers.length){
     var g = L.featureGroup(markers.map(function(m){ return m.marker; }));
     map.fitBounds(g.getBounds().pad(0.2));
   }
@@ -517,7 +527,7 @@ function setActive(id, fly){
   Array.prototype.forEach.call(document.querySelectorAll(".trip"), function(b){
     b.setAttribute("aria-current", b.getAttribute("data-id") === id ? "true" : "false");
   });
-  var hit = markers.filter(function(m){ return m.id === id; })[0];
+  var hit = MAPOK ? markers.filter(function(m){ return m.id === id; })[0] : null;
   if(hit && fly){
     map.flyTo(hit.marker.getLatLng(), Math.max(map.getZoom(), 12), { duration:0.6 });
     hit.marker.openPopup();
@@ -604,8 +614,26 @@ function jsonpLoad(id){
 
     window[fn] = function(payload){
       done();
+      console.log("trips map: the feed replied with", payload);
+
+      if(payload && payload.status === "error"){
+        var er = (payload.errors && payload.errors[0]) || {};
+        var msg = er.detailed_message || er.message || er.reason || "the sheet refused the request";
+        msg = String(msg).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+        if(String(er.reason) === "access_denied"){
+          msg = "the sheet is not shared openly enough. In the sheet, Share, General access, set it to Anyone with the link, Viewer";
+        }
+        reject(new Error(msg));
+        return;
+      }
+
+      if(!payload || !payload.table || !payload.table.cols){
+        reject(new Error("the sheet answered but sent no table. Check the first tab has the header row on row one"));
+        return;
+      }
+
       try { resolve(gvizRows(payload)); }
-      catch(e){ reject(new Error("the sheet came back in an unexpected shape")); }
+      catch(e){ reject(new Error("the table could not be read, " + (e && e.message ? e.message : "no detail"))); }
     };
 
     s.onerror = function(){
@@ -621,7 +649,7 @@ function jsonpLoad(id){
 function gvizRows(p){
   var t = p.table, head = [], rows = [];
   t.cols.forEach(function(c){ head.push(c.label || c.id || ""); });
-  rows.push(head);
+
   t.rows.forEach(function(r){
     var out = [];
     (r.c || []).forEach(function(cell){
@@ -630,7 +658,12 @@ function gvizRows(p){
     });
     rows.push(out);
   });
-  return rows;
+
+  /* Column labels come back as A, B, C when the sheet has no header row
+     set. In that case the first data row is the header. */
+  var named = head.filter(function(h){ return h && !/^[A-Z]{1,2}$/.test(h); }).length;
+  if(named < 2 && rows.length) return rows;
+  return [head].concat(rows);
 }
 
 function load(){
