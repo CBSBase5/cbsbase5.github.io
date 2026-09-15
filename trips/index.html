@@ -201,12 +201,14 @@ details.help code{background:#f3ece7;padding:1px 5px;border-radius:5px;font-size
    the published CSV link is the one that always works.
    ===================================================================== */
 
-var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTJGizZpawkbY9c4uETkldtzX-ymnUCxjMoVKDqtwRY6R0qU5OCVzq23qqereHxnKPrj2tYyS193WKt/pub?output=csv";
+var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTJGizZpawkbY9c4uETkldtzX-ymnUCxjMoVKDqtwRY6R0qU5OCVzq23qqereHxnKPrj2tYyS193WKt/pub?gid=1957717891&single=true&output=csv";
 
-/* The sheet's own file ID, used as a second way in if the published
-   link does not answer. Needs the sheet shared as anyone with the link
-   can view. Leave it empty to rely on the published link alone. */
+/* The sheet's own file ID and the trips tab ID, used as a second way in
+   if the published link does not answer. That route needs the sheet
+   shared as anyone with the link can view, which the school account may
+   not allow, so it is a spare rather than the main road. */
 var SHEET_ID = "1pX2X7whiN7dE9ZAgQNQkMmTzTAaEf_ub_JB7ifm2oHE";
+var SHEET_GID = "1957717891";
 
 var lastError = "";
 
@@ -556,18 +558,24 @@ function useTrips(list, msg){
    into the two endpoints Google will serve CSV from, tried in order. */
 function csvCandidates(u){
   if(!u) return [];
-  if(u.indexOf("output=csv") > -1) return [u];
+
   /* A published link ending in pubhtml serves a web page, not data */
-  if(u.indexOf("/pubhtml") > -1){
-    var base = u.split("/pubhtml")[0];
-    var pg = u.match(/[#&?]gid=(\d+)/);
-    return [base + "/pub?output=csv&single=true" + (pg ? "&gid=" + pg[1] : "")];
+  if(u.indexOf("/pubhtml") > -1) u = u.split("/pubhtml")[0] + "/pub";
+
+  if(u.indexOf("/pub") > -1){
+    var base = u.split("/pub")[0] + "/pub";
+    var g = u.match(/[#&?]gid=(\d+)/);
+    var out = [];
+    if(g) out.push(base + "?gid=" + g[1] + "&single=true&output=csv");
+    out.push(base + "?gid=0&single=true&output=csv");
+    out.push(base + "?single=true&output=csv");
+    out.push(base + "?output=csv");
+    return out;
   }
-  if(u.indexOf("/pub") > -1) return [u + (u.indexOf("?") > -1 ? "&" : "?") + "output=csv"];
+
   var m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9\-_]+)/);
   if(!m) return [u];
-  var g = u.match(/[#&?]gid=(\d+)/);
-  var gid = g ? g[1] : "0";
+  var gid = (u.match(/[#&?]gid=(\d+)/) || [,"0"])[1];
   return [
     "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv&gid=" + gid,
     "https://docs.google.com/spreadsheets/d/" + m[1] + "/export?format=csv&gid=" + gid
@@ -641,7 +649,7 @@ function jsonpLoad(id){
       reject(new Error("the sheet is not readable by link, so set sharing to anyone with the link can view"));
     };
     s.src = "https://docs.google.com/spreadsheets/d/" + id +
-            "/gviz/tq?tqx=out:json;responseHandler:" + fn + "&headers=1";
+            "/gviz/tq?tqx=out:json;responseHandler:" + fn + "&headers=1&gid=" + SHEET_GID;
     document.head.appendChild(s);
   });
 }
@@ -674,8 +682,8 @@ function load(){
   }
   if(SHEET_ID){
     urls = urls.concat([
-      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv",
-      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=0"
+      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID,
+      "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=" + SHEET_GID
     ]);
   }
 
