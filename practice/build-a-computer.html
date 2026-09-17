@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a computer - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+.sec{background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:24px;margin:0 0 20px;box-shadow:var(--lift)}
+.seclab{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;
+  font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--paper);border:2px solid var(--ink);
+  border-radius:999px;padding:5px 12px;display:inline-block;margin:0 0 12px}
+.sec h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;
+  font-size:1.5rem;margin:0 0 10px;line-height:1.1}
+.sec p{max-width:64ch}
+
+/* ---- workbench ---- */
+.bench{display:grid;grid-template-columns:minmax(260px,1fr) minmax(280px,1.1fr);gap:18px}
+@media (max-width:820px){ .bench{grid-template-columns:1fr} }
+
+.tray{border:2px solid var(--ink);border-radius:16px;background:var(--paper);padding:14px}
+.trayhead{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;
+  font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:0 0 10px}
+.parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.part{background:var(--white);border:2px solid var(--ink);border-radius:12px;
+  padding:8px 6px 6px;cursor:pointer;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:5px}
+.part svg{width:46px;height:34px;display:block}
+.part span{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;
+  font-size:.66rem;letter-spacing:.03em;line-height:1.15}
+.part.sel{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.part.done{opacity:.35;cursor:default}
+.part.done span::after{content:" - in";opacity:.7}
+
+.pc{border:var(--border) solid var(--ink);border-radius:18px;background:var(--paper);
+  padding:14px;display:flex;flex-direction:column;gap:10px;min-height:340px}
+.pctop{display:flex;justify-content:flex-end;gap:10px}
+.slot{border:3px dashed var(--ink);border-radius:12px;background:rgba(255,255,255,.45);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:8px;cursor:default;text-align:center;opacity:.55}
+.slot .lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;
+  font-size:.6rem;letter-spacing:.1em;text-transform:uppercase}
+.slot.live{opacity:1;border-color:var(--teal);background:var(--white);cursor:pointer;
+  animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,114,145,.45)}50%{box-shadow:0 0 0 7px rgba(0,114,145,0)}}
+.slot.filled{opacity:1;border-style:solid;background:var(--white);cursor:pointer;animation:none}
+.slot svg{width:100%;max-width:120px;height:auto}
+.slot-fan{width:74px;height:74px}
+.slot-mobo{flex:1;padding:12px}
+.slot-mobo.board-on{background:#e9f0e7;border-color:#2f7d52}
+.slot-mobo.board-on>.lab{opacity:.75;margin-bottom:8px}
+.slot-psu{height:66px}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.board .slot{min-height:64px}
+.slot-gpu{grid-column:1 / -1;min-height:56px}
+.ports{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ports .slot{width:96px;height:86px}
+
+.info{border:2px solid var(--ink);border-radius:16px;background:var(--white);padding:16px;margin:14px 0 0}
+.info h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:1.15rem;margin:0 0 2px}
+.info .sub{font-size:.85rem;opacity:.7;margin:0 0 10px}
+.info dl{margin:0}
+.info dt{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;
+  font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin:10px 0 3px}
+.info dd{margin:0;font-size:.98rem}
+.msg{margin:12px 0 0;font-size:.95rem;min-height:1.4em}
+.msg.good{color:var(--teal);font-variation-settings:"wght" 700}
+.msg.soft{opacity:.85}
+
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
+.bar .track{flex:1;min-width:140px;height:12px;border:2px solid var(--ink);
+  border-radius:999px;background:var(--white);overflow:hidden}
+.bar .track span{display:block;height:100%;width:0;background:var(--orange);transition:width .3s}
+.bar .count{font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+
+/* ---- boot ---- */
+.powerbtn{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;
+  font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--orange);color:var(--white);border:var(--border) solid var(--ink);
+  border-radius:999px;padding:14px 28px;cursor:pointer;box-shadow:4px 5px 0 var(--ink)}
+.powerbtn:disabled{background:var(--paper);color:var(--ink);opacity:.5;cursor:default;box-shadow:none}
+.powerbtn:not(:disabled):active{transform:translate(3px,4px);box-shadow:0 0 0}
+.screen{border:var(--border) solid var(--ink);border-radius:14px;background:#0a2f38;
+  color:#b9f3c9;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem;
+  padding:16px;margin:16px 0 0;min-height:150px;line-height:1.6}
+.screen p{margin:0 0 4px;max-width:none}
+.screen .dim{opacity:.55}
+
+/* ---- questions ---- */
+.q{border:2px solid var(--ink);border-radius:16px;background:var(--paper);
+  padding:16px 18px;margin:14px 0 0}
+.q h3{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:1rem;margin:0 0 10px;line-height:1.3}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;
+  font-size:.85rem;background:var(--white);color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:999px;
+  padding:10px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);text-align:left}
+.opt:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.opt.on{background:var(--yellow)}
+.opt.miss{opacity:.5}
+.fb{margin:9px 0 0;font-size:.93rem;min-height:1.3em}
+.fb.good{color:var(--teal);font-variation-settings:"wght" 700}
+.fb.soft{opacity:.8}
+
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
+.sentmsg{margin:12px 0 0;font-size:.9rem;color:var(--teal);min-height:1.2em}
+.locked{opacity:.45}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>BUILD A <span class="accent">COMPUTER</span></h1>
+    <div class="line">
+      <span class="chip">Digital media</span>
+      <p>An empty case, a tray of parts, and nothing that can be broken by getting it wrong.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel panel-teal">
+    <p><strong>What this is.</strong> A computer with the lid off. Pick up a part, read what it is for, and put it where it goes. Parts that are not ready yet will not go in, and nothing explodes, because this one is made of pixels.</p>
+    <p>Four stages, about half an hour if you do all of them. Stop after any stage. It saves itself, so you can come back to a half built machine and carry on.</p>
+  </div>
+
+  <!-- ================= STAGE 1 ================= -->
+  <div class="sec" id="s1">
+    <span class="seclab">Stage one</span>
+    <h2>Inside the box</h2>
+    <p>Tap a part in the tray. It will tell you what it does and where it lives, and the place it goes will start pulsing. Tap that place to fit it.</p>
+
+    <div class="bar">
+      <span class="count" id="c1">0 of 8 fitted</span>
+      <div class="track"><span id="t1"></span></div>
+    </div>
+
+    <div class="bench" style="margin-top:14px">
+      <div class="tray">
+        <p class="trayhead">Parts tray</p>
+        <div class="parts" id="tray"></div>
+      </div>
+
+      <div class="pc" id="pc">
+        <div class="pctop">
+          <div class="slot slot-fan" data-slot="fan"><span class="lab">Fan<br>mount</span></div>
+        </div>
+        <div class="slot slot-mobo" data-slot="mobo">
+          <span class="lab">Motherboard tray</span>
+          <div class="board" id="board" hidden>
+            <div class="slot" data-slot="cpu"><span class="lab">CPU socket</span></div>
+            <div class="slot" data-slot="cooler"><span class="lab">On top of the CPU</span></div>
+            <div class="slot" data-slot="ram"><span class="lab">Memory slots</span></div>
+            <div class="slot" data-slot="ssd"><span class="lab">Storage slot</span></div>
+            <div class="slot slot-gpu" data-slot="gpu"><span class="lab">Long expansion slot</span></div>
+          </div>
+        </div>
+        <div class="slot slot-psu" data-slot="psu"><span class="lab">Power supply bay</span></div>
+      </div>
+    </div>
+
+    <div class="info" id="info">
+      <h3 id="iname">Nothing picked up yet</h3>
+      <p class="sub" id="isub">Tap any part in the tray to have a look at it.</p>
+      <dl id="idl" hidden>
+        <dt>Its job</dt><dd id="ijob"></dd>
+        <dt>Where it goes</dt><dd id="iwhere"></dd>
+        <dt>Fitting it</dt><dd id="ihow"></dd>
+      </dl>
+      <p class="msg" id="imsg"></p>
+    </div>
+  </div>
+
+  <!-- ================= STAGE 2 ================= -->
+  <div class="sec locked" id="s2">
+    <span class="seclab">Stage two</span>
+    <h2>Outside the box</h2>
+    <p id="s2lead">This one opens once the box is built.</p>
+
+    <div id="s2body" hidden>
+      <p>The machine is finished and completely useless, because nothing can get information in or out of it. Parts that carry information in are called <strong>input</strong>. Parts that carry it back out are <strong>output</strong>.</p>
+
+      <div class="bench" style="margin-top:14px">
+        <div class="tray">
+          <p class="trayhead">The rest of it</p>
+          <div class="parts" id="tray2"></div>
+        </div>
+        <div class="pc" style="min-height:0">
+          <p class="trayhead" style="text-align:center">Back of the case</p>
+          <div class="ports" id="ports">
+            <div class="slot" data-slot="port1"><span class="lab">Port</span></div>
+            <div class="slot" data-slot="port2"><span class="lab">Port</span></div>
+            <div class="slot" data-slot="port3"><span class="lab">Port</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info" id="info2">
+        <h3 id="i2name">Nothing picked up yet</h3>
+        <p class="sub" id="i2sub">Tap one of the three to have a look.</p>
+        <dl id="i2dl" hidden>
+          <dt>Its job</dt><dd id="i2job"></dd>
+          <dt>Plugging it in</dt><dd id="i2how"></dd>
+        </dl>
+        <div id="io" hidden>
+          <p style="margin:12px 0 8px;font-variation-settings:'wght' 700">Does this one carry information in or out?</p>
+          <div class="opts" id="ioopts"></div>
+        </div>
+        <p class="msg" id="i2msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STAGE 3 ================= -->
+  <div class="sec locked" id="s3">
+    <span class="seclab">Stage three</span>
+    <h2>Switch it on</h2>
+    <p id="s3lead">This one opens once everything is plugged in.</p>
+
+    <div id="s3body" hidden>
+      <p>Everything is in. Press the button and watch what the parts you just fitted actually do, in the order they do it.</p>
+      <button class="powerbtn" id="powerBtn">Power on</button>
+      <div class="screen" id="screen" hidden></div>
+    </div>
+  </div>
+
+  <!-- ================= STAGE 4 ================= -->
+  <div class="sec locked" id="s4">
+    <span class="seclab">Stage four</span>
+    <h2>Which part does what</h2>
+    <p id="s4lead">This one opens once the machine has booted.</p>
+    <div id="s4body" hidden>
+      <p>Six quick ones. Getting one wrong costs nothing, and you can change your answer as often as you like.</p>
+      <div id="quiz"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="seclab">The end</span>
+    <h2>Send it to Jay</h2>
+    <p>This sends what you fitted and how the last six went. It does not send a mark out of anything.</p>
+    <div class="rowbtns">
+      <button class="btn btn-orange" id="sendBtn">Send it to Jay</button>
+      <button class="btn btn-quiet" id="copyBtn">Copy it instead</button>
+      <button class="btn btn-quiet" id="resetBtn">Start the build again</button>
+    </div>
+    <p class="sentmsg" id="sentmsg"></p>
+  </div>
+
+  <a class="backlink" href="/practice/#dm">Back to practice</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
+var KEY = "base5.dm.buildacomputer.v1";
+
+/* ---------------- the drawings ---------------- */
+
+var SVG = {
+mobo: '<svg viewBox="0 0 120 84" aria-hidden="true"><rect x="3" y="3" width="114" height="78" rx="6" fill="#2f7d52" stroke="#0a2f38" stroke-width="3"/><rect x="16" y="14" width="28" height="26" rx="3" fill="#0a2f38" opacity=".55"/><rect x="58" y="14" width="7" height="34" rx="2" fill="#f2c14e"/><rect x="69" y="14" width="7" height="34" rx="2" fill="#f2c14e"/><rect x="16" y="52" width="60" height="6" rx="3" fill="#0a2f38" opacity=".4"/><rect x="16" y="64" width="86" height="6" rx="3" fill="#0a2f38" opacity=".4"/><circle cx="98" cy="22" r="6" fill="#0a2f38" opacity=".35"/></svg>',
+cpu:  '<svg viewBox="0 0 84 84" aria-hidden="true"><rect x="12" y="12" width="60" height="60" rx="4" fill="#cfd6da" stroke="#0a2f38" stroke-width="3"/><rect x="24" y="24" width="36" height="36" rx="3" fill="#8c979d" stroke="#0a2f38" stroke-width="2"/><path d="M18 18 L28 18 L18 28 Z" fill="#e2703a"/><g stroke="#0a2f38" stroke-width="3" stroke-linecap="round"><path d="M22 6v6M34 6v6M46 6v6M58 6v6M22 72v6M34 72v6M46 72v6M58 72v6M6 22h6M6 34h6M6 46h6M6 58h6M72 22h6M72 34h6M72 46h6M72 58h6"/></g></svg>',
+cooler:'<svg viewBox="0 0 84 84" aria-hidden="true"><rect x="8" y="8" width="68" height="68" rx="8" fill="#cfd6da" stroke="#0a2f38" stroke-width="3"/><circle cx="42" cy="42" r="24" fill="#f7f2e9" stroke="#0a2f38" stroke-width="3"/><g fill="#0a2f38" opacity=".7"><path d="M42 42 L42 20 Q54 24 50 36 Z"/><path d="M42 42 L64 42 Q60 54 48 50 Z"/><path d="M42 42 L42 64 Q30 60 34 48 Z"/><path d="M42 42 L20 42 Q24 30 36 34 Z"/></g><circle cx="42" cy="42" r="6" fill="#0a2f38"/></svg>',
+ram:  '<svg viewBox="0 0 120 44" aria-hidden="true"><rect x="4" y="6" width="112" height="26" rx="3" fill="#2f7d52" stroke="#0a2f38" stroke-width="3"/><g fill="#0a2f38" opacity=".55"><rect x="14" y="12" width="16" height="14" rx="2"/><rect x="36" y="12" width="16" height="14" rx="2"/><rect x="58" y="12" width="16" height="14" rx="2"/><rect x="80" y="12" width="16" height="14" rx="2"/></g><g fill="#f2c14e"><rect x="10" y="32" width="40" height="7"/><rect x="58" y="32" width="50" height="7"/></g></svg>',
+ssd:  '<svg viewBox="0 0 120 44" aria-hidden="true"><rect x="10" y="12" width="96" height="22" rx="3" fill="#1f5f7a" stroke="#0a2f38" stroke-width="3"/><rect x="24" y="17" width="26" height="12" rx="2" fill="#f7f2e9" opacity=".8"/><rect x="58" y="17" width="26" height="12" rx="2" fill="#f7f2e9" opacity=".5"/><rect x="4" y="18" width="8" height="10" fill="#f2c14e"/></svg>',
+gpu:  '<svg viewBox="0 0 140 56" aria-hidden="true"><rect x="6" y="8" width="128" height="34" rx="4" fill="#0a2f38"/><circle cx="40" cy="25" r="12" fill="#f7f2e9" opacity=".9"/><circle cx="40" cy="25" r="4" fill="#0a2f38"/><circle cx="92" cy="25" r="12" fill="#f7f2e9" opacity=".9"/><circle cx="92" cy="25" r="4" fill="#0a2f38"/><rect x="20" y="42" width="44" height="8" fill="#f2c14e"/><rect x="72" y="42" width="24" height="8" fill="#f2c14e"/></svg>',
+psu:  '<svg viewBox="0 0 120 60" aria-hidden="true"><rect x="6" y="8" width="108" height="44" rx="5" fill="#4a4f54" stroke="#0a2f38" stroke-width="3"/><circle cx="40" cy="30" r="15" fill="#f7f2e9" opacity=".85"/><g fill="#0a2f38" opacity=".65"><path d="M40 30 L40 16 Q49 19 46 27 Z"/><path d="M40 30 L54 30 Q51 39 43 36 Z"/><path d="M40 30 L40 44 Q31 41 34 33 Z"/><path d="M40 30 L26 30 Q29 21 37 24 Z"/></g><rect x="74" y="20" width="28" height="20" rx="3" fill="#0a2f38"/><rect x="80" y="26" width="5" height="8" fill="#f2c14e"/><rect x="90" y="26" width="5" height="8" fill="#f2c14e"/></svg>',
+fan:  '<svg viewBox="0 0 84 84" aria-hidden="true"><rect x="6" y="6" width="72" height="72" rx="8" fill="#1f5f7a" stroke="#0a2f38" stroke-width="3"/><circle cx="42" cy="42" r="28" fill="#f7f2e9" opacity=".9"/><g fill="#1f5f7a"><path d="M42 42 L42 16 Q57 21 52 36 Z"/><path d="M42 42 L68 42 Q63 57 48 52 Z"/><path d="M42 42 L42 68 Q27 63 32 48 Z"/><path d="M42 42 L16 42 Q21 27 36 32 Z"/></g><circle cx="42" cy="42" r="7" fill="#0a2f38"/></svg>',
+monitor:'<svg viewBox="0 0 120 84" aria-hidden="true"><rect x="8" y="8" width="104" height="56" rx="5" fill="#0a2f38"/><rect x="15" y="15" width="90" height="42" rx="2" fill="#7fd1e0" opacity=".85"/><rect x="48" y="64" width="24" height="10" fill="#4a4f54"/><rect x="32" y="74" width="56" height="7" rx="3" fill="#4a4f54"/></svg>',
+keyboard:'<svg viewBox="0 0 120 60" aria-hidden="true"><rect x="5" y="14" width="110" height="36" rx="5" fill="#4a4f54" stroke="#0a2f38" stroke-width="3"/><g fill="#f7f2e9" opacity=".85"><rect x="14" y="21" width="9" height="8" rx="2"/><rect x="27" y="21" width="9" height="8" rx="2"/><rect x="40" y="21" width="9" height="8" rx="2"/><rect x="53" y="21" width="9" height="8" rx="2"/><rect x="66" y="21" width="9" height="8" rx="2"/><rect x="79" y="21" width="9" height="8" rx="2"/><rect x="92" y="21" width="14" height="8" rx="2"/><rect x="14" y="33" width="22" height="8" rx="2"/><rect x="40" y="33" width="44" height="8" rx="2"/><rect x="88" y="33" width="18" height="8" rx="2"/></g></svg>',
+mouse:'<svg viewBox="0 0 60 84" aria-hidden="true"><rect x="10" y="10" width="40" height="64" rx="20" fill="#f7f2e9" stroke="#0a2f38" stroke-width="3"/><path d="M30 12v22" stroke="#0a2f38" stroke-width="3"/><path d="M12 34h36" stroke="#0a2f38" stroke-width="3"/><rect x="27" y="18" width="6" height="12" rx="3" fill="#e2703a"/></svg>'
+};
+
+/* ---------------- the parts ---------------- */
+
+var PARTS = [
+  {id:"psu", name:"Power supply", slot:"psu", needs:[],
+   sub:"The PSU. Heavy, boring, does everything.",
+   job:"Takes the dangerous electricity from the wall and turns it into the small, steady kind every other part can survive. Nothing in the box works without it.",
+   where:"Bolts into the bay at the bottom of the case, fan pointing down at the vent.",
+   how:"Slide it in, four screws at the back, then run its cables up to the parts that need them. Fit it early, because reaching in around a finished build to thread cables is how people lose an afternoon.",
+   done:"In. Everything else now has something to plug into."},
+
+  {id:"mobo", name:"Motherboard", slot:"mobo", needs:[],
+   sub:"The big green one.",
+   job:"Not really a part so much as the floor everything else stands on. Every other component plugs into it, and it carries the messages between them.",
+   where:"The big flat tray in the middle of the case.",
+   how:"Lower it onto the little brass posts so it sits just off the metal, then screw it down. Never force a board flat: if it will not sit, something is under it.",
+   done:"In. Now there are places to plug things into."},
+
+  {id:"cpu", name:"Processor", slot:"cpu", needs:["mobo"],
+   sub:"The CPU. The one that does the thinking.",
+   job:"Does the actual work. Every sum, every keypress, every frame of a game passes through it. Billions of tiny decisions a second, and it never gets bored.",
+   where:"The square socket in the top corner of the motherboard.",
+   how:"Lift the little lever, line up the triangle on the corner of the chip with the triangle on the socket, and lower it in with no pressure at all. It falls in when it is right. Then close the lever, which feels like too much force and is normal.",
+   done:"In. The triangles lined up, which is the only thing that mattered."},
+
+  {id:"cooler", name:"CPU cooler", slot:"cooler", needs:["cpu"],
+   sub:"The fan that sits on the processor.",
+   job:"A processor working hard gets hot enough to damage itself in seconds. This pulls the heat off it and blows it away. It is not optional and it is not decoration.",
+   where:"Clamps directly on top of the processor.",
+   how:"A pea of thermal paste in the middle of the chip, sit the cooler on it, then tighten the screws a little at a time in a criss-cross so it settles down flat. Plug its fan cable into the header marked CPU FAN.",
+   done:"On. The processor can now work without cooking itself."},
+
+  {id:"ram", name:"Memory", slot:"ram", needs:["mobo"],
+   sub:"RAM. Short-term memory.",
+   job:"The desk the computer works on. Whatever it is using right now sits here, because this is fast. It empties completely every time the power goes off, which is why unsaved work disappears.",
+   where:"The long thin slots beside the processor.",
+   how:"Push the clips down at each end, line up the notch so it only fits one way round, then press down firmly on both ends until the clips snap up on their own. It takes more force than feels right.",
+   done:"In. Both clips snapped up, which is how you know."},
+
+  {id:"ssd", name:"Storage", slot:"ssd", needs:["mobo"],
+   sub:"The SSD. Long-term memory.",
+   job:"Where everything is kept when the power is off: the operating system, your files, your games. Slower than memory, but it remembers.",
+   where:"The small slot lying flat on the motherboard.",
+   how:"Slide it into the slot at a slight angle, press it flat, and hold it down with the tiny screw. That screw is about three millimetres long and the floor will eat it, so do this over the desk.",
+   done:"In. There is now somewhere to keep things."},
+
+  {id:"gpu", name:"Graphics card", slot:"gpu", needs:["mobo"],
+   sub:"The GPU. Draws things.",
+   job:"Works out what every dot on the screen should look like, many times a second. The processor could do this, badly and slowly. This does nothing else, so it is very good at it.",
+   where:"The long slot across the lower half of the motherboard.",
+   how:"Take the blanking plate off the back of the case, line the gold teeth up with the slot, press until it clicks, screw the bracket down, then plug in its own power cable from the supply. It is heavy and it will sag. Everybody's does.",
+   done:"In. Clicked, screwed and powered."},
+
+  {id:"fan", name:"Case fan", slot:"fan", needs:[],
+   sub:"Moves the air about.",
+   job:"Every part in here turns electricity into heat. Without moving air, the hot air just sits there and gets hotter. This drags cool air in and pushes warm air out.",
+   where:"Screws into the mount at the back of the case.",
+   how:"Look for the small arrow moulded into the plastic frame: it shows which way the air goes. Point it out of the case at the back. Four long screws, then plug it into any fan header.",
+   done:"In, and pointing the right way, which is the bit people get wrong."}
+];
+
+var OUTSIDE = [
+  {id:"monitor", name:"Monitor", io:"out",
+   job:"Shows you what the computer is doing. Without it the machine still works perfectly, it just has no way of telling you anything.",
+   how:"HDMI cable from the monitor into the socket on the graphics card itself, not the one on the motherboard. This trips up almost everybody once.",
+   yes:"Output, yes. Information coming out of the computer to you.",
+   no:"Other way round. A screen does not tell the computer anything, it tells you."},
+  {id:"keyboard", name:"Keyboard", io:"in",
+   job:"Turns what your fingers do into something the processor can work with. Every letter is a signal going in.",
+   how:"Straight into any USB socket on the back. There is no wrong one, and it only goes in one way up, however many times you try the other.",
+   yes:"Input, yes. Information going into the computer.",
+   no:"Have another think. Who is telling whom something when you type?"},
+  {id:"mouse", name:"Mouse", io:"in",
+   job:"Tells the computer where you are pointing and when you clicked. Movement in, nothing out.",
+   how:"Any spare USB socket. If it is wireless, the little dongle goes in instead.",
+   yes:"Input, yes. Same job as the keyboard, different language.",
+   no:"Have another think. The mouse is reporting what your hand did."}
+];
+
+var QUIZ = [
+  {id:"z1", q:"Which part does the actual thinking and working out?",
+   opts:["Processor","Storage","Power supply","Case fan"], ans:"Processor",
+   yes:"Yes. Every instruction goes through it.",
+   no:"Not that one. Think about which part would still be needed if all it had to do was add two numbers."},
+  {id:"z2", q:"You turn the computer off without saving. What have you lost, and from where?",
+   opts:["The work, from memory","The work, from storage","Nothing, it is all safe","The work, from the graphics card"],
+   ans:"The work, from memory",
+   yes:"Yes. Memory empties when the power goes. That is the whole reason saving exists.",
+   no:"Not quite. One of those two empties itself every time the power goes off."},
+  {id:"z3", q:"Which part keeps your files while the computer is switched off?",
+   opts:["Memory","Storage","Processor","Monitor"], ans:"Storage",
+   yes:"Yes. Slower than memory, but it remembers.",
+   no:"Not that one. Ask which one is still holding your things tomorrow morning."},
+  {id:"z4", q:"What does the motherboard actually do?",
+   opts:["Connects all the parts so they can talk","Stores your files","Powers the house","Cools the processor"],
+   ans:"Connects all the parts so they can talk",
+   yes:"Yes. It is the floor and the wiring, not a worker.",
+   no:"Not that one. It is the one part that does no job of its own."},
+  {id:"z5", q:"Which of these is an input device?",
+   opts:["Monitor","Keyboard","Speakers","Printer"], ans:"Keyboard",
+   yes:"Yes. Information going in.",
+   no:"Not that one. Three of those hand something to you. One hands something to the computer."},
+  {id:"z6", q:"Why does a processor need a cooler bolted to it?",
+   opts:["It gets hot enough to damage itself","It looks better","It makes it faster at maths","It stops dust"],
+   ans:"It gets hot enough to damage itself",
+   yes:"Yes. Working hard makes heat, and heat is what kills chips.",
+   no:"Not that one. Think about what happens to your phone when you use it hard for an hour."}
+];
+
+var BOOT = [
+  "Power supply wakes up and sends steady power to the board.",
+  "Processor starts, looks around, and asks what is connected.",
+  "Memory reports in, empty and ready.",
+  "Storage hands over the operating system, one piece at a time.",
+  "Memory holds the operating system while the processor runs it.",
+  "Graphics card works out what the first screen should look like.",
+  "Monitor shows it to you. Fans keep the whole lot cool.",
+  "",
+  "Ready. That took every single part you fitted."
+];
+
+/* ---------------- state ---------------- */
+
+var state = {fitted:{}, plugged:{}, io:{}, quiz:{}, booted:false};
+var picked = null, picked2 = null;
+
+function load(){
+  try{
+    var s = JSON.parse(localStorage.getItem(KEY));
+    if(s){
+      state = s;
+      ["fitted","plugged","io","quiz"].forEach(function(k){ state[k] = state[k] || {} });
+    }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)) }catch(e){} }
+
+function part(id){
+  for(var i=0;i<PARTS.length;i++) if(PARTS[i].id === id) return PARTS[i];
+  return null;
+}
+function outside(id){
+  for(var i=0;i<OUTSIDE.length;i++) if(OUTSIDE[i].id === id) return OUTSIDE[i];
+  return null;
+}
+function fittedCount(){ return Object.keys(state.fitted).length }
+function allFitted(){ return fittedCount() === PARTS.length }
+function allPlugged(){ return Object.keys(state.plugged).length === OUTSIDE.length }
+
+/* ---------------- stage one ---------------- */
+
+function drawTray(){
+  var tray = document.getElementById('tray');
+  tray.innerHTML = "";
+  PARTS.forEach(function(p){
+    var b = document.createElement('button');
+    b.className = 'part' + (state.fitted[p.id] ? ' done' : '') + (picked === p.id ? ' sel' : '');
+    b.type = 'button';
+    b.innerHTML = SVG[p.id] + '<span>' + p.name + '</span>';
+    if(!state.fitted[p.id]){
+      b.addEventListener('click', function(){
+        picked = (picked === p.id) ? null : p.id;
+        drawTray(); drawCase(); showInfo();
+      });
+    }
+    tray.appendChild(b);
+  });
+}
+
+function missingFor(p){
+  var missing = [];
+  p.needs.forEach(function(n){ if(!state.fitted[n]) missing.push(part(n).name.toLowerCase()) });
+  return missing;
+}
+
+function drawCase(){
+  document.getElementById('board').hidden = !state.fitted.mobo;
+
+  document.querySelectorAll('#pc .slot').forEach(function(el){
+    var slot = el.getAttribute('data-slot');
+    var p = null;
+    PARTS.forEach(function(x){ if(x.slot === slot) p = x });
+    if(!p) return;
+
+    el.classList.remove('live','filled');
+    var lab = el.querySelector('.lab');
+
+    if(state.fitted[p.id]){
+      el.classList.add('filled');
+      if(p.id === 'mobo'){
+        el.classList.add('board-on');
+      }else if(!el.querySelector('svg')){
+        if(lab) lab.hidden = true;
+        el.insertAdjacentHTML('afterbegin', SVG[p.id]);
+      }
+      el.onclick = function(e){ if(e) e.stopPropagation();
+        picked = p.id; drawTray(); drawCase(); showInfo(true) };
+      return;
+    }
+
+    if(lab) lab.hidden = false;
+    var s = el.querySelector('svg');
+    if(s) s.remove();
+
+    if(picked === p.id){
+      el.classList.add('live');
+      el.onclick = function(e){ if(e) e.stopPropagation(); tryFit(p) };
+    }else{
+      el.onclick = function(e){
+        if(e) e.stopPropagation();
+        if(!picked){ msg("Pick a part out of the tray first, then this will light up.", "soft"); return }
+        var wrong = part(picked);
+        msg("The " + wrong.name.toLowerCase() + " does not go there. Its own spot is " +
+            slotName(wrong.slot) + ".", "soft");
+      };
+    }
+  });
+
+  document.getElementById('c1').textContent = fittedCount() + ' of ' + PARTS.length + ' fitted';
+  document.getElementById('t1').style.width = (fittedCount() / PARTS.length * 100) + '%';
+}
+
+function slotName(slot){
+  return {psu:"the bay at the bottom", mobo:"the big tray in the middle",
+          cpu:"the square socket", cooler:"on top of the processor",
+          ram:"the long thin slots", ssd:"the small flat slot",
+          gpu:"the long slot lower down", fan:"the mount at the back"}[slot];
+}
+
+function tryFit(p){
+  var missing = missingFor(p);
+  if(missing.length){
+    msg("Not yet. The " + missing.join(" and the ") + " has to be in first, or there is nothing for this to plug into.", "soft");
+    return;
+  }
+  state.fitted[p.id] = true;
+  picked = null;
+  save();
+  drawTray(); drawCase();
+  document.getElementById('iname').textContent = p.name;
+  document.getElementById('isub').textContent = p.sub;
+  document.getElementById('idl').hidden = true;
+  msg(p.done, "good");
+  unlock();
+}
+
+function showInfo(installed){
+  var box = document.getElementById('idl');
+  if(!picked){
+    document.getElementById('iname').textContent = "Nothing picked up yet";
+    document.getElementById('isub').textContent = "Tap any part in the tray to have a look at it.";
+    box.hidden = true; msg("");
+    return;
+  }
+  var p = part(picked);
+  document.getElementById('iname').textContent = p.name;
+  document.getElementById('isub').textContent = p.sub;
+  document.getElementById('ijob').textContent = p.job;
+  document.getElementById('iwhere').textContent = p.where;
+  document.getElementById('ihow').textContent = p.how;
+  box.hidden = false;
+
+  if(installed){ msg("Already fitted. This is just the notes again.", "soft"); return }
+
+  var missing = missingFor(p);
+  if(missing.length){
+    msg("This one has to wait for the " + missing.join(" and the ") + ".", "soft");
+  }else{
+    msg("Its place is pulsing. Tap it to fit this.", "soft");
+  }
+}
+
+function msg(t, cls){
+  var m = document.getElementById('imsg');
+  m.className = 'msg' + (cls ? ' ' + cls : '');
+  m.textContent = t;
+}
+
+/* ---------------- stage two ---------------- */
+
+function drawTray2(){
+  var tray = document.getElementById('tray2');
+  tray.innerHTML = "";
+  OUTSIDE.forEach(function(o){
+    var b = document.createElement('button');
+    b.className = 'part' + (state.plugged[o.id] ? ' done' : '') + (picked2 === o.id ? ' sel' : '');
+    b.type = 'button';
+    b.innerHTML = SVG[o.id] + '<span>' + o.name + '</span>';
+    if(!state.plugged[o.id]){
+      b.addEventListener('click', function(){
+        picked2 = (picked2 === o.id) ? null : o.id;
+        drawTray2(); drawPorts(); showInfo2();
+      });
+    }
+    tray.appendChild(b);
+  });
+}
+
+function drawPorts(){
+  var ports = document.querySelectorAll('#ports .slot');
+  ports.forEach(function(el){
+    var slot = el.getAttribute('data-slot');
+    var id = null;
+    Object.keys(state.plugged).forEach(function(k){ if(state.plugged[k] === slot) id = k });
+    el.classList.remove('live','filled');
+    var lab = el.querySelector('.lab');
+    if(id){
+      el.classList.add('filled');
+      if(!el.querySelector('svg')){ if(lab) lab.hidden = true; el.insertAdjacentHTML('afterbegin', SVG[id]) }
+      el.onclick = null;
+      return;
+    }
+    if(lab) lab.hidden = false;
+    var s = el.querySelector('svg'); if(s) s.remove();
+    if(picked2){
+      el.classList.add('live');
+      el.onclick = function(){ plugIn(picked2, slot) };
+    }else{
+      el.onclick = function(){ msg2("Pick one of the three first.", "soft") };
+    }
+  });
+}
+
+function plugIn(id, slot){
+  state.plugged[id] = slot;
+  save();
+  drawTray2(); drawPorts();
+  var o = outside(id);
+  document.getElementById('i2name').textContent = o.name;
+  document.getElementById('i2sub').textContent = "Plugged in.";
+  document.getElementById('i2dl').hidden = true;
+  msg2("In. One question about it before you move on.", "good");
+  askIO(id);
+}
+
+function askIO(id){
+  var o = outside(id);
+  var wrap = document.getElementById('io');
+  var opts = document.getElementById('ioopts');
+  wrap.hidden = false;
+  opts.innerHTML = "";
+  ["Information in","Information out"].forEach(function(label){
+    var val = (label === "Information in") ? "in" : "out";
+    var b = document.createElement('button');
+    b.className = 'opt' + (state.io[id] === val ? (val === o.io ? ' on' : ' miss') : '');
+    b.type = 'button'; b.textContent = label;
+    b.addEventListener('click', function(){
+      state.io[id] = val; save();
+      msg2(val === o.io ? o.yes : o.no, val === o.io ? "good" : "soft");
+      askIO(id);
+      unlock();
+    });
+    opts.appendChild(b);
+  });
+}
+
+function showInfo2(){
+  var box = document.getElementById('i2dl');
+  document.getElementById('io').hidden = true;
+  if(!picked2){
+    document.getElementById('i2name').textContent = "Nothing picked up yet";
+    document.getElementById('i2sub').textContent = "Tap one of the three to have a look.";
+    box.hidden = true; msg2("");
+    return;
+  }
+  var o = outside(picked2);
+  document.getElementById('i2name').textContent = o.name;
+  document.getElementById('i2sub').textContent = "";
+  document.getElementById('i2job').textContent = o.job;
+  document.getElementById('i2how').textContent = o.how;
+  box.hidden = false;
+  msg2("Tap any port on the back to plug it in.", "soft");
+}
+
+function msg2(t, cls){
+  var m = document.getElementById('i2msg');
+  m.className = 'msg' + (cls ? ' ' + cls : '');
+  m.textContent = t;
+}
+
+/* ---------------- stage three ---------------- */
+
+function runBoot(){
+  var screen = document.getElementById('screen');
+  screen.hidden = false;
+  screen.innerHTML = "";
+  document.getElementById('powerBtn').disabled = true;
+  var i = 0;
+  (function step(){
+    if(i >= BOOT.length){
+      state.booted = true; save(); unlock();
+      document.getElementById('powerBtn').disabled = false;
+      document.getElementById('powerBtn').textContent = "Run it again";
+      return;
+    }
+    var p = document.createElement('p');
+    if(BOOT[i] === ""){ p.innerHTML = "&nbsp;" }
+    else{ p.textContent = "> " + BOOT[i] }
+    if(i === BOOT.length - 1) p.style.color = "#f2c14e";
+    screen.appendChild(p);
+    i++;
+    setTimeout(step, 850);
+  })();
+}
+
+/* ---------------- stage four ---------------- */
+
+function drawQuiz(){
+  var box = document.getElementById('quiz');
+  box.innerHTML = "";
+  QUIZ.forEach(function(z){
+    var q = document.createElement('div');
+    q.className = 'q';
+    var h = document.createElement('h3');
+    h.textContent = z.q;
+    var opts = document.createElement('div');
+    opts.className = 'opts';
+    var fb = document.createElement('p');
+    fb.className = 'fb';
+
+    z.opts.forEach(function(o){
+      var b = document.createElement('button');
+      b.className = 'opt'; b.type = 'button'; b.textContent = o;
+      if(state.quiz[z.id] === o) b.classList.add(o === z.ans ? 'on' : 'miss');
+      b.addEventListener('click', function(){
+        state.quiz[z.id] = o; save(); drawQuiz();
+      });
+      opts.appendChild(b);
+    });
+
+    if(state.quiz[z.id]){
+      var ok = state.quiz[z.id] === z.ans;
+      fb.textContent = ok ? z.yes : z.no;
+      fb.className = 'fb ' + (ok ? 'good' : 'soft');
+    }
+
+    q.appendChild(h); q.appendChild(opts); q.appendChild(fb);
+    box.appendChild(q);
+  });
+}
+
+/* ---------------- unlocking ---------------- */
+
+function unlock(){
+  var s2 = document.getElementById('s2');
+  if(allFitted()){
+    s2.classList.remove('locked');
+    document.getElementById('s2body').hidden = false;
+    document.getElementById('s2lead').textContent =
+      "Eight parts in. The box is finished, and completely useless until this stage is done.";
+  }
+  var s3 = document.getElementById('s3');
+  if(allFitted() && allPlugged()){
+    s3.classList.remove('locked');
+    document.getElementById('s3body').hidden = false;
+    document.getElementById('s3lead').textContent = "Everything is connected.";
+  }
+  var s4 = document.getElementById('s4');
+  if(state.booted){
+    s4.classList.remove('locked');
+    document.getElementById('s4body').hidden = false;
+    document.getElementById('s4lead').textContent = "It booted, so you have seen all of this happen.";
+  }
+}
+
+/* ---------------- sending ---------------- */
+
+function buildText(){
+  var L = [];
+  L.push("BUILD A COMPUTER");
+  L.push("Finished: " + new Date().toLocaleString('en-GB'));
+  L.push("");
+  L.push("PARTS FITTED: " + fittedCount() + " of " + PARTS.length);
+  PARTS.forEach(function(p){
+    L.push("  " + p.name + ": " + (state.fitted[p.id] ? "fitted" : "not yet"));
+  });
+  L.push("");
+  L.push("INPUT OR OUTPUT");
+  OUTSIDE.forEach(function(o){
+    var v = state.io[o.id];
+    L.push("  " + o.name + ": " + (v ? (v === "in" ? "information in" : "information out") : "(not answered)") +
+      (v ? (v === o.io ? "  [right]" : "  [not yet]") : ""));
+  });
+  L.push("");
+  L.push("BOOTED: " + (state.booted ? "yes" : "not yet"));
+  L.push("");
+  L.push("WHICH PART DOES WHAT");
+  QUIZ.forEach(function(z){
+    var v = state.quiz[z.id];
+    L.push("  " + z.q);
+    L.push("    " + (v ? v : "(skipped)") + (v ? (v === z.ans ? "  [right]" : "  [not yet]") : ""));
+  });
+  return L.join("\n");
+}
+
+/* ---------------- start ---------------- */
+
+load();
+drawTray(); drawCase(); showInfo();
+drawTray2(); drawPorts(); showInfo2();
+drawQuiz();
+unlock();
+
+document.getElementById('powerBtn').addEventListener('click', runBoot);
+
+document.getElementById('sendBtn').addEventListener('click', function(){
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(TEACHER_EMAIL) +
+    '&su=' + encodeURIComponent("Build a computer") + '&body=' + encodeURIComponent(buildText()), '_blank');
+  document.getElementById('sentmsg').textContent = "Gmail should have opened in a new tab. Press send there.";
+});
+document.getElementById('copyBtn').addEventListener('click', function(){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(buildText()).then(function(){
+      document.getElementById('sentmsg').textContent = "Copied. Paste it wherever you want it.";
+    });
+  }
+});
+document.getElementById('resetBtn').addEventListener('click', function(){
+  state = {fitted:{}, plugged:{}, io:{}, quiz:{}, booted:false};
+  picked = null; picked2 = null;
+  save();
+  document.querySelectorAll('#pc .slot svg, #ports .slot svg').forEach(function(s){ s.remove() });
+  document.querySelectorAll('.slot .lab').forEach(function(l){ l.hidden = false });
+  document.getElementById('screen').hidden = true;
+  document.getElementById('powerBtn').disabled = false;
+  document.getElementById('powerBtn').textContent = "Power on";
+  ['s2','s3','s4'].forEach(function(id){ document.getElementById(id).classList.add('locked') });
+  ['s2body','s3body','s4body'].forEach(function(id){ document.getElementById(id).hidden = true });
+  drawTray(); drawCase(); showInfo(); drawTray2(); drawPorts(); showInfo2(); drawQuiz();
+  document.getElementById('sentmsg').textContent = "Emptied out. Start again whenever.";
+});
+
+})();
+</script>
+
+</body>
+</html>
