@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chip Run - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Chip Run only. Shared pieces live in style.css */
+
+.game{background:var(--ink);border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  box-shadow:var(--lift-hi);padding:14px;margin:0 0 22px;color:var(--paper)}
+
+.hud{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin:0 0 12px}
+.hud .lvl{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1rem;line-height:1.1}
+.hud .lvl small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;opacity:.75;max-width:22ch}
+.qbox{justify-self:center;text-align:center;background:var(--yellow);color:var(--ink);
+  border:3px solid var(--paper);border-radius:18px 14px 20px 12px;padding:6px 22px;
+  transform:rotate(-1deg);min-width:200px}
+.qbox .q{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;
+  font-size:clamp(1.5rem,4.5vw,2.4rem);line-height:1.05;letter-spacing:.01em}
+.qbox .qn{font-size:.78rem;font-weight:700}
+.qbox.pop{animation:pop .45s}
+@keyframes pop{0%{transform:rotate(-1deg) scale(1)}40%{transform:rotate(2deg) scale(1.12)}100%{transform:rotate(-1deg) scale(1)}}
+.side{text-align:right;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.9rem}
+.lives{display:flex;gap:4px;justify-content:flex-end;margin:0 0 4px;min-height:22px}
+.lives i{display:block;width:9px;height:22px;border-radius:4px;background:linear-gradient(90deg,#f5d36b,#e8b33c);
+  border:2px solid var(--paper);transform:rotate(8deg)}
+.lives i:nth-child(2n){transform:rotate(-6deg)}
+
+.stagewrap{position:relative;border-radius:14px;overflow:hidden;border:3px solid var(--paper);background:#0b566d}
+canvas#board{display:block;width:100%;height:auto;touch-action:none}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,47,56,.84);padding:14px;overflow:auto}
+.overlay[hidden]{display:none}
+.card-o{background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);
+  box-shadow:6px 7px 0 var(--orange);padding:18px 20px;max-width:620px;width:100%;
+  max-height:100%;overflow:auto;transform:rotate(-.4deg)}
+.card-o h2{font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 900;
+  font-size:clamp(1.5rem,5vw,2.4rem);line-height:1;margin:0 0 6px}
+.card-o h2 .o{color:var(--orange)}
+.card-o p{margin:0 0 10px;max-width:56ch}
+.card-o .big{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:3.2rem;line-height:1;color:var(--orange)}
+.obtns{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 0}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:7px;margin:12px 0 0}
+.lbtn{font-family:var(--body);text-align:left;background:var(--paper);color:var(--ink);cursor:pointer;
+  border:2px solid var(--ink);border-radius:12px;padding:7px 9px;line-height:1.15;position:relative}
+.lbtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.15rem}
+.lbtn span{font-size:.72rem}
+.lbtn.done{background:var(--yellow)}
+.lbtn.done::after{content:"\2713";position:absolute;right:8px;top:6px;font-weight:700}
+.lbtn.next{box-shadow:0 0 0 3px var(--orange)}
+.lbtn:hover{transform:translateY(-2px)}
+.toggles{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.tog{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.78rem;cursor:pointer;
+  background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:7px 13px}
+.tog[aria-pressed="true"]{background:var(--teal);color:var(--white)}
+.gullcast{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 10px}
+.gullcast span{font-size:.85rem;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;background:var(--paper)}
+.gullcast span i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:1.5px solid var(--ink);vertical-align:-1px}
+
+.under{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:12px 0 0}
+.saybox{flex:1 1 260px;font-size:.95rem;min-height:1.4em}
+.saybox b{color:var(--yellow)}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+.ctl button{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.78rem;cursor:pointer;
+  background:var(--paper);color:var(--ink);border:2px solid var(--paper);border-radius:999px;padding:8px 14px}
+.ctl button:hover{background:var(--yellow)}
+.hinttxt{margin:10px 0 0;background:rgba(255,194,71,.14);border:2px dashed var(--yellow);border-radius:12px;
+  padding:9px 13px;font-size:.95rem}
+.hinttxt[hidden]{display:none}
+
+.pad{display:grid;grid-template-columns:repeat(3,62px);grid-template-rows:repeat(2,54px);gap:6px;
+  justify-content:center;margin:14px auto 2px}
+.pad button{border:3px solid var(--paper);background:#16505e;color:var(--paper);border-radius:14px;
+  font-size:1.5rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.pad button:active{background:var(--orange)}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+@media (hover:hover) and (pointer:fine){.pad{display:none}}
+
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 22px}
+.howto .h{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:14px 16px;box-shadow:var(--lift)}
+.howto .h b{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 900;display:block;font-size:1.05rem;margin:0 0 4px}
+.howto .h p{margin:0;font-size:.95rem}
+.sec{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:22px;margin:0 0 20px;box-shadow:var(--lift)}
+.sec h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:1.5rem;margin:0 0 8px}
+.sec p{max-width:64ch}
+
+@media (max-width:640px){
+  .hud{grid-template-columns:1fr auto;grid-template-areas:"q q" "l s"}
+  .qbox{grid-area:q}.hud .lvl{grid-area:l}.side{grid-area:s}
+  .game{padding:10px}
+}
+@media (prefers-reduced-motion:reduce){.qbox.pop{animation:none}.lbtn:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>CHIP <span class="accent">RUN</span></h1>
+    <div class="line">
+      <span class="chip">Times tables</span>
+      <p>You are a chip. The seagulls want you. Grab the right answer before they grab you.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="game" aria-label="Chip Run game">
+    <div class="hud">
+      <div class="lvl" id="hudLvl">Level 1<small>A gentle stroll down the pier</small></div>
+      <div class="qbox" id="qbox"><div class="q" id="hudQ">?</div><div class="qn" id="hudQn">Pick a level to start</div></div>
+      <div class="side"><div class="lives" id="hudLives" aria-label="Chips left"></div><span id="hudScore">0 points</span></div>
+    </div>
+
+    <div class="stagewrap">
+      <canvas id="board" width="690" height="450" aria-label="The pier maze"></canvas>
+      <div class="overlay" id="overlay"></div>
+    </div>
+
+    <div class="pad" aria-label="Arrow buttons">
+      <button class="u" data-d="0" aria-label="Up">&#9650;</button>
+      <button class="l" data-d="3" aria-label="Left">&#9664;</button>
+      <button class="d" data-d="2" aria-label="Down">&#9660;</button>
+      <button class="r" data-d="1" aria-label="Right">&#9654;</button>
+    </div>
+
+    <div class="under">
+      <p class="saybox" id="say" aria-live="polite"></p>
+      <div class="ctl">
+        <button id="musicBtn" aria-pressed="true">Music on</button>
+        <button id="hintBtn">Hint</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="levelsBtn">Levels</button>
+      </div>
+    </div>
+    <p class="hinttxt" id="hintTxt" hidden></p>
+  </section>
+
+  <div class="howto">
+    <div class="h"><b>Moving</b><p>Arrow keys or WASD on a keyboard. On a tablet, swipe on the pier or use the arrow buttons.</p></div>
+    <div class="h"><b>Answering</b><p>Run into the buoy with the right answer. Wrong buoys just pop, no lives lost.</p></div>
+    <div class="h"><b>Vinegar</b><p>Seagulls cannot stand it. Grab a bottle and they panic, and you can shoo them back to the bin.</p></div>
+    <div class="h"><b>Breathing space</b><p>P or Space pauses any time, M turns the music on or off. Any level can be picked, in any order. Paper is allowed for the big ones.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2>Send it to Jay</h2>
+    <p>Only if you want to. It sends which levels you cleared and which times tables facts were slippery, nothing else.</p>
+    <div id="sendHost"></div>
+  </div>
+
+  <a class="backlink" href="/practice/#maths-standard">Back to practice</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "base5.maths.chiprun.v1";
+var X = "\u00d7";
+var W = 23, H = 15, T = 30;
+var DX = [0,1,0,-1], DY = [-1,0,1,0];
+var BIN = {x:11, y:7}, START = {x:11, y:13};
+
+/* ====================== little helpers ====================== */
+
+function rng(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var R = Math.random;
+function ri(a,b){ return a + Math.floor(R() * (b - a + 1)) }
+function pick(arr){ return arr[Math.floor(R() * arr.length)] }
+function shuffle(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(R() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t } return a }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]}) }
+function fill(tpl, o){ return tpl.replace(/\{(\w+)\}/g, function(m,k){ return o[k] }) }
+
+/* ====================== questions ====================== */
+
+function tab(tables, lo, hi){
+  return function(){
+    var a = pick(tables), b = ri(lo, hi);
+    return mk("tab", a, b);
+  };
+}
+function mk(kind, a, b){
+  var q = {kind:kind, a:a, b:b, ans:a*b};
+  if(R() < .5 && kind === "tab"){ q.a = b; q.b = a }
+  q.text = q.a + " " + X + " " + q.b;
+  q.key = Math.min(q.a,q.b) + X + Math.max(q.a,q.b);
+  return q;
+}
+function missing(){
+  var a = ri(2,12), b = ri(2,12);
+  return {kind:"miss", a:a, b:b, ans:a, c:a*b, text:"? " + X + " " + b + " = " + (a*b), key:"? " + X + " " + b + " = " + (a*b)};
+}
+function place(){
+  var a = R() < .6 ? ri(11,99) : ri(2,9), b = pick([10,100]);
+  return mk("place", a, b);
+}
+function split(lo, hi){
+  return function(){ return mk("split", ri(lo,hi), ri(2,9)) };
+}
+function tens(){
+  var d = ri(2,9), e = ri(2,9);
+  return R() < .55 ? mk("tens", d*10, e) : mk("tens", d*10, e*10);
+}
+function teens(){ return mk("two", ri(11,15), ri(11,15)) }
+function twoByTwo(){ return mk("two", ri(21,39), ri(11,19)) }
+function mix(gens){ return function(){ return pick(gens)() } }
+
+var LEVELS = [
+  {t:"A gentle stroll down the pier", s:"2, 5 and 10 times tables", g:tab([2,5,10],1,10), n:3, o:3, gulls:1},
+  {t:"Gary has noticed you", s:"2, 5 and 10, up to 12", g:tab([2,5,10],1,12), n:3, o:3, gulls:1},
+  {t:"Gary brought a friend", s:"3 and 4 times tables", g:tab([3,4],1,12), n:3, o:3, gulls:2},
+  {t:"Sharon is not impressed", s:"3, 4 and 5 times tables", g:tab([3,4,5],2,12), n:3, o:4, gulls:2},
+  {t:"The gulls have had a meeting", s:"2, 3, 4, 5 and 10 mixed up", g:tab([2,3,4,5,10],2,12), n:3, o:4, gulls:2},
+  {t:"Sixes by the seaside", s:"6 times table", g:tab([6],2,12), n:3, o:4, gulls:2},
+  {t:"Sevens, and a stiff breeze", s:"7 times table", g:tab([7],2,12), n:3, o:4, gulls:3},
+  {t:"Big Dave has arrived", s:"8 times table", g:tab([8],2,12), n:3, o:4, gulls:3},
+  {t:"Nines. Nobody is having a nice time", s:"9 times table", g:tab([9],2,12), n:3, o:4, gulls:3},
+  {t:"Everything up to ten, all at once", s:"2 to 10 times tables mixed", g:tab([2,3,4,5,6,7,8,9,10],2,10), n:3, o:4, gulls:3},
+  {t:"The posh end of the pier", s:"11 and 12 times tables", g:tab([11,12],2,12), n:4, o:4, gulls:3},
+  {t:"Kevin is here, sadly", s:"Every times table up to 12", g:tab([3,4,6,7,8,9,11,12],3,12), n:4, o:4, gulls:3},
+  {t:"The gulls stole a number", s:"Missing numbers: what goes in the gap?", g:missing, n:4, o:4, gulls:4},
+  {t:"Just add noughts (sort of)", s:"Times 10 and times 100", g:place, n:4, o:4, gulls:4},
+  {t:"Teens times things", s:"Numbers from 11 to 19 times a single digit", g:split(11,19), n:4, o:4, gulls:4},
+  {t:"Bigger numbers, bigger gulls", s:"Numbers from 21 to 49 times a single digit", g:split(21,49), n:4, o:4, gulls:4},
+  {t:"Gary has done a course", s:"Multiples of ten, like 30 " + X + " 7 or 40 " + X + " 60", g:tens, n:4, o:4, gulls:4},
+  {t:"Teens times teens", s:"11 to 15 times 11 to 15. Paper allowed", g:teens, n:4, o:5, gulls:4},
+  {t:"Paper allowed. Gulls not allowed", s:"Two digits times two digits", g:twoByTwo, n:4, o:5, gulls:4},
+  {t:"Gary's revenge", s:"A bit of everything from levels 13 to 19", g:mix([missing,place,split(21,49),tens,teens,twoByTwo]), n:5, o:5, gulls:4}
+];
+
+function swapDigits(n){
+  var s = String(n); if(s.length < 2) return -1;
+  return +(s.slice(0,-2) + s.slice(-1) + s.slice(-2,-1));
+}
+function options(q, n){
+  var c, a = q.a, b = q.b, ans = q.ans;
+  if(q.kind === "miss"){
+    c = [a+1, a-1, a+2, a-2, a+3];
+  } else {
+    c = [a*(b+1), a*(b-1), (a+1)*b, (a-1)*b, ans+1, ans-1, ans+10, ans-10, swapDigits(ans), ans+a, ans-a];
+    if(q.kind === "place" || q.kind === "tens"){ c.push(ans*10, ans/10) }
+    if(q.kind === "two" || q.kind === "split"){ c.push(ans+100, ans-100, ans+20, ans-20) }
+  }
+  var seen = {}; seen[ans] = 1;
+  c = shuffle(c.filter(function(v){
+    if(!(v > 0) || v !== Math.floor(v) || seen[v]) return false;
+    seen[v] = 1; return true;
+  }));
+  var out = [ans].concat(c.slice(0, n - 1));
+  return shuffle(out);
+}
+function hintFor(q){
+  var a = q.a, b = q.b;
+  if(q.kind === "miss") return "What times " + b + " makes " + q.c + "? Count up in " + b + "s until you land on " + q.c + ".";
+  if(q.kind === "place") return X + "10 moves every digit one place bigger, " + X + "100 moves them two places. So " + (b === 10 ? a + " becomes " + a + "0." : a + " becomes " + a + "00.");
+  if(q.kind === "tens"){
+    var d = a/10, e = b % 10 === 0 ? b/10 : b, z = b % 10 === 0 ? "two noughts" : "one nought";
+    return "Take the noughts off: " + d + " " + X + " " + e + " = " + (d*e) + ". Then put " + z + " back on.";
+  }
+  if(q.kind === "split"){
+    var big = Math.max(a,b), sm = Math.min(a,b), tn = Math.floor(big/10)*10, on = big - tn;
+    return "Split " + big + " into " + tn + " and " + on + ". Do " + tn + " " + X + " " + sm + " and " + on + " " + X + " " + sm + ", then add them.";
+  }
+  if(q.kind === "two"){
+    var t2 = Math.floor(b/10)*10, o2 = b - t2;
+    return "Split the " + b + ": do " + a + " " + X + " " + t2 + ", then " + a + " " + X + " " + o2 + ", then add the two answers.";
+  }
+  var s = Math.min(a,b), l = Math.max(a,b);
+  if(s === 1) return "Anything " + X + " 1 stays exactly the same.";
+  if(l === 10) return X + "10 is the easy one: put a nought on the end, so " + s + " becomes " + s + "0.";
+  if(l > 10) return "Do " + s + " " + X + " 10 = " + (s*10) + ", then add " + (l-10) + " more lot" + (l-10 === 1 ? "" : "s") + " of " + s + ".";
+  if(s === 10) return X + "10 is the easy one: put a nought on the end, so " + l + " becomes " + l + "0.";
+  if(l >= 6) return "Do " + s + " " + X + " 5 = " + (s*5) + ", then add " + (l-5) + " more lot" + (l-5 === 1 ? "" : "s") + " of " + s + ".";
+  return "Count up in " + l + "s, " + s + " times.";
+}
+
+/* ====================== words ====================== */
+
+var GULLS = [
+  {name:"Gary",     col:"#ef7724", size:1.0,  style:"direct"},
+  {name:"Sharon",   col:"#9b5fb2", size:1.0,  style:"ahead"},
+  {name:"Big Dave", col:"#00a6c9", size:1.18, style:"shy"},
+  {name:"Kevin",    col:"#ffc247", size:.9,   style:"chaos"}
+];
+var SAY = {
+  right:["Correct! The chip lives to fry another day.","Yes! Crispy.","Right! Gary is furious.","Spot on. A gull somewhere is sulking.",
+         "Correct. That is a very well seasoned answer.","Yes! Somebody get this chip a medal. A small one."],
+  wrong:["{n}? That is what Gary guessed too.","Not {n}. That buoy was a decoy.","Nope, {n} was a soggy one.",
+         "{n}? A gull ate that number anyway.","Not that one. The gulls are laughing, but gulls laugh at everything."],
+  caught:["{g} got you. That chip had a family.","{g}: MINE. Classic {g}.","{g} swooped. Nobody saw it coming, except everybody.",
+          "{g} nabbed you and is now doing a little dance.","Pinched by {g}. Chips are delicate."],
+  vinegar:["Vinegar! The gulls hate this one weird trick.","Splash! The gulls are panicking.","Vinegar time. Chase them off!"],
+  shoo:["{g} has gone for a sulk in the bin.","{g} flew off to have a word with themselves.","Bye, {g}!"],
+  ready:["Ready?","Chip, activate.","Run, chip, run."]
+};
+function say(kind, o){ return fill(pick(SAY[kind]), o || {}) }
+
+/* ====================== saved progress ====================== */
+
+var save = {levels:{}, tricky:{}, easy:false, sound:true, music:true, best:0};
+try{ var sv = JSON.parse(localStorage.getItem(KEY)); if(sv) for(var k in sv) save[k] = sv[k] }catch(e){}
+function store(){ try{ localStorage.setItem(KEY, JSON.stringify(save)) }catch(e){} }
+function nextSuggested(){
+  for(var i = 0; i < LEVELS.length; i++) if(!save.levels[i+1] || !save.levels[i+1].cleared) return i + 1;
+  return LEVELS.length;
+}
+
+/* ====================== sound ====================== */
+
+var AC = null;
+function tone(f, dur, type, vol, f2, delay){
+  if(!save.sound) return;
+  try{
+    if(!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    var t0 = AC.currentTime + (delay || 0), o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "square"; o.frequency.setValueAtTime(f, t0);
+    if(f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(vol || .05, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + dur + .02);
+  }catch(e){}
+}
+var SFX = {
+  right:function(){ tone(523,.1,"square",.05); tone(659,.1,"square",.05,0,.09); tone(784,.18,"square",.05,0,.18) },
+  wrong:function(){ tone(220,.25,"sawtooth",.04,140) },
+  squawk:function(){ tone(1100,.12,"sawtooth",.035,600); tone(1000,.14,"sawtooth",.035,500,.13) },
+  vinegar:function(){ tone(300,.35,"triangle",.07,900) },
+  shoo:function(){ tone(900,.2,"square",.04,1500) },
+  level:function(){ [523,659,784,1047].forEach(function(f,i){ tone(f,.16,"square",.05,0,i*.12) }) }
+};
+
+/* ====================== music ======================
+   The song lives beside this page as its own file so the page stays
+   small enough to edit in the browser. Browsers only allow sound after
+   a tap or key press, so it starts on the first one. It speeds up a
+   little on the harder levels, without changing the key.            */
+
+var MUSIC_SRC = "/practice/audio/times-tables-in-base-5.mp3";
+var song = null, songBroken = false;
+function getSong(){
+  if(song || songBroken) return song;
+  try{
+    song = new Audio(MUSIC_SRC);
+    song.loop = true; song.volume = .35; song.preload = "auto";
+    if("preservesPitch" in song) song.preservesPitch = true;
+    song.addEventListener("error", function(){ songBroken = true; song = null; musicLabel() });
+  }catch(e){ songBroken = true }
+  return song;
+}
+function musicShouldPlay(){
+  return save.music && !document.hidden && G.screen !== "paused";
+}
+function musicSync(){
+  var a = getSong();
+  if(!a) return;
+  if(musicShouldPlay()){
+    var lv = G.level || 1;
+    a.playbackRate = 1 + (lv - 1) * .008;
+    a.volume = G.screen === "play" ? .35 : .22;
+    if(a.paused){ var pr = a.play(); if(pr && pr.catch) pr.catch(function(){}) }
+  } else if(!a.paused) a.pause();
+}
+function musicLabel(){
+  var b = document.getElementById("musicBtn");
+  b.textContent = songBroken ? "No music file" : (save.music ? "Music on" : "Music off");
+  b.setAttribute("aria-pressed", save.music && !songBroken ? "true" : "false");
+}
+function toggleMusic(){
+  save.music = !save.music; store(); musicLabel(); musicSync();
+}
+
+/* ====================== the maze ====================== */
+
+var grid = [];
+function open(x,y){ return x >= 0 && y >= 0 && x < W && y < H && grid[y][x] === 0 }
+
+function makeMaze(level){
+  var r = rng(level * 7919 + 13), cols = 11, rows = 7, x, y, c, i;
+  grid = [];
+  for(y = 0; y < H; y++){ grid.push([]); for(x = 0; x < W; x++) grid[y].push(1) }
+  var seen = {}, stack = [[5,3]];
+  seen["5,3"] = 1; grid[7][11] = 0;
+  while(stack.length){
+    var cur = stack[stack.length - 1], nb = [];
+    for(i = 0; i < 4; i++){
+      var nc = cur[0] + DX[i], nr = cur[1] + DY[i];
+      if(nc >= 0 && nr >= 0 && nc < cols && nr < rows && !seen[nc+","+nr]) nb.push([nc,nr,i]);
+    }
+    if(!nb.length){ stack.pop(); continue }
+    var n = nb[Math.floor(r() * nb.length)];
+    grid[cur[1]*2+1 + DY[n[2]]][cur[0]*2+1 + DX[n[2]]] = 0;
+    grid[n[1]*2+1][n[0]*2+1] = 0;
+    seen[n[0]+","+n[1]] = 1; stack.push([n[0],n[1]]);
+  }
+  /* knock through every dead end: dead ends and seagulls are a bad mix */
+  for(y = 0; y < rows; y++) for(x = 0; x < cols; x++){
+    var cx = x*2+1, cy = y*2+1, openN = 0, shut = [];
+    for(i = 0; i < 4; i++){
+      var wx = cx + DX[i], wy = cy + DY[i], tx = x + DX[i], ty = y + DY[i];
+      if(tx < 0 || ty < 0 || tx >= cols || ty >= rows) continue;
+      if(grid[wy][wx] === 0) openN++; else shut.push([wx,wy]);
+    }
+    if(openN <= 1 && shut.length){ var s = shut[Math.floor(r() * shut.length)]; grid[s[1]][s[0]] = 0 }
+  }
+  /* a few extra loops */
+  for(y = 1; y < H - 1; y++) for(x = 1; x < W - 1; x++){
+    if(grid[y][x] === 1 && ((x % 2 === 0 && y % 2 === 1) || (x % 2 === 1 && y % 2 === 0)) && r() < .09) grid[y][x] = 0;
+  }
+  /* a straight run along the bottom and round the bin, so the start is never a trap */
+  for(x = 7; x <= 15; x++) grid[13][x] = 0;
+  grid[7][10] = 0; grid[7][12] = 0; grid[6][11] = 0; grid[8][11] = 0;
+  drawMazeLayer(r);
+}
+
+function bfs(sx, sy){
+  var d = {}, q = [[sx,sy]]; d[sx+","+sy] = 0;
+  while(q.length){
+    var p = q.shift();
+    for(var i = 0; i < 4; i++){
+      var nx = p[0] + DX[i], ny = p[1] + DY[i], k = nx + "," + ny;
+      if(open(nx,ny) && d[k] === undefined){ d[k] = d[p[0]+","+p[1]] + 1; q.push([nx,ny]) }
+    }
+  }
+  return d;
+}
+
+/* ====================== game state ====================== */
+
+var G = {screen:"menu"};
+var cvs = document.getElementById("board"), ctx = cvs.getContext("2d");
+var DPR = Math.min(2, window.devicePixelRatio || 1);
+cvs.width = W*T*DPR; cvs.height = H*T*DPR;
+var layer = document.createElement("canvas");
+
+function newGull(i, lv){
+  var d = GULLS[i];
+  return {name:d.name, col:d.col, size:d.size, style:d.style, x:BIN.x, y:BIN.y, dir:-1, face:1,
+          wait:1.2 + i * Math.max(1.4, 3.2 - lv*.09), active:false, home:[[1,1],[21,1],[1,13],[21,13]][i], flap:R()*6};
+}
+
+function startLevel(n){
+  var L = LEVELS[n-1];
+  G = {screen:"play", level:n, L:L, qi:0, lives:3, score:0, t:0, scared:0, freeze:1.6, ready:say("ready"),
+       tiles:[], bottles:[], used:{}, firstTry:0, wrongNow:0, toasts:[], parts:[], sayT:""};
+  makeMaze(n);
+  G.player = {x:START.x, y:START.y, dir:-1, next:-1, walk:0, face:1};
+  G.gulls = [];
+  for(var i = 0; i < L.gulls; i++) G.gulls.push(newGull(i, n));
+  var corners = shuffle([[1,1],[21,1],[1,13],[21,13]]);
+  G.bottles = corners.slice(0,2).map(function(c){ return {x:c[0], y:c[1]} });
+  newQuestion();
+  G.freeze = 1.8;
+  hideHint(); setSay("");
+  hideOverlay();
+  drawHud();
+  musicSync();
+}
+
+function newQuestion(){
+  var q, tries = 0;
+  do { q = G.L.g(); tries++ } while(G.used[q.key] && tries < 30);
+  G.used[q.key] = 1;
+  G.q = q; G.wrongNow = 0;
+  var opts = options(q, G.L.o);
+  var dist = bfs(Math.round(G.player.x), Math.round(G.player.y));
+  var cells = [];
+  for(var y = 0; y < H; y++) for(var x = 0; x < W; x++){
+    if(!open(x,y) || (x === BIN.x && y === BIN.y)) continue;
+    if(G.bottles.some(function(b){ return b.x === x && b.y === y })) continue;
+    cells.push({x:x, y:y, d:dist[x+","+y] || 0});
+  }
+  shuffle(cells);
+  G.tiles = [];
+  var need = 6;
+  opts.forEach(function(v){
+    var spot = null;
+    for(var pass = 0; pass < 3 && !spot; pass++){
+      var minD = [need, 4, 2][pass], gap = [4, 3, 1][pass];
+      for(var i = 0; i < cells.length; i++){
+        var c = cells[i];
+        if(c.d < minD) continue;
+        if(G.tiles.some(function(t){ return Math.abs(t.x-c.x) + Math.abs(t.y-c.y) < gap })) continue;
+        spot = c; break;
+      }
+    }
+    if(spot) G.tiles.push({x:spot.x, y:spot.y, v:v, ok:v === q.ans, born:G.t});
+  });
+  hideHint();
+  G.gulls.forEach(function(g){ if(g.active) g.huh = 1.3 });
+  var qb = document.getElementById("qbox"); qb.classList.remove("pop"); void qb.offsetWidth; qb.classList.add("pop");
+  drawHud();
+}
+
+/* ====================== movement ====================== */
+
+function advance(e, dist, decide){
+  for(var guard = 0; dist > 1e-9 && guard < 12; guard++){
+    var cx = Math.round(e.x), cy = Math.round(e.y), d;
+    if(Math.abs(e.x - cx) < 1e-6 && Math.abs(e.y - cy) < 1e-6){
+      e.x = cx; e.y = cy;
+      decide(e, cx, cy);
+      if(e.dir < 0 || !open(cx + DX[e.dir], cy + DY[e.dir])){ e.dir = -1; return }
+      d = 1;
+    } else {
+      if(e.dir < 0) return;
+      if(e.dir === 1) d = Math.floor(e.x) + 1 - e.x;
+      else if(e.dir === 3) d = e.x - Math.floor(e.x);
+      else if(e.dir === 2) d = Math.floor(e.y) + 1 - e.y;
+      else d = e.y - Math.floor(e.y);
+    }
+    var m = Math.min(dist, d);
+    e.x += DX[e.dir] * m; e.y += DY[e.dir] * m; dist -= m;
+    if(m >= d - 1e-9){ e.x = Math.round(e.x); e.y = Math.round(e.y) }
+    if(DX[e.dir]) e.face = DX[e.dir];
+  }
+}
+
+function playerDecide(p, cx, cy){
+  if(p.next >= 0 && open(cx + DX[p.next], cy + DY[p.next])) p.dir = p.next;
+  else if(p.dir >= 0 && open(cx + DX[p.dir], cy + DY[p.dir])) { /* keep going */ }
+  else p.dir = -1;
+}
+
+function gullTarget(g){
+  var p = G.player, px = Math.round(p.x), py = Math.round(p.y);
+  var cycle = 4 + 12 + G.level, phase = G.t % cycle;
+  if(phase < 4 && G.level < 17) return {x:g.home[0], y:g.home[1]};
+  if(g.style === "ahead" && p.dir >= 0) return {x:px + DX[p.dir]*3, y:py + DY[p.dir]*3};
+  if(g.style === "shy"){
+    var dd = Math.abs(g.x - px) + Math.abs(g.y - py);
+    return dd > 6 ? {x:px, y:py} : {x:g.home[0], y:g.home[1]};
+  }
+  return {x:px, y:py};
+}
+
+function gullDecide(g, cx, cy){
+  var opts = [];
+  for(var i = 0; i < 4; i++){
+    if(!open(cx + DX[i], cy + DY[i])) continue;
+    if(g.dir >= 0 && i === (g.dir + 2) % 4) continue;
+    opts.push(i);
+  }
+  if(!opts.length){ g.dir = g.dir >= 0 ? (g.dir + 2) % 4 : -1; return }
+  var wobble = Math.max(.06, .5 - G.level * .024) + (g.style === "chaos" ? .25 : 0);
+  if(G.scared > 0 || R() < wobble){ g.dir = pick(opts); return }
+  var t = gullTarget(g), best = opts[0], bd = 1e9;
+  opts.forEach(function(d){
+    var nx = cx + DX[d], ny = cy + DY[d], v = (nx - t.x)*(nx - t.x) + (ny - t.y)*(ny - t.y);
+    if(v < bd){ bd = v; best = d }
+  });
+  g.dir = best;
+}
+
+/* ====================== update ====================== */
+
+function update(dt){
+  if(G.screen !== "play") return;
+  G.t += dt;
+  G.toasts = G.toasts.filter(function(t){ t.life -= dt; return t.life > 0 });
+  G.parts = G.parts.filter(function(p){ p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 9*dt; return p.life > 0 });
+
+  if(G.hold){ G.hold.t -= dt; if(G.hold.t <= 0){ var fn = G.hold.fn; G.hold = null; fn() } return }
+  if(G.freeze > 0){ G.freeze -= dt; return }
+
+  var p = G.player;
+  advance(p, 5.4 * dt, playerDecide);
+  if(p.dir >= 0) p.walk += dt * 12;
+
+  var gs = (2.4 + G.level * .14) * (save.easy ? .72 : 1);
+  if(G.scared > 0) G.scared -= dt;
+
+  G.gulls.forEach(function(g){
+    g.flap += dt * (g.active ? 10 : 4);
+    if(!g.active){ g.wait -= dt; if(g.wait <= 0){ g.active = true; g.x = BIN.x; g.y = BIN.y; g.dir = -1; SFX.squawk() } return }
+    if(g.huh > 0){ g.huh -= dt; return }
+    advance(g, gs * (G.scared > 0 ? .55 : 1) * dt, gullDecide);
+  });
+
+  /* buoys */
+  for(var i = 0; i < G.tiles.length; i++){
+    var tl = G.tiles[i];
+    if(Math.abs(tl.x - p.x) + Math.abs(tl.y - p.y) < .55){
+      if(tl.ok) return gotRight(tl);
+      G.tiles.splice(i,1); gotWrong(tl); break;
+    }
+  }
+  /* vinegar */
+  for(i = 0; i < G.bottles.length; i++){
+    var b = G.bottles[i];
+    if(Math.abs(b.x - p.x) + Math.abs(b.y - p.y) < .55){
+      G.bottles.splice(i,1);
+      G.scared = Math.max(3, 7.5 - G.level * .2);
+      G.gulls.forEach(function(g){ if(g.active && g.dir >= 0 && Math.abs(g.x-Math.round(g.x)) < 1e-6 && Math.abs(g.y-Math.round(g.y)) < 1e-6) g.dir = (g.dir + 2) % 4 });
+      SFX.vinegar(); toast(say("vinegar"), p.x, p.y, "#9be3f2"); setSay(say("vinegar"));
+      break;
+    }
+  }
+  /* gulls */
+  for(i = 0; i < G.gulls.length; i++){
+    var g = G.gulls[i];
+    if(!g.active) continue;
+    if(Math.abs(g.x - p.x) < .6 && Math.abs(g.y - p.y) < .6){
+      if(G.scared > 0){
+        g.active = false; g.wait = 3.5; g.x = BIN.x; g.y = BIN.y; g.dir = -1;
+        G.score += 50; SFX.shoo(); var m = say("shoo", {g:g.name});
+        toast("+50", p.x, p.y - .6, "#ffc247"); setSay(m); drawHud();
+      } else { caught(g); return }
+    }
+  }
+}
+
+function gotRight(tl){
+  SFX.right();
+  var pts = 100 + G.level * 10 + (G.wrongNow === 0 ? 50 : 0);
+  G.score += pts;
+  if(G.wrongNow === 0) G.firstTry++;
+  burst(tl.x, tl.y);
+  toast("+" + pts, tl.x, tl.y, "#ffc247");
+  setSay("<b>" + esc(G.q.text) + " = " + G.q.ans + ".</b> " + esc(say("right")));
+  G.qi++;
+  if(G.qi >= G.L.n){ G.tiles = []; drawHud(); G.hold = {t:1.1, fn:levelDone}; return }
+  newQuestion();
+}
+
+function gotWrong(tl){
+  SFX.wrong(); SFX.squawk();
+  G.wrongNow++;
+  save.tricky[G.q.key] = (save.tricky[G.q.key] || 0) + 1; store();
+  G.score = Math.max(0, G.score - 10);
+  toast("pop!", tl.x, tl.y, "#ffffff");
+  setSay(esc(say("wrong", {n:tl.v})));
+  if(G.wrongNow >= 2) showHint();
+  drawHud();
+}
+
+function caught(g){
+  SFX.squawk(); tone(400,.5,"triangle",.06,90,.1);
+  G.lives--;
+  setSay(esc(say("caught", {g:g.name})));
+  toast("SQUAWK", g.x, g.y - .5, "#ffffff");
+  drawHud();
+  G.hold = {t:1.5, fn:function(){
+    if(G.lives <= 0) return gameOver();
+    G.player.x = START.x; G.player.y = START.y; G.player.dir = -1; G.player.next = -1;
+    G.gulls.forEach(function(gg, i){ gg.active = false; gg.x = BIN.x; gg.y = BIN.y; gg.dir = -1; gg.wait = .6 + i * 1.3 });
+    G.scared = 0; G.freeze = 1.2; G.ready = "Go again";
+  }};
+}
+
+function toast(text, x, y, col){ G.toasts.push({text:text, x:x, y:y, col:col, life:1.4}) }
+function burst(x, y){
+  for(var i = 0; i < 22; i++) G.parts.push({x:x, y:y, vx:(R()-.5)*8, vy:-R()*7-1, life:.9 + R()*.5,
+    col:pick(["#ffc247","#ef7724","#fffdf8","#00a6c9","#f5d36b"])});
+}
+
+/* ====================== screens ====================== */
+
+var ov = document.getElementById("overlay");
+function showOverlay(html){ setTimeout(musicSync, 0); ov.innerHTML = '<div class="card-o">' + html + '</div>'; ov.hidden = false; var b = ov.querySelector("button"); if(b) b.focus({preventScroll:true}) }
+function hideOverlay(){ ov.hidden = true; ov.innerHTML = "" }
+
+function levelGrid(){
+  var nx = nextSuggested();
+  return '<div class="lgrid">' + LEVELS.map(function(L, i){
+    var n = i + 1, s = save.levels[n], cls = "lbtn" + (s && s.cleared ? " done" : "") + (n === nx ? " next" : "");
+    return '<button class="' + cls + '" data-lv="' + n + '"><b>' + n + '</b><span>' + esc(L.s) + '</span></button>';
+  }).join("") + '</div>';
+}
+function wireLevels(){
+  ov.querySelectorAll("[data-lv]").forEach(function(b){
+    b.addEventListener("click", function(){ intro(+b.getAttribute("data-lv")) });
+  });
+}
+function wireToggles(){
+  ov.querySelectorAll(".tog").forEach(function(b){
+    b.addEventListener("click", function(){
+      var k = b.getAttribute("data-k"); save[k] = !save[k]; store();
+      b.setAttribute("aria-pressed", save[k] ? "true" : "false");
+      if(k === "music"){ musicLabel(); musicSync() }
+    });
+  });
+}
+
+function menu(){
+  G.screen = "menu";
+  var nx = nextSuggested(), cleared = Object.keys(save.levels).filter(function(k){ return save.levels[k].cleared }).length;
+  showOverlay(
+    '<h2>CHIP <span class="o">RUN</span></h2>' +
+    '<p>You are a chip on a pier. Four seagulls would very much like to eat you. Run into the buoy with the right answer, three or four times, and the level is yours.</p>' +
+    '<p>' + (cleared ? cleared + " of 20 levels cleared so far. " : "") + 'Level ' + nx + ' is a good next one, but any level is fine.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="goNext">Play level ' + nx + '</button></div>' +
+    levelGrid() +
+    '<div class="toggles"><button class="tog" data-k="music" aria-pressed="' + save.music + '">Music</button>' +
+    '<button class="tog" data-k="sound" aria-pressed="' + save.sound + '">Sound effects</button>' +
+    '<button class="tog" data-k="easy" aria-pressed="' + save.easy + '">Sleepy gulls (slower)</button></div>'
+  );
+  document.getElementById("goNext").addEventListener("click", function(){ intro(nx) });
+  wireLevels(); wireToggles();
+  setHudIdle();
+}
+
+function intro(n){
+  G = {screen:"intro", level:n};
+  var L = LEVELS[n-1];
+  showOverlay(
+    '<p class="big">' + n + '</p>' +
+    '<h2>' + esc(L.t) + '</h2>' +
+    '<p><b>' + esc(L.s) + '.</b> ' + L.n + ' answers to find.</p>' +
+    '<div class="gullcast">' + GULLS.slice(0, L.gulls).map(function(g){
+      return '<span><i style="background:' + g.col + '"></i>' + g.name + '</span>' }).join("") + '</div>' +
+    '<p>Press an arrow key or tap Go when you are ready. Nothing starts until then.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="goBtn">Go</button><button class="btn btn-quiet" id="backBtn">Levels</button></div>'
+  );
+  document.getElementById("goBtn").addEventListener("click", function(){ startLevel(n) });
+  document.getElementById("backBtn").addEventListener("click", menu);
+  var L2 = LEVELS[n-1];
+  document.getElementById("hudLvl").innerHTML = "Level " + n + "<small>" + esc(L2.t) + "</small>";
+}
+
+function levelDone(){
+  SFX.level();
+  var n = G.level, bonus = G.lives * 50;
+  G.score += bonus;
+  var s = save.levels[n] || {};
+  s.cleared = true; s.best = Math.max(s.best || 0, G.score);
+  s.first = Math.max(s.first || 0, G.firstTry); s.total = G.L.n;
+  save.levels[n] = s; save.best = Math.max(save.best || 0, G.score); store();
+  G.screen = "done";
+  if(n === LEVELS.length) return finale();
+  var lines = ["The gulls have gone off to argue about it.","Gary is writing a strongly worded letter.","Sharon says it does not count. It counts.",
+               "A small crowd has gathered. They are clapping. Mostly.","The pier is yours, for now."];
+  showOverlay(
+    '<p class="big">' + n + '</p><h2>Level cleared!</h2>' +
+    '<p>' + pick(lines) + '</p>' +
+    '<p><b>' + G.score + ' points</b> (including ' + bonus + ' for chips left). Right first time: ' + G.firstTry + ' of ' + G.L.n + '.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="nextBtn">Level ' + (n+1) + '</button><button class="btn btn-quiet" id="againBtn">Play this one again</button><button class="btn btn-quiet" id="backBtn">Levels</button></div>'
+  );
+  document.getElementById("nextBtn").addEventListener("click", function(){ intro(n + 1) });
+  document.getElementById("againBtn").addEventListener("click", function(){ intro(n) });
+  document.getElementById("backBtn").addEventListener("click", menu);
+}
+
+function gameOver(){
+  G.screen = "over";
+  showOverlay(
+    '<h2>Out of chips</h2>' +
+    '<p>' + (G.qi ? 'The gulls are having a lovely time. You got ' + G.qi + ' of ' + G.L.n + ' answers on level ' + G.level + ' before they got you, and that still counts.'
+                  : 'The gulls got there first this time. Gary is going to be unbearable about it.') + '</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="againBtn">Try level ' + G.level + ' again</button>' +
+    (G.level > 1 ? '<button class="btn btn-quiet" id="easierBtn">Level ' + (G.level-1) + '</button>' : '') +
+    '<button class="btn btn-quiet" id="sleepyBtn">' + (save.easy ? "Sleepy gulls are on" : "Turn on sleepy gulls") + '</button>' +
+    '<button class="btn btn-quiet" id="backBtn">Levels</button></div>'
+  );
+  var n = G.level;
+  document.getElementById("againBtn").addEventListener("click", function(){ intro(n) });
+  var eb = document.getElementById("easierBtn"); if(eb) eb.addEventListener("click", function(){ intro(n - 1) });
+  document.getElementById("sleepyBtn").addEventListener("click", function(e){ save.easy = true; store(); e.target.textContent = "Sleepy gulls are on" });
+  document.getElementById("backBtn").addEventListener("click", menu);
+}
+
+function finale(){
+  showOverlay(
+    '<p class="big">20</p><h2>Gary has been <span class="o">defeated</span></h2>' +
+    '<p>Every level on the pier. Two digits times two digits, with seagulls on you. That is properly impressive.</p>' +
+    '<p>Gary has retired to a quiet bin in Skegness. Sharon is writing a memoir. Big Dave has taken up yoga. Kevin still does not know what happened.</p>' +
+    '<p><b>' + G.score + ' points</b> on the last level.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="backBtn">Back to the levels</button></div>'
+  );
+  document.getElementById("backBtn").addEventListener("click", menu);
+}
+
+function pause(){
+  if(G.screen !== "play") return;
+  G.screen = "paused";
+  showOverlay('<h2>Paused</h2><p>The gulls are frozen mid flap. Take as long as you need.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" id="resBtn">Carry on</button><button class="btn btn-quiet" id="backBtn">Levels</button></div>');
+  document.getElementById("resBtn").addEventListener("click", resume);
+  document.getElementById("backBtn").addEventListener("click", menu);
+}
+function resume(){ if(G.screen === "paused"){ G.screen = "play"; hideOverlay(); musicSync() } }
+
+/* ====================== HUD ====================== */
+
+function drawHud(){
+  if(!G.L) return;
+  document.getElementById("hudLvl").innerHTML = "Level " + G.level + "<small>" + esc(G.L.t) + "</small>";
+  document.getElementById("hudQ").textContent = G.q ? (G.q.kind === "miss" ? G.q.text : G.q.text + " = ?") : "";
+  document.getElementById("hudQn").textContent = "Answer " + Math.min(G.qi + 1, G.L.n) + " of " + G.L.n;
+  var l = ""; for(var i = 0; i < G.lives; i++) l += "<i></i>";
+  document.getElementById("hudLives").innerHTML = l;
+  document.getElementById("hudScore").textContent = G.score + " points";
+}
+function setHudIdle(){
+  document.getElementById("hudLvl").innerHTML = "Chip Run<small>20 levels of pier based peril</small>";
+  document.getElementById("hudQ").textContent = "? " + X + " ?";
+  document.getElementById("hudQn").textContent = "Pick a level to start";
+  document.getElementById("hudLives").innerHTML = "<i></i><i></i><i></i>";
+  document.getElementById("hudScore").textContent = (save.best || 0) + " best";
+  setSay(""); hideHint();
+}
+function setSay(h){ document.getElementById("say").innerHTML = h }
+function showHint(){ if(!G.q) return; var h = document.getElementById("hintTxt"); h.textContent = "Hint: " + hintFor(G.q); h.hidden = false }
+function hideHint(){ document.getElementById("hintTxt").hidden = true }
+
+/* ====================== drawing ====================== */
+
+function drawMazeLayer(r){
+  layer.width = W*T*DPR; layer.height = H*T*DPR;
+  var c = layer.getContext("2d"), x, y;
+  c.setTransform(DPR,0,0,DPR,0,0);
+  var sea = c.createLinearGradient(0,0,0,H*T); sea.addColorStop(0,"#0e7a96"); sea.addColorStop(1,"#0a4f63");
+  c.fillStyle = sea; c.fillRect(0,0,W*T,H*T);
+  c.strokeStyle = "rgba(255,255,255,.22)"; c.lineWidth = 1.6;
+  for(y = 0; y < H; y++) for(x = 0; x < W; x++){
+    if(grid[y][x] !== 1 || r() < .45) continue;
+    var wx = x*T + 5 + r()*12, wy = y*T + 8 + r()*14;
+    c.beginPath(); c.moveTo(wx, wy); c.quadraticCurveTo(wx+4, wy-4, wx+8, wy); c.quadraticCurveTo(wx+12, wy+4, wx+16, wy); c.stroke();
+  }
+  for(y = 0; y < H; y++) for(x = 0; x < W; x++){
+    if(grid[y][x] !== 0) continue;
+    var px = x*T, py = y*T;
+    c.fillStyle = (x + y) % 2 ? "#e9c48c" : "#e3bb80"; c.fillRect(px, py, T, T);
+    c.strokeStyle = "rgba(122,74,34,.28)"; c.lineWidth = 1;
+    for(var k = 1; k < 3; k++){ c.beginPath(); c.moveTo(px, py + k*T/3); c.lineTo(px+T, py + k*T/3); c.stroke() }
+    c.fillStyle = "rgba(90,55,25,.35)"; c.fillRect(px+3, py+4, 2, 2); c.fillRect(px+T-5, py+T-6, 2, 2);
+  }
+  c.strokeStyle = "#6b3f1d"; c.lineWidth = 3; c.lineCap = "round";
+  for(y = 0; y < H; y++) for(x = 0; x < W; x++){
+    if(grid[y][x] !== 0) continue;
+    var ax = x*T, ay = y*T;
+    if(!open(x, y-1)) line(c, ax, ay+1.5, ax+T, ay+1.5);
+    if(!open(x, y+1)) line(c, ax, ay+T-1.5, ax+T, ay+T-1.5);
+    if(!open(x-1, y)) line(c, ax+1.5, ay, ax+1.5, ay+T);
+    if(!open(x+1, y)) line(c, ax+T-1.5, ay, ax+T-1.5, ay+T);
+  }
+}
+function line(c,a,b,d,e){ c.beginPath(); c.moveTo(a,b); c.lineTo(d,e); c.stroke() }
+
+function rr(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath() }
+
+function drawBin(c, t){
+  var x = BIN.x*T + T/2, y = BIN.y*T + T/2;
+  c.fillStyle = "#3d6b4f"; rr(c, x-11, y-9, 22, 20, 3); c.fill();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 2; c.stroke();
+  c.fillStyle = "#2c5139"; rr(c, x-13, y-13, 26, 6, 2); c.fill(); c.stroke();
+  c.strokeStyle = "rgba(255,255,255,.35)"; line(c, x-5, y-4, x-5, y+8); line(c, x+1, y-4, x+1, y+8); line(c, x+7, y-4, x+7, y+8);
+}
+
+function drawTile(c, tl, t){
+  var x = tl.x*T + T/2, y = tl.y*T + T/2 + Math.sin(t*3 + tl.x) * 1.8;
+  var txt = String(tl.v);
+  c.font = "900 " + (txt.length > 3 ? 12 : 15) + "px Archivo, 'Arial Black', sans-serif";
+  var w = Math.max(T - 2, c.measureText(txt).width + 12), h = T - 6;
+  var s = Math.min(1, (t - tl.born) * 5);
+  c.save(); c.translate(x, y); c.scale(s, s);
+  c.fillStyle = "rgba(0,0,0,.22)"; rr(c, -w/2 + 2, -h/2 + 3, w, h, 8); c.fill();
+  c.fillStyle = "#fffdf8"; rr(c, -w/2, -h/2, w, h, 8); c.fill();
+  c.fillStyle = "#ef7724"; c.save(); rr(c, -w/2, -h/2, w, h, 8); c.clip(); c.fillRect(-w/2, -h/2, w, 5); c.fillRect(-w/2, h/2-5, w, 5); c.restore();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 2.2; rr(c, -w/2, -h/2, w, h, 8); c.stroke();
+  c.fillStyle = "#0a2f38"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(txt, 0, 1);
+  c.restore();
+}
+
+function drawBottle(c, b, t){
+  var x = b.x*T + T/2, y = b.y*T + T/2 + Math.sin(t*4) * 1.5;
+  c.save(); c.translate(x, y); c.rotate(Math.sin(t*2) * .12);
+  c.fillStyle = "#7a3b12"; rr(c, -6, -5, 12, 16, 3); c.fill();
+  c.fillRect(-3, -11, 6, 7);
+  c.fillStyle = "#ffc247"; c.fillRect(-4, -12, 8, 3);
+  c.fillStyle = "#fffdf8"; c.fillRect(-5, 0, 10, 6);
+  c.fillStyle = "#0a2f38"; c.font = "900 6px Archivo, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("V", 0, 3.3);
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 1.5; rr(c, -6, -5, 12, 16, 3); c.stroke();
+  c.restore();
+  c.fillStyle = "rgba(255,255,255," + (.4 + .4*Math.sin(t*6)) + ")"; c.beginPath(); c.arc(x+8, y-9, 1.8, 0, 7); c.fill();
+}
+
+function drawChip(c, p, t){
+  var x = p.x*T + T/2, y = p.y*T + T/2, bob = p.dir >= 0 ? Math.sin(p.walk) * 1.5 : Math.sin(t*2) * .8;
+  var near = G.gulls && G.gulls.some(function(g){ return g.active && Math.abs(g.x-p.x) + Math.abs(g.y-p.y) < 3.2 }) && G.scared <= 0;
+  c.save(); c.translate(x, y + bob);
+  c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(0, 13 - bob, 8, 2.5, 0, 0, 7); c.fill();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 2; c.lineCap = "round";
+  var leg = p.dir >= 0 ? Math.sin(p.walk) * 3 : 0;
+  line(c, -3, 8, -3 - leg, 13); line(c, 3, 8, 3 + leg, 13);
+  c.rotate(p.face * .08);
+  var g = c.createLinearGradient(-6, 0, 6, 0); g.addColorStop(0, "#f7d774"); g.addColorStop(1, "#e2a93a");
+  c.fillStyle = g; rr(c, -6.5, -12, 13, 22, 4); c.fill();
+  c.fillStyle = "#b7722a"; rr(c, -6.5, -12, 13, 4, 3); c.fill();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 2; rr(c, -6.5, -12, 13, 22, 4); c.stroke();
+  var ex = p.face * 1.4;
+  c.fillStyle = "#fff"; c.beginPath(); c.arc(-2.6 + ex, -3, 3, 0, 7); c.arc(3 + ex, -3, 3, 0, 7); c.fill();
+  c.fillStyle = "#0a2f38"; c.beginPath(); c.arc(-2.2 + ex*1.6, -2.6, 1.4, 0, 7); c.arc(3.4 + ex*1.6, -2.6, 1.4, 0, 7); c.fill();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 1.4; c.beginPath();
+  if(near){ c.arc(ex, 4, 2, 0, 7) } else { c.arc(ex, 2.5, 3, .2, Math.PI - .2) }
+  c.stroke();
+  c.fillStyle = "rgba(255,255,255,.8)"; c.fillRect(-4, 5, 1.2, 1.2); c.fillRect(2, 7, 1.2, 1.2); c.fillRect(-1, -8, 1.2, 1.2);
+  c.restore();
+}
+
+function drawGull(c, g, t){
+  var x = g.x*T + T/2, y = g.y*T + T/2, s = g.size;
+  if(!g.active){
+    var peek = Math.max(0, Math.sin(t*2 + g.flap)) * 4;
+    c.save(); c.translate(BIN.x*T + T/2 + (g.name.length % 3 - 1)*5, BIN.y*T + T/2 - 12 - peek);
+    c.fillStyle = "#fff"; c.beginPath(); c.arc(0, 0, 5, 0, 7); c.fill(); c.strokeStyle = "#0a2f38"; c.lineWidth = 1.5; c.stroke();
+    c.fillStyle = "#ffc247"; c.beginPath(); c.moveTo(3,0); c.lineTo(9,1); c.lineTo(3,3); c.fill();
+    c.fillStyle = "#0a2f38"; c.fillRect(0, -2, 1.6, 1.6);
+    c.restore(); return;
+  }
+  var scared = G.scared > 0, flick = scared && G.scared < 1.6 && Math.floor(t*8) % 2;
+  var f = g.face || 1, flap = Math.sin(g.flap) * 5;
+  c.save(); c.translate(x, y); c.scale(s * f, s);
+  c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(0, 13, 9, 2.5, 0, 0, 7); c.fill();
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 1.8;
+  c.fillStyle = scared ? (flick ? "#fffdf8" : "#bfe3ff") : "#fffdf8";
+  c.beginPath(); c.ellipse(-2, 3, 10, 7, 0, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = scared ? "#7fb3d6" : "#9aa7ad";
+  c.beginPath(); c.moveTo(-9, 1); c.quadraticCurveTo(-3, -5 - flap, 5, 1); c.quadraticCurveTo(-2, 4, -9, 1); c.fill(); c.stroke();
+  c.fillStyle = scared ? "#bfe3ff" : "#fffdf8"; c.beginPath(); c.arc(7, -5, 6, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = "#ffc247"; c.beginPath(); c.moveTo(11, -5); c.lineTo(19, -3); c.lineTo(11, -1); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = "#d8332a"; c.beginPath(); c.arc(16, -3, 1.2, 0, 7); c.fill();
+  c.fillStyle = g.col; c.fillRect(1, -1, 7, 3.2);
+  if(scared){
+    c.strokeStyle = "#0a2f38"; c.lineWidth = 1.2;
+    line(c, 6, -8, 9, -5); line(c, 9, -8, 6, -5);
+    c.beginPath(); c.arc(10, 1, 1.6, 0, 7); c.stroke();
+  } else {
+    c.fillStyle = "#0a2f38"; c.beginPath(); c.arc(8.5, -6, 1.5, 0, 7); c.fill();
+    c.lineWidth = 1.8; line(c, 5, -10.5, 11, -8);
+  }
+  if(g.name === "Kevin"){ c.fillStyle = "#7b4b8f"; c.beginPath(); c.moveTo(4,-10); c.lineTo(10,-10); c.lineTo(7,-18); c.closePath(); c.fill(); c.fillStyle = "#ffc247"; c.beginPath(); c.arc(7,-18,1.6,0,7); c.fill() }
+  c.strokeStyle = "#0a2f38"; c.lineWidth = 1.5; line(c, -3, 10, -4, 13); line(c, 1, 10, 1, 13);
+  c.restore();
+  c.font = "700 9px 'Atkinson Hyperlegible', Verdana, sans-serif"; c.textAlign = "center"; c.textBaseline = "bottom";
+  c.fillStyle = "rgba(10,47,56,.75)"; var tw = c.measureText(g.name).width + 6;
+  rr(c, x - tw/2, y - 22*s - 11, tw, 11, 4); c.fill();
+  c.fillStyle = "#fffdf8"; c.fillText(g.name, x, y - 22*s - 1);
+  if(g.huh > 0){ c.font = "900 16px Archivo, sans-serif"; c.fillStyle = "#ffc247"; c.fillText("?", x + 12, y - 12) }
+}
+
+function render(){
+  var t = performance.now() / 1000;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(G.screen === "menu" || G.screen === "intro" || !G.player){
+    ctx.drawImage(layer, 0, 0, W*T, H*T);
+    drawBin(ctx, t);
+    return;
+  }
+  ctx.drawImage(layer, 0, 0, W*T, H*T);
+  drawBin(ctx, t);
+  G.bottles.forEach(function(b){ drawBottle(ctx, b, t) });
+  G.tiles.forEach(function(tl){ drawTile(ctx, tl, G.t) });
+  drawChip(ctx, G.player, t);
+  G.gulls.forEach(function(g){ drawGull(ctx, g, t) });
+  G.parts.forEach(function(p){ ctx.fillStyle = p.col; ctx.fillRect(p.x*T + T/2 + p.vx, p.y*T + T/2, 4, 7) });
+  G.toasts.forEach(function(tt){
+    ctx.globalAlpha = Math.min(1, tt.life);
+    ctx.font = "900 15px Archivo, 'Arial Black', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    var ty = tt.y*T - (1.4 - tt.life) * 22, tx = Math.max(60, Math.min(W*T - 60, tt.x*T + T/2));
+    ctx.lineWidth = 4; ctx.strokeStyle = "#0a2f38"; ctx.strokeText(tt.text, tx, ty);
+    ctx.fillStyle = tt.col; ctx.fillText(tt.text, tx, ty);
+    ctx.globalAlpha = 1;
+  });
+  if(G.scared > 0){
+    ctx.fillStyle = "rgba(155,227,242,.12)"; ctx.fillRect(0,0,W*T,H*T);
+    ctx.fillStyle = "#9be3f2"; ctx.fillRect(0, H*T - 5, W*T * Math.min(1, G.scared / 7.5), 5);
+  }
+  if(G.freeze > 0 && G.screen === "play" && !G.hold){
+    ctx.fillStyle = "rgba(10,47,56,.45)"; ctx.fillRect(0, H*T/2 - 34, W*T, 68);
+    ctx.font = "900 34px Archivo, 'Arial Black', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 6; ctx.strokeStyle = "#0a2f38"; ctx.strokeText(G.ready, W*T/2, H*T/2);
+    ctx.fillStyle = "#ffc247"; ctx.fillText(G.ready, W*T/2, H*T/2);
+  }
+}
+
+/* ====================== loop ====================== */
+
+var last = performance.now();
+function frame(now){
+  var dt = Math.min(.05, (now - last) / 1000); last = now;
+  update(dt); render();
+  requestAnimationFrame(frame);
+}
+
+/* ====================== input ====================== */
+
+var KEYS = {ArrowUp:0, KeyW:0, ArrowRight:1, KeyD:1, ArrowDown:2, KeyS:2, ArrowLeft:3, KeyA:3};
+function steer(d){
+  if(G.screen === "intro"){ startLevel(G.level) }
+  if(G.screen !== "play") return;
+  var p = G.player;
+  p.next = d;
+  var atC = Math.abs(p.x - Math.round(p.x)) < 1e-6 && Math.abs(p.y - Math.round(p.y)) < 1e-6;
+  if(!atC && p.dir >= 0 && d === (p.dir + 2) % 4) p.dir = d;
+}
+document.addEventListener("keydown", function(e){
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if(KEYS[e.code] !== undefined){
+    if(G.screen === "play" || G.screen === "intro"){ e.preventDefault(); steer(KEYS[e.code]) }
+    return;
+  }
+  if(e.code === "KeyM"){ toggleMusic(); return }
+  if(e.code === "KeyP" || e.code === "Escape" || (e.code === "Space" && G.screen === "play")){
+    if(G.screen === "play"){ e.preventDefault(); pause() }
+    else if(G.screen === "paused"){ e.preventDefault(); resume() }
+  }
+});
+document.querySelectorAll(".pad button").forEach(function(b){
+  b.addEventListener("pointerdown", function(e){ e.preventDefault(); steer(+b.getAttribute("data-d")) });
+});
+var sw = null;
+cvs.addEventListener("pointerdown", function(e){ sw = {x:e.clientX, y:e.clientY} });
+cvs.addEventListener("pointerup", function(e){
+  if(!sw) return;
+  var dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+  if(Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+  steer(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
+});
+document.getElementById("pauseBtn").addEventListener("click", function(){ G.screen === "paused" ? resume() : pause() });
+document.getElementById("levelsBtn").addEventListener("click", menu);
+document.getElementById("hintBtn").addEventListener("click", function(){
+  if(G.q && (G.screen === "play" || G.screen === "paused")) showHint();
+  else setSay("Hints appear once a level is running.");
+});
+document.addEventListener("visibilitychange", function(){ if(document.hidden) pause(); musicSync() });
+document.getElementById("musicBtn").addEventListener("click", toggleMusic);
+/* the first tap or key press anywhere is what lets the browser play the song */
+function firstTouch(){ musicSync(); document.removeEventListener("pointerdown", firstTouch); document.removeEventListener("keydown", firstTouch) }
+document.addEventListener("pointerdown", firstTouch);
+document.addEventListener("keydown", firstTouch);
+
+/* ====================== send ====================== */
+
+function buildText(){
+  var L = ["CHIP RUN (times tables maze)", ""];
+  var cleared = [];
+  LEVELS.forEach(function(lv, i){
+    var s = save.levels[i+1];
+    if(s && s.cleared) cleared.push("  Level " + (i+1) + " (" + lv.s + "): cleared, best " + s.best + " points, right first time " + s.first + " of " + s.total);
+  });
+  L.push("LEVELS CLEARED: " + cleared.length + " of 20");
+  L = L.concat(cleared.length ? cleared : ["  none yet"]);
+  L.push("");
+  var tk = Object.keys(save.tricky).sort(function(a,b){ return save.tricky[b] - save.tricky[a] }).slice(0, 15);
+  L.push("SLIPPERY FACTS (wrong buoy picked at least once):");
+  L = L.concat(tk.length ? tk.map(function(k){ return "  " + k.replace(/\u00d7/g,"x") + "  (" + save.tricky[k] + ")" }) : ["  none"]);
+  L.push("");
+  L.push("Sleepy gulls setting: " + (save.easy ? "on" : "off"));
+  return L.join("\n");
+}
+if(window.Base5Send){
+  Base5Send.mount(document.getElementById("sendHost"), {tool:"Chip Run", getText:buildText, filename:"chip-run"});
+}
+
+/* ====================== start ====================== */
+
+makeMaze(1);
+musicLabel();
+menu();
+requestAnimationFrame(frame);
+
+})();
+</script>
+
+</body>
+</html>
