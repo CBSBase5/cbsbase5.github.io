@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Level 2 English: six stops - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Six stops only. Shared pieces live in style.css */
+
+/* ---------- the route: the one bold thing on this page ---------- */
+.route{position:relative;background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);box-shadow:var(--lift);padding:18px 14px 14px;margin:0 0 22px}
+.routescroll{overflow-x:auto;padding:4px 0 6px}
+.route ol{list-style:none;margin:0;padding:0;display:flex;justify-content:space-between;
+  min-width:620px;position:relative}
+.route ol::before{content:"";position:absolute;left:28px;right:28px;top:22px;height:6px;
+  background:repeating-linear-gradient(90deg,var(--ink) 0 14px,transparent 14px 22px);
+  border-radius:3px;opacity:.9}
+.route li{flex:1;display:flex;justify-content:center;position:relative}
+.stopbtn{background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:6px;color:var(--ink);font-family:var(--body);max-width:96px}
+.stopbtn .dot{width:50px;height:50px;border-radius:50%;border:var(--border) solid var(--ink);
+  background:var(--paper);display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.2rem;
+  position:relative;z-index:1;transition:transform .15s}
+.stopbtn .nm{font-size:.8rem;line-height:1.2;text-align:center}
+.stopbtn .mm{font-family:var(--display);font-size:.66rem;letter-spacing:.08em;opacity:.6}
+.stopbtn:hover .dot{transform:translateY(-3px)}
+.stopbtn.done .dot{background:var(--orange);color:var(--white)}
+.stopbtn.part .dot{background:var(--yellow)}
+.stopbtn[aria-current="step"] .dot{box-shadow:0 0 0 5px var(--bright);transform:scale(1.08)}
+.stopbtn:focus-visible{outline:none}
+.stopbtn:focus-visible .dot{outline:3px dashed var(--teal);outline-offset:5px}
+
+.clock{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 4px 0;font-size:.9rem}
+.clock .track{flex:1;min-width:140px;height:10px;border:2px solid var(--ink);border-radius:999px;
+  background:var(--paper);overflow:hidden}
+.clock .track span{display:block;height:100%;width:0;background:var(--teal);transition:width .6s}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--teal);text-decoration:underline;cursor:pointer}
+
+/* ---------- a stop ---------- */
+.sec{background:var(--white);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);padding:24px;margin:0 0 20px;box-shadow:var(--lift)}
+.sec h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;
+  font-size:1.6rem;margin:0 0 6px;line-height:1.1}
+.sec .about{margin:0 0 14px;max-width:64ch}
+.sec .mins{display:inline-block;font-family:var(--display);font-variation-settings:"wght" 800;
+  font-size:.8rem;background:var(--paper);border:2px solid var(--ink);border-radius:999px;
+  padding:3px 11px;margin:0 0 10px}
+
+.lookup{display:flex;gap:10px;flex-wrap:wrap;align-items:center;border:2px dashed var(--ink);
+  border-radius:14px;padding:12px 14px;margin:0 0 16px;background:var(--paper)}
+.lookup p{margin:0;flex:1 1 220px;font-size:.93rem}
+.lookup a{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;
+  color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:999px;
+  padding:7px 13px;text-decoration:none;box-shadow:2px 3px 0 var(--ink)}
+.lookup a:hover{background:var(--yellow)}
+
+.drill{border:2px solid var(--ink);border-radius:16px;background:var(--paper);
+  padding:18px 20px;margin:14px 0 0}
+.drill h3{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:1.04rem;margin:0 0 12px;line-height:1.35}
+.extract{border:2px solid var(--ink);border-radius:12px;background:var(--white);
+  padding:14px 16px;margin:0 0 14px;font-size:.99rem;line-height:1.55}
+.extract p{margin:0 0 8px}
+.extract p:last-child{margin:0}
+
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts.stack{flex-direction:column;align-items:stretch}
+.opt{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;
+  font-size:.86rem;background:var(--white);color:var(--ink);text-align:left;
+  border:var(--border) solid var(--ink);border-radius:999px;
+  padding:10px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink)}
+.opt:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.opt.on{background:var(--yellow)}
+.opt.good{background:var(--teal);color:var(--white)}
+.opt.miss{opacity:.5}
+
+.sortrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border:2px solid var(--ink);border-radius:12px;background:var(--white);
+  padding:10px 14px;margin:0 0 8px}
+.sortrow .txt{flex:1 1 240px;font-size:.97rem}
+.sortrow .opt{padding:8px 14px;font-size:.78rem;box-shadow:2px 3px 0 var(--ink)}
+
+.tokens{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 12px;line-height:2.1;
+  background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:12px}
+.tok{font-family:var(--body);font-size:1rem;background:none;color:var(--ink);
+  border:2px solid transparent;border-radius:8px;padding:2px 6px;cursor:pointer}
+.tok:hover{border-color:var(--line)}
+.tok.on{background:var(--yellow);border-color:var(--ink)}
+.tok.right{background:var(--teal);color:var(--white);border-color:var(--ink)}
+.tok.wrong{opacity:.45;text-decoration:line-through}
+
+.steps .step{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:2px solid var(--ink);border-radius:12px;background:var(--white);
+  padding:11px 14px;margin:0 0 7px;cursor:pointer;font-family:var(--body);
+  font-size:.98rem;color:var(--ink)}
+.steps .num{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;
+  font-size:1.05rem;width:30px;height:30px;flex:none;border:2px solid var(--ink);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.steps .step.placed .num{background:var(--orange);color:var(--white)}
+
+.gaptext{background:var(--white);border:2px solid var(--ink);border-radius:12px;
+  padding:14px 16px;line-height:2.3;font-size:1rem;margin:0 0 10px}
+select.gap{font-family:var(--body);font-size:.95rem;border:2px solid var(--ink);border-radius:8px;
+  padding:3px 6px;background:var(--paper);color:var(--ink)}
+select.gap.good{background:var(--teal);color:var(--white)}
+select.gap.nope{background:var(--yellow)}
+.labrow{display:flex;align-items:center;gap:12px;margin:0 0 8px;flex-wrap:wrap}
+.labrow .badge{width:34px;height:34px;flex:none}
+
+.fb{margin:10px 0 0;font-size:.93rem;min-height:1.3em}
+.fb.good{color:var(--teal);font-weight:700}
+.learn{margin:10px 0 0;padding:11px 14px;border-radius:12px;
+  background:var(--white);border:2px dashed var(--ink);font-size:.93rem}
+.learn b{font-family:var(--display);font-variation-settings:"wght" 800}
+.minibtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.minibtns .btn{font-size:.72rem;padding:9px 15px}
+
+/* ---------- the pretend leaflet ---------- */
+.leaflet{position:relative;max-width:520px;margin-left:54px !important;background:#fffef9;border:2px solid var(--ink);
+  border-radius:6px;padding:22px 22px 18px;margin:0 0 14px;
+  box-shadow:6px 7px 0 rgba(10,47,56,.18);transform:rotate(-.6deg)}
+.leaflet .lf-h{font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 900;
+  font-size:1.7rem;line-height:1;color:var(--teal);margin:0 0 4px}
+.leaflet .lf-sub{font-family:var(--display);font-variation-settings:"wght" 700;font-size:1rem;margin:0 0 12px}
+.leaflet ul{margin:0 0 12px;padding-left:20px;font-size:.93rem}
+.leaflet .lf-pic{display:flex;gap:12px;align-items:center;margin:0 0 12px}
+.leaflet .lf-pic svg{flex:none;border:2px solid var(--ink);border-radius:6px}
+.leaflet .lf-pic i{font-size:.82rem}
+.leaflet table{border-collapse:collapse;font-size:.88rem;margin:0 0 12px}
+.leaflet td,.leaflet th{border:1.5px solid var(--ink);padding:4px 10px;text-align:left}
+.leaflet .lf-foot{font-size:.86rem;border-top:2px solid var(--ink);padding-top:8px}
+.leaflet .lf-bold{font-weight:700}
+.part{position:relative}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:50%;background:var(--orange);color:var(--white);border:2px solid var(--ink);
+  font-family:var(--display);font-variation-settings:"wght" 900;font-size:.8rem}
+.part > .badge{position:absolute;left:-50px;top:0}
+@media (max-width:620px){.part > .badge{position:static;margin:0 0 4px}.leaflet{transform:none;margin-left:0 !important}}
+
+/* ---------- pretend contents page ---------- */
+.contents{background:var(--white);border:2px solid var(--ink);border-radius:12px;
+  padding:12px 16px;margin:0 0 14px;max-width:460px}
+.contents b{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 900}
+.contents ol{margin:8px 0 0;padding-left:0;list-style:none}
+.contents li{display:flex;gap:8px;font-size:.95rem;padding:3px 0}
+.contents li span:first-child{flex:1;border-bottom:2px dotted var(--line)}
+
+/* ---------- confidence and writing ---------- */
+.conf .sortrow .opt{min-width:84px;text-align:center}
+.plan3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 12px}
+.plan3 label{font-size:.85rem;font-weight:700;display:block;margin:0 0 4px}
+.plan3 input,.writebox{width:100%;box-sizing:border-box;font-family:var(--body);font-size:1rem;
+  border:2px solid var(--ink);border-radius:10px;padding:9px 11px;background:var(--white);color:var(--ink)}
+.writebox{min-height:260px;line-height:1.6;resize:vertical}
+.wc{font-size:.88rem;margin:6px 0 0}
+.checks{display:grid;gap:7px;margin:12px 0 0}
+.check{display:flex;gap:10px;align-items:center;text-align:left;border:2px solid var(--ink);
+  border-radius:12px;background:var(--white);padding:9px 12px;cursor:pointer;font:inherit;color:var(--ink)}
+.check .box{width:24px;height:24px;flex:none;border:2px solid var(--ink);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.check.on .box{background:var(--orange);color:var(--white)}
+
+.navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 20px}
+.lead{max-width:64ch}
+
+@media (prefers-reduced-motion:reduce){
+  .stopbtn .dot,.clock .track span{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>LEVEL 2 ENGLISH: <span class="accent">SIX STOPS</span></h1>
+    <div class="line">
+      <span class="chip">About 45 minutes</span>
+      <p>One lesson&#39;s worth of revision, a stop at a time. Each stop has a quick look at Pass Functional Skills and a go at it here.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel panel-teal">
+    <p><strong>How it works.</strong> Six stops along the line, plus a start. The minutes are a guide for fitting it into a lesson, not a race. Go in order or jump about, skip anything, come back later. It saves itself.</p>
+    <p>Every stop links to the matching page on <a href="https://passfunctionalskills.co.uk/functional-skills-english-level-2/#revision" target="_blank" rel="noopener">Pass Functional Skills</a> if you want the longer version. It opens in a new tab, so this page stays where it is.</p>
+  </div>
+
+  <div class="route" aria-label="The route">
+    <div class="routescroll"><ol id="route"></ol></div>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <div id="stage"></div>
+
+  <div class="navrow">
+    <button class="btn btn-quiet" id="prevBtn">Previous stop</button>
+    <button class="btn btn-orange" id="nextBtn">Next stop</button>
+  </div>
+
+  <div class="sec">
+    <h2>Send it to Jay</h2>
+    <p class="lead">Sends which stops you did, how they went, and your email from stop six, so the next lesson goes on whatever is still wobbly.</p>
+    <div id="sendHost"></div>
+    <div class="minibtns"><button class="btn btn-quiet" id="clearBtn">Clear my answers</button></div>
+  </div>
+
+  <a class="backlink" href="/practice/#english-gcse">Back to practice</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "base5.english.l2sixstops.v1";
+var PFS = "https://passfunctionalskills.co.uk/functional-skills-english-level-2/";
+var PDF = "https://passfunctionalskills.co.uk/wp-content/uploads/2023/03/";
+
+/* ====================== content ====================== */
+
+var TOPICS = [
+  {id:"t1", t:"Text types and presentational features"},
+  {id:"t2", t:"Formality and bias"},
+  {id:"t3", t:"Point of view and line of argument"},
+  {id:"t4", t:"Finding things in a source"},
+  {id:"t5", t:"Linking words and tenses"},
+  {id:"t6", t:"Writing an email for a real reader"}
+];
+
+var LEAFLET =
+ '<div class="leaflet" aria-label="A pretend leaflet">' +
+   '<div class="part"><span class="badge">A</span><p class="lf-h">Riverside Pool is back</p></div>' +
+   '<div class="part"><span class="badge">B</span><p class="lf-sub">Reopening Saturday 3 October after a full refit</p></div>' +
+   '<div class="part"><span class="badge">C</span><ul><li>New 25 metre pool with a separate learner pool</li><li>Changing rooms with private cubicles</li><li>Free parking for two hours</li></ul></div>' +
+   '<div class="part"><span class="badge">D</span><div class="lf-pic">' +
+     '<svg width="92" height="62" viewBox="0 0 92 62" aria-hidden="true"><rect width="92" height="62" fill="#bfe6ef"/>' +
+     '<path d="M0 30 Q12 24 23 30 T46 30 T69 30 T92 30 V62 H0Z" fill="#00a6c9"/>' +
+     '<path d="M0 42 Q12 36 23 42 T46 42 T69 42 T92 42" fill="none" stroke="#fffdf8" stroke-width="2"/>' +
+     '<circle cx="70" cy="14" r="7" fill="#ffc247"/></svg>' +
+     '<i>The new main pool, photographed on its first test fill.</i></div></div>' +
+   '<div class="part"><span class="badge">E</span><table><tr><th>Day</th><th>Open</th></tr>' +
+     '<tr><td>Monday to Friday</td><td>6.30am to 9pm</td></tr><tr><td>Weekends</td><td>8am to 6pm</td></tr></table></div>' +
+   '<div class="part"><span class="badge">F</span><p class="lf-foot"><span class="lf-bold">Book a swim:</span> riversidepool.example or call 01234 567890</p></div>' +
+ '</div>';
+
+var CONTENTS =
+ '<div class="contents"><b>Chilton Leisure Centre: member handbook</b><ol>' +
+ '<li><span>1. Welcome and how to join</span><span>page 2</span></li>' +
+ '<li><span>2. Opening times and bank holidays</span><span>page 3</span></li>' +
+ '<li><span>3. Prices and memberships</span><span>page 4</span></li>' +
+ '<li><span>4. Classes timetable</span><span>page 6</span></li>' +
+ '<li><span>5. Safety rules in the pool and gym</span><span>page 8</span></li>' +
+ '<li><span>6. Complaints and feedback</span><span>page 10</span></li>' +
+ '</ol></div>';
+
+var ARTICLE =
+ '<div class="extract">' +
+ '<p><b>Let teenagers sleep</b></p>' +
+ '<p>Every morning, thousands of teenagers drag themselves to school half awake. It is time we started the school day at ten o\'clock.</p>' +
+ '<p>Scientists have found that the body clock shifts during the teenage years, so most teenagers cannot fall asleep before eleven at night. Asking them to be sharp at half past eight is asking the impossible.</p>' +
+ '<p>Some parents worry that a later start would clash with their jobs. That is a fair point, but schools could open early for breakfast clubs so nobody is left waiting outside.</p>' +
+ '<p>A later start would mean calmer mornings, better moods and, most importantly, better learning. Surely that is worth changing the timetable for.</p>' +
+ '</div>';
+
+var STOPS = [
+
+{id:"start", short:"Start", mins:3, title:"Start here",
+ about:"A quick look at how each part feels right now. There are no wrong answers, and it helps pick where to start.",
+ links:[{t:"The whole topic list", u:PFS+"#revision"}],
+ qs:[{id:"conf", type:"conf"}]},
+
+{id:"s1", short:"Text types", mins:7, title:"Text types and presentational features",
+ about:"The reading paper likes asking what kind of text something is and why it is laid out the way it is. Here is a pretend leaflet to take apart.",
+ links:[{t:"Read: text types", u:PFS+"reading-text-types"},
+        {t:"Read: presentational features", u:PFS+"reading-presentational-features"},
+        {t:"Worksheet", u:PDF+"Reading-Presentational-Features-L2.pdf"},
+        {t:"Answers", u:PDF+"Reading-Presentational-Features-L2-Answers.pdf"}],
+ qs:[
+  {id:"s1a", type:"label", pre:LEAFLET,
+   q:"Name each part of the leaflet. Every name gets used once.",
+   rows:[{k:"A",a:"Heading"},{k:"B",a:"Subheading"},{k:"C",a:"Bullet points"},
+         {k:"D",a:"Image and caption"},{k:"E",a:"Table"},{k:"F",a:"Contact details"}],
+   options:["Heading","Subheading","Bullet points","Image and caption","Table","Contact details"],
+   learn:"In the exam, naming the feature gets you nothing on its own. The mark comes from saying what it does for the reader."},
+  {id:"s1b", type:"mc", q:"What type of text is this?",
+   options:["A report","A leaflet","A formal letter","A news article"], a:1,
+   learn:"Clues for a leaflet: short chunks, a catchy heading, bullet points, and contact details at the end so the reader can act."},
+  {id:"s1c", type:"mc", stack:true, q:"Why are the opening times in a table rather than a sentence?",
+   options:["Tables look more professional","The reader can find their day and time at a glance","It makes the leaflet longer","The writer ran out of ideas"], a:1,
+   learn:"Good answers link feature to reader: it lets the reader find X quickly. Try that shape for any feature."},
+  {id:"s1d", type:"mc", stack:true, q:"Which is the best exam answer about the bullet points?",
+   options:["They are bullet points.","They break the new features into short chunks so the reader can scan them quickly.","They make it look nice."], a:1,
+   learn:"Say the feature, then what it does, then for whom. Three parts, one sentence."}
+ ]},
+
+{id:"s2", short:"Formality and bias", mins:7, title:"Formality and bias",
+ about:"Formal or informal is about who the writer is talking to. Bias is about a writer only showing one side.",
+ links:[{t:"Read: formality and bias", u:PFS+"formality-and-bias"},
+        {t:"Worksheet", u:PDF+"Reading-Formality-and-Bias-L2.pdf"},
+        {t:"Answers", u:PDF+"Reading-Formality-and-Bias-L2-Answers.pdf"}],
+ qs:[
+  {id:"s2a", type:"sort", q:"Formal or informal? Sort each line.", cats:["Formal","Informal"],
+   rows:[{t:"I am writing to request a refund for the item below.",a:0},
+         {t:"Honestly, the gig was mega, you should have come!",a:1},
+         {t:"Please find attached the completed application form.",a:0},
+         {t:"Cheers for sorting that out so quick.",a:1},
+         {t:"We would be grateful for a response by Friday.",a:0},
+         {t:"Gonna be late, save me a seat x",a:1}],
+   learn:"Formal writing: full words (I am, not I'm), no slang, polite and a bit distant. You need formal for letters and emails to people you do not know."},
+  {id:"s2b", type:"tap",
+   q:"This review is biased. Tap the four words that push the reader to feel a certain way, then check.",
+   text:"The new car park on Mill Street is a *disgraceful* waste of money. It *obviously* cost far too much, the barriers are *pathetic* and the prices are *shocking*. It has 120 spaces and opens at 7am.",
+   learn:"Loaded words carry feelings, not facts. Notice the last sentence has none: that is the only neutral bit."},
+  {id:"s2c", type:"mc", stack:true, q:"How can you tell the review is biased?",
+   options:["It includes numbers","It gives only one side and uses loaded words","It is about a car park","It is written in the past tense"], a:1,
+   learn:"Bias checklist: one side only, loaded words, no counter argument, opinions dressed up as facts."}
+ ]},
+
+{id:"s3", short:"Point of view", mins:7, title:"Point of view and line of argument",
+ about:"What does the writer think, and how do they walk you towards agreeing? Read the short article, then have a go.",
+ links:[{t:"Read: point of view", u:PFS+"reading-point-of-view-and-line-of-argument"},
+        {t:"Worksheet", u:PDF+"Reading-Point-of-View-and-Line-of-Argument-L2.pdf"},
+        {t:"Answers", u:PDF+"Reading-Point-of-View-and-Line-of-Argument-L2-Answers.pdf"}],
+ qs:[
+  {id:"s3a", type:"mc", stack:true, pre:ARTICLE, q:"What is the writer's point of view?",
+   options:["Teenagers are lazy and should go to bed earlier","The school day should start later","Breakfast clubs should be free","Parents should drive teenagers to school"], a:1,
+   learn:"The point of view is usually stated plainly near the start and repeated at the end. Here: start at ten."},
+  {id:"s3b", type:"order", pre:"keep", q:"Put the steps of the argument in the order the writer uses them. Tap them one at a time.",
+   items:["States the problem: teenagers are half awake","Gives the science about body clocks","Deals with the worry about parents' jobs","Sums up the benefits and asks you to agree"],
+   show:[2,0,3,1],
+   learn:"That is the line of argument: problem, evidence, answer the other side, conclusion. Spotting it earns marks, and it works for your own writing too."},
+  {id:"s3c", type:"mc", stack:true, q:"Why does the writer mention the parents' worry at all?",
+   options:["To show they have not thought it through","To answer the other side, which makes the argument stronger","Because they agree with the parents","To make the article longer"], a:1,
+   learn:"Raising a counter argument and knocking it down is called rebuttal. It makes the writer sound fair."}
+ ]},
+
+{id:"s4", short:"Finding things", mins:5, title:"Finding things in a source",
+ about:"Some questions are really asking whether you can find information fast. Headings, contents pages and links are there to help.",
+ links:[{t:"Read: navigating sources", u:PFS+"types-of-and-navigating-sources"},
+        {t:"Worksheet", u:PDF+"Reading-Types-of-and-navigating-sources-L2.pdf"},
+        {t:"Answers", u:PDF+"Reading-Types-of-and-navigating-sources-L2-Answers.pdf"}],
+ qs:[
+  {id:"s4a", type:"mc", pre:CONTENTS, q:"You want to know if the gym is open on Boxing Day. Which page?",
+   options:["Page 2","Page 3","Page 4","Page 10"], a:1,
+   learn:"Match the key word in the question (bank holiday) to a heading. Do not read the whole thing."},
+  {id:"s4b", type:"mc", pre:"keep", q:"How much is a junior swim? Which page?",
+   options:["Page 3","Page 4","Page 6","Page 8"], a:1},
+  {id:"s4c", type:"mc", pre:"keep", q:"Someone was rude to you at reception. Which page tells you what to do?",
+   options:["Page 2","Page 8","Page 10","Page 6"], a:2},
+  {id:"s4d", type:"mc", stack:true, q:"On a long web page, what is the fastest way to find one piece of information?",
+   options:["Read from the top to the bottom","Use the headings, the menu or search (Ctrl and F)","Look at the pictures","Print it out"], a:1,
+   learn:"Skim for the heading, scan for the key word, then read closely only that bit."}
+ ]},
+
+{id:"s5", short:"Linking and tenses", mins:7, title:"Linking words and tenses",
+ about:"Two quick wins for the writing paper: linking words that guide the reader, and sticking to one tense.",
+ links:[{t:"Read: organisational markers", u:PFS+"writing-organisational-markers"},
+        {t:"Read: tenses", u:PFS+"writing-tenses"},
+        {t:"Worksheet: markers", u:PDF+"Writing-Organisational-markers-L2.pdf"},
+        {t:"Worksheet: tenses", u:PDF+"Writing-Tenses-L2.pdf"}],
+ qs:[
+  {id:"s5a", type:"gaps", q:"Pick the linking word that fits each gap.",
+   text:"{0}, the youth centre gives young people somewhere safe to go. {1}, it runs free cooking and music sessions. {2}, closing it would leave nowhere to go on a Friday night. {3}, I am asking the council to think again.",
+   gaps:[{o:["Firstly","However","Finally"],a:0},
+         {o:["In addition","Instead","Despite this"],a:0},
+         {o:["For example","As a result","Similarly"],a:1},
+         {o:["To begin with","In conclusion","On the other hand"],a:1}],
+   learn:"Order words (firstly, finally), adding words (in addition), cause words (as a result) and summing up words (in conclusion). One of each lifts a whole piece."},
+  {id:"s5b", type:"tap", q:"This is written in the past tense, but three verbs slip into the present. Tap them, then check.",
+   text:"Last Saturday we went to the market in town. It was busy and the stalls *sell* everything from cheese to phone cases. We bought a pie each and *eat* it by the river. Afterwards, we *walk* home in the rain.",
+   learn:"Pick a tense before you start and read back once just for verbs. Past: sold, ate, walked."}
+ ]},
+
+{id:"s6", short:"Write it", mins:9, title:"Write it: an email for a real reader",
+ about:"Put the stops together in a short piece of writing. A full exam answer is longer; today is the opening, one strong paragraph and a sign off. Jay reads it, nothing is marked here.",
+ links:[{t:"Read: assessing audience", u:PFS+"writing-assessing-audience"},
+        {t:"Read: the writing exam", u:PFS+"writing-the-exam"},
+        {t:"Writing examples", u:PFS+"functional-skills-english-level-2-writing-blog/"}],
+ qs:[
+  {id:"s6a", type:"mc", q:"The task: the council wants to close the youth centre on Fridays to save money. Write an email to the manager, Ms Adeyemi, giving your views. Who is the reader?",
+   options:["A friend","Someone you do not know, in charge","Other teenagers"], a:1,
+   learn:"Someone you do not know, in charge: so formal. Dear Ms Adeyemi, and Yours sincerely at the end."},
+  {id:"s6b", type:"mc", pre:"keep", q:"What is the main purpose?",
+   options:["To entertain","To persuade","To describe a place"], a:1,
+   learn:"Persuade: a clear view, reasons, maybe a counter argument answered, and a polite ask at the end."},
+  {id:"s6c", type:"write"}
+ ]}
+];
+
+var CHECKS = [
+  "Dear Ms Adeyemi at the top",
+  "A first line saying why I am writing",
+  "At least one reason with a detail or example",
+  "At least one linking word from stop five",
+  "No slang, full words",
+  "A polite ask and a formal sign off",
+  "Read it back once just for verbs and full stops"
+];
+
+/* ====================== state ====================== */
+
+var state = {stop:0, ans:{}, conf:{}, plan:["","",""], text:"", checks:{}, clock:null};
+function load(){
+  try{
+    var s = JSON.parse(localStorage.getItem(KEY));
+    if(s && typeof s === "object"){ for(var k in s){ state[k] = s[k] } }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)) }catch(e){} }
+
+/* ====================== marking ====================== */
+
+function tapTargets(q){
+  var t = [];
+  words(q.text).forEach(function(w,i){ if(w.target) t.push(i) });
+  return t;
+}
+function words(text){
+  return text.split(" ").map(function(w){
+    var target = w.indexOf("*") > -1;
+    return {w:w.replace(/\*/g,""), target:target};
+  });
+}
+function isDone(q){
+  var v = state.ans[q.id];
+  if(q.type === "conf") return Object.keys(state.conf).length === TOPICS.length;
+  if(q.type === "write") return wordCount(state.text) > 0;
+  if(v === undefined || v === null) return false;
+  if(q.type === "sort") return Object.keys(v).length === q.rows.length;
+  if(q.type === "label") return Object.keys(v).length === q.rows.length;
+  if(q.type === "gaps") return Object.keys(v).length === q.gaps.length;
+  if(q.type === "order") return v.length === q.items.length;
+  if(q.type === "tap") return v.checked === true;
+  return true;
+}
+function isRight(q){
+  if(!isDone(q)) return false;
+  var v = state.ans[q.id];
+  if(q.type === "conf" || q.type === "write") return true;
+  if(q.type === "mc") return v === q.a;
+  if(q.type === "sort") return q.rows.every(function(r,i){ return v[i] === r.a });
+  if(q.type === "label") return q.rows.every(function(r,i){ return v[i] === r.a });
+  if(q.type === "gaps") return q.gaps.every(function(g,i){ return v[i] === g.a });
+  if(q.type === "order") return v.every(function(x,i){ return x === i });
+  if(q.type === "tap"){
+    var t = tapTargets(q), s = (v.sel || []).slice().sort(function(a,b){return a-b});
+    return t.length === s.length && t.every(function(x,i){ return x === s[i] });
+  }
+  return false;
+}
+function marked(q){ return q.type !== "conf" && q.type !== "write" }
+function touched(q){
+  if(q.type === "conf") return Object.keys(state.conf).length > 0;
+  if(q.type === "write") return wordCount(state.text) > 0;
+  var v = state.ans[q.id];
+  if(v === undefined || v === null) return false;
+  if(q.type === "tap") return (v.sel || []).length > 0;
+  if(typeof v === "object") return Object.keys(v).length > 0;
+  return true;
+}
+function stopStatus(st){
+  var qs = st.qs, done = qs.filter(isDone).length;
+  if(!qs.some(touched)) return "";
+  return done === qs.length ? "done" : "part";
+}
+function wordCount(t){ var m = (t || "").trim().match(/\S+/g); return m ? m.length : 0 }
+
+/* ====================== drawing ====================== */
+
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]}) }
+
+function drawRoute(){
+  var ol = document.getElementById("route");
+  ol.innerHTML = STOPS.map(function(st,i){
+    var cls = "stopbtn " + stopStatus(st);
+    return '<li><button class="' + cls + '" data-i="' + i + '"' +
+      (i === state.stop ? ' aria-current="step"' : '') + '>' +
+      '<span class="dot">' + (i === 0 ? "Go" : i) + '</span>' +
+      '<span class="nm">' + esc(st.short) + '</span>' +
+      '<span class="mm">' + st.mins + ' min</span></button></li>';
+  }).join("");
+  ol.querySelectorAll(".stopbtn").forEach(function(b){
+    b.addEventListener("click", function(){ go(+b.getAttribute("data-i"), true) });
+  });
+}
+
+function go(i, scroll){
+  state.stop = Math.max(0, Math.min(STOPS.length - 1, i));
+  save(); drawRoute(); drawStage();
+  document.getElementById("prevBtn").disabled = state.stop === 0;
+  document.getElementById("nextBtn").textContent = state.stop === STOPS.length - 1 ? "Back to the start" : "Next stop";
+  if(scroll) document.getElementById("route").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function drawStage(){
+  var st = STOPS[state.stop];
+  var h = '<section class="sec">' +
+    '<span class="mins">Stop ' + (state.stop === 0 ? "zero" : state.stop) + ', about ' + st.mins + ' minutes</span>' +
+    '<h2>' + esc(st.title) + '</h2><p class="about">' + esc(st.about) + '</p>' +
+    '<div class="lookup"><p>Want the longer version first? These open Pass Functional Skills in a new tab.</p>' +
+    st.links.map(function(l){ return '<a href="' + l.u + '" target="_blank" rel="noopener">' + esc(l.t) + '</a>' }).join("") +
+    '</div>';
+  st.qs.forEach(function(q){
+    var pre = q.pre === "keep" ? "" : (q.pre || "");
+    h += '<div class="drill" id="d-' + q.id + '">' + pre + '<div class="body"></div></div>';
+  });
+  h += '</section>';
+  document.getElementById("stage").innerHTML = h;
+  st.qs.forEach(drawQ);
+}
+
+function drawQ(q){
+  var host = document.querySelector("#d-" + q.id + " .body");
+  var fn = {mc:drawMC, sort:drawSort, tap:drawTap, order:drawOrder, label:drawLabel,
+            gaps:drawGaps, conf:drawConf, write:drawWrite}[q.type];
+  fn(q, host);
+}
+
+function after(q, host){
+  var p = document.createElement("div");
+  if(marked(q) && isDone(q)){
+    var ok = isRight(q);
+    p.innerHTML = '<p class="fb ' + (ok ? "good" : "") + '">' +
+      (ok ? "Got it." : "Not quite yet. Have another go, or leave it and come back.") + '</p>' +
+      (ok && q.learn ? '<div class="learn"><b>Keep this:</b> ' + esc(q.learn) + '</div>' : '');
+  }
+  host.appendChild(p);
+}
+
+function set(q, v){ state.ans[q.id] = v; save(); drawQ(q); drawRoute() }
+
+function drawMC(q, host){
+  var v = state.ans[q.id];
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3><div class="opts' + (q.stack ? ' stack' : '') + '">' +
+    q.options.map(function(o,i){
+      var c = "opt";
+      if(v === i) c += (i === q.a ? " good" : " on");
+      return '<button class="' + c + '" data-i="' + i + '">' + esc(o) + '</button>';
+    }).join("") + '</div>';
+  host.querySelectorAll(".opt").forEach(function(b){
+    b.addEventListener("click", function(){ set(q, +b.getAttribute("data-i")) });
+  });
+  after(q, host);
+}
+
+function drawSort(q, host){
+  var v = state.ans[q.id] || {};
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3>' + q.rows.map(function(r,i){
+    return '<div class="sortrow"><span class="txt">' + esc(r.t) + '</span><span class="opts">' +
+      q.cats.map(function(c,j){
+        var cls = "opt";
+        if(v[i] === j) cls += (j === r.a ? " good" : " on");
+        return '<button class="' + cls + '" data-r="' + i + '" data-c="' + j + '">' + esc(c) + '</button>';
+      }).join("") + '</span></div>';
+  }).join("");
+  host.querySelectorAll(".opt").forEach(function(b){
+    b.addEventListener("click", function(){
+      var nv = Object.assign({}, state.ans[q.id] || {});
+      nv[b.getAttribute("data-r")] = +b.getAttribute("data-c");
+      set(q, nv);
+    });
+  });
+  after(q, host);
+}
+
+function drawTap(q, host){
+  var v = state.ans[q.id] || {sel:[], checked:false};
+  var ws = words(q.text);
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3><div class="tokens">' + ws.map(function(w,i){
+    var on = v.sel.indexOf(i) > -1, cls = "tok";
+    if(v.checked){
+      if(on && w.target) cls += " right";
+      else if(on) cls += " wrong";
+    } else if(on) cls += " on";
+    return '<button class="' + cls + '" data-i="' + i + '" aria-pressed="' + on + '">' + esc(w.w) + '</button>';
+  }).join("") + '</div><div class="minibtns">' +
+    '<button class="btn btn-orange" data-a="check">Check</button>' +
+    '<button class="btn btn-quiet" data-a="reset">Start again</button></div>';
+  host.querySelectorAll(".tok").forEach(function(b){
+    b.addEventListener("click", function(){
+      var i = +b.getAttribute("data-i"), sel = v.sel.slice(), k = sel.indexOf(i);
+      if(k > -1) sel.splice(k,1); else sel.push(i);
+      set(q, {sel:sel, checked:false});
+    });
+  });
+  host.querySelector('[data-a="check"]').addEventListener("click", function(){ set(q, {sel:v.sel, checked:true}) });
+  host.querySelector('[data-a="reset"]').addEventListener("click", function(){ set(q, {sel:[], checked:false}) });
+  after(q, host);
+  if(v.checked && !isRight(q)){
+    var n = tapTargets(q).length;
+    host.querySelector(".fb").textContent = "Not quite yet. There are " + n + " to find. The struck out ones are not it.";
+  }
+}
+
+function drawOrder(q, host){
+  var v = state.ans[q.id] || [];
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3><div class="steps">' + q.show.map(function(idx){
+    var pos = v.indexOf(idx);
+    return '<button class="step' + (pos > -1 ? ' placed' : '') + '" data-i="' + idx + '">' +
+      '<span class="num">' + (pos > -1 ? pos + 1 : "") + '</span><span>' + esc(q.items[idx]) + '</span></button>';
+  }).join("") + '</div><div class="minibtns"><button class="btn btn-quiet" data-a="reset">Start again</button></div>';
+  host.querySelectorAll(".step").forEach(function(b){
+    b.addEventListener("click", function(){
+      var i = +b.getAttribute("data-i"), cur = (state.ans[q.id] || []).slice();
+      var k = cur.indexOf(i);
+      if(k > -1) cur = cur.slice(0,k); else cur.push(i);
+      set(q, cur);
+    });
+  });
+  host.querySelector('[data-a="reset"]').addEventListener("click", function(){ set(q, []) });
+  after(q, host);
+}
+
+function selectHTML(opts, val, right, key){
+  var cls = "gap";
+  if(val !== undefined) cls += (val === right ? " good" : " nope");
+  return '<select class="' + cls + '" data-k="' + key + '" aria-label="Choose">' +
+    '<option value="">choose</option>' +
+    opts.map(function(o,j){ return '<option value="' + j + '"' + (val === j ? ' selected' : '') + '>' + esc(o) + '</option>' }).join("") +
+    '</select>';
+}
+function wireSelects(q, host){
+  host.querySelectorAll("select.gap").forEach(function(s){
+    s.addEventListener("change", function(){
+      var nv = Object.assign({}, state.ans[q.id] || {});
+      if(s.value === "") delete nv[s.getAttribute("data-k")];
+      else nv[s.getAttribute("data-k")] = +s.value;
+      set(q, nv);
+    });
+  });
+}
+
+/* label rows are written with the right name for readability; turn that into its option index once */
+STOPS.forEach(function(st){ st.qs.forEach(function(q){
+  if(q.type === "label") q.rows.forEach(function(r){ r.a = q.options.indexOf(r.a) });
+})});
+
+function drawLabel(q, host){
+  var v = state.ans[q.id] || {};
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3>' + q.rows.map(function(r,i){
+    return '<div class="labrow"><span class="badge">' + r.k + '</span>' + selectHTML(q.options, v[i], r.a, i) + '</div>';
+  }).join("");
+  wireSelects(q, host);
+  after(q, host);
+}
+
+function drawGaps(q, host){
+  var v = state.ans[q.id] || {};
+  var html = esc(q.text).replace(/\{(\d+)\}/g, function(m, n){
+    var g = q.gaps[+n];
+    return selectHTML(g.o, v[n], g.a, n);
+  });
+  host.innerHTML = '<h3>' + esc(q.q) + '</h3><div class="gaptext">' + html + '</div>';
+  wireSelects(q, host);
+  after(q, host);
+}
+
+function drawConf(q, host){
+  var levels = ["Solid","Wobbly","No idea yet"];
+  host.innerHTML = '<h3>How does each of these feel today?</h3><div class="conf">' +
+    TOPICS.map(function(t,i){
+      return '<div class="sortrow"><span class="txt"><b>' + (i+1) + '.</b> ' + esc(t.t) + '</span><span class="opts">' +
+        levels.map(function(l,j){
+          return '<button class="opt' + (state.conf[t.id] === j ? ' on' : '') + '" data-t="' + t.id + '" data-j="' + j + '">' + l + '</button>';
+        }).join("") + '</span></div>';
+    }).join("") + '</div><p class="fb" id="confTip"></p>';
+  host.querySelectorAll(".opt").forEach(function(b){
+    b.addEventListener("click", function(){
+      state.conf[b.getAttribute("data-t")] = +b.getAttribute("data-j");
+      save(); drawQ(q); drawRoute();
+    });
+  });
+  var wob = TOPICS.map(function(t,i){ return state.conf[t.id] > 0 ? i + 1 : null }).filter(Boolean);
+  var tip = document.getElementById("confTip");
+  if(Object.keys(state.conf).length){
+    tip.innerHTML = wob.length
+      ? "One idea: start at stop " + wob[0] + ", since that one is not solid yet. Or go in order. Your call. " +
+        '<button class="linkbtn" id="jumpBtn">Go to stop ' + wob[0] + '</button>'
+      : "All solid? Then the stops should feel quick. Stop six is where it all gets used.";
+    var jb = document.getElementById("jumpBtn");
+    if(jb) jb.addEventListener("click", function(){ go(wob[0], true) });
+  }
+}
+
+function drawWrite(q, host){
+  host.innerHTML =
+    '<h3>Plan it in three words or phrases, then write.</h3>' +
+    '<div class="plan3">' + ["Reason one","Reason two","What you are asking for"].map(function(l,i){
+      return '<div><label for="pl' + i + '">' + l + '</label><input id="pl' + i + '" type="text" value="' + esc(state.plan[i] || "") + '"></div>';
+    }).join("") + '</div>' +
+    '<label class="sr" for="wb" style="font-weight:700;display:block;margin:0 0 4px">Your email</label>' +
+    '<textarea class="writebox" id="wb" placeholder="Dear Ms Adeyemi,">' + esc(state.text) + '</textarea>' +
+    '<p class="wc" id="wc"></p>' +
+    '<h3 style="margin-top:16px">Before you send it, tick what is in there</h3>' +
+    '<div class="checks">' + CHECKS.map(function(c,i){
+      var on = !!state.checks[i];
+      return '<button class="check' + (on ? ' on' : '') + '" data-i="' + i + '" aria-pressed="' + on + '"><span class="box">' + (on ? "&#10003;" : "") + '</span>' + esc(c) + '</button>';
+    }).join("") + '</div>';
+  var wb = host.querySelector("#wb"), wc = host.querySelector("#wc");
+  function count(){
+    var n = wordCount(wb.value);
+    wc.textContent = n + (n === 1 ? " word." : " words.") + (n >= 100 ? " That is a solid chunk for today." : " Around 100 to 150 is plenty for today.");
+  }
+  count();
+  wb.addEventListener("input", function(){ state.text = wb.value; save(); count(); drawRoute() });
+  [0,1,2].forEach(function(i){
+    host.querySelector("#pl" + i).addEventListener("input", function(e){ state.plan[i] = e.target.value; save() });
+  });
+  host.querySelectorAll(".check").forEach(function(b){
+    b.addEventListener("click", function(){
+      var i = b.getAttribute("data-i");
+      if(state.checks[i]) delete state.checks[i]; else state.checks[i] = true;
+      save(); drawQ(q);
+    });
+  });
+}
+
+/* ====================== optional clock ====================== */
+
+var tick = null;
+function drawClock(){
+  var el = document.getElementById("clock");
+  if(!state.clock){
+    el.innerHTML = '<span>Want a clock for the 45 minutes? Totally optional.</span> <button class="linkbtn" id="clkOn">Start the clock</button>';
+    document.getElementById("clkOn").addEventListener("click", function(){ state.clock = Date.now(); save(); drawClock() });
+    if(tick){ clearInterval(tick); tick = null }
+    return;
+  }
+  var mins = Math.floor((Date.now() - state.clock) / 60000);
+  var pct = Math.min(100, mins / 45 * 100);
+  var acc = 0, at = 0;
+  for(var i = 0; i < STOPS.length; i++){ acc += STOPS[i].mins; if(mins < acc){ at = i; break } at = i }
+  var note = mins >= 45 ? "That is the 45. Stop wherever you are, or keep going if it is going well."
+                        : mins + " of 45 minutes. At a gentle pace that is about stop " + (at === 0 ? "zero" : at) + ", but ahead or behind is fine.";
+  el.innerHTML = '<div class="track" aria-hidden="true"><span style="width:' + pct + '%"></span></div>' +
+    '<span>' + note + '</span> <button class="linkbtn" id="clkOff">Hide the clock</button>';
+  document.getElementById("clkOff").addEventListener("click", function(){ state.clock = null; save(); drawClock() });
+  if(!tick) tick = setInterval(drawClock, 30000);
+}
+
+/* ====================== sending ====================== */
+
+function buildText(){
+  var L = [], levels = ["solid","wobbly","no idea yet"];
+  L.push("LEVEL 2 ENGLISH: SIX STOPS");
+  L.push("");
+  L.push("HOW IT FELT AT THE START");
+  TOPICS.forEach(function(t){
+    L.push("  " + t.t + ": " + (state.conf[t.id] === undefined ? "not picked" : levels[state.conf[t.id]]));
+  });
+  L.push("");
+  STOPS.slice(1).forEach(function(st, i){
+    var qs = st.qs.filter(marked);
+    var done = qs.filter(isDone).length, right = qs.filter(isRight).length;
+    L.push("STOP " + (i+1) + ", " + st.title.toUpperCase() + ": " + right + " right of " + done + " tried, " + qs.length + " in total");
+    qs.forEach(function(q){
+      L.push("  " + q.id + ": " + (isDone(q) ? (isRight(q) ? "right" : "not yet") : "not tried"));
+    });
+  });
+  L.push("");
+  L.push("PLAN: " + state.plan.map(function(p){ return p || "(blank)" }).join(" / "));
+  L.push("CHECKLIST TICKED: " + Object.keys(state.checks).length + " of " + CHECKS.length);
+  CHECKS.forEach(function(c,i){ L.push("  " + (state.checks[i] ? "[x] " : "[ ] ") + c) });
+  L.push("");
+  L.push("THE EMAIL (" + wordCount(state.text) + " words):");
+  L.push(state.text || "(not written)");
+  return L.join("\n");
+}
+
+/* ====================== start ====================== */
+
+load();
+go(state.stop || 0, false);
+drawClock();
+
+document.getElementById("prevBtn").addEventListener("click", function(){ go(state.stop - 1, true) });
+document.getElementById("nextBtn").addEventListener("click", function(){
+  go(state.stop === STOPS.length - 1 ? 0 : state.stop + 1, true);
+});
+document.getElementById("clearBtn").addEventListener("click", function(){
+  if(!confirm("Clear every answer on this page?")) return;
+  state = {stop:0, ans:{}, conf:{}, plan:["","",""], text:"", checks:{}, clock:null};
+  save(); go(0, true); drawClock();
+});
+
+if(window.Base5Send){
+  Base5Send.mount(document.getElementById("sendHost"), {
+    tool: "Level 2 English: six stops",
+    getText: buildText,
+    filename: "level-2-six-stops"
+  });
+}
+
+})();
+</script>
+
+</body>
+</html>
