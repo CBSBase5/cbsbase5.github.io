@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safety and Predictability: the games - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* page scoped: PHSE week 4 games */
+:root{--g-ink:#0a2f38;--g-teal:#007291;--g-orange:#ef7724;--g-yellow:#f6c343;--g-plum:#7a3b69;--g-cyan:#2bb3c9;--g-paper:#fffdf8}
+.g-wrap{max-width:860px;margin:10px auto 30px}
+.daybar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.daybar button{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:var(--g-ink);border:2px solid var(--g-ink);border-radius:999px;padding:10px 16px;cursor:pointer;box-shadow:3px 4px 0 rgba(10,47,56,.18)}
+.daybar button[aria-selected="true"]{background:var(--g-orange);color:#fff;box-shadow:4px 5px 0 var(--g-ink)}
+.daybar button:focus-visible,.gbtn:focus-visible,.zone:focus-visible,input:focus-visible{outline:3px solid var(--g-orange);outline-offset:2px}
+.panel{background:var(--g-paper);border:2px solid var(--g-ink);border-radius:18px 14px 20px 16px;padding:20px;box-shadow:6px 7px 0 rgba(10,47,56,.16)}
+.panel h2{font-family:Archivo,sans-serif;font-stretch:118%;font-weight:850;font-size:28px;line-height:1.05;margin:2px 0 4px;color:var(--g-ink)}
+.panel .rules{font:16.5px/1.55 "Atkinson Hyperlegible",sans-serif;color:var(--g-ink);max-width:62ch;margin:0 0 14px}
+.panel p,.panel li{font:16.5px/1.55 "Atkinson Hyperlegible",sans-serif;color:var(--g-ink)}
+.deck{background:linear-gradient(150deg,#123c47,var(--g-ink));color:#fff;border-radius:16px 20px 14px 18px;padding:20px;margin:0 0 14px;min-height:150px;display:flex;flex-direction:column;justify-content:center;box-shadow:5px 6px 0 rgba(10,47,56,.25)}
+.deck .kick{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g-yellow);margin:0 0 8px}
+.deck .big{font:700 26px/1.3 "Atkinson Hyperlegible",sans-serif;margin:0}
+.deck .sub{font:16px/1.5 "Atkinson Hyperlegible",sans-serif;opacity:.85;margin:10px 0 0}
+.deck.flip{animation:flipin .22s ease}
+@keyframes flipin{from{transform:scale(.97) rotate(-.6deg);opacity:.4}to{transform:none;opacity:1}}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.gbtn{font:700 16px/1 "Atkinson Hyperlegible",sans-serif;border:2px solid var(--g-ink);border-radius:12px 10px 13px 11px;padding:12px 16px;background:#fff;color:var(--g-ink);cursor:pointer}
+.gbtn.main{background:var(--g-teal);border-color:var(--g-teal);color:#fff}
+.gbtn.warm{background:var(--g-orange);border-color:var(--g-orange);color:#fff}
+.gbtn.quiet{background:transparent}
+.gbtn:disabled{opacity:.4;cursor:default}
+.zones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 12px}
+@media (max-width:640px){.zones{grid-template-columns:1fr}}
+.zone{border:2px dashed #9dbac2;border-radius:14px;padding:12px;background:#fff;text-align:left;cursor:pointer;color:var(--g-ink)}
+.zone b{display:block;font:700 17px "Atkinson Hyperlegible",sans-serif;margin-bottom:2px}
+.zone span{font:14px "Atkinson Hyperlegible",sans-serif;color:#556}
+.zone .cnt{float:right;font:700 20px Archivo,sans-serif;color:var(--g-teal)}
+.pile{font:15px/1.5 "Atkinson Hyperlegible",sans-serif;color:#445;background:#fff;border:1.5px solid #dfe9ec;border-radius:12px;padding:10px 12px;margin:0 0 12px;max-height:150px;overflow:auto}
+.pile b{color:var(--g-ink)}
+.clock{font-family:Archivo,sans-serif;font-stretch:125%;font-weight:900;font-size:68px;line-height:1;color:var(--g-ink);text-align:center;margin:6px 0 10px}
+.clock.warn{color:var(--g-orange)}
+.pass{display:none;text-align:center;font-family:Archivo,sans-serif;font-stretch:125%;font-weight:900;font-size:42px;color:#fff;background:var(--g-orange);border-radius:14px;padding:14px;margin:0 0 12px}
+.pass.on{display:block}
+.slots{display:grid;gap:8px;margin:0 0 12px}
+.slot{display:flex;gap:12px;align-items:flex-start;border:2px solid #dfe9ec;border-radius:12px;padding:11px 13px;background:#fff;font:16px/1.45 "Atkinson Hyperlegible",sans-serif}
+.slot .num{flex:0 0 30px;height:30px;border-radius:50%;background:#e8f3f6;display:grid;place-items:center;font-weight:700}
+.slot.kept{border-color:#1f7a4d;background:#eef9f2}
+.slot.kept .num{background:#1f7a4d;color:#fff}
+.slot.chaos{border-color:var(--g-orange);background:#fff6ea}
+.slot.chaos .num{background:var(--g-orange);color:#fff}
+.die{display:inline-grid;place-items:center;width:46px;height:46px;border:2px solid var(--g-ink);border-radius:10px;background:#fff;font-family:Archivo,sans-serif;font-weight:900;font-size:24px;margin-right:10px}
+.noms{display:grid;gap:8px;margin:0 0 12px}
+.nom{display:flex;gap:10px;align-items:center;border:2px solid #dfe9ec;border-radius:12px;padding:9px 12px;background:#fff;font:17px "Atkinson Hyperlegible",sans-serif}
+.nom .who{flex:1}
+.nom .votes{font-family:Archivo,sans-serif;font-weight:900;font-size:22px;color:var(--g-teal);min-width:34px;text-align:right}
+.nom.win{border-color:var(--g-yellow);background:#fffaec}
+input[type=text]{font:17px "Atkinson Hyperlegible",sans-serif;padding:10px 12px;border:2px solid #b9cdd3;border-radius:10px;background:#fff;color:var(--g-ink);width:170px}
+.note{border-left:5px solid var(--g-yellow);background:#fff8e1;border-radius:0 10px 10px 0;padding:10px 12px;margin:14px 0 0;font:15.5px/1.5 "Atkinson Hyperlegible",sans-serif;color:#334}
+.note b{color:var(--g-ink)}
+.small{font-size:14.5px;color:#556}
+.counter{font:14px "Atkinson Hyperlegible",sans-serif;color:#556;margin:0 0 10px}
+@media (prefers-reduced-motion:reduce){.deck.flip{animation:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>SAFETY AND PREDICTABILITY</h1>
+    <div class="line">
+      <span class="chip">PHSE, week 4</span>
+      <p>Five games instead of five worksheets. Cards get picked on, not people.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="g-wrap">
+
+    <div class="daybar" role="tablist" aria-label="Days">
+      <button role="tab" id="tab-mon" aria-selected="true" data-day="mon">Mon: Control or Chaos</button>
+      <button role="tab" id="tab-tue" aria-selected="false" data-day="tue">Tue: Two Moves</button>
+      <button role="tab" id="tab-wed" aria-selected="false" data-day="wed">Wed: Anything Goes</button>
+      <button role="tab" id="tab-thu" aria-selected="false" data-day="thu">Thu: Slowest Line</button>
+      <button role="tab" id="tab-fri" aria-selected="false" data-day="fri">Fri: The Awards</button>
+    </div>
+
+    <div id="panels"></div>
+
+    <a class="backlink" href="/shuffle/">Back to shuffle</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var KEY="b5.phse.week4.v1";
+var S;
+function fresh(){return {v:1, day:"mon", mon:{i:0,order:[],tally:{mine:0,not:0,argue:0},log:[]}, fri:{cat:-1,noms:[]}};}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.v===1)return o;}}catch(e){}return null;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+S=load()||fresh();
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+/* ---------- Monday: Control or Chaos ---------- */
+var CONTROL = [
+ "Whether you get up when the alarm goes off",
+ "Whether the alarm goes off at all, because the phone died in the night",
+ "Whether you charged the phone",
+ "Whether somebody replies to your message",
+ "Whether you send the message in the first place",
+ "Whether the wifi is having one of its days",
+ "Whether you start the thing or scroll for another forty minutes",
+ "Whether the bus turns up",
+ "Whether you leave ten minutes earlier",
+ "What somebody says about you when you are not in the room",
+ "Whether you let it ruin the afternoon",
+ "Whether somebody is in a mood with you",
+ "Whether you decide it is about you",
+ "The weather at the weekend",
+ "Whether you take a coat anyway",
+ "Whether the vending machine eats your money",
+ "Whether you hit the vending machine, which never works and you know it",
+ "What mark you get back",
+ "Whether you hand it in at all",
+ "Whether a seagull takes your chips",
+ "Whether you eat your chips indoors like a sensible coward",
+ "Whether the shop has run out of the only thing you wanted",
+ "Whether you have a backup snack in your bag",
+ "How loud the room is",
+ "Whether the ear defenders are on your head or in your bag at home",
+ "Whether the bread rises in cooking",
+ "Whether you follow the recipe or freestyle it",
+ "Whether your team wins",
+ "Whether you practise",
+ "Whether the referee needs glasses",
+ "Whether the train is cancelled",
+ "Whether you check before you leave",
+ "Whether somebody eats the last of the cereal",
+ "What you say to them about the cereal",
+ "Whether the plants in the polytunnel survive you",
+ "Whether you water them",
+ "How much of your plan survives Monday",
+ "What time you go to bed",
+ "Whether you are tired tomorrow",
+ "The weather on Mars",
+ "Whether the dog respects you",
+ "Whether you deserve the dog's respect"
+];
+
+function monPanel(){
+  var m=S.mon;
+  if(!m.order.length){m.order=shuffle(CONTROL.map(function(_,i){return i;}));save();}
+  var done=m.i>=m.order.length;
+  var card=done?null:CONTROL[m.order[m.i]];
+  var h='<div class="panel"><h2>Control or Chaos</h2>'+
+    '<p class="rules">A card gets read out. Decide where it goes. If you can talk the room into <b>argue about it</b>, it goes there and nobody can stop you.</p>'+
+    '<p class="counter">Card '+Math.min(m.i+1,m.order.length)+' of '+m.order.length+' &middot; yours '+m.tally.mine+', not yours '+m.tally.not+', argue about it '+m.tally.argue+'</p>'+
+    '<div class="deck flip" id="monCard"><p class="kick">Control or chaos</p><p class="big">'+
+      (done?"Deck finished. That is the whole pack.":esc(card))+'</p>'+
+      (done?'':'<p class="sub">Where does it go?</p>')+'</div>';
+  if(!done){
+    h+='<div class="zones">'+
+      '<button class="zone" data-z="mine"><span class="cnt">'+m.tally.mine+'</span><b>Mine</b><span>I decide this one.</span></button>'+
+      '<button class="zone" data-z="not"><span class="cnt">'+m.tally.not+'</span><b>Not mine</b><span>Happens whatever I do.</span></button>'+
+      '<button class="zone" data-z="argue"><span class="cnt">'+m.tally.argue+'</span><b>Argue about it</b><span>Say why. Convince the room.</span></button>'+
+      '</div>';
+  }
+  h+='<div class="row"><button class="gbtn main" id="monNext">'+(done?"Shuffle and go again":"Skip this card")+'</button>'+
+     '<button class="gbtn quiet" id="monReset">Reset the pack</button></div>';
+  if(m.log.length){
+    h+='<div class="pile"><b>Not mine, so far:</b> '+m.log.slice(-8).map(esc).join(" &middot; ")+'</div>'+
+       '<p class="small">Round two: take one of those and find the one bit of it you <i>could</i> do something about. There is always one bit. Sometimes it is only what you do afterwards.</p>';
+  }
+  h+='<div class="note"><b>Running it in a quarter of an hour:</b> ten cards is plenty. Deal, decide, move on. Nobody reads out a list of their goals, and watching counts as playing.</div></div>';
+  return h;
+}
+function monWire(){
+  var m=S.mon;
+  Array.prototype.forEach.call(document.querySelectorAll("[data-z]"),function(b){
+    b.onclick=function(){
+      var z=b.getAttribute("data-z");
+      m.tally[z]++;
+      if(z==="not")m.log.push(CONTROL[m.order[m.i]]);
+      m.i++;save();paint();
+    };
+  });
+  document.getElementById("monNext").onclick=function(){
+    if(m.i>=m.order.length){m.order=shuffle(CONTROL.map(function(_,i){return i;}));m.i=0;}
+    else m.i++;
+    save();paint();
+  };
+  document.getElementById("monReset").onclick=function(){S.mon={i:0,order:shuffle(CONTROL.map(function(_,i){return i;})),tally:{mine:0,not:0,argue:0},log:[]};save();paint();};
+}
+
+/* ---------- Tuesday: Two Moves ---------- */
+var CURVE = [
+ "The minibus will not start. Everyone is already in it.",
+ "The place is shut. There is a handwritten sign and it does not explain anything.",
+ "Your ticket is somewhere between the car park and here.",
+ "Your phone is on two per cent and you are the one holding the map.",
+ "It starts hammering down. One person brought a coat and it is not you.",
+ "Your lunch is on the kitchen counter at home. You can picture it.",
+ "The toilets cost thirty pence and the group has four pence between them.",
+ "You look up and the group has gone. The room is full of other people's families.",
+ "The cafe has one thing left and it is olives.",
+ "A shoe has given up. Not come loose, given up, sole flapping like a mouth.",
+ "The queue is forty minutes. You have twenty five.",
+ "You are on the wrong bus and you notice three stops in.",
+ "A seagull takes the food out of your actual hand.",
+ "Everyone else wants to do the one thing you were hoping to avoid.",
+ "Card machine is down. It is cash only and nobody carries cash.",
+ "You need the toilet at the exact moment the tour starts.",
+ "It is far louder in here than anybody said it would be.",
+ "Your ear defenders are in the minibus. The minibus is locked.",
+ "Somebody starts feeling sick on the way back.",
+ "You are ten minutes late back and the driver has gone for a coffee.",
+ "The thing you came to see is behind a school group of forty seven year olds.",
+ "You have been walking the wrong way for fifteen minutes with great confidence."
+];
+var tueI=0, tueOrder=shuffle(CURVE.map(function(_,i){return i;}));
+var tueT=null, tueLeft=30;
+
+function tuePanel(){
+  var c=CURVE[tueOrder[tueI%tueOrder.length]];
+  return '<div class="panel"><h2>Two Moves</h2>'+
+    '<p class="rules">Draw a curveball. You get <b>two moves only</b>, never a whole plan. Thirty seconds, then the next person. Two prizes at the end: most likely to work, and most ridiculous. Both count.</p>'+
+    '<div class="deck flip" id="tueCard"><p class="kick">Curveball</p><p class="big">'+esc(c)+'</p><p class="sub">Two moves. Go.</p></div>'+
+    '<div class="clock" id="tueClock">0:'+(tueLeft<10?"0":"")+tueLeft+'</div>'+
+    '<div class="row"><button class="gbtn warm" id="tueDeal">Next curveball</button>'+
+    '<button class="gbtn main" id="tueStart">Start thirty seconds</button>'+
+    '<button class="gbtn quiet" id="tueStop">Stop the clock</button></div>'+
+    '<p class="small">Good answers on this one are boring: tell an adult, sit down, wait where you are. Ridiculous answers are the price of getting the boring ones said out loud.</p>'+
+    '<div class="note"><b>In the minibus:</b> read them off a phone, no clock needed. The prizes matter more than the timer.</div></div>';
+}
+function tueWire(){
+  var clock=document.getElementById("tueClock");
+  function show(){clock.textContent="0:"+(tueLeft<10?"0":"")+tueLeft;clock.className="clock"+(tueLeft<=10?" warn":"");}
+  document.getElementById("tueDeal").onclick=function(){tueI++;if(tueI%tueOrder.length===0)tueOrder=shuffle(tueOrder);stopT();tueLeft=30;paint();};
+  document.getElementById("tueStart").onclick=function(){
+    stopT();tueLeft=30;show();
+    tueT=setInterval(function(){tueLeft--;if(tueLeft<=0){tueLeft=0;show();stopT();}else show();},1000);
+  };
+  document.getElementById("tueStop").onclick=function(){stopT();};
+}
+function stopT(){if(tueT){clearInterval(tueT);tueT=null;}}
+
+/* ---------- Wednesday: The Anything Goes Day ---------- */
+var SLOTS=["Get up and out","Get there","The main thing","Food","The second thing","Get home"];
+var CHAOS=[
+ "Somebody else picks the music. Their taste is a crime scene.",
+ "Add forty minutes. No reason. Forty minutes.",
+ "The thing you booked has moved. To another town.",
+ "Somebody brings their small cousin. The cousin has opinions.",
+ "Everything costs double today.",
+ "This slot happens in silence.",
+ "Swap this slot with the person on your left.",
+ "This slot now starts at six in the morning.",
+ "Nobody can agree, so this slot is standing in a car park.",
+ "The bit you were looking forward to is closed for cleaning.",
+ "Phones in a bag for this slot.",
+ "Somebody says we will just pop in here. It takes an hour.",
+ "Nobody ate, so this slot is now finding food.",
+ "It rains. Properly rains. The indoor plan does not exist.",
+ "This slot is genuinely fine. Enjoy it, it will not happen twice.",
+ "You have to explain the plan to somebody who was not listening."
+];
+var wedState=[], wedStep=0;
+
+function wedPanel(){
+  var h='<div class="panel"><h2>The Anything Goes Day</h2>'+
+    '<p class="rules">Plan a brilliant day out, six slots. Then roll for each one. One or two and it happens the way you wanted. Anything else, chaos picks for you.</p>'+
+    '<div class="slots">';
+  SLOTS.forEach(function(s,i){
+    var st=wedState[i];
+    var cls = st ? (st.kept?" kept":" chaos") : "";
+    h+='<div class="slot'+cls+'"><span class="num">'+(i+1)+'</span><div><b>'+s+'</b>'+
+       (st?'<div class="small">'+(st.kept?'Rolled '+st.roll+'. It happens exactly as planned. Enjoy that.':'Rolled '+st.roll+'. '+esc(st.card))+'</div>':'<div class="small">Not rolled yet.</div>')+
+       '</div></div>';
+  });
+  h+='</div>';
+  if(wedStep>=SLOTS.length){
+    var kept=wedState.filter(function(x){return x.kept;}).length;
+    h+='<div class="deck"><p class="kick">Result</p><p class="big">'+kept+' of 6 slots survived.</p>'+
+       '<p class="sub">So: how does having a routine give you more freedom to have fun? Answer it now, while you are annoyed. That is the honest version.</p></div>';
+  }
+  h+='<div class="row"><button class="gbtn main" id="wedRoll"'+(wedStep>=SLOTS.length?' disabled':'')+'>'+
+     (wedStep>=SLOTS.length?'Day finished':'Roll for '+SLOTS[wedStep])+'</button>'+
+     '<button class="gbtn quiet" id="wedReset">Start a new day</button></div>'+
+     '<div class="note"><b>Wednesday has no PHSE slot this week.</b> This one fits in breathe out, or on the way back from somewhere. Three minutes of rolling beats ten minutes of discussing.</div></div>';
+  return h;
+}
+function wedWire(){
+  var r=document.getElementById("wedRoll");
+  if(r)r.onclick=function(){
+    if(wedStep>=SLOTS.length)return;
+    var roll=1+Math.floor(Math.random()*6);
+    wedState[wedStep]= roll<=2 ? {kept:true,roll:roll} : {kept:false,roll:roll,card:CHAOS[Math.floor(Math.random()*CHAOS.length)]};
+    wedStep++;paint();
+  };
+  document.getElementById("wedReset").onclick=function(){wedState=[];wedStep=0;paint();};
+}
+
+/* ---------- Thursday: Slowest Line Wins ---------- */
+var thuT=null, thuMs=0, thuOut=[], thuMode="slow", passT=null, passLeft=60;
+
+function fmt(ms){
+  var s=Math.floor(ms/1000), m=Math.floor(s/60);
+  s=s%60;return m+":"+(s<10?"0":"")+s;
+}
+function thuPanel(){
+  var h='<div class="panel"><h2>Slowest Line Wins</h2>';
+  if(thuMode==="slow"){
+    h+='<p class="rules">One line, drawn as slowly as you can, without lifting the pen. Lift the pen and you are out. Last one still drawing wins, and the winner has accidentally done five minutes of slow breathing.</p>'+
+      '<div class="clock" id="thuClock">'+fmt(thuMs)+'</div>'+
+      '<div class="row"><button class="gbtn main" id="thuStart">'+(thuT?"Pause":"Start")+'</button>'+
+      '<button class="gbtn warm" id="thuOut">Someone lifted their pen</button>'+
+      '<button class="gbtn quiet" id="thuReset">Reset</button></div>'+
+      '<div class="row"><input type="text" id="thuWho" maxlength="4" placeholder="Initials" aria-label="Initials of whoever is out"></div>';
+    if(thuOut.length){
+      h+='<div class="pile"><b>Out, in order:</b><br>'+thuOut.map(function(o,i){return (i+1)+". "+esc(o.who||"somebody")+" at "+fmt(o.at);}).join("<br>")+'</div>';
+    }
+    h+='<p class="small">The pen never stops moving. Slow is allowed. Stopping is not.</p>';
+  } else {
+    h+='<p class="rules">Pass the pattern. Sixty seconds on your own paper, then everything moves one to the left and you carry on somebody else\'s. Nobody owns the drawing by the end, which is the point.</p>'+
+      '<div class="pass" id="passBanner">PASS IT ON</div>'+
+      '<div class="clock" id="thuClock">0:'+(passLeft<10?"0":"")+passLeft+'</div>'+
+      '<div class="row"><button class="gbtn main" id="passStart">'+(passT?"Stop":"Start the rounds")+'</button>'+
+      '<button class="gbtn quiet" id="passReset">Reset</button></div>'+
+      '<p class="small">It flashes rather than beeps, so it will not go through anybody like a fire alarm.</p>';
+  }
+  h+='<div class="row" style="margin-top:14px"><button class="gbtn'+(thuMode==="slow"?" warm":"")+'" data-mode="slow">Slowest line</button>'+
+     '<button class="gbtn'+(thuMode==="pass"?" warm":"")+'" data-mode="pass">Pass the pattern</button></div>'+
+     '<div class="note"><b>Either version:</b> Jay plays too, and Jay should lose. Somebody sitting it out and calling the timings is still in the game.</div></div>';
+  return h;
+}
+function thuWire(){
+  Array.prototype.forEach.call(document.querySelectorAll("[data-mode]"),function(b){
+    b.onclick=function(){thuMode=b.getAttribute("data-mode");stopThu();stopPass();paint();};
+  });
+  var clock=document.getElementById("thuClock");
+  if(thuMode==="slow"){
+    document.getElementById("thuStart").onclick=function(){
+      if(thuT){stopThu();}
+      else{var t0=Date.now()-thuMs;thuT=setInterval(function(){thuMs=Date.now()-t0;clock.textContent=fmt(thuMs);},200);}
+      this.textContent=thuT?"Pause":"Start";
+    };
+    document.getElementById("thuOut").onclick=function(){
+      var who=document.getElementById("thuWho").value.trim();
+      thuOut.push({who:who,at:thuMs});
+      document.getElementById("thuWho").value="";
+      paint();
+    };
+    document.getElementById("thuReset").onclick=function(){stopThu();thuMs=0;thuOut=[];paint();};
+  } else {
+    document.getElementById("passStart").onclick=function(){
+      if(passT){stopPass();this.textContent="Start the rounds";return;}
+      passLeft=60;clock.textContent="1:00";
+      passT=setInterval(function(){
+        passLeft--;
+        if(passLeft<=0){
+          passLeft=60;
+          var ban=document.getElementById("passBanner");
+          if(ban){ban.classList.add("on");setTimeout(function(){ban.classList.remove("on");},2500);}
+        }
+        clock.textContent=(passLeft>=60?"1:00":"0:"+(passLeft<10?"0":"")+passLeft);
+        clock.className="clock"+(passLeft<=10?" warn":"");
+      },1000);
+      this.textContent="Stop";
+    };
+    document.getElementById("passReset").onclick=function(){stopPass();passLeft=60;paint();};
+  }
+}
+function stopThu(){if(thuT){clearInterval(thuT);thuT=null;}}
+function stopPass(){if(passT){clearInterval(passT);passT=null;}}
+
+/* ---------- Friday: The Curveball Awards ---------- */
+var AWARDS=[
+ {t:"Biggest Nothing", d:"The thing that was built up all week and turned out to be nothing at all."},
+ {t:"Most Dramatic Reaction", d:"Staff are eligible. Staff are usually the winner."},
+ {t:"Best Recovery", d:"Something went sideways and somebody quietly fixed it."},
+ {t:"Worst Timing", d:"Right thing, catastrophically wrong moment."},
+ {t:"Most Avoidable", d:"Everyone could see it coming. It still happened."},
+ {t:"Best Unrelated Fact", d:"Said during a lesson it had nothing to do with."},
+ {t:"Most Confident Wrong Answer", d:"Said with total certainty. Completely wrong. Respect."},
+ {t:"Quietest Win", d:"Something good that nobody noticed at the time."},
+ {t:"Best Excuse", d:"Points for style, not for whether anyone believed it."},
+ {t:"The Weather Award", d:"For something nobody could have controlled, so nobody gets blamed."},
+ {t:"Most Improved At Something Useless", d:"Genuine progress. No practical value whatsoever."},
+ {t:"The Long Game", d:"Started this week, nowhere near finished, still counts."},
+ {t:"Best Plan B", d:"The backup that turned out better than the plan."},
+ {t:"Loudest Five Minutes", d:"You know which five minutes."}
+];
+function friPanel(){
+  var f=S.fri, cat=f.cat>=0?AWARDS[f.cat]:null;
+  var max=f.noms.reduce(function(a,n){return Math.max(a,n.v);},0);
+  var h='<div class="panel"><h2>The Curveball Awards</h2>'+
+    '<p class="rules">Nominate, vote, hand out something ridiculous. Reviewing the week happens sideways, while everyone is busy arguing about who deserves what.</p>'+
+    '<div class="deck flip"><p class="kick">Category</p><p class="big">'+(cat?esc(cat.t):"No category yet")+'</p>'+
+    '<p class="sub">'+(cat?esc(cat.d):"Draw one and see who gets nominated.")+'</p></div>'+
+    '<div class="row"><button class="gbtn warm" id="friDeal">Draw a category</button>'+
+    '<button class="gbtn quiet" id="friClear">Clear the nominations</button></div>'+
+    '<div class="row"><input type="text" id="friWho" maxlength="16" placeholder="Nominate somebody" aria-label="Who to nominate">'+
+    '<button class="gbtn" id="friAdd">Add</button></div>';
+  if(f.noms.length){
+    h+='<div class="noms">';
+    f.noms.forEach(function(n,i){
+      h+='<div class="nom'+(n.v===max&&max>0?" win":"")+'"><span class="who">'+esc(n.who)+'</span>'+
+         '<span class="votes">'+n.v+'</span>'+
+         '<button class="gbtn" data-vote="'+i+'">Vote</button>'+
+         '<button class="gbtn quiet" data-drop="'+i+'">Remove</button></div>';
+    });
+    h+='</div>';
+  }
+  h+='<p class="small">Everyone gets one vote. Voting for yourself is allowed and tells everybody something.</p>'+
+     '<div class="note"><b>Fifteen minutes:</b> two categories is plenty. The prize should be genuinely rubbish: a biscuit, a certificate written on the back of something.</div></div>';
+  return h;
+}
+function friWire(){
+  var f=S.fri;
+  document.getElementById("friDeal").onclick=function(){
+    var n;do{n=Math.floor(Math.random()*AWARDS.length);}while(AWARDS.length>1&&n===f.cat);
+    f.cat=n;f.noms=[];save();paint();
+  };
+  document.getElementById("friClear").onclick=function(){f.noms=[];save();paint();};
+  document.getElementById("friAdd").onclick=function(){
+    var v=document.getElementById("friWho").value.trim();
+    if(!v)return;
+    f.noms.push({who:v,v:0});save();paint();
+  };
+  var inp=document.getElementById("friWho");
+  inp.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();document.getElementById("friAdd").click();}};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-vote]"),function(b){
+    b.onclick=function(){f.noms[+b.getAttribute("data-vote")].v++;save();paint();};
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-drop]"),function(b){
+    b.onclick=function(){f.noms.splice(+b.getAttribute("data-drop"),1);save();paint();};
+  });
+}
+
+/* ---------- paint ---------- */
+function paint(){
+  var host=document.getElementById("panels");
+  if(S.day!=="tue")stopT();
+  if(S.day!=="thu"){stopThu();stopPass();}
+  if(S.day==="mon"){host.innerHTML=monPanel();monWire();}
+  else if(S.day==="tue"){host.innerHTML=tuePanel();tueWire();}
+  else if(S.day==="wed"){host.innerHTML=wedPanel();wedWire();}
+  else if(S.day==="thu"){host.innerHTML=thuPanel();thuWire();}
+  else {host.innerHTML=friPanel();friWire();}
+  Array.prototype.forEach.call(document.querySelectorAll("[data-day]"),function(b){
+    b.setAttribute("aria-selected", b.getAttribute("data-day")===S.day ? "true":"false");
+  });
+}
+
+Array.prototype.forEach.call(document.querySelectorAll("[data-day]"),function(b){
+  b.addEventListener("click",function(){S.day=b.getAttribute("data-day");save();paint();});
+});
+paint();
+})();
+</script>
+
+</body>
+</html>
