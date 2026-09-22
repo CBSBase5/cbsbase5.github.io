@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cue the Sequence - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Cue the Sequence only. Shared pieces live in style.css */
+
+.game{background:linear-gradient(150deg,var(--plum) 0%,#5c3269 100%);border:var(--border) solid var(--ink);
+  border-radius:var(--r-alt);box-shadow:var(--lift-hi);padding:14px;margin:0 0 22px;color:var(--paper)}
+
+.hud{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:0 0 12px}
+.hud .lvl{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.05rem;line-height:1.1}
+.hud .lvl small{display:block;font-family:var(--body);font-weight:400;font-size:.82rem;opacity:.85}
+.scorebox{justify-self:center;display:flex;align-items:center;gap:14px;background:var(--yellow);color:var(--ink);
+  border:3px solid var(--ink);border-radius:18px 14px 20px 12px;padding:7px 18px;transform:rotate(-1deg);
+  box-shadow:3px 4px 0 var(--ink)}
+.scorebox .who{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 900;font-size:.78rem;
+  letter-spacing:.12em;text-transform:uppercase;text-align:center}
+.scorebox .n{display:block;font-size:2rem;line-height:1;letter-spacing:0}
+.scorebox .to{font-size:.74rem;font-weight:700;text-align:center;max-width:9ch;line-height:1.15}
+.pips{display:flex;gap:3px;justify-content:center;margin-top:3px}
+.pips i{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);background:transparent}
+.pips i.on{background:var(--orange)}
+.turn{justify-self:end;text-align:right;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.92rem}
+.turn span{display:inline-block;background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;
+  border:2px solid var(--ink);transform:rotate(1deg)}
+.turn span.cpu{background:var(--bright);color:var(--ink)}
+
+.stagewrap{position:relative;border-radius:16px;overflow:hidden;border:3px solid var(--ink);background:var(--ink)}
+canvas#table{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,47,56,.78);padding:12px;overflow:auto}
+.overlay[hidden]{display:none}
+.card-o{background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);
+  box-shadow:6px 7px 0 var(--orange);padding:18px 20px;max-width:640px;width:100%;
+  max-height:100%;overflow:auto;transform:rotate(-.4deg)}
+.card-o h2{font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 900;
+  font-size:clamp(1.4rem,4.4vw,2.3rem);line-height:1.02;margin:0 0 8px}
+.card-o h2 .o{color:var(--orange)}
+.card-o p{margin:0 0 10px;max-width:58ch}
+.card-o .kick{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:0 0 6px;display:block}
+.card-o .qtext{font-size:1.12rem;font-weight:700;margin:0 0 12px}
+.card-o .seq{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.3rem;
+  background:var(--paper);border:2px dashed var(--teal);border-radius:12px;padding:5px 12px;display:inline-block;margin:2px 0 10px;
+  letter-spacing:.03em}
+.card-o .big{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:3rem;line-height:1;color:var(--orange);margin:0 0 6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;margin:0 0 10px}
+.opt{font-family:var(--body);font-size:1.02rem;font-weight:700;text-align:left;cursor:pointer;
+  background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:14px 12px 16px 11px;
+  padding:11px 14px;box-shadow:3px 4px 0 rgba(10,47,56,.2);transition:transform .12s ease,background .12s ease}
+.opt:hover{transform:translate(-1px,-2px) rotate(-.6deg);background:var(--yellow)}
+.opt:disabled{cursor:default;transform:none}
+.opt.right{background:#9fe0c8;border-color:var(--ink)}
+.opt.picked{background:var(--roseish,#ffd1b8)}
+.opt.faded{opacity:.5}
+.why{background:rgba(0,166,201,.12);border:2px solid var(--bright);border-radius:14px;padding:10px 14px;margin:4px 0 10px;font-size:.98rem}
+.why b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900}
+.obtns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0;align-items:center}
+.quiet{font-family:var(--body);background:none;border:0;color:var(--teal);text-decoration:underline;cursor:pointer;font-size:.95rem;padding:6px 2px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:7px;margin:12px 0 0}
+.lbtn{font-family:var(--body);text-align:left;background:var(--paper);color:var(--ink);cursor:pointer;
+  border:2px solid var(--ink);border-radius:12px;padding:7px 9px;line-height:1.15;position:relative}
+.lbtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.1rem}
+.lbtn span{font-size:.74rem}
+.lbtn.done{background:var(--yellow)}
+.lbtn.done::after{content:"\2713";position:absolute;right:8px;top:6px;font-weight:700}
+.lbtn.next{box-shadow:0 0 0 3px var(--orange)}
+.lbtn:hover{transform:translateY(-2px)}
+
+.shotbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 0}
+.power{flex:1 1 220px;height:26px;border:3px solid var(--ink);border-radius:999px;background:var(--paper);overflow:hidden;position:relative}
+.power i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--yellow),var(--orange) 70%,var(--orange-deep))}
+.power span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-variation-settings:"wght" 800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.shotbar button{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.8rem;cursor:pointer;
+  background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:8px 14px}
+.shotbar button:hover{background:var(--yellow)}
+.shotbar button.go{background:var(--orange);font-size:.9rem;padding:9px 18px}
+.shotbar button:disabled{opacity:.4;cursor:default;background:var(--paper)}
+
+.under{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:12px 0 0}
+.chalky{display:flex;gap:10px;align-items:center;flex:1 1 300px}
+.chalky svg{flex:none}
+.saybox{font-size:.98rem;min-height:1.4em;background:var(--paper);color:var(--ink);border:2px solid var(--ink);
+  border-radius:16px 14px 16px 4px;padding:7px 13px;margin:0}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+.ctl button{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.78rem;cursor:pointer;
+  background:var(--paper);color:var(--ink);border:2px solid var(--paper);border-radius:999px;padding:8px 14px}
+.ctl button:hover{background:var(--yellow)}
+
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 22px}
+.howto .h{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:14px 16px;box-shadow:var(--lift)}
+.howto .h:nth-child(odd){transform:rotate(-.5deg)}
+.howto .h:nth-child(even){transform:rotate(.4deg)}
+.howto .h b{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 900;display:block;font-size:1.05rem;margin:0 0 4px}
+.howto .h p{margin:0;font-size:.95rem}
+.sec{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:22px;margin:0 0 20px;box-shadow:var(--lift)}
+.sec h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:1.5rem;margin:0 0 8px}
+.sec p{max-width:64ch}
+
+@media (max-width:640px){
+  .hud{grid-template-columns:1fr auto;grid-template-areas:"s s" "l t"}
+  .scorebox{grid-area:s}.hud .lvl{grid-area:l}.turn{grid-area:t}
+  .game{padding:10px}
+}
+@media (max-width:760px){
+  /* small screens: the question card sits under the table instead of squashed on top of it */
+  .overlay{position:static;background:var(--ink);padding:10px}
+  .card-o{transform:none;max-height:none;box-shadow:4px 5px 0 var(--orange)}
+}
+@media (prefers-reduced-motion:reduce){.opt:hover,.lbtn:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>CUE THE <span class="accent">SEQUENCE</span></h1>
+    <div class="line">
+      <span class="chip">Sequences and the nth term</span>
+      <p>A potting race against Chalky. There's a quick warm up question before each of your turns, and it never changes the game.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="game" aria-label="Cue the Sequence game">
+    <div class="hud">
+      <div class="lvl" id="hudLvl">Level 1<small>Terms and gaps</small></div>
+      <div class="scorebox" aria-live="polite">
+        <div class="who">You<span class="n" id="scYou">0</span><div class="pips" id="pipYou"></div></div>
+        <div class="to" id="scTo">first to 3</div>
+        <div class="who">Chalky<span class="n" id="scCpu">0</span><div class="pips" id="pipCpu"></div></div>
+      </div>
+      <div class="turn"><span id="turnTag">Pick a level</span></div>
+    </div>
+
+    <div class="stagewrap">
+      <canvas id="table" width="1088" height="588" aria-label="The pool table"></canvas>
+      <div class="overlay" id="overlay"></div>
+    </div>
+
+    <div class="shotbar">
+      <button id="nudgeL" aria-label="Turn aim left">&#9664; Nudge</button>
+      <button id="nudgeR" aria-label="Turn aim right">Nudge &#9654;</button>
+      <div class="power" aria-hidden="true"><i id="powFill"></i><span id="powTxt">Aim first</span></div>
+      <button id="reaimBtn" disabled>Re-aim</button>
+      <button id="shootBtn" class="go" disabled>Lock aim</button>
+    </div>
+
+    <div class="under">
+      <div class="chalky">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+          <rect x="5" y="7" width="36" height="34" rx="7" fill="#00a6c9" stroke="#fffdf8" stroke-width="3" transform="rotate(-6 23 24)"/>
+          <ellipse cx="23" cy="10" rx="12" ry="4" fill="#fffdf8" opacity=".55" transform="rotate(-6 23 24)"/>
+          <circle cx="17" cy="23" r="3" fill="#0a2f38"/><circle cx="29" cy="22" r="3" fill="#0a2f38"/>
+          <path d="M16 31 Q23 36 31 30" fill="none" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M14 17 L20 18 M26 17 L32 15" stroke="#0a2f38" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        <p class="saybox" id="say" aria-live="polite">Chalky is chalking himself. Pick a level when you're ready.</p>
+      </div>
+      <div class="ctl">
+        <button id="levelsBtn">Levels</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="howto">
+    <div class="h"><b>The race</b><p>You and Chalky share every ball. Whoever pots the number shown first wins the level. Pot a ball and you go again.</p></div>
+    <div class="h"><b>Aiming</b><p>Tap or click the table to point the cue, then lock it. Nudge buttons or the arrow keys fine tune it. The dotted line shows where the white goes.</p></div>
+    <div class="h"><b>Power</b><p>Once the aim is locked the power bar swings. Tap the table, press Space or hit Shoot to stop it and play the shot.</p></div>
+    <div class="h"><b>Warm ups</b><p>A quick sequences question pops up before each of your turns. Right, wrong or "show me", you still take your shot. They get trickier as the levels climb.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2>Send it to Jay</h2>
+    <p>Only if you want to. It sends how far you got and which kinds of warm up went well, nothing else.</p>
+    <div id="sendHost"></div>
+  </div>
+
+  <a class="backlink" href="/practice/#maths-standard">Back to practice</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ====================== setup ====================== */
+
+var KEY = "base5.maths.cuesequence.v1";
+var X = "\u00d7";
+var W = 1000, H = 500, RAIL = 44, R = 14;          /* playing surface, rail and ball radius */
+var CW = W + RAIL * 2, CH = H + RAIL * 2;
+var HEAD = {x: W * 0.25, y: H / 2};
+
+var cvs = document.getElementById("table");
+var ctx = cvs.getContext("2d");
+var $ = function(id){ return document.getElementById(id) };
+var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+var COLS = ["#ef7724","#ffc247","#7b4b8f","#00a6c9","#d75f10","#007291","#f0a80f","#5c3269","#e24b6a"];
+
+var save = {best:0, level:1, wins:0, losses:0, asked:0, right:0, topics:{}, seen:{}, log:[]};
+try{ var sv = JSON.parse(localStorage.getItem(KEY)); if(sv) for(var k in sv) save[k] = sv[k] }catch(e){}
+function store(){ try{ localStorage.setItem(KEY, JSON.stringify(save)) }catch(e){} }
+
+function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)) }
+function pick(a){ return a[Math.floor(Math.random() * a.length)] }
+function shuffle(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t } return a }
+function gauss(){ return (Math.random() + Math.random() + Math.random() - 1.5) / 0.5 }
+
+/* ====================== levels ====================== */
+
+var TOPICS = [
+  "",
+  "Terms and gaps",
+  "Patterns and tables",
+  "Spot the slip",
+  "Finding the nth term",
+  "Using the nth term",
+  "Counting down",
+  "Is it in there?",
+  "The pool hall challenge"
+];
+
+function params(L){
+  var T = L <= 2 ? 3 : (L <= 5 ? 4 : 5);
+  return {
+    target: T,
+    balls: T * 2 - 1,
+    pocket: Math.max(22, 32 - (L - 1) * 1.15),
+    err: Math.max(0.6, 5.4 - (L - 1) * 0.55),       /* Chalky's aim wobble in degrees */
+    bumpers: L >= 10 ? 2 : (L >= 6 ? 1 : 0),
+    topic: L <= 8 ? TOPICS[L] : "Mixed bag"
+  };
+}
+
+/* ====================== warm up questions ====================== */
+
+function rule(d, c){
+  var dn = d === 1 ? "n" : (d === -1 ? "-n" : d + "n");
+  if(d < 0 && c > 0) return c + " - " + (d === -1 ? "n" : (-d) + "n");
+  if(c === 0) return dn;
+  return dn + (c > 0 ? " + " + c : " - " + (-c));
+}
+function terms(a, d, n){ var t = []; for(var i = 0; i < n; i++) t.push(a + i * d); return t }
+function sgn(d){ return d > 0 ? "+" + d : "" + d }
+
+function mc(tier, q, seq, right, wrongs, why){
+  var opts = [String(right)];
+  wrongs.forEach(function(w){ w = String(w); if(opts.indexOf(w) < 0 && opts.length < 4) opts.push(w) });
+  if(typeof right === "number"){
+    [right + 2, right - 2, right + 10, right + 1].forEach(function(w){ w = String(w); if(opts.indexOf(w) < 0 && opts.length < 3) opts.push(w) });
+  }
+  var r = opts[0];
+  shuffle(opts);
+  return {tier: tier, q: q, seq: seq || "", opts: opts, ans: opts.indexOf(r), why: why};
+}
+
+var GEN = {};
+
+GEN[1] = function(seed, big){
+  var a = seed ? 4 : ri(1, big ? 30 : 12), d = seed ? 3 : ri(2, big ? 12 : 9);
+  var t = terms(a, d, 5), s = t.join(", ") + ", ...";
+  var v = seed ? 2 : ri(0, 2);
+  if(v === 0) return mc(1, "What is the first term of this sequence?", s, a, [a + d, d, t[4]],
+    "The first term is just the first number in the list: <b>" + a + "</b>.");
+  if(v === 1) return mc(1, "What is the difference between each term?", s, sgn(d), [sgn(d + 1), sgn(a), sgn(d - 1 || d + 2)],
+    t[1] + " - " + t[0] + " = " + d + ", and every gap is the same, so it goes up by <b>" + sgn(d) + "</b> each time.");
+  var nx = a + 5 * d;
+  return mc(1, "What is the next number in this sequence?", s, nx, [nx + 1, nx - 1, nx + d],
+    "The gap is " + sgn(d) + ", so " + t[4] + " + " + d + " = <b>" + nx + "</b>.");
+};
+
+GEN[2] = function(seed, big){
+  var v = seed ? 1 : ri(0, 3);
+  var a = seed ? 5 : ri(2, big ? 20 : 9), d = seed ? 4 : ri(2, big ? 11 : 7);
+  var t = terms(a, d, 6);
+  if(v === 0){
+    return mc(2, "Sam sets up pool balls in rows. Row 1 has " + t[0] + " balls, Row 2 has " + t[1] + " and Row 3 has " + t[2] + ". How many balls are added for each new row?", "",
+      d, [d + 1, a, t[1]], t[1] + " - " + t[0] + " = " + d + " and " + t[2] + " - " + t[1] + " = " + d + ", so <b>" + d + "</b> balls are added each time.");
+  }
+  if(v === 1){
+    return mc(2, "A table shows squares in a line of tiles. Pattern 1 has " + t[0] + ", Pattern 2 has " + t[1] + ", Pattern 3 has " + t[2] + ". How many squares in Pattern 5?", "",
+      t[4], [t[3], t[5], 5 * d], "Keep adding " + d + ": Pattern 4 is " + t[3] + ", then Pattern 5 is " + t[3] + " + " + d + " = <b>" + t[4] + "</b>.");
+  }
+  if(v === 2){
+    var s = t.slice(0, 4).join(", ") + ", __, __";
+    return mc(2, "Which are the next two terms?", s, t[4] + ", " + t[5],
+      [t[4] + ", " + (t[5] + 2), (t[3] + d + 1) + ", " + (t[3] + 2 * d + 2), (t[3] + d - 1) + ", " + (t[3] + 2 * d - 2)],
+      "The gap is " + sgn(d) + ": " + t[3] + " + " + d + " = " + t[4] + ", then " + t[4] + " + " + d + " = <b>" + t[5] + "</b>.");
+  }
+  var b = a + ri(1, 3);
+  return mc(2, "Sequence A is " + terms(a, d, 4).join(", ") + ". Sequence B is " + terms(b, d, 4).join(", ") + ". What is the same about them?", "",
+    "They both go up by " + d + " each time", ["They both start on the same number", "They both go up by " + (b - a) + " each time", "They are both in the " + a + " times table"],
+    "Both gaps are " + sgn(d) + ". What is different is where they start: " + a + " and " + b + ".");
+};
+
+GEN[3] = function(seed, big){
+  var d = seed ? 4 : ri(2, big ? 11 : 6), c = seed ? 1 : ri(1, 5), k = seed ? 10 : pick([10, 20, 10, 100]);
+  var t = terms(d + c, d, 4), v = seed ? 0 : ri(0, 1);
+  if(v === 0){
+    return mc(3, "A student says: \"Pattern " + k + " will have " + (d * k) + " squares because " + d + " " + X + " " + k + " = " + (d * k) + ".\" Are they right?", t.join(", ") + ", ...",
+      "No: it's " + (d * k + c) + ", because the rule is " + rule(d, c),
+      ["Yes: " + d + " " + X + " " + k + " = " + (d * k), "No: it's " + (d * k + d) + ", because you add another " + d, "No: it's " + (k + d) + ", because " + k + " + " + d + " = " + (k + d)],
+      d + "n makes the " + d + " times table (" + terms(d, d, 3).join(", ") + "). This sequence is always " + c + " more, so it's " + rule(d, c) + ": " + d + " " + X + " " + k + " + " + c + " = <b>" + (d * k + c) + "</b>.");
+  }
+  return mc(3, "A student says: \"The nth term is n + " + d + ", because you add " + d + " each time.\" Are they right?", t.join(", ") + ", ...",
+    "No: adding " + d + " each time means " + d + "n, so it's " + rule(d, c),
+    ["Yes: you add " + d + " each time", "No: it's " + rule(t[0], d), "No: it's " + rule(d, t[0])],
+    "The gap tells you how many n's. A gap of " + d + " means " + d + "n. When n = 1 that gives " + d + ", and the first term is " + t[0] + ", so add " + c + ": <b>" + rule(d, c) + "</b>.");
+};
+
+GEN[4] = function(seed, big){
+  var d = seed ? 3 : ri(2, big ? 12 : 7), c = seed ? 2 : ri(-3, big ? 15 : 8);
+  if(c === 0) c = 1;
+  var a = d + c, t = terms(a, d, 4);
+  return mc(4, "What is the nth term rule for this sequence?", t.join(", ") + ", ...",
+    rule(d, c), [rule(d, a), rule(a, d), rule(1, d), rule(d, -c)],
+    "Step 1: the gap is " + sgn(d) + ", so start with " + d + "n. Step 2: when n = 1, " + d + "n = " + d + ", but the first term is " + a + ", so " +
+    (c > 0 ? "add " + c : "take away " + (-c)) + ". The rule is <b>" + rule(d, c) + "</b>.");
+};
+
+GEN[5] = function(seed, big){
+  var d = seed ? 3 : ri(2, big ? 12 : 9), c = seed ? 4 : ri(-5, 9), k = seed ? 10 : pick(big ? [20, 50, 100, 200] : [10, 20, 50, 100]);
+  if(c === 0) c = -1;
+  var right = d * k + c, pool = !seed && Math.random() < 0.3;
+  var q = pool ? "In a game of pool, balls are lined up using the rule " + rule(d, c) + ". How many balls are in Row " + k + "?"
+               : "The rule for a sequence is " + rule(d, c) + ". What is the " + k + "th term?";
+  return mc(5, q, "", right, [d * k, Number("" + d + k) + c, d * (k + c), d + k + c],
+    "Swap n for " + k + ": " + d + " " + X + " " + k + " = " + (d * k) + ", then " + (c > 0 ? "+ " + c : "- " + (-c)) + " gives <b>" + right + "</b>.");
+};
+
+GEN[6] = function(seed, big){
+  var g = seed ? 3 : ri(2, big ? 9 : 6), a = seed ? 20 : ri(g * 6 + 1, g * 6 + (big ? 30 : 12));
+  var d = -g, t = terms(a, d, 7), v = seed ? 0 : ri(0, 2);
+  var s = t.slice(0, 5).join(", ") + ", ...";
+  if(v === 0) return mc(6, "This sequence counts down. What is the difference between each term?", s, sgn(d), [sgn(g), sgn(d - 1), sgn(d + 1)],
+    t[1] + " - " + t[0] + " = " + d + ". It goes down, so the difference is negative: <b>" + sgn(d) + "</b>.");
+  if(v === 1) return mc(6, "What are the next two terms?", s, t[5] + ", " + t[6], [(t[4] + g) + ", " + (t[4] + 2 * g), t[5] + ", " + (t[6] - 1), (t[5] - 1) + ", " + (t[6] - 2)],
+    "Keep taking away " + g + ": " + t[4] + " - " + g + " = " + t[5] + ", then " + t[5] + " - " + g + " = <b>" + t[6] + "</b>.");
+  var c = a + g;
+  return mc(6, "What is the nth term rule for this sequence?", s, rule(d, c), [rule(g, c), rule(d, a), rule(g, a - g)],
+    "The gap is " + sgn(d) + ", so start with " + d + "n. When n = 1 that is " + d + ", but the first term is " + a + ", so add " + c + ". The rule is <b>" + rule(d, c) + "</b>.");
+};
+
+GEN[7] = function(seed, big){
+  var v = seed ? 0 : ri(0, 1);
+  if(v === 0){
+    var d = seed ? 5 : ri(3, big ? 11 : 7), c = seed ? 2 : ri(1, 9), k = seed ? 13 : ri(8, big ? 40 : 20);
+    var yes = seed ? true : Math.random() < 0.5;
+    var x = yes ? d * k + c : d * k + c + ri(1, d - 1);
+    var n = (x - c) / d, nt = Math.round(n * 100) / 100;
+    var work = "Set " + rule(d, c) + " = " + x + ". Take away " + c + ": " + d + "n = " + (x - c) + ". Divide by " + d + ": n = " + nt + ". ";
+    if(yes) return mc(7, "A sequence has the rule " + rule(d, c) + ". Is " + x + " in the sequence?", "",
+      "Yes, it's term " + k, ["Yes, it's term " + (k + 1), "No, it isn't in the sequence", "Yes, it's term " + Math.round(x / d)],
+      work + "That's a whole number, so <b>" + x + " is term " + k + "</b>.");
+    return mc(7, "A sequence has the rule " + rule(d, c) + ". Is " + x + " in the sequence?", "",
+      "No: n would be " + nt + ", not a whole number",
+      ["Yes, it's term " + Math.floor(n), "Yes, it's term " + Math.ceil(n), "Yes, it's term " + nt, "Yes, it's term " + (Math.ceil(n) + 1)],
+      work + "Positions are always whole numbers, so <b>" + x + " isn't in it</b>.");
+  }
+  var d1 = ri(1, 3), d2 = d1 + ri(2, 4), n0 = ri(3, big ? 12 : 8), c2 = ri(1, 6), c1 = c2 + (d2 - d1) * n0;
+  var who = pick([["Maya","Leo"],["Ash","Kit"],["Rio","Sam"]]);
+  return mc(7, who[0] + "'s rule is " + rule(d1, c1) + ". " + who[1] + "'s rule is " + rule(d2, c2) + ". At which position n do they make the same number?", "",
+    "n = " + n0, ["n = " + (n0 + 1), "n = " + (n0 - 1), "n = " + (c1 - c2)],
+    rule(d2, c2) + " = " + rule(d1, c1) + ". Take " + rule(d1, 0) + " from both: " + rule(d2 - d1, c2) + " = " + c1 + ". Take away " + c2 + ": " +
+    rule(d2 - d1, 0) + " = " + (c1 - c2) + ". So <b>n = " + n0 + "</b>. Check: both make " + (d1 * n0 + c1) + ".");
+};
+
+GEN[8] = function(seed, big){
+  var a = seed ? 6 : ri(4, big ? 15 : 9), d = seed ? 4 : ri(3, big ? 9 : 6), c = a - d, v = seed ? 0 : ri(0, 3);
+  var t = terms(a, d, 3);
+  var intro = "A pool hall lights its tables in stages. Stage 1 uses " + t[0] + " lights, Stage 2 uses " + t[1] + ", Stage 3 uses " + t[2] + ". ";
+  if(v === 0) return mc(8, intro + "What is the rule for the lights at Stage n?", "", rule(d, c), [rule(d, a), rule(a, d), rule(1, d)],
+    "The gap is " + sgn(d) + ", so " + d + "n. When n = 1 that is " + d + ", and Stage 1 uses " + a + ", so " + (c >= 0 ? "add " + c : "take away " + (-c)) + ": <b>" + rule(d, c) + "</b>.");
+  if(v === 1){ var k = ri(12, big ? 60 : 30);
+    return mc(8, intro + "How many lights for Stage " + k + "?", "", d * k + c, [d * k, a * k, d * k + c + d],
+      "The rule is " + rule(d, c) + ". " + d + " " + X + " " + k + " = " + (d * k) + ", " + (c >= 0 ? "+ " + c : "- " + (-c)) + " = <b>" + (d * k + c) + "</b>."); }
+  var B = ri(big ? 150 : 80, big ? 400 : 200), n = Math.floor((B - c) / d), left = B - (d * n + c);
+  if(v === 2) return mc(8, intro + "They have " + B + " lights. What is the biggest stage they can fully build?", "", "Stage " + n,
+    ["Stage " + (n + 1), "Stage " + Math.floor(B / d), "Stage " + (n - 1), "Stage " + (n + 2)],
+    "The rule is " + rule(d, c) + ". " + rule(d, c) + " = " + B + " gives n = " + (Math.round((B - c) / d * 100) / 100) + ". Round down: <b>Stage " + n + "</b> uses " + (d * n + c) + " lights.");
+  return mc(8, intro + "They have " + B + " lights and build the biggest stage they can. How many lights are left over?", "", left,
+    [left + d, B % d === left ? left + 1 : B % d, left === 0 ? d : 0, d - left || d + 1],
+    "The biggest stage is " + n + ", which uses " + d + " " + X + " " + n + " " + (c >= 0 ? "+ " + c : "- " + (-c)) + " = " + (d * n + c) + ". " + B + " - " + (d * n + c) + " = <b>" + left + "</b> left over.");
+};
+
+function makeQuestion(L){
+  var big = L > 8, tier;
+  if(L <= 8) tier = (L > 1 && Math.random() < 0.3) ? ri(Math.max(1, L - 2), L - 1) : L;
+  else tier = ri(3, 8);
+  var seed = !save.seen[tier];
+  save.seen[tier] = 1; store();
+  return GEN[tier](seed, big);
+}
+
+/* ====================== table state ====================== */
+
+var G = {
+  L: 1, P: params(1), balls: [], cue: null, bumpers: [], pockets: [],
+  score: [0, 0], turn: 0, state: "menu",          /* menu, question, aim, power, moving, cpu, over */
+  angle: 0, power: 0, pt: 0, potted: [], scratch: false, cpuPlan: null, felt: null, q: null
+};
+
+function makePockets(pr){
+  G.pockets = [
+    {x: 0, y: 0, r: pr, c: 1}, {x: W / 2, y: -6, r: pr * 0.92, c: 0}, {x: W, y: 0, r: pr, c: 1},
+    {x: 0, y: H, r: pr, c: 1}, {x: W / 2, y: H + 6, r: pr * 0.92, c: 0}, {x: W, y: H, r: pr, c: 1}
+  ];
+}
+
+function rack(){
+  var n = G.P.balls, a = ri(1, 9), d = ri(2, 7), labels = terms(a, d, n);
+  G.seqNote = labels.slice(0, 3).join(", ") + ", ...";
+  G.balls = [];
+  var apex = W * 0.7, gap = R * 2 + 0.6, i = 0;
+  for(var row = 0; i < n; row++){
+    for(var j = 0; j <= row && i < n; j++, i++){
+      G.balls.push({x: apex + row * gap * 0.866, y: H / 2 + (j - row / 2) * gap, vx: 0, vy: 0, n: labels[i], col: COLS[i % COLS.length], in: false, t: 0});
+    }
+  }
+  G.cue = {x: HEAD.x, y: HEAD.y, vx: 0, vy: 0, cue: true, in: false, t: 0};
+  G.bumpers = [];
+  if(G.P.bumpers === 1) G.bumpers.push({x: W * 0.5, y: H * 0.26, r: 24});
+  if(G.P.bumpers === 2){ G.bumpers.push({x: W * 0.5, y: H * 0.24, r: 22}); G.bumpers.push({x: W * 0.5, y: H * 0.76, r: 22}) }
+}
+
+function all(){ return [G.cue].concat(G.balls) }
+
+/* ====================== physics ====================== */
+
+var MU = 160, DRAG = 0.9, E_BALL = 0.96, E_RAIL = 0.78, E_BUMP = 0.85, VMIN = 180, VMAX = 2080;
+
+function inGap(b){
+  var p = G.P.pocket;
+  var nearX = b.x < p * 1.2 || b.x > W - p * 1.2 || Math.abs(b.x - W / 2) < p * 0.9;
+  var nearY = b.y < p * 1.2 || b.y > H - p * 1.2;
+  return {x: nearX, y: nearY};
+}
+
+function step(dt){
+  var list = all();
+  list.forEach(function(b){
+    if(b.in) return;
+    var s = Math.hypot(b.vx, b.vy);
+    if(s > 0){
+      var ns = Math.max(0, s - (MU + DRAG * s) * dt);
+      if(ns < 4) ns = 0;
+      b.vx *= ns / s; b.vy *= ns / s;
+    }
+    b.x += b.vx * dt; b.y += b.vy * dt;
+
+    for(var k = 0; k < G.pockets.length; k++){
+      var p = G.pockets[k];
+      if(Math.hypot(b.x - p.x, b.y - p.y) < p.r){ sink(b, p); return }
+    }
+    var g = inGap(b);
+    if(b.x < R && !g.y){ b.x = R; b.vx = -b.vx * E_RAIL }
+    if(b.x > W - R && !g.y){ b.x = W - R; b.vx = -b.vx * E_RAIL }
+    if(b.y < R && !g.x){ b.y = R; b.vy = -b.vy * E_RAIL }
+    if(b.y > H - R && !g.x){ b.y = H - R; b.vy = -b.vy * E_RAIL }
+    if(b.x < -R * 1.5 || b.x > W + R * 1.5 || b.y < -R * 1.5 || b.y > H + R * 1.5){
+      var best = G.pockets[0], bd = 1e9;
+      G.pockets.forEach(function(p){ var dd = Math.hypot(b.x - p.x, b.y - p.y); if(dd < bd){ bd = dd; best = p } });
+      sink(b, best); return;
+    }
+    G.bumpers.forEach(function(m){
+      var dx = b.x - m.x, dy = b.y - m.y, dd = Math.hypot(dx, dy), min = R + m.r;
+      if(dd < min && dd > 0){
+        var nx = dx / dd, ny = dy / dd;
+        b.x = m.x + nx * min; b.y = m.y + ny * min;
+        var vn = b.vx * nx + b.vy * ny;
+        if(vn < 0){ b.vx -= (1 + E_BUMP) * vn * nx; b.vy -= (1 + E_BUMP) * vn * ny }
+      }
+    });
+  });
+  for(var i = 0; i < list.length; i++){
+    var a = list[i]; if(a.in) continue;
+    for(var j = i + 1; j < list.length; j++){
+      var b = list[j]; if(b.in) continue;
+      var dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+      if(d < R * 2 && d > 0){
+        var nx = dx / d, ny = dy / d, ov = (R * 2 - d) / 2;
+        a.x -= nx * ov; a.y -= ny * ov; b.x += nx * ov; b.y += ny * ov;
+        var rel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+        if(rel > 0){
+          var imp = rel * (1 + E_BALL) / 2;
+          a.vx -= imp * nx; a.vy -= imp * ny; b.vx += imp * nx; b.vy += imp * ny;
+        }
+      }
+    }
+  }
+}
+
+function sink(b, p){
+  b.in = true; b.vx = 0; b.vy = 0; b.px = p.x; b.py = p.y; b.t = 1;
+  if(b.cue) G.scratch = true; else G.potted.push(b);
+}
+
+function moving(){ return all().some(function(b){ return !b.in && (b.vx || b.vy) }) }
+
+/* ====================== shots ====================== */
+
+function shoot(angle, power){
+  var v = VMIN + power * (VMAX - VMIN);
+  G.cue.vx = Math.cos(angle) * v; G.cue.vy = Math.sin(angle) * v;
+  G.potted = []; G.scratch = false;
+  G.state = "moving";
+  syncShotbar();
+}
+
+function afterShot(){
+  var me = G.turn, got = G.potted.length;
+  G.score[me] += got;
+  hud();
+  if(G.score[me] >= G.P.target){ return finish(me === 0) }
+  var left = G.balls.filter(function(b){ return !b.in }).length;
+  if(left === 0){ return finish(G.score[0] > G.score[1]) }
+
+  if(G.scratch){
+    respot();
+    say(me === 0 ? pick(LINES.pScratch) : pick(LINES.cScratch));
+    return nextTurn(1 - me);
+  }
+  if(got > 0){
+    say(me === 0 ? pick(LINES.pPot) : pick(LINES.cPot));
+    return nextTurn(me, true);
+  }
+  say(me === 0 ? pick(LINES.pMiss) : pick(LINES.cMiss));
+  nextTurn(1 - me);
+}
+
+function respot(){
+  var c = G.cue; c.in = false; c.t = 0; c.vx = c.vy = 0; c.x = HEAD.x; c.y = HEAD.y;
+  var tries = 0;
+  while(G.balls.some(function(b){ return !b.in && Math.hypot(b.x - c.x, b.y - c.y) < R * 2.2 }) && tries < 40){
+    c.y = HEAD.y + (tries % 2 ? 1 : -1) * Math.ceil(tries / 2) * R * 2.3; tries++;
+  }
+}
+
+function nextTurn(who, again){
+  G.turn = who; hud();
+  if(who === 1){ G.state = "cpu"; syncShotbar(); setTimeout(cpuTurn, reduce ? 300 : 900); return }
+  if(again){ startAim(); return }
+  askQuestion();
+}
+
+function startAim(){
+  G.state = "aim"; G.power = 0;
+  if(G.aimTarget == null) G.angle = aimAtNearest();
+  syncShotbar();
+}
+
+function aimAtNearest(){
+  var best = null, bd = 1e9;
+  G.balls.forEach(function(b){ if(b.in) return; var d = Math.hypot(b.x - G.cue.x, b.y - G.cue.y); if(d < bd){ bd = d; best = b } });
+  return best ? Math.atan2(best.y - G.cue.y, best.x - G.cue.x) : 0;
+}
+
+/* ====================== aiming guide ====================== */
+
+function rayCircle(ox, oy, dx, dy, cx, cy, rad){
+  var fx = ox - cx, fy = oy - cy;
+  var b = fx * dx + fy * dy, c = fx * fx + fy * fy - rad * rad, disc = b * b - c;
+  if(disc < 0) return -1;
+  var t = -b - Math.sqrt(disc);
+  return t > 0.01 ? t : -1;
+}
+
+function traceAim(angle){
+  var ox = G.cue.x, oy = G.cue.y, dx = Math.cos(angle), dy = Math.sin(angle);
+  var best = 1e9, hit = null, kind = "wall";
+  G.balls.forEach(function(b){ if(b.in) return; var t = rayCircle(ox, oy, dx, dy, b.x, b.y, R * 2); if(t > 0 && t < best){ best = t; hit = b; kind = "ball" } });
+  G.bumpers.forEach(function(m){ var t = rayCircle(ox, oy, dx, dy, m.x, m.y, R + m.r); if(t > 0 && t < best){ best = t; hit = m; kind = "bump" } });
+  var tw = [];
+  if(dx > 0) tw.push((W - R - ox) / dx); if(dx < 0) tw.push((R - ox) / dx);
+  if(dy > 0) tw.push((H - R - oy) / dy); if(dy < 0) tw.push((R - oy) / dy);
+  var twall = Math.min.apply(null, tw.filter(function(t){ return t > 0 }).concat([1e9]));
+  if(twall < best){ best = twall; hit = null; kind = "wall" }
+  return {x: ox + dx * best, y: oy + dy * best, hit: hit, kind: kind};
+}
+
+/* ====================== Chalky ====================== */
+
+var LINES = {
+  start: ["Right then. First to {T}. I've chalked my own head for this.", "Level {L}. I've been practising. Mostly in the mirror.", "First to {T}? I'll try to go easy. I won't, but I'll try.", "New rack, new me. Same moustache."],
+  cPot: ["Get in!", "Textbook. Well, pool book.", "Did you see that? Tell everyone.", "That's going on my fridge.", "Calculated. Mostly."],
+  cMiss: ["The table moved. I saw it.", "That was a warm up shot.", "The cushion owes me one.", "I meant that. For tactical reasons.", "Hmm. The pocket blinked."],
+  pPot: ["Oh, that's rude.", "Fine. That was quite good.", "Lucky. Probably. Maybe.", "I'm writing that one down.", "You've done this before."],
+  pMiss: ["Close. The pocket blinked.", "Ooh, unlucky.", "My go then. Stand back.", "Thanks for setting that up for me."],
+  pScratch: ["Where's the white gone? Oh.", "The white fancied a swim. My go."],
+  cScratch: ["I meant to do that. The white needed a rest.", "Nobody saw that. Right?"],
+  cWin: ["Chalky wins! Rematch? I'll pretend to be nervous.", "That one's mine. The next one might be yours."],
+  pWin: ["Okay, okay. I'll get my coat.", "You win. I'm going to go and sit in the chalk tin for a bit."]
+};
+
+function say(t){ $("say").textContent = t.replace("{T}", G.P.target).replace("{L}", G.L) }
+
+function cpuTurn(){
+  if(G.state !== "cpu") return;
+  var plan = cpuPlan();
+  var err = gauss() * G.P.err * Math.PI / 180;
+  var target = plan.angle + err;
+  say(pick(["Hmm...", "Let me see...", "Watch and learn.", "Easy. Probably."]));
+  var start = aimAtNearest(), t0 = performance.now(), dur = reduce ? 10 : 700;
+  var diff = Math.atan2(Math.sin(target - start), Math.cos(target - start));
+  G.cpuAim = true;
+  (function turn(now){
+    if(G.state !== "cpu") return;
+    var f = Math.min(1, (now - t0) / dur);
+    G.angle = start + diff * (1 - Math.pow(1 - f, 3));
+    if(f < 1) return requestAnimationFrame(turn);
+    var pw = Math.max(0.05, Math.min(1, plan.power * (1 + gauss() * 0.06)));
+    var p0 = performance.now();
+    (function pull(n2){
+      if(G.state !== "cpu") return;
+      var g = Math.min(1, (n2 - p0) / (reduce ? 10 : 450));
+      G.power = pw * g; powerBar(G.power);
+      if(g < 1) return requestAnimationFrame(pull);
+      G.cpuAim = false; G.angle = target;
+      shoot(target, pw);
+    })(p0);
+  })(t0);
+}
+
+function clearPath(x1, y1, x2, y2, ignore, rad){
+  var dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
+  function blocked(cx, cy, r){
+    var t = L2 ? Math.max(0, Math.min(1, ((cx - x1) * dx + (cy - y1) * dy) / L2)) : 0;
+    return Math.hypot(x1 + dx * t - cx, y1 + dy * t - cy) < r;
+  }
+  for(var i = 0; i < G.balls.length; i++){ var b = G.balls[i]; if(b.in || ignore.indexOf(b) >= 0) continue; if(blocked(b.x, b.y, rad)) return false }
+  for(var j = 0; j < G.bumpers.length; j++){ var m = G.bumpers[j]; if(blocked(m.x, m.y, m.r + R)) return false }
+  return true;
+}
+
+function travel(v){ return v <= MU ? 0 : (v - MU * Math.log((MU + DRAG * v) / MU) / DRAG) / DRAG }
+function speedAfter(v0, d){
+  var lo = 0, hi = v0;
+  for(var i = 0; i < 30; i++){ var m = (lo + hi) / 2; if(travel(v0) - travel(m) > d) lo = m; else hi = m }
+  return (lo + hi) / 2;
+}
+function needV(dCue, dObj, cosT){
+  var lo = VMIN, hi = VMAX;
+  for(var i = 0; i < 30; i++){
+    var m = (lo + hi) / 2, vc = speedAfter(m, dCue), vo = vc * cosT * (1 + E_BALL) / 2;
+    if(travel(vo) > dObj + 70) hi = m; else lo = m;
+  }
+  return hi;
+}
+
+function cpuPlan(){
+  var c = G.cue, best = null;
+  G.balls.forEach(function(b){
+    if(b.in) return;
+    G.pockets.forEach(function(p){
+      var px = p.x + (p.x < W / 2 ? 6 : (p.x > W / 2 ? -6 : 0)), py = p.y + (p.y <= 0 ? 6 : -6);
+      var ux = px - b.x, uy = py - b.y, dObj = Math.hypot(ux, uy); ux /= dObj; uy /= dObj;
+      if(!p.c && Math.abs(uy) < 0.5) return;
+      var gx = b.x - ux * R * 2, gy = b.y - uy * R * 2;
+      if(gx < R || gx > W - R || gy < R || gy > H - R) return;
+      var cx = gx - c.x, cy = gy - c.y, dCue = Math.hypot(cx, cy);
+      if(dCue < 1) return;
+      var cosT = (cx * ux + cy * uy) / dCue;
+      if(cosT < 0.3) return;
+      if(!clearPath(c.x, c.y, gx, gy, [b], R * 2)) return;
+      if(!clearPath(b.x, b.y, px, py, [b], R * 2)) return;
+      var score = cosT * 1.6 - (dCue + dObj) / 1400 + (p.c ? 0.05 : 0);
+      if(!best || score > best.score){
+        var v = needV(dCue, dObj, cosT);
+        best = {score: score, angle: Math.atan2(cy, cx), power: (v - VMIN) / (VMAX - VMIN)};
+      }
+    });
+  });
+  if(best) return best;
+  var a = aimAtNearest();
+  return {angle: a + (Math.random() - 0.5) * 0.3, power: 0.55};
+}
+
+/* ====================== drawing ====================== */
+
+function makeFelt(){
+  var f = document.createElement("canvas"); f.width = W; f.height = H;
+  var g = f.getContext("2d");
+  var rg = g.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, W * 0.62);
+  rg.addColorStop(0, "#0a8fae"); rg.addColorStop(0.6, "#007291"); rg.addColorStop(1, "#005a73");
+  g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  for(var i = 0; i < 5000; i++){
+    g.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,.035)" : "rgba(0,0,0,.05)";
+    g.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+  }
+  g.fillStyle = "rgba(255,194,71,.10)";
+  g.beginPath(); g.ellipse(W * 0.3, H * 0.3, 260, 120, -0.3, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "rgba(239,119,36,.08)";
+  g.beginPath(); g.ellipse(W * 0.75, H * 0.75, 280, 130, 0.25, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = "rgba(255,253,248,.28)"; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(HEAD.x, 0); g.lineTo(HEAD.x, H); g.stroke();
+  g.beginPath(); g.arc(HEAD.x, H / 2, 70, Math.PI / 2, Math.PI * 1.5); g.stroke();
+  g.fillStyle = "rgba(255,253,248,.4)";
+  g.beginPath(); g.arc(W * 0.7, H / 2, 3, 0, Math.PI * 2); g.fill();
+  return f;
+}
+
+function roundRect(x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function drawBall(b){
+  var x = RAIL + b.x, y = RAIL + b.y, r = R, a = 1;
+  if(b.in){
+    if(b.t <= 0) return;
+    x = RAIL + b.px + (b.x - b.px) * b.t; y = RAIL + b.py + (b.y - b.py) * b.t;
+    r = R * b.t; a = b.t;
+  }
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.beginPath(); ctx.ellipse(x + 3, y + 4, r, r * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+  var g = ctx.createRadialGradient(x - r * 0.4, y - r * 0.45, r * 0.15, x, y, r);
+  if(b.cue){ g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#e6dccb") }
+  else { g.addColorStop(0, "#fff4d6"); g.addColorStop(0.28, b.col); g.addColorStop(1, shade(b.col)) }
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 1.6; ctx.strokeStyle = "#0a2f38"; ctx.stroke();
+  if(!b.cue && r > 8){
+    ctx.fillStyle = "#fffdf8"; ctx.beginPath(); ctx.arc(x, y, r * 0.62, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#0a2f38";
+    var s = String(b.n);
+    ctx.font = "800 " + (s.length > 2 ? 9 : (s.length > 1 ? 11 : 12)) * (r / R) + "px Archivo, Arial, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(s, x, y + 0.5);
+  }
+  ctx.restore();
+}
+
+function shade(hex){
+  var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return "rgb(" + Math.round(r * 0.62) + "," + Math.round(g * 0.62) + "," + Math.round(b * 0.62) + ")";
+}
+
+function draw(){
+  ctx.clearRect(0, 0, CW, CH);
+  /* rails */
+  var rg = ctx.createLinearGradient(0, 0, CW, CH);
+  rg.addColorStop(0, "#123c47"); rg.addColorStop(1, "#0a2f38");
+  ctx.fillStyle = rg; roundRect(0, 0, CW, CH, 26); ctx.fill();
+  ctx.fillStyle = "#ffc247";
+  [0.125, 0.25, 0.375, 0.625, 0.75, 0.875].forEach(function(f){
+    diamond(RAIL + W * f, RAIL / 2); diamond(RAIL + W * f, CH - RAIL / 2);
+  });
+  [0.25, 0.5, 0.75].forEach(function(f){ diamond(RAIL / 2, RAIL + H * f); diamond(CW - RAIL / 2, RAIL + H * f) });
+  /* felt */
+  if(!G.felt) G.felt = makeFelt();
+  ctx.drawImage(G.felt, RAIL, RAIL);
+  ctx.strokeStyle = "#004a5e"; ctx.lineWidth = 6; ctx.strokeRect(RAIL - 3, RAIL - 3, W + 6, H + 6);
+  /* pockets */
+  G.pockets.forEach(function(p){
+    ctx.fillStyle = "#051a20"; ctx.beginPath(); ctx.arc(RAIL + p.x, RAIL + p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#ef7724"; ctx.lineWidth = 3; ctx.stroke();
+  });
+  /* bumpers */
+  G.bumpers.forEach(function(m){
+    var x = RAIL + m.x, y = RAIL + m.y;
+    ctx.fillStyle = "rgba(0,0,0,.28)"; ctx.beginPath(); ctx.arc(x + 3, y + 4, m.r, 0, Math.PI * 2); ctx.fill();
+    var g = ctx.createRadialGradient(x - 6, y - 7, 3, x, y, m.r);
+    g.addColorStop(0, "#9fe6f5"); g.addColorStop(1, "#00a6c9");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, m.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#0a2f38"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = "#0a2f38"; ctx.font = "800 11px Archivo, Arial, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("CHALK", x, y);
+  });
+  /* guide */
+  var aiming = G.state === "aim" || G.state === "power" || (G.state === "cpu" && G.cpuAim);
+  if(aiming && !G.cue.in){
+    var tr = traceAim(G.angle), cx = RAIL + G.cue.x, cy = RAIL + G.cue.y;
+    ctx.save();
+    ctx.setLineDash([7, 7]); ctx.lineWidth = 2.4; ctx.strokeStyle = "rgba(255,253,248,.85)";
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(RAIL + tr.x, RAIL + tr.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(RAIL + tr.x, RAIL + tr.y, R, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,253,248,.9)"; ctx.lineWidth = 2; ctx.stroke();
+    if(tr.kind === "ball" && G.state !== "cpu"){
+      var nx = tr.hit.x - tr.x, ny = tr.hit.y - tr.y, nd = Math.hypot(nx, ny);
+      ctx.strokeStyle = "#ffc247"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(RAIL + tr.hit.x, RAIL + tr.hit.y); ctx.lineTo(RAIL + tr.hit.x + nx / nd * 90, RAIL + tr.hit.y + ny / nd * 90); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  /* balls */
+  G.balls.forEach(drawBall);
+  drawBall(G.cue);
+  /* cue stick */
+  if(aiming && !G.cue.in){
+    var pull = 20 + G.power * 70, ang = G.angle + Math.PI;
+    var sx = RAIL + G.cue.x + Math.cos(ang) * (R + pull), sy = RAIL + G.cue.y + Math.sin(ang) * (R + pull);
+    var ex = sx + Math.cos(ang) * 420, ey = sy + Math.sin(ang) * 420;
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(0,0,0,.3)"; ctx.lineWidth = 10;
+    ctx.beginPath(); ctx.moveTo(sx + 4, sy + 5); ctx.lineTo(ex + 4, ey + 5); ctx.stroke();
+    var cg = ctx.createLinearGradient(sx, sy, ex, ey);
+    cg.addColorStop(0, "#00a6c9"); cg.addColorStop(0.03, "#00a6c9"); cg.addColorStop(0.035, "#fffdf8");
+    cg.addColorStop(0.3, "#ffc247"); cg.addColorStop(0.75, G.state === "cpu" ? "#00a6c9" : "#ef7724"); cg.addColorStop(1, "#0a2f38");
+    ctx.strokeStyle = cg; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function diamond(x, y){
+  ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill();
+}
+
+/* ====================== loop ====================== */
+
+var last = performance.now(), acc = 0, STEP = 1 / 240;
+function frame(now){
+  var dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if(G.state === "moving"){
+    acc += dt;
+    var n = 0;
+    while(acc >= STEP && n < 20){ step(STEP); acc -= STEP; n++ }
+    if(!moving()){ acc = 0; G.state = "settle"; setTimeout(afterShot, 250) }
+  }
+  all().forEach(function(b){ if(b.in && b.t > 0) b.t = Math.max(0, b.t - dt * 5) });
+  if(G.state === "power"){
+    G.pt += dt;
+    G.power = (1 - Math.cos(G.pt * Math.PI * 2 / 1.8)) / 2;
+    powerBar(G.power);
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+/* ====================== HUD and controls ====================== */
+
+function hud(){
+  $("hudLvl").innerHTML = "Level " + G.L + "<small>" + G.P.topic + "</small>";
+  $("scYou").textContent = G.score[0]; $("scCpu").textContent = G.score[1];
+  $("scTo").textContent = "first to " + G.P.target;
+  ["pipYou", "pipCpu"].forEach(function(id, who){
+    var h = ""; for(var i = 0; i < G.P.target; i++) h += '<i class="' + (i < G.score[who] ? "on" : "") + '"></i>';
+    $(id).innerHTML = h;
+  });
+  var t = $("turnTag");
+  if(G.state === "menu" || G.state === "over"){ t.textContent = G.state === "menu" ? "Pick a level" : "Game over"; t.className = "" }
+  else if(G.turn === 0){ t.textContent = "Your shot"; t.className = "" }
+  else { t.textContent = "Chalky's shot"; t.className = "cpu" }
+}
+
+function powerBar(p){
+  $("powFill").style.width = Math.round(p * 100) + "%";
+}
+
+function syncShotbar(){
+  var st = G.state, txt = $("powTxt"), sb = $("shootBtn"), ra = $("reaimBtn");
+  var aimable = st === "aim";
+  $("nudgeL").disabled = !aimable; $("nudgeR").disabled = !aimable;
+  if(st === "aim"){ txt.textContent = "Tap the table to aim"; sb.textContent = "Lock aim"; sb.disabled = false; ra.disabled = true; powerBar(0) }
+  else if(st === "power"){ txt.textContent = "Tap to shoot"; sb.textContent = "Shoot"; sb.disabled = false; ra.disabled = false }
+  else { txt.textContent = st === "cpu" ? "Chalky's go" : (st === "moving" ? "Rolling..." : "Wait a moment"); sb.disabled = true; ra.disabled = true; if(st !== "cpu") powerBar(0) }
+  hud();
+}
+
+function lockAim(){ if(G.state !== "aim") return; G.state = "power"; G.pt = 0; syncShotbar() }
+function release(){ if(G.state !== "power") return; shoot(G.angle, Math.max(0.03, G.power)) }
+
+function toTable(e){
+  var r = cvs.getBoundingClientRect();
+  return {x: (e.clientX - r.left) / r.width * CW - RAIL, y: (e.clientY - r.top) / r.height * CH - RAIL};
+}
+var downAt = null;
+cvs.addEventListener("pointerdown", function(e){
+  if(G.state === "aim"){
+    var p = toTable(e); G.angle = Math.atan2(p.y - G.cue.y, p.x - G.cue.x); downAt = p;
+    try{ cvs.setPointerCapture(e.pointerId) }catch(err){}
+  }
+});
+cvs.addEventListener("pointermove", function(e){
+  if(G.state !== "aim") return;
+  if(e.pointerType === "mouse" || downAt){ var p = toTable(e); G.angle = Math.atan2(p.y - G.cue.y, p.x - G.cue.x) }
+});
+cvs.addEventListener("pointerup", function(){
+  if(G.state === "aim" && downAt){ downAt = null; lockAim(); return }
+  if(G.state === "power") release();
+});
+
+$("shootBtn").addEventListener("click", function(){ if(G.state === "aim") lockAim(); else release() });
+$("reaimBtn").addEventListener("click", function(){ if(G.state === "power"){ G.state = "aim"; syncShotbar() } });
+function nudge(dir, big){ if(G.state === "aim") G.angle += dir * (big ? 2 : 0.35) * Math.PI / 180 }
+$("nudgeL").addEventListener("click", function(){ nudge(-1) });
+$("nudgeR").addEventListener("click", function(){ nudge(1) });
+$("levelsBtn").addEventListener("click", menu);
+
+document.addEventListener("keydown", function(e){
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if(G.state === "aim"){
+    if(e.key === "ArrowLeft" || e.key === "ArrowUp"){ nudge(-1, e.shiftKey); e.preventDefault() }
+    if(e.key === "ArrowRight" || e.key === "ArrowDown"){ nudge(1, e.shiftKey); e.preventDefault() }
+    if(e.key === " " || e.key === "Enter"){ lockAim(); e.preventDefault() }
+  } else if(G.state === "power"){
+    if(e.key === " " || e.key === "Enter"){ release(); e.preventDefault() }
+    if(e.key === "Escape"){ G.state = "aim"; syncShotbar() }
+  }
+});
+
+/* ====================== overlays ====================== */
+
+var ov = $("overlay");
+function showOv(html){ ov.innerHTML = '<div class="card-o">' + html + '</div>'; ov.hidden = false }
+function hideOv(){ ov.hidden = true; ov.innerHTML = "" }
+
+function menu(){
+  G.state = "menu"; syncShotbar();
+  var top = Math.max(1, save.best + 1), h = "";
+  for(var i = 1; i <= top; i++){
+    h += '<button class="lbtn' + (i <= save.best ? " done" : "") + (i === top ? " next" : "") + '" data-l="' + i + '"><b>Level ' + i + '</b><span>' + params(i).topic + '</span></button>';
+  }
+  showOv(
+    '<span class="kick">Linear sequences</span>' +
+    '<h2>Cue the <span class="o">Sequence</span></h2>' +
+    '<p>A potting race against Chalky. Each level asks trickier warm ups, and Chalky gets sharper, the pockets get tighter and chalk blocks appear on the table. It never runs out of levels.</p>' +
+    '<div class="obtns"><button class="btn btn-orange" data-l="' + Math.min(top, save.level || 1) + '">Play level ' + Math.min(top, save.level || 1) + '</button></div>' +
+    '<div class="lgrid">' + h + '</div>'
+  );
+  ov.querySelectorAll("[data-l]").forEach(function(b){ b.addEventListener("click", function(){ startLevel(+b.dataset.l) }) });
+}
+
+function startLevel(L){
+  G.L = L; G.P = params(L); save.level = L; store();
+  makePockets(G.P.pocket); rack();
+  G.score = [0, 0]; G.turn = 0; G.aimTarget = null;
+  hideOv(); hud();
+  say(pick(LINES.start));
+  askQuestion();
+}
+
+function askQuestion(){
+  G.state = "question"; syncShotbar();
+  var q = G.q = makeQuestion(G.L);
+  var h = '<span class="kick">Warm up &middot; ' + TOPICS[q.tier] + ' &middot; no pressure, it doesn\'t change the game</span>' +
+    '<p class="qtext">' + q.q + '</p>' + (q.seq ? '<span class="seq">' + q.seq + '</span>' : "") +
+    '<div class="opts">' + q.opts.map(function(o, i){ return '<button class="opt" data-i="' + i + '">' + o + '</button>' }).join("") + '</div>' +
+    '<div id="afterQ"><button class="quiet" id="showMe">Not sure? Show me</button></div>';
+  showOv(h);
+  ov.querySelectorAll(".opt").forEach(function(b){ b.addEventListener("click", function(){ answer(+b.dataset.i) }) });
+  $("showMe").addEventListener("click", function(){ answer(-1) });
+  var first = ov.querySelector(".opt"); if(first) first.focus({preventScroll: true});
+}
+
+function answer(i){
+  var q = G.q, ok = i === q.ans;
+  ov.querySelectorAll(".opt").forEach(function(b, j){
+    b.disabled = true;
+    if(j === q.ans) b.classList.add("right"); else if(j === i) b.classList.add("picked"); else b.classList.add("faded");
+  });
+  var tn = TOPICS[q.tier];
+  save.asked++; if(ok) save.right++;
+  save.topics[tn] = save.topics[tn] || [0, 0]; save.topics[tn][1]++; if(ok) save.topics[tn][0]++;
+  save.log.push({l: G.L, t: tn, q: q.q.replace(/<[^>]+>/g, "") + (q.seq ? " " + q.seq : ""), a: i < 0 ? "(show me)" : q.opts[i], c: q.opts[q.ans], ok: ok});
+  if(save.log.length > 20) save.log = save.log.slice(-20);
+  store();
+  var head = ok ? pick(["Yes, that's it.", "Spot on.", "Nailed it.", "That's the one."]) : (i < 0 ? "Here's one way to see it." : "Not this time. Here's one way to see it.");
+  $("afterQ").innerHTML = '<div class="why"><b>' + head + '</b> ' + q.why + '</div>' +
+    '<div class="obtns"><button class="btn btn-orange" id="goShot">Take my shot</button></div>';
+  $("goShot").addEventListener("click", function(){ hideOv(); startAim() });
+  $("goShot").focus({preventScroll: true});
+}
+
+function finish(win){
+  G.state = "over"; syncShotbar();
+  if(win){ save.wins++; save.best = Math.max(save.best, G.L); save.level = G.L + 1 } else save.losses++;
+  store();
+  say(pick(win ? LINES.pWin : LINES.cWin));
+  showOv(
+    '<span class="kick">Level ' + G.L + ' &middot; ' + G.P.topic + '</span>' +
+    '<h2>' + (win ? 'You win <span class="o">level ' + G.L + '</span>' : 'Chalky takes <span class="o">this one</span>') + '</h2>' +
+    '<p class="big">' + G.score[0] + ' - ' + G.score[1] + '</p>' +
+    '<p>' + (win ? 'Level ' + (G.L + 1) + ' is open. Chalky has gone quiet and is chalking twice as hard.' : 'Nothing lost. Play it again, or pick any level you have already opened.') + '</p>' +
+    '<div class="obtns">' +
+      (win ? '<button class="btn btn-orange" id="nx">Level ' + (G.L + 1) + '</button><button class="btn btn-quiet" id="again">Play this one again</button>'
+           : '<button class="btn btn-orange" id="again">Rematch</button>') +
+      '<button class="btn btn-quiet" id="lv">Levels</button></div>'
+  );
+  if($("nx")) $("nx").addEventListener("click", function(){ startLevel(G.L + 1) });
+  $("again").addEventListener("click", function(){ startLevel(G.L) });
+  $("lv").addEventListener("click", menu);
+}
+
+/* ====================== send ====================== */
+
+function buildText(){
+  var L = ["CUE THE SEQUENCE (linear sequences pool game)", ""];
+  L.push("Highest level won: " + (save.best || "none yet"));
+  L.push("Games won: " + save.wins + ", games Chalky won: " + save.losses);
+  L.push("Warm ups right: " + save.right + " of " + save.asked);
+  L.push("");
+  L.push("BY TOPIC:");
+  var any = false;
+  TOPICS.forEach(function(t){ if(t && save.topics[t]){ any = true; L.push("  " + t + ": " + save.topics[t][0] + " of " + save.topics[t][1]) } });
+  if(!any) L.push("  none yet");
+  L.push("");
+  L.push("LAST FEW WARM UPS:");
+  var lg = save.log.slice(-8);
+  if(!lg.length) L.push("  none yet");
+  lg.forEach(function(r){
+    L.push("  [Level " + r.l + ", " + r.t + "] " + r.q.replace(/\u00d7/g, "x"));
+    L.push("     picked: " + String(r.a).replace(/\u00d7/g, "x") + (r.ok ? "  (right)" : "  | answer: " + String(r.c).replace(/\u00d7/g, "x")));
+  });
+  return L.join("\n");
+}
+if(window.Base5Send){
+  Base5Send.mount($("sendHost"), {tool: "Cue the Sequence", getText: buildText, filename: "cue-the-sequence"});
+}
+
+/* ====================== start ====================== */
+
+G.P = params(1); makePockets(G.P.pocket); rack(); hud();
+menu();
+requestAnimationFrame(frame);
+
+})();
+</script>
+
+</body>
+</html>
