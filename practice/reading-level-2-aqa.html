@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Level 2 reading: safari sources - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* page scoped: AQA Level 2 reading, heavily scaffolded */
+:root{--w-ink:#0a2f38;--w-teal:#007291;--w-orange:#ef7724;--w-yellow:#f6c343;--w-plum:#7a3b69;--w-cyan:#2bb3c9;--w-paper:#fffdf8;--w-good:#1f7a4d;--w-bad:#c24b3a;--w-soft:#e8f3f6}
+.w-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start;margin:10px 0 30px}
+.w-grid.solo{grid-template-columns:minmax(0,780px);justify-content:center}
+.w-grid.solo .brief{display:none}
+@media (max-width:940px){.w-grid{grid-template-columns:minmax(0,1fr)}}
+
+.brief{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;background:#fff;border:2px solid var(--w-ink);
+  border-radius:16px 20px 14px 18px;box-shadow:5px 6px 0 rgba(10,47,56,.18);padding:0}
+@media (max-width:940px){.brief{position:relative;top:0;max-height:none}}
+.btabs{display:flex;gap:6px;padding:10px 12px 0;flex-wrap:wrap;position:sticky;top:0;background:#fff;z-index:2}
+.btab{font:700 13px "Atkinson Hyperlegible",sans-serif;border:2px solid var(--w-ink);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--w-ink)}
+.btab[aria-pressed="true"]{background:var(--w-ink);color:#fff}
+.bbody{padding:10px 14px 14px}
+.bbody h2{font-family:Archivo,sans-serif;font-stretch:115%;font-weight:850;font-size:18px;margin:6px 0 4px;color:var(--w-ink)}
+.bbody h3{font-family:Archivo,sans-serif;font-weight:800;font-size:15px;margin:12px 0 2px;color:var(--w-ink)}
+.bbody p,.bbody li{font:15px/1.5 "Atkinson Hyperlegible",sans-serif;color:var(--w-ink);margin:6px 0}
+.bbody ul,.bbody ol{margin:6px 0;padding-left:20px}
+.srcnote{font:13px/1.45 "Atkinson Hyperlegible",sans-serif;color:#567;border-top:2px dashed #cfdde1;margin-top:12px;padding-top:8px}
+.webshot{border:2px solid var(--w-ink);border-radius:10px;overflow:hidden;margin:6px 0}
+.urlbar{background:#e9eef0;padding:6px 10px;font:12px "Atkinson Hyperlegible",sans-serif;color:#456;border-bottom:2px solid var(--w-ink)}
+.brand{font-family:Archivo,sans-serif;font-weight:900;font-size:22px;color:var(--w-orange);padding:8px 10px 0}
+.pull{background:var(--w-yellow);padding:8px 10px;font-weight:700;margin:6px 0}
+.pricebar{background:var(--w-yellow);display:inline-block;padding:4px 9px;font-weight:700;margin:4px 0;border-radius:4px}
+.smallprint{font:12px/1.4 "Atkinson Hyperlegible",sans-serif;color:#567}
+.paper2{background:#f7f5ef;border:2px solid #cbc3b4;border-radius:4px;padding:10px 12px;margin:6px 0}
+.paper2 h2{font-family:Cambria,Georgia,serif;font-size:20px}
+.notice{background:#fff8e2;border:2px solid var(--w-ink);border-radius:8px;padding:10px 12px;margin:6px 0}
+
+.wcard{background:var(--w-paper);border:2px solid var(--w-ink);border-radius:18px 14px 20px 16px;padding:20px;box-shadow:6px 7px 0 rgba(10,47,56,.16)}
+.wcard.learn{background:linear-gradient(160deg,#fff6e3,#e9f6f9);transform:rotate(-.4deg)}
+.wcard h2{font-family:Archivo,sans-serif;font-stretch:115%;font-weight:850;font-size:26px;line-height:1.1;margin:2px 0 10px;color:var(--w-ink)}
+.wcard h3{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;margin:18px 0 6px;color:var(--w-ink)}
+.wcard p,.wcard li{font:17px/1.55 "Atkinson Hyperlegible",sans-serif;max-width:64ch;color:var(--w-ink)}
+.wcard ul{padding-left:20px}
+.whead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.pill{display:inline-block;font:700 14px/1 "Atkinson Hyperlegible",sans-serif;padding:7px 11px;border-radius:999px;background:var(--w-ink);color:#fff}
+.pill.o{background:var(--w-orange)}.pill.y{background:var(--w-yellow);color:var(--w-ink)}.pill.t{background:var(--w-teal)}.pill.p{background:var(--w-plum)}
+.prog{height:12px;background:#dfe9ec;border-radius:99px;overflow:hidden;margin:0 0 6px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--w-teal),var(--w-cyan));border-radius:99px;transition:width .3s}
+.progtxt{font:14px "Atkinson Hyperlegible",sans-serif;color:#355;margin:0 0 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.wbtn{font:700 16px/1 "Atkinson Hyperlegible",sans-serif;border:2px solid var(--w-ink);border-radius:12px 10px 13px 11px;padding:11px 15px;background:#fff;color:var(--w-ink);cursor:pointer}
+.wbtn.main{background:var(--w-teal);border-color:var(--w-teal);color:#fff}
+.wbtn.warm{background:var(--w-orange);border-color:var(--w-orange);color:#fff}
+.wbtn.help{border-style:dashed;background:#fffaf0}
+.wbtn.sm{font-size:14px;padding:8px 12px}
+.wbtn:disabled{opacity:.45;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-top:18px}
+.actions .l,.actions .r{display:flex;gap:8px;flex-wrap:wrap}
+.helprow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px;align-items:center}
+
+textarea,input[type=text]{width:100%;box-sizing:border-box;font:17px/1.6 "Atkinson Hyperlegible",sans-serif;padding:10px 12px;
+  border:2px solid #b9cdd3;border-radius:10px;background:#fff;color:var(--w-ink)}
+textarea{resize:vertical;min-height:120px}
+textarea.big{min-height:230px}
+label.lab{display:block;font:700 15px "Atkinson Hyperlegible",sans-serif;color:#355;margin:12px 0 4px}
+textarea:focus-visible,input:focus-visible,.wbtn:focus-visible,.chip2:focus-visible,.optb:focus-visible,.tfb:focus-visible,.sdot:focus-visible,.smb:focus-visible,.btab:focus-visible{outline:3px solid var(--w-orange);outline-offset:2px}
+.chips2{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 10px}
+.chip2{font:15px "Atkinson Hyperlegible",sans-serif;border:2px dashed #9dbac2;background:#fff;border-radius:999px;padding:7px 13px;cursor:pointer;color:var(--w-ink);text-align:left}
+.chip2:hover{background:var(--w-soft)}
+.chip2[aria-pressed="true"]{background:var(--w-teal);color:#fff;border-style:solid;border-color:var(--w-teal)}
+
+.tip{display:flex;gap:10px;align-items:flex-start;margin:10px 0}
+.tip i{flex:none;min-width:28px;height:28px;padding:0 5px;border-radius:999px;background:var(--w-teal);color:#fff;font:800 15px/28px "Atkinson Hyperlegible",sans-serif;text-align:center;font-style:normal}
+.tip p{margin:2px 0}
+
+.markmap{display:flex;gap:6px;margin:10px 0 4px;height:46px;border:2px solid var(--w-ink);border-radius:10px;overflow:hidden;background:#fff}
+.markmap div{display:flex;align-items:center;justify-content:center;font:700 13px "Atkinson Hyperlegible",sans-serif;text-align:center;line-height:1.1;color:#fff}
+.mm1{background:var(--w-teal)}.mm2{background:var(--w-orange)}.mm3{background:var(--w-plum)}
+.maplab{font:14px "Atkinson Hyperlegible",sans-serif;color:#355;margin:0 0 14px}
+
+.ladder{margin:12px 0 6px}
+.band{border:2px solid var(--w-ink);border-radius:12px;padding:10px 13px;margin:0 0 8px;background:#fff}
+.band.top{background:#e7f6ee;box-shadow:4px 5px 0 rgba(31,122,77,.25)}
+.band .bh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.band .bm{font-family:Archivo,sans-serif;font-weight:850;font-size:17px;background:var(--w-ink);color:#fff;border-radius:999px;padding:3px 10px}
+.band.top .bm{background:var(--w-good)}
+.band .bt{font:700 16px "Atkinson Hyperlegible",sans-serif}
+.band ul{margin:4px 0 0;padding-left:20px}
+.band li{font-size:15.5px;line-height:1.45}
+.jump{border-left:4px solid var(--w-orange);background:#fff6e9;padding:8px 12px;margin:0 0 10px;font:15.5px/1.5 "Atkinson Hyperlegible",sans-serif;border-radius:0 10px 10px 0}
+
+/* question cards */
+.q{border:2px solid var(--w-ink);border-radius:16px;background:#fff;padding:16px 18px;margin:14px 0;box-shadow:4px 5px 0 rgba(10,47,56,.13)}
+.q.done{border-color:var(--w-good)}
+.qtop{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qn{font-family:Archivo,sans-serif;font-weight:900;font-size:20px}
+.qmk{font:700 13px "Atkinson Hyperlegible",sans-serif;background:var(--w-ink);color:#fff;border-radius:999px;padding:4px 10px}
+.qsrc{font:700 13px "Atkinson Hyperlegible",sans-serif;background:var(--w-soft);border:2px solid var(--w-teal);color:var(--w-ink);border-radius:999px;padding:3px 10px}
+.qq{font:700 17px/1.5 "Atkinson Hyperlegible",sans-serif;margin:4px 0 8px}
+.asks{background:#f3f8f6;border:2px dashed #9dbac2;border-radius:12px;padding:9px 12px;margin:0 0 10px;font:15.5px/1.5 "Atkinson Hyperlegible",sans-serif}
+.asks b{font-family:Archivo,sans-serif;font-weight:850;display:block;color:var(--w-teal)}
+.opts2{display:grid;gap:8px;margin:8px 0}
+.optb{font:16px/1.4 "Atkinson Hyperlegible",sans-serif;text-align:left;border:2px solid #b9cdd3;background:#fff;border-radius:12px;padding:10px 13px;cursor:pointer;color:var(--w-ink)}
+.optb:hover{background:var(--w-soft)}
+.optb.right{border-color:var(--w-good);background:#e7f6ee}
+.optb.wrong{border-color:var(--w-bad);background:#fdecea}
+.optb:disabled{cursor:default}
+.fb{border:2px dashed var(--w-cyan);background:#eef8fb;border-radius:12px;padding:10px 13px;margin:8px 0 0;font:16px/1.5 "Atkinson Hyperlegible",sans-serif}
+.fb b{font-family:Archivo,sans-serif;font-weight:850}
+.fb.good{border-color:var(--w-good);background:#e7f6ee}
+.fb.miss{border-color:var(--w-orange);background:#fff6e9}
+.tfrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:2px dashed #dfe9ec;padding:8px 0}
+.tfrow span.s{flex:1 1 220px;font:16px/1.45 "Atkinson Hyperlegible",sans-serif}
+.tfb{font:700 14px "Atkinson Hyperlegible",sans-serif;border:2px solid #b9cdd3;background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;min-width:70px}
+.tfb[aria-pressed="true"]{background:var(--w-teal);color:#fff;border-color:var(--w-teal)}
+.tfrow.right .tfb[aria-pressed="true"]{background:var(--w-good);border-color:var(--w-good)}
+.tfrow.wrong .tfb[aria-pressed="true"]{background:var(--w-bad);border-color:var(--w-bad)}
+.tfwhy{flex:1 1 100%;font:14.5px/1.5 "Atkinson Hyperlegible",sans-serif;color:#456;margin:2px 0 0}
+.fieldrow{display:flex;gap:8px;align-items:center;margin:0 0 8px}
+.fieldrow b{font-family:Archivo,sans-serif;font-weight:850;min-width:22px}
+.fieldrow input{flex:1}
+.fieldrow.hit input{border-color:var(--w-good);background:#f2fbf6}
+.selfmark{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 0;border-top:2px dashed #dfe9ec;padding-top:10px}
+.selfmark span.l{font:700 15px "Atkinson Hyperlegible",sans-serif}
+.smb{font:700 15px "Atkinson Hyperlegible",sans-serif;border:2px solid var(--w-ink);background:#fff;border-radius:10px;padding:7px 13px;cursor:pointer;min-width:42px}
+.smb[aria-pressed="true"]{background:var(--w-good);color:#fff;border-color:var(--w-good)}
+.score{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:700 16px "Atkinson Hyperlegible",sans-serif;margin:0 0 10px}
+.score .pip{background:var(--w-ink);color:#fff;border-radius:999px;padding:5px 12px}
+.model{border:2px solid var(--w-ink);border-radius:14px;background:#fff;overflow:hidden;margin:10px 0}
+.mrow{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);border-bottom:2px dashed #cfdde1}
+.mrow:last-child{border-bottom:0}
+@media (max-width:760px){.mrow{grid-template-columns:1fr}}
+.mtext{padding:12px 14px;font:16.5px/1.6 "Atkinson Hyperlegible",sans-serif;white-space:pre-wrap}
+.mnote{padding:12px 14px;background:var(--w-soft);border-left:2px dashed #cfdde1;font:15px/1.5 "Atkinson Hyperlegible",sans-serif}
+@media (max-width:760px){.mnote{border-left:0;border-top:2px dashed #cfdde1}}
+.mnote b{font-family:Archivo,sans-serif;font-weight:850;display:block;margin-bottom:2px;color:var(--w-teal)}
+.mhead{background:var(--w-ink);color:#fff;padding:9px 14px;font:700 15px "Atkinson Hyperlegible",sans-serif;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cgrid{width:100%;border-collapse:collapse;margin:10px 0}
+.cgrid th,.cgrid td{border:2px solid #b9cdd3;padding:8px 10px;font:15.5px/1.45 "Atkinson Hyperlegible",sans-serif;text-align:left;vertical-align:top}
+.cgrid th{background:var(--w-soft);font-weight:800}
+.cgrid td input{border-width:1px;padding:6px 8px;font-size:15.5px}
+
+.stepgrid{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.sdot{font:13px "Atkinson Hyperlegible",sans-serif;border:2px solid #b9cdd3;background:#fff;border-radius:999px;padding:5px 10px;cursor:pointer;color:#355}
+.sdot.on{background:var(--w-ink);color:#fff;border-color:var(--w-ink)}
+.sdot.did{background:#e7f6ee;border-color:var(--w-good)}
+.small{font:14.5px/1.5 "Atkinson Hyperlegible",sans-serif;color:#456}
+.hr{border:0;height:3px;background:repeating-linear-gradient(90deg,#cfdde1 0 18px,transparent 18px 28px);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THREE SOURCES, <span class="accent">ONE SAFARI</span></h1>
+    <div class="line">
+      <span class="chip">AQA Level 2 reading</span>
+      <p>The reading paper taken slowly, with every question explained: what it is really asking, how the marks are given, and what a full answer looks like.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="w-grid" id="grid">
+    <aside class="brief" id="brief"></aside>
+    <main>
+      <div class="prog"><i id="progBar" style="width:0%"></i></div>
+      <p class="progtxt"><span id="progTxt">Step 1</span><span id="progSide"></span></p>
+      <section class="wcard" id="pane" aria-live="polite"></section>
+      <div class="stepgrid" id="dots"></div>
+    </main>
+  </div>
+
+  <a class="backlink" href="/practice/#english-gcse">Back to practice</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "base5.english.readingL2aqa.v1";
+var P = "\u00a3";
+var TICK = "\u2713";
+
+/* ============================================================
+   AQA Functional Skills English Level 2, Component 1 Reading.
+   Specimen 8725R. Three sources, 14 questions, 30 marks,
+   ten marks per section. A dictionary is allowed.
+   Band wording is the mark scheme in plain words. The model
+   answers are written for Base 5.
+   ============================================================ */
+
+/* ---------- the sources ---------- */
+
+var SOURCES = {
+  A: {name:"Source A", what:"a webpage from the Kandu Travel website", html:
+    '<div class="webshot"><div class="urlbar">https://www.kandutravel.co.uk/safari-and-beach</div>' +
+    '<div class="brand">Kandu Travel</div>' +
+    '<div class="bbody" style="padding:8px 12px">' +
+    '<p class="pull">You wake up in your luxurious tent, as the sun rises over the Masai Mara Game Reserve.</p>' +
+    '<p>Stepping out into the morning sunshine, you see elephants and giraffes grazing. After a delicious breakfast, you head out on safari across the African wilderness.</p>' +
+    '<p>You have your binoculars and camera ready as the expert guides chauffeur you in luxury four-wheel-drive vehicles to the best places to experience, up-close, the abundant wildlife - including black rhino, ostriches, cheetahs, leopards, hyenas, elands, vultures, martial eagles ...</p>' +
+    '<p><span class="pricebar">Luxury Safari and Beach Tour, Kenya</span><br><span class="pricebar">10 nights from ' + P + '3995 per person</span></p>' +
+    '<p><b>You visit a Masai village, meeting the people and learning about their unique way of life.</b></p>' +
+    '<p>You spend your final few days in this extraordinary continent relaxing and winding-down in a luxury villa on the Kenyan coast at Kinondo Kwetu. You take to the crystal-clear water for a little sailing, kayaking or even some deep-sea fishing. You horse-ride along the beach or just chill and enjoy the Indian Ocean views.</p>' +
+    '<p>We at Kandu Travel are world-class experts in exclusive getaways. For more than 30 years, our experienced and professional team have tailor-made high-class holidays for discerning clients like yourself. Join us now for the trip of a lifetime!</p>' +
+    '<p><b>Price includes:</b></p><ul><li>Flights from London Heathrow (regional airport departures are available)</li><li>Transfers as detailed</li><li>Accommodation and meals specified in the itinerary</li><li>All activities and park fees whilst on safari</li><li>Airport departure taxes</li></ul>' +
+    '<p class="smallprint">Prices from ' + P + '3995 per person, based on two adults and two children travelling. Single supplementary fee applies. Daily departures. Travel insurance and visa fees not included. Prices are subject to availability and may vary. Club carriage fees payable to the airline. Kandu Travel reserves the right to amend the route or offer similar accommodation to that specified.</p>' +
+    '</div></div>'},
+  B: {name:"Source B", what:"an article from a national newspaper", html:
+    '<div class="paper2"><h2>Responsible Travel</h2>' +
+    '<h3>What Responsible Travel does.</h3>' +
+    '<p>Responsible Travel aren\'t travel agents. They don\'t sell holidays. Instead, they advise eco-conscious and ethically-minded tourists about which holidays they should buy. They carry out detailed checks on the holidays provided by the world\'s best tour operators and approve only those holidays which meet their stringent criteria.</p>' +
+    '<h3>What Responsible Travel expects.</h3>' +
+    '<p>Responsible Travel\'s requirements are that, as far as possible, tour operators must employ local people. Local guides must always accompany visitors in local communities. Tourists must be given advice on how to minimise their impact on the environment. For example, they should use re-usable water bottles and shopping bags. They should be encouraged to travel on public transport, alongside the locals. Tour operators are strongly encouraged to support local projects, both by donating money and by giving their staff opportunities to volunteer. These opportunities benefit both the local community and the tour operators.</p>' +
+    '<h3>The needs of local people.</h3>' +
+    '<p>Tim Williamson, Customer Director of Responsible Travel, said:</p>' +
+    '<p>"Ten per cent of the world\'s population depends on tourism and many of them live in developing countries, where tourism is growing fast. We at Responsible Travel consider the needs of local people, creating better places for them to live, which are also better places for our travellers to visit."</p>' +
+    '<h3>The role of local guides.</h3>' +
+    '<p>The role of local guides is key in this new kind of tourism. They work with tourists to ensure that they understand the culture before they meet local people. They help locals and visitors to communicate with each other, giving travellers an insight into the life and culture of local people that they would not be able to get otherwise. Guides are experts in the best places to go and can take travellers off the tourist track.</p>' +
+    '<h3>Thinking about cost...</h3>' +
+    '<p>Some approved holidays can be expensive. For example, a whale-watching week in Hawaii costs ' + P + '2459 and a 15 day trip to Antarctica costs ' + P + '7885. (It\'s a curious rule of travelling that the coldest places in the world are usually the most expensive to visit.) On the other hand, eight days in Indonesia start at a more modest ' + P + '464.</p>' +
+    '</div><p class="srcnote">Source B is from the AQA specimen insert 8725R and is credited there to Responsible Travel.</p>'},
+  C: {name:"Source C", what:"a notice given to all visitors to the Masai Mara Game Reserve when they arrive", html:
+    '<div class="notice"><h2>STAY SAFE ON SAFARI</h2>' +
+    '<p>A safari is an adventure in which you will meet, and learn a lot about, African wildlife. But wild animals can also be very dangerous.</p>' +
+    '<p>These rules are designed to keep you and the animals you will see safe.</p>' +
+    '<ol><li><b>Always stay in the vehicle.</b> Wild animals do not associate vehicles with humans or food, so you are safe if you stay inside.</li>' +
+    '<li><b>Listen to your guide.</b> They understand animal behaviour and will notice if an animal is becoming agitated. Not every situation is safe and you should follow your guide\'s instructions immediately.</li>' +
+    '<li><b>Keep your voices down.</b> Don\'t use a flash on your camera.</li>' +
+    '<li><b>Protect yourself by wearing mosquito repellent.</b> The mosquito carries diseases which kill more people in Africa than any other creature. A good sunscreen and hat are essential. Always wear closed shoes to protect your feet from spiders, ticks and scorpions.</li>' +
+    '<li><b>Don\'t carry food</b> as this may attract animals.</li>' +
+    '<li>If you do find yourself close to a wild animal, <b>don\'t run.</b></li></ol>' +
+    '<p>Thomas Mbeke<br>Chief Guide and Park Ranger</p></div>'}
+};
+
+/* ---------- band ladders ---------- */
+
+var BAND6 = [
+  {m:"3", t:"Full marks", top:true, li:[
+    "You name the persuasive techniques the writer uses",
+    "You back each one with a short quotation from the source",
+    "You say what it is meant to make the reader think or feel"]},
+  {m:"2", t:"Nearly", li:[
+    "You pick out relevant bits of the text",
+    "There is an attempt to explain the effect, but it is thin"]},
+  {m:"1", t:"Fragments", li:["Points that do not join up, or quotations with nothing said about them"]},
+  {m:"0", t:"Nothing to credit", li:["Nothing relevant written"]}
+];
+
+var BAND14 = [
+  {m:"5-6", t:"Top band", top:true, li:[
+    "A range of similarities and differences, each explained in detail",
+    "You cover what the sources say and how they say it",
+    "You mention things like level of detail, tone, formality, possible bias and what is implied",
+    "You point at textual features and word choices, with short quotations"]},
+  {m:"3-4", t:"Middle band", li:[
+    "Either one similarity or difference explained in detail",
+    "Or several set out clearly but not developed",
+    "Some reference to detail, tone, formality or features"]},
+  {m:"1-2", t:"Lower band", li:["Fragmented points, and it is not clear whether they are similarities or differences"]},
+  {m:"0", t:"Nothing to credit", li:["Nothing relevant written"]}
+];
+
+/* ---------- question type teaching ---------- */
+
+var TYPEQ = [
+  {id:"t1", tag:"Spotting the type", q:"\"The word 'abundant' means A dangerous B endangered C exciting D plentiful.\" What kind of question is this, and what should you do first?",
+   opts:["A vocabulary question: read the whole sentence it came from, then try each option in its place",
+         "A retrieval question: find the word and copy the sentence",
+         "An inference question: work out what the writer thinks about the word"],
+   ans:0,
+   why:"Vocabulary questions give you the sentence for a reason. Put each option back into the sentence and see which one still makes sense. A dictionary is allowed on the reading paper, so you can look it up as well."},
+  {id:"t2", tag:"Spotting the type", q:"\"List three ways in which local communities benefit. [3 marks]\" How many separate points should you write?",
+   opts:["One long paragraph covering everything","Three separate points, one per line","As many as you can fit in the space"],
+   ans:1,
+   why:"One mark per clear point, up to three. Three short lines make the three points easy to see. A long paragraph can hide them, and a marker cannot award what they cannot find."},
+  {id:"t3", tag:"Spotting the type", q:"\"The webpage implies that...\" What does implies mean here?",
+   opts:["The text says it outright","The text does not say it in so many words, but it is the impression given",
+         "The text is trying to trick you"],
+   ans:1,
+   why:"Implies means the writer has not said it directly. You work it out from word choices and what the text is trying to do. Watch for options that are true of the world but not suggested by this text."},
+  {id:"t4", tag:"Fact or opinion", q:"Which of these from Source A is a fact?",
+   opts:["The tents are luxurious","Elephants and giraffes live on the Masai Mara","Kenya is the trip of a lifetime"],
+   ans:1,
+   why:"A fact can be checked. An opinion is somebody's judgement: luxurious, delicious, extraordinary and trip of a lifetime are all judgements. Adverts mix both, and this question is checking you can tell them apart."},
+  {id:"t5", tag:"Timing", q:"The paper is one hour for 30 marks, ten per section. Roughly how long should the 6 mark comparison get?",
+   opts:["Two or three minutes","About fifteen minutes, including planning it","Whatever is left at the end, even if that is two minutes"],
+   ans:1,
+   why:"Six marks is a fifth of the paper. A sensible split is about fifteen minutes on question 14 and forty five on everything else. Doing the short questions fast is what buys you that time."}
+];
+
+/* ---------- questions ---------- */
+
+var QS = {
+
+q1: {n:"1", marks:1, src:"A", type:"text",
+  q:"In which African country is the Masai Mara Game Reserve?",
+  asks:"Straight retrieval. The answer is printed in the source, so this is one mark for finding it.",
+  how:"Scan for a place name. One word is a full answer here. You do not need a sentence.",
+  accept:["kenya"], answer:"Kenya",
+  why:"It is in the orange banner: Luxury Safari and Beach Tour, Kenya. Also in the last section, the Kenyan coast."},
+
+q2: {n:"2", marks:1, src:"A", type:"mc",
+  q:"Source A states: '...the abundant wildlife - including black rhino, ostriches...'. The word 'abundant' means:",
+  asks:"Vocabulary in context. The paper says you may use a dictionary for this one.",
+  how:"Put each option back into the sentence and read it. Which one still makes sense next to that long list of animals?",
+  opts:["dangerous","endangered","exciting","plentiful"], ans:3,
+  why:"Abundant means plentiful, there is a lot of it. The clue is the list that follows: rhino, ostriches, cheetahs, leopards, hyenas, elands, vultures, eagles, and then three dots to suggest even more."},
+
+q3: {n:"3", marks:1, src:"A", type:"mc",
+  q:"The webpage implies that:",
+  asks:"Inference. The answer is not written down anywhere, so you work it out from the impression the page gives.",
+  how:"Rule out the ones that the page does not actually suggest, even if they sound reasonable.",
+  opts:["only families of four can go on this safari","London Heathrow is preferred to regional airports",
+        "breakfast in bed is provided at an additional cost","this holiday experience is very special"],
+  ans:3,
+  why:"Luxurious, exclusive, world-class, trip of a lifetime, and a price of " + P + "3995: everything on the page is working to make the holiday feel special. The family of four is only how the price is worked out, regional departures are offered, and nothing says breakfast costs extra."},
+
+q4: {n:"4", marks:2, src:"A", type:"tf",
+  q:"Using the information in Source A, decide whether each statement is true or false.",
+  asks:"Two marks for all four right, one mark for three right. Nothing for two or fewer, so it is worth checking each one against the text.",
+  how:"Find the words in the source for each statement. Two of these are deliberately close to something the page says, but not the same thing.",
+  rows:[
+    {t:"Kandu Travel have been in business for more than 30 years", a:true, why:"True: for more than 30 years, our experienced and professional team have tailor-made high-class holidays."},
+    {t:"Elephants and giraffes live on the Masai Mara Game Reserve", a:true, why:"True: stepping out into the morning sunshine, you see elephants and giraffes grazing."},
+    {t:"You cannot start this holiday at the weekend", a:false, why:"False: the small print says daily departures, which includes weekends."},
+    {t:"You can horse-ride on the Masai Mara Game Reserve", a:false, why:"False: the horse-riding is on the beach on the Kenyan coast, not on the reserve. This is the trap: the activity is real, the place is wrong."}
+  ]},
+
+q5: {n:"5", marks:2, src:"A", type:"factop",
+  q:"The writer presents both facts and opinions. Identify two facts and two opinions about the Safari and Beach Tour.",
+  asks:"One mark for two facts, one mark for two opinions. Four boxes, two marks.",
+  how:"A fact can be checked by somebody else. An opinion is a judgement: if two people could disagree about it, it is an opinion. Short answers are fine.",
+  factExamples:["Kenya is in Africa","It is sunny in Kenya","Elephants and giraffes live on the Masai Mara","The tour is 10 nights","Flights leave from London Heathrow","The price starts at " + P + "3995 per person"],
+  opExamples:["The tents are luxurious","The breakfast is delicious","Africa is an extraordinary continent","It is the trip of a lifetime","The water is crystal-clear","Kandu Travel are world-class experts"],
+  sortItems:[
+    {t:"10 nights from " + P + "3995 per person", a:"f", why:"Fact: a price you can check."},
+    {t:"You wake up in your luxurious tent", a:"o", why:"Opinion: luxurious is a judgement. Somebody else might call it a tent."},
+    {t:"Flights from London Heathrow", a:"f", why:"Fact: it is in the price includes list."},
+    {t:"After a delicious breakfast", a:"o", why:"Opinion: delicious is the writer's view, and it is there to sell the holiday."},
+    {t:"Kandu Travel have been going for more than 30 years", a:"f", why:"Fact: a length of time, and checkable."},
+    {t:"Join us now for the trip of a lifetime", a:"o", why:"Opinion, and a very big one. No one can check whether it is the trip of your lifetime."}
+  ]},
+
+q6: {n:"6", marks:3, src:"A", type:"open3",
+  q:"Explain how the writer of Source A uses words and language techniques to persuade people to go on the Safari and Beach Tour. Give examples from Source A.",
+  asks:"Three marks, and they come from a formula: name the technique, quote it, say what it does to the reader.",
+  how:"Three short points, each with a quotation, is a full answer. You do not need an essay.",
+  chips:[
+    {t:"Repetition of luxury", n:"luxurious tent, luxury four-wheel-drive vehicles, Luxury Safari, luxury villa. Saying it four times fixes the idea of luxury in the reader's head."},
+    {t:"A long list of animals", n:"black rhino, ostriches, cheetahs, leopards, hyenas, elands, vultures, martial eagles ... The three dots suggest there are even more, so the reader feels they will see a huge amount."},
+    {t:"Direct address: you", n:"You wake up, you see, you head out. It puts the reader inside the holiday, as though it is already happening to them."},
+    {t:"Expert claims", n:"world-class experts, experienced and professional team, expert guides. This builds trust in the company so the price feels safer."},
+    {t:"Flattering the reader", n:"discerning clients like yourself. It tells the reader they have good taste, which is hard to argue with."},
+    {t:"A command at the end", n:"Join us now for the trip of a lifetime! An imperative plus an exclamation mark, pushing the reader to act."}
+  ],
+  frames:["The writer uses ... , for example '...' , which makes the reader feel ...",
+          "By repeating '...' the writer suggests that ...",
+          "The phrase '...' is designed to make the reader think ..."],
+  bands:BAND6,
+  model:[
+    {t:"The writer repeats the idea of luxury throughout: a 'luxurious tent', 'luxury four-wheel-drive vehicles' and a 'luxury villa'.",
+     n:"Technique named (repetition), then quoted. Two short quotations are plenty."},
+    {t:"This makes the reader picture a holiday that is expensive and special, so the price of " + P + "3995 feels like it is worth paying.",
+     n:"The effect on the reader. This is the sentence most students miss, and it is where the third mark lives."},
+    {t:"The long list of animals, 'black rhino, ostriches, cheetahs, leopards, hyenas...', followed by three dots, suggests there is even more wildlife than the writer has room to name.",
+     n:"A second technique with its own quotation and its own effect."},
+    {t:"The writer also flatters the reader by calling them one of the 'discerning clients like yourself', which makes the reader feel they have good taste in choosing this company.",
+     n:"A third point. Three techniques, three quotations, three effects: a full three marks."}
+  ]},
+
+q7: {n:"7", marks:1, src:"B", type:"mc",
+  q:"Source B states: '...approve only those holidays which meet their stringent criteria'. The word 'stringent' means:",
+  asks:"Vocabulary in context again, and again a dictionary is allowed.",
+  how:"Read the sentence before it: they carry out detailed checks. What kind of criteria would go with detailed checks?",
+  opts:["ethical","numerous","strict","limited"], ans:2,
+  why:"Stringent means strict. The paragraph is about detailed checks and approving only some holidays, which tells you the criteria are hard to meet. Ethical is tempting because the article is about ethical travel, but it is not what the word means."},
+
+q8: {n:"8", marks:1, src:"B", type:"mc",
+  q:"According to Source B, Responsible Travel:",
+  asks:"Inference, but anchored to something on the page. Only one option can be supported by the text.",
+  how:"Test each option against the article. Three of them are things the article never says.",
+  opts:["approves some holidays which are expensive","cares more about local people than tourists",
+        "is less efficient than travel agents","teaches tourists the local language."],
+  ans:0,
+  why:"The last section says some approved holidays can be expensive, and gives " + P + "7885 for Antarctica. The article says local guides help people communicate, not that Responsible Travel teaches languages, and it never compares itself to travel agents for efficiency or puts locals above tourists: it says better places to live are also better places to visit."},
+
+q9: {n:"9", marks:2, src:"B", type:"tf",
+  q:"Using the information in Source B, decide whether each statement is true or false.",
+  asks:"Two marks for four right, one mark for three right.",
+  how:"Two of these swap a detail around. Go back and check the exact figures and who does what.",
+  rows:[
+    {t:"A whale-watching holiday in Antarctica costs " + P + "7885", a:false, why:"False: the whale-watching week is in Hawaii at " + P + "2459. Antarctica is a 15 day trip at " + P + "7885. Both numbers are real, but they have been swapped."},
+    {t:"Local guides accompany visitors to local communities", a:true, why:"True: local guides must always accompany visitors in local communities."},
+    {t:"Visitors need to take their own re-usable water bottles", a:false, why:"False: tourists must be given advice that they should use re-usable bottles. The article does not say visitors have to bring their own."},
+    {t:"Ten per cent of the world's population depends on tourism", a:true, why:"True: it is in the quotation from Tim Williamson."}
+  ]},
+
+q10: {n:"10", marks:3, src:"B", type:"list",
+  q:"List three ways in which local communities benefit from holidays approved by Responsible Travel.",
+  asks:"One mark per clear point, up to three. This is a retrieval question with a sorting job attached.",
+  how:"The benefits are spread across two sections of the article. Write three separate lines, and keep each one short so the marker can see three points.",
+  points:[
+    {accept:["employ","job","work","local people are employed","employment"], name:"Tour operators must employ local people, so there are jobs"},
+    {accept:["environment","impact","plastic","bottle","bag","litter","public transport"], name:"Less damage to the local environment: re-usable bottles and bags, travelling on public transport"},
+    {accept:["project","support"], name:"Local projects are supported by tour operators"},
+    {accept:["money","donat","fund"], name:"Money is donated to local projects"},
+    {accept:["volunteer","staff help"], name:"Tour operator staff get the chance to volunteer on local projects"},
+    {accept:["better place","live","communicate","understand the culture","insight"], name:"Better places for local people to live, and visitors who understand the local culture"}
+  ]},
+
+q11: {n:"11", marks:3, src:"B", type:"list",
+  q:"Source B gives details on the role of local guides. List three skills a local guide needs for this role.",
+  asks:"One mark per valid skill, up to three. Skills are things a person can do, so start each answer with a doing word if you can.",
+  how:"Read the local guides section and turn each sentence into a skill. 'They help locals and visitors to communicate' becomes 'good communication skills'.",
+  points:[
+    {accept:["communicat","talk","speak","explain to"], name:"Good communication skills"},
+    {accept:["friendly","open","welcoming","people"], name:"Being friendly and open with people"},
+    {accept:["know","area","local knowledge","best places","tourist track"], name:"Knowing the local area, including places off the tourist track"},
+    {accept:["culture","tradition","custom"], name:"Understanding their own culture, and being able to explain it"},
+    {accept:["translat","language"], name:"Being able to translate between visitors and local people"},
+    {accept:["expert","advise","guide"], name:"Expert knowledge of the best places to take travellers"}
+  ]},
+
+q12: {n:"12", marks:1, src:"C", type:"mc",
+  q:"Source C states: '...will notice if an animal is becoming agitated'. The word 'agitated' means:",
+  asks:"The last vocabulary question. Same method: read it in place.",
+  how:"The sentence before says guides understand animal behaviour, and the one after says not every situation is safe. So the word describes an animal that is becoming a problem.",
+  opts:["confused","playful","tired","unsettled"], ans:3,
+  why:"Agitated means unsettled or worked up. The surrounding sentences are about safety, so tired and playful do not fit, and confused is about understanding rather than mood."},
+
+q13: {n:"13", marks:3, src:"C", type:"list",
+  q:"From reading Source C, list three things you learn about the animals you might meet on safari.",
+  asks:"One mark per valid point, up to three. The trick is that the source is a list of rules for people, not a list of facts about animals.",
+  how:"Take each rule and ask: what does this tell me about the animals? 'Don't carry food' tells you that animals are attracted to food.",
+  points:[
+    {accept:["vehicle","car","associate","inside"], name:"Animals do not connect vehicles with humans or food, so people inside a vehicle are safe"},
+    {accept:["dangerous","attack","harm","kill"], name:"Wild animals can be dangerous to a person on foot"},
+    {accept:["agitated","behaviour","tell","notice","hard to"], name:"It is not easy to tell when an animal is becoming agitated: it takes a guide who understands their behaviour"},
+    {accept:["noise","loud","voice","flash","startle","frighten","scare"], name:"Animals are startled by loud voices and camera flashes"},
+    {accept:["food","attract","smell"], name:"Animals are attracted to food that people carry"},
+    {accept:["run","chase","prey"], name:"An animal may chase a person who runs, as though they were prey"},
+    {accept:["mosquito","disease","spider","tick","scorpion"], name:"Some of the dangerous creatures are small: mosquitoes carry diseases, and there are spiders, ticks and scorpions on the ground"}
+  ]},
+
+q14: {n:"14", marks:6, src:"AC", type:"open6",
+  q:"Compare Source A and Source C in terms of what they say and how the material is conveyed. You may refer to the level of detail, presentation and language, formality, possible bias and how the writers come across.",
+  asks:"Six marks, a fifth of the paper. The word compare is the whole job: every point should mention both sources.",
+  how:"Four or five paragraphs, each one making a point about both sources with a short quotation from each. Use whereas, however and in contrast to keep it comparative.",
+  grid:[
+    {k:"What it is for", a:"Selling a holiday: it wants your money", c:"Keeping you alive: it wants you to follow rules"},
+    {k:"Who wrote it", a:"A travel company, so it is biased towards the good bits", c:"Thomas Mbeke, Chief Guide and Park Ranger, who is there and knows the animals"},
+    {k:"How it looks", a:"Photographs, colour banners, a price, bullet points of what is included", c:"A plain numbered list with a heading in capitals"},
+    {k:"Language", a:"Persuasive: luxurious, extraordinary, trip of a lifetime", c:"Commands: always stay, listen, don't run"},
+    {k:"What it says about animals", a:"Wildlife is a treat to see up close", c:"Wild animals can also be very dangerous"},
+    {k:"How formal", a:"Warm and chatty, speaking to you directly", c:"Formal and direct, but also speaking to you directly"}
+  ],
+  frames:["Both sources ... , however Source A ... whereas Source C ...",
+          "Source A is written to ... , while the purpose of Source C is to ...",
+          "In Source A the writer describes ... , but Source C warns that ...",
+          "Both writers address the reader as 'you', although Source A uses it to ... and Source C uses it to ..."],
+  bands:BAND14,
+  model:[
+    {t:"Both sources are about the same safari, but they want completely different things from the reader. Source A is selling a holiday, describing 'the abundant wildlife' you will see up close, whereas Source C is a set of safety rules that warns 'wild animals can also be very dangerous'.",
+     n:"Opens with a comparison of purpose, with a quotation from each source. The word whereas does the comparing."},
+    {t:"The difference shows in the language. Source A uses persuasive, flattering words such as 'luxurious', 'extraordinary' and 'the trip of a lifetime', while Source C uses short commands: 'Always stay in the vehicle', 'don't run'.",
+     n:"A second point, again covering both sources, with quotations. Naming the imperatives in Source C is the kind of detail the top band asks for."},
+    {t:"They are presented differently too. Source A is a colourful webpage with photographs, headings and a price in a banner, designed to be browsed. Source C is a plain numbered list with a heading in capitals, so a visitor can take it in quickly on arrival.",
+     n:"Presentation, which the question names. Saying why each choice suits its reader is what moves it from listing to explaining."},
+    {t:"The writers come across differently as well. Kandu Travel write as a company selling to you, calling you one of their 'discerning clients', so there is clear bias: nothing negative is mentioned anywhere. Thomas Mbeke signs as 'Chief Guide and Park Ranger', which gives him authority, and he has nothing to sell.",
+     n:"Bias and how the writers come across, both named in the question. Noticing what Source A leaves out is a strong point."},
+    {t:"What they have in common is that both speak directly to the reader as 'you'. In Source A this is used to place the reader inside the holiday, while in Source C it is used to make each instruction feel personal, so it is harder to ignore.",
+     n:"A similarity, explained for both sources. The top band asks for a range of similarities and differences, so at least one similarity is worth having."}
+  ]}
+};
+
+/* ============================================================
+   STEPS
+   ============================================================ */
+
+var STEPS = [
+  {id:"L1", kind:"learn", src:0, title:"What this paper is, and where the marks are", body:function(){
+    return '<p>AQA Functional Skills English Level 2, the reading paper. One hour, three sources, fourteen questions, thirty marks. A dictionary is allowed in this one.</p>' +
+    '<div class="markmap"><div class="mm1" style="flex:10">Section A<br>Source A, 10 marks</div><div class="mm2" style="flex:10">Section B<br>Source B, 10 marks</div><div class="mm3" style="flex:10">Section C<br>Source C, 10 marks</div></div>' +
+    '<p class="maplab">Ten marks a section, so roughly twenty minutes each. Section C has only three questions because one of them is worth six.</p>' +
+    '<div class="tip"><i>1</i><p><b>Everything you need is in the sources.</b> Nothing here is testing what you already know about safaris. If you cannot point at the words that gave you the answer, it is probably wrong.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>Marks in brackets tell you the size of the answer.</b> One mark is a word or a line. Three marks is three separate points. Six marks needs paragraphs.</p></div>' +
+    '<div class="tip"><i>3</i><p>This page marks the multiple choice, true or false and short answers for you. The three long answers you mark yourself against the real bands, and Jay sees everything at the end.</p></div>';
+  }},
+
+  {id:"L2", kind:"learn", src:0, title:"The question types, and what each one wants", body:function(){
+    return '<p>The same handful of question types come up every time. Knowing which one you are looking at tells you the shape of the answer before you start.</p>' +
+    '<div class="tip"><i>1</i><p><b>Find it.</b> The answer is in the source. One or two words is enough.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>What does this word mean?</b> Read the whole sentence, try each option in the gap, and use the dictionary if you want it.</p></div>' +
+    '<div class="tip"><i>3</i><p><b>What does the text imply?</b> Not written down anywhere. Work it out from the words the writer chose and what the text is trying to do.</p></div>' +
+    '<div class="tip"><i>4</i><p><b>True or false.</b> Two marks for all four, one for three. Check each against the exact words, because one or two will have a detail swapped.</p></div>' +
+    '<div class="tip"><i>5</i><p><b>Fact or opinion.</b> A fact can be checked. An opinion is a judgement somebody could disagree with.</p></div>' +
+    '<div class="tip"><i>6</i><p><b>List three.</b> One mark per point. Three short separate lines, never one long paragraph.</p></div>' +
+    '<div class="tip"><i>7</i><p><b>Explain how the writer...</b> Name the technique, quote it, say what it does to the reader. All three parts, every time.</p></div>' +
+    '<div class="tip"><i>8</i><p><b>Compare two sources.</b> Every point mentions both. Whereas and however are the words that hold it together.</p></div>';
+  }},
+
+  {id:"Q0", kind:"quiz", src:0, title:"Know the type", sub:"Five quick ones before you start the paper.", items:TYPEQ},
+
+  {id:"LA", kind:"learn", src:"A", title:"Section A: read Source A first", body:function(){
+    return '<p>Source A is in the panel beside this, and it stays there through Section A. Before the questions, give it one quick read with three things in mind.</p>' +
+    '<div class="tip"><i>1</i><p><b>Who made this, and what do they want?</b> It is a travel company\'s webpage. Everything on it is chosen to sell a holiday.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>What is fact and what is opinion?</b> Prices, dates and places are facts. Luxurious, delicious and extraordinary are opinions.</p></div>' +
+    '<div class="tip"><i>3</i><p><b>Read the small print.</b> Exam questions love it. Daily departures is down there, and so is the fact that the price assumes two adults and two children.</p></div>' +
+    '<p class="small">Six questions on this source, ten marks: one, one, one, two, two, three.</p>';
+  }},
+
+  {id:"A1", kind:"qs", src:"A", title:"Questions 1 to 4", sub:"The short ones. Five marks between them.", qs:["q1","q2","q3","q4"]},
+  {id:"A2", kind:"qs", src:"A", title:"Question 5: fact and opinion", sub:"Two marks, with a warm up first.", qs:["q5"]},
+  {id:"A3", kind:"qs", src:"A", title:"Question 6: how the writer persuades", sub:"Three marks. Name it, quote it, explain it.", qs:["q6"]},
+
+  {id:"LB", kind:"learn", src:"B", title:"Section B: read Source B first", body:function(){
+    return '<p>Source B is a newspaper article about Responsible Travel, and it has subheadings. Those subheadings are a map: when a question asks about local guides, go to the section called <b>The role of local guides</b>.</p>' +
+    '<div class="tip"><i>1</i><p><b>Read the subheadings first.</b> Four sections: what they do, what they expect, the needs of local people, the role of local guides, and a note about cost.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>Watch the numbers.</b> Three prices and one percentage, and the true or false question swaps two of them around.</p></div>' +
+    '<div class="tip"><i>3</i><p><b>This source is information, not persuasion.</b> There is a quotation from a named person, which is a feature of newspaper writing worth noticing.</p></div>' +
+    '<p class="small">Five questions, ten marks: one, one, two, three, three.</p>';
+  }},
+
+  {id:"B1", kind:"qs", src:"B", title:"Questions 7 to 9", sub:"Four marks between them.", qs:["q7","q8","q9"]},
+  {id:"B2", kind:"qs", src:"B", title:"Questions 10 and 11", sub:"Two list questions, three marks each. Six of the thirty marks are here.", qs:["q10","q11"]},
+
+  {id:"LC", kind:"learn", src:"C", title:"Section C: read Source C first", body:function(){
+    return '<p>Source C is a notice handed to visitors when they arrive. It is short, and every line is doing a job.</p>' +
+    '<div class="tip"><i>1</i><p><b>It is written as rules, not information.</b> Each one is a command: always stay, listen, keep your voices down, don\'t run.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>The rules hide facts about animals.</b> Question 13 asks what you learn about the animals, and the source never says it directly. Turn each rule round: don\'t carry food, because animals are attracted to it.</p></div>' +
+    '<div class="tip"><i>3</i><p><b>Notice who signed it.</b> Thomas Mbeke, Chief Guide and Park Ranger. That matters for the comparison question at the end.</p></div>' +
+    '<p class="small">Three questions, ten marks: one, three, and then the six mark comparison.</p>';
+  }},
+
+  {id:"C1", kind:"qs", src:"C", title:"Questions 12 and 13", sub:"Four marks. Question 13 is the one that needs turning round.", qs:["q12","q13"]},
+
+  {id:"LD", kind:"learn", src:"AC", title:"Question 14: how six marks are given", body:function(){
+    return '<p>The last question is worth a fifth of the paper, and it is the one most people rush. Both sources are in the panel, on tabs.</p>' +
+    '<h3>What the bands ask for</h3>' + ladder(BAND14) +
+    '<div class="jump"><b>The jump from the middle band to the top:</b> a range of points, each explained rather than listed, and both sources in every point. A page about Source A followed by a page about Source C is not a comparison, however good each half is.</div>' +
+    '<h3>The words that do the work</h3>' +
+    '<p>whereas &middot; however &middot; in contrast &middot; while &middot; both sources &middot; on the other hand &middot; similarly</p>' +
+    '<p class="small">On the next screen there is a grid to fill in first. Five filled rows is a plan for five paragraphs.</p>';
+  }},
+
+  {id:"C2", kind:"qs", src:"AC", title:"Question 14: compare Source A and Source C", sub:"Six marks. Grid first, then write.", qs:["q14"]},
+
+  {id:"F1", kind:"finish", src:0, title:"How it went", sub:"Your marks, and the whole lot off to Jay if you want."}
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+var S;
+function fresh(){ return {v:1, idx:0, ans:{}, got:{}, quiz:{}, sort:{}, chips:{}, grid:{}, help:{}} }
+function load(){ try{ var r = localStorage.getItem(KEY); if(r){ var o = JSON.parse(r); if(o && o.v === 1) return o } }catch(e){} return null }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+S = load() || fresh();
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] }) }
+function words(t){ t = String(t || "").trim(); return t ? t.split(/\s+/).length : 0 }
+function norm(t){ return String(t || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim() }
+function ladder(bands){
+  return '<div class="ladder">' + bands.map(function(b){
+    return '<div class="band' + (b.top ? " top" : "") + '"><div class="bh"><span class="bm">' + esc(b.m) + '</span><span class="bt">' + esc(b.t) + '</span></div><ul>' +
+      b.li.map(function(l){ return "<li>" + esc(l) + "</li>" }).join("") + "</ul></div>";
+  }).join("") + "</div>";
+}
+function totalMarks(){ var t = 0; for(var k in QS) t += QS[k].marks; return t }
+function gotTotal(){ var t = 0; for(var k in S.got) t += S.got[k] || 0; return t }
+function answered(id){ return S.got[id] != null }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+var grid = document.getElementById("grid"), pane = document.getElementById("pane"), briefEl = document.getElementById("brief");
+var briefTab = "A";
+
+function renderBrief(src){
+  if(!src){ briefEl.innerHTML = ""; return }
+  var keys = src === "AC" ? ["A","C"] : [src];
+  if(keys.indexOf(briefTab) < 0) briefTab = keys[0];
+  var h = keys.length > 1 ? '<div class="btabs">' + keys.map(function(k){
+    return '<button class="btab" data-k="' + k + '" aria-pressed="' + (k === briefTab) + '">Source ' + k + "</button>";
+  }).join("") + "</div>" : "";
+  var s = SOURCES[briefTab];
+  h += '<div class="bbody"><h2>' + esc(s.name) + '</h2><p class="small">' + esc(s.what) + "</p>" + s.html + "</div>";
+  briefEl.innerHTML = h;
+  briefEl.querySelectorAll(".btab").forEach(function(b){
+    b.addEventListener("click", function(){ briefTab = b.dataset.k; renderBrief(src) });
+  });
+}
+
+function progress(){
+  var step = STEPS[S.idx];
+  document.getElementById("progBar").style.width = Math.round((S.idx + 1) / STEPS.length * 100) + "%";
+  document.getElementById("progTxt").textContent = "Step " + (S.idx + 1) + " of " + STEPS.length;
+  document.getElementById("progSide").textContent = step.src && step.src !== 0 ? ("Source " + String(step.src).split("").join(" and ")) : "";
+  var h = "";
+  STEPS.forEach(function(st, i){
+    var did = st.kind === "qs" ? st.qs.every(answered) : (st.kind === "quiz" ? st.items.every(function(q){ return S.quiz[q.id] != null }) : false);
+    h += '<button class="sdot' + (i === S.idx ? " on" : (did ? " did" : "")) + '" data-i="' + i + '" aria-label="Step ' + (i + 1) + '">' + (i + 1) + "</button>";
+  });
+  var dots = document.getElementById("dots");
+  dots.innerHTML = h;
+  dots.querySelectorAll(".sdot").forEach(function(b){ b.addEventListener("click", function(){ go(+b.dataset.i) }) });
+}
+
+function go(i){ S.idx = Math.max(0, Math.min(STEPS.length - 1, i)); save(); render(); window.scrollTo({top: 0, behavior: "smooth"}) }
+
+function actions(){
+  return '<div class="actions"><div class="l">' + (S.idx > 0 ? '<button class="wbtn" id="back">Back</button>' : "") + '</div>' +
+    '<div class="r">' + (S.idx < STEPS.length - 1 ? '<button class="wbtn main" id="next">Next</button>' : "") + "</div></div>";
+}
+function wireActions(){
+  var b = document.getElementById("back"), n = document.getElementById("next");
+  if(b) b.addEventListener("click", function(){ go(S.idx - 1) });
+  if(n) n.addEventListener("click", function(){ go(S.idx + 1) });
+}
+
+function render(){
+  var st = STEPS[S.idx];
+  grid.className = "w-grid" + (st.src ? "" : " solo");
+  renderBrief(st.src);
+  var head = '<div class="whead"><span class="pill' + (st.src === "A" ? " t" : (st.src === "B" ? " o" : (st.src === "C" ? " p" : ""))) + '">' +
+    (st.src === 0 ? "The paper" : "Source " + String(st.src).split("").join(" + ")) + "</span>" +
+    (st.kind === "learn" ? '<span class="pill y">Read</span>' : "") +
+    (st.kind === "quiz" ? '<span class="pill y">Have a go</span>' : "") +
+    (st.kind === "qs" ? '<span class="pill y">The paper itself</span>' : "") + "</div>" +
+    "<h2>" + esc(st.title) + "</h2>" + (st.sub ? '<p class="small">' + esc(st.sub) + "</p>" : "");
+
+  if(st.kind === "learn"){ pane.className = "wcard learn"; pane.innerHTML = head + st.body() + actions() }
+  else if(st.kind === "quiz") renderQuiz(st, head);
+  else if(st.kind === "qs") renderQs(st, head);
+  else if(st.kind === "finish") renderFinish(st, head);
+  progress();
+  wireActions();
+}
+
+function renderQuiz(st, head){
+  pane.className = "wcard";
+  var h = head;
+  st.items.forEach(function(q){
+    var picked = S.quiz[q.id];
+    h += '<hr class="hr"><p><span class="pill y">' + esc(q.tag) + "</span></p><p><b>" + esc(q.q) + "</b></p>" +
+      '<div class="opts2">' + q.opts.map(function(o, i){
+        return '<button class="optb' + (picked != null ? (i === q.ans ? " right" : (i === picked ? " wrong" : "")) : "") + '" data-q="' + q.id + '" data-i="' + i + '"' + (picked != null ? " disabled" : "") + ">" + esc(o) + "</button>";
+      }).join("") + "</div>";
+    if(picked != null) h += '<div class="fb"><b>' + (picked === q.ans ? "Yes." : "Not this one.") + "</b> " + esc(q.why) + "</div>";
+  });
+  pane.innerHTML = h + actions();
+  pane.querySelectorAll(".optb").forEach(function(b){
+    b.addEventListener("click", function(){ S.quiz[b.dataset.q] = +b.dataset.i; save(); render() });
+  });
+}
+
+/* ---------- question rendering ---------- */
+
+function qHead(id, q){
+  return '<div class="qtop"><span class="qn">Question ' + q.n + '</span>' +
+    '<span class="qmk">' + q.marks + " mark" + (q.marks > 1 ? "s" : "") + "</span>" +
+    '<span class="qsrc">Source ' + String(q.src).split("").join(" + ") + "</span>" +
+    (answered(id) ? '<span class="qmk" style="background:#1f7a4d">' + S.got[id] + " of " + q.marks + "</span>" : "") + "</div>" +
+    '<p class="qq">' + esc(q.q) + "</p>" +
+    '<div class="asks"><b>What it is really asking</b>' + esc(q.asks) + "</div>" +
+    '<div class="asks" style="background:#fff6e9;border-color:#f0c48a"><b>How to get the marks</b>' + esc(q.how) + "</div>";
+}
+
+function renderQs(st, head){
+  pane.className = "wcard";
+  pane.innerHTML = head +
+    '<div class="score"><span class="pip">' + gotTotal() + " of " + totalMarks() + " so far</span><span class=\"small\">Answers stay saved on this device.</span></div>" +
+    st.qs.map(function(id){ return '<div class="q' + (answered(id) ? " done" : "") + '" id="card_' + id + '"></div>' }).join("") +
+    actions();
+  st.qs.forEach(function(id){ drawQ(id) });
+}
+
+function drawQ(id){
+  var q = QS[id], card = document.getElementById("card_" + id);
+  if(!card) return;
+  var h = qHead(id, q);
+  var done = answered(id);
+
+  if(q.type === "mc"){
+    var picked = S.ans[id];
+    h += '<div class="opts2">' + q.opts.map(function(o, i){
+      return '<button class="optb' + (done ? (i === q.ans ? " right" : (i === picked ? " wrong" : "")) : "") + '" data-i="' + i + '"' + (done ? " disabled" : "") + ">" + esc(o) + "</button>";
+    }).join("") + "</div>";
+    if(done) h += '<div class="fb ' + (S.got[id] ? "good" : "miss") + '"><b>' + (S.got[id] ? "Right." : "The answer is: " + esc(q.opts[q.ans]) + ".") + "</b> " + esc(q.why) + "</div>";
+  }
+
+  if(q.type === "text"){
+    h += '<input type="text" id="in_' + id + '" value="' + esc(S.ans[id] || "") + '" placeholder="Your answer"' + (done ? " disabled" : "") + ">" +
+      (done ? "" : '<div class="helprow"><button class="wbtn sm main" data-act="check">Check it</button></div>');
+    if(done) h += '<div class="fb ' + (S.got[id] ? "good" : "miss") + '"><b>' + (S.got[id] ? "Right." : "The answer is " + esc(q.answer) + ".") + "</b> " + esc(q.why) + "</div>";
+  }
+
+  if(q.type === "tf"){
+    var picks = S.ans[id] || {};
+    h += q.rows.map(function(r, i){
+      var got = picks[i], cls = done ? (got === r.a ? " right" : " wrong") : "";
+      return '<div class="tfrow' + cls + '"><span class="s">' + esc(r.t) + "</span>" +
+        '<button class="tfb" data-r="' + i + '" data-v="1" aria-pressed="' + (got === true) + '"' + (done ? " disabled" : "") + ">True</button>" +
+        '<button class="tfb" data-r="' + i + '" data-v="0" aria-pressed="' + (got === false) + '"' + (done ? " disabled" : "") + ">False</button>" +
+        (done ? '<p class="tfwhy">' + esc(r.why) + "</p>" : "") + "</div>";
+    }).join("");
+    if(!done) h += '<div class="helprow"><button class="wbtn sm main" data-act="check">Check them</button></div>';
+    else {
+      var right = q.rows.filter(function(r, i){ return picks[i] === r.a }).length;
+      h += '<div class="fb ' + (S.got[id] === q.marks ? "good" : "miss") + '"><b>' + right + ' of 4 correct, so ' + S.got[id] + " mark" + (S.got[id] === 1 ? "" : "s") + '.</b> Two marks need all four, one mark needs three.</div>';
+    }
+  }
+
+  if(q.type === "factop"){
+    var sorted = q.sortItems.every(function(x, i){ return S.sort[id + i] != null });
+    h += "<h3>Warm up: which of these is which?</h3>" +
+      q.sortItems.map(function(x, i){
+        var got = S.sort[id + i];
+        return '<div class="tfrow' + (got ? (got === x.a ? " right" : " wrong") : "") + '"><span class="s">' + esc(x.t) + "</span>" +
+          '<button class="tfb" data-s="' + i + '" data-v="f" aria-pressed="' + (got === "f") + '">Fact</button>' +
+          '<button class="tfb" data-s="' + i + '" data-v="o" aria-pressed="' + (got === "o") + '">Opinion</button>' +
+          (got ? '<p class="tfwhy">' + esc(x.why) + "</p>" : "") + "</div>";
+      }).join("");
+    h += "<h3>Now the question</h3>";
+    var vals = S.ans[id] || ["","","",""];
+    ["Fact 1","Fact 2","Opinion 1","Opinion 2"].forEach(function(lab, i){
+      h += '<div class="fieldrow"><b>' + lab + '</b><input type="text" data-f="' + i + '" value="' + esc(vals[i] || "") + '"' + (done ? " disabled" : "") + "></div>";
+    });
+    if(!done) h += '<div class="helprow"><button class="wbtn sm main" data-act="reveal">Check mine against the mark scheme</button>' +
+      (sorted ? "" : '<span class="small">The warm up above is worth doing first.</span>') + "</div>";
+    if(S.help["rev" + id] || done){
+      h += '<div class="fb"><b>What the mark scheme accepts.</b> Facts, for example: ' + q.factExamples.map(esc).join("; ") +
+        ". Opinions, for example: " + q.opExamples.map(esc).join("; ") + ".</div>";
+      h += selfMark(id, q, "One mark if both your facts are facts, one mark if both your opinions are opinions.");
+    }
+  }
+
+  if(q.type === "list"){
+    var lv = S.ans[id] || ["","",""];
+    h += [0,1,2].map(function(i){
+      var hit = done && matchPoint(q, lv[i], lv, i);
+      return '<div class="fieldrow' + (hit ? " hit" : "") + '"><b>' + (i + 1) + '</b><input type="text" data-f="' + i + '" value="' + esc(lv[i] || "") + '" placeholder="Point ' + (i + 1) + '"' + (done ? " disabled" : "") + "></div>";
+    }).join("");
+    if(!done) h += '<div class="helprow"><button class="wbtn sm main" data-act="check">Check my three</button>' +
+      '<button class="wbtn sm help" data-act="hint">Where to look</button></div>' +
+      (S.help["h" + id] ? '<div class="fb"><b>Where to look.</b> ' + esc(q.how) + "</div>" : "");
+    if(done){
+      h += '<div class="fb ' + (S.got[id] === q.marks ? "good" : "miss") + '"><b>' + S.got[id] + " of " + q.marks + " matched automatically.</b> The mark scheme accepts any three of these:</div><ul>" +
+        q.points.map(function(p){ return "<li>" + esc(p.name) + "</li>" }).join("") + "</ul>" +
+        '<p class="small">If you made a fair point in different words that the checker missed, you can change the mark yourself below. Jay sees both numbers.</p>' +
+        selfMark(id, q, "One mark per clear point, up to three.");
+    }
+  }
+
+  if(q.type === "open3" || q.type === "open6"){
+    if(q.chips){
+      h += "<h3>First, what can you spot?</h3><p class=\"small\">Tap the techniques you can find in the source. Tapping one shows you where it is.</p><div class=\"chips2\">" +
+        q.chips.map(function(c, i){ return '<button class="chip2" data-c="' + i + '" aria-pressed="' + (!!S.chips[id + i]) + '">' + esc(c.t) + "</button>" }).join("") + "</div>";
+      q.chips.forEach(function(c, i){ if(S.chips[id + i]) h += '<div class="fb"><b>' + esc(c.t) + ".</b> " + esc(c.n) + "</div>" });
+    }
+    if(q.grid){
+      var nudged = !!S.help["g" + id];
+      h += "<h3>First, fill in the grid</h3><p class=\"small\">Each filled row is a paragraph waiting to happen. Notes are enough, and empty rows are fine.</p>" +
+        '<div class="helprow"><button class="wbtn sm help" data-act="nudge">' + (nudged ? "Nudges are showing" : "I would like a nudge in each row") + "</button></div>" +
+        '<table class="cgrid"><tr><th style="width:22%">Think about</th><th>Source A</th><th>Source C</th></tr>' +
+        q.grid.map(function(g, i){
+          var gv = S.grid[id + i] || ["",""];
+          return "<tr><th>" + esc(g.k) + '</th><td><input type="text" data-g="' + i + '" data-c="0" value="' + esc(gv[0]) + '" placeholder="Your note">' +
+            (nudged ? '<p class="small" style="margin:4px 0 0">' + esc(g.a) + "</p>" : "") + "</td>" +
+            '<td><input type="text" data-g="' + i + '" data-c="1" value="' + esc(gv[1]) + '" placeholder="Your note">' +
+            (nudged ? '<p class="small" style="margin:4px 0 0">' + esc(g.c) + "</p>" : "") + "</td></tr>";
+        }).join("") + "</table>";
+    }
+    h += "<h3>Sentence frames</h3><div class=\"chips2\">" + q.frames.map(function(f){ return '<button class="chip2" data-fr="' + esc(f) + '">' + esc(f) + "</button>" }).join("") + "</div>" +
+      '<label class="lab" for="ta_' + id + '">Your answer</label>' +
+      '<textarea class="' + (q.type === "open6" ? "big" : "") + '" id="ta_' + id + '" placeholder="Take your time. It saves as you type.">' + esc(S.ans[id] || "") + "</textarea>" +
+      '<p class="small" id="wc_' + id + '">Words: ' + words(S.ans[id]) + "</p>";
+    if(!S.help["m" + id]){
+      h += '<div class="helprow"><button class="wbtn sm main" data-act="model">I have written mine: show the model</button></div>';
+    } else {
+      h += "<h3>The bands for this question</h3>" + ladder(q.bands) +
+        '<div class="model"><div class="mhead"><span>A model answer</span><span>Why it earns marks</span></div>' +
+        q.model.map(function(m){ return '<div class="mrow"><div class="mtext">' + esc(m.t) + '</div><div class="mnote"><b>What this is doing</b>' + esc(m.n) + "</div></div>" }).join("") + "</div>" +
+        selfMark(id, q, "Read your answer next to the bands, then give yourself a mark. Being honest here is what makes it useful.");
+    }
+  }
+
+  card.innerHTML = h;
+  card.className = "q" + (answered(id) ? " done" : "");
+  wireQ(id, q, card);
+}
+
+function selfMark(id, q, note){
+  var h = '<div class="selfmark"><span class="l">Your mark:</span>';
+  for(var i = 0; i <= q.marks; i++) h += '<button class="smb" data-sm="' + i + '" aria-pressed="' + (S.got[id] === i) + '">' + i + "</button>";
+  return h + '<span class="small" style="flex:1 1 100%">' + esc(note) + "</span></div>";
+}
+
+function matchPoint(q, val, all, idx){
+  if(!norm(val)) return false;
+  var v = norm(val);
+  for(var i = 0; i < q.points.length; i++){
+    var p = q.points[i];
+    if(p.accept.some(function(k){ return v.indexOf(norm(k)) > -1 })){
+      /* only count this point once: the earliest field claiming it wins */
+      for(var j = 0; j < idx; j++){
+        var w = norm(all[j] || "");
+        if(w && p.accept.some(function(k){ return w.indexOf(norm(k)) > -1 })) return false;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+function wireQ(id, q, card){
+  card.querySelectorAll(".optb").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(answered(id)) return;
+      S.ans[id] = +b.dataset.i;
+      S.got[id] = (+b.dataset.i === q.ans) ? q.marks : 0;
+      save(); render();
+    });
+  });
+  card.querySelectorAll("input[type=text]").forEach(function(inp){
+    inp.addEventListener("input", function(){
+      if(inp.dataset.f != null){
+        var arr = S.ans[id] || (q.type === "factop" ? ["","","",""] : ["","",""]);
+        arr[+inp.dataset.f] = inp.value; S.ans[id] = arr; save();
+      } else if(inp.dataset.g != null){
+        var key = id + inp.dataset.g, gv = S.grid[key] || ["",""];
+        gv[+inp.dataset.c] = inp.value; S.grid[key] = gv; save();
+      } else { S.ans[id] = inp.value; save() }
+    });
+  });
+  card.querySelectorAll(".tfb[data-r]").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(answered(id)) return;
+      var picks = S.ans[id] || {};
+      picks[+b.dataset.r] = b.dataset.v === "1";
+      S.ans[id] = picks; save(); drawQ(id);
+    });
+  });
+  card.querySelectorAll(".tfb[data-s]").forEach(function(b){
+    b.addEventListener("click", function(){ S.sort[id + b.dataset.s] = b.dataset.v; save(); drawQ(id) });
+  });
+  card.querySelectorAll(".chip2[data-c]").forEach(function(b){
+    b.addEventListener("click", function(){ var k = id + b.dataset.c; S.chips[k] = !S.chips[k]; save(); drawQ(id) });
+  });
+  card.querySelectorAll(".chip2[data-fr]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var ta = document.getElementById("ta_" + id);
+      if(!ta) return;
+      var v = ta.value;
+      ta.value = v + (v && !/\n$/.test(v) ? "\n\n" : "") + b.dataset.fr;
+      ta.dispatchEvent(new Event("input"));
+      ta.focus();
+    });
+  });
+  var ta = card.querySelector("textarea");
+  if(ta) ta.addEventListener("input", function(){
+    S.ans[id] = ta.value; save();
+    var wc = document.getElementById("wc_" + id);
+    if(wc) wc.textContent = "Words: " + words(ta.value);
+  });
+  card.querySelectorAll(".smb").forEach(function(b){
+    b.addEventListener("click", function(){ S.got[id] = +b.dataset.sm; save(); render() });
+  });
+  card.querySelectorAll("[data-act]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var a = b.dataset.act;
+      if(a === "check"){
+        if(q.type === "text"){
+          var v = norm(document.getElementById("in_" + id).value);
+          S.got[id] = q.accept.some(function(k){ return v.indexOf(norm(k)) > -1 }) ? q.marks : 0;
+        }
+        if(q.type === "tf"){
+          var picks = S.ans[id] || {};
+          if(Object.keys(picks).length < q.rows.length){ window.alert("Give an answer for all four first."); return }
+          var right = q.rows.filter(function(r, i){ return picks[i] === r.a }).length;
+          S.got[id] = right === 4 ? 2 : (right === 3 ? 1 : 0);
+        }
+        if(q.type === "list"){
+          var arr = S.ans[id] || ["","",""];
+          var n = 0;
+          [0,1,2].forEach(function(i){ if(matchPoint(q, arr[i], arr, i)) n++ });
+          S.got[id] = n;
+        }
+        save(); render();
+      }
+      if(a === "hint"){ S.help["h" + id] = 1; save(); drawQ(id) }
+      if(a === "nudge"){ S.help["g" + id] = 1; save(); drawQ(id) }
+      if(a === "reveal"){ S.help["rev" + id] = 1; save(); drawQ(id) }
+      if(a === "model"){ S.help["m" + id] = 1; save(); drawQ(id) }
+    });
+  });
+}
+
+/* ---------- finish ---------- */
+
+function renderFinish(st, head){
+  pane.className = "wcard";
+  var secs = [["Section A", ["q1","q2","q3","q4","q5","q6"]], ["Section B", ["q7","q8","q9","q10","q11"]], ["Section C", ["q12","q13","q14"]]];
+  var h = head + '<div class="score"><span class="pip">' + gotTotal() + " of " + totalMarks() + "</span></div><ul>";
+  secs.forEach(function(s){
+    var got = s[1].reduce(function(a, id){ return a + (S.got[id] || 0) }, 0);
+    var max = s[1].reduce(function(a, id){ return a + QS[id].marks }, 0);
+    var left = s[1].filter(function(id){ return !answered(id) }).length;
+    h += "<li><b>" + s[0] + ":</b> " + got + " of " + max + (left ? " (" + left + " not answered yet)" : "") + "</li>";
+  });
+  h += "</ul>" +
+    '<p>The three long answers are the ones you marked yourself, so treat the total as a guide rather than a grade. Jay sees every answer and both numbers.</p>' +
+    '<div id="sendHost"></div>' +
+    '<hr class="hr"><h3>If you want to go again</h3><p class="small">Starting fresh clears every answer on this device. Send it first if you want to keep it.</p>' +
+    '<div class="helprow"><button class="wbtn help" id="reset">Start the paper again</button></div>';
+  pane.innerHTML = h + actions();
+  document.getElementById("reset").addEventListener("click", function(){
+    if(window.confirm("Clear every answer and start again?")){ S = fresh(); save(); go(0) }
+  });
+  if(window.Base5Send) Base5Send.mount(document.getElementById("sendHost"), {tool: "Level 2 reading: three sources", getText: buildText, filename: "reading-level-2"});
+}
+
+function answerText(id){
+  var q = QS[id], a = S.ans[id];
+  if(a == null) return "(not answered)";
+  if(q.type === "mc") return q.opts[a];
+  if(q.type === "text") return String(a);
+  if(q.type === "tf") return q.rows.map(function(r, i){ return "    " + r.t + ": " + (a[i] == null ? "-" : (a[i] ? "True" : "False")) + (a[i] === r.a ? "" : "  (answer: " + (r.a ? "True" : "False") + ")") }).join("\n");
+  if(q.type === "factop") return ["Fact 1: " + (a[0] || "-"), "    Fact 2: " + (a[1] || "-"), "    Opinion 1: " + (a[2] || "-"), "    Opinion 2: " + (a[3] || "-")].join("\n");
+  if(q.type === "list") return a.map(function(x, i){ return "    " + (i + 1) + ". " + (x || "-") }).join("\n");
+  return "\n" + String(a);
+}
+
+function buildText(){
+  var L = ["AQA FUNCTIONAL SKILLS ENGLISH LEVEL 2 - READING (practice)", "Specimen paper 8725R: Kandu Travel, Responsible Travel, Stay Safe on Safari", "",
+    "TOTAL: " + gotTotal() + " of " + totalMarks(), ""];
+  ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12","q13","q14"].forEach(function(id){
+    var q = QS[id];
+    var self = (q.type === "open3" || q.type === "open6" || q.type === "factop") ? " (marked by me)" : (q.type === "list" ? " (checked here, adjustable)" : " (checked here)");
+    L.push("Q" + q.n + " [" + (S.got[id] == null ? "-" : S.got[id]) + " of " + q.marks + "]" + self);
+    L.push("  " + q.q);
+    L.push("  " + answerText(id));
+    L.push("");
+  });
+  var qr = 0, qt = 0;
+  TYPEQ.forEach(function(q){ qt++; if(S.quiz[q.id] === q.ans) qr++ });
+  L.push("Know the type warm up: " + qr + " of " + qt + " right first time");
+  return L.join("\n");
+}
+
+render();
+
+})();
+</script>
+
+</body>
+</html>
