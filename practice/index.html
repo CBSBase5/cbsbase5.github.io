@@ -11,42 +11,87 @@
 <style>
 /* Practice hub only. Everything else lives in style.css */
 
-/* a quiet label for a small group of cards inside a shelf */
+/* filter chips: one row under the subject tabs */
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 18px}
+.fchip{
+  font-family:var(--display);
+  font-variation-settings:"wdth" 106,"wght" 800;
+  font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--white);color:var(--ink);
+  border:2px solid var(--ink);border-radius:var(--r-pill);
+  padding:8px 14px;cursor:pointer;
+  box-shadow:2px 3px 0 rgba(10,47,56,.18);
+  transition:transform .14s ease,background .14s ease,box-shadow .14s ease;
+}
+.fchip:hover{transform:translateY(-2px) rotate(-1deg)}
+.fchip[aria-pressed="true"]{background:var(--ink);color:var(--paper);box-shadow:3px 4px 0 rgba(10,47,56,.3)}
+.fchip .n{opacity:.55;margin-left:7px;font-variation-settings:"wght" 600}
+
+/* one activity, one row */
+.rows{display:flex;flex-direction:column;gap:8px;margin:0 0 6px}
+.row{
+  display:grid;grid-template-columns:128px minmax(0,1fr) minmax(0,220px);
+  gap:16px;align-items:center;
+  background:var(--white);
+  border:var(--border) solid var(--ink);
+  border-radius:17px 13px 18px 12px;
+  padding:12px 16px;
+  text-decoration:none;color:var(--ink);
+  box-shadow:3px 4px 0 rgba(10,47,56,.16);
+  transition:transform .14s ease,box-shadow .14s ease;
+}
+.row:hover{transform:translate(-2px,-2px);box-shadow:6px 7px 0 var(--ink)}
+.row:active{transform:translate(1px,2px);box-shadow:1px 1px 0 var(--ink)}
+.row[hidden]{display:none}
+
+.rtype{
+  font-family:var(--display);
+  font-variation-settings:"wdth" 102,"wght" 800;
+  font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  text-align:center;border:2px solid var(--ink);border-radius:var(--r-pill);
+  padding:6px 8px;
+}
+.t-paper{background:var(--teal);color:var(--paper)}
+.t-drill{background:var(--yellow)}
+.t-expl{background:var(--bright)}
+.t-make{background:var(--orange)}
+.t-game{background:var(--ink);color:var(--yellow)}
+.t-book{background:var(--plum);color:var(--paper)}
+
+.rmain b{
+  display:block;
+  font-family:var(--display);
+  font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:1.1rem;line-height:1.15;
+}
+.rdesc{display:block;font-size:.9rem;color:var(--body-tint);margin-top:3px}
+.rmeta{font-size:.76rem;font-weight:700;color:var(--body-tint);text-align:right;line-height:1.35}
+
+@media (max-width:820px){
+  .row{grid-template-columns:1fr;gap:6px;padding:14px 16px}
+  .rtype{justify-self:start;padding:6px 12px}
+  .rmeta{text-align:left}
+}
+
+/* a quiet label for a small group of rows inside a shelf */
 .grouplab{
   font-family:var(--display);
   font-variation-settings:"wdth" 110,"wght" 800;
-  font-size:.78rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--body-tint);
   margin:18px 0 8px;
 }
-.grouplab:first-of-type{margin-top:6px}
-
-/* one line of the same facts on every card: what it covers, how long, where it ends up */
-.card .meta{
-  margin-top:10px;
-  padding-top:8px;
-  border-top:1.5px solid currentColor;
-  font-size:.82rem;
-  font-weight:700;
-  opacity:.75;
-}
+.shelf{margin:0 0 26px}
+.shelf[hidden],.grouplab[hidden],.rows[hidden]{display:none}
 
 /* a quiet line where a shelf has nothing on it yet */
-.shelfnote{
-  font-size:.94rem;
-  color:var(--body-tint);
-  margin:2px 0 18px;
-}
+.shelfnote{font-size:.94rem;color:var(--body-tint);margin:2px 0 18px}
 
-/* the suggestion box at the foot of the page, in place of a card on every shelf */
+/* the suggestion box at the foot of the page */
 .askbox{
   border:var(--border) dashed var(--ink);
   border-radius:var(--r-alt);
-  padding:18px 22px;
-  margin:26px 0 8px;
-  background:transparent;
+  padding:18px 22px;margin:26px 0 8px;background:transparent;
 }
 .askbox h2{font-variation-settings:"wdth" 115,"wght" 800;font-size:1.15rem;margin-bottom:4px}
 .askbox p{margin:0;font-size:.94rem;color:var(--body-tint)}
@@ -95,351 +140,285 @@
     <button class="wtab" role="tab" id="tab-pe" aria-controls="panel-pe" aria-selected="false" tabindex="-1">PE<span class="dates">Moving about</span></button>
   </div>
 
-  <!-- ============ MATHS ============ -->
   <section class="wpanel" id="panel-maths" role="tabpanel" aria-labelledby="tab-maths">
 
-    <div id="maths-gcse">
-      <div class="weektheme">
-        <h2>Working towards a qualification</h2>
-        <span>GCSE topics, and Functional Skills papers.</span>
-      </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">10</span></button><button class="fchip" data-f="whole-paper" aria-pressed="false">Whole papers<span class="n">4</span></button><button class="fchip" data-f="drills" aria-pressed="false">Drills<span class="n">4</span></button><button class="fchip" data-f="game" aria-pressed="false">Games<span class="n">2</span></button></div>
+<div class="shelf" id="maths-gcse">
+  <div class="weektheme"><h2>Working towards a qualification</h2><span>GCSE topics, and Functional Skills papers.</span></div>
+  <p class="grouplab">The Level 1 paper</p>
+  <div class="rows">
+    <a class="row" href="/practice/maths-level-1.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Maths paper: Set 9</b><span class="rdesc">The whole paper, one question at a time. Section A without a calculator, then Section B with one. Tap a net onto a grid, build a bar chart, and a working box on every question.</span></span>
+      <span class="rmeta">Level 1 maths &middot; 56 marks &middot; answers marked here, working goes to Jay</span>
+    </a>
+  </div>
+  <p class="grouplab">GCSE topics</p>
+  <div class="rows">
+    <a class="row" href="/practice/maths-check-foundation.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Maths check</b><span class="rdesc">Twenty six questions in the style of Paper 1F. Shows where the gaps are, not a test.</span></span>
+      <span class="rmeta">Foundation, all topics &middot; 26 questions &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/surds.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Surds</b><span class="rdesc">Learn a bit, try a bit: picture explainers for each idea, then short questions from square roots up to rationalising.</span></span>
+      <span class="rmeta">Number &middot; 37 questions &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/scale.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Scale and similarity</b><span class="rdesc">Picture explainers, then questions from scale factors to reading real distances off OS maps.</span></span>
+      <span class="rmeta">Geometry &middot; 25 questions &middot; marked here</span>
+    </a>
+  </div>
+  <p class="grouplab">The NCFE Level 2 paper, in two sections</p>
+  <div class="rows">
+    <a class="row" href="/practice/maths-level-2-ncfe.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Building blocks</b><span class="rdesc">The non-calculator section, one step at a time, with the method marks shown: where each mark sits, and how to pick them up even when the answer goes wrong.</span></span>
+      <span class="rmeta">Level 2 maths (NCFE) &middot; Section A, 15 marks &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/maths-level-2-ncfe-b.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>The calculator section</b><span class="rdesc">The other three activities: ratio, percentages, scale and speed, area, averages, formulas and graphs, each broken into the steps the mark scheme pays for.</span></span>
+      <span class="rmeta">Level 2 maths (NCFE) &middot; Section B, 45 marks &middot; marked here</span>
+    </a>
+  </div>
+</div>
 
-      <p class="grouplab">The Level 1 paper</p>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/maths-level-1.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Maths paper: Set 9</h3>
-          <p>The whole paper, one question at a time. Section A without a calculator, then Section B with one. Tap a net onto a grid, build a bar chart, and a working box on every question.</p>
-          <p class="meta">Level 1 maths &middot; 56 marks &middot; answers marked here, working goes to Jay</p>
-        </a>
-      </div>
-
-      <p class="grouplab">GCSE topics</p>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/maths-check-foundation.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Maths check</h3>
-          <p>Twenty six questions in the style of Paper 1F. Shows where the gaps are, not a test.</p>
-          <p class="meta">Foundation, all topics &middot; 26 questions &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-yellow" href="/practice/surds.html">
-          <span class="kicker">Drills</span>
-          <h3>Surds</h3>
-          <p>Learn a bit, try a bit: picture explainers for each idea, then short questions from square roots up to rationalising.</p>
-          <p class="meta">Number &middot; 37 questions &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-yellow" href="/practice/scale.html">
-          <span class="kicker">Drills</span>
-          <h3>Scale and similarity</h3>
-          <p>Picture explainers, then questions from scale factors to reading real distances off OS maps.</p>
-          <p class="meta">Geometry &middot; 25 questions &middot; marked here</p>
-        </a>
-      </div>
-    </div>
-
-    <div id="maths-standard">
-      <div class="weektheme">
-        <h2>Everyday maths</h2>
-        <span>No exam attached.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-yellow" href="/practice/multiplication.html">
-          <span class="kicker">Drills</span>
-          <h3>Multiplying in your head</h3>
-          <p>Picture explainers, then short questions on times 10, 100 and 1,000, money, and smart tricks.</p>
-          <p class="meta">Number &middot; 25 questions &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-yellow" href="/practice/fractions.html">
-          <span class="kicker">Drills</span>
-          <h3>Simplifying fractions</h3>
-          <p>Fractions with the pictures left in: bars and pizzas on the questions themselves, and answer boxes shaped like fractions.</p>
-          <p class="meta">Number &middot; 24 questions &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-ink" href="/practice/chip-run.html">
-          <span class="kicker">Game</span>
-          <h3>Chip Run</h3>
-          <p>You are a chip on a pier and the seagulls want you. Run into the right answer before they catch you.</p>
-          <p class="meta">Times tables &middot; 20 levels &middot; nothing is sent</p>
-        </a>
-        <a class="card w12 fill-bright" href="/practice/maths-level-2-ncfe.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Building blocks</h3>
-          <p>The non-calculator half of an NCFE Level 2 paper, one step at a time, with the method marks shown: where each mark sits, and how to pick them up even when the answer goes wrong.</p>
-          <p class="meta">Level 2 maths (NCFE) &middot; Section A, 15 marks &middot; marked here, working goes to Jay</p>
-        </a>
-        <a class="card w6 fill-ink" href="/practice/cue-the-sequence.html">
-          <span class="kicker">Game</span>
-          <h3>Cue the Sequence</h3>
-          <p>A pool potting race against Chalky, with a quick sequences warm up before each of your turns. The levels never run out.</p>
-          <p class="meta">Sequences and the nth term &middot; endless levels &middot; you choose if it goes to Jay</p>
-        </a>
-      </div>
-    </div>
+<div class="shelf" id="maths-standard">
+  <div class="weektheme"><h2>Everyday maths</h2><span>No exam attached.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/multiplication.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Multiplying in your head</b><span class="rdesc">Picture explainers, then short questions on times 10, 100 and 1,000, money, and smart tricks.</span></span>
+      <span class="rmeta">Number &middot; 25 questions &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/fractions.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Simplifying fractions</b><span class="rdesc">Fractions with the pictures left in: bars and pizzas on the questions themselves, and answer boxes shaped like fractions.</span></span>
+      <span class="rmeta">Number &middot; 24 questions &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/chip-run.html" data-type="game">
+      <span class="rtype t-game">Game</span>
+      <span class="rmain"><b>Chip Run</b><span class="rdesc">You are a chip on a pier and the seagulls want you. Run into the right answer before they catch you.</span></span>
+      <span class="rmeta">Times tables &middot; 20 levels &middot; nothing is sent</span>
+    </a>
+    <a class="row" href="/practice/cue-the-sequence.html" data-type="game">
+      <span class="rtype t-game">Game</span>
+      <span class="rmain"><b>Cue the Sequence</b><span class="rdesc">A pool potting race against Chalky, with a quick sequences warm up before each of your turns. The levels never run out.</span></span>
+      <span class="rmeta">Sequences and the nth term &middot; endless levels &middot; you choose if it goes to Jay</span>
+    </a>
+  </div>
+</div>
 
   </section>
 
-  <!-- ============ ENGLISH ============ -->
   <section class="wpanel" id="panel-english" role="tabpanel" aria-labelledby="tab-english" hidden>
 
-    <div id="english-gcse">
-      <div class="weektheme">
-        <h2>Working towards a qualification</h2>
-        <span>Functional Skills papers, and the drills that feed into them.</span>
-      </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">12</span></button><button class="fchip" data-f="whole-paper" aria-pressed="false">Whole papers<span class="n">7</span></button><button class="fchip" data-f="drills" aria-pressed="false">Drills<span class="n">3</span></button><button class="fchip" data-f="make" aria-pressed="false">Make something<span class="n">1</span></button><button class="fchip" data-f="book" aria-pressed="false">Books<span class="n">1</span></button></div>
+<div class="shelf" id="english-gcse">
+  <div class="weektheme"><h2>Working towards a qualification</h2><span>Functional Skills papers, and the drills that feed into them.</span></div>
+  <p class="grouplab">The Level 1 paper, in two halves</p>
+  <div class="rows">
+    <a class="row" href="/practice/ice-cream-bike.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Ice Cream Bike</b><span class="rdesc">Both documents stay on screen beside the questions. Learn cards in between, three help buttons if you want them, and an explanation every time.</span></span>
+      <span class="rmeta">Level 1 reading &middot; about an hour &middot; 30 marks, marked here</span>
+    </a>
+    <a class="row" href="/practice/writing-level-1.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>A report and a letter</b><span class="rdesc">The writing half of the same level, a step at a time: plan, write, check. Idea lists, sentence starters and a live word count.</span></span>
+      <span class="rmeta">Level 1 writing &middot; about an hour &middot; goes to Jay</span>
+    </a>
+  </div>
+  <p class="grouplab">The Level 2 paper, in two halves</p>
+  <div class="rows">
+    <a class="row" href="/practice/reading-paper-6.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Reading paper 6</b><span class="rdesc">Three texts kept on screen beside the questions, fifteen questions, with a breakdown of which reading skills went well.</span></span>
+      <span class="rmeta">Level 2 reading &middot; about an hour &middot; 35 marks, marked here</span>
+    </a>
+    <a class="row" href="/practice/writing-paper-6.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Writing paper 6</b><span class="rdesc">The other half of the same paper: an email and an online form, with sentence starters, word counts and optional timers.</span></span>
+      <span class="rmeta">Level 2 writing &middot; about an hour &middot; goes to Jay</span>
+    </a>
+  </div>
+  <p class="grouplab">The AQA Level 2 paper, step by step</p>
+  <div class="rows">
+    <a class="row" href="/practice/reading-level-2-aqa.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Three sources, one safari</b><span class="rdesc">The AQA specimen reading paper with every question explained: what it is really asking, how the marks are given, hints, and a model answer for the long ones.</span></span>
+      <span class="rmeta">Level 2 reading (AQA) &middot; 30 marks &middot; marked here, then off to Jay</span>
+    </a>
+    <a class="row" href="/practice/writing-level-2-aqa.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>The email and the article</b><span class="rdesc">The AQA specimen writing paper taken slowly, with the marking explained at every step: what each band actually asks for, how to unpack the task, plans, sentence starters, a machine check, a model answer with the marks pointed out, and ten SPaG drills.</span></span>
+      <span class="rmeta">Level 2 writing (AQA) &middot; 30 marks &middot; both pieces go to Jay</span>
+    </a>
+  </div>
+  <p class="grouplab">Revision and reading</p>
+  <div class="rows">
+    <a class="row" href="/practice/english-level-2-revision.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Level 2 English: the fortnight</b><span class="rdesc">Short drills on what the paper asks for every time: fact and opinion, language features, inference, formats, tone and SPaG. Ten sessions to pick from.</span></span>
+      <span class="rmeta">Level 2 &middot; 10 to 20 minutes a go &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/english-level-2-six-stops.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Level 2 English: six stops</b><span class="rdesc">A route through one lesson: text types, formality and bias, point of view, finding things fast, linking words, then a short email to the council.</span></span>
+      <span class="rmeta">Level 2 &middot; about 45 minutes &middot; last stop goes to Jay</span>
+    </a>
+    <a class="row" href="/practice/animal-farm.html" data-type="book">
+      <span class="rtype t-book">Book</span>
+      <span class="rmain"><b>Animal Farm</b><span class="rdesc">Learn a bit, read a bit, write a bit: themes and the history underneath, 8 quick questions on an extract, and 3 pieces of writing.</span></span>
+      <span class="rmeta">Literature &middot; 30 to 40 minutes &middot; writing goes to Jay</span>
+    </a>
+  </div>
+</div>
 
-      <p class="grouplab">The Level 1 paper, in two halves</p>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/ice-cream-bike.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Ice Cream Bike</h3>
-          <p>Both documents stay on screen beside the questions. Learn cards in between, three help buttons if you want them, and an explanation every time.</p>
-          <p class="meta">Level 1 reading &middot; about an hour &middot; 30 marks, marked here</p>
-        </a>
-        <a class="card w6 fill-teal" href="/practice/writing-level-1.html">
-          <span class="kicker">Whole paper</span>
-          <h3>A report and a letter</h3>
-          <p>The writing half of the same level, a step at a time: plan, write, check. Idea lists, sentence starters and a live word count.</p>
-          <p class="meta">Level 1 writing &middot; about an hour &middot; goes to Jay</p>
-        </a>
-      </div>
-
-      <p class="grouplab">The Level 2 paper, in two halves</p>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/reading-paper-6.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Reading paper 6</h3>
-          <p>Three texts kept on screen beside the questions, fifteen questions, with a breakdown of which reading skills went well.</p>
-          <p class="meta">Level 2 reading &middot; about an hour &middot; 35 marks, marked here</p>
-        </a>
-        <a class="card w6 fill-teal" href="/practice/writing-paper-6.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Writing paper 6</h3>
-          <p>The other half of the same paper: an email and an online form, with sentence starters, word counts and optional timers.</p>
-          <p class="meta">Level 2 writing &middot; about an hour &middot; goes to Jay</p>
-        </a>
-      </div>
-
-      <p class="grouplab">The AQA Level 2 paper, step by step</p>
-      <div class="board">
-        <a class="card w6 fill-bright" href="/practice/reading-level-2-aqa.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Three sources, one safari</h3>
-          <p>The AQA specimen reading paper with every question explained: what it is really asking, how the marks are given, hints, and a model answer for the long ones.</p>
-          <p class="meta">Level 2 reading (AQA) &middot; 30 marks &middot; marked here, then off to Jay</p>
-        </a>
-        <a class="card w6 fill-bright" href="/practice/writing-level-2-aqa.html">
-          <span class="kicker">Whole paper</span>
-          <h3>The email and the article</h3>
-          <p>The AQA specimen writing paper taken slowly, with the marking explained at every step: what each band actually asks for, how to unpack the task, plans, sentence starters, a machine check, a model answer with the marks pointed out, and ten SPaG drills.</p>
-          <p class="meta">Level 2 writing (AQA) &middot; 30 marks &middot; both pieces go to Jay</p>
-        </a>
-      </div>
-
-      <p class="grouplab">Revision and reading</p>
-      <div class="board">
-        <a class="card w6 fill-yellow" href="/practice/english-level-2-revision.html">
-          <span class="kicker">Drills</span>
-          <h3>Level 2 English: the fortnight</h3>
-          <p>Short drills on what the paper asks for every time: fact and opinion, language features, inference, formats, tone and SPaG. Ten sessions to pick from.</p>
-          <p class="meta">Level 2 &middot; 10 to 20 minutes a go &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-yellow" href="/practice/english-level-2-six-stops.html">
-          <span class="kicker">Drills</span>
-          <h3>Level 2 English: six stops</h3>
-          <p>A route through one lesson: text types, formality and bias, point of view, finding things fast, linking words, then a short email to the council.</p>
-          <p class="meta">Level 2 &middot; about 45 minutes &middot; last stop goes to Jay</p>
-        </a>
-        <a class="card w6 fill-plum" href="/practice/animal-farm.html">
-          <span class="kicker">Book</span>
-          <h3>Animal Farm</h3>
-          <p>Learn a bit, read a bit, write a bit: themes and the history underneath, 8 quick questions on an extract, and 3 pieces of writing.</p>
-          <p class="meta">Literature &middot; 30 to 40 minutes &middot; writing goes to Jay</p>
-        </a>
-      </div>
-    </div>
-
-    <div id="english-standard">
-      <div class="weektheme">
-        <h2>Everyday English</h2>
-        <span>Reading and writing with no exam attached.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/reading-evidence.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Retrieval and evidence</h3>
-          <p>Two extracts, a cellar and a river, kept on screen while you answer. Tap the quote rather than copying it out, then say what it proves.</p>
-          <p class="meta">Reading &middot; 30 to 40 minutes &middot; 30 marks, marked here</p>
-        </a>
-        <a class="card w6 fill-yellow" href="/practice/punctuation.html">
-          <span class="kicker">Drills</span>
-          <h3>Punctuation</h3>
-          <p>Road signs for sentences: picture explainers, then 25 quick questions from full stops to inverted commas.</p>
-          <p class="meta">Writing &middot; 20 to 30 minutes &middot; one piece goes to Jay</p>
-        </a>
-        <a class="card w6 fill-orange" href="/practice/day-at-school.html">
-          <span class="kicker">Make something</span>
-          <h3>A day at school</h3>
-          <p>Build a story one bit at a time, with a guide and first line ideas for each part. Real day, made up day, or a completely ridiculous one.</p>
-          <p class="meta">Writing &middot; as long as you like &middot; goes to Jay</p>
-        </a>
-      </div>
-    </div>
+<div class="shelf" id="english-standard">
+  <div class="weektheme"><h2>Everyday English</h2><span>Reading and writing with no exam attached.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/reading-evidence.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Retrieval and evidence</b><span class="rdesc">Two extracts, a cellar and a river, kept on screen while you answer. Tap the quote rather than copying it out, then say what it proves.</span></span>
+      <span class="rmeta">Reading &middot; 30 to 40 minutes &middot; 30 marks, marked here</span>
+    </a>
+    <a class="row" href="/practice/punctuation.html" data-type="drills">
+      <span class="rtype t-drill">Drills</span>
+      <span class="rmain"><b>Punctuation</b><span class="rdesc">Road signs for sentences: picture explainers, then 25 quick questions from full stops to inverted commas.</span></span>
+      <span class="rmeta">Writing &middot; 20 to 30 minutes &middot; one piece goes to Jay</span>
+    </a>
+    <a class="row" href="/practice/day-at-school.html" data-type="make">
+      <span class="rtype t-make">Make something</span>
+      <span class="rmain"><b>A day at school</b><span class="rdesc">Build a story one bit at a time, with a guide and first line ideas for each part. Real day, made up day, or a completely ridiculous one.</span></span>
+      <span class="rmeta">Writing &middot; as long as you like &middot; goes to Jay</span>
+    </a>
+  </div>
+</div>
 
   </section>
 
-  <!-- ============ HUMAN AND SOCIAL ============ -->
   <section class="wpanel" id="panel-hs" role="tabpanel" aria-labelledby="tab-hs" hidden>
 
-    <div id="hs-gcse">
-      <div class="weektheme">
-        <h2>Working towards GCSE</h2>
-        <span>Geography and history topics.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/weather-storms.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Weather systems and storm hazards</h3>
-          <p>Air pressure, UK depressions, tropical storms and storm surges, with the diagrams drawn on the page.</p>
-          <p class="meta">Geography &middot; 12 questions, 51 marks &middot; marked here</p>
-        </a>
-      </div>
-    </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">1</span></button><button class="fchip" data-f="whole-paper" aria-pressed="false">Whole papers<span class="n">1</span></button></div>
+<div class="shelf" id="hs-gcse">
+  <div class="weektheme"><h2>Working towards GCSE</h2><span>Geography and history topics.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/weather-storms.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Weather systems and storm hazards</b><span class="rdesc">Air pressure, UK depressions, tropical storms and storm surges, with the diagrams drawn on the page.</span></span>
+      <span class="rmeta">Geography &middot; 12 questions, 51 marks &middot; marked here</span>
+    </a>
+  </div>
+</div>
 
-    <div id="hs-standard">
-      <div class="weektheme">
-        <h2>Everyday</h2>
-        <span>The world and the people in it.</span>
-      </div>
-      <p class="shelfnote">Nothing on this shelf yet. The box at the bottom of the page is for saying what would help.</p>
-    </div>
+<div class="shelf" id="hs-standard">
+  <div class="weektheme"><h2>Everyday</h2><span>The world and the people in it.</span></div>
+  <p class="shelfnote">Nothing on this shelf yet.</p>
+</div>
 
   </section>
 
-  <!-- ============ DIGITAL MEDIA ============ -->
-  <section class="wpanel" id="panel-dm" role="tabpanel" aria-labelledby="tab-dm" hidden>
-
-    <div id="dm-gcse">
-      <div class="weektheme">
-        <h2>Working towards GCSE</h2>
-        <span>Computer science topics.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-teal" href="/practice/computer-systems.html">
-          <span class="kicker">Whole paper</span>
-          <h3>Computer systems and architecture</h3>
-          <p>Supported assessment with word banks and sentence starters: hardware and software, inside the CPU, RAM and ROM, storage, buses and cooling.</p>
-          <p class="meta">Computer science &middot; 63 marks &middot; marked here</p>
-        </a>
-        <a class="card w6 fill-bright" href="/practice/build-a-computer.html">
-          <span class="kicker">Explainer</span>
-          <h3>Build a computer</h3>
-          <p>An empty case and a tray of parts. Fit each one where it goes, plug in the screen and keyboard, then switch it on and watch every part do its job.</p>
-          <p class="meta">Parts of a computer &middot; about half an hour &middot; checked as you go</p>
-        </a>
-      </div>
-    </div>
-
-    <div id="dm-standard">
-      <div class="weektheme">
-        <h2>Everyday computing</h2>
-        <span>Making things and using computers well.</span>
-      </div>
-      <p class="shelfnote">Nothing on this shelf yet. The box at the bottom of the page is for saying what would help.</p>
-    </div>
-
-  </section>
-
-  <!-- ============ PREPARATION FOR ADULTHOOD ============ -->
-  <section class="wpanel" id="panel-pfa" role="tabpanel" aria-labelledby="tab-pfa" hidden>
-
-    <div id="pfa-gcse">
-      <div class="weektheme">
-        <h2>Working towards a qualification</h2>
-        <span>Qualification work, once there is some.</span>
-      </div>
-      <p class="shelfnote">Nothing on this shelf yet. The box at the bottom of the page is for saying what would help.</p>
-    </div>
-
-    <div id="pfa-standard">
-      <div class="weektheme">
-        <h2>Everyday</h2>
-        <span>The practical stuff nobody quite gets round to teaching you.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-orange" href="/practice/food-budget.html">
-          <span class="kicker">Make something</span>
-          <h3>Smart food budgeting</h3>
-          <p>Six short parts: what the words mean, fuel against treats, the base ingredient rule, then two shops to get right. The till adds up as you go.</p>
-          <p class="meta">Money and food &middot; 6 parts, nothing compulsory &middot; goes to Jay</p>
-        </a>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ============ SCIENCE ============ -->
   <section class="wpanel" id="panel-science" role="tabpanel" aria-labelledby="tab-science" hidden>
 
-    <div id="science-standard">
-      <div class="weektheme">
-        <h2>Science</h2>
-        <span>Autumn 1 is microorganisms and plant life.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-bright" href="/practice/microorganisms.html">
-          <span class="kicker">Explainer</span>
-          <h3>The world of microorganisms</h3>
-          <p>Bacteria, fungi and viruses, why bread has holes in it, what soap actually does, and why antibiotics do nothing for a cold.</p>
-          <p class="meta">Biology &middot; 7 sections, any order &middot; checked as you go</p>
-        </a>
-        <a class="card w6 fill-bright" href="/practice/plant-cell.html">
-          <span class="kicker">Explainer</span>
-          <h3>Parts of a plant</h3>
-          <p>Label the cell against a diagram that stays on screen while you work, then name five plant parts from pictures.</p>
-          <p class="meta">Biology &middot; 4 sections, one optional &middot; checked as you go</p>
-        </a>
-      </div>
-    </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">2</span></button><button class="fchip" data-f="explainer" aria-pressed="false">Explainers<span class="n">2</span></button></div>
+<div class="shelf" id="science-standard">
+  <div class="weektheme"><h2>Science</h2><span>Autumn 1 is microorganisms and plant life.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/microorganisms.html" data-type="explainer">
+      <span class="rtype t-expl">Explainer</span>
+      <span class="rmain"><b>The world of microorganisms</b><span class="rdesc">Bacteria, fungi and viruses, why bread has holes in it, what soap actually does, and why antibiotics do nothing for a cold.</span></span>
+      <span class="rmeta">Biology &middot; 7 sections, any order &middot; checked as you go</span>
+    </a>
+    <a class="row" href="/practice/plant-cell.html" data-type="explainer">
+      <span class="rtype t-expl">Explainer</span>
+      <span class="rmain"><b>Parts of a plant</b><span class="rdesc">Label the cell against a diagram that stays on screen while you work, then name five plant parts from pictures.</span></span>
+      <span class="rmeta">Biology &middot; 4 sections, one optional &middot; checked as you go</span>
+    </a>
+  </div>
+</div>
 
   </section>
 
-  <!-- ============ PHSE ============ -->
+  <section class="wpanel" id="panel-dm" role="tabpanel" aria-labelledby="tab-dm" hidden>
+
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">2</span></button><button class="fchip" data-f="whole-paper" aria-pressed="false">Whole papers<span class="n">1</span></button><button class="fchip" data-f="explainer" aria-pressed="false">Explainers<span class="n">1</span></button></div>
+<div class="shelf" id="dm-gcse">
+  <div class="weektheme"><h2>Working towards GCSE</h2><span>Computer science topics.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/computer-systems.html" data-type="whole-paper">
+      <span class="rtype t-paper">Whole paper</span>
+      <span class="rmain"><b>Computer systems and architecture</b><span class="rdesc">Supported assessment with word banks and sentence starters: hardware and software, inside the CPU, RAM and ROM, storage, buses and cooling.</span></span>
+      <span class="rmeta">Computer science &middot; 63 marks &middot; marked here</span>
+    </a>
+    <a class="row" href="/practice/build-a-computer.html" data-type="explainer">
+      <span class="rtype t-expl">Explainer</span>
+      <span class="rmain"><b>Build a computer</b><span class="rdesc">An empty case and a tray of parts. Fit each one where it goes, plug in the screen and keyboard, then switch it on and watch every part do its job.</span></span>
+      <span class="rmeta">Parts of a computer &middot; about half an hour &middot; checked as you go</span>
+    </a>
+  </div>
+</div>
+
+<div class="shelf" id="dm-standard">
+  <div class="weektheme"><h2>Everyday computing</h2><span>Making things and using computers well.</span></div>
+  <p class="shelfnote">Nothing on this shelf yet.</p>
+</div>
+
+  </section>
+
+  <section class="wpanel" id="panel-pfa" role="tabpanel" aria-labelledby="tab-pfa" hidden>
+
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">1</span></button><button class="fchip" data-f="make" aria-pressed="false">Make something<span class="n">1</span></button></div>
+<div class="shelf" id="pfa-gcse">
+  <div class="weektheme"><h2>Working towards a qualification</h2><span>Qualification work, once there is some.</span></div>
+  <p class="shelfnote">Nothing on this shelf yet.</p>
+</div>
+
+<div class="shelf" id="pfa-standard">
+  <div class="weektheme"><h2>Everyday</h2><span>The practical stuff nobody quite gets round to teaching you.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/food-budget.html" data-type="make">
+      <span class="rtype t-make">Make something</span>
+      <span class="rmain"><b>Smart food budgeting</b><span class="rdesc">Six short parts: what the words mean, fuel against treats, the base ingredient rule, then two shops to get right. The till adds up as you go.</span></span>
+      <span class="rmeta">Money and food &middot; 6 parts, nothing compulsory &middot; goes to Jay</span>
+    </a>
+  </div>
+</div>
+
+  </section>
+
   <section class="wpanel" id="panel-phse" role="tabpanel" aria-labelledby="tab-phse" hidden>
 
-    <div id="phse-standard">
-      <div class="weektheme">
-        <h2>PHSE</h2>
-        <span>A quarter of an hour with Willow, and the things that come up in it.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-bright" href="/practice/boundaries-and-signals.html">
-          <span class="kicker">Explainer</span>
-          <h3>Boundaries and signals</h3>
-          <p>How to tell whether somebody is interested, what a quiet no looks like, how to ask plainly, and how to turn somebody down without being cruel.</p>
-          <p class="meta">Relationships &middot; 6 sections, skip anything &middot; goes to Jay</p>
-        </a>
-      </div>
-    </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">1</span></button><button class="fchip" data-f="explainer" aria-pressed="false">Explainers<span class="n">1</span></button></div>
+<div class="shelf" id="phse-standard">
+  <div class="weektheme"><h2>PHSE</h2><span>A quarter of an hour with Willow, and the things that come up in it.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/boundaries-and-signals.html" data-type="explainer">
+      <span class="rtype t-expl">Explainer</span>
+      <span class="rmain"><b>Boundaries and signals</b><span class="rdesc">How to tell whether somebody is interested, what a quiet no looks like, how to ask plainly, and how to turn somebody down without being cruel.</span></span>
+      <span class="rmeta">Relationships &middot; 6 sections, skip anything &middot; goes to Jay</span>
+    </a>
+  </div>
+</div>
 
   </section>
 
-  <!-- ============ PE ============ -->
   <section class="wpanel" id="panel-pe" role="tabpanel" aria-labelledby="tab-pe" hidden>
 
-    <div id="pe-standard">
-      <div class="weektheme">
-        <h2>PE</h2>
-        <span>Your body, your pace. Nothing in here is a fitness test.</span>
-      </div>
-      <div class="board">
-        <a class="card w6 fill-orange" href="/practice/training-plan.html">
-          <span class="kicker">Make something</span>
-          <h3>Build your own training plan</h3>
-          <p>Pick what you are training for, build the routine out of exercises you choose, then tick off the days you do it. Missed days are not failures.</p>
-          <p class="meta">Strength and fitness &middot; four weeks on one grid &middot; goes to Jay</p>
-        </a>
-      </div>
-    </div>
+<div class="filters" role="group" aria-label="Filter by what kind of thing it is"><button class="fchip" data-f="all" aria-pressed="true">Everything<span class="n">1</span></button><button class="fchip" data-f="make" aria-pressed="false">Make something<span class="n">1</span></button></div>
+<div class="shelf" id="pe-standard">
+  <div class="weektheme"><h2>PE</h2><span>Your body, your pace. Nothing in here is a fitness test.</span></div>
+  <div class="rows">
+    <a class="row" href="/practice/training-plan.html" data-type="make">
+      <span class="rtype t-make">Make something</span>
+      <span class="rmain"><b>Build your own training plan</b><span class="rdesc">Pick what you are training for, build the routine out of exercises you choose, then tick off the days you do it. Missed days are not failures.</span></span>
+      <span class="rmeta">Strength and fitness &middot; four weeks on one grid &middot; goes to Jay</span>
+    </a>
+  </div>
+</div>
 
   </section>
 
@@ -460,72 +439,85 @@
 <script>
 /* ---------- subject tabs, same behaviour as the week tabs ---------- */
 (function(){
-  var tabs=Array.prototype.slice.call(document.querySelectorAll('.wtab'));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.wtab'));
 
   /* a tab id is always tab-<subject>, and <subject> is what the hash uses,
-     so new subjects only need a tab and a panel, not a change down here */
-  function subjectOf(tab){return tab.id.replace('tab-','')}
+     so a new subject only needs a tab and a panel, not a change down here */
+  function subjectOf(tab){ return tab.id.replace('tab-','') }
 
   function show(tab){
     tabs.forEach(function(t){
-      var panel=document.getElementById(t.getAttribute('aria-controls'));
-      var on=(t===tab);
-      t.setAttribute('aria-selected',on?'true':'false');
-      t.tabIndex=on?0:-1;
-      panel.hidden=!on;
-      if(on){
-        panel.querySelectorAll('.card').forEach(function(c){
-          c.style.animation='none';
-          void c.offsetWidth;
-          c.style.animation='';
-        });
-      }
+      var panel = document.getElementById(t.getAttribute('aria-controls'));
+      var on = (t === tab);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      panel.hidden = !on;
     });
   }
 
-  tabs.forEach(function(tab,i){
-    tab.addEventListener('click',function(){
+  tabs.forEach(function(tab, i){
+    tab.addEventListener('click', function(){
       show(tab);
-      history.replaceState(null,'','#'+subjectOf(tab));
+      history.replaceState(null, '', '#' + subjectOf(tab));
     });
-    tab.addEventListener('keydown',function(e){
-      var next=null;
-      if(e.key==='ArrowRight')next=tabs[(i+1)%tabs.length];
-      if(e.key==='ArrowLeft')next=tabs[(i-1+tabs.length)%tabs.length];
-      if(e.key==='Home')next=tabs[0];
-      if(e.key==='End')next=tabs[tabs.length-1];
-      if(next){e.preventDefault();show(next);next.focus()}
+    tab.addEventListener('keydown', function(e){
+      var next = null;
+      if(e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+      if(e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+      if(e.key === 'Home') next = tabs[0];
+      if(e.key === 'End') next = tabs[tabs.length - 1];
+      if(next){ e.preventDefault(); show(next); next.focus() }
     });
   });
 
   /* Deep links the timetable can use:
-       /practice/#maths            /practice/#english          /practice/#hs
-       /practice/#dm               /practice/#pfa
-       /practice/#science
-       /practice/#phse
-       /practice/#pe
-       /practice/#maths-gcse       /practice/#maths-standard
-       /practice/#english-gcse     /practice/#english-standard
-       /practice/#hs-gcse          /practice/#hs-standard
-       /practice/#dm-gcse          /practice/#dm-standard
-       /practice/#pfa-gcse         /practice/#pfa-standard       */
-  function fromHash(){
-    var h=(location.hash||'').replace('#','');
-    if(!h)return;
-    var subject=null;
-    tabs.forEach(function(t){
-      var s=subjectOf(t);
-      if(h===s||h.indexOf(s+'-')===0)subject=s;
-    });
-    if(!subject)return;
-    show(document.getElementById('tab-'+subject));
-    if(h!==subject){
-      var t=document.getElementById(h);
-      if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+       /practice/#maths   /practice/#english   /practice/#hs   /practice/#science
+       /practice/#dm      /practice/#pfa       /practice/#phse /practice/#pe
+     and any shelf id, such as /practice/#maths-gcse or /practice/#english-standard */
+  var hash = (location.hash || '').replace('#','');
+  if(hash){
+    var byTab = document.getElementById('tab-' + hash);
+    if(byTab){ show(byTab) }
+    else {
+      var shelf = document.getElementById(hash);
+      if(shelf){
+        var panel = shelf.closest('.wpanel');
+        var tab = panel && document.getElementById(panel.id.replace('panel-','tab-'));
+        if(tab){ show(tab); setTimeout(function(){ shelf.scrollIntoView({block:'start'}) }, 60) }
+      }
     }
   }
-  window.addEventListener('hashchange',fromHash);
-  fromHash();
+})();
+
+/* ---------- filter chips: show one kind of activity at a time ---------- */
+(function(){
+  document.querySelectorAll('.wpanel').forEach(function(panel){
+    var chips = Array.prototype.slice.call(panel.querySelectorAll('.fchip'));
+    if(!chips.length) return;
+
+    function apply(want){
+      panel.querySelectorAll('.row').forEach(function(row){
+        row.hidden = !(want === 'all' || row.dataset.type === want);
+      });
+      /* a group heading or a shelf with nothing left under it goes quiet too */
+      panel.querySelectorAll('.rows').forEach(function(list){
+        var any = list.querySelector('.row:not([hidden])');
+        list.hidden = !any;
+        var lab = list.previousElementSibling;
+        if(lab && lab.classList.contains('grouplab')) lab.hidden = !any;
+      });
+      panel.querySelectorAll('.shelf').forEach(function(shelf){
+        var any = shelf.querySelector('.row:not([hidden])');
+        var note = shelf.querySelector('.shelfnote');
+        shelf.hidden = !any && !(note && want === 'all');
+      });
+      chips.forEach(function(c){ c.setAttribute('aria-pressed', c.dataset.f === want ? 'true' : 'false') });
+    }
+
+    chips.forEach(function(chip){
+      chip.addEventListener('click', function(){ apply(chip.dataset.f) });
+    });
+  });
 })();
 </script>
 
