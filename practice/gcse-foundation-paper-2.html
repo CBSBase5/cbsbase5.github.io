@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GCSE Foundation Paper 2 - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* page scoped: AQA GCSE Foundation Paper 2, calculator, heavily scaffolded */
+:root{--w-ink:#0a2f38;--w-teal:#007291;--w-orange:#ef7724;--w-yellow:#f6c343;--w-plum:#7a3b69;--w-cyan:#2bb3c9;--w-paper:#fffdf8;--w-good:#1f7a4d;--w-bad:#c24b3a;--w-soft:#e8f3f6}
+.w-grid{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:22px;align-items:start;margin:10px 0 30px}
+.w-grid.solo{grid-template-columns:minmax(0,780px);justify-content:center}
+.w-grid.solo .brief{display:none}
+@media (max-width:940px){.w-grid{grid-template-columns:minmax(0,1fr)}}
+
+.brief{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;background:#fff;border:2px solid var(--w-ink);
+  border-radius:16px 20px 14px 18px;box-shadow:5px 6px 0 rgba(10,47,56,.18);padding:14px}
+@media (max-width:940px){.brief{position:relative;top:0;max-height:none}}
+.brief h2{font-family:Archivo,sans-serif;font-stretch:115%;font-weight:850;font-size:19px;margin:0 0 4px;color:var(--w-ink)}
+.brief h3{font-family:Archivo,sans-serif;font-weight:800;font-size:15px;margin:14px 0 4px;color:var(--w-ink)}
+.brief p,.brief li{font:15px/1.5 "Atkinson Hyperlegible",sans-serif;color:var(--w-ink);margin:6px 0}
+.brief ul{margin:6px 0;padding-left:18px}
+.kit{border:2px dashed var(--w-teal);background:var(--w-soft);border-radius:12px;padding:8px 11px;margin:6px 0}
+.kit b{font-family:Archivo,sans-serif;font-weight:850}
+.kit.on{border-style:solid;background:#fff6e9;border-color:var(--w-orange)}
+.tbl{width:100%;border-collapse:collapse;margin:6px 0}
+.tbl th,.tbl td{border:2px solid var(--w-ink);padding:5px 8px;font:15px "Atkinson Hyperlegible",sans-serif;text-align:left}
+.tbl th{background:var(--w-soft)}
+
+.wcard{background:var(--w-paper);border:2px solid var(--w-ink);border-radius:18px 14px 20px 16px;padding:20px;box-shadow:6px 7px 0 rgba(10,47,56,.16)}
+.wcard.learn{background:linear-gradient(160deg,#fff6e3,#e9f6f9);transform:rotate(-.4deg)}
+.wcard h2{font-family:Archivo,sans-serif;font-stretch:115%;font-weight:850;font-size:26px;line-height:1.1;margin:2px 0 10px;color:var(--w-ink)}
+.wcard h3{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;margin:18px 0 6px;color:var(--w-ink)}
+.wcard p,.wcard li{font:17px/1.55 "Atkinson Hyperlegible",sans-serif;max-width:64ch;color:var(--w-ink)}
+.wcard ul{padding-left:20px}
+.whead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.pill{display:inline-block;font:700 14px/1 "Atkinson Hyperlegible",sans-serif;padding:7px 11px;border-radius:999px;background:var(--w-ink);color:#fff}
+.pill.o{background:var(--w-orange)}.pill.y{background:var(--w-yellow);color:var(--w-ink)}.pill.t{background:var(--w-teal)}.pill.p{background:var(--w-plum)}
+.prog{height:12px;background:#dfe9ec;border-radius:99px;overflow:hidden;margin:0 0 6px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--w-teal),var(--w-cyan));border-radius:99px;transition:width .3s}
+.progtxt{font:14px "Atkinson Hyperlegible",sans-serif;color:#355;margin:0 0 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.wbtn{font:700 16px/1 "Atkinson Hyperlegible",sans-serif;border:2px solid var(--w-ink);border-radius:12px 10px 13px 11px;padding:11px 15px;background:#fff;color:var(--w-ink);cursor:pointer}
+.wbtn.main{background:var(--w-teal);border-color:var(--w-teal);color:#fff}
+.wbtn.warm{background:var(--w-orange);border-color:var(--w-orange);color:#fff}
+.wbtn.help{border-style:dashed;background:#fffaf0}
+.wbtn.sm{font-size:14px;padding:8px 12px}
+.wbtn:disabled{opacity:.45;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-top:18px}
+.actions .l,.actions .r{display:flex;gap:8px;flex-wrap:wrap}
+.helprow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px;align-items:center}
+
+textarea,input[type=text]{width:100%;box-sizing:border-box;font:17px/1.6 "Atkinson Hyperlegible",sans-serif;padding:10px 12px;
+  border:2px solid #b9cdd3;border-radius:10px;background:#fff;color:var(--w-ink)}
+textarea{resize:vertical;min-height:110px}
+label.lab{display:block;font:700 15px "Atkinson Hyperlegible",sans-serif;color:#355;margin:12px 0 4px}
+textarea:focus-visible,input:focus-visible,.wbtn:focus-visible,.optb:focus-visible,.sdot:focus-visible,.cell:focus-visible,.ordb:focus-visible{outline:3px solid var(--w-orange);outline-offset:2px}
+
+.tip{display:flex;gap:10px;align-items:flex-start;margin:10px 0}
+.tip i{flex:none;min-width:28px;height:28px;padding:0 5px;border-radius:999px;background:var(--w-teal);color:#fff;font:800 15px/28px "Atkinson Hyperlegible",sans-serif;text-align:center;font-style:normal}
+.tip p{margin:2px 0}
+.markmap{display:flex;gap:6px;margin:10px 0 4px;height:46px;border:2px solid var(--w-ink);border-radius:10px;overflow:hidden;background:#fff}
+.markmap div{display:flex;align-items:center;justify-content:center;font:700 13px "Atkinson Hyperlegible",sans-serif;text-align:center;line-height:1.1;color:#fff}
+.mm1{background:var(--w-teal)}.mm2{background:var(--w-orange)}.mm3{background:var(--w-plum)}.mm4{background:var(--w-cyan);color:var(--w-ink)}
+.maplab{font:14px "Atkinson Hyperlegible",sans-serif;color:#355;margin:0 0 14px}
+
+/* question */
+.q{border:2px solid var(--w-ink);border-radius:16px;background:#fff;padding:16px 18px;margin:14px 0;box-shadow:4px 5px 0 rgba(10,47,56,.13)}
+.q.done{border-color:var(--w-good)}
+.qtop{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qn{font-family:Archivo,sans-serif;font-weight:900;font-size:20px}
+.qmk{font:700 13px "Atkinson Hyperlegible",sans-serif;background:var(--w-ink);color:#fff;border-radius:999px;padding:4px 10px}
+.qq{font:700 17px/1.5 "Atkinson Hyperlegible",sans-serif;margin:4px 0 8px}
+.asks{background:#f3f8f6;border:2px dashed #9dbac2;border-radius:12px;padding:9px 12px;margin:0 0 10px;font:15.5px/1.5 "Atkinson Hyperlegible",sans-serif}
+.asks b{font-family:Archivo,sans-serif;font-weight:850;display:block;color:var(--w-teal)}
+.asks.marks{background:#fff6e9;border-color:#f0c48a}
+.asks.marks b{color:var(--w-orange)}
+.marklist{list-style:none;padding:0;margin:6px 0 0}
+.marklist li{display:flex;gap:8px;align-items:flex-start;font:15.5px/1.45 "Atkinson Hyperlegible",sans-serif;margin:0 0 5px}
+.marklist li i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--w-orange);color:#fff;font-style:normal;font-weight:800;font-size:13px;text-align:center;line-height:22px}
+.part{border-top:2px dashed #dfe9ec;padding:12px 0 0;margin:12px 0 0}
+.part:first-of-type{border-top:0}
+.plab{font:700 16px/1.45 "Atkinson Hyperlegible",sans-serif;margin:0 0 6px}
+.plab .mk{font-size:13px;background:var(--w-soft);border:2px solid var(--w-teal);border-radius:999px;padding:2px 8px;margin-left:6px;white-space:nowrap}
+.ansrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ansrow input{flex:1 1 160px;max-width:260px}
+.ansrow .unit{font:700 16px "Atkinson Hyperlegible",sans-serif}
+.opts2{display:grid;gap:8px;margin:6px 0}
+.optb{font:16px/1.4 "Atkinson Hyperlegible",sans-serif;text-align:left;border:2px solid #b9cdd3;background:#fff;border-radius:12px;padding:10px 13px;cursor:pointer;color:var(--w-ink)}
+.optb:hover{background:var(--w-soft)}
+.optb.right{border-color:var(--w-good);background:#e7f6ee}
+.optb.wrong{border-color:var(--w-bad);background:#fdecea}
+.optb:disabled{cursor:default}
+.ok{border-color:var(--w-good)!important;background:#f2fbf6}
+.no{border-color:var(--w-bad)!important;background:#fdecea}
+.fb{border:2px dashed var(--w-cyan);background:#eef8fb;border-radius:12px;padding:10px 13px;margin:8px 0 0;font:16px/1.5 "Atkinson Hyperlegible",sans-serif}
+.fb b{font-family:Archivo,sans-serif;font-weight:850}
+.fb.good{border-color:var(--w-good);background:#e7f6ee}
+.fb.miss{border-color:var(--w-orange);background:#fff6e9}
+.sol{border:2px solid var(--w-ink);border-radius:14px;background:#fff;overflow:hidden;margin:10px 0}
+.sol .mhead{background:var(--w-ink);color:#fff;padding:8px 14px;font:700 15px "Atkinson Hyperlegible",sans-serif;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-bottom:2px dashed #cfdde1}
+.srow:last-child{border-bottom:0}
+@media (max-width:700px){.srow{grid-template-columns:1fr}}
+.swork{padding:10px 14px;font:16.5px/1.6 "Atkinson Hyperlegible",sans-serif;white-space:pre-wrap}
+.snote{padding:10px 14px;background:var(--w-soft);border-left:2px dashed #cfdde1;font:15px/1.5 "Atkinson Hyperlegible",sans-serif}
+@media (max-width:700px){.snote{border-left:0;border-top:2px dashed #cfdde1}}
+.snote b{font-family:Archivo,sans-serif;font-weight:850;display:block;color:var(--w-teal)}
+.score{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:700 16px "Atkinson Hyperlegible",sans-serif;margin:0 0 10px}
+.score .pip{background:var(--w-ink);color:#fff;border-radius:999px;padding:5px 12px}
+.nocalc{display:inline-block;font:700 13px "Atkinson Hyperlegible",sans-serif;background:var(--w-plum);color:#fff;border-radius:999px;padding:4px 11px}
+.yescalc{display:inline-block;font:700 13px "Atkinson Hyperlegible",sans-serif;background:#007291;color:#fff;border-radius:999px;padding:4px 11px}
+
+/* plan view grid */
+.planwrap{display:inline-block;border:2px solid var(--w-ink);border-radius:6px;overflow:hidden;background:#fff;margin:6px 0}
+.planrow{display:flex}
+.cell{width:30px;height:30px;border:1px solid #cfdde1;background:#fff;cursor:pointer;padding:0}
+.cell[aria-pressed="true"]{background:var(--w-teal)}
+.cell:hover{background:var(--w-soft)}
+.cell[aria-pressed="true"]:hover{background:#005a73}
+
+/* ordering */
+.ordrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.ordb{font:700 16px "Atkinson Hyperlegible",sans-serif;border:2px solid var(--w-ink);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;min-width:56px}
+.ordb.used{opacity:.35}
+.slot{display:flex;flex-wrap:wrap;gap:6px;min-height:46px;border:2px dashed #9dbac2;border-radius:10px;padding:6px;background:#fff;margin:6px 0}
+.slot .ordb{border-style:solid}
+
+svg.fig{display:block;max-width:100%;height:auto;margin:8px 0;background:#fff;border:2px solid var(--w-ink);border-radius:12px}
+.figcap{font:14px "Atkinson Hyperlegible",sans-serif;color:#456;margin:2px 0 10px}
+.notacc{display:inline-block;border:2px solid var(--w-ink);border-radius:6px;padding:3px 8px;font:700 13px "Atkinson Hyperlegible",sans-serif;background:#fff}
+
+.stepgrid{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.sdot{font:13px "Atkinson Hyperlegible",sans-serif;border:2px solid #b9cdd3;background:#fff;border-radius:999px;padding:5px 10px;cursor:pointer;color:#355}
+.sdot.on{background:var(--w-ink);color:#fff;border-color:var(--w-ink)}
+.sdot.did{background:#e7f6ee;border-color:var(--w-good)}
+.small{font:14.5px/1.5 "Atkinson Hyperlegible",sans-serif;color:#456}
+.hr{border:0;height:3px;background:repeating-linear-gradient(90deg,#cfdde1 0 18px,transparent 18px 28px);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#007291" stroke-width="1.6" opacity=".5"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/baselines/">Baselines</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>PAPER TWO, <span class="accent">WITH A CALCULATOR</span></h1>
+    <div class="line">
+      <span class="chip">AQA GCSE Foundation, June 2025</span>
+      <p>All 26 questions, broken into the steps the mark scheme pays for, with the method marks shown. The game is in the corner again if you want it.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="w-grid" id="grid">
+    <aside class="brief" id="brief"></aside>
+    <main>
+      <div class="prog"><i id="progBar" style="width:0%"></i></div>
+      <p class="progtxt"><span id="progTxt">Step 1</span><span id="progSide"></span></p>
+      <section class="wcard" id="pane" aria-live="polite"></section>
+      <div class="stepgrid" id="dots"></div>
+    </main>
+  </div>
+
+  <a class="backlink" href="/practice/#maths-gcse">Back to practice</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/data/flappyjay.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "base5.maths.gcseF2jun25.v1";
+var P = "\u00a3", ROOT = "\u221a", TICK = "\u2713", PI = "\u03c0", X = "\u00d7", DIV = "\u00f7", DEG = "\u00b0", SQ2 = "\u00b2", SQ3 = "\u00b3", LE = "\u2264";
+
+/* ============================================================
+   AQA GCSE Mathematics 8300/2F, Foundation Paper 2
+   (calculator), June 2025. 80 marks, 1 hour 30 minutes.
+   Mark points follow the AQA mark scheme; the wording, the
+   scaffolding and the worked solutions are ours, and the
+   diagrams are redrawn.
+   ============================================================ */
+
+/* ---------- figures ---------- */
+
+function pathFig(){
+  var s = 34, ox = 60, oy = 30, g = "";
+  for(var r = 0; r < 5; r++) for(var c = 0; c < 8; c++)
+    g += '<rect x="' + (ox + c * s) + '" y="' + (oy + r * s) + '" width="' + s + '" height="' + s + '" fill="#fff" stroke="#cfdde1" stroke-width="1" stroke-dasharray="3 3"/>';
+  var ax = ox + 2 * s, ay = oy + 4 * s, bx = ox + 6 * s, by = ay, cy = oy + 1 * s;
+  g += '<line x1="' + ax + '" y1="' + ay + '" x2="' + bx + '" y2="' + by + '" stroke="#0a2f38" stroke-width="3"/>';
+  g += '<line x1="' + bx + '" y1="' + by + '" x2="' + bx + '" y2="' + cy + '" stroke="#0a2f38" stroke-width="3"/>';
+  [[ax, ay, "A", -14, 18], [bx, by, "B", 10, 18], [bx, cy, "C", 10, -6]].forEach(function(p){
+    g += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="#0a2f38"/>' +
+      '<text x="' + (p[0] + p[3]) + '" y="' + (p[1] + p[4]) + '" font-size="15" font-style="italic" font-family="Atkinson Hyperlegible, sans-serif">' + p[2] + "</text>";
+  });
+  g += '<line x1="30" y1="170" x2="30" y2="70" stroke="#0a2f38" stroke-width="2"/><polygon points="30,62 25,74 35,74" fill="#0a2f38"/>' +
+    '<text x="12" y="56" font-size="12" font-family="Atkinson Hyperlegible, sans-serif">North</text>';
+  return '<svg class="fig" viewBox="0 0 350 215" role="img" aria-label="A path from A east to B, then north to C, on a centimetre grid">' + g +
+    '<text x="60" y="210" font-size="13" font-family="Atkinson Hyperlegible, sans-serif">Scale: 1 cm represents 10 m</text></svg>';
+}
+
+function barFig(){
+  var x0 = 70, y0 = 250, h = 210, bw = 46, gap = 22;
+  var bars = [["Bear", 11], ["Rhino", 20], ["Ox", 14], ["Lion", null]];
+  var g = "", i;
+  for(i = 0; i <= 22; i += 2){
+    var y = y0 - i / 22 * h;
+    g += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + 4 * (bw + gap)) + '" y2="' + y + '" stroke="#e3ecee" stroke-width="1"/>';
+    g += '<text x="' + (x0 - 8) + '" y="' + (y + 4) + '" font-size="11" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">' + i + "</text>";
+  }
+  g += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + (x0 + 4 * (bw + gap)) + '" y2="' + y0 + '" stroke="#0a2f38" stroke-width="2"/>';
+  g += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + (y0 - h) + '" stroke="#0a2f38" stroke-width="2"/>';
+  bars.forEach(function(b, k){
+    var bx = x0 + gap / 2 + k * (bw + gap);
+    if(b[1] != null){
+      var bh = b[1] / 22 * h;
+      g += '<rect x="' + bx + '" y="' + (y0 - bh) + '" width="' + bw + '" height="' + bh + '" fill="#cfdde1" stroke="#0a2f38" stroke-width="2"/>';
+    }
+    g += '<text x="' + (bx + bw / 2) + '" y="' + (y0 + 18) + '" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">' + b[0] + "</text>";
+  });
+  g += '<text x="20" y="' + (y0 - h / 2) + '" font-size="12" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" transform="rotate(-90 20 ' + (y0 - h / 2) + ')">Number of people</text>';
+  g += '<text x="' + (x0 + 2 * (bw + gap)) + '" y="24" font-size="14" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800">Mascot choices</text>';
+  return '<svg class="fig" viewBox="0 0 360 285" role="img" aria-label="Bar chart: bear 11, rhino 20, ox 14, lion missing">' + g + "</svg>";
+}
+
+function similarFig(){
+  function shape(ox, oy, k, labels){
+    var p = [[0,0],[110*k,0],[60*k,34*k],[118*k,52*k],[0,52*k]];
+    var d = p.map(function(q, i){ return (i ? "L" : "M") + (ox + q[0]).toFixed(0) + " " + (oy + q[1]).toFixed(0) }).join(" ") + " Z";
+    return '<path d="' + d + '" fill="#eef4f6" stroke="#0a2f38" stroke-width="2.5"/>' + labels;
+  }
+  var g = shape(40, 40, 1,
+      '<text x="26" y="72" font-size="15" font-style="italic" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">x</text>' +
+      '<text x="95" y="112" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">15 cm</text>' +
+      '<path d="M115 64 A18 18 0 0 1 117 79" fill="none" stroke="#7a3b69" stroke-width="2"/>' +
+      '<text x="134" y="82" font-size="13" font-family="Atkinson Hyperlegible, sans-serif">30' + DEG + "</text>");
+  g += shape(250, 58, 0.4,
+      '<text x="240" y="76" font-size="13" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">3 cm</text>' +
+      '<text x="272" y="96" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">6 cm</text>' +
+      '<path d="M281 66 A9 9 0 0 1 283 74" fill="none" stroke="#7a3b69" stroke-width="2"/>' +
+      '<text x="306" y="78" font-size="15" font-style="italic" font-family="Atkinson Hyperlegible, sans-serif">y</text>');
+  return '<svg class="fig" viewBox="0 0 380 130" role="img" aria-label="Two similar arrow shapes, the larger with side 15 cm and angle 30 degrees, the smaller with sides 3 cm and 6 cm">' + g +
+    '<text x="376" y="18" font-size="12" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">Not drawn accurately</text></svg>';
+}
+
+function riceFig(){
+  function packet(ox, oy, w, h, label, price, mass){
+    return '<path d="M' + ox + " " + oy + " q" + (w / 4) + " 8 " + (w / 2) + " 0 q" + (w / 4) + " -8 " + (w / 2) + " 0 L" + (ox + w) + " " + (oy + h) +
+      " q" + (-w / 4) + " -8 " + (-w / 2) + " 0 q" + (-w / 4) + " 8 " + (-w / 2) + ' 0 Z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>' +
+      '<text x="' + (ox + w / 2) + '" y="' + (oy - 10) + '" font-size="14" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800">' + label + "</text>" +
+      '<text x="' + (ox + w / 2) + '" y="' + (oy + h * 0.42) + '" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">Rice</text>' +
+      '<text x="' + (ox + w / 2) + '" y="' + (oy + h * 0.58) + '" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">' + price + "</text>" +
+      '<text x="' + (ox + w / 2) + '" y="' + (oy + h * 0.74) + '" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">' + mass + "</text>";
+  }
+  return '<svg class="fig" viewBox="0 0 340 190" role="img" aria-label="Packet A of rice, 1 pound 10 for 200 grams, and packet B, 2 pounds 60 for 500 grams">' +
+    packet(40, 40, 90, 110, "A", P + "1.10", "200 g") + packet(180, 25, 115, 140, "B", P + "2.60", "500 g") + "</svg>";
+}
+
+function treeFig2(){
+  var g = '<text x="95" y="18" font-size="13" font-family="Archivo, sans-serif" font-weight="800">Spinner 1</text>' +
+    '<text x="248" y="18" font-size="13" font-family="Archivo, sans-serif" font-weight="800">Spinner 2</text>' +
+    '<line x1="40" y1="120" x2="140" y2="60" stroke="#0a2f38" stroke-width="2"/>' +
+    '<line x1="40" y1="120" x2="140" y2="185" stroke="#0a2f38" stroke-width="2"/>' +
+    '<line x1="205" y1="60" x2="290" y2="28" stroke="#0a2f38" stroke-width="2"/>' +
+    '<line x1="205" y1="60" x2="290" y2="95" stroke="#0a2f38" stroke-width="2"/>' +
+    '<line x1="205" y1="185" x2="290" y2="152" stroke="#0a2f38" stroke-width="2"/>' +
+    '<line x1="205" y1="185" x2="290" y2="218" stroke="#0a2f38" stroke-width="2"/>' +
+    '<text x="172" y="65" font-size="14" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">Red</text>' +
+    '<text x="172" y="190" font-size="14" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">Green</text>' +
+    '<text x="296" y="32" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Red</text>' +
+    '<text x="296" y="99" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Green</text>' +
+    '<text x="296" y="156" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Red</text>' +
+    '<text x="296" y="222" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Green</text>' +
+    '<text x="82" y="78" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">3/8</text>' +
+    '<text x="76" y="158" font-size="14" fill="#ef7724" font-family="Atkinson Hyperlegible, sans-serif">?</text>' +
+    '<text x="228" y="44" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">1/5</text>' +
+    '<text x="228" y="82" font-size="14" fill="#ef7724" font-family="Atkinson Hyperlegible, sans-serif">?</text>' +
+    '<text x="228" y="166" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">1/5</text>' +
+    '<text x="228" y="206" font-size="14" fill="#ef7724" font-family="Atkinson Hyperlegible, sans-serif">?</text>';
+  return '<svg class="fig" viewBox="0 0 350 240" role="img" aria-label="A probability tree for two spinners, with three branches missing">' + g + "</svg>";
+}
+
+function seriesFig(){
+  var x0 = 70, y0 = 250, x1 = 420, y1 = 30, g = "", i;
+  function px(d){ return x0 + d / 7.5 * (x1 - x0) }
+  function py(v){ return y0 + v / 110000 * (y1 - y0) }
+  for(i = 0; i <= 7; i++) g += '<line x1="' + px(i) + '" y1="' + py(0) + '" x2="' + px(i) + '" y2="' + py(110000) + '" stroke="#e3ecee" stroke-width="1"/>';
+  for(i = 0; i <= 110000; i += 10000) g += '<line x1="' + px(0) + '" y1="' + py(i) + '" x2="' + px(7.5) + '" y2="' + py(i) + '" stroke="#e3ecee" stroke-width="1"/>';
+  g += '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + px(7.5) + '" y2="' + py(0) + '" stroke="#0a2f38" stroke-width="2"/>';
+  g += '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + px(0) + '" y2="' + py(110000) + '" stroke="#0a2f38" stroke-width="2"/>';
+  for(i = 1; i <= 7; i++) g += '<text x="' + px(i) + '" y="' + (py(0) + 18) + '" font-size="12" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">' + i + "</text>";
+  for(i = 0; i <= 100000; i += 20000) g += '<text x="' + (px(0) - 8) + '" y="' + (py(i) + 4) + '" font-size="11" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">' + (i / 1000) + "k</text>";
+  g += '<text x="' + px(3.75) + '" y="' + (py(0) + 38) + '" font-size="13" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">Day</text>';
+  g += '<text x="20" y="' + py(55000) + '" font-size="12" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" transform="rotate(-90 20 ' + py(55000) + ')">Number of views</text>';
+  var pts = [[1,49000],[2,95000],[3,87000],[4,77000],[5,64000],[6,48000]];
+  var d = pts.map(function(q, k){ return (k ? "L" : "M") + px(q[0]).toFixed(1) + " " + py(q[1]).toFixed(1) }).join(" ");
+  g += '<path d="' + d + '" fill="none" stroke="#007291" stroke-width="2.5"/>';
+  pts.forEach(function(q){
+    var x = px(q[0]), y = py(q[1]);
+    g += '<path d="M' + (x - 5) + " " + (y - 5) + "L" + (x + 5) + " " + (y + 5) + "M" + (x + 5) + " " + (y - 5) + "L" + (x - 5) + " " + (y + 5) + '" stroke="#0a2f38" stroke-width="2"/>';
+  });
+  g += '<path d="M' + px(6).toFixed(1) + " " + py(48000).toFixed(1) + "L" + px(7).toFixed(1) + " " + py(32000).toFixed(1) + '" stroke="#ef7724" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  g += '<text x="' + px(6.2) + '" y="' + py(20000) + '" font-size="12" fill="#b4560f" font-family="Atkinson Hyperlegible, sans-serif">day 7?</text>';
+  return '<svg class="fig" viewBox="0 0 450 300" role="img" aria-label="Time series graph of views over six days, falling after day 2, with a dashed line continuing to day 7">' + g + "</svg>";
+}
+
+function sectorFig(){
+  var cx = 150, cy = 130, r = 88;
+  return '<svg class="fig" viewBox="0 0 380 260" role="img" aria-label="A circle centre O with a quarter shaded between the upward radius and the rightward radius">' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#fff" stroke="#0a2f38" stroke-width="2.5"/>' +
+    '<path d="M' + cx + " " + cy + "L" + cx + " " + (cy - r) + " A" + r + " " + r + " 0 0 1 " + (cx + r) + " " + cy + ' Z" fill="#cfdde1" stroke="#0a2f38" stroke-width="2.5"/>' +
+    '<text x="' + (cx - 18) + '" y="' + (cy + 16) + '" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">O</text>' +
+    '<text x="' + (cx + 10) + '" y="' + (cy - 12) + '" font-size="14" font-style="italic" font-family="Atkinson Hyperlegible, sans-serif">x</text>' +
+    '<text x="260" y="40" font-size="12" font-family="Atkinson Hyperlegible, sans-serif">Not drawn</text>' +
+    '<text x="260" y="56" font-size="12" font-family="Atkinson Hyperlegible, sans-serif">accurately</text>' +
+    '<text x="250" y="140" font-size="13" font-family="Atkinson Hyperlegible, sans-serif">Circumference</text>' +
+    '<text x="250" y="158" font-size="13" font-family="Atkinson Hyperlegible, sans-serif">= 20 cm</text>' +
+    "</svg>";
+}
+
+function triFig(){
+  return '<svg class="fig" viewBox="0 0 360 200" role="img" aria-label="A right angled triangle with base 4 cm, an angle of 36 degrees at the base right, and the height marked x">' +
+    '<path d="M80 165 L80 45 L250 165 Z" fill="#eef4f6" stroke="#0a2f38" stroke-width="2.5"/>' +
+    '<path d="M80 145 L100 145 L100 165" fill="none" stroke="#0a2f38" stroke-width="2"/>' +
+    '<path d="M215 165 A36 36 0 0 0 232 152" fill="none" stroke="#7a3b69" stroke-width="2"/>' +
+    '<text x="206" y="158" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">36' + DEG + "</text>" +
+    '<text x="70" y="108" font-size="15" font-style="italic" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">x</text>' +
+    '<text x="165" y="186" font-size="14" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif">4 cm</text>' +
+    '<text x="352" y="40" font-size="12" text-anchor="end" font-family="Atkinson Hyperlegible, sans-serif">Not drawn accurately</text>' +
+    "</svg>";
+}
+
+/* ---------- questions ---------- */
+
+var QS = [
+{id:"q1", n:"1", marks:3, kit:"solve", title:"Solving one step equations",
+ intro:"<p>Three quick ones. In each, work out the letter.</p>",
+ asks:"Each equation needs one step to undo. Ask what has been done to the letter, then do the opposite.",
+ marklist:["One mark for each answer"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Solve w + 8 = 19", ans:11, hint:"Something plus 8 makes 19. Take 8 off both sides."},
+  {kind:"num", marks:1, prompt:"Solve 3x = 24", ans:8, hint:"3x means 3 lots of x. Divide both sides by 3."},
+  {kind:"num", marks:1, prompt:"Solve 20 - y = 7", ans:13, hint:"20 take away something leaves 7. What was taken away?"}
+ ],
+ sol:[
+  {w:"w + 8 = 19\nw = 19 - 8 = 11", n:"Mark one. Check it: 11 + 8 = 19."},
+  {w:"3x = 24\nx = 24 " + DIV + " 3 = 8", n:"Mark two."},
+  {w:"20 - y = 7\ny = 20 - 7 = 13", n:"Mark three. The trap here is answering -13 or 27. Check it: 20 - 13 = 7."},
+  {w:"", n:"Write the answer as a number only. Writing 11 + 8 = 19 on the answer line instead of 11 scores nothing."}
+ ],
+ slip:"In the third one, subtracting the wrong way round and answering 27."},
+
+{id:"q2", n:"2", marks:2, kit:"ratio", title:"Sheep and cows",
+ intro:"<p>The only animals in a field are sheep and cows. The ratio <b>sheep : cows = 31 : 47</b>, and there are <b>fewer than 100 animals</b> in the field.</p>",
+ asks:"The trick is the words fewer than 100. Add the parts of the ratio and see what that tells you.",
+ marklist:["One mark for 47 cows", "One mark for 78 animals altogether"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How many cows are in the field?", ans:47,
+   hint:"31 + 47 = 78, which is already under 100. Doubling it would be 156, which is too many. So the ratio numbers are the actual numbers."},
+  {kind:"num", marks:1, prompt:"How many animals are there in total?", ans:78,
+   hint:"31 sheep and 47 cows."}
+ ],
+ sol:[
+  {w:"31 + 47 = 78 animals, which is under 100\nDoubling gives 62 : 94 = 156 animals, which is over 100", n:"So the only possibility is 31 sheep and 47 cows themselves."},
+  {w:"Cows = 47\nTotal = 78", n:"Both marks. Questions that give a ratio and a limit are usually asking you to test whether the ratio can be scaled up."}
+ ],
+ slip:"Trying to share 100 in the ratio 31 : 47, which is not what the question says."},
+
+{id:"q3a", n:"3 (a)", marks:1, kit:"compass", title:"The direction of B from A",
+ intro:"<p>A path joins points A, B and C on a centimetre grid.</p>" + pathFig(),
+ asks:"A compass direction. North is marked, so work out which way you travel to get from A to B.",
+ marklist:["One mark for East"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"What is the direction of B from A?",
+   opts:["East", "West", "North", "South"], ans:0,
+   hint:"Stand at A and look at B. North is up the page, so right is East."}
+ ],
+ sol:[
+  {w:"North is up. B is directly to the right of A, so B is East of A.", n:"The mark. Due East, Easterly, E or 090 all count. Right does not."},
+  {w:"", n:"Never Eat Shredded Wheat, going clockwise from the top: North, East, South, West."}
+ ],
+ slip:"Answering right, which is a direction on the page rather than a compass direction."},
+
+{id:"q3b", n:"3 (b)", marks:2, kit:"compass", title:"The actual distance along the path",
+ intro:"<p>Work out the <b>actual</b> distance along the path from A to C. The scale is 1 cm represents 10 m.</p>",
+ asks:"Along the path means A to B and then B to C, not the straight line from A to C. Measure in squares, then scale up.",
+ marklist:["One mark for a correct method, such as 4 " + X + " 10 or 3 " + X + " 10",
+           "One mark for 70 metres"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How many centimetres is the path altogether on the drawing?", ans:7, unit:"cm",
+   hint:"A to B is 4 squares across, and B to C is 3 squares up."},
+  {kind:"num", marks:1, prompt:"So what is the actual distance, in metres?", ans:70, unit:"m",
+   hint:"Every 1 cm on the drawing is 10 m in real life."}
+ ],
+ sol:[
+  {w:"A to B = 4 cm, B to C = 3 cm\nTotal on the drawing = 7 cm", n:"Mark one. Count the grid squares rather than guessing."},
+  {w:"7 " + X + " 10 = 70 metres", n:"Mark two. Units matter here, and the question asks for metres."},
+  {w:"", n:"An answer of 50 m comes from measuring the straight line A to C, and only earns a special case mark."}
+ ],
+ slip:"Using the diagonal from A to C instead of going along the path."},
+
+{id:"q4", n:"4", marks:4, kit:"simplify", title:"Simplifying algebra",
+ intro:"<p>Four short ones. Simplify each expression.</p>",
+ asks:"Each one tests a different rule: multiplying letters, adding the same letter, powers, and dividing by itself.",
+ marklist:["One mark for each answer"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Simplify a " + X + " b", accept:["ab","ba"],
+   hint:"When letters are multiplied, the times sign disappears and they sit together."},
+  {kind:"frac", marks:1, prompt:"Simplify fully c + c + c", accept:["3c"],
+   hint:"Three lots of c. This one is adding, not multiplying."},
+  {kind:"frac", marks:1, prompt:"Simplify fully p " + X + " p " + X + " p. Type it as p^3", accept:["p^3","p3"],
+   hint:"Three p's multiplied together is p to the power 3."},
+  {kind:"num", marks:1, prompt:"Simplify d " + DIV + " d", ans:1,
+   hint:"Anything divided by itself, as long as it is not zero."}
+ ],
+ sol:[
+  {w:"a " + X + " b = ab", n:"Mark one. a " + X + " b written out does not count as simplified."},
+  {w:"c + c + c = 3c", n:"Mark two. Not c" + SQ3 + ": adding gives a number in front, multiplying gives a power."},
+  {w:"p " + X + " p " + X + " p = p" + SQ3, n:"Mark three. This is the pair to the one above, and the two get swapped constantly."},
+  {w:"d " + DIV + " d = 1", n:"Mark four. One d shared between one d. Not d/d, and not 0."}
+ ],
+ slip:"Writing 3c for p " + X + " p " + X + " p and p" + SQ3 + " for c + c + c, which loses both marks at once."},
+
+{id:"q5", n:"5", marks:2, kit:"units", title:"Show that Jenny walks more than 1 kilometre",
+ intro:"<p>Jenny walks <b>400 metres</b> to the shop, <b>250 metres</b> to the park, and <b>380 metres</b> home.</p>" +
+   "<p>Show that Jenny walks more than 1 kilometre.</p>",
+ asks:"A show that question, so the working is the answer. Add the distances, then compare with 1 km in the same unit.",
+ marklist:["One mark for adding the three distances, or for converting to kilometres",
+           "One mark for showing 1030 next to 1000, or 1.03 next to 1"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How far does Jenny walk altogether, in metres?", ans:1030, unit:"m",
+   hint:"400 + 250 + 380."},
+  {kind:"choice", marks:1, prompt:"Which line finishes the argument?",
+   opts:["1 km = 1000 m, and 1030 m is more than 1000 m", "1030 m is a long way", "1030 m is about 1 km", "1030 " + DIV + " 1000 = 1.03 km, which is roughly 1 km"], ans:0,
+   hint:"Both numbers have to be in the same unit, and you have to say which is bigger."}
+ ],
+ sol:[
+  {w:"400 + 250 + 380 = 1030 m", n:"Mark one."},
+  {w:"1 km = 1000 m\n1030 m > 1000 m, so Jenny walks more than 1 km", n:"Mark two. Writing 1.03 km and 1 km earns it too. What does not earn it is stopping at 1030."},
+  {w:"", n:"In a show that question the conclusion has to be written down, even when it looks obvious."}
+ ],
+ slip:"Leaving the answer as 1030 with no mention of 1000 or 1 km."},
+
+{id:"q6", n:"6", marks:4, kit:"bar", title:"Completing the bar chart",
+ intro:"<p>50 people each choose one of bear, rhino, ox or lion as a mascot.</p>" + barFig() +
+   "<p>Complete the bar chart.</p>",
+ asks:"Read the three bars you have, take them off 50, then draw the fourth bar to match the others.",
+ marklist:["One mark for reading the three bars",
+           "One mark for 50 - 11 - 20 - 14",
+           "Two marks for a bar at height 5, the same width as the others, with equal gaps and straight lines"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What do the three bars add up to? (bear, rhino, ox)", ans:45,
+   hint:"Read the heights carefully against the scale: the gridlines go up in 2s, so bear is 11, not 10."},
+  {kind:"num", marks:1, prompt:"So how tall should the lion bar be?", ans:5,
+   hint:"50 people altogether, minus the ones already shown."},
+  {kind:"choice", marks:2, prompt:"Apart from the height, what does the lion bar need to get both drawing marks?",
+   opts:["The same width as the others, equal gaps, and straight lines",
+         "Shading in the same colour, and a label", "To be the tallest bar", "Nothing else, height is all that is marked"], ans:0,
+   hint:"Two of the four marks are for drawing it properly, not for the number."}
+ ],
+ sol:[
+  {w:"Bear 11, rhino 20, ox 14\n11 + 20 + 14 = 45", n:"Mark one. Reading 11 correctly off a scale going up in 2s is part of the test."},
+  {w:"50 - 45 = 5, so the lion bar is 5 tall", n:"Mark two."},
+  {w:"Draw it the same width as the others, with the same gaps, using a ruler.", n:"Marks three and four. The mark scheme lists four things: right height, same width, equal gaps, straight lines."}
+ ],
+ slip:"Reading bear as 10 because the gridlines are in 2s, which makes the last bar 6."},
+
+{id:"q7", n:"7", marks:2, kit:"frac", title:"80p as a fraction of " + P + "1",
+ intro:"<p>Work out <b>80p as a fraction of " + P + "1</b>. Give your answer in its simplest form.</p>",
+ asks:"Same units first. Turn the pound into pence, then write the fraction and simplify it.",
+ marklist:["One mark for 80/100, or another equivalent fraction",
+           "One mark for 4/5"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Write it as a fraction before simplifying.", accept:["80/100"],
+   hint:P + "1 is 100p, so it is 80 out of 100."},
+  {kind:"frac", marks:1, prompt:"Now write it in its simplest form.", accept:["4/5"],
+   hint:"80 and 100 both divide by 20."}
+ ],
+ sol:[
+  {w:P + "1 = 100p\nSo it is 80/100", n:"Mark one. Mixing units, as in 80p over " + P + "1, earns nothing."},
+  {w:"80/100 = 4/5 (both divide by 20)", n:"Mark two. Simplest form means nothing divides into both any more."},
+  {w:"", n:"0.8 or 80% on their own earn one mark only. The question asks for a fraction."}
+ ],
+ slip:"Answering 0.8, which is the right value in the wrong form."},
+
+{id:"q8", n:"8", marks:4, kit:"units", title:"Three conversions",
+ intro:"<p>Three conversions. The last one gives you the rule to use.</p>",
+ asks:"Each needs a different fact: 60 minutes in an hour, 1000 grams in a kilogram, and the 8 km to 5 miles rule you are given.",
+ marklist:["One mark for 210 minutes", "One mark for 1.4 kilograms",
+           "One mark for a method, such as 32 " + DIV + " 8", "One mark for 20 miles"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Convert 3 1/2 hours to minutes.", ans:210, unit:"minutes",
+   hint:"3 hours is 180 minutes, and half an hour is another 30."},
+  {kind:"num", marks:1, prompt:"Convert 1400 grams to kilograms.", ans:1.4, tol:0.001, unit:"kg",
+   hint:"1000 g in a kilogram, so divide by 1000."},
+  {kind:"num", marks:1, prompt:"Using 8 km = 5 miles, how many lots of 8 km are in 32 km?", ans:4,
+   hint:"32 " + DIV + " 8."},
+  {kind:"num", marks:1, prompt:"So convert 32 kilometres to miles.", ans:20, unit:"miles",
+   hint:"Four lots of 8 km, so four lots of 5 miles."}
+ ],
+ sol:[
+  {w:"3.5 " + X + " 60 = 210 minutes", n:"Mark one."},
+  {w:"1400 " + DIV + " 1000 = 1.4 kg", n:"Mark two. Kilo means a thousand, and the answer should be smaller than the number of grams."},
+  {w:"32 " + DIV + " 8 = 4, so 4 " + X + " 5 = 20 miles", n:"Marks three and four. Scaling the given fact up is safer than remembering a rate."},
+  {w:"", n:"Sense check: miles are longer than kilometres, so the number of miles must be smaller. 20 is smaller than 32."}
+ ],
+ slip:"Multiplying instead of dividing and getting 51.2 miles, which is more than the kilometres."},
+
+{id:"q9a", n:"9 (a)", marks:1, kit:"time", title:"What time did Margot finish?",
+ intro:'<p>The table shows information about two workers on one day.</p>' +
+   '<table class="tbl"><tr><th></th><th>Total working time (hours)</th><th>Working time spent online (minutes)</th></tr>' +
+   '<tr><td>Zeke</td><td>8</td><td>200</td></tr><tr><td>Margot</td><td>4</td><td>110</td></tr></table>' +
+   "<p>Margot started work at <b>10:30 am</b>. What time did she finish?</p>",
+ asks:"Add her working hours to her start time. The answer needs am or pm, or the 24 hour version.",
+ marklist:["One mark for 2:30 pm or 14:30"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"What time did Margot finish?",
+   opts:["2:30 pm", "2:30 am", "14:30 am", "1:30 pm"], ans:0,
+   hint:"10:30 plus 4 hours. Going past 12 noon means the afternoon."}
+ ],
+ sol:[
+  {w:"10:30 + 4 hours = 14:30, which is 2:30 pm", n:"The mark. 2:30 on its own does not get it, because it could be the middle of the night."},
+  {w:"", n:"Count on in steps if it helps: 11:30, 12:30, 13:30, 14:30."}
+ ],
+ slip:"Writing 2:30 with no am or pm, which the mark scheme does not accept."},
+
+{id:"q9b", n:"9 (b)", marks:3, kit:"frac", title:"Is Zeke right about a quarter?",
+ intro:"<p>Zeke says he spent <b>more than one quarter</b> of his total working time online. He worked <b>8 hours</b> and spent <b>200 minutes</b> online.</p>" +
+   "<p>Is he correct? Show working to support your answer.</p>",
+ asks:"Hours and minutes in the same question, so convert first. Then compare a quarter of his day with 200 minutes.",
+ marklist:["One mark for converting, such as 8 hours = 480 minutes",
+           "One mark for a quarter of the working time",
+           "One mark for the comparison and Yes"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How many minutes did Zeke work altogether?", ans:480, unit:"minutes",
+   hint:"8 hours, and each hour is 60 minutes."},
+  {kind:"num", marks:1, prompt:"What is one quarter of that?", ans:120, unit:"minutes",
+   hint:"480 " + DIV + " 4."},
+  {kind:"choice", marks:1, prompt:"So is Zeke correct?",
+   opts:["Yes: 200 minutes is more than 120 minutes", "No: 200 minutes is less than a quarter", "You cannot tell without knowing his breaks"], ans:0,
+   hint:"Compare the 200 minutes he spent online with the quarter you just worked out."}
+ ],
+ sol:[
+  {w:"8 hours = 8 " + X + " 60 = 480 minutes", n:"Mark one. Everything in minutes, because that is what the online time is given in."},
+  {w:"A quarter of 480 = 480 " + DIV + " 4 = 120 minutes", n:"Mark two."},
+  {w:"200 > 120, so yes, Zeke is correct (80 minutes more)", n:"Mark three. Tick the box AND show the numbers: a tick on its own earns nothing."},
+  {w:"", n:"Another route: 200 " + DIV + " 480 = 0.4166, which is bigger than 0.25. Either way works."}
+ ],
+ slip:"Comparing 200 minutes with a quarter of 8, which is 2, and mixing the units up."},
+
+{id:"q10a", n:"10 (a)", marks:1, kit:"similar", title:"The angle in the smaller shape",
+ intro:"<p>These two shapes are similar.</p>" + similarFig() + "<p>Write down the value of y.</p>",
+ asks:"Similar means the same shape at a different size. The sides change, but the angles stay exactly the same.",
+ marklist:["One mark for 30"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is the value of y, in degrees?", ans:30, unit:DEG,
+   hint:"y is in the same position as the 30 degree angle in the bigger shape, and similar shapes have equal angles."}
+ ],
+ sol:[
+  {w:"Similar shapes have equal angles, so y = 30" + DEG, n:"The mark, and no calculation needed. The word similar is doing all the work."},
+  {w:"", n:"Do not scale the angle. Halving it to 15, or dividing by 2.5, is the classic mistake here."}
+ ],
+ slip:"Scaling the angle down because the shape is smaller."},
+
+{id:"q10b", n:"10 (b)", marks:2, kit:"similar", title:"The missing length",
+ intro:"<p>Work out the value of x, in centimetres.</p>",
+ asks:"Find the scale factor between the two shapes using the pair of sides you know, then use it on the side you want.",
+ marklist:["One mark for a correct method, such as 15 " + DIV + " 6",
+           "One mark for 7.5 cm"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How many times bigger is the large shape? (15 cm against 6 cm)", ans:2.5, tol:0.01,
+   hint:"15 " + DIV + " 6."},
+  {kind:"num", marks:1, prompt:"So what is x, in centimetres?", ans:7.5, tol:0.01, unit:"cm",
+   hint:"The matching side on the small shape is 3 cm, and the big shape is 2.5 times bigger."}
+ ],
+ sol:[
+  {w:"Scale factor = 15 " + DIV + " 6 = 2.5", n:"Mark one. Always pair up the sides that match: 15 goes with 6."},
+  {w:"x = 3 " + X + " 2.5 = 7.5 cm", n:"Mark two. Sense check: x is on the bigger shape, so it must be more than 3."},
+  {w:"", n:"The other route is 3 " + DIV + " 6 = 0.5, then 15 " + X + " 0.5 = 7.5. Same answer, same marks."}
+ ],
+ slip:"Dividing when you should multiply and getting 1.2, which is smaller than the small shape's side."},
+
+{id:"q11", n:"11", marks:3, kit:"expand", title:"Show that A and B are equivalent",
+ intro:'<p>Here are two expressions.</p><p style="font-size:19px"><b>A = 7(x - 2) + 4x + 6</b><br><b>B = 5(3x + 2) - 4x - 18</b></p>' +
+   "<p>Show that A and B are equivalent.</p>",
+ asks:"Expand both, tidy both, and show they end up the same. Equivalent means identical once simplified.",
+ marklist:["One mark for expanding one bracket",
+           "One mark for simplifying one expression fully",
+           "One mark for both simplified to 11x - 8"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"Expanding 7(x - 2) gives:",
+   opts:["7x - 14", "7x - 2", "7x + 14", "x - 14"], ans:0,
+   hint:"The 7 multiplies both things inside the bracket."},
+  {kind:"choice", marks:1, prompt:"So A simplifies to:",
+   opts:["11x - 8", "11x + 8", "7x - 8", "11x - 20"], ans:0,
+   hint:"7x - 14 + 4x + 6. Collect the x terms (7x + 4x) and the numbers (-14 + 6)."},
+  {kind:"choice", marks:1, prompt:"And B, which is 5(3x + 2) - 4x - 18, simplifies to:",
+   opts:["11x - 8, so A and B are equivalent", "15x - 8", "11x + 28", "19x - 8"], ans:0,
+   hint:"5(3x + 2) is 15x + 10. Then 15x - 4x = 11x, and 10 - 18 = -8."}
+ ],
+ sol:[
+  {w:"A: 7(x - 2) + 4x + 6\n= 7x - 14 + 4x + 6\n= 11x - 8", n:"Marks one and two. Both lines are worth writing out."},
+  {w:"B: 5(3x + 2) - 4x - 18\n= 15x + 10 - 4x - 18\n= 11x - 8", n:"Mark three, once both come to the same thing."},
+  {w:"Both simplify to 11x - 8, so A and B are equivalent.", n:"Say it. In a show that question the sentence at the end is part of the answer."},
+  {w:"", n:"Substituting a number, such as x = 1, into both is not accepted here. It shows they agree once, not always."}
+ ],
+ slip:"Forgetting the sign: 5(3x + 2) - 4x - 18 gives 10 - 18 = -8, not +28."},
+
+{id:"q12", n:"12", marks:2, kit:"propn", title:"The cost of 7 apples",
+ intro:"<p>4 apples cost <b>" + P + "2.20</b>. Work out the cost of <b>7</b> of these apples.</p>",
+ asks:"Find one, then scale up. A calculator makes this two button presses, so the marks are for choosing the right two.",
+ marklist:["One mark for 2.20 " + DIV + " 4, or another correct method",
+           "One mark for " + P + "3.85"],
+ parts:[
+  {kind:"num", marks:1, prompt:"How much is one apple?", ans:0.55, tol:0.001, unit:P,
+   hint:"2.20 " + DIV + " 4."},
+  {kind:"num", marks:1, prompt:"So how much are 7 apples?", ans:3.85, tol:0.001, unit:P,
+   hint:"0.55 " + X + " 7."}
+ ],
+ sol:[
+  {w:"One apple: 2.20 " + DIV + " 4 = " + P + "0.55", n:"Mark one."},
+  {w:"Seven apples: 0.55 " + X + " 7 = " + P + "3.85", n:"Mark two. Money answers get two decimal places."},
+  {w:"", n:"Writing 385p is fine, but 3.85p is not: that would be under four pence."}
+ ],
+ slip:"Answering 3.85p instead of " + P + "3.85, which the mark scheme penalises."},
+
+{id:"q13a", n:"13 (a)", marks:1, kit:"stats", title:"The range",
+ intro:"<p>Ingrid records the minutes she uses her phone over four weeks:</p>" +
+   '<p style="font-size:19px"><b>140 &nbsp; 168 &nbsp; 205 &nbsp; 192</b></p><p>Work out the range.</p>',
+ asks:"Range is one subtraction: biggest take smallest.",
+ marklist:["One mark for 65"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is the range, in minutes?", ans:65, unit:"minutes",
+   hint:"The biggest is 205 and the smallest is 140."}
+ ],
+ sol:[
+  {w:"205 - 140 = 65 minutes", n:"The mark. Range measures spread, so it is always a single number, never a pair."}
+ ],
+ slip:"Writing 140 to 205, which describes the spread but is not the range."},
+
+{id:"q13b", n:"13 (b)", marks:3, kit:"stats", title:"The fifth week",
+ intro:"<p>Ingrid records a fifth week. The <b>mean for all five weeks is 178 minutes</b>. Work out the minutes used in the fifth week.</p>",
+ asks:"Working backwards from a mean. The mean times how many there are gives the total, and the total is what you can work with.",
+ marklist:["One mark for 178 " + X + " 5",
+           "One mark for subtracting the four known weeks",
+           "One mark for 185"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What must the five weeks add up to?", ans:890,
+   hint:"Mean = total " + DIV + " how many. So total = mean " + X + " 5."},
+  {kind:"num", marks:1, prompt:"What do the first four weeks add up to?", ans:705,
+   hint:"140 + 168 + 205 + 192."},
+  {kind:"num", marks:1, prompt:"So how many minutes in the fifth week?", ans:185, unit:"minutes",
+   hint:"890 - 705."}
+ ],
+ sol:[
+  {w:"Total for five weeks = 178 " + X + " 5 = 890", n:"Mark one. This is the step that unlocks the question."},
+  {w:"First four weeks = 140 + 168 + 205 + 192 = 705", n:"Mark two."},
+  {w:"Fifth week = 890 - 705 = 185 minutes", n:"Mark three. Check: (705 + 185) " + DIV + " 5 = 178."},
+  {w:"", n:"Trial and improvement can score full marks here, but only if a trial of 185 is shown with the mean worked out."}
+ ],
+ slip:"Averaging the four weeks and comparing with 178 without ever finding the total."},
+
+{id:"q14", n:"14", marks:4, kit:"simplify", title:"Matching descriptions to expressions",
+ intro:"<p>Match each description to the correct expression. The expressions available are:</p>" +
+   '<p style="font-size:18px"><b>2n &nbsp;&nbsp; n + 2 &nbsp;&nbsp; ' + ROOT + 'n &nbsp;&nbsp; n/2 &nbsp;&nbsp; n - 2 &nbsp;&nbsp; n' + SQ2 + ' &nbsp;&nbsp; 2 - n</b></p>' +
+   "<p>2 more than n has been matched to n + 2 for you.</p>",
+ asks:"Four matches, one mark each. Two pairs are easy to swap: doubled against squared, and 2 less than n against 2 minus n.",
+ marklist:["One mark for each correct match"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"n doubled", opts:["2n", "n" + SQ2, "n/2", "2 - n"], ans:0,
+   hint:"Doubled means two lots of it."},
+  {kind:"choice", marks:1, prompt:"n multiplied by itself", opts:["n" + SQ2, "2n", ROOT + "n", "n + 2"], ans:0,
+   hint:"n " + X + " n. Multiplying a number by itself is squaring it."},
+  {kind:"choice", marks:1, prompt:"half of n", opts:["n/2", "2 - n", "2n", ROOT + "n"], ans:0,
+   hint:"Half means divided by 2."},
+  {kind:"choice", marks:1, prompt:"2 less than n", opts:["n - 2", "2 - n", "n/2", "2n"], ans:0,
+   hint:"Start at n and take 2 away. The order matters: 2 - n would be 2 take away n."}
+ ],
+ sol:[
+  {w:"n doubled = 2n\nn multiplied by itself = n" + SQ2, n:"Marks one and two. 2n means n + n, while n" + SQ2 + " means n " + X + " n. They only agree when n is 2."},
+  {w:"half of n = n/2\n2 less than n = n - 2", n:"Marks three and four."},
+  {w:"Left over: " + ROOT + "n (the square root of n) and 2 - n (2 take away n)", n:"Checking which are left over is a good way to catch a mistake."}
+ ],
+ slip:"Matching 2 less than n to 2 - n, which reverses the subtraction."},
+
+{id:"q15", n:"15", marks:1, kit:"perim", title:"Is Warren correct?",
+ intro:"<p>A rectangle has an <b>area of 60 cm" + SQ2 + "</b> and a <b>side length of 10 cm</b>.</p>" +
+   '<p>Warren says: "The perimeter of the rectangle is 32 cm because 60 ' + DIV + ' 10 = 6"</p><p>Is Warren correct? Show working to support your answer.</p>',
+ asks:"His answer is right, but the reason he gives is only half the story. The mark is for showing the perimeter working.",
+ marklist:["One mark for Yes, with working that shows the perimeter, such as 6 + 10 + 6 + 10"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"Which response earns the mark?",
+   opts:["Yes: the other side is 6 cm, and 6 + 10 + 6 + 10 = 32 cm",
+         "Yes, because 60 " + DIV + " 10 = 6",
+         "No, because the perimeter is 60 cm",
+         "Yes, the sides are 10 and 6"], ans:0,
+   hint:"Dividing gives the missing side. The perimeter needs all four sides added, and that working has to be written down."}
+ ],
+ sol:[
+  {w:"Area " + DIV + " one side = other side\n60 " + DIV + " 10 = 6 cm", n:"Warren got this far, and it is correct as far as it goes."},
+  {w:"Perimeter = 6 + 10 + 6 + 10 = 32 cm, so yes.", n:"The mark. 2 " + X + " (10 + 6) = 32 earns it too."},
+  {w:"", n:"Ticking Yes and repeating his reason scores nothing, because his reason does not mention the perimeter at all."}
+ ],
+ slip:"Ticking the box without adding the four sides, which is exactly what the mark is for."},
+
+{id:"q16", n:"16", marks:1, kit:"solve", title:"Rearranging a + 3 = b",
+ intro:"<p>Rearrange <b>a + 3 = b</b> to make a the subject.</p>",
+ asks:"Make a the subject means end up with a on its own on one side.",
+ marklist:["One mark for a = b - 3"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Write a = ...", accept:["b-3","b - 3","-3+b"],
+   hint:"Take 3 away from both sides. Whatever you do to one side, do to the other."}
+ ],
+ sol:[
+  {w:"a + 3 = b\na = b - 3", n:"The mark. Check by putting it back: (b - 3) + 3 = b."},
+  {w:"", n:"3 - b is not accepted: subtraction does not flip round like that."}
+ ],
+ slip:"Answering 3 - b, or changing the letter to B - 3 in a way that is not clear."},
+
+{id:"q17", n:"17", marks:3, kit:"value", title:"Which packet of rice is better value?",
+ intro:"<p>Which packet is better value for money? You must show your working.</p>" + riceFig(),
+ asks:"Better value needs a fair comparison, so work out the same thing for both packets: the cost of the same amount.",
+ marklist:["One mark for a method for one packet",
+           "One mark for comparable values for both packets",
+           "One mark for B, with the two numbers that prove it"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Packet A: what does 100 g cost, in pence?", ans:55, tol:0.5, unit:"p",
+   hint:P + "1.10 is 110p for 200 g, so halve it for 100 g."},
+  {kind:"num", marks:1, prompt:"Packet B: what does 100 g cost, in pence?", ans:52, tol:0.5, unit:"p",
+   hint:"260p for 500 g. Divide by 5."},
+  {kind:"choice", marks:1, prompt:"So which is better value?",
+   opts:["B, because 52p per 100 g is less than 55p per 100 g", "A, because it is cheaper to buy", "B, because it is a bigger packet", "They are the same value"], ans:0,
+   hint:"Better value means less money for the same amount, not a smaller price tag."}
+ ],
+ sol:[
+  {w:"A: 110p " + DIV + " 200 g = 0.55p per gram, so 55p per 100 g", n:"Mark one."},
+  {w:"B: 260p " + DIV + " 500 g = 0.52p per gram, so 52p per 100 g", n:"Mark two. Any matching pair works: per gram, per 100 g, or grams per pound."},
+  {w:"B is better value, because 52p < 55p for the same amount of rice.", n:"Mark three. Both numbers and the conclusion, otherwise it is just a guess."},
+  {w:"", n:"Saying A is cheaper earns nothing: A costs less, but you get less. Value is about the rate."}
+ ],
+ slip:"Comparing " + P + "1.10 with " + P + "2.60 and choosing A, which ignores the amount of rice."},
+
+{id:"q18a", n:"18 (a)", marks:1, kit:"ratio", title:"From a fraction to a ratio",
+ intro:'<p style="font-size:19px"><b>number of days using bus / number of days using train = 1/8</b></p>' +
+   "<p>Write down the ratio <b>bus : train</b>.</p>",
+ asks:"A fraction compares one part with another here, so it turns straight into a ratio.",
+ marklist:["One mark for 1 : 8"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Write the ratio bus : train", accept:["1:8","1 : 8"],
+   hint:"The top of the fraction is the bus, the bottom is the train."}
+ ],
+ sol:[
+  {w:"bus/train = 1/8, so bus : train = 1 : 8", n:"The mark. Order matters: 8 : 1 is the same information the wrong way round, and scores nothing."}
+ ],
+ slip:"Writing 8 : 1."},
+
+{id:"q18b", n:"18 (b)", marks:2, kit:"ratio", title:"In the form n : 1",
+ intro:"<p>Write the ratio <b>6a : 5a</b> in the form <b>n : 1</b>, where n is a decimal.</p>",
+ asks:"The a cancels, then divide both sides by the right hand number to make it 1.",
+ marklist:["One mark for 6 : 5, or for 6 " + DIV + " 5",
+           "One mark for 1.2 : 1"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Simplify 6a : 5a first.", accept:["6:5","6 : 5"],
+   hint:"Both sides have an a, so it cancels."},
+  {kind:"num", marks:1, prompt:"Now write it as n : 1. What is n?", ans:1.2, tol:0.001,
+   hint:"Divide both sides by 5: 6 " + DIV + " 5 and 5 " + DIV + " 5."}
+ ],
+ sol:[
+  {w:"6a : 5a = 6 : 5", n:"Mark one. Letters that appear on both sides cancel, exactly like a common factor."},
+  {w:"6 " + DIV + " 5 = 1.2, so the ratio is 1.2 : 1", n:"Mark two. To get a 1 on the right, divide both sides by the right hand number."},
+  {w:"", n:"Sense check: 6 is a bit more than 5, so n should be a bit more than 1."}
+ ],
+ slip:"Dividing by 6 instead of 5, which gives 1 : 0.83 and answers a different question."},
+
+{id:"q18c", n:"18 (c)", marks:1, kit:"ratio", title:"1 : x = x : 4",
+ intro:"<p><b>1 : x = x : 4</b>. Work out the value of x.</p>",
+ asks:"Both ratios have to scale the same way. Whatever multiplies 1 to give x must also multiply x to give 4.",
+ marklist:["One mark for 2"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is x?", ans:2,
+   hint:"Try it: if x were 2, the ratios are 1 : 2 and 2 : 4, and both double."}
+ ],
+ sol:[
+  {w:"1 : x = x : 4 means x " + X + " x = 1 " + X + " 4\nx" + SQ2 + " = 4, so x = 2", n:"The mark. Cross multiplying is the quick route, and -2 is accepted too."},
+  {w:"", n:"Checking beats algebra here: 1 : 2 and 2 : 4 are the same ratio, because both double."}
+ ],
+ slip:"Answering 4, without checking whether 1 : 4 and 4 : 4 match."},
+
+{id:"q19a", n:"19 (a)", marks:2, kit:"prob", title:"Completing the tree diagram",
+ intro:"<p>Two spinners have only red and green sections. <b>Spinner 1: P(red) = 3/8</b> and <b>Spinner 2: P(red) = 1/5</b>.</p>" + treeFig2() +
+   "<p>Complete the three missing probabilities.</p>",
+ asks:"Each pair of branches covers everything that can happen, so each pair adds to 1.",
+ marklist:["One mark for 5/8 on the spinner 1 green branch",
+           "One mark for 4/5 on both spinner 2 green branches"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Spinner 1, green. Write the probability.", accept:["5/8","0.625","62.5%"],
+   hint:"Red is 3/8, and the two branches add to 1, so green is 8/8 - 3/8."},
+  {kind:"frac", marks:1, prompt:"Spinner 2, green. Write the probability (it is the same on both green branches).", accept:["4/5","0.8","80%"],
+   hint:"Red is 1/5, so green is 5/5 - 1/5."}
+ ],
+ sol:[
+  {w:"Spinner 1: red 3/8, so green = 1 - 3/8 = 5/8", n:"Mark one."},
+  {w:"Spinner 2: red 1/5, so green = 1 - 1/5 = 4/5", n:"Mark two, and it goes on both of the spinner 2 green branches, because the second spinner does not care what the first did."},
+  {w:"", n:"Every pair of branches out of the same point adds to 1. That is the single most useful check on a tree diagram."}
+ ],
+ slip:"Writing 5/8 on the second spinner too, or making the two green branches different."},
+
+{id:"q19b", n:"19 (b)", marks:1, kit:"prob", title:"Both spinners land on red",
+ intro:"<p>Both spinners are spun. Work out the probability that <b>both</b> land on red.</p>",
+ asks:"Both means this and then that, and along the branches of a tree you multiply.",
+ marklist:["One mark for 3/40, or 0.075, or 7.5%"],
+ parts:[
+  {kind:"frac", marks:1, prompt:"Write the probability that both land on red.", accept:["3/40","0.075","7.5%"],
+   hint:"3/8 " + X + " 1/5. Multiply the tops, then the bottoms."}
+ ],
+ sol:[
+  {w:"P(red and red) = 3/8 " + X + " 1/5\n= 3/40", n:"The mark. Tops multiplied: 3 " + X + " 1 = 3. Bottoms multiplied: 8 " + X + " 5 = 40."},
+  {w:"", n:"And means multiply along the branches. Or means add the finished branches. That one line covers most tree diagram questions."}
+ ],
+ slip:"Adding the two probabilities instead of multiplying, which gives a bigger answer than either one on its own."},
+
+{id:"q20a", n:"20 (a)", marks:2, kit:"series", title:"Drawing the time series graph",
+ intro:'<p>The table shows the views of an advert over six days.</p>' +
+   '<table class="tbl"><tr><th>Day</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>' +
+   '<tr><th>Views</th><td>49 000</td><td>95 000</td><td>87 000</td><td>77 000</td><td>64 000</td><td>48 000</td></tr></table>' +
+   "<p>In the real paper you plot these on the grid. The graph below is how it should look.</p>" + seriesFig(),
+ asks:"Six points plotted accurately, then joined with straight lines. Two marks, and accuracy is what they are for.",
+ marklist:["One mark for at least four points plotted correctly",
+           "One mark for all six plotted and joined with straight lines"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Day 2 is the highest point. How many views, in thousands?", ans:95,
+   hint:"Read it off the table: 95 000 views."},
+  {kind:"choice", marks:1, prompt:"How should the points be joined?",
+   opts:["With straight lines, point to point", "With a smooth curve", "With a line of best fit", "They should not be joined at all"], ans:0,
+   hint:"A time series graph joins the actual readings in order, straight from one to the next."}
+ ],
+ sol:[
+  {w:"Plot (1, 49 000), (2, 95 000), (3, 87 000), (4, 77 000), (5, 64 000), (6, 48 000)", n:"Mark one, for at least four of them accurate to within half a square."},
+  {w:"Join them point to point with straight lines, using a ruler.", n:"Mark two. Not a curve, and not a line of best fit."},
+  {w:"", n:"The shape tells the story: a spike on day 2, then a steady fall. Part (b) depends on seeing that fall."}
+ ],
+ slip:"Drawing a smooth curve or a line of best fit rather than joining the readings."},
+
+{id:"q20b", n:"20 (b)", marks:3, kit:"series", title:"Estimating day 7",
+ intro:"<p>Youssuf receives <b>0.018p for each view</b>. Estimate how much he receives from views on <b>day 7</b>.</p>",
+ asks:"Estimate means continue the pattern of the graph first, then do the money. The trend is falling by roughly 13 to 16 thousand a day.",
+ marklist:["One mark for a sensible day 7 estimate between 20 000 and 40 000 views",
+           "One mark for multiplying by 0.018",
+           "One mark for an answer in pounds, between " + P + "3.60 and " + P + "7.20"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Roughly how many views on day 7? (the fall is about 14 000 a day)", ans:32000, tol:8000,
+   hint:"Day 6 was 48 000 and the graph is falling steadily. Anything from about 20 000 to 40 000 is accepted."},
+  {kind:"choice", marks:1, prompt:"What do you do with the 0.018p?",
+   opts:["Multiply the views by 0.018 to get pence", "Divide the views by 0.018", "Multiply the views by 0.18"], ans:0,
+   hint:"Each view is worth 0.018 pence, so the total pence is views " + X + " 0.018."},
+  {kind:"num", marks:1, prompt:"So how much does he receive, in pounds? (using about 32 000 views)", ans:5.76, tol:1.7, unit:P,
+   hint:"32 000 " + X + " 0.018 = 576 pence. Then divide by 100 to turn pence into pounds."}
+ ],
+ sol:[
+  {w:"Day 7 estimate: about 32 000 views\n(48 000 minus roughly another 16 000)", n:"Mark one. Anything in the 20 000 to 40 000 range is accepted, because it is an estimate."},
+  {w:"32 000 " + X + " 0.018 = 576 pence", n:"Mark two. Watch the units: the rate is in pence, not pounds."},
+  {w:"576 " + DIV + " 100 = " + P + "5.76", n:"Mark three, and it follows through from your own estimate."},
+  {w:"", n:"Rounding 0.018 to 0.02 caps this at two marks out of three, so keep the exact rate."}
+ ],
+ slip:"Leaving the answer in pence, or treating 0.018p as " + P + "0.018."},
+
+{id:"q21", n:"21", marks:3, kit:"pct", title:"What percentage of the discs are removed?",
+ intro:"<p><b>70%</b> of the discs in a box are red and the rest are blue.</p>" +
+   "<ul><li><b>40%</b> of the red discs are removed</li><li><b>50%</b> of the blue discs are removed</li></ul>" +
+   "<p>In total, what percentage of the discs are removed?</p>",
+ asks:"A percentage of a percentage. Working with 100 discs makes it concrete: 70 red and 30 blue.",
+ marklist:["One mark for 40% of 70",
+           "One mark for 50% of 30",
+           "One mark for 43"],
+ parts:[
+  {kind:"num", marks:1, prompt:"Imagine 100 discs. How many red discs are removed?", ans:28,
+   hint:"70 red discs, and 40% of them go. 0.4 " + X + " 70."},
+  {kind:"num", marks:1, prompt:"How many blue discs are removed?", ans:15,
+   hint:"The rest are blue, so 30 of them, and half go."},
+  {kind:"num", marks:1, prompt:"So what percentage of all the discs is removed?", ans:43, unit:"%",
+   hint:"28 + 15 out of the 100 you started with."}
+ ],
+ sol:[
+  {w:"Take 100 discs: 70 red, 30 blue\nRed removed: 40% of 70 = 28", n:"Mark one. Using 100 turns percentages into counts, which is much easier to hold on to."},
+  {w:"Blue removed: 50% of 30 = 15", n:"Mark two."},
+  {w:"Removed altogether: 28 + 15 = 43 out of 100 = 43%", n:"Mark three."},
+  {w:"", n:"An answer of 57% is the percentage left behind, and picks up a special case mark only."}
+ ],
+ slip:"Adding 40% and 50% to get 90%, or averaging them to 45%."},
+
+{id:"q22", n:"22", marks:4, kit:"money", title:"How many adults at the theme park?",
+ intro:"<p>Prices: <b>Adult " + P + "24.50</b>, <b>Student " + P + "16.25</b>, and <b>one adult free with every 5 students</b>.</p>" +
+   "<p>There are <b>48 students</b> in the group and the total price is <b>" + P + "927</b>. How many adults are in the group?</p>",
+ asks:"The hardest question on the paper. Work out what the students cost, what is left for adults, how many adults that pays for, and then add the free ones.",
+ marklist:["One mark for the cost of the students",
+           "One mark for dividing what is left by 24.50",
+           "One mark for the number of free adults",
+           "One mark for 15"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What do the 48 students cost altogether?", ans:780, tol:0.5, unit:P,
+   hint:"48 " + X + " 16.25."},
+  {kind:"num", marks:1, prompt:"How many adults were paid for? (927 - 780, then divide by 24.50)", ans:6,
+   hint:"927 - 780 = 147, and 147 " + DIV + " 24.50."},
+  {kind:"num", marks:1, prompt:"How many adults got in free? (one per 5 students)", ans:9,
+   hint:"48 " + DIV + " 5 = 9.6, but free adults come whole, so 9 complete groups of 5."},
+  {kind:"num", marks:1, prompt:"So how many adults are in the group altogether?", ans:15,
+   hint:"The paid ones plus the free ones."}
+ ],
+ sol:[
+  {w:"Students: 48 " + X + " 16.25 = " + P + "780", n:"Mark one."},
+  {w:"Left for adults: 927 - 780 = " + P + "147\nPaid adults: 147 " + DIV + " 24.50 = 6", n:"Mark two. A whole number coming out is a good sign."},
+  {w:"Free adults: 48 " + DIV + " 5 = 9.6, so 9 free adults", n:"Mark three. Round down here: 9 complete groups of five students."},
+  {w:"Total adults = 6 + 9 = 15", n:"Mark four. Forgetting the free adults gives 6, which is the commonest wrong answer."},
+  {w:"", n:"An answer of 63 is everybody in the group, students included."}
+ ],
+ slip:"Stopping at 6 paid adults and forgetting the nine who came in free."},
+
+{id:"q23a", n:"23 (a)", marks:2, kit:"bounds", title:"The error interval",
+ intro:"<p>The length of a fence panel is <b>160 cm to the nearest 10 cm</b>. Complete the error interval:</p>" +
+   '<p style="font-size:19px"><b>___ cm ' + LE + ' length < ___ cm</b></p>',
+ asks:"To the nearest 10 cm means anything that rounds to 160. Half of 10 is 5, so go 5 either side.",
+ marklist:["One mark for 155 or 165 in the right place",
+           "One mark for both"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is the smallest the length could be?", ans:155, unit:"cm",
+   hint:"160 - 5. Anything from 155 upwards rounds to 160."},
+  {kind:"num", marks:1, prompt:"What is the upper limit?", ans:165, unit:"cm",
+   hint:"160 + 5. At exactly 165 it would round up to 170, which is why the sign is < rather than " + LE + "."}
+ ],
+ sol:[
+  {w:"Nearest 10 cm, so half of 10 is 5\n160 - 5 = 155 and 160 + 5 = 165", n:"Both marks."},
+  {w:"155 cm " + LE + " length < 165 cm", n:"The signs matter: 155 is included, 165 is not, because 165 rounds up to 170."},
+  {w:"", n:"Getting 155 and 165 the wrong way round scores one special case mark only."}
+ ],
+ slip:"Using 159.5 and 160.5, which would be right for the nearest 1 cm, not the nearest 10 cm."},
+
+{id:"q23b", n:"23 (b)", marks:2, kit:"bounds", title:"Show that Kim is correct",
+ intro:"<p>A different panel measures <b>2 metres to the nearest 10 cm</b>. Kim says the total length of <b>three</b> of these panels must be <b>less than 6.2 m</b>.</p>" +
+   "<p>Show that Kim is correct.</p>",
+ asks:"Take the largest each panel could be, multiply by three, and compare with 6.2 m.",
+ marklist:["One mark for 2.05 m as the upper limit of one panel",
+           "One mark for 2.05 " + X + " 3 = 6.15, compared with 6.2"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is the most one panel could measure, in metres?", ans:2.05, tol:0.001, unit:"m",
+   hint:"2 m to the nearest 10 cm means 5 cm either side, and 5 cm is 0.05 m."},
+  {kind:"num", marks:1, prompt:"So what is the most three panels could measure?", ans:6.15, tol:0.001, unit:"m",
+   hint:"2.05 " + X + " 3."}
+ ],
+ sol:[
+  {w:"One panel at most: 2 + 0.05 = 2.05 m", n:"Mark one. Take the biggest case, because Kim's claim has to hold even then."},
+  {w:"Three panels at most: 2.05 " + X + " 3 = 6.15 m\n6.15 < 6.2, so Kim is correct.", n:"Mark two. The comparison sentence is part of the answer."},
+  {w:"", n:"Using 2 m exactly proves nothing: the question is about what happens at the extremes."}
+ ],
+ slip:"Working with 2 m and answering 6 m, which does not test Kim's claim at all."},
+
+{id:"q24", n:"24", marks:1, kit:"factor", title:"A factor of 3x + 15",
+ intro:"<p>Circle the expression which is a factor of <b>3x + 15</b></p>" +
+   '<p style="font-size:18px">3x &nbsp;&nbsp; x + 12 &nbsp;&nbsp; x + 5 &nbsp;&nbsp; x + 15</p>',
+ asks:"A factor is something that divides in exactly. Factorise the expression and see what comes out.",
+ marklist:["One mark for x + 5"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"Which is a factor of 3x + 15?",
+   opts:["x + 5", "3x", "x + 12", "x + 15"], ans:0,
+   hint:"Take out the common factor of 3: 3x + 15 = 3(x + 5)."}
+ ],
+ sol:[
+  {w:"3x + 15 = 3(x + 5)", n:"So the factors are 3 and x + 5."},
+  {w:"x + 5 is a factor.", n:"The mark. Check by expanding: 3(x + 5) = 3x + 15."},
+  {w:"", n:"3x is not a factor, because 15 is not a multiple of x."}
+ ],
+ slip:"Picking x + 15 because 15 appears in the expression."},
+
+{id:"q25a", n:"25 (a)", marks:3, kit:"circle", title:"The shaded area",
+ intro:"<p>Here is a circle, centre O. The circumference is <b>20 cm</b> and angle x is <b>90" + DEG + "</b>.</p>" + sectorFig() +
+   "<p>Work out the shaded area. Give your answer as a decimal.</p>",
+ asks:"You are given the circumference, not the radius, so the first job is to work backwards to the radius. Then area, then a quarter of it.",
+ marklist:["One mark for a method to find the radius: 20 " + DIV + " (2" + PI + ")",
+           "One mark for a full method for the shaded area",
+           "One mark for an answer between 7.93 and 7.97"],
+ parts:[
+  {kind:"num", marks:1, prompt:"What is the radius, in cm? (to 2 decimal places)", ans:3.18, tol:0.02, unit:"cm",
+   hint:"Circumference = 2" + PI + "r, so r = 20 " + DIV + " (2 " + X + " " + PI + ")."},
+  {kind:"num", marks:1, prompt:"What is the area of the whole circle, in cm squared?", ans:31.83, tol:0.2,
+   hint:"Area = " + PI + " " + X + " r " + X + " r, using your radius."},
+  {kind:"num", marks:1, prompt:"So what is the shaded area, in cm squared?", ans:7.96, tol:0.04, unit:"cm" + SQ2,
+   hint:"The angle is 90 degrees, which is a quarter of the circle."}
+ ],
+ sol:[
+  {w:"C = 2" + PI + "r, so r = 20 " + DIV + " (2" + PI + ") = 3.1831 cm", n:"Mark one. Keep the full number on the calculator rather than rounding here."},
+  {w:"Area = " + PI + " " + X + " 3.1831" + SQ2 + " = 31.831 cm" + SQ2, n:"Mark two."},
+  {w:"Shaded = 31.831 " + DIV + " 4 = 7.96 cm" + SQ2, n:"Mark three. Anything from 7.93 to 7.97 is accepted, depending on rounding."},
+  {w:"", n:"Rounding the radius to 3.2 early gives 8.04, which falls outside the accepted range. Round once, at the end."}
+ ],
+ slip:"Using 20 as the radius, or forgetting to take the quarter."},
+
+{id:"q25b", n:"25 (b)", marks:1, kit:"circle", title:"If the angle is smaller",
+ intro:"<p>In fact, angle x is <b>smaller than 90" + DEG + "</b>. What does this mean about the shaded area?</p>",
+ asks:"No calculation. A smaller angle means a thinner slice of the same circle.",
+ marklist:["One mark for: it is smaller than the answer to part (a)"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"Tick one:",
+   opts:["It is smaller than the answer to part (a)", "It is the same as the answer to part (a)",
+         "It is larger than the answer to part (a)", "It could be any of the above"], ans:0,
+   hint:"Picture the slice closing up towards the centre line."}
+ ],
+ sol:[
+  {w:"The circle is the same size, but the slice takes up less of it.", n:"Smaller angle, smaller sector."},
+  {w:"It is smaller than the answer to part (a)", n:"The mark. The paper does this twice: a calculation, then a question about which way the answer moves."}
+ ],
+ slip:"Choosing could be any of the above, when the direction is certain."},
+
+{id:"q26", n:"26", marks:3, kit:"trig", title:"Trigonometry: find x",
+ intro:"<p>Use trigonometry to work out the value of x. You must show your working.</p>" + triFig(),
+ asks:"A right angled triangle with an angle and one side. Label the sides against the 36 degree angle, then pick sin, cos or tan.",
+ marklist:["One mark for stating or using tan",
+           "One mark for tan 36 = x " + DIV + " 4, or x = 4 tan 36",
+           "One mark for 2.9 cm"],
+ parts:[
+  {kind:"choice", marks:1, prompt:"Against the 36 degree angle, the 4 cm side is adjacent and x is opposite. Which ratio uses those two?",
+   opts:["tan", "sin", "cos"], ans:0,
+   hint:"SOH CAH TOA. Opposite and adjacent together means TOA, which is tan."},
+  {kind:"choice", marks:1, prompt:"So which equation is right?",
+   opts:["tan 36 = x " + DIV + " 4", "tan 36 = 4 " + DIV + " x", "x = tan 36 " + DIV + " 4", "sin 36 = x " + DIV + " 4"], ans:0,
+   hint:"tan = opposite " + DIV + " adjacent, so tan 36 = x over 4."},
+  {kind:"num", marks:1, prompt:"What is x, in cm? (to 1 decimal place)", ans:2.9, tol:0.06, unit:"cm",
+   hint:"x = 4 " + X + " tan 36. Make sure the calculator is in degrees."}
+ ],
+ sol:[
+  {w:"Opposite = x, adjacent = 4, so use tan", n:"Mark one. Label the triangle first: hypotenuse opposite the right angle, then opposite and adjacent relative to the 36 degrees."},
+  {w:"tan 36 = x " + DIV + " 4\nx = 4 " + X + " tan 36", n:"Mark two."},
+  {w:"= 4 " + X + " 0.7265 = 2.9 cm", n:"Mark three. Answers from 2.9 to 2.91 are accepted."},
+  {w:"", n:"An answer with no working scores nothing here, because the question says you must show your working."}
+ ],
+ slip:"Having the calculator in radians, which gives 3.1 and no marks for the answer."}
+];
+
+var TYPEQ = [
+  {id:"h1", tag:"Show that", q:"A question says: show that Jenny walks more than 1 kilometre. You work out 1030 metres and stop. What happens?",
+   opts:["Full marks, the number is right","You lose the mark that is for the comparison","You lose all the marks"],
+   ans:1, why:"Show that questions want the comparison written down: 1030 m against 1000 m, and a sentence saying which is bigger. The calculation alone is only half of it."},
+  {id:"h2", tag:"Tick and show", q:"Several questions say tick a box AND show working. What scores nothing?",
+   opts:["A tick with the working underneath","A tick on its own","Working with the box left untouched but the answer clear"],
+   ans:1, why:"A tick on its own could be a guess, and half the boxes are right by luck. Question 15 and question 17 both give the mark for the working, not the tick."},
+  {id:"h3", tag:"Rounding", q:"In question 25 you work out a radius of 3.1831. Why not round it to 3.2 before finding the area?",
+   opts:["It looks untidy","The final answer drifts outside the accepted range","Calculators cannot handle long decimals"],
+   ans:1, why:"Rounding early turns 7.96 into 8.04, which is outside what the mark scheme accepts. Keep the full number on the calculator and round once, at the end."},
+  {id:"h4", tag:"Degrees", q:"You work out 4 " + X + " tan 36 and get 3.1 rather than 2.9. What is most likely wrong?",
+   opts:["The calculator is in radians, not degrees","You used the wrong side","tan cannot do 36 degrees"],
+   ans:0, why:"Check for a small D or DEG on the calculator display. It is worth checking at the start of every paper with a question like this one: tan 45 should give exactly 1."},
+  {id:"h5", tag:"Units", q:"Question 20 pays 0.018 PENCE per view and asks for an answer in POUNDS. What has to happen?",
+   opts:["Nothing, pence and pounds are interchangeable","Divide the pence by 100 at the end","Multiply the pence by 100"],
+   ans:1, why:"576 pence is " + P + "5.76. Watch for questions that give a rate in one unit and ask for the answer in another: it is one of the most common places to lose the last mark."}
+];
+
+/* ---------- steps ---------- */
+
+var STEPS = [
+  {id:"L1", kind:"learn", title:"What this paper is, and how it is marked", body:function(){
+    return '<p>AQA GCSE Mathematics, Foundation tier, <b>Paper 2 (calculator)</b>, June 2025. One hour thirty minutes, <b>80 marks</b>, 26 questions.</p>' +
+    '<p><span class="nocalc">Calculator allowed &middot; formulae sheet provided &middot; bring a ruler and a protractor</span></p>' +
+    '<div class="markmap"><div class="mm1" style="flex:26">Questions 1 to 9<br>26 marks</div><div class="mm2" style="flex:25">Questions 10 to 18<br>25 marks</div><div class="mm3" style="flex:29">Questions 19 to 26<br>29 marks</div></div>' +
+    '<p class="maplab">Roughly a minute a mark. The questions grow from one mark to four as you go.</p>' +
+    '<div class="tip"><i>1</i><p><b>A calculator does not make this paper easier to mark.</b> Almost every mark here is for choosing what to calculate, and for writing it down.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>Four questions say show that or show your working.</b> On those, the working IS the answer, and a bare number scores nothing.</p></div>' +
+    '<div class="tip"><i>3</i><p>This page breaks every question into the steps the mark scheme pays for, and marks each one as you go. Your working goes to Jay at the end.</p></div>' +
+    '<div class="tip"><i>4</i><p>The game is in the corner again if you want it. Same as last time: it changes nothing and nobody is counting.</p></div>';
+  }},
+
+  {id:"L2", kind:"learn", title:"Where the marks go on a calculator paper", body:function(){
+    return '<p>Six habits. They are worth more on this paper than any single topic, because a calculator removes one kind of mistake and quietly adds another.</p>' +
+    '<div class="tip"><i>1</i><p><b>Write down what you typed.</b> 48 ' + X + ' 16.25 is a mark in question 22 before the total appears.</p></div>' +
+    '<div class="tip"><i>2</i><p><b>Round once, at the very end.</b> Question 25 is built to catch anyone who rounds the radius first.</p></div>' +
+    '<div class="tip"><i>3</i><p><b>Watch the units.</b> Pence and pounds, grams and kilograms, minutes and hours. Three questions here swap units on you mid way.</p></div>' +
+    '<div class="tip"><i>4</i><p><b>Check the calculator is in degrees</b> before question 26. tan 45 should give exactly 1.</p></div>' +
+    '<div class="tip"><i>5</i><p><b>Tick the box and show the numbers.</b> Questions 15, 17 and 9(b) all want both.</p></div>' +
+    '<div class="tip"><i>6</i><p><b>Sense check.</b> Miles fewer than kilometres, value for money about the rate rather than the price tag, adults fewer than students.</p></div>' +
+    '<hr class="hr"><h3>On the formulae sheet</h3>' +
+    '<ul><li>Circumference = ' + PI + ' ' + X + ' d, and area of a circle = ' + PI + ' r squared</li>' +
+    "<li>Area of a trapezium, volume of a prism</li><li>Pythagoras, and sin, cos and tan</li><li>Compound interest, and P(A or B)</li></ul>" +
+    '<p class="small">SOH CAH TOA is not on the sheet, but the three ratios are. Question 26 needs you to pick the right one.</p>';
+  }},
+
+  {id:"Q0", kind:"quiz", title:"Five about this paper", sub:"Two minutes, then the questions.", items:TYPEQ},
+
+  {id:"S1", kind:"q", title:"Questions 1 and 2", qs:["q1","q2"]},
+  {id:"S2", kind:"q", title:"Question 3", qs:["q3a","q3b"]},
+  {id:"S3", kind:"q", title:"Questions 4 and 5", qs:["q4","q5"]},
+  {id:"S4", kind:"q", title:"Questions 6 and 7", qs:["q6","q7"]},
+  {id:"S5", kind:"q", title:"Question 8", qs:["q8"]},
+  {id:"S6", kind:"q", title:"Question 9", qs:["q9a","q9b"]},
+  {id:"S7", kind:"q", title:"Question 10", qs:["q10a","q10b"]},
+  {id:"S8", kind:"q", title:"Questions 11 and 12", qs:["q11","q12"]},
+  {id:"S9", kind:"q", title:"Question 13", qs:["q13a","q13b"]},
+  {id:"S10", kind:"q", title:"Question 14", qs:["q14"]},
+  {id:"S11", kind:"q", title:"Questions 15 and 16", qs:["q15","q16"]},
+  {id:"S12", kind:"q", title:"Question 17", qs:["q17"]},
+  {id:"S13", kind:"q", title:"Question 18", qs:["q18a","q18b","q18c"]},
+  {id:"S14", kind:"q", title:"Question 19", qs:["q19a","q19b"]},
+  {id:"S15", kind:"q", title:"Question 20", qs:["q20a","q20b"]},
+  {id:"S16", kind:"q", title:"Questions 21 and 22", qs:["q21","q22"]},
+  {id:"S17", kind:"q", title:"Questions 23 and 24", qs:["q23a","q23b","q24"]},
+  {id:"S18", kind:"q", title:"Questions 25 and 26", qs:["q25a","q25b","q26"]},
+
+  {id:"F1", kind:"finish", title:"How it went", sub:"Your marks, and everything off to Jay if you want."}
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+var S;
+function fresh(){ return {v:1, idx:0, ans:{}, got:{}, quiz:{}, help:{}, work:{}, grid:{}, line:{}, order:{}} }
+function load(){ try{ var r = localStorage.getItem(KEY); if(r){ var o = JSON.parse(r); if(o && o.v === 1) return o } }catch(e){} return null }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+S = load() || fresh();
+
+/* ---- Options are laid out in a fixed but scrambled order, so the correct
+   answer is not always sitting at the top of the list. The order never
+   changes between visits, so a half finished page still looks the same. ---- */
+function optHash(s){ var h = 2166136261, i; for(i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0 } return h }
+var OPTSEAT = {};
+(function(){
+  var c = 0;
+  QS.forEach(function(q){
+    q.parts.forEach(function(p, i){
+      if(p.kind !== "choice" || !p.opts) return;
+      OPTSEAT[q.id + ":" + i] = c % p.opts.length;
+      c++;
+    });
+  });
+})();
+function optOrder(seed, n, ans){
+  var rest = [], k, j, t, h = optHash(seed);
+  for(k = 0; k < n; k++) if(k !== ans) rest.push(k);
+  for(k = rest.length - 1; k > 0; k--){ h = (h * 1664525 + 1013904223) >>> 0; j = h % (k + 1); t = rest[k]; rest[k] = rest[j]; rest[j] = t }
+  var seat = OPTSEAT[seed];
+  if(seat == null) seat = h % n;
+  rest.splice(seat, 0, ans);
+  return rest;
+}
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] }) }
+function Q(id){ for(var i = 0; i < QS.length; i++) if(QS[i].id === id) return QS[i]; return null }
+function totalMarks(){ return QS.reduce(function(a, q){ return a + q.marks }, 0) }
+function qGot(q){ var t = 0; q.parts.forEach(function(p, i){ t += (S.got[q.id + i] || 0) }); return t }
+function gotTotal(){ return QS.reduce(function(a, q){ return a + qGot(q) }, 0) }
+function qDone(q){ return q.parts.every(function(p, i){ return S.got[q.id + i] != null }) }
+function numEq(v, ans, tol){
+  var n = parseFloat(String(v == null ? "" : v).replace(/[^0-9.\-]/g, ""));
+  if(isNaN(n)) return false;
+  return Math.abs(n - ans) <= (tol || 0.0001);
+}
+
+/* plan view target: an L of four squares */
+var PLAN_TARGET = [[0,0],[1,0],[2,0],[2,1]];
+function normShape(cells){
+  if(!cells.length) return "";
+  var minr = Math.min.apply(null, cells.map(function(c){ return c[0] }));
+  var minc = Math.min.apply(null, cells.map(function(c){ return c[1] }));
+  return cells.map(function(c){ return (c[0] - minr) + "," + (c[1] - minc) }).sort().join(" ");
+}
+function shapeMatches(cells){
+  if(cells.length !== PLAN_TARGET.length) return false;
+  var t = PLAN_TARGET.map(function(c){ return [c[1], c[0]] });   /* [row, col] */
+  var forms = [];
+  for(var f = 0; f < 2; f++){
+    var base = f ? t.map(function(c){ return [c[0], -c[1]] }) : t;
+    var cur = base;
+    for(var r = 0; r < 4; r++){
+      forms.push(normShape(cur));
+      cur = cur.map(function(c){ return [c[1], -c[0]] });
+    }
+  }
+  return forms.indexOf(normShape(cells)) > -1;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+var grid = document.getElementById("grid"), pane = document.getElementById("pane"), briefEl = document.getElementById("brief");
+
+
+function briefHTML(step){
+  var kit = [
+    {k:"solve", b:"Solving equations", t:"undo what was done to the letter, and do the same to both sides"},
+    {k:"ratio", b:"Ratio", t:"add the parts first. Then see whether it scales up or stays as it is"},
+    {k:"compass", b:"Compass and scale", t:"North is up. Count squares, then multiply by what one square is worth"},
+    {k:"simplify", b:"Simplifying", t:"cancel what is on the top and the bottom. Anything divided by itself is 1"},
+    {k:"bar", b:"Bar chart", t:"read the scale before you read a bar. Check what each gridline is worth"},
+    {k:"pct", b:"Percentages", t:"out of 100. To compare, put both over the same total"},
+    {k:"time", b:"Time", t:"minutes and hours are 60 apart, not 100. Add the hours, then the minutes"},
+    {k:"similar", b:"Similar shapes", t:"find the scale factor from a matching pair, then use it on the side you want"},
+    {k:"expand", b:"Expanding brackets", t:"multiply everything inside by what is outside, signs included"},
+    {k:"money", b:"Money", t:"pounds or pence, pick one and stay with it. Two decimal places for pounds"},
+    {k:"stats", b:"Range and averages", t:"range is largest take smallest. It is a spread, not an average"},
+    {k:"series", b:"Sequences in words", t:"try n = 1, 2, 3 and see what the expression gives you"},
+    {k:"perim", b:"Perimeter", t:"all the way round the outside. Opposite sides of a rectangle match"},
+    {k:"factor", b:"Factorising", t:"take out what both terms share, and put it outside the bracket"},
+    {k:"value", b:"Best value", t:"work out the cost of one, or how much you get for " + P + "1. Then compare"},
+    {k:"prob", b:"Probability", t:"outcomes you want " + DIV + " outcomes altogether. All the branches add to 1"},
+    {k:"frac", b:"Fractions", t:"divide: keep, change, flip. multiply: straight across"},
+    {k:"circle", b:"Circles", t:"circumference = " + PI + " " + X + " d. Area = " + PI + " r squared. Radius is half the diameter"},
+    {k:"propn", b:"Proportion", t:"find one, then scale up. Keep an eye on the units"},
+    {k:"units", b:"Units", t:"grams and kilograms, miles and kilometres. Write the unit down every time"},
+    {k:"bounds", b:"Rounding and bounds", t:"round to the nearest 10 means anything within 5 either side"},
+    {k:"trig", b:"Trigonometry", t:"label the sides opposite, adjacent, hypotenuse. Then SOH CAH TOA picks the ratio"}
+  ];
+  var ids = step.qs || [];
+  var on = ids.map(function(id){ var q = Q(id); return q ? q.kit : "" });
+  var show = kit.filter(function(k){ return on.indexOf(k.k) > -1 });
+  if(!show.length) show = kit.slice(0, 3);
+  return "<h2>GCSE Foundation, Paper 2</h2><p>Calculator, 1 hour 30 minutes, 80 marks.</p>" +
+    '<p><span class="yescalc">Calculator allowed</span></p>' +
+    "<h3>For these questions</h3>" +
+    show.map(function(k){ return '<div class="kit on"><b>' + k.b + "</b><br>" + k.t + "</div>" }).join("") +
+    "<h3>On the formulae sheet</h3>" +
+    '<div class="kit">Circumference = ' + PI + ' ' + X + ' d<br>Area of a circle = ' + PI + ' r squared<br>Volume of a prism = area of cross section ' + X + ' length<br>sin, cos and tan, and Pythagoras</div>' +
+    '<p class="srcnote small">From AQA 8300/2F, June 2025. Diagrams redrawn for Base 5.</p>';
+}
+
+function progress(){
+  var step = STEPS[S.idx];
+  document.getElementById("progBar").style.width = Math.round((S.idx + 1) / STEPS.length * 100) + "%";
+  document.getElementById("progTxt").textContent = "Step " + (S.idx + 1) + " of " + STEPS.length;
+  document.getElementById("progSide").textContent = step.kind === "q" ? (gotTotal() + " of " + totalMarks() + " marks so far") : "";
+  var h = "";
+  STEPS.forEach(function(st, i){
+    var did = st.kind === "q" ? st.qs.every(function(id){ return qDone(Q(id)) }) : (st.kind === "quiz" ? st.items.every(function(x){ return S.quiz[x.id] != null }) : false);
+    h += '<button class="sdot' + (i === S.idx ? " on" : (did ? " did" : "")) + '" data-i="' + i + '" aria-label="Step ' + (i + 1) + '">' + (i + 1) + "</button>";
+  });
+  var dots = document.getElementById("dots");
+  dots.innerHTML = h;
+  dots.querySelectorAll(".sdot").forEach(function(b){ b.addEventListener("click", function(){ go(+b.dataset.i) }) });
+}
+
+function go(i){ S.idx = Math.max(0, Math.min(STEPS.length - 1, i)); save(); render(); window.scrollTo({top: 0, behavior: "smooth"}) }
+
+function actions(){
+  return '<div class="actions"><div class="l">' + (S.idx > 0 ? '<button class="wbtn" id="back">Back</button>' : "") + '</div>' +
+    '<div class="r">' + (S.idx < STEPS.length - 1 ? '<button class="wbtn main" id="next">Next</button>' : "") + "</div></div>";
+}
+function wireActions(){
+  var b = document.getElementById("back"), n = document.getElementById("next");
+  if(b) b.addEventListener("click", function(){ go(S.idx - 1) });
+  if(n) n.addEventListener("click", function(){ go(S.idx + 1) });
+}
+
+function render(){
+  var st = STEPS[S.idx];
+  var wantsBrief = st.kind === "q";
+  grid.className = "w-grid" + (wantsBrief ? "" : " solo");
+  briefEl.innerHTML = wantsBrief ? briefHTML(st) : "";
+  var head = '<div class="whead"><span class="pill' + (st.kind === "q" ? " t" : " p") + '">' + (st.kind === "q" ? "Activity 1" : "The paper") + "</span>" +
+    (st.kind === "learn" ? '<span class="pill y">Read</span>' : "") +
+    (st.kind === "quiz" ? '<span class="pill y">Have a go</span>' : "") + "</div>" +
+    "<h2>" + esc(st.title) + "</h2>" + (st.sub ? '<p class="small">' + esc(st.sub) + "</p>" : "");
+
+  if(st.kind === "learn"){ pane.className = "wcard learn"; pane.innerHTML = head + st.body() + actions() }
+  else if(st.kind === "quiz") renderQuiz(st, head);
+  else if(st.kind === "q") renderQ(st, head);
+  else if(st.kind === "finish") renderFinish(st, head);
+  progress();
+  wireActions();
+}
+
+function renderQuiz(st, head){
+  pane.className = "wcard";
+  var h = head;
+  st.items.forEach(function(q){
+    var picked = S.quiz[q.id];
+    h += '<hr class="hr"><p><span class="pill y">' + esc(q.tag) + "</span></p><p><b>" + esc(q.q) + "</b></p>" +
+      '<div class="opts2">' + q.opts.map(function(o, i){
+        return '<button class="optb' + (picked != null ? (i === q.ans ? " right" : (i === picked ? " wrong" : "")) : "") + '" data-q="' + q.id + '" data-i="' + i + '"' + (picked != null ? " disabled" : "") + ">" + esc(o) + "</button>";
+      }).join("") + "</div>";
+    if(picked != null) h += '<div class="fb"><b>' + (picked === q.ans ? "Yes." : "Not this one.") + "</b> " + esc(q.why) + "</div>";
+  });
+  pane.innerHTML = h + actions();
+  pane.querySelectorAll(".optb").forEach(function(b){
+    b.addEventListener("click", function(){ S.quiz[b.dataset.q] = +b.dataset.i; save(); render() });
+  });
+}
+
+function renderQ(st, head){
+  pane.className = "wcard";
+  pane.innerHTML = head +
+    '<div class="score"><span class="pip">' + gotTotal() + " of " + totalMarks() + ' marks so far</span><span class="small">Answers stay saved on this device.</span></div>' +
+    st.qs.map(function(id){ return '<div class="q" id="qcard_' + id + '"></div>' }).join("") + actions();
+  st.qs.forEach(function(id){ drawQ(Q(id)) });
+}
+
+function drawQ(q){
+  var card = document.getElementById("qcard_" + q.id);
+  if(!card) return;
+  var done = qDone(q);
+  var h = '<div class="qtop"><span class="qn">' + esc(q.n) + '</span><span class="qmk">' + q.marks + " mark" + (q.marks > 1 ? "s" : "") + "</span>" +
+    (done ? '<span class="qmk" style="background:#1f7a4d">' + qGot(q) + " of " + q.marks + "</span>" : "") + "</div>" +
+    q.intro + '<p class="qq">' + esc(q.title) + "</p>" +
+    '<div class="asks"><b>What it is really asking</b>' + esc(q.asks) + "</div>" +
+    '<div class="asks marks"><b>Where the marks are</b><ul class="marklist">' +
+      q.marklist.map(function(m, i){ return "<li><i>" + (i + 1) + "</i><span>" + m + "</span></li>" }).join("") + "</ul></div>";
+
+
+  q.parts.forEach(function(p, i){
+    var key = q.id + i, mark = S.got[key];
+    h += '<div class="part"><p class="plab">' + esc(p.prompt) + '<span class="mk">' + p.marks + " mark" + (p.marks > 1 ? "s" : "") + "</span></p>";
+
+    if(p.kind === "num" || p.kind === "frac"){
+      h += '<div class="ansrow"><input type="text" data-p="' + i + '" value="' + esc(S.ans[key] || "") + '" placeholder="Your answer"' + (mark != null ? " disabled" : "") +
+        (mark != null ? (mark ? ' class="ok"' : ' class="no"') : "") + ">" + (p.unit ? '<span class="unit">' + p.unit + "</span>" : "") + "</div>";
+    }
+    if(p.kind === "choice"){
+      var picked = S.ans[key];
+      h += '<div class="opts2">' + optOrder(q.id + ":" + i, p.opts.length, p.ans).map(function(j){
+        var o = p.opts[j];
+        return '<button class="optb' + (mark != null ? (j === p.ans ? " right" : (j === picked ? " wrong" : "")) : "") + '" data-c="' + i + '" data-j="' + j + '"' + (mark != null ? " disabled" : "") + ">" + o + "</button>";
+      }).join("") + "</div>";
+    }
+    if(p.kind === "grid"){
+      var cells = S.grid[q.id] || [];
+      h += '<div class="planwrap">';
+      for(var r = 0; r < 6; r++){
+        h += '<div class="planrow">';
+        for(var c = 0; c < 10; c++){
+          var on = cells.some(function(x){ return x[0] === r && x[1] === c });
+          h += '<button class="cell" data-r="' + r + '" data-c="' + c + '" aria-pressed="' + on + '" aria-label="row ' + (r + 1) + " column " + (c + 1) + '"></button>';
+        }
+        h += "</div>";
+      }
+      h += "</div>" + '<p class="small">Each square is 1 cm. Tap to shade, tap again to clear.</p>';
+    }
+    if(p.kind === "order"){
+      var placed = S.order[q.id] || [];
+      h += '<div class="slot" id="slot_' + q.id + '">' + (placed.length ? placed.map(function(v, k){ return '<button class="ordb" data-un="' + k + '">' + v + "</button>" }).join("") : '<span class="small">Tap the weights below, smallest first.</span>') + "</div>" +
+        '<div class="ordrow">' + p.items.map(function(v, k){
+          var used = placed.indexOf(v) > -1;
+          return '<button class="ordb' + (used ? " used" : "") + '" data-o="' + v + '"' + (used ? " disabled" : "") + ">" + v + "</button>";
+        }).join("") + "</div>";
+    }
+    if(p.kind === "line"){
+      var ln = S.line[q.id] || [];
+      h += '<p class="small">' + (ln.length === 2 ? "Line drawn. Tap the chart again to redraw it." : (ln.length === 1 ? "One point placed. Tap once more." : "No line yet.")) + "</p>";
+    }
+
+    if(mark == null){
+      h += '<div class="helprow"><button class="wbtn sm help" data-hint="' + i + '">Give me a hint</button></div>' +
+        (S.help[key] ? '<div class="fb"><b>Hint.</b> ' + p.hint + "</div>" : "");
+    } else {
+      h += '<div class="fb ' + (mark ? "good" : "miss") + '"><b>' + (mark ? TICK + " One mark." : "No mark for this step.") + "</b> " +
+        (mark ? (S.help["ft" + key] ? "That is a follow through mark: it does not match the expected answer, but it is the right reading off the line you drew." : "")
+              : "Keep going: the next step can still score.") + "</div>";
+    }
+    h += "</div>";
+  });
+
+  if(!done){
+    h += '<div class="helprow"><button class="wbtn main" data-check="1">Check this question</button></div>';
+  } else {
+    h += '<hr class="hr"><h3>How the marks are given</h3><div class="sol"><div class="mhead"><span>Working</span><span>Which mark it earns</span></div>' +
+      q.sol.map(function(s){ return '<div class="srow"><div class="swork">' + s.w + '</div><div class="snote"><b>Why</b>' + s.n + "</div></div>" }).join("") + "</div>" +
+      '<div class="fb miss"><b>The common slip.</b> ' + q.slip + "</div>";
+  }
+
+  h += '<label class="lab" for="wk_' + q.id + '">Your working, in your own words (this goes to Jay, and nothing here is marked by the page)</label>' +
+    '<textarea id="wk_' + q.id + '" placeholder="Optional. Jotting the steps down is the habit that earns method marks in the real paper.">' + esc(S.work[q.id] || "") + "</textarea>";
+
+  card.innerHTML = h;
+  card.className = "q" + (done ? " done" : "");
+  wireQ(q, card);
+}
+
+function wireQ(q, card){
+  card.querySelectorAll("input[type=text][data-p]").forEach(function(inp){
+    inp.addEventListener("input", function(){ S.ans[q.id + inp.dataset.p] = inp.value; save() });
+  });
+  card.querySelectorAll(".optb[data-c]").forEach(function(b){
+    b.addEventListener("click", function(){ S.ans[q.id + b.dataset.c] = +b.dataset.j; save(); drawQ(q) });
+  });
+  card.querySelectorAll(".cell").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(qDone(q)) return;
+      var r = +b.dataset.r, c = +b.dataset.c, cells = S.grid[q.id] || [];
+      var at = cells.findIndex(function(x){ return x[0] === r && x[1] === c });
+      if(at > -1) cells.splice(at, 1); else cells.push([r, c]);
+      S.grid[q.id] = cells; save(); drawQ(q);
+    });
+  });
+  card.querySelectorAll(".ordb[data-o]").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(qDone(q)) return;
+      var placed = S.order[q.id] || [];
+      placed.push(parseFloat(b.dataset.o));
+      S.order[q.id] = placed; save(); drawQ(q);
+    });
+  });
+  card.querySelectorAll(".ordb[data-un]").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(qDone(q)) return;
+      var placed = S.order[q.id] || [];
+      placed.splice(+b.dataset.un, 1);
+      S.order[q.id] = placed; save(); drawQ(q);
+    });
+  });
+  card.querySelectorAll("[data-hint]").forEach(function(b){
+    b.addEventListener("click", function(){ S.help[q.id + b.dataset.hint] = 1; save(); drawQ(q) });
+  });
+  var ta = card.querySelector("textarea");
+  if(ta) ta.addEventListener("input", function(){ S.work[q.id] = ta.value; save() });
+
+  var svg = document.getElementById("scsvg");
+  if(svg && !qDone(q)) svg.addEventListener("click", function(ev){
+    var r = svg.getBoundingClientRect();
+    var px = (ev.clientX - r.left) / r.width * 620, py = (ev.clientY - r.top) / r.height * 300;
+    var dx = unsx(px), dy = unsy(py);
+    if(dx < -100 || dx > 6200 || dy < -20 || dy > 320) return;
+    var ln = S.line[q.id] || [];
+    if(ln.length >= 2) ln = [];
+    ln.push([dx, dy]);
+    S.line[q.id] = ln; save(); drawQ(q);
+  });
+
+  var chk = card.querySelector("[data-check]");
+  if(chk) chk.addEventListener("click", function(){
+    var missing = false;
+    q.parts.forEach(function(p, i){
+      var key = q.id + i, got = 0;
+      if(p.kind === "num"){
+        if(!String(S.ans[key] || "").trim()) missing = true;
+        got = numEq(S.ans[key], p.ans, p.tol) ? p.marks : 0;
+        if(!got && p.ftLine){
+          /* follow through: the mark scheme allows a reading that matches the line they drew */
+          var fl = S.line[q.id] || [];
+          if(fl.length === 2 && fl[0][0] !== fl[1][0]){
+            var fm = (fl[1][1] - fl[0][1]) / (fl[1][0] - fl[0][0]);
+            var theirs = fm * 3500 + (fl[0][1] - fm * fl[0][0]);
+            if(numEq(S.ans[key], theirs, 8)){ got = p.marks; S.help["ft" + key] = 1 }
+          }
+        }
+      }
+      if(p.kind === "frac"){
+        var v = String(S.ans[key] || "").toLowerCase().replace(/\s/g, "");
+        if(!v) missing = true;
+        got = p.accept.some(function(a){ return v === a.replace(/\s/g, "") || v.indexOf(a.replace(/\s/g, "")) === 0 }) ? p.marks : 0;
+      }
+      if(p.kind === "choice"){
+        if(S.ans[key] == null) missing = true;
+        got = S.ans[key] === p.ans ? p.marks : 0;
+      }
+      if(p.kind === "grid"){
+        var cells = S.grid[q.id] || [];
+        if(!cells.length) missing = true;
+        got = shapeMatches(cells) ? p.marks : 0;
+      }
+      if(p.kind === "order"){
+        var placed = S.order[q.id] || [];
+        if(placed.length < p.sorted.length) missing = true;
+        got = placed.join(",") === p.sorted.join(",") ? p.marks : 0;
+      }
+      if(p.kind === "line"){
+        var ln = S.line[q.id] || [];
+        if(ln.length < 2) missing = true;
+        got = 0;
+        if(ln.length === 2 && ln[0][0] !== ln[1][0]){
+          var m = (ln[1][1] - ln[0][1]) / (ln[1][0] - ln[0][0]), c = ln[0][1] - m * ln[0][0];
+          var at500 = m * 500 + c, at5500 = m * 5500 + c;
+          got = (at500 >= 45 && at500 <= 65 && at5500 >= 250 && at5500 <= 270) ? p.marks : 0;
+        }
+      }
+      S.got[key] = got;
+    });
+    if(missing){
+      q.parts.forEach(function(p, i){ delete S.got[q.id + i] });
+      window.alert("Have a go at every step first. A guess is fine: nothing here counts against you.");
+      return;
+    }
+    save(); render();
+  });
+}
+
+function renderFinish(st, head){
+  pane.className = "wcard";
+  var qr = 0; TYPEQ.forEach(function(x){ if(S.quiz[x.id] === x.ans) qr++ });
+  var h = head + '<div class="score"><span class="pip">' + gotTotal() + " of " + totalMarks() + " marks</span></div><ul>" +
+    QS.map(function(q){
+      return "<li><b>" + q.n + "</b> " + (qDone(q) ? qGot(q) + " of " + q.marks : "not answered yet") + "</li>";
+    }).join("") + "</ul>" +
+    "<p>Every mark here was given the way the real mark scheme gives them, one step at a time. A step you got wrong never stops the next one from counting.</p>" +
+    '<p class="small">Warm up questions right first time: ' + qr + " of " + TYPEQ.length + "</p>" +
+    '<div id="sendHost"></div>' +
+    '<hr class="hr"><h3>If you want to go again</h3><p class="small">Starting fresh clears every answer on this device. Send it first if you want to keep it.</p>' +
+    '<div class="helprow"><button class="wbtn help" id="reset">Start the paper again</button></div>';
+  pane.innerHTML = h + actions();
+  document.getElementById("reset").addEventListener("click", function(){
+    if(window.confirm("Clear every answer and start again?")){ S = fresh(); save(); go(0) }
+  });
+  if(window.Base5Send) Base5Send.mount(document.getElementById("sendHost"), {tool: "GCSE Foundation Paper 2", getText: buildText, filename: "gcse-foundation-paper-2"});
+}
+
+function buildText(){
+  var L = ["AQA GCSE MATHEMATICS 8300/2F - FOUNDATION PAPER 2 (practice)", "June 2025 past paper, calculator, 80 marks", "",
+    "TOTAL: " + gotTotal() + " of " + totalMarks(), ""];
+  QS.forEach(function(q){
+    L.push(q.n + " [" + (qDone(q) ? qGot(q) : "-") + " of " + q.marks + "]  " + q.title);
+    q.parts.forEach(function(p, i){
+      var key = q.id + i, v = "-";
+      if(p.kind === "choice") v = S.ans[key] == null ? "-" : String(p.opts[S.ans[key]]).replace(/__[A-Z]+__/g, "");
+      else if(p.kind === "grid") v = (S.grid[q.id] || []).length + " squares shaded";
+      else if(p.kind === "order") v = (S.order[q.id] || []).join(", ") || "-";
+      else if(p.kind === "line"){
+        var ln = S.line[q.id] || [];
+        v = ln.length === 2 ? "line through (" + Math.round(ln[0][0]) + ", " + Math.round(ln[0][1]) + ") and (" + Math.round(ln[1][0]) + ", " + Math.round(ln[1][1]) + ")" : "-";
+      }
+      else v = S.ans[key] || "-";
+      L.push("    step " + (i + 1) + " [" + (S.got[key] == null ? "-" : S.got[key]) + "/" + p.marks + "]: " + v);
+    });
+    if(S.work[q.id]) L.push("    working: " + S.work[q.id].replace(/\n/g, "\n      "));
+    L.push("");
+  });
+  var qr = 0; TYPEQ.forEach(function(x){ if(S.quiz[x.id] === x.ans) qr++ });
+  L.push("Picking up marks warm up: " + qr + " of " + TYPEQ.length + " right first time");
+  return L.join("\n");
+}
+
+render();
+
+})();
+
+if(window.FlappyJay) FlappyJay.mount({start:"tucked"});
+</script>
+
+</body>
+</html>
