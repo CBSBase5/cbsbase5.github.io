@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign It: BSL - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Sign It only. Shared pieces live in style.css */
+
+.bs-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 22px}
+.bs-fact{border:3px solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;box-shadow:var(--lift)}
+.bs-fact:nth-child(odd){transform:rotate(-.5deg)}
+.bs-fact:nth-child(even){transform:rotate(.4deg)}
+.bs-fact .big{font-size:2.2rem;line-height:1;display:block;margin:0 0 6px}
+.bs-fact h3{font-variation-settings:"wdth" 118,"wght" 850;font-size:1.15rem;line-height:1.1;margin:0 0 5px}
+.bs-fact p{margin:0;font-size:.93rem}
+
+/* dictionary */
+.bs-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.bs-search{font-family:var(--body);font-size:1rem;border:3px solid var(--ink);border-radius:999px;padding:9px 16px;
+  background:var(--white);color:var(--ink);min-width:0;flex:1 1 200px;max-width:320px}
+.bs-cats{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 16px}
+.bs-cat{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;
+  padding:7px 13px;cursor:pointer}
+.bs-cat[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.bs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:10px;margin:0 0 20px}
+.bs-card{font-family:var(--body);color:var(--ink);background:var(--white);border:3px solid var(--ink);
+  border-radius:18px 14px 17px 13px;padding:12px 8px 10px;cursor:pointer;text-align:center;box-shadow:3px 4px 0 rgba(10,47,56,.16);
+  transition:transform .14s ease,box-shadow .14s ease;position:relative}
+.bs-card:nth-child(3n+1){transform:rotate(-.6deg)}
+.bs-card:nth-child(3n+2){transform:rotate(.5deg)}
+.bs-card:hover{transform:translate(-2px,-3px) rotate(0);box-shadow:5px 7px 0 var(--ink)}
+.bs-card .e{font-size:2.3rem;line-height:1.1;display:block}
+.bs-card b{display:block;font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 850;font-size:1.02rem;margin-top:4px}
+.bs-card .seen{position:absolute;top:6px;right:8px;width:12px;height:12px;border-radius:50%;background:var(--bright);border:2px solid var(--ink)}
+.bs-card.c-hello{background:#fff3d6}.bs-card.c-people{background:#e2f4f8}.bs-card.c-feel{background:#ffe4d3}
+.bs-card.c-q{background:#efe3f5}.bs-card.c-do{background:#e6f5e2}.bs-card.c-things{background:#f6efe2}.bs-card.c-time{background:#e8ecf7}
+.bs-empty{color:var(--body-tint);font-size:.95rem}
+
+/* viewer */
+.bs-view{position:fixed;inset:0;z-index:700;background:rgba(10,47,56,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+.bs-view[hidden]{display:none}
+.bs-box{background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);box-shadow:8px 9px 0 var(--orange);
+  width:min(560px,100%);max-height:100%;overflow:auto;padding:16px 18px}
+.bs-box .top2{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+.bs-box .e{font-size:2.6rem;line-height:1}
+.bs-box h2{font-variation-settings:"wdth" 122,"wght" 900;font-size:1.9rem;line-height:1;flex:1}
+.bs-box h2 small{display:block;font-family:var(--body);font-weight:400;font-size:.85rem;color:var(--body-tint);margin-top:3px}
+.bs-x{flex:none;width:40px;height:40px;border-radius:50%;border:3px solid var(--ink);background:var(--paper);cursor:pointer;font-size:1.1rem;font-weight:700;color:var(--ink)}
+.bs-vid{position:relative;background:#0d2a31;border:3px solid var(--ink);border-radius:14px;overflow:hidden;aspect-ratio:4/3}
+.bs-vid video{width:100%;height:100%;object-fit:contain;display:block;background:#0d2a31}
+.bs-vmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;color:var(--paper);font-size:.95rem}
+.bs-vmsg[hidden]{display:none}
+.bs-vmsg a{color:var(--yellow)}
+.bs-credit{font-size:.78rem;color:var(--body-tint);margin:6px 0 10px}
+.bs-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bs-row .btn{font-size:.78rem;padding:9px 14px}
+.bs-link{font-size:.9rem;color:var(--teal)}
+
+/* phrase builder */
+.bs-strip{min-height:108px;background:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px;display:flex;
+  flex-wrap:wrap;gap:8px;align-items:flex-start;margin:0 0 10px;box-shadow:var(--lift)}
+.bs-strip .hint{color:rgba(255,255,255,.7);font-size:.92rem;align-self:center;padding:0 6px}
+.bs-tile{background:var(--yellow);color:var(--ink);border:3px solid var(--ink);border-radius:14px 11px 15px 10px;padding:6px 8px 4px;
+  min-width:78px;text-align:center;position:relative}
+.bs-tile .e{font-size:1.6rem;display:block;line-height:1.1}
+.bs-tile b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:.86rem;letter-spacing:.04em;display:block}
+.bs-tile.spell{background:var(--bright)}
+.bs-tile.on{outline:4px solid var(--orange);outline-offset:2px}
+.bs-tile .ctl{display:flex;justify-content:center;gap:2px;margin-top:3px}
+.bs-tile .ctl button{width:24px;height:22px;border-radius:7px;border:2px solid var(--ink);background:var(--white);cursor:pointer;
+  font-size:.72rem;font-weight:700;padding:0;line-height:1;color:var(--ink)}
+.bs-bank{display:grid;gap:10px;margin:0 0 16px}
+.bs-bank h4{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--body-tint);margin:0 0 5px}
+.bs-bank .chips2{display:flex;flex-wrap:wrap;gap:6px}
+.bs-add{font-family:var(--body);font-size:.9rem;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;
+  padding:4px 11px 4px 7px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.bs-add span{font-size:1.1rem}
+.bs-add:hover{background:var(--yellow)}
+.bs-spellrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 0}
+.bs-spellrow input,.bs-mean{font-family:var(--body);font-size:1rem;border:3px solid var(--ink);border-radius:12px;padding:7px 11px;background:var(--paper);color:var(--ink)}
+.bs-spellrow input{width:160px}
+.bs-mean{width:100%;margin:0 0 10px}
+.bs-tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 16px}
+.bs-tips div{background:var(--white);border:3px solid var(--ink);border-radius:16px 12px 15px 11px;padding:11px 14px;font-size:.9rem}
+.bs-tips b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:.95rem;margin-bottom:3px}
+.bs-tips code{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;background:var(--yellow);border-radius:6px;padding:0 5px;font-size:.84rem}
+.bs-ex{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px}
+.bs-ex button{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.8rem;letter-spacing:.03em;
+  background:var(--white);color:var(--ink);border:2px dashed var(--teal);border-radius:12px;padding:6px 11px;cursor:pointer;text-align:left}
+.bs-ex button small{display:block;font-family:var(--body);font-weight:400;font-size:.76rem;letter-spacing:0;color:var(--body-tint)}
+.bs-dare{background:var(--plum);color:var(--paper);border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 16px;margin:0 0 14px;
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bs-dare p{margin:0;flex:1 1 220px;font-weight:700}
+.bs-saved{display:grid;gap:8px;margin:0 0 10px}
+.bs-sv{background:var(--white);border:3px solid var(--ink);border-radius:14px 11px 15px 10px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bs-sv .g{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;letter-spacing:.04em;flex:1 1 200px}
+.bs-sv .g small{display:block;font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.86rem;color:var(--body-tint)}
+.bs-sv button{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer}
+
+/* phrase player */
+.bs-play .cap{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.bs-play .cap span{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:.9rem;border:2px solid var(--ink);
+  border-radius:10px;padding:3px 9px;background:var(--paper);opacity:.55}
+.bs-play .cap span.on{opacity:1;background:var(--yellow)}
+.bs-letter{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:5rem;color:var(--yellow);line-height:1}
+
+/* guess */
+.bs-quiz{max-width:560px}
+.bs-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:12px 0}
+.bs-opt{font-family:var(--body);font-size:1.05rem;font-weight:700;background:var(--paper);color:var(--ink);border:3px solid var(--ink);
+  border-radius:14px 12px 15px 11px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.bs-opt span{font-size:1.5rem}
+.bs-opt.right{background:#9fe0c8}
+.bs-opt.wrong{background:#ffd1b8}
+.bs-opt:disabled{cursor:default}
+.bs-score{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 850;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:0 0 8px}
+.bs-nav{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 30px}
+.bs-note{font-size:.85rem;color:var(--body-tint);max-width:62ch;margin:0 0 16px}
+@media (max-width:520px){.bs-opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/shuffle/">Shuffle</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero hero-sm">
+    <h1>Sign <span class="accent">It</span></h1>
+    <div class="line">
+      <span class="chip">Cultural calendar</span>
+      <p>A visual dictionary of British Sign Language, and a place to build your own phrases. For the International Week of Deaf People, and any week after it.</p>
+    </div>
+  </div>
+
+  <div class="weekbar" role="tablist" aria-label="Parts">
+    <button class="wtab" role="tab" id="tab-about" aria-controls="panel-about" aria-selected="true">About BSL<span class="dates">two minutes</span></button>
+    <button class="wtab" role="tab" id="tab-dict" aria-controls="panel-dict" aria-selected="false" tabindex="-1">Dictionary<span class="dates">52 signs</span></button>
+    <button class="wtab" role="tab" id="tab-build" aria-controls="panel-build" aria-selected="false" tabindex="-1">Build a phrase<span class="dates">make your own</span></button>
+    <button class="wtab" role="tab" id="tab-guess" aria-controls="panel-guess" aria-selected="false" tabindex="-1">Guess the sign<span class="dates">if you fancy it</span></button>
+  </div>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="wpanel" id="panel-about" role="tabpanel" aria-labelledby="tab-about">
+    <div class="weektheme"><h2>A language, not a code</h2><span>Six things worth knowing before you start.</span></div>
+    <div class="bs-facts">
+      <div class="bs-fact fill-yellow"><span class="big">&#x1F5E3;&#xFE0F;</span><h3>BSL is its own language</h3><p>It has its own grammar and word order. It is not English done with your hands, which is why phrases come out in a different order.</p></div>
+      <div class="bs-fact fill-teal"><span class="big">&#x2696;&#xFE0F;</span><h3>It is recognised in law</h3><p>The British Sign Language Act 2022 recognised BSL as a language of England, Wales and Scotland.</p></div>
+      <div class="bs-fact fill-orange"><span class="big">&#x1F928;</span><h3>Your face is grammar</h3><p>Eyebrows, mouth and head movements are part of the sign. Eyebrows down for a "what" or "where" question, eyebrows up for a yes or no question.</p></div>
+      <div class="bs-fact fill-plum"><span class="big">&#x1F5FA;&#xFE0F;</span><h3>Signs have accents</h3><p>Signs change from region to region, the way spoken words do. That is why the dictionary can show you more than one version.</p></div>
+      <div class="bs-fact fill-bright"><span class="big">&#x270C;&#xFE0F;</span><h3>Two hands to spell</h3><p>BSL fingerspelling uses both hands. It is used for names and for words that do not have a sign yet.</p></div>
+      <div class="bs-fact fill-yellow"><span class="big">&#x1F4C5;</span><h3>Why now</h3><p>The International Week of Deaf People is the last full week of September, and 23 September is the International Day of Sign Languages.</p></div>
+    </div>
+    <div class="panel panel-teal">
+      <p><b>Deaf with a capital D</b> is often used for people who see themselves as part of the Deaf community, with its own language and culture. To get a Deaf person's attention, a wave or a gentle tap on the shoulder works. Keep your face where they can see it, and there is no need to shout.</p>
+    </div>
+    <div class="bs-nav"><button class="btn" data-go="dict">To the dictionary</button><button class="btn btn-quiet" data-go="build">Straight to building a phrase</button></div>
+  </section>
+
+  <!-- ============ DICTIONARY ============ -->
+  <section class="wpanel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+    <div class="weektheme"><h2>Tap a sign to watch it</h2><span>Slow it down, watch it again, copy it. There is no test.</span></div>
+    <div class="bs-tools">
+      <input class="bs-search" id="bs-q" type="search" placeholder="Find a word" aria-label="Find a word">
+      <span class="bs-note" id="bs-count" style="margin:0"></span>
+    </div>
+    <div class="bs-cats" id="bs-cats" role="group" aria-label="Show a group of signs"></div>
+    <div class="bs-grid" id="bs-grid"></div>
+    <p class="bs-note">Videos come from <a href="https://www.signbsl.com/" target="_blank" rel="noopener">SignBSL.com</a>, mostly the University of Bristol and Deaf Studies Trust. Each sign links through to SignBSL, where there are more versions from different signers.</p>
+  </section>
+
+  <!-- ============ BUILD ============ -->
+  <section class="wpanel" id="panel-build" role="tabpanel" aria-labelledby="tab-build" hidden>
+    <div class="weektheme"><h2>Build a phrase</h2><span>Tap signs to line them up, then play the whole thing back.</span></div>
+
+    <div class="bs-tips">
+      <div><b>Time goes first</b><code>TODAY ME TIRED</code> not "I am tired today".</div>
+      <div><b>Question words go last</b><code>YOUR NAME WHAT?</code> with your eyebrows down.</div>
+      <div><b>Topic, then what you think</b><code>FOOTBALL ME LIKE</code> says what you are talking about first.</div>
+      <div><b>Names get spelled</b>Type a name below and it goes in as a fingerspelled word.</div>
+    </div>
+
+    <p class="chiplabel">Borrow one to start</p>
+    <div class="bs-ex" id="bs-ex"></div>
+
+    <div class="bs-dare">
+      <p id="bs-dare-t">Stuck? Get a random challenge.</p>
+      <button class="btn btn-quiet" id="bs-dare">Give me one</button>
+    </div>
+
+    <p class="chiplabel">Your phrase</p>
+    <div class="bs-strip" id="bs-strip" aria-live="polite"></div>
+    <input class="bs-mean" id="bs-mean" type="text" placeholder="What it means in English (optional)" aria-label="What your phrase means in English">
+    <div class="bs-row" style="margin:0 0 20px">
+      <button class="btn btn-orange" id="bs-playp">Play my phrase</button>
+      <button class="btn" id="bs-save">Keep it</button>
+      <button class="btn btn-quiet" id="bs-clear">Start again</button>
+    </div>
+
+    <p class="chiplabel">Signs to use</p>
+    <div class="bs-bank" id="bs-bank"></div>
+    <div class="bs-spellrow">
+      <input id="bs-spell" type="text" maxlength="14" placeholder="A name, e.g. Jay" aria-label="A word to fingerspell">
+      <button class="btn btn-quiet" id="bs-spelladd" style="font-size:.78rem;padding:9px 14px">Add as fingerspelling</button>
+    </div>
+
+    <hr class="rule">
+    <div class="weektheme"><h2>Phrases you kept</h2><span>Saved on this device.</span></div>
+    <div class="bs-saved" id="bs-saved"></div>
+    <div id="bs-send"></div>
+  </section>
+
+  <!-- ============ GUESS ============ -->
+  <section class="wpanel" id="panel-guess" role="tabpanel" aria-labelledby="tab-guess" hidden>
+    <div class="weektheme"><h2>Guess the sign</h2><span>Watch it, pick the word. Wrong guesses just show you the answer.</span></div>
+    <div class="bs-quiz">
+      <p class="bs-score" id="bs-score"></p>
+      <div class="bs-vid"><video id="bs-qv" muted playsinline loop preload="auto"></video><div class="bs-vmsg" id="bs-qmsg" hidden></div></div>
+      <div class="bs-opts" id="bs-opts"></div>
+      <div class="bs-row"><button class="btn btn-quiet" id="bs-qslow">Slow it down</button><button class="btn" id="bs-qnext">Another one</button></div>
+    </div>
+  </section>
+
+  <div class="bs-nav"><a class="btn btn-quiet" href="/practice/#cc">Back to practice</a></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<!-- one sign, big -->
+<div class="bs-view" id="bs-view" hidden role="dialog" aria-modal="true" aria-labelledby="bs-vt">
+  <div class="bs-box">
+    <div class="top2"><span class="e" id="bs-ve"></span><h2 id="bs-vt"></h2><button class="bs-x" id="bs-vx" aria-label="Close">X</button></div>
+    <div class="bs-vid"><video id="bs-v" muted playsinline loop preload="auto"></video><div class="bs-vmsg" id="bs-vmsg" hidden></div></div>
+    <p class="bs-credit" id="bs-vc"></p>
+    <div class="bs-row">
+      <button class="btn btn-quiet" id="bs-vslow">Slow it down</button>
+      <button class="btn btn-quiet" id="bs-valt">Another version</button>
+      <button class="btn btn-orange" id="bs-vadd">Add to my phrase</button>
+    </div>
+    <p style="margin:12px 0 0"><a class="bs-link" id="bs-vl" target="_blank" rel="noopener">More versions on SignBSL</a></p>
+  </div>
+</div>
+
+<!-- a whole phrase, played through -->
+<div class="bs-view bs-play" id="bs-pv" hidden role="dialog" aria-modal="true" aria-label="Your phrase, played through">
+  <div class="bs-box">
+    <div class="top2"><h2>Your phrase<small id="bs-pm"></small></h2><button class="bs-x" id="bs-px" aria-label="Close">X</button></div>
+    <div class="bs-vid"><video id="bs-pvid" muted playsinline preload="auto"></video><div class="bs-vmsg" id="bs-pmsg" hidden></div></div>
+    <div class="cap" id="bs-pcap"></div>
+    <div class="bs-row" style="margin-top:8px"><button class="btn btn-quiet" id="bs-pslow">Slow: off</button><button class="btn" id="bs-pagain">Play again</button></div>
+  </div>
+</div>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- the signs. Videos from SignBSL.com ---------- */
+var S='https://media.signbsl.com/videos/bsl/signstation/',
+    M='https://media.signbsl.com/videos/bsl/signmonkey/mp4/',
+    D='https://media.signbsl.com/videos/bsl/deafway/mp4/',
+    Y='https://media.signbsl.com/videos/bsl/youtube/mp4/',
+    NF='https://media.signbsl.com/videos/bsl/nf/mp4/';
+var B='University of Bristol and Deaf Studies Trust',K='Karl O\'Keeffe',DW='Deafway',N='National Deaf Children\'s Society',F='Nathanael Farley',U='University of Wolverhampton';
+
+var CATS=[['hello','Hello and manners'],['people','People'],['feel','Feelings'],['q','Questions'],['do','Doing'],['things','Things and places'],['time','Time, good and bad']];
+
+/* [slug, word, category, emoji code points, [[video, credit], ...]] */
+var W=[
+ ['hello','hello','hello',[0x1F44B],[[S+'hello.mp4',B],[D+'Hello.mp4',DW]]],
+ ['goodbye','goodbye','hello',[0x1F6B6],[[S+'goodbye.mp4',B],[D+'Bye.mp4',DW]]],
+ ['please','please','hello',[0x1F64F],[[S+'please.mp4',B],[D+'Please.mp4',DW]]],
+ ['thank-you','thank you','hello',[0x1F60A],[[S+'thank-you.mp4',B],[D+'Thank%20you.mp4',DW]]],
+ ['sorry','sorry','hello',[0x1F614],[[S+'sorry.mp4',B],[D+'sorry.mp4',DW]]],
+ ['yes','yes','hello',[0x2705],[[S+'yes.mp4',B],[NF+'Yes.mp4',F]]],
+ ['no','no','hello',[0x274C],[[S+'no.mp4',B]]],
+ ['ok','OK','hello',[0x1F44C],[[S+'OK.mp4',B],[S+'alright.mp4',B]]],
+ ['me','me','people',[0x1F64B],[[S+'ME.mp4',B],[M+'me.mp4',K]]],
+ ['you','you','people',[0x1F449],[[S+'you.mp4',B],[NF+'You.mp4',F]]],
+ ['my','my','people',[0x1F91A],[[S+'my.mp4',B],[M+'my.mp4',K]]],
+ ['your','your','people',[0x1F450],[[S+'your.mp4',B],[M+'your.mp4',K]]],
+ ['friend','friend','people',[0x1F91D],[[S+'friend.mp4',B],[M+'friend.mp4',K]]],
+ ['mum','mum','people',[0x1F469],[[S+'mum.mp4',B],[S+'mummy.mp4',B]]],
+ ['dad','dad','people',[0x1F468],[[S+'father.mp4',B],[D+'Father%20or%20Dad.mp4',DW]]],
+ ['teacher','teacher','people',[0x1F9D1,0x200D,0x1F3EB],[[S+'teacher.mp4',B],[M+'teacher.mp4',K]]],
+ ['name','name','people',[0x1F4DB],[[S+'name.mp4',B],[M+'name.mp4',K]]],
+ ['happy','happy','feel',[0x1F604],[[S+'happy.mp4',B],[M+'happy.mp4',K]]],
+ ['sad','sad','feel',[0x1F622],[[S+'101-06-605.mp4',B],[D+'Sad.mp4',DW]]],
+ ['tired','tired','feel',[0x1F634],[[S+'tired.mp4',B],[M+'tired%20(1).mp4',K]]],
+ ['hungry','hungry','feel',[0x1F924],[[S+'hungry.mp4',B],[Y+'6fLdeyoZY9c.mp4',N]]],
+ ['angry','angry','feel',[0x1F620],[[S+'angry.mp4',B],[D+'Angry.mp4',DW]]],
+ ['bored','bored','feel',[0x1F971],[[S+'bored.mp4',B]]],
+ ['excited','excited','feel',[0x1F929],[[S+'excited.mp4',B],[S+'excited-2.mp4',B]]],
+ ['what','what','q',[0x2753],[[S+'what.mp4',B],[Y+'kxag6_1TKAA.mp4',N]]],
+ ['where','where','q',[0x1F4CD],[[S+'where.mp4',B],[Y+'qAY6hUsCs84.mp4',N]]],
+ ['who','who','q',[0x1F464],[[S+'WHO.mp4',B],[S+'WHO-2.mp4',B]]],
+ ['how','how','q',[0x2699,0xFE0F],[[S+'how.mp4',B],[S+'how-2.mp4',B]]],
+ ['why','why','q',[0x1F914],[[S+'why.mp4',B],[M+'why.mp4',K]]],
+ ['when','when','q',[0x23F0],[[S+'when.mp4',B],[Y+'4pHEfwqxuvs.mp4',N]]],
+ ['like','like','do',[0x1F44D],[[S+'like.mp4',B],[M+'like.mp4',K]]],
+ ['want','want','do',[0x1F932],[[S+'want.mp4',B],[M+'want.mp4',K]]],
+ ['go','go','do',[0x1F3C3],[[S+'go.mp4',B],[Y+'CoSEPhmliQw.mp4',N]]],
+ ['eat','eat','do',[0x1F37D,0xFE0F],[[S+'eat.mp4',B],[S+'101-06-650.mp4',B]]],
+ ['drink','drink','do',[0x1F964],[[S+'drink.mp4',B],[Y+'uUL1SaNlR-Q.mp4',N]]],
+ ['play','play','do',[0x1F938],[[S+'play.mp4',B],[M+'play.mp4',K]]],
+ ['help','help','do',[0x1F198],[[S+'help.mp4',B],[S+'assist.mp4',B]]],
+ ['understand','understand','do',[0x1F4A1],[[S+'understand.mp4',B],[M+'understand.mp4',K]]],
+ ['know','know','do',[0x1F9E0],[[S+'know.mp4',B],[M+'know.mp4',K]]],
+ ['school','school','things',[0x1F3EB],[[S+'school.mp4',B],[M+'school.mp4',K]]],
+ ['home','home','things',[0x1F3E0],[[S+'home.mp4',B],[S+'home-2.mp4',B]]],
+ ['food','food','things',[0x1F354],[[S+'food.mp4',B],[Y+'JGjCpTB3hoY.mp4',N]]],
+ ['toilet','toilet','things',[0x1F6BD],[[S+'toilet.mp4',B],[S+'toilet-2.mp4',B]]],
+ ['dog','dog','things',[0x1F415],[[S+'dog.mp4',B],[M+'dog.mp4',K]]],
+ ['football','football','things',[0x26BD],[[S+'football.mp4',B],[S+'football-2.mp4',B]]],
+ ['dinosaur','dinosaur','things',[0x1F995],[['https://media.signbsl.com/videos/wolver/mp4/sci_dinosa_6104.mp4',U]]],
+ ['today','today','time',[0x1F4C5],[[S+'today.mp4',B],[M+'today.mp4',K]]],
+ ['tomorrow','tomorrow','time',[0x1F305],[[S+'tomorrow.mp4',B]]],
+ ['now','now','time',[0x23F1,0xFE0F],[[S+'101-06-1115.mp4',B],[Y+'kqg60c2FMmY.mp4',N]]],
+ ['later','later','time',[0x1F319],[[S+'later.mp4',B],[S+'afterwards.mp4',B]]],
+ ['good','good','time',[0x1F31F],[[S+'good.mp4',B],[S+'good-2.mp4',B]]],
+ ['bad','bad','time',[0x1F44E],[[S+'bad.mp4',B],[Y+'Cg22tczx3nE.mp4',N]]]
+];
+var BY={};W.forEach(function(w){BY[w[0]]=w});
+function emo(w){return String.fromCodePoint.apply(null,w[3])}
+function gloss(w){return w[1].toUpperCase().replace(' ','-')}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ---------- saving ---------- */
+var KEY='b5.practice.bsl.v1',ST;
+try{ST=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){ST=null}
+ST=ST||{};ST.phrase=ST.phrase||[];ST.saved=ST.saved||[];ST.seen=ST.seen||{};ST.mean=ST.mean||'';ST.q=ST.q||{tried:0,got:0};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+
+/* ---------- tabs ---------- */
+var tabs=Array.prototype.slice.call(document.querySelectorAll('.wtab'));
+function show(part,focus){
+  tabs.forEach(function(t){
+    var on=t.id==='tab-'+part;
+    t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+    if(on&&focus)t.focus();
+  });
+  ST.tab=part;save();
+  if(part==='guess'&&!quizW)nextQ();
+  if(part!=='guess'){qv.pause();}
+}
+tabs.forEach(function(t,i){
+  t.addEventListener('click',function(){show(t.id.replace('tab-',''))});
+  t.addEventListener('keydown',function(e){
+    var n=null;
+    if(e.key==='ArrowRight')n=tabs[(i+1)%tabs.length];
+    if(e.key==='ArrowLeft')n=tabs[(i-1+tabs.length)%tabs.length];
+    if(n){e.preventDefault();show(n.id.replace('tab-',''),true);}
+  });
+});
+document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.go);window.scrollTo({top:document.querySelector('.weekbar').offsetTop-10,behavior:'smooth'});})});
+
+/* ---------- a video that copes with not loading ---------- */
+function load(video,msg,w,alt,rate){
+  var v=w[4][alt%w[4].length];
+  msg.hidden=true;
+  video.onerror=function(){
+    msg.hidden=false;
+    msg.innerHTML='This video will not load here. <a href="https://www.signbsl.com/sign/'+w[0]+'" target="_blank" rel="noopener">Watch '+esc(w[1])+' on SignBSL</a>';
+  };
+  video.src=v[0];
+  video.playbackRate=rate||1;
+  video.onloadeddata=function(){video.playbackRate=rate||1;};
+  var p=video.play();if(p&&p.catch)p.catch(function(){});
+  return v[1];
+}
+
+/* ---------- dictionary ---------- */
+var grid=document.getElementById('bs-grid'),cats=document.getElementById('bs-cats'),qIn=document.getElementById('bs-q'),count=document.getElementById('bs-count');
+var cat='all';
+cats.innerHTML='<button class="bs-cat" data-c="all" aria-pressed="true">Everything</button>'+CATS.map(function(c){return '<button class="bs-cat" data-c="'+c[0]+'" aria-pressed="false">'+c[1]+'</button>'}).join('');
+cats.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;cat=b.dataset.c;
+  cats.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});drawGrid();});
+qIn.addEventListener('input',drawGrid);
+function drawGrid(){
+  var q=qIn.value.trim().toLowerCase(),list=W.filter(function(w){return (cat==='all'||w[2]===cat)&&(!q||w[1].toLowerCase().indexOf(q)>=0)});
+  grid.innerHTML=list.map(function(w){
+    return '<button class="bs-card c-'+w[2]+'" data-s="'+w[0]+'">'+(ST.seen[w[0]]?'<span class="seen" title="watched"></span>':'')+'<span class="e" aria-hidden="true">'+emo(w)+'</span><b>'+esc(w[1])+'</b></button>';
+  }).join('')||'<p class="bs-empty">Nothing with that name yet. SignBSL has thousands more: <a href="https://www.signbsl.com/search/'+encodeURIComponent(q)+'" target="_blank" rel="noopener">search for "'+esc(q)+'" there</a>.</p>';
+  var seen=Object.keys(ST.seen).length;
+  count.textContent='Watched '+seen+' of '+W.length;
+}
+grid.addEventListener('click',function(e){var b=e.target.closest('.bs-card');if(b)openSign(b.dataset.s);});
+
+var view=document.getElementById('bs-view'),vv=document.getElementById('bs-v'),vmsg=document.getElementById('bs-vmsg'),
+    slowBtn=document.getElementById('bs-vslow'),altBtn=document.getElementById('bs-valt');
+var cur=null,alt=0,slow=false,lastFocus=null;
+function openSign(slug){
+  cur=BY[slug];alt=0;slow=false;lastFocus=document.activeElement;
+  document.getElementById('bs-ve').textContent=emo(cur);
+  document.getElementById('bs-vt').innerHTML=esc(cur[1])+'<small>In BSL this is written '+gloss(cur)+'</small>';
+  document.getElementById('bs-vl').href='https://www.signbsl.com/sign/'+cur[0];
+  altBtn.hidden=cur[4].length<2;
+  playCur();
+  view.hidden=false;document.getElementById('bs-vx').focus();
+  ST.seen[slug]=1;save();drawGrid();
+}
+function playCur(){
+  var c=load(vv,vmsg,cur,alt,slow?0.5:1);
+  document.getElementById('bs-vc').textContent='Video: '+c+', via SignBSL.com'+(cur[4].length>1?' (version '+(alt+1)+' of '+cur[4].length+')':'');
+  slowBtn.textContent=slow?'Normal speed':'Slow it down';
+}
+slowBtn.addEventListener('click',function(){slow=!slow;vv.playbackRate=slow?0.5:1;slowBtn.textContent=slow?'Normal speed':'Slow it down';});
+altBtn.addEventListener('click',function(){alt=(alt+1)%cur[4].length;playCur();});
+document.getElementById('bs-vadd').addEventListener('click',function(){addTile({s:cur[0]});closeView();show('build');});
+function closeView(){view.hidden=true;vv.pause();vv.removeAttribute('src');vv.load();if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+document.getElementById('bs-vx').addEventListener('click',closeView);
+view.addEventListener('click',function(e){if(e.target===view)closeView();});
+
+/* ---------- phrase builder ---------- */
+var strip=document.getElementById('bs-strip'),meanIn=document.getElementById('bs-mean');
+meanIn.value=ST.mean;
+meanIn.addEventListener('input',function(){ST.mean=meanIn.value;save();});
+function tileHtml(t,i,ctl){
+  if(t.sp)return '<div class="bs-tile spell" data-i="'+i+'"><span class="e" aria-hidden="true">&#x270C;&#xFE0F;</span><b>'+esc(t.sp.toUpperCase().split('').join('-'))+'</b>'+(ctl?ctlHtml(i):'')+'</div>';
+  var w=BY[t.s];
+  return '<div class="bs-tile" data-i="'+i+'"><span class="e" aria-hidden="true">'+emo(w)+'</span><b>'+gloss(w)+'</b>'+(ctl?ctlHtml(i):'')+'</div>';
+}
+function ctlHtml(i){return '<span class="ctl"><button data-a="l" data-i="'+i+'" aria-label="Move left">&lt;</button><button data-a="x" data-i="'+i+'" aria-label="Take out">x</button><button data-a="r" data-i="'+i+'" aria-label="Move right">&gt;</button></span>'}
+function drawStrip(){
+  strip.innerHTML=ST.phrase.length?ST.phrase.map(function(t,i){return tileHtml(t,i,true)}).join(''):'<span class="hint">Tap signs below, or borrow a phrase above. They line up here.</span>';
+}
+strip.addEventListener('click',function(e){
+  var b=e.target.closest('button[data-a]');if(!b)return;
+  var i=+b.dataset.i,a=b.dataset.a,p=ST.phrase;
+  if(a==='x')p.splice(i,1);
+  if(a==='l'&&i>0){var t=p[i];p[i]=p[i-1];p[i-1]=t;}
+  if(a==='r'&&i<p.length-1){var t2=p[i];p[i]=p[i+1];p[i+1]=t2;}
+  save();drawStrip();
+});
+function addTile(t){if(ST.phrase.length>=12)return;ST.phrase.push(t);save();drawStrip();}
+var bank=document.getElementById('bs-bank');
+bank.innerHTML=CATS.map(function(c){
+  return '<div><h4>'+c[1]+'</h4><div class="chips2">'+W.filter(function(w){return w[2]===c[0]}).map(function(w){
+    return '<button class="bs-add" data-s="'+w[0]+'"><span aria-hidden="true">'+emo(w)+'</span>'+esc(w[1])+'</button>';}).join('')+'</div></div>';
+}).join('');
+bank.addEventListener('click',function(e){var b=e.target.closest('.bs-add');if(b)addTile({s:b.dataset.s});});
+var spellIn=document.getElementById('bs-spell');
+function addSpell(){var v=spellIn.value.replace(/[^A-Za-z]/g,'').slice(0,14);if(!v)return;addTile({sp:v});spellIn.value='';}
+document.getElementById('bs-spelladd').addEventListener('click',addSpell);
+spellIn.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addSpell();}});
+document.getElementById('bs-clear').addEventListener('click',function(){ST.phrase=[];ST.mean='';meanIn.value='';save();drawStrip();});
+
+var EX=[
+ [['hello'],'Hello'],
+ [['hello','your','name','what'],'Hello, what is your name?'],
+ [['my','name',{sp:'Jay'}],'My name is Jay'],
+ [['today','me','tired'],'I am tired today'],
+ [['football','me','like'],'I like football'],
+ [['toilet','where'],'Where is the toilet?'],
+ [['you','ok'],'Are you OK?'],
+ [['now','me','hungry','food','where'],'I am hungry. Where is the food?'],
+ [['thank-you','friend'],'Thanks, friend'],
+ [['dinosaur','me','like'],'I like dinosaurs'],
+ [['tomorrow','school','me','go'],'I am going to school tomorrow'],
+ [['sorry','me','understand','no'],'Sorry, I do not understand']
+];
+function exTiles(ex){return ex[0].map(function(x){return typeof x==='string'?{s:x}:x})}
+document.getElementById('bs-ex').innerHTML=EX.map(function(ex,i){
+  return '<button data-e="'+i+'">'+exTiles(ex).map(function(t){return t.sp?t.sp.toUpperCase():gloss(BY[t.s])}).join(' ')+'<small>'+esc(ex[1])+'</small></button>';
+}).join('');
+document.getElementById('bs-ex').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;var ex=EX[+b.dataset.e];
+  ST.phrase=exTiles(ex);ST.mean=ex[1];meanIn.value=ex[1];save();drawStrip();
+});
+
+var DARES=['Ask someone how they are.','Tell someone what you like doing.','Say what you want to eat, and when.','Introduce yourself, with your name spelled.',
+ 'Ask where your friend is.','Say sorry and ask for help.','Tell someone how you feel today, and why.','Say goodbye and when you will see them.',
+ 'Ask your teacher a question.','Tell someone about a dog. Any dog.','Make the most dramatic phrase you can with only four signs.','Say something nice to someone in the room.'];
+document.getElementById('bs-dare').addEventListener('click',function(){
+  var t=document.getElementById('bs-dare-t');var d;do{d=DARES[Math.floor(Math.random()*DARES.length)]}while(d===t.textContent&&DARES.length>1);t.textContent=d;
+});
+
+/* keeping phrases */
+var savedEl=document.getElementById('bs-saved');
+function phraseGloss(p){return p.map(function(t){return t.sp?t.sp.toUpperCase().split('').join('-'):gloss(BY[t.s])}).join(' ')}
+function drawSaved(){
+  savedEl.innerHTML=ST.saved.length?ST.saved.map(function(s,i){
+    return '<div class="bs-sv"><span class="g">'+esc(phraseGloss(s.p))+(s.m?'<small>'+esc(s.m)+'</small>':'')+'</span><button data-a="play" data-i="'+i+'">Play</button><button data-a="edit" data-i="'+i+'">Edit</button><button data-a="del" data-i="'+i+'">Remove</button></div>';
+  }).join(''):'<p class="bs-note" style="margin:0">Nothing kept yet. Build a phrase and press Keep it.</p>';
+}
+document.getElementById('bs-save').addEventListener('click',function(){
+  if(!ST.phrase.length)return;
+  ST.saved.unshift({p:ST.phrase.slice(),m:ST.mean.trim()});if(ST.saved.length>30)ST.saved.pop();save();drawSaved();
+  var b=this;b.textContent='Kept';setTimeout(function(){b.textContent='Keep it'},1400);
+});
+savedEl.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;var i=+b.dataset.i,s=ST.saved[i];
+  if(b.dataset.a==='play')playPhrase(s.p,s.m);
+  if(b.dataset.a==='edit'){ST.phrase=s.p.slice();ST.mean=s.m||'';meanIn.value=ST.mean;save();drawStrip();strip.scrollIntoView({behavior:'smooth',block:'center'});}
+  if(b.dataset.a==='del'){ST.saved.splice(i,1);save();drawSaved();}
+});
+
+/* ---------- playing a phrase through ---------- */
+var pv=document.getElementById('bs-pv'),pvid=document.getElementById('bs-pvid'),pmsg=document.getElementById('bs-pmsg'),pcap=document.getElementById('bs-pcap');
+var pList=[],pI=0,pSlow=false,pTimer=null;
+document.getElementById('bs-playp').addEventListener('click',function(){if(ST.phrase.length)playPhrase(ST.phrase,ST.mean.trim());});
+function playPhrase(p,m){
+  pList=p.slice();document.getElementById('bs-pm').textContent=m||'';
+  pcap.innerHTML=pList.map(function(t,i){return '<span data-i="'+i+'">'+esc(t.sp?t.sp.toUpperCase():gloss(BY[t.s]))+'</span>'}).join('');
+  pv.hidden=false;document.getElementById('bs-px').focus();pI=0;step();
+}
+function step(){
+  clearTimeout(pTimer);
+  pcap.querySelectorAll('span').forEach(function(s,i){s.classList.toggle('on',i===pI)});
+  if(pI>=pList.length){pvid.pause();pmsg.hidden=false;pmsg.innerHTML='<span>That was your phrase. Play it again, or copy it yourself.</span>';return;}
+  var t=pList[pI];
+  if(t.sp){
+    pvid.pause();pvid.removeAttribute('src');
+    var letters=t.sp.toUpperCase().split(''),k=0;
+    pmsg.hidden=false;
+    (function next(){
+      if(k>=letters.length){pI++;step();return;}
+      pmsg.innerHTML='<div><div class="bs-letter">'+letters[k]+'</div><div>fingerspell it</div></div>';k++;
+      pTimer=setTimeout(next,pSlow?1100:700);
+    })();
+    return;
+  }
+  var w=BY[t.s];load(pvid,pmsg,w,0,pSlow?0.5:1);
+  pvid.onended=function(){pI++;step();};
+  pvid.onerror=function(){pmsg.hidden=false;pmsg.innerHTML='<span>'+esc(w[1])+' would not load. Skipping it.</span>';pTimer=setTimeout(function(){pI++;step();},1200);};
+}
+document.getElementById('bs-pagain').addEventListener('click',function(){pI=0;step();});
+document.getElementById('bs-pslow').addEventListener('click',function(){pSlow=!pSlow;this.textContent='Slow: '+(pSlow?'on':'off');pvid.playbackRate=pSlow?0.5:1;});
+function closePlay(){pv.hidden=true;clearTimeout(pTimer);pvid.pause();pvid.onended=null;}
+document.getElementById('bs-px').addEventListener('click',closePlay);
+pv.addEventListener('click',function(e){if(e.target===pv)closePlay();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(!view.hidden)closeView();if(!pv.hidden)closePlay();}});
+
+/* ---------- send ---------- */
+function sendText(){
+  var L=['Sign It: BSL phrases','Signs watched in the dictionary: '+Object.keys(ST.seen).length+' of '+W.length];
+  if(ST.q.tried)L.push('Guess the sign: '+ST.q.got+' right out of '+ST.q.tried);
+  L.push('');L.push('Phrases kept:');
+  if(!ST.saved.length)L.push('(none yet)');
+  ST.saved.forEach(function(s,i){L.push((i+1)+'. '+phraseGloss(s.p)+(s.m?'  ('+s.m+')':''));});
+  if(ST.phrase.length){L.push('');L.push('Phrase still on the go: '+phraseGloss(ST.phrase)+(ST.mean?'  ('+ST.mean+')':''));}
+  return L.join('\n');
+}
+if(window.Base5Send)Base5Send.mount(document.getElementById('bs-send'),{tool:'Sign It (BSL)',getText:sendText,filename:'bsl-phrases'});
+
+/* ---------- guess the sign ---------- */
+var qv=document.getElementById('bs-qv'),qmsg=document.getElementById('bs-qmsg'),opts=document.getElementById('bs-opts'),quizW=null,qSlow=false,qDone=false;
+function drawScore(){document.getElementById('bs-score').textContent=ST.q.tried?('Got '+ST.q.got+' out of '+ST.q.tried):'Watch the sign, then pick the word';}
+function nextQ(){
+  var pool=W.filter(function(w){return w!==quizW});
+  quizW=pool[Math.floor(Math.random()*pool.length)];qDone=false;
+  var others=W.filter(function(w){return w!==quizW}).sort(function(){return Math.random()-0.5}).slice(0,3);
+  var four=others.concat([quizW]).sort(function(){return Math.random()-0.5});
+  opts.innerHTML=four.map(function(w){return '<button class="bs-opt" data-s="'+w[0]+'"><span aria-hidden="true">'+emo(w)+'</span>'+esc(w[1])+'</button>'}).join('');
+  load(qv,qmsg,quizW,0,qSlow?0.5:1);drawScore();
+  qv.onerror=function(){qmsg.hidden=false;qmsg.innerHTML='The videos will not load on this network, so this game cannot run here. The dictionary still links out to SignBSL.';};
+}
+opts.addEventListener('click',function(e){
+  var b=e.target.closest('.bs-opt');if(!b||qDone)return;qDone=true;
+  var ok=b.dataset.s===quizW[0];ST.q.tried++;if(ok)ST.q.got++;save();drawScore();
+  opts.querySelectorAll('.bs-opt').forEach(function(x){x.disabled=true;if(x.dataset.s===quizW[0])x.classList.add('right');else if(x===b)x.classList.add('wrong');});
+  ST.seen[quizW[0]]=1;save();drawGrid();
+});
+document.getElementById('bs-qnext').addEventListener('click',nextQ);
+document.getElementById('bs-qslow').addEventListener('click',function(){qSlow=!qSlow;qv.playbackRate=qSlow?0.5:1;this.textContent=qSlow?'Normal speed':'Slow it down';});
+
+/* ---------- start ---------- */
+drawGrid();drawStrip();drawSaved();drawScore();
+var start=(location.hash||'').replace('#','');
+show(['about','dict','build','guess'].indexOf(start)>=0?start:(ST.tab||'about'));
+})();
+</script>
+</body>
+</html>
