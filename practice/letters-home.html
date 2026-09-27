@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letters Home - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Letters Home only. Shell, cards and buttons come from style.css */
+.pw{max-width:720px;margin:0 auto}
+.pw .card{cursor:default}
+.pw .kicker{opacity:.85}
+.lead{font-size:1.08rem;line-height:1.55;margin:8px 0 10px!important;max-width:62ch}
+.qprogress{height:10px;border-radius:999px;background:rgba(10,47,56,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:2px}
+.prompt{font-size:1.25rem;line-height:1.5;margin:8px 0 12px!important}
+.qvis{margin:4px 0 14px;text-align:center}
+.qvis svg{width:100%;max-width:460px;height:auto}
+.learnbody p{font-size:1.08rem!important;line-height:1.55;margin:12px 0 6px!important}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:480px;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.35rem;margin-bottom:8px}
+.arow input{width:130px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:2px solid rgba(10,47,56,.2);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.arow input:focus-visible,.choices button:focus-visible,.tapbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.hintline{font-size:.92rem;opacity:.75;margin:0 0 12px!important}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.05rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.2);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.choices button:disabled{cursor:default;opacity:1}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.topicbar{margin:12px 0 6px}
+.topicbar .trow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 190px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(10,47,56,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.7}
+.pw details.rev{margin-top:14px}
+.pw details.rev summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.98rem}
+.tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.smallnote{font-size:.9rem;opacity:.75;margin-top:10px!important}
+.hidden{display:none!important}
+@media (max-width:480px){.prompt{font-size:1.12rem}.topicbar .name{flex-basis:130px}.arow input{width:110px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+
+.src{position:sticky;top:.4rem;z-index:15;border:3px solid var(--ink);border-radius:18px 12px 18px 12px;background:#fffdfb;padding:10px 14px 12px;margin:0 0 14px;box-shadow:4px 5px 0 rgba(10,47,56,.14)}
+.src-tabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.src-tabs button{font-family:var(--body);font-size:.92rem;font-weight:700;padding:6px 12px;border-radius:999px;border:2px solid rgba(10,47,56,.25);background:#fff;color:var(--ink);cursor:pointer}
+.src-tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.src-tabs .fold{margin-left:auto;background:transparent;border-style:dashed}
+.src-body{max-height:40vh;overflow:auto;margin-top:10px;padding-right:6px;font-size:1rem;line-height:1.6}
+.src-body.letter{font-family:Georgia,"Times New Roman",serif;background:#fbf7ee;border-radius:8px;padding:10px 14px}
+.src-body h4{font-family:var(--display);font-size:1rem;margin:0 0 6px}
+.src-body p{margin:0 0 10px}
+.src-body .meta{font-style:italic;opacity:.8}
+.src-body .hl{background:rgba(255,194,71,.55);border-radius:4px}
+.src-body.folded{display:none}
+.evlist{display:grid;gap:8px;margin:6px 0 10px}
+.evlist button{text-align:left;font-family:Georgia,"Times New Roman",serif;font-size:1rem;line-height:1.45;padding:10px 12px;border:2px solid rgba(10,47,56,.2);border-radius:12px 9px 12px 9px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.evlist button[aria-pressed="true"]{border-color:#007291;background:rgba(0,114,145,.1)}
+.evlist button.good{border-color:#2e7d4f;background:#e9f4ec}
+.evlist button.bad{border-color:#d75f10;background:#fdf0e5}
+.pee{display:grid;gap:12px;margin:6px 0}
+.pee label{font-weight:700;display:block;margin-bottom:4px}
+.pee label span{font-weight:400;opacity:.75;font-size:.92rem}
+.pee textarea{width:100%;min-height:70px;font-family:var(--body);font-size:1rem;padding:10px 12px;border:2px solid rgba(10,47,56,.2);border-radius:12px 9px 12px 9px;background:#fffdfb;color:var(--ink);resize:vertical}
+.pee textarea:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.starters button{font-family:var(--body);font-size:.88rem;padding:5px 10px;border-radius:999px;border:2px solid rgba(10,47,56,.2);background:#fff;color:var(--ink);cursor:pointer}
+.selfcheck{border:2px dashed rgba(10,47,56,.25);border-radius:12px;padding:10px 12px;margin-top:10px}
+.selfcheck label{display:flex;gap:8px;align-items:flex-start;font-size:.97rem;padding:3px 0;cursor:pointer}
+.selfcheck input{margin-top:4px;width:18px;height:18px;accent-color:#007291;flex:none}
+@media (max-width:520px){.src-body{max-height:32vh}}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pw">
+
+  <div class="weektheme">
+    <h2>Letters Home</h2>
+    <span>English, working towards a qualification. Retrieval, evidence and inference, from two brothers and a shoe box of letters.</span>
+  </div>
+
+  <div class="board">
+    <div class="card w12 fill-plum" id="startCard">
+      <span class="kicker">Before you start</span>
+      <h3>Two shoe boxes of letters</h3>
+      <p class="lead">In Tiny Legends, Clement kept every letter his brother ever sent him. Here are the first two, from 1957 and 1958, and a short piece his granddaughter wrote after finding them.</p>
+      <p class="lead">The letters stay at the top of the screen while you answer, and the answers are always in them somewhere. Some questions ask you to tap the sentence that proves something, instead of copying it out. The last one asks for a proper written answer, which goes to Jay unmarked. Laid out like a Functional Skills reading paper, so it counts as practice for that too.</p>
+      <div class="qnav">
+        <button class="btn" id="beginBtn">Start when ready</button>
+        <button class="btn ghost hidden" id="resumeBtn">Carry on where I left off</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="src hidden" id="srcPanel">
+    <div class="src-tabs" id="srcTabs"></div>
+    <div class="src-body" id="srcBody"></div>
+  </div>
+
+  <div class="board">
+    <div class="card w12 hidden" id="qCard">
+      <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
+      <span class="qcount" id="qCount"></span>
+      <span class="kicker" id="qTopic"></span>
+      <p class="prompt" id="qPrompt"></p>
+      <div id="qAnswer"></div>
+      <div id="qFb"></div>
+      <div class="qnav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="skipBtn">Skip for now</button>
+        <button class="btn" id="nextBtn">Check</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="resultCard">
+      <span class="kicker">How it went</span>
+      <h3 id="scoreLine"></h3>
+      <p id="scoreNote"></p>
+      <div class="topicbar" id="topicBars"></div>
+      <div class="qnav"><button class="btn ghost" id="againBtn">Start again</button></div>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <div id="sendHost"></div>
+      <p class="smallnote">Your answers also stay saved on this device.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+
+(function(){
+  "use strict";
+  var STORE = "b5.practice.letters-home.v1";
+  function el(id){ return document.getElementById(id) }
+  function show(id, on){ el(id).classList.toggle("hidden", !on) }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c] }) }
+
+  // Sources: paragraphs of sentences, so single sentences can be tapped as evidence.
+  var SRC = {
+    A: { tab:"Source A: Clement, 1957", letter:true, head:"Source A", meta:"A letter from Clement in London to his brother Joseph in Kingston, Jamaica. 14 November 1957.",
+      paras:[
+        ["Dear Joseph,"],
+        ["I hope this letter finds you and Mama well.", "It has taken me three weeks to write it, because I wanted to have good news to put in it, and now I do.", "I have a job at last.", "I work at the railway goods yard at King's Cross, loading parcels onto the night trains.", "The work is heavy and the hours are long, but the men on my shift are decent.", "One of them, a Scotsman called Alec, shares his flask of tea with me every night at two o'clock."],
+        ["The weather here is something I cannot describe to you properly.", "The fog comes down so thick that you cannot see your own hand, and the cold gets into your bones.", "I have bought a coat, a second hand one, but it is the warmest thing I have ever owned."],
+        ["I rent one room in a house in Brixton.", "The landlady is strict about noise after ten, but she lets me use her kitchen on Sundays.", "I have been trying to cook the way Mama does, but it never tastes the same.", "I would give a week's wages for one mango from the tree in our yard."],
+        ["I am saving what I can.", "By next summer I hope to have enough for Grace's fare, and then this room will feel like a home."],
+        ["Write soon and tell me everything, even the small things.", "Especially the small things."],
+        ["Your brother,", "Clement"]
+      ]},
+    B: { tab:"Source B: Joseph, 1958", letter:true, head:"Source B", meta:"Joseph's reply, from Kingston. 20 January 1958.",
+      paras:[
+        ["Dear Clement,"],
+        ["Your letter came on a Tuesday and Mama made me read it to her four times.", "She says the tea from the Scotsman is the answer to her prayers, because at least somebody over there is feeding you."],
+        ["Everything here goes on as before.", "The mango tree has more fruit than we can eat, so I have been giving them to the neighbours, and every time I do, I think of you in your fog.", "I passed my exams at the teacher training college, and I start at the school on Hope Road in September.", "Mama has told everyone on the street, twice."],
+        ["Grace comes to the house most Sundays.", "She is saving too, from her work at the dressmaker's, and she keeps your photograph on the shelf by her sewing machine.", "She asked me to tell you not to spend all your money on coats."],
+        ["You asked for the small things.", "The dog had puppies under the house.", "The rain came early.", "Papa's old radio finally stopped working, and nobody has had the heart to throw it away."],
+        ["We are proud of you.", "Do not forget that on the cold nights."],
+        ["Your brother,", "Joseph"]
+      ]},
+    C: { tab:"Source C: The shoe boxes", letter:false, head:"Source C: The shoe boxes", meta:"From a community newsletter, autumn 2026. Written by Maya, Clement's granddaughter.",
+      paras:[
+        ["When Grandad Clement moved into a smaller flat last spring, we found two shoe boxes at the back of his wardrobe.", "Inside were more than two hundred letters, all from his brother Joseph, kept in order and tied with string."],
+        ["Grandad came to England in 1957.", "For the first few years, a letter took around three weeks to cross the ocean, and the same again for the reply.", "That meant every question he asked took six weeks to answer.", "So he wrote carefully, and he kept everything."],
+        ["Reading them now, what surprises me is how ordinary most of them are: rain, puppies, a broken radio.", "But I think that was the point.", "When you are far from home, the small things are the ones you miss."],
+        ["I send my own brother about thirty messages a day.", "I do not think either of us has kept a single one.", "This half term, our family is typing the letters up so that everyone can read them.", "I have also started writing to my brother on paper, once a month.", "He thinks I have gone mad.", "He has written back twice."]
+      ]}
+  };
+  // sentence ids like A3.1 (paragraph 3, sentence 1, counting from 0)
+  function sid(s, p, i){ return s + p + "." + i }
+  function sentence(id){ var s = id[0], parts = id.slice(1).split("."); return SRC[s].paras[+parts[0]][+parts[1]] }
+
+  var Q = [
+    { t:"Finding information", src:"A", type:"mc", p:"Where does Clement work?", opts:["On the buses in Brixton", "At the railway goods yard at King's Cross", "In a dressmaker's shop", "At a school on Hope Road"], ans:1, why:"Paragraph 2 of Source A: he loads parcels onto the night trains at the goods yard at King's Cross." },
+    { t:"Finding information", src:"A", type:"mc", p:"Why did it take Clement three weeks to write this letter?", opts:["He did not have any paper", "He wanted to wait until he had good news to tell", "The post office was closed", "He was too busy with his new job"], ans:1, why:"He says he waited because he wanted to have good news to put in it, and now he does: the job." },
+    { t:"Using evidence", src:"A", type:"ev", p:"Tap the sentence that best shows the London weather is a shock to Clement.", ok:["A2.1", "A2.0"], why:"The fog so thick you cannot see your own hand, and cold that gets into your bones. Nothing like home." },
+    { t:"Using evidence", src:"A", type:"ev", p:"Tap the sentence that best shows Clement misses home.", ok:["A3.3", "A3.2"], why:"Giving a whole week's wages for one mango from the family tree shows how much he misses home. Mama's cooking that never tastes the same shows it too." },
+    { t:"Reading between the lines", src:"A", type:"mc", p:"Clement writes \"the men on my shift are decent\". What does <b>decent</b> mean here?", opts:["Kind and fair", "Very rich", "Strict and bossy", "Hard to understand"], ans:0, why:"Decent here means good to be around: kind and fair. Alec sharing his tea every night backs that up." },
+    { t:"Reading between the lines", src:"A", type:"mc", p:"Who is Grace most likely to be?", opts:["Clement's landlady", "Someone Clement loves and hopes will join him in England", "A woman at the goods yard", "Joseph's teacher"], ans:1, why:"He is saving for her fare, and says the room will feel like a home once she comes. Source B adds that she keeps his photograph by her sewing machine." },
+    { t:"Reading between the lines", src:"A", type:"mc", p:"Why does Clement end with \"Especially the small things\"?", opts:["He is short of paper", "Ordinary news from home helps him feel close to his family", "He is only interested in gossip", "Joseph usually writes too much"], ans:1, why:"Far from home, it is the everyday details he misses most. Source C says exactly this: \"the small things are the ones you miss\"." },
+    { t:"Finding information", src:"B", type:"mc", p:"What will Joseph start doing in September?", opts:["Working at the goods yard", "Teaching at the school on Hope Road", "Travelling to England", "Working at the dressmaker's"], ans:1, why:"He passed his exams at the teacher training college, and starts at the school on Hope Road in September." },
+    { t:"Using evidence", src:"B", type:"ev", p:"Tap the sentence that best shows how happy Mama was to get Clement's letter.", ok:["B1.0"], why:"Making Joseph read it to her four times shows how much the letter meant to her." },
+    { t:"Reading between the lines", src:"B", type:"mc", p:"Grace keeps Clement's photograph by her sewing machine. What does this suggest?", opts:["She is tidy", "She thinks about him often and misses him", "She wants to sell it", "She does not have anywhere else to put it"], ans:1, why:"She sees it all day while she works and saves for her fare, so he is never far from her mind." },
+    { t:"Reading between the lines", src:"B", type:"mc", p:"Why does Joseph tell Clement about the puppies, the rain and the radio?", opts:["Because Clement asked to hear the small things", "Because nothing important has happened", "To make Clement feel guilty for leaving", "Because he has run out of paper"], ans:0, why:"Clement asked for \"everything, even the small things\", and Joseph says \"You asked for the small things\" before he lists them." },
+    { t:"Finding information", src:"C", type:"mc", p:"According to Maya, how long did it take to get an answer to a question in a letter?", opts:["Three days", "Three weeks", "Six weeks", "Two hundred days"], ans:2, why:"Three weeks there, and the same again for the reply: six weeks in all." },
+    { t:"Comparing", src:"C", type:"mc", p:"What is the main purpose of Source C?", opts:["To persuade people to stop sending messages", "To tell readers about the letters and what they show", "To complain about the post", "To give instructions for writing a letter"], ans:1, why:"It is a newsletter piece telling readers about the shoe boxes and what Maya learned from them. It does not try to make anyone do anything." },
+    { t:"Comparing", src:"C", type:"mc", p:"What idea is in all three sources?", opts:["Life in London is easy", "Small everyday things matter when people are far apart", "Letters are better than phones", "Brothers always argue"], ans:1, why:"Clement asks for the small things, Joseph sends them, and Maya says the small things are the ones you miss." },
+    { t:"Written answer", src:"A", type:"write", p:"How does Clement feel about his new life in London? Use evidence from Source A.",
+      starters:{ P:["Clement feels", "At the start of the letter Clement seems", "Although he is homesick, Clement also"], E:["He writes, \"", "This is shown when he says \"", "For example, \""], X:["This shows that", "The word ... suggests", "This makes me think that"] } }
+  ];
+  var QNUM = [], TOTAL = 0; Q.forEach(function(q, i){ QNUM[i] = q.type === "write" ? 0 : ++TOTAL });
+
+  var st = { idx:0, a:{}, started:false, finished:false, srcShown:"A", folded:false };
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+  try{ var raw = localStorage.getItem(STORE); if(raw){ var s = JSON.parse(raw); if(s && s.a) st = s } }catch(e){}
+
+  /* ---------- source panel ---------- */
+  var evOpen = {};
+  function drawSrc(hl){
+    var q = Q[st.idx], autoFold = !!(q && q.type === "ev" && !(st.a[st.idx] && st.a[st.idx].checked) && !evOpen[st.idx] && !el("srcPanel").classList.contains("hidden") && st.started), folded = st.folded || autoFold;
+    var tabs = el("srcTabs"); tabs.innerHTML = "";
+    Object.keys(SRC).forEach(function(k){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = SRC[k].tab;
+      b.setAttribute("aria-pressed", st.srcShown === k ? "true" : "false");
+      b.onclick = function(){ st.srcShown = k; st.folded = false; save(); drawSrc() };
+      tabs.appendChild(b);
+    });
+    var f = document.createElement("button"); f.type = "button"; f.className = "fold"; f.textContent = folded ? "Show the text" : "Fold away";
+    f.onclick = function(){ if(autoFold){ evOpen[st.idx] = true } else { st.folded = !st.folded; save() } drawSrc() };
+    tabs.appendChild(f);
+    var S = SRC[st.srcShown], body = el("srcBody");
+    body.className = "src-body" + (S.letter ? " letter" : "") + (folded ? " folded" : "");
+    var h = "<h4>" + S.head + "</h4><p class='meta'>" + esc(S.meta) + "</p>";
+    S.paras.forEach(function(p, pi){ h += "<p>" + p.map(function(sen, si){ var id = sid(st.srcShown, pi, si); return "<span" + (hl && hl.indexOf(id) >= 0 ? " class='hl'" : "") + ">" + esc(sen) + "</span>" }).join(" ") + "</p>" });
+    body.innerHTML = h;
+    if(hl){ var m = body.querySelector(".hl"); if(m) m.scrollIntoView({ block:"nearest" }) }
+  }
+
+  /* ---------- questions ---------- */
+  function fb(kind, html){ el("qFb").innerHTML = "<div class='fb " + kind + "'>" + html + "</div>" }
+  function render(){
+    var q = Q[st.idx], a = st.a[st.idx], checked = a && a.checked, last = st.idx === Q.length - 1;
+    if(st.srcShown !== q.src){ st.srcShown = q.src; st.folded = false }
+    drawSrc(checked && q.type === "ev" ? q.ok : null);
+    el("qTopic").textContent = q.t + " \u00B7 Source " + q.src;
+    el("qCount").textContent = q.type === "write" ? "Written answer" : QNUM[st.idx] + " of " + TOTAL;
+    el("progFill").style.width = Math.round(st.idx / Q.length * 100) + "%";
+    el("qPrompt").innerHTML = q.p;
+    el("qFb").innerHTML = "";
+    el("backBtn").disabled = st.idx === 0;
+    var box = el("qAnswer"); box.innerHTML = "";
+
+    if(q.type === "write"){
+      var v = a || { P:"", E:"", X:"", sc:{} };
+      box.innerHTML = "<p class='hintline'>Point, evidence, explain. Write as much or as little as you like in each box. Tap a starter to drop it in.</p><div class='pee'>" +
+        box3("P", "Point", "what you think Clement feels", v.P, q.starters.P) + box3("E", "Evidence", "his exact words, in speech marks", v.E, q.starters.E) + box3("X", "Explain", "what those words show", v.X, q.starters.X) + "</div>" +
+        "<div class='selfcheck'><b>Check your own</b>" + ["I said how Clement feels, not just what happens", "I copied his exact words and put them in speech marks", "I explained what those words show about him", "Stretch: I noticed he feels more than one thing"].map(function(t, i){ return "<label><input type='checkbox' data-sc='" + i + "'" + (v.sc && v.sc[i] ? " checked" : "") + "> " + t + "</label>" }).join("") + "</div>";
+      box.querySelectorAll("textarea").forEach(function(ta){ ta.addEventListener("input", function(){ var w = st.a[st.idx] || { P:"", E:"", X:"", sc:{} }; w[ta.dataset.k] = ta.value; st.a[st.idx] = w; save() }) });
+      box.querySelectorAll("[data-starter]").forEach(function(b){ b.onclick = function(){ var ta = box.querySelector("textarea[data-k='" + b.dataset.k + "']"); ta.value = (ta.value ? ta.value.replace(/\s*$/, " ") : "") + b.dataset.starter; ta.dispatchEvent(new Event("input")); ta.focus() } });
+      box.querySelectorAll("[data-sc]").forEach(function(c){ c.onchange = function(){ var w = st.a[st.idx] || { P:"", E:"", X:"", sc:{} }; w.sc = w.sc || {}; w.sc[c.dataset.sc] = c.checked; st.a[st.idx] = w; save() } });
+      el("skipBtn").classList.add("hidden");
+      el("nextBtn").textContent = "Finish";
+      return;
+    }
+    el("skipBtn").classList.toggle("hidden", !!checked);
+    el("nextBtn").textContent = checked ? (last ? "Finish" : "Next") : "Check";
+
+    if(q.type === "mc"){
+      var g = document.createElement("div"); g.className = "choices";
+      q.opts.forEach(function(o, oi){
+        var b = document.createElement("button"); b.type = "button"; b.innerHTML = o;
+        if(a && a.v === oi) b.classList.add("picked");
+        if(checked){ b.disabled = true; if(oi === q.ans) b.classList.add("good"); else if(a.v === oi) b.classList.add("bad") }
+        else b.onclick = function(){ st.a[st.idx] = { v:oi }; save(); render() };
+        g.appendChild(b);
+      });
+      box.appendChild(g);
+    }
+    if(q.type === "ev"){
+      if(!checked) box.insertAdjacentHTML("beforeend", "<p class='hintline'>Every sentence from the letter is listed below, so the letter has folded itself away. Tap Show the text at the top if you want it back.</p>");
+      var list = document.createElement("div"); list.className = "evlist";
+      SRC[q.src].paras.forEach(function(p, pi){ p.forEach(function(sen, si){
+        if(sen.split(" ").length < 4) return;
+        var id = sid(q.src, pi, si), b = document.createElement("button"); b.type = "button"; b.textContent = "\"" + sen + "\"";
+        b.setAttribute("aria-pressed", a && a.v === id ? "true" : "false");
+        if(checked){ b.disabled = true; if(q.ok.indexOf(id) >= 0 && (a.v === id || id === q.ok[0])) b.classList.add("good"); else if(a.v === id) b.classList.add("bad") }
+        else b.onclick = function(){ st.a[st.idx] = { v:id }; save(); render() };
+        list.appendChild(b);
+      }) });
+      box.appendChild(list);
+    }
+    if(checked){
+      var ok = a.ok;
+      if(q.type === "ev") fb(ok ? "ok" : "nope", ok ? "<b>Good evidence.</b> " + q.why : "<b>Not the strongest one.</b> The best evidence is highlighted in the letter: \"" + esc(sentence(q.ok[0])) + "\" " + q.why);
+      else fb(ok ? "ok" : "nope", ok ? "<b>Yes.</b> " + q.why : "<b>Not this time.</b> " + q.why);
+    }
+  }
+  function box3(k, name, sub, val, starters){
+    return "<div><label for='pee" + k + "'>" + name + " <span>" + sub + "</span></label><textarea id='pee" + k + "' data-k='" + k + "'>" + esc(val || "") + "</textarea><div class='starters'>" + starters.map(function(s){ return "<button type='button' data-k='" + k + "' data-starter='" + esc(s) + "'>" + esc(s) + "</button>" }).join("") + "</div></div>";
+  }
+
+  function next(){
+    var q = Q[st.idx];
+    if(q.type === "write"){ finish(); return }
+    var a = st.a[st.idx];
+    if(!a || !a.checked){
+      if(!a){ fb("tell", "Have a go first, or press <b>Skip for now</b>."); return }
+      a.ok = q.type === "mc" ? a.v === q.ans : q.ok.indexOf(a.v) >= 0; a.checked = true; save(); render(); return;
+    }
+    st.idx++; save(); render(); el("qCard").scrollIntoView({ block:"nearest" });
+  }
+
+  function finish(){
+    st.finished = true; save();
+    show("qCard", false); show("srcPanel", false); show("resultCard", true); show("sendCard", true);
+    var topics = {}, order = [], right = 0;
+    Q.forEach(function(q, i){ if(q.type === "write") return; if(!topics[q.t]){ topics[q.t] = [0, 0]; order.push(q.t) } topics[q.t][1]++; if(st.a[i] && st.a[i].ok){ right++; topics[q.t][0]++ } });
+    el("scoreLine").textContent = right + " out of " + TOTAL;
+    var w = st.a[Q.length - 1];
+    el("scoreNote").textContent = (w && (w.P || w.E || w.X) ? "Your written answer is ready to send to Jay below. " : "") + (right >= TOTAL * .75 ? "Strong reading all round." : "The letters are here to come back to whenever you like.");
+    var bars = el("topicBars"); bars.innerHTML = "";
+    order.forEach(function(t){ var f = topics[t][0] / topics[t][1];
+      bars.insertAdjacentHTML("beforeend", "<div class='trow'><div class='name'>" + t + "</div><div class='track'><span class='fill' style='width:" + Math.round(f * 100) + "%;background:" + (f >= .75 ? "linear-gradient(90deg,#2e7d4f,#4ba36f)" : "linear-gradient(90deg,#ef7724,#d55f0f)") + "'></span></div><div class='score'>" + topics[t][0] + "/" + topics[t][1] + "</div></div>") });
+    if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Letters Home", filename:"letters-home", getText:function(){
+      var out = ["Letters Home: " + right + " out of " + TOTAL + " marked questions", ""];
+      order.forEach(function(t){ out.push(t + ": " + topics[t][0] + "/" + topics[t][1]) });
+      out.push("");
+      Q.forEach(function(q, i){ if(q.type === "write") return; var a = st.a[i];
+        out.push("Q" + QNUM[i] + " [" + q.t + "] " + q.p.replace(/<[^>]+>/g, "") + " -> " + (!a || !a.checked ? "skipped" : a.ok ? "correct" : "chose " + (q.type === "mc" ? q.opts[a.v] : "\"" + sentence(a.v) + "\""))) });
+      var w = st.a[Q.length - 1] || {};
+      out.push("", "WRITTEN ANSWER (unmarked): How does Clement feel about his new life in London?", "", "Point: " + (w.P || "(blank)"), "Evidence: " + (w.E || "(blank)"), "Explain: " + (w.X || "(blank)"));
+      var sc = w.sc || {}, labels = ["said how he feels", "used his exact words", "explained the words", "noticed more than one feeling"];
+      out.push("", "Self check ticked: " + (labels.filter(function(l, i){ return sc[i] }).join(", ") || "none"));
+      return out.join("\n");
+    }});
+    window.scrollTo({ top:0 });
+  }
+
+  el("beginBtn").onclick = function(){ st = { idx:0, a:{}, started:true, finished:false, srcShown:"A", folded:false }; save(); go() };
+  el("resumeBtn").onclick = function(){ if(st.finished) { show("startCard", false); finish() } else go() };
+  function go(){ show("startCard", false); show("srcPanel", true); show("qCard", true); render() }
+  el("backBtn").onclick = function(){ if(st.idx > 0){ st.idx--; save(); render() } };
+  el("skipBtn").onclick = function(){ var a = st.a[st.idx]; if(a && !a.checked) delete st.a[st.idx]; st.idx++; save(); render() };
+  el("nextBtn").onclick = next;
+  el("againBtn").onclick = function(){ st = { idx:0, a:{}, started:false, finished:false, srcShown:"A", folded:false }; save(); show("resultCard", false); show("sendCard", false); show("startCard", true); show("resumeBtn", false); window.scrollTo({ top:0 }) };
+
+  if(st.started) show("resumeBtn", true);
+  window.__lh = { Q:Q, SRC:SRC, sentence:sentence, st:function(){ return st } };
+})();
+
+</script>
+
+</body>
+</html>

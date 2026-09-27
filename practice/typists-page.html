@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Typist's Page - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Typist's Page only. Shell, cards and buttons come from style.css */
+.pw{max-width:720px;margin:0 auto}
+.pw .card{cursor:default}
+.pw .kicker{opacity:.85}
+.lead{font-size:1.08rem;line-height:1.55;margin:8px 0 10px!important;max-width:62ch}
+.qprogress{height:10px;border-radius:999px;background:rgba(10,47,56,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:2px}
+.prompt{font-size:1.25rem;line-height:1.5;margin:8px 0 12px!important}
+.qvis{margin:4px 0 14px;text-align:center}
+.qvis svg{width:100%;max-width:460px;height:auto}
+.learnbody p{font-size:1.08rem!important;line-height:1.55;margin:12px 0 6px!important}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:480px;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.35rem;margin-bottom:8px}
+.arow input{width:130px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:2px solid rgba(10,47,56,.2);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.arow input:focus-visible,.choices button:focus-visible,.tapbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.hintline{font-size:.92rem;opacity:.75;margin:0 0 12px!important}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.05rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.2);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.choices button:disabled{cursor:default;opacity:1}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.topicbar{margin:12px 0 6px}
+.topicbar .trow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 190px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(10,47,56,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.7}
+.pw details.rev{margin-top:14px}
+.pw details.rev summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.98rem}
+.tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.smallnote{font-size:.9rem;opacity:.75;margin-top:10px!important}
+.hidden{display:none!important}
+@media (max-width:480px){.prompt{font-size:1.12rem}.topicbar .name{flex-basis:130px}.arow input{width:110px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+
+.tp-pages{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.tp-pages button{font-family:var(--body);font-size:.95rem;font-weight:700;padding:8px 14px;border-radius:999px;border:2px solid rgba(10,47,56,.25);background:#fffdfb;color:var(--ink);cursor:pointer}
+.tp-pages button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tp-pages button.done{border-color:#2e7d4f}
+.tp-pages button.done::after{content:" \2713";color:#2e7d4f}
+.tp-pages button[aria-pressed="true"].done::after{color:#bfe3cb}
+.tp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px}
+.tp-count{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1.05rem}
+.tp-toggle{display:inline-flex;align-items:center;gap:8px;font-size:.95rem;cursor:pointer}
+.tp-toggle input{width:20px;height:20px;accent-color:#007291}
+.tp-clock{font-family:var(--display);font-size:1.05rem;font-variation-settings:"wght" 800}
+.paper{position:relative;background:#fbf8f0;background-image:repeating-linear-gradient(transparent 0 33px,rgba(0,114,145,.12) 33px 34px);border:2px solid #cbbfae;border-radius:4px;box-shadow:4px 6px 0 rgba(10,47,56,.12);padding:22px 22px 26px 46px;font-family:"Special Elite","Courier New",monospace;font-size:1.12rem;line-height:34px;color:#1f2a30;margin:6px 0 12px;overflow-wrap:anywhere}
+.paper::before{content:"";position:absolute;left:30px;top:0;bottom:0;width:2px;background:rgba(239,119,36,.35)}
+.paper .gap{display:block;height:34px}
+.tok{font:inherit;color:inherit;background:none;border:0;padding:0 2px;margin:0 -2px;border-radius:4px;cursor:pointer;line-height:inherit}
+.tok:hover{background:rgba(255,194,71,.35)}
+.tok:focus-visible{outline:2px solid #ef7724;outline-offset:1px}
+.tok.fixed{background:rgba(46,125,79,.16);color:#1d5b37;text-decoration:underline;text-decoration-color:#2e7d4f;text-decoration-thickness:2px}
+.tok.fine{animation:tpnope .35s}
+.tok.missed{background:rgba(239,119,36,.28);outline:2px dashed #d75f10}
+.tok.open{background:rgba(255,194,71,.6)}
+@keyframes tpnope{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.fixbox{border:2px solid var(--ink);border-radius:14px 10px 14px 10px;padding:12px 14px;background:#fffdfb;margin:0 0 10px}
+.fixbox p{margin:0 0 8px!important}
+.fixbox .opts{display:flex;flex-wrap:wrap;gap:8px}
+.fixbox .opts button{font-family:"Special Elite","Courier New",monospace;font-size:1.1rem;padding:8px 14px;border-radius:10px;border:2px solid rgba(10,47,56,.25);background:#fff;color:var(--ink);cursor:pointer;white-space:pre}
+.fixbox .opts button.bad{border-color:#d75f10;background:#fdf0e5}
+@media (max-width:520px){.paper{font-size:1rem;padding:18px 14px 22px 34px}.paper::before{left:22px}}
+@media (prefers-reduced-motion:reduce){.tok.fine{animation:none}}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pw">
+
+  <div class="weektheme">
+    <h2>The Typist's Page</h2>
+    <span>Everyday English. Capital letters, full stops, apostrophes and speech marks, fixed before the bell.</span>
+  </div>
+
+  <div class="board">
+
+    <div class="card w12 fill-yellow">
+      <span class="kicker">Gwen's typing pool, 1962</span>
+      <h3>Ninety words a minute, ding</h3>
+      <p class="lead">Gwen typed ninety words a minute, and one mistake near the bottom meant starting the whole page again. The new starters have not been so careful. Tap any word that has a punctuation or capital letter mistake in it, then pick how it should be.</p>
+      <p class="lead">Tapping a word that is fine costs nothing. Each page says how many mistakes are hiding in it.</p>
+    </div>
+
+    <div class="card w12" id="tpCard">
+      <div class="tp-pages" id="tpPages" role="group" aria-label="Pages"></div>
+      <div class="tp-bar">
+        <span class="tp-count" id="tpCount"></span>
+        <label class="tp-toggle"><input type="checkbox" id="bellMode"> Race the bell (two minutes a page)</label>
+        <span class="tp-clock hidden" id="tpClock"></span>
+      </div>
+      <div class="paper" id="paper"></div>
+      <div id="fixHost"></div>
+      <div id="tpFb"></div>
+      <div class="qnav">
+        <button class="btn ghost" id="giveUp">Show me the rest</button>
+        <button class="btn ghost" id="resetPage">Start this page again</button>
+        <button class="btn" id="nextPage">Next page</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="sumCard">
+      <span class="kicker">How it went</span>
+      <h3 id="sumLine"></h3>
+      <p id="sumNote"></p>
+      <div class="topicbar" id="sumBars"></div>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <div id="sendHost"></div>
+      <p class="smallnote">Your pages also stay saved on this device.</p>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+
+(function(){
+  "use strict";
+  var STORE = "b5.practice.typists-page.v1";
+  function el(id){ return document.getElementById(id) }
+  function show(id, on){ el(id).classList.toggle("hidden", !on) }
+
+  var WHY = {
+    Cs:"A new sentence starts with a capital letter.",
+    Cn:"Names of people, places, days and months, and titles like Mr and Mrs, always start with a capital letter.",
+    Ci:"I on its own always takes a capital letter.",
+    F:"A sentence needs a full stop at the end. Without one, two sentences run into each other.",
+    Q:"It is asking something, so it ends with a question mark instead of a full stop.",
+    Ac:"The apostrophe goes where letters have been left out. Don't is short for do not, I'm is short for I am.",
+    Ap:"The apostrophe shows that something belongs to someone: Gwen's machine is the machine belonging to Gwen.",
+    Ai:"Its with no apostrophe means belonging to it. It's with an apostrophe only ever means it is or it has.",
+    L:"Things in a list are split up with commas, with and or or before the last one.",
+    S:"Speech marks go around the exact words someone said, opening before the first word. The first word he said needs a capital, and it's needs its apostrophe because it means it is.",
+    H:"There is for places and for there is. Their means belonging to them."
+  };
+
+  // {shown|fix|type|wrong option|wrong option}
+  var PAGES = [
+    { title:"The tea trolley", text:
+      "MEMO\nTo: all staff in the typing pool\nFrom: {mrs|Mrs|Cn|mrs.|MRS} Holloway, office manager\n\n" +
+      "From Monday the tea trolley will come round at half past ten and half past {three|three.|F|three,|three?} {please|Please|Cs|please.|PLEASE} do not leave cups on top of the typewriters. " +
+      "Last week a whole cup of tea went into {gwens|Gwen's|Ap|gwen's|Gwens'} machine, and it still goes ding in the middle of a line. " +
+      "The trolley will have {tea|tea,|L|tea.|tea;} coffee and squash. Biscuits are for everyone, so take one each. " +
+      "{i|I|Ci|i.|me} would also like to know one thing. Who left the milk out on {friday?|Friday?|Cn|friday.|Friday.}" },
+    { title:"A letter to Mr Patel", text:
+      "3 March 1962\n\nDear Mr {patel,|Patel,|Cn|patel.|PATEL}\n\n" +
+      "Thank you for your letter. {im|I'm|Ac|Im|i'm} sorry to hear that your new vacuum cleaner arrived without {it's|its|Ai|its'|it is} bag. " +
+      "We have sent a new bag by {post|post.|F|post,|post?} {it|It|Cs|it.|IT} should arrive by Thursday. " +
+      "{Their|There|H|They're|Theire} is no charge for the bag or the postage. " +
+      "Would you like us to send a spare one as {well.|well?|Q|well,|well!}\n\nYours sincerely,\n{gwen|Gwen|Cn|gwen.|GWEN}\nfor the typing pool" },
+    { title:"Typing pool rules", text:
+      "TYPING POOL RULES\n\n1. Arrive by nine o'clock. Being late means someone else gets the good chair.\n" +
+      "2. One mistake near the bottom of a page means starting the page {again|again.|F|again,|again?}\n" +
+      "3. Every letter needs the {date|date,|L|date.|date and} the name and the address.\n" +
+      "4. Never borrow the {managers|manager's|Ap|managers'|manager} stapler.\n" +
+      "5. {dont|Don't|Ac|Dont|don't} eat at your desk.\n" +
+      "6. If the bell {doesnt|doesn't|Ac|does'nt|doesnt.} ring at the end of a line, tell {mr|Mr|Cn|mr.|MR} {ellis.|Ellis.|Cn|ellis|ELLIS.}\n" +
+      "7. Where is the carbon paper {kept.|kept?|Q|kept,|kept!}" },
+    { title:"Dancing at the Palais", text:
+      "DANCING AT THE PALAIS\n\n" +
+      "The Palais on {station|Station|Cn|station.|STATION} Road will hold its autumn dance on Saturday {night|night.|F|night,|night?} {music|Music|Cs|music.|MUSIC} will be by the Silver Stars. " +
+      "Tickets can be bought from the {bakery|bakery,|L|bakery.|bakery and} the post office or the door. " +
+      "Frank, who has danced there for forty years, said, {its|\"It's|S|\"its|It's\"} the best floor in town.\" " +
+      "Will you be {there.|there?|Q|there!|their?}" },
+    { title:"Gwen's diary", text:
+      "{monday|Monday|Cn|monday.|MONDAY} 4 June\n\n" +
+      "Today I typed forty letters and made only one {mistake,|mistake.|F|mistake|mistake?} {it|It|Cs|it,|IT} was on the last line of the last page, of course. " +
+      "{mrs|Mrs|Cn|mrs.|MRS} Holloway did not even notice. After work {i|I|Ci|i'|me} caught the bus home with {dot,|Dot,|Cn|dot.|DOT} who is a conductor on the number 12. " +
+      "{shes|She's|Ac|Shes|she's} saving up for a record player. I wonder if my {sisters|sister's|Ap|sisters'|sister} letter from {canada|Canada|Cn|canada.|CANADA} has {arrived.|arrived?|Q|arrived,|arrived!}" }
+  ];
+
+  // parse pages into tokens
+  PAGES.forEach(function(pg){
+    var toks = [], re = /\{([^}]*)\}|\n|[^\s{}\n]+/g, m, eIdx = 0;
+    while((m = re.exec(pg.text))){
+      if(m[0] === "\n"){ toks.push({ br:true }); continue }
+      if(m[1] !== undefined){ var p = m[1].split("|"); toks.push({ shown:p[0], fix:p[1], type:p[2], alts:[p[3], p[4]], err:eIdx++ }); continue }
+      toks.push({ shown:m[0] });
+    }
+    pg.toks = toks; pg.nErr = eIdx;
+  });
+
+  var st = { page:0, pages:{}, bell:false };
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+  try{ var raw = localStorage.getItem(STORE); if(raw){ var s = JSON.parse(raw); if(s && s.pages) st = s } }catch(e){}
+  function ps(i){ if(!st.pages[i]) st.pages[i] = { found:{}, fine:0, wrongFix:0, shown:false, done:false }; return st.pages[i] }
+
+  var AC = null;
+  function ding(){
+    try{
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      var t = AC.currentTime;
+      [1567, 3135].forEach(function(f, i){ var o = AC.createOscillator(), g = AC.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(i ? .05 : .14, t); g.gain.exponentialRampToValueAtTime(.0008, t + 1.2); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 1.25) });
+    }catch(e){}
+  }
+
+  function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t } return a }
+
+  function drawPages(){
+    var box = el("tpPages"); box.innerHTML = "";
+    PAGES.forEach(function(pg, i){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = (i + 1) + ". " + pg.title;
+      b.setAttribute("aria-pressed", i === st.page ? "true" : "false");
+      if(st.pages[i] && st.pages[i].done) b.classList.add("done");
+      b.onclick = function(){ openPage(i) };
+      box.appendChild(b);
+    });
+  }
+
+  var openTok = null, timer = null, timeLeft = 0;
+
+  function renderPaper(){
+    var pg = PAGES[st.page], s = ps(st.page), paper = el("paper"); paper.innerHTML = "";
+    var line = document.createElement("span");
+    pg.toks.forEach(function(t, ti){
+      if(t.br){ paper.appendChild(line); line = document.createElement("span"); paper.appendChild(document.createElement("br")); return }
+      var b = document.createElement("button"); b.type = "button"; b.className = "tok";
+      var fixed = t.err !== undefined && s.found[t.err];
+      b.textContent = fixed ? t.fix : t.shown;
+      if(fixed) b.classList.add("fixed");
+      if(t.err !== undefined && s.shown && !fixed) b.classList.add("missed");
+      if(openTok === ti) b.classList.add("open");
+      b.onclick = function(){ tapTok(ti, b) };
+      line.appendChild(b); line.appendChild(document.createTextNode(" "));
+    });
+    paper.appendChild(line);
+    var n = Object.keys(s.found).length;
+    el("tpCount").textContent = n + " of " + pg.nErr + " mistakes fixed";
+    drawPages();
+  }
+
+  function tapTok(ti, btn){
+    var pg = PAGES[st.page], t = pg.toks[ti], s = ps(st.page);
+    if(s.done && !s.shown && Object.keys(s.found).length === pg.nErr) return;
+    if(t.err === undefined || s.found[t.err]){
+      if(t.err === undefined){ s.fine++; save(); btn.classList.remove("fine"); void btn.offsetWidth; btn.classList.add("fine"); el("tpFb").innerHTML = "<div class='fb tell'><b>That one is fine as it is.</b> Keep looking.</div>" }
+      return;
+    }
+    openTok = ti; renderPaper();
+    var opts = shuffle([t.fix].concat(t.alts));
+    var host = el("fixHost");
+    host.innerHTML = "<div class='fixbox'><p>You spotted something in <b>" + esc(t.shown) + "</b>. How should it be?</p><div class='opts'></div></div>";
+    var ob = host.querySelector(".opts");
+    opts.forEach(function(o){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.onclick = function(){
+        if(o === t.fix){
+          s.found[t.err] = true; openTok = null; host.innerHTML = "";
+          el("tpFb").innerHTML = "<div class='fb ok'><b>Fixed.</b> " + WHY[t.type] + "</div>";
+          save(); renderPaper(); checkDone();
+        } else { s.wrongFix++; save(); b.classList.add("bad"); el("tpFb").innerHTML = "<div class='fb nope'><b>Not quite.</b> Have another look at the other options.</div>" }
+      };
+      ob.appendChild(b);
+    });
+    ob.firstChild.focus();
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c] }) }
+
+  function checkDone(){
+    var pg = PAGES[st.page], s = ps(st.page);
+    if(Object.keys(s.found).length === pg.nErr){
+      s.done = true; save(); stopClock(); ding(); drawPages();
+      el("tpFb").innerHTML = "<div class='fb ok'><b>Ding. Page finished.</b> All " + pg.nErr + " mistakes fixed" + (s.fine ? ", with " + s.fine + " taps on words that were fine" : ", and not a single wasted tap") + ". Gwen would sign this one off.</div>";
+      if(allTried()) summary();
+    }
+  }
+  function allTried(){ return PAGES.every(function(p, i){ return st.pages[i] && (st.pages[i].done || st.pages[i].shown) }) }
+
+  function openPage(i){
+    st.page = i; save(); openTok = null; el("fixHost").innerHTML = ""; el("tpFb").innerHTML = "";
+    renderPaper();
+    el("nextPage").textContent = i === PAGES.length - 1 ? "See how it went" : "Next page";
+    if(st.bell && !ps(i).done) startClock(); else stopClock();
+  }
+
+  function startClock(){
+    stopClock(); timeLeft = 120; show("tpClock", true); tick();
+    timer = setInterval(function(){ timeLeft--; tick(); if(timeLeft <= 0){ stopClock(); ding(); giveUp(true) } }, 1000);
+  }
+  function tick(){ el("tpClock").textContent = Math.floor(timeLeft / 60) + ":" + ("0" + (timeLeft % 60)).slice(-2) }
+  function stopClock(){ if(timer){ clearInterval(timer); timer = null } show("tpClock", false) }
+
+  function giveUp(bell){
+    var s = ps(st.page), pg = PAGES[st.page];
+    s.shown = true; s.done = true; save(); openTok = null; el("fixHost").innerHTML = ""; stopClock(); renderPaper();
+    var left = pg.nErr - Object.keys(s.found).length;
+    el("tpFb").innerHTML = "<div class='fb tell'><b>" + (bell ? "Ding, that is the bell. " : "") + (left ? "The " + left + " still to fix are marked in orange." : "Nothing left to find.") + "</b> You can still tap them to fix them, or move on to the next page.</div>";
+    if(allTried()) summary();
+  }
+
+  function summary(){
+    show("sumCard", true); show("sendCard", true);
+    var tot = 0, got = 0, taps = 0;
+    var bars = el("sumBars"); bars.innerHTML = "";
+    PAGES.forEach(function(pg, i){
+      var s = st.pages[i] || { found:{}, fine:0 }, n = Object.keys(s.found).length; tot += pg.nErr; got += n; taps += s.fine;
+      var f = n / pg.nErr;
+      bars.insertAdjacentHTML("beforeend", "<div class='trow'><div class='name'>" + pg.title + "</div><div class='track'><span class='fill' style='width:" + Math.round(f * 100) + "%;background:" + (f >= .75 ? "linear-gradient(90deg,#2e7d4f,#4ba36f)" : "linear-gradient(90deg,#ef7724,#d55f0f)") + "'></span></div><div class='score'>" + n + "/" + pg.nErr + "</div></div>");
+    });
+    el("sumLine").textContent = got + " of " + tot + " mistakes fixed";
+    el("sumNote").textContent = got === tot ? "Every page is fit to post. Gwen would be proud." : "Any page can be started again whenever you like.";
+    if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Typist's Page", filename:"typists-page", getText:function(){
+      var out = ["The Typist's Page: " + got + " of " + tot + " mistakes fixed" + (st.bell ? " (racing the bell)" : ""), ""];
+      var byType = {};
+      PAGES.forEach(function(pg, i){
+        var s = st.pages[i] || { found:{}, fine:0, wrongFix:0 };
+        out.push(pg.title + ": " + Object.keys(s.found).length + "/" + pg.nErr + " fixed, " + (s.fine || 0) + " taps on words that were fine" + (s.shown ? ", used Show me" : ""));
+        pg.toks.forEach(function(t){ if(t.err !== undefined){ var k = t.type; byType[k] = byType[k] || [0, 0]; byType[k][1]++; if(s.found[t.err]) byType[k][0]++ } });
+      });
+      var NAMES = { Cs:"Capitals to start sentences", Cn:"Capitals for names", Ci:"Capital I", F:"Full stops", Q:"Question marks", Ac:"Apostrophes for missing letters", Ap:"Apostrophes for belonging", Ai:"Its and it's", L:"Commas in lists", S:"Speech marks", H:"There and their" };
+      out.push("", "By kind of mistake:");
+      Object.keys(byType).forEach(function(k){ out.push("  " + NAMES[k] + ": " + byType[k][0] + "/" + byType[k][1]) });
+      return out.join("\n");
+    }});
+  }
+
+  el("bellMode").checked = !!st.bell;
+  el("bellMode").onchange = function(){ st.bell = el("bellMode").checked; save(); if(st.bell && !ps(st.page).done) startClock(); else stopClock() };
+  el("giveUp").onclick = function(){ giveUp(false) };
+  el("resetPage").onclick = function(){ st.pages[st.page] = null; delete st.pages[st.page]; save(); openPage(st.page) };
+  el("nextPage").onclick = function(){ if(st.page < PAGES.length - 1) openPage(st.page + 1); else { summary(); el("sumCard").scrollIntoView() } };
+
+  openPage(st.page || 0);
+  if(allTried()) summary();
+  window.__tp = { PAGES:PAGES, st:function(){ return st } };
+})();
+
+</script>
+
+</body>
+</html>

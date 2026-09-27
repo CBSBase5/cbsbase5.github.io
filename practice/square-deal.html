@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Square Deal - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Square Deal only. Shell, cards and buttons come from style.css */
+.pw{max-width:720px;margin:0 auto}
+.pw .card{cursor:default}
+.pw .kicker{opacity:.85}
+.lead{font-size:1.08rem;line-height:1.55;margin:8px 0 10px!important;max-width:62ch}
+.qprogress{height:10px;border-radius:999px;background:rgba(10,47,56,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:2px}
+.prompt{font-size:1.25rem;line-height:1.5;margin:8px 0 12px!important}
+.qvis{margin:4px 0 14px;text-align:center}
+.qvis svg{width:100%;max-width:460px;height:auto}
+.learnbody p{font-size:1.08rem!important;line-height:1.55;margin:12px 0 6px!important}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:480px;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.35rem;margin-bottom:8px}
+.arow input{width:130px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:2px solid rgba(10,47,56,.2);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.arow input:focus-visible,.choices button:focus-visible,.tapbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.hintline{font-size:.92rem;opacity:.75;margin:0 0 12px!important}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.05rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.2);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.choices button:disabled{cursor:default;opacity:1}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.topicbar{margin:12px 0 6px}
+.topicbar .trow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 190px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(10,47,56,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.7}
+.pw details.rev{margin-top:14px}
+.pw details.rev summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.98rem}
+.tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.smallnote{font-size:.9rem;opacity:.75;margin-top:10px!important}
+.hidden{display:none!important}
+@media (max-width:480px){.prompt{font-size:1.12rem}.topicbar .name{flex-basis:130px}.arow input{width:110px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+
+.hs{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;max-width:460px;margin:12px 0 10px}
+.hs button{min-width:0;aspect-ratio:1/1;font-family:var(--body);font-size:.95rem;font-weight:700;border:2px solid rgba(10,47,56,.2);border-radius:8px 6px 9px 6px;background:#fffdfb;color:var(--ink);cursor:pointer;padding:0}
+.hs button.on{background:rgba(0,114,145,.18);border-color:#007291}
+.hs button.good{background:#bfe3cb;border-color:#2e7d4f}
+.hs button.miss{background:#fff;border:2px dashed #2e7d4f}
+.hs button.bad{background:#fbd9bf;border-color:#d75f10}
+.hs button:focus-visible{outline:3px solid #ef7724;outline-offset:1px}
+@media (max-width:420px){.hs{gap:3px}.hs button{font-size:.78rem;border-width:1.5px}}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pw">
+
+  <div class="weektheme">
+    <h2>Square Deal</h2>
+    <span>Everyday maths. Square numbers, square roots and estimating, on Ken's allotment.</span>
+  </div>
+
+  <div class="board">
+    <div class="card w12 fill-yellow" id="warmCard">
+      <span class="kicker">Warm up, if you fancy it</span>
+      <h3>Square spotter</h3>
+      <p class="lead">Ken is paving his allotment with square patios. A square patio needs a square number of slabs: 4 slabs make a 2 by 2, 9 slabs make a 3 by 3. Tap every square number on the hundred square, then check.</p>
+      <div class="hs" id="hs" role="group" aria-label="Hundred square"></div>
+      <div class="qnav">
+        <button class="btn btn-quiet" id="hsCheck">Check</button>
+        <button class="btn ghost" id="hsShow">Show me</button>
+        <button class="btn ghost" id="hsClear">Clear</button>
+      </div>
+      <div id="hsFb"></div>
+    </div>
+  </div>
+
+  <div class="board">
+
+    <div class="card w12" id="startCard">
+      <span class="kicker">Before you start</span>
+      <h3 id="startTitle"></h3>
+      <div id="startText"></div>
+      <div class="qnav">
+        <button class="btn" id="beginBtn">Start when ready</button>
+        <button class="btn ghost hidden" id="resumeBtn">Carry on where I left off</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="qCard">
+      <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
+      <span class="qcount" id="qCount"></span>
+      <span class="kicker" id="qTopic"></span>
+      <p class="prompt" id="qPrompt"></p>
+      <div class="qvis" id="qVis"></div>
+      <div id="qAnswer"></div>
+      <p class="hintline" id="qHint"></p>
+      <div id="qFb"></div>
+      <div class="qnav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="skipBtn">Skip for now</button>
+        <button class="btn" id="nextBtn">Check</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="resultCard">
+      <span class="kicker">How it went</span>
+      <h3 id="scoreLine"></h3>
+      <p id="scoreNote"></p>
+      <div class="topicbar" id="topicBars"></div>
+      <details class="rev">
+        <summary>See each question</summary>
+        <div id="reviewList"></div>
+      </details>
+      <div class="qnav"><button class="btn ghost" id="againBtn">Have another go</button></div>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <div id="sendHost"></div>
+      <p class="smallnote">Your answers also stay saved on this device.</p>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+
+var LB = (function(){
+  "use strict";
+  function el(id){ return document.getElementById(id) }
+  function show(id, on){ el(id).classList.toggle("hidden", !on) }
+  var decoder = document.createElement("textarea");
+  function plain(s){ decoder.innerHTML = String(s).replace(/<[^>]+>/g, ""); return decoder.value }
+  function money(n){ return "\u00A3" + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, "") }
+
+  function parseNum(raw, isMoney){
+    var s = String(raw).trim().toLowerCase().replace(/,/g, "").replace(/\s+/g, "");
+    if(!s) return NaN;
+    var pence = false;
+    if(isMoney && /p$/.test(s) && s.indexOf("\u00A3") < 0){ pence = true; s = s.slice(0, -1) }
+    s = s.replace(/^\u00A3/, "").replace(/%$/, "");
+    if(!/^-?\d*\.?\d+$/.test(s)) return NaN;
+    var v = parseFloat(s);
+    return pence ? v / 100 : v;
+  }
+
+  function run(cfg){
+    var ITEMS = cfg.items;
+    var QNUM = [], TOTALQ = 0;
+    ITEMS.forEach(function(q, i){ QNUM[i] = q.learn ? 0 : ++TOTALQ });
+    var state = { idx:0, answers:{}, started:false, finished:false };
+
+    function save(){ try{ localStorage.setItem(cfg.store, JSON.stringify(state)) }catch(e){} }
+    function load(){ try{ var r = localStorage.getItem(cfg.store); if(r){ var s = JSON.parse(r); if(s && typeof s === "object" && s.answers) state = s } }catch(e){} }
+
+    el("startTitle").textContent = cfg.startTitle;
+    el("startText").innerHTML = cfg.startText;
+
+    function answerText(q){
+      if(q.type === "mc") return plain(q.opts[q.ans]);
+      if(q.money) return money(q.ans);
+      return (q.pre ? plain(q.pre) : "") + q.ans + (q.post ? plain(q.post) : "");
+    }
+    function givenText(q, a){
+      if(!a) return "skipped";
+      if(q.type === "mc") return plain(q.opts[a.v]);
+      return a.v === "" ? "blank" : a.v;
+    }
+    function mark(q, v){
+      if(q.type === "mc") return v === q.ans;
+      var n = parseNum(v, q.money);
+      if(isNaN(n)) return false;
+      var tol = q.tol !== undefined ? q.tol : 0.005;
+      return Math.abs(n - q.ans) <= tol;
+    }
+
+    function renderQ(){
+      var q = ITEMS[state.idx], a = state.answers[state.idx];
+      el("qTopic").textContent = q.t;
+      el("progFill").style.width = Math.round(state.idx / ITEMS.length * 100) + "%";
+      el("backBtn").disabled = state.idx === 0;
+      el("qFb").innerHTML = "";
+      el("qVis").innerHTML = q.vis || "";
+      var box = el("qAnswer"); box.innerHTML = "";
+      el("qHint").textContent = "";
+      var last = state.idx === ITEMS.length - 1;
+
+      if(q.learn){
+        el("qCount").textContent = "";
+        el("qPrompt").innerHTML = "<strong>" + q.h + "</strong>";
+        el("qVis").innerHTML = "";
+        box.innerHTML = "<div class='learnbody'>" + (q.vis ? "<div class='learnfig'>" + q.vis + "</div>" : "") + q.body + "</div>";
+        el("skipBtn").classList.add("hidden");
+        el("nextBtn").textContent = last ? "Finish" : "Got it";
+        return;
+      }
+      el("qCount").textContent = QNUM[state.idx] + " of " + TOTALQ;
+      el("qPrompt").innerHTML = q.p;
+      var checked = a && a.checked;
+      el("skipBtn").classList.toggle("hidden", !!checked);
+      el("nextBtn").textContent = checked ? (last ? "Finish" : "Next") : "Check";
+
+      if(q.type === "mc"){
+        var grid = document.createElement("div"); grid.className = "choices";
+        q.opts.forEach(function(o, oi){
+          var b = document.createElement("button"); b.type = "button"; b.innerHTML = o;
+          if(a && a.v === oi) b.classList.add("picked");
+          if(checked){
+            b.disabled = true;
+            if(oi === q.ans) b.classList.add("good");
+            else if(a.v === oi) b.classList.add("bad");
+          } else {
+            b.onclick = function(){ state.answers[state.idx] = { v:oi }; save(); renderQ() };
+          }
+          grid.appendChild(b);
+        });
+        box.appendChild(grid);
+      } else {
+        var row = document.createElement("div"); row.className = "arow";
+        if(q.money || q.pre) row.appendChild(document.createTextNode(q.money && !q.pre ? "\u00A3" : plain(q.pre)));
+        var inp = document.createElement("input");
+        inp.type = "text"; inp.inputMode = "decimal"; inp.autocomplete = "off"; inp.maxLength = 10;
+        inp.setAttribute("aria-label", "Your answer");
+        inp.value = a ? a.v : "";
+        inp.disabled = !!checked;
+        inp.addEventListener("input", function(){ state.answers[state.idx] = { v:inp.value.trim() }; if(!inp.value.trim()) delete state.answers[state.idx]; save() });
+        inp.addEventListener("keydown", function(e){ if(e.key === "Enter") el("nextBtn").click() });
+        row.appendChild(inp);
+        if(q.post) row.appendChild(document.createTextNode(plain(q.post)));
+        box.appendChild(row);
+        el("qHint").textContent = q.hint || (q.money ? "Pounds and pence, like 24 or 40.50. Working it out on paper first is a good idea." : "");
+        if(!checked && window.matchMedia("(min-width: 700px)").matches) inp.focus();
+      }
+      if(checked) showFb(q, a);
+    }
+
+    function showFb(q, a){
+      var ok = a.ok;
+      var html = ok
+        ? "<div class='fb ok'><b>" + (q.yes || "Got it.") + "</b> " + (q.why || "") + "</div>"
+        : "<div class='fb nope'><b>Not this time.</b> The answer is <b>" + answerText(q) + "</b>. " + (q.why || "") + "</div>";
+      el("qFb").innerHTML = html;
+    }
+
+    function next(){
+      var q = ITEMS[state.idx], last = state.idx === ITEMS.length - 1;
+      if(!q.learn){
+        var a = state.answers[state.idx];
+        if(!a || a.checked === undefined){
+          if(!a || a.v === undefined || a.v === ""){ el("qFb").innerHTML = "<div class='fb tell'>Have a go first, or press <b>Skip for now</b> and come back to it.</div>"; return }
+          a.ok = mark(q, a.v); a.checked = true; save(); renderQ(); return;
+        }
+      }
+      if(last) finish(); else { state.idx++; save(); renderQ() }
+    }
+
+    function finish(){
+      state.finished = true; save();
+      show("qCard", false); show("resultCard", true); show("sendCard", true);
+      var topics = {}, order = [], right = 0;
+      ITEMS.forEach(function(q, i){
+        if(q.learn) return;
+        if(!topics[q.t]){ topics[q.t] = { right:0, total:0 }; order.push(q.t) }
+        topics[q.t].total++;
+        var a = state.answers[i];
+        if(a && a.ok){ right++; topics[q.t].right++ }
+      });
+      el("scoreLine").textContent = right + " out of " + TOTALQ;
+      var strong = [], again = [];
+      order.forEach(function(t){ (topics[t].right / topics[t].total >= 0.75 ? strong : again).push(t.toLowerCase()) });
+      el("scoreNote").textContent = again.length === 0 ? "All of these look solid. Nice one."
+        : strong.length === 0 ? "Plenty here that would be worth a look together. No rush at all."
+        : "Looking strong on " + strong.join(", ") + ". Might be worth another look at " + again.join(", ") + " sometime.";
+      var bars = el("topicBars"); bars.innerHTML = "";
+      order.forEach(function(t){
+        var f = topics[t].right / topics[t].total;
+        bars.insertAdjacentHTML("beforeend", "<div class='trow'><div class='name'>" + t + "</div><div class='track'><span class='fill' style='width:" + Math.round(f * 100) + "%;background:" +
+          (f >= .75 ? "linear-gradient(90deg,#2e7d4f,#4ba36f)" : "linear-gradient(90deg,#ef7724,#d55f0f)") + "'></span></div><div class='score'>" + topics[t].right + "/" + topics[t].total + "</div></div>");
+      });
+      var list = el("reviewList"); list.innerHTML = "";
+      ITEMS.forEach(function(q, i){
+        if(q.learn) return;
+        var a = state.answers[i], ok = a && a.ok;
+        var tag = ok ? "<span class='tag right'>Got it</span>" : !a ? "<span class='tag diff'>Skipped</span>" : "<span class='tag diff'>Not this time</span>";
+        list.insertAdjacentHTML("beforeend", "<div class='review-item'>Q" + QNUM[i] + ". " + q.p + " " + tag + (ok ? "" : ". Answer: " + answerText(q) + (a && a.checked ? " (you put " + givenText(q, a) + ")" : "")) + "</div>");
+      });
+      if(window.Base5Send){
+        Base5Send.mount(el("sendHost"), { tool: cfg.tool, filename: cfg.filename, getText: function(){
+          var L = [cfg.tool + ": " + right + " out of " + TOTALQ, ""];
+          order.forEach(function(t){ L.push(t + ": " + topics[t].right + "/" + topics[t].total) });
+          L.push("");
+          ITEMS.forEach(function(q, i){
+            if(q.learn) return;
+            var a = state.answers[i];
+            L.push("Q" + QNUM[i] + " [" + q.t + "] " + plain(q.p) + " -> " + (a && a.ok ? "correct" : !a ? "skipped" : "gave " + givenText(q, a) + ", answer " + answerText(q)));
+          });
+          return L.join("\n");
+        }});
+      }
+      window.scrollTo({ top:0 });
+    }
+
+    el("beginBtn").onclick = function(){ state = { idx:0, answers:{}, started:true, finished:false }; save(); show("startCard", false); show("qCard", true); renderQ() };
+    el("resumeBtn").onclick = function(){ show("startCard", false); if(state.finished) finish(); else { show("qCard", true); renderQ() } };
+    el("backBtn").onclick = function(){ if(state.idx > 0){ state.idx--; save(); renderQ() } };
+    el("skipBtn").onclick = function(){ var a = state.answers[state.idx]; if(a && !a.checked) delete state.answers[state.idx]; if(state.idx === ITEMS.length - 1) finish(); else { state.idx++; save(); renderQ() } };
+    el("nextBtn").onclick = next;
+    el("againBtn").onclick = function(){ state = { idx:0, answers:{}, started:false, finished:false }; save(); show("resultCard", false); show("sendCard", false); show("startCard", true); show("resumeBtn", false); window.scrollTo({ top:0 }) };
+
+    load();
+    if(state.started && (Object.keys(state.answers).length || state.idx > 0 || state.finished)) show("resumeBtn", true);
+    return { state: function(){ return state } };
+  }
+  return { run: run, money: money };
+})();
+
+(function(){
+  var INK = "#0a2f38", ORANGE = "#ef7724", TEAL = "#007291", PAPER = "#fffdf8", GREEN = "#4f9e5c";
+  var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+
+  /* ---------- hundred square warm up ---------- */
+  var SQ = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+  var HKEY = "b5.practice.square-deal.warm.v1", picked = {}, warmDone = false;
+  try{ picked = JSON.parse(localStorage.getItem(HKEY) || "{}") || {} }catch(e){ picked = {} }
+  var hs = document.getElementById("hs");
+  for(var n = 1; n <= 100; n++){
+    (function(n){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = n;
+      b.setAttribute("aria-pressed", picked[n] ? "true" : "false");
+      if(picked[n]) b.classList.add("on");
+      b.onclick = function(){
+        picked[n] = !picked[n]; if(!picked[n]) delete picked[n];
+        b.classList.toggle("on", !!picked[n]); b.classList.remove("good", "bad", "miss");
+        b.setAttribute("aria-pressed", picked[n] ? "true" : "false");
+        try{ localStorage.setItem(HKEY, JSON.stringify(picked)) }catch(e){}
+      };
+      hs.appendChild(b);
+    })(n);
+  }
+  function hsMark(reveal){
+    var found = 0, extra = 0;
+    Array.prototype.forEach.call(hs.children, function(b, i){
+      var n = i + 1, isSq = SQ.indexOf(n) >= 0;
+      b.classList.remove("good", "bad", "miss");
+      if(picked[n] && isSq){ b.classList.add("good"); found++ }
+      else if(picked[n]){ b.classList.add("bad"); extra++ }
+      else if(isSq && reveal) b.classList.add("miss");
+    });
+    return { found:found, extra:extra };
+  }
+  document.getElementById("hsCheck").onclick = function(){
+    var r = hsMark(false), fb = document.getElementById("hsFb");
+    var msg = r.found === 10 && r.extra === 0 ? "<div class='fb ok'><b>All ten.</b> 1, 4, 9, 16, 25, 36, 49, 64, 81 and 100. Notice how the gaps between them grow: 3, 5, 7, 9... the odd numbers.</div>"
+      : "<div class='fb tell'><b>" + r.found + " of 10 found</b>" + (r.extra ? ", and " + r.extra + " in orange that are not square numbers" : "") + ". Try each one: can you make it by timesing a number by itself? Press Show me whenever you like.</div>";
+    fb.innerHTML = msg;
+  };
+  document.getElementById("hsShow").onclick = function(){ hsMark(true); document.getElementById("hsFb").innerHTML = "<div class='fb tell'>The dashed green ones are the square numbers you have not tapped yet. 1&times;1, 2&times;2, 3&times;3 and so on, all the way to 10&times;10 = 100.</div>" };
+  document.getElementById("hsClear").onclick = function(){ picked = {}; try{ localStorage.removeItem(HKEY) }catch(e){} Array.prototype.forEach.call(hs.children, function(b){ b.classList.remove("on", "good", "bad", "miss"); b.setAttribute("aria-pressed", "false") }); document.getElementById("hsFb").innerHTML = "" };
+
+  /* ---------- pictures ---------- */
+  function tiles(ns, label){
+    var cell = 14, gap = 26, x = 10, s = "", maxN = Math.max.apply(null, ns), h = maxN * cell + 50;
+    ns.forEach(function(n){
+      for(var i = 0; i < n; i++) for(var j = 0; j < n; j++)
+        s += "<rect x='" + (x + i * cell) + "' y='" + (10 + (maxN - n) * cell + j * cell) + "' width='" + (cell - 2) + "' height='" + (cell - 2) + "' rx='2' fill='" + (n % 2 ? ORANGE : TEAL) + "' fill-opacity='.75'/>";
+      s += "<text x='" + (x + n * cell / 2) + "' y='" + (maxN * cell + 34) + "' text-anchor='middle' " + FF + " font-size='14' fill='" + INK + "'>" + n + "&#215;" + n + " = " + (n * n) + "</text>";
+      x += n * cell + gap;
+    });
+    return "<svg viewBox='0 0 " + (x) + " " + h + "' role='img' aria-label='" + label + "'>" + s + "</svg>";
+  }
+  function patio(n, label){
+    var cell = 22, s = "<svg viewBox='0 0 " + (n * cell + 120) + " " + (n * cell + 40) + "' role='img' aria-label='" + label + "'>";
+    s += "<rect x='6' y='6' width='" + (n * cell + 108) + "' height='" + (n * cell + 28) + "' rx='10' fill='#8a6a3b' fill-opacity='.18'/>";
+    for(var i = 0; i < n; i++) for(var j = 0; j < n; j++)
+      s += "<rect x='" + (20 + i * cell) + "' y='" + (20 + j * cell) + "' width='" + (cell - 3) + "' height='" + (cell - 3) + "' rx='2' fill='#c9c1ad' stroke='" + INK + "' stroke-width='1'/>";
+    s += "<path d='M" + (n * cell + 40) + " 30 q 10 -14 22 0 q 10 -14 22 0' fill='none' stroke='" + GREEN + "' stroke-width='5' stroke-linecap='round'/>";
+    s += "<rect x='" + (n * cell + 46) + " ' y='38' width='34' height='26' rx='4' fill='" + GREEN + "' fill-opacity='.5'/>";
+    return s + "</svg>";
+  }
+  function line(a, b, mark, label){
+    var s = "<svg viewBox='0 0 460 110' role='img' aria-label='" + label + "'>";
+    s += "<line x1='30' y1='50' x2='430' y2='50' stroke='" + INK + "' stroke-width='3'/>";
+    for(var n = a; n <= b; n++){
+      var x = 30 + (n - a) / (b - a) * 400;
+      s += "<line x1='" + x + "' y1='40' x2='" + x + "' y2='60' stroke='" + INK + "' stroke-width='2'/>";
+      s += "<text x='" + x + "' y='84' text-anchor='middle' " + FF + " font-size='14' fill='" + INK + "'>" + n + "</text>";
+    }
+    if(mark){
+      var mx = 30 + (Math.sqrt(mark) - a) / (b - a) * 400;
+      s += "<circle cx='" + mx + "' cy='50' r='9' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2'/>";
+      s += "<text x='" + mx + "' y='24' text-anchor='middle' " + FF + " font-size='15' font-weight='bold' fill='" + INK + "'>&#8730;" + mark + "</text>";
+    }
+    return s + "</svg>";
+  }
+  function learn(t, h, vis, body){ return { t:t, learn:true, h:h, vis:vis, body:body } }
+
+  var ITEMS = [
+    learn("Square numbers", "A number times itself", tiles([1, 2, 3, 4, 5], "Squares of tiles, 1 by 1 up to 5 by 5"),
+      "<p>A <b>square number</b> is what you get when you times a number by itself. 4 &times; 4 = 16, so 16 is a square number. It is called square because that many tiles make a perfect square.</p><p>The small raised 2 means the same thing: 4&sup2; says \"4 squared\", which is 4 &times; 4.</p>"),
+    { t:"Square numbers", type:"num", p:"What is 7&sup2;?", ans:49, why:"7 &times; 7 = 49." },
+    { t:"Square numbers", type:"num", p:"What is 12&sup2;?", ans:144, why:"12 &times; 12 = 144. 10 &times; 12 is 120, and 2 &times; 12 is 24 more." },
+    { t:"Square numbers", type:"mc", p:"Which of these is <b>not</b> a square number?", opts:["36", "49", "60", "81"], ans:2, why:"36 is 6&sup2;, 49 is 7&sup2; and 81 is 9&sup2;. 7 &times; 7 is 49 and 8 &times; 8 is 64, so 60 falls in between." },
+    { t:"Square numbers", type:"mc", p:"Kai says 3&sup2; is 6. What has he done?", opts:["Nothing, he is right", "Worked out 3 &times; 2 instead of 3 &times; 3", "Added 3 and 3, which is the same thing", "Squared the wrong number"], ans:1,
+      why:"The little 2 means times the number by itself, not times it by 2. 3&sup2; = 3 &times; 3 = 9." },
+
+    learn("Square roots", "Going backwards", patio(6, "A 6 by 6 patio of 36 slabs next to a vegetable bed"),
+      "<p>A <b>square root</b> undoes squaring. If a square patio uses 36 slabs, how many slabs long is each side? The answer is 6, because 6 &times; 6 = 36. So the square root of 36 is 6.</p><p>It is written with this sign: &#8730;36 = 6.</p>"),
+    { t:"Square roots", type:"num", p:"What is &#8730;49?", ans:7, why:"7 &times; 7 = 49, so &#8730;49 = 7." },
+    { t:"Square roots", type:"num", p:"What is &#8730;144?", ans:12, why:"12 &times; 12 = 144." },
+    { t:"Square roots", type:"num", p:"Ken has 64 slabs and wants a perfect square patio. How many slabs long is each side?", vis:patio(8, "A square patio of 64 slabs"), post:" slabs", ans:8, why:"8 &times; 8 = 64, so each side is 8 slabs." },
+    { t:"Square roots", type:"num", p:"Ken's square vegetable bed has an area of 25 square metres. How long is each side?", post:" m", ans:5, why:"The side times itself makes the area, and 5 &times; 5 = 25." },
+
+    learn("Estimating roots", "Between two squares", line(7, 8, 50, "Square root of 50 sits between 7 and 8, closer to 7"),
+      "<p>Most numbers are not square numbers, so their roots are not whole numbers. You can still get close. 50 sits between 49 (7&sup2;) and 64 (8&sup2;), so &#8730;50 is between 7 and 8.</p><p>And 50 is right next to 49, so &#8730;50 is only a tiny bit more than 7. A calculator says about 7.07.</p>"),
+    { t:"Estimating roots", type:"mc", p:"&#8730;30 is between which two whole numbers?", opts:["3 and 4", "5 and 6", "6 and 7", "15 and 16"], ans:1, why:"5&sup2; = 25 and 6&sup2; = 36. 30 sits between them, so &#8730;30 is between 5 and 6." },
+    { t:"Estimating roots", type:"num", p:"What is &#8730;95 to the nearest whole number?", ans:10, why:"95 sits between 81 (9&sup2;) and 100 (10&sup2;), and it is much closer to 100. So &#8730;95 is just under 10." },
+    { t:"Estimating roots", type:"mc", p:"A square patio covers 20 square metres. Roughly how long is each side?", opts:["About 4.5 m", "About 10 m", "About 2 m", "Exactly 5 m"], ans:0,
+      why:"4&sup2; = 16 and 5&sup2; = 25. 20 is about halfway, so each side is about 4.5 m. Halving 20 to get 10 is a common slip." },
+
+    learn("On the allotment", "Squares out in the wild", patio(4, "A 4 by 4 patio"),
+      "<p>Squares turn up whenever something has the same length both ways. The <b>area</b> of a square is the side times itself. A bed 3 m by 3 m covers 9 square metres. A patio 4 slabs by 4 slabs needs 16 slabs.</p><p>Watch the units. Half a metre squared is 0.5 &times; 0.5 = 0.25, which is smaller than you might expect.</p>"),
+    { t:"On the allotment", type:"num", p:"A square patio is 9 slabs along each side. How many slabs does Ken need?", post:" slabs", ans:81, why:"9 &times; 9 = 81." },
+    { t:"On the allotment", type:"num", p:"Each slab is half a metre wide. A square patio is 4 m by 4 m. How many slabs does it need?", post:" slabs", ans:64, why:"4 m is 8 slabs of half a metre, so the patio is 8 by 8 slabs, and 8 &times; 8 = 64." },
+    { t:"On the allotment", type:"mc", p:"What is 0.5&sup2;?", opts:["1", "0.25", "0.10", "2.5"], ans:1, why:"0.5 &times; 0.5 = 0.25. Half of a half is a quarter." },
+
+    learn("The pattern", "Squares in a sequence", tiles([1, 2, 3, 4], "Each square is the last one plus an L shape"),
+      "<p>Look at the square numbers in a row: 1, 4, 9, 16, 25. The gaps are 3, 5, 7, 9, the odd numbers going up by 2 each time.</p><p>You can see it in the tiles: each new square is the last one with an L shape wrapped round it, and each L has two more tiles than the one before.</p>"),
+    { t:"The pattern", type:"num", p:"What comes next? 1, 4, 9, 16, 25, ...", ans:36, why:"6&sup2; = 36. The gaps go 3, 5, 7, 9, so the next gap is 11, and 25 + 11 = 36." },
+    { t:"The pattern", type:"num", p:"What is the gap between 10&sup2; and 11&sup2;?", ans:21, why:"121 take away 100 is 21. It is also the eleventh odd number." },
+    { t:"The pattern", type:"mc", p:"Which is the 20th square number?", opts:["40", "200", "400", "220"], ans:2, why:"The 20th square number is 20&sup2; = 20 &times; 20 = 400." }
+  ];
+
+  LB.run({
+    store: "b5.practice.square-deal.v1", tool: "Square Deal", filename: "square-deal", items: ITEMS,
+    startTitle: "Learn a bit, try a bit",
+    startText: "<p class='lead'>Square numbers, square roots and a bit of estimating, all out on Ken's allotment. After each answer you find out straight away how it went and why. " + ITEMS.filter(function(q){ return !q.learn }).length + " questions, nothing timed, and skipping any of them is fine.</p>"
+  });
+})();
+
+</script>
+
+</body>
+</html>

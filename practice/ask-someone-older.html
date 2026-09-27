@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask someone older - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Ask someone older only. Shell, cards and buttons come from style.css */
+.pw{max-width:720px;margin:0 auto}
+.pw .card{cursor:default}
+.pw .kicker{opacity:.85}
+.lead{font-size:1.08rem;line-height:1.55;margin:8px 0 10px!important;max-width:62ch}
+.qprogress{height:10px;border-radius:999px;background:rgba(10,47,56,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:2px}
+.prompt{font-size:1.25rem;line-height:1.5;margin:8px 0 12px!important}
+.qvis{margin:4px 0 14px;text-align:center}
+.qvis svg{width:100%;max-width:460px;height:auto}
+.learnbody p{font-size:1.08rem!important;line-height:1.55;margin:12px 0 6px!important}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:480px;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.35rem;margin-bottom:8px}
+.arow input{width:130px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:2px solid rgba(10,47,56,.2);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.arow input:focus-visible,.choices button:focus-visible,.tapbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.hintline{font-size:.92rem;opacity:.75;margin:0 0 12px!important}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.05rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.2);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.choices button:disabled{cursor:default;opacity:1}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.topicbar{margin:12px 0 6px}
+.topicbar .trow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 190px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(10,47,56,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.7}
+.pw details.rev{margin-top:14px}
+.pw details.rev summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.98rem}
+.tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.smallnote{font-size:.9rem;opacity:.75;margin-top:10px!important}
+.hidden{display:none!important}
+@media (max-width:480px){.prompt{font-size:1.12rem}.topicbar .name{flex-basis:130px}.arow input{width:110px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.steps button{font-family:var(--body);font-size:.9rem;font-weight:700;padding:7px 12px;border-radius:999px;border:2px solid rgba(10,47,56,.25);background:#fffdfb;color:var(--ink);cursor:pointer}
+.steps button[aria-current="step"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.steps button.done{border-color:#2e7d4f}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.pick button{font-family:var(--body);font-size:.98rem;padding:9px 14px;border-radius:14px 10px 14px 10px;border:2px solid rgba(10,47,56,.2);background:#fffdfb;color:var(--ink);cursor:pointer;text-align:left}
+.pick button[aria-pressed="true"]{border-color:#007291;background:rgba(0,114,145,.12);font-weight:700}
+.fld{display:block;margin:10px 0}
+.fld label{display:block;font-weight:700;margin-bottom:4px}
+.fld label span{font-weight:400;opacity:.75;font-size:.92rem}
+.fld input,.fld textarea{width:100%;font-family:var(--body);font-size:1rem;padding:10px 12px;border:2px solid rgba(10,47,56,.2);border-radius:12px 9px 12px 9px;background:#fffdfb;color:var(--ink)}
+.fld textarea{min-height:90px;resize:vertical;line-height:1.5}
+.fld input:focus-visible,.fld textarea:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.qbank h4{font-family:var(--display);font-size:1rem;margin:14px 0 6px}
+.qbank .qb{display:flex;flex-wrap:wrap;gap:6px}
+.qbank .qb button{font-family:var(--body);font-size:.92rem;padding:7px 11px;border-radius:12px 9px 12px 9px;border:2px solid rgba(10,47,56,.18);background:#fff;color:var(--ink);cursor:pointer;text-align:left}
+.qbank .qb button[aria-pressed="true"]{border-color:#ef7724;background:rgba(239,119,36,.14)}
+.mylist{counter-reset:q;list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}
+.mylist li{display:flex;gap:8px;align-items:center}
+.mylist li::before{counter-increment:q;content:counter(q);font-family:var(--display);font-weight:800;width:22px;flex:none;text-align:right}
+.mylist input{flex:1;font-family:var(--body);font-size:1rem;padding:8px 10px;border:2px solid rgba(10,47,56,.2);border-radius:10px;background:#fffdfb;color:var(--ink)}
+.mylist button{font-family:var(--body);font-size:.85rem;padding:6px 10px;border-radius:999px;border:2px solid rgba(10,47,56,.2);background:#fff;color:var(--ink);cursor:pointer}
+.tips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.tips span{font-size:.9rem;padding:5px 10px;border-radius:999px;background:rgba(0,114,145,.1)}
+.keeper{border:2px solid var(--ink);border-radius:14px 10px 14px 10px;padding:12px 14px;background:#fbf7ee;margin:8px 0 12px;font-family:Georgia,"Times New Roman",serif;line-height:1.55}
+.keeper b{font-family:var(--display)}
+.speech{border:2px dashed rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;padding:12px 14px;margin:14px 0}
+.speech .out{font-size:1.1rem;padding:10px 12px;background:#fffdfb;border-radius:10px;margin:8px 0;min-height:1.6em}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.starters button{font-family:var(--body);font-size:.88rem;padding:5px 10px;border-radius:999px;border:2px solid rgba(10,47,56,.2);background:#fff;color:var(--ink);cursor:pointer}
+.checks{display:grid;gap:6px;margin:10px 0}
+.checks div{padding:8px 12px;border-radius:10px;font-size:.97rem}
+.checks .ok{background:#e9f4ec}
+.checks .look{background:#fdf0e5}
+.consent{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:2px solid rgba(10,47,56,.2);border-radius:12px;margin:10px 0;cursor:pointer}
+.consent input{width:20px;height:20px;margin-top:2px;accent-color:#007291;flex:none}
+#printSheet{display:none}
+@media print{
+  body *{visibility:hidden}
+  #printSheet,#printSheet *{visibility:visible}
+  #printSheet{display:block;position:absolute;left:0;top:0;width:100%;font-family:Georgia,serif;font-size:14pt;color:#000}
+  #printSheet li{margin:0 0 70px}
+}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pw">
+
+  <div class="weektheme">
+    <h2>Ask someone older</h2>
+    <span>Everyday English. Questions, notes, speech marks and three paragraphs, for Elderly Appreciation Day.</span>
+  </div>
+
+  <div class="board">
+    <div class="card w12 fill-teal">
+      <span class="kicker">For Elderly Appreciation Day</span>
+      <h3>Everyone older has a story</h3>
+      <p class="lead">Talk to someone older, then turn what they tell you into a short piece of writing. A grandparent, a neighbour, someone at school, a family friend. The questions are yours to choose, and nothing has to be shared that they do not want shared.</p>
+      <p class="lead">No one to ask right now? That is fine. You can interview one of the Memory Keepers from Tiny Legends instead.</p>
+    </div>
+
+    <div class="card w12" id="mainCard">
+      <nav class="steps" id="steps" aria-label="Steps"></nav>
+      <div id="stepBody"></div>
+      <div id="stepFb"></div>
+      <div class="qnav">
+        <button class="btn ghost" id="prevBtn">Back</button>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+  </div>
+  <div id="printSheet"></div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+
+(function(){
+  "use strict";
+  var STORE = "b5.practice.ask-someone-older.v1";
+  function el(id){ return document.getElementById(id) }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c] }) }
+
+  var WHO = ["A grandparent", "A neighbour", "Someone at school", "A family friend", "Someone in the community", "Someone else", "A Memory Keeper from Tiny Legends"];
+  var BANK = {
+    "Growing up":["Where did you grow up?", "What was your street like?", "What did you do for fun when you were my age?", "Who was your best friend, and what were they like?", "What were you not allowed to do?"],
+    "School":["What was your school like?", "Which teacher do you remember most, and why?", "What did you learn at school that you still use?", "What were school dinners like?", "How did you get to school?"],
+    "Work":["What was your first job?", "How much did you earn in your first job?", "Which job were you proudest of?", "What is a skill you are really good at?", "Who taught you the most at work?"],
+    "Music and fun":["What music did you love when you were young?", "Where did you go on a night out?", "What was the first record or tape you ever bought?", "What did you do at weekends?", "What was the best day out you ever had?"],
+    "Then and now":["What has changed most since you were young?", "What was better back then?", "What is better now?", "What did things cost when you were my age?", "Which new invention surprised you most?"],
+    "Advice":["What do you wish someone had told you at my age?", "What is the best advice you were ever given?", "What are you proudest of?", "What would you tell your younger self?", "Is there anything you would like people to remember?"]
+  };
+  var KEEPERS = [
+    { id:"dot", name:"Dot", age:81, role:"Bus conductor, 1962 to 1994", lines:["I worked the number 12 for thirty two years. Ding ding, hold tight, fares please.", "One morning a mother duck walked her whole family across the high street. I stopped the bus, and not one person on board complained.", "Six minutes late. Best six minutes of my career."] },
+    { id:"harold", name:"Harold", age:77, role:"Television repair man", lines:["People brought me tellies with valves inside. When one went, you could smell it. I could tell you which valve by the smell alone.", "Now if something breaks, you buy a new one. I understand why.", "But fixing something with your own two hands? That feeling never goes out of date."] },
+    { id:"nasreen", name:"Nasreen", age:74, role:"Cook and street party organiser", lines:["When I first moved to this street I knew nobody. So I cooked. Too much, on purpose.", "By the street party in 1977 I was feeding forty people off one folding table.", "Food is how you tell people they belong here. Remember that one."] },
+    { id:"frank", name:"Frank", age:88, role:"Ballroom dancer", lines:["Saturday nights at the Palais. You walked across the whole dance floor to ask someone to dance, and everyone watched you do it.", "I asked Jean four Saturdays running. On the fifth, she said yes.", "We were married fifty two years. I still practise the quickstep in the kitchen."] },
+    { id:"beryl", name:"Beryl", age:79, role:"Punk, 1977 to present", lines:["In 1977 I had green hair, safety pins and a leather jacket my mum absolutely hated.", "I saw bands in rooms so small the singer stood on your feet.", "I still have the jacket. It still fits. Mostly."] },
+    { id:"clement", name:"Clement", age:83, role:"Letter writer", lines:["When I came to England, a letter to my brother took three weeks to arrive, and three weeks for his reply.", "So you thought hard about every word. You did not waste good paper on nonsense.", "I kept every letter he ever sent me. Two shoe boxes full. They are the best thing I own."] },
+    { id:"sheila", name:"Sheila", age:90, role:"Radio engineer", lines:["At sixteen I learned to wire radios. The foreman said girls could not do it.", "I did it faster than the lads, and I made sure the foreman noticed.", "Listen carefully and a machine will tell you what is wrong with it. People too, usually."] },
+    { id:"ken", name:"Ken", age:72, role:"Allotment holder for fifty years", lines:["My dad said to plant potatoes on Good Friday. I have never missed a year.", "Fifty years on the same plot. I have grown things that won prizes, and things that should be arrested.", "Kids from the school come down now. They are better at it than I was at their age."] },
+    { id:"margaret", name:"Margaret", age:85, role:"Lived on Station Road all her life", lines:["There was one telephone for our whole street. A red box on the corner.", "You queued with your pennies, and everyone in the queue heard your business.", "Big news came through that box. Babies, jobs, engagements. We would all cheer on the pavement."] },
+    { id:"tony", name:"Tony", age:76, role:"Ran a record shop for forty years", lines:["In the old record shops you took a single into a little booth and listened before you bought it.", "Three minutes to decide if a song was worth a week of paper round money.", "Choosing carefully made you love it more. I still think that."] },
+    { id:"pat", name:"Pat", age:80, role:"Open water swimmer", lines:["I learned to swim at sixty. Everyone said I had left it late.", "At sixty five I swam across the lake for charity. Four hours. My grandson rowed next to me and ate all my sandwiches.", "It is never too late to be new at something."] },
+    { id:"iris", name:"Iris", age:84, role:"Cinema usher", lines:["Saturday morning pictures. Sixpence to get in, and three hundred kids shouting at the screen.", "I walked the aisles with my torch, keeping order. Mostly I was laughing.", "When the hero was in trouble the whole room yelled LOOK BEHIND YOU. Best sound in the world."] },
+    { id:"des", name:"Des", age:79, role:"Milkman", lines:["Up at four every morning, rain or shine. The milk float was so quiet you only heard the bottles.", "I knew every dog on my round by name. The dogs knew me by the clink.", "If a bottle was not taken in, you knocked on the door. Sometimes that knock mattered a lot."] },
+    { id:"gwen", name:"Gwen", age:86, role:"Typist", lines:["Ninety words a minute on a typewriter that went ding at the end of every line.", "One mistake near the bottom and you started the whole page again. So you learned not to make it.", "Your keyboards have a delete button. Lucky you. Use it kindly."] },
+    { id:"samuel", name:"Samuel", age:78, role:"Taught a whole estate to fix bikes", lines:["I taught half the kids on our estate to fix a puncture. Bowl of water, find the bubbles, patch it.", "Some of them are grandparents now. They still stop me in the street to tell me they can do it.", "Teach someone something useful and it keeps going long after you."] },
+    { id:"rita", name:"Rita", age:82, role:"Street games champion", lines:["We played out until the streetlights came on. That was the only rule.", "Hopscotch, skipping, knock and run. Well. Maybe not that last one.", "When the lights flickered on, you went home. You knew the way without looking."] }
+  ];
+  var STEPS = ["Who", "Questions", "Notes", "Write", "Send"];
+
+  var st = { step:0, who:"", call:"", keeper:"", qs:[], notes:{}, quote:"", p1:"", p2:"", p3:"", consent:false, spk:{ words:"", verb:"said" } };
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+  try{ var raw = localStorage.getItem(STORE); if(raw){ var s = JSON.parse(raw); if(s && s.qs) { for(var k in s) st[k] = s[k] } } }catch(e){}
+  function keeper(){ for(var i = 0; i < KEEPERS.length; i++) if(KEEPERS[i].id === st.keeper) return KEEPERS[i]; return null }
+  function isKeeper(){ return st.who === WHO[6] }
+  function nameOf(){ var k = keeper(); return isKeeper() && k ? k.name : (st.call.trim() || "they") }
+  function fb(kind, html){ el("stepFb").innerHTML = html ? "<div class='fb " + kind + "'>" + html + "</div>" : "" }
+
+  function drawSteps(){
+    var n = el("steps"); n.innerHTML = "";
+    STEPS.forEach(function(s, i){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = (i + 1) + ". " + s;
+      if(i === st.step) b.setAttribute("aria-current", "step");
+      if(stepDone(i) && i !== st.step) b.classList.add("done");
+      b.onclick = function(){ go(i) };
+      n.appendChild(b);
+    });
+  }
+  function stepDone(i){
+    if(i === 0) return !!st.who && (!isKeeper() || !!st.keeper);
+    if(i === 1) return st.qs.filter(function(q){ return q.trim() }).length >= 3;
+    if(i === 2) return Object.keys(st.notes).some(function(k){ return (st.notes[k] || "").trim() });
+    if(i === 3) return (st.p1 + st.p2 + st.p3).trim().split(/\s+/).length > 30;
+    return false;
+  }
+
+  function go(i){ st.step = Math.max(0, Math.min(STEPS.length - 1, i)); save(); render(); el("mainCard").scrollIntoView({ block:"start" }) }
+
+  function render(){
+    drawSteps(); fb("", "");
+    var b = el("stepBody"), h = "";
+    el("prevBtn").disabled = st.step === 0;
+    el("nextBtn").classList.toggle("hidden", st.step === STEPS.length - 1);
+    if(st.step === 0){
+      h += "<span class='kicker'>Step 1 of 5</span><h3>Who are you going to talk to?</h3><div class='pick' id='whoPick'>" + WHO.map(function(w){ return "<button type='button' aria-pressed='" + (st.who === w) + "'>" + w + "</button>" }).join("") + "</div>";
+      if(isKeeper()){
+        h += "<p>Pick a Memory Keeper. Their story is waiting in the Notes step.</p><div class='pick' id='kPick'>" + KEEPERS.map(function(k){ return "<button type='button' data-k='" + k.id + "' aria-pressed='" + (st.keeper === k.id) + "'>" + k.name + ", " + k.role.toLowerCase() + "</button>" }).join("") + "</div>";
+      } else if(st.who){
+        h += "<div class='fld'><label for='call'>What do you call them? <span>Nan, Mr B, Auntie Pam, whatever you use. A first name is plenty.</span></label><input id='call' maxlength='40' value='" + esc(st.call) + "'></div>" +
+          "<div class='fb tell'><b>Before you start,</b> ask them if they are happy to talk, and let them know they can skip any question. Keep it to things they are happy for Jay to read. No surnames or addresses needed.</div>";
+      }
+      b.innerHTML = h;
+      b.querySelectorAll("#whoPick button").forEach(function(x){ x.onclick = function(){ st.who = x.textContent; save(); render() } });
+      b.querySelectorAll("#kPick button").forEach(function(x){ x.onclick = function(){ st.keeper = x.dataset.k; save(); render() } });
+      var c = el("call"); if(c) c.oninput = function(){ st.call = c.value; save() };
+    }
+    if(st.step === 1){
+      h += "<span class='kicker'>Step 2 of 5</span><h3>Pick your questions</h3><p>Tap questions to add them to your list. Five to eight is plenty. You can change the wording, or write your own.</p><div class='qbank'>";
+      Object.keys(BANK).forEach(function(t){ h += "<h4>" + t + "</h4><div class='qb'>" + BANK[t].map(function(q){ return "<button type='button' data-q='" + esc(q) + "' aria-pressed='" + (st.qs.indexOf(q) >= 0) + "'>" + esc(q) + "</button>" }).join("") + "</div>" });
+      h += "</div><h4 style='margin-top:18px'>Your list</h4><ol class='mylist' id='myList'></ol><div class='qnav'><button class='btn btn-quiet' id='addOwn' type='button'>Add my own question</button><button class='btn ghost' id='printQs' type='button'>Print my questions</button></div>" +
+        "<p class='hintline' style='margin-top:12px'>Good follow up questions for when an answer is interesting:</p><div class='tips'><span>Why?</span><span>What was that like?</span><span>Can you tell me more about that?</span><span>How did that feel?</span><span>What happened next?</span></div>";
+      b.innerHTML = h;
+      b.querySelectorAll("[data-q]").forEach(function(x){ x.onclick = function(){ var q = x.dataset.q, i = st.qs.indexOf(q); if(i >= 0) st.qs.splice(i, 1); else st.qs.push(q); save(); render() } });
+      drawList();
+      el("addOwn").onclick = function(){ st.qs.push(""); save(); drawList(); var ins = el("myList").querySelectorAll("input"); ins[ins.length - 1].focus() };
+      el("printQs").onclick = function(){ el("printSheet").innerHTML = "<h2>Questions for " + esc(nameOf() === "they" ? "my interview" : nameOf()) + "</h2><ol>" + st.qs.filter(function(q){ return q.trim() }).map(function(q){ return "<li>" + esc(q) + "</li>" }).join("") + "</ol>"; window.print() };
+    }
+    if(st.step === 2){
+      var k = keeper();
+      h += "<span class='kicker'>Step 3 of 5</span><h3>" + (isKeeper() && k ? k.name + " tells you their story" : "Notes from the chat") + "</h3>";
+      if(isKeeper() && k) h += "<div class='keeper'><b>" + k.name + ", " + k.age + "</b><br><i>" + esc(k.role) + "</i><br><br>" + k.lines.map(esc).join("<br><br>") + "</div><p>Jot down what you notice. Short notes are best: a few words each, not full sentences.</p>";
+      else h += "<p>Jot down what they say while you talk, or straight after. Short notes are best: a few words each, not full sentences. Leave any question blank if it did not come up.</p>";
+      var qs = st.qs.filter(function(q){ return q.trim() });
+      if(!qs.length) h += "<div class='fb tell'>Your question list is empty. You can still make notes here, or go back to Step 2 and pick some.</div>";
+      (qs.length ? qs : ["What did they tell you?"]).forEach(function(q, i){ h += "<div class='fld'><label for='n" + i + "'>" + esc(q) + "</label><textarea id='n" + i + "' data-q='" + esc(q) + "'>" + esc(st.notes[q] || "") + "</textarea></div>" });
+      h += "<div class='fld'><label for='quote'>Something they said, word for word <span>the best line of the whole chat, exactly as they said it</span></label><input id='quote' maxlength='200' value='" + esc(st.quote) + "'></div>";
+      b.innerHTML = h;
+      b.querySelectorAll("textarea[data-q]").forEach(function(t){ t.oninput = function(){ st.notes[t.dataset.q] = t.value; save() } });
+      el("quote").oninput = function(){ st.quote = el("quote").value; save() };
+    }
+    if(st.step === 3){
+      var nm = nameOf(), N = nm === "they" ? "they" : nm;
+      var S = {
+        p1:N === "they" ? ["I spoke to someone older.", "They are ", "When they were young, "] : ["I spoke to " + N + ".", N + " is ", "When " + N + " was young, "],
+        p2:["One thing " + N + " remembers is ", N + " told me about ", "Back then, "],
+        p3:["The most surprising thing was ", "Something that has changed since then is ", "Talking to " + N + " made me realise "]
+      };
+      h += "<span class='kicker'>Step 4 of 5</span><h3>Turn it into writing</h3><p>Three short paragraphs, one job each. Tap a starter if you want a way in. Your notes are one step back if you need them.</p>";
+      [["p1", "Paragraph 1: who they are"], ["p2", "Paragraph 2: something they remember"], ["p3", "Paragraph 3: what you learned"]].forEach(function(p){
+        h += "<div class='fld'><label for='" + p[0] + "'>" + p[1] + "</label><textarea id='" + p[0] + "'>" + esc(st[p[0]]) + "</textarea><div class='starters'>" + S[p[0]].map(function(s){ return "<button type='button' data-p='" + p[0] + "' data-s='" + esc(s) + "'>" + esc(s) + "</button>" }).join("") + "</div></div>";
+        if(p[0] === "p2") h += speechBox();
+      });
+      h += "<div class='qnav'><button class='btn btn-quiet' type='button' id='chk'>Check my writing</button></div><div class='checks' id='checks'></div>";
+      b.innerHTML = h;
+      ["p1", "p2", "p3"].forEach(function(p){ el(p).oninput = function(){ st[p] = el(p).value; save() } });
+      b.querySelectorAll("[data-s]").forEach(function(x){ x.onclick = function(){ var t = el(x.dataset.p); t.value = (t.value.trim() ? t.value.replace(/\s*$/, " ") : "") + x.dataset.s; st[x.dataset.p] = t.value; save(); t.focus() } });
+      wireSpeech();
+      el("chk").onclick = checkWriting;
+    }
+    if(st.step === 4){
+      var words = (st.p1 + " " + st.p2 + " " + st.p3).trim().split(/\s+/).filter(Boolean).length;
+      h += "<span class='kicker'>Step 5 of 5</span><h3>Send it to Jay</h3><p>Your writing is " + words + " words long" + (words < 40 ? ", which is a start. You can go back and add more whenever you like" : "") + ". The message will include your questions, your notes and your writing.</p>";
+      if(!isKeeper()) h += "<label class='consent'><input type='checkbox' id='consent'" + (st.consent ? " checked" : "") + "> <span><b>Optional.</b> " + esc(nameOf() === "they" ? "The person I spoke to" : nameOf()) + " is happy for Jay to maybe turn their story into a new Memory Keeper in Tiny Legends, using the name I call them.</span></label>";
+      h += "<div id='sendHost'></div>";
+      b.innerHTML = h;
+      var cc = el("consent"); if(cc) cc.onchange = function(){ st.consent = cc.checked; save() };
+      if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Ask someone older", filename:"ask-someone-older", getText:sendText });
+    }
+    el("nextBtn").textContent = st.step === 3 ? "Ready to send" : "Next";
+  }
+
+  function drawList(){
+    var ol = el("myList"); if(!ol) return; ol.innerHTML = "";
+    if(!st.qs.length){ ol.innerHTML = "<li style='opacity:.7'>Nothing yet. Tap some questions above.</li>"; return }
+    st.qs.forEach(function(q, i){
+      var li = document.createElement("li");
+      li.innerHTML = "<input aria-label='Question " + (i + 1) + "' maxlength='160' value='" + esc(q) + "'><button type='button'>Remove</button>";
+      var inp = li.querySelector("input");
+      inp.oninput = function(){ st.qs[i] = inp.value; save() };
+      inp.onchange = function(){ render() };
+      li.querySelector("button").onclick = function(){ st.qs.splice(i, 1); save(); render() };
+      ol.appendChild(li);
+    });
+  }
+
+  function speechBox(){
+    return "<div class='speech'><b>Put their words in.</b> Type exactly what they said and this shows you how to punctuate it.<div class='fld'><label for='spkW'>Their words</label><input id='spkW' maxlength='200' value='" + esc(st.spk.words || st.quote) + "'></div>" +
+      "<div class='pick' id='spkV'>" + ["said", "told me", "laughed", "remembered", "asked"].map(function(v){ return "<button type='button' aria-pressed='" + (st.spk.verb === v) + "'>" + v + "</button>" }).join("") + "</div>" +
+      "<div class='out' id='spkOut'></div><div class='qnav'><button type='button' class='btn btn-quiet' id='spkAdd'>Add it to paragraph 2</button></div>" +
+      "<p class='hintline' style='margin-top:10px'>The rules: speech marks go round the exact words. The words start with a capital. The comma, question mark or exclamation mark goes inside the closing speech mark.</p></div>";
+  }
+  function speechLine(){
+    var w = (el("spkW") ? el("spkW").value : st.spk.words || "").trim(); if(!w) return "";
+    w = w.replace(/^["']+|["']+$/g, "").trim(); w = w.charAt(0).toUpperCase() + w.slice(1);
+    var end = /[?!]$/.test(w) ? "" : ",";
+    w = w.replace(/[.,]$/, "");
+    var who = nameOf() === "they" ? "they" : nameOf(), verb = st.spk.verb || "said";
+    if(verb === "asked" && !/[?]$/.test(w)){ w += "?"; end = "" }
+    return "\"" + w + end + "\" " + (verb === "told me" ? who + " told me." : who + " " + verb + ".");
+  }
+  function wireSpeech(){
+    var W = el("spkW"); if(!W) return;
+    function upd(){ st.spk.words = W.value; save(); el("spkOut").textContent = speechLine() || "Your sentence will appear here." }
+    W.oninput = upd; upd();
+    el("spkV").querySelectorAll("button").forEach(function(x){ x.onclick = function(){ st.spk.verb = x.textContent; save(); el("spkV").querySelectorAll("button").forEach(function(y){ y.setAttribute("aria-pressed", y === x ? "true" : "false") }); upd() } });
+    el("spkAdd").onclick = function(){ var line = speechLine(); if(!line) return; var t = el("p2"); t.value = (t.value.trim() ? t.value.replace(/\s*$/, " ") : "") + line; st.p2 = t.value; save() };
+  }
+
+  function checkWriting(){
+    var paras = [st.p1, st.p2, st.p3].map(function(p){ return p.trim() }), all = paras.join(" "), out = [];
+    var filled = paras.filter(Boolean).length;
+    out.push(filled === 3 ? ["ok", "Three paragraphs, each with its own job."] : ["look", filled + " of 3 paragraphs have writing in them so far."]);
+    var sentences = (all.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || []).map(function(x){ return x.trim() }).filter(Boolean);
+    var lower = sentences.filter(function(s){ var c = s.replace(/^["'\s]+/, "").charAt(0); return c && c !== c.toUpperCase() });
+    out.push(lower.length ? ["look", "Some sentences start with a small letter, like: \"" + esc(lower[0].slice(0, 40)) + "\""] : ["ok", "Every sentence starts with a capital letter."]);
+    var noStop = paras.filter(function(p){ return p && !/[.!?]["']?$/.test(p) }).length;
+    out.push(noStop ? ["look", noStop + " paragraph" + (noStop > 1 ? "s end" : " ends") + " without a full stop."] : ["ok", "Each paragraph ends with a full stop."]);
+    if(/(^|\s)i(\s|'|$)/.test(all)) out.push(["look", "There is an i on its own that wants to be a capital I."]);
+    var q = (all.match(/"/g) || []).length;
+    out.push(q === 0 ? ["look", "No speech marks yet. Their words, in speech marks, would bring it to life."] : q % 2 ? ["look", "One of your speech marks is missing its partner."] : ["ok", "Speech marks come in pairs. Nice."]);
+    var long = sentences.filter(function(s){ return s.split(/\s+/).length > 35 });
+    if(long.length) out.push(["look", "One sentence is over 35 words long. It might read better split in two."]);
+    el("checks").innerHTML = out.map(function(o){ return "<div class='" + o[0] + "'>" + (o[0] === "ok" ? "Yes: " : "Have a look: ") + o[1] + "</div>" }).join("");
+  }
+
+  function sendText(){
+    var k = keeper(), L = [];
+    L.push("Who: " + (isKeeper() && k ? "Memory Keeper " + k.name + " from Tiny Legends" : st.who + (st.call.trim() ? " (" + st.call.trim() + ")" : "")));
+    if(!isKeeper()) L.push("Happy to maybe become a Memory Keeper: " + (st.consent ? "yes" : "not ticked"));
+    L.push("", "QUESTIONS AND NOTES");
+    st.qs.filter(function(q){ return q.trim() }).forEach(function(q){ L.push("- " + q, "  " + ((st.notes[q] || "").trim() || "(no notes)")) });
+    if(st.quote.trim()) L.push("", "In their own words: \"" + st.quote.trim().replace(/^"|"$/g, "") + "\"");
+    L.push("", "WRITING", "", st.p1.trim() || "(paragraph 1 blank)", "", st.p2.trim() || "(paragraph 2 blank)", "", st.p3.trim() || "(paragraph 3 blank)");
+    return L.join("\n");
+  }
+
+  el("prevBtn").onclick = function(){ go(st.step - 1) };
+  el("nextBtn").onclick = function(){
+    if(st.step === 0 && !stepDone(0)){ fb("tell", isKeeper() ? "Pick a Memory Keeper first." : "Pick who you are going to talk to first."); return }
+    go(st.step + 1);
+  };
+  render();
+  window.__ao = { st:function(){ return st }, speechLine:speechLine, KEEPERS:KEEPERS };
+})();
+
+</script>
+
+</body>
+</html>

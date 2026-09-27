@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Moves - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Pixel Moves only. Shell, cards and buttons come from style.css */
+.pw{max-width:720px;margin:0 auto}
+.pw .card{cursor:default}
+.pw .kicker{opacity:.85}
+.lead{font-size:1.08rem;line-height:1.55;margin:8px 0 10px!important;max-width:62ch}
+.qprogress{height:10px;border-radius:999px;background:rgba(10,47,56,.1);overflow:hidden;margin-bottom:16px}
+.qprogress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#007291,#ef7724);transition:width .25s}
+.qcount{float:right;font-size:.85rem;opacity:.65;padding-top:2px}
+.prompt{font-size:1.25rem;line-height:1.5;margin:8px 0 12px!important}
+.qvis{margin:4px 0 14px;text-align:center}
+.qvis svg{width:100%;max-width:460px;height:auto}
+.learnbody p{font-size:1.08rem!important;line-height:1.55;margin:12px 0 6px!important}
+.learnfig{margin:6px 0 4px;text-align:center}
+.learnfig svg{width:100%;max-width:480px;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:1.35rem;margin-bottom:8px}
+.arow input{width:130px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:2px solid rgba(10,47,56,.2);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.arow input:focus-visible,.choices button:focus-visible,.tapbtn:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.hintline{font-size:.92rem;opacity:.75;margin:0 0 12px!important}
+.choices{display:grid;gap:10px;margin-bottom:10px}
+.choices button{text-align:left;font-size:1.05rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.2);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button.picked{border-color:#007291;background:rgba(0,114,145,.1);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.choices button:disabled{cursor:default;opacity:1}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.topicbar{margin:12px 0 6px}
+.topicbar .trow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.topicbar .name{flex:0 0 190px;font-size:.95rem}
+.topicbar .track{flex:1;height:12px;background:rgba(10,47,56,.1);border-radius:999px;overflow:hidden}
+.topicbar .fill{display:block;height:100%;border-radius:999px}
+.topicbar .score{flex:0 0 46px;text-align:right;font-size:.9rem;opacity:.7}
+.pw details.rev{margin-top:14px}
+.pw details.rev summary{cursor:pointer;font-weight:700;color:#005a73}
+.review-item{padding:10px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.98rem}
+.tag{font-weight:700}
+.tag.right{color:#2e7d4f}
+.tag.diff{color:#b3541e}
+.smallnote{font-size:.9rem;opacity:.75;margin-top:10px!important}
+.hidden{display:none!important}
+@media (max-width:480px){.prompt{font-size:1.12rem}.topicbar .name{flex-basis:130px}.arow input{width:110px}}
+@media (prefers-reduced-motion:reduce){.qprogress span{transition:none}}
+
+.pm-chaps{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.pm-chaps button{font-family:var(--body);font-size:.95rem;font-weight:700;padding:8px 14px;border-radius:999px;border:2px solid rgba(10,47,56,.25);background:#fffdfb;color:var(--ink);cursor:pointer}
+.pm-chaps button .n{opacity:.6;font-weight:400;margin-left:6px}
+.pm-chaps button.done{border-color:#2e7d4f;background:#e9f4ec}
+.pm-grid{display:block;width:100%;max-width:520px;height:auto;margin:6px auto 8px;touch-action:none;border-radius:12px;cursor:crosshair}
+.pm-grid:focus-visible{outline:3px solid #ef7724;outline-offset:3px}
+.pm-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.9rem;margin:0 0 10px;justify-content:center}
+.pm-legend span{display:inline-flex;align-items:center;gap:6px}
+.pm-legend i{display:inline-block;width:14px;height:14px;border-radius:3px}
+.vec{display:inline-flex;align-items:center;gap:10px;font-size:1.2rem;margin:6px 0 4px}
+.vecbox{display:inline-flex;flex-direction:column;gap:6px;padding:6px 10px;border-left:3px solid var(--ink);border-right:3px solid var(--ink);border-radius:14px}
+.vecbox input{width:70px;font-size:1.25rem;font-family:var(--body);text-align:center;padding:6px;border:2px solid rgba(10,47,56,.2);border-radius:10px;background:#fffdfb;color:var(--ink)}
+.vecbox input:focus-visible{outline:3px solid #ef7724;outline-offset:2px}
+.vecshow{display:inline-flex;flex-direction:column;align-items:center;padding:2px 10px;border-left:3px solid var(--ink);border-right:3px solid var(--ink);border-radius:12px;font-weight:700;line-height:1.35;font-size:1.15rem;vertical-align:middle;margin:0 4px}
+.routelist{display:flex;flex-wrap:wrap;gap:10px 18px;margin:8px 0}
+.routerow{display:flex;align-items:center;gap:8px}
+.routerow .lab{font-weight:700;font-size:.95rem}
+.routerow .vecbox input{width:56px}
+.pm-stars{font-family:var(--display);font-size:1.1rem}
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pw">
+
+  <div class="weektheme">
+    <h2>Pixel Moves</h2>
+    <span>GCSE maths. Vectors, reflections, rotations and enlargements, one pixel square at a time.</span>
+  </div>
+
+  <div class="board">
+
+    <div class="card w12" id="startCard">
+      <span class="kicker">Before you start</span>
+      <h3>Move it, flip it, turn it, grow it</h3>
+      <p class="lead">Bonnie and a few other pixel shapes need moving around the Memory House. Every chapter starts with a quick explainer, then you move shapes yourself: by typing a vector, or by tapping the squares where the shape ends up. You can drag across squares to paint faster.</p>
+      <p class="lead">Every puzzle can be tried again as many times as you like, and <b>Show me</b> is always there. Pick a chapter, or start at the beginning.</p>
+      <div class="pm-chaps" id="chaps"></div>
+      <div class="qnav">
+        <button class="btn" id="beginBtn">Start at the beginning</button>
+        <button class="btn ghost hidden" id="resumeBtn">Carry on where I left off</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="lvCard">
+      <div class="qprogress"><span id="progFill" style="width:0%"></span></div>
+      <span class="qcount" id="lvCount"></span>
+      <span class="kicker" id="lvChap"></span>
+      <p class="prompt" id="lvPrompt"></p>
+      <div id="lvLearn"></div>
+      <svg class="pm-grid" id="grid" tabindex="0" role="img" aria-label="Coordinate grid"></svg>
+      <div class="pm-legend" id="legend"></div>
+      <div id="lvControls"></div>
+      <div id="lvFb"></div>
+      <div class="qnav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn ghost" id="menuBtn">Chapters</button>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <div class="card w12 hidden" id="endCard">
+      <span class="kicker">How it went</span>
+      <h3 id="endLine"></h3>
+      <p id="endNote"></p>
+      <div class="topicbar" id="endBars"></div>
+      <div class="qnav"><button class="btn ghost" id="againBtn">Back to the chapters</button></div>
+    </div>
+
+    <div class="card w12 hidden" id="sendCard">
+      <div id="sendHost"></div>
+      <p class="smallnote">Your progress also stays saved on this device.</p>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+
+(function(){
+  "use strict";
+  var STORE = "b5.practice.pixel-moves.v1";
+  var GW = 14, GH = 10, C = 30, OX = 30, OY = 12;
+  var SVGW = OX + GW * C + 12, SVGH = OY + GH * C + 28;
+  var INK = "#0a2f38", TEAL = "#007291", ORANGE = "#ef7724", PLUM = "#7b4b8f", GREEN = "#2e7d4f", PAPER = "#fffdf8";
+  var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+  var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+  function el(id){ return document.getElementById(id) }
+  function show(id, on){ el(id).classList.toggle("hidden", !on) }
+
+  /* ---------- shapes ---------- */
+  var SPR = {
+    bonnie: { name:"Bonnie", col:"#8a5230", cells:[[0,2],[1,2],[1,1],[2,1],[3,1],[1,0],[3,0]] },
+    flag:   { name:"the flag", col:ORANGE, cells:[[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[1,2]] },
+    ell:    { name:"the L", col:PLUM, cells:[[0,0],[1,0],[2,0],[0,1]] }
+  };
+  function place(spr, x, y){ return SPR[spr].cells.map(function(c){ return [c[0] + x, c[1] + y] }) }
+  var T = {
+    tr: function(cs, dx, dy){ return cs.map(function(c){ return [c[0] + dx, c[1] + dy] }) },
+    refX: function(cs, a){ return cs.map(function(c){ return [2 * a - c[0] - 1, c[1]] }) },
+    refY: function(cs, b){ return cs.map(function(c){ return [c[0], 2 * b - c[1] - 1] }) },
+    refYX: function(cs){ return cs.map(function(c){ return [c[1], c[0]] }) },
+    cw: function(cs, px, py){ return cs.map(function(c){ return [px + c[1] - py, py - c[0] - 1 + px] }) },
+    acw: function(cs, px, py){ return cs.map(function(c){ return [px - c[1] - 1 + py, py + c[0] - px] }) },
+    half: function(cs, px, py){ return cs.map(function(c){ return [2 * px - c[0] - 1, 2 * py - c[1] - 1] }) },
+    enl: function(cs, cx, cy, k){ var out = []; cs.forEach(function(c){ var bx = cx + k * (c[0] - cx), by = cy + k * (c[1] - cy); for(var a = 0; a < k; a++) for(var b = 0; b < k; b++) out.push([bx + a, by + b]) }); return out }
+  };
+  function key(c){ return c[0] + "," + c[1] }
+  function setOf(cs){ var s = {}; cs.forEach(function(c){ s[key(c)] = 1 }); return s }
+  function sameSet(a, b){ var ka = Object.keys(a), kb = Object.keys(b); if(ka.length !== kb.length) return false; return ka.every(function(k){ return b[k] }) }
+
+  /* ---------- levels ---------- */
+  var L = [];
+  function learn(ch, h, body, demo){ L.push({ ch:ch, kind:"learn", h:h, body:body, demo:demo }) }
+
+  learn("Translation", "Sliding with a vector",
+    "<p>A <b>translation</b> slides a shape without turning or flipping it. A <b>column vector</b> says how far: the <b>top</b> number is left or right, the <b>bottom</b> number is up or down.</p><p>Positive means right or up. Negative means left or down. So <span class='vecshow'><span>5</span><span>2</span></span> is 5 right and 2 up, and <span class='vecshow'><span>-3</span><span>0</span></span> is 3 left and not up at all.</p>",
+    { obj:["bonnie", 1, 1], ghost:T.tr(place("bonnie", 1, 1), 5, 2), arrow:[[2.5, 2.5], [7.5, 4.5]] });
+  L.push({ ch:"Translation", kind:"vector", obj:["bonnie", 1, 1], ans:[6, 3], prompt:"Bonnie wants to get to the dashed outline. Type the vector that slides her there, then press Move." });
+  L.push({ ch:"Translation", kind:"vector", obj:["flag", 9, 2], ans:[-5, 4], prompt:"This one goes left, so the top number will be negative. Type the vector that moves the flag onto the outline." });
+  L.push({ ch:"Translation", kind:"paint", obj:["ell", 2, 6], ans:function(cs){ return T.tr(cs, 4, -3) }, vec:[4, -3], prompt:"Tap the squares where the L ends up after the translation <span class='vecshow'><span>4</span><span>-3</span></span>." });
+  L.push({ ch:"Translation", kind:"mc", obj:["bonnie", 2, 5], img:function(cs){ return T.tr(cs, 6, -4) }, prompt:"Which vector takes Bonnie from A to B?",
+    opts:["<span class='vecshow'><span>6</span><span>-4</span></span>", "<span class='vecshow'><span>-4</span><span>6</span></span>", "<span class='vecshow'><span>6</span><span>4</span></span>", "<span class='vecshow'><span>4</span><span>-6</span></span>"], ans:0,
+    why:"Pick any square on A and find the same square on B. It moves 6 right, so the top is 6, and 4 down, so the bottom is -4." });
+
+  learn("Reflection", "Flipping in a mirror line",
+    "<p>A <b>reflection</b> flips a shape over a mirror line. Every square ends up the <b>same distance</b> from the line on the other side, and the shape comes out back to front.</p><p>Lines have names. <b>x = 6</b> is the upright line through 6 on the bottom axis. <b>y = 4</b> is the flat line through 4 on the side axis. A good trick: count squares from the line on one side, then count the same on the other.</p>",
+    { obj:["flag", 2, 3], ghost:T.refX(place("flag", 2, 3), 6), line:{ x:6 } });
+  L.push({ ch:"Reflection", kind:"paint", obj:["flag", 2, 3], line:{ x:6 }, ans:function(cs){ return T.refX(cs, 6) }, prompt:"Reflect the flag in the line <b>x = 6</b>. Tap the squares of the reflection." });
+  L.push({ ch:"Reflection", kind:"paint", obj:["ell", 5, 1], line:{ y:4 }, ans:function(cs){ return T.refY(cs, 4) }, prompt:"Now a flat mirror. Reflect the L in the line <b>y = 4</b>." });
+  L.push({ ch:"Reflection", kind:"mc", obj:["bonnie", 1, 2], img:function(cs){ return T.refX(cs, 6) }, prompt:"B is a reflection of A. Where is the mirror line?",
+    opts:["x = 6", "x = 5", "y = 6", "x = 7"], ans:0,
+    why:"A finishes at 5 on the bottom axis and B starts at 7, so the mirror sits exactly halfway between them, on x = 6." });
+  L.push({ ch:"Reflection", kind:"paint", stretch:true, obj:["flag", 1, 5], line:{ yx:true }, ans:function(cs){ return T.refYX(cs) }, prompt:"Stretch, if you fancy it. Reflect the flag in the diagonal line <b>y = x</b>. Each square swaps its across and up numbers." });
+
+  learn("Rotation", "Turning about a point",
+    "<p>A <b>rotation</b> turns a shape about a fixed point, the <b>centre</b>. You need three things: the centre, how far (a quarter turn is 90 degrees, a half turn is 180), and which way, clockwise or anticlockwise.</p><p>The tracing paper trick works on a screen too: imagine pinning the shape at the centre and turning the whole page. A half turn is the same both ways round.</p>",
+    { obj:["ell", 4, 5], ghost:T.half(place("ell", 4, 5), 7, 5), centre:[7, 5] });
+  L.push({ ch:"Rotation", kind:"paint", obj:["ell", 4, 5], centre:[7, 5], ans:function(cs){ return T.half(cs, 7, 5) }, prompt:"Rotate the L a <b>half turn</b> (180 degrees) about the orange point <b>(7, 5)</b>." });
+  L.push({ ch:"Rotation", kind:"paint", obj:["flag", 7, 5], centre:[7, 5], ans:function(cs){ return T.cw(cs, 7, 5) }, prompt:"Rotate the flag a <b>quarter turn clockwise</b> (90 degrees) about <b>(7, 5)</b>. The pole ends up lying flat." });
+  L.push({ ch:"Rotation", kind:"mc", obj:["bonnie", 7, 6], centre:[7, 5], img:function(cs){ return T.acw(cs, 7, 5) }, prompt:"B is A rotated about the orange point. Which rotation is it?",
+    opts:["90 degrees clockwise about (7, 5)", "90 degrees anticlockwise about (7, 5)", "180 degrees about (7, 5)", "A reflection in x = 7"], ans:1,
+    why:"Bonnie started above the point and ended up to its left, a quarter turn the opposite way to a clock's hands. That is 90 degrees anticlockwise." });
+
+  learn("Enlargement", "Making it bigger",
+    "<p>An <b>enlargement</b> changes the size but not the shape. The <b>scale factor</b> says how many times bigger: scale factor 2 makes every length twice as long.</p><p>The <b>centre of enlargement</b> fixes where it lands. Every point moves away from the centre: twice as far away for scale factor 2, three times as far for scale factor 3.</p>",
+    { obj:["ell", 2, 2], ghost:T.enl(place("ell", 2, 2), 1, 1, 2), centre:[1, 1] });
+  L.push({ ch:"Enlargement", kind:"paint", obj:["ell", 2, 2], centre:[1, 1], ans:function(cs){ return T.enl(cs, 1, 1, 2) }, prompt:"Enlarge the L by <b>scale factor 2</b> from the centre <b>(1, 1)</b>. Each square becomes a 2 by 2 block, twice as far from the centre." });
+  L.push({ ch:"Enlargement", kind:"mc", obj:["ell", 1, 1], centre:[0, 0], img:function(cs){ return T.enl(cs, 0, 0, 3) }, prompt:"B is an enlargement of A from the point (0, 0). What is the scale factor?",
+    opts:["2", "3", "4", "9"], ans:1,
+    why:"The bottom of A is 3 squares long and the bottom of B is 9, so every length is 3 times as long. 9 would be how many times more squares it covers, which is a different thing." });
+
+  learn("Bonnie's route", "Getting Bonnie to bed",
+    "<p>Last one, and it is a puzzle. Bonnie wants her bed in the far corner, but the sideboard and the armchair are in the way. She moves in straight lines, one vector at a time, and she cannot pass through furniture.</p><p>Use up to four moves. Any route that works counts. Can you do it in two?</p>", null);
+  L.push({ ch:"Bonnie's route", kind:"route", obj:["bonnie", 0, 0], bed:[10, 7],
+    walls:[[6,0],[7,0],[6,1],[7,1],[6,2],[7,2],[6,3],[7,3],[6,4],[7,4],[6,5],[7,5],[6,6],[7,6],[10,3],[11,3],[12,3],[10,4],[11,4],[12,4],[10,5],[11,5],[12,5]],
+    prompt:"Type up to four vectors, then press Go. Bonnie follows them in order." });
+
+  var CHAPS = []; L.forEach(function(l){ if(CHAPS.indexOf(l.ch) < 0) CHAPS.push(l.ch) });
+
+  /* ---------- state ---------- */
+  var st = { lv:0, res:{}, started:false, route:null };
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+  try{ var raw = localStorage.getItem(STORE); if(raw){ var s = JSON.parse(raw); if(s && s.res) st = s } }catch(e){}
+  var cur = { painted:{}, reveal:null, moved:null, cursor:[0, 0], anim:null, routeAt:null, shownB:false };
+
+  /* ---------- drawing ---------- */
+  function gx(x){ return OX + x * C } function gy(y){ return OY + (GH - y) * C }
+  function cellRect(c, fill, extra){ return "<rect x='" + (gx(c[0]) + 1) + "' y='" + (gy(c[1] + 1) + 1) + "' width='" + (C - 2) + "' height='" + (C - 2) + "' rx='3' fill='" + fill + "'" + (extra || "") + "/>" }
+  function outline(cs, col, dash){ return cs.map(function(c){ return "<rect x='" + (gx(c[0]) + 3) + "' y='" + (gy(c[1] + 1) + 3) + "' width='" + (C - 6) + "' height='" + (C - 6) + "' rx='3' fill='none' stroke='" + col + "' stroke-width='2.5'" + (dash ? " stroke-dasharray='5 4'" : "") + "/>" }).join("") }
+  function labelAt(cs, txt, col){
+    var minx = 99, maxy = -99; cs.forEach(function(c){ if(c[0] < minx) minx = c[0]; if(c[1] > maxy) maxy = c[1] });
+    return "<text x='" + (gx(minx) + 2) + "' y='" + (gy(maxy + 1) - 4) + "' " + FF + " font-size='16' font-weight='bold' fill='" + col + "'>" + txt + "</text>";
+  }
+  function base(){
+    var s = "<rect x='" + OX + "' y='" + OY + "' width='" + GW * C + "' height='" + GH * C + "' fill='" + PAPER + "' stroke='" + INK + "' stroke-width='2'/>";
+    for(var i = 1; i < GW; i++) s += "<line x1='" + gx(i) + "' y1='" + OY + "' x2='" + gx(i) + "' y2='" + gy(0) + "' stroke='#d6c9b6' stroke-width='1'/>";
+    for(var j = 1; j < GH; j++) s += "<line x1='" + OX + "' y1='" + gy(j) + "' x2='" + gx(GW) + "' y2='" + gy(j) + "' stroke='#d6c9b6' stroke-width='1'/>";
+    for(i = 0; i <= GW; i++) s += "<text x='" + gx(i) + "' y='" + (gy(0) + 19) + "' text-anchor='middle' " + FF + " font-size='12' fill='" + INK + "'>" + i + "</text>";
+    for(j = 0; j <= GH; j++) s += "<text x='" + (OX - 8) + "' y='" + (gy(j) + 4) + "' text-anchor='end' " + FF + " font-size='12' fill='" + INK + "'>" + j + "</text>";
+    return s;
+  }
+  function lineSVG(ln){
+    if(!ln) return "";
+    if(ln.x !== undefined) return "<line x1='" + gx(ln.x) + "' y1='" + (OY - 4) + "' x2='" + gx(ln.x) + "' y2='" + (gy(0) + 4) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (gx(ln.x) + 5) + "' y='" + (OY + 14) + "' " + FF + " font-size='14' font-weight='bold' fill='" + PLUM + "'>x = " + ln.x + "</text>";
+    if(ln.y !== undefined) return "<line x1='" + (OX - 4) + "' y1='" + gy(ln.y) + "' x2='" + (gx(GW) + 4) + "' y2='" + gy(ln.y) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (gx(GW) - 4) + "' y='" + (gy(ln.y) - 6) + "' text-anchor='end' " + FF + " font-size='14' font-weight='bold' fill='" + PLUM + "'>y = " + ln.y + "</text>";
+    return "<line x1='" + gx(0) + "' y1='" + gy(0) + "' x2='" + gx(GH) + "' y2='" + gy(GH) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (gx(GH) - 30) + "' y='" + (gy(GH) + 16) + "' text-anchor='end' " + FF + " font-size='14' font-weight='bold' fill='" + PLUM + "'>y = x</text>";
+  }
+  function centreSVG(c){ return c ? "<circle cx='" + gx(c[0]) + "' cy='" + gy(c[1]) + "' r='7' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2.5'/><text x='" + (gx(c[0]) + 10) + "' y='" + (gy(c[1]) + 20) + "' " + FF + " font-size='13' font-weight='bold' fill='" + INK + "'>(" + c[0] + ", " + c[1] + ")</text>" : "" }
+  function shapeSVG(cs, col, id, dx, dy){
+    return "<g" + (id ? " id='" + id + "'" : "") + (dx || dy ? " transform='translate(" + (dx * C) + "," + (-dy * C) + ")'" : "") + ">" + cs.map(function(c){ return cellRect(c, col, " stroke='" + INK + "' stroke-width='1.5'") }).join("") + "</g>";
+  }
+  function inBounds(cs){ return cs.every(function(c){ return c[0] >= 0 && c[0] < GW && c[1] >= 0 && c[1] < GH }) }
+
+  function render(){
+    var lv = L[st.lv], g = el("grid"), s = base(), legend = [];
+    g.setAttribute("viewBox", "0 0 " + SVGW + " " + SVGH);
+    if(lv.kind === "learn"){
+      if(!lv.demo){ g.style.display = "none"; el("legend").innerHTML = ""; return }
+      g.style.display = "";
+      var d = lv.demo, oc = place(d.obj[0], d.obj[1], d.obj[2]);
+      s += lineSVG(d.line) + outline(d.ghost, TEAL, true) + shapeSVG(oc, SPR[d.obj[0]].col) + shapeSVG(d.ghost, TEAL + "99") + centreSVG(d.centre);
+      if(d.arrow) s += "<defs><marker id='ah' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto'><path d='M0 0 L10 5 L0 10 z' fill='" + INK + "'/></marker></defs><line x1='" + gx(d.arrow[0][0]) + "' y1='" + gy(d.arrow[0][1]) + "' x2='" + gx(d.arrow[1][0]) + "' y2='" + gy(d.arrow[1][1]) + "' stroke='" + INK + "' stroke-width='3' marker-end='url(#ah)'/>";
+      g.innerHTML = s; el("legend").innerHTML = "<span><i style='background:" + SPR[d.obj[0]].col + "'></i>before</span><span><i style='background:" + TEAL + "99'></i>after</span>";
+      return;
+    }
+    g.style.display = "";
+    var obj = place(lv.obj[0], lv.obj[1], lv.obj[2]), col = SPR[lv.obj[0]].col;
+    s += lineSVG(lv.line);
+    if(lv.walls){ s += lv.walls.map(function(c){ return cellRect(c, "#9aa5b1", " stroke='" + INK + "' stroke-width='1.5'") }).join(""); legend.push("<span><i style='background:#9aa5b1'></i>furniture</span>") }
+    if(lv.kind === "vector"){ s += outline(T.tr(obj, lv.ans[0], lv.ans[1]), TEAL, true); legend.push("<span><i style='border:2px dashed " + TEAL + "'></i>where it needs to go</span>") }
+    if(lv.kind === "route"){ s += outline(T.tr(obj, lv.bed[0], lv.bed[1]), TEAL, true) + "<text x='" + (gx(lv.bed[0]) + 2) + "' y='" + (gy(lv.bed[1] + 3) - 4) + "' " + FF + " font-size='14' font-weight='bold' fill='" + TEAL + "'>bed</text>"; legend.push("<span><i style='border:2px dashed " + TEAL + "'></i>Bonnie's bed</span>") }
+    if(lv.kind === "mc"){ var im = lv.img(obj); s += shapeSVG(im, TEAL + "aa") + labelAt(im, "B", TEAL); s += labelAt(obj, "A", INK); legend.push("<span><i style='background:" + TEAL + "aa'></i>B, the image</span>") }
+    if(lv.kind === "paint"){
+      Object.keys(cur.painted).forEach(function(k){ var p = k.split(",").map(Number); s += cellRect(p, TEAL, " fill-opacity='.8'") });
+      if(cur.reveal) s += outline(cur.reveal, GREEN, true);
+      legend.push("<span><i style='background:" + TEAL + "cc'></i>your squares</span>");
+      if(cur.reveal) legend.push("<span><i style='border:2px dashed " + GREEN + "'></i>the answer</span>");
+    }
+    var off = cur.moved || [0, 0];
+    s += shapeSVG(obj, col, "obj", off[0], off[1]);
+    legend.unshift("<span><i style='background:" + col + "'></i>" + SPR[lv.obj[0]].name + "</span>");
+    s += centreSVG(lv.centre);
+    if(lv.kind === "paint" && cur.kb) s += "<rect x='" + (gx(cur.cursor[0]) + 1) + "' y='" + (gy(cur.cursor[1] + 1) + 1) + "' width='" + (C - 2) + "' height='" + (C - 2) + "' fill='none' stroke='" + ORANGE + "' stroke-width='3'/>";
+    g.innerHTML = s;
+    el("legend").innerHTML = legend.join("");
+  }
+
+  /* ---------- level screen ---------- */
+  var ITEMQ = []; var TOTAL = 0;
+  L.forEach(function(l, i){ ITEMQ[i] = l.kind === "learn" ? 0 : ++TOTAL });
+
+  function fb(kind, html){ el("lvFb").innerHTML = "<div class='fb " + kind + "'>" + html + "</div>" }
+  function result(ok){ var r = st.res[st.lv] || {}; if(r.first === undefined) r.first = ok; if(ok) r.done = true; st.res[st.lv] = r; save(); drawChaps() }
+
+  function openLevel(i){
+    st.lv = i; st.started = true; save();
+    cur = { painted:{}, reveal:null, moved:null, cursor:[0, 0], kb:false, routeAt:null };
+    var lv = L[i];
+    show("startCard", false); show("endCard", false); show("sendCard", false); show("lvCard", true);
+    el("lvChap").textContent = lv.ch + (lv.stretch ? " (stretch)" : "");
+    el("lvCount").textContent = lv.kind === "learn" ? "" : ITEMQ[i] + " of " + TOTAL;
+    el("progFill").style.width = Math.round(i / L.length * 100) + "%";
+    el("lvPrompt").innerHTML = lv.kind === "learn" ? "<strong>" + lv.h + "</strong>" : lv.prompt;
+    el("lvLearn").innerHTML = lv.kind === "learn" ? "<div class='learnbody'>" + lv.body + "</div>" : "";
+    el("lvFb").innerHTML = "";
+    el("backBtn").disabled = i === 0;
+    el("nextBtn").textContent = i === L.length - 1 ? "Finish" : (lv.kind === "learn" ? "Got it" : "Next");
+    var r = st.res[i];
+    controls(lv, r);
+    render();
+    if(r && r.done && lv.kind !== "learn") fb("ok", "<b>Done already.</b> Have another go if you like, or press Next.");
+    window.scrollTo({ top: el("lvCard").getBoundingClientRect().top + window.scrollY - 10 });
+  }
+
+  function controls(lv, r){
+    var c = el("lvControls"); c.innerHTML = "";
+    if(lv.kind === "vector"){
+      c.innerHTML = "<div class='vec'><span>Vector</span><span class='vecbox'><input id='vx' inputmode='numeric' aria-label='Top number, left or right' autocomplete='off' maxlength='4'><input id='vy' inputmode='numeric' aria-label='Bottom number, up or down' autocomplete='off' maxlength='4'></span></div>" +
+        "<p class='hintline'>Top box: right is positive, left is negative. Bottom box: up is positive, down is negative.</p>" +
+        "<div class='qnav'><button class='btn btn-orange' id='goBtn'>Move</button><button class='btn ghost' id='showBtn'>Show me</button></div>";
+      el("goBtn").onclick = function(){
+        var dx = parseInt(el("vx").value, 10), dy = parseInt(el("vy").value, 10);
+        if(isNaN(dx) || isNaN(dy)){ fb("tell", "Put a number in both boxes. 0 is fine if it does not move that way."); return }
+        animate([0, 0], [dx, dy], function(){
+          cur.moved = [dx, dy]; render();
+          if(dx === lv.ans[0] && dy === lv.ans[1]){ fb("ok", "<b>Spot on.</b> That is " + words(dx, dy) + "."); result(true) }
+          else { fb("nope", "<b>Close, have another look.</b> That went " + words(dx, dy) + ". Count the squares from one corner of the shape to the same corner on the outline."); result(false); setTimeout(function(){ cur.moved = null; render() }, reduce ? 0 : 1100) }
+        });
+      };
+      el("showBtn").onclick = function(){ el("vx").value = lv.ans[0]; el("vy").value = lv.ans[1]; result(false); fb("tell", "The vector is <span class='vecshow'><span>" + lv.ans[0] + "</span><span>" + lv.ans[1] + "</span></span>, which is " + words(lv.ans[0], lv.ans[1]) + ". Press Move to watch it.") };
+    }
+    if(lv.kind === "paint"){
+      c.innerHTML = "<p class='hintline'>Tap or drag across squares to paint them. Tap again to rub out. On a keyboard: arrow keys to move, Space to paint.</p>" +
+        "<div class='qnav'><button class='btn btn-orange' id='chkBtn'>Check</button><button class='btn ghost' id='showBtn'>Show me</button><button class='btn ghost' id='clrBtn'>Clear</button></div>";
+      el("chkBtn").onclick = function(){
+        var want = lv.ans(place(lv.obj[0], lv.obj[1], lv.obj[2])), ws = setOf(want);
+        var got = Object.keys(cur.painted).length;
+        if(!got){ fb("tell", "Paint some squares first. Tap or drag on the grid."); return }
+        if(sameSet(ws, cur.painted)){ fb("ok", "<b>Exactly right.</b> " + (lv.stretch ? "That was a tricky one." : "Every square in the right place.")); result(true); return }
+        var right = Object.keys(cur.painted).filter(function(k){ return ws[k] }).length;
+        fb("nope", "<b>" + right + " of your squares are right, out of " + want.length + " needed.</b> " + (got > want.length ? "You have a few extra. " : "") + "Have another go, or press Show me."); result(false);
+      };
+      el("showBtn").onclick = function(){ cur.reveal = lv.ans(place(lv.obj[0], lv.obj[1], lv.obj[2])); result(false); render(); fb("tell", "The dashed green squares show where it goes. Paint over them if you want to finish it off.") };
+      el("clrBtn").onclick = function(){ cur.painted = {}; render() };
+    }
+    if(lv.kind === "mc"){
+      var box = document.createElement("div"); box.className = "choices";
+      lv.opts.forEach(function(o, oi){
+        var b = document.createElement("button"); b.type = "button"; b.innerHTML = o;
+        b.onclick = function(){
+          Array.prototype.forEach.call(box.children, function(x){ x.classList.remove("good", "bad") });
+          if(oi === lv.ans){ b.classList.add("good"); fb("ok", "<b>Yes.</b> " + lv.why); result(true) }
+          else { b.classList.add("bad"); fb("nope", "<b>Not that one.</b> Have another look, or read this: " + lv.why); result(false) }
+        };
+        box.appendChild(b);
+      });
+      c.appendChild(box);
+    }
+    if(lv.kind === "route"){
+      var rows = "";
+      for(var k = 0; k < 4; k++) rows += "<div class='routerow'><span class='lab'>Move " + (k + 1) + "</span><span class='vecbox'><input id='rx" + k + "' inputmode='numeric' aria-label='Move " + (k + 1) + " top number' maxlength='4' autocomplete='off'><input id='ry" + k + "' inputmode='numeric' aria-label='Move " + (k + 1) + " bottom number' maxlength='4' autocomplete='off'></span></div>";
+      c.innerHTML = "<div class='routelist'>" + rows + "</div><p class='hintline'>Leave the moves you do not need empty.</p><div class='qnav'><button class='btn btn-orange' id='goBtn'>Go</button><button class='btn ghost' id='showBtn'>Show me a route</button></div>";
+      if(st.route) st.route.forEach(function(v, k){ el("rx" + k).value = v[0]; el("ry" + k).value = v[1] });
+      el("goBtn").onclick = function(){ runRoute(lv) };
+      el("showBtn").onclick = function(){ el("rx0").value = 0; el("ry0").value = 7; el("rx1").value = 10; el("ry1").value = 0; el("rx2").value = ""; el("ry2").value = ""; el("rx3").value = ""; el("ry3").value = ""; result(false); fb("tell", "One way: straight up 7, over the top of the sideboard, then 10 right into bed. Press Go to watch.") };
+    }
+  }
+
+  function words(dx, dy){
+    var a = dx === 0 ? "" : Math.abs(dx) + (dx > 0 ? " right" : " left");
+    var b = dy === 0 ? "" : Math.abs(dy) + (dy > 0 ? " up" : " down");
+    return (a && b) ? a + " and " + b : (a || b || "nowhere at all");
+  }
+
+  function animate(from, to, done, steps){
+    var g = el("obj"); if(!g || reduce){ done(); return }
+    var t0 = null, dur = 650;
+    function f(ts){ if(!t0) t0 = ts; var k = Math.min(1, (ts - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      var x = from[0] + (to[0] - from[0]) * e, y = from[1] + (to[1] - from[1]) * e;
+      g.setAttribute("transform", "translate(" + (x * C) + "," + (-y * C) + ")");
+      if(k < 1) requestAnimationFrame(f); else done() }
+    requestAnimationFrame(f);
+  }
+
+  function collides(lv, ox, oy){
+    var base = SPR[lv.obj[0]].cells, sx = lv.obj[1] + ox, sy = lv.obj[2] + oy;
+    for(var i = 0; i < base.length; i++){
+      var x = base[i][0] + sx, y = base[i][1] + sy;
+      if(x < -0.001 || y < -0.001 || x > GW - 1 + 0.001 || y > GH - 1 + 0.001) return "edge";
+      for(var w = 0; w < lv.walls.length; w++) if(Math.abs(x - lv.walls[w][0]) < 0.94 && Math.abs(y - lv.walls[w][1]) < 0.94) return "wall";
+    }
+    return null;
+  }
+  function runRoute(lv){
+    var moves = [];
+    for(var k = 0; k < 4; k++){
+      var a = el("rx" + k).value.trim(), b = el("ry" + k).value.trim();
+      if(a === "" && b === "") continue;
+      var dx = parseInt(a || "0", 10), dy = parseInt(b || "0", 10);
+      if(isNaN(dx) || isNaN(dy)){ fb("tell", "Move " + (k + 1) + " needs whole numbers."); return }
+      moves.push([dx, dy]);
+    }
+    if(!moves.length){ fb("tell", "Type at least one move first."); return }
+    st.route = moves; save();
+    var pos = [0, 0], i = 0;
+    cur.moved = [0, 0]; render();
+    function step(){
+      if(i >= moves.length){
+        if(pos[0] === lv.bed[0] && pos[1] === lv.bed[1]){ fb("ok", "<b>Bonnie is in bed.</b> " + moves.length + " move" + (moves.length === 1 ? "" : "s") + (moves.length <= 2 ? ". That is as short as it gets." : ". Could you do it in two?")); result(true) }
+        else { fb("nope", "<b>Bonnie stopped short.</b> She ended up " + words(lv.bed[0] - pos[0], lv.bed[1] - pos[1]) + " away from her bed. Have another go."); result(false); setTimeout(function(){ cur.moved = null; render() }, reduce ? 0 : 1200) }
+        return;
+      }
+      var m = moves[i], hit = null, hitAt = 1;
+      for(var s = 1; s <= 60; s++){ var t = s / 60, h = collides(lv, pos[0] + m[0] * t, pos[1] + m[1] * t); if(h){ hit = h; hitAt = (s - 1) / 60; break } }
+      var to = [pos[0] + m[0] * hitAt, pos[1] + m[1] * hitAt];
+      animate(pos, to, function(){
+        if(hit){ cur.moved = to; render(); fb("nope", "<b>Bump.</b> Move " + (i + 1) + " sends Bonnie " + (hit === "edge" ? "off the edge of the room" : "into the furniture") + ". Try a different route."); result(false); setTimeout(function(){ cur.moved = null; render() }, reduce ? 0 : 1300); return }
+        pos = [pos[0] + m[0], pos[1] + m[1]]; cur.moved = pos.slice(); render(); i++; setTimeout(step, reduce ? 0 : 150);
+      });
+    }
+    step();
+  }
+
+  /* ---------- painting input ---------- */
+  var painting = null;
+  function cellFromEvent(e){
+    var g = el("grid"), pt = g.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(g.getScreenCTM().inverse());
+    var cx = Math.floor((p.x - OX) / C), cy = GH - 1 - Math.floor((p.y - OY) / C);
+    if(cx < 0 || cy < 0 || cx >= GW || cy >= GH) return null;
+    return [cx, cy];
+  }
+  function paintCell(c, on){ var k = key(c); if(on) cur.painted[k] = 1; else delete cur.painted[k]; render() }
+  el("grid").addEventListener("pointerdown", function(e){
+    var lv = L[st.lv]; if(lv.kind !== "paint") return;
+    var c = cellFromEvent(e); if(!c) return;
+    e.preventDefault(); cur.kb = false;
+    painting = !cur.painted[key(c)]; paintCell(c, painting);
+    try{ el("grid").setPointerCapture(e.pointerId) }catch(err){}
+  });
+  el("grid").addEventListener("pointermove", function(e){
+    if(painting === null) return;
+    var c = cellFromEvent(e); if(!c) return;
+    if(!!cur.painted[key(c)] !== painting) paintCell(c, painting);
+  });
+  window.addEventListener("pointerup", function(){ painting = null });
+  el("grid").addEventListener("keydown", function(e){
+    var lv = L[st.lv]; if(lv.kind !== "paint") return;
+    var k = e.key, c = cur.cursor;
+    if(k === "ArrowLeft") c[0] = Math.max(0, c[0] - 1); else if(k === "ArrowRight") c[0] = Math.min(GW - 1, c[0] + 1);
+    else if(k === "ArrowUp") c[1] = Math.min(GH - 1, c[1] + 1); else if(k === "ArrowDown") c[1] = Math.max(0, c[1] - 1);
+    else if(k === " " || k === "Enter"){ var kk = key(c); if(cur.painted[kk]) delete cur.painted[kk]; else cur.painted[kk] = 1 }
+    else return;
+    e.preventDefault(); cur.kb = true; render();
+  });
+
+  /* ---------- chapters, end, send ---------- */
+  function chapStats(ch){ var d = 0, n = 0; L.forEach(function(l, i){ if(l.ch === ch && l.kind !== "learn"){ n++; if(st.res[i] && st.res[i].done) d++ } }); return { d:d, n:n } }
+  function drawChaps(){
+    var box = el("chaps"); box.innerHTML = "";
+    CHAPS.forEach(function(ch){
+      var s = chapStats(ch), b = document.createElement("button"); b.type = "button";
+      b.innerHTML = ch + "<span class='n'>" + s.d + "/" + s.n + "</span>";
+      if(s.d === s.n) b.classList.add("done");
+      b.onclick = function(){ for(var i = 0; i < L.length; i++) if(L[i].ch === ch){ openLevel(i); return } };
+      box.appendChild(b);
+    });
+  }
+  function finish(){
+    show("lvCard", false); show("startCard", false); show("endCard", true); show("sendCard", true);
+    var done = 0, first = 0;
+    L.forEach(function(l, i){ if(l.kind !== "learn" && st.res[i]){ if(st.res[i].done) done++; if(st.res[i].first) first++ } });
+    el("endLine").textContent = done + " of " + TOTAL + " puzzles solved";
+    el("endNote").textContent = first + " of them first time. " + (done === TOTAL ? "Every chapter finished, including getting Bonnie to bed." : "Any you missed are still there in the chapters whenever you want them.");
+    var bars = el("endBars"); bars.innerHTML = "";
+    CHAPS.forEach(function(ch){ var s = chapStats(ch), f = s.n ? s.d / s.n : 0;
+      bars.insertAdjacentHTML("beforeend", "<div class='trow'><div class='name'>" + ch + "</div><div class='track'><span class='fill' style='width:" + Math.round(f * 100) + "%;background:" + (f >= .75 ? "linear-gradient(90deg,#2e7d4f,#4ba36f)" : "linear-gradient(90deg,#ef7724,#d55f0f)") + "'></span></div><div class='score'>" + s.d + "/" + s.n + "</div></div>") });
+    if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Pixel Moves", filename:"pixel-moves", getText:function(){
+      var out = ["Pixel Moves: " + done + " of " + TOTAL + " puzzles solved, " + first + " first time", ""];
+      CHAPS.forEach(function(ch){ var s = chapStats(ch); out.push(ch + ": " + s.d + "/" + s.n) });
+      out.push("");
+      L.forEach(function(l, i){ if(l.kind === "learn") return; var r = st.res[i]; out.push("Puzzle " + ITEMQ[i] + " [" + l.ch + "] " + (r ? (r.done ? "solved" + (r.first ? " first time" : " after another go") : "tried, not finished") : "not tried")) });
+      if(st.route) out.push("", "Bonnie's route: " + st.route.map(function(v){ return "(" + v[0] + ", " + v[1] + ")" }).join(" then "));
+      return out.join("\n");
+    }});
+    window.scrollTo({ top:0 });
+  }
+
+  el("beginBtn").onclick = function(){ openLevel(0) };
+  el("resumeBtn").onclick = function(){ openLevel(st.lv || 0) };
+  el("backBtn").onclick = function(){ if(st.lv > 0) openLevel(st.lv - 1) };
+  el("nextBtn").onclick = function(){ if(st.lv >= L.length - 1) finish(); else openLevel(st.lv + 1) };
+  el("menuBtn").onclick = function(){ show("lvCard", false); show("startCard", true); drawChaps(); show("resumeBtn", true); window.scrollTo({ top:0 }) };
+  el("againBtn").onclick = function(){ show("endCard", false); show("sendCard", false); show("startCard", true); drawChaps(); window.scrollTo({ top:0 }) };
+
+  drawChaps();
+  if(st.started) show("resumeBtn", true);
+  window.__pm = { L:L, T:T, place:place, inBounds:inBounds, collides:collides, st:function(){ return st } };
+})();
+
+</script>
+
+</body>
+</html>
