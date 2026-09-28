@@ -173,7 +173,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .wcard>div{min-width:0}#wName0{max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wcard.sm{flex-direction:column;gap:1px;padding:3px 4px;min-width:34px}.wcard.sm canvas{width:22px;height:22px}.wcard.sm b{display:none}.wcard.sm small{font-size:9px;opacity:1}
 .wcard.locked{opacity:.45;border-style:dashed}.wcard.empty{opacity:.7;border-style:dashed}.wcard.evo{border-color:#f0c24a;box-shadow:0 0 0 1px #7a5a12,0 0 8px rgba(240,194,74,.45)}
-.build span.evo{border-color:#d9a520;color:#6b4500;background:#fff4c2}.build span.lock{opacity:.6;border-style:dashed}.up .st.evo{color:#b8860b}.up.wup{outline:2px dashed rgba(240,194,74,.55);outline-offset:-6px}
+.build span.evo{border-color:#d9a520;color:#6b4500;background:#fff4c2}.tbar{position:relative;height:12px;background:#e8dcc4;border:2px solid var(--ink);margin-top:6px}.tbar .tfill{position:absolute;left:0;top:0;bottom:0;background:#3dbdb0}.tbar .tfill.old{background:#2a8f84;z-index:1}.tbar i{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:rgba(42,31,51,.35);z-index:2}.tbar i.on{background:var(--ink)}.tbar i.pass{background:#7b4b8f;width:4px;margin-left:-2px}
+.ladder{display:grid;gap:4px;margin:12px 0 6px}.rung{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:6px 10px;background:var(--card);border:1.5px solid rgba(42,31,51,.25);opacity:.7}.rung b{font-family:var(--pix);font-size:13px}.rung small{display:block;font-size:12px;color:var(--muted)}.rung em{font-family:var(--pix);font-size:11px;font-style:normal;color:#2a8f84}.rung.got{opacity:1;border-color:#3dbdb0}.rung.pass{border-left:5px solid #7b4b8f}
+.build.unl span{border-color:#3dbdb0;background:#e3f6f3}
+.resetBox{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:14px 0 4px;padding:10px 12px;border:2px dashed rgba(176,48,74,.45)}.resetBox span{display:grid;gap:2px}.resetBox small{font-size:13px;color:var(--muted)}.resetBox .btn{flex:none}
+@media (max-width:520px){.resetBox{flex-direction:column;align-items:stretch}}
+.build span.lock{opacity:.6;border-style:dashed}.up .st.evo{color:#b8860b}.up.wup{outline:2px dashed rgba(240,194,74,.55);outline-offset:-6px}
 .wcard canvas{width:30px;height:30px;image-rendering:pixelated}
 .wcard b{font-size:13px;display:block}.wcard small{font-size:10px;opacity:.85}
 .xp{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(6px + env(safe-area-inset-bottom,0px));width:min(420px,56vw);height:8px;background:#0e0a12;border:2px solid #3a2c47}
@@ -968,7 +973,7 @@ function threatNear(x,y,r){for(var i=0;i<G.ebul.length;i++){var b=G.ebul[i];if(M
 function onPerfect(){var p=G.P;floatText(p.x,p.y-18,'NICE!','perfect');sfx('perfect');p.dcd=Math.max(0,p.dcd*0.5);
   if(p.hero.id==='brenda'){p.buffT=3;bark('dodge',true);}else if(Math.random()<0.3)bark('dodge');}
 function hurtPlayer(dmg,src){if(G.state!=='play')return false;var p=G.P;if(p.iT>0||p.dodgeT>0)return false;
-  dmg*=p.st.dmgTaken*DIFF[settings.diff].taken*(isMelee(WEAP[p.weapon.id])?MELEE_GUARD:1);dmg=Math.max(Math.ceil(dmg*0.3),Math.round(dmg-p.st.armour*2));if(dmg<1)dmg=1;
+  if(G.foeN&&G.roomType==='boss')dmg*=1-0.06*G.foeN;dmg*=p.st.dmgTaken*DIFF[settings.diff].taken*(isMelee(WEAP[p.weapon.id])?MELEE_GUARD:1);dmg=Math.max(Math.ceil(dmg*0.3),Math.round(dmg-p.st.armour*2));if(dmg<1)dmg=1;
   p.hp-=dmg;if(p.hp>0&&p.hp<p.maxHp*0.3&&!p.lowSaid){p.lowSaid=true;bark('low',true);}p.iT=0.9+p.st.iframe;G.hurtT=0.35;shake(3);sfx('hurt');floatText(p.x,p.y-14,'-'+dmg,'hurt');burst(p.x,p.y-4,8,'#e2556b');G.run.taken+=dmg;jayHitLine();G.hitstop=0.05;
   if(p.hp<=0){if(p.st.tough&&!p.toughUsed){p.toughUsed=true;p.hp=1;p.iT=1.6;floatText(p.x,p.y-24,'TOUGH AS OLD BOOTS','big');sfx('perfect');}else{p.hp=0;playerDown();}}
   return true;}
@@ -1066,7 +1071,7 @@ function updateOrbit(dt,def){var p=G.P,w=CW.w,n=(def.n||3)+CW.ep,dmg=def.dmg*CW.
 function hitEnemy(e,base,o){o=o||{};if(e.dead||e.spawnT>0||e.invuln)return;var p=G.P,st=p.st,dmg=base;
   if(st.firstHit&&!e.touched)dmg*=2;e.touched=true;
   if(st.patience&&e.windup)dmg*=1+st.patience;
-  if(e.vuln)dmg*=(e.vuln===true?2:e.vuln);
+  if(e.vuln)dmg*=(e.vuln===true?2:e.vuln);if(e.boss&&G.foeN)dmg*=1+0.1*G.foeN;
   var crit=!o.noCrit&&Math.random()<st.crit+(o.crit||0);if(crit)dmg*=st.critMult;
   dmg=Math.max(1,Math.round(dmg));e.hp-=dmg;e.flash=0.08;G.run.dealt+=dmg;
   if(o.kb&&o.a!==undefined){var k=o.kb*st.kb*(e.boss?0:e.elite?0.45:1);e.kx+=Math.cos(o.a)*k;e.ky+=Math.sin(o.a)*k;}
@@ -1545,11 +1550,17 @@ var HEIR=[
  {id:'reroll',name:'Second Opinion',d:'Reroll the upgrade choices twice per run, for every level.',max:2,base:50},
  {id:'start',name:'Head Start',d:'A free upgrade pick once the first room is clear, for every level.',max:2,base:80}];
 var HERO_PRICE=150;
-var HERO_UNLOCK={
- brenda:{d:'Beat the Grandfather Clock on floor 1.',ok:function(m){return !!m.boss[1];}},
- raj:{d:'Beat the Self-Service Nightmare on floor 2.',ok:function(m){return !!m.boss[2];}},
- winston:{d:'Hear 3 stories in Memory rooms.',ok:function(){return store.get('album',[]).length>=3;}},
- pearl:{d:'Beat the Broken Machine on floor 3.',ok:function(m){return !!m.boss[3];}}};
+/* memory threads: every run, win or lose, weaves threads; the ladder unlocks things along the way */
+var LADDER=[
+ {at:5,k:'hero',id:'brenda'},{at:10,k:'tier',n:1},{at:16,k:'hero',id:'raj'},{at:22,k:'tier',n:2},{at:29,k:'hero',id:'winston'},{at:36,k:'tier',n:3},
+ {at:44,k:'hero',id:'pearl'},{at:52,k:'pass',n:1,name:'Jay\'s lanyard',d:'Somebody dropped it on the stairs. It says STAFF in big letters.'},{at:60,k:'tier',n:4},
+ {at:68,k:'pass',n:2,name:'The Staff Room key',d:'On a keyring shaped like a little bird.'},{at:76,k:'tier',n:5},{at:85,k:'pass',n:3,name:'The door code',d:'Written on a sticky note. It is 1234. Of course it is.'}];
+var LADDER_MAX=LADDER[LADDER.length-1].at;
+function ladderAt(k,v){for(var i=0;i<LADDER.length;i++){var L=LADDER[i];if(L.k===k&&(L.id===v||L.n===v))return L.at;}return 0;}
+function ladderName(L){return L.k==='hero'?heroById(L.id).name+' joins your legends':L.k==='tier'?'New weapons: '+WEAPON_TIERS[L.n].ids.map(function(id){return WEAP[id].name;}).join(', '):L.name+' (Staff Room pass, part '+L.n+' of 3)';}
+function passParts(m){m=m||metaGet();var n=0;LADDER.forEach(function(L){if(L.k==='pass'&&m.threads>=L.at)n++;});return n;}
+var HERO_UNLOCK={brenda:{},raj:{},winston:{},pearl:{}};
+Object.keys(HERO_UNLOCK).forEach(function(id){var at=ladderAt('hero',id);HERO_UNLOCK[id]={at:at,d:'Weave '+at+' memory threads.',ok:function(m){return m.threads>=at;}};});
 var WEAPON_TIERS=[
  {need:0,ids:['stick','pin','slippers','umbrella','paper','spanner','shears','vinyl','gloves','bat','cards','needles','dabber','teapot','pan']},
  {need:1,ids:['hose','handbag','darts','buttons']},
@@ -1559,9 +1570,10 @@ var WEAPON_TIERS=[
  {need:5,ids:['toolbox']}];
 var BOSS_NAMES=['','the Grandfather Clock','the Self-Service Nightmare','the Broken Machine','The Static','The Forgetting'];
 function metaGet(){var m=store.get('meta',null);if(!m||typeof m!=='object')m={};
-  m.savings=Math.max(0,Math.floor(+m.savings||0));if(!m.heir||typeof m.heir!=='object')m.heir={};if(!m.boss||typeof m.boss!=='object')m.boss={};if(!Array.isArray(m.heroes))m.heroes=[];if(!m.used||typeof m.used!=='object')m.used={};
+  m.savings=Math.max(0,Math.floor(+m.savings||0));if(!m.heir||typeof m.heir!=='object')m.heir={};if(!m.boss||typeof m.boss!=='object')m.boss={};if(!Array.isArray(m.heroes))m.heroes=[];if(!m.used||typeof m.used!=='object')m.used={};if(!m.foes||typeof m.foes!=='object')m.foes={};m.wins=Math.max(0,Math.floor(+m.wins||0));m.lossStreak=Math.max(0,Math.floor(+m.lossStreak||0));
   var best=store.get('best',null),f,ch=false;if(best){for(f=1;f<Math.min(6,best.floor||1);f++)if(!m.boss[f]){m.boss[f]=true;ch=true;}if(best.wins)for(f=1;f<=5;f++)if(!m.boss[f]){m.boss[f]=true;ch=true;}}
-  var hv=cleanHouse(store.get('house',null));for(f=1;f<=5;f++)if(hv.bosses[f]>0&&!m.boss[f]){m.boss[f]=true;ch=true;}if(ch)store.set('meta',m);
+  var hv=cleanHouse(store.get('house',null));for(f=1;f<=5;f++)if(hv.bosses[f]>0&&!m.boss[f]){m.boss[f]=true;ch=true;}if(m.threads===undefined||m.threads===null||!isFinite(+m.threads)){var tb=0;for(f=1;f<=5;f++)tb+=Math.min(3,hv.bosses[f]||0);m.threads=Math.min(LADDER_MAX-1,hv.runs*4+tb*2+store.get('album',[]).length);if(m.staff||(best&&best.wins))m.staffLegacy=true;if(best&&best.wins)m.wins=Math.max(m.wins,best.wins);ch=true;}
+  m.threads=Math.max(0,Math.floor(+m.threads||0));if(ch)store.set('meta',m);
   return m;}
 function metaSet(m){store.set('meta',m);}
 function heirLvl(id,m){m=m||metaGet();return Math.max(0,Math.min(+m.heir[id]||0,HEIR.filter(function(h){return h.id===id;})[0].max));}
@@ -1569,19 +1581,47 @@ function heirCost(h,lvl){return h.base*(lvl+1);}
 function heroUnlocked(id,m){m=m||metaGet();var u=HERO_UNLOCK[id];return !u||m.heroes.indexOf(id)>=0||u.ok(m);}
 function unlockedHeroIds(m){m=m||metaGet();return HEROES.filter(function(h){return heroUnlocked(h.id,m);}).map(function(h){return h.id;});}
 function weaponTier(id){for(var i=0;i<WEAPON_TIERS.length;i++)if(WEAPON_TIERS[i].ids.indexOf(id)>=0)return WEAPON_TIERS[i].need;return 0;}
-function weaponUnlocked(id,m){m=m||metaGet();var n=weaponTier(id);return n===0||!!m.boss[n];}
+function weaponUnlocked(id,m){m=m||metaGet();var n=weaponTier(id);return n===0||m.threads>=ladderAt('tier',n);}
 function markUsed(id){var m=metaGet();if(!m.used[id]){m.used[id]=true;metaSet(m);}}
 function applyHeirlooms(p){var m=metaGet(),l;
   l=heirLvl('hp',m);if(l){p.maxHp=Math.round(p.maxHp*(1+0.05*l));p.hp=p.maxHp;}
   p.st.dmg+=0.04*heirLvl('dmg',m);p.st.spd+=0.03*heirLvl('spd',m);p.st.armour+=heirLvl('armour',m);
   l=heirLvl('dodge',m);if(l){p.maxCharges+=l;p.charges+=l;}
   p.st.coin+=0.1*heirLvl('coin',m);p.st.discount+=0.1*heirLvl('discount',m);p.rerolls=2*heirLvl('reroll',m);p.giftQ+=heirLvl('start',m);}
-function onBossMeta(f){var m=metaGet();if(m.boss[f])return;var beforeH=unlockedHeroIds(m);m.boss[f]=true;metaSet(m);
-  var tier=WEAPON_TIERS.filter(function(t){return t.need===f;})[0];
-  if(tier)G.timers.push({t:2,fn:function(){toast('<b>NEW WEAPONS</b> '+tier.ids.map(function(id){return WEAP[id].name;}).join(', ')+' can turn up now.');}});
-  var newH=unlockedHeroIds(m).filter(function(id){return beforeH.indexOf(id)<0;});
-  if(newH.length)G.timers.push({t:3.2,fn:function(){toast('<b>NEW LEGEND</b> '+newH.map(function(id){return heroById(id).name;}).join(' and ')+' can join future runs.');}});}
-function bankRun(win){var r=G.run,m=metaGet();if(r.banked!==undefined)return r.banked;var collected=r.coins||0;
+function onBossMeta(f){var m=metaGet();if(m.boss[f])return;m.boss[f]=true;metaSet(m);}
+/* losses teach you a boss's tricks: up to 3 lessons per boss */
+function foeStacks(f){var m=metaGet();return Math.min(3,Math.max(0,Math.floor(+m.foes[f]||0)));}
+function learnFoe(f){var m=metaGet(),n=Math.min(3,(+m.foes[f]||0)+1);m.foes[f]=n;metaSet(m);return n;}
+var FOE_NAMES=['','the Grandfather Clock','the Self-Service Nightmare','the Broken Machine','The Static','The Forgetting','Jay'];
+function weaveRun(win){var r=G.run,m=metaGet();if(!r||r.threads!==undefined||r.challenge)return;var parts=[],n=0;
+  var fl=Math.max(0,Math.min(5,r.floorReached||1)-1);if(fl){parts.push(['Floors climbed',fl]);n+=fl;}
+  var bs=Math.min(5,r.bosses||0);if(bs){parts.push(['Bosses beaten',bs*2]);n+=bs*2;}
+  var st=(r.heard||[]).length;if(st){parts.push(['Stories heard',st]);n+=st;}
+  if(win){parts.push(['Full restoration',2]);n+=2;m.wins++;m.lossStreak=0;}
+  else{parts.push(['A good go',3]);n+=3;if(m.lossStreak>0){var gr=Math.min(3,m.lossStreak);parts.push(['Keeping at it',gr]);n+=gr;}m.lossStreak++;
+    if(G.roomType==='boss'&&G.floor<=5){m.foes[G.floor]=Math.min(3,(+m.foes[G.floor]||0)+1);r.lesson={f:G.floor,n:m.foes[G.floor]};}}
+  var before=m.threads;m.threads+=n;r.threads=n;r.threadParts=parts;r.threadsBefore=before;r.unlocked=LADDER.filter(function(L){return L.at>before&&L.at<=m.threads;});
+  if(!m.staffOpen&&staffReady(m)){m.staffOpen=true;r.staffOpened=true;}metaSet(m);}
+function staffReady(m){return m.threads>=LADDER_MAX&&m.wins>0;}
+function nextRung(m){m=m||metaGet();for(var i=0;i<LADDER.length;i++)if(LADDER[i].at>m.threads)return LADDER[i];return null;}
+function threadBar(m,before){m=m||metaGet();var nx=nextRung(m),pct=Math.min(100,m.threads/LADDER_MAX*100),bp=before!==undefined?Math.min(100,before/LADDER_MAX*100):pct,marks='';
+  LADDER.forEach(function(L){marks+='<i class="'+(m.threads>=L.at?'on':'')+(L.k==='pass'?' pass':'')+'" style="left:'+(L.at/LADDER_MAX*100).toFixed(2)+'%"></i>';});
+  return '<div class="tbar"><div class="tfill old" style="width:'+bp.toFixed(1)+'%"></div><div class="tfill" style="width:'+pct.toFixed(1)+'%"></div>'+marks+'</div><p class="hint" style="margin-top:6px">'+Math.min(m.threads,LADDER_MAX)+' of '+LADDER_MAX+' threads woven.'+(nx?' Next, at '+nx.at+': <b>'+esc(ladderName(nx))+'</b>.':' The whole ladder is woven.')+'</p>';}
+function threadSummary(){var r=G.run;if(!r||r.threads===undefined)return '';var m=metaGet();
+  var h='<div class="kick">Memory threads</div><p style="margin:4px 0 8px">You wove <b>'+r.threads+' threads</b> this run: '+r.threadParts.map(function(p){return p[0].toLowerCase()+' +'+p[1];}).join(', ')+'.</p>'+threadBar(m,r.threadsBefore);
+  if(r.unlocked&&r.unlocked.length)h+='<div class="build unl">'+r.unlocked.map(function(L){return '<span>'+esc(ladderName(L))+'</span>';}).join('')+'</div>';
+  if(r.lesson)h+='<p class="hint"><b>'+FOE_NAMES[r.lesson.f].charAt(0).toUpperCase()+FOE_NAMES[r.lesson.f].slice(1)+' taught you something.</b> Next time you face it, you deal '+(r.lesson.n*10)+'% more damage to it and take '+(r.lesson.n*6)+'% less in its room.'+(r.lesson.n>=3?' That is as much as it can teach you.':'')+'</p>';
+  if(r.staffOpened)h+='<p class="hint"><b>The Staff Room door is unlocked.</b> Somebody has been waiting.</p>';
+  return h;}
+function showThreads(back){G.threadBack=back||'title';var m=metaGet(),rows='';
+  LADDER.forEach(function(L){var got=m.threads>=L.at;rows+='<div class="rung'+(got?' got':'')+(L.k==='pass'?' pass':'')+'"><b>'+L.at+'</b><span>'+esc(ladderName(L))+(L.k==='pass'&&got?'<small>'+esc(L.d)+'</small>':'')+'</span><em>'+(got?'WOVEN':'')+'</em></div>';});
+  var foes='';for(var f=1;f<=6;f++){var n=Math.min(3,+m.foes[f]||0);if(n)foes+='<span>'+FOE_NAMES[f].charAt(0).toUpperCase()+FOE_NAMES[f].slice(1)+' <b>'+n+'/3</b></span>';}
+  var door=staffUnlocked()?'The Staff Room door is open.':'The Staff Room door needs all three parts of the pass and one full restoration of all five floors. You have '+passParts(m)+' of 3 parts, and '+(m.wins?'you have restored every floor.':'every floor is still waiting to be restored.');
+  showOv('<div class="sheet"><div class="kick">Memory threads</div><h2>What the house remembers</h2><p>Every run brings threads home, win or lose. You get them for floors climbed, bosses beaten and stories heard. Every run that ends early adds three more for a good go, and a few extra if you keep at it. Weave enough and more of the Memory House comes back.</p>'+threadBar(m)+
+   '<div class="ladder">'+rows+'</div><p class="hint">'+door+'</p>'+
+   '<div class="kick" style="margin-top:12px">Lessons learned</div><p class="hint" style="margin-top:4px">When a boss ends your run, you learn its tricks. Each lesson means 10% more damage to it and 6% less damage taken in its room, up to three lessons per boss.</p>'+(foes?'<div class="build">'+foes+'</div>':'<p class="hint">No lessons yet.</p>')+
+   '<div class="row end" style="margin-top:14px"><button class="btn" data-act="threadBack" autofocus>Back</button></div></div>');}
+function bankRun(win){var r=G.run;weaveRun(win);var m=metaGet();if(r.banked!==undefined)return r.banked;var collected=r.coins||0;
   var bank=Math.round(collected*0.3+10*Math.max(0,(r.floorReached||1)-1)+(r.bosses||0)*5+(win?50:0));r.banked=bank;m.savings+=bank;metaSet(m);return bank;}
 function heroUnlocksSince(){var r=G.run;if(!r||!r.heroesAtStart)return [];var now=unlockedHeroIds();return now.filter(function(id){return r.heroesAtStart.indexOf(id)<0;});}
 
@@ -1602,8 +1642,8 @@ function refundHeir(){var m=metaGet(),back=0;HEIR.forEach(function(h){var l=heir
 function showCollection(){G.state='coll';var m=metaGet(),cells='',have=0,ids=Object.keys(WEAP);
   var ic=document.createElement('canvas');ic.width=16;ic.height=16;
   ids.forEach(function(id){var d=WEAP[id],open=weaponUnlocked(id,m);if(open)have++;var src='';if(open){weaponIcon(d,ic);src=ic.toDataURL();}
-    cells+='<div class="wcell'+(open?'':' locked')+'">'+(open?'<img alt="" src="'+src+'">':'<span class="q">?</span>')+'<div><b class="r-'+d.r+'">'+(open?d.name:'Locked')+'</b><small>'+(open?weaponStyle(d)+(m.used[id]?'. Used':'')+(EVO[id]?'. Level 5 plus '+upgName(EVO[id].up)+' evolves it'+(m.evos&&m.evos[id]?' into <b>'+EVO[id].name+'</b>':''):''):'Beat '+BOSS_NAMES[weaponTier(id)]+' to find it')+'</small></div></div>';});
-  showOv('<div class="sheet"><div class="kick">Weapons</div><h2>What you might find</h2><p>'+have+' of '+ids.length+' weapons can turn up in chests, shops and Mystery rooms. Beating each boss for the first time adds more. '+(m.evos?Object.keys(m.evos).length:0)+' of '+Object.keys(EVO).length+' evolutions found.</p><div class="wgrid">'+cells+'</div><div class="row end" style="margin-top:14px"><button class="btn" data-act="back" autofocus>Back</button></div></div>');}
+    cells+='<div class="wcell'+(open?'':' locked')+'">'+(open?'<img alt="" src="'+src+'">':'<span class="q">?</span>')+'<div><b class="r-'+d.r+'">'+(open?d.name:'Locked')+'</b><small>'+(open?weaponStyle(d)+(m.used[id]?'. Used':'')+(EVO[id]?'. Level 5 plus '+upgName(EVO[id].up)+' evolves it'+(m.evos&&m.evos[id]?' into <b>'+EVO[id].name+'</b>':''):''):'Weave '+ladderAt('tier',weaponTier(id))+' memory threads to find it')+'</small></div></div>';});
+  showOv('<div class="sheet"><div class="kick">Weapons</div><h2>What you might find</h2><p>'+have+' of '+ids.length+' weapons can turn up in chests, shops and Mystery rooms. Weaving memory threads adds more. '+(m.evos?Object.keys(m.evos).length:0)+' of '+Object.keys(EVO).length+' evolutions found.</p><div class="wgrid">'+cells+'</div><div class="row end" style="margin-top:14px"><button class="btn" data-act="back" autofocus>Back</button></div></div>');}
 /* ================= THE STAFF ROOM (secret sixth floor) ================= */
 FLOORS[6]={name:'The Staff Room',blurb:'A room students are not normally allowed into. Mugs, a kettle, a noticeboard nobody reads, and Jay, who has been expecting you.',
   enemies:[],props:[],boss:'jay',bossName:'Jay',bossIcon:'',restored:'',
@@ -1691,7 +1731,7 @@ function drawStaffWall(c){var x,P=FLOORS[6].pal;c.fillStyle=P.wa;c.fillRect(0,0,
   c.fillStyle='#f3f1ea';c.fillRect(314,27,48,2);c.fillStyle='#8a5a3c';c.fillRect(344,21,6,4);c.fillStyle='#e2556b';c.fillRect(348,22,2,2);c.fillStyle='#8a5a3c';c.fillRect(349,19,2,2);}
 
 /* ---------- getting in, and getting out ---------- */
-function staffUnlocked(){var m=metaGet();return !!m.staff||(store.get('best',{})||{}).wins>0;}
+function staffUnlocked(){var m=metaGet();return !!m.staffOpen||!!m.staffLegacy||staffReady(m);}
 function startStaffChallenge(heroId){if(!heroUnlocked(heroId))heroId='mavis';var h=heroById(heroId),p=newPlayer(h),i;G.P=p;
   G.run={hero:heroId,kills:0,dealt:0,taken:0,coins:0,rooms:0,heard:[],floorReached:6,bosses:0,staff:true,challenge:true,t0:G.time};applyHeirlooms(p);
   var m=metaGet(),pool=Object.keys(WEAP).filter(function(k){return (WEAP[k].r==='R'||WEAP[k].r==='L')&&weaponUnlocked(k,m);});
@@ -1705,10 +1745,10 @@ function startStaffFromRun(){var p=G.P;p.hp=p.maxHp;p.levelQ=0;G.run.staff=true;
 function staffRematch(){var p=G.P;p.hp=p.maxHp;p.iT=1;p.dodgeT=0;p.charges=p.maxCharges;p.toughUsed=false;G.floor=6;G.room=0;hideOv();G.state='play';showHUD(true);enterRoom('boss');G.trans={t:0.25,cb:function(){},done:true};}
 function staffWon(e){G.say.push({e:e,txt:'Fine. Well played. Genuinely.',t:3});floatText(CX,CY-30,'JAY IS DEFEATED','big');G.timers.push({t:3.4,fn:function(){showStaffEnd(true);}});}
 function showStaffEnd(win){G.state='over';showHUD(false);stopSpeak();store.set('save',null);musicStart('title');var m=metaGet(),first=false;
-  if(win){first=!m.staffWins;m.savings+=100;m.staffWins=(m.staffWins||0)+1;metaSet(m);G.run.staffWin=true;}
+  if(win){first=!m.staffWins;m.savings+=100;m.staffWins=(m.staffWins||0)+1;metaSet(m);G.run.staffWin=true;}else{G.run.jayLesson=learnFoe(6);}
   var body=win
     ?'<div class="kick">The Staff Room</div><h2>You beat Jay.</h2><p>He has gone very quiet, which never happens. Then: "Genuinely, well played. I am telling everyone."</p><p>'+(first?'That is the first time. ':'That is '+m.staffWins+' times now. ')+'100 coins have gone into your savings for Mo\'s Heirlooms, and Bonnie has decided you are her favourite.</p>'
-    :'<div class="kick">The Staff Room</div><h2>Jay wins this round.</h2><p>"Well done, though. Honestly. Same time tomorrow?"</p><p>Your legend keeps the same weapon and upgrades if you knock again.</p>';
+    :'<div class="kick">The Staff Room</div><h2>Jay wins this round.</h2><p>"Well done, though. Honestly. Same time tomorrow?"</p><p>Your legend keeps the same weapons and upgrades if you knock again.</p><p class="hint"><b>You are learning his tricks.</b> '+(G.run.jayLesson>=3?'Three lessons: that is as much as Jay can teach you. ':'')+'Next time you deal '+(G.run.jayLesson*10)+'% more damage to him and take '+(G.run.jayLesson*6)+'% less.</p>';
   showOv('<div class="sheet narrow">'+body+'<div class="row"><button class="btn gold" data-act="staffAgain" autofocus>Knock again</button><button class="btn alt" data-act="back">Front door</button></div></div>');}
 /* ================= RUN FLOW ================= */
 var ROOMS_PER_FLOOR=4;
@@ -1719,9 +1759,9 @@ function rollRar(boost){var f=G.floor,l=G.P?G.P.st.luck:0;var w={C:Math.max(10,6
 function makeWeapon(r){var m=metaGet(),skip={};if(G.P&&G.P.weapons)G.P.weapons.forEach(function(w){if(w.lvl>=WMAX||G.P.weapons.length<G.P.slots)skip[w.id]=1;});var order=['L','R','U','C'],pool=[];for(var ri=order.indexOf(r);ri<order.length&&!pool.length;ri++)pool=Object.keys(WEAP).filter(function(k){return WEAP[k].r===order[ri]&&!skip[k]&&weaponUnlocked(k,m);});if(!pool.length)pool=Object.keys(WEAP).filter(function(k){return !skip[k]&&weaponUnlocked(k,m);});return {id:pick(pool),mult:1+0.12*(Math.min(G.floor,5)-1),tunes:0,lvl:1,evo:false};}
 function startRun(heroId){if(!heroUnlocked(heroId))heroId='mavis';var h=heroById(heroId);store.set('lastHero',heroId);G.P=newPlayer(h);G.run={hero:heroId,kills:0,dealt:0,taken:0,coins:0,rooms:0,heard:[],floorReached:1,bosses:0};applyHeirlooms(G.P);G.run.heroesAtStart=unlockedHeroIds();markUsed(h.weapon);G.floor=1;if(selKeep&&unlockedKeeps().indexOf(selKeep)>=0)giveKeep(selKeep);startFloor(1);}
 function startFloor(f){G.floor=f;G.room=0;G.memCount=0;G.roomType='';G.P.toughUsed=false;G.run.floorReached=Math.max(G.run.floorReached,f);showIntro(f);}
-function enterRoom(type,reward){var p=G.P;G.room++;G.run.rooms++;var prev=G.roomType;G.prevType=prev;G.roomType=type;G.reward=reward;
+function enterRoom(type,reward){var p=G.P;G.room++;G.run.rooms++;var prev=G.roomType;G.prevType=prev;G.roomType=type;G.foeN=type==='boss'?foeStacks(G.floor):0;G.reward=reward;
   G.enemies=[];G.newE=[];G.ebul=[];G.pbul=[];G.pick=[];G.fx=[];G.parts=[];G.warns=[];G.haz=[];G.texts=[];G.timers=[];G.doors=[];G.npc=null;G.shop=[];G.say=[];G.decor=[];G.boss=null;G.windPush=null;G.caption=null;G.sat=1;G.cleared=false;
-  G.waves=[];G.waveIdx=0;G.waveDelay=0.9;G.waveT=0;G.float=[];G.event=null;G.bossCard=null;G.dog=null;
+  G.waves=[];G.waveIdx=0;G.waveDelay=0.9;G.waveT=0;G.float=[];G.event=null;G.bossCard=null;G.dog=null;if(G.foeN)G.timers.push({t:2.2,fn:function(){var jy=G.floor===6;toast('<b>YOU KNOW '+(jy?'HIS':'ITS')+' TRICKS</b> '+G.foeN+(G.foeN===1?' lesson':' lessons')+' from last time: +'+(G.foeN*10)+'% damage to '+(jy?'him':'it')+'.');}});
   buildProps(type);renderBG();
   if(G.floor===4&&type!=='boss')for(var i=0;i<9;i++)G.float.push({x:rnd(AX+10,AX2-10),y:rnd(AY+10,AY2-10),k:pick(['photo','letter','tape','post']),ph:rnd(TAU)});
   p.x=CX;p.y=AY2-14;p.vx=p.vy=0;p.dodgeT=0;p.iT=0.8;p.orbR=22;p.budT=[];
@@ -1869,7 +1909,7 @@ function showTitle(){G.state='title';G.staffPick=false;G.P=null;G.floor=1;G.room
   var line=best&&best.floor?('Best so far: floor '+best.floor+(best.wins?' and '+best.wins+' full '+(best.wins===1?'restoration':'restorations'):'')+'. Stories heard: '+album.length+' of '+NPCS.length+'.'):'Keyboard and mouse, or touch. Takes about twenty minutes to reach the end.';
   var sv=store.get('save',null),mt=metaGet(),cont=sv&&sv.p?'<button class="btn gold wide" data-act="cont" autofocus>Carry on: '+heroById(sv.p.hero).name+', floor '+sv.floor+'</button>':'';
   showOv((ON_SITE?'<a class="backlink" href="'+SITE_BACK+'">Back to Base 5</a>':'')+'<div class="title"><h1 class="logo">TINY<br>LEGENDS<small>THE MEMORY HOUSE</small></h1><p class="tag">Stories, skills and memories are vanishing from the Memory House. Pick an older legend, fight your way through five floors, and help it remember.</p>'+
-   '<p class="foot" style="margin:-6px 0 0">Made for Base 5 at Chilton Bridge.</p><div class="menu">'+cont+'<button class="btn wide '+(cont?'':'gold')+'" data-act="start"'+(cont?'':' autofocus')+'>'+(cont?'Start a new run':'Start a run')+'</button><button class="btn" data-act="heir">Heirlooms ('+mt.savings+')</button><button class="btn" data-act="house">Memory House</button><button class="btn" data-act="album">Memory album</button><button class="btn" data-act="weapons">Weapons</button><button class="btn" data-act="how">How to play</button><button class="btn" data-act="settings">Settings</button>'+(staffUnlocked()?'<button class="btn wide" data-act="staff" style="background:#7b4b8f;color:#f3e5c8">The Staff Room'+(mt.staffWins?' (Jay beaten '+mt.staffWins+(mt.staffWins===1?' time':' times')+')':'')+'</button>':'')+'</div><p class="foot">'+line+'<br><span id="houseLine"></span></p></div>','clear');onHouseChange();}
+   '<p class="foot" style="margin:-6px 0 0">Made for Base 5 at Chilton Bridge.</p><div class="menu">'+cont+'<button class="btn wide '+(cont?'':'gold')+'" data-act="start"'+(cont?'':' autofocus')+'>'+(cont?'Start a new run':'Start a run')+'</button><button class="btn" data-act="threads">Threads ('+(mt.threads>=LADDER_MAX?'all woven':mt.threads+'/'+LADDER_MAX)+')</button><button class="btn" data-act="heir">Heirlooms ('+mt.savings+')</button><button class="btn" data-act="house">Memory House</button><button class="btn" data-act="album">Memory album</button><button class="btn" data-act="weapons">Weapons</button><button class="btn" data-act="how">How to play</button><button class="btn" data-act="settings">Settings</button>'+(staffUnlocked()?'<button class="btn wide" data-act="staff" style="background:#7b4b8f;color:#f3e5c8">The Staff Room'+(mt.staffWins?' (Jay beaten '+mt.staffWins+(mt.staffWins===1?' time':' times')+')':'')+'</button>':(mt.wins||passParts(mt)?'<button class="btn wide" data-act="threads" style="opacity:.75">The Staff Room (locked, '+passParts(mt)+' of 3 pass parts)</button>':''))+'</div><p class="foot">'+line+'<br><span id="houseLine"></span></p></div>','clear');onHouseChange();}
 function showSelect(){G.state='select';var m=metaGet();if(!heroUnlocked(selHero,m))selHero=unlockedHeroIds(m)[0]||'mavis';var h='';HEROES.forEach(function(x){var open=heroUnlocked(x.id,m);h+='<button class="card'+(open?'':' locked')+'" data-act="pick" data-v="'+x.id+'" aria-pressed="'+(x.id===selHero)+'">'+img(x.look,80,open?FLOORS[1].pal.bg:'#6d5a6a',!open)+'<span class="nm">'+x.name+'</span><span class="rl">'+(open?x.role:'Locked')+'</span></button>';});
   showOv('<div class="sheet"><div class="kick">Pick your legend</div><h2>Who is going in?</h2><p>Everyone plays differently. You can try a different legend every run.</p><div class="heroes">'+h+'</div><div id="heroDetail"></div><div class="picks"><div><div class="kick">How tough?</div><div class="chips" id="diffChips"></div><p class="hint" id="diffHint"></p></div><div><div class="kick">Bring a keepsake from home</div><div class="chips" id="keepChips"></div><p class="hint" id="keepHint"></p></div></div><div class="row end" style="margin-top:16px"><button class="btn alt" data-act="back">Back</button><button class="btn gold" data-act="go" id="goBtn">Off we go</button></div></div>');
   renderDetail();renderPicks();}
@@ -1878,7 +1918,7 @@ function renderPicks(){var dc='';['cosy','classic','tough'].forEach(function(k){
   var un=unlockedKeeps();if(selKeep&&un.indexOf(selKeep)<0)selKeep=null;var kc='<button class="chip" data-act="kpick" data-v="none" aria-pressed="'+(!selKeep)+'">Nothing</button>';un.forEach(function(k){kc+='<button class="chip" data-act="kpick" data-v="'+k+'" aria-pressed="'+(selKeep===k)+'">'+KEEP[k].name+'</button>';});$('keepChips').innerHTML=kc;
   $('keepHint').textContent=selKeep?KEEP[selKeep].d:un.length?'Every story you have heard lets you bring that person\'s keepsake. Pick one, or travel light.':'Hear a story in a Memory room and you can bring that person\'s keepsake on future runs.';}
 function renderDetail(){var x=heroById(selHero),w=WEAP[x.weapon],mm=metaGet();
-  if(!heroUnlocked(x.id,mm)){var cant=mm.savings<HERO_PRICE;$('heroDetail').innerHTML='<div class="detail">'+img(x.look,120,'#6d5a6a',true)+'<div><div class="nm" style="font-family:var(--pix);font-size:22px;font-weight:700">'+x.name+', '+x.role+'</div><p class="q">Not in the Memory House yet.</p><div class="facts"><b>TO UNLOCK</b><span>'+HERO_UNLOCK[x.id].d+'</span><b>OR</b><span>Unlock now with '+HERO_PRICE+' saved coins. You have '+mm.savings+'.</span></div><div class="row" style="margin-top:10px"><button class="btn '+(cant?'alt':'gold')+'" data-act="unlockHero" data-v="'+x.id+'"'+(cant?' disabled':'')+'>Unlock '+x.name+'</button></div></div></div>';
+  if(!heroUnlocked(x.id,mm)){$('heroDetail').innerHTML='<div class="detail">'+img(x.look,120,'#6d5a6a',true)+'<div><div class="nm" style="font-family:var(--pix);font-size:22px;font-weight:700">'+x.name+', '+x.role+'</div><p class="q">Not in the Memory House yet.</p><div class="facts"><b>TO UNLOCK</b><span>Weave '+HERO_UNLOCK[x.id].at+' memory threads. You have '+mm.threads+'. Every run brings threads home, win or lose.</span></div></div></div>';
     $('goBtn').textContent=x.name+' is locked';$('goBtn').disabled=true;return;}
   $('goBtn').disabled=false;var bars=['Health','Speed','Punch'].map(function(lb,i){var s='';for(var k=0;k<5;k++)s+='<s class="'+(k<x.bars[i]?'on':'')+'"></s>';return '<span class="bar">'+lb+' <i>'+s+'</i></span>';}).join('');
   $('heroDetail').innerHTML='<div class="detail">'+img(x.look,120,FLOORS[1].pal.bg)+'<div><div class="nm" style="font-family:var(--pix);font-size:22px;font-weight:700">'+x.name+', '+x.role+'</div><p class="q">'+x.quip+'</p><div class="facts"><b>WEAPON</b><span>'+w.name+'. '+w.d+'</span><b>PASSIVE</b><span><strong>'+x.passive+'.</strong> '+x.pdesc+'</span></div><div class="bars">'+bars+'</div></div></div>';
@@ -1888,12 +1928,21 @@ function showIntro(f){G.state='intro';showHUD(true);var F=FLOORS[f];musicStart(f
 function showHow(back){ovBack=back||'title';var dk='';['health','coins','upgrade','weapon','mystery','workshop','memory'].forEach(function(k){dk+='<div><span>'+DOORS[k].icon+'</span><span><b>'+DOORS[k].label+'.</b> '+DOORS[k].d+'</span></div>';});
   showOv('<div class="sheet"><div class="kick">How to play</div><h2>The short version</h2><p>Your legend attacks on their own. You keep them moving, roll out of danger, pick a door after each room and grow stronger. Beat the boss at the end of each floor. Five floors in all.</p>'+
   '<h3>Controls</h3><div class="keys"><kbd>WASD / ARROWS</kbd><span>Move</span><kbd>AUTO</kbd><span>Your legend attacks the nearest enemy all by themselves. You move, dodge and choose doors. Prefer to aim yourself? Turn off Auto attack and Auto aim in Settings, then use the mouse and left click or J.</span><kbd>SPACE</kbd><span>Dodge roll. You cannot be hurt while rolling.</span><kbd>E</kbd><span>Use doors, chests, shops and people</span><kbd>ESC</kbd><span>Pause</span><kbd>TOUCH</kbd><span>Left thumb moves. Right thumb aims and attacks. Buttons roll and use.</span><kbd>GAMEPAD</kbd><span>Left stick moves. Right stick aims and attacks, or hold RT. B rolls, A uses, Start pauses. In menus the d-pad moves and A picks.</span></div>'+
-  '<h3>Reading the room</h3><p>Red lines and circles are warnings: something is about to happen there. A <b>!</b> over an enemy means it is winding up. Rolling through danger at the very last moment is a <b>Nice</b> dodge and recharges your roll faster.</p><p>Close range weapons hit harder, bat enemy shots out of the air, and you take less damage while holding one. Thrown weapons keep you safer at a distance. Both are good.</p><p>You start with one weapon. Beating the Grandfather Clock opens a second weapon slot, and beating the Broken Machine opens a third. Extra weapons fight alongside you as helpers, a little softer than your main one. Picking up a weapon you already carry levels it up, up to level 5. A level 5 weapon plus its partner upgrade evolves when you open a boss chest.</p><p>Gold sparks from enemies fill your level bar. Level ups wait until the room is clear, so a fight is never interrupted, then you pick an upgrade for each one.</p><p>Some rooms have a twist: an old radio to fix, letters to deliver, or a tough crowd of elites. Your progress saves every time you walk into a room.</p><p>When a run ends, win or lose, you bring some of your coins home. Spend them on Heirlooms from the front door, which help on every future run. Beating bosses for the first time unlocks new legends and adds new weapons to what you can find.</p>'+
+  '<h3>Reading the room</h3><p>Red lines and circles are warnings: something is about to happen there. A <b>!</b> over an enemy means it is winding up. Rolling through danger at the very last moment is a <b>Nice</b> dodge and recharges your roll faster.</p><p>Close range weapons hit harder, bat enemy shots out of the air, and you take less damage while holding one. Thrown weapons keep you safer at a distance. Both are good.</p><p>You start with one weapon. Beating the Grandfather Clock opens a second weapon slot, and beating the Broken Machine opens a third. Extra weapons fight alongside you as helpers, a little softer than your main one. Picking up a weapon you already carry levels it up, up to level 5. A level 5 weapon plus its partner upgrade evolves when you open a boss chest.</p><p>Gold sparks from enemies fill your level bar. Level ups wait until the room is clear, so a fight is never interrupted, then you pick an upgrade for each one.</p><p>Some rooms have a twist: an old radio to fix, letters to deliver, or a tough crowd of elites. Your progress saves every time you walk into a room.</p><p>When a run ends, win or lose, you bring some of your coins home. Spend them on Heirlooms from the front door, which help on every future run. You also bring home memory threads, and a run that ends early still counts. Threads bring new legends, new weapons and, eventually, the pass to a door you have not found yet. If a boss ends your run, you learn its tricks and hit it harder next time.</p>'+
   '<h3>Doors</h3><div class="doorkey">'+dk+'</div><div class="row end" style="margin-top:18px"><button class="btn" data-act="howBack" autofocus>Got it</button></div></div>');}
 function showSettings(back){ovBack=back||ovBack;var T=[['sound','Sound effects',''],['music','Music',''],['bigText','Bigger text','Larger writing on screen and in menus'],['readAloud','Read stories aloud','Memory room stories are read out as they appear'],['shake','Screen shake','Small wobble when things hit hard'],['flash','Bright flashes','Camera flash and big hit flashes'],['autoFire','Auto attack','Your legend attacks by themselves whenever enemies are in the room. Turn off to attack with left click or J.'],['autoAim','Auto aim','Always aim at the nearest enemy. Turn off to aim with the mouse.'],['slowWarn','Longer warnings','Enemy attacks give you more notice']];
   if(!canSpeak)T=T.filter(function(t){return t[0]!=='readAloud';});
   var h='<button class="tog" data-act="diffCycle"><span>Difficulty<small id="diffSmall">'+DIFF[settings.diff].d+'</small></span><em id="diffEm">'+DIFF[settings.diff].name.toUpperCase()+'</em></button>';T.forEach(function(t){h+='<button class="tog" role="switch" aria-checked="'+(!!settings[t[0]])+'" data-act="tog" data-v="'+t[0]+'"><span>'+t[1]+(t[2]?'<small>'+t[2]+'</small>':'')+'</span><em>'+(settings[t[0]]?'ON':'OFF')+'</em></button>';});
-  showOv('<div class="sheet narrow"><div class="kick">Settings</div><h2>Make it work for you</h2><div class="togs">'+h+'</div><div class="row end"><button class="btn" data-act="setBack" autofocus>Done</button></div></div>');}
+  showOv('<div class="sheet narrow"><div class="kick">Settings</div><h2>Make it work for you</h2><div class="togs">'+h+'</div>'+(ovBack==='title'?'<div class="resetBox"><span><b>Start fresh</b><small>Clears saved legends, heirlooms, coins, stories and weapon finds on this device. Your settings stay as they are.</small></span><button class="btn alt" data-act="resetAsk">Reset progress</button></div>':'<p class="hint">Resetting progress lives in Settings on the front door, so it cannot happen halfway through a run.</p>')+'<div class="row end"><button class="btn" data-act="setBack" autofocus>Done</button></div></div>');}
+var RESET_KEYS=['meta','album','best','house','save','lastHero','startKeep'];
+function showResetAsk(){var t=progressSummary();
+  showOv('<div class="sheet narrow"><div class="kick">Start fresh</div><h2>Clear your progress?</h2><p>This takes the Memory House back to the very beginning on this device'+(t?', including '+t:'')+'. It cannot be undone.</p>'+(CLASS.db?'<p class="hint">The flowers you have already planted in Base 5\'s shared Memory House stay there for everyone.</p>':'')+'<p class="hint">Your settings, like sound and difficulty, will not change.</p><div class="row end"><button class="btn gold" data-act="resetNo" autofocus>Keep my progress</button><button class="btn alt" data-act="resetYes">Yes, start fresh</button></div></div>');}
+function progressSummary(){var m=metaGet(),bits=[],album=store.get('album',[]),extra=(m.heroes||[]).length,sv=m.savings||0;
+  if(extra)bits.push(extra+' unlocked legend'+(extra===1?'':'s'));if(sv)bits.push(sv+' saved coins');if(album.length)bits.push(album.length+' stor'+(album.length===1?'y':'ies'));var ev=m.evos?Object.keys(m.evos).length:0;if(ev)bits.push(ev+' evolution'+(ev===1?'':'s'));
+  if(!bits.length)return '';return bits.length===1?bits[0]:bits.slice(0,-1).join(', ')+' and '+bits[bits.length-1];}
+function resetProgress(){RESET_KEYS.forEach(function(k){try{localStorage.removeItem(STORE_PREFIX+k);localStorage.removeItem('tinyLegends.'+k);}catch(e){}});
+  selHero='mavis';selKeep=null;G.run=null;G.P=null;titleWalkers=null;showTitle();toast('<b>A FRESH START</b> The Memory House is waiting.');sfx('select');}
+
 function showAlbum(){var album=store.get('album',[]),h='';NPCS.forEach(function(n){var got=album.indexOf(n.id)>=0;h+=got?'<div class="slot"><b>'+n.name+', '+n.age+'</b>'+n.role+'. <i>'+esc(n.lines[n.lines.length-1])+'</i></div>':'<div class="slot no"><b>Not heard yet</b>Someone in a Memory room is waiting to tell this one.</div>';});
   showOv('<div class="sheet"><div class="kick">Memory album</div><h2>Stories you have heard</h2><p>'+album.length+' of '+NPCS.length+' so far. Take a Memory door during a run to meet someone new. Each story you hear also lets you bring that person\'s keepsake from home at the start of a run.</p><div class="album">'+h+'</div><div class="row end" style="margin-top:16px"><button class="btn" data-act="back" autofocus>Back</button></div></div>');}
 function openStory(npc){G.state='story';var p=G.P,k=KEEP[npc.keep],lines='';npc.lines.forEach(function(l){lines+='<p>'+esc(l)+'</p>';});
@@ -1925,15 +1974,15 @@ function buildSummary(){var p=G.P;if(!p)return '';var w={name:wName(p.weapon)},u
    '<div class="kick">Weapons</div><div class="build">'+p.weapons.map(function(q,i){return '<span'+(q.evo?' class="evo"':'')+'>'+esc(wName(q))+' <b>LV '+q.lvl+'</b>'+(i?' <small>helper</small>':'')+'</span>';}).join('')+(p.slots<3?'<span class="lock">'+(3-p.slots)+' slot'+(p.slots<2?'s':'')+' still to open</span>':'')+'</div>'+
    (ups?'<div class="kick">Upgrades</div><div class="build">'+ups+'</div>':'')+(ks?'<div class="kick">Keepsakes</div><div class="build">'+ks+'</div>':'');}
 function resume(){hideOv();G.state='play';showHUD(true);musicStart(G.musicWanted||G.floor);mouse.down=false;}
-function showOver(win){if(G.run&&G.run.staff&&G.floor===6){showStaffEnd(win);return;}if(win){var sm=metaGet();if(!sm.staff){sm.staff=true;metaSet(sm);}}if(G.run&&!G.run.ended){G.run.ended=true;G.run.win=win;endRun(win);store.set('save',null);houseAdd('run');if(win)houseAdd('win');bankRun(win);}G.state='over';showHUD(false);stopSpeak();$('endSkip').hidden=true;var hv=houseView();var r=G.run,p=G.P;musicStart('title');
+function showOver(win){if(G.run&&G.run.staff&&G.floor===6){showStaffEnd(win);return;}if(G.run&&!G.run.ended){G.run.ended=true;G.run.win=win;endRun(win);store.set('save',null);houseAdd('run');if(win)houseAdd('win');bankRun(win);}G.state='over';showHUD(false);stopSpeak();$('endSkip').hidden=true;var hv=houseView();var r=G.run,p=G.P;musicStart('title');
   var heard=r.heard.map(function(id){return NPCS.filter(function(n){return n.id===id;})[0];});
   var stories=heard.length?'<div class="kick">Stories you heard this run</div><div class="build">'+heard.map(function(n){return '<span>'+n.name+': '+n.mem+'</span>';}).join('')+'</div>':'';
   var mins=Math.max(1,Math.round((G.time-(r.t0||0))/60));
   var head=win?'<div class="kick">The Memory House remembers</div><h2>You did it, '+p.hero.name+'.</h2><p>Every floor is restored. The clocks tick properly, the high street is busy, the tools are back on their hooks and every photograph has a face again. Stories only last if someone listens, and today that was you.</p>'
    :'<div class="kick">Run over on floor '+G.floor+'</div><h2>That was a good go.</h2><p>The Memory House will still be here whenever you want another go. Every run is different, and every legend plays differently.</p>';
   showOv('<div class="sheet narrow">'+head+'<div class="stats"><div><b>'+r.floorReached+'/5</b><small>Floor reached</small></div><div><b>'+r.kills+'</b><small>Enemies</small></div><div><b>LV '+p.lvl+'</b><small>Level</small></div><div><b>'+r.heard.length+'</b><small>Stories heard</small></div></div>'+stories+
-   '<p class="hint">Your run planted a flower in '+houseName(hv)+(r.bosses?', and every boss you beat keeps its floor lit':'')+'. You brought <b>'+(r.banked||0)+' coins</b> home for Mo\'s Heirlooms, so you have '+metaGet().savings+' saved.'+heroUnlocksSince().map(function(id){return ' <b>'+heroById(id).name+'</b> can now join your runs.';}).join('')+'</p>'+
-   (win&&!r.staff?'<div class="row" style="margin-bottom:10px"><button class="btn gold" data-act="staffGo" autofocus>Knock on the Staff Room door</button></div>':'')+'<div class="row"><button class="btn '+(win&&!r.staff?'':'gold')+'" data-act="again"'+(win&&!r.staff?'':' autofocus')+'>Have another go</button><button class="btn" data-act="heirO">Heirlooms</button><button class="btn" data-act="postcard">Make a postcard</button><button class="btn" data-act="houseO">See the Memory House</button><button class="btn" data-act="change">Pick a different legend</button><button class="btn alt" data-act="back">Front door</button></div></div>');}
+   '<p class="hint">Your run planted a flower in '+houseName(hv)+(r.bosses?', and every boss you beat keeps its floor lit':'')+'. You brought <b>'+(r.banked||0)+' coins</b> home for Mo\'s Heirlooms, so you have '+metaGet().savings+' saved.</p>'+threadSummary()+(win&&!r.staff&&!staffUnlocked()?'<p class="hint">On the way out you notice a door you have never seen before. It is locked. The pass for it comes in three parts, and you have '+passParts()+'.</p>':'')+
+   (win&&!r.staff&&staffUnlocked()?'<div class="row" style="margin-bottom:10px"><button class="btn gold" data-act="staffGo" autofocus>Knock on the Staff Room door</button></div>':'')+'<div class="row"><button class="btn '+(win&&!r.staff&&staffUnlocked()?'':'gold')+'" data-act="again"'+(win&&!r.staff&&staffUnlocked()?'':' autofocus')+'>Have another go</button><button class="btn" data-act="threadsO">Threads</button><button class="btn" data-act="heirO">Heirlooms</button><button class="btn" data-act="postcard">Make a postcard</button><button class="btn" data-act="houseO">See the Memory House</button><button class="btn" data-act="change">Pick a different legend</button><button class="btn alt" data-act="back">Front door</button></div></div>');}
 var ACT={
  start:function(){showSelect();},
  pick:function(v){selHero=v;ov.querySelectorAll('.card').forEach(function(c){c.setAttribute('aria-pressed',c.dataset.v===v?'true':'false');});renderDetail();},
@@ -1944,6 +1993,7 @@ var ACT={
  how:function(){showHow('title');},howP:function(){showHow('pause');},
  howBack:function(){if(ovBack==='pause'){G.state='play';openPause();}else showTitle();},
  settings:function(){showSettings('title');},settingsP:function(){showSettings('pause');},
+ resetAsk:function(){showResetAsk();},resetNo:function(){showSettings('title');},resetYes:function(){resetProgress();},
  setBack:function(){if(ovBack==='pause'){G.state='play';openPause();}else showTitle();},
  tog:function(v,btn){settings[v]=!settings[v];saveSettings();btn.setAttribute('aria-checked',settings[v]);btn.querySelector('em').textContent=settings[v]?'ON':'OFF';if(v==='music'){if(settings.music)musicStart(G.musicWanted||'title');else musicStop();}if(v==='sound'&&settings.sound){audioInit();sfx('select');}if(v==='bigText')document.body.classList.toggle('bigtext',!!settings.bigText);if(v==='readAloud'&&!settings.readAloud)stopSpeak();},
  introGo:function(){if(G.state!=='intro')return;hideOv();G.state='play';showHUD(true);enterRoom(G.floor===6?'boss':'combat',G.floor===1?'coins':pick(['coins','upgrade','health']));G.trans={t:0.25,cb:function(){},done:true};},
@@ -1952,6 +2002,7 @@ var ACT={
  heir:function(){showHeirlooms('title');},heirO:function(){showHeirlooms('over');},heirBuy:function(v){buyHeir(v);},heirRefund:function(){refundHeir();},
  heirBack:function(){if(G.heirBack==='over')showOver(!!(G.run&&G.run.win));else showTitle();},
  weapons:function(){showCollection();},
+ threads:function(){showThreads('title');},threadsO:function(){showThreads('over');},threadBack:function(){if(G.threadBack==='over')showOver(!!(G.run&&G.run.win));else showTitle();},
  unlockHero:function(v){var m=metaGet();if(m.savings<HERO_PRICE||heroUnlocked(v,m))return;m.savings-=HERO_PRICE;m.heroes.push(v);metaSet(m);sfx('level');toast('<b>'+heroById(v).name.toUpperCase()+'</b> has joined the Memory House.');selHero=v;showSelect();},
  reroll:function(){var p=G.P;if(G.state!=='level'||!(p.rerolls>0))return;p.rerolls--;hideOv();G.state='play';openLevel(G.lvlGift);},
  house:function(){showHouse('title');},houseO:function(){showHouse('over');},
