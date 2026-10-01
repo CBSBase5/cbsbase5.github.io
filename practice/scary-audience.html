@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who is reading? | Scary stories | Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7efe3; --paper2:#fffaf2; --ink:#1f1b2e; --ink2:#4a4458;
+  --teal:#007291; --teal2:#2fb3c9; --orange:#ef7724; --orange2:#ffb066;
+  --plum:#5b2d6e; --plum2:#9b5fb4; --yellow:#f6c64a; --red:#c8413b;
+  --dusk1:#231a35; --dusk2:#4a2a5e; --dusk3:#8a3f5c;
+  --r1:20px 26px 18px 24px; --r2:26px 18px 24px 20px;
+  --display:"Archivo","Arial Black",system-ui,sans-serif;
+  --shadow:0 2px 0 rgba(31,27,46,.08),0 10px 24px rgba(31,27,46,.10);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink); background:var(--paper);
+  font-family:"Atkinson Hyperlegible",system-ui,sans-serif; font-size:18px; line-height:1.5;
+  background-image:
+    radial-gradient(1200px 500px at 110% -10%,rgba(239,119,36,.16),transparent 60%),
+    radial-gradient(900px 600px at -20% 30%,rgba(0,114,145,.12),transparent 60%),
+    radial-gradient(900px 700px at 120% 90%,rgba(91,45,110,.12),transparent 60%);
+  background-attachment:fixed; min-height:100vh;
+}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.22;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
+h1,h2,h3,.display{font-family:var(--display);letter-spacing:-.01em;line-height:1.15;margin:0}
+a{color:var(--teal)}
+button{font:inherit;color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(247,239,227,.92);backdrop-filter:blur(6px);
+  border-bottom:2px solid rgba(31,27,46,.08)}
+.topbar .wrap{display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:900;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px;font-size:18px}
+.brand .mark{width:30px;height:30px;border-radius:10px 12px 9px 13px;background:linear-gradient(135deg,var(--teal),var(--teal2));
+  display:grid;place-items:center;color:#fff;font-size:14px;transform:rotate(-4deg)}
+.topbar nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{text-decoration:none;color:var(--ink2);font-weight:700;font-size:15px;padding:6px 10px;border-radius:12px}
+.topbar nav a:hover,.topbar nav a.on{background:#fff;color:var(--ink)}
+
+/* hero */
+.hero{position:relative;overflow:hidden;color:#fff;margin:18px 0 6px;padding:28px 22px 30px;border-radius:var(--r1);
+  background:linear-gradient(140deg,var(--dusk1) 0%,var(--dusk2) 55%,var(--dusk3) 100%);box-shadow:var(--shadow)}
+.hero h1{font-size:clamp(30px,6vw,52px);font-weight:900;max-width:15ch;position:relative;z-index:2}
+.hero p{position:relative;z-index:2;max-width:46ch;margin:10px 0 0;color:#efe6ff;font-size:19px}
+.hero .kicker{position:relative;z-index:2;color:var(--yellow)}
+.hero .moon{position:absolute;right:28px;top:22px;width:84px;height:84px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff8dc,#f6d77a 60%,#d9a93c);box-shadow:0 0 50px rgba(246,215,122,.55);z-index:1}
+@media(max-width:620px){.hero .moon{width:46px;height:46px;right:14px;top:14px}}
+.hero .hills{position:absolute;left:0;right:0;width:100%;bottom:-2px;height:60px;z-index:1;opacity:.9}
+.hero .hint{position:relative;z-index:2;display:inline-flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero .hint span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:999px;font-size:15px}
+
+.kicker{display:inline-block;font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+
+/* step tabs */
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+.steps button{border:0;cursor:pointer;background:#fff;padding:8px 14px;border-radius:14px 18px 12px 16px;font-weight:700;font-size:15px;
+  box-shadow:0 1px 0 rgba(31,27,46,.1);display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.steps button .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--paper);font-size:13px;font-family:var(--display);font-weight:900}
+.steps button.on{background:var(--ink);color:#fff}
+.steps button.on .n{background:var(--yellow);color:var(--ink)}
+.steps button.done .n{background:var(--teal);color:#fff}
+
+.panel{display:none;animation:rise .35s ease}
+.panel.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* cards */
+.card{background:var(--paper2);border-radius:var(--r1);padding:20px;box-shadow:var(--shadow);margin:16px 0;position:relative}
+.card:nth-of-type(2n){border-radius:var(--r2)}
+.tilt-l{transform:rotate(-.6deg)} .tilt-r{transform:rotate(.5deg)}
+.card h2{font-size:clamp(22px,4vw,30px);font-weight:900;margin-bottom:6px}
+.card h3{font-size:20px;font-weight:800;margin-bottom:4px}
+.lead{font-size:19px;color:var(--ink2);margin:4px 0 0;max-width:60ch}
+.fill-teal{background:linear-gradient(140deg,#0b7f9e,#2fb3c9);color:#fff}
+.fill-orange{background:linear-gradient(140deg,#ef7724,#ffb066);color:#2a1606}
+.fill-plum{background:linear-gradient(140deg,#5b2d6e,#9b5fb4);color:#fff}
+.fill-yellow{background:linear-gradient(140deg,#f6c64a,#ffe08f);color:#2a2006}
+.fill-ink{background:linear-gradient(140deg,#1f1b2e,#3b3352);color:#fff}
+.fill-teal .lead,.fill-plum .lead,.fill-ink .lead{color:rgba(255,255,255,.88)}
+
+.grid{display:grid;gap:14px}
+@media(min-width:720px){.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}}
+
+/* buttons and chips */
+.btn{border:0;cursor:pointer;font-weight:800;font-family:var(--display);font-size:17px;padding:12px 20px;border-radius:16px 20px 14px 18px;
+  background:var(--ink);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .1s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.btn.alt{background:#fff;color:var(--ink);box-shadow:0 3px 0 rgba(31,27,46,.15)}
+.btn.orange{background:var(--orange)} .btn.teal{background:var(--teal)} .btn.plum{background:var(--plum)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin:20px 0 40px;flex-wrap:wrap}
+.chip{border:2px solid rgba(31,27,46,.15);background:#fff;cursor:pointer;padding:8px 14px;border-radius:999px;font-weight:700;font-size:16px;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.t-time.on{background:var(--teal);border-color:var(--teal)}
+.chip.t-place.on{background:var(--orange);border-color:var(--orange)}
+.chip.t-person.on{background:var(--plum);border-color:var(--plum)}
+.chip.t-topic.on{background:#b8860b;border-color:#b8860b}
+
+textarea,input[type=text]{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid rgba(31,27,46,.15);border-radius:14px 18px 12px 16px;background:#fff;color:var(--ink)}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+textarea:focus,input[type=text]:focus{outline:3px solid var(--yellow);border-color:var(--ink)}
+.small{font-size:15px;color:var(--ink2)}
+.muted{opacity:.75}
+
+/* reader cards */
+.reader{border-radius:var(--r1);padding:18px;color:#fff;position:relative;overflow:hidden;min-height:100%}
+.reader .face{width:64px;height:64px;float:right;margin:0 0 6px 10px}
+.reader h3{font-size:24px}
+.reader .age{font-family:var(--display);font-weight:800;opacity:.85}
+.reader ul{margin:8px 0 0;padding-left:20px}
+.reader .lab{font-weight:800;margin-top:8px;display:block}
+.r-pip{background:linear-gradient(140deg,#e9762b,#f7b267)}
+.r-sam{background:linear-gradient(140deg,#4a2a5e,#8a3f5c)}
+.r-ray{background:linear-gradient(140deg,#0b6f8a,#3aa7a0)}
+
+/* fear dial */
+.dial{max-width:420px;margin:6px auto 0;text-align:center}
+.dial svg{width:100%;height:auto;display:block}
+.dial .needle{transition:transform .5s cubic-bezier(.3,1.6,.5,1);transform-origin:200px 200px}
+.dial .labels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.dial .labels button{border:0;cursor:pointer;border-radius:12px;padding:8px 2px;font-weight:800;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 1px 0 rgba(31,27,46,.12)}
+.dial .labels button .num{display:block;font-family:var(--display);font-size:20px}
+.dial .labels button.on{color:#fff}
+.dial .now{font-family:var(--display);font-weight:900;font-size:26px;margin-top:10px}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px) rotate(-1deg)}75%{transform:translateX(4px) rotate(1deg)}}
+
+/* initials */
+.who{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* feedback bubble */
+.jay{display:flex;gap:12px;align-items:flex-start;background:#fff;border-radius:18px 22px 16px 20px;padding:14px;border:2px dashed rgba(0,114,145,.35);margin-top:12px}
+.jay .av{flex:0 0 46px;height:46px;border-radius:50%;background:linear-gradient(140deg,var(--teal),var(--teal2));display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:900}
+.jay b{display:block}
+
+/* send */
+.sendbox .row{margin-top:10px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:60;transition:transform .3s}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+.footer{margin:30px 0 50px;text-align:center}
+.footer a{font-weight:700}
+.next-links{display:grid;gap:12px}
+@media(min-width:720px){.next-links{grid-template-columns:1fr 1fr 1fr}}
+.next-links a{display:block;text-decoration:none;color:inherit;padding:14px;border-radius:var(--r2);background:#fff;box-shadow:var(--shadow)}
+.next-links a.here{outline:3px solid var(--yellow)}
+.next-links a b{font-family:var(--display);display:block;font-size:18px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{.topbar,.grain,.steps,.navrow,.sendbox{display:none}.panel{display:block}}
+.scene{display:flex;gap:16px;align-items:center}
+.scene svg{flex:0 0 120px;height:120px}
+@media(max-width:560px){.scene{flex-direction:column;align-items:flex-start}.scene svg{flex-basis:auto;width:110px}}
+.sent{background:#fff;border-radius:18px 22px 16px 20px;padding:16px;box-shadow:0 1px 0 rgba(31,27,46,.08);margin:12px 0;border-left:8px solid var(--paper)}
+.sent.sorted{border-left-color:var(--teal)}
+.sent q{display:block;font-size:20px;quotes:none;font-weight:700;margin-bottom:10px}
+.sent .row .chip.p-pip.on{background:#e9762b;border-color:#e9762b}
+.sent .row .chip.p-sam.on{background:#6b2f5f;border-color:#6b2f5f}
+.sent .row .chip.p-ray.on{background:#0b6f8a;border-color:#0b6f8a}
+.peek{border:0;background:none;color:var(--teal);font-weight:800;cursor:pointer;padding:6px 0;margin-left:auto;text-decoration:underline}
+.meter{display:flex;gap:6px;align-items:center;margin-top:8px}
+.meter i{width:22px;height:22px;border-radius:50%;background:rgba(31,27,46,.1);display:block}
+.meter i.on{background:var(--teal)}
+.meter i.over{background:var(--orange)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.bank .chip{font-size:15px;padding:6px 12px}
+.ask{display:grid;gap:8px;margin-top:12px}
+.ask div{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fff;padding:10px 12px;border-radius:14px}
+.ask div span{flex:1 1 220px}
+.ask .chip{padding:5px 12px;font-size:14px}
+.tip{margin-top:12px;font-weight:700;min-height:1.5em}
+.preview{white-space:pre-wrap;background:#fff;border-radius:16px;padding:14px;font-size:17px;max-height:340px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="/"><span class="mark">B5</span>Base 5</a>
+  <nav><a href="/">Home</a><a class="on" href="/practice/#english-standard">Practice</a><a href="/shuffle/">Shuffle</a></nav>
+</div></header>
+<main class="wrap">
+<section class="hero">
+  <div class="moon" aria-hidden="true"></div>
+  <span class="kicker">Scary stories 1 of 3</span>
+  <h1>Who is reading?</h1>
+  <p>The same spooky moment can feel cosy for one reader and terrifying for another. Let's find out why.</p>
+  <div class="hint"><span>About 20 minutes</span><span>Tap, sort, write</span><span>Sends to Jay</span></div>
+  <svg class="hills" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 L0 34 Q80 8 170 30 T360 26 T560 32 T800 20 L800 60 Z" fill="#160f22"/><path d="M620 22 l0 -18 l14 -8 l14 8 l0 18 Z" fill="#160f22"/><rect x="630" y="6" width="5" height="6" fill="#f6c64a"/></svg>
+</section>
+
+<div class="who" id="who" style="margin-top:12px"></div>
+<div class="steps" id="steps"></div>
+
+<!-- 1 readers -->
+<section class="panel" data-name="Readers">
+  <div class="card tilt-l">
+    <div class="scene">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><rect width="120" height="120" rx="22" fill="#231a35"/><circle cx="96" cy="22" r="10" fill="#f6d77a"/><path d="M22 58 L60 26 L98 58 Z" fill="#4a2a5e"/><rect x="28" y="56" width="64" height="50" fill="#5b3a70"/><rect x="40" y="62" width="14" height="14" fill="#f6c64a"/><rect x="66" y="62" width="14" height="14" fill="#2b2140"/><rect x="52" y="84" width="16" height="22" fill="#2b2140"/><text x="74" y="56" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="14" fill="#fff">?!</text></svg>
+      <div>
+        <span class="kicker">The scary moment</span>
+        <h2>Home alone. Night time. A noise upstairs.</h2>
+        <p class="lead">We will write this one moment for different readers.</p>
+      </div>
+    </div>
+  </div>
+  <div class="card tilt-r">
+    <span class="kicker">Meet the readers</span>
+    <h2>Three people want a scary story</h2>
+    <p class="lead">Have a look at what each one likes. Which one would you most like to scare?</p>
+    <div class="grid g3" style="margin-top:14px">
+      <div class="reader r-pip">
+        <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="34" r="22" fill="#ffe3c4"/><circle cx="12" cy="22" r="8" fill="#7a3b12"/><circle cx="52" cy="22" r="8" fill="#7a3b12"/><path d="M12 30 Q32 6 52 30 Q32 18 12 30Z" fill="#7a3b12"/><circle cx="25" cy="34" r="3" fill="#1f1b2e"/><circle cx="39" cy="34" r="3" fill="#1f1b2e"/><path d="M24 44 Q32 51 40 44" stroke="#1f1b2e" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+        <h3>Pip</h3><span class="age">aged 6</span>
+        <span class="lab">Likes</span>
+        <ul><li>Short sentences</li><li>Silly surprises</li><li>A happy ending</li></ul>
+        <span class="lab">Not keen on</span>
+        <ul><li>Long words</li><li>Being left worried</li></ul>
+      </div>
+      <div class="reader r-sam">
+        <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 60 Q8 14 32 12 Q56 14 56 60 Z" fill="#2b2140"/><circle cx="32" cy="34" r="17" fill="#e8b98f"/><path d="M15 30 Q32 14 49 30 L49 24 Q32 8 15 24 Z" fill="#3a2a1a"/><path d="M24 34 h6 M34 34 h6" stroke="#1f1b2e" stroke-width="3" stroke-linecap="round"/><path d="M27 43 h10" stroke="#1f1b2e" stroke-width="3" stroke-linecap="round"/></svg>
+        <h3>Sam</h3><span class="age">aged 13</span>
+        <span class="lab">Likes</span>
+        <ul><li>Suspense</li><li>Cliffhangers</li><li>A twist nobody saw coming</li></ul>
+        <span class="lab">Not keen on</span>
+        <ul><li>Babyish words</li><li>The scary thing explained too soon</li></ul>
+      </div>
+      <div class="reader r-ray">
+        <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="34" r="22" fill="#f1c9a5"/><path d="M10 30 Q12 18 18 20 M54 30 Q52 18 46 20" stroke="#e8e8e8" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="24" cy="33" r="7" fill="none" stroke="#1f1b2e" stroke-width="2.5"/><circle cx="40" cy="33" r="7" fill="none" stroke="#1f1b2e" stroke-width="2.5"/><path d="M31 33 h2" stroke="#1f1b2e" stroke-width="2.5"/><circle cx="24" cy="33" r="2" fill="#1f1b2e"/><circle cx="40" cy="33" r="2" fill="#1f1b2e"/><path d="M22 46 Q32 42 42 46" stroke="#e8e8e8" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+        <h3>Ray</h3><span class="age">aged 70, ghost story fan</span>
+        <span class="lab">Likes</span>
+        <ul><li>Old creaky houses</li><li>A slow, creepy build up</li><li>Clever descriptions</li></ul>
+        <span class="lab">Not keen on</span>
+        <ul><li>Lots of action, not much atmosphere</li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="navrow"><span></span><button class="btn orange" data-go="next">Let's sort some sentences</button></div>
+</section>
+
+<!-- 2 sort -->
+<section class="panel" data-name="Sort">
+  <div class="card tilt-l fill-plum">
+    <span class="kicker" style="color:var(--yellow)">Sort the sentences</span>
+    <h2>Who might each sentence suit?</h2>
+    <p class="lead">Tap Pip, Sam or Ray. You can pick more than one. There are no wrong answers, and you can peek at what Jay thinks whenever you like.</p>
+    <p class="display" style="margin-top:8px;font-size:20px" id="sortCount"></p>
+  </div>
+  <div id="sentences"></div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Set the Fear Dial</button></div>
+</section>
+
+<!-- 3 dial -->
+<section class="panel" data-name="Fear Dial">
+  <div class="card tilt-r">
+    <span class="kicker">Your turn soon</span>
+    <h2>Who will you write for?</h2>
+    <div class="row" id="pickReader" style="margin-top:10px"></div>
+  </div>
+  <div class="card tilt-l">
+    <span class="kicker">The Fear Dial</span>
+    <h2>How scary should it be?</h2>
+    <p class="lead">Tap the dial. You are the author, so you decide.</p>
+    <div id="dial"></div>
+    <p class="tip" id="dialTip"></p>
+  </div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Start writing</button></div>
+</section>
+
+<!-- 4 write -->
+<section class="panel" data-name="Write">
+  <div class="card tilt-r">
+    <span class="kicker" id="writeKicker">Writing for</span>
+    <h2>The noise upstairs</h2>
+    <p class="lead">Write two to four sentences about the noise upstairs. You could type it, or say it out loud while someone types.</p>
+    <p class="small" style="margin-top:10px">Need a word? Tap one to pop it in.</p>
+    <div class="bank" id="bank"></div>
+    <textarea id="w1" placeholder="It was late, and the house was quiet..."></textarea>
+    <div class="meter" id="meter1"></div>
+    <div class="ask" id="ask"></div>
+  </div>
+  <div class="card tilt-l fill-yellow" id="againCard">
+    <span class="kicker" style="color:var(--plum)">If you fancy it</span>
+    <h2>Same moment, different reader</h2>
+    <p class="lead" style="color:#4a3a06">Pick someone else and write it again. What do you change?</p>
+    <div class="row" id="pickReader2" style="margin-top:10px"></div>
+    <textarea id="w2" placeholder="Now for someone new..." style="margin-top:12px;display:none"></textarea>
+  </div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Ready to share</button></div>
+</section>
+
+<!-- 5 send -->
+<section class="panel" data-name="Send">
+  <div class="card tilt-r fill-teal">
+    <span class="kicker" style="color:var(--yellow)">Nice work</span>
+    <h2>Send it to Jay</h2>
+    <p class="lead">Here is everything you made. Send it, save it, or keep tweaking.</p>
+  </div>
+  <div class="card">
+    <div class="preview" id="preview"></div>
+    <div class="sendbox" id="send"></div>
+  </div>
+  <div class="card tilt-l fill-ink">
+    <span class="kicker" style="color:var(--yellow)">Up next</span>
+    <h2>The Crow at the Window</h2>
+    <p class="lead">A scary story has been muddled up. Can you put the paragraphs back?</p>
+    <p style="margin-top:12px"><a class="btn orange" style="text-decoration:none;display:inline-block" href="/practice/scary-paragraphs.html">Go to Activity 2</a></p>
+  </div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn alt" id="restart">Start again</button></div>
+</section>
+<section class="footer">
+  <span class="kicker">Scary stories: all three activities</span>
+  <div class="next-links">
+    <a href="/practice/scary-audience.html" data-here="1"><span class="kicker">Activity 1</span><b>Who is reading?</b><span class="small">Same scary moment, different readers</span></a>
+    <a href="/practice/scary-paragraphs.html" data-here="2"><span class="kicker">Activity 2</span><b>The Crow at the Window</b><span class="small">Rescue a muddled story</span></a>
+    <a href="/practice/scary-story-builder.html" data-here="3"><span class="kicker">Activity 3</span><b>Build your own fright</b><span class="small">Plan and write your story</span></a>
+  </div>
+  <p class="small" style="margin-top:18px"><a href="/practice/#english-standard">Back to Practice</a></p>
+</section>
+</main>
+<script>
+(function(){
+  var B5 = window.B5 = {};
+  var JAY = "jay.raine@chiltonbridgeschool.co.uk";
+  B5.COHORT = ["JT","LW","EGW","LP","LC","HK"];
+
+  /* ---------- storage (namespaced, never required) ---------- */
+  B5.store = function(key){
+    var data = {};
+    try { data = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch(e){ data = {}; }
+    return {
+      data: data,
+      save: function(){ try { localStorage.setItem(key, JSON.stringify(data)); } catch(e){} },
+      wipe: function(){ try { localStorage.removeItem(key); } catch(e){} }
+    };
+  };
+
+  /* ---------- helpers ---------- */
+  B5.$ = function(s, r){ return (r || document).querySelector(s); };
+  B5.$$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  B5.esc = function(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); };
+  B5.toast = function(msg){
+    var t = B5.$(".toast");
+    if (!t){ t = document.createElement("div"); t.className = "toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("on");
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+  };
+  B5.sentences = function(t){
+    var m = String(t || "").trim().match(/[^.!?]+[.!?]+["')]*|[^.!?]+$/g);
+    return m ? m.filter(function(s){ return s.trim().length > 1; }).length : 0;
+  };
+  B5.words = function(t){ var m = String(t || "").trim().match(/\S+/g); return m ? m.length : 0; };
+
+  /* ---------- step tabs ---------- */
+  B5.steps = function(opts){
+    var bar = B5.$(opts.bar), panels = B5.$$(".panel"), st = opts.store;
+    bar.innerHTML = "";
+    panels.forEach(function(p, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = "<span class='n'>" + (i + 1) + "</span>" + B5.esc(p.getAttribute("data-name"));
+      b.addEventListener("click", function(){ go(i); });
+      bar.appendChild(b);
+    });
+    function go(i){
+      i = Math.max(0, Math.min(panels.length - 1, i));
+      panels.forEach(function(p, j){ p.classList.toggle("on", j === i); });
+      B5.$$("button", bar).forEach(function(b, j){
+        b.classList.toggle("on", j === i);
+        b.classList.toggle("done", !!(st.data.seen && st.data.seen[j]) && j !== i);
+      });
+      st.data.step = i; st.data.seen = st.data.seen || {}; st.data.seen[i] = true; st.save();
+      if (opts.onShow) opts.onShow(i);
+      var top = B5.$(opts.bar).getBoundingClientRect().top + window.pageYOffset - 70;
+      if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: "smooth" });
+    }
+    B5.$$("[data-go]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var cur = st.data.step || 0, v = b.getAttribute("data-go");
+        go(v === "next" ? cur + 1 : v === "back" ? cur - 1 : parseInt(v, 10));
+      });
+    });
+    go(st.data.step || 0);
+    return { go: go };
+  };
+
+  /* ---------- initials picker ---------- */
+  B5.who = function(el, st){
+    function draw(){
+      el.innerHTML = "<span class='small'>Who is this? (optional)</span>";
+      B5.COHORT.concat(["Skip"]).forEach(function(c){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chip" + ((st.data.who || "") === c ? " on" : "");
+        b.textContent = c;
+        b.addEventListener("click", function(){ st.data.who = c; st.save(); draw(); });
+        el.appendChild(b);
+      });
+    }
+    draw();
+  };
+
+  /* ---------- fear dial ---------- */
+  B5.FEAR = [
+    { n:1, name:"Cosy",       col:"#3aa7a0" },
+    { n:2, name:"Spooky",     col:"#d9a520" },
+    { n:3, name:"Creepy",     col:"#ef7724" },
+    { n:4, name:"Scary",      col:"#c8413b" },
+    { n:5, name:"Terrifying", col:"#5b2d6e" }
+  ];
+  B5.fearName = function(v){ return v ? (v + " " + B5.FEAR[v - 1].name) : "not set"; };
+  B5.dial = function(el, value, onChange){
+    var cx = 200, cy = 200, R = 170, r = 96;
+    function pt(a, rad){ var t = a * Math.PI / 180; return [cx + rad * Math.cos(t), cy + rad * Math.sin(t)]; }
+    var segs = "";
+    B5.FEAR.forEach(function(f, i){
+      var a0 = 180 + i * 36 + 1, a1 = 180 + (i + 1) * 36 - 1;
+      var p0 = pt(a0, R), p1 = pt(a1, R), p2 = pt(a1, r), p3 = pt(a0, r);
+      segs += "<path data-v='" + f.n + "' style='cursor:pointer' fill='" + f.col + "' d='M" + p0[0].toFixed(1) + " " + p0[1].toFixed(1) +
+        " A" + R + " " + R + " 0 0 1 " + p1[0].toFixed(1) + " " + p1[1].toFixed(1) +
+        " L" + p2[0].toFixed(1) + " " + p2[1].toFixed(1) +
+        " A" + r + " " + r + " 0 0 0 " + p3[0].toFixed(1) + " " + p3[1].toFixed(1) + " Z'/>";
+      var m = pt(180 + (i + .5) * 36, (R + r) / 2);
+      segs += "<text x='" + m[0].toFixed(1) + "' y='" + (m[1] + 8).toFixed(1) + "' text-anchor='middle' font-family='Archivo, Arial, sans-serif' font-weight='900' font-size='24' fill='#fff' pointer-events='none'>" + f.n + "</text>";
+    });
+    el.innerHTML =
+      "<div class='dial'><svg viewBox='0 0 400 220' role='img' aria-label='Fear Dial from 1 Cosy to 5 Terrifying'>" + segs +
+      "<g class='needle'><path d='M196 200 L200 52 L204 200 Z' fill='#1f1b2e'/></g>" +
+      "<circle cx='200' cy='200' r='16' fill='#1f1b2e'/><circle cx='200' cy='200' r='6' fill='#f6c64a'/></svg>" +
+      "<div class='labels'></div><div class='now'></div></div>";
+    var labels = B5.$(".labels", el), needle = B5.$(".needle", el), now = B5.$(".now", el), dialBox = B5.$(".dial", el);
+    B5.FEAR.forEach(function(f){
+      var b = document.createElement("button"); b.type = "button";
+      b.innerHTML = "<span class='num'>" + f.n + "</span>" + f.name;
+      b.addEventListener("click", function(){ set(f.n, true); });
+      labels.appendChild(b);
+    });
+    B5.$$("path[data-v]", el).forEach(function(p){
+      p.addEventListener("click", function(){ set(parseInt(p.getAttribute("data-v"), 10), true); });
+    });
+    function set(v, user){
+      value = v;
+      var ang = v ? (-90 + (v - .5) * 36) : -90;
+      needle.style.transform = "rotate(" + ang + "deg)";
+      B5.$$("button", labels).forEach(function(b, i){
+        var on = (i + 1) === v;
+        b.classList.toggle("on", on); b.style.background = on ? B5.FEAR[i].col : "";
+      });
+      now.textContent = v ? B5.FEAR[v - 1].name : "Tap a number to set the dial";
+      now.style.color = v ? B5.FEAR[v - 1].col : "";
+      if (user){
+        if (v >= 4){ dialBox.classList.remove("shake"); void dialBox.offsetWidth; dialBox.classList.add("shake"); }
+        if (onChange) onChange(v);
+      }
+    }
+    set(value || 0, false);
+    return { set: set };
+  };
+
+  /* ---------- send to Jay ---------- */
+  B5.sendBox = function(el, getMessage, st){
+    el.innerHTML =
+      "<div class='row'>" +
+      "<button type='button' class='btn teal' data-s='gmail'>Send with Gmail</button>" +
+      "<button type='button' class='btn alt' data-s='mail'>Email app</button>" +
+      "<button type='button' class='btn alt' data-s='copy'>Copy it</button>" +
+      "<button type='button' class='btn alt' data-s='save'>Save a copy</button></div>";
+    function build(){
+      var m = getMessage(), who = (st.data.who && st.data.who !== "Skip") ? st.data.who : "No initials";
+      var d = new Date(), stamp = d.toLocaleDateString("en-GB") + " " + d.toTimeString().slice(0, 5);
+      return { subject: m.subject + " (" + who + ")",
+               body: "From: " + who + "\nSent: " + stamp + "\n\n" + m.body + "\n", file: m.file };
+    }
+    B5.$$("button", el).forEach(function(b){
+      b.addEventListener("click", function(){
+        var m = build(), k = b.getAttribute("data-s");
+        if (k === "gmail"){
+          window.open("https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(JAY) +
+            "&su=" + encodeURIComponent(m.subject) + "&body=" + encodeURIComponent(m.body), "_blank");
+        } else if (k === "mail"){
+          location.href = "mailto:" + JAY + "?subject=" + encodeURIComponent(m.subject) + "&body=" + encodeURIComponent(m.body);
+        } else if (k === "copy"){
+          var txt = m.subject + "\n\n" + m.body;
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(txt).then(function(){ B5.toast("Copied"); }, function(){ fallback(txt); });
+          } else fallback(txt);
+        } else if (k === "save"){
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(new Blob([m.subject + "\n\n" + m.body], { type: "text/plain" }));
+          a.download = m.file || "my-work.txt"; document.body.appendChild(a); a.click();
+          setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+          B5.toast("Saved");
+        }
+      });
+    });
+    function fallback(txt){
+      var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand("copy"); B5.toast("Copied"); } catch(e){ B5.toast("Could not copy"); }
+      ta.remove();
+    }
+  };
+})();
+</script>
+<script>
+(function(){ var h = document.querySelector("[data-here='1']"); if (h) h.classList.add("here"); })();
+(function(){
+  var st = B5.store("b5.practice.scary-audience.v1"), d = st.data;
+  d.sort = d.sort || {}; d.peek = d.peek || {};
+  var READERS = { Pip:"p-pip", Sam:"p-sam", Ray:"p-ray" };
+
+  var SENTS = [
+    { t:"Bump! Something went bump upstairs. It was only Fluffy the cat, wearing a sock on her head.", jay:["Pip"],
+      why:"A silly surprise with short words, and it turns out fine. Sam might roll their eyes at this one." },
+    { t:"The floorboard above her creaked once. Then again. Closer to the stairs.", jay:["Sam","Ray"],
+      why:"Short sentences make the reader hold their breath. That is suspense, and older readers love it." },
+    { t:"She hugged her teddy and shouted for Mum.", jay:["Pip"],
+      why:"Easy to picture, and Mum is nearby, so it feels safe for a younger reader." },
+    { t:"The noise stopped. Somehow, the silence was worse.", jay:["Sam"],
+      why:"Nothing happens, and that is exactly what makes it creepy. Very Sam." },
+    { t:"The old house groaned, as it had every night for a hundred years, but tonight something groaned back.", jay:["Ray"],
+      why:"An old house, a slow build, and a twist hiding in the last few words. Perfect for a ghost story fan." },
+    { t:"It was a big, wobbly noise, like a giant trying to dance.", jay:["Pip"],
+      why:"A funny picture with nothing to really worry about. Pip would giggle." }
+  ];
+
+  B5.who(B5.$("#who"), st);
+
+  /* sort */
+  var box = B5.$("#sentences");
+  function drawSort(){
+    box.innerHTML = "";
+    var n = 0;
+    SENTS.forEach(function(s, i){
+      var picks = d.sort[i] || [];
+      if (picks.length) n++;
+      var c = document.createElement("div");
+      c.className = "sent" + (picks.length ? " sorted" : "");
+      var html = "<q>" + B5.esc(s.t) + "</q><div class='row'>";
+      Object.keys(READERS).forEach(function(r){
+        html += "<button type='button' class='chip " + READERS[r] + (picks.indexOf(r) > -1 ? " on" : "") + "' data-r='" + r + "'>" + r + "</button>";
+      });
+      html += "<button type='button' class='peek'>" + (d.peek[i] ? "Hide" : "What does Jay think?") + "</button></div>";
+      if (d.peek[i]){
+        var mine = picks.length ? picks.join(" and ") : "nobody yet";
+        var same = picks.length && s.jay.some(function(r){ return picks.indexOf(r) > -1; });
+        html += "<div class='jay'><span class='av'>J</span><div><b>Jay would pick " + s.jay.join(" and ") + ".</b>" + B5.esc(s.why) +
+          "<div class='small' style='margin-top:6px'>You picked " + B5.esc(mine) + "." +
+          (picks.length ? (same ? " We overlap. Great minds!" : " Different to Jay, which is fine. Can you say why you chose it?") : "") + "</div></div></div>";
+      }
+      c.innerHTML = html;
+      B5.$$("[data-r]", c).forEach(function(b){
+        b.addEventListener("click", function(){
+          var r = b.getAttribute("data-r"), p = d.sort[i] || [];
+          var k = p.indexOf(r); if (k > -1) p.splice(k, 1); else p.push(r);
+          d.sort[i] = p; st.save(); drawSort();
+        });
+      });
+      B5.$(".peek", c).addEventListener("click", function(){ d.peek[i] = !d.peek[i]; st.save(); drawSort(); });
+      box.appendChild(c);
+    });
+    B5.$("#sortCount").textContent = n + " of " + SENTS.length + " sorted";
+  }
+  drawSort();
+
+  /* reader pick + dial */
+  var TIPS = {
+    Pip:"Writing for Pip? Short words, a silly surprise and a happy ending work well.",
+    Sam:"Writing for Sam? Keep the scary thing hidden for as long as you can.",
+    Ray:"Writing for Ray? Slow it down and describe the old house."
+  };
+  function readerRow(el, key, onPick, exclude){
+    el.innerHTML = "";
+    Object.keys(READERS).forEach(function(r){
+      if (r === exclude) return;
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip " + (d[key] === r ? "on" : "");
+      b.textContent = r;
+      b.addEventListener("click", function(){ d[key] = r; st.save(); onPick(); });
+      el.appendChild(b);
+    });
+  }
+  function dialTip(){
+    var r = d.reader, v = d.fear, t = "";
+    if (!r) t = "Pick a reader first, then set the dial.";
+    else if (!v) t = TIPS[r];
+    else if (r === "Pip" && v >= 4) t = "Hmm, Pip is only 6. A " + v + " might mean nightmares. Still your call!";
+    else if (r === "Sam" && v <= 1) t = "Sam might find a 1 a bit babyish. Still your call!";
+    else if (r === "Ray" && v === 5) t = "Ray has read hundreds of ghost stories. A 5 might be just the challenge.";
+    else t = "A " + B5.FEAR[v - 1].name.toLowerCase() + " story for " + r + ". " + TIPS[r];
+    B5.$("#dialTip").textContent = t;
+  }
+  function drawPick(){ readerRow(B5.$("#pickReader"), "reader", function(){ drawPick(); dialTip(); drawWrite(); }); }
+  drawPick();
+  B5.dial(B5.$("#dial"), d.fear, function(v){ d.fear = v; st.save(); dialTip(); drawWrite(); });
+  dialTip();
+
+  /* write */
+  var BANK = {
+    Pip:["bump","wobbly","giggle","tiptoe","teddy","torch","squeak","phew"],
+    Sam:["creak","shadow","silence","closer","frozen","whisper","suddenly","behind"],
+    Ray:["ancient","groaned","flickering","gloom","cobwebs","stillness","forgotten","echo"]
+  };
+  var ASKS = [
+    "Would {r} understand all these words?",
+    "Would {r} enjoy this, or is it too much (or not enough)?",
+    "Does it make {r} want to know what happens next?"
+  ];
+  d.ask = d.ask || {};
+  var w1 = B5.$("#w1"), w2 = B5.$("#w2");
+  w1.value = d.w1 || ""; w2.value = d.w2 || "";
+  function insert(word){
+    var s = w1.selectionStart != null ? w1.selectionStart : w1.value.length, v = w1.value;
+    var pre = v.slice(0, s), post = v.slice(s);
+    var add = (pre && !/\s$/.test(pre) ? " " : "") + word + (post && !/^\s/.test(post) ? " " : "");
+    w1.value = pre + add + post; w1.focus();
+    w1.selectionStart = w1.selectionEnd = (pre + add).length;
+    d.w1 = w1.value; st.save(); meter();
+  }
+  function meter(){
+    var n = B5.sentences(w1.value), m = B5.$("#meter1"), h = "";
+    for (var i = 1; i <= 4; i++) h += "<i class='" + (i <= n ? "on" : "") + "'></i>";
+    if (n > 4) h += "<i class='over'></i>";
+    h += "<span class='small'>" + (n === 0 ? "Two to four sentences is plenty" : n + " sentence" + (n === 1 ? "" : "s") +
+      (n >= 2 && n <= 4 ? ". Lovely." : n > 4 ? ". Going for extra? Nice." : "")) + "</span>";
+    m.innerHTML = h;
+  }
+  function drawWrite(){
+    var r = d.reader || "your reader";
+    B5.$("#writeKicker").textContent = "Writing for " + r + (d.fear ? " / Fear Dial " + B5.fearName(d.fear) : "");
+    var bank = B5.$("#bank"); bank.innerHTML = "";
+    (BANK[d.reader] || BANK.Sam).forEach(function(w){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = w;
+      b.addEventListener("click", function(){ insert(w); }); bank.appendChild(b);
+    });
+    var ask = B5.$("#ask"); ask.innerHTML = "<span class='small'>Questions you might ask yourself</span>";
+    ASKS.forEach(function(q, i){
+      var row = document.createElement("div");
+      row.innerHTML = "<span>" + B5.esc(q.replace("{r}", r)) + "</span>";
+      ["Yes","Not sure"].forEach(function(a){
+        var b = document.createElement("button"); b.type = "button"; b.className = "chip" + (d.ask[i] === a ? " on" : ""); b.textContent = a;
+        b.addEventListener("click", function(){ d.ask[i] = (d.ask[i] === a ? null : a); st.save(); drawWrite(); });
+        row.appendChild(b);
+      });
+      ask.appendChild(row);
+    });
+    readerRow(B5.$("#pickReader2"), "reader2", function(){ drawWrite(); }, d.reader);
+    if (d.reader2 && d.reader2 !== d.reader){ w2.style.display = "block"; w2.placeholder = "Now write it for " + d.reader2 + "..."; }
+    else w2.style.display = "none";
+    meter();
+  }
+  w1.addEventListener("input", function(){ d.w1 = w1.value; st.save(); meter(); });
+  w2.addEventListener("input", function(){ d.w2 = w2.value; st.save(); });
+  drawWrite();
+
+  /* send */
+  function message(){
+    var lines = ["SCARY STORIES 1: WHO IS READING?", ""];
+    lines.push("Sorting the sentences:");
+    SENTS.forEach(function(s, i){
+      var p = d.sort[i] || [];
+      lines.push("- \"" + s.t + "\" -> " + (p.length ? p.join(", ") : "not sorted") + "  (Jay: " + s.jay.join(", ") + ")");
+    });
+    lines.push("", "Writing for: " + (d.reader || "not chosen"), "Fear Dial: " + B5.fearName(d.fear), "");
+    lines.push("My scary moment:", (d.w1 || "").trim() || "(nothing written yet)");
+    if (d.reader2 && d.reader2 !== d.reader && (d.w2 || "").trim()){
+      lines.push("", "The same moment for " + d.reader2 + ":", d.w2.trim());
+    }
+    var a = ASKS.map(function(q, i){ return "- " + q.replace("{r}", d.reader || "my reader") + " " + (d.ask[i] || "-"); });
+    lines.push("", "Checking my writing:"); lines = lines.concat(a);
+    return { subject:"Scary stories 1: Who is reading?", body: lines.join("\n"), file:"who-is-reading.txt" };
+  }
+  B5.sendBox(B5.$("#send"), message, st);
+
+  B5.steps({ bar:"#steps", store:st, onShow:function(i){
+    if (i === 3) drawWrite();
+    if (i === 4) B5.$("#preview").textContent = message().body;
+  }});
+
+  B5.$("#restart").addEventListener("click", function(){
+    if (confirm("Clear everything on this page and start again?")){ st.wipe(); location.reload(); }
+  });
+})();
+</script>
+</body>
+</html>

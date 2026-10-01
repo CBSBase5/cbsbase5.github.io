@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build your own fright | Scary stories | Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7efe3; --paper2:#fffaf2; --ink:#1f1b2e; --ink2:#4a4458;
+  --teal:#007291; --teal2:#2fb3c9; --orange:#ef7724; --orange2:#ffb066;
+  --plum:#5b2d6e; --plum2:#9b5fb4; --yellow:#f6c64a; --red:#c8413b;
+  --dusk1:#231a35; --dusk2:#4a2a5e; --dusk3:#8a3f5c;
+  --r1:20px 26px 18px 24px; --r2:26px 18px 24px 20px;
+  --display:"Archivo","Arial Black",system-ui,sans-serif;
+  --shadow:0 2px 0 rgba(31,27,46,.08),0 10px 24px rgba(31,27,46,.10);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink); background:var(--paper);
+  font-family:"Atkinson Hyperlegible",system-ui,sans-serif; font-size:18px; line-height:1.5;
+  background-image:
+    radial-gradient(1200px 500px at 110% -10%,rgba(239,119,36,.16),transparent 60%),
+    radial-gradient(900px 600px at -20% 30%,rgba(0,114,145,.12),transparent 60%),
+    radial-gradient(900px 700px at 120% 90%,rgba(91,45,110,.12),transparent 60%);
+  background-attachment:fixed; min-height:100vh;
+}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.22;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
+h1,h2,h3,.display{font-family:var(--display);letter-spacing:-.01em;line-height:1.15;margin:0}
+a{color:var(--teal)}
+button{font:inherit;color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(247,239,227,.92);backdrop-filter:blur(6px);
+  border-bottom:2px solid rgba(31,27,46,.08)}
+.topbar .wrap{display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:900;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px;font-size:18px}
+.brand .mark{width:30px;height:30px;border-radius:10px 12px 9px 13px;background:linear-gradient(135deg,var(--teal),var(--teal2));
+  display:grid;place-items:center;color:#fff;font-size:14px;transform:rotate(-4deg)}
+.topbar nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{text-decoration:none;color:var(--ink2);font-weight:700;font-size:15px;padding:6px 10px;border-radius:12px}
+.topbar nav a:hover,.topbar nav a.on{background:#fff;color:var(--ink)}
+
+/* hero */
+.hero{position:relative;overflow:hidden;color:#fff;margin:18px 0 6px;padding:28px 22px 30px;border-radius:var(--r1);
+  background:linear-gradient(140deg,var(--dusk1) 0%,var(--dusk2) 55%,var(--dusk3) 100%);box-shadow:var(--shadow)}
+.hero h1{font-size:clamp(30px,6vw,52px);font-weight:900;max-width:15ch;position:relative;z-index:2}
+.hero p{position:relative;z-index:2;max-width:46ch;margin:10px 0 0;color:#efe6ff;font-size:19px}
+.hero .kicker{position:relative;z-index:2;color:var(--yellow)}
+.hero .moon{position:absolute;right:28px;top:22px;width:84px;height:84px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff8dc,#f6d77a 60%,#d9a93c);box-shadow:0 0 50px rgba(246,215,122,.55);z-index:1}
+@media(max-width:620px){.hero .moon{width:46px;height:46px;right:14px;top:14px}}
+.hero .hills{position:absolute;left:0;right:0;width:100%;bottom:-2px;height:60px;z-index:1;opacity:.9}
+.hero .hint{position:relative;z-index:2;display:inline-flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero .hint span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:999px;font-size:15px}
+
+.kicker{display:inline-block;font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+
+/* step tabs */
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+.steps button{border:0;cursor:pointer;background:#fff;padding:8px 14px;border-radius:14px 18px 12px 16px;font-weight:700;font-size:15px;
+  box-shadow:0 1px 0 rgba(31,27,46,.1);display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.steps button .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--paper);font-size:13px;font-family:var(--display);font-weight:900}
+.steps button.on{background:var(--ink);color:#fff}
+.steps button.on .n{background:var(--yellow);color:var(--ink)}
+.steps button.done .n{background:var(--teal);color:#fff}
+
+.panel{display:none;animation:rise .35s ease}
+.panel.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* cards */
+.card{background:var(--paper2);border-radius:var(--r1);padding:20px;box-shadow:var(--shadow);margin:16px 0;position:relative}
+.card:nth-of-type(2n){border-radius:var(--r2)}
+.tilt-l{transform:rotate(-.6deg)} .tilt-r{transform:rotate(.5deg)}
+.card h2{font-size:clamp(22px,4vw,30px);font-weight:900;margin-bottom:6px}
+.card h3{font-size:20px;font-weight:800;margin-bottom:4px}
+.lead{font-size:19px;color:var(--ink2);margin:4px 0 0;max-width:60ch}
+.fill-teal{background:linear-gradient(140deg,#0b7f9e,#2fb3c9);color:#fff}
+.fill-orange{background:linear-gradient(140deg,#ef7724,#ffb066);color:#2a1606}
+.fill-plum{background:linear-gradient(140deg,#5b2d6e,#9b5fb4);color:#fff}
+.fill-yellow{background:linear-gradient(140deg,#f6c64a,#ffe08f);color:#2a2006}
+.fill-ink{background:linear-gradient(140deg,#1f1b2e,#3b3352);color:#fff}
+.fill-teal .lead,.fill-plum .lead,.fill-ink .lead{color:rgba(255,255,255,.88)}
+
+.grid{display:grid;gap:14px}
+@media(min-width:720px){.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}}
+
+/* buttons and chips */
+.btn{border:0;cursor:pointer;font-weight:800;font-family:var(--display);font-size:17px;padding:12px 20px;border-radius:16px 20px 14px 18px;
+  background:var(--ink);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .1s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.btn.alt{background:#fff;color:var(--ink);box-shadow:0 3px 0 rgba(31,27,46,.15)}
+.btn.orange{background:var(--orange)} .btn.teal{background:var(--teal)} .btn.plum{background:var(--plum)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin:20px 0 40px;flex-wrap:wrap}
+.chip{border:2px solid rgba(31,27,46,.15);background:#fff;cursor:pointer;padding:8px 14px;border-radius:999px;font-weight:700;font-size:16px;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.t-time.on{background:var(--teal);border-color:var(--teal)}
+.chip.t-place.on{background:var(--orange);border-color:var(--orange)}
+.chip.t-person.on{background:var(--plum);border-color:var(--plum)}
+.chip.t-topic.on{background:#b8860b;border-color:#b8860b}
+
+textarea,input[type=text]{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid rgba(31,27,46,.15);border-radius:14px 18px 12px 16px;background:#fff;color:var(--ink)}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+textarea:focus,input[type=text]:focus{outline:3px solid var(--yellow);border-color:var(--ink)}
+.small{font-size:15px;color:var(--ink2)}
+.muted{opacity:.75}
+
+/* reader cards */
+.reader{border-radius:var(--r1);padding:18px;color:#fff;position:relative;overflow:hidden;min-height:100%}
+.reader .face{width:64px;height:64px;float:right;margin:0 0 6px 10px}
+.reader h3{font-size:24px}
+.reader .age{font-family:var(--display);font-weight:800;opacity:.85}
+.reader ul{margin:8px 0 0;padding-left:20px}
+.reader .lab{font-weight:800;margin-top:8px;display:block}
+.r-pip{background:linear-gradient(140deg,#e9762b,#f7b267)}
+.r-sam{background:linear-gradient(140deg,#4a2a5e,#8a3f5c)}
+.r-ray{background:linear-gradient(140deg,#0b6f8a,#3aa7a0)}
+
+/* fear dial */
+.dial{max-width:420px;margin:6px auto 0;text-align:center}
+.dial svg{width:100%;height:auto;display:block}
+.dial .needle{transition:transform .5s cubic-bezier(.3,1.6,.5,1);transform-origin:200px 200px}
+.dial .labels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.dial .labels button{border:0;cursor:pointer;border-radius:12px;padding:8px 2px;font-weight:800;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 1px 0 rgba(31,27,46,.12)}
+.dial .labels button .num{display:block;font-family:var(--display);font-size:20px}
+.dial .labels button.on{color:#fff}
+.dial .now{font-family:var(--display);font-weight:900;font-size:26px;margin-top:10px}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px) rotate(-1deg)}75%{transform:translateX(4px) rotate(1deg)}}
+
+/* initials */
+.who{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* feedback bubble */
+.jay{display:flex;gap:12px;align-items:flex-start;background:#fff;border-radius:18px 22px 16px 20px;padding:14px;border:2px dashed rgba(0,114,145,.35);margin-top:12px}
+.jay .av{flex:0 0 46px;height:46px;border-radius:50%;background:linear-gradient(140deg,var(--teal),var(--teal2));display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:900}
+.jay b{display:block}
+
+/* send */
+.sendbox .row{margin-top:10px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:60;transition:transform .3s}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+.footer{margin:30px 0 50px;text-align:center}
+.footer a{font-weight:700}
+.next-links{display:grid;gap:12px}
+@media(min-width:720px){.next-links{grid-template-columns:1fr 1fr 1fr}}
+.next-links a{display:block;text-decoration:none;color:inherit;padding:14px;border-radius:var(--r2);background:#fff;box-shadow:var(--shadow)}
+.next-links a.here{outline:3px solid var(--yellow)}
+.next-links a b{font-family:var(--display);display:block;font-size:18px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{.topbar,.grain,.steps,.navrow,.sendbox{display:none}.panel{display:block}}
+.reels{display:grid;gap:14px;margin-top:12px}
+@media(min-width:720px){.reels{grid-template-columns:1fr 1fr}}
+.reel{background:#fff;border-radius:18px 22px 16px 20px;padding:14px;box-shadow:var(--shadow)}
+.reel .win{font-family:var(--display);font-weight:900;font-size:24px;min-height:72px;display:grid;place-items:center;text-align:center;
+  border-radius:14px;background:linear-gradient(140deg,var(--dusk1),var(--dusk2));color:var(--yellow);padding:10px;margin:8px 0}
+.reel .win.spin{animation:flick .1s infinite}
+@keyframes flick{50%{opacity:.6}}
+.reel .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.reel .opts .chip{font-size:14px;padding:6px 10px}
+.plan{display:grid;gap:12px;margin-top:6px}
+.prow{background:#fff;border-radius:18px 22px 16px 20px;padding:14px;box-shadow:0 1px 0 rgba(31,27,46,.08);display:grid;grid-template-columns:44px 1fr;gap:12px}
+.prow .num{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:20px;color:#fff;background:var(--ink)}
+.prow:nth-child(2) .num{background:var(--teal)}.prow:nth-child(3) .num{background:var(--orange)}.prow:nth-child(4) .num{background:var(--plum)}.prow:nth-child(5) .num{background:var(--red)}
+.prow h3{font-size:19px}
+.prow textarea{min-height:70px;margin-top:8px}
+.prow .row{margin-top:8px}
+.prow .chip{font-size:14px;padding:5px 11px}
+.prow .idea{background:var(--paper);border-radius:12px;padding:8px 12px;margin-top:6px;font-size:16px}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.starters .chip{font-size:14px;padding:5px 11px;background:#fffaf2}
+.book{background:#fffdf7;border-radius:6px 18px 18px 6px;padding:26px 24px;box-shadow:inset 10px 0 18px -12px rgba(0,0,0,.25),var(--shadow);font-family:Georgia,serif;font-size:19px;line-height:1.7}
+.book h2{font-family:var(--display);font-size:28px;margin-bottom:4px}
+.book .by{font-size:15px;color:var(--ink2);margin-bottom:14px;font-family:"Atkinson Hyperlegible"}
+.book p{margin:0 0 14px;text-indent:1.4em}
+.book p:first-of-type{text-indent:0}
+.book .empty{color:var(--ink2);font-style:italic}
+.notice{display:grid;gap:8px;margin-top:10px}
+.notice label{display:flex;gap:12px;align-items:center;background:#fff;padding:12px;border-radius:14px;cursor:pointer;font-weight:700}
+.notice input{width:26px;height:26px;accent-color:var(--teal)}
+.auto{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.auto span{background:#fff;border-radius:999px;padding:6px 12px;font-weight:700;font-size:15px}
+.preview{white-space:pre-wrap;background:#fff;border-radius:16px;padding:14px;font-size:17px;max-height:300px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="/"><span class="mark">B5</span>Base 5</a>
+  <nav><a href="/">Home</a><a class="on" href="/practice/#english-standard">Practice</a><a href="/shuffle/">Shuffle</a></nav>
+</div></header>
+<main class="wrap">
+<section class="hero">
+  <div class="moon" aria-hidden="true"></div>
+  <span class="kicker">Scary stories 3 of 3</span>
+  <h1>Build your own fright</h1>
+  <p>Now you are the author. You choose who it's for, how scary it is, and what happens.</p>
+  <div class="hint"><span>30 to 45 minutes</span><span>Plan, then write</span><span>Sends to Jay</span></div>
+  <svg class="hills" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 L0 30 Q90 12 200 32 T420 24 T640 34 T800 18 L800 60 Z" fill="#160f22"/><path d="M120 30 l6 -22 l6 22 Z M150 32 l7 -28 l7 28 Z M690 30 l6 -20 l6 20Z" fill="#160f22"/></svg>
+</section>
+
+<div class="who" id="who" style="margin-top:12px"></div>
+<div class="steps" id="steps"></div>
+
+<!-- 1 reader -->
+<section class="panel" data-name="Reader">
+  <div class="card tilt-l">
+    <span class="kicker">Choose your reader</span>
+    <h2>Who is this story for?</h2>
+    <div class="row" id="readers" style="margin-top:12px"></div>
+    <input type="text" id="readerOwn" placeholder="Who? For example: my cousin, aged 10" style="margin-top:12px;display:none">
+    <p class="tip small" id="readerTip" style="margin-top:10px"></p>
+  </div>
+  <div class="card tilt-r">
+    <span class="kicker">The Fear Dial</span>
+    <h2>How scary?</h2>
+    <div id="dial"></div>
+  </div>
+  <div class="navrow"><span></span><button class="btn orange" data-go="next">Pick ingredients</button></div>
+</section>
+
+<!-- 2 ingredients -->
+<section class="panel" data-name="Ingredients">
+  <div class="card tilt-r fill-plum">
+    <span class="kicker" style="color:var(--yellow)">Pick your ingredients</span>
+    <h2>Spin, choose, or invent your own</h2>
+    <p class="lead">Mix and match. Nothing here is fixed, you can change it later.</p>
+  </div>
+  <div class="reels">
+    <div class="reel"><span class="kicker">Where</span><div class="win" id="winWhere">?</div>
+      <div class="row"><button class="btn plum" type="button" id="spinWhere">Spin</button></div>
+      <div class="opts" id="optWhere"></div>
+      <input type="text" id="ownWhere" placeholder="Or your own idea" style="margin-top:10px">
+    </div>
+    <div class="reel"><span class="kicker">What is scary</span><div class="win" id="winWhat">?</div>
+      <div class="row"><button class="btn plum" type="button" id="spinWhat">Spin</button></div>
+      <div class="opts" id="optWhat"></div>
+      <input type="text" id="ownWhat" placeholder="Or your own idea" style="margin-top:10px">
+    </div>
+  </div>
+  <div class="card tilt-l">
+    <span class="kicker">Your main character</span>
+    <div class="row"><input type="text" id="hero" placeholder="A name" style="flex:1 1 220px"><button class="btn alt" type="button" id="heroDice">Random name</button></div>
+  </div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Plan it</button></div>
+</section>
+
+<!-- 3 plan -->
+<section class="panel" data-name="Plan">
+  <div class="card tilt-l">
+    <span class="kicker">Plan your paragraphs</span>
+    <h2>How many paragraphs?</h2>
+    <p class="lead">Five is a classic scary story. Three is great too. Notes, single words or doodle ideas all count.</p>
+    <div class="row" id="howMany" style="margin-top:10px"></div>
+  </div>
+  <div class="plan" id="plan"></div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Start writing</button></div>
+</section>
+
+<!-- 4 write -->
+<section class="panel" data-name="Write">
+  <div class="card tilt-r">
+    <span class="kicker">Write it</span>
+    <h2>One paragraph at a time</h2>
+    <p class="lead">Your plan is here to help. Tap a starter if you want one.</p>
+    <input type="text" id="title" placeholder="Your story's title" style="margin-top:12px;font-family:var(--display);font-weight:800;font-size:22px">
+  </div>
+  <div class="plan" id="write"></div>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn orange" data-go="next">Read it back</button></div>
+</section>
+
+<!-- 5 read and send -->
+<section class="panel" data-name="Read and send">
+  <div class="book" id="book"></div>
+  <div class="card tilt-l">
+    <span class="kicker">Things you might notice in your story</span>
+    <div class="auto" id="auto"></div>
+    <div class="notice" id="notice"></div>
+  </div>
+  <div class="card fill-teal">
+    <span class="kicker" style="color:var(--yellow)">Share it</span>
+    <h2>Send it to Jay, or to your reader</h2>
+    <p class="lead">You might like to read it to the person you wrote it for and watch their face.</p>
+    <div class="sendbox" id="send"></div>
+  </div>
+  <details class="card"><summary style="cursor:pointer;font-weight:800">See exactly what gets sent</summary><div class="preview" id="preview" style="margin-top:10px"></div></details>
+  <div class="navrow"><button class="btn alt" data-go="back">Back</button><button class="btn alt" id="restart">Start again</button></div>
+</section>
+<section class="footer">
+  <span class="kicker">Scary stories: all three activities</span>
+  <div class="next-links">
+    <a href="/practice/scary-audience.html" data-here="1"><span class="kicker">Activity 1</span><b>Who is reading?</b><span class="small">Same scary moment, different readers</span></a>
+    <a href="/practice/scary-paragraphs.html" data-here="2"><span class="kicker">Activity 2</span><b>The Crow at the Window</b><span class="small">Rescue a muddled story</span></a>
+    <a href="/practice/scary-story-builder.html" data-here="3"><span class="kicker">Activity 3</span><b>Build your own fright</b><span class="small">Plan and write your story</span></a>
+  </div>
+  <p class="small" style="margin-top:18px"><a href="/practice/#english-standard">Back to Practice</a></p>
+</section>
+</main>
+<script>
+(function(){
+  var B5 = window.B5 = {};
+  var JAY = "jay.raine@chiltonbridgeschool.co.uk";
+  B5.COHORT = ["JT","LW","EGW","LP","LC","HK"];
+
+  /* ---------- storage (namespaced, never required) ---------- */
+  B5.store = function(key){
+    var data = {};
+    try { data = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch(e){ data = {}; }
+    return {
+      data: data,
+      save: function(){ try { localStorage.setItem(key, JSON.stringify(data)); } catch(e){} },
+      wipe: function(){ try { localStorage.removeItem(key); } catch(e){} }
+    };
+  };
+
+  /* ---------- helpers ---------- */
+  B5.$ = function(s, r){ return (r || document).querySelector(s); };
+  B5.$$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  B5.esc = function(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); };
+  B5.toast = function(msg){
+    var t = B5.$(".toast");
+    if (!t){ t = document.createElement("div"); t.className = "toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("on");
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+  };
+  B5.sentences = function(t){
+    var m = String(t || "").trim().match(/[^.!?]+[.!?]+["')]*|[^.!?]+$/g);
+    return m ? m.filter(function(s){ return s.trim().length > 1; }).length : 0;
+  };
+  B5.words = function(t){ var m = String(t || "").trim().match(/\S+/g); return m ? m.length : 0; };
+
+  /* ---------- step tabs ---------- */
+  B5.steps = function(opts){
+    var bar = B5.$(opts.bar), panels = B5.$$(".panel"), st = opts.store;
+    bar.innerHTML = "";
+    panels.forEach(function(p, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = "<span class='n'>" + (i + 1) + "</span>" + B5.esc(p.getAttribute("data-name"));
+      b.addEventListener("click", function(){ go(i); });
+      bar.appendChild(b);
+    });
+    function go(i){
+      i = Math.max(0, Math.min(panels.length - 1, i));
+      panels.forEach(function(p, j){ p.classList.toggle("on", j === i); });
+      B5.$$("button", bar).forEach(function(b, j){
+        b.classList.toggle("on", j === i);
+        b.classList.toggle("done", !!(st.data.seen && st.data.seen[j]) && j !== i);
+      });
+      st.data.step = i; st.data.seen = st.data.seen || {}; st.data.seen[i] = true; st.save();
+      if (opts.onShow) opts.onShow(i);
+      var top = B5.$(opts.bar).getBoundingClientRect().top + window.pageYOffset - 70;
+      if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: "smooth" });
+    }
+    B5.$$("[data-go]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var cur = st.data.step || 0, v = b.getAttribute("data-go");
+        go(v === "next" ? cur + 1 : v === "back" ? cur - 1 : parseInt(v, 10));
+      });
+    });
+    go(st.data.step || 0);
+    return { go: go };
+  };
+
+  /* ---------- initials picker ---------- */
+  B5.who = function(el, st){
+    function draw(){
+      el.innerHTML = "<span class='small'>Who is this? (optional)</span>";
+      B5.COHORT.concat(["Skip"]).forEach(function(c){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chip" + ((st.data.who || "") === c ? " on" : "");
+        b.textContent = c;
+        b.addEventListener("click", function(){ st.data.who = c; st.save(); draw(); });
+        el.appendChild(b);
+      });
+    }
+    draw();
+  };
+
+  /* ---------- fear dial ---------- */
+  B5.FEAR = [
+    { n:1, name:"Cosy",       col:"#3aa7a0" },
+    { n:2, name:"Spooky",     col:"#d9a520" },
+    { n:3, name:"Creepy",     col:"#ef7724" },
+    { n:4, name:"Scary",      col:"#c8413b" },
+    { n:5, name:"Terrifying", col:"#5b2d6e" }
+  ];
+  B5.fearName = function(v){ return v ? (v + " " + B5.FEAR[v - 1].name) : "not set"; };
+  B5.dial = function(el, value, onChange){
+    var cx = 200, cy = 200, R = 170, r = 96;
+    function pt(a, rad){ var t = a * Math.PI / 180; return [cx + rad * Math.cos(t), cy + rad * Math.sin(t)]; }
+    var segs = "";
+    B5.FEAR.forEach(function(f, i){
+      var a0 = 180 + i * 36 + 1, a1 = 180 + (i + 1) * 36 - 1;
+      var p0 = pt(a0, R), p1 = pt(a1, R), p2 = pt(a1, r), p3 = pt(a0, r);
+      segs += "<path data-v='" + f.n + "' style='cursor:pointer' fill='" + f.col + "' d='M" + p0[0].toFixed(1) + " " + p0[1].toFixed(1) +
+        " A" + R + " " + R + " 0 0 1 " + p1[0].toFixed(1) + " " + p1[1].toFixed(1) +
+        " L" + p2[0].toFixed(1) + " " + p2[1].toFixed(1) +
+        " A" + r + " " + r + " 0 0 0 " + p3[0].toFixed(1) + " " + p3[1].toFixed(1) + " Z'/>";
+      var m = pt(180 + (i + .5) * 36, (R + r) / 2);
+      segs += "<text x='" + m[0].toFixed(1) + "' y='" + (m[1] + 8).toFixed(1) + "' text-anchor='middle' font-family='Archivo, Arial, sans-serif' font-weight='900' font-size='24' fill='#fff' pointer-events='none'>" + f.n + "</text>";
+    });
+    el.innerHTML =
+      "<div class='dial'><svg viewBox='0 0 400 220' role='img' aria-label='Fear Dial from 1 Cosy to 5 Terrifying'>" + segs +
+      "<g class='needle'><path d='M196 200 L200 52 L204 200 Z' fill='#1f1b2e'/></g>" +
+      "<circle cx='200' cy='200' r='16' fill='#1f1b2e'/><circle cx='200' cy='200' r='6' fill='#f6c64a'/></svg>" +
+      "<div class='labels'></div><div class='now'></div></div>";
+    var labels = B5.$(".labels", el), needle = B5.$(".needle", el), now = B5.$(".now", el), dialBox = B5.$(".dial", el);
+    B5.FEAR.forEach(function(f){
+      var b = document.createElement("button"); b.type = "button";
+      b.innerHTML = "<span class='num'>" + f.n + "</span>" + f.name;
+      b.addEventListener("click", function(){ set(f.n, true); });
+      labels.appendChild(b);
+    });
+    B5.$$("path[data-v]", el).forEach(function(p){
+      p.addEventListener("click", function(){ set(parseInt(p.getAttribute("data-v"), 10), true); });
+    });
+    function set(v, user){
+      value = v;
+      var ang = v ? (-90 + (v - .5) * 36) : -90;
+      needle.style.transform = "rotate(" + ang + "deg)";
+      B5.$$("button", labels).forEach(function(b, i){
+        var on = (i + 1) === v;
+        b.classList.toggle("on", on); b.style.background = on ? B5.FEAR[i].col : "";
+      });
+      now.textContent = v ? B5.FEAR[v - 1].name : "Tap a number to set the dial";
+      now.style.color = v ? B5.FEAR[v - 1].col : "";
+      if (user){
+        if (v >= 4){ dialBox.classList.remove("shake"); void dialBox.offsetWidth; dialBox.classList.add("shake"); }
+        if (onChange) onChange(v);
+      }
+    }
+    set(value || 0, false);
+    return { set: set };
+  };
+
+  /* ---------- send to Jay ---------- */
+  B5.sendBox = function(el, getMessage, st){
+    el.innerHTML =
+      "<div class='row'>" +
+      "<button type='button' class='btn teal' data-s='gmail'>Send with Gmail</button>" +
+      "<button type='button' class='btn alt' data-s='mail'>Email app</button>" +
+      "<button type='button' class='btn alt' data-s='copy'>Copy it</button>" +
+      "<button type='button' class='btn alt' data-s='save'>Save a copy</button></div>";
+    function build(){
+      var m = getMessage(), who = (st.data.who && st.data.who !== "Skip") ? st.data.who : "No initials";
+      var d = new Date(), stamp = d.toLocaleDateString("en-GB") + " " + d.toTimeString().slice(0, 5);
+      return { subject: m.subject + " (" + who + ")",
+               body: "From: " + who + "\nSent: " + stamp + "\n\n" + m.body + "\n", file: m.file };
+    }
+    B5.$$("button", el).forEach(function(b){
+      b.addEventListener("click", function(){
+        var m = build(), k = b.getAttribute("data-s");
+        if (k === "gmail"){
+          window.open("https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(JAY) +
+            "&su=" + encodeURIComponent(m.subject) + "&body=" + encodeURIComponent(m.body), "_blank");
+        } else if (k === "mail"){
+          location.href = "mailto:" + JAY + "?subject=" + encodeURIComponent(m.subject) + "&body=" + encodeURIComponent(m.body);
+        } else if (k === "copy"){
+          var txt = m.subject + "\n\n" + m.body;
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(txt).then(function(){ B5.toast("Copied"); }, function(){ fallback(txt); });
+          } else fallback(txt);
+        } else if (k === "save"){
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(new Blob([m.subject + "\n\n" + m.body], { type: "text/plain" }));
+          a.download = m.file || "my-work.txt"; document.body.appendChild(a); a.click();
+          setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+          B5.toast("Saved");
+        }
+      });
+    });
+    function fallback(txt){
+      var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand("copy"); B5.toast("Copied"); } catch(e){ B5.toast("Could not copy"); }
+      ta.remove();
+    }
+  };
+})();
+</script>
+<script>
+(function(){ var h = document.querySelector("[data-here='3']"); if (h) h.classList.add("here"); })();
+(function(){
+  var st = B5.store("b5.practice.scary-story-builder.v1"), d = st.data;
+  d.plan = d.plan || {}; d.chg = d.chg || {}; d.para = d.para || {}; d.notice = d.notice || {};
+  d.n = d.n || 5;
+
+  B5.who(B5.$("#who"), st);
+
+  /* reader */
+  var RTIP = {
+    Pip:"Pip is 6: short words, silly surprises, and a happy ending.",
+    Sam:"Sam is 13: suspense, cliffhangers, and a twist.",
+    Ray:"Ray is 70 and loves ghost stories: old houses and a slow, creepy build up.",
+    Other:"Think about what your reader enjoys, and what might be too much for them."
+  };
+  var own = B5.$("#readerOwn"); own.value = d.readerOwn || "";
+  own.addEventListener("input", function(){ d.readerOwn = own.value; st.save(); });
+  function drawReaders(){
+    var row = B5.$("#readers"); row.innerHTML = "";
+    [["Pip","Pip (6)"],["Sam","Sam (13)"],["Ray","Ray (70)"],["Other","Someone else"]].forEach(function(r){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip" + (d.reader === r[0] ? " on" : ""); b.textContent = r[1];
+      b.addEventListener("click", function(){ d.reader = r[0]; st.save(); drawReaders(); });
+      row.appendChild(b);
+    });
+    own.style.display = d.reader === "Other" ? "block" : "none";
+    B5.$("#readerTip").textContent = d.reader ? RTIP[d.reader] : "";
+  }
+  function readerName(){ return d.reader === "Other" ? ((d.readerOwn || "").trim() || "someone else") : (d.reader || "not chosen"); }
+  drawReaders();
+  B5.dial(B5.$("#dial"), d.fear, function(v){ d.fear = v; st.save(); });
+
+  /* ingredients */
+  var WHERE = ["An empty school at night","A foggy forest","A lift that will not stop","A caravan in a storm","A theme park after closing","Grandad's attic"];
+  var WHAT = ["A noise that keeps getting closer","A shadow that moves on its own","A door that was locked yesterday","A bird that will not stop watching","A phone that rings with no caller","Footprints that stop in the middle"];
+  var NAMES = ["Mia","Kai","Ollie","Ava","Reggie","Nova","Finn","Isla","Dex","Ruby","Zack","Luna"];
+  function reel(key, list, winSel, optSel, ownSel, spinSel){
+    var win = B5.$(winSel), opts = B5.$(optSel), ownIn = B5.$(ownSel);
+    ownIn.value = d[key + "Own"] || "";
+    function show(){ win.textContent = (d[key + "Own"] || "").trim() || d[key] || "?"; drawOpts(); }
+    function drawOpts(){
+      opts.innerHTML = "";
+      list.forEach(function(x){
+        var b = document.createElement("button"); b.type = "button"; b.className = "chip" + (d[key] === x && !(d[key + "Own"] || "").trim() ? " on" : ""); b.textContent = x;
+        b.addEventListener("click", function(){ d[key] = x; d[key + "Own"] = ""; ownIn.value = ""; st.save(); show(); });
+        opts.appendChild(b);
+      });
+    }
+    ownIn.addEventListener("input", function(){ d[key + "Own"] = ownIn.value; st.save(); show(); });
+    B5.$(spinSel).addEventListener("click", function(){
+      var n = 0, h;
+      win.classList.add("spin");
+      h = setInterval(function(){
+        win.textContent = list[Math.floor(Math.random() * list.length)];
+        if (++n > 12){
+          clearInterval(h); win.classList.remove("spin");
+          d[key] = list[Math.floor(Math.random() * list.length)]; d[key + "Own"] = ""; ownIn.value = ""; st.save(); show();
+        }
+      }, 70);
+    });
+    show();
+  }
+  reel("where", WHERE, "#winWhere", "#optWhere", "#ownWhere", "#spinWhere");
+  reel("what", WHAT, "#winWhat", "#optWhat", "#ownWhat", "#spinWhat");
+  function whereTxt(){ return (d.whereOwn || "").trim() || d.where || ""; }
+  function whatTxt(){ return (d.whatOwn || "").trim() || d.what || ""; }
+  var hero = B5.$("#hero"); hero.value = d.hero || "";
+  hero.addEventListener("input", function(){ d.hero = hero.value; st.save(); });
+  B5.$("#heroDice").addEventListener("click", function(){
+    hero.value = NAMES[Math.floor(Math.random() * NAMES.length)]; d.hero = hero.value; st.save();
+  });
+
+  /* plan */
+  var STEPS5 = [
+    ["Opening","Where are we, and who is there?"],
+    ["Something odd","The first strange thing happens."],
+    ["It gets worse","The strange thing grows."],
+    ["The scariest moment","The big reveal."],
+    ["The ending","Happy, a twist, or a cliffhanger?"]
+  ];
+  var STEPS3 = [
+    ["Opening","Where are we, and who is there?"],
+    ["Something strange","The scary thing appears and grows."],
+    ["The ending","Happy, a twist, or a cliffhanger?"]
+  ];
+  var KINDS = [["time","Time"],["place","Place"],["person","Person"],["topic","Topic"]];
+  var STARTERS = {
+    time:["Later that night,","A few minutes later,","At midnight,","The next morning,"],
+    place:["Outside,","Down in the cellar,","Back in the corridor,","At the end of the path,"],
+    person:["Then a voice said,","Out of nowhere, someone","That was when","Behind them,"],
+    topic:["Suddenly,","Then they noticed","Strangely,","But there was something else."]
+  };
+  function steps(){ return d.n === 3 ? STEPS3 : STEPS5; }
+  function drawHowMany(){
+    var row = B5.$("#howMany"); row.innerHTML = "";
+    [3,5].forEach(function(n){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip" + (d.n === n ? " on" : ""); b.textContent = n + " paragraphs";
+      b.addEventListener("click", function(){ d.n = n; st.save(); drawHowMany(); drawPlan(); });
+      row.appendChild(b);
+    });
+  }
+  function hint(i){
+    if (i !== 0) return "";
+    var bits = [];
+    if (whereTxt()) bits.push(whereTxt().toLowerCase());
+    if ((d.hero || "").trim()) bits.push(d.hero.trim());
+    return bits.length ? "From your ingredients: " + bits.join(", ") : "";
+  }
+  function drawPlan(){
+    var box = B5.$("#plan"); box.innerHTML = "";
+    steps().forEach(function(s, i){
+      var k = d.n + "-" + i, row = document.createElement("div"); row.className = "prow";
+      var h = "<span class='num'>" + (i + 1) + "</span><div><h3>" + s[0] + "</h3><span class='small'>" + s[1] + "</span>";
+      if (i === 1 && whatTxt()) h += "<div class='small' style='margin-top:4px'>Your scary thing: <b>" + B5.esc(whatTxt()) + "</b></div>";
+      var hh = hint(i); if (hh) h += "<div class='small' style='margin-top:4px'>" + B5.esc(hh) + "</div>";
+      h += "<textarea data-plan='" + k + "' placeholder='My idea...'></textarea>";
+      if (i > 0){
+        h += "<div class='row'><span class='small'>What changes?</span>";
+        KINDS.forEach(function(kk){
+          var on = (d.chg[k] || []).indexOf(kk[0]) > -1;
+          h += "<button type='button' class='chip t-" + kk[0] + (on ? " on" : "") + "' data-c='" + kk[0] + "'>" + kk[1] + "</button>";
+        });
+        h += "</div>";
+      }
+      row.innerHTML = h + "</div>";
+      var ta = B5.$("textarea", row); ta.value = d.plan[k] || "";
+      ta.addEventListener("input", function(){ d.plan[k] = ta.value; st.save(); });
+      B5.$$("[data-c]", row).forEach(function(b){
+        b.addEventListener("click", function(){
+          var v = b.getAttribute("data-c"), p = d.chg[k] || [], j = p.indexOf(v);
+          if (j > -1) p.splice(j, 1); else p.push(v);
+          d.chg[k] = p; st.save(); b.classList.toggle("on");
+        });
+      });
+      box.appendChild(row);
+    });
+  }
+  drawHowMany(); drawPlan();
+
+  /* write */
+  var title = B5.$("#title"); title.value = d.title || "";
+  title.addEventListener("input", function(){ d.title = title.value; st.save(); });
+  function drawWrite(){
+    var box = B5.$("#write"); box.innerHTML = "";
+    steps().forEach(function(s, i){
+      var k = d.n + "-" + i, row = document.createElement("div"); row.className = "prow";
+      var plan = (d.plan[k] || "").trim(), chg = d.chg[k] || [];
+      var h = "<span class='num'>" + (i + 1) + "</span><div><h3>" + s[0] + "</h3>";
+      h += "<div class='idea'>" + (plan ? "<b>Your plan:</b> " + B5.esc(plan) : "<span class='small'>" + s[1] + "</span>") + "</div>";
+      var pool = [];
+      (chg.length ? chg : (i > 0 ? ["time","topic"] : [])).forEach(function(c){ pool = pool.concat(STARTERS[c]); });
+      if (pool.length){
+        h += "<div class='starters'>";
+        pool.slice(0, 6).forEach(function(p){ h += "<button type='button' class='chip' data-s='" + B5.esc(p) + "'>" + B5.esc(p) + "</button>"; });
+        h += "</div>";
+      }
+      h += "<textarea data-para='" + k + "' placeholder='" + (i === 0 ? "Once..." : "Write paragraph " + (i + 1) + "...") + "' style='min-height:120px'></textarea><div class='small' data-wc></div></div>";
+      row.innerHTML = h;
+      var ta = B5.$("textarea", row), wc = B5.$("[data-wc]", row);
+      ta.value = d.para[k] || "";
+      function count(){ var w = B5.words(ta.value); wc.textContent = w ? w + " words" : ""; }
+      ta.addEventListener("input", function(){ d.para[k] = ta.value; st.save(); count(); });
+      B5.$$("[data-s]", row).forEach(function(b){
+        b.addEventListener("click", function(){
+          var v = b.getAttribute("data-s");
+          ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, " ") + v + " " : v + " ";
+          d.para[k] = ta.value; st.save(); ta.focus(); count();
+        });
+      });
+      count();
+      box.appendChild(row);
+    });
+  }
+
+  /* read and send */
+  var NOTICE = [
+    "I thought about what my reader would enjoy",
+    "My story matches the Fear Dial I chose",
+    "Each new paragraph starts when something changes",
+    "My ending leaves my reader feeling something"
+  ];
+  function paras(){
+    return steps().map(function(s, i){ return (d.para[d.n + "-" + i] || "").trim(); });
+  }
+  function drawRead(){
+    var ps = paras(), filled = ps.filter(Boolean).length;
+    var h = "<h2>" + B5.esc((d.title || "").trim() || "My scary story") + "</h2><div class='by'>For " + B5.esc(readerName()) + " / Fear Dial " + B5.esc(B5.fearName(d.fear)) + "</div>";
+    if (!filled) h += "<p class='empty'>Your story will appear here once you start writing.</p>";
+    ps.forEach(function(p){ if (p) h += "<p>" + B5.esc(p) + "</p>"; });
+    B5.$("#book").innerHTML = h;
+    var words = ps.reduce(function(a, p){ return a + B5.words(p); }, 0);
+    B5.$("#auto").innerHTML = "<span>" + filled + " of " + d.n + " paragraphs</span><span>" + words + " words</span>" +
+      (d.reader ? "<span>Written for " + B5.esc(readerName()) + "</span>" : "");
+    var nb = B5.$("#notice"); nb.innerHTML = "";
+    NOTICE.forEach(function(t, i){
+      var l = document.createElement("label");
+      l.innerHTML = "<input type='checkbox'" + (d.notice[i] ? " checked" : "") + "><span>" + B5.esc(t) + "</span>";
+      B5.$("input", l).addEventListener("change", function(e){ d.notice[i] = e.target.checked; st.save(); B5.$("#preview").textContent = message().body; });
+      nb.appendChild(l);
+    });
+    B5.$("#preview").textContent = message().body;
+  }
+  function message(){
+    var L = ["SCARY STORIES 3: BUILD YOUR OWN FRIGHT", ""];
+    L.push("Title: " + ((d.title || "").trim() || "My scary story"));
+    L.push("Written for: " + readerName(), "Fear Dial: " + B5.fearName(d.fear));
+    L.push("Where: " + (whereTxt() || "-"), "What is scary: " + (whatTxt() || "-"), "Main character: " + ((d.hero || "").trim() || "-"), "");
+    L.push("THE STORY", "");
+    paras().forEach(function(p, i){ L.push((i + 1) + ". " + (p || "(not written yet)"), ""); });
+    L.push("Plan and paragraph changes:");
+    steps().forEach(function(s, i){
+      var k = d.n + "-" + i;
+      L.push("- " + s[0] + ": " + ((d.plan[k] || "").trim() || "-") + (i > 0 ? "  [changes: " + ((d.chg[k] || []).join(", ") || "-") + "]" : ""));
+    });
+    L.push("", "Things I noticed:");
+    NOTICE.forEach(function(t, i){ L.push("- " + t + ": " + (d.notice[i] ? "yes" : "-")); });
+    return { subject:"Scary stories 3: " + ((d.title || "").trim() || "My scary story"), body:L.join("\n"), file:"my-scary-story.txt" };
+  }
+  B5.sendBox(B5.$("#send"), message, st);
+
+  B5.steps({ bar:"#steps", store:st, onShow:function(i){
+    if (i === 2) drawPlan();
+    if (i === 3) drawWrite();
+    if (i === 4) drawRead();
+  }});
+  B5.$("#restart").addEventListener("click", function(){
+    if (confirm("Clear your whole story and start again?")){ st.wipe(); location.reload(); }
+  });
+})();
+</script>
+</body>
+</html>
