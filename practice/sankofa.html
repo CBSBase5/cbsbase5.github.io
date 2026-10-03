@@ -5916,7 +5916,7 @@ function dootStartMap(idx,keep){
   D.parts=[];D.shells=[];D.smoke=[];D.kick=0;D.spin=0;D.spinV=0;D.combo=0;D.lastCalm=-9;D.announce=null;D.hitT=0;D.recoil=0;D.muzzle=0;D.bossSeen=false;D.hint=idx===0||!D.hintShown?7:0;D.hintShown=true;dPlaceExtras(def);
   dSetFog(L.theme);dSoftenBlockers();dPlaceLamps(L);dBuildLight(L);D.dyn=[];D.progT=0;D.progSeen=0;D.nagT=0;D.trailT=-99;
   dMsg(def.id+': '+def.name);
-  playMusic('doot',def.hand==='gate');
+  dMusicRate(1);dMusic(idx);
 }
 /* ---------- the world grid ---------- */
 function dCell(x,y){var L=D.L;if(x<0||y<0||x>=L.w||y>=L.h)return DC_WALL;return L.cell[y*L.w+x];}
@@ -6078,7 +6078,7 @@ function dPickup(it){
   if(kind==='health'){if(p.hp>=cap)return false;p.hp=Math.min(cap,p.hp+val);}
   else if(kind==='armour'){if(p.armour>=val)return false;p.armour=val;p.armourAbs=it.k==='J'?0.5:0.34;}
   else if(kind==='weapon'){var had=p.weapons[val];p.weapons[val]=true;var W2=DWEAP[val];p.ammo[W2.ammo]=Math.min(DAMMO_MAX[W2.ammo],p.ammo[W2.ammo]+({1:8,2:20,3:2,4:40}[val])*sk.ammo);if(!had){p.cur=val;p.switchT=0.3;D.face.grin=1.6;}sfx('dweapon');dMsg(P2[3]);D.L.found.items++;D.pick=0.3;return true;}
-  else if(kind==='mv'){p.mv=20;sfx('dmv');D.pick=0.5;D.face.grin=2;dAnnounce('MAXIMUM VOLUME!','Toot twice as fast for 20 seconds',2.2,'rainbow');dMsg(P2[3]);playMusic('doot',true);return true;}
+  else if(kind==='mv'){p.mv=20;sfx('dmv');D.pick=0.5;D.face.grin=2;dAnnounce('MAXIMUM VOLUME!','Toot twice as fast for 20 seconds',2.2,'rainbow');dMsg(P2[3]);if(DMUS.cur)dMusicRate(1.15);else playMusic('doot',true);return true;}
   else if(kind==='key'){p.keys[val]=true;sfx('dkey');dMsg(P2[3]);D.pick=0.3;return true;}
   else{if(p.ammo[kind]>=DAMMO_MAX[kind])return false;p.ammo[kind]=Math.min(DAMMO_MAX[kind],p.ammo[kind]+Math.round(val*sk.ammo));}
   sfx('dpick');dMsg(P2[3]);D.L.found.items++;D.pick=0.25;return true;
@@ -6163,7 +6163,7 @@ function dPlayUpdate(dt){
   dPlayerUpdate(dt);dUpdateDoors(dt);dEnemiesUpdate(dt);dProjUpdate(dt);dPartsUpdate(dt);dGunFx(dt);
   if(D.hitT>0)D.hitT-=dt;if(D.recoil>0)D.recoil=Math.max(0,D.recoil-dt*6);if(D.muzzle>0)D.muzzle-=dt;if(D.hint>0)D.hint-=dt;
   if(D.announce){D.announce.t-=dt;if(D.announce.t<=0)D.announce=null;}
-  var p=D.p;if(p.mv>0){p.mv-=dt;if(p.mv<=0){p.mv=0;dMsg('The volume settles back down.');playMusic('doot',D.L.def.hand==='gate');}}
+  var p=D.p;if(p.mv>0){p.mv-=dt;if(p.mv<=0){p.mv=0;dMsg('The volume settles back down.');if(DMUS.cur)dMusicRate(1);else playMusic('doot',D.L.def.hand==='gate');}}
   if(!D.bossSeen){var bs=D.ents.filter(function(e){return e.A.boss&&!e.calm;})[0];if(bs&&Math.hypot(bs.x-p.x,bs.y-p.y)<13&&dSee(p.x,p.y,bs.x,bs.y)){D.bossSeen=true;bs.alert=true;D.shake=0.8;sfx('dbossrev');dAnnounce('THE CYBER-FADE','Guardian of the Gloom Dimension',2.6,'#e8322a');}}
   if(D.exitT>0){D.exitT-=dt;if(D.exitT<=0){D.exitT=0;dootLevelDone(D.exitSecret);}}
 }
@@ -6292,17 +6292,17 @@ function dDrawInter(){dDrawBackdrop();var I=D.inter,L=D.L;dText(L.def.name,RW/2,
   if(I.t>3.2){var nx=dNextMap();dText(nx===null?'Press any key':'Entering: '+DMAPS[nx].name,RW/2,176,10,'#ffd23f','center');}}
 function dNextMap(){var i=D.mapIdx;if(i===4)return null;if(D.exitSecret&&i===2)return 5;if(i===5)return 3;return i+1;}
 /* ---------- flow ---------- */
-function dootEnter(){closeUI();dootCanvas();try{window.focus();}catch(e){}G.state='doot';showTouch(false);D.screen='title';D.menu=0;D.t=0;DK={};DKP={};playMusic('doot',false);sfx('dbfsboom');}
-function dootQuit(){try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}D.screen='off';G.state='title';showTitle();}
+function dootEnter(){closeUI();dootCanvas();try{window.focus();}catch(e){}G.state='doot';showTouch(false);D.screen='title';D.menu=0;D.t=0;DK={};DKP={};dMusic('title');sfx('dbfsboom');}
+function dootQuit(){dMusicStop();try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}D.screen='off';G.state='title';showTitle();}
 function dPause(){D.screen='pause';D.menu=0;try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}}
 function dootLevelDone(secret){var nx=dNextMap();meta.doot=meta.doot||{};if(nx!==null){meta.doot.map=nx;meta.doot.skill=D.skill;}else meta.doot.map=0;saveMeta();try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}dIntermission();}
-function dootFinish(){meta.doot=meta.doot||{};var first=!meta.doot.done;meta.doot.done=1;meta.hats=meta.hats||{};meta.hats.helmet=1;meta.titles=meta.titles||{};meta.titles['Rip and Toot']=1;saveMeta();
+function dootFinish(){dMusic('title');meta.doot=meta.doot||{};var first=!meta.doot.done;meta.doot.done=1;meta.hats=meta.hats||{};meta.hats.helmet=1;meta.titles=meta.titles||{};meta.titles['Rip and Toot']=1;saveMeta();
   dootTextScreen(['Once calmed, the Cyber-Fade lets out one last, long, tired sigh. Then it turns a lovely shade of orange and floats away, humming.',
     'Somewhere, a kazoo plays. Every story is safe in the nest. Every creature in the Gloom Dimension is dancing, badly, but with real enthusiasm.',
     'You went back. You fetched it. You ripped, and you tooted.',
     first?'Unlocked: the Doot helmet hat and the title Rip and Toot. Wear them in the nest.':'Thank you for playing DOOT. Again!'],function(){dootQuit();});}
 function dootUpdate(dt){
-  D.t+=dt;var s=D.screen;
+  D.t+=dt;dMusicTick(dt);var s=D.screen;
   if(s==='title'){if(Object.keys(DKP).length||DMOUSE.click){DMOUSE.click=null;D.screen='menu';D.menu=0;sfx('dmenu');}}
   else if(s==='menu'){var cont=meta.doot&&meta.doot.map>0;var items=['New game'].concat(cont?['Continue: '+DMAPS[meta.doot.map].id]:[]).concat(['How to play','Quit to Sankofa']);var r=dMenuNav(items.length);
     if(r==='go'){var it=items[D.menu];sfx('dselect');if(it==='New game'){D.screen='skill';D.menu=2;}else if(it.indexOf('Continue')===0){D.skill=meta.doot.skill||2;D.contMap=meta.doot.map;dootStartMap(D.contMap,{hp:100,armour:0,armourAbs:0,weapons:dKitFor(D.contMap),cur:0,ammo:{notes:30,recs:D.contMap>1?60:0,pans:D.contMap>2?5:0,batts:D.contMap>3?80:0}});D.screen='play';}
@@ -7065,6 +7065,59 @@ function dHintTrail(){var L=D.L,p=D.p,w=L.w,h=L.h,sx=p.x|0,sy=p.y|0,prev=new Int
   var path=[],c=goal;while(c!==sy*w+sx&&path.length<200){path.push(c);c=prev[c];}path.reverse();
   path.slice(0,60).forEach(function(i,k){var x=i%w+0.5,y=((i/w)|0)+0.5;for(var s=0;s<2;s++)D.parts.push({x:x+rnd(-0.2,0.2),y:y+rnd(-0.2,0.2),z:0.02,vx:0,vy:0,vz:0,col:k%2?'#ffd23f':'#fff2a0',life:4+k*0.12,s:0.07,glow:s===0});});
   D.trailT=D.t;dMsg('Follow the sparkles to '+what+'.');sfx('dsecret');}
+
+/* ================= DOOT: A SONG FOR EVERY LEVEL =================
+   Two ways to play a song:
+   - built in songs (DMUS_DATA, added to the published page by the build) are decoded and
+     played through the game's own Web Audio engine, which works even where a page may not
+     load separate files;
+   - otherwise the song files in the doot_music folder next to the game are streamed.
+   Tracks crossfade when the level changes, duck while paused, and speed up during
+   MAXIMUM VOLUME. If a song cannot play, DOOT falls back to its built in riff. */
+var DMUS_DIR='doot_music/';
+var DMUS_FILES={title:'title.mp3',0:'e1m1.mp3',1:'e1m2.mp3',2:'e1m3.mp3',3:'e1m4.mp3',4:'e1m5.mp3',5:'e1m9.mp3'};
+var DMUS={cur:null,key:null,old:[],failed:{},rate:1,vol:0.8,bufs:{}};
+function dMusicHasData(key){return typeof DMUS_DATA!=='undefined'&&DMUS_DATA&&DMUS_DATA[key];}
+function dB64(s){var bin=atob(s),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u;}
+/* a streamed track (song files on the site) */
+function dTrackFile(key){var a=new Audio(),t={key:key,vol:0,dead:false};a.preload='auto';a.loop=true;a.src=DMUS_DIR+DMUS_FILES[key];a.volume=0;
+  try{a.playbackRate=DMUS.rate;}catch(e){}
+  t.start=function(){if(!settings.music)return;try{var pr=a.play();if(pr&&pr.catch)pr.catch(function(err){if(err&&err.name==='NotAllowedError')DMUS.blocked=true;});}catch(e){DMUS.blocked=true;}};
+  t.setVol=function(v){t.vol=v;a.volume=Math.max(0,Math.min(1,v));};
+  t.setRate=function(r){try{a.playbackRate=r;}catch(e){}};
+  t.tick=function(){if(settings.music&&a.paused&&!DMUS.blocked&&!t.dead)t.start();if(!settings.music&&!a.paused)a.pause();};
+  t.stop=function(){t.dead=true;try{a.pause();a.removeAttribute('src');a.load();}catch(e){}};
+  a.addEventListener('error',function(){if(!t.dead)dTrackFailed(t);});return t;}
+/* a built in track, decoded into the Web Audio engine */
+function dTrackBuf(key){var t={key:key,vol:0,dead:false,g:null,src:null};
+  t.begin=function(buf){if(t.dead)return;t.g=AC.createGain();t.g.gain.value=t.vol*2.6;t.g.connect(musicBus);var s=AC.createBufferSource();s.buffer=buf;s.loop=true;s.playbackRate.value=DMUS.rate;s.connect(t.g);s.start();t.src=s;};
+  t.start=function(){if(t.src||t.loading||t.dead)return;if(!AC){try{audioResume();}catch(e){}}if(!AC){t.retry=true;return;}
+    if(DMUS.bufs[key]){t.begin(DMUS.bufs[key]);return;}t.loading=true;
+    try{var bytes=dB64(DMUS_DATA[key]);AC.decodeAudioData(bytes.buffer,function(buf){t.loading=false;DMUS.bufs={};DMUS.bufs[key]=buf;t.begin(buf);},function(){t.loading=false;if(!t.dead)dTrackFailed(t);});}
+    catch(e){t.loading=false;dTrackFailed(t);}};
+  t.setVol=function(v){t.vol=v;if(t.g)t.g.gain.value=Math.max(0,v)*2.6;};
+  t.setRate=function(r){if(t.src)try{t.src.playbackRate.value=r;}catch(e){}};
+  t.tick=function(){if(t.retry&&AC){t.retry=false;t.start();}};
+  t.stop=function(){t.dead=true;if(t.src)try{t.src.stop();}catch(e){}if(t.g)try{t.g.disconnect();}catch(e){}t.src=null;t.g=null;};
+  return t;}
+function dTrackFailed(t){DMUS.failed[t.key]=1;if(DMUS.cur===t){DMUS.cur=null;if(G.state==='doot'){DMUS.key=null;dMusic(t.key);}}}
+function dMusic(key){
+  var hasData=dMusicHasData(key),hasFile=!!DMUS_FILES[key];
+  if(DMUS.key===key&&DMUS.cur)return;
+  if(DMUS.failed[key]||(!hasData&&!hasFile)){if(DMUS.cur)dMusicFadeOut();DMUS.key=key;playMusic('doot',key===4);return;}
+  stopMusic();if(DMUS.cur)dMusicFadeOut();
+  var t=hasData?dTrackBuf(key):dTrackFile(key);DMUS.cur=t;DMUS.key=key;t.start();}
+function dMusicFadeOut(){var t=DMUS.cur;if(!t)return;DMUS.old.push(t);DMUS.cur=null;}
+function dMusicStop(){if(DMUS.cur)dMusicFadeOut();DMUS.key=null;DMUS.rate=1;}
+function dMusicRate(r){DMUS.rate=r;if(DMUS.cur)DMUS.cur.setRate(r);}
+function dMusicTick(dt){var t=DMUS.cur,want=settings.music?(D.screen==='pause'||D.screen==='quit'||D.screen==='help'?0.25:D.screen==='inter'?0.45:DMUS.vol):0;
+  if(t){t.tick();t.setVol(t.vol+(want-t.vol)*Math.min(1,dt*2.5));}
+  for(var i=DMUS.old.length-1;i>=0;i--){var o=DMUS.old[i];o.setVol(Math.max(0,o.vol-dt*1.4));if(o.vol<=0.01){o.stop();DMUS.old.splice(i,1);}}}
+/* browsers may hold back sound until the next tap or key press */
+function dMusicUnblock(){if(DMUS.blocked&&DMUS.cur&&settings.music){DMUS.blocked=false;DMUS.cur.start();}}
+window.addEventListener('keydown',dMusicUnblock,true);window.addEventListener('pointerdown',dMusicUnblock,true);
+/* keep fading old tracks out after leaving DOOT */
+setInterval(function(){if(G.state!=='doot'&&(DMUS.old.length||DMUS.cur)){if(DMUS.cur)dMusicFadeOut();dMusicTick(0.05);}},50);
 
 /* ================= UPDATE ================= */
 function update(dt){
