@@ -2619,7 +2619,7 @@ function showTitle(){
     '<h1 class="logo">SANKOFA<small>Go back and fetch it</small></h1>'+
     '<p class="tag">The past is fading to grey. Fly back through Black British history from today to 1948, find the lost eggs of knowledge and bring the colour home.</p>'+
     '<div class="menu">'+
-    (snap?btn('Carry on your flight','resume','gold','autofocus')+btn('Start a new flight','newrun'):btn('Start a flight','newrun','gold','autofocus'))+btn('Practice flight','practice')+
+    (snap?btn('Carry on your flight','resume','gold','autofocus')+btn('Start a new flight','newrun'):btn('Start a flight','newrun','gold','autofocus'))+
     btn('The nest'+(nNew?' <span class="badge">'+nNew+' new</span>':''),'nest')+(meta.wins>0?btn('Challenge winds'+(windsChosen().length?' ('+windsChosen().length+' on)':''),'winds'):'')+btn('Feather Pass'+(passUnclaimed()?' <span class="badge">'+passUnclaimed()+' to claim</span>':' <span class="badge hype">NEW SEASON!</span>'),'pass','passbtn')+btn('How to play','how')+btn('Settings','settings')+
     '</div><p class="foot">For Black History Month &middot; about 15 minutes a flight &middot; '+eggCount()+' of 30 eggs found</p></div>';
   showOv(html,null,'clear');playMusic('menu');
@@ -2627,8 +2627,7 @@ function showTitle(){
 ACTIONS.newrun=function(){if(store.get('run',null)){showConfirm('Start a new flight? Your saved flight will end.','newrunyes','title');return;}beginFlight();};
 ACTIONS.newrunyes=function(){store.del('run');beginFlight();};
 function beginFlight(){
-  if(!meta.tutorialOffered&&!meta.tutorialDone&&!meta.runs){meta.tutorialOffered=1;saveMeta();
-    showOv('<div class="sheet narrow">'+kente()+'<h2>Welcome, little bird</h2><p class="lead">Would you like a practice flight first? It is short, it shows you each move, and nothing in it can end your flight.</p><div class="row">'+btn('Yes, a practice flight','practice','gold','autofocus')+btn('No thanks, let us fly','practiceno')+'</div><p class="hint">The practice flight is always on the title screen too.</p></div>');return;}
+  if(!meta.tutorialOffered&&!meta.tutorialDone&&!meta.runs){startTutorial(false);return;}
   startRun();
 }
 ACTIONS.resume=function(){resumeRun();};
@@ -2654,9 +2653,9 @@ function howHTML(){return '<div class="sheet">'+kente()+'<h2>How to play</h2>'+
   '<div><h3>Golden creatures</h3><p>Now and then a creature shines gold. It is quick and it runs from you, but calming it showers you with seeds and fills your song meter.</p></div>'+
   '<div><h3>Challenge doors</h3><p>Look for a kente door on the low road. Press <b>Down</b> to step inside for a short skill room. Reach the golden feather for a treasure, seeds and a song boost. Nothing in there can hurt you.</p></div>'+
   '<div><h3>Big bops</h3><p>Each guardian\'s arena uses its era. Bounce off a speaker or drum, leap from a bus, neon or crate, or let go of a rope to get a <b>boost</b>. Bop the guardian while boosted for a big bop.</p></div>'+
-  '<div><h3>Practice and memories</h3><p>The practice flight on the title screen shows every move. When you find an egg, a short memory picture plays. You can turn the pictures off in Settings.</p></div>'+
+  '<div><h3>Practice and memories</h3><p>Your first flight starts with a short practice at the nest, and you can replay it from here any time. When you find an egg, a short memory picture plays. You can turn the pictures off in Settings.</p></div>'+
   '<div><h3>Take your time</h3><p>Press <b>P</b> or <b>Esc</b> to pause. Your flight saves at the start of every level. The game quietly adjusts to how you are getting on.</p></div></div>'+
-  '<div class="row">'+btn('Got it','back','gold','autofocus')+'</div></div>';}
+  '<div class="row">'+btn('Got it','back','gold','autofocus')+(run?'':btn('Replay the practice flight','practicereplay'))+'</div></div>';}
 ACTIONS.how=function(){var from=G.state;showOv(howHTML());ACTIONS.back=function(){if(from==='play'||from==='paused')showPause();else showTitle();};};
 
 /* ---------- settings ---------- */
@@ -2680,7 +2679,7 @@ function showPause(){G.state='paused';
   var pw=run.order.map(function(id){var p=PMAP[id];return '<div class="mini"><img src="'+symbolURL(id,48,'#21170f')+'" alt=""><div><b>'+p.name+'</b> <span class="lvl">level '+run.powers[id]+'</span><br><small>'+p.lv[run.powers[id]-1]+'</small></div></div>';}).join('');
   showOv('<div class="sheet narrow">'+kente()+'<h2>Paused</h2><p class="lead">Take your time. '+ERAS[run.era].name+', '+ERAS[run.era].years+'.</p>'+(G.lvl&&!G.lvl.boss&&G.lvl.goalId?'<p><b>Level goal:</b> '+esc(goalLine(G.lvl))+'</p>':'')+'<p><b>Your song special:</b> '+SPECIALS[dominantTag()].name+'. '+SPECIALS[dominantTag()].text+'</p>'+
     (pw?'<div class="minis">'+pw+'</div>':'<p>No powers yet. You pick one after each level.</p>')+(setsHTML?'<p>Bonuses: '+setsHTML+'</p>':'')+logHTML()+
-    '<div class="row">'+btn('Carry on','resumeplay','gold','autofocus')+btn('How to play','how')+btn('Settings','settings')+btn('End this flight','quit','alt')+(ON_SITE?'<a class="btn alt" href="'+SITE_BACK+'">Back to Base 5</a>':'')+'</div>'+
+    '<div class="row">'+btn('Carry on','resumeplay','gold','autofocus')+btn('How to play','how')+btn('Settings','settings')+(run.tutorial?btn(run.tutReplay?'Leave the practice':'Skip the practice','skippractice','alt'):btn('End this flight','quit','alt'))+(ON_SITE?'<a class="btn alt" href="'+SITE_BACK+'">Back to Base 5</a>':'')+'</div>'+
     '<p class="hint">Your flight saves at the start of every level, so you can come back and carry on.</p></div>',function(e){if(e.code==='Escape'||e.code==='KeyP'){e.preventDefault();ACTIONS.resumeplay();}});}
 ACTIONS.resumeplay=function(){G.state='play';closeUI();};
 ACTIONS.quit=function(){showConfirm('End this flight now? You keep any eggs you found.','quityes','resumepause');};
@@ -3680,7 +3679,7 @@ var SIGNS_KEYS=['Walk with the arrow keys or A and D. Press Space or Up to jump.
  'Grey creatures turn back into colour when you calm them. Sankofa sings at them by itself, slowly. Each creature also has a best move that calms it fast. Try a bop from above.',
  'Touch the cage to free the songbird. Freed birds join your flock and sing with you.',
  'Your song meter is now full. Press V to sing your song special. It changes with the powers you collect.',
- 'That is the nest. Fly into it to finish your practice.'];
+ 'That is the nest. Fly into it, and the long flight back begins.'];
 var SIGNS_TOUCH=['Use the arrow buttons to walk. Tap Jump to jump.',
  'Tap Jump again while you are in the air to flap. You get two flaps, and they come back when you land.',
  'Tap Dash to dash. Dash into the cracked wall to break it. It may take two dashes.',
@@ -3688,9 +3687,9 @@ var SIGNS_TOUCH=['Use the arrow buttons to walk. Tap Jump to jump.',
  'Grey creatures turn back into colour when you calm them. Sankofa sings at them by itself, slowly. Each creature also has a best move that calms it fast. Try a bop from above.',
  'Touch the cage to free the songbird. Freed birds join your flock and sing with you.',
  'Your song meter is now full. Tap Song to sing your song special. It changes with the powers you collect.',
- 'That is the nest. Fly into it to finish your practice.'];
-function startTutorial(){
-  closeUI();audioResume();newRun();run.tutorial=true;recalc();run.hearts=run.maxHearts;
+ 'That is the nest. Fly into it, and the long flight back begins.'];
+function startTutorial(replay){
+  closeUI();audioResume();newRun();run.tutorial=true;run.tutReplay=!!replay;recalc();run.hearts=run.maxHearts;
   G.lvl=parseMap(TUTORIAL_MAP,0,{tutorial:true,colour:0.55});
   G.boss=null;G.bossDoneT=null;G.goldTaken=false;G.bonnie=null;G.shrines=[];G.buddy=null;G.plaque=null;G.cracksSeen=true;G.toasts=[];
   spawnLevel();ents.forEach(function(e){e.canCharge=false;e.golden=false;});
@@ -3699,14 +3698,14 @@ function startTutorial(){
   P=newPlayer(24,180);G.camX=0;G.camY=0;ambient=[];initFlock();
   G.special=null;G.mini=null;G.ambush=null;G.orb=null;G.shower=0;G.combo=0;G.bigText=null;
   G.fun=null;G.rainT=0;G.kazooT=0;MUS.kazoo=false;G.congaT=0;G.conga=[];G.fade=null;G.lvlT=0;G.fogT=0;G.dark=0;G.flowers=[];calmFx.length=0;
-  playMusic('voices');G.banner={top:'Practice flight',title:'At the nest',sub:'Try each move. Nothing here can end your flight.',t:3,max:3};
+  playMusic('voices');G.banner=replay?{top:'Practice flight',title:'At the nest',sub:'Try each move. Nothing here can end your flight.',t:3,max:3}:{top:'Today',title:'The nest',sub:'Stretch your wings. Then the long flight back begins.',t:3.4,max:3.4};
   G.state='play';showTouch(true);
 }
 function updateSigns(){
   if(!G.signs)return;var best=null;
   G.signs.forEach(function(s){if(Math.abs(P.x+P.w/2-s.x)<44&&Math.abs(P.y-s.y)<60){best=s;
     if(!s.seen){s.seen=true;sfx('chirp');if(s.i===6){run.meter=100;sfx('ring');}}}});
-  if(best)G.plaque={name:'Tip '+(best.i+1)+' of '+G.signs.length,line:(isTouch?SIGNS_TOUCH:SIGNS_KEYS)[best.i]||''};
+  if(best)G.plaque={name:'Tip '+(best.i+1)+' of '+G.signs.length,line:(best.i===7&&run.tutReplay)?'That is the nest. Fly into it to finish your practice.':((isTouch?SIGNS_TOUCH:SIGNS_KEYS)[best.i]||'')};
 }
 function drawSigns(camX){
   if(!G.signs)return;
@@ -3714,11 +3713,17 @@ function drawSigns(camX){
     b.fillStyle='#f3e3bf';b.fillRect(x-6,y-21,12,8);b.fillStyle='#21170f';b.font='bold 7px monospace';b.textAlign='center';b.textBaseline='middle';b.fillText(String(s.i+1),x,y-17);
     if(!s.seen){b.globalAlpha=0.4+0.3*Math.sin(G.t*5);ell(b,x,y-17,10,8,'#ffd23f');b.globalAlpha=1;}});
 }
-function tutorialDone(){
-  G.state='between';var first=!meta.tutorialDone;meta.tutorialDone=1;if(first)meta.twigs+=10;saveMeta();sfx('win');
-  showOv('<div class="sheet narrow">'+kente()+'<h2>Practice done!</h2><p class="lead">You tried every move.'+(first?' Here are 10 twigs for your nest.':'')+'</p><p>Whenever you want a reminder, the practice flight is on the title screen.</p>'+
-    '<div class="row">'+btn('Start a real flight','tutnew','gold','autofocus')+btn('Back to the title','title','alt')+'</div></div>');
+function tutorialDone(skipped){
+  G.state='between';var first=!meta.tutorialDone;meta.tutorialDone=1;meta.tutorialOffered=1;var gift=first&&!skipped;if(gift)meta.twigs+=10;saveMeta();
+  if(run&&run.tutReplay){sfx('win');
+    showOv('<div class="sheet narrow">'+kente()+'<h2>Practice done!</h2><p class="lead">You tried every move.</p>'+
+      '<div class="row">'+btn('Start a flight','tutnew','gold','autofocus')+btn('Back to the title','title','alt')+'</div></div>');return;}
+  /* a new player flies straight on into their first real level */
+  sfx(skipped?'click':'win');if(!skipped){for(var i=0;i<30;i++)parts.push({x:P.x+5,y:P.y+6,vx:rnd(-160,160),vy:rnd(-200,40),life:rnd(0.5,1),col:choice(['#ffd23f','#ff5f6d','#5fd66b','#5fc3ff']),s:2,grav:200});}
+  setTimeout(function(){run=null;startRun();if(gift)toast('Practice done. 10 twigs for your nest.');},reduceMotion||skipped?60:900);
 }
+ACTIONS.skippractice=function(){closeUI();tutorialDone(true);};
+ACTIONS.practicereplay=function(){startTutorial(true);};
 ACTIONS.tutnew=function(){run=null;startRun();};
 ACTIONS.practice=function(){startTutorial();};
 ACTIONS.practiceno=function(){startRun();};
