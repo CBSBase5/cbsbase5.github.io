@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sculpture Studio - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Sculpture Studio only. Shell, cards and buttons come from style.css */
+.ss{max-width:1020px}
+.hidden{display:none!important}
+.ss-box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px;box-shadow:var(--lift)}
+.ss-intro{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start;margin:4px 0 22px}
+.ss-intro .ss-box{transform:rotate(-.35deg)}
+.ss-lead{font-size:1.05rem;margin:0 0 10px;max-width:58ch}
+.ss-small{font-size:.9rem;color:var(--body-tint);margin:6px 0 0}
+.ss-lab{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;display:block;margin:14px 0 6px}
+.ss-who{display:flex;flex-wrap:wrap;gap:7px}
+.ss-who button{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.86rem;letter-spacing:.06em;background:var(--white);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;box-shadow:2px 3px 0 rgba(10,47,56,.2)}
+.ss-who button[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.ss-ms{margin:12px 0 0;padding:12px 14px;border:2px dashed var(--plum);border-radius:16px;background:#f5eef8;font-size:.95rem}
+.ss-ms ol{margin:6px 0 0;padding-left:22px}
+.ss-ms li{margin:0 0 4px}
+
+/* turntable */
+.ss-tt{background:radial-gradient(circle at 50% 28%,#fff7de 0,#ffd98e 52%,#f2a65a 100%);border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);padding:10px 10px 12px;text-align:center;transform:rotate(.7deg)}
+.ss-tt svg{width:100%;max-width:300px;height:auto;display:block;margin:0 auto}
+.ss-ttcap{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.86rem;letter-spacing:.06em;margin:2px 0 6px;text-transform:uppercase}
+.ss-ttbtn{font-family:var(--body);font-size:.82rem;font-weight:700;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.ss-sculpt{transform-box:view-box;transform-origin:120px 204px;animation:ssTurn 5.5s ease-in-out infinite}
+.ss-ring{animation:ssRing 3s linear infinite}
+.ss-pop{transform-box:view-box;transform-origin:120px 204px;animation:ssPop .55s cubic-bezier(.2,1.5,.4,1)}
+.ss-paused .ss-sculpt,.ss-paused .ss-ring{animation-play-state:paused}
+@keyframes ssTurn{0%,100%{transform:scaleX(1) skewX(0)}25%{transform:scaleX(.8) skewX(4deg)}50%{transform:scaleX(1) skewX(0)}75%{transform:scaleX(.8) skewX(-4deg)}}
+@keyframes ssRing{to{stroke-dashoffset:-64}}
+@keyframes ssPop{0%{transform:scale(.5)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* stage map */
+.ss-map{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:14px 10px;margin:0 0 22px;padding-top:8px}
+.ss-tile{position:relative;border:var(--border) solid var(--ink);border-radius:18px 14px 20px 12px;padding:12px 6px 10px;cursor:pointer;text-align:center;font:inherit;color:var(--ink);box-shadow:3px 4px 0 var(--ink);transition:transform .15s ease,box-shadow .15s ease;background:var(--white)}
+.ss-tile:nth-child(odd){transform:rotate(-1.2deg)}
+.ss-tile:nth-child(even){transform:rotate(1deg)}
+.ss-tile:hover{transform:translateY(-3px) rotate(0deg);box-shadow:5px 7px 0 var(--ink)}
+.ss-tile svg{width:56px;height:46px;display:block;margin:0 auto 4px}
+.ss-tile b{display:block;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;line-height:1.12}
+.ss-tile .n{position:absolute;top:-11px;left:-9px;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);font-family:var(--display);font-variation-settings:"wght" 800;font-size:.85rem;display:grid;place-items:center}
+.ss-tile .tr{position:absolute;top:-9px;right:-6px;background:#2e7d4f;color:#fff;border:2px solid var(--ink);border-radius:999px;font-size:.62rem;font-weight:700;padding:1px 7px;transform:rotate(6deg)}
+.ss-tile .gp{display:block;margin:6px auto 0;background:var(--yellow);border:2px solid var(--ink);border-radius:999px;font-size:.64rem;font-weight:700;padding:1px 6px;color:var(--ink);line-height:1.3}
+.ss-tile[aria-current="true"]{outline:4px dashed var(--plum);outline-offset:4px}
+.t1{background:linear-gradient(150deg,#ffd27a,var(--yellow-deep))}
+.t2{background:linear-gradient(150deg,#f59a5a,var(--orange-deep))}
+.t3{background:linear-gradient(150deg,#53c4de,var(--bright))}
+.t4{background:linear-gradient(150deg,#a274b6,var(--plum));color:var(--paper)!important}
+.t5{background:linear-gradient(150deg,#2e93ad,var(--teal));color:var(--paper)!important}
+.t6{background:linear-gradient(150deg,#ffe08f,var(--yellow))}
+.t7{background:linear-gradient(150deg,#ff9d63,var(--orange))}
+
+/* stages */
+.ss-stage{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);padding:22px;margin:0 0 22px;animation:ssIn .35s cubic-bezier(.2,1.2,.4,1)}
+@keyframes ssIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.ss-head{display:flex;gap:14px;align-items:center;margin:0 0 6px}
+.ss-num{flex:none;width:60px;height:60px;border-radius:46% 54% 50% 50%/55% 45% 55% 45%;border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.7rem;box-shadow:3px 4px 0 var(--ink)}
+.ss-head h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:clamp(1.45rem,4.2vw,2.1rem);line-height:1.04}
+.ss-for{font-size:.88rem;color:var(--body-tint);margin:3px 0 0}
+.ss-part{border-top:3px dashed var(--line);padding-top:16px;margin-top:20px}
+.ss-part.first{border-top:0;padding-top:4px;margin-top:8px}
+.ss-part h3{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.18rem;margin:0 0 4px}
+.ss-part>p{margin:0 0 10px;max-width:64ch}
+.ss-learn{background:#eaf5f8;border:2px solid var(--teal);border-radius:18px 14px 18px 12px;padding:14px 16px;margin:6px 0 14px;display:grid;grid-template-columns:minmax(0,230px) 1fr;gap:16px;align-items:center}
+.ss-learn svg{width:100%;height:auto;display:block}
+.ss-learn p{margin:0 0 6px;font-size:.98rem}
+.ss-learn .k{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);display:block;margin:0 0 4px}
+.ss-stagenav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:22px;padding-top:14px;border-top:3px solid var(--ink)}
+.ss-stagenav .ss-small{flex:1 1 200px;margin:0}
+
+/* buttons and bits */
+.ss-opts{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.ss-opt{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.84rem;background:var(--white);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);text-align:left;line-height:1.25}
+.ss-opt:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.ss-opt.on,.ss-opt[aria-pressed="true"]{background:var(--yellow)}
+.ss-opt.good{background:#dff0e4;border-color:#2e7d4f}
+.ss-opt.miss{background:#fdf0e5;opacity:.75}
+.ss-chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px}
+.ss-chip{font-family:var(--body);font-size:.84rem;background:var(--white);color:#005a73;border:2px dashed var(--teal);border-radius:999px;padding:5px 11px;cursor:pointer}
+.ss-chip:hover{background:#eaf5f8}
+.ss-ta,.ss-in{width:100%;font-family:var(--body);font-size:1rem;color:var(--ink);background:#fffdfb;border:2px solid rgba(10,47,56,.28);border-radius:14px 10px 14px 10px;padding:10px 12px;line-height:1.45}
+.ss-ta{min-height:86px;resize:vertical}
+.ss-fb{margin:10px 0 4px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:.98rem;line-height:1.5}
+.ss-fb:empty{display:none}
+.ss-fb.ok{background:#e9f4ec;border:2px solid #9fcfac}
+.ss-fb.try{background:#fdf0e5;border:2px solid #f2c9a4}
+.ss-fb.tell{background:#eef4f6;border:2px solid #c3d9e0}
+.ss-fb b{font-family:var(--display);font-variation-settings:"wght" 800}
+.ss-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.ss-two{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+
+/* stage 1 */
+.ss-mats{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;margin:6px 0 12px}
+.ss-mat{position:relative;border:3px solid var(--ink);border-radius:16px 12px 16px 12px;background:var(--paper);padding:10px 6px 8px;cursor:pointer;text-align:center;font:inherit;color:var(--ink);box-shadow:3px 4px 0 rgba(10,47,56,.28)}
+.ss-mat svg{width:86px;height:60px;display:block;margin:0 auto 4px}
+.ss-mat b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em}
+.ss-mat.on{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.ss-mat .seen{position:absolute;top:-8px;right:-6px;background:var(--teal);color:#fff;border:2px solid var(--ink);border-radius:999px;font-size:.6rem;font-weight:700;padding:0 6px}
+.ss-info{border:3px solid var(--ink);border-radius:18px;background:var(--white);padding:16px;box-shadow:4px 5px 0 rgba(10,47,56,.2);animation:ssIn .3s ease}
+.ss-info h4{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.3rem;margin:0 0 2px}
+.ss-info .sub{margin:0 0 10px;font-size:.92rem;color:var(--body-tint)}
+.ss-gt{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ss-gt>div{border-radius:14px;padding:10px 12px}
+.ss-gt .g{background:#e9f4ec}
+.ss-gt .t{background:#fdf0e5}
+.ss-gt h5{margin:0 0 4px;font-family:var(--display);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}
+.ss-gt ul{margin:0;padding-left:18px;font-size:.95rem}
+.ss-toolline{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.ss-toolline span{background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-size:.85rem}
+.ss-tools{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;min-height:56px;padding:10px;border:2px dashed var(--line);border-radius:16px;background:var(--paper)}
+.ss-tool{display:flex;align-items:center;gap:6px;font-family:var(--body);font-size:.88rem;font-weight:700;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:5px 10px 5px 6px;cursor:pointer}
+.ss-tool svg{width:40px;height:30px;flex:none}
+.ss-tool[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink);transform:translateY(-2px)}
+.ss-bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ss-bin{border:3px solid var(--ink);border-radius:16px;background:var(--white);padding:8px;min-height:92px;cursor:pointer;text-align:left;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.ss-bin b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.ss-bin .in{display:flex;flex-wrap:wrap;gap:4px}
+.ss-bin .in span{font-size:.75rem;background:#e9f4ec;border:1.5px solid #2e7d4f;border-radius:999px;padding:1px 7px}
+.ss-bins.armed .ss-bin{border-style:dashed;background:#fffbe9}
+
+/* stage 2 */
+.ss-forms{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:6px 0 10px}
+.ss-form{border:3px solid var(--ink);border-radius:16px;background:var(--paper);padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:var(--ink);box-shadow:3px 4px 0 rgba(10,47,56,.25)}
+.ss-form b{display:block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem}
+.ss-form span{font-size:.88rem}
+.ss-form.on{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.ss-steps{margin:6px 0 0;padding-left:22px}
+.ss-steps li{margin:0 0 6px}
+.ss-made{display:grid;grid-template-columns:minmax(0,280px) 1fr;gap:18px;align-items:start;margin-top:10px}
+.ss-tick{display:inline-flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;margin:8px 0 0}
+.ss-tick input{width:22px;height:22px;accent-color:#2e7d4f}
+
+/* stage 3 */
+.ss-jlab{display:grid;grid-template-columns:1fr minmax(0,330px);gap:18px;align-items:start}
+.ss-rig{border:3px solid var(--ink);border-radius:18px;background:linear-gradient(#fff9ec,#ffe6b8);padding:8px;text-align:center}
+.ss-rig svg{width:100%;height:auto;display:block}
+.ss-meter{display:flex;gap:5px;justify-content:center;margin:6px 0 8px}
+.ss-meter span{width:36px;height:14px;border:2px solid var(--ink);border-radius:6px;background:var(--white);font-size:0}
+.ss-meter span.on{background:var(--orange)}
+.ss-meter span.held{background:#2e7d4f}
+.ss-meterlab{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+.ss-meth{display:flex;align-items:center;gap:6px}
+.ss-meth svg{width:26px;height:20px;flex:none}
+.ss-exp{width:100%;border-collapse:collapse;font-size:.92rem;margin:8px 0 0}
+.ss-exp td,.ss-exp th{border-bottom:1.5px dashed var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.ss-exp th{font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+.ss-dots{white-space:nowrap;letter-spacing:2px;color:#2e7d4f;font-weight:700}
+
+/* stage 4 */
+.ss-reels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0}
+.ss-reel{border:3px solid var(--ink);border-radius:16px;background:var(--ink);color:var(--paper);padding:10px;display:flex;flex-direction:column;gap:6px;min-height:132px}
+.ss-reel .rl{font-family:var(--display);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
+.ss-reel .rv{flex:1;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:1.02rem;line-height:1.2;background:var(--white);color:var(--ink);border-radius:10px;padding:8px;display:flex;align-items:center}
+.ss-reel.spin .rv{background:#fff3c4}
+.ss-reel button{font-family:var(--body);font-size:.8rem;font-weight:700;border:2px solid var(--paper);background:transparent;color:var(--paper);border-radius:999px;padding:3px 8px;cursor:pointer;align-self:flex-start}
+.ss-reel button[aria-pressed="true"]{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.ss-ideaout{font-size:1.08rem;font-weight:700;background:#f5eef8;border:2px solid var(--plum);border-radius:14px;padding:10px 14px;margin:8px 0}
+.ss-pad{border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#fffdf8;touch-action:none;max-width:660px}
+.ss-pad canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.ss-padbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.ss-padbar button{font-family:var(--body);font-size:.85rem;font-weight:700;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:6px 11px;cursor:pointer}
+.ss-padbar button[aria-pressed="true"]{background:var(--yellow);box-shadow:2px 3px 0 var(--ink)}
+.ss-padbar .sw{width:30px;height:30px;padding:0;border-radius:50%}
+.ss-padbar .sw[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.ss-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0}
+.ss-thumb{border:3px solid var(--ink);border-radius:12px;background:var(--white);padding:6px;position:relative;box-shadow:3px 4px 0 rgba(10,47,56,.2)}
+.ss-thumb:nth-child(odd){transform:rotate(-1.5deg)}
+.ss-thumb:nth-child(even){transform:rotate(1.2deg)}
+.ss-thumb img{display:block;width:100%;height:auto;border-radius:6px}
+.ss-thumb span{display:block;font-size:.8rem;font-weight:700;margin:4px 0 0}
+.ss-x{position:absolute;top:-10px;right:-10px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--white);color:var(--ink);font-weight:700;cursor:pointer;line-height:1}
+.ss-range{width:100%;max-width:420px;accent-color:var(--orange)}
+.ss-know{border:2px solid var(--ink);border-radius:14px;background:var(--paper);padding:10px 14px;font-size:.95rem;margin:8px 0}
+
+/* stage 5 */
+.ss-logform{border:3px solid var(--ink);border-radius:18px;background:#f2f9fb;padding:16px}
+.ss-photo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+.ss-photo img{width:110px;height:auto;border:3px solid var(--ink);border-radius:8px;background:#fff;transform:rotate(-2deg)}
+.ss-filebtn{position:relative;display:inline-block}
+.ss-filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.ss-filebtn input:focus-visible+span{outline:4px solid var(--plum);outline-offset:3px}
+.ss-log{list-style:none;margin:14px 0 0;padding:0;position:relative}
+.ss-log li{position:relative;border:3px solid var(--ink);border-radius:16px 12px 16px 12px;background:var(--white);padding:12px 14px 12px 16px;margin:0 0 12px 22px;box-shadow:3px 4px 0 rgba(10,47,56,.18)}
+.ss-log li::before{content:"";position:absolute;left:-24px;top:16px;width:14px;height:14px;border-radius:50%;background:var(--orange);border:3px solid var(--ink)}
+.ss-log li .when{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.ss-log li img{float:right;width:96px;margin:0 0 6px 10px;border:2px solid var(--ink);border-radius:6px;transform:rotate(2deg)}
+.ss-log li p{margin:4px 0;font-size:.95rem}
+.ss-tags{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.ss-tags span{font-size:.75rem;background:var(--paper);border:1.5px solid var(--ink);border-radius:999px;padding:1px 8px}
+
+/* stage 6 */
+.ss-critic{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:18px;align-items:start}
+.ss-critic svg{width:100%;height:auto;display:block;border:3px solid var(--ink);border-radius:16px;background:linear-gradient(#eaf6fb,#fff6df)}
+.ss-stmts{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px}
+.ss-stmt{font-family:var(--body);font-size:.93rem;text-align:left;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:7px 11px;cursor:pointer}
+.ss-stmt[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.ss-cbins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ss-cbin{border:3px solid var(--ink);border-radius:16px;padding:10px;min-height:110px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.ss-cbin.w{background:#e9f4ec}
+.ss-cbin.b{background:#fdf0e5}
+.ss-cbin b{display:block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.86rem;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.ss-cbin p{font-size:.84rem;margin:0 0 4px;padding:4px 6px;background:rgba(255,255,255,.7);border-radius:8px}
+.ss-rates{display:grid;gap:12px;margin:8px 0}
+.ss-rate{border:2px solid var(--ink);border-radius:14px;padding:10px 12px;background:var(--paper)}
+.ss-rate .q{display:flex;gap:10px;align-items:center;margin:0 0 6px}
+.ss-rate .q svg{width:40px;height:40px;flex:none}
+.ss-rate .q b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.ss-rate .lv{display:flex;flex-wrap:wrap;gap:6px}
+.ss-rate .lv button{font-family:var(--body);font-size:.84rem;font-weight:700;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:5px 10px;cursor:pointer}
+.ss-rate .lv button[aria-pressed="true"]{background:var(--orange);box-shadow:2px 3px 0 var(--ink)}
+.ss-chlist{list-style:none;padding:0;margin:10px 0 0;counter-reset:ch}
+.ss-chlist li{border:3px solid var(--ink);border-radius:16px;background:var(--white);padding:10px 14px;margin:0 0 10px;position:relative}
+.ss-chlist li b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+
+/* stage 7 */
+.ss-story{border:4px solid var(--ink);border-radius:26px 20px 24px 18px;background:linear-gradient(160deg,#fffdf8,#fbefd8);box-shadow:var(--lift-hi);padding:20px;margin:14px 0 0}
+.ss-story h3.t{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:clamp(1.7rem,6vw,2.8rem);line-height:.95;margin:0 0 4px;color:var(--teal);text-shadow:3px 3px 0 rgba(239,119,36,.25)}
+.ss-story .by{font-size:.9rem;color:var(--body-tint);margin:0 0 12px}
+.ss-storygrid{display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:18px;align-items:start}
+.ss-sblk{border-left:6px solid var(--orange);padding:4px 0 4px 12px;margin:0 0 14px}
+.ss-sblk:nth-child(3n+2){border-left-color:var(--teal)}
+.ss-sblk:nth-child(3n+3){border-left-color:var(--plum)}
+.ss-sblk h4{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+.ss-sblk p{margin:0 0 4px;font-size:.96rem}
+.ss-sblk .ss-mini{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.ss-sblk .ss-mini img{width:90px;border:2px solid var(--ink);border-radius:6px;background:#fff}
+.ss-bars{display:grid;gap:4px;font-size:.88rem;max-width:360px}
+.ss-bars div{display:grid;grid-template-columns:64px 90px 1fr;gap:8px;align-items:center}
+.ss-bars .trk{display:block;height:12px;border-radius:999px;background:var(--white);border:1.5px solid var(--ink);overflow:hidden}
+.ss-bars i{display:block;height:100%;background:var(--orange)}
+.ss-slides{border:4px solid var(--ink);border-radius:24px;background:var(--ink);color:var(--paper);padding:22px;margin:14px 0 0;min-height:300px;display:flex;flex-direction:column}
+.ss-slides .sk{font-family:var(--display);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow)}
+.ss-slides h3{font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 900;font-size:clamp(1.6rem,5vw,2.6rem);line-height:1;margin:6px 0 12px;color:var(--paper)}
+.ss-slides .sb{flex:1;font-size:1.18rem;line-height:1.5}
+.ss-slides .sb p{margin:0 0 10px}
+.ss-slides .sb img{width:130px;border:3px solid var(--paper);border-radius:8px;margin:0 8px 8px 0;background:#fff}
+.ss-slides .sb .ss-tt{max-width:260px;color:var(--ink)}
+.ss-slides .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.ss-slides .nav span{flex:1;font-size:.9rem;opacity:.8}
+
+.ss-sendwrap{margin:6px 0 10px}
+.ss-savenote{font-size:.85rem;color:var(--orange-deep);margin:6px 0 0}
+
+@media (max-width:820px){
+  .ss-intro,.ss-jlab,.ss-made,.ss-critic,.ss-storygrid,.ss-two{grid-template-columns:1fr}
+  .ss-learn{grid-template-columns:1fr}
+  .ss-learn svg{max-width:300px}
+  .ss-tt{max-width:340px;margin:0 auto}
+}
+@media (max-width:560px){
+  .ss-stage{padding:16px}
+  .ss-bins{grid-template-columns:1fr 1fr}
+  .ss-reels{grid-template-columns:1fr}
+  .ss-reel{min-height:0}
+  .ss-gt,.ss-cbins{grid-template-columns:1fr}
+  .ss-map{grid-template-columns:repeat(2,1fr)}
+  .ss-tile svg{width:44px;height:36px}
+  .ss-head h2{font-size:1.35rem}
+  .ss-num{width:48px;height:48px;font-size:1.3rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .ss-sculpt,.ss-ring,.ss-pop,.ss-stage,.ss-info{animation:none!important}
+}
+@media print{
+  .top,.ss-map,.ss-intro,.ss-stage>*:not(#storyHost),.ss-sendwrap,footer,.backlink,.hero,.grain{display:none!important}
+  .ss-stage{border:0;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>SCULPTURE <span class="accent">STUDIO</span></h1>
+    <div class="line">
+      <span class="chip">Aesthetic and creative</span>
+      <p>Squish it, bend it, join it, wobble it. A studio on screen to go with the clay, card and wire on the table.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap ss">
+
+  <section class="ss-intro">
+    <div class="ss-box">
+      <p class="ss-lead"><b>Seven stages, any order.</b> Poke around the materials, test some joins, dream up an idea, then log, look at and tell the story of the sculpture you make for real in the room.</p>
+      <p class="ss-small">Every stage is open. Skip anything that is not for you, and come back whenever. It saves itself on this device.</p>
+      <span class="ss-lab" id="whoLab">Who is this? (only if you want)</span>
+      <div class="ss-who" id="who" role="group" aria-labelledby="whoLab"></div>
+      <div id="whoMs"></div>
+    </div>
+    <div>
+      <div class="ss-tt" id="tt0wrap">
+        <div class="ss-ttcap" id="tt0cap">The turntable</div>
+        <div data-tt="a"></div>
+        <button type="button" class="ss-ttbtn" id="ttPause">Pause the turntable</button>
+      </div>
+    </div>
+  </section>
+
+  <nav class="ss-map" id="map" aria-label="Stages"></nav>
+
+  <div id="stages"></div>
+
+  <section class="ss-sendwrap" id="sendSec">
+    <div id="sendHost"></div>
+    <p class="ss-small">Your notes, sketches and photos stay saved on this device. Photos and sketches are never sent, only the words.</p>
+    <p class="ss-savenote hidden" id="saveNote">This device could not save just now (it might be full). Everything still works while the page is open.</p>
+    <div class="ss-row"><button type="button" class="btn btn-quiet" id="resetBtn">Start again</button></div>
+  </section>
+
+  <a class="backlink" href="/practice/#ac-standard">Back to Aesthetic and creative</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.sculpture-studio.v1", WHOKEY = "base5.who.v1";
+var reduce = false; try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c] }) }
+function has(a, v){ return a && a.indexOf(v) >= 0 }
+var INK = "#0a2f38";
+
+/* =================== people and milestones =================== */
+var PEOPLE = ["JT","LW","EGW","LP","LC","HK"];
+var MS = {
+  LC: ["I can explore different sculpture materials and tools.", "I can choose a material and tool and use them to make a simple shape or form."],
+  LP: ["I can develop an idea for a small-scale sculpture through sketches or models.", "I can turn my chosen idea into a sculpture, choosing materials that suit my design."],
+  LW: ["I can create a small-scale sculpture using techniques I have practised.", "I can evaluate my sculpture and talk about what I would change next time."],
+  EGW:["I can experiment with different ways to shape, join and build materials.", "I can use the joining and building methods I have tried to create a small sculpture."],
+  HK: ["I can evaluate my sculpture and identify what works well and what could be improved.", "I can make changes to my sculpture based on my evaluation."],
+  JT: ["I can make changes based on my evaluation and explain how my sculpture developed.", "I can present my finished sculpture and review the whole process from first idea to final piece."]
+};
+var MSF = {
+  LC: ["Have a poke around the sculpture materials and tools.", "Pick one material and one tool, and use them to make a simple form."],
+  LP: ["Grow an idea for a small sculpture with sketches or a tiny test model.", "Turn that idea into a real sculpture, picking materials that suit it."],
+  LW: ["Make a small sculpture using techniques you have practised.", "Look at your sculpture and say what you would change next time."],
+  EGW:["Experiment with ways to shape, join and build.", "Use the joins and building methods you tried to make a small sculpture."],
+  HK: ["Look at your sculpture: what works well, and what could be better?", "Make some changes to your sculpture based on what you noticed."],
+  JT: ["Make changes after evaluating, and explain how your sculpture grew.", "Present your finished sculpture and tell its story from first idea to final piece."]
+};
+var REC = { LC:[1,2], LP:[4,5], LW:[5,6], EGW:[2,3,5], HK:[6], JT:[6,7] };
+var TARGET = "Sculpture and ceramics: I can create a small-scale sculpture through experimentation, evaluation, and review.";
+
+/* =================== materials and tools =================== */
+var MATK = ["clay","card","wire","foil","pm","found"];
+var MATS = {
+  clay:{ name:"Clay", col:"#c8693f", sub:"Soft, squishy earth that dries hard.",
+    good:["Squishes into almost any form", "Takes texture and tiny details", "Pieces join really well with slip and score"],
+    tricky:["Heavy, so tall thin parts can droop", "Joins crack if you skip slip and score", "Thin parts snap once it is dry"],
+    tools:["Loop tool","Needle tool","Wooden modelling tool","Sponge","Cutting wire"],
+    props:"heavy, soft and smooth" },
+  card:{ name:"Card", col:"#d9b26e", sub:"Stiff paper that folds, slots and rolls.",
+    good:["Light and stiff, great for tall flat parts", "Folds, slots and rolls into forms", "Easy to paint or draw on"],
+    tricky:["Goes soggy and weak if it gets wet", "Folds go wobbly unless you score them first", "Thin card bends under weight"],
+    tools:["Scissors","Ruler and scoring tool","Masking tape","Hot glue gun (with an adult)"],
+    props:"light and stiff" },
+  wire:{ name:"Wire", col:"#7d8d96", sub:"Bendy metal that stays where you put it.",
+    good:["Bends and stays bent", "Draws lines in the air, like a 3D drawing", "Makes a strong skeleton (an armature) inside other materials"],
+    tricky:["Cut ends can be sharp, so tuck them in", "Thin wire springs back and wobbles", "Hard to make solid, filled in shapes"],
+    tools:["Round nose pliers","Wire cutters"],
+    props:"thin, bendy and strong" },
+  foil:{ name:"Foil", col:"#b7c4ca", sub:"Kitchen foil, scrunched and squeezed.",
+    good:["Scrunches into shape in seconds", "Light, and holds the shape you squeeze", "A brilliant armature to build papier mache or clay over"],
+    tricky:["Tears if you pull it too thin", "Hard to get really smooth", "Bits can drop off unless you tape them"],
+    tools:["Your hands","Masking tape","Scissors"],
+    props:"light and scrunchy" },
+  pm:{ name:"Papier mache", col:"#ece4cf", sub:"Paper strips and paste, layered into a shell.",
+    good:["Light but surprisingly strong when dry", "Covers almost anything: a balloon, foil or card", "Takes paint really well"],
+    tricky:["Slow: each layer needs time to dry", "Messy, so cover the table", "Soft and weak until fully dry"],
+    tools:["Paste brush","Torn newspaper strips","Paste: PVA and water, or flour and water","A balloon or armature to build on"],
+    props:"light once dry, and slow to make" },
+  found:{ name:"Found objects", col:"#e2402f", sub:"Bottle tops, tubes, buttons, boxes and bits.",
+    good:["Interesting shapes and textures for free", "Quick way to build a big idea", "Each object can tell part of a story"],
+    tricky:["Smooth, shiny things are hard to stick", "Different weights can make it tippy", "Check things are clean and safe first"],
+    tools:["Hot glue gun (with an adult)","Masking tape","Scissors"],
+    props:"mixed, with interesting shapes" }
+};
+var TOOLS = [
+  { id:"loop", name:"Loop tool", mats:["clay"], job:"scoops and carves clay away" },
+  { id:"needle", name:"Needle tool", mats:["clay"], job:"scores, cuts and pokes holes in clay" },
+  { id:"sponge", name:"Sponge", mats:["clay"], job:"smooths the surface of damp clay" },
+  { id:"pliers", name:"Round nose pliers", mats:["wire"], job:"bends wire into neat curves and loops" },
+  { id:"cutters", name:"Wire cutters", mats:["wire"], job:"snips wire to length" },
+  { id:"scorer", name:"Ruler and scoring tool", mats:["card"], job:"presses a line into card so it folds neatly" },
+  { id:"scissors", name:"Scissors", mats:["card","pm","foil","found"], job:"cuts card, paper and foil" },
+  { id:"brush", name:"Paste brush", mats:["pm"], job:"spreads paste over paper strips" },
+  { id:"glue", name:"Hot glue gun", mats:["found","card"], job:"sticks hard objects together fast, only with Jay or HB" },
+  { id:"tape", name:"Masking tape", mats:["foil","card","pm","found"], job:"holds parts while they set, tears by hand and takes paint" }
+];
+function toolById(id){ for(var i = 0; i < TOOLS.length; i++) if(TOOLS[i].id === id) return TOOLS[i]; return null }
+
+/* =================== forms (stage 2) =================== */
+/* tools: [label, ok, note] */
+var FORMS = {
+  clay:[
+    { id:"pinch", name:"Pinch pot", move:"Pinch", blurb:"Push your thumb in, pinch the walls thin.",
+      tools:[["Wire cutters",0,"Wire cutters are for snipping metal wire. They would just squash soft clay."],["Your thumbs and fingers",1,"Yes. Pinch pots are made with nothing but your hands."],["A paste brush",0,"A paste brush spreads glue on paper. Clay wants squeezing, not painting."]],
+      steps:["Roll a ball of clay about the size of a satsuma.","Push your thumb into the middle, not quite to the bottom.","Pinch the wall between thumb and fingers, turning the ball a little each time, until the walls are even."] },
+    { id:"coil", name:"Coil pot", move:"Coil", blurb:"Roll clay sausages and stack them up.",
+      tools:[["Scissors",0,"Scissors are for card and paper. Clay coils are rolled by hand."],["Round nose pliers",0,"Pliers bend wire. Clay coils need rolling, then smoothing."],["Hands to roll, then a wooden modelling tool to smooth",1,"Yes. Roll the coils by hand, then smooth them together with the tool."]],
+      steps:["Flatten a ball of clay into a round base.","Roll long, even sausages (coils) on the table.","Score and slip, then stack each coil and smooth it down onto the one below, inside and out."] }
+  ],
+  card:[
+    { id:"fold", name:"Folded zigzag", move:"Score and fold", blurb:"A concertina that stands up on its own.",
+      tools:[["Sponge",0,"A sponge is for smoothing damp clay. Wet card goes soggy."],["Ruler and scoring tool",1,"Yes. Scoring along a ruler makes sharp, straight folds."],["Loop tool",0,"A loop tool carves clay. It would rip card."]],
+      steps:["Draw lines across a strip of card, the same gap apart.","Press along each line with the scoring tool against a ruler.","Fold back and forth along the scored lines, then stand it up."] },
+    { id:"slot", name:"Slotted tree", move:"Cut and slot", blurb:"Two flat shapes that slide together.",
+      tools:[["Scissors",1,"Yes. Cut two shapes and a slot in each, and they slide together."],["Needle tool",0,"A needle tool is for scoring clay. It would only poke holes in card."],["Paste brush",0,"No glue needed here. The slots hold it together."]],
+      steps:["Cut two matching tree shapes from card.","Cut a slot halfway up the middle of one, from the top.","Cut a slot halfway down the other, from the bottom, then slide them together."] }
+  ],
+  wire:[
+    { id:"spiral", name:"Spring spiral", move:"Coil around a pencil", blurb:"A springy spiral rising off a base.",
+      tools:[["Sponge",0,"A sponge smooths clay. Wire needs bending and gripping."],["Scoring tool",0,"The scoring tool is a card tool. Wire needs pliers."],["Round nose pliers and a pencil",1,"Yes. Wrap the wire around the pencil, and use the pliers for the ends."]],
+      steps:["Wrap wire tightly around a pencil, about ten times.","Slide the pencil out and stretch the spring a little.","Use pliers to curl the cut ends in so nothing is sharp, then fix it to a base."] },
+    { id:"figure", name:"Running figure", move:"Bend and twist", blurb:"A wire person mid stride.",
+      tools:[["Scissors",0,"Scissors get blunt and damaged on wire. Wire cutters are made for it."],["Pliers and wire cutters",1,"Yes. Cutters for length, pliers for bends and twists."],["Loop tool",0,"A loop tool carves clay. Wire needs pliers."]],
+      steps:["Cut a long piece of wire, about as long as your arm.","Bend a loop for the head and twist the wire below it to make a neck and body.","Bend arms and legs into a running pose, then twist the feet onto a base."] }
+  ],
+  foil:[
+    { id:"bird", name:"Little bird", move:"Scrunch and pinch", blurb:"A foil bird that sits in your palm.",
+      tools:[["Your hands",1,"Yes. Foil is the one material where your hands are the best tool."],["Wire cutters",0,"Wire cutters are for wire. Foil just needs scrunching."],["Loop tool",0,"A loop tool carves clay. Foil would just tear."]],
+      steps:["Scrunch a big sheet of foil into an egg shape for the body.","Scrunch a smaller ball for the head and press it on firmly.","Pinch out a beak and a tail, and squeeze the wings flat."] },
+    { id:"tree", name:"Twisty tree", move:"Twist", blurb:"Twisted foil branches reaching up.",
+      tools:[["Needle tool",0,"A needle tool is for clay. Foil branches come from twisting."],["Paste brush",0,"A paste brush is for papier mache. Here, just twist."],["Your hands, twisting strips",1,"Yes. Tear the top into strips and twist each one into a branch."]],
+      steps:["Roll a long sheet of foil into a loose tube.","Tear the top half into four or five strips.","Twist each strip into a branch, and squeeze the bottom wide so it stands."] }
+  ],
+  pm:[
+    { id:"bowl", name:"Balloon bowl", move:"Layer strips over a balloon", blurb:"A light, bright bowl.",
+      tools:[["Wire cutters",0,"Wire cutters snip wire. Papier mache is all paper and paste."],["Paste brush and torn newspaper",1,"Yes. Paste on, strip on, smooth it down, repeat."],["Needle tool",0,"A needle tool is for clay. Here you want a brush and paper."]],
+      steps:["Blow up a balloon and stand it in a bowl or pot.","Brush paste over torn newspaper strips and lay them over the top half, crossing in different directions.","Add three or four layers, letting it dry between them, then pop the balloon and paint."] },
+    { id:"fish", name:"Fish on a stand", move:"Layer strips over foil", blurb:"Papier mache skin over a foil fish.",
+      tools:[["Paste brush and torn newspaper",1,"Yes. Layer strips over the foil shape until it is covered."],["Sponge",0,"A sponge smooths clay. Papier mache needs paste and paper."],["Round nose pliers",0,"Pliers are for wire. The skin is paper strips."]],
+      steps:["Scrunch and tape foil into a fish shape.","Paste strips of newspaper all over it, two or three layers.","When dry, paint it and fix it onto a stick in a base."] }
+  ],
+  found:[
+    { id:"totem", name:"Stacked totem", move:"Stack and stick", blurb:"A tower of bits with a face.",
+      tools:[["Sponge",0,"A sponge smooths clay. Found objects need something strong and grippy."],["Loop tool",0,"A loop tool carves clay. Here you are sticking, not carving."],["Hot glue gun, with Jay or HB",1,"Yes. Hot glue grabs odd shapes fast. Always with an adult."]],
+      steps:["Pick a tube or box for the main body.","Try out bits on top and on the front before sticking anything.","With Jay or HB, hot glue the pieces on, biggest first."] },
+    { id:"robot", name:"Bits and bobs robot", move:"Arrange and join", blurb:"A box robot with bottle top eyes.",
+      tools:[["Needle tool",0,"A needle tool is for scoring clay."],["Masking tape and hot glue",1,"Yes. Tape holds it while you check, glue makes it stay."],["Paste brush",0,"PVA paste struggles on shiny plastic. Tape and hot glue work better."]],
+      steps:["Choose a box for the body and a smaller one for the head.","Tape them together and try out eyes, arms and an aerial.","When you are happy, swap the tape for hot glue, with Jay or HB."] }
+  ]
+};
+function formOf(mat, id){ var f = FORMS[mat] || []; for(var i = 0; i < f.length; i++) if(f[i].id === id) return f[i]; return f[0] || null }
+
+/* =================== joining lab (stage 3) =================== */
+var PAIRS = [
+  { id:"cc", a:"clay", b:"clay", label:"Clay to clay", eg:"like a handle onto a pot" },
+  { id:"kk", a:"card", b:"card", label:"Card to card", eg:"like a wall onto a base" },
+  { id:"ww", a:"wire", b:"wire", label:"Wire to wire", eg:"like an arm onto a body" },
+  { id:"fc", a:"card", b:"foil", label:"Foil to card", eg:"like a foil figure onto a card base" },
+  { id:"pf", a:"foil", b:"pm", label:"Papier mache to foil", eg:"like a paper skin over a foil armature" },
+  { id:"fo", a:"found", b:"found", label:"Found objects", eg:"like a bottle top onto a cardboard tube" }
+];
+var METHODS = [
+  { id:"slip", name:"Slip and score" },
+  { id:"tabs", name:"Tabs and slots" },
+  { id:"wrap", name:"Wire wrap" },
+  { id:"tape", name:"Masking tape" },
+  { id:"glue", name:"Hot glue" },
+  { id:"pins", name:"Pins and split pins" },
+  { id:"pva", name:"PVA glue" }
+];
+function methodById(id){ for(var i = 0; i < METHODS.length; i++) if(METHODS[i].id === id) return METHODS[i]; return null }
+function pairById(id){ for(var i = 0; i < PAIRS.length; i++) if(PAIRS[i].id === id) return PAIRS[i]; return null }
+var JOIN = {
+  cc:{ slip:[5,"Scratch both surfaces, add slip (clay mixed with water), press together and smooth the seam. The two pieces become one."],
+       tabs:[2,"You can slot soft clay, but it squashes and cracks as it dries. Slip and score holds far better."],
+       wrap:[1,"Wire just slices through soft clay."],
+       tape:[1,"Tape will not stick to damp clay."],
+       glue:[1,"Hot glue does not stick to wet clay, and it would burn away in a kiln."],
+       pins:[1,"Pins slide straight out of soft clay."],
+       pva:[2,"PVA can mend dry air drying clay, but on damp clay slip and score is much stronger."] },
+  kk:{ slip:[1,"Slip is runny clay. On card it just makes a soggy mess."],
+       tabs:[5,"Cut slots halfway into each piece and slide them together. Strong, and no glue needed."],
+       wrap:[2,"Wire poked through card holds a bit, but the holes tear bigger."],
+       tape:[3,"Quick and handy, but tape can peel. Fold little tabs and tape those for a better hold."],
+       glue:[4,"Hot glue grabs card fast and sets hard. Only with Jay or HB."],
+       pins:[3,"Split pins let card parts swivel, like a joint. Great for moving parts, a bit floppy for walls."],
+       pva:[4,"PVA on folded tabs is strong once dry. Hold it with tape or a peg while it sets."] },
+  ww:{ slip:[1,"Clay slip does nothing for metal wire."],
+       tabs:[1,"Wire has no flat bits to cut slots in."],
+       wrap:[5,"Twist one wire tightly round the other with pliers. Strong, and it can still bend."],
+       tape:[2,"Tape holds wire loosely. It slips and twists round."],
+       glue:[2,"Hot glue only touches a tiny bit of smooth wire, so it pops off."],
+       pins:[1,"Pins cannot grip wire."],
+       pva:[1,"PVA cannot grip smooth metal."] },
+  fc:{ slip:[1,"Slip is for clay. On card and foil it is just mud."],
+       tabs:[3,"Cut a slot in the card base, push the foil feet through and fold them flat underneath. Not bad at all."],
+       wrap:[3,"Wire poked through the card and twisted round the foil holds well."],
+       tape:[4,"Strips of masking tape over the feet and onto the card. The classic way to fix a foil armature down."],
+       glue:[3,"Hot glue sticks, but foil carries heat straight to your fingers. Careful, and only with Jay or HB."],
+       pins:[3,"Pins through the foil into the card hold for a while, but can work loose."],
+       pva:[2,"PVA does not grip shiny foil well. It might hold, gently, once fully dry."] },
+  pf:{ slip:[1,"Slip is clay. Papier mache needs paste."],
+       tabs:[1,"Soggy paper strips cannot be slotted."],
+       wrap:[2,"Wire can hold strips in place, but it is fiddly and lumpy."],
+       tape:[3,"A layer of masking tape first gives the paper something to grip. Great as a first layer."],
+       glue:[2,"Hot glue makes hard lumps under the paper."],
+       pins:[1,"Pins tear wet paper."],
+       pva:[5,"Pasted strips, layer by layer, dry into a hard shell. This is how papier mache works."] },
+  fo:{ slip:[1,"Slip is runny clay. It will not hold plastic or cardboard."],
+       tabs:[3,"Cut a slot in the tube and push the lid in. Neat, and it holds if it is a snug fit."],
+       wrap:[2,"Wire round a smooth object slips off unless there is something to hook onto."],
+       tape:[3,"Holds while you work things out, but it can peel off shiny surfaces."],
+       glue:[5,"Hot glue fills the gaps between odd shapes and sets in seconds. With Jay or HB."],
+       pins:[1,"Pins cannot push into hard plastic."],
+       pva:[2,"PVA does not grip smooth plastic well and takes ages to dry."] }
+};
+var STRENGTH = ["", "Falls apart", "Wobbly", "Holds gently", "Strong", "Rock solid"];
+
+/* =================== idea reels (stage 4) =================== */
+var THEMES = ["a creature from the deep sea", "a tiny house for a bird", "a feeling, like calm or excited", "a monster made of weather", "a plant from another planet", "an animal in the middle of moving", "a robot with one silly job", "a bird with an outrageous hairdo", "my favourite food, but giant", "a shape that looks like music", "a guardian for my desk", "a tree with a secret"];
+var TWISTS = ["it balances on a small point", "it has a hole you can see through", "it is taller than it is wide", "it uses only two colours", "it looks like it is moving", "it has a rough side and a smooth side", "it tells a tiny story", "it looks different from every side", "it fits in the palm of your hand"];
+
+/* =================== evaluation (stage 6) =================== */
+var STMTS = [
+  { t:"The wings make a big, strong shape that looks like flying.", w:true, why:"The wings are big and spread out, so the gull reads as flying from across the room. That is a strength of the form." },
+  { t:"The thin legs lean, so the gull looks like it might tip over.", w:false, why:"Leaning legs make it look unsteady, and it really does fall over. That is a balance problem to fix." },
+  { t:"The crinkly foil looks a bit like feathers.", w:true, why:"The crinkles give a feathery surface texture. Foil doing a job, nice." },
+  { t:"Masking tape shows under the tail.", w:false, why:"Visible tape draws the eye to the join. It could be hidden or covered." },
+  { t:"The bright yellow beak catches your eye.", w:true, why:"A small pop of colour gives the eye somewhere to land. That works well." },
+  { t:"The base is tiny for such a big bird.", w:false, why:"A tiny base under a big, heavy top is why it tips. A wider base would help balance." }
+];
+var GULLQ = [
+  { t:"Give it a wider, heavier base", ok:true, why:"Yes. A wider base, and keeping the weight low, makes things much more stable. The gull stays standing." },
+  { t:"Add more crinkles to the foil", ok:false, why:"The surface already works well, and more crinkles will not stop it tipping. Balance is the bigger problem." },
+  { t:"Make the beak bigger", ok:false, why:"Fun, but a bigger beak adds weight at the front, so it could tip even more. Balance first." }
+];
+var RATES = [
+  { id:"form", name:"Form", q:"Is the 3D shape strong and interesting from different sides?" },
+  { id:"balance", name:"Balance", q:"Does it stand up well and feel even?" },
+  { id:"surface", name:"Surface", q:"How do the texture and finish look?" },
+  { id:"idea", name:"Idea", q:"Does it show what you wanted it to show?" }
+];
+var LEVELS = ["Just started", "Getting there", "Happy with it", "Really proud"];
+var CTYPES = [
+  { id:"base", name:"A wider or heavier base" },
+  { id:"join", name:"A stronger join" },
+  { id:"smooth", name:"A smoother surface" },
+  { id:"detail", name:"More detail or texture" },
+  { id:"size", name:"A different size" },
+  { id:"colour", name:"Paint or colour" },
+  { id:"other", name:"Something else" }
+];
+function ctypeName(id){ for(var i = 0; i < CTYPES.length; i++) if(CTYPES[i].id === id) return CTYPES[i].name; return "" }
+var LOGTECH = ["Pinched","Rolled coils","Rolled a slab","Slip and score","Folded and scored","Tabs and slots","Bent wire","Wire wrap","Scrunched foil","Taped","Layered paper strips","Hot glued (with an adult)","Carved","Smoothed","Added texture","Painted"];
+var LOGRES = ["It worked", "It wobbled", "It cracked", "It fell apart", "It surprised me", "Still drying"];
+
+/* =================== SVG: icons =================== */
+function matIcon(m){
+  if(m === "clay") return "<svg viewBox='0 0 86 60' aria-hidden='true'><rect x='12' y='30' width='62' height='24' rx='5' fill='#c8693f' stroke='" + INK + "' stroke-width='2.5'/><path d='M22 30 Q30 8 46 14 Q62 6 64 30 Z' fill='#e08a5c' stroke='" + INK + "' stroke-width='2.5'/><path d='M34 22 q4 -3 8 0 M48 20 q4 -3 8 0' stroke='#7e3a1c' stroke-width='2' fill='none'/></svg>";
+  if(m === "card") return "<svg viewBox='0 0 86 60' aria-hidden='true'><path d='M10 46 L40 52 L76 40 L46 34 Z' fill='#c79a52' stroke='" + INK + "' stroke-width='2.5'/><path d='M14 38 L44 44 L78 30 L48 24 Z' fill='#d9b26e' stroke='" + INK + "' stroke-width='2.5'/><path d='M44 44 L44 18 L78 6 L78 30' fill='#ecd09a' stroke='" + INK + "' stroke-width='2.5'/></svg>";
+  if(m === "wire") return "<svg viewBox='0 0 86 60' aria-hidden='true'><ellipse cx='40' cy='30' rx='26' ry='20' fill='none' stroke='#3c4a52' stroke-width='3'/><ellipse cx='42' cy='30' rx='22' ry='16' fill='none' stroke='#7d8d96' stroke-width='3'/><ellipse cx='44' cy='30' rx='18' ry='12' fill='none' stroke='#3c4a52' stroke-width='3'/><path d='M62 34 Q74 40 70 52' fill='none' stroke='#3c4a52' stroke-width='3' stroke-linecap='round'/></svg>";
+  if(m === "foil") return "<svg viewBox='0 0 86 60' aria-hidden='true'><path d='M20 34 L26 16 L40 10 L56 12 L68 24 L66 42 L52 52 L32 52 Z' fill='#cfd9de' stroke='" + INK + "' stroke-width='2.5'/><path d='M28 22 L38 28 L44 18 L52 30 L60 24 M30 40 L40 34 L48 44 L58 36' fill='none' stroke='#7f939b' stroke-width='1.6'/><path d='M32 16 L40 14' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>";
+  if(m === "pm") return "<svg viewBox='0 0 86 60' aria-hidden='true'><rect x='48' y='26' width='26' height='26' rx='4' fill='#fffdf8' stroke='" + INK + "' stroke-width='2.5'/><path d='M50 30 h22' stroke='#ffffff' stroke-width='4'/><rect x='52' y='30' width='18' height='6' fill='#f3efe4'/><g transform='rotate(-14 26 30)'><rect x='8' y='16' width='34' height='11' fill='#ece4cf' stroke='" + INK + "' stroke-width='2'/><path d='M12 20 h24 M12 23 h18' stroke='#8a877d' stroke-width='1.2'/></g><g transform='rotate(10 28 44)'><rect x='12' y='38' width='32' height='11' fill='#ece4cf' stroke='" + INK + "' stroke-width='2'/><path d='M16 42 h22 M16 45 h14' stroke='#8a877d' stroke-width='1.2'/></g><path d='M60 22 L66 4' stroke='#8a5230' stroke-width='4' stroke-linecap='round'/></svg>";
+  return "<svg viewBox='0 0 86 60' aria-hidden='true'><rect x='12' y='20' width='22' height='34' rx='3' fill='#c79a63' stroke='" + INK + "' stroke-width='2.5'/><ellipse cx='23' cy='20' rx='11' ry='4' fill='#a87d47' stroke='" + INK + "' stroke-width='2'/><rect x='42' y='38' width='22' height='9' rx='3' fill='#e2402f' stroke='" + INK + "' stroke-width='2.5'/><circle cx='70' cy='22' r='9' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/><circle cx='67' cy='20' r='1.6' fill='" + INK + "'/><circle cx='73' cy='24' r='1.6' fill='" + INK + "'/><circle cx='48' cy='18' r='6' fill='#00a6c9' stroke='" + INK + "' stroke-width='2'/></svg>";
+}
+function toolIcon(id){
+  var s = "<svg viewBox='0 0 40 30' aria-hidden='true'>", e = "</svg>", w = " stroke='" + INK + "' stroke-width='2'";
+  if(id === "loop") return s + "<rect x='12' y='13' width='22' height='5' rx='2' fill='#a8743f'" + w + "/><path d='M12 15.5 L6 15.5 M6 15.5 a4 5 0 1 1 0 0.1' fill='none'" + w + "/><ellipse cx='5' cy='15.5' rx='4' ry='5' fill='none' stroke='#7d8d96' stroke-width='2'/>" + e;
+  if(id === "needle") return s + "<rect x='16' y='12' width='20' height='6' rx='3' fill='#a8743f'" + w + "/><path d='M16 15 L3 15' stroke='#3c4a52' stroke-width='2' stroke-linecap='round'/>" + e;
+  if(id === "sponge") return s + "<rect x='6' y='7' width='28' height='17' rx='7' fill='#ffd75e'" + w + "/><circle cx='14' cy='13' r='2' fill='#e0a800'/><circle cx='24' cy='17' r='2.4' fill='#e0a800'/><circle cx='28' cy='11' r='1.6' fill='#e0a800'/>" + e;
+  if(id === "pliers") return s + "<path d='M4 13 L16 14 M4 17 L16 16' stroke='#3c4a52' stroke-width='2.5' stroke-linecap='round'/><circle cx='17' cy='15' r='2.5' fill='#7d8d96'" + w + "/><path d='M19 14 Q28 6 37 8 M19 16 Q28 24 37 22' fill='none' stroke='#e2402f' stroke-width='4' stroke-linecap='round'/>" + e;
+  if(id === "cutters") return s + "<path d='M4 11 L16 14 M4 19 L16 16' stroke='#3c4a52' stroke-width='3' stroke-linecap='round'/><circle cx='17' cy='15' r='2.5' fill='#7d8d96'" + w + "/><path d='M19 14 Q28 6 37 8 M19 16 Q28 24 37 22' fill='none' stroke='#007291' stroke-width='4' stroke-linecap='round'/>" + e;
+  if(id === "scorer") return s + "<rect x='3' y='18' width='34' height='8' fill='#ffc247'" + w + "/><path d='M8 18 v3 M14 18 v4 M20 18 v3 M26 18 v4 M32 18 v3' stroke='" + INK + "' stroke-width='1.2'/><path d='M10 14 L34 4' stroke='#7b4b8f' stroke-width='4' stroke-linecap='round'/>" + e;
+  if(id === "scissors") return s + "<circle cx='8' cy='9' r='5' fill='none' stroke='#ef7724' stroke-width='3'/><circle cx='8' cy='22' r='5' fill='none' stroke='#ef7724' stroke-width='3'/><path d='M12 11 L36 20 M12 20 L36 11' stroke='#3c4a52' stroke-width='2.5' stroke-linecap='round'/>" + e;
+  if(id === "brush") return s + "<rect x='16' y='13' width='20' height='5' rx='2' fill='#a8743f'" + w + "/><rect x='12' y='12' width='5' height='7' fill='#7d8d96'" + w + "/><path d='M12 12 L3 13 L3 18 L12 19 Z' fill='#f7f2e9'" + w + "/>" + e;
+  if(id === "glue") return s + "<path d='M6 8 H28 Q32 8 32 12 V14 H6 Z' fill='#7b4b8f'" + w + "/><path d='M14 14 L12 27 H19 L21 14' fill='#5c3269'" + w + "/><path d='M6 11 L1 11' stroke='#3c4a52' stroke-width='2'/><path d='M32 11 H38' stroke='#fffdf8' stroke-width='3'" + "/>" + e;
+  return s + "<circle cx='18' cy='15' r='11' fill='#ecd59c'" + w + "/><circle cx='18' cy='15' r='5' fill='#fffdf8'" + w + "/><path d='M27 21 L38 26 L36 18 Z' fill='#ecd59c'" + w + "/>" + e;
+}
+function methIcon(id){
+  var s = "<svg viewBox='0 0 26 20' aria-hidden='true'>", e = "</svg>";
+  if(id === "slip") return s + "<path d='M3 8 L23 8 M5 4 L9 12 M11 4 L15 12 M17 4 L21 12' stroke='#7e3a1c' stroke-width='1.8' stroke-linecap='round'/><path d='M3 16 Q8 13 13 16 T23 16' stroke='#c8693f' stroke-width='3' fill='none'/>" + e;
+  if(id === "tabs") return s + "<rect x='2' y='6' width='22' height='10' fill='#d9b26e' stroke='" + INK + "' stroke-width='1.5'/><rect x='11' y='2' width='4' height='10' fill='#fffdf8' stroke='" + INK + "' stroke-width='1.5'/>" + e;
+  if(id === "wrap") return s + "<path d='M2 10 H24' stroke='#7d8d96' stroke-width='2'/><path d='M8 4 Q11 10 8 16 M12 4 Q15 10 12 16 M16 4 Q19 10 16 16' stroke='#3c4a52' stroke-width='2' fill='none'/>" + e;
+  if(id === "tape") return s + "<rect x='3' y='5' width='20' height='10' rx='1' fill='#ecd59c' stroke='" + INK + "' stroke-width='1.5'/><path d='M3 5 l2 2 l-2 2 l2 2 l-2 2 l2 2' stroke='" + INK + "' stroke-width='1' fill='none'/>" + e;
+  if(id === "glue") return s + "<path d='M13 2 Q20 10 17 15 Q13 20 9 15 Q6 10 13 2 Z' fill='#e9f3f8' stroke='#5c3269' stroke-width='1.8'/>" + e;
+  if(id === "pins") return s + "<circle cx='9' cy='6' r='4' fill='#e2402f' stroke='" + INK + "' stroke-width='1.5'/><path d='M9 10 V18' stroke='#3c4a52' stroke-width='2'/><circle cx='19' cy='8' r='3' fill='#ffc247' stroke='" + INK + "' stroke-width='1.5'/><path d='M17 11 L15 18 M21 11 L23 18' stroke='#c79a00' stroke-width='1.6'/>" + e;
+  return s + "<rect x='8' y='5' width='10' height='13' rx='2' fill='#fffdf8' stroke='" + INK + "' stroke-width='1.5'/><path d='M10 5 L11 1 H15 L16 5' fill='#ef7724' stroke='" + INK + "' stroke-width='1.2'/><path d='M10 11 h6' stroke='#007291' stroke-width='2'/>" + e;
+}
+function tileIcon(n){
+  var s = "<svg viewBox='0 0 56 46' aria-hidden='true'>", e = "</svg>", k = " stroke='" + INK + "' stroke-width='2.2'";
+  if(n === 1) return s + "<rect x='3' y='38' width='50' height='5' fill='#8a5230'" + k + "/><rect x='6' y='22' width='12' height='16' rx='3' fill='#c8693f'" + k + "/><circle cx='29' cy='31' r='7' fill='#cfd9de'" + k + "/><path d='M40 38 L40 18 L50 14 L50 38' fill='#d9b26e'" + k + "/><path d='M8 8 q6 -8 12 0 q6 8 12 0' fill='none' stroke='#3c4a52' stroke-width='2.4'/>" + e;
+  if(n === 2) return s + "<path d='M10 22 Q8 42 28 42 Q48 42 46 22 Z' fill='#c8693f'" + k + "/><ellipse cx='28' cy='22' rx='18' ry='5' fill='#e08a5c'" + k + "/><path d='M38 8 q6 2 4 10' stroke='" + INK + "' stroke-width='2.2' fill='none' stroke-linecap='round'/>" + e;
+  if(n === 3) return s + "<rect x='10' y='26' width='36' height='14' fill='#d9b26e'" + k + "/><rect x='16' y='8' width='24' height='18' fill='#c8693f'" + k + "/><path d='M12 26 h32' stroke='#7b4b8f' stroke-width='4'/><path d='M4 12 l4 3 l-4 3 M52 12 l-4 3 l4 3' stroke='" + INK + "' stroke-width='2' fill='none'/>" + e;
+  if(n === 4) return s + "<rect x='4' y='10' width='32' height='30' rx='3' fill='#fffdf8'" + k + "/><path d='M10 32 q6 -14 12 -6 t10 -8' stroke='#ef7724' stroke-width='2.4' fill='none'/><path d='M44 4 L52 12 L32 34 L26 36 L28 30 Z' fill='#ffc247'" + k + "/>" + e;
+  if(n === 5) return s + "<rect x='6' y='6' width='30' height='36' rx='3' fill='#fffdf8'" + k + "/><path d='M12 14 h18 M12 20 h18 M12 26 h12' stroke='#007291' stroke-width='2'/><rect x='30' y='22' width='22' height='16' rx='3' fill='#7b4b8f'" + k + "/><circle cx='41' cy='30' r='4.5' fill='#fffdf8'" + k + "/>" + e;
+  if(n === 6) return s + "<circle cx='22' cy='20' r='13' fill='#eaf5f8'" + k + "/><path d='M31 29 L46 42' stroke='" + INK + "' stroke-width='5' stroke-linecap='round'/><path d='M22 12 l2.4 5 l5.4 .6 l-4 3.6 l1.2 5.4 l-5 -2.8 l-5 2.8 l1.2 -5.4 l-4 -3.6 l5.4 -.6 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='1.4'/>" + e;
+  return s + "<path d='M16 44 L24 30 M40 44 L32 30' stroke='#8a5230' stroke-width='3'/><rect x='6' y='4' width='44' height='28' rx='3' fill='#fffdf8'" + k + "/><path d='M14 24 Q22 10 28 18 Q34 8 42 22' stroke='#007291' stroke-width='2.4' fill='none'/><circle cx='18' cy='12' r='3' fill='#ef7724'/>" + e;
+}
+var STAGEFILL = { 1:"#ffc247", 2:"#ef7724", 3:"#00a6c9", 4:"#a274b6", 5:"#2e93ad", 6:"#ffe08f", 7:"#ff9d63" };
+
+/* =================== SVG: the turntable sculpture =================== */
+function pal(m){
+  return {
+    clay:{ f:"#c8693f", d:"#7e3a1c", l:"#e08a5c" },
+    card:{ f:"#d9b26e", d:"#8a6531", l:"#ecd09a" },
+    wire:{ f:"#7d8d96", d:"#3c4a52", l:"#c9d4d9" },
+    foil:{ f:"#cfd9de", d:"#5f7179", l:"#f4f7f8" },
+    pm:{ f:"#ece4cf", d:"#6d6a5f", l:"#ffffff" },
+    found:{ f:"#c79a63", d:"#6b4a24", l:"#e2c79e" }
+  }[m];
+}
+function woodBase(){ return "<rect x='76' y='190' width='88' height='14' rx='3' fill='#a8743f' stroke='#5e3d1d' stroke-width='2.5'/><path d='M84 197 h20 M116 199 h28' stroke='#5e3d1d' stroke-width='1.2' opacity='.6'/>" }
+function drawForm(mat, form, uid){
+  var p = pal(mat), body = "", tex = "", sw = " stroke='" + p.d + "' stroke-width='3' stroke-linejoin='round'";
+  var foilF = "url(#fo" + uid + ")";
+  if(mat === "clay" && form === "coil"){
+    var ws = [92,100,104,104,100,94,88];
+    for(var i = 0; i < ws.length; i++){ var y = 204 - 15 * (i + 1); body += "<rect x='" + (120 - ws[i] / 2) + "' y='" + y + "' width='" + ws[i] + "' height='15' rx='7.5' fill='" + (i % 2 ? p.f : "#c46238") + "'" + sw + "/>"; tex += "<path d='M" + (104 + (i % 3) * 9) + " " + (y + 10) + " v8 M" + (128 + (i % 2) * 8) + " " + (y + 11) + " v8' stroke='" + p.d + "' stroke-width='2' stroke-linecap='round'/>" }
+    body += "<ellipse cx='120' cy='100' rx='40' ry='6' fill='" + p.d + "' opacity='.55'/>";
+  } else if(mat === "clay"){
+    body = "<path d='M72 146 Q66 204 120 204 Q174 204 168 146 Z' fill='" + p.f + "'" + sw + "/><ellipse cx='120' cy='146' rx='48' ry='12' fill='" + p.l + "'" + sw + "/><ellipse cx='120' cy='148' rx='38' ry='8' fill='" + p.d + "' opacity='.6'/>";
+    tex = "<path d='M86 170 q7 -6 14 0 M110 184 q7 -6 14 0 M136 168 q7 -6 14 0 M96 192 q6 -5 12 0 M144 188 q6 -5 12 0' stroke='" + p.d + "' stroke-width='2.2' fill='none' stroke-linecap='round'/>";
+  } else if(mat === "card" && form === "slot"){
+    body = "<rect x='111' y='140' width='18' height='64' fill='" + p.f + "'" + sw + "/><circle cx='120' cy='104' r='48' fill='" + p.l + "'" + sw + "/><rect x='115' y='56' width='10' height='96' rx='3' fill='" + p.f + "'" + sw + "/>";
+    tex = "<circle cx='96' cy='92' r='7' fill='#fff3d6' stroke='" + p.d + "' stroke-width='2'/><circle cx='146' cy='112' r='8' fill='#fff3d6' stroke='" + p.d + "' stroke-width='2'/><circle cx='100' cy='124' r='5' fill='#fff3d6' stroke='" + p.d + "' stroke-width='2'/><path d='M140 80 l8 4 M84 108 l8 -2' stroke='" + p.d + "' stroke-width='2'/>";
+  } else if(mat === "card"){
+    var xs = [60,84,108,132,156,180], tops = [78,92,78,92,78,92], bots = [198,206,198,206,198,206];
+    for(var j = 0; j < 5; j++) body += "<polygon points='" + xs[j] + "," + tops[j] + " " + xs[j + 1] + "," + tops[j + 1] + " " + xs[j + 1] + "," + bots[j + 1] + " " + xs[j] + "," + bots[j] + "' fill='" + (j % 2 ? p.f : p.l) + "'" + sw + "/>";
+    tex = "<path d='M70 110 q6 -8 12 0 M118 126 q6 -8 12 0 M164 140 q6 -8 12 0' stroke='#ef7724' stroke-width='2.5' fill='none'/><path d='M94 150 l4 6 l4 -6 M142 160 l4 6 l4 -6' stroke='#007291' stroke-width='2.5' fill='none'/>";
+  } else if(mat === "wire" && form === "figure"){
+    var fig = "<circle cx='134' cy='74' r='13'/><path d='M130 88 L118 132 M126 100 L146 112 L160 100 M126 100 L106 110 L94 96 M118 132 L138 156 L132 190 M118 132 L102 154 L84 162 L84 190'/>";
+    body = woodBase() + "<g fill='none' stroke='" + p.d + "' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'>" + fig + "</g>";
+    tex = "<g fill='none' stroke='" + p.l + "' stroke-width='1.4' stroke-dasharray='3 3' stroke-linecap='round'>" + fig + "</g>";
+  } else if(mat === "wire"){
+    var pts = [], pts2 = [];
+    for(var t = 0; t <= 6 * Math.PI; t += 0.2){ var r = 36 - t * 1.3, x = 120 + r * Math.sin(t), yy = 188 - t * 6; pts.push(x.toFixed(1) + "," + yy.toFixed(1)); pts2.push((x - 1).toFixed(1) + "," + (yy - 1.2).toFixed(1)) }
+    body = woodBase() + "<polyline points='" + pts.join(" ") + "' fill='none' stroke='" + p.d + "' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/><circle cx='120' cy='74' r='6' fill='#ef7724' stroke='" + INK + "' stroke-width='2'/>";
+    tex = "<polyline points='" + pts2.join(" ") + "' fill='none' stroke='" + p.l + "' stroke-width='1.2'/>";
+  } else if(mat === "foil" && form === "tree"){
+    body = "<path d='M98 204 Q112 172 110 142 L94 104 L104 98 L118 130 L120 88 L130 88 L130 130 L146 96 L156 104 L134 144 Q130 174 144 204 Z' fill='" + foilF + "'" + sw + "/><circle cx='98' cy='98' r='11' fill='" + foilF + "'" + sw + "/><circle cx='125' cy='82' r='12' fill='" + foilF + "'" + sw + "/><circle cx='152' cy='98' r='11' fill='" + foilF + "'" + sw + "/>";
+    tex = "<path d='M110 190 l8 -8 M114 176 l8 -8 M114 160 l8 -8 M122 148 l6 -6 M104 120 l6 -4 M138 120 l6 -6 M120 110 l6 -6' stroke='" + p.d + "' stroke-width='1.6' opacity='.7'/>";
+  } else if(mat === "foil"){
+    body = "<path d='M108 176 L104 204 M126 176 L130 204' stroke='" + p.d + "' stroke-width='4' stroke-linecap='round'/><polygon points='76,146 46,126 52,152 74,162' fill='" + foilF + "'" + sw + "/><ellipse cx='116' cy='152' rx='44' ry='28' fill='" + foilF + "'" + sw + "/><circle cx='154' cy='122' r='18' fill='" + foilF + "'" + sw + "/><polygon points='169,116 190,123 169,130' fill='#d7e0e4'" + sw + "/><path d='M98 142 Q120 116 142 144 Q120 152 98 142 Z' fill='" + p.l + "'" + sw + "/><circle cx='158' cy='118' r='3' fill='" + INK + "'/>";
+    tex = "<path d='M92 162 l6 -4 l5 5 l6 -5 l5 4 M110 172 l6 -4 l5 5 l6 -5 M140 156 l5 -5 l5 4 M58 140 l6 2 l2 6' stroke='" + p.d + "' stroke-width='1.5' fill='none' opacity='.75'/>";
+  } else if(mat === "pm" && form === "fish"){
+    body = "<rect x='86' y='194' width='68' height='10' rx='3' fill='#a8743f' stroke='#5e3d1d' stroke-width='2.5'/><rect x='118' y='130' width='5' height='66' fill='#6b7a82' stroke='" + INK + "' stroke-width='1.5'/><path d='M58 112 Q98 68 150 104 L186 84 L180 116 L188 148 L150 124 Q98 158 58 112 Z' fill='#f6b73c'" + sw + "/><path d='M104 84 Q116 66 132 84' fill='#ef7724'" + sw + "/><circle cx='76' cy='106' r='7' fill='#fff' stroke='" + p.d + "' stroke-width='2.5'/><circle cx='77' cy='106' r='3' fill='" + INK + "'/>";
+    tex = "<path d='M98 100 q7 9 0 18 M114 96 q7 11 0 22 M130 98 q7 10 0 20 M146 104 q5 7 0 14' stroke='#c46d1d' stroke-width='2.4' fill='none'/><path d='M90 126 l16 -4 M120 128 l18 -6' stroke='#fff' stroke-width='1.5' opacity='.7'/>";
+  } else if(mat === "pm"){
+    body = "<path d='M62 140 Q62 204 120 204 Q178 204 178 140 Z' fill='#ef7724'" + sw + "/><polyline points='68,166 80,156 92,168 104,156 116,168 128,156 140,168 152,156 164,168 174,158' fill='none' stroke='#ffc247' stroke-width='6' stroke-linejoin='round'/><ellipse cx='120' cy='140' rx='58' ry='13' fill='" + p.f + "'" + sw + "/>";
+    tex = "<path d='M84 138 h20 M90 142 h26 M126 137 h22 M132 142 h18 M108 146 h18' stroke='#9a978b' stroke-width='1.5'/><circle cx='92' cy='186' r='4' fill='#7b4b8f'/><circle cx='120' cy='192' r='4' fill='#7b4b8f'/><circle cx='148' cy='186' r='4' fill='#7b4b8f'/><path d='M76 176 l14 8 M150 172 l14 -6' stroke='#fff' stroke-width='1.4' opacity='.6'/>";
+  } else if(mat === "found" && form === "robot"){
+    body = "<path d='M120 100 L120 74' stroke='#3c4a52' stroke-width='2'/><polyline points='120,98 114,94 126,90 114,86 126,82 114,78 120,74' fill='none' stroke='#3c4a52' stroke-width='2.5'/><circle cx='120' cy='70' r='6' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><polyline points='88,160 66,148 58,168' fill='none' stroke='#ef7724' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><polyline points='152,160 176,148 184,168' fill='none' stroke='#ef7724' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><rect x='86' y='146' width='68' height='58' rx='4' fill='#2f86c9' stroke='" + INK + "' stroke-width='3'/><rect x='98' y='100' width='44' height='42' rx='4' fill='#b9c3c7' stroke='" + INK + "' stroke-width='3'/><circle cx='110' cy='118' r='7' fill='#e2402f' stroke='" + INK + "' stroke-width='2'/><circle cx='130' cy='118' r='7' fill='#e2402f' stroke='" + INK + "' stroke-width='2'/><rect x='108' y='130' width='24' height='5' rx='2' fill='" + INK + "'/>";
+    tex = "<path d='M100 104 v34 M106 104 v34 M134 104 v34 M140 104 v34' stroke='#8a979c' stroke-width='1.5'/><circle cx='100' cy='160' r='3' fill='#fff'/><circle cx='112' cy='172' r='3' fill='#fff'/><circle cx='138' cy='164' r='3' fill='#fff'/><circle cx='126' cy='186' r='3' fill='#fff'/><rect x='108' y='180' width='24' height='10' rx='2' fill='#ffc247' stroke='" + INK + "' stroke-width='1.5'/>";
+  } else if(mat === "found"){
+    body = "<polygon points='70,136 98,142 98,150 70,146' fill='#e2c79e' stroke='" + INK + "' stroke-width='2'/><polygon points='170,128 142,142 142,150 170,138' fill='#e2c79e' stroke='" + INK + "' stroke-width='2'/><rect x='98' y='118' width='44' height='86' fill='" + p.f + "'" + sw + "/><ellipse cx='120' cy='118' rx='22' ry='5' fill='" + p.l + "'" + sw + "/><rect x='92' y='100' width='56' height='16' rx='4' fill='#e2402f' stroke='#7d1d14' stroke-width='3'/><circle cx='110' cy='142' r='8' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><circle cx='131' cy='142' r='8' fill='#00a6c9' stroke='" + INK + "' stroke-width='2'/><circle cx='108' cy='140' r='1.6' fill='" + INK + "'/><circle cx='112' cy='144' r='1.6' fill='" + INK + "'/><circle cx='129' cy='140' r='1.6' fill='" + INK + "'/><circle cx='133' cy='144' r='1.6' fill='" + INK + "'/><path d='M108 164 Q120 174 132 164' stroke='#7b4b8f' stroke-width='3.5' fill='none' stroke-linecap='round'/>";
+    tex = "<path d='M98 130 L142 150 M98 170 L142 190' stroke='" + p.d + "' stroke-width='1.5' opacity='.6'/><path d='M98 102 v12 M106 102 v12 M114 102 v12 M122 102 v12 M130 102 v12 M138 102 v12' stroke='#7d1d14' stroke-width='1.4'/>";
+  }
+  return { body:body, tex:tex };
+}
+function ttSVG(uid, sc){
+  var defs = "<defs><linearGradient id='fo" + uid + "' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#f4f7f8'/><stop offset='.45' stop-color='#b7c4ca'/><stop offset='.6' stop-color='#eef2f4'/><stop offset='1' stop-color='#8fa1a9'/></linearGradient><radialGradient id='sp" + uid + "' cx='.5' cy='.35' r='.6'><stop offset='0' stop-color='#fffdf3' stop-opacity='.95'/><stop offset='1' stop-color='#fffdf3' stop-opacity='0'/></radialGradient></defs>";
+  var s = "<svg viewBox='0 0 240 240' role='img' aria-label='" + esc(sc.label) + "'>" + defs;
+  s += "<ellipse cx='120' cy='110' rx='110' ry='100' fill='url(#sp" + uid + ")'/>";
+  s += "<path d='M32 206 v12 a88 16 0 0 0 176 0 v-12' fill='#5c3269' stroke='" + INK + "' stroke-width='3'/><ellipse cx='120' cy='206' rx='88' ry='16' fill='#7b4b8f' stroke='" + INK + "' stroke-width='3'/><ellipse class='ss-ring' cx='120' cy='206' rx='70' ry='11' fill='none' stroke='#ffc247' stroke-width='3' stroke-dasharray='6 10'/>";
+  if(!sc.mat){
+    s += "<g><path d='M86 200 Q74 150 104 132 Q120 104 146 128 Q170 150 156 200 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3' stroke-dasharray='8 6' opacity='.7'/><text x='121' y='182' text-anchor='middle' font-family='Archivo, Arial Black, sans-serif' font-weight='900' font-size='54' fill='#ef7724'>?</text></g>";
+  } else {
+    var d = drawForm(sc.mat, sc.form, uid);
+    s += "<g class='" + (sc.pop && !reduce ? "ss-pop" : "") + "'>";
+    if(sc.base) s += "<rect x='58' y='188' width='124' height='18' rx='3' fill='#6b4a2b' stroke='" + INK + "' stroke-width='3'/><path d='M66 196 h40 M120 199 h50' stroke='#3d2814' stroke-width='1.4' opacity='.6'/>";
+    s += "<g" + (sc.base ? " transform='translate(0,-16)'" : "") + "><g class='ss-sculpt'>" + d.body + "<g opacity='" + (sc.smooth ? ".15" : "1") + "'>" + d.tex + "</g></g></g></g>";
+  }
+  return s + "</svg>";
+}
+
+/* the gull for stage 6 */
+function gullSVG(){
+  return "<svg viewBox='0 0 300 230' role='img' aria-label='A foil seagull with big wings, a yellow beak, thin leaning legs, tape under the tail and a tiny base'><defs><linearGradient id='gfo' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#f4f7f8'/><stop offset='.45' stop-color='#b7c4ca'/><stop offset='.6' stop-color='#eef2f4'/><stop offset='1' stop-color='#8fa1a9'/></linearGradient></defs>" +
+    "<path d='M10 216 H290' stroke='#d6c9b6' stroke-width='3'/>" +
+    "<rect x='128' y='200' width='40' height='12' rx='2' fill='#a8743f' stroke='" + INK + "' stroke-width='2.5'/>" +
+    "<path d='M140 202 L124 152 M154 202 L140 154' stroke='#5f7179' stroke-width='3.5' stroke-linecap='round'/>" +
+    "<g transform='rotate(-8 150 140)'><path d='M96 136 L60 116 L64 146 Z' fill='url(#gfo)' stroke='#5f7179' stroke-width='3' stroke-linejoin='round'/><ellipse cx='140' cy='140' rx='56' ry='28' fill='url(#gfo)' stroke='#5f7179' stroke-width='3'/>" +
+    "<path d='M110 126 Q70 60 30 52 Q80 94 120 132 Z' fill='url(#gfo)' stroke='#5f7179' stroke-width='3' stroke-linejoin='round'/><path d='M150 124 Q200 52 262 40 Q214 88 168 134 Z' fill='url(#gfo)' stroke='#5f7179' stroke-width='3' stroke-linejoin='round'/>" +
+    "<circle cx='196' cy='120' r='18' fill='url(#gfo)' stroke='#5f7179' stroke-width='3'/><polygon points='212,114 238,122 212,128' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/><circle cx='201' cy='116' r='3.2' fill='" + INK + "'/>" +
+    "<rect x='84' y='142' width='24' height='10' fill='#ecd59c' stroke='#8a6531' stroke-width='1.5' transform='rotate(20 96 147)'/>" +
+    "<path d='M120 150 l6 -4 l5 5 l6 -5 l5 4 M60 70 l8 6 M210 64 l-8 8 M150 152 l6 -5 l5 4' stroke='#5f7179' stroke-width='1.6' fill='none'/></g>" +
+    "<path d='M168 186 q10 -4 14 4' stroke='#ef7724' stroke-width='2.5' fill='none'/><text x='186' y='196' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='bold' fill='#d75f10'>wobble</text>" +
+    "</svg>";
+}
+
+/* learn bit pictures */
+var LEARN_FORM = "<svg viewBox='0 0 240 120' role='img' aria-label='A flat square next to a cube, and a flat circle next to a shaded ball'><rect x='14' y='30' width='44' height='44' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><path d='M66 52 h14' stroke='" + INK + "' stroke-width='3'/><path d='M74 46 l6 6 l-6 6' stroke='" + INK + "' stroke-width='3' fill='none'/><polygon points='88,40 112,28 136,40 112,52' fill='#ffd98e' stroke='" + INK + "' stroke-width='3'/><polygon points='88,40 112,52 112,84 88,72' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><polygon points='112,52 136,40 136,72 112,84' fill='#f0a80f' stroke='" + INK + "' stroke-width='3'/><circle cx='166' cy='56' r='20' fill='#00a6c9' stroke='" + INK + "' stroke-width='3'/><path d='M192 56 h10' stroke='" + INK + "' stroke-width='3'/><path d='M197 50 l6 6 l-6 6' stroke='" + INK + "' stroke-width='3' fill='none'/><defs><radialGradient id='lfb' cx='.35' cy='.35' r='.7'><stop offset='0' stop-color='#bfeefa'/><stop offset='1' stop-color='#007291'/></radialGradient></defs><circle cx='222' cy='56' r='16' fill='url(#lfb)' stroke='" + INK + "' stroke-width='3'/><text x='36' y='104' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='bold' fill='" + INK + "'>shape</text><text x='112' y='104' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='bold' fill='" + INK + "'>form</text><text x='166' y='104' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='bold' fill='" + INK + "'>shape</text><text x='222' y='104' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='bold' fill='" + INK + "'>form</text></svg>";
+var LEARN_SLIP = "<svg viewBox='0 0 240 120' role='img' aria-label='Three steps: scratch criss cross lines on both pieces, brush on slip, press together and smooth the seam'><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' font-weight='bold' fill='" + INK + "'><rect x='8' y='40' width='60' height='34' rx='6' fill='#c8693f' stroke='" + INK + "' stroke-width='2.5'/><path d='M14 44 l12 26 M26 44 l12 26 M38 44 l12 26 M50 44 l12 26 M14 70 l12 -26 M26 70 l12 -26 M38 70 l12 -26 M50 70 l12 -26' stroke='#7e3a1c' stroke-width='1.6'/><text x='38' y='96' text-anchor='middle'>1 score</text><rect x='90' y='50' width='60' height='24' rx='6' fill='#c8693f' stroke='" + INK + "' stroke-width='2.5'/><path d='M96 52 q8 -6 16 0 t16 0 t16 0' stroke='#f3d3bf' stroke-width='5' fill='none'/><path d='M138 16 L124 46' stroke='#8a5230' stroke-width='5' stroke-linecap='round'/><path d='M124 46 l-4 8 l8 -2 z' fill='#f3d3bf' stroke='" + INK + "' stroke-width='1.5'/><text x='120' y='96' text-anchor='middle'>2 slip</text><rect x='172' y='56' width='60' height='22' rx='6' fill='#c8693f' stroke='" + INK + "' stroke-width='2.5'/><rect x='184' y='30' width='36' height='26' rx='6' fill='#e08a5c' stroke='" + INK + "' stroke-width='2.5'/><path d='M180 57 q22 6 44 0' stroke='#7e3a1c' stroke-width='3' fill='none'/><path d='M176 20 l6 8 M228 20 l-6 8' stroke='#ef7724' stroke-width='3' stroke-linecap='round'/><text x='202' y='96' text-anchor='middle'>3 press</text></g></svg>";
+function rateIcon(id){
+  var s = "<svg viewBox='0 0 40 40' aria-hidden='true'>", e = "</svg>", k = " stroke='" + INK + "' stroke-width='2'";
+  if(id === "form") return s + "<polygon points='8,14 20,8 32,14 20,20' fill='#ffd98e'" + k + "/><polygon points='8,14 20,20 20,34 8,28' fill='#ffc247'" + k + "/><polygon points='20,20 32,14 32,28 20,34' fill='#f0a80f'" + k + "/>" + e;
+  if(id === "balance") return s + "<path d='M4 30 H36' stroke='" + INK + "' stroke-width='2.5'/><polygon points='20,30 14,36 26,36' fill='#ef7724'" + k + "/><rect x='6' y='22' width='10' height='8' fill='#00a6c9'" + k + "/><rect x='24' y='22' width='10' height='8' fill='#00a6c9'" + k + "/><path d='M20 6 V18' stroke='#7b4b8f' stroke-width='2' stroke-dasharray='3 2'/>" + e;
+  if(id === "surface") return s + "<rect x='5' y='8' width='30' height='24' rx='4' fill='#e08a5c'" + k + "/><path d='M8 14 q4 -4 8 0 t8 0 t8 0 M8 21 q4 -4 8 0 t8 0 t8 0 M8 28 q4 -4 8 0 t8 0 t8 0' stroke='#7e3a1c' stroke-width='1.6' fill='none'/>" + e;
+  return s + "<path d='M20 5 a11 11 0 0 1 7 19 v4 h-14 v-4 a11 11 0 0 1 7 -19 z' fill='#ffc247'" + k + "/><rect x='14' y='29' width='12' height='6' rx='2' fill='#7d8d96'" + k + "/>" + e;
+}
+var LEARN_EVAL = "<svg viewBox='0 0 240 110' role='img' aria-label='Four things to look at: form, balance, surface and idea'><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' font-weight='bold' fill='" + INK + "' text-anchor='middle'>" +
+  "<g transform='translate(10,14) scale(1.2)'>" + rateIcon("form").replace("<svg viewBox='0 0 40 40' aria-hidden='true'>", "").replace("</svg>", "") + "</g><text x='34' y='84'>form</text>" +
+  "<g transform='translate(68,14) scale(1.2)'>" + rateIcon("balance").replace("<svg viewBox='0 0 40 40' aria-hidden='true'>", "").replace("</svg>", "") + "</g><text x='92' y='84'>balance</text>" +
+  "<g transform='translate(126,14) scale(1.2)'>" + rateIcon("surface").replace("<svg viewBox='0 0 40 40' aria-hidden='true'>", "").replace("</svg>", "") + "</g><text x='150' y='84'>surface</text>" +
+  "<g transform='translate(184,14) scale(1.2)'>" + rateIcon("idea").replace("<svg viewBox='0 0 40 40' aria-hidden='true'>", "").replace("</svg>", "") + "</g><text x='208' y='84'>idea</text></g></svg>";
+
+/* =================== state =================== */
+var STAGES = [
+  { name:"Materials shelf", f:"Exploring sculpture materials and tools" },
+  { name:"Form maker", f:"Picking a material and a tool to make a simple form" },
+  { name:"Joining lab", f:"Experimenting with ways to join and build" },
+  { name:"Idea and sketches", f:"Growing an idea and choosing materials that suit it" },
+  { name:"Build log", f:"Making it for real with techniques you have practised" },
+  { name:"Evaluate and change", f:"What works well, what could be better, and the changes you make" },
+  { name:"My sculpture story", f:"Presenting your piece, from first idea to final sculpture" }
+];
+function fresh(){
+  return { who:"", whoSet:false, cur:1, tried:{}, seen:{}, sorted:{}, sculpt:{ mat:"", form:"" },
+    form:{ mat:"", form:"", tool:-1, real:false, note:"" }, jsel:{ pair:"cc", method:"" }, joins:{}, joinReal:"",
+    idea:{ r:[-1,-1,-1], locks:[false,false,false], own:"" }, sketches:[], sk:{ paper:false, model:false },
+    plan:{ main:"", second:"", join:"", size:12, why:"" }, log:[], critic:{ placed:{}, change:-1 }, rate:{},
+    well:"", better:"", changes:[], nextTime:"", story:{ title:"", journey:"", proud:"" } };
+}
+var st = fresh();
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){ var o = JSON.parse(raw); if(o && typeof o === "object"){ var f0 = fresh(); for(var k0 in f0) if(o[k0] !== undefined && o[k0] !== null) st[k0] = o[k0] } }
+}catch(e){}
+if(!st.whoSet){ try{ var w0 = (localStorage.getItem(WHOKEY) || "").toUpperCase(); if(PEOPLE.indexOf(w0) >= 0) st.who = w0 }catch(e){} }
+var paused = false;
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(st)); $("saveNote").classList.add("hidden") }
+  catch(e){ $("saveNote").classList.remove("hidden") }
+}
+var saveT = null;
+function saveSoon(){ clearTimeout(saveT); saveT = setTimeout(save, 350) }
+function tried(n){ if(n && !st.tried[n]){ st.tried[n] = true; drawMap() } save() }
+function getPath(p){ var a = p.split("."), o = st; for(var i = 0; i < a.length; i++){ if(o == null) return ""; o = o[a[i]] } return o == null ? "" : o }
+function setPath(p, v){ var a = p.split("."), o = st; for(var i = 0; i < a.length - 1; i++){ if(!o[a[i]] || typeof o[a[i]] !== "object") o[a[i]] = {}; o = o[a[i]] } o[a[a.length - 1]] = v }
+function stageOf(node){ var s = node.closest ? node.closest(".ss-stage") : null; return s ? +s.id.replace("stage", "") : 0 }
+function fb(id, kind, html){ var b = $(id); if(!b) return; b.className = "ss-fb " + (html ? kind : ""); b.innerHTML = html || "" }
+function chips(forId, list){ return "<div class='ss-chips'>" + list.map(function(c){ return "<button type='button' class='ss-chip' data-for='" + forId + "' data-chip='" + esc(c) + " '>" + esc(c) + "...</button>" }).join("") + "</div>" }
+function hasChange(t){ for(var i = 0; i < st.changes.length; i++) if(st.changes[i].type === t) return true; return false }
+
+/* =================== turntable =================== */
+function sculptLabel(){
+  var s = st.sculpt;
+  if(!s.mat) return "An empty turntable, waiting for a material";
+  var f = formOf(s.mat, s.form);
+  return "The turntable: " + MATS[s.mat].name.toLowerCase() + " " + (f ? f.name.toLowerCase() : "");
+}
+function capText(){
+  var s = st.sculpt;
+  if(!s.mat) return "The turntable: pick a material";
+  var f = formOf(s.mat, s.form);
+  return MATS[s.mat].name + (f ? ": " + f.name : "");
+}
+function renderTT(pop){
+  var sc = { mat:st.sculpt.mat, form:st.sculpt.form, base:hasChange("base"), smooth:hasChange("smooth"), pop:pop, label:sculptLabel() };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-tt]"), function(h){ h.innerHTML = ttSVG(h.getAttribute("data-tt"), sc) });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ttcap]"), function(h){ h.textContent = capText() });
+  $("tt0cap").textContent = capText();
+}
+function setSculpt(mat, form){
+  var f = form || (st.sculpt.mat === mat && st.sculpt.form ? st.sculpt.form : FORMS[mat][0].id);
+  var changed = st.sculpt.mat !== mat || st.sculpt.form !== f;
+  st.sculpt = { mat:mat, form:f };
+  renderTT(changed);
+}
+function ttBox(uid, extra){ return "<div class='ss-tt'><div class='ss-ttcap' data-ttcap='1'></div><div data-tt='" + uid + "'></div>" + (extra || "") + "</div>" }
+
+/* =================== who =================== */
+function drawWho(){
+  var h = "";
+  PEOPLE.forEach(function(p){ h += "<button type='button' data-who='" + p + "' aria-pressed='" + (st.who === p) + "'>" + p + "</button>" });
+  h += "<button type='button' data-who='' aria-pressed='" + (st.whoSet && !st.who) + "'>just looking</button>";
+  $("who").innerHTML = h;
+  var m = $("whoMs");
+  if(st.who && MSF[st.who]){
+    var rec = REC[st.who].map(function(n){ return "<b>" + n + " " + STAGES[n - 1].name + "</b>" }).join(", ");
+    m.innerHTML = "<div class='ss-ms'><b>Hi " + st.who + ".</b> Your two steps:<ol><li>" + esc(MSF[st.who][0]) + "</li><li>" + esc(MSF[st.who][1]) + "</li></ol>Good places to start: " + rec + ". Everything else is open too.</div>";
+  } else m.innerHTML = "";
+}
+$("who").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-who]"); if(!b) return;
+  st.who = b.getAttribute("data-who"); st.whoSet = true;
+  try{ localStorage.setItem(WHOKEY, st.who) }catch(err){} var inp = document.getElementById("b5who"); if(inp) inp.value = st.who;
+  save(); drawWho(); drawMap();
+});
+
+/* =================== map and stage switching =================== */
+function drawMap(){
+  var rec = (st.who && REC[st.who]) || [], h = "";
+  STAGES.forEach(function(S, i){
+    var n = i + 1;
+    h += "<button type='button' class='ss-tile t" + n + "' data-go='" + n + "' aria-current='" + (st.cur === n) + "'><span class='n'>" + n + "</span>" + (st.tried[n] ? "<span class='tr'>tried</span>" : "") + tileIcon(n) + "<b>" + S.name + "</b>" + (has(rec, n) ? "<span class='gp'>good place to start</span>" : "") + "</button>";
+  });
+  $("map").innerHTML = h;
+}
+function go(n, scroll){
+  if(n === "send"){ $("sendSec").scrollIntoView({ behavior:reduce ? "auto" : "smooth", block:"start" }); return }
+  n = +n; if(!(n >= 1 && n <= 7)) n = 1;
+  st.cur = n; save();
+  for(var i = 1; i <= 7; i++) $("stage" + i).classList.toggle("hidden", i !== n);
+  drawMap();
+  if(n === 4) setTimeout(sizePad, 30);
+  if(scroll){ var y = $("stage" + n).getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top:y, behavior:reduce ? "auto" : "smooth" }) }
+}
+document.addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]"); if(g){ go(g.getAttribute("data-go"), true); return }
+  var c = e.target.closest(".ss-chip[data-for]");
+  if(c){
+    var ta = $(c.getAttribute("data-for")); if(!ta) return;
+    var add = c.getAttribute("data-chip");
+    ta.value = ta.value + (ta.value && !/\s$/.test(ta.value) ? " " : "") + add;
+    ta.dispatchEvent(new Event("input", { bubbles:true }));
+    ta.focus(); try{ ta.setSelectionRange(ta.value.length, ta.value.length) }catch(err){}
+  }
+});
+document.addEventListener("input", function(e){
+  var t = e.target, p = t.getAttribute && t.getAttribute("data-bind");
+  if(!p) return;
+  setPath(p, t.value); saveSoon();
+  var n = stageOf(t); if(n && !st.tried[n]){ st.tried[n] = true; drawMap() }
+});
+function fillBinds(){ Array.prototype.forEach.call(document.querySelectorAll("[data-bind]"), function(t){ t.value = getPath(t.getAttribute("data-bind")) }) }
+
+/* =================== stage shells =================== */
+function shell(n, inner){
+  var S = STAGES[n - 1];
+  return "<section class='ss-stage hidden' id='stage" + n + "' aria-labelledby='h" + n + "'>" +
+    "<div class='ss-head'><div class='ss-num' style='background:" + STAGEFILL[n] + "'>" + n + "</div><div><span class='kicker'>Stage " + n + " of 7</span><h2 id='h" + n + "'>" + S.name + "</h2><p class='ss-for'>" + S.f + "</p></div></div>" +
+    inner +
+    "<div class='ss-stagenav'><p class='ss-small'>Skip anything that is not for you. Every stage stays open.</p>" +
+    (n > 1 ? "<button type='button' class='btn btn-quiet' data-go='" + (n - 1) + "'>Back a stage</button>" : "") +
+    (n < 7 ? "<button type='button' class='btn' data-go='" + (n + 1) + "'>Next stage</button>" : "<button type='button' class='btn' data-go='send'>Send it to Jay</button>") +
+    "</div></section>";
+}
+function learnBox(svg, html){ return "<div class='ss-learn'>" + svg + "<div><span class='k'>Learn a bit</span>" + html + "</div></div>" }
+
+var H = "";
+H += shell(1,
+  "<div class='ss-part first'><h3>Have a look at the shelf</h3><p>Tap a material to see what it is good at, what is tricky, and which tools go with it. It pops onto the turntable too.</p><div class='ss-mats' id='mats'></div><div id='matInfo'></div></div>" +
+  "<div class='ss-part'><h3>Tool sort</h3><p>Tap a tool, then tap the material it goes with. Some tools suit more than one, so there can be more than one good answer.</p>" +
+  "<div class='ss-tools' id='toolTray' role='group' aria-label='Tools to sort'></div><div class='ss-bins' id='toolBins'></div><div class='ss-fb' id='toolFb'></div>" +
+  "<div class='ss-row'><span class='ss-small' id='toolCount'></span><button type='button' class='btn btn-quiet' id='toolReset'>Tip them back out</button></div></div>");
+H += shell(2,
+  learnBox(LEARN_FORM, "<p>A <b>shape</b> is flat, like a drawing. It has height and width.</p><p>A <b>form</b> is 3D. It has depth too, so you can walk all the way round it. Sculptors make forms.</p>") +
+  "<div class='ss-part first'><h3>1. Pick a material</h3><div class='ss-opts' id='fmMats'></div></div>" +
+  "<div class='ss-part hidden' id='fmP2'><h3>2. Pick a form to make</h3><div class='ss-forms' id='fmForms'></div></div>" +
+  "<div class='ss-part hidden' id='fmP3'><h3>3. Which tool does the job?</h3><div class='ss-opts' id='fmTools'></div><div class='ss-fb' id='fmFb'></div></div>" +
+  "<div class='ss-part hidden' id='fmP4'><h3>Made it. Now have a go for real?</h3><div class='ss-made'>" + ttBox("b") + "<div><p><b>How to make it in the room:</b></p><ol class='ss-steps' id='fmSteps'></ol>" +
+  "<label class='ss-tick'><input type='checkbox' id='fmReal'> I made one for real</label>" +
+  "<p style='margin:12px 0 4px'><label for='fmNote'><b>How did it go?</b> (if you fancy)</label></p>" + chips("fmNote", ["It went well because", "It was tricky when", "Next time I would"]) +
+  "<textarea class='ss-ta' id='fmNote' data-bind='form.note'></textarea></div></div></div>");
+H += shell(3,
+  learnBox(LEARN_SLIP, "<p>Fixing parts together is called <b>joining</b>. The best join depends on the materials.</p><p>Clay joins best with <b>slip and score</b>: scratch both surfaces, brush on slip (clay mixed with water into a creamy paste), press together and smooth the seam.</p>") +
+  "<div class='ss-part first'><h3>The wobble machine</h3><p>Pick two materials and a way to join them, then give it a wobble. It is an experiment, so every result tells you something.</p>" +
+  "<div class='ss-jlab'><div><span class='ss-lab'>Two materials</span><div class='ss-opts' id='jPairs'></div><p class='ss-small' id='jEg'></p><span class='ss-lab'>A way to join them</span><div class='ss-opts' id='jMeths'></div></div>" +
+  "<div><div class='ss-rig' id='jRig'></div><div class='ss-meterlab' style='text-align:center;margin-top:8px'>Wobble level</div><div class='ss-meter' id='jMeter'></div><div class='ss-row' style='justify-content:center'><button type='button' class='btn btn-orange' id='jTest'>Wobble it</button></div><div class='ss-fb' id='jFb' aria-live='polite'></div></div></div></div>" +
+  "<div class='ss-part'><h3>My experiments</h3><div id='jTable'><p class='ss-small'>Nothing wobbled yet. Results land here.</p></div>" +
+  "<p style='margin:14px 0 4px'><label for='jReal'><b>Tried a join for real?</b> What happened?</label></p>" + chips("jReal", ["I joined", "with", "It held because", "It came apart because", "Next I will try"]) +
+  "<textarea class='ss-ta' id='jReal' data-bind='joinReal'></textarea></div>");
+H += shell(4,
+  "<div class='ss-part first'><h3>Idea spinner</h3><p>Spin for a starting point. Lock any reel you like and spin the others. Or skip it and use your own idea.</p><div class='ss-reels' id='reels'></div>" +
+  "<div class='ss-row'><button type='button' class='btn btn-orange' id='spin'>Spin</button></div><div id='ideaOut'></div>" +
+  "<p style='margin:12px 0 4px'><label for='ideaOwn'><b>My own idea</b> (or change the spun one)</label></p><input class='ss-in' id='ideaOwn' data-bind='idea.own' maxlength='160'></div>" +
+  "<div class='ss-part'><h3>Sketch pad</h3><p>Sketch it from the front, then the side, then add a close up. Sketches are for thinking, not for being perfect.</p>" +
+  "<div class='ss-padbar' id='padBar'></div><div class='ss-pad'><canvas id='pad' width='640' height='420' aria-label='Sketch pad. Draw with a mouse, finger or pen.'></canvas></div>" +
+  "<span class='ss-lab'>This sketch is a</span><div class='ss-opts' id='skTags'></div>" +
+  "<div class='ss-row'><button type='button' class='btn' id='skSave'>Save this sketch</button><span class='ss-small' id='skMsg'></span></div><div class='ss-thumbs' id='thumbs'></div>" +
+  "<label class='ss-tick'><input type='checkbox' id='skPaper'> I sketched on paper too</label><br><label class='ss-tick'><input type='checkbox' id='skModel'> I made a small test model (a maquette)</label></div>" +
+  "<div class='ss-part'><h3>Plan the build</h3><p>Pick materials that suit your idea. The turntable shows your main material.</p>" +
+  "<span class='ss-lab'>Main material</span><div class='ss-opts' id='plMain'></div><div id='plKnow'></div>" +
+  "<span class='ss-lab'>Something else as well?</span><div class='ss-opts' id='plSecond'></div>" +
+  "<span class='ss-lab'>Main way to join it</span><div class='ss-opts' id='plJoin'></div>" +
+  "<span class='ss-lab'><label for='plSize'>How tall?</label></span><input type='range' class='ss-range' id='plSize' min='5' max='30' step='1'><p class='ss-small' id='plSizeLab'></p>" +
+  "<p style='margin:12px 0 4px'><label for='plWhy'><b>Why do these materials suit my idea?</b></label></p>" + chips("plWhy", ["I chose", "because it can", "It suits my idea because", "The tricky part might be", "so I will", "I will join the parts with"]) +
+  "<textarea class='ss-ta' id='plWhy' data-bind='plan.why'></textarea></div>");
+H += shell(5,
+  "<div class='ss-part first'><p>Make your sculpture for real in the room, then pop a quick note in here after each go. Short notes are perfect.</p>" +
+  "<div class='ss-logform'><span class='ss-lab' style='margin-top:0'>What did I do?</span><div class='ss-opts' id='lgTech'></div>" +
+  "<p style='margin:10px 0 4px'><label for='lgText'><b>What I tried</b></label></p>" + chips("lgText", ["First I", "Then I", "I used", "to"]) + "<textarea class='ss-ta' id='lgText'></textarea>" +
+  "<span class='ss-lab'>How did it go?</span><div class='ss-opts' id='lgRes'></div>" +
+  "<p style='margin:10px 0 4px'><label for='lgNext'><b>Next I will</b></label></p><input class='ss-in' id='lgNext' maxlength='160'>" +
+  "<div class='ss-photo'><span class='ss-filebtn'><input type='file' id='lgPhoto' accept='image/*' aria-label='Add a photo, optional'><span class='btn btn-quiet'>Add a photo (optional)</span></span><span id='lgPrev'></span></div>" +
+  "<p class='ss-small'>A photo only shows here as a little picture on this device. It is never sent to Jay.</p>" +
+  "<div class='ss-row'><button type='button' class='btn btn-orange' id='lgAdd'>Add to my log</button></div><div class='ss-fb' id='lgFb'></div></div></div>" +
+  "<div class='ss-part'><h3>My build log</h3><ol class='ss-log' id='logList'></ol></div>");
+H += shell(6,
+  "<div class='ss-part first'><h3>Be the critic</h3><p>Jay made a foil seagull. It keeps falling over, which he says is outrageous. Sort what people said about it: tap a comment, then tap where it goes.</p>" +
+  "<div class='ss-critic'><div>" + gullSVG() + "</div><div><div class='ss-stmts' id='cStmts'></div><div class='ss-cbins' id='cBins'></div><div class='ss-fb' id='cFb' aria-live='polite'></div></div></div>" +
+  "<p style='margin:14px 0 4px'><b>Which one change would help the gull most?</b></p><div class='ss-opts' id='gullQ'></div><div class='ss-fb' id='gullFb'></div></div>" +
+  "<div class='ss-part'><h3>Look at your own sculpture</h3>" + learnBox(LEARN_EVAL, "<p>Sculptors look at four things. <b>Form</b>: the 3D shape. <b>Balance</b>: does it stand well. <b>Surface</b>: texture and finish. <b>Idea</b>: does it show what you meant.</p><p>Turn it round and look from every side first.</p>") +
+  "<div class='ss-rates' id='rates'></div>" +
+  "<p style='margin:12px 0 4px'><label for='evWell'><b>What works well</b></label></p>" + chips("evWell", ["What works well is", "because", "I am pleased with the way", "The best part is", "My join worked because"]) + "<textarea class='ss-ta' id='evWell' data-bind='well'></textarea>" +
+  "<p style='margin:12px 0 4px'><label for='evBetter'><b>It could be even better if</b></label></p>" + chips("evBetter", ["It could be even better if", "The part that did not work was", "so", "To help it balance I could", "The surface would look better if"]) + "<textarea class='ss-ta' id='evBetter' data-bind='better'></textarea></div>" +
+  "<div class='ss-part'><h3>Changes I made</h3><p>Picked something to improve? Have a go at changing it in the room, then note it here. Some changes show on the turntable.</p>" +
+  "<div class='ss-made'>" + ttBox("c") + "<div><span class='ss-lab' style='margin-top:0'>The change</span><div class='ss-opts' id='chType'></div>" +
+  "<p style='margin:8px 0 4px'><label for='chNoticed'><b>I noticed</b></label></p><input class='ss-in' id='chNoticed' maxlength='200'>" +
+  "<p style='margin:8px 0 4px'><label for='chDid'><b>So I</b></label></p><input class='ss-in' id='chDid' maxlength='200'>" +
+  "<p style='margin:8px 0 4px'><label for='chNow'><b>Now it</b></label></p><input class='ss-in' id='chNow' maxlength='200'>" +
+  "<div class='ss-row'><button type='button' class='btn btn-orange' id='chAdd'>Add this change</button></div><div class='ss-fb' id='chFb'></div></div></div>" +
+  "<ol class='ss-chlist' id='chList'></ol>" +
+  "<p style='margin:14px 0 4px'><label for='evNext'><b>Next time I would</b></label></p>" + chips("evNext", ["Next time I would", "I would try", "instead of", "because"]) + "<textarea class='ss-ta' id='evNext' data-bind='nextTime'></textarea></div>");
+H += shell(7,
+  "<div class='ss-part first'><p>Pull it all together into one story card. Fill in what you fancy. Gaps are fine, the card skips them.</p>" +
+  "<p style='margin:10px 0 4px'><label for='stTitle'><b>My sculpture is called</b></label></p><input class='ss-in' id='stTitle' data-bind='story.title' maxlength='80'>" +
+  "<p style='margin:12px 0 4px'><label for='stJourney'><b>How it grew, from first idea to final piece</b></label></p>" + chips("stJourney", ["At first my idea was", "When I sketched it I", "Then I changed", "because", "The biggest change was", "In the end"]) + "<textarea class='ss-ta' id='stJourney' data-bind='story.journey'></textarea>" +
+  "<p style='margin:12px 0 4px'><label for='stProud'><b>What I am most proud of</b></label></p>" + chips("stProud", ["I am most proud of", "because", "People should look at"]) + "<textarea class='ss-ta' id='stProud' data-bind='story.proud'></textarea>" +
+  "<div class='ss-row'><button type='button' class='btn btn-orange' id='storyBuild'>Build my story card</button><button type='button' class='btn' id='storyPresent'>Present it</button><button type='button' class='btn btn-quiet' id='storyPrint'>Print the card</button></div></div>" +
+  "<div id='storyHost'></div>");
+$("stages").innerHTML = H;
+
+/* =================== stage 1 =================== */
+var selMat = "", selTool = "";
+function drawMats(){
+  $("mats").innerHTML = MATK.map(function(m){ return "<button type='button' class='ss-mat" + (selMat === m ? " on" : "") + "' data-mat='" + m + "' aria-pressed='" + (selMat === m) + "'>" + (st.seen[m] ? "<span class='seen'>looked</span>" : "") + matIcon(m) + "<b>" + MATS[m].name + "</b></button>" }).join("");
+  if(!selMat){ $("matInfo").innerHTML = "<p class='ss-small'>" + Object.keys(st.seen).length + " of 6 looked at so far.</p>"; return }
+  var M = MATS[selMat];
+  $("matInfo").innerHTML = "<div class='ss-info'><h4>" + M.name + "</h4><p class='sub'>" + M.sub + "</p><div class='ss-gt'><div class='g'><h5>Good at</h5><ul>" + M.good.map(function(x){ return "<li>" + x + "</li>" }).join("") + "</ul></div><div class='t'><h5>Watch out</h5><ul>" + M.tricky.map(function(x){ return "<li>" + x + "</li>" }).join("") + "</ul></div></div>" +
+    "<div class='ss-toolline'><b style='font-size:.85rem'>Tools that go with it:</b>" + M.tools.map(function(x){ return "<span>" + x + "</span>" }).join("") + "</div>" +
+    "<p class='ss-small' style='margin-top:10px'>" + Object.keys(st.seen).length + " of 6 looked at. Every one is worth a poke.</p></div>";
+}
+$("mats").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-mat]"); if(!b) return;
+  selMat = b.getAttribute("data-mat"); st.seen[selMat] = true;
+  setSculpt(selMat); drawMats(); tried(1);
+});
+function drawTools(){
+  var left = TOOLS.filter(function(t){ return !st.sorted[t.id] });
+  $("toolTray").innerHTML = left.length ? left.map(function(t){ return "<button type='button' class='ss-tool' data-tool='" + t.id + "' aria-pressed='" + (selTool === t.id) + "'>" + toolIcon(t.id) + t.name + "</button>" }).join("") : "<p class='ss-small' style='margin:0'>Every tool is on a shelf. Lovely sorting.</p>";
+  $("toolBins").innerHTML = MATK.map(function(m){
+    var inn = TOOLS.filter(function(t){ return st.sorted[t.id] === m }).map(function(t){ return "<span>" + t.name + "</span>" }).join("");
+    return "<button type='button' class='ss-bin' data-bin='" + m + "'><b>" + MATS[m].name + "</b><span class='in'>" + inn + "</span></button>";
+  }).join("");
+  $("toolBins").classList.toggle("armed", !!selTool);
+  $("toolCount").textContent = Object.keys(st.sorted).length + " of " + TOOLS.length + " tools sorted";
+}
+$("toolTray").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-tool]"); if(!b) return;
+  var id = b.getAttribute("data-tool"); selTool = selTool === id ? "" : id;
+  var t = toolById(id);
+  if(selTool) fb("toolFb", "tell", "<b>" + t.name + "</b> picked up. Now tap the material it goes with.");
+  drawTools();
+  var again = document.querySelector("#toolTray button[data-tool='" + id + "']"); if(again) again.focus();
+});
+$("toolBins").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-bin]"); if(!b) return;
+  if(!selTool){ fb("toolFb", "tell", "Tap a tool first, then tap its material."); return }
+  var m = b.getAttribute("data-bin"), t = toolById(selTool);
+  if(has(t.mats, m)){
+    st.sorted[t.id] = m;
+    var also = t.mats.filter(function(x){ return x !== m }).map(function(x){ return MATS[x].name.toLowerCase() });
+    fb("toolFb", "ok", "<b>Yes.</b> " + t.name + ": it " + t.job + "." + (also.length ? " It is handy for " + also.join(" and ") + " too." : ""));
+    selTool = "";
+  } else {
+    fb("toolFb", "try", "<b>Not quite that shelf.</b> " + t.name + ": it " + t.job + ". Which material sounds like that? Have another tap.");
+  }
+  drawTools(); tried(1);
+});
+$("toolReset").addEventListener("click", function(){ st.sorted = {}; selTool = ""; fb("toolFb"); drawTools(); save() });
+
+/* =================== stage 2 =================== */
+var fmMiss = {};
+function drawFM(){
+  var F = st.form;
+  $("fmMats").innerHTML = MATK.map(function(m){ return "<button type='button' class='ss-opt' data-m='" + m + "' aria-pressed='" + (F.mat === m) + "'>" + MATS[m].name + "</button>" }).join("");
+  $("fmP2").classList.toggle("hidden", !F.mat);
+  $("fmP3").classList.toggle("hidden", !F.form);
+  $("fmP4").classList.toggle("hidden", !(F.form && F.tool >= 0));
+  if(!F.mat) return;
+  $("fmForms").innerHTML = FORMS[F.mat].map(function(f){ return "<button type='button' class='ss-form" + (F.form === f.id ? " on" : "") + "' data-f='" + f.id + "' aria-pressed='" + (F.form === f.id) + "'><b>" + f.name + "</b><span>" + f.move + ". " + f.blurb + "</span></button>" }).join("");
+  if(!F.form) return;
+  var fo = formOf(F.mat, F.form);
+  $("fmTools").innerHTML = fo.tools.map(function(t, i){ var cls = F.tool === i ? " good" : (fmMiss[i] ? " miss" : ""); return "<button type='button' class='ss-opt" + cls + "' data-t='" + i + "'>" + t[0] + "</button>" }).join("");
+  $("fmSteps").innerHTML = fo.steps.map(function(s){ return "<li>" + s + "</li>" }).join("");
+  $("fmReal").checked = !!F.real;
+}
+$("fmMats").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-m]"); if(!b) return;
+  var m = b.getAttribute("data-m");
+  st.form.mat = m; st.form.form = ""; st.form.tool = -1; fmMiss = {}; fb("fmFb");
+  setSculpt(m); drawFM(); tried(2);
+});
+$("fmForms").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-f]"); if(!b) return;
+  st.form.form = b.getAttribute("data-f"); st.form.tool = -1; fmMiss = {}; fb("fmFb");
+  setSculpt(st.form.mat, st.form.form); drawFM(); tried(2);
+});
+$("fmTools").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-t]"); if(!b) return;
+  var i = +b.getAttribute("data-t"), t = formOf(st.form.mat, st.form.form).tools[i];
+  if(t[1]){ st.form.tool = i; fb("fmFb", "ok", "<b>Spot on.</b> " + t[2]); setSculpt(st.form.mat, st.form.form); renderTT(true) }
+  else { fmMiss[i] = true; fb("fmFb", "try", "<b>Hmm, not that one.</b> " + t[2] + " Have another pick.") }
+  drawFM(); tried(2);
+});
+$("fmReal").addEventListener("change", function(){ st.form.real = this.checked; tried(2) });
+
+/* =================== stage 3 =================== */
+var testing = false;
+function rigPiece(m, x, y, w, h){
+  var p = pal(m);
+  if(m === "wire") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='6' fill='none' stroke='" + p.d + "' stroke-width='5'/><path d='M" + (x + 6) + " " + (y + h - 6) + " L" + (x + w - 6) + " " + (y + 6) + "' stroke='" + p.f + "' stroke-width='4'/>";
+  if(m === "foil") return "<path d='M" + x + " " + (y + 6) + " L" + (x + w * .3) + " " + y + " L" + (x + w * .7) + " " + (y + 4) + " L" + (x + w) + " " + y + " L" + (x + w - 3) + " " + (y + h) + " L" + (x + 3) + " " + (y + h) + " Z' fill='url(#jfo)' stroke='" + p.d + "' stroke-width='3' stroke-linejoin='round'/><path d='M" + (x + 8) + " " + (y + h / 2) + " l8 -6 l8 6 l8 -6 l8 6' stroke='" + p.d + "' stroke-width='1.5' fill='none'/>";
+  if(m === "pm") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='8' fill='" + p.f + "' stroke='" + p.d + "' stroke-width='3'/><path d='M" + (x + 6) + " " + (y + 12) + " h" + (w - 20) + " M" + (x + 10) + " " + (y + 20) + " h" + (w - 26) + " M" + (x + 6) + " " + (y + 30) + " h" + (w - 16) + "' stroke='#9a978b' stroke-width='1.5'/>";
+  if(m === "found") return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='4' fill='" + (h > 45 ? "#c79a63" : "#e2402f") + "' stroke='" + INK + "' stroke-width='3'/><path d='M" + (x + 8) + " " + (y + 4) + " v" + (h - 8) + " M" + (x + 18) + " " + (y + 4) + " v" + (h - 8) + "' stroke='rgba(0,0,0,.2)' stroke-width='2'/>";
+  return "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + h + "' rx='" + (m === "clay" ? 10 : 2) + "' fill='" + p.f + "' stroke='" + p.d + "' stroke-width='3'/>";
+}
+function joinMark(mid){
+  var y = 112;
+  if(mid === "slip") return "<path d='M90 " + y + " q8 -5 16 0 t16 0 t16 0 t16 0 t16 0' stroke='#f3d3bf' stroke-width='5' fill='none'/>";
+  if(mid === "tabs") return "<rect x='104' y='" + (y - 10) + "' width='8' height='20' fill='#fffdf8' stroke='" + INK + "' stroke-width='2'/><rect x='128' y='" + (y - 10) + "' width='8' height='20' fill='#fffdf8' stroke='" + INK + "' stroke-width='2'/>";
+  if(mid === "wrap") return "<path d='M98 " + (y - 8) + " q4 8 0 16 M108 " + (y - 8) + " q4 8 0 16 M118 " + (y - 8) + " q4 8 0 16 M128 " + (y - 8) + " q4 8 0 16 M138 " + (y - 8) + " q4 8 0 16' stroke='#3c4a52' stroke-width='3' fill='none'/>";
+  if(mid === "tape") return "<rect x='86' y='" + (y - 9) + "' width='68' height='18' fill='#ecd59c' stroke='#8a6531' stroke-width='2' opacity='.95'/>";
+  if(mid === "glue") return "<path d='M94 " + y + " q4 -8 8 0 q4 8 8 0 M126 " + y + " q4 -8 8 0 q4 8 8 0' stroke='#cfe3ee' stroke-width='6' fill='none' stroke-linecap='round'/>";
+  if(mid === "pins") return "<circle cx='104' cy='" + (y - 4) + "' r='5' fill='#e2402f' stroke='" + INK + "' stroke-width='2'/><circle cx='136' cy='" + (y - 4) + "' r='5' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/>";
+  if(mid === "pva") return "<path d='M92 " + y + " H148' stroke='#ffffff' stroke-width='5' stroke-linecap='round'/><path d='M92 " + y + " H148' stroke='#cfe0e6' stroke-width='1.5'/>";
+  return "<path d='M90 " + y + " H150' stroke='" + INK + "' stroke-width='2' stroke-dasharray='4 4'/>";
+}
+function drawRig(){
+  var P = pairById(st.jsel.pair);
+  $("jRig").innerHTML = "<svg viewBox='0 0 240 200' role='img' aria-label='" + esc(P.label + " joined with " + (st.jsel.method ? methodById(st.jsel.method).name : "nothing yet")) + " on the wobble machine'><defs><linearGradient id='jfo' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#f4f7f8'/><stop offset='.45' stop-color='#b7c4ca'/><stop offset='.6' stop-color='#eef2f4'/><stop offset='1' stop-color='#8fa1a9'/></linearGradient></defs>" +
+    "<rect x='62' y='176' width='116' height='20' rx='4' fill='#7b4b8f' stroke='" + INK + "' stroke-width='3'/><text x='120' y='190' text-anchor='middle' font-family='Archivo, Arial Black, sans-serif' font-weight='800' font-size='10' letter-spacing='1.5' fill='#fffdf8'>WOBBLE MACHINE</text>" +
+    "<g id='rigShake'><rect x='36' y='160' width='168' height='14' rx='3' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/>" + rigPiece(P.a, 78, 112, 84, 48) +
+    "<g id='rigTop'>" + rigPiece(P.b, 92, 64, 56, 48) + joinMark(st.jsel.method) + "</g></g></svg>";
+  drawMeter(0, 0);
+}
+function drawMeter(lvl, held){
+  var h = "";
+  for(var i = 1; i <= 5; i++) h += "<span class='" + (i <= held ? "held" : (i <= lvl ? "on" : "")) + "'>" + i + "</span>";
+  $("jMeter").innerHTML = h;
+}
+function drawJ(){
+  $("jPairs").innerHTML = PAIRS.map(function(p){ return "<button type='button' class='ss-opt' data-p='" + p.id + "' aria-pressed='" + (st.jsel.pair === p.id) + "'>" + p.label + "</button>" }).join("");
+  $("jEg").textContent = "For example, " + pairById(st.jsel.pair).eg + ".";
+  $("jMeths").innerHTML = METHODS.map(function(m){ return "<button type='button' class='ss-opt ss-meth' data-j='" + m.id + "' aria-pressed='" + (st.jsel.method === m.id) + "'>" + methIcon(m.id) + m.name + "</button>" }).join("");
+  drawRig(); drawJTable();
+}
+function drawJTable(){
+  var keys = Object.keys(st.joins);
+  if(!keys.length){ $("jTable").innerHTML = "<p class='ss-small'>Nothing wobbled yet. Results land here.</p>"; return }
+  var h = "<table class='ss-exp'><tr><th>Materials</th><th>Join</th><th>Result</th></tr>";
+  keys.forEach(function(k){ var a = k.split("|"), s = st.joins[k], dots = ""; for(var i = 0; i < 5; i++) dots += i < s ? "&#9679;" : "&#9675;"; h += "<tr><td>" + pairById(a[0]).label + "</td><td>" + methodById(a[1]).name + "</td><td><span class='ss-dots'>" + dots + "</span> " + STRENGTH[s] + "</td></tr>" });
+  $("jTable").innerHTML = h + "</table><p class='ss-small'>" + keys.length + " experiment" + (keys.length === 1 ? "" : "s") + " so far.</p>";
+}
+$("jPairs").addEventListener("click", function(e){ var b = e.target.closest("button[data-p]"); if(!b || testing) return; st.jsel.pair = b.getAttribute("data-p"); fb("jFb"); drawJ(); save() });
+$("jMeths").addEventListener("click", function(e){ var b = e.target.closest("button[data-j]"); if(!b || testing) return; st.jsel.method = b.getAttribute("data-j"); fb("jFb"); drawJ(); save() });
+function jResult(){
+  var r = JOIN[st.jsel.pair][st.jsel.method], s = r[0], M = methodById(st.jsel.method);
+  st.joins[st.jsel.pair + "|" + st.jsel.method] = s;
+  var head = s === 5 ? "<b>Rock solid.</b> It held through all five wobble levels." : (s === 1 ? "<b>It fell apart</b> straight away, at level 1." : "<b>" + STRENGTH[s] + ".</b> It held through level " + (s - 1) + ", then let go at level " + s + ".");
+  var tail = s <= 2 ? " Useful to know. Want to try a different join?" : (s >= 4 ? " A good one to use for real." : "");
+  fb("jFb", s >= 4 ? "ok" : (s === 3 ? "tell" : "try"), head + " " + M.name + ": " + r[1] + tail);
+  drawMeter(Math.max(1, s), s === 5 ? 5 : s - 1);
+  drawJTable(); tried(3); testing = false; $("jTest").disabled = false;
+}
+$("jTest").addEventListener("click", function(){
+  if(testing) return;
+  if(!st.jsel.method){ fb("jFb", "tell", "Pick a way to join them first, then wobble it."); return }
+  drawRig(); fb("jFb");
+  var s = JOIN[st.jsel.pair][st.jsel.method][0];
+  if(reduce){ jResult(); return }
+  testing = true; $("jTest").disabled = true;
+  var sh = $("rigShake"), top = $("rigTop"), t0 = null, fell = false, fx = 0, fy = 0, fr = 0, vx = 0, vy = 0, failAt = s < 5 ? 0.35 + (s - 1) * 0.7 : 99;
+  function frame(ts){
+    if(!t0) t0 = ts;
+    var t = (ts - t0) / 1000, lvl = Math.min(5, 1 + Math.floor(t / 0.7)), amp = lvl * 2.6, x = amp * Math.sin(t * 26);
+    sh.setAttribute("transform", "translate(" + x.toFixed(2) + ",0)");
+    if(!fell){
+      var loose = (5 - s) * 0.5 + 0.3;
+      top.setAttribute("transform", "rotate(" + (Math.sin(t * 26 - 0.7) * loose * lvl * 0.7).toFixed(2) + " 120 112)");
+      drawMeter(lvl, 0);
+      if(t >= failAt){ fell = true; vx = (x >= 0 ? 1 : -1) * 2.4; vy = -3 }
+    } else {
+      fx += vx; vy += 0.45; fy += vy; fr += vx * 2.2;
+      top.setAttribute("transform", "translate(" + fx.toFixed(1) + "," + fy.toFixed(1) + ") rotate(" + fr.toFixed(1) + " 120 88)");
+    }
+    if((!fell && t < 3.5) || (fell && fy < 150)) requestAnimationFrame(frame);
+    else { sh.setAttribute("transform", ""); jResult() }
+  }
+  requestAnimationFrame(frame);
+});
+
+/* =================== stage 4: reels =================== */
+var REELS = [THEMES, MATK.map(function(m){ return MATS[m].name.toLowerCase() }), TWISTS];
+var REELLAB = ["Make", "Mostly from", "The twist"];
+function ideaText(){
+  var r = st.idea.r;
+  if(r[0] < 0) return "";
+  return "Make " + THEMES[r[0]] + ", mostly from " + REELS[1][r[1]] + ", and " + TWISTS[r[2]] + ".";
+}
+function drawReels(spinning){
+  var r = st.idea.r;
+  $("reels").innerHTML = REELS.map(function(list, i){
+    return "<div class='ss-reel" + (spinning && !st.idea.locks[i] ? " spin" : "") + "'><span class='rl'>" + REELLAB[i] + "</span><span class='rv' id='rv" + i + "'>" + (r[i] >= 0 ? esc(list[r[i]]) : "?") + "</span><button type='button' data-lock='" + i + "' aria-pressed='" + !!st.idea.locks[i] + "'>" + (st.idea.locks[i] ? "Locked" : "Lock this") + "</button></div>";
+  }).join("");
+  var t = ideaText();
+  $("ideaOut").innerHTML = t ? "<div class='ss-ideaout'>" + esc(t) + "</div>" : "";
+}
+$("reels").addEventListener("click", function(e){ var b = e.target.closest("button[data-lock]"); if(!b) return; var i = +b.getAttribute("data-lock"); if(st.idea.r[i] < 0) return; st.idea.locks[i] = !st.idea.locks[i]; drawReels(false); save() });
+var spinning = false;
+$("spin").addEventListener("click", function(){
+  if(spinning) return;
+  var r = st.idea.r.slice(), fin = REELS.map(function(list, i){ return st.idea.locks[i] && r[i] >= 0 ? r[i] : Math.floor(Math.random() * list.length) });
+  function done(){ st.idea.r = fin; spinning = false; drawReels(false); var m = MATK[fin[1]]; setSculpt(m); tried(4) }
+  if(reduce){ done(); return }
+  spinning = true; drawReels(true);
+  var n = 0, iv = setInterval(function(){
+    n++;
+    for(var i = 0; i < 3; i++){ if(st.idea.locks[i] && r[i] >= 0) continue; var stopAt = 8 + i * 4; var el = $("rv" + i); if(!el) continue; el.textContent = n >= stopAt ? REELS[i][fin[i]] : REELS[i][Math.floor(Math.random() * REELS[i].length)] }
+    if(n >= 17){ clearInterval(iv); done() }
+  }, 70);
+});
+
+/* =================== stage 4: sketch pad =================== */
+var pad = $("pad"), ctx = pad.getContext("2d"), PAPER = "#fffdf8";
+var pen = { tool:"pencil", col:INK }, undo = [], drawing = false, lastP = null, skTag = "first idea";
+var COLS = [[INK, "ink"], ["#007291", "teal"], ["#ef7724", "orange"], ["#7b4b8f", "plum"], ["#2e7d4f", "green"]];
+var SKTAGS = ["first idea", "front view", "side view", "close up detail", "changed idea"];
+function clearPad(){ ctx.fillStyle = PAPER; ctx.fillRect(0, 0, pad.width, pad.height); ctx.strokeStyle = "rgba(10,47,56,.12)"; ctx.lineWidth = 2; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(30, 380); ctx.lineTo(610, 380); ctx.stroke(); ctx.setLineDash([]) }
+clearPad();
+function sizePad(){}
+function drawPadBar(){
+  var h = ["pencil", "marker", "rubber"].map(function(t){ return "<button type='button' data-pt='" + t + "' aria-pressed='" + (pen.tool === t) + "'>" + t.charAt(0).toUpperCase() + t.slice(1) + "</button>" }).join("");
+  h += COLS.map(function(c){ return "<button type='button' class='sw' data-pc='" + c[0] + "' style='background:" + c[0] + "' aria-label='" + c[1] + "' aria-pressed='" + (pen.col === c[0] && pen.tool !== "rubber") + "'></button>" }).join("");
+  h += "<button type='button' data-pa='undo'>Undo</button><button type='button' data-pa='clear'>Clear</button>";
+  $("padBar").innerHTML = h;
+  $("skTags").innerHTML = SKTAGS.map(function(t){ return "<button type='button' class='ss-opt' data-tag='" + t + "' aria-pressed='" + (skTag === t) + "'>" + t + "</button>" }).join("");
+}
+$("padBar").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  if(b.hasAttribute("data-pt")) pen.tool = b.getAttribute("data-pt");
+  if(b.hasAttribute("data-pc")){ pen.col = b.getAttribute("data-pc"); if(pen.tool === "rubber") pen.tool = "pencil" }
+  var a = b.getAttribute("data-pa");
+  if(a === "undo" && undo.length) ctx.putImageData(undo.pop(), 0, 0);
+  if(a === "clear"){ pushUndo(); clearPad() }
+  drawPadBar();
+});
+$("skTags").addEventListener("click", function(e){ var b = e.target.closest("button[data-tag]"); if(!b) return; skTag = b.getAttribute("data-tag"); drawPadBar() });
+function pushUndo(){ try{ undo.push(ctx.getImageData(0, 0, pad.width, pad.height)); if(undo.length > 12) undo.shift() }catch(e){} }
+function padPos(e){ var r = pad.getBoundingClientRect(); return [(e.clientX - r.left) * pad.width / r.width, (e.clientY - r.top) * pad.height / r.height] }
+function stroke(a, b){
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.strokeStyle = pen.tool === "rubber" ? PAPER : pen.col;
+  ctx.lineWidth = pen.tool === "pencil" ? 3 : (pen.tool === "marker" ? 11 : 26);
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0] + 0.01, b[1] + 0.01); ctx.stroke();
+}
+pad.addEventListener("pointerdown", function(e){ e.preventDefault(); pushUndo(); drawing = true; lastP = padPos(e); stroke(lastP, lastP); try{ pad.setPointerCapture(e.pointerId) }catch(err){} });
+pad.addEventListener("pointermove", function(e){ if(!drawing) return; var p = padPos(e); stroke(lastP, p); lastP = p });
+function endDraw(){ if(drawing){ drawing = false; if(!st.tried[4]) tried(4) } }
+pad.addEventListener("pointerup", endDraw); pad.addEventListener("pointercancel", endDraw);
+function drawThumbs(){
+  $("thumbs").innerHTML = st.sketches.map(function(s, i){ return "<div class='ss-thumb'><img src='" + s.img + "' alt='Sketch " + (i + 1) + ", " + esc(s.tag) + "'><span>" + (i + 1) + ". " + esc(s.tag) + "</span><button type='button' class='ss-x' data-del='" + i + "' aria-label='Remove sketch " + (i + 1) + "'>&times;</button></div>" }).join("");
+}
+$("skSave").addEventListener("click", function(){
+  if(st.sketches.length >= 6){ $("skMsg").textContent = "Six saved already. Remove one to save another."; return }
+  var c = document.createElement("canvas"); c.width = 300; c.height = 197;
+  var x = c.getContext("2d"); x.drawImage(pad, 0, 0, c.width, c.height);
+  var img = ""; try{ img = c.toDataURL("image/jpeg", 0.72) }catch(e){}
+  if(!img) return;
+  st.sketches.push({ img:img, tag:skTag }); drawThumbs(); tried(4);
+  $("skMsg").textContent = "Saved as sketch " + st.sketches.length + ". Keep drawing on it, or clear it for a new one.";
+});
+$("thumbs").addEventListener("click", function(e){ var b = e.target.closest("button[data-del]"); if(!b) return; st.sketches.splice(+b.getAttribute("data-del"), 1); drawThumbs(); save() });
+$("skPaper").addEventListener("change", function(){ st.sk.paper = this.checked; tried(4) });
+$("skModel").addEventListener("change", function(){ st.sk.model = this.checked; tried(4) });
+
+/* =================== stage 4: plan =================== */
+function sizeWords(n){ return n <= 7 ? "smaller than a mug" : (n <= 12 ? "about as tall as a mug" : (n <= 20 ? "about as tall as a pencil" : "up to a long ruler")) }
+function drawPlan(){
+  var P = st.plan;
+  $("plMain").innerHTML = MATK.map(function(m){ return "<button type='button' class='ss-opt' data-pm='" + m + "' aria-pressed='" + (P.main === m) + "'>" + MATS[m].name + "</button>" }).join("");
+  $("plSecond").innerHTML = MATK.concat(["none"]).map(function(m){ return "<button type='button' class='ss-opt' data-ps='" + m + "' aria-pressed='" + (P.second === m) + "'>" + (m === "none" ? "Nothing else" : MATS[m].name) + "</button>" }).join("");
+  $("plJoin").innerHTML = METHODS.map(function(m){ return "<button type='button' class='ss-opt ss-meth' data-pj='" + m.id + "' aria-pressed='" + (P.join === m.id) + "'>" + methIcon(m.id) + m.name + "</button>" }).join("");
+  $("plSize").value = P.size || 12;
+  $("plSizeLab").textContent = "About " + (P.size || 12) + " cm tall, " + sizeWords(P.size || 12) + ".";
+  var k = "";
+  if(P.main){ var M = MATS[P.main]; k = "<div class='ss-know'><b>Good to know about " + M.name.toLowerCase() + ":</b> " + M.good[0].toLowerCase() + ", but watch out: " + M.tricky[0].toLowerCase() + ".";
+    if(P.main === "clay" && (P.size || 12) > 20) k += " Tall clay can droop, so a wider base or a thicker bottom will help.";
+    if(P.main === "wire" && P.second && P.second !== "none" && P.second !== "wire") k += " Wire makes a great armature inside " + MATS[P.second].name.toLowerCase() + ".";
+    if(P.join && JOIN.kk && P.main === "clay" && P.join !== "slip") k += " For clay on clay, slip and score is the strongest join.";
+    k += "</div>" }
+  $("plKnow").innerHTML = k;
+}
+$("plMain").addEventListener("click", function(e){ var b = e.target.closest("button[data-pm]"); if(!b) return; st.plan.main = b.getAttribute("data-pm"); setSculpt(st.plan.main); drawPlan(); tried(4) });
+$("plSecond").addEventListener("click", function(e){ var b = e.target.closest("button[data-ps]"); if(!b) return; st.plan.second = b.getAttribute("data-ps"); drawPlan(); tried(4) });
+$("plJoin").addEventListener("click", function(e){ var b = e.target.closest("button[data-pj]"); if(!b) return; st.plan.join = b.getAttribute("data-pj"); drawPlan(); tried(4) });
+$("plSize").addEventListener("input", function(){ st.plan.size = +this.value; $("plSizeLab").textContent = "About " + st.plan.size + " cm tall, " + sizeWords(st.plan.size) + "."; saveSoon() });
+$("plSize").addEventListener("change", function(){ drawPlan(); tried(4) });
+
+/* =================== stage 5: build log =================== */
+var draft = { tech:[], res:[], photo:"" };
+function drawLogForm(){
+  $("lgTech").innerHTML = LOGTECH.map(function(t){ return "<button type='button' class='ss-opt' data-lt='" + esc(t) + "' aria-pressed='" + has(draft.tech, t) + "'>" + esc(t) + "</button>" }).join("");
+  $("lgRes").innerHTML = LOGRES.map(function(t){ return "<button type='button' class='ss-opt' data-lr='" + esc(t) + "' aria-pressed='" + has(draft.res, t) + "'>" + esc(t) + "</button>" }).join("");
+  $("lgPrev").innerHTML = draft.photo ? "<img src='" + draft.photo + "' alt='Your photo, shown on this device only'> <button type='button' class='btn btn-quiet' id='lgNoPhoto'>Remove photo</button>" : "";
+}
+function toggleIn(arr, v){ var i = arr.indexOf(v); if(i >= 0) arr.splice(i, 1); else arr.push(v) }
+$("lgTech").addEventListener("click", function(e){ var b = e.target.closest("button[data-lt]"); if(!b) return; toggleIn(draft.tech, b.getAttribute("data-lt")); drawLogForm() });
+$("lgRes").addEventListener("click", function(e){ var b = e.target.closest("button[data-lr]"); if(!b) return; toggleIn(draft.res, b.getAttribute("data-lr")); drawLogForm() });
+$("lgPrev").addEventListener("click", function(e){ if(e.target.id === "lgNoPhoto"){ draft.photo = ""; $("lgPhoto").value = ""; drawLogForm() } });
+$("lgPhoto").addEventListener("change", function(){
+  var f = this.files && this.files[0]; if(!f) return;
+  if(!/^image\//.test(f.type)){ fb("lgFb", "tell", "That file does not look like a picture. Any photo will do."); return }
+  var url = URL.createObjectURL(f), im = new Image();
+  im.onload = function(){
+    var max = 220, sc = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(im.width * sc)); c.height = Math.max(1, Math.round(im.height * sc));
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    try{ draft.photo = c.toDataURL("image/jpeg", 0.7) }catch(e){ draft.photo = "" }
+    URL.revokeObjectURL(url); drawLogForm();
+  };
+  im.onerror = function(){ URL.revokeObjectURL(url); fb("lgFb", "tell", "That picture would not open. Try another, or skip the photo.") };
+  im.src = url;
+});
+function drawLog(){
+  if(!st.log.length){ $("logList").innerHTML = "<li><p>Nothing logged yet. Your first note will appear here, with a little timeline dot.</p></li>"; return }
+  $("logList").innerHTML = st.log.map(function(L, i){
+    return "<li>" + (L.photo ? "<img src='" + L.photo + "' alt='Photo for step " + (i + 1) + "'>" : "") + "<span class='when'>Step " + (i + 1) + (L.date ? " &middot; " + esc(L.date) : "") + "</span>" +
+      (L.tech.length ? "<div class='ss-tags'>" + L.tech.map(function(t){ return "<span>" + esc(t) + "</span>" }).join("") + "</div>" : "") +
+      (L.text ? "<p>" + esc(L.text) + "</p>" : "") + (L.res.length ? "<p><b>How it went:</b> " + esc(L.res.join(", ")) + "</p>" : "") + (L.next ? "<p><b>Next:</b> " + esc(L.next) + "</p>" : "") +
+      "<button type='button' class='btn btn-quiet' data-ldel='" + i + "' style='font-size:.7rem;padding:6px 12px;margin-top:4px'>Remove</button><div style='clear:both'></div></li>";
+  }).join("");
+}
+$("logList").addEventListener("click", function(e){ var b = e.target.closest("button[data-ldel]"); if(!b) return; st.log.splice(+b.getAttribute("data-ldel"), 1); drawLog(); save() });
+$("lgAdd").addEventListener("click", function(){
+  var text = $("lgText").value.trim(), next = $("lgNext").value.trim();
+  if(!text && !draft.tech.length && !draft.res.length && !next){ fb("lgFb", "tell", "Tap a technique or jot a few words first. Even one word is fine."); return }
+  var d = ""; try{ d = new Date().toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short" }) }catch(e){}
+  st.log.push({ tech:draft.tech.slice(), res:draft.res.slice(), text:text, next:next, photo:draft.photo, date:d });
+  draft = { tech:[], res:[], photo:"" }; $("lgText").value = ""; $("lgNext").value = ""; $("lgPhoto").value = "";
+  drawLogForm(); drawLog(); tried(5);
+  fb("lgFb", "ok", "<b>Logged.</b> That is step " + st.log.length + " of your build.");
+});
+
+/* =================== stage 6 =================== */
+var selStmt = -1;
+function drawCritic(){
+  var P = st.critic.placed;
+  var left = STMTS.map(function(s, i){ return i }).filter(function(i){ return P[i] === undefined });
+  $("cStmts").innerHTML = left.length ? left.map(function(i){ return "<button type='button' class='ss-stmt' data-s='" + i + "' aria-pressed='" + (selStmt === i) + "'>" + STMTS[i].t + "</button>" }).join("") : "<p class='ss-small' style='margin:0'>All sorted. Nice critic eyes.</p>";
+  function bin(w, cls, lab){ return "<button type='button' class='ss-cbin " + cls + "' data-b='" + (w ? "w" : "b") + "'><b>" + lab + "</b>" + STMTS.map(function(s, i){ return P[i] === w ? "<p>" + s.t + "</p>" : "" }).join("") + "</button>" }
+  $("cBins").innerHTML = bin(true, "w", "Works well") + bin(false, "b", "Could be better");
+  $("gullQ").innerHTML = GULLQ.map(function(g, i){ return "<button type='button' class='ss-opt" + (st.critic.change === i ? (g.ok ? " good" : " on") : "") + "' data-g='" + i + "'>" + g.t + "</button>" }).join("");
+}
+$("cStmts").addEventListener("click", function(e){ var b = e.target.closest("button[data-s]"); if(!b) return; var i = +b.getAttribute("data-s"); selStmt = selStmt === i ? -1 : i; drawCritic(); if(selStmt >= 0) fb("cFb", "tell", "Picked up. Now tap <b>Works well</b> or <b>Could be better</b>.") });
+$("cBins").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-b]"); if(!b) return;
+  if(selStmt < 0){ fb("cFb", "tell", "Tap one of the comments first."); return }
+  var w = b.getAttribute("data-b") === "w", S = STMTS[selStmt];
+  if(S.w === w){ st.critic.placed[selStmt] = w; fb("cFb", "ok", "<b>Yes.</b> " + S.why); selStmt = -1 }
+  else fb("cFb", "try", "<b>Have another look.</b> " + S.why + " Try the other side?");
+  drawCritic(); tried(6);
+});
+$("gullQ").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-g]"); if(!b) return;
+  var i = +b.getAttribute("data-g"), g = GULLQ[i]; st.critic.change = i;
+  fb("gullFb", g.ok ? "ok" : "try", (g.ok ? "<b>That is the one.</b> " : "<b>Good thinking, but maybe not first.</b> ") + g.why + (g.ok ? "" : " Fancy another pick?"));
+  drawCritic(); tried(6);
+});
+function drawRates(){
+  $("rates").innerHTML = RATES.map(function(R){
+    return "<div class='ss-rate'><div class='q'>" + rateIcon(R.id) + "<div><b>" + R.name + "</b><br><span style='font-size:.92rem'>" + R.q + "</span></div></div><div class='lv' role='group' aria-label='" + R.name + "'>" +
+      LEVELS.map(function(L, i){ return "<button type='button' data-r='" + R.id + "' data-l='" + i + "' aria-pressed='" + (st.rate[R.id] === i) + "'>" + L + "</button>" }).join("") + "</div></div>";
+  }).join("");
+}
+$("rates").addEventListener("click", function(e){ var b = e.target.closest("button[data-r]"); if(!b) return; var id = b.getAttribute("data-r"), l = +b.getAttribute("data-l"); if(st.rate[id] === l) delete st.rate[id]; else st.rate[id] = l; drawRates(); tried(6) });
+var chType = "";
+function drawChanges(){
+  $("chType").innerHTML = CTYPES.map(function(c){ return "<button type='button' class='ss-opt' data-ct='" + c.id + "' aria-pressed='" + (chType === c.id) + "'>" + c.name + "</button>" }).join("");
+  $("chList").innerHTML = st.changes.map(function(c, i){
+    return "<li><b>Change " + (i + 1) + ": " + esc(ctypeName(c.type) || "A change") + "</b>" + (c.noticed ? "<br>I noticed " + esc(c.noticed) : "") + (c.did ? "<br>So I " + esc(c.did) : "") + (c.now ? "<br>Now it " + esc(c.now) : "") +
+      "<br><button type='button' class='btn btn-quiet' data-cdel='" + i + "' style='font-size:.7rem;padding:6px 12px;margin-top:6px'>Remove</button></li>";
+  }).join("");
+}
+$("chType").addEventListener("click", function(e){ var b = e.target.closest("button[data-ct]"); if(!b) return; chType = chType === b.getAttribute("data-ct") ? "" : b.getAttribute("data-ct"); drawChanges() });
+$("chList").addEventListener("click", function(e){ var b = e.target.closest("button[data-cdel]"); if(!b) return; st.changes.splice(+b.getAttribute("data-cdel"), 1); drawChanges(); renderTT(true); save() });
+$("chAdd").addEventListener("click", function(){
+  var n = $("chNoticed").value.trim(), d = $("chDid").value.trim(), w = $("chNow").value.trim();
+  if(!chType && !n && !d && !w){ fb("chFb", "tell", "Pick the kind of change, or write a few words, then add it."); return }
+  st.changes.push({ type:chType || "other", noticed:n, did:d, now:w });
+  var vis = chType === "base" || chType === "smooth";
+  chType = ""; $("chNoticed").value = ""; $("chDid").value = ""; $("chNow").value = "";
+  drawChanges(); renderTT(true); tried(6);
+  fb("chFb", "ok", "<b>Change added.</b>" + (vis ? " Look at the turntable." : " Every change is part of the story."));
+});
+
+/* =================== stage 7 =================== */
+function ideaLine(){ return st.idea.own ? st.idea.own : ideaText() }
+function storyBlocks(){
+  var B = [], P = st.plan;
+  var idea = ideaLine();
+  if(idea || st.sketches.length || st.sk.paper || st.sk.model){
+    var h = idea ? "<p>" + esc(idea) + "</p>" : "";
+    if(st.sketches.length) h += "<div class='ss-mini'>" + st.sketches.map(function(s, i){ return "<img src='" + s.img + "' alt='Sketch " + (i + 1) + ", " + esc(s.tag) + "'>" }).join("") + "</div>";
+    var ex = []; if(st.sk.paper) ex.push("sketched on paper"); if(st.sk.model) ex.push("made a small test model (a maquette)");
+    if(ex.length) h += "<p>I also " + ex.join(" and ") + ".</p>";
+    B.push({ k:"Where it started", h:"First idea and sketches", html:h });
+  }
+  var tri = [];
+  if(st.form.mat && st.form.form && st.form.tool >= 0) tri.push("Practised a " + formOf(st.form.mat, st.form.form).name.toLowerCase() + " in " + MATS[st.form.mat].name.toLowerCase() + (st.form.real ? ", and made one for real" : ""));
+  var jk = Object.keys(st.joins);
+  if(jk.length){ var best = jk.filter(function(k){ return st.joins[k] >= 4 }).map(function(k){ var a = k.split("|"); return methodById(a[1]).name.toLowerCase() + " (" + pairById(a[0]).label.toLowerCase() + ")" }); tri.push("Wobble tested " + jk.length + " join" + (jk.length === 1 ? "" : "s") + (best.length ? ". Strongest: " + best.join(", ") : "")) }
+  if(st.joinReal) tri.push(st.joinReal);
+  if(tri.length) B.push({ k:"Trying things out", h:"Experiments", html:tri.map(function(t){ return "<p>" + esc(t) + "</p>" }).join("") });
+  if(P.main){ B.push({ k:"The plan", h:"Materials", html:"<p>Mostly " + MATS[P.main].name.toLowerCase() + (P.second && P.second !== "none" ? ", with " + MATS[P.second].name.toLowerCase() : "") + (P.join ? ", joined with " + methodById(P.join).name.toLowerCase() : "") + ". About " + (P.size || 12) + " cm tall.</p>" + (P.why ? "<p>" + esc(P.why) + "</p>" : "") }) }
+  if(st.log.length){
+    var ph = st.log.filter(function(L){ return L.photo }).map(function(L, i){ return "<img src='" + L.photo + "' alt='Build photo'>" }).join("");
+    B.push({ k:"Making it", h:"Build log", html:st.log.map(function(L, i){ return "<p><b>Step " + (i + 1) + ".</b> " + esc([L.tech.join(", "), L.text].filter(Boolean).join(": ")) + (L.res.length ? " (" + esc(L.res.join(", ").toLowerCase()) + ")" : "") + "</p>" }).join("") + (ph ? "<div class='ss-mini'>" + ph + "</div>" : "") });
+  }
+  var rk = Object.keys(st.rate);
+  if(rk.length || st.well || st.better){
+    var hh = rk.length ? "<div class='ss-bars'>" + RATES.filter(function(R){ return st.rate[R.id] !== undefined }).map(function(R){ return "<div><span>" + R.name + "</span><span class='trk'><i style='width:" + ((st.rate[R.id] + 1) * 25) + "%'></i></span><span>" + LEVELS[st.rate[R.id]] + "</span></div>" }).join("") + "</div>" : "";
+    if(st.well) hh += "<p><b>Works well:</b> " + esc(st.well) + "</p>";
+    if(st.better) hh += "<p><b>Even better if:</b> " + esc(st.better) + "</p>";
+    B.push({ k:"Looking closely", h:"Evaluation", html:hh });
+  }
+  if(st.changes.length || st.nextTime){
+    var ch = st.changes.map(function(c, i){ return "<p><b>" + esc(ctypeName(c.type)) + ".</b> " + esc([c.noticed ? "I noticed " + c.noticed : "", c.did ? "so I " + c.did : "", c.now ? "and now it " + c.now : ""].filter(Boolean).join(", ")) + "</p>" }).join("");
+    if(st.nextTime) ch += "<p><b>Next time:</b> " + esc(st.nextTime) + "</p>";
+    B.push({ k:"Making it better", h:"Changes", html:ch });
+  }
+  var fin = "";
+  if(st.story.journey) fin += "<p>" + esc(st.story.journey) + "</p>";
+  if(st.story.proud) fin += "<p><b>Most proud of:</b> " + esc(st.story.proud) + "</p>";
+  if(fin) B.push({ k:"The final piece", h:"How it grew", html:fin });
+  return B;
+}
+function buildStory(){
+  var B = storyBlocks(), title = st.story.title || "My sculpture";
+  var h = "<div class='ss-story'><h3 class='t'>" + esc(title) + "</h3><p class='by'>" + (st.who ? "By " + esc(st.who) + " &middot; " : "") + "Sculpture Studio, Base 5</p><div class='ss-storygrid'><div>" + ttBox("d") + "</div><div>";
+  h += B.length ? B.map(function(b){ return "<div class='ss-sblk'><h4>" + b.h + "</h4>" + b.html + "</div>" }).join("") : "<p>Nothing to show yet, and that is fine. Pop into any stage, then build the card again.</p>";
+  h += "</div></div></div>";
+  $("storyHost").innerHTML = h; renderTT(false); tried(7);
+}
+var slideI = 0;
+function present(){
+  var B = storyBlocks(), title = st.story.title || "My sculpture";
+  var S = [{ k:"Presenting", h:title, html:"<p>" + (st.who ? "By " + esc(st.who) + ". " : "") + "Here is the story of my sculpture, from first idea to final piece.</p>" }].concat(B).concat([{ k:"The end", h:"Thank you for looking", html:ttBox("e") + "<p>Any questions?</p>" }]);
+  if(slideI >= S.length) slideI = S.length - 1; if(slideI < 0) slideI = 0;
+  var s = S[slideI];
+  $("storyHost").innerHTML = "<div class='ss-slides' tabindex='-1' id='slides' aria-live='polite'><span class='sk'>" + esc(s.k) + "</span><h3>" + esc(s.h) + "</h3><div class='sb'>" + s.html + "</div><div class='nav'><span>Slide " + (slideI + 1) + " of " + S.length + "</span><button type='button' class='btn btn-quiet' id='slBack'" + (slideI === 0 ? " disabled" : "") + ">Back</button><button type='button' class='btn' id='slNext'" + (slideI === S.length - 1 ? " disabled" : "") + ">Next</button><button type='button' class='btn btn-quiet' id='slStop'>Stop</button></div></div>";
+  renderTT(false);
+  $("slBack").onclick = function(){ slideI--; present(); $("slBack").focus() };
+  $("slNext").onclick = function(){ slideI++; present(); var n = $("slNext"); if(n.disabled) $("slStop").focus(); else n.focus() };
+  $("slStop").onclick = function(){ buildStory() };
+  tried(7);
+}
+$("storyHost").addEventListener("keydown", function(e){
+  if(!$("slides")) return;
+  if(e.key === "ArrowRight" && $("slNext") && !$("slNext").disabled){ slideI++; present(); $("slNext").focus() }
+  if(e.key === "ArrowLeft" && $("slBack") && !$("slBack").disabled){ slideI--; present(); $("slBack").focus() }
+});
+$("storyBuild").addEventListener("click", function(){ buildStory(); $("storyHost").scrollIntoView({ behavior:reduce ? "auto" : "smooth", block:"start" }) });
+$("storyPresent").addEventListener("click", function(){ slideI = 0; present(); $("slides").focus(); $("storyHost").scrollIntoView({ behavior:reduce ? "auto" : "smooth", block:"start" }) });
+$("storyPrint").addEventListener("click", function(){ buildStory(); try{ window.print() }catch(e){} });
+
+/* =================== send =================== */
+function summary(){
+  var out = ["Sculpture Studio", "Target: " + TARGET, ""];
+  if(st.who && MS[st.who]) out.push("Milestones for " + st.who + ":", "  1. " + MS[st.who][0], "  2. " + MS[st.who][1], "");
+  var tr = []; for(var i = 1; i <= 7; i++) if(st.tried[i]) tr.push(i + " " + STAGES[i - 1].name);
+  out.push("Stages tried: " + (tr.length ? tr.join(", ") : "none yet"), "");
+  if(st.tried[1]){
+    out.push("1. MATERIALS SHELF");
+    var seen = MATK.filter(function(m){ return st.seen[m] }).map(function(m){ return MATS[m].name });
+    out.push("Looked at: " + (seen.length ? seen.join(", ") : "none"));
+    var so = Object.keys(st.sorted);
+    out.push("Tool sort: " + so.length + " of " + TOOLS.length + " tools sorted" + (so.length ? " (" + so.map(function(id){ return toolById(id).name + " to " + MATS[st.sorted[id]].name }).join("; ") + ")" : ""), "");
+  }
+  if(st.tried[2]){
+    out.push("2. FORM MAKER");
+    if(st.form.mat && st.form.form){ var fo = formOf(st.form.mat, st.form.form); out.push("Chose: " + MATS[st.form.mat].name + ", " + fo.name + (st.form.tool >= 0 ? ", tool: " + fo.tools[st.form.tool][0] : ", tool not picked yet")) }
+    out.push("Made one for real: " + (st.form.real ? "yes" : "not ticked"));
+    if(st.form.note) out.push("How it went: " + st.form.note);
+    out.push("");
+  }
+  if(st.tried[3] || st.joinReal){
+    out.push("3. JOINING LAB");
+    Object.keys(st.joins).forEach(function(k){ var a = k.split("|"); out.push("- " + pairById(a[0]).label + " with " + methodById(a[1]).name + ": " + STRENGTH[st.joins[k]] + " (" + st.joins[k] + " out of 5)") });
+    if(st.joinReal) out.push("Tried for real: " + st.joinReal);
+    out.push("");
+  }
+  if(st.tried[4]){
+    out.push("4. IDEA AND SKETCHES");
+    if(ideaText()) out.push("Spun idea: " + ideaText());
+    if(st.idea.own) out.push("My idea: " + st.idea.own);
+    out.push("Sketches saved: " + st.sketches.length + (st.sketches.length ? " (" + st.sketches.map(function(s){ return s.tag }).join(", ") + ")" : "") + (st.sk.paper ? ". Also sketched on paper" : "") + (st.sk.model ? ". Made a maquette" : ""));
+    var P = st.plan;
+    if(P.main) out.push("Plan: mostly " + MATS[P.main].name + (P.second && P.second !== "none" ? " with " + MATS[P.second].name : "") + (P.join ? ", joined with " + methodById(P.join).name : "") + ", about " + (P.size || 12) + " cm tall");
+    if(P.why) out.push("Why these materials: " + P.why);
+    out.push("");
+  }
+  if(st.log.length){
+    out.push("5. BUILD LOG (" + st.log.length + " step" + (st.log.length === 1 ? "" : "s") + ")");
+    st.log.forEach(function(L, i){ out.push("Step " + (i + 1) + (L.date ? " (" + L.date + ")" : "") + ": " + [L.tech.join(", "), L.text.replace(/[.\s]+$/, "")].filter(Boolean).join(". ") + (L.res.length ? ". How it went: " + L.res.join(", ") : "") + (L.next ? ". Next: " + L.next : "") + (L.photo ? " [photo kept on the device]" : "")) });
+    out.push("");
+  }
+  if(st.tried[6] || st.well || st.better || st.changes.length || st.nextTime){
+    out.push("6. EVALUATE AND CHANGE");
+    var pl = Object.keys(st.critic.placed).length;
+    if(pl || st.critic.change >= 0) out.push("Critic practice on Jay's foil gull: sorted " + pl + " of " + STMTS.length + " comments" + (st.critic.change >= 0 ? "; change picked: " + GULLQ[st.critic.change].t : ""));
+    var rk = RATES.filter(function(R){ return st.rate[R.id] !== undefined });
+    if(rk.length) out.push("My ratings: " + rk.map(function(R){ return R.name + ": " + LEVELS[st.rate[R.id]] }).join("; "));
+    if(st.well) out.push("What works well: " + st.well);
+    if(st.better) out.push("Even better if: " + st.better);
+    st.changes.forEach(function(c, i){ out.push("Change " + (i + 1) + " (" + ctypeName(c.type) + "): " + [c.noticed ? "I noticed " + c.noticed : "", c.did ? "so I " + c.did : "", c.now ? "now it " + c.now : ""].filter(Boolean).join(", ")) });
+    if(st.nextTime) out.push("Next time: " + st.nextTime);
+    out.push("");
+  }
+  if(st.tried[7] || st.story.title || st.story.journey || st.story.proud){
+    out.push("7. MY SCULPTURE STORY");
+    if(st.story.title) out.push("Title: " + st.story.title);
+    if(st.story.journey) out.push("How it grew: " + st.story.journey);
+    if(st.story.proud) out.push("Most proud of: " + st.story.proud);
+    out.push("");
+  }
+  out.push("Links to milestones:");
+  var LINKS = { 1:"exploring materials and tools (LC)", 2:"choosing a material and tool to make a form (LC, EGW)", 3:"experimenting with shaping, joining and building (EGW, LW)", 4:"developing an idea through sketches or models and choosing materials (LP)", 5:"making the sculpture with practised techniques and joins (LW, EGW, LP)", 6:"evaluating, and making changes (HK, LW, JT)", 7:"explaining how it developed and presenting it (JT)" };
+  var any = false; for(var j = 1; j <= 7; j++) if(st.tried[j]){ out.push("- " + STAGES[j - 1].name + ": " + LINKS[j]); any = true }
+  if(!any) out.push("- nothing tried yet");
+  return out.join("\n");
+}
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"Sculpture Studio", filename:"sculpture-studio", getText:summary });
+
+/* =================== start again, pause =================== */
+var resetArmed = null;
+$("resetBtn").addEventListener("click", function(){
+  var b = this;
+  if(!resetArmed){ b.textContent = "Sure? Tap again to clear it all"; resetArmed = setTimeout(function(){ resetArmed = null; b.textContent = "Start again" }, 4000); return }
+  clearTimeout(resetArmed); resetArmed = null; b.textContent = "Start again";
+  var who = st.who, whoSet = st.whoSet;
+  try{ localStorage.removeItem(KEY) }catch(e){}
+  st = fresh(); st.who = who; st.whoSet = whoSet;
+  selMat = ""; selTool = ""; fmMiss = {}; selStmt = -1; chType = ""; draft = { tech:[], res:[], photo:"" }; undo = []; clearPad();
+  ["toolFb","fmFb","jFb","lgFb","cFb","gullFb","chFb"].forEach(function(id){ fb(id) });
+  $("storyHost").innerHTML = ""; $("skMsg").textContent = "";
+  drawAll(); save(); go(1, true);
+});
+$("ttPause").addEventListener("click", function(){ paused = !paused; document.body.classList.toggle("ss-paused", paused); this.textContent = paused ? "Spin the turntable" : "Pause the turntable" });
+if(reduce){ $("ttPause").classList.add("hidden") }
+
+function drawAll(){
+  drawWho(); drawMap(); drawMats(); drawTools(); drawFM(); drawJ(); drawReels(false); drawPadBar(); drawThumbs(); drawPlan(); drawLogForm(); drawLog(); drawCritic(); drawRates(); drawChanges();
+  $("skPaper").checked = !!st.sk.paper; $("skModel").checked = !!st.sk.model;
+  fillBinds(); renderTT(false);
+}
+drawAll();
+go(st.cur || 1, false);
+window.__ss = { st:function(){ return st }, go:go, summary:summary };
+})();
+</script>
+
+</body>
+</html>

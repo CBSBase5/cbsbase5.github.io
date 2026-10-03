@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sorting Office - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Sorting Office only. Shell, cards and buttons come from style.css */
+.so{max-width:920px;margin:0 auto}
+.hidden{display:none!important}
+.smallnote{font-size:.88rem;color:var(--body-tint);margin:10px 0 0}
+
+/* hero belt */
+.herobelt{width:100%;height:auto;display:block;margin:4px 0 16px}
+@keyframes beltslide{from{transform:translateX(0)}to{transform:translateX(300px)}}
+.hb-parcels{animation:beltslide 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.roller{transform-box:fill-box;transform-origin:center;animation:spin 1.4s linear infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px) rotate(-3deg)}}
+.pidge-head{transform-box:fill-box;transform-origin:50% 90%;animation:bob 1.3s ease-in-out infinite}
+
+/* who */
+.whobox{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:18px 20px;margin:0 0 18px;box-shadow:var(--lift)}
+.whobox h2{font-variation-settings:"wdth" 118,"wght" 800;font-size:1.25rem;margin:0 0 2px}
+.whobox p{margin:0;font-size:.95rem}
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px}
+.whochip{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.08em;padding:8px 16px;min-height:44px;border:3px solid var(--ink);border-radius:999px;background:var(--paper);color:var(--ink);cursor:pointer}
+.whochip[aria-pressed="true"]{background:var(--orange);box-shadow:3px 4px 0 var(--ink)}
+.whochip.look{font-variation-settings:"wdth" 104,"wght" 700;letter-spacing:.02em}
+.mslist{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.mslist li{background:var(--paper);border:2px dashed var(--teal);border-radius:14px;padding:10px 14px;font-size:.98rem;line-height:1.45}
+.mslist .where{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);white-space:nowrap}
+.badge{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:3px 9px;vertical-align:middle;white-space:nowrap}
+.badge.next{background:var(--plum);color:var(--white)}
+
+/* floor plan */
+.floorlab{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.floorlab::after{content:"";flex:1;height:3px;background:var(--line)}
+.floor{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 12px;margin:0 0 28px}
+.baytile{position:relative;display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:16px 14px 18px 12px;padding:12px;box-shadow:3px 4px 0 rgba(10,47,56,.18);transition:transform .14s ease,box-shadow .14s ease;min-height:78px}
+.baytile:nth-child(odd){transform:rotate(-.5deg)}
+.baytile:nth-child(even){transform:rotate(.4deg)}
+.baytile:hover{transform:translateY(-3px) rotate(-1deg);box-shadow:5px 7px 0 var(--ink)}
+.baytile svg{flex:none;width:46px;height:46px}
+.baytile .bt{min-width:0}
+.baytile .bn{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7;display:block}
+.baytile b{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.02rem;line-height:1.1;display:block}
+.baytile .st{font-size:.8rem;color:var(--body-tint);display:block;line-height:1.3;margin-top:2px}
+.baytile .badge{position:absolute;top:-11px;right:8px;transform:rotate(3deg)}
+.tstamp{position:absolute;bottom:6px;right:8px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#c4321a;border:2px solid #c4321a;border-radius:5px;padding:1px 6px;transform:rotate(-10deg);background:rgba(255,253,248,.85)}
+@media (max-width:720px){.floor{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.baytile{padding:10px 8px;gap:7px}.baytile svg{width:34px;height:34px}.baytile b{font-size:.92rem}.baytile .st{font-size:.74rem}}
+
+/* bays */
+.bay{background:var(--white);border:3px solid var(--ink);border-radius:var(--r-alt);margin:0 0 30px;box-shadow:var(--lift);overflow:hidden;scroll-margin-top:12px}
+.bayhead{display:flex;align-items:center;gap:14px;padding:16px 20px;flex-wrap:wrap}
+.bayhead .num{flex:none;width:56px;height:56px;border-radius:50%;background:var(--white);color:var(--ink);border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.55rem;box-shadow:3px 3px 0 var(--ink);transform:rotate(-6deg)}
+.bayhead .ht{flex:1;min-width:180px}
+.bayhead .ht .kicker{margin:0 0 2px}
+.bayhead h2{font-variation-settings:"wdth" 120,"wght" 850;font-size:clamp(1.35rem,3.8vw,1.95rem);line-height:1.02}
+.bayhead p{margin:4px 0 0;font-size:.95rem}
+.fill-ink h2{color:var(--yellow)}
+.tape{height:14px;background:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,var(--ink) 14px 28px);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)}
+.baybody{padding:20px}
+.skiprow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:20px 0 0;padding-top:14px;border-top:2px dashed var(--line);font-size:.88rem;color:var(--body-tint)}
+.skiprow a{color:var(--teal);font-weight:700}
+
+/* learn a bit */
+.learn{display:grid;grid-template-columns:210px 1fr;gap:18px;align-items:center;background:var(--paper);border:2px dashed var(--ink);border-radius:18px 14px 20px 12px;padding:14px 18px;margin:0 0 20px}
+.learn svg{width:100%;height:auto;display:block}
+.learn h3{font-variation-settings:"wdth" 116,"wght" 800;font-size:1.2rem;line-height:1.1;margin:0 0 6px}
+.learn p{margin:0 0 7px;font-size:.98rem;line-height:1.5}
+.learn p:last-child{margin-bottom:0}
+.learn .kicker{margin-bottom:4px;color:var(--teal);opacity:1}
+@media (max-width:620px){.learn{grid-template-columns:1fr}.learn svg{max-width:260px;margin:0 auto}}
+.trylab{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--orange-deep);margin:0 0 6px}
+.tryline{margin:0 0 14px;font-size:1.02rem;max-width:64ch}
+.piece{font-size:.98rem;margin:0 0 12px}
+.piece b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+
+/* tabs and feedback */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.tab{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;letter-spacing:.05em;padding:8px 14px;min-height:42px;border:2px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.tab .tc{opacity:.7;margin-left:4px;font-variation-settings:"wdth" 100,"wght" 600}
+.fb{margin:14px 0 0;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb:empty{display:none}
+.fb.ok{background:#e9f4ec;border:2px solid #9fcdaa}
+.fb.nope{background:#fdf0e5;border:2px solid #f2c9a2}
+.fb.tell{background:#eef4f6;border:2px solid #bcd6de}
+.fb b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
+.btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none}
+
+/* stamps */
+.stamp{position:absolute;z-index:3;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#c4321a;border:3px solid #c4321a;border-radius:8px;padding:3px 9px;background:rgba(255,253,248,.9);transform:rotate(-12deg);pointer-events:none;animation:stampin .38s cubic-bezier(.3,1.6,.5,1) both;white-space:nowrap}
+.stamp.still{animation:none}
+.stamp.green{color:#2e7d4f;border-color:#2e7d4f}
+@keyframes stampin{from{transform:scale(2.4) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
+
+/* bay 1: belt and bins */
+.belt{position:relative;background:repeating-linear-gradient(90deg,#46585f 0 46px,#3b4c53 46px 92px);border:3px solid var(--ink);border-radius:18px;padding:40px 14px 40px;min-height:170px;animation:beltmove 2.6s linear infinite;margin:0 0 16px}
+@keyframes beltmove{from{background-position:0 0}to{background-position:92px 0}}
+.belt::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;border-radius:0 0 14px 14px;border-top:3px solid var(--ink);background:radial-gradient(circle at 12px 9px,#c9d3d6 0 4px,#6b7c82 4.5px 6.5px,transparent 7px) 0 0/24px 18px repeat-x,#26343a}
+.beltcount{position:absolute;top:10px;left:16px;color:#e8eef0;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase}
+.belthint{position:absolute;top:10px;right:16px;color:#cfdade;font-size:.78rem}
+.parcel{position:relative;max-width:560px;margin:0 auto;background:linear-gradient(160deg,#dcaa70,#c58a4c);border:3px solid var(--ink);border-radius:10px;padding:16px 18px 16px 16px;box-shadow:5px 7px 0 rgba(0,0,0,.35);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .45s cubic-bezier(.5,0,.6,1),opacity .45s ease}
+.parcel::before{content:"";position:absolute;top:0;bottom:0;left:22px;width:20px;background:rgba(255,238,196,.6);border-left:2px solid rgba(10,47,56,.14);border-right:2px solid rgba(10,47,56,.14)}
+.plabel{position:relative;background:var(--white);border:2px solid var(--ink);border-radius:6px;padding:12px 14px;margin:0 34px 0 34px;font-size:1.1rem;line-height:1.45}
+.pstamp{position:absolute;top:10px;right:8px;width:34px;height:40px}
+.parcel.arrive{animation:arrive .55s cubic-bezier(.2,1.2,.4,1)}
+@keyframes arrive{from{transform:translateX(-120%) rotate(-5deg);opacity:0}to{transform:none;opacity:1}}
+.parcel.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.parcel.dragging{transition:none;cursor:grabbing;z-index:20;box-shadow:10px 14px 0 rgba(0,0,0,.28)}
+.parcel:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+.beltempty{text-align:center;color:#f3f6f7;font-size:1.05rem;padding:20px 0}
+.beltempty b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.4rem;color:var(--yellow);display:block}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.bin{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;padding:12px 10px;border:3px solid var(--ink);border-radius:10px 10px 18px 18px;background:repeating-linear-gradient(0deg,#b97c40 0 20px,#a66a31 20px 23px);cursor:pointer;color:var(--ink);font-family:var(--body);min-height:128px;box-shadow:3px 5px 0 var(--ink);transition:transform .14s ease}
+.bin:hover:not(:disabled){transform:translateY(-3px)}
+.bin:disabled{cursor:default}
+.bin.hot{outline:5px dashed var(--yellow);outline-offset:3px;transform:scale(1.03)}
+.bplate{background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:6px 10px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.95rem;line-height:1.15;text-align:center;display:flex;align-items:center;gap:7px}
+.bplate svg{width:28px;height:28px;flex:none}
+.stack{display:flex;flex-wrap:wrap-reverse;gap:3px;justify-content:center;min-height:18px;max-width:150px}
+.stack i{display:block;width:18px;height:13px;background:#efc78f;border:2px solid var(--ink);border-radius:3px}
+.bcount{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--white);background:rgba(10,47,56,.7);border-radius:999px;padding:2px 9px}
+.bin .stamp{top:6px;right:-4px}
+.bin.gulp{animation:gulp .45s}
+@keyframes gulp{40%{transform:scale(1.07) rotate(-1.5deg)}}
+.unpacked{display:grid;gap:12px;margin:16px 0 0}
+.para{background:var(--white);border:2px solid var(--ink);border-left:12px solid var(--orange);border-radius:0 14px 14px 0;padding:12px 16px}
+.para:nth-child(2){border-left-color:var(--teal)}
+.para:nth-child(3){border-left-color:var(--plum)}
+.para .kicker{margin:0 0 4px;opacity:.75}
+.para p{margin:0;font-size:1rem;line-height:1.55}
+
+/* bay 2: slips */
+.openbox{position:relative;background:linear-gradient(160deg,#e6bb84,#cf9558);border:3px solid var(--ink);border-radius:6px 6px 16px 16px;padding:16px 14px 14px;margin:6px 0 4px}
+.openbox::before,.openbox::after{content:"";position:absolute;top:-16px;width:42%;height:16px;background:#d9a066;border:3px solid var(--ink);border-bottom:0}
+.openbox::before{left:-3px;transform:skewX(-30deg);transform-origin:bottom left;border-radius:4px 0 0 0}
+.openbox::after{right:-3px;transform:skewX(30deg);transform-origin:bottom right;border-radius:0 4px 0 0}
+.slips{display:grid;gap:9px}
+.slip{position:relative;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--body);font-size:1.02rem;line-height:1.45;background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:11px 13px;color:var(--ink);box-shadow:2px 3px 0 rgba(10,47,56,.25);width:100%}
+button.slip{cursor:pointer}
+button.slip:hover{background:#fff6e3}
+.slip.dim{opacity:.6;background:#f1ebe1}
+.slip .txt{flex:1}
+.slip.topic{background:#fff1c9;border-width:3px;padding-right:130px}
+.slip.topic .stamp{right:10px;top:50%;margin-top:-14px}
+.slip.done{background:#f3faf5}
+.detailtag{flex:none;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:2px solid var(--body-tint);color:var(--body-tint);border-radius:5px;padding:1px 6px}
+.ord{flex:none;display:flex;flex-direction:column;gap:5px}
+.mv{width:40px;height:34px;border:2px solid var(--ink);border-radius:8px;background:var(--yellow);color:var(--ink);font-size:1.05rem;font-weight:700;cursor:pointer;padding:0}
+.mv:disabled{background:var(--paper);opacity:.4;cursor:default}
+.steplab{margin:6px 0 12px;font-size:1rem}
+.stepn{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;background:var(--ink);color:var(--paper);border-radius:6px;padding:3px 8px;margin-right:6px;transform:rotate(-3deg)}
+.sealed{margin:14px 0 0;background:var(--paper);border:2px solid var(--ink);border-radius:12px;padding:12px 16px}
+.sealed p{margin:0;font-size:1.02rem;line-height:1.6}
+.sealed .first{background:linear-gradient(transparent 58%,var(--yellow) 58%,var(--yellow) 92%,transparent 92%)}
+.mcq{margin:0 0 20px}
+.mcq .blanklabel{display:inline-block;background:var(--white);border:3px dashed var(--ink);border-radius:8px;padding:6px 14px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;margin:0 0 10px}
+.mcq .bodytxt{background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:10px 13px;font-size:1rem;line-height:1.55}
+.opts{display:grid;gap:8px;margin:12px 0 0}
+.opt{font-family:var(--body);font-size:1rem;text-align:left;padding:11px 14px;border:2px solid rgba(10,47,56,.3);border-radius:12px 9px 12px 9px;background:#fffdfb;color:var(--ink);cursor:pointer;line-height:1.4}
+.opt:hover{border-color:var(--ink)}
+.opt.good{border-color:#2e7d4f;background:#e9f4ec;font-weight:700}
+.opt.bad{border-color:var(--orange-deep);background:#fdf0e5}
+
+/* bay 3: chopping */
+.tipgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 2px}
+.tipgrid div{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:7px 4px;text-align:center;font-size:.8rem;line-height:1.2}
+.tipgrid b{display:block;font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.25rem}
+@media (max-width:420px){.tipgrid{grid-template-columns:repeat(2,1fr)}}
+.chopbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.chopbar .cl{display:inline-flex;gap:4px}
+.chopbar .cl svg{width:22px;height:22px}
+.chopbar .cl svg.off{opacity:.25}
+.wall{position:relative}
+.slab{position:relative;background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:14px 16px;font-size:1.05rem;line-height:1.95;box-shadow:3px 4px 0 rgba(10,47,56,.15)}
+.slab.fresh{animation:slabin .5s cubic-bezier(.2,1.3,.4,1)}
+@keyframes slabin{from{transform:translateY(-16px) rotate(-1.2deg);background:#f6effa}to{transform:none}}
+.cut{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:30px;height:30px;margin:0 3px;padding:0;border:2px dashed rgba(123,75,143,.45);border-radius:8px;background:transparent;cursor:pointer;color:var(--plum)}
+.cut svg{width:18px;height:18px;opacity:.6}
+.cut:hover,.cut:focus-visible{background:#f3e8f7;border-color:var(--plum);border-style:solid}
+.cut:hover svg,.cut:focus-visible svg{opacity:1}
+.cut.no{animation:shake .4s;border-color:var(--orange-deep);background:#fdf0e5}
+.blade{position:absolute;width:64px;height:80px;pointer-events:none;z-index:6;animation:chopdown .3s cubic-bezier(.6,0,.9,.4) both}
+@keyframes chopdown{from{transform:translateY(-80px) rotate(-20deg);opacity:0}60%{opacity:1}to{transform:translateY(0) rotate(0);opacity:1}}
+.chopfx{position:absolute;z-index:7;font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.6rem;color:var(--plum);text-shadow:2px 2px 0 var(--yellow);pointer-events:none;animation:stampin .3s .15s both}
+.chopline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 4px;margin:0;border-top:3px dashed var(--plum);border-bottom:3px dashed var(--plum);background:repeating-linear-gradient(90deg,rgba(123,75,143,.06) 0 10px,transparent 10px 20px);margin:10px 0}
+.cl-lab{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--plum)}
+.cl-lab svg{width:20px;height:20px}
+.tips{display:flex;flex-wrap:wrap;gap:6px}
+.tip{font-family:var(--body);font-size:.88rem;padding:6px 11px;min-height:38px;border:2px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);cursor:pointer}
+.tip b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;margin-right:2px}
+.tip.yes{background:#dff1e5;border-color:#2e7d4f}
+.tip.notq{background:#fdf0e5;border-color:var(--orange-deep);border-style:dashed}
+.tipsay{flex-basis:100%;font-size:.92rem;color:var(--ink)}
+
+/* bay 4: linking */
+.tagtray{display:flex;flex-wrap:wrap;gap:9px;padding:14px;background:var(--paper);border:2px dashed var(--ink);border-radius:14px;min-height:64px;margin:0 0 12px}
+.tagtray:empty::after{content:"Tray empty. Every tag is in a crate.";font-size:.92rem;color:var(--body-tint)}
+.ltag{position:relative;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.92rem;padding:9px 16px 9px 26px;min-height:44px;border:3px solid var(--ink);border-radius:8px 999px 999px 8px;background:var(--yellow);color:var(--ink);cursor:pointer;transition:transform .12s ease}
+.ltag::before{content:"";position:absolute;left:9px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--white);border:2px solid var(--ink)}
+.ltag[aria-pressed="true"]{background:var(--orange);transform:translateY(-3px) rotate(-2deg);box-shadow:3px 4px 0 var(--ink)}
+.ltag.wrong{animation:shake .4s}
+.crates{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:0 0 6px}
+.crate{position:relative;display:flex;flex-direction:column;gap:8px;text-align:left;padding:12px;border:3px solid var(--ink);border-radius:12px;background:var(--white);color:var(--ink);cursor:pointer;min-height:118px;font-family:var(--body);box-shadow:3px 4px 0 var(--ink)}
+.crate .cname{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:1.02rem;line-height:1.1}
+.crate .cjob{font-size:.84rem;line-height:1.35;color:var(--body-tint)}
+.crate .placed{display:flex;flex-wrap:wrap;gap:5px}
+.crate .placed span{font-size:.8rem;font-weight:700;background:var(--white);border:2px solid var(--ink);border-radius:6px;padding:1px 7px}
+.crate.add{background:linear-gradient(160deg,#d9f0f5,#b8e2ec)}
+.crate.but{background:linear-gradient(160deg,#efe2f4,#dcc6e6)}
+.crate.time{background:linear-gradient(160deg,#fff1cf,#ffe0a0)}
+.crate.cause{background:linear-gradient(160deg,#fde3d0,#f9c7a3)}
+.crate.ready{outline:4px dashed var(--orange);outline-offset:2px}
+.crate.gulp{animation:gulp .45s}
+.lane{margin:8px 0 0}
+.pcard{position:relative;background:var(--white);border:3px solid var(--ink);border-radius:12px;padding:12px 16px;font-size:1.02rem;line-height:1.6;box-shadow:3px 4px 0 rgba(10,47,56,.18)}
+.pcard .kicker{margin:0 0 3px;opacity:.6;font-size:.62rem}
+.pcard p{margin:0}
+.linkword{font-weight:700;background:#c9ebd3;border-radius:4px;padding:1px 5px}
+.linkgap{display:inline-block;min-width:110px;border-bottom:3px dashed var(--plum);color:var(--plum);font-weight:700;text-align:center}
+.coupling{position:relative;display:flex;justify-content:center;padding:10px 0}
+.coupling::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:10px;margin-left:-5px;background:repeating-linear-gradient(0deg,#7d8d93 0 7px,#2a383d 7px 13px);border-radius:3px}
+.gapbtn{position:relative;z-index:1;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.85rem;letter-spacing:.04em;padding:8px 18px;min-height:44px;border:3px dashed var(--ink);background:var(--paper);color:var(--ink);border-radius:999px;cursor:pointer}
+.gapbtn[aria-pressed="true"]{border-style:solid;background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.gapbtn.ok{border-style:solid;background:#c9ebd3;cursor:default}
+.chiptray{position:sticky;bottom:0;z-index:4;background:rgba(247,242,233,.97);border:2px solid var(--ink);border-radius:14px;padding:10px 12px;margin:14px 0 0;box-shadow:0 -4px 0 rgba(10,47,56,.08)}
+.chiptray .kicker{margin:0 0 6px}
+.chiptray .chips{gap:6px}
+.lchip{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.82rem;padding:7px 12px;min-height:40px;border:2px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);cursor:pointer}
+.lchip[aria-pressed="true"]{background:var(--orange)}
+.parthead{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.15rem;margin:22px 0 6px;display:flex;align-items:center;gap:10px}
+.parthead span{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;background:var(--plum);color:var(--white);border-radius:6px;padding:3px 8px}
+
+/* bay 5: planner */
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 16px}
+.pickbtn{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:var(--white);color:var(--ink);cursor:pointer;font-family:var(--body);font-size:.95rem;line-height:1.3;min-height:64px}
+.pickbtn svg{width:40px;height:40px;flex:none}
+.pickbtn[aria-pressed="true"]{background:var(--yellow);box-shadow:4px 5px 0 var(--ink)}
+.fieldlab{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+.tinput{width:100%;font-family:var(--body);font-size:1rem;padding:9px 11px;border:2px solid var(--ink);border-radius:8px;background:var(--white);color:var(--ink)}
+.shelf{display:grid;gap:14px;margin:14px 0 0;padding:16px 12px 20px;background:linear-gradient(transparent calc(100% - 16px),#8a5230 calc(100% - 16px));border-bottom:3px solid var(--ink)}
+.pbox{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:linear-gradient(160deg,#e6bb84,#cf9558);border:3px solid var(--ink);border-radius:10px;padding:12px;box-shadow:4px 5px 0 rgba(10,47,56,.25)}
+.pbox::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:18px;margin-left:-9px;background:rgba(255,238,196,.45);pointer-events:none}
+.pno{position:relative;width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--yellow);display:grid;place-items:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.2rem}
+.pfields{position:relative;display:grid;gap:8px;background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:10px}
+.pmoves{position:relative;display:flex;flex-direction:column;gap:6px}
+.minib{width:42px;height:38px;border:2px solid var(--ink);border-radius:8px;background:var(--white);color:var(--ink);cursor:pointer;font-size:1.05rem;font-weight:700;padding:0}
+.minib:disabled{opacity:.35;cursor:default}
+.suggs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 0;font-size:.9rem}
+.sugg{font-family:var(--body);font-size:.85rem;padding:5px 11px;min-height:36px;border:2px dashed var(--teal);border-radius:999px;background:var(--white);color:#005a73;cursor:pointer}
+@media (max-width:560px){.pbox{grid-template-columns:1fr}.pmoves{flex-direction:row}.pno{width:36px;height:36px;font-size:1rem}}
+
+/* bay 6: builder */
+.wbox{border:3px solid var(--ink);border-radius:14px;background:var(--white);margin:0 0 6px;overflow:hidden;box-shadow:3px 4px 0 rgba(10,47,56,.18)}
+.whead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:linear-gradient(160deg,#e6bb84,#cf9558);border-bottom:3px solid var(--ink)}
+.whead .pno{width:34px;height:34px;font-size:1rem}
+.addr{background:var(--white);border:2px solid var(--ink);border-radius:6px;padding:4px 12px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem}
+.wbody{padding:12px 14px 14px}
+.wbody textarea{width:100%;min-height:120px;font-family:var(--body);font-size:1.03rem;line-height:1.55;padding:10px 12px;border:2px solid rgba(10,47,56,.35);border-radius:10px;background:#fffdfb;color:var(--ink);resize:vertical}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px;align-items:center}
+.starters .sl{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-right:2px}
+.starter{font-family:var(--body);font-size:.86rem;padding:5px 11px;min-height:36px;border:2px solid var(--teal);border-radius:999px;background:var(--white);color:#005a73;cursor:pointer}
+.starter.lk{border-color:var(--plum);color:var(--plum)}
+.kwhint{font-size:.86rem;color:var(--body-tint);margin:8px 0 0}
+.kwhint i{font-style:normal;font-weight:700;color:var(--ink)}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.chk{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;border:2px dashed rgba(10,47,56,.35);border-radius:6px;padding:4px 9px;color:var(--body-tint);transform:rotate(-2deg)}
+.chk:nth-child(even){transform:rotate(1.5deg)}
+.chk.lit{border-style:solid;border-color:#2e7d4f;color:#2e7d4f;background:#e9f4ec}
+.wnote{font-size:.92rem;margin:8px 0 0;padding:8px 11px;border-radius:10px;background:#eef4f6;border:2px solid #bcd6de}
+.wnote:empty{display:none}
+.wlink{display:flex;justify-content:center;padding:4px 0}
+.wlink span{display:block;width:10px;height:22px;background:repeating-linear-gradient(0deg,#7d8d93 0 7px,#2a383d 7px 13px);border-radius:3px}
+.postrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:18px 0 0;overflow:hidden}
+.van{width:150px;height:auto;flex:none}
+.van.go{animation:drive 1.6s cubic-bezier(.5,0,.8,.6) forwards}
+@keyframes drive{0%{transform:translateX(0)}15%{transform:translateX(-8px)}100%{transform:translateX(900px)}}
+.quickplans{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+
+/* send */
+.sendbay .baybody{padding-top:4px}
+.resetb{font-size:.78rem}
+@media (max-width:480px){
+  .baybody{padding:16px 14px}
+  .bayhead{padding:14px}
+  .bayhead .num{width:46px;height:46px;font-size:1.3rem}
+  .plabel{margin:0 0 0 30px;font-size:1rem}
+  .pstamp{display:none}
+  .slip.topic{padding-right:13px;padding-top:54px}
+  .slip.topic .stamp{top:8px;right:10px;margin-top:0}
+  .belt{padding:38px 10px 38px}
+}
+@media (max-width:600px){
+  .chiptray{position:static}
+  .bins{grid-template-columns:repeat(3,1fr);gap:8px}
+  .bin{min-height:104px;padding:8px 5px}
+  .bplate{flex-direction:column;gap:2px;font-size:.76rem;padding:5px 4px}
+  .bplate svg{width:22px;height:22px}
+  .stack{max-width:90px}
+  .stack i{width:13px;height:10px}
+  .bin .stamp{font-size:.62rem;right:-2px}
+}
+@media (prefers-reduced-motion:reduce){
+  .parcel,.bin,.ltag,.baytile{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE SORTING <span class="accent">OFFICE</span></h1>
+    <div class="line">
+      <span class="chip">English &middot; paragraphs</span>
+      <p>Sentences arrive in a jumble. Sort them, stamp them, chop them and link them, then pack your own.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap so">
+
+  <svg class="herobelt" viewBox="0 0 900 160" role="img" aria-label="Parcels and letters travel along a conveyor belt towards Pidge, a pigeon in a postal cap">
+    <defs>
+      <clipPath id="hbclip"><rect x="0" y="0" width="742" height="112"/></clipPath>
+      <linearGradient id="neck" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f9b7a"/><stop offset="1" stop-color="#7b4b8f"/></linearGradient>
+      <g id="hbA"><rect width="62" height="46" rx="4" fill="#d9a066" stroke="#0a2f38" stroke-width="3"/><rect x="25" y="1.5" width="12" height="43" fill="#f3dca8"/><rect x="5" y="8" width="16" height="11" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/></g>
+      <g id="hbB"><rect width="58" height="36" rx="3" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><path d="M2 3 L29 21 L56 3" fill="none" stroke="#0a2f38" stroke-width="2.5"/><rect x="44" y="5" width="9" height="11" fill="#ef7724" stroke="#0a2f38" stroke-width="1.5"/></g>
+      <g id="hbC"><rect width="48" height="58" rx="4" fill="#c58a4c" stroke="#0a2f38" stroke-width="3"/><rect x="1.5" y="22" width="45" height="11" fill="#f3dca8"/><rect x="8" y="38" width="30" height="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/></g>
+    </defs>
+    <g clip-path="url(#hbclip)">
+      <g class="hb-parcels">
+        <use href="#hbA" x="-290" y="54"/><use href="#hbB" x="-190" y="64"/><use href="#hbC" x="-90" y="42"/>
+        <use href="#hbA" x="10" y="54"/><use href="#hbB" x="110" y="64"/><use href="#hbC" x="210" y="42"/>
+        <use href="#hbA" x="310" y="54"/><use href="#hbB" x="410" y="64"/><use href="#hbC" x="510" y="42"/>
+        <use href="#hbA" x="610" y="54"/><use href="#hbB" x="710" y="64"/>
+      </g>
+    </g>
+    <rect x="0" y="100" width="745" height="16" rx="3" fill="#46585f" stroke="#0a2f38" stroke-width="3"/>
+    <g fill="#c9d3d6" stroke="#0a2f38" stroke-width="2.5">
+      <g class="roller"><circle cx="30" cy="128" r="9"/><line x1="24" y1="128" x2="36" y2="128"/></g>
+      <g class="roller"><circle cx="150" cy="128" r="9"/><line x1="144" y1="128" x2="156" y2="128"/></g>
+      <g class="roller"><circle cx="270" cy="128" r="9"/><line x1="264" y1="128" x2="276" y2="128"/></g>
+      <g class="roller"><circle cx="390" cy="128" r="9"/><line x1="384" y1="128" x2="396" y2="128"/></g>
+      <g class="roller"><circle cx="510" cy="128" r="9"/><line x1="504" y1="128" x2="516" y2="128"/></g>
+      <g class="roller"><circle cx="630" cy="128" r="9"/><line x1="624" y1="128" x2="636" y2="128"/></g>
+    </g>
+    <path d="M60 138 V158 M690 138 V158" stroke="#0a2f38" stroke-width="5"/>
+    <rect x="755" y="122" width="140" height="34" rx="4" fill="#8a5230" stroke="#0a2f38" stroke-width="3"/>
+    <rect x="772" y="131" width="40" height="14" rx="2" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/>
+    <g transform="translate(772,6)">
+      <path d="M70 76 L112 86 L106 98 L66 90 Z" fill="#6d7b89" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="56" cy="80" rx="38" ry="27" fill="#a3afbc" stroke="#0a2f38" stroke-width="3"/>
+      <path d="M44 70 Q72 58 96 78 Q76 98 50 90 Z" fill="#8795a4" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M62 78 h16 M64 85 h13" stroke="#0a2f38" stroke-width="3" stroke-linecap="round"/>
+      <path d="M24 70 Q18 48 32 38 L48 42 Q50 60 44 72 Z" fill="url(#neck)" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M48 106 v10 M62 106 v10 M43 116 h9 M57 116 h9" stroke="#e0736b" stroke-width="4" stroke-linecap="round"/>
+      <g class="pidge-head">
+        <circle cx="32" cy="32" r="15" fill="#a3afbc" stroke="#0a2f38" stroke-width="3"/>
+        <path d="M18 32 L5 37 L18 38 Z" fill="#e8d9bf" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/>
+        <ellipse cx="19" cy="31" rx="3.2" ry="2.2" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/>
+        <circle cx="27" cy="28" r="4.5" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/>
+        <circle cx="26.3" cy="28" r="1.8" fill="#0a2f38"/>
+        <path d="M18 21 Q30 6 47 18 L47 22 L18 22 Z" fill="#123c47" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M19 22 L4 25 Q10 18 21 18 Z" fill="#0a2f38"/>
+        <circle cx="34" cy="15" r="3" fill="#ffc247" stroke="#0a2f38" stroke-width="1"/>
+      </g>
+    </g>
+    <g transform="translate(640,4)">
+      <path d="M0 4 Q0 0 4 0 H110 Q114 0 114 4 V30 Q114 34 110 34 H70 L82 46 L56 34 H4 Q0 34 0 30 Z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>
+      <text x="57" y="22" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="13" fill="#0a2f38">Coo. Sort these?</text>
+    </g>
+  </svg>
+
+  <div class="panel panel-orange">
+    <p><strong>What this is.</strong> A sorting office where sentences come in muddled, and paragraphs go out tidy. Six bays, any order, and every one can be skipped. It saves as you go.</p>
+  </div>
+
+  <section class="whobox" aria-labelledby="whoh">
+    <h2 id="whoh">Who is this?</h2>
+    <p>Optional. Pick your initials to see your two steps and where to start, or just have a look around.</p>
+    <div class="whochips" id="whochips"></div>
+    <div id="whoms"></div>
+  </section>
+
+  <p class="floorlab">The sorting office floor</p>
+  <nav class="floor" id="floor" aria-label="Bays"></nav>
+
+  <!-- ============ BAY 1 ============ -->
+  <section class="bay" id="bay1" aria-labelledby="bay1h">
+    <div class="bayhead fill-orange">
+      <span class="num">1</span>
+      <div class="ht"><span class="kicker">Bay 1</span><h2 id="bay1h">The sorting belt</h2><p>Sentences that belong together go in the same paragraph.</p></div>
+      <span class="badge hidden" id="badge1"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div class="learn">
+        <svg viewBox="0 0 220 150" aria-hidden="true">
+          <rect x="20" y="8" width="80" height="12" rx="3" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="120" y="8" width="80" height="12" rx="3" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="70" y="30" width="80" height="12" rx="3" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/>
+          <circle cx="30" cy="14" r="3" fill="#ef7724"/><circle cx="130" cy="14" r="3" fill="#007291"/><circle cx="80" cy="36" r="3" fill="#7b4b8f"/>
+          <path d="M45 22 Q38 50 38 74" fill="none" stroke="#ef7724" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <path d="M175 22 Q182 50 182 74" fill="none" stroke="#007291" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <path d="M110 44 V74" fill="none" stroke="#7b4b8f" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <g stroke="#0a2f38" stroke-width="2.5">
+            <rect x="8" y="80" width="62" height="54" rx="4" fill="#d9a066"/><rect x="79" y="80" width="62" height="54" rx="4" fill="#d9a066"/><rect x="150" y="80" width="62" height="54" rx="4" fill="#d9a066"/>
+          </g>
+          <rect x="16" y="88" width="46" height="14" rx="2" fill="#fffdf8" stroke="#ef7724" stroke-width="2.5"/>
+          <rect x="87" y="88" width="46" height="14" rx="2" fill="#fffdf8" stroke="#7b4b8f" stroke-width="2.5"/>
+          <rect x="158" y="88" width="46" height="14" rx="2" fill="#fffdf8" stroke="#007291" stroke-width="2.5"/>
+          <g font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="9" text-anchor="middle" fill="#0a2f38"><text x="39" y="98.5">TANK</text><text x="110" y="98.5">FOOD</text><text x="181" y="98.5">HEALTH</text></g>
+          <g stroke="#0a2f38" stroke-width="1.5" stroke-linecap="round" opacity=".55"><path d="M16 112 h46 M16 120 h38 M87 112 h46 M87 120 h34 M158 112 h46 M158 120 h40"/></g>
+          <text x="110" y="148" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="10" fill="#0a2f38">one parcel = one paragraph</text>
+        </svg>
+        <div>
+          <span class="kicker">Learn a bit</span>
+          <h3>One paragraph, one idea</h3>
+          <p>A paragraph is a group of sentences about the <b>same thing</b>. Think of it as a parcel: everything packed inside belongs together.</p>
+          <p>When a sentence is about something different, it goes in a different parcel.</p>
+        </div>
+      </div>
+      <p class="trylab">Try a bit</p>
+      <p class="tryline">Parcels are coming down the belt. Drag each one into the bin it belongs in, or just tap a bin to send it there.</p>
+      <div class="tabs" id="s1tabs" role="tablist" aria-label="Pick a pile"></div>
+      <p class="piece" id="s1title"></p>
+      <div class="belt" id="s1belt"></div>
+      <div class="bins" id="s1bins"></div>
+      <div class="fb" id="s1fb" aria-live="polite"></div>
+      <div id="s1out"></div>
+      <div class="skiprow"><span>Not for you right now? That is fine.</span><a href="#bay2">Skip to bay 2</a></div>
+    </div>
+  </section>
+
+  <!-- ============ BAY 2 ============ -->
+  <section class="bay" id="bay2" aria-labelledby="bay2h">
+    <div class="bayhead fill-teal">
+      <span class="num">2</span>
+      <div class="ht"><span class="kicker">Bay 2</span><h2 id="bay2h">The label stamp</h2><p>Every paragraph starts with a label: the topic sentence.</p></div>
+      <span class="badge hidden" id="badge2"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div class="learn">
+        <svg viewBox="0 0 220 150" aria-hidden="true">
+          <path d="M30 60 L20 40 L100 40 L110 60 Z M190 60 L200 40 L120 40 L110 60 Z" fill="#e6bb84" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/>
+          <rect x="30" y="60" width="160" height="80" rx="4" fill="#cf9558" stroke="#0a2f38" stroke-width="3"/>
+          <rect x="44" y="70" width="132" height="14" rx="2" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/>
+          <rect x="44" y="90" width="120" height="14" rx="2" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/>
+          <rect x="44" y="110" width="126" height="14" rx="2" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/>
+          <g font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="9" fill="#3d5b64"><text x="50" y="80.5">detail</text><text x="50" y="100.5">detail</text><text x="50" y="120.5">detail</text></g>
+          <g transform="rotate(-6 110 18)"><rect x="34" y="4" width="152" height="30" rx="4" fill="#fff1c9" stroke="#0a2f38" stroke-width="3"/>
+          <text x="110" y="18" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="11" fill="#0a2f38">TOPIC SENTENCE</text>
+          <text x="110" y="29" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="8.5" fill="#0a2f38">what this paragraph is about</text></g>
+        </svg>
+        <div>
+          <span class="kicker">Learn a bit</span>
+          <h3>The label on the parcel</h3>
+          <p>The first sentence of a paragraph is usually the <b>topic sentence</b>. Like a label on a parcel, it tells the reader what is inside.</p>
+          <p>The sentences after it add the <b>details</b>.</p>
+        </div>
+      </div>
+      <p class="trylab">Try a bit</p>
+      <p class="tryline">Each parcel has been opened and its sentences muddled. Find the label first, then put the details back in order.</p>
+      <div class="tabs" id="s2tabs" role="tablist" aria-label="Pick a parcel"></div>
+      <div id="s2main"></div>
+      <div class="fb" id="s2fb" aria-live="polite"></div>
+      <div class="skiprow"><span>Skip anything that is not for you.</span><a href="#bay3">Skip to bay 3</a></div>
+    </div>
+  </section>
+
+  <!-- ============ BAY 3 ============ -->
+  <section class="bay" id="bay3" aria-labelledby="bay3h">
+    <div class="bayhead fill-plum">
+      <span class="num">3</span>
+      <div class="ht"><span class="kicker">Bay 3</span><h2 id="bay3h">The chopping desk</h2><p>A wall of words, and a cleaver. Chop where something changes.</p></div>
+      <span class="badge hidden" id="badge3"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div class="learn">
+        <svg viewBox="0 0 220 150" aria-hidden="true">
+          <rect x="8" y="12" width="190" height="50" rx="8" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>
+          <g stroke="#0a2f38" stroke-width="2" stroke-linecap="round" opacity=".5"><path d="M20 26 h160 M20 37 h150 M20 48 h110"/></g>
+          <g transform="rotate(2 110 112)"><rect x="18" y="88" width="190" height="50" rx="8" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>
+          <g stroke="#0a2f38" stroke-width="2" stroke-linecap="round" opacity=".5"><path d="M30 102 h150 M30 113 h160 M30 124 h90"/></g>
+          <rect x="22" y="94" width="34" height="12" rx="3" fill="#ffc247" stroke="#0a2f38" stroke-width="1.5"/><text x="39" y="103" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="8" fill="#0a2f38">LATER</text></g>
+          <path d="M4 75 H216" stroke="#7b4b8f" stroke-width="3" stroke-dasharray="7 5"/>
+          <g transform="translate(148,30) rotate(-14)"><rect x="12" y="-18" width="10" height="20" rx="3" fill="#8a5230" stroke="#0a2f38" stroke-width="2.5"/><path d="M-4 0 H38 V36 L-4 44 Z" fill="#dfe6e8" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/><circle cx="4" cy="9" r="3" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/></g>
+          <text x="60" y="80" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="18" fill="#7b4b8f" stroke="#fffdf8" stroke-width="4" paint-order="stroke">CHOP!</text>
+        </svg>
+        <div>
+          <span class="kicker">Learn a bit</span>
+          <h3>TiPToP: when to chop</h3>
+          <p>Start a <b>new paragraph</b> when one of these changes:</p>
+          <div class="tipgrid"><div><b>Ti</b>time</div><div><b>P</b>place</div><div><b>To</b>topic</div><div><b>P</b>person</div></div>
+        </div>
+      </div>
+      <p class="trylab">Try a bit</p>
+      <p class="tryline">This writer forgot to use paragraphs. Tap a dashed gap where you think a new paragraph should start. If you are right, chop!</p>
+      <div class="tabs" id="s3tabs" role="tablist" aria-label="Pick a text"></div>
+      <div class="chopbar" id="s3bar"></div>
+      <div class="wall" id="s3wall"></div>
+      <div class="fb" id="s3fb" aria-live="polite"></div>
+      <div class="btnrow"><button type="button" class="btn btn-quiet" id="s3show">Show me the rest</button><button type="button" class="btn btn-quiet" id="s3glue">Glue it back together</button></div>
+      <div class="skiprow"><span>No chopping today? No problem.</span><a href="#bay4">Skip to bay 4</a></div>
+    </div>
+  </section>
+
+  <!-- ============ BAY 4 ============ -->
+  <section class="bay" id="bay4" aria-labelledby="bay4h">
+    <div class="bayhead fill-yellow">
+      <span class="num">4</span>
+      <div class="ht"><span class="kicker">Bay 4</span><h2 id="bay4h">Linking lane</h2><p>Couple your paragraphs together so the writing flows.</p></div>
+      <span class="badge hidden" id="badge4"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div class="learn">
+        <svg viewBox="0 0 220 150" aria-hidden="true">
+          <rect x="8" y="30" width="84" height="64" rx="6" fill="#d9a066" stroke="#0a2f38" stroke-width="3"/>
+          <rect x="128" y="30" width="84" height="64" rx="6" fill="#c58a4c" stroke="#0a2f38" stroke-width="3"/>
+          <g stroke="#0a2f38" stroke-width="1.6" opacity=".6" stroke-linecap="round"><path d="M18 46 h64 M18 56 h56 M18 66 h60 M18 76 h44 M138 46 h64 M138 56 h56 M138 66 h60 M138 76 h40"/></g>
+          <rect x="86" y="54" width="20" height="14" rx="7" fill="none" stroke="#0a2f38" stroke-width="4"/>
+          <rect x="114" y="54" width="20" height="14" rx="7" fill="none" stroke="#0a2f38" stroke-width="4"/>
+          <rect x="99" y="56" width="22" height="10" rx="5" fill="none" stroke="#ef7724" stroke-width="4"/>
+          <g transform="rotate(-8 110 112)"><path d="M72 100 H150 L160 112 L150 124 H72 Z" fill="#ffc247" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><circle cx="80" cy="112" r="3.5" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/>
+          <text x="117" y="117" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="13" fill="#0a2f38">However,</text></g>
+          <path d="M110 70 Q112 86 112 98" fill="none" stroke="#0a2f38" stroke-width="2" stroke-dasharray="3 3"/>
+          <g font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="10" fill="#0a2f38"><text x="50" y="22" text-anchor="middle">PARAGRAPH 1</text><text x="170" y="22" text-anchor="middle">PARAGRAPH 2</text></g>
+        </svg>
+        <div>
+          <span class="kicker">Learn a bit</span>
+          <h3>Couplings between parcels</h3>
+          <p>A <b>linking word or phrase</b> at the start of a paragraph tells the reader how it connects to the one before.</p>
+          <p>Some <b>add more</b> (Also). Some <b>change direction</b> (However). Some <b>move time on</b> (Later that day). Some show a <b>result</b> (As a result).</p>
+        </div>
+      </div>
+      <p class="parthead"><span>Part A</span> Tag sorting</p>
+      <p class="tryline">Tap a luggage tag, then tap the crate for its job.</p>
+      <div class="tagtray" id="s4tray"></div>
+      <div class="crates" id="s4crates"></div>
+      <div class="fb" id="s4fba" aria-live="polite"></div>
+      <p class="parthead"><span>Part B</span> Couple the review</p>
+      <p class="tryline">A review of a trip to Roarsome Valley dinosaur park. Tap a coupling, then tap a linking phrase to fit it. Some couplings take more than one.</p>
+      <div class="lane" id="s4lane"></div>
+      <div class="chiptray" id="s4chips"></div>
+      <div class="fb" id="s4fbb" aria-live="polite"></div>
+      <div class="skiprow"><span>Skip it if it is not for you.</span><a href="#bay5">Skip to bay 5</a></div>
+    </div>
+  </section>
+
+  <!-- ============ BAY 5 ============ -->
+  <section class="bay" id="bay5" aria-labelledby="bay5h">
+    <div class="bayhead fill-bright">
+      <span class="num">5</span>
+      <div class="ht"><span class="kicker">Bay 5</span><h2 id="bay5h">The planning shelf</h2><p>Label the boxes before you pack them.</p></div>
+      <span class="badge hidden" id="badge5"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div class="learn">
+        <svg viewBox="0 0 220 150" aria-hidden="true">
+          <rect x="4" y="112" width="212" height="12" fill="#8a5230" stroke="#0a2f38" stroke-width="3"/>
+          <path d="M20 124 V146 M200 124 V146" stroke="#0a2f38" stroke-width="5"/>
+          <g stroke="#0a2f38" stroke-width="3"><rect x="12" y="60" width="60" height="52" rx="4" fill="#d9a066"/><rect x="80" y="52" width="60" height="60" rx="4" fill="#c58a4c"/><rect x="148" y="66" width="60" height="46" rx="4" fill="#e6bb84"/></g>
+          <g stroke="#0a2f38" stroke-width="1.5"><rect x="18" y="70" width="48" height="16" rx="2" fill="#fffdf8"/><rect x="86" y="62" width="48" height="16" rx="2" fill="#fffdf8"/><rect x="154" y="76" width="48" height="16" rx="2" fill="#fffdf8"/></g>
+          <g font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="8.5" fill="#0a2f38" text-anchor="middle"><text x="42" y="81">1 MORNING</text><text x="110" y="73">2 AFTERNOON</text><text x="178" y="87">3 EVENING</text></g>
+          <g transform="rotate(8 170 28)"><rect x="140" y="4" width="56" height="44" rx="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M148 16 h40 M148 26 h34 M148 36 h38" stroke="#007291" stroke-width="2.5" stroke-linecap="round"/></g>
+          <path d="M40 30 q20 -22 46 -6" fill="none" stroke="#ef7724" stroke-width="3" stroke-linecap="round"/><path d="M80 18 l7 6 l-9 3" fill="none" stroke="#ef7724" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <span class="kicker">Learn a bit</span>
+          <h3>Plan the boxes first</h3>
+          <p>Before writing, decide what each paragraph will be about. Give each box a <b>label</b>, put them in a sensible <b>order</b>, and jot a few <b>ideas</b> in each.</p>
+          <p>Notes are fine here. Nobody writes full sentences on a plan.</p>
+        </div>
+      </div>
+      <p class="trylab">Try a bit</p>
+      <p class="tryline">Pick something to write about. You can change anything on the plan whenever you like.</p>
+      <div class="picks" id="s5picks"></div>
+      <div id="s5main"></div>
+      <div class="fb" id="s5fb" aria-live="polite"></div>
+      <div class="skiprow"><span>Rather skip the plan? Bay 6 has ready made plans too.</span><a href="#bay6">Skip to bay 6</a></div>
+    </div>
+  </section>
+
+  <!-- ============ BAY 6 ============ -->
+  <section class="bay" id="bay6" aria-labelledby="bay6h">
+    <div class="bayhead fill-ink">
+      <span class="num">6</span>
+      <div class="ht"><span class="kicker">Bay 6</span><h2 id="bay6h">Pack and post</h2><p>Write your own paragraphs, one box at a time.</p></div>
+      <span class="badge hidden" id="badge6"></span>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <p class="tryline">Each box is one paragraph. Start with a label sentence, keep to the box's idea, and link it to the box before. The stamps light up as you write. Nothing here is marked, it just gives you hints.</p>
+      <div id="s6main"></div>
+      <div class="fb" id="s6fb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ============ SEND ============ -->
+  <section class="bay sendbay" id="sendbay" aria-labelledby="sendh">
+    <div class="bayhead fill-orange">
+      <span class="num">&#9993;</span>
+      <div class="ht"><span class="kicker">Dispatch</span><h2 id="sendh">Send it to Jay</h2><p>Only if you want to. It sends what you tried and anything you wrote.</p></div>
+    </div>
+    <div class="tape"></div>
+    <div class="baybody">
+      <div id="sendHost"></div>
+      <div class="btnrow"><button type="button" class="btn btn-quiet resetb" id="resetBtn">Start again</button></div>
+      <p class="smallnote" id="resetMsg">Your progress stays saved on this device.</p>
+    </div>
+  </section>
+
+  <a class="backlink" href="/practice/#english-standard">Back to English</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.paragraph-sort.v1", WHOKEY = "base5.who.v1";
+var reduce = false; try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" }[c] }) }
+function later(fn, ms){ return setTimeout(fn, reduce ? 0 : ms) }
+function keys(o){ return Object.keys(o || {}) }
+function pick(a){ return a[Math.floor(Math.random() * a.length)] }
+function fb(id, kind, html){ var e = $(id); e.className = "fb " + kind; e.innerHTML = html }
+function clearFb(id){ var e = $(id); e.className = "fb"; e.innerHTML = "" }
+function restart(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls) }
+
+/* ---------------- state ---------------- */
+function blank(){ return { tried:{}, looking:false, s1:{ round:0, r:{} }, s2:{ cur:0, p:{}, mc:{} }, s3:{ cur:0, t:{} }, s4:{ sort:{}, sortMiss:{}, gaps:{}, gapTries:{} }, s5:{ piece:"", title:"", boxes:[], seq:0 }, s6:{ texts:{}, posted:false } } }
+var st = blank();
+try{
+  var raw = localStorage.getItem(STORE);
+  if(raw){ var o = JSON.parse(raw); if(o && typeof o === "object"){ var b0 = blank(); keys(b0).forEach(function(k){ if(o[k] !== undefined && typeof o[k] === typeof b0[k]) b0[k] = o[k] }); st = b0 } }
+}catch(e){}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+function mark(n){ st.tried[n] = true; save(); drawFloor() }
+
+/* ---------------- little pictures ---------------- */
+var IC = {
+  tank:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="10" width="38" height="30" rx="3" fill="#bfe6f0" stroke="#0a2f38" stroke-width="3"/><path d="M6 18 q6-4 12 0 t12 0 t12 0" fill="none" stroke="#007291" stroke-width="2.5"/><circle cx="14" cy="28" r="2.5" fill="#fffdf8" stroke="#007291" stroke-width="1.5"/><circle cx="19" cy="23" r="1.8" fill="#fffdf8" stroke="#007291" stroke-width="1.5"/><path d="M24 35 q7-9 14 0 z" fill="#f2a7b8" stroke="#0a2f38" stroke-width="2"/></svg>',
+  food:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 24 h38 q-2 17 -19 17 q-17 0 -19 -17z" fill="#ef7724" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><path d="M13 21 q4 -8 8 -2 t8 -2 t7 0" fill="none" stroke="#c96a7a" stroke-width="4" stroke-linecap="round"/></svg>',
+  heart:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 41 C8 31 3 21 9 13 C14 7 21 9 24 15 C27 9 34 7 39 13 C45 21 40 31 24 41Z" fill="#e05a6b" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/></svg>',
+  bus:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="11" width="42" height="23" rx="5" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><rect x="8" y="15" width="9" height="8" fill="#bfe6f0" stroke="#0a2f38" stroke-width="2"/><rect x="20" y="15" width="9" height="8" fill="#bfe6f0" stroke="#0a2f38" stroke-width="2"/><rect x="32" y="15" width="9" height="8" fill="#bfe6f0" stroke="#0a2f38" stroke-width="2"/><circle cx="13" cy="36" r="4.5" fill="#0a2f38"/><circle cx="35" cy="36" r="4.5" fill="#0a2f38"/></svg>',
+  dino:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 34 Q9 24 20 24 L27 24 Q29 12 37 10 Q44 9 44 15 Q42 18 38 18 L36 26 Q38 34 34 37 L33 44 L28 44 L28 38 L20 38 L18 44 L13 44 L13 37 Q7 37 4 34Z" fill="#4f9b7a" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/><circle cx="39" cy="13" r="1.6" fill="#0a2f38"/></svg>',
+  shop:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 17 h32 l-3 26 h-26z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><path d="M17 21 v-7 a7 7 0 0 1 14 0 v7" fill="none" stroke="#0a2f38" stroke-width="3"/></svg>',
+  pet:'<svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="31" rx="10" ry="9" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/><circle cx="11" cy="19" r="5" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/><circle cx="20" cy="11" r="5" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/><circle cx="29" cy="11" r="5" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/><circle cx="37" cy="19" r="5" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/></svg>',
+  sun:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="9" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><g stroke="#0a2f38" stroke-width="3" stroke-linecap="round"><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/></g></svg>',
+  star:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 L30 17 L44 18 L33 28 L37 42 L24 34 L11 42 L15 28 L4 18 L18 17 Z" fill="#ffc247" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/></svg>',
+  pen:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40 L12 28 L34 6 L42 14 L20 36 Z" fill="#00a6c9" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><path d="M8 40 L12 28 L20 36 Z" fill="#f3dca8" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/></svg>'
+};
+var BI = {
+  b1:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="4" width="16" height="12" rx="2" fill="#efc78f" stroke="#0a2f38" stroke-width="2.5"/><rect x="24" y="9" width="14" height="10" rx="2" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><rect x="4" y="20" width="40" height="24" rx="3" fill="#b97c40" stroke="#0a2f38" stroke-width="3"/><path d="M4 28 h40 M4 36 h40" stroke="#0a2f38" stroke-width="2"/></svg>',
+  b2:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="10" r="7" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2.5"/><rect x="20" y="16" width="8" height="11" fill="#c58a4c" stroke="#0a2f38" stroke-width="2.5"/><rect x="9" y="27" width="30" height="8" rx="2" fill="#0a2f38"/><rect x="7" y="38" width="34" height="6" rx="2" fill="#c4321a"/></svg>',
+  b3:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="19" y="2" width="10" height="15" rx="3" fill="#8a5230" stroke="#0a2f38" stroke-width="2.5"/><path d="M7 16 H41 V40 L7 45 Z" fill="#dfe6e8" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><circle cx="14" cy="23" r="2.5" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/></svg>',
+  b4:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="16" width="24" height="15" rx="7.5" fill="none" stroke="#0a2f38" stroke-width="4.5"/><rect x="21" y="18" width="24" height="15" rx="7.5" fill="none" stroke="#ef7724" stroke-width="4.5"/></svg>',
+  b5:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="6" width="32" height="40" rx="3" fill="#8a5230" stroke="#0a2f38" stroke-width="2.5"/><rect x="12" y="11" width="24" height="31" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/><rect x="17" y="3" width="14" height="7" rx="2" fill="#c9d3d6" stroke="#0a2f38" stroke-width="2"/><g fill="#d9a066" stroke="#0a2f38" stroke-width="1.5"><rect x="15" y="15" width="8" height="6"/><rect x="15" y="24" width="8" height="6"/><rect x="15" y="33" width="8" height="6"/></g><path d="M26 18h7M26 27h7M26 36h7" stroke="#007291" stroke-width="2"/></svg>',
+  b6:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="16" width="30" height="26" rx="3" fill="#d9a066" stroke="#0a2f38" stroke-width="3"/><rect x="16" y="17" width="7" height="24" fill="#f3dca8"/><path d="M26 30 L40 6 L46 10 L32 34 L25 37 Z" fill="#00a6c9" stroke="#0a2f38" stroke-width="2.5" stroke-linejoin="round"/></svg>'
+};
+var POSTSTAMP = '<svg class="pstamp" viewBox="0 0 34 40" aria-hidden="true"><rect x="2" y="2" width="30" height="36" fill="#fffdf8" stroke="#0a2f38" stroke-width="2" stroke-dasharray="3 2"/><rect x="6" y="6" width="22" height="28" fill="#00a6c9"/><circle cx="17" cy="18" r="6" fill="#a3afbc" stroke="#0a2f38" stroke-width="1.5"/><circle cx="15" cy="17" r="1.2" fill="#ef7724"/><path d="M11 18 l-3 1 l3 1" fill="#e8d9bf" stroke="#0a2f38" stroke-width="1"/></svg>';
+var SCISSORS = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 7.5 L20 18 M8.5 16.5 L20 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+var CLEAVER = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="1" width="4" height="7" rx="1.5" fill="#8a5230" stroke="#0a2f38" stroke-width="1.2"/><path d="M4 7 H20 V19 L4 22 Z" fill="#dfe6e8" stroke="#0a2f38" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+var BLADE = '<svg viewBox="0 0 64 80" aria-hidden="true"><rect x="26" y="1" width="12" height="26" rx="4" fill="#8a5230" stroke="#0a2f38" stroke-width="3"/><path d="M8 24 H56 V68 L8 78 Z" fill="#dfe6e8" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><path d="M14 34 H48" stroke="#fffdf8" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="44" r="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/></svg>';
+
+/* ---------------- who is this ---------------- */
+var STUDENTS = {
+  JT:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], start:[1], next:[3] },
+  LW:{ m:["I can use paragraphs to group sentences that belong together.", "I can start each paragraph with a clear topic sentence."], start:[1], next:[2] },
+  EGW:{ m:["I can organise my ideas into clear paragraphs.", "I can link my paragraphs so my writing flows from one idea to the next."], start:[1], next:[4, 6] },
+  LP:{ m:["I can organise my writing into clear paragraphs.", "I can use linking words and phrases to connect ideas between my paragraphs."], start:[1], next:[4, 6] },
+  LC:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], start:[1], next:[3] },
+  HK:{ m:["I can use paragraphs to group sentences that belong together.", "I can plan my writing in sections before I write it in paragraphs."], start:[1], next:[5, 6] }
+};
+var ORDER = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+function getWho(){ try{ return (localStorage.getItem(WHOKEY) || "").trim().toUpperCase() }catch(e){ return "" } }
+function setWho(v){ try{ if(v) localStorage.setItem(WHOKEY, v); else localStorage.removeItem(WHOKEY) }catch(e){} }
+function badgeFor(n){ var S = STUDENTS[getWho()]; if(!S) return ""; if(S.start.indexOf(n) >= 0) return "start"; if(S.next.indexOf(n) >= 0) return "next"; return "" }
+function drawWho(){
+  var w = getWho(), known = STUDENTS[w] ? w : "";
+  $("whochips").innerHTML = ORDER.map(function(k){ return '<button type="button" class="whochip" data-w="' + k + '" aria-pressed="' + (known === k) + '">' + k + '</button>' }).join("") +
+    '<button type="button" class="whochip look" data-w="" aria-pressed="' + (!known && st.looking) + '">Just looking</button>';
+  if(known){
+    var S = STUDENTS[known];
+    $("whoms").innerHTML = '<ul class="mslist"><li><span class="badge">Good place to start</span> ' + esc(S.m[0]) + ' <span class="where">Bay ' + S.start.join(" and ") + '</span></li>' +
+      '<li><span class="badge next">Your next step</span> ' + esc(S.m[1]) + ' <span class="where">Bay ' + S.next.join(" and ") + '</span></li></ul>' +
+      '<p class="smallnote">Every bay stays open, in any order. These are only suggestions.</p>';
+  } else $("whoms").innerHTML = st.looking ? '<p class="smallnote">No problem. Wander into any bay you like.</p>' : "";
+  for(var n = 1; n <= 6; n++){
+    var t = badgeFor(n), bd = $("badge" + n);
+    bd.className = "badge" + (t === "next" ? " next" : "") + (t ? "" : " hidden");
+    bd.textContent = t === "start" ? "Good place to start" : (t === "next" ? "Your next step" : "");
+  }
+  drawFloor();
+}
+$("whochips").addEventListener("click", function(e){
+  var b = e.target.closest(".whochip"); if(!b) return;
+  var w = b.dataset.w; setWho(w); st.looking = !w; save(); drawWho();
+  var inp = document.getElementById("b5who"); if(inp) inp.value = w;
+});
+
+/* ---------------- floor plan ---------------- */
+var BAYS = [[1, "The sorting belt", "Sort sentences into paragraphs"], [2, "The label stamp", "Find the topic sentence"], [3, "The chopping desk", "Chop where TiPToP changes"], [4, "Linking lane", "Link paragraphs together"], [5, "The planning shelf", "Plan your own boxes"], [6, "Pack and post", "Write your own paragraphs"]];
+function drawFloor(){
+  $("floor").innerHTML = BAYS.map(function(b){
+    var n = b[0], t = badgeFor(n), s = status(n);
+    return '<a class="baytile' + (st.tried[n] ? " tried" : "") + '" href="#bay' + n + '">' + BI["b" + n] +
+      '<span class="bt"><span class="bn">Bay ' + n + '</span><b>' + b[1] + '</b><span class="st">' + (s || b[2]) + '</span></span>' +
+      (t ? '<span class="badge' + (t === "next" ? " next" : "") + '">' + (t === "start" ? "Start here" : "Next step") + '</span>' : "") +
+      (st.tried[n] ? '<span class="tstamp">Tried</span>' : "") + '</a>';
+  }).join("");
+}
+function status(n){
+  var c;
+  if(n === 1){ c = 0; R1.forEach(function(r){ var s = st.s1.r[r.id]; if(s) c += keys(s.sorted).length }); return c ? c + " of 18 parcels sorted" : "" }
+  if(n === 2){ c = 0; P2.forEach(function(p){ var s = st.s2.p[p.id]; if(s && s.topic) c++ }); var m = keys(st.s2.mc).length; return (c || m) ? c + " of 3 labels found" : "" }
+  if(n === 3){ c = 0; T3.forEach(function(t){ var s = st.s3.t[t.id]; if(s) c += s.chops.length + s.shown.length }); return c ? c + " of 7 chops made" : "" }
+  if(n === 4){ c = keys(st.s4.sort).length + keys(st.s4.gaps).length; return c ? c + " of 16 links placed" : "" }
+  if(n === 5){ c = st.s5.boxes.filter(function(b){ return b.label.trim() }).length; return st.s5.piece ? c + " boxes labelled" : "" }
+  if(n === 6){ c = 0; st.s5.boxes.forEach(function(b){ if((st.s6.texts[b.id] || "").trim()) c++ }); return c ? c + " paragraph" + (c === 1 ? "" : "s") + " written" + (st.s6.posted ? ", posted" : "") : "" }
+  return "";
+}
+
+/* ================= BAY 1: sorting belt ================= */
+var R1 = [
+  { id:"axo", tab:"Axolotl guide", title:"A guide to looking after a pet axolotl",
+    bins:[["The tank", "tank"], ["Food", "food"], ["Handling and health", "heart"]],
+    items:[
+      ["Axolotls need a long tank with plenty of room to swim.", 0, "Room to swim is about where it lives. Which bin is about its home?"],
+      ["The water should stay cool, below about 20 degrees Celsius.", 0, "Water temperature is about setting up its home, not about food."],
+      ["Avoid small gravel on the bottom, because an axolotl can swallow it.", 0, "Gravel goes on the bottom of something. Where would that be?"],
+      ["Axolotls are meat eaters, and earthworms are a favourite.", 1, "Earthworms are something it eats. Which bin is about eating?"],
+      ["Adults usually only need feeding every two or three days.", 1, "Feeding is the clue word here."],
+      ["Any food they leave should be taken out, so it does not rot in the water.", 1, "This one mentions water, but what is it really about? The leftover food."],
+      ["Their skin is very delicate, so it is best not to pick them up.", 2, "Picking it up is handling. Which bin is about handling?"],
+      ["If an axolotl loses a leg, it can grow a whole new one.", 2, "Losing a leg and healing is about its body and health."],
+      ["Gills that curl forward can be a sign that an axolotl is stressed.", 2, "A sign of stress is about how well the axolotl is. That is health."]
+    ], order:[3, 0, 6, 4, 2, 7, 1, 8, 5] },
+  { id:"dino", tab:"Dinosaur park review", title:"A review of a trip to Roarsome Valley dinosaur park",
+    bins:[["Getting there", "bus"], ["The dinosaurs", "dino"], ["Food and the gift shop", "shop"]],
+    items:[
+      ["The coach journey took nearly two hours, and the traffic was terrible.", 0, "A coach journey happens before you arrive. Which bin is about the trip there?"],
+      ["We were dropped off at the bottom of a very steep hill.", 0, "Being dropped off is part of arriving."],
+      ["At least the signs from the motorway were easy to follow.", 0, "Signs from the motorway help you get somewhere."],
+      ["The model Triceratops was about eight metres long, as long as two cars.", 1, "Triceratops is the big clue."],
+      ["A roaring T rex model moved its head, and a little boy next to me burst into tears.", 1, "A T rex model is one of the attractions. Which bin is about those?"],
+      ["A sign explained that Stegosaurus died out millions of years before T rex was around.", 1, "Two dinosaurs in one sentence. Which bin fits?"],
+      ["The cafe sold dino nuggets and chips, which were tasty but a bit cold.", 2, "Dino nuggets sounds like a dinosaur, but it is something to eat."],
+      ["Everything in the gift shop cost far too much.", 2, "Gift shop is right there in the sentence."],
+      ["I still bought a glow in the dark fossil keyring.", 2, "A fossil sounds like dinosaurs, but where do you buy a keyring?"]
+    ], order:[4, 7, 0, 3, 6, 1, 8, 5, 2] }
+];
+var PRAISE = ["Sorted.", "Into the bin it goes.", "Lovely sorting.", "Spot on.", "Thunk. Perfect.", "Neatly done."];
+function s1st(){ var r = R1[st.s1.round]; return st.s1.r[r.id] || (st.s1.r[r.id] = { sorted:{}, first:{}, tries:0 }) }
+function s1next(){ var R = R1[st.s1.round], S = s1st(); for(var k = 0; k < R.order.length; k++) if(S.sorted[R.order[k]] === undefined) return R.order[k]; return -1 }
+function s1render(arrive){
+  var R = R1[st.s1.round], S = s1st(), idx = s1next(), done = keys(S.sorted).length, n = R.items.length;
+  $("s1tabs").innerHTML = R1.map(function(r, i){ var s = st.s1.r[r.id], c = s ? keys(s.sorted).length : 0; return '<button type="button" class="tab" role="tab" data-r="' + i + '" aria-selected="' + (i === st.s1.round) + '">' + esc(r.tab) + '<span class="tc">' + c + '/' + r.items.length + '</span></button>' }).join("");
+  $("s1title").innerHTML = "<b>On the belt:</b> " + esc(R.title);
+  var belt = '<span class="beltcount">' + (idx < 0 ? "All " + n + " sorted" : "Parcel " + (done + 1) + " of " + n) + '</span>';
+  if(idx < 0) belt += '<div class="beltempty"><b>Belt empty!</b>Every parcel is in a bin. Have a look at what you made below.</div>';
+  else belt += '<span class="belthint">drag me, or tap a bin</span><div class="parcel' + (arrive ? " arrive" : "") + '" id="s1parcel" tabindex="0" role="group" aria-label="Parcel on the belt"><div class="plabel">' + esc(R.items[idx][0]) + '</div>' + POSTSTAMP + '</div>';
+  $("s1belt").innerHTML = belt;
+  $("s1bins").innerHTML = R.bins.map(function(b, bi){
+    var c = 0; keys(S.sorted).forEach(function(k){ if(S.sorted[k] === bi) c++ });
+    var stack = ""; for(var j = 0; j < c; j++) stack += "<i></i>";
+    return '<button type="button" class="bin" data-b="' + bi + '"' + (idx < 0 ? " disabled" : "") + ' aria-label="Send to the ' + esc(b[0]) + ' bin, ' + c + ' in so far"><span class="bplate">' + IC[b[1]] + esc(b[0]) + '</span><span class="stack">' + stack + '</span><span class="bcount">' + c + ' in</span></button>';
+  }).join("");
+  var out = "";
+  if(idx < 0){
+    var first = keys(S.first).filter(function(k){ return S.first[k] }).length;
+    out = '<p class="trylab" style="margin-top:18px">Unpacked</p><p class="tryline">Three bins, three paragraphs. Each one is about one thing, so a reader always knows where they are. (' + first + ' of ' + n + ' went in on the first go.)</p><div class="unpacked">' +
+      R.bins.map(function(b, bi){ var s = R.items.filter(function(it){ return it[1] === bi }).map(function(it){ return esc(it[0]) }).join(" "); return '<div class="para"><span class="kicker">Paragraph ' + (bi + 1) + ': ' + esc(b[0]) + '</span><p>' + s + '</p></div>' }).join("") +
+      '</div><div class="btnrow">' + (st.s1.round === 0 ? '<button type="button" class="btn" data-go="1">Next pile: the dinosaur park</button>' : '<button type="button" class="btn" data-go="0">Back to the axolotl pile</button>') + '<button type="button" class="btn btn-quiet" data-again="1">Sort this pile again</button></div>';
+  }
+  $("s1out").innerHTML = out;
+}
+function s1drop(bi, dx, dy){
+  var R = R1[st.s1.round], S = s1st(), idx = s1next(); if(idx < 0) return;
+  var it = R.items[idx], parcel = $("s1parcel"), bin = document.querySelector('#s1bins .bin[data-b="' + bi + '"]');
+  mark(1);
+  if(it[1] === bi){
+    if(S.first[idx] === undefined) S.first[idx] = true;
+    S.sorted[idx] = bi; save();
+    if(parcel && bin){
+      var pr = parcel.getBoundingClientRect(), br = bin.getBoundingClientRect();
+      var tx = (dx || 0) + (br.left + br.width / 2) - (pr.left + pr.width / 2), ty = (dy || 0) + (br.top + br.height / 2) - (pr.top + pr.height / 2);
+      parcel.classList.remove("dragging");
+      parcel.style.transform = "translate(" + tx + "px," + ty + "px) scale(.12) rotate(14deg)";
+      parcel.style.opacity = "0";
+      restart(bin, "gulp");
+      var sp = document.createElement("span"); sp.className = "stamp"; sp.textContent = "Sorted"; bin.appendChild(sp);
+    }
+    fb("s1fb", "ok", "<b>" + pick(PRAISE) + "</b> It goes with the other sentences about " + esc(R.bins[bi][0].toLowerCase()) + ".");
+    later(function(){ s1render(true); drawFloor() }, 500);
+  } else {
+    if(S.first[idx] === undefined) S.first[idx] = false;
+    S.tries++; save();
+    if(parcel){ parcel.classList.remove("dragging"); parcel.style.transform = ""; later(function(){ restart(parcel, "shake") }, 200) }
+    if(bin) restart(bin, "shake");
+    fb("s1fb", "nope", "<b>Not that bin.</b> " + esc(it[2]) + " Have another go.");
+  }
+}
+$("s1tabs").addEventListener("click", function(e){ var t = e.target.closest(".tab"); if(!t) return; st.s1.round = +t.dataset.r; save(); clearFb("s1fb"); s1render(true) });
+$("s1bins").addEventListener("click", function(e){ var b = e.target.closest(".bin"); if(!b || b.disabled) return; s1drop(+b.dataset.b) });
+$("s1out").addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]"), a = e.target.closest("[data-again]");
+  if(g){ st.s1.round = +g.dataset.go; save(); clearFb("s1fb"); s1render(true); $("s1tabs").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" }) }
+  if(a){ delete st.s1.r[R1[st.s1.round].id]; save(); clearFb("s1fb"); s1render(true); drawFloor() }
+});
+/* drag a parcel onto a bin */
+var drag = null;
+function binAt(x, y){ var bs = document.querySelectorAll("#s1bins .bin"); for(var i = 0; i < bs.length; i++){ var r = bs[i].getBoundingClientRect(); if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return bs[i] } return null }
+$("s1belt").addEventListener("pointerdown", function(e){
+  var p = e.target.closest(".parcel"); if(!p) return;
+  drag = { id:e.pointerId, x:e.clientX, y:e.clientY, dx:0, dy:0, moved:false, el:p };
+  try{ p.setPointerCapture(e.pointerId) }catch(err){}
+});
+document.addEventListener("pointermove", function(e){
+  if(!drag || e.pointerId !== drag.id) return;
+  drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y;
+  if(!drag.moved && Math.abs(drag.dx) + Math.abs(drag.dy) > 6){ drag.moved = true; drag.el.classList.add("dragging") }
+  if(drag.moved){
+    drag.el.style.transform = "translate(" + drag.dx + "px," + drag.dy + "px) rotate(-3deg)";
+    var hb = binAt(e.clientX, e.clientY);
+    Array.prototype.forEach.call(document.querySelectorAll("#s1bins .bin"), function(b){ b.classList.toggle("hot", b === hb) });
+  }
+});
+function endDrag(e){
+  if(!drag || e.pointerId !== drag.id) return;
+  var d = drag; drag = null;
+  Array.prototype.forEach.call(document.querySelectorAll("#s1bins .bin"), function(b){ b.classList.remove("hot") });
+  if(!d.moved) return;
+  var b = binAt(e.clientX, e.clientY);
+  if(b) s1drop(+b.dataset.b, d.dx, d.dy);
+  else { d.el.classList.remove("dragging"); d.el.style.transform = ""; fb("s1fb", "tell", "Drop it right on top of a bin, or just tap the bin instead.") }
+}
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+
+/* ================= BAY 2: label stamp ================= */
+var P2 = [
+  { id:"tea", tab:"Parcel 1",
+    s:["Making a good cup of tea only takes a few simple steps.", "First, boil the kettle and put a tea bag in a mug.", "Next, pour in the hot water and leave it for about three minutes.", "Finally, take the tea bag out and add milk if you like it."],
+    mix:[2, 0, 3, 1], clue:"The words <b>First</b>, <b>Next</b> and <b>Finally</b> give the order away." },
+  { id:"pig", tab:"Parcel 2",
+    s:["Pigeons are much cleverer than most people think.", "For a start, they can find their way home from places they have never been before.", "They can also learn to recognise different human faces.", "Some have even been trained to tell apart paintings by different artists."],
+    mix:[3, 1, 0, 2], clue:"<b>For a start</b> opens the list, <b>also</b> adds to it, and <b>even</b> saves the most surprising fact for last." },
+  { id:"trip", tab:"Parcel 3",
+    s:["Our class trip to the seaside went wrong from the very start.", "The minibus broke down before we had even left the car park.", "By the time a new one arrived, it had started to pour with rain.", "When we finally reached the beach, the tide was in and there was no sand left to sit on."],
+    mix:[1, 3, 0, 2], clue:"Follow the trip in time: <b>before we had even left</b>, then <b>by the time a new one arrived</b>, then <b>when we finally reached the beach</b>." }
+];
+var MC2 = [
+  { body:["Pick a quiet corner, away from busy doors.", "A cardboard box with a soft blanket inside feels cosy and safe.", "Keep fresh water close by, but not right next to the bed."],
+    opts:["There are lots of different pets you could get.", "A new kitten needs a calm, cosy place to sleep.", "Kittens have very sharp claws."], ans:1,
+    why:["That is true, but it is far too big. This paragraph is only about a bed for one kitten.", "Yes. Every sentence after it is about the kitten's sleeping spot, so this label fits the whole parcel.", "True, but nothing in the paragraph is about claws. That label would be on the wrong parcel."] },
+  { body:["Bring a waterproof coat, because the weather on the hills can change quickly.", "Wear boots with a good grip for the rocky paths.", "Pack a drink and a snack for when you reach the top."],
+    opts:["Hills are very big.", "My favourite snack is a cheese sandwich.", "Getting ready properly makes a hill walk much more fun."], ans:2,
+    why:["Hills are big, but the paragraph is not about hills. It is about what to bring.", "A tasty thought, but the paragraph is about getting ready, not about one snack.", "Yes. The coat, the boots and the snack are all about getting ready, so this label covers everything inside."] }
+];
+function s2st(id){ return st.s2.p[id] || (st.s2.p[id] = { topic:false, first:null, wrong:[], order:null, ok:false, firstOrder:null, shown:false }) }
+function s2render(stampNow){
+  var tabs = P2.map(function(p, i){ var s = st.s2.p[p.id]; return '<button type="button" class="tab" role="tab" data-c="' + i + '" aria-selected="' + (st.s2.cur === i) + '">' + p.tab + (s && s.ok ? '<span class="tc">sealed</span>' : "") + '</button>' }).join("");
+  tabs += '<button type="button" class="tab" role="tab" data-c="' + P2.length + '" aria-selected="' + (st.s2.cur === P2.length) + '">Missing labels' + (keys(st.s2.mc).length ? '<span class="tc">' + keys(st.s2.mc).length + '/2</span>' : "") + '</button>';
+  $("s2tabs").innerHTML = tabs;
+  var h = "";
+  if(st.s2.cur < P2.length){
+    var P = P2[st.s2.cur], S = s2st(P.id);
+    if(!S.topic){
+      h += '<p class="steplab"><span class="stepn">Step 1</span>Tap the sentence you think is the <b>label</b>: the one that tells you what the whole paragraph is about.</p>';
+      h += '<div class="openbox"><div class="slips">' + P.mix.map(function(i){ var w = S.wrong.indexOf(i) >= 0; return '<button type="button" class="slip' + (w ? " dim" : "") + '" data-t="' + i + '"><span class="txt">' + esc(P.s[i]) + '</span>' + (w ? '<span class="detailtag">detail</span>' : "") + '</button>' }).join("") + '</div></div>';
+    } else {
+      if(!S.ok) h += '<p class="steplab"><span class="stepn">Step 2</span>Label found. Now use the arrows to put the details in order, then check.</p>';
+      h += '<div class="openbox"><div class="slips"><div class="slip topic"><span class="txt">' + esc(P.s[0]) + '</span><span class="stamp' + (stampNow ? "" : " still") + '">Topic sentence</span></div>';
+      h += S.order.map(function(i, k){
+        if(S.ok) return '<div class="slip done"><span class="txt">' + esc(P.s[i]) + '</span></div>';
+        return '<div class="slip"><span class="ord"><button type="button" class="mv" data-mv="' + k + '" data-d="-1" aria-label="Move up"' + (k === 0 ? " disabled" : "") + '>&uarr;</button><button type="button" class="mv" data-mv="' + k + '" data-d="1" aria-label="Move down"' + (k === S.order.length - 1 ? " disabled" : "") + '>&darr;</button></span><span class="txt">' + esc(P.s[i]) + '</span></div>';
+      }).join("") + '</div></div>';
+      if(!S.ok) h += '<div class="btnrow"><button type="button" class="btn btn-orange" id="s2check">Check the order</button><button type="button" class="btn btn-quiet" id="s2show">Show me</button></div>';
+      else h += '<div class="sealed"><span class="kicker">Read it as one paragraph</span><p><span class="first">' + esc(P.s[0]) + '</span> ' + esc(P.s.slice(1).join(" ")) + '</p></div>' +
+        '<div class="btnrow">' + '<button type="button" class="btn" data-next="1">' + (st.s2.cur < P2.length - 1 ? "Next parcel" : "On to the missing labels") + '</button>' + '<button type="button" class="btn btn-quiet" data-redo="1">Muddle it up again</button></div>';
+    }
+  } else {
+    h += '<p class="steplab">These parcels have lost their labels. Pick the best topic sentence for each one.</p>';
+    MC2.forEach(function(q, qi){
+      var picked = st.s2.mc[qi];
+      h += '<div class="mcq"><div class="openbox"><span class="blanklabel">Label: ?</span><div class="bodytxt">' + esc(q.body.join(" ")) + '</div></div><div class="opts">' +
+        q.opts.map(function(o, oi){ var cls = picked && picked.indexOf(oi) >= 0 ? (oi === q.ans ? " good" : " bad") : ""; return '<button type="button" class="opt' + cls + '" data-q="' + qi + '" data-o="' + oi + '">' + esc(o) + '</button>' }).join("") + '</div>';
+      if(picked && picked.length){ var last = picked[picked.length - 1]; h += '<div class="fb ' + (last === q.ans ? "ok" : "nope") + '">' + (last === q.ans ? "<b>That label fits.</b> " : "<b>Not quite.</b> ") + esc(q.why[last]) + (last === q.ans ? "" : " Have another look.") + '</div>' }
+      h += '</div>';
+    });
+  }
+  $("s2main").innerHTML = h;
+}
+$("s2tabs").addEventListener("click", function(e){ var t = e.target.closest(".tab"); if(!t) return; st.s2.cur = +t.dataset.c; save(); clearFb("s2fb"); s2render() });
+$("s2main").addEventListener("click", function(e){
+  var P = P2[st.s2.cur], S = P ? s2st(P.id) : null, t;
+  if((t = e.target.closest("button.slip")) && S){
+    mark(2);
+    var i = +t.dataset.t;
+    if(i === 0){
+      if(S.first === null) S.first = true;
+      S.topic = true; S.order = P.mix.filter(function(x){ return x !== 0 }); save();
+      s2render(true);
+      fb("s2fb", "ok", "<b>Stamped.</b> That sentence tells us what the whole paragraph is about, so it goes first. The others are details.");
+      drawFloor();
+    } else {
+      if(S.first === null) S.first = false;
+      if(S.wrong.indexOf(i) < 0) S.wrong.push(i); save();
+      s2render();
+      fb("s2fb", "nope", "<b>That one is a detail.</b> It tells us one small thing. The label covers the whole parcel: which sentence could sit on top of all the others?");
+    }
+    return;
+  }
+  if((t = e.target.closest(".mv")) && S){
+    var k = +t.dataset.mv, d = +t.dataset.d, j = k + d, o = S.order;
+    if(j < 0 || j >= o.length) return;
+    var tmp = o[k]; o[k] = o[j]; o[j] = tmp; save(); s2render();
+    var again = document.querySelector('#s2main .mv[data-mv="' + j + '"][data-d="' + d + '"]') || document.querySelector('#s2main .mv[data-mv="' + j + '"]');
+    if(again) again.focus();
+    return;
+  }
+  if(e.target.closest("#s2check") && S){
+    mark(2);
+    var good = S.order.every(function(x, n){ return x === n + 1 });
+    if(S.firstOrder === null) S.firstOrder = good;
+    if(good){ S.ok = true; save(); s2render(); fb("s2fb", "ok", "<b>Sealed.</b> " + P.clue) }
+    else { save(); fb("s2fb", "nope", "<b>Nearly.</b> Read it from the label down. Look for words that show order, like time words or words that add on. Swap a couple and check again, or press Show me.") }
+    drawFloor(); return;
+  }
+  if(e.target.closest("#s2show") && S){ S.order = [1, 2, 3]; S.ok = true; S.shown = true; if(S.firstOrder === null) S.firstOrder = false; save(); s2render(); fb("s2fb", "tell", "Here it is in order. " + P.clue); return }
+  if(e.target.closest("[data-next]")){ st.s2.cur = Math.min(P2.length, st.s2.cur + 1); save(); clearFb("s2fb"); s2render(); return }
+  if(e.target.closest("[data-redo]") && P){ delete st.s2.p[P.id]; save(); clearFb("s2fb"); s2render(); drawFloor(); return }
+  if((t = e.target.closest(".opt"))){
+    mark(2);
+    var qi = +t.dataset.q, oi = +t.dataset.o, arr = st.s2.mc[qi] || (st.s2.mc[qi] = []);
+    if(arr.indexOf(oi) < 0) arr.push(oi); else { arr.splice(arr.indexOf(oi), 1); arr.push(oi) }
+    save(); s2render(); drawFloor();
+  }
+});
+
+/* ================= BAY 3: chopping desk ================= */
+var T3 = [
+  { id:"pidge", tab:"Pidge the pigeon", title:"A day in the life of Pidge the pigeon",
+    s:["At sunrise, Pidge woke up on a ledge high above the railway station.", "She fluffed up her feathers and bobbed her head at the pigeon next door.", "Neither of them said much, because it was very early.",
+       "By mid morning, Pidge had flown down to the market square.", "A man dropped half a sandwich near the fountain, and she got there first.", "Then she drank from a puddle, sucking the water up like a straw.",
+       "Meanwhile, a small boy called Sam was chasing every bird in the square.", "He ran straight at Pidge with his arms flapping.", "His dad told him to leave the birds alone.",
+       "Pigeons are actually very good at spotting danger.", "Their eyes are on the sides of their heads, so they can see almost all the way around.", "Pidge saw Sam coming long before he got close.",
+       "That evening, she flew back to her ledge at the station.", "The trains rumbled below as she tucked her head into her feathers.", "Tomorrow, she would do it all again."],
+    chops:{ 3:["Ti", "Pl"], 6:["Pe"], 9:["To"], 12:["Ti", "Pl"] } },
+  { id:"seed", tab:"The lost parcel", title:"The parcel that went the wrong way",
+    s:["On Monday morning, a parcel of birdseed left the sorting office in Leeds.", "It was meant to reach a house in Bristol the next day.",
+       "By Wednesday, it was sitting on a shelf in a warehouse in Glasgow.", "Nobody there knew how it had got so lost.", "It spent two nights next to a box of rubber ducks.",
+       "Back in Bristol, Mrs Okafor was wondering where her birdseed had got to.", "She rang the sorting office three times.", "The birds in her garden were starting to look very hungry.",
+       "On Friday, the parcel finally turned up at her door, a bit squashed but in one piece.", "Her birds had cleared the lot by teatime."],
+    chops:{ 2:["Ti", "Pl"], 5:["Pe", "Pl"], 8:["Ti"] } }
+];
+var TIP = [["Ti", "Ti", "Time"], ["Pl", "P", "Place"], ["To", "To", "Topic"], ["Pe", "P", "Person"]];
+var TIPYES = { Ti:"Yes, the writing jumps to a new time.", Pl:"Yes, the writing moves to a new place.", To:"Yes, the writing starts on a new idea.", Pe:"Yes, a different person takes the spotlight." };
+var TIPNOT = { Ti:"Not time: the time does not really jump here.", Pl:"Not place: we are still in the same place.", To:"Not topic: it is still the same story or subject.", Pe:"Not person: the same person or animal is still in the spotlight." };
+function s3st(){ var T = T3[st.s3.cur]; return st.s3.t[T.id] || (st.s3.t[T.id] = { chops:[], shown:[], why:{}, miss:0, last:null }) }
+function firstWords(s){ var w = s.split(" "); return w.slice(0, 5).join(" ") + (w.length > 5 ? "..." : "") }
+function s3render(fresh){
+  var T = T3[st.s3.cur], S = s3st(), all = keys(T.chops).length;
+  $("s3tabs").innerHTML = T3.map(function(t, i){ var s = st.s3.t[t.id], c = s ? s.chops.length + s.shown.length : 0; return '<button type="button" class="tab" role="tab" data-c="' + i + '" aria-selected="' + (st.s3.cur === i) + '">' + esc(t.tab) + '<span class="tc">' + c + '/' + keys(t.chops).length + '</span></button>' }).join("");
+  var cuts = S.chops.concat(S.shown).sort(function(a, b){ return a - b }), found = cuts.length, icons = "";
+  for(var k = 0; k < all; k++) icons += CLEAVER.replace("<svg ", '<svg class="' + (k < found ? "on" : "off") + '" ');
+  $("s3bar").innerHTML = '<span>' + esc(T.title) + '</span><span class="cl" aria-hidden="true">' + icons + '</span><span>' + found + ' of ' + all + ' chops</span>';
+  var bounds = [0].concat(cuts).concat([T.s.length]), h = "";
+  for(var b = 0; b < bounds.length - 1; b++){
+    var a = bounds[b], z = bounds[b + 1];
+    if(b > 0) h += chopline(T, S, a);
+    h += '<div class="slab' + (a === fresh ? " fresh" : "") + '">';
+    for(var i = a; i < z; i++){
+      if(i > a) h += '<button type="button" class="cut" data-i="' + i + '" aria-label="Chop here, before: ' + esc(firstWords(T.s[i])) + '">' + SCISSORS + '</button>';
+      h += '<span class="sent">' + esc(T.s[i]) + '</span>';
+    }
+    h += '</div>';
+  }
+  if(found === all) h += '<div class="fb ok"><b>Every chop found.</b> ' + all + ' chops make ' + (all + 1) + ' paragraphs. Each new one starts when the time, place, topic or person changes.</div>';
+  $("s3wall").innerHTML = h;
+}
+function chopline(T, S, i){
+  var picks = S.why[i] || [], acc = T.chops[i], shown = S.shown.indexOf(i) >= 0;
+  var h = '<div class="chopline"><span class="cl-lab">' + SCISSORS + (shown ? "Chop shown here." : "Chopped!") + ' What changed?</span><span class="tips">';
+  TIP.forEach(function(t){ var p = picks.indexOf(t[0]) >= 0, ok = acc.indexOf(t[0]) >= 0; h += '<button type="button" class="tip' + (p ? (ok ? " yes" : " notq") : "") + '" data-c="' + i + '" data-k="' + t[0] + '" aria-pressed="' + p + '"><b>' + t[1] + '</b> ' + t[2] + '</button>' });
+  h += '</span>';
+  if(S.last && S.last[0] === i){ var l = S.last[1]; h += '<span class="tipsay">' + (acc.indexOf(l) >= 0 ? TIPYES[l] : TIPNOT[l]) + (acc.indexOf(l) >= 0 && picks.filter(function(x){ return acc.indexOf(x) >= 0 }).length < acc.length ? " Anything else change here?" : "") + '</span>' }
+  return h + '</div>';
+}
+$("s3tabs").addEventListener("click", function(e){ var t = e.target.closest(".tab"); if(!t) return; st.s3.cur = +t.dataset.c; save(); clearFb("s3fb"); s3render() });
+$("s3wall").addEventListener("click", function(e){
+  var T = T3[st.s3.cur], S = s3st(), c = e.target.closest(".cut"), tp = e.target.closest(".tip");
+  if(c){
+    mark(3);
+    var i = +c.dataset.i;
+    if(T.chops[i]){
+      var wall = $("s3wall"), wr = wall.getBoundingClientRect(), br = c.getBoundingClientRect();
+      var bl = document.createElement("div"); bl.className = "blade"; bl.innerHTML = BLADE;
+      bl.style.left = (br.left - wr.left + br.width / 2 - 32) + "px"; bl.style.top = (br.top - wr.top - 62) + "px"; wall.appendChild(bl);
+      var fx = document.createElement("div"); fx.className = "chopfx"; fx.textContent = "CHOP!";
+      fx.style.left = Math.min(wr.width - 90, Math.max(0, br.left - wr.left + 30)) + "px"; fx.style.top = (br.top - wr.top - 40) + "px"; wall.appendChild(fx);
+      c.disabled = true;
+      S.chops.push(i); S.last = null; save();
+      later(function(){ s3render(i); fb("s3fb", "ok", "<b>Chop!</b> A new paragraph starts with \u201c" + esc(firstWords(T.s[i])) + "\u201d. What changed there? Tap any that fit."); drawFloor() }, 520);
+    } else {
+      S.miss++; save();
+      restart(c, "no");
+      fb("s3fb", "nope", "<b>No chop needed there.</b> \u201c" + esc(firstWords(T.s[i])) + "\u201d carries straight on from the sentence before it: same time, same place, same topic, same person. Try another gap.");
+    }
+    return;
+  }
+  if(tp){
+    mark(3);
+    var ci = +tp.dataset.c, kk = tp.dataset.k, arr = S.why[ci] || (S.why[ci] = []);
+    if(arr.indexOf(kk) < 0) arr.push(kk);
+    S.last = [ci, kk]; save(); s3render();
+    var again = document.querySelector('#s3wall .tip[data-c="' + ci + '"][data-k="' + kk + '"]'); if(again) again.focus();
+  }
+});
+$("s3show").addEventListener("click", function(){
+  var T = T3[st.s3.cur], S = s3st(); mark(3);
+  keys(T.chops).forEach(function(k){ k = +k; if(S.chops.indexOf(k) < 0 && S.shown.indexOf(k) < 0) S.shown.push(k) });
+  save(); s3render(); fb("s3fb", "tell", "Here are all the chops. Have a look at what changed at each one, and tap the TiPToP buttons to check your thinking."); drawFloor();
+});
+$("s3glue").addEventListener("click", function(){ delete st.s3.t[T3[st.s3.cur].id]; save(); clearFb("s3fb"); s3render(); drawFloor() });
+
+/* ================= BAY 4: linking lane ================= */
+var CRATES = [
+  ["add", "Adding more", "Adds another point that goes the same way."],
+  ["but", "Changing direction", "Shows a contrast: the other side, or a surprise."],
+  ["time", "Time moves on", "Moves the reader to a new time."],
+  ["cause", "Because of that", "Shows a result, or a reason why."]
+];
+var LINKERS = [
+  ["However,", "but"], ["Also,", "add"], ["Later that day,", "time"], ["As a result,", "cause"],
+  ["On top of that,", "add"], ["Despite this,", "but"], ["Meanwhile,", "time"], ["Because of this,", "cause"],
+  ["Furthermore,", "add"], ["After lunch,", "time"], ["For this reason,", "cause"], ["On the other hand,", "but"]
+];
+var LHINT = {
+  "However,":"However turns the writing round to the other side.", "Also,":"Also adds one more thing.", "Later that day,":"Later that day moves the clock on.", "As a result,":"As a result shows what happened because of something.",
+  "On top of that,":"On top of that piles one more thing on.", "Despite this,":"Despite this means it happened anyway, even though something was against it.", "Meanwhile,":"Meanwhile means at the same time, somewhere else.", "Because of this,":"Because of this shows a result.",
+  "Furthermore,":"Furthermore is a fancy way to say and also.", "After lunch,":"After lunch moves the clock on.", "For this reason,":"For this reason gives the reason for something.", "On the other hand,":"On the other hand shows the other side."
+};
+var LANE = [
+  "Getting to Roarsome Valley was a nightmare. The coach took nearly two hours, and then we had to climb a steep hill from the car park.",
+  "the dinosaurs made the whole trip worth it. The moving T rex was so realistic that a little boy next to me burst into tears.",
+  "the guides really knew their stuff. One told us that Stegosaurus died out millions of years before T rex was even around.",
+  "we found the gift shop, where everything cost far too much. I still bought a glow in the dark fossil keyring.",
+  "I would give Roarsome Valley four stars instead of five. Next time, I would like to go by train."
+];
+var GAPS = [
+  { ok:["However,", "Despite this,", "On the other hand,"], want:"but", why:"Paragraph 1 is a moan and paragraph 2 is happy, so the writing changes direction." },
+  { ok:["Also,", "On top of that,", "Furthermore,"], want:"add", why:"Paragraph 3 adds another good thing, going the same way as paragraph 2." },
+  { ok:["Later that day,", "After lunch,"], want:"time", why:"The gift shop came later in the day, so a time link moves the reader on." },
+  { ok:["As a result,", "Because of this,", "For this reason,"], want:"cause", why:"The prices are the reason for losing a star, so a result link fits." }
+];
+var ui4 = { tag:null, gap:null, chip:null };
+function crateName(id){ for(var i = 0; i < CRATES.length; i++) if(CRATES[i][0] === id) return CRATES[i][1]; return "" }
+function s4render(){
+  $("s4tray").innerHTML = LINKERS.filter(function(l){ return !st.s4.sort[l[0]] }).map(function(l){ return '<button type="button" class="ltag" data-l="' + esc(l[0]) + '" aria-pressed="' + (ui4.tag === l[0]) + '">' + esc(l[0]) + '</button>' }).join("");
+  $("s4crates").innerHTML = CRATES.map(function(c){
+    var placed = keys(st.s4.sort).filter(function(k){ return st.s4.sort[k] === c[0] });
+    return '<button type="button" class="crate ' + c[0] + (ui4.tag ? " ready" : "") + '" data-c="' + c[0] + '"><span class="cname">' + c[1] + '</span><span class="cjob">' + c[2] + '</span><span class="placed">' + placed.map(function(p){ return "<span>" + esc(p) + "</span>" }).join("") + '</span></button>';
+  }).join("");
+  var h = "";
+  LANE.forEach(function(p, i){
+    if(i > 0){
+      var g = i - 1, got = st.s4.gaps[g];
+      h += '<div class="coupling"><button type="button" class="gapbtn' + (got ? " ok" : "") + '" data-g="' + g + '" aria-pressed="' + (ui4.gap === g) + '"' + (got ? ' aria-label="Coupling ' + (g + 1) + ' linked with ' + esc(got) + '"' : ' aria-label="Coupling ' + (g + 1) + ', empty"') + '>' + (got ? "Linked" : (ui4.gap === g ? "Pick a link below" : "Fit a link here")) + '</button></div>';
+    }
+    var pre = "";
+    if(i > 0){ var gg = st.s4.gaps[i - 1]; pre = gg ? '<span class="linkword">' + esc(gg) + '</span> ' : '<span class="linkgap">?</span> ' }
+    h += '<div class="pcard"><span class="kicker">Paragraph ' + (i + 1) + '</span><p>' + pre + esc(p) + '</p></div>';
+  });
+  $("s4lane").innerHTML = h;
+  var allDone = keys(st.s4.gaps).length === GAPS.length;
+  $("s4chips").innerHTML = allDone ? '<span class="kicker">All coupled</span><p style="margin:0;font-size:.95rem">The review flows from start to finish now. Read it top to bottom and notice how each link tells you what is coming.</p>' :
+    '<span class="kicker">' + (ui4.gap !== null ? "Coupling " + (ui4.gap + 1) + " picked. Tap a link to fit it." : "Linking phrases. Tap one, then a coupling, or the other way round.") + '</span><div class="chips">' +
+    LINKERS.map(function(l){ return '<button type="button" class="lchip" data-k="' + esc(l[0]) + '" aria-pressed="' + (ui4.chip === l[0]) + '">' + esc(l[0]) + '</button>' }).join("") + '</div>';
+}
+function s4try(){
+  if(ui4.gap === null || !ui4.chip) { s4render(); return }
+  mark(4);
+  var g = ui4.gap, k = ui4.chip, G = GAPS[g], tries = st.s4.gapTries[g] || (st.s4.gapTries[g] = []);
+  tries.push(k);
+  if(G.ok.indexOf(k) >= 0){
+    st.s4.gaps[g] = k; ui4.gap = null; ui4.chip = null; save(); s4render();
+    fb("s4fbb", "ok", "<b>Coupled.</b> " + esc(G.why) + (keys(st.s4.gaps).length === GAPS.length ? " That was the last one. " + pick(["Outrageously smooth.", "Lovely flow."]) : ""));
+  } else {
+    var mine = "";
+    for(var i = 0; i < LINKERS.length; i++) if(LINKERS[i][0] === k) mine = LINKERS[i][1];
+    ui4.chip = null; save(); s4render();
+    var msg = mine === G.want ? esc(LHINT[k]) + " It is the right kind of link, but it does not quite fit here: the gift shop came after the dinosaurs, not at the same time." : esc(LHINT[k]) + " Here, " + esc(G.why.charAt(0).toLowerCase() + G.why.slice(1));
+    fb("s4fbb", "nope", "<b>Not quite.</b> " + msg + " Coupling " + (g + 1) + " is still picked, so try another link.");
+  }
+  drawFloor();
+}
+$("s4tray").addEventListener("click", function(e){ var t = e.target.closest(".ltag"); if(!t) return; ui4.tag = ui4.tag === t.dataset.l ? null : t.dataset.l; s4render(); var b = document.querySelector('#s4tray .ltag[data-l="' + t.dataset.l + '"]'); if(b) b.focus() });
+$("s4crates").addEventListener("click", function(e){
+  var c = e.target.closest(".crate"); if(!c) return;
+  if(!ui4.tag){ fb("s4fba", "tell", "Tap a luggage tag in the tray first, then tap its crate."); return }
+  mark(4);
+  var k = ui4.tag, want = "";
+  for(var i = 0; i < LINKERS.length; i++) if(LINKERS[i][0] === k) want = LINKERS[i][1];
+  if(want === c.dataset.c){
+    st.s4.sort[k] = want; ui4.tag = null; save(); s4render();
+    var nc = document.querySelector('#s4crates .crate[data-c="' + want + '"]'); if(nc) restart(nc, "gulp");
+    fb("s4fba", "ok", "<b>In it goes.</b> " + esc(LHINT[k]) + (keys(st.s4.sort).length === LINKERS.length ? " Every tag sorted." : ""));
+    var nx = document.querySelector("#s4tray .ltag"); if(nx) nx.focus();
+  } else {
+    st.s4.sortMiss[k] = (st.s4.sortMiss[k] || 0) + 1; save();
+    var tg = document.querySelector('#s4tray .ltag[data-l="' + k + '"]'); if(tg) restart(tg, "wrong");
+    fb("s4fba", "nope", "<b>Not that crate.</b> " + esc(LHINT[k]) + " Which crate does that job?");
+  }
+  drawFloor();
+});
+$("s4lane").addEventListener("click", function(e){ var g = e.target.closest(".gapbtn"); if(!g || g.classList.contains("ok")) return; var n = +g.dataset.g; ui4.gap = ui4.gap === n ? null : n; s4try() });
+$("s4chips").addEventListener("click", function(e){ var c = e.target.closest(".lchip"); if(!c) return; ui4.chip = ui4.chip === c.dataset.k ? null : c.dataset.k; if(ui4.gap === null && ui4.chip){ s4render(); fb("s4fbb", "tell", "Now tap the coupling where <b>" + esc(ui4.chip) + "</b> should go."); return } s4try() });
+
+/* ================= BAY 5: planning shelf ================= */
+var PIECES = {
+  pet:{ name:"A guide to looking after a pet", icon:"pet", boxes:[
+      ["Its home", "home tank cage hutch bed bedding clean space warm cosy", ["Every pet needs a home that", "First of all, think about where"]],
+      ["Food and water", "food feed feeding eat water drink meal treat hungry bowl worm hay pellet", ["When it comes to food,", "Feeding your pet properly means"]],
+      ["Keeping it happy and healthy", "happy health healthy vet play exercise toy handle stroke groom ill sick", ["To keep your pet happy,", "A healthy pet needs"]]],
+    extra:["Choosing the right pet", "Cleaning out", "Fun facts"] },
+  day:{ name:"A day in the life of an animal", icon:"sun", boxes:[
+      ["Morning", "morning wake woke sunrise breakfast early dawn", ["Early in the morning,", "At sunrise,"]],
+      ["Afternoon", "afternoon lunch midday noon", ["By the afternoon,", "At lunchtime,"]],
+      ["Evening", "evening night sleep dark sunset dusk bed home", ["As the sun went down,", "That evening,"]]],
+    extra:["A narrow escape", "Meeting a friend", "Finding food"] },
+  review:{ name:"A review of a place I have been", icon:"star", boxes:[
+      ["Getting there", "travel journey bus coach car train drive walk arrive arrived road traffic", ["Getting there was", "The journey to"]],
+      ["The best bit", "best favourite loved great amazing fun brilliant", ["The best bit by far was", "My favourite part was"]],
+      ["The worst bit", "worst bad boring disappointing annoying rubbish queue", ["The worst bit was", "One thing I did not enjoy was"]],
+      ["Would I go back?", "again back return recommend stars rate worth", ["Overall, I would", "Would I go back? Well,"]]],
+    extra:["The food", "The people", "How much it cost"] },
+  own:{ name:"My own idea", icon:"pen", boxes:[["", "", []], ["", "", []], ["", "", []]], extra:["Beginning", "Middle", "End", "Who is in it", "Where it happens"] }
+};
+var armSwap = null;
+function newBox(label, kw, starters){ st.s5.seq = (st.s5.seq || 0) + 1; return { id:"b" + st.s5.seq, label:label || "", notes:"", kw:kw || "", starters:starters || [] } }
+function loadPiece(k){
+  var P = PIECES[k]; st.s5.piece = k; st.s5.title = k === "own" ? "" : P.name;
+  st.s5.boxes = P.boxes.map(function(b){ return newBox(b[0], b[1], b[2]) });
+  save();
+}
+function s5render(){
+  $("s5picks").innerHTML = keys(PIECES).map(function(k){ var P = PIECES[k]; return '<button type="button" class="pickbtn" data-p="' + k + '" aria-pressed="' + (st.s5.piece === k) + '">' + IC[P.icon] + '<span>' + esc(P.name) + '</span></button>' }).join("");
+  if(!st.s5.piece){ $("s5main").innerHTML = ""; return }
+  var B = st.s5.boxes, h = '<label class="fieldlab" for="s5title">Title</label><input class="tinput" id="s5title" maxlength="80" value="' + esc(st.s5.title) + '" placeholder="What is your piece called?">';
+  h += '<div class="shelf">' + B.map(function(b, k){
+    return '<div class="pbox" data-id="' + b.id + '"><span class="pno">' + (k + 1) + '</span><div class="pfields">' +
+      '<div><label class="fieldlab" for="lab_' + b.id + '">Label: what is this paragraph about?</label><input class="tinput" id="lab_' + b.id + '" data-f="label" data-id="' + b.id + '" maxlength="60" value="' + esc(b.label) + '" placeholder="eg Morning"></div>' +
+      '<div><label class="fieldlab" for="not_' + b.id + '">Ideas to pack in, a few words</label><input class="tinput" id="not_' + b.id + '" data-f="notes" data-id="' + b.id + '" maxlength="160" value="' + esc(b.notes) + '" placeholder="a few words, with commas between"></div>' +
+      '</div><div class="pmoves"><button type="button" class="minib" data-mv="-1" data-id="' + b.id + '" aria-label="Move box ' + (k + 1) + ' up"' + (k === 0 ? " disabled" : "") + '>&uarr;</button><button type="button" class="minib" data-mv="1" data-id="' + b.id + '" aria-label="Move box ' + (k + 1) + ' down"' + (k === B.length - 1 ? " disabled" : "") + '>&darr;</button><button type="button" class="minib" data-del="' + b.id + '" aria-label="Take box ' + (k + 1) + ' off the shelf"' + (B.length <= 2 ? " disabled" : "") + '>&times;</button></div></div>';
+  }).join("") + '</div>';
+  if(B.length < 5) h += '<div class="suggs"><span>Add a box:</span>' + PIECES[st.s5.piece].extra.map(function(x){ return '<button type="button" class="sugg" data-add="' + esc(x) + '">+ ' + esc(x) + '</button>' }).join("") + '<button type="button" class="sugg" data-add="">+ an empty box</button></div>';
+  else h += '<p class="smallnote">Five boxes is plenty for a short piece.</p>';
+  h += '<div class="btnrow"><button type="button" class="btn btn-orange" id="s5check">Check my plan</button><a class="btn btn-quiet" href="#bay6">Off to pack it</a></div>';
+  $("s5main").innerHTML = h;
+}
+var s6timer = null;
+function s6soon(){ clearTimeout(s6timer); s6timer = setTimeout(function(){ s6render(); drawFloor() }, 350) }
+$("s5picks").addEventListener("click", function(e){
+  var b = e.target.closest(".pickbtn"); if(!b) return;
+  var k = b.dataset.p;
+  if(st.s5.piece === k) return;
+  var busy = st.s5.boxes.some(function(x){ return x.notes.trim() || (st.s6.texts[x.id] || "").trim() });
+  if(busy && armSwap !== k){ armSwap = k; fb("s5fb", "tell", "Tap <b>" + esc(PIECES[k].name) + "</b> again if you want to swap. Your boxes on the shelf will be replaced."); return }
+  armSwap = null; mark(5); loadPiece(k); s5render(); clearFb("s5fb"); s6render(); drawFloor();
+});
+$("s5main").addEventListener("input", function(e){
+  var t = e.target;
+  if(t.id === "s5title"){ st.s5.title = t.value; save(); s6soon(); return }
+  if(t.dataset && t.dataset.f){ var bx = st.s5.boxes.filter(function(x){ return x.id === t.dataset.id })[0]; if(!bx) return; bx[t.dataset.f] = t.value; mark(5); s6soon() }
+});
+$("s5main").addEventListener("click", function(e){
+  var t = e.target.closest("button"); if(!t) return;
+  var B = st.s5.boxes, i;
+  if(t.dataset.mv){ for(i = 0; i < B.length; i++) if(B[i].id === t.dataset.id) break; var j = i + (+t.dataset.mv); if(j < 0 || j >= B.length) return; var tmp = B[i]; B[i] = B[j]; B[j] = tmp; save(); s5render(); s6render(); var f = document.querySelector('#s5main .minib[data-id="' + tmp.id + '"][data-mv="' + t.dataset.mv + '"]'); if(f && !f.disabled) f.focus(); return }
+  if(t.dataset.del){ st.s5.boxes = B.filter(function(x){ return x.id !== t.dataset.del }); save(); s5render(); s6render(); drawFloor(); return }
+  if(t.dataset.add !== undefined){ if(B.length >= 5) return; B.push(newBox(t.dataset.add, "", [])); mark(5); s5render(); s6render(); var last = st.s5.boxes[st.s5.boxes.length - 1]; var inp = $(t.dataset.add ? "not_" + last.id : "lab_" + last.id); if(inp) inp.focus(); return }
+  if(t.id === "s5check"){ mark(5); s5check() }
+});
+function s5check(){
+  var B = st.s5.boxes, notes = [], seen = {}, good = 0;
+  B.forEach(function(b, k){
+    var L = b.label.trim();
+    if(!L) notes.push("Box " + (k + 1) + " has no label yet. What will that paragraph be about?");
+    else if(seen[L.toLowerCase()]) notes.push("Boxes " + seen[L.toLowerCase()] + " and " + (k + 1) + " have the same label. Could they be one box, or could one be about something else?");
+    else seen[L.toLowerCase()] = k + 1;
+    if(!b.notes.trim()) notes.push("Box " + (k + 1) + (L ? " (" + L + ")" : "") + " has no ideas jotted in it yet. Even two words helps.");
+    if(L && b.notes.trim()) good++;
+  });
+  var kws = B.map(function(b){ return boxWords(b, false) });
+  B.forEach(function(b, k){
+    words(b.notes).map(stem).forEach(function(w){
+      for(var o = 0; o < B.length; o++) if(o !== k && B[o].label.trim() && kws[o].indexOf(w) >= 0 && kws[k].indexOf(w) < 0 && w.length > 3){ var m = "The idea \u201c" + w + "\u201d in box " + (k + 1) + " sounds like it might belong in the " + B[o].label.trim() + " box."; if(notes.indexOf(m) < 0) notes.push(m) }
+    });
+  });
+  if(!notes.length) fb("s5fb", "ok", "<b>Plan looks ready to pack.</b> " + B.length + " boxes, each with a label and some ideas. That means " + B.length + " paragraphs, each about one thing. Head to bay 6 when you fancy it.");
+  else fb("s5fb", "tell", "<b>" + good + " of " + B.length + " boxes are ready.</b> A few things you might look at:<br>&middot; " + notes.map(esc).join("<br>&middot; "));
+}
+
+/* ================= BAY 6: pack and post ================= */
+var STOP = " the a an and or but of to in on at for with is are was were be it its it's this that my your our their his her they them we you i me about from by as so if not very really just can will would could should have has had do does did what when where how why who which all some any more most much many there here then than too also into out up down over one two get got like every few day days lot lots thing things good big small little make made use used need needs want first last next well pet pets things kind sort way ";
+var LINKRE = /^\s*(also|however|on top of that|furthermore|in addition|later|after that|afterwards|after lunch|meanwhile|as a result|because of this|for this reason|despite this|on the other hand|finally|next|then|overall|to sum up|in the end|secondly|thirdly|another|by the|by lunchtime|the next|that evening|that night|that afternoon|eventually|moving on|lastly|as well as|besides|similarly|even so|apart from)\b/i;
+var LINKCHIPS = ["Also,", "However,", "On top of that,", "Later that day,", "After that,", "As a result,", "Meanwhile,", "Despite this,"];
+var LASTCHIPS = ["Overall,", "Finally,", "To sum up,"];
+function words(t){ return (String(t).toLowerCase().match(/[a-z]+/g) || []) }
+function stem(w){ if(w.length > 5) w = w.replace(/(ing|ed|es)$/, ""); if(w.length > 3) w = w.replace(/s$/, ""); return w }
+function boxWords(b, withKw){
+  var src = (withKw === false ? "" : (b.kw || "") + " ") + b.label + " " + b.notes, out = [];
+  words(src).forEach(function(w){ if(w.length < 3 || STOP.indexOf(" " + w + " ") >= 0) return; var s = stem(w); if(out.indexOf(s) < 0) out.push(s) });
+  return out;
+}
+function rawWords(b){ var out = []; words((b.kw || "") + " " + b.label + " " + b.notes).forEach(function(w){ if(w.length < 3 || STOP.indexOf(" " + w + " ") >= 0 || out.indexOf(w) >= 0) return; out.push(w) }); return out }
+function hits(text, list){ var ws = words(text).map(stem), f = []; list.forEach(function(k){ for(var i = 0; i < ws.length; i++){ if(ws[i] === k || (k.length >= 4 && ws[i].indexOf(k) === 0)){ if(f.indexOf(k) < 0) f.push(k); break } } }); return f }
+function niceLabel(b, k){ return b.label.trim() || "Box " + (k + 1) }
+function s6render(){
+  var B = st.s5.boxes, h = "";
+  if(!st.s5.piece || !B.length){
+    h = '<div class="learn" style="grid-template-columns:1fr"><div><span class="kicker">No plan on the shelf yet</span><p>You can make one in bay 5, or grab a ready made plan here and start packing straight away.</p><div class="quickplans">' +
+      ["pet", "day", "review"].map(function(k){ return '<button type="button" class="btn btn-quiet" data-quick="' + k + '">' + esc(PIECES[k].name) + '</button>' }).join("") + '</div></div></div>';
+    $("s6main").innerHTML = h; return;
+  }
+  h += '<p class="piece"><b>Your piece:</b> ' + esc(st.s5.title.trim() || "Untitled, add a title in bay 5 if you like") + '</p>';
+  B.forEach(function(b, k){
+    if(k > 0) h += '<div class="wlink" aria-hidden="true"><span></span></div>';
+    var starters = (b.starters && b.starters.length ? b.starters : ["This part is all about", "The main thing to know is", "To start with,"]);
+    h += '<div class="wbox" data-id="' + b.id + '"><div class="whead"><span class="pno">' + (k + 1) + '</span><span class="addr">' + esc(niceLabel(b, k)) + '</span></div><div class="wbody">';
+    h += '<div class="starters"><span class="sl">Starters</span>' + starters.map(function(s){ return '<button type="button" class="starter" data-ins="' + esc(s) + '" data-for="' + b.id + '">' + esc(s) + '</button>' }).join("") + '</div>';
+    if(k > 0) h += '<div class="starters"><span class="sl">Links</span>' + (k === B.length - 1 ? LASTCHIPS : []).concat(LINKCHIPS.slice(0, 6)).map(function(s){ return '<button type="button" class="starter lk" data-ins="' + esc(s) + '" data-for="' + b.id + '">' + esc(s) + '</button>' }).join("") + '</div>';
+    h += '<label class="fieldlab" for="ta_' + b.id + '">Paragraph ' + (k + 1) + ': ' + esc(niceLabel(b, k)) + '</label><textarea id="ta_' + b.id + '" data-id="' + b.id + '" placeholder="Start with a sentence that says what this paragraph is about.">' + esc(st.s6.texts[b.id] || "") + '</textarea>';
+    h += '<div class="checks" id="ck_' + b.id + '"></div><p class="wnote" id="wn_' + b.id + '"></p></div></div>';
+  });
+  h += '<div class="postrow"><svg class="van" id="van" viewBox="0 0 150 80" aria-hidden="true"><rect x="4" y="14" width="92" height="48" rx="6" fill="#c4321a" stroke="#0a2f38" stroke-width="3"/><path d="M96 28 H124 L144 46 V62 H96 Z" fill="#c4321a" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/><path d="M102 33 H122 L134 45 H102 Z" fill="#bfe6f0" stroke="#0a2f38" stroke-width="2"/><rect x="14" y="24" width="56" height="18" rx="3" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><text x="42" y="37" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="11" fill="#0a2f38">TO JAY</text><circle cx="30" cy="64" r="10" fill="#0a2f38"/><circle cx="30" cy="64" r="4" fill="#c9d3d6"/><circle cx="118" cy="64" r="10" fill="#0a2f38"/><circle cx="118" cy="64" r="4" fill="#c9d3d6"/></svg>' +
+    '<div><button type="button" class="btn btn-orange" id="s6post">' + (st.s6.posted ? "Post it again" : "Post my parcels") + '</button><p class="smallnote" id="s6postmsg">' + (st.s6.posted ? "Posted. It is ready in the send box below." : "When you are happy, load it on the van. It goes into the send box below.") + '</p></div></div>';
+  $("s6main").innerHTML = h;
+  B.forEach(function(b){ s6check(b.id) });
+}
+function s6check(id){
+  var B = st.s5.boxes, k = -1;
+  for(var i = 0; i < B.length; i++) if(B[i].id === id) k = i;
+  if(k < 0) return;
+  var b = B[k], text = st.s6.texts[id] || "", own = boxWords(b), ck = $("ck_" + id), wn = $("wn_" + id);
+  if(!ck) return;
+  var trimmed = text.trim(), sents = trimmed ? trimmed.split(/[.!?]+(\s|$)/).filter(function(s){ return s && s.trim() }).length : 0;
+  var first = trimmed.split(/[.!?]/)[0] || "", ownHit = hits(text, own), firstHit = hits(first, own);
+  var others = {}, stray = [];
+  B.forEach(function(o, oi){ if(oi === k) return; boxWords(o).forEach(function(w){ if(own.indexOf(w) < 0 && w.length > 3) others[w] = niceLabel(o, oi) }) });
+  hits(text, keys(others)).forEach(function(w){ stray.push([w, others[w]]) });
+  var linked = k > 0 && LINKRE.test(trimmed);
+  var c = '<span class="chk' + (sents >= 2 ? " lit" : "") + '">' + (sents ? sents + " sentence" + (sents === 1 ? "" : "s") : "Empty so far") + '</span>';
+  c += '<span class="chk' + (trimmed && firstHit.length ? " lit" : "") + '">Label sentence</span>';
+  c += '<span class="chk' + (ownHit.length && !stray.length ? " lit" : "") + '">Sticks to one idea</span>';
+  if(k > 0) c += '<span class="chk' + (linked ? " lit" : "") + '">Linked</span>';
+  ck.innerHTML = c;
+  var n = [];
+  if(!trimmed){ if(own.length) n.push("Words that fit this box: <i>" + rawWords(b).slice(0, 6).map(esc).join(", ") + "</i>.") }
+  else {
+    if(!own.length) n.push("Give this box a label in bay 5 and the hints can help you stay on topic.");
+    else if(!firstHit.length) n.push("Could your first sentence say what this paragraph is about? A word like <i>" + esc(rawWords(b)[0] || own[0]) + "</i> would do it.");
+    if(stray.length) n.push(stray.slice(0, 2).map(function(s){ return "\u201c" + esc(s[0]) + "\u201d sounds like the <i>" + esc(s[1]) + "</i> box" }).join(", and ") + ". If that bit is really about " + esc(stray[0][1]) + ", it could move there.");
+    if(k > 0 && !linked && sents >= 1) n.push("Fancy a link? Starting with something like <i>Also,</i> or <i>Later that day,</i> joins this box to the one before.");
+    if(!n.length && sents >= 2) n.push(pick(["This box is nicely packed.", "One box, one idea. Lovely.", "Neat parcel."]));
+  }
+  wn.innerHTML = n.join(" ");
+}
+function insertAt(ta, text){
+  var v = ta.value, s = typeof ta.selectionStart === "number" ? ta.selectionStart : v.length, e = typeof ta.selectionEnd === "number" ? ta.selectionEnd : v.length;
+  var pre = v.slice(0, s), sp = pre && !/\s$/.test(pre) ? " " : "", ins = sp + text + " ";
+  ta.value = pre + ins + v.slice(e);
+  var p = (pre + ins).length; ta.focus(); try{ ta.setSelectionRange(p, p) }catch(err){}
+  st.s6.texts[ta.dataset.id] = ta.value; mark(6); s6check(ta.dataset.id);
+}
+$("s6main").addEventListener("input", function(e){ var t = e.target; if(t.tagName !== "TEXTAREA") return; st.s6.texts[t.dataset.id] = t.value; st.tried[6] = true; save(); s6check(t.dataset.id); clearTimeout(s6timer); s6timer = setTimeout(drawFloor, 600) });
+$("s6main").addEventListener("click", function(e){
+  var t = e.target.closest("button"); if(!t) return;
+  if(t.dataset.quick){ loadPiece(t.dataset.quick); mark(5); s5render(); s6render(); drawFloor(); return }
+  if(t.dataset.ins){ var ta = $("ta_" + t.dataset.for); if(ta) insertAt(ta, t.dataset.ins); return }
+  if(t.id === "s6post"){
+    var any = st.s5.boxes.some(function(b){ return (st.s6.texts[b.id] || "").trim() });
+    if(!any){ fb("s6fb", "tell", "The boxes are empty so far. Write a little in at least one box first, then post it."); return }
+    mark(6); st.s6.posted = true; save();
+    var van = $("van"); if(van) restart(van, "go");
+    $("s6postmsg").textContent = "Posted. It is ready in the send box below.";
+    t.textContent = "Post it again";
+    fb("s6fb", "ok", "<b>Brrrm.</b> Your parcels are on the van. If you would like Jay to see them, the send box is just below.");
+    later(function(){ if(van) van.classList.remove("go") }, 2200);
+    drawFloor();
+  }
+});
+
+/* ================= send ================= */
+var BAYMS = { 1:"grouping related sentences into paragraphs", 2:"starting a paragraph with a topic sentence", 3:"starting a new paragraph when the time, place, topic or person changes (TiPToP)", 4:"linking paragraphs with linking words and phrases", 5:"planning writing in sections", 6:"organising my own writing into clear, linked paragraphs" };
+function summary(){
+  var w = getWho(), S = STUDENTS[w], out = [], tried = [];
+  out.push("The Sorting Office: using paragraphs to group related material");
+  out.push("");
+  if(S){ out.push("My milestones:"); out.push("- " + S.m[0]); out.push("- " + S.m[1]) }
+  else out.push("Target: I can use paragraphs as a way to group related material.");
+  for(var n = 1; n <= 6; n++) if(st.tried[n]) tried.push(n);
+  out.push("");
+  out.push("Bays I tried: " + (tried.length ? tried.map(function(n){ return n + " (" + BAYS[n - 1][1] + ")" }).join(", ") : "none yet"));
+  if(tried.length){ out.push("This work relates to:"); tried.forEach(function(n){ out.push("- " + BAYMS[n]) }) }
+
+  out.push(""); out.push("BAY 1, THE SORTING BELT (grouping sentences into paragraphs)");
+  R1.forEach(function(r){ var s = st.s1.r[r.id]; if(!s || !keys(s.sorted).length){ out.push("- " + r.title + ": not tried"); return } var f = keys(s.first).filter(function(k){ return s.first[k] }).length; out.push("- " + r.title + ": " + keys(s.sorted).length + " of " + r.items.length + " parcels sorted, " + f + " on the first go") });
+
+  out.push(""); out.push("BAY 2, THE LABEL STAMP (topic sentences)");
+  P2.forEach(function(p){ var s = st.s2.p[p.id]; if(!s || (!s.topic && !s.wrong.length)){ out.push("- " + p.tab + ": not tried"); return }
+    out.push("- " + p.tab + ": topic sentence " + (s.topic ? (s.first ? "found first go" : "found after another look") : "not found yet") + (s.ok ? ", details ordered " + (s.shown ? "with Show me" : (s.firstOrder ? "first go" : "after another go")) : (s.topic ? ", order not finished" : ""))) });
+  MC2.forEach(function(q, qi){ var p = st.s2.mc[qi]; out.push("- Missing label " + (qi + 1) + ": " + (p && p.length ? (p.indexOf(q.ans) >= 0 ? "picked \"" + q.opts[q.ans] + "\"" + (p[0] === q.ans ? " first go" : " after another look") : "tried, not found yet") : "not tried")) });
+
+  out.push(""); out.push("BAY 3, THE CHOPPING DESK (new paragraph when time, place, topic or person changes)");
+  T3.forEach(function(t){ var s = st.s3.t[t.id]; if(!s || (!s.chops.length && !s.shown.length && !s.miss)){ out.push("- " + t.title + ": not tried"); return }
+    out.push("- " + t.title + ": " + s.chops.length + " of " + keys(t.chops).length + " chops found by me" + (s.shown.length ? ", " + s.shown.length + " shown" : ""));
+    s.chops.concat(s.shown).sort(function(a, b){ return a - b }).forEach(function(i){ var why = (s.why[i] || []).filter(function(k){ return t.chops[i].indexOf(k) >= 0 }); out.push("   chop before \"" + firstWords(t.s[i]) + "\": what changed, I said " + (why.length ? why.map(function(k){ return { Ti:"time", Pl:"place", To:"topic", Pe:"person" }[k] }).join(" and ") : "(not answered)")) });
+  });
+
+  out.push(""); out.push("BAY 4, LINKING LANE (linking paragraphs)");
+  out.push("- Tags sorted into crates: " + keys(st.s4.sort).length + " of " + LINKERS.length);
+  GAPS.forEach(function(g, i){ var got = st.s4.gaps[i], tr = st.s4.gapTries[i] || []; out.push("- Coupling " + (i + 1) + ": " + (got ? "\"" + got + "\"" + (tr.length > 1 ? " (tried " + tr.slice(0, -1).join(" / ") + " first)" : " first go") : (tr.length ? "tried " + tr.join(" / ") + " but not linked yet" : "not tried"))) });
+
+  out.push(""); out.push("BAY 5, THE PLANNING SHELF (planning in sections)");
+  if(!st.s5.piece) out.push("- No plan made");
+  else { out.push("- Piece: " + (st.s5.title.trim() || PIECES[st.s5.piece].name)); st.s5.boxes.forEach(function(b, k){ out.push("  Box " + (k + 1) + ": " + (b.label.trim() || "(no label)") + (b.notes.trim() ? ". Ideas: " + b.notes.trim() : "")) }) }
+
+  out.push(""); out.push("BAY 6, PACK AND POST (my own paragraphs)");
+  var wrote = false;
+  st.s5.boxes.forEach(function(b, k){ var t = (st.s6.texts[b.id] || "").trim(); if(!t) return; wrote = true; out.push(""); out.push("Paragraph " + (k + 1) + " [" + niceLabel(b, k) + "]"); out.push(t) });
+  if(!wrote) out.push("- Nothing written yet");
+  return out.join("\n");
+}
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"The Sorting Office", filename:"paragraph-sort", getText:summary });
+
+var armReset = false;
+$("resetBtn").addEventListener("click", function(){
+  if(!armReset){ armReset = true; this.textContent = "Tap again to clear it all"; $("resetMsg").textContent = "This clears every bay on this device. Your initials stay."; later(function(){ armReset = false; $("resetBtn").textContent = "Start again"; $("resetMsg").textContent = "Your progress stays saved on this device." }, 5000); return }
+  try{ localStorage.removeItem(STORE) }catch(e){}
+  st = blank(); armReset = false; this.textContent = "Start again"; $("resetMsg").textContent = "All cleared. Fresh parcels on every belt.";
+  ui4 = { tag:null, gap:null, chip:null };
+  ["s1fb", "s2fb", "s3fb", "s4fba", "s4fbb", "s5fb", "s6fb"].forEach(clearFb);
+  renderAll();
+});
+
+function renderAll(){ drawWho(); s1render(); s2render(); s3render(); s4render(); s5render(); s6render(); drawFloor() }
+renderAll();
+window.__ps = { st:function(){ return st }, R1:R1, T3:T3, summary:summary };
+})();
+</script>
+</body>
+</html>

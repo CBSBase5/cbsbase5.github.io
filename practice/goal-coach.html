@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal Coach - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Goal Coach only. Shell, cards and buttons come from style.css */
+:root{--green:#2f9e6a;--red:#e0443a;--pink:#e85d9a}
+.gc p{max-width:64ch}
+[hidden]{display:none!important}
+.gc p.ctr{max-width:52ch;margin-left:auto;margin-right:auto;text-align:center}
+.watchbtn{display:block;margin:0 auto}
+.small{font-size:.88rem;opacity:.8}
+.lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;margin:22px 0 9px;display:block}
+.hint{font-size:.9rem;color:var(--body-tint);margin:6px 0 0}
+
+/* who picker */
+.whobox{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;margin:0 0 20px;box-shadow:var(--lift)}
+.whobox .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.whobtn{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.9rem;letter-spacing:.1em;background:var(--paper);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:44px}
+.whobtn[aria-pressed="true"]{background:var(--plum);color:var(--paper)}
+.mslist{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.mslist li{background:var(--paper);border:2px dashed var(--plum);border-radius:14px;padding:10px 14px;font-size:.95rem}
+.mslist li b{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--plum);display:block}
+
+/* stage map */
+.smap{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:0 0 22px}
+.smbtn{position:relative;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem;line-height:1.15;color:var(--ink);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:12px 10px 10px;cursor:pointer;text-align:left;box-shadow:3px 4px 0 var(--ink);display:flex;flex-direction:column;gap:6px;transition:transform .14s}
+.smbtn:hover{transform:translateY(-3px) rotate(-1deg)}
+.smbtn .n{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.smbtn svg{width:34px;height:34px}
+.smbtn .tick{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:none;align-items:center;justify-content:center}
+.smbtn.done .tick{display:flex}
+.smbtn.lt{color:var(--paper)}
+.gps{display:none;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:2px 8px;align-self:flex-start}
+.suits .gps{display:inline-block}
+.smbtn.suits{outline:4px dashed var(--plum);outline-offset:3px}
+
+/* stage accordions */
+.stage summary .num{flex:none;width:52px;height:52px;border-radius:50%;background:var(--white);color:var(--ink);border:var(--border) solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.4rem}
+.stage summary .gps{margin-top:6px}
+.stage.suits summary .gps{display:inline-block}
+.stage .body{background:var(--white)}
+.stage .chev{stroke:currentColor}
+.learn{background:var(--paper);border:var(--border) solid var(--ink);border-left-width:10px;border-left-color:var(--bright);border-radius:0 18px 18px 0;padding:14px 18px;margin:0 0 18px}
+.learn .lk{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.learn p{margin:6px 0}
+.tryk{display:inline-block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;margin:20px 0 8px}
+.skipnote{font-size:.85rem;color:var(--body-tint);margin:24px 0 0}
+
+/* generic pick chips */
+.picks{display:flex;gap:8px;flex-wrap:wrap}
+.pk{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.86rem;background:var(--paper);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:10px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);text-align:left;min-height:44px}
+.pk:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.pk[aria-pressed="true"]{background:var(--yellow)}
+.pk.good{background:#bfe8cf;border-color:var(--green)}
+.pk.miss{background:#fde0cf}
+.pk:disabled{cursor:default}
+.starters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.st{font-family:var(--body);font-size:.85rem;background:var(--white);border:2px dashed var(--teal);border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--ink);min-height:36px}
+textarea,input[type=text],input[type=number],input[type=date]{font-family:var(--body);font-size:1rem;border:var(--border) solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);max-width:100%}
+textarea{width:100%;min-height:96px;resize:vertical}
+input.num{width:110px;text-align:center;font-size:1.15rem}
+input.wide{width:min(460px,100%)}
+.fb{margin:10px 0 0;font-size:.97rem;min-height:1.4em}
+.fb.good{color:#1f6b45;font-variation-settings:"wght" 700}
+.fb.soft{color:var(--orange-deep)}
+
+/* sport grid */
+.sportgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.sport{border:var(--border) solid var(--ink);border-radius:20px 16px 22px 14px;padding:12px 6px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);box-shadow:3px 4px 0 var(--ink);font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.82rem;line-height:1.1;text-align:center;transition:transform .15s}
+.sport:nth-child(odd){transform:rotate(-1deg)}
+.sport:nth-child(even){transform:rotate(.8deg)}
+.sport:hover{transform:translateY(-3px) rotate(0)}
+.sport .disc{width:64px;height:64px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.sport .disc svg{width:48px;height:48px}
+.sport[aria-pressed="true"]{outline:5px solid var(--ink);outline-offset:3px;animation:boing .5s ease}
+.sport.lt{color:var(--paper)}
+@keyframes boing{0%{transform:scale(1)}30%{transform:scale(1.12) rotate(-3deg)}60%{transform:scale(.96)}100%{transform:scale(1)}}
+
+/* skill snap */
+.snap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.snap{grid-template-columns:1fr}}
+.snapcol{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px}
+.snapcol .picks{gap:6px}
+.snapcol .pk{font-size:.8rem;padding:8px 12px;min-height:40px}
+.pk.sel{background:var(--plum);color:var(--paper);animation:jitter .4s}
+
+/* components */
+.comps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.comp{border:var(--border) solid var(--ink);border-radius:16px;background:var(--white);padding:10px;cursor:pointer;text-align:left;color:var(--ink);font-family:var(--body);font-size:.85rem;min-height:120px;box-shadow:3px 4px 0 rgba(10,47,56,.2);display:flex;flex-direction:column;gap:6px}
+.comp b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.95rem}
+.comp svg{width:38px;height:38px}
+.comp .front{display:flex;flex-direction:column;gap:4px}
+.comp .back{display:none}
+.comp.open{background:var(--yellow)}
+.comp.open .back{display:block}
+.comp.open .front{display:none}
+.qbox{background:var(--paper);border:var(--border) solid var(--ink);border-radius:18px;padding:16px}
+.qbox .qscen{font-size:1.15rem;font-variation-settings:"wght" 700;margin:4px 0 12px}
+.qopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.qopts .pk{display:flex;align-items:center;gap:6px;font-size:.8rem;padding:8px 10px}
+.qopts .pk svg{width:24px;height:24px;flex:none}
+.dots{display:flex;gap:6px;margin:10px 0 0;flex-wrap:wrap}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.dots i.on{background:var(--green)}
+.dots i.cur{background:var(--yellow)}
+
+/* radar */
+.radarwrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.radarwrap{grid-template-columns:1fr}}
+.radar{width:100%;max-width:440px;height:auto;display:block;margin:0 auto}
+.radar .pol{transition:all .25s}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin:6px 0 0;justify-content:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:18px;height:12px;border-radius:4px;border:2px solid var(--ink)}
+.rate{display:grid;grid-template-columns:110px 1fr 92px;gap:8px;align-items:center;margin:0 0 6px;font-size:.88rem}
+.rate b{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem}
+.rate input{width:100%;accent-color:var(--teal);min-height:32px}
+.rate span{font-size:.78rem;opacity:.8}
+.gaps{display:grid;gap:8px;margin:10px 0 0}
+.gap{display:flex;align-items:center;gap:10px;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:8px 12px;font-size:.9rem}
+.gap svg{width:28px;height:28px;flex:none}
+.gap .bar{flex:1;height:10px;border-radius:999px;background:rgba(10,47,56,.12);overflow:hidden;min-width:50px}
+.gap .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--red))}
+
+/* test lab */
+.modebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.tests{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.test{border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:var(--paper);padding:16px;box-shadow:var(--lift)}
+.test h3{font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.test h3 svg{width:34px;height:34px;flex:none}
+.test p{font-size:.9rem;margin:0 0 10px}
+.rx{width:100%;height:150px;border:var(--border) solid var(--ink);border-radius:18px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.15rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;color:var(--paper);background:var(--teal);padding:10px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.rx.wait{background:var(--plum)}
+.rx.go{background:var(--green);animation:jitter .3s}
+.rx.early{background:var(--orange);color:var(--ink)}
+.drum{width:150px;height:150px;border-radius:50%;border:var(--border) solid var(--ink);background:radial-gradient(circle at 40% 35%,#ffd77a,var(--yellow-deep));font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.4rem;cursor:pointer;display:block;margin:0 auto;box-shadow:4px 5px 0 var(--ink);touch-action:manipulation;user-select:none;-webkit-user-select:none;color:var(--ink)}
+.drum:active{transform:scale(.95);box-shadow:1px 1px 0 var(--ink)}
+.drum.live{background:radial-gradient(circle at 40% 35%,#ffb27a,var(--orange))}
+.tbar{height:10px;border-radius:999px;background:rgba(10,47,56,.12);overflow:hidden;margin:10px 0 0}
+.tbar span{display:block;height:100%;width:0;background:var(--teal)}
+.clock{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.6rem;text-align:center;line-height:1;margin:6px 0 10px}
+.res{margin:12px 0 0;font-size:.88rem;border-top:2px dashed var(--line);padding-top:8px}
+.res div{display:flex;justify-content:space-between;gap:8px}
+.res b{font-family:var(--display);font-variation-settings:"wght" 800}
+.flash{animation:pop .4s}
+.tries{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0;font-size:.8rem}
+.tries span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:2px 8px}
+
+/* SMART */
+.smart{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:640px){.smart{grid-template-columns:1fr}}
+.sl{border:var(--border) solid var(--ink);border-radius:16px;padding:10px;text-align:center;font-size:.82rem}
+.sl b{display:block;font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:2rem;line-height:1}
+.sl i{display:block;font-style:normal;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.8rem;margin:2px 0 4px}
+@media (max-width:640px){.sl{display:grid;grid-template-columns:44px 1fr;text-align:left;align-items:center;gap:0 10px}.sl b{grid-row:span 2}}
+.glow{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 14px;margin:0 0 10px}
+.glow .vague{font-family:var(--display);font-variation-settings:"wght" 800;font-size:1.05rem;margin:0 0 8px}
+.glow .vague s{text-decoration-thickness:3px;text-decoration-color:var(--orange)}
+.glow .picks{flex-direction:column;align-items:stretch}
+.glow .pk{font-family:var(--body);font-variation-settings:normal;font-size:.92rem}
+.build{display:grid;gap:4px}
+.numrow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.numrow label{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.ticket{position:relative;background:linear-gradient(150deg,var(--yellow),var(--yellow-deep));border:var(--border) dashed var(--ink);border-radius:18px;padding:18px 22px;margin:20px 0 12px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:1.15rem;line-height:1.3;box-shadow:var(--lift)}
+.ticket .tk{display:block;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;opacity:.75;margin:0 0 6px}
+.ticket.empty{background:var(--paper);font-variation-settings:"wght" 600;font-size:1rem}
+.lights{display:flex;gap:10px;flex-wrap:wrap}
+.light{flex:1 1 160px;display:flex;gap:10px;align-items:flex-start;border:2px solid var(--ink);border-radius:14px;padding:8px 10px;background:var(--white);font-size:.84rem}
+.light b{flex:none;width:36px;height:36px;border-radius:50%;border:var(--border) solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 900;background:#e8e2d6;transition:background .2s}
+.light.on b{background:var(--green);color:var(--white);animation:boing .4s}
+.light.half b{background:var(--yellow)}
+
+/* dial */
+.dial{width:100%;max-width:360px;height:auto;display:block;margin:0 auto}
+#needle{transition:transform .6s cubic-bezier(.3,1.5,.5,1)}
+.zones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+@media (max-width:600px){.zones{grid-template-columns:1fr}}
+.zone{border:var(--border) solid var(--ink);border-radius:16px;padding:10px 12px;font-size:.88rem}
+.zone b{font-family:var(--display);font-variation-settings:"wght" 800;display:block}
+.scens{display:grid;gap:10px}
+.scen{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 14px}
+.scen .who{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.scen p{margin:4px 0 8px}
+.scen .picks .pk{font-size:.78rem;padding:7px 12px;min-height:38px}
+.verdict{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.2rem;text-align:center;margin:6px 0}
+
+/* stairs and chart */
+.stairs,.chart{width:100%;height:auto;display:block;background:var(--paper);border:2px solid var(--ink);border-radius:16px}
+.steplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:10px 0 0}
+.steplist label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-family:var(--display);font-variation-settings:"wght" 700}
+.steplist input{width:100%}
+.planprev{background:var(--paper);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;margin:18px 0 0}
+.planprev ul{margin:6px 0 0;padding-left:20px}
+.loglist{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.loglist span{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:4px 6px 4px 12px;font-size:.85rem}
+.loglist button{border:0;background:var(--paper);border-radius:50%;width:30px;height:30px;cursor:pointer;font-weight:700;color:var(--ink)}
+.cmp{display:grid;gap:10px;margin:10px 0 0}
+.cmprow{background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:10px 12px;font-size:.88rem}
+.cmprow .bars{display:grid;grid-template-columns:70px 1fr 70px;gap:4px 8px;align-items:center;margin:6px 0}
+.cmprow .bars i{display:block;height:14px;border-radius:999px;border:2px solid var(--ink)}
+.advice{background:var(--white);border:var(--border) solid var(--ink);border-left-width:10px;border-left-color:var(--green);border-radius:0 16px 16px 0;padding:12px 16px;margin:12px 0 0}
+
+/* coach card */
+.coach{position:relative;border:4px solid var(--ink);border-radius:28px 22px 30px 20px;background:linear-gradient(160deg,#fff4d9 0%,var(--white) 45%,#dff3f8 100%);padding:22px;box-shadow:var(--lift-hi);overflow:hidden}
+.coach:before{content:"";position:absolute;right:-50px;top:-50px;width:180px;height:180px;border-radius:50%;background:var(--orange);opacity:.22}
+.coachtop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative}
+.coachtop .disc{width:72px;height:72px;border-radius:50%;background:var(--white);border:var(--border) solid var(--ink);display:flex;align-items:center;justify-content:center}
+.coachtop .disc svg{width:54px;height:54px}
+.coachtop h3{font-variation-settings:"wdth" 122,"wght" 900;font-size:1.7rem;line-height:1}
+.coachgrid{display:grid;grid-template-columns:200px 1fr;gap:18px;margin:16px 0 0;position:relative}
+@media (max-width:640px){.coachgrid{grid-template-columns:1fr}}
+.coachgrid .radar{max-width:220px}
+.cline{margin:0 0 10px;font-size:.93rem}
+.cline b{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+.endrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0 0}
+
+/* confetti */
+.bit{position:fixed;width:10px;height:14px;border-radius:3px;pointer-events:none;z-index:9000;animation:fly .9s ease-out forwards}
+@keyframes fly{from{transform:translate(0,0) rotate(0)}to{transform:translate(var(--dx),var(--dy)) rotate(540deg);opacity:0}}
+@media (max-width:520px){.rate{grid-template-columns:96px 1fr 70px}.stage summary{padding:16px 14px;gap:12px}.stage summary .num{width:42px;height:42px;font-size:1.15rem}.acc .body{padding:16px 14px 20px}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>GOAL <span class="accent">COACH</span></h1>
+    <div class="line">
+      <span class="chip">PE &middot; training goals</span>
+      <p>Pick a sport, find out what it asks of a body, test yourself, then build a goal that actually fits you.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap gc">
+
+  <div class="panel panel-teal">
+    <p><strong>How this works.</strong> Seven stages, in any order you fancy. Skip anything that is not for you. It saves itself on this device, so you can stop and come back.</p>
+    <p>The tests in here are <span class="hl">not a fitness test</span>. They are a starting line you only ever compare with yourself. If something hurts in a sharp way, stop. That is the whole safety talk.</p>
+  </div>
+
+  <div class="whobox">
+    <span class="lab" style="margin-top:0">Who is this? (optional)</span>
+    <div class="row" id="whoRow"></div>
+    <ul class="mslist" id="msList" hidden></ul>
+  </div>
+
+  <div class="smap" id="smap"></div>
+
+  <!-- ================= STAGE 1 ================= -->
+  <details class="acc acc-orange stage" id="st1" data-n="1">
+    <summary>
+      <span class="num">1</span>
+      <div class="txt"><h2>Pick your sport</h2><p>Choose a sport and one skill inside it.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <p>Tap the sport you want to get better at. Anything counts, even if it is not on the grid.</p>
+      <div class="sportgrid" id="sportGrid"></div>
+      <div id="ownSportBox" hidden style="margin-top:14px">
+        <label class="lab" for="ownSport">My sport is</label>
+        <input type="text" class="wide" id="ownSport" maxlength="40" placeholder="e.g. table tennis">
+      </div>
+
+      <span class="lab">Now pick one skill in it</span>
+      <p class="small" style="margin-top:-4px">A skill is one thing you do in the sport, like passing or a jump. Pick the one you most want to get better at.</p>
+      <div class="picks" id="skillChips"></div>
+      <div id="ownSkillBox" hidden style="margin-top:10px">
+        <input type="text" class="wide" id="ownSkill" maxlength="50" placeholder="the skill I want to get better at">
+      </div>
+      <p class="fb good" id="s1fb"></p>
+
+      <span class="tryk">Warm up game, if you fancy</span>
+      <h3 style="font-size:1.25rem;margin:0 0 4px">Skill Snap</h3>
+      <p>Every sport has its own skills. Tap a skill, then tap the sport it belongs to.</p>
+      <div class="snap">
+        <div class="snapcol"><span class="lab" style="margin-top:0">Skills</span><div class="picks" id="snapSkills"></div></div>
+        <div class="snapcol"><span class="lab" style="margin-top:0">Sports</span><div class="picks" id="snapSports"></div></div>
+      </div>
+      <p class="fb" id="snapFb" aria-live="polite"></p>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 2 ================= -->
+  <details class="acc acc-yellow stage" id="st2" data-n="2">
+    <summary>
+      <span class="num">2</span>
+      <div class="txt"><h2>What your sport needs</h2><p>Eight fitness powers, your sport&rsquo;s shape, and yours.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>Coaches split fitness into parts called <b>components</b>. Every sport needs a different mix. Tap a card to see what it means.</p>
+      </div>
+      <div class="comps" id="comps"></div>
+
+      <span class="tryk">Try a bit</span>
+      <h3 style="font-size:1.2rem;margin:0 0 8px">Which power is it?</h3>
+      <div class="qbox">
+        <div class="small" id="qCount"></div>
+        <p class="qscen" id="qScen"></p>
+        <div class="qopts" id="qOpts"></div>
+        <p class="fb" id="qFb" aria-live="polite"></p>
+        <div class="endrow" style="margin-top:8px"><button class="btn btn-quiet" id="qPrev">Back one</button><button class="btn" id="qNext">Next one</button></div>
+        <div class="dots" id="qDots"></div>
+      </div>
+
+      <span class="tryk">Your sport and you</span>
+      <div class="radarwrap">
+        <div>
+          <div id="radarBox"></div>
+          <div class="legend"><span><i style="background:rgba(239,119,36,.55)"></i><b id="legSport">The sport</b></span><span><i style="background:rgba(0,166,201,.55)"></i>Me, right now</span></div>
+          <p class="hint" id="radarNote"></p>
+        </div>
+        <div>
+          <div id="profEdit" hidden>
+            <span class="lab" style="margin-top:0">How much does your sport need each one?</span>
+            <div id="profRates"></div>
+          </div>
+          <span class="lab" style="margin-top:0">Rate yourself, honestly but kindly</span>
+          <p class="small" style="margin:-4px 0 8px">1 is just starting, 5 is a real strength. Nobody else sees this unless you send it.</p>
+          <div id="selfRates"></div>
+        </div>
+      </div>
+
+      <span class="lab">Where the gaps are</span>
+      <p class="small" style="margin-top:-4px">The biggest gaps between your sport and you are often the best things to train. Pick one to focus on, if you want to.</p>
+      <div class="gaps" id="gaps"></div>
+      <div class="picks" id="focusChips" style="margin-top:12px"></div>
+
+      <label class="lab" for="practise">What would you practise to get better?</label>
+      <div class="starters" data-for="practise">
+        <button class="st" type="button">To get better at my skill I would practise </button>
+        <button class="st" type="button">I could work on my </button>
+        <button class="st" type="button">A drill that would help is </button>
+        <button class="st" type="button">because in my sport you need </button>
+      </div>
+      <textarea id="practise" placeholder="Say it in your own words, as short or long as you like."></textarea>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 3 ================= -->
+  <details class="acc acc-teal stage" id="st3" data-n="3">
+    <summary>
+      <span class="num">3</span>
+      <div class="txt"><h2>Test lab</h2><p>Mini tests you can do right here, saved as your starting line.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>You cannot tell if training works unless you <b>measure</b> something before and after. Your first go is your <b>starting line</b>. Later, a <b>retest</b> shows how far you have come.</p>
+        <p class="small">Do as many or as few as you like. Every number here is only ever compared with you.</p>
+      </div>
+      <div class="modebar">
+        <span class="lab" style="margin:0">Saving results as</span>
+        <button class="pk" id="modeBase" aria-pressed="true">My starting line</button>
+        <button class="pk" id="modeRe" aria-pressed="false">A retest</button>
+      </div>
+      <div class="tests">
+        <div class="test">
+          <h3><span id="icoReact"></span>Reaction time</h3>
+          <p>Tap the panel to start. When it turns <b>green</b>, tap as fast as you can. Five goes. Smaller numbers are quicker.</p>
+          <button class="rx" id="rxPad">Tap to start</button>
+          <div class="tries" id="rxTries"></div>
+          <div class="res" id="resReact"></div>
+          <p class="hint">Fun fact: in sprinting, a start less than 0.1 seconds after the gun counts as a false start, because people are not thought to be able to react that fast.</p>
+        </div>
+        <div class="test">
+          <h3><span id="icoTaps"></span>Tap speed</h3>
+          <p>Your first tap starts a 10 second clock. Tap the drum as many times as you can. Stop any time.</p>
+          <button class="drum" id="drum">GO</button>
+          <div class="tbar"><span id="tapBar"></span></div>
+          <p class="small" id="tapInfo" style="text-align:center;margin:6px 0 0">Ready when you are</p>
+          <div class="res" id="resTaps"></div>
+        </div>
+        <div class="test">
+          <h3><span id="icoBal"></span>Balance</h3>
+          <p>Stand near a wall or a chair. Lift one foot, press start. Press stop when the foot touches down. It stops itself at 60 seconds.</p>
+          <div class="picks" id="legPick" style="margin-bottom:8px"><button class="pk" data-leg="L" aria-pressed="true">Standing on left leg</button><button class="pk" data-leg="R" aria-pressed="false">Standing on right leg</button></div>
+          <div class="clock" id="balClock">0.0</div>
+          <button class="btn btn-orange watchbtn" id="balBtn">Start</button>
+          <div class="res" id="resBal"></div>
+        </div>
+        <div class="test">
+          <h3><span id="icoPlank"></span>Plank hold</h3>
+          <p>Forearms and toes, or forearms and knees. Both count. Stop as soon as your back starts to sag. Short and solid beats long and wobbly. It stops itself at 2 minutes.</p>
+          <div class="picks" id="plankPick" style="margin-bottom:8px"><button class="pk" data-p="full" aria-pressed="true">On toes</button><button class="pk" data-p="knees" aria-pressed="false">On knees</button></div>
+          <div class="clock" id="plankClock">0.0</div>
+          <button class="btn btn-orange watchbtn" id="plankBtn">Start</button>
+          <div class="res" id="resPlank"></div>
+          <p class="hint">Skip this one if your body is not up for it today.</p>
+        </div>
+        <div class="test">
+          <h3><span id="icoOwn"></span>My own sport test</h3>
+          <p>Something from your sport you can count, done away from the screen. Keepy uppies in a row, free throws out of 10, lengths without stopping.</p>
+          <input type="text" id="ownTest" class="wide" maxlength="60" placeholder="what I counted">
+          <div class="numrow" style="margin-top:8px"><input type="number" class="num" id="ownTestN" inputmode="decimal" placeholder="number" aria-label="My result"><button class="btn" id="ownTestBtn">Save it</button></div>
+          <div class="res" id="resOwn"></div>
+        </div>
+      </div>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 4 ================= -->
+  <details class="acc acc-plum stage" id="st4" data-n="4">
+    <summary>
+      <span class="num">4</span>
+      <div class="txt"><h2>Goal builder</h2><p>Turn &ldquo;get better at it&rdquo; into a SMART goal.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>&ldquo;Get better at football&rdquo; is a wish. A <b>SMART</b> goal is a wish with a plan inside it.</p>
+      </div>
+      <div class="smart">
+        <div class="sl fill-orange"><b>S</b><i>Specific</i>Says exactly which skill.</div>
+        <div class="sl fill-yellow"><b>M</b><i>Measurable</i>Has a number you can count.</div>
+        <div class="sl fill-teal"><b>A</b><i>Achievable</i>You can picture getting there.</div>
+        <div class="sl fill-plum"><b>R</b><i>Realistic</i>Fits your life, and matters to you.</div>
+        <div class="sl fill-bright"><b>T</b><i>Time bound</i>Has a &ldquo;by when&rdquo;.</div>
+      </div>
+
+      <span class="tryk">Try a bit: goal glow up</span>
+      <p>Each wish below needs a glow up. Tap the version that is the SMART one.</p>
+      <div id="glows"></div>
+
+      <span class="tryk">Build yours</span>
+      <p id="gSportLine" class="small"></p>
+      <div class="build">
+        <span class="lab">1. What will you count?</span>
+        <div class="picks" id="measChips"></div>
+        <div id="ownMeasBox" hidden style="margin-top:10px">
+          <input type="text" class="wide" id="gWhat" maxlength="70" placeholder="e.g. times I hit the target, out of 10">
+          <div class="picks" id="dirPick" style="margin-top:8px"><button class="pk" data-d="up" aria-pressed="true">Bigger number is better</button><button class="pk" data-d="down" aria-pressed="false">Smaller number is better</button></div>
+        </div>
+
+        <span class="lab">2. Where are you now, and where do you want to get to?</span>
+        <div class="numrow">
+          <label>Now I can do<input type="number" class="num" id="gNow" inputmode="decimal"></label>
+          <label>My goal<input type="number" class="num" id="gTarget" inputmode="decimal"></label>
+          <button class="btn btn-quiet" id="useBase" hidden>Use my test lab number</button>
+        </div>
+        <p class="hint" id="nowHint">Not sure what &ldquo;now&rdquo; is? Have a go and count it, or use the test lab.</p>
+
+        <span class="lab">3. By when?</span>
+        <div class="picks" id="whenChips"></div>
+
+        <span class="lab">4. Why does it matter to you?</span>
+        <div class="picks" id="whyChips"></div>
+        <input type="text" class="wide" id="whyOwn" maxlength="80" placeholder="or in my own words" style="margin-top:10px">
+      </div>
+
+      <div class="ticket" id="ticket"></div>
+      <div class="lights" id="lights"></div>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 5 ================= -->
+  <details class="acc acc-bright stage" id="st5" data-n="5">
+    <summary>
+      <span class="num">5</span>
+      <div class="txt"><h2>Goldilocks goals</h2><p>Too easy, too hard, or just right?</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>The best goals sit in the <b>stretch zone</b>: hard enough that you have to practise, doable enough that you can see yourself getting there.</p>
+      </div>
+      <div class="zones">
+        <div class="zone" style="background:#cdeef6"><b>Too easy: comfort zone</b>You could do it today. No practice needed, so nothing changes.</div>
+        <div class="zone" style="background:#c6ead6"><b>Just right: stretch zone</b>A bit wobbly at first. With practice, you get there. This is where you improve.</div>
+        <div class="zone" style="background:#fbd2c6"><b>Too hard: panic zone</b>So far away it feels impossible, so most people give up. Sometimes not safe either.</div>
+      </div>
+
+      <span class="tryk">Try a bit: judge the goal</span>
+      <p>A flock of made up athletes have set some goals. What do you reckon?</p>
+      <div class="scens" id="scens"></div>
+
+      <span class="tryk">Your goal on the dial</span>
+      <svg class="dial" viewBox="0 -14 300 189" role="img" aria-labelledby="dialT">
+        <title id="dialT">Challenge dial from too easy to too hard</title>
+        <path d="M40 140 A110 110 0 0 1 95 44.7" fill="none" stroke="#00a6c9" stroke-width="34"/>
+        <path d="M95 44.7 A110 110 0 0 1 205 44.7" fill="none" stroke="#2f9e6a" stroke-width="34"/>
+        <path d="M205 44.7 A110 110 0 0 1 260 140" fill="none" stroke="#e0443a" stroke-width="34"/>
+        <path d="M23 140 A127 127 0 0 1 277 140" fill="none" stroke="#0a2f38" stroke-width="3"/>
+        <path d="M57 140 A93 93 0 0 1 243 140" fill="none" stroke="#0a2f38" stroke-width="3"/>
+        <text x="38" y="168" font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#0a2f38" text-anchor="middle">TOO EASY</text>
+        <text x="150" y="2" font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#0a2f38" text-anchor="middle">JUST RIGHT</text>
+        <text x="262" y="168" font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#0a2f38" text-anchor="middle">TOO HARD</text>
+        <g id="needle" style="transform-origin:150px 140px;transform:rotate(-90deg)">
+          <path d="M150 140 L144 136 L150 52 L156 136 Z" fill="#0a2f38"/>
+        </g>
+        <circle cx="150" cy="140" r="12" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/>
+      </svg>
+      <p class="verdict ctr" id="dialVerdict">Build a goal in stage 4 and it shows up here.</p>
+      <p class="hint ctr" id="dialWhy"></p>
+      <div class="endrow" style="justify-content:center" id="nudgeRow" hidden>
+        <button class="btn btn-quiet" id="nudgeDown">Make it a bit easier</button>
+        <button class="btn btn-quiet" id="nudgeUp">Make it a bit harder</button>
+      </div>
+      <p class="hint ctr">The dial is a rough guess. You know your sport and your body better than a dial does.</p>
+
+      <span class="lab">What do you think of your goal?</span>
+      <div class="picks" id="myVerdict"></div>
+      <label class="lab" for="justify">Why? (this is the bit coaches care about)</label>
+      <div class="starters" data-for="justify">
+        <button class="st" type="button">I think it is just right because </button>
+        <button class="st" type="button">It will stretch me because </button>
+        <button class="st" type="button">It is still achievable because </button>
+        <button class="st" type="button">If it turns out too easy I will </button>
+        <button class="st" type="button">If it turns out too hard I will </button>
+      </div>
+      <textarea id="justify" placeholder="A sentence or two is plenty."></textarea>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 6 ================= -->
+  <details class="acc acc-orange stage" id="st6" data-n="6">
+    <summary>
+      <span class="num">6</span>
+      <div class="txt"><h2>Plan the steps</h2><p>Mini targets, practice, and how you will check.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>A big goal is a staircase. Each step is a <b>mini target</b> you can check. Hit a step, and you know the plan is working. Miss one, and you change the plan, not yourself.</p>
+      </div>
+      <div id="stairsBox"></div>
+      <div class="steplist" id="stepList"></div>
+      <div class="endrow"><button class="btn btn-quiet" id="restep">Work the steps out again from my goal</button></div>
+
+      <span class="lab">What will you practise? Pick up to three</span>
+      <div class="picks" id="actChips"></div>
+      <input type="text" class="wide" id="ownAct" maxlength="70" placeholder="or my own practice idea" style="margin-top:10px">
+
+      <span class="lab">Which days?</span>
+      <div class="picks" id="dayChips"></div>
+
+      <span class="lab">How will you measure it?</span>
+      <div class="picks" id="measureChips"></div>
+
+      <span class="lab">Who could help?</span>
+      <div class="picks" id="helpChips"></div>
+
+      <span class="lab">When will you check how it is going?</span>
+      <div class="picks" id="reviewChips"></div>
+
+      <div class="planprev" id="planPrev"></div>
+      <p class="hint">Want a weekly fitness routine to go with it? <a href="/practice/training-plan.html">Build your own training plan</a> pairs nicely with this.</p>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 7 ================= -->
+  <details class="acc acc-teal stage" id="st7" data-n="7">
+    <summary>
+      <span class="num">7</span>
+      <div class="txt"><h2>Track, retest, rethink</h2><p>Record it, compare it, decide what is next.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>Coaches do not just set goals. They <b>record</b>, <b>review</b> and <b>adjust</b>. Come back here after a few practice sessions and add what you managed.</p>
+      </div>
+
+      <span class="lab">Progress log</span>
+      <div class="numrow">
+        <label>Date<input type="date" id="logDate"></label>
+        <label>What I managed<input type="number" class="num" id="logN" inputmode="decimal"></label>
+        <button class="btn btn-orange" id="logAdd">Add it</button>
+      </div>
+      <div class="loglist" id="logList"></div>
+      <div id="chartBox"></div>
+      <p class="fb" id="logFb"></p>
+
+      <span class="lab">Test lab: starting line against retest</span>
+      <div class="cmp" id="cmp"></div>
+      <div class="endrow"><button class="btn btn-quiet" id="goRetest">Do a retest in the test lab</button></div>
+
+      <span class="lab">How is it going?</span>
+      <div class="picks" id="statusChips"></div>
+      <div id="advice"></div>
+
+      <span class="lab">Adjust the goal (only if you want to)</span>
+      <div class="numrow">
+        <label>New goal number<input type="number" class="num" id="adjN" inputmode="decimal"></label>
+      </div>
+      <div class="picks" id="adjWhen" style="margin-top:10px"></div>
+      <div class="picks" id="adjWhy" style="margin-top:10px"></div>
+      <div class="endrow"><button class="btn" id="adjSave">Change my goal</button></div>
+      <p class="fb" id="adjFb"></p>
+      <div id="adjList" class="small"></div>
+
+      <label class="lab" for="reflect">Look back</label>
+      <div class="starters" data-for="reflect">
+        <button class="st" type="button">Over the last few weeks I </button>
+        <button class="st" type="button">The thing that helped most was </button>
+        <button class="st" type="button">Something that did not work was </button>
+        <button class="st" type="button">Compared with my starting line, </button>
+        <button class="st" type="button">Next time I would </button>
+      </div>
+      <textarea id="reflect" placeholder="What happened, what helped, what you would change."></textarea>
+      <label class="lab" for="nextGoal">My next goal, for the next stage</label>
+      <input type="text" class="wide" id="nextGoal" maxlength="140" placeholder="e.g. 20 keepy uppies using my weaker foot by Christmas">
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <hr class="rule">
+
+  <div class="weektheme"><h2>Your coach card</h2><span>Builds itself from whatever you have tried. Gaps are fine.</span></div>
+  <div class="coach" id="coach"></div>
+
+  <div id="sendHost"></div>
+
+  <div class="endrow">
+    <button class="btn btn-quiet" id="resetBtn">Start again</button>
+    <span class="small" id="resetMsg"></span>
+  </div>
+
+  <a class="backlink" href="/practice/#pe-standard">Back to PE</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.goal-coach.v1", WHO = "base5.who.v1";
+var INK = "#0a2f38";
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c] }) }
+var RM = false;
+try{ RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+
+/* ---------------- icons ---------------- */
+var SW = ' stroke="' + INK + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+function svg(vb, inner){ return '<svg viewBox="' + vb + '" aria-hidden="true">' + inner + '</svg>' }
+var ICON = {
+  football: (function(){ var o = '<circle cx="32" cy="32" r="24" fill="#fffdf8"' + SW + '/><path d="M32 23l8.5 6.2-3.2 10H26.7l-3.2-10z" fill="' + INK + '"/>';
+    for(var i = 0; i < 5; i++){ var a = (-90 + i * 72) * Math.PI / 180, b1 = a - .3, b2 = a + .3;
+      o += '<path d="M' + (32 + 9 * Math.cos(a)).toFixed(1) + ' ' + (32 + 9 * Math.sin(a)).toFixed(1) + 'L' + (32 + 17 * Math.cos(a)).toFixed(1) + ' ' + (32 + 17 * Math.sin(a)).toFixed(1) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      o += '<path d="M' + (32 + 21 * Math.cos(b1)).toFixed(1) + ' ' + (32 + 21 * Math.sin(b1)).toFixed(1) + 'A21 21 0 0 1 ' + (32 + 21 * Math.cos(b2)).toFixed(1) + ' ' + (32 + 21 * Math.sin(b2)).toFixed(1) + '" fill="none" stroke="' + INK + '" stroke-width="7"/>' }
+    return o })(),
+  basketball: '<circle cx="32" cy="32" r="24" fill="#ef7724"' + SW + '/><path d="M32 8v48M8 32h48M15 14c9 9 9 27 0 36M49 14c-9 9-9 27 0 36" fill="none"' + SW + '/>',
+  boxing: '<path d="M20 34c-1-14 6-24 18-24 10 0 16 7 16 17 0 9-5 15-12 17H24c-3-2-4-6-4-10z" fill="#e0443a"' + SW + '/><path d="M20 30c-7 0-9 9-2 12h8" fill="#e0443a"' + SW + '/><rect x="23" y="44" width="21" height="12" rx="3" fill="#fffdf8"' + SW + '/>',
+  swimming: '<circle cx="24" cy="24" r="7" fill="#ffc247"' + SW + '/><path d="M31 29 Q42 12 55 20" fill="none"' + SW + ' stroke-width="4"/><path d="M5 40q6-6 12 0t12 0 12 0 12 0 6-3" fill="none" stroke="#00a6c9" stroke-width="4" stroke-linecap="round"/><path d="M5 50q6-6 12 0t12 0 12 0 12 0 6-3" fill="none" stroke="#007291" stroke-width="4" stroke-linecap="round"/>',
+  running: '<path d="M10 42c0-8 4-14 8-16l7 6c6 4 14 4 21 6 6 1 10 4 10 8H10z" fill="#00a6c9"' + SW + '/><rect x="9" y="46" width="48" height="7" rx="3.5" fill="#fffdf8"' + SW + '/><path d="M24 34l4-4M30 37l4-4M2 22h10M4 30h7" fill="none"' + SW + '/>',
+  climbing: '<rect x="10" y="7" width="44" height="50" rx="6" fill="#d6c9b6"' + SW + '/><circle cx="22" cy="18" r="4" fill="#ef7724"' + SW + '/><circle cx="40" cy="24" r="4" fill="#7b4b8f"' + SW + '/><circle cx="26" cy="36" r="4" fill="#2f9e6a"' + SW + '/><circle cx="42" cy="46" r="4" fill="#ffc247"' + SW + '/><path d="M46 4v14" fill="none"' + SW + '/>',
+  skate: '<path d="M6 30h52" fill="none" stroke="' + INK + '" stroke-width="3"/><rect x="6" y="26" width="52" height="8" rx="4" fill="#7b4b8f"' + SW + '/><path d="M18 34v4M46 34v4" fill="none"' + SW + '/><circle cx="18" cy="43" r="5" fill="#ffc247"' + SW + '/><circle cx="46" cy="43" r="5" fill="#ffc247"' + SW + '/>',
+  dance: '<path d="M24 46V16l24-6v30" fill="none"' + SW + '/><path d="M24 22l24-6" fill="none"' + SW + '/><circle cx="18" cy="46" r="7" fill="#e85d9a"' + SW + '/><circle cx="42" cy="40" r="7" fill="#e85d9a"' + SW + '/>',
+  badminton: '<path d="M17 8h30l-9 30H26z" fill="#fffdf8"' + SW + '/><path d="M27 8l3 30M37 8l-3 30M20 18h24" fill="none" stroke="' + INK + '" stroke-width="2"/><circle cx="32" cy="46" r="8" fill="#ffc247"' + SW + '/>',
+  cycling: '<circle cx="16" cy="42" r="11" fill="none"' + SW + '/><circle cx="48" cy="42" r="11" fill="none"' + SW + '/><path d="M16 42l10-16h16l6 16M26 26l6 16 10-16M24 20h7M40 20l2 6" fill="none" stroke="#ef7724" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  martial: '<rect x="4" y="25" width="56" height="10" rx="3" fill="' + INK + '"/><path d="M27 34l-6 22M37 34l6 22" fill="none" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/><rect x="25" y="21" width="14" height="18" rx="4" fill="#ffc247"' + SW + '/>',
+  esports: '<path d="M14 20h36c7 0 10 7 10 15s-2 15-8 15c-5 0-8-7-12-7H24c-4 0-7 7-12 7-6 0-8-7-8-15s3-15 10-15z" fill="#007291"' + SW + '/><path d="M18 29v10M13 34h10" fill="none" stroke="#fffdf8" stroke-width="3.5" stroke-linecap="round"/><circle cx="44" cy="31" r="3" fill="#ffc247"/><circle cx="50" cy="37" r="3" fill="#ef7724"/>',
+  own: '<path d="M32 7l7.5 15.5 17 2.3-12.4 11.8 3.1 16.9L32 45.4l-15.2 8.1 3.1-16.9L7.5 24.8l17-2.3z" fill="#ffc247"' + SW + '/>'
+};
+var CICON = {
+  speed: '<path d="M23 3L8 23h9l-3 14 17-21h-9z" fill="#ffc247"' + SW + '/>',
+  stamina: '<path d="M20 35S5 25 5 14a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 11-15 21-15 21z" fill="#e0443a"' + SW + '/><path d="M9 19h6l3-5 4 9 3-4h6" fill="none" stroke="#fffdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  strength: '<path d="M12 20h16" fill="none" stroke="' + INK + '" stroke-width="5"/><rect x="4" y="11" width="8" height="18" rx="2" fill="#007291"' + SW + '/><rect x="28" y="11" width="8" height="18" rx="2" fill="#007291"' + SW + '/>',
+  flex: '<path d="M7 32 Q20 -4 33 32" fill="none" stroke="#7b4b8f" stroke-width="5" stroke-linecap="round"/><circle cx="7" cy="32" r="4" fill="#ffc247"' + SW + '/><circle cx="33" cy="32" r="4" fill="#ffc247"' + SW + '/>',
+  balance: '<path d="M20 23l-7 12h14z" fill="#ef7724"' + SW + '/><path d="M4 22h32" fill="none"' + SW + '/><circle cx="10" cy="15" r="5" fill="#00a6c9"' + SW + '/><circle cx="30" cy="15" r="5" fill="#00a6c9"' + SW + '/>',
+  coord: '<path d="M8 30 Q20 -2 32 30" fill="none" stroke="' + INK + '" stroke-width="2" stroke-dasharray="3 4"/><circle cx="8" cy="31" r="5" fill="#e85d9a"' + SW + '/><circle cx="20" cy="9" r="5" fill="#ffc247"' + SW + '/><circle cx="32" cy="31" r="5" fill="#2f9e6a"' + SW + '/>',
+  react: '<circle cx="20" cy="23" r="13" fill="#fffdf8"' + SW + '/><path d="M20 23v-7M16 5h8M20 5v5M31 11l3-3" fill="none"' + SW + '/>',
+  power: '<path d="M20 3l4 10 10-4-6 9 9 6-11 1 1 11-7-8-7 8 1-11-11-1 9-6-6-9 10 4z" fill="#ef7724"' + SW + '/>'
+};
+function sIcon(id){ return svg("0 0 64 64", ICON[id] || ICON.own) }
+function cIcon(id){ return svg("0 0 40 40", CICON[id]) }
+var TICK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#2f9e6a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------------- data ---------------- */
+var COMP = [
+  {id:"speed", name:"Speed", what:"Moving your body, or part of it, quickly.", eg:"Sprinting to reach a ball first."},
+  {id:"stamina", name:"Stamina", what:"Keeping going for a long time. Your heart and lungs do the work.", eg:"Still running in the last minutes of a match."},
+  {id:"strength", name:"Strength", what:"How hard your muscles can push or pull.", eg:"Pulling yourself up a climbing wall."},
+  {id:"flex", name:"Flexibility", what:"How far your joints can move. Think bendy.", eg:"A high kick in martial arts."},
+  {id:"balance", name:"Balance", what:"Staying steady, standing still or on the move.", eg:"Landing a skateboard trick."},
+  {id:"coord", name:"Coordination", what:"Body parts working together smoothly. Hands and eyes count.", eg:"Dribbling a basketball while running."},
+  {id:"react", name:"Reaction time", what:"How quickly you start to respond after something happens.", eg:"A goalkeeper diving for a penalty."},
+  {id:"power", name:"Power", what:"Strength and speed together, in one quick burst.", eg:"Jumping high for a rebound."}
+];
+var CBY = {}; COMP.forEach(function(c){ CBY[c.id] = c });
+
+var QUIZ = [
+  {s:"Saving a shot that bounces off a defender at the last second.", a:"react", why:"The ball changed direction suddenly, so it is all about how fast you respond."},
+  {s:"Swimming 20 lengths without needing to stop.", a:"stamina", why:"Keeping going for a long time is stamina."},
+  {s:"Holding a still pose on one foot at the end of a dance.", a:"balance", why:"Staying steady on one foot is balance."},
+  {s:"Leaping off the ground to smash a shuttlecock from high up.", a:"power", why:"A jump is strength and speed in one burst, which is power."},
+  {s:"Doing the splits in a martial arts class.", a:"flex", why:"How far your hips can open is flexibility."},
+  {s:"Keeping a football in the air with feet, knees and thighs.", a:"coord", why:"Lots of body parts working together with your eyes is coordination."},
+  {s:"Racing back to stop an attacker before they reach the goal.", a:"speed", why:"Getting from A to B quickly is speed."},
+  {s:"Gripping tiny holds on a climbing wall.", a:"strength", why:"Holding on hard with your fingers and arms is strength. Stamina helps too if the route is long."}
+];
+
+/* order: speed stamina strength flex balance coord react power */
+var SPORTS = [
+  {id:"football", name:"Football", bg:"linear-gradient(150deg,#4bbf7f,#2f9e6a)", p:[4,5,3,3,3,4,4,4],
+   skills:["Passing","Dribbling","Shooting","First touch","Keepy uppies","Defending"],
+   meas:[{t:"keepy uppies in a row",d:"up"},{t:"passes that hit a target, out of 10",d:"up",max:10},{t:"shots on target, out of 10",d:"up",max:10},{t:"seconds to dribble round 6 cones",d:"down"}],
+   acts:["Wall passes, both feet","Keepy uppie practice, 5 minutes","Cone dribbling course","Shooting at a target in the goal","First touch: throw, control, pass","Small games with friends"]},
+  {id:"basketball", name:"Basketball", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", p:[4,4,3,3,3,5,4,5],
+   skills:["Dribbling","Free throws","Layups","Passing","Defending","Rebounding"],
+   meas:[{t:"free throws in, out of 10",d:"up",max:10},{t:"layups in, out of 10",d:"up",max:10},{t:"seconds to dribble round the cones",d:"down"}],
+   acts:["10 free throws, same routine every time","Layups from both sides","Dribbling with my weaker hand","Chest passes against a wall","Defensive slides","A game of HORSE with a friend"]},
+  {id:"boxing", name:"Boxing", bg:"linear-gradient(150deg,#f06a5f,var(--red))", lt:1, p:[4,5,4,2,4,4,5,5],
+   skills:["Footwork","Jab","Keeping my guard up","Combinations","Skipping","Pad work"],
+   meas:[{t:"skips in a row without tripping",d:"up"},{t:"one minute rounds of shadow boxing with my guard up",d:"up"},{t:"clean combinations on the pads in 30 seconds",d:"up"}],
+   acts:["Skipping, 3 rounds of 1 minute","Shadow boxing in front of a mirror","Footwork along lines on the floor","Pad work with a coach","Guard check: hands up all round"]},
+  {id:"swimming", name:"Swimming", bg:"linear-gradient(150deg,var(--bright),var(--teal))", lt:1, p:[3,5,4,4,2,4,2,3],
+   skills:["Front crawl","Breaststroke","Backstroke","Breathing rhythm","Kicking","Turns"],
+   meas:[{t:"lengths without stopping",d:"up"},{t:"seconds to swim one length",d:"down"}],
+   acts:["Kick with a float, 4 lengths","Breathing every 3 strokes","Steady lengths with rests","Push and glide practice","Two lengths of my trickiest stroke"]},
+  {id:"running", name:"Running", bg:"linear-gradient(150deg,var(--yellow),var(--yellow-deep))", p:[3,5,2,2,2,3,2,3],
+   skills:["Pacing","Sprint starts","Arm action","Running further","Breathing rhythm","Finishing strong"],
+   meas:[{t:"minutes running without stopping",d:"up"},{t:"seconds to run 60 metres",d:"down"},{t:"laps of the field without stopping",d:"up"}],
+   acts:["Run walk intervals","Short sprints with full rests","Steady jog at chatting pace","Sprint start practice","Arm swing drills","A parkrun on a Saturday morning"]},
+  {id:"climbing", name:"Climbing", bg:"linear-gradient(150deg,#a77bb9,var(--plum))", lt:1, p:[1,3,5,4,4,4,1,3],
+   skills:["Footwork","Grip","Reading a route","Hips close to the wall","Resting on the wall","Falling safely"],
+   meas:[{t:"boulder problems I can finish",d:"up"},{t:"moves along the traverse wall without stepping off",d:"up"}],
+   acts:["Silent feet: place each foot without a sound","Traverse along the bottom of the wall","Repeat one problem until it is smooth","Look at a route before climbing it","Practise resting with straight arms"]},
+  {id:"skate", name:"Skateboarding", bg:"linear-gradient(150deg,#f08ab8,var(--pink))", p:[2,2,2,3,5,5,4,3],
+   skills:["Pushing","Ollie","Carving","Kickturns","Manuals","Stopping safely"],
+   meas:[{t:"ollies landed, out of 10",d:"up",max:10},{t:"kickturns in a row",d:"up"},{t:"metres rolling in a manual",d:"up"}],
+   acts:["Ollie practice on grass or carpet first","Kickturns on flat ground","Carving round a cone","Short rolling manuals","Practise stopping and falling safely, helmet on"]},
+  {id:"dance", name:"Dance", bg:"linear-gradient(150deg,#c27ad6,#8e3fa6)", lt:1, p:[3,4,3,5,5,5,2,3],
+   skills:["Learning a routine","Timing to the beat","Spins","Kicks and leaps","Freestyle","Isolations"],
+   meas:[{t:"counts of 8 I can dance from memory",d:"up"},{t:"clean spins, out of 10",d:"up",max:10},{t:"seconds holding a balance pose",d:"up"}],
+   acts:["Learn one count of 8 at a time","Dance along to a video at half speed","Spotting practice for spins","Stretching after warming up","Freestyle to one whole song","Film it and watch it back"]},
+  {id:"badminton", name:"Badminton", bg:"linear-gradient(150deg,#7fd3e6,var(--bright))", p:[5,4,2,3,3,5,5,3],
+   skills:["Serve","Clear","Smash","Drop shot","Footwork","Net shots"],
+   meas:[{t:"serves landing in, out of 10",d:"up",max:10},{t:"hits in a rally with a partner",d:"up"},{t:"clears that reach the back, out of 10",d:"up",max:10}],
+   acts:["Serve practice, 20 serves","Rally with a partner and count the hits","Shadow footwork to the four corners","Drop shots into a target zone","Smash practice from easy feeds"]},
+  {id:"cycling", name:"Cycling", bg:"linear-gradient(150deg,#2a8aa6,#005a73)", lt:1, p:[3,5,3,2,3,2,2,4],
+   skills:["Riding slowly with balance","Gears","Hills","Signalling","Cornering","Riding further"],
+   meas:[{t:"minutes riding without stopping",d:"up"},{t:"seconds riding slowly without putting a foot down",d:"up"},{t:"seconds to ride my loop",d:"down"}],
+   acts:["Slow race: ride as slowly as I can","Look back and signal practice","Change gear before a hill","A steady ride, a bit longer each week","Cornering round cones"]},
+  {id:"martial", name:"Martial arts", bg:"linear-gradient(150deg,#ffd77a,var(--yellow))", p:[4,3,3,5,5,5,4,4],
+   skills:["Kicks","Stances","Forms or patterns","Punches and blocks","Breakfalls","Flexibility"],
+   meas:[{t:"moves of my form I can do from memory",d:"up"},{t:"seconds holding a low stance",d:"up"},{t:"clean kicks to the pad, out of 10",d:"up",max:10}],
+   acts:["Practise one section of my form","Kicks slowly with control, then faster","Stance holds","Stretching after warming up","Partner practice at club"]},
+  {id:"esports", name:"Gaming (esports reflexes)", bg:"linear-gradient(150deg,#2b4e58,var(--ink))", lt:1, p:[1,2,1,1,1,5,5,1],
+   skills:["Aim","Reaction time","Map awareness","Callouts and teamwork","Game sense","Staying calm"],
+   meas:[{t:"milliseconds on the reaction test",d:"down",test:"react"},{t:"aim trainer score",d:"up"},{t:"games where I stay calm, out of 10",d:"up",max:10}],
+   acts:["10 minutes of aim training","The reaction test in the test lab","Watch a replay and spot one thing to fix","Practise callouts with my team","Stand up and stretch every hour","Learn one map properly"]},
+  {id:"own", name:"My own sport", bg:"linear-gradient(150deg,#fffdf8,#efe6d6)", p:[3,3,3,3,3,3,3,3],
+   skills:["Technique","Accuracy","Speed","Keeping going","Confidence","Teamwork"],
+   meas:[{t:"times I get it right, out of 10",d:"up",max:10},{t:"in a row without a mistake",d:"up"},{t:"seconds it takes me",d:"down"}],
+   acts:["Practise the hardest bit slowly","Repeat it 10 times","Watch someone good and copy one thing","Film it and watch it back","Ask someone for one tip"]}
+];
+var SBY = {}; SPORTS.forEach(function(s){ SBY[s.id] = s });
+
+var SNAP = [
+  {k:"Ollie", s:"skate", why:"An ollie is jumping the board into the air with you on it.", hint:"It is a jump, and there are wheels involved."},
+  {k:"Front crawl", s:"swimming", why:"Front crawl is the fastest swimming stroke.", hint:"You need water for this one."},
+  {k:"Layup", s:"basketball", why:"A layup is a close shot laid up off the backboard.", hint:"Think hoops."},
+  {k:"Jab", s:"boxing", why:"A jab is a quick straight punch with your front hand.", hint:"It is a punch."},
+  {k:"Drop shot", s:"badminton", why:"A drop shot falls just over the net.", hint:"It goes over a net, with a racket."},
+  {k:"Free kick", s:"football", why:"A free kick is taken after a foul.", hint:"You kick it, and there is a goal."},
+  {k:"Pirouette", s:"dance", why:"A pirouette is a full spin on one foot.", hint:"It is a spin, often to music."},
+  {k:"Kata", s:"martial", why:"A kata is a set pattern of moves, practised in karate.", hint:"It is a set pattern of moves in a dojo."}
+];
+
+var GLOW = [
+  {v:"Get better at football", o:[
+    {t:"Be the best footballer in the world.", ok:0, why:"Huge dream, but there is no number and no date, and it is not really achievable soon."},
+    {t:"Go from 5 to 15 keepy uppies in a row in 4 weeks, practising 3 times a week.", ok:1, why:"Specific skill, a number, doable, and a date. That is SMART."},
+    {t:"Do some football at some point.", ok:0, why:"Nothing to count and no by when, so you would never know if you got there."}]},
+  {v:"Be good at swimming", o:[
+    {t:"Swim loads.", ok:0, why:"How much is loads? There is no number to check."},
+    {t:"Swim across the English Channel next Tuesday.", ok:0, why:"It has a date, but it is far too big a jump. Panic zone."},
+    {t:"Swim 4 lengths of front crawl without stopping by the end of half term.", ok:1, why:"Which stroke, how many lengths, and by when. SMART."}]},
+  {v:"Get faster at gaming", o:[
+    {t:"Get my reaction test average 20 milliseconds quicker in 3 weeks, with 10 minutes of aim training on school days.", ok:1, why:"A number you can test, a sensible step, and a date. SMART."},
+    {t:"Never lose a game again.", ok:0, why:"Nobody can promise that, so it is not achievable."},
+    {t:"Be faster.", ok:0, why:"Faster at what, and by how much, and when?"}]}
+];
+
+var WHEN = [{t:"in 2 weeks",w:2},{t:"in 4 weeks",w:4},{t:"in 6 weeks",w:6},{t:"by the end of half term",w:5},{t:"by the end of term",w:10}];
+var WHY = ["it is fun","I want to get into a team","I want to beat my own best","I want to keep up with my friends","I have an event coming up","I want to feel proud of it"];
+
+var SCEN = [
+  {who:"Robin, football", t:"Can do 5 keepy uppies. Goal: 6 keepy uppies in 6 weeks.", a:"easy", why:"Just one more in six weeks? Robin could probably do that on a good day already. Comfort zone."},
+  {who:"Wren, football", t:"Can do 5 keepy uppies. Goal: 200 keepy uppies by Friday.", a:"hard", why:"From 5 to 200 in a few days is a massive jump. Wren would likely give up. Panic zone."},
+  {who:"Jay&rsquo;s pigeon, football", t:"Can do 5 keepy uppies. Goal: 15 in 4 weeks, practising 3 times a week.", a:"right", why:"Three times more, with a month of regular practice. A stretch, but doable. And yes, the pigeon has been training."},
+  {who:"Finch, swimming", t:"Can swim 2 lengths without stopping. Goal: 4 lengths in 6 weeks.", a:"right", why:"Doubling over six weeks of swimming is a solid stretch."},
+  {who:"Swift, fitness", t:"Can hold a plank for 20 seconds. Goal: a 10 minute plank by next week.", a:"hard", why:"Far too big a jump, and holding a plank that long is not a sensible thing to aim for anyway. A minute with good form is a great goal."},
+  {who:"Lark, basketball", t:"Gets 3 free throws in, out of 10. Goal: 3 out of 10 by the end of term.", a:"easy", why:"That is what Lark can already do. No change means no stretch."},
+  {who:"Kestrel, gaming", t:"Reaction test average 300 milliseconds. Goal: 100 milliseconds in 3 weeks.", a:"hard", why:"Even top sprinters rarely react much quicker than about 120 milliseconds, and screens add their own delay. Trimming 20 or 30 would be just right."}
+];
+
+var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var MEASURE = ["Count it","Time it","Use the test lab on this page","Film it and compare","Ask someone to watch and score it","Keep a tally in my planner"];
+var HELP = ["Jay","HB","A friend","Someone at home","A club coach","Just me"];
+var REVIEW = ["Every week","Every two weeks","Halfway through","At the end"];
+var STATUS = [
+  {id:"hit", t:"I have hit my goal already", a:"Outrageous! Time to raise the bar. Use the adjust box below for a bigger number, or write a brand new goal in the look back box."},
+  {id:"track", t:"On track, getting there", a:"Keep the plan as it is. Steady is good. Check again at your next review point."},
+  {id:"slow", t:"Getting better, but slowly", a:"Two good moves: give it more time (change the date below), or make the goal a smaller step. Neither is giving up. That is coaching."},
+  {id:"stuck", t:"Stuck, it is not changing", a:"Try changing the practice rather than the goal. A different drill, shorter sessions more often, or ask Jay or HB to watch and give you one tip."},
+  {id:"bored", t:"It has stopped being fun", a:"That matters. Swap the drill, train with a friend, or pick a different skill. Enjoying it is what keeps people going."}
+];
+var ADJWHY = ["It was too easy","It was too hard","I need more time","I changed what I want"];
+
+var STUD = {
+  JT: {ms:["Set a realistic goal and say how you will measure your progress.","Record how you are getting on and say what you will do next."], st:[3,5,7]},
+  LW: {ms:["Choose a simple training goal for a sport.","Say what you would practise to reach your goal."], st:[1,4,6]},
+  EGW:{ms:["Set goals that stretch you but are still doable, explain why, and change the plan as you go.","Look back over a training period and set new goals for the next stage."], st:[5,7]},
+  LP: {ms:["Make a short training plan with clear goals, practice ideas and ways to check how it is going.","Follow the plan, record how it goes and change your goals if you need to."], st:[6,7]},
+  LC: {ms:["Pick a sport you want to get better at and name one skill in it.","Choose a simple goal to help you get better at that skill."], st:[1,4]},
+  HK: {ms:["Set a clear training goal and say what you need to practise.","Explain how you will measure your progress towards it."], st:[3,4,6]}
+};
+var STAGES = [
+  {n:1, t:"Pick your sport", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", ic:ICON.football, vb:"0 0 64 64"},
+  {n:2, t:"What your sport needs", bg:"linear-gradient(150deg,var(--yellow),var(--yellow-deep))", ic:CICON.power, vb:"0 0 40 40"},
+  {n:3, t:"Test lab", bg:"linear-gradient(150deg,var(--teal),#005a73)", ic:CICON.react, vb:"0 0 40 40", lt:1},
+  {n:4, t:"Goal builder", bg:"linear-gradient(150deg,var(--plum),#5c3269)", ic:'<circle cx="20" cy="20" r="16" fill="#e0443a"' + SW + '/><circle cx="20" cy="20" r="10" fill="#fffdf8"' + SW + '/><circle cx="20" cy="20" r="4" fill="#e0443a"' + SW + '/>', vb:"0 0 40 40", lt:1},
+  {n:5, t:"Goldilocks goals", bg:"linear-gradient(150deg,var(--bright),var(--teal))", ic:'<path d="M5 30a15 15 0 0 1 30 0" fill="#fffdf8"' + SW + '/><path d="M20 30l8-11" fill="none"' + SW + '/>', vb:"0 0 40 40", lt:1},
+  {n:6, t:"Plan the steps", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", ic:'<path d="M4 34h8v-8h8v-8h8v-8h8v24z" fill="#ffc247"' + SW + '/>', vb:"0 0 40 40"},
+  {n:7, t:"Track, retest, rethink", bg:"linear-gradient(150deg,var(--teal),#005a73)", ic:'<rect x="4" y="4" width="32" height="32" rx="4" fill="#fffdf8"' + SW + '/><path d="M9 28l7-8 6 5 9-12" fill="none" stroke="#ef7724" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>', vb:"0 0 40 40", lt:1}
+];
+
+/* ---------------- state ---------------- */
+function fresh(){
+  return {sport:"", ownSport:"", skill:"", ownSkill:"", snap:{}, seen:{}, quiz:{}, qi:0, prof:[3,3,3,3,3,3,3,3],
+    self:[3,3,3,3,3,3,3,3], selfTouched:false, focus:"", practise:"", mode:"base", tests:{base:{}, re:{}}, ownTest:"",
+    glow:{}, goal:{mi:-1, what:"", dir:"up", now:"", target:"", when:-1, why:"", whyOwn:""},
+    scen:{}, verdict:"", justify:"",
+    plan:{acts:[], ownAct:"", days:[], measure:[], help:[], review:"", steps:[]},
+    log:[], adjust:[], status:"", reflect:"", next:"", tried:{}, look:false};
+}
+var st = fresh();
+try{
+  var raw = JSON.parse(localStorage.getItem(KEY));
+  if(raw && typeof raw === "object"){
+    var f = fresh();
+    for(var k in f){ if(raw[k] !== undefined) f[k] = raw[k] }
+    ["goal","plan"].forEach(function(o){ var d = fresh()[o]; for(var kk in d){ if(f[o][kk] === undefined) f[o][kk] = d[kk] } });
+    if(!f.tests.base) f.tests.base = {}; if(!f.tests.re) f.tests.re = {};
+    st = f;
+  }
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
+function tried(n){ if(!st.tried[n]){ st.tried[n] = 1; drawMap() } save(); drawCoach() }
+
+function getWho(){ try{ return localStorage.getItem(WHO) || "" }catch(e){ return "" } }
+function setWho(v){ try{ localStorage.setItem(WHO, v) }catch(e){} }
+
+function sport(){ return SBY[st.sport] || null }
+function sportName(){ var s = sport(); if(!s) return ""; if(s.id === "own") return st.ownSport.trim() || "my own sport"; return s.id === "esports" ? "gaming" : s.name.toLowerCase() }
+function skillName(){ return st.skill === "__own" ? st.ownSkill.trim() : st.skill }
+function profile(){ var s = sport(); if(!s) return null; return s.id === "own" ? st.prof : s.p }
+function today(){ var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) }
+function prettyDate(iso){ if(!iso) return ""; var p = iso.split("-"); var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return (+p[2]) + " " + m[(+p[1]) - 1] }
+function numOr(v){ var n = parseFloat(v); return isNaN(n) ? null : n }
+
+/* confetti */
+function burst(target){
+  if(RM || !target || !target.getBoundingClientRect) return;
+  var r = target.getBoundingClientRect(), cols = ["#ef7724","#ffc247","#00a6c9","#7b4b8f","#2f9e6a","#e85d9a"];
+  for(var i = 0; i < 16; i++){
+    var b = document.createElement("span"); b.className = "bit";
+    b.style.left = (r.left + r.width / 2) + "px"; b.style.top = (r.top + r.height / 2) + "px";
+    b.style.background = cols[i % cols.length];
+    var a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90;
+    b.style.setProperty("--dx", Math.round(Math.cos(a) * d) + "px");
+    b.style.setProperty("--dy", Math.round(Math.sin(a) * d - 30) + "px");
+    document.body.appendChild(b);
+    (function(x){ setTimeout(function(){ if(x.parentNode) x.parentNode.removeChild(x) }, 950) })(b);
+  }
+}
+
+function btn(cls, html, pressed){ var b = document.createElement("button"); b.type = "button"; b.className = cls; b.innerHTML = html; if(pressed !== undefined) b.setAttribute("aria-pressed", pressed ? "true" : "false"); return b }
+function chipList(box, items, isOn, onTap){
+  box.innerHTML = "";
+  items.forEach(function(it, i){
+    var b = btn("pk", esc(it), isOn(it, i));
+    b.addEventListener("click", function(){ onTap(it, i, b) });
+    box.appendChild(b);
+  });
+}
+
+/* ---------------- who + map ---------------- */
+var who = (function(){ var w = getWho().toUpperCase(); return STUD[w] ? w : "" })();
+function drawWho(){
+  var row = el("whoRow"); row.innerHTML = "";
+  ["JT","LW","EGW","LP","LC","HK"].forEach(function(w){
+    var b = btn("whobtn", w, who === w);
+    b.addEventListener("click", function(){ who = (who === w) ? "" : w; if(who) setWho(who); st.look = false; save(); drawWho(); drawMap() });
+    row.appendChild(b);
+  });
+  var lk = btn("whobtn", "Just looking", !who && st.look);
+  lk.addEventListener("click", function(){ who = ""; st.look = true; save(); drawWho(); drawMap() });
+  row.appendChild(lk);
+  var ms = el("msList");
+  if(who){
+    ms.hidden = false;
+    ms.innerHTML = "<li><b>Step one</b>" + esc(STUD[who].ms[0]) + "</li><li><b>Step two</b>" + esc(STUD[who].ms[1]) + "</li>" +
+      "<li style='border-style:solid;border-color:var(--yellow-deep);background:#fff4d9'>Stages marked <b style='display:inline;color:var(--ink)'>good place to start</b> suit these best. Everything stays open, in any order.</li>";
+  }else ms.hidden = true;
+  document.querySelectorAll(".stage").forEach(function(d){
+    var n = +d.getAttribute("data-n");
+    d.classList.toggle("suits", !!(who && STUD[who].st.indexOf(n) > -1));
+  });
+}
+function drawMap(){
+  var box = el("smap"); box.innerHTML = "";
+  STAGES.forEach(function(s){
+    var b = btn("smbtn" + (s.lt ? " lt" : ""), '<span class="n">Stage ' + s.n + '</span>' + svg(s.vb, s.ic) + '<span>' + esc(s.t) + '</span><span class="gps">Good place to start</span><span class="tick">' + TICK + '</span>');
+    b.style.background = s.bg;
+    if(st.tried[s.n]) b.classList.add("done");
+    if(who && STUD[who].st.indexOf(s.n) > -1) b.classList.add("suits");
+    b.setAttribute("aria-label", "Stage " + s.n + ", " + s.t + (st.tried[s.n] ? ", tried" : ""));
+    b.addEventListener("click", function(){ openStage(s.n) });
+    box.appendChild(b);
+  });
+}
+function openStage(n){
+  var d = el("st" + n); d.open = true;
+  setTimeout(function(){ d.scrollIntoView({behavior: RM ? "auto" : "smooth", block:"start"}) }, 30);
+}
+
+/* ---------------- stage 1 ---------------- */
+function drawSports(){
+  var g = el("sportGrid"); g.innerHTML = "";
+  SPORTS.forEach(function(s){
+    var b = btn("sport" + (s.lt ? " lt" : ""), '<span class="disc">' + sIcon(s.id) + '</span><span>' + esc(s.name) + '</span>', st.sport === s.id);
+    b.style.background = s.bg;
+    b.addEventListener("click", function(){
+      if(st.sport !== s.id){ st.sport = s.id; st.skill = ""; st.goal.mi = -1 }
+      tried(1); drawSports(); drawSkills(); afterSport(); burst(b);
+    });
+    g.appendChild(b);
+  });
+  el("ownSportBox").hidden = st.sport !== "own";
+}
+function drawSkills(){
+  var s = sport(), box = el("skillChips");
+  if(!s){ box.innerHTML = "<p class='small'>Pick a sport first and its skills pop up here.</p>"; el("ownSkillBox").hidden = true; drawS1fb(); return }
+  var list = s.skills.concat(["Something else"]);
+  chipList(box, list, function(it){ return it === "Something else" ? st.skill === "__own" : st.skill === it }, function(it, i, b){
+    st.skill = it === "Something else" ? "__own" : it; tried(1); drawSkills(); afterSport(); if(it !== "Something else") burst(b);
+  });
+  el("ownSkillBox").hidden = st.skill !== "__own";
+  drawS1fb();
+}
+function drawS1fb(){
+  var s = sport(), k = skillName();
+  el("s1fb").textContent = s && k ? "Sport: " + sportName() + ". Skill: " + k.toLowerCase() + ". That is the start of any training goal sorted." : (s ? "Nice pick. Now one skill inside it." : "");
+}
+var snapSel = -1;
+function drawSnap(){
+  var a = el("snapSkills"), b = el("snapSports"); a.innerHTML = ""; b.innerHTML = "";
+  SNAP.forEach(function(x, i){
+    var done = !!st.snap[i];
+    var c = btn("pk" + (done ? " good" : "") + (snapSel === i ? " sel" : ""), esc(x.k) + (done ? " &rarr; " + esc(SBY[x.s].name) : ""));
+    if(done) c.disabled = true;
+    c.addEventListener("click", function(){ snapSel = (snapSel === i) ? -1 : i; el("snapFb").className = "fb"; el("snapFb").textContent = snapSel > -1 ? "Now tap the sport for " + x.k + "." : ""; drawSnap() });
+    a.appendChild(c);
+  });
+  ["football","basketball","boxing","swimming","running","skate","dance","badminton","martial","cycling"].forEach(function(id){
+    var s = SBY[id];
+    var c = btn("pk", esc(s.name));
+    c.addEventListener("click", function(){
+      var fb = el("snapFb");
+      if(snapSel < 0){ fb.className = "fb"; fb.textContent = "Tap a skill on the left first, then its sport."; return }
+      var x = SNAP[snapSel];
+      if(x.s === id){ st.snap[snapSel] = 1; fb.className = "fb good"; fb.textContent = "Snap! " + x.why; snapSel = -1; burst(c); tried(1);
+        if(Object.keys(st.snap).length === SNAP.length) fb.textContent += " That is all eight. Skill Snap champion.";
+      }else{ fb.className = "fb soft"; fb.textContent = "Not " + s.name.toLowerCase() + ". Clue: " + x.hint + " Have another go." }
+      drawSnap();
+    });
+    b.appendChild(c);
+  });
+}
+
+/* ---------------- stage 2 ---------------- */
+function drawComps(){
+  var box = el("comps"); box.innerHTML = "";
+  COMP.forEach(function(c){
+    var b = btn("comp" + (st.seen[c.id] === 2 ? " open" : ""), '<span class="front">' + cIcon(c.id) + '<b>' + esc(c.name) + '</b><span class="small">Tap to see</span></span><span class="back"><b>' + esc(c.name) + '</b><br>' + esc(c.what) + '<br><i>Like: ' + esc(c.eg) + '</i></span>');
+    b.addEventListener("click", function(){ st.seen[c.id] = st.seen[c.id] === 2 ? 1 : 2; tried(2); b.classList.toggle("open") });
+    box.appendChild(b);
+  });
+}
+function drawQuiz(){
+  var i = st.qi, q = QUIZ[i];
+  el("qCount").textContent = "Scenario " + (i + 1) + " of " + QUIZ.length;
+  el("qScen").textContent = q.s;
+  var box = el("qOpts"); box.innerHTML = "";
+  var got = st.quiz[i] === 1;
+  COMP.forEach(function(c){
+    var b = btn("pk" + (got && c.id === q.a ? " good" : ""), cIcon(c.id) + "<span>" + esc(c.name) + "</span>");
+    b.addEventListener("click", function(){
+      var fb = el("qFb");
+      if(c.id === q.a){ st.quiz[i] = 1; fb.className = "fb good"; fb.textContent = "Yes! " + q.why; burst(b); tried(2); drawQuiz(); drawDots() }
+      else{ b.classList.add("miss"); fb.className = "fb soft"; fb.textContent = "Not quite. " + c.name + " is about this: " + c.what.toLowerCase() + " Which one fits better?"; tried(2) }
+    });
+    box.appendChild(b);
+  });
+  if(!got){ el("qFb").className = "fb"; el("qFb").textContent = "" }
+  else if(!el("qFb").textContent){ el("qFb").className = "fb good"; el("qFb").textContent = "You got this one. " + q.why }
+  drawDots();
+}
+function drawDots(){
+  var d = el("qDots"); d.innerHTML = "";
+  QUIZ.forEach(function(q, i){ var x = document.createElement("i"); if(st.quiz[i] === 1) x.className = "on"; else if(i === st.qi) x.className = "cur"; d.appendChild(x) });
+}
+el("qNext").addEventListener("click", function(){ st.qi = (st.qi + 1) % QUIZ.length; el("qFb").textContent = ""; save(); drawQuiz() });
+el("qPrev").addEventListener("click", function(){ st.qi = (st.qi + QUIZ.length - 1) % QUIZ.length; el("qFb").textContent = ""; save(); drawQuiz() });
+
+function radarSVG(sets, labels, size){
+  var R = 100, n = 8, out = [];
+  var vb = labels ? "-228 -142 456 284" : "-110 -110 220 220";
+  out.push('<svg class="radar" viewBox="' + vb + '" role="img" aria-label="Radar chart of fitness components">');
+  for(var ring = 1; ring <= 5; ring++){
+    var pts = [];
+    for(var i = 0; i < n; i++){ var a = -Math.PI / 2 + i * 2 * Math.PI / n; pts.push((Math.cos(a) * R * ring / 5).toFixed(1) + "," + (Math.sin(a) * R * ring / 5).toFixed(1)) }
+    out.push('<polygon points="' + pts.join(" ") + '" fill="' + (ring % 2 ? "#fffdf8" : "#f2ead9") + '" stroke="#d6c9b6" stroke-width="1.5"/>');
+  }
+  for(var j = 0; j < n; j++){
+    var a2 = -Math.PI / 2 + j * 2 * Math.PI / n, x = Math.cos(a2) * R, y = Math.sin(a2) * R;
+    out.push('<line x1="0" y1="0" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="#d6c9b6" stroke-width="1.5"/>');
+    if(labels){
+      var lx = Math.cos(a2) * 116, ly = Math.sin(a2) * 116 + 5, anc = Math.abs(lx) < 5 ? "middle" : (lx > 0 ? "start" : "end");
+      if(Math.abs(lx) < 5) ly += (ly > 0 ? 8 : -2);
+      out.push('<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anc + '" font-family="Archivo,Arial" font-weight="800" font-size="14" fill="' + INK + '">' + COMP[j].name + '</text>');
+    }
+  }
+  sets.forEach(function(s){
+    if(!s.v) return;
+    var pts = s.v.map(function(v, i){ var a = -Math.PI / 2 + i * 2 * Math.PI / n; return (Math.cos(a) * R * v / 5).toFixed(1) + "," + (Math.sin(a) * R * v / 5).toFixed(1) });
+    out.push('<polygon class="pol" points="' + pts.join(" ") + '" fill="' + s.fill + '" stroke="' + s.stroke + '" stroke-width="3.5" stroke-linejoin="round"/>');
+    s.v.forEach(function(v, i){ var a = -Math.PI / 2 + i * 2 * Math.PI / n; out.push('<circle cx="' + (Math.cos(a) * R * v / 5).toFixed(1) + '" cy="' + (Math.sin(a) * R * v / 5).toFixed(1) + '" r="4.5" fill="' + s.stroke + '" stroke="' + INK + '" stroke-width="1.5"/>') });
+  });
+  out.push("</svg>");
+  return out.join("");
+}
+function drawRadar(){
+  var p = profile();
+  el("radarBox").innerHTML = radarSVG([{v:p, fill:"rgba(239,119,36,.35)", stroke:"#ef7724"}, {v:st.self, fill:"rgba(0,166,201,.35)", stroke:"#007291"}], true);
+  el("legSport").textContent = sport() ? sportName().charAt(0).toUpperCase() + sportName().slice(1) : "Pick a sport in stage 1";
+  el("radarNote").textContent = sport() ? (sport().id === "own" ? "You set your sport's shape with the sliders. You are the expert on it." : "A rough guide only. Coaches argue about these all the time.") : "Pick a sport in stage 1 and its shape appears in orange.";
+  el("profEdit").hidden = !(sport() && sport().id === "own");
+  drawGaps();
+}
+var WORD = ["", "just starting", "getting there", "okay", "good", "a strength"];
+function rateRows(box, arr, onCh){
+  box.innerHTML = "";
+  COMP.forEach(function(c, i){
+    var row = document.createElement("div"); row.className = "rate";
+    row.innerHTML = '<b>' + esc(c.name) + '</b><input type="range" min="1" max="5" step="1" value="' + arr[i] + '" aria-label="' + esc(c.name) + '"><span>' + WORD[arr[i]] + '</span>';
+    var inp = row.querySelector("input"), sp = row.querySelector("span");
+    inp.addEventListener("input", function(){ arr[i] = +inp.value; sp.textContent = WORD[arr[i]]; onCh() });
+    box.appendChild(row);
+  });
+}
+function gapList(){
+  var p = profile(); if(!p) return [];
+  return COMP.map(function(c, i){ return {c:c, g:p[i] - st.self[i], need:p[i]} }).filter(function(x){ return x.g > 0 }).sort(function(a, b){ return b.g - a.g || b.need - a.need });
+}
+function drawGaps(){
+  var box = el("gaps"), g = gapList();
+  if(!sport()){ box.innerHTML = "<p class='small'>Pick a sport and rate yourself, and the gaps show up here.</p>" }
+  else if(!st.selfTouched){ box.innerHTML = "<p class='small'>Move the sliders to rate yourself, and the gaps show up here.</p>" }
+  else if(!g.length){ box.innerHTML = "<p class='small'>No gaps at all! Either you are a natural, or you could pick one power to make even stronger.</p>" }
+  else{
+    box.innerHTML = g.slice(0, 3).map(function(x){ return '<div class="gap">' + cIcon(x.c.id) + '<b style="min-width:96px">' + esc(x.c.name) + '</b><div class="bar"><span style="width:' + Math.min(100, x.g * 25) + '%"></span></div><span class="small">gap of ' + x.g + '</span></div>' }).join("");
+  }
+  var big = g.slice(0, 3).map(function(x){ return x.c.id });
+  chipList(el("focusChips"), COMP.map(function(c){ return c.name }), function(it, i){ return st.focus === COMP[i].id }, function(it, i){
+    st.focus = st.focus === COMP[i].id ? "" : COMP[i].id; tried(2); drawGaps();
+  });
+  el("focusChips").querySelectorAll(".pk").forEach(function(b, i){ if(big.indexOf(COMP[i].id) > -1 && st.focus !== COMP[i].id) b.style.borderStyle = "dashed" });
+}
+
+/* ---------------- stage 3: test lab ---------------- */
+var TESTS = {react:{n:"Reaction time", u:"ms", dir:"down"}, taps:{n:"Tap speed", u:"taps in 10 s", dir:"up"}, balL:{n:"Balance, left leg", u:"s", dir:"up"}, balR:{n:"Balance, right leg", u:"s", dir:"up"}, plank:{n:"Plank", u:"s", dir:"up"}, own:{n:"My own test", u:"", dir:"up"}};
+el("icoReact").innerHTML = cIcon("react"); el("icoTaps").innerHTML = cIcon("coord"); el("icoBal").innerHTML = cIcon("balance"); el("icoPlank").innerHTML = cIcon("strength"); el("icoOwn").innerHTML = cIcon("power");
+function fmt(id, r){ if(!r) return "not yet"; var u = TESTS[id].u; if(id === "own") u = ""; return r.v + (u ? " " + u : "") + (r.x ? " (" + r.x + ")" : "") + " &middot; " + prettyDate(r.d) }
+function drawRes(){
+  function rows(ids){ return ids.map(function(id){ var pre = ids.length > 1 ? (id === "balL" ? "Left leg " : "Right leg ") : ""; return '<div><span>' + pre + (pre ? "start" : "Start") + '</span><b>' + fmt(id, st.tests.base[id]) + '</b></div><div><span>' + pre + (pre ? "retest" : "Retest") + '</span><b>' + fmt(id, st.tests.re[id]) + '</b></div>' }).join("") }
+  el("resReact").innerHTML = rows(["react"]); el("resTaps").innerHTML = rows(["taps"]); el("resBal").innerHTML = rows(["balL","balR"]); el("resPlank").innerHTML = rows(["plank"]);
+  el("resOwn").innerHTML = rows(["own"]);
+  drawCmp(); updateUseBase();
+}
+function record(id, v, extra, node){
+  st.tests[st.mode][id] = {v:v, d:today(), x:extra || ""};
+  tried(3); drawRes(); if(node){ node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash") }
+}
+function setMode(m){ st.mode = m; el("modeBase").setAttribute("aria-pressed", m === "base" ? "true" : "false"); el("modeRe").setAttribute("aria-pressed", m === "re" ? "true" : "false"); save() }
+el("modeBase").addEventListener("click", function(){ setMode("base") });
+el("modeRe").addEventListener("click", function(){ setMode("re") });
+
+/* reaction */
+var rx = {s:"idle", tries:[], t0:0, tm:null};
+var pad = el("rxPad");
+function rxSet(cls, txt){ pad.className = "rx" + (cls ? " " + cls : ""); pad.textContent = txt }
+function rxWait(){ rx.s = "wait"; rxSet("wait", "Wait for green..."); clearTimeout(rx.tm); rx.tm = setTimeout(function(){ rx.s = "go"; rx.t0 = performance.now(); rxSet("go", "TAP!") }, 1200 + Math.random() * 2600) }
+function rxHit(e){
+  if(e && e.type === "keydown"){ if(e.key !== " " && e.key !== "Enter") return; e.preventDefault(); if(e.repeat) return }
+  if(rx.s === "idle" || rx.s === "done"){ rx.tries = []; el("rxTries").innerHTML = ""; rxWait(); return }
+  if(rx.s === "wait"){ clearTimeout(rx.tm); rx.s = "early"; rxSet("early", "Whoa, too keen! That one does not count. Tap to go again."); return }
+  if(rx.s === "early" || rx.s === "between"){ rxWait(); return }
+  if(rx.s === "go"){
+    var t = Math.round(performance.now() - rx.t0); rx.tries.push(t);
+    el("rxTries").innerHTML = rx.tries.map(function(x, i){ return "<span>Go " + (i + 1) + ": " + x + " ms</span>" }).join("");
+    if(rx.tries.length >= 5){
+      var avg = Math.round(rx.tries.reduce(function(a, b){ return a + b }, 0) / rx.tries.length), best = Math.min.apply(null, rx.tries);
+      rx.s = "done"; rxSet("", "Average " + avg + " ms. Tap for another set.");
+      record("react", avg, "best " + best + " ms", el("resReact")); burst(pad);
+    }else{ rx.s = "between"; rxSet("", t + " ms. Tap for go " + (rx.tries.length + 1) + ".") }
+  }
+}
+pad.addEventListener("pointerdown", function(e){ if(e.button === 0 || e.pointerType !== "mouse") rxHit(e) });
+pad.addEventListener("keydown", rxHit);
+pad.addEventListener("click", function(e){ e.preventDefault() });
+
+/* taps */
+var tp = {s:"idle", n:0, t0:0, iv:null};
+var drum = el("drum");
+function tapHit(e){
+  if(e && e.type === "keydown"){ if(e.key !== " " && e.key !== "Enter") return; e.preventDefault(); if(e.repeat) return }
+  if(tp.s === "done"){ return }
+  if(tp.s === "idle"){
+    tp.s = "live"; tp.n = 0; tp.t0 = performance.now(); drum.classList.add("live");
+    tp.iv = setInterval(function(){
+      var el2 = (performance.now() - tp.t0) / 1000;
+      el("tapBar").style.width = Math.min(100, el2 * 10) + "%";
+      el("tapInfo").textContent = Math.max(0, 10 - el2).toFixed(1) + " seconds left";
+      if(el2 >= 10){
+        clearInterval(tp.iv); tp.s = "done"; drum.classList.remove("live");
+        el("tapInfo").textContent = tp.n + " taps! Tap the drum again in a moment for another go.";
+        record("taps", tp.n, "", el("resTaps")); burst(drum);
+        setTimeout(function(){ tp.s = "idle"; drum.textContent = "GO" }, 1200);
+      }
+    }, 50);
+  }
+  if(tp.s === "live"){ tp.n++; drum.textContent = tp.n }
+}
+drum.addEventListener("pointerdown", function(e){ if(e.button === 0 || e.pointerType !== "mouse") tapHit(e) });
+drum.addEventListener("keydown", tapHit);
+
+/* stopwatches */
+function watch(clockId, btnId, cap, onStop){
+  var w = {on:false, t0:0, iv:null};
+  var b = el(btnId), c = el(clockId);
+  function stop(){
+    clearInterval(w.iv); w.on = false; b.textContent = "Start";
+    var s = Math.min(cap, (performance.now() - w.t0) / 1000);
+    c.textContent = s.toFixed(1); onStop(Math.round(s * 10) / 10);
+  }
+  b.addEventListener("click", function(){
+    if(w.on){ stop(); return }
+    w.on = true; w.t0 = performance.now(); b.textContent = "Stop";
+    w.iv = setInterval(function(){ var s = (performance.now() - w.t0) / 1000; c.textContent = Math.min(cap, s).toFixed(1); if(s >= cap) stop() }, 100);
+  });
+}
+var leg = "L", plankType = "full";
+el("legPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-leg]"); if(!b) return; leg = b.getAttribute("data-leg"); el("legPick").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false") }) });
+el("plankPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-p]"); if(!b) return; plankType = b.getAttribute("data-p"); el("plankPick").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false") }) });
+watch("balClock", "balBtn", 60, function(s){ if(s < 0.3) return; record(leg === "L" ? "balL" : "balR", s, "", el("resBal")); burst(el("balBtn")) });
+watch("plankClock", "plankBtn", 120, function(s){ if(s < 0.3) return; record("plank", s, plankType === "knees" ? "on knees" : "on toes", el("resPlank")); burst(el("plankBtn")) });
+el("ownTest").addEventListener("input", function(){ st.ownTest = this.value; save() });
+el("ownTestBtn").addEventListener("click", function(){
+  var n = numOr(el("ownTestN").value);
+  if(n === null){ el("resOwn").insertAdjacentHTML("afterbegin", "<p class='small' style='margin:0 0 6px'>Pop a number in the box first.</p>"); return }
+  record("own", n, st.ownTest.trim() || "my own test", el("resOwn")); burst(el("ownTestBtn"));
+});
+
+/* ---------------- stage 4 ---------------- */
+function drawGlows(){
+  var box = el("glows"); box.innerHTML = "";
+  GLOW.forEach(function(g, gi){
+    var d = document.createElement("div"); d.className = "glow";
+    d.innerHTML = '<p class="vague">Wish: <s>' + esc(g.v) + '</s></p><div class="picks"></div><p class="fb"></p>';
+    var pk = d.querySelector(".picks"), fb = d.querySelector(".fb");
+    g.o.forEach(function(o, oi){
+      var b = btn("pk" + (st.glow[gi] === oi && o.ok ? " good" : ""), esc(o.t));
+      b.addEventListener("click", function(){
+        if(o.ok){ st.glow[gi] = oi; b.classList.add("good"); fb.className = "fb good"; fb.textContent = "Glowed up. " + o.why; burst(b) }
+        else{ b.classList.add("miss"); fb.className = "fb soft"; fb.textContent = "Close, but: " + o.why + " Try another." }
+        tried(4);
+      });
+      pk.appendChild(b);
+    });
+    if(st.glow[gi] !== undefined){ fb.className = "fb good"; fb.textContent = "Glowed up. " + g.o[st.glow[gi]].why }
+    box.appendChild(d);
+  });
+}
+function measures(){ var s = sport(); return s ? s.meas : SBY.own.meas }
+function curMeas(){
+  var g = st.goal; if(g.mi === -2) return {t:g.what.trim(), d:g.dir, max:/out of 10/i.test(g.what) ? 10 : null};
+  var m = measures()[g.mi]; return m || null;
+}
+function drawMeas(){
+  var list = measures().map(function(m){ return m.t }).concat(["My own way to count it"]);
+  chipList(el("measChips"), list, function(it, i){ return i === list.length - 1 ? st.goal.mi === -2 : st.goal.mi === i }, function(it, i){
+    st.goal.mi = (i === list.length - 1) ? -2 : i; tried(4); drawMeas(); goalChanged();
+  });
+  el("ownMeasBox").hidden = st.goal.mi !== -2;
+  el("dirPick").querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-d") === st.goal.dir ? "true" : "false") });
+  var s = sport(), k = skillName();
+  el("gSportLine").innerHTML = s ? "Your sport: <b>" + esc(sportName()) + "</b>" + (k ? ", skill: <b>" + esc(k.toLowerCase()) + "</b>" : ". No skill picked yet, which is fine.") + " (change it in stage 1)" : "No sport picked yet. The ideas below are general ones, or <button class='st' type='button' id='go1'>pick a sport in stage 1</button>";
+  var g1 = el("go1"); if(g1) g1.addEventListener("click", function(){ openStage(1) });
+  updateUseBase();
+}
+el("dirPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-d]"); if(!b) return; st.goal.dir = b.getAttribute("data-d"); drawMeas(); goalChanged() });
+el("gWhat").addEventListener("input", function(){ st.goal.what = this.value; goalChanged() });
+el("gNow").addEventListener("input", function(){ st.goal.now = this.value; tried(4); goalChanged() });
+el("gTarget").addEventListener("input", function(){ st.goal.target = this.value; tried(4); goalChanged() });
+el("whyOwn").addEventListener("input", function(){ st.goal.whyOwn = this.value; goalChanged() });
+function updateUseBase(){
+  var m = curMeas(), b = el("useBase");
+  var src = null, lab = "";
+  if(m && m.test && st.tests.base[m.test]){ src = st.tests.base[m.test].v; lab = "Use my test lab number (" + src + ")" }
+  else if(st.tests.base.own){ src = st.tests.base.own.v; lab = "Use my own test number (" + src + (st.tests.base.own.x ? ", " + st.tests.base.own.x : "") + ")" }
+  b.hidden = src === null; b.textContent = lab;
+  b.onclick = function(){ st.goal.now = String(src); el("gNow").value = src; goalChanged() };
+}
+function drawWhen(){
+  chipList(el("whenChips"), WHEN.map(function(w){ return w.t }), function(it, i){ return st.goal.when === i }, function(it, i){ st.goal.when = i; tried(4); drawWhen(); goalChanged() });
+  chipList(el("whyChips"), WHY, function(it){ return st.goal.why === it }, function(it){ st.goal.why = st.goal.why === it ? "" : it; tried(4); drawWhen(); goalChanged() });
+}
+function whyText(){ return st.goal.whyOwn.trim() || st.goal.why }
+function goalSentence(){
+  var g = st.goal, m = curMeas(), n = numOr(g.now), t = numOr(g.target);
+  if(!m || !m.t || n === null || t === null) return "";
+  var when = g.when > -1 ? WHEN[g.when].t : "";
+  var s = (when ? when.charAt(0).toUpperCase() + when.slice(1) + ", I" : "I") + " want to go from " + n + " to " + t + " " + m.t;
+  var k = skillName(); if(sport()) s += " in " + sportName() + (k && m.t.toLowerCase().indexOf(k.toLowerCase()) < 0 ? " (" + k.toLowerCase() + ")" : "");
+  if(whyText()) s += ", because " + whyText().replace(/^because /i, "");
+  return s + ".";
+}
+function weeks(){ return st.goal.when > -1 ? WHEN[st.goal.when].w : 4 }
+function dial(){
+  var g = st.goal, m = curMeas(), n = numOr(g.now), t = numOr(g.target);
+  if(!m || n === null || t === null) return null;
+  var dir = m.d || "up", w = weeks();
+  var gain = dir === "up" ? t - n : n - t;
+  if(gain <= 0) return {z:"easy", pos:.06, why:"Your goal is the same as now, or behind it, so there is nothing to stretch for."};
+  if(m.max && t > m.max) return {z:"hard", pos:.97, why:"Out of " + m.max + " cannot go past " + m.max + "."};
+  if(m.test === "react" && t < 150) return {z:"hard", pos:.95, why:"Even top sprinters rarely react much quicker than about 120 milliseconds, and screens add their own delay."};
+  if(dir === "down" && t <= 0) return {z:"hard", pos:.95, why:"It cannot take zero time."};
+  var p = gain / Math.max(n, 1); if(dir === "down") p = gain / n * 4;
+  var r = p / w;
+  if(p < 0.25 || r < 0.04) return {z:"easy", pos:.06 + .26 * Math.min(1, Math.max(p / .25, r / .04) * .9), why:"That is a small step for " + (w === 1 ? "a week" : w + " weeks") + ". Could you push it a little?"};
+  if(r > 0.75 || p > 4) return {z:"hard", pos:.7 + .26 * Math.min(1, (r - .75) / 2), why:"That is a big jump for the time you have given it. More time or a smaller number would help."};
+  var f = (Math.log(r) - Math.log(.04)) / (Math.log(.75) - Math.log(.04));
+  return {z:"right", pos:.36 + .28 * f, why:"A real stretch, but you can picture getting there with practice."};
+}
+var ZN = {easy:"Too easy", right:"Just right", hard:"Too hard"};
+function drawTicket(){
+  var s = goalSentence(), tk = el("ticket");
+  if(s){ tk.className = "ticket"; tk.innerHTML = '<span class="tk">My training goal</span>' + esc(s) }
+  else{ tk.className = "ticket empty"; tk.innerHTML = '<span class="tk">My training goal</span>Pick what to count and fill in the two numbers, and your goal writes itself here.' }
+  var g = st.goal, m = curMeas(), d = dial();
+  var L = [
+    {k:"S", on: sport() && m && m.t ? 2 : (m && m.t ? 1 : 0), t:"Specific", y:"You named the sport and exactly what you will count.", h:"Pick what you will count."},
+    {k:"M", on: numOr(g.now) !== null && numOr(g.target) !== null ? 2 : (numOr(g.now) !== null || numOr(g.target) !== null ? 1 : 0), t:"Measurable", y:"There is a number to check.", h:"Fill in both numbers."},
+    {k:"A", on: d ? (d.z === "right" || st.verdict === "right" ? 2 : 1) : 0, t:"Achievable", y:"In the stretch zone.", h: d ? "The dial says " + ZN[d.z].toLowerCase() + ". Peek at stage 5." : "Needs the numbers first."},
+    {k:"R", on: whyText() ? 2 : 0, t:"Realistic", y:"It matters to you.", h:"Pick a reason it matters."},
+    {k:"T", on: g.when > -1 ? 2 : 0, t:"Time bound", y:"It has a by when.", h:"Pick a by when."}
+  ];
+  el("lights").innerHTML = L.map(function(x){ return '<div class="light' + (x.on === 2 ? " on" : x.on === 1 ? " half" : "") + '"><b>' + x.k + '</b><span><strong>' + x.t + '</strong><br>' + esc(x.on === 2 ? x.y : x.h) + '</span></div>' }).join("");
+  if(L.every(function(x){ return x.on === 2 }) && !drawTicket.cheered){ drawTicket.cheered = true; burst(tk) }
+}
+function goalChanged(){ save(); drawTicket(); drawDial(); drawSteps(); drawPlanPrev(); drawChart(); drawCoach() }
+
+/* ---------------- stage 5 ---------------- */
+function drawScens(){
+  var box = el("scens"); box.innerHTML = "";
+  SCEN.forEach(function(s, i){
+    var d = document.createElement("div"); d.className = "scen";
+    d.innerHTML = '<span class="who">' + s.who + '</span><p>' + esc(s.t) + '</p><div class="picks"></div><p class="fb"></p>';
+    var pk = d.querySelector(".picks"), fb = d.querySelector(".fb");
+    ["easy","right","hard"].forEach(function(z){
+      var b = btn("pk" + (st.scen[i] === z && z === s.a ? " good" : ""), ZN[z]);
+      b.addEventListener("click", function(){
+        if(z === s.a){ st.scen[i] = z; b.classList.add("good"); fb.className = "fb good"; fb.textContent = "Agreed. " + s.why; burst(b) }
+        else{ b.classList.add("miss"); fb.className = "fb soft"; fb.textContent = "Hmm, have a think: how big is the jump, and how long have they got? Try another."; }
+        tried(5);
+      });
+      pk.appendChild(b);
+    });
+    if(st.scen[i] === s.a){ fb.className = "fb good"; fb.textContent = "Agreed. " + s.why }
+    box.appendChild(d);
+  });
+}
+function drawDial(){
+  var d = dial(), nd = el("needle");
+  if(!d){ nd.style.transform = "rotate(-90deg)"; el("dialVerdict").textContent = "Build a goal in stage 4 and it shows up here."; el("dialWhy").textContent = ""; el("nudgeRow").hidden = true; return }
+  nd.style.transform = "rotate(" + ((d.pos - .5) * 180).toFixed(1) + "deg)";
+  el("dialVerdict").textContent = "Dial says: " + ZN[d.z];
+  el("dialWhy").textContent = goalSentence() + " " + d.why;
+  el("nudgeRow").hidden = false;
+}
+function nudge(harder){
+  var m = curMeas(), n = numOr(st.goal.now), t = numOr(st.goal.target); if(!m || n === null || t === null) return;
+  var step = Math.max(1, Math.round(Math.abs(t - n) * .2) || Math.round(Math.max(n, 1) * .1));
+  var up = (m.d || "up") === "up";
+  t = t + ((harder === up) ? step : -step);
+  if(m.max) t = Math.min(m.max, t);
+  if(t < 0) t = 0;
+  st.goal.target = String(t); el("gTarget").value = t; tried(5); goalChanged();
+}
+el("nudgeUp").addEventListener("click", function(){ nudge(true) });
+el("nudgeDown").addEventListener("click", function(){ nudge(false) });
+function drawVerdict(){
+  chipList(el("myVerdict"), ["Too easy","Just right","Too hard"], function(it, i){ return st.verdict === ["easy","right","hard"][i] }, function(it, i){ st.verdict = ["easy","right","hard"][i]; tried(5); drawVerdict(); drawTicket(); drawCoach() });
+}
+
+/* ---------------- stage 6 ---------------- */
+function stepPlan(){
+  var n = numOr(st.goal.now), t = numOr(st.goal.target); if(n === null || t === null) return null;
+  var w = weeks(), K = w <= 6 ? w : 5, gap = w <= 6 ? 1 : w / 5, out = [];
+  var dec = (n % 1 !== 0 || t % 1 !== 0) ? 1 : 0;
+  for(var i = 1; i <= K; i++){ var v = n + (t - n) * i / K; out.push({lab:"Week " + Math.round(i * gap), v:(dec ? v.toFixed(1) : String(Math.round(v)))}) }
+  return out;
+}
+function drawSteps(force){
+  var p = stepPlan();
+  if(p && (force || st.plan.steps.length !== p.length || st.plan.stepsKey !== st.goal.now + "|" + st.goal.target + "|" + st.goal.when)){ st.plan.steps = p; st.plan.stepsKey = st.goal.now + "|" + st.goal.target + "|" + st.goal.when; save() }
+  if(!p){ st.plan.steps = []; el("stairsBox").innerHTML = "<p class='small'>Your staircase builds itself once your goal has two numbers in stage 4. Everything else below works without it.</p>"; el("stepList").innerHTML = ""; return }
+  var box = el("stepList"); box.innerHTML = "";
+  st.plan.steps.forEach(function(s, i){
+    var l = document.createElement("label"); l.innerHTML = esc(s.lab) + '<input type="number" class="num" inputmode="decimal" value="' + esc(s.v) + '">';
+    l.querySelector("input").addEventListener("input", function(){ s.v = this.value; save(); drawStairs(); drawPlanPrev(); tried(6) });
+    box.appendChild(l);
+  });
+  drawStairs();
+}
+function drawStairs(){
+  var S = st.plan.steps, n = numOr(st.goal.now), K = S.length; if(!K) return;
+  var W = 620, H = 230, pad = 20, sw = (W - pad * 2) / (K + 1), sh = (H - 60) / (K + 1), cols = ["#ef7724","#ffc247","#00a6c9","#7b4b8f","#2f9e6a","#e85d9a"];
+  var o = ['<svg class="stairs" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Staircase of mini targets">'];
+  o.push('<rect x="' + pad + '" y="' + (H - 30 - sh) + '" width="' + sw + '" height="' + sh + '" fill="#fffdf8" stroke="' + INK + '" stroke-width="3"/>');
+  o.push('<text x="' + (pad + sw / 2) + '" y="' + (H - 30 - sh / 2 + 6) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="18" fill="' + INK + '">' + esc(n) + '</text>');
+  o.push('<text x="' + (pad + sw / 2) + '" y="' + (H - 10) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="12" fill="' + INK + '">NOW</text>');
+  S.forEach(function(s, i){
+    var x = pad + sw * (i + 1), h = sh * (i + 2), y = H - 30 - h;
+    o.push('<rect x="' + x + '" y="' + y + '" width="' + sw + '" height="' + h + '" fill="' + cols[i % cols.length] + '" stroke="' + INK + '" stroke-width="3"/>');
+    o.push('<text x="' + (x + sw / 2) + '" y="' + (y + 24) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="18" fill="' + INK + '">' + esc(s.v) + '</text>');
+    o.push('<text x="' + (x + sw / 2) + '" y="' + (H - 10) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="12" fill="' + INK + '">' + esc(s.lab.toUpperCase()) + '</text>');
+  });
+  var fx = pad + sw * K + sw / 2, fy = H - 30 - sh * (K + 1);
+  o.push('<path d="M' + fx + ' ' + (fy - 2) + 'v-26" stroke="' + INK + '" stroke-width="3"/><path d="M' + fx + ' ' + (fy - 28) + 'h22l-6 6 6 6h-22z" fill="#e0443a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>');
+  o.push("</svg>");
+  el("stairsBox").innerHTML = o.join("");
+}
+el("restep").addEventListener("click", function(){ drawSteps(true); drawPlanPrev(); tried(6) });
+function toggleIn(arr, v, max){ var i = arr.indexOf(v); if(i > -1) arr.splice(i, 1); else{ if(max && arr.length >= max) arr.shift(); arr.push(v) } }
+function drawPlanChips(){
+  var s = sport(), acts = s ? s.acts : SBY.own.acts;
+  chipList(el("actChips"), acts, function(it){ return st.plan.acts.indexOf(it) > -1 }, function(it){ toggleIn(st.plan.acts, it, 3); tried(6); drawPlanChips(); drawPlanPrev() });
+  chipList(el("dayChips"), DAYS, function(it){ return st.plan.days.indexOf(it) > -1 }, function(it){ toggleIn(st.plan.days, it); tried(6); drawPlanChips(); drawPlanPrev() });
+  chipList(el("measureChips"), MEASURE, function(it){ return st.plan.measure.indexOf(it) > -1 }, function(it){ toggleIn(st.plan.measure, it); tried(6); drawPlanChips(); drawPlanPrev() });
+  chipList(el("helpChips"), HELP, function(it){ return st.plan.help.indexOf(it) > -1 }, function(it){ toggleIn(st.plan.help, it); tried(6); drawPlanChips(); drawPlanPrev() });
+  chipList(el("reviewChips"), REVIEW, function(it){ return st.plan.review === it }, function(it){ st.plan.review = st.plan.review === it ? "" : it; tried(6); drawPlanChips(); drawPlanPrev() });
+}
+el("ownAct").addEventListener("input", function(){ st.plan.ownAct = this.value; save(); drawPlanPrev() });
+function planActs(){ var a = st.plan.acts.slice(); if(st.plan.ownAct.trim()) a.push(st.plan.ownAct.trim()); return a }
+function drawPlanPrev(){
+  var p = st.plan, a = planActs(), days = DAYS.filter(function(d){ return p.days.indexOf(d) > -1 });
+  var li = [];
+  li.push("<li><b>Goal:</b> " + esc(goalSentence() || "not set yet (stage 4)") + "</li>");
+  if(p.steps.length) li.push("<li><b>Mini targets:</b> " + p.steps.map(function(s){ return esc(s.lab) + " " + esc(s.v) }).join(", ") + "</li>");
+  li.push("<li><b>Practice:</b> " + (a.length ? esc(a.join("; ")) : "not picked yet") + "</li>");
+  li.push("<li><b>Days:</b> " + (days.length ? days.join(", ") : "not picked yet") + "</li>");
+  li.push("<li><b>Measure it by:</b> " + (p.measure.length ? esc(p.measure.join(", ").toLowerCase()) : "not picked yet") + "</li>");
+  li.push("<li><b>Help from:</b> " + (p.help.length ? esc(p.help.join(", ")) : "not picked yet") + "</li>");
+  li.push("<li><b>Check in:</b> " + (p.review ? esc(p.review.toLowerCase()) : "not picked yet") + "</li>");
+  el("planPrev").innerHTML = '<span class="lab" style="margin-top:0">My plan so far</span><ul>' + li.join("") + "</ul>";
+  drawCoach();
+}
+
+/* ---------------- stage 7 ---------------- */
+el("logDate").value = today();
+el("logAdd").addEventListener("click", function(){
+  var v = numOr(el("logN").value), d = el("logDate").value || today();
+  if(v === null){ el("logFb").className = "fb soft"; el("logFb").textContent = "Pop a number in first, then add it."; return }
+  st.log.push({d:d, v:v}); st.log.sort(function(a, b){ return a.d < b.d ? -1 : a.d > b.d ? 1 : 0 });
+  el("logN").value = ""; tried(7); drawLog(); burst(el("logAdd"));
+});
+function drawLog(){
+  var box = el("logList"); box.innerHTML = "";
+  st.log.forEach(function(e, i){
+    var s = document.createElement("span"); s.innerHTML = esc(prettyDate(e.d)) + ": <b>" + esc(e.v) + "</b>";
+    var x = btn("", "&times;"); x.setAttribute("aria-label", "Remove " + prettyDate(e.d) + " entry");
+    x.addEventListener("click", function(){ st.log.splice(i, 1); save(); drawLog() });
+    s.appendChild(x); box.appendChild(s);
+  });
+  drawChart(); drawCoach();
+}
+function drawChart(){
+  var n = numOr(st.goal.now), t = numOr(st.goal.target), L = st.log, m = curMeas();
+  var fb = el("logFb");
+  if(!L.length && n === null){ el("chartBox").innerHTML = "<p class='small'>Add a result after a practice session and your progress line appears here. With a goal from stage 4, you get a start line and a goal line too.</p>"; fb.textContent = ""; return }
+  var vals = L.map(function(e){ return e.v }); if(n !== null) vals.push(n); if(t !== null) vals.push(t);
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals); if(hi === lo){ hi += 1; lo = Math.max(0, lo - 1) }
+  var padv = (hi - lo) * .12; lo -= padv; hi += padv;
+  var W = 620, H = 240, x0 = 50, x1 = W - 20, y0 = 20, y1 = H - 34;
+  function Y(v){ return y1 - (v - lo) / (hi - lo) * (y1 - y0) }
+  var k = Math.max(L.length, 1);
+  function X(i){ return k === 1 ? (x0 + x1) / 2 : x0 + 20 + i * (x1 - x0 - 40) / (k - 1) }
+  var o = ['<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Progress chart">'];
+  o.push('<line x1="' + x0 + '" y1="' + y1 + '" x2="' + x1 + '" y2="' + y1 + '" stroke="' + INK + '" stroke-width="2.5"/><line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + y1 + '" stroke="' + INK + '" stroke-width="2.5"/>');
+  if(n !== null) o.push('<line x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(n) + '" y2="' + Y(n) + '" stroke="#007291" stroke-width="3" stroke-dasharray="8 6"/><text x="' + (x0 + 6) + '" y="' + (Y(n) - 6) + '" font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#007291">START ' + esc(n) + '</text>');
+  if(t !== null) o.push('<line x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(t) + '" y2="' + Y(t) + '" stroke="#ef7724" stroke-width="3" stroke-dasharray="8 6"/><text x="' + (x1 - 6) + '" y="' + (Y(t) - 6) + '" text-anchor="end" font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#d75f10">GOAL ' + esc(t) + '</text>');
+  if(L.length){
+    o.push('<polyline points="' + L.map(function(e, i){ return X(i).toFixed(1) + "," + Y(e.v).toFixed(1) }).join(" ") + '" fill="none" stroke="#7b4b8f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>');
+    L.forEach(function(e, i){
+      o.push('<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(e.v).toFixed(1) + '" r="7" fill="#ffc247" stroke="' + INK + '" stroke-width="2.5"/>');
+      if(L.length <= 8 || i % 2 === 0) o.push('<text x="' + X(i).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="700" font-size="12" fill="' + INK + '">' + esc(prettyDate(e.d)) + '</text>');
+    });
+  }
+  o.push("</svg>");
+  el("chartBox").innerHTML = o.join("") + (m && m.d === "down" ? "<p class='hint'>For this goal, smaller numbers are better.</p>" : "");
+  if(L.length && n !== null && t !== null && t !== n){
+    var last = L[L.length - 1].v, frac = (last - n) / (t - n);
+    fb.className = "fb good";
+    if(frac >= 1) fb.textContent = "Latest result: " + last + ". That is your goal reached!";
+    else if(frac > 0) fb.textContent = "Latest result: " + last + ". You have come about " + Math.round(frac * 100) + "% of the way from your start to your goal.";
+    else{ fb.className = "fb"; fb.textContent = "Latest result: " + last + ". Not moving the right way yet. That is really common early on. Have a look at the options below." }
+  }else fb.textContent = "";
+}
+function drawCmp(){
+  var box = el("cmp"), any = false, out = [];
+  Object.keys(TESTS).forEach(function(id){
+    var a = st.tests.base[id], b = st.tests.re[id]; if(!a || !b) return; any = true;
+    var mx = Math.max(a.v, b.v) || 1, dir = TESTS[id].dir, diff = Math.round((b.v - a.v) * 10) / 10, better = dir === "up" ? diff > 0 : diff < 0;
+    var u = id === "own" ? "" : " " + TESTS[id].u;
+    var msg = diff === 0 ? "Exactly the same. Steady." : better ? (dir === "down" ? "Quicker by " + Math.abs(diff) + u + "." : "Up by " + Math.abs(diff) + u + ".") : "A bit off your starting line this time. Tired days happen, and one test is just one day.";
+    out.push('<div class="cmprow"><b>' + esc(TESTS[id].n) + (id === "own" && a.x ? " (" + esc(a.x) + ")" : "") + '</b>' + (dir === "down" ? " <span class='small'>(smaller is quicker)</span>" : "") +
+      '<div class="bars"><span class="small">Start</span><i style="width:' + Math.max(4, a.v / mx * 100) + '%;background:#9fd9e8"></i><b>' + a.v + '</b><span class="small">Retest</span><i style="width:' + Math.max(4, b.v / mx * 100) + '%;background:' + (better ? "#2f9e6a" : "#ffc247") + '"></i><b>' + b.v + '</b></div>' + esc(msg) + '</div>');
+  });
+  box.innerHTML = any ? out.join("") : "<p class='small'>Once you have a starting line and a retest for the same test, they line up here. Switch the test lab to &ldquo;A retest&rdquo; when you come back after some practice.</p>";
+}
+el("goRetest").addEventListener("click", function(){ setMode("re"); openStage(3) });
+function drawStatus(){
+  chipList(el("statusChips"), STATUS.map(function(s){ return s.t }), function(it, i){ return st.status === STATUS[i].id }, function(it, i){ st.status = STATUS[i].id; tried(7); drawStatus(); drawCoach() });
+  var s = null; STATUS.forEach(function(x){ if(x.id === st.status) s = x });
+  el("advice").innerHTML = s ? '<div class="advice">' + esc(s.a) + '</div>' : "";
+}
+var adj = {when:-1, why:""};
+function drawAdj(){
+  chipList(el("adjWhen"), ["Keep the same date"].concat(WHEN.map(function(w){ return w.t })), function(it, i){ return adj.when === i - 1 }, function(it, i){ adj.when = i - 1; drawAdj() });
+  chipList(el("adjWhy"), ADJWHY, function(it){ return adj.why === it }, function(it){ adj.why = it; drawAdj() });
+  el("adjList").innerHTML = st.adjust.length ? "<b>Changes so far:</b><br>" + st.adjust.map(function(a){ return esc(prettyDate(a.d) + ": " + a.from + " to " + a.to + (a.when ? ", " + a.when : "") + (a.why ? " (" + a.why.toLowerCase() + ")" : "")) }).join("<br>") : "";
+}
+el("adjSave").addEventListener("click", function(){
+  var v = numOr(el("adjN").value), fb = el("adjFb");
+  if(v === null && adj.when < 0){ fb.className = "fb soft"; fb.textContent = "Put a new number in, or pick a new date, and then press the button."; return }
+  var from = st.goal.target || "?";
+  var rec = {d:today(), from:from, to:v === null ? from : v, when:adj.when > -1 ? WHEN[adj.when].t : "", why:adj.why};
+  if(v !== null){ st.goal.target = String(v); el("gTarget").value = v }
+  if(adj.when > -1) st.goal.when = adj.when;
+  st.adjust.push(rec); el("adjN").value = ""; adj = {when:-1, why:""};
+  fb.className = "fb good"; fb.textContent = "Goal updated. Changing a goal because of what you found out is exactly what coaches do.";
+  tried(7); drawAdj(); drawWhen(); goalChanged(); burst(el("adjSave"));
+});
+
+/* ---------------- text areas + starters ---------------- */
+[["practise","practise",2],["justify","justify",5],["reflect","reflect",7],["nextGoal","next",7]].forEach(function(a){
+  var t = el(a[0]); t.value = st[a[1]] || "";
+  t.addEventListener("input", function(){ st[a[1]] = t.value; tried(a[2]) });
+});
+document.querySelectorAll(".starters").forEach(function(box){
+  box.addEventListener("click", function(e){
+    var b = e.target.closest(".st"); if(!b) return;
+    var t = el(box.getAttribute("data-for")), add = b.textContent;
+    t.value = t.value + (t.value && !/\s$/.test(t.value) ? " " : "") + add; t.focus();
+    t.dispatchEvent(new Event("input"));
+  });
+});
+el("ownSport").value = st.ownSport; el("ownSport").addEventListener("input", function(){ st.ownSport = this.value; save(); drawS1fb(); drawRadar(); drawMeas(); drawTicket(); drawCoach() });
+el("ownSkill").value = st.ownSkill; el("ownSkill").addEventListener("input", function(){ st.ownSkill = this.value; save(); drawS1fb(); drawMeas(); drawTicket(); drawCoach() });
+el("ownTest").value = st.ownTest;
+el("gWhat").value = st.goal.what; el("gNow").value = st.goal.now; el("gTarget").value = st.goal.target; el("whyOwn").value = st.goal.whyOwn; el("ownAct").value = st.plan.ownAct;
+
+/* ---------------- coach card ---------------- */
+function drawCoach(){
+  var s = sport(), p = profile();
+  var tests = [];
+  Object.keys(TESTS).forEach(function(id){ var a = st.tests.base[id], b = st.tests.re[id]; var u = id === "own" ? "" : " " + TESTS[id].u; if(a || b) tests.push(TESTS[id].n + ": " + (a ? a.v + u : "none") + (b ? " then " + b.v + u : "")) });
+  var last = st.log.length ? st.log[st.log.length - 1] : null;
+  var gl = gapList().slice(0, 2).map(function(x){ return x.c.name.toLowerCase() });
+  var focus = st.focus ? CBY[st.focus].name : "";
+  var stat = ""; STATUS.forEach(function(x){ if(x.id === st.status) stat = x.t });
+  var h = [];
+  h.push('<div class="coachtop"><span class="disc">' + sIcon(s ? s.id : "own") + '</span><div><span class="kicker" style="margin:0">Coach card' + (who ? " &middot; " + who : "") + '</span><h3>' + esc(s ? sportName().charAt(0).toUpperCase() + sportName().slice(1) : "Sport not picked yet") + '</h3><span>' + esc(skillName() ? "Skill: " + skillName() : "No skill picked yet") + '</span></div></div>');
+  h.push('<div class="coachgrid"><div>' + radarSVG([{v:p, fill:"rgba(239,119,36,.35)", stroke:"#ef7724"}, {v:st.selfTouched ? st.self : null, fill:"rgba(0,166,201,.35)", stroke:"#007291"}], false) + '<p class="small" style="text-align:center;margin:4px 0 0">Orange: the sport. Blue: me.</p></div><div>');
+  h.push('<p class="cline"><b>My goal</b>' + esc(goalSentence() || "Not built yet") + '</p>');
+  var d = dial();
+  if(d || st.verdict) h.push('<p class="cline"><b>Challenge</b>' + (d ? "Dial: " + ZN[d.z].toLowerCase() : "") + (st.verdict ? (d ? ". " : "") + "Me: " + ZN[st.verdict].toLowerCase() : "") + '</p>');
+  if(focus || gl.length) h.push('<p class="cline"><b>Fitness focus</b>' + esc(focus || ("biggest gaps: " + gl.join(" and "))) + '</p>');
+  if(tests.length) h.push('<p class="cline"><b>Test lab</b>' + esc(tests.join(" | ")) + '</p>');
+  var a = planActs(); if(a.length) h.push('<p class="cline"><b>Practice</b>' + esc(a.join("; ")) + (st.plan.days.length ? " &middot; " + DAYS.filter(function(x){ return st.plan.days.indexOf(x) > -1 }).join(", ") : "") + '</p>');
+  if(last) h.push('<p class="cline"><b>Latest result</b>' + esc(last.v + " on " + prettyDate(last.d)) + (stat ? " &middot; " + esc(stat.toLowerCase()) : "") + '</p>');
+  if(st.next.trim()) h.push('<p class="cline"><b>Next goal</b>' + esc(st.next.trim()) + '</p>');
+  h.push("</div></div>");
+  el("coach").innerHTML = h.join("");
+}
+
+/* ---------------- send ---------------- */
+function summary(){
+  var L = [], s = sport(), g = st.goal;
+  L.push("GOAL COACH");
+  L.push("Target: I can set training goals for a particular sport.");
+  if(who){ L.push("Milestones this relates to (" + who + "):"); STUD[who].ms.forEach(function(m){ L.push("  * " + m) }) }
+  var done = STAGES.filter(function(x){ return st.tried[x.n] }).map(function(x){ return x.n + " " + x.t });
+  L.push("Stages tried: " + (done.length ? done.join(", ") : "none yet"));
+  L.push("");
+  L.push("1. SPORT AND SKILL");
+  L.push("  Sport: " + (s ? sportName() : "not picked") + " | Skill: " + (skillName() || "not picked"));
+  L.push("  Skill Snap matched: " + Object.keys(st.snap).length + " of " + SNAP.length);
+  L.push("");
+  L.push("2. WHAT THE SPORT NEEDS");
+  L.push("  Fitness power cards looked at: " + Object.keys(st.seen).length + " of 8. Scenarios matched: " + Object.keys(st.quiz).length + " of " + QUIZ.length);
+  if(p0()) L.push("  Sport profile (1 to 5): " + COMP.map(function(c, i){ return c.name + " " + p0()[i] }).join(", "));
+  if(st.selfTouched) L.push("  My self rating (1 to 5): " + COMP.map(function(c, i){ return c.name + " " + st.self[i] }).join(", "));
+  var gl = gapList(); if(st.selfTouched && gl.length) L.push("  Biggest gaps: " + gl.slice(0, 3).map(function(x){ return x.c.name + " (" + x.g + ")" }).join(", "));
+  if(st.focus) L.push("  Focus I picked: " + CBY[st.focus].name);
+  if(st.practise.trim()) L.push("  What I would practise: " + st.practise.trim());
+  L.push("");
+  L.push("3. TEST LAB (start | retest)");
+  var any = false;
+  Object.keys(TESTS).forEach(function(id){ var a = st.tests.base[id], b = st.tests.re[id]; if(!a && !b) return; any = true;
+    function f(r){ return r ? r.v + (id === "own" ? "" : " " + TESTS[id].u) + (r.x ? " (" + r.x + ")" : "") + " on " + r.d : "none" }
+    L.push("  " + TESTS[id].n + ": " + f(a) + " | " + f(b)) });
+  if(!any) L.push("  No tests saved yet");
+  L.push("");
+  L.push("4. SMART GOAL");
+  L.push("  Goal glow ups solved: " + Object.keys(st.glow).length + " of " + GLOW.length);
+  L.push("  My goal: " + (goalSentence() || "not built yet"));
+  L.push("");
+  L.push("5. CHALLENGE LEVEL");
+  L.push("  Goals judged: " + Object.keys(st.scen).length + " of " + SCEN.length);
+  var d = dial(); if(d) L.push("  Dial: " + ZN[d.z]);
+  if(st.verdict) L.push("  I think my goal is: " + ZN[st.verdict]);
+  if(st.justify.trim()) L.push("  Why: " + st.justify.trim());
+  L.push("");
+  L.push("6. PLAN");
+  if(st.plan.steps.length) L.push("  Mini targets: " + st.plan.steps.map(function(x){ return x.lab + " " + x.v }).join(", "));
+  L.push("  Practice: " + (planActs().join("; ") || "none yet"));
+  L.push("  Days: " + (DAYS.filter(function(x){ return st.plan.days.indexOf(x) > -1 }).join(", ") || "none yet"));
+  L.push("  Measure by: " + (st.plan.measure.join(", ") || "none yet"));
+  L.push("  Help from: " + (st.plan.help.join(", ") || "none yet"));
+  L.push("  Check in: " + (st.plan.review || "none yet"));
+  L.push("");
+  L.push("7. PROGRESS");
+  L.push("  Log: " + (st.log.length ? st.log.map(function(e){ return e.d + " = " + e.v }).join(", ") : "nothing logged yet"));
+  var stt = ""; STATUS.forEach(function(x){ if(x.id === st.status) stt = x.t }); if(stt) L.push("  How it is going: " + stt);
+  st.adjust.forEach(function(a){ L.push("  Goal changed " + a.d + ": " + a.from + " to " + a.to + (a.when ? ", " + a.when : "") + (a.why ? " (" + a.why + ")" : "")) });
+  if(st.reflect.trim()) L.push("  Look back: " + st.reflect.trim());
+  if(st.next.trim()) L.push("  Next goal: " + st.next.trim());
+  return L.join("\n");
+}
+function p0(){ return profile() }
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Goal Coach", filename:"goal-coach", getText:summary });
+
+/* ---------------- reset ---------------- */
+var armed = false;
+el("resetBtn").addEventListener("click", function(){
+  if(!armed){ armed = true; el("resetBtn").textContent = "Tap again to clear it all"; el("resetMsg").textContent = "This wipes your goal, tests and plan on this device."; setTimeout(function(){ armed = false; el("resetBtn").textContent = "Start again"; el("resetMsg").textContent = "" }, 4000); return }
+  try{ localStorage.removeItem(KEY) }catch(e){}
+  location.reload();
+});
+
+/* ---------------- boot ---------------- */
+function afterSport(){ drawRadar(); drawMeas(); drawPlanChips(); goalChanged() }
+rateRows(el("selfRates"), st.self, function(){ st.selfTouched = true; tried(2); drawRadar() });
+rateRows(el("profRates"), st.prof, function(){ tried(2); drawRadar() });
+drawWho(); drawMap(); drawSports(); drawSkills(); drawSnap(); drawComps(); drawQuiz(); drawRadar();
+setMode(st.mode); drawRes(); drawGlows(); drawMeas(); drawWhen(); drawScens(); drawVerdict(); drawPlanChips(); drawLog(); drawStatus(); drawAdj();
+goalChanged();
+if(!Object.keys(st.tried).length) el("st1").open = true;
+document.querySelectorAll(".stage").forEach(function(d){ d.addEventListener("toggle", function(){ if(d.open) drawCoach() }) });
+window.__gc = {st:function(){ return st }, dial:dial};
+})();
+</script>
+</body>
+</html>

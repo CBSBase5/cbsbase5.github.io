@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Tile Shop - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Tile Shop only. Shell, cards and buttons come from style.css */
+.ts{max-width:940px;margin:0 auto}
+.hidden{display:none!important}
+.ts p{max-width:64ch}
+.box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:22px;margin:0 0 20px;box-shadow:var(--lift)}
+.seclab{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;display:inline-block;margin:0 0 12px}
+.box h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:1.55rem;margin:0 0 8px;line-height:1.1}
+.box h3{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.15rem;margin:18px 0 8px;line-height:1.15}
+
+/* intro */
+.intro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center}
+.intro svg.shopfront{width:100%;height:auto;display:block}
+@media (max-width:760px){.intro{grid-template-columns:1fr}}
+.whorow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px}
+.whobtn{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.08em;padding:9px 14px;border-radius:999px;border:var(--border) solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:2px 3px 0 var(--ink)}
+.whobtn[aria-pressed="true"]{background:var(--yellow)}
+.whobtn.look{font-size:.75rem}
+.mlist{margin:10px 0 0;padding:12px 14px;border:2px dashed var(--teal);border-radius:14px;background:#f0f8fa}
+.mlist p{margin:0 0 6px;font-size:.98rem}
+.mlist p:last-child{margin:0}
+
+/* stage map */
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:0 0 22px}
+.stbtn{position:relative;display:flex;gap:12px;align-items:center;text-align:left;font-family:var(--body);color:var(--ink);background:var(--white);border:var(--border) solid var(--ink);border-radius:18px 14px 20px 12px;padding:12px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .14s ease,box-shadow .14s ease}
+.stbtn:hover{transform:translate(-2px,-2px) rotate(-1deg);box-shadow:5px 7px 0 var(--ink)}
+.stbtn:nth-child(odd){transform:rotate(-.6deg)}
+.stbtn:nth-child(even){transform:rotate(.5deg)}
+.stbtn svg{width:52px;height:52px;flex:none}
+.stbtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;line-height:1.1}
+.stbtn small{display:block;font-size:.8rem;opacity:.75}
+.stbtn .tried{display:block;font-size:.75rem;color:var(--teal);font-weight:700;margin-top:2px}
+.stbtn.on{background:var(--yellow)}
+.badge{position:absolute;top:-11px;right:8px;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:2px 8px;transform:rotate(2deg)}
+
+/* stages */
+.stage .sthead{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.stage .sthead>div{flex:1;min-width:220px}
+.stage .stsub{margin:0 0 4px;font-size:1rem}
+.gf{margin-bottom:8px}
+.goodfor{display:inline-block;font-size:.82rem;font-weight:700;background:#fff1e3;border:2px solid var(--orange);border-radius:999px;padding:3px 10px;margin:4px 0 0}
+.learn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:center;background:#eef6f8;border:2px solid #b9d9e2;border-radius:16px;padding:14px 16px;margin:14px 0 16px}
+.learn svg{width:100%;height:auto;display:block}
+.learn p{margin:0 0 8px;font-size:1rem}
+.learn p:last-child{margin:0}
+.learn .lk{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+@media (max-width:640px){.learn{grid-template-columns:1fr}}
+.stnav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 0;padding-top:14px;border-top:3px dashed var(--line)}
+
+/* shared bits */
+.btn.small{font-size:.74rem;padding:9px 14px}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.pick{font-family:var(--body);font-size:1rem;text-align:left;padding:11px 14px;border:2px solid rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer;line-height:1.35}
+.pick:hover{border-color:var(--teal)}
+.pick.good{border-color:#2e7d4f;background:#e9f4ec;font-weight:700}
+.pick.bad{border-color:#d75f10;background:#fdf0e5}
+.picks{display:grid;gap:8px;margin:8px 0}
+.picks.two{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.fb{margin:10px 0 4px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb:empty{display:none}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.hint{font-size:.9rem;opacity:.8;margin:4px 0 10px}
+.prompt{font-size:1.15rem;line-height:1.45;margin:4px 0 10px}
+.figure{display:block;width:100%;height:auto;margin:6px auto 8px;border-radius:12px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.88rem;margin:0 0 8px;justify-content:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px}
+
+/* stepper */
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.steps button{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.8rem;width:38px;height:38px;border-radius:10px 8px 12px 8px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.steps button.tr{background:#d8eef3}
+.steps button.ok{background:#bfe3c9}
+.steps button.cur{background:var(--yellow);box-shadow:2px 3px 0 var(--ink)}
+.stepnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+/* vectors */
+.vec{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:1px 9px;border-left:3px solid var(--ink);border-right:3px solid var(--ink);border-radius:12px;font-weight:700;line-height:1.3;vertical-align:middle;margin:0 3px;min-width:34px}
+.vecin{display:inline-flex;flex-direction:column;gap:6px;padding:6px 10px;border-left:3px solid var(--ink);border-right:3px solid var(--ink);border-radius:16px;vertical-align:middle}
+.vecin input,.num{width:72px;font-size:1.2rem;font-family:var(--body);text-align:center;padding:6px;border:2px solid rgba(10,47,56,.3);border-radius:10px;background:#fffdfb;color:var(--ink)}
+.num.wide{width:110px}
+.vecrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0}
+.vlab{font-size:.85rem;line-height:1.3;opacity:.85}
+
+/* tessellation */
+.shapebar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.shbtn{display:flex;flex-direction:column;align-items:center;gap:3px;width:96px;padding:8px 4px;border:2px solid var(--ink);border-radius:14px 10px 14px 10px;background:var(--white);cursor:pointer;font-family:var(--body);font-size:.74rem;line-height:1.15;color:var(--ink)}
+.shbtn svg{width:38px;height:38px}
+.shbtn.sel{background:var(--yellow);box-shadow:2px 3px 0 var(--ink)}
+.shbtn.yes{border-color:#2e7d4f}
+.shbtn.no{border-style:dashed}
+.floorwrap{position:relative;max-width:560px;margin:0 auto}
+.floor .tl{animation:tilein .35s cubic-bezier(.2,1.3,.4,1) both;transform-box:fill-box;transform-origin:center}
+@keyframes tilein{from{opacity:0;transform:scale(.3) rotate(-20deg)}to{opacity:1;transform:none}}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.bin{border:2px dashed var(--ink);border-radius:14px;padding:10px;min-height:70px;background:var(--paper)}
+.bin b{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.bin span{display:inline-block;font-size:.85rem;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;margin:0 4px 4px 0}
+.anglebig{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.3rem;text-align:center;margin:4px 0}
+.cornerwrap{max-width:360px;margin:0 auto}
+
+/* grid stages */
+.gridsvg{display:block;width:100%;max-width:520px;height:auto;margin:6px auto 8px;touch-action:none;border-radius:12px;cursor:crosshair}
+.gridsvg:focus-visible{outline:4px solid var(--plum);outline-offset:3px}
+
+/* till */
+.tillwrap{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:640px){.tillwrap{grid-template-columns:1fr}.tillwrap svg.tillsvg{max-width:200px;margin:0 auto}}
+.tillsvg{width:100%;height:auto;display:block}
+.drawer{transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
+.drawer.open{transform:translateY(18px)}
+.order{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 14px;margin:0 0 10px}
+.order .who{display:flex;gap:10px;align-items:center}
+.order .who svg{width:56px;height:56px;flex:none}
+.order .who p{margin:0;font-size:1.02rem}
+.calc{display:grid;grid-template-columns:auto auto 1fr;gap:8px 10px;align-items:center;margin:10px 0}
+.calc label{font-size:1rem}
+.calc .mk{font-size:1.2rem;font-weight:700;min-width:24px}
+.calc .note{grid-column:1 / -1;font-size:.9rem;margin:-4px 0 4px;padding:6px 10px;border-radius:10px;background:#fdf0e5;border:1px solid #f2d5b8}
+.calc .note.ok{background:#e9f4ec;border-color:#bcdcc4}
+.calc .note:empty{display:none}
+.money{display:inline-flex;align-items:center;gap:2px;font-size:1.15rem;font-weight:700}
+@media (max-width:480px){.calc{grid-template-columns:1fr auto;}.calc .mk{grid-column:2;grid-row:auto}.calc label{grid-column:1 / -1}}
+.pctbar{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0 6px;height:38px}
+.pctbar i{display:block;border:2px solid var(--ink);border-radius:4px;background:var(--white);transition:background .15s}
+.pctbar i.d{background:var(--orange)}
+.pctbar i.f{background:var(--yellow)}
+.slider{width:100%;accent-color:var(--orange);height:28px}
+.breakdown{font-size:1.05rem;line-height:1.6;background:var(--paper);border-radius:12px;padding:10px 14px;border:2px solid var(--line)}
+.pricechips{display:flex;gap:8px;flex-wrap:wrap}
+
+/* patterns */
+.patsvg{display:block;width:100%;height:auto;margin:6px auto 8px;border:3px solid var(--ink);border-radius:10px;background:var(--white)}
+.studio{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.studio{grid-template-columns:1fr}}
+.ctl{margin:0 0 12px}
+.ctl .lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font-family:var(--body);font-size:.88rem;padding:7px 12px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--teal);color:var(--white)}
+.studiotile{cursor:pointer}
+.studiotile:focus{outline:none}
+.studiotile:focus-visible rect.hit{stroke:var(--plum);stroke-width:5}
+.desc{background:#eef6f8;border:2px solid #b9d9e2;border-radius:12px;padding:10px 14px;font-size:1rem;margin:8px 0}
+.chipset{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chipset button{font-family:var(--body);font-size:.85rem;padding:6px 11px;border-radius:999px;border:2px dashed var(--teal);background:var(--white);color:var(--ink);cursor:pointer}
+textarea.wr{width:100%;min-height:96px;font-family:var(--body);font-size:1rem;line-height:1.5;padding:10px 12px;border:2px solid rgba(10,47,56,.3);border-radius:12px;background:#fffdfb;color:var(--ink)}
+.saved{font-size:.85rem;color:var(--teal);min-height:1.2em;margin:4px 0 0}
+.designs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.designs span{font-size:.8rem;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;background:var(--paper)}
+
+.endbox p{font-size:1rem}
+.again{margin-top:10px}
+.again .btn{font-size:.72rem}
+input:focus-visible,button:focus-visible,textarea:focus-visible,select:focus-visible{outline:4px solid var(--plum);outline-offset:2px}
+@media (max-width:480px){.box{padding:16px}.prompt{font-size:1.05rem}.shbtn{width:86px}.bins{grid-template-columns:1fr}}
+@keyframes wob{0%,100%{transform:rotate(0)}30%{transform:rotate(-4deg)}60%{transform:rotate(3deg)}}
+.wob{animation:wob .5s ease}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}.floor .tl{animation:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE TILE <span class="accent">SHOP</span></h1>
+    <div class="line">
+      <span class="chip">Maths</span>
+      <p>Tiles that fit, tiles that flip, a robot that reads vectors, and a till full of discounts.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap ts">
+
+  <div class="box intro">
+    <div>
+      <span class="seclab">Welcome in</span>
+      <h2>Open for business</h2>
+      <p>Jay has opened a tile shop. There are floors to fit, patterns to design, a robot that only understands vectors, and customers who want a bargain.</p>
+      <p>Seven stages. Pick any one, in any order, and skip anything that is not for you.</p>
+      <h3>Who is this? <small style="font-family:var(--body);font-weight:400;font-size:.85rem">(optional)</small></h3>
+      <div class="whorow" id="whoRow"></div>
+      <div id="whoInfo"></div>
+    </div>
+    <svg class="shopfront" viewBox="0 0 360 280" role="img" aria-label="A shop front with a striped awning and patterned tiles in the window">
+      <rect x="20" y="70" width="320" height="200" rx="10" fill="#fffdf8" stroke="#0a2f38" stroke-width="4"/>
+      <rect x="40" y="24" width="280" height="44" rx="8" fill="#007291" stroke="#0a2f38" stroke-width="4"/>
+      <text x="180" y="55" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="24" fill="#fffdf8" letter-spacing="3">TILE SHOP</text>
+      <g stroke="#0a2f38" stroke-width="3">
+        <path d="M14 70 h332 l-12 30 h-308 z" fill="#ef7724"/>
+        <path d="M58 70 l-6 30 h28 l2 -30 z M118 70 l-2 30 h28 l2 -30 z M178 70 l0 30 h28 l2 -30 z M238 70 l2 30 h28 l2 -30 z M298 70 l6 30 h28 l-6 -30 z" fill="#ffc247"/>
+      </g>
+      <rect x="40" y="118" width="170" height="130" rx="6" fill="#d8eef3" stroke="#0a2f38" stroke-width="4"/>
+      <g stroke="#0a2f38" stroke-width="2">
+        <polygon points="70,150 88,140 106,150 106,171 88,181 70,171" fill="#ffc247"/>
+        <polygon points="106,150 124,140 142,150 142,171 124,181 106,171" fill="#00a6c9"/>
+        <polygon points="142,150 160,140 178,150 178,171 160,181 142,171" fill="#ef7724"/>
+        <polygon points="88,181 106,171 124,181 124,202 106,212 88,202" fill="#7b4b8f"/>
+        <polygon points="124,181 142,171 160,181 160,202 142,212 124,202" fill="#ffc247"/>
+      </g>
+      <rect x="230" y="118" width="88" height="152" rx="6" fill="#7b4b8f" stroke="#0a2f38" stroke-width="4"/>
+      <circle cx="300" cy="196" r="5" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/>
+      <g transform="translate(250 136)">
+        <rect width="52" height="34" rx="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>
+        <text x="26" y="22" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="12" fill="#d75f10">SALE</text>
+      </g>
+      <g transform="translate(286 4)">
+        <ellipse cx="20" cy="18" rx="15" ry="10" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2.5"/>
+        <circle cx="33" cy="10" r="7" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2.5"/>
+        <circle cx="35" cy="9" r="1.8" fill="#0a2f38"/>
+        <path d="M39 10 l7 2 l-7 2 z" fill="#ffc247" stroke="#0a2f38" stroke-width="1.5"/>
+        <path d="M6 16 l-8 -6 l3 10 z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/>
+        <path d="M18 27 v6 M24 27 v6" stroke="#0a2f38" stroke-width="2.5"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="map" id="map"></div>
+
+  <!-- ===================== STAGE 1 ===================== -->
+  <section class="box stage hidden" id="st1">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 1 &middot; Will it tile?</span>
+      <h2>No gaps, no overlaps</h2>
+      <p class="stsub">Test shapes on a shop floor and find out which ones tessellate.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 140" aria-hidden="true">
+        <g stroke="#0a2f38" stroke-width="2">
+          <polygon points="20,40 40,28 60,40 60,64 40,76 20,64" fill="#ffc247"/>
+          <polygon points="60,40 80,28 100,40 100,64 80,76 60,64" fill="#00a6c9"/>
+          <polygon points="40,76 60,64 80,76 80,100 60,112 40,100" fill="#ef7724"/>
+          <polygon points="80,76 100,64 120,76 120,100 100,112 80,100" fill="#ffc247"/>
+        </g>
+        <text x="70" y="132" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="13" font-weight="700" fill="#2e7d4f">tessellates</text>
+        <rect x="170" y="22" width="112" height="92" fill="#7b4b8f" opacity=".35"/>
+        <g stroke="#0a2f38" stroke-width="2" fill="#00a6c9">
+          <circle cx="193" cy="45" r="22"/><circle cx="237" cy="45" r="22"/><circle cx="193" cy="89" r="22"/><circle cx="237" cy="89" r="22"/>
+        </g>
+        <text x="226" y="132" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="13" font-weight="700" fill="#7b4b8f">gaps (purple)</text>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p>A shape <b>tessellates</b> when copies of it cover a floor with <b>no gaps</b> and <b>no overlaps</b>, going on for ever.</p>
+        <p>Tilers love shapes that tessellate. Nobody wants a bathroom floor with holes in it.</p>
+      </div>
+    </div>
+
+    <h3>Floor test</h3>
+    <p class="hint">Pick a shape. Have a guess first if you fancy, then lay the floor. Purple shows any gaps.</p>
+    <div class="shapebar" id="shapeBar"></div>
+    <div id="guessRow" class="row hidden">
+      <span id="guessQ"></span>
+      <button class="btn small" data-guess="yes">I think it tiles</button>
+      <button class="btn small btn-quiet" data-guess="no">I think it leaves gaps</button>
+      <button class="btn small btn-quiet" data-guess="skip">Just show me</button>
+    </div>
+    <div class="floorwrap"><svg class="figure floor" id="floor" viewBox="0 0 360 220" role="img" aria-label="Shop floor"></svg></div>
+    <div class="fb" id="floorFb"></div>
+    <div class="bins">
+      <div class="bin" id="binYes"><b>Tessellates</b></div>
+      <div class="bin" id="binNo"><b>Leaves gaps</b></div>
+    </div>
+
+    <h3>Corner check <small style="font-family:var(--body);font-weight:400;font-size:.85rem">(a stretch, if you want the reason why)</small></h3>
+    <div class="learn">
+      <svg viewBox="0 0 220 140" aria-hidden="true">
+        <g stroke="#0a2f38" stroke-width="2">
+          <rect x="20" y="10" width="60" height="60" fill="#ffc247"/><rect x="80" y="10" width="60" height="60" fill="#00a6c9"/>
+          <rect x="20" y="70" width="60" height="60" fill="#ef7724"/><rect x="80" y="70" width="60" height="60" fill="#fffdf8"/>
+        </g>
+        <circle cx="80" cy="70" r="7" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/>
+        <text x="196" y="66" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#0a2f38">90+90</text><text x="196" y="82" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#0a2f38">+90+90</text>
+        <text x="196" y="98" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#0a2f38">= 360</text>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p>Where tiles meet, their corners go all the way round a point. A full turn is <b>360&deg;</b>.</p>
+        <p>So a shape tiles on its own when its corners can add up to exactly 360&deg;.</p>
+      </div>
+    </div>
+    <p class="hint">Pick a shape, then add tiles round the purple point one at a time.</p>
+    <div class="seg" id="cornerPick"></div>
+    <div class="cornerwrap"><svg class="figure" id="corner" viewBox="0 0 320 320" role="img" aria-label="Tiles meeting at a point"></svg></div>
+    <div class="anglebig" id="cornerSum"></div>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-orange small" id="cornerAdd">Add a tile</button>
+      <button class="btn btn-quiet small" id="cornerClear">Clear</button>
+    </div>
+    <div class="fb" id="cornerFb"></div>
+
+    <p class="prompt"><b>Pick one:</b> a regular pentagon has corners of 108&deg;. Why will it not tessellate on its own?</p>
+    <div class="picks" id="pentQ"></div>
+    <div class="fb" id="pentFb"></div>
+
+    <p class="prompt">Want to explain it in your own words? Why do some shapes tessellate and others do not?</p>
+    <div class="chipset" data-for="w_tess"></div>
+    <textarea class="wr" id="w_tess" aria-label="Why some shapes tessellate"></textarea>
+    <p class="saved" data-saved="w_tess"></p>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 2 ===================== -->
+  <section class="box stage hidden" id="st2">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 2 &middot; Turn and flip</span>
+      <h2>Tiles on the cutting board</h2>
+      <p class="stsub">Reflect and rotate tile offcuts on a grid, square by square.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 130" aria-hidden="true">
+        <g stroke="#0a2f38" stroke-width="2">
+          <rect x="20" y="30" width="20" height="20" fill="#ef7724"/><rect x="40" y="30" width="20" height="20" fill="#ef7724"/><rect x="20" y="50" width="20" height="20" fill="#ef7724"/><rect x="20" y="70" width="20" height="20" fill="#ef7724"/>
+          <rect x="100" y="30" width="20" height="20" fill="#00a6c9"/><rect x="120" y="30" width="20" height="20" fill="#00a6c9"/><rect x="120" y="50" width="20" height="20" fill="#00a6c9"/><rect x="120" y="70" width="20" height="20" fill="#00a6c9"/>
+        </g>
+        <line x1="80" y1="14" x2="80" y2="106" stroke="#7b4b8f" stroke-width="3" stroke-dasharray="7 5"/>
+        <text x="80" y="124" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#7b4b8f">mirror line</text>
+        <g stroke="#0a2f38" stroke-width="2">
+          <rect x="190" y="30" width="20" height="20" fill="#ef7724"/><rect x="210" y="30" width="20" height="20" fill="#ef7724"/><rect x="190" y="50" width="20" height="20" fill="#ef7724"/><rect x="190" y="70" width="20" height="20" fill="#ef7724"/>
+          <rect x="210" y="70" width="20" height="20" fill="#00a6c9"/><rect x="230" y="70" width="20" height="20" fill="#00a6c9"/><rect x="250" y="70" width="20" height="20" fill="#00a6c9"/><rect x="250" y="90" width="20" height="20" fill="#00a6c9"/>
+        </g>
+        <circle cx="210" cy="90" r="6" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/>
+        <path d="M236 40 A 32 32 0 0 1 262 62" fill="none" stroke="#0a2f38" stroke-width="2.5" marker-end="url(#ah2)"/>
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0a2f38"/></marker></defs>
+        <text x="226" y="124" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#0a2f38">quarter turn clockwise</text>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p><b>Reflect:</b> flip over a mirror line. Every square ends up the same distance away on the other side.</p>
+        <p><b>Rotate:</b> turn about a centre point. You need the centre, the angle (90&deg; or 180&deg;) and the direction.</p>
+        <p>The <b>tracing paper</b> button shows the move happening, like a real piece of tracing paper.</p>
+      </div>
+    </div>
+    <div id="flipHost"></div>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 3 ===================== -->
+  <section class="box stage hidden" id="st3">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 3 &middot; Robot tiler</span>
+      <h2>A robot that speaks vector</h2>
+      <p class="stsub">Read vectors, write vectors, and drive the tiling robot.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 150" aria-hidden="true">
+        <g stroke="#d6c9b6" stroke-width="1">
+          <path d="M10 20 H170 M10 40 H170 M10 60 H170 M10 80 H170 M10 100 H170 M10 120 H170 M10 140 H170"/>
+          <path d="M10 20 V140 M30 20 V140 M50 20 V140 M70 20 V140 M90 20 V140 M110 20 V140 M130 20 V140 M150 20 V140 M170 20 V140"/>
+        </g>
+        <defs><marker id="ah3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0a2f38"/></marker></defs>
+        <path d="M30 120 H110" stroke="#ef7724" stroke-width="3" stroke-dasharray="5 4"/>
+        <path d="M110 120 V60" stroke="#00a6c9" stroke-width="3" stroke-dasharray="5 4"/>
+        <line x1="30" y1="120" x2="110" y2="60" stroke="#0a2f38" stroke-width="3.5" marker-end="url(#ah3)"/>
+        <text x="70" y="140" text-anchor="middle" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#d75f10">4 right</text>
+        <text x="118" y="94" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="12" font-weight="700" fill="#007291">3 up</text>
+        <path d="M210 40 q-14 35 0 70" fill="none" stroke="#0a2f38" stroke-width="3.5"/>
+        <path d="M250 40 q14 35 0 70" fill="none" stroke="#0a2f38" stroke-width="3.5"/>
+        <text x="230" y="68" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="24" fill="#d75f10">4</text>
+        <text x="230" y="102" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="24" fill="#007291">3</text>
+        <text x="258" y="66" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="11" fill="#d75f10">across</text>
+        <text x="258" y="100" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="11" fill="#007291">up</text>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p>A <b>column vector</b> is two numbers stacked in tall brackets.</p>
+        <p><b>Top number:</b> across. Positive is right, negative is left.<br><b>Bottom number:</b> up or down. Positive is up, negative is down.</p>
+        <p>So <span class="vec"><span>4</span><span>3</span></span> means 4 right and 3 up. <span class="vec"><span>-2</span><span>-5</span></span> means 2 left and 5 down.</p>
+      </div>
+    </div>
+    <div id="robotHost"></div>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 4 ===================== -->
+  <section class="box stage hidden" id="st4">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 4 &middot; The till</span>
+      <h2>Sale on! Everything in 5% steps</h2>
+      <p class="stsub">Build any discount from 10% and 5% blocks, then serve the customers.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 150" aria-hidden="true">
+        <g font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-weight="700">
+          <rect x="10" y="14" width="140" height="34" rx="8" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/>
+          <text x="80" y="37" text-anchor="middle" font-size="15" fill="#0a2f38">100% = &#163;60</text>
+          <path d="M80 50 v14" stroke="#0a2f38" stroke-width="2.5" marker-end="url(#ah4)"/>
+          <rect x="30" y="68" width="100" height="30" rx="8" fill="#ef7724" stroke="#0a2f38" stroke-width="2.5"/>
+          <text x="80" y="88" text-anchor="middle" font-size="14" fill="#0a2f38">10% = &#163;6</text>
+          <text x="88" y="61" font-size="11" fill="#0a2f38">divide by 10</text>
+          <path d="M80 100 v14" stroke="#0a2f38" stroke-width="2.5" marker-end="url(#ah4)"/>
+          <rect x="45" y="118" width="70" height="28" rx="8" fill="#00a6c9" stroke="#0a2f38" stroke-width="2.5"/>
+          <text x="80" y="137" text-anchor="middle" font-size="13" fill="#0a2f38">5% = &#163;3</text>
+          <text x="88" y="111" font-size="11" fill="#0a2f38">halve it</text>
+          <rect x="186" y="40" width="100" height="74" rx="10" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/>
+          <text x="236" y="62" text-anchor="middle" font-size="13" fill="#0a2f38">15% =</text>
+          <text x="236" y="82" text-anchor="middle" font-size="13" fill="#d75f10">&#163;6 + &#163;3</text>
+          <text x="236" y="103" text-anchor="middle" font-size="15" fill="#0a2f38">= &#163;9</text>
+        </g>
+        <defs><marker id="ah4" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0a2f38"/></marker></defs>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p><b>10%:</b> divide by 10. <b>5%:</b> half of that.</p>
+        <p>Every multiple of 5% is built from those two blocks. 35% = 10% + 10% + 10% + 5%.</p>
+        <p>The <b>sale price</b> is the old price take away the discount.</p>
+      </div>
+    </div>
+    <h3>Discount slider</h3>
+    <p class="hint">A toy, nothing to get right. Pick a price and slide.</p>
+    <div class="pricechips seg" id="slPrices"></div>
+    <div class="pctbar" id="pctBar" aria-hidden="true"></div>
+    <input type="range" class="slider" id="pctSlider" min="0" max="100" step="5" value="15" aria-label="Discount percentage">
+    <div class="breakdown" id="breakdown" aria-live="polite"></div>
+    <h3>Customers at the till</h3>
+    <div class="tillwrap">
+      <svg class="tillsvg" viewBox="0 0 200 200" role="img" aria-label="A shop till">
+        <rect x="30" y="20" width="140" height="56" rx="10" fill="#0a2f38"/>
+        <rect x="42" y="30" width="116" height="36" rx="6" fill="#b9f3c9"/>
+        <text id="tillText" x="150" y="55" text-anchor="end" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#0a2f38">&#163;0.00</text>
+        <rect x="20" y="80" width="160" height="70" rx="12" fill="#ef7724" stroke="#0a2f38" stroke-width="4"/>
+        <g fill="#fffdf8" stroke="#0a2f38" stroke-width="2">
+          <rect x="36" y="92" width="22" height="14" rx="3"/><rect x="64" y="92" width="22" height="14" rx="3"/><rect x="92" y="92" width="22" height="14" rx="3"/>
+          <rect x="36" y="112" width="22" height="14" rx="3"/><rect x="64" y="112" width="22" height="14" rx="3"/><rect x="92" y="112" width="22" height="14" rx="3"/>
+          <rect x="124" y="92" width="40" height="34" rx="5" fill="#ffc247"/>
+        </g>
+        <g class="drawer" id="drawer">
+          <rect x="14" y="150" width="172" height="30" rx="6" fill="#ffc247" stroke="#0a2f38" stroke-width="4"/>
+          <circle cx="100" cy="165" r="5" fill="#0a2f38"/>
+        </g>
+      </svg>
+      <div id="tillHost"></div>
+    </div>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 5 ===================== -->
+  <section class="box stage hidden" id="st5">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 5 &middot; Pattern detective</span>
+      <h2>How was this floor made?</h2>
+      <p class="stsub">Spot the move that takes each tile to the next one.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 120" aria-hidden="true" id="detLearn"></svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p>Every tile in the shop has a little bird on it, so you can see which way it faces.</p>
+        <p><b>Translation:</b> slid, nothing else. <b>Reflection:</b> flipped like a mirror image. <b>Rotation:</b> turned round.</p>
+      </div>
+    </div>
+    <div id="detHost"></div>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 6 ===================== -->
+  <section class="box stage hidden" id="st6">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 6 &middot; Pattern studio</span>
+      <h2>Design a floor</h2>
+      <p class="stsub">Pick a tile and the moves. The shop lays the floor for you.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="studio">
+      <div>
+        <svg class="patsvg" id="studioSvg" viewBox="0 0 360 240" role="group" aria-label="Your floor design. Tap a tile to give it an extra quarter turn."></svg>
+        <p class="hint">Tap any tile to give it an extra quarter turn by hand.</p>
+        <div class="desc" id="studioDesc" aria-live="polite"></div>
+      </div>
+      <div>
+        <div class="ctl"><span class="lab">Tile</span><div class="seg" id="stMotif"></div></div>
+        <div class="ctl"><span class="lab">Colours</span><div class="seg" id="stPal"></div></div>
+        <div class="ctl"><span class="lab">Along the top row, each tile is...</span><div class="seg" id="stAcross"></div></div>
+        <div class="ctl"><span class="lab">Going down, each tile is...</span><div class="seg" id="stDown"></div></div>
+        <div class="row">
+          <button class="btn btn-quiet small" id="stReset">Clear hand turns</button>
+          <button class="btn btn-orange small" id="stKeep">Keep this design</button>
+        </div>
+        <div class="designs" id="stDesigns"></div>
+      </div>
+    </div>
+    <p class="prompt">If you fancy it, describe your floor in your own words. How do the slides, flips and turns make it repeat?</p>
+    <div class="chipset" data-for="w_studio"></div>
+    <textarea class="wr" id="w_studio" aria-label="Describe your pattern"></textarea>
+    <p class="saved" data-saved="w_studio"></p>
+    <div class="stnav"></div>
+  </section>
+
+  <!-- ===================== STAGE 7 ===================== -->
+  <section class="box stage hidden" id="st7">
+    <div class="sthead"><div>
+      <span class="seclab">Stage 7 &middot; Good deal?</span>
+      <h2>Is it really a bargain?</h2>
+      <p class="stsub">Work out both prices, then decide which deal wins.</p>
+      <div class="gf"></div>
+    </div></div>
+    <div class="learn">
+      <svg viewBox="0 0 300 120" aria-hidden="true">
+        <g stroke="#0a2f38" stroke-width="3">
+          <path d="M150 20 v92" />
+          <path d="M60 40 h180" />
+          <path d="M60 40 l-30 40 h60 z" fill="#ffc247"/>
+          <path d="M240 40 l-30 40 h60 z" fill="#00a6c9"/>
+          <path d="M120 112 h60" />
+        </g>
+        <g font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-weight="700" font-size="13" text-anchor="middle" fill="#0a2f38">
+          <text x="60" y="100">25% off</text><text x="240" y="100">&#163;20 off</text>
+        </g>
+      </svg>
+      <div>
+        <span class="lk">Learn a bit</span>
+        <p>A bigger number on the sticker is not always the bigger saving.</p>
+        <p>The fair test: work out what you would <b>actually pay</b> each way, then compare.</p>
+      </div>
+    </div>
+    <div id="dealHost"></div>
+    <p class="prompt">Want to tell Jay how you decided? Pick one of the deals and explain it.</p>
+    <div class="chipset" data-for="w_deal"></div>
+    <textarea class="wr" id="w_deal" aria-label="Explain a deal"></textarea>
+    <p class="saved" data-saved="w_deal"></p>
+    <div class="stnav"></div>
+  </section>
+
+  <div class="box endbox">
+    <span class="seclab">When you are ready</span>
+    <h2>Closing up shop</h2>
+    <p id="endLine">Whatever you tried today gets bundled up below, if you want to send it.</p>
+    <div id="sendHost"></div>
+    <div class="again"><button class="btn btn-quiet" id="restartBtn">Start again</button> <span class="hint" id="restartMsg"></span></div>
+  </div>
+
+  <a class="backlink" href="/practice/#maths-standard">Back to Maths</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.tile-shop.v1", WHO = "base5.who.v1";
+var INK = "#0a2f38", TEAL = "#007291", BRIGHT = "#00a6c9", ORANGE = "#ef7724", YELLOW = "#ffc247", PLUM = "#7b4b8f", GREEN = "#2e7d4f", PAPER = "#fffdf8", LINE = "#d6c9b6";
+var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+var POUND = "\u00a3", DEG = "\u00b0";
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") }
+function fbSet(node, kind, html){ node.className = "fb " + kind; node.innerHTML = html }
+
+/* ---------- state ---------- */
+var st = { open:0, ans:{}, txt:{}, shapes:{}, corner:[], studio:null, designs:[], stamp:null };
+try{ var raw = localStorage.getItem(STORE); if(raw){ var s0 = JSON.parse(raw); if(s0 && typeof s0 === "object" && s0.ans) st = Object.assign(st, s0) } }catch(e){}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+
+/* rec: one line per item, latest answer kept */
+function rec(stage, id, label, answer, ok){
+  var r = st.ans[id] || { s:stage, l:label, n:0 };
+  r.s = stage; r.l = label; r.a = answer; r.n++;
+  if(ok === true) r.ok = true; else if(r.ok !== true) r.ok = ok;
+  st.ans[id] = r; save(); drawMap();
+}
+function triedIn(stage){
+  var n = 0;
+  Object.keys(st.ans).forEach(function(k){ if(st.ans[k].s === stage) n++ });
+  Object.keys(st.txt).forEach(function(k){ if(st.txt[k] && TXTSTAGE[k] === stage) n++ });
+  return n;
+}
+var TXTSTAGE = { w_tess:1, w_studio:6, w_deal:7, w_det:5 };
+
+/* ---------- stages and milestones ---------- */
+var STAGES = [
+  { n:1, name:"Will it tile?", sub:"Tessellations" },
+  { n:2, name:"Turn and flip", sub:"Rotations and reflections" },
+  { n:3, name:"Robot tiler", sub:"Vectors" },
+  { n:4, name:"The till", sub:"Discounts in 5% steps" },
+  { n:5, name:"Pattern detective", sub:"Describe the moves" },
+  { n:6, name:"Pattern studio", sub:"Make your own floor" },
+  { n:7, name:"Good deal?", sub:"Compare and decide" }
+];
+var MS = {
+  LC: { m:[ ["I can recognise and create simple tessellating patterns using repeating shapes.", "Spot shapes that tile with no gaps, and make a simple tiling pattern.", [1,6]],
+            ["I can use rotations and reflections to create a repeating pattern.", "Use turns and flips to make a repeating pattern.", [2,6]] ], best:[1,2] },
+  LP: { m:[ ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts like 5%, 15%, 25% and 35% off.", [4,7]],
+            ["I can use vector notation to describe a translation on a grid.", "Use a vector to describe a slide on a grid.", [3]] ], best:[3,4] },
+  LW: { m:[ ["I can describe how rotations, reflections and translations have been used to create a repeating pattern.", "Say how a pattern was made from slides, turns and flips.", [5]],
+            ["I can create my own repeating pattern using rotations, reflections and translations.", "Make your own repeating pattern with slides, turns and flips.", [6]] ], best:[5,6] },
+  EGW: { m:[ ["Use and read vector notation", "Read and write vectors in their tall brackets.", [3]],
+             ["I can use vectors to describe translations of shapes on a coordinate grid.", "Use vectors to describe how a shape slides on a coordinate grid.", [3]] ], best:[3] },
+  JT: { m:[ ["I can create and analyse complex repeating patterns, combining transformations and explaining why particular shapes tessellate successfully.", "Make and pick apart trickier patterns, and explain why some shapes tile.", [1,5,6]],
+            ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts in steps of 5%.", [4,7]] ], best:[1,7] },
+  HK: { m:[ ["I can rotate and reflect shapes accurately using a grid or practical resources.", "Turn and flip shapes accurately on a grid.", [2]],
+            ["I can use translations to move shapes on a grid and create a simple repeating pattern.", "Slide shapes on a grid to make a simple repeating pattern.", [3,6]] ], best:[2,3] }
+};
+var WHOS = ["JT","LW","EGW","LP","LC","HK"];
+function getWho(){ try{ var w = localStorage.getItem(WHO) || ""; return MS[w.toUpperCase()] ? w.toUpperCase() : "" }catch(e){ return "" } }
+var who = getWho();
+
+var ICONS = [
+  "<svg viewBox='0 0 52 52'><g stroke='#0a2f38' stroke-width='2'><polygon points='6,16 16,10 26,16 26,28 16,34 6,28' fill='#ffc247'/><polygon points='26,16 36,10 46,16 46,28 36,34 26,28' fill='#00a6c9'/><polygon points='16,34 26,28 36,34 36,46 26,52 16,46' fill='#ef7724'/></g></svg>",
+  "<svg viewBox='0 0 52 52'><g stroke='#0a2f38' stroke-width='2'><rect x='6' y='10' width='9' height='9' fill='#ef7724'/><rect x='15' y='10' width='9' height='9' fill='#ef7724'/><rect x='6' y='19' width='9' height='9' fill='#ef7724'/><rect x='37' y='10' width='9' height='9' fill='#00a6c9'/><rect x='28' y='10' width='9' height='9' fill='#00a6c9'/><rect x='37' y='19' width='9' height='9' fill='#00a6c9'/></g><line x1='26' y1='4' x2='26' y2='48' stroke='#7b4b8f' stroke-width='3' stroke-dasharray='4 3'/></svg>",
+  "<svg viewBox='0 0 52 52'><rect x='14' y='18' width='24' height='20' rx='5' fill='#00a6c9' stroke='#0a2f38' stroke-width='2.5'/><circle cx='22' cy='27' r='3' fill='#0a2f38'/><circle cx='31' cy='27' r='3' fill='#0a2f38'/><path d='M26 18 v-8' stroke='#0a2f38' stroke-width='2.5'/><circle cx='26' cy='9' r='3' fill='#ef7724' stroke='#0a2f38' stroke-width='2'/><circle cx='18' cy='42' r='4' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><circle cx='34' cy='42' r='4' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/></svg>",
+  "<svg viewBox='0 0 52 52'><rect x='8' y='8' width='36' height='16' rx='4' fill='#0a2f38'/><rect x='12' y='11' width='28' height='10' rx='2' fill='#b9f3c9'/><rect x='6' y='26' width='40' height='18' rx='5' fill='#ef7724' stroke='#0a2f38' stroke-width='2.5'/><text x='26' y='41' text-anchor='middle' font-family='Archivo, Arial Black, sans-serif' font-weight='900' font-size='12' fill='#0a2f38'>%</text></svg>",
+  "<svg viewBox='0 0 52 52'><circle cx='22' cy='22' r='13' fill='#fffdf8' stroke='#0a2f38' stroke-width='3'/><path d='M31 31 l12 12' stroke='#0a2f38' stroke-width='5' stroke-linecap='round'/><rect x='16' y='16' width='6' height='6' fill='#ef7724'/><rect x='22' y='22' width='6' height='6' fill='#00a6c9'/></svg>",
+  "<svg viewBox='0 0 52 52'><g stroke='#0a2f38' stroke-width='2'><rect x='6' y='6' width='20' height='20' fill='#ffc247'/><rect x='26' y='6' width='20' height='20' fill='#7b4b8f'/><rect x='6' y='26' width='20' height='20' fill='#7b4b8f'/><rect x='26' y='26' width='20' height='20' fill='#ffc247'/></g><path d='M6 6 A20 20 0 0 1 26 26 M46 26 A20 20 0 0 1 26 46' fill='none' stroke='#0a2f38' stroke-width='3'/></svg>",
+  "<svg viewBox='0 0 52 52'><path d='M26 8 v34 M10 16 h32' stroke='#0a2f38' stroke-width='3'/><path d='M10 16 l-7 12 h14 z' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><path d='M42 16 l-7 12 h14 z' fill='#00a6c9' stroke='#0a2f38' stroke-width='2'/><path d='M16 44 h20' stroke='#0a2f38' stroke-width='3'/></svg>"
+];
+
+function drawWho(){
+  var row = el("whoRow"); row.innerHTML = "";
+  WHOS.concat(["look"]).forEach(function(w){
+    var b = document.createElement("button"); b.type = "button"; b.className = "whobtn" + (w === "look" ? " look" : "");
+    b.textContent = w === "look" ? "Just looking" : w;
+    b.setAttribute("aria-pressed", (w === who || (w === "look" && !who)) ? "true" : "false");
+    b.onclick = function(){
+      who = w === "look" ? "" : w;
+      try{ if(who) localStorage.setItem(WHO, who); }catch(e){}
+      drawWho(); drawMap(); drawGoodFor();
+      var bw = document.getElementById("b5who"); if(bw && who) bw.value = who;
+    };
+    row.appendChild(b);
+  });
+  var info = el("whoInfo");
+  if(!who){ info.innerHTML = ""; return }
+  var m = MS[who];
+  info.innerHTML = "<div class='mlist'><p><b>Hi " + who + ".</b> Your two milestones for this one:</p>" +
+    m.m.map(function(x, i){ return "<p>" + (i + 1) + ". " + x[1] + " <span class='hint'>(stage " + x[2].join(" and ") + ")</span></p>" }).join("") +
+    "<p class='hint'>Stages marked <b>good place to start</b> suit you best. Everything else is open too.</p></div>";
+}
+
+function drawMap(){
+  var map = el("map"); map.innerHTML = "";
+  STAGES.forEach(function(s, i){
+    var b = document.createElement("button"); b.type = "button"; b.className = "stbtn" + (st.open === s.n ? " on" : "");
+    var t = triedIn(s.n);
+    b.innerHTML = ICONS[i] + "<span><b>" + s.n + ". " + s.name + "</b><small>" + s.sub + "</small>" +
+      "<span class='tried'>" + (t ? t + " thing" + (t === 1 ? "" : "s") + " tried" : "&nbsp;") + "</span></span>" +
+      (who && MS[who].best.indexOf(s.n) >= 0 ? "<span class='badge'>Good place to start</span>" : "");
+    b.onclick = function(){ openStage(s.n, true) };
+    map.appendChild(b);
+  });
+}
+function drawGoodFor(){
+  STAGES.forEach(function(s){
+    var g = document.querySelector("#st" + s.n + " .gf"); if(!g) return;
+    if(!who){ g.innerHTML = ""; return }
+    var hits = MS[who].m.filter(function(x){ return x[2].indexOf(s.n) >= 0 });
+    g.innerHTML = hits.length ? "<span class='goodfor'>" + who + ": " + hits.map(function(x){ return x[1] }).join(" ") + "</span>" : "";
+  });
+}
+function openStage(n, scroll){
+  st.open = n; save();
+  for(var i = 1; i <= 7; i++) el("st" + i).classList.toggle("hidden", i !== n);
+  drawMap();
+  if(OPENERS[n]) OPENERS[n]();
+  if(scroll){ var t = el("st" + n).getBoundingClientRect().top + window.scrollY - 10; window.scrollTo({ top:t, behavior: reduce ? "auto" : "smooth" }) }
+}
+function closeStages(){
+  st.open = 0; save();
+  for(var i = 1; i <= 7; i++) el("st" + i).classList.add("hidden");
+  drawMap();
+  window.scrollTo({ top: el("map").getBoundingClientRect().top + window.scrollY - 10, behavior: reduce ? "auto" : "smooth" });
+}
+var OPENERS = {};
+
+document.querySelectorAll(".stage").forEach(function(sec){
+  var n = parseInt(sec.id.slice(2), 10), nav = sec.querySelector(".stnav");
+  nav.innerHTML = "<button class='btn btn-quiet' type='button' data-go='map'>Back to the map</button>" +
+    (n < 7 ? "<button class='btn' type='button' data-go='next'>Next stage: " + STAGES[n].name + "</button>" : "<button class='btn' type='button' data-go='end'>Go to sending</button>");
+  nav.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.go === "map") closeStages();
+    if(b.dataset.go === "next") openStage(n + 1, true);
+    if(b.dataset.go === "end") window.scrollTo({ top: el("sendHost").getBoundingClientRect().top + window.scrollY - 60, behavior: reduce ? "auto" : "smooth" });
+  });
+});
+
+/* ---------- writing boxes with starter chips ---------- */
+var CHIPS = {
+  w_tess:["A shape tessellates when", "the corners that meet at a point add up to 360" + DEG, "360 divided by", "is a whole number", "Hexagons work because 3 \u00d7 120 = 360.", "Pentagons do not work because", "it leaves a gap", "it overlaps"],
+  w_studio:["Along the top row,", "Going down,", "each tile is", "translated", "reflected in the line between the tiles", "rotated 90" + DEG + " clockwise", "rotated 180" + DEG, "The pattern repeats every", "tiles."],
+  w_deal:["I think the better deal is", "because", "I worked out 10% first by", "then I halved it to get 5%.", "The difference is", "A bigger percentage does not always mean", "you pay less."],
+  w_det:["Along the top row,", "Going down,", "each tile is", "translated", "reflected in the line between the rows", "rotated 90" + DEG + " clockwise", "rotated 180" + DEG, "the tile above it"]
+};
+document.querySelectorAll(".chipset").forEach(setupChips);
+function setupChips(box){
+  var id = box.dataset.for, ta = el(id);
+  box.innerHTML = "";
+  (CHIPS[id] || []).forEach(function(c){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = c;
+    b.onclick = function(){ var v = ta.value; ta.value = v + (v && !/\s$/.test(v) ? " " : "") + c; ta.dispatchEvent(new Event("input")); ta.focus() };
+    box.appendChild(b);
+  });
+  ta.value = st.txt[id] || "";
+  var tmr = null;
+  ta.addEventListener("input", function(){
+    st.txt[id] = ta.value; save();
+    var m = document.querySelector("[data-saved='" + id + "']");
+    clearTimeout(tmr); tmr = setTimeout(function(){ if(m) m.textContent = ta.value.trim() ? "Saved on this device. It goes in your message to Jay." : ""; drawMap() }, 400);
+  });
+}
+
+/* ---------- money helpers (pence) ---------- */
+function money(p){ var neg = p < 0; p = Math.abs(Math.round(p)); var s = POUND + Math.floor(p / 100) + (p % 100 ? "." + ("0" + (p % 100)).slice(-2) : ""); return (neg ? "-" : "") + s }
+function money2(p){ p = Math.round(p); return POUND + Math.floor(p / 100) + "." + ("0" + (p % 100)).slice(-2) }
+function parseMoney(s){ s = String(s || ""); var pence = /^[^\u00a3]*\d\s*p$/i.test(s.trim()); s = s.replace(/[\u00a3,\s]/g, "").replace(/p$/i, ""); if(s === "" || isNaN(Number(s))) return NaN; return Math.round(Number(s) * (pence ? 1 : 100)) }
+function parseInt2(s){ s = String(s || "").trim().replace(/\u2212/g, "-"); if(!/^[+-]?\d+$/.test(s)) return NaN; return parseInt(s, 10) }
+function vecH(a, b){ return "<span class='vec'><span>" + a + "</span><span>" + b + "</span></span>" }
+function vecT(a, b){ return "(" + a + " over " + b + ")" }
+function vwords(dx, dy){
+  var a = dx === 0 ? "" : Math.abs(dx) + (dx > 0 ? " right" : " left");
+  var b = dy === 0 ? "" : Math.abs(dy) + (dy > 0 ? " up" : " down");
+  return (a && b) ? a + " and " + b : (a || b || "nowhere at all");
+}
+
+/* ---------- generic stepper ---------- */
+function Stepper(host, items, stage, render){
+  host.innerHTML = "<div class='steps'></div><div class='stepbody'></div><div class='stepnav'><button class='btn btn-quiet small' type='button' data-d='-1'>Previous</button><button class='btn small' type='button' data-d='1'>Next one</button></div>";
+  var bar = host.querySelector(".steps"), body = host.querySelector(".stepbody"), idx = 0;
+  function dots(){
+    bar.innerHTML = "";
+    items.forEach(function(it, i){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = i + 1;
+      var r = st.ans[it.id];
+      b.className = (r ? (r.ok ? "ok" : "tr") : "") + (i === idx ? " cur" : "");
+      b.setAttribute("aria-label", "Puzzle " + (i + 1) + (it.stretch ? ", stretch" : "") + (r ? (r.ok ? ", done" : ", tried") : ""));
+      b.onclick = function(){ go(i) };
+      bar.appendChild(b);
+    });
+  }
+  function go(i){ idx = Math.max(0, Math.min(items.length - 1, i)); dots(); render(items[idx], body, dots); host.querySelector("[data-d='-1']").disabled = idx === 0; host.querySelector("[data-d='1']").textContent = idx === items.length - 1 ? "Back to the first" : "Next one" }
+  host.querySelector(".stepnav").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    var d = parseInt(b.dataset.d, 10);
+    if(d === 1 && idx === items.length - 1) go(0); else go(idx + d);
+  });
+  go(0);
+  return { refresh:dots };
+}
+
+/* ======================================================
+   STAGE 1: tessellation
+   ====================================================== */
+var SH = [
+  { k:"sq", name:"Square", tiles:true, ang:90, why:"Four corners of 90" + DEG + " meet at every point: 4 \u00d7 90 = 360." },
+  { k:"tri", name:"Equilateral triangle", tiles:true, ang:60, why:"Six corners of 60" + DEG + " meet at every point: 6 \u00d7 60 = 360." },
+  { k:"hex", name:"Regular hexagon", tiles:true, ang:120, why:"Three corners of 120" + DEG + " meet: 3 \u00d7 120 = 360. Bees build honeycomb in this shape." },
+  { k:"pent", name:"Regular pentagon", tiles:false, ang:108, why:"Corners are 108" + DEG + ". Three make 324, leaving a gap. Four make 432, which overlaps. However you push them, gaps appear." },
+  { k:"oct", name:"Regular octagon", tiles:false, ang:135, why:"Corners are 135" + DEG + ". Two make 270, leaving a 90" + DEG + " gap. Little squares fill those gaps, so octagons need help from squares." },
+  { k:"circ", name:"Circle", tiles:false, ang:0, why:"Curved edges only touch at single points, so there are always gaps between circles." },
+  { k:"quad", name:"Wonky four sided shape", tiles:true, ang:0, why:"Surprise! Any four sided shape tiles. Its four corners always add up to 360" + DEG + ", so turned copies fit round every point." }
+];
+var FW = 360, FH = 220, TCOL = [BRIGHT, YELLOW, ORANGE, PAPER, "#b98fcc"];
+function pts(a){ return a.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1) }).join(" ") }
+function regPoly(cx, cy, R, n, startDeg){ var o = []; for(var i = 0; i < n; i++){ var a = (startDeg + 360 / n * i) * Math.PI / 180; o.push([cx + R * Math.cos(a), cy + R * Math.sin(a)]) } return o }
+function floorTiles(k){
+  var T = [], s, x, y, r, c;
+  if(k === "sq"){ s = 40; for(y = 0, r = 0; y < FH; y += s, r++) for(x = 0, c = 0; x < FW; x += s, c++) T.push({ p:[[x,y],[x+s,y],[x+s,y+s],[x,y+s]], c:(r + c) % 2 ? 0 : 1 }) }
+  if(k === "tri"){ s = 46; var h = s * Math.sqrt(3) / 2;
+    for(r = 0; r * h < FH; r++){ y = r * h; var off = (r % 2) * s / 2 - s;
+      for(c = 0; off + c * s < FW + s; c++){ x = off + c * s;
+        T.push({ p:[[x, y + h],[x + s, y + h],[x + s / 2, y]], c:0 });
+        T.push({ p:[[x + s / 2, y],[x + 3 * s / 2, y],[x + s, y + h]], c:(r % 2) ? 1 : 2 }); } } }
+  if(k === "hex"){ var R = 26, w = Math.sqrt(3) * R;
+    for(r = 0; (r - 1) * 1.5 * R < FH + R; r++) for(c = -1; c * w < FW + w; c++){ var cx = c * w + (r % 2) * w / 2, cy = r * 1.5 * R; T.push({ p:regPoly(cx, cy, R, 6, -90), c:((c - (r % 2 ? 0 : 1) * 0) % 3 + 3 + r) % 3 }) } }
+  if(k === "pent"){ var Rp = 28, dx = 2 * Rp * Math.sin(72 * Math.PI / 180), dy = Rp * (1 + Math.cos(36 * Math.PI / 180));
+    for(r = 0; r * dy < FH + dy; r++) for(c = -1; c * dx < FW + dx; c++) T.push({ p:regPoly(c * dx + (r % 2) * dx / 2, r * dy + Rp, Rp, 5, -90), c:(r + c + 9) % 3 }) }
+  if(k === "oct"){ var Ro = 26, wo = 2 * Ro * Math.cos(22.5 * Math.PI / 180);
+    for(y = wo / 2, r = 0; y - wo / 2 < FH; y += wo, r++) for(x = wo / 2, c = 0; x - wo / 2 < FW; x += wo, c++) T.push({ p:regPoly(x, y, Ro, 8, 22.5), c:(r + c) % 2 ? 0 : 2 }) }
+  if(k === "quad"){ var A = [0,0], B = [52,-6], C = [60,40], D = [8,30], u = [C[0]-A[0], C[1]-A[1]], v = [D[0]-B[0], D[1]-B[1]];
+    var Q = [A,B,C,D], Q2 = Q.map(function(p){ return [B[0] + C[0] - p[0], B[1] + C[1] - p[1]] });
+    for(var m = -8; m <= 8; m++) for(var n = -8; n <= 8; n++){ var tx = m * u[0] + n * v[0] - 30, ty = m * u[1] + n * v[1] + 10;
+      if(tx < -140 || tx > FW + 40 || ty < -120 || ty > FH + 40) continue;
+      T.push({ p:Q.map(function(p){ return [p[0] + tx, p[1] + ty] }), c:1 });
+      T.push({ p:Q2.map(function(p){ return [p[0] + tx, p[1] + ty] }), c:0 }); } }
+  return T;
+}
+function floorSVG(k){
+  var s = "<defs><clipPath id='fclip'><rect x='0' y='0' width='" + FW + "' height='" + FH + "' rx='10'/></clipPath>" +
+    "<pattern id='gapPat' width='10' height='10' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect width='10' height='10' fill='" + PLUM + "'/><rect width='4' height='10' fill='#9b6caf'/></pattern></defs>" +
+    "<rect x='0' y='0' width='" + FW + "' height='" + FH + "' rx='10' fill='url(#gapPat)'/><g clip-path='url(#fclip)'>";
+  if(k === "circ"){ var r = 22, i = 0; for(var y = r; y - r < FH; y += 2 * r) for(var x = r; x - r < FW; x += 2 * r, i++) s += "<circle class='tl' style='animation-delay:" + Math.round(x * 2.2) + "ms' cx='" + x + "' cy='" + y + "' r='" + r + "' fill='" + TCOL[i % 3] + "' stroke='" + INK + "' stroke-width='2'/>" }
+  else floorTiles(k).forEach(function(t){
+    var mx = 0; t.p.forEach(function(p){ mx += p[0] }); mx /= t.p.length;
+    s += "<polygon class='tl' style='animation-delay:" + Math.max(0, Math.round(mx * 2.2)) + "ms' points='" + pts(t.p) + "' fill='" + TCOL[t.c] + "' stroke='" + INK + "' stroke-width='2' stroke-linejoin='round'/>";
+  });
+  return s + "</g><rect x='1.5' y='1.5' width='" + (FW - 3) + "' height='" + (FH - 3) + "' rx='10' fill='none' stroke='" + INK + "' stroke-width='3'/>";
+}
+function shapeIcon(k){
+  var inner = "";
+  if(k === "sq") inner = "<rect x='7' y='7' width='24' height='24' fill='" + YELLOW + "'/>";
+  if(k === "tri") inner = "<polygon points='" + pts([[5,31],[33,31],[19,6.75]]) + "' fill='" + BRIGHT + "'/>";
+  if(k === "hex") inner = "<polygon points='" + pts(regPoly(19, 19, 15, 6, -90)) + "' fill='" + ORANGE + "'/>";
+  if(k === "pent") inner = "<polygon points='" + pts(regPoly(19, 20, 15, 5, -90)) + "' fill='#b98fcc'/>";
+  if(k === "oct") inner = "<polygon points='" + pts(regPoly(19, 19, 15, 8, 22.5)) + "' fill='" + BRIGHT + "'/>";
+  if(k === "circ") inner = "<circle cx='19' cy='19' r='14' fill='" + YELLOW + "'/>";
+  if(k === "quad") inner = "<polygon points='6,10 30,6 33,30 12,26' fill='" + ORANGE + "'/>";
+  return "<svg viewBox='0 0 38 38' aria-hidden='true'><g stroke='" + INK + "' stroke-width='2'>" + inner + "</g></svg>";
+}
+var curShape = null;
+function drawShapeBar(){
+  var bar = el("shapeBar"); bar.innerHTML = "";
+  SH.forEach(function(sh){
+    var b = document.createElement("button"); b.type = "button";
+    var r = st.shapes[sh.k];
+    b.className = "shbtn" + (curShape === sh.k ? " sel" : "") + (r ? (sh.tiles ? " yes" : " no") : "");
+    b.innerHTML = shapeIcon(sh.k) + "<span>" + sh.name + "</span>";
+    b.onclick = function(){ pickShape(sh.k) };
+    bar.appendChild(b);
+  });
+  var y = el("binYes"), n = el("binNo");
+  y.innerHTML = "<b>Tessellates</b>"; n.innerHTML = "<b>Leaves gaps</b>";
+  SH.forEach(function(sh){ if(st.shapes[sh.k]) (sh.tiles ? y : n).insertAdjacentHTML("beforeend", "<span>" + sh.name + "</span>") });
+  if(!y.querySelector("span")) y.insertAdjacentHTML("beforeend", "<small class='hint'>Test a shape to fill this.</small>");
+  if(!n.querySelector("span")) n.insertAdjacentHTML("beforeend", "<small class='hint'>Test a shape to fill this.</small>");
+}
+function pickShape(k){
+  curShape = k; drawShapeBar();
+  var sh = SH.filter(function(x){ return x.k === k })[0];
+  el("guessRow").classList.remove("hidden");
+  el("guessQ").innerHTML = "<b>" + sh.name + ":</b> what do you reckon?";
+  el("floor").innerHTML = "<rect x='0' y='0' width='" + FW + "' height='" + FH + "' rx='10' fill='" + PAPER + "' stroke='" + INK + "' stroke-width='3' stroke-dasharray='8 6'/><text x='180' y='116' text-anchor='middle' " + FF + " font-size='16' fill='" + INK + "'>Empty floor, waiting for tiles</text>";
+  el("floorFb").innerHTML = ""; el("floorFb").className = "fb";
+}
+el("guessRow").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-guess]"); if(!b || !curShape) return;
+  var g = b.dataset.guess, sh = SH.filter(function(x){ return x.k === curShape })[0];
+  el("floor").innerHTML = floorSVG(curShape);
+  var head;
+  if(g === "skip") head = sh.tiles ? "<b>It tessellates.</b> " : "<b>Gaps!</b> ";
+  else if((g === "yes") === sh.tiles) head = "<b>Your guess was right.</b> " + (sh.tiles ? "No gaps at all. " : "See the purple? Those are gaps. ");
+  else head = "<b>Good one to test.</b> " + (sh.tiles ? "It actually tiles perfectly. " : "It actually leaves purple gaps. ");
+  fbSet(el("floorFb"), sh.tiles ? "ok" : "tell", head + sh.why);
+  st.shapes[curShape] = { guess:g, tiles:sh.tiles }; save();
+  rec(1, "shape_" + curShape, "Floor test: " + sh.name, (g === "skip" ? "no guess" : "guessed " + (g === "yes" ? "tiles" : "gaps")) + ", " + (sh.tiles ? "it tessellates" : "it leaves gaps"), g === "skip" ? null : ((g === "yes") === sh.tiles));
+  drawShapeBar();
+});
+
+/* corner check */
+var CSH = [ { k:"tri", n:3, name:"Triangle", s:100 }, { k:"sq", n:4, name:"Square", s:92 }, { k:"pent", n:5, name:"Pentagon", s:80 }, { k:"hex", n:6, name:"Hexagon", s:70 }, { k:"oct", n:8, name:"Octagon", s:56 } ];
+var cornerK = "pent", cornerN = 0;
+function cornerPoly(n, s, theta){
+  var P = [160, 160], ext = 360 / n, v = [[0, 0]], cur = [0, 0];
+  for(var i = 0; i < n - 1; i++){ var a = (theta + i * ext) * Math.PI / 180; cur = [cur[0] + s * Math.cos(a), cur[1] + s * Math.sin(a)]; v.push(cur) }
+  return v.map(function(p){ return [P[0] + p[0], P[1] - p[1]] });
+}
+function drawCorner(fromAdd){
+  var c = CSH.filter(function(x){ return x.k === cornerK })[0], ang = 180 - 360 / c.n, s = "";
+  var cols = [YELLOW, BRIGHT, ORANGE, "#b98fcc", "#9fd8a8", PAPER, YELLOW, BRIGHT];
+  s += "<rect x='0' y='0' width='320' height='320' rx='14' fill='" + PAPER + "'/>";
+  for(var i = 0; i < cornerN; i++){
+    var over = (i + 1) * ang > 360 + 0.001;
+    s += "<polygon points='" + pts(cornerPoly(c.n, c.s, i * ang)) + "' fill='" + (over ? "rgba(215,95,16,.45)" : cols[i % cols.length]) + "' stroke='" + (over ? "#d75f10" : INK) + "' stroke-width='" + (over ? 4 : 2.5) + "' stroke-linejoin='round'" + (over ? " stroke-dasharray='8 5'" : "") + "/>";
+  }
+  var tot = cornerN * ang;
+  if(cornerN > 0 && tot < 360 - 0.001 && tot + ang > 360 + 0.001){
+    var a0 = tot * Math.PI / 180, a1 = 2 * Math.PI, R = 90;
+    var x0 = 160 + R * Math.cos(a0), y0 = 160 - R * Math.sin(a0), x1 = 160 + R * Math.cos(a1), y1 = 160 - R * Math.sin(a1);
+    s += "<path d='M160 160 L" + x0.toFixed(1) + " " + y0.toFixed(1) + " A" + R + " " + R + " 0 0 0 " + x1.toFixed(1) + " " + y1.toFixed(1) + " Z' fill='rgba(123,75,143,.35)' stroke='" + PLUM + "' stroke-width='2' stroke-dasharray='5 4'/>";
+    var am = (tot + 360) / 2 * Math.PI / 180;
+    s += "<text x='" + (160 + 62 * Math.cos(am)).toFixed(1) + "' y='" + (160 - 62 * Math.sin(am) + 5).toFixed(1) + "' text-anchor='middle' " + FF + " font-size='15' font-weight='700' fill='" + PLUM + "'>gap " + Math.round(360 - tot) + DEG + "</text>";
+  }
+  s += "<circle cx='160' cy='160' r='7' fill='" + PLUM + "' stroke='" + INK + "' stroke-width='2.5'/>";
+  el("corner").innerHTML = s;
+  var sum = cornerN ? (new Array(cornerN + 1).join(ang + " + ")).slice(0, -3) + " = " + tot + DEG : "0" + DEG + " so far";
+  el("cornerSum").textContent = sum;
+  var fb = el("cornerFb");
+  if(!cornerN){ fbSet(fb, "tell", "Each " + c.name.toLowerCase() + " corner is " + ang + DEG + ". Add tiles and watch the total.") }
+  else if(Math.abs(tot - 360) < 0.001){ fbSet(fb, "ok", "<b>Exactly 360" + DEG + ".</b> A full turn with no gap, so " + (c.k === "tri" ? "triangles" : c.k === "sq" ? "squares" : "hexagons") + " tessellate."); if(fromAdd) rec(1, "corner_" + c.k, "Corner check: " + c.name, cornerN + " tiles made exactly 360" + DEG, true) }
+  else if(tot > 360){ fbSet(fb, "nope", "<b>Overlap!</b> " + tot + DEG + " is more than 360" + DEG + ", so the last tile sits on top of the first. " + (c.k === "oct" ? "Two octagons left a 90" + DEG + " gap: a square fits there exactly." : "One fewer left a gap. Neither works, so the " + c.name.toLowerCase() + " does not tessellate.")); if(fromAdd) rec(1, "corner_" + c.k, "Corner check: " + c.name, "found the gap and the overlap", true) }
+  else if(tot + ang > 360){ fbSet(fb, "tell", "<b>" + tot + DEG + " so far.</b> There is a " + Math.round(360 - tot) + DEG + " gap but a whole " + ang + DEG + " corner will not fit in it. Want to try adding one more anyway?") }
+  else fbSet(fb, "tell", tot + DEG + " so far. Room for more.");
+}
+function drawCornerPick(){
+  var box = el("cornerPick"); box.innerHTML = "";
+  CSH.forEach(function(c){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = c.name + " (" + (180 - 360 / c.n) + DEG + ")";
+    b.setAttribute("aria-pressed", c.k === cornerK ? "true" : "false");
+    b.onclick = function(){ cornerK = c.k; cornerN = 0; drawCornerPick(); drawCorner() };
+    box.appendChild(b);
+  });
+}
+el("cornerAdd").onclick = function(){
+  var c = CSH.filter(function(x){ return x.k === cornerK })[0], ang = 180 - 360 / c.n;
+  if(cornerN * ang >= 360 - 0.001){ fbSet(el("cornerFb"), "tell", "That is a full turn already, no room for more. Press Clear to start again."); return }
+  cornerN++; drawCorner(true);
+};
+el("cornerClear").onclick = function(){ cornerN = 0; drawCorner() };
+
+var PENT = [
+  { t:"Three corners make 324" + DEG + ", leaving a gap, and four make 432" + DEG + ", which overlaps. 108 does not go into 360 exactly.", ok:true, why:"<b>Spot on.</b> 360 \u00f7 108 = 3.33..., not a whole number, so the corners can never close up neatly." },
+  { t:"It has an odd number of sides.", ok:false, why:"<b>Not quite.</b> Triangles have 3 sides, an odd number, and they tile perfectly. Have a look at the corner angles instead." },
+  { t:"Its sides are too long.", ok:false, why:"<b>Not that one.</b> Bigger or smaller pentagons have exactly the same 108" + DEG + " corners, so size does not change anything." },
+  { t:"It has no right angles.", ok:false, why:"<b>Close thinking, but no.</b> Hexagons and triangles have no right angles either, and they both tile. It is about whether the corners add to 360" + DEG + "." }
+];
+function drawPent(){
+  var box = el("pentQ"); box.innerHTML = "";
+  PENT.forEach(function(o){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = o.t;
+    b.onclick = function(){
+      box.querySelectorAll(".pick").forEach(function(x){ x.classList.remove("good", "bad") });
+      b.classList.add(o.ok ? "good" : "bad");
+      fbSet(el("pentFb"), o.ok ? "ok" : "nope", o.why);
+      rec(1, "pentwhy", "Why a regular pentagon does not tessellate", o.t, o.ok);
+    };
+    box.appendChild(b);
+  });
+}
+OPENERS[1] = function(){ drawShapeBar(); drawCornerPick(); drawCorner(); drawPent(); if(!curShape) el("floor").innerHTML = "<rect x='0' y='0' width='" + FW + "' height='" + FH + "' rx='10' fill='" + PAPER + "' stroke='" + INK + "' stroke-width='3' stroke-dasharray='8 6'/><text x='180' y='116' text-anchor='middle' " + FF + " font-size='16' fill='" + INK + "'>Pick a shape to tile this floor</text>" };
+
+/* ======================================================
+   shared square grid
+   ====================================================== */
+function Grid(W, H, C, OX, OY){
+  var g = { W:W, H:H, C:C, OX:OX, OY:OY, vw:OX + W * C + 14, vh:OY + H * C + 26 };
+  g.x = function(x){ return OX + x * C }; g.y = function(y){ return OY + (H - y) * C };
+  g.base = function(){
+    var s = "<rect x='" + OX + "' y='" + OY + "' width='" + W * C + "' height='" + H * C + "' fill='" + PAPER + "' stroke='" + INK + "' stroke-width='2'/>";
+    for(var i = 1; i < W; i++) s += "<line x1='" + g.x(i) + "' y1='" + OY + "' x2='" + g.x(i) + "' y2='" + g.y(0) + "' stroke='" + LINE + "'/>";
+    for(var j = 1; j < H; j++) s += "<line x1='" + OX + "' y1='" + g.y(j) + "' x2='" + g.x(W) + "' y2='" + g.y(j) + "' stroke='" + LINE + "'/>";
+    for(i = 0; i <= W; i++) s += "<text x='" + g.x(i) + "' y='" + (g.y(0) + 18) + "' text-anchor='middle' " + FF + " font-size='12' fill='" + INK + "'>" + i + "</text>";
+    for(j = 0; j <= H; j++) s += "<text x='" + (OX - 7) + "' y='" + (g.y(j) + 4) + "' text-anchor='end' " + FF + " font-size='12' fill='" + INK + "'>" + j + "</text>";
+    return s;
+  };
+  g.cell = function(c, fill, extra){ return "<rect x='" + (g.x(c[0]) + 1) + "' y='" + (g.y(c[1] + 1) + 1) + "' width='" + (C - 2) + "' height='" + (C - 2) + "' rx='3' fill='" + fill + "'" + (extra || "") + "/>" };
+  g.outline = function(cs, col){ return cs.map(function(c){ return "<rect x='" + (g.x(c[0]) + 3) + "' y='" + (g.y(c[1] + 1) + 3) + "' width='" + (C - 6) + "' height='" + (C - 6) + "' rx='3' fill='none' stroke='" + col + "' stroke-width='2.5' stroke-dasharray='5 4'/>" }).join("") };
+  g.cellAt = function(svg, e){
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var cx = Math.floor((p.x - OX) / C), cy = H - 1 - Math.floor((p.y - OY) / C);
+    return (cx < 0 || cy < 0 || cx >= W || cy >= H) ? null : [cx, cy];
+  };
+  return g;
+}
+function key(c){ return c[0] + "," + c[1] }
+function setOf(cs){ var o = {}; cs.forEach(function(c){ o[key(c)] = 1 }); return o }
+
+/* ======================================================
+   STAGE 2: turn and flip
+   ====================================================== */
+var G2 = Grid(10, 10, 30, 26, 10);
+var SHP = { P:[[0,0],[1,0],[0,1],[1,1],[0,2]], L:[[0,0],[1,0],[2,0],[0,1]] };
+function placeS(n, x, y){ return SHP[n].map(function(c){ return [c[0] + x, c[1] + y] }) }
+var OP = {
+  refx: function(cs, o){ return cs.map(function(c){ return [2 * o.a - c[0] - 1, c[1]] }) },
+  refy: function(cs, o){ return cs.map(function(c){ return [c[0], 2 * o.b - c[1] - 1] }) },
+  refyx: function(cs){ return cs.map(function(c){ return [c[1], c[0]] }) },
+  cw: function(cs, o){ var px = o.p[0], py = o.p[1]; return cs.map(function(c){ return [px + c[1] - py, py - c[0] - 1 + px] }) },
+  acw: function(cs, o){ var px = o.p[0], py = o.p[1]; return cs.map(function(c){ return [px - c[1] - 1 + py, py + c[0] - px] }) },
+  half: function(cs, o){ var px = o.p[0], py = o.p[1]; return cs.map(function(c){ return [2 * px - c[0] - 1, 2 * py - c[1] - 1] }) }
+};
+var F2 = [
+  { id:"tf1", kind:"paint", shp:"P", at:[1,3], op:{ t:"refx", a:5 }, prompt:"Reflect the tile in the mirror line <b>x = 5</b>. Tap the squares where its reflection lands." },
+  { id:"tf2", kind:"paint", shp:"L", at:[3,7], op:{ t:"refy", b:6 }, prompt:"A flat mirror this time. Reflect the tile in the line <b>y = 6</b>." },
+  { id:"tf3", kind:"pick", shp:"L", at:[1,1], line:{ t:"refx", a:5 },
+    cands:[ { lab:"A", cells:[[6,4],[7,4],[8,4],[6,5]] }, { lab:"B", cells:[[8,1],[7,1],[6,1],[8,2]] }, { lab:"C", cells:[[6,7],[6,8],[7,8],[8,8]] } ],
+    ans:1, prompt:"Which ghost, A, B or C, is the reflection of the orange tile in the line <b>x = 5</b>?",
+    whys:[ "A has been slid, not flipped. Its short leg still points the same way as the orange tile.", "<b>Yes.</b> B is the same distance from the mirror on the other side, and it is back to front.", "C has been flipped upside down, which is a reflection in a flat line, not in x = 5." ] },
+  { id:"tf4", kind:"paint", shp:"P", at:[2,5], op:{ t:"half", p:[5,5] }, prompt:"Rotate the tile a <b>half turn (180" + DEG + ")</b> about the orange point <b>(5, 5)</b>." },
+  { id:"tf5", kind:"paint", shp:"L", at:[5,5], op:{ t:"cw", p:[4,4] }, prompt:"Rotate the tile <b>90" + DEG + " clockwise</b> about the orange point <b>(4, 4)</b>." },
+  { id:"tf6", kind:"pick", shp:"P", at:[5,5], centre:[4,4], cands:[ { lab:"B", cells:[[2,5],[2,6],[1,5],[1,6],[0,5]] } ], ans:1,
+    choices:["90" + DEG + " clockwise about (4, 4)", "90" + DEG + " anticlockwise about (4, 4)", "180" + DEG + " about (4, 4)", "A reflection in x = 4"],
+    prompt:"Ghost B is the orange tile rotated about the point (4, 4). Which rotation is it?",
+    whys:[ "Clockwise would swing it from the top right round to the bottom right. B ended up top left.", "<b>Yes.</b> It swung from the top right to the top left, a quarter turn against the clock.", "A half turn would land it bottom left, diagonally opposite.", "A reflection in x = 4 would keep the tall part upright. B is lying on its side, so it has been turned." ] },
+  { id:"tf7", kind:"paint", stretch:true, shp:"L", at:[1,5], op:{ t:"refyx" }, prompt:"Stretch, if you fancy it. Reflect the tile in the diagonal line <b>y = x</b>. Tip: every square swaps its across and up numbers." }
+];
+var p2 = { painted:{}, ghost:null, cursor:[0,0], kb:false, item:null, anim:null };
+function lineSVG2(o){
+  if(!o) return "";
+  var g = G2;
+  if(o.t === "refx") return "<line x1='" + g.x(o.a) + "' y1='" + (g.OY - 4) + "' x2='" + g.x(o.a) + "' y2='" + (g.y(0) + 4) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (g.x(o.a) + 5) + "' y='" + (g.OY + 14) + "' " + FF + " font-size='14' font-weight='700' fill='" + PLUM + "'>x = " + o.a + "</text>";
+  if(o.t === "refy") return "<line x1='" + (g.OX - 4) + "' y1='" + g.y(o.b) + "' x2='" + (g.x(10) + 4) + "' y2='" + g.y(o.b) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (g.x(10) - 4) + "' y='" + (g.y(o.b) - 6) + "' text-anchor='end' " + FF + " font-size='14' font-weight='700' fill='" + PLUM + "'>y = " + o.b + "</text>";
+  if(o.t === "refyx") return "<line x1='" + g.x(0) + "' y1='" + g.y(0) + "' x2='" + g.x(10) + "' y2='" + g.y(10) + "' stroke='" + PLUM + "' stroke-width='3.5' stroke-dasharray='9 6'/><text x='" + (g.x(8) + 8) + "' y='" + g.y(7) + "' " + FF + " font-size='14' font-weight='700' fill='" + PLUM + "'>y = x</text>";
+  return "";
+}
+function centreSVG2(p){ return p ? "<circle cx='" + G2.x(p[0]) + "' cy='" + G2.y(p[1]) + "' r='7' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2.5'/><text x='" + (G2.x(p[0]) + 9) + "' y='" + (G2.y(p[1]) + 19) + "' " + FF + " font-size='13' font-weight='700' fill='" + INK + "'>(" + p[0] + ", " + p[1] + ")</text>" : "" }
+function opTransform(o, t){
+  var g = G2;
+  if(o.t === "refx"){ var X = g.x(o.a); return "translate(" + X + " 0) scale(" + (1 - 2 * t) + " 1) translate(" + (-X) + " 0)" }
+  if(o.t === "refy"){ var Y = g.y(o.b); return "translate(0 " + Y + ") scale(1 " + (1 - 2 * t) + ") translate(0 " + (-Y) + ")" }
+  if(o.t === "refyx"){ var qx = g.x(0), qy = g.y(0); return "translate(" + qx + " " + qy + ") rotate(-45) scale(1 " + (1 - 2 * t) + ") rotate(45) translate(" + (-qx) + " " + (-qy) + ")" }
+  var d = o.t === "cw" ? 90 : o.t === "acw" ? -90 : 180;
+  return "rotate(" + (d * t) + " " + g.x(o.p[0]) + " " + g.y(o.p[1]) + ")";
+}
+function render2(){
+  var it = p2.item, g = G2, s = g.base(), leg = [];
+  var obj = placeS(it.shp, it.at[0], it.at[1]);
+  s += lineSVG2(it.op || it.line);
+  if(it.kind === "pick"){
+    var cc = [BRIGHT, "#9fd8a8", "#b98fcc"];
+    it.cands.forEach(function(c, i){
+      s += c.cells.map(function(q){ return g.cell(q, cc[i], " fill-opacity='.75' stroke='" + INK + "' stroke-width='1.5' stroke-dasharray='4 3'") }).join("");
+      var mx = 99, my = -99; c.cells.forEach(function(q){ if(q[0] < mx) mx = q[0]; if(q[1] > my) my = q[1] });
+      s += "<text x='" + (g.x(mx) + 4) + "' y='" + (g.y(my + 1) - 4) + "' " + FF + " font-size='16' font-weight='700' fill='" + INK + "'>" + c.lab + "</text>";
+    });
+  }
+  if(it.kind === "paint"){
+    Object.keys(p2.painted).forEach(function(k){ s += g.cell(k.split(",").map(Number), TEAL, " fill-opacity='.85'") });
+    if(p2.ghost) s += g.outline(p2.ghost, GREEN);
+    leg.push("<span><i style='background:" + TEAL + "'></i>your squares</span>");
+    if(p2.ghost) leg.push("<span><i style='border:2px dashed " + GREEN + "'></i>tracing paper</span>");
+  }
+  s += "<g>" + obj.map(function(c){ return g.cell(c, ORANGE, " stroke='" + INK + "' stroke-width='1.5'") }).join("") + "</g>";
+  s += "<g id='trace'></g>";
+  s += centreSVG2((it.op && it.op.p) || it.centre);
+  if(it.kind === "paint" && p2.kb) s += "<rect x='" + (g.x(p2.cursor[0]) + 1) + "' y='" + (g.y(p2.cursor[1] + 1) + 1) + "' width='" + (g.C - 2) + "' height='" + (g.C - 2) + "' fill='none' stroke='" + PLUM + "' stroke-width='3.5'/>";
+  el("g2").innerHTML = s;
+  el("g2leg").innerHTML = "<span><i style='background:" + ORANGE + "'></i>the tile</span>" + leg.join("");
+}
+function trace(){
+  var it = p2.item, g = G2, obj = placeS(it.shp, it.at[0], it.at[1]);
+  var cells = obj.map(function(c){ return g.cell(c, BRIGHT, " fill-opacity='.45' stroke='" + TEAL + "' stroke-width='2'") }).join("");
+  var tg = el("trace"); if(!tg) return;
+  var done = function(){ p2.ghost = OP[it.op.t](obj, it.op); render2() };
+  if(reduce){ done(); return }
+  var t0 = null, dur = 1100;
+  cancelAnimationFrame(p2.anim);
+  function f(ts){ if(!t0) t0 = ts; var k = Math.min(1, (ts - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    var tgn = el("trace"); if(!tgn) return; tgn.innerHTML = "<g transform='" + opTransform(it.op, e) + "'>" + cells + "</g>";
+    if(k < 1) p2.anim = requestAnimationFrame(f); else setTimeout(done, 250) }
+  p2.anim = requestAnimationFrame(f);
+}
+function body2(it, host){
+  p2 = { painted:{}, ghost:null, cursor:[0,0], kb:false, item:it, anim:null };
+  var h = "<p class='prompt'>" + (it.stretch ? "<span class='goodfor' style='margin-right:6px'>Stretch</span>" : "") + it.prompt + "</p>" +
+    "<svg class='gridsvg' id='g2' viewBox='0 0 " + G2.vw + " " + G2.vh + "' tabindex='0' role='img' aria-label='Grid. Use arrow keys to move and Space to paint a square.'></svg><div class='legend' id='g2leg'></div>";
+  if(it.kind === "paint"){
+    h += "<p class='hint'>Tap or drag across squares to paint them. Tap again to rub out. Keyboard: arrow keys, then Space.</p>" +
+      "<div class='row'><button class='btn btn-orange small' type='button' id='chk2'>Check</button><button class='btn small' type='button' id='trc2'>Use tracing paper</button><button class='btn btn-quiet small' type='button' id='clr2'>Clear</button></div>";
+  } else {
+    var opts = it.choices || it.cands.map(function(c){ return "Ghost " + c.lab });
+    h += "<div class='picks two' id='pk2'>" + opts.map(function(o, i){ return "<button type='button' class='pick' data-i='" + i + "'>" + o + "</button>" }).join("") + "</div>";
+  }
+  h += "<div class='fb' id='fb2'></div>";
+  host.innerHTML = h;
+  render2();
+  var svg = el("g2"), painting = null;
+  if(it.kind === "paint"){
+    svg.addEventListener("pointerdown", function(e){ var c = G2.cellAt(svg, e); if(!c) return; e.preventDefault(); p2.kb = false; painting = !p2.painted[key(c)]; if(painting) p2.painted[key(c)] = 1; else delete p2.painted[key(c)]; render2(); try{ svg.setPointerCapture(e.pointerId) }catch(err){} });
+    svg.addEventListener("pointermove", function(e){ if(painting === null) return; var c = G2.cellAt(svg, e); if(!c) return; if(!!p2.painted[key(c)] !== painting){ if(painting) p2.painted[key(c)] = 1; else delete p2.painted[key(c)]; render2() } });
+    svg.addEventListener("pointerup", function(){ painting = null }); svg.addEventListener("pointercancel", function(){ painting = null });
+    svg.addEventListener("keydown", function(e){
+      var c = p2.cursor, k = e.key;
+      if(k === "ArrowLeft") c[0] = Math.max(0, c[0] - 1); else if(k === "ArrowRight") c[0] = Math.min(9, c[0] + 1);
+      else if(k === "ArrowUp") c[1] = Math.min(9, c[1] + 1); else if(k === "ArrowDown") c[1] = Math.max(0, c[1] - 1);
+      else if(k === " " || k === "Enter"){ var kk = key(c); if(p2.painted[kk]) delete p2.painted[kk]; else p2.painted[kk] = 1 }
+      else return;
+      e.preventDefault(); p2.kb = true; render2();
+    });
+    el("chk2").onclick = function(){
+      var want = OP[it.op.t](placeS(it.shp, it.at[0], it.at[1]), it.op), ws = setOf(want), got = Object.keys(p2.painted);
+      if(!got.length){ fbSet(el("fb2"), "tell", "Paint some squares first, then press Check. The tracing paper can help."); return }
+      var right = got.filter(function(k){ return ws[k] }).length, extra = got.length - right;
+      if(right === want.length && !extra){ fbSet(el("fb2"), "ok", "<b>Exactly right.</b> Every square in the right place" + (p2.ghost ? ", with a bit of help from the tracing paper." : ".")); rec(2, it.id, firstSentence(it.prompt), "painted it correctly" + (p2.ghost ? " (used tracing paper)" : ""), true); flash(svg) }
+      else { fbSet(el("fb2"), "nope", "<b>" + right + " of the " + want.length + " squares are in place.</b> " + (extra ? extra + " square" + (extra === 1 ? " is" : "s are") + " not part of it. " : "") + (it.op.t.indexOf("ref") === 0 ? "Count from the mirror line to each orange square, then count the same on the other side." : "Try the tracing paper button to watch the turn happen.")); rec(2, it.id, firstSentence(it.prompt), right + " of " + want.length + " squares placed", false) }
+    };
+    el("trc2").onclick = function(){ trace() };
+    el("clr2").onclick = function(){ p2.painted = {}; render2() };
+  } else {
+    el("pk2").addEventListener("click", function(e){
+      var b = e.target.closest("button"); if(!b) return;
+      var i = parseInt(b.dataset.i, 10), ok = i === it.ans;
+      el("pk2").querySelectorAll(".pick").forEach(function(x){ x.classList.remove("good", "bad") });
+      b.classList.add(ok ? "good" : "bad");
+      fbSet(el("fb2"), ok ? "ok" : "nope", (ok ? "" : "<b>Have another look.</b> ") + it.whys[i]);
+      rec(2, it.id, firstSentence(it.prompt), b.textContent, ok);
+    });
+  }
+}
+function firstSentence(h){ var t = h.replace(/<[^>]+>/g, ""); var m = t.match(/^(Stretch, if you fancy it\. )?[^.?]*[.?]/); return (m ? m[0] : t).replace(/^Stretch, if you fancy it\. /, "Stretch: ").replace(/[.]$/, "") }
+function flash(node){ if(reduce) return; node.classList.remove("wob"); void node.getBoundingClientRect(); node.classList.add("wob") }
+var stepper2 = null;
+OPENERS[2] = function(){ if(!stepper2) stepper2 = Stepper(el("flipHost"), F2, 2, function(it, host){ body2(it, host) }); };
+/* refresh stepper dots after rec */
+var recBase = rec;
+rec = function(a, b, c, d, e){ recBase(a, b, c, d, e); [stepper2, stepper3, stepper4, stepper5, stepper7].forEach(function(sp){ if(sp) sp.refresh() }) };
+
+/* ======================================================
+   STAGE 3: robot tiler
+   ====================================================== */
+var G3 = Grid(12, 8, 32, 26, 10);
+var R3 = [
+  { id:"v1", kind:"read", from:[1,1], to:[5,3], opts:[[4,2],[2,4],[5,3],[-4,2]], ans:0,
+    whys:["<b>Yes.</b> 4 squares right, so the top is 4. 2 squares up, so the bottom is 2.", "Those are swapped round. The top number is always the across move.", "5 and 3 are where the arrow ends, not how far it moves. Count the squares from the start.", "The arrow goes right, so the top number is positive."] },
+  { id:"v2", kind:"read", from:[9,6], to:[6,1], opts:[[3,5],[-3,-5],[-5,-3],[3,-5]], ans:1,
+    whys:["This arrow goes left and down, so both numbers should be negative.", "<b>Yes.</b> 3 left gives -3 on top. 5 down gives -5 underneath.", "Those are swapped. Across goes on top.", "The arrow goes left, so the top number is negative."] },
+  { id:"v3", kind:"drive", from:[1,5], to:[7,2], prompt:"Drive the robot to the tile spot. Type the vector, then press Go." },
+  { id:"v4", kind:"drive", from:[10,1], to:[3,6], prompt:"This one goes left, so the top number will be negative." },
+  { id:"v5", kind:"add", from:[2,5], m1:[3,1], m2:[2,-4], prompt:"The robot did two moves: " + vecH(3, 1) + " then " + vecH(2, -4) + ". What single vector would have got it there in one go?" },
+  { id:"v6", kind:"shape", A:[[1,1],[4,1],[1,3]], vec:[6,4], prompt:"Shape A slides to shape B. Which vector describes the translation from A to B?" },
+  { id:"v7", kind:"shape", A:[[6,1],[9,1],[10,3],[7,3]], vec:[-5,3], prompt:"Another translation. Which vector takes A to B?" },
+  { id:"v8", kind:"point", A:[[2,6],[4,6],[4,7],[2,7]], P:[2,6], vec:[5,-4], prompt:"" },
+  { id:"v9", kind:"stamp", prompt:"The robot stamps a 2 square tile, then moves by your vector. Can you lay a row of 5 tiles along the dashed line with no gaps and no overlaps?" }
+];
+R3[7].prompt = "The rectangle is translated by " + vecH(5, -4) + ". Corner P is at (2, 6). Where does P end up? Type the coordinates.";
+function robotAt(x, y, extra){
+  var g = G3, X = g.x(x), Y = g.y(y + 1), C = g.C;
+  return "<g" + (extra || "") + "><g transform='translate(" + X + " " + Y + ") scale(" + (C / 32) + ")'>" +
+    "<rect x='6' y='8' width='20' height='16' rx='4' fill='" + BRIGHT + "' stroke='" + INK + "' stroke-width='2'/>" +
+    "<circle cx='12' cy='15' r='2.4' fill='" + INK + "'/><circle cx='20' cy='15' r='2.4' fill='" + INK + "'/>" +
+    "<path d='M16 8 v-4' stroke='" + INK + "' stroke-width='2'/><circle cx='16' cy='3.5' r='2.3' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='1.5'/>" +
+    "<circle cx='10' cy='27' r='3' fill='" + YELLOW + "' stroke='" + INK + "' stroke-width='1.5'/><circle cx='22' cy='27' r='3' fill='" + YELLOW + "' stroke='" + INK + "' stroke-width='1.5'/></g></g>";
+}
+function arrow3(a, b, col, id){
+  var g = G3;
+  return "<line x1='" + g.x(a[0] + .5) + "' y1='" + g.y(a[1] + .5) + "' x2='" + g.x(b[0] + .5) + "' y2='" + g.y(b[1] + .5) + "' stroke='" + col + "' stroke-width='3.5' marker-end='url(#" + id + ")'/>";
+}
+function markers3(){ return "<defs><marker id='ahI' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0 L10 5 L0 10 z' fill='" + INK + "'/></marker><marker id='ahO' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0 L10 5 L0 10 z' fill='" + ORANGE + "'/></marker><marker id='ahT' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0 L10 5 L0 10 z' fill='" + TEAL + "'/></marker></defs>" }
+function spot3(c){ var g = G3; return "<rect x='" + (g.x(c[0]) + 3) + "' y='" + (g.y(c[1] + 1) + 3) + "' width='" + (g.C - 6) + "' height='" + (g.C - 6) + "' rx='4' fill='rgba(255,194,71,.5)' stroke='" + ORANGE + "' stroke-width='2.5' stroke-dasharray='5 3'/>" }
+function poly3(P, fill, lab){
+  var g = G3, s = "<polygon points='" + P.map(function(p){ return g.x(p[0]) + "," + g.y(p[1]) }).join(" ") + "' fill='" + fill + "' fill-opacity='.8' stroke='" + INK + "' stroke-width='2.5' stroke-linejoin='round'/>";
+  if(lab){ var cx = 0, cy = 0; P.forEach(function(p){ cx += p[0]; cy += p[1] }); cx /= P.length; cy /= P.length; s += "<text x='" + g.x(cx) + "' y='" + (g.y(cy) + 6) + "' text-anchor='middle' " + FF + " font-size='17' font-weight='700' fill='" + INK + "'>" + lab + "</text>" }
+  return s;
+}
+var r3 = { at:null, anim:null };
+function body3(it, host){
+  cancelAnimationFrame(r3.anim);
+  var g = G3, h = "";
+  if(it.kind === "read") h += "<p class='prompt'>Which vector matches the arrow from the robot to the tile spot?</p>";
+  else h += "<p class='prompt'>" + it.prompt + "</p>";
+  h += "<svg class='gridsvg' id='g3' viewBox='0 0 " + g.vw + " " + g.vh + "' role='img' aria-label='Grid with the tiling robot'></svg>";
+  if(it.kind === "read") h += "<div class='picks two' id='pk3'>" + it.opts.map(function(o, i){ return "<button type='button' class='pick' data-i='" + i + "' style='text-align:center'>" + vecH(o[0], o[1]) + "</button>" }).join("") + "</div>";
+  if(it.kind === "drive" || it.kind === "add" || it.kind === "shape" || it.kind === "stamp")
+    h += "<div class='vecrow'><span class='vecin'><input id='vx3' inputmode='text' autocomplete='off' maxlength='4' aria-label='Top number, across'><input id='vy3' inputmode='text' autocomplete='off' maxlength='4' aria-label='Bottom number, up or down'></span><span class='vlab'>top: across (right +, left -)<br>bottom: up + or down -</span></div>" +
+      "<div class='row'>" + (it.kind === "stamp" ? "<button class='btn btn-orange small' type='button' id='go3'>Stamp 5 tiles</button><button class='btn btn-quiet small' type='button' id='clr3'>Clear floor</button>" : "<button class='btn btn-orange small' type='button' id='go3'>" + (it.kind === "drive" ? "Go" : "Check") + "</button>") + "<button class='btn btn-quiet small' type='button' id='show3'>Show me</button></div>";
+  if(it.kind === "point") h += "<div class='vecrow'><span style='font-size:1.3rem'>P' = (</span><input class='num' id='px3' inputmode='text' maxlength='4' aria-label='x coordinate'><span style='font-size:1.3rem'>,</span><input class='num' id='py3' inputmode='text' maxlength='4' aria-label='y coordinate'><span style='font-size:1.3rem'>)</span></div><div class='row'><button class='btn btn-orange small' type='button' id='go3'>Check</button><button class='btn btn-quiet small' type='button' id='show3'>Show me</button></div>";
+  h += "<div class='fb' id='fb3'></div>";
+  host.innerHTML = h;
+  r3.at = null; r3.extra = null; r3.stamps = [];
+  draw3(it);
+  var fb = el("fb3");
+  if(it.kind === "read") el("pk3").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return; var i = parseInt(b.dataset.i, 10), ok = i === it.ans;
+    el("pk3").querySelectorAll(".pick").forEach(function(x){ x.classList.remove("good", "bad") }); b.classList.add(ok ? "good" : "bad");
+    fbSet(fb, ok ? "ok" : "nope", (ok ? "" : "<b>Not that one.</b> ") + it.whys[i]);
+    rec(3, it.id, "Read the vector from an arrow", vecT(it.opts[i][0], it.opts[i][1]), ok);
+  });
+  function readV(){ var a = parseInt2(el("vx3").value), b = parseInt2(el("vy3").value); if(isNaN(a) || isNaN(b)){ fbSet(fb, "tell", "Pop a whole number in both boxes. 0 is fine if there is no move that way. Use a minus sign for left or down."); return null } return [a, b] }
+  if(it.kind === "drive"){
+    var ans = [it.to[0] - it.from[0], it.to[1] - it.from[1]];
+    el("go3").onclick = function(){
+      var v = readV(); if(!v) return;
+      var end = [it.from[0] + v[0], it.from[1] + v[1]], off = end[0] < 0 || end[1] < 0 || end[0] > 11 || end[1] > 7;
+      var stopAt = off ? [Math.max(0, Math.min(11, end[0])), Math.max(0, Math.min(7, end[1]))] : end;
+      slide3(it, it.from, stopAt, function(){
+        var ok = v[0] === ans[0] && v[1] === ans[1];
+        if(ok){ fbSet(fb, "ok", "<b>Tile placed!</b> " + vecH(v[0], v[1]) + " is " + vwords(v[0], v[1]) + "."); flash(el("g3")) }
+        else fbSet(fb, "nope", "<b>The robot went " + vwords(v[0], v[1]) + (off ? ", right off the edge of the floor" : "") + ".</b> " + hint3(v, ans) + " Have another go.");
+        rec(3, it.id, "Drive the robot " + vwords(ans[0], ans[1]), vecT(v[0], v[1]), ok);
+        if(!ok) setTimeout(function(){ r3.at = null; draw3(it) }, reduce ? 0 : 1300);
+      });
+    };
+    el("show3").onclick = function(){ el("vx3").value = ans[0]; el("vy3").value = ans[1]; fbSet(fb, "tell", "It is " + vwords(ans[0], ans[1]) + ", so " + vecH(ans[0], ans[1]) + ". Press Go to watch."); rec(3, it.id, "Drive the robot " + vwords(ans[0], ans[1]), "used Show me", false) };
+  }
+  if(it.kind === "add" || it.kind === "shape"){
+    var want = it.kind === "add" ? [it.m1[0] + it.m2[0], it.m1[1] + it.m2[1]] : it.vec;
+    el("go3").onclick = function(){
+      var v = readV(); if(!v) return; var ok = v[0] === want[0] && v[1] === want[1];
+      if(it.kind === "add"){
+        if(ok) fbSet(fb, "ok", "<b>Yes.</b> Add the tops: " + it.m1[0] + " + " + it.m2[0] + " = " + want[0] + ". Add the bottoms: " + it.m1[1] + " + " + it.m2[1] + " = " + want[1] + ".");
+        else fbSet(fb, "nope", "<b>Nearly.</b> Add the two top numbers together, then the two bottom numbers. Watch the minus sign: 1 + -4 is the same as 1 - 4.");
+        rec(3, it.id, "Add two vectors " + vecT(it.m1[0], it.m1[1]) + " + " + vecT(it.m2[0], it.m2[1]), vecT(v[0], v[1]), ok);
+      } else {
+        if(ok){ fbSet(fb, "ok", "<b>Exactly.</b> Every corner of A moves " + vwords(want[0], want[1]) + " to reach B. That is the translation " + vecH(want[0], want[1]) + "."); r3.extra = "arrows"; draw3(it) }
+        else fbSet(fb, "nope", "<b>Have another look.</b> " + hint3(v, want) + " Pick one corner of A, find the matching corner of B, and count.");
+        rec(3, it.id, "Vector for a translation of a shape", vecT(v[0], v[1]), ok);
+      }
+    };
+    el("show3").onclick = function(){ el("vx3").value = want[0]; el("vy3").value = want[1]; r3.extra = "arrows"; draw3(it); fbSet(fb, "tell", "The arrows show it: " + vwords(want[0], want[1]) + ", so " + vecH(want[0], want[1]) + "."); rec(3, it.id, it.kind === "add" ? "Add two vectors" : "Vector for a translation of a shape", "used Show me", false) };
+  }
+  if(it.kind === "point"){
+    var tgt = [it.P[0] + it.vec[0], it.P[1] + it.vec[1]];
+    el("go3").onclick = function(){
+      var x = parseInt2(el("px3").value), y = parseInt2(el("py3").value);
+      if(isNaN(x) || isNaN(y)){ fbSet(fb, "tell", "Pop a whole number in each box."); return }
+      var ok = x === tgt[0] && y === tgt[1];
+      if(ok){ fbSet(fb, "ok", "<b>Yes, (" + tgt[0] + ", " + tgt[1] + ").</b> Across: 2 + 5 = 7. Up: 6 + -4 = 2. The whole rectangle moved with it."); r3.extra = "image"; draw3(it) }
+      else fbSet(fb, "nope", "<b>Not quite.</b> Add the top number to the x coordinate, and the bottom number to the y coordinate. " + (x === it.P[0] + it.vec[1] ? "It looks like the numbers got swapped round." : ""));
+      rec(3, it.id, "Where P (2, 6) goes after translation (5 over -4)", "(" + x + ", " + y + ")", ok);
+    };
+    el("show3").onclick = function(){ el("px3").value = tgt[0]; el("py3").value = tgt[1]; r3.extra = "image"; draw3(it); fbSet(fb, "tell", "x: 2 + 5 = 7. y: 6 - 4 = 2. So P lands on (7, 2)."); rec(3, it.id, "Where P goes after a translation", "used Show me", false) };
+  }
+  if(it.kind === "stamp"){
+    if(st.stamp){ el("vx3").value = st.stamp[0]; el("vy3").value = st.stamp[1] }
+    el("go3").onclick = function(){
+      var v = readV(); if(!v) return; st.stamp = v; save();
+      r3.stamps = []; var pos = [1, 3], i = 0;
+      (function next(){
+        if(i >= 5 || pos[0] < 0 || pos[0] > 10 || pos[1] < 0 || pos[1] > 7){ finishStamp(v); return }
+        r3.stamps.push(pos.slice()); r3.at = pos.slice(); draw3(it); i++;
+        pos = [pos[0] + v[0], pos[1] + v[1]];
+        setTimeout(next, reduce ? 0 : 280);
+      })();
+    };
+    el("clr3").onclick = function(){ r3.stamps = []; r3.at = null; draw3(it); fb.innerHTML = ""; fb.className = "fb" };
+    el("show3").onclick = function(){ el("vx3").value = 2; el("vy3").value = 0; fbSet(fb, "tell", "Each tile is 2 squares wide, so the robot moves 2 right and 0 up: " + vecH(2, 0) + ". Press Stamp to watch.") };
+  }
+  function finishStamp(v){
+    var ok = v[0] === 2 && v[1] === 0, msg;
+    if(ok) msg = "<b>A perfect row.</b> Each tile is 2 wide, so " + vecH(2, 0) + " puts every tile right next to the last one. That is a repeating pattern made by translation.";
+    else if(v[1] === 0 && Math.abs(v[0]) === 1) msg = "<b>Overlaps!</b> Moving only 1 square means each tile lands half on top of the last. The tiles are 2 squares wide.";
+    else if(v[1] === 0 && v[0] > 2) msg = "<b>Gaps!</b> Moving " + v[0] + " squares leaves a gap, because each tile is only 2 wide.";
+    else if(v[0] === 0 && v[1] === 0) msg = "<b>The robot stayed put</b> and stamped 5 tiles in one spot. Try a top number that moves it along.";
+    else msg = "<b>That makes a pattern, just not on the dashed row.</b> It went " + vwords(v[0], v[1]) + " each time. Want to try a vector with 0 on the bottom?";
+    fbSet(el("fb3"), ok ? "ok" : "tell", msg);
+    rec(3, "v9", "Stamp a row of tiles with one vector", vecT(v[0], v[1]), ok);
+    if(ok) flash(el("g3"));
+  }
+}
+function hint3(v, a){
+  if(v[0] === a[1] && v[1] === a[0]) return "The numbers look swapped. Across goes on top, up or down goes underneath.";
+  if(v[0] === -a[0] && v[1] === -a[1]) return "Right numbers, opposite directions. Check which way it goes: left and down are negative.";
+  if(v[0] === a[0]) return "The top number is right. Check the bottom one.";
+  if(v[1] === a[1]) return "The bottom number is right. Check the top one.";
+  return "Count squares across first, then up or down.";
+}
+function draw3(it){
+  var g = G3, s = markers3() + g.base(), at = r3.at;
+  if(it.kind === "read"){ s += spot3(it.to) + arrow3(it.from, it.to, INK, "ahI") + robotAt(it.from[0], it.from[1]) }
+  if(it.kind === "drive"){ s += spot3(it.to) + robotAt((at || it.from)[0], (at || it.from)[1], " id='rb3'") }
+  if(it.kind === "add"){ var mid = [it.from[0] + it.m1[0], it.from[1] + it.m1[1]], end = [mid[0] + it.m2[0], mid[1] + it.m2[1]];
+    s += spot3(end) + arrow3(it.from, mid, ORANGE, "ahO") + arrow3(mid, end, TEAL, "ahT") + robotAt(it.from[0], it.from[1]);
+    s += "<g " + FF + " font-size='14' font-weight='700'><text x='" + g.x(it.from[0] + .2) + "' y='" + g.y(it.from[1] + 1.9) + "' fill='" + ORANGE + "'>move 1</text><text x='" + g.x(mid[0] + 1.5) + "' y='" + g.y(mid[1] - 1.3) + "' fill='" + TEAL + "'>move 2</text></g>";
+    if(r3.extra === "arrows") s += arrow3(it.from, end, PLUM, "ahI");
+  }
+  if(it.kind === "shape"){ var B = it.A.map(function(p){ return [p[0] + it.vec[0], p[1] + it.vec[1]] });
+    s += poly3(it.A, ORANGE, "A") + poly3(B, BRIGHT, "B");
+    if(r3.extra === "arrows") it.A.forEach(function(p, i){ s += "<line x1='" + g.x(p[0]) + "' y1='" + g.y(p[1]) + "' x2='" + g.x(B[i][0]) + "' y2='" + g.y(B[i][1]) + "' stroke='" + PLUM + "' stroke-width='2.5' stroke-dasharray='6 4' marker-end='url(#ahI)'/>" });
+  }
+  if(it.kind === "point"){ s += poly3(it.A, ORANGE, "");
+    s += "<circle cx='" + g.x(it.P[0]) + "' cy='" + g.y(it.P[1]) + "' r='6' fill='" + PLUM + "' stroke='" + INK + "' stroke-width='2'/><text x='" + (g.x(it.P[0]) - 8) + "' y='" + (g.y(it.P[1]) + 18) + "' text-anchor='end' " + FF + " font-size='15' font-weight='700' fill='" + PLUM + "'>P</text>";
+    if(r3.extra === "image"){ var B2 = it.A.map(function(p){ return [p[0] + it.vec[0], p[1] + it.vec[1]] }), Q = [it.P[0] + it.vec[0], it.P[1] + it.vec[1]];
+      s += poly3(B2, BRIGHT, "") + "<line x1='" + g.x(it.P[0]) + "' y1='" + g.y(it.P[1]) + "' x2='" + g.x(Q[0]) + "' y2='" + g.y(Q[1]) + "' stroke='" + PLUM + "' stroke-width='2.5' stroke-dasharray='6 4' marker-end='url(#ahI)'/><circle cx='" + g.x(Q[0]) + "' cy='" + g.y(Q[1]) + "' r='6' fill='" + PLUM + "' stroke='" + INK + "' stroke-width='2'/><text x='" + (g.x(Q[0]) + 9) + "' y='" + (g.y(Q[1]) + 18) + "' " + FF + " font-size='15' font-weight='700' fill='" + PLUM + "'>P'</text>" }
+  }
+  if(it.kind === "stamp"){
+    for(var x = 1; x <= 10; x++) s += "<rect x='" + (g.x(x) + 3) + "' y='" + (g.y(4) + 3) + "' width='" + (g.C - 6) + "' height='" + (g.C - 6) + "' fill='none' stroke='" + ORANGE + "' stroke-width='2' stroke-dasharray='5 3'/>";
+    var count = {};
+    (r3.stamps || []).forEach(function(p, i){
+      [[p[0], p[1]], [p[0] + 1, p[1]]].forEach(function(c){ var k = key(c); count[k] = (count[k] || 0) + 1 });
+      s += "<rect x='" + (g.x(p[0]) + 2) + "' y='" + (g.y(p[1] + 1) + 2) + "' width='" + (2 * g.C - 4) + "' height='" + (g.C - 4) + "' rx='4' fill='" + [YELLOW, BRIGHT, "#b98fcc", ORANGE, "#9fd8a8"][i % 5] + "' fill-opacity='.85' stroke='" + INK + "' stroke-width='2'/>";
+    });
+    Object.keys(count).forEach(function(k){ if(count[k] > 1){ var c = k.split(",").map(Number); s += "<text x='" + g.x(c[0] + .5) + "' y='" + (g.y(c[1] + .5) + 6) + "' text-anchor='middle' " + FF + " font-size='18' font-weight='700' fill='#b3261e'>!</text>" } });
+    var rp = r3.at || [1, 3]; s += robotAt(rp[0], rp[1]);
+  }
+  el("g3").innerHTML = s;
+}
+function slide3(it, from, to, done){
+  if(reduce){ r3.at = to; draw3(it); done(); return }
+  var t0 = null, dur = 750, g = G3;
+  r3.at = from; draw3(it);
+  function f(ts){ if(!t0) t0 = ts; var k = Math.min(1, (ts - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    var rb = el("rb3"); if(!rb) return;
+    rb.setAttribute("transform", "translate(" + ((to[0] - from[0]) * e * g.C) + " " + (-(to[1] - from[1]) * e * g.C) + ")");
+    if(k < 1) r3.anim = requestAnimationFrame(f); else { r3.at = to; draw3(it); done() } }
+  r3.anim = requestAnimationFrame(f);
+}
+var stepper3 = null;
+OPENERS[3] = function(){ if(!stepper3) stepper3 = Stepper(el("robotHost"), R3, 3, body3) };
+
+/* ======================================================
+   STAGE 4: the till
+   ====================================================== */
+var SLP = [8000, 24000, 3600, 1260];
+var slPrice = 8000;
+function drawSlider(){
+  var box = el("slPrices"); box.innerHTML = "";
+  SLP.forEach(function(p){ var b = document.createElement("button"); b.type = "button"; b.textContent = money(p); b.setAttribute("aria-pressed", p === slPrice ? "true" : "false"); b.onclick = function(){ slPrice = p; drawSlider() }; box.appendChild(b) });
+  var pct = parseInt(el("pctSlider").value, 10), bar = el("pctBar"), h = "";
+  for(var i = 0; i < 20; i++) h += "<i class='" + (i * 5 < pct ? (i * 5 < Math.floor(pct / 10) * 10 ? "d" : "f") : "") + "'></i>";
+  bar.innerHTML = h;
+  var ten = slPrice / 10, five = ten / 2, tens = Math.floor(pct / 10), hasFive = pct % 10 === 5;
+  var parts = [], amts = [];
+  for(i = 0; i < tens; i++){ parts.push("10%"); amts.push(money(ten)) }
+  if(hasFive){ parts.push("5%"); amts.push(money(five)) }
+  var disc = tens * ten + (hasFive ? five : 0);
+  var out = "<b>" + pct + "% off " + money(slPrice) + "</b><br>";
+  if(pct === 0) out += "No discount. Slide to start the sale.";
+  else {
+    out += "10% = " + money(ten) + " &nbsp;&middot;&nbsp; 5% = " + money(five) + "<br>";
+    out += pct + "% = " + parts.join(" + ") + (parts.length > 1 ? "<br>= " + amts.join(" + ") : "") + " = <b>" + money(disc) + "</b> off";
+    if(pct === 50) out += " (or just halve it)"; if(pct === 25) out += " (or a quarter)";
+    out += "<br>Sale price: " + money(slPrice) + " - " + money(disc) + " = <b style='color:#d75f10'>" + money(slPrice - disc) + "</b>";
+  }
+  el("breakdown").innerHTML = out;
+}
+el("pctSlider").addEventListener("input", drawSlider);
+
+var AV = {
+  bev:"<svg viewBox='0 0 56 56'><circle cx='28' cy='30' r='18' fill='#f2c9a0' stroke='#0a2f38' stroke-width='2.5'/><path d='M10 24 q18 -22 36 0 z' fill='#ffc247' stroke='#0a2f38' stroke-width='2.5'/><rect x='8' y='22' width='40' height='5' rx='2' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><circle cx='22' cy='32' r='2.2' fill='#0a2f38'/><circle cx='34' cy='32' r='2.2' fill='#0a2f38'/><path d='M22 40 q6 5 12 0' fill='none' stroke='#0a2f38' stroke-width='2'/></svg>",
+  pigeon:"<svg viewBox='0 0 56 56'><ellipse cx='26' cy='36' rx='18' ry='13' fill='#9aa5b1' stroke='#0a2f38' stroke-width='2.5'/><circle cx='38' cy='22' r='10' fill='#9aa5b1' stroke='#0a2f38' stroke-width='2.5'/><path d='M38 30 q-6 6 -2 12' fill='none' stroke='#7b4b8f' stroke-width='4'/><circle cx='41' cy='20' r='2.2' fill='#0a2f38'/><path d='M47 22 l7 2 l-7 2 z' fill='#ffc247' stroke='#0a2f38' stroke-width='1.5'/><rect x='31' y='6' width='14' height='6' rx='2' fill='#0a2f38'/><rect x='34' y='0' width='8' height='8' rx='2' fill='#0a2f38'/></svg>",
+  hex:"<svg viewBox='0 0 56 56'><circle cx='28' cy='30' r='18' fill='#c98f63' stroke='#0a2f38' stroke-width='2.5'/><path d='M12 22 h32 l-4 -12 h-24 z' fill='#0a2f38'/><polygon points='28,9 32,11.5 32,16.5 28,19 24,16.5 24,11.5' fill='#ffc247'/><circle cx='22' cy='31' r='2.2' fill='#0a2f38'/><path d='M30 28 h8 v6 h-8 z' fill='#0a2f38'/><path d='M22 41 q6 4 12 0' fill='none' stroke='#0a2f38' stroke-width='2'/></svg>",
+  nan:"<svg viewBox='0 0 56 56'><circle cx='28' cy='16' r='9' fill='#e7e2d8' stroke='#0a2f38' stroke-width='2.5'/><circle cx='28' cy='32' r='16' fill='#f2c9a0' stroke='#0a2f38' stroke-width='2.5'/><circle cx='22' cy='31' r='4' fill='none' stroke='#0a2f38' stroke-width='2'/><circle cx='34' cy='31' r='4' fill='none' stroke='#0a2f38' stroke-width='2'/><path d='M26 31 h4' stroke='#0a2f38' stroke-width='2'/><path d='M23 40 q5 4 10 0' fill='none' stroke='#0a2f38' stroke-width='2'/></svg>",
+  care:"<svg viewBox='0 0 56 56'><circle cx='28' cy='28' r='18' fill='#8d5a3b' stroke='#0a2f38' stroke-width='2.5'/><path d='M10 24 q18 -18 36 0' fill='#007291' stroke='#0a2f38' stroke-width='2.5'/><circle cx='22' cy='30' r='2.2' fill='#0a2f38'/><circle cx='34' cy='30' r='2.2' fill='#0a2f38'/><path d='M21 38 q7 5 14 0' fill='none' stroke='#0a2f38' stroke-width='2'/><rect x='18' y='46' width='20' height='8' fill='#ef7724' stroke='#0a2f38' stroke-width='2'/></svg>",
+  goblin:"<svg viewBox='0 0 56 56'><path d='M6 22 l12 6 M50 22 l-12 6' stroke='#0a2f38' stroke-width='3'/><path d='M4 18 l14 8 l-2 6 z M52 18 l-14 8 l2 6 z' fill='#7fb069' stroke='#0a2f38' stroke-width='2'/><circle cx='28' cy='30' r='16' fill='#7fb069' stroke='#0a2f38' stroke-width='2.5'/><circle cx='22' cy='28' r='3' fill='#ffc247' stroke='#0a2f38' stroke-width='1.5'/><circle cx='34' cy='28' r='3' fill='#ffc247' stroke='#0a2f38' stroke-width='1.5'/><path d='M20 38 q8 5 16 0' fill='none' stroke='#0a2f38' stroke-width='2'/><path d='M24 40 l2 3 l2 -3' fill='#fffdf8' stroke='#0a2f38' stroke-width='1'/></svg>"
+};
+var TILL = [
+  { id:"c1", av:"bev", who:"Builder Bev", item:"bathroom tiles", price:6000, pct:15 },
+  { id:"c2", av:"pigeon", who:"A pigeon in a tiny top hat", item:"a grout bundle", price:4800, pct:25, extra:"Jay says this is the most important customer of the year." },
+  { id:"c3", av:"hex", who:"Captain Hex", item:"hexagon tiles", price:24000, pct:35 },
+  { id:"c4", av:"nan", who:"Nan from next door", item:"a mosaic kit", price:1860, pct:5 },
+  { id:"c5", av:"care", who:"The school caretaker", item:"a whole kitchen floor", price:35000, pct:45 },
+  { id:"c6", av:"goblin", who:"A goblin", item:"some very shiny tiles", price:7240, pct:65, stretch:true, extra:"Unhand me, goblin! It still pays full attention to the maths, though." }
+];
+function tillVals(c){ var ten = c.price / 10, five = ten / 2, tens = Math.floor(c.pct / 10), disc = tens * ten + (c.pct % 10 ? five : 0); return { ten:ten, five:five, tens:tens, disc:disc, pay:c.price - disc } }
+function buildWords(c, v){ var parts = []; for(var i = 0; i < v.tens; i++) parts.push("10%"); if(c.pct % 10) parts.push("5%"); return parts.join(" + ") }
+function buildMoney(c, v){ var parts = []; for(var i = 0; i < v.tens; i++) parts.push(money(v.ten)); if(c.pct % 10) parts.push(money(v.five)); return parts.join(" + ") }
+function body4(c, host){
+  var v = tillVals(c), P = money(c.price);
+  setTill(0, false);
+  var rows = [
+    { k:"ten", lab:"10% of " + P + " is", want:v.ten, hint:"10% means divide by 10. Every digit moves one place to the right.", worked:P + " \u00f7 10 = " + money(v.ten) },
+    { k:"five", lab:"5% of " + P + " is", want:v.five, hint:"5% is half of 10%. Halve your 10% answer.", worked:"Half of " + money(v.ten) + " = " + money(v.five) },
+    { k:"disc", lab:"So " + c.pct + "% off is", want:v.disc, hint:"Build it from blocks: " + c.pct + "% = " + buildWords(c, v) + ".", worked:buildMoney(c, v) + " = " + money(v.disc) },
+    { k:"pay", lab:"The customer pays", want:v.pay, hint:"Take the discount away from the price.", worked:P + " - " + money(v.disc) + " = " + money(v.pay) }
+  ];
+  var h = "<div class='order'><div class='who'>" + AV[c.av] + "<p><b>" + c.who + "</b> wants " + c.item + " at <b>" + P + "</b>, with <b>" + c.pct + "% off</b>." + (c.stretch ? " <span class='goodfor'>Stretch</span>" : "") + "</p></div>" + (c.extra ? "<p class='hint' style='margin:8px 0 0'>" + c.extra + "</p>" : "") + "</div>";
+  h += "<div class='calc'>";
+  rows.forEach(function(r){ h += "<label for='t_" + r.k + "'>" + r.lab + "</label><span class='money'>" + POUND + "<input class='num wide' id='t_" + r.k + "' inputmode='decimal' autocomplete='off'></span><span class='mk' id='m_" + r.k + "'></span><div class='note' id='n_" + r.k + "'></div>" });
+  h += "</div><div class='row'><button class='btn btn-orange small' type='button' id='chk4'>Ring it up</button><button class='btn btn-quiet small' type='button' id='show4'>Show me the method</button></div><div class='fb' id='fb4'></div>";
+  host.innerHTML = h;
+  var tries = {};
+  el("chk4").onclick = function(){
+    var allOk = true, any = false, got = {};
+    rows.forEach(function(r){
+      var inp = el("t_" + r.k), val = parseMoney(inp.value), m = el("m_" + r.k), n = el("n_" + r.k);
+      got[r.k] = val;
+      if(inp.value.trim() === ""){ allOk = false; m.textContent = ""; n.textContent = ""; n.className = "note"; return }
+      any = true;
+      if(val === Math.round(r.want)){ m.innerHTML = "<span style='color:#2e7d4f'>&#10003;</span>"; n.textContent = ""; n.className = "note" }
+      else {
+        allOk = false; tries[r.k] = (tries[r.k] || 0) + 1; m.innerHTML = "<span style='color:#d75f10'>?</span>";
+        var msg = tries[r.k] > 1 ? r.hint + " " + r.worked + "." : r.hint;
+        if(r.k === "pay" && !isNaN(got.disc) && got.disc !== Math.round(v.disc) && val === c.price - got.disc) msg = "Your method here is spot on. It just carries the slip from the line above.";
+        if(r.k === "pay" && val === Math.round(v.disc)) msg = "That is the discount. The customer pays what is left: " + (tries[r.k] > 1 ? r.worked + "." : "price take away discount.");
+        n.textContent = msg; n.className = "note";
+      }
+    });
+    if(!any){ fbSet(el("fb4"), "tell", "Fill in whichever boxes you can, then press Ring it up. Pounds and pence like 4.80 are fine."); return }
+    if(allOk){ fbSet(el("fb4"), "ok", "<b>Ka ching!</b> " + c.who + " pays " + money2(v.pay) + ". " + c.pct + "% = " + buildWords(c, v) + " = " + buildMoney(c, v) + " = " + money(v.disc) + "."); setTill(v.pay, true) }
+    else fbSet(el("fb4"), "tell", "Some lines have a little note. Have another go at those, no rush.");
+    rec(4, c.id, c.pct + "% off " + P, "10% " + fmtGot(got.ten) + ", 5% " + fmtGot(got.five) + ", discount " + fmtGot(got.disc) + ", pays " + fmtGot(got.pay), allOk);
+  };
+  el("show4").onclick = function(){
+    rows.forEach(function(r){ var n = el("n_" + r.k); n.textContent = r.worked; n.className = "note ok" });
+    fbSet(el("fb4"), "tell", "There is the method, step by step. Type the numbers in and ring it up if you like.");
+    rec(4, c.id, c.pct + "% off " + P, "looked at the method", false);
+  };
+}
+function fmtGot(p){ return isNaN(p) ? "blank" : money2(p) }
+function setTill(p, open){ el("tillText").textContent = money2(p); var d = el("drawer"); d.classList.toggle("open", !!open) }
+var stepper4 = null;
+OPENERS[4] = function(){ drawSlider(); if(!stepper4) stepper4 = Stepper(el("tillHost"), TILL, 4, body4) };
+
+/* ======================================================
+   Tile motifs (stages 5 and 6)
+   ====================================================== */
+var PALS = [
+  { name:"Seaside", c:[PAPER, BRIGHT, ORANGE, INK] },
+  { name:"Sunset", c:["#fff1d6", ORANGE, PLUM, INK] },
+  { name:"Forest", c:["#eef6e8", "#4b9b6a", YELLOW, INK] }
+];
+function motif(kind, pal){
+  var c = PALS[pal].c, s = "<rect x='0' y='0' width='60' height='60' fill='" + c[0] + "'/>";
+  if(kind === "bird"){
+    s += "<path d='M0 60 L0 34 L26 60 Z' fill='" + c[1] + "'/>";
+    s += "<ellipse cx='28' cy='32' rx='14' ry='9' fill='" + c[2] + "' stroke='" + c[3] + "' stroke-width='2'/>";
+    s += "<circle cx='40' cy='22' r='7' fill='" + c[2] + "' stroke='" + c[3] + "' stroke-width='2'/>";
+    s += "<circle cx='42' cy='21' r='1.8' fill='" + c[3] + "'/>";
+    s += "<path d='M46.5 21 L54 23.5 L46.5 26 Z' fill='" + YELLOW + "' stroke='" + c[3] + "' stroke-width='1.5'/>";
+    s += "<path d='M15 30 L6 23 L9 34 Z' fill='" + c[2] + "' stroke='" + c[3] + "' stroke-width='1.8'/>";
+    s += "<path d='M24 41 v7 M31 41 v7' stroke='" + c[3] + "' stroke-width='2'/>";
+  }
+  if(kind === "arc"){
+    s += "<path d='M0 0 H40 A40 40 0 0 1 0 40 Z' fill='" + c[1] + "'/>";
+    s += "<path d='M60 60 H44 A16 16 0 0 1 60 44 Z' fill='" + c[2] + "'/>";
+    s += "<path d='M0 0 H22 A22 22 0 0 1 0 22 Z' fill='" + c[2] + "'/>";
+  }
+  if(kind === "tri"){
+    s += "<path d='M60 0 L60 60 L0 60 Z' fill='" + c[1] + "'/>";
+    s += "<circle cx='16' cy='16' r='8' fill='" + c[2] + "'/>";
+    s += "<path d='M60 30 L45 60 L60 60 Z' fill='" + c[2] + "'/>";
+  }
+  return s + "<rect x='0.75' y='0.75' width='58.5' height='58.5' fill='none' stroke='" + c[3] + "' stroke-width='1.5'/>";
+}
+var OPS = {
+  T:{ tf:"", name:"slid (translated)" },
+  M:{ tf:"scale(-1 1)", name:"flipped left to right (reflected)" },
+  H:{ tf:"scale(1 -1)", name:"flipped upside down (reflected)" },
+  R:{ tf:"rotate(90)", name:"turned 90" + DEG + " clockwise" },
+  R2:{ tf:"rotate(180)", name:"turned 180" + DEG }
+};
+function tileTf(list){ return "translate(30 30) " + list.map(function(o){ return OPS[o].tf }).join(" ") + " translate(-30 -30)" }
+function repeatOp(o, n){ var a = []; for(var i = 0; i < n; i++) a.push(o); return a }
+/* tile(i, j) = down^j then across^i applied first (down outermost), extra hand turns outermost of all */
+function patternSVG(cols, rows, kind, pal, across, down, extra){
+  var s = "";
+  for(var j = 0; j < rows; j++) for(var i = 0; i < cols; i++){
+    var list = repeatOp("R", extra ? (extra[i + "," + j] || 0) : 0).concat(repeatOp(down, j)).concat(repeatOp(across, i));
+    s += "<g transform='translate(" + i * 60 + " " + j * 60 + ")'><g transform='" + tileTf(list) + "'>" + motif(kind, pal) + "</g></g>";
+  }
+  return s;
+}
+
+/* ======================================================
+   STAGE 5: pattern detective
+   ====================================================== */
+var STRIPOPTS = ["Translation: each tile is slid along, nothing else changes", "Reflection: each tile is a mirror image of the one before, in the line between them", "Rotation: each tile is turned 90" + DEG + " clockwise from the one before", "Rotation: each tile is turned 180" + DEG + " (a half turn) from the one before"];
+var D5 = [
+  { id:"p1", kind:"strip", op:"T", ans:0, why:"Every bird faces the same way and stands the same way up. The tile has just been slid along." },
+  { id:"p2", kind:"strip", op:"M", ans:1, why:"The birds take turns facing right and left, but none are upside down. That is a reflection in the line between tiles." },
+  { id:"p3", kind:"strip", op:"R2", ans:3, why:"Every other bird is upside down and facing the other way. Flipping alone would not do both, so it is a half turn." },
+  { id:"p4", kind:"strip", op:"R", ans:2, why:"The bird goes right way up, then on its side, then upside down, then on its other side: a quarter turn clockwise each time." },
+  { id:"p5", kind:"block", across:"M", down:"H",
+    opts:["Along the top: reflected left to right. Going down: reflected upside down, in the line between rows.", "Along the top: turned 180" + DEG + ". Going down: slid.", "Along the top: slid. Going down: turned 90" + DEG + " clockwise.", "Along the top: reflected left to right. Going down: slid."], ans:0,
+    why:"Along the top, the birds swap between facing right and left, the right way up. Each row below is the row above flipped upside down, like a mirror lying flat between them." },
+  { id:"p6", kind:"write", across:"R", down:"H" }
+];
+var MOVE5 = { T:"slid along", M:"reflected", H:"reflected in a flat line", R:"turned 90" + DEG + " clockwise", R2:"turned 180" + DEG };
+function body5(it, host){
+  var h = "";
+  if(it.kind === "strip"){
+    h += "<p class='prompt'>How does each tile get from one to the next?</p><svg class='patsvg' viewBox='0 0 300 60' style='max-width:520px' role='img' aria-label='A row of five bird tiles'>" + patternSVG(5, 1, "bird", 0, it.op, "T") + "</svg>";
+    h += "<div class='picks' id='pk5'>" + STRIPOPTS.map(function(o, i){ return "<button type='button' class='pick' data-i='" + i + "'>" + o + "</button>" }).join("") + "</div>";
+  }
+  if(it.kind === "block"){
+    h += "<p class='prompt'>This floor uses two different moves. Which two?</p><svg class='patsvg' viewBox='0 0 240 240' style='max-width:300px' role='img' aria-label='A four by four floor of bird tiles'>" + patternSVG(4, 4, "bird", 1, it.across, it.down) + "</svg>";
+    h += "<div class='picks' id='pk5'>" + it.opts.map(function(o, i){ return "<button type='button' class='pick' data-i='" + i + "'>" + o + "</button>" }).join("") + "</div>";
+  }
+  if(it.kind === "write"){
+    h += "<p class='prompt'>Your turn to be the expert. Describe how this floor was made, in your own words.</p><svg class='patsvg' viewBox='0 0 240 180' style='max-width:320px' role='img' aria-label='A floor of bird tiles'>" + patternSVG(4, 3, "bird", 2, it.across, it.down) + "</svg>";
+    h += "<p class='hint'>Look along the top row first. Then compare each tile with the one underneath it.</p><div class='chipset' data-for='w_det'></div><textarea class='wr' id='w_det' aria-label='Describe the pattern'></textarea><p class='saved' data-saved='w_det'></p>";
+    h += "<div class='row'><button class='btn small' type='button' id='model5'>Show one way to say it</button></div>";
+  }
+  h += "<div class='fb' id='fb5'></div>";
+  host.innerHTML = h;
+  if(it.kind === "write"){
+    setupChips(host.querySelector(".chipset"));
+    el("model5").onclick = function(){ fbSet(el("fb5"), "tell", "<b>One way:</b> Along the top row, each tile is rotated 90" + DEG + " clockwise from the one before. Each tile in the next row is a reflection of the tile above it, in the line between the rows. The whole pattern repeats every 4 tiles across.") };
+    return;
+  }
+  el("pk5").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return; var i = parseInt(b.dataset.i, 10), ok = i === it.ans;
+    el("pk5").querySelectorAll(".pick").forEach(function(x){ x.classList.remove("good", "bad") }); b.classList.add(ok ? "good" : "bad");
+    fbSet(el("fb5"), ok ? "ok" : "nope", (ok ? "<b>Nice detective work.</b> " : "<b>Have another look.</b> Follow one bird's beak from tile to tile. ") + (ok ? it.why : ""));
+    rec(5, it.id, it.kind === "strip" ? "Which move makes this row of tiles" : "Which two moves make this floor", b.textContent, ok);
+  });
+}
+var stepper5 = null;
+OPENERS[5] = function(){
+  el("detLearn").innerHTML = (function(){
+    var s = "", labs = ["start", "translated", "reflected", "rotated"], lists = [[], [], ["M"], ["R"]];
+    for(var i = 0; i < 4; i++) s += "<g transform='translate(" + (i * 74 + 6) + " 8)'><g transform='" + tileTf(lists[i]) + "'>" + motif("bird", 0) + "</g></g><text x='" + (i * 74 + 36) + "' y='88' text-anchor='middle' " + FF + " font-size='12' font-weight='700' fill='" + INK + "'>" + labs[i] + "</text>";
+    return s;
+  })();
+  if(!stepper5) stepper5 = Stepper(el("detHost"), D5, 5, body5);
+};
+
+/* ======================================================
+   STAGE 6: pattern studio
+   ====================================================== */
+var SD = st.studio || { kind:"bird", pal:0, across:"M", down:"H", extra:{} };
+var ACROSS = [["T","Slid"],["M","Reflected"],["R","Turned 90" + DEG],["R2","Turned 180" + DEG],["H","Flipped upside down"]];
+var DOWN = [["T","Slid"],["H","Reflected"],["R","Turned 90" + DEG],["R2","Turned 180" + DEG],["M","Flipped left to right"]];
+function segs(id, list, cur, set){
+  var box = el(id); box.innerHTML = "";
+  list.forEach(function(o){ var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.setAttribute("aria-pressed", o[0] === cur ? "true" : "false"); b.onclick = function(){ set(o[0]); drawStudio(true) }; box.appendChild(b) });
+}
+function acrossWords(a){
+  return { T:"slid along, nothing else changes (a translation)", M:"reflected in the line between it and the next tile", R:"rotated 90" + DEG + " clockwise from the one before", R2:"rotated 180" + DEG + " from the one before", H:"flipped upside down and slid along (a reflection, then a translation)" }[a];
+}
+function downWords(d){
+  return { T:"slid down from the one above (a translation)", H:"a reflection of the tile above it, in the line between the rows", R:"the tile above it rotated 90" + DEG + " clockwise", R2:"the tile above it rotated 180" + DEG, M:"the tile above it flipped left to right and slid down (a reflection, then a translation)" }[d];
+}
+function studioDesc(){
+  var nHand = Object.keys(SD.extra).filter(function(k){ return SD.extra[k] % 4 }).length;
+  return "Along the top row, each tile is " + acrossWords(SD.across) + ". Going down, each tile is " + downWords(SD.down) + "." + (nHand ? " You also turned " + nHand + " tile" + (nHand === 1 ? "" : "s") + " by hand." : "");
+}
+function drawStudio(changed){
+  segs("stMotif", [["bird","Bird"],["arc","Arcs"],["tri","Triangles"]], SD.kind, function(v){ SD.kind = v });
+  segs("stPal", PALS.map(function(p, i){ return [i, p.name] }), SD.pal, function(v){ SD.pal = v });
+  segs("stAcross", ACROSS, SD.across, function(v){ SD.across = v });
+  segs("stDown", DOWN, SD.down, function(v){ SD.down = v });
+  var cols = 6, rows = 4, s = "";
+  for(var j = 0; j < rows; j++) for(var i = 0; i < cols; i++){
+    var list = repeatOp("R", SD.extra[i + "," + j] || 0).concat(repeatOp(SD.down, j)).concat(repeatOp(SD.across, i));
+    s += "<g class='studiotile' tabindex='0' role='button' aria-label='Tile " + (i + 1) + " across, " + (j + 1) + " down. Press to turn it.' data-k='" + i + "," + j + "' transform='translate(" + i * 60 + " " + j * 60 + ")'><g transform='" + tileTf(list) + "'>" + motif(SD.kind, SD.pal) + "</g><rect class='hit' x='1' y='1' width='58' height='58' fill='transparent' stroke='none'/></g>";
+  }
+  el("studioSvg").innerHTML = s;
+  el("studioDesc").innerHTML = "<b>What the shop sees:</b> " + studioDesc();
+  st.studio = SD; save();
+  if(changed){ rec(6, "studio", "Pattern studio design", SD.kind + " tile, " + PALS[SD.pal].name + " colours. " + studioDesc(), null); if(!reduce){ el("studioSvg").classList.remove("wob"); void el("studioSvg").getBoundingClientRect(); el("studioSvg").classList.add("wob") } }
+  drawDesigns();
+}
+function turnTile(k){ SD.extra[k] = ((SD.extra[k] || 0) + 1) % 4; drawStudio(true); var t = document.querySelector(".studiotile[data-k='" + k + "']"); if(t) t.focus() }
+el("studioSvg").addEventListener("click", function(e){ var t = e.target.closest(".studiotile"); if(t) turnTile(t.dataset.k) });
+el("studioSvg").addEventListener("keydown", function(e){ if(e.key !== "Enter" && e.key !== " ") return; var t = e.target.closest(".studiotile"); if(!t) return; e.preventDefault(); turnTile(t.dataset.k) });
+el("stReset").onclick = function(){ SD.extra = {}; drawStudio(true) };
+el("stKeep").onclick = function(){
+  st.designs = st.designs || []; st.designs.push(SD.kind + " tile, " + PALS[SD.pal].name + " colours: " + studioDesc());
+  if(st.designs.length > 6) st.designs.shift();
+  save(); rec(6, "studio_keep_" + st.designs.length, "Kept a design", st.designs[st.designs.length - 1], null); drawDesigns();
+};
+function drawDesigns(){ var d = st.designs || []; el("stDesigns").innerHTML = d.length ? d.map(function(x, i){ return "<span>Design " + (i + 1) + " kept</span>" }).join("") : "" }
+OPENERS[6] = function(){ drawStudio(false) };
+
+/* ======================================================
+   STAGE 7: good deal?
+   ====================================================== */
+var DEALS = [
+  { id:"d1", intro:"The same box of tiles in two shops.",
+    rows:[ { lab:"Tile Shop: " + POUND + "120 with 25% off. You pay", want:9000, hint:"10% of 120 is 12. 5% is 6. 25% = 12 + 12 + 6 = 30.", worked:POUND + "120 - " + POUND + "30 = " + POUND + "90" },
+           { lab:"Shop over the road: " + POUND + "100 with 5% off. You pay", want:9500, hint:"10% of 100 is 10, so 5% is 5.", worked:POUND + "100 - " + POUND + "5 = " + POUND + "95" } ],
+    choices:["Tile Shop", "Shop over the road", "Same price"], ans:0, why:"The Tile Shop is " + POUND + "5 cheaper, even though its price started higher." },
+  { id:"d2", intro:"A " + POUND + "60 tile cutter. Two vouchers, and you can only use one.",
+    rows:[ { lab:"With the 35% off voucher you pay", want:3900, hint:"10% of 60 is 6, 5% is 3. 35% = 6 + 6 + 6 + 3 = 21.", worked:POUND + "60 - " + POUND + "21 = " + POUND + "39" },
+           { lab:"With the " + POUND + "20 off voucher you pay", want:4000, hint:"Just take 20 away.", worked:POUND + "60 - " + POUND + "20 = " + POUND + "40" } ],
+    choices:["35% off", POUND + "20 off", "Same price"], ans:0, why:"35% off saves " + POUND + "21, which beats " + POUND + "20 off by " + POUND + "1. Close one!" },
+  { id:"d3", intro:"You need 10 tiles.",
+    rows:[ { lab:"A pack of 10 for " + POUND + "25, with 15% off. You pay", want:2125, hint:"10% of 25 is 2.50. 5% is 1.25. 15% = 2.50 + 1.25 = 3.75.", worked:POUND + "25 - " + POUND + "3.75 = " + POUND + "21.25" },
+           { lab:"10 single tiles at " + POUND + "2.20 each. You pay", want:2200, hint:"10 lots of 2.20. Multiplying by 10 moves the digits one place left.", worked:"10 \u00d7 " + POUND + "2.20 = " + POUND + "22" } ],
+    choices:["The pack", "Single tiles", "Same price"], ans:0, why:"The pack is 75p cheaper: " + POUND + "22.00 - " + POUND + "21.25 = 75p." },
+  { id:"d4", stretch:true, intro:"Twist! A " + POUND + "50 tile saw has a 20% off sticker. Then the till takes another 20% off. Is that the same as 40% off?",
+    rows:[ { lab:"After the first 20% off " + POUND + "50, it costs", want:4000, hint:"10% of 50 is 5, so 20% is 10.", worked:POUND + "50 - " + POUND + "10 = " + POUND + "40" },
+           { lab:"Then 20% off that new price. It costs", want:3200, hint:"Careful: the 20% is of the new price now, not 50. 10% of 40 is 4.", worked:"20% of " + POUND + "40 = " + POUND + "8, and " + POUND + "40 - " + POUND + "8 = " + POUND + "32" },
+           { lab:"40% off " + POUND + "50 in one go costs", want:3000, hint:"10% of 50 is 5, so 40% is 20.", worked:POUND + "50 - " + POUND + "20 = " + POUND + "30" } ],
+    choices:["Two lots of 20% off", "40% off in one go", "They are the same"], ans:1, why:"The second 20% comes off " + POUND + "40, not " + POUND + "50, so it only saves " + POUND + "8. Two lots of 20% off works out the same as 36% off, not 40%. Outrageous!" }
+];
+function body7(d, host){
+  var h = "<p class='prompt'>" + (d.stretch ? "<span class='goodfor' style='margin-right:6px'>Stretch</span>" : "") + d.intro + "</p><div class='calc'>";
+  d.rows.forEach(function(r, i){ h += "<label for='g_" + i + "'>" + r.lab + "</label><span class='money'>" + POUND + "<input class='num wide' id='g_" + i + "' inputmode='decimal' autocomplete='off'></span><span class='mk' id='gm_" + i + "'></span><div class='note' id='gn_" + i + "'></div>" });
+  h += "</div><div class='row'><button class='btn small' type='button' id='chk7'>Check my prices</button><button class='btn btn-quiet small' type='button' id='show7'>Show me the method</button></div>";
+  h += "<p class='prompt' style='margin-top:14px'><b>Which is the better deal?</b></p><div class='picks two' id='pk7'>" + d.choices.map(function(o, i){ return "<button type='button' class='pick' data-i='" + i + "'>" + o + "</button>" }).join("") + "</div><div class='fb' id='fb7'></div>";
+  host.innerHTML = h;
+  var tries = {};
+  el("chk7").onclick = function(){
+    var got = [], allOk = true, any = false;
+    d.rows.forEach(function(r, i){
+      var inp = el("g_" + i), v = parseMoney(inp.value), m = el("gm_" + i), n = el("gn_" + i); got.push(v);
+      if(inp.value.trim() === ""){ allOk = false; return }
+      any = true;
+      if(v === r.want){ m.innerHTML = "<span style='color:#2e7d4f'>&#10003;</span>"; n.textContent = ""; n.className = "note" }
+      else { allOk = false; tries[i] = (tries[i] || 0) + 1; m.innerHTML = "<span style='color:#d75f10'>?</span>"; n.textContent = tries[i] > 1 ? r.hint + " " + r.worked + "." : r.hint; n.className = "note" }
+    });
+    if(!any){ fbSet(el("fb7"), "tell", "Pop a price in any box, then check."); return }
+    fbSet(el("fb7"), allOk ? "ok" : "tell", allOk ? "<b>Both prices right.</b> Now pick the better deal below." : "A note has popped up under anything worth another look.");
+    rec(7, d.id + "_calc", "Good deal prices: " + d.intro, got.map(fmtGot).join(" and "), allOk);
+  };
+  el("show7").onclick = function(){ d.rows.forEach(function(r, i){ var n = el("gn_" + i); n.textContent = r.hint + " " + r.worked + "."; n.className = "note ok" }) };
+  el("pk7").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return; var i = parseInt(b.dataset.i, 10), ok = i === d.ans;
+    el("pk7").querySelectorAll(".pick").forEach(function(x){ x.classList.remove("good", "bad") }); b.classList.add(ok ? "good" : "bad");
+    fbSet(el("fb7"), ok ? "ok" : "nope", ok ? "<b>Good call.</b> " + d.why : "<b>Worth checking the numbers.</b> Work out what you would actually pay each way, then compare. The Show me button can help.");
+    rec(7, d.id + "_pick", "Better deal: " + d.intro, b.textContent, ok);
+  });
+}
+var stepper7 = null;
+OPENERS[7] = function(){ if(!stepper7) stepper7 = Stepper(el("dealHost"), DEALS, 7, body7) };
+
+/* ======================================================
+   summary, send, restart
+   ====================================================== */
+function summary(){
+  var out = ["The Tile Shop (tessellations, transformations, vectors and 5% discounts)", ""];
+  if(who){ out.push("Milestones for " + who + ":"); MS[who].m.forEach(function(m, i){ out.push("  " + (i + 1) + ". " + m[0] + " (stages " + m[2].join(", ") + ")") }); out.push("") }
+  else out.push("Target: Use and read vector notation. Calculate discounts in multiples of 5%. Explore rotations, reflections and tessellations to make repeating patterns.", "");
+  var any = false;
+  STAGES.forEach(function(s){
+    var items = Object.keys(st.ans).filter(function(k){ return st.ans[k].s === s.n }).map(function(k){ return st.ans[k] });
+    var writes = Object.keys(st.txt).filter(function(k){ return TXTSTAGE[k] === s.n && st.txt[k] && st.txt[k].trim() });
+    if(!items.length && !writes.length){ out.push("Stage " + s.n + ", " + s.name + ": not tried this time"); return }
+    any = true;
+    var rel = WHOS.filter(function(w){ return MS[w].m.some(function(m){ return m[2].indexOf(s.n) >= 0 }) });
+    out.push("Stage " + s.n + ", " + s.name + " (" + s.sub + "). Links to milestones for: " + rel.join(", "));
+    items.forEach(function(r){
+      var tag = r.ok === true ? (r.n === 1 ? "got it first go" : "got there in the end") : r.ok === false ? "had a go, still working on it" : "explored";
+      out.push("  - " + r.l + ": " + r.a + " [" + tag + "]");
+    });
+    writes.forEach(function(k){ out.push("  - In my own words: \"" + st.txt[k].trim() + "\"") });
+    if(s.n === 6 && st.designs && st.designs.length) out.push("  - Designs kept: " + st.designs.length);
+    out.push("");
+  });
+  if(!any) out.push("", "Nothing tried yet, just having a look.");
+  out.push("", "Vectors above are written (top over bottom): top is across, bottom is up or down.");
+  return out.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Tile Shop", filename:"tile-shop", getText:summary });
+var restartArm = false;
+el("restartBtn").onclick = function(){
+  if(!restartArm){ restartArm = true; el("restartBtn").textContent = "Tap again to clear it all"; el("restartMsg").textContent = "This clears your answers on this device."; return }
+  try{ localStorage.removeItem(STORE) }catch(e){}
+  location.reload();
+};
+
+/* ---------- go ---------- */
+drawWho(); drawMap(); drawGoodFor();
+if(st.open >= 1 && st.open <= 7) openStage(st.open, false);
+window.__ts = { st:function(){ return st }, summary:summary, OP:OP, F2:F2, placeS:placeS, tillVals:tillVals, TILL:TILL, floorTiles:floorTiles };
+})();
+</script>
+</body>
+</html>

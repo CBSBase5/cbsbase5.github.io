@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garden Detective - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Garden Detective only. Shell, cards and buttons come from style.css */
+:root{--leaf:#3a9a4f;--leaf-deep:#22703a;--soil:#8a5a35;--soil-deep:#5e3b20;--sky:#d8f1f7;--bac:#7b4b8f;--fun:#c2540c;--vir:#007291;--good:#2e7d4f}
+.gd{max-width:980px;margin:0 auto}
+.hidden{display:none!important}
+
+/* hero garnish */
+.strip{display:block;width:100%;height:auto;margin:6px 0 14px;overflow:visible}
+.bee{animation:beefly 9s ease-in-out infinite alternate}
+@keyframes beefly{0%{transform:translate(0,0)}25%{transform:translate(160px,-18px)}50%{transform:translate(330px,8px)}75%{transform:translate(520px,-22px)}100%{transform:translate(700px,0)}}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:swayp 3.4s ease-in-out infinite alternate}
+@keyframes swayp{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.spin{transform-box:fill-box;transform-origin:50% 50%;animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wig{animation:wig 2.2s ease-in-out infinite alternate}
+@keyframes wig{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
+
+/* sections */
+.sec{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:24px;margin:0 0 20px;box-shadow:var(--lift)}
+.seclab{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;display:inline-block;margin:0 0 12px}
+.sec h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:1.6rem;margin:0 0 8px;line-height:1.08}
+.sec p{max-width:64ch}
+.lead{font-size:1.04rem;margin:0 0 12px}
+.sub{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.18rem;margin:26px 0 8px;display:flex;align-items:center;gap:10px;line-height:1.15}
+.sub .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;font-size:.85rem}
+.small{font-size:.88rem;opacity:.78}
+
+/* who picker */
+.who{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.who button{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.9rem;letter-spacing:.08em;padding:9px 15px;border-radius:999px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:2px 3px 0 var(--ink)}
+.who button[aria-pressed="true"]{background:var(--ink);color:var(--yellow)}
+.mbox{margin:12px 0 0;padding:12px 16px;border-radius:16px;background:#fff6d6;border:2px dashed var(--yellow-deep)}
+.mbox ul{margin:6px 0 0;padding-left:20px}
+.mbox li{margin:0 0 4px}
+
+/* seed packet map */
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:14px;margin:14px 0 6px}
+.packet{position:relative;font:inherit;color:var(--ink);text-align:center;cursor:pointer;border:3px solid var(--ink);border-radius:4px 4px 16px 16px;background:var(--pc,#fff);padding:20px 8px 12px;box-shadow:3px 4px 0 var(--ink);transition:transform .14s ease,box-shadow .14s ease;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:186px}
+.packet:nth-child(odd){transform:rotate(-1.2deg)}
+.packet:nth-child(even){transform:rotate(1deg)}
+.packet:hover{transform:translateY(-4px) rotate(0);box-shadow:5px 8px 0 var(--ink)}
+.packet::before{content:"";position:absolute;left:6px;right:6px;top:7px;border-top:2px dashed rgba(10,47,56,.45)}
+.packet .pn{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.packet b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1rem;line-height:1.1}
+.packet svg{width:70px;height:62px}
+.packet .ps{font-size:.74rem;opacity:.8;line-height:1.2}
+.packet.cur{outline:4px dashed var(--orange);outline-offset:4px}
+.badge{position:absolute;top:-12px;right:-8px;background:var(--ink);color:var(--yellow);font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;transform:rotate(5deg);box-shadow:2px 2px 0 var(--orange)}
+.maprow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 0}
+
+/* stages */
+.stage{display:none}
+.stage.on{display:block;animation:pop .35s cubic-bezier(.2,1.3,.4,1)}
+.stagehead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
+.stagehead svg{flex:none;width:64px;height:64px}
+.stagehead .t{flex:1;min-width:200px}
+.stagefoot{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 0;padding-top:16px;border-top:3px dashed var(--line)}
+
+/* learn a bit cards */
+.learn{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:center;background:#eef8ef;border:2px solid var(--leaf-deep);border-radius:18px 14px 18px 14px;padding:14px 16px;margin:10px 0 14px}
+.learn.micro{background:#f3ecf7;border-color:var(--bac)}
+.learn svg{width:100%;height:auto;display:block}
+.learn .lk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf-deep)}
+.learn.micro .lk{color:var(--bac)}
+.learn ul{margin:6px 0 0;padding-left:18px}
+.learn li{margin:0 0 5px}
+@media (max-width:600px){.learn{grid-template-columns:1fr}.learn svg{max-width:220px;margin:0 auto}}
+
+/* toggles */
+.seg{display:inline-flex;border:3px solid var(--ink);border-radius:999px;overflow:hidden;margin:4px 0 12px;flex-wrap:wrap}
+.seg button{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.85rem;letter-spacing:.06em;padding:9px 16px;border:0;background:var(--white);color:var(--ink);cursor:pointer}
+.seg button+button{border-left:3px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--leaf);color:var(--white)}
+
+/* chips you drag or tap */
+.tray{display:flex;flex-wrap:wrap;gap:9px;margin:8px 0 12px;padding:12px;border:2px dashed rgba(10,47,56,.35);border-radius:16px;background:var(--paper);min-height:60px}
+.chipbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.86rem;letter-spacing:.02em;border:3px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);padding:8px 14px;box-shadow:3px 3px 0 var(--ink);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;text-align:left;line-height:1.2}
+.chipbtn svg{width:26px;height:26px;flex:none}
+.chipbtn.sel{background:var(--yellow);transform:translateY(-3px) rotate(-2deg);box-shadow:4px 6px 0 var(--ink)}
+.chipbtn.used{opacity:.32;box-shadow:none;cursor:default}
+.chipbtn.dragging{opacity:.4}
+.chipbtn.card{border-radius:14px 10px 14px 10px;font-family:var(--body);font-variation-settings:normal;font-weight:700;font-size:.9rem;max-width:100%}
+.ghostdrag{position:fixed!important;pointer-events:none;z-index:10000;transform:translate(-50%,-70%) rotate(-4deg)!important;background:var(--yellow)!important;opacity:.95!important;box-shadow:6px 8px 0 rgba(10,47,56,.3)!important;max-width:280px}
+.tapnote{font-size:.85rem;opacity:.75;margin:0 0 6px}
+
+/* build a plant scene */
+.buildgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.buildgrid{grid-template-columns:1fr}.buildgrid>div:last-child{order:-1}}
+.scene{position:relative;max-width:420px;width:100%;margin:0 auto}
+.scene svg{display:block;width:100%;height:auto;border:3px solid var(--ink);border-radius:18px;background:var(--sky)}
+.zone{position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;border:3px dashed var(--ink);background:rgba(255,253,248,.92);font-family:var(--display);font-variation-settings:"wght" 900;font-size:1rem;cursor:pointer;color:var(--ink);padding:0;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.picking .zone{border-color:var(--orange);background:#fff1c2;animation:zpulse 1.2s ease-in-out infinite}
+@keyframes zpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,119,36,.6)}50%{box-shadow:0 0 0 9px rgba(239,119,36,0)}}
+[data-target].over{background:var(--yellow)!important}
+.zone.over{transform:translate(-50%,-50%) scale(1.18)}
+.slot.over{transform:translate(-50%,-50%) scale(1.06)}
+.job.over,.bin.over{transform:scale(1.03)}
+.shake{animation:shake .42s}
+@keyframes shake{0%,100%{translate:0}20%{translate:-7px}40%{translate:6px}60%{translate:-4px}80%{translate:3px}}
+.ghost *{fill:none!important;stroke:rgba(10,47,56,.26)!important;stroke-width:1.6!important;stroke-dasharray:4 4}
+.real{opacity:0;transform:scale(.4);transform-box:fill-box;transition:opacity .4s ease,transform .55s cubic-bezier(.2,1.4,.4,1)}
+.real.on{opacity:1;transform:none}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:10px 0 0}
+.note{background:#fffbea;border:2px solid var(--ink);border-radius:14px 10px 16px 10px;padding:10px 12px;font-size:.9rem;box-shadow:2px 3px 0 rgba(10,47,56,.15)}
+.note:nth-child(odd){transform:rotate(-.6deg)}
+.note h4{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin:0 0 4px}
+.note p{margin:0 0 4px}
+.note .k{font-weight:700;color:var(--leaf-deep)}
+.note.fresh{animation:pop .4s cubic-bezier(.2,1.3,.4,1)}
+
+/* feedback */
+.fb{margin:10px 0 4px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:.98rem;line-height:1.5;max-width:66ch}
+.fb:empty{display:none}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+
+/* jobs board */
+.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.job{position:relative;text-align:left;font:inherit;font-size:.95rem;color:var(--ink);background:var(--white);border:3px dashed rgba(10,47,56,.5);border-radius:16px 12px 16px 12px;padding:12px 12px 12px 14px;cursor:pointer;min-height:84px;transition:transform .15s,background .15s}
+.picking .job:not(.done){border-color:var(--orange);background:#fffaf0}
+.job.done{border-style:solid;border-color:var(--good);background:#e9f4ec;cursor:default}
+.job .tagp{display:inline-block;margin:0 0 6px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;background:var(--good);color:#fff;border-radius:999px;padding:3px 10px}
+
+/* choose your response */
+.q{border:2px solid var(--ink);border-radius:16px;background:var(--paper);padding:14px 16px;margin:12px 0 0}
+.q h4{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem;margin:0 0 10px;line-height:1.3}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{font-family:var(--body);font-weight:700;font-size:.93rem;text-align:left;background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:14px 10px 14px 10px;padding:9px 14px;cursor:pointer;box-shadow:2px 3px 0 var(--ink)}
+.opt.good{background:#d9efdf;border-color:var(--good)}
+.opt.bad{background:#fdf0e5;border-color:#d75f10;opacity:.75}
+
+/* grow slider */
+.grow svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border:3px solid var(--ink);border-radius:18px;background:var(--sky)}
+.slider{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px auto 0;max-width:520px}
+.slider input[type=range]{flex:1;min-width:200px;accent-color:var(--leaf);height:30px}
+.stepcard{max-width:520px;margin:10px auto 0;background:#eef8ef;border:2px solid var(--leaf-deep);border-radius:16px;padding:10px 14px;min-height:96px}
+.stepcard h4{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.1rem;margin:0 0 4px}
+.stepcard p{margin:0}
+.stepdots{display:flex;gap:5px;justify-content:center;margin:8px 0 0;flex-wrap:wrap}
+.stepdots span{width:11px;height:11px;border-radius:50%;background:rgba(10,47,56,.18)}
+.stepdots span.on{background:var(--leaf)}
+
+/* cycle wheel */
+.wheelwrap{position:relative;max-width:420px;margin:6px auto 0}
+.wheelwrap svg{display:block;width:100%;height:auto}
+.slot{position:absolute;transform:translate(-50%,-50%);width:30%;min-height:58px;font:inherit;font-size:.78rem;line-height:1.2;font-weight:700;color:var(--ink);background:rgba(255,253,248,.95);border:3px dashed var(--ink);border-radius:14px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.slot i{font-style:normal;font-family:var(--display);font-size:.62rem;letter-spacing:.12em;opacity:.6}
+.slot.filled{border-style:solid;background:#fff6d6}
+.slot.fixed{background:#e9f4ec;border-style:solid;cursor:default}
+.slot.right{background:#d9efdf;border-color:var(--good)}
+.slot.wrong{background:#fdf0e5;border-color:#d75f10;border-style:dashed}
+@media (max-width:420px){.slot{font-size:.68rem;min-height:52px;padding:4px}}
+
+/* need cards */
+.needs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:8px 0}
+.need{font:inherit;font-weight:700;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:16px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:2px 3px 0 var(--ink)}
+.need svg{width:44px;height:44px}
+.need[aria-pressed="true"]{background:var(--yellow);transform:translateY(-2px)}
+.need.yes{outline:3px solid var(--good);outline-offset:2px}
+.need.no{outline:3px dashed #d75f10;outline-offset:2px}
+
+/* plumbing */
+.pipes{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.pipes{grid-template-columns:1fr}}
+.pipes svg{display:block;width:100%;height:auto;border:3px solid var(--ink);border-radius:18px;background:var(--sky)}
+.layerbtns{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.layerbtns button{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;letter-spacing:.05em;border:3px solid var(--ink);border-radius:999px;padding:8px 13px;cursor:pointer;background:var(--white);color:var(--ink);box-shadow:2px 3px 0 var(--ink)}
+.layerbtns button[aria-pressed="true"]{color:#fff}
+.layerbtns button[data-l="water"][aria-pressed="true"]{background:#1f7fd1}
+.layerbtns button[data-l="food"][aria-pressed="true"]{background:var(--orange-deep)}
+.layerbtns button[data-l="photo"][aria-pressed="true"]{background:var(--leaf-deep)}
+.layerbtns button[data-l="poll"][aria-pressed="true"]{background:var(--plum)}
+.layerinfo{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 14px;font-size:.95rem;min-height:120px}
+.layerinfo p{margin:0 0 8px}
+.eq{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 700;background:var(--white);border:2px dashed var(--leaf-deep);border-radius:10px;padding:6px 10px;display:inline-block}
+
+/* cloze */
+.cloze{font-size:1.04rem;line-height:2.25;background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 16px;max-width:none}
+.gap{display:inline-block;min-width:112px;font:inherit;font-weight:700;font-size:.95rem;line-height:1.3;color:var(--ink);background:var(--white);border:0;border-bottom:3px dashed var(--ink);border-radius:8px 8px 0 0;padding:3px 8px;cursor:pointer;vertical-align:baseline;text-align:center}
+.picking .gap:not(.done){background:#fff1c2;border-bottom-color:var(--orange)}
+.gap.done{background:#d9efdf;border-bottom:3px solid var(--good);cursor:default}
+
+/* writing */
+textarea.write{width:100%;min-height:120px;font:inherit;font-size:1rem;line-height:1.5;color:var(--ink);background:#fffdfb;border:3px solid var(--ink);border-radius:14px;padding:10px 12px;resize:vertical}
+.starters{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 8px}
+.starters button{font:inherit;font-size:.85rem;color:var(--ink);background:#fff6d6;border:2px dashed var(--yellow-deep);border-radius:999px;padding:5px 11px;cursor:pointer}
+.saved{font-size:.82rem;color:var(--teal);min-height:1.1em;margin:4px 0 0}
+
+/* face off */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;max-width:560px;margin:8px auto 10px}
+.vs .pic{background:var(--white);border:3px solid var(--ink);border-radius:18px;text-align:center;padding:8px}
+.vs .pic svg{width:100%;max-width:160px;height:auto;display:block;margin:0 auto}
+.vs .pic b{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800}
+.vs .mid{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.6rem;color:var(--orange)}
+.crow{border:2px solid var(--ink);border-radius:14px;background:var(--paper);padding:10px 12px;margin:0 0 10px}
+.crow h5{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+.cells{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cell{font:inherit;font-size:.9rem;text-align:left;color:var(--ink);background:var(--white);border:3px dashed var(--ink);border-radius:12px;padding:8px 10px;cursor:pointer;min-height:48px}
+.cell .who2{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;opacity:.65}
+.cell.done{border-style:solid;border-color:var(--good);background:#e9f4ec;cursor:default}
+.cell.open{background:#fff1c2;border-color:var(--orange)}
+.chooser{margin:8px 0 0;display:grid;gap:7px}
+.chooser button{font:inherit;font-size:.9rem;text-align:left;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer}
+.chooser button.bad{opacity:.5;text-decoration:line-through}
+
+/* microscope */
+.scope{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.scope{grid-template-columns:1fr}}
+.lens{position:relative;max-width:360px;width:100%;margin:0 auto}
+.lens svg{display:block;width:100%;height:auto}
+.lens .mic{cursor:pointer}
+.lens .mic:focus{outline:none}
+.lens .mic:focus-visible .hit{stroke:var(--plum);stroke-width:4}
+.lens.zooming .view{animation:zoomin .45s ease}
+@keyframes zoomin{from{transform:scale(.55);filter:blur(4px)}to{transform:none;filter:none}}
+.view{transform-box:fill-box;transform-origin:50% 50%}
+.samples{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}
+.samples button{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.78rem;letter-spacing:.04em;border:3px solid var(--ink);border-radius:999px;padding:7px 12px;background:var(--white);color:var(--ink);cursor:pointer}
+.samples button[aria-pressed="true"]{background:var(--bac);color:#fff}
+.samples button .cnt{opacity:.7;margin-left:4px;font-weight:400}
+.zoomrow{display:flex;align-items:center;gap:8px;margin:8px 0 2px}
+.zoomrow input{flex:1;accent-color:var(--bac);height:30px;min-width:0}
+.zoomrow button{width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:var(--white);font-family:var(--display);font-size:1.3rem;font-weight:900;cursor:pointer;color:var(--ink);flex:none;padding:0}
+.zlab{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.95rem;text-align:center}
+.guide{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0 0}
+.gcard{font:inherit;font-size:.74rem;line-height:1.15;font-weight:700;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:6px 4px;text-align:center;cursor:pointer}
+.gcard svg{width:44px;height:44px;display:block;margin:0 auto 2px}
+.gcard.unk{border-style:dashed;opacity:.55;cursor:default}
+.gcard.bac{border-color:var(--bac);background:#f3ecf7}
+.gcard.fun{border-color:var(--fun);background:#fdf0e5}
+.gcard.vir{border-color:var(--vir);background:#e6f3f7}
+.idcard{border:3px solid var(--ink);border-radius:18px 14px 18px 14px;background:var(--white);padding:12px 14px;margin:10px 0 0;box-shadow:4px 5px 0 rgba(10,47,56,.18)}
+.idcard h4{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.1rem;margin:0 0 2px}
+.grp{display:inline-block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#fff;border-radius:999px;padding:3px 10px;margin:0 0 6px}
+.grp.bac{background:var(--bac)}.grp.fun{background:var(--fun)}.grp.vir{background:var(--vir)}
+.idcard dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.9rem}
+.idcard dt{font-weight:700}
+.idcard dd{margin:0}
+
+/* bins */
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0}
+.bin{font:inherit;color:var(--ink);text-align:left;background:var(--white);border:3px solid var(--ink);border-radius:18px;padding:10px;min-height:120px;cursor:pointer;transition:transform .15s,background .15s;display:flex;flex-direction:column;gap:6px}
+.bin .bh{display:flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem}
+.bin .bh svg{width:34px;height:34px;flex:none}
+.bin .in{display:flex;flex-direction:column;gap:4px}
+.bin .in span{font-size:.78rem;line-height:1.25;background:var(--paper);border-radius:8px;padding:4px 6px}
+.picking .bin{background:#fffaf0;border-style:dashed;border-color:var(--orange)}
+.bin.bac{border-color:var(--bac)}.bin.fun{border-color:var(--fun)}.bin.vir{border-color:var(--vir)}
+.bin.food{border-color:var(--yellow-deep)}.bin.med{border-color:var(--teal)}.bin.env{border-color:var(--good)}.bin.harm{border-color:#c0392b}
+
+/* hygiene */
+.washbtns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.washbox svg{display:block;width:100%;max-width:620px;max-height:none;height:auto;margin:0 auto;border:3px solid var(--ink);border-radius:18px;background:#f4fbfd}
+.bars{max-width:560px;margin:10px auto 0}
+.bars .r{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:.9rem}
+.bars .r .nm{flex:0 0 150px}
+.bars .r .tr{flex:1;height:14px;border:2px solid var(--ink);border-radius:999px;background:var(--white);overflow:hidden}
+.bars .r .tr span{display:block;height:100%;background:linear-gradient(90deg,#7b4b8f,#c2540c);transition:width .6s}
+.handspots{position:relative;max-width:440px;margin:6px auto 0}
+.handspots svg{display:block;width:100%;height:auto}
+.spot{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;border:3px dashed var(--ink);background:rgba(255,253,248,.55);cursor:pointer;padding:0;font-weight:900;color:var(--ink)}
+.spot.yes{background:#d9efdf;border-style:solid;border-color:var(--good)}
+.spot.no{background:#fff1c2;border-style:solid;border-color:var(--yellow-deep)}
+.soapsteps{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.soapsteps button{font-family:var(--display);font-variation-settings:"wght" 800;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--white);cursor:pointer;font-size:1rem;color:var(--ink)}
+.soapsteps button[aria-pressed="true"]{background:var(--teal);color:#fff}
+.soapfig svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border:3px solid var(--ink);border-radius:18px;background:#eef8fb}
+
+/* celebration */
+.petal{position:fixed;width:14px;height:10px;border-radius:60% 40% 60% 40%;pointer-events:none;z-index:9998;animation:burst .9s ease-out forwards}
+@keyframes burst{from{transform:translate(0,0) rotate(0);opacity:1}to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+
+.quiet{font-family:var(--body);font-size:.85rem;background:none;border:0;color:var(--body-tint);text-decoration:underline;cursor:pointer;padding:6px 2px}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+[data-item]:focus-visible,.zone:focus-visible,.job:focus-visible,.bin:focus-visible,.gap:focus-visible,.cell:focus-visible,.slot:focus-visible,.spot:focus-visible,.packet:focus-visible,.opt:focus-visible,.need:focus-visible{outline:4px solid var(--plum);outline-offset:3px}
+
+@media (max-width:480px){
+  .sec{padding:16px}
+  .sec h2{font-size:1.35rem}
+  .cells{grid-template-columns:1fr}
+  .bars .r .nm{flex-basis:110px}
+  .vs .mid{font-size:1.1rem}
+  .map{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .bee,.sway,.spin,.wig,.stage.on,.note.fresh{animation:none!important}
+  .real{transition:none}
+  .petal{display:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>GARDEN <span class="accent">DETECTIVE</span></h1>
+    <div class="line">
+      <span class="chip">Science &middot; plants and microbes</span>
+      <p>Plants from root to seed, and the tiny life hiding in the soil, the bread bin and on your hands.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap gd">
+
+  <svg class="strip" viewBox="0 0 800 110" aria-hidden="true">
+    <path d="M0 92 Q100 80 200 92 T400 92 T600 92 T800 92 L800 110 L0 110 Z" fill="#8a5a35"/>
+    <path d="M0 92 Q100 80 200 92 T400 92 T600 92 T800 92" fill="none" stroke="#3a9a4f" stroke-width="6"/>
+    <g class="sway"><path d="M70 92 C70 70 72 50 70 34" stroke="#3a9a4f" stroke-width="5" fill="none"/><path d="M70 64 C56 56 46 60 42 68 C54 72 64 70 70 64Z" fill="#46a85a"/><g transform="translate(70 30)"><g fill="#ffc247" stroke="#f0a80f"><ellipse cx="0" cy="-13" rx="5" ry="10"/><ellipse cx="0" cy="13" rx="5" ry="10"/><ellipse cx="-13" cy="0" rx="10" ry="5"/><ellipse cx="13" cy="0" rx="10" ry="5"/><ellipse cx="9" cy="-9" rx="5" ry="10" transform="rotate(45 9 -9)"/><ellipse cx="-9" cy="9" rx="5" ry="10" transform="rotate(45 -9 9)"/><ellipse cx="-9" cy="-9" rx="5" ry="10" transform="rotate(-45 -9 -9)"/><ellipse cx="9" cy="9" rx="5" ry="10" transform="rotate(-45 9 9)"/></g><circle r="8" fill="#6b3f1d"/></g></g>
+    <g class="sway" style="animation-delay:-1.3s"><path d="M250 92 C250 76 252 66 250 56" stroke="#3a9a4f" stroke-width="4" fill="none"/><g fill="#ef7724"><circle cx="250" cy="48" r="7"/><circle cx="243" cy="54" r="7"/><circle cx="257" cy="54" r="7"/></g><circle cx="250" cy="53" r="4" fill="#ffc247"/></g>
+    <g transform="translate(430 18)"><circle cx="38" cy="38" r="30" fill="#fffdf8" stroke="#0a2f38" stroke-width="5"/><line x1="60" y1="60" x2="86" y2="86" stroke="#0a2f38" stroke-width="9" stroke-linecap="round"/><g class="wig"><rect x="20" y="30" width="16" height="7" rx="3.5" fill="#7b4b8f"/><circle cx="48" cy="28" r="5" fill="#c2540c"/><circle cx="54" cy="31" r="3" fill="#c2540c"/><rect x="34" y="46" width="14" height="6" rx="3" fill="#7b4b8f" transform="rotate(30 41 49)"/><polygon points="26,46 30,43 34,46 34,51 30,54 26,51" fill="#007291"/></g></g>
+    <g class="sway" style="animation-delay:-.6s"><path d="M640 92 C640 70 644 56 640 40" stroke="#3a9a4f" stroke-width="5" fill="none"/><g fill="#fff0f5" stroke="#e08fb3"><circle cx="640" cy="32" r="7"/><circle cx="632" cy="38" r="7"/><circle cx="648" cy="38" r="7"/><circle cx="635" cy="46" r="7"/><circle cx="645" cy="46" r="7"/></g><circle cx="640" cy="40" r="4" fill="#ffc247"/></g>
+    <g class="bee"><g transform="translate(30 30)"><ellipse cx="0" cy="0" rx="11" ry="8" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M-3 -7 V7 M3 -7 V7" stroke="#0a2f38" stroke-width="3"/><ellipse cx="-2" cy="-11" rx="6" ry="4" fill="#e6f6fb" stroke="#0a2f38" stroke-width="1.5"/><ellipse cx="5" cy="-10" rx="5" ry="3.5" fill="#e6f6fb" stroke="#0a2f38" stroke-width="1.5"/><circle cx="9" cy="-1" r="1.6" fill="#0a2f38"/></g></g>
+  </svg>
+
+  <div class="sec">
+    <span class="seclab">Start here</span>
+    <h2>Seven seed packets. Open any of them.</h2>
+    <p class="lead">Half of this is plants: their parts, their jobs and how they grow. The other half is <b>microorganisms</b>, the living things too small to see, which are busy in every garden. Handy before or after Horticulture with Kara.</p>
+    <p class="lead">The packets go roughly from naming things to explaining things. Any order is fine, every packet can be skipped, and it all saves on this device as you go.</p>
+
+    <p class="sub" style="margin-top:14px"><span class="n">?</span>Who is this? <span class="small" style="font-family:var(--body);font-weight:400">(only if you want to)</span></p>
+    <div class="who" id="who"></div>
+    <div id="whoInfo"></div>
+
+    <div class="map" id="map"></div>
+    <div class="maprow">
+      <button class="btn btn-orange" id="firstBtn">Open packet 1</button>
+      <button class="quiet" id="resetBtn">Start again</button>
+    </div>
+  </div>
+
+  <div id="stages"></div>
+
+  <div class="sec" id="sendSec">
+    <span class="seclab">When you are done, or any time</span>
+    <h2>Send it to Jay</h2>
+    <p>This sends a note of what you tried, your answers and anything you wrote. Even one packet is worth sending.</p>
+    <div id="sendHost"></div>
+  </div>
+
+  <a class="backlink" href="/practice/#science-standard">Back to Science</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.garden-detective.v1", WHO_KEY = "base5.who.v1";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t } return a }
+function count(o){ return Object.keys(o || {}).length }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c] }) }
+
+/* ---------- state ---------- */
+function fresh(){
+  return { v:1, open:null,
+    s1:{ mode:"sunflower", sunflower:{}, tree:{}, wrong:0 },
+    s2:{ m:{}, w:{}, q:{} },
+    s3:{ max:0, step:0, order:null, checks:0, right:0, needs:{}, needsChecked:false },
+    s4:{ layers:{}, gaps:{}, gw:0, q:{}, text:"" },
+    s5:{ pair:"a", cells:{}, cw:0, q:{}, text:"" },
+    s6:{ found:{}, sample:"soil", zoom:0, sort:{}, sw:0 },
+    s7:{ roles:{}, rw:0, washes:{}, spots:{}, soap:0, q:{}, text:"" } };
+}
+var st = fresh();
+try{
+  var raw = localStorage.getItem(STORE);
+  if(raw){ var sv = JSON.parse(raw); if(sv && sv.v === 1){ for(var k in st){ if(sv[k] !== undefined) st[k] = sv[k] } } }
+}catch(e){}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} drawMap() }
+
+/* ---------- little helpers ---------- */
+var PETALS = ["#ffc247", "#ef7724", "#3a9a4f", "#7b4b8f", "#00a6c9", "#f6a5c0"];
+function burst(node){
+  if(reduce || !node || !node.getBoundingClientRect) return;
+  var r = node.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for(var i = 0; i < 14; i++){
+    var p = document.createElement("span"); p.className = "petal";
+    var a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 70;
+    p.style.left = cx + "px"; p.style.top = cy + "px"; p.style.background = PETALS[i % PETALS.length];
+    p.style.setProperty("--dx", Math.cos(a) * d + "px"); p.style.setProperty("--dy", (Math.sin(a) * d - 30) + "px");
+    document.body.appendChild(p);
+    (function(pp){ setTimeout(function(){ pp.remove() }, 950) })(p);
+  }
+}
+function shake(node){ if(!node) return; node.classList.remove("shake"); void node.offsetWidth; node.classList.add("shake") }
+function fb(id, kind, html){ var f = el(id); if(!f) return; f.className = "fb " + kind; f.innerHTML = html }
+
+/* tap or drag. Items carry data-item, places carry data-target. */
+function tapDrag(root, o){
+  var sel = null, drag = null, suppress = false, over = null;
+  function clear(){ if(sel){ sel.classList.remove("sel"); sel.setAttribute("aria-pressed", "false") } sel = null; root.classList.remove("picking") }
+  function targetAt(x, y){ var n = document.elementFromPoint(x, y); n = n && n.closest ? n.closest("[data-target]") : null; return n && root.contains(n) ? n : null }
+  root.addEventListener("click", function(e){
+    if(suppress){ suppress = false; return }
+    var it = e.target.closest("[data-item]");
+    if(it && root.contains(it)){
+      if(it.classList.contains("used")) return;
+      if(o.tap){ o.tap(it.getAttribute("data-item"), it); return }
+      if(sel === it){ clear(); return }
+      clear(); sel = it; it.classList.add("sel"); it.setAttribute("aria-pressed", "true"); root.classList.add("picking");
+      if(o.pick) o.pick(it.getAttribute("data-item"), it);
+      return;
+    }
+    var tg = e.target.closest("[data-target]");
+    if(tg && root.contains(tg)){
+      if(sel){ var s = sel; clear(); o.drop(s.getAttribute("data-item"), tg.getAttribute("data-target"), s, tg) }
+      else if(o.empty) o.empty(tg.getAttribute("data-target"), tg);
+    }
+  });
+  root.addEventListener("pointerdown", function(e){
+    var it = e.target.closest("[data-item]");
+    if(!it || !root.contains(it) || it.classList.contains("used") || e.button > 0) return;
+    drag = { it:it, x:e.clientX, y:e.clientY, on:false, g:null, id:e.pointerId };
+  });
+  window.addEventListener("pointermove", function(e){
+    if(!drag || e.pointerId !== drag.id) return;
+    if(!drag.on){
+      if(Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 10) return;
+      drag.on = true; clear();
+      var g = drag.it.cloneNode(true); g.classList.add("ghostdrag"); g.removeAttribute("data-item"); g.removeAttribute("id");
+      g.style.width = drag.it.offsetWidth + "px";
+      document.body.appendChild(g); drag.g = g; drag.it.classList.add("dragging"); root.classList.add("picking");
+    }
+    drag.g.style.left = e.clientX + "px"; drag.g.style.top = e.clientY + "px";
+    var t = targetAt(e.clientX, e.clientY);
+    if(over !== t){ if(over) over.classList.remove("over"); over = t; if(over) over.classList.add("over") }
+  });
+  function end(e, cancel){
+    if(!drag || (e && e.pointerId !== drag.id)) return;
+    var d = drag; drag = null;
+    if(!d.on) return;
+    d.g.remove(); d.it.classList.remove("dragging"); root.classList.remove("picking");
+    if(over){ over.classList.remove("over"); over = null }
+    suppress = true; setTimeout(function(){ suppress = false }, 60);
+    if(cancel) return;
+    var t = targetAt(e.clientX, e.clientY);
+    if(t) o.drop(d.it.getAttribute("data-item"), t.getAttribute("data-target"), d.it, t);
+  }
+  window.addEventListener("pointerup", function(e){ end(e, false) });
+  window.addEventListener("pointercancel", function(e){ end(e, true) });
+  return { clear:clear };
+}
+
+/* choose your response questions. Stored in bucket[id] = {first, pick, done} */
+function questions(host, list, bucket, onAny){
+  host.innerHTML = "";
+  list.forEach(function(q){
+    var box = document.createElement("div"); box.className = "q";
+    box.innerHTML = "<h4>" + q.q + "</h4><div class='opts'></div><div class='fb'></div>";
+    var opts = box.querySelector(".opts"), f = box.querySelector(".fb");
+    var order = q.keep ? q.opts.map(function(_, i){ return i }) : shuffle(q.opts.map(function(_, i){ return i }));
+    order.forEach(function(oi){
+      var b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.textContent = q.opts[oi];
+      b.onclick = function(){
+        var rec = bucket[q.id] || {};
+        if(rec.first === undefined) rec.first = oi;
+        rec.pick = oi;
+        if(oi === q.ans){
+          rec.done = true; b.classList.add("good");
+          f.className = "fb ok"; f.innerHTML = "<b>" + (q.yes || "Yes.") + "</b> " + q.why;
+          burst(b);
+        } else {
+          b.classList.add("bad");
+          f.className = "fb nope"; f.innerHTML = "<b>Not that one, but a good guess.</b> " + ((q.not && q.not[oi]) || "") + " Have another look.";
+          shake(b);
+        }
+        bucket[q.id] = rec; save(); if(onAny) onAny();
+      };
+      opts.appendChild(b);
+      var r = bucket[q.id];
+      if(r && r.done && oi === q.ans){ b.classList.add("good"); f.className = "fb ok"; f.innerHTML = "<b>" + (q.yes || "Yes.") + "</b> " + q.why }
+    });
+    host.appendChild(box);
+  });
+}
+
+/* writing box with sentence starters */
+function writer(host, obj, key, label, starters){
+  host.innerHTML = "<label class='small' for='w_" + host.id + "'>" + label + "</label><div class='starters'></div><textarea class='write' id='w_" + host.id + "' placeholder='Tap a starter above, or just type'></textarea><p class='saved'></p>";
+  var ta = host.querySelector("textarea"), sv = host.querySelector(".saved"), sb = host.querySelector(".starters");
+  ta.value = obj[key] || "";
+  var t = null;
+  ta.addEventListener("input", function(){ obj[key] = ta.value; clearTimeout(t); t = setTimeout(function(){ save(); sv.textContent = "Saved on this device." }, 400) });
+  starters.forEach(function(s){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = s;
+    b.onclick = function(){ var v = ta.value; ta.value = v + (v && !/\s$/.test(v) ? " " : "") + s + " "; obj[key] = ta.value; save(); sv.textContent = "Saved on this device."; ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length };
+    sb.appendChild(b);
+  });
+}
+
+/* ---------- stage list, people, map ---------- */
+var STAGES = [
+  { n:1, name:"Build a plant", col:"#ffd56b", blurb:"Put the parts on a sunflower and an apple tree." },
+  { n:2, name:"Jobs board", col:"#ffb98a", blurb:"Match every part to its job." },
+  { n:3, name:"Seed to seed", col:"#bfe3b4", blurb:"Grow a sunflower through its whole life cycle." },
+  { n:4, name:"Plant plumbing", col:"#a9dbe8", blurb:"Xylem, phloem and photosynthesis, working together." },
+  { n:5, name:"Plant face off", col:"#dcc6ea", blurb:"Sunflower against oak, cactus against fern." },
+  { n:6, name:"Microscope hunt", col:"#c9bdf2", blurb:"Zoom into soil, bread and a grubby hand." },
+  { n:7, name:"Microbes at work", col:"#f7c6d3", blurb:"Helpful, harmful, and the science of soap." }
+];
+var PEOPLE = {
+  LC:{ m:["Say where each part of a plant is found and what it looks like.", "Explain what some parts of a plant do, like the roots, stem and flower."], s:[1, 2] },
+  LP:{ m:["Describe what microorganisms are like, where they are found and how they spread or reproduce.", "Explain the jobs microorganisms do in food, medicine and the environment."], s:[6, 7] },
+  LW:{ m:["Use science words to explain how plant parts work together for growth, reproduction and survival.", "Explain the life cycle of a flowering plant, from seed to flower and back to seed."], s:[4, 3] },
+  EGW:{ m:["Name different types of microorganism: bacteria, fungi and viruses.", "Describe what each type is like and where it can be found."], s:[6] },
+  JT:{ m:["Explain the basic job of each plant part, like roots taking in water and stems holding the plant up.", "Explain how a plant grows from a seed, naming the parts that help it grow."], s:[2, 3] },
+  HK:{ m:["Compare the parts of different plants and trees, and say how they are similar or different.", "Explain how the structure of a plant or tree helps it survive where it lives."], s:[5] }
+};
+var ORDER = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+function getWho(){ try{ return (localStorage.getItem(WHO_KEY) || "").trim().toUpperCase() }catch(e){ return "" } }
+function setWho(v){ try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){} }
+
+function drawWho(){
+  var w = getWho(), box = el("who"); box.innerHTML = "";
+  ORDER.concat(["Just looking"]).forEach(function(p){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = p;
+    var on = p === "Just looking" ? !PEOPLE[w] : w === p;
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.onclick = function(){ setWho(p === "Just looking" ? "" : p); var inp = el("b5who"); if(inp) inp.value = p === "Just looking" ? "" : p; drawWho(); drawMap() };
+    box.appendChild(b);
+  });
+  var info = el("whoInfo");
+  if(PEOPLE[w]){
+    var P = PEOPLE[w];
+    info.innerHTML = "<div class='mbox'><b>Hi " + w + ".</b> Your two steps for this target:<ul><li>" + P.m[0] + "</li><li>" + P.m[1] + "</li></ul><p class='small' style='margin:6px 0 0'>Packets marked <b>good place to start</b> fit these best. Every packet is still open, in any order.</p></div>";
+  } else info.innerHTML = "";
+}
+
+function stageIcon(n){
+  var s = "<svg viewBox='0 0 64 64' aria-hidden='true'>";
+  if(n === 1) s += "<path d='M32 60 V30' stroke='#22703a' stroke-width='4'/><path d='M32 46 C24 40 16 42 14 48 C22 52 28 50 32 46Z' fill='#3a9a4f'/>" + petalRing(32, 22, 8, 12, 4, 7) + "<circle cx='32' cy='22' r='7' fill='#6b3f1d'/>";
+  if(n === 2) s += "<rect x='12' y='8' width='40' height='50' rx='6' fill='#fffdf8' stroke='#0a2f38' stroke-width='3'/><rect x='24' y='4' width='16' height='9' rx='3' fill='#ef7724' stroke='#0a2f38' stroke-width='2'/><path d='M19 24 h26 M19 34 h26 M19 44 h18' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/><path d='M42 42 l4 4 l8 -10' stroke='#2e7d4f' stroke-width='4' fill='none' stroke-linecap='round'/>";
+  if(n === 3) s += "<path d='M32 8 A24 24 0 1 1 10 40' fill='none' stroke='#0a2f38' stroke-width='3' stroke-dasharray='5 4'/><path d='M6 34 l4 8 l8 -4' fill='none' stroke='#0a2f38' stroke-width='3'/><ellipse cx='32' cy='36' rx='7' ry='11' fill='#3b2a1a' stroke='#fff' stroke-width='1.5'/><path d='M32 26 v20' stroke='#fff' stroke-width='1.5'/><path d='M32 25 C30 18 36 14 40 12' stroke='#3a9a4f' stroke-width='3' fill='none'/>";
+  if(n === 4) s += "<path d='M32 60 V18' stroke='#3a9a4f' stroke-width='8'/><path d='M29 58 V20' stroke='#1f7fd1' stroke-width='2'/><path d='M35 58 V20' stroke='#d75f10' stroke-width='2'/><path d='M32 34 C22 26 12 28 8 36 C18 42 26 40 32 34Z M32 26 C42 18 52 20 56 28 C46 34 38 32 32 26Z' fill='#46a85a'/><path d='M48 50 C44 56 52 60 54 54 C54 50 50 46 50 46Z' fill='#1f7fd1'/>";
+  if(n === 5) s += "<rect x='10' y='22' width='14' height='36' rx='7' fill='#4c9a5b' stroke='#22703a' stroke-width='2'/><path d='M10 36 h-5 v-10' stroke='#4c9a5b' stroke-width='6' fill='none' stroke-linecap='round'/><path d='M44 58 C40 40 36 30 30 22 M44 58 C46 40 52 30 60 24 M44 58 C44 40 44 28 46 14' stroke='#2e7d32' stroke-width='3' fill='none'/><text x='28' y='62' font-family='Archivo, Arial Black, sans-serif' font-weight='900' font-size='11' fill='#ef7724'>VS</text>";
+  if(n === 6) s += "<rect x='14' y='54' width='38' height='6' rx='3' fill='#0a2f38'/><path d='M22 54 C22 40 30 34 40 34' stroke='#0a2f38' stroke-width='5' fill='none'/><rect x='30' y='8' width='12' height='26' rx='3' transform='rotate(-25 36 21)' fill='#7b4b8f' stroke='#0a2f38' stroke-width='2'/><rect x='34' y='40' width='22' height='5' rx='2' fill='#00a6c9'/><circle cx='52' cy='18' r='6' fill='#ffc247' class='wig'/>";
+  if(n === 7) s += "<path d='M18 58 V30 a4 4 0 0 1 8 0 V24 a4 4 0 0 1 8 0 V26 a4 4 0 0 1 8 0 V32 a4 4 0 0 1 8 0 V46 C50 54 44 60 34 60 Z' fill='#f2c6a0' stroke='#0a2f38' stroke-width='2.5'/><g fill='#e6f6fb' stroke='#00a6c9' stroke-width='2'><circle cx='12' cy='18' r='6'/><circle cx='24' cy='10' r='4'/><circle cx='52' cy='14' r='5'/></g>";
+  return s + "</svg>";
+}
+function petalRing(cx, cy, n, dist, rx, ry, fill, stroke){
+  var s = "<g fill='" + (fill || "#ffc247") + "' stroke='" + (stroke || "#f0a80f") + "'>";
+  for(var i = 0; i < n; i++) s += "<ellipse cx='" + cx + "' cy='" + (cy - dist) + "' rx='" + rx + "' ry='" + ry + "' transform='rotate(" + (i * 360 / n) + " " + cx + " " + cy + ")'/>";
+  return s + "</g>";
+}
+
+function progress(n){
+  var s;
+  if(n === 1){ s = st.s1; return (count(s.sunflower) + count(s.tree)) / 11 }
+  if(n === 2){ s = st.s2; return (count(s.m) + count(s.q)) / 12 }
+  if(n === 3){ s = st.s3; return ((s.max >= 7 ? 1 : s.max / 7) + (s.checks ? 1 : 0) + (s.needsChecked ? 1 : 0)) / 3 }
+  if(n === 4){ s = st.s4; return (count(s.layers) / 4 + count(s.gaps) / 7 + count(s.q) / 4 + (s.text.trim() ? 1 : 0)) / 4 }
+  if(n === 5){ s = st.s5; return (Math.min(1, count(s.cells) / 24) + count(s.q) / 6 + (s.text.trim() ? 1 : 0)) / 3 }
+  if(n === 6){ s = st.s6; return (count(s.found) / 10 + count(s.sort) / 10) / 2 }
+  if(n === 7){ s = st.s7; return (count(s.roles) / 13 + count(s.washes) / 3 + count(s.spots) / 4 + count(s.q) / 3 + (s.text.trim() ? 1 : 0)) / 5 }
+  return 0;
+}
+function statusWord(p){ return p <= 0 ? "Not opened yet" : p < .5 ? "Started" : p < .95 ? "Well on the way" : "All explored" }
+
+function drawMap(){
+  var box = el("map"); if(!box) return;
+  var w = getWho(), suits = PEOPLE[w] ? PEOPLE[w].s : [];
+  box.innerHTML = "";
+  STAGES.forEach(function(S){
+    var p = progress(S.n);
+    var b = document.createElement("button"); b.type = "button"; b.className = "packet" + (st.open === S.n ? " cur" : "");
+    b.style.setProperty("--pc", S.col);
+    var pips = ""; for(var i = 0; i < 3; i++) pips += "<span style='display:inline-block;width:10px;height:10px;margin:0 2px;border-radius:50% 0;border:2px solid #22703a;background:" + (p > i / 3 + .01 ? "#3a9a4f" : "transparent") + "'></span>";
+    b.innerHTML = (suits.indexOf(S.n) >= 0 ? "<span class='badge'>good place to start</span>" : "") +
+      "<span class='pn'>Packet " + S.n + "</span>" + stageIcon(S.n) + "<b>" + S.name + "</b><span class='ps'>" + statusWord(p) + "</span><span aria-hidden='true'>" + pips + "</span>";
+    b.setAttribute("aria-label", "Packet " + S.n + ", " + S.name + ". " + statusWord(p) + (suits.indexOf(S.n) >= 0 ? ". Good place to start." : ""));
+    b.onclick = function(){ openStage(S.n) };
+    box.appendChild(b);
+  });
+}
+
+var built = {};
+function head(n, intro){
+  var S = STAGES[n - 1];
+  return "<div class='stagehead'>" + stageIcon(n) + "<div class='t'><span class='seclab' style='background:" + S.col + "'>Packet " + n + "</span><h2>" + S.name + "</h2></div></div><p class='lead'>" + intro + "</p>";
+}
+function foot(n){
+  var next = STAGES[n] ? "<button class='btn' data-go='" + (n + 1) + "'>Next: " + STAGES[n].name + "</button>" : "<button class='btn btn-orange' data-go='send'>Send it to Jay</button>";
+  return "<div class='stagefoot'>" + next + "<button class='btn btn-quiet' data-go='map'>Back to the packets</button></div>";
+}
+function openStage(n){
+  var host = el("stages");
+  if(!built[n]){
+    var sec = document.createElement("section"); sec.className = "sec stage"; sec.id = "stage" + n;
+    host.appendChild(sec); BUILD[n](sec); built[n] = true;
+    sec.addEventListener("click", function(e){
+      var g = e.target.closest("[data-go]"); if(!g) return;
+      var v = g.getAttribute("data-go");
+      if(v === "map") el("map").scrollIntoView({ behavior:reduce ? "auto" : "smooth", block:"center" });
+      else if(v === "send") el("sendSec").scrollIntoView({ behavior:reduce ? "auto" : "smooth" });
+      else openStage(+v);
+    });
+  }
+  Array.prototype.forEach.call(host.children, function(c){ c.classList.toggle("on", c.id === "stage" + n) });
+  st.open = n; save();
+  var t = el("stage" + n);
+  window.scrollTo({ top:t.getBoundingClientRect().top + window.scrollY - 12, behavior:reduce ? "auto" : "smooth" });
+}
+var BUILD = {};
+
+/* =========================================================
+   STAGE 1  Build a plant
+   ========================================================= */
+function sceneBase(){
+  var rays = ""; for(var i = 0; i < 10; i++){ var a = i * Math.PI / 5; rays += "<line x1='" + (345 + Math.cos(a) * 28).toFixed(1) + "' y1='" + (52 + Math.sin(a) * 28).toFixed(1) + "' x2='" + (345 + Math.cos(a) * 38).toFixed(1) + "' y2='" + (52 + Math.sin(a) * 38).toFixed(1) + "'/>" }
+  return "<rect width='400' height='300' fill='#d8f1f7'/><g class='spin'><circle cx='345' cy='52' r='22' fill='#ffc247'/><g stroke='#f0a80f' stroke-width='4' stroke-linecap='round'>" + rays + "</g></g>" +
+    "<g fill='#fff'><ellipse cx='80' cy='54' rx='32' ry='12'/><ellipse cx='100' cy='45' rx='20' ry='13'/></g>" +
+    "<rect y='300' width='400' height='140' fill='#8a5a35'/><g fill='#6e4527'><ellipse cx='60' cy='340' rx='9' ry='5'/><ellipse cx='330' cy='380' rx='12' ry='6'/><ellipse cx='110' cy='410' rx='7' ry='4'/><ellipse cx='300' cy='326' rx='6' ry='3'/><ellipse cx='40' cy='400' rx='10' ry='5'/><ellipse cx='370' cy='420' rx='8' ry='4'/></g>" +
+    "<path d='M0 300 Q50 292 100 300 T200 300 T300 300 T400 300' fill='none' stroke='#3a9a4f' stroke-width='8'/>" +
+    "<text x='12' y='432' font-family='Archivo, Arial, sans-serif' font-weight='800' font-size='13' fill='#f7e2c4' letter-spacing='2'>SOIL</text>";
+}
+function phyllo(cx, cy, n, k){
+  var s = "";
+  for(var i = 1; i <= n; i++){ var r = k * Math.sqrt(i), a = i * 137.508 * Math.PI / 180;
+    s += "<ellipse cx='" + (cx + r * Math.cos(a)).toFixed(1) + "' cy='" + (cy + r * Math.sin(a)).toFixed(1) + "' rx='1.5' ry='2.4' transform='rotate(" + (a * 180 / Math.PI).toFixed(0) + " " + (cx + r * Math.cos(a)).toFixed(1) + " " + (cy + r * Math.sin(a)).toFixed(1) + ")'/>" }
+  return s;
+}
+var ART1 = {
+  sunflower:{
+    root:["50% 0%", "<g fill='none' stroke='#f3e6c8' stroke-linecap='round'><path d='M200 300 C200 330 198 362 200 420' stroke-width='6'/><path d='M200 326 C182 336 162 342 138 360' stroke-width='4'/><path d='M200 326 C220 338 242 344 264 362' stroke-width='4'/><path d='M200 358 C186 370 172 380 158 400' stroke-width='3'/><path d='M200 358 C214 370 228 382 244 402' stroke-width='3'/><path d='M150 352 l-6 8 M170 340 l-2 9 M232 342 l3 9 M252 354 l7 7 M180 384 l-8 4 M222 386 l8 4 M199 400 l-7 5 M201 410 l7 4' stroke-width='1.5'/></g>"],
+    stem:["50% 100%", "<g><path d='M200 302 C195 250 205 180 200 128' stroke='#3a9a4f' stroke-width='13' fill='none' stroke-linecap='round'/><path d='M195 280 l-6 -3 M205 250 l6 -3 M195 220 l-6 -3 M205 190 l6 -3 M196 160 l-6 -3' stroke='#2a7a3c' stroke-width='1.6'/></g>"],
+    leaf:["50% 50%", "<g stroke='#22703a' stroke-width='2'><path d='M198 238 C172 214 128 218 112 246 C138 266 178 262 198 238 Z' fill='#46a85a'/><path d='M198 238 C170 240 140 244 118 246' fill='none'/><path d='M202 196 C228 172 272 176 288 204 C262 224 222 220 202 196 Z' fill='#46a85a'/><path d='M202 196 C230 198 260 202 282 204' fill='none'/></g>"],
+    flower:["50% 50%", "<g>" + petalRing(200, 110, 18, 52, 12, 26) + "<circle cx='200' cy='110' r='31' fill='#6b3f1d'/></g>"],
+    seed:["50% 50%", "<g><circle cx='200' cy='110' r='31' fill='#4e2c12'/><g fill='#1d1d1d' stroke='#f2efe6' stroke-width='.6'>" + phyllo(200, 110, 70, 3.4) + "</g></g>"]
+  },
+  tree:{
+    root:["50% 0%", "<g fill='none' stroke='#6b4426' stroke-linecap='round'><path d='M200 300 C190 322 160 340 110 360' stroke-width='9'/><path d='M200 300 C210 322 240 340 292 356' stroke-width='9'/><path d='M200 300 C200 330 196 362 200 402' stroke-width='8'/><path d='M150 345 C140 360 120 372 100 395' stroke-width='4'/><path d='M260 345 C272 360 290 370 305 392' stroke-width='4'/><path d='M199 362 C185 376 175 388 168 410' stroke-width='3'/><path d='M200 372 C215 386 225 396 234 414' stroke-width='3'/></g>"],
+    trunk:["50% 100%", "<g><path d='M183 304 C187 262 188 222 190 182 L210 182 C212 222 213 262 217 304 Z' fill='#7a5232' stroke='#4e321b' stroke-width='2'/><path d='M195 290 C194 270 196 250 195 230 M205 280 C206 260 204 240 205 210 M199 250 C198 236 200 222 199 200' stroke='#4e321b' stroke-width='1.6' fill='none'/></g>"],
+    branch:["50% 100%", "<g fill='none' stroke='#7a5232' stroke-linecap='round'><path d='M196 190 C180 170 160 150 125 120' stroke-width='9'/><path d='M204 190 C220 170 245 140 275 112' stroke-width='9'/><path d='M200 186 C200 160 200 130 198 92' stroke-width='8'/><path d='M158 150 C150 135 145 120 140 100' stroke-width='4'/><path d='M240 150 C255 140 272 136 296 134' stroke-width='4'/><path d='M200 130 C215 115 225 100 240 82' stroke-width='4'/><path d='M200 128 C185 114 175 100 160 85' stroke-width='4'/></g>"],
+    leaf:["50% 50%", (function(){ var L = [[125,116,-30],[110,128,20],[138,97,-10],[150,108,40],[160,80,-20],[176,94,30],[198,86,0],[186,72,-30],[212,74,30],[240,78,-20],[253,92,30],[275,106,-10],[290,118,30],[298,134,-40],[270,126,20],[224,106,10],[170,126,-30],[226,140,40],[206,110,-15],[143,134,10],[262,146,-20],[282,96,10],[118,145,-10],[300,104,35],[262,72,-15]], s = "<g fill='#4caf50' stroke='#2e7d32' stroke-width='1.4'>"; L.forEach(function(l){ s += "<ellipse cx='" + l[0] + "' cy='" + l[1] + "' rx='10' ry='5' transform='rotate(" + l[2] + " " + l[0] + " " + l[1] + ")'/>" }); return s + "</g>" })()],
+    flower:["50% 50%", (function(){ var F = [[148,92],[180,68],[232,66],[302,122],[130,138],[256,124],[205,96]], s = ""; F.forEach(function(f){ s += petalRing(f[0], f[1], 5, 4.6, 4.2, 4.2, "#fff0f5", "#e08fb3") + "<circle cx='" + f[0] + "' cy='" + f[1] + "' r='2.2' fill='#ffc247'/>" }); return "<g>" + s + "</g>" })()],
+    fruit:["50% 50%", "<g><g fill='#d63c2f' stroke='#8e1f17' stroke-width='1.5'><circle cx='232' cy='122' r='10'/><circle cx='118' cy='132' r='9'/><circle cx='264' cy='152' r='9'/><circle cx='186' cy='112' r='9'/></g><g fill='#fff' opacity='.7'><circle cx='228' cy='118' r='2.5'/><circle cx='115' cy='128' r='2'/><circle cx='261' cy='148' r='2'/><circle cx='183' cy='108' r='2'/></g><circle cx='312' cy='318' r='18' fill='#fff6dc' stroke='#c0392b' stroke-width='4'/><path d='M312 306 L315 314 L323 316 L316 320 L318 328 L312 323 L306 328 L308 320 L301 316 L309 314 Z' fill='#f1e2b0' stroke='#c9a85a'/><g fill='#3b2412'><ellipse cx='312' cy='310' rx='1.6' ry='3'/><ellipse cx='320' cy='316' rx='1.6' ry='3' transform='rotate(72 320 316)'/><ellipse cx='316' cy='325' rx='1.6' ry='3' transform='rotate(144 316 325)'/><ellipse cx='308' cy='325' rx='1.6' ry='3' transform='rotate(216 308 325)'/><ellipse cx='304' cy='316' rx='1.6' ry='3' transform='rotate(288 304 316)'/></g></g>"]
+  }
+};
+var PARTS1 = {
+  sunflower:{ label:"Sunflower", parts:[
+    { id:"root", name:"Roots", z:[50, 87], zl:"low down, under the soil", where:"Under the ground, in the soil.", looks:"Pale, thin, branching strands covered in tiny hairs. A sunflower has one long main root that grows deep.", hint:"Roots grow where the water is: down in the soil." },
+    { id:"stem", name:"Stem", z:[50, 61], zl:"in the middle, just above the soil", where:"Above the ground, from the soil up to the flower.", looks:"Tall, green, thick and a little bit hairy. It can grow taller than an adult.", hint:"The stem joins the roots to the flower, so it runs up the middle." },
+    { id:"leaf", name:"Leaves", z:[37.5, 54.5], zl:"out to the side of the plant", where:"Growing out from the sides of the stem.", looks:"Big, flat, green and heart shaped, with veins running through them.", hint:"Leaves stick out sideways from the stem, to catch the light." },
+    { id:"flower", name:"Flower", z:[66, 25], zl:"at the top, round the outside of the head", where:"Right at the top of the stem.", looks:"A giant head with yellow petals round the edge. It is really hundreds of tiny flowers packed together.", hint:"The flower is at the very top, with its petals round the outside." },
+    { id:"seed", name:"Seeds", z:[50, 25], zl:"at the top, right in the centre of the head", where:"Packed into the middle of the flower head, once the flower has been pollinated.", looks:"Teardrop shaped, striped black and white, and arranged in spirals.", hint:"Seeds form right in the middle of the flower head." }
+  ]},
+  tree:{ label:"Apple tree", parts:[
+    { id:"root", name:"Roots", z:[50, 85], zl:"low down, under the soil", where:"Under the ground, spreading out wide around the tree.", looks:"Thick, brown and woody near the trunk, getting thinner and thinner further out.", hint:"Roots grow underground, in the soil." },
+    { id:"trunk", name:"Trunk", z:[50, 57], zl:"the thick bit just above the ground", where:"From the ground up to where the branches start.", looks:"Thick, tall and woody, covered in rough bark. A trunk is a tree's stem.", hint:"The trunk is the tree's thick main stem, straight up out of the ground." },
+    { id:"branch", name:"Branches", z:[40.5, 34.5], zl:"where the arms split off the trunk", where:"Growing out from the top of the trunk.", looks:"Woody arms covered in bark, splitting into smaller and smaller twigs.", hint:"Branches grow out from the top of the trunk, like arms." },
+    { id:"leaf", name:"Leaves", z:[71, 21], zl:"out on the edge of the tree, on the twigs", where:"On the twigs, all over the outside of the tree.", looks:"Green and oval, with a pointy tip and tiny teeth round the edge. Apple trees drop them in autumn.", hint:"Leaves are on the outside edge of the tree, where the light is." },
+    { id:"flower", name:"Blossom (flowers)", z:[37, 21], zl:"up high, on the outside of the branches", where:"On the branches, in spring.", looks:"White or pale pink, with five petals each.", hint:"Blossom grows on the outside of the branches, where bees can find it." },
+    { id:"fruit", name:"Fruit and seeds", z:[58, 27.7], zl:"hanging among the leaves", where:"Hanging from the branches in late summer and autumn. Each apple grows from a flower.", looks:"A round apple. Cut it across the middle and the seeds, called pips, sit in a star shape in the core.", hint:"Apples hang from the branches, among the leaves." }
+  ]}
+};
+function partIcon(id){
+  var m = { root:"<path d='M13 4 V22 M13 10 L6 18 M13 12 L20 20 M13 16 L9 24' stroke='#8a5a35' stroke-width='2.4' fill='none' stroke-linecap='round'/>",
+    stem:"<path d='M13 24 V3' stroke='#3a9a4f' stroke-width='5' stroke-linecap='round'/>",
+    trunk:"<path d='M8 24 L10 4 H16 L18 24Z' fill='#7a5232'/>",
+    branch:"<path d='M4 22 L22 6 M12 15 L8 6 M17 10 L23 12' stroke='#7a5232' stroke-width='3' stroke-linecap='round'/>",
+    leaf:"<path d='M4 22 C4 10 12 4 23 4 C23 14 16 22 4 22Z' fill='#46a85a' stroke='#22703a'/><path d='M4 22 L18 9' stroke='#22703a'/>",
+    flower:petalRing(13, 13, 6, 6, 3.6, 5.5) + "<circle cx='13' cy='13' r='4' fill='#6b3f1d'/>",
+    seed:"<ellipse cx='13' cy='13' rx='6' ry='10' fill='#1d1d1d'/><path d='M13 4 V22 M10 7 V19 M16 7 V19' stroke='#f2efe6' stroke-width='1'/>",
+    fruit:"<circle cx='13' cy='15' r='9' fill='#d63c2f'/><path d='M13 6 V3' stroke='#4e321b' stroke-width='2'/><path d='M14 5 C17 2 21 3 22 4 C19 7 16 7 14 5Z' fill='#46a85a'/>" };
+  return "<svg viewBox='0 0 26 26' aria-hidden='true'>" + (m[id] || "") + "</svg>";
+}
+
+BUILD[1] = function(sec){
+  sec.innerHTML = head(1, "A sunflower and an apple tree, both in bits. Pick a part from the tray, then tap the <b>?</b> where it grows. Dragging works too. Every part you place adds a note to your notebook.") +
+    "<div class='learn'><svg viewBox='0 0 170 120' aria-hidden='true'><rect width='170' height='120' rx='12' fill='#fffdf8'/><path d='M50 104 V40' stroke='#3a9a4f' stroke-width='6'/>" + petalRing(50, 32, 10, 12, 4, 8) + "<circle cx='50' cy='32' r='7' fill='#6b3f1d'/><path d='M120 104 L122 60 H130 L132 104Z' fill='#7a5232'/><circle cx='126' cy='44' r='26' fill='#4caf50'/><path d='M0 104 H170' stroke='#8a5a35' stroke-width='5'/><text x='50' y='117' text-anchor='middle' font-size='10' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-weight='700'>stem</text><text x='126' y='117' text-anchor='middle' font-size='10' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-weight='700'>trunk</text></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>Most plants have <b>roots</b>, a <b>stem</b>, <b>leaves</b>, <b>flowers</b> and <b>seeds</b>.</li><li>Trees have them too. A <b>trunk</b> is a stem, just thick and woody. <b>Branches</b> hold the leaves up high.</li></ul></div></div>" +
+    "<div class='seg' role='group' aria-label='Pick a plant'><button type='button' data-mode='sunflower'>Sunflower</button><button type='button' data-mode='tree'>Apple tree</button></div>" +
+    "<div class='buildgrid' id='b1'><div class='scene' id='scene1'></div><div><p class='tapnote'>Tap a part, then tap a <b>?</b>. Or drag it.</p><div class='tray' id='tray1'></div><div class='fb' id='fb1'></div></div></div><p class='sub' style='margin-top:18px'><span class='n'>&#9998;</span>My notebook</p><div class='notes' id='notes1'></div>" + foot(1);
+  sec.querySelectorAll("[data-mode]").forEach(function(b){ b.onclick = function(){ st.s1.mode = b.getAttribute("data-mode"); save(); render1(); fb("fb1", "", "") } });
+  tapDrag(el("b1"), {
+    pick:function(id){ var p = find1(id); fb("fb1", "tell", "<b>" + p.name + "</b> picked up. Now tap the spot where it grows.") },
+    empty:function(){ fb("fb1", "tell", "Pick a part from the tray first, then tap this spot.") },
+    drop:function(item, target, itEl, tgEl){
+      var mode = st.s1.mode, p = find1(item), z = find1(target);
+      if(item === target){
+        st.s1[mode][item] = true; save();
+        var g = el("r1_" + item); if(g) g.classList.add("on");
+        burst(tgEl); tgEl.remove(); itEl.classList.add("used"); itEl.disabled = true;
+        drawNotes(item);
+        var left = PARTS1[mode].parts.length - count(st.s1[mode]);
+        fb("fb1", "ok", "<b>Yes, that is where the " + p.name.toLowerCase() + " go" + (/s$|\)$/.test(p.name) ? "" : "es") + ".</b> " + (left ? left + " more to place." : "Every part is in. " + (mode === "sunflower" ? "Fancy building the apple tree too?" : "Fancy building the sunflower too?")));
+      } else {
+        st.s1.wrong++; save(); shake(tgEl);
+        fb("fb1", "nope", "<b>Not quite.</b> That spot is " + z.zl + ". " + p.hint);
+      }
+    }
+  });
+  render1();
+};
+function find1(id){ var ps = PARTS1[st.s1.mode].parts; for(var i = 0; i < ps.length; i++) if(ps[i].id === id) return ps[i]; return null }
+function render1(){
+  var mode = st.s1.mode, P = PARTS1[mode], art = ART1[mode], done = st.s1[mode];
+  el("stage1").querySelectorAll("[data-mode]").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode ? "true" : "false") });
+  var ghost = "", real = "";
+  P.parts.forEach(function(p){ ghost += art[p.id][1]; real += "<g id='r1_" + p.id + "' class='real" + (done[p.id] ? " on" : "") + "' style='transform-origin:" + art[p.id][0] + "'>" + art[p.id][1] + "</g>" });
+  var zones = "", letters = "ABCDEF";
+  P.parts.forEach(function(p, i){ if(!done[p.id]) zones += "<button type='button' class='zone' data-target='" + p.id + "' style='left:" + p.z[0] + "%;top:" + p.z[1] + "%' aria-label='Spot " + letters[i] + ": " + p.zl + "'>?</button>" });
+  el("scene1").innerHTML = "<svg viewBox='0 0 400 440' role='img' aria-label='" + P.label + " being built'>" + sceneBase() + "<g class='ghost'>" + ghost + "</g>" + real + "</svg>" + zones;
+  var tray = el("tray1"); tray.innerHTML = "";
+  shuffle(P.parts).forEach(function(p){
+    var b = document.createElement("button"); b.type = "button"; b.className = "chipbtn" + (done[p.id] ? " used" : ""); b.setAttribute("data-item", p.id); b.setAttribute("aria-pressed", "false");
+    if(done[p.id]) b.disabled = true;
+    b.innerHTML = partIcon(p.id) + p.name; tray.appendChild(b);
+  });
+  drawNotes();
+}
+function drawNotes(freshId){
+  var box = el("notes1"); box.innerHTML = "";
+  [st.s1.mode].forEach(function(m){
+    PARTS1[m].parts.forEach(function(p){
+      if(!st.s1[m][p.id]) return;
+      var d = document.createElement("div"); d.className = "note" + (freshId === p.id && m === st.s1.mode ? " fresh" : "");
+      d.innerHTML = "<h4>" + PARTS1[m].label + ": " + p.name + "</h4><p><span class='k'>Where:</span> " + p.where + "</p><p><span class='k'>Looks like:</span> " + p.looks + "</p>";
+      box.appendChild(d);
+    });
+  });
+  if(!box.children.length) box.innerHTML = "<p class='small'>Nothing yet. Notes appear here as parts go on.</p>";
+}
+
+/* =========================================================
+   STAGE 2  Jobs board
+   ========================================================= */
+var JOBS = [
+  { id:"root", name:"Roots", job:"Take in water and minerals from the soil, and anchor the plant so it does not blow over.", hint:"Roots live underground. Which job happens down in the soil?" },
+  { id:"stem", name:"Stem", job:"Hold the plant up towards the light, and carry water and food between the roots and the leaves.", hint:"The stem is the bit in the middle, joining the roots to the leaves." },
+  { id:"trunk", name:"Trunk", job:"A thick, woody stem covered in bark, strong enough to hold up a whole tree for years and years.", hint:"A trunk is a tree's version of a stem, only much tougher." },
+  { id:"branch", name:"Branches", job:"Spread the leaves, flowers and fruit out wide, so the leaves catch as much light as possible.", hint:"Branches stick out from the trunk. What do they hold up?" },
+  { id:"leaf", name:"Leaves", job:"Catch sunlight and use it to make food (a sugar) for the plant. This is photosynthesis.", hint:"Leaves are flat and green, perfect for catching light." },
+  { id:"flower", name:"Flower", job:"Reproduction. It makes pollen, attracts insects, and is where the seeds are made.", hint:"Flowers are bright and smell sweet. Who are they trying to attract, and why?" },
+  { id:"seed", name:"Seed", job:"Hold a baby plant and a store of food, ready to grow into a brand new plant.", hint:"A seed is the start of the next plant." }
+];
+var JOBORDER = shuffle(JOBS);
+var EMERG = [
+  { id:"e1", q:"A storm is coming. Which part stops the sunflower being pulled out of the ground?", opts:["Roots", "Flower", "Leaves"], ans:0, why:"Roots grip the soil like an anchor. The wider they spread, the harder the plant is to pull out.", not:{ 1:"The flower is right at the top, so it catches the wind rather than holding on.", 2:"Leaves catch light, and actually catch wind too." } },
+  { id:"e2", q:"It has not rained for a week. The only water left is deep in the soil. Which part goes and gets it?", opts:["Roots", "Stem", "Seed"], ans:0, why:"Roots grow down towards water, and tiny root hairs soak it up.", not:{ 1:"The stem carries water, but it has to come in through something underground first.", 2:"A seed is for making a new plant, not for drinking." } },
+  { id:"e3", q:"Water has got into the roots. Which part carries it up to the leaves?", opts:["Stem", "Flower", "Seed"], ans:0, why:"The stem is full of thin tubes that carry water up, like a bundle of drinking straws.", not:{ 1:"The flower is at the top, but it is not a pipe.", 2:"Seeds do not move water around the plant." } },
+  { id:"e4", q:"The plant needs food to grow. Where does it make it?", opts:["Leaves", "Roots", "Flower"], ans:0, why:"Plants make their own food in their leaves, using sunlight. Roots take in water and minerals, but not food.", not:{ 1:"A really common idea. Roots take in water and minerals, but plants make their actual food in their leaves.", 2:"The flower uses food, but does not make it." } },
+  { id:"e5", q:"A bee lands and wanders about, getting covered in yellow dust. Which part is it visiting?", opts:["Flower", "Leaf", "Stem"], ans:0, why:"The yellow dust is pollen, and the bee came for the sweet nectar in the flower.", not:{ 1:"Leaves have no pollen or nectar, so bees are not interested.", 2:"There is no pollen on a stem." } }
+];
+BUILD[2] = function(sec){
+  sec.innerHTML = head(2, "Every part of a plant has a job. Pick up a part, then tap the job card it does. Dragging works too.") +
+    "<div id='b2'><div class='tray' id='tray2'></div><div class='fb' id='fb2'></div><div class='jobs' id='jobs2'></div></div>" +
+    "<p class='sub'><span class='n'>!</span>Plant emergency</p><p>Some quick problems. Tap the part that saves the day.</p><div id='q2'></div>" + foot(2);
+  tapDrag(el("b2"), {
+    pick:function(id){ fb("fb2", "tell", "<b>" + findJ(id).name + "</b> picked up. Which job card is theirs?") },
+    empty:function(){ fb("fb2", "tell", "Pick a part from the tray first, then tap the job it does.") },
+    drop:function(item, target, itEl, tgEl){
+      if(st.s2.m[target]) return;
+      var p = findJ(item);
+      if(item === target){ st.s2.m[item] = { first:!st.s2.w[item] }; save(); fb("fb2", "ok", "<b>Matched.</b> " + p.name + ": " + p.job); render2(); burst(el("job_" + item)) }
+      else { st.s2.w[item] = (st.s2.w[item] || 0) + 1; save(); shake(tgEl); fb("fb2", "nope", "<b>That is not the job for the " + p.name.toLowerCase() + ".</b> " + p.hint) }
+    }
+  });
+  render2();
+  questions(el("q2"), EMERG, st.s2.q);
+};
+function findJ(id){ for(var i = 0; i < JOBS.length; i++) if(JOBS[i].id === id) return JOBS[i] }
+function render2(){
+  var tray = el("tray2"); tray.innerHTML = "";
+  JOBS.forEach(function(p){
+    var b = document.createElement("button"); b.type = "button"; b.className = "chipbtn" + (st.s2.m[p.id] ? " used" : ""); b.setAttribute("data-item", p.id); b.setAttribute("aria-pressed", "false");
+    if(st.s2.m[p.id]) b.disabled = true; b.innerHTML = partIcon(p.id) + p.name; tray.appendChild(b);
+  });
+  var jobs = el("jobs2"); jobs.innerHTML = "";
+  JOBORDER.forEach(function(p){
+    var d = document.createElement("button"); d.type = "button"; d.id = "job_" + p.id;
+    d.className = "job" + (st.s2.m[p.id] ? " done" : ""); d.setAttribute("data-target", p.id);
+    d.innerHTML = (st.s2.m[p.id] ? "<span class='tagp'>" + p.name + "</span><br>" : "") + p.job;
+    jobs.appendChild(d);
+  });
+  if(count(st.s2.m) === JOBS.length) fb("fb2", "ok", "<b>The whole board is matched.</b> Seven parts, seven jobs. The roots feed water up the stem, the leaves make the food, the flower makes the seeds, and the seeds start it all again.");
+}
+
+/* =========================================================
+   STAGE 3  Seed to seed
+   ========================================================= */
+var STEPS3 = [
+  { t:"Seed", p:"seed coat, food store", d:"Inside every seed is a tiny baby plant, called an embryo, and a store of food. The tough seed coat protects it. It can wait for months until conditions are right." },
+  { t:"Germination", p:"root, shoot, food store", d:"Water soaks in, the seed swells and the seed coat splits. The root grows out first and heads down. Then the shoot heads up towards the light, using the food store for energy." },
+  { t:"Seedling", p:"first leaves, stem, root", d:"The shoot breaks through the soil and the first leaves open. Now the leaves can make food from sunlight, so the plant no longer needs the seed's food store." },
+  { t:"Growing", p:"roots, stem, leaves", d:"Roots spread out to take in more water and minerals. The stem grows taller and stronger, and every new leaf makes more food." },
+  { t:"Flowering", p:"flower, petals, pollen, nectar", d:"The grown up plant makes a flower. Bright petals and sweet nectar attract insects, and the flower makes yellow, dusty pollen." },
+  { t:"Pollination", p:"flower, pollen, and a bee", d:"A bee feeds on nectar and gets dusted with pollen, then carries it to another sunflower. When pollen reaches the right part of a flower, it can join with an egg cell inside. This is called fertilisation, and then seeds start to form." },
+  { t:"Seeds form", p:"flower head, seeds", d:"The petals dry up and fall off. The middle of the flower head fills up with seeds, each holding a new baby plant and its own food store." },
+  { t:"Seed dispersal", p:"seeds", d:"The seeds get scattered. Birds like goldfinches pull them out and drop some, and others fall to the ground. One lands in the soil, and the whole cycle starts again." }
+];
+function growSVG(k){
+  var s = "<rect width='400' height='300' fill='#d8f1f7'/><circle cx='350' cy='46' r='20' fill='#ffc247'/>" +
+    "<rect y='190' width='400' height='110' fill='#8a5a35'/><path d='M0 190 Q50 184 100 190 T200 190 T300 190 T400 190' stroke='#3a9a4f' stroke-width='6' fill='none'/>";
+  function stem(top, bend){ return "<path d='M200 236 C198 210 202 " + (top + 40) + " " + (200 + (bend || 0)) + " " + top + "' stroke='#3a9a4f' stroke-width='" + (k >= 4 ? 8 : 5) + "' fill='none' stroke-linecap='round'/>" }
+  function lf(x, y, dir, sz, col){ var a = dir * sz; return "<path d='M" + x + " " + y + " C" + (x + a * .5) + " " + (y - sz * .6) + " " + (x + a) + " " + (y - sz * .3) + " " + (x + a * 1.1) + " " + (y + sz * .05) + " C" + (x + a * .7) + " " + (y + sz * .35) + " " + (x + a * .3) + " " + (y + sz * .2) + " " + x + " " + y + "Z' fill='" + (col || "#46a85a") + "' stroke='#22703a' stroke-width='1.5'/>" }
+  function roots(depth, spread){ return "<g stroke='#f3e6c8' stroke-linecap='round' fill='none'><path d='M200 236 C201 " + (236 + depth * .5) + " 198 " + (236 + depth * .8) + " 200 " + (236 + depth) + "' stroke-width='3.5'/>" + (spread ? "<path d='M200 250 C190 256 " + (200 - spread * .6) + " 262 " + (200 - spread) + " 272' stroke-width='2'/><path d='M200 252 C210 258 " + (200 + spread * .6) + " 264 " + (200 + spread) + " 276' stroke-width='2'/>" : "") + "</g>" }
+  if(k === 0) s += "<g transform='rotate(-20 200 236)'><ellipse cx='200' cy='236' rx='9' ry='15' fill='#2b2b2b' stroke='#f2efe6' stroke-width='1.5'/><path d='M200 222 V250 M195 225 V247 M205 225 V247' stroke='#f2efe6' stroke-width='1.2'/></g><circle cx='200' cy='236' r='26' fill='none' stroke='#ffc247' stroke-width='3' stroke-dasharray='5 5'/>";
+  if(k === 1) s += roots(40, 0) + "<path d='M200 228 C196 214 206 206 198 198' stroke='#9fd38a' stroke-width='4' fill='none' stroke-linecap='round'/><path d='M190 236 C188 226 196 222 198 228 M210 236 C212 226 204 222 202 228' fill='#2b2b2b' stroke='#f2efe6'/>";
+  if(k >= 2) s += "<path d='M190 244 l-6 4 M210 246 l6 3' stroke='#2b2b2b' stroke-width='3'/>";
+  if(k === 2) s += roots(48, 18) + stem(150) + "<ellipse cx='188' cy='150' rx='12' ry='6' fill='#6cc070' stroke='#22703a' stroke-width='1.5' transform='rotate(-20 188 150)'/><ellipse cx='212' cy='150' rx='12' ry='6' fill='#6cc070' stroke='#22703a' stroke-width='1.5' transform='rotate(20 212 150)'/>";
+  if(k === 3) s += roots(56, 34) + stem(96) + lf(200, 160, -1, 30) + lf(200, 150, 1, 30) + lf(200, 122, -1, 24) + lf(200, 112, 1, 24) + "<circle cx='200' cy='94' r='6' fill='#3a9a4f'/>";
+  if(k >= 4){
+    var droop = k >= 6, ys = k >= 6 ? "#9ab84a" : "#46a85a";
+    s += roots(60, 44) + stem(56, droop ? 14 : 0) + lf(200, 170, -1, 36, ys) + lf(200, 160, 1, 36, ys) + lf(200, 132, -1, 30, ys) + lf(200, 120, 1, 30, ys) + lf(200, 94, -1, 24, ys) + lf(200, 86, 1, 24, ys);
+    var hx = droop ? 216 : 200, hy = droop ? 60 : 46;
+    if(k < 6) s += petalRing(hx, hy, 16, 22, 6, 12) + "<circle cx='" + hx + "' cy='" + hy + "' r='15' fill='#6b3f1d'/>";
+    else s += "<circle cx='" + hx + "' cy='" + hy + "' r='17' fill='#4e2c12'/><g fill='#1d1d1d' stroke='#f2efe6' stroke-width='.5'>" + phyllo(hx, hy, 34, 2.6) + "</g><g fill='#d9a520'><ellipse cx='150' cy='188' rx='8' ry='3' transform='rotate(10 150 188)'/><ellipse cx='256' cy='189' rx='8' ry='3' transform='rotate(-14 256 189)'/><ellipse cx='236' cy='187' rx='7' ry='3'/></g>";
+  }
+  if(k === 5) s += "<path d='M200 46 C240 10 290 20 300 60' stroke='#0a2f38' stroke-width='2' stroke-dasharray='4 5' fill='none'/><g class='wig'><g transform='translate(300 62)'><ellipse rx='13' ry='9' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><path d='M-4 -8 V8 M3 -8 V8' stroke='#0a2f38' stroke-width='3'/><ellipse cx='-2' cy='-13' rx='7' ry='5' fill='#e6f6fb' stroke='#0a2f38' stroke-width='1.5'/><circle cx='11' cy='-1' r='1.8' fill='#0a2f38'/><g fill='#ffd84a' stroke='#c99a00' stroke-width='.6'><circle cx='-8' cy='6' r='2'/><circle cx='-2' cy='8' r='2'/><circle cx='5' cy='7' r='2'/></g></g></g><text x='310' y='96' font-size='12' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-weight='700' fill='#0a2f38'>pollen</text>";
+  if(k === 7) s += "<g transform='translate(236 44)'><ellipse cx='0' cy='0' rx='14' ry='10' fill='#c9a46a' stroke='#0a2f38' stroke-width='1.5'/><circle cx='-12' cy='-8' r='8' fill='#c9a46a' stroke='#0a2f38' stroke-width='1.5'/><path d='M-18 -12 a6 5 0 0 1 8 -2 L-10 -6 L-19 -6Z' fill='#d62828'/><path d='M-20 -8 L-27 -6 L-20 -5Z' fill='#e9d8b4' stroke='#0a2f38' stroke-width='1'/><circle cx='-14' cy='-9' r='1.4' fill='#0a2f38'/><path d='M-4 -4 C4 -6 10 -2 14 4 L2 6Z' fill='#ffd60a' stroke='#0a2f38' stroke-width='1'/><path d='M12 2 L26 6 L12 8Z' fill='#222'/></g><g fill='#1d1d1d' stroke='#f2efe6' stroke-width='.6'><ellipse cx='250' cy='110' rx='2.5' ry='4'/><ellipse cx='272' cy='150' rx='2.5' ry='4' transform='rotate(30 272 150)'/><ellipse cx='292' cy='226' rx='3' ry='5' transform='rotate(-30 292 226)'/></g><circle cx='292' cy='226' r='16' fill='none' stroke='#ffc247' stroke-width='3' stroke-dasharray='5 5'/><text x='312' y='250' font-size='12' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-weight='700' fill='#fff'>round again</text>";
+  return "<svg viewBox='0 0 400 300' role='img' aria-label='Sunflower life cycle, step " + (k + 1) + ": " + STEPS3[k].t + "'>" + s + "</svg>";
+}
+var CYCLE = [
+  { id:"seed", t:"Seed" },
+  { id:"germ", t:"Germination: root down, shoot up" },
+  { id:"seedling", t:"Seedling: first leaves open" },
+  { id:"adult", t:"Grown plant makes flowers" },
+  { id:"poll", t:"Pollination: insects carry pollen" },
+  { id:"scatter", t:"Seeds form and scatter" }
+];
+var NEEDS = [
+  { id:"water", t:"Water", yes:true, why:"Yes. Water makes the seed swell, splits the seed coat and wakes the baby plant up." },
+  { id:"warm", t:"Warmth", yes:true, why:"Yes. Most seeds stay asleep when it is cold. That is why gardeners sow in spring." },
+  { id:"air", t:"Air (oxygen)", yes:true, why:"Yes. The seed uses oxygen to release energy from its food store. Waterlogged soil can stop seeds sprouting." },
+  { id:"light", t:"Light", yes:false, why:"Not for most seeds. They use their own food store until the leaves reach the light. Light matters once the seedling is up." },
+  { id:"soil", t:"Soil", yes:false, why:"Not needed to germinate. Cress happily sprouts on wet kitchen roll. Soil matters later, for minerals and something to grip." },
+  { id:"feed", t:"Plant food", yes:false, why:"Not yet. The seed brings its own packed lunch, its food store." }
+];
+function needIcon(id){
+  var m = { water:"<path d='M22 6 C14 18 10 24 10 30 a12 12 0 0 0 24 0 C34 24 30 18 22 6Z' fill='#1f7fd1'/>",
+    warm:"<rect x='18' y='6' width='8' height='26' rx='4' fill='#fffdf8' stroke='#0a2f38' stroke-width='2'/><circle cx='22' cy='34' r='7' fill='#d62828' stroke='#0a2f38' stroke-width='2'/><rect x='20' y='16' width='4' height='16' fill='#d62828'/>",
+    air:"<path d='M6 16 H28 a5 5 0 1 0 -5 -5 M6 24 H34 a5 5 0 1 1 -5 5 M6 32 H22' stroke='#00a6c9' stroke-width='3' fill='none' stroke-linecap='round'/>",
+    light:"<circle cx='22' cy='22' r='8' fill='#ffc247'/><g stroke='#f0a80f' stroke-width='3' stroke-linecap='round'><path d='M22 4 V9 M22 35 V40 M4 22 H9 M35 22 H40 M9 9 L12 12 M32 32 L35 35 M9 35 L12 32 M32 12 L35 9'/></g>",
+    soil:"<path d='M4 30 Q12 20 22 24 T40 26 V40 H4Z' fill='#8a5a35'/><circle cx='14' cy='34' r='2' fill='#5e3b20'/><circle cx='30' cy='33' r='2.5' fill='#5e3b20'/>",
+    feed:"<rect x='12' y='8' width='20' height='30' rx='3' fill='#ef7724' stroke='#0a2f38' stroke-width='2'/><path d='M22 16 C16 20 16 28 22 30 C28 28 28 20 22 16Z' fill='#3a9a4f'/>" };
+  return "<svg viewBox='0 0 44 44' aria-hidden='true'>" + m[id] + "</svg>";
+}
+BUILD[3] = function(sec){
+  sec.innerHTML = head(3, "A sunflower's whole life, from one seed to hundreds. Slide through it first, then have a go at putting the stages round the circle.") +
+    "<div class='grow' id='grow3'></div><div class='slider'><button class='btn btn-quiet' id='g3prev' type='button' aria-label='Back a step'>&larr;</button><input type='range' min='0' max='7' step='1' id='g3' aria-label='Life cycle step'><button class='btn' id='g3next' type='button'>Grow &rarr;</button></div>" +
+    "<div class='stepcard' id='step3' aria-live='polite'></div><div class='stepdots' id='dots3'></div>" +
+    "<p class='sub'><span class='n'>2</span>Round the circle</p><p>The cycle has no real start, so <b>Seed</b> is already in place. Tap the other cards in order, going clockwise. Tap a filled spot to send a card back.</p>" +
+    "<div id='b3'><div class='tray' id='tray3'></div><div class='wheelwrap' id='wheel3'></div><div class='maprow'><button class='btn btn-orange' id='chk3' type='button'>Check my circle</button><button class='btn btn-quiet' id='show3' type='button'>Show me</button></div><div class='fb' id='fb3'></div></div>" +
+    "<p class='sub'><span class='n'>3</span>What does a seed need to wake up?</p><p>Tap the things you think a seed needs to <b>germinate</b>. Pick as many as you like, then check.</p><div class='needs' id='needs3'></div><div class='maprow'><button class='btn btn-orange' id='chkN' type='button'>Check</button></div><div class='fb' id='fbN'></div>" + foot(3);
+  var r = el("g3"); r.value = st.s3.step || 0;
+  function go(v){ v = Math.max(0, Math.min(7, v)); st.s3.step = v; if(v > st.s3.max) st.s3.max = v; r.value = v; save(); draw3() }
+  r.addEventListener("input", function(){ go(+r.value) });
+  el("g3prev").onclick = function(){ go(st.s3.step - 1) };
+  el("g3next").onclick = function(){ go(st.s3.step >= 7 ? 0 : st.s3.step + 1) };
+  draw3();
+  if(!st.s3.order){ st.s3.order = ["seed", null, null, null, null, null] }
+  tapDrag(el("b3"), {
+    tap:function(id){ var o = st.s3.order, i = o.indexOf(null); if(i < 0){ fb("fb3", "tell", "The circle is full. Tap a spot to send a card back, or check it."); return } o[i] = id; save(); drawWheel(); fb("fb3", "", "") },
+    empty:function(t){ var i = +t; if(i === 0) return; if(st.s3.order[i]){ st.s3.order[i] = null; save(); drawWheel() } },
+    drop:function(item, t){ var i = +t; if(i === 0) return; var o = st.s3.order, was = o.indexOf(item); if(was >= 0) o[was] = null; o[i] = item; save(); drawWheel() }
+  });
+  el("chk3").onclick = function(){
+    var o = st.s3.order, right = 0, filled = 0;
+    for(var i = 1; i < 6; i++){ if(o[i]) filled++; if(o[i] === CYCLE[i].id) right++ }
+    if(filled < 5){ fb("fb3", "tell", "There are still some empty spots. Fill them all first, then check."); return }
+    st.s3.checks++; st.s3.right = right; save(); drawWheel(true);
+    if(right === 5){ fb("fb3", "ok", "<b>Round it goes, all five in the right place.</b> Seed, germination, seedling, flowering plant, pollination, new seeds, and back to seed."); burst(el("chk3")) }
+    else fb("fb3", "nope", "<b>" + right + " of 5 are in the right place.</b> The dashed ones could swap about. A clue: a plant has to flower before a bee can pollinate it, and it needs leaves before it can grow big enough to flower.");
+  };
+  el("show3").onclick = function(){ st.s3.order = CYCLE.map(function(c){ return c.id }); save(); drawWheel(true); fb("fb3", "tell", "Here it is in order. Slide through the sunflower above to see each stage happen.") };
+  drawWheel();
+  var nb = el("needs3");
+  NEEDS.forEach(function(n){
+    var b = document.createElement("button"); b.type = "button"; b.className = "need"; b.id = "need_" + n.id;
+    b.innerHTML = needIcon(n.id) + n.t; b.setAttribute("aria-pressed", st.s3.needs[n.id] ? "true" : "false");
+    b.onclick = function(){ st.s3.needs[n.id] = !st.s3.needs[n.id]; if(!st.s3.needs[n.id]) delete st.s3.needs[n.id]; b.setAttribute("aria-pressed", st.s3.needs[n.id] ? "true" : "false"); save() };
+    nb.appendChild(b);
+  });
+  el("chkN").onclick = function(){
+    st.s3.needsChecked = true; save();
+    var good = 0, out = [];
+    NEEDS.forEach(function(n){ var b = el("need_" + n.id), on = !!st.s3.needs[n.id]; b.classList.toggle("yes", n.yes); b.classList.toggle("no", !n.yes); if(on === n.yes) good++; out.push("<li><b>" + n.t + ":</b> " + n.why + "</li>") });
+    fb("fbN", good === 6 ? "ok" : "tell", "<b>" + (good === 6 ? "Spot on. Water, warmth and air." : "The three a seed really needs are water, warmth and air.") + "</b> Solid green outline means needed, dashed orange means not needed yet.<ul style='margin:6px 0 0;padding-left:18px'>" + out.join("") + "</ul>");
+  };
+};
+function draw3(){
+  var k = st.s3.step || 0;
+  el("grow3").innerHTML = growSVG(k);
+  el("step3").innerHTML = "<h4>" + (k + 1) + ". " + STEPS3[k].t + "</h4><p>" + STEPS3[k].d + "</p><p class='small' style='margin-top:4px'><b>Parts at work:</b> " + STEPS3[k].p + "</p>";
+  var d = ""; for(var i = 0; i < 8; i++) d += "<span class='" + (i <= k ? "on" : "") + "'></span>";
+  el("dots3").innerHTML = d;
+  el("g3next").innerHTML = k >= 7 ? "Start again &#8635;" : "Grow &rarr;";
+}
+function drawWheel(marked){
+  var o = st.s3.order, tray = el("tray3"); tray.innerHTML = "";
+  CYCLE.slice(1).forEach(function(c){
+    var used = o.indexOf(c.id) >= 0;
+    var b = document.createElement("button"); b.type = "button"; b.className = "chipbtn card" + (used ? " used" : ""); b.setAttribute("data-item", c.id);
+    if(used) b.disabled = true; b.textContent = c.t; tray.appendChild(b);
+  });
+  if(!tray.children.length || o.indexOf(null) < 0) tray.insertAdjacentHTML("beforeend", "<span class='small'>All the cards are on the circle.</span>");
+  var pos = [[50, 9], [84, 30], [84, 70], [50, 91], [16, 70], [16, 30]];
+  var svg = "<svg viewBox='0 0 400 400' aria-hidden='true'><circle cx='200' cy='200' r='150' fill='none' stroke='#3a9a4f' stroke-width='10' stroke-dasharray='2 18' stroke-linecap='round'/>";
+  for(var i = 0; i < 6; i++){ var a = (-90 + i * 60 + 30) * Math.PI / 180, x = 200 + Math.cos(a) * 150, y = 200 + Math.sin(a) * 150, rot = i * 60 + 30;
+    svg += "<path d='M-9 -9 L9 0 L-9 9 Z' fill='#ef7724' transform='translate(" + x.toFixed(1) + " " + y.toFixed(1) + ") rotate(" + rot + ")'/>" }
+  svg += petalRing(200, 200, 12, 30, 9, 18) + "<circle cx='200' cy='200' r='24' fill='#6b3f1d'/></svg>";
+  var h = svg;
+  for(i = 0; i < 6; i++){
+    var c = o[i], cls = "slot" + (i === 0 ? " fixed" : c ? " filled" : "");
+    if(marked && i > 0 && c) cls += c === CYCLE[i].id ? " right" : " wrong";
+    var txt = c ? CYCLE.filter(function(x){ return x.id === c })[0].t : "tap a card";
+    h += "<button type='button' class='" + cls + "' data-target='" + i + "' style='left:" + pos[i][0] + "%;top:" + pos[i][1] + "%' aria-label='Spot " + (i + 1) + ": " + txt + "'><i>" + (i + 1) + "</i>" + txt + "</button>";
+  }
+  el("wheel3").innerHTML = h;
+}
+
+/* =========================================================
+   STAGE 4  Plant plumbing
+   ========================================================= */
+var LAYERS = {
+  water:{ t:"Water up (xylem)", i:"<p><b>Xylem</b> are thin tubes that carry water and minerals <b>up</b> from the roots to the leaves. Water evaporates out of the leaves, which pulls more water up behind it, a bit like sucking on a straw. That is called <b>transpiration</b>.</p>" },
+  food:{ t:"Food around (phloem)", i:"<p><b>Phloem</b> are tubes that carry the sugar made in the leaves to every part of the plant: <b>up</b> to the flower and <b>down</b> to the roots. Every part needs food to grow and stay alive.</p>" },
+  photo:{ t:"Photosynthesis", i:"<p><b>Photosynthesis</b> happens in the leaves. Green <b>chlorophyll</b> traps light energy, and the leaf uses it to turn carbon dioxide from the air and water from the roots into <b>glucose</b>, a sugar. Oxygen goes out into the air.</p><p class='eq'>carbon dioxide + water &rarr; glucose + oxygen</p>" },
+  poll:{ t:"Pollination", i:"<p><b>Pollination</b> is pollen moving from one flower to another, often carried by insects. When pollen lands on the <b>stigma</b> of a flower, the flower can make seeds. This is how the plant <b>reproduces</b>.</p>" }
+};
+function dots(pathId, col, n, dur){ var s = ""; for(var i = 0; i < n; i++) s += "<circle r='4.5' fill='" + col + "' stroke='#fff' stroke-width='1'><animateMotion dur='" + dur + "s' repeatCount='indefinite' begin='-" + (i * dur / n).toFixed(2) + "s'><mpath href='#" + pathId + "'/></animateMotion></circle>"; return s }
+function plumbSVG(){
+  var F = "font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-weight='700' font-size='13'";
+  var s = "<svg viewBox='0 0 420 400' role='img' aria-label='A plant with its water and food tubes'><rect width='420' height='300' fill='#d8f1f7'/><rect y='300' width='420' height='100' fill='#8a5a35'/><path d='M0 300 Q60 292 120 300 T240 300 T360 300 T480 300' stroke='#3a9a4f' stroke-width='7' fill='none'/>" +
+    "<g class='spin'><circle cx='56' cy='54' r='24' fill='#ffc247'/></g>" +
+    "<g stroke='#f3e6c8' stroke-width='4' fill='none' stroke-linecap='round'><path d='M210 300 C208 330 212 360 210 392'/><path d='M210 320 C190 336 176 350 168 386'/><path d='M210 320 C232 336 246 352 252 390'/></g>" +
+    "<path d='M210 210 C180 186 130 186 100 206 C130 228 180 228 210 210Z' fill='#46a85a' stroke='#22703a' stroke-width='2' id='leafL'/><path d='M210 160 C240 136 290 136 320 156 C290 178 240 178 210 160Z' fill='#46a85a' stroke='#22703a' stroke-width='2'/>" +
+    "<rect x='199' y='82' width='22' height='222' rx='8' fill='#4caf50' stroke='#22703a' stroke-width='2'/><line x1='205' y1='86' x2='205' y2='300' stroke='#1f7fd1' stroke-width='3'/><line x1='215' y1='86' x2='215' y2='300' stroke='#d75f10' stroke-width='3'/>" +
+    petalRing(210, 66, 14, 26, 7, 14) + "<circle cx='210' cy='66' r='15' fill='#6b3f1d'/>" +
+    "<path id='wp1' d='M168 386 C176 350 205 330 205 300 L205 160 C235 150 275 150 305 155' fill='none'/><path id='wp2' d='M252 390 C246 352 205 330 205 300 L205 210 C180 205 140 203 112 206' fill='none'/>" +
+    "<path id='sp1' d='M305 157 C270 152 235 152 215 164 L215 330 C215 350 232 370 250 388' fill='none'/><path id='sp2' d='M112 208 C150 208 190 210 215 200 L215 84' fill='none'/>" +
+    "<path id='bp' d='M210 26 C250 26 262 60 250 84 C236 108 184 108 170 84 C158 60 170 26 210 26Z' fill='none'/>";
+  s += "<g id='L_water' style='display:none'>" + dots("wp1", "#1f7fd1", 5, 6) + dots("wp2", "#1f7fd1", 5, 6) + "<g stroke='#1f7fd1' stroke-width='2' fill='none' stroke-linecap='round'><path d='M300 136 q5 -8 0 -16 q-5 -8 0 -16'/><path d='M314 140 q5 -8 0 -16 q-5 -8 0 -16'/></g><text x='326' y='112' " + F + " fill='#1f5f9a'>water vapour</text><text x='326' y='127' " + F + " fill='#1f5f9a'>out</text><rect x='22' y='330' width='122' height='22' rx='11' fill='#fffdf8' opacity='.92'/><text x='83' y='346' text-anchor='middle' " + F + " fill='#1f5f9a'>xylem: water up</text><line x1='144' y1='336' x2='204' y2='292' stroke='#1f7fd1' stroke-width='2'/></g>";
+  s += "<g id='L_food' style='display:none'>" + dots("sp1", "#d75f10", 5, 7) + dots("sp2", "#d75f10", 4, 6) + "<rect x='282' y='322' width='126' height='38' rx='12' fill='#fffdf8' opacity='.92'/><text x='345' y='338' text-anchor='middle' " + F + " fill='#a6450b'>phloem: sugar</text><text x='345' y='353' text-anchor='middle' " + F + " fill='#a6450b'>up and down</text><line x1='282' y1='332' x2='216' y2='292' stroke='#d75f10' stroke-width='2'/></g>";
+  s += "<g id='L_photo' style='display:none'><g stroke='#f0a80f' stroke-width='5' stroke-dasharray='10 8' stroke-linecap='round'><line x1='76' y1='74' x2='150' y2='196'><animate attributeName='stroke-dashoffset' from='36' to='0' dur='1s' repeatCount='indefinite'/></line><line x1='80' y1='66' x2='268' y2='150'><animate attributeName='stroke-dashoffset' from='36' to='0' dur='1s' repeatCount='indefinite'/></line></g><text x='96' y='116' " + F + " fill='#a07000'>light</text>" +
+    "<path d='M24 262 L98 218' stroke='#0a2f38' stroke-width='3' marker-end='url(#ah4)'/><text x='8' y='284' " + F + " fill='#0a2f38'>carbon dioxide in</text><path d='M322 166 L380 200' stroke='#22703a' stroke-width='3' marker-end='url(#ah4g)'/><text x='330' y='222' " + F + " fill='#22703a'>oxygen out</text>" +
+    "<circle cx='158' cy='206' r='9' fill='#ffe066' opacity='.7'><animate attributeName='opacity' values='.2;.85;.2' dur='1.6s' repeatCount='indefinite'/></circle><circle cx='262' cy='156' r='9' fill='#ffe066' opacity='.7'><animate attributeName='opacity' values='.2;.85;.2' dur='1.6s' begin='-.8s' repeatCount='indefinite'/></circle><text x='150' y='244' text-anchor='middle' " + F + " fill='#22703a'>glucose</text><text x='150' y='258' text-anchor='middle' " + F + " fill='#22703a'>made here</text></g>";
+  s += "<g id='L_poll' style='display:none'><g fill='#ffd84a' stroke='#c99a00' stroke-width='.6'><circle cx='204' cy='62' r='2.4'/><circle cx='214' cy='70' r='2.4'/><circle cx='209' cy='58' r='2.4'/><circle cx='217' cy='62' r='2.4'/></g><g><animateMotion dur='5s' repeatCount='indefinite' rotate='auto'><mpath href='#bp'/></animateMotion><ellipse rx='11' ry='8' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><path d='M-3 -7 V7 M3 -7 V7' stroke='#0a2f38' stroke-width='3'/><ellipse cx='-1' cy='-11' rx='6' ry='4' fill='#e6f6fb' stroke='#0a2f38' stroke-width='1.3'/></g><text x='262' y='40' " + F + " fill='#5c3269'>bee carries pollen</text><text x='262' y='55' " + F + " fill='#5c3269'>flower to flower</text></g>";
+  s += "<defs><marker id='ah4' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto'><path d='M0 0 L10 5 L0 10z' fill='#0a2f38'/></marker><marker id='ah4g' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto'><path d='M0 0 L10 5 L0 10z' fill='#22703a'/></marker></defs></svg>";
+  return s;
+}
+var GAPS = [
+  { id:"g1", w:"root hairs" }, { id:"g2", w:"xylem" }, { id:"g3", w:"chlorophyll" }, { id:"g4", w:"photosynthesis" },
+  { id:"g5", w:"phloem" }, { id:"g6", w:"pollination" }, { id:"g7", w:"seeds" }
+];
+var GAPTEXT = "Water soaks into the plant through tiny {g1} on the roots. It travels up the stem inside tubes called {g2}. In the leaves, a green chemical called {g3} traps energy from sunlight. The leaf uses that energy to turn water and carbon dioxide into sugar and oxygen. This is {g4}. The sugar travels to every part of the plant through tubes called {g5}. Bees carry pollen from flower to flower, which is called {g6}. After that, the flower can make {g7}.";
+var GAPHINT = { g1:"This is the very first thing water meets, on the outside of the roots.", g2:"These tubes carry water, and only go one way: up.", g3:"This is the stuff that makes leaves green.", g4:"The long word for how a leaf makes food from light.", g5:"These tubes carry sugar, up and down.", g6:"This is the job a bee does for a flower.", g7:"What a flower makes, so there can be new plants." };
+var WHATIF = [
+  { id:"w1", q:"Slugs eat most of the leaves overnight. What happens next?", opts:["The plant makes much less food, so it grows slowly or struggles", "Nothing much. The roots make food instead", "The flower starts making the food"], ans:0, why:"Leaves are the food factory. Fewer leaves means less photosynthesis, so less sugar in the phloem for growing.", not:{ 1:"Roots take in water and minerals, but they cannot make food. That needs light, and roots are in the dark.", 2:"Flowers are for making seeds. They use food, they do not make it." } },
+  { id:"w2", q:"A gardener accidentally cuts the stem halfway through. Why do the leaves start to wilt?", opts:["The xylem is cut, so water cannot get up to the leaves", "The leaves are getting too much sunlight", "The phloem is carrying too much sugar"], ans:0, why:"Water travels up in the xylem inside the stem. Cut the tubes and the leaves dry out and flop.", not:{ 1:"The sunlight has not changed. Something has stopped the water supply.", 2:"Cutting the stem would stop the phloem, not make it carry more." } },
+  { id:"w3", q:"All the bees in a garden disappear. What happens to the sunflowers?", opts:["Fewer flowers get pollinated, so fewer seeds are made", "Their leaves stop making food", "Their roots dry out"], ans:0, why:"Bees carry pollen between flowers. No pollination means hardly any seeds, so fewer new plants next year.", not:{ 1:"Leaves make food with light, water and carbon dioxide. Bees have nothing to do with it.", 2:"Roots get water from the soil. Bees do not help with that." } },
+  { id:"w4", q:"A seed is planted far too deep. Its food store runs out before the shoot reaches the light. Why does it struggle?", opts:["It cannot make its own food until its leaves are in the light", "Seeds need soil on top to grow", "The roots grow upwards instead"], ans:0, why:"Until the first leaves can photosynthesise, the seedling lives on its food store. If that runs out in the dark, it has nothing left.", not:{ 1:"A little soil on top is fine. Too much means a long, dark climb.", 2:"Roots always grow down, towards water and gravity." } }
+];
+BUILD[4] = function(sec){
+  sec.innerHTML = head(4, "A plant is a team. Roots, stem, leaves and flowers all pass things to each other. Switch on the layers to watch what travels where.") +
+    "<div class='pipes'><div id='plumb4'></div><div><div class='layerbtns' id='layers4'></div><div class='layerinfo' id='info4' aria-live='polite'><p>Tap a layer above. You can switch on as many as you like at once.</p></div></div></div>" +
+    "<p class='sub'><span class='n'>2</span>Fill the gaps</p><p>Pick a science word, then tap the gap where it fits. Dragging works too.</p>" +
+    "<div id='b4'><div class='tray' id='tray4'></div><p class='cloze' id='cloze4'></p><div class='fb' id='fb4'></div></div>" +
+    "<p class='sub'><span class='n'>3</span>What if...?</p><p>When one part goes wrong, the others feel it. Pick what you think happens.</p><div id='q4'></div>" +
+    "<p class='sub'><span class='n'>4</span>In your own words</p><p>If you fancy it: pick two parts and explain how they work together to help the plant grow, make seeds or survive.</p><div id='wr4'></div>" + foot(4);
+  el("plumb4").innerHTML = plumbSVG();
+  var svg = el("plumb4").querySelector("svg"); if(reduce && svg.pauseAnimations) svg.pauseAnimations();
+  var lb = el("layers4");
+  Object.keys(LAYERS).forEach(function(k){
+    var b = document.createElement("button"); b.type = "button"; b.setAttribute("data-l", k); b.textContent = LAYERS[k].t; b.setAttribute("aria-pressed", "false");
+    b.onclick = function(){ var on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on ? "true" : "false"); el("L_" + k).style.display = on ? "" : "none"; if(on){ st.s4.layers[k] = true; save() } info4() };
+    lb.appendChild(b);
+  });
+  tapDrag(el("b4"), {
+    pick:function(w){ fb("fb4", "tell", "<b>" + w + "</b> picked up. Tap the gap where it fits.") },
+    empty:function(){ fb("fb4", "tell", "Pick a word from the tray first.") },
+    drop:function(w, gid, itEl, tgEl){
+      if(st.s4.gaps[gid]) return;
+      var g = GAPS.filter(function(x){ return x.id === gid })[0];
+      if(g.w === w){ st.s4.gaps[gid] = w; save(); draw4(); burst(el("gap_" + gid)); fb("fb4", "ok", "<b>Yes, " + w + ".</b>" + (count(st.s4.gaps) === GAPS.length ? " Every gap filled. That paragraph is the whole plant working as a team." : "")) }
+      else { st.s4.gw++; save(); shake(tgEl); fb("fb4", "nope", "<b>" + w + " does not fit there.</b> " + GAPHINT[gid]) }
+    }
+  });
+  draw4();
+  questions(el("q4"), WHATIF, st.s4.q);
+  writer(el("wr4"), st.s4, "text", "My explanation", ["The roots take in", "The xylem carries", "The leaves use", "to make", "The phloem moves", "This helps the plant to", "Without the", "the plant would"]);
+};
+function info4(){
+  var on = []; el("layers4").querySelectorAll("button").forEach(function(b){ if(b.getAttribute("aria-pressed") === "true") on.push(b.getAttribute("data-l")) });
+  el("info4").innerHTML = on.length ? on.map(function(k){ return LAYERS[k].i }).join("") : "<p>Tap a layer above. You can switch on as many as you like at once.</p>";
+}
+var GAPWORDS = shuffle(GAPS.map(function(g){ return g.w }).concat(["bark", "petals"]));
+function draw4(){
+  var tray = el("tray4"); tray.innerHTML = "";
+  var usedW = {}; Object.keys(st.s4.gaps).forEach(function(k){ usedW[st.s4.gaps[k]] = 1 });
+  GAPWORDS.forEach(function(w){
+    var b = document.createElement("button"); b.type = "button"; b.className = "chipbtn" + (usedW[w] ? " used" : ""); b.setAttribute("data-item", w); b.setAttribute("aria-pressed", "false");
+    if(usedW[w]) b.disabled = true; b.textContent = w; tray.appendChild(b);
+  });
+  el("cloze4").innerHTML = GAPTEXT.replace(/\{(g\d)\}/g, function(_, id){
+    var f = st.s4.gaps[id];
+    return "<button type='button' class='gap" + (f ? " done" : "") + "' id='gap_" + id + "' data-target='" + id + "' aria-label='" + (f ? f : "Empty gap") + "'>" + (f || "&nbsp;?&nbsp;") + "</button>";
+  });
+}
+
+/* =========================================================
+   STAGE 5  Plant face off
+   ========================================================= */
+var ROWS5 = [{ id:"stem", t:"Stem" }, { id:"leaves", t:"Leaves" }, { id:"roots", t:"Roots" }, { id:"repro", t:"Flowers and seeds" }, { id:"life", t:"How long it lives" }, { id:"home", t:"Where it grows best" }];
+var PL5 = {
+  sunflower:{ n:"Sunflower", r:{ stem:"Soft, green and hairy. Tall, but not woody.", leaves:"Big, broad and heart shaped.", roots:"One long main root going deep, with smaller roots off it.", repro:"One giant flower head, pollinated by insects. Seeds in the middle.", life:"One growing season. It dies in autumn, leaving its seeds.", home:"Sunny, open ground." } },
+  oak:{ n:"Oak tree", r:{ stem:"A thick, woody trunk covered in bark.", leaves:"Wavy edged. They fall off in autumn.", roots:"Huge, woody roots spreading wide underground.", repro:"Small dangly flowers called catkins, pollinated by the wind. Its seeds are acorns.", life:"Hundreds of years. Some oaks are over a thousand years old.", home:"Woods, parks and fields with deep soil." } },
+  cactus:{ n:"Cactus", r:{ stem:"Fat, fleshy and green. It stores water and makes the food.", leaves:"Sharp spines. They are leaves that have changed shape.", roots:"Shallow roots spreading wide, to soak up rain fast.", repro:"Bright flowers, visited by insects, birds or bats. Seeds inside a fruit.", life:"Many years. Big desert cacti can live for over 150 years.", home:"Hot, dry deserts." } },
+  fern:{ n:"Fern", r:{ stem:"Usually creeps along or under the ground. It is called a rhizome.", leaves:"Big, feathery fronds that uncurl from tight coils.", roots:"Thin, wiry roots near the surface.", repro:"No flowers and no seeds at all. It spreads by spores from brown dots under the fronds.", life:"Many years. Lots die back in winter and grow again in spring.", home:"Damp, shady places, like woodland floors." } }
+};
+var PAIRS5 = { a:["sunflower", "oak"], b:["cactus", "fern"] };
+function plantPic(id){
+  var s = "<svg viewBox='0 0 160 170' aria-hidden='true'><rect width='160' height='170' rx='14' fill='" + (id === "cactus" ? "#fde7b8" : id === "fern" ? "#d6ead2" : "#d8f1f7") + "'/>";
+  if(id === "sunflower") s += "<rect y='146' width='160' height='24' fill='#8a5a35'/><path d='M80 148 C78 110 82 70 80 44' stroke='#3a9a4f' stroke-width='6' fill='none'/><path d='M80 110 C66 98 50 100 44 110 C58 118 72 116 80 110Z M80 88 C94 76 110 78 116 88 C102 96 88 94 80 88Z' fill='#46a85a' stroke='#22703a'/>" + petalRing(80, 38, 14, 18, 5, 10) + "<circle cx='80' cy='38' r='12' fill='#6b3f1d'/>";
+  if(id === "oak") s += "<rect y='146' width='160' height='24' fill='#8a5a35'/><path d='M72 148 L75 92 H85 L88 148Z' fill='#7a5232'/><g fill='#4caf50' stroke='#2e7d32' stroke-width='2'><circle cx='80' cy='58' r='30'/><circle cx='52' cy='72' r='22'/><circle cx='108' cy='72' r='22'/><circle cx='64' cy='44' r='20'/><circle cx='98' cy='44' r='20'/></g><g transform='translate(122 132)'><ellipse cx='0' cy='4' rx='6' ry='8' fill='#a0712f' stroke='#5e3b20'/><path d='M-7 -1 Q0 -9 7 -1Z' fill='#6b4a26' stroke='#5e3b20'/></g>";
+  if(id === "cactus") s += "<rect y='146' width='160' height='24' fill='#e3c27a'/><g fill='#4c9a5b' stroke='#22703a' stroke-width='2'><rect x='66' y='40' width='28' height='110' rx='14'/><path d='M66 100 H48 a8 8 0 0 1 -8 -8 V70 a8 8 0 0 1 16 0 V86 H66Z'/><path d='M94 90 H110 a8 8 0 0 0 8 -8 V60 a8 8 0 0 0 -16 0 V76 H94Z'/></g><g stroke='#fff8e0' stroke-width='1.6'><path d='M72 60 l-6 -3 M88 70 l6 -3 M72 90 l-6 -2 M88 110 l6 -3 M72 126 l-6 -2 M44 76 l-6 -3 M114 66 l6 -3'/></g>" + petalRing(80, 38, 6, 7, 4, 7, "#f06292", "#c2185b");
+  if(id === "fern") s += "<rect y='146' width='160' height='24' fill='#5e3b20'/>" + frond(80, 148, 22, 60, 50, 96) + frond(80, 148, 138, 56, 108, 92) + frond(80, 148, 70, 26, 76, 80) + frond(80, 148, 40, 40, 64, 92) + "<path d='M118 148 C118 132 116 124 122 118 a7 7 0 1 0 -7 -7' stroke='#2e7d32' stroke-width='3.5' fill='none'/>";
+  return s + "</svg>";
+}
+function frond(x0, y0, x1, y1, cx, cy){
+  var s = "<path d='M" + x0 + " " + y0 + " Q" + cx + " " + cy + " " + x1 + " " + y1 + "' stroke='#2e7d32' stroke-width='2.5' fill='none'/>";
+  for(var i = 1; i < 12; i++){
+    var t = i / 12, x = (1 - t) * (1 - t) * x0 + 2 * (1 - t) * t * cx + t * t * x1, y = (1 - t) * (1 - t) * y0 + 2 * (1 - t) * t * cy + t * t * y1;
+    var dx = 2 * (1 - t) * (cx - x0) + 2 * t * (x1 - cx), dy = 2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy), a = Math.atan2(dy, dx) * 180 / Math.PI, L = 11 * (1 - t * .6);
+    s += "<ellipse cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' rx='" + L.toFixed(1) + "' ry='2.6' fill='#4caf50' stroke='#2e7d32' stroke-width='.8' transform='rotate(" + (a + 70).toFixed(0) + " " + x.toFixed(1) + " " + y.toFixed(1) + ")'/><ellipse cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' rx='" + L.toFixed(1) + "' ry='2.6' fill='#4caf50' stroke='#2e7d32' stroke-width='.8' transform='rotate(" + (a - 70).toFixed(0) + " " + x.toFixed(1) + " " + y.toFixed(1) + ")'/>";
+  }
+  return s;
+}
+var SURV = [
+  { id:"v1", q:"Why are a cactus's leaves thin, sharp spines instead of flat and wide?", opts:["Thin spines lose hardly any water, and keep thirsty animals away", "So they can catch more sunlight", "So the wind can pollinate them"], ans:0, why:"In a desert, water is precious. Wide leaves would let lots evaporate. Spines lose very little, and an animal looking for a juicy drink gets a sharp surprise.", not:{ 1:"Spines are tiny, so they catch almost no light. The green stem does the photosynthesis instead.", 2:"Cactus flowers are pollinated by animals, and spines are not flowers." } },
+  { id:"v2", q:"Why is a cactus stem so fat and fleshy?", opts:["It stores water for the long dry months", "It is full of seeds", "To stop it blowing over"], ans:0, why:"After a rare desert rain, the stem swells up with water and slowly uses it until the next rain.", not:{ 1:"The seeds are in the fruit, after flowering.", 2:"The wide shallow roots help with grip. The fat stem is a water tank." } },
+  { id:"v3", q:"Ferns grow on dark woodland floors. Why are their fronds so big and wide?", opts:["To catch as much of the dim light as possible", "To keep the rain off their roots", "To scare away insects"], ans:0, why:"Under the trees, light is scarce. Big, wide fronds spread out to catch every bit that gets through.", not:{ 1:"Ferns like damp. They are not trying to keep water away.", 2:"Their size is about light, not insects." } },
+  { id:"v4", q:"Why does an oak tree drop all its leaves in autumn?", opts:["To save water and energy through the cold, dark winter", "Because the leaves have been eaten", "So the acorns can fall"], ans:0, why:"In winter there is little light, and frozen ground means hardly any water. Dropping leaves stops water escaping. New leaves grow in spring.", not:{ 1:"Some leaves get nibbled, but every oak drops every leaf, eaten or not.", 2:"Acorns drop on their own. Leaves fall for a different reason." } },
+  { id:"v5", q:"Why does a sunflower grow such a tall stem in just one summer?", opts:["To lift its leaves and flower up into the sunshine, above other plants", "To get closer to the rain clouds", "Because its roots push it upwards"], ans:0, why:"Being tallest means first dibs on the light, and a big bright flower up high is easy for bees to find.", not:{ 1:"Rain falls on everyone. Height is about light.", 2:"The stem grows from the top. Roots grow down, not up." } },
+  { id:"v6", q:"An oak cannot walk, so how do its acorns end up far away to grow new trees?", opts:["Birds like jays bury thousands of them each autumn, and forget some", "The wind blows them for miles", "They roll downhill every time"], ans:0, why:"Jays (the birds, not that Jay) bury acorns to eat in winter. The forgotten ones grow into new oaks, sometimes far from the parent tree.", not:{ 1:"Acorns are far too heavy for the wind. Light seeds like dandelions use wind.", 2:"Some might roll a little, but that only gets them as far as the bottom of the hill." } }
+];
+var open5 = null, msg5 = null;
+BUILD[5] = function(sec){
+  sec.innerHTML = head(5, "Two matches. Pick one, then fill in the comparison table: tap a <b>?</b> and choose the fact that fits. Then work out how each plant's shape helps it survive.") +
+    "<div class='seg' role='group' aria-label='Pick a match'><button type='button' data-pair='a'>Sunflower vs Oak</button><button type='button' data-pair='b'>Cactus vs Fern</button></div>" +
+    "<div class='vs' id='vs5'></div><div id='table5'></div><div class='fb' id='fb5'></div>" +
+    "<p class='sub'><span class='n'>2</span>Survival detective</p><p>Every shape has a reason. Pick the one that explains it.</p><div id='q5'></div>" +
+    "<p class='sub'><span class='n'>3</span>Same and different</p><p>If you fancy it: pick a pair and write one thing that is the same, one thing that is different, and how one part helps it survive where it lives.</p><div id='wr5'></div>" + foot(5);
+  sec.querySelectorAll("[data-pair]").forEach(function(b){ b.onclick = function(){ st.s5.pair = b.getAttribute("data-pair"); open5 = null; msg5 = null; save(); draw5(); fb("fb5", "", "") } });
+  draw5();
+  questions(el("q5"), SURV, st.s5.q);
+  writer(el("wr5"), st.s5, "text", "My comparison", ["Both plants have", "One difference is that the", "has", "but the", "This helps it survive because", "In the desert,", "In the shade,"]);
+};
+function draw5(){
+  var pr = PAIRS5[st.s5.pair];
+  el("stage5").querySelectorAll("[data-pair]").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-pair") === st.s5.pair ? "true" : "false") });
+  el("vs5").innerHTML = "<div class='pic'>" + plantPic(pr[0]) + "<b>" + PL5[pr[0]].n + "</b></div><div class='mid'>VS</div><div class='pic'>" + plantPic(pr[1]) + "<b>" + PL5[pr[1]].n + "</b></div>";
+  var h = "";
+  ROWS5.forEach(function(r){
+    h += "<div class='crow'><h5>" + r.t + "</h5><div class='cells'>";
+    pr.forEach(function(p){
+      var key = st.s5.pair + "|" + r.id + "|" + p, done = st.s5.cells[key], isOpen = open5 && open5.key === key;
+      h += "<button type='button' class='cell" + (done ? " done" : "") + (isOpen ? " open" : "") + "' data-cell='" + key + "'><span class='who2'>" + PL5[p].n + "</span>" + (done ? PL5[p].r[r.id] : "? tap to choose") + "</button>";
+    });
+    h += "</div>";
+    if(msg5 && msg5.row === r.id) h += "<div class='fb " + msg5.k + "'>" + msg5.h + "</div>";
+    if(open5 && open5.row === r.id){
+      h += "<div class='chooser' role='group' aria-label='Choose the fact for " + PL5[open5.p].n + "'>";
+      open5.opts.forEach(function(o){ h += "<button type='button' data-opt='" + o + "'" + (open5.bad[o] ? " class='bad'" : "") + ">" + PL5[o].r[r.id] + "</button>" });
+      h += "</div>";
+    }
+    h += "</div>";
+  });
+  var t = el("table5"); t.innerHTML = h;
+  t.querySelectorAll("[data-cell]").forEach(function(b){
+    b.onclick = function(){
+      var key = b.getAttribute("data-cell"); if(st.s5.cells[key]) return;
+      var parts = key.split("|"), p = parts[2], row = parts[1];
+      msg5 = null; if(open5 && open5.key === key){ open5 = null; draw5(); return }
+      var others = shuffle(Object.keys(PL5).filter(function(x){ return x !== p })).slice(0, 2);
+      open5 = { key:key, p:p, row:row, opts:shuffle(others.concat([p])), bad:{} };
+      draw5();
+      var c = el("table5").querySelector(".chooser button"); if(c) c.focus();
+    };
+  });
+  t.querySelectorAll("[data-opt]").forEach(function(b){
+    b.onclick = function(){
+      var o = b.getAttribute("data-opt");
+      if(o === open5.p){ st.s5.cells[open5.key] = true; var k = open5.key; msg5 = { row:open5.row, k:"ok", h:"<b>That is the one.</b> " + pairDone() }; open5 = null; save(); draw5(); burst(el("table5").querySelector("[data-cell='" + k + "']")) }
+      else { open5.bad[o] = true; st.s5.cw++; msg5 = { row:open5.row, k:"nope", h:"<b>Close.</b> That is true for the " + PL5[o].n.toLowerCase() + ", not the " + PL5[open5.p].n.toLowerCase() + ". Have another go." }; save(); draw5() }
+    };
+  });
+}
+function pairDone(){
+  var pr = PAIRS5[st.s5.pair], n = 0;
+  ROWS5.forEach(function(r){ pr.forEach(function(p){ if(st.s5.cells[st.s5.pair + "|" + r.id + "|" + p]) n++ }) });
+  return n === 12 ? "Table complete. Look along each row: where are they the same, and where are they completely different?" : (12 - n) + " left in this table.";
+}
+
+/* =========================================================
+   STAGE 6  Microscope hunt
+   ========================================================= */
+var GRP = { bac:"Bacteria", fun:"Fungi", vir:"Viruses" };
+var MIC = {
+  soilbac:{ n:"Soil bacteria", g:"bac", z:3, shape:"rod", col:"#8e5bb0", size:"About 1 to 2 micrometres long. A micrometre is a thousandth of a millimetre.", cells:"One cell, with no nucleus.", rep:"Splits in two. In good conditions some kinds do it every 20 minutes or so.", host:"No. It lives freely in the soil.", where:"Garden soil", fact:"A single teaspoon of soil can hold hundreds of millions of bacteria. Many of them recycle dead stuff into nutrients for plants." },
+  soilfun:{ n:"Fungus threads", g:"fun", z:2, shape:"hyphae", col:"#e9e2cf", size:"Each thread is only a few micrometres wide, but they can stretch for metres underground.", cells:"Many cells, joined in long threads called hyphae.", rep:"Grows its threads, and releases spores that spread through air, water and soil.", host:"No. Most feed on dead leaves and wood.", where:"Garden soil", fact:"Some fungus threads link up with plant roots and swap nutrients with them, like an underground trading network." },
+  phage:{ n:"Bacteriophage", g:"vir", z:4, shape:"phage", col:"#2aa3c7", size:"About 0.2 micrometres. Around ten would fit across one bacterium.", cells:"Not a cell at all. Genetic material inside a protein coat.", rep:"Injects itself into a bacterium and makes it build hundreds of copies.", host:"Yes. It needs bacteria to copy itself.", where:"Garden soil", fact:"Soil is full of viruses, but most of them only attack bacteria, not people or plants." },
+  compbac:{ n:"Decomposer bacteria", g:"bac", z:3, shape:"rod", col:"#b07ad0", size:"About 1 to 3 micrometres.", cells:"One cell, with no nucleus.", rep:"Splits in two.", host:"No. It feeds on dead plants and food scraps.", where:"Compost heap", fact:"Busy decomposers can heat the middle of a compost heap to over 50 degrees Celsius." },
+  compfun:{ n:"Compost mould", g:"fun", z:2, shape:"hyphae", col:"#f4f1e6", size:"Threads a few micrometres wide, forming white webs you can sometimes see.", cells:"Many cells, in threads.", rep:"Spores, carried by air and by creatures in the heap.", host:"No. It feeds on dead plant material.", where:"Compost heap", fact:"Moulds and other fungi break down the tough stuff, like woody stems and dead leaves, that bacteria struggle with." },
+  yeast:{ n:"Baker's yeast", g:"fun", z:2, shape:"yeast", col:"#f2c46d", size:"About 5 micrometres across. Bigger than most bacteria.", cells:"One cell, with a nucleus. Yeast is a fungus that lives as single cells.", rep:"Budding: a little bud grows on the side and pinches off as a new cell.", host:"No.", where:"Bread dough", fact:"Yeast feeds on sugar and gives off carbon dioxide gas. Those bubbles make bread dough rise." },
+  breadmould:{ n:"Bread mould", g:"fun", z:0, shape:"mould", col:"#5f8f6e", size:"Each thread a few micrometres wide. The fuzzy patch is millions of threads.", cells:"Many cells, in threads.", rep:"Spores. The dark dots on top of the fuzz are spore cases, each holding thousands of spores.", host:"No. It feeds on the bread.", where:"Old bread", fact:"The threads grow right through the bread, so cutting off the fuzzy bit does not make the rest safe to eat." },
+  lacto:{ n:"Yoghurt bacteria", g:"bac", z:3, shape:"rod", col:"#6a4c93", size:"A few micrometres long, shaped like rods.", cells:"One cell, with no nucleus.", rep:"Splits in two.", host:"No.", where:"Yoghurt", fact:"They turn the sugar in milk into lactic acid, which makes yoghurt thick and tangy. One kind is called Lactobacillus." },
+  skinbac:{ n:"Skin bacteria", g:"bac", z:3, shape:"cocci", col:"#9b59b6", size:"About 1 micrometre. Round, in bunches like grapes.", cells:"One cell, with no nucleus.", rep:"Splits in two.", host:"No. Lots live on everyone's skin all the time.", where:"Unwashed hand", fact:"Most are harmless, but some kinds can cause an infection if they get into a cut. One kind is called Staphylococcus." },
+  coldvirus:{ n:"Common cold virus", g:"vir", z:4, shape:"virus", col:"#1b8fb5", size:"About 0.03 micrometres. Around 60 would fit across one bacterium.", cells:"Not a cell. Genetic material inside a protein coat.", rep:"Gets inside cells in your nose and throat and makes them build copies.", host:"Yes. It can only copy itself inside a living cell.", where:"Unwashed hand", fact:"It cannot grow on a door handle, but it can survive there for a while and hitch a ride on your fingers." }
+};
+var SAMP = [
+  { id:"soil", n:"Garden soil", m:["soilbac", "soilfun", "phage"], bg:"#7a5232", fl:"#a77a52" },
+  { id:"compost", n:"Compost heap", m:["compbac", "compfun"], bg:"#4e3320", fl:"#6c8a3a" },
+  { id:"dough", n:"Bread dough", m:["yeast"], bg:"#f3e2bf", fl:"#e2c88f" },
+  { id:"oldbread", n:"Old bread", m:["breadmould"], bg:"#e7c48c", fl:"#cfa064" },
+  { id:"yog", n:"Yoghurt", m:["lacto"], bg:"#fbf7ee", fl:"#ece3cf" },
+  { id:"hand", n:"Unwashed hand", m:["skinbac", "coldvirus"], bg:"#eab894", fl:"#d69a73" }
+];
+var ZL = [
+  { n:"Your eye", d:"Just looking. Anything you can see here is millions of microbes together." },
+  { n:"Hand lens, 10 times", d:"Bigger, but still nowhere near small enough for most microbes." },
+  { n:"Microscope, 400 times", d:"A light microscope. Fungus threads and yeast cells show up here." },
+  { n:"Microscope, 1000 times", d:"As far as a light microscope goes. Bacteria show up here." },
+  { n:"Electron microscope", d:"Uses a beam of electrons instead of light. The only way to see viruses." }
+];
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 } }
+function hash(s){ var h = 7; for(var i = 0; i < s.length; i++) h = h * 31 + s.charCodeAt(i) | 0; return h }
+function micShape(shape, col, s, R){
+  var o = "", i;
+  if(shape === "rod") o = "<rect x='" + (-9 * s) + "' y='" + (-3.4 * s) + "' width='" + (18 * s) + "' height='" + (6.8 * s) + "' rx='" + (3.4 * s) + "' fill='" + col + "' stroke='#2b1838' stroke-width='" + Math.min(2.5, .8 * s) + "'/><path d='M" + (9 * s) + " 0 q" + (3 * s) + " " + (-3 * s) + " " + (6 * s) + " 0 t" + (6 * s) + " 0' stroke='#2b1838' stroke-width='" + Math.min(2, .6 * s) + "' fill='none'/>" + (s > 2 ? "<ellipse cx='0' cy='0' rx='" + (4 * s) + "' ry='" + (1.4 * s) + "' fill='#d9c3ea' opacity='.6'/>" : "");
+  if(shape === "cocci"){ var P = [[0,0],[5,1],[2,5],[-4,4],[-5,-1],[1,-5],[6,-4]]; P.forEach(function(p){ o += "<circle cx='" + (p[0] * s) + "' cy='" + (p[1] * s) + "' r='" + (3 * s) + "' fill='" + col + "' stroke='#2b1838' stroke-width='" + Math.min(2, .6 * s) + "'/>" }) }
+  if(shape === "yeast") o = "<ellipse rx='" + (7 * s) + "' ry='" + (6 * s) + "' fill='" + col + "' stroke='#7a5a1a' stroke-width='" + Math.min(2.5, .7 * s) + "'/><circle cx='" + (7.5 * s) + "' cy='" + (-3 * s) + "' r='" + (3 * s) + "' fill='" + col + "' stroke='#7a5a1a' stroke-width='" + Math.min(2, .6 * s) + "'/><circle cx='" + (-1.5 * s) + "' cy='" + (.5 * s) + "' r='" + (2 * s) + "' fill='#b78a2e' opacity='.7'/>";
+  if(shape === "hyphae" || shape === "mouldthreads"){
+    var w = Math.min(4, .9 * s), L = 18 * s;
+    o = "<g stroke='" + col + "' stroke-width='" + w + "' fill='none' stroke-linecap='round'><path d='M" + (-L) + " " + (4 * s) + " C" + (-L / 2) + " " + (-2 * s) + " 0 " + (6 * s) + " " + L + " " + (-2 * s) + "'/><path d='M" + (-L / 3) + " " + (2 * s) + " C" + (-L / 4) + " " + (-6 * s) + " " + (-L / 6) + " " + (-10 * s) + " " + (-L / 8) + " " + (-14 * s) + "'/><path d='M" + (L / 3) + " " + (2 * s) + " C" + (L / 2) + " " + (8 * s) + " " + (L / 1.6) + " " + (10 * s) + " " + (L / 1.3) + " " + (14 * s) + "'/></g><g stroke='#0a2f38' stroke-width='" + Math.min(1.2, .3 * s) + "' fill='none' opacity='.35'><path d='M" + (-L / 2) + " " + (-1 * s) + " v" + (3 * s) + " M" + (L / 4) + " " + (2 * s) + " v" + (3 * s) + "'/></g>";
+    if(shape === "mouldthreads") o += "<g fill='#2f3b33'><circle cx='" + (-L / 8) + "' cy='" + (-16 * s) + "' r='" + (3 * s) + "'/><circle cx='" + (L / 1.3) + "' cy='" + (16 * s) + "' r='" + (3 * s) + "'/><circle cx='" + L + "' cy='" + (-4 * s) + "' r='" + (2.6 * s) + "'/></g>";
+  }
+  if(shape === "fuzz"){ o = "<circle r='" + (14 * s) + "' fill='#7fae8c' opacity='.85'/>"; for(i = 0; i < 26; i++){ var a = i / 26 * Math.PI * 2; o += "<line x1='0' y1='0' x2='" + (Math.cos(a) * 17 * s).toFixed(1) + "' y2='" + (Math.sin(a) * 17 * s).toFixed(1) + "' stroke='#e8f1e6' stroke-width='1.2'/>" } o += "<g fill='#24352b'><circle cx='" + (4 * s) + "' cy='" + (-3 * s) + "' r='2'/><circle cx='" + (-5 * s) + "' cy='" + (2 * s) + "' r='2'/><circle cx='0' cy='" + (6 * s) + "' r='1.8'/></g>" }
+  if(shape === "virus"){ var r = 5 * s, pts = []; for(i = 0; i < 6; i++){ var b = i * Math.PI / 3 + Math.PI / 6; pts.push((Math.cos(b) * r).toFixed(1) + "," + (Math.sin(b) * r).toFixed(1)) } o = "<polygon points='" + pts.join(" ") + "' fill='" + col + "' stroke='#08394a' stroke-width='" + Math.min(2, .5 * s) + "'/><path d='M0 0 L" + pts[0] + " M0 0 L" + pts[2] + " M0 0 L" + pts[4] + "' stroke='#08394a' stroke-width='" + Math.min(1.4, .35 * s) + "' opacity='.6'/>" }
+  if(shape === "phage"){ var hr = 4 * s, hp = []; for(i = 0; i < 6; i++){ var c = i * Math.PI / 3; hp.push((Math.cos(c) * hr).toFixed(1) + "," + (Math.sin(c) * hr - 6 * s).toFixed(1)) } o = "<polygon points='" + hp.join(" ") + "' fill='" + col + "' stroke='#08394a' stroke-width='" + Math.min(2, .5 * s) + "'/><rect x='" + (-1.2 * s) + "' y='" + (-2 * s) + "' width='" + (2.4 * s) + "' height='" + (8 * s) + "' fill='#08394a'/><path d='M0 " + (6 * s) + " l" + (-5 * s) + " " + (4 * s) + " M0 " + (6 * s) + " l" + (5 * s) + " " + (4 * s) + " M0 " + (6 * s) + " l" + (-2 * s) + " " + (5 * s) + " M0 " + (6 * s) + " l" + (2 * s) + " " + (5 * s) + "' stroke='#08394a' stroke-width='" + Math.min(1.6, .45 * s) + "'/>" }
+  return "<g transform='rotate(" + R + ")'>" + o + "</g>";
+}
+function micIcon(id){ var m = MIC[id], sh = m.shape === "mould" ? "mouldthreads" : m.shape, s = { rod:1.6, cocci:2, yeast:1.9, hyphae:1.25, mouldthreads:1.05, virus:3.2, phage:2.2 }[sh]; return "<svg viewBox='-24 -24 48 48' aria-hidden='true'>" + micShape(sh, sh === "hyphae" || sh === "mouldthreads" ? "#9a6b2e" : m.col, s, sh === "rod" ? -30 : 0) + "</svg>" }
+function scopeSVG(){
+  var S = SAMP.filter(function(x){ return x.id === st.s6.sample })[0], L = st.s6.zoom, R = rng(hash(S.id + L)), i;
+  var v = "<rect x='0' y='0' width='300' height='300' fill='" + S.bg + "'/>";
+  var nd = [26, 16, 9, 6, 4][L], dsz = [3, 7, 16, 26, 40][L];
+  for(i = 0; i < nd; i++){
+    var x = R() * 300, y = R() * 300, sz = dsz * (.5 + R());
+    if(S.id === "dough" || S.id === "oldbread" || S.id === "yog") v += "<circle cx='" + x.toFixed(0) + "' cy='" + y.toFixed(0) + "' r='" + (sz * .7).toFixed(1) + "' fill='" + S.fl + "' opacity='.7'/>";
+    else if(S.id === "hand") v += "<path d='M" + (x - sz * 2).toFixed(0) + " " + y.toFixed(0) + " q" + sz.toFixed(0) + " " + (-sz / 2).toFixed(0) + " " + (sz * 4).toFixed(0) + " 0' stroke='" + S.fl + "' stroke-width='" + Math.max(1.5, sz / 8).toFixed(1) + "' fill='none'/>";
+    else v += "<polygon points='" + x.toFixed(0) + "," + (y - sz).toFixed(0) + " " + (x + sz).toFixed(0) + "," + (y - sz * .2).toFixed(0) + " " + (x + sz * .5).toFixed(0) + "," + (y + sz).toFixed(0) + " " + (x - sz * .8).toFixed(0) + "," + (y + sz * .5).toFixed(0) + "' fill='" + S.fl + "' opacity='.75'/>";
+  }
+  var vis = [];
+  S.m.slice().sort(function(a, b){ return MIC[a].z - MIC[b].z }).forEach(function(id){
+    var m = MIC[id], k = L - m.z; if(k < 0) return; vis.push(id);
+    var kk = Math.min(k, 2), sc, n, shape = m.shape;
+    if(shape === "mould"){ if(k === 0){ shape = "fuzz"; sc = 1.6; n = 3 } else { shape = "mouldthreads"; sc = [1.5, 2.8, 4.4][Math.min(k - 1, 2)]; n = [4, 2, 1][Math.min(k - 1, 2)] } }
+    else { sc = [1, 2.4, 5][kk]; n = [7, 3, 1][kk] }
+    for(var j = 0; j < n; j++){
+      var a = R() * Math.PI * 2, d = n === 1 ? 20 : 30 + R() * 85, x2 = 150 + Math.cos(a) * d, y2 = 150 + Math.sin(a) * d, rot = Math.round(R() * 360);
+      var hit = Math.min(40, Math.max(16, (shape === "hyphae" || shape === "mouldthreads" ? 10 : 9) * sc));
+      v += "<g class='mic' data-m='" + id + "' transform='translate(" + x2.toFixed(0) + " " + y2.toFixed(0) + ")'" + (j === 0 ? " tabindex='0' role='button' aria-label='" + (st.s6.found[id] ? esc(m.n) + ", found" : "Something living. Tap to look closer") + "'" : " aria-hidden='true'") + ">" +
+        "<circle class='hit' r='" + hit.toFixed(0) + "' fill='transparent' stroke='" + (st.s6.found[id] ? "#2e7d4f" : "none") + "' stroke-width='2.5' stroke-dasharray='5 4'/>" + micShape(shape, m.col, sc, rot) + "</g>";
+    }
+  });
+  var out = "<svg viewBox='0 0 300 300' role='group' aria-label='" + S.n + " seen through: " + ZL[L].n + "'><defs><clipPath id='lensclip'><circle cx='150' cy='150' r='138'/></clipPath><radialGradient id='vign'><stop offset='70%' stop-color='#000' stop-opacity='0'/><stop offset='100%' stop-color='#000' stop-opacity='.45'/></radialGradient></defs>" +
+    "<g clip-path='url(#lensclip)'><g class='view'>" + v + "</g><circle cx='150' cy='150' r='138' fill='url(#vign)' pointer-events='none'/></g>" +
+    "<circle cx='150' cy='150' r='141' fill='none' stroke='#0a2f38' stroke-width='9'/><circle cx='150' cy='150' r='147' fill='none' stroke='#7b4b8f' stroke-width='3'/>" +
+    "<g stroke='#0a2f38' stroke-width='1' opacity='.35' pointer-events='none'><line x1='150' y1='20' x2='150' y2='280'/><line x1='20' y1='150' x2='280' y2='150'/></g></svg>";
+  return { svg:out, vis:vis, S:S };
+}
+var SORT6 = [
+  { id:"t1", t:"Not a cell at all", a:"vir", h:"Bacteria and fungi are both made of cells. Only one group is not." },
+  { id:"t2", t:"One cell, with no nucleus", a:"bac", h:"Fungus cells have a nucleus, and viruses are not cells at all." },
+  { id:"t3", t:"Includes yeast, mould and mushrooms", a:"fun", h:"These all belong to one big group. Think about what you found in the bread." },
+  { id:"t4", t:"Reproduces by splitting in two", a:"bac", h:"Yeast buds, mould makes spores, viruses hijack cells. Which group just splits?" },
+  { id:"t5", t:"Spreads by releasing spores", a:"fun", h:"Remember the dark dots on top of the bread mould." },
+  { id:"t6", t:"Can only copy itself inside another living cell", a:"vir", h:"Bacteria and fungi can grow on their own. One group needs a host." },
+  { id:"t7", t:"The smallest. Only an electron microscope shows it", a:"vir", h:"Which ones only appeared at the very last zoom?" },
+  { id:"t8", t:"Some kinds can make people ill", a:"all", h:"Think about all three. Is there one group where no kinds ever cause illness?" },
+  { id:"t9", t:"Turns milk into yoghurt", a:"bac", h:"Think about the rod shapes in the yoghurt sample." },
+  { id:"t10", t:"Makes bread dough rise", a:"fun", h:"Yeast does this. Which group is yeast in?" }
+];
+var SORT6ORDER = shuffle(SORT6);
+var BINS6 = [{ id:"bac", t:"Bacteria" }, { id:"fun", t:"Fungi" }, { id:"vir", t:"Viruses" }, { id:"all", t:"All three" }];
+BUILD[6] = function(sec){
+  sec.innerHTML = head(6, "Six samples from around the garden and the kitchen. Pick one, zoom in, and tap anything that looks alive. Each new find goes in your field guide.") +
+    "<div class='learn micro'><svg viewBox='0 0 170 120' aria-hidden='true'><rect width='170' height='120' rx='12' fill='#fffdf8'/><ellipse cx='42' cy='52' rx='26' ry='22' fill='#f2c46d' stroke='#7a5a1a' stroke-width='2'/><circle cx='68' cy='40' r='10' fill='#f2c46d' stroke='#7a5a1a' stroke-width='2'/><rect x='96' y='46' width='26' height='11' rx='5.5' fill='#8e5bb0' stroke='#2b1838' stroke-width='2'/><circle cx='148' cy='52' r='1.6' fill='#1b8fb5'/><circle cx='148' cy='52' r='7' fill='none' stroke='#0a2f38' stroke-dasharray='2 2'/><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='10' font-weight='700' text-anchor='middle' fill='#0a2f38'><text x='46' y='94'>yeast cell</text><text x='109' y='94'>bacterium</text><text x='148' y='94'>virus</text><text x='85' y='112' font-weight='400'>roughly to scale</text></g></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>A <b>microorganism</b> (or microbe) is a living thing too small to see without a microscope.</li><li>Three big groups: <b>bacteria</b>, <b>fungi</b> and <b>viruses</b>.</li><li>Viruses are far smaller than the others, and they are not even cells.</li></ul></div></div>" +
+    "<div class='scope'><div><div class='samples' id='samp6'></div><div class='lens' id='lens6'></div><div class='zoomrow'><button type='button' id='zo6' aria-label='Zoom out'>&minus;</button><input type='range' min='0' max='4' step='1' id='zr6' aria-label='Zoom level'><button type='button' id='zi6' aria-label='Zoom in'>+</button></div><p class='zlab' id='zl6'></p></div>" +
+    "<div><div class='fb' id='fb6' aria-live='polite'></div><div id='card6'></div><p class='sub' style='margin-top:14px'><span class='n'>&#9733;</span>Field guide <span class='small' id='fc6' style='font-family:var(--body);font-weight:400'></span></p><div class='guide' id='guide6'></div></div></div>" +
+    "<p class='sub'><span class='n'>2</span>Who am I?</p><p>Sort each fact into the right group. Tap a fact, then tap a group. Dragging works too.</p>" +
+    "<div id='b6'><div class='tray' id='tray6'></div><div class='fb' id='fbs6'></div><div class='bins' id='bins6'></div></div>" + foot(6);
+  var zr = el("zr6");
+  function setZ(z){ z = Math.max(0, Math.min(4, z)); var ch = z !== st.s6.zoom; st.s6.zoom = z; zr.value = z; save(); draw6(ch) }
+  zr.addEventListener("input", function(){ setZ(+zr.value) });
+  el("zo6").onclick = function(){ setZ(st.s6.zoom - 1) };
+  el("zi6").onclick = function(){ setZ(st.s6.zoom + 1) };
+  var lens = el("lens6");
+  function tapMic(g){ var id = g.getAttribute("data-m"), m = MIC[id], isNew = !st.s6.found[id]; st.s6.found[id] = true; save(); draw6(false); showCard(id); if(isNew) burst(el("card6")); fb("fb6", "ok", "<b>" + (isNew ? "New find: " : "Found again: ") + m.n + ".</b> It is one of the " + GRP[m.g].toLowerCase() + ". " + hint6()) }
+  lens.addEventListener("click", function(e){ var g = e.target.closest(".mic"); if(g) tapMic(g) });
+  lens.addEventListener("keydown", function(e){ if(e.key !== "Enter" && e.key !== " ") return; var g = e.target.closest(".mic"); if(g){ e.preventDefault(); tapMic(g) } });
+  zr.value = st.s6.zoom; draw6(false); fb("fb6", "tell", hint6());
+  tapDrag(el("b6"), {
+    pick:function(id){ fb("fbs6", "tell", "Picked up. Which group does it describe?") },
+    empty:function(){ fb("fbs6", "tell", "Pick a fact from the tray first.") },
+    drop:function(id, bin, itEl, tgEl){
+      var f = SORT6.filter(function(x){ return x.id === id })[0];
+      if(f.a === bin){ st.s6.sort[id] = bin; save(); drawSort6(); burst(el("bin6_" + bin)); fb("fbs6", "ok", "<b>Yes.</b> " + (count(st.s6.sort) === SORT6.length ? "Every fact sorted. You know your bacteria from your fungi from your viruses." : "")) }
+      else { st.s6.sw++; save(); shake(tgEl); fb("fbs6", "nope", "<b>Not that group.</b> " + f.h) }
+    }
+  });
+  drawSort6();
+};
+function hint6(){
+  var S = SAMP.filter(function(x){ return x.id === st.s6.sample })[0], L = st.s6.zoom;
+  var vis = S.m.filter(function(id){ return MIC[id].z <= L }), hid = S.m.filter(function(id){ return MIC[id].z > L });
+  var unf = vis.filter(function(id){ return !st.s6.found[id] });
+  if(S.m.every(function(id){ return st.s6.found[id] })) return "That is everything living in the " + S.n.toLowerCase() + ". Try another sample.";
+  if(unf.length) return "Something is in view. Tap anything that looks alive.";
+  if(!vis.length) return "Nothing tiny shows up at this zoom. Try zooming in.";
+  if(hid.length) return "There might be something even smaller in here. Zoom in further.";
+  return "";
+}
+function showCard(id){
+  var m = MIC[id];
+  el("card6").innerHTML = "<div class='idcard'><span class='grp " + m.g + "'>" + GRP[m.g] + "</span><h4>" + m.n + "</h4><dl><dt>Size</dt><dd>" + m.size + "</dd><dt>Cells</dt><dd>" + m.cells + "</dd><dt>Reproduces</dt><dd>" + m.rep + "</dd><dt>Needs a host?</dt><dd>" + m.host + "</dd><dt>Found in</dt><dd>" + m.where + "</dd><dt>Fact</dt><dd>" + m.fact + "</dd></dl></div>";
+}
+function draw6(zoomed){
+  var r = scopeSVG(), lens = el("lens6");
+  lens.innerHTML = r.svg;
+  if(zoomed && !reduce){ lens.classList.remove("zooming"); void lens.offsetWidth; lens.classList.add("zooming") }
+  el("zl6").innerHTML = ZL[st.s6.zoom].n + "<br><span class='small' style='font-family:var(--body);font-weight:400'>" + ZL[st.s6.zoom].d + "</span>";
+  var sb = el("samp6"); sb.innerHTML = "";
+  SAMP.forEach(function(S){
+    var f = S.m.filter(function(id){ return st.s6.found[id] }).length;
+    var b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", S.id === st.s6.sample ? "true" : "false");
+    b.innerHTML = S.n + "<span class='cnt'>" + f + "/" + S.m.length + "</span>";
+    b.onclick = function(){ st.s6.sample = S.id; st.s6.zoom = 0; el("zr6").value = 0; save(); draw6(true); fb("fb6", "tell", hint6()) };
+    sb.appendChild(b);
+  });
+  var g = el("guide6"); g.innerHTML = "";
+  Object.keys(MIC).forEach(function(id){
+    var m = MIC[id], k = st.s6.found[id];
+    var b = document.createElement("button"); b.type = "button"; b.className = "gcard " + (k ? m.g : "unk");
+    b.innerHTML = k ? micIcon(id) + m.n : "<svg viewBox='0 0 44 44' aria-hidden='true'><circle cx='22' cy='22' r='15' fill='none' stroke='#0a2f38' stroke-width='2' stroke-dasharray='4 3'/><text x='22' y='28' text-anchor='middle' font-size='16' font-weight='700' fill='#0a2f38'>?</text></svg>Not found yet";
+    if(k) b.onclick = function(){ showCard(id) }; else b.disabled = true;
+    g.appendChild(b);
+  });
+  el("fc6").textContent = "(" + count(st.s6.found) + " of 10 found)";
+}
+function binIcon(id){
+  var m = { bac:micShape("rod", "#8e5bb0", 1.5, -20), fun:micShape("yeast", "#f2c46d", 1.6, 0), vir:micShape("virus", "#1b8fb5", 3, 0), all:"<g>" + "<g transform='translate(-8 -6)'>" + micShape("rod", "#8e5bb0", .8, -20) + "</g><g transform='translate(8 -6)'>" + micShape("yeast", "#f2c46d", .8, 0) + "</g><g transform='translate(0 9)'>" + micShape("virus", "#1b8fb5", 1.5, 0) + "</g></g>",
+    food:"<path d='M-14 6 C-14 -10 14 -10 14 6 Z' fill='#e2b064' stroke='#7a5a1a' stroke-width='2'/><path d='M-6 -2 l3 -3 M2 -3 l3 -3' stroke='#7a5a1a' stroke-width='2'/>",
+    med:"<rect x='-14' y='-6' width='28' height='12' rx='6' fill='#fffdf8' stroke='#007291' stroke-width='2'/><path d='M0 -6 V6' stroke='#007291' stroke-width='2'/><rect x='-13' y='-5' width='13' height='10' rx='5' fill='#00a6c9'/>",
+    env:"<path d='M-12 12 C-12 -4 0 -12 14 -12 C14 2 6 12 -12 12Z' fill='#46a85a' stroke='#22703a' stroke-width='2'/><path d='M-12 12 L8 -6' stroke='#22703a' stroke-width='2'/>",
+    harm:"<path d='M0 -14 L15 12 H-15 Z' fill='#ffc247' stroke='#c0392b' stroke-width='2.5' stroke-linejoin='round'/><path d='M0 -4 V4' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/><circle cx='0' cy='8.5' r='1.8' fill='#0a2f38'/>" };
+  return "<svg viewBox='-20 -20 40 40' aria-hidden='true'>" + m[id] + "</svg>";
+}
+function drawBins(hostId, trayId, items, order, bins, store, prefix){
+  var tray = el(trayId); tray.innerHTML = "";
+  order.forEach(function(f){
+    if(store[f.id]) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "chipbtn card"; b.setAttribute("data-item", f.id); b.setAttribute("aria-pressed", "false"); b.textContent = f.t; tray.appendChild(b);
+  });
+  if(!tray.children.length) tray.innerHTML = "<span class='small'>All sorted.</span>";
+  var bx = el(hostId); bx.innerHTML = "";
+  bins.forEach(function(B){
+    var d = document.createElement("button"); d.type = "button"; d.className = "bin " + B.id; d.id = prefix + B.id; d.setAttribute("data-target", B.id);
+    var inside = items.filter(function(f){ return store[f.id] === B.id }).map(function(f){ return "<span>" + f.t + "</span>" }).join("");
+    d.innerHTML = "<span class='bh'>" + binIcon(B.id) + B.t + "</span><span class='in'>" + inside + "</span>";
+    bx.appendChild(d);
+  });
+}
+function drawSort6(){ drawBins("bins6", "tray6", SORT6, SORT6ORDER, BINS6, st.s6.sort, "bin6_") }
+
+/* =========================================================
+   STAGE 7  Microbes at work
+   ========================================================= */
+var ROLES = [
+  { id:"r1", t:"Yeast makes bread dough rise", a:"food" },
+  { id:"r2", t:"Bacteria turn milk into yoghurt", a:"food" },
+  { id:"r3", t:"Bacteria, and sometimes moulds, help turn milk into cheese", a:"food" },
+  { id:"r4", t:"Penicillin, the first antibiotic, was found growing on a mould", a:"med" },
+  { id:"r5", t:"Bacteria are used to make insulin, a medicine for people with diabetes", a:"med" },
+  { id:"r6", t:"Vaccines use weakened or harmless parts of germs to train your body to fight them", a:"med" },
+  { id:"r7", t:"Decomposers in a compost heap turn dead plants into rich soil", a:"env" },
+  { id:"r8", t:"Bacteria in the roots of peas and beans take nitrogen from the air and feed the soil", a:"env" },
+  { id:"r9", t:"Bacteria help clean dirty water at sewage works", a:"env" },
+  { id:"r10", t:"Salmonella bacteria in undercooked chicken can cause food poisoning", a:"harm" },
+  { id:"r11", t:"Mould makes bread go fuzzy and spoils it", a:"harm" },
+  { id:"r12", t:"Flu viruses spread in coughs and sneezes", a:"harm" },
+  { id:"r13", t:"Athlete's foot is a fungus that grows on skin", a:"harm" }
+];
+var ROLEORDER = shuffle(ROLES);
+var BINS7 = [{ id:"food", t:"Food" }, { id:"med", t:"Medicine" }, { id:"env", t:"Environment" }, { id:"harm", t:"Harmful" }];
+var BINHINT = { food:"This one is about making something we eat.", med:"This one is about making people better, or protecting them.", env:"This one is about keeping nature working: soil, plants, water.", harm:"This one is about microbes causing trouble." };
+var WASH = {
+  none:{ t:"No wash", left:60, fb:"<b>Outrageous.</b> Nobody washed, so germs went onto the handle, the phone, the sandwich and your friend. Whoever touches those next picks them up too." },
+  water:{ t:"Quick rinse, water only", left:36, fb:"<b>Better than nothing.</b> A quick rinse shifts some germs, but water slides over the oily layer on skin that germs cling to. Plenty still spread." },
+  soap:{ t:"Soap and water, 20 seconds", left:5, fb:"<b>Massive difference.</b> Soap and a proper 20 second scrub lift most germs off, and the rinse washes them away. Hardly anything spreads." }
+};
+var GERMPTS = (function(){ var R = rng(42), p = []; for(var i = 0; i < 60; i++){ var hnd = i % 2, x = (hnd ? 160 : 52) + R() * 64, y = 105 + R() * 80; p.push([x, y, Math.floor(R() * 3)]) } return p })();
+var GCOL = ["#7b4b8f", "#c2540c", "#007291"];
+function handPath(){ return "<rect x='-15' y='73.5' width='20' height='55' rx='10' transform='rotate(-29 -5 101)'/><rect x='2' y='12' width='18' height='62' rx='9'/><rect x='22' y='0' width='18' height='72' rx='9'/><rect x='42' y='6' width='18' height='66' rx='9'/><rect x='62' y='24' width='16' height='50' rx='8'/><rect x='0' y='60' width='80' height='92' rx='22'/>" }
+function washSVG(state){
+  var nar = window.innerWidth < 600;
+  var on = state.left, s = "<svg viewBox='" + (nar ? "0 0 290 420" : "0 0 620 260") + "' role='img' aria-label='Germs on hands, then on the things the hands touch'>";
+  s += "<g fill='#f2c6a0' stroke='#0a2f38' stroke-width='2.5'><g transform='translate(48 52) scale(.95)'>" + handPath() + "</g><g transform='translate(232 52) scale(-.95 .95)'>" + handPath() + "</g></g>";
+  for(var i = 0; i < 60; i++){ var g = GERMPTS[i]; if(i < on) s += "<circle cx='" + g[0].toFixed(0) + "' cy='" + g[1].toFixed(0) + "' r='4' fill='" + GCOL[g[2]] + "' opacity='.9'/>" }
+  if(state.washing) s += "<g fill='#e6f6fb' stroke='#00a6c9' stroke-width='2'><circle cx='70' cy='90' r='12'/><circle cx='120' cy='140' r='9'/><circle cx='180' cy='100' r='14'/><circle cx='210' cy='160' r='8'/><circle cx='100' cy='60' r='7'/></g>";
+  var xs = nar ? [44, 108, 176, 246] : [330, 405, 480, 560];
+  var OB = [{ n:"door handle", x:xs[0] }, { n:"phone", x:xs[1] }, { n:"sandwich", x:xs[2] }, { n:"friend's hand", x:xs[3] }];
+  OB.forEach(function(o, j){
+    var y = nar ? 312 : 150, art = "";
+    if(j === 0) art = "<rect x='" + (o.x - 22) + "' y='" + (y - 40) + "' width='10' height='60' rx='3' fill='#c9ced6' stroke='#0a2f38' stroke-width='2'/><rect x='" + (o.x - 18) + "' y='" + (y - 14) + "' width='40' height='9' rx='4.5' fill='#9aa5b1' stroke='#0a2f38' stroke-width='2'/>";
+    if(j === 1) art = "<rect x='" + (o.x - 15) + "' y='" + (y - 36) + "' width='30' height='54' rx='6' fill='#0a2f38'/><rect x='" + (o.x - 11) + "' y='" + (y - 30) + "' width='22' height='40' rx='2' fill='#00a6c9'/>";
+    if(j === 2) art = "<path d='M" + (o.x - 24) + " " + (y + 10) + " L" + o.x + " " + (y - 26) + " L" + (o.x + 24) + " " + (y + 10) + " Z' fill='#f3dcae' stroke='#a8803e' stroke-width='3'/><path d='M" + (o.x - 18) + " " + (y + 4) + " L" + (o.x + 18) + " " + (y + 4) + "' stroke='#3a9a4f' stroke-width='4'/>";
+    if(j === 3) art = "<g transform='translate(" + (o.x - 16) + " " + (y - 40) + ") scale(.4)' fill='#d9a77f' stroke='#0a2f38' stroke-width='5'>" + handPath() + "</g>";
+    s += art;
+    var n = state.obj ? state.obj[j] || 0 : 0;
+    for(var q = 0; q < Math.min(n, 18); q++) s += "<circle cx='" + (o.x - 20 + (q % 6) * 8) + "' cy='" + (y + 30 + Math.floor(q / 6) * 8) + "' r='3.2' fill='" + GCOL[q % 3] + "'/>";
+    s += "<text x='" + o.x + "' y='" + (y + 68) + "' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' font-weight='700' fill='#0a2f38'>" + o.n + "</text>";
+    if(state.touch === j) s += "<circle cx='" + o.x + "' cy='" + (y - 8) + "' r='34' fill='none' stroke='#ef7724' stroke-width='4' stroke-dasharray='6 5'/>";
+  });
+  s += "<text x='140' y='236' text-anchor='middle' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#0a2f38'>germs on hands: " + on + "</text>";
+  s += "<path d='" + (nar ? "M140 246 V270" : "M262 118 H296") + "' stroke='#0a2f38' stroke-width='3' stroke-dasharray='5 4' marker-end='url(#ah7)'/><defs><marker id='ah7' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto'><path d='M0 0 L10 5 L0 10z' fill='#0a2f38'/></marker></defs>";
+  return s + "</svg>";
+}
+var SPOTS = [
+  { id:"palm", x:26.4, y:63, yes:false, t:"Palms usually get the best scrub, so they are rarely missed. Try another spot." },
+  { id:"thumb", x:12, y:52, yes:true, t:"Thumbs get missed loads. People rub their palms and forget to grip and twist each thumb." },
+  { id:"tips", x:24, y:14, yes:true, t:"Fingertips and under the nails. Germs hide there, and fingertips are what touch your face and food." },
+  { id:"between", x:73.9, y:38, yes:true, t:"Between the fingers gets skipped unless you lace your fingers together and rub." },
+  { id:"back", x:74, y:66, yes:true, t:"The backs of hands. People scrub their palms and forget to flip over." }
+];
+function spotsSVG(){
+  var F = "font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#0a2f38' text-anchor='middle'";
+  return "<svg viewBox='0 0 440 240' aria-hidden='true'><rect width='440' height='240' rx='16' fill='#f4fbfd'/><g fill='#f2c6a0' stroke='#0a2f38' stroke-width='2.5'><g transform='translate(70 26) scale(1.15)'>" + handPath() + "</g><g transform='translate(372 26) scale(-1.15 1.15)'>" + handPath() + "</g></g>" +
+    "<g fill='#fbe3d4' stroke='#c99a80' stroke-width='1.5'><rect x='353' y='30' width='13' height='12' rx='5'/><rect x='330' y='17' width='13' height='12' rx='5'/><rect x='307' y='24' width='13' height='12' rx='5'/><rect x='286' y='44' width='11' height='11' rx='4'/></g>" +
+    "<path d='M86 150 q18 10 36 0 M84 130 q22 8 44 0' stroke='#c99a80' stroke-width='2' fill='none'/>" +
+    "<text x='116' y='232' " + F + ">palm side</text><text x='326' y='232' " + F + ">back of hand</text></svg>";
+}
+var SOAP = [
+  "Germs stick to the natural oils and grease on your skin. Water on its own slides straight over oil, like rain on a waxed car.",
+  "Soap molecules have a <b>head that loves water</b> and a <b>tail that loves oil</b>. The tails dig into the grease that the germs are stuck in.",
+  "The soap wraps the grease and germs up into tiny balls. Rinsing washes the balls away down the sink. Soap can also break open some viruses, like flu, that have an oily outer coat."
+];
+function soapSVG(k){
+  var s = "<svg viewBox='0 0 520 220' role='img' aria-label='How soap works, step " + (k + 1) + "'><rect x='0' y='170' width='520' height='50' fill='#f2c6a0'/><path d='M0 170 Q40 162 80 170 T160 170 T240 170 T320 170 T400 170 T480 170 T560 170' stroke='#c99a80' stroke-width='3' fill='none'/><text x='14' y='206' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#7a4a2a'>skin</text>";
+  function oil(x, y){ return "<ellipse cx='" + x + "' cy='" + y + "' rx='34' ry='16' fill='#ffd36b' opacity='.85' stroke='#d8a630' stroke-width='2'/><circle cx='" + (x - 8) + "' cy='" + (y - 2) + "' r='5' fill='#7b4b8f'/><circle cx='" + (x + 10) + "' cy='" + (y + 3) + "' r='4.5' fill='#c2540c'/>" }
+  function soapM(x, y, ang){ var a = ang * Math.PI / 180, tx = x + Math.cos(a) * 26, ty = y + Math.sin(a) * 26; return "<path d='M" + x + " " + y + " L" + tx.toFixed(1) + " " + ty.toFixed(1) + "' stroke='#ef7724' stroke-width='3' stroke-dasharray='4 2'/><circle cx='" + x + "' cy='" + y + "' r='6' fill='#00a6c9' stroke='#005a73' stroke-width='1.5'/>" }
+  if(k === 0){ s += oil(130, 160) + oil(370, 160); s += "<g fill='#7cc6ea' stroke='#1f7fd1' stroke-width='1.5'><path d='M240 60 C232 74 230 80 230 86 a10 10 0 0 0 20 0 C250 80 248 74 240 60Z'/><path d='M300 40 C292 54 290 60 290 66 a10 10 0 0 0 20 0 C310 60 308 54 300 40Z'/></g><path d='M250 110 C280 130 320 120 340 100' stroke='#1f7fd1' stroke-width='3' fill='none' stroke-dasharray='6 5'/><text x='260' y='30' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#1f5f9a'>water slides off</text>" }
+  if(k === 1){ s += oil(130, 160) + oil(370, 160); [[90, 110, 50], [130, 98, 90], [172, 112, 130], [330, 110, 50], [370, 98, 90], [412, 112, 130], [250, 60, 70], [270, 80, 120]].forEach(function(m){ s += soapM(m[0], m[1], m[2]) }); s += "<text x='200' y='34' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#005a73'>head loves water, tail loves oil</text>" }
+  if(k === 2){
+    [[150, 90], [370, 70]].forEach(function(c){ s += "<ellipse cx='" + c[0] + "' cy='" + c[1] + "' rx='22' ry='14' fill='#ffd36b' stroke='#d8a630' stroke-width='2'/><circle cx='" + (c[0] - 6) + "' cy='" + c[1] + "' r='5' fill='#7b4b8f'/><circle cx='" + (c[0] + 8) + "' cy='" + (c[1] + 2) + "' r='4.5' fill='#c2540c'/>"; for(var i = 0; i < 12; i++){ var a = i * 30, r = a * Math.PI / 180, x = c[0] + Math.cos(r) * 52, y = c[1] + Math.sin(r) * 44; s += soapM(+x.toFixed(1), +y.toFixed(1), a + 180) } });
+    s += "<path d='M220 150 C300 150 420 140 500 110' stroke='#1f7fd1' stroke-width='5' fill='none' marker-end='url(#ah8)'/><text x='300' y='164' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='13' font-weight='700' fill='#1f5f9a'>rinse washes them away</text><defs><marker id='ah8' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0 L10 5 L0 10z' fill='#1f7fd1'/></marker></defs>";
+  }
+  return s + "</svg>";
+}
+var SOAPQ = [
+  { id:"h1", q:"Why scrub for at least 20 seconds, about two rounds of Happy Birthday?", opts:["It gives the soap time to reach every spot and lift the germs off", "Germs fall asleep after 20 seconds", "Your hands need to warm up first"], ans:0, why:"Soap needs time and rubbing to get into all the grease on every part of your hands.", not:{ 1:"Germs do not nap. They just stay stuck on until something shifts them.", 2:"Warm or cold water both work. It is the soap and the scrubbing that matter." } },
+  { id:"h2", q:"Why does a quick rinse with water not do much?", opts:["Water slides over the oily layer that germs cling to", "Water feeds the germs", "Water is full of germs"], ans:0, why:"Oil and water do not mix. Without soap, the germs stay stuck in the grease.", not:{ 1:"Water does not feed them. It just cannot get a grip on the grease.", 2:"Tap water in the UK is clean. The problem is the oil on your skin." } },
+  { id:"h3", q:"When is washing your hands most important?", opts:["After the toilet and before eating or cooking", "Only when they look dirty", "Once a week"], ans:0, why:"Germs are invisible. The big moments are after the toilet, before food, after touching bins or animals, and after blowing your nose.", not:{ 1:"Hands can look spotless and still carry millions of germs.", 2:"Once a week would leave loads of chances for germs to spread." } }
+];
+BUILD[7] = function(sec){
+  sec.innerHTML = head(7, "Microbes are not all bad news. Some make food, some make medicine and some keep the planet working. Others make us ill, and that is where soap comes in.") +
+    "<div class='learn micro'><svg viewBox='0 0 170 120' aria-hidden='true'><rect width='170' height='120' rx='12' fill='#fffdf8'/><path d='M20 70 C20 40 70 40 70 70 Z' fill='#e2b064' stroke='#7a5a1a' stroke-width='2'/><rect x='92' y='40' width='56' height='22' rx='11' fill='#fffdf8' stroke='#007291' stroke-width='2'/><rect x='93' y='41' width='27' height='20' rx='10' fill='#00a6c9'/><path d='M30 104 C30 88 46 80 62 80 C62 94 52 104 30 104Z' fill='#46a85a' stroke='#22703a' stroke-width='2'/><path d='M120 78 L138 108 H102 Z' fill='#ffc247' stroke='#c0392b' stroke-width='2.5' stroke-linejoin='round'/><path d='M120 88 V97' stroke='#0a2f38' stroke-width='3'/><circle cx='120' cy='102' r='1.8' fill='#0a2f38'/></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>Microbes help with <b>food</b> (bread, yoghurt, cheese), <b>medicine</b> (antibiotics, vaccines) and the <b>environment</b> (compost, soil, clean water).</li><li>Some are <b>harmful</b>: they cause disease or spoil food. Those are often called germs, or pathogens.</li></ul></div></div>" +
+    "<p class='sub'><span class='n'>1</span>Good microbe, bad microbe</p><p>Tap a card, then tap the basket it belongs in. Dragging works too.</p>" +
+    "<div id='b7'><div class='tray' id='tray7'></div><div class='fb' id='fb7'></div><div class='bins' id='bins7'></div></div>" +
+    "<p class='sub'><span class='n'>2</span>Hygiene lab</p><p>These hands are covered in germs (made visible, just for this). Pick how to wash, then watch where the germs end up as the hands touch four things.</p>" +
+    "<div class='washbtns' id='wb7'></div><div class='washbox' id='wash7'></div><div class='fb' id='fbw7'></div><div class='bars' id='bars7'></div><p class='small' style='text-align:center'>A made up model to show the idea, not real germ counts.</p>" +
+    "<p class='sub'><span class='n'>3</span>Where do germs hide?</p><p>Tap the places people most often <b>miss</b> when they wash. There are four.</p><div class='handspots' id='spots7'></div><div class='fb' id='fbh7'></div>" +
+    "<p class='sub'><span class='n'>4</span>Why soap works</p><p>Three steps. Tap through them.</p><div class='soapsteps' id='ss7'></div><div class='soapfig' id='soap7'></div><p id='soapt7' class='lead' style='margin-top:8px'></p><div id='q7'></div>" +
+    "<p class='sub'><span class='n'>5</span>In your own words</p><p>If you fancy it: explain one way microbes help us and one way they harm us, and how hygiene helps.</p><div id='wr7'></div>" + foot(7);
+  tapDrag(el("b7"), {
+    pick:function(){ fb("fb7", "tell", "Picked up. Which basket?") },
+    empty:function(){ fb("fb7", "tell", "Pick a card from the tray first.") },
+    drop:function(id, bin, itEl, tgEl){
+      var f = ROLES.filter(function(x){ return x.id === id })[0];
+      if(f.a === bin){ st.s7.roles[id] = bin; save(); drawRoles(); burst(el("bin7_" + bin)); fb("fb7", "ok", "<b>Yes.</b> " + (count(st.s7.roles) === ROLES.length ? "Every card sorted. Nine helpful jobs and four harmful ones." : "")) }
+      else { st.s7.rw++; save(); shake(tgEl); fb("fb7", "nope", "<b>Not that basket.</b> " + (id === "r11" && bin === "food" ? "It is about food, but is the mould helping here? " : "") + BINHINT[f.a]) }
+    }
+  });
+  drawRoles();
+  var wb = el("wb7"), busy = false;
+  Object.keys(WASH).forEach(function(k, i){
+    var b = document.createElement("button"); b.type = "button"; b.className = "btn " + (i === 2 ? "btn-orange" : "btn-quiet"); b.textContent = WASH[k].t;
+    b.onclick = function(){ if(busy) return; busy = true; runWash(k, function(){ busy = false }) };
+    wb.appendChild(b);
+  });
+  el("wash7").innerHTML = washSVG({ left:60 });
+  drawBars();
+  var sp = el("spots7"); var sh = spotsSVG();
+  SPOTS.forEach(function(p){ sh += "<button type='button' class='spot" + (st.s7.spots[p.id] ? " yes" : "") + "' id='spot_" + p.id + "' style='left:" + p.x + "%;top:" + p.y + "%' aria-label='" + p.id + "'></button>" });
+  sp.innerHTML = sh;
+  SPOTS.forEach(function(p){
+    el("spot_" + p.id).onclick = function(){
+      var b = el("spot_" + p.id);
+      if(p.yes){ st.s7.spots[p.id] = true; save(); b.classList.add("yes"); burst(b); var n = count(st.s7.spots); fb("fbh7", "ok", "<b>Found one.</b> " + p.t + (n === 4 ? " That is all four. Next time you wash, give those spots extra attention." : " " + (4 - n) + " to go.")) }
+      else { b.classList.add("no"); fb("fbh7", "tell", "<b>Good thinking, but no.</b> " + p.t) }
+    };
+  });
+  var ss = el("ss7");
+  [0, 1, 2].forEach(function(k){ var b = document.createElement("button"); b.type = "button"; b.textContent = k + 1; b.setAttribute("aria-label", "Step " + (k + 1)); b.onclick = function(){ soapStep(k) }; ss.appendChild(b) });
+  soapStep(0);
+  questions(el("q7"), SOAPQ, st.s7.q);
+  writer(el("wr7"), st.s7, "text", "My explanation", ["Microbes help us by", "For example,", "Some microbes are harmful because", "They can spread by", "Washing with soap helps because"]);
+};
+function soapStep(k){
+  if(k + 1 > st.s7.soap){ st.s7.soap = k + 1; save() }
+  el("ss7").querySelectorAll("button").forEach(function(b, i){ b.setAttribute("aria-pressed", i === k ? "true" : "false") });
+  el("soap7").innerHTML = soapSVG(k); el("soapt7").innerHTML = SOAP[k];
+}
+function drawRoles(){ drawBins("bins7", "tray7", ROLES, ROLEORDER, BINS7, st.s7.roles, "bin7_") }
+function drawBars(){
+  var h = "";
+  Object.keys(WASH).forEach(function(k){ if(st.s7.washes[k] === undefined) return; h += "<div class='r'><span class='nm'>" + WASH[k].t + "</span><span class='tr'><span style='width:" + Math.round(st.s7.washes[k] / 60 * 100) + "%'></span></span><b>" + st.s7.washes[k] + "</b></div>" });
+  el("bars7").innerHTML = h ? "<p class='small' style='margin:0 0 6px'><b>Germs left on the hands after washing:</b></p>" + h : "";
+}
+function runWash(k, done){
+  var W = WASH[k], box = el("wash7"), obj = [0, 0, 0, 0];
+  fb("fbw7", "tell", "Washing: " + W.t.toLowerCase() + "...");
+  function finish(){
+    var on = W.left;
+    for(var j = 0; j < 4; j++){ obj[j] = Math.round(on * .3); on = on - obj[j] }
+    box.innerHTML = washSVG({ left:on, obj:obj });
+    st.s7.washes[k] = W.left; save(); drawBars(); fb("fbw7", k === "soap" ? "ok" : "nope", W.fb); done();
+  }
+  if(reduce){ finish(); return }
+  box.innerHTML = washSVG({ left:60, washing:true });
+  var steps = 8, i = 0;
+  var t = setInterval(function(){
+    i++; var left = Math.round(60 - (60 - W.left) * i / steps);
+    box.innerHTML = washSVG({ left:left, washing:i < steps });
+    if(i >= steps){
+      clearInterval(t);
+      var on = W.left, j = 0;
+      var t2 = setInterval(function(){
+        obj[j] = Math.round(on * .3); on -= obj[j];
+        box.innerHTML = washSVG({ left:on, obj:obj, touch:j });
+        j++; if(j >= 4){ clearInterval(t2); setTimeout(finish, 450) }
+      }, 450);
+    }
+  }, 140);
+}
+
+/* =========================================================
+   SEND, RESET, START
+   ========================================================= */
+function summary(){
+  var w = getWho(), out = [];
+  out.push("GARDEN DETECTIVE: plants and microorganisms");
+  out.push("Target: plant parts (flower, root, stem, trunk, branch, seed) and microorganisms (types, characteristics, roles in daily life, health and hygiene).");
+  if(PEOPLE[w]){ out.push("", "Milestones for " + w + ":"); PEOPLE[w].m.forEach(function(m){ out.push("- " + m) }) }
+  out.push("", "PACKETS");
+  STAGES.forEach(function(S){ out.push(S.n + ". " + S.name + ": " + statusWord(progress(S.n)).toLowerCase()) });
+  function qline(list, bucket){ var a = 0, f = 0; list.forEach(function(q){ var r = bucket[q.id]; if(r){ a++; if(r.first === q.ans) f++ } }); return a + " of " + list.length + " answered (" + f + " first try)" }
+  var s;
+  s = st.s1; out.push("", "1. BUILD A PLANT", "Sunflower parts placed: " + count(s.sunflower) + " of 5. Apple tree parts placed: " + count(s.tree) + " of 6." + (s.wrong ? " Tried a different spot first " + s.wrong + " time(s)." : ""));
+  s = st.s2; var ft = 0; Object.keys(s.m).forEach(function(k){ if(s.m[k].first) ft++ });
+  out.push("", "2. JOBS BOARD", "Parts matched to their job: " + count(s.m) + " of 7 (" + ft + " first try).", "Plant emergency questions: " + qline(EMERG, s.q) + ".");
+  s = st.s3; out.push("", "3. SEED TO SEED", "Grew the sunflower as far as step " + (s.max + 1) + " of 8 (" + STEPS3[s.max].t + ").",
+    "Life cycle circle: " + (s.checks ? "checked " + s.checks + " time(s), last check " + s.right + " of 5 in place." : "not checked yet.") + (s.order ? " Order: " + s.order.map(function(id){ return id ? CYCLE.filter(function(c){ return c.id === id })[0].t : "(empty)" }).join(" > ") : ""),
+    "What a seed needs to germinate: " + (s.needsChecked ? "picked " + (NEEDS.filter(function(n){ return s.needs[n.id] }).map(function(n){ return n.t }).join(", ") || "nothing") + " (answer: water, warmth, air)." : "not tried."));
+  s = st.s4; out.push("", "4. PLANT PLUMBING", "Layers explored: " + (Object.keys(s.layers).map(function(k){ return LAYERS[k].t }).join(", ") || "none") + ".", "Science words placed in the paragraph: " + count(s.gaps) + " of 7.", "What if questions: " + qline(WHATIF, s.q) + ".", "Written explanation: " + (s.text.trim() ? "\n  " + s.text.trim() : "(none)"));
+  s = st.s5; var ca = 0, cb = 0; Object.keys(s.cells).forEach(function(k){ if(k.charAt(0) === "a") ca++; else cb++ });
+  out.push("", "5. PLANT FACE OFF", "Comparison table: sunflower vs oak " + ca + " of 12, cactus vs fern " + cb + " of 12.", "Survival detective: " + qline(SURV, s.q) + ".", "Written comparison: " + (s.text.trim() ? "\n  " + s.text.trim() : "(none)"));
+  s = st.s6; out.push("", "6. MICROSCOPE HUNT", "Microbes found: " + count(s.found) + " of 10" + (count(s.found) ? ": " + Object.keys(s.found).map(function(id){ return MIC[id].n + " (" + GRP[MIC[id].g].toLowerCase() + ")" }).join(", ") : "") + ".", "Who am I? facts sorted into bacteria, fungi, viruses: " + count(s.sort) + " of 10.");
+  s = st.s7; out.push("", "7. MICROBES AT WORK", "Food, medicine, environment, harmful sort: " + count(s.roles) + " of 13 cards sorted.", "Handwashing tried: " + (Object.keys(s.washes).map(function(k){ return WASH[k].t + " (" + s.washes[k] + " germs left)" }).join(", ") || "none") + ".", "Germ hiding spots found: " + count(s.spots) + " of 4.", "Why soap works: saw " + s.soap + " of 3 steps. Questions: " + qline(SOAPQ, s.q) + ".", "Written explanation: " + (s.text.trim() ? "\n  " + s.text.trim() : "(none)"));
+  return out.join("\n");
+}
+
+el("firstBtn").onclick = function(){ openStage(1) };
+var resetArmed = false;
+el("resetBtn").onclick = function(){
+  var b = el("resetBtn");
+  if(!resetArmed){ resetArmed = true; b.textContent = "Sure? Tap again to clear everything"; setTimeout(function(){ resetArmed = false; b.textContent = "Start again" }, 4000); return }
+  st = fresh(); try{ localStorage.removeItem(STORE) }catch(e){}
+  built = {}; el("stages").innerHTML = ""; resetArmed = false; b.textContent = "Start again"; drawMap();
+  window.scrollTo({ top:0 });
+};
+
+drawWho();
+drawMap();
+if(st.open && BUILD[st.open]){
+  var keep = st.open, host = el("stages");
+  var sec0 = document.createElement("section"); sec0.className = "sec stage on"; sec0.id = "stage" + keep; host.appendChild(sec0); BUILD[keep](sec0); built[keep] = true;
+  sec0.addEventListener("click", function(e){ var g = e.target.closest("[data-go]"); if(!g) return; var v = g.getAttribute("data-go"); if(v === "map") el("map").scrollIntoView({ behavior:reduce ? "auto" : "smooth", block:"center" }); else if(v === "send") el("sendSec").scrollIntoView({ behavior:reduce ? "auto" : "smooth" }); else openStage(+v) });
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Garden Detective", filename:"garden-detective", getText:summary });
+var whoIn = el("b5who"); if(whoIn) whoIn.addEventListener("input", function(){ drawWho(); drawMap() });
+window.__gd = { st:function(){ return st }, summary:summary, openStage:openStage };
+})();
+</script>
+</body>
+</html>

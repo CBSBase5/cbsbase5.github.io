@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaped by People - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Shaped by People only. Shell, cards and buttons come from style.css */
+.sbp{max-width:1000px;margin:0 auto}
+.intro{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.intro svg{width:150px;height:auto}
+@media (max-width:620px){.intro{grid-template-columns:1fr}.intro svg{display:none}}
+.intro p{margin:0 0 10px}
+.intro p:last-child{margin:0}
+
+/* who picker */
+.whobox{margin:0 0 22px}
+.whorow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.who{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;letter-spacing:.08em;
+  background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-pill);padding:8px 16px;cursor:pointer;
+  box-shadow:2px 3px 0 rgba(10,47,56,.2);transition:transform .12s}
+.who:hover{transform:translateY(-2px) rotate(-1deg)}
+.who[aria-pressed="true"]{background:var(--teal);color:var(--paper);box-shadow:3px 4px 0 var(--ink)}
+.who.quiet{font-size:.8rem;border-style:dashed}
+.mymiles{margin:14px 0 0;display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mymiles.on{display:grid}
+.mile{background:var(--paper);border:2px solid var(--ink);border-radius:16px 12px 18px 10px;padding:12px 14px;font-size:.95rem}
+.mile b{display:block;font-family:var(--display);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+
+/* stage tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 10px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{position:relative;text-align:left;cursor:pointer;border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 12px 34px;
+  color:var(--ink);box-shadow:var(--lift);transition:transform .16s cubic-bezier(.2,1.2,.4,1),box-shadow .16s;font-family:var(--body);font-size:.85rem;line-height:1.35}
+.tile:nth-child(odd){transform:rotate(-.6deg)}
+.tile:nth-child(even){transform:rotate(.5deg)}
+.tile:hover{transform:translateY(-4px) rotate(0);box-shadow:var(--lift-hi)}
+.tile[aria-current="true"]{outline:4px dashed var(--ink);outline-offset:4px}
+.tile svg{display:block;width:100%;height:58px;margin:0 0 6px}
+.tile .tn{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.tile .tt{display:block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 850;font-size:1.08rem;line-height:1.05;margin:2px 0 4px}
+.tile.c1{background:linear-gradient(150deg,#ffd76e,var(--yellow-deep))}
+.tile.c2{background:linear-gradient(150deg,#22b8d6,var(--teal));color:var(--paper)}
+.tile.c3{background:linear-gradient(150deg,#f68b3e,var(--orange-deep))}
+.tile.c4{background:linear-gradient(150deg,#9465a8,#5c3269);color:var(--paper)}
+.tile.c5{background:linear-gradient(150deg,#7fd3a0,#2e8b5c)}
+.tile.c6{background:linear-gradient(150deg,#204e5a,var(--ink));color:var(--paper)}
+.tile.c7{background:linear-gradient(150deg,#ffb3c7,#e2577e)}
+.badge{position:absolute;top:-12px;right:-6px;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;
+  font-family:var(--display);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;transform:rotate(4deg);display:none;
+  font-variation-settings:"wght" 800}
+.tile.best .badge{display:block;background:var(--yellow)}
+.tick{position:absolute;bottom:8px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:none;align-items:center;justify-content:center}
+.tile.tried .tick{display:flex}
+.trybar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 26px;font-size:.9rem;color:var(--body-tint)}
+.trydots{display:flex;gap:6px}
+.trydots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);background:transparent;display:block}
+.trydots i.on{background:var(--orange)}
+
+/* stage shell */
+.stage{background:var(--white);border:3px solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);margin:0 0 26px;overflow:hidden}
+.stage[hidden]{display:none}
+.shead{padding:16px 20px;border-bottom:3px solid var(--ink);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.shead h2{font-variation-settings:"wdth" 120,"wght" 850;font-size:clamp(1.5rem,4.4vw,2.2rem);line-height:1}
+.shead .sk{font-family:var(--display);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-variation-settings:"wght" 800;display:block;opacity:.8;margin-bottom:3px}
+.shead p{margin:4px 0 0;font-size:.95rem;max-width:60ch}
+.shead .stxt{flex:1;min-width:200px}
+.sbody{padding:20px}
+.sfoot{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 20px;align-items:center}
+.sfoot .spacer{margin-left:auto}
+.mtag{display:inline-block;font-size:.72rem;font-family:var(--display);letter-spacing:.08em;font-variation-settings:"wght" 700;background:rgba(10,47,56,.08);border-radius:999px;padding:3px 9px;margin:6px 4px 0 0}
+
+/* learn a bit */
+.learn{border:3px dashed var(--teal);border-radius:var(--r-alt);background:#f0fafc;padding:14px 16px;margin:0 0 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:center}
+.learn h3{font-variation-settings:"wdth" 114,"wght" 800;font-size:1.15rem;margin:0 0 6px}
+.learn p{margin:0 0 6px;font-size:.95rem}
+.learn svg{width:100%;height:auto;display:block}
+.learn .lk{font-family:var(--display);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-variation-settings:"wght" 800}
+@media (max-width:680px){.learn{grid-template-columns:1fr}}
+.tryhead{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:18px 0 8px;display:flex;align-items:center;gap:10px}
+.tryhead::before{content:"";width:14px;height:14px;border-radius:4px;background:var(--orange);border:2px solid var(--ink);transform:rotate(12deg)}
+.small{font-size:.88rem;color:var(--body-tint);margin:0 0 10px}
+
+/* scene */
+.erabar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 12px}
+.erabig{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:clamp(2.2rem,8vw,3.4rem);line-height:.9;color:var(--orange);text-shadow:3px 3px 0 rgba(10,47,56,.18);min-width:3.3ch}
+.erasub{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 750;font-size:1rem}
+.erabtns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.erab{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.85rem;letter-spacing:.06em;border:3px solid var(--ink);border-radius:999px;padding:7px 12px;background:var(--white);color:var(--ink);cursor:pointer}
+.erab[aria-pressed="true"]{background:var(--ink);color:var(--yellow)}
+.erab.future{border-style:dashed}
+input[type=range]{accent-color:var(--orange);width:100%;height:28px;cursor:pointer}
+.slidewrap{margin:0 0 6px}
+.slideticks{display:flex;justify-content:space-between;font-size:.72rem;font-family:var(--display);letter-spacing:.06em;color:var(--body-tint);padding:0 4px}
+.scenewrap{border:3px solid var(--ink);border-radius:18px;overflow-x:auto;overflow-y:hidden;background:#cfeaf5;position:relative;-webkit-overflow-scrolling:touch}
+.scenewrap svg{display:block;width:100%;min-width:760px;height:auto;transition:filter .5s}
+.scenewrap[data-era="0"] svg{filter:sepia(.55) saturate(.85)}
+.scenewrap[data-era="1"] svg{filter:sepia(.3)}
+.scenewrap[data-era="2"] svg{filter:sepia(.1) saturate(.92)}
+.scenewrap[data-era="4"]{border-style:dashed;border-color:var(--plum)}
+.swipehint{display:none;font-size:.8rem;color:var(--body-tint);margin:4px 0 0}
+@media (max-width:800px){.swipehint{display:block}}
+.ft{cursor:pointer;outline:none}
+.ft:hover,.ft:focus{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 6px var(--orange))}
+.ft.pulse{animation:glow 1.1s ease-in-out 4}
+@keyframes glow{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 10px #ef7724)}}
+.nat{cursor:pointer;outline:none}
+.nat:hover,.nat:focus{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 6px #2e8b5c)}
+.train{animation:chug 26s linear infinite}
+@keyframes chug{from{transform:translateX(-200px)}to{transform:translateX(1150px)}}
+.boat{animation:drift 30s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(260px)}}
+.cloud{animation:drift 60s ease-in-out infinite alternate}
+.wheel,.blades{transform-box:fill-box;transform-origin:center;animation:spin 6s linear infinite}
+.blades{animation-duration:4s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.smoke{animation:puff 4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.smoke.s2{animation-delay:1.3s}.smoke.s3{animation-delay:2.6s}
+@keyframes puff{0%{opacity:.8;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(14px,-40px) scale(1.6)}}
+.star{pointer-events:none}
+.star circle{animation:pop2 .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop2{from{transform:scale(0)}to{transform:scale(1)}}
+
+.scenegrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+.infocard{border:3px solid var(--ink);border-radius:var(--r-alt);padding:14px 16px;background:var(--paper);min-height:110px;box-shadow:3px 4px 0 rgba(10,47,56,.15)}
+.infocard h3{font-variation-settings:"wdth" 118,"wght" 850;font-size:1.3rem;margin:0 0 4px}
+.infocard p{margin:4px 0;font-size:.97rem}
+.kind{display:inline-block;font-family:var(--display);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:3px 10px;border:2px solid var(--ink);font-variation-settings:"wght" 800;margin-bottom:6px}
+.kind.h{background:var(--orange)}
+.kind.n{background:#7fd3a0}
+.fact{background:var(--white);border-left:6px solid var(--yellow);padding:6px 10px;border-radius:0 10px 10px 0;font-size:.9rem;margin-top:8px}
+.foundrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0}
+.fchip{font-size:.8rem;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;background:var(--white)}
+.fchip.got{background:var(--yellow)}
+.fchip.miss{border-style:dashed;opacity:.55}
+.counter{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem}
+.changes{font-size:.92rem;background:rgba(0,166,201,.1);border-radius:14px;padding:10px 14px;margin:10px 0 0}
+.changes b{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+
+/* written answers */
+textarea.note,input.note{font-family:var(--body);font-size:1rem;width:100%;min-height:84px;border:3px solid var(--ink);border-radius:14px 12px 16px 10px;padding:11px 14px;background:var(--white);color:var(--ink);line-height:1.5}
+input.note{min-height:0}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.starter{font-family:var(--body);font-size:.84rem;border:2px dashed var(--teal);background:var(--white);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.starter:hover{background:#e3f6fa}
+.lab{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem;letter-spacing:.06em;margin:14px 0 4px}
+.writebox{background:rgba(255,194,71,.18);border-radius:18px;padding:14px 16px;margin:18px 0 0}
+
+/* matching */
+.rounds{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.matchgrid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px}
+@media (max-width:560px){.matchgrid{grid-template-columns:1fr}}
+.mcol{display:grid;gap:8px;align-content:start}
+.mcol .lab{margin:0 0 2px}
+.mbtn{text-align:left;font-family:var(--body);font-size:.95rem;line-height:1.3;border:3px solid var(--ink);border-radius:14px 10px 16px 9px;padding:10px 12px;background:var(--white);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center;transition:transform .12s}
+.mbtn svg{flex:none;width:38px;height:30px}
+.mbtn:hover{transform:translateX(3px)}
+.mbtn[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}
+.mbtn.done{background:#c9f0d6;border-color:#2e8b5c;cursor:default;transform:none}
+.mbtn.done .num{background:#2e8b5c;color:#fff}
+.num{flex:none;display:inline-flex;width:24px;height:24px;border-radius:50%;align-items:center;justify-content:center;font-family:var(--display);font-size:.75rem;background:rgba(10,47,56,.1)}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.fbline{min-height:1.4em;margin:12px 0 0;padding:10px 14px;border-radius:14px;font-size:.95rem;background:rgba(10,47,56,.05)}
+.fbline:empty{display:none}
+.fbline.good{background:#d8f3e2}
+.fbline.hmm{background:#ffe6cf}
+
+/* who does it help */
+.helpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.helpcard{border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 14px;background:var(--paper)}
+.helpcard h4{font-variation-settings:"wdth" 114,"wght" 800;font-size:1.05rem;margin:0 0 8px;display:flex;gap:8px;align-items:center}
+.hchips{display:flex;flex-wrap:wrap;gap:6px}
+.hchip{font-family:var(--body);font-size:.85rem;border:2px solid var(--ink);border-radius:999px;padding:5px 11px;background:var(--white);color:var(--ink);cursor:pointer}
+.hchip.yes{background:#bfeccf}
+.hchip.maybe{background:#ffe2a8}
+.hchip.no{background:#f3d3d3}
+.hnote{font-size:.88rem;margin:8px 0 0;min-height:1.2em}
+
+/* sorter */
+.pickrow{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.pick{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.85rem;letter-spacing:.05em;border:3px solid var(--ink);border-radius:999px;padding:8px 14px;background:var(--white);color:var(--ink);cursor:pointer}
+.pick[aria-pressed="true"]{background:var(--orange);box-shadow:3px 3px 0 var(--ink)}
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:50px;padding:10px;border:3px dashed var(--line);border-radius:16px;margin:0 0 12px;background:rgba(255,255,255,.6)}
+.tray:empty::after{content:"All sorted. Nice one.";font-size:.9rem;color:var(--body-tint);padding:6px}
+.ecard{font-family:var(--body);font-size:.9rem;line-height:1.3;text-align:left;border:3px solid var(--ink);border-radius:12px 9px 14px 8px;padding:8px 11px;background:var(--white);color:var(--ink);cursor:grab;max-width:260px;box-shadow:2px 3px 0 rgba(10,47,56,.2)}
+.ecard[aria-pressed="true"]{background:var(--yellow);transform:rotate(-1.5deg) scale(1.03);box-shadow:4px 5px 0 var(--ink)}
+.ecard.placed{cursor:default;box-shadow:none;max-width:none;width:100%;font-size:.84rem;padding:6px 9px}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.bins{grid-template-columns:1fr}}
+.bin{border:3px solid var(--ink);border-radius:16px;padding:10px;min-height:96px;cursor:pointer;background:var(--white);text-align:left;font-family:var(--body);color:var(--ink);display:flex;flex-direction:column;gap:6px}
+.bin .bt{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:.95rem;display:flex;gap:8px;align-items:center}
+.bin.gp{background:#e3f7ea}.bin.bp{background:#fde9dc}.bin.gn{background:#e0f4f0}.bin.bn{background:#f8e3ea}
+.bin.ready{outline:4px dashed var(--orange);outline-offset:2px}
+.bin.over{outline:4px solid var(--orange)}
+.scalebox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:center;margin:16px 0 0}
+@media (max-width:620px){.scalebox{grid-template-columns:1fr}}
+.scalebox svg{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.tally4{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.88rem}
+.tally4 span{background:var(--paper);border-radius:10px;padding:6px 10px;border:2px solid rgba(10,47,56,.15)}
+#beam,#panL,#panR{transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+
+/* chart */
+.chartgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.chartgrid{grid-template-columns:1fr}}
+.chartgrid svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
+.raterow{border:2px solid rgba(10,47,56,.2);border-radius:14px;padding:8px 12px;margin:0 0 8px;background:var(--paper)}
+.raterow h4{font-variation-settings:"wdth" 110,"wght" 800;font-size:.95rem;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+.raterow .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.rr{display:grid;grid-template-columns:62px 1fr 92px;gap:8px;align-items:center;font-size:.82rem}
+.rr output{font-size:.78rem;text-align:right;color:var(--body-tint)}
+.cmpwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 0}
+@media (max-width:560px){.cmpwrap{grid-template-columns:1fr}}
+.cmpcard{border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 14px;background:var(--white)}
+.cmpcard h4{font-variation-settings:"wdth" 116,"wght" 850;font-size:1.1rem;margin:0 0 6px}
+.cmpcard ul{margin:0;padding-left:0;list-style:none;font-size:.9rem}
+.cmpcard li{padding:3px 0 3px 26px;position:relative}
+.cmpcard li::before{position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;font-weight:700;font-size:.85rem}
+.cmpcard li.p::before{content:"+";background:#bfeccf}
+.cmpcard li.m::before{content:"\2212";background:#ffd2b5}
+.cmpnote{background:rgba(123,75,143,.12);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:.93rem}
+
+/* maps */
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.maps{grid-template-columns:1fr}}
+.mapbox{border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:var(--white)}
+.mapbox .mh{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1rem;padding:6px 12px;border-bottom:3px solid var(--ink);display:flex;justify-content:space-between}
+.mapbox.old .mh{background:#e6d3a8}
+.mapbox.new .mh{background:var(--bright);color:var(--paper)}
+.mapbox svg{display:block;width:100%;height:auto;cursor:crosshair}
+.dz{fill:#000;fill-opacity:0;cursor:pointer}
+.dzs{stroke:#000;stroke-opacity:0;fill:none;cursor:pointer}
+.ring{fill:none;stroke:var(--orange);stroke-width:4;pointer-events:none;stroke-dasharray:5 4}
+.keyrow{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:.82rem;margin:10px 0 0}
+.keyrow span{display:inline-flex;align-items:center;gap:6px}
+.diffs{display:grid;gap:10px;margin:14px 0 0}
+.diff{border:3px solid var(--ink);border-radius:16px;padding:10px 14px;background:var(--paper)}
+.diff h4{font-variation-settings:"wdth" 114,"wght" 800;font-size:1rem;margin:0 0 4px}
+.diff p{margin:0 0 6px;font-size:.92rem}
+.whyopts{display:grid;gap:6px}
+.whyopt{text-align:left;font-family:var(--body);font-size:.9rem;border:2px solid var(--ink);border-radius:12px;padding:7px 11px;background:var(--white);color:var(--ink);cursor:pointer}
+.whyopt.best{background:#bfeccf}
+.whyopt.meh{background:#ffe6cf}
+.diffcount{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:10px 0 0}
+.diffcount i{width:22px;height:22px;border-radius:50%;border:3px solid var(--ink);display:block;background:var(--white)}
+.diffcount i.on{background:var(--orange)}
+
+/* planner */
+.opts6{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.popt{text-align:left;cursor:pointer;border:3px solid var(--ink);border-radius:var(--r-alt);padding:10px;background:var(--white);color:var(--ink);font-family:var(--body);font-size:.85rem;line-height:1.3}
+.popt svg{display:block;width:100%;height:60px;margin:0 0 6px}
+.popt b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:.98rem;margin-bottom:2px}
+.popt[aria-pressed="true"]{background:var(--yellow);box-shadow:4px 5px 0 var(--ink);transform:rotate(-1deg)}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 0}
+@media (max-width:560px){.meters{grid-template-columns:1fr}}
+.meter{border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px;background:var(--paper);text-align:center}
+.meter svg{width:90px;height:90px;display:block;margin:0 auto 4px}
+.meter output{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.9rem;margin-top:2px}
+.quotes{display:grid;gap:8px;margin:12px 0 0}
+.quote{background:var(--white);border:2px solid var(--ink);border-radius:18px 18px 18px 4px;padding:8px 12px;font-size:.92rem}
+.quote b{font-family:var(--display);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;display:block}
+
+/* survey */
+.safety{display:flex;gap:12px;align-items:center;background:#fff4d6;border:3px solid var(--ink);border-radius:var(--r-alt);padding:10px 14px;margin:0 0 14px;font-size:.93rem}
+.safety svg{flex:none;width:52px;height:52px}
+.tallies{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:10px}
+.tcell{border:3px solid var(--ink);border-radius:16px;background:var(--white);padding:8px;text-align:center}
+.tcell svg{width:40px;height:34px;display:block;margin:0 auto}
+.tcell .tl{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem;display:block;margin:2px 0 4px}
+.tcount{display:flex;align-items:center;justify-content:center;gap:8px}
+.tcount b{font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.5rem;min-width:2ch}
+.tb{width:38px;height:38px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-family:var(--display);font-size:1.2rem;font-weight:900;cursor:pointer;line-height:1;color:var(--ink)}
+.tb.minus{background:var(--white);width:30px;height:30px;font-size:1rem}
+.tcell.has{background:#fff6dc}
+.marks{font-family:monospace;font-size:.8rem;color:var(--teal);min-height:1.1em;letter-spacing:.06em;word-break:break-all}
+.qrow{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;border-bottom:2px dashed rgba(10,47,56,.12);padding:8px 0}
+@media (max-width:520px){.qrow{grid-template-columns:1fr}}
+.qrow .qn{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.9rem}
+.qends{display:flex;justify-content:space-between;font-size:.75rem;color:var(--body-tint)}
+.qscore{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--ink);color:var(--paper);border-radius:var(--r-alt);padding:12px 16px;margin:12px 0 0}
+.qscore .big{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.4rem;color:var(--yellow);line-height:1}
+.qbar{flex:1;min-width:140px;height:16px;background:rgba(247,242,233,.2);border-radius:999px;overflow:hidden}
+.qbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#ef7724,#ffc247,#7fd3a0);transition:width .3s}
+
+.restart{background:none;border:0;font-family:var(--body);font-size:.85rem;text-decoration:underline;color:var(--body-tint);cursor:pointer;padding:6px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(240%);visibility:hidden;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:.92rem;z-index:50;transition:transform .3s;max-width:90vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0);visibility:visible}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){.train,.boat,.cloud{transform:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>SHAPED BY <span class="accent">PEOPLE</span></h1>
+    <div class="line">
+      <span class="chip">Physical world</span>
+      <p>Roads, bridges, parks and reservoirs. How people have built, dug and changed the places around us.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap sbp">
+
+  <div class="panel panel-orange intro">
+    <div>
+      <p><b>Meet Bridgeford.</b> A made up town in an English valley. Slide it through 250 years and watch people change it: a ford becomes a bridge, fields become houses, a railway becomes a cycle path.</p>
+      <p>Seven stages, any order. Skip anything that is not for you today. The last one takes you outside, to survey the real streets around school.</p>
+      <p>It saves as you go, and nothing reaches Jay unless you send it.</p>
+    </div>
+    <svg viewBox="0 0 150 110" aria-hidden="true">
+      <rect x="0" y="0" width="150" height="110" rx="16" fill="#bfe6f5"/>
+      <circle cx="122" cy="24" r="12" fill="#ffc247"/>
+      <path d="M0 62 Q40 40 80 56 T150 50 L150 110 L0 110Z" fill="#86bd68"/>
+      <path d="M0 84 C40 78 90 92 150 86" stroke="#3b9bd6" stroke-width="12" fill="none"/>
+      <path d="M52 84 Q75 64 98 86" stroke="#cdb58f" stroke-width="9" fill="none"/>
+      <path d="M48 80 L102 80" stroke="#8d7a5c" stroke-width="3"/>
+      <rect x="24" y="44" width="18" height="16" fill="#b9573a"/><path d="M22 46 L33 36 L44 46Z" fill="#56606a"/>
+      <rect x="104" y="40" width="10" height="22" fill="#cdb58f"/><path d="M102 42 L109 24 L116 42Z" fill="#56606a"/>
+      <path d="M60 30 q6 -6 12 0 q6 -6 12 0" stroke="#0a2f38" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="card whobox" style="transform:rotate(.3deg)">
+    <span class="kicker">Who is this? (only if you want)</span>
+    <div class="whorow" id="whoRow" role="group" aria-label="Pick your initials"></div>
+    <div class="mymiles" id="myMiles" aria-live="polite"></div>
+  </div>
+
+  <div class="weektheme">
+    <h2>Seven stages</h2>
+    <span>Tap one to open it. Any order is fine.</span>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="trybar"><div class="trydots" id="tryDots"></div><span id="tryText">Nothing tried yet. Pick any stage.</span></div>
+
+  <!-- ================= STAGE 1 ================= -->
+  <section class="stage" id="s1" hidden aria-labelledby="h-s1">
+    <div class="shead fill-yellow">
+      <div class="stxt"><span class="sk">Stage 1</span><h2 id="h-s1">Time machine</h2>
+        <p>Slide Bridgeford through time. Tap anything you think people made or changed.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>Made by nature, or by people?</h3>
+          <p>Rivers, hills and wild woods were made by nature.</p>
+          <p>Anything people built, dug, planted or changed is <b>human made</b>. Even a hedge counts: people planted it.</p>
+        </div>
+        <svg viewBox="0 0 360 150" role="img" aria-label="On the left, a river and a wild tree labelled made by nature. On the right, a bridge and a lamp post labelled made by people.">
+          <rect x="4" y="4" width="170" height="142" rx="14" fill="#dff3e6" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="186" y="4" width="170" height="142" rx="14" fill="#ffe8d4" stroke="#0a2f38" stroke-width="2"/>
+          <text x="89" y="26" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="14" fill="#0a2f38">MADE BY NATURE</text>
+          <text x="271" y="26" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="14" fill="#0a2f38">MADE BY PEOPLE</text>
+          <path d="M10 118 C60 104 110 132 168 116" stroke="#3b9bd6" stroke-width="14" fill="none"/>
+          <rect x="52" y="60" width="8" height="44" fill="#7a5638"/>
+          <circle cx="56" cy="56" r="22" fill="#3f8a4a"/><circle cx="40" cy="66" r="14" fill="#2f6b3a"/><circle cx="72" cy="66" r="14" fill="#2f6b3a"/>
+          <path d="M110 104 L130 64 L150 104Z" fill="#9ccc7e"/>
+          <path d="M192 118 C240 104 290 132 350 116" stroke="#3b9bd6" stroke-width="14" fill="none"/>
+          <path d="M214 120 Q262 74 310 120" stroke="#cdb58f" stroke-width="12" fill="none"/>
+          <path d="M206 92 L318 92" stroke="#8d7a5c" stroke-width="4"/>
+          <rect x="330" y="46" width="5" height="72" fill="#0a2f38"/>
+          <path d="M320 46 L346 46 L340 38 L326 38Z" fill="#0a2f38"/><circle cx="333" cy="50" r="5" fill="#ffc247"/>
+        </svg>
+      </div>
+
+      <div class="erabar">
+        <div class="erabig" id="eraBig">1800</div>
+        <div class="erasub" id="eraSub">Farms and a ford</div>
+        <div class="erabtns" id="eraBtns" role="group" aria-label="Jump to a year"></div>
+      </div>
+      <div class="slidewrap">
+        <label class="sr" for="eraSlide">Year</label>
+        <input type="range" id="eraSlide" min="0" max="4" step="1" value="0">
+        <div class="slideticks"><span>1800</span><span>1900</span><span>1960</span><span>Today</span><span>2050?</span></div>
+      </div>
+
+      <div class="scenewrap" id="sceneWrap" data-era="0">
+<svg id="scene" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Bridgeford, a valley town. Tap things to find out about them.">
+<defs>
+  <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd0f0"/><stop offset=".55" stop-color="#d8f0f6"/><stop offset="1" stop-color="#fff3d6"/></linearGradient>
+  <linearGradient id="waterG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b9bd6"/><stop offset="1" stop-color="#2f80bf"/></linearGradient>
+  <g id="hs"><rect x="0" y="0" width="16" height="13" fill="#e9dcc3" stroke="#6b5a48" stroke-width="1"/><path d="M-2 1 L8 -7 L18 1Z" fill="#8a4b3b"/><rect x="6" y="7" width="4" height="6" fill="#5a4a3a"/></g>
+  <g id="hs2"><rect x="0" y="0" width="16" height="13" fill="#f4efe4" stroke="#6b5a48" stroke-width="1"/><path d="M-2 1 L8 -7 L18 1Z" fill="#56606a"/><rect x="3" y="3" width="4" height="4" fill="#7fc6e6"/><rect x="9" y="3" width="4" height="4" fill="#7fc6e6"/></g>
+  <g id="hsol"><rect x="0" y="0" width="16" height="13" fill="#fdf6e8" stroke="#6b5a48" stroke-width="1"/><path d="M-2 1 L8 -7 L18 1Z" fill="#2c4f8a"/><path d="M1 -1 L8 -6 L15 -1" stroke="#9fb7d9" stroke-width="1" fill="none"/></g>
+  <g id="tree"><rect x="-1.5" y="0" width="3" height="8" fill="#6b4a2e"/><circle cx="0" cy="-3" r="7" fill="#3f8a4a"/></g>
+  <g id="ytree"><rect x="-1" y="0" width="2" height="6" fill="#6b4a2e"/><circle cx="0" cy="-2" r="4.5" fill="#5aa85a"/></g>
+  <g id="cow"><ellipse cx="0" cy="0" rx="7" ry="4" fill="#fff"/><circle cx="-2" cy="-1" r="2" fill="#222"/><circle cx="7" cy="-2" r="2.6" fill="#fff"/><rect x="-5" y="3" width="1.6" height="4" fill="#222"/><rect x="3" y="3" width="1.6" height="4" fill="#222"/></g>
+  <g id="sheep"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#fbf8f0" stroke="#bbb" stroke-width=".6"/><circle cx="6" cy="-1" r="2.2" fill="#333"/><rect x="-3" y="3" width="1.4" height="3" fill="#333"/><rect x="2" y="3" width="1.4" height="3" fill="#333"/></g>
+  <g id="car"><rect x="-8" y="-4" width="16" height="7" rx="2"/><rect x="-4" y="-8" width="8" height="5" rx="1.5" fill="#cfeaf5"/><circle cx="-4" cy="3.5" r="2" fill="#222"/><circle cx="4" cy="3.5" r="2" fill="#222"/></g>
+  <g id="bike"><circle cx="-5" cy="0" r="4" fill="none" stroke="#0a2f38" stroke-width="1.5"/><circle cx="5" cy="0" r="4" fill="none" stroke="#0a2f38" stroke-width="1.5"/><path d="M-5 0 L0 -5 L5 0 M0 -5 L-1 -10" stroke="#0a2f38" stroke-width="1.5" fill="none"/><circle cx="-1" cy="-14" r="2.5" fill="#ef7724"/></g>
+  <g id="pylon"><path d="M-9 0 L-2 -40 L2 -40 L9 0 M-6 -14 L6 -14 M-4 -26 L4 -26 M-8 -30 L8 -30 M-6 -36 L6 -36 M-6 -14 L4 -26 M6 -14 L-4 -26" stroke="#6d757a" stroke-width="1.6" fill="none"/></g>
+  <g id="reed"><path d="M0 0 L-2 -12 M3 0 L4 -14 M-3 0 L-6 -10" stroke="#5f8a3a" stroke-width="1.6"/><rect x="3" y="-18" width="2.4" height="6" rx="1" fill="#7a5638"/></g>
+</defs>
+
+<!-- sky -->
+<rect width="1000" height="560" fill="url(#skyG)"/>
+<g class="nat" data-n="sun" tabindex="0" role="button" aria-label="The sun">
+  <circle cx="880" cy="70" r="34" fill="#ffd35c"/><circle cx="880" cy="70" r="46" fill="#ffd35c" opacity=".25"/>
+</g>
+<g class="cloud"><path d="M90 70 q10 -22 32 -12 q14 -18 34 -2 q22 -4 22 16 q-2 12 -18 12 h-64 q-20 -2 -6 -14z" fill="#fff" opacity=".9"/></g>
+<g class="cloud" style="animation-duration:80s"><path d="M560 50 q8 -18 26 -10 q12 -14 28 -2 q18 -2 18 14 q-2 10 -14 10 h-52 q-16 -2 -6 -12z" fill="#fff" opacity=".85"/></g>
+<g data-bird="1"><path d="M330 60 q6 -6 12 0 q6 -6 12 0" stroke="#0a2f38" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M370 80 q4 -4 8 0 q4 -4 8 0" stroke="#0a2f38" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+
+<!-- pylons on the ridge (1960 on) -->
+<g class="ft" data-f="pylons" data-e="2-4" tabindex="0" role="button" aria-label="Electricity pylons">
+  <path d="M264 120 Q342 132 420 104 Q498 118 575 90" stroke="#6d757a" stroke-width="1" fill="none"/>
+  <use href="#pylon" x="264" y="160"/><use href="#pylon" x="420" y="144"/><use href="#pylon" x="575" y="130"/>
+  <path d="M250 130 L590 92" stroke="#000" stroke-opacity="0" stroke-width="30"/>
+</g>
+
+<!-- wind turbines option (2050) -->
+<g class="ft" data-f="wind" data-e="4-4" data-opt="wind" tabindex="0" role="button" aria-label="Wind turbines">
+  <g transform="translate(830 143)"><rect x="-2" y="-78" width="4" height="78" fill="#f4f4f0" stroke="#9aa" stroke-width=".8"/><g class="blades" transform="translate(0 -78)"><path d="M0 0 L-3 -34 L3 -34Z M0 0 L30 15 L27 20Z M0 0 L-27 20 L-30 15Z" fill="#fbfbf8" stroke="#9aa" stroke-width=".8"/><circle r="3" fill="#ccd"/></g></g>
+  <g transform="translate(913 136)"><rect x="-2" y="-78" width="4" height="78" fill="#f4f4f0" stroke="#9aa" stroke-width=".8"/><g class="blades" transform="translate(0 -78)" style="animation-duration:5s"><path d="M0 0 L-3 -34 L3 -34Z M0 0 L30 15 L27 20Z M0 0 L-27 20 L-30 15Z" fill="#fbfbf8" stroke="#9aa" stroke-width=".8"/><circle r="3" fill="#ccd"/></g></g>
+  <g transform="translate(975 138)"><rect x="-2" y="-64" width="4" height="64" fill="#f4f4f0" stroke="#9aa" stroke-width=".8"/><g class="blades" transform="translate(0 -64)" style="animation-duration:4.5s"><path d="M0 0 L-3 -28 L3 -28Z M0 0 L25 12 L22 17Z M0 0 L-22 17 L-25 12Z" fill="#fbfbf8" stroke="#9aa" stroke-width=".8"/><circle r="3" fill="#ccd"/></g></g>
+</g>
+
+<!-- ridge -->
+<path d="M0 190 C140 140 240 165 340 155 C450 140 540 112 660 140 C780 165 880 122 1000 140 L1000 560 L0 560 Z" fill="#9ccc7e"/>
+<path class="nat" data-n="hills" tabindex="0" role="button" aria-label="The hills" d="M0 196 C140 146 240 171 340 161 C450 146 540 118 660 146 C780 171 880 128 1000 146" stroke="#000" stroke-opacity="0" stroke-width="26" fill="none"/>
+
+<!-- old woodland -->
+<g class="nat" data-n="woods" tabindex="0" role="button" aria-label="Old woodland">
+  <circle cx="40" cy="200" r="20" fill="#2f6b3a"/><circle cx="70" cy="188" r="22" fill="#3f8a4a"/><circle cx="100" cy="196" r="20" fill="#2f6b3a"/>
+  <circle cx="130" cy="190" r="22" fill="#3c8045"/><circle cx="162" cy="200" r="18" fill="#2f6b3a"/><circle cx="185" cy="214" r="16" fill="#3f8a4a"/>
+  <circle cx="30" cy="232" r="20" fill="#3c8045"/><circle cx="62" cy="226" r="22" fill="#2f6b3a"/><circle cx="96" cy="230" r="22" fill="#3f8a4a"/>
+  <circle cx="130" cy="226" r="20" fill="#2f6b3a"/><circle cx="160" cy="236" r="20" fill="#3c8045"/><circle cx="190" cy="244" r="14" fill="#2f6b3a"/>
+  <circle cx="20" cy="260" r="16" fill="#2f6b3a"/><circle cx="50" cy="258" r="16" fill="#3f8a4a"/><circle cx="84" cy="262" r="16" fill="#3c8045"/><circle cx="118" cy="258" r="16" fill="#2f6b3a"/><circle cx="150" cy="262" r="14" fill="#3f8a4a"/>
+</g>
+
+<!-- hill fields A (become the estate today) -->
+<g class="ft" data-f="fields" data-e="0-2" tabindex="0" role="button" aria-label="Fields and hedges">
+  <g stroke="#3d7a3b" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M210 190 L300 180 L305 225 L215 232Z" fill="#a8d27f"/><path d="M300 180 L395 170 L398 218 L305 225Z" fill="#c9dc85"/>
+    <path d="M215 232 L305 225 L308 264 L218 268Z" fill="#8cc56c"/><path d="M305 225 L398 218 L400 260 L308 264Z" fill="#b5d67a"/>
+  </g>
+  <use href="#sheep" x="250" y="210"/><use href="#sheep" x="268" y="216"/><use href="#cow" x="350" y="245"/>
+</g>
+<!-- housing estate (today) -->
+<g class="ft" data-f="estate" data-e="3-4" tabindex="0" role="button" aria-label="Housing estate">
+  <path d="M208 186 L398 168 L402 262 L216 270Z" fill="#b9d98f" stroke="#3d7a3b" stroke-width="3"/>
+  <path d="M222 258 C260 250 290 222 330 214 Q372 206 384 222" stroke="#8d9396" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <circle cx="386" cy="224" r="9" fill="#8d9396"/>
+  <use href="#hs2" x="226" y="226"/><use href="#hs" x="250" y="216"/><use href="#hs2" x="274" y="204"/><use href="#hs" x="300" y="194"/><use href="#hs2" x="326" y="188"/><use href="#hs" x="352" y="184"/>
+  <use href="#hs" x="262" y="244"/><use href="#hs2" x="290" y="232"/><use href="#hs" x="318" y="226"/><use href="#hs2" x="346" y="226"/><use href="#hs" x="372" y="236"/>
+  <use href="#ytree" x="240" y="250"/><use href="#ytree" x="338" y="250"/>
+  <use href="#car" x="300" y="222" fill="#3b7dd8"/>
+</g>
+
+<!-- hill fields B (solar option) -->
+<g class="ft" data-f="fields" data-e="0-4" data-yield="solar" tabindex="0" role="button" aria-label="Fields and hedges">
+  <g stroke="#3d7a3b" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M420 170 L495 160 L498 208 L422 214Z" fill="#c9dc85"/><path d="M495 160 L568 150 L570 200 L498 208Z" fill="#a8d27f"/>
+    <path d="M422 214 L498 208 L500 258 L424 262Z" fill="#b5d67a"/><path d="M498 208 L570 200 L572 254 L500 258Z" fill="#8cc56c"/>
+  </g>
+  <path d="M430 196 L486 190 M432 202 L488 196" stroke="#d9c26a" stroke-width="2"/>
+  <use href="#cow" x="530" y="230"/><use href="#cow" x="548" y="238"/>
+</g>
+<g class="ft" data-f="solar" data-e="4-4" data-opt="solar" tabindex="0" role="button" aria-label="Solar farm">
+  <path d="M418 168 L570 148 L574 256 L422 264Z" fill="#a8d27f" stroke="#3d7a3b" stroke-width="3.5"/>
+  <g fill="#2c4f8a" stroke="#9fb7d9" stroke-width="1">
+    <path d="M428 176 L560 160 L562 170 L430 186Z"/><path d="M430 196 L562 180 L564 190 L432 206Z"/><path d="M432 216 L564 200 L566 210 L434 226Z"/><path d="M434 236 L566 220 L568 230 L436 246Z"/>
+  </g>
+  <use href="#sheep" x="470" y="214"/><use href="#sheep" x="520" y="250"/>
+</g>
+
+<!-- hill fields C (homes or woodland option) -->
+<g class="ft" data-f="fields" data-e="0-4" data-yield="homes,woodland" tabindex="0" role="button" aria-label="Fields and hedges">
+  <g stroke="#3d7a3b" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M590 152 L680 154 L682 200 L592 204Z" fill="#b5d67a"/><path d="M680 154 L770 160 L772 206 L682 200Z" fill="#c9dc85"/>
+    <path d="M592 204 L682 200 L684 252 L594 256Z" fill="#a8d27f"/><path d="M682 200 L772 206 L774 250 L684 252Z" fill="#9fcf76"/>
+  </g>
+  <use href="#sheep" x="620" y="180"/><use href="#sheep" x="640" y="186"/><use href="#sheep" x="720" y="232"/>
+</g>
+<g class="ft" data-f="homes" data-e="4-4" data-opt="homes" tabindex="0" role="button" aria-label="New homes">
+  <path d="M588 150 L772 158 L776 252 L592 258Z" fill="#c4e0a0" stroke="#3d7a3b" stroke-width="3"/>
+  <path d="M600 240 C640 230 680 200 760 196" stroke="#8d9396" stroke-width="6" fill="none"/>
+  <use href="#hsol" x="604" y="214"/><use href="#hsol" x="628" y="206"/><use href="#hsol" x="652" y="196"/><use href="#hsol" x="676" y="188"/><use href="#hsol" x="700" y="180"/><use href="#hsol" x="724" y="176"/>
+  <use href="#hsol" x="640" y="232"/><use href="#hsol" x="666" y="224"/><use href="#hsol" x="692" y="214"/><use href="#hsol" x="718" y="210"/><use href="#hsol" x="744" y="212"/>
+  <use href="#ytree" x="612" y="190"/><use href="#ytree" x="760" y="236"/>
+</g>
+<g class="ft" data-f="woodland" data-e="4-4" data-opt="woodland" tabindex="0" role="button" aria-label="New woodland">
+  <path d="M588 150 L772 158 L776 252 L592 258Z" fill="#9fcf76" stroke="#3d7a3b" stroke-width="3"/>
+  <use href="#ytree" x="602" y="172"/><use href="#ytree" x="622" y="168"/><use href="#ytree" x="644" y="172"/><use href="#ytree" x="668" y="170"/><use href="#ytree" x="692" y="174"/><use href="#ytree" x="716" y="176"/><use href="#ytree" x="742" y="178"/><use href="#ytree" x="764" y="182"/>
+  <use href="#ytree" x="610" y="198"/><use href="#ytree" x="634" y="196"/><use href="#ytree" x="658" y="198"/><use href="#ytree" x="682" y="200"/><use href="#ytree" x="706" y="202"/><use href="#ytree" x="730" y="204"/><use href="#ytree" x="756" y="206"/>
+  <use href="#ytree" x="604" y="224"/><use href="#ytree" x="628" y="222"/><use href="#ytree" x="652" y="226"/><use href="#ytree" x="676" y="224"/><use href="#ytree" x="700" y="228"/><use href="#ytree" x="724" y="228"/><use href="#ytree" x="750" y="230"/>
+  <use href="#ytree" x="616" y="248"/><use href="#ytree" x="642" y="248"/><use href="#ytree" x="668" y="248"/><use href="#ytree" x="694" y="248"/><use href="#ytree" x="720" y="248"/><use href="#ytree" x="746" y="246"/>
+</g>
+
+<!-- quarry -->
+<g class="ft" data-f="quarry" data-e="1-3" tabindex="0" role="button" aria-label="Quarry">
+  <path d="M805 172 L935 162 L926 236 L816 240Z" fill="#c9c1b3" stroke="#8a8174" stroke-width="3"/>
+  <path d="M818 190 L926 182 M820 208 L926 200 M822 224 L924 218" stroke="#a69c8c" stroke-width="5"/>
+  <path d="M900 234 l10 -12 l12 12z" fill="#a69c8c"/>
+  <g transform="translate(850 226)"><rect x="0" y="-8" width="16" height="8" fill="#f0a80f"/><rect x="2" y="-14" width="7" height="6" fill="#f0a80f"/><path d="M16 -6 L26 -16 L30 -10" stroke="#f0a80f" stroke-width="3" fill="none"/><circle cx="4" cy="1" r="3" fill="#333"/><circle cx="13" cy="1" r="3" fill="#333"/></g>
+</g>
+<g class="ft" data-f="quarrylake" data-e="4-4" tabindex="0" role="button" aria-label="Quarry lake nature reserve">
+  <path d="M805 172 L935 162 L926 236 L816 240Z" fill="#a9cf8a" stroke="#5f8a3a" stroke-width="3"/>
+  <path d="M818 184 L924 176 L918 230 L826 232Z" fill="url(#waterG)"/>
+  <use href="#reed" x="830" y="232"/><use href="#reed" x="912" y="230"/><use href="#reed" x="900" y="186"/>
+  <path d="M850 200 q5 -5 10 0 q5 -5 10 0" stroke="#fff" stroke-width="2" fill="none"/>
+  <ellipse cx="880" cy="214" rx="7" ry="3" fill="#6b4a2e"/><circle cx="886" cy="210" r="2.5" fill="#2f6b3a"/>
+</g>
+
+<!-- valley floor -->
+<path d="M0 285 C200 268 380 280 520 276 C680 272 820 290 1000 278 L1000 560 L0 560 Z" fill="#86bd68"/>
+
+<!-- railway (1900-1960) -->
+<g class="ft" data-f="railway" data-e="1-2" tabindex="0" role="button" aria-label="Railway and station">
+  <path d="M0 292 C300 284 700 282 1000 284" stroke="#9a8670" stroke-width="9" fill="none"/>
+  <path d="M0 292 C300 284 700 282 1000 284" stroke="#4a3a2a" stroke-width="7" stroke-dasharray="2 5" fill="none"/>
+  <path d="M0 290 C300 282 700 280 1000 282" stroke="#555" stroke-width="1.6" fill="none"/>
+  <g transform="translate(700 252)"><rect x="-6" y="20" width="62" height="8" fill="#b9a68a"/><rect x="6" y="2" width="38" height="20" fill="#c9a77a" stroke="#6b5a48"/><path d="M2 4 L25 -8 L48 4Z" fill="#7a3b2e"/><rect x="20" y="10" width="9" height="12" fill="#4a3a2a"/><rect x="-4" y="12" width="10" height="3" fill="#7a3b2e"/></g>
+  <g class="train">
+    <g data-era-only="1"><rect x="0" y="266" width="44" height="18" rx="3" fill="#2a5a3a"/><rect x="30" y="256" width="14" height="12" fill="#2a5a3a"/><rect x="6" y="258" width="8" height="10" fill="#222"/><circle cx="10" cy="285" r="5" fill="#222"/><circle cx="34" cy="285" r="5" fill="#222"/><circle cx="8" cy="250" r="5" fill="#ddd" opacity=".8"/><circle cx="-2" cy="244" r="7" fill="#ddd" opacity=".6"/>
+      <rect x="-40" y="266" width="36" height="16" rx="2" fill="#7a3b2e"/><rect x="-80" y="266" width="36" height="16" rx="2" fill="#7a3b2e"/></g>
+    <g data-era-only="2"><rect x="-70" y="262" width="120" height="20" rx="5" fill="#2f6e4a"/><rect x="-66" y="266" width="112" height="6" fill="#cfeaf5"/><rect x="-70" y="276" width="120" height="3" fill="#ffc247"/><circle cx="-56" cy="285" r="4" fill="#222"/><circle cx="38" cy="285" r="4" fill="#222"/></g>
+  </g>
+  <path d="M0 290 C300 282 700 280 1000 282" stroke="#000" stroke-opacity="0" stroke-width="26" fill="none"/>
+</g>
+<!-- cycle path (today on) -->
+<g class="ft" data-f="cyclepath" data-e="3-4" tabindex="0" role="button" aria-label="Cycle path">
+  <path d="M0 292 C300 284 700 282 1000 284" stroke="#d9b98a" stroke-width="9" fill="none"/>
+  <path d="M0 292 C300 284 700 282 1000 284" stroke="#fff" stroke-width="1.5" stroke-dasharray="10 8" fill="none"/>
+  <g transform="translate(700 252)"><rect x="6" y="2" width="38" height="20" fill="#c9a77a" stroke="#6b5a48"/><path d="M2 4 L25 -8 L48 4Z" fill="#7a3b2e"/><rect x="20" y="10" width="9" height="12" fill="#4a3a2a"/><rect x="-14" y="6" width="18" height="12" rx="2" fill="#fffdf8" stroke="#0a2f38"/><text x="-5" y="15" text-anchor="middle" font-size="7" font-family="Arial" font-weight="700" fill="#0a2f38">CAFE</text><circle cx="52" cy="20" r="3" fill="#ef7724"/><circle cx="58" cy="20" r="3" fill="#00a6c9"/></g>
+  <use href="#bike" x="240" y="286"/><use href="#bike" x="520" y="280"/><use href="#bike" x="880" y="280"/>
+  <path d="M0 290 C300 282 700 280 1000 282" stroke="#000" stroke-opacity="0" stroke-width="26" fill="none"/>
+</g>
+
+<!-- fields D, valley right (retail park today) -->
+<g class="ft" data-f="fields" data-e="0-2" tabindex="0" role="button" aria-label="Fields and hedges">
+  <path d="M790 296 L1000 290 L1000 455 L880 422 L790 390Z" fill="#9fcf76" stroke="#3d7a3b" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M890 293 L900 428" stroke="#3d7a3b" stroke-width="3.5"/>
+  <use href="#cow" x="830" y="330"/><use href="#cow" x="850" y="346"/><use href="#cow" x="940" y="360"/>
+</g>
+<g class="ft" data-f="retail" data-e="3-4" tabindex="0" role="button" aria-label="Retail park">
+  <path d="M790 296 L1000 290 L1000 455 L880 422 L790 390Z" fill="#9fcf76" stroke="#3d7a3b" stroke-width="3"/>
+  <rect x="800" y="336" width="165" height="44" fill="#9ca3a6"/>
+  <g stroke="#fff" stroke-width="1.5"><path d="M812 340 V352 M826 340 V352 M840 340 V352 M854 340 V352 M868 340 V352 M882 340 V352 M896 340 V352 M910 340 V352 M924 340 V352 M938 340 V352 M952 340 V352 M812 364 V376 M826 364 V376 M840 364 V376 M854 364 V376 M868 364 V376 M882 364 V376 M896 364 V376 M910 364 V376 M924 364 V376 M938 364 V376"/></g>
+  <use href="#car" x="833" y="347" fill="#e2577e"/><use href="#car" x="889" y="371" fill="#3b7dd8"/><use href="#car" x="931" y="347" fill="#ffc247"/>
+  <rect x="804" y="298" width="74" height="36" fill="#ece6d8" stroke="#6b5a48"/><rect x="804" y="298" width="74" height="9" fill="#ef7724"/><text x="841" y="306" text-anchor="middle" font-size="7.5" font-family="Arial" font-weight="700" fill="#fff">MEGAMART</text>
+  <rect x="884" y="300" width="82" height="34" fill="#ece6d8" stroke="#6b5a48"/><rect x="884" y="300" width="82" height="9" fill="#7b4b8f"/><text x="925" y="308" text-anchor="middle" font-size="7.5" font-family="Arial" font-weight="700" fill="#fff">SOFA CITY</text>
+</g>
+
+<!-- fields E, south of river (wetland option) -->
+<g class="ft" data-f="fields" data-e="0-4" data-yield="wetland" tabindex="0" role="button" aria-label="Fields and hedges">
+  <g stroke="#3d7a3b" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M10 320 L190 340 L192 452 L10 452Z" fill="#b5d67a"/><path d="M190 340 L372 370 L378 452 L192 452Z" fill="#a8d27f"/>
+  </g>
+  <path d="M30 380 L170 384 M30 396 L170 400 M30 412 L170 416 M30 428 L170 432" stroke="#d9c26a" stroke-width="2.5"/>
+  <use href="#sheep" x="240" y="410"/><use href="#sheep" x="262" y="420"/><use href="#sheep" x="300" y="404"/>
+</g>
+<g class="ft" data-f="wetland" data-e="4-4" data-opt="wetland" tabindex="0" role="button" aria-label="Wetland">
+  <path d="M10 320 L190 340 L372 370 L378 452 L10 452Z" fill="#8fc8a0" stroke="#5f8a3a" stroke-width="3"/>
+  <ellipse cx="100" cy="406" rx="52" ry="18" fill="url(#waterG)"/><ellipse cx="250" cy="420" rx="46" ry="14" fill="url(#waterG)"/><ellipse cx="320" cy="396" rx="24" ry="9" fill="url(#waterG)"/>
+  <use href="#reed" x="54" y="414"/><use href="#reed" x="148" y="400"/><use href="#reed" x="206" y="428"/><use href="#reed" x="290" y="424"/><use href="#reed" x="342" y="400"/><use href="#reed" x="180" y="380"/><use href="#reed" x="60" y="378"/>
+  <path d="M90 440 q4 -4 8 0 q4 -4 8 0 M230 380 q4 -4 8 0 q4 -4 8 0" stroke="#0a2f38" stroke-width="1.8" fill="none"/>
+</g>
+
+<!-- Combe Farm (1800-1900) -->
+<g class="ft" data-f="farm" data-e="0-1" tabindex="0" role="button" aria-label="Combe Farm">
+  <rect x="64" y="318" width="34" height="22" fill="#e9dcc3" stroke="#6b5a48"/><path d="M60 320 L81 304 L102 320Z" fill="#8a6a3b"/><rect x="77" y="328" width="7" height="12" fill="#5a4a3a"/>
+  <rect x="108" y="322" width="40" height="18" fill="#9b4a32" stroke="#5a3a2a"/><path d="M104 324 L128 310 L152 324Z" fill="#6b4a2e"/>
+  <use href="#cow" x="160" y="346"/>
+</g>
+
+<!-- river -->
+<g class="nat" data-n="river" tabindex="0" role="button" aria-label="River">
+  <path d="M-10 305 C80 310 170 322 240 332 C330 345 400 362 470 368 C540 374 600 372 660 380 C740 392 820 420 880 440 C930 456 970 470 1010 480" stroke="#2f80bf" stroke-width="28" fill="none" stroke-linecap="round"/>
+  <path d="M-10 305 C80 310 170 322 240 332 C330 345 400 362 470 368 C540 374 600 372 660 380 C740 392 820 420 880 440 C930 456 970 470 1010 480" stroke="#5fb3e6" stroke-width="16" fill="none"/>
+  <path d="M120 316 q10 -3 20 0 M420 362 q10 -3 20 0 M700 386 q10 -3 20 0 M900 448 q10 -3 20 0" stroke="#d8f0f6" stroke-width="2" fill="none"/>
+</g>
+
+<!-- ford (1800) -->
+<g class="ft" data-f="ford" data-e="0-0" tabindex="0" role="button" aria-label="The ford">
+  <path d="M548 352 L548 394" stroke="#b48a5a" stroke-width="14" opacity=".55"/>
+  <ellipse cx="540" cy="362" rx="4" ry="3" fill="#9a8a78"/><ellipse cx="556" cy="370" rx="4" ry="3" fill="#9a8a78"/><ellipse cx="542" cy="378" rx="4" ry="3" fill="#9a8a78"/><ellipse cx="555" cy="386" rx="4" ry="3" fill="#9a8a78"/>
+  <rect x="528" y="350" width="40" height="46" fill="#000" fill-opacity="0"/>
+</g>
+
+<!-- reservoir (1960 on) -->
+<g class="ft" data-f="reservoir" data-e="2-4" tabindex="0" role="button" aria-label="Reservoir and dam">
+  <path d="M0 290 C60 284 150 286 228 298 L238 344 C170 356 80 354 0 350 Z" fill="url(#waterG)"/>
+  <path d="M30 312 q12 -4 24 0 M110 330 q12 -4 24 0 M170 310 q12 -4 24 0" stroke="#d8f0f6" stroke-width="2" fill="none"/>
+  <path d="M228 294 Q244 320 238 348" stroke="#cfc9bf" stroke-width="11" fill="none" stroke-linecap="round"/>
+  <path d="M228 294 Q244 320 238 348" stroke="#a49c90" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+  <g transform="translate(120 318)"><path d="M-10 0 L10 0 L6 5 L-6 5Z" fill="#fff"/><path d="M0 0 L0 -18 L10 -2Z" fill="#ef7724"/></g>
+</g>
+
+<!-- flood wall (today on) -->
+<g class="ft" data-f="floodwall" data-e="3-4" tabindex="0" role="button" aria-label="Flood wall">
+  <path d="M458 350 C490 354 515 356 528 357 M568 358 C600 358 640 362 660 366 C690 370 710 374 726 379" stroke="#8f9089" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M458 348 C490 352 515 354 528 355 M568 356 C600 356 640 360 660 364 C690 368 710 372 726 377" stroke="#c9c7bf" stroke-width="2" fill="none"/>
+  <path d="M458 350 C520 356 640 360 726 379" stroke="#000" stroke-opacity="0" stroke-width="20" fill="none"/>
+</g>
+
+<!-- mill (1900 on) -->
+<g class="ft" data-f="mill" data-e="1-4" tabindex="0" role="button" aria-label="The mill">
+  <rect x="380" y="306" width="60" height="46" fill="#d2b48a" stroke="#6b5a48" stroke-width="1.5"/>
+  <path d="M376 308 L410 290 L444 308Z" fill="#56606a"/>
+  <g fill="#4a3a2a"><rect x="388" y="314" width="8" height="8"/><rect x="402" y="314" width="8" height="8"/><rect x="416" y="314" width="8" height="8"/><rect x="388" y="330" width="8" height="8"/><rect x="402" y="330" width="8" height="8"/><rect x="416" y="330" width="8" height="8"/></g>
+  <g data-era-from="3" fill="#7fd3a0"><rect x="388" y="321" width="8" height="2"/><rect x="416" y="321" width="8" height="2"/><rect x="402" y="337" width="8" height="2"/></g>
+  <g data-era-from="3"><rect x="386" y="342" width="30" height="8" fill="#fffdf8" stroke="#0a2f38" stroke-width=".8"/><text x="401" y="348.5" text-anchor="middle" font-size="5.5" font-family="Arial" font-weight="700" fill="#0a2f38">MILL FLATS</text></g>
+  <rect x="428" y="262" width="9" height="40" fill="#9b4a32"/>
+  <g data-era-to="2"><circle class="smoke" cx="432" cy="256" r="6" fill="#ccc"/><circle class="smoke s2" cx="432" cy="256" r="6" fill="#ccc"/><circle class="smoke s3" cx="432" cy="256" r="6" fill="#ccc"/></g>
+  <g class="wheel"><circle cx="448" cy="352" r="13" fill="none" stroke="#6b4a2e" stroke-width="3"/><path d="M435 352 H461 M448 339 V365 M439 343 L457 361 M457 343 L439 361" stroke="#6b4a2e" stroke-width="2"/></g>
+</g>
+
+<!-- cottages (1800 on) -->
+<g class="ft" data-f="cottages" data-e="0-4" tabindex="0" role="button" aria-label="Cottages">
+  <g transform="translate(466 334)"><use href="#hs"/></g><g transform="translate(486 332)"><use href="#hs"/></g><g transform="translate(506 336)"><use href="#hs"/></g>
+</g>
+
+<!-- church (always) -->
+<g class="ft" data-f="church" data-e="0-4" tabindex="0" role="button" aria-label="Church">
+  <rect x="592" y="322" width="36" height="26" fill="#cdb58f" stroke="#6b5a48" stroke-width="1.2"/><path d="M588 324 L610 310 L632 324Z" fill="#56606a"/>
+  <rect x="628" y="302" width="16" height="46" fill="#d6c09a" stroke="#6b5a48" stroke-width="1.2"/><path d="M626 302 L636 270 L646 302Z" fill="#56606a"/>
+  <path d="M600 334 a4 4 0 0 1 8 0 v6 h-8z M614 334 a4 4 0 0 1 8 0 v6 h-8z" fill="#4a3a2a"/><circle cx="636" cy="314" r="4" fill="#fffdf8" stroke="#6b5a48"/>
+</g>
+
+<!-- council houses (1960 on) -->
+<g class="ft" data-f="council" data-e="2-4" tabindex="0" role="button" aria-label="Council houses">
+  <g transform="translate(664 346)"><rect width="34" height="18" fill="#efe7d6" stroke="#6b5a48"/><path d="M-2 1 L17 -9 L36 1Z" fill="#7a6e66"/><rect x="4" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="24" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="14" y="8" width="6" height="10" fill="#c94a3a"/></g>
+  <g transform="translate(708 352)"><rect width="34" height="18" fill="#efe7d6" stroke="#6b5a48"/><path d="M-2 1 L17 -9 L36 1Z" fill="#7a6e66"/><rect x="4" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="24" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="14" y="8" width="6" height="10" fill="#3b7dd8"/></g>
+  <g transform="translate(752 360)"><rect width="34" height="18" fill="#efe7d6" stroke="#6b5a48"/><path d="M-2 1 L17 -9 L36 1Z" fill="#7a6e66"/><rect x="4" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="24" y="5" width="6" height="5" fill="#7fc6e6"/><rect x="14" y="8" width="6" height="10" fill="#2e8b5c"/></g>
+</g>
+
+<!-- terraced houses (1900 on) -->
+<g class="ft" data-f="terraces" data-e="1-4" tabindex="0" role="button" aria-label="Terraced houses">
+  <rect x="384" y="404" width="144" height="24" fill="#b9573a" stroke="#6b3a2a" stroke-width="1.2"/>
+  <path d="M382 406 L392 394 L520 394 L530 406Z" fill="#56606a"/>
+  <g fill="#7a3b2e"><rect x="392" y="388" width="5" height="8"/><rect x="428" y="388" width="5" height="8"/><rect x="464" y="388" width="5" height="8"/><rect x="500" y="388" width="5" height="8"/></g>
+  <g fill="#f4e6c8"><rect x="388" y="410" width="6" height="6"/><rect x="406" y="410" width="6" height="6"/><rect x="424" y="410" width="6" height="6"/><rect x="442" y="410" width="6" height="6"/><rect x="460" y="410" width="6" height="6"/><rect x="478" y="410" width="6" height="6"/><rect x="496" y="410" width="6" height="6"/><rect x="514" y="410" width="6" height="6"/></g>
+  <path d="M402 404 V428 M420 404 V428 M438 404 V428 M456 404 V428 M474 404 V428 M492 404 V428 M510 404 V428" stroke="#6b3a2a" stroke-width="1"/>
+</g>
+
+<!-- park (1960 on) -->
+<g class="ft" data-f="park" data-e="2-4" tabindex="0" role="button" aria-label="Park and playground">
+  <path d="M590 398 L680 402 L762 418 L760 456 L592 456Z" fill="#b6e27e" stroke="#3d7a3b" stroke-width="3"/>
+  <path d="M598 450 C640 430 700 440 754 424" stroke="#e9dcc3" stroke-width="4" fill="none"/>
+  <use href="#tree" x="606" y="416"/><use href="#tree" x="742" y="432"/>
+  <g transform="translate(640 410)" stroke="#c94a3a" stroke-width="2.5" fill="none"><path d="M0 22 L8 0 L16 22 M8 0 L28 0 M20 0 L28 22"/><path d="M14 0 V14 M22 0 V14" stroke="#555" stroke-width="1"/><rect x="11" y="14" width="6" height="2" fill="#555"/></g>
+  <path d="M692 446 V432 H714 V446" stroke="#fff" stroke-width="2.5" fill="none"/>
+</g>
+
+<!-- canal (1900 on) -->
+<g class="ft" data-f="canal" data-e="1-4" tabindex="0" role="button" aria-label="Canal">
+  <path d="M0 470 C200 466 400 474 600 472 C800 470 900 476 1010 472" stroke="#3a86b8" stroke-width="12" fill="none"/>
+  <path d="M0 462 C200 458 400 466 600 464 C800 462 900 468 1010 464" stroke="#d6bf94" stroke-width="3" fill="none"/>
+  <rect x="296" y="462" width="5" height="16" fill="#5a3a2a"/><rect x="330" y="462" width="5" height="16" fill="#5a3a2a"/>
+  <g class="boat"><rect x="100" y="464" width="56" height="9" rx="3" fill="#c94a3a"/><rect x="108" y="459" width="38" height="7" fill="#2e6b4a"/><rect x="146" y="460" width="5" height="4" fill="#ffc247"/></g>
+  <path d="M0 468 C300 466 700 472 1010 470" stroke="#000" stroke-opacity="0" stroke-width="24" fill="none"/>
+</g>
+
+<!-- main road -->
+<g class="ft" data-f="road" data-e="0-4" tabindex="0" role="button" aria-label="Main road">
+  <path data-era-to="0" d="M548 560 L548 396 M548 352 L548 300 C552 270 570 240 600 215" stroke="#b48a5a" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path data-era-from="1" data-era-to="1" d="M548 560 L548 300 C552 270 570 240 600 215" stroke="#a7a091" stroke-width="13" fill="none"/>
+  <g data-era-from="2"><path d="M548 560 L548 300 C552 270 570 240 600 215" stroke="#5c6266" stroke-width="14" fill="none"/>
+  <path d="M548 560 L548 300 C552 270 570 240 600 215" stroke="#fff" stroke-width="1.6" stroke-dasharray="8 8" fill="none"/></g>
+  <g data-era-only="1" transform="translate(554 446)"><rect x="0" y="-6" width="16" height="8" fill="#8a5a2e"/><circle cx="4" cy="3" r="3.5" fill="none" stroke="#3a2a1a" stroke-width="1.5"/><circle cx="13" cy="3" r="3.5" fill="none" stroke="#3a2a1a" stroke-width="1.5"/><path d="M-12 -2 h10 v-6 h-10z" fill="#6b4a2e"/></g>
+  <g data-era-only="0" transform="translate(554 470)"><rect x="0" y="-6" width="14" height="7" fill="#8a5a2e"/><circle cx="7" cy="2" r="4" fill="none" stroke="#3a2a1a" stroke-width="1.5"/><path d="M-12 -2 h10 v-6 h-10z" fill="#9a8a78"/></g>
+  <g data-era-from="2" data-yield="carfree"><use href="#car" x="548" y="430" fill="#e2577e" transform="rotate(90 548 430)"/><use href="#car" x="548" y="320" fill="#ffc247" transform="rotate(-90 548 320)"/></g>
+  <path d="M548 560 L548 300 C552 270 570 240 600 215" stroke="#000" stroke-opacity="0" stroke-width="22" fill="none"/>
+</g>
+
+<!-- stone bridge (1900 on) -->
+<g class="ft" data-f="bridge" data-e="1-4" tabindex="0" role="button" aria-label="Stone bridge">
+  <rect x="532" y="354" width="32" height="42" fill="#cdb58f"/>
+  <path d="M532 354 V396 M564 354 V396" stroke="#8d7a5c" stroke-width="5"/>
+  <path d="M520 398 Q548 382 576 398" stroke="#8d7a5c" stroke-width="3" fill="none"/>
+  <path data-era-from="2" d="M548 354 L548 396" stroke="#5c6266" stroke-width="12"/>
+  <path data-era-from="2" d="M548 354 L548 396" stroke="#fff" stroke-width="1.6" stroke-dasharray="8 8"/>
+  <path data-era-only="1" d="M548 354 L548 396" stroke="#a7a091" stroke-width="12"/>
+</g>
+
+<!-- car free high street option (2050) -->
+<g class="ft" data-f="carfree" data-e="4-4" data-opt="carfree" tabindex="0" role="button" aria-label="Car free high street">
+  <path d="M548 520 L548 300" stroke="#eadfc8" stroke-width="16" fill="none"/>
+  <path d="M548 520 L548 300" stroke="#c9b48f" stroke-width="1.5" stroke-dasharray="3 6" fill="none"/>
+  <use href="#ytree" x="532" y="440"/><use href="#ytree" x="564" y="440"/><use href="#ytree" x="532" y="488"/><use href="#ytree" x="564" y="488"/><use href="#ytree" x="532" y="320"/><use href="#ytree" x="564" y="320"/>
+  <use href="#bike" x="548" y="460"/><use href="#bike" x="548" y="330"/>
+</g>
+
+<!-- bypass (today on) -->
+<g class="ft" data-f="bypass" data-e="3-4" tabindex="0" role="button" aria-label="Bypass">
+  <path d="M690 560 C760 505 830 455 880 436 C930 418 975 380 1010 350" stroke="#c6c3ba" stroke-width="26" fill="none"/>
+  <path d="M690 560 C760 505 830 455 880 436 C930 418 975 380 1010 350" stroke="#4d5356" stroke-width="20" fill="none"/>
+  <path d="M690 560 C760 505 830 455 880 436 C930 418 975 380 1010 350" stroke="#fff" stroke-width="1.6" stroke-dasharray="10 9" fill="none"/>
+  <use href="#car" x="760" y="500" fill="#3b7dd8"/><use href="#car" x="930" y="410" fill="#e2577e"/><g transform="translate(850 452)"><rect x="-14" y="-6" width="28" height="11" rx="2" fill="#f0f0ea" stroke="#555"/><circle cx="-8" cy="6" r="2.5" fill="#222"/><circle cx="8" cy="6" r="2.5" fill="#222"/></g>
+</g>
+
+<!-- foreground -->
+<path d="M0 520 C250 505 600 530 1000 512 L1000 560 L0 560Z" fill="#6aa452"/>
+<g class="ft" data-f="fields" data-e="0-4" tabindex="0" role="button" aria-label="Fields and hedges">
+  <path d="M0 516 C120 508 250 506 360 512 C440 516 500 520 532 520 M564 521 C640 524 680 522 700 520" stroke="#2f6b3a" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M0 512 C120 504 250 502 360 508 M564 517 C640 520 680 518 700 516" stroke="#3f8a4a" stroke-width="5" fill="none" stroke-dasharray="6 7" stroke-linecap="round"/>
+</g>
+
+<!-- heron -->
+<g class="nat" data-n="heron" tabindex="0" role="button" aria-label="A bird by the river">
+  <g transform="translate(330 382)">
+    <path d="M-2 0 L-4 16 M4 0 L6 16" stroke="#e0a030" stroke-width="1.6"/>
+    <ellipse cx="0" cy="-4" rx="10" ry="6" fill="#9aa4ab"/><path d="M-8 -6 L-16 2 L-6 -2Z" fill="#5d666c"/>
+    <path d="M6 -8 C10 -16 4 -20 8 -26" stroke="#c9d0d4" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <circle cx="9" cy="-27" r="3.4" fill="#e8ecee"/><path d="M11 -27 L22 -26 L11 -25Z" fill="#e0a030"/><path d="M7 -29 L1 -31" stroke="#222" stroke-width="1.4"/>
+  </g>
+  <rect x="312" y="350" width="40" height="52" fill="#000" fill-opacity="0"/>
+</g>
+
+<!-- placeholder for 2050 idea -->
+<g id="ideaSign" data-e="4-4" data-noopt="1" style="cursor:pointer" tabindex="0" role="button" aria-label="Your 2050 idea goes here. Opens Bridgeford 2050.">
+  <rect x="636" y="482" width="5" height="40" fill="#6b4a2e"/>
+  <rect x="582" y="474" width="114" height="30" rx="6" fill="#fffdf8" stroke="#7b4b8f" stroke-width="3" stroke-dasharray="5 3"/>
+  <text x="639" y="487" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="10" fill="#7b4b8f">YOUR 2050 IDEA?</text>
+  <text x="639" y="499" text-anchor="middle" font-family="Arial" font-size="8.5" fill="#0a2f38">tap to plan it</text>
+</g>
+
+<g id="stars"></g>
+<text id="eraStamp" x="20" y="540" font-family="Archivo,Arial" font-weight="900" font-size="34" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5" opacity=".85">1800</text>
+</svg>
+      </div>
+      <p class="swipehint">Swipe the picture sideways to see all of Bridgeford.</p>
+
+      <div class="scenegrid">
+        <div class="infocard" id="info" aria-live="polite">
+          <span class="kind h">Tap something</span>
+          <h3>What did people make?</h3>
+          <p>Tap anything in the picture. Some things were made by people, some by nature. Glowing stars mark what you have found.</p>
+        </div>
+      </div>
+      <div class="foundrow"><span class="counter" id="counter"></span></div>
+      <div class="foundrow" id="foundChips"></div>
+      <div class="toolrow">
+        <button class="btn btn-quiet sm" id="showNew">Show me what is new</button>
+        <button class="btn btn-quiet sm" id="nudge">Give me a clue</button>
+      </div>
+      <div class="changes" id="changes"></div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s1">If you fancy: describe how one place in Bridgeford changed</label>
+        <p class="small">Pick anywhere: the river crossing, the hill fields, the railway. Slide back and forth to check.</p>
+        <div class="starters" data-for="t-s1"><button class="starter">In 1800 there was </button><button class="starter">By 1900 people had </button><button class="starter">Today it is </button><button class="starter">People changed it by </button><button class="starter">The biggest change was </button></div>
+        <textarea class="note" id="t-s1" data-save="s1text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s1"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s2">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 2 ================= -->
+  <section class="stage" id="s2" hidden aria-labelledby="h-s2">
+    <div class="shead fill-bright">
+      <div class="stxt"><span class="sk">Stage 2</span><h2 id="h-s2">Why did people build it?</h2>
+        <p>Match each thing to its job. Then work out who it helps.</p></div>
+    </div>
+    <div class="sbody">
+      <p class="tryhead">Match it up</p>
+      <p class="small">Tap a thing on the left, then tap what it is for. Two rounds, do one or both.</p>
+      <div class="rounds" id="rounds"></div>
+      <div class="matchgrid">
+        <div class="mcol" id="mLeft"></div>
+        <div class="mcol" id="mRight"></div>
+      </div>
+      <p class="fbline" id="mFb" aria-live="polite"></p>
+
+      <p class="tryhead">Who does it help?</p>
+      <p class="small">Tap anyone you think it helps. Each one tells you a bit more, there are no wrong taps.</p>
+      <div class="helpgrid" id="helpGrid"></div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s2">If you fancy: pick one thing and explain why people built it, and who it helps</label>
+        <div class="starters" data-for="t-s2"><button class="starter">People built the </button><button class="starter">because </button><button class="starter">It helps </button><button class="starter">Before it was there, </button><button class="starter">It does not help everyone, because </button></div>
+        <textarea class="note" id="t-s2" data-save="s2text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s2"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s3">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 3 ================= -->
+  <section class="stage" id="s3" hidden aria-labelledby="h-s3">
+    <div class="shead fill-orange">
+      <div class="stxt"><span class="sk">Stage 3</span><h2 id="h-s3">Good, bad or both?</h2>
+        <p>Every change helps someone and costs something. Sort the effects and watch the scales.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>Effects come in four flavours</h3>
+          <p>A change can be good or bad for <b>people</b>, and good or bad for <b>nature</b> (plants and animals).</p>
+          <p>Most changes land in more than one box. That is normal.</p>
+        </div>
+        <svg viewBox="0 0 360 160" role="img" aria-label="A grid of four boxes: good for people, bad for people, good for nature, bad for nature.">
+          <rect x="6" y="6" width="170" height="70" rx="12" fill="#e3f7ea" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="184" y="6" width="170" height="70" rx="12" fill="#fde9dc" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="6" y="84" width="170" height="70" rx="12" fill="#e0f4f0" stroke="#0a2f38" stroke-width="2"/>
+          <rect x="184" y="84" width="170" height="70" rx="12" fill="#f8e3ea" stroke="#0a2f38" stroke-width="2"/>
+          <g font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#0a2f38">
+            <text x="60" y="46">Good for people</text><text x="238" y="46">Bad for people</text>
+            <text x="60" y="124">Good for nature</text><text x="238" y="124">Bad for nature</text>
+          </g>
+          <g transform="translate(34 40)"><circle r="14" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M-6 3 Q0 9 6 3" stroke="#0a2f38" stroke-width="2" fill="none"/><circle cx="-5" cy="-3" r="1.6"/><circle cx="5" cy="-3" r="1.6"/></g>
+          <g transform="translate(212 40)"><circle r="14" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M-6 7 Q0 1 6 7" stroke="#0a2f38" stroke-width="2" fill="none"/><circle cx="-5" cy="-3" r="1.6"/><circle cx="5" cy="-3" r="1.6"/></g>
+          <g transform="translate(34 118)"><path d="M0 12 C-14 4 -12 -12 0 -14 C12 -12 14 4 0 12Z" fill="#5aa85a" stroke="#0a2f38" stroke-width="2"/><path d="M0 12 V-10" stroke="#0a2f38" stroke-width="1.5"/></g>
+          <g transform="translate(212 118)"><path d="M0 12 C-14 4 -12 -12 0 -14 C12 -12 14 4 0 12Z" fill="#b08a4a" stroke="#0a2f38" stroke-width="2"/><path d="M0 12 V-10" stroke="#0a2f38" stroke-width="1.5"/><path d="M-12 -12 L12 12" stroke="#c94a3a" stroke-width="3"/></g>
+        </svg>
+      </div>
+      <p class="tryhead">Pick a change to sort</p>
+      <div class="pickrow" id="sortPick" role="group" aria-label="Pick a change"></div>
+      <p class="small">Tap a card, then tap the box it belongs in. On a computer you can drag too.</p>
+      <div class="tray" id="tray"></div>
+      <div class="bins" id="bins"></div>
+      <p class="fbline" id="sFb" aria-live="polite"></p>
+      <div class="scalebox">
+        <svg viewBox="0 0 300 190" role="img" aria-label="Balance scale with good effects on the left and bad effects on the right" id="scaleSvg">
+          <path d="M150 60 L150 172 M118 176 L182 176" stroke="#0a2f38" stroke-width="6" stroke-linecap="round"/>
+          <path d="M136 176 L150 150 L164 176Z" fill="#0a2f38"/>
+          <g id="beam"><path d="M40 60 L260 60" stroke="#7b4b8f" stroke-width="8" stroke-linecap="round"/><circle cx="150" cy="60" r="8" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/></g>
+          <g id="panL"><path d="M40 60 L20 110 M40 60 L60 110" stroke="#0a2f38" stroke-width="1.5"/><path d="M10 110 L70 110 Q66 126 40 126 Q14 126 10 110Z" fill="#bfeccf" stroke="#0a2f38" stroke-width="2.5"/><g id="blocksL"></g><text x="40" y="142" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="11" fill="#0a2f38">GOOD</text></g>
+          <g id="panR"><path d="M260 60 L240 110 M260 60 L280 110" stroke="#0a2f38" stroke-width="1.5"/><path d="M230 110 L290 110 Q286 126 260 126 Q234 126 230 110Z" fill="#ffd2b5" stroke="#0a2f38" stroke-width="2.5"/><g id="blocksR"></g><text x="260" y="142" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="11" fill="#0a2f38">BAD</text></g>
+        </svg>
+        <div>
+          <div class="tally4" id="tally4"></div>
+          <p class="lab">So, on balance?</p>
+          <div class="pickrow" id="verdict" role="group" aria-label="Your verdict"></div>
+        </div>
+      </div>
+      <div class="writebox">
+        <label class="lab" for="t-s3">If you fancy: the good and the bad of this change</label>
+        <div class="starters" data-for="t-s3"><button class="starter">One good effect is </button><button class="starter">One bad effect is </button><button class="starter">For nature, </button><button class="starter">On balance I think </button><button class="starter">It depends who you ask, because </button></div>
+        <textarea class="note" id="t-s3" data-save="s3text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s3"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s4">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 4 ================= -->
+  <section class="stage" id="s4" hidden aria-labelledby="h-s4">
+    <div class="shead fill-plum">
+      <div class="stxt"><span class="sk">Stage 4</span><h2 id="h-s4">Compare two changes</h2>
+        <p>Rate six changes for people and for nature, see where they land, then put two head to head.</p></div>
+    </div>
+    <div class="sbody">
+      <p class="tryhead">Rate them</p>
+      <p class="small">Slide each one. Your dots move on the chart. There is no right answer, it is your judgement.</p>
+      <div class="chartgrid">
+        <div id="rateList"></div>
+        <div>
+          <svg viewBox="0 0 340 350" id="chart" role="img" aria-label="Chart with good for people going up and good for nature going right"></svg>
+        </div>
+      </div>
+      <p class="tryhead">Pick two to compare</p>
+      <div class="pickrow" id="cmpPick" role="group" aria-label="Pick two changes"></div>
+      <div id="cmpOut"></div>
+      <div class="writebox">
+        <label class="lab" for="t-s4">If you fancy: compare your two</label>
+        <div class="starters" data-for="t-s4"><button class="starter">Both changes </button><button class="starter">The first one is better for people because </button><button class="starter">However, </button><button class="starter">For nature, the worse one is </button><button class="starter">Overall the better change is </button></div>
+        <textarea class="note" id="t-s4" data-save="s4text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s4"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s5">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 5 ================= -->
+  <section class="stage" id="s5" hidden aria-labelledby="h-s5">
+    <div class="shead" style="background:linear-gradient(150deg,#7fd3a0,#2e8b5c)">
+      <div class="stxt"><span class="sk">Stage 5</span><h2 id="h-s5">Then and now maps</h2>
+        <p>Two maps of Bridgeford, 1900 and today. Find five big differences, then work out why they happened.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>Maps are evidence</h3>
+          <p>A map is a picture from above. Symbols stand for real things. Put an old map next to a new one and every difference is a clue about what people changed.</p>
+        </div>
+        <svg viewBox="0 0 360 120" role="img" aria-label="Map key: railway line, cycle path, main road, bypass, buildings, water, church">
+          <rect x="2" y="2" width="356" height="116" rx="12" fill="#fbf8ef" stroke="#0a2f38" stroke-width="2"/>
+          <g font-family="Arial" font-size="12" fill="#0a2f38">
+            <path d="M14 26 H60" stroke="#2a1a0a" stroke-width="3"/><path d="M14 26 H60" stroke="#2a1a0a" stroke-width="9" stroke-dasharray="1 7"/><text x="68" y="30">railway</text>
+            <path d="M14 54 H60" stroke="#2e8b5c" stroke-width="3.5" stroke-dasharray="6 4"/><text x="68" y="58">cycle path</text>
+            <path d="M14 82 H60" stroke="#c94a3a" stroke-width="6"/><text x="68" y="86">main road</text>
+            <path d="M14 106 H60" stroke="#0a2f38" stroke-width="9"/><path d="M14 106 H60" stroke="#ef9a2a" stroke-width="6"/><text x="68" y="110">bypass</text>
+            <rect x="190" y="18" width="10" height="10" fill="#4a3a3a"/><rect x="204" y="18" width="10" height="10" fill="#4a3a3a"/><text x="226" y="28">buildings</text>
+            <rect x="190" y="44" width="28" height="14" rx="6" fill="#7fbfe6"/><text x="226" y="56">water</text>
+            <circle cx="204" cy="78" r="7" fill="none" stroke="#0a2f38" stroke-width="2"/><path d="M204 72 V84 M198 78 H210" stroke="#0a2f38" stroke-width="2"/><text x="226" y="82">church</text>
+            <rect x="192" y="96" width="22" height="14" fill="#2f6fc0"/><text x="203" y="107" text-anchor="middle" fill="#fff" font-weight="700">P</text><text x="226" y="108">car park</text>
+          </g>
+        </svg>
+      </div>
+      <p class="tryhead">Spot the differences</p>
+      <p class="small">Tap on either map where something has changed.</p>
+      <div class="maps">
+        <div class="mapbox old"><div class="mh"><span>Bridgeford 1900</span><span>N &uarr;</span></div>
+<svg viewBox="0 0 400 300" id="map1900" role="group" aria-label="Map of Bridgeford in 1900">
+  <rect width="400" height="300" fill="#f1e3c2"/>
+  <g stroke="#a5875a" stroke-width="1" fill="none" opacity=".6"><path d="M0 60 H400 M0 120 H400 M0 180 H400 M0 240 H400 M80 0 V300 M160 0 V300 M240 0 V300 M320 0 V300"/></g>
+  <g fill="#8aa86a"><circle cx="18" cy="24" r="5"/><circle cx="32" cy="34" r="5"/><circle cx="20" cy="46" r="5"/><circle cx="38" cy="56" r="5"/><circle cx="16" cy="66" r="5"/></g>
+  <g stroke="#7a5a3a" stroke-width="1.5" fill="none"><path d="M58 26 H162 V80 H58Z M110 26 V80 M58 52 H162"/></g>
+  <text x="76" y="44" font-family="Georgia,serif" font-size="9" fill="#5a3a1a" font-style="italic">fields</text>
+  <path d="M0 118 C60 122 120 140 200 150 S 320 170 400 188" stroke="#6f9fb8" stroke-width="9" fill="none"/>
+  <path d="M0 240 C120 236 260 244 400 240" stroke="#6f9fb8" stroke-width="4" fill="none"/>
+  <text x="300" y="234" font-family="Georgia,serif" font-size="9" fill="#3a5a6a" font-style="italic">Canal</text>
+  <rect x="34" y="128" width="9" height="7" fill="#4a3a2a"/><rect x="47" y="131" width="12" height="6" fill="#4a3a2a"/>
+  <text x="26" y="150" font-family="Georgia,serif" font-size="9" fill="#5a3a1a">Combe Fm</text>
+  <path d="M0 92 L400 84" stroke="#2a1a0a" stroke-width="2.5"/><path d="M0 92 L400 84" stroke="#2a1a0a" stroke-width="8" stroke-dasharray="1 7"/>
+  <rect x="262" y="76" width="18" height="8" fill="#4a3a2a"/><text x="262" y="72" font-family="Georgia,serif" font-size="9" fill="#5a3a1a">Sta.</text>
+  <path d="M200 300 L200 0" stroke="#b0644a" stroke-width="5"/>
+  <g fill="#4a3a2a"><rect x="168" y="118" width="10" height="8"/><rect x="180" y="126" width="12" height="8"/><rect x="210" y="138" width="10" height="8"/><rect x="170" y="160" width="40" height="8"/><rect x="172" y="172" width="38" height="8"/><rect x="214" y="160" width="16" height="10"/></g>
+  <circle cx="226" cy="124" r="6" fill="none" stroke="#2a1a0a" stroke-width="1.6"/><path d="M226 119 V129 M221 124 H231" stroke="#2a1a0a" stroke-width="1.6"/>
+  <text x="140" y="112" font-family="Georgia,serif" font-size="11" fill="#2a1a0a" font-weight="bold">BRIDGEFORD</text>
+  <path d="M290 102 H385 V150 H290Z M338 102 V150" stroke="#7a5a3a" stroke-width="1.5" fill="none"/>
+  <text x="300" y="130" font-family="Georgia,serif" font-size="9" fill="#5a3a1a" font-style="italic">meadow</text>
+  <path d="M330 30 H380 V58 H330Z" fill="#d8c8a8" stroke="#7a5a3a"/><path d="M332 36 H378 M332 44 H378 M332 52 H378" stroke="#7a5a3a" stroke-width=".8"/>
+  <text x="334" y="24" font-family="Georgia,serif" font-size="9" fill="#5a3a1a">Quarry</text>
+  <text x="300" y="290" font-family="Georgia,serif" font-size="9" fill="#5a3a1a">fields</text>
+  <g class="dzones"></g><g class="rings"></g>
+</svg>
+        </div>
+        <div class="mapbox new"><div class="mh"><span>Bridgeford today</span><span>N &uarr;</span></div>
+<svg viewBox="0 0 400 300" id="mapNow" role="group" aria-label="Map of Bridgeford today">
+  <rect width="400" height="300" fill="#fbf8ef"/>
+  <g stroke="#cfd8d3" stroke-width="1" fill="none"><path d="M0 60 H400 M0 120 H400 M0 180 H400 M0 240 H400 M80 0 V300 M160 0 V300 M240 0 V300 M320 0 V300"/></g>
+  <g fill="#7fbf6a"><circle cx="18" cy="24" r="5"/><circle cx="32" cy="34" r="5"/><circle cx="20" cy="46" r="5"/><circle cx="38" cy="56" r="5"/><circle cx="16" cy="66" r="5"/></g>
+  <path d="M60 30 C90 50 120 40 150 56 M100 44 V78 M130 48 V80" stroke="#fff" stroke-width="6" fill="none"/>
+  <path d="M60 30 C90 50 120 40 150 56 M100 44 V78 M130 48 V80" stroke="#9aa3a6" stroke-width="1" fill="none"/>
+  <g fill="#4a3a3a"><rect x="62" y="40" width="7" height="6"/><rect x="74" y="44" width="7" height="6"/><rect x="86" y="48" width="7" height="6"/><rect x="106" y="34" width="7" height="6"/><rect x="118" y="38" width="7" height="6"/><rect x="138" y="42" width="7" height="6"/><rect x="88" y="62" width="7" height="6"/><rect x="104" y="60" width="7" height="6"/><rect x="104" y="70" width="7" height="6"/><rect x="134" y="60" width="7" height="6"/><rect x="134" y="70" width="7" height="6"/><rect x="146" y="62" width="7" height="6"/><rect x="74" y="58" width="7" height="6"/></g>
+  <text x="62" y="20" font-family="Arial" font-size="9" fill="#0a2f38">Hillside estate</text>
+  <path d="M0 118 C60 122 120 140 200 150 S 320 170 400 188" stroke="#7fbfe6" stroke-width="9" fill="none"/>
+  <path d="M0 98 C40 96 80 100 96 104 L100 156 C70 162 30 160 0 156Z" fill="#7fbfe6"/>
+  <path d="M96 102 L101 158" stroke="#0a2f38" stroke-width="3"/>
+  <text x="14" y="134" font-family="Arial" font-size="9" fill="#0a4a6a" font-weight="bold">Reservoir</text>
+  <path d="M0 240 C120 236 260 244 400 240" stroke="#7fbfe6" stroke-width="4" fill="none"/>
+  <text x="300" y="234" font-family="Arial" font-size="9" fill="#0a4a6a">Canal</text>
+  <path d="M0 92 L400 84" stroke="#2e8b5c" stroke-width="3.5" stroke-dasharray="6 4"/>
+  <text x="300" y="80" font-family="Arial" font-size="9" fill="#2e8b5c">cycle path</text>
+  <rect x="262" y="76" width="18" height="8" fill="#4a3a3a"/>
+  <path d="M200 300 L200 0" stroke="#c94a3a" stroke-width="6"/>
+  <path d="M180 140 C190 144 196 146 200 146 M204 147 C220 149 236 152 250 154" stroke="#0a2f38" stroke-width="2.4" fill="none"/>
+  <g fill="#4a3a3a"><rect x="168" y="118" width="10" height="8"/><rect x="180" y="126" width="12" height="8"/><rect x="210" y="138" width="10" height="8"/><rect x="170" y="160" width="40" height="8"/><rect x="172" y="172" width="38" height="8"/><rect x="214" y="160" width="16" height="10"/><rect x="236" y="134" width="8" height="6"/><rect x="248" y="136" width="8" height="6"/></g>
+  <circle cx="226" cy="124" r="6" fill="none" stroke="#0a2f38" stroke-width="1.6"/><path d="M226 119 V129 M221 124 H231" stroke="#0a2f38" stroke-width="1.6"/>
+  <text x="140" y="112" font-family="Arial" font-size="11" fill="#0a2f38" font-weight="bold">BRIDGEFORD</text>
+  <rect x="288" y="102" width="56" height="44" fill="#d9d6cf" stroke="#9aa3a6"/>
+  <rect x="292" y="106" width="22" height="16" fill="#6d757a"/><rect x="318" y="106" width="22" height="16" fill="#6d757a"/>
+  <rect x="304" y="128" width="20" height="14" fill="#2f6fc0"/><text x="314" y="139" text-anchor="middle" font-family="Arial" font-size="11" fill="#fff" font-weight="bold">P</text>
+  <text x="288" y="98" font-family="Arial" font-size="9" fill="#0a2f38">Retail park</text>
+  <path d="M300 300 C320 250 345 200 400 150" stroke="#0a2f38" stroke-width="10" fill="none"/>
+  <path d="M300 300 C320 250 345 200 400 150" stroke="#ef9a2a" stroke-width="7" fill="none"/>
+  <text x="338" y="250" font-family="Arial" font-size="9" fill="#0a2f38" font-weight="bold">Bypass</text>
+  <path d="M330 30 H380 V58 H330Z" fill="#e2ddd2" stroke="#9aa3a6"/><path d="M332 36 H378 M332 44 H378 M332 52 H378" stroke="#9aa3a6" stroke-width=".8"/>
+  <text x="334" y="24" font-family="Arial" font-size="9" fill="#0a2f38">Quarry</text>
+  <text x="250" y="290" font-family="Arial" font-size="9" fill="#0a2f38">fields</text>
+  <g class="dzones"></g><g class="rings"></g>
+</svg>
+        </div>
+      </div>
+      <div class="diffcount" id="diffCount" aria-live="polite"></div>
+      <div class="toolrow"><button class="btn btn-quiet sm" id="mapHint">Show me one</button></div>
+      <p class="fbline" id="mapFb" aria-live="polite"></p>
+      <div class="diffs" id="diffs"></div>
+      <div class="writebox">
+        <label class="lab" for="t-s5">If you fancy: use the maps as evidence. What changed, and why?</label>
+        <div class="starters" data-for="t-s5"><button class="starter">On the 1900 map there was </button><button class="starter">On today's map there is </button><button class="starter">This changed because </button><button class="starter">The evidence is </button><button class="starter">This shows that people </button></div>
+        <textarea class="note" id="t-s5" data-save="s5text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s5"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s6">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 6 ================= -->
+  <section class="stage" id="s6" hidden aria-labelledby="h-s6">
+    <div class="shead fill-ink">
+      <div class="stxt"><span class="sk" style="color:var(--yellow)">Stage 6</span><h2 id="h-s6" style="color:var(--yellow)">Bridgeford 2050</h2>
+        <p>You are in charge of one big change. Pick it, predict what happens to people and nature, then see it on the 2050 picture.</p></div>
+    </div>
+    <div class="sbody">
+      <p class="tryhead">Pick your change</p>
+      <div class="opts6" id="planOpts" role="group" aria-label="Pick a change for 2050"></div>
+      <div id="planWork" hidden>
+        <p class="tryhead">Predict it</p>
+        <p class="small">Slide each meter to show what you think happens.</p>
+        <div class="meters">
+          <div class="meter"><svg viewBox="0 0 90 90" id="faceP" aria-hidden="true"></svg><label class="lab" for="mP">Effect on people</label><input type="range" id="mP" min="-3" max="3" step="1" value="0"><output id="oP"></output></div>
+          <div class="meter"><svg viewBox="0 0 90 90" id="faceN" aria-hidden="true"></svg><label class="lab" for="mN">Effect on nature</label><input type="range" id="mN" min="-3" max="3" step="1" value="0"><output id="oN"></output></div>
+        </div>
+        <p class="lab">Who might be pleased?</p>
+        <div class="hchips" id="pleased"></div>
+        <p class="lab">Who might be worried?</p>
+        <div class="hchips" id="worried"></div>
+        <div class="toolrow"><button class="btn btn-quiet sm" id="hearBtn">Hear what Bridgeford thinks</button><button class="btn btn-quiet sm" id="see2050">See it in 2050</button></div>
+        <div class="quotes" id="quotes" hidden></div>
+        <div class="writebox">
+          <label class="lab" for="t-s6">If you fancy: your plan, and why</label>
+          <div class="starters" data-for="t-s6"><button class="starter">In 2050 I would </button><button class="starter">This would help people because </button><button class="starter">It could be good for nature because </button><button class="starter">A problem might be </button><button class="starter">To make that better, I would </button></div>
+          <textarea class="note" id="t-s6" data-save="s6text"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s6"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s7">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 7 ================= -->
+  <section class="stage" id="s7" hidden aria-labelledby="h-s7">
+    <div class="shead" style="background:linear-gradient(150deg,#ffb3c7,#e2577e)">
+      <div class="stxt"><span class="sk">Stage 7</span><h2 id="h-s7">My own patch</h2>
+        <p>Take this outside. Walk round school and tally what people have made or changed. Then score the place.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="safety">
+        <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><path d="M14 38 L20 22 L26 30 L32 16 L38 38" stroke="#0a2f38" stroke-width="3" fill="none" stroke-linejoin="round"/><circle cx="32" cy="12" r="3" fill="#0a2f38"/></svg>
+        <span>Walks happen with Jay or HB. Look, do not touch (bins and drains can be grubby), and keep to paths. No walk today? Do it from a window, or from memory of your street.</span>
+      </div>
+      <p class="tryhead">Tally what you spot</p>
+      <p class="small">Tap + every time you see one. Tap the small minus if you tapped by mistake.</p>
+      <div class="tallies" id="tallies"></div>
+      <label class="lab" for="otherName">Something else people made? Name it and tally it</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input class="note" id="otherName" data-save="otherName" style="max-width:260px" placeholder="for example: bus stop">
+        <div class="tcount"><button class="tb minus" data-t="other" data-d="-1" aria-label="One less">&minus;</button><b id="tc-other">0</b><button class="tb" data-t="other" data-d="1" aria-label="One more">+</button></div>
+      </div>
+
+      <p class="tryhead">Score the place</p>
+      <p class="small">How does this patch feel? Slide each one. This scores the place, not you.</p>
+      <div id="qualRows"></div>
+      <div class="qscore"><div><div class="big" id="qBig">0</div><span style="font-size:.8rem">out of 24</span></div><div class="qbar"><span id="qBar"></span></div><div id="qWord" style="font-family:var(--display);font-variation-settings:'wght' 800"></div></div>
+
+      <p class="tryhead">Notes</p>
+      <label class="lab" for="n-where">Where did you go?</label>
+      <input class="note" id="n-where" data-save="nWhere" placeholder="for example: round the car park and down to the gate">
+      <p class="lab">Who came with you?</p>
+      <div class="pickrow" id="walkWith" role="group" aria-label="Who came with you"></div>
+      <label class="lab" for="n-best">The most interesting thing people made, what it is for, and who it helps</label>
+      <div class="starters" data-for="n-best"><button class="starter">I spotted </button><button class="starter">It is used for </button><button class="starter">It helps </button></div>
+      <textarea class="note" id="n-best" data-save="nBest"></textarea>
+      <label class="lab" for="n-change">Something that looks newer or older than the rest. What changed?</label>
+      <div class="starters" data-for="n-change"><button class="starter">It looks newer because </button><button class="starter">I think it used to be </button><button class="starter">People probably changed it because </button></div>
+      <textarea class="note" id="n-change" data-save="nChange"></textarea>
+      <label class="lab" for="n-idea">One change you would make here, and what it would do for people and nature</label>
+      <div class="starters" data-for="n-idea"><button class="starter">I would add </button><button class="starter">It would help people by </button><button class="starter">For nature it would </button></div>
+      <textarea class="note" id="n-idea" data-save="nIdea"></textarea>
+    </div>
+    <div class="sfoot"><span id="ms-s7"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn btn-orange sm" data-goto="sendHost">Send to Jay</button></div>
+  </section>
+
+  <div id="sendHost"></div>
+  <p><button class="restart" id="restart">Start again (clears everything on this page)</button></p>
+
+  <a class="backlink" href="/practice/#pw-standard">&larr; Back to Physical world</a>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "b5.practice.shaped-by-people.v1";
+var WHO_KEY = "base5.who.v1";
+var PEOPLE = ["JT","LW","EGW","LP","LC","HK"];
+var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function $(id){ return document.getElementById(id); }
+function qa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+/* ---------------- state ---------------- */
+function fresh(){
+  return { open:"s1", era:0, erasSeen:{0:true}, found:{}, texts:{}, match:{}, mWrong:0, round:0, help:{},
+    sortPick:"bypass", sort:{}, verdict:{}, rate:{}, pair:[], mapFound:{}, mapWhy:{},
+    plan:{ choice:"", p:0, n:0, moved:false, pleased:[], worried:[], heard:false },
+    tally:{}, qual:{}, walkWith:"", tried:{} };
+}
+var st = fresh();
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){ var o = JSON.parse(raw); if(o && typeof o === "object"){ for(var k in o) st[k] = o[k]; } }
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+
+var who = "";
+try{ var w0 = (localStorage.getItem(WHO_KEY) || "").toUpperCase().trim(); if(PEOPLE.indexOf(w0) > -1) who = w0; }catch(e){}
+
+var toastT;
+function toast(msg){
+  var t = $("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 2600);
+}
+
+/* ---------------- milestones ---------------- */
+var MS = {
+  LC:["Spot and name things around here that people have made or changed.","Say what one of those things is used for."],
+  LP:["Weigh up how people have shaped a place over time, using evidence from what you see, maps or other sources.","Suggest how a place could change in future, and what that would mean for people and nature."],
+  LW:["Explain why people changed parts of a place, and what the changes are used for.","Compare the good and bad effects of one change people made."],
+  EGW:["Compare different changes people have made, and their good and bad effects.","Use maps or old pictures to show how a place changed, and explain why."],
+  JT:["Describe how a place has been changed by people.","Explain why people made a change, and who it helps."],
+  HK:["Find examples of how people changed a place, like roads, buildings, paths and parks.","Say what those changes are used for, and how they help people."]
+};
+var MS_FULL = {
+  LC:["I can notice and name features in the local environment that have been made or changed by people.","I can describe what a feature made by people in the local area is used for."],
+  LP:["I can evaluate how human activity has shaped the local environment over time, using evidence from observations, maps or other sources.","I can suggest how the local environment could change in the future and explain the possible impact on people and nature."],
+  LW:["I can explain why people have changed parts of the local environment and what those changes are used for.","I can compare the positive and negative effects of a change people have made to the local environment."],
+  EGW:["I can compare different examples of human changes in the local area and explain their positive and negative effects.","I can use maps or old photographs to show how the local area has changed over time and explain why."],
+  JT:["I can describe how a local place has been changed by human activity.","I can explain why people made a change to a local place and who it helps."],
+  HK:["I can identify examples of how humans have physically changed the local area, such as roads, buildings, paths and parks.","I can describe what these changes are used for and how they help people."]
+};
+var STAGE_MS = {
+  s1:["LC1","HK1","JT1","LC2","HK2"],
+  s2:["LC2","HK2","LW1","JT2"],
+  s3:["LW2","EGW1"],
+  s4:["EGW1","LW2","LP1"],
+  s5:["EGW2","LP1","JT1"],
+  s6:["LP2","LP1"],
+  s7:["LC1","HK1","HK2","LC2","LP1","JT1"]
+};
+var BEST = { LC:["s1","s2"], LP:["s5","s6"], LW:["s2","s3"], EGW:["s4","s5"], JT:["s1","s2"], HK:["s1","s7"] };
+
+/* ---------------- tiles ---------------- */
+var TILES = [
+  {id:"s1", c:"c1", name:"Time machine", d:"Slide through 250 years and tap what people made.",
+   icon:'<rect x="6" y="8" width="108" height="44" rx="8" fill="#bfe6f5" stroke="#0a2f38" stroke-width="2.5"/><path d="M6 38 Q40 26 70 34 T114 30 V52 H6Z" fill="#86bd68"/><path d="M48 44 Q60 32 72 44" stroke="#8d7a5c" stroke-width="4" fill="none"/><path d="M6 46 C40 42 80 50 114 46" stroke="#3b9bd6" stroke-width="5" fill="none"/><circle cx="96" cy="18" r="6" fill="#ffc247"/>'},
+  {id:"s2", c:"c2", name:"Why did people build it?", d:"Match things to their jobs, and who they help.",
+   icon:'<rect x="8" y="10" width="40" height="16" rx="5" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><rect x="8" y="34" width="40" height="16" rx="5" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><rect x="72" y="10" width="40" height="16" rx="5" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><rect x="72" y="34" width="40" height="16" rx="5" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><path d="M48 18 L72 42 M48 42 L72 18" stroke="#fffdf8" stroke-width="3"/>'},
+  {id:"s3", c:"c3", name:"Good, bad or both?", d:"Sort effects for people and nature. Watch the scales tip.",
+   icon:'<path d="M60 8 V52 M44 54 H76" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/><path d="M22 18 L98 26" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/><path d="M10 32 H36 Q32 42 23 42 Q14 42 10 32Z" fill="#bfeccf" stroke="#0a2f38" stroke-width="2.5"/><path d="M84 40 H112 Q108 50 98 50 Q88 50 84 40Z" fill="#ffd2b5" stroke="#0a2f38" stroke-width="2.5"/><path d="M22 18 L12 32 M22 18 L34 32 M98 26 L86 40 M98 26 L110 40" stroke="#0a2f38" stroke-width="1.5"/>'},
+  {id:"s4", c:"c4", name:"Compare two changes", d:"Rate six changes, then put two head to head.",
+   icon:'<rect x="8" y="6" width="104" height="48" rx="6" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M60 8 V52 M10 30 H110" stroke="#0a2f38" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="84" cy="18" r="6" fill="#2e8b5c" stroke="#0a2f38" stroke-width="2"/><circle cx="34" cy="42" r="6" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><circle cx="74" cy="40" r="6" fill="#2f80bf" stroke="#0a2f38" stroke-width="2"/>'},
+  {id:"s5", c:"c5", name:"Then and now maps", d:"Spot five differences between 1900 and today.",
+   icon:'<rect x="6" y="8" width="50" height="44" rx="4" fill="#f1e3c2" stroke="#0a2f38" stroke-width="2.5"/><rect x="64" y="8" width="50" height="44" rx="4" fill="#fbf8ef" stroke="#0a2f38" stroke-width="2.5"/><path d="M6 30 Q30 34 56 40 M64 30 Q88 34 114 40" stroke="#6f9fb8" stroke-width="4" fill="none"/><path d="M64 10 Q80 22 76 28 L70 26Z" fill="#7fbfe6"/><circle cx="100" cy="20" r="8" fill="none" stroke="#ef7724" stroke-width="3" stroke-dasharray="4 3"/>'},
+  {id:"s6", c:"c6", name:"Bridgeford 2050", d:"Plan one big change and predict what happens.",
+   icon:'<rect x="6" y="8" width="108" height="44" rx="8" fill="#123c47" stroke="#ffc247" stroke-width="2.5" stroke-dasharray="5 3"/><path d="M14 46 H52 L56 30 H18Z" fill="#2c4f8a" stroke="#9fb7d9"/><rect x="84" y="18" width="3" height="30" fill="#fffdf8"/><path d="M85 18 L80 6 M85 18 L98 22 M85 18 L76 26" stroke="#fffdf8" stroke-width="3" stroke-linecap="round"/><text x="60" y="24" font-family="Archivo,Arial" font-weight="900" font-size="12" fill="#ffc247">2050</text>'},
+  {id:"s7", c:"c7", name:"My own patch", d:"Go outside. Tally, score and note the real place.",
+   icon:'<rect x="10" y="6" width="54" height="48" rx="6" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M18 18 H40 M18 28 H48 M18 38 H36" stroke="#0a2f38" stroke-width="2.5"/><path d="M44 14 l4 4 l8 -8" stroke="#2e8b5c" stroke-width="3" fill="none"/><circle cx="92" cy="18" r="8" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M92 26 V42 M92 32 L84 38 M92 32 L100 36 M92 42 L86 54 M92 42 L98 54" stroke="#0a2f38" stroke-width="3" stroke-linecap="round"/>'}
+];
+
+function drawTiles(){
+  var box = $("tiles"); box.innerHTML = "";
+  TILES.forEach(function(t, i){
+    var b = document.createElement("button");
+    b.className = "tile " + t.c; b.type = "button"; b.dataset.s = t.id;
+    b.innerHTML = '<span class="badge">Good place to start</span><svg viewBox="0 0 120 60" aria-hidden="true">' + t.icon + '</svg>' +
+      '<span class="tn">Stage ' + (i + 1) + '</span><span class="tt">' + t.name + '</span>' + t.d +
+      '<span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8 l3 3 l7 -7" stroke="#2e8b5c" stroke-width="3" fill="none"/></svg></span>';
+    b.addEventListener("click", function(){ openStage(t.id, true); });
+    box.appendChild(b);
+  });
+  refreshTiles();
+}
+function refreshTiles(){
+  var best = who ? BEST[who] : [];
+  qa(".tile").forEach(function(b){
+    var id = b.dataset.s;
+    b.classList.toggle("best", best.indexOf(id) > -1);
+    b.classList.toggle("tried", !!st.tried[id]);
+    b.setAttribute("aria-current", st.open === id ? "true" : "false");
+    var lab = b.querySelector(".tt").textContent + (best.indexOf(id) > -1 ? ", good place to start" : "") + (st.tried[id] ? ", tried" : "");
+    b.setAttribute("aria-label", "Stage " + id.slice(1) + ": " + lab);
+  });
+  var dots = $("tryDots"); dots.innerHTML = "";
+  var n = 0;
+  TILES.forEach(function(t){ var i = document.createElement("i"); if(st.tried[t.id]){ i.className = "on"; n++; } dots.appendChild(i); });
+  $("tryText").textContent = n === 0 ? "Nothing tried yet. Pick any stage." :
+    (n === 7 ? "You have had a go at all seven stages. Brilliant." : "You have had a go at " + n + " of 7 stages.");
+  TILES.forEach(function(t){
+    var span = $("ms-" + t.id); if(!span) return;
+    span.innerHTML = STAGE_MS[t.id].map(function(c){ return '<span class="mtag">' + c + '</span>'; }).join("");
+  });
+}
+function markTried(id){
+  if(!st.tried[id]){ st.tried[id] = true; save(); refreshTiles(); }
+}
+
+function openStage(id, scroll){
+  qa(".stage").forEach(function(s){ s.hidden = s.id !== id; });
+  st.open = id; save(); refreshTiles();
+  if(id === "s1") renderScene();
+  if(id === "s4") drawChart();
+  if(scroll){
+    var el = $(id);
+    el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"start" });
+  }
+}
+qa("[data-goto]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var g = b.dataset.goto;
+    if(g === "tiles"){ $("tiles").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"center" }); return; }
+    if(g === "sendHost"){ $("sendHost").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"start" }); return; }
+    openStage(g, true);
+  });
+});
+
+/* ---------------- who ---------------- */
+function drawWho(){
+  var row = $("whoRow"); row.innerHTML = "";
+  PEOPLE.concat(["just looking"]).forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "who" + (p === "just looking" ? " quiet" : ""); b.textContent = p;
+    b.setAttribute("aria-pressed", (p === who || (p === "just looking" && !who)) ? "true" : "false");
+    b.addEventListener("click", function(){
+      who = p === "just looking" ? "" : p;
+      try{ if(who) localStorage.setItem(WHO_KEY, who); else localStorage.removeItem(WHO_KEY); }catch(e){}
+      var inp = document.getElementById("b5who"); if(inp) inp.value = who;
+      drawWho(); refreshTiles();
+    });
+    row.appendChild(b);
+  });
+  var mm = $("myMiles");
+  if(who){
+    mm.className = "mymiles on";
+    var best = BEST[who].map(function(s){ return TILES[+s.slice(1) - 1].name; });
+    mm.innerHTML = '<div class="mile"><b>Step 1</b>' + MS[who][0] + '</div><div class="mile"><b>Step 2</b>' + MS[who][1] + '</div>' +
+      '<div class="mile" style="background:var(--yellow)"><b>Good places to start</b>' + best.join(" and ") + '. Everything else is open too.</div>';
+  } else { mm.className = "mymiles"; mm.innerHTML = ""; }
+}
+
+/* ---------------- writing helpers ---------------- */
+var TEXT_STAGE = { s1text:"s1", s2text:"s2", s3text:"s3", s4text:"s4", s5text:"s5", s6text:"s6", otherName:"s7", nWhere:"s7", nBest:"s7", nChange:"s7", nIdea:"s7" };
+qa("[data-save]").forEach(function(el){
+  var k = el.dataset.save;
+  if(st.texts[k]) el.value = st.texts[k];
+  el.addEventListener("input", function(){ st.texts[k] = el.value; save(); if(el.value.trim()) markTried(TEXT_STAGE[k]); });
+});
+qa(".starters").forEach(function(box){
+  var target = $(box.dataset.for);
+  qa(".starter", box).forEach(function(b){
+    b.type = "button";
+    b.addEventListener("click", function(){
+      var v = target.value;
+      if(v && !/\s$/.test(v)) v += /[.!?]$/.test(v) ? " " : ". ";
+      target.value = v + b.textContent;
+      target.focus();
+      try{ target.setSelectionRange(target.value.length, target.value.length); }catch(e){}
+      target.dispatchEvent(new Event("input"));
+    });
+  });
+});
+
+/* =========================================================
+   STAGE 1  Time machine
+   ========================================================= */
+var ERAS = [
+  {y:"1800", sub:"Farms and a ford"},
+  {y:"1900", sub:"Steam, stone and mills"},
+  {y:"1960", sub:"Cars, water and new homes"},
+  {y:"Today", sub:"Roads, shops and paths"},
+  {y:"2050?", sub:"A possible future, you choose"}
+];
+var FEAT = {
+  fields:{name:"Fields and hedges", what:"Farmers made fields to grow crops and keep animals. People planted the hedges, to mark the edges and keep sheep and cows in.", fact:"Lots of English hedges were planted between about 1750 and 1850, when open land was split up into fields."},
+  road:{name:["Cart track","Stone road","Main road","Main road","Main road"], what:["A muddy track for people walking, riding, and pulling carts to market.","A harder road made with crushed stone, so carts and coaches do not sink in the mud.","Tarmac now, for cars, buses and lorries. It goes right through the middle of town.","The main road through town. Since the bypass was built, it is a lot quieter.","The main road through town."]},
+  ford:{name:"The ford", what:"A shallow part of the river where people, horses and carts could splash across.", fact:"Lots of English place names come from fords: Oxford, Bradford, Stratford. Bridgeford got its name right here."},
+  cottages:{name:"Cottages", what:"Homes for farm workers and their families, built from local stone."},
+  church:{name:"Church", what:"A place of worship, and a meeting place for the whole village. It is the oldest building in Bridgeford."},
+  farm:{name:"Combe Farm", what:"A farmhouse and barn, with cows and crops. Food for the town came from farms like this.", fact:"Keep an eye on this farm when you slide to 1960."},
+  bridge:{name:"Stone bridge", what:"Lets people, carts and later cars cross the river safely, even when it is high. It replaced the ford."},
+  mill:{name:["","Woollen mill","Woollen mill","Old mill, now flats","Old mill, now flats"], what:["","The river turns the water wheel, which powers machines that spin wool and weave cloth. Lots of people worked here.","Still working, still noisy. Lots of Bridgeford families work here.","The mill closed years ago. Instead of knocking it down, people turned it into flats to live in.","Still flats. Good old building."], fact:"Over 5,000 water mills were listed in the Domesday Book in 1086. People have used rivers for power for a very long time."},
+  terraces:{name:"Terraced houses", what:"Rows of houses joined together. Quick and cheap to build, so mill workers could live close to work."},
+  canal:{name:"Canal", what:["","A waterway dug by people, mostly by hand. Horses on the towpath pulled boats loaded with heavy coal and stone.","Fewer working boats now. Trains and lorries carry most goods.","No coal boats now. People use it for holiday boats, fishing, and walks along the towpath.","Holiday boats, fishing and towpath walks."], fact:"Most English canals were dug between about 1760 and 1830, before railways took over."},
+  railway:{name:"Railway and station", what:["","Steam trains carry people, post, milk and goods far away, much faster than horses.","Diesel trains now. But lots of families have cars, and fewer people use the trains."], fact:"Slide to Today to see what happens to the railway."},
+  quarry:{name:"Quarry", what:"A huge hole dug into the hill to get stone for building houses, walls, bridges and roads."},
+  reservoir:{name:"Reservoir and dam", what:"The dam holds back the river to store clean water for homes, schools and businesses.", fact:"Combe Farm is under the water now. Lots of real English reservoirs flooded farms, and even whole villages."},
+  council:{name:"Council houses", what:"New homes with gardens and indoor bathrooms, built after the Second World War, when lots of families needed somewhere to live."},
+  park:{name:"Park and playground", what:"Somewhere to play, run about, walk the dog and meet friends. Grass and trees in the middle of town."},
+  pylons:{name:"Electricity pylons", what:"Tall metal towers that carry electricity cables across the country, to homes, shops and factories."},
+  estate:{name:"Housing estate", what:"Lots of new homes for families, built on what used to be fields.", fact:"Slide back to 1960 to see what was here before."},
+  bypass:{name:"Bypass", what:"A road that goes round the town, so traffic passing through does not clog up the high street."},
+  retail:{name:"Retail park", what:"Big shops with a big car park, on the edge of town where there is lots of space.", fact:"Slide back to 1960. Cows used to graze here."},
+  cyclepath:{name:"Cycle path", what:"The railway closed in the 1960s. The flat old track is now a path for bikes, walkers and wheelchairs.", fact:"This happened for real across the South West. The Camel Trail in Cornwall and the Tarka Trail in Devon are both old railway lines."},
+  floodwall:{name:"Flood wall", what:"A strong wall along the river that keeps water out of homes and shops when the river is high."},
+  quarrylake:{name:"Quarry lake nature reserve", what:"The quarry closed and filled up with water. Now it is home to birds, fish and dragonflies."},
+  solar:{name:"Solar farm", what:"Rows of panels turn sunlight into electricity. Sheep can still graze underneath.", fact:"This is your 2050 idea from Stage 6."},
+  wetland:{name:"Wild wetland", what:"The low fields are left to go wild, with ponds and reeds. It soaks up floodwater and gives wildlife a home.", fact:"This is your 2050 idea from Stage 6."},
+  homes:{name:"New homes", what:"Homes for more families, with solar panels on the roofs.", fact:"This is your 2050 idea from Stage 6."},
+  woodland:{name:"New woodland", what:"Thousands of young trees. Roots and leaves slow the rain down, which can help stop floods.", fact:"This is your 2050 idea from Stage 6."},
+  carfree:{name:"Car free high street", what:"No cars in the town centre. Trees, bikes and space to walk.", fact:"This is your 2050 idea from Stage 6."},
+  wind:{name:"Wind turbines", what:"Big turbines on the ridge turn wind into electricity.", fact:"This is your 2050 idea from Stage 6."}
+};
+var NAT = {
+  river:{name:"River", what:"Made by nature. Rain running downhill carved this valley over a very, very long time. But look how much people have built on it, over it and beside it."},
+  woods:{name:"Old woodland", what:"Mostly made by nature. These trees have been growing here for hundreds of years."},
+  hills:{name:"Hills", what:"Made by nature, over millions of years. People have farmed them, dug into them and built on them though."},
+  heron:{name:"Grey heron", what:"Made by nature. A grey heron, standing very still, waiting for a fish. Jay would want you to know that."},
+  sun:{name:"The sun", what:"Definitely not made by people. Outrageous suggestion."}
+};
+var BECAME = { cyclepath:"railway", quarrylake:"quarry" };
+var ON_OLD = { estate:" (on old fields)", retail:" (on old fields)", reservoir:" (Combe Farm is under it)" };
+
+function pick(v, e){ return Array.isArray(v) ? (v[e] || v[v.length - 1]) : v; }
+function fname(id, e){ return pick(FEAT[id].name, e); }
+
+function rangeOf(el){ var r = (el.getAttribute("data-e") || "0-4").split("-"); return [+r[0], +r[1]]; }
+function visibleIn(el, e){
+  if(el.hasAttribute("data-e")){ var r = rangeOf(el); if(e < r[0] || e > r[1]) return false; }
+  if(el.hasAttribute("data-era-only") && +el.getAttribute("data-era-only") !== e) return false;
+  if(el.hasAttribute("data-era-from") && e < +el.getAttribute("data-era-from")) return false;
+  if(el.hasAttribute("data-era-to") && e > +el.getAttribute("data-era-to")) return false;
+  if(el.hasAttribute("data-opt") && st.plan.choice !== el.getAttribute("data-opt")) return false;
+  if(el.hasAttribute("data-noopt") && st.plan.choice) return false;
+  if(el.hasAttribute("data-yield") && e === 4 && el.getAttribute("data-yield").split(",").indexOf(st.plan.choice) > -1) return false;
+  return true;
+}
+function featuresIn(e){
+  var out = [];
+  qa("#scene .ft").forEach(function(g){ var id = g.dataset.f; if(visibleIn(g, e) && out.indexOf(id) < 0) out.push(id); });
+  return out;
+}
+function foundIn(e){ return st.found[e] || (st.found[e] = {}); }
+
+var ORDER = ["fields","road","ford","cottages","church","farm","bridge","mill","terraces","canal","railway","quarry","reservoir","council","park","pylons","estate","bypass","retail","cyclepath","floodwall","quarrylake","solar","wetland","homes","woodland","carfree","wind"];
+
+function renderScene(){
+  var e = st.era;
+  $("sceneWrap").setAttribute("data-era", e);
+  $("eraSlide").value = e;
+  $("eraBig").textContent = ERAS[e].y;
+  $("eraSub").textContent = ERAS[e].sub;
+  $("eraStamp").textContent = ERAS[e].y;
+  qa("#scene [data-e], #scene [data-era-only], #scene [data-era-from], #scene [data-era-to], #scene [data-yield], #scene [data-noopt], #scene [data-opt]").forEach(function(el){
+    el.style.display = visibleIn(el, e) ? "" : "none";
+  });
+  qa(".erab").forEach(function(b){ b.setAttribute("aria-pressed", +b.dataset.e === e ? "true" : "false"); });
+  drawStars();
+  var list = featuresIn(e).sort(function(a, b){ return ORDER.indexOf(a) - ORDER.indexOf(b); });
+  var f = foundIn(e), got = 0;
+  var chips = $("foundChips"); chips.innerHTML = "";
+  list.forEach(function(id){
+    var s = document.createElement("span");
+    s.className = "fchip " + (f[id] ? "got" : "miss");
+    s.textContent = f[id] ? fname(id, e) : "?";
+    if(f[id]) got++;
+    chips.appendChild(s);
+  });
+  $("counter").textContent = "Found " + got + " of " + list.length + " things people made in " + (e === 3 ? "today's Bridgeford" : ERAS[e].y.replace("?", "")) + (got === list.length ? ". Every one!" : "");
+  // what changed
+  var ch = $("changes");
+  if(e === 0){
+    ch.innerHTML = "<b>1800</b><br>The start of our story. A small farming village by a ford. Slide on to see what people do to it.";
+  } else {
+    var prev = featuresIn(e - 1), now = list;
+    var added = now.filter(function(id){ return prev.indexOf(id) < 0; });
+    var gone = prev.filter(function(id){ return now.indexOf(id) < 0; });
+    var became = [], newOnes = [];
+    added.forEach(function(id){
+      if(BECAME[id] && gone.indexOf(BECAME[id]) > -1){ became.push(fname(BECAME[id], e - 1) + " became " + fname(id, e)); gone.splice(gone.indexOf(BECAME[id]), 1); }
+      else newOnes.push(fname(id, e) + (ON_OLD[id] || ""));
+    });
+    now.forEach(function(id){ if(prev.indexOf(id) > -1 && fname(id, e - 1) !== fname(id, e)) became.push(fname(id, e - 1) + " became " + fname(id, e)); });
+    var h = "<b>Since " + ERAS[e - 1].y + "</b><br>";
+    if(newOnes.length) h += "New: " + newOnes.join(", ") + ".<br>";
+    if(became.length) h += "Changed: " + became.join(", ") + ".<br>";
+    if(gone.length) h += "Gone: " + gone.map(function(id){ return fname(id, e - 1); }).join(", ") + ".";
+    if(e === 4 && !st.plan.choice) h += "<br>Your own 2050 idea is missing. Tap the purple sign, or try Stage 6.";
+    ch.innerHTML = h;
+  }
+}
+
+function drawStars(){
+  var layer = $("stars"); layer.innerHTML = "";
+  var f = foundIn(st.era);
+  qa("#scene .ft").forEach(function(g){
+    if(!f[g.dataset.f] || g.style.display === "none") return;
+    var b; try{ b = g.getBBox(); }catch(e){ return; }
+    if(!b || !b.width) return;
+    var x = b.x + b.width / 2, y = Math.max(14, b.y + Math.min(b.height / 2, 12));
+    layer.insertAdjacentHTML("beforeend", '<g class="star" transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"><circle r="10" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M0 -6 L1.8 -1.8 L6 -1.8 L2.6 1 L3.8 5.4 L0 2.8 L-3.8 5.4 L-2.6 1 L-6 -1.8 L-1.8 -1.8Z" fill="#0a2f38"/></g>');
+  });
+}
+
+function showInfo(kind, id){
+  var e = st.era, box = $("info");
+  if(kind === "h"){
+    var F = FEAT[id];
+    var fresh1 = !foundIn(e)[id];
+    foundIn(e)[id] = true; save(); markTried("s1");
+    var since = "";
+    var els = qa('#scene .ft[data-f="' + id + '"]').filter(function(g){ return g.style.display !== "none"; });
+    if(els.length){ var r = rangeOf(els[0]); if(id !== "fields") since = r[0] === 0 ? "Here since before 1800." : "First appears in " + ERAS[r[0]].y.replace("?","") + "."; }
+    box.innerHTML = '<span class="kind h">Made by people</span><h3>' + esc(fname(id, e)) + '</h3>' +
+      '<p><b>What it is for:</b> ' + esc(pick(F.what, e)) + '</p>' + (since ? '<p class="small" style="margin:4px 0 0">' + since + '</p>' : "") +
+      (F.fact ? '<p class="fact">' + esc(F.fact) + '</p>' : "");
+    renderScene();
+    if(fresh1){
+      var list = featuresIn(e), f = foundIn(e), n = 0; list.forEach(function(x){ if(f[x]) n++; });
+      if(n === list.length) toast("You found every human made thing in " + ERAS[e].y.replace("?","") + ". Try another year?");
+    }
+  } else {
+    var N = NAT[id];
+    box.innerHTML = '<span class="kind n">Made by nature</span><h3>' + esc(N.name) + '</h3><p>' + esc(N.what) + '</p>';
+    markTried("s1");
+  }
+}
+
+function bindScene(){
+  qa("#scene .ft").forEach(function(g){
+    g.addEventListener("click", function(ev){ ev.stopPropagation(); showInfo("h", g.dataset.f); });
+    g.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); showInfo("h", g.dataset.f); } });
+  });
+  qa("#scene .nat").forEach(function(g){
+    g.addEventListener("click", function(ev){ ev.stopPropagation(); showInfo("n", g.dataset.n); });
+    g.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); showInfo("n", g.dataset.n); } });
+  });
+  var sign = $("ideaSign");
+  function goPlan(){ openStage("s6", true); }
+  sign.addEventListener("click", goPlan);
+  sign.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); goPlan(); } });
+  var eb = $("eraBtns");
+  ERAS.forEach(function(er, i){
+    var b = document.createElement("button"); b.type = "button"; b.className = "erab" + (i === 4 ? " future" : "");
+    b.textContent = er.y; b.dataset.e = i;
+    b.addEventListener("click", function(){ setEra(i); });
+    eb.appendChild(b);
+  });
+  $("eraSlide").addEventListener("input", function(){ setEra(+this.value); });
+  $("showNew").addEventListener("click", function(){
+    var e = st.era, now = featuresIn(e), prev = e ? featuresIn(e - 1) : [];
+    var ids = now.filter(function(id){ return prev.indexOf(id) < 0 || (e && fname(id, e - 1) !== fname(id, e)); });
+    if(!ids.length){ toast("Nothing brand new here. Try another year."); return; }
+    pulse(ids);
+    toast(e === 0 ? "Everything glowing was made by people." : "Glowing: new or changed since " + ERAS[e - 1].y + ".");
+  });
+  $("nudge").addEventListener("click", function(){
+    var e = st.era, f = foundIn(e);
+    var left = featuresIn(e).filter(function(id){ return !f[id]; });
+    if(!left.length){ toast("You have found them all in this year."); return; }
+    pulse([left[0]]);
+    toast("Look for the glowing bit.");
+  });
+}
+function pulse(ids){
+  qa("#scene .ft").forEach(function(g){
+    g.classList.remove("pulse");
+    if(ids.indexOf(g.dataset.f) > -1 && g.style.display !== "none"){ void g.getBoundingClientRect(); g.classList.add("pulse"); }
+  });
+  setTimeout(function(){ qa("#scene .ft.pulse").forEach(function(g){ g.classList.remove("pulse"); }); }, REDUCED ? 3000 : 4600);
+  if(REDUCED){ qa("#scene .ft").forEach(function(g){ if(ids.indexOf(g.dataset.f) > -1) g.style.filter = "drop-shadow(0 0 6px #ef7724)"; }); setTimeout(function(){ qa("#scene .ft").forEach(function(g){ g.style.filter = ""; }); }, 3000); }
+}
+function setEra(i){
+  st.era = i; st.erasSeen[i] = true; save(); markTried("s1");
+  renderScene();
+  var e = i;
+  $("info").innerHTML = '<span class="kind h">' + ERAS[e].y + '</span><h3>' + ERAS[e].sub + '</h3><p>Tap things to find out what people made, and what it is for.</p>';
+}
+
+/* =========================================================
+   STAGE 2  Why did people build it?
+   ========================================================= */
+var MI = {
+  bridge:'<path d="M2 24 H36" stroke="#3b9bd6" stroke-width="6"/><path d="M4 22 Q19 6 34 22" stroke="#8d7a5c" stroke-width="4" fill="none"/><path d="M2 12 H36" stroke="#8d7a5c" stroke-width="3"/>',
+  canal:'<path d="M2 18 H36" stroke="#3a86b8" stroke-width="8"/><rect x="8" y="12" width="18" height="6" rx="2" fill="#c94a3a"/><path d="M2 10 H36" stroke="#d6bf94" stroke-width="2"/>',
+  railway:'<path d="M2 24 H36" stroke="#4a3a2a" stroke-width="2"/><path d="M2 24 H36" stroke="#4a3a2a" stroke-width="6" stroke-dasharray="1 4"/><rect x="8" y="10" width="20" height="10" rx="2" fill="#2a5a3a"/><circle cx="12" cy="6" r="3" fill="#ccc"/>',
+  terraces:'<rect x="2" y="12" width="34" height="14" fill="#b9573a"/><path d="M1 13 L5 6 H33 L37 13Z" fill="#56606a"/><path d="M10 12 V26 M19 12 V26 M28 12 V26" stroke="#6b3a2a"/>',
+  mill:'<rect x="4" y="8" width="20" height="18" fill="#d2b48a"/><path d="M2 9 L14 2 L26 9Z" fill="#56606a"/><circle cx="29" cy="20" r="7" fill="none" stroke="#6b4a2e" stroke-width="2.5"/><path d="M22 20 H36 M29 13 V27" stroke="#6b4a2e" stroke-width="1.5"/>',
+  reservoir:'<path d="M2 10 Q18 4 30 10 L32 26 Q16 30 2 26Z" fill="#3b9bd6"/><path d="M30 8 Q36 17 32 28" stroke="#c9c4bb" stroke-width="4" fill="none"/>',
+  bypass:'<path d="M2 28 Q20 24 36 4" stroke="#4d5356" stroke-width="7" fill="none"/><path d="M2 28 Q20 24 36 4" stroke="#fff" stroke-width="1" stroke-dasharray="3 3" fill="none"/><rect x="2" y="6" width="10" height="10" fill="#b9573a"/>',
+  floodwall:'<path d="M2 24 H36" stroke="#3b9bd6" stroke-width="8"/><rect x="2" y="10" width="34" height="8" fill="#8f9089"/><rect x="10" y="2" width="8" height="8" fill="#e9dcc3"/><path d="M8 3 L14 -2 L20 3Z" fill="#8a4b3b"/>',
+  cyclepath:'<path d="M2 26 H36" stroke="#d9b98a" stroke-width="5"/><circle cx="12" cy="18" r="5" fill="none" stroke="#0a2f38" stroke-width="2"/><circle cx="26" cy="18" r="5" fill="none" stroke="#0a2f38" stroke-width="2"/><path d="M12 18 L18 11 L26 18" stroke="#0a2f38" stroke-width="2" fill="none"/>',
+  solar:'<path d="M4 26 L10 8 H34 L28 26Z" fill="#2c4f8a" stroke="#9fb7d9"/><path d="M7 17 H31 M19 8 L16 26" stroke="#9fb7d9"/><circle cx="6" cy="6" r="4" fill="#ffc247"/>'
+};
+var ROUNDS = [
+  [ {id:"bridge", name:"Stone bridge", job:"Cross the river safely, even when it is high", hint:"Think about getting from one bank to the other without getting wet."},
+    {id:"canal", name:"Canal", job:"Carry heavy loads like coal and stone by boat", hint:"It is full of water, but nobody drinks it. What floats along it?"},
+    {id:"railway", name:"Railway", job:"Move people and goods quickly over long distances", hint:"Much faster than a horse and cart."},
+    {id:"terraces", name:"Terraced houses", job:"Homes for workers, close to the mill", hint:"Where did all the mill workers sleep?"},
+    {id:"mill", name:"Water mill", job:"Use the flowing river to power machines", hint:"The water pushes the wheel round. What could that wheel turn?"} ],
+  [ {id:"reservoir", name:"Reservoir", job:"Store clean water for homes and businesses", hint:"Where does the water in your tap come from?"},
+    {id:"bypass", name:"Bypass", job:"Take traffic round the town, not through it", hint:"By means beside or past. It passes by the town."},
+    {id:"floodwall", name:"Flood wall", job:"Keep river water out of homes and shops", hint:"What happens when the river gets too high?"},
+    {id:"cyclepath", name:"Cycle path", job:"Travel by bike or on foot, away from cars", hint:"Two wheels, no engine."},
+    {id:"solar", name:"Solar farm", job:"Make electricity from sunlight", hint:"Sol means sun."} ]
+];
+var PERM = [[2,4,0,3,1],[3,0,4,1,2]];
+var mSel = null;
+
+function drawRounds(){
+  var r = $("rounds"); r.innerHTML = "";
+  ["Round 1: old Bridgeford","Round 2: newer Bridgeford"].forEach(function(t, i){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = t;
+    var n = ROUNDS[i].filter(function(x){ return st.match[x.id]; }).length;
+    if(n) b.textContent += " (" + n + "/5)";
+    b.setAttribute("aria-pressed", st.round === i ? "true" : "false");
+    b.addEventListener("click", function(){ st.round = i; mSel = null; save(); drawMatch(); });
+    r.appendChild(b);
+  });
+}
+function drawMatch(){
+  drawRounds();
+  var R = ROUNDS[st.round], L = $("mLeft"), Rt = $("mRight");
+  L.innerHTML = '<span class="lab">The thing</span>'; Rt.innerHTML = '<span class="lab">What it is for</span>';
+  var num = 0, nums = {};
+  R.forEach(function(x){ if(st.match[x.id]) nums[x.id] = ++num; });
+  R.forEach(function(x){
+    var b = document.createElement("button"); b.type = "button"; b.className = "mbtn" + (st.match[x.id] ? " done" : "");
+    b.innerHTML = '<svg viewBox="0 0 38 30" aria-hidden="true">' + MI[x.id] + '</svg><span>' + x.name + '</span>' + (st.match[x.id] ? '<span class="num" style="margin-left:auto">' + nums[x.id] + '</span>' : "");
+    b.setAttribute("aria-pressed", mSel === x.id ? "true" : "false");
+    if(st.match[x.id]) b.setAttribute("aria-label", x.name + ", matched");
+    b.addEventListener("click", function(){ if(st.match[x.id]) return; mSel = x.id; drawMatch(); $("mFb").className = "fbline"; $("mFb").textContent = "Now tap what the " + x.name.toLowerCase() + " is for."; });
+    L.appendChild(b);
+  });
+  PERM[st.round].forEach(function(k){
+    var x = R[k];
+    var b = document.createElement("button"); b.type = "button"; b.className = "mbtn" + (st.match[x.id] ? " done" : "");
+    b.innerHTML = (st.match[x.id] ? '<span class="num">' + nums[x.id] + '</span>' : "") + '<span>' + x.job + '</span>';
+    b.addEventListener("click", function(){ tryMatch(x, b); });
+    Rt.appendChild(b);
+  });
+}
+function tryMatch(x, btn){
+  var fb = $("mFb");
+  if(st.match[x.id]) return;
+  if(!mSel){ fb.className = "fbline"; fb.textContent = "Pick a thing on the left first, then its job."; return; }
+  markTried("s2");
+  var sel = ROUNDS[st.round].filter(function(y){ return y.id === mSel; })[0];
+  if(sel.id === x.id){
+    st.match[x.id] = true; save(); mSel = null; drawMatch();
+    fb.className = "fbline good"; fb.textContent = "Yes! The " + sel.name.toLowerCase() + ": " + x.job.toLowerCase() + ".";
+    var done = ROUNDS[st.round].every(function(y){ return st.match[y.id]; });
+    if(done) fb.textContent += st.round === 0 ? " Round 1 all matched. Fancy round 2?" : " Round 2 all matched. Great work.";
+  } else {
+    st.mWrong = (st.mWrong || 0) + 1; save();
+    btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake");
+    fb.className = "fbline hmm"; fb.textContent = "Not that one. Clue for the " + sel.name.toLowerCase() + ": " + sel.hint;
+  }
+}
+
+var HELP = [
+  {id:"bypass", name:"The bypass", chips:[
+    ["People living on the high street","yes","Yes. Fewer lorries outside their windows, so it is quieter and the air is cleaner."],
+    ["Drivers just passing through","yes","Yes. They can go round the town instead of crawling through it."],
+    ["Ambulances and fire engines","yes","Yes. Fewer jams in town means they get places faster."],
+    ["Shops on the high street","maybe","It depends. Quieter streets are nicer to shop in, but some shops lose customers who used to stop on the way through."],
+    ["Badgers and hedgehogs","no","Not really. The road cut through their home, and it is dangerous to cross."] ]},
+  {id:"floodwall", name:"The flood wall", chips:[
+    ["Families living by the river","yes","Yes. Their homes stay dry when the river rises."],
+    ["Shop owners in town","yes","Yes. Flood water ruins floors and stock, so the wall saves money and worry."],
+    ["Fish and otters","no","Not really. The wall is for people. Natural river banks are usually better for wildlife."],
+    ["People further down the valley","maybe","It depends. Water that cannot spread out in town may rush on further downstream."],
+    ["Walkers on the river path","maybe","Partly. The path floods less, but the wall can block the view of the river."] ]},
+  {id:"cyclepath", name:"The cycle path", chips:[
+    ["Students getting to school","yes","Yes. A safe route with no cars to dodge."],
+    ["Wheelchair users","yes","Yes. The old railway is flat and smooth, so it is easier to get along."],
+    ["Train passengers","no","Not any more. The trains stopped in the 1960s."],
+    ["Bats, birds and wild flowers","yes","Often, yes. Old railway lines make long green corridors where wildlife can live and move about."],
+    ["The cafe owner","yes","Yes. Hungry cyclists! The old station is a cafe now."] ]}
+];
+function drawHelp(){
+  var g = $("helpGrid"); g.innerHTML = "";
+  HELP.forEach(function(h){
+    var tapped = st.help[h.id] || [];
+    var c = document.createElement("div"); c.className = "helpcard";
+    c.innerHTML = '<h4><svg viewBox="0 0 38 30" width="38" height="30" aria-hidden="true">' + MI[h.id] + '</svg>' + h.name + ' helps...</h4><div class="hchips"></div><p class="hnote" aria-live="polite"></p>';
+    var row = c.querySelector(".hchips"), note = c.querySelector(".hnote");
+    h.chips.forEach(function(ch, i){
+      var b = document.createElement("button"); b.type = "button";
+      b.className = "hchip" + (tapped.indexOf(i) > -1 ? " " + ch[1] : "");
+      b.textContent = ch[0];
+      b.addEventListener("click", function(){
+        var t = st.help[h.id] || (st.help[h.id] = []);
+        if(t.indexOf(i) < 0) t.push(i);
+        save(); markTried("s2");
+        b.className = "hchip " + ch[1];
+        note.textContent = ch[2];
+      });
+      row.appendChild(b);
+    });
+    g.appendChild(c);
+  });
+}
+
+/* =========================================================
+   STAGE 3  Good, bad or both?
+   ========================================================= */
+var BINS = [["gp","Good for people"],["bp","Bad for people"],["gn","Good for nature"],["bn","Bad for nature"]];
+var BIN_ICON = {
+  gp:'<svg width="24" height="24" viewBox="-14 -14 28 28" aria-hidden="true"><circle r="12" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M-5 3 Q0 8 5 3" stroke="#0a2f38" stroke-width="2" fill="none"/><circle cx="-4" cy="-3" r="1.5"/><circle cx="4" cy="-3" r="1.5"/></svg>',
+  bp:'<svg width="24" height="24" viewBox="-14 -14 28 28" aria-hidden="true"><circle r="12" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M-5 6 Q0 1 5 6" stroke="#0a2f38" stroke-width="2" fill="none"/><circle cx="-4" cy="-3" r="1.5"/><circle cx="4" cy="-3" r="1.5"/></svg>',
+  gn:'<svg width="24" height="24" viewBox="-14 -14 28 28" aria-hidden="true"><path d="M0 12 C-13 4 -11 -11 0 -13 C11 -11 13 4 0 12Z" fill="#5aa85a" stroke="#0a2f38" stroke-width="2"/></svg>',
+  bn:'<svg width="24" height="24" viewBox="-14 -14 28 28" aria-hidden="true"><path d="M0 12 C-13 4 -11 -11 0 -13 C11 -11 13 4 0 12Z" fill="#b08a4a" stroke="#0a2f38" stroke-width="2"/><path d="M-10 -10 L10 10" stroke="#c94a3a" stroke-width="3"/></svg>'
+};
+var SORT = {
+  bypass:{name:"The bypass", cards:[
+    ["Fewer lorries rumbling down the high street",["gp"]],
+    ["Journeys round the area are quicker",["gp"]],
+    ["Fields and hedges were dug up to build it",["bn"]],
+    ["Badgers and hedgehogs get hit crossing it",["bn"]],
+    ["Some high street shops get fewer customers",["bp"]],
+    ["Noise for houses near the new road",["bp"]],
+    ["Wild flowers grow on the grass verges, and bees feed there",["gn"]] ]},
+  reservoir:{name:"The reservoir", cards:[
+    ["Clean water for thousands of homes",["gp"]],
+    ["Combe Farm and its fields were flooded",["bp"]],
+    ["Ducks and wading birds visit the lake",["gn"]],
+    ["Fish cannot swim up the river past the dam",["bn"]],
+    ["Sailing, fishing and walks round the lake",["gp"]],
+    ["The river below the dam can run low in dry summers",["bn"]] ]},
+  estate:{name:"The housing estate", cards:[
+    ["Homes for hundreds of families",["gp"]],
+    ["More traffic on the lanes at school time",["bp"]],
+    ["Meadows and hedges were lost",["bn"]],
+    ["Gardens, ponds and bird boxes give wildlife new homes",["gn"]],
+    ["A new primary school and shop were built",["gp"]],
+    ["More roofs and roads, so rain runs off fast and can cause floods",["bp","bn"]] ]}
+};
+var sSel = null;
+function drawSortPick(){
+  var r = $("sortPick"); r.innerHTML = "";
+  Object.keys(SORT).forEach(function(k){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick";
+    var placed = Object.keys(st.sort[k] || {}).length;
+    b.textContent = SORT[k].name + (placed ? " (" + placed + "/" + SORT[k].cards.length + ")" : "");
+    b.setAttribute("aria-pressed", st.sortPick === k ? "true" : "false");
+    b.addEventListener("click", function(){ st.sortPick = k; sSel = null; save(); $("sFb").textContent = ""; drawSort(); });
+    r.appendChild(b);
+  });
+}
+function drawSort(){
+  drawSortPick();
+  var k = st.sortPick, S = SORT[k], placed = st.sort[k] || {};
+  var tray = $("tray"); tray.innerHTML = "";
+  S.cards.forEach(function(c, i){
+    if(placed[i]) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "ecard"; b.textContent = c[0];
+    b.draggable = true;
+    b.setAttribute("aria-pressed", sSel === i ? "true" : "false");
+    b.addEventListener("click", function(){ sSel = (sSel === i ? null : i); drawSort(); });
+    b.addEventListener("dragstart", function(ev){ sSel = i; try{ ev.dataTransfer.setData("text/plain", String(i)); }catch(e){} qa(".bin").forEach(function(x){ x.classList.add("ready"); }); });
+    b.addEventListener("dragend", function(){ qa(".bin").forEach(function(x){ x.classList.remove("ready","over"); }); });
+    tray.appendChild(b);
+  });
+  var bins = $("bins"); bins.innerHTML = "";
+  BINS.forEach(function(bn){
+    var d = document.createElement("div"); d.className = "bin " + bn[0] + (sSel !== null ? " ready" : "");
+    d.setAttribute("role", "button"); d.tabIndex = 0;
+    d.setAttribute("aria-label", bn[1] + (sSel !== null ? ". Put the card here." : ""));
+    d.innerHTML = '<span class="bt">' + BIN_ICON[bn[0]] + bn[1] + '</span>';
+    S.cards.forEach(function(c, i){ if(placed[i] === bn[0]) d.insertAdjacentHTML("beforeend", '<span class="ecard placed">' + esc(c[0]) + '</span>'); });
+    d.addEventListener("click", function(){ place(bn[0]); });
+    d.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); place(bn[0]); } });
+    d.addEventListener("dragover", function(ev){ ev.preventDefault(); d.classList.add("over"); });
+    d.addEventListener("dragleave", function(){ d.classList.remove("over"); });
+    d.addEventListener("drop", function(ev){ ev.preventDefault(); place(bn[0]); });
+    bins.appendChild(d);
+  });
+  drawScale(); drawVerdict();
+}
+function place(bin){
+  var fb = $("sFb");
+  if(sSel === null){ fb.className = "fbline"; fb.textContent = "Tap an effect card first, then tap a box."; return; }
+  markTried("s3");
+  var k = st.sortPick, card = SORT[k].cards[sSel], ok = card[1];
+  if(ok.indexOf(bin) > -1){
+    (st.sort[k] = st.sort[k] || {})[sSel] = bin; save();
+    fb.className = "fbline good";
+    fb.textContent = "Yes, " + BINS.filter(function(b){ return b[0] === bin; })[0][1].toLowerCase() + "." + (ok.length > 1 ? " It could go in the other bad box too: floods hurt people and nature." : "");
+    sSel = null; drawSort();
+  } else {
+    var right = ok[0];
+    var msg;
+    if(right[0] === bin[0]) msg = "Close! Right idea, but think about who it affects most: people, or plants and animals?";
+    else if(right[1] === bin[1]) msg = "Hmm. Would " + (bin[1] === "p" ? "people" : "wildlife") + " be pleased about this, or fed up? Have another go.";
+    else msg = "Not quite. Read it again: is it a win or a problem, and for people or for nature?";
+    fb.className = "fbline hmm"; fb.textContent = msg;
+    var bEl = qa(".bin." + bin)[0]; if(bEl){ bEl.classList.remove("shake"); void bEl.offsetWidth; bEl.classList.add("shake"); }
+  }
+}
+function counts(k){
+  var p = st.sort[k] || {}, c = {gp:0,bp:0,gn:0,bn:0};
+  Object.keys(p).forEach(function(i){ c[p[i]]++; });
+  return c;
+}
+function drawScale(){
+  var c = counts(st.sortPick), good = c.gp + c.gn, bad = c.bp + c.bn;
+  var ang = Math.max(-16, Math.min(16, (good - bad) * 5));
+  var rad = ang * Math.PI / 180;
+  $("beam").setAttribute("transform", "rotate(" + (-ang) + " 150 60)");
+  var dyL = -110 * Math.sin(-rad), dyR = 110 * Math.sin(-rad);
+  // left end (40,60) rotated about (150,60) by -ang
+  var lx = 150 - 110 * Math.cos(rad), ly = 60 + 110 * Math.sin(rad);
+  var rx = 150 + 110 * Math.cos(rad), ry = 60 - 110 * Math.sin(rad);
+  $("panL").setAttribute("transform", "translate(" + (lx - 40).toFixed(1) + " " + (ly - 60).toFixed(1) + ")");
+  $("panR").setAttribute("transform", "translate(" + (rx - 260).toFixed(1) + " " + (ry - 60).toFixed(1) + ")");
+  function blocks(n, cx, col){
+    var h = "";
+    for(var i = 0; i < n; i++){ var row = Math.floor(i / 3), col2 = i % 3; h += '<rect x="' + (cx - 17 + col2 * 12) + '" y="' + (98 - row * 10) + '" width="10" height="9" rx="2" fill="' + col + '" stroke="#0a2f38" stroke-width="1"/>'; }
+    return h;
+  }
+  $("blocksL").innerHTML = blocks(good, 40, "#2e8b5c");
+  $("blocksR").innerHTML = blocks(bad, 260, "#ef7724");
+  $("tally4").innerHTML = BINS.map(function(b){ return '<span>' + b[1] + ': <b>' + c[b[0]] + '</b></span>'; }).join("");
+}
+var VERDICTS = ["More good than bad","More bad than good","About even, it depends who you ask"];
+function drawVerdict(){
+  var r = $("verdict"); r.innerHTML = "";
+  VERDICTS.forEach(function(v){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = v;
+    b.setAttribute("aria-pressed", st.verdict[st.sortPick] === v ? "true" : "false");
+    b.addEventListener("click", function(){ st.verdict[st.sortPick] = v; save(); markTried("s3"); drawVerdict(); });
+    r.appendChild(b);
+  });
+}
+
+/* =========================================================
+   STAGE 4  Compare two changes
+   ========================================================= */
+var CMP = [
+  {id:"quarry", name:"Quarry", col:"#a69c8c", facts:[["p","Stone for houses, walls and roads"],["p","Jobs for local people"],["m","Noise, dust and heavy lorries"],["m","Habitats dug away, and a scar on the hill"],["p","Old quarries can become lakes for wildlife"]]},
+  {id:"railway", name:"Railway", col:"#7a3b2e", facts:[["p","Fast travel for people and goods"],["p","Jobs at the station and on the trains"],["m","Smoke and soot from steam trains"],["m","Cut through fields and woods"],["p","Grassy banks became homes for wildlife"]]},
+  {id:"reservoir", name:"Reservoir", col:"#2f80bf", facts:[["p","Clean water for thousands of homes"],["m","A farm was flooded"],["p","A lake where birds feed and rest"],["m","Fish blocked by the dam"],["p","Sailing and walks round the lake"]]},
+  {id:"bypass", name:"Bypass", col:"#4d5356", facts:[["p","Quieter, safer high street"],["p","Quicker journeys"],["m","Fields and hedges dug up"],["m","Animals hit crossing it"],["m","Noise for homes nearby"]]},
+  {id:"retail", name:"Retail park", col:"#ef7724", facts:[["p","Lots of shops in one place, with parking"],["p","Jobs"],["m","Fields covered in tarmac"],["m","Some high street shops close"],["m","More car journeys"]]},
+  {id:"cyclepath", name:"Cycle path", col:"#2e8b5c", facts:[["p","Safe travel away from cars"],["p","Exercise and fresh air"],["p","A green corridor for wildlife"],["m","Costs money to build and look after"],["m","The trains it replaced are gone"]]}
+];
+var RWORD = {"-2":"very bad","-1":"a bit bad","0":"mixed","1":"a bit good","2":"very good"};
+function rateOf(id){ return st.rate[id] || {p:0, n:0, set:false}; }
+function drawRate(){
+  var box = $("rateList"); box.innerHTML = "";
+  CMP.forEach(function(c){
+    var r = rateOf(c.id);
+    var d = document.createElement("div"); d.className = "raterow";
+    d.innerHTML = '<h4><span class="dot" style="background:' + c.col + '"></span>' + c.name + '</h4>' +
+      '<div class="rr"><label for="rp-' + c.id + '">People</label><input type="range" min="-2" max="2" step="1" id="rp-' + c.id + '" value="' + r.p + '"><output id="op-' + c.id + '">' + RWORD[r.p] + '</output></div>' +
+      '<div class="rr"><label for="rn-' + c.id + '">Nature</label><input type="range" min="-2" max="2" step="1" id="rn-' + c.id + '" value="' + r.n + '"><output id="on-' + c.id + '">' + RWORD[r.n] + '</output></div>';
+    box.appendChild(d);
+    ["p","n"].forEach(function(ax){
+      var inp = d.querySelector("#r" + ax + "-" + c.id);
+      inp.addEventListener("input", function(){
+        var rr = st.rate[c.id] || (st.rate[c.id] = {p:0, n:0});
+        rr[ax] = +inp.value; rr.set = true; save(); markTried("s4");
+        d.querySelector("#o" + ax + "-" + c.id).textContent = RWORD[inp.value];
+        drawChart(); drawCmp();
+      });
+    });
+  });
+}
+function drawChart(){
+  var s = '<rect x="20" y="20" width="300" height="300" rx="14" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>' +
+    '<rect x="170" y="22" width="148" height="148" fill="#d8f3e2" opacity=".7"/><rect x="22" y="170" width="148" height="148" fill="#ffe2cf" opacity=".7"/>' +
+    '<path d="M170 24 V316 M24 170 H316" stroke="#0a2f38" stroke-width="2" stroke-dasharray="5 4"/>' +
+    '<g font-family="Archivo,Arial" font-weight="800" font-size="10" fill="#0a2f38" opacity=".38" text-anchor="middle">' +
+    '<text x="245" y="96">GOOD FOR BOTH</text><text x="95" y="246">HARD ON BOTH</text>' +
+    '<text x="95" y="90">GOOD FOR PEOPLE,</text><text x="95" y="102">HARD ON NATURE</text>' +
+    '<text x="245" y="240">GOOD FOR NATURE,</text><text x="245" y="252">HARD ON PEOPLE</text></g>' +
+    '<g font-family="Arial" font-size="10.5" fill="#3d5b64" font-weight="700"><text x="320" y="338" text-anchor="end">better for nature &#8594;</text><text x="20" y="14">&#8593; better for people</text></g>';
+  var seen = {}, dots = "", labs = "";
+  CMP.forEach(function(c){
+    var r = rateOf(c.id), key = r.p + "," + r.n;
+    var k = seen[key] || 0; seen[key] = k + 1;
+    var x = 170 + r.n * 58 + (k % 3) * 16 * (k % 2 ? 1 : -1) * (k % 3 ? 1 : 0), y = 170 - r.p * 58 + (k >= 3 ? 16 : 0);
+    var on = st.pair.indexOf(c.id) > -1;
+    dots += '<circle cx="' + x + '" cy="' + y + '" r="' + (on ? 11 : 8) + '" fill="' + c.col + '" stroke="#0a2f38" stroke-width="' + (on ? 3.5 : 2) + '"/>';
+    if((st.rate[c.id] && st.rate[c.id].set) || on){
+      var right = x < 230;
+      labs += '<text x="' + (x + (right ? 13 : -13)) + '" y="' + (y + 4) + '" text-anchor="' + (right ? "start" : "end") + '" font-family="Arial" font-weight="700" font-size="11" fill="#0a2f38" paint-order="stroke" stroke="#fffdf8" stroke-width="3.5">' + c.name + '</text>';
+    }
+  });
+  $("chart").innerHTML = s + dots + labs;
+}
+function drawCmpPick(){
+  var r = $("cmpPick"); r.innerHTML = "";
+  CMP.forEach(function(c){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = c.name;
+    b.setAttribute("aria-pressed", st.pair.indexOf(c.id) > -1 ? "true" : "false");
+    b.addEventListener("click", function(){
+      var i = st.pair.indexOf(c.id);
+      if(i > -1) st.pair.splice(i, 1); else { st.pair.push(c.id); if(st.pair.length > 2) st.pair.shift(); }
+      save(); markTried("s4"); drawCmpPick(); drawCmp(); drawChart();
+    });
+    r.appendChild(b);
+  });
+}
+function cById(id){ return CMP.filter(function(c){ return c.id === id; })[0]; }
+function drawCmp(){
+  var out = $("cmpOut");
+  if(st.pair.length < 2){ out.innerHTML = '<p class="small">' + (st.pair.length ? "Pick one more." : "Pick any two.") + '</p>'; return; }
+  var a = cById(st.pair[0]), b = cById(st.pair[1]), ra = rateOf(a.id), rb = rateOf(b.id);
+  function card(c, r){
+    return '<div class="cmpcard" style="border-top:10px solid ' + c.col + '"><h4>' + c.name + '</h4><ul>' +
+      c.facts.map(function(f){ return '<li class="' + f[0] + '">' + f[1] + '</li>'; }).join("") +
+      '</ul><p class="small" style="margin:8px 0 0">You said: people ' + RWORD[r.p] + ', nature ' + RWORD[r.n] + '.</p></div>';
+  }
+  function cmpLine(ax, word){
+    if(ra[ax] === rb[ax]) return "You rated them the same for " + word + ".";
+    var w = ra[ax] > rb[ax] ? a : b, l = ra[ax] > rb[ax] ? b : a;
+    return "You think the " + w.name.toLowerCase() + " is better for " + word + " than the " + l.name.toLowerCase() + ".";
+  }
+  out.innerHTML = '<div class="cmpwrap">' + card(a, ra) + card(b, rb) + '</div>' +
+    '<p class="cmpnote">' + cmpLine("p", "people") + ' ' + cmpLine("n", "nature") + ' Can you say why?</p>';
+}
+
+/* =========================================================
+   STAGE 5  Then and now maps
+   ========================================================= */
+var DIFFS = [
+  {id:"estate", name:"Fields became a housing estate", z:'<rect class="dz" x="54" y="20" width="114" height="60"/>', ring:'<rect class="ring" x="50" y="18" width="122" height="66" rx="10"/>',
+    what:"The fields on the hill are now streets of houses.",
+    opts:[["More people needed homes, and the fields on the edge of town had space","best","Yes. Towns usually grow outwards, onto the fields around them."],
+          ["The farmer wanted some neighbours","meh","Probably not! Houses get built because lots of people need somewhere to live."],
+          ["The fields were too steep to farm","meh","Not really. Sheep were fine up there. The land was wanted for homes."]]},
+  {id:"reservoir", name:"Combe Farm became a reservoir", z:'<rect class="dz" x="0" y="96" width="106" height="68"/>', ring:'<rect class="ring" x="2" y="94" width="106" height="72" rx="12"/>',
+    what:"In 1900 there was a farm by the river. Today that bit of valley is under water.",
+    opts:[["The town grew, and more homes needed clean water","best","Yes. More people means more water. A dam across a narrow valley can store lots of it."],
+          ["People wanted a bigger river for boats","meh","Not quite. Boats use the canal. The lake is mainly there to store water."],
+          ["The farm was too old to use","meh","Not really. The farm still worked. The valley was chosen because it was a good shape to hold water."]]},
+  {id:"retail", name:"The meadow became a retail park", z:'<rect class="dz" x="284" y="96" width="68" height="56"/>', ring:'<rect class="ring" x="280" y="92" width="76" height="62" rx="10"/>',
+    what:"The meadow now has big shop buildings and a car park.",
+    opts:[["Big shops need lots of space and parking, so they were built on the edge of town","best","Yes. There is no room in the old town centre for huge shops and car parks."],
+          ["The meadow kept flooding","meh","Maybe a little, but the main reason is space for big shops and parking."],
+          ["People stopped needing shops","meh","The opposite. People still shop, but more of them drive to big shops."]]},
+  {id:"bypass", name:"A new bypass", z:'<path class="dzs" d="M300 300 C320 250 345 200 400 150" stroke-width="30"/>', ring:'<path class="ring" d="M300 300 C320 250 345 200 400 150" stroke-width="22" opacity=".45"/>',
+    what:"A thick orange road now curves round the east side of town.",
+    opts:[["Too much traffic was squeezing through the high street","best","Yes. As more people got cars, town centres jammed up. A bypass sends through traffic round the edge."],
+          ["People wanted a road to the canal","meh","Not quite. It crosses the canal, but it is really about getting traffic out of the town centre."],
+          ["The main road was closed","meh","No, the main road is still there. The bypass takes the traffic that is only passing through."]]},
+  {id:"cyclepath", name:"The railway became a cycle path", z:'<path class="dzs" d="M0 92 L400 84" stroke-width="18"/>', ring:'<path class="ring" d="M0 92 L400 84" stroke-width="14" opacity=".45"/>',
+    what:"The black railway line is now a green dashed cycle path. Same route, new use.",
+    opts:[["More people had cars and lorries, so lots of small railways closed in the 1960s","best","Yes. Lots of small lines closed in the 1960s. The flat old track was later turned into a path."],
+          ["Trains were banned","meh","Not quite. Trains were never banned, but lots of small lines closed because fewer people used them."],
+          ["The reservoir flooded the railway","meh","Not this time. The line is in the same place, it is just used differently now."]]}
+];
+var BONUS = {id:"floodwall", z:'<path class="dzs" d="M180 140 C190 144 196 146 200 146 C220 149 236 152 250 154" stroke-width="14"/>', ring:'<path class="ring" d="M178 140 C200 146 230 150 252 155" stroke-width="10" opacity=".5"/>'};
+
+function drawMaps(){
+  ["map1900","mapNow"].forEach(function(mid){
+    var svg = $(mid), dz = svg.querySelector(".dzones"), rings = svg.querySelector(".rings");
+    var h = "";
+    DIFFS.concat([BONUS]).forEach(function(d){ h += d.z.replace(/class="(dzs?)"/, 'class="$1" data-d="' + d.id + '"'); });
+    dz.innerHTML = h;
+    var r = "";
+    DIFFS.concat([BONUS]).forEach(function(d){ if(st.mapFound[d.id]) r += d.ring; });
+    rings.innerHTML = r;
+  });
+  var dc = $("diffCount"), n = 0, h2 = "";
+  DIFFS.forEach(function(d){ var on = !!st.mapFound[d.id]; if(on) n++; h2 += '<i class="' + (on ? "on" : "") + '"></i>'; });
+  dc.innerHTML = h2 + '<span class="counter" style="margin-left:6px">' + n + ' of 5 found' + (st.mapFound.floodwall ? ", plus the bonus" : "") + '</span>';
+  drawDiffs();
+}
+function bindMaps(){
+  ["map1900","mapNow"].forEach(function(mid){
+    $(mid).addEventListener("click", function(ev){
+      var t = ev.target.closest("[data-d]");
+      var fb = $("mapFb");
+      markTried("s5");
+      if(!t){ fb.className = "fbline"; fb.textContent = "Nothing big changed right there. Try the hill, the river, the railway, or the edges of town."; return; }
+      var id = t.getAttribute("data-d");
+      if(st.mapFound[id]){ fb.className = "fbline"; fb.textContent = "You already found that one."; return; }
+      st.mapFound[id] = true; save();
+      if(id === "floodwall"){ fb.className = "fbline good"; fb.textContent = "Bonus spot! A flood wall along the river in town. Built because the river flooded homes and shops."; }
+      else { var d = DIFFS.filter(function(x){ return x.id === id; })[0]; fb.className = "fbline good"; fb.textContent = "Found one: " + d.name + ". Have a think about why, just below."; }
+      drawMaps();
+    });
+  });
+  $("mapHint").addEventListener("click", function(){
+    var left = DIFFS.filter(function(d){ return !st.mapFound[d.id]; });
+    var fb = $("mapFb");
+    if(!left.length){ fb.className = "fbline good"; fb.textContent = st.mapFound.floodwall ? "All five, and the bonus. Brilliant map reading." : "All five found. There is a sneaky bonus one along the river in town, if you fancy it."; return; }
+    var d = left[0];
+    ["map1900","mapNow"].forEach(function(mid){ $(mid).querySelector(".rings").insertAdjacentHTML("beforeend", d.ring.replace('class="ring"', 'class="ring" data-tmp="1" style="stroke:#7b4b8f"')); });
+    setTimeout(function(){ qa('[data-tmp]').forEach(function(x){ x.remove(); }); }, 3500);
+    fb.className = "fbline"; fb.textContent = "Look inside the purple outline. What is different between the two maps there?";
+  });
+}
+function drawDiffs(){
+  var box = $("diffs"); box.innerHTML = "";
+  DIFFS.forEach(function(d){
+    if(!st.mapFound[d.id]) return;
+    var c = document.createElement("div"); c.className = "diff";
+    c.innerHTML = '<h4>' + d.name + '</h4><p>' + d.what + ' <b>Why do you think it changed?</b></p><div class="whyopts"></div><p class="hnote" aria-live="polite"></p>';
+    var row = c.querySelector(".whyopts"), note = c.querySelector(".hnote");
+    d.opts.forEach(function(o, i){
+      var b = document.createElement("button"); b.type = "button"; b.className = "whyopt" + (st.mapWhy[d.id] === i ? " " + o[1] : "");
+      b.textContent = o[0];
+      b.addEventListener("click", function(){
+        st.mapWhy[d.id] = i; save(); markTried("s5");
+        qa(".whyopt", row).forEach(function(x){ x.className = "whyopt"; });
+        b.className = "whyopt " + o[1];
+        note.textContent = o[2] + (o[1] === "meh" ? " Fancy another pick?" : "");
+      });
+      row.appendChild(b);
+    });
+    if(st.mapWhy[d.id] !== undefined) note.textContent = d.opts[st.mapWhy[d.id]][2];
+    box.appendChild(c);
+  });
+}
+
+/* =========================================================
+   STAGE 6  Bridgeford 2050
+   ========================================================= */
+var PLAN = [
+  {id:"solar", name:"Solar farm", blurb:"Cover the Hill Farm fields in solar panels.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><path d="M0 40 Q60 26 120 36 V60 H0Z" fill="#9ccc7e"/><path d="M14 52 L26 34 H64 L52 52Z M60 52 L72 34 H110 L98 52Z" fill="#2c4f8a" stroke="#9fb7d9"/><circle cx="100" cy="14" r="8" fill="#ffc247"/>',
+    pleased:["Families paying for electricity","People worried about climate change","The farmer, who gets paid rent","Sheep, who graze under the panels"],
+    worried:["People who love the view","Skylarks that nest in open fields","Walkers on the hill path","People who want the land for food"],
+    quotes:[["Farmer","The panels pay me more than wheat ever did, and the sheep still graze underneath."],["Dog walker","I miss the view across the valley. It looks like a car park for robots."],["Wildlife officer","Wild flowers between the rows could really help bees, if it is planned well."]]},
+  {id:"wetland", name:"Wild wetland", blurb:"Let the low fields by the river go wild, with ponds and reeds.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><path d="M0 30 H120 V60 H0Z" fill="#8fc8a0"/><ellipse cx="40" cy="44" rx="24" ry="8" fill="#3b9bd6"/><ellipse cx="92" cy="40" rx="16" ry="6" fill="#3b9bd6"/><path d="M14 46 L12 30 M18 46 L20 28 M70 46 L68 30 M74 46 L76 32" stroke="#5f8a3a" stroke-width="2"/>',
+    pleased:["Families in homes that flood","Birdwatchers","Herons, otters and dragonflies","People who want somewhere wild to walk"],
+    worried:["The farmer who loses the fields","People who want land for houses","Anyone who hates midges","Dog owners, if dogs must stay on leads"],
+    quotes:[["Flood engineer","Wetland soaks up floodwater like a sponge. It can be cheaper than a taller wall."],["Farmer","That was good grazing land. Who pays me for losing it?"],["Birdwatcher","Herons, egrets, maybe even otters one day. Brilliant."]]},
+  {id:"homes", name:"300 new homes", blurb:"Build homes with solar roofs on the hill fields.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><path d="M0 38 Q60 28 120 38 V60 H0Z" fill="#c4e0a0"/><g fill="#fdf6e8" stroke="#6b5a48"><rect x="12" y="34" width="18" height="14"/><rect x="40" y="30" width="18" height="14"/><rect x="68" y="32" width="18" height="14"/><rect x="94" y="36" width="18" height="14"/></g><g fill="#2c4f8a"><path d="M10 35 L21 26 L32 35Z"/><path d="M38 31 L49 22 L60 31Z"/><path d="M66 33 L77 24 L88 33Z"/><path d="M92 37 L103 28 L114 37Z"/></g>',
+    pleased:["Families who need a home","Young people who want to stay in Bridgeford","Builders","Local shops, with more customers"],
+    worried:["Neighbours who like the fields","Wildlife in the hedges","Parents worried about school places","Drivers stuck in more traffic"],
+    quotes:[["Young couple","We grew up here but cannot afford to stay. We need homes."],["Neighbour","More cars on our lane, and the fields we walk in, gone."],["Primary head teacher","More children, lovely. But where do they all fit?"]]},
+  {id:"woodland", name:"New woodland", blurb:"Plant thousands of trees on the hill fields.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><path d="M0 36 Q60 26 120 36 V60 H0Z" fill="#9fcf76"/><g fill="#3f8a4a"><circle cx="16" cy="40" r="7"/><circle cx="34" cy="36" r="8"/><circle cx="52" cy="40" r="7"/><circle cx="70" cy="34" r="8"/><circle cx="88" cy="38" r="7"/><circle cx="106" cy="36" r="8"/><circle cx="26" cy="50" r="6"/><circle cx="62" cy="50" r="6"/><circle cx="98" cy="50" r="6"/></g>',
+    pleased:["Walkers and runners","Birds, squirrels and insects","People downstream, as trees slow floods","People worried about climate change"],
+    worried:["The farmer losing grazing land","People who wanted houses built there","Anyone impatient, trees take years to grow","People who like the open view"],
+    quotes:[["Tree planter","Roots soak up rain and leaves slow it down, so the river rises less after a storm."],["Farmer","I need that land for my sheep. Will anyone pay me to look after trees?"],["Ten year old","I will be old by the time these are big. I will still climb them."]]},
+  {id:"carfree", name:"Car free high street", blurb:"No cars in the town centre. Trees, benches and space.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><rect x="0" y="34" width="120" height="26" fill="#eadfc8"/><g fill="#3f8a4a"><circle cx="20" cy="30" r="9"/><circle cx="100" cy="30" r="9"/></g><rect x="19" y="36" width="3" height="8" fill="#6b4a2e"/><rect x="99" y="36" width="3" height="8" fill="#6b4a2e"/><circle cx="52" cy="48" r="6" fill="none" stroke="#0a2f38" stroke-width="2"/><circle cx="70" cy="48" r="6" fill="none" stroke="#0a2f38" stroke-width="2"/><path d="M52 48 L60 40 L70 48" stroke="#0a2f38" stroke-width="2" fill="none"/>',
+    pleased:["People walking and cycling","Cafes with outdoor tables","Families with buggies","Everyone breathing the air"],
+    worried:["Delivery drivers","Older people who cannot walk far","Shops worried about losing drivers","People on the high street who own cars"],
+    quotes:[["Cafe owner","Tables outside, people sitting in the sun. Business has never been better."],["Older resident","I cannot walk far. How do I get to the chemist now?"],["Student","It is so much quieter. You can actually hear the birds."]]},
+  {id:"wind", name:"Wind turbines", blurb:"Three big turbines on the ridge above town.",
+    icon:'<rect width="120" height="60" fill="#cdeaf5"/><path d="M0 44 Q60 24 120 40 V60 H0Z" fill="#9ccc7e"/><g stroke="#fffdf8" stroke-width="3" stroke-linecap="round"><path d="M40 40 V14 M40 14 L36 2 M40 14 L52 18 M40 14 L30 22"/><path d="M80 36 V12 M80 12 L76 0 M80 12 L92 16 M80 12 L70 20"/></g>',
+    pleased:["Families paying for electricity","People worried about climate change","The landowner, who gets paid","Engineers who get jobs"],
+    worried:["People who love the view","Some birds and bats","Neighbours who hear a whoosh","Walkers on the ridge"],
+    quotes:[["Engineer","Three big turbines can make enough electricity for thousands of homes."],["Hill walker","I come up here for the view, and now it spins."],["Bird expert","Put them in the right place, away from bird routes, and the risk is much lower."]]}
+];
+var MWORD = {"-3":"very bad","-2":"bad","-1":"a bit bad","0":"no real change","1":"a bit good","2":"good","3":"very good"};
+function planById(id){ return PLAN.filter(function(p){ return p.id === id; })[0]; }
+function drawPlanOpts(){
+  var box = $("planOpts"); box.innerHTML = "";
+  PLAN.forEach(function(p){
+    var b = document.createElement("button"); b.type = "button"; b.className = "popt";
+    b.setAttribute("aria-pressed", st.plan.choice === p.id ? "true" : "false");
+    b.innerHTML = '<svg viewBox="0 0 120 60" aria-hidden="true">' + p.icon + '</svg><b>' + p.name + '</b>' + p.blurb;
+    b.addEventListener("click", function(){
+      if(st.plan.choice !== p.id){ st.plan.choice = p.id; st.plan.pleased = []; st.plan.worried = []; st.plan.heard = false; st.plan.p = 0; st.plan.n = 0; st.plan.moved = false; }
+      save(); markTried("s6"); drawPlan();
+    });
+    box.appendChild(b);
+  });
+}
+function face(v, nature){
+  var mouth = 'M30 ' + (60 - v * 2) + ' Q45 ' + (60 + v * 5) + ' 60 ' + (60 - v * 2);
+  if(!nature){
+    return '<circle cx="45" cy="45" r="38" fill="' + (v >= 0 ? "#ffc247" : "#ffd88a") + '" stroke="#0a2f38" stroke-width="3"/><circle cx="32" cy="36" r="4" fill="#0a2f38"/><circle cx="58" cy="36" r="4" fill="#0a2f38"/><path d="' + mouth + '" stroke="#0a2f38" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+  }
+  var col = ["#a0703a","#b08a4a","#a8a050","#8cbf5a","#6aaf52","#4a9c4a","#2e8b3c"][v + 3];
+  return '<rect x="40" y="56" width="10" height="28" fill="#6b4a2e"/><circle cx="45" cy="38" r="' + (26 + v * 2) + '" fill="' + col + '" stroke="#0a2f38" stroke-width="3"/><circle cx="36" cy="34" r="3.5" fill="#0a2f38"/><circle cx="54" cy="34" r="3.5" fill="#0a2f38"/><path d="M34 ' + (48 - v) + ' Q45 ' + (48 + v * 3) + ' 56 ' + (48 - v) + '" stroke="#0a2f38" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+    (v >= 2 ? '<path d="M70 14 q4 -4 8 0 q4 -4 8 0" stroke="#0a2f38" stroke-width="2" fill="none"/>' : "");
+}
+function drawPlan(){
+  drawPlanOpts();
+  var p = planById(st.plan.choice);
+  $("planWork").hidden = !p;
+  if(!p) return;
+  $("mP").value = st.plan.p; $("mN").value = st.plan.n;
+  $("oP").textContent = MWORD[st.plan.p]; $("oN").textContent = MWORD[st.plan.n];
+  $("faceP").innerHTML = face(st.plan.p, false); $("faceN").innerHTML = face(st.plan.n, true);
+  ["pleased","worried"].forEach(function(k){
+    var row = $(k); row.innerHTML = "";
+    p[k].forEach(function(t){
+      var b = document.createElement("button"); b.type = "button";
+      var on = st.plan[k].indexOf(t) > -1;
+      b.className = "hchip" + (on ? (k === "pleased" ? " yes" : " maybe") : "");
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.textContent = t;
+      b.addEventListener("click", function(){
+        var arr = st.plan[k], i = arr.indexOf(t);
+        if(i > -1) arr.splice(i, 1); else arr.push(t);
+        save(); markTried("s6"); drawPlan();
+      });
+      row.appendChild(b);
+    });
+  });
+  var q = $("quotes");
+  q.hidden = !st.plan.heard;
+  q.innerHTML = p.quotes.map(function(x){ return '<div class="quote"><b>' + x[0] + '</b>' + x[1] + '</div>'; }).join("") +
+    '<p class="small" style="margin:0">Made up voices, but real arguments. Do any of them change your prediction?</p>';
+}
+function bindPlan(){
+  ["P","N"].forEach(function(ax){
+    $("m" + ax).addEventListener("input", function(){
+      st.plan[ax.toLowerCase()] = +this.value; st.plan.moved = true; save(); markTried("s6");
+      $("o" + ax).textContent = MWORD[this.value];
+      $("face" + ax).innerHTML = face(+this.value, ax === "N");
+    });
+  });
+  $("hearBtn").addEventListener("click", function(){ st.plan.heard = true; save(); markTried("s6"); drawPlan(); });
+  $("see2050").addEventListener("click", function(){ st.era = 4; st.erasSeen[4] = true; save(); openStage("s1", true); setEra(4); });
+}
+
+/* =========================================================
+   STAGE 7  My own patch
+   ========================================================= */
+var TALLY = [
+  ["roads","Roads",'<rect x="2" y="10" width="36" height="14" fill="#5c6266"/><path d="M4 17 H36" stroke="#fff" stroke-width="2" stroke-dasharray="5 4"/>'],
+  ["paths","Paths and pavements",'<path d="M6 32 L16 2 H24 L34 32Z" fill="#d9c9a8" stroke="#8d7a5c"/>'],
+  ["signs","Signs",'<rect x="18" y="12" width="4" height="22" fill="#6d757a"/><rect x="6" y="2" width="28" height="14" rx="2" fill="#2f6fc0"/><path d="M12 9 H28" stroke="#fff" stroke-width="2"/>'],
+  ["bins","Bins",'<rect x="10" y="8" width="20" height="24" rx="2" fill="#2e8b5c"/><rect x="8" y="4" width="24" height="5" rx="2" fill="#1f6b44"/>'],
+  ["fences","Fences and walls",'<path d="M6 32 V8 M14 32 V6 M22 32 V8 M30 32 V6 M2 14 H36 M2 24 H36" stroke="#8a5a2e" stroke-width="3"/>'],
+  ["buildings","Buildings",'<rect x="6" y="14" width="28" height="18" fill="#b9573a"/><path d="M3 15 L20 3 L37 15Z" fill="#56606a"/><rect x="16" y="22" width="8" height="10" fill="#4a3a2a"/>'],
+  ["parks","Parks and green spaces",'<rect x="2" y="24" width="36" height="8" rx="3" fill="#9fd86b"/><rect x="18" y="14" width="4" height="12" fill="#6b4a2e"/><circle cx="20" cy="12" r="9" fill="#3f8a4a"/>'],
+  ["drains","Drains",'<rect x="6" y="6" width="28" height="24" rx="3" fill="#6d757a"/><path d="M12 8 V28 M18 8 V28 M24 8 V28 M30 8 V28" stroke="#2a2f33" stroke-width="2"/>'],
+  ["hedges","Hedges",'<path d="M2 32 V16 Q8 6 14 14 Q20 4 26 14 Q32 6 38 16 V32Z" fill="#3f8a4a"/>'],
+  ["trees","Planted trees",'<rect x="18" y="18" width="4" height="14" fill="#6b4a2e"/><circle cx="20" cy="14" r="10" fill="#5aa85a"/><path d="M12 32 H28" stroke="#8d7a5c" stroke-width="3"/>'],
+  ["lamps","Lamp posts",'<rect x="18" y="6" width="4" height="28" fill="#0a2f38"/><path d="M14 6 H30 L26 2 H18Z" fill="#0a2f38"/><circle cx="24" cy="9" r="3" fill="#ffc247"/>'],
+  ["benches","Benches",'<rect x="4" y="12" width="32" height="5" fill="#8a5a2e"/><rect x="4" y="20" width="32" height="5" fill="#8a5a2e"/><path d="M8 25 V32 M32 25 V32" stroke="#333" stroke-width="3"/>'],
+  ["carparks","Car parks",'<rect x="8" y="4" width="24" height="26" rx="4" fill="#2f6fc0"/><text x="20" y="25" text-anchor="middle" font-family="Arial" font-weight="700" font-size="20" fill="#fff">P</text>'],
+  ["bikes","Bike racks",'<path d="M6 32 V16 Q6 8 14 8 Q22 8 22 16 V32 M18 32 V16 Q18 8 26 8 Q34 8 34 16 V32" stroke="#6d757a" stroke-width="3" fill="none"/>']
+];
+var QUAL = [["litter","Litter","Lots of litter","No litter"],["noise","Noise","Very loud","Peaceful"],["green","Greenery","No green","Loads of green"],["air","Air","Smelly or fumy","Fresh"],["safe","Safe to walk","Feels unsafe","Feels safe"],["cared","Looks cared for","Run down","Well cared for"]];
+function marks(n){ var s = ""; for(var i = 0; i < n; i++){ s += (i % 5 === 4) ? "/ " : "|"; } return s; }
+function drawTallies(){
+  var box = $("tallies"); box.innerHTML = "";
+  TALLY.forEach(function(t){
+    var n = st.tally[t[0]] || 0;
+    var c = document.createElement("div"); c.className = "tcell" + (n ? " has" : "");
+    c.innerHTML = '<svg viewBox="0 0 40 34" aria-hidden="true">' + t[2] + '</svg><span class="tl">' + t[1] + '</span>' +
+      '<div class="tcount"><button class="tb minus" data-t="' + t[0] + '" data-d="-1" aria-label="One less ' + t[1] + '">&minus;</button><b id="tc-' + t[0] + '">' + n + '</b><button class="tb" data-t="' + t[0] + '" data-d="1" aria-label="One more ' + t[1] + '">+</button></div>' +
+      '<div class="marks" id="tm-' + t[0] + '">' + marks(n) + '</div>';
+    box.appendChild(c);
+  });
+  var o = $("tc-other"); if(o) o.textContent = st.tally.other || 0;
+}
+document.addEventListener("click", function(ev){
+  var b = ev.target.closest(".tb"); if(!b) return;
+  var k = b.dataset.t, d = +b.dataset.d;
+  st.tally[k] = Math.max(0, (st.tally[k] || 0) + d); save(); markTried("s7");
+  var n = st.tally[k];
+  var el = $("tc-" + k); if(el) el.textContent = n;
+  var m = $("tm-" + k); if(m) m.textContent = marks(n);
+  var cell = b.closest(".tcell"); if(cell) cell.classList.toggle("has", n > 0);
+});
+function drawQual(){
+  var box = $("qualRows"); box.innerHTML = "";
+  QUAL.forEach(function(q){
+    var v = st.qual[q[0]];
+    var d = document.createElement("div"); d.className = "qrow";
+    d.innerHTML = '<label class="qn" for="q-' + q[0] + '">' + q[1] + '</label><div><input type="range" min="0" max="4" step="1" id="q-' + q[0] + '" value="' + (v === undefined ? 2 : v) + '"><div class="qends"><span>' + q[2] + '</span><span>' + q[3] + '</span></div></div>';
+    d.querySelector("input").addEventListener("input", function(){ st.qual[q[0]] = +this.value; save(); markTried("s7"); scoreQual(); });
+    box.appendChild(d);
+  });
+  scoreQual();
+}
+function qualScore(){
+  var t = 0, set = 0;
+  QUAL.forEach(function(q){ var v = st.qual[q[0]]; if(v !== undefined) set++; t += (v === undefined ? 2 : v); });
+  return {t:t, set:set};
+}
+function scoreQual(){
+  var s = qualScore();
+  $("qBig").textContent = s.set ? s.t : "?";
+  $("qBar").style.width = s.set ? (s.t / 24 * 100) + "%" : "0%";
+  var w = !s.set ? "Slide the bars to score the place" : s.t <= 8 ? "This patch needs some love" : s.t <= 14 ? "An OK patch" : s.t <= 19 ? "A pretty nice patch" : "A lovely patch";
+  $("qWord").textContent = w;
+}
+function drawWalkWith(){
+  var r = $("walkWith"); r.innerHTML = "";
+  ["Jay","HB","Someone else","From memory or a window"].forEach(function(v){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = v;
+    b.setAttribute("aria-pressed", st.walkWith === v ? "true" : "false");
+    b.addEventListener("click", function(){ st.walkWith = v; save(); markTried("s7"); drawWalkWith(); });
+    r.appendChild(b);
+  });
+}
+
+/* =========================================================
+   SEND
+   ========================================================= */
+function buildText(){
+  var L = [], T = st.texts;
+  L.push("SHAPED BY PEOPLE (Bridgeford, a made up valley town, plus a real survey)");
+  var tried = TILES.filter(function(t){ return st.tried[t.id]; });
+  L.push("Stages tried: " + tried.length + " of 7" + (tried.length ? " (" + tried.map(function(t){ return t.name; }).join(", ") + ")" : ""));
+  if(who){
+    L.push("");
+    L.push("Picked initials: " + who);
+    MS_FULL[who].forEach(function(m, i){
+      var code = who + (i + 1);
+      var where = TILES.filter(function(t){ return st.tried[t.id] && STAGE_MS[t.id].indexOf(code) > -1; }).map(function(t){ return t.name; });
+      L.push(" Milestone " + (i + 1) + ": " + m);
+      L.push("   Worked on in: " + (where.length ? where.join(", ") : "not yet"));
+    });
+  }
+
+  L.push(""); L.push("1. TIME MACHINE");
+  var seen = Object.keys(st.erasSeen || {}).map(function(e){ return ERAS[+e].y; });
+  L.push("Years looked at: " + (seen.length ? seen.join(", ") : "none"));
+  for(var e = 0; e < 5; e++){
+    var f = st.found[e]; if(!f) continue;
+    var ids = Object.keys(f); if(!ids.length) continue;
+    var all = featuresIn(e);
+    L.push(" " + ERAS[e].y + ": found " + ids.length + " of " + all.length + " human made things: " + ids.map(function(id){ return fname(id, e); }).join(", "));
+  }
+  if(T.s1text) L.push("How a place changed: " + T.s1text);
+
+  L.push(""); L.push("2. WHY DID PEOPLE BUILD IT?");
+  var m = [];
+  ROUNDS.forEach(function(R){ R.forEach(function(x){ if(st.match[x.id]) m.push(x.name + " = " + x.job.toLowerCase()); }); });
+  L.push("Matched " + m.length + " of 10" + (m.length ? ":" : ""));
+  m.forEach(function(x){ L.push(" " + x); });
+  HELP.forEach(function(h){
+    var t = st.help[h.id]; if(!t || !t.length) return;
+    L.push(" Who " + h.name.toLowerCase() + " helps, explored: " + t.map(function(i){ return h.chips[i][0] + " (" + h.chips[i][1] + ")"; }).join(", "));
+  });
+  if(T.s2text) L.push("Why and who it helps: " + T.s2text);
+
+  L.push(""); L.push("3. GOOD, BAD OR BOTH?");
+  Object.keys(SORT).forEach(function(k){
+    var p = st.sort[k] || {}, n = Object.keys(p).length;
+    if(!n && !st.verdict[k]) return;
+    var c = counts(k);
+    L.push(" " + SORT[k].name + ": sorted " + n + " of " + SORT[k].cards.length + " effects. Good for people " + c.gp + ", bad for people " + c.bp + ", good for nature " + c.gn + ", bad for nature " + c.bn + ".");
+    if(st.verdict[k]) L.push("   Verdict: " + st.verdict[k]);
+  });
+  if(T.s3text) L.push("Good and bad: " + T.s3text);
+
+  L.push(""); L.push("4. COMPARE TWO CHANGES");
+  var rated = CMP.filter(function(c){ return st.rate[c.id] && st.rate[c.id].set; });
+  rated.forEach(function(c){ var r = st.rate[c.id]; L.push(" " + c.name + ": people " + RWORD[r.p] + ", nature " + RWORD[r.n]); });
+  if(!rated.length) L.push(" No ratings moved.");
+  if(st.pair.length === 2) L.push(" Compared: " + cById(st.pair[0]).name + " and " + cById(st.pair[1]).name);
+  if(T.s4text) L.push("Comparison: " + T.s4text);
+
+  L.push(""); L.push("5. THEN AND NOW MAPS");
+  var fd = DIFFS.filter(function(d){ return st.mapFound[d.id]; });
+  L.push(" Differences found: " + fd.length + " of 5" + (st.mapFound.floodwall ? ", plus the bonus flood wall" : ""));
+  fd.forEach(function(d){
+    var w = st.mapWhy[d.id];
+    L.push("  " + d.name + (w !== undefined ? ". Why: " + d.opts[w][0] + (d.opts[w][1] === "best" ? " (strongest reason)" : " (picked a weaker reason)") : ". Why: not chosen"));
+  });
+  if(T.s5text) L.push("Map evidence: " + T.s5text);
+
+  L.push(""); L.push("6. BRIDGEFORD 2050");
+  var p = planById(st.plan.choice);
+  if(p){
+    L.push(" Chosen change: " + p.name + " (" + p.blurb + ")");
+    if(st.plan.moved) L.push(" Predicted effect on people: " + MWORD[st.plan.p] + ". On nature: " + MWORD[st.plan.n] + ".");
+    if(st.plan.pleased.length) L.push(" Might be pleased: " + st.plan.pleased.join(", "));
+    if(st.plan.worried.length) L.push(" Might be worried: " + st.plan.worried.join(", "));
+    if(st.plan.heard) L.push(" Read the residents' views.");
+  } else L.push(" No change picked yet.");
+  if(T.s6text) L.push("Plan and why: " + T.s6text);
+
+  L.push(""); L.push("7. MY OWN PATCH (real walk)");
+  if(st.walkWith) L.push(" With: " + st.walkWith);
+  if(T.nWhere) L.push(" Where: " + T.nWhere);
+  var tl = TALLY.filter(function(t){ return st.tally[t[0]]; }).map(function(t){ return t[1] + " " + st.tally[t[0]]; });
+  if(st.tally.other) tl.push((T.otherName || "Something else") + " " + st.tally.other);
+  L.push(" Tally: " + (tl.length ? tl.join(", ") : "nothing tallied"));
+  var qs = qualScore();
+  if(qs.set){
+    L.push(" Environment score: " + qs.t + " out of 24 (" + qs.set + " of 6 slid)");
+    QUAL.forEach(function(q){ var v = st.qual[q[0]]; if(v !== undefined) L.push("  " + q[1] + ": " + v + " of 4"); });
+  }
+  if(T.nBest) L.push(" Most interesting thing: " + T.nBest);
+  if(T.nChange) L.push(" Something that changed: " + T.nChange);
+  if(T.nIdea) L.push(" A change I would make: " + T.nIdea);
+
+  var codes = [];
+  tried.forEach(function(t){ STAGE_MS[t.id].forEach(function(c){ if(codes.indexOf(c) < 0) codes.push(c); }); });
+  L.push(""); L.push("Milestone codes this work touches: " + (codes.length ? codes.join(", ") : "none yet"));
+  return L.join("\n");
+}
+
+/* ---------------- restart ---------------- */
+var armed = false;
+$("restart").addEventListener("click", function(){
+  if(!armed){ armed = true; this.textContent = "Sure? Tap again to clear everything on this page"; var me = this; setTimeout(function(){ armed = false; me.textContent = "Start again (clears everything on this page)"; }, 4000); return; }
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  st = fresh(); armed = false; this.textContent = "Start again (clears everything on this page)";
+  qa("[data-save]").forEach(function(el){ el.value = ""; });
+  initAll(); openStage("s1", false); window.scrollTo(0, 0);
+  toast("All cleared. Fresh start.");
+});
+
+/* ---------------- init ---------------- */
+function initAll(){
+  drawWho(); drawTiles();
+  drawMatch(); drawHelp();
+  drawSort();
+  drawRate(); drawCmpPick(); drawCmp(); drawChart();
+  drawMaps();
+  drawPlan();
+  drawTallies(); drawQual(); drawWalkWith();
+}
+bindScene(); bindMaps(); bindPlan();
+initAll();
+openStage(st.open && $(st.open) ? st.open : "s1", false);
+renderScene();
+
+if(window.Base5Send) Base5Send.mount($("sendHost"), {
+  tool: "Shaped by People", filename: "shaped-by-people",
+  getText: buildText
+});
+var whoIn = document.getElementById("b5who");
+if(whoIn) whoIn.addEventListener("input", function(){
+  var v = whoIn.value.trim().toUpperCase();
+  var nw = PEOPLE.indexOf(v) > -1 ? v : "";
+  if(nw !== who){ who = nw; drawWho(); refreshTiles(); }
+});
+
+window.__sbp = { st:function(){ return st; }, buildText:buildText, featuresIn:featuresIn };
+})();
+</script>
+
+</body>
+</html>

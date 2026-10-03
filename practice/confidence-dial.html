@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Confidence Dial - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Confidence Dial only. Shell, cards and buttons come from style.css */
+.cd{max-width:920px;margin:0 auto}
+.hidden{display:none!important}
+.cd p{max-width:64ch}
+.intro{display:grid;grid-template-columns:1fr 230px;gap:18px;align-items:center}
+.intro .panel{margin:0;max-width:none}
+.intro .panel p{margin:0 0 10px}
+.introdial{width:100%;height:auto}
+.introdial .swing{transform-origin:115px 118px;animation:swing 5.5s ease-in-out infinite}
+@keyframes swing{0%{transform:rotate(-78deg)}22%{transform:rotate(78deg)}40%{transform:rotate(-30deg)}55%{transform:rotate(12deg)}70%,100%{transform:rotate(0deg)}}
+@media (max-width:680px){.intro{grid-template-columns:1fr}.introdial{max-width:220px;margin:0 auto;display:block}}
+
+/* who picker */
+.whobox{background:var(--white);border:var(--border) dashed var(--plum);border-radius:var(--r-alt);padding:16px 18px;margin:18px 0}
+.whobox h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.1rem;margin:0 0 4px}
+.whobox .sub{font-size:.9rem;color:var(--body-tint);margin:0 0 10px}
+.whorow{display:flex;flex-wrap:wrap;gap:8px}
+.whob{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:.95rem;letter-spacing:.1em;min-width:58px;padding:9px 14px;border-radius:999px;border:var(--border) solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+.whob[aria-pressed="true"]{background:var(--plum);color:var(--paper);box-shadow:3px 4px 0 var(--ink)}
+.whob.look{letter-spacing:.04em;font-size:.82rem}
+.miles{margin:12px 0 0;padding:12px 14px;background:linear-gradient(150deg,#f4eaf8,#fbf6fc);border:2px solid var(--plum);border-radius:16px 12px 16px 12px}
+.miles b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.miles ol{margin:6px 0 0;padding-left:22px}
+.miles li{margin:3px 0}
+
+/* stage map */
+.maptitle{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 10px}
+.maptitle h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.6rem}
+.maptitle span{font-size:.92rem;color:var(--body-tint)}
+.smap{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 20px}
+.tile{position:relative;text-align:left;font-family:var(--body);color:var(--ink);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:12px 12px 12px;cursor:pointer;box-shadow:var(--lift);transition:transform .15s ease,box-shadow .15s ease;display:flex;flex-direction:column;gap:4px;min-height:150px}
+.tile:nth-child(odd){transform:rotate(-.6deg)}
+.tile:nth-child(even){transform:rotate(.5deg)}
+.tile:hover{transform:translateY(-4px) rotate(0);box-shadow:var(--lift-hi)}
+.tile svg{width:56px;height:56px}
+.tile .tn{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.tile .tt{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.05rem;line-height:1.08}
+.tile .tst{font-size:.8rem;margin-top:auto}
+.tile.cur{outline:4px dashed var(--ink);outline-offset:4px}
+.t1{background:linear-gradient(150deg,#ffd77e,var(--yellow))}
+.t2{background:linear-gradient(150deg,#ff9f5c,var(--orange))}
+.t3{background:linear-gradient(150deg,#a77ab9,var(--plum));color:var(--paper)}
+.t4{background:linear-gradient(150deg,#3fbfdc,var(--bright))}
+.t5{background:linear-gradient(150deg,#ffe3a3,#ffcf6a)}
+.t6{background:linear-gradient(150deg,#1a8fae,var(--teal));color:var(--paper)}
+.t7{background:linear-gradient(150deg,#1d4f5c,var(--ink));color:var(--paper)}
+.t3 .tt,.t6 .tt,.t7 .tt{color:var(--paper)}
+.tag{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--white);color:var(--ink);border:2px solid var(--ink)}
+.tile .start{position:absolute;top:-10px;right:-6px;background:var(--yellow);transform:rotate(4deg);box-shadow:2px 3px 0 var(--ink)}
+.tile .done{background:#e9f4ec}
+
+/* stages */
+.stage{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:24px;margin:0 0 20px;box-shadow:var(--lift)}
+.stage>.sh{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:0 0 6px}
+.stage>.sh svg{width:62px;height:62px;flex:none}
+.stage>.sh .shtxt{flex:1;min-width:200px}
+.stage h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:clamp(1.45rem,4vw,1.9rem);line-height:1.05;margin:2px 0 6px}
+.stage .shtxt p{margin:0;font-size:1rem}
+.stage h3.part{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.15rem;margin:22px 0 8px;display:flex;align-items:center;gap:10px}
+.stage h3.part .pn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:.85rem;flex:none}
+.stagenav{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 0;padding-top:16px;border-top:3px dashed var(--line)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+
+.learn{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center;background:linear-gradient(150deg,#eaf6f9,#f7fbfc);border:2px solid #b8dbe4;border-radius:18px 14px 18px 14px;padding:14px 16px;margin:14px 0}
+.learn svg{width:100%;height:auto}
+.learn .lk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+.learn ul{margin:6px 0 0;padding-left:20px}
+.learn li{margin:4px 0}
+@media (max-width:600px){.learn{grid-template-columns:1fr}.learn svg{max-width:240px;margin:0 auto;display:block}}
+
+.chipset{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 8px}
+.cb{font-family:var(--body);font-size:.95rem;font-weight:700;text-align:left;padding:9px 14px;border-radius:999px;border:2px solid rgba(10,47,56,.35);background:var(--white);color:var(--ink);cursor:pointer;line-height:1.25;max-width:100%}
+.cb:hover{border-color:var(--ink)}
+.cb[aria-pressed="true"]{background:var(--teal);color:var(--paper);border-color:var(--ink);box-shadow:2px 3px 0 var(--ink)}
+.cb.starter{border-style:dashed;font-weight:400;font-size:.9rem}
+.cb.starter:hover{background:#fff6df}
+textarea.wr,input.wr{width:100%;font-family:var(--body);font-size:1rem;line-height:1.5;padding:10px 12px;border:2px solid rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+textarea.wr{min-height:84px;resize:vertical}
+.wrlab{display:block;font-weight:700;margin:12px 0 4px}
+.note{font-size:.9rem;color:var(--body-tint);margin:6px 0!important}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+.pop{animation:popin .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes popin{from{transform:scale(.9);opacity:.2}to{transform:scale(1);opacity:1}}
+
+/* strengths */
+.strgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media (max-width:760px){.strgrid{grid-template-columns:1fr}}
+.deck{position:relative;min-height:250px}
+.scard{border:var(--border) solid var(--ink);border-radius:22px 16px 24px 16px;padding:18px;text-align:center;box-shadow:6px 7px 0 rgba(10,47,56,.2);background:var(--white)}
+.scard .cat{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+.scard .big{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.45rem;line-height:1.1;margin:8px 0 12px;min-height:3.2rem;display:flex;align-items:center;justify-content:center}
+.scard svg{width:74px;height:74px}
+.scard .cnt{font-size:.82rem;opacity:.65;margin-top:8px}
+.deckbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.flyR{animation:flyR .32s ease-in forwards}
+.flyL{animation:flyL .32s ease-in forwards}
+@keyframes flyR{to{transform:translateX(70px) rotate(10deg);opacity:0}}
+@keyframes flyL{to{transform:translateX(-70px) rotate(-10deg);opacity:0}}
+.strcardout{border:var(--border) solid var(--ink);border-radius:20px;padding:16px;background:repeating-linear-gradient(135deg,#fff8e6 0 14px,#fff3d6 14px 28px);box-shadow:var(--lift)}
+.strcardout h4{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;font-size:1.15rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.stickers{display:flex;flex-wrap:wrap;gap:7px}
+.stk{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);border-radius:999px;padding:5px 11px;font-size:.88rem;font-weight:700;background:var(--white)}
+.stk.some{border-style:dashed;font-weight:400;opacity:.85}
+.stk:nth-child(3n){transform:rotate(-1.5deg)}
+.stk:nth-child(3n+1){transform:rotate(1deg)}
+.stk i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1.5px solid var(--ink)}
+.stk.top{background:var(--yellow);box-shadow:2px 3px 0 var(--ink)}
+.addrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.addrow input{flex:1;min-width:160px}
+.wherebox{display:grid;gap:8px}
+.whererow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--paper);border-radius:12px}
+.whererow b{min-width:140px}
+.sentence{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 700;font-size:1.15rem;background:var(--yellow);border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;padding:12px 16px;margin:10px 0;box-shadow:3px 4px 0 var(--ink)}
+
+/* dial game */
+.scenrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;margin:8px 0 14px}
+.scenb{font-family:var(--body);text-align:center;border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;background:var(--white);padding:10px 8px;cursor:pointer;color:var(--ink);font-size:.9rem;font-weight:700;line-height:1.2}
+.scenb svg{width:46px;height:46px;display:block;margin:0 auto 4px}
+.scenb[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.scenb .tr{display:block;font-weight:400;font-size:.75rem;opacity:.7;margin-top:2px}
+.dialwrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:center;background:linear-gradient(160deg,#fff7ea,#fdeedd);border:var(--border) solid var(--ink);border-radius:22px 16px 22px 16px;padding:16px}
+@media (max-width:720px){.dialwrap{grid-template-columns:1fr}}
+.dialsvg{width:100%;max-width:380px;display:block;margin:0 auto;touch-action:none;cursor:pointer}
+.dialsvg:focus-visible{outline:4px solid var(--plum);outline-offset:3px;border-radius:12px}
+.needle{transition:transform .5s cubic-bezier(.3,1.5,.5,1)}
+.dialctl{display:flex;align-items:center;gap:10px;justify-content:center;margin:6px 0}
+.dialctl input[type=range]{flex:1;max-width:240px;accent-color:var(--orange);height:30px}
+.rb{width:44px;height:44px;border-radius:50%;border:var(--border) solid var(--ink);background:var(--white);font-family:var(--display);font-size:1.4rem;font-weight:800;cursor:pointer;color:var(--ink);line-height:1}
+.zonelab{text-align:center;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;font-size:1.3rem;margin:4px 0}
+.situ{font-size:1.05rem;margin:0 0 10px}
+.situ b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.outcome{border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;background:var(--white);padding:14px;display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:center;margin-top:10px}
+.outcome svg{width:90px;height:90px}
+.outcome .verdict{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin:0 0 6px;border:2px solid var(--ink)}
+.outcome p{margin:0}
+.bob{animation:bob .6s ease}
+@keyframes bob{0%{transform:translateY(0)}30%{transform:translateY(-10px)}60%{transform:translateY(3px)}100%{transform:translateY(0)}}
+.charsvg{width:120px;height:120px;display:block;margin:0 auto}
+.triedline{font-size:.85rem;color:var(--body-tint);margin-top:8px}
+
+/* sort */
+.trays{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+@media (max-width:620px){.trays{grid-template-columns:1fr}}
+.tray{border:var(--border) dashed var(--ink);border-radius:18px 14px 18px 14px;padding:10px;min-height:110px;background:var(--paper);cursor:pointer;text-align:left;font-family:var(--body);color:var(--ink);display:block;width:100%}
+.tray.armed{border-style:solid;box-shadow:0 0 0 4px rgba(239,119,36,.4)}
+.tray .th{display:flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin-bottom:6px}
+.tray .th svg{width:34px;height:34px;flex:none}
+.tray.low{background:linear-gradient(160deg,#e3f3f8,#d3ecf4)}
+.tray.mid{background:linear-gradient(160deg,#eef8e8,#dff0d6)}
+.tray.high{background:linear-gradient(160deg,#fde9da,#fbd9c2)}
+.quickdrop{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 4px 12px}
+.quickdrop .cb{display:inline-flex;align-items:center;gap:6px;padding:6px 12px}
+.placed{display:block;width:100%;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;font-size:.86rem;background:var(--white);border:2px solid var(--ink);border-radius:10px;padding:5px 8px;margin:5px 0;line-height:1.3}
+.placed.wobble{border-color:#d75f10}
+.pile{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.sitem{font-family:var(--body);font-size:1rem;text-align:left;padding:11px 14px;border:2px solid var(--ink);border-radius:14px 10px 14px 10px;background:var(--white);cursor:pointer;color:var(--ink);box-shadow:3px 3px 0 rgba(10,47,56,.2)}
+.sitem[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink);transform:rotate(-.6deg)}
+.fixq{border:2px solid var(--ink);border-radius:16px;background:var(--paper);padding:14px 16px;margin:12px 0}
+.fixq .qq{font-weight:700;margin:0 0 8px}
+.fixopts{display:grid;gap:8px}
+.fixopts button{font-family:var(--body);font-size:.98rem;text-align:left;padding:10px 14px;border:2px solid rgba(10,47,56,.3);border-radius:12px;background:var(--white);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:10px}
+.fixopts button.good{border-color:#2e7d4f;background:#e9f4ec}
+.fixopts button.meh{border-color:#d75f10;background:#fdf0e5}
+.minidial{width:46px;height:28px;flex:none}
+
+/* tools */
+.toolgrid{display:grid;gap:14px}
+.tool{border:var(--border) solid var(--ink);border-radius:20px 14px 20px 14px;overflow:hidden;background:var(--white)}
+.tool>.thd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:var(--border) solid var(--ink)}
+.tool>.thd svg{width:48px;height:48px;flex:none}
+.tool>.thd h4{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:0}
+.tool>.thd p{margin:0;font-size:.9rem}
+.tool>.tbd{padding:14px}
+.th1{background:linear-gradient(150deg,#ffd77e,var(--yellow))}
+.th2{background:linear-gradient(150deg,#ffb27c,#f39250)}
+.th3{background:linear-gradient(150deg,#cfe9b8,#a9d68a)}
+.th4{background:linear-gradient(150deg,#8fd6e8,#5cc3dd)}
+.th5{background:linear-gradient(150deg,#d6b7e3,#b994cc)}
+.rate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:2px dashed var(--line)}
+.rate span{font-weight:700;font-size:.92rem}
+.stairs{width:100%;max-width:420px;height:auto;display:block;margin:6px auto}
+.bubble{position:relative;background:#eef7fa;border:var(--border) solid var(--ink);border-radius:20px;padding:12px 16px;margin:10px 0;font-size:1.05rem}
+.bubble:after{content:"";position:absolute;left:26px;bottom:-14px;border:12px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.rehearse{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 700;transition:font-size .3s ease,letter-spacing .3s ease;line-height:1.25}
+.meter{height:14px;background:rgba(10,47,56,.12);border-radius:999px;overflow:hidden;margin:8px 0;border:2px solid var(--ink)}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));transition:width .4s ease}
+.flip{display:grid;gap:8px;margin:10px 0}
+.thought{background:#e9edf0;border:2px solid #9aa5b1;border-radius:16px;padding:10px 14px;font-style:italic}
+
+/* wins timeline */
+.tlsvg{width:100%;height:auto;display:block;margin:8px 0}
+.winlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:8px 0}
+.win{border:2px solid var(--ink);border-radius:16px 12px 16px 12px;background:var(--white);padding:10px 12px;position:relative;font-size:.92rem}
+.win .wn{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;color:var(--white);font-weight:700;font-size:.85rem;margin-right:6px;border:2px solid var(--ink)}
+.win b{font-size:1rem}
+.win .x{position:absolute;top:6px;right:6px;border:0;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--ink);padding:2px 8px;border-radius:8px}
+.formbox{border:var(--border) dashed var(--teal);border-radius:18px;padding:14px 16px;background:#f5fbfc}
+.formbox .wrlab:first-child{margin-top:0}
+
+/* decide */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:8px 0 14px}
+.dbtn{font-family:var(--body);text-align:left;border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;padding:12px;cursor:pointer;background:var(--white);color:var(--ink)}
+.dbtn .sz{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:2px solid var(--ink);margin-bottom:6px}
+.dbtn .sz.small{background:#dff0d6}
+.dbtn .sz.big{background:#fbd9c2}
+.dbtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.05rem;line-height:1.15}
+.dbtn .d{font-size:.82rem;opacity:.75}
+.dbtn[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.dbtn .ok{font-size:.78rem;color:#2e7d4f;font-weight:700}
+.dbox{border:var(--border) solid var(--ink);border-radius:20px 14px 20px 14px;padding:16px;background:linear-gradient(160deg,#f2fafc,#fffdf8)}
+.dq{font-size:1.12rem;font-weight:700;margin:0 0 6px}
+.scalesvg{width:100%;max-width:440px;height:auto;display:block;margin:4px auto}
+.beam{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.reasons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.reasons{grid-template-columns:1fr}}
+.rcol{border-radius:14px;padding:10px;border:2px solid var(--ink)}
+.rcol.a{background:#e3f3f8}
+.rcol.b{background:#fdeadf}
+.rcol h5{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;margin:0 0 6px}
+.rbtn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;font-family:var(--body);font-size:.92rem;text-align:left;padding:8px 10px;margin:0 0 6px;border:2px solid rgba(10,47,56,.3);border-radius:10px;background:var(--white);cursor:pointer;color:var(--ink)}
+.rbtn .w{font-size:.7rem;font-weight:700;white-space:nowrap;opacity:.8}
+.rbtn.w1{border-color:var(--ink);background:#fff6df}
+.rbtn.w2{border-color:var(--ink);background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
+.choicebtns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.consq{border-left:8px solid var(--orange);background:var(--white);border-radius:0 14px 14px 0;padding:12px 14px;margin:10px 0;border-top:2px solid var(--ink);border-right:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.twist{border:var(--border) dashed var(--plum);border-radius:16px;padding:12px 14px;margin:14px 0;background:#f9f3fb}
+.twist .tk{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;color:var(--plum);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase}
+
+/* plan card */
+.plancard{border:4px solid var(--ink);border-radius:26px 20px 24px 18px;background:linear-gradient(160deg,#fffdf8,#fff3db);padding:20px;box-shadow:8px 9px 0 var(--ink);margin:14px 0;position:relative;overflow:hidden}
+.plancard h4{font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 900;font-size:1.6rem;margin:0 0 2px;line-height:1}
+.plancard .pw{font-size:.88rem;color:var(--body-tint);margin:0 0 12px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){.pgrid{grid-template-columns:1fr}}
+.pcell{border:2px solid var(--ink);border-radius:14px;padding:10px 12px;background:var(--white)}
+.pcell .pk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;opacity:.75;display:block;margin-bottom:3px}
+.pcell.wide{grid-column:1/-1}
+.pcell .empty{opacity:.55;font-style:italic}
+.pcell.lo{background:#e3f3f8}.pcell.hi{background:#fde9da}.pcell.mid{background:#eef8e8}
+.plancard .pdial{position:absolute;right:14px;top:12px;width:96px;height:auto}
+@media (max-width:480px){.plancard .pdial{width:64px}.plancard h4{font-size:1.3rem;padding-right:64px}}
+
+.restart{margin:24px 0 0;text-align:right}
+.restart button{background:none;border:0;color:var(--body-tint);text-decoration:underline;cursor:pointer;font-family:var(--body);font-size:.88rem}
+
+@media (max-width:760px){.smap{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:480px){.stage{padding:16px}.tile{min-height:132px}.smap{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.introdial .swing{animation:none}.needle,.beam{transition:none}.flyR,.flyL,.pop,.bob{animation:none!important}}
+@media print{.top,.hero,footer,.grain,.whobox,.smap,.maptitle,.intro,.stagenav,#sendCard,.restart,.noprint{display:none!important}.stage{box-shadow:none;border:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE CONFIDENCE <span class="accent">DIAL</span></h1>
+    <div class="line">
+      <span class="chip">Preparation for adulthood</span>
+      <p>Too little and you freeze. Too much and you crash. Find the sweet spot at home, at school and at work.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap cd">
+
+  <div class="intro">
+    <div class="panel panel-orange">
+      <p><strong>Confidence is a dial, not a switch.</strong> Turned right down, people freeze and miss out. Cranked right up, people rush in and things go wrong. Somewhere in the middle is the bit that works.</p>
+      <p>Seven stages: spot your strengths, play with the dial, try some confidence tools, log your past wins, make some decisions and build a plan card. Any order, skip anything, and it saves as you go.</p>
+    </div>
+    <svg class="introdial" viewBox="0 0 230 150" role="img" aria-label="A confidence dial swinging from frozen to reckless, then settling in the middle">
+      <path d="M15 118 A100 100 0 0 1 48 44" fill="none" stroke="#7cc3dd" stroke-width="22"/>
+      <path d="M48 44 A100 100 0 0 1 90 20" fill="none" stroke="#a7d8c9" stroke-width="22"/>
+      <path d="M90 20 A100 100 0 0 1 140 20" fill="none" stroke="#7fc36a" stroke-width="22"/>
+      <path d="M140 20 A100 100 0 0 1 182 44" fill="none" stroke="#ef7724" stroke-width="22"/>
+      <path d="M182 44 A100 100 0 0 1 215 118" fill="none" stroke="#d2401f" stroke-width="22"/>
+      <path d="M4 118 A111 111 0 0 1 226 118" fill="none" stroke="#0a2f38" stroke-width="3"/>
+      <text x="8" y="142" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="13" fill="#0a2f38">FROZEN</text>
+      <text x="152" y="142" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="13" fill="#0a2f38">RECKLESS</text>
+      <g class="swing"><path d="M111 118 L115 30 L119 118 Z" fill="#0a2f38"/></g>
+      <circle cx="115" cy="118" r="13" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="whobox">
+    <h3>Who is this? <span style="font-weight:400;font-family:var(--body);font-size:.85rem">(optional)</span></h3>
+    <p class="sub">Pick your initials to see your two milestones and a good place to start. Every stage stays open either way.</p>
+    <div class="whorow" id="whoRow"></div>
+    <div id="whoMiles"></div>
+  </div>
+
+  <div class="maptitle"><h2>Pick a stage</h2><span>Any order. Each one is about five to ten minutes.</span></div>
+  <div class="smap" id="smap"></div>
+
+  <div id="stageHost"></div>
+
+  <div class="stage" id="sendCard">
+    <div class="sh"><div class="shtxt"><span class="kicker">When you are ready</span><h2>Send it to Jay</h2><p>It sends whatever you have tried so far, from any stage. Half done is completely fine.</p></div></div>
+    <div id="sendHost"></div>
+    <p class="note">Your work also stays saved on this device.</p>
+  </div>
+
+  <div class="restart"><button type="button" id="restartBtn">Start again (clears everything on this page)</button></div>
+
+  <a class="backlink" href="/practice/#pfa-standard">Back to Preparation for adulthood</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.confidence-dial.v1", WHO_KEY = "base5.who.v1";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c] }) }
+var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+var FD = "font-family='Archivo, Arial Black, sans-serif'";
+var INK = "#0a2f38";
+var ZC = ["#7cc3dd", "#a7d8c9", "#7fc36a", "#ef7724", "#d2401f"];
+var ZN = ["Frozen", "Wobbly", "Steady", "Cocky", "Reckless"];
+
+/* ================= state ================= */
+var S = blank();
+function blank(){
+  return { seen:{}, stage:null,
+    str:{ marks:{}, own:[], top:[], where:{}, idx:0, newThing:"", useStr:"" },
+    dial:{ cur:"cafe", vals:{}, tries:{}, notice:{}, noticeTxt:"" },
+    sort:{ placed:{}, fixes:{}, ex:"" },
+    tools:{ rate:{}, steps:[], reps:0, line:0, winA:"", winB:"", askWho:"", askWhat:"", talk:{}, useTool:"", useWhen:"", useHow:"" },
+    wins:{ list:[], d:{ what:"", when:"", where:"", helped:{} }, next:"", nextTxt:"" },
+    dec:{ cur:null, s:{} },
+    plan:{ low:{}, high:{}, tool:"", win:"", next:"", txtNew:"", txtBal:"" } };
+}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(S)) }catch(e){} }
+try{
+  var raw = localStorage.getItem(STORE);
+  if(raw){ var got = JSON.parse(raw), b = blank();
+    if(got && typeof got === "object"){ Object.keys(b).forEach(function(k){ if(got[k] !== undefined){ if(b[k] && typeof b[k] === "object" && !Array.isArray(b[k])){ Object.keys(b[k]).forEach(function(kk){ if(got[k][kk] === undefined) got[k][kk] = b[k][kk] }) } b[k] = got[k] } }); S = b }
+  }
+}catch(e){}
+function getWho(){ try{ return localStorage.getItem(WHO_KEY) || "" }catch(e){ return "" } }
+function setWho(v){ try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){} }
+function tried(id){ if(!S.seen[id]){ S.seen[id] = true; drawMap() } }
+
+/* ================= students ================= */
+var WHO = {
+  JT:{ m:["Make a simple choice for yourself at home, school or work.", "Say why you made a choice and how you felt about it afterwards."],
+       full:["I can make a simple choice for myself at home, school or work.", "I can explain why I made a choice and how I felt about it afterwards."], best:["decide","strengths"] },
+  LW:{ m:["Explain why you made a decision and look back at how it went.", "Spot how confidence can push your actions in helpful and unhelpful ways."],
+       full:["I can explain why I have made a particular decision and reflect on how it went.", "I can recognise how confidence can influence my actions in both helpful and unhelpful ways."], best:["dial","decide"] },
+  EGW:{ m:["Use your strengths and past experiences to take on new challenges with more confidence.", "Explain how too much or too little confidence can lead to poor choices, and how to find the balance."],
+       full:["I can use my strengths and previous experiences to approach new challenges with greater confidence.", "I can explain how overconfidence or low confidence might lead to poor choices, and how to find a balance."], best:["wins","sort"] },
+  LP:{ m:["Make decisions on your own, check how they turned out, and change your approach when you need to.", "Explain, with examples, how too little or too much confidence affects the choices people make."],
+       full:["I can make informed decisions independently, evaluate the outcome, and adapt my approach when needed.", "I can explain, with examples, how too little or too much confidence can affect the choices people make."], best:["decide","sort"] },
+  HK:{ m:["Find strategies that help you feel more confident when making decisions.", "Use a strategy when making a decision and say how it helped."],
+       full:["I can identify strategies that help me feel more confident when making decisions.", "I can use a strategy that helps me feel confident when making a decision and say how it helped."], best:["tools","decide"] },
+  LC:{ m:["Spot something you are good at or feel confident doing.", "Talk about how feeling confident helps you try something new."],
+       full:["I can recognise something I am good at or feel confident doing.", "I can talk about how feeling confident helps me try something new."], best:["strengths","dial"] }
+};
+var ORDER = ["JT","LW","EGW","LP","LC","HK"];
+
+/* ================= icons ================= */
+var ICON = {
+  strengths:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M30 5 L37 21 L55 22 L41 34 L46 52 L30 42 L14 52 L19 34 L5 22 L23 21 Z' fill='#fffdf8' stroke='"+INK+"' stroke-width='3' stroke-linejoin='round'/><circle cx='25' cy='29' r='2.5' fill='"+INK+"'/><circle cx='35' cy='29' r='2.5' fill='"+INK+"'/><path d='M24 35 Q30 40 36 35' fill='none' stroke='"+INK+"' stroke-width='2.5' stroke-linecap='round'/></svg>",
+  dial:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M8 42 A22 22 0 0 1 52 42' fill='none' stroke='#fffdf8' stroke-width='10'/><path d='M8 42 A22 22 0 0 1 52 42' fill='none' stroke='"+INK+"' stroke-width='3'/><path d='M28 42 L36 22 L32 43 Z' fill='"+INK+"'/><circle cx='30' cy='42' r='5' fill='#ffc247' stroke='"+INK+"' stroke-width='2.5'/></svg>",
+  sort:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M6 38 L54 24' stroke='"+INK+"' stroke-width='4' stroke-linecap='round'/><path d='M24 48 L30 32 L36 48 Z' fill='#ffc247' stroke='"+INK+"' stroke-width='2.5'/><circle cx='11' cy='30' r='6' fill='#7cc3dd' stroke='"+INK+"' stroke-width='2.5'/><circle cx='48' cy='15' r='6' fill='#d2401f' stroke='"+INK+"' stroke-width='2.5'/></svg>",
+  tools:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='7' y='22' width='46' height='28' rx='4' fill='#ef7724' stroke='"+INK+"' stroke-width='3'/><path d='M22 22 V15 H38 V22' fill='none' stroke='"+INK+"' stroke-width='3'/><rect x='7' y='30' width='46' height='5' fill='"+INK+"'/><rect x='26' y='28' width='8' height='9' rx='2' fill='#ffc247' stroke='"+INK+"' stroke-width='2'/></svg>",
+  wins:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M5 46 Q20 30 30 42 T55 30' fill='none' stroke='"+INK+"' stroke-width='3' stroke-dasharray='5 4'/><path d='M15 40 V14' stroke='"+INK+"' stroke-width='3'/><path d='M15 14 L30 18 L15 23 Z' fill='#d2401f' stroke='"+INK+"' stroke-width='2'/><path d='M44 36 V12' stroke='"+INK+"' stroke-width='3'/><path d='M44 12 L57 16 L44 21 Z' fill='#007291' stroke='"+INK+"' stroke-width='2'/></svg>",
+  decide:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M30 10 V50' stroke='#fffdf8' stroke-width='4'/><path d='M20 52 H40' stroke='#fffdf8' stroke-width='4' stroke-linecap='round'/><path d='M8 20 L52 14' stroke='#fffdf8' stroke-width='4' stroke-linecap='round'/><path d='M8 20 L2 34 H16 Z' fill='#ffc247' stroke='#fffdf8' stroke-width='2'/><path d='M52 14 L46 28 H58 Z' fill='#ef7724' stroke='#fffdf8' stroke-width='2'/><circle cx='30' cy='12' r='4' fill='#fffdf8'/></svg>",
+  plan:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='8' y='8' width='44' height='46' rx='6' fill='#fffdf8' stroke='#ffc247' stroke-width='3'/><path d='M16 22 H44 M16 31 H44 M16 40 H34' stroke='"+INK+"' stroke-width='3' stroke-linecap='round'/><circle cx='44' cy='44' r='9' fill='#ffc247' stroke='"+INK+"' stroke-width='2.5'/><path d='M40 44 L43 47 L48 41' fill='none' stroke='"+INK+"' stroke-width='2.5'/></svg>"
+};
+
+var STAGES = [
+  { id:"strengths", n:1, t:"Strengths spotter", d:"Tap through everyday strengths and build your card.", cls:"t1" },
+  { id:"dial", n:2, t:"Set the dial", d:"Six characters, six situations. You set their confidence.", cls:"t2" },
+  { id:"sort", n:3, t:"Too low, too high", d:"Sort what people do, then find the balance.", cls:"t3" },
+  { id:"tools", n:4, t:"Confidence toolkit", d:"Five tools to try out and rate.", cls:"t4" },
+  { id:"wins", n:5, t:"Past wins", d:"Log hard things you have already done.", cls:"t5" },
+  { id:"decide", n:6, t:"Decide like a pro", d:"Weigh it up, choose, see what happens.", cls:"t6" },
+  { id:"plan", n:7, t:"My confidence plan", d:"Pull it together into one card.", cls:"t7" }
+];
+function stageById(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return STAGES[i]; return null }
+
+/* ================= who picker ================= */
+function drawWho(){
+  var w = getWho().toUpperCase(), row = el("whoRow"), html = "";
+  ORDER.forEach(function(k){ html += "<button type='button' class='whob' data-who='" + k + "' aria-pressed='" + (w === k) + "'>" + k + "</button>" });
+  html += "<button type='button' class='whob look' data-who='' aria-pressed='" + (!WHO[w]) + "'>Just looking</button>";
+  row.innerHTML = html;
+  var box = el("whoMiles");
+  if(WHO[w]){
+    box.innerHTML = "<div class='miles pop'><b>" + w + ", your two steps:</b><ol><li>" + esc(WHO[w].m[0]) + "</li><li>" + esc(WHO[w].m[1]) + "</li></ol><p class='note' style='margin:6px 0 0!important'>Good places to start: " + WHO[w].best.map(function(id){ var s = stageById(id); return "<b>" + s.t + "</b>" }).join(" and ") + ". They have a yellow sticker on the map.</p></div>";
+  } else box.innerHTML = "";
+}
+el("whoRow").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-who]"); if(!b) return;
+  setWho(b.dataset.who); drawWho(); drawMap();
+  var nb = el("whoRow").querySelector("button[data-who='" + b.dataset.who + "']"); if(nb) nb.focus();
+});
+
+/* ================= map ================= */
+function drawMap(){
+  var w = getWho().toUpperCase(), best = WHO[w] ? WHO[w].best : [];
+  el("smap").innerHTML = STAGES.map(function(s){
+    return "<button type='button' class='tile " + s.cls + (S.stage === s.id ? " cur" : "") + "' data-stage='" + s.id + "'>" +
+      (best.indexOf(s.id) >= 0 ? "<span class='tag start'>Good place to start</span>" : "") +
+      ICON[s.id] + "<span class='tn'>Stage " + s.n + "</span><span class='tt'>" + s.t + "</span>" +
+      "<span class='tst'>" + (S.seen[s.id] ? "<span class='tag done'>Tried</span>" : esc(s.d)) + "</span></button>";
+  }).join("");
+}
+el("smap").addEventListener("click", function(e){ var b = e.target.closest("button[data-stage]"); if(b) openStage(b.dataset.stage, true) });
+
+function openStage(id, scroll){
+  S.stage = id; save(); drawMap();
+  renderStage();
+  if(scroll){ var t = el("stageHost").getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top:t, behavior: reduce ? "auto" : "smooth" }) }
+}
+function stageShell(s, intro, body){
+  var w = getWho().toUpperCase(), isBest = WHO[w] && WHO[w].best.indexOf(s.id) >= 0;
+  var i = STAGES.indexOf(s), nx = STAGES[i + 1], pv = STAGES[i - 1];
+  return "<section class='stage' aria-labelledby='h_" + s.id + "'><div class='sh'>" + ICON[s.id].replace("<svg", "<svg style='background:" + tileBg(s.cls) + ";border-radius:16px;border:3px solid " + INK + ";padding:4px'") +
+    "<div class='shtxt'><span class='kicker'>Stage " + s.n + " of 7" + (isBest ? " &middot; good place to start for " + w : "") + "</span><h2 id='h_" + s.id + "' tabindex='-1'>" + s.t + "</h2><p>" + intro + "</p></div></div>" +
+    body +
+    "<div class='stagenav'>" + (pv ? "<button type='button' class='btn btn-quiet sm' data-go='" + pv.id + "'>Back: " + pv.t + "</button>" : "") +
+    (nx ? "<button type='button' class='btn sm' data-go='" + nx.id + "'>Next: " + nx.t + "</button>" : "<button type='button' class='btn btn-orange sm' data-go='send'>Go to send</button>") +
+    "<button type='button' class='btn btn-quiet sm' data-go='map'>Back to the map</button></div></section>";
+}
+function tileBg(c){ return { t1:"#ffc247", t2:"#ef7724", t3:"#7b4b8f", t4:"#00a6c9", t5:"#ffcf6a", t6:"#007291", t7:"#0a2f38" }[c] }
+
+var R = {};
+var focusKey = null;
+function renderStage(){
+  var host = el("stageHost");
+  if(!S.stage){ host.innerHTML = ""; return }
+  var s = stageById(S.stage);
+  host.innerHTML = R[s.id](s);
+  if(focusKey){ try{ var f = host.querySelector("[data-k='" + focusKey + "']"); if(f) f.focus({ preventScroll:true }) }catch(e){} focusKey = null }
+  if(s.id === "dial") dialAfter();
+  if(s.id === "decide") scaleAfter();
+}
+function rerender(k){ focusKey = k || null; save(); renderStage() }
+
+el("stageHost").addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]");
+  if(g){
+    var to = g.dataset.go;
+    if(to === "map"){ window.scrollTo({ top: el("smap").getBoundingClientRect().top + window.scrollY - 60, behavior: reduce ? "auto" : "smooth" }); return }
+    if(to === "send"){ window.scrollTo({ top: el("sendCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+    openStage(to, true); var h = el("h_" + to); if(h) h.focus({ preventScroll:true }); return;
+  }
+  var a = e.target.closest("[data-a]");
+  if(a && ACT[S.stage]) ACT[S.stage](a, e);
+});
+el("stageHost").addEventListener("input", function(e){
+  var t = e.target; if(!t.dataset || !t.dataset.f) return;
+  setPath(t.dataset.f, t.value); tried(S.stage); save();
+  if(S.stage === "plan") updatePlanCard();
+});
+function setPath(p, v){ var parts = p.split("."), o = S; for(var i = 0; i < parts.length - 1; i++){ if(o[parts[i]] == null) o[parts[i]] = {}; o = o[parts[i]] } o[parts[parts.length - 1]] = v }
+function getPath(p){ var parts = p.split("."), o = S; for(var i = 0; i < parts.length; i++){ if(o == null) return ""; o = o[parts[i]] } return o == null ? "" : o }
+var ACT = {};
+
+/* shared bits */
+function starters(field, list){
+  return "<div class='chipset'>" + list.map(function(t, i){ return "<button type='button' class='cb starter' data-a='starter' data-f='" + field + "' data-t='" + esc(t) + "'>" + esc(t) + "...</button>" }).join("") + "</div>";
+}
+function textBox(field, label, ph){
+  return "<label class='wrlab' for='f_" + field.replace(/\./g, "_") + "'>" + label + "</label><textarea class='wr' id='f_" + field.replace(/\./g, "_") + "' data-f='" + field + "' placeholder='" + esc(ph || "") + "'>" + esc(getPath(field)) + "</textarea>";
+}
+function doStarter(a){
+  var f = a.dataset.f, t = a.dataset.t, box = el("f_" + f.replace(/\./g, "_"));
+  if(!box) return;
+  var v = box.value; if(v && !/\s$/.test(v)) v += " ";
+  box.value = v + t + " "; setPath(f, box.value); tried(S.stage); save();
+  box.focus(); try{ box.setSelectionRange(box.value.length, box.value.length) }catch(e){}
+  if(S.stage === "plan") updatePlanCard();
+}
+function chip(k, label, on, extra){ return "<button type='button' class='cb' data-k='" + esc(k) + "' aria-pressed='" + (!!on) + "'" + (extra || "") + ">" + esc(label) + "</button>" }
+
+/* ================= faces ================= */
+function face(z, size, cls){
+  var c = ZC[z], s = "<svg class='" + (cls || "") + "' viewBox='0 0 120 120' width='" + (size || 120) + "' height='" + (size || 120) + "' aria-hidden='true'>";
+  if(z === 4) s += "<path d='M30 34 Q34 10 44 26 Q50 4 60 22 Q70 2 76 26 Q86 10 90 34 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/>";
+  s += "<path d='M60 22 C92 22 106 44 104 70 C102 98 84 110 60 110 C36 110 16 98 16 70 C14 44 28 22 60 22 Z' fill='" + c + "' stroke='" + INK + "' stroke-width='4'/>";
+  if(z === 0){ s += "<path d='M30 30 L34 44 L38 28 M52 24 L55 38 L58 23 M74 26 L77 40 L81 28' fill='#fff' stroke='" + INK + "' stroke-width='2.5' stroke-linejoin='round'/><circle cx='44' cy='62' r='6' fill='#fff' stroke='" + INK + "' stroke-width='3'/><circle cx='76' cy='62' r='6' fill='#fff' stroke='" + INK + "' stroke-width='3'/><circle cx='44' cy='62' r='2' fill='" + INK + "'/><circle cx='76' cy='62' r='2' fill='" + INK + "'/><path d='M44 86 L50 82 L56 86 L62 82 L68 86 L74 82' fill='none' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/>" }
+  if(z === 1){ s += "<circle cx='46' cy='60' r='4' fill='" + INK + "'/><circle cx='74' cy='60' r='4' fill='" + INK + "'/><path d='M38 50 L52 54 M82 50 L68 54' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/><path d='M44 86 Q50 80 56 86 T68 86 T78 84' fill='none' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/><path d='M92 44 Q98 54 92 58 Q86 54 92 44 Z' fill='#cfeffa' stroke='" + INK + "' stroke-width='2'/>" }
+  if(z === 2){ s += "<circle cx='46' cy='60' r='5' fill='" + INK + "'/><circle cx='74' cy='60' r='5' fill='" + INK + "'/><path d='M42 80 Q60 96 78 80' fill='none' stroke='" + INK + "' stroke-width='4' stroke-linecap='round'/><circle cx='34' cy='76' r='5' fill='#f6a5a0' opacity='.7'/><circle cx='86' cy='76' r='5' fill='#f6a5a0' opacity='.7'/>" }
+  if(z === 3){ s += "<rect x='30' y='52' width='26' height='14' rx='5' fill='" + INK + "'/><rect x='64' y='52' width='26' height='14' rx='5' fill='" + INK + "'/><path d='M56 57 H64' stroke='" + INK + "' stroke-width='3'/><path d='M34 55 L44 55' stroke='#fff' stroke-width='2' opacity='.7'/><path d='M46 86 Q66 92 80 78' fill='none' stroke='" + INK + "' stroke-width='4' stroke-linecap='round'/>" }
+  if(z === 4){ s += "<circle cx='44' cy='58' r='9' fill='#fff' stroke='" + INK + "' stroke-width='3'/><circle cx='76' cy='58' r='9' fill='#fff' stroke='" + INK + "' stroke-width='3'/><circle cx='46' cy='56' r='3' fill='" + INK + "'/><circle cx='74' cy='60' r='3' fill='" + INK + "'/><path d='M38 78 Q60 106 82 78 Z' fill='" + INK + "'/><path d='M46 82 H74' stroke='#fff' stroke-width='3'/>" }
+  return s + "</svg>";
+}
+function zoneOf(v){ return v <= 1 ? 0 : v <= 3 ? 1 : v <= 6 ? 2 : v <= 8 ? 3 : 4 }
+
+/* ================= STAGE 1: strengths ================= */
+var CATS = { people:["People", "#7b4b8f"], hands:["Hands on", "#ef7724"], head:["Brain", "#007291"], grit:["Character", "#ffc247"], odd:["Unusual but brilliant", "#00a6c9"] };
+var STR = [
+  ["makes people laugh","Makes people laugh","people"],["listener","A good listener","people"],["animals","Good with animals","odd"],["onething","Knows loads about one thing","odd"],
+  ["fix","Fixing things","hands"],["cook","Cooking","hands"],["draw","Drawing or doodling","hands"],["sport","Sport or moving about","hands"],["tech","Good with tech","hands"],
+  ["facts","Remembers loads of facts","head"],["patterns","Spots patterns","head"],["numbers","Good with numbers","head"],["puzzles","Great at puzzles","head"],["details","Notices details other people miss","head"],
+  ["keepgoing","Keeps going when it is hard","grit"],["honest","Honest","grit"],["calm","Calm when things go wrong","grit"],["kind","Kind to people who get left out","grit"],["patient","Patient","grit"],["ideas","Full of ideas","grit"],
+  ["younger","Good with younger kids","people"],["fair","Fair when sorting out arguments","people"],["cheer","Cheers people up","people"],
+  ["voices","Does impressions or voices","odd"],["songs","Knows every word to loads of songs","odd"],["birds","Can name birds by sight (Jay would approve)","odd"],["presents","Great at choosing presents","odd"],["buses","Knows the best bus route anywhere","odd"],["games","Quick reactions in games","odd"],["organise","Good at organising stuff","grit"]
+];
+function strById(id){ for(var i = 0; i < STR.length; i++) if(STR[i][0] === id) return STR[i]; for(var j = 0; j < S.str.own.length; j++) if("own" + j === id) return ["own" + j, S.str.own[j], "odd"]; return null }
+function strIcon(cat){
+  var col = CATS[cat][1];
+  var shapes = { people:"<circle cx='26' cy='28' r='9' fill='" + col + "' stroke='" + INK + "' stroke-width='3'/><circle cx='48' cy='28' r='9' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><path d='M12 58 Q26 38 40 58 Q50 40 62 58' fill='none' stroke='" + INK + "' stroke-width='3'/>",
+    hands:"<path d='M20 52 L44 28 M38 22 Q48 14 56 22 Q50 26 50 30 Q54 30 58 36 Q50 44 42 34 Z' fill='" + col + "' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><path d='M14 58 L24 48' stroke='" + INK + "' stroke-width='6' stroke-linecap='round'/>",
+    head:"<path d='M37 10 C54 10 62 24 58 36 C56 44 50 46 50 56 H26 C26 46 16 42 16 32 C16 18 24 10 37 10 Z' fill='" + col + "' stroke='" + INK + "' stroke-width='3'/><path d='M30 26 Q37 20 44 26 M28 36 Q37 32 46 36' fill='none' stroke='#fffdf8' stroke-width='2.5'/><rect x='27' y='56' width='22' height='6' rx='2' fill='" + INK + "'/>",
+    grit:"<path d='M37 60 C14 44 8 32 16 22 C24 12 34 16 37 24 C40 16 50 12 58 22 C66 32 60 44 37 60 Z' fill='" + col + "' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/>",
+    odd:"<path d='M37 8 L43 28 L64 30 L47 42 L53 62 L37 50 L21 62 L27 42 L10 30 L31 28 Z' fill='" + col + "' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><circle cx='56' cy='12' r='4' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/>" };
+  return "<svg viewBox='0 0 74 70' aria-hidden='true'>" + shapes[cat] + "</svg>";
+}
+var deckLock = false;
+var NEWTHINGS = ["Join a club", "Try a new food", "Go somewhere new on the bus", "Ask about a Saturday job", "Learn a new game", "Speak up in a group", "Cook a meal for someone"];
+
+R.strengths = function(s){
+  var st = S.str, i = st.idx, body = "";
+  body += "<div class='learn'><svg viewBox='0 0 200 130' aria-hidden='true'><rect x='10' y='14' width='110' height='100' rx='12' fill='#fffdf8' stroke='" + INK + "' stroke-width='3' transform='rotate(-5 65 64)'/><rect x='80' y='20' width='110' height='100' rx='12' fill='#ffc247' stroke='" + INK + "' stroke-width='3' transform='rotate(4 135 70)'/><path d='M135 40 L141 56 L158 57 L145 68 L150 85 L135 75 L120 85 L125 68 L112 57 L129 56 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><g transform='rotate(-5 65 64)' " + FD + " font-weight='800' font-size='14' fill='" + INK + "'><text x='22' y='50'>Makes</text><text x='22' y='68'>people</text><text x='22' y='86'>laugh</text></g></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>A strength is anything you are good at, or getting good at.</li><li>It does not have to be school stuff. Making people laugh counts. So does knowing every bus route.</li><li>Knowing your strengths is where confidence starts.</li></ul></div></div>";
+  body += "<h3 class='part'><span class='pn'>1</span>Tap through the deck</h3><div class='strgrid'><div>";
+  if(i < STR.length){
+    var c = STR[i];
+    body += "<div class='deck'><div class='scard' id='scard' style='border-top:12px solid " + CATS[c[2]][1] + "'><span class='cat'>" + CATS[c[2]][0] + "</span>" + strIcon(c[2]) + "<div class='big'>" + esc(c[1]) + "</div>" +
+      "<div class='deckbtns'><button type='button' class='btn btn-orange sm' data-a='mark' data-v='y' data-k='mk_y'>That's me</button><button type='button' class='btn sm' data-a='mark' data-v='s' data-k='mk_s'>Sometimes</button><button type='button' class='btn btn-quiet sm' data-a='mark' data-v='n' data-k='mk_n'>Not really</button></div>" +
+      "<div class='cnt'>Card " + (i + 1) + " of " + STR.length + (i > 0 ? " &middot; <button type='button' class='cb' style='padding:2px 10px;font-size:.8rem' data-a='deckback' data-k='deckback'>back one</button>" : "") + " &middot; <button type='button' class='cb' style='padding:2px 10px;font-size:.8rem' data-a='deckend' data-k='deckend'>skip to the end</button></div></div></div>";
+  } else {
+    body += "<div class='scard'><div class='big'>Deck done</div><p style='margin:0 auto'>Change your mind on any of them below, or go round again.</p><div class='deckbtns'><button type='button' class='btn btn-quiet sm' data-a='deckreset' data-k='deckreset'>Go round again</button></div></div>";
+    body += "<details style='margin-top:12px'" + (st.reviewOpen ? " open" : "") + "><summary class='cb' style='display:inline-block;list-style:none'>Change my mind on some</summary><div class='chipset' style='margin-top:10px'>" + STR.map(function(c){ var m = st.marks[c[0]]; return "<button type='button' class='cb' data-a='cyc' data-id='" + c[0] + "' data-k='cy_" + c[0] + "' aria-pressed='" + (m === "y") + "'" + (m === "s" ? " style='border-style:dashed;border-color:" + INK + "'" : "") + ">" + esc(c[1]) + (m === "s" ? " (sometimes)" : "") + "</button>" }).join("") + "</div><p class='note'>Tap to switch between: that's me, sometimes, not really.</p></details>";
+  }
+  body += "</div><div>" + strCardHTML() + "<div class='addrow'><label class='sr' for='ownStr' style='position:absolute;left:-9999px'>Add your own strength</label><input class='wr' id='ownStr' maxlength='50' placeholder='Add your own strength'><button type='button' class='btn sm' data-a='addown' data-k='addown'>Add</button></div></div></div>";
+
+  var pool = STR.filter(function(c){ return st.marks[c[0]] === "y" || st.marks[c[0]] === "s" }).map(function(c){ return [c[0], c[1]] }).concat(st.own.map(function(o, j){ return ["own" + j, o] }));
+  body += "<h3 class='part'><span class='pn'>2</span>Pick your top three</h3>";
+  if(!pool.length) body += "<p class='note'>Once you have tapped a few in the deck, they will show up here.</p>";
+  else body += "<div class='chipset'>" + pool.map(function(p){ return "<button type='button' class='cb' data-a='top' data-id='" + p[0] + "' data-k='tp_" + p[0] + "' aria-pressed='" + (st.top.indexOf(p[0]) >= 0) + "'>" + esc(p[1]) + "</button>" }).join("") + "</div><p class='note'>" + st.top.length + " of 3 picked. Tap again to swap one out.</p>";
+
+  if(st.top.length){
+    body += "<h3 class='part'><span class='pn'>3</span>Where does it show up?</h3><div class='wherebox'>" + st.top.map(function(id){
+      var c = strById(id); if(!c) return ""; var w = st.where[id] || {};
+      return "<div class='whererow'><b>" + esc(c[1]) + "</b>" + ["Home","School","Work or out and about"].map(function(p){ return "<button type='button' class='cb' data-a='where' data-id='" + id + "' data-p='" + p + "' data-k='wh_" + id + p + "' aria-pressed='" + (!!w[p]) + "'>" + p + "</button>" }).join("") + "</div>";
+    }).join("") + "</div>";
+    body += "<h3 class='part'><span class='pn'>4</span>Strength meets something new</h3><p>Pick something new you might try, and the strength that could help.</p><div class='chipset'>" +
+      NEWTHINGS.map(function(n){ return "<button type='button' class='cb' data-a='newthing' data-v='" + esc(n) + "' data-k='nt_" + esc(n) + "' aria-pressed='" + (st.newThing === n) + "'>" + esc(n) + "</button>" }).join("") + "</div>" +
+      "<div class='chipset'>" + st.top.map(function(id){ var c = strById(id); return c ? "<button type='button' class='cb' data-a='usestr' data-v='" + id + "' data-k='us_" + id + "' aria-pressed='" + (st.useStr === id) + "'>" + esc(c[1]) + "</button>" : "" }).join("") + "</div>";
+    if(st.newThing && st.useStr && strById(st.useStr)){
+      body += "<div class='sentence pop'>My strength &ldquo;" + esc(strById(st.useStr)[1].toLowerCase()) + "&rdquo; could help me " + esc(st.newThing.toLowerCase()) + ".</div>" +
+        textBox("str.how", "How would it help? (optional)", "Feeling good at this would help because...") + starters("str.how", ["It would help because", "Feeling confident about this means", "I would feel less nervous because"]);
+    }
+  }
+  return stageShell(s, "Everyone has strengths, including ones nobody gives prizes for. Tap through, then build your strengths card.", body);
+};
+function strCardHTML(){
+  var st = S.str, ys = [], ss = [];
+  STR.forEach(function(c){ if(st.marks[c[0]] === "y") ys.push(c); else if(st.marks[c[0]] === "s") ss.push(c) });
+  st.own.forEach(function(o, j){ ys.push(["own" + j, o, "odd"]) });
+  var inner = ys.map(function(c){ return "<span class='stk" + (st.top.indexOf(c[0]) >= 0 ? " top" : "") + "'><i style='background:" + CATS[c[2]][1] + "'></i>" + esc(c[1]) + "</span>" }).join("") +
+    ss.map(function(c){ return "<span class='stk some" + (st.top.indexOf(c[0]) >= 0 ? " top" : "") + "'><i style='background:" + CATS[c[2]][1] + "'></i>" + esc(c[1]) + "</span>" }).join("");
+  return "<div class='strcardout' id='strOut'><h4>" + ICON.strengths.replace("<svg", "<svg width='30' height='30'") + "My strengths card</h4><div class='stickers'>" + (inner || "<span class='note'>Empty for now. Tap That's me or Sometimes and they land here.</span>") + "</div></div>";
+}
+ACT.strengths = function(a){
+  var st = S.str, act = a.dataset.a; tried("strengths");
+  if(act === "mark"){
+    var c = STR[st.idx]; if(!c || deckLock) return;
+    st.marks[c[0]] = a.dataset.v; deckLock = true;
+    var card = el("scard");
+    var go = function(){ deckLock = false; st.idx++; rerender(st.idx < STR.length ? "mk_" + a.dataset.v : "deckreset") };
+    if(card && !reduce){ card.classList.add(a.dataset.v === "n" ? "flyL" : "flyR"); setTimeout(go, 260) } else go();
+    return;
+  }
+  if(act === "deckback"){ st.idx = Math.max(0, st.idx - 1); return rerender("deckback") }
+  if(act === "deckend"){ st.idx = STR.length; return rerender("deckreset") }
+  if(act === "deckreset"){ st.idx = 0; return rerender("mk_y") }
+  if(act === "cyc"){ st.reviewOpen = true; var m = st.marks[a.dataset.id]; st.marks[a.dataset.id] = m === "y" ? "s" : m === "s" ? "n" : "y"; if(st.marks[a.dataset.id] === "n"){ var ti = st.top.indexOf(a.dataset.id); if(ti >= 0) st.top.splice(ti, 1) } return rerender(a.dataset.k) }
+  if(act === "addown"){ var inp = el("ownStr"), v = inp.value.trim(); if(!v) return; st.own.push(v.slice(0, 50)); return rerender("addown") }
+  if(act === "top"){ var id = a.dataset.id, ix = st.top.indexOf(id); if(ix >= 0) st.top.splice(ix, 1); else { if(st.top.length >= 3) st.top.shift(); st.top.push(id) } return rerender(a.dataset.k) }
+  if(act === "where"){ var w = st.where[a.dataset.id] || (st.where[a.dataset.id] = {}); w[a.dataset.p] = !w[a.dataset.p]; return rerender(a.dataset.k) }
+  if(act === "newthing"){ st.newThing = st.newThing === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "usestr"){ st.useStr = st.useStr === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+el("stageHost").addEventListener("keydown", function(e){ if(e.key === "Enter" && e.target.id === "ownStr"){ e.preventDefault(); var b = el("stageHost").querySelector("[data-a='addown']"); if(b) b.click() } });
+
+/* ================= STAGE 2: dial ================= */
+var SCEN = [
+  { id:"cafe", who:"Ash", what:"Ordering food", where:"Out and about", sit:"Ash is in a busy cafe queue. Ash has never been here before.",
+    out:["Ash lets three people go ahead, then leaves without ordering. Still hungry.",
+         "Ash points at the menu and mumbles. Gets a cheese toastie instead of a tuna melt. Eats it anyway, a bit annoyed.",
+         "Ash reads the menu while queuing, then says: Can I have a tuna melt and an orange juice, please? Sorted.",
+         "Ash does not look at the menu and orders something they do not sell. Holds up the whole queue arguing about it.",
+         "Ash orders the Volcano Challenge wings. Cannot feel their face for an hour, and that was most of their money."],
+    icon:"<svg viewBox='0 0 50 50'><path d='M10 18 H36 V36 Q36 44 28 44 H18 Q10 44 10 36 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M36 22 Q46 22 44 30 Q42 36 36 34' fill='none' stroke='" + INK + "' stroke-width='3'/><path d='M18 6 Q14 10 18 14 M26 6 Q22 10 26 14' fill='none' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/></svg>" },
+  { id:"trial", who:"Tia", what:"Team trial", where:"School", sit:"Tia's school football team is holding trials after school.",
+    out:["Tia does not go. On Monday her mates are talking about how fun it was.",
+         "Tia goes but hangs at the back and never calls for the ball. The coach barely notices her.",
+         "Tia warms up, has a go, misses one shot and keeps going. The coach asks her back next week.",
+         "Tia shows off tricks and ignores the drills. The coach says she does not listen.",
+         "Tia slide tackles everyone, including the coach's cones. She twists her ankle and is out for three weeks."],
+    icon:"<svg viewBox='0 0 50 50'><circle cx='25' cy='25' r='18' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M25 16 L33 22 L30 31 H20 L17 22 Z' fill='" + INK + "'/></svg>" },
+  { id:"shift", who:"Dev", what:"First work shift", where:"Work", sit:"Dev is starting a first shift at a supermarket, stacking shelves.",
+    out:["Dev is too nervous to ask where the stockroom is, and stands in the aisle for twenty minutes.",
+         "Dev does the job but does not ask anything. Puts all the yoghurts in the wrong fridge.",
+         "Dev asks a question when unsure and gets on with it. The manager says: good first shift.",
+         "Dev says I know what I am doing and skips the training. Gets the price labels all wrong.",
+         "Dev decides to rearrange the whole aisle without asking. The manager is not impressed."],
+    icon:"<svg viewBox='0 0 50 50'><rect x='8' y='14' width='34' height='28' rx='3' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M8 24 H42 M8 33 H42' stroke='" + INK + "' stroke-width='2.5'/><rect x='12' y='17' width='6' height='6' fill='#ef7724'/><rect x='22' y='26' width='6' height='6' fill='#007291'/><rect x='31' y='35' width='6' height='6' fill='#ffc247'/></svg>" },
+  { id:"bike", who:"Kai", what:"Fixing a bike", where:"Home", sit:"Kai's bike brakes are rubbing and squeaking. Kai wants to fix them.",
+    out:["Kai leaves the bike in the shed for months. It gets rusty.",
+         "Kai watches half a video, gets confused and gives up.",
+         "Kai follows a guide step by step, then asks someone to check the brakes before riding. They work.",
+         "Kai tightens everything by feel and skips checking. The brakes now grab really suddenly.",
+         "Kai tests the brakes by riding straight down the steepest hill around. They do not work. Hedge landing."],
+    icon:"<svg viewBox='0 0 50 50'><circle cx='12' cy='32' r='9' fill='none' stroke='" + INK + "' stroke-width='3'/><circle cx='38' cy='32' r='9' fill='none' stroke='" + INK + "' stroke-width='3'/><path d='M12 32 L20 18 H32 L38 32 M20 18 L26 32 H12 M30 12 H36' fill='none' stroke='#ef7724' stroke-width='3' stroke-linejoin='round'/></svg>" },
+  { id:"class", who:"Mo", what:"Answering in class", where:"School", sit:"Jay asks the group a question. Mo is pretty sure of the answer.",
+    out:["Mo says nothing. Someone else says the same answer and gets the praise.",
+         "Mo whispers it to the person next to them. They say it out loud instead.",
+         "Mo says it. It is half right, and Jay helps finish it off. Now Mo knows the rest too.",
+         "Mo shouts out every single answer before anyone else can think.",
+         "Mo tells Jay the whole lesson is wrong without checking anything. Jay says: Outrageous."],
+    icon:"<svg viewBox='0 0 50 50'><path d='M20 44 V20 Q20 14 24 14 Q28 14 28 20 V10 Q28 6 31 6 Q34 6 34 10 V22 Q38 18 40 22 L34 38 Q32 44 26 44 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/></svg>" },
+  { id:"dare", who:"Bea", what:"A dare from mates", where:"Out and about", sit:"Bea's mates dare her to climb onto a garage roof and jump to the shed.",
+    out:["Bea does not want to, but cannot get the word no out. She climbs up shaking and scrapes her leg coming down.",
+         "Bea says maybe later and hopes they forget. They do not, and they keep going on about it.",
+         "Bea says: Nah, not for me, and suggests the skate park instead. Two of her mates look relieved.",
+         "Bea says easy and climbs up to show off. Gets stuck and needs help down while they film it.",
+         "Bea jumps. The shed roof gives way. In the wise words of Jay's late, great grandfather: stop."],
+    icon:"<svg viewBox='0 0 50 50'><path d='M6 42 V24 L20 14 L34 24 V42 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><circle cx='40' cy='10' r='4' fill='#ef7724' stroke='" + INK + "' stroke-width='2'/><path d='M40 14 V24 M36 18 H44 M40 24 L36 30 M40 24 L44 30' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/></svg>" }
+];
+var VERD = [["Too little confidence held them back", "#cfeffa"], ["Not quite enough confidence", "#e1f2ec"], ["Sweet spot", "#dff0d6"], ["A bit too much confidence", "#fde3cf"], ["Way too much confidence", "#f8c9bc"]];
+var NOTICE = ["Too little confidence held people back", "Too much confidence got people into trouble", "The middle usually went best", "Sometimes being confident means saying no", "Feeling confident helped people try something new", "Low and high can both end in the same mess"];
+function scenById(id){ for(var i = 0; i < SCEN.length; i++) if(SCEN[i].id === id) return SCEN[i]; return SCEN[0] }
+
+var DC = { cx:150, cy:160, r:118 };
+function dAng(v){ return 180 - (v + 0.5) * 180 / 11 }
+function dPt(a, r){ var t = a * Math.PI / 180; return [DC.cx + r * Math.cos(t), DC.cy - r * Math.sin(t)] }
+function arcPath(v1, v2, r){ var a = dPt(dAng(v1), r), b = dPt(dAng(v2), r); return "M" + a[0].toFixed(1) + " " + a[1].toFixed(1) + " A" + r + " " + r + " 0 0 1 " + b[0].toFixed(1) + " " + b[1].toFixed(1) }
+function dialSVG(v, showSweet){
+  var s = "<svg class='dialsvg' id='dialSvg' viewBox='0 0 300 200' tabindex='0' role='slider' aria-label='Confidence dial' aria-valuemin='0' aria-valuemax='10' aria-valuenow='" + v + "' aria-valuetext='" + v + ", " + ZN[zoneOf(v)] + "'>";
+  var bands = [[-0.5, 1.5], [1.5, 3.5], [3.5, 6.5], [6.5, 8.5], [8.5, 10.5]];
+  bands.forEach(function(b, i){ s += "<path d='" + arcPath(b[0], b[1], DC.r) + "' fill='none' stroke='" + ZC[i] + "' stroke-width='38'/>" });
+  s += "<path d='" + arcPath(-0.5, 10.5, DC.r + 20) + "' fill='none' stroke='" + INK + "' stroke-width='3'/><path d='" + arcPath(-0.5, 10.5, DC.r - 20) + "' fill='none' stroke='" + INK + "' stroke-width='2'/>";
+  for(var i = 0; i <= 10; i++){ var p1 = dPt(dAng(i), DC.r + 20), p2 = dPt(dAng(i), DC.r + 13); s += "<line x1='" + p1[0].toFixed(1) + "' y1='" + p1[1].toFixed(1) + "' x2='" + p2[0].toFixed(1) + "' y2='" + p2[1].toFixed(1) + "' stroke='" + INK + "' stroke-width='2'/>" }
+  var labs = [[0.5, "FROZEN"], [2.5, "WOBBLY"], [5, "STEADY"], [7.5, "COCKY"], [9.6, "RECKLESS"]];
+  labs.forEach(function(l){ var a = dAng(l[0]), p = dPt(a, DC.r); s += "<text x='" + p[0].toFixed(1) + "' y='" + p[1].toFixed(1) + "' text-anchor='middle' dominant-baseline='middle' " + FD + " font-weight='800' font-size='10.5' fill='" + INK + "' transform='rotate(" + (90 - a).toFixed(1) + " " + p[0].toFixed(1) + " " + p[1].toFixed(1) + ")'>" + l[1] + "</text>" });
+  if(showSweet) s += "<path d='" + arcPath(3.5, 6.5, DC.r + 29) + "' fill='none' stroke='#2e7d4f' stroke-width='5' stroke-dasharray='7 5' stroke-linecap='round'/><text x='150' y='8' text-anchor='middle' " + FF + " font-weight='700' font-size='11' fill='#2e7d4f'>sweet spot</text>";
+  s += "<g class='needle' id='needle' style='transform-origin:" + DC.cx + "px " + DC.cy + "px;transform:rotate(" + (dAng(v) * -1 + 90).toFixed(1) + "deg)'><path d='M" + (DC.cx - 6) + " " + DC.cy + " L" + DC.cx + " " + (DC.cy - DC.r + 8) + " L" + (DC.cx + 6) + " " + DC.cy + " Z' fill='" + INK + "'/></g>";
+  s += "<circle cx='" + DC.cx + "' cy='" + DC.cy + "' r='16' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><text x='" + DC.cx + "' y='" + (DC.cy + 5) + "' text-anchor='middle' " + FD + " font-weight='800' font-size='14' fill='" + INK + "' id='dialNum'>" + v + "</text>";
+  return s + "</svg>";
+}
+R.dial = function(s){
+  var d = S.dial, sc = scenById(d.cur), v = d.vals[sc.id] != null ? d.vals[sc.id] : 5, trs = d.tries[sc.id] || [], body = "";
+  body += "<div class='learn'><svg viewBox='0 0 200 120' aria-hidden='true'><path d='M20 104 A80 80 0 0 1 180 104' fill='none' stroke='#ddd' stroke-width='26'/><path d='M20 104 A80 80 0 0 1 58 36' fill='none' stroke='#7cc3dd' stroke-width='26'/><path d='M76 27 A80 80 0 0 1 124 27' fill='none' stroke='#7fc36a' stroke-width='26'/><path d='M142 36 A80 80 0 0 1 180 104' fill='none' stroke='#d2401f' stroke-width='26'/><text x='100' y='12' text-anchor='middle' " + FF + " font-size='12' font-weight='700' fill='" + INK + "'>gets it done</text><text x='18' y='120' " + FF + " font-size='11' fill='" + INK + "'>misses out</text><text x='130' y='120' " + FF + " font-size='11' fill='" + INK + "'>crashes in</text><path d='M98 104 L104 40 L106 104 Z' fill='" + INK + "'/><circle cx='102' cy='104' r='8' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li><b>Too little</b> confidence: people freeze, avoid things and miss out.</li><li><b>Too much</b> confidence: people rush, skip checks and take silly risks.</li><li><b>Steady</b>: confident enough to try, sensible enough to check.</li></ul></div></div>";
+  body += "<h3 class='part'><span class='pn'>1</span>Pick a character</h3><div class='scenrow'>" + SCEN.map(function(c){ var t = d.tries[c.id] || []; return "<button type='button' class='scenb' data-a='scen' data-id='" + c.id + "' data-k='sc_" + c.id + "' aria-pressed='" + (c.id === sc.id) + "'>" + c.icon + c.who + ": " + c.what + "<span class='tr'>" + c.where + (t.length ? " &middot; tried " + t.length : "") + "</span></button>" }).join("") + "</div>";
+  body += "<h3 class='part'><span class='pn'>2</span>Set " + sc.who + "'s dial, then play it out</h3>";
+  body += "<p class='situ'><b>" + sc.who + ".</b> " + esc(sc.sit) + "</p><div class='dialwrap'><div>" + dialSVG(v, trs.length > 0) +
+    "<div class='dialctl'><button type='button' class='rb' data-a='dminus' data-k='dminus' aria-label='Turn down'>&minus;</button><input type='range' min='0' max='10' step='1' value='" + v + "' id='dialRange' aria-label='Confidence level for " + sc.who + "'><button type='button' class='rb' data-a='dplus' data-k='dplus' aria-label='Turn up'>+</button></div>" +
+    "<div class='zonelab' id='zoneLab' style='color:" + (zoneOf(v) === 2 ? "#2e7d4f" : INK) + "'>" + ZN[zoneOf(v)] + "</div></div>" +
+    "<div><div id='dialFace'>" + face(zoneOf(v), 120, "charsvg") + "</div>" +
+    "<div style='text-align:center;margin-top:8px'><button type='button' class='btn btn-orange' data-a='play' data-k='play'>Play it out</button></div></div></div>";
+  body += "<div id='dialOut' aria-live='polite'>" + (d.last && d.last.id === sc.id ? outcomeHTML(sc, d.last.v) : "") + "</div>";
+  if(trs.length) body += "<p class='triedline'>You have tried " + sc.who + " at: " + trs.map(function(x){ return x + " (" + ZN[zoneOf(x)].toLowerCase() + ")" }).join(", ") + ". Try another setting to compare, or pick another character.</p>";
+  var total = 0; SCEN.forEach(function(c){ if((d.tries[c.id] || []).length) total++ });
+  body += "<h3 class='part'><span class='pn'>3</span>What did you notice?</h3><p>" + (total < 2 ? "Try a couple of characters first, then come back here. Or have a go now if you fancy." : "You have tried " + total + " of 6 characters. Tap anything you noticed.") + "</p>" +
+    "<div class='chipset'>" + NOTICE.map(function(n, i){ return chip("nt" + i, n, d.notice[i], " data-a='notice' data-i='" + i + "'") }).join("") + "</div>" +
+    textBox("dial.noticeTxt", "In your own words (optional)", "Confidence helped when... It caused trouble when...") + starters("dial.noticeTxt", ["Confidence helped when", "Too little confidence meant", "Too much confidence meant", "The best setting was"]);
+  return stageShell(s, "Six characters, six situations. You choose how confident they feel, then watch what happens.", body);
+};
+function outcomeHTML(sc, v){
+  var z = zoneOf(v);
+  return "<div class='outcome pop'><div class='bob'>" + face(z, 90) + "</div><div><span class='verdict' style='background:" + VERD[z][1] + "'>" + VERD[z][0] + "</span><p>" + esc(sc.out[z]) + "</p>" +
+    (sc.id === "dare" && z === 2 ? "<p class='note'>Plot twist: here, the confident move is saying no.</p>" : "") +
+    (z === 0 || z === 4 ? "<p class='note'>Notice how both ends of the dial can go wrong.</p>" : "") + "</div></div>";
+}
+function dialAfter(){
+  var svg = el("dialSvg"), rng = el("dialRange"); if(!svg) return;
+  var dragging = false;
+  function fromEvent(e){ var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; var p = pt.matrixTransform(svg.getScreenCTM().inverse()); var a = Math.atan2(DC.cy - p.y, p.x - DC.cx) * 180 / Math.PI; if(a < -90) a = 180; if(a < 0) a = 0; var v = Math.round((180 - a) / (180 / 11) - 0.5); return Math.max(0, Math.min(10, v)) }
+  svg.addEventListener("pointerdown", function(e){ dragging = true; try{ svg.setPointerCapture(e.pointerId) }catch(err){} setDial(fromEvent(e)) });
+  svg.addEventListener("pointermove", function(e){ if(dragging) setDial(fromEvent(e)) });
+  svg.addEventListener("pointerup", function(){ dragging = false });
+  svg.addEventListener("keydown", function(e){ var v = S.dial.vals[S.dial.cur]; if(v == null) v = 5; if(e.key === "ArrowLeft" || e.key === "ArrowDown"){ e.preventDefault(); setDial(v - 1) } else if(e.key === "ArrowRight" || e.key === "ArrowUp"){ e.preventDefault(); setDial(v + 1) } else if(e.key === "Enter" || e.key === " "){ e.preventDefault(); playDial() } });
+  rng.addEventListener("input", function(){ setDial(parseInt(rng.value, 10)) });
+}
+function setDial(v){
+  v = Math.max(0, Math.min(10, v)); S.dial.vals[S.dial.cur] = v; save(); tried("dial");
+  var n = el("needle"); if(n) n.style.transform = "rotate(" + (90 - dAng(v)).toFixed(1) + "deg)";
+  el("dialNum").textContent = v; el("dialRange").value = v;
+  var svg = el("dialSvg"); svg.setAttribute("aria-valuenow", v); svg.setAttribute("aria-valuetext", v + ", " + ZN[zoneOf(v)]);
+  var zl = el("zoneLab"); zl.textContent = ZN[zoneOf(v)]; zl.style.color = zoneOf(v) === 2 ? "#2e7d4f" : INK;
+  var fc = el("dialFace"); var nz = String(zoneOf(v)); if(fc.dataset.z !== nz){ fc.dataset.z = nz; fc.innerHTML = face(zoneOf(v), 120, "charsvg") }
+}
+function playDial(){
+  var d = S.dial, sc = scenById(d.cur), v = d.vals[sc.id] != null ? d.vals[sc.id] : 5;
+  d.vals[sc.id] = v; (d.tries[sc.id] = d.tries[sc.id] || []).push(v); d.last = { id:sc.id, v:v }; tried("dial");
+  rerender("play");
+}
+ACT.dial = function(a){
+  var d = S.dial, act = a.dataset.a;
+  if(act === "scen"){ d.cur = a.dataset.id; d.last = null; return rerender(a.dataset.k) }
+  if(act === "dminus" || act === "dplus"){ var v = d.vals[d.cur]; if(v == null) v = 5; setDial(v + (act === "dplus" ? 1 : -1)); return }
+  if(act === "play") return playDial();
+  if(act === "notice"){ var i = a.dataset.i; d.notice[i] = !d.notice[i]; tried("dial"); return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+
+/* ================= STAGE 3: sort ================= */
+var SORT = [
+  { id:"hand", t:"Knows the answer but never puts a hand up.", b:"low", why:"They had the answer. Too little confidence kept it locked in." },
+  { id:"run", t:"Signs up for a 10k run tomorrow with no training at all.", b:"high", why:"Going from nothing to 10k overnight is asking for injury. That is the dial turned way up." },
+  { id:"ask", t:"Asks the manager a question when unsure on the first day.", b:"mid", why:"Asking is not weak. It takes steady confidence, and it stops mistakes." },
+  { id:"gym", t:"Turns down a free taster session at the gym in case they look silly.", b:"low", why:"Worrying about looking silly made them miss a free go. That is the dial too low." },
+  { id:"revise", t:"Tells everyone they will pass easily, so they do not revise.", b:"high", why:"Believing in yourself is good, but skipping the work because of it is too much." },
+  { id:"practise", t:"Practises a phone call in their head before making it.", b:"mid", why:"Getting ready, then doing it. That is the steady zone." },
+  { id:"apply", t:"Will not send a job application because it will not be good enough.", b:"low", why:"An application nobody sees cannot get the job. Too little confidence stopped it." },
+  { id:"skate", t:"Tries a new skate trick on the small ramp first, then the big one.", b:"mid", why:"Brave enough to try, sensible enough to start small. Sweet spot." },
+  { id:"instr", t:"Ignores the instructions because they have basically built one before.", b:"high", why:"Basically is doing a lot of work there. Skipping instructions is classic too much confidence." }
+];
+var BINS = { low:["Too low", "#7cc3dd"], mid:["Just right", "#7fc36a"], high:["Too high", "#d2401f"] };
+var FIX = [
+  { id:"f1", q:"Knows the answer but never puts a hand up. What would be balanced?", o:[["Shout out every answer from now on", "high"], ["Put a hand up once a lesson, even if not totally sure", "mid"], ["Keep quiet, someone else will say it", "low"]] },
+  { id:"f2", q:"Signed up for a 10k with no training. What would be balanced?", o:[["Never run at all, it is too risky", "low"], ["Sign up for a marathon instead", "high"], ["Jog 2k this week and build up over a few weeks", "mid"]] },
+  { id:"f3", q:"Will not send a job application. What would be balanced?", o:[["Ask someone to check it, fix a couple of bits, then send it", "mid"], ["Send it straight away, spelling mistakes and all", "high"], ["Delete it and forget about it", "low"]] }
+];
+function miniDial(b){ var ang = b === "low" ? -60 : b === "mid" ? 0 : 60; return "<svg class='minidial' viewBox='0 0 46 28' aria-hidden='true'><path d='M5 25 A18 18 0 0 1 41 25' fill='none' stroke='#ddd' stroke-width='6'/><path d='M5 25 A18 18 0 0 1 14 9' fill='none' stroke='#7cc3dd' stroke-width='6'/><path d='M18 7 A18 18 0 0 1 28 7' fill='none' stroke='#7fc36a' stroke-width='6'/><path d='M32 9 A18 18 0 0 1 41 25' fill='none' stroke='#d2401f' stroke-width='6'/><g transform='rotate(" + ang + " 23 25)'><path d='M21 25 L23 9 L25 25 Z' fill='" + INK + "'/></g><circle cx='23' cy='25' r='3' fill='" + INK + "'/></svg>" }
+var sortSel = null;
+R.sort = function(s){
+  var so = S.sort, body = "";
+  body += "<h3 class='part'><span class='pn'>1</span>Sort them</h3><p>Tap a card, then pick where it goes: too low, just right or too high. Changed your mind? Tap a card in a tray to pick it back up.</p>";
+  var left = SORT.filter(function(x){ return !so.placed[x.id] });
+  body += "<div class='pile'>" + (left.length ? left.map(function(x){ return "<button type='button' class='sitem' data-a='pick' data-id='" + x.id + "' data-k='si_" + x.id + "' aria-pressed='" + (sortSel === x.id) + "'>" + esc(x.t) + "</button>" + (sortSel === x.id ? "<div class='quickdrop pop'>" + ["low", "mid", "high"].map(function(b){ return "<button type='button' class='cb' data-a='drop' data-b='" + b + "' data-k='qd_" + b + "'>" + miniDial(b) + " " + BINS[b][0] + "</button>" }).join("") + "</div>" : "") }).join("") : "<p class='fb ok'><b>All sorted.</b> Have a look at the trays. Any orange edged ones are worth a second look.</p>") + "</div>";
+  body += "<div class='trays'>" + ["low", "mid", "high"].map(function(b){
+    var inside = SORT.filter(function(x){ return so.placed[x.id] === b });
+    return "<div class='tray " + b + (sortSel ? " armed" : "") + "' role='button' tabindex='0' data-a='drop' data-b='" + b + "' data-k='tr_" + b + "' aria-label='Put it in: " + BINS[b][0] + "'><div class='th'>" + miniDial(b).replace("class='minidial'", "class='minidial' style='width:40px;height:26px'") + BINS[b][0] + "</div>" +
+      inside.map(function(x){ var ok = x.b === b; return "<button type='button' class='placed" + (ok ? "" : " wobble") + "' data-a='unplace' data-id='" + x.id + "' data-k='pl_" + x.id + "'>" + esc(x.t) + "</button>" }).join("") + "</div>";
+  }).join("") + "</div><div id='sortFb' aria-live='polite'>" + (so.lastFb || "") + "</div>";
+  body += "<h3 class='part'><span class='pn'>2</span>Find the balance</h3><p>For each one, pick the version that sits in the steady middle.</p>";
+  body += FIX.map(function(f){
+    var pick = so.fixes[f.id];
+    return "<div class='fixq'><p class='qq'>" + esc(f.q) + "</p><div class='fixopts'>" + f.o.map(function(o, i){
+      var cls = pick === i ? (o[1] === "mid" ? "good" : "meh") : "";
+      return "<button type='button' class='" + cls + "' data-a='fix' data-f='" + f.id + "' data-i='" + i + "' data-k='fx_" + f.id + i + "'>" + (pick === i ? miniDial(o[1]) : "") + "<span>" + esc(o[0]) + "</span></button>";
+    }).join("") + "</div>" + (pick != null ? "<div class='fb " + (f.o[pick][1] === "mid" ? "ok'><b>Balanced.</b> Still brave, but with a plan." : "nope'><b>That one tips the dial " + (f.o[pick][1] === "high" ? "too high" : "too low") + ".</b> Have another go if you like.") + "</div>" : "") + "</div>";
+  }).join("");
+  body += "<h3 class='part'><span class='pn'>3</span>Explain it, with an example</h3><p>Stretch, if you fancy it. How can too little or too much confidence lead to a poor choice? And what is the balance?</p>" +
+    textBox("sort.ex", "Your explanation", "Too little confidence can... For example... Too much confidence can... The balance is...") +
+    starters("sort.ex", ["Too little confidence can lead to", "For example,", "Too much confidence can lead to", "Someone with too much confidence might", "The balance is", "To find the balance, you could"]);
+  return stageShell(s, "Some people have their dial too low, some too high, and some just right. Can you tell which is which?", body);
+};
+function sortDrop(b){
+  var so = S.sort; if(!sortSel) { so.lastFb = "<div class='fb tell'>Tap a card first, then tap the tray.</div>"; return rerender() }
+  var x = SORT.filter(function(i){ return i.id === sortSel })[0]; so.placed[x.id] = b; sortSel = null; tried("sort");
+  so.lastFb = x.b === b ? "<div class='fb ok pop'><b>Yes, " + BINS[b][0].toLowerCase() + ".</b> " + esc(x.why) + "</div>" : "<div class='fb nope pop'><b>Hmm, have another think.</b> Look at what they actually did, and what happened because of it. Tap the card in the tray to move it.</div>";
+  var nxt = SORT.filter(function(i){ return !so.placed[i.id] })[0];
+  rerender(nxt ? "si_" + nxt.id : "tr_" + b);
+}
+ACT.sort = function(a){
+  var so = S.sort, act = a.dataset.a;
+  if(act === "pick"){ sortSel = sortSel === a.dataset.id ? null : a.dataset.id; so.lastFb = ""; return rerender(a.dataset.k) }
+  if(act === "unplace" && sortSel){ var tr = a.closest(".tray"); if(tr) return sortDrop(tr.dataset.b) }
+  if(act === "unplace"){ delete so.placed[a.dataset.id]; sortSel = a.dataset.id; so.lastFb = "<div class='fb tell'>Picked back up. Tap a tray to put it somewhere else.</div>"; return rerender("tr_mid") }
+  if(act === "drop") return sortDrop(a.dataset.b);
+  if(act === "fix"){ so.fixes[a.dataset.f] = parseInt(a.dataset.i, 10); tried("sort"); return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+el("stageHost").addEventListener("keydown", function(e){ if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("tray")){ e.preventDefault(); sortDrop(e.target.dataset.b) } });
+
+/* ================= STAGE 4: tools ================= */
+var TOOLS = [
+  { id:"steps", t:"Small steps", d:"Chop the big scary thing into little ones.", cls:"th1" },
+  { id:"practise", t:"Practise first", d:"Say it a few times before it counts.", cls:"th2" },
+  { id:"pastwin", t:"Remember a past win", d:"You have done hard things before.", cls:"th3" },
+  { id:"ask", t:"Ask for help", d:"Nobody does everything alone.", cls:"th4" },
+  { id:"talk", t:"Fair self talk", d:"Talk to yourself like a good mate would.", cls:"th5" }
+];
+var STEPS = ["Write down what I want to say", "Walk past and see when it is quiet", "Go in at a quiet time", "Say: Hi, are you looking for any Saturday help?"];
+var LINES = [["Ordering at a cafe", "Can I have a hot chocolate and a toastie, please?"], ["Asking Jay for help", "Jay, I am stuck on this bit. Can you show me again?"], ["Booking a haircut", "Hi, can I book a haircut for Saturday morning, please?"]];
+var WINS_A = ["Starting at a new school", "Learning to ride a bike", "Making a phone call on my own", "Getting a bus somewhere new", "Trying a food I was unsure about"];
+var CHALL = ["a first work shift", "a club I have never been to", "a new course", "speaking up in a meeting"];
+var ASKWHO = ["Jay", "HB", "A parent or carer", "A mate", "A manager at work"];
+var ASKWHAT = ["checking my plan", "practising what to say", "coming with me the first time", "explaining it another way"];
+var TALK = [
+  { id:"t1", th:"I'll mess it up.", o:[["Yeah, I always mess everything up.", "low"], ["I never mess anything up. I am a legend.", "high"], ["I might make a mistake. That is how everyone gets better.", "mid"]] },
+  { id:"t2", th:"Everyone will look at me.", o:[["Good, they should be watching. I am brilliant.", "high"], ["Most people are busy thinking about themselves. A few looks will not hurt me.", "mid"], ["So I had better not go.", "low"]] },
+  { id:"t3", th:"I have never done this before.", o:[["Everyone starts somewhere. I will find out how it works first.", "mid"], ["So I definitely cannot do it.", "low"], ["How hard can it be? I do not need any help.", "high"]] }
+];
+R.tools = function(s){
+  var to = S.tools, body = "";
+  body += "<div class='learn'><svg viewBox='0 0 200 120' aria-hidden='true'><rect x='20' y='44' width='160' height='66' rx='10' fill='#ef7724' stroke='" + INK + "' stroke-width='3'/><path d='M70 44 V28 H130 V44' fill='none' stroke='" + INK + "' stroke-width='4'/><rect x='20' y='60' width='160' height='8' fill='" + INK + "'/><rect x='34' y='20' width='10' height='40' rx='3' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5' transform='rotate(-14 39 40)'/><rect x='150' y='16' width='10' height='44' rx='3' fill='#00a6c9' stroke='" + INK + "' stroke-width='2.5' transform='rotate(12 155 38)'/><circle cx='100' cy='86' r='10' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>Confidence is not something you either have or do not have. You can build it with tools.</li><li>Different tools suit different people. Try each one, then rate it.</li><li>Not for me is a perfectly good answer.</li></ul></div></div>";
+  body += "<div class='toolgrid'>" + TOOLS.map(function(t){ return "<div class='tool'><div class='thd " + t.cls + "'>" + toolIcon(t.id) + "<div><h4>" + t.t + "</h4><p>" + t.d + "</p></div></div><div class='tbd'>" + toolBody(t.id) + rateRow(t.id) + "</div></div>" }).join("") + "</div>";
+  body += "<h3 class='part'><span class='pn'>!</span>Use one for real</h3><p>Pick a tool and a decision coming up. Then say how it helped, or how you think it would.</p>" +
+    "<div class='chipset'>" + TOOLS.map(function(t){ return chip("ut_" + t.id, t.t, to.useTool === t.id, " data-a='usetool' data-v='" + t.id + "'") }).join("") + "</div>" +
+    "<div class='chipset'>" + ["What to have for lunch", "Which task to do first", "Whether to go to a club", "What to say to a manager", "Whether to say yes to something"].map(function(w){ return chip("uw_" + w, w, to.useWhen === w, " data-a='usewhen' data-v='" + esc(w) + "'") }).join("") + "</div>" +
+    textBox("tools.useHow", "How did it help? (or how would it?)", "I used... when I had to decide... It helped because...") + starters("tools.useHow", ["I used it when", "It helped because", "Before, I felt", "Afterwards, I felt", "Next time I will"]);
+  return stageShell(s, "Five tools people use to turn their dial up a notch, or calm it down. Have a go with each, then rate them.", body);
+};
+function toolIcon(id){
+  var m = { steps:"<path d='M6 42 H16 V32 H26 V22 H36 V12 H44' fill='none' stroke='" + INK + "' stroke-width='4' stroke-linejoin='round'/><circle cx='40' cy='7' r='4' fill='" + INK + "'/>",
+    practise:"<path d='M10 12 H40 Q44 12 44 16 V30 Q44 34 40 34 H22 L14 42 V34 H10 Q6 34 6 30 V16 Q6 12 10 12 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M14 21 H36 M14 27 H30' stroke='" + INK + "' stroke-width='2.5'/>",
+    pastwin:"<path d='M14 8 H34 V18 Q34 28 24 28 Q14 28 14 18 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><path d='M24 28 V36 M16 40 H32' stroke='" + INK + "' stroke-width='3'/><path d='M14 12 H8 Q8 20 14 20 M34 12 H40 Q40 20 34 20' fill='none' stroke='" + INK + "' stroke-width='2.5'/>",
+    ask:"<circle cx='16' cy='16' r='7' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><circle cx='34' cy='16' r='7' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><path d='M4 42 Q16 24 28 42 M22 42 Q34 24 46 42' fill='none' stroke='" + INK + "' stroke-width='3'/>",
+    talk:"<path d='M25 6 C38 6 44 14 42 24 C40 34 32 36 30 44 H20 C18 36 8 34 8 24 C6 14 12 6 25 6 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M18 22 Q25 28 32 22' fill='none' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/>" };
+  return "<svg viewBox='0 0 48 48' aria-hidden='true'>" + m[id] + "</svg>";
+}
+function rateRow(id){
+  var r = S.tools.rate[id];
+  return "<div class='rate'><span>Would this help you?</span>" + [["no", "Not for me"], ["maybe", "Maybe"], ["yes", "Yes, this one"]].map(function(o){ return chip("rt_" + id + o[0], o[1], r === o[0], " data-a='rate' data-id='" + id + "' data-v='" + o[0] + "'") }).join("") + "</div>";
+}
+function toolBody(id){
+  var to = S.tools;
+  if(id === "steps"){
+    var n = to.steps.length, svg = "<svg class='stairs' viewBox='0 0 420 150' aria-hidden='true'>";
+    for(var i = 0; i < 4; i++){ var x = 10 + i * 100, y = 120 - i * 28; svg += "<rect x='" + x + "' y='" + y + "' width='100' height='" + (150 - y) + "' fill='" + (i < n ? "#ffc247" : "#efe7d8") + "' stroke='" + INK + "' stroke-width='2.5'/>" + (i < n ? "<text x='" + (x + 50) + "' y='" + (y + 20) + "' text-anchor='middle' " + FD + " font-weight='800' font-size='15' fill='" + INK + "'>" + (i + 1) + "</text>" : "") }
+    var fx = n ? 10 + (n - 1) * 100 + 50 : -40, fy = n ? 120 - (n - 1) * 28 : 150;
+    if(n) svg += "<g style='transition:transform .4s' transform='translate(" + fx + "," + (fy - 4) + ")'><circle cx='0' cy='-34' r='9' fill='#7fc36a' stroke='" + INK + "' stroke-width='2.5'/><path d='M0 -25 V-10 M0 -10 L-7 0 M0 -10 L7 0 M-9 -20 L9 -20' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/></g>";
+    if(n === 4) svg += "<path d='M386 6 L400 10 L386 16 Z' fill='#d2401f' stroke='" + INK + "' stroke-width='2'/><path d='M386 6 V30' stroke='" + INK + "' stroke-width='2.5'/>";
+    svg += "</svg>";
+    return "<p><b>Big scary thing:</b> asking about a Saturday job at the bakery. Tap the small steps in the order you would do them.</p>" + svg +
+      "<div class='chipset'>" + STEPS.map(function(t, i){ var at = to.steps.indexOf(i); return "<button type='button' class='cb' data-a='step' data-i='" + i + "' data-k='st_" + i + "' aria-pressed='" + (at >= 0) + "'>" + (at >= 0 ? (at + 1) + ". " : "") + esc(t) + "</button>" }).join("") + "</div>" +
+      (n === 4 ? "<div class='fb ok pop'><b>Top of the stairs.</b> Each step on its own is small. Stack them and the big thing gets done. Any order that makes sense to you is fine.</div>" : "") +
+      (n ? "<button type='button' class='cb' data-a='stepreset' data-k='stepreset'>Start the stairs again</button>" : "");
+  }
+  if(id === "practise"){
+    var L = LINES[to.line] || LINES[0], reps = to.reps, fs = 1.05 + Math.min(reps, 3) * 0.15;
+    return "<p>Pick a line, then say it out loud or in your head. Press the button each time.</p><div class='chipset'>" + LINES.map(function(l, i){ return chip("ln_" + i, l[0], to.line === i, " data-a='line' data-i='" + i + "'") }).join("") + "</div>" +
+      "<div class='bubble'><span class='rehearse' style='font-size:" + fs.toFixed(2) + "rem;opacity:" + (0.55 + Math.min(reps, 3) * 0.15) + "'>" + esc(L[1]) + "</span></div>" +
+      "<div class='meter' aria-hidden='true'><span style='width:" + Math.min(100, reps / 3 * 100) + "%'></span></div>" +
+      "<button type='button' class='btn sm' data-a='rep' data-k='rep'>I said it</button> <span class='note'>" + (reps === 0 ? "" : reps === 1 ? "Once. Feels a bit odd, right?" : reps === 2 ? "Twice. Getting smoother." : "Three times or more. It sounds like yours now.") + "</span>";
+  }
+  if(id === "pastwin"){
+    var sent = to.winA && to.winB ? "<div class='sentence pop'>Before " + esc(to.winB) + ", remember: I have already managed " + esc(to.winA.charAt(0).toLowerCase() + to.winA.slice(1)) + ". I was nervous then too, and I did it.</div>" : "";
+    return "<p>Pick something hard you have already done, and something new coming up.</p><p class='note'>Something I have done:</p><div class='chipset'>" + WINS_A.map(function(w){ return chip("wa_" + w, w, to.winA === w, " data-a='winA' data-v='" + esc(w) + "'") }).join("") + "</div>" +
+      "<p class='note'>Something new coming up:</p><div class='chipset'>" + CHALL.map(function(w){ return chip("wb_" + w, w.charAt(0).toUpperCase() + w.slice(1), to.winB === w, " data-a='winB' data-v='" + esc(w) + "'") }).join("") + "</div>" + sent +
+      "<p class='note'>Stage 5 lets you log your own wins properly.</p>";
+  }
+  if(id === "ask"){
+    var line = to.askWho && to.askWhat ? "<div class='bubble pop'>" + (to.askWho === "A parent or carer" || to.askWho === "A mate" || to.askWho === "A manager at work" ? "" : esc(to.askWho) + ", ") + "could you help me with " + esc(to.askWhat) + "? I am a bit unsure about it.</div>" : "";
+    return "<p>Who would you ask, and what for?</p><div class='chipset'>" + ASKWHO.map(function(w){ return chip("aw_" + w, w, to.askWho === w, " data-a='askWho' data-v='" + esc(w) + "'") }).join("") + "</div><div class='chipset'>" + ASKWHAT.map(function(w){ return chip("ah_" + w, w.charAt(0).toUpperCase() + w.slice(1), to.askWhat === w, " data-a='askWhat' data-v='" + esc(w) + "'") }).join("") + "</div>" + line +
+      (line ? "<p class='note'>Asking is a confident move. People who never ask are often the ones with the dial too low, or too high.</p>" : "");
+  }
+  if(id === "talk"){
+    return "<p>Your brain says something gloomy. Which reply would a good mate give? Not fake hype, not doom. Fair.</p>" + TALK.map(function(tk){
+      var p = to.talk[tk.id];
+      return "<div class='flip'><div class='thought'>&ldquo;" + esc(tk.th) + "&rdquo;</div><div class='fixopts'>" + tk.o.map(function(o, i){ var cls = p === i ? (o[1] === "mid" ? "good" : "meh") : ""; return "<button type='button' class='" + cls + "' data-a='talk' data-t='" + tk.id + "' data-i='" + i + "' data-k='tk_" + tk.id + i + "'>" + (p === i ? miniDial(o[1]) : "") + "<span>" + esc(o[0]) + "</span></button>" }).join("") + "</div>" +
+        (p != null ? "<div class='fb " + (tk.o[p][1] === "mid" ? "ok'><b>That is the fair one.</b> Honest and kind at the same time." : "nope'><b>That one pushes the dial " + (tk.o[p][1] === "high" ? "too high. Hype feels good, then crashes." : "too low. It sounds true but it is not fair to you.") + "</b> Want to try another?") + "</div>" : "") + "</div>";
+    }).join("");
+  }
+  return "";
+}
+ACT.tools = function(a){
+  var to = S.tools, act = a.dataset.a; tried("tools");
+  if(act === "rate"){ to.rate[a.dataset.id] = to.rate[a.dataset.id] === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "step"){ var i = parseInt(a.dataset.i, 10), at = to.steps.indexOf(i); if(at >= 0) to.steps.splice(at, 1); else to.steps.push(i); return rerender(a.dataset.k) }
+  if(act === "stepreset"){ to.steps = []; return rerender("st_0") }
+  if(act === "line"){ to.line = parseInt(a.dataset.i, 10); to.reps = 0; return rerender(a.dataset.k) }
+  if(act === "rep"){ to.reps++; return rerender("rep") }
+  if(["winA", "winB", "askWho", "askWhat", "useTool", "useWhen"].indexOf(act) >= 0 || act === "usetool" || act === "usewhen"){
+    var key = act === "usetool" ? "useTool" : act === "usewhen" ? "useWhen" : act;
+    to[key] = to[key] === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k);
+  }
+  if(act === "talk"){ to.talk[a.dataset.t] = parseInt(a.dataset.i, 10); return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+
+/* ================= STAGE 5: past wins ================= */
+var WHAT_IDEAS = ["Started at a new school", "Learned to swim", "Made a phone call on my own", "Got a bus somewhere new", "Cooked a meal", "Spoke in front of a group", "Fixed something", "Tried a new food", "Went to a new club", "Finished something I nearly gave up on"];
+var WHEN = ["Ages ago", "Last year", "This year", "This term", "This week"];
+var WHERE = [["Home", "#ef7724"], ["School", "#007291"], ["Work", "#7b4b8f"], ["Out and about", "#2e7d4f"]];
+var HELP = ["Small steps", "Practising first", "Someone with me", "Asking for help", "Telling myself I could", "Just keeping going", "Knowing what to expect", "A past win"];
+var NEXTS = ["A first work shift", "A new course or college", "Going somewhere new on my own", "Trying out for a team or club", "A job interview", "Speaking up about something"];
+function whereCol(w){ for(var i = 0; i < WHERE.length; i++) if(WHERE[i][0] === w) return WHERE[i][1]; return "#7b4b8f" }
+R.wins = function(s){
+  var wn = S.wins, d = wn.d, body = "";
+  body += "<div class='learn'><svg viewBox='0 0 200 110' aria-hidden='true'><path d='M10 90 Q50 50 90 76 T190 50' fill='none' stroke='" + INK + "' stroke-width='3' stroke-dasharray='7 6'/><path d='M40 70 V30' stroke='" + INK + "' stroke-width='3'/><path d='M40 30 L62 36 L40 44 Z' fill='#ef7724' stroke='" + INK + "' stroke-width='2'/><path d='M110 76 V34' stroke='" + INK + "' stroke-width='3'/><path d='M110 34 L132 40 L110 48 Z' fill='#007291' stroke='" + INK + "' stroke-width='2'/><path d='M180 52 V14' stroke='" + INK + "' stroke-width='3'/><path d='M180 14 L196 19 L180 25 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><text x='130' y='104' " + FF + " font-size='12' fill='" + INK + "'>next one?</text></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li>You have already done loads of things that once felt hard.</li><li>Each one is evidence: proof you can do new things.</li><li>The best bit: what helped last time will probably help next time.</li></ul></div></div>";
+  body += "<h3 class='part'><span class='pn'>1</span>Log a win</h3><div class='formbox'>" +
+    "<label class='wrlab' for='winWhat'>What did you do that was hard?</label><input class='wr' id='winWhat' data-f='wins.d.what' maxlength='80' value='" + esc(d.what) + "' placeholder='Type it, or tap an idea'>" +
+    "<div class='chipset'>" + WHAT_IDEAS.map(function(w){ return chip("wi_" + w, w, d.what === w, " data-a='what' data-v='" + esc(w) + "'") }).join("") + "</div>" +
+    "<p class='wrlab'>When?</p><div class='chipset'>" + WHEN.map(function(w){ return chip("wwn_" + w, w, d.when === w, " data-a='when' data-v='" + w + "'") }).join("") + "</div>" +
+    "<p class='wrlab'>Where?</p><div class='chipset'>" + WHERE.map(function(w){ return chip("wwr_" + w[0], w[0], d.where === w[0], " data-a='where' data-v='" + w[0] + "'") }).join("") + "</div>" +
+    "<p class='wrlab'>What helped? Tap any.</p><div class='chipset'>" + HELP.map(function(w){ return chip("whp_" + w, w, d.helped[w], " data-a='helped' data-v='" + w + "'") }).join("") + "</div>" +
+    "<button type='button' class='btn btn-orange' data-a='addwin' data-k='addwin'>Add it to my timeline</button><div id='winFb'>" + (wn.fb || "") + "</div></div>";
+  body += "<h3 class='part'><span class='pn'>2</span>My timeline</h3>" + timelineSVG();
+  body += wn.list.length ? "<div class='winlist'>" + wn.list.map(function(w, i){ return "<div class='win'><span class='wn' style='background:" + whereCol(w.where) + "'>" + (i + 1) + "</span><b>" + esc(w.what) + "</b><br><span class='note'>" + esc([w.when, w.where].filter(Boolean).join(", ")) + "</span>" + (w.helped.length ? "<br>Helped: " + esc(w.helped.join(", ")) : "") + "<button type='button' class='x' data-a='delwin' data-i='" + i + "' aria-label='Remove " + esc(w.what) + "'>&times;</button></div>" }).join("") + "</div>" : "<p class='note'>Nothing on it yet. Your first win will plant a flag.</p>";
+  body += "<h3 class='part'><span class='pn'>3</span>Bring your wins to something new</h3><p>Pick a new challenge. Your timeline will tell you what to bring.</p><div class='chipset'>" + NEXTS.map(function(w){ return chip("nx_" + w, w, wn.next === w, " data-a='next' data-v='" + esc(w) + "'") }).join("") + "</div>";
+  if(wn.next){
+    var counts = {}; wn.list.forEach(function(w){ w.helped.forEach(function(h){ counts[h] = (counts[h] || 0) + 1 }) });
+    var top = Object.keys(counts).sort(function(a, b){ return counts[b] - counts[a] })[0];
+    var src = top ? wn.list.filter(function(w){ return w.helped.indexOf(top) >= 0 })[0] : wn.list[0];
+    if(wn.list.length){
+      body += "<div class='sentence pop'>For &ldquo;" + esc(wn.next.toLowerCase()) + "&rdquo;: " + (top ? "bring <u>" + esc(top.toLowerCase()) + "</u>. It helped when " + esc(src.what.charAt(0).toLowerCase() + src.what.slice(1)) + "." : "remember " + esc(src.what.charAt(0).toLowerCase() + src.what.slice(1)) + ". You managed that.") + "</div>";
+    } else body += "<p class='fb tell'>Log a win or two above and this box will match them to your challenge.</p>";
+    body += textBox("wins.nextTxt", "How will your strengths and past wins help? (optional)", "When I... I will remember... because...") + starters("wins.nextTxt", ["When I", "I will remember the time I", "What helped then was", "One of my strengths is", "So this time I will"]);
+  }
+  return stageShell(s, "Log times you did something hard, and what helped. Then use them as evidence for the next thing.", body);
+};
+function timelineSVG(){
+  var L = S.wins.list, n = Math.max(L.length, 1), W = 480, H = 160;
+  var s = "<svg class='tlsvg' viewBox='0 0 " + W + " " + H + "' role='img' aria-label='Timeline with " + L.length + " wins'><path d='M10 116 C90 80 150 150 240 110 S390 80 470 106' fill='none' stroke='" + INK + "' stroke-width='4' stroke-dasharray='10 8' stroke-linecap='round'/>";
+  s += "<text x='10' y='152' " + FF + " font-size='16' fill='" + INK + "'>back then</text><text x='470' y='152' text-anchor='end' " + FF + " font-size='16' fill='" + INK + "'>now</text>";
+  L.forEach(function(w, i){
+    var x = 40 + (L.length === 1 ? 200 : i * (390 / Math.max(1, L.length - 1))), y = 112 - Math.sin(i * 1.3) * 8;
+    s += "<g class='" + (i === L.length - 1 && S.wins.justAdded ? "pop" : "") + "' style='transform-origin:" + x + "px " + y + "px'><path d='M" + x + " " + y + " V" + (y - 70) + "' stroke='" + INK + "' stroke-width='3'/><path d='M" + x + " " + (y - 70) + " L" + (x + 34) + " " + (y - 60) + " L" + x + " " + (y - 50) + " Z' fill='" + whereCol(w.where) + "' stroke='" + INK + "' stroke-width='2.5'/><text x='" + (x + 12) + "' y='" + (y - 55) + "' " + FD + " font-weight='800' font-size='17' fill='#fff'>" + (i + 1) + "</text><circle cx='" + x + "' cy='" + y + "' r='6' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/></g>";
+  });
+  if(!L.length) s += "<text x='240' y='60' text-anchor='middle' " + FF + " font-size='18' fill='" + INK + "' opacity='.6'>your flags go here</text>";
+  return s + "</svg>";
+}
+ACT.wins = function(a){
+  var wn = S.wins, d = wn.d, act = a.dataset.a; tried("wins"); wn.justAdded = false;
+  if(act === "what"){ d.what = d.what === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "when" || act === "where"){ d[act] = d[act] === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "helped"){ d.helped[a.dataset.v] = !d.helped[a.dataset.v]; return rerender(a.dataset.k) }
+  if(act === "addwin"){
+    var what = (el("winWhat").value || "").trim();
+    if(!what){ wn.fb = "<div class='fb tell'>Type or tap what you did first. Everything else is optional.</div>"; return rerender("addwin") }
+    if(wn.list.length >= 8){ wn.fb = "<div class='fb tell'>Eight wins is a full timeline. Remove one to add another.</div>"; return rerender("addwin") }
+    wn.list.push({ what:what.slice(0, 80), when:d.when, where:d.where, helped:HELP.filter(function(h){ return d.helped[h] }) });
+    wn.d = { what:"", when:"", where:"", helped:{} }; wn.justAdded = true;
+    wn.fb = "<div class='fb ok pop'><b>Flag planted.</b> That is win number " + wn.list.length + ". Fancy adding another?</div>";
+    return rerender("addwin");
+  }
+  if(act === "delwin"){ wn.list.splice(parseInt(a.dataset.i, 10), 1); wn.fb = ""; return rerender("addwin") }
+  if(act === "next"){ wn.next = wn.next === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+
+/* ================= STAGE 6: decide ================= */
+var DEC = [
+  { id:"tea", size:"small", place:"Home", title:"Friday tea", q:"It is Friday and you are starving. Cook some pasta yourself, or order a takeaway?", A:"Cook pasta", B:"Order a takeaway",
+    r:[["A", "Much cheaper"], ["A", "I can make it how I like"], ["A", "Practice for living on my own"], ["A", "Ready in about 15 minutes"], ["B", "No washing up"], ["B", "A treat after a long week"], ["B", "I am really tired"], ["B", "No cooking skills needed"]],
+    out:{ A:"The pasta is ready in 15 minutes. You burn the garlic a bit, but it still tastes good, and you have money left for the weekend.", B:"It takes 50 minutes and arrives a bit cold. Tasty though. That was most of your money for the weekend." } },
+  { id:"club", size:"small", place:"School", title:"Lunchtime club", q:"There is a new board game club at lunch. Give it a go, or chill in your usual spot?", A:"Try the club", B:"Usual spot",
+    r:[["A", "Try something new"], ["A", "Might meet new people"], ["A", "Games are fun"], ["A", "It is only once a week"], ["B", "I know what to expect"], ["B", "I get a proper rest"], ["B", "My mates are there"], ["B", "Busy rooms wear me out"]],
+    out:{ A:"The first five minutes are awkward. Then someone teaches you a card game and you nearly win. They ask if you are coming next week.", B:"A relaxed lunch with your mates. Later you hear the club was good, and it is on again next week if you fancy it." } },
+  { id:"shift", size:"big", place:"Work", title:"Extra shift", q:"Your manager at the cafe offers you an extra Saturday shift. It is the same day as your mate's birthday cinema trip.", A:"Take the shift", B:"Go to the birthday",
+    r:[["A", "Extra money"], ["A", "Shows my manager I am reliable"], ["A", "I am saving up for something"], ["A", "They asked me first"], ["B", "My mate really wants me there"], ["B", "I have worked every weekend this month"], ["B", "Time to rest and have fun"], ["B", "There will be other shifts"]],
+    out:{ A:"You earn the money and your manager says thanks. Your mate says it is fine, but on Monday everyone is talking about the trip.", B:"A brilliant afternoon. Your manager finds someone else, no problem, and offers you a shift next month." },
+    tw:{ A:["Plot twist: the shift finishes at 4pm and the film is not until 6pm.", ["Stick: work, then go home and rest", "Adapt: work, then meet them for the film", "Switch: give up the shift after all"]],
+         B:["Plot twist: your manager messages again. They are really stuck and it would be a big help.", ["Stick: still go to the birthday, and say sorry kindly", "Adapt: offer to do a short bit in the morning", "Switch: do the shift and miss the trip"]] } },
+  { id:"college", size:"big", place:"Future", title:"College course", q:"Choosing a college course. Stay where you know everyone, or go for the course you love at a new college where you know nobody?", A:"Stay where I know", B:"Go for the new one",
+    r:[["A", "My mates are there"], ["A", "Short journey"], ["A", "I know the staff"], ["A", "Less stress at the start"], ["B", "It is the subject I actually love"], ["B", "It leads to the job I want"], ["B", "A fresh start"], ["B", "Meet new people"]],
+    out:{ A:"The first term is easy and comfortable. By spring you are a bit bored, and you keep wondering about the other course.", B:"The first two weeks are hard and you feel like the new one. By half term you have a couple of new mates and you really like the subject." },
+    tw:{ A:["Plot twist: you find out the course you love has an open day next week.", ["Stick: stay put, I am happy enough", "Adapt: go to the open day and find out more", "Switch: apply to move"]],
+         B:["Plot twist: the bus to the new college takes an hour each way.", ["Stick: an hour is fine, I will use it for music or games", "Adapt: ask if there is a college bus or a quicker route", "Switch: go back to the course I know"]] } }
+];
+var FEEL = ["Proud", "Relieved", "Fine about it", "Unsure", "Wish I had picked the other one"];
+function decById(id){ for(var i = 0; i < DEC.length; i++) if(DEC[i].id === id) return DEC[i]; return null }
+function dstate(id){ return S.dec.s[id] || (S.dec.s[id] = { w:{}, own:[], choice:"", feel:"", rate:"", why:"", diff:"", tw:null, twWhy:"" }) }
+function weights(dc, ds){ var a = 0, b = 0; dc.r.forEach(function(r, i){ var w = ds.w[i] || 0; if(r[0] === "A") a += w; else b += w }); ds.own.forEach(function(o){ if(o.side === "A") a += o.w; else b += o.w }); return [a, b] }
+function scaleSVG(dc, ds){
+  var w = weights(dc, ds), ang = Math.max(-16, Math.min(16, (w[1] - w[0]) * 4));
+  var s = "<svg class='scalesvg' viewBox='0 0 380 220' role='img' aria-label='Scale: " + esc(dc.A) + " " + w[0] + ", " + esc(dc.B) + " " + w[1] + "'>";
+  s += "<path d='M190 50 V190' stroke='" + INK + "' stroke-width='8' stroke-linecap='round'/><path d='M140 200 H240' stroke='" + INK + "' stroke-width='10' stroke-linecap='round'/>";
+  s += "<g class='beam' id='beam' style='transform-origin:190px 50px;transform:rotate(" + ang + "deg)'>";
+  s += "<path d='M90 50 H290' stroke='" + INK + "' stroke-width='8' stroke-linecap='round'/>";
+  [[90, "A", "#cfeaf3", w[0]], [290, "B", "#fbd9c2", w[1]]].forEach(function(p){
+    var x = p[0];
+    s += "<g style='transform-origin:" + x + "px 50px;transform:rotate(" + (-ang) + "deg)'><path d='M" + x + " 50 L" + (x - 46) + " 120 M" + x + " 50 L" + (x + 46) + " 120' stroke='" + INK + "' stroke-width='2.5'/><path d='M" + (x - 56) + " 120 H" + (x + 56) + " Q" + (x + 50) + " 146 " + x + " 146 Q" + (x - 50) + " 146 " + (x - 56) + " 120 Z' fill='" + p[2] + "' stroke='" + INK + "' stroke-width='3'/>";
+    for(var k = 0; k < Math.min(p[3], 10); k++){ var bx = x - 45 + (k % 5) * 18, by = 104 - Math.floor(k / 5) * 16; s += "<rect x='" + bx + "' y='" + by + "' width='16' height='14' rx='3' fill='" + (p[1] === "A" ? "#007291" : "#ef7724") + "' stroke='" + INK + "' stroke-width='2'/>" }
+    s += "<text x='" + x + "' y='172' text-anchor='middle' " + FD + " font-weight='800' font-size='16' fill='" + INK + "'>" + esc(p[1] === "A" ? dc.A : dc.B) + "</text></g>";
+  });
+  s += "</g><circle cx='190' cy='50' r='9' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/></svg>";
+  return s;
+}
+function scaleAfter(){}
+R.decide = function(s){
+  var cur = S.dec.cur, body = "";
+  body += "<div class='learn'><svg viewBox='0 0 200 120' aria-hidden='true'><path d='M100 26 V104' stroke='" + INK + "' stroke-width='5'/><path d='M70 108 H130' stroke='" + INK + "' stroke-width='6' stroke-linecap='round'/><g transform='rotate(-10 100 26)'><path d='M30 26 H170' stroke='" + INK + "' stroke-width='5' stroke-linecap='round'/><path d='M30 26 L12 60 H48 Z' fill='#cfeaf3' stroke='" + INK + "' stroke-width='3'/><path d='M170 26 L152 60 H188 Z' fill='#fbd9c2' stroke='" + INK + "' stroke-width='3'/><rect x='20' y='46' width='12' height='10' fill='#007291' stroke='" + INK + "' stroke-width='1.5'/><rect x='160' y='46' width='12' height='10' fill='#ef7724' stroke='" + INK + "' stroke-width='1.5'/><rect x='174' y='46' width='12' height='10' fill='#ef7724' stroke='" + INK + "' stroke-width='1.5'/></g><circle cx='100' cy='26' r='6' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/></svg>" +
+    "<div><span class='lk'>Learn a bit</span><ul><li><b>Weigh it:</b> tap the reasons that matter to you. Tap twice if it matters a lot.</li><li><b>Choose:</b> the scale is a guide, not the boss. Your call.</li><li><b>Look back:</b> how did it go, and what would you do next time?</li></ul></div></div>";
+  body += "<h3 class='part'><span class='pn'>1</span>Pick a decision</h3><div class='dgrid'>" + DEC.map(function(dc){ var ds = S.dec.s[dc.id]; return "<button type='button' class='dbtn' data-a='pickdec' data-id='" + dc.id + "' data-k='pd_" + dc.id + "' aria-pressed='" + (cur === dc.id) + "'><span class='sz " + dc.size + "'>" + (dc.size === "small" ? "Small choice" : "Bigger choice") + " &middot; " + dc.place + "</span><b>" + dc.title + "</b><span class='d'>" + esc(dc.A) + " or " + esc(dc.B.toLowerCase()) + "?</span>" + (ds && ds.choice ? "<br><span class='ok'>Decided: " + esc(ds.choice === "A" ? dc.A : dc.B) + "</span>" : "") + "</button>" }).join("") + "</div>";
+  if(!cur){ body += "<p class='note'>Small ones first if you like. The bigger ones have a plot twist.</p>" }
+  else {
+    var dc = decById(cur), ds = dstate(cur), w = weights(dc, ds);
+    body += "<div class='dbox'><p class='dq'>" + esc(dc.q) + "</p>";
+    body += "<h3 class='part'><span class='pn'>2</span>Weigh it up</h3>" + scaleSVG(dc, ds) +
+      "<p style='text-align:center;font-weight:700;margin:0 auto 8px'>" + (w[0] === 0 && w[1] === 0 ? "Tap reasons below to load the scale." : w[0] === w[1] ? "Perfectly balanced. Tricky one." : "The scale leans towards: " + esc(w[0] > w[1] ? dc.A : dc.B)) + "</p>";
+    body += "<div class='reasons'>" + ["A", "B"].map(function(side){
+      return "<div class='rcol " + side.toLowerCase() + "'><h5>Reasons for: " + esc(side === "A" ? dc.A : dc.B) + "</h5>" + dc.r.map(function(r, i){ if(r[0] !== side) return ""; var wv = ds.w[i] || 0; return "<button type='button' class='rbtn w" + wv + "' data-a='weigh' data-i='" + i + "' data-k='rw_" + i + "' aria-label='" + esc(r[1]) + ", " + (wv === 2 ? "matters a lot" : wv === 1 ? "matters" : "not picked") + "'><span>" + esc(r[1]) + "</span><span class='w'>" + (wv === 2 ? "matters a lot" : wv === 1 ? "matters" : "") + "</span></button>" }).join("") +
+        ds.own.map(function(o, j){ return o.side === side ? "<button type='button' class='rbtn w" + o.w + "' data-a='ownw' data-j='" + j + "' data-k='ow_" + j + "'><span>" + esc(o.t) + "</span><span class='w'>" + (o.w === 2 ? "matters a lot" : o.w === 1 ? "matters" : "") + "</span></button>" : "" }).join("") + "</div>";
+    }).join("") + "</div>";
+    body += "<div class='addrow'><label for='ownR' style='position:absolute;left:-9999px'>Add your own reason</label><input class='wr' id='ownR' maxlength='60' placeholder='A reason of your own'><button type='button' class='btn btn-quiet sm' data-a='ownadd' data-side='A' data-k='oa_A'>For " + esc(dc.A.toLowerCase()) + "</button><button type='button' class='btn btn-quiet sm' data-a='ownadd' data-side='B' data-k='oa_B'>For " + esc(dc.B.toLowerCase()) + "</button></div>";
+    body += "<h3 class='part'><span class='pn'>3</span>Make the call</h3><div class='choicebtns'><button type='button' class='btn" + (ds.choice === "A" ? " btn-orange" : " btn-quiet") + "' data-a='choose' data-v='A' data-k='ch_A'>" + esc(dc.A) + "</button><button type='button' class='btn" + (ds.choice === "B" ? " btn-orange" : " btn-quiet") + "' data-a='choose' data-v='B' data-k='ch_B'>" + esc(dc.B) + "</button></div>";
+    if(ds.choice){
+      var lean = w[0] === w[1] ? "" : (w[0] > w[1] ? "A" : "B");
+      body += "<div class='consq pop'><b>What happened:</b> " + esc(dc.out[ds.choice]) + "</div>";
+      if(lean && lean !== ds.choice) body += "<p class='note'>Your gut and the scale disagreed. That is allowed. Worth saying why below.</p>";
+      body += "<p class='note'>Neither choice was perfect. A pro decision is one you thought through and can explain.</p>";
+      body += "<h3 class='part'><span class='pn'>4</span>Look back</h3><p class='wrlab'>How do you feel about it afterwards?</p><div class='chipset'>" + FEEL.map(function(f){ return chip("fl_" + f, f, ds.feel === f, " data-a='feel' data-v='" + esc(f) + "'") }).join("") + "</div>" +
+        "<p class='wrlab'>How did it go overall?</p><div class='chipset'>" + ["Went well", "Bit of both", "Not great"].map(function(f){ return chip("rr_" + f, f, ds.rate === f, " data-a='rategoes' data-v='" + f + "'") }).join("") + "</div>" +
+        textBox("dec.s." + cur + ".why", "Why did you pick it?", "I picked it because...") + starters("dec.s." + cur + ".why", ["I picked it because", "The reason that mattered most was", "I felt"]) +
+        textBox("dec.s." + cur + ".diff", "What would you keep or change next time?", "Next time I would...") + starters("dec.s." + cur + ".diff", ["Next time I would", "I would keep", "I would change", "I did not think about"]);
+      if(dc.tw){
+        var t = dc.tw[ds.choice];
+        body += "<div class='twist'><span class='tk'>Plot twist</span><p style='font-weight:700;margin:4px 0 8px'>" + esc(t[0].replace("Plot twist: ", "").replace(/^./, function(c){ return c.toUpperCase() })) + "</p><p class='note'>Something changed. Does your plan still work? Stick, adapt or switch.</p><div class='fixopts'>" +
+          t[1].map(function(o, i){ return "<button type='button' class='" + (ds.tw === i ? "good" : "") + "' data-a='twist' data-i='" + i + "' data-k='tw_" + i + "'>" + esc(o) + "</button>" }).join("") + "</div>" +
+          (ds.tw != null ? textBox("dec.s." + cur + ".twWhy", "Why that one?", "I would... because...") + starters("dec.s." + cur + ".twWhy", ["I would stick because", "I would adapt because", "I would switch because", "What changed was"]) : "") + "</div>";
+      }
+    }
+    body += "</div>";
+  }
+  return stageShell(s, "Small choices and bigger ones. Weigh it up, make the call, see what happens, then look back on it.", body);
+};
+ACT.decide = function(a){
+  var act = a.dataset.a, cur = S.dec.cur; tried("decide");
+  if(act === "pickdec"){ S.dec.cur = S.dec.cur === a.dataset.id ? null : a.dataset.id; return rerender(a.dataset.k) }
+  var ds = cur ? dstate(cur) : null; if(!ds && act !== "starter") return;
+  if(act === "weigh"){ var i = a.dataset.i; ds.w[i] = ((ds.w[i] || 0) + 1) % 3; return rerender(a.dataset.k) }
+  if(act === "ownw"){ var o = ds.own[a.dataset.j]; o.w = (o.w + 1) % 3; return rerender(a.dataset.k) }
+  if(act === "ownadd"){ var v = (el("ownR").value || "").trim(); if(!v) return; ds.own.push({ side:a.dataset.side, t:v.slice(0, 60), w:1 }); return rerender(a.dataset.k) }
+  if(act === "choose"){ ds.choice = a.dataset.v; ds.tw = null; return rerender(a.dataset.k) }
+  if(act === "feel"){ ds.feel = ds.feel === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "rategoes"){ ds.rate = ds.rate === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "twist"){ ds.tw = parseInt(a.dataset.i, 10); return rerender(a.dataset.k) }
+  if(act === "starter") doStarter(a);
+};
+
+/* ================= STAGE 7: plan ================= */
+var LOWS = ["I go quiet", "I avoid it", "I say I do not care", "I wait for someone else", "I get stuck deciding"];
+var HIGHS = ["I rush in", "I skip the instructions", "I show off", "I do not ask for help", "I say yes to silly dares"];
+function bestTool(){ var order = ["yes", "maybe"]; for(var k = 0; k < order.length; k++) for(var i = 0; i < TOOLS.length; i++) if(S.tools.rate[TOOLS[i].id] === order[k]) return TOOLS[i].t; return "" }
+R.plan = function(s){
+  var p = S.plan, body = "";
+  body += "<p>Bits from the other stages drop in by themselves. Fill in or change anything you like.</p>";
+  body += "<h3 class='part'><span class='pn'>1</span>When my dial is too low, I notice...</h3><div class='chipset'>" + LOWS.map(function(l){ return chip("lo_" + l, l, p.low[l], " data-a='low' data-v='" + esc(l) + "'") }).join("") + "</div>";
+  body += "<h3 class='part'><span class='pn'>2</span>When my dial is too high, I notice...</h3><div class='chipset'>" + HIGHS.map(function(l){ return chip("hi_" + l, l, p.high[l], " data-a='high' data-v='" + esc(l) + "'") }).join("") + "</div>";
+  var bt = bestTool();
+  body += "<h3 class='part'><span class='pn'>3</span>My go to tool</h3><div class='chipset'>" + TOOLS.map(function(t){ return chip("pt_" + t.id, t.t, (p.tool || bt) === t.t, " data-a='tool' data-v='" + t.t + "'") }).join("") + "</div>" + (bt && !p.tool ? "<p class='note'>Picked from your Stage 4 ratings.</p>" : "");
+  if(S.wins.list.length){ body += "<h3 class='part'><span class='pn'>4</span>A past win I can use</h3><div class='chipset'>" + S.wins.list.map(function(w, i){ return chip("pw_" + i, w.what, (p.win || S.wins.list[0].what) === w.what, " data-a='win' data-v='" + esc(w.what) + "'") }).join("") + "</div>" }
+  else body += "<h3 class='part'><span class='pn'>4</span>A past win I can use</h3><label for='pWin' style='position:absolute;left:-9999px'>A past win</label><input class='wr' id='pWin' data-f='plan.win' maxlength='80' value='" + esc(p.win) + "' placeholder='Something hard I have already done'>";
+  body += "<h3 class='part'><span class='pn'>5</span>My next challenge</h3><label for='pNext' style='position:absolute;left:-9999px'>My next challenge</label><input class='wr' id='pNext' data-f='plan.next' maxlength='80' value='" + esc(p.next || S.wins.next) + "' placeholder='Something I want to have a go at'>";
+  body += "<h3 class='part'><span class='pn'>6</span>In my own words</h3>" +
+    textBox("plan.txtNew", "How does feeling confident help you try something new?", "When I feel confident, I...") + starters("plan.txtNew", ["When I feel confident, I", "Feeling confident helps me", "For example, when I"]) +
+    textBox("plan.txtBal", "How can too little or too much confidence lead to a poor choice, and what is the balance? (stretch, if you fancy it)", "Too little... Too much... The balance is...") + starters("plan.txtBal", ["Too little confidence can mean", "Too much confidence can mean", "For example,", "The balance is", "To find it, I"]);
+  body += "<h3 class='part'><span class='pn'>&#9733;</span>My card</h3><div id='planCard'>" + planCardHTML() + "</div><button type='button' class='btn btn-quiet sm noprint' data-a='print' data-k='print'>Print my card</button>";
+  return stageShell(s, "Pull it all together on one card you can keep. Every box is optional.", body);
+};
+function planCardHTML(){
+  var p = S.plan, w = getWho().toUpperCase();
+  var strs = S.str.top.map(function(id){ var c = strById(id); return c ? c[1] : "" }).filter(Boolean);
+  if(!strs.length) STR.forEach(function(c){ if(S.str.marks[c[0]] === "y" && strs.length < 3) strs.push(c[1]) });
+  var lows = LOWS.filter(function(l){ return p.low[l] }), highs = HIGHS.filter(function(l){ return p.high[l] });
+  var tool = p.tool || bestTool(), win = p.win || (S.wins.list[0] ? S.wins.list[0].what : ""), next = p.next || S.wins.next;
+  function cell(k, v, cls){ return "<div class='pcell " + (cls || "") + "'><span class='pk'>" + k + "</span>" + (v ? esc(v) : "<span class='empty'>not filled in yet</span>") + "</div>" }
+  return "<div class='plancard'><svg class='pdial' viewBox='0 0 100 60' aria-hidden='true'><path d='M8 54 A42 42 0 0 1 28 18' fill='none' stroke='#7cc3dd' stroke-width='12'/><path d='M34 14 A42 42 0 0 1 66 14' fill='none' stroke='#7fc36a' stroke-width='12'/><path d='M72 18 A42 42 0 0 1 92 54' fill='none' stroke='#d2401f' stroke-width='12'/><path d='M47 54 L50 16 L53 54 Z' fill='" + INK + "'/><circle cx='50' cy='54' r='6' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/></svg>" +
+    "<h4>My confidence plan</h4><p class='pw'>" + (WHO[w] ? w + " &middot; " : "") + "Aim for the middle of the dial.</p><div class='pgrid'>" +
+    cell("My strengths", strs.join(", "), "wide") + cell("Too low, I notice", lows.join(", "), "lo") + cell("Too high, I notice", highs.join(", "), "hi") +
+    cell("My go to tool", tool, "mid") + cell("A past win", win, "mid") + cell("Next challenge", next, "wide") +
+    (p.txtNew ? cell("Confidence helps me try new things", p.txtNew, "wide") : "") + (p.txtBal ? cell("Finding the balance", p.txtBal, "wide") : "") + "</div></div>";
+}
+function updatePlanCard(){ var c = el("planCard"); if(c) c.innerHTML = planCardHTML() }
+ACT.plan = function(a){
+  var p = S.plan, act = a.dataset.a; tried("plan");
+  if(act === "low" || act === "high"){ p[act][a.dataset.v] = !p[act][a.dataset.v]; return rerender(a.dataset.k) }
+  if(act === "tool" || act === "win"){ p[act] = a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "print"){ try{ window.print() }catch(e){} return }
+  if(act === "starter") doStarter(a);
+};
+
+/* ================= send ================= */
+var STAGE_MILES = { strengths:["LC","EGW"], dial:["LW","LC","EGW","LP"], sort:["LP","EGW","LW"], tools:["HK"], wins:["EGW","LC"], decide:["JT","LW","LP","HK"], plan:["LC","EGW","LP"] };
+function summary(){
+  var o = [], w = getWho().toUpperCase();
+  o.push("Target: I can explore ways of building confidence in personal abilities and decisions at home and at school or work. I can recognise how confidence can influence actions both good and bad.");
+  if(WHO[w]) o.push("", "My milestones (" + w + "):", "1. " + WHO[w].full[0], "2. " + WHO[w].full[1]);
+  var triedList = STAGES.filter(function(s){ return S.seen[s.id] }).map(function(s){ return s.t });
+  o.push("", "Stages tried: " + (triedList.length ? triedList.join(", ") : "none yet"));
+
+  var st = S.str, ys = [], ss = [];
+  STR.forEach(function(c){ if(st.marks[c[0]] === "y") ys.push(c[1]); else if(st.marks[c[0]] === "s") ss.push(c[1]) });
+  ys = ys.concat(st.own);
+  if(S.seen.strengths){
+    o.push("", "== 1. Strengths spotter ==");
+    o.push("That's me: " + (ys.join(", ") || "none picked"));
+    if(ss.length) o.push("Sometimes: " + ss.join(", "));
+    var tops = st.top.map(function(id){ var c = strById(id); if(!c) return ""; var wh = st.where[id] || {}, ws = Object.keys(wh).filter(function(k){ return wh[k] }); return c[1] + (ws.length ? " (shows up at: " + ws.join(", ") + ")" : "") }).filter(Boolean);
+    if(tops.length) o.push("Top three: " + tops.join("; "));
+    if(st.newThing && st.useStr && strById(st.useStr)) o.push("My strength '" + strById(st.useStr)[1] + "' could help me " + st.newThing.toLowerCase() + ".");
+    if(st.how) o.push("How it would help: " + st.how);
+  }
+  if(S.seen.dial){
+    o.push("", "== 2. Set the dial ==");
+    SCEN.forEach(function(c){ var t = S.dial.tries[c.id]; if(t && t.length) o.push(c.who + " (" + c.what.toLowerCase() + "): tried " + t.map(function(x){ return x + " " + ZN[zoneOf(x)].toLowerCase() }).join(", ")) });
+    var nts = NOTICE.filter(function(n, i){ return S.dial.notice[i] });
+    if(nts.length) o.push("I noticed: " + nts.join("; "));
+    if(S.dial.noticeTxt) o.push("In my words: " + S.dial.noticeTxt);
+  }
+  if(S.seen.sort){
+    o.push("", "== 3. Too low, too high ==");
+    var placed = SORT.filter(function(x){ return S.sort.placed[x.id] });
+    var match = placed.filter(function(x){ return S.sort.placed[x.id] === x.b }).length;
+    o.push("Sorted " + placed.length + " of " + SORT.length + " cards (" + match + " in the tray I would expect).");
+    FIX.forEach(function(f){ var p = S.sort.fixes[f.id]; if(p != null) o.push("Balance pick: " + f.o[p][0] + " (" + (f.o[p][1] === "mid" ? "balanced" : f.o[p][1] === "high" ? "still too high" : "still too low") + ")") });
+    if(S.sort.ex) o.push("My explanation: " + S.sort.ex);
+  }
+  if(S.seen.tools){
+    o.push("", "== 4. Confidence toolkit ==");
+    TOOLS.forEach(function(t){ var r = S.tools.rate[t.id]; if(r) o.push(t.t + ": " + (r === "yes" ? "yes, this one" : r === "maybe" ? "maybe" : "not for me")) });
+    if(S.tools.steps.length) o.push("Small steps order: " + S.tools.steps.map(function(i){ return STEPS[i] }).join(" > "));
+    if(S.tools.reps) o.push("Practised a line " + S.tools.reps + " time(s).");
+    var tk = TALK.filter(function(t){ return S.tools.talk[t.id] != null }).map(function(t){ var p = S.tools.talk[t.id]; return "'" + t.th + "' > '" + t.o[p][0] + "'" });
+    if(tk.length) o.push("Self talk picks: " + tk.join("; "));
+    if(S.tools.askWho && S.tools.askWhat) o.push("I would ask " + S.tools.askWho + " for help with " + S.tools.askWhat + ".");
+    if(S.tools.useTool){ var tt = TOOLS.filter(function(t){ return t.id === S.tools.useTool })[0]; o.push("Tool used for real: " + tt.t + (S.tools.useWhen ? ", for: " + S.tools.useWhen.toLowerCase() : "")) }
+    if(S.tools.useHow) o.push("How it helped: " + S.tools.useHow);
+  }
+  if(S.seen.wins){
+    o.push("", "== 5. Past wins ==");
+    S.wins.list.forEach(function(x, i){ o.push((i + 1) + ". " + x.what + (x.when || x.where ? " (" + [x.when, x.where].filter(Boolean).join(", ") + ")" : "") + (x.helped.length ? ". Helped: " + x.helped.join(", ") : "")) });
+    if(!S.wins.list.length) o.push("No wins logged yet.");
+    if(S.wins.next) o.push("Next challenge: " + S.wins.next);
+    if(S.wins.nextTxt) o.push("How my wins will help: " + S.wins.nextTxt);
+  }
+  if(S.seen.decide){
+    o.push("", "== 6. Decide like a pro ==");
+    DEC.forEach(function(dc){ var ds = S.dec.s[dc.id]; if(!ds || !ds.choice) return; var wv = weights(dc, ds);
+      var reasons = dc.r.map(function(r, i){ var x = ds.w[i] || 0; return x ? r[1] + (x === 2 ? " (a lot)" : "") + " [" + (r[0] === "A" ? dc.A : dc.B) + "]" : "" }).filter(Boolean).concat(ds.own.filter(function(x){ return x.w }).map(function(x){ return x.t + " (my own) [" + (x.side === "A" ? dc.A : dc.B) + "]" }));
+      o.push(dc.title + " (" + (dc.size === "small" ? "small" : "bigger") + " choice): chose " + (ds.choice === "A" ? dc.A : dc.B) + ". Scale was " + wv[0] + " to " + wv[1] + ".");
+      if(reasons.length) o.push("  Reasons that mattered: " + reasons.join("; "));
+      if(ds.feel) o.push("  Felt afterwards: " + ds.feel);
+      if(ds.rate) o.push("  How it went: " + ds.rate);
+      if(ds.why) o.push("  Why: " + ds.why);
+      if(ds.diff) o.push("  Next time: " + ds.diff);
+      if(dc.tw && ds.tw != null) o.push("  Plot twist: " + dc.tw[ds.choice][1][ds.tw] + (ds.twWhy ? ". Because: " + ds.twWhy : ""));
+    });
+  }
+  if(S.seen.plan){
+    var p = S.plan;
+    o.push("", "== 7. My confidence plan ==");
+    var lows = LOWS.filter(function(l){ return p.low[l] }), highs = HIGHS.filter(function(l){ return p.high[l] });
+    if(lows.length) o.push("Too low, I notice: " + lows.join(", "));
+    if(highs.length) o.push("Too high, I notice: " + highs.join(", "));
+    var tl = p.tool || bestTool(); if(tl) o.push("Go to tool: " + tl);
+    var wi = p.win || (S.wins.list[0] ? S.wins.list[0].what : ""); if(wi) o.push("Past win: " + wi);
+    var nx = p.next || S.wins.next; if(nx) o.push("Next challenge: " + nx);
+    if(p.txtNew) o.push("Confidence helps me try new things: " + p.txtNew);
+    if(p.txtBal) o.push("Finding the balance: " + p.txtBal);
+  }
+  var rel = {}; STAGES.forEach(function(s){ if(S.seen[s.id]) STAGE_MILES[s.id].forEach(function(k){ rel[k] = 1 }) });
+  if(Object.keys(rel).length) o.push("", "Milestones this work links to: " + ORDER.filter(function(k){ return rel[k] }).join(", ") + (WHO[w] ? (rel[w] ? " (including mine)" : "") : ""));
+  return o.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Confidence Dial", filename:"confidence-dial", getText:summary });
+el("sendHost").addEventListener("input", function(e){ if(e.target.id === "b5who"){ drawWho(); drawMap() } });
+
+el("restartBtn").onclick = function(){
+  if(!window.confirm("Clear everything on this page and start again?")) return;
+  S = blank(); sortSel = null; save(); drawMap(); renderStage(); window.scrollTo({ top:0 });
+};
+
+drawWho(); drawMap(); if(S.stage) renderStage();
+window.__cd = { S:function(){ return S }, summary:summary, open:openStage };
+})();
+</script>
+
+</body>
+</html>

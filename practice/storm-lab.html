@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storm Lab - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Storm Lab only. Shell, cards and buttons come from style.css */
+.sl{max-width:980px;margin:0 auto}
+.hidden{display:none!important}
+.lead{font-size:1.05rem;line-height:1.55;margin:6px 0 10px!important;max-width:62ch}
+.small{font-size:.9rem;opacity:.8}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn.ghost{background:transparent;border:2px solid rgba(10,47,56,.45);box-shadow:none}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* who picker */
+.whobar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px}
+.whobar button{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.08em;padding:8px 14px;border-radius:999px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.whobar button[aria-pressed="true"]{background:var(--ink);color:var(--yellow)}
+.whobar button.look{font-size:.78rem;border-style:dashed}
+.goals{margin:12px 0 0;padding:12px 16px;border-radius:16px 12px 18px 12px;background:rgba(255,194,71,.28);border:2px dashed var(--yellow-deep)}
+.goals b{font-family:var(--display)}
+.goals ul{margin:6px 0 0;padding-left:20px}
+.goals li{margin:4px 0}
+
+/* stage map */
+.smap{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:14px 0 4px}
+.stile{position:relative;text-align:left;font-family:var(--body);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 12px 10px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .14s ease,box-shadow .14s ease;min-height:150px;display:flex;flex-direction:column;gap:4px}
+.stile:hover{transform:translate(-2px,-3px) rotate(-1deg);box-shadow:5px 7px 0 var(--ink)}
+.stile svg{width:54px;height:54px;flex:none}
+.stile .num{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.stile .nm{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.05rem;line-height:1.05}
+.stile .ds{font-size:.82rem;line-height:1.3}
+.stile.on{outline:4px solid var(--plum);outline-offset:3px}
+.stile .badge{position:absolute;top:-10px;right:-6px;background:var(--plum);color:#fff;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;border:2px solid var(--ink);transform:rotate(3deg)}
+.stile .tried{position:absolute;bottom:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#2e7d4f;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-size:.8rem}
+.s1c{background:linear-gradient(150deg,#ffd877,#ffc247)}
+.s2c{background:linear-gradient(150deg,#ff9b52,#ef7724)}
+.s3c{background:linear-gradient(150deg,#5fd0e6,#00a6c9)}
+.s4c{background:linear-gradient(150deg,#b98ad0,#9467a8);color:#fff}
+.s5c{background:linear-gradient(150deg,#8ed3a8,#4ba36f)}
+.s6c{background:linear-gradient(150deg,#ff8f7a,#e2553e);color:#fff}
+.s7c{background:linear-gradient(150deg,#fff3d6,#f3dfb3)}
+.s4c .nm,.s6c .nm{color:#fff}
+
+/* stage shell */
+.stage{border:3px solid var(--ink);border-radius:var(--r-alt);background:var(--white);box-shadow:var(--lift);padding:20px;margin:18px 0}
+.stagehead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.stagehead svg{width:60px;height:60px;flex:none}
+.stagehead h2{font-variation-settings:"wdth" 122,"wght" 900;font-size:clamp(1.6rem,4.6vw,2.3rem);line-height:1}
+.stagehead .kicker{margin-bottom:4px}
+.part{margin:18px 0 0;padding:16px;border-radius:18px 14px 20px 14px;background:rgba(10,47,56,.04);border:2px solid rgba(10,47,56,.1)}
+.part h3{font-variation-settings:"wdth" 116,"wght" 800;font-size:1.25rem;margin:0 0 6px}
+.learn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:center;margin:12px 0 0;padding:14px;border-radius:18px 14px 20px 14px;background:linear-gradient(150deg,rgba(0,166,201,.14),rgba(0,114,145,.06));border:2px solid rgba(0,114,145,.3)}
+.learn .kicker{color:var(--teal);opacity:1}
+.learn ul{margin:4px 0 0;padding-left:18px}
+.learn li{margin:5px 0;font-size:.98rem;line-height:1.45}
+.learn svg{width:100%;height:auto;display:block}
+.stagefoot{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:3px dashed rgba(10,47,56,.18)}
+@media (max-width:700px){.learn{grid-template-columns:1fr}}
+
+/* feedback */
+.fb{margin:10px 0 4px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:.98rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #9fcdab}
+.fb.nope{background:#fdf0e5;border:2px solid #f2c79f}
+.fb.tell{background:#eef4f6;border:2px solid #bcd6de}
+.fb b{font-family:var(--display)}
+@keyframes boing{0%{transform:scale(.96)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+.fb{animation:boing .3s ease}
+
+/* tiles, bins, drag */
+.tile{font-family:var(--body);font-size:.93rem;line-height:1.3;text-align:left;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:12px 9px 13px 9px;padding:8px 11px;cursor:grab;box-shadow:2px 3px 0 rgba(10,47,56,.25);touch-action:none;user-select:none;-webkit-user-select:none}
+.tile:hover{background:#fffaf0}
+.tile.held{background:var(--yellow);box-shadow:0 0 0 4px rgba(123,75,143,.45);transform:rotate(-1.5deg)}
+.tile.dragging{opacity:.35}
+.tile.placed{cursor:default;box-shadow:none;border-color:#2e7d4f;background:#e9f4ec}
+.dragghost{position:fixed;z-index:10000;pointer-events:none;transform:rotate(-3deg) scale(1.04);box-shadow:6px 8px 0 rgba(10,47,56,.3)!important;max-width:260px}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;padding:10px;border-radius:14px;background:rgba(255,194,71,.18);min-height:48px}
+.holding .drop{outline:3px dashed var(--plum);outline-offset:2px}
+.drop.hover{background:rgba(123,75,143,.14)!important}
+.bins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bin{border:3px solid var(--ink);border-radius:16px 12px 18px 12px;padding:10px;min-height:120px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit;display:flex;flex-direction:column;gap:6px}
+.bin .bh{display:flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.98rem;line-height:1.1}
+.bin .bh svg{width:40px;height:40px;flex:none}
+.bin .tile{font-size:.84rem;padding:6px 8px}
+@media (max-width:640px){.bins{grid-template-columns:1fr}.bin{min-height:70px}}
+
+/* scene */
+.scene{position:relative;max-width:760px;margin:10px auto 0}
+.scene svg{width:100%;height:auto;display:block;border-radius:16px;border:3px solid var(--ink)}
+.hot{cursor:pointer}
+.hot circle.ring{fill:var(--yellow);stroke:var(--ink);stroke-width:3}
+.hot.done circle.ring{fill:#4ba36f}
+.hot:focus{outline:none}
+.hot:focus-visible circle.ring{stroke:var(--plum);stroke-width:6}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.hot .pz{transform-box:fill-box;transform-origin:center;animation:pulse 1.6s ease-in-out infinite}
+.hot.done .pz{animation:none}
+.labelpick{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.labelpick button,.pickbtn{font:inherit;font-size:.92rem;font-weight:700;padding:8px 13px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.labelpick button:hover,.pickbtn:hover{background:#fff3d6}
+.pickbtn[aria-pressed="true"]{background:var(--teal);color:#fff}
+.found{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.found span{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;background:#e9f4ec;border:2px solid #9fcdab}
+
+/* storm builder */
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:12px}
+@media (max-width:760px){.lab{grid-template-columns:1fr}}
+.screen{background:#082733;border:3px solid var(--ink);border-radius:18px;overflow:hidden;position:relative}
+.screen svg{display:block;width:100%;height:auto}
+.screen .tag{position:absolute;left:10px;top:8px;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.16em;color:#cfe8ee;text-transform:uppercase}
+.slide{margin:0 0 12px}
+.slide label{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:.95rem}
+.slide label span{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;color:var(--teal);white-space:nowrap}
+.slide small{display:block;font-size:.8rem;opacity:.75;margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--orange);height:28px}
+.gauge{margin:10px 0;padding:12px;border-radius:16px;border:3px solid var(--ink);background:#fff}
+.gauge .big{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.5rem;line-height:1.05}
+.ladder{display:flex;gap:3px;margin:8px 0 4px}
+.ladder i{flex:1;height:14px;border-radius:4px;background:rgba(10,47,56,.12)}
+.ladder i.on{background:var(--c)}
+.ladlab{display:flex;justify-content:space-between;font-size:.68rem;opacity:.7}
+.why{list-style:none;padding:0;margin:8px 0 0}
+.why li{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed rgba(10,47,56,.18);font-size:.92rem;line-height:1.35}
+.why li i{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;color:#fff;font-size:.8rem;border:2px solid var(--ink)}
+.why li.y i{background:#2e7d4f}
+.why li.n i{background:var(--orange-deep)}
+.missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:10px}
+.mission{padding:9px 12px;border-radius:14px;border:2px dashed rgba(10,47,56,.35);font-size:.9rem;background:#fff}
+.mission.done{border-style:solid;border-color:#2e7d4f;background:#e9f4ec}
+.mission b{font-family:var(--display)}
+@keyframes spinccw{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(26px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.spin{transform-origin:180px 180px;animation:spinccw var(--dur,8s) linear infinite}
+.drift{animation:drift 2.4s ease-in-out infinite alternate}
+.bob{animation:bob 2.2s ease-in-out infinite}
+
+/* order list */
+.olist{list-style:none;padding:0;margin:10px 0;counter-reset:o}
+.olist li{display:flex;align-items:center;gap:8px;padding:8px;margin:6px 0;background:#fff;border:2px solid var(--ink);border-radius:14px 10px 14px 10px;counter-increment:o}
+.olist li::before{content:counter(o);flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--yellow);font-family:var(--display);font-variation-settings:"wght" 900;display:flex;align-items:center;justify-content:center}
+.olist li .tx{flex:1;font-size:.95rem;line-height:1.35}
+.olist li .mv{display:flex;flex-direction:column;gap:3px}
+.olist li .mv button{font:inherit;font-weight:700;width:34px;height:28px;border-radius:8px;border:2px solid var(--ink);background:var(--white);cursor:pointer;color:var(--ink)}
+.olist li.good{border-color:#2e7d4f;background:#e9f4ec}
+.olist li.sel{background:#fff3d6;box-shadow:0 0 0 3px rgba(123,75,143,.4)}
+.diagram{background:linear-gradient(#bfe6f2,#eaf7fb);border:3px solid var(--ink);border-radius:16px;overflow:hidden}
+.diagram svg{display:block;width:100%;height:auto}
+.dg .part-g{transition:opacity .3s}
+.dg.playing .part-g{opacity:.18}
+.dg.playing .part-g.lit{opacity:1}
+.steptext{min-height:3.2em;font-weight:700;margin:8px 0 0}
+.pin{cursor:pointer}
+.pin circle{fill:var(--plum);stroke:#fff;stroke-width:3}
+.pin.done circle{fill:#2e7d4f}
+.pin text{fill:#fff;font-weight:700}
+.pinlabels{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin-top:8px}
+.pinlabels div{font-size:.88rem;padding:6px 10px;border-radius:10px;background:#fff;border:2px solid rgba(10,47,56,.2)}
+.pinlabels div.done{border-color:#2e7d4f;background:#e9f4ec}
+
+/* map */
+.mapwrap{align-self:start;position:relative;border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#2b5d8a}
+.mapwrap svg{display:block;width:100%;height:auto}
+.tracker{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;margin-top:12px}
+@media (max-width:760px){.tracker{grid-template-columns:1fr}}
+.daycard{border:3px solid var(--ink);border-radius:16px 12px 18px 12px;background:#fff;padding:12px 14px}
+.daycard .d{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 900;font-size:1.3rem}
+.stat{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.stat span{font-size:.82rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(10,47,56,.07)}
+.choices{display:grid;gap:8px;margin-top:8px}
+.choices button{text-align:left;font:inherit;font-size:.96rem;padding:10px 14px;border:2px solid rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button:hover{background:#fff7e8}
+.choices button[aria-pressed="true"]{border-color:var(--teal);background:rgba(0,114,145,.12);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec}
+.choices button.bad{border-color:var(--orange-deep);background:#fdf0e5}
+.fuel{height:16px;border-radius:999px;background:rgba(10,47,56,.12);overflow:hidden;margin:4px 0}
+.fuel span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#00a6c9,#ef7724,#e2553e);transition:width .6s}
+
+/* compare table */
+.ctable{display:grid;grid-template-columns:minmax(80px,.55fr) minmax(0,1fr) minmax(0,1fr);gap:6px;margin-top:10px}
+.ctable .hd{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;padding:8px;border-radius:12px;text-align:center}
+.ctable .rl{font-weight:700;font-size:.86rem;display:flex;align-items:center;padding:4px}
+.cell{min-height:58px;border:2px dashed rgba(10,47,56,.35);border-radius:12px;padding:6px;background:#fff;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.cell .tile{font-size:.8rem;padding:5px 7px;width:100%}
+@media (max-width:560px){.ctable{grid-template-columns:1fr 1fr}.ctable .rl{grid-column:1 / -1;padding:8px 2px 0}.ctable .hd.blank{display:none}}
+.bothrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+
+/* chain builder */
+.cspick{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.csbtn{text-align:left;font:inherit;color:inherit;border:3px solid var(--ink);border-radius:18px 14px 20px 14px;padding:12px;cursor:pointer;background:#fff;display:flex;gap:10px;align-items:center;box-shadow:3px 4px 0 var(--ink)}
+.csbtn svg{width:60px;height:60px;flex:none}
+.csbtn b{font-family:var(--display);font-size:1.1rem}
+.csbtn[aria-pressed="true"]{background:var(--yellow)}
+.factfile{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px}
+.factfile div{background:#fff;border:2px solid var(--ink);border-radius:14px 10px 14px 10px;padding:8px 10px;font-size:.9rem;line-height:1.35}
+.factfile div b{display:block;font-family:var(--display);font-size:1.15rem;color:var(--teal)}
+.chain{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr) 26px minmax(0,1fr);gap:4px;align-items:stretch;margin:10px 0;padding:8px;border-radius:14px;background:#fff;border:2px solid rgba(10,47,56,.2)}
+.chain.good{border-color:#2e7d4f;background:#f1f9f3}
+.chain .arr{display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.3rem;color:var(--orange-deep)}
+.slot{min-height:64px;border:2px dashed rgba(10,47,56,.35);border-radius:12px;padding:5px;background:#fffdf8;cursor:pointer;font:inherit;color:inherit;text-align:left;display:flex;flex-direction:column;gap:3px}
+.slot .sh{font-size:.66rem;font-family:var(--display);font-variation-settings:"wght" 800;letter-spacing:.12em;text-transform:uppercase;opacity:.65}
+.slot .tile{font-size:.8rem;padding:5px 7px}
+@media (max-width:640px){.chain{grid-template-columns:1fr}.chain .arr{height:24px}.chain .arr span{display:inline-block;transform:rotate(90deg)}}
+.ptag{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px;font-size:.85rem}
+
+/* writing */
+textarea.write{width:100%;min-height:170px;font:inherit;font-size:1.02rem;line-height:1.55;padding:12px 14px;border:3px solid var(--ink);border-radius:16px 12px 18px 12px;background:#fffdf8;color:var(--ink);resize:vertical}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.starters button{font:inherit;font-size:.88rem;padding:6px 11px;border-radius:999px;border:2px solid var(--teal);background:#fff;color:var(--ink);cursor:pointer}
+.starters button.w{border-color:var(--plum);border-style:dashed}
+.spot{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.spot span{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(123,75,143,.14);border:2px solid rgba(123,75,143,.4)}
+.prompts{display:grid;gap:8px;margin-top:8px}
+.prompts button{text-align:left;font:inherit;padding:10px 14px;border-radius:14px 10px 14px 10px;border:2px solid rgba(10,47,56,.3);background:#fff;color:var(--ink);cursor:pointer}
+.prompts button[aria-pressed="true"]{border-color:var(--plum);background:rgba(123,75,143,.12);font-weight:700}
+.prompts button .for{display:block;font-size:.76rem;font-weight:400;opacity:.7}
+
+.holding .pin circle{stroke:#ffc247;stroke-width:5}
+.pin.hover circle{fill:#ef7724}
+.slot .ttag{display:none}
+.ttag{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-bottom:2px}
+.lab.uk{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+@media (max-width:760px){.lab.uk{grid-template-columns:1fr}}
+.svgtext{font-family:"Atkinson Hyperlegible",Verdana,sans-serif}
+@media (max-width:600px){.hot circle.ring{r:34px}.hot text.q{font-size:34px}.hot text.lbl{font-size:26px}.pin circle{r:24px}.pin text{font-size:24px}}
+@media (max-width:480px){.stage{padding:14px}.part{padding:12px}.sl .wrap{padding:0 16px}}
+@media (prefers-reduced-motion:reduce){.spin,.drift,.bob,.hot .pz{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>STORM <span class="accent">LAB</span></h1>
+    <div class="line">
+      <span class="chip">Human and social</span>
+      <p>Build a hurricane, chase one across the Atlantic, and find out why the UK gets its own kind of storm.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap sl">
+
+  <div class="stage" id="introCard">
+    <span class="kicker">Welcome to the lab</span>
+    <h3 style="font-variation-settings:'wdth' 120,'wght' 800;font-size:1.5rem">Seven stations. Any order. Skip anything.</h3>
+    <p class="lead">Each station is a game, a toy or a puzzle about weather hazards. Pick whichever looks fun. Nothing here is timed, and wrong answers just get a hint.</p>
+    <p class="small" style="margin:10px 0 2px"><b>Who is this?</b> Optional. It shows your targets and a good place to start.</p>
+    <div class="whobar" id="whoBar"></div>
+    <div id="goals"></div>
+    <div class="smap" id="smap"></div>
+    <div class="row"><button class="btn btn-quiet sm" id="resetBtn" type="button">Start again</button><span class="small" id="resetMsg"></span></div>
+  </div>
+
+  <div id="stageHost"></div>
+
+  <div class="stage" id="sendCard">
+    <span class="kicker">When you are ready</span>
+    <h3 style="font-variation-settings:'wdth' 120,'wght' 800;font-size:1.4rem">Send your storm work to Jay</h3>
+    <p class="small">It picks up whatever you have tried so far, even if it is only one station.</p>
+    <div id="sendHost"></div>
+  </div>
+
+  <a class="backlink" href="/practice/#hs-standard">Back to Human and social</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.storm-lab.v1", WHOKEY = "base5.who.v1";
+var DEG = "\u00b0C";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") }
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t } return a }
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)) }
+function fbHTML(kind, html){ return "<div class='fb " + kind + "'>" + html + "</div>" }
+function setFb(id, kind, html){ var x = el(id); if(x) x.innerHTML = fbHTML(kind, html) }
+
+/* ---------- state ---------- */
+function fresh(){ return {
+  s1:{ bins:{}, binTries:0, scene:{}, sceneTries:0 },
+  s2:{ moves:0, missions:{}, broke:[], best:0 },
+  s3:{ order:null, orderTries:0, orderDone:false, pins:{}, pinTries:0, played:false },
+  s4:{ step:0, preds:{}, reasons:null, reasonsChecked:false },
+  s5:{ tried:{}, table:{}, tableTries:0, both:{}, bothChecked:false },
+  s6:{ cs:"", chains:{}, chainTries:0, tags:{}, most:"", mostWhy:"" },
+  s7:{ prompt:"", text:"" },
+  opened:{}
+} }
+var st = fresh();
+try{ var raw = localStorage.getItem(STORE); if(raw){ var p = JSON.parse(raw); if(p && p.s1){ var f = fresh(); for(var k in f){ if(p[k] === undefined) p[k] = f[k] } st = p } } }catch(e){}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} drawMap() }
+
+var who = ""; try{ who = (localStorage.getItem(WHOKEY) || "").toUpperCase() }catch(e){}
+
+/* ---------- students and milestones ---------- */
+var KIDS = {
+  LC:{ m:["Name different weather hazards, like hurricanes, tropical storms and deep depressions.", "Describe what happens during a weather hazard, like strong winds, heavy rain or flooding."], go:[1] },
+  HK:{ m:["Describe what happens during a weather hazard, including strong winds, heavy rain and flooding.", "Spot some of the conditions that cause weather hazards, like warm oceans and low air pressure."], go:[1, 2] },
+  JT:{ m:["Spot some of the conditions that cause severe weather hazards, like warm oceans, low pressure and strong winds.", "Explain how warm oceans, low pressure and strong winds work together to make a tropical storm."], go:[2, 3, 7] },
+  LW:{ m:["Explain how different conditions work together to make weather hazards, including tropical storms and UK depressions.", "Use a diagram to explain how a tropical storm forms and grows stronger."], go:[2, 3, 5] },
+  EGW:{ m:["Compare the causes of tropical storms with the storms that hit the UK.", "Explain why tropical storms rarely reach the UK at full strength, and what happens to them on the way."], go:[4, 5] },
+  LP:{ m:["Discuss in detail why weather hazards develop, using geography words for pressure, ocean temperature, moisture and global circulation.", "Use a case study to explain how the causes of a weather hazard led to its effects on people and places."], go:[2, 5, 6, 7] }
+};
+var MILESTONE_STAGES = {
+  1:"Naming weather hazards and describing what happens (LC, HK)",
+  2:"Conditions that cause tropical storms and how they work together (HK, JT, LW, LP)",
+  3:"Using a diagram to explain how a tropical storm forms and grows (LW, JT)",
+  4:"Why tropical storms rarely reach the UK at full strength (EGW)",
+  5:"UK depressions, global circulation, and comparing tropical and UK storms (LW, EGW, LP)",
+  6:"Case study: how causes led to effects on people and places (LP)",
+  7:"Explaining in writing (JT, LP, EGW, LW)"
+};
+
+/* ---------- icons ---------- */
+var ICON = {
+  1:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='26' fill='#fff' stroke='#0a2f38' stroke-width='3'/><path d='M14 24h18a5 5 0 1 0-5-5' fill='none' stroke='#007291' stroke-width='4' stroke-linecap='round'/><path d='M12 33h26a6 6 0 1 1-6 6' fill='none' stroke='#007291' stroke-width='4' stroke-linecap='round'/><path d='M40 14l-4 9h6l-5 10' fill='none' stroke='#ef7724' stroke-width='3.5' stroke-linejoin='round' stroke-linecap='round'/></svg>",
+  2:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='26' fill='#0a2f38'/><g fill='none' stroke='#fff' stroke-width='4' stroke-linecap='round'><path d='M30 30c0-8 9-12 15-8'/><path d='M30 30c8 0 12 9 8 15'/><path d='M30 30c0 8-9 12-15 8'/><path d='M30 30c-8 0-12-9-8-15'/></g><circle cx='30' cy='30' r='4' fill='#ffc247'/></svg>",
+  3:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='4' y='44' width='52' height='12' rx='3' fill='#ef7724' stroke='#0a2f38' stroke-width='2.5'/><path d='M10 44c0-14 4-26 12-30 4 6 4 18 2 30z' fill='#fff' stroke='#0a2f38' stroke-width='2.5'/><path d='M50 44c0-14-4-26-12-30-4 6-4 18-2 30z' fill='#fff' stroke='#0a2f38' stroke-width='2.5'/><path d='M30 14v24' stroke='#7b4b8f' stroke-width='3'/><path d='M26 33l4 6 4-6' fill='none' stroke='#7b4b8f' stroke-width='3'/></svg>",
+  4:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='3' y='3' width='54' height='54' rx='10' fill='#3a86a8' stroke='#0a2f38' stroke-width='3'/><path d='M44 50c-2-12-16-12-22-20s0-18 10-22' fill='none' stroke='#fff' stroke-width='3' stroke-dasharray='4 4'/><circle cx='32' cy='8' r='5' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><path d='M40 30h12v12H40z' fill='#4ba36f' stroke='#0a2f38' stroke-width='2'/></svg>",
+  5:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='26' fill='#fff' stroke='#0a2f38' stroke-width='3'/><text x='22' y='40' font-size='26' font-weight='900' fill='#e2553e' font-family='Archivo,Arial Black,sans-serif'>L</text><path d='M8 22q12-8 24-2t22-4' fill='none' stroke='#007291' stroke-width='3'/><path d='M38 46l6-8 4 10z' fill='#2d6fd6'/><circle cx='44' cy='24' r='4' fill='#e2553e'/></svg>",
+  6:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='8' y='6' width='44' height='50' rx='6' fill='#fff' stroke='#0a2f38' stroke-width='3'/><path d='M16 18h28M16 26h28M16 34h20' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/><path d='M14 46h8l4-5 4 5h8' fill='none' stroke='#007291' stroke-width='3'/><circle cx='44' cy='44' r='7' fill='#ffc247' stroke='#0a2f38' stroke-width='2.5'/></svg>",
+  7:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='6' y='8' width='40' height='46' rx='5' fill='#fff' stroke='#0a2f38' stroke-width='3'/><path d='M13 20h26M13 28h26M13 36h18' stroke='#7b4b8f' stroke-width='3' stroke-linecap='round'/><path d='M50 10l6 6-20 20-8 2 2-8z' fill='#ffc247' stroke='#0a2f38' stroke-width='2.5' stroke-linejoin='round'/></svg>"
+};
+var STAGES = [
+  null,
+  { n:"Storm spotter", d:"Sort the storms and spot what they do to a town.", cls:"s1c" },
+  { n:"Storm builder", d:"Slide the conditions and grow your own hurricane.", cls:"s2c" },
+  { n:"Inside a storm", d:"Put the steps in order, then label the diagram.", cls:"s3c" },
+  { n:"Track the storm", d:"Chase a hurricane from Africa to the UK.", cls:"s4c" },
+  { n:"UK storm factory", d:"Make a deep depression, then compare it.", cls:"s5c" },
+  { n:"Case study", d:"Storm Desmond or Hurricane Katrina. Link causes to effects.", cls:"s6c" },
+  { n:"Explain it", d:"Write it in your own words, with starters.", cls:"s7c" }
+];
+function tried(n){
+  var s = st["s" + n];
+  if(n === 1) return Object.keys(s.bins).length > 0 || Object.keys(s.scene).length > 0;
+  if(n === 2) return s.moves > 0;
+  if(n === 3) return s.orderTries > 0 || Object.keys(s.pins).length > 0 || s.played;
+  if(n === 4) return Object.keys(s.preds).length > 0;
+  if(n === 5) return Object.keys(s.tried).length > 0 || Object.keys(s.table).length > 0;
+  if(n === 6) return !!s.cs;
+  if(n === 7) return s.text.trim().length > 0;
+}
+
+/* ---------- who picker ---------- */
+function drawWho(){
+  var b = el("whoBar"), h = "";
+  ["JT", "LW", "EGW", "LP", "LC", "HK"].forEach(function(k){ h += "<button type='button' data-w='" + k + "' aria-pressed='" + (who === k) + "'>" + k + "</button>" });
+  h += "<button type='button' class='look' data-w='' aria-pressed='" + (!KIDS[who]) + "'>Just looking</button>";
+  b.innerHTML = h;
+  var g = el("goals");
+  if(KIDS[who]){
+    var K = KIDS[who];
+    g.innerHTML = "<div class='goals'><b>Hi " + who + ". Your two storm targets:</b><ul><li>" + K.m[0] + "</li><li>" + K.m[1] + "</li></ul><p class='small' style='margin:6px 0 0'>Good places to start have a purple badge. Every station is open, so go wherever you like.</p></div>";
+  } else g.innerHTML = "";
+}
+el("whoBar").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-w]"); if(!b) return;
+  who = b.getAttribute("data-w");
+  try{ localStorage.setItem(WHOKEY, who) }catch(err){}
+  var inp = document.getElementById("b5who"); if(inp) inp.value = who;
+  drawWho(); drawMap();
+});
+
+/* ---------- stage map ---------- */
+var current = 0;
+function drawMap(){
+  var h = "", go = KIDS[who] ? KIDS[who].go : [];
+  for(var i = 1; i <= 7; i++){
+    var S = STAGES[i];
+    h += "<button type='button' class='stile " + S.cls + (current === i ? " on" : "") + "' data-s='" + i + "'>" + ICON[i] +
+      "<span class='num'>Station " + i + "</span><span class='nm'>" + S.n + "</span><span class='ds'>" + S.d + "</span>" +
+      (go.indexOf(i) >= 0 ? "<span class='badge'>Good place to start</span>" : "") +
+      (tried(i) ? "<span class='tried' title='You have tried this'>&#10003;</span>" : "") + "</button>";
+  }
+  el("smap").innerHTML = h;
+}
+el("smap").addEventListener("click", function(e){ var b = e.target.closest("[data-s]"); if(b) openStage(+b.getAttribute("data-s")) });
+
+var RENDER = {};
+function openStage(n){
+  current = n; st.opened[n] = 1; save();
+  var S = STAGES[n];
+  var nav = "<div class='stagefoot'>" + (n > 1 ? "<button class='btn btn-quiet' type='button' data-go='" + (n - 1) + "'>Station " + (n - 1) + "</button>" : "") +
+    (n < 7 ? "<button class='btn' type='button' data-go='" + (n + 1) + "'>Next station</button>" : "<button class='btn' type='button' data-go='send'>Send to Jay</button>") +
+    "<button class='btn btn-quiet' type='button' data-go='map'>Back to the map</button></div>";
+  el("stageHost").innerHTML = "<section class='stage' id='stageCard'><div class='stagehead'>" + ICON[n] + "<div><span class='kicker'>Station " + n + " of 7</span><h2>" + S.n + "</h2></div></div><div id='stageBody'></div>" + nav + "</section>";
+  RENDER[n](el("stageBody"));
+  var top = el("stageCard").getBoundingClientRect().top + window.scrollY - 12;
+  window.scrollTo({ top:top, behavior: reduce ? "auto" : "smooth" });
+}
+el("stageHost").addEventListener("click", function(e){
+  var b = e.target.closest("[data-go]"); if(!b) return;
+  var g = b.getAttribute("data-go");
+  if(g === "map"){ current = 0; drawMap(); window.scrollTo({ top: el("introCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+  if(g === "send"){ window.scrollTo({ top: el("sendCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+  openStage(+g);
+});
+
+/* ---------- tap or drag helper ---------- */
+function dnd(root, tileSel, dropSel, onDrop){
+  var held = null, drag = null, lastHover = null;
+  function setHeld(t){
+    if(held){ held.classList.remove("held"); held.setAttribute("aria-pressed", "false") }
+    held = t;
+    if(t){ t.classList.add("held"); t.setAttribute("aria-pressed", "true") }
+    root.classList.toggle("holding", !!t);
+  }
+  root.addEventListener("click", function(e){
+    if(drag && drag.done){ drag = null; return }
+    var t = e.target.closest(tileSel);
+    if(t && root.contains(t) && !t.classList.contains("placed")){
+      var inDrop = t.closest(dropSel);
+      if(held && held !== t && inDrop && root.contains(inDrop)){ var h0 = held; setHeld(null); onDrop(h0, inDrop); return }
+      setHeld(held === t ? null : t); return }
+    var d = e.target.closest(dropSel);
+    if(d && root.contains(d) && held){ var hh = held; setHeld(null); onDrop(hh, d) }
+  });
+  root.addEventListener("pointerdown", function(e){
+    var t = e.target.closest(tileSel);
+    if(!t || t.classList.contains("placed") || (e.button && e.button > 0)) return;
+    drag = { t:t, x:e.clientX, y:e.clientY, g:null };
+  });
+  window.addEventListener("pointermove", function(e){
+    if(!drag || drag.done) return;
+    if(!drag.g){
+      if(Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 10) return;
+      drag.g = drag.t.cloneNode(true); drag.g.classList.add("dragghost"); drag.g.classList.remove("held");
+      drag.g.style.width = drag.t.offsetWidth + "px";
+      document.body.appendChild(drag.g); drag.t.classList.add("dragging"); root.classList.add("holding");
+    }
+    drag.g.style.left = (e.clientX - 20) + "px"; drag.g.style.top = (e.clientY - 16) + "px";
+    var u = document.elementFromPoint(e.clientX, e.clientY), d = u && u.closest(dropSel);
+    if(lastHover && lastHover !== d) lastHover.classList.remove("hover");
+    if(d && root.contains(d)){ d.classList.add("hover"); lastHover = d }
+  });
+  function end(e){
+    if(!drag || drag.done) return;
+    if(drag.g){
+      drag.g.remove(); drag.t.classList.remove("dragging");
+      if(lastHover){ lastHover.classList.remove("hover"); lastHover = null }
+      var u = e.type === "pointercancel" ? null : document.elementFromPoint(e.clientX, e.clientY), d = u && u.closest(dropSel), t = drag.t;
+      drag = { done:true }; setTimeout(function(){ if(drag && drag.done) drag = null }, 30);
+      setHeld(null);
+      if(d && root.contains(d)) onDrop(t, d);
+    } else drag = null;
+  }
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+}
+
+/* =========================================================
+   STAGE 1: Storm spotter
+   ========================================================= */
+var BINS = [
+  { id:"ts", n:"Tropical storm", ic:"<svg viewBox='0 0 40 40'><circle cx='20' cy='20' r='17' fill='#ffc247' stroke='#0a2f38' stroke-width='2.5'/><path d='M20 20c0-6 6-8 10-5M20 20c0 6-6 8-10 5' fill='none' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/></svg>" },
+  { id:"hu", n:"Hurricane, typhoon or cyclone", ic:"<svg viewBox='0 0 40 40'><circle cx='20' cy='20' r='17' fill='#ef7724' stroke='#0a2f38' stroke-width='2.5'/><path d='M20 20c0-8 9-11 14-6M20 20c8 0 11 9 6 14M20 20c0 8-9 11-14 6M20 20c-8 0-11-9-6-14' fill='none' stroke='#fff' stroke-width='3' stroke-linecap='round'/><circle cx='20' cy='20' r='3.5' fill='#0a2f38'/></svg>" },
+  { id:"dd", n:"UK deep depression", ic:"<svg viewBox='0 0 40 40'><circle cx='20' cy='20' r='17' fill='#00a6c9' stroke='#0a2f38' stroke-width='2.5'/><text x='13' y='28' font-size='20' font-weight='900' fill='#fff' font-family='Archivo,Arial Black,sans-serif'>L</text></svg>" }
+];
+var CLUES = [
+  { id:"c1", b:"ts", t:"A spinning storm over a warm tropical sea, with winds of 39 to 73 mph" },
+  { id:"c2", b:"ts", t:"Strong enough to get a name, but not yet hurricane strength" },
+  { id:"c3", b:"hu", t:"Winds of 74 mph or more, spinning round a calm eye" },
+  { id:"c4", b:"hu", t:"Called a typhoon near Japan, and a cyclone near India or Australia" },
+  { id:"c5", b:"hu", t:"Can push a storm surge of sea water metres high onto the coast" },
+  { id:"c6", b:"dd", t:"Sweeps in from the Atlantic, mostly in autumn and winter" },
+  { id:"c7", b:"dd", t:"Has a warm front and a cold front, but no eye" },
+  { id:"c8", b:"dd", t:"Named by the Met Office, like Storm Desmond in 2015" }
+];
+var CLUE_HINT = {
+  c1:"Spinning and tropical, but under 74 mph. That is one step below a hurricane.",
+  c2:"Tropical storms get a name once winds reach 39 mph. Hurricanes need 74 mph.",
+  c3:"74 mph is the hurricane line, and the calm eye is a hurricane giveaway.",
+  c4:"Same kind of storm, different name depending on which ocean it is in.",
+  c5:"Storm surges come with the most powerful tropical storms, the hurricanes.",
+  c6:"Storms that come off the Atlantic in autumn and winter are UK depressions.",
+  c7:"Fronts are where warm and cold air meet. That is how UK depressions work.",
+  c8:"The Met Office names the big UK storms. Desmond hit Cumbria in December 2015."
+};
+var SCENE = [
+  { id:"wind", n:"Strong winds", x:520, y:80, d:"Trees snap and roofs lose tiles. Flying objects can hurt people." },
+  { id:"rain", n:"Heavy rain", x:300, y:58, d:"Days of rain soak the ground until it cannot hold any more." },
+  { id:"flood", n:"River flooding", x:180, y:262, d:"The river bursts its banks and water pours into homes and shops." },
+  { id:"surge", n:"Storm surge", x:660, y:262, d:"Wind and low pressure push the sea up over the sea wall." },
+  { id:"power", n:"Power cut", x:424, y:170, d:"Fallen lines and flooded substations leave homes with no electricity." },
+  { id:"slide", n:"Landslide", x:90, y:150, d:"Soaked hillsides can slip, blocking roads." }
+];
+
+function sceneSVG(){
+  var s = "<svg viewBox='0 0 760 340' role='img' aria-label='A coastal town in a storm with six things to spot'>";
+  s += "<defs><linearGradient id='sky1' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3d4f63'/><stop offset='1' stop-color='#7d93a6'/></linearGradient><pattern id='rainp' width='14' height='22' patternUnits='userSpaceOnUse' patternTransform='rotate(18)'><line x1='4' y1='0' x2='4' y2='12' stroke='#cfe8ee' stroke-width='2' opacity='.7'/></pattern></defs>";
+  s += "<rect width='760' height='340' fill='url(#sky1)'/>";
+  // clouds
+  s += "<g class='drift'><ellipse cx='300' cy='50' rx='160' ry='38' fill='#55667a'/><ellipse cx='220' cy='62' rx='90' ry='30' fill='#4a5a6c'/><ellipse cx='560' cy='40' rx='170' ry='34' fill='#5b6d80'/></g>";
+  s += "<rect x='120' y='70' width='560' height='200' fill='url(#rainp)'/>";
+  // hill with landslide
+  s += "<path d='M0 120 Q60 100 150 160 L190 300 L0 300Z' fill='#5f8a4e' stroke='#0a2f38' stroke-width='3'/><path d='M70 128 Q100 150 120 210 L150 260 L95 250 Q85 190 60 140Z' fill='#8a5a33' opacity='.9'/>";
+  // river
+  s += "<path d='M140 300 Q200 250 260 270 T380 300 L380 340 L120 340Z' fill='#5a7f96'/><path d='M120 262 Q200 240 280 262 L300 300 L120 300Z' fill='#6b8fa5' opacity='.85'/>";
+  // houses
+  function house(x, y, c, flood){ var h = "<g><rect x='" + x + "' y='" + y + "' width='60' height='50' fill='" + c + "' stroke='#0a2f38' stroke-width='3'/><path d='M" + (x - 6) + " " + y + " L" + (x + 30) + " " + (y - 30) + " L" + (x + 66) + " " + y + "Z' fill='#a0412d' stroke='#0a2f38' stroke-width='3'/><rect x='" + (x + 10) + "' y='" + (y + 12) + "' width='14' height='14' fill='#ffe9a8' stroke='#0a2f38' stroke-width='2'/><rect x='" + (x + 36) + "' y='" + (y + 22) + "' width='14' height='28' fill='#0a2f38'/></g>"; if(flood) h += "<rect x='" + (x - 10) + "' y='" + (y + 34) + "' width='80' height='18' fill='#6b8fa5' opacity='.85'/>"; return h }
+  s += house(150, 220, "#f3dfb3", true) + house(240, 222, "#ffd877", true) + house(480, 220, "#cfe8ee", false);
+  // power pole fallen
+  s += "<line x1='400' y1='270' x2='400' y2='150' stroke='#5b3a1e' stroke-width='7'/><line x1='384' y1='160' x2='416' y2='160' stroke='#5b3a1e' stroke-width='5'/><path d='M416 160 Q440 190 470 268' fill='none' stroke='#0a2f38' stroke-width='2.5'/><path d='M384 160 Q350 150 330 160' fill='none' stroke='#0a2f38' stroke-width='2.5'/><path d='M462 262l8 6 4-10' fill='none' stroke='#ffc247' stroke-width='3'/>";
+  // tree bending
+  s += "<path d='M560 272 Q565 210 600 160' fill='none' stroke='#5b3a1e' stroke-width='9' stroke-linecap='round'/><g><ellipse cx='620' cy='140' rx='46' ry='26' fill='#4ba36f' stroke='#0a2f38' stroke-width='3' transform='rotate(-25 620 140)'/></g><path d='M650 110 l20 -4 M660 130 l24 -2 M640 92 l18 -8' stroke='#e9f2f4' stroke-width='3' stroke-linecap='round'/><rect x='528' y='184' width='12' height='7' fill='#a0412d' transform='rotate(30 534 188)'/><rect x='548' y='170' width='12' height='7' fill='#a0412d' transform='rotate(-20 554 174)'/>";
+  // sea and wall
+  s += "<rect x='560' y='272' width='200' height='68' fill='#2f6f8f'/><rect x='560' y='262' width='16' height='40' fill='#9aa5b1' stroke='#0a2f38' stroke-width='2'/><path d='M760 250 Q720 230 690 250 T620 246 Q590 238 572 262 L760 272Z' fill='#3f87a8' stroke='#e9f2f4' stroke-width='3'/>";
+  s += "<rect x='0' y='300' width='560' height='40' fill='#6c6f5e'/><rect x='380' y='272' width='180' height='28' fill='#7b7f6c'/>";
+  // hotspots
+  SCENE.forEach(function(h, i){
+    var done = st.s1.scene[h.id];
+    s += "<g class='hot" + (done ? " done" : "") + "' data-h='" + h.id + "' tabindex='0' role='button' aria-label='" + (done ? h.n : "Mystery spot " + (i + 1)) + "'><g class='pz'><circle class='ring' cx='" + h.x + "' cy='" + h.y + "' r='19'/><text class='q' x='" + h.x + "' y='" + h.y + "' dominant-baseline='central' text-anchor='middle' font-size='20' font-weight='900' fill='#0a2f38' font-family='Archivo,Arial Black,sans-serif'>" + (done ? "&#10003;" : "?") + "</text></g>" +
+      (done ? "<text class='lbl svgtext' x='" + h.x + "' y='" + (h.y + 48) + "' text-anchor='middle' font-size='15' font-weight='700' fill='#fff' stroke='#0a2f38' stroke-width='4' paint-order='stroke'>" + h.n + "</text>" : "") + "</g>";
+  });
+  return s + "</svg>";
+}
+
+RENDER[1] = function(b){
+  var S = st.s1;
+  var h = "<p class='lead'>Three big kinds of storm. Sort the clue cards, then go spotting in a storm hit town.</p>";
+  h += "<div class='learn'><div><span class='kicker'>Learn a bit</span><ul><li>A <b>tropical storm</b> spins over a warm tropical sea, with winds of 39 to 73 mph.</li><li>At <b>74 mph</b> it becomes a <b>hurricane</b>. In other oceans the same storm is a <b>typhoon</b> or a <b>cyclone</b>.</li><li>The UK gets <b>deep depressions</b>: big areas of low pressure that blow in from the Atlantic.</li></ul></div>" + namesSVG() + "</div>";
+  h += "<div class='part' id='p1a'><h3>Sort the clue cards</h3><p class='small'>Drag a card into a box, or tap a card and then tap a box.</p><div class='pool' id='cluePool'></div><div class='bins' id='clueBins'></div><div id='fb1a'></div></div>";
+  h += "<div class='part' id='p1b'><h3>Storm town: spot what is happening</h3><p class='small'>Tap a yellow spot, then pick what it shows. There are six to find.</p><div class='scene' id='scene'></div><div id='scenePick'></div><div id='fb1b'></div><div class='found' id='found'></div></div>";
+  b.innerHTML = h;
+  drawClues(); drawScene();
+  dnd(el("p1a"), ".tile", ".bin", function(t, d){
+    var c = CLUES.filter(function(x){ return x.id === t.getAttribute("data-c") })[0], bin = d.getAttribute("data-b");
+    S.binTries++;
+    if(c.b === bin){ S.bins[c.id] = bin; save(); drawClues(); var left = CLUES.length - Object.keys(S.bins).length;
+      setFb("fb1a", "ok", "<b>Yes.</b> " + CLUE_HINT[c.id] + (left ? "" : " <b>All eight sorted. Outrageous.</b>"));
+    } else { save(); setFb("fb1a", "nope", "<b>Not that box.</b> " + CLUE_HINT[c.id] + " Have another go.") }
+  });
+};
+function namesSVG(){
+  return "<svg viewBox='0 0 320 170' role='img' aria-label='World strip: hurricanes in the Atlantic, typhoons in the north west Pacific, cyclones in the Indian Ocean and near Australia'>" +
+    "<rect width='320' height='170' rx='14' fill='#3a86a8'/>" +
+    "<path d='M20 30 q20 -10 40 0 l10 40 q-10 30 -20 20 l-20 -30z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='2'/>" +
+    "<path d='M60 100 q14 10 10 40 l-10 20 l-10 -40z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='2'/>" +
+    "<path d='M120 30 q20 -8 30 10 l-6 30 q-10 40 -18 30 l-10 -40z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='2'/>" +
+    "<path d='M160 26 q60 -10 90 10 l-10 30 q-30 10 -50 30 l-26 -30z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='2'/>" +
+    "<path d='M240 110 q30 -6 40 14 q-10 20 -36 14z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='2'/>" +
+    "<g font-family='Archivo,Arial Black,sans-serif' font-weight='800' font-size='13'><rect x='70' y='54' width='86' height='22' rx='11' fill='#ef7724' stroke='#0a2f38' stroke-width='2'/><text x='113' y='70' text-anchor='middle' fill='#0a2f38'>Hurricane</text>" +
+    "<rect x='232' y='70' width='78' height='22' rx='11' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><text x='271' y='86' text-anchor='middle' fill='#0a2f38'>Typhoon</text>" +
+    "<rect x='150' y='118' width='74' height='22' rx='11' fill='#b98ad0' stroke='#0a2f38' stroke-width='2'/><text x='187' y='134' text-anchor='middle' fill='#0a2f38'>Cyclone</text></g>" +
+    "<text x='12' y='162' font-size='11' fill='#e9f2f4' class='svgtext'>Same storm, three names, depending on the ocean.</text></svg>";
+}
+function drawClues(){
+  var S = st.s1, pool = "", bins = "";
+  if(!drawClues.o) drawClues.o = shuffle(CLUES);
+  drawClues.o.forEach(function(c){ if(!S.bins[c.id]) pool += "<button type='button' class='tile' data-c='" + c.id + "' aria-pressed='false'>" + c.t + "</button>" });
+  el("cluePool").innerHTML = pool || "<span class='small'>All sorted.</span>";
+  BINS.forEach(function(bn){
+    bins += "<div class='bin drop' data-b='" + bn.id + "' role='button' tabindex='0' aria-label='Put it in " + bn.n + "'><span class='bh'>" + bn.ic + bn.n + "</span>";
+    CLUES.forEach(function(c){ if(S.bins[c.id] === bn.id) bins += "<span class='tile placed'>" + c.t + "</span>" });
+    bins += "</div>";
+  });
+  el("clueBins").innerHTML = bins;
+  Array.prototype.forEach.call(el("clueBins").querySelectorAll(".bin"), function(x){ x.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); x.click() } }) });
+}
+var sceneOpen = null;
+function drawScene(){
+  var S = st.s1;
+  el("scene").innerHTML = sceneSVG();
+  el("found").innerHTML = SCENE.filter(function(h){ return S.scene[h.id] }).map(function(h){ return "<span>" + h.n + "</span>" }).join("");
+  Array.prototype.forEach.call(el("scene").querySelectorAll(".hot"), function(g){
+    function open(){ sceneOpen = g.getAttribute("data-h"); var hs = SCENE.filter(function(x){ return x.id === sceneOpen })[0];
+      if(S.scene[sceneOpen]){ el("scenePick").innerHTML = ""; setFb("fb1b", "tell", "<b>" + hs.n + ".</b> " + hs.d); return }
+      el("scenePick").innerHTML = "<p class='small' style='margin:10px 0 0'><b>What is happening at this spot?</b></p><div class='labelpick'>" + shuffle(SCENE).map(function(x){ return "<button type='button' data-l='" + x.id + "'>" + x.n + "</button>" }).join("") + "</div>";
+      el("fb1b").innerHTML = "";
+      Array.prototype.forEach.call(el("scenePick").querySelectorAll("button"), function(bt){ bt.onclick = function(){
+        S.sceneTries++;
+        var l = bt.getAttribute("data-l");
+        if(l === sceneOpen){ S.scene[l] = 1; save(); drawScene(); el("scenePick").innerHTML = "";
+          var n = Object.keys(S.scene).length;
+          setFb("fb1b", "ok", "<b>" + hs.n + ".</b> " + hs.d + (n === SCENE.length ? " <b>All six spotted.</b> Those are the things a weather hazard does to a place." : ""));
+        } else { save(); var other = SCENE.filter(function(x){ return x.id === l })[0];
+          setFb("fb1b", "nope", "<b>Look again.</b> " + other.n + " is somewhere else in the picture. Clue for this spot: " + hintFor(sceneOpen)) }
+      } });
+    }
+    g.addEventListener("click", open);
+    g.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open() } });
+  });
+}
+function hintFor(id){ return { wind:"look at the bent tree and the flying tiles.", rain:"look up at the clouds.", flood:"the houses are standing in water from the river.", surge:"the sea is coming over the wall.", power:"look at the pole and its wires.", slide:"look at the hillside." }[id] }
+
+/* =========================================================
+   STAGE 2: Storm builder
+   ========================================================= */
+var SB = { sst:24, p:1018, hum:50, shear:40, lat:2 };
+var SBprev = null;
+function sbEval(c){
+  var ok = { sst: c.sst >= 26.5, p: c.p <= 1010, hum: c.hum >= 70, shear: c.shear <= 20, lat: c.lat >= 5 && c.lat <= 30 };
+  var n = 0; for(var k in ok) if(ok[k]) n++;
+  var wind = 0, cat = -1, name = "", pic = "";
+  if(n === 5){
+    var f = clamp((c.sst - 26.5) / 5.5, 0, 1) * .65 + clamp((c.hum - 70) / 30, 0, 1) * .2 + clamp((1010 - c.p) / 10, 0, 1) * .15;
+    wind = Math.round((40 + f * 130) * (1 - c.shear / 100));
+    if(wind < 39) wind = 39;
+    cat = wind >= 157 ? 5 : wind >= 130 ? 4 : wind >= 111 ? 3 : wind >= 96 ? 2 : wind >= 74 ? 1 : 0;
+    name = cat === 0 ? "Tropical storm" : "Category " + cat + " hurricane";
+    pic = "storm";
+  } else {
+    if(!ok.p) pic = "clear"; else if(!ok.sst || !ok.hum) pic = "puffs"; else if(!ok.lat) pic = "cluster"; else if(!ok.shear) pic = "sheared"; else pic = "puffs";
+    name = n === 4 ? "Thunderstorms, but no tropical storm" : n >= 2 ? "Some clouds and showers" : "Nothing much";
+    if(!ok.p && n < 4) name = "Calm, settled weather";
+  }
+  var cp = cat >= 0 ? Math.round(1006 - (wind - 39) * .72) : null;
+  return { ok:ok, n:n, wind:wind, cat:cat, name:name, pic:pic, cp:cp };
+}
+function spiralArms(R, arms, tight){
+  var s = "";
+  for(var a = 0; a < arms; a++){
+    var d = "", th0 = a * Math.PI * 2 / arms;
+    for(var i = 0; i <= 40; i++){
+      var r = 18 + (R - 18) * (i / 40), th = th0 + tight * Math.log(r / 18);
+      var x = 180 + r * Math.cos(th), y = 180 - r * Math.sin(th);
+      d += (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+    }
+    s += "<path d='" + d + "' fill='none' stroke='#fff' stroke-width='" + (12 + R / 12) + "' stroke-linecap='round' opacity='.78'/>";
+  }
+  return s;
+}
+function sbSVG(c, r){
+  var warm = clamp((c.sst - 20) / 12, 0, 1);
+  var sea = "rgb(" + Math.round(30 + warm * 40) + "," + Math.round(90 + warm * 60) + "," + Math.round(150 - warm * 30) + ")";
+  var s = "<svg viewBox='0 0 360 360' role='img' aria-label='" + esc(r.name) + "'><rect width='360' height='360' fill='" + sea + "'/>";
+  for(var i = 0; i < 6; i++) s += "<path d='M" + (i * 70 - 20) + " " + (40 + i * 55) + " q20 -8 40 0 t40 0' fill='none' stroke='rgba(255,255,255,.18)' stroke-width='3'/>";
+  if(r.pic === "clear"){
+    s += "<text x='180' y='200' text-anchor='middle' font-size='90' font-weight='900' fill='rgba(255,255,255,.22)' font-family='Archivo,Arial Black,sans-serif'>H</text>";
+    s += "<g class='bob'><ellipse cx='90' cy='90' rx='22' ry='12' fill='#fff' opacity='.7'/><ellipse cx='270' cy='280' rx='18' ry='10' fill='#fff' opacity='.6'/></g>";
+    s += "<g stroke='#fff' stroke-width='3' opacity='.6' fill='none'><path d='M180 70v40m-8 -10l8 10 8 -10'/></g>";
+  } else if(r.pic === "puffs"){
+    var nP = Math.round(3 + c.hum / 15);
+    for(i = 0; i < nP; i++){ var x = 40 + (i * 83) % 290, y = 50 + (i * 131) % 270; s += "<g class='bob'><ellipse cx='" + x + "' cy='" + y + "' rx='" + (14 + c.hum / 8) + "' ry='" + (9 + c.hum / 14) + "' fill='#fff' opacity='.75'/></g>" }
+  } else if(r.pic === "cluster" || r.pic === "sheared"){
+    var g = "<g" + (r.pic === "sheared" ? " class='drift'" : "") + ">";
+    var pts = [[180,180,60],[140,160,40],[220,200,44],[170,230,36],[210,140,34],[130,210,30]];
+    pts.forEach(function(p){ g += "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='" + p[2] + "' fill='#fff' opacity='.82'/>" });
+    if(r.pic === "sheared") for(i = 0; i < 5; i++) g += "<path d='M" + (200 + i * 6) + " " + (130 + i * 22) + " q60 -10 130 -4' stroke='#fff' stroke-width='" + (14 - i) + "' stroke-linecap='round' opacity='.55' fill='none'/>";
+    g += "</g>";
+    s += g;
+    if(r.pic === "cluster") s += "<text x='180' y='330' text-anchor='middle' font-size='15' fill='#fff' class='svgtext'>Big thunderstorms, but no spin</text>";
+    else s += "<text x='180' y='330' text-anchor='middle' font-size='15' fill='#fff' class='svgtext'>The tops are being blown away</text>";
+  } else {
+    var R = 70 + r.wind * .62, arms = r.cat >= 3 ? 4 : 3, dur = Math.max(1.6, 11 - r.wind / 18);
+    s += "<g class='spin' style='--dur:" + dur.toFixed(1) + "s'>";
+    s += "<circle cx='180' cy='180' r='" + (R * .55) + "' fill='#fff' opacity='.55'/>" + spiralArms(R, arms, 1.6);
+    s += "</g>";
+    if(r.cat >= 1){ var er = clamp(18 - r.cat * 2, 8, 16); s += "<circle cx='180' cy='180' r='" + (er + 8) + "' fill='#fff'/><circle cx='180' cy='180' r='" + er + "' fill='" + sea + "' stroke='#cfe8ee' stroke-width='2'/>" }
+    else s += "<circle cx='180' cy='180' r='26' fill='#fff' opacity='.9'/>";
+  }
+  return s + "</svg>";
+}
+var CATCOL = ["#00a6c9", "#ffc247", "#f0a80f", "#ef7724", "#e2553e", "#7b4b8f"];
+RENDER[2] = function(b){
+  var h = "<p class='lead'>You control the weather. Slide the conditions and watch what grows over the ocean. A storm only forms when <b>everything</b> is right.</p>";
+  h += "<div class='learn'><div><span class='kicker'>Learn a bit</span><ul><li>Tropical storms need sea water of about <b>26.5 " + "&deg;C</b> or warmer. That is their fuel.</li><li>They need <b>low pressure</b>, where air is rising, to get going.</li><li>Lots of <b>moisture</b> (water vapour) in the air, so huge clouds can build.</li><li><b>Low wind shear</b>: winds higher up must not be too different, or they rip the storm apart.</li><li>At least about <b>5 degrees from the equator</b>, so the spin of the Earth (the <b>Coriolis effect</b>) can make the storm turn.</li></ul></div>" + ingredientsSVG() + "</div>";
+  h += "<div class='lab'><div><div class='screen'><span class='tag'>Satellite view</span><div id='sbPic'></div></div><div class='gauge' id='sbGauge'></div></div><div>";
+  [["sst", "Sea surface temperature", 20, 32, .5, "How warm the top of the ocean is"],
+   ["p", "Air pressure", 1000, 1025, 1, "Low pressure means air is rising"],
+   ["hum", "Moisture in the air", 20, 100, 5, "How much water vapour there is"],
+   ["shear", "Wind shear", 0, 60, 5, "Difference between low winds and winds high up"],
+   ["lat", "Distance from the equator", 0, 35, 1, "In degrees of latitude, north"]].forEach(function(q){
+    h += "<div class='slide'><label for='sb_" + q[0] + "'>" + q[1] + " <span id='sbv_" + q[0] + "'></span></label><input type='range' id='sb_" + q[0] + "' min='" + q[2] + "' max='" + q[3] + "' step='" + q[4] + "' value='" + SB[q[0]] + "'><small>" + q[5] + "</small></div>";
+  });
+  h += "<ul class='why' id='sbWhy'></ul></div></div>";
+  h += "<div class='part'><h3>Missions, if you fancy them</h3><div class='missions' id='sbMis'></div><div id='fb2'></div></div>";
+  b.innerHTML = h;
+  ["sst", "p", "hum", "shear", "lat"].forEach(function(k){ el("sb_" + k).addEventListener("input", function(){ SB[k] = parseFloat(this.value); sbUpdate(true, k) }) });
+  SBprev = null; sbUpdate(false);
+};
+function ingredientsSVG(){
+  return "<svg viewBox='0 0 320 180' role='img' aria-label='Five ingredients for a tropical storm'>" +
+    "<rect width='320' height='180' rx='14' fill='#fff'/>" +
+    "<g font-size='11' text-anchor='middle' class='svgtext' fill='#0a2f38'>" +
+    "<circle cx='40' cy='50' r='26' fill='#ef7724' stroke='#0a2f38' stroke-width='2.5'/><text x='40' y='55' font-size='13' font-weight='700' fill='#fff'>26.5&#176;</text><text x='40' y='94'>Warm sea</text>" +
+    "<circle cx='110' cy='50' r='26' fill='#00a6c9' stroke='#0a2f38' stroke-width='2.5'/><text x='110' y='58' font-size='22' font-weight='900' fill='#fff' font-family='Archivo,Arial Black,sans-serif'>L</text><text x='110' y='94'>Low pressure</text>" +
+    "<circle cx='180' cy='50' r='26' fill='#cfe8ee' stroke='#0a2f38' stroke-width='2.5'/><path d='M180 36c-8 12-10 16-10 20a10 10 0 0 0 20 0c0-4-2-8-10-20z' fill='#007291'/><text x='180' y='94'>Moist air</text>" +
+    "<circle cx='250' cy='50' r='26' fill='#ffc247' stroke='#0a2f38' stroke-width='2.5'/><path d='M234 44h28M234 56h28' stroke='#0a2f38' stroke-width='3'/><text x='250' y='94'>Low wind shear</text>" +
+    "<circle cx='110' cy='136' r='26' fill='#b98ad0' stroke='#0a2f38' stroke-width='2.5'/><path d='M98 136a12 12 0 1 1 12 12' fill='none' stroke='#fff' stroke-width='3.5'/><path d='M106 144l4 4-4 4' fill='none' stroke='#fff' stroke-width='3'/><text x='110' y='176'>Earth's spin</text>" +
+    "<text x='220' y='130' font-size='13' font-weight='700'>All five together</text><text x='220' y='148' font-size='13' font-weight='700'>= a spinning storm</text></g></svg>";
+}
+var WHY = {
+  sst:[ "Sea is warm enough, 26.5 " + DEG + " or more. Plenty of fuel.", "Sea is too cool. Below about 26.5 " + DEG + " there is not enough warm, moist air to feed a storm." ],
+  p:[ "Low pressure: warm air is rising, which pulls more air in.", "Pressure is high, so air is sinking. Sinking air stops clouds growing." ],
+  hum:[ "Moist air: lots of water vapour to make huge clouds.", "Air is too dry. Dry air chokes the thunderclouds." ],
+  shear:[ "Low wind shear: the storm can grow tall without being torn apart.", "Too much wind shear. Strong winds high up blow the top off the storm." ],
+  lat:[ "Far enough from the equator for the Earth's spin to turn the storm.", "" ]
+};
+function sbUpdate(user, changed){
+  var c = SB, r = sbEval(c), S = st.s2;
+  el("sbv_sst").textContent = c.sst.toFixed(1) + " " + DEG;
+  el("sbv_p").textContent = c.p + " hPa" + (c.p <= 1010 ? " (low)" : " (high)");
+  el("sbv_hum").textContent = c.hum + "%";
+  el("sbv_shear").textContent = c.shear + " mph" + (c.shear <= 20 ? " (low)" : c.shear <= 35 ? " (medium)" : " (high)");
+  el("sbv_lat").textContent = c.lat + "\u00b0 N";
+  el("sbPic").innerHTML = sbSVG(c, r);
+  var latMsg = c.lat < 5 ? "Too close to the equator. The Earth's spin is too weak here to make a storm turn." : "More than about 30 degrees from the equator. Storms very rarely form this far out, where the sea is usually cooler.";
+  var w = "";
+  ["sst", "p", "hum", "shear", "lat"].forEach(function(k){ var y = r.ok[k]; w += "<li class='" + (y ? "y" : "n") + "'><i>" + (y ? "&#10003;" : "&times;") + "</i><span>" + (y ? WHY[k][0] : (k === "lat" ? latMsg : WHY[k][1])) + "</span></li>" });
+  el("sbWhy").innerHTML = w;
+  var lad = "";
+  for(var i = 0; i <= 5; i++) lad += "<i class='" + (r.cat >= i ? "on" : "") + "' style='--c:" + CATCOL[i] + "'></i>";
+  el("sbGauge").innerHTML = "<div class='big'>" + r.name + "</div>" + (r.cat >= 0 ? "<div class='small'>Winds about <b>" + r.wind + " mph</b>. Pressure in the middle about <b>" + r.cp + " hPa</b>." + (r.cat >= 1 ? " An eye has formed." : "") + "</div>" : "<div class='small'>" + r.n + " of 5 conditions are right.</div>") +
+    "<div class='ladder'>" + lad + "</div><div class='ladlab'><span>Storm</span><span>Cat 1</span><span>Cat 3</span><span>Cat 5</span></div>";
+  if(user){
+    S.moves++;
+    if(r.cat === 0) S.missions.ts = 1;
+    if(r.cat >= 1) S.missions.hu = 1;
+    if(r.cat === 5) S.missions.c5 = 1;
+    if(r.cat > S.best) S.best = r.cat;
+    if(SBprev && SBprev.cat >= 0 && r.cat < 0 && changed){
+      var names = { sst:"sea temperature", p:"air pressure", hum:"moisture", shear:"wind shear", lat:"distance from the equator" };
+      S.missions.br = 1; if(S.broke.indexOf(names[changed]) < 0) S.broke.push(names[changed]);
+      setFb("fb2", "tell", "<b>Storm gone.</b> You broke it by changing the " + names[changed] + ". " + (r.ok[changed] ? "" : (changed === "lat" ? latMsg : WHY[changed][1])));
+    } else if(SBprev && SBprev.cat < 0 && r.cat >= 0){
+      setFb("fb2", "ok", "<b>A storm is born.</b> All five conditions are working together. Now see how strong you can make it.");
+    } else if(SBprev && r.cat === 5 && SBprev.cat < 5){
+      setFb("fb2", "ok", "<b>Category 5.</b> Winds of 157 mph or more. That needs very warm sea and very moist air.");
+    }
+    save();
+  }
+  SBprev = r;
+  var M = [["ts", "Make a tropical storm", "winds 39 to 73 mph"], ["hu", "Make a hurricane with an eye", "74 mph or more"], ["c5", "Make a Category 5", "the very strongest"], ["br", "Break a storm", "change one thing and make it fall apart"]];
+  el("sbMis").innerHTML = M.map(function(m){ return "<div class='mission" + (S.missions[m[0]] ? " done" : "") + "'>" + (S.missions[m[0]] ? "&#10003; " : "") + "<b>" + m[1] + "</b><br><span class='small'>" + m[2] + "</span></div>" }).join("");
+}
+
+/* =========================================================
+   STAGE 3: Inside a storm
+   ========================================================= */
+var STEPS = [
+  { id:"a", t:"The sun heats the ocean to 26.5 " + DEG + " or more, and warm water evaporates into the air above.", lit:["sea"] },
+  { id:"b", t:"Warm, moist air rises quickly, leaving low pressure at the surface.", lit:["sea", "rise"] },
+  { id:"c", t:"The rising air cools, and water vapour condenses into huge thunderclouds.", lit:["rise", "cloud"] },
+  { id:"d", t:"Condensing releases heat. This warms the air, so it rises even faster, like adding fuel.", lit:["cloud", "heat"] },
+  { id:"e", t:"Pressure drops even lower, so more air rushes in across the sea. The Earth's spin makes it spiral.", lit:["inflow", "low"] },
+  { id:"f", t:"Cool air sinks in the middle, making a calm eye. The strongest winds whirl round it in the eyewall.", lit:["eye", "cloud", "out"] }
+];
+var PINS = [
+  { id:"eye", n:"Eye: calm, sinking air", x:320, y:150 },
+  { id:"wall", n:"Eyewall: strongest winds and heaviest rain", x:282, y:200 },
+  { id:"in", n:"Warm, moist air spirals in", x:110, y:262 },
+  { id:"up", n:"Air rises, cools and condenses", x:410, y:180 },
+  { id:"out", n:"Air flows out at the top", x:520, y:40 },
+  { id:"sea", n:"Warm ocean, the fuel", x:520, y:305 }
+];
+function crossSVG(){
+  var s = "<svg viewBox='0 0 640 340' role='img' aria-label='Cross section through a tropical storm' class='dg' id='dg'>";
+  s += "<defs><marker id='ar' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0L10 5L0 10z' fill='#0a2f38'/></marker><marker id='arR' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0L10 5L0 10z' fill='#e2553e'/></marker><marker id='arB' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0L10 5L0 10z' fill='#2d6fd6'/></marker><linearGradient id='seag' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ef7724'/><stop offset='1' stop-color='#b84a0c'/></linearGradient></defs>";
+  s += "<g class='part-g' data-p='sea'><rect x='0' y='285' width='640' height='55' fill='url(#seag)'/><path d='M0 288 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0' fill='none' stroke='#ffd877' stroke-width='3'/><g stroke='#fff' stroke-width='2' opacity='.8'><path d='M60 282 q4 -10 0 -18 q-4 -8 0 -16' fill='none'/><path d='M560 282 q4 -10 0 -18 q-4 -8 0 -16' fill='none'/><path d='M150 282 q4 -10 0 -18' fill='none'/></g></g>";
+  s += "<g class='part-g' data-p='cloud'><path d='M190 285 C170 200 170 110 200 60 C150 50 110 40 70 52 C120 30 230 20 290 40 C300 110 290 210 290 285Z' fill='#f4f8fa' stroke='#0a2f38' stroke-width='3'/><path d='M450 285 C470 200 470 110 440 60 C490 50 530 40 570 52 C520 30 410 20 350 40 C340 110 350 210 350 285Z' fill='#f4f8fa' stroke='#0a2f38' stroke-width='3'/><path d='M60 285 c0 -30 10 -50 30 -60 c20 10 26 30 26 60z' fill='#e6eef2' stroke='#0a2f38' stroke-width='2.5'/><path d='M524 285 c0 -30 10 -50 30 -60 c20 10 26 30 26 60z' fill='#e6eef2' stroke='#0a2f38' stroke-width='2.5'/><g stroke='#5a7f96' stroke-width='2' opacity='.8'><line x1='210' y1='240' x2='204' y2='280'/><line x1='240' y1='240' x2='234' y2='280'/><line x1='270' y1='240' x2='264' y2='280'/><line x1='370' y1='240' x2='364' y2='280'/><line x1='400' y1='240' x2='394' y2='280'/><line x1='430' y1='240' x2='424' y2='280'/></g></g>";
+  s += "<g class='part-g' data-p='heat'><g fill='#ef7724' stroke='#0a2f38' stroke-width='1.5'><path d='M236 150l6 -14 6 14 -6 -4z'/><path d='M396 150l6 -14 6 14 -6 -4z'/><path d='M226 196l6 -14 6 14 -6 -4z'/><path d='M410 196l6 -14 6 14 -6 -4z'/></g><text x='232' y='222' text-anchor='middle' font-size='13' font-weight='700' fill='#b84a0c' stroke='#fff' stroke-width='3' paint-order='stroke' class='svgtext'>heat released</text></g>";
+  s += "<g class='part-g' data-p='rise'><path d='M250 270 V90' stroke='#e2553e' stroke-width='5' marker-end='url(#arR)'/><path d='M390 270 V90' stroke='#e2553e' stroke-width='5' marker-end='url(#arR)'/></g>";
+  s += "<g class='part-g' data-p='inflow'><path d='M30 262 H170' stroke='#e2553e' stroke-width='5' marker-end='url(#arR)'/><path d='M610 262 H470' stroke='#e2553e' stroke-width='5' marker-end='url(#arR)'/></g>";
+  s += "<g class='part-g' data-p='low'><text x='320' y='276' text-anchor='middle' font-size='26' font-weight='900' fill='#0a2f38' font-family='Archivo,Arial Black,sans-serif'>L</text></g>";
+  s += "<g class='part-g' data-p='eye'><path d='M320 70 V236' stroke='#2d6fd6' stroke-width='5' stroke-dasharray='10 6' marker-end='url(#arB)'/></g>";
+  s += "<g class='part-g' data-p='out'><path d='M250 34 Q160 14 80 34' fill='none' stroke='#0a2f38' stroke-width='3.5' marker-end='url(#ar)'/><path d='M390 34 Q480 14 560 34' fill='none' stroke='#0a2f38' stroke-width='3.5' marker-end='url(#ar)'/></g>";
+  PINS.forEach(function(p, i){ var d = st.s3.pins[p.id]; s += "<g class='pin drop" + (d ? " done" : "") + "' data-pin='" + p.id + "' tabindex='0' role='button' aria-label='Label spot " + (i + 1) + (d ? ", " + p.n : "") + "'><circle cx='" + p.x + "' cy='" + p.y + "' r='15'/><text x='" + p.x + "' y='" + p.y + "' dominant-baseline='central' text-anchor='middle' font-size='16' class='svgtext'>" + (d ? "&#10003;" : (i + 1)) + "</text></g>" });
+  return s + "</svg>";
+}
+RENDER[3] = function(b){
+  var S = st.s3;
+  if(!S.order) S.order = shuffle(STEPS.map(function(x){ return x.id }));
+  var h = "<p class='lead'>Here is a slice through a tropical storm, as if you cut it in half. Two things to try: put the story in order, then label the diagram.</p>";
+  h += "<div class='diagram' id='dgWrap'>" + crossSVG() + "</div><p class='steptext' id='stepText' aria-live='polite'></p>";
+  h += "<div class='row'><button type='button' class='btn btn-orange sm' id='playBtn'>Play the diagram</button><span class='small'>Watch how a storm grows, one step at a time.</span></div>";
+  h += "<div class='part'><h3>Put the story in order</h3><p class='small'>Use the arrows to move a step up or down, or tap two steps to swap them. Then check.</p><ol class='olist' id='olist'></ol><div class='row'><button class='btn sm' type='button' id='ordChk'>Check my order</button><button class='btn ghost sm' type='button' id='ordShow'>Show me</button></div><div id='fb3a'></div></div>";
+  h += "<div class='part' id='p3b'><h3>Label the diagram</h3><p class='small'>Drag a label onto a numbered purple spot, or tap a label then tap a spot.</p><div class='pool' id='pinPool'></div><div id='fb3b'></div><div class='pinlabels' id='pinDone'></div></div>";
+  b.innerHTML = h;
+  drawOrder(); drawPins();
+  el("ordChk").onclick = function(){
+    S.orderTries++;
+    var right = 0; S.order.forEach(function(id, i){ if(STEPS[i].id === id) right++ });
+    drawOrder(true);
+    if(right === STEPS.length){ S.orderDone = true; save(); setFb("fb3a", "ok", "<b>Spot on.</b> Did you notice the loop? Warm air rises, condenses, releases heat, so more air rises. That is why storms keep growing while they are over warm water.") }
+    else { save(); setFb("fb3a", "nope", "<b>" + right + " of 6 are in the right place</b> (the green ones). Think: what has to happen first before air can rise? Have another go.") }
+  };
+  el("ordShow").onclick = function(){ S.order = STEPS.map(function(x){ return x.id }); save(); drawOrder(true); setFb("fb3a", "tell", "Here is the order. Press <b>Play the diagram</b> to watch it happen.") };
+  el("playBtn").onclick = playDiagram;
+  dnd(el("stageBody"), "#pinPool .tile", ".pin", function(t, d){
+    var want = d.getAttribute("data-pin"), got = t.getAttribute("data-l");
+    S.pinTries++;
+    var p = PINS.filter(function(x){ return x.id === got })[0];
+    if(want === got){ S.pins[got] = 1; save(); refreshDiagram(); drawPins(); setFb("fb3b", "ok", "<b>Yes.</b> " + p.n + "." + (Object.keys(S.pins).length === PINS.length ? " Fully labelled. You could use this diagram to explain a storm to anyone." : "")) }
+    else { save(); setFb("fb3b", "nope", "<b>Not quite there.</b> Look for where " + pinHint(got) + ".") }
+  });
+};
+function pinHint(id){ return { eye:"the blue sinking arrow runs down the middle", wall:"the inside edge of the tall cloud wall hugs the calm eye", "in":"air moves along the sea surface towards the storm", up:"the red arrow goes straight up inside the cloud", out:"the arrows spread out at the very top", sea:"the orange water is" }[id] }
+function refreshDiagram(){ var w = el("dgWrap"); if(w) w.innerHTML = crossSVG() }
+var sel3 = null;
+function drawOrder(mark){
+  var S = st.s3, h = "";
+  S.order.forEach(function(id, i){ var s = STEPS.filter(function(x){ return x.id === id })[0];
+    var good = mark && STEPS[i].id === id;
+    h += "<li class='" + (good ? "good" : "") + (sel3 === i ? " sel" : "") + "' data-i='" + i + "'><span class='tx' role='button' tabindex='0'>" + s.t + "</span><span class='mv'><button type='button' data-u='" + i + "' aria-label='Move up'" + (i === 0 ? " disabled" : "") + ">&#9650;</button><button type='button' data-d='" + i + "' aria-label='Move down'" + (i === S.order.length - 1 ? " disabled" : "") + ">&#9660;</button></span></li>";
+  });
+  el("olist").innerHTML = h;
+  el("olist").onclick = function(e){
+    var u = e.target.closest("[data-u]"), d = e.target.closest("[data-d]"), tx = e.target.closest(".tx");
+    function sw(a, c){ var t = S.order[a]; S.order[a] = S.order[c]; S.order[c] = t; save(); drawOrder() }
+    if(u){ var i = +u.getAttribute("data-u"); sel3 = null; sw(i, i - 1); return }
+    if(d){ var j = +d.getAttribute("data-d"); sel3 = null; sw(j, j + 1); return }
+    if(tx){ var k = +tx.parentNode.getAttribute("data-i"); if(sel3 === null){ sel3 = k; drawOrder() } else { var a = sel3; sel3 = null; if(a !== k) sw(a, k); else drawOrder() } }
+  };
+  Array.prototype.forEach.call(el("olist").querySelectorAll(".tx"), function(x){ x.onkeydown = function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); x.click() } } });
+}
+function drawPins(){
+  var S = st.s3;
+  if(!drawPins.o) drawPins.o = shuffle(PINS);
+  el("pinPool").innerHTML = drawPins.o.filter(function(p){ return !S.pins[p.id] }).map(function(p){ return "<button type='button' class='tile' data-l='" + p.id + "' aria-pressed='false'>" + p.n + "</button>" }).join("") || "<span class='small'>All labels placed.</span>";
+  el("pinDone").innerHTML = PINS.map(function(p, i){ return S.pins[p.id] ? "<div class='done'><b>" + (i + 1) + ".</b> " + p.n + "</div>" : "" }).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("#dg .pin"), function(x){ x.onkeydown = function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); x.dispatchEvent(new MouseEvent("click", { bubbles:true })) } } });
+}
+var playT = null;
+function playDiagram(){
+  var S = st.s3; S.played = true; save();
+  var dg = el("dg"); if(!dg) return;
+  clearTimeout(playT);
+  var i = 0;
+  function step(){
+    if(!el("dg")) return;
+    dg = el("dg");
+    if(i >= STEPS.length){ dg.classList.remove("playing"); el("stepText").textContent = "And the storm keeps growing while it stays over warm water."; return }
+    dg.classList.add("playing");
+    Array.prototype.forEach.call(dg.querySelectorAll(".part-g"), function(g){ g.classList.toggle("lit", STEPS[i].lit.indexOf(g.getAttribute("data-p")) >= 0) });
+    el("stepText").textContent = (i + 1) + ". " + STEPS[i].t;
+    i++; playT = setTimeout(step, reduce ? 3200 : 2600);
+  }
+  step();
+}
+
+/* =========================================================
+   Maps: shared land shapes (lon, lat)
+   ========================================================= */
+var LAND = {
+  na:[[-100,65],[-68,65],[-64,60],[-61.5,56],[-57,52],[-57.2,51.4],[-60,50.2],[-64,50.2],[-66.5,49.2],[-64.5,48.9],[-64.3,48.4],[-65,47.9],[-64.8,47],[-64,46.2],[-61.5,45.7],[-60,46.2],[-60.2,45.6],[-63.5,44.6],[-65.7,43.6],[-66.2,44.4],[-67,44.8],[-68.5,44.2],[-70,43.6],[-70.5,41.8],[-74,40.6],[-74.2,39.5],[-75.5,38],[-76.3,37],[-75.5,35.2],[-77.5,34.2],[-79,33.2],[-81,31.8],[-81.4,30],[-80.5,28],[-80.1,26],[-80.4,25.2],[-81.2,25.3],[-82.5,27.5],[-82.7,28.8],[-84,30.1],[-86,30.4],[-88,30.4],[-89.3,30.2],[-89.2,29.2],[-90.5,29.1],[-92,29.6],[-94,29.6],[-95.5,28.7],[-97.2,27.6],[-97.5,25.5],[-97.8,22.5],[-97,20.5],[-96,19],[-94.5,18.2],[-92.5,18.6],[-91,18.8],[-90.5,20.5],[-90,21.2],[-87.5,21.5],[-86.8,21],[-87.5,19.5],[-88.2,17.5],[-88.5,16],[-86,15.9],[-83.3,15],[-83.6,13],[-83.7,11],[-82.3,9.5],[-81.5,9],[-79.5,9.5],[-77.5,8.6],[-76.5,9.4],[-75.5,10.6],[-73.5,11.3],[-71.6,12.3],[-71,11],[-70,11.6],[-68,10.6],[-64.5,10.3],[-62,10.6],[-61,9],[-59.8,8.3],[-57.5,6],[-54,5.8],[-52,5],[-51,4],[-50,1.8],[-49.5,0],[-80,0],[-80.5,1.5],[-78.8,1.8],[-77.5,4],[-77.4,7],[-78.5,8.5],[-80,7.4],[-82,8.2],[-84,9.5],[-85.7,11],[-87.5,13],[-91,13.9],[-93,15.5],[-95,16],[-97,15.8],[-100,17]],
+  nf:[[-59.4,47.6],[-56,51.6],[-55.4,51.5],[-55.6,49.5],[-53,48.5],[-52.7,47.5],[-53.5,46.6],[-56,47.6]],
+  cuba:[[-84.9,21.9],[-84,22.7],[-82,23.2],[-80,23.1],[-77.5,21.8],[-75.5,21.1],[-74.2,20.2],[-75.5,19.9],[-77.7,19.9],[-78,20.7],[-80.5,21.8],[-82,22.1],[-84,21.8]],
+  hisp:[[-74.4,19.8],[-73,19.9],[-71.5,19.9],[-70,19.7],[-68.4,18.6],[-68.8,18.2],[-70.5,18.2],[-71.5,17.6],[-73,18.2],[-74.4,18.4],[-72.8,18.6]],
+  jam:[[-78.3,18.4],[-77,18.5],[-76.2,18],[-77.2,17.8],[-78.2,18.2]],
+  pr:[[-67.2,18.5],[-65.6,18.4],[-65.6,18],[-67.2,18]],
+  af:[[-5.5,35.9],[-6.3,35.5],[-6.9,34],[-9.6,32.5],[-9.8,30.5],[-11.5,28.2],[-13.2,27.3],[-14.5,26],[-16,24],[-17,21.5],[-16.2,19.5],[-16.5,17],[-17.5,14.7],[-16.8,13.5],[-16.7,12.3],[-15.2,11.2],[-13.5,9.6],[-13.2,8.4],[-11.5,6.9],[-9.5,5.5],[-7.5,4.4],[-5,5.1],[-2,4.8],[1,6],[3.5,6.4],[5,5.8],[6,4.3],[8.5,4.5],[9.5,3.8],[9.8,2.5],[9.6,1],[10,0],[10,37],[9.8,37.3],[8.5,36.9],[6.3,37],[3,36.8],[0,35.9],[-2,35.1],[-3.8,35.2],[-5.3,35.9]],
+  eu:[[10,65],[10,63.8],[8,63.3],[5.4,62.3],[5,61],[5.2,59.5],[6,58.4],[7.5,58],[8.1,58.3],[8.2,56.9],[8.1,55.6],[8.6,54.9],[8.9,53.9],[7,53.6],[5.5,53.4],[4.7,52.9],[4,51.9],[3.4,51.4],[2.5,51.1],[1.6,50.8],[1.6,50.2],[0.2,49.7],[-1.2,49.6],[-1.6,49.7],[-1.5,48.7],[-3,48.8],[-4.7,48.4],[-4.3,47.8],[-2.5,47.3],[-2.1,46.8],[-1.2,46.1],[-1.3,44.6],[-1.6,43.4],[-3.8,43.4],[-8,43.7],[-9.3,43],[-8.9,42],[-8.9,41],[-9.5,39.3],[-9.2,38.6],[-8.9,37.9],[-8.8,37],[-7.4,37.2],[-6.2,36.4],[-5.6,36],[-4.4,36.7],[-2.2,36.7],[-0.7,37.6],[0.2,38.8],[-0.3,39.5],[0.9,41],[3.2,41.9],[3.1,43.1],[4.7,43.4],[6.5,43.1],[7.6,43.8],[8.8,44.4],[10,44]],
+  gb:[[-5.7,50.05],[-5,50.15],[-4.2,50.35],[-3.4,50.6],[-2.4,50.6],[-1.3,50.75],[0.2,50.75],[1.4,51.15],[0.9,51.6],[1.7,52.4],[1.7,52.75],[0.4,52.95],[0.3,53.5],[-0.1,54.1],[-0.6,54.5],[-1.3,54.9],[-1.6,55.6],[-2.1,55.9],[-3.1,56.05],[-2.6,56.3],[-2.3,56.8],[-1.8,57.5],[-2,57.7],[-3.3,57.7],[-4.1,57.6],[-3.1,58.6],[-4.4,58.55],[-5,58.6],[-5.3,58.2],[-5.7,57.6],[-5.6,57],[-6.2,56.6],[-5.6,56.3],[-5.8,55.5],[-5.1,55],[-5.2,54.6],[-4.4,54.8],[-3.6,54.9],[-3.4,54.4],[-3.2,54.1],[-2.9,53.8],[-3.1,53.4],[-3.6,53.3],[-4.6,53.3],[-4.2,52.9],[-4.1,52.3],[-4.7,52.1],[-5.2,51.8],[-4.4,51.6],[-3.4,51.4],[-2.7,51.55],[-3.1,51.2],[-4.2,51.2],[-4.6,50.9],[-5.2,50.5]],
+  ie:[[-6,52.1],[-6.2,52.9],[-6.1,53.6],[-6.4,54],[-5.6,54.4],[-5.8,54.8],[-6.2,55.2],[-7.4,55.3],[-8.3,55.1],[-8.6,54.6],[-10,54.2],[-9.9,53.5],[-9.3,53.2],[-9.9,52.6],[-10.4,51.9],[-9.7,51.5],[-8.5,51.6],[-7,52.1]],
+  ice:[[-22.7,64],[-21.5,63.85],[-18.7,63.4],[-16.2,63.8],[-14.3,64.4],[-13.6,65.2],[-14.5,66.2],[-18,66.2],[-22.5,66.4],[-24,65.5]],
+  gr:[[-52,66],[-52,65],[-50.3,63.5],[-48.8,61.6],[-46.5,60.8],[-44,59.8],[-43,60.2],[-42.2,62],[-41,63.5],[-39.8,65],[-38,66]]
+};
+var DOTS = [[-77.5,24.5],[-78,26.6],[-76,24],[-75,23.3],[-73.5,21.2],[-61.6,16.2],[-61.3,15.4],[-61,14.6],[-61,13.2],[-61.7,12.1],[-61.3,10.5],[-23.5,15],[-24.4,16.7],[-22.9,16.6],[-25,17.1],[-15.5,28],[-16.5,28.3],[-14,28.4],[-28,38.6],[-25.5,37.8]];
+function mkProj(lon0, lon1, lat0, lat1, W){
+  var r = Math.PI / 180;
+  function my(l){ return Math.log(Math.tan(Math.PI / 4 + l * r / 2)) }
+  var x0 = lon0 * r, x1 = lon1 * r, y0 = my(lat0), y1 = my(lat1), H = W * (y1 - y0) / (x1 - x0);
+  return { W:W, H:Math.round(H), p:function(lon, lat){ return [(lon * r - x0) / (x1 - x0) * W, (y1 - my(lat)) / (y1 - y0) * H] } };
+}
+function polyD(P, pts){ return pts.map(function(q, i){ var a = P.p(q[0], q[1]); return (i ? "L" : "M") + a[0].toFixed(1) + " " + a[1].toFixed(1) }).join("") + "Z" }
+function landSVG(P, fill){
+  var s = "<g fill='" + fill + "' stroke='#0a2f38' stroke-width='1.6' stroke-linejoin='round'>";
+  for(var k in LAND) s += "<path d='" + polyD(P, LAND[k]) + "'/>";
+  DOTS.forEach(function(d){ var a = P.p(d[0], d[1]); s += "<circle cx='" + a[0].toFixed(1) + "' cy='" + a[1].toFixed(1) + "' r='2.6'/>" });
+  return s + "</g>";
+}
+function smoothD(pts){
+  var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+  for(var i = 0; i < pts.length - 1; i++){
+    var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + " " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+  }
+  return d;
+}
+function hurricaneIcon(x, y, cat, sc){
+  var R = (cat === "ts" ? 13 : 15 + cat * 2.4) * (sc || 1), col = cat === "ts" ? "#ffc247" : CATCOL[cat];
+  var s = "<g transform='translate(" + x.toFixed(1) + "," + y.toFixed(1) + ")'><g class='spin' style='transform-origin:0 0;--dur:" + (cat === "ts" ? 6 : Math.max(1.8, 6 - cat)) + "s'>";
+  s += "<circle r='" + R + "' fill='" + col + "' stroke='#0a2f38' stroke-width='2.5'/>";
+  for(var a = 0; a < 3; a++){ var t = a * 2.094; s += "<path d='M0 0 Q" + (Math.cos(t) * R * .9).toFixed(1) + " " + (-Math.sin(t) * R * .9).toFixed(1) + " " + (Math.cos(t + 1.3) * R * 1.35).toFixed(1) + " " + (-Math.sin(t + 1.3) * R * 1.35).toFixed(1) + "' fill='none' stroke='#fff' stroke-width='3.5' stroke-linecap='round'/>" }
+  s += "</g>" + (cat !== "ts" ? "<circle r='3.5' fill='#0a2f38'/>" : "") + "</g>";
+  return s;
+}
+function frontLine(x0, y0, x1, y1, type, n, flip){
+  var col = type === "w" ? "#e2553e" : "#2d6fd6";
+  var s = "<line x1='" + x0 + "' y1='" + y0 + "' x2='" + x1 + "' y2='" + y1 + "' stroke='" + col + "' stroke-width='3.5' stroke-linecap='round'/>";
+  var dx = x1 - x0, dy = y1 - y0, L = Math.sqrt(dx * dx + dy * dy), ux = dx / L, uy = dy / L, nx = -uy * (flip ? -1 : 1), ny = ux * (flip ? -1 : 1);
+  for(var i = 1; i <= n; i++){
+    var t = i / (n + 1), cx = x0 + dx * t, cy = y0 + dy * t, w = 6;
+    if(type === "w"){ var a1x = cx - ux * w, a1y = cy - uy * w, a2x = cx + ux * w, a2y = cy + uy * w; s += "<path d='M" + a1x.toFixed(1) + " " + a1y.toFixed(1) + " A" + w + " " + w + " 0 0 " + (flip ? 0 : 1) + " " + a2x.toFixed(1) + " " + a2y.toFixed(1) + "Z' fill='" + col + "'/>" }
+    else s += "<path d='M" + (cx - ux * w).toFixed(1) + " " + (cy - uy * w).toFixed(1) + " L" + (cx + nx * 10).toFixed(1) + " " + (cy + ny * 10).toFixed(1) + " L" + (cx + ux * w).toFixed(1) + " " + (cy + uy * w).toFixed(1) + "Z' fill='" + col + "'/>";
+  }
+  return s;
+}
+function lowIcon(x, y, sc, rings){
+  var s = "<g transform='translate(" + x.toFixed(1) + "," + y.toFixed(1) + ") scale(" + sc + ")'>";
+  for(var i = rings; i >= 1; i--) s += "<ellipse rx='" + (14 + i * 13) + "' ry='" + (11 + i * 10) + "' fill='none' stroke='rgba(255,255,255,.75)' stroke-width='1.6'/>";
+  s += frontLine(6, 4, 70, 26, "w", 3, true) + frontLine(6, 6, -26, 74, "c", 3, true);
+  s += "<circle r='15' fill='#fff' stroke='#0a2f38' stroke-width='2.5'/><text y='7' text-anchor='middle' font-size='19' font-weight='900' fill='#e2553e' font-family='Archivo,Arial Black,sans-serif'>L</text></g>";
+  return s;
+}
+
+/* =========================================================
+   STAGE 4: Track the storm
+   ========================================================= */
+var MAPA = mkProj(-100, 10, 0, 65, 800);
+var UP = "Gets stronger", SAME = "Stays strong, maybe a little weaker", DOWN = "Gets weaker";
+var WP = [
+  { day:1, ll:[-22, 12], sst:27, wind:45, cat:"ts", st:"Tropical storm", text:"A cluster of thunderstorms drifts off the coast of Africa over 27 " + DEG + " water. It starts to spin and becomes Tropical Storm Kestrel. (Kestrel is made up, but its journey is like real ones.)" },
+  { day:3, ll:[-38, 14.5], sst:28, wind:85, cat:1, st:"Category 1", q:"The trade winds push Kestrel west over 28 " + DEG + " water, with light winds high up. What happens next?", o:[UP, SAME, DOWN], a:0, why:"Warm water and low wind shear mean more fuel. Kestrel becomes a Category 1 hurricane and an eye forms." },
+  { day:5, ll:[-53, 18], sst:29, wind:125, cat:3, st:"Category 3", q:"Still heading west, now over 29 " + DEG + " water. What happens next?", o:[UP, SAME, DOWN], a:0, why:"Even warmer water, even more fuel. Kestrel is now a Category 3, a major hurricane." },
+  { day:7, ll:[-66, 24], sst:30, wind:145, cat:4, st:"Category 4", q:"North of the Caribbean islands, the sea is 30 " + DEG + ". What happens next?", o:[UP, SAME, DOWN], a:0, why:"Category 4. Kestrel now starts to curve north, steered round the edge of a big area of high pressure in the middle of the Atlantic." },
+  { day:9, ll:[-71, 33], sst:27, wind:120, cat:3, st:"Category 3", q:"Kestrel turns north, out at sea off the USA. The Gulf Stream, a warm ocean current, keeps the water here at about 27 " + DEG + ". What happens next?", o:[UP, SAME, DOWN], a:1, why:"The sea is cooler than before but still above 26.5 " + DEG + ", so Kestrel stays a strong Category 3." },
+  { day:11, ll:[-56, 41], sst:18, wind:85, cat:1, st:"Category 1", q:"The westerly winds now push Kestrel north east, over water of about 18 " + DEG + ". What happens next?", o:[UP, SAME, DOWN], a:2, why:"Below about 26.5 " + DEG + " the storm runs out of warm, moist fuel. Kestrel drops to Category 1." },
+  { day:12, ll:[-40, 47], sst:15, wind:70, cat:"ex", st:"Ex hurricane", q:"Kestrel meets cold air from the north and the fast jet stream high above. What happens to it?", o:["It keeps its eye and stays a hurricane", "It loses its eye, spreads out and becomes an ex hurricane with fronts", "It disappears completely"], a:1, why:"Strong winds high up tear the tropical shape apart and cold air gets mixed in. Kestrel becomes an ex hurricane (an extratropical storm) with a warm front and a cold front. Weaker, but much bigger." },
+  { day:14, ll:[-13, 53], sst:13, wind:65, cat:"ex", st:"Ex hurricane", q:"Ex hurricane Kestrel reaches Ireland and the UK, where the sea is about 13 " + DEG + ". What will people notice?", o:["A Category 4 hurricane with a huge storm surge", "Gales and heavy rain, like a strong autumn storm", "Nothing at all"], a:1, why:"By now it is like a deep depression. It can still bring damaging gusts and flooding rain, so warnings may go out. A real example: ex hurricane Ophelia hit Ireland in October 2017." },
+  { day:15, ll:[-2, 56.5], sst:null, wind:45, cat:"ex", st:"Fading away", q:"Kestrel crosses the UK. What happens over land?", o:["It gets stronger from the warm land", "It weakens: no sea to feed it, and the land slows the wind with friction"], a:1, why:"Over land there is no warm, moist sea to feed it, and rough ground slows the wind. Kestrel fades into an ordinary low." }
+];
+var REASONS = [
+  { t:"The sea near the UK is far below 26.5 " + DEG, y:true },
+  { t:"It is cut off from its fuel: warm, moist air", y:true },
+  { t:"Strong winds high up (the jet stream) tear the storm's shape apart", y:true },
+  { t:"It mixes with cold air and turns into a different kind of storm, with fronts", y:true },
+  { t:"Crossing land slows it down with friction", y:true },
+  { t:"The UK is too small for a hurricane to hit", y:false },
+  { t:"The Earth's spin stops working this far north", y:false },
+  { t:"Hurricanes are not allowed to keep their names in Europe", y:false }
+];
+function mapSVG(step, moving){
+  var P = MAPA, s = "<svg viewBox='0 0 " + P.W + " " + P.H + "' role='img' aria-label='Map of the North Atlantic showing the track of Hurricane Kestrel'>";
+  s += "<defs><linearGradient id='seaT' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1f4f7a'/><stop offset='.45' stop-color='#2f7aa0'/><stop offset='1' stop-color='#3f9fb0'/></linearGradient></defs>";
+  s += "<rect width='" + P.W + "' height='" + P.H + "' fill='url(#seaT)'/>";
+  var warm = [[-100, 0], [-100, 31], [-82, 31], [-78, 34], [-76, 37.5], [-70, 36.5], [-60, 34], [-45, 31], [-30, 28], [-20, 23], [-17, 20], [-15, 10], [-10, 0]];
+  s += "<defs><linearGradient id='warmG' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='#e2553e'/><stop offset='1' stop-color='#f59a3c'/></linearGradient></defs><path d='" + polyD(P, warm) + "' fill='url(#warmG)' opacity='.88'/>";
+  var iso = warm.slice(3, 11).map(function(q){ return P.p(q[0], q[1]) });
+  s += "<path d='" + smoothD(iso) + "' fill='none' stroke='#ffd877' stroke-width='3' stroke-dasharray='8 6'/>";
+  var lp = P.p(-48, 33.5); s += "<text x='" + lp[0] + "' y='" + lp[1] + "' font-size='15' font-weight='700' fill='#ffd877' class='svgtext' transform='rotate(-8 " + lp[0] + " " + lp[1] + ")'>26.5 &#176;C line</text>";
+  var t1 = P.p(-45, 22), t2 = P.p(-42, 49);
+  s += "<text x='" + t1[0] + "' y='" + t1[1] + "' font-size='16' font-weight='700' fill='#fff' class='svgtext' opacity='.9'>Warm sea: fuel</text><text x='" + t2[0] + "' y='" + t2[1] + "' font-size='16' font-weight='700' fill='#cfe8ee' class='svgtext' opacity='.9'>Cooler sea: no fuel</text>";
+  s += landSVG(P, "#9cc98a");
+  var pu = P.p(1, 55.6), pa = P.p(-11, 17);
+  s += "<text x='" + (pu[0] + 14) + "' y='" + (pu[1] + 4) + "' font-size='14' font-weight='700' fill='#0a2f38' class='svgtext'>UK</text><text x='" + (pa[0] + 18) + "' y='" + pa[1] + "' font-size='15' font-weight='700' fill='#0a2f38' class='svgtext'>Africa</text>";
+  var pc = P.p(-95, 40); s += "<text x='" + pc[0] + "' y='" + pc[1] + "' font-size='15' font-weight='700' fill='#0a2f38' class='svgtext'>USA</text>";
+  var pts = WP.slice(0, step + 1).map(function(w){ return P.p(w.ll[0], w.ll[1]) });
+  if(pts.length > 1) s += "<path d='" + smoothD(pts) + "' fill='none' stroke='#fff' stroke-width='3.5' stroke-dasharray='2 8' stroke-linecap='round'/>";
+  WP.slice(0, step).forEach(function(w, i){ var a = pts[i]; s += "<circle cx='" + a[0].toFixed(1) + "' cy='" + a[1].toFixed(1) + "' r='5' fill='#fff' stroke='#0a2f38' stroke-width='2'/><text x='" + (a[0] + 7).toFixed(1) + "' y='" + (a[1] + 20).toFixed(1) + "' font-size='12' font-weight='700' fill='#fff' stroke='#0a2f38' stroke-width='3' paint-order='stroke' class='svgtext'>Day " + w.day + "</text>" });
+  if(step < WP.length - 1){ var nx = P.p(WP[step + 1].ll[0], WP[step + 1].ll[1]); s += "<g class='bob'><circle cx='" + nx[0].toFixed(1) + "' cy='" + nx[1].toFixed(1) + "' r='14' fill='none' stroke='#ffc247' stroke-width='3' stroke-dasharray='4 4'/><text x='" + nx[0].toFixed(1) + "' y='" + (nx[1] + 6).toFixed(1) + "' text-anchor='middle' font-size='17' font-weight='900' fill='#ffc247' font-family='Archivo,Arial Black,sans-serif'>?</text></g>" }
+  var cur = WP[step], c = moving || P.p(cur.ll[0], cur.ll[1]);
+  s += "<g id='kIcon'>" + (cur.cat === "ex" ? lowIcon(c[0], c[1], step === WP.length - 1 ? .55 : .75, 2) : hurricaneIcon(c[0], c[1], cur.cat, 1.15)) + "</g>";
+  return s + "</svg>";
+}
+RENDER[4] = function(b){
+  var h = "<p class='lead'>Meet Hurricane Kestrel. Follow it from Africa towards the UK. At each stop, guess what happens next, then watch.</p>";
+  h += "<div class='learn'><div><span class='kicker'>Learn a bit</span><ul><li>Hurricanes need sea of about <b>26.5 " + "&deg;C</b>. The sea near the UK is usually about <b>8 to 18 &deg;C</b>.</li><li>Winds steer storms: the <b>trade winds</b> push them west, then the <b>westerlies</b> carry them north east towards Europe.</li><li>Many fade out at sea. Some reach the UK as <b>ex hurricanes</b>: still stormy, but no longer hurricanes.</li></ul></div>" + fuelSVG() + "</div>";
+  h += "<div class='tracker'><div class='mapwrap' id='mapBox'></div><div class='daycard' id='dayCard' aria-live='polite'></div></div>";
+  h += "<div class='part' id='p4b'><h3>Why do tropical storms rarely reach the UK at full strength?</h3><p class='small'>Tap every reason you think is true, then check. Have a go whenever you like, you do not need to finish the journey first.</p><div class='choices' id='rsn'></div><div class='row'><button class='btn sm' type='button' id='rsnChk'>Check my reasons</button></div><div id='fb4b'></div></div>";
+  b.innerHTML = h;
+  drawTrack(); drawReasons();
+};
+function fuelSVG(){
+  return "<svg viewBox='0 0 320 170' role='img' aria-label='As the storm moves north the sea gets cooler and the fuel runs out'><rect width='320' height='170' rx='14' fill='#fff'/>" +
+    "<defs><linearGradient id='fl' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#ef7724'/><stop offset='.5' stop-color='#ffc247'/><stop offset='1' stop-color='#00a6c9'/></linearGradient></defs>" +
+    "<rect x='16' y='96' width='288' height='22' rx='11' fill='url(#fl)' stroke='#0a2f38' stroke-width='2'/>" +
+    "<g font-size='12' font-weight='700' fill='#0a2f38' class='svgtext'><text x='16' y='136'>Tropics 29 &#176;C</text><text x='304' y='136' text-anchor='end'>UK 13 &#176;C</text></g>" +
+    hurricaneIcon(48, 56, 4, 1) + hurricaneIcon(160, 60, 1, 1) + lowIcon(270, 50, .45, 2) +
+    "<text x='160' y='160' text-anchor='middle' font-size='12' fill='#0a2f38' class='svgtext'>Cooler sea, less fuel, weaker storm</text></svg>";
+}
+function drawTrack(movingFrom){
+  var S = st.s4, step = S.step, cur = WP[step];
+  if(movingFrom !== undefined && !reduce){
+    var a = MAPA.p(WP[movingFrom].ll[0], WP[movingFrom].ll[1]), z = MAPA.p(cur.ll[0], cur.ll[1]), t0 = null;
+    var f = function(ts){ if(!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 900), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      var icon = el("kIcon"); if(!icon) return;
+      icon.setAttribute("transform", "translate(" + ((a[0] - z[0]) * (1 - e)).toFixed(1) + "," + ((a[1] - z[1]) * (1 - e)).toFixed(1) + ")");
+      if(k < 1) requestAnimationFrame(f) };
+    el("mapBox").innerHTML = mapSVG(step);
+    el("kIcon").setAttribute("transform", "translate(" + (a[0] - z[0]) + "," + (a[1] - z[1]) + ")");
+    requestAnimationFrame(f);
+  } else el("mapBox").innerHTML = mapSVG(step);
+  var fuel = cur.sst == null ? 0 : clamp((cur.sst - 10) / 20, 0, 1);
+  var h = "<div class='d'>Day " + cur.day + ": " + cur.st + "</div><div class='stat'><span>Winds about " + cur.wind + " mph</span><span>" + (cur.sst == null ? "Over land" : "Sea " + cur.sst + " " + DEG) + "</span></div>";
+  h += "<div class='small'>Fuel from the sea</div><div class='fuel'><span style='width:" + Math.round(fuel * 100) + "%'></span></div>";
+  var pr = WP[step].why && S.preds[step] !== undefined ? "<p style='margin:8px 0 0'>" + WP[step].why + "</p>" : "<p style='margin:8px 0 0'>" + (WP[step].text || "") + "</p>";
+  h += pr;
+  if(step < WP.length - 1){
+    var nx = WP[step + 1];
+    h += "<p style='margin:10px 0 0'><b>Next stop, day " + nx.day + ".</b> " + nx.q + "</p><div class='choices' id='predOpts'>" + nx.o.map(function(o, i){ return "<button type='button' data-o='" + i + "'>" + o + "</button>" }).join("") + "</div><div id='fb4a'></div>";
+    h += "<div class='row'><button class='btn ghost sm' type='button' id='skipDay'>Just show me</button></div>";
+  } else {
+    h += "<p style='margin:10px 0 0'><b>Journey over.</b> From a Category 4 to a fading low. Have a go at the reasons question below, if you like.</p><div class='row'><button class='btn ghost sm' type='button' id='replay'>Watch the journey again</button></div>";
+  }
+  el("dayCard").innerHTML = h;
+  if(step < WP.length - 1){
+    var nxt = WP[step + 1];
+    Array.prototype.forEach.call(el("predOpts").querySelectorAll("button"), function(bt){ bt.onclick = function(){
+      var o = +bt.getAttribute("data-o"), key = step + 1;
+      if(S.preds[key] === undefined) S.preds[key] = { first:o, right:o === nxt.a };
+      if(o === nxt.a){ save(); bt.classList.add("good"); advance(step) }
+      else { save(); bt.classList.add("bad"); setFb("fb4a", "nope", "<b>Have another think.</b> " + hint4(step + 1)) }
+    } });
+    el("skipDay").onclick = function(){ if(S.preds[step + 1] === undefined){ S.preds[step + 1] = { first:-1, right:false } } save(); advance(step) };
+  } else el("replay").onclick = function(){ S.step = 0; save(); drawTrack() };
+}
+function hint4(k){
+  var w = WP[k];
+  if(w.sst != null && w.sst >= 28) return "Is the sea warmer or cooler than 26.5 " + DEG + "? Warm sea is fuel.";
+  if(k === 4) return "27 " + DEG + " is cooler than before, but is it still above 26.5 " + DEG + "?";
+  if(k === 5) return "18 " + DEG + " is well below 26.5 " + DEG + ". What happens to a storm with no fuel?";
+  if(k === 6) return "Cold air and strong winds high up are bad news for a hurricane's neat round shape.";
+  if(k === 7) return "The storm has been weakening for days over cool water.";
+  return "Think about where the storm gets its energy from.";
+}
+function advance(from){ var S = st.s4; S.step = from + 1; save(); drawTrack(from) }
+function drawReasons(){
+  var S = st.s4; if(!S.reasons) S.reasons = {};
+  if(!S.order4) S.order4 = shuffle(REASONS.map(function(r, i){ return i }));
+  el("rsn").innerHTML = S.order4.map(function(i){ var r = REASONS[i], on = !!S.reasons[i], cls = "";
+    if(S.reasonsChecked && on) cls = r.y ? "good" : "bad";
+    return "<button type='button' data-r='" + i + "' aria-pressed='" + on + "' class='" + cls + "'>" + r.t + "</button>" }).join("");
+  Array.prototype.forEach.call(el("rsn").querySelectorAll("button"), function(bt){ bt.onclick = function(){ var i = +bt.getAttribute("data-r"); S.reasons[i] = !S.reasons[i]; if(!S.reasons[i]) delete S.reasons[i]; S.reasonsChecked = false; save(); drawReasons() } });
+  el("rsnChk").onclick = function(){
+    var picked = Object.keys(S.reasons).map(Number), good = picked.filter(function(i){ return REASONS[i].y }).length, bad = picked.length - good, all = REASONS.filter(function(r){ return r.y }).length;
+    if(!picked.length){ setFb("fb4b", "tell", "Tap any reasons you think are true first."); return }
+    S.reasonsChecked = true; save(); drawReasons();
+    var msg = "<b>" + good + " of the " + all + " real reasons spotted.</b> ";
+    if(bad) msg += "The orange one" + (bad > 1 ? "s are" : " is") + " not right: the UK is plenty big enough, the Earth's spin is actually stronger further north, and names have nothing to do with it. ";
+    if(good < all) msg += "There " + (all - good === 1 ? "is one more" : "are " + (all - good) + " more") + " true reason" + (all - good === 1 ? "" : "s") + " to find. ";
+    else msg += "You found them all. The big idea: cooler sea means no fuel. ";
+    setFb("fb4b", good === all && !bad ? "ok" : "tell", msg);
+  };
+}
+
+/* =========================================================
+   STAGE 5: UK storm factory
+   ========================================================= */
+var MAPU = mkProj(-45, 8, 40, 63, 640);
+var U5 = { season:"winter", path:"over" };
+function circSVG(){
+  var cx = 150, cy = 172, R = 140;
+  function y(l){ return cy - R * Math.sin(l * Math.PI / 180) } function hw(l){ return R * Math.cos(l * Math.PI / 180) }
+  var s = "<svg viewBox='0 0 320 190' role='img' aria-label='Global atmospheric circulation: rising air and low pressure at the equator and at 60 degrees, sinking air and high pressure at 30 degrees and the pole'>";
+  s += "<defs><marker id='ca' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='5' markerHeight='5' orient='auto'><path d='M0 0L10 5L0 10z' fill='#0a2f38'/></marker></defs>";
+  s += "<path d='M" + (cx - R) + " " + cy + " A" + R + " " + R + " 0 0 1 " + (cx + R) + " " + cy + "Z' fill='#bfe6f2' stroke='#0a2f38' stroke-width='2.5'/>";
+  [30, 60].forEach(function(l){ s += "<line x1='" + (cx - hw(l)) + "' y1='" + y(l) + "' x2='" + (cx + hw(l)) + "' y2='" + y(l) + "' stroke='#0a2f38' stroke-width='1.5' stroke-dasharray='5 4'/>" });
+  s += "<ellipse cx='" + (cx + 60) + "' cy='" + ((y(0) + y(30)) / 2) + "' rx='44' ry='24' fill='rgba(239,119,36,.3)' stroke='#ef7724' stroke-width='2.5'/><path d='M" + (cx + 104) + " " + ((y(0) + y(30)) / 2) + " l-3 -8' stroke='#ef7724' stroke-width='2.5'/>";
+  s += "<ellipse cx='" + (cx + 44) + "' cy='" + ((y(30) + y(60)) / 2) + "' rx='30' ry='17' fill='rgba(0,166,201,.25)' stroke='#007291' stroke-width='2.5'/>";
+  s += "<ellipse cx='" + (cx + 22) + "' cy='" + ((y(60) + y(90)) / 2 + 4) + "' rx='16' ry='9' fill='rgba(123,75,143,.25)' stroke='#7b4b8f' stroke-width='2.5'/>";
+  s += "<path d='M" + (cx - 20) + " " + (y(28) + 4) + " L" + (cx - 46) + " " + (y(6) - 4) + "' stroke='#0a2f38' stroke-width='2.5' marker-end='url(#ca)'/><text x='" + (cx - 62) + "' y='" + (y(16) + 4) + "' font-size='10' class='svgtext' fill='#0a2f38' text-anchor='end'>trade winds</text>";
+  s += "<path d='M" + (cx - 26) + " " + (y(34) - 2) + " L" + (cx - 4) + " " + (y(55) + 2) + "' stroke='#0a2f38' stroke-width='2.5' marker-end='url(#ca)'/><text x='" + (cx - 30) + "' y='" + (y(40) + 2) + "' font-size='10' class='svgtext' fill='#0a2f38' text-anchor='end'>westerlies</text>";
+  var uy = y(54); s += "<circle cx='" + (cx - 66) + "' cy='" + uy + "' r='6' fill='#e2553e' stroke='#0a2f38' stroke-width='2'/><text x='" + (cx - 56) + "' y='" + (uy + 4) + "' font-size='11' font-weight='700' class='svgtext' fill='#0a2f38'>UK</text>";
+  s += "<g font-size='10.5' font-weight='700' class='svgtext' fill='#0a2f38'>";
+  s += "<text x='" + (cx + R - 2) + "' y='" + (y(0) - 4) + "' text-anchor='end'>L 0&#176; air rises</text>";
+  s += "<text x='" + (cx + hw(30) + 4) + "' y='" + (y(30) + 4) + "'>H 30&#176;</text>";
+  s += "<text x='" + (cx + hw(60) + 4) + "' y='" + (y(60) + 4) + "'>L 60&#176;</text>";
+  s += "<text x='" + (cx + 8) + "' y='" + (y(90) - 6) + "'>H pole</text></g>";
+  s += "<text x='4' y='186' font-size='10' class='svgtext' fill='#0a2f38'>Tropical storms form in the orange cell. UK lows form near 60&#176;.</text>";
+  return s + "</svg>";
+}
+function u5Result(){
+  var base = { summer:1000, autumn:975, winter:955 }[U5.season];
+  var jet = { summer:"weak, about 100 mph", autumn:"stronger, about 150 mph", winter:"strongest, can top 200 mph" }[U5.season];
+  var contrast = { summer:"small", autumn:"growing", winter:"big" }[U5.season];
+  var out = { p:base, jet:jet, contrast:contrast };
+  if(U5.path === "over"){
+    out.title = base <= 980 ? "Deep depression over the UK" : "A shallow low over the UK";
+    out.hazard = base <= 980;
+    out.text = base <= 980 ? "Gales and heavy rain sweep across the UK. First steady rain at the warm front, then a burst of heavy rain and gusty wind at the cold front, then colder, showery weather." : "A breezy day with some rain, then sunny spells. Not really a hazard. The jet stream is weak in summer and the air masses are not very different.";
+  } else if(U5.path === "north"){
+    out.title = "Lows pass north of Scotland"; out.hazard = U5.season !== "summer" && base <= 980;
+    out.text = U5.season === "summer" ? "The lows stay far to the north. Most of the UK has settled, warmer weather." : "North west Scotland gets gales and rain. Further south it is windy at times but often drier and milder.";
+    out.p = base + 0;
+  } else {
+    out.title = "Lows track over France and Spain"; out.hazard = false;
+    out.text = U5.season === "winter" ? "The UK sits on the cold side of the jet stream. That often means colder, drier weather, frost, and sometimes snow." : "The storms go south of the UK. It is cooler and cloudier than usual, but the worst weather misses.";
+  }
+  return out;
+}
+function ukMapSVG(){
+  var P = MAPU, s = "<svg viewBox='0 0 " + P.W + " " + P.H + "' role='img' aria-label='Map of the Atlantic and the UK with the jet stream and a low pressure system'>";
+  s += "<rect width='" + P.W + "' height='" + P.H + "' fill='#2f6f95'/>";
+  var coldY = P.p(0, 61)[1], warmY = P.p(0, 42)[1];
+  s += "<rect x='0' y='0' width='" + P.W + "' height='" + (coldY + 10) + "' fill='#9fd3ef' opacity='.25'/><rect x='0' y='" + (warmY - 10) + "' width='" + P.W + "' height='" + (P.H - warmY + 10) + "' fill='#ef7724' opacity='.18'/>";
+  s += landSVG(P, "#9cc98a");
+  var lat = { north:60.5, over:53.5, south:45.5 }[U5.path], amp = { summer:1.2, autumn:2, winter:2.6 }[U5.season];
+  var jp = []; for(var lo = -45; lo <= 8; lo += 2) jp.push(P.p(lo, lat + Math.sin((lo + 45) / 9) * amp));
+  var jw = { summer:5, autumn:9, winter:13 }[U5.season];
+  s += "<path d='" + smoothD(jp) + "' fill='none' stroke='#ffc247' stroke-width='" + jw + "' stroke-linecap='round' opacity='.85'/><path d='" + smoothD(jp) + "' fill='none' stroke='#fff' stroke-width='2' stroke-dasharray='10 12' class='jetdash'/>";
+  var jl = jp[2]; s += "<text x='" + (jl[0] + 4) + "' y='" + (jl[1] - jw) + "' font-size='19' font-weight='700' fill='#fff' stroke='#0a2f38' stroke-width='3' paint-order='stroke' class='svgtext'>jet stream</text>";
+  var tc = P.p(-42, 61.8); s += "<text x='" + tc[0] + "' y='" + tc[1] + "' font-size='18' font-weight='700' fill='#0a2f38' class='svgtext'>cold polar air</text>";
+  var tw = P.p(-42, 41.2); s += "<text x='" + tw[0] + "' y='" + tw[1] + "' font-size='18' font-weight='700' fill='#fff' class='svgtext'>warm tropical air</text>";
+  var r = u5Result(), rings = r.p <= 960 ? 5 : r.p <= 980 ? 4 : 2, sc = r.p <= 960 ? 1.05 : r.p <= 980 ? .9 : .7;
+  var end = { north:[-14, 61.5], over:[-7, 56.5], south:[-6, 46.5] }[U5.path];
+  var e = P.p(end[0], end[1]);
+  s += "<g id='lowG' data-x='" + e[0].toFixed(1) + "'>" + lowIcon(e[0], e[1], sc, rings) + "</g>";
+  return s + "</svg>";
+}
+var TROW = [
+  ["Where it starts", "Over warm tropical seas, about 5 to 30 degrees from the equator", "Over the North Atlantic, where cold polar air meets warm tropical air"],
+  ["What powers it", "Heat and moisture from sea of 26.5 " + DEG + " or more, released when water vapour condenses", "The clash between warm and cold air, boosted by a strong jet stream"],
+  ["Shape", "Round and tight, with a calm eye in the middle", "A big swirl with a warm front and a cold front, and no eye"],
+  ["Size", "Usually a few hundred kilometres across", "Often more than 1,000 km across"],
+  ["When", "Late summer and early autumn (the Atlantic season runs June to November)", "Mostly autumn and winter"],
+  ["Winds", "74 mph or more for a hurricane, the strongest over 150 mph", "Gales, with gusts of 60 to 90 mph in a bad storm"],
+  ["Biggest dangers", "Storm surge, extreme winds and flooding rain", "Flooding from days of heavy rain, and gales"]
+];
+var BOTH = [
+  { t:"Low pressure in the middle", y:true },
+  { t:"Air rises, cools and makes clouds and rain", y:true },
+  { t:"Winds spiral anticlockwise (in the northern hemisphere)", y:true },
+  { t:"Has a calm eye", y:false },
+  { t:"Has warm and cold fronts", y:false }
+];
+RENDER[5] = function(b){
+  var S = st.s5;
+  var h = "<p class='lead'>The UK does not get hurricanes. It gets its own storms, made in a different way. Build one, then compare the two kinds.</p>";
+  h += "<div class='learn'><div><span class='kicker'>Learn a bit</span><ul><li>Air moves round the planet in giant loops (<b>global atmospheric circulation</b>). Where air <b>rises</b> you get <b>low pressure</b> and rain.</li><li>The UK sits near <b>60&deg; N</b>, at the <b>polar front</b>: cold air from the north meets warm air from the south.</li><li>Warm air is lighter, so it rises over the cold air. That makes a <b>depression</b>. The <b>jet stream</b>, a fast river of air high up, deepens it and steers it.</li><li>In autumn and winter the difference between the cold north and warm south is biggest, so the jet stream is strongest.</li></ul></div>" + circSVG() + "</div>";
+  h += "<div class='part'><h3>Storm factory</h3><p class='small'>Pick a season and where the jet stream goes. Watch what the UK gets.</p>";
+  h += "<div class='row' id='u5s'>" + ["summer", "autumn", "winter"].map(function(x){ return "<button type='button' class='pickbtn' data-s='" + x + "' aria-pressed='" + (U5.season === x) + "'>" + x[0].toUpperCase() + x.slice(1) + "</button>" }).join("") + "</div>";
+  h += "<div class='row' id='u5p'>" + [["north", "Jet stream north of the UK"], ["over", "Jet stream over the UK"], ["south", "Jet stream south of the UK"]].map(function(x){ return "<button type='button' class='pickbtn' data-p='" + x[0] + "' aria-pressed='" + (U5.path === x[0]) + "'>" + x[1] + "</button>" }).join("") + "</div>";
+  h += "<div class='lab uk'><div class='mapwrap' id='ukMap'></div><div class='gauge' id='ukOut' aria-live='polite'></div></div><div id='fb5a'></div></div>";
+  h += "<div class='part' id='p5b'><h3>Compare: tropical storm or UK depression?</h3><p class='small'>Drag each card to the right box in the table, or tap a card and then tap a box.</p><div class='pool' id='tPool'></div><div class='ctable' id='ctab'></div><div id='fb5b'></div>";
+  h += "<h3 style='margin-top:16px'>True for both?</h3><p class='small'>Tap the ones that are true for both kinds of storm, then check.</p><div class='bothrow choices' id='bothRow'></div><div class='row'><button class='btn sm' type='button' id='bothChk'>Check</button></div><div id='fb5c'></div></div>";
+  b.innerHTML = h;
+  el("u5s").onclick = function(e){ var x = e.target.closest("[data-s]"); if(!x) return; U5.season = x.getAttribute("data-s"); u5draw(true) };
+  el("u5p").onclick = function(e){ var x = e.target.closest("[data-p]"); if(!x) return; U5.path = x.getAttribute("data-p"); u5draw(true) };
+  u5draw(false); drawTable(); drawBoth();
+  dnd(el("p5b"), "#tPool .tile", ".cell", function(t, d){
+    var id = t.getAttribute("data-t"), want = d.getAttribute("data-cell");
+    S.tableTries++;
+    if(id === want){ S.table[id] = 1; save(); drawTable(); var left = TROW.length * 2 - Object.keys(S.table).length; setFb("fb5b", "ok", "<b>Yes.</b> " + (left ? left + " to go." : "Table complete. You have compared the causes and features of both storms.")) }
+    else {
+      var r1 = id.split("_"), r2 = want.split("_"); save();
+      if(r1[0] === r2[0]) setFb("fb5b", "nope", "<b>Right row, other storm.</b> Have a think: is that the tropical one or the UK one?");
+      else if(r1[1] === r2[1]) setFb("fb5b", "nope", "<b>Right storm, different row.</b> Which heading does it answer: " + TROW[+r1[0]][0].toLowerCase() + "?");
+      else setFb("fb5b", "nope", "<b>Not that box.</b> Try reading the row headings on the left first.");
+    }
+  });
+  el("bothChk").onclick = function(){
+    var picked = Object.keys(S.both).map(Number); if(!picked.length){ setFb("fb5c", "tell", "Tap the ones you think are true for both first."); return }
+    S.bothChecked = true; save(); drawBoth();
+    var good = picked.filter(function(i){ return BOTH[i].y }).length, bad = picked.length - good;
+    setFb("fb5c", good === 3 && !bad ? "ok" : "tell", good === 3 && !bad ? "<b>Exactly.</b> Both are low pressure systems with rising air, and both spin anticlockwise in the northern hemisphere. Only hurricanes have an eye, and only UK depressions have fronts." : "<b>" + good + " of 3 found.</b> " + (bad ? "The orange one belongs to just one kind of storm. " : "") + "Think about pressure, rising air and which way they spin.");
+  };
+};
+function u5draw(user){
+  var S = st.s5;
+  Array.prototype.forEach.call(document.querySelectorAll("#u5s .pickbtn"), function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-s") === U5.season) });
+  Array.prototype.forEach.call(document.querySelectorAll("#u5p .pickbtn"), function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-p") === U5.path) });
+  el("ukMap").innerHTML = ukMapSVG();
+  var g = el("lowG"); if(g && !reduce){ g.style.transition = "none"; g.style.transform = "translateX(-260px)"; g.style.opacity = ".2"; requestAnimationFrame(function(){ requestAnimationFrame(function(){ g.style.transition = "transform 1.6s cubic-bezier(.2,.8,.3,1), opacity 1s"; g.style.transform = "translateX(0)"; g.style.opacity = "1" }) }) }
+  var r = u5Result();
+  el("ukOut").innerHTML = "<div class='big'>" + r.title + "</div><div class='stat'><span>Low about " + r.p + " hPa</span><span>Jet stream " + r.jet + "</span><span>Warm and cold air difference: " + r.contrast + "</span></div><p style='margin:6px 0 0'>" + r.text + "</p>" + (r.hazard ? "<p style='margin:8px 0 0'><b style='color:#d75f10'>Weather hazard!</b> The Met Office would probably name this storm.</p>" : "");
+  if(user){ S.tried[U5.season + "/" + U5.path] = 1; save();
+    if(U5.season === "winter" && U5.path === "over") setFb("fb5a", "ok", "<b>The worst combination.</b> A big difference between warm and cold air, a strong jet stream, and it is pointed right at the UK. That is why our big storms come in autumn and winter.");
+    else el("fb5a").innerHTML = "";
+  }
+}
+function drawTable(){
+  var S = st.s5, tiles = [];
+  TROW.forEach(function(r, i){ tiles.push({ id:i + "_t", t:r[1] }); tiles.push({ id:i + "_u", t:r[2] }) });
+  if(!drawTable.o) drawTable.o = shuffle(tiles);
+  el("tPool").innerHTML = drawTable.o.filter(function(x){ return !S.table[x.id] }).map(function(x){ return "<button type='button' class='tile' data-t='" + x.id + "' aria-pressed='false'>" + x.t + "</button>" }).join("") || "<span class='small'>All placed. Nice.</span>";
+  var h = "<div class='hd blank'></div><div class='hd' style='background:#ffd2b0'>Tropical storm</div><div class='hd' style='background:#bfe6f2'>UK depression</div>";
+  TROW.forEach(function(r, i){
+    h += "<div class='rl'>" + r[0] + "</div>";
+    ["t", "u"].forEach(function(c, j){ var id = i + "_" + c; h += "<div class='cell drop' data-cell='" + id + "' role='button' tabindex='0' aria-label='" + r[0] + ", " + (c === "t" ? "tropical storm" : "UK depression") + "'>" + (S.table[id] ? "<span class='tile placed'>" + r[j + 1] + "</span>" : "") + "</div>" });
+  });
+  el("ctab").innerHTML = h;
+  Array.prototype.forEach.call(el("ctab").querySelectorAll(".cell"), function(x){ x.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); x.click() } }) });
+}
+function drawBoth(){
+  var S = st.s5;
+  el("bothRow").innerHTML = BOTH.map(function(b2, i){ var on = !!S.both[i], cls = S.bothChecked && on ? (b2.y ? "good" : "bad") : ""; return "<button type='button' class='" + cls + "' data-b='" + i + "' aria-pressed='" + on + "'>" + b2.t + "</button>" }).join("");
+  Array.prototype.forEach.call(el("bothRow").querySelectorAll("button"), function(bt){ bt.onclick = function(){ var i = +bt.getAttribute("data-b"); if(S.both[i]) delete S.both[i]; else S.both[i] = 1; S.bothChecked = false; save(); drawBoth() } });
+}
+
+/* =========================================================
+   STAGE 6: Case study
+   ========================================================= */
+var CS = {
+  desmond:{ n:"Storm Desmond", sub:"Cumbria, December 2015. A UK deep depression.",
+    facts:[["5 to 6 Dec 2015", "when the worst rain fell"], ["341.4 mm", "of rain at Honister Pass in 24 hours, a UK record"], ["About 5,200", "homes flooded in Cumbria and Lancashire"], ["About 61,000", "homes around Lancaster lost power"]],
+    chains:[
+      ["An atmospheric river: a long plume of warm, moist air flowing from near the Caribbean to the UK", "The air was forced up over the Cumbrian fells, cooled, and dropped record amounts of rain", "Rivers like the Eden burst their banks and about 5,200 homes flooded, many in Carlisle", "people"],
+      ["November 2015 had already been very wet, so the ground was soaked", "The rain could not soak in, so it ran straight into rivers, which rose very fast", "Roads and bridges were washed away, including the old bridge at Pooley Bridge and part of the A591", "places"],
+      ["Rivers were already high and heavy rain kept falling for more than a day", "The River Lune rose and flooded an electricity substation in Lancaster", "About 61,000 homes lost power, many of them for three nights", "people"]
+    ] },
+  katrina:{ n:"Hurricane Katrina", sub:"Louisiana and Mississippi, USA, August 2005. A tropical storm.",
+    facts:[["29 Aug 2005", "when it hit the coast"], ["175 mph", "top winds over the Gulf of Mexico, Category 5"], ["At least 80%", "of New Orleans flooded"], ["About 1,800", "people died across the region"]],
+    chains:[
+      ["Katrina crossed the very warm water of the Gulf of Mexico", "It quickly strengthened to a Category 5 hurricane with 175 mph winds", "It was still a huge Category 3 when it hit land, wrecking buildings and trees across a wide area", "places"],
+      ["Strong winds and very low pressure pushed the sea towards the coast", "A storm surge up to about 8 metres high hit the Mississippi coast", "Whole streets of homes along the Mississippi coast were swept away", "places"],
+      ["Much of New Orleans lies below sea level, protected by levees (flood walls)", "The surge pushed water against the levees and many of them broke", "At least 80% of the city flooded. About 1,800 people died across the region", "people"]
+    ] }
+};
+var COLS = ["Cause", "What happened", "Effect"];
+function csIcon(k){
+  return k === "desmond" ? "<svg viewBox='0 0 60 60' aria-hidden='true'><rect width='60' height='60' rx='10' fill='#bfe6f2'/><path d='M0 40 L14 22 L24 32 L36 14 L60 40Z' fill='#4ba36f' stroke='#0a2f38' stroke-width='2'/><rect x='0' y='40' width='60' height='20' fill='#2f6f95'/><g stroke='#007291' stroke-width='2'><line x1='10' y1='4' x2='8' y2='14'/><line x1='22' y1='4' x2='20' y2='14'/><line x1='34' y1='4' x2='32' y2='14'/><line x1='46' y1='4' x2='44' y2='14'/></g></svg>"
+    : "<svg viewBox='0 0 60 60' aria-hidden='true'><rect width='60' height='60' rx='10' fill='#ef7724'/><g transform='translate(30 30)'><circle r='22' fill='#fff' opacity='.85'/><path d='M0 0c0-10 11-14 18-8M0 0c10 0 14 11 8 18M0 0c0 10-11 14-18 8M0 0c-10 0-14-11-8-18' fill='none' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/><circle r='4' fill='#0a2f38'/></g></svg>";
+}
+RENDER[6] = function(b){
+  var S = st.s6;
+  var h = "<p class='lead'>Pick one real storm. Read the fact file, then link each cause to what it did to people and places.</p><div class='cspick' id='csPick'>";
+  ["desmond", "katrina"].forEach(function(k){ h += "<button type='button' class='csbtn' data-cs='" + k + "' aria-pressed='" + (S.cs === k) + "'>" + csIcon(k) + "<span><b>" + CS[k].n + "</b><br><span class='small'>" + CS[k].sub + "</span></span></button>" });
+  h += "</div><div id='csBody'></div>";
+  b.innerHTML = h;
+  el("csPick").onclick = function(e){ var x = e.target.closest("[data-cs]"); if(!x) return; S.cs = x.getAttribute("data-cs"); save(); Array.prototype.forEach.call(el("csPick").querySelectorAll(".csbtn"), function(y){ y.setAttribute("aria-pressed", y === x) }); drawCase() };
+  if(S.cs) drawCase();
+};
+function drawCase(){
+  var S = st.s6, C = CS[S.cs]; if(!S.chains[S.cs]) S.chains[S.cs] = {};
+  var P = S.chains[S.cs];
+  var h = "<div class='factfile'>" + C.facts.map(function(f){ return "<div><b>" + f[0] + "</b>" + f[1] + "</div>" }).join("") + "</div>";
+  h += "<div class='part' id='p6'><h3>Cause and effect chains</h3><p class='small'>Build three chains. Each one goes cause, then what happened, then the effect. Drag cards into the boxes or tap a card then a box. Tap a placed card to pick it up again.</p><div class='pool drop' id='cPool' data-slot='pool'></div><div id='chains'></div><div id='fb6'></div></div>";
+  h += "<div class='part'><h3>Which cause mattered most?</h3><p class='small'>There is no single right answer. Pick one and say why, if you fancy it.</p><div class='choices' id='most'></div><textarea class='write' id='mostWhy' style='min-height:90px;margin-top:8px' placeholder='I think this mattered most because...'></textarea></div>";
+  el("csBody").innerHTML = h;
+  drawChains();
+  el("most").innerHTML = C.chains.map(function(c, i){ return "<button type='button' data-m='" + i + "' aria-pressed='" + (S.most === S.cs + i) + "'>" + c[0] + "</button>" }).join("");
+  el("most").onclick = function(e){ var x = e.target.closest("[data-m]"); if(!x) return; S.most = S.cs + x.getAttribute("data-m"); save(); Array.prototype.forEach.call(el("most").querySelectorAll("button"), function(y){ y.setAttribute("aria-pressed", y === x) }) };
+  el("mostWhy").value = S.mostWhy || "";
+  el("mostWhy").oninput = function(){ S.mostWhy = this.value; save() };
+  dnd(el("p6"), ".tile", ".slot, #cPool", function(t, d){
+    var id = t.getAttribute("data-k"), slot = d.getAttribute("data-slot");
+    for(var k in P) if(P[k] === id) delete P[k];
+    if(slot === "pool"){ save(); drawChains(); return }
+    var col = +slot.split("_")[1], tcol = +id.split("_")[1];
+    if(col !== tcol){ save(); drawChains(); setFb("fb6", "nope", "<b>That card is a " + COLS[tcol].toLowerCase() + "</b>, so it goes in the " + COLS[tcol].toLowerCase() + " column. The little label on each card tells you."); return }
+    P[slot] = id; S.chainTries++; save(); drawChains(); checkRow(+slot.split("_")[0]);
+  });
+}
+function chainOk(P, r){ var a = P[r + "_0"], b = P[r + "_1"], c = P[r + "_2"]; return a && b && c && a.split("_")[0] === b.split("_")[0] && b.split("_")[0] === c.split("_")[0] }
+function checkRow(r){
+  var S = st.s6, P = S.chains[S.cs], C = CS[S.cs];
+  var filled = P[r + "_0"] && P[r + "_1"] && P[r + "_2"];
+  if(!filled) return;
+  if(chainOk(P, r)){
+    var n = 0; for(var i = 0; i < 3; i++) if(chainOk(P, i)) n++;
+    setFb("fb6", "ok", "<b>That chain links up.</b> " + (n === 3 ? "All three chains done. You have shown how causes led to effects." : "Is that effect mostly on people or on places? Tap one under the chain."));
+  } else setFb("fb6", "nope", "<b>These do not quite link up yet.</b> Read it as a sentence: does the middle card follow from the cause? Does the effect follow from the middle? Tap a card to move it.");
+}
+function drawChains(){
+  var S = st.s6, P = S.chains[S.cs], C = CS[S.cs], used = {};
+  for(var k in P) used[P[k]] = 1;
+  var tiles = []; C.chains.forEach(function(c, i){ for(var j = 0; j < 3; j++) tiles.push({ id:i + "_" + j, t:c[j], col:j }) });
+  if(!S.shuf) S.shuf = {};
+  if(!S.shuf[S.cs]) S.shuf[S.cs] = shuffle(tiles.map(function(x){ return x.id }));
+  function tileH(id, locked){ var p = id.split("_"), t = C.chains[+p[0]][+p[1]]; return "<button type='button' class='tile" + (locked ? " placed" : "") + "' data-k='" + id + "' aria-pressed='false'><span class='ttag'>" + COLS[+p[1]] + "</span>" + t + "</button>" }
+  el("cPool").innerHTML = S.shuf[S.cs].filter(function(id){ return !used[id] }).map(function(id){ return tileH(id, false) }).join("") || "<span class='small'>All cards placed.</span>";
+  var h = "";
+  for(var r = 0; r < 3; r++){
+    var ok = chainOk(P, r);
+    h += "<div class='chain" + (ok ? " good" : "") + "'>";
+    for(var c = 0; c < 3; c++){
+      var key = r + "_" + c;
+      h += "<div class='slot drop' data-slot='" + key + "' role='button' tabindex='0' aria-label='Chain " + (r + 1) + ", " + COLS[c] + "'><span class='sh'>" + COLS[c] + "</span>" + (P[key] ? tileH(P[key], ok) : "") + "</div>";
+      if(c < 2) h += "<div class='arr' aria-hidden='true'><span>&#8594;</span></div>";
+    }
+    h += "</div>";
+    if(ok){
+      var cid = P[r + "_0"].split("_")[0], tg = S.tags[S.cs + cid];
+      h += "<div class='ptag'>Effect mostly on: <button type='button' class='pickbtn' data-tag='" + cid + "' data-v='people' aria-pressed='" + (tg === "people") + "'>People</button><button type='button' class='pickbtn' data-tag='" + cid + "' data-v='places' aria-pressed='" + (tg === "places") + "'>Places</button><span id='tagfb" + cid + "' class='small'>" + (tg ? tagMsg(cid, tg) : "") + "</span></div>";
+    }
+  }
+  el("chains").innerHTML = h;
+  Array.prototype.forEach.call(el("chains").querySelectorAll(".slot"), function(x){ x.addEventListener("keydown", function(e){ if(e.target === x && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); x.click() } }) });
+  Array.prototype.forEach.call(el("chains").querySelectorAll("[data-tag]"), function(x){ x.onclick = function(e){ e.stopPropagation(); var cid = x.getAttribute("data-tag"); S.tags[S.cs + cid] = x.getAttribute("data-v"); save(); drawChains() } });
+}
+function tagMsg(cid, v){ var want = CS[st.s6.cs].chains[+cid][3]; return v === want ? "Yes, mostly " + want + "." : "Fair point, it touches both. It is mostly about " + want + " though." }
+
+/* =========================================================
+   STAGE 7: Explain it
+   ========================================================= */
+var PROMPTS = [
+  { id:"desc", q:"Describe what happens during a weather hazard.", f:"Good for LC and HK", s:["During a hurricane...", "The wind...", "Heavy rain can...", "Flooding happens when...", "People might..."] },
+  { id:"work", q:"How do warm oceans, low air pressure and strong winds work together to make a tropical storm?", f:"Good for JT, HK and LW", s:["It starts when the sea is...", "The warm, moist air...", "As the air rises, it...", "This leaves low pressure, so...", "The winds get stronger because...", "The Earth's spin makes..."] },
+  { id:"uk", q:"Why do tropical storms rarely reach the UK at full strength?", f:"Good for EGW", s:["As the storm moves north...", "The sea near the UK is...", "Without warm water...", "Strong winds high up...", "By the time it reaches the UK, it has become..."] },
+  { id:"comp", q:"Compare a hurricane with a UK deep depression.", f:"Good for EGW, LW and LP", s:["Both storms...", "A hurricane gets its energy from..., whereas a UK depression...", "One big difference is...", "The UK gets depressions mostly in autumn and winter because...", "Global atmospheric circulation means..."] },
+  { id:"case", q:"Use your case study to explain how the causes led to the effects on people and places.", f:"Good for LP", s:["The main cause was...", "This led to...", "As a result, people...", "Places were affected because...", "The effects were worse because..."] }
+];
+var VOCAB = ["evaporate", "evaporation", "condense", "condensation", "water vapour", "low pressure", "high pressure", "air pressure", "moist", "humid", "latent heat", "Coriolis", "eye", "eyewall", "storm surge", "wind shear", "jet stream", "warm front", "cold front", "polar front", "atmospheric river", "extratropical", "ex hurricane", "circulation", "saturated", "relief rain", "trade winds", "westerlies", "26.5", "Category"];
+RENDER[7] = function(b){
+  var S = st.s7;
+  var h = "<p class='lead'>Pick a question and explain it in your own words. Short is fine. Tap a starter or a word to drop it in.</p><div class='prompts' id='prm'>";
+  PROMPTS.forEach(function(p){ h += "<button type='button' data-p='" + p.id + "' aria-pressed='" + (S.prompt === p.id) + "'>" + p.q + "<span class='for'>" + p.f + "</span></button>" });
+  h += "</div><div id='wBody'></div>";
+  b.innerHTML = h;
+  el("prm").onclick = function(e){ var x = e.target.closest("[data-p]"); if(!x) return; S.prompt = x.getAttribute("data-p"); save(); Array.prototype.forEach.call(el("prm").querySelectorAll("button"), function(y){ y.setAttribute("aria-pressed", y === x) }); drawWrite() };
+  drawWrite();
+};
+function drawWrite(){
+  var S = st.s7, P = PROMPTS.filter(function(p){ return p.id === S.prompt })[0];
+  if(!P){ el("wBody").innerHTML = "<p class='small' style='margin-top:10px'>Pick a question above to get sentence starters. Or just write.</p>" + writeBox([]); wireWrite(); return }
+  el("wBody").innerHTML = "<div class='part'><h3>" + P.q + "</h3><p class='small'>Sentence starters:</p><div class='starters'>" + P.s.map(function(s){ return "<button type='button' data-ins='" + esc(s.replace("...", " ")) + "'>" + s + "</button>" }).join("") + "</div>" + writeBox(P) + "</div>";
+  wireWrite();
+}
+function writeBox(){
+  var words = ["evaporation", "condenses", "low pressure", "water vapour", "Coriolis effect", "eye", "storm surge", "wind shear", "jet stream", "warm front", "cold front", "polar front", "extratropical", "global atmospheric circulation", "saturated"];
+  return "<p class='small'>Geography words:</p><div class='starters'>" + words.map(function(w){ return "<button type='button' class='w' data-ins='" + esc(w + " ") + "'>" + w + "</button>" }).join("") + "</div><textarea class='write' id='wTxt' aria-label='Your explanation' placeholder='Write here...'></textarea><div class='spot' id='spot'></div><p class='small' id='wCount'></p>";
+}
+function wireWrite(){
+  var S = st.s7, ta = el("wTxt");
+  ta.value = S.text || "";
+  function upd(){ S.text = ta.value; save(); spot() }
+  ta.oninput = upd;
+  Array.prototype.forEach.call(el("wBody").querySelectorAll("[data-ins]"), function(x){ x.onclick = function(){
+    var ins = x.getAttribute("data-ins"), v = ta.value, p = ta.selectionStart == null ? v.length : ta.selectionStart;
+    var before = v.slice(0, p), lead = before && !/\s$/.test(before) ? " " : "";
+    ta.value = before + lead + ins + v.slice(p); ta.focus(); var np = (before + lead + ins).length; try{ ta.setSelectionRange(np, np) }catch(e){} upd();
+  } });
+  spot();
+}
+function foundVocab(t){ var lo = (t || "").toLowerCase(), out = []; VOCAB.forEach(function(v){ if(lo.indexOf(v.toLowerCase()) >= 0 && out.indexOf(v) < 0) out.push(v) }); return out.filter(function(v){ return !(v === "condense" && out.indexOf("condensation") >= 0) && !(v === "evaporate" && out.indexOf("evaporation") >= 0) }) }
+function spot(){
+  var S = st.s7, f = foundVocab(S.text), w = (S.text.trim().match(/\S+/g) || []).length;
+  el("spot").innerHTML = f.length ? "<span style='background:none;border:0;padding:3px 0'>Geography words you used:</span>" + f.map(function(v){ return "<span>" + v + "</span>" }).join("") : "";
+  el("wCount").textContent = w ? w + " words so far. It saves as you type." : "";
+}
+
+/* =========================================================
+   Send to Jay
+   ========================================================= */
+function summary(){
+  var L = [], w = KIDS[who] ? who : "";
+  L.push("Storm Lab (weather hazards)");
+  if(w){ L.push("Targets for " + w + ":"); L.push("  1. " + KIDS[w].m[0]); L.push("  2. " + KIDS[w].m[1]) }
+  L.push("");
+  var any = false;
+  for(var i = 1; i <= 7; i++) if(tried(i)) any = true;
+  if(!any) L.push("Nothing tried yet.");
+  var s1 = st.s1;
+  if(tried(1)){
+    L.push("STATION 1: Storm spotter [" + MILESTONE_STAGES[1] + "]");
+    L.push("  Clue cards sorted: " + Object.keys(s1.bins).length + " of " + CLUES.length + " (" + s1.binTries + " goes)");
+    L.push("  Storm town effects spotted: " + Object.keys(s1.scene).length + " of " + SCENE.length + (Object.keys(s1.scene).length ? " (" + SCENE.filter(function(h){ return s1.scene[h.id] }).map(function(h){ return h.n }).join(", ") + ")" : ""));
+    L.push("");
+  }
+  var s2 = st.s2;
+  if(tried(2)){
+    var names = { 0:"tropical storm", 1:"Category 1", 2:"Category 2", 3:"Category 3", 4:"Category 4", 5:"Category 5" };
+    L.push("STATION 2: Storm builder [" + MILESTONE_STAGES[2] + "]");
+    L.push("  Strongest storm made: " + (s2.best >= 0 && (s2.missions.ts || s2.missions.hu) ? names[s2.best] : "none yet"));
+    L.push("  Missions done: " + (["ts", "hu", "c5", "br"].filter(function(k){ return s2.missions[k] }).map(function(k){ return { ts:"tropical storm", hu:"hurricane with an eye", c5:"Category 5", br:"break a storm" }[k] }).join(", ") || "none yet"));
+    if(s2.broke.length) L.push("  Broke a storm by changing: " + s2.broke.join(", "));
+    L.push("");
+  }
+  var s3 = st.s3;
+  if(tried(3)){
+    L.push("STATION 3: Inside a storm [" + MILESTONE_STAGES[3] + "]");
+    L.push("  Formation steps in order: " + (s3.orderDone ? "yes" : "not yet") + " (" + s3.orderTries + " checks)");
+    L.push("  Diagram labels placed: " + Object.keys(s3.pins).length + " of " + PINS.length);
+    if(s3.played) L.push("  Watched the diagram play through");
+    L.push("");
+  }
+  var s4 = st.s4;
+  if(tried(4)){
+    L.push("STATION 4: Track the storm [" + MILESTONE_STAGES[4] + "]");
+    var ks = Object.keys(s4.preds).map(Number).sort(function(a, b2){ return a - b2 });
+    L.push("  Reached day " + WP[s4.step].day + " of 15 (" + WP[s4.step].st + ")");
+    ks.forEach(function(k){ var p = s4.preds[k]; L.push("  Day " + WP[k].day + ": " + (p.first < 0 ? "skipped to see" : "first guess '" + WP[k].o[p.first] + "'" + (p.right ? " (spot on)" : " (then found it)"))) });
+    if(s4.reasons && Object.keys(s4.reasons).length){ L.push("  Reasons picked for why storms weaken before the UK:"); Object.keys(s4.reasons).forEach(function(i){ L.push("    - " + REASONS[i].t + (REASONS[i].y ? "" : " (not right)")) }) }
+    L.push("");
+  }
+  var s5 = st.s5;
+  if(tried(5)){
+    L.push("STATION 5: UK storm factory [" + MILESTONE_STAGES[5] + "]");
+    L.push("  Season and jet stream combinations tried: " + (Object.keys(s5.tried).join(", ") || "none"));
+    L.push("  Compare table: " + Object.keys(s5.table).length + " of " + (TROW.length * 2) + " placed (" + s5.tableTries + " goes)");
+    var bp = Object.keys(s5.both).map(Number); if(bp.length) L.push("  True for both: " + bp.map(function(i){ return BOTH[i].t + (BOTH[i].y ? "" : " (not right)") }).join("; "));
+    L.push("");
+  }
+  var s6 = st.s6;
+  if(tried(6)){
+    var C = CS[s6.cs], P = s6.chains[s6.cs] || {}, n = 0;
+    for(var r = 0; r < 3; r++) if(chainOk(P, r)) n++;
+    L.push("STATION 6: Case study, " + C.n + " [" + MILESTONE_STAGES[6] + "]");
+    L.push("  Cause and effect chains linked: " + n + " of 3");
+    for(r = 0; r < 3; r++) if(chainOk(P, r)){ var cid = +P[r + "_0"].split("_")[0], ch = C.chains[cid]; L.push("    " + ch[0] + " -> " + ch[1] + " -> " + ch[2] + (s6.tags[s6.cs + cid] ? " [effect on " + s6.tags[s6.cs + cid] + "]" : "")) }
+    if(s6.most && s6.most.indexOf(s6.cs) === 0) L.push("  Cause that mattered most: " + C.chains[+s6.most.slice(s6.cs.length)][0]);
+    if(s6.mostWhy && s6.mostWhy.trim()) L.push("  Why: " + s6.mostWhy.trim());
+    L.push("");
+  }
+  var s7 = st.s7;
+  if(tried(7)){
+    var P7 = PROMPTS.filter(function(p){ return p.id === s7.prompt })[0];
+    L.push("STATION 7: Explain it [" + MILESTONE_STAGES[7] + "]");
+    L.push("  Question: " + (P7 ? P7.q : "own choice"));
+    L.push("  Their writing:");
+    s7.text.trim().split(/\n+/).forEach(function(line){ L.push("    " + line) });
+    var fv = foundVocab(s7.text); if(fv.length) L.push("  Geography words used: " + fv.join(", "));
+    L.push("");
+  }
+  return L.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Storm Lab", filename:"storm-lab", getText:summary });
+
+/* ---------- start again ---------- */
+el("resetBtn").onclick = function(){
+  if(el("resetBtn").getAttribute("data-sure") !== "1"){ el("resetBtn").setAttribute("data-sure", "1"); el("resetBtn").textContent = "Yes, clear my storm work"; el("resetMsg").textContent = "Tap again to clear everything on this page."; return }
+  st = fresh(); save(); el("resetBtn").removeAttribute("data-sure"); el("resetBtn").textContent = "Start again"; el("resetMsg").textContent = "Cleared. Fresh start.";
+  el("stageHost").innerHTML = ""; current = 0; drawMap();
+};
+
+drawWho(); drawMap();
+window.__sl = { st:function(){ return st }, open:openStage, summary:summary, sbEval:sbEval, SB:SB, sbUpdate:sbUpdate, WP:WP };
+})();
+</script>
+
+</body>
+</html>
