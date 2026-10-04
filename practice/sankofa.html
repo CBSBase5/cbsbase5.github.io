@@ -2911,7 +2911,7 @@ function startLevel(){
   run.hitsLevel=0;
   var era=run.era,idx=run.idx;
   G.lvl=idx<2?genLevel(era,idx):parseMap(ARENAS[era],era,{boss:true,idx:2,colour:0.5,total:1});G.signs=null;G.roomSave=null;G.memQueue=[];if(!G.lvl.boss)setupFun(G.lvl);G.lvlT=0;G.fade=null;G.fadeWarned=false;G.fun=null;G.rainT=0;G.kazooT=0;MUS.kazoo=false;G.congaT=0;G.conga=[];G.fogT=0;G.dark=0;G.flowers=[];G.ccard=null;calmFx.length=0;
-  G.boss=null;G.slowmo=0;G.bossCard=null;G.bossSay=null;G.bossDoneT=null;G.goldTaken=false;var keepBonnie=run.bonnieFound;G.bonnie=null;G.shrines=[];G.buddy=null;G.plaque=null;G.cracksSeen=false;
+  G.boss=null;G.slowmo=0;G.bossCard=null;G.bossSay=null;G.bossDoneT=null;G.goldTaken=false;G.onwardHint=0;G.keepsake=null;var keepBonnie=run.bonnieFound;G.bonnie=null;G.shrines=[];G.buddy=null;G.plaque=null;G.cracksSeen=false;
   recalc();
   spawnLevel();
   var sx=G.lvl.boss?40:24,sy=G.lvl.boss?GROUND_Y-12:(G.lvl.h*16-32-12);
@@ -7760,6 +7760,23 @@ function drawKeepsakeFx(dt){var k=G.keepsake;if(!k||k.shown||!G.boss||!G.boss.de
   if(Math.floor(t*10)%2)cSpark(x+rnd(-18,18)|0,y+rnd(-18,18)|0,'#ffffff');
   cText('RARE KEEPSAKE!',200,30,2,'#ffd23f','#5a1a10');}
 
+/* ---------- after a guardian: no rush. A column of light on the right is the way on ---------- */
+var ONWARD_X=W-26;
+function onwardOpen(){return G.boss&&G.boss.dead&&(G.bossDoneT||0)>3&&!(G.keepsake&&!G.keepsake.shown);}
+function updateOnward(dt){if(!onwardOpen()||!P)return;
+  if(!G.onwardHint&&G.bossDoneT>14){G.onwardHint=1;toast('Take your time. When you are ready, fly into the light on the right.');}
+  if(P.x+P.w/2<ONWARD_X-4)return;
+  /* leaving: pick up the golden egg if it is still here, show its memory, then on to the next era */
+  G.onwardHint=0;var gold=pickups.some(function(k){return k.k==='gold';});
+  if(gold){pickups=pickups.filter(function(k){return k.k!=='gold';});collectEgg(true);}
+  sfx('win');var go=function(){closeUI();G.state='play';G.keepsake=null;G.memQueue=[];eraComplete();};
+  if(G.memQueue&&G.memQueue.length&&settings.memories!==false){var c=G.memQueue.shift();showMemory(c,go);}else go();}
+function drawOnward(dt){if(!onwardOpen())return;var k=Math.min(1,(G.bossDoneT-3)/0.8),t=G.t,E=ERAS[G.boss.era],x=Math.round(ONWARD_X-(G.camX||0)),top=GROUND_Y-70;
+  b.save();b.globalAlpha=0.22*k;b.fillStyle='#fff3b0';b.fillRect(x-10,0,20,GROUND_Y);b.globalAlpha=0.35*k;b.fillStyle='#ffe08a';b.fillRect(x-5,0,10,GROUND_Y);
+  b.globalAlpha=0.7*k*(0.75+0.25*Math.sin(t*4));b.fillStyle='#ffffff';b.fillRect(x-1,0,2,GROUND_Y);b.restore();
+  for(var i=0;i<10;i++){var u=((t*0.5+i/10)%1);b.fillStyle=i%2?'#ffd23f':E.accent;b.globalAlpha=k*(1-u);b.fillRect(Math.round(x-8+((i*7)%16)),Math.round(GROUND_Y-u*GROUND_Y),2,2);}b.globalAlpha=1;
+  if(k>0.6){var bob=Math.round(Math.sin(t*4)*2);cText('FLY ON',x-14,top-16+bob,1,'#ffd23f','#3a1a10');b.fillStyle='#ffd23f';for(var a=0;a<4;a++)b.fillRect(x-24+a+bob,top-2+a,1,8-a*2);}}
+
 /* ================= UPDATE ================= */
 function update(dt){
   G.t+=0;
@@ -7796,12 +7813,10 @@ function update(dt){
   updateFun(dt);updateFade(dt);updateQuiet(dt);
   /* goal */
   if(L.goal&&P.x+P.w>L.goal.x)levelComplete();
-  /* guardian defeated: collect the golden egg, then move on */
+  /* guardian calmed: stay as long as you like, then fly on through the light */
   if(G.boss&&G.boss.dead&&G.state==='play'){G.bossDoneT=(G.bossDoneT||0)+dt;
-    var gold=pickups.some(function(k){return k.k==='gold';});
-    if(!gold&&!G.goldTaken){G.goldTaken=true;}
-    if((G.goldTaken&&G.bossDoneT>(G.keepsake&&!G.keepsake.shown?4.6:1.6))||G.bossDoneT>9){if(gold){pickups=pickups.filter(function(k){return k.k!=='gold';});collectEgg(true);}G.goldTaken=false;
-      if(G.keepsake&&!G.keepsake.shown){G.keepsake.shown=true;var ke=G.keepsake.era;showKeepsake(ke,function(){closeUI();G.keepsake=null;G.state='play';eraComplete();});}else eraComplete();}}
+    if(G.keepsake&&!G.keepsake.shown&&G.bossDoneT>4.6){G.keepsake.shown=true;showKeepsake(G.keepsake.era,function(){closeUI();G.state='play';});}
+    else updateOnward(dt);}
 }
 /* ================= RENDER LOOP ================= */
 var titleT=0;
@@ -7809,7 +7824,7 @@ function render(dt){
   ctx.imageSmoothingEnabled=false;
   if(G.state==='ending'){drawEnding(dt);return;}
   if(G.state==='doot'){dootRender(dt);return;}
-  if(G.lvl&&P){drawWorld();if(G.keepsake)drawKeepsakeFx(dt);}
+  if(G.lvl&&P){drawWorld();if(G.keepsake)drawKeepsakeFx(dt);if(G.boss&&G.boss.dead)drawOnward(dt);}
   else if(G.state==='intro'){drawIntro(dt);}
   else{ /* title and nest backdrop: drift through the eras */
     titleT+=dt;var era=Math.floor(titleT/7)%5;var off=titleT*12;
