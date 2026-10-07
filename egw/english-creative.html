@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create and evaluate - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+.statement{background:#fff;border:2px solid var(--ink);border-radius:14px 14px 14px 4px;padding:10px 14px;margin:10px 0;font-size:1.02rem}
+.statement b{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--coral);margin-bottom:3px}
+
+/* Show, don't tell machine */
+.sm{background:var(--ink);color:#fff;border-radius:16px;padding:14px;margin:6px 0}
+.smtop{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+.smtop .stage{font-family:var(--display);font-weight:700;background:rgba(255,255,255,.12);border-radius:99px;padding:4px 12px;font-size:.88rem}
+.tellslip{background:#fff;color:var(--ink);border-radius:12px;padding:10px 12px 10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tellslip .stampt{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.14em;color:var(--coral);border:3px solid var(--coral);border-radius:6px;padding:2px 7px;transform:rotate(-8deg);flex:none}
+.tellslip .said{font-size:1.15rem;font-weight:700}
+.gaugewrap{display:flex;align-items:center;gap:12px}
+.gaugewrap svg{width:110px;height:auto;flex:none}
+.gaugewrap .glab{font-size:.88rem;color:#c9cdf0;line-height:1.35}
+.needle{transition:transform .6s cubic-bezier(.3,1.5,.5,1);transform-origin:60px 62px}
+.trays{display:grid;gap:10px;margin-top:10px}
+.tray{background:rgba(255,255,255,.07);border-radius:12px;padding:8px}
+.tray .tn{font-family:var(--display);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sun);margin:0 0 6px 2px}
+.tray .tn .tick{color:var(--mint);margin-left:4px}
+.chipsrow{display:grid;gap:6px}
+.chipsrow button{font-family:inherit;font-size:.95rem;line-height:1.35;text-align:left;color:var(--ink);background:var(--paper);border:2px solid transparent;border-radius:10px;padding:8px 10px;cursor:pointer;min-height:44px}
+.chipsrow button:hover{border-color:var(--cyan)}
+.chipsrow button.in{border-color:var(--mint);background:#e3f8f1;box-shadow:0 0 0 2px var(--mint)}
+.chipsrow button.spat{background:#ffe9e9;border-color:var(--coral);text-decoration:line-through;opacity:.7;cursor:default}
+.chipsrow button.shake{animation:nudge .35s}
+.printout{background:#fffdf4;color:var(--ink);border-radius:4px 4px 12px 12px;padding:12px 14px;margin-top:12px;font-size:1.04rem;line-height:1.6;border-top:6px dashed var(--line);min-height:60px}
+.printout .ph{color:var(--body-tint);font-style:italic;font-size:.95rem}
+.printout span.new{animation:rise .5s}
+.smmsg{margin-top:10px;font-size:.96rem;line-height:1.45;background:rgba(255,255,255,.08);border-radius:12px;padding:9px 12px;min-height:1.4em}
+.smmsg b{color:var(--sun)}
+.smrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.judge{display:grid;gap:8px}
+.judge button{font-family:inherit;font-size:.98rem;line-height:1.45;text-align:left;color:var(--ink);background:var(--paper);border:2px solid transparent;border-radius:12px;padding:10px 12px;cursor:pointer}
+.judge button:hover{border-color:var(--cyan)}
+.judge button.ok{border-color:var(--mint);background:#e3f8f1}
+.judge button.no{border-color:var(--coral);background:#ffe9e9}
+.smend{text-align:center;padding:6px 0}
+.smend .big{font-family:var(--display);font-weight:700;font-size:2.2rem;color:var(--sun);line-height:1.1}
+.smend .rank{font-family:var(--display);font-weight:700;font-size:1.2rem;margin:4px 0 8px}
+@media (max-width:420px){ .sm{padding:10px} .gaugewrap svg{width:90px} }
+</style>
+</head>
+<body class="subj-eng">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Create and evaluate</h2>
+    <span>English Language. Judging how well a writer does something, then writing a description or story of your own.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* The extract is original, written for this page, so it can be printed in full. */
+var EXTRACT =
+'<div class="extract">' +
+'<p><span class="ln">&para; 1</span>By nine o\'clock the fairground had begun to die. One by one the rides groaned to a halt, and the music from the waltzers wound down like a tired clock.</p>' +
+'<p><span class="ln">&para; 2</span>Ama should have left with the others. Instead she stood by the hook a duck stall, hands deep in her pockets, watching the lights go out in rows: the dodgems, the helter skelter, the big wheel, until only the carousel was still lit.</p>' +
+'<p><span class="ln">&para; 3</span>Its painted horses had stopped mid gallop. Their eyes were wide and white, their mouths open, as if they had seen something coming and could not run.</p>' +
+'<p><span class="ln">&para; 4</span>The wind picked up a paper bag and dragged it across the mud. Somewhere a generator coughed. Then nothing.</p>' +
+'<p><span class="ln">&para; 5</span>Ama took a step closer. The smell of candyfloss still hung in the air, sweet and sticky and slightly burnt.</p>' +
+'<p><span class="ln">&para; 6</span>Then, with a jolt, the carousel began to turn.</p>' +
+'<p><span class="ln">&para; 7</span>Slowly. Silently. With no one at the controls.</p>' +
+'</div>';
+var FOLD = '<details class="working"><summary>The extract (tap to open)</summary>' + EXTRACT + '</details>';
+var STATEMENT = '<div class="statement"><b>A student said</b>"In this part of the story, the writer turns a place that should be fun into somewhere frightening."</div>';
+
+/* ---------- figures ---------- */
+var MOUNTAIN =
+'<svg viewBox="0 0 380 210" role="img" aria-label="The five part story shape: exposition, rising action, climax, falling action, resolution, drawn as a mountain">' +
+'<path d="M14 170 L70 170 L190 46 L280 130 L366 150" fill="none" stroke="#ff5d5d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>' +
+'<g fill="#ffffff" stroke="#141a33" stroke-width="3"><circle cx="40" cy="170" r="9"/><circle cx="130" cy="108" r="9"/><circle cx="280" cy="130" r="9"/><circle cx="352" cy="147" r="9"/></g>' +
+'<circle cx="190" cy="46" r="12" fill="#ffd23f" stroke="#141a33" stroke-width="3"/>' +
+'<g font-family="Space Grotesk,Arial" font-weight="700" font-size="14" fill="#141a33" text-anchor="middle">' +
+'<text x="190" y="22">3 Climax</text>' +
+'<text x="40" y="198">1 Exposition</text>' +
+'<text x="100" y="140" text-anchor="end">2 Rising</text><text x="100" y="156" text-anchor="end">action</text>' +
+'<text x="300" y="104" text-anchor="start">4 Falling</text><text x="300" y="120" text-anchor="start">action</text>' +
+'<text x="320" y="182">5 Resolution</text>' +
+'</g></svg>';
+
+var ZOOM =
+'<svg viewBox="0 0 380 150" role="img" aria-label="A camera plan for description: wide shot, zoom in, close up, then a shift in time or place">' +
+'<g stroke="#141a33" stroke-width="3">' +
+'<rect x="6" y="20" width="82" height="70" rx="10" fill="#22b8e6"/>' +
+'<rect x="102" y="28" width="74" height="62" rx="10" fill="#ffffff"/>' +
+'<rect x="190" y="36" width="66" height="54" rx="10" fill="#ffd23f"/>' +
+'<rect x="270" y="20" width="104" height="70" rx="10" fill="#8a5cf6"/>' +
+'</g>' +
+'<g fill="none" stroke="#141a33" stroke-width="2"><path d="M14 74 Q30 58 46 70 T80 62"/><circle cx="66" cy="38" r="7" fill="#ffd23f"/>' +
+'<circle cx="139" cy="59" r="16" fill="#ffd23f"/><circle cx="223" cy="63" r="13" fill="#ff5d5d"/><circle cx="223" cy="63" r="4" fill="#141a33"/>' +
+'<circle cx="300" cy="44" r="9" fill="#ffffff"/><path d="M286 78 L322 54 L360 78"/></g>' +
+'<g font-family="Space Grotesk,Arial" font-weight="700" font-size="14" fill="#141a33" text-anchor="middle">' +
+'<text x="47" y="112">Wide</text><text x="139" y="112">Zoom</text><text x="223" y="112">Close up</text><text x="322" y="112">Shift</text>' +
+'<text x="47" y="132" font-weight="400" font-size="13">the scene</text><text x="139" y="132" font-weight="400" font-size="13">one area</text><text x="223" y="132" font-weight="400" font-size="13">one detail</text><text x="322" y="132" font-weight="400" font-size="13">time or place</text>' +
+'</g></svg>';
+
+var SENSES =
+'<svg viewBox="0 0 380 104" role="img" aria-label="The five senses: sight, sound, smell, touch, taste">' +
+'<g stroke="#141a33" stroke-width="3">' +
+'<circle cx="40" cy="40" r="30" fill="#ffd23f"/><circle cx="115" cy="40" r="30" fill="#22b8e6"/><circle cx="190" cy="40" r="30" fill="#ff5d5d"/><circle cx="265" cy="40" r="30" fill="#19c39a"/><circle cx="340" cy="40" r="30" fill="#8a5cf6"/>' +
+'</g>' +
+'<g fill="none" stroke="#141a33" stroke-width="3" stroke-linecap="round">' +
+'<path d="M24 40 Q40 26 56 40 Q40 54 24 40 Z"/><circle cx="40" cy="40" r="5" fill="#141a33"/>' +
+'<path d="M106 30 Q118 22 124 34 Q126 44 116 50"/><path d="M128 28 Q136 40 128 52"/>' +
+'<path d="M186 26 Q182 44 178 48 Q186 54 196 50"/>' +
+'<path d="M254 52 L254 32 M260 52 L260 28 M266 52 L266 30 M272 52 L272 36"/>' +
+'<path d="M326 36 Q340 56 354 36"/>' +
+'</g>' +
+'<g font-family="Space Grotesk,Arial" font-weight="700" font-size="14" fill="#ffffff" text-anchor="middle">' +
+'<text x="40" y="94" fill="#141a33">Sight</text><text x="115" y="94" fill="#141a33">Sound</text><text x="190" y="94" fill="#141a33">Smell</text><text x="265" y="94" fill="#141a33">Touch</text><text x="340" y="94" fill="#141a33">Taste</text>' +
+'</g></svg>';
+
+/* the picture prompt: a busy market at dusk, drawn for this page */
+function awning(x, w, col){
+  var s = '<path d="M' + x + ' 128 L' + (x + 8) + ' 108 L' + (x + w - 8) + ' 108 L' + (x + w) + ' 128 Z" fill="#ffffff" stroke="#141a33" stroke-width="2"/>';
+  var n = 6, sw = w / n;
+  for(var k = 0; k < n; k += 2){
+    var a = x + k * sw, b = a + sw;
+    var ta = x + 8 + (w - 16) * (k / n), tb = x + 8 + (w - 16) * ((k + 1) / n);
+    s += '<path d="M' + a.toFixed(1) + ' 128 L' + ta.toFixed(1) + ' 108 L' + tb.toFixed(1) + ' 108 L' + b.toFixed(1) + ' 128 Z" fill="' + col + '"/>';
+  }
+  for(var j = 0; j < n; j++){
+    var cx = x + sw * (j + 0.5);
+    s += '<path d="M' + (cx - sw / 2).toFixed(1) + ' 128 Q' + cx.toFixed(1) + ' 138 ' + (cx + sw / 2).toFixed(1) + ' 128" fill="' + (j % 2 ? "#ffffff" : col) + '" stroke="#141a33" stroke-width="1.5"/>';
+  }
+  return s + '<path d="M' + (x + 4) + ' 132 V196 M' + (x + w - 4) + ' 132 V196" stroke="#141a33" stroke-width="3"/>';
+}
+function person(x, y, sc, col){
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + sc + ')" fill="' + col + '">' +
+    '<circle cx="0" cy="-46" r="8"/><path d="M-11 -36 Q0 -40 11 -36 L14 0 L-14 0 Z"/></g>';
+}
+var MARKET = (function(){
+  var s = '<svg viewBox="0 0 380 260" role="img" aria-label="A busy street market at dusk: striped stalls under strings of lights, a steaming food stall, crowds of people in silhouette, a cat on a crate, and a sun setting behind the rooftops">' +
+  '<defs><linearGradient id="mkSky" x1="0" y1="0" x2="0" y2="1">' +
+  '<stop offset="0" stop-color="#141a33"/><stop offset=".45" stop-color="#8a5cf6"/><stop offset=".8" stop-color="#ff5d5d"/><stop offset="1" stop-color="#ffd23f"/></linearGradient>' +
+  '<radialGradient id="mkGlow"><stop offset="0" stop-color="#ffd23f" stop-opacity=".85"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient></defs>' +
+  '<rect width="380" height="260" fill="url(#mkSky)"/>' +
+  '<circle cx="300" cy="118" r="30" fill="#ffd23f"/>' +
+  '<g fill="#ffffff"><circle cx="40" cy="22" r="1.6"/><circle cx="96" cy="40" r="1.2"/><circle cx="210" cy="16" r="1.5"/><circle cx="340" cy="30" r="1.2"/></g>' +
+  '<path d="M66 18 A12 12 0 1 0 76 38 A9 9 0 1 1 66 18 Z" fill="#f2f1ec"/>' +
+  /* rooftops and a clock tower */
+  '<path d="M0 120 L0 92 L30 92 L30 80 L58 80 L58 98 L84 98 L84 70 L92 58 L100 70 L100 98 L140 98 L140 84 L176 84 L176 104 L214 104 L214 88 L246 88 L246 108 L276 108 L276 96 L320 96 L320 86 L352 86 L352 102 L380 102 L380 120 Z" fill="#141a33" opacity=".88"/>' +
+  '<circle cx="92" cy="80" r="5" fill="#ffd23f"/>' +
+  '<g fill="#ffd23f" opacity=".9"><rect x="38" y="88" width="5" height="6"/><rect x="150" y="90" width="5" height="6"/><rect x="226" y="96" width="5" height="6"/><rect x="330" y="92" width="5" height="6"/></g>' +
+  /* ground */
+  '<rect x="0" y="190" width="380" height="70" fill="#141a33"/><rect x="0" y="190" width="380" height="70" fill="#8a5cf6" opacity=".45"/>' +
+  '<g fill="#3a5cff" opacity=".35"><ellipse cx="60" cy="214" rx="18" ry="4"/><ellipse cx="150" cy="232" rx="22" ry="4"/><ellipse cx="250" cy="218" rx="16" ry="4"/><ellipse cx="330" cy="240" rx="20" ry="4"/><ellipse cx="100" cy="250" rx="14" ry="3"/></g>' +
+  '<ellipse cx="200" cy="244" rx="46" ry="7" fill="#ffd23f" opacity=".25"/>' +
+  /* stalls */
+  '<rect x="10" y="160" width="104" height="36" fill="#f2f1ec" stroke="#141a33" stroke-width="2"/>' +
+  '<rect x="138" y="160" width="104" height="36" fill="#f2f1ec" stroke="#141a33" stroke-width="2"/>' +
+  '<rect x="266" y="160" width="104" height="36" fill="#f2f1ec" stroke="#141a33" stroke-width="2"/>' +
+  awning(6, 112, "#ff5d5d") + awning(134, 112, "#3a5cff") + awning(262, 112, "#19c39a") +
+  /* fruit */
+  '<g stroke="#141a33" stroke-width="1">' +
+  '<circle cx="24" cy="156" r="6" fill="#ff5d5d"/><circle cx="36" cy="156" r="6" fill="#ff5d5d"/><circle cx="30" cy="148" r="6" fill="#ff5d5d"/>' +
+  '<circle cx="54" cy="156" r="6" fill="#ffd23f"/><circle cx="66" cy="156" r="6" fill="#ffd23f"/><circle cx="60" cy="148" r="6" fill="#ffd23f"/>' +
+  '<circle cx="84" cy="156" r="6" fill="#19c39a"/><circle cx="96" cy="156" r="6" fill="#19c39a"/><circle cx="90" cy="148" r="6" fill="#19c39a"/></g>' +
+  /* food stall with steam */
+  '<rect x="160" y="146" width="60" height="14" rx="4" fill="#141a33"/>' +
+  '<g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".8"><path d="M172 142 Q166 132 172 122 T172 104"/><path d="M190 142 Q184 130 190 118 T190 98"/><path d="M208 142 Q202 132 208 122 T208 106"/></g>' +
+  /* fabric stall */
+  '<g stroke="#141a33" stroke-width="1.5"><path d="M280 140 L290 160 L270 160 Z" fill="#8a5cf6"/><path d="M304 136 L316 160 L292 160 Z" fill="#ffd23f"/><path d="M330 140 L340 160 L320 160 Z" fill="#22b8e6"/><path d="M352 138 L362 160 L342 160 Z" fill="#ff5d5d"/></g>' +
+  /* lanterns under awnings */
+  '<g><circle cx="62" cy="140" r="16" fill="url(#mkGlow)"/><circle cx="190" cy="138" r="16" fill="url(#mkGlow)"/><circle cx="318" cy="140" r="16" fill="url(#mkGlow)"/></g>' +
+  /* string lights */
+  '<path d="M0 64 Q95 98 190 70 T380 66" fill="none" stroke="#141a33" stroke-width="1.5"/>';
+  var pts = [[12, 69], [40, 78], [68, 85], [96, 88], [124, 86], [152, 80], [180, 72], [208, 67], [236, 66], [264, 68], [292, 72], [320, 74], [348, 72], [372, 67]];
+  pts.forEach(function(p, k){
+    s += '<circle cx="' + p[0] + '" cy="' + (p[1] + 4) + '" r="4" fill="' + (k % 3 === 0 ? "#ffd23f" : k % 3 === 1 ? "#ffffff" : "#ff5d5d") + '" stroke="#141a33" stroke-width="1"/>';
+  });
+  /* crowd */
+  s += person(40, 254, 1.35, "#141a33") + person(82, 246, 1.1, "#141a33") +
+       person(150, 258, 1.45, "#141a33") + person(240, 256, 1.4, "#141a33") +
+       person(282, 244, 1.05, "#141a33") + person(350, 258, 1.5, "#141a33") +
+       '<g fill="#2b3366"><circle cx="206" cy="212" r="5"/><path d="M199 218 Q206 215 213 218 L215 236 L197 236 Z"/></g>';
+  /* a cat on a crate */
+  s += '<rect x="112" y="200" width="26" height="18" fill="#8a5cf6" stroke="#141a33" stroke-width="2"/>' +
+       '<g fill="#141a33"><ellipse cx="125" cy="194" rx="9" ry="7"/><circle cx="133" cy="186" r="5"/><path d="M130 183 L131 177 L134 182 Z M134 182 L137 177 L137 184 Z"/><path d="M116 196 Q106 192 110 182" fill="none" stroke="#141a33" stroke-width="2.5"/></g>' +
+       '<circle cx="134.5" cy="186" r="1.3" fill="#ffd23f"/>';
+  return s + '</svg>';
+})();
+
+/* ---------- Show, don't tell machine ---------- */
+var TRAYS = [
+  { name: "Setting detail", chips: [
+    ["The corridor lights flickered, then died.", 1],
+    ["It was a really scary place.", 0],
+    ["Somewhere above her, a floorboard creaked.", 1] ] },
+  { name: "A sense", chips: [
+    ["She felt very frightened.", 0],
+    ["The air tasted of dust and old metal.", 1],
+    ["Her own heartbeat thudded in her ears.", 1] ] },
+  { name: "Body language", chips: [
+    ["Her fingers tightened around the torch until her knuckles whitened.", 1],
+    ["She pressed her back flat against the cold wall.", 1],
+    ["She was scared out of her wits.", 0] ] },
+  { name: "Short sentence", chips: [
+    ["Then the door moved.", 1],
+    ["It was all very scary.", 0],
+    ["Silence.", 1] ] }
+];
+var SPIT = [
+  "That one names the feeling (or the place) instead of showing it. That is telling.",
+  "\"Scary\" and \"frightened\" are labels. The machine wants clues the reader can feel.",
+  "Telling in disguise. Swap it for something the reader could see, hear or touch."
+];
+var JUDGE = [
+  { tell: "He was angry.",
+    opts: ["He was really, really angry, and he felt very furious inside.",
+           "His jaw tightened. He set the mug down so carefully that it made no sound at all, then walked out without a word.",
+           "His face went as red as a tomato, his eyes burned like fire, his blood boiled like a kettle and steam came out of his ears like a train."],
+    right: 1,
+    nope: ["That is telling, just louder. \"Angry\" and \"furious\" are labels, not clues.", "", "Four similes in one sentence, and all of them clich&eacute;s. Overloading buries the feeling."],
+    why: "Quiet anger is scarier than shouting. The careful mug and the silent exit let the reader feel the danger without one feeling word." },
+  { tell: "The house was old.",
+    opts: ["Ivy had swallowed the porch. Inside, the wallpaper hung in curls, and every stair groaned its own different note.",
+           "The house was very ancient and had been standing there for a long, long time.",
+           "The house was as old as the hills, as old as time itself, an ancient, aged, elderly old house."],
+    right: 0,
+    nope: ["", "Still telling: \"ancient\" is just a fancier word for old.", "A pile of words that all mean old, plus a clich&eacute;. Nothing for the reader to picture."],
+    why: "Ivy, curling wallpaper and groaning stairs are evidence. The reader works out \"old\" for themselves, and that is far more satisfying." },
+  { tell: "She was excited.",
+    opts: ["She was so excited that she felt really happy and thrilled.",
+           "She was on cloud nine, over the moon and grinning like a Cheshire cat.",
+           "She read the letter twice, then a third time, and suddenly she was laughing, spinning round the kitchen with it pressed to her chest."],
+    right: 2,
+    nope: ["Three feeling labels in a row. That is telling.", "Every phrase is a clich&eacute;. Readers skim straight past them.", ""],
+    why: "Reading it three times, laughing, spinning: actions do the work. We do not even know what the letter says, and we are already excited with her." },
+  { tell: "It was cold.",
+    opts: ["Frost had furred the inside of the window. Her breath hung in front of her, and her fingers had stopped doing as they were told.",
+           "It was freezing cold, extremely chilly and very cold indeed.",
+           "The cold was a bitter, icy, freezing, frosty, glacial, wintry blanket of total coldness."],
+    right: 0,
+    nope: ["", "Telling three times over. Nothing to see or feel.", "Seven adjectives stacked up. One precise detail beats a pile of synonyms."],
+    why: "\"Furred\" is a fresh, surprising verb, and fingers that will not obey are something every reader has felt. That is showing." }
+];
+
+function gaugeSvg(){
+  return '<svg viewBox="0 0 120 74" role="img" aria-label="Show meter">' +
+    '<path d="M12 62 A48 48 0 0 1 108 62" fill="none" stroke="#ffffff" stroke-opacity=".2" stroke-width="12"/>' +
+    '<path d="M12 62 A48 48 0 0 1 44 17" fill="none" stroke="#ff5d5d" stroke-width="12"/>' +
+    '<path d="M44 17 A48 48 0 0 1 84 20" fill="none" stroke="#ffd23f" stroke-width="12"/>' +
+    '<path d="M84 20 A48 48 0 0 1 108 62" fill="none" stroke="#19c39a" stroke-width="12"/>' +
+    '<g class="needle"><path d="M60 62 L60 20" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/></g>' +
+    '<circle cx="60" cy="62" r="6" fill="#ffffff"/></svg>';
+}
+
+function machine(el, api){
+  var d = api.data;
+  if(!d.stage) d.stage = 1;
+  if(!d.pick) d.pick = {};
+  if(!d.spat) d.spat = {};
+  if(d.round === undefined) d.round = 0;
+  if(d.firstGo === undefined) d.firstGo = 0;
+  if(d.traps === undefined) d.traps = 0;
+  var msg = "";
+
+  function setNeedle(frac){
+    var n = el.querySelector(".needle");
+    if(n) setTimeout(function(){ n.style.transform = "rotate(" + Math.round(-80 + 160 * frac) + "deg)"; }, 30);
+  }
+  function result(){ return d.shown ? "shown" : d.firstGo >= 3 ? "right1" : "right2"; }
+
+  function draw(){
+    if(d.stage === 1) drawBuild();
+    else if(d.stage === 2) drawJudge();
+    else drawEnd();
+  }
+
+  function drawBuild(){
+    var count = Object.keys(d.pick).length;
+    el.innerHTML = '<div class="sm">' +
+      '<div class="smtop"><span class="stage">Part 1: build it</span><div class="gaugewrap">' + gaugeSvg() + '<span class="glab">Show meter<br>' + count + ' of 4 ingredients</span></div></div>' +
+      '<div class="tellslip"><span class="stampt">TELL</span><span class="said">She was scared.</span></div>' +
+      '<p class="wnote" style="color:#c9cdf0;margin:0">Feed the machine one ingredient from each tray. It turns them into a \"show\" version. It spits out anything that is still telling.</p>' +
+      '<div class="trays"></div>' +
+      '<div class="printout" aria-live="polite"></div>' +
+      '<div class="smmsg" aria-live="polite">' + (msg || "Tap any ingredient to drop it in. Tap another in the same tray to swap.") + '</div>' +
+      '<div class="smrow" id="smRow"></div></div>';
+    var trays = el.querySelector(".trays");
+    TRAYS.forEach(function(t, ti){
+      var box = document.createElement("div");
+      box.className = "tray";
+      box.innerHTML = '<p class="tn">' + t.name + (d.pick[ti] !== undefined ? '<span class="tick">&#10003;</span>' : '') + '</p><div class="chipsrow"></div>';
+      var row = box.querySelector(".chipsrow");
+      t.chips.forEach(function(c, ci){
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = c[0];
+        if(d.pick[ti] === ci) b.className = "in";
+        if(d.spat[ti + "_" + ci]) b.className = "spat";
+        b.onclick = function(){ feed(ti, ci, b); };
+        row.appendChild(b);
+      });
+      trays.appendChild(box);
+    });
+    var out = el.querySelector(".printout");
+    if(!count) out.innerHTML = '<span class="ph">Your show version prints here...</span>';
+    else out.innerHTML = TRAYS.map(function(t, ti){ return d.pick[ti] !== undefined ? '<span>' + t.chips[d.pick[ti]][0] + '</span>' : ''; }).filter(Boolean).join(" ");
+    setNeedle(count / 4);
+    var row2 = el.querySelector("#smRow");
+    if(count === 4){
+      row2.innerHTML = '<button class="btn" type="button" id="smOn">That is showing. On to part 2</button>';
+      row2.querySelector("#smOn").onclick = function(){ d.stage = 2; msg = ""; api.save(); draw(); };
+    }else if(d.traps > 0){
+      row2.innerHTML = '<button class="btn btn-quiet" type="button" id="smFill">Show me</button>';
+      row2.querySelector("#smFill").onclick = function(){
+        TRAYS.forEach(function(t, ti){ if(d.pick[ti] === undefined){ for(var ci = 0; ci < t.chips.length; ci++){ if(t.chips[ci][1]){ d.pick[ti] = ci; break; } } } });
+        msg = "<b>Filled in.</b> Notice that none of these sentences uses the word scared, yet the whole paragraph is full of fear.";
+        api.save(); draw();
+      };
+    }
+  }
+
+  function feed(ti, ci, btn){
+    if(d.spat[ti + "_" + ci]) return;
+    var c = TRAYS[ti].chips[ci];
+    if(c[1]){
+      d.pick[ti] = ci;
+      var n = Object.keys(d.pick).length;
+      msg = n === 4 ? "<b>Ding.</b> Read your paragraph. Not one word says she is scared, and yet you can feel it." : "<b>Whirr.</b> In it goes.";
+      api.save(); draw();
+    }else{
+      d.spat[ti + "_" + ci] = true; d.traps++;
+      msg = "<b>Clunk.</b> " + SPIT[d.traps % SPIT.length];
+      api.save(); draw();
+      var b2 = el.querySelectorAll(".tray")[ti].querySelectorAll("button")[ci];
+      if(b2) b2.classList.add("shake");
+    }
+  }
+
+  function drawJudge(){
+    var r = JUDGE[d.round];
+    el.innerHTML = '<div class="sm">' +
+      '<div class="smtop"><span class="stage">Part 2: you be the judge &middot; ' + (d.round + 1) + ' of ' + JUDGE.length + '</span><div class="gaugewrap">' + gaugeSvg() + '<span class="glab">First go<br>' + d.firstGo + ' of ' + JUDGE.length + '</span></div></div>' +
+      '<div class="tellslip"><span class="stampt">TELL</span><span class="said">' + r.tell + '</span></div>' +
+      '<p class="wnote" style="color:#c9cdf0;margin:0 0 8px">Three writers had a go at showing this. Which version is strongest?</p>' +
+      '<div class="judge"></div><div class="smmsg" aria-live="polite">Two of these are traps.</div><div class="smrow" id="smRow"></div></div>';
+    setNeedle(d.firstGo / JUDGE.length);
+    var box = el.querySelector(".judge"), out = el.querySelector(".smmsg"), row = el.querySelector("#smRow");
+    var missed = false;
+    function win(b, shown){
+      b.classList.add("ok");
+      [].forEach.call(box.children, function(c){ c.disabled = true; });
+      if(!missed && !shown){ d.firstGo++; setNeedle(d.firstGo / JUDGE.length); el.querySelector(".glab").innerHTML = "First go<br>" + d.firstGo + " of " + JUDGE.length; }
+      if(shown) d.shown = true;
+      api.save();
+      out.innerHTML = '<b>' + (shown ? "This one." : missed ? "Got there." : "Ding.") + '</b> ' + r.why;
+      row.innerHTML = '<button class="btn" type="button" id="smNext">' + (d.round === JUDGE.length - 1 ? "See your score" : "Next") + '</button>';
+      row.querySelector("#smNext").onclick = function(){ d.round++; if(d.round >= JUDGE.length) d.stage = 3; api.save(); draw(); };
+    }
+    r.opts.forEach(function(t, k){
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = t;
+      b.onclick = function(){
+        if(b.disabled) return;
+        if(k === r.right) win(b, false);
+        else{
+          b.classList.add("no"); b.disabled = true; missed = true;
+          out.innerHTML = '<b>Clunk.</b> ' + r.nope[k];
+          row.innerHTML = '<button class="btn btn-quiet" type="button" id="smShow">Show me</button>';
+          row.querySelector("#smShow").onclick = function(){ win(box.children[r.right], true); };
+        }
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function drawEnd(){
+    var rank = d.firstGo === JUDGE.length ? "Master of show" : d.firstGo >= 3 ? "Sharp eyed editor" : d.firstGo >= 2 ? "Showing promise" : "Getting the hang of it";
+    var built = TRAYS.map(function(t, ti){ return d.pick[ti] !== undefined ? t.chips[d.pick[ti]][0] : ""; }).join(" ");
+    el.innerHTML = '<div class="sm"><div class="smend">' +
+      '<div class="gaugewrap" style="justify-content:center">' + gaugeSvg() + '</div>' +
+      '<div class="big">' + d.firstGo + ' / ' + JUDGE.length + '</div><div class="rank">' + rank + '</div>' +
+      '<p class="wnote" style="color:#c9cdf0">The traps were always the same two: <b style="color:#ffd23f">telling louder</b> (piling on feeling words) and <b style="color:#ffd23f">clich&eacute; overload</b>. The winner was always a few precise, fresh details.</p>' +
+      '</div><div class="printout"><span class="tiny">Your paragraph from part 1:</span><br>' + built + '</div>' +
+      '<div class="smrow" style="justify-content:center"><button class="btn btn-quiet" type="button" id="smAgain">Play again</button></div></div>';
+    setNeedle(d.firstGo / JUDGE.length);
+    el.querySelector("#smAgain").onclick = function(){ d.stage = 1; d.pick = {}; d.spat = {}; d.round = 0; d.firstGo = 0; d.traps = 0; d.shown = false; msg = ""; api.save(); draw(); };
+    api.done(result());
+  }
+
+  draw();
+}
+
+EGW.run({
+  id: "english-creative",
+  title: "Create and evaluate",
+  subject: "English Language",
+  mins: 55,
+  blurb: "Two big exam skills in one: judging how well a writer creates an effect, and then writing a description or story of your own, which on most boards is worth 40 marks. It ends with a picture to describe.",
+  steps: [
+
+  /* ---------- EVALUATING ---------- */
+  { type: "learn", topic: "Do you agree?",
+    title: "\"A student said... to what extent do you agree?\"",
+    html: '<p>This is the evaluation question. On AQA it is Paper 1 Question 4; Eduqas asks it in almost the same way, and Edexcel asks you to evaluate how successfully a writer does something. It is the same skill.</p>' +
+          EXTRACT + STATEMENT +
+          '<ul>' +
+          '<li><b>Say how far you agree.</b> You do not have to disagree. \"I mostly agree\" or \"I strongly agree\" is fine.</li>' +
+          '<li><b>Use the statement\'s own words</b> (fun, frightening) as you go.</li>' +
+          '<li><b>Evidence and method</b>, as in any language answer: a short quote, and what the writer is doing.</li>' +
+          '<li><b>Judge it:</b> how well does it work? Words like <i>successfully, effectively, convincingly</i>.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Agree, then prove it, then go one step further: \"and what makes it even more frightening is...\"</div>' },
+
+  { type: "mc", topic: "Do you agree?",
+    q: "Which quotation gives the strongest support to the statement?",
+    fig: STATEMENT + FOLD,
+    options: [
+      "\"Ama should have left with the others.\"",
+      "\"Their eyes were wide and white, their mouths open, as if they had seen something coming and could not run.\"",
+      "\"the dodgems, the helter skelter, the big wheel\"",
+      "\"Ama took a step closer.\""
+    ],
+    answer: 1,
+    hint: "Find the moment where something meant for children's fun looks terrified.",
+    why: "Carousel horses are a symbol of childhood fun, and the writer makes them look terrified, as if they have seen something. The fun object itself becomes frightening, which is exactly what the statement says." },
+
+  { type: "sort", topic: "Do you agree?",
+    q: "Sort these sentences from a student's answer. Which are <b>evaluating</b> (judging how well it works) and which are just <b>retelling</b> the story?",
+    buckets: ["Evaluating", "Just retelling"],
+    cards: [
+      ["The writer successfully turns the carousel, a symbol of fun, into something sinister.", 0],
+      ["The single word sentences \"Slowly. Silently.\" are effective because they slow the moment right down.", 0],
+      ["I strongly agree, because the fairground is described as if it is dying.", 0],
+      ["Ama stays behind when everyone else goes home.", 1],
+      ["The lights go out and then the carousel starts.", 1],
+      ["There is a hook a duck stall and some dodgems.", 1]
+    ],
+    hint: "Retelling just says what happens. Evaluating says how well the writer makes it work, often with words like successfully or effective.",
+    why: "Retelling earns almost nothing, however accurate it is. Every sentence you write for this question should be doing some judging: a method, an effect, and how well it works." },
+
+  { type: "mc", topic: "Do you agree?", stretch: true,
+    q: "Which opening would reach the highest marks?",
+    options: [
+      "I agree with the student because it is scary.",
+      "I disagree, because fairgrounds are fun.",
+      "I largely agree. The writer makes the fairground frightening, but cleverly keeps traces of fun, like the candyfloss smell, so the fear feels worse by contrast.",
+      "The student said the place should be fun but is frightening, which is what the student said."
+    ],
+    answer: 2,
+    hint: "The best answers agree, then add something the student did not notice.",
+    why: "\"Largely agree\" plus a twist shows a critical view. The candyfloss is \"sweet\" but \"slightly burnt\": even the nice smell has gone wrong. Noticing that is what grade 6 and above looks like." },
+
+  /* ---------- PLANNING ---------- */
+  { type: "learn", topic: "Planning",
+    title: "Two plans: a story shape and a camera",
+    fig: MOUNTAIN,
+    html: '<p>The writing question gives you a choice, usually a <b>story</b> or a <b>description</b>, often with a picture. On most boards it is worth 40 marks and you have about 45 minutes. Spend five of them planning.</p>' +
+          '<p><b>For a story</b>, use the five part shape above. Keep it small: one character, one place, one problem. A great story about ten minutes beats a rushed one about ten years.</p>' +
+          '<p><b>For a description</b>, nothing much needs to happen. Plan it like a camera:</p>' + ZOOM +
+          '<div class="keep"><b>Keep this</b>Story: exposition, rising action, climax, falling action, resolution. Description: wide, zoom, close up, shift.</div>' },
+
+  { type: "order", topic: "Planning",
+    q: "Here is a plan for a story called <i>The Last Bus</i>. Put it into the five part story shape.",
+    items: [
+      "Exposition: Leah waits alone at a bus stop in the rain, phone on 2%",
+      "Rising action: the last bus is late; headlights appear, then turn away",
+      "Climax: a stranger's car pulls up and the window slides down",
+      "Falling action: it is her older brother, who has been driving round looking for her",
+      "Resolution: warm in the car, she watches the empty bus stop disappear behind them"
+    ],
+    hint: "Set the scene, build tension, the big moment, the release, the ending.",
+    why: "Notice how small it is: one person, one stop, one evening. The ending echoes the opening (the bus stop again), which is a cyclical ending; more on that later." },
+
+  { type: "match", topic: "Planning",
+    q: "Match each line of a description to its camera shot.",
+    pairs: [
+      ["The whole valley lay under snow, silent from one ridge to the next.", "Wide shot"],
+      ["Down in the village, a single street of crooked cottages.", "Zoom in"],
+      ["On one doorstep, a child's red mitten, frozen stiff.", "Close up"],
+      ["By spring, the mitten would be gone, and the street loud with meltwater.", "Shift in time"]
+    ],
+    hint: "Follow the camera: the whole landscape, then part of it, then one tiny thing, then a jump.",
+    why: "Moving from wide to close gives a description a clear structure, which is a large part of the content and organisation marks. The shift at the end stops it simply stopping." },
+
+  /* ---------- OPENINGS ---------- */
+  { type: "learn", topic: "Openings",
+    title: "Hook them in one line",
+    html: '<ul>' +
+          '<li><b>In medias res</b> (Latin for \"in the middle of things\"): start mid action. <i>The glass was already falling when I saw it.</i></li>' +
+          '<li><b>A sensory detail:</b> <i>The kitchen smelled of burnt toast and bad news.</i></li>' +
+          '<li><b>Dialogue:</b> <i>\"Don\'t open that,\" Gran said, a second too late.</i></li>' +
+          '<li><b>A short, intriguing statement:</b> <i>Nobody had used the back stairs since 1987.</i></li>' +
+          '</ul>' +
+          '<p>Openings to avoid: waking up, \"Hi, my name is...\", the weather report, \"One day...\".</p>' +
+          '<div class="keep"><b>Keep this</b>A good first line raises a question the reader needs answered.</div>' },
+
+  { type: "match", topic: "Openings",
+    q: "Match each opening to its type of hook.",
+    pairs: [
+      ["I was halfway up the drainpipe when the window above me slammed shut.", "In medias res"],
+      ["The air in the cellar was thick and sweet, like fruit left too long in a bowl.", "Sensory detail"],
+      ["\"You have exactly one minute to explain the goat.\"", "Dialogue"],
+      ["My sister had been invisible for three days before anyone noticed.", "Intriguing statement"]
+    ],
+    hint: "Which one starts with speech marks? Which one starts mid climb? Which describes a smell?",
+    why: "All four raise a question: why is she on a drainpipe, what is rotting, why is there a goat, how can someone be invisible? That question is the hook." },
+
+  { type: "mc", topic: "Openings",
+    q: "Which opening is <b>weakest</b>?",
+    options: [
+      "\"Run,\" she whispered. So I ran.",
+      "One day I woke up and got ready for school and had my breakfast, which was cereal.",
+      "The sea had taken the pier in the night, and nobody in Saltby could quite believe it.",
+      "Thirteen steps led down to the basement. I counted every one."
+    ],
+    answer: 1,
+    hint: "Which one could start a thousand stories, and raises no question at all?",
+    why: "Waking up and breakfast spend your best line on nothing. The other three each drop the reader into something already strange or tense." },
+
+  /* ---------- SHOW NOT TELL ---------- */
+  { type: "learn", topic: "Show, not tell",
+    title: "Let the reader work it out",
+    html: '<p><b>Telling</b> names the feeling: <i>She was nervous.</i></p>' +
+          '<p><b>Showing</b> gives clues so the reader feels it: <i>She checked the time again. Two minutes since she last looked. She picked at the corner of her sleeve until a thread came loose.</i></p>' +
+          '<p>Showing ingredients: <b>body language</b>, <b>actions</b>, <b>senses</b>, <b>setting details</b> that match the mood, and <b>short sentences</b> at the tense moments.</p>' +
+          '<div class="keep"><b>Keep this</b>Test: could a camera film it? A camera can film a trembling hand. It cannot film \"nervous\".</div>' },
+
+  { type: "widget", topic: "Show, not tell",
+    title: "The show, don't tell machine",
+    html: "Part 1: build a show version of a tell sentence, ingredient by ingredient. Part 2: judge three versions of four more. Three of four first go earns full sparks.",
+    mount: machine,
+    report: function(d){
+      if(d.stage === 3) return "Show machine: " + (d.firstGo || 0) + " of 4 judged first go, " + (d.traps || 0) + " telling chips spat out" + (d.shown ? " (used Show me)" : "");
+      return "Show machine: reached part " + (d.stage || 1) + (d.stage === 2 ? ", round " + ((d.round || 0) + 1) : "");
+    } },
+
+  { type: "multi", topic: "Show, not tell",
+    q: "Which <b>two</b> sentences show rather than tell?",
+    options: [
+      "He was very embarrassed.",
+      "Heat crawled up his neck, and he suddenly found his shoelaces fascinating.",
+      "She felt lonely at the party.",
+      "Everyone else was laughing in a circle; she held her drink with both hands and studied the bookshelf.",
+      "The room was really messy."
+    ],
+    answers: [1, 3],
+    hint: "Use the camera test. Which ones could actually be filmed?",
+    why: "A red neck and staring at shoelaces both scream embarrassment without saying it. The girl outside the laughing circle, holding her drink like a shield, is loneliness on film. The other three are labels." },
+
+  /* ---------- SENSES AND IMAGERY ---------- */
+  { type: "learn", topic: "Senses and imagery",
+    title: "Five senses, and imagery with a light touch",
+    fig: SENSES,
+    html: '<p>Most writers lean on sight. Adding sound, smell, touch or taste makes a scene feel real, and it is an easy way to stand out.</p>' +
+          '<p><b>Figurative language</b> (similes, metaphors, personification) is powerful, but only when it is fresh and used sparingly. One striking image in a paragraph beats five crammed together.</p>' +
+          '<div class="keep"><b>Keep this</b>Swap the first image that comes to mind (often a clich&eacute; like \"as cold as ice\") for the second or third. Those are usually yours.</div>' },
+
+  { type: "match", topic: "Senses and imagery",
+    q: "Match each sentence to the sense it mainly uses.",
+    pairs: [
+      ["Neon signs buzzed and flickered pink across the wet road.", "Sight"],
+      ["Somewhere behind the wall, a radio was muttering the football scores.", "Sound"],
+      ["The bakery breathed warm bread and cinnamon into the street.", "Smell"],
+      ["The railing was rough with rust and freezing under my palm.", "Touch"],
+      ["Sea spray left salt on my lips.", "Taste"]
+    ],
+    hint: "Look for the key word in each: flickered, muttering, bread and cinnamon, rough, salt on my lips.",
+    why: "Notice that some do two jobs: the bakery sentence also personifies the shop (it \"breathed\"). Combining a sense with a small piece of imagery is a neat way to pack detail into one line." },
+
+  { type: "mc", topic: "Senses and imagery", stretch: true,
+    q: "Which sentence uses imagery most skilfully?",
+    options: [
+      "The moon was like a big white ball, as white as snow, shining like a torch in the sky like a lamp.",
+      "The moon was as bright as a diamond.",
+      "The moon hung over the estate like a security light that nobody had remembered to switch off.",
+      "The moon was nice and bright."
+    ],
+    answer: 2,
+    hint: "One is overloaded, one is a clich&eacute;, one has no imagery. Which one is fresh and fits a particular place?",
+    why: "The security light simile is surprising, fits the urban setting, and quietly adds a feeling of being watched and forgotten. That is imagery doing two jobs at once. Option A piles four comparisons on top of each other, and B is a clich&eacute;." },
+
+  /* ---------- SENTENCES AND PARAGRAPHS ---------- */
+  { type: "learn", topic: "Sentences and paragraphs",
+    title: "Vary the starts, the lengths, the paragraphs",
+    html: '<p>Lots of sentences starting with \"I\" or \"The\" make writing sound flat. Mix your starts:</p>' +
+          '<ul>' +
+          '<li>A verb ending in ing: <i>Shivering, she...</i></li>' +
+          '<li>An adverb: <i>Slowly, the door...</i></li>' +
+          '<li>A preposition (where or when): <i>Beneath the bridge,...</i> <i>After midnight,...</i></li>' +
+          '<li>A connective: <i>Although it was late,...</i></li>' +
+          '</ul>' +
+          '<p>Then vary the <b>lengths</b>: a long, flowing sentence that builds the scene, then a short one that lands. And remember a <b>one line paragraph</b> makes a moment stand out on the page.</p>' +
+          '<div class="keep"><b>Keep this</b>Use one line paragraphs once or twice, for the moment that matters most. Every paragraph a single line just looks like a list.</div>' },
+
+  { type: "match", topic: "Sentences and paragraphs",
+    q: "Match each sentence to the way it starts.",
+    pairs: [
+      ["Gasping, Tom reached the top of the hill.", "Verb ending in ing"],
+      ["Carefully, she lifted the lid.", "Adverb"],
+      ["Under the stairs, something was breathing.", "Preposition"],
+      ["Although the house was empty, the kettle was warm.", "Connective"]
+    ],
+    hint: "Look at the first word only. Does it end in ing or ly? Is it a place word? Is it a joining word?",
+    why: "Starting with an adverb, a verb ending in ing, or a preposition usually needs a comma after the opening phrase. Mixing these up across a paragraph keeps the rhythm alive." },
+
+  { type: "mc", topic: "Sentences and paragraphs", stretch: true,
+    q: "Which version uses a one line paragraph best?",
+    options: [
+      "<p>I walked in.</p><p>I sat down.</p><p>I got my book out.</p><p>I started reading.</p>",
+      "<p>For weeks I had rehearsed what I would say to him: the careful opening, the jokes, the exact moment I would mention the letter.</p><p>He did not even look up.</p>",
+      "<p>It was a nice day and I went to the park and I saw some ducks and then I went home.</p>",
+      "<p>The end.</p>"
+    ],
+    answer: 1,
+    hint: "Which one isolates a single line because it is a turning point?",
+    why: "The long sentence builds hope, and the one line paragraph knocks it down. That contrast is exactly what the examiner calls \"crafted\". Option A makes every line a paragraph, so none of them stands out." },
+
+  /* ---------- ENDINGS AND TRAPS ---------- */
+  { type: "learn", topic: "Endings and traps",
+    title: "Finish well, and dodge the traps",
+    html: '<p><b>A cyclical ending</b> returns to something from your opening: the same place, object, line or image, but changed. It makes a piece feel deliberately built.</p>' +
+          '<p>The common traps:</p>' +
+          '<ul>' +
+          '<li><b>Too much plot:</b> car chases, three locations, a time machine. Fewer events, more detail.</li>' +
+          '<li><b>Clich&eacute;s:</b> \"it was all a dream\", \"heart pounding out of my chest\".</li>' +
+          '<li><b>\"And then... and then...\"</b>: a list of events with no shaping.</li>' +
+          '<li><b>Running out of time</b> before an ending. Know your last line before you start.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>A small story told well always beats a big story told fast.</div>' },
+
+  { type: "mc", topic: "Endings and traps",
+    q: "A story opens: <i>\"The swing in Nana's garden had not moved in a year.\"</i> Which ending is cyclical?",
+    options: [
+      "And then I woke up and it was all a dream.",
+      "I went home and had my tea.",
+      "Outside, in the low autumn sun, the swing moved: just once, as if someone had sat down to say goodbye.",
+      "Suddenly an alien landed in the garden."
+    ],
+    answer: 2,
+    hint: "Which one brings back the object from the first line, changed?",
+    why: "The swing returns, and now it moves: the same image, with a new meaning. That one link turns a set of paragraphs into a crafted whole." },
+
+  { type: "multi", topic: "Endings and traps",
+    q: "Which <b>three</b> are traps to avoid?",
+    options: [
+      "Ending with \"it was all a dream\"",
+      "A story covering three countries and ten years in 45 minutes",
+      "Returning to your opening image at the end",
+      "\"And then I went downstairs and then I saw the dog and then I went out\"",
+      "Focusing on one small moment in rich detail"
+    ],
+    answers: [0, 1, 3],
+    hint: "Two of these are things the learn card recommended.",
+    why: "The dream ending cancels everything the reader cared about. Too much plot leaves no room for description. \"And then\" chains read like a list. The other two are exactly what to aim for." },
+
+  { type: "mc", topic: "Endings and traps", stretch: true,
+    q: "Which is the best rewrite of <i>\"I opened the door and then I saw the dog and then it ran at me and then I screamed.\"</i>?",
+    options: [
+      "I opened the door, then I saw the dog, then it ran at me, then I screamed.",
+      "The door swung open. There, in the hallway, sat the biggest dog I had ever seen. For a second, neither of us moved. Then it ran.",
+      "I opened the door and I saw a dog and it ran and I screamed and it was scary.",
+      "Door. Dog. Run. Scream. Scary. Very. Scary."
+    ],
+    answer: 1,
+    hint: "Which one slows down the important moment, and varies its sentences?",
+    why: "It cuts \"and then\", varies sentence lengths, and stretches the frozen second before the action. Option A just swaps \"and then\" for commas. D overdoes short sentences until they lose their power." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your turn",
+    fig: MARKET,
+    q: '<p><b>Write a description suggested by this picture.</b> Take a minute to really look first. What can you hear? What would it smell like? Who is by the steaming stall, and where is the cat looking? You do not have to describe everything: pick a few things and describe them really well.</p>' +
+       '<p><b>Step 1: a camera plan.</b> Jot a few words for each shot. Bullet points are perfect.</p>',
+    starters: ["Wide:", "Zoom:", "Close up:", "A sound:", "A smell:", "Shift:", "Last line idea:"],
+    checklist: [
+      "I have a wide shot and at least one close up",
+      "I have at least two senses besides sight",
+      "I have an idea for a shift (later that night, or a different place)",
+      "I know roughly how I will end"
+    ],
+    minWords: 30 },
+
+  { type: "write", topic: "Your turn",
+    fig: MARKET,
+    q: '<p><b>Step 2: write it.</b> Aim for three or four paragraphs if you can, or start with one strong opening paragraph and see where it takes you. It goes to Jay only if you choose to send it.</p>',
+    starters: [
+      "The market",
+      "Beneath the lights,",
+      "Steam curled",
+      "Somewhere in the crowd,",
+      "Slowly,",
+      "On a crate by the fruit stall,",
+      "By midnight,"
+    ],
+    checklist: [
+      "My first line hooks the reader (not \"One day...\")",
+      "I showed rather than told at least once",
+      "I used at least three senses",
+      "I used one fresh image, not a clich&eacute;",
+      "I varied my sentence starts and included a short sentence",
+      "I used a one line paragraph for effect",
+      "Stretch: my ending links back to my opening"
+    ],
+    minWords: 200 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sequences and graphs - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+.alg{font-family:"Atkinson Hyperlegible",Verdana,sans-serif;white-space:nowrap}
+.nocalc{display:inline-block;font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:3px 10px;margin:0 6px 4px 0;vertical-align:middle}
+/* Line tamer (widget on this page only) */
+.lt-dots{display:flex;gap:6px;margin-bottom:6px}
+.lt-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.lt-dots span.on{background:var(--mint)}
+.lt-dots span.now{background:var(--sun)}
+.lt-task p{margin:0 0 6px}
+.lt-svg svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
+.lt-eq{text-align:center;margin:4px 0 2px}
+.lt-ctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:6px 0}
+.lt-ctl .lab{font-family:var(--display);font-weight:700;min-width:96px}
+.lt-ctl .lab b{display:inline-block;min-width:38px;text-align:center;background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:1px 6px;margin-left:4px}
+.lt-ctl .pm{display:flex;gap:6px}
+.lt-ctl .pm button{font-family:var(--display);font-weight:700;font-size:1.15rem;width:42px;height:42px;border:3px solid var(--ink);border-radius:10px;background:var(--white);color:var(--ink);cursor:pointer}
+.lt-ctl .pm button:active{background:var(--sun)}
+.lt-ctl input[type=range]{height:34px}
+.lt-fb .btn{margin-top:10px}
+@media (max-width:460px){
+  .lt-ctl{grid-template-columns:1fr auto}
+  .lt-ctl input[type=range]{grid-column:1 / -1;grid-row:2}
+}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Sequences and graphs</h2>
+    <span>GCSE Maths, Foundation. Sequences and the nth term, coordinates, straight line graphs, y = mx + c, real life graphs and a peek at quadratics.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var NC = '<span class="nocalc">No calculator</span> ';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function neg(v){ return v < 0 ? "&minus;" + (-v) : String(v); }
+var clipN = 0;
+
+/* A general grid. o: {x0,x1,y0,y1,ux,uy,step,stepY,left,top,w,h,xlab,ylab,aria,body(X,Y)} */
+function grid(o){
+  var left = o.left || 30, top = o.top || 14;
+  var ux = o.ux, uy = o.uy, sx = o.step || 1, sy = o.stepY || sx;
+  function X(x){ return +(left + (x - o.x0) * ux).toFixed(1); }
+  function Y(y){ return +(top + (o.y1 - y) * uy).toFixed(1); }
+  var W = o.w || Math.ceil(X(o.x1) + 16), H = o.h || Math.ceil(Y(o.y0) + (o.xlab ? 44 : 28));
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + o.aria + '">';
+  var gx = o.gridX || sx, gy = o.gridY || sy, x, y;
+  for(x = o.x0; x <= o.x1 + 1e-9; x += gx) s += '<path d="M' + X(x) + ' ' + Y(o.y1) + ' V' + Y(o.y0) + '" stroke="' + LINE + '" stroke-width="1"/>';
+  for(y = o.y0; y <= o.y1 + 1e-9; y += gy) s += '<path d="M' + X(o.x0) + ' ' + Y(y) + ' H' + X(o.x1) + '" stroke="' + LINE + '" stroke-width="1"/>';
+  var ax = o.x0 <= 0 && o.x1 >= 0 ? 0 : o.x0, ay = o.y0 <= 0 && o.y1 >= 0 ? 0 : o.y0;
+  s += '<path d="M' + X(o.x0) + ' ' + Y(ay) + ' H' + X(o.x1) + '" stroke="' + INK + '" stroke-width="2.2"/>';
+  s += '<path d="M' + X(ax) + ' ' + Y(o.y0) + ' V' + Y(o.y1) + '" stroke="' + INK + '" stroke-width="2.2"/>';
+  for(x = o.x0; x <= o.x1 + 1e-9; x += sx){ if(Math.abs(x - ax) < 1e-9 && o.x0 < 0) continue; s += t(X(x), Y(ay) + 17, neg(+x.toFixed(2)), 14, INK, BODY + ' text-anchor="middle"'); }
+  for(y = o.y0; y <= o.y1 + 1e-9; y += sy){ if(Math.abs(y - ay) < 1e-9) continue; s += t(X(ax) - 6, Y(y) + 5, neg(+y.toFixed(2)), 14, INK, BODY + ' text-anchor="end"'); }
+  if(o.x0 < 0 || o.y0 < 0) s += t(X(ax) - 6, Y(ay) + 17, "0", 14, INK, BODY + ' text-anchor="end"');
+  else s += t(X(ax), Y(ay) + 17, "0", 14, INK, BODY + ' text-anchor="middle"');
+  if(o.xlab) s += t((X(o.x0) + X(o.x1)) / 2, Y(o.y0) + 38, o.xlab, 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  if(o.ylab) s += t(X(o.x0) + 4, Y(o.y1) - 2, o.ylab, 15, INK, LAB + ' font-weight="700"');
+  var id = "gclip" + (++clipN);
+  s += '<clipPath id="' + id + '"><rect x="' + X(o.x0) + '" y="' + Y(o.y1) + '" width="' + (X(o.x1) - X(o.x0)) + '" height="' + (Y(o.y0) - Y(o.y1)) + '"/></clipPath>';
+  s += '<g clip-path="url(#' + id + ')">' + (o.clipped ? o.clipped(X, Y) : "") + '</g>';
+  s += (o.body ? o.body(X, Y) : "") + '</svg>';
+  return s;
+}
+function dot(X, Y, x, y, col, lab, dx, dy){
+  return '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" fill="' + (col || BLUE) + '" stroke="' + INK + '" stroke-width="2"/>' +
+    (lab ? t(X(x) + (dx === undefined ? 9 : dx), Y(y) + (dy === undefined ? -8 : dy), lab, 17, INK, LAB + ' font-weight="700"') : "");
+}
+function seg(X, Y, x1, y1, x2, y2, col, w, dash){
+  return '<path d="M' + X(x1) + ' ' + Y(y1) + ' L' + X(x2) + ' ' + Y(y2) + '" stroke="' + (col || BLUE) + '" stroke-width="' + (w || 3) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' fill="none" stroke-linecap="round"/>';
+}
+
+/* ---------- figures ---------- */
+
+/* Sequence hops */
+var HOPS = (function(){
+  var v = [5, 8, 11, 14, 17];
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="The sequence 5, 8, 11, 14, 17 goes up by 3 each time. The term before 5 would be 2, so the nth term is 3n plus 2.">';
+  v.forEach(function(n, k){
+    var x = 60 + k * 72;
+    s += '<rect x="' + (x - 24) + '" y="60" width="48" height="42" rx="9" fill="' + (k ? WHITE : SUN) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x, 89, n, 21, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += t(x, 124, "n = " + (k + 1), 14, "#4b5275", BODY + ' text-anchor="middle"');
+    if(k < 4){
+      s += '<path d="M' + (x + 4) + ' 56 Q' + (x + 36) + ' 24 ' + (x + 68) + ' 56" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>';
+      s += t(x + 36, 30, "+3", 16, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+    }
+  });
+  s += t(200, 146, "nth term = 3n + 2", 18, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Triangular dots */
+var TRI = (function(){
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="Triangular numbers as dot patterns: 1, 3, 6 and 10 dots.">';
+  var x0 = [30, 90, 175, 285];
+  for(var n = 1; n <= 4; n++){
+    for(var r = 0; r < n; r++) for(var c = 0; c <= r; c++){
+      s += '<circle cx="' + (x0[n - 1] + (n - 1 - r) * 11 + c * 22) + '" cy="' + (22 + r * 22) + '" r="8" fill="' + [SUN, CYAN, MINT, VIOLET][n - 1] + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    }
+    s += t(x0[n - 1] + (n - 1) * 11, 136, String(n * (n + 1) / 2), 19, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '</svg>';
+  return s;
+})();
+
+/* Coordinates in four quadrants */
+var QUAD = grid({ x0: -5, x1: 5, y0: -5, y1: 5, ux: 34, uy: 26, left: 24, top: 12,
+  aria: "Grid from minus 5 to 5 on both axes. Point A at 3, 2. Point B at minus 4, 1. Point C at minus 2, minus 3. Point D at 4, minus 4.",
+  body: function(X, Y){
+    return dot(X, Y, 3, 2, BLUE, "A") + dot(X, Y, -4, 1, CORAL, "B") + dot(X, Y, -2, -3, VIOLET, "C") + dot(X, Y, 4, -4, MINT, "D", -24, -8);
+  } });
+
+/* Plotting y = 2x - 1 */
+var PLOT = grid({ x0: -2, x1: 4, y0: -4, y1: 7, ux: 44, uy: 22, left: 28, top: 12,
+  aria: "The points from the table for y equals 2x minus 1 plotted and joined with a straight line.",
+  clipped: function(X, Y){ return seg(X, Y, -2, -5, 4, 7, BLUE, 3); },
+  body: function(X, Y){
+    var o = "";
+    [-1, 0, 1, 2, 3].forEach(function(x){ o += dot(X, Y, x, 2 * x - 1, SUN); });
+    return o + t(X(2.6) - 70, Y(6) + 2, "y = 2x &minus; 1", 17, BLUE, LAB + ' font-weight="700"');
+  } });
+
+/* Gradient triangle on y = 2x + 1 */
+var GRAD = grid({ x0: -2, x1: 4, y0: -2, y1: 8, ux: 44, uy: 24, left: 28, top: 12,
+  aria: "The line y equals 2x plus 1. It crosses the y axis at 1. A triangle shows that for 1 across, the line goes up 2, so the gradient is 2.",
+  clipped: function(X, Y){ return seg(X, Y, -2, -3, 4, 9, BLUE, 3); },
+  body: function(X, Y){
+    return seg(X, Y, 1, 3, 2, 3, CORAL, 3) + seg(X, Y, 2, 3, 2, 5, CORAL, 3) +
+      t(X(1.5), Y(3) + 20, "1 across", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"') +
+      t(X(2) + 8, Y(4) + 5, "2 up", 15, CORAL, LAB + ' font-weight="700"') +
+      dot(X, Y, 0, 1, SUN) + t(X(0) + 12, Y(1) + 20, "c = 1", 15, INK, LAB + ' font-weight="700"') +
+      t(X(2.4), Y(1.6), "y = 2x + 1", 17, BLUE, LAB + ' font-weight="700"');
+  } });
+
+/* Distance time graph of a walk */
+var DT = grid({ x0: 0, x1: 3, y0: 0, y1: 8, ux: 100, uy: 24, step: 0.5, stepY: 2, gridY: 1, left: 34, top: 18, xlab: "Time (hours)", ylab: "Distance from home (km)",
+  aria: "Distance time graph. From 0 to 1 hour the distance rises from 0 to 6 km. From 1 hour to 1.5 hours it stays at 6 km. From 1.5 hours to 3 hours it falls back to 0.",
+  body: function(X, Y){
+    return '<path d="M' + X(0) + ' ' + Y(0) + ' L' + X(1) + ' ' + Y(6) + ' L' + X(1.5) + ' ' + Y(6) + ' L' + X(3) + ' ' + Y(0) + '" fill="none" stroke="' + BLUE + '" stroke-width="3.5" stroke-linejoin="round"/>';
+  } });
+
+/* Conversion graph: miles to km */
+var CONV = grid({ x0: 0, x1: 50, y0: 0, y1: 80, ux: 6, uy: 3, step: 10, stepY: 20, gridX: 5, gridY: 10, left: 34, top: 22, xlab: "Miles", ylab: "Kilometres",
+  aria: "Conversion graph. A straight line from 0 miles, 0 kilometres to 50 miles, 80 kilometres. 5 miles is 8 kilometres.",
+  body: function(X, Y){
+    return seg(X, Y, 0, 0, 50, 80, BLUE, 3.5) + seg(X, Y, 25, 0, 25, 40, CORAL, 2, "5 4") + seg(X, Y, 0, 40, 25, 40, CORAL, 2, "5 4") +
+      dot(X, Y, 25, 40, CORAL, "25 miles = 40 km", 10, 22);
+  } });
+
+/* Quadratic y = x^2 - 2x - 3 */
+function curve(X, Y, f, a, b, col){
+  var p = "", n = 60;
+  for(var k = 0; k <= n; k++){ var x = a + (b - a) * k / n; p += (k ? " L" : "M") + X(x) + " " + Y(f(x)); }
+  return '<path d="' + p + '" fill="none" stroke="' + (col || BLUE) + '" stroke-width="3.5"/>';
+}
+var QUADG = grid({ x0: -2, x1: 4, y0: -5, y1: 5, ux: 44, uy: 22, left: 28, top: 12,
+  aria: "Graph of y equals x squared minus 2x minus 3. A U shaped curve crossing the x axis at minus 1 and 3, with its lowest point, the turning point, at 1, minus 4.",
+  clipped: function(X, Y){ return curve(X, Y, function(x){ return x * x - 2 * x - 3; }, -2.2, 4.2); },
+  body: function(X, Y){
+    return seg(X, Y, 1, -5, 1, 5, VIOLET, 2, "6 5") + dot(X, Y, -1, 0, SUN) + dot(X, Y, 3, 0, SUN) + dot(X, Y, 1, -4, CORAL) +
+      t(X(1) + 10, Y(-4) + 6, "turning point", 15, CORAL, LAB + ' font-weight="700"') +
+      '<rect x="' + (X(-1.3) - 4) + '" y="' + (Y(4.1) - 16) + '" width="196" height="22" rx="5" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.5"/>' + t(X(-1.3), Y(4.1), "roots: x = &minus;1 and x = 3", 15, INK, LAB + ' font-weight="700"');
+  } });
+
+/* Quadratic for the question: y = x^2 - 4x + 3 */
+var QUADQ = grid({ x0: -1, x1: 5, y0: -2, y1: 8, ux: 44, uy: 22, left: 28, top: 12,
+  aria: "Graph of a U shaped curve, y equals x squared minus 4x plus 3, drawn for x from minus 1 to 5.",
+  clipped: function(X, Y){ return curve(X, Y, function(x){ return x * x - 4 * x + 3; }, -1.2, 5.2); } });
+
+/* ---------- the line tamer ---------- */
+var CHAL = [
+  { txt: "Make the line go through both stars, (1, 5) and (3, 9).", pts: [[1, 5], [3, 9]], m: 2, c: 3,
+    hint: "From (1, 5) to (3, 9) the line goes up 4 for 2 across. How much up for each 1 across? Then slide c until the line hits the stars.",
+    show: "Up 4 for 2 across is a gradient of 2. Going back 1 from (1, 5) to x = 0 takes you down 2, to (0, 3). So y = 2x + 3." },
+  { txt: "Make a line parallel to the dashed line y = 2x + 1 that goes through the star at (0, &minus;3).", pts: [[0, -3]], guide: { m: 2, c: 1 }, m: 2, c: -3,
+    hint: "Parallel lines have the same gradient. And a line through (0, &minus;3) crosses the y axis at &minus;3.",
+    show: "Parallel means the same m, so m = 2. The star is on the y axis, so c = &minus;3. y = 2x &minus; 3." },
+  { txt: "Make a line through (0, 4) and (2, 0).", pts: [[0, 4], [2, 0]], m: -2, c: 4,
+    hint: "This line goes down from left to right, so the gradient is negative. Down 4 for 2 across is how much per 1 across?",
+    show: "Down 4 for 2 across is a gradient of &minus;2. It crosses the y axis at 4. y = &minus;2x + 4." },
+  { txt: "Last one. Make the horizontal line that goes through (&minus;3, &minus;2).", pts: [[-3, -2]], m: 0, c: -2,
+    hint: "A horizontal line is flat, so how steep is it? Every point on it has the same y coordinate.",
+    show: "Flat means gradient 0. Every point has y = &minus;2, so the line is y = &minus;2." }
+];
+function fmtNum(v){ var a = Math.abs(v); return (v < 0 ? "&minus;" : "") + (a % 1 ? a.toFixed(1) : String(a)); }
+function fmtEq(m, c){
+  var ms = m === 0 ? "" : m === 1 ? "x" : m === -1 ? "&minus;x" : fmtNum(m) + "x";
+  if(!ms) return "y = " + fmtNum(c);
+  return "y = " + ms + (c > 0 ? " + " + c : c < 0 ? " &minus; " + (-c) : "");
+}
+
+function mountTamer(el, api){
+  var d = api.data;
+  if(typeof d.i !== "number") d.i = 0;
+  if(typeof d.m !== "number") d.m = 1;
+  if(typeof d.k !== "number") d.k = 0;
+  if(!d.miss) d.miss = [0, 0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false, false];
+  var view = d.i;
+
+  el.innerHTML =
+    '<div class="wpanel lt-task" data-r="task"></div>' +
+    '<div class="lt-svg" data-r="svg"></div>' +
+    '<div class="lt-eq wbig alg" data-r="eq"></div>' +
+    '<div class="wpanel">' +
+      '<div class="lt-ctl"><span class="lab">Gradient m <b data-r="mv"></b></span><input type="range" id="ltM" min="-4" max="4" step="0.5" aria-label="Gradient m"><span class="pm"><button type="button" data-r="m-" aria-label="Gradient down">&minus;</button><button type="button" data-r="m+" aria-label="Gradient up">+</button></span></div>' +
+      '<div class="lt-ctl"><span class="lab">Intercept c <b data-r="cv"></b></span><input type="range" id="ltC" min="-6" max="10" step="1" aria-label="Intercept c"><span class="pm"><button type="button" data-r="c-" aria-label="Intercept down">&minus;</button><button type="button" data-r="c+" aria-label="Intercept up">+</button></span></div>' +
+      '<div class="wrow"><button class="btn" type="button" data-r="lock">Lock it in</button><button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button></div>' +
+    '</div>' +
+    '<div class="fb lt-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  var rm = el.querySelector("#ltM"), rc = el.querySelector("#ltC");
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb lt-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb lt-fb " + cls; f.innerHTML = html;
+  }
+  function on(p){ return Math.abs(d.m * p[0] + d.k - p[1]) < 1e-9; }
+
+  function star(X, Y, p, hit){
+    var cx = X(p[0]), cy = Y(p[1]), r1 = 11, r2 = 5, pts = [];
+    for(var k = 0; k < 10; k++){
+      var a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? r2 : r1;
+      pts.push((cx + r * Math.cos(a)).toFixed(1) + "," + (cy + r * Math.sin(a)).toFixed(1));
+    }
+    return '<polygon points="' + pts.join(" ") + '" fill="' + (hit ? MINT : SUN) + '" stroke="' + INK + '" stroke-width="2"/>' +
+      (hit ? '<circle cx="' + cx + '" cy="' + cy + '" r="16" fill="none" stroke="' + MINT + '" stroke-width="2.5"/>' : "");
+  }
+
+  function svg(){
+    var ch = view < 4 ? CHAL[view] : null;
+    var hits = ch ? ch.pts.filter(on).length : 0;
+    return grid({ x0: -5, x1: 5, y0: -6, y1: 10, ux: 32, uy: 20, step: 1, stepY: 2, gridY: 1, left: 24, top: 12,
+      aria: "Grid with the line " + fmtEq(d.m, d.k).replace(/&minus;/g, "minus ") + (ch ? ". Targets: " + ch.pts.map(function(p){ return "(" + p[0] + ", " + p[1] + ")"; }).join(" and ") + ". " + hits + " hit." : "."),
+      clipped: function(X, Y){
+        var o = "";
+        if(ch && ch.guide) o += seg(X, Y, -5, ch.guide.m * -5 + ch.guide.c, 5, ch.guide.m * 5 + ch.guide.c, VIOLET, 2.5, "8 6");
+        o += seg(X, Y, -5, d.m * -5 + d.k, 5, d.m * 5 + d.k, BLUE, 4);
+        return o;
+      },
+      body: function(X, Y){
+        var o = '<circle cx="' + X(0) + '" cy="' + Y(d.k) + '" r="5" fill="' + WHITE + '" stroke="' + BLUE + '" stroke-width="2.5"/>';
+        if(ch) ch.pts.forEach(function(p){ o += star(X, Y, p, on(p)); });
+        if(ch && ch.guide) o += t(X(-4.8), Y(8.4), "dashed: y = 2x + 1", 14, VIOLET, LAB + ' font-weight="700"');
+        return o;
+      } });
+  }
+
+  function task(){
+    var dots = '<div class="lt-dots" aria-hidden="true">';
+    for(var k = 0; k < 4; k++) dots += '<span class="' + (k < d.i ? "on" : (k === view && view < 4 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= 4) return dots + '<p><b>Line tamed, all four.</b> Free play now: slide things about and watch what m and c each do.</p>';
+    return dots + '<p class="tiny" style="margin:0 0 4px">Challenge ' + (view + 1) + ' of 4</p><p>' + CHAL[view].txt + '</p>' +
+      '<p class="tiny" style="margin:0">Stars light up green when your line goes through them.</p>';
+  }
+
+  function draw(){
+    q("task").innerHTML = task();
+    q("svg").innerHTML = svg();
+    q("eq").innerHTML = fmtEq(d.m, d.k);
+    q("mv").innerHTML = fmtNum(d.m); q("cv").innerHTML = fmtNum(d.k);
+    rm.value = d.m; rc.value = d.k;
+    var live = view < 4 && d.i === view;
+    q("lock").classList.toggle("hidden", !live);
+    q("show").classList.toggle("hidden", !(live && d.miss[view] > 0));
+  }
+
+  function setM(v){ d.m = Math.max(-4, Math.min(4, Math.round(v * 2) / 2)); api.save(); draw(); }
+  function setC(v){ d.k = Math.max(-6, Math.min(10, Math.round(v))); api.save(); draw(); }
+  rm.addEventListener("input", function(){ setM(parseFloat(rm.value)); });
+  rc.addEventListener("input", function(){ setC(parseFloat(rc.value)); });
+  q("m-").onclick = function(){ setM(d.m - 0.5); };
+  q("m+").onclick = function(){ setM(d.m + 0.5); };
+  q("c-").onclick = function(){ setC(d.k - 1); };
+  q("c+").onclick = function(){ setC(d.k + 1); };
+
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(x){ return x > 0; })) return "right2";
+    return "right1";
+  }
+
+  function solved(viaShow){
+    var ch = CHAL[view];
+    d.i = view + 1;
+    var last = d.i >= 4;
+    if(last) d.result = result();
+    api.save();
+    var html = (viaShow ? "<b>Here it is.</b> " + ch.show : "<b>" + ["Tamed.", "Got it.", "Lovely line.", "Bang on."][view] + "</b> " + fmtEq(ch.m, ch.c) + " does it.");
+    if(!last) html += '<br><button class="btn" type="button" data-r="next">Next challenge</button>';
+    else html += '<p style="margin:8px 0 0">m sets the steepness and direction; c slides the line up and down without turning it. That is all y = mx + c is.</p>';
+    fb(viaShow ? "show" : "good", html);
+    draw();
+    if(!last){
+      q("next").onclick = function(){ view = d.i; fb(null); draw(); };
+    }else{
+      view = 4; draw();
+      api.done(d.result);
+    }
+  }
+
+  q("lock").onclick = function(){
+    if(view >= 4) return;
+    var ch = CHAL[view];
+    if(d.m === ch.m && d.k === ch.c){ solved(false); return; }
+    d.miss[view]++; api.save();
+    var msg;
+    if(d.m === ch.m) msg = "The gradient is spot on, so the steepness is right. Now slide c to move the line up or down.";
+    else if(d.k === ch.c) msg = "It crosses the y axis in the right place. Now the steepness needs work. " + ch.hint;
+    else msg = ch.hint;
+    fb("nudge", "<b>" + ["Nearly.", "Not tamed yet.", "Close."][d.miss[view] % 3] + "</b> " + msg);
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view >= 4) return;
+    var ch = CHAL[view];
+    d.shown[view] = true; d.m = ch.m; d.k = ch.c; api.save();
+    solved(true);
+  };
+
+  if(d.i >= 4) view = 4;
+  draw();
+  if(d.i >= 4 && d.result){
+    fb("good", "<b>All four lines tamed.</b> Free play is open if you fancy it.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "maths-graphs",
+  title: "Sequences and graphs",
+  subject: "Maths",
+  mins: 55,
+  blurb: "Sequences and the nth term, coordinates, plotting straight lines, y = mx + c and real life graphs, with a line to tame by sliding m and c, and stretch questions on quadratic graphs and finding equations.",
+  steps: [
+
+  /* ---------- SEQUENCES ---------- */
+  { type: "learn", topic: "Sequences",
+    title: "Rules for sequences",
+    fig: HOPS,
+    html: '<p>A <b>term to term rule</b> tells you how to get from one term to the next: 5, 8, 11, 14 goes "add 3".</p>' +
+          '<p>The <b>nth term</b> is a rule that jumps straight to any term. For a linear sequence (same jump every time):</p>' +
+          '<ul><li>The jump is the number in front of n. Here it is 3, so start with 3n.</li>' +
+          '<li>Compare 3n with the sequence: 3n gives 3, 6, 9... and the sequence is 5, 8, 11... always 2 more. So the nth term is <b>3n + 2</b>.</li>' +
+          '<li>Quick way: the term before the first one (the "zero term") is 5 &minus; 3 = 2.</li></ul>' +
+          '<p><b>Is 50 in the sequence?</b> Solve 3n + 2 = 50: 3n = 48, n = 16, a whole number, so yes, it is the 16th term. For 75: 3n = 73, n = 24.33..., not whole, so no.</p>' +
+          '<div class="keep"><b>Keep this</b>nth term = jump &times; n + zero term. Check it by putting n = 1 back in; you should get the first term.</div>' },
+
+  { type: "num", topic: "Sequences",
+    q: NC + "a) Here is a sequence: 23, 18, 13, 8, ... Write down the next two terms.<br>b) The nth term of a different sequence is <span class=\"alg\">4n + 3</span>. Work out the 20th term.",
+    boxes: [
+      { label: "a) next term", a: 3 },
+      { label: "a) the one after", a: -2, show: "-2" },
+      { label: "b) 20th term", a: 83 }
+    ],
+    hint: "a) The rule is take away 5, and it can carry on below zero. b) Put n = 20 into the rule: multiply first, then add.",
+    why: "a) Take away 5 each time: 8 &minus; 5 = <b>3</b>, then 3 &minus; 5 = <b>&minus;2</b>. Sequences do not stop at zero.<br>b) 4 &times; 20 + 3 = 80 + 3 = <b>83</b>. Writing 423 by sticking 4 next to 20 is a slip worth watching for." },
+
+  { type: "mc", topic: "Sequences",
+    q: "Find the nth term of <span class=\"alg\">4, 10, 16, 22, ...</span>",
+    options: ["6n &minus; 2", "6n + 4", "n + 6", "4n + 6"],
+    answer: 0,
+    hint: "What is the jump each time? That goes in front of n. Then work back one step from the first term to get the zero term.",
+    why: "The jump is 6, so 6n. 6n gives 6, 12, 18, 24, and the sequence is 2 less each time, so <b>6n &minus; 2</b>. Zero term check: 4 &minus; 6 = &minus;2.<br>6n + 4 uses the first term instead of the zero term, the most common slip. n + 6 is the term to term rule written backwards. 4n + 6 swaps the jump and the first term." },
+
+  { type: "mc", topic: "Sequences",
+    q: "The nth term of a sequence is <span class=\"alg\">4n + 3</span>. Is 101 a term in the sequence?",
+    options: [
+      "Yes, it is the 25th term",
+      "No, because 4n + 3 = 101 gives n = 24.5, which is not a whole number",
+      "Yes, because 101 is odd and every term in the sequence is odd",
+      "No, because the sequence never goes past 100"
+    ],
+    answer: 1,
+    hint: "Set 4n + 3 equal to 101 and solve it. What does n have to be for it to be a real position in the sequence?",
+    why: "4n + 3 = 101, so 4n = 98 and n = 24.5. There is no 24.5th term, so <b>101 is not in the sequence</b>. The 24th term is 99 and the 25th is 103, which jumps over 101.<br>Every term is odd, but being odd is not enough: plenty of odd numbers are skipped. In the exam, the reason (n is not a whole number) is where the mark is." },
+
+  /* ---------- SPECIAL SEQUENCES ---------- */
+  { type: "learn", topic: "Special sequences",
+    title: "Sequences with names",
+    fig: TRI,
+    html: '<ul><li><b>Square numbers</b>: 1, 4, 9, 16, 25... (n&sup2;)</li>' +
+          '<li><b>Cube numbers</b>: 1, 8, 27, 64, 125... (n&sup3;)</li>' +
+          '<li><b>Triangular numbers</b>: 1, 3, 6, 10, 15... The jumps go up by one each time: +2, +3, +4, +5. They make triangles of dots.</li>' +
+          '<li><b>Fibonacci type</b>: add the two terms before to get the next one. 1, 1, 2, 3, 5, 8, 13...</li>' +
+          '<li><b>Geometric</b> (stretch): multiply by the same number each time. 3, 6, 12, 24 multiplies by 2. That number is called the common ratio.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Same jump: linear. Jumps growing by one: triangular. Add the last two: Fibonacci type. Multiply each time: geometric.</div>' },
+
+  { type: "sort", topic: "Special sequences",
+    q: "Which kind of sequence is each one?",
+    buckets: ["Square", "Cube", "Triangular", "Fibonacci type"],
+    cards: [
+      ["1, 4, 9, 16", 0],
+      ["49, 64, 81, 100", 0],
+      ["1, 8, 27, 64", 1],
+      ["125, 216, 343, 512", 1],
+      ["1, 3, 6, 10", 2],
+      ["15, 21, 28, 36", 2],
+      ["1, 1, 2, 3, 5", 3],
+      ["2, 5, 7, 12, 19", 3]
+    ],
+    hint: "Look at the jumps. If they grow by one each time, it is triangular. If each term is the two before added together, it is Fibonacci type. Otherwise, is each one a number times itself, or times itself twice?",
+    why: "Square: 7&sup2;, 8&sup2;, 9&sup2;, 10&sup2; = 49, 64, 81, 100. Cube: 5&sup3;, 6&sup3;, 7&sup3;, 8&sup3; = 125, 216, 343, 512. Triangular: 15, 21, 28, 36 has jumps +6, +7, +8. Fibonacci type: 2 + 5 = 7, 5 + 7 = 12, 7 + 12 = 19." },
+
+  { type: "num", topic: "Special sequences", stretch: true,
+    q: "a) A Fibonacci type sequence starts 3, 4, 7, 11, ... Write down the next two terms.<br>b) A geometric sequence starts 2, 6, 18, 54, ... What is the common ratio?<br>c) Work out the 6th term of that geometric sequence.",
+    boxes: [
+      { label: "a) next", a: 18 },
+      { label: "a) after that", a: 29 },
+      { label: "b) ratio", a: 3 },
+      { label: "c) 6th term", a: 486 }
+    ],
+    hint: "a) Add the last two terms each time. b) and c) What do you multiply by to get from one term to the next? Keep multiplying.",
+    why: "a) 7 + 11 = <b>18</b>, then 11 + 18 = <b>29</b>.<br>b) 6 &divide; 2 = 3 and 18 &divide; 6 = 3, so the common ratio is <b>3</b>. It is not a linear sequence: the jumps (4, 12, 36) keep changing.<br>c) 54 &times; 3 = 162 (5th), then 162 &times; 3 = <b>486</b> (6th). Adding 36 again would be treating it as linear." },
+
+  /* ---------- COORDINATES ---------- */
+  { type: "learn", topic: "Coordinates",
+    title: "Coordinates in four quadrants",
+    fig: QUAD,
+    html: '<p>Coordinates are written (x, y): <b>across first, then up or down</b>. "Along the corridor, then up the stairs." Point A is at (3, 2).</p>' +
+          '<p>Left of the y axis, x is negative. Below the x axis, y is negative. So C is at (&minus;2, &minus;3).</p>' +
+          '<p>The <b>midpoint</b> of two points is halfway between them. Add the x coordinates and halve; add the y coordinates and halve. Midpoint of (2, 7) and (8, &minus;1) is (10 &divide; 2, 6 &divide; 2) = (5, 3).</p>' +
+          '<div class="keep"><b>Keep this</b>x before y, like a before b in the alphabet. Midpoint: the mean of the x values and the mean of the y values.</div>' },
+
+  { type: "num", topic: "Coordinates",
+    q: "Use the grid. Write down the coordinates of B and D. Then find the midpoint of A and B.",
+    fig: QUAD,
+    boxes: [
+      { label: "B: x =", a: -4, show: "-4" },
+      { label: "B: y =", a: 1 },
+      { label: "D: x =", a: 4 },
+      { label: "D: y =", a: -4, show: "-4" },
+      { label: "Midpoint of A and B: x =", a: -0.5, show: "-0.5" },
+      { label: "Midpoint of A and B: y =", a: 1.5 }
+    ],
+    hint: "Go across first from the origin, then up or down. For the midpoint, add the two x values and halve, then do the same with the y values.",
+    why: "B is 4 left and 1 up: <b>(&minus;4, 1)</b>. D is 4 right and 4 down: <b>(4, &minus;4)</b>. Swapping to (1, &minus;4) is the classic mix up.<br>A is (3, 2). Midpoint: x = (3 + &minus;4) &divide; 2 = &minus;1 &divide; 2 = <b>&minus;0.5</b>; y = (2 + 1) &divide; 2 = <b>1.5</b>. Midpoints do not have to be whole numbers." },
+
+  { type: "num", topic: "Coordinates", stretch: true,
+    q: "M is the midpoint of the line AB. A is at (1, &minus;2) and M is at (4, 1). Find the coordinates of B.",
+    boxes: [
+      { label: "B: x =", a: 7 },
+      { label: "B: y =", a: 4 }
+    ],
+    hint: "How far is it from A to M in x? And in y? B is the same distance again beyond M.",
+    why: "From A to M, x goes from 1 to 4 (up 3) and y goes from &minus;2 to 1 (up 3). Do the same again from M: x = 4 + 3 = <b>7</b>, y = 1 + 3 = <b>4</b>. So B = (7, 4).<br>Check: midpoint of (1, &minus;2) and (7, 4) is (8 &divide; 2, 2 &divide; 2) = (4, 1). Finding the midpoint of A and M, (2.5, &minus;0.5), answers a different question." },
+
+  /* ---------- PLOTTING LINES ---------- */
+  { type: "learn", topic: "Plotting lines",
+    title: "From a table to a straight line",
+    fig: PLOT,
+    html: '<p>To draw <span class="alg">y = 2x &minus; 1</span>, make a table: put each x value into the rule.</p>' +
+          '<div class="fig"><table class="datatable"><tr><th>x</th><td>&minus;1</td><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>y</th><td>&minus;3</td><td>&minus;1</td><td>1</td><td>3</td><td>5</td></tr></table></div>' +
+          '<p>Plot each pair as a point, then join them with one straight line drawn with a ruler, right across the grid. If one point is off the line, recheck that one.</p>' +
+          '<p><b>Special lines</b>: y = 3 is <b>horizontal</b> (every point has y = 3). x = 3 is <b>vertical</b>. y = x goes diagonally up through the origin and y = &minus;x goes diagonally down.</p>' +
+          '<div class="keep"><b>Keep this</b>y = a number: flat across. x = a number: straight up and down. Negative x values need brackets in your head: 2 &times; (&minus;1) &minus; 1 = &minus;3.</div>' },
+
+  { type: "num", topic: "Plotting lines",
+    q: "Complete the table of values for <span class=\"alg\">y = 3 &minus; 2x</span>.",
+    fig: '<table class="datatable"><tr><th>x</th><td>&minus;1</td><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>y</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></table>',
+    boxes: [
+      { label: "x = &minus;1, y =", a: 5 },
+      { label: "x = 0, y =", a: 3 },
+      { label: "x = 1, y =", a: 1 },
+      { label: "x = 2, y =", a: -1, show: "-1" },
+      { label: "x = 3, y =", a: -3, show: "-3" }
+    ],
+    hint: "Work out 2 &times; x first, then take that away from 3. When x is &minus;1, taking away a negative means adding.",
+    why: "x = &minus;1: 3 &minus; 2 &times; (&minus;1) = 3 + 2 = <b>5</b>. x = 0: <b>3</b>. x = 1: 3 &minus; 2 = <b>1</b>. x = 2: 3 &minus; 4 = <b>&minus;1</b>. x = 3: 3 &minus; 6 = <b>&minus;3</b>.<br>The y values drop by 2 every time, which is a good self check: a straight line always has an even pattern in its table." },
+
+  { type: "match", topic: "Plotting lines",
+    q: "Match each equation to its line.",
+    pairs: [
+      ["x = 3", "Vertical, through (3, 0)"],
+      ["y = 3", "Horizontal, through (0, 3)"],
+      ["y = x", "Diagonal through the origin, going up"],
+      ["y = &minus;x", "Diagonal through the origin, going down"],
+      ["y = 0", "The x axis itself"]
+    ],
+    hint: "x = 3 means every point on the line has an x coordinate of 3. Which way does that line run?",
+    why: "x = 3 is every point with x = 3, such as (3, 0), (3, 5), (3, &minus;2): a vertical line. y = 3 is every point with y = 3: horizontal. y = x has points like (1, 1) and (2, 2), going up; y = &minus;x has (1, &minus;1) and (2, &minus;2), going down. y = 0 is the x axis. Mixing up x = 3 and y = 3 is the trap here." },
+
+  /* ---------- Y = MX + C ---------- */
+  { type: "learn", topic: "y = mx + c",
+    title: "Gradient and intercept",
+    fig: GRAD,
+    html: '<p>Every straight line can be written <b>y = mx + c</b>.</p>' +
+          '<ul><li><b>m is the gradient</b>: how far the line goes up for every 1 across. Positive slopes up left to right; negative slopes down; 0 is flat.</li>' +
+          '<li><b>c is the y intercept</b>: where the line crosses the y axis, at (0, c).</li></ul>' +
+          '<p><b>Gradient from two points</b>: change in y &divide; change in x. From (1, 2) to (4, 11): up 9, across 3, so m = 9 &divide; 3 = 3.</p>' +
+          '<p><b>Parallel lines</b> have the same gradient. y = 2x + 1 and y = 2x &minus; 5 are parallel.</p>' +
+          '<div class="keep"><b>Keep this</b>Get it into the form y = ... first. Then m is the number in front of x (sign included) and c is the number on its own.</div>' },
+
+  { type: "widget", topic: "y = mx + c",
+    title: "Line tamer",
+    html: "Use the sliders or the buttons to set m and c. Four challenges: get the line through the stars, then tap Lock it in.",
+    mount: mountTamer,
+    report: function(d){
+      if(!d || !d.result) return "Line tamer: " + ((d && d.i) || 0) + " of 4 challenges done.";
+      var lab = { right1: "all four first go", right2: "all four, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Line tamer: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "mc", topic: "y = mx + c",
+    q: "What are the gradient and y intercept of <span class=\"alg\">y = 5 &minus; 3x</span>?",
+    options: [
+      "Gradient &minus;3, crosses the y axis at (0, 5)",
+      "Gradient 5, crosses the y axis at (0, &minus;3)",
+      "Gradient 3, crosses the y axis at (0, 5)",
+      "Gradient &minus;3, crosses the y axis at (0, &minus;5)"
+    ],
+    answer: 0,
+    hint: "Rewrite it as y = &minus;3x + 5. Which number is stuck to the x?",
+    why: "y = 5 &minus; 3x is the same as y = &minus;3x + 5. The number with x is the gradient, <b>&minus;3</b> (sign included), and the number on its own is the intercept, <b>5</b>.<br>Taking the first number as the gradient only works when the equation is in the order y = mx + c. Dropping the minus sign gives 3, which would slope the wrong way." },
+
+  { type: "multi", topic: "y = mx + c",
+    q: "Which lines are parallel to <span class=\"alg\">y = 4x &minus; 2</span>?",
+    options: ["y = 4x + 7", "y = 2x &minus; 4", "y = &minus;4x &minus; 2", "y = 4x", "2y = 8x + 1", "y = x + 4"],
+    answers: [0, 3, 4],
+    hint: "Parallel means the same gradient. For 2y = 8x + 1, divide everything by 2 first so it starts y = ...",
+    why: "The gradient of y = 4x &minus; 2 is 4. <b>y = 4x + 7</b> and <b>y = 4x</b> both have gradient 4. <b>2y = 8x + 1</b> becomes y = 4x + 0.5, gradient 4, so it counts too.<br>y = &minus;4x &minus; 2 has gradient &minus;4 (it slopes the other way). y = 2x &minus; 4 and y = x + 4 just swap numbers around." },
+
+  { type: "num", topic: "y = mx + c", stretch: true,
+    q: "A straight line goes through (1, 2) and (4, 11). Its equation is y = mx + c. Find m and c.",
+    boxes: [
+      { label: "m =", a: 3 },
+      { label: "c =", a: -1, show: "-1" }
+    ],
+    hint: "Gradient: change in y &divide; change in x. Then put one of the points into y = mx + c to find c.",
+    why: "m = (11 &minus; 2) &divide; (4 &minus; 1) = 9 &divide; 3 = <b>3</b>. Now use (1, 2): 2 = 3 &times; 1 + c, so c = <b>&minus;1</b>. The line is y = 3x &minus; 1.<br>Check with the other point: 3 &times; 4 &minus; 1 = 11. Doing change in x &divide; change in y gives 1/3, which is upside down." },
+
+  /* ---------- REAL LIFE GRAPHS ---------- */
+  { type: "learn", topic: "Real life graphs",
+    title: "Graphs that tell a story",
+    fig: DT,
+    html: '<p>On a <b>distance time graph</b>:</p>' +
+          '<ul><li>The gradient is the <b>speed</b>: distance &divide; time. Steeper means faster.</li>' +
+          '<li>A flat section means <b>stopped</b>: time passes, distance does not change.</li>' +
+          '<li>A line going back down means travelling back towards the start.</li></ul>' +
+          '<p>On a <b>conversion graph</b> (pounds to euros, miles to kilometres), go across from one axis to the line, then down or up to read the other. For values off the edge, scale up: if 25 miles is 40 km, 250 miles is 400 km.</p>' +
+          '<p>Any gradient is a <b>rate</b>: litres per minute, pounds per hour, centimetres per day. Its units are "y units per x unit".</p>' +
+          '<div class="keep"><b>Keep this</b>Read the axis labels and scales first; squares are not always worth 1. Speed = distance &divide; time, which is the gradient.</div>' },
+
+  { type: "num", topic: "Real life graphs",
+    q: "Sam goes for a walk. The graph shows the walk.",
+    fig: DT,
+    boxes: [
+      { label: "a) Speed for the first hour", a: 6, post: "km/h" },
+      { label: "b) How long Sam stopped for", a: 30, post: "minutes" },
+      { label: "c) Speed on the way home", a: 4, post: "km/h" }
+    ],
+    hint: "Speed is distance &divide; time for each straight part. For c), the way home starts at 1.5 hours and ends at 3 hours.",
+    why: "a) 6 km in 1 hour: <b>6 km/h</b>.<br>b) Flat from 1 hour to 1.5 hours: half an hour, which is <b>30 minutes</b> (not 0.5 minutes, and not 50).<br>c) 6 km back home in 1.5 hours: 6 &divide; 1.5 = <b>4 km/h</b>. The line down is less steep than the line up, so slower makes sense." },
+
+  { type: "num", topic: "Real life graphs",
+    q: "Use the conversion graph.<br>a) Convert 30 miles to kilometres.<br>b) Convert 20 kilometres to miles.<br>c) Convert 200 miles to kilometres.",
+    fig: CONV,
+    boxes: [
+      { label: "a)", a: 48, tol: 2, post: "km" },
+      { label: "b)", a: 12.5, tol: 0.5, post: "miles" },
+      { label: "c)", a: 320, post: "km" }
+    ],
+    hint: "Check the scale on each axis first. For c), 200 miles is off the graph: use a value you can read and multiply up.",
+    why: "a) Up from 30 miles to the line, across to <b>48 km</b>. (Each small square across is 5 miles and each one up is 10 km.)<br>b) Across from 20 km to the line, down to <b>12.5 miles</b>, halfway between the 10 and 15 gridlines. In the exam, readings within half a small square are usually accepted.<br>c) 50 miles = 80 km, and 200 = 4 &times; 50, so 4 &times; 80 = <b>320 km</b>. Adding instead of multiplying (80 + 150) does not work, because a conversion is a proportion." },
+
+  { type: "mc", topic: "Real life graphs",
+    q: "A tank is filling with water. A graph shows depth of water (cm) against time (minutes). The line is straight with a gradient of 4. What does the 4 tell you?",
+    options: [
+      "The depth goes up by 4 cm every minute",
+      "The tank is 4 cm deep",
+      "The tank takes 4 minutes to fill",
+      "The depth goes up by 1 cm every 4 minutes"
+    ],
+    answer: 0,
+    hint: "Gradient is change in y for each 1 across. What is on each axis here?",
+    why: "The gradient is the rate: <b>4 cm of depth for every 1 minute</b>, or 4 cm per minute. The units come from the axes: y units per x unit.<br>1 cm every 4 minutes would be a gradient of 0.25: that is the gradient turned upside down." },
+
+  /* ---------- QUADRATIC GRAPHS ---------- */
+  { type: "learn", topic: "Quadratic graphs", stretch: true,
+    title: "Stretch: curves with x&sup2;",
+    fig: QUADG,
+    html: '<p>A <b>quadratic</b> has an x&sup2; in it, like y = x&sup2; &minus; 2x &minus; 3. Its graph is a smooth U shaped curve called a <b>parabola</b> (upside down if the x&sup2; is negative). Draw it with a smooth curve, not straight lines between the points.</p>' +
+          '<ul><li>The <b>roots</b> are where the curve crosses the x axis. They are the solutions of x&sup2; &minus; 2x &minus; 3 = 0: here x = &minus;1 and x = 3.</li>' +
+          '<li>The <b>turning point</b> is the very bottom (or top) of the curve: here (1, &minus;4).</li>' +
+          '<li>The curve is symmetrical about a vertical line through the turning point: here x = 1, exactly halfway between the roots.</li></ul>' +
+          '<p>In a table, square negatives carefully: when x = &minus;2, x&sup2; = (&minus;2)&sup2; = 4, not &minus;4.</p>' +
+          '<div class="keep"><b>Keep this</b>Roots: where y = 0, on the x axis. Turning point: the lowest point, halfway between the roots.</div>' },
+
+  { type: "num", topic: "Quadratic graphs", stretch: true,
+    q: "This is the graph of <span class=\"alg\">y = x&sup2; &minus; 4x + 3</span>.<br>a) Write down the roots, smallest first.<br>b) Write down the coordinates of the turning point.<br>c) Work out y when x = &minus;1, to check the graph.",
+    fig: QUADQ,
+    boxes: [
+      { label: "a) smaller root x =", a: 1 },
+      { label: "a) larger root x =", a: 3 },
+      { label: "b) turning point x =", a: 2 },
+      { label: "b) turning point y =", a: -1, show: "-1" },
+      { label: "c) y =", a: 8 }
+    ],
+    hint: "Roots are where the curve meets the x axis. The turning point is halfway between them, at the bottom of the U. For c), (&minus;1)&sup2; is positive.",
+    why: "a) The curve crosses the x axis at <b>x = 1</b> and <b>x = 3</b>.<br>b) Halfway between is x = 2, and the bottom of the curve is at y = &minus;1: <b>(2, &minus;1)</b>. Check: 4 &minus; 8 + 3 = &minus;1.<br>c) (&minus;1)&sup2; &minus; 4 &times; (&minus;1) + 3 = 1 + 4 + 3 = <b>8</b>, which matches the top left of the curve. Getting &minus;8 or 0 here usually means a sign slipped." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: NC + "Line L has equation <span class=\"alg\">y = 3x &minus; 2</span>.<br>a) Write down the gradient of L.<br>b) Write down the coordinates of the point where L crosses the y axis.<br>c) Line M is parallel to L and goes through (0, 5). Write the equation of M as y = mx + c.<br>d) The point (k, 19) is on line L. Find k.",
+    boxes: [
+      { label: "a) gradient", a: 3 },
+      { label: "b) x =", a: 0 },
+      { label: "b) y =", a: -2, show: "-2" },
+      { label: "c) M: y =", a: 3, post: "x +" },
+      { label: "c) the number after +", a: 5 },
+      { label: "d) k =", a: 7 }
+    ],
+    hint: "a) and b) read straight from y = mx + c. c) Parallel means same gradient. d) Put y = 19 into the equation and solve for x.",
+    why: "a) The number in front of x: <b>3</b>.<br>b) It crosses at c = &minus;2, so the point is <b>(0, &minus;2)</b>. Every point on the y axis has x = 0.<br>c) Same gradient, new intercept: <b>y = 3x + 5</b>.<br>d) 19 = 3k &minus; 2, so 3k = 21 and <b>k = 7</b>. Check: 3 &times; 7 &minus; 2 = 19." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

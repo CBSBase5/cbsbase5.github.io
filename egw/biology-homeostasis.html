@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homeostasis and hormones - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: method list, gland table, the reflex race widget */
+.steps{margin:0 0 10px;padding-left:1.4em}
+.steps li{margin-bottom:4px}
+.vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:6px 0 12px}
+.vars div{border:2px solid var(--ink);border-radius:12px;background:var(--white);padding:8px 10px;font-size:.92rem;line-height:1.4}
+.vars b{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+.sep{display:inline-block;font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;background:var(--violet);color:#fff;border-radius:999px;padding:2px 9px;margin-bottom:6px}
+.rpad{border:3px solid var(--ink);border-radius:18px;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--display);font-weight:700;font-size:1.3rem;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  transition:background-color .3s;padding:14px;background:var(--white)}
+.rpad small{display:block;font-family:var(--body);font-weight:400;font-size:.9rem;margin-top:6px;color:var(--body-tint)}
+.rpad.wait{background:#ece6fd}
+.rpad.go{background:var(--mint)}
+.rpad.early{background:#ffe6e6}
+.rpad.res{background:#fff6d1}
+.rpad:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.rstats{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.rstats span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-size:.88rem}
+.rchart svg{width:100%;max-width:440px;height:auto;display:block;margin:6px auto 0}
+.tchips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.tchips button{font-family:inherit;font-size:.95rem;line-height:1.35;text-align:left;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:8px 11px;cursor:pointer}
+.tchips button.no{animation:nudge .35s;border-color:var(--coral);background:#ffe9e9}
+.tseq{margin:6px 0;padding-left:1.6em}
+.tseq li{background:#e3f8f1;border:2px solid var(--mint);border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:.95rem}
+.wq{margin-top:6px}
+.wq + .wq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Homeostasis and hormones</h2>
+    <span>Biology. How your body keeps things steady: nerves, reflexes, hormones, blood glucose and the hormones of reproduction.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 16) + '" fill="' + (o.c || INK) + '">' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function box(x, y, w, h, fill){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+/* arrow head pointing in direction (dx, dy) with its tip at (x, y) */
+function head(x, y, dx, dy, c){
+  var a = Math.atan2(dy, dx), s = 9;
+  var p1 = [x - s * Math.cos(a) + s * 0.6 * Math.sin(a), y - s * Math.sin(a) - s * 0.6 * Math.cos(a)];
+  var p2 = [x - s * Math.cos(a) - s * 0.6 * Math.sin(a), y - s * Math.sin(a) + s * 0.6 * Math.cos(a)];
+  return '<path d="M' + x + ' ' + y + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + (c || INK) + '"/>';
+}
+function arrow(x1, y1, x2, y2, c){
+  return L(x1, y1, x2, y2, c || INK, 3) + head(x2, y2, x2 - x1, y2 - y1, c);
+}
+function lines(x, y, arr, o){
+  var s = "";
+  arr.forEach(function(t, k){ s += T(x, y + k * ((o && o.gap) || 20), t, o); });
+  return s;
+}
+
+/* ---------- figures ---------- */
+var FIG_CTRL = svg("0 0 380 262", "A control system as a loop: a change happens, a receptor detects it, the coordination centre processes it, an effector responds, and conditions go back towards normal",
+  box(8, 30, 160, 70, "#fff6d1") + lines(88, 60, ["A change", "happens"], { s: 18 }) +
+  box(212, 30, 160, 70) + lines(292, 60, ["Receptor", "detects it"], { s: 18 }) +
+  box(212, 162, 160, 70) + lines(292, 192, ["Coordination", "centre"], { s: 18 }) +
+  box(8, 162, 160, 70) + lines(88, 192, ["Effector", "responds"], { s: 18 }) +
+  arrow(168, 65, 208, 65) + arrow(292, 100, 292, 158) + arrow(212, 197, 172, 197) +
+  arrow(88, 162, 88, 104, MINT) + T(78, 138, "back to", { s: 15, a: "end", c: INK, body: true, w: 400 }) + T(78, 154, "normal", { s: 15, a: "end", c: INK, body: true, w: 400 }) +
+  T(376, 252, "brain, spinal cord, pancreas", { s: 15, a: "end", body: true, w: 400 }) +
+  T(8, 252, "muscle or gland", { s: 15, a: "start", body: true, w: 400 }) +
+  "");
+
+var FIG_ARC = svg("0 0 380 330", "A reflex arc: stimulus, receptor, sensory neurone, relay neurone in the spinal cord, motor neurone, effector, response",
+  T(88, 22, "Stimulus: hot pan", { s: 16, body: true, w: 400 }) + arrow(88, 30, 88, 46) +
+  box(8, 50, 160, 66, "#fff6d1") + lines(88, 78, ["Receptor", "in the skin"], { s: 18 }) +
+  box(212, 50, 160, 66) + lines(292, 78, ["Sensory", "neurone"], { s: 18 }) +
+  box(212, 146, 160, 66, "#e3f8f1") + lines(292, 174, ["Relay neurone", "in spinal cord"], { s: 17 }) +
+  box(212, 242, 160, 66) + lines(292, 270, ["Motor", "neurone"], { s: 18 }) +
+  box(8, 242, 160, 66, "#fff6d1") + lines(88, 270, ["Effector", "arm muscle"], { s: 18 }) +
+  arrow(168, 83, 208, 83) + arrow(292, 116, 292, 142) + arrow(292, 212, 292, 238) + arrow(212, 275, 172, 275) +
+  lines(88, 176, ["Response:", "hand pulls", "away"], { s: 16, body: true, w: 400 }) + arrow(88, 240, 88, 216, MINT));
+
+var FIG_SYN = svg("0 0 400 128", "A synapse: an impulse arrives at the end of one neurone, chemicals are released and diffuse across the gap to the next neurone",
+  '<path d="M10 40 H140 Q176 40 176 64 Q176 88 140 88 H10 Z" fill="#e6ecff" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<path d="M390 40 H250 Q222 40 222 64 Q222 88 250 88 H390 Z" fill="#e6ecff" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<g fill="' + VIOLET + '"><circle cx="186" cy="54" r="4.5"/><circle cx="196" cy="70" r="4.5"/><circle cx="206" cy="58" r="4.5"/><circle cx="190" cy="80" r="4.5"/><circle cx="210" cy="78" r="4.5"/></g>' +
+  arrow(30, 64, 120, 64, BLUE) + arrow(250, 64, 360, 64, BLUE) +
+  T(80, 26, "impulse arrives", { s: 17, body: true, w: 400 }) + T(320, 26, "new impulse", { s: 17, body: true, w: 400 }) +
+  T(199, 118, "chemical crosses the gap", { s: 18 }));
+
+var FIG_RULER = (function(){
+  var s = "";
+  function ruler(x, top){
+    var r = '<rect x="' + x + '" y="' + top + '" width="40" height="165" rx="4" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+    for(var cm = 0; cm <= 30; cm++){
+      var y = top + 160 - cm * 5;
+      r += L(x, y, x + (cm % 5 ? 8 : 15), y, INK, 1.2);
+      if(cm % 10 === 0) r += T(x + 29, y + 5, cm, { s: 14 });
+    }
+    return r;
+  }
+  function hand(x, y){
+    return '<rect x="' + (x - 26) + '" y="' + (y - 6) + '" width="24" height="16" rx="8" fill="#f3c8a2" stroke="' + INK + '" stroke-width="2"/>' +
+           '<rect x="' + (x + 42) + '" y="' + (y - 6) + '" width="24" height="16" rx="8" fill="#f3c8a2" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  var handY = 180;
+  /* before: zero mark (top + 160) level with the fingers */
+  s += ruler(70, handY - 160) + hand(70, handY);
+  /* after: the ruler has fallen 14 cm (70 units), so the 14 cm mark is at the fingers */
+  s += ruler(280, handY - 160 + 70) + hand(280, handY);
+  s += L(250, 10, 250, 250, LINE, 2, "6 6");
+  s += T(90, 214, "Before: thumb", { s: 16 }) + T(90, 234, "level with 0", { s: 16 });
+  s += T(300, 274, "After: caught at 14 cm", { s: 16 });
+  s += arrow(360, 40, 360, 100, CORAL) + T(368, 30, "falls", { s: 15, a: "start", c: INK, body: true, w: 400 });
+  return svg("0 0 400 284", "Ruler drop test. Before, the zero mark is level with the top of the thumb. After falling, the ruler is caught at the 14 centimetre mark.", s);
+})();
+
+var FIG_GLANDS = (function(){
+  var s = "";
+  s += '<circle cx="200" cy="58" r="40" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<path d="M186 96 V112 H214 V96" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<path d="M150 116 Q200 104 250 116 Q262 200 248 300 Q200 316 152 300 Q138 200 150 116 Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  /* kidneys */
+  s += '<ellipse cx="178" cy="214" rx="9" ry="15" fill="#f6d5c8" stroke="' + INK + '" stroke-width="1.5"/><ellipse cx="222" cy="214" rx="9" ry="15" fill="#f6d5c8" stroke="' + INK + '" stroke-width="1.5"/>';
+  function dot(x, y, c){ return '<circle cx="' + x + '" cy="' + y + '" r="7" fill="' + c + '" stroke="' + INK + '" stroke-width="1.5"/>'; }
+  s += dot(200, 62, VIOLET) + dot(200, 112, BLUE) + dot(178, 196, CORAL) + dot(222, 196, CORAL) + dot(206, 238, SUN) +
+       dot(178, 272, MINT) + dot(222, 272, MINT) + dot(200, 300, CYAN);
+  s += L(207, 62, 270, 50) + T(276, 46, "Pituitary", { s: 16, a: "start" }) + T(276, 64, "in the brain", { s: 14, a: "start", body: true, w: 400 });
+  s += L(193, 112, 120, 104) + T(114, 100, "Thyroid", { s: 16, a: "end" }) + T(114, 118, "in the neck", { s: 14, a: "end", body: true, w: 400 });
+  s += L(229, 196, 270, 170) + T(276, 166, "Adrenal glands", { s: 16, a: "start" }) + T(276, 184, "on the kidneys", { s: 14, a: "start", body: true, w: 400 });
+  s += L(199, 238, 120, 214) + T(114, 214, "Pancreas", { s: 16, a: "end" });
+  s += L(229, 272, 270, 254) + T(276, 252, "Ovaries", { s: 16, a: "start" }) + T(276, 270, "(female)", { s: 14, a: "start", body: true, w: 400 });
+  s += L(193, 302, 120, 300) + T(114, 296, "Testes", { s: 16, a: "end" }) + T(114, 314, "(male)", { s: 14, a: "end", body: true, w: 400 });
+  return svg("0 0 400 330", "Main glands of the endocrine system: pituitary in the brain, thyroid in the neck, adrenal glands on the kidneys, pancreas, ovaries in females and testes in males", s);
+})();
+
+var FIG_GLUC = svg("0 0 384 390", "Blood glucose control. Too high: the pancreas releases insulin, glucose moves into cells and is stored as glycogen. Too low, Higher only: the pancreas releases glucagon and the liver turns glycogen into glucose. Both bring blood glucose back to normal.",
+  box(6, 6, 180, 64, "#fff6d1") + lines(96, 32, ["Too high", "after a meal"], { s: 17 }) +
+  box(198, 6, 180, 64, "#ece6fd") + lines(288, 32, ["Too low", "(Higher only)"], { s: 17 }) +
+  box(6, 104, 180, 64) + lines(96, 130, ["Pancreas releases", "insulin"], { s: 16 }) +
+  box(198, 104, 180, 64) + lines(288, 130, ["Pancreas releases", "glucagon"], { s: 16 }) +
+  box(6, 202, 180, 80) + lines(96, 228, ["Glucose moves into", "cells; extra stored", "as glycogen"], { s: 15 }) +
+  box(198, 202, 180, 80) + lines(288, 228, ["Liver turns", "glycogen back", "into glucose"], { s: 15 }) +
+  box(80, 318, 224, 58, "#e3f8f1") + lines(192, 342, ["Blood glucose", "back to normal"], { s: 17 }) +
+  arrow(96, 70, 96, 100) + arrow(288, 70, 288, 100) + arrow(96, 168, 96, 198) + arrow(288, 168, 288, 198) +
+  arrow(96, 282, 130, 314, MINT) + arrow(288, 282, 254, 314, MINT));
+
+/* menstrual cycle as four small multiples sharing a day axis */
+var FIG_CYCLE = (function(){
+  function bump(d, c, w){ return Math.exp(-Math.pow((d - c) / w, 2)); }
+  var rows = [
+    { n: "FSH", src: "pituitary", c: BLUE, f: function(d){ return 0.3 + 0.25 * bump(d, 3, 3) + 0.4 * bump(d, 13, 1.4); } },
+    { n: "LH", src: "pituitary", c: CORAL, f: function(d){ return 0.12 + 0.88 * bump(d, 13.5, 1.1); } },
+    { n: "Oestrogen", src: "ovaries", c: MINT, f: function(d){ return 0.12 + 0.75 * bump(d, 12, 2.6) + 0.3 * bump(d, 21, 3.2); } },
+    { n: "Progesterone", src: "ovaries", c: VIOLET, f: function(d){ return 0.06 + 0.86 * bump(d, 21, 3.6); } }
+  ];
+  var X0 = 128, X1 = 388, RH = 64, TOP = 8;
+  function X(d){ return X0 + (d - 1) / 27 * (X1 - X0); }
+  var s = "";
+  rows.forEach(function(r, k){
+    var y0 = TOP + k * RH + RH - 8, yh = RH - 16;
+    s += L(X0, y0, X1, y0, LINE, 1.5);
+    var pts = [];
+    for(var d = 1; d <= 28; d += 0.25) pts.push(X(d).toFixed(1) + " " + (y0 - r.f(d) * yh).toFixed(1));
+    s += '<path d="M' + pts.join(" L") + '" fill="none" stroke="' + r.c + '" stroke-width="3" stroke-linejoin="round"/>';
+    s += T(X0 - 8, y0 - 20, r.n, { s: 17, a: "end" }) + T(X0 - 8, y0 - 2, r.src, { s: 15, a: "end", body: true, w: 400 });
+  });
+  var yb = TOP + 4 * RH - 8;
+  s += L(X0, yb, X1, yb, INK, 2);
+  [1, 7, 14, 21, 28].forEach(function(d){ s += L(X(d), yb, X(d), yb + 5, INK, 1.5) + T(X(d), yb + 22, d, { s: 15, body: true, w: 400 }); });
+  s += L(X(14), TOP, X(14), yb, INK, 1.5, "5 5");
+  s += T(200, yb + 46, "Day of the cycle", { s: 16 }) + T(200, yb + 68, "Ovulation is around day 14", { s: 15, body: true, w: 400 });
+  return svg("0 0 400 334", "Hormone levels across a 28 day menstrual cycle. FSH rises early and peaks just before day 14. LH has a sharp peak around day 14, which triggers ovulation. Oestrogen rises to a peak just before ovulation. Progesterone stays low, then rises after ovulation and peaks around day 21.", s);
+})();
+
+/* ---------- small in-widget quiz: mc, number, tap order ---------- */
+function wquiz(host, qs, api){
+  var d = api.data;
+  if(!d.q) d.q = [];
+  var MINUS = new RegExp(String.fromCharCode(8722), "g");
+  function parse(s){
+    s = String(s).replace(/,/g, "").replace(MINUS, "-");
+    var m = s.match(/-?\d*\.?\d+/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function val(x){ return typeof x === "function" ? x() : x; }
+  function overall(){
+    var r = "right1";
+    for(var k = 0; k < qs.length; k++){
+      var st = d.q[k];
+      if(!st || !st.done) return null;
+      if(st.done === "shown") r = "shown";
+      else if(st.done === "right2" && r === "right1") r = "right2";
+    }
+    return r;
+  }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e; }
+  function render(){
+    host.innerHTML = '<span class="kicker" style="margin-bottom:4px">Your challenge</span>';
+    for(var k = 0; k < qs.length; k++){
+      if(!d.q[k]) d.q[k] = { tries: 0 };
+      host.appendChild(one(k));
+      if(!d.q[k].done) break;
+    }
+  }
+  function one(k){
+    var q = qs[k], st = d.q[k];
+    var bx = el("div", "wq", '<p class="wnote"><b>' + (k + 1) + ' of ' + qs.length + '.</b> ' + val(q.q) + '</p>');
+    var picked = st.pick === undefined ? -1 : st.pick, input = null, btns = [];
+    var fb = el("div", "fb hidden"); fb.setAttribute("aria-live", "polite");
+    var nav = el("div", "wrow");
+    var cb = el("button", "btn", "Check"); cb.type = "button";
+    var sb = el("button", "btn btn-quiet", "Show me"); sb.type = "button";
+    function finish(r){
+      st.done = r; api.save();
+      var o = overall();
+      if(o) api.done(o);
+      render();
+    }
+    function whyHtml(){
+      return "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") +
+        '</b><div class="why">' + val(q.why) + "</div>";
+    }
+    if(q.order){
+      /* tap the items in order */
+      if(!st.perm){
+        st.perm = q.order.map(function(t, n){ return n; });
+        for(var i = st.perm.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = st.perm[i]; st.perm[i] = st.perm[j]; st.perm[j] = t; }
+        if(st.perm.join() === q.order.map(function(t, n){ return n; }).join()) st.perm.reverse();
+      }
+      if(!st.got) st.got = 0;
+      var seq = el("ol", "tseq"), chips = el("div", "tchips");
+      bx.appendChild(seq); bx.appendChild(chips);
+      var drawO = function(){
+        seq.innerHTML = q.order.slice(0, st.got).map(function(t){ return "<li>" + t + "</li>"; }).join("");
+        chips.innerHTML = "";
+        st.perm.forEach(function(n){
+          if(n < st.got) return;
+          var b = el("button", "", q.order[n]); b.type = "button";
+          b.onclick = function(){
+            if(st.done) return;
+            if(n === st.got){
+              st.got++; api.save();
+              fb.className = "fb hidden";
+              if(st.got === q.order.length){ finish(st.tries ? "right2" : "right1"); return; }
+              drawO();
+            }else{
+              st.tries++; api.save();
+              b.classList.remove("no"); void b.offsetWidth; b.classList.add("no");
+              fb.className = "fb nudge";
+              fb.innerHTML = "<b>Not that one yet.</b> " + (q.hints ? q.hints[st.got] : q.hint) + '<br><span class="tiny">Tap another, or tap Show me.</span>';
+              sb.classList.remove("hidden");
+            }
+          };
+          chips.appendChild(b);
+        });
+      };
+      if(!st.done) drawO(); else { st.got = q.order.length; drawO(); }
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      sb.onclick = function(){ st.got = q.order.length; finish("shown"); };
+      nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+      if(st.done){ fb.className = "fb " + (st.done === "shown" ? "show" : "good"); fb.innerHTML = whyHtml(); }
+      return bx;
+    }
+    if(q.options){
+      var ch = el("div", "choices");
+      q.options.forEach(function(o, n){
+        var b = el("button", n === picked ? "picked" : "", o); b.type = "button";
+        b.onclick = function(){
+          if(st.done) return;
+          picked = n;
+          btns.forEach(function(x, m){ x.classList.toggle("picked", m === n); x.classList.remove("no"); });
+        };
+        btns.push(b); ch.appendChild(b);
+      });
+      bx.appendChild(ch);
+    }else{
+      var row = el("label", "numrow", q.pre ? '<span class="aff">' + q.pre + '</span>' : "");
+      input = el("input"); input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+      input.setAttribute("aria-label", "Your answer");
+      if(st.val !== undefined) input.value = st.val;
+      input.addEventListener("input", function(){ input.classList.remove("no"); st.val = input.value; });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      row.appendChild(input);
+      if(q.post) row.appendChild(el("span", "aff", q.post));
+      bx.appendChild(row);
+    }
+    nav.appendChild(cb); nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+    function right(){
+      if(q.options) return picked === q.answer;
+      return Math.abs(parse(input.value) - val(q.a)) <= (q.tol || 1e-9);
+    }
+    function paint(){
+      cb.classList.toggle("hidden", !!st.done);
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      if(!st.done) return;
+      if(q.options){
+        btns.forEach(function(x, m){ x.classList.remove("no", "ok"); if(m === q.answer) x.classList.add("ok"); });
+      }else{
+        if(st.done === "shown"){ input.value = q.show ? val(q.show) : String(val(q.a)); input.classList.add("given"); }
+        else input.classList.add("ok");
+        input.readOnly = true;
+      }
+      fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+      fb.innerHTML = whyHtml();
+    }
+    cb.onclick = function(){
+      if(q.options ? picked < 0 : !input.value.trim()){
+        fb.className = "fb nudge"; fb.innerHTML = "Pop an answer in first, if you like.";
+        return;
+      }
+      st.pick = picked; if(input) st.val = input.value;
+      if(right()){ finish(st.tries ? "right2" : "right1"); return; }
+      st.tries++;
+      if(st.tries >= 2){ finish("shown"); return; }
+      api.save();
+      var msg = val(q.hint);
+      if(q.options && q.nearOpt && q.nearOpt[picked]) msg = q.nearOpt[picked];
+      if(input) input.classList.add("no"); else btns[picked].classList.add("no");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+      paint();
+    };
+    sb.onclick = function(){ finish("shown"); };
+    paint();
+    return bx;
+  }
+  render();
+  return { refresh: render };
+}
+
+/* ---------- the reflex race widget ---------- */
+var REFLEX = {
+  type: "widget", topic: "Reaction time",
+  title: "Reflex race",
+  html: '<p>Tap the panel to start a go. It turns lilac while you wait, then <b>mint</b> at a random moment: tap as soon as you see the mint. No rush between goes, and early taps just do not count.</p><p>After three goes, a small challenge appears underneath.</p>',
+  report: function(d){
+    var t = d.times || [], q = d.q || [];
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" };
+    var mean = t.length ? Math.round(t.reduce(function(a, b){ return a + b; }, 0) / t.length) : 0;
+    return "Reflex race: " + t.length + " goes" + (t.length ? ", mean " + mean + " ms, best " + Math.min.apply(null, t) + " ms" : "") +
+      "; pathway order " + (q[0] && lab[q[0].done] || "not done") + ", reflex question " + (q[1] && lab[q[1].done] || "not done") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(!d.times) d.times = [];
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="rpad" id="rpad" role="button" tabindex="0" aria-live="polite"></div>' +
+        '<div class="rstats" id="rstats"></div>' +
+        '<div class="rchart" id="rchart"></div>' +
+        '<p class="tiny">Screen taps are usually a little slower than catching a real ruler, because the screen and the device add a tiny delay of their own.</p>' +
+      '</div>' +
+      '<div class="wpanel" id="rq"></div>';
+    var pad = el.querySelector("#rpad"), stats = el.querySelector("#rstats"), chart = el.querySelector("#rchart"), qh = el.querySelector("#rq");
+    var mode = "idle", timer = null, t0 = 0, quiz = null;
+    function setPad(cls, big, small){
+      mode = cls;
+      pad.className = "rpad " + (cls === "idle" ? "" : cls);
+      pad.innerHTML = '<span>' + big + '</span>' + (small ? '<small>' + small + '</small>' : "");
+    }
+    function mean(){ return d.times.reduce(function(a, b){ return a + b; }, 0) / d.times.length; }
+    function cm(ms){ return 0.5 * 9.81 * Math.pow(ms / 1000, 2) * 100; }
+    function drawStats(){
+      if(!d.times.length){ stats.innerHTML = '<span>No goes yet</span>'; chart.innerHTML = ""; return; }
+      var m = mean();
+      stats.innerHTML = '<span><b>' + d.times.length + '</b> go' + (d.times.length === 1 ? "" : "es") + '</span>' +
+        '<span>Mean <b>' + Math.round(m) + ' ms</b></span><span>Best <b>' + Math.min.apply(null, d.times) + ' ms</b></span>' +
+        (cm(m) <= 30 ? '<span>You would catch a 30 cm ruler at about <b>' + Math.round(cm(m)) + ' cm</b></span>' :
+          '<span>In that time a dropped ruler falls about <b>' + Math.round(cm(m)) + ' cm</b>, past the end of a 30 cm one</span>');
+      /* simple bar chart of the last 8 goes with the mean as a dashed line */
+      var last = d.times.slice(-8), first = d.times.length - last.length;
+      var top = Math.max(500, Math.ceil(Math.max.apply(null, last) / 100) * 100);
+      var X0 = 52, X1 = 352, Y0 = 150, Y1 = 14, bw = (X1 - X0) / 8;
+      function Y(v){ return Y0 - v / top * (Y0 - Y1); }
+      var s = "";
+      var step = top > 600 ? 200 : 100;
+      top = Math.ceil(top / step) * step;
+      for(var v = 0; v <= top; v += step){
+        s += L(X0, Y(v), X1, Y(v), LINE, v ? 1 : 0);
+        s += T(X0 - 6, Y(v) + 5, v, { s: 14, a: "end", body: true, w: 400 });
+      }
+      last.forEach(function(t, k){
+        var x = X0 + k * bw + 5, h = Y0 - Y(t);
+        s += '<path d="M' + x + ' ' + Y0 + ' V' + (Y(t) + 4) + ' Q' + x + ' ' + Y(t) + ' ' + (x + 4) + ' ' + Y(t) + ' H' + (x + bw - 14) + ' Q' + (x + bw - 10) + ' ' + Y(t) + ' ' + (x + bw - 10) + ' ' + (Y(t) + 4) + ' V' + Y0 + ' Z" fill="' + BLUE + '"><title>Go ' + (first + k + 1) + ': ' + t + ' ms</title></path>';
+        s += T(x + (bw - 10) / 2, Y0 + 17, first + k + 1, { s: 14, body: true, w: 400 });
+      });
+      s += L(X0, Y0, X1, Y0, INK, 2);
+      var ym = Y(mean());
+      s += L(X0, ym, X1, ym, CORAL, 2.5, "7 5") + T(X1, ym - 6, "mean " + Math.round(mean()) + " ms", { s: 14, a: "end" });
+      s += T(200, 186, "Go number", { s: 14 });
+      s += '<text transform="translate(12 82) rotate(-90)" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="14" fill="' + INK + '">Reaction time (ms)</text>';
+      chart.innerHTML = svg("0 0 360 194", "Bar chart of your reaction times in milliseconds for your recent goes, with your mean shown as a dashed line", s);
+    }
+    function drawQuiz(){
+      if(d.times.length < 3 && !d.q){
+        qh.innerHTML = '<p class="wnote">The challenge appears here after three goes. ' + (3 - d.times.length) + ' to go.</p>';
+        return;
+      }
+      if(quiz) return;
+      quiz = wquiz(qh, [
+        { q: "Seeing the mint and tapping is a <b>reaction</b>, which goes through your brain. Tap the steps in order, from stimulus to response.",
+          order: ["The screen turns mint (the stimulus)", "Receptor cells in the retina of your eye", "Sensory neurone carries impulses", "Brain (the coordinator) decides to tap",
+                  "Motor neurone carries impulses", "Muscles in your finger contract (the effector)"],
+          hints: ["Start with the change that happens on the screen.", "What detects light first?", "What carries the impulse away from the receptor?",
+                  "Where is the decision made?", "Which neurone carries the impulse out to the muscle?", "Only one left!"],
+          why: "Stimulus, receptor, sensory neurone, coordinator, motor neurone, effector. A <b>reaction</b> like this goes through the conscious part of the brain, which takes time to decide. That is why your times are a few hundred milliseconds." },
+        { q: "Pulling your hand off a hot pan is a <b>reflex</b>. Why is it faster than your tap?",
+          options: [
+            "The impulse goes through a relay neurone in the spinal cord, without waiting for the conscious part of the brain",
+            "Reflexes use hormones, which travel faster than nerve impulses",
+            "Pain receptors are always faster than light receptors",
+            "Reflexes do not use any neurones at all"
+          ],
+          answer: 0,
+          hint: "Think about which part of the nervous system a reflex arc skips.",
+          nearOpt: { 1: "Hormones travel in the blood, which is much slower than nerve impulses. Reflexes are nervous, not hormonal." },
+          why: "A reflex arc goes receptor, sensory neurone, relay neurone, motor neurone, effector. The relay neurone is in the spinal cord, so the response does not wait for you to think. Fewer steps, no decision, faster response. A common slip is to say reflexes use hormones: they do not." }
+      ], api);
+    }
+    function start(){
+      setPad("wait", "Wait for it...", "Tap when it turns mint");
+      var delay = 1200 + Math.random() * 2300;
+      timer = setTimeout(function(){
+        timer = null;
+        setPad("go", "Tap!", "");
+        t0 = performance.now();
+      }, delay);
+    }
+    function hit(e){
+      if(e){ e.preventDefault(); }
+      if(mode === "idle" || mode === "res" || mode === "early"){ start(); return; }
+      if(mode === "wait"){
+        clearTimeout(timer); timer = null;
+        setPad("early", "Too keen!", "That one does not count. Tap to have another go.");
+        return;
+      }
+      if(mode === "go"){
+        var ms = Math.round(performance.now() - t0);
+        if(ms > 2000){ setPad("res", "Missed that one", "No worries. Tap to have another go."); return; }
+        d.times.push(ms);
+        if(d.times.length > 40) d.times.shift();
+        api.save();
+        var msg = ms < 250 ? "Speedy." : ms < 350 ? "Nice and quick." : ms < 500 ? "Solid." : "Taking it steady.";
+        setPad("res", ms + " ms", msg + " Tap for another go.");
+        drawStats(); drawQuiz();
+      }
+    }
+    pad.addEventListener("pointerdown", hit);
+    pad.addEventListener("keydown", function(e){ if(e.key === " " || e.key === "Enter") hit(e); });
+    setPad("idle", d.times.length ? "Tap to have another go" : "Tap here to start", d.times.length ? "" : "Then wait for the mint");
+    drawStats(); drawQuiz();
+  }
+};
+
+EGW.run({
+  id: "biology-homeostasis",
+  title: "Homeostasis and hormones",
+  subject: "Biology",
+  mins: 50,
+  blurb: "How your body keeps things steady, using nerves and hormones. There is a reaction time game in the middle, and the brain, eye and temperature are tucked in at the end as a stretch.",
+  steps: [
+
+  /* ---------- HOMEOSTASIS ---------- */
+  { type: "learn", topic: "Homeostasis",
+    title: "Keeping things steady",
+    fig: FIG_CTRL,
+    html: '<p><b>Homeostasis</b> is keeping the conditions inside a cell or body at the best (<b>optimum</b>) levels, even when things change inside or outside.</p>' +
+          '<p>Why bother? Cells only work well in the right conditions. Enzymes in particular need the right temperature and pH.</p>' +
+          '<p>In humans, homeostasis controls <b>blood glucose concentration</b>, <b>body temperature</b> and <b>water levels</b>.</p>' +
+          '<p>It uses automatic <b>control systems</b>, which can be nervous (impulses) or chemical (hormones):</p>' +
+          '<ul>' +
+          '<li><b>Receptors</b> detect a change, called a <b>stimulus</b>.</li>' +
+          '<li><b>Coordination centres</b> (the brain, the spinal cord, the pancreas) receive and process the information.</li>' +
+          '<li><b>Effectors</b>, which are muscles or glands, bring about a response that puts things back towards normal.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Receptor detects, coordination centre processes, effector responds.</div>' },
+
+  { type: "mc", topic: "Homeostasis",
+    q: "Which is the best description of <b>homeostasis</b>?",
+    options: [
+      "Keeping internal conditions at optimum levels, even when conditions change",
+      "Making body temperature as high as possible so enzymes work fast",
+      "Responding to danger as quickly as possible",
+      "Keeping the outside environment the same"
+    ],
+    answer: 0,
+    hint: "Homeo means same, stasis means staying still. Which conditions does the body control: inside or outside?",
+    why: "Homeostasis is about the <b>internal</b> conditions, kept at the best level for cells and enzymes. Too hot is not better: above the optimum, enzymes stop working well and can be denatured." },
+
+  { type: "match", topic: "Homeostasis",
+    q: "Match each part of a control system to its job.",
+    pairs: [
+      ["Receptor", "Detects a change (a stimulus)"],
+      ["Coordination centre", "Receives and processes the information, for example the brain or pancreas"],
+      ["Effector", "A muscle or gland that brings about a response"]
+    ],
+    hint: "One spots the change, one decides, one does something about it.",
+    why: "The order is always the same: receptor, coordination centre, effector. Exam answers often mix up receptors and effectors, so it helps to remember that an <b>e</b>ffector has an <b>e</b>ffect." },
+
+  /* ---------- NERVES AND REFLEXES ---------- */
+  { type: "learn", topic: "Nerves and reflexes",
+    title: "Fast messages",
+    fig: FIG_ARC,
+    html: '<p>The <b>nervous system</b> lets you react to your surroundings. Receptors send information as <b>electrical impulses</b> along nerve cells (<b>neurones</b>) to the <b>central nervous system</b> (CNS): the brain and spinal cord.</p>' +
+          '<p>The CNS coordinates the response. Effectors respond: <b>muscles contract</b> or <b>glands secrete</b> hormones.</p>' +
+          '<p>Stimulus &rarr; receptor &rarr; coordinator &rarr; effector &rarr; response.</p>' +
+          '<p><b>Reflexes</b> are <b>automatic</b> and <b>rapid</b>. They do not involve the conscious part of the brain, so they protect you before you have time to think. Pulling your hand from something hot is one. Your pupils shrinking in bright light is another.</p>' +
+          '<p>Between neurones there is a tiny gap called a <b>synapse</b>. When an impulse arrives, a <b>chemical</b> is released. It diffuses across the gap and starts a new impulse in the next neurone.</p>' +
+          '<div class="fig">' + FIG_SYN + '</div>' +
+          '<div class="keep"><b>Keep this</b>Reflex arc: receptor, sensory neurone, relay neurone, motor neurone, effector. Synapses are crossed by a chemical.</div>' },
+
+  { type: "order", topic: "Nerves and reflexes",
+    q: "You touch a hot pan. Put the reflex arc in order.",
+    items: [
+      "Receptors in the skin detect the heat",
+      "Impulses travel along a sensory neurone",
+      "Impulses pass to a relay neurone in the spinal cord",
+      "Impulses travel along a motor neurone",
+      "A muscle in the arm contracts",
+      "Your hand moves away from the pan"
+    ],
+    hint: "Sensory comes in, relay passes it on, motor goes out to the muscle.",
+    why: "Receptor, sensory neurone, relay neurone, motor neurone, effector, response. The relay neurone sits in the spinal cord, which is why the response is so quick: it does not wait for the conscious brain." },
+
+  { type: "mc", topic: "Nerves and reflexes",
+    q: "How does a nerve impulse get across a <b>synapse</b>?",
+    options: [
+      "A chemical is released, diffuses across the gap and starts an impulse in the next neurone",
+      "The electrical impulse jumps straight across the gap",
+      "A hormone travels through the blood to the next neurone",
+      "The two neurones touch, so the impulse flows straight through"
+    ],
+    answer: 0,
+    hint: "There is a gap, and electricity cannot cross it here. What crosses instead?",
+    why: "At a synapse the signal changes form: electrical impulse, then a chemical crossing the gap by diffusion, then a new electrical impulse. The neurones do not touch, and it is not a hormone, because nothing goes into the blood." },
+
+  /* ---------- REACTION TIME (required practical) ---------- */
+  { type: "learn", topic: "Reaction time",
+    title: "Required practical: reaction time",
+    fig: FIG_RULER,
+    html: '<p><b>Reaction time</b> is the time between a stimulus and your response. A reaction goes through the conscious brain, so it is slower than a reflex.</p>' +
+          '<p><b>The ruler drop method</b></p>' +
+          '<ol class="steps">' +
+          '<li>Sit with your forearm resting on a table and your hand over the edge.</li>' +
+          '<li>A partner holds a ruler upright, with the 0 cm mark level with the top of your thumb. Your thumb and finger are apart, not touching it.</li>' +
+          '<li>Without warning, they let go. You catch it as quickly as you can.</li>' +
+          '<li>Read the mark level with the top of your thumb.</li>' +
+          '<li>Repeat several times and work out a <b>mean</b>.</li>' +
+          '<li>Change one factor (for example, after a caffeine drink, or using your other hand) and repeat.</li>' +
+          '</ol>' +
+          '<p>A <b>shorter distance</b> means a <b>faster</b> reaction. A conversion table can turn distance into time.</p>' +
+          '<div class="vars">' +
+          '<div><b>Independent</b>The factor you change, such as caffeine or which hand.</div>' +
+          '<div><b>Dependent</b>The distance the ruler falls (or the reaction time).</div>' +
+          '<div><b>Control</b>Same ruler, same person dropping, same starting position, no warning.</div>' +
+          '</div>' +
+          '<p class="tiny">Some factors need care. If caffeine is tested, only small amounts, and only if it is safe for that person.</p>' +
+          '<div class="keep"><b>Keep this</b>Change one thing, keep the rest the same, repeat and take a mean.</div>' },
+
+  REFLEX,
+
+  { type: "num", topic: "Reaction time",
+    q: "Priya does the ruler drop five times. She catches the ruler at <b>12 cm, 15 cm, 11 cm, 26 cm</b> and <b>14 cm</b>.",
+    boxes: [
+      { label: "(a) Which result is anomalous?", a: 26, post: "cm" },
+      { label: "(b) The mean of the other four results", a: 13, tol: 0.01, post: "cm" }
+    ],
+    hint: "One result is a long way from the others. Leave it out, add up the other four, then divide by 4.",
+    why: "26 cm does not fit the pattern, so it is anomalous (maybe she was distracted). 12 + 15 + 11 + 14 = 52, and 52 &divide; 4 = <b>13 cm</b>. Including the 26 would give 15.6 cm and make her look slower than she really is. Remember to divide by the number of results you actually used." },
+
+  { type: "mc", topic: "Reaction time",
+    q: "Sam investigates whether caffeine changes reaction time. Which of these is a <b>control variable</b>?",
+    options: [
+      "Using the same ruler and the same person dropping it every time",
+      "Whether or not Sam has had caffeine",
+      "The distance the ruler falls before Sam catches it",
+      "The mean of the results"
+    ],
+    answer: 0,
+    hint: "Control variables are the things kept the same, so the test is fair.",
+    why: "Caffeine is the <b>independent</b> variable (the thing changed). The distance is the <b>dependent</b> variable (the thing measured). The mean is how you process the results. Keeping the ruler and the dropper the same is what makes it a fair test." },
+
+  /* ---------- HORMONES ---------- */
+  { type: "learn", topic: "Hormones",
+    title: "The endocrine system",
+    fig: FIG_GLANDS,
+    html: '<p>The <b>endocrine system</b> is made of <b>glands</b> that secrete chemicals called <b>hormones</b> straight into the <b>bloodstream</b>. The blood carries each hormone to a <b>target organ</b>, where it has an effect.</p>' +
+          '<p>Compared with nerves, hormones act <b>more slowly</b>, but their effects <b>last longer</b>.</p>' +
+          '<p>The <b>pituitary gland</b> in the brain is often called the master gland. It releases several hormones that act on other glands, telling them to release their own hormones.</p>' +
+          '<table class="datatable"><tr><th>Gland</th><th>Hormone</th></tr>' +
+          '<tr><td>Pituitary</td><td>several, such as FSH and LH</td></tr>' +
+          '<tr><td>Thyroid</td><td>thyroxine (metabolic rate)</td></tr>' +
+          '<tr><td>Adrenal</td><td>adrenaline (fight or flight)</td></tr>' +
+          '<tr><td>Pancreas</td><td>insulin (blood glucose)</td></tr>' +
+          '<tr><td>Ovaries</td><td>oestrogen</td></tr>' +
+          '<tr><td>Testes</td><td>testosterone</td></tr></table>' +
+          '<div class="keep"><b>Keep this</b>Nerves: electrical, fast, short lived. Hormones: chemical, in the blood, slower, longer lasting.</div>' },
+
+  { type: "match", topic: "Hormones",
+    q: "Match each gland to a hormone it makes.",
+    pairs: [
+      ["Pancreas", "Insulin"],
+      ["Thyroid", "Thyroxine"],
+      ["Adrenal glands", "Adrenaline"],
+      ["Ovaries", "Oestrogen"],
+      ["Testes", "Testosterone"]
+    ],
+    hint: "Two of them nearly share a name with their gland: adrenal and adrenaline, thyroid and thyroxine.",
+    why: "Pancreas: insulin. Thyroid: thyroxine. Adrenal glands: adrenaline. Ovaries: oestrogen. Testes: testosterone. The pituitary is the one that controls several of the others." },
+
+  { type: "sort", topic: "Hormones",
+    q: "Nervous system or hormones?",
+    buckets: ["Nervous system", "Hormones"],
+    cards: [
+      ["Electrical impulses", 0],
+      ["Travels along neurones", 0],
+      ["Very fast response", 0],
+      ["Effect is short lived", 0],
+      ["Chemicals carried in the blood", 1],
+      ["Released by glands straight into the blood", 1],
+      ["Slower response", 1],
+      ["Effect lasts longer", 1]
+    ],
+    hint: "Nerves are like a text message: instant, then gone. Hormones are more like a letter in the post.",
+    why: "Nerves use electrical impulses along neurones: fast and brief. Hormones are chemicals in the blood: slower to arrive, but the effect lasts longer. Both are ways the body coordinates itself." },
+
+  /* ---------- BLOOD GLUCOSE ---------- */
+  { type: "learn", topic: "Blood glucose",
+    title: "Blood glucose and diabetes",
+    fig: FIG_GLUC,
+    html: '<p>The <b>pancreas</b> monitors and controls the concentration of glucose in your blood.</p>' +
+          '<ul>' +
+          '<li>After a meal, blood glucose goes up. The pancreas releases <b>insulin</b> into the blood.</li>' +
+          '<li>Insulin makes glucose move from the blood <b>into cells</b>. In <b>liver and muscle cells</b>, extra glucose is turned into <b>glycogen</b> for storage.</li>' +
+          '<li><b>Higher only:</b> if blood glucose falls too low, the pancreas releases <b>glucagon</b>. Glucagon makes the liver turn glycogen back into glucose, which goes into the blood. Insulin and glucagon work against each other: this is <b>negative feedback</b>.</li>' +
+          '</ul>' +
+          '<p><b>Diabetes</b> means the body cannot control blood glucose properly.</p>' +
+          '<ul>' +
+          '<li><b>Type 1</b>: the pancreas does not make enough insulin, so blood glucose can rise very high. It is usually treated with <b>insulin injections</b> (or an insulin pump).</li>' +
+          '<li><b>Type 2</b>: the body cells no longer respond properly to insulin. It is often treated with a <b>carbohydrate controlled diet</b> and <b>exercise</b>, sometimes with medicine too. <b>Obesity</b> is a risk factor, along with things like age and family history.</li>' +
+          '</ul>' +
+          '<p>Lots of people manage diabetes every day and get on with their lives. It is a medical condition, not a judgement on anyone.</p>' +
+          '<div class="keep"><b>Keep this</b>Insulin brings glucose down, into cells and stores. Glucagon (Higher) brings it back up. Glycogen is the store, glucagon is the hormone.</div>' },
+
+  { type: "order", topic: "Blood glucose",
+    q: "Someone eats a meal with lots of carbohydrate. Put what happens next in order.",
+    items: [
+      "Blood glucose concentration rises",
+      "The pancreas detects the rise",
+      "The pancreas releases insulin into the blood",
+      "Glucose moves from the blood into cells",
+      "Liver and muscle cells store extra glucose as glycogen",
+      "Blood glucose concentration falls back to normal"
+    ],
+    hint: "Detect, then release the hormone, then the hormone has its effect.",
+    why: "Rise, detect, insulin, glucose into cells, stored as glycogen, back to normal. The pancreas is both the receptor and the coordination centre here; the liver and muscles act as effectors." },
+
+  { type: "sort", topic: "Blood glucose",
+    q: "Type 1 or type 2 diabetes?",
+    buckets: ["Type 1", "Type 2"],
+    cards: [
+      ["The pancreas does not produce enough insulin", 0],
+      ["Usually treated with insulin injections", 0],
+      ["Body cells no longer respond properly to insulin", 1],
+      ["Often treated with a carbohydrate controlled diet and exercise", 1],
+      ["Obesity is a risk factor", 1]
+    ],
+    hint: "Type 1 is about not making enough insulin. Type 2 is about cells not responding to it.",
+    why: "In type 1 the insulin is missing, so it has to be given, usually by injection. In type 2 insulin is made but the cells respond less, so a diet low in sugary and starchy food plus exercise can help keep glucose in range." },
+
+  { type: "mc", topic: "Blood glucose", stretch: true,
+    q: "<b>Higher only.</b> Someone has not eaten for several hours and their blood glucose is falling. What happens?",
+    options: [
+      "The pancreas releases glucagon, which makes the liver turn glycogen into glucose",
+      "The pancreas releases insulin, which turns glycogen into glucose",
+      "The liver releases glucagon, which turns glucose into glycogen",
+      "The muscles release insulin, which raises blood glucose"
+    ],
+    answer: 0,
+    hint: "Which hormone brings glucose back up? And which organ makes both hormones?",
+    why: "The pancreas makes both hormones. Glucagon raises blood glucose by getting the liver to break glycogen down into glucose. The names catch everyone out: glyco<b>gen</b> is the store, gluca<b>gon</b> is the hormone." },
+
+  /* ---------- REPRODUCTION ---------- */
+  { type: "learn", topic: "Reproduction",
+    title: "Hormones in reproduction",
+    fig: FIG_CYCLE,
+    html: '<p>At puberty, reproductive hormones cause the body to develop.</p>' +
+          '<ul>' +
+          '<li><b>Oestrogen</b> is the main female reproductive hormone, made in the <b>ovaries</b>. From puberty, eggs mature and one is released about every 28 days: <b>ovulation</b>.</li>' +
+          '<li><b>Testosterone</b> is the main male reproductive hormone, made by the <b>testes</b>. It stimulates <b>sperm production</b>.</li>' +
+          '</ul>' +
+          '<p><b>The menstrual cycle</b> is controlled by four hormones:</p>' +
+          '<ul>' +
+          '<li><b>FSH</b> (from the pituitary) causes an egg to <b>mature</b> in an ovary.</li>' +
+          '<li><b>LH</b> (from the pituitary) stimulates the <b>release</b> of the egg.</li>' +
+          '<li><b>Oestrogen</b> and <b>progesterone</b> (from the ovaries) keep the <b>lining of the uterus</b> thick and ready.</li>' +
+          '<li><b>Higher only:</b> FSH also makes the ovaries produce oestrogen. Oestrogen then inhibits FSH and stimulates LH. Progesterone inhibits both FSH and LH.</li>' +
+          '</ul>' +
+          '<p><b>Contraception</b> stops pregnancy. <b>Hormonal</b> methods: the pill (hormones that inhibit FSH so no eggs mature); an implant, injection or skin patch that slowly releases progesterone, stopping eggs maturing and being released for months or years. <b>Non hormonal</b> methods: condoms and diaphragms (barriers that stop sperm reaching an egg; condoms also protect against sexually transmitted infections), spermicides (kill or disable sperm), an IUD or coil (stops an embryo implanting; some also release a hormone), avoiding sex around ovulation, and surgical sterilisation.</p>' +
+          '<div class="keep"><b>Keep this</b>FSH matures the egg, LH releases it, oestrogen and progesterone keep the lining ready.</div>' },
+
+  { type: "match", topic: "Reproduction",
+    q: "Match each hormone to what it does.",
+    pairs: [
+      ["FSH", "Causes an egg to mature in an ovary"],
+      ["LH", "Stimulates the release of an egg (ovulation)"],
+      ["Oestrogen", "Main female reproductive hormone, made in the ovaries"],
+      ["Progesterone", "Keeps the uterus lining in place after ovulation"],
+      ["Testosterone", "Stimulates sperm production"]
+    ],
+    hint: "F for FSH comes first, then L for LH lets the egg go.",
+    why: "FSH matures, LH releases. Oestrogen and progesterone both look after the uterus lining, with progesterone highest after ovulation, as the graph shows. Testosterone is made in the testes." },
+
+  { type: "sort", topic: "Reproduction",
+    q: "Hormonal or non hormonal contraception?",
+    buckets: ["Hormonal", "Non hormonal"],
+    cards: [
+      ["The contraceptive pill", 0],
+      ["An implant that slowly releases progesterone", 0],
+      ["A skin patch", 0],
+      ["Condom", 1],
+      ["Diaphragm", 1],
+      ["Spermicide", 1],
+      ["Surgical sterilisation", 1]
+    ],
+    hint: "Does it change hormone levels, or does it physically or chemically stop sperm?",
+    why: "The pill, implants, injections and patches all work with hormones. Condoms and diaphragms are barriers, spermicides kill or disable sperm, and sterilisation is surgery. Only condoms also protect against sexually transmitted infections." },
+
+  { type: "mc", topic: "Reproduction", stretch: true,
+    q: "<b>Higher only.</b> The contraceptive pill contains hormones that inhibit <b>FSH</b>. Why does this prevent pregnancy?",
+    options: [
+      "Without FSH, no eggs mature, so no egg is released",
+      "Without FSH, sperm cannot be made",
+      "FSH is the hormone that kills sperm",
+      "Without FSH, the uterus lining grows too thick"
+    ],
+    answer: 0,
+    hint: "What is the job of FSH in the cycle?",
+    why: "FSH causes eggs to mature. Inhibit it, and no egg matures, so there is nothing to release and nothing to fertilise. The pill works on the person taking it, not on sperm." },
+
+  /* ---------- SEPARATE BIOLOGY STRETCH ---------- */
+  { type: "learn", topic: "Brain, eye and heat",
+    title: "Brain, eye and body temperature",
+    html: '<span class="sep">Separate Biology only</span>' +
+          '<p>If you are doing Combined Science, this chunk is not on your papers. It is here as a stretch, if you fancy it.</p>' +
+          '<p><b>The brain</b></p>' +
+          '<ul>' +
+          '<li><b>Cerebral cortex</b>: consciousness, intelligence, memory and language.</li>' +
+          '<li><b>Cerebellum</b>: coordinates muscle activity and balance.</li>' +
+          '<li><b>Medulla</b>: unconscious activities, such as heartbeat and breathing.</li>' +
+          '</ul>' +
+          '<p><b>The eye</b></p>' +
+          '<ul>' +
+          '<li><b>Retina</b>: receptor cells sensitive to light intensity and colour. The <b>optic nerve</b> carries impulses to the brain.</li>' +
+          '<li><b>Cornea</b>: clear front layer that bends light. <b>Iris</b>: controls the size of the pupil, so how much light gets in.</li>' +
+          '<li><b>Lens</b>: focuses light on the retina. <b>Ciliary muscles</b> and <b>suspensory ligaments</b> change its shape. For a near object, the ciliary muscles contract, the ligaments loosen and the lens gets thicker. For a far object, the muscles relax, the ligaments pull tight and the lens gets thinner.</li>' +
+          '</ul>' +
+          '<p><b>Body temperature</b></p>' +
+          '<p>The <b>thermoregulatory centre</b> in the brain has receptors that detect the temperature of the blood. Receptors in the skin send it impulses too.</p>' +
+          '<table class="datatable"><tr><th>Too hot</th><th>Too cold</th></tr>' +
+          '<tr><td>sweat is made; it evaporates and cools the skin</td><td>sweating stops</td></tr>' +
+          '<tr><td>blood vessels to the skin dilate (<b>vasodilation</b>), so more heat is lost</td><td>blood vessels to the skin constrict (<b>vasoconstriction</b>), so less heat is lost</td></tr>' +
+          '<tr><td></td><td><b>shivering</b>: muscles contract, and respiration releases heat</td></tr></table>' +
+          '<div class="keep"><b>Keep this</b>Too hot: widen and sweat. Too cold: narrow and shiver.</div>' },
+
+  { type: "match", topic: "Brain, eye and heat", stretch: true,
+    q: "<b>Separate Biology only.</b> Match each part to its job.",
+    pairs: [
+      ["Cerebral cortex", "Memory, language and conscious thought"],
+      ["Cerebellum", "Coordinating muscle movement and balance"],
+      ["Medulla", "Unconscious actions such as heartbeat and breathing"],
+      ["Iris", "Controls the size of the pupil"],
+      ["Retina", "Contains receptor cells sensitive to light"]
+    ],
+    hint: "The medulla is at the base of the brain and runs the things you never think about.",
+    why: "Cortex for thinking, cerebellum for coordination and balance, medulla for automatic jobs like breathing. In the eye, the iris sets the pupil size and the retina holds the light receptors." },
+
+  { type: "sort", topic: "Brain, eye and heat", stretch: true,
+    q: "<b>Separate Biology only.</b> What does the body do when it is too hot, and when it is too cold?",
+    buckets: ["Too hot", "Too cold"],
+    cards: [
+      ["Sweat is produced", 0],
+      ["Blood vessels supplying the skin dilate", 0],
+      ["More blood flows near the skin surface", 0],
+      ["Shivering", 1],
+      ["Blood vessels supplying the skin constrict", 1],
+      ["Sweating stops", 1]
+    ],
+    hint: "To lose heat, get warm blood close to the surface. To keep heat, do the opposite.",
+    why: "Too hot: vasodilation sends more blood near the skin to lose heat, and sweat evaporating cools you. Too cold: vasoconstriction keeps blood away from the surface, and shivering releases heat from respiration in the muscles. A common slip is to say the blood vessels move: they do not move, they widen or narrow." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your explanation",
+    q: '<p><b>Explain how blood glucose concentration is brought back to normal after a meal, and why type 1 and type 2 diabetes are treated differently.</b> (about 6 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "After a meal, blood glucose",
+      "The pancreas detects this and releases",
+      "Insulin causes glucose to",
+      "In the liver and muscles, glucose is stored as",
+      "In type 1 diabetes,",
+      "so it is treated with",
+      "In type 2 diabetes,",
+      "so it is often treated with"
+    ],
+    checklist: [
+      "I said the pancreas detects the rise and releases insulin",
+      "I said glucose moves from the blood into cells",
+      "I said extra glucose is stored as glycogen in the liver and muscles",
+      "I explained type 1: not enough insulin, so insulin injections",
+      "I explained type 2: cells do not respond to insulin, so diet and exercise",
+      "Stretch: I used the words negative feedback, or mentioned glucagon"
+    ],
+    minWords: 80 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

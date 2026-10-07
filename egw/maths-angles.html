@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angles and shapes - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Column vectors written the maths way */
+.cv{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;border-left:3px solid currentColor;border-right:3px solid currentColor;border-radius:12px;padding:1px 9px;line-height:1.15;vertical-align:middle;font-family:var(--display);font-weight:700;min-width:34px;margin:0 2px}
+.learnbody .datatable{font-size:.92rem}
+.learnbody .datatable td,.learnbody .datatable th{padding:6px 8px}
+.learnbody .datatable td:first-child{text-align:left;font-weight:700}
+/* Transformation arcade (widget on this page only) */
+.ta{background:var(--ink);color:#fff;border-radius:16px;padding:14px;margin:6px 0}
+.ta-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+.ta-top span{background:rgba(255,255,255,.12);border-radius:99px;padding:4px 11px}
+.ta-top .sc{color:var(--sun)}
+.ta-msg{margin:10px 0;font-size:1rem;line-height:1.45}
+.ta-svg{background:var(--paper);border-radius:12px;padding:4px}
+.ta-svg svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.ta-pick{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px}
+.ta-pick button{font-family:var(--display);font-weight:700;font-size:.95rem;padding:8px 12px;border-radius:99px;border:2px solid rgba(255,255,255,.7);background:transparent;color:#fff;cursor:pointer;min-height:40px}
+.ta-pick button.on{background:var(--sun);border-color:var(--sun);color:var(--ink)}
+.ta-pick button:disabled{opacity:.4;cursor:default}
+.ta-ctl{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;margin-top:10px}
+.ta-ctl .k{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--display);font-weight:700;opacity:.75;margin:2px 0 4px}
+.ta-step{display:flex;align-items:center;gap:8px;margin:6px 0}
+.ta-step .lab{flex:1;font-size:.95rem;line-height:1.3}
+.ta-step button{width:42px;height:42px;border-radius:10px;border:2px solid #fff;background:transparent;color:#fff;font-size:1.35rem;font-weight:700;cursor:pointer;flex:none}
+.ta-step button:active{background:rgba(255,255,255,.18)}
+.ta-step .val{min-width:42px;text-align:center;font-family:var(--display);font-weight:700;font-size:1.35rem}
+.ta-desc{font-family:var(--display);font-weight:700;color:var(--sun);margin:10px 0 0;line-height:1.5}
+.ta-go{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ta-go .btn{min-width:110px}
+.ta-fb .btn{margin-top:10px}
+.ta-tip{font-size:.85rem;opacity:.8;margin:4px 0 0}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Angles and shapes</h2>
+    <span>GCSE Maths, Foundation. Angle facts with reasons, parallel lines, shape properties, polygons, bearings, transformations and symmetry.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var MINUS = "&minus;";
+
+/* ---------- small SVG helpers ---------- */
+function r1(v){ return Math.round(v * 10) / 10; }
+function rad(d){ return d * Math.PI / 180; }
+function pt(cx, cy, r, deg){ return [cx + r * Math.cos(rad(deg)), cy - r * Math.sin(rad(deg))]; }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + r1(x) + '" y="' + r1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function bold(x, y, s, size, fill, anchor){ return t(x, y, s, size, fill, LAB + ' font-weight="700" text-anchor="' + (anchor || "middle") + '"'); }
+function ln(a, b, col, w, extra){
+  return '<path d="M' + r1(a[0]) + ' ' + r1(a[1]) + ' L' + r1(b[0]) + ' ' + r1(b[1]) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linecap="round" fill="none" ' + (extra || "") + '/>';
+}
+function arc(cx, cy, r, a1, a2, col, w){
+  var p = pt(cx, cy, r, a1), q = pt(cx, cy, r, a2);
+  return '<path d="M' + r1(p[0]) + ' ' + r1(p[1]) + ' A' + r + ' ' + r + ' 0 ' + ((a2 - a1) > 180 ? 1 : 0) + ' 0 ' + r1(q[0]) + ' ' + r1(q[1]) + '" fill="none" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"/>';
+}
+function wedge(cx, cy, r, a1, a2, fill, op){
+  var p = pt(cx, cy, r, a1), q = pt(cx, cy, r, a2);
+  return '<path d="M' + r1(cx) + ' ' + r1(cy) + ' L' + r1(p[0]) + ' ' + r1(p[1]) + ' A' + r + ' ' + r + ' 0 ' + ((a2 - a1) > 180 ? 1 : 0) + ' 0 ' + r1(q[0]) + ' ' + r1(q[1]) + ' Z" fill="' + fill + '" opacity="' + (op || 0.85) + '"/>';
+}
+function alab(cx, cy, r, a1, a2, s, size, col){
+  var m = pt(cx, cy, r, (a1 + a2) / 2);
+  return bold(m[0], m[1] + (size || 16) * 0.35, s, size || 16, col || INK);
+}
+function poly(pts, fill, stroke, w, extra){
+  return '<path d="M' + pts.map(function(p){ return r1(p[0]) + ' ' + r1(p[1]); }).join(" L") + ' Z" fill="' + fill + '" stroke="' + (stroke || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linejoin="round" ' + (extra || "") + '/>';
+}
+function rightMark(v, a, s, col){
+  var p1 = pt(v[0], v[1], s, a), p3 = pt(v[0], v[1], s, a + 90);
+  var p2 = [p1[0] + p3[0] - v[0], p1[1] + p3[1] - v[1]];
+  return '<path d="M' + r1(p1[0]) + ' ' + r1(p1[1]) + ' L' + r1(p2[0]) + ' ' + r1(p2[1]) + ' L' + r1(p3[0]) + ' ' + r1(p3[1]) + '" fill="none" stroke="' + (col || INK) + '" stroke-width="2"/>';
+}
+function tick(a, b, n){
+  var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+  var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy);
+  var ux = dx / L, uy = dy / L, nx = -uy, ny = ux, s = "";
+  for(var k = 0; k < (n || 1); k++){
+    var off = (k - ((n || 1) - 1) / 2) * 6;
+    var cx = mx + ux * off, cy = my + uy * off;
+    s += ln([cx - nx * 7, cy - ny * 7], [cx + nx * 7, cy + ny * 7], INK, 2);
+  }
+  return s;
+}
+function chevron(x, y, n){
+  var s = "";
+  for(var k = 0; k < (n || 1); k++) s += '<path d="M' + (x - 4 + k * 7) + ' ' + (y - 6) + ' l6 6 l-6 6" fill="none" stroke="' + INK + '" stroke-width="2.2"/>';
+  return s;
+}
+function nda(x, y, anchor){ return t(x, y, "Not drawn accurately", 14, INK, BODY + ' font-style="italic" opacity=".7" text-anchor="' + (anchor || "end") + '"'); }
+function svg(w, h, label, inner){ return '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + label + '">' + inner + '</svg>'; }
+function num(n){ return n < 0 ? MINUS + Math.abs(n) : String(n); }
+
+/* square grid with numbers along the bottom and left edges */
+function grid(o){
+  var X = function(x){ return o.L + (x - o.x0) * o.c; };
+  var Y = function(y){ return o.T + (o.y1 - y) * o.c; };
+  var s = '<rect x="' + X(o.x0) + '" y="' + Y(o.y1) + '" width="' + (o.x1 - o.x0) * o.c + '" height="' + (o.y1 - o.y0) * o.c + '" fill="' + WHITE + '"/>';
+  var x, y;
+  for(x = o.x0; x <= o.x1; x++) s += ln([X(x), Y(o.y1)], [X(x), Y(o.y0)], x === 0 ? INK : LINE, x === 0 ? 2 : 1.2);
+  for(y = o.y0; y <= o.y1; y++) s += ln([X(o.x0), Y(y)], [X(o.x1), Y(y)], y === 0 ? INK : LINE, y === 0 ? 2 : 1.2);
+  var ev = o.every || 1;
+  for(x = o.x0; x <= o.x1; x++) if(x % ev === 0) s += t(X(x), Y(o.y0) + 17, num(x), 14, INK, BODY + ' text-anchor="middle"');
+  for(y = o.y0; y <= o.y1; y++) if(y % ev === 0) s += t(X(o.x0) - 6, Y(y) + 5, num(y), 14, INK, BODY + ' text-anchor="end"');
+  return { s: s, X: X, Y: Y };
+}
+function gpoly(g, pts, fill, stroke, extra){ return poly(pts.map(function(p){ return [g.X(p[0]), g.Y(p[1])]; }), fill, stroke, 2.5, extra); }
+function cv(a, b){ return '<span class="cv"><span>' + num(a) + '</span><span>' + num(b) + '</span></span>'; }
+
+/* ---------- figures ---------- */
+
+/* four basic angle facts */
+var FACTS = (function(){
+  var s = "";
+  s += bold(95, 22, "On a straight line", 15, INK);
+  s += ln([12, 100], [178, 100]) + ln([95, 100], pt(95, 100, 72, 62));
+  s += arc(95, 100, 30, 0, 62, BLUE, 2.5) + arc(95, 100, 24, 62, 180, CORAL, 2.5);
+  s += alab(95, 100, 46, 0, 62, "a", 17, BLUE) + alab(95, 100, 40, 62, 180, "b", 17, CORAL);
+  s += bold(95, 135, "a + b = 180&deg;", 16, INK);
+
+  s += bold(285, 22, "Around a point", 15, INK);
+  s += ln([285, 85], pt(285, 85, 58, 20)) + ln([285, 85], pt(285, 85, 58, 140)) + ln([285, 85], pt(285, 85, 58, 250));
+  s += arc(285, 85, 22, 20, 140, BLUE, 2.5) + arc(285, 85, 26, 140, 250, CORAL, 2.5) + arc(285, 85, 18, 250, 380, MINT, 2.5);
+  s += alab(285, 85, 38, 20, 140, "a", 16, BLUE) + alab(285, 85, 42, 140, 250, "b", 16, CORAL) + alab(285, 85, 34, 250, 380, "c", 16, "#0f8a6c");
+  s += bold(285, 165, "a + b + c = 360&deg;", 16, INK);
+
+  s += bold(95, 196, "Vertically opposite", 15, INK);
+  s += ln(pt(95, 250, 62, 25), pt(95, 250, 62, 205)) + ln(pt(95, 250, 62, 155), pt(95, 250, 62, 335));
+  s += arc(95, 250, 24, 155, 205, BLUE, 2.5) + arc(95, 250, 24, -25, 25, BLUE, 2.5);
+  s += alab(95, 250, 40, 155, 205, "a", 16, BLUE) + alab(95, 250, 40, -25, 25, "b", 16, BLUE);
+  s += bold(95, 300, "a = b", 16, INK);
+
+  s += bold(285, 196, "In a triangle", 15, INK);
+  s += poly([[215, 272], [365, 272], [300, 212]], "rgba(58,92,255,.08)", INK, 2.5);
+  s += bold(234, 266, "a", 16, BLUE) + bold(346, 266, "b", 16, CORAL) + bold(300, 234, "c", 16, "#0f8a6c");
+  s += bold(285, 300, "a + b + c = 180&deg;", 16, INK);
+  return svg(380, 310, "Four angle facts. Angles on a straight line add to 180 degrees. Angles around a point add to 360 degrees. Vertically opposite angles are equal. Angles in a triangle add to 180 degrees.", s);
+})();
+
+/* Q: straight line and around a point */
+var LINEPOINT = (function(){
+  var s = "";
+  var c = [100, 130];
+  s += '<circle cx="18" cy="22" r="13" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>' + bold(18, 28, "1", 15);
+  s += ln([10, 130], [190, 130]) + ln(c, pt(c[0], c[1], 88, 38)) + ln(c, pt(c[0], c[1], 88, 105));
+  s += arc(c[0], c[1], 40, 0, 38, INK, 2) + arc(c[0], c[1], 28, 38, 105, CORAL, 2.5) + arc(c[0], c[1], 30, 105, 180, INK, 2);
+  s += alab(c[0], c[1], 60, 0, 38, "38&deg;", 15) + alab(c[0], c[1], 46, 38, 105, "x", 18, CORAL) + alab(c[0], c[1], 52, 105, 180, "75&deg;", 15);
+  var p = [288, 100];
+  s += '<circle cx="212" cy="22" r="13" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>' + bold(212, 28, "2", 15);
+  [0, 120, 215, 270].forEach(function(a){ s += ln(p, pt(p[0], p[1], 72, a)); });
+  s += rightMark(p, 270, 14);
+  s += arc(p[0], p[1], 24, 0, 120, INK, 2) + arc(p[0], p[1], 22, 120, 215, INK, 2) + arc(p[0], p[1], 26, 215, 270, CORAL, 2.5);
+  s += alab(p[0], p[1], 44, 0, 120, "120&deg;", 15) + alab(p[0], p[1], 44, 120, 215, "95&deg;", 15) + alab(p[0], p[1], 44, 215, 270, "y", 18, CORAL);
+  s += nda(372, 196);
+  return svg(380, 202, "Diagram 1: a straight line with angles 38 degrees, x and 75 degrees. Diagram 2: angles around a point of 120 degrees, 95 degrees, y and a right angle.", s);
+})();
+
+/* Q: crossing lines */
+var CROSS = (function(){
+  var c = [190, 95], s = "";
+  s += ln(pt(c[0], c[1], 150, 20), pt(c[0], c[1], 150, 200)) + ln(pt(c[0], c[1], 110, 128), pt(c[0], c[1], 110, 308));
+  s += arc(c[0], c[1], 28, 128, 200, INK, 2) + arc(c[0], c[1], 24, 20, 128, CORAL, 2.5);
+  s += alab(c[0], c[1], 50, 128, 200, "72&deg;", 15) + alab(c[0], c[1], 42, 20, 128, "b", 18, CORAL);
+  s += nda(372, 186);
+  return svg(380, 192, "Two straight lines cross. One angle is 72 degrees. Angle b is next to it on the same straight line.", s);
+})();
+
+/* Q: isosceles triangle */
+var ISO = (function(){
+  var A = [190, 22], B = [105, 170], C = [275, 170], s = "";
+  s += poly([A, B, C], "rgba(58,92,255,.08)", INK, 2.5);
+  s += tick(A, B, 1) + tick(A, C, 1);
+  s += bold(136, 162, "52&deg;", 15) + bold(246, 162, "x", 18, CORAL) + bold(190, 62, "y", 18, CORAL);
+  s += nda(372, 196);
+  return svg(380, 202, "An isosceles triangle. The two sloping sides are marked equal. One base angle is 52 degrees, the other base angle is x, the top angle is y.", s);
+})();
+
+/* parallel lines: three angle pairs */
+function transversal(x0, thetaDeg, yA, yB){
+  /* line through (x0, yB) at angle theta to the horizontal */
+  var k = 1 / Math.tan(rad(thetaDeg));
+  return {
+    at: function(y){ return [x0 + (yB - y) * k, y]; },
+    k: k
+  };
+}
+var PARA = (function(){
+  var s = "";
+  var names = ["Alternate", "Corresponding", "Co interior"];
+  var caps = ["equal", "equal", "add to 180&deg;"];
+  var cols = [BLUE, CORAL, MINT];
+  for(var p = 0; p < 3; p++){
+    var x0 = p * 127;
+    var yA = 52, yB = 122, th = 64;
+    s += ln([x0 + 8, yA], [x0 + 120, yA]) + ln([x0 + 8, yB], [x0 + 120, yB]);
+    s += chevron(x0 + 22, yA) + chevron(x0 + 22, yB);
+    var tr = transversal(x0 + 48, th, yA, yB);
+    s += ln(tr.at(172), tr.at(6));
+    var U = tr.at(yA), D = tr.at(yB);
+    var pairs = [ [[U, 180 + th, 360], [D, 0, th]].slice(0),
+                  [[U, 0, th], [D, 0, th]],
+                  [[U, 180 + th, 360], [D, 0, th]] ];
+    if(p === 0) pairs[0] = [[U, 180, 180 + th], [D, 0, th]];
+    pairs[p].forEach(function(w){ s += wedge(w[0][0], w[0][1], 22, w[1], w[2], cols[p], 0.9); });
+    s += bold(x0 + 63, 196, names[p], 15, INK);
+    s += t(x0 + 63, 216, caps[p], 15, INK, BODY + ' text-anchor="middle"');
+  }
+  return svg(380, 224, "Three diagrams of parallel lines cut by a transversal. Alternate angles, in a Z shape, are equal. Corresponding angles, in an F shape, are equal. Co interior angles, in a C shape, add up to 180 degrees.", s);
+})();
+
+/* Q: alternate angle */
+var PARAQ = (function(){
+  var s = "", yA = 60, yB = 140, th = 64;
+  s += ln([20, yA], [360, yA]) + ln([20, yB], [360, yB]);
+  s += chevron(50, yA) + chevron(50, yB);
+  var tr = transversal(170, th, yA, yB);
+  s += ln(tr.at(195), tr.at(8));
+  var U = tr.at(yA), D = tr.at(yB);
+  s += arc(U[0], U[1], 26, 180, 180 + th, INK, 2) + alab(U[0], U[1], 46, 180, 180 + th, "64&deg;", 15);
+  s += arc(D[0], D[1], 26, 0, th, CORAL, 2.5) + alab(D[0], D[1], 44, 0, th, "x", 18, CORAL);
+  s += nda(372, 214);
+  return svg(380, 220, "Two parallel lines cut by a transversal. Between the parallel lines, a 64 degree angle sits on the left of the transversal at the top line, and angle x sits on the right of the transversal at the bottom line.", s);
+})();
+
+/* Q: co interior with algebra */
+var PARAALG = (function(){
+  var s = "", yA = 60, yB = 140, th = 95;
+  s += ln([20, yA], [360, yA]) + ln([20, yB], [360, yB]);
+  s += chevron(50, yA, 2) + chevron(50, yB, 2);
+  var tr = transversal(190, th, yA, yB);
+  s += ln(tr.at(195), tr.at(8));
+  var U = tr.at(yA), D = tr.at(yB);
+  s += arc(U[0], U[1], 22, 180 + th, 360, INK, 2) + t(U[0] + 14, U[1] + 34, "(2x + 15)&deg;", 16, BLUE, LAB + ' font-weight="700"');
+  s += arc(D[0], D[1], 22, 0, th, INK, 2) + t(D[0] + 16, D[1] - 14, "(3x " + MINUS + " 10)&deg;", 16, CORAL, LAB + ' font-weight="700"');
+  s += nda(372, 214);
+  return svg(380, 220, "Two parallel lines cut by a transversal. Between the parallel lines on the right of the transversal are the angles 2x plus 15 degrees and 3x minus 10 degrees.", s);
+})();
+
+/* triangle types */
+var TRIS = (function(){
+  var s = "";
+  var e = [[12, 92], [92, 92], [52, 23]];
+  s += poly(e, "rgba(58,92,255,.1)", INK, 2.5) + tick(e[0], e[1]) + tick(e[1], e[2]) + tick(e[2], e[0]);
+  var i = [[107, 92], [177, 92], [142, 18]];
+  s += poly(i, "rgba(255,93,93,.1)", INK, 2.5) + tick(i[0], i[2]) + tick(i[1], i[2]);
+  var sc = [[195, 92], [285, 92], [222, 38]];
+  s += poly(sc, "rgba(25,195,154,.12)", INK, 2.5);
+  var r = [[300, 92], [370, 92], [300, 30]];
+  s += poly(r, "rgba(255,210,63,.3)", INK, 2.5) + rightMark([300, 92], 0, 12);
+  s += bold(52, 116, "Equilateral", 14) + bold(142, 116, "Isosceles", 14) + bold(240, 116, "Scalene", 14) + bold(335, 116, "Right angled", 14);
+  s += t(52, 134, "3 equal sides", 14, INK, BODY + ' text-anchor="middle"') + t(142, 134, "2 equal sides", 14, INK, BODY + ' text-anchor="middle"');
+  s += t(240, 134, "none equal", 14, INK, BODY + ' text-anchor="middle"') + t(335, 134, "one 90&deg;", 14, INK, BODY + ' text-anchor="middle"');
+  return svg(380, 142, "Four kinds of triangle: equilateral with three equal sides, isosceles with two equal sides, scalene with no equal sides, and right angled with one 90 degree angle.", s);
+})();
+
+/* Q: rectangle and parallelogram */
+var RECPAR = (function(){
+  var s = "";
+  s += poly([[20, 30], [170, 30], [170, 115], [20, 115]], "rgba(58,92,255,.1)", INK, 2.5);
+  s += poly([[225, 115], [335, 115], [370, 30], [260, 30]], "rgba(255,93,93,.1)", INK, 2.5);
+  s += bold(95, 145, "Rectangle", 15) + bold(297, 145, "Parallelogram", 15);
+  return svg(380, 154, "A rectangle that is not a square, and a parallelogram with no right angles.", s);
+})();
+
+/* polygons: triangles inside and an exterior angle */
+var POLYS = (function(){
+  var s = "";
+  var c = [95, 98], R = 72, V = [];
+  for(var k = 0; k < 5; k++) V.push(pt(c[0], c[1], R, 90 + 72 * k));
+  s += poly(V, "rgba(58,92,255,.08)", INK, 2.5);
+  s += ln(V[0], V[2], BLUE, 2, 'stroke-dasharray="6 5"') + ln(V[0], V[3], BLUE, 2, 'stroke-dasharray="6 5"');
+  s += bold(95, 196, "3 triangles", 15) + t(95, 216, "3 &times; 180&deg; = 540&deg;", 15, INK, BODY + ' text-anchor="middle"');
+  var h = [288, 108], r = 62, H = [];
+  for(var j = 0; j < 6; j++) H.push(pt(h[0], h[1], r, 60 * j));
+  s += poly(H, "rgba(255,210,63,.25)", INK, 2.5);
+  var v = H[1];
+  s += ln(v, pt(v[0], v[1], 52, 120), INK, 2, 'stroke-dasharray="6 5"');
+  s += wedge(v[0], v[1], 22, 120, 180, CORAL, 0.9) + wedge(v[0], v[1], 18, 180, 300, BLUE, 0.85);
+  s += bold(288, 196, "interior + exterior", 15) + t(288, 216, "= 180&deg;", 15, INK, BODY + ' text-anchor="middle"');
+  s += t(v[0] - 30, v[1] - 22, "ext", 14, "#d13b3b", LAB + ' font-weight="700" text-anchor="end"');
+  s += t(v[0] - 12, v[1] + 38, "int", 14, BLUE, LAB + ' font-weight="700" text-anchor="end"');
+  return svg(380, 224, "A pentagon split into 3 triangles from one corner, so its angles add to 540 degrees. A regular hexagon with one side extended to show the exterior angle next to the interior angle; together they make 180 degrees.", s);
+})();
+
+/* bearings */
+var BEAR = (function(){
+  var s = "", A = [110, 170], B = pt(110, 170, 150, 30);
+  s += ln(A, [110, 30], INK, 2.5) + '<path d="M104 40 L110 26 L116 40 Z" fill="' + INK + '"/>' + bold(110, 20, "N", 16);
+  s += ln(A, B, BLUE, 3);
+  s += arc(A[0], A[1], 46, 30, 90, BLUE, 2.5) + alab(A[0], A[1], 66, 30, 90, "060&deg;", 15, BLUE);
+  s += '<circle cx="' + A[0] + '" cy="' + A[1] + '" r="5" fill="' + INK + '"/>' + bold(A[0] - 14, A[1] + 6, "A", 17, INK, "end");
+  s += ln(B, [B[0], 22], INK, 2, 'stroke-dasharray="6 5"') + bold(B[0], 16, "N", 15);
+  s += arc(B[0], B[1], 24, 210, 450, VIOLET, 2.5);
+  s += t(B[0] + 30, B[1] + 34, "240&deg;", 15, VIOLET, LAB + ' font-weight="700"');
+  s += '<circle cx="' + r1(B[0]) + '" cy="' + r1(B[1]) + '" r="5" fill="' + INK + '"/>' + bold(B[0] + 10, B[1] - 8, "B", 17, INK, "start");
+  return svg(380, 190, "From A, the North line points up. Turning clockwise 60 degrees from North reaches the line to B, so the bearing of B from A is 060. At B, the bearing back to A is 240 degrees.", s);
+})();
+
+/* Q: bearings */
+var BEARQ = (function(){
+  var s = "", P = [190, 112];
+  s += ln(P, [190, 16]) + '<path d="M184 26 L190 12 L196 26 Z" fill="' + INK + '"/>' + bold(206, 26, "N", 16);
+  s += ln(P, [190, 206], INK, 2, 'stroke-dasharray="6 5"');
+  var Q = pt(P[0], P[1], 100, 125), R = pt(P[0], P[1], 108, 320);
+  s += ln(P, Q, BLUE, 3) + ln(P, R, CORAL, 3);
+  s += arc(P[0], P[1], 40, 90, 125, INK, 2) + alab(P[0], P[1], 58, 90, 125, "35&deg;", 15);
+  s += arc(P[0], P[1], 40, 270, 320, INK, 2) + alab(P[0], P[1], 60, 270, 320, "50&deg;", 15);
+  s += '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" fill="' + INK + '"/>' + bold(P[0] + 12, P[1] + 2, "P", 17, INK, "start");
+  s += '<circle cx="' + r1(Q[0]) + '" cy="' + r1(Q[1]) + '" r="5" fill="' + BLUE + '"/>' + bold(Q[0] - 10, Q[1] + 4, "Q", 17, BLUE, "end");
+  s += '<circle cx="' + r1(R[0]) + '" cy="' + r1(R[1]) + '" r="5" fill="' + CORAL + '"/>' + bold(R[0] + 10, R[1] + 4, "R", 17, "#d13b3b", "start");
+  s += nda(372, 214);
+  return svg(380, 220, "From P, North points up. The line to Q is 35 degrees anticlockwise from North. The line to R is 50 degrees anticlockwise from the dashed South line.", s);
+})();
+
+/* transformations: a translation with its column vector */
+var L_SHAPE = [[1, 1], [3, 1], [3, 2], [2, 2], [2, 4], [1, 4]];
+function shift(pts, a, b){ return pts.map(function(p){ return [p[0] + a, p[1] + b]; }); }
+var TRANSL = (function(){
+  var g = grid({ x0: 0, x1: 9, y0: 0, y1: 6, c: 24, L: 28, T: 10 });
+  var A = shift(L_SHAPE, 0, 1), B = shift(A, 4, -2);
+  var s = g.s + gpoly(g, A, "rgba(58,92,255,.75)", INK) + gpoly(g, B, "rgba(255,93,93,.55)", INK);
+  s += bold(g.X(1.5), g.Y(3.3), "A", 16, WHITE) + bold(g.X(5.5), g.Y(1.3), "B", 16, INK);
+  s += ln([g.X(2), g.Y(5)], [g.X(6), g.Y(3)], VIOLET, 3) + '<circle cx="' + g.X(6) + '" cy="' + g.Y(3) + '" r="5" fill="' + VIOLET + '"/>';
+  /* column vector drawn big */
+  var cx = 320;
+  s += '<path d="M' + (cx - 26) + ' 34 q-16 46 0 92" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<path d="M' + (cx + 26) + ' 34 q16 46 0 92" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += bold(cx, 70, "4", 26, BLUE) + bold(cx, 114, MINUS + "2", 26, CORAL);
+  s += t(cx, 150, "4 right", 14, BLUE, BODY + ' text-anchor="middle" font-weight="700"');
+  s += t(cx, 168, "2 down", 14, "#d13b3b", BODY + ' text-anchor="middle" font-weight="700"');
+  return svg(380, 190, "Shape A is translated 4 squares right and 2 squares down to shape B. The column vector has 4 on top and minus 2 underneath.", s);
+})();
+
+/* Q: describe the rotation */
+var ROTQ = (function(){
+  var g = grid({ x0: -5, x1: 5, y0: -5, y1: 5, c: 25, L: 30, T: 8 });
+  var A = [[1, 1], [4, 1], [1, 3]], B = [[1, -1], [1, -4], [3, -1]];
+  var s = g.s + gpoly(g, A, "rgba(58,92,255,.7)", INK) + gpoly(g, B, "rgba(255,93,93,.55)", INK);
+  s += bold(g.X(1.9), g.Y(1.45), "A", 16, WHITE) + bold(g.X(1.65), g.Y(-1.95), "B", 16, INK);
+  return svg(290, 284, "Coordinate grid from minus 5 to 5. Triangle A has corners at (1, 1), (4, 1) and (1, 3). Triangle B has corners at (1, minus 1), (1, minus 4) and (3, minus 1).", s);
+})();
+
+/* enlargement learn card */
+var ENL = (function(){
+  var g = grid({ x0: 0, x1: 7, y0: 0, y1: 7, c: 26, L: 28, T: 8 });
+  var C = [0, 1], A = [[1, 2], [2, 2], [1, 3]], B = [[3, 4], [6, 4], [3, 7]];
+  var s = g.s;
+  B.forEach(function(p){ s += ln([g.X(C[0]), g.Y(C[1])], [g.X(p[0]), g.Y(p[1])], VIOLET, 2, 'stroke-dasharray="5 4"'); });
+  s += gpoly(g, B, "rgba(255,93,93,.45)", INK) + gpoly(g, A, "rgba(58,92,255,.8)", INK);
+  s += '<circle cx="' + g.X(0) + '" cy="' + g.Y(1) + '" r="6" fill="' + VIOLET + '"/>';
+  s += bold(g.X(3.8), g.Y(5.1), "B", 17, INK) + bold(g.X(1.3), g.Y(2.3), "A", 12, WHITE);
+  s += t(232, 40, "Centre", 16, VIOLET, LAB + ' font-weight="700"') + t(232, 60, "(0, 1)", 16, VIOLET, LAB + ' font-weight="700"');
+  s += t(232, 100, "Scale", 16, INK, LAB + ' font-weight="700"') + t(232, 120, "factor 3", 16, INK, LAB + ' font-weight="700"');
+  s += t(232, 160, "lengths", 15, INK, BODY) + t(232, 178, "&times; 3", 15, INK, BODY);
+  return svg(310, 212, "Small blue triangle A is enlarged by scale factor 3 from the centre (0, 1) to make the big triangle B. Dashed lines from the centre pass through matching corners.", s);
+})();
+
+/* Q: find the enlargement */
+var ENLQ = (function(){
+  var g = grid({ x0: 0, x1: 8, y0: 0, y1: 8, c: 26, L: 26, T: 8 });
+  var A = [[3, 2], [4, 2], [3, 4]], B = [[4, 3], [6, 3], [4, 7]];
+  var s = g.s + gpoly(g, B, "rgba(255,93,93,.45)", INK) + gpoly(g, A, "rgba(58,92,255,.8)", INK);
+  s += bold(g.X(3.33), g.Y(2.7), "A", 13, WHITE) + bold(g.X(4.7), g.Y(4.2), "B", 17, INK);
+  return svg(250, 240, "Grid from 0 to 8. Triangle A has corners (3, 2), (4, 2) and (3, 4). Triangle B has corners (4, 3), (6, 3) and (4, 7).", s);
+})();
+
+/* exam: two regular pentagons and a rhombus */
+var PENT = (function(){
+  var P = [205, 150], sd = 80, s = "";
+  function walk(start, n, ext){
+    var v = [[0, 0]], x = 0, y = 0;
+    for(var k = 0; k < n - 1; k++){
+      var a = rad(start + ext * k);
+      x += sd * Math.cos(a); y += sd * Math.sin(a);
+      v.push([x, y]);
+    }
+    return v;
+  }
+  function scr(v){ return v.map(function(p){ return [P[0] + p[0], P[1] - p[1]]; }); }
+  var p1 = scr(walk(0, 5, 72)), p2 = scr(walk(108, 5, 72));
+  var R1 = [sd * Math.cos(rad(216)), sd * Math.sin(rad(216))];
+  var rh = scr([[0, 0], R1, [R1[0] + sd, R1[1]], [sd, 0]]);
+  s += poly(p1, "rgba(58,92,255,.14)", INK, 2.5) + poly(p2, "rgba(58,92,255,.14)", INK, 2.5) + poly(rh, "rgba(255,210,63,.45)", INK, 2.5);
+  s += arc(P[0], P[1], 20, 216, 360, CORAL, 2.5) + alab(P[0], P[1], 34, 216, 360, "x", 17, "#d13b3b");
+  var Q = rh[3];
+  s += arc(Q[0], Q[1], 26, 180, 216, CORAL, 2.5) + alab(Q[0], Q[1], 44, 180, 216, "y", 17, "#d13b3b");
+  s += '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="4" fill="' + INK + '"/>';
+  s += nda(372, 214);
+  return svg(380, 220, "Two regular pentagons and a rhombus meet at one point with no gaps. Angle x is the angle of the rhombus at that point. Angle y is the next angle of the rhombus along the shared side.", s);
+})();
+
+/* ---------- the transformation arcade widget ---------- */
+var LEVELS = [
+  { kind: "T", shape: shift(L_SHAPE, -6, 0), ans: { kind: "T", a: 6, b: -4 },
+    intro: "<b>Level 1: slide it.</b> Set the column vector so shape A lands exactly on the dashed target, then tap Fire." },
+  { kind: "R", shape: L_SHAPE, ans: { kind: "R", line: "x", k: -1 },
+    intro: "<b>Level 2: flip it.</b> Pick a mirror line that drops A exactly onto the target. The line shows up dashed as you choose." },
+  { kind: "O", shape: L_SHAPE, ans: { kind: "O", ang: 90, dir: "acw", cx: -1, cy: 0 },
+    intro: "<b>Level 3: spin it.</b> Choose the angle, the direction and the centre. You can tap a grid point to move the centre." }
+];
+var SHAPES = [L_SHAPE.map(function(p){ return [p[0] - 1, p[1] - 1]; }),
+              [[0, 0], [3, 0], [3, 1], [1, 1], [1, 2], [0, 2]],
+              [[0, 0], [3, 0], [0, 2]],
+              [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2], [0, 2]]];
+var KINDS = { T: "Translate", R: "Reflect", O: "Rotate" };
+
+function applyT(pts, m){
+  return pts.map(function(p){
+    var x = p[0], y = p[1];
+    if(m.kind === "T") return [x + m.a, y + m.b];
+    if(m.kind === "R"){
+      if(m.line === "x") return [2 * m.k - x, y];
+      if(m.line === "y") return [x, 2 * m.k - y];
+      if(m.line === "yx") return [y, x];
+      return [-y, -x];
+    }
+    var dx = x - m.cx, dy = y - m.cy, r;
+    if(m.ang === 180) r = [-dx, -dy];
+    else if(m.dir === "cw") r = [dy, -dx];
+    else r = [-dy, dx];
+    return [m.cx + r[0], m.cy + r[1]];
+  });
+}
+function keyOf(pts){ return pts.map(function(p){ return Math.round(p[0]) + "," + Math.round(p[1]); }).sort().join(" "); }
+function inGrid(pts){ return pts.every(function(p){ return Math.abs(p[0]) <= 6 && Math.abs(p[1]) <= 6; }); }
+function rnd(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+
+function lineName(m){
+  if(m.line === "x") return "x = " + num(m.k) + (m.k === 0 ? " (the y axis)" : "");
+  if(m.line === "y") return "y = " + num(m.k) + (m.k === 0 ? " (the x axis)" : "");
+  if(m.line === "yx") return "y = x";
+  return "y = " + MINUS + "x";
+}
+function describe(m){
+  if(m.kind === "T") return "Translation by the vector " + cv(m.a, m.b);
+  if(m.kind === "R") return "Reflection in the line " + lineName(m);
+  return "Rotation " + m.ang + "&deg; " + (m.ang === 180 ? "" : (m.dir === "cw" ? "clockwise " : "anticlockwise ")) + "about (" + num(m.cx) + ", " + num(m.cy) + ")";
+}
+
+function mystery(){
+  for(var tries = 0; tries < 400; tries++){
+    var base = SHAPES[rnd(0, SHAPES.length - 1)];
+    var sh = shift(base, rnd(-5, 3), rnd(-5, 3));
+    var kind = ["T", "R", "O"][rnd(0, 2)], m;
+    if(kind === "T") m = { kind: "T", a: rnd(-7, 7), b: rnd(-7, 7) };
+    else if(kind === "R"){
+      var ln2 = ["x", "y", "x", "y", "yx", "ymx"][rnd(0, 5)];
+      m = { kind: "R", line: ln2, k: rnd(-3, 3) };
+    }else{
+      var ang = Math.random() < 0.7 ? 90 : 180;
+      m = { kind: "O", ang: ang, dir: Math.random() < 0.5 ? "cw" : "acw", cx: rnd(-3, 3), cy: rnd(-3, 3) };
+    }
+    var img = applyT(sh, m);
+    if(!inGrid(sh) || !inGrid(img) || keyOf(img) === keyOf(sh)) continue;
+    /* keep the target apart from A so it is readable */
+    var overlap = img.filter(function(p){ return sh.some(function(q){ return q[0] === p[0] && q[1] === p[1]; }); }).length;
+    if(overlap > 2) continue;
+    return { shape: sh, ans: m };
+  }
+  return { shape: shift(SHAPES[0], -4, 1), ans: { kind: "T", a: 5, b: -3 } };
+}
+
+function mountArcade(el, api){
+  var d = api.data;
+  if(typeof d.lv !== "number") d.lv = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(typeof d.score !== "number") d.score = 0;
+  if(typeof d.mysN !== "number") d.mysN = 0;
+  if(typeof d.mysMiss !== "number") d.mysMiss = 0;
+  function freshCtl(kind){ return { kind: kind || "T", a: 0, b: 0, line: "x", k: 0, ang: 90, dir: "cw", cx: 0, cy: 0 }; }
+  if(!d.ctl || d.ctlLv !== d.lv){ d.ctl = freshCtl(d.lv < 3 ? LEVELS[d.lv].kind : "T"); d.ctlLv = d.lv; }
+  if(d.lv >= 3 && !d.mys) d.mys = mystery();
+  var view = d.lv;          /* level on screen; lags d.lv while the win message shows */
+  var busy = false, ghost = null, landed = null, anim = null;
+  var reduce = false;
+  try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  el.innerHTML =
+    '<div class="ta">' +
+      '<div class="ta-top"><span data-r="lvl"></span><span class="sc" data-r="score"></span></div>' +
+      '<p class="ta-msg" data-r="msg"></p>' +
+      '<div class="ta-svg" data-r="svg"></div>' +
+      '<div class="ta-ctl" data-r="ctl"></div>' +
+      '<p class="ta-desc" data-r="desc"></p>' +
+      '<div class="ta-go">' +
+        '<button class="btn btn-orange" type="button" data-act="fire">Fire</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-act="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb ta-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function task(){ return view < 3 ? LEVELS[view] : d.mys; }
+  function kindNow(){ return view < 3 ? LEVELS[view].kind : d.ctl.kind; }
+  function move(){
+    var c = d.ctl, k = kindNow();
+    if(k === "T") return { kind: "T", a: c.a, b: c.b };
+    if(k === "R") return { kind: "R", line: c.line, k: c.k };
+    return { kind: "O", ang: c.ang, dir: c.dir, cx: c.cx, cy: c.cy };
+  }
+
+  /* grid geometry: -6..6 each way, 24 units a square */
+  var C = 24, OX = 182, OY = 166;
+  function X(x){ return OX + C * x; }
+  function Y(y){ return OY - C * y; }
+  function P(pts){ return pts.map(function(p){ return [X(p[0]), Y(p[1])]; }); }
+
+  function mirrorPath(m){
+    var a, b;
+    if(m.line === "x"){ a = [m.k, -6.4]; b = [m.k, 6.4]; }
+    else if(m.line === "y"){ a = [-6.4, m.k]; b = [6.4, m.k]; }
+    else if(m.line === "yx"){ a = [-6.4, -6.4]; b = [6.4, 6.4]; }
+    else { a = [-6.4, 6.4]; b = [6.4, -6.4]; }
+    return ln([X(a[0]), Y(a[1])], [X(b[0]), Y(b[1])], VIOLET, 3, 'stroke-dasharray="8 6"');
+  }
+
+  function drawSvg(cur){
+    var tk = task();
+    var target = applyT(tk.shape, tk.ans);
+    var s = '<rect x="' + X(-6) + '" y="' + Y(6) + '" width="' + 12 * C + '" height="' + 12 * C + '" fill="' + WHITE + '"/>';
+    for(var i = -6; i <= 6; i++){
+      s += ln([X(i), Y(6)], [X(i), Y(-6)], i === 0 ? INK : LINE, i === 0 ? 2 : 1.1);
+      s += ln([X(-6), Y(i)], [X(6), Y(i)], i === 0 ? INK : LINE, i === 0 ? 2 : 1.1);
+      if(i % 2 === 0){
+        s += t(X(i), Y(-6) + 18, num(i), 14, INK, BODY + ' text-anchor="middle"');
+        s += t(X(-6) - 7, Y(i) + 5, num(i), 14, INK, BODY + ' text-anchor="end"');
+      }
+    }
+    s += t(X(6) + 4, Y(0) - 5, "x", 14, INK, LAB + ' font-weight="700"') + t(X(0) + 5, Y(6) + 13, "y", 14, INK, LAB + ' font-weight="700"');
+    /* target */
+    s += poly(P(target), landed ? "rgba(25,195,154,.35)" : "rgba(255,210,63,.35)", landed ? MINT : "#c79a00", 2.5, 'stroke-dasharray="7 5"');
+    /* preview of the line or centre */
+    var m = move();
+    if(m.kind === "R") s += mirrorPath(m);
+    if(ghost) s += poly(P(ghost), "rgba(255,93,93,.25)", CORAL, 2.5, 'stroke-dasharray="4 4"');
+    if(landed) s += poly(P(tk.shape), "none", BLUE, 2, 'stroke-dasharray="3 4" opacity=".7"');
+    var pts = cur || (landed ? landed : tk.shape);
+    s += poly(P(pts), landed ? "rgba(25,195,154,.9)" : "rgba(58,92,255,.85)", INK, 2.5);
+    if(!cur && !landed) s += bold(X(pts[0][0] + 0.5), Y(pts[0][1] + 0.5) + 5, "A", 15, WHITE);
+    if(m.kind === "O"){
+      s += '<circle cx="' + X(m.cx) + '" cy="' + Y(m.cy) + '" r="7" fill="' + VIOLET + '" stroke="' + WHITE + '" stroke-width="2"/>';
+    }
+    q("svg").innerHTML = '<svg viewBox="0 0 340 342" role="img" aria-label="Grid from minus 6 to 6. Shape A is solid blue and the target is a dashed outline.">' + s + '</svg>';
+  }
+
+  function stepper(lab, field, lo, hi){
+    return '<div class="ta-step"><span class="lab">' + lab + '</span>' +
+      '<button type="button" data-act="dec" data-f="' + field + '" data-lo="' + lo + '" aria-label="Decrease">' + MINUS + '</button>' +
+      '<span class="val">' + num(d.ctl[field]) + '</span>' +
+      '<button type="button" data-act="inc" data-f="' + field + '" data-hi="' + hi + '" aria-label="Increase">+</button></div>';
+  }
+  function pick(field, opts){
+    return '<div class="ta-pick">' + opts.map(function(o){
+      return '<button type="button" data-act="pick" data-f="' + field + '" data-v="' + o[0] + '" class="' + (String(d.ctl[field]) === String(o[0]) ? "on" : "") + '">' + o[1] + '</button>';
+    }).join("") + '</div>';
+  }
+
+  function drawCtl(){
+    var k = kindNow(), h = "";
+    if(view >= 3){
+      h += '<p class="k">Which transformation?</p>' + pick("kind", [["T", "Translate"], ["R", "Reflect"], ["O", "Rotate"]]);
+    }
+    if(k === "T"){
+      h += '<p class="k">Column vector</p>' +
+        stepper("Top: across (right +, left " + MINUS + ")", "a", -10, 10) +
+        stepper("Bottom: up + or down " + MINUS, "b", -10, 10);
+    }else if(k === "R"){
+      h += '<p class="k">Mirror line</p>' + pick("line", [["x", "x = ..."], ["y", "y = ..."], ["yx", "y = x"], ["ymx", "y = " + MINUS + "x"]]);
+      if(d.ctl.line === "x" || d.ctl.line === "y") h += stepper("The number: " + d.ctl.line + " = ?", "k", -5, 5);
+    }else{
+      h += '<p class="k">Angle and direction</p>' + pick("ang", [[90, "90&deg;"], [180, "180&deg;"]]);
+      if(d.ctl.ang === 90) h += pick("dir", [["cw", "clockwise"], ["acw", "anticlockwise"]]);
+      h += '<p class="k" style="margin-top:8px">Centre of rotation</p>' + stepper("Centre x", "cx", -6, 6) + stepper("Centre y", "cy", -6, 6) +
+        '<p class="ta-tip">Or tap a grid point.</p>';
+    }
+    q("ctl").innerHTML = h;
+  }
+
+  function stars(){
+    var s = "";
+    for(var k = 0; k < 3; k++) s += k < Math.min(d.lv, 3) ? "&#9733;" : "&#9734;";
+    return s;
+  }
+  function drawTop(){
+    q("lvl").innerHTML = view < 3 ? "Level " + (view + 1) + " of 3 &middot; " + KINDS[LEVELS[view].kind] + " " + stars() : "Mystery mode &middot; " + d.mysN + " landed";
+    q("score").innerHTML = "Score " + d.score;
+    q("msg").innerHTML = view < 3 ? LEVELS[view].intro :
+      "<b>Mystery mode.</b> Bonus round, no pressure: a new target every time. Work out which transformation it is, set it up, fire. +50 a landing.";
+  }
+  function drawButtons(){
+    var waiting = busy || !!landed;
+    el.querySelector('[data-act="fire"]').disabled = waiting;
+    var canShow = !waiting && ((view < 3 && view === d.lv && d.miss[view] > 0) || (view >= 3 && d.lastMiss));
+    el.querySelector('[data-act="show"]').classList.toggle("hidden", !canShow);
+  }
+  function render(){
+    drawTop(); drawCtl(); drawSvg();
+    q("desc").innerHTML = "You are setting up: " + describe(move());
+    drawButtons();
+  }
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb ta-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb ta-fb " + cls; f.innerHTML = html;
+  }
+
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+
+  /* animation from the start shape to where this move sends it */
+  function frame(pts, m, f){
+    if(m.kind === "T") return pts.map(function(p){ return [p[0] + m.a * f, p[1] + m.b * f]; });
+    if(m.kind === "R"){
+      var img = applyT(pts, m);
+      return pts.map(function(p, k){ return [p[0] + (img[k][0] - p[0]) * f, p[1] + (img[k][1] - p[1]) * f]; });
+    }
+    var a = rad(m.ang === 180 ? 180 : (m.dir === "cw" ? -90 : 90)) * f;
+    return pts.map(function(p){
+      var dx = p[0] - m.cx, dy = p[1] - m.cy;
+      return [m.cx + dx * Math.cos(a) - dy * Math.sin(a), m.cy + dx * Math.sin(a) + dy * Math.cos(a)];
+    });
+  }
+  function play(m, done){
+    var pts = task().shape;
+    if(reduce){ done(); return; }
+    busy = true; drawButtons();
+    var t0 = null;
+    function f(ts){
+      if(t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 650), e = 1 - Math.pow(1 - k, 3);
+      drawSvg(frame(pts, m, e));
+      if(k < 1) anim = requestAnimationFrame(f);
+      else { busy = false; done(); }
+    }
+    anim = requestAnimationFrame(f);
+  }
+
+  var CHEER = ["Bullseye!", "Perfect landing!", "Spot on, right on the outline.", "Clean hit!"];
+  function win(how){
+    var tk = task(), m = move();
+    landed = applyT(tk.shape, m);
+    ghost = null;
+    var pts, head;
+    if(view < 3){
+      pts = how === "shown" ? 20 : d.miss[view] ? 60 : 100;
+      d.score += pts;
+      d.lv = view + 1;
+      if(d.lv >= 3) d.result = result();
+    }else{
+      pts = how === "shown" ? 0 : 50;
+      d.score += pts;
+      if(pts) d.mysN++;
+      d.lastMiss = false;
+    }
+    if((d.best || 0) < d.score) d.best = d.score;
+    api.save();
+    head = how === "shown" ? "<b>Here is how this one works.</b> " : "<b>" + CHEER[Math.floor(Math.random() * CHEER.length)] + "</b> " + (pts ? "+" + pts + ". " : "");
+    var body = "Described fully: <b>" + describe(m) + "</b>.";
+    if(tk === LEVELS[2] || (view >= 3 && m.kind === "O")) body += " For a rotation that is three things: angle, direction and centre.";
+    if(view === 0) body += " Top number across, bottom number up or down.";
+    if(view === 1) body += " Every corner of the target is the same distance from the mirror line as its matching corner on A.";
+    var btn;
+    if(view < 2) btn = '<button class="btn" type="button" data-act="next">Next level</button>';
+    else if(view === 2) btn = '<p style="margin:8px 0 0">All three levels cleared. <b>Mystery mode</b> is unlocked if you fancy a bonus round: you pick the transformation too.</p><button class="btn" type="button" data-act="next">Play mystery mode</button>';
+    else btn = '<button class="btn" type="button" data-act="next">Next mystery target</button>';
+    fb(how === "shown" ? "show" : "good", head + body + "<br>" + btn);
+    render();
+    if(view === 2) api.done(d.result);
+  }
+
+  function nudge(m, img){
+    var tk = task(), target = applyT(tk.shape, tk.ans);
+    var k = m.kind;
+    function same(a, b){ return a.every(function(p, i){ return p[0] - a[0][0] === b[i][0] - b[0][0] && p[1] - a[0][1] === b[i][1] - b[0][1]; }); }
+    if(view >= 3 && k !== tk.ans.kind && tk.ans.kind === "T" && same(tk.shape, target)) return "The target faces exactly the same way as A. No flip or turn needed: that is a slide.";
+    if(k === "T"){
+      var dx = target[0][0] - img[0][0], dy = target[0][1] - img[0][1];
+      if(tk.ans.kind !== "T") return "A slide keeps the shape facing the same way, but the target faces a different way. Try a different transformation.";
+      var parts = [];
+      if(dx) parts.push(Math.abs(dx) + " more square" + (Math.abs(dx) === 1 ? "" : "s") + (dx > 0 ? " right" : " left"));
+      if(dy) parts.push(Math.abs(dy) + " more square" + (Math.abs(dy) === 1 ? "" : "s") + (dy > 0 ? " up" : " down"));
+      return "Close. It needs to go " + parts.join(" and ") + ". Count from one corner of A to the same corner of the target.";
+    }
+    if(k === "R"){
+      if(tk.ans.kind === "R" && tk.ans.line !== m.line && view < 3){
+        return "Different kind of line needed. The target sits to the side of A, so the mirror runs straight up and down: that is a line x = a number.";
+      }
+      return "The mirror line sits exactly halfway between each corner of A and the matching corner of the target. Find one halfway point and read off the line.";
+    }
+    var sameTurn = same(img, target);
+    if(tk.ans.kind !== "O" && !sameTurn) return "That turn does not match the way the target faces. Have another think about which transformation it is.";
+    if(sameTurn) return "The turn is right; the centre is not. Picture tracing paper pinned at the centre: turn the paper and see where A ends up.";
+    return "The turn is not right yet. Compare the long arm of A with the long arm of the target: which way has it swung?";
+  }
+
+  function fire(viaShow){
+    if(busy || landed) return;
+    var m = move(), tk = task();
+    ghost = null;
+    play(m, function(){
+      var img = applyT(tk.shape, m);
+      if(keyOf(img) === keyOf(applyT(tk.shape, tk.ans))){ win(viaShow ? "shown" : "right"); return; }
+      ghost = img;
+      if(view < 3) d.miss[view]++; else { d.mysMiss++; d.lastMiss = true; }
+      api.save();
+      fb("nudge", "<b>" + ["Clang. Not quite.", "Ooh, near miss.", "Not on the target yet."][Math.floor(Math.random() * 3)] + "</b> " + nudge(m, img) +
+        '<br><span class="tiny">The pink dashed shape shows where that move sent A. Change the settings and fire again, or tap Show me.</span>');
+      render();
+    });
+  }
+
+  function setCtlTo(ans){
+    d.ctl.kind = ans.kind;
+    if(ans.kind === "T"){ d.ctl.a = ans.a; d.ctl.b = ans.b; }
+    else if(ans.kind === "R"){ d.ctl.line = ans.line; d.ctl.k = ans.k || 0; }
+    else { d.ctl.ang = ans.ang; d.ctl.dir = ans.dir; d.ctl.cx = ans.cx; d.ctl.cy = ans.cy; }
+  }
+
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("[data-act]");
+    if(!b || !el.contains(b)) return;
+    var act = b.getAttribute("data-act"), f = b.getAttribute("data-f");
+    if(act === "fire"){ fire(false); return; }
+    if(act === "show"){
+      if(busy || landed) return;
+      if(view < 3) d.shown[view] = true;
+      setCtlTo(task().ans); api.save(); ghost = null; render();
+      fire(true);
+      return;
+    }
+    if(act === "next"){
+      if(busy) return;
+      landed = null; ghost = null; fb(null);
+      view = d.lv;
+      if(view >= 3){ d.mys = mystery(); d.ctl = freshCtl("T"); }
+      else d.ctl = freshCtl(LEVELS[view].kind);
+      d.ctlLv = d.lv;
+      api.save(); render();
+      return;
+    }
+    if(busy || landed) return;
+    if(act === "inc" || act === "dec"){
+      var v = d.ctl[f] + (act === "inc" ? 1 : -1);
+      var lo = f === "k" ? -5 : f === "cx" || f === "cy" ? -6 : -10, hi = -lo;
+      d.ctl[f] = Math.max(lo, Math.min(hi, v));
+    }else if(act === "pick"){
+      var val = b.getAttribute("data-v");
+      d.ctl[f] = f === "ang" ? parseInt(val, 10) : val;
+    }
+    ghost = null;
+    api.save(); render();
+  });
+
+  /* tap the grid to place the centre of rotation */
+  q("svg").addEventListener("click", function(e){
+    if(busy || landed || kindNow() !== "O") return;
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var r = sv.getBoundingClientRect();
+    var ux = (e.clientX - r.left) * 340 / r.width, uy = (e.clientY - r.top) * 342 / r.height;
+    var gx = Math.round((ux - OX) / C), gy = Math.round((OY - uy) / C);
+    if(Math.abs(gx) > 6 || Math.abs(gy) > 6) return;
+    d.ctl.cx = gx; d.ctl.cy = gy; ghost = null;
+    api.save(); render();
+  });
+
+  render();
+  if(d.lv >= 3 && d.result){
+    if(view === 3 && d.mysN === 0) fb("good", "<b>All three levels cleared.</b> Mystery mode is here whenever you want it.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "maths-angles",
+  title: "Angles and shapes",
+  subject: "Maths",
+  mins: 55,
+  blurb: "Angles and shapes questions are often quick marks once you know the facts and the exact reasons to write. This goes from basic angle facts and parallel lines through polygons and bearings to transformations, with an arcade game to land shapes on targets.",
+  steps: [
+
+  /* ---------- ANGLE FACTS ---------- */
+  { type: "learn", topic: "Angle facts",
+    title: "Five facts that do most of the work",
+    fig: FACTS,
+    html: "<ul>" +
+          "<li><b>Angles on a straight line</b> add up to 180&deg;.</li>" +
+          "<li><b>Angles around a point</b> add up to 360&deg;.</li>" +
+          "<li><b>Vertically opposite angles</b> are equal. These are the opposite pair where two straight lines cross.</li>" +
+          "<li><b>Angles in a triangle</b> add up to 180&deg;.</li>" +
+          "<li><b>Angles in a quadrilateral</b> add up to 360&deg;.</li>" +
+          "</ul>" +
+          "<p>When a question says <b>give reasons</b>, it wants the fact written out in words, like the bold bits above. A number on its own does not get the reason mark.</p>" +
+          "<div class='keep'><b>Keep this</b>Work it out, then write the rule you used: &ldquo;angles on a straight line add up to 180&deg;&rdquo;. Diagrams marked &ldquo;not drawn accurately&rdquo; mean you calculate, not measure.</div>" },
+
+  { type: "num", topic: "Angle facts",
+    q: "Work out the angles marked x and y.",
+    fig: LINEPOINT,
+    boxes: [
+      { label: "x (diagram 1)", a: 67, post: "&deg;" },
+      { label: "y (diagram 2)", a: 55, post: "&deg;" }
+    ],
+    hint: "Diagram 1 is a straight line, so all three angles add to 180&deg;. Diagram 2 goes all the way round a point; the little square is 90&deg;.",
+    why: "x: angles on a straight line add up to 180&deg;, so x = 180 &minus; 38 &minus; 75 = <b>67&deg;</b>.<br>y: angles around a point add up to 360&deg;, so y = 360 &minus; 120 &minus; 95 &minus; 90 = <b>55&deg;</b>. The little square corner slips past a lot of people: it still counts as 90&deg;." },
+
+  { type: "mc", topic: "Angle facts",
+    q: "Two straight lines cross. Which is the full answer for angle b, with the right reason?",
+    fig: CROSS,
+    options: [
+      "b = 108&deg;, because angles on a straight line add up to 180&deg;",
+      "b = 72&deg;, because vertically opposite angles are equal",
+      "b = 108&deg;, because vertically opposite angles are equal",
+      "b = 118&deg;, because angles on a straight line add up to 180&deg;"
+    ],
+    answer: 0,
+    hint: "Is b opposite the 72&deg;, or next to it on the same straight line?",
+    why: "b sits next to the 72&deg; on one straight line, so b = 180 &minus; 72 = <b>108&deg;</b>, because <b>angles on a straight line add up to 180&deg;</b>.<br>The angle vertically opposite the 72&deg; would also be 72&deg;, but that is a different angle. A right number with the wrong reason loses the reason mark." },
+
+  { type: "num", topic: "Angle facts",
+    q: "This triangle is isosceles. Work out x and y.",
+    fig: ISO,
+    boxes: [
+      { label: "x", a: 52, post: "&deg;" },
+      { label: "y", a: 76, post: "&deg;" }
+    ],
+    hint: "The little dashes show the two equal sides. The two angles at the bottom of those equal sides are equal too.",
+    why: "Base angles of an isosceles triangle are equal, so x = <b>52&deg;</b>.<br>Angles in a triangle add up to 180&deg;, so y = 180 &minus; 52 &minus; 52 = <b>76&deg;</b>.<br>A common slip is to think the top angle matches the 52&deg;; the equal angles are the two at the ends of the base, opposite the equal sides." },
+
+  /* ---------- PARALLEL LINES ---------- */
+  { type: "learn", topic: "Parallel lines",
+    title: "Parallel lines: three pairs to spot",
+    fig: PARA,
+    html: "<p>Arrows on two lines mean they are <b>parallel</b>. A line crossing them makes lots of angles, and three pairs have names:</p>" +
+          "<ul>" +
+          "<li><b>Alternate angles are equal.</b> They make a Z shape, on opposite sides of the crossing line.</li>" +
+          "<li><b>Corresponding angles are equal.</b> They make an F shape, in the same spot at each crossing.</li>" +
+          "<li><b>Co interior angles add up to 180&deg;.</b> They make a C shape, between the lines on the same side. (Some books call them allied angles.)</li>" +
+          "</ul>" +
+          "<div class='keep'><b>Keep this</b>Letters help you spot them, but write the proper name in the exam. &ldquo;Alternate angles are equal&rdquo; gets the mark; &ldquo;Z angles&rdquo; does not.</div>" },
+
+  { type: "match", topic: "Parallel lines",
+    q: "Match each pair of angles to its shape and rule.",
+    pairs: [
+      ["Alternate angles", "Z shape, equal"],
+      ["Corresponding angles", "F shape, equal"],
+      ["Co interior angles", "C shape, add up to 180&deg;"],
+      ["Vertically opposite angles", "X shape, equal"]
+    ],
+    hint: "Only one of the four pairs adds up to 180&deg;. The rest are all equal pairs; think about the shape each one traces.",
+    why: "Alternate: Z, equal. Corresponding: F, equal. Co interior: C, add up to 180&deg;. Vertically opposite: where two lines cross, X, equal.<br>Co interior is the odd one out, and it is the one people most often call equal by mistake." },
+
+  { type: "mc", topic: "Parallel lines",
+    q: "x = 64&deg;. Which reason would get the mark?",
+    fig: PARAQ,
+    options: [
+      "Alternate angles are equal",
+      "Z angles are equal",
+      "Corresponding angles are equal",
+      "Co interior angles add up to 180&deg;"
+    ],
+    answer: 0,
+    hint: "Both angles sit between the parallel lines. Are they on the same side of the crossing line, or opposite sides?",
+    why: "The 64&deg; and x are between the parallel lines, on opposite sides of the crossing line: a Z shape. So the reason is <b>alternate angles are equal</b>.<br>&ldquo;Z angles&rdquo; describes the same thing but examiners do not accept it. Corresponding angles would be in matching positions at each crossing (an F)." },
+
+  { type: "num", topic: "Parallel lines", stretch: true,
+    q: "The two angles marked are co interior. Work out x, then the size of the larger angle.",
+    fig: PARAALG,
+    boxes: [
+      { label: "x", a: 35 },
+      { label: "Larger angle", a: 95, post: "&deg;" }
+    ],
+    hint: "Co interior angles add up to 180&deg;. Add the two expressions, set them equal to 180 and solve.",
+    why: "Co interior angles add up to 180&deg;: (2x + 15) + (3x &minus; 10) = 180, so 5x + 5 = 180, 5x = 175, <b>x = 35</b>.<br>The angles are 2 &times; 35 + 15 = 85&deg; and 3 &times; 35 &minus; 10 = <b>95&deg;</b>. Check: 85 + 95 = 180.<br>Stopping at x = 35 is the common slip when the question asks for an angle." },
+
+  /* ---------- SHAPES AND SYMMETRY ---------- */
+  { type: "learn", topic: "Shapes and symmetry",
+    title: "Triangles, quadrilaterals and symmetry",
+    fig: TRIS,
+    html: "<p>Equal sides are marked with dashes. In an <b>isosceles</b> triangle the two angles at the bottom of the equal sides are equal; an <b>equilateral</b> triangle has three 60&deg; angles.</p>" +
+          "<ul style='margin-bottom:8px'>" +
+          "<li><b>Square</b>: 4 equal sides, 4 right angles.</li>" +
+          "<li><b>Rectangle</b>: opposite sides equal, 4 right angles.</li>" +
+          "<li><b>Rhombus</b>: 4 equal sides, opposite angles equal.</li>" +
+          "<li><b>Parallelogram</b>: opposite sides equal and parallel.</li>" +
+          "<li><b>Trapezium</b>: one pair of parallel sides.</li>" +
+          "<li><b>Kite</b>: two pairs of equal sides next to each other.</li>" +
+          "</ul>" +
+          "<table class='datatable'><tr><th>Shape</th><th>Lines of symmetry</th><th>Order of rotation</th></tr>" +
+          "<tr><td>Square</td><td>4</td><td>4</td></tr>" +
+          "<tr><td>Rectangle</td><td>2</td><td>2</td></tr>" +
+          "<tr><td>Rhombus</td><td>2</td><td>2</td></tr>" +
+          "<tr><td>Parallelogram</td><td>0</td><td>2</td></tr>" +
+          "<tr><td>Trapezium</td><td>0 (1 if isosceles)</td><td>1</td></tr>" +
+          "<tr><td>Kite</td><td>1</td><td>1</td></tr>" +
+          "</table>" +
+          "<p><b>Lines</b> of symmetry: mirror lines that fold the shape onto itself. <b>Order</b> of rotational symmetry: how many times it fits onto itself in one full turn. Every shape fits at least once, so the lowest order is 1.</p>" +
+          "<div class='keep'><b>Keep this</b>A parallelogram has <b>no</b> lines of symmetry, but rotational symmetry of order 2. Try folding one in your head: the halves never match.</div>" },
+
+  { type: "sort", topic: "Shapes and symmetry",
+    q: "Is each statement true for <b>every</b> parallelogram?",
+    buckets: ["True for every parallelogram", "Not always true"],
+    cards: [
+      ["Opposite sides are parallel", 0],
+      ["Opposite sides are equal", 0],
+      ["Opposite angles are equal", 0],
+      ["The diagonals cut each other in half", 0],
+      ["All the angles are 90&deg;", 1],
+      ["The diagonals are the same length", 1],
+      ["The diagonals cross at right angles", 1],
+      ["It has a line of symmetry", 1]
+    ],
+    hint: "Picture a slanty parallelogram, not a rectangle or a square. Which of these still hold for the slanty one?",
+    why: "Every parallelogram has opposite sides parallel and equal, opposite angles equal, and diagonals that cut each other in half.<br>Right angles and equal diagonals only happen in rectangles and squares. Diagonals crossing at 90&deg; only happens in rhombuses and squares. A general parallelogram has no line of symmetry." },
+
+  { type: "num", topic: "Shapes and symmetry",
+    q: "Fill in the symmetry for each shape.",
+    fig: RECPAR,
+    boxes: [
+      { label: "Rectangle: lines of symmetry", a: 2 },
+      { label: "Rectangle: order of rotational symmetry", a: 2 },
+      { label: "Parallelogram: lines of symmetry", a: 0 },
+      { label: "Parallelogram: order of rotational symmetry", a: 2 }
+    ],
+    hint: "A rectangle folds across the middle both ways, but not along its diagonals. For rotation, count how many times it looks the same in one full turn.",
+    why: "Rectangle: <b>2</b> lines (across the middle, both ways) and order <b>2</b>. The diagonals are not lines of symmetry: fold along one and the corners miss.<br>Parallelogram: <b>0</b> lines, but it looks the same after a half turn, so order <b>2</b>." },
+
+  /* ---------- POLYGONS ---------- */
+  { type: "learn", topic: "Polygons",
+    title: "Interior and exterior angles",
+    fig: POLYS,
+    html: "<p>From one corner you can split any polygon into triangles. A shape with n sides makes n &minus; 2 triangles, so:</p>" +
+          "<p style='text-align:center;font-size:1.1rem'><b>sum of interior angles = (n &minus; 2) &times; 180&deg;</b></p>" +
+          "<p>The <b>exterior angles</b> of any polygon add up to <b>360&deg;</b> (walk round the edge and you turn once all the way round). In a <b>regular</b> polygon all the sides and angles are equal, so:</p>" +
+          "<ul><li>each exterior angle = 360&deg; &divide; n</li><li>each interior angle = 180&deg; &minus; exterior angle</li></ul>" +
+          "<div class='keep'><b>Keep this</b>Regular polygon questions are fastest through the exterior angle. 360 &divide; number of sides, then take it from 180.</div>" },
+
+  { type: "num", topic: "Polygons",
+    q: "A hexagon has 6 sides. Five of its angles are 110&deg;, 130&deg;, 125&deg;, 100&deg; and 140&deg;.",
+    boxes: [
+      { label: "a) Sum of the interior angles of a hexagon", a: 720, post: "&deg;" },
+      { label: "b) The sixth angle", a: 115, post: "&deg;" }
+    ],
+    hint: "a) Use (n &minus; 2) &times; 180 with n = 6. b) Take the five angles you know away from that total.",
+    why: "a) (6 &minus; 2) &times; 180 = 4 &times; 180 = <b>720&deg;</b>.<br>b) 110 + 130 + 125 + 100 + 140 = 605, and 720 &minus; 605 = <b>115&deg;</b>.<br>Using 6 &times; 180 by mistake gives 1080&deg;; it is always two fewer triangles than sides." },
+
+  { type: "num", topic: "Polygons",
+    q: "A regular octagon has 8 equal sides and 8 equal angles.",
+    boxes: [
+      { label: "Each exterior angle", a: 45, post: "&deg;" },
+      { label: "Each interior angle", a: 135, post: "&deg;" }
+    ],
+    hint: "Exterior angles always add up to 360&deg;. Share that between 8. Interior and exterior sit on a straight line together.",
+    why: "Exterior: 360 &divide; 8 = <b>45&deg;</b>. Interior: 180 &minus; 45 = <b>135&deg;</b>.<br>Check another way: (8 &minus; 2) &times; 180 = 1080, and 1080 &divide; 8 = 135." },
+
+  { type: "num", topic: "Polygons", stretch: true,
+    q: "Each interior angle of a regular polygon is 156&deg;. How many sides does it have?",
+    boxes: [
+      { label: "Each exterior angle", a: 24, post: "&deg;" },
+      { label: "Number of sides", a: 15 }
+    ],
+    hint: "Go through the exterior angle: interior and exterior add to 180. Then how many of those fit into 360?",
+    why: "Exterior angle = 180 &minus; 156 = <b>24&deg;</b>. The exterior angles add up to 360&deg;, so the number of sides is 360 &divide; 24 = <b>15</b>.<br>Exam twist: if the division does not give a whole number, that polygon cannot exist. For example, an interior angle of 130&deg; gives 360 &divide; 50 = 7.2, so no regular polygon has 130&deg; angles." },
+
+  /* ---------- BEARINGS ---------- */
+  { type: "learn", topic: "Bearings",
+    title: "Bearings: North, clockwise, three figures",
+    fig: BEAR,
+    html: "<p>A bearing is a direction given as an angle. Three rules:</p>" +
+          "<ul>" +
+          "<li>Measure from <b>North</b>. Draw a North line at the point you are measuring <b>from</b>.</li>" +
+          "<li>Turn <b>clockwise</b>.</li>" +
+          "<li>Write <b>three figures</b>: 60&deg; is written 060&deg;, 5&deg; is 005&deg;.</li>" +
+          "</ul>" +
+          "<p>&ldquo;The bearing of B from A&rdquo; means stand at A and look at B.</p>" +
+          "<p><b>Stretch: back bearings.</b> The bearing back the other way differs by 180&deg;. Add 180 if the bearing is less than 180, take away 180 if it is more. From A to B is 060&deg;, so from B to A is 240&deg;.</p>" +
+          "<div class='keep'><b>Keep this</b>Stand at the word after &ldquo;from&rdquo;. Face North. Turn clockwise until you face the other point. Three figures.</div>" },
+
+  { type: "num", topic: "Bearings",
+    q: "Use the diagram to work out each bearing. Give each one as three figures.",
+    fig: BEARQ,
+    boxes: [
+      { label: "Bearing of Q from P", a: 325, post: "&deg;" },
+      { label: "Bearing of R from P", a: 130, post: "&deg;" }
+    ],
+    hint: "Bearings always go clockwise from North. Q is 35&deg; the wrong way round, so how far clockwise is that? For R, the 50&deg; is measured from South, and South is 180&deg;.",
+    why: "Q: going clockwise from North all the way round to PQ is 360 &minus; 35 = <b>325&deg;</b>.<br>R: South is 180&deg; clockwise from North, and PR is 50&deg; before South, so 180 &minus; 50 = <b>130&deg;</b>.<br>Writing 035&deg; for Q is the classic slip: that would be clockwise, on the other side of North." },
+
+  { type: "num", topic: "Bearings", stretch: true,
+    q: "Back bearings. Give each answer as three figures.<br>a) The bearing of B from A is 070&deg;. Work out the bearing of A from B.<br>b) The bearing of D from C is 220&deg;. Work out the bearing of C from D.",
+    boxes: [
+      { label: "a) Bearing of A from B", a: 250, post: "&deg;" },
+      { label: "b) Bearing of C from D", a: 40, post: "&deg;", show: "040" }
+    ],
+    hint: "Turning round to look back is a half turn. Add 180&deg; if that keeps you under 360&deg;, otherwise take 180&deg; away.",
+    why: "a) 70 is less than 180, so add: 70 + 180 = <b>250&deg;</b>.<br>b) 220 is more than 180, so take away: 220 &minus; 180 = 40, written <b>040&deg;</b>.<br>Sketching both North lines helps: the two North lines are parallel, so the angles at each end are co interior." },
+
+  /* ---------- TRANSFORMATIONS ---------- */
+  { type: "learn", topic: "Transformations",
+    title: "Four transformations, and what to say about each",
+    fig: TRANSL,
+    html: "<ul>" +
+          "<li><b>Translation</b>: a slide. Give the <b>column vector</b>. Top number is across (right is positive), bottom number is up and down (up is positive). The picture shows " + cv(4, -2) + ".</li>" +
+          "<li><b>Reflection</b>: a flip. Give the <b>mirror line</b> as an equation, such as x = 2, y = &minus;1 or y = x.</li>" +
+          "<li><b>Rotation</b>: a turn. Give the <b>angle</b>, the <b>direction</b> (clockwise or anticlockwise) and the <b>centre</b>. A 180&deg; turn needs no direction.</li>" +
+          "<li><b>Enlargement</b>: a resize. Give the <b>scale factor</b> and the <b>centre</b>. More on this in the next chunk.</li>" +
+          "</ul>" +
+          "<div class='keep'><b>Keep this</b>&ldquo;Describe fully the single transformation&rdquo; means one name plus every detail. Two transformations, such as &ldquo;a reflection then a translation&rdquo;, scores nothing even if it works.</div>" },
+
+  { type: "widget", topic: "Transformations",
+    title: "Transformation arcade",
+    html: "Land shape A exactly on the dashed target. Three levels: slide, flip, spin. Points for every landing, and more for first go.",
+    mount: mountArcade,
+    report: function(d){
+      if(!d || !d.result) return "Transformation arcade: " + (d && d.lv ? d.lv : 0) + " of 3 levels cleared, score " + (d && d.score ? d.score : 0) + ".";
+      var lab = { right1: "all three levels first go", right2: "all three levels, some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Transformation arcade: " + lab + " (misses " + (d.miss || []).join("/") + "), score " + d.score + ", mystery mode landings " + (d.mysN || 0) + ".";
+    } },
+
+  { type: "num", topic: "Transformations",
+    q: "A translation moves the point (2, 5) to the point (&minus;1, 7). Write the column vector for this translation.",
+    boxes: [
+      { label: "Top number (across)", a: -3 },
+      { label: "Bottom number (up or down)", a: 2 }
+    ],
+    hint: "How far, and which way, does the x coordinate change? Then the y coordinate. Left and down are negative.",
+    why: "x goes from 2 to &minus;1: that is 3 to the left, so <b>&minus;3</b>. y goes from 5 to 7: 2 up, so <b>2</b>. The vector is " + cv(-3, 2) + ".<br>Quick method: new minus old, for each coordinate." },
+
+  { type: "mc", topic: "Transformations",
+    q: "Describe fully the single transformation that maps triangle A onto triangle B.",
+    fig: ROTQ,
+    options: [
+      "Rotation 90&deg; clockwise about (0, 0)",
+      "Rotation 90&deg; clockwise",
+      "Rotation 90&deg; anticlockwise about (0, 0)",
+      "Reflection in the x axis"
+    ],
+    answer: 0,
+    hint: "Has B been flipped, or turned? The corner at (4, 1) ends up at (1, &minus;4). Imagine turning the page about the origin.",
+    why: "B is A turned a quarter turn clockwise about the origin: (1, 1) goes to (1, &minus;1) and (4, 1) goes to (1, &minus;4). So <b>rotation 90&deg; clockwise about (0, 0)</b>.<br>&ldquo;Rotation 90&deg; clockwise&rdquo; is right but not full: without a centre it loses a mark. A reflection in the x axis would put the long side along the bottom of B, not up the side." },
+
+  /* ---------- ENLARGEMENT ---------- */
+  { type: "learn", topic: "Enlargement",
+    title: "Enlargement: scale factor and centre",
+    fig: ENL,
+    html: "<p>An enlargement multiplies every length by the <b>scale factor</b>. Angles do not change, so the shape stays the same shape.</p>" +
+          "<p>The <b>centre of enlargement</b> is where everything is measured from. Each corner of the image is scale factor times as far from the centre as the matching corner of the original.</p>" +
+          "<ul><li><b>Finding the scale factor</b>: new length &divide; old length.</li>" +
+          "<li><b>Finding the centre</b>: draw lines through matching corners and extend them back. They all meet at the centre.</li></ul>" +
+          "<p><b>Stretch: fractional scale factors.</b> A scale factor between 0 and 1 makes the shape <b>smaller</b>. Scale factor &frac12; halves every length, and the image is pulled in towards the centre.</p>" +
+          "<div class='keep'><b>Keep this</b>Describe an enlargement with two things: the scale factor and the centre. &ldquo;Made twice as big&rdquo; on its own is not enough.</div>" },
+
+  { type: "num", topic: "Enlargement",
+    q: "Triangle B is an enlargement of triangle A. Find the scale factor and the centre of enlargement.",
+    fig: ENLQ,
+    boxes: [
+      { label: "Scale factor", a: 2 },
+      { label: "Centre: x coordinate", a: 2 },
+      { label: "Centre: y coordinate", a: 1 }
+    ],
+    hint: "Compare one pair of matching sides for the scale factor. For the centre, join matching corners with straight lines and follow them back until they meet.",
+    why: "The bottom side of A is 1 square, of B is 2 squares, so the scale factor is <b>2</b>.<br>Join (4, 3) to (3, 2) and keep going: you reach (2, 1). Do the same with (4, 7) and (3, 4): that line also reaches (2, 1). So the centre is <b>(2, 1)</b>.<br>Check: from (2, 1) to (3, 2) is 1 right, 1 up; doubled is 2 right, 2 up, which lands on (4, 3)." },
+
+  { type: "mc", topic: "Enlargement", stretch: true,
+    q: "Shape A has a side of 8 cm and an angle of 70&deg;. It is enlarged by scale factor &frac12; to make shape B. What are the matching side and angle in B?",
+    options: [
+      "Side 4 cm, angle 70&deg;",
+      "Side 4 cm, angle 35&deg;",
+      "Side 16 cm, angle 70&deg;",
+      "Side 16 cm, angle 140&deg;"
+    ],
+    answer: 0,
+    hint: "A scale factor of &frac12; does something to lengths. Does an enlargement ever change angles?",
+    why: "Lengths are multiplied by the scale factor: 8 &times; &frac12; = <b>4 cm</b>. Angles never change in an enlargement, so it stays <b>70&deg;</b>.<br>Scale factor &frac12; still counts as an enlargement in GCSE language, even though the shape gets smaller." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "<p>Two regular pentagons and a rhombus fit together at a point with no gaps, as shown.</p><p>Work through it in parts. In the exam you would write a reason for each step.</p>",
+    fig: PENT,
+    boxes: [
+      { label: "a) Each exterior angle of a regular pentagon", a: 72, post: "&deg;" },
+      { label: "b) Each interior angle of a regular pentagon", a: 108, post: "&deg;" },
+      { label: "c) Angle x", a: 144, post: "&deg;" },
+      { label: "d) Angle y", a: 36, post: "&deg;" }
+    ],
+    hint: "a) Exterior angles add to 360&deg;. c) Three angles meet at the point: two pentagon angles and x. d) In a rhombus, angles next to each other along a side add up to 180&deg; (they are co interior, because opposite sides are parallel).",
+    why: "a) 360 &divide; 5 = <b>72&deg;</b>, because exterior angles add up to 360&deg;.<br>b) 180 &minus; 72 = <b>108&deg;</b>, because interior and exterior angles lie on a straight line.<br>c) x = 360 &minus; 108 &minus; 108 = <b>144&deg;</b>, because angles around a point add up to 360&deg;.<br>d) y = 180 &minus; 144 = <b>36&deg;</b>, because co interior angles add up to 180&deg; (the sides of a rhombus are parallel in pairs).<br>Writing the reason after each line is what turns a right answer into full marks." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experiments and spread - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Paper plane lab widget */
+.ppl .pstep{font-family:var(--display);font-weight:700;font-size:1rem;margin:14px 0 6px}
+.ppl .pstep:first-of-type{margin-top:4px}
+.ppl .pstep small{font-family:var(--body);font-weight:400;font-size:.88rem;color:var(--body-tint)}
+.ppl .pchips{display:flex;flex-wrap:wrap;gap:8px}
+.ppl .pchips button{font-family:inherit;font-size:.95rem;line-height:1.2;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:99px;padding:8px 13px;cursor:pointer;min-height:40px}
+.ppl .pchips button:hover{border-color:var(--violet)}
+.ppl .pchips button.on{background:var(--violet);color:#fff;border-color:var(--ink)}
+.ppl .pchips.ticks button.on::before{content:"\2713  ";font-weight:700}
+.ppl .pchips.reps button{min-width:52px;font-family:var(--display);font-weight:700}
+.ppl .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.ppl .badge{font-family:var(--display);font-weight:700;font-size:.9rem;background:var(--ink);color:#fff;border-radius:99px;padding:5px 12px}
+.ppl .badge b{color:var(--sun)}
+.ppl .hyp{background:#fff;border:2px dashed var(--ink);border-radius:12px;padding:8px 12px;font-size:.98rem;margin:0 0 4px}
+.ppl .hall{background:var(--ink);color:#fff;border-radius:16px;padding:12px 12px 14px;margin:10px 0}
+.ppl .hall svg{width:100%;height:auto;display:block}
+.ppl .hall .wnote{color:#fff}
+.ppl .hall .wnote b{color:var(--sun)}
+.ppl .hall h4{font-size:1.05rem;margin:2px 0 6px;color:#fff}
+.ppl .msg{background:#fff;border-radius:12px;padding:10px 12px;border:2px solid var(--ink)}
+.ppl .msg:empty{display:none}
+.ppl .msg.good{border-color:var(--good);background:#e6f7ef}
+.ppl .msg.nudge{border-color:var(--coral);background:#fff1f1}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Experiments and spread</h2>
+    <span>GCSE Statistics. Designing a fair experiment, control groups, reliability and validity, testing a hypothesis, then standard deviation and the binomial distribution.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function box(x, y, w, hgt, fill, title, sub, col){
+  col = col || INK;
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + hgt + '" rx="12" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<text x="' + (x + w / 2) + '" y="' + (y + (sub ? hgt / 2 - 3 : hgt / 2 + 6)) + '" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="16" fill="' + col + '">' + title + '</text>' +
+    (sub ? '<text x="' + (x + w / 2) + '" y="' + (y + hgt / 2 + 16) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + col + '">' + sub + '</text>' : "");
+}
+function arrowHead(x, y, dir){
+  /* dir: "r" right, "d" down */
+  if(dir === "d") return '<path d="M' + (x - 7) + ' ' + (y - 9) + ' L' + x + ' ' + y + ' L' + (x + 7) + ' ' + (y - 9) + '" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+  return '<path d="M' + (x - 9) + ' ' + (y - 7) + ' L' + x + ' ' + y + ' L' + (x - 9) + ' ' + (y + 7) + '" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+
+/* ---------- figures ---------- */
+var VARS =
+'<svg viewBox="0 0 360 214" role="img" aria-label="The explanatory variable, wing size, is changed on purpose. An arrow goes to the response variable, flight distance, which is measured. Extraneous variables such as paper, thrower and draughts could also affect the distance, so they are kept the same." style="max-width:440px">' +
+box(4, 6, 150, 62, SUN, "Explanatory", "wing size: you change it") +
+'<line x1="156" y1="37" x2="200" y2="37" stroke="' + INK + '" stroke-width="3"/>' + arrowHead(204, 37, "r") +
+box(206, 6, 150, 62, CYAN, "Response", "distance: you measure it") +
+'<line x1="180" y1="122" x2="180" y2="48" stroke="' + INK + '" stroke-width="2.5" stroke-dasharray="6 5"/>' + arrowHead(180, 46, "d").replace("M173 37 L180 46 L187 37", "M173 55 L180 46 L187 55") +
+'<rect x="20" y="122" width="320" height="86" rx="14" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5" stroke-dasharray="7 5"/>' +
+'<text x="180" y="146" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="16" fill="' + INK + '">Extraneous variables</text>' +
+'<text x="180" y="168" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">paper, thrower, launch height, draughts</text>' +
+'<text x="180" y="194" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + VIOLET + '">could sneak in, so keep them the same</text>' +
+'</svg>';
+
+function person(x, y, col){
+  return '<circle cx="' + x + '" cy="' + (y - 11) + '" r="7" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>' +
+    '<path d="M' + (x - 10) + ' ' + (y + 12) + ' Q' + x + ' ' + (y - 6) + ' ' + (x + 10) + ' ' + (y + 12) + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>';
+}
+var MATCHED = (function(){
+  var cols = [SUN, MINT, CORAL, CYAN];
+  var s = '<svg viewBox="0 0 360 200" role="img" aria-label="Matched pairs. Four pairs of people, each pair alike in age and ability, shown in the same colour. One person from each pair goes into the experimental group and the other into the control group." style="max-width:440px">';
+  s += '<rect x="4" y="4" width="166" height="192" rx="14" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="190" y="4" width="166" height="192" rx="14" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<text x="87" y="30" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="16" fill="' + INK + '">Experimental</text>';
+  s += '<text x="87" y="49" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">gets the new thing</text>';
+  s += '<text x="273" y="30" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="16" fill="' + INK + '">Control</text>';
+  s += '<text x="273" y="49" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">carries on as usual</text>';
+  cols.forEach(function(c, k){
+    var y = 86 + k * 30;
+    s += person(87, y, c) + person(273, y, c);
+    s += '<line x1="102" y1="' + (y - 2) + '" x2="258" y2="' + (y - 2) + '" stroke="' + INK + '" stroke-width="1.6" stroke-dasharray="3 4"/>';
+  });
+  s += '<text x="180" y="190" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">same colour = a matched pair</text>';
+  return s + '</svg>';
+})();
+
+var TYPES = (function(){
+  var s = '<svg viewBox="0 0 360 178" role="img" aria-label="Three types of experiment on a scale. Laboratory has the most control but is least like real life. Field is in the middle. Natural has the least control but is most like real life." style="max-width:440px">';
+  s += box(4, 6, 110, 60, VIOLET, "Laboratory", "set up indoors", WHITE);
+  s += box(125, 6, 110, 60, CYAN, "Field", "real setting");
+  s += box(246, 6, 110, 60, MINT, "Natural", "it just happens");
+  s += '<line x1="20" y1="96" x2="336" y2="96" stroke="' + INK + '" stroke-width="3"/>' + '<path d="M28 88 L18 96 L28 104" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<text x="180" y="88" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + INK + '">more control</text>';
+  s += '<line x1="20" y1="140" x2="336" y2="140" stroke="' + INK + '" stroke-width="3"/>' + '<path d="M328 132 L338 140 L328 148" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<text x="180" y="132" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + INK + '">more like real life</text>';
+  s += '<text x="180" y="170" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">You usually trade one for the other.</text>';
+  return s + '</svg>';
+})();
+
+var TARGETS = (function(){
+  function target(cx, title, sub, pts){
+    var t = "";
+    [44, 30, 16].forEach(function(r, k){
+      t += '<circle cx="' + cx + '" cy="62" r="' + r + '" fill="' + (k === 2 ? SUN : (k === 1 ? WHITE : PAPER)) + '" stroke="' + INK + '" stroke-width="2"/>';
+    });
+    pts.forEach(function(p){ t += '<circle cx="' + (cx + p[0]) + '" cy="' + (62 + p[1]) + '" r="4.5" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="1.6"/>'; });
+    t += '<text x="' + cx + '" y="128" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + INK + '">' + title + '</text>';
+    t += '<text x="' + cx + '" y="148" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + sub + '</text>';
+    return t;
+  }
+  var s = '<svg viewBox="0 0 360 158" role="img" aria-label="Three targets. Left: shots scattered everywhere, neither reliable nor valid. Middle: shots tightly grouped but away from the centre, reliable but not valid. Right: shots tightly grouped on the centre, reliable and valid." style="max-width:440px">';
+  s += target(60, "Neither", "all over", [[-30, -14], [22, -26], [-8, 30], [30, 18], [-24, 22]]);
+  s += target(180, "Reliable", "but not valid", [[24, -22], [29, -17], [21, -15], [27, -26], [31, -21]]);
+  s += target(300, "Reliable", "and valid", [[-3, -4], [4, 2], [-1, 5], [5, -4], [0, 0]]);
+  return s + '</svg>';
+})();
+
+var SPREAD = (function(){
+  var L = 40, W = 300, lo = 0, hi = 12;
+  function X(v){ return L + (v - lo) / (hi - lo) * W; }
+  function row(y, vals, col, name, sd){
+    var t = '<line x1="' + L + '" y1="' + y + '" x2="' + (L + W) + '" y2="' + y + '" stroke="' + INK + '" stroke-width="2"/>';
+    var seen = {};
+    vals.forEach(function(v){
+      seen[v] = (seen[v] || 0) + 1;
+      t += '<circle cx="' + X(v) + '" cy="' + (y - 9 - (seen[v] - 1) * 15) + '" r="6.5" fill="' + col + '" stroke="' + INK + '" stroke-width="1.8"/>';
+    });
+    t += '<text x="' + L + '" y="' + (y - 50) + '" ' + LAB + ' font-weight="700" font-size="15" fill="' + INK + '">' + name + '</text>';
+    t += '<text x="' + (L + W) + '" y="' + (y - 50) + '" text-anchor="end" ' + BODY + ' font-weight="700" font-size="15" fill="' + INK + '">' + sd + '</text>';
+    return t;
+  }
+  var s = '<svg viewBox="0 0 360 214" role="img" aria-label="Two dot plots with the same mean of 6. Set A: 5, 6, 6, 6, 7, tightly bunched, standard deviation 0.63. Set B: 2, 4, 6, 8, 10, spread out, standard deviation 2.83." style="max-width:440px">';
+  s += '<line x1="' + X(6) + '" y1="14" x2="' + X(6) + '" y2="186" stroke="' + VIOLET + '" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  s += row(84, [5, 6, 6, 6, 7], SUN, "Set A", "sd = 0.63");
+  s += row(166, [2, 4, 6, 8, 10], CYAN, "Set B", "sd = 2.83");
+  for(var v = 0; v <= 12; v += 2) s += '<text x="' + X(v) + '" y="186" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+  s += '<text x="' + X(6) + '" y="208" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + VIOLET + '">both have mean 6</text>';
+  return s + '</svg>';
+})();
+
+var SDTABLE =
+'<table class="datatable"><tr><th>x</th><th>x &minus; mean</th><th>(x &minus; mean)&sup2;</th></tr>' +
+'<tr><td>3</td><td>&minus;3</td><td>9</td></tr>' +
+'<tr><td>5</td><td>&minus;1</td><td>1</td></tr>' +
+'<tr><td>6</td><td>0</td><td>0</td></tr>' +
+'<tr><td>8</td><td>2</td><td>4</td></tr>' +
+'<tr><td>8</td><td>2</td><td>4</td></tr>' +
+'<tr><th>Total</th><td></td><td><b>18</b></td></tr></table>';
+
+var BINBARS = (function(){
+  var p = [0.512, 0.384, 0.096, 0.008];
+  var s = '<svg viewBox="0 0 360 200" role="img" aria-label="Bar chart of the binomial distribution with 3 spins and probability 0.2. P of 0 golds is 0.512, P of 1 is 0.384, P of 2 is 0.096, P of 3 is 0.008." style="max-width:420px">';
+  var base = 160, top = 24, H = base - top;
+  s += '<line x1="30" y1="' + base + '" x2="350" y2="' + base + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  p.forEach(function(v, k){
+    var x = 52 + k * 76, h = v / 0.6 * H;
+    s += '<rect x="' + x + '" y="' + (base - h) + '" width="50" height="' + h + '" rx="4" fill="' + (k === 1 ? CORAL : VIOLET) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<text x="' + (x + 25) + '" y="' + (base - h - 7) + '" text-anchor="middle" ' + BODY + ' font-weight="700" font-size="14" fill="' + INK + '">' + v + '</text>';
+    s += '<text x="' + (x + 25) + '" y="' + (base + 19) + '" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + INK + '">' + k + '</text>';
+  });
+  s += '<text x="190" y="196" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">number of golds in 3 spins</text>';
+  return s + '</svg>';
+})();
+
+var WINGDATA =
+'<table class="datatable"><tr><th>Throw</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>' +
+'<tr><th>Big wings (m)</th><td>7.2</td><td>8.0</td><td>6.9</td><td>7.5</td><td>8.4</td></tr>' +
+'<tr><th>Small wings (m)</th><td>6.1</td><td>6.8</td><td>5.9</td><td>7.0</td><td>6.2</td></tr></table>';
+
+var DRINK =
+'<table class="datatable"><tr><th>Person</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>' +
+'<tr><th>Before (s)</th><td>0.42</td><td>0.38</td><td>0.45</td><td>0.40</td><td>0.35</td></tr>' +
+'<tr><th>After (s)</th><td>0.36</td><td>0.37</td><td>0.40</td><td>0.41</td><td>0.31</td></tr></table>';
+
+/* ---------- widget: Paper plane lab ---------- */
+var VARCHIPS = ["Wing size", "Flight distance", "Paper type", "Who throws"];
+var CTRLS = [
+  { k: "paper",   t: "Paper type",              real: true },
+  { k: "thrower", t: "Who throws",              real: true },
+  { k: "height",  t: "Launch height and push",  real: true },
+  { k: "air",     t: "Draughts (fly indoors)",  real: true },
+  { k: "wings",   t: "Wing size",               real: false }
+];
+var REPS = [1, 3, 5, 10];
+
+function rng(seed){
+  /* mulberry32: same seed, same flights, so a reload shows the same results */
+  var a = seed >>> 0;
+  return function(){
+    a = (a + 0x6D2B79F5) >>> 0;
+    var t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gauss(r){
+  var u = 1 - r(), v = r();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+function mean(a){ var t = 0; a.forEach(function(x){ t += x; }); return a.length ? t / a.length : 0; }
+function f1(x){ return (Math.round(x * 10) / 10).toFixed(1); }
+function signed(x){ var v = Math.round(x * 10) / 10; return (v > 0 ? "+" : v < 0 ? "&minus;" : "") + Math.abs(v).toFixed(1); }
+
+function mountPlanes(el, api){
+  var d = api.data;
+  d.ctrl = d.ctrl || {};
+  d.book = d.book || [];
+  d.tries = d.tries || 0;
+  d.seed = d.seed || (1 + Math.floor(Math.random() * 1e9));
+  d.rounds = d.rounds || 0;
+
+  function chips(id, list, cls){
+    return '<div class="pchips ' + (cls || "") + '" id="' + id + '">' + list.map(function(t, k){
+      return '<button type="button" data-k="' + k + '" aria-pressed="false">' + t + '</button>';
+    }).join("") + '</div>';
+  }
+
+  el.innerHTML =
+    '<div class="ppl">' +
+    '<div class="wpanel">' +
+      '<div class="ptop"><span class="badge">Lab rating <b id="ppRate">?</b></span><span class="badge">Rounds flown <b id="ppRounds">0</b></span></div>' +
+      '<p class="hyp"><b>Hypothesis:</b> paper planes with bigger wings fly further.</p>' +
+      '<p class="pstep">1. What will you change? <small>(explanatory)</small></p>' + chips("ppExp", VARCHIPS) +
+      '<p class="pstep">2. What will you measure? <small>(response)</small></p>' + chips("ppResp", VARCHIPS) +
+      '<p class="pstep">3. Keep it fair <small>(tap everything you will keep the same)</small></p>' + chips("ppCtrl", CTRLS.map(function(c){ return c.t; }), "ticks") +
+      '<p class="pstep">4. Throws for each plane <small>(repeats)</small></p>' + chips("ppReps", REPS.map(String), "reps") +
+      '<div class="wrow" style="margin-top:14px">' +
+        '<button class="btn" type="button" id="ppCheck">Check my plan</button>' +
+        '<button class="btn btn-quiet hidden" type="button" id="ppShow">Show me</button>' +
+      '</div>' +
+      '<div class="wnote msg" id="ppMsg" aria-live="polite"></div>' +
+    '</div>' +
+    '<div class="hall">' +
+      '<h4>The flight hall</h4>' +
+      '<svg id="ppHall" viewBox="0 0 360 214" role="img" aria-label="A hall with two lanes and a distance scale from 0 to 12 metres. Coral dots show where big wing planes landed and blue dots show small wing planes. A yellow flag marks each mean."></svg>' +
+      '<div class="wrow"><button class="btn btn-orange" type="button" id="ppFly">Fly!</button><span class="wnote" id="ppFlyNote" style="margin:0">Uses your plan as it is right now.</span></div>' +
+      '<div class="wnote" id="ppRes" aria-live="polite"></div>' +
+      '<h4 style="margin-top:12px">Lab book</h4>' +
+      '<svg id="ppBook" viewBox="0 0 360 178" role="img" aria-label="Lab book. Each dot is one round, placed at the big wings mean minus the small wings mean, in rows for 1, 3, 5 and 10 throws."></svg>' +
+      '<div class="wnote" style="font-size:.9rem">Each dot is one round: how much further the big wings flew on average. Try a few rounds with 1 throw, then a few with 10, and compare the rows.</div>' +
+    '</div>' +
+    '</div>';
+
+  var q = function(s){ return el.querySelector(s); };
+  var expBox = q("#ppExp"), respBox = q("#ppResp"), ctrlBox = q("#ppCtrl"), repBox = q("#ppReps");
+  var msg = q("#ppMsg"), checkBtn = q("#ppCheck"), showBtn = q("#ppShow"), flyBtn = q("#ppFly");
+  var hall = q("#ppHall"), book = q("#ppBook");
+  var flying = false, skipAnim = false;
+
+  /* ----- plan ----- */
+  function syncChips(){
+    [].forEach.call(expBox.children, function(b, k){ var on = d.exp === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    [].forEach.call(respBox.children, function(b, k){ var on = d.resp === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    [].forEach.call(ctrlBox.children, function(b, k){ var on = !!d.ctrl[CTRLS[k].k]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    [].forEach.call(repBox.children, function(b, k){ var on = d.reps === REPS[k]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    q("#ppRounds").textContent = d.rounds;
+    if(d.result) q("#ppRate").textContent = rating().score;
+  }
+  function changed(){ api.save(); syncChips(); }
+  [].forEach.call(expBox.children, function(b, k){ b.onclick = function(){ d.exp = d.exp === k ? undefined : k; changed(); }; });
+  [].forEach.call(respBox.children, function(b, k){ b.onclick = function(){ d.resp = d.resp === k ? undefined : k; changed(); }; });
+  [].forEach.call(ctrlBox.children, function(b, k){ b.onclick = function(){ var key = CTRLS[k].k; d.ctrl[key] = !d.ctrl[key]; changed(); }; });
+  [].forEach.call(repBox.children, function(b, k){ b.onclick = function(){ d.reps = REPS[k]; changed(); }; });
+
+  function rating(){
+    var score = 0, notes = [];
+    if(d.exp === 0) score += 20;
+    else notes.push("<b>Step 1:</b> the explanatory variable is the one you change on purpose, to test the hypothesis.");
+    if(d.resp === 1) score += 20;
+    else notes.push("<b>Step 2:</b> the response variable is the one you measure, to see if the change made a difference.");
+    var missing = 0;
+    CTRLS.forEach(function(c){ if(c.real){ if(d.ctrl[c.k]) score += 10; else missing++; } });
+    if(missing) notes.push("<b>Step 3:</b> " + (missing === 1 ? "one more thing" : missing + " more things") + " could change how far a plane flies. Have a think about the paper, the person, the launch and the air.");
+    if(d.ctrl.wings){
+      score = Math.max(0, score - 20);
+      notes.push("<b>Step 3:</b> if both planes have the same wing size, what is left to test?");
+    }
+    if(d.reps === 5 || d.reps === 10) score += 20;
+    else if(d.reps === 3){ score += 10; notes.push("<b>Step 4:</b> 3 throws is a start, but one odd throw still pulls the mean a long way. A few more would be more reliable."); }
+    else notes.push("<b>Step 4:</b> " + (d.reps === 1 ? "one throw could be a fluke." : "pick how many throws.") + " More repeats give a more reliable mean.");
+    return { score: score, notes: notes };
+  }
+
+  var WIN = "Wing size is what you change, flight distance is what you measure, and you keep the paper, the thrower, the launch and the air the same so nothing else can sneak in. Five or more throws each gives a mean that one wobbly throw cannot wreck.";
+  function finished(){
+    checkBtn.classList.add("hidden"); showBtn.classList.add("hidden");
+    msg.className = "wnote msg good";
+    msg.innerHTML = (d.result === "shown" ? "<b>Here is a plan Jay would sign off.</b> " : "<b>Lab rating 100. Plan approved!</b> ") + WIN +
+      " <br>Now have some fun in the flight hall. You can still change the plan: try a round with nothing controlled and 1 throw, and watch the chaos.";
+  }
+  function attempt(){
+    if(d.exp === undefined || d.resp === undefined || !d.reps){
+      msg.className = "wnote msg"; msg.innerHTML = "Pick something for steps 1, 2 and 4 first. Step 3 is up to you.";
+      return;
+    }
+    var r = rating();
+    q("#ppRate").textContent = r.score;
+    if(r.score === 100 && !d.ctrl.wings){
+      d.result = d.tries ? "right2" : "right1"; api.save();
+      api.done(d.result); finished(); syncChips(); return;
+    }
+    d.tries++; api.save();
+    msg.className = "wnote msg nudge";
+    msg.innerHTML = "<b>Lab rating " + r.score + " out of 100.</b> Nearly there. " + r.notes.join(" ") +
+      (d.tries >= 1 ? " Tweak it and check again, or tap Show me." : "");
+    showBtn.classList.remove("hidden");
+  }
+  checkBtn.onclick = attempt;
+  showBtn.onclick = function(){
+    d.exp = 0; d.resp = 1; d.reps = d.reps === 10 ? 10 : 5;
+    d.ctrl = { paper: true, thrower: true, height: true, air: true, wings: false };
+    d.result = "shown"; api.save(); api.done("shown"); finished(); syncChips();
+  };
+
+  /* ----- flight hall ----- */
+  var GX0 = 28, GSC = 26.5;            /* x position for 0 m, pixels per metre */
+  var LANES = [{ name: "Big wings", col: CORAL, ground: 92, scale: 1.25 }, { name: "Small wings", col: CYAN, ground: 168, scale: 0.9 }];
+  function gx(m){ return GX0 + m * GSC; }
+
+  function planePath(sc){
+    return '<g transform="scale(' + sc + ')"><path d="M0 0 L-26 -9 L-18 0 Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.4"/>' +
+      '<path d="M0 0 L-18 0 L-23 6 Z" fill="' + LINE + '" stroke="' + INK + '" stroke-width="1.4"/></g>';
+  }
+  function drawHall(last, live){
+    var s = "";
+    LANES.forEach(function(L, k){
+      s += '<text x="6" y="' + (L.ground - 54) + '" ' + LAB + ' font-weight="700" font-size="15" fill="' + L.col + '">' + L.name + '</text>';
+      s += '<line x1="' + gx(0) + '" y1="' + L.ground + '" x2="' + gx(12) + '" y2="' + L.ground + '" stroke="' + WHITE + '" stroke-opacity="0.45" stroke-width="2"/>';
+      s += '<rect x="' + (gx(0) - 8) + '" y="' + (L.ground - 30) + '" width="8" height="30" rx="2" fill="' + VIOLET + '"/>';
+      var pts = last ? (k === 0 ? last.big : last.small) : [];
+      var shown = live ? live[k] : pts.length;
+      for(var i = 0; i < shown && i < pts.length; i++){
+        s += '<circle cx="' + gx(pts[i]).toFixed(1) + '" cy="' + (L.ground - 5) + '" r="5" fill="' + L.col + '" fill-opacity="0.85" stroke="' + WHITE + '" stroke-width="1.2"/>';
+      }
+      if(last && !live && pts.length){
+        var m = mean(pts), x = gx(m).toFixed(1);
+        s += '<line x1="' + x + '" y1="' + (L.ground + 4) + '" x2="' + x + '" y2="' + (L.ground - 34) + '" stroke="' + SUN + '" stroke-width="3"/>';
+        s += '<path d="M' + x + ' ' + (L.ground - 34) + ' l14 6 l-14 6 z" fill="' + SUN + '"/>';
+        var tx = Math.min(gx(m) + 4, 300);
+        s += '<text x="' + tx + '" y="' + (L.ground - 40) + '" ' + BODY + ' font-weight="700" font-size="14" fill="' + SUN + '">mean ' + f1(m) + '</text>';
+      }
+    });
+    var ry = 196;
+    s += '<line x1="' + gx(0) + '" y1="' + (ry - 12) + '" x2="' + gx(12) + '" y2="' + (ry - 12) + '" stroke="' + WHITE + '" stroke-width="2"/>';
+    for(var m2 = 0; m2 <= 12; m2 += 2){
+      s += '<line x1="' + gx(m2) + '" y1="' + (ry - 16) + '" x2="' + gx(m2) + '" y2="' + (ry - 8) + '" stroke="' + WHITE + '" stroke-width="2"/>';
+      s += '<text x="' + gx(m2) + '" y="' + (ry + 8) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + WHITE + '">' + m2 + '</text>';
+    }
+    s += '<text x="354" y="' + (ry + 8) + '" text-anchor="end" ' + BODY + ' font-size="14" fill="' + WHITE + '">m</text>';
+    s += '<g id="ppPlane" style="display:none"></g>';
+    hall.innerHTML = s;
+  }
+
+  function drawBook(){
+    var L0 = 74, R0 = 350, lo = -3, hi = 4;
+    function X(v){ return L0 + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (R0 - L0); }
+    var s = '<text x="6" y="16" ' + LAB + ' font-weight="700" font-size="14" fill="' + WHITE + '">Throws</text>';
+    REPS.forEach(function(n, r){
+      var y = 34 + r * 28;
+      s += '<line x1="' + L0 + '" y1="' + y + '" x2="' + R0 + '" y2="' + y + '" stroke="' + WHITE + '" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round"/>';
+      s += '<text x="40" y="' + (y + 5) + '" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="15" fill="' + WHITE + '">' + n + '</text>';
+    });
+    s += '<line x1="' + X(0) + '" y1="20" x2="' + X(0) + '" y2="130" stroke="' + WHITE + '" stroke-width="2" stroke-dasharray="5 4"/>';
+    for(var v = -2; v <= 4; v += 2){
+      s += '<text x="' + X(v) + '" y="148" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + WHITE + '">' + (v > 0 ? "+" : v < 0 ? "&minus;" : "") + Math.abs(v) + '</text>';
+    }
+    s += '<text x="' + X(-1.5) + '" y="172" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + CYAN + '">small won</text>';
+    s += '<text x="' + X(2) + '" y="172" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + CORAL + '">big won (m)</text>';
+    d.book.forEach(function(b, i){
+      var r = REPS.indexOf(b.n); if(r < 0) return;
+      var latest = i === d.book.length - 1;
+      s += '<circle cx="' + X(b.diff).toFixed(1) + '" cy="' + (34 + r * 28) + '" r="' + (latest ? 7 : 5.5) + '" fill="' + (latest ? CORAL : SUN) + '" stroke="' + INK + '" stroke-width="1.6"/>';
+    });
+    book.innerHTML = s;
+  }
+
+  function flyOne(lane, dist, cb){
+    var L = LANES[lane], g = hall.querySelector("#ppPlane");
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(skipAnim || reduce){ cb(); return; }
+    var x0 = gx(0), x1 = gx(dist), y0 = L.ground - 30, dur = d.reps >= 10 ? 260 : d.reps >= 5 ? 360 : 650;
+    var lift = 18 + dist * 2.2, wob = 1.5 + ((d.reps * 7 + dist * 13) % 3);
+    g.innerHTML = planePath(L.scale);
+    g.style.display = "";
+    var t0 = null, px = x0, py = y0;
+    function step(ts){
+      if(skipAnim){ g.style.display = "none"; cb(); return; }
+      if(t0 === null) t0 = ts;
+      var t = Math.min(1, (ts - t0) / dur);
+      var x = x0 + (x1 - x0) * t;
+      var y = y0 + (L.ground - 4 - y0) * t * t - lift * Math.sin(Math.PI * t) + wob * Math.sin(t * 14) * (1 - t);
+      var ang = Math.atan2(y - py, Math.max(0.5, x - px)) * 180 / Math.PI;
+      g.setAttribute("transform", "translate(" + x.toFixed(1) + "," + y.toFixed(1) + ") rotate(" + ang.toFixed(0) + ")");
+      px = x; py = y;
+      if(t < 1) requestAnimationFrame(step);
+      else { g.style.display = "none"; cb(); }
+    }
+    requestAnimationFrame(step);
+  }
+
+  function runRound(){
+    if(flying){ skipAnim = true; return; }
+    if(!d.reps){ q("#ppRes").innerHTML = "Pick how many throws for each plane in step 4 first."; return; }
+    var n = d.reps;
+    var loose = CTRLS.filter(function(c){ return c.real && !d.ctrl[c.k]; }).length;
+    var sd = 0.9 + 0.45 * loose;
+    var same = !!d.ctrl.wings;
+    var r = rng(d.seed + d.rounds * 7919);
+    var big = [], small = [];
+    for(var i = 0; i < n; i++){
+      big.push(Math.max(0.5, Math.min(12, Math.round((same ? 7.0 : 7.5) + sd * gauss(r)) * 10) / 10));
+      small.push(Math.max(0.5, Math.min(12, Math.round((same ? 7.0 : 6.5) + sd * gauss(r)) * 10) / 10));
+    }
+    big = big.map(function(v){ return Math.round(v * 10) / 10; });
+    small = small.map(function(v){ return Math.round(v * 10) / 10; });
+    var last = { big: big, small: small, n: n, same: same, loose: loose };
+    flying = true; skipAnim = false;
+    flyBtn.textContent = "Land them all";
+    q("#ppRes").innerHTML = "Wheee...";
+    var live = [0, 0], k = 0;
+    drawHall(last, live);
+    function next(){
+      if(k >= 2 * n){ done(); return; }
+      var lane = k % 2, idx = Math.floor(k / 2);
+      flyOne(lane, lane === 0 ? big[idx] : small[idx], function(){
+        live[lane] = idx + 1; k++;
+        if(!skipAnim) drawHall(last, live);
+        next();
+      });
+    }
+    function done(){
+      flying = false; skipAnim = false;
+      flyBtn.textContent = "Fly again";
+      d.rounds++;
+      d.last = last;
+      d.book.push({ n: n, diff: Math.round((mean(big) - mean(small)) * 100) / 100 });
+      if(d.book.length > 24) d.book.shift();
+      api.save();
+      drawHall(last); drawBook(); syncChips(); say(last);
+      if(!api.resolved()) api.save();
+    }
+    next();
+  }
+  flyBtn.onclick = runRound;
+
+  function say(last){
+    if(!last){ q("#ppRes").innerHTML = "No flights yet. Tap <b>Fly!</b> when you are ready."; return; }
+    var mb = mean(last.big), ms = mean(last.small), diff = mb - ms;
+    var t = "Big wings mean <b>" + f1(mb) + " m</b>, small wings mean <b>" + f1(ms) + " m</b> (" + last.n + " throw" + (last.n === 1 ? "" : "s") + " each). Difference: <b>" + signed(diff) + " m</b>. ";
+    if(last.same) t += "Both planes had the same wings, so any difference is pure luck. Nothing was being tested!";
+    else if(diff < 0 && last.n <= 3) t += "Small wings won this time! With so few throws, a fluke can flip the result. That is why we repeat.";
+    else if(diff < 0) t += "Small wings won, even with " + last.n + " throws each. Rare, but random variation can do that. Fly again and see.";
+    else if(last.loose >= 2) t += "Look how spread out the dots are. With " + last.loose + " things left uncontrolled, the results are a bit of a jumble.";
+    else if(last.n === 1) t += "One throw each. Fly again: does the difference stay the same?";
+    else if(last.n >= 5) t += "With " + last.n + " throws each, one odd throw cannot drag the mean far. Nice and reliable.";
+    else t += "Fly again and see how much the difference moves.";
+    q("#ppRes").innerHTML = t;
+  }
+
+  /* restore */
+  drawHall(d.last); drawBook(); syncChips(); say(d.last);
+  if(d.last) flyBtn.textContent = "Fly again";
+  if(d.result) finished();
+  else if(d.tries >= 1) showBtn.classList.remove("hidden");
+}
+
+EGW.run({
+  id: "stats-experiments",
+  title: "Experiments and spread",
+  subject: "GCSE Statistics",
+  mins: 55,
+  blurb: "Plan a fair experiment, see why control groups and repeats matter, test a hypothesis from real results, then meet standard deviation and the binomial distribution. Paper planes included.",
+  steps: [
+
+  /* ---------- DESIGNING AN EXPERIMENT ---------- */
+  { type: "learn", topic: "Designing an experiment",
+    title: "Change one thing, measure one thing",
+    fig: VARS,
+    html: '<p>An experiment tests a hypothesis by changing something on purpose and seeing what happens.</p>' +
+          '<ul>' +
+          '<li>The <b>explanatory variable</b> (or independent variable) is the one <b>you change</b>. Wing size.</li>' +
+          '<li>The <b>response variable</b> (or dependent variable) is the one <b>you measure</b>. How far the plane flies.</li>' +
+          '<li><b>Extraneous variables</b> are anything else that could affect the response. Type of paper, who throws, draughts.</li>' +
+          '</ul>' +
+          '<p>You <b>control</b> extraneous variables by keeping them the same. Then, if the response changes, it is much more likely to be because of the explanatory variable. This is what people mean by a <b>fair test</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Explanatory: you change it. Response: you measure it. Extraneous: you keep it the same.</div>' },
+
+  { type: "sort", topic: "Designing an experiment",
+    q: "A gardener asks: <b>does the amount of fertiliser affect how tall a tomato plant grows?</b> Sort each variable.",
+    buckets: ["Explanatory", "Response", "Extraneous (control it)"],
+    cards: [
+      ["Amount of fertiliser given", 0],
+      ["Height of the plant after 6 weeks", 1],
+      ["Amount of water each day", 2],
+      ["Type of soil", 2],
+      ["How much light the plants get", 2],
+      ["Temperature of the greenhouse", 2]
+    ],
+    hint: "Which one does the gardener change on purpose? Which one gets measured at the end? Everything else could muddy the result.",
+    why: "Fertiliser is changed on purpose, so it is explanatory. Height is measured, so it is the response. Water, soil, light and temperature could all change how tall a plant grows, so they are extraneous and should be kept the same for every plant. A common slip is putting the response in extraneous because it is \"something that changes\"." },
+
+  { type: "mc", topic: "Designing an experiment",
+    q: "Priya tests whether a cup of coffee affects reaction time. She tests everyone at <b>10am</b>. Why?",
+    options: [
+      "Time of day is the response variable",
+      "Time of day could affect reaction times, so keeping it the same means any difference is more likely to be down to the coffee",
+      "Testing at the same time makes the sample bigger",
+      "It means the data is primary rather than secondary"
+    ],
+    answer: 1,
+    hint: "Could people be faster or slower at different times of day? What would that do to her results?",
+    why: "Time of day is an <b>extraneous variable</b>: people may be sleepier first thing or after lunch. Keeping it fixed is <b>controlling</b> it. The response is the reaction time, sample size has nothing to do with the clock, and the data is primary either way because she collects it herself." },
+
+  /* ---------- CONTROL GROUPS ---------- */
+  { type: "learn", topic: "Control groups and pairs",
+    title: "Something to compare with",
+    fig: MATCHED,
+    html: '<p>A <b>control group</b> does <b>not</b> get the new treatment. The <b>experimental group</b> does. Comparing the two shows whether the treatment made the difference, or whether things would have changed anyway (practice, time passing, the weather ...).</p>' +
+          '<ul>' +
+          '<li>Put people into groups <b>at random</b>, so the groups start off as alike as possible.</li>' +
+          '<li>In medical trials the control group is often given a <b>placebo</b>: a dummy treatment that looks the same, so nobody knows which group they are in.</li>' +
+          '<li><b>Matched pairs</b>: pair up people who are alike (age, gender, ability). One from each pair goes in each group. The groups are then very alike, so extraneous variables like age matter less.</li>' +
+          '<li><b>Before and after</b>: measure the same people before and after the treatment. Each person is compared with themselves. But other things may also change in between, like getting better with practice.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>No control group, no fair comparison. Matched pairs make the two groups as alike as possible.</div>' },
+
+  { type: "match", topic: "Control groups and pairs",
+    q: "Three ways to test a new revision app. Match each plan to its design.",
+    pairs: [
+      ["50 students use the app, 50 others revise as usual, then all sit the same test", "Experimental and control groups"],
+      ["Students are paired by age and last test score, and one from each pair uses the app", "Matched pairs"],
+      ["30 students sit a test, use the app for a month, then sit a similar test", "Before and after"]
+    ],
+    hint: "Look for pairing, for two separate groups, and for the same people tested twice.",
+    why: "Two separate groups with one left as normal is a control group design. Pairing similar people first is matched pairs. The same people tested twice is before and after. Matched pairs is a special kind of control group design where the groups are built carefully." },
+
+  { type: "mc", topic: "Control groups and pairs",
+    q: "In the before and after plan, the 30 students' scores went up by 8 marks on average. Why might this <b>not</b> show the app works?",
+    options: [
+      "30 students is a census",
+      "The scores could have gone up anyway, from a month of lessons and doing a similar test twice, and there is no control group to compare with",
+      "Before and after designs can never be used in statistics",
+      "The mean is the wrong average for test scores"
+    ],
+    answer: 1,
+    hint: "What else happens to students during a month of school?",
+    why: "With no control group, you cannot separate the app from everything else that happened that month: lessons, practice at that kind of test, just getting older. A control group who did not use the app would show how much scores rise anyway. Before and after designs are allowed; they just need care." },
+
+  { type: "text", topic: "Control groups and pairs",
+    q: "Give one advantage of using <b>matched pairs</b> instead of just splitting people into two groups. One sentence is plenty.",
+    need: [["alike", "similar", "same", "match", "fair", "extraneous", "other variable", "age", "abilit", "gender", "compar", "differen", "bias", "reduc", "control"]],
+    model: "The two groups are very alike (for example in age and ability), so any difference in results is more likely to be caused by the treatment and not by differences between the people.",
+    hint: "What do you know about the two people in each pair? What does that do to the two groups?",
+    why: "Matching controls extraneous variables like age, gender and ability, so the groups are as similar as possible. Then a difference in the response is more likely to be down to the treatment. With a plain split, one group might just happen to have more strong students in it." },
+
+  /* ---------- TYPES OF EXPERIMENT ---------- */
+  { type: "learn", topic: "Types of experiment",
+    title: "Lab, field or natural?",
+    fig: TYPES,
+    html: '<table class="datatable" style="font-size:.95rem"><tr><th></th><th>What it is</th><th>Good</th><th>Not so good</th></tr>' +
+          '<tr><th>Laboratory</th><td>In a controlled place, with the experimenter setting everything</td><td>Easy to control extraneous variables; easy to repeat</td><td>Artificial, so people may not behave as they would in real life</td></tr>' +
+          '<tr><th>Field</th><td>In the real world, but the experimenter still changes the explanatory variable</td><td>More natural results</td><td>Harder to control extraneous variables; harder to repeat</td></tr>' +
+          '<tr><th>Natural</th><td>The explanatory variable changes by itself; the experimenter just records what happens</td><td>Can study things you could not (or should not) set up</td><td>Very little control; hard or impossible to repeat</td></tr></table>' +
+          '<div class="keep"><b>Keep this</b>Ask: who changes the explanatory variable, and where? Experimenter indoors: lab. Experimenter out in the world: field. Nobody, it just happens: natural.</div>' },
+
+  { type: "sort", topic: "Types of experiment",
+    q: "What type of experiment is each one?",
+    buckets: ["Laboratory", "Field", "Natural"],
+    cards: [
+      ["Volunteers do a memory test in a quiet room after a set number of hours of sleep", 0],
+      ["Seedlings grow in a cabinet where a computer sets the light, water and temperature", 0],
+      ["A supermarket moves sweets away from the tills in half of its shops and compares sales", 1],
+      ["A teacher tries a new seating plan in her own classroom and records how much work gets done", 1],
+      ["Researchers compare asthma rates in a town before and after a new bypass opened", 2],
+      ["Comparing the fitness of people who live high in the mountains with people who live by the sea", 2]
+    ],
+    hint: "Who decides the explanatory variable? The experimenter, or nobody?",
+    why: "The memory test and the seedling cabinet are fully controlled settings: laboratory. The supermarket and the teacher change something on purpose, but out in the real world: field. Nobody built the bypass or the mountains for the study, they just happened: natural." },
+
+  { type: "multi", topic: "Types of experiment",
+    q: "Which <b>two</b> are advantages of a <b>laboratory</b> experiment?",
+    options: [
+      "Extraneous variables are easier to control",
+      "It is easy for someone else to repeat it in exactly the same way",
+      "People behave just as they would in everyday life",
+      "It can study things it would be wrong to set up on purpose",
+      "It costs nothing to run"
+    ],
+    answers: [0, 1],
+    hint: "What does a controlled room give you? And what does it take away?",
+    why: "Control and repeatability are the big wins of a lab. The catch is the opposite: it is artificial, so behaviour may not be natural (that is a strength of field experiments). Studying things you should not set up is a strength of natural experiments. Labs are often not cheap at all." },
+
+  /* ---------- RELIABILITY AND VALIDITY ---------- */
+  { type: "learn", topic: "Reliable and valid",
+    title: "Reliable? Valid? Both, please",
+    fig: TARGETS,
+    html: '<ul>' +
+          '<li><b>Reliable</b> results are <b>consistent</b>: if you, or someone else, repeated the experiment, you would get similar results.</li>' +
+          '<li>To make results more reliable, <b>repeat</b> the measurements and use the <b>mean</b>. A bigger sample helps in the same way. One odd result then cannot pull the answer far.</li>' +
+          '<li><b>Valid</b> means the experiment really measures what it set out to measure. Controlling extraneous variables and using a fair test makes it more valid.</li>' +
+          '</ul>' +
+          '<p>Results can be reliable but <b>not</b> valid: a tape measure with the first 10 cm snipped off gives the same answer every time, but every answer is wrong.</p>' +
+          '<div class="keep"><b>Keep this</b>Reliable: you get the same again. Valid: it measures the right thing.</div>' },
+
+  { type: "widget", topic: "Reliable and valid",
+    title: "Paper plane lab",
+    html: "Plan a fair test of the hypothesis, check it for a lab rating, then fly as many rounds as you like. Your challenge: a lab rating of 100.",
+    mount: mountPlanes,
+    report: function(d){
+      var r = { right1: "planned a fair test first go", right2: "planned a fair test on a later go", shown: "used Show me for the plan" }[d.result] || "plan not finished";
+      return "Paper plane lab: " + r + "; flew " + (d.rounds || 0) + " rounds" + (d.reps ? ", last with " + d.reps + " throws each" : "") + ".";
+    } },
+
+  { type: "mc", topic: "Reliable and valid",
+    q: "To test wing size, Sam makes the big wing plane out of <b>thick card</b> and the small wing plane out of <b>thin paper</b>. He throws each one 10 times. What is the main problem?",
+    options: [
+      "10 throws is not enough to be reliable",
+      "The results are not valid: if the distances differ, it could be the material and not the wing size",
+      "He should have measured the time in the air instead",
+      "Nothing; using different materials makes it a field experiment"
+    ],
+    answer: 1,
+    hint: "Two things changed between the planes. Can he tell which one made the difference?",
+    why: "Material is an extraneous variable that Sam has let change, so the experiment no longer tests only wing size: it is <b>not valid</b>. Ten repeats make the results reliable, but repeating a flawed test just gives you the wrong answer very consistently. It is still a laboratory style test, whatever the materials." },
+
+  /* ---------- TESTING A HYPOTHESIS ---------- */
+  { type: "learn", topic: "Testing a hypothesis",
+    title: "Does the data back it up?",
+    html: '<p>A <b>hypothesis</b> is a statement you can test, like "planes with bigger wings fly further". To test one from an experiment:</p>' +
+          '<ul>' +
+          '<li>Work out an <b>average</b> for each group (usually the mean) and compare them.</li>' +
+          '<li>Look at the <b>spread</b> too. If the groups overlap a lot, a small difference in means could just be luck.</li>' +
+          '<li>Write a conclusion that <b>refers back to the hypothesis</b> and quotes the numbers: "The data supports the hypothesis, because the mean for big wings (7.6 m) is higher than for small wings (6.4 m)."</li>' +
+          '<li>Say how <b>reliable</b> it is: how many repeats, was it a fair test?</li>' +
+          '</ul>' +
+          '<p>Data <b>supports</b> or <b>does not support</b> a hypothesis. It never <b>proves</b> it: another experiment could give different results.</p>' +
+          '<div class="keep"><b>Keep this</b>Compare averages, mention spread, link to the hypothesis, quote numbers. Say "supports", never "proves".</div>' },
+
+  { type: "num", topic: "Testing a hypothesis",
+    q: "Ruby tests the hypothesis <b>planes with bigger wings fly further</b>. Here are her results.",
+    fig: WINGDATA,
+    boxes: [
+      { label: "Mean for big wings", a: 7.6, post: "m" },
+      { label: "Mean for small wings", a: 6.4, post: "m" },
+      { label: "How much further, on average, did big wings fly?", a: 1.2, post: "m" }
+    ],
+    hint: "Add up each row and divide by how many throws there were.",
+    why: "Big: 7.2 + 8.0 + 6.9 + 7.5 + 8.4 = 38.0, and 38.0 &divide; 5 = <b>7.6 m</b>.<br>Small: 6.1 + 6.8 + 5.9 + 7.0 + 6.2 = 32.0, and 32.0 &divide; 5 = <b>6.4 m</b>.<br>Difference: 7.6 &minus; 6.4 = <b>1.2 m</b>. A common slip is dividing by 10 because there are 10 numbers in the table; each mean is out of its own 5 throws." },
+
+  { type: "mc", topic: "Testing a hypothesis",
+    q: "Which is the best conclusion for Ruby's experiment?",
+    options: [
+      "This proves that bigger wings always make a plane fly further",
+      "The hypothesis is wrong, because one small wing throw (7.0 m) beat one big wing throw (6.9 m)",
+      "The data supports the hypothesis: big wings flew 1.2 m further on average. With only 5 throws each, more repeats would make this more reliable",
+      "Nothing can be concluded without asking every paper plane maker in the country"
+    ],
+    answer: 2,
+    hint: "A good conclusion links back to the hypothesis, quotes numbers and is honest about how reliable it is.",
+    why: "It refers to the hypothesis, quotes the difference in means, and comments on reliability. \"Proves\" and \"always\" go too far. One overlapping pair of throws does not overturn a clear difference in means; that is just natural variation. And an experiment does not need a census." },
+
+  /* ---------- STANDARD DEVIATION ---------- */
+  { type: "learn", topic: "Standard deviation",
+    title: "Spread, one more way (may be Higher only)",
+    fig: SPREAD,
+    html: '<p><b>Recap:</b> the <b>range</b> is largest &minus; smallest, and the <b>interquartile range</b> is UQ &minus; LQ, the spread of the middle half (there is more on the <a href="/egw/stats-averages.html#chunk-5">averages page</a>). The <b>standard deviation</b> is another measure of spread: roughly, how far values typically are from the <b>mean</b>. This part <b>may be Higher only</b>.</p>' +
+          '<p>Formula (given on the formula sheet): <b>standard deviation = &radic;( &Sigma;(x &minus; mean)&sup2; &divide; n )</b>. The <b>variance</b> is the same thing without the square root.</p>' +
+          '<p>Example: 3, 5, 6, 8, 8. Mean = 30 &divide; 5 = 6.</p>' + SDTABLE +
+          '<p>Variance = 18 &divide; 5 = <b>3.6</b>. Standard deviation = &radic;3.6 = <b>1.90</b> (2 dp).</p>' +
+          '<ul><li><b>Bigger</b> standard deviation: values more spread out, less consistent.</li>' +
+          '<li><b>Smaller</b> standard deviation: values bunched close to the mean, more consistent.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Mean, take it away, square, add, divide by n (that is the variance), square root. Most calculators also do it in stats mode.</div>' },
+
+  { type: "num", topic: "Standard deviation", stretch: true,
+    q: "Five flights, in metres: <b>4, 6, 7, 9, 14</b>. Work through the standard deviation.",
+    boxes: [
+      { label: "Mean", a: 8, post: "m" },
+      { label: "&Sigma;(x &minus; mean)&sup2;", a: 58 },
+      { label: "Variance", a: 11.6 },
+      { label: "Standard deviation (2 dp)", a: 3.41, tol: 0.006, post: "m" }
+    ],
+    hint: "Mean first. Then each value minus the mean: some will be negative, but squaring makes them all positive.",
+    why: "Mean = 40 &divide; 5 = <b>8</b>.<br>Differences: &minus;4, &minus;2, &minus;1, 1, 6. Squares: 16, 4, 1, 1, 36. Total <b>58</b>.<br>Variance = 58 &divide; 5 = <b>11.6</b>.<br>Standard deviation = &radic;11.6 = 3.4058... = <b>3.41 m</b>.<br>Common slips: forgetting to square the negatives (they would cancel out to 0), or forgetting the square root at the end." },
+
+  { type: "mc", topic: "Standard deviation", stretch: true,
+    q: "Two machines fill cereal boxes. <b>Machine A</b>: mean 500 g, standard deviation 2 g. <b>Machine B</b>: mean 500 g, standard deviation 9 g. Which statement is right?",
+    options: [
+      "On average they fill the same amount, but Machine A is more consistent",
+      "Machine B is more consistent, because its standard deviation is bigger",
+      "Machine B puts more cereal in on average",
+      "Every box from Machine A weighs exactly 500 g"
+    ],
+    answer: 0,
+    hint: "The means are equal. What does a smaller standard deviation tell you?",
+    why: "Same mean, so the same amount on average. A's smaller standard deviation means its boxes are bunched closer to 500 g, so A is more consistent. A bigger standard deviation means <b>more</b> spread, not less. A standard deviation of 2 g still means some variation, so not every box is exactly 500 g." },
+
+  { type: "mc", topic: "Standard deviation", stretch: true,
+    q: "Two wing designs. <b>Wide wings</b>: mean 9.2 m, standard deviation 1.1 m. <b>Narrow wings</b>: mean 7.5 m, standard deviation 2.6 m. Which comparison is correct?",
+    options: [
+      "Wide wings flew further on average (higher mean), and their distances were more consistent (lower standard deviation)",
+      "Narrow wings were more consistent, because their standard deviation is higher",
+      "Wide wings flew further on average, but their distances were more spread out",
+      "You cannot compare them without the range"
+    ],
+    answer: 0,
+    hint: "Compare the averages, then compare the spreads, and say what each means in context.",
+    why: "9.2 &gt; 7.5, so wide wings flew further on average. 1.1 &lt; 2.6, so the wide wing distances were less spread out, which means more consistent. In the exam, one comment on average and one on spread, both in context, is usually what earns both marks. You do not need the range when you have the standard deviation." },
+
+  /* ---------- BINOMIAL ---------- */
+  { type: "learn", topic: "Binomial basics",
+    title: "The binomial distribution (may be Higher only)",
+    fig: BINBARS,
+    html: '<p>This part <b>may be Higher only</b>. A <b>binomial distribution</b> B(n, p) models the number of successes when:</p>' +
+          '<ul>' +
+          '<li>there is a <b>fixed number</b> of trials, n</li>' +
+          '<li>each trial has just <b>two outcomes</b> (success or failure)</li>' +
+          '<li>the probability of success, p, is the <b>same</b> every time</li>' +
+          '<li>the trials are <b>independent</b>.</li>' +
+          '</ul>' +
+          '<p>A spinner lands on gold with probability 0.2. Spin it 3 times: B(3, 0.2). P(exactly 1 gold): there are 3 ways (GNN, NGN, NNG), each 0.2 &times; 0.8 &times; 0.8, so 3 &times; 0.2 &times; 0.8&sup2; = <b>0.384</b>. The 3 comes from Pascal\'s triangle (1, 3, 3, 1).</p>' +
+          '<p>The <b>mean</b> (expected number of successes) is <b>n &times; p</b>. Here 3 &times; 0.2 = 0.6.</p>' +
+          '<div class="keep"><b>Keep this</b>Fixed n, two outcomes, same p, independent. Mean = np.</div>' },
+
+  { type: "multi", topic: "Binomial basics", stretch: true,
+    q: "Which <b>two</b> could be modelled by a binomial distribution?",
+    options: [
+      "Rolling a fair dice 10 times and counting the sixes",
+      "Throwing a plane 8 times and counting how many land on a mat, if the chance is the same each throw and throws are independent",
+      "Counting how many throws it takes to get the first loop",
+      "Measuring how far each plane flies, in metres",
+      "Taking 5 cards from a pack without putting them back and counting the hearts"
+    ],
+    answers: [0, 1],
+    hint: "Check each one against the four conditions: fixed n, two outcomes, same p, independent.",
+    why: "The dice and the mat both have a fixed n, success or failure, the same p, and independent trials. Throws until the first loop has no fixed n. Distance is a measurement, not success or failure. Without replacement, the chance of a heart changes each time, so p is not constant." },
+
+  { type: "num", topic: "Binomial basics", stretch: true,
+    q: "Each throw, a stunt plane does a loop with probability 0.3, independently. Lina throws it 4 times, so the number of loops is B(4, 0.3).",
+    boxes: [
+      { label: "P(no loops), to 4 dp", a: 0.2401, tol: 0.0002 },
+      { label: "P(exactly 1 loop), to 4 dp", a: 0.4116, tol: 0.0002 },
+      { label: "Mean number of loops", a: 1.2 }
+    ],
+    hint: "No loops means 4 misses in a row. For exactly 1 loop, how many places could the loop be?",
+    why: "P(no loops) = 0.7 &times; 0.7 &times; 0.7 &times; 0.7 = 0.7<sup>4</sup> = <b>0.2401</b>.<br>P(exactly 1) = 4 &times; 0.3 &times; 0.7&sup3; = 4 &times; 0.3 &times; 0.343 = <b>0.4116</b>. The 4 is because the loop could be on throw 1, 2, 3 or 4.<br>Mean = np = 4 &times; 0.3 = <b>1.2</b> loops. A common slip is leaving out the 4 and getting 0.1029." },
+
+  /* ---------- EXAM PRACTICE ---------- */
+  { type: "num", topic: "Exam practice",
+    q: "A company says its energy drink makes reactions faster. Five people did a reaction test before and after the drink. Times are in seconds; lower is faster.",
+    fig: DRINK,
+    boxes: [
+      { label: "(a) How many people got faster?", a: 4 },
+      { label: "(b) Mean time before", a: 0.4, post: "s", show: "0.40" },
+      { label: "(c) Mean time after", a: 0.37, post: "s" },
+      { label: "(d) Mean improvement (before minus after)", a: 0.03, post: "s" }
+    ],
+    hint: "Compare each person's two times. For the means, add each row and divide by 5.",
+    why: "(a) A, B, C and E got faster; D went from 0.40 to 0.41, so <b>4</b>.<br>(b) 0.42 + 0.38 + 0.45 + 0.40 + 0.35 = 2.00, and 2.00 &divide; 5 = <b>0.40 s</b>.<br>(c) 0.36 + 0.37 + 0.40 + 0.41 + 0.31 = 1.85, and 1.85 &divide; 5 = <b>0.37 s</b>.<br>(d) 0.40 &minus; 0.37 = <b>0.03 s</b> faster on average." },
+
+  { type: "write", topic: "Exam practice",
+    q: "Using the drink results above: <b>evaluate</b> the company's experiment, then <b>describe</b> how you would design a better one to test their claim. Aim for a short paragraph or two.",
+    fig: DRINK,
+    starters: [
+      "The data supports the claim a little, because",
+      "However, the experiment may not be reliable because",
+      "There is no control group, so",
+      "The extraneous variables I would control are",
+      "To improve it, I would",
+      "I would use matched pairs, so that"
+    ],
+    checklist: [
+      "I said what the data shows, with a number (like the 0.03 s mean improvement)",
+      "I commented on the sample size or repeats",
+      "I explained why a control group (or placebo) is needed",
+      "I named the explanatory and response variables",
+      "I named at least two extraneous variables to control",
+      "I said how to choose or match the groups fairly"
+    ],
+    minWords: 90 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

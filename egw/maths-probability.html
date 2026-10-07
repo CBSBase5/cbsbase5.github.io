@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probability - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;margin:0 2px}
+.fr > span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+.nocalc{display:inline-block;font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:3px 10px;margin:0 6px 4px 0;vertical-align:middle}
+.alg{font-family:"Atkinson Hyperlegible",Verdana,sans-serif;white-space:nowrap}
+/* Lucky dice lab (widget on this page only) */
+.dl-lab{background:var(--ink);color:#fff;border-radius:16px;padding:14px;margin:6px 0}
+.dl-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dl-dice svg{width:132px;height:auto;display:block}
+.dl-dice.roll svg{animation:dlshake .32s ease}
+@keyframes dlshake{0%{transform:rotate(0)}30%{transform:rotate(-10deg) translateY(-4px)}60%{transform:rotate(8deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion: reduce){.dl-dice.roll svg{animation:none}}
+.dl-stats{font-family:var(--display);font-weight:700;text-align:right;line-height:1.35}
+.dl-stats .big{font-size:1.9rem;color:var(--sun);display:block;line-height:1}
+.dl-stats small{font-weight:500;opacity:.8}
+.dl-chart svg{width:100%;max-width:460px;height:auto;display:block;margin:8px auto 0}
+.dl-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.dl-btns button{font-family:var(--display);font-weight:700;font-size:1rem;padding:10px 14px;border-radius:12px;border:2px solid #fff;background:transparent;color:#fff;cursor:pointer;min-width:62px}
+.dl-btns button.main{background:var(--sun);color:var(--ink);border-color:var(--sun)}
+.dl-btns button:disabled{opacity:.4;cursor:default}
+.dl-key{font-size:.85rem;opacity:.85;margin:6px 0 0}
+.dl-key i{display:inline-block;width:14px;height:10px;vertical-align:middle;margin:0 4px 0 8px;border-radius:2px}
+.dl-pick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+.dl-pick button{font-family:var(--display);font-weight:700;font-size:1.05rem;padding:9px 0;border:3px solid var(--ink);border-radius:10px;background:var(--white);color:var(--ink);cursor:pointer}
+.dl-pick button.no{border-color:var(--orange-deep);background:rgba(255,93,93,.15)}
+.dl-pick button.ok{border-color:var(--good);background:rgba(31,157,99,.15)}
+.dl-in{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.dl-in input{font-family:inherit;font-size:1.15rem;width:110px;text-align:center;padding:8px;border:3px solid var(--ink);border-radius:10px}
+.dl-in input.ok{border-color:var(--good);background:rgba(31,157,99,.1)}
+.dl-steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.dl-steps span{font-family:var(--display);font-weight:700;font-size:.78rem;border:2px solid var(--ink);border-radius:99px;padding:3px 10px;background:var(--white)}
+.dl-steps span.on{background:var(--mint)}
+.dl-steps span.now{background:var(--sun)}
+.dl-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Probability</h2>
+    <span>GCSE Maths, Foundation. The probability scale, adding to 1, sample spaces, relative frequency, Venn diagrams, frequency trees and tree diagrams.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var NC = '<span class="nocalc">No calculator</span> ';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function fr(top, bot){ return '<span class="fr"><span>' + top + '</span><span>' + bot + '</span></span>'; }
+
+/* ---------- figures ---------- */
+
+/* Probability scale */
+var SCALE = (function(){
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="Probability scale from 0, impossible, through one half, even chance, to 1, certain. Unlikely is below one half and likely is above.">';
+  s += '<defs><linearGradient id="pscale" x1="0" x2="1"><stop offset="0" stop-color="' + CORAL + '"/><stop offset=".5" stop-color="' + SUN + '"/><stop offset="1" stop-color="' + MINT + '"/></linearGradient></defs>';
+  s += '<rect x="20" y="48" width="360" height="18" rx="9" fill="url(#pscale)" stroke="' + INK + '" stroke-width="2"/>';
+  [[20, "0"], [110, "1/4"], [200, "1/2"], [290, "3/4"], [380, "1"]].forEach(function(p){
+    s += '<path d="M' + p[0] + ' 42 V72" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(p[0], 34, p[1], 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += t(20, 94, "impossible", 15, INK, BODY + ' text-anchor="start"');
+  s += t(200, 94, "even chance", 15, INK, BODY + ' text-anchor="middle"');
+  s += t(380, 94, "certain", 15, INK, BODY + ' text-anchor="end"');
+  s += t(110, 124, "unlikely", 16, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(290, 124, "likely", 16, "#0f8f70", LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(200, 146, "0, 0.5 and 1 are the same as 0%, 50% and 100%", 14, "#4b5275", BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Two dice sample space */
+function sampleSpace(op, hiFn, aria){
+  var s = '<svg viewBox="0 0 400 300" role="img" aria-label="' + aria + '">';
+  var x0 = 70, y0 = 46, c = 50;
+  s += t(x0 + 3 * c, 18, "Dice 1", 16, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(18, y0 + 3 * c, "Dice 2", 16, CORAL, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(-90 18 ' + (y0 + 3 * c) + ')"');
+  s += t(x0 - 14, y0 - 10, op, 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  for(var a = 1; a <= 6; a++){
+    s += t(x0 + (a - 0.5) * c, y0 - 10, a, 17, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+    s += t(x0 - 14, y0 + (a - 0.5) * c + 6, a, 17, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  for(var r = 1; r <= 6; r++) for(var k = 1; k <= 6; k++){
+    var v = op === "+" ? r + k : r * k;
+    var hi = hiFn(k, r);
+    s += '<rect x="' + (x0 + (k - 1) * c) + '" y="' + (y0 + (r - 1) * c) + '" width="' + c + '" height="' + c + '" fill="' + (hi ? SUN : WHITE) + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += t(x0 + (k - 0.5) * c, y0 + (r - 0.5) * c + 6, v, 17, INK, (hi ? LAB + ' font-weight="700"' : BODY) + ' text-anchor="middle"');
+  }
+  s += '</svg>';
+  return s;
+}
+var SS7 = sampleSpace("+", function(a, b){ return a + b === 7; }, "Sample space for adding two dice. 36 outcomes in a 6 by 6 grid. The six totals of 7 are highlighted, on the diagonal.");
+
+/* Venn: football and tennis */
+function venn(o){
+  var s = '<svg viewBox="0 0 400 230" role="img" aria-label="' + o.aria + '">';
+  s += '<rect x="6" y="6" width="388" height="218" rx="10" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += t(22, 32, "&#958;", 20, INK, BODY + ' font-style="italic"');
+  if(o.total) s += t(42, 32, o.total, 16, INK, BODY);
+  s += '<circle cx="160" cy="118" r="80" fill="' + BLUE + '" fill-opacity=".13" stroke="' + BLUE + '" stroke-width="3"/>';
+  s += '<circle cx="244" cy="118" r="80" fill="' + CORAL + '" fill-opacity=".13" stroke="' + CORAL + '" stroke-width="3"/>';
+  s += t(96, 50, o.A, 18, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(310, 50, o.B, 18, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(124, 126, o.a, o.fs || 24, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(202, 126, o.ab, o.fs || 24, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(280, 126, o.b, o.fs || 24, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(362, 210, o.n, o.fs || 24, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+}
+var VENN_LEARN = venn({ A: "Dog", B: "Cat", a: "13", ab: "5", b: "7", n: "5", total: "30 students",
+  aria: "Venn diagram for 30 students. 13 have only a dog, 5 have both, 7 have only a cat and 5 have neither." });
+var VENN_Q = venn({ A: "Football", B: "Tennis", a: "14", ab: "8", b: "7", n: "?", total: "40 students",
+  aria: "Venn diagram for 40 students. 14 play only football, 8 play both, 7 play only tennis. The number outside both circles is missing." });
+var VENN_SET = venn({ A: "A", B: "B", a: "3  9", ab: "6  12", b: "2  4  8  10", n: "1 5 7 11", fs: 18,
+  aria: "Venn diagram for the numbers 1 to 12. A only holds 3 and 9. Both A and B hold 6 and 12. B only holds 2, 4, 8 and 10. Outside both are 1, 5, 7 and 11." });
+
+/* Frequency tree */
+function ftree(o){
+  var s = '<svg viewBox="0 0 400 236" role="img" aria-label="' + o.aria + '">';
+  function box(x, y, v, col){
+    return '<rect x="' + (x - 26) + '" y="' + (y - 18) + '" width="52" height="34" rx="8" fill="' + (col || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+      t(x, y + 6, v, 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  function ln(x1, y1, x2, y2){ return '<path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" stroke="' + INK + '" stroke-width="2"/>'; }
+  s += ln(66, 118, 160, 62) + ln(66, 118, 160, 174);
+  s += ln(186, 62, 290, 30) + ln(186, 62, 290, 94) + ln(186, 174, 290, 142) + ln(186, 174, 290, 206);
+  s += box(40, 118, o.root, SUN);
+  s += box(160, 62, o.v[0]) + box(160, 174, o.v[1]);
+  s += box(290, 30, o.v[2]) + box(290, 94, o.v[3]) + box(290, 142, o.v[4]) + box(290, 206, o.v[5]);
+  s += t(100, 80, o.l[0], 15, BLUE, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(-31 100 80)"');
+  s += t(100, 166, o.l[1], 15, CORAL, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(31 100 166)"');
+  [[30, 2], [94, 3], [142, 2], [206, 3]].forEach(function(p, k){
+    s += t(322, p[0] + 6, o.l[p[1]], 16, INK, BODY + ' text-anchor="start"');
+  });
+  s += '</svg>';
+  return s;
+}
+var FT_LEARN = ftree({ root: "100", v: ["60", "40", "24", "36", "30", "10"], l: ["adults", "children", "pet", "no pet"],
+  aria: "Frequency tree. 100 people split into 60 adults and 40 children. Of the 60 adults, 24 have a pet and 36 do not. Of the 40 children, 30 have a pet and 10 do not." });
+var FT_Q = ftree({ root: "120", v: ["70", "?", "56", "?", "18", "?"], l: ["revised", "did not", "passed", "failed"],
+  aria: "Frequency tree for 120 students. 70 revised and the other branch is missing. Of those who revised, 56 passed and the number who failed is missing. Of those who did not revise, 18 passed and the number who failed is missing." });
+
+/* Probability tree */
+function ptree(o){
+  var s = '<svg viewBox="0 0 400 250" role="img" aria-label="' + o.aria + '">';
+  function ln(x1, y1, x2, y2){ return '<path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" stroke="' + INK + '" stroke-width="2"/>'; }
+  s += t(110, 18, o.h1, 15, "#4b5275", LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(250, 18, o.h2, 15, "#4b5275", LAB + ' font-weight="700" text-anchor="middle"');
+  s += ln(20, 134, 140, 74) + ln(20, 134, 140, 194);
+  s += ln(176, 74, 274, 44) + ln(176, 74, 274, 104) + ln(176, 194, 274, 164) + ln(176, 194, 274, 224);
+  s += t(158, 80, o.a, 17, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(158, 200, o.b, 17, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  [[44, o.a, BLUE], [104, o.b, CORAL], [164, o.a, BLUE], [224, o.b, CORAL]].forEach(function(p){
+    s += t(292, p[0] + 6, p[1], 17, p[2], LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += t(70, 92, o.p[0], 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(70, 190, o.p[1], 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(222, 50, o.p[2], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(222, 109, o.p[3], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(222, 170, o.p[4], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(222, 229, o.p[5], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  if(o.ends) o.ends.forEach(function(e, k){
+    s += t(316, [50, 110, 170, 230][k], e, 15, INK, BODY + ' text-anchor="start"');
+  });
+  s += '</svg>';
+  return s;
+}
+var PT_LEARN = ptree({ h1: "Monday", h2: "Tuesday", a: "R", b: "N", p: ["0.3", "0.7", "0.3", "0.7", "0.3", "0.7"],
+  ends: ["RR 0.09", "RN 0.21", "NR 0.21", "NN 0.49"],
+  aria: "Tree diagram for rain on Monday and Tuesday. Rain has probability 0.3 and no rain 0.7 on each day. Outcomes: rain rain 0.09, rain then no rain 0.21, no rain then rain 0.21, no rain both days 0.49." });
+var PT_Q = ptree({ h1: "First counter", h2: "Second counter", a: "R", b: "B", p: ["3/5", "2/5", "3/5", "2/5", "3/5", "2/5"],
+  aria: "Tree diagram for picking a counter, putting it back, then picking again. Red has probability 3 fifths and blue 2 fifths each time." });
+
+/* ---------- Lucky dice lab ---------- */
+var WAYS = [0, 0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1];
+
+function diceFace(x, v, col){
+  var P = { 1: [[1, 1]], 2: [[0, 0], [2, 2]], 3: [[0, 0], [1, 1], [2, 2]], 4: [[0, 0], [2, 0], [0, 2], [2, 2]],
+            5: [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]], 6: [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2]] };
+  var s = '<rect x="' + x + '" y="4" width="56" height="56" rx="11" fill="' + col + '" stroke="' + WHITE + '" stroke-width="2.5"/>';
+  (P[v] || []).forEach(function(p){ s += '<circle cx="' + (x + 13 + p[0] * 15) + '" cy="' + (17 + p[1] * 15) + '" r="5" fill="' + WHITE + '"/>'; });
+  return s;
+}
+
+function mountDice(el, api){
+  var d = api.data;
+  if(!d.c) d.c = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  if(typeof d.n !== "number") d.n = 0;
+  if(typeof d.stage !== "number") d.stage = 0;  // 0 roll and spot, 1 predict, 2 test, 3 done
+  if(!d.miss) d.miss = [0, 0];
+  if(!d.shown) d.shown = [false, false];
+  if(!d.last) d.last = [3, 4];
+  var busy = false, reduce = false;
+  try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  el.innerHTML =
+    '<div class="wpanel" data-r="task"></div>' +
+    '<div class="dl-lab">' +
+      '<div class="dl-top"><div class="dl-dice" data-r="dice"></div><div class="dl-stats" data-r="stats"></div></div>' +
+      '<div class="dl-chart" data-r="chart"></div>' +
+      '<p class="dl-key"><i style="background:' + SUN + '"></i>your rolls<i style="background:transparent;border:2px dashed ' + CYAN + '"></i>what the sample space predicts</p>' +
+      '<div class="dl-btns" data-r="btns"></div>' +
+    '</div>' +
+    '<div data-r="ask"></div>' +
+    '<div class="fb dl-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb dl-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb dl-fb " + cls; f.innerHTML = html;
+  }
+
+  function roll1(){
+    var a = 1 + Math.floor(Math.random() * 6), b = 1 + Math.floor(Math.random() * 6);
+    d.c[a + b]++; d.n++; d.last = [a, b];
+  }
+
+  function drawDice(anim){
+    var box = q("dice");
+    box.innerHTML = '<svg viewBox="0 0 132 64" role="img" aria-label="Last roll: ' + d.last[0] + ' and ' + d.last[1] + ', total ' + (d.last[0] + d.last[1]) + '">' +
+      diceFace(4, d.last[0], BLUE) + diceFace(72, d.last[1], CORAL) + '</svg>';
+    if(anim){ box.classList.remove("roll"); void box.offsetWidth; box.classList.add("roll"); }
+    var tot = d.last[0] + d.last[1];
+    q("stats").innerHTML = '<span class="big">' + tot + '</span>' + (tot === 7 ? "lucky 7" : "last total") + '<br><small>' + d.n + ' roll' + (d.n === 1 ? "" : "s") + ' &middot; ' + d.c[7] + ' sevens</small>';
+  }
+
+  function drawChart(){
+    var W = 360, H = 202, x0 = 6, bw = 29, gap = 3.2, base = 156;
+    var maxv = 1;
+    for(var k = 2; k <= 12; k++){ maxv = Math.max(maxv, d.c[k], d.n * WAYS[k] / 36); }
+    var sc = 130 / maxv;
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bar chart of totals from ' + d.n + ' rolls. ' +
+      [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function(k){ return k + ": " + d.c[k]; }).join(", ") + '.">';
+    for(k = 2; k <= 12; k++){
+      var x = x0 + (k - 2) * (bw + gap), h = d.c[k] * sc, e = d.n * WAYS[k] / 36 * sc;
+      s += '<rect x="' + x.toFixed(1) + '" y="' + (base - h).toFixed(1) + '" width="' + bw + '" height="' + h.toFixed(1) + '" rx="3" fill="' + (k === 7 ? SUN : "#c9b04a") + '"/>';
+      if(d.n) s += '<rect x="' + x.toFixed(1) + '" y="' + (base - e).toFixed(1) + '" width="' + bw + '" height="' + e.toFixed(1) + '" fill="none" stroke="' + CYAN + '" stroke-width="2" stroke-dasharray="4 3"/>';
+      if(d.c[k]) s += t((x + bw / 2).toFixed(1), (base - h - 4).toFixed(1), d.c[k], 13, WHITE, LAB + ' text-anchor="middle"');
+      s += t((x + bw / 2).toFixed(1), base + 20, k, 15, WHITE, LAB + ' font-weight="700" text-anchor="middle"');
+    }
+    s += '<path d="M' + x0 + ' ' + base + ' H' + (W - 6) + '" stroke="' + WHITE + '" stroke-width="1.5" opacity=".6"/>';
+    s += t(W / 2, H - 2, "total of the two dice", 14, WHITE, LAB + ' text-anchor="middle" opacity=".8"');
+    s += '</svg>';
+    q("chart").innerHTML = s;
+  }
+
+  function stepsBar(){
+    var names = ["Roll and spot", "Predict", "Test it"];
+    return '<div class="dl-steps" aria-hidden="true">' + names.map(function(nm, k){
+      return '<span class="' + (k < d.stage ? "on" : k === d.stage ? "now" : "") + '">' + nm + '</span>';
+    }).join("") + '</div>';
+  }
+
+  function drawTask(){
+    var h = stepsBar();
+    if(d.stage === 0){
+      h += d.n < 100 ? '<p style="margin:0"><b>Roll two dice and add them.</b> Roll at least 100 times (the &times;100 button is your friend) and watch which totals pile up. ' + (d.n ? "<b>" + (100 - d.n) + " more to go.</b>" : "") + '</p>'
+        : '<p style="margin:0"><b>Which total comes up most often?</b> Tap it below. You can keep rolling first if you like.</p>';
+    }else if(d.stage === 1){
+      h += '<p style="margin:0"><b>Predict.</b> If you rolled the two dice 360 times, how many 7s would you expect? Use the sample space, not your rolls so far.</p>';
+    }else if(d.stage === 2){
+      h += '<p style="margin:0"><b>Test it.</b> Clear the chart and roll exactly 360 times. Will you hit your prediction bang on?</p>';
+    }else{
+      h += '<p style="margin:0"><b>Lab complete.</b> Free play: roll as much as you like. The more you roll, the closer the bars hug the dashed outline.</p>';
+    }
+    q("task").innerHTML = h;
+  }
+
+  function drawBtns(){
+    var b = q("btns");
+    if(d.stage === 2){
+      b.innerHTML = '<button type="button" class="main" data-b="test">Clear and roll 360</button>';
+    }else{
+      b.innerHTML = '<button type="button" class="main" data-b="1">Roll &times;1</button><button type="button" data-b="10">&times;10</button><button type="button" data-b="100">&times;100</button>' +
+        (d.stage === 3 ? '<button type="button" data-b="clear">Clear</button>' : "");
+    }
+    [].forEach.call(b.querySelectorAll("button"), function(x){
+      x.disabled = busy;
+      x.onclick = function(){
+        var v = x.getAttribute("data-b");
+        if(v === "test"){ runTest(); return; }
+        if(v === "clear"){ d.c = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; d.n = 0; api.save(); draw(false); return; }
+        for(var k = 0; k < +v; k++) roll1();
+        api.save(); draw(true);
+      };
+    });
+  }
+
+  function drawAsk(){
+    var a = q("ask");
+    if(d.stage === 0 && d.n >= 100){
+      var h = '<div class="dl-pick">';
+      for(var k = 2; k <= 12; k++) h += '<button type="button" data-t="' + k + '" class="' + ((d.wrong || []).indexOf(k) >= 0 ? "no" : "") + '">' + k + '</button>';
+      a.innerHTML = h + '</div>';
+      [].forEach.call(a.querySelectorAll("button"), function(x){ x.onclick = function(){ pickTotal(+x.getAttribute("data-t")); }; });
+    }else if(d.stage === 1){
+      a.innerHTML = '<div class="dl-in"><label for="dlP"><b>Expected 7s in 360 rolls</b></label><input id="dlP" type="text" inputmode="numeric" autocomplete="off" value="' + (d.pred || "") + '"><button class="btn" type="button" data-r="pcheck">Check</button></div>';
+      var inp = el.querySelector("#dlP");
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") checkPred(); });
+      q("pcheck").onclick = checkPred;
+    }else{
+      a.innerHTML = "";
+    }
+    var showable = (d.stage === 0 && d.n >= 100 && d.miss[0] > 0) || (d.stage === 1 && d.miss[1] > 0);
+    if(showable){
+      var row = document.createElement("div");
+      row.className = "wrow";
+      row.innerHTML = '<button class="btn btn-quiet" type="button" data-r="show">Show me</button>';
+      a.appendChild(row);
+    }
+    var sh = q("show");
+    if(sh) sh.onclick = showMe;
+  }
+
+  function draw(anim){ drawTask(); drawDice(anim); drawChart(); drawBtns(); drawAsk(); }
+
+  function pickTotal(k){
+    if(k === 7){
+      d.stage = 1; api.save();
+      fb("good", "<b>Seven it is.</b> There are 6 ways to make 7 (1+6, 2+5, 3+4, 4+3, 5+2, 6+1), more than any other total. 2 and 12 only have one way each. So P(7) = " + fr(6, 36) + " = " + fr(1, 6) + ".");
+      draw(false); return;
+    }
+    d.miss[0]++; d.wrong = (d.wrong || []).concat([k]); api.save();
+    fb("nudge", "<b>Not that one.</b> " + (d.c[k] > d.c[7] ? "Your rolls are being cheeky: " + k + " is ahead right now, but that is just luck. " : "") +
+      "Think about the sample space: how many different ways can each total be made? " + k + " can be made " + WAYS[k] + " way" + (WAYS[k] === 1 ? "" : "s") + ".");
+    draw(false);
+  }
+
+  function checkPred(){
+    var inp = el.querySelector("#dlP"), v = EGW.parseNum(inp.value);
+    d.pred = inp.value;
+    if(v === 60){ d.stage = 2; api.save(); fb("good", "<b>Exactly.</b> Expected frequency = probability &times; number of trials = " + fr(1, 6) + " &times; 360 = <b>60</b>."); draw(false); return; }
+    d.miss[1]++; api.save();
+    fb("nudge", "<b>Not quite.</b> " + (v === 6 ? "6 is the number of ways to make 7. " : "") + "P(7) = " + fr(6, 36) + ". Expected number = probability &times; number of rolls.");
+    draw(false);
+  }
+
+  function showMe(){
+    if(d.stage === 0){ d.shown[0] = true; pickTotal(7); fb("show", "<b>Here it is: 7.</b> 6 of the 36 outcomes in the sample space make 7, more than any other total. P(7) = " + fr(6, 36) + " = " + fr(1, 6) + "."); return; }
+    if(d.stage === 1){ d.shown[1] = true; d.pred = "60"; d.stage = 2; api.save(); fb("show", "<b>Here it is.</b> P(7) = " + fr(1, 6) + ", and " + fr(1, 6) + " &times; 360 = 360 &divide; 6 = <b>60</b>. That is the expected number, or expected frequency."); draw(false); }
+  }
+
+  function result(){ return d.shown[0] || d.shown[1] ? "shown" : d.miss[0] || d.miss[1] ? "right2" : "right1"; }
+
+  function runTest(){
+    d.c = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; d.n = 0;
+    busy = true; fb(null);
+    function done(){
+      busy = false;
+      var got = d.c[7], diff = Math.abs(got - 60);
+      d.test = got; d.stage = 3; d.result = result(); api.save();
+      var verdict = diff === 0 ? "Bang on 60. That is properly lucky; it does not happen often." : diff <= 6 ? "Very close to 60, and that is about as close as randomness usually gets." : "Not exactly 60, and that is completely normal. Random results wobble around the expected number.";
+      fb("good", "<b>" + got + " sevens out of 360.</b> " + verdict + " Expected frequency is what you would get <i>on average</i>, not a promise. More rolls means the relative frequency, " + got + " &divide; 360 = " + (got / 360).toFixed(3) + ", gets more reliable, closer to " + fr(1, 6) + " = 0.167.");
+      draw(true);
+      api.done(d.result);
+    }
+    if(reduce){ for(var k = 0; k < 360; k++) roll1(); done(); return; }
+    var left = 360;
+    (function step(){
+      for(var k = 0; k < 24 && left > 0; k++, left--) roll1();
+      draw(true);
+      if(left > 0) setTimeout(step, 70); else done();
+    })();
+  }
+
+  draw(false);
+  if(d.stage === 3 && d.result){
+    fb("good", "<b>Lab complete.</b> Your test run gave " + d.test + " sevens against an expected 60.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "maths-probability",
+  title: "Probability",
+  subject: "Maths",
+  mins: 50,
+  blurb: "From the probability scale to tree diagrams: adding to 1, sample spaces, relative frequency and fair games, Venn diagrams and frequency trees, with a dice lab to roll in and stretch questions on set notation and picking without replacement.",
+  steps: [
+
+  /* ---------- THE BASICS ---------- */
+  { type: "learn", topic: "The basics",
+    title: "How likely is it?",
+    fig: SCALE,
+    html: '<p>Probability measures how likely something is, on a scale from <b>0 (impossible)</b> to <b>1 (certain)</b>. It can be a fraction, a decimal or a percentage, but never more than 1 or less than 0.</p>' +
+          '<p>When every outcome is equally likely:</p>' +
+          '<p style="text-align:center"><b>P(event) = ' + fr("number of ways it can happen", "total number of outcomes") + '</b></p>' +
+          '<p>A bag has 5 red, 3 blue and 2 green counters, 10 in all. P(blue) = ' + fr(3, 10) + ' = 0.3 = 30%.</p>' +
+          '<div class="keep"><b>Keep this</b>Write probabilities as fractions, decimals or percentages, never as "3 out of 10" or "3:10". Those lose the mark.</div>' },
+
+  { type: "sort", topic: "The basics",
+    q: "Where does each one sit on the probability scale?",
+    buckets: ["Impossible", "Unlikely", "Even chance", "Likely", "Certain"],
+    cards: [
+      ["Rolling a 7 on an ordinary six sided dice", 0],
+      ["Rolling a 6 on a fair dice", 1],
+      ["Picking a vowel from the letters M, A, T, H, S", 1],
+      ["Getting heads on a fair coin", 2],
+      ["Rolling an even number on a fair dice", 2],
+      ["Rolling a number less than 6 on a fair dice", 3],
+      ["Picking a blue sock from 9 blue socks and 1 black sock", 3],
+      ["Picking a red counter from a bag of only red counters", 4]
+    ],
+    hint: "Work out each probability as a fraction first. Less than a half is unlikely; more than a half is likely; exactly a half is even chance.",
+    why: "Impossible: a normal dice has no 7, so P = 0. Unlikely: P(6) = 1/6, P(vowel) = 1/5. Even chance: heads is 1/2, and even numbers are 3 out of 6 = 1/2. Likely: less than 6 is 5/6, a blue sock is 9/10. Certain: a bag of only red counters gives P = 1." },
+
+  { type: "num", topic: "The basics",
+    q: "A bag has 5 red, 3 blue and 2 green counters. One is picked at random.<br>a) P(blue), as a fraction or decimal<br>b) P(blue), as a percentage<br>c) P(red or green), as a decimal<br>d) P(yellow)",
+    boxes: [
+      { label: "a)", a: 0.3, show: "3/10" },
+      { label: "b)", a: 30, post: "%" },
+      { label: "c)", a: 0.7 },
+      { label: "d)", a: 0 }
+    ],
+    hint: "There are 10 counters in all. Count the ones that fit, and put that over 10.",
+    why: "a) 3 blue out of 10: <b>" + fr(3, 10) + " = 0.3</b>.<br>b) 0.3 &times; 100 = <b>30%</b>.<br>c) 5 + 2 = 7 counters are red or green, so " + fr(7, 10) + " = <b>0.7</b>.<br>d) No yellow counters at all: impossible, so <b>0</b>." },
+
+  /* ---------- ADDING TO 1 ---------- */
+  { type: "learn", topic: "Adding to 1",
+    title: "Everything adds up to 1",
+    html: '<p>The probabilities of all the possible outcomes add up to <b>1</b>. So:</p>' +
+          '<p style="text-align:center"><b>P(not A) = 1 &minus; P(A)</b></p>' +
+          '<p>If P(rain) = 0.35, then P(no rain) = 1 &minus; 0.35 = 0.65.</p>' +
+          '<p>Tables of probabilities for a spinner or a biased dice often have a gap. Add up what you know and take it away from 1.</p>' +
+          '<div class="fig"><table class="datatable"><tr><th>Colour</th><td>Red</td><td>Blue</td><td>Green</td></tr><tr><th>Probability</th><td>0.5</td><td>0.2</td><td><b>?</b></td></tr></table></div>' +
+          '<p>Missing: 1 &minus; (0.5 + 0.2) = 1 &minus; 0.7 = 0.3.</p>' +
+          '<div class="keep"><b>Keep this</b>All the outcomes add to 1. "Not" means take it away from 1.</div>' },
+
+  { type: "num", topic: "Adding to 1",
+    q: NC + "A spinner is biased. The table shows some of the probabilities.<br>a) Find the probability that it lands on green.<br>b) Find the probability that it does <b>not</b> land on red.",
+    fig: '<table class="datatable"><tr><th>Colour</th><td>Red</td><td>Blue</td><td>Green</td><td>Yellow</td></tr><tr><th>Probability</th><td>0.3</td><td>0.25</td><td>?</td><td>0.15</td></tr></table>',
+    boxes: [
+      { label: "a) P(green)", a: 0.3 },
+      { label: "b) P(not red)", a: 0.7 }
+    ],
+    hint: "Add up the three you know, then take that total away from 1.",
+    why: "a) 0.3 + 0.25 + 0.15 = 0.7, and 1 &minus; 0.7 = <b>0.3</b>.<br>b) 1 &minus; 0.3 = <b>0.7</b>. (Or add blue, green and yellow: 0.25 + 0.3 + 0.15 = 0.7.) Line up the decimal points when adding 0.25 and 0.15, or 0.25 + 0.15 can easily turn into 0.30 by mistake." },
+
+  { type: "num", topic: "Adding to 1", stretch: true,
+    q: NC + "A biased dice has these probabilities. The probability of a 6 is twice the probability of a 5, so they are written 2x and x.<br>a) Find x.<br>b) Find P(6).",
+    fig: '<table class="datatable"><tr><th>Score</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><th>Probability</th><td>0.1</td><td>0.15</td><td>0.1</td><td>0.2</td><td>x</td><td>2x</td></tr></table>',
+    boxes: [
+      { label: "a) x =", a: 0.15 },
+      { label: "b) P(6) =", a: 0.3 }
+    ],
+    hint: "The known ones add to something. What is left is shared between x and 2x, which is 3x altogether.",
+    why: "0.1 + 0.15 + 0.1 + 0.2 = 0.55, so x + 2x = 1 &minus; 0.55 = 0.45. That is 3x = 0.45, so <b>x = 0.15</b>.<br>P(6) = 2x = <b>0.3</b>. Check: 0.55 + 0.15 + 0.3 = 1. A common slip is setting 2x = 0.45, forgetting the x for the 5." },
+
+  /* ---------- SAMPLE SPACES ---------- */
+  { type: "learn", topic: "Sample spaces",
+    title: "List everything that could happen",
+    fig: SS7,
+    html: '<p>When two things happen together, list every outcome <b>systematically</b>, so nothing is missed. Fix the first thing and run through all of the second, then move on.</p>' +
+          '<p>A coin and a spinner numbered 1 to 3: H1, H2, H3, T1, T2, T3. That is 2 &times; 3 = <b>6 outcomes</b>.</p>' +
+          '<p>Two dice give 6 &times; 6 = <b>36 outcomes</b>. A <b>sample space diagram</b> is a grid of them. For totals of 7, count the highlighted squares: 6. So P(total of 7) = ' + fr(6, 36) + ' = ' + fr(1, 6) + '.</p>' +
+          '<div class="keep"><b>Keep this</b>Number of outcomes = outcomes for the first &times; outcomes for the second. Then count the ones you want and put them over the total.</div>' },
+
+  { type: "num", topic: "Sample spaces",
+    q: "A fair coin is flipped and a fair spinner numbered 1, 2, 3, 4 is spun.<br>a) How many different outcomes are there?<br>b) What is the probability of getting a head and an even number? A fraction or a decimal is fine.",
+    boxes: [
+      { label: "a)", a: 8 },
+      { label: "b)", a: 0.25, show: "2/8 = 1/4" }
+    ],
+    hint: "List them: H1, H2, ... then T1, T2, ... Count the ones with an H and a 2 or a 4.",
+    why: "a) H1, H2, H3, H4, T1, T2, T3, T4: 2 &times; 4 = <b>8</b>.<br>b) H2 and H4 work: <b>" + fr(2, 8) + " = " + fr(1, 4) + "</b> = 0.25. Adding 2 + 4 = 6 outcomes instead of multiplying is the usual slip in part a." },
+
+  { type: "num", topic: "Sample spaces",
+    q: "Two fair dice are rolled and the scores are added. Use the sample space diagram.<br>a) P(total of 9)<br>b) P(a double, the same number on both)<br>Fractions are fine, like 5/36.",
+    fig: sampleSpace("+", function(){ return false; }, "Sample space grid for adding two dice: 36 totals from 2 to 12."),
+    boxes: [
+      { label: "a)", a: 4 / 36, tol: 0.001, show: "4/36 = 1/9" },
+      { label: "b)", a: 6 / 36, tol: 0.001, show: "6/36 = 1/6" }
+    ],
+    hint: "Count the squares showing 9. For doubles, look along the diagonal from top left to bottom right.",
+    why: "a) 9 comes from 3+6, 4+5, 5+4, 6+3: 4 squares, so <b>" + fr(4, 36) + " = " + fr(1, 9) + "</b>.<br>b) Doubles are 1+1, 2+2, ... 6+6: 6 squares on the diagonal, so <b>" + fr(6, 36) + " = " + fr(1, 6) + "</b>.<br>The bottom number is 36, not 11: there are 11 different totals, but they are not equally likely." },
+
+  { type: "mc", topic: "Sample spaces", stretch: true,
+    q: "Two fair dice are rolled and the scores are <b>multiplied</b>. What is the probability that the product is even?",
+    fig: sampleSpace("&times;", function(a, b){ return (a * b) % 2 === 0; }, "Sample space for multiplying two dice. The 27 even products are highlighted. Only the 9 squares where both dice are odd are odd."),
+    options: [fr(27, 36) + " = " + fr(3, 4), fr(1, 2), fr(18, 36), fr(9, 36) + " = " + fr(1, 4)],
+    answer: 0,
+    hint: "A product is only odd when both numbers are odd. How many squares is that? Take them away from 36.",
+    why: "Odd &times; odd = odd; anything with an even number in it is even. Both dice odd: 3 &times; 3 = 9 squares, so 36 &minus; 9 = 27 are even. P = <b>" + fr(27, 36) + " = " + fr(3, 4) + "</b>.<br>One half feels right because half of all numbers are even, but multiplying changes things. " + fr(9, 36) + " is the probability of an odd product." },
+
+  /* ---------- RELATIVE FREQUENCY ---------- */
+  { type: "learn", topic: "Relative frequency",
+    title: "Experiments and expectations",
+    html: '<p>Sometimes you cannot work a probability out, for example with a bent coin or a drawing pin. So you <b>experiment</b>, and use the results.</p>' +
+          '<p style="text-align:center"><b>Relative frequency = ' + fr("number of times it happened", "number of trials") + '</b></p>' +
+          '<p>A drawing pin lands point up 36 times in 120 drops: relative frequency = ' + fr(36, 120) + ' = 0.3. That is an <b>estimate</b> of the probability.</p>' +
+          '<ul><li><b>More trials = a more reliable estimate.</b> 10 goes can be wildly off; 1000 goes is much better.</li>' +
+          '<li><b>Expected outcomes</b> = probability &times; number of trials. Rolling a fair dice 300 times, you would expect about ' + fr(1, 6) + ' &times; 300 = 50 sixes.</li>' +
+          '<li><b>Fair</b> means every outcome is equally likely. <b>Biased</b> means some outcomes are more likely. If the relative frequency after lots of trials is far from the fair probability, that is evidence of bias.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Expected number = P &times; trials. It is what you would get on average, not exactly every time.</div>' },
+
+  { type: "widget", topic: "Relative frequency",
+    title: "Lucky dice lab",
+    html: "Roll two dice and watch the totals stack up against what the sample space predicts. Spot the most likely total, predict, then test your prediction.",
+    mount: mountDice,
+    report: function(d){
+      if(!d || !d.result) return "Lucky dice lab: reached step " + (((d && d.stage) || 0) + 1) + " of 3, " + ((d && d.n) || 0) + " rolls.";
+      var lab = { right1: "most likely total and the prediction both first go", right2: "finished with some second goes", shown: "finished, used Show me" }[d.result];
+      return "Lucky dice lab: " + lab + ". Test run: " + d.test + " sevens in 360 (expected 60).";
+    } },
+
+  { type: "num", topic: "Relative frequency",
+    q: "Priya thinks her dice is biased. She rolls it 200 times and gets a six 50 times.<br>a) What is the relative frequency of a six?<br>b) Using that, how many sixes would she expect in 600 rolls?<br>c) How many sixes would you expect in 600 rolls of a <b>fair</b> dice?",
+    boxes: [
+      { label: "a)", a: 0.25, show: "50/200 = 0.25" },
+      { label: "b)", a: 150 },
+      { label: "c)", a: 100 }
+    ],
+    hint: "a) Times it happened over number of trials. b) and c) Expected number = probability &times; number of trials.",
+    why: "a) " + fr(50, 200) + " = <b>0.25</b>.<br>b) 0.25 &times; 600 = <b>150</b>.<br>c) " + fr(1, 6) + " &times; 600 = <b>100</b>. 150 is a lot more than 100, and 200 rolls is a fair number of trials, so it does look like the dice is biased towards six." },
+
+  { type: "mc", topic: "Relative frequency",
+    q: "Jo flips a coin 10 times and gets 7 heads. She says, \"This coin is biased.\" What is the best response?",
+    options: [
+      "10 flips is not enough to tell. She could flip it many more times and look at the relative frequency then.",
+      "She is right, because 7 is more than 5.",
+      "She is wrong, because a coin always gives 5 heads in 10 flips.",
+      "She is right, because the probability of heads is now 0.7 for ever."
+    ],
+    answer: 0,
+    hint: "Think back to the dice lab. How much do results wobble when there are only a few trials?",
+    why: "With only 10 flips, a perfectly fair coin gives 7 or more heads about 1 time in 6. <b>More trials give a more reliable estimate</b>, so she could flip it, say, 500 times. If heads stayed near 0.7, that would be good evidence of bias.<br>A fair coin does not promise exactly 5 heads in 10: expected results are an average, not a guarantee." },
+
+  /* ---------- VENN DIAGRAMS ---------- */
+  { type: "learn", topic: "Venn diagrams",
+    title: "Venn diagrams",
+    fig: VENN_LEARN,
+    html: '<p>30 students: 18 have a dog, 12 have a cat, and 5 have both. Fill a Venn diagram from the <b>middle outwards</b>:</p>' +
+          '<ul><li>Both: 5 in the overlap.</li><li>Dog only: 18 &minus; 5 = 13. Cat only: 12 &minus; 5 = 7.</li><li>Neither: 30 &minus; (13 + 5 + 7) = 5, outside the circles.</li></ul>' +
+          '<p>P(a student has a dog but not a cat) = ' + fr(13, 30) + '.</p>' +
+          '<p><b>Stretch: set notation.</b> &#958; is the universal set, everything in the question. A &#8745; B ("A and B") is the overlap. A &#8746; B ("A or B") is everything in either circle, overlap included. A&#8242; ("not A") is everything outside A.</p>' +
+          '<div class="keep"><b>Keep this</b>Overlap first, then subtract it from each circle total, then work out what is outside. Check the four regions add up to the total.</div>' },
+
+  { type: "num", topic: "Venn diagrams",
+    q: "40 students were asked if they play football or tennis.",
+    fig: VENN_Q,
+    boxes: [
+      { label: "a) Students who play neither", a: 11 },
+      { label: "b) How many play football altogether?", a: 22 },
+      { label: "c) P(a random student plays only tennis)", a: 7 / 40, tol: 0.001, show: "7/40" }
+    ],
+    hint: "Add up the three numbers inside the circles and take that from 40. For football altogether, include the overlap.",
+    why: "a) 14 + 8 + 7 = 29, and 40 &minus; 29 = <b>11</b>.<br>b) Football only plus both: 14 + 8 = <b>22</b>. Just giving 14 misses the students who play both.<br>c) 7 play only tennis, out of 40: <b>" + fr(7, 40) + "</b> = 0.175." },
+
+  { type: "num", topic: "Venn diagrams", stretch: true,
+    q: "&#958; = {whole numbers from 1 to 12}. A = {multiples of 3}. B = {even numbers}.<br>a) How many numbers are in A &#8745; B?<br>b) How many numbers are in A &#8746; B?<br>c) A number is picked at random from &#958;. Find P(A&#8242;).",
+    fig: VENN_SET,
+    boxes: [
+      { label: "a)", a: 2 },
+      { label: "b)", a: 8 },
+      { label: "c)", a: 8 / 12, tol: 0.001, show: "8/12 = 2/3" }
+    ],
+    hint: "&#8745; is the overlap only. &#8746; is everything inside either circle. A&#8242; is everything not in circle A, including numbers outside both circles.",
+    why: "a) A &#8745; B = {6, 12}: <b>2</b> numbers.<br>b) A &#8746; B = {2, 3, 4, 6, 8, 9, 10, 12}: <b>8</b> numbers. Count the overlap once, not twice.<br>c) A = {3, 6, 9, 12}, so A&#8242; is the other 8 numbers: P = <b>" + fr(8, 12) + " = " + fr(2, 3) + "</b>. The 1, 5, 7 and 11 outside both circles count too." },
+
+  /* ---------- FREQUENCY TREES ---------- */
+  { type: "learn", topic: "Frequency trees",
+    title: "Frequency trees",
+    fig: FT_LEARN,
+    html: '<p>A frequency tree splits a group of people (or things) in two, then splits each part again. The branches hold <b>numbers of people</b>, not probabilities.</p>' +
+          '<p>Each pair of branches adds up to the box it came from: 60 + 40 = 100, 24 + 36 = 60 and 30 + 10 = 40.</p>' +
+          '<p>Probabilities come straight off the tree. P(a random person is a child with a pet) = ' + fr(30, 100) + '. Of the people with a pet, the fraction who are children is ' + fr(30, 54) + ', because 24 + 30 = 54 people have a pet.</p>' +
+          '<div class="keep"><b>Keep this</b>Branches add up to the box they came from. For "of those who..." questions, the bottom of the fraction is just that group, not the whole total.</div>' },
+
+  { type: "num", topic: "Frequency trees",
+    q: "120 students sat a test. 70 of them revised. 56 of the students who revised passed. 18 of the students who did not revise passed. Complete the frequency tree.",
+    fig: FT_Q,
+    boxes: [
+      { label: "Did not revise", a: 50 },
+      { label: "Revised and failed", a: 14 },
+      { label: "Did not revise and failed", a: 32 },
+      { label: "Passed altogether", a: 74 }
+    ],
+    hint: "Each pair of branches adds up to the box before it. Start with 120 &minus; 70.",
+    why: "Did not revise: 120 &minus; 70 = <b>50</b>. Revised and failed: 70 &minus; 56 = <b>14</b>. Did not revise and failed: 50 &minus; 18 = <b>32</b>. Passed altogether: 56 + 18 = <b>74</b>.<br>Check: 56 + 14 + 18 + 32 = 120." },
+
+  { type: "num", topic: "Frequency trees", stretch: true,
+    q: "Using the same tree: one of the students who <b>passed</b> is picked at random. What is the probability that they revised? Give a fraction, or a decimal to 2 decimal places.",
+    fig: FT_Q,
+    boxes: [ { label: "P =", a: 56 / 74, tol: 0.006, show: "56/74 = 28/37" } ],
+    hint: "Only the students who passed are in the running now. How many of them are there, and how many of those revised?",
+    why: "74 students passed (56 + 18), and 56 of those revised. P = <b>" + fr(56, 74) + " = " + fr(28, 37) + "</b> &asymp; 0.76.<br>Using 120 on the bottom (" + fr(56, 120) + ") answers a different question: that is a random student from everyone. Using 70 on the bottom gives the fraction of revisers who passed, which is the other way round." },
+
+  /* ---------- TREE DIAGRAMS ---------- */
+  { type: "learn", topic: "Tree diagrams",
+    title: "Tree diagrams: AND multiply, OR add",
+    fig: PT_LEARN,
+    html: '<p>A probability tree shows two (or more) events one after the other. The probabilities on each pair of branches add to 1.</p>' +
+          '<p>The chance of rain is 0.3 each day, and the days are <b>independent</b> (one does not affect the other).</p>' +
+          '<ul><li><b>AND: multiply along the branches.</b> P(rain on both days) = 0.3 &times; 0.3 = 0.09.</li>' +
+          '<li><b>OR: add the end results.</b> P(rain on exactly one day) = P(RN) + P(NR) = 0.21 + 0.21 = 0.42.</li>' +
+          '<li>All the ends add to 1: 0.09 + 0.21 + 0.21 + 0.49 = 1.</li></ul>' +
+          '<p><b>Stretch: without replacement.</b> If a counter is taken and <b>not</b> put back, the second set of branches changes: there is one fewer counter, and one fewer of the colour already picked.</p>' +
+          '<div class="keep"><b>Keep this</b>Along the branches: multiply. Between different routes: add. "At least one" is often quickest as 1 &minus; P(none).</div>' },
+
+  { type: "num", topic: "Tree diagrams",
+    q: NC + "A bag has 3 red and 2 blue counters. A counter is picked, its colour noted, and it is <b>put back</b>. Then a second counter is picked. Fractions or decimals are fine.",
+    fig: PT_Q,
+    boxes: [
+      { label: "a) P(both red)", a: 9 / 25, tol: 0.001, show: "9/25" },
+      { label: "b) P(one of each colour)", a: 12 / 25, tol: 0.001, show: "12/25" },
+      { label: "c) P(at least one blue)", a: 16 / 25, tol: 0.001, show: "16/25" }
+    ],
+    hint: "a) Multiply along the red, red route. b) There are two routes: red then blue, and blue then red. c) The only way to get no blue is red, red.",
+    why: "a) " + fr(3, 5) + " &times; " + fr(3, 5) + " = <b>" + fr(9, 25) + "</b> = 0.36.<br>b) RB: " + fr(3, 5) + " &times; " + fr(2, 5) + " = " + fr(6, 25) + ", and BR is also " + fr(6, 25) + ". Add: <b>" + fr(12, 25) + "</b> = 0.48. Forgetting the second route gives " + fr(6, 25) + ", the most common slip.<br>c) 1 &minus; P(both red) = 1 &minus; " + fr(9, 25) + " = <b>" + fr(16, 25) + "</b> = 0.64." },
+
+  { type: "num", topic: "Tree diagrams", stretch: true,
+    q: NC + "Same bag: 3 red and 2 blue counters. This time the first counter is <b>not</b> put back before the second is picked.<br>a) P(both red)<br>b) P(both the same colour)",
+    boxes: [
+      { label: "a)", a: 0.3, show: "6/20 = 3/10" },
+      { label: "b)", a: 0.4, show: "8/20 = 2/5" }
+    ],
+    hint: "After a red is taken, there are 4 counters left, and only 2 of them are red. Same colour means both red OR both blue.",
+    why: "a) " + fr(3, 5) + " &times; " + fr(2, 4) + " = " + fr(6, 20) + " = <b>" + fr(3, 10) + "</b>.<br>b) Both blue: " + fr(2, 5) + " &times; " + fr(1, 4) + " = " + fr(2, 20) + ". Add both red: " + fr(6, 20) + " + " + fr(2, 20) + " = " + fr(8, 20) + " = <b>" + fr(2, 5) + "</b>.<br>Using " + fr(3, 5) + " again on the second pick would be treating it as if the counter went back." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: NC + "Lena has a biased coin. The probability it lands on heads is 0.6. She also has a fair six sided dice.<br>a) Find the probability the coin lands on tails.<br>b) She flips the coin 250 times. How many heads would she expect?<br>c) She flips the coin and rolls the dice. Find P(heads and a 6).<br>d) She flips the coin twice. Find P(exactly one head).",
+    boxes: [
+      { label: "a)", a: 0.4 },
+      { label: "b)", a: 150 },
+      { label: "c)", a: 0.1, show: "0.1" },
+      { label: "d)", a: 0.48 }
+    ],
+    hint: "a) Adds to 1. b) Probability &times; trials. c) AND means multiply. d) Two routes, HT and TH, so multiply along each then add.",
+    why: "a) 1 &minus; 0.6 = <b>0.4</b>.<br>b) 0.6 &times; 250 = <b>150</b>.<br>c) 0.6 &times; " + fr(1, 6) + " = 0.6 &divide; 6 = <b>0.1</b>. The coin and dice do not affect each other, so multiply.<br>d) HT: 0.6 &times; 0.4 = 0.24. TH: 0.4 &times; 0.6 = 0.24. Add: <b>0.48</b>. Just giving 0.24 counts only one of the two orders." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

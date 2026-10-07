@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time series - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Ice cream season widget */
+.ics-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.ics-phase{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px}
+.ics-scoops{display:flex;gap:4px;align-items:center}
+.ics-scoops i{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);background:#fff;display:inline-block}
+.ics-scoops i.on{background:var(--coral)}
+.ics-scoops i.on.c1{background:var(--sun)}
+.ics-scoops i.on.c2{background:var(--mint)}
+.ics-calc{background:#fff;border:2px dashed var(--ink);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:1rem;min-height:2.4em}
+.ics-calc b{font-family:var(--display)}
+.ics-in{width:110px;text-align:center;padding:9px 8px;font-family:inherit;font-size:1.1rem;border:3px solid rgba(20,26,51,.22);border-radius:12px 10px 14px 10px;background:#fff;color:var(--ink)}
+.ics-table{border-collapse:collapse;margin:6px 0;font-size:.95rem;width:100%;max-width:420px}
+.ics-table th,.ics-table td{border:2px solid var(--ink);padding:5px 6px;text-align:center;background:#fff}
+.ics-table th{background:var(--accent-soft)}
+.ics-svg{width:100%;max-width:560px;height:auto;display:block;margin:0 auto;touch-action:none;user-select:none}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Time series</h2>
+    <span>GCSE Statistics. Graphs over time, trend and seasonal patterns, moving averages, trend lines and predictions.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function f1(n){ return (Math.round(n * 10) / 10).toString(); }
+
+/* ---------- time series figure helper ----------
+   o.data: values; o.n: slots on the x axis (default data length)
+   o.xl: label for each slot; o.groups: [[label, firstSlot, lastSlot]]
+   o.lo, o.hi, o.step: y axis; o.ytitle
+   o.ma: [[position, value]] (positions 1 based, can be .5)
+   o.trend: [p1, v1, p2, v2]; o.window: [from, to] highlight
+   o.notes: extra svg */
+function TS(o){
+  var W = 360, H = o.h || 236, L = 46, R = W - 10, T = 14, B = H - 54;
+  var n = o.n || o.data.length;
+  function X(p){ return L + (p - 0.5) * (R - L) / n; }
+  function Y(v){ return B - (v - o.lo) / (o.hi - o.lo) * (B - T); }
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + o.aria + '" style="max-width:480px">';
+  s += '<rect x="' + L + '" y="' + T + '" width="' + (R - L) + '" height="' + (B - T) + '" fill="' + WHITE + '"/>';
+  for(var v = o.lo; v <= o.hi + 1e-9; v += o.step){
+    s += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + R + '" y2="' + Y(v) + '" stroke="' + LINE + '" stroke-width="1.2"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (Y(v) + 5) + '" text-anchor="end" ' + BODY + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+  }
+  if(o.window){
+    s += '<rect x="' + (X(o.window[0]) - 9) + '" y="' + T + '" width="' + (X(o.window[1]) - X(o.window[0]) + 18) + '" height="' + (B - T) + '" fill="' + SUN + '" fill-opacity="0.35"/>';
+  }
+  s += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  for(var i = 1; i <= n; i++){
+    s += '<line x1="' + X(i) + '" y1="' + B + '" x2="' + X(i) + '" y2="' + (B + 5) + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    if(o.xl) s += '<text x="' + X(i) + '" y="' + (B + 21) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + o.xl[i - 1] + '</text>';
+  }
+  (o.groups || []).forEach(function(g){
+    var a = X(g[1]) - 8, b = X(g[2]) + 8;
+    s += '<path d="M' + a + ' ' + (B + 28) + ' v4 H' + b + ' v-4" fill="none" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += '<text x="' + ((a + b) / 2) + '" y="' + (B + 48) + '" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">' + g[0] + '</text>';
+  });
+  if(o.ytitle) s += '<text x="12" y="' + ((T + B) / 2) + '" transform="rotate(-90 12 ' + ((T + B) / 2) + ')" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">' + o.ytitle + '</text>';
+  var pts = o.data.map(function(d, k){ return X(k + 1) + "," + Y(d); }).join(" ");
+  s += '<polyline points="' + pts + '" fill="none" stroke="' + BLUE + '" stroke-width="2.5"/>';
+  o.data.forEach(function(d, k){
+    s += '<circle cx="' + X(k + 1) + '" cy="' + Y(d) + '" r="4.5" fill="' + BLUE + '" stroke="' + WHITE + '" stroke-width="1.5"/>';
+    if(o.values) s += '<text x="' + X(k + 1) + '" y="' + (Y(d) - 9) + '" text-anchor="middle" ' + BODY + ' font-weight="700" font-size="14" fill="' + INK + '">' + d + '</text>';
+  });
+  if(o.trend){
+    s += '<line x1="' + X(o.trend[0]) + '" y1="' + Y(o.trend[1]) + '" x2="' + X(o.trend[2]) + '" y2="' + Y(o.trend[3]) + '" stroke="' + CORAL + '" stroke-width="3"' + (o.trendDash ? ' stroke-dasharray="7 5"' : '') + '/>';
+  }
+  (o.ma || []).forEach(function(m){
+    var x = X(m[0]), y = Y(m[1]);
+    s += '<path d="M' + (x - 5) + ' ' + (y - 5) + ' L' + (x + 5) + ' ' + (y + 5) + ' M' + (x + 5) + ' ' + (y - 5) + ' L' + (x - 5) + ' ' + (y + 5) + '" stroke="' + VIOLET + '" stroke-width="3"/>';
+  });
+  if(o.notes) s += o.notes(X, Y);
+  return s + '</svg>';
+}
+
+var Q4 = ["1", "2", "3", "4"];
+function quarters(years){ var a = []; for(var i = 0; i < years; i++) a = a.concat(Q4); return a; }
+function yearGroups(years, per){ var g = []; for(var i = 0; i < years; i++) g.push(["Year " + (i + 1), i * per + 1, i * per + per]); return g; }
+
+/* ---------- figures ---------- */
+var CAFE = [20, 34, 46, 24, 24, 38, 50, 28];
+var CAFE_MA = [[2.5, 31], [3.5, 32], [4.5, 33], [5.5, 34], [6.5, 35]];
+
+var FIG_INTRO = TS({ data: CAFE, xl: quarters(2), groups: yearGroups(2, 4), lo: 0, hi: 60, step: 10, values: true,
+  ytitle: "Visitors (100s)",
+  aria: "Time series graph of visitors to a seaside cafe in hundreds, quarter by quarter for two years: 20, 34, 46, 24, then 24, 38, 50, 28. The points are joined with straight lines." });
+
+var BIKES = [30, 52, 70, 36, 34, 56, 78, 40];
+var FIG_BIKES = TS({ data: BIKES, xl: quarters(2), groups: yearGroups(2, 4), lo: 20, hi: 80, step: 10, values: true,
+  ytitle: "Bike hires (100s)",
+  aria: "Time series graph of bike hires in hundreds over two years, quarter by quarter: 30, 52, 70, 36, then 34, 56, 78, 40." });
+
+var GAS = [14, 7, 4, 11, 13, 6, 4, 10, 12, 6, 3, 9];
+var FIG_GAS = TS({ data: GAS, xl: quarters(3), groups: yearGroups(3, 4), lo: 0, hi: 16, step: 4,
+  ytitle: "Gas (100 kWh)",
+  aria: "Time series graph of a household's gas use over three years. Each year it peaks in quarter 1 and is lowest in quarter 3. The peaks go 14, 13, 12 and the low points go 4, 4, 3." });
+
+var FIG_PLOT = TS({ data: CAFE, xl: quarters(2), groups: yearGroups(2, 4), lo: 0, hi: 60, step: 10, ma: CAFE_MA,
+  ytitle: "Visitors (100s)",
+  aria: "The cafe graph again with the first window of four quarters marked. The first 4 point moving average, 31, is plotted as a purple cross halfway between quarter 2 and quarter 3. The other moving averages 32, 33, 34 and 35 follow, each half a quarter along from the middle of its four.",
+  window: [1, 4],
+  notes: function(X, Y){
+    return '<line x1="' + X(2.5) + '" y1="' + Y(31) + '" x2="' + X(2.5) + '" y2="' + Y(0) + '" stroke="' + VIOLET + '" stroke-width="1.5" stroke-dasharray="4 3"/>' +
+      '<text x="' + (X(2.5) + 6) + '" y="' + Y(4) + '" ' + LAB + ' font-weight="700" font-size="14" fill="' + VIOLET + '">31 goes here</text>';
+  } });
+
+var FIG_TREND = TS({ data: CAFE, xl: quarters(2), groups: yearGroups(2, 4), lo: 0, hi: 60, step: 10, ma: CAFE_MA,
+  trend: [1, 29.5, 8, 36.5], ytitle: "Visitors (100s)",
+  aria: "The cafe graph with the moving averages as purple crosses and a coral trend line drawn through them, rising from about 29.5 to about 36.5." });
+
+/* ---------- widget: Ice cream season ---------- */
+var ICE = [12, 28, 41, 15, 16, 31, 46, 19, 19, 36, 50, 23];
+var ICE_MA = [];
+for(var w = 0; w < 9; w++) ICE_MA.push((ICE[w] + ICE[w + 1] + ICE[w + 2] + ICE[w + 3]) / 4);
+/* least squares line through the moving averages, as a check */
+var BEST = (function(){
+  var xs = ICE_MA.map(function(_, k){ return k + 2.5; });
+  var mx = xs.reduce(function(a, b){ return a + b; }, 0) / 9, my = ICE_MA.reduce(function(a, b){ return a + b; }, 0) / 9;
+  var sxy = 0, sxx = 0;
+  xs.forEach(function(x, k){ sxy += (x - mx) * (ICE_MA[k] - my); sxx += (x - mx) * (x - mx); });
+  var b = sxy / sxx, a = my - b * mx;
+  return { a: a, b: b, at: function(t){ return a + b * t; } };
+})();
+var HX1 = 2, HX2 = 11, TARGET = 15;
+function bestPrediction(){
+  var sv = [3, 7, 11].map(function(t){ return ICE[t - 1] - BEST.at(t); });
+  return BEST.at(TARGET) + (sv[0] + sv[1] + sv[2]) / 3;
+}
+var BEST_PRED = bestPrediction();   /* about 53.7 */
+var REAL_NEXT = 54;                 /* the made up "what actually happened" */
+
+function mountIce(el, api){
+  var d = api.data;
+  d.step = d.step || 0;
+  d.myTries = d.myTries || 0;
+  d.tries = d.tries || 0;
+  if(typeof d.A !== "number"){ d.A = 18; d.B = 44; }
+  d.sc = d.sc || { ma: 0, fit: 0, pred: 0 };
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="ics-top"><span class="ics-phase" id="icPhase"></span><span class="ics-scoops" id="icScoops" aria-label="Scoops earned"></span></div>' +
+      '<svg class="ics-svg" id="icSvg" viewBox="0 0 360 286" role="img" aria-label="Ice cream sales in thousands of pounds, quarter by quarter for three years, with room for year 4. Summer quarters peak at 41, 46 and 50."></svg>' +
+      '<div class="ics-calc" id="icCalc" aria-live="polite"></div>' +
+      '<div id="icCtl"></div>' +
+      '<div class="wnote" id="icMsg" aria-live="polite"></div>' +
+    '</div>';
+
+  var svg = el.querySelector("#icSvg"), calc = el.querySelector("#icCalc"), ctl = el.querySelector("#icCtl"), msg = el.querySelector("#icMsg");
+  var W = 360, L = 42, R = 352, T = 12, Bt = 222, N = 16, LO = 0, HI = 60;
+  function X(p){ return L + (p - 0.5) * (R - L) / N; }
+  function Y(v){ return Bt - (v - LO) / (HI - LO) * (Bt - T); }
+  function line(t){ return d.A + (d.B - d.A) * (t - HX1) / (HX2 - HX1); }
+  function fit(){
+    var s = 0;
+    ICE_MA.forEach(function(m, k){ s += Math.abs(m - line(k + 2.5)); });
+    return s / 9;
+  }
+  function svs(){ return [3, 7, 11].map(function(t){ return ICE[t - 1] - line(t); }); }
+  function myPred(){ var v = svs(); return line(TARGET) + (v[0] + v[1] + v[2]) / 3; }
+
+  function phase(){
+    if(d.result) return "done";
+    if(d.step < 9) return "ma";
+    if(!d.lineOk) return "line";
+    return "pred";
+  }
+
+  function scoops(){
+    var box = el.querySelector("#icScoops"), s = "";
+    var got = [d.sc.ma, d.sc.fit, d.sc.pred];
+    for(var g = 0; g < 3; g++) for(var k = 0; k < 3; k++) s += '<i class="' + (k < got[g] ? "on c" + g : "") + '"></i>';
+    var tot = got[0] + got[1] + got[2];
+    box.innerHTML = s + '<b style="margin-left:6px;font-family:var(--display)">' + tot + '/9</b>';
+  }
+
+  /* the centre of the scoop sits exactly on the value; the cone hangs below */
+  function scoop(x, y, col){
+    return '<path d="M' + (x - 6) + ' ' + (y + 3) + ' L' + x + ' ' + (y + 17) + ' L' + (x + 6) + ' ' + (y + 3) + ' Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="6.5" fill="' + col + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="1.6" fill="' + INK + '"/>';
+  }
+
+  function draw(){
+    var ph = phase(), s = "";
+    s += '<rect x="' + L + '" y="' + T + '" width="' + (R - L) + '" height="' + (Bt - T) + '" fill="' + WHITE + '"/>';
+    /* summer stripes */
+    [3, 7, 11, 15].forEach(function(p){
+      s += '<rect x="' + (X(p) - 9) + '" y="' + T + '" width="18" height="' + (Bt - T) + '" fill="' + SUN + '" fill-opacity="' + (p === 15 ? 0.5 : 0.18) + '"/>';
+    });
+    for(var v = LO; v <= HI; v += 10){
+      s += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + R + '" y2="' + Y(v) + '" stroke="' + LINE + '" stroke-width="1.2"/>';
+      s += '<text x="' + (L - 6) + '" y="' + (Y(v) + 5) + '" text-anchor="end" ' + BODY + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+    }
+    if(ph === "ma" && !d.asking){
+      var w0 = Math.max(1, d.step);
+      s += '<rect x="' + (X(w0) - 9) + '" y="' + T + '" width="' + (X(w0 + 3) - X(w0) + 18) + '" height="' + (Bt - T) + '" rx="6" fill="' + CYAN + '" fill-opacity="0.22" stroke="' + CYAN + '" stroke-width="2"/>';
+    }
+    if(d.asking){
+      s += '<rect x="' + (X(3) - 9) + '" y="' + T + '" width="' + (X(6) - X(3) + 18) + '" height="' + (Bt - T) + '" rx="6" fill="' + CORAL + '" fill-opacity="0.16" stroke="' + CORAL + '" stroke-width="2"/>';
+    }
+    s += '<line x1="' + L + '" y1="' + Bt + '" x2="' + R + '" y2="' + Bt + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + Bt + '" stroke="' + INK + '" stroke-width="2"/>';
+    for(var i = 1; i <= N; i++){
+      s += '<text x="' + X(i) + '" y="' + (Bt + 18) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + ((i - 1) % 4 + 1) + '</text>';
+    }
+    for(var yr = 0; yr < 4; yr++){
+      var a = X(yr * 4 + 1) - 7, b = X(yr * 4 + 4) + 7;
+      s += '<path d="M' + a + ' ' + (Bt + 25) + ' v4 H' + b + ' v-4" fill="none" stroke="' + INK + '" stroke-width="1.5"/>';
+      s += '<text x="' + ((a + b) / 2) + '" y="' + (Bt + 46) + '" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">Year ' + (yr + 1) + '</text>';
+    }
+    s += '<text x="12" y="' + ((T + Bt) / 2) + '" transform="rotate(-90 12 ' + ((T + Bt) / 2) + ')" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">Sales (&pound;1000s)</text>';
+    /* data */
+    s += '<polyline points="' + ICE.map(function(v, k){ return X(k + 1) + "," + Y(v); }).join(" ") + '" fill="none" stroke="' + BLUE + '" stroke-width="2.5"/>';
+    ICE.forEach(function(v, k){
+      s += '<circle cx="' + X(k + 1) + '" cy="' + Y(v) + '" r="4.5" fill="' + BLUE + '" stroke="' + WHITE + '" stroke-width="1.5"/>';
+    });
+    /* trend line */
+    if(ph !== "ma"){
+      var x1 = 1, x2 = TARGET + 0.5;
+      s += '<line x1="' + X(x1) + '" y1="' + Y(line(x1)) + '" x2="' + X(x2) + '" y2="' + Y(line(x2)) + '" stroke="' + CORAL + '" stroke-width="3"/>';
+    }
+    /* moving average scoops */
+    var shown = Math.min(d.step, 9);
+    for(var m = 0; m < shown; m++){
+      s += scoop(X(m + 2.5), Y(ICE_MA[m]), MINT);
+    }
+    /* handles */
+    if(ph === "line"){
+      [[HX1, d.A], [HX2, d.B]].forEach(function(hd){
+        s += '<circle cx="' + X(hd[0]) + '" cy="' + Y(hd[1]) + '" r="11" fill="' + WHITE + '" stroke="' + CORAL + '" stroke-width="4"/>';
+        s += '<path d="M' + X(hd[0]) + ' ' + (Y(hd[1]) - 22) + ' l-5 6 h10 z M' + X(hd[0]) + ' ' + (Y(hd[1]) + 22) + ' l-5 -6 h10 z" fill="' + CORAL + '"/>';
+      });
+    }
+    /* prediction */
+    if(ph === "pred" || ph === "done"){
+      var tv = line(TARGET);
+      s += '<line x1="' + X(TARGET) + '" y1="' + Y(tv) + '" x2="' + X(TARGET) + '" y2="' + Y(0) + '" stroke="' + CORAL + '" stroke-width="1.5" stroke-dasharray="4 3"/>';
+      s += '<circle cx="' + X(TARGET) + '" cy="' + Y(tv) + '" r="5" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    }
+    if(ph === "done" && typeof d.pred === "number"){
+      s += scoop(X(TARGET), Y(d.pred), CORAL);
+      s += '<text x="' + (X(TARGET) - 12) + '" y="' + (Y(d.pred) - 4) + '" text-anchor="end" ' + LAB + ' font-weight="800" font-size="15" fill="' + CORAL + '">' + f1(d.pred) + '?</text>';
+    }else if(ph === "pred"){
+      s += '<text x="' + X(TARGET) + '" y="' + (Y(56) ) + '" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="20" fill="' + CORAL + '">?</text>';
+    }
+    svg.innerHTML = s;
+  }
+
+  function maCalc(k){
+    var a = ICE.slice(k, k + 4), sum = a[0] + a[1] + a[2] + a[3];
+    return 'Window ' + (k + 1) + ': ' + a.join(" + ") + ' = ' + sum + ', and ' + sum + ' &divide; 4 = <b>' + ICE_MA[k] + '</b>. Plotted halfway between the 2nd and 3rd quarter of the window.';
+  }
+
+  function controls(){
+    var ph = phase();
+    scoops();
+    if(ph === "ma"){
+      el.querySelector("#icPhase").textContent = "1. Scoop the averages";
+      if(d.asking){
+        calc.innerHTML = '<b>Your turn.</b> Window 3 is 41 + 15 + 16 + 31. What is this 4 point moving average?';
+        ctl.innerHTML = '<div class="wrow"><input class="ics-in" id="icMy" type="text" inputmode="decimal" autocomplete="off" aria-label="Window 3 moving average">' +
+          '<button class="btn" type="button" id="icMyGo">Scoop it</button>' +
+          (d.myTries >= 1 ? '<button class="btn btn-quiet" type="button" id="icMyShow">Show me</button>' : '') + '</div>';
+        var inp = el.querySelector("#icMy");
+        el.querySelector("#icMyGo").onclick = function(){
+          var v = EGW.parseNum(inp.value);
+          if(isNaN(v)){ msg.innerHTML = "Pop a number in first."; return; }
+          if(Math.abs(v - 25.75) < 0.06){
+            d.sc.ma = d.myTries ? 2 : 3; d.asking = false; d.step = 3; api.save();
+            msg.innerHTML = '<b>Three scoops' + (d.myTries ? ', well, two' : '') + '.</b> 41 + 15 + 16 + 31 = 103, and 103 &divide; 4 = 25.75.';
+            refresh(); return;
+          }
+          d.myTries++; api.save();
+          msg.innerHTML = d.myTries === 1 ? '<b>Not quite.</b> Add the four, then share the total between 4.' : '<b>Still not it.</b> Have another go, or tap Show me.';
+          controls();
+        };
+        inp.addEventListener("keydown", function(e){ if(e.key === "Enter") el.querySelector("#icMyGo").click(); });
+        var sh = el.querySelector("#icMyShow");
+        if(sh) sh.onclick = function(){
+          d.sc.ma = 1; d.asking = false; d.step = 3; api.save();
+          msg.innerHTML = '<b>Here it is.</b> 41 + 15 + 16 + 31 = 103, and 103 &divide; 4 = 25.75. One scoop for sticking with it.';
+          refresh();
+        };
+        return;
+      }
+      calc.innerHTML = d.step === 0 ? 'Each 4 point moving average covers one whole year (the blue window), so the summer high and the winter low cancel out. Each scoop is plotted with its dot exactly on the average.' : maCalc(d.step - 1);
+      ctl.innerHTML = '<div class="wrow"><button class="btn" type="button" id="icNext">' + (d.step === 0 ? "Scoop the first 4 quarters" : "Slide to the next 4") + '</button>' +
+        (d.step >= 3 ? '<button class="btn btn-quiet" type="button" id="icAll">Do the rest</button>' : '') + '</div>';
+      el.querySelector("#icNext").onclick = function(){
+        msg.innerHTML = "";
+        if(d.step === 2){ d.asking = true; api.save(); refresh(); return; }
+        d.step++; api.save(); refresh();
+      };
+      var all = el.querySelector("#icAll");
+      if(all) all.onclick = function(){ d.step = 9; msg.innerHTML = ""; api.save(); refresh(); };
+      return;
+    }
+    if(ph === "line"){
+      el.querySelector("#icPhase").textContent = "2. Draw the trend";
+      calc.innerHTML = 'All nine scoops are in: ' + ICE_MA.join(", ") + '. Drag the two white handles (or use the buttons) so the coral line runs through the middle of the green scoops.';
+      ctl.innerHTML =
+        '<div class="wrow" style="justify-content:space-between">' +
+          '<span class="wnote" style="margin:0">Left end <button class="btn btn-quiet" type="button" data-h="A" data-d="-0.5" aria-label="Left end down">&darr;</button> <button class="btn btn-quiet" type="button" data-h="A" data-d="0.5" aria-label="Left end up">&uarr;</button></span>' +
+          '<span class="wnote" style="margin:0">Right end <button class="btn btn-quiet" type="button" data-h="B" data-d="-0.5" aria-label="Right end down">&darr;</button> <button class="btn btn-quiet" type="button" data-h="B" data-d="0.5" aria-label="Right end up">&uarr;</button></span>' +
+        '</div>' +
+        '<div class="wrow"><button class="btn" type="button" id="icLine">Check my line</button>' +
+        (d.tries >= 1 ? '<button class="btn btn-quiet" type="button" id="icShow">Show me</button>' : '') + '</div>';
+      [].forEach.call(ctl.querySelectorAll("[data-h]"), function(b){
+        b.onclick = function(){ var k = b.getAttribute("data-h"); d[k] = clampY(d[k] + parseFloat(b.getAttribute("data-d"))); api.save(); draw(); };
+      });
+      el.querySelector("#icLine").onclick = function(){
+        var f = fit();
+        if(f <= 0.6){
+          d.lineOk = true; d.sc.fit = f <= 0.25 ? 3 : f <= 0.45 ? 2 : 1; api.save();
+          msg.innerHTML = '<b>' + ["", "Decent line.", "Lovely line.", "Gorgeous line."][d.sc.fit] + '</b> On average your line is ' + f.toFixed(2) + ' away from the scoops. ' + d.sc.fit + ' scoop' + (d.sc.fit > 1 ? "s" : "") + '.';
+          refresh(); return;
+        }
+        d.tries++; api.save();
+        var above = 0;
+        ICE_MA.forEach(function(m, k){ if(m > line(k + 2.5)) above++; });
+        msg.innerHTML = '<b>Not quite yet: ' + above + ' scoops are above your line and ' + (9 - above) + ' below.</b> A good trend line has them roughly balanced, and follows the slope of the scoops, not the blue zigzag.' + (d.tries >= 1 ? ' Show me is there if you want it.' : '');
+        controls();
+      };
+      wireShow();
+      return;
+    }
+    if(ph === "pred"){
+      el.querySelector("#icPhase").textContent = "3. Predict next summer";
+      var v = svs();
+      calc.innerHTML = '<b>Higher tier skill, maybe.</b> Your line says the <b>trend</b> next summer (Year 4, quarter 3) is about <b>' + f1(line(TARGET)) + '</b>. But summers always beat the trend. By how much?' +
+        '<table class="ics-table"><tr><th>Summer</th><th>Actual</th><th>Your trend</th><th>Actual &minus; trend</th></tr>' +
+        [3, 7, 11].map(function(t, k){ return '<tr><td>Year ' + (k + 1) + '</td><td>' + ICE[t - 1] + '</td><td>' + f1(line(t)) + '</td><td>' + f1(v[k]) + '</td></tr>'; }).join("") +
+        '</table>Find the mean of the last column (the mean seasonal variation), then add it to the trend.';
+      ctl.innerHTML = '<div class="wrow"><span class="wnote" style="margin:0">Next summer: &pound;</span><input class="ics-in" id="icPred" type="text" inputmode="decimal" autocomplete="off" aria-label="Predicted sales in thousands of pounds"><span class="wnote" style="margin:0">thousand</span>' +
+        '<button class="btn" type="button" id="icGo">Predict</button>' +
+        (d.tries >= 1 ? '<button class="btn btn-quiet" type="button" id="icShow">Show me</button>' : '') + '</div>';
+      var pin = el.querySelector("#icPred");
+      if(d.lastPred) pin.value = d.lastPred;
+      el.querySelector("#icGo").onclick = function(){
+        var p = EGW.parseNum(pin.value);
+        if(isNaN(p)){ msg.innerHTML = "Pop a number in first."; return; }
+        d.lastPred = pin.value;
+        var off = Math.abs(p - BEST_PRED), offMine = Math.abs(p - myPred());
+        if(off <= 3 || offMine <= 1){
+          d.pred = p; d.sc.pred = off <= 1 ? 3 : off <= 2 ? 2 : 1;
+          d.result = d.tries ? "right2" : "right1"; api.save();
+          api.done(d.result); refresh(); return;
+        }
+        d.tries++; api.save();
+        msg.innerHTML = p < line(TARGET) ?
+          '<b>Hmm, that is below the trend.</b> Summers sit above the trend line, so the seasonal variation for quarter 3 is positive. Add it on.' :
+          '<b>Not quite yet.</b> Add the three numbers in the last column, divide by 3, then add that to ' + f1(line(TARGET)) + '.';
+        controls();
+      };
+      pin.addEventListener("keydown", function(e){ if(e.key === "Enter") el.querySelector("#icGo").click(); });
+      wireShow();
+      return;
+    }
+    /* done */
+    el.querySelector("#icPhase").textContent = "Season complete";
+    var sv = svs(), mean = (sv[0] + sv[1] + sv[2]) / 3;
+    calc.innerHTML = (d.result === "shown" ? '<b>Here is how it goes.</b> ' : '<b>Nice forecasting.</b> ') +
+      'Trend next summer about ' + f1(line(TARGET)) + ', mean summer seasonal variation about +' + f1(mean) + ', so about &pound;' + f1(line(TARGET) + mean) + ' thousand. ' +
+      'And the (made up) real figure turned out to be <b>&pound;' + REAL_NEXT + ' thousand</b>' +
+      (typeof d.pred === "number" ? ', so you were ' + f1(Math.abs(d.pred - REAL_NEXT)) + ' thousand away.' : '.') +
+      ' The further ahead you predict, the less you can trust it: the trend might not carry on.';
+    ctl.innerHTML = '';
+    msg.innerHTML = 'Scoop score: <b>' + (d.sc.ma + d.sc.fit + d.sc.pred) + ' out of 9</b>.';
+  }
+
+  function wireShow(){
+    var sh = el.querySelector("#icShow");
+    if(!sh) return;
+    sh.onclick = function(){
+      d.A = Math.round(BEST.at(HX1) * 10) / 10; d.B = Math.round(BEST.at(HX2) * 10) / 10;
+      if(d.step < 9) d.step = 9;
+      d.lineOk = true; d.pred = Math.round(myPred() * 10) / 10;
+      d.result = "shown"; api.save(); api.done("shown"); refresh();
+    };
+  }
+
+  function clampY(v){ return Math.max(2, Math.min(58, Math.round(v * 2) / 2)); }
+  function refresh(){ draw(); controls(); }
+
+  /* dragging the handles */
+  var drag = null;
+  function pt(e){
+    var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    return p.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  svg.addEventListener("pointerdown", function(e){
+    if(phase() !== "line") return;
+    var p = pt(e);
+    drag = Math.abs(p.x - X(HX1)) < Math.abs(p.x - X(HX2)) ? "A" : "B";
+    try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+    move(e); e.preventDefault();
+  });
+  function move(e){
+    if(!drag) return;
+    var p = pt(e);
+    var v = LO + (Bt - p.y) / (Bt - T) * (HI - LO);
+    d[drag] = clampY(v); draw();
+  }
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerup", function(){ if(drag){ drag = null; api.save(); } });
+  svg.addEventListener("pointercancel", function(){ drag = null; api.save(); });
+
+  refresh();
+}
+
+EGW.run({
+  id: "stats-time-series",
+  title: "Time series",
+  subject: "GCSE Statistics",
+  mins: 50,
+  blurb: "Reading graphs over time, spotting trend and seasonal patterns, working out and plotting moving averages, drawing trend lines, and (as stretch) predicting the future with seasonal variation.",
+  steps: [
+
+  /* ---------- TIME SERIES GRAPHS ---------- */
+  { type: "learn", topic: "Time series graphs",
+    title: "What is a time series?",
+    fig: FIG_INTRO,
+    html: '<p>A <b>time series</b> is a set of data recorded at regular times: every month, every quarter, every year.</p>' +
+          '<ul>' +
+          '<li><b>Time</b> always goes along the <b>horizontal</b> axis.</li>' +
+          '<li>Plot each value, then join the points with <b>straight lines</b>. The lines help you see the pattern; the points are the real data.</li>' +
+          '<li>A <b>quarter</b> is three months, so a year has four quarters. Quarter 1 is January to March.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Read a time series in two moves: the overall direction first, then the pattern that keeps repeating.</div>' },
+
+  { type: "num", topic: "Time series graphs",
+    q: "The graph shows bike hires (in hundreds) at a park, quarter by quarter.",
+    fig: FIG_BIKES,
+    boxes: [
+      { label: "Bike hires in Year 2, quarter 3", a: 78, post: "hundred" },
+      { label: "How many more hires in Year 2 quarter 3 than Year 1 quarter 3?", a: 8, post: "hundred" }
+    ],
+    hint: "Find Year 2 on the bracket underneath, then count along to quarter 3.",
+    why: "Year 2 quarter 3 is the 7th point: 78. Year 1 quarter 3 is the 3rd point: 70. 78 &minus; 70 = 8 hundred, so 800 more hires. Comparing the <b>same quarter</b> in different years is a fair comparison, because the season is the same." },
+
+  { type: "mc", topic: "Time series graphs",
+    q: "In the bike hire graph, which quarter is the busiest every year?",
+    fig: FIG_BIKES,
+    options: ["Quarter 1 (January to March)", "Quarter 2 (April to June)", "Quarter 3 (July to September)", "Quarter 4 (October to December)"],
+    answer: 2,
+    hint: "Look for the highest point inside each year bracket.",
+    why: "The peaks are 70 and 78, both in quarter 3, the summer holidays. A good answer in an exam names the quarter <b>and</b> gives a reason in context: more people hire bikes in the warm summer months." },
+
+  { type: "mc", topic: "Time series graphs",
+    q: "On a time series graph of quarterly sales, why is it a little risky to read a value off the line <b>halfway between</b> two points?",
+    options: [
+      "The line between points is only there to show the pattern; there is no real data value between quarters",
+      "Straight lines are never allowed on a statistics graph",
+      "Halfway points are always exactly the mean of the whole data",
+      "Time should go up the vertical axis, so the graph is upside down"
+    ],
+    answer: 0,
+    hint: "Each point is a total for a whole quarter. What would a value halfway between two quarters even mean?",
+    why: "The joining lines make the pattern easy to see, but the real data are only the plotted points. That is also why you draw straight lines between them and not a smooth curve. Time always goes on the horizontal axis." },
+
+  /* ---------- TREND AND SEASONS ---------- */
+  { type: "learn", topic: "Trend and seasons",
+    title: "Trend, seasonal variation and cycles",
+    fig: FIG_GAS,
+    html: '<ul>' +
+          '<li>The <b>trend</b> is the general direction over time, ignoring the ups and downs: <b>rising</b> (increasing), <b>falling</b> (decreasing) or roughly level.</li>' +
+          '<li><b>Seasonal variation</b> is a pattern that repeats over a fixed period, usually each year (but it can be each week or each day). Gas use is high every winter and low every summer.</li>' +
+          '<li>A <b>cycle</b> is a longer up and down pattern, often over several years, like an economy going through boom and bust.</li>' +
+          '</ul>' +
+          '<p>In the gas graph: peaks every quarter 1 (winter), lows every quarter 3 (summer), and the peaks slowly get lower, so the trend is <b>falling</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Describe both: "The trend is ... and the seasonal pattern is ...", always in context.</div>' },
+
+  { type: "sort", topic: "Trend and seasons",
+    q: "Is each one mostly about the <b>trend</b>, <b>seasonal variation</b> or a <b>cycle</b>?",
+    buckets: ["Trend", "Seasonal variation", "Cycle"],
+    cards: [
+      ["The number of letters posted has fallen steadily for twenty years", 0],
+      ["Over ten years, more and more people have bought electric cars", 0],
+      ["Ice cream sales go up every summer and down every winter", 1],
+      ["A cinema is busiest every Saturday and quietest every Tuesday", 1],
+      ["House prices rise and fall in a boom and bust lasting several years", 2],
+      ["Sunspots peak roughly every eleven years", 2]
+    ],
+    hint: "Trend: one direction over a long time. Seasonal: repeats every year, week or day. Cycle: a longer up and down.",
+    why: "Letters and electric cars describe a long term direction (falling, rising). Ice cream and the cinema repeat over a fixed period (a year, a week), so seasonal variation. House price booms and sunspots go up and down over many years: cycles. A common slip is calling any up and down pattern seasonal; seasonal means it repeats over a fixed calendar period." },
+
+  { type: "mc", topic: "Trend and seasons",
+    q: "Which is the best description of the gas graph from the learn card?",
+    fig: FIG_GAS,
+    options: [
+      "Gas use is highest in quarter 1 each year, and the trend is falling slowly",
+      "Gas use is highest in quarter 3 each year, and the trend is rising",
+      "There is no pattern because the graph goes up and down",
+      "The trend is rising because the graph goes up after every low point"
+    ],
+    answer: 0,
+    hint: "Find the peaks first. Then ask: are the peaks (and the lows) getting higher or lower over the three years?",
+    why: "Peaks are in quarter 1 (winter: heating on), and they go 14, 13, 12, while the lows go 4, 4, 3. So the seasonal pattern is high in winter, and the trend is falling slowly, perhaps from better insulation. Going up after each low point is just the seasonal pattern, not the trend." },
+
+  /* ---------- MOVING AVERAGES ---------- */
+  { type: "learn", topic: "Moving averages",
+    title: "Moving averages smooth out the seasons",
+    html: '<p>A <b>moving average</b> is the mean of a few values in a row, then the window slides along one place and you do it again.</p>' +
+          '<p>Cafe visitors (hundreds): <b>20, 34, 46, 24,</b> 24, 38, 50, 28</p>' +
+          '<ul>' +
+          '<li>1st 4 point moving average: (20 + 34 + 46 + 24) &divide; 4 = 124 &divide; 4 = <b>31</b></li>' +
+          '<li>Slide one along: (34 + 46 + 24 + 24) &divide; 4 = 128 &divide; 4 = <b>32</b></li>' +
+          '<li>Keep going to the end: 33, 34, 35.</li>' +
+          '</ul>' +
+          '<p>Pick the number of points to match <b>one full cycle</b> of the seasons: <b>4 point</b> for quarterly data, <b>12 point</b> for monthly data, <b>7 point</b> for daily data over a week, 3 point for a pattern of three (like school terms).</p>' +
+          '<div class="keep"><b>Keep this</b>Each window holds one of every season, so the highs and lows cancel and what is left shows the trend.</div>' },
+
+  { type: "num", topic: "Moving averages",
+    q: "A school shop records its sales (in &pound;) each term for two years: autumn, spring, summer.<br><b>120, 96, 81, 126, 102, 84</b><br>Work out the 3 point moving averages.",
+    boxes: [
+      { label: "1st", a: 99 },
+      { label: "2nd", a: 101 },
+      { label: "3rd", a: 103 },
+      { label: "4th", a: 104 }
+    ],
+    hint: "Add the first three values and divide by 3. Then drop the first value, bring in the next one, and repeat.",
+    why: "(120 + 96 + 81) &divide; 3 = 297 &divide; 3 = 99.<br>(96 + 81 + 126) &divide; 3 = 303 &divide; 3 = 101.<br>(81 + 126 + 102) &divide; 3 = 309 &divide; 3 = 103.<br>(126 + 102 + 84) &divide; 3 = 312 &divide; 3 = 104.<br>Six values give four 3 point moving averages. The averages rise steadily, so the trend in sales is upwards." },
+
+  { type: "num", topic: "Moving averages",
+    q: "Bike hires (hundreds), quarterly for two years:<br><b>30, 52, 70, 36, 34, 56, 78, 40</b>",
+    boxes: [
+      { label: "How many 4 point moving averages can you work out?", a: 5 },
+      { label: "The 1st 4 point moving average", a: 47 },
+      { label: "The last 4 point moving average", a: 52 }
+    ],
+    hint: "With 8 values and a window of 4, count how many different starting places the window has.",
+    why: "The window can start at the 1st, 2nd, 3rd, 4th or 5th value: <b>5</b> moving averages (8 &minus; 4 + 1).<br>1st: (30 + 52 + 70 + 36) &divide; 4 = 188 &divide; 4 = <b>47</b>.<br>Last: (34 + 56 + 78 + 40) &divide; 4 = 208 &divide; 4 = <b>52</b>.<br>All five are 47, 48, 49, 51, 52: smooth, and rising." },
+
+  { type: "mc", topic: "Moving averages",
+    q: "A shop records its sales <b>every month</b> for four years. Sales follow a pattern that repeats each year. Which moving average would be most suitable?",
+    options: ["3 point", "4 point", "7 point", "12 point"],
+    answer: 3,
+    hint: "How many values make one full turn of the pattern?",
+    why: "The pattern repeats every year, and a year is 12 months, so a <b>12 point</b> moving average contains each month once and the seasonal ups and downs cancel. 4 point suits quarterly data; 7 point suits daily data with a weekly pattern." },
+
+  /* ---------- PLOTTING ---------- */
+  { type: "learn", topic: "Plotting the averages",
+    title: "Where does a moving average go?",
+    fig: FIG_PLOT,
+    html: '<p>Plot each moving average at the <b>middle</b> of the time period it covers.</p>' +
+          '<ul>' +
+          '<li><b>3 point</b>: the middle is the 2nd of the three. The average of March, April and May goes at April.</li>' +
+          '<li><b>4 point</b>: the middle of four quarters is <b>halfway between the 2nd and 3rd</b>. The average of Q1 to Q4 goes between Q2 and Q3.</li>' +
+          '</ul>' +
+          '<p>Use crosses for moving averages so they look different from the data, and you can join them up or draw a trend line through them.</p>' +
+          '<div class="keep"><b>Keep this</b>Odd window: plot on a data point. Even window: plot halfway between two data points.</div>' },
+
+  { type: "mc", topic: "Plotting the averages",
+    q: "The 1st 4 point moving average uses Year 1 quarters 1, 2, 3 and 4. Where should it be plotted?",
+    options: ["Above Year 1 quarter 1", "Above Year 1 quarter 2", "Halfway between Year 1 quarter 2 and quarter 3", "Above Year 1 quarter 4"],
+    answer: 2,
+    hint: "Four values: what is the middle of 1, 2, 3, 4?",
+    why: "The middle of 1, 2, 3, 4 is 2.5, halfway between quarter 2 and quarter 3. Plotting it at quarter 4 (the end of the window) is the most common slip, and it shifts the whole trend line to the right." },
+
+  { type: "mc", topic: "Plotting the averages",
+    q: "A 3 point moving average is worked out from the sales in <b>May, June and July</b>. Where should it be plotted?",
+    options: ["May", "June", "July", "Halfway between June and July"],
+    answer: 1,
+    hint: "Three values have a proper middle one.",
+    why: "With an odd number of values the middle is one of the data points: June. Only even windows (like 4 point or 12 point) land halfway between two points." },
+
+  { type: "multi", topic: "Plotting the averages",
+    q: "Which <b>two</b> statements about moving averages are true?",
+    options: [
+      "A graph of moving averages is smoother than the original data",
+      "Moving averages smooth out the seasonal variation, so the trend is easier to see",
+      "You always get the same number of moving averages as data values",
+      "The 1st 4 point moving average is plotted at the 1st quarter",
+      "Moving averages show the highest value in each year"
+    ],
+    answers: [0, 1],
+    hint: "Think about what averaging a whole year at a time does to the summer peaks and winter dips.",
+    why: "Averaging over a full cycle cancels out the seasonal ups and downs, so the moving averages are smoother and show the trend. You always get fewer of them than data values (8 quarterly values give 5), and the first one sits in the middle of its window, not at the start." },
+
+  /* ---------- TREND LINES ---------- */
+  { type: "learn", topic: "Trend lines",
+    title: "A trend line through the moving averages",
+    fig: FIG_TREND,
+    html: '<ul>' +
+          '<li>Draw a straight <b>trend line</b> (a line of best fit) through the <b>moving averages</b>, not through the original zigzag data.</li>' +
+          '<li>Aim for the crosses to be roughly balanced either side of the line.</li>' +
+          '<li>Use it to describe the trend with a number: "visitors rise by about 100 each quarter".</li>' +
+          '<li>Extend it a little to estimate the trend in the near future. The further you go, the less reliable it is.</li>' +
+          '</ul>' +
+          '<p>Rate of the trend = change in the trend line &divide; number of time periods.</p>' +
+          '<div class="keep"><b>Keep this</b>Through the crosses, straight, balanced. Then read off, and say what it means in context.</div>' },
+
+  { type: "num", topic: "Trend lines", stretch: true,
+    q: "A trend line through some quarterly moving averages goes through a value of <b>40</b> at the first moving average, and through <b>56</b> at a point <b>8 quarters later</b>.",
+    boxes: [
+      { label: "Increase in the trend per quarter", a: 2 },
+      { label: "Trend value 2 quarters after the 56 point", a: 60 }
+    ],
+    hint: "Spread the total rise over the 8 quarters. Then keep going at the same rate.",
+    why: "The trend rises 56 &minus; 40 = 16 over 8 quarters: 16 &divide; 8 = <b>2 per quarter</b>.<br>Two more quarters: 56 + 2 &times; 2 = <b>60</b>.<br>That is extrapolation, so it is only an estimate; it assumes the trend carries on in a straight line." },
+
+  { type: "mc", topic: "Trend lines",
+    q: "Kai draws his trend line by joining the first and last points of the <b>original data</b>. Why is that a poor trend line?",
+    options: [
+      "The original data go up and down with the seasons, so the line depends on which season the first and last points are in",
+      "A trend line has to go through the origin",
+      "Trend lines can only be drawn on monthly data",
+      "There is nothing wrong; any straight line will do"
+    ],
+    answer: 0,
+    hint: "If the first point is a winter low and the last point is a summer high, what happens to the slope?",
+    why: "The raw data include the seasonal highs and lows, so a line through two raw points could start on a low and finish on a high, making the trend look far steeper than it is. Moving averages remove the seasons first, which is why the trend line goes through them, as a line of best fit." },
+
+  /* ---------- PREDICTING ---------- */
+  { type: "learn", topic: "Predicting",
+    title: "Seasonal variation and predictions",
+    html: '<p class="tiny"><b>This chunk may be Higher only.</b> Worth a look either way.</p>' +
+          '<p>The trend line gives the trend. But a summer value is always above it, and a winter value below.</p>' +
+          '<ul>' +
+          '<li><b>Seasonal variation</b> = actual value &minus; trend value (read from the trend line at that time).</li>' +
+          '<li><b>Mean seasonal variation</b> = the mean of the seasonal variations for the same season.</li>' +
+          '<li><b>Prediction</b> = trend line value for the future time + mean seasonal variation for that season.</li>' +
+          '</ul>' +
+          '<p>A seaside shop, quarter 3: actual 80, 86, 95; trend 70, 75, 80. Variations: 10, 11, 15. Mean: 36 &divide; 3 = <b>12</b>. Trend next quarter 3: 85. Prediction: 85 + 12 = <b>97</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Winter variations are negative, so a winter prediction comes out <b>below</b> the trend. Keep the minus sign.</div>' },
+
+  { type: "num", topic: "Predicting", stretch: true,
+    q: "The trend line estimate for a shop's sales in next year's quarter 4 is <b>&pound;120 thousand</b>. The mean seasonal variation for quarter 4 is <b>+18</b> (thousand). Predict the sales.",
+    boxes: [ { label: "Prediction", pre: "&pound;", a: 138, post: "thousand" } ],
+    hint: "Prediction = trend value + mean seasonal variation.",
+    why: "120 + 18 = <b>&pound;138 thousand</b>. Quarter 4 is usually above the trend (Christmas shopping), so the prediction is above the trend line too." },
+
+  { type: "widget", topic: "Predicting",
+    title: "Ice cream season",
+    html: "A seaside kiosk's ice cream sales for three years. Scoop up the 4 point moving averages, draw the trend, then forecast next summer. Up to 9 scoops to win.",
+    mount: mountIce,
+    report: function(d){
+      var r = { right1: "predicted next summer first go", right2: "predicted next summer after a nudge", shown: "used Show me" }[d.result] || "not finished";
+      var sc = d.sc ? d.sc.ma + d.sc.fit + d.sc.pred : 0;
+      return "Ice cream season widget: " + r + "; scoops " + sc + "/9" + (typeof d.pred === "number" ? "; prediction " + d.pred : "") + ".";
+    } },
+
+  { type: "num", topic: "Predicting", stretch: true,
+    q: "Quarter 1 (winter) sales at a beach shop, in &pound;1000s.<br>Actual values: <b>31, 33, 38</b>.<br>Trend line values at the same times: <b>46, 50, 54</b>.<br>The trend line gives <b>58</b> for next year's quarter 1.",
+    boxes: [
+      { label: "Mean seasonal variation for quarter 1", a: -16 },
+      { label: "Predicted sales for next quarter 1", pre: "&pound;", a: 42, post: "thousand" }
+    ],
+    hint: "Do actual &minus; trend for each one first. Winter is below the trend, so expect negatives.",
+    why: "31 &minus; 46 = &minus;15, 33 &minus; 50 = &minus;17, 38 &minus; 54 = &minus;16.<br>Mean: (&minus;15 &minus; 17 &minus; 16) &divide; 3 = &minus;48 &divide; 3 = <b>&minus;16</b>.<br>Prediction: 58 + (&minus;16) = <b>42</b>, so about &pound;42 000.<br>Dropping the minus sign gives 74, which would put a winter quarter way above the trend: a good clue something has gone wrong." },
+
+  /* ---------- IN CONTEXT ---------- */
+  { type: "learn", topic: "Exam practice",
+    title: "Saying what it means",
+    html: '<p>Marks often come from words, not sums. A strong comment:</p>' +
+          '<ul>' +
+          '<li>names the <b>trend</b> with a number: "the moving averages rise from 47 to 52, so hires are increasing by about 125 a quarter";</li>' +
+          '<li>names the <b>seasonal pattern</b> with a reason: "highest in quarter 3, the summer holidays";</li>' +
+          '<li>is <b>careful about predictions</b>: they assume the trend and the seasonal pattern carry on. The further ahead, the less reliable. Something new (bad weather, a new rival) could change everything.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Trend, season, reason, caution. Four words for a full answer.</div>' },
+
+  { type: "multi", topic: "Exam practice",
+    q: "Ana uses three years of quarterly data to predict sales <b>five years</b> from now. Which <b>two</b> are good reasons the prediction might not be reliable?",
+    options: [
+      "It is a long way beyond the data, and the trend may not carry on in a straight line",
+      "Something could change, like a new competitor or very different weather",
+      "She used moving averages, which always give the wrong trend",
+      "Predictions can only be made for the quarter straight after the data",
+      "Seasonal variation is always zero after three years"
+    ],
+    answers: [0, 1],
+    hint: "Think about extrapolation, and about things the data could not know about.",
+    why: "Going far beyond the data is extrapolation: the trend might level off or turn. And outside events can break the pattern. Moving averages are a sensible tool, and you can predict further than one quarter; you just trust it less." },
+
+  { type: "num", topic: "Exam practice", stretch: true,
+    q: "Exam style. A household's gas use (in hundreds of kWh), quarterly for three years:<br><b>Year 1:</b> 14, 7, 4, 11 &nbsp; <b>Year 2:</b> 13, 6, 4, 10 &nbsp; <b>Year 3:</b> 12, 6, 3, 9",
+    fig: FIG_GAS,
+    boxes: [
+      { label: "(a) The 1st 4 point moving average", a: 9 },
+      { label: "(b) The last 4 point moving average", a: 7.5 },
+      { label: "(c) The moving averages are 8 quarters apart. Mean fall per quarter", a: 0.1875, tol: 0.006, show: "0.1875 (about 0.19)" }
+    ],
+    hint: "(a) and (b): add four values in a row and divide by 4. (c): the total fall, shared between 8 quarters.",
+    why: "(a) (14 + 7 + 4 + 11) &divide; 4 = 36 &divide; 4 = <b>9</b>.<br>(b) (12 + 6 + 3 + 9) &divide; 4 = 30 &divide; 4 = <b>7.5</b>.<br>(c) The fall is 9 &minus; 7.5 = 1.5 over 8 quarters: 1.5 &divide; 8 = <b>0.1875</b>, about 19 kWh less each quarter. The trend is falling slowly, perhaps because of better insulation. The first is plotted at 2.5 and the last at 10.5, which is why they are 8 quarters apart." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

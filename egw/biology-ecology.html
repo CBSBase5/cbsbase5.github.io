@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ecology - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: method list, variable boxes, the quadrat field trip */
+.steps{margin:0 0 10px;padding-left:1.4em}
+.steps li{margin-bottom:4px}
+.vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:6px 0 12px}
+.vars div{border:2px solid var(--ink);border-radius:12px;background:var(--white);padding:8px 10px;font-size:.92rem;line-height:1.4}
+.vars b{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+.sep{display:inline-block;font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;background:var(--violet);color:#fff;border-radius:999px;padding:2px 9px;margin:2px 0 6px}
+.formula{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:10px 12px;text-align:center;font-family:var(--display);font-weight:700;margin:6px 0 12px;line-height:1.5}
+.meadow svg{width:100%;max-width:520px;margin:0 auto;height:auto;display:block;touch-action:manipulation;cursor:crosshair;border-radius:12px}
+.qrow{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;margin-top:8px}
+.qrow svg{width:120px;height:auto;display:block}
+.qstats{display:flex;flex-wrap:wrap;gap:6px}
+.qstats span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-size:.86rem}
+.qstats span.est{background:var(--sun)}
+.trend svg{width:100%;max-width:420px;height:auto;display:block;margin:8px auto 0}
+.wq{margin-top:6px}
+.wq + .wq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+@media (max-width:420px){.qrow{grid-template-columns:96px 1fr}.qrow svg{width:96px}}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Ecology</h2>
+    <span>Biology. How living things depend on each other and their surroundings, how we survey them, how materials cycle, and what humans do to it all.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 16) + '" fill="' + (o.c || INK) + '">' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function box(x, y, w, h, fill){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+function head(x, y, dx, dy, c){
+  var a = Math.atan2(dy, dx), s = 9;
+  var p1 = [x - s * Math.cos(a) + s * 0.6 * Math.sin(a), y - s * Math.sin(a) - s * 0.6 * Math.cos(a)];
+  var p2 = [x - s * Math.cos(a) - s * 0.6 * Math.sin(a), y - s * Math.sin(a) + s * 0.6 * Math.cos(a)];
+  return '<path d="M' + x + ' ' + y + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + (c || INK) + '"/>';
+}
+function arrow(x1, y1, x2, y2, c){ return L(x1, y1, x2, y2, c || INK, 3) + head(x2, y2, x2 - x1, y2 - y1, c); }
+function lines(x, y, arr, o){
+  var s = "";
+  arr.forEach(function(t, k){ s += T(x, y + k * ((o && o.gap) || 20), t, o); });
+  return s;
+}
+function mulberry(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- figures ---------- */
+var FIG_WEB = svg("0 0 380 270", "A food web. Grass is eaten by rabbits and grasshoppers. Rabbits are eaten by foxes. Grasshoppers are eaten by frogs and birds. Frogs are eaten by foxes. Arrows point from the food to the feeder.",
+  box(130, 222, 120, 40, "#e3f8f1") + T(190, 248, "Grass", { s: 18 }) +
+  box(20, 140, 130, 40) + T(85, 166, "Rabbit", { s: 18 }) +
+  box(230, 140, 130, 40) + T(295, 166, "Grasshopper", { s: 17 }) +
+  box(160, 72, 100, 40) + T(210, 98, "Frog", { s: 18 }) +
+  box(280, 62, 90, 40) + T(325, 88, "Bird", { s: 18 }) +
+  box(20, 8, 130, 40, "#fff6d1") + T(85, 34, "Fox", { s: 18 }) +
+  arrow(160, 222, 110, 182) + arrow(220, 222, 270, 182) + arrow(85, 140, 85, 52) +
+  arrow(275, 140, 240, 114) + arrow(310, 140, 320, 106) + arrow(170, 80, 152, 40));
+
+/* predator and prey: two series, direct labels */
+var FIG_PP = (function(){
+  var X0 = 54, X1 = 296, Y0 = 210, Y1 = 20, s = "";
+  function X(t){ return X0 + t / 40 * (X1 - X0); }
+  function Y(v){ return Y0 - v / 100 * (Y0 - Y1); }
+  function prey(t){ return 55 + 35 * Math.sin(t / 10 * Math.PI); }
+  function pred(t){ return 25 + 13 * Math.sin((t - 5) / 10 * Math.PI); }
+  for(var v = 0; v <= 100; v += 25) s += L(X0, Y(v), X1, Y(v), LINE, v ? 1 : 0);
+  var a = [], b = [];
+  for(var t = 0; t <= 40; t += 0.5){ a.push(X(t).toFixed(1) + " " + Y(prey(t)).toFixed(1)); b.push(X(t).toFixed(1) + " " + Y(pred(t)).toFixed(1)); }
+  s += '<path d="M' + a.join(" L") + '" fill="none" stroke="' + MINT + '" stroke-width="3.5" stroke-linejoin="round"/>';
+  s += '<path d="M' + b.join(" L") + '" fill="none" stroke="' + CORAL + '" stroke-width="3.5" stroke-linejoin="round" stroke-dasharray="9 5"/>';
+  s += L(X0, Y0, X1, Y0, INK, 2) + L(X0, Y0, X0, Y1, INK, 2);
+  s += T(X1 + 8, Y(prey(40)) - 2, "prey", { s: 16, a: "start" }) + T(X1 + 8, Y(prey(40)) + 16, "(hares)", { s: 15, a: "start", body: true, w: 400 });
+  s += T(X1 + 8, Y(pred(40)) - 6, "predators", { s: 16, a: "start" }) + T(X1 + 8, Y(pred(40)) + 12, "(lynx)", { s: 15, a: "start", body: true, w: 400 });
+  s += T((X0 + X1) / 2, 236, "Time (years)", { s: 16 });
+  s += '<text transform="translate(22 ' + ((Y0 + Y1) / 2) + ') rotate(-90)" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="16" fill="' + INK + '">Population size</text>';
+  return svg("0 0 380 246", "Predator and prey populations rise and fall in cycles. The predator peaks come a little after the prey peaks, and the predator population is smaller.", s);
+})();
+
+var FIG_CARBON = svg("0 0 380 392", "The carbon cycle. Plants take carbon dioxide from the air by photosynthesis. Animals eat plants. Plants, animals and decomposers return carbon dioxide to the air by respiration. Dead remains and waste go to decomposers. Burning fossil fuels releases carbon dioxide.",
+  box(100, 8, 180, 50, "#e6ecff") + lines(190, 30, ["Carbon dioxide", "in the air"], { s: 17, gap: 19 }) +
+  box(8, 120, 110, 44, "#e3f8f1") + T(63, 148, "Plants", { s: 18 }) +
+  box(226, 120, 110, 44) + T(281, 148, "Animals", { s: 18 }) +
+  box(8, 288, 160, 56, "#fff6d1") + lines(88, 311, ["Decomposers", "(microorganisms)"], { s: 16, gap: 20 }) +
+  box(246, 288, 126, 56) + lines(309, 311, ["Fossil", "fuels"], { s: 16, gap: 20 }) +
+  '<path d="M100 30 H40 V112" fill="none" stroke="' + MINT + '" stroke-width="3"/>' + head(40, 116, 0, 1, MINT) +
+  arrow(92, 120, 138, 62, CORAL) + arrow(262, 120, 236, 62, CORAL) + arrow(118, 290, 168, 62, CORAL) +
+  '<path d="M356 288 V33 H288" fill="none" stroke="' + CORAL + '" stroke-width="3"/>' + head(284, 33, -1, 0, CORAL) +
+  arrow(118, 142, 222, 142) + T(196, 134, "eaten", { s: 15, body: true, w: 400 }) +
+  arrow(40, 164, 40, 284) + arrow(272, 164, 160, 284) + T(48, 232, "death,", { s: 15, a: "start", body: true, w: 400 }) + T(48, 250, "waste", { s: 15, a: "start", body: true, w: 400 }) +
+  T(364, 200, "burning", { s: 15, a: "start", body: true, w: 400 }).replace('<text ', '<text transform="rotate(90 364 200)" ') +
+  L(14, 370, 40, 370, MINT, 4) + T(46, 375, "photosynthesis", { s: 15, a: "start", body: true, w: 400 }) +
+  L(170, 370, 196, 370, CORAL, 4) + T(202, 375, "respiration, burning", { s: 15, a: "start", body: true, w: 400 }));
+
+var FIG_PYR = svg("0 0 380 200", "A pyramid of biomass. Producers at the bottom have the most biomass, then primary consumers, then secondary consumers, then tertiary consumers at the top with the least.",
+  '<rect x="40" y="150" width="300" height="40" fill="#e3f8f1" stroke="' + INK + '" stroke-width="2.5"/>' + T(190, 176, "Producers: grass", { s: 16 }) +
+  '<rect x="100" y="110" width="180" height="40" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' + T(190, 136, "Rabbits", { s: 16 }) +
+  '<rect x="145" y="70" width="90" height="40" fill="#fff6d1" stroke="' + INK + '" stroke-width="2.5"/>' + T(190, 96, "Stoats", { s: 16 }) +
+  '<rect x="170" y="30" width="40" height="40" fill="#ffe6e6" stroke="' + INK + '" stroke-width="2.5"/>' + T(190, 56, "Fox", { s: 14 }) +
+  T(190, 20, "wider bar = more biomass", { s: 14, body: true, w: 400 }));
+
+/* small in-widget quiz (mc, number, tap order) */
+function wquiz(host, qs, api){
+  var d = api.data;
+  if(!d.q) d.q = [];
+  var MINUS = new RegExp(String.fromCharCode(8722), "g");
+  function parse(s){
+    s = String(s).replace(/,/g, "").replace(MINUS, "-");
+    var m = s.match(/-?\d*\.?\d+/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function val(x){ return typeof x === "function" ? x() : x; }
+  function overall(){
+    var r = "right1";
+    for(var k = 0; k < qs.length; k++){
+      var st = d.q[k];
+      if(!st || !st.done) return null;
+      if(st.done === "shown") r = "shown";
+      else if(st.done === "right2" && r === "right1") r = "right2";
+    }
+    return r;
+  }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e; }
+  function render(){
+    host.innerHTML = '<span class="kicker" style="margin-bottom:4px">Your challenge</span>';
+    for(var k = 0; k < qs.length; k++){
+      if(!d.q[k]) d.q[k] = { tries: 0 };
+      host.appendChild(one(k));
+      if(!d.q[k].done) break;
+    }
+  }
+  function one(k){
+    var q = qs[k], st = d.q[k];
+    var bx = el("div", "wq", '<p class="wnote"><b>' + (k + 1) + ' of ' + qs.length + '.</b> ' + val(q.q) + '</p>');
+    var picked = st.pick === undefined ? -1 : st.pick, input = null, btns = [];
+    var fb = el("div", "fb hidden"); fb.setAttribute("aria-live", "polite");
+    var nav = el("div", "wrow");
+    var cb = el("button", "btn", "Check"); cb.type = "button";
+    var sb = el("button", "btn btn-quiet", "Show me"); sb.type = "button";
+    function finish(r){
+      st.done = r; api.save();
+      var o = overall();
+      if(o) api.done(o);
+      render();
+    }
+    function whyHtml(){
+      return "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") +
+        '</b><div class="why">' + val(q.why) + "</div>";
+    }
+    if(q.order){
+      /* tap the items in order */
+      if(!st.perm){
+        st.perm = q.order.map(function(t, n){ return n; });
+        for(var i = st.perm.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = st.perm[i]; st.perm[i] = st.perm[j]; st.perm[j] = t; }
+        if(st.perm.join() === q.order.map(function(t, n){ return n; }).join()) st.perm.reverse();
+      }
+      if(!st.got) st.got = 0;
+      var seq = el("ol", "tseq"), chips = el("div", "tchips");
+      bx.appendChild(seq); bx.appendChild(chips);
+      var drawO = function(){
+        seq.innerHTML = q.order.slice(0, st.got).map(function(t){ return "<li>" + t + "</li>"; }).join("");
+        chips.innerHTML = "";
+        st.perm.forEach(function(n){
+          if(n < st.got) return;
+          var b = el("button", "", q.order[n]); b.type = "button";
+          b.onclick = function(){
+            if(st.done) return;
+            if(n === st.got){
+              st.got++; api.save();
+              fb.className = "fb hidden";
+              if(st.got === q.order.length){ finish(st.tries ? "right2" : "right1"); return; }
+              drawO();
+            }else{
+              st.tries++; api.save();
+              b.classList.remove("no"); void b.offsetWidth; b.classList.add("no");
+              fb.className = "fb nudge";
+              fb.innerHTML = "<b>Not that one yet.</b> " + (q.hints ? q.hints[st.got] : q.hint) + '<br><span class="tiny">Tap another, or tap Show me.</span>';
+              sb.classList.remove("hidden");
+            }
+          };
+          chips.appendChild(b);
+        });
+      };
+      if(!st.done) drawO(); else { st.got = q.order.length; drawO(); }
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      sb.onclick = function(){ st.got = q.order.length; finish("shown"); };
+      nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+      if(st.done){ fb.className = "fb " + (st.done === "shown" ? "show" : "good"); fb.innerHTML = whyHtml(); }
+      return bx;
+    }
+    if(q.options){
+      var ch = el("div", "choices");
+      q.options.forEach(function(o, n){
+        var b = el("button", n === picked ? "picked" : "", o); b.type = "button";
+        b.onclick = function(){
+          if(st.done) return;
+          picked = n;
+          btns.forEach(function(x, m){ x.classList.toggle("picked", m === n); x.classList.remove("no"); });
+        };
+        btns.push(b); ch.appendChild(b);
+      });
+      bx.appendChild(ch);
+    }else{
+      var row = el("label", "numrow", q.pre ? '<span class="aff">' + q.pre + '</span>' : "");
+      input = el("input"); input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+      input.setAttribute("aria-label", "Your answer");
+      if(st.val !== undefined) input.value = st.val;
+      input.addEventListener("input", function(){ input.classList.remove("no"); st.val = input.value; });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      row.appendChild(input);
+      if(q.post) row.appendChild(el("span", "aff", q.post));
+      bx.appendChild(row);
+    }
+    nav.appendChild(cb); nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+    function right(){
+      if(q.options) return picked === q.answer;
+      return Math.abs(parse(input.value) - val(q.a)) <= (q.tol || 1e-9);
+    }
+    function paint(){
+      cb.classList.toggle("hidden", !!st.done);
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      if(!st.done) return;
+      if(q.options){
+        btns.forEach(function(x, m){ x.classList.remove("no", "ok"); if(m === q.answer) x.classList.add("ok"); });
+      }else{
+        if(st.done === "shown"){ input.value = q.show ? val(q.show) : String(val(q.a)); input.classList.add("given"); }
+        else input.classList.add("ok");
+        input.readOnly = true;
+      }
+      fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+      fb.innerHTML = whyHtml();
+    }
+    cb.onclick = function(){
+      if(q.options ? picked < 0 : !input.value.trim()){
+        fb.className = "fb nudge"; fb.innerHTML = "Pop an answer in first, if you like.";
+        return;
+      }
+      st.pick = picked; if(input) st.val = input.value;
+      if(right()){ finish(st.tries ? "right2" : "right1"); return; }
+      st.tries++;
+      if(st.tries >= 2){ finish("shown"); return; }
+      api.save();
+      var msg = val(q.hint);
+      if(q.options && q.nearOpt && q.nearOpt[picked]) msg = q.nearOpt[picked];
+      if(input) input.classList.add("no"); else btns[picked].classList.add("no");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+      paint();
+    };
+    sb.onclick = function(){ finish("shown"); };
+    paint();
+    return bx;
+  }
+  render();
+  return { refresh: render };
+}
+
+/* ---------- the quadrat field trip ---------- */
+var FW = 15, FH = 10, S = 24, SEED = 2468, AREA = FW * FH;     /* field 15 m by 10 m, 24 units per metre */
+var FIELD = (function(){
+  var rnd = mulberry(SEED), pts = [], clumps = [], k;
+  for(k = 0; k < 7; k++) clumps.push([3.5 + rnd() * 11, 0.8 + rnd() * 8.4]);
+  function shade(x, y){ var dx = x - 2.6, dy = y - 2.5; return dx * dx + dy * dy < 6.25; }
+  while(pts.length < 780){
+    var x, y;
+    if(rnd() < 0.55){
+      var c = clumps[Math.floor(rnd() * clumps.length)];
+      var r = Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * 1.1, th = rnd() * Math.PI * 2;
+      x = c[0] + r * Math.cos(th); y = c[1] + r * Math.sin(th);
+    }else{
+      x = rnd() * FW; y = rnd() * FH;
+      if(rnd() > 0.35 + 0.65 * x / FW) continue;
+    }
+    if(x < 0.05 || y < 0.05 || x > FW - 0.05 || y > FH - 0.05) continue;
+    if(shade(x, y) && rnd() < 0.85) continue;
+    pts.push([x, y]);
+  }
+  return pts;
+})();
+var TRUE_TOTAL = FIELD.length;
+function countIn(gx, gy){
+  var n = 0;
+  for(var i = 0; i < FIELD.length; i++) if(Math.floor(FIELD[i][0]) === gx && Math.floor(FIELD[i][1]) === gy) n++;
+  return n;
+}
+function daisyPath(pts, sc, ox, oy, r){
+  var w = "", y = "";
+  pts.forEach(function(p){
+    var X = ((p[0] - ox) * sc).toFixed(1), Y = ((p[1] - oy) * sc).toFixed(1);
+    w += "M" + (X - r) + " " + Y + "a" + r + " " + r + " 0 1 0 " + (2 * r) + " 0a" + r + " " + r + " 0 1 0 " + (-2 * r) + " 0";
+    y += "M" + (X - r * 0.42) + " " + Y + "a" + (r * 0.42) + " " + (r * 0.42) + " 0 1 0 " + (r * 0.84) + " 0a" + (r * 0.42) + " " + (r * 0.42) + " 0 1 0 " + (-r * 0.84) + " 0";
+  });
+  return '<path d="' + w + '" fill="' + WHITE + '" stroke="#b9c2a8" stroke-width="0.6"/><path d="' + y + '" fill="' + SUN + '"/>';
+}
+var MEADOW_BASE = (function(){
+  var s = '<rect width="360" height="240" fill="#bfe3b4"/>';
+  s += '<circle cx="' + (2.6 * S) + '" cy="' + (2.5 * S) + '" r="' + (2.5 * S) + '" fill="#9dc993"/>';
+  s += '<circle cx="' + (2.6 * S) + '" cy="' + (2.5 * S) + '" r="18" fill="#5e8f57" stroke="' + INK + '" stroke-width="1.5"/>';
+  s += '<circle cx="' + (2.6 * S + 14) + '" cy="' + (2.5 * S - 9) + '" r="12" fill="#6fa067" stroke="' + INK + '" stroke-width="1.5"/>';
+  s += daisyPath(FIELD, S, 0, 0, 3);
+  return s;
+})();
+
+var FIELDTRIP = {
+  type: "widget", topic: "Sampling",
+  title: "Quadrat field trip",
+  html: '<p>This meadow is <b>15 m by 10 m</b>, so its area is <b>150 m&sup2;</b>. Your quadrat is <b>1 m by 1 m</b>. Daisies are dotted about unevenly: there are fewer in the tree\'s shade.</p><p>Tap <b>Random drop</b> to place a quadrat at random coordinates, or tap the meadow to place one by hand. Watch the estimate change as you go. A challenge appears after 5 quadrats.</p>',
+  report: function(d){
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" }, q = d.q || [], qs = d.qs || [];
+    var sum = 0; qs.forEach(function(x){ sum += x.c; });
+    return "Field trip: " + qs.length + " quadrats" + (qs.length ? ", mean " + (sum / qs.length).toFixed(1) + ", estimate " + Math.round(sum / qs.length * AREA) : "") +
+      "; estimate question " + (q[0] && lab[q[0].done] || "not done") + ", random question " + (q[1] && lab[q[1].done] || "not done") +
+      ", accuracy question " + (q[2] && lab[q[2].done] || "not done") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(!d.qs) d.qs = [];
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="meadow" id="meadow"></div>' +
+        '<div class="wrow"><button type="button" class="btn btn-orange" id="drop">Random drop</button>' +
+          '<button type="button" class="btn btn-quiet" id="drop5">Drop 5 at once</button>' +
+          '<button type="button" class="btn btn-quiet" id="clear">Start a new survey</button></div>' +
+        '<p class="wnote" id="note" aria-live="polite"></p>' +
+        '<div class="qrow"><div id="mag"></div><div class="qstats" id="stats"></div></div>' +
+        '<div class="trend" id="trend"></div>' +
+        '<div class="wrow" id="revealRow"></div>' +
+      '</div>' +
+      '<div class="wpanel" id="fq"></div>';
+    var meadow = el.querySelector("#meadow"), note = el.querySelector("#note"), mag = el.querySelector("#mag"),
+        stats = el.querySelector("#stats"), trend = el.querySelector("#trend"), qh = el.querySelector("#fq"),
+        revealRow = el.querySelector("#revealRow");
+    var quiz = null;
+    meadow.innerHTML = '<svg viewBox="0 0 360 240" role="img" aria-label="A meadow with daisies, 15 metres by 10 metres. Tap to place a quadrat."><g>' + MEADOW_BASE + '</g><g id="qlayer"></g></svg>';
+    var svgEl = meadow.querySelector("svg"), layer = meadow.querySelector("#qlayer");
+
+    function sum(){ var s = 0; d.qs.forEach(function(q){ s += q.c; }); return s; }
+    function place(gx, gy, how){
+      if(d.qs.length >= 50){ note.innerHTML = "That is 50 quadrats, which is a lot of kneeling in a field. Start a new survey if you want another go."; return false; }
+      if(d.qs.some(function(q){ return q.x === gx && q.y === gy; })){
+        note.innerHTML = "There is already a quadrat on that square metre. Pick a different spot, if you like.";
+        return false;
+      }
+      d.qs.push({ x: gx, y: gy, c: countIn(gx, gy), h: how === "h" ? 1 : 0 });
+      return true;
+    }
+    function randomFree(){
+      for(var tries = 0; tries < 400; tries++){
+        var gx = Math.floor(Math.random() * FW), gy = Math.floor(Math.random() * FH);
+        if(!d.qs.some(function(q){ return q.x === gx && q.y === gy; })) return [gx, gy];
+      }
+      return null;
+    }
+    function drawQuadrats(){
+      var s = "";
+      d.qs.forEach(function(q, k){
+        var last = k === d.qs.length - 1;
+        s += '<rect x="' + (q.x * S) + '" y="' + (q.y * S) + '" width="' + S + '" height="' + S + '" fill="' + WHITE + '" fill-opacity="0.72" stroke="' + (q.h ? CORAL : BLUE) + '" stroke-width="' + (last ? 3 : 2) + '"><title>Quadrat ' + (k + 1) + ': ' + q.c + ' daisies</title></rect>';
+        s += '<text x="' + (q.x * S + S / 2) + '" y="' + (q.y * S + 17) + '" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="16" fill="' + INK + '" pointer-events="none">' + q.c + '</text>';
+      });
+      layer.innerHTML = s;
+    }
+    function drawMag(){
+      var q = d.qs[d.qs.length - 1];
+      if(!q){ mag.innerHTML = svg("0 0 120 120", "No quadrat placed yet", '<rect x="2" y="2" width="116" height="116" rx="10" fill="' + PAPER + '" stroke="' + LINE + '" stroke-width="2" stroke-dasharray="6 5"/>' + lines(60, 56, ["close", "up"], { s: 15, body: true, w: 400, c: "#4b5275" })); return; }
+      var inside = FIELD.filter(function(p){ return p[0] >= q.x - 0.15 && p[0] < q.x + 1.15 && p[1] >= q.y - 0.15 && p[1] < q.y + 1.15; });
+      var s = '<rect x="0" y="0" width="120" height="120" rx="10" fill="#bfe3b4"/>';
+      s += '<g transform="translate(60 60)">' + daisyPath(inside, 92, q.x + 0.5, q.y + 0.5, 7) + '</g>';
+      s += '<rect x="14" y="14" width="92" height="92" fill="none" stroke="' + (q.h ? CORAL : BLUE) + '" stroke-width="3"/>';
+      s += '<rect x="2" y="2" width="116" height="116" rx="10" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+      mag.innerHTML = svg("0 0 120 120", "Close up of the last quadrat: " + q.c + " daisies inside", s);
+    }
+    function drawStats(){
+      var n = d.qs.length;
+      if(!n){ stats.innerHTML = '<span>No quadrats yet</span>'; trend.innerHTML = ""; revealRow.innerHTML = ""; return; }
+      var tot = sum(), mean = tot / n, hand = d.qs.filter(function(q){ return q.h; }).length;
+      stats.innerHTML = '<span><b>' + n + '</b> quadrat' + (n === 1 ? "" : "s") + (hand ? ' (' + hand + ' by hand)' : "") + '</span>' +
+        '<span>Last one: <b>' + d.qs[n - 1].c + '</b></span>' +
+        '<span>Total counted: <b>' + tot + '</b></span>' +
+        '<span>Mean: <b>' + (Math.round(mean * 100) / 100) + '</b> per m&sup2;</span>' +
+        '<span class="est">Estimate: <b>' + Math.round(mean * AREA) + '</b> daisies</span>';
+      /* running estimate line, with the real total once revealed */
+      var ests = [], run = 0;
+      d.qs.forEach(function(q, k){ run += q.c; ests.push(run / (k + 1) * AREA); });
+      var top = Math.max(1600, Math.max.apply(null, ests));
+      var X0 = 56, X1 = 370, Y0 = 150, Y1 = 14, maxN = Math.max(10, n);
+      function X(k){ return X0 + (k - 1) / (maxN - 1) * (X1 - X0); }
+      function Y(v){ return Y0 - v / top * (Y0 - Y1); }
+      var s = "";
+      var step = top <= 1600 ? 400 : top <= 3200 ? 800 : 2000;
+      top = Math.ceil(top / step) * step;
+      for(var v = 0; v <= top; v += step) s += L(X0, Y(v), X1, Y(v), LINE, v ? 1 : 0) + T(X0 - 6, Y(v) + 5, v, { s: 14, a: "end", body: true, w: 400 });
+      if(d.revealed){
+        s += L(X0, Y(TRUE_TOTAL), X1, Y(TRUE_TOTAL), INK, 2, "7 5") + T(X0 + 6, Y(TRUE_TOTAL) + 18, "real total " + TRUE_TOTAL, { s: 14, a: "start" });
+      }
+      s += '<path d="M' + ests.map(function(e, k){ return X(k + 1).toFixed(1) + " " + Y(e).toFixed(1); }).join(" L") + '" fill="none" stroke="' + BLUE + '" stroke-width="2.5" stroke-linejoin="round"/>';
+      ests.forEach(function(e, k){
+        s += '<circle cx="' + X(k + 1).toFixed(1) + '" cy="' + Y(e).toFixed(1) + '" r="4" fill="' + BLUE + '" stroke="' + WHITE + '" stroke-width="2"><title>After ' + (k + 1) + ' quadrat' + (k ? "s" : "") + ': estimate ' + Math.round(e) + '</title></circle>';
+      });
+      s += L(X0, Y0, X1, Y0, INK, 2);
+      s += T(X0, Y0 + 18, 1, { s: 14, body: true, w: 400 }) + T(X1, Y0 + 18, maxN, { s: 14, body: true, w: 400 });
+      s += T((X0 + X1) / 2, Y0 + 20, "Number of quadrats", { s: 14 });
+      s += '<text transform="translate(14 ' + ((Y0 + Y1) / 2) + ') rotate(-90)" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="14" fill="' + INK + '">Estimate</text>';
+      trend.innerHTML = svg("0 0 380 178", "Line chart of your population estimate after each quadrat" + (d.revealed ? ", with the real total of " + TRUE_TOTAL + " shown as a dashed line" : ""), s);
+      revealRow.innerHTML = "";
+      if(d.revealed){
+        var off = Math.round(mean * AREA) - TRUE_TOTAL;
+        revealRow.innerHTML = '<p class="wnote">The meadow really has <b>' + TRUE_TOTAL + '</b> daisies. Your estimate is ' + (off === 0 ? "exactly right. Wow." : Math.abs(off) + (off > 0 ? " too high" : " too low") + ", which is " + Math.round(Math.abs(off) / TRUE_TOTAL * 100) + "% out.") + '</p>';
+      }else if(n >= 10){
+        var rb = document.createElement("button"); rb.type = "button"; rb.className = "btn btn-quiet"; rb.textContent = "Count every daisy (reveal the real total)";
+        rb.onclick = function(){ d.revealed = true; api.save(); drawStats(); };
+        revealRow.appendChild(rb);
+      }else{
+        revealRow.innerHTML = '<p class="tiny">After 10 quadrats you can reveal the real total and see how close you got.</p>';
+      }
+    }
+    function drawQuiz(){
+      if(d.qs.length < 5 && !d.snap){
+        qh.innerHTML = '<span class="kicker">Your challenge</span><p class="wnote">The challenge appears here after 5 quadrats. ' + (5 - d.qs.length) + ' to go.</p>';
+        return;
+      }
+      if(!d.snap){ d.snap = { n: d.qs.length, t: sum() }; api.save(); }
+      if(quiz) return;
+      quiz = wquiz(qh, [
+        { q: function(){ return "When you had <b>" + d.snap.n + "</b> quadrats, you had counted <b>" + d.snap.t + "</b> daisies altogether. Use those numbers to estimate the number of daisies in the whole 150 m&sup2; meadow."; },
+          a: function(){ return d.snap.t / d.snap.n * AREA; }, tol: 1, post: "daisies",
+          show: function(){ return String(Math.round(d.snap.t / d.snap.n * AREA * 100) / 100); },
+          hint: function(){ return "First find the mean per quadrat: " + d.snap.t + " &divide; " + d.snap.n + ". Then multiply by the field area and divide by the quadrat area (1 m&sup2;)."; },
+          why: function(){
+            var m = d.snap.t / d.snap.n;
+            return "Mean = " + d.snap.t + " &divide; " + d.snap.n + " = " + (Math.round(m * 100) / 100) + " per quadrat. Estimate = mean &times; field area &divide; quadrat area = " +
+              (Math.round(m * 100) / 100) + " &times; 150 &divide; 1 = <b>" + (Math.round(m * AREA * 100) / 100) + "</b>. The common slip is to multiply the total counted by 150, instead of the mean.";
+          } },
+        { q: "Why is it better to place quadrats at <b>random coordinates</b> than to choose where they go?",
+          options: [
+            "It avoids bias, such as choosing spots that look as if they have lots of daisies",
+            "It means you need fewer quadrats",
+            "It makes every quadrat contain the same number of daisies",
+            "It is quicker to walk to random places"
+          ],
+          answer: 0,
+          hint: "If you pick the spots yourself, what might you be tempted to do, without meaning to?",
+          why: "Random sampling avoids <b>bias</b>. People tend to choose interesting looking spots, which pushes the estimate up or down. In a real field, two tape measures make a grid and a random number generator picks the coordinates." },
+        { q: "How could you make your estimate of the population more <b>accurate</b>?",
+          options: [
+            "Use more quadrats, placed at random",
+            "Use one quadrat in the best looking spot",
+            "Count only the biggest daisies",
+            "Round the mean to a whole number before multiplying"
+          ],
+          answer: 0,
+          hint: "Look at your estimate line: what happens to it as the number of quadrats goes up?",
+          why: "More quadrats make the sample more representative, so the mean settles down and the estimate gets closer to the real number. One quadrat, or rounding early, makes it less accurate. Your line chart shows the wobble shrinking as you add more." }
+      ], api);
+    }
+    function after(msg){
+      api.save(); drawQuadrats(); drawMag(); drawStats(); drawQuiz();
+      if(msg) note.innerHTML = msg;
+    }
+    el.querySelector("#drop").onclick = function(){
+      var p = randomFree(); if(!p) return;
+      if(place(p[0], p[1], "r")) after("Quadrat dropped at coordinates (" + p[0] + ", " + p[1] + "). It has <b>" + d.qs[d.qs.length - 1].c + "</b> daisies inside.");
+    };
+    el.querySelector("#drop5").onclick = function(){
+      var k = 0;
+      for(var i = 0; i < 5; i++){ var p = randomFree(); if(p && place(p[0], p[1], "r")) k++; }
+      if(k) after(k + " quadrats dropped at random. Have a look at how the estimate moved.");
+    };
+    el.querySelector("#clear").onclick = function(){
+      d.qs = []; d.revealed = false; after("Fresh survey. The daisies have not moved, so you can see how a new set of samples compares.");
+    };
+    svgEl.addEventListener("pointerdown", function(e){
+      var pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      var m = svgEl.getScreenCTM(); if(!m) return;
+      var p = pt.matrixTransform(m.inverse());
+      var gx = Math.floor(p.x / S), gy = Math.floor(p.y / S);
+      if(gx < 0 || gy < 0 || gx >= FW || gy >= FH) return;
+      if(place(gx, gy, "h")) after("Placed by hand (red outline). <b>" + d.qs[d.qs.length - 1].c + "</b> daisies inside. Hand placed quadrats can be biased, so random drops are fairer.");
+    });
+    after(d.qs.length ? "Welcome back. Your survey is just as you left it." : "Ready when you are. A good survey uses at least 10 quadrats.");
+  }
+};
+
+EGW.run({
+  id: "biology-ecology",
+  title: "Ecology",
+  subject: "Biology",
+  mins: 50,
+  blurb: "Communities, adaptations, food webs, sampling, the carbon cycle and how humans affect biodiversity. There is a meadow to survey with quadrats in the middle.",
+  steps: [
+
+  /* ---------- COMMUNITIES ---------- */
+  { type: "learn", topic: "Communities",
+    title: "Who lives where, and why",
+    html: '<p>Some words first:</p>' +
+          '<ul>' +
+          '<li><b>Habitat</b>: the place where an organism lives.</li>' +
+          '<li><b>Population</b>: all the organisms of one species in a habitat.</li>' +
+          '<li><b>Community</b>: the populations of different species living in a habitat.</li>' +
+          '<li><b>Ecosystem</b>: the community interacting with the non living parts of the environment.</li>' +
+          '</ul>' +
+          '<p>Organisms <b>compete</b>. Plants compete for light, space, water and mineral ions from the soil. Animals compete for food, mates and territory.</p>' +
+          '<p><b>Interdependence</b>: species in a community depend on each other for food, shelter, pollination and seed dispersal. Remove one species and it can affect the whole community. A <b>stable community</b> is one where all the species and environmental factors are in balance, so population sizes stay fairly constant.</p>' +
+          '<p>Factors that affect a community:</p>' +
+          '<ul>' +
+          '<li><b>Abiotic</b> (non living): light intensity, temperature, moisture levels, soil pH and mineral content, wind intensity and direction, carbon dioxide levels for plants, oxygen levels for animals that live in water.</li>' +
+          '<li><b>Biotic</b> (living): availability of food, new predators arriving, new pathogens, and one species outcompeting another.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Abiotic: the a at the start means not, so not living. Biotic: bio means life, so living.</div>' },
+
+  { type: "sort", topic: "Communities",
+    q: "Abiotic or biotic factor?",
+    buckets: ["Abiotic (non living)", "Biotic (living)"],
+    cards: [
+      ["Light intensity", 0],
+      ["Temperature", 0],
+      ["Soil pH", 0],
+      ["Wind direction", 0],
+      ["A new predator arrives", 1],
+      ["A new disease spreads", 1],
+      ["Less food available", 1],
+      ["Another species outcompetes it", 1]
+    ],
+    hint: "Ask: is it a living thing, or caused by living things?",
+    why: "Abiotic factors are physical and chemical conditions. Biotic factors are about other organisms: food, predators, pathogens, competitors. Food can feel like a supply rather than a living thing, but it is biotic because it is other organisms." },
+
+  { type: "mc", topic: "Communities",
+    q: "In a wood, a disease kills most of the rabbits. Which is the most likely <b>immediate</b> effect?",
+    options: [
+      "The number of foxes falls, because they have less food",
+      "The number of foxes rises, because there is less competition",
+      "The grass gets shorter, because more of it is eaten",
+      "Nothing changes, because foxes and rabbits are not connected"
+    ],
+    answer: 0,
+    hint: "Follow the food. Who eats rabbits?",
+    why: "Foxes depend on rabbits for food, so fewer rabbits means less food and fewer foxes surviving. The grass would actually get longer, because fewer rabbits eat it. This is interdependence: one change spreads through the community." },
+
+  { type: "match", topic: "Communities",
+    q: "Match each word to its meaning.",
+    pairs: [
+      ["Population", "All the organisms of one species in a habitat"],
+      ["Community", "All the populations of different species in a habitat"],
+      ["Ecosystem", "Living organisms interacting with the non living environment"],
+      ["Habitat", "The place where an organism lives"]
+    ],
+    hint: "Population is one species. Community is many. Ecosystem adds the non living parts.",
+    why: "They build up: individual, population (one species), community (many species), ecosystem (community plus the physical environment). Mixing up population and community is the most common slip." },
+
+  /* ---------- ADAPTATIONS ---------- */
+  { type: "learn", topic: "Adaptations",
+    title: "Built for the job",
+    html: '<p>Organisms have <b>adaptations</b>: features that help them survive in the conditions where they normally live.</p>' +
+          '<ul>' +
+          '<li><b>Structural</b>: features of the body. Thick fur and a small surface area to volume ratio in an arctic fox; long roots in a cactus; spines instead of leaves to cut water loss.</li>' +
+          '<li><b>Behavioural</b>: the way it acts. Migrating somewhere warmer for the winter; being active at night in the desert; birds puffing up their feathers.</li>' +
+          '<li><b>Functional</b>: processes inside the body, such as metabolism. Camels making very little urine to save water; animals hibernating, slowing their metabolism right down.</li>' +
+          '</ul>' +
+          '<p><b>Extremophiles</b> live in extreme conditions: very high temperature, high pressure or high salt. Some bacteria live in deep sea vents above 80 &deg;C.</p>' +
+          '<div class="keep"><b>Keep this</b>Structural: body. Behavioural: actions. Functional: inside processes.</div>' },
+
+  { type: "sort", topic: "Adaptations",
+    q: "What kind of adaptation is each one?",
+    buckets: ["Structural", "Behavioural", "Functional"],
+    cards: [
+      ["Thick white fur on a polar bear", 0],
+      ["A cactus has spines instead of leaves", 0],
+      ["Swallows migrate south for winter", 1],
+      ["Desert rodents only come out at night", 1],
+      ["A camel produces very concentrated urine", 2],
+      ["A hedgehog hibernates, with a much slower metabolism", 2]
+    ],
+    hint: "Can you see it on the body? Is it something the animal does? Or is it happening inside?",
+    why: "Fur and spines are body features: structural. Migrating and being nocturnal are actions: behavioural. Concentrated urine and slowed metabolism are processes inside the body: functional. Hibernating is sometimes called behavioural too, but the slowed metabolism part is functional." },
+
+  { type: "mc", topic: "Adaptations",
+    q: "What is an <b>extremophile</b>?",
+    options: [
+      "An organism that lives in extreme conditions, such as very high temperature, pressure or salt",
+      "An animal that eats only one food",
+      "A predator at the top of a food chain",
+      "A plant that grows extremely fast"
+    ],
+    answer: 0,
+    hint: "Extreme plus phile, which means lover.",
+    why: "Extremophiles thrive where most life could not: hot springs, deep sea vents, very salty lakes. Many are bacteria or archaea. Their enzymes are adapted to work in those conditions." },
+
+  /* ---------- FEEDING ---------- */
+  { type: "learn", topic: "Feeding",
+    title: "Food chains, webs and cycles",
+    fig: FIG_WEB,
+    html: '<p>Feeding relationships start with a <b>producer</b>, usually a green plant or alga, which makes glucose by <b>photosynthesis</b>. All the biomass in a food chain starts here.</p>' +
+          '<p>Then come <b>consumers</b>: <b>primary</b> consumers eat producers, <b>secondary</b> consumers eat primary consumers, and so on. <b>Predators</b> kill and eat other animals, their <b>prey</b>. Arrows point in the direction the energy goes: from the food to the feeder.</p>' +
+          '<p>A <b>food web</b> shows several food chains joined together.</p>' +
+          '<div class="fig">' + FIG_PP + '</div>' +
+          '<p>In a stable community, predator and prey numbers rise and fall in <b>cycles</b>. More prey means more food, so more predators survive. More predators eat more prey, so the prey numbers fall. Then predators go short, and their numbers fall too. The predator peaks come a little <b>after</b> the prey peaks.</p>' +
+          '<div class="keep"><b>Keep this</b>Arrows mean "is eaten by". Producers come first, every time.</div>' },
+
+  { type: "order", topic: "Feeding",
+    q: "Put this food chain in order, starting with the producer.",
+    items: ["Seaweed", "Limpet", "Crab", "Seagull"],
+    hint: "Which one makes its own food by photosynthesis?",
+    why: "Seaweed is the producer, the limpet is the primary consumer, the crab the secondary consumer and the seagull the tertiary consumer. The arrows would point from seaweed to limpet to crab to seagull." },
+
+  { type: "mc", topic: "Feeding",
+    q: "In the food web on the learn card, which is a <b>secondary consumer</b>?",
+    fig: FIG_WEB,
+    options: ["Frog", "Grasshopper", "Grass", "Rabbit"],
+    answer: 0,
+    hint: "A secondary consumer eats a primary consumer, which eats the plants.",
+    why: "The frog eats grasshoppers, which eat grass, so the frog is a secondary consumer. The grasshopper and rabbit are primary consumers, and grass is the producer. The fox can be secondary (eating rabbits) or tertiary (eating frogs): in webs, one animal can be at more than one level." },
+
+  { type: "mc", topic: "Feeding", stretch: true,
+    q: "Look at the predator and prey graph. Why do the predator peaks come <b>after</b> the prey peaks?",
+    fig: FIG_PP,
+    options: [
+      "Predator numbers only rise once there is plenty of prey to eat, and it takes time for them to breed",
+      "Predators breed faster than prey",
+      "The prey eat the predators",
+      "The two populations are not connected"
+    ],
+    answer: 0,
+    hint: "What does a predator population need before it can grow?",
+    why: "Lots of prey means more food, so more predators survive and breed, but that takes time, so their peak lags behind. Then the extra predators eat more prey, the prey falls, and the predators follow it down. The predator line is also lower, because a lot of energy is lost at each step of a food chain." },
+
+  /* ---------- SAMPLING (required practical) ---------- */
+  { type: "learn", topic: "Sampling",
+    title: "Required practical: quadrats and transects",
+    html: '<p>You cannot count every plant in a field, so you <b>sample</b> it.</p>' +
+          '<p><b>Estimating a population with random quadrats</b></p>' +
+          '<ol class="steps">' +
+          '<li>Lay two tape measures at right angles along two edges of the area, to make a grid.</li>' +
+          '<li>Use a random number generator to pick coordinates.</li>' +
+          '<li>Place the quadrat (a square frame, often 0.25 m&sup2; or 1 m&sup2;) at those coordinates.</li>' +
+          '<li>Count the organisms inside. A common rule: count one if more than half of it is inside.</li>' +
+          '<li>Repeat for lots of quadrats, at least 10.</li>' +
+          '<li>Work out the mean per quadrat, then scale up.</li>' +
+          '</ol>' +
+          '<div class="formula">estimated population =<br>mean number per quadrat &times; total area &divide; area of one quadrat</div>' +
+          '<p><b>Transects</b> show how a population changes across an area, for example from a shady hedge into an open field. Lay a tape measure along a line and place a quadrat at regular intervals, such as every 2 m. Count the organisms, and you can measure an abiotic factor at each point too, like light intensity.</p>' +
+          '<div class="vars">' +
+          '<div><b>Random</b>To estimate a population and avoid bias.</div>' +
+          '<div><b>Transect</b>To see how distribution changes along a line.</div>' +
+          '<div><b>Reliable</b>More quadrats give a more representative mean.</div>' +
+          '</div>' +
+          '<div class="keep"><b>Keep this</b>Mean per quadrat, times the area, divided by the quadrat size.</div>' },
+
+  FIELDTRIP,
+
+  { type: "num", topic: "Sampling",
+    q: "Jo places <b>10</b> random quadrats, each <b>0.25 m&sup2;</b>, in a field <b>50 m by 40 m</b>. The numbers of buttercups are:<br><b>3, 5, 2, 0, 4, 6, 1, 3, 2, 4</b>",
+    boxes: [
+      { label: "(a) Area of the field", a: 2000, post: "m&sup2;" },
+      { label: "(b) Mean number of buttercups per quadrat", a: 3 },
+      { label: "(c) Estimated number of buttercups in the field", a: 24000 }
+    ],
+    hint: "Area = 50 &times; 40. Mean = total &divide; 10. Then mean &times; field area &divide; 0.25.",
+    why: "Area = 50 &times; 40 = <b>2000 m&sup2;</b>. Total = 30, so mean = 30 &divide; 10 = <b>3</b> per quadrat. Estimate = 3 &times; 2000 &divide; 0.25 = <b>24 000</b>. Dividing by 0.25 is the same as multiplying by 4, because four of these quadrats fit in 1 m&sup2;. Forgetting to divide by the quadrat area is the classic slip: it would give 6000." },
+
+  { type: "mc", topic: "Sampling",
+    q: "Kai wants to find out how the number of daisies changes as you move away from a hedge into an open field. Which method is best?",
+    options: [
+      "Place quadrats at regular intervals along a transect line running out from the hedge",
+      "Place quadrats at random coordinates all over the field",
+      "Place one quadrat by the hedge",
+      "Count the daisies in the middle of the field only"
+    ],
+    answer: 0,
+    hint: "The question is about change along a line, not the total.",
+    why: "A <b>transect</b> shows how distribution changes across a habitat. Random quadrats are for estimating the population of a whole area. Kai could also measure light intensity at each quadrat, to see if shade explains the pattern." },
+
+  /* ---------- CYCLES ---------- */
+  { type: "learn", topic: "Cycles",
+    title: "The carbon cycle, water cycle and decay",
+    fig: FIG_CARBON,
+    html: '<p>Materials are <b>recycled</b> so they can be used again by living things. <b>Decomposers</b> (microorganisms such as bacteria and fungi) break down dead plants and animals and their waste. This returns <b>carbon</b> to the air as carbon dioxide, and <b>mineral ions</b> to the soil.</p>' +
+          '<p><b>The carbon cycle</b></p>' +
+          '<ul>' +
+          '<li><b>Photosynthesis</b> takes carbon dioxide out of the air.</li>' +
+          '<li>Carbon passes along food chains when animals eat.</li>' +
+          '<li><b>Respiration</b> by plants, animals and decomposers puts carbon dioxide back.</li>' +
+          '<li><b>Combustion</b> (burning) of fossil fuels and wood also releases carbon dioxide.</li>' +
+          '</ul>' +
+          '<p><b>The water cycle</b>: the sun heats water, which <b>evaporates</b>; plants lose water by <b>transpiration</b>. The vapour cools and <b>condenses</b> to form clouds, then falls as <b>precipitation</b> (rain, snow), giving fresh water for plants and animals before it drains back to the sea.</p>' +
+          '<p><span class="sep">Separate Biology only</span><br>Decay is faster when it is <b>warm</b> (but not too hot), <b>moist</b>, and there is plenty of <b>oxygen</b>. Gardeners make <b>compost</b> this way. Without oxygen, anaerobic decay makes <b>methane</b>, which can be collected as <b>biogas</b> fuel.</p>' +
+          '<div class="keep"><b>Keep this</b>Photosynthesis takes carbon dioxide in. Respiration and burning put it back out.</div>' },
+
+  { type: "sort", topic: "Cycles",
+    q: "Does each process take carbon dioxide <b>out of</b> the air, or put it <b>into</b> the air?",
+    buckets: ["Out of the air", "Into the air"],
+    cards: [
+      ["Photosynthesis by plants", 0],
+      ["Algae in the sea photosynthesising", 0],
+      ["Respiration by animals", 1],
+      ["Decomposers breaking down dead leaves", 1],
+      ["Burning coal in a power station", 1],
+      ["Burning wood", 1]
+    ],
+    hint: "Only one process in the carbon cycle removes carbon dioxide from the air.",
+    why: "Only photosynthesis takes carbon dioxide out. Respiration, by any organism including decomposers, and combustion put it back. Decomposers count because breaking things down is their way of respiring." },
+
+  { type: "order", topic: "Cycles",
+    q: "Put the water cycle in order, starting from the sea.",
+    items: [
+      "The sun heats water in the sea and it evaporates",
+      "Water vapour rises and cools",
+      "It condenses to form clouds",
+      "Water falls as precipitation, such as rain",
+      "Water drains through soil and rivers back to the sea"
+    ],
+    hint: "Evaporate, condense, precipitate.",
+    why: "Evaporation, cooling, condensation, precipitation, then drainage back to the sea. Transpiration from plants also adds water vapour to the air." },
+
+  { type: "mc", topic: "Cycles", stretch: true,
+    q: "<b>Separate Biology only.</b> Which compost heap would decay the fastest?",
+    options: [
+      "Warm, moist and with air spaces, turned every week",
+      "Cold, dry and tightly packed",
+      "Very hot, at 90 &deg;C",
+      "Sealed in an airtight plastic bag in the shade"
+    ],
+    answer: 0,
+    hint: "Decomposers are living things. What do they need to respire and grow?",
+    why: "Decomposers work fastest when warm (not too hot), moist and with oxygen. At 90 &deg;C their enzymes would denature. Without oxygen, decay is slower and anaerobic, which makes methane instead." },
+
+  /* ---------- HUMAN IMPACT ---------- */
+  { type: "learn", topic: "Human impact",
+    title: "Biodiversity and what humans do",
+    html: '<p><b>Biodiversity</b> is the variety of all the different species of organisms on Earth, or within an ecosystem. High biodiversity makes ecosystems more <b>stable</b>, because species depend less on any one other species. The future of humans depends on it too.</p>' +
+          '<p>More people, using more resources, put pressure on biodiversity:</p>' +
+          '<ul>' +
+          '<li><b>Waste and pollution</b>: sewage, fertiliser and toxic chemicals in water; smoke and acidic gases in air; landfill and toxic chemicals on land.</li>' +
+          '<li><b>Land use</b>: building, quarrying, farming and dumping waste. <b>Peat bogs</b> are destroyed for garden compost; as peat decays or burns it releases carbon dioxide.</li>' +
+          '<li><b>Deforestation</b>, especially in the tropics, to grow crops for biofuels, to farm cattle, or for rice fields. It removes habitats, and fewer trees take in less carbon dioxide.</li>' +
+          '<li><b>Global warming</b>: more carbon dioxide and methane in the air trap more heat. This can change where species can live, cause loss of habitat, and change migration patterns.</li>' +
+          '</ul>' +
+          '<p><b>Maintaining biodiversity</b>: breeding programmes for endangered species; protecting and regenerating rare habitats; replanting hedgerows and field margins on farms; reducing deforestation and carbon dioxide emissions; recycling instead of dumping in landfill.</p>' +
+          '<div class="keep"><b>Keep this</b>More variety, more stable. Pollution, land use, deforestation and warming all reduce it.</div>' },
+
+  { type: "multi", topic: "Human impact",
+    q: "Which <b>three</b> help to maintain biodiversity?",
+    options: [
+      "Breeding programmes for endangered species",
+      "Replanting hedgerows around fields",
+      "Recycling more and sending less to landfill",
+      "Clearing tropical forest to grow biofuel crops",
+      "Digging up peat bogs for garden compost",
+      "Growing just one crop across a huge area"
+    ],
+    answers: [0, 1, 2],
+    hint: "Which ones protect habitats or species, and which ones remove them?",
+    why: "Breeding programmes protect species, hedgerows give habitats and food, and recycling reduces land used for waste. Clearing forest, digging peat and growing a single crop (a monoculture) all reduce the variety of habitats and species." },
+
+  { type: "mc", topic: "Human impact",
+    q: "Why does deforestation add to global warming?",
+    options: [
+      "Fewer trees take in carbon dioxide by photosynthesis, and burning or decaying trees release carbon dioxide",
+      "Trees release oxygen, which traps heat",
+      "Cutting trees down makes the ground hotter",
+      "Animals in the forest stop respiring"
+    ],
+    answer: 0,
+    hint: "Think about the carbon cycle: what do trees take in, and what happens to the carbon in them?",
+    why: "Two effects: less photosynthesis, so less carbon dioxide removed, and the wood is often burnt or left to decay, which releases carbon dioxide. More carbon dioxide in the air traps more heat. Oxygen is not a greenhouse gas." },
+
+  /* ---------- BIOMASS (separate) ---------- */
+  { type: "learn", topic: "Biomass",
+    title: "Pyramids of biomass",
+    fig: FIG_PYR,
+    html: '<span class="sep">Separate Biology only</span>' +
+          '<p>If you are doing Combined Science, this chunk is a stretch, not something on your papers.</p>' +
+          '<p>Each stage of a food chain is a <b>trophic level</b>. Level 1 is the producers, level 2 the primary consumers, and so on. A <b>pyramid of biomass</b> shows the mass of living material at each level, drawn to scale. It is nearly always pyramid shaped.</p>' +
+          '<p>Only about <b>10%</b> of the biomass at one level is passed on to the next. The rest is lost because:</p>' +
+          '<ul>' +
+          '<li>not all of the organism is eaten (bones, roots);</li>' +
+          '<li>some of what is eaten is not absorbed and is lost as <b>faeces</b>;</li>' +
+          '<li>lots of glucose is used in <b>respiration</b>, and some is lost as waste such as <b>urea</b> in urine and carbon dioxide.</li>' +
+          '</ul>' +
+          '<div class="formula">efficiency of transfer (%) =<br>biomass transferred to the next level &divide; biomass available &times; 100</div>' +
+          '<p>This is why food chains rarely have more than four or five levels: there is not enough biomass left to support another one.</p>' +
+          '<div class="keep"><b>Keep this</b>Efficiency = biomass at the higher level &divide; biomass at the level below &times; 100.</div>' },
+
+  { type: "num", topic: "Biomass", stretch: true,
+    q: "<b>Separate Biology only.</b> In a field, grass has a biomass of <b>12 000 g/m&sup2;</b>, rabbits <b>1 200 g/m&sup2;</b> and stoats <b>90 g/m&sup2;</b>.",
+    boxes: [
+      { label: "(a) Efficiency of transfer from grass to rabbits", a: 10, post: "%" },
+      { label: "(b) Efficiency of transfer from rabbits to stoats", a: 7.5, post: "%" }
+    ],
+    hint: "Biomass at the higher level, divided by the level below it, times 100.",
+    why: "(a) 1200 &divide; 12 000 &times; 100 = <b>10%</b>. (b) 90 &divide; 1200 &times; 100 = <b>7.5%</b>. Always divide by the level <b>below</b>, the one that was eaten. Dividing the wrong way round gives a number bigger than 100%, which is a good sign to swap." },
+
+  { type: "multi", topic: "Biomass", stretch: true,
+    q: "<b>Separate Biology only.</b> Which <b>three</b> are reasons biomass is lost between trophic levels?",
+    options: [
+      "Not all of the organism is eaten",
+      "Some material is not absorbed and is lost in faeces",
+      "Glucose is used in respiration, releasing carbon dioxide",
+      "Consumers photosynthesise",
+      "Producers are always smaller than consumers"
+    ],
+    answers: [0, 1, 2],
+    hint: "Think about what happens to a rabbit's dinner.",
+    why: "Uneaten parts, faeces, and respiration (plus waste like urea) all mean less biomass reaches the next level. Consumers do not photosynthesise, and producers usually have far more biomass than consumers, which is why the pyramid has a wide base." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your explanation",
+    q: '<p><b>Describe how you would estimate the number of dandelions on a school field using quadrats.</b> (about 6 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "First, I would measure the field to find its area.",
+      "I would lay out two tape measures",
+      "Then I would use a random number generator to",
+      "I would place a quadrat at",
+      "I would count",
+      "I would repeat this",
+      "To estimate the population, I would"
+    ],
+    checklist: [
+      "I measured the area of the field",
+      "I said how the quadrats are placed randomly (tapes as a grid, random coordinates)",
+      "I said to count the dandelions in each quadrat",
+      "I said to use lots of quadrats, at least 10",
+      "I worked out a mean per quadrat",
+      "I used: mean &times; field area &divide; quadrat area"
+    ],
+    minWords: 80 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

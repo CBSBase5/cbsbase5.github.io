@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tables and charts - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Misleading graph makeover widget */
+.mk-meter{display:flex;justify-content:space-around;text-align:center;gap:8px;margin:6px 0 2px}
+.mk-meter .tiny{margin:0}
+.mk-tog{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0 4px}
+.mk-tog button{font-family:inherit;font-size:1rem;font-weight:700;text-align:left;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.mk-tog button .bx{width:22px;height:22px;flex:none;border:2px solid var(--ink);border-radius:6px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem}
+.mk-tog button.on{background:rgba(25,195,154,.16);border-color:var(--good)}
+.mk-tog button.on .bx{background:var(--good);border-color:var(--good);color:#fff}
+.mk-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.mk-pill{font-family:var(--display);font-weight:700;font-size:.85rem;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px}
+.mk-stars{font-family:var(--display);font-weight:700;color:var(--violet)}
+.mk-end{text-align:center;padding:6px 0}
+.mk-end .wbig{font-size:2.2rem;color:var(--violet)}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Tables and charts</h2>
+    <span>GCSE Statistics. Turning data into tables and pictures, reading them back, and catching graphs that try to fool you.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var MINUS = "&#8722;";
+
+/* ---------- tiny SVG helpers ---------- */
+function T(x, y, str, size, opts){
+  opts = opts || {};
+  return '<text x="' + x + '" y="' + y + '"' + (opts.anchor ? ' text-anchor="' + opts.anchor + '"' : '') +
+    ' ' + (opts.lab ? LAB + ' font-weight="700"' : BODY) + ' font-size="' + size + '" fill="' + (opts.col || INK) + '"' +
+    (opts.rot ? ' transform="rotate(' + opts.rot + ' ' + x + ' ' + y + ')"' : '') + '>' + str + '</text>';
+}
+function Ln(x1, y1, x2, y2, col, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>';
+}
+function Rc(x, y, w, h, fill, sw){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + (sw || 2) + '"/>';
+}
+function open(w, h, aria, maxw){
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + aria + '" style="max-width:' + (maxw || 460) + 'px">';
+}
+/* A plain frame: y axis with gridlines. Returns {s, Y} */
+function yAxis(L, R, top, bot, lo, hi, step, title, fmt){
+  var s = "";
+  function Y(v){ return bot - (v - lo) / (hi - lo) * (bot - top); }
+  for(var v = lo; v <= hi + 1e-9; v += step){
+    var y = Y(v);
+    if(v > lo) s += Ln(L, y, R, y, LINE, 1.5);
+    s += Ln(L - 5, y, L, y, INK, 2);
+    s += T(L - 8, y + 5, fmt ? fmt(v) : String(Math.round(v * 100) / 100), 14, { anchor: "end" });
+  }
+  s += Ln(L, top - 4, L, bot, INK, 2) + Ln(L, bot, R, bot, INK, 2);
+  if(title) s += T(14, (top + bot) / 2, title, 14, { anchor: "middle", rot: -90 });
+  return { s: s, Y: Y };
+}
+
+/* Tally marks: gates of five */
+function tally(n){
+  var gates = Math.floor(n / 5), rest = n % 5, w = gates * 34 + rest * 8 + 4;
+  var s = '<svg viewBox="0 0 ' + w + ' 26" width="' + w + '" height="26" role="img" aria-label="tally of ' + n + '" style="vertical-align:middle">';
+  var x = 3;
+  for(var g = 0; g < gates; g++){
+    for(var k = 0; k < 4; k++) s += Ln(x + k * 7, 3, x + k * 7, 23, INK, 2.2);
+    s += Ln(x - 3, 20, x + 24, 6, CORAL, 2.4);
+    x += 34;
+  }
+  for(var r = 0; r < rest; r++){ s += Ln(x, 3, x, 23, INK, 2.2); x += 8; }
+  return s + '</svg>';
+}
+
+/* ---------- learn and question figures ---------- */
+var TALLY_TABLE =
+'<table class="datatable"><tr><th>Pet</th><th>Tally</th><th>Frequency</th></tr>' +
+'<tr><td>Cat</td><td style="text-align:left">' + tally(8) + '</td><td>8</td></tr>' +
+'<tr><td>Dog</td><td style="text-align:left">' + tally(11) + '</td><td>11</td></tr>' +
+'<tr><td>Fish</td><td style="text-align:left">' + tally(4) + '</td><td>4</td></tr>' +
+'<tr><th>Total</th><th></th><th>23</th></tr></table>';
+
+var TWOWAY_Q =
+'<table class="datatable"><tr><th></th><th>Art</th><th>Music</th><th>Drama</th><th>Total</th></tr>' +
+'<tr><th>Year 10</th><td>14</td><td style="background:#fff6cc"><b>a</b></td><td>6</td><td>26</td></tr>' +
+'<tr><th>Year 11</th><td style="background:#fff6cc"><b>b</b></td><td>11</td><td style="background:#fff6cc"><b>c</b></td><td style="background:#fff6cc"><b>d</b></td></tr>' +
+'<tr><th>Total</th><td>23</td><td>17</td><td>15</td><td>55</td></tr></table>';
+
+/* Multiple (dual) bar chart for the learn card */
+var DUAL = (function(){
+  var L = 46, R = 352, top = 18, bot = 196;
+  var ax = yAxis(L, R, top, bot, 0, 10, 2, "Number of students");
+  var s = open(360, 262, "Multiple bar chart of favourite sport. Football: boys 8, girls 5. Netball: boys 2, girls 7. Swimming: boys 4, girls 6.") + ax.s;
+  var data = [["Football", 8, 5], ["Netball", 2, 7], ["Swimming", 4, 6]];
+  data.forEach(function(d, i){
+    var cx = L + 52 + i * 100;
+    s += Rc(cx - 34, ax.Y(d[1]), 32, bot - ax.Y(d[1]), BLUE);
+    s += Rc(cx + 2, ax.Y(d[2]), 32, bot - ax.Y(d[2]), SUN);
+    s += T(cx, bot + 20, d[0], 14, { anchor: "middle" });
+  });
+  s += Rc(L + 40, 236, 16, 16, BLUE) + T(L + 62, 249, "Boys", 14);
+  s += Rc(L + 130, 236, 16, 16, SUN) + T(L + 152, 249, "Girls", 14);
+  return s + '</svg>';
+})();
+
+/* Compound (stacked) bar chart for the question */
+var STACK = (function(){
+  var L = 46, R = 258, top = 16, bot = 216;
+  var ax = yAxis(L, R, top, bot, 0, 30, 5, "Number of students");
+  var s = open(360, 248, "Compound bar chart of how students travel to school. 10A: walk 12, bus 8, car 5. 10B: walk 9, bus 10, car 6. 10C: walk 15, bus 6, car 7.") + ax.s;
+  var data = [["10A", 12, 8, 5], ["10B", 9, 10, 6], ["10C", 15, 6, 7]];
+  var cols = [CYAN, SUN, CORAL];
+  data.forEach(function(d, i){
+    var cx = L + 38 + i * 68, run = 0;
+    for(var k = 1; k <= 3; k++){
+      s += Rc(cx - 22, ax.Y(run + d[k]), 44, ax.Y(run) - ax.Y(run + d[k]), cols[k - 1]);
+      run += d[k];
+    }
+    s += T(cx, bot + 22, d[0], 15, { anchor: "middle", lab: true });
+  });
+  ["Walk", "Bus", "Car"].forEach(function(nm, k){
+    var y = 30 + (2 - k) * 30;
+    s += Rc(272, y, 18, 18, cols[k]) + T(296, y + 15, nm, 15);
+  });
+  return s + '</svg>';
+})();
+
+/* Pie chart helper. parts: [[label, angle, colour]] */
+function pieSlices(cx, cy, r, parts, showAngles){
+  var s = "", a0 = -90;
+  parts.forEach(function(p){
+    var a1 = a0 + p[1];
+    var x0 = cx + r * Math.cos(a0 * Math.PI / 180), y0 = cy + r * Math.sin(a0 * Math.PI / 180);
+    var x1 = cx + r * Math.cos(a1 * Math.PI / 180), y1 = cy + r * Math.sin(a1 * Math.PI / 180);
+    s += '<path d="M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (p[1] > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + p[2] + '" stroke="' + INK + '" stroke-width="2.2"/>';
+    var mid = (a0 + a1) / 2 * Math.PI / 180, lr = r * 0.62;
+    var lx = cx + lr * Math.cos(mid), ly = cy + lr * Math.sin(mid);
+    s += T(lx.toFixed(1), (ly - (showAngles ? 2 : -5)).toFixed(1), p[0], 14, { anchor: "middle", lab: true });
+    if(showAngles) s += T(lx.toFixed(1), (ly + 15).toFixed(1), p[1] + "&#176;", 14, { anchor: "middle" });
+    a0 = a1;
+  });
+  return s;
+}
+var PIE = open(360, 236, "Pie chart of favourite fruit for 30 people: apple 144 degrees, banana 108 degrees, grape 72 degrees, kiwi 36 degrees.", 380) +
+  pieSlices(180, 118, 110, [["Apple", 144, CYAN], ["Banana", 108, SUN], ["Grape", 72, VIOLET], ["Kiwi", 36, MINT]], true) + '</svg>';
+
+/* A little pictogram, inline in the bar chart learn card */
+var PICTO = (function(){
+  function cup(x, y, frac){
+    var w = 22 * frac;
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="24" rx="' + (frac < 1 ? 2 : 5) + '" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  var s = open(360, 112, "Pictogram: one cup stands for 4 drinks. Monday shows 3 cups, 12 drinks. Tuesday shows 2 and a half cups, 10 drinks.", 400);
+  s += T(4, 26, "Mon", 15, { lab: true });
+  for(var i = 0; i < 3; i++) s += cup(54 + i * 30, 8, 1);
+  s += T(4, 62, "Tue", 15, { lab: true });
+  for(i = 0; i < 2; i++) s += cup(54 + i * 30, 44, 1);
+  s += cup(114, 44, 0.5);
+  s += cup(4, 82, 1) + T(32, 100, "= 4 drinks (the key)", 15);
+  return s + '</svg>';
+})();
+
+/* Stem and leaf tables as HTML */
+function stem(rows, key){
+  var s = '<table class="datatable" style="font-variant-numeric:tabular-nums">';
+  rows.forEach(function(r){
+    s += '<tr><th style="min-width:44px">' + r[0] + '</th><td style="text-align:left;letter-spacing:.32em;min-width:150px">' + r[1] + '</td></tr>';
+  });
+  return s + '</table><p class="tiny" style="text-align:center">Key: ' + key + '</p>';
+}
+function stem2(rows, key, leftName, rightName){
+  var s = '<table class="datatable" style="font-variant-numeric:tabular-nums"><tr><th>' + leftName + '</th><th></th><th>' + rightName + '</th></tr>';
+  rows.forEach(function(r){
+    s += '<tr><td style="text-align:right;letter-spacing:.32em;min-width:110px">' + r[0] + '</td><th>' + r[1] + '</th><td style="text-align:left;letter-spacing:.32em;min-width:110px">' + r[2] + '</td></tr>';
+  });
+  return s + '</table><p class="tiny" style="text-align:center">Key: ' + key + '</p>';
+}
+var STEM_LEARN = stem([["1", "2 5 8"], ["2", "1 3 3 7"], ["3", "0 4 5"], ["4", "1"]], "1 | 2 means 12 seconds");
+var STEM_Q = stem([["2", "4 7 8"], ["3", "0 2 2 5 9"], ["4", "1 3 6 6 6"], ["5", "2 8"]], "2 | 4 means 24 minutes");
+var STEM_B2B = stem2([["9 7 6 4 3 1", "1", "2 5 8"], ["5 2", "2", "1 4 6 9"], ["1", "3", "3 5"]],
+  "1 | 2 | 5 means 21 for Group A and 25 for Group B", "Group A", "Group B");
+
+/* Frequency polygon for the learn card */
+var POLY = (function(){
+  var L = 50, R = 350, top = 14, bot = 198;
+  var ax = yAxis(L, R, top, bot, 0, 14, 2, "Frequency");
+  function X(v){ return L + v / 50 * (R - L); }
+  var s = open(360, 250, "Frequency polygon of journey times. Points at midpoints 5, 15, 25, 35, 45 with frequencies 4, 9, 12, 6, 3, joined by straight lines.") + ax.s;
+  var f = [4, 9, 12, 6, 3];
+  /* faint bars so the midpoints make sense */
+  f.forEach(function(v, i){ s += '<rect x="' + X(i * 10) + '" y="' + ax.Y(v) + '" width="' + (X(10) - X(0)) + '" height="' + (bot - ax.Y(v)) + '" fill="' + CYAN + '" fill-opacity="0.18" stroke="' + CYAN + '" stroke-width="1.5"/>'; });
+  var pts = f.map(function(v, i){ return X(i * 10 + 5) + "," + ax.Y(v); }).join(" ");
+  s += '<polyline points="' + pts + '" fill="none" stroke="' + VIOLET + '" stroke-width="3.5"/>';
+  f.forEach(function(v, i){ s += '<circle cx="' + X(i * 10 + 5) + '" cy="' + ax.Y(v) + '" r="5.5" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="2"/>'; });
+  for(var t = 0; t <= 50; t += 10){ s += Ln(X(t), bot, X(t), bot + 5) + T(X(t), bot + 22, t, 14, { anchor: "middle" }); }
+  s += T((L + R) / 2, bot + 44, "Journey time (minutes)", 14, { anchor: "middle" });
+  return s + '</svg>';
+})();
+
+/* Smooth cumulative frequency curve. xs and cf the same length; reads: [[cf, x, colour, label]] */
+function CF(xs, cf, xlo, xhi, xstep, ylo, yhi, ystep, xTitle, aria, reads){
+  var L = 52, R = 350, top = 14, bot = 228;
+  var ax = yAxis(L, R, top, bot, ylo, yhi, ystep, "Cumulative frequency");
+  function X(v){ return L + (v - xlo) / (xhi - xlo) * (R - L); }
+  var s = open(360, 280, aria) + ax.s;
+  for(var t = xlo; t <= xhi; t += xstep){
+    if(t > xlo) s += Ln(X(t), top, X(t), bot, LINE, 1.5);
+    s += Ln(X(t), bot, X(t), bot + 5) + T(X(t), bot + 22, t, 14, { anchor: "middle" });
+  }
+  s += T((L + R) / 2, bot + 46, xTitle, 14, { anchor: "middle" });
+  var P = xs.map(function(x, i){ return [X(x), ax.Y(cf[i])]; });
+  /* Catmull Rom to Bezier for a smooth curve through every point */
+  var d = "M" + P[0][0].toFixed(1) + " " + P[0][1].toFixed(1);
+  for(var i = 0; i < P.length - 1; i++){
+    var p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+    var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += " C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + " " + c2x.toFixed(1) + " " + c2y.toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+  }
+  s += '<path d="' + d + '" fill="none" stroke="' + VIOLET + '" stroke-width="3.5"/>';
+  P.forEach(function(p){ s += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4.5" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>'; });
+  (reads || []).forEach(function(r){
+    var y = ax.Y(r[0]), x = X(r[1]);
+    s += '<path d="M' + L + ' ' + y + ' H' + x + ' V' + bot + '" fill="none" stroke="' + r[2] + '" stroke-width="2.5" stroke-dasharray="6 4"/>';
+    s += T(L + 6, y - 6, r[3], 14, { lab: true, col: r[2] });
+  });
+  return s + '</svg>';
+}
+var CF_LEARN = CF([0, 10, 20, 30, 40, 50], [0, 4, 12, 20, 32, 40], 0, 50, 10, 0, 40, 5, "Time (minutes)",
+  "Cumulative frequency curve for 40 people. Reading across from 20, half of 40, the curve gives a median of 30 minutes.",
+  [[20, 30, CORAL, "half way: 20"]]);
+var CF_Q = CF([10, 20, 30, 40, 50, 60, 70], [0, 8, 20, 40, 60, 74, 80], 10, 70, 10, 0, 80, 10, "Height (cm)",
+  "Cumulative frequency curve for the heights of 80 plants, through the points (10, 0), (20, 8), (30, 20), (40, 40), (50, 60), (60, 74) and (70, 80).");
+
+/* Histogram helper. bars: [[lo, hi, fd]] */
+function HIST(bars, xhi, xstep, yhi, ystep, xTitle, aria, showF){
+  var L = 52, R = 350, top = 14, bot = 214;
+  var ax = yAxis(L, R, top, bot, 0, yhi, ystep, "Frequency density");
+  function X(v){ return L + v / xhi * (R - L); }
+  var s = open(360, 266, aria) + ax.s;
+  bars.forEach(function(b, i){
+    s += '<rect x="' + X(b[0]) + '" y="' + ax.Y(b[2]) + '" width="' + (X(b[1]) - X(b[0])) + '" height="' + (bot - ax.Y(b[2])) + '" fill="' + [CYAN, SUN, MINT, CORAL][i % 4] + '" fill-opacity="0.75" stroke="' + INK + '" stroke-width="2"/>';
+    if(showF) s += T((X(b[0]) + X(b[1])) / 2, (ax.Y(b[2]) + bot) / 2 + 5, "f = " + Math.round((b[1] - b[0]) * b[2]), 14, { anchor: "middle", lab: true });
+  });
+  for(var t = 0; t <= xhi; t += xstep){ s += Ln(X(t), bot, X(t), bot + 5) + T(X(t), bot + 22, t, 14, { anchor: "middle" }); }
+  s += T((L + R) / 2, bot + 46, xTitle, 14, { anchor: "middle" });
+  return s + '</svg>';
+}
+var HIST_LEARN = HIST([[0, 10, 0.8], [10, 15, 2.4], [15, 30, 1.2]], 30, 5, 2.5, 0.5, "Length (cm)",
+  "Histogram with unequal widths. 0 to 10: frequency density 0.8, frequency 8. 10 to 15: density 2.4, frequency 12. 15 to 30: density 1.2, frequency 18.", true);
+var HIST_Q = HIST([[0, 10, 1.5], [10, 20, 2.5], [20, 40, 1], [40, 60, 0.5]], 60, 10, 3, 0.5, "Time, t (minutes)",
+  "Histogram of time taken. 0 to 10: frequency density 1.5. 10 to 20: 2.5. 20 to 40: 1. 40 to 60: 0.5.");
+
+var FD_TABLE =
+'<table class="datatable"><tr><th>Time, t (s)</th><th>Frequency</th><th>Class width</th><th>Frequency density</th></tr>' +
+'<tr><td>0 &lt; t &le; 5</td><td>10</td><td>5</td><td>?</td></tr>' +
+'<tr><td>5 &lt; t &le; 10</td><td>16</td><td>5</td><td>?</td></tr>' +
+'<tr><td>10 &lt; t &le; 20</td><td>24</td><td>10</td><td>?</td></tr>' +
+'<tr><td>20 &lt; t &le; 40</td><td>12</td><td>20</td><td>?</td></tr></table>';
+
+var CF_TABLE =
+'<table class="datatable"><tr><th>Time, t (minutes)</th><th>Frequency</th><th>Cumulative frequency</th></tr>' +
+'<tr><td>0 &lt; t &le; 10</td><td>5</td><td>5</td></tr>' +
+'<tr><td>10 &lt; t &le; 20</td><td>15</td><td>?</td></tr>' +
+'<tr><td>20 &lt; t &le; 30</td><td>22</td><td>?</td></tr>' +
+'<tr><td>30 &lt; t &le; 40</td><td>14</td><td>?</td></tr>' +
+'<tr><td>40 &lt; t &le; 50</td><td>4</td><td>?</td></tr></table>';
+
+/* Population pyramid */
+var PYR = (function(){
+  var ages = ["80+", "60 to 79", "40 to 59", "20 to 39", "0 to 19"];
+  var m = [2, 6, 10, 14, 18], f = [3, 7, 11, 14, 15];
+  var cx = 180, gap = 31, sc = 6.5, top = 30, rowH = 34;
+  var s = open(360, 254, "Population pyramid. Males on the left, females on the right, as percentages of the whole population. Age 0 to 19: male 18, female 15. 20 to 39: 14 and 14. 40 to 59: 10 and 11. 60 to 79: 6 and 7. 80 and over: 2 and 3.", 440);
+  s += T(cx - gap - 4, 20, "Male", 15, { anchor: "end", lab: true, col: BLUE });
+  s += T(cx + gap + 4, 20, "Female", 15, { lab: true, col: VIOLET });
+  ages.forEach(function(a, i){
+    var y = top + i * rowH;
+    s += Rc(cx - gap - m[i] * sc, y + 3, m[i] * sc, rowH - 6, CYAN);
+    s += Rc(cx + gap, y + 3, f[i] * sc, rowH - 6, "#c9b6fb");
+    s += T(cx, y + rowH / 2 + 5, a, 14, { anchor: "middle", lab: true });
+  });
+  var by = top + 5 * rowH + 4;
+  s += Ln(cx - gap - 20 * sc, by, cx - gap, by) + Ln(cx + gap, by, cx + gap + 20 * sc, by);
+  [0, 10, 20].forEach(function(v){
+    s += Ln(cx - gap - v * sc, by, cx - gap - v * sc, by + 5) + T(cx - gap - v * sc, by + 21, v, 14, { anchor: "middle" });
+    s += Ln(cx + gap + v * sc, by, cx + gap + v * sc, by + 5) + T(cx + gap + v * sc, by + 21, v, 14, { anchor: "middle" });
+  });
+  s += T(cx, by + 42, "Percentage of population", 14, { anchor: "middle" });
+  return s + '</svg>';
+})();
+
+/* Choropleth map of six made up districts */
+var CHORO = (function(){
+  var shades = ["#efe9ff", "#c9b6fb", "#9c7cf2", "#5b35c9"];
+  var regions = [
+    ["A", "M10 10 H130 V90 H10 Z", 1, 70, 56],
+    ["B", "M130 10 H240 V70 H130 Z", 0, 185, 46],
+    ["C", "M10 90 H130 V170 H10 Z", 3, 70, 136],
+    ["D", "M130 70 H240 V170 H130 Z", 2, 185, 126],
+    ["E", "M10 170 H160 V220 H10 Z", 1, 85, 201],
+    ["F", "M160 170 H240 V220 H160 Z", 0, 200, 201]
+  ];
+  var s = open(360, 232, "Choropleth map of rainfall in six districts. Key: lightest 0 to 49 mm, then 50 to 99, then 100 to 149, darkest 150 mm or more. A is 50 to 99. B is 0 to 49. C is 150 or more. D is 100 to 149. E is 50 to 99. F is 0 to 49.", 440);
+  regions.forEach(function(r){
+    s += '<path d="' + r[1] + '" fill="' + shades[r[2]] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += T(r[3], r[4] + 6, r[0], 18, { anchor: "middle", lab: true, col: r[2] >= 2 ? WHITE : INK });
+  });
+  var keys = ["0 to 49", "50 to 99", "100 to 149", "150 +"];
+  s += T(252, 26, "Rain (mm)", 14, { lab: true });
+  keys.forEach(function(k, i){ s += Rc(252, 40 + i * 34, 22, 22, shades[i]) + T(280, 57 + i * 34, k, 14); });
+  return s + '</svg>';
+})();
+
+/* A truncated axis chart for the misleading learn card */
+var TRUNC_LEARN = (function(){
+  function half(ox, lo, title){
+    var L = ox + 40, R = ox + 170, top = 30, bot = 172;
+    var ax = yAxis(L, R, top, bot, lo, lo === 0 ? 60 : 54, lo === 0 ? 20 : 4);
+    var s = ax.s;
+    s += Rc(L + 18, ax.Y(52), 40, bot - ax.Y(52), CORAL) + Rc(L + 74, ax.Y(44), 40, bot - ax.Y(44), CYAN);
+    s += T(L + 38, bot + 20, "A", 15, { anchor: "middle", lab: true }) + T(L + 94, bot + 20, "B", 15, { anchor: "middle", lab: true });
+    s += T((L + R) / 2, 18, title, 15, { anchor: "middle", lab: true, col: lo === 0 ? INK : CORAL });
+    return s;
+  }
+  return open(360, 200, "Two bar charts of the same data, A 52 and B 44. On the left the axis starts at 40 and A looks three times as tall. On the right the axis starts at 0 and the bars look similar.") +
+    half(0, 40, "Starts at 40") + half(180, 0, "Starts at 0") + '</svg>';
+})();
+
+/* The final exam style chart */
+var BATTERY = (function(){
+  var L = 54, R = 330, top = 44, bot = 210;
+  var ax = yAxis(L, R, top, bot, 9.6, 10.3, 0.1, "", function(v){ return v.toFixed(1); });
+  var s = open(360, 246, "A bar chart headed Zap lasts WAY longer. The vertical axis starts at 9.6 and has no title. Zap's bar is at 10.2 and is drawn much wider than Volt's bar at 9.8.");
+  s += T(180, 24, "Zap lasts WAY longer!", 18, { anchor: "middle", lab: true, col: CORAL }) + ax.s;
+  s += Rc(L + 30, ax.Y(10.2), 110, bot - ax.Y(10.2), CORAL) + Rc(L + 170, ax.Y(9.8), 50, bot - ax.Y(9.8), CYAN);
+  s += T(L + 85, bot + 22, "Zap", 15, { anchor: "middle", lab: true }) + T(L + 195, bot + 22, "Volt", 15, { anchor: "middle", lab: true });
+  return s + '</svg>';
+})();
+
+/* ---------- the widget: misleading graph makeover ---------- */
+var VAL_F = 52, VAL_G = 44;
+var TRICKS = [
+  "The axis does not start at zero",
+  "The picture grows in two directions",
+  "Uneven gaps on the scale",
+  "The parts add up to more than 100%",
+  "The bars are in the wrong order"
+];
+var ROUNDS = [
+  { head: "Milkshake sales have EXPLODED!", ans: 1,
+    hint: "Compare the heights and the widths of the two cups. What happens to the space they take up?",
+    why: "Sales doubled, from 1000 to 2000. But the cup doubled in height <b>and</b> width, so it covers 4 times the area, and your eye reads it as 4 times bigger. A fair version uses cups of the same size, or a bar chart." },
+  { head: "Club growth has STALLED!", ans: 2,
+    hint: "Read the years along the bottom. Are the gaps between them the same number of years?",
+    why: "The first two gaps are 10 years each, the last two only 2 years each, but they are drawn the same width. Membership really grew by a steady 2 people a year the whole time. Time on an axis needs equal steps." },
+  { head: "How we get to school", ans: 3,
+    hint: "Add up the three percentages.",
+    why: "45 + 35 + 30 = 110%. A pie chart shows one whole, so its parts must total 100%. Something has been counted twice, or a number is wrong." }
+];
+
+function roundSvg(k){
+  var s;
+  if(k === 0){
+    s = open(360, 230, "Pictogram. A small milkshake cup for 2024, 1000 sold. A cup twice as tall and twice as wide for 2025, 2000 sold.", 420);
+    var cupP = function(x, base, w, h){
+      return '<path d="M' + x + ' ' + (base - h) + ' H' + (x + w) + ' L' + (x + w * 0.85) + ' ' + base + ' H' + (x + w * 0.15) + ' Z" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+        '<rect x="' + (x - 3) + '" y="' + (base - h - 8) + '" width="' + (w + 6) + '" height="9" rx="3" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>' +
+        Ln(x + w * 0.6, base - h - 8, x + w * 0.75, base - h - 30, INK, 4);
+    };
+    s += cupP(60, 176, 50, 66) + cupP(190, 176, 100, 132);
+    s += T(85, 200, "2024", 15, { anchor: "middle", lab: true }) + T(85, 220, "1000 sold", 14, { anchor: "middle" });
+    s += T(240, 200, "2025", 15, { anchor: "middle", lab: true }) + T(240, 220, "2000 sold", 14, { anchor: "middle" });
+    return s + '</svg>';
+  }
+  if(k === 1){
+    var L = 46, R = 340, top = 16, bot = 182;
+    var ax = yAxis(L, R, top, bot, 0, 80, 20, "Members");
+    s = open(360, 230, "Line graph of club members. Years 2000, 2010, 2020, 2022, 2024 are spaced equally. Members 20, 40, 60, 64, 68. The line looks like it flattens at the end.", 420) + ax.s;
+    var yrs = ["2000", "2010", "2020", "2022", "2024"], v = [20, 40, 60, 64, 68];
+    var pts = v.map(function(m, i){ return (L + 30 + i * 64) + "," + ax.Y(m); });
+    s += '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + BLUE + '" stroke-width="3.5"/>';
+    v.forEach(function(m, i){
+      s += '<circle cx="' + (L + 30 + i * 64) + '" cy="' + ax.Y(m) + '" r="5" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += T(L + 30 + i * 64, bot + 22, yrs[i], 14, { anchor: "middle" });
+    });
+    s += T((L + R) / 2, bot + 44, "Year", 14, { anchor: "middle" });
+    return s + '</svg>';
+  }
+  s = open(360, 230, "Pie chart of how students get to school. Walk 45 percent, bus 35 percent, car 30 percent.", 380);
+  var tot = 110;
+  s += pieSlices(180, 115, 105, [["Walk 45%", 45 / tot * 360, CYAN], ["Bus 35%", 35 / tot * 360, SUN], ["Car 30%", 30 / tot * 360, MINT]], false);
+  return s + '</svg>';
+}
+
+function mountMakeover(el, api){
+  var d = api.data;
+  d.fix = d.fix || { zero: false, width: false, labels: false };
+  d.stage = d.stage || 1;
+  d.round = d.round || 0;
+  d.miss = d.miss || [0, 0, 0];
+  d.shownR = d.shownR || [false, false, false];
+  d.solved = d.solved || [false, false, false];
+
+  el.innerHTML =
+    '<div class="wpanel" id="mkP1">' +
+      '<div class="mk-head"><span class="mk-pill">Part 1: the makeover</span><span class="mk-stars" id="mkFixCount"></span></div>' +
+      '<svg id="mkChart" viewBox="0 0 360 262" role="img" aria-label="A bar chart comparing cans of Fizzo and Glug sold. It changes as you switch on each fix." style="width:100%;max-width:520px;height:auto;display:block;margin:0 auto"></svg>' +
+      '<div class="mk-meter">' +
+        '<div><div class="tiny">Looks like Fizzo sells</div><div class="wbig" id="mkLooks" style="color:' + CORAL + '"></div></div>' +
+        '<div><div class="tiny">Really, Fizzo sells</div><div class="wbig" id="mkReal" style="color:' + MINT + '"></div></div>' +
+      '</div>' +
+      '<p class="wnote" style="margin-top:8px"><b>Tap each fix</b> and watch what happens to the "looks like" number. Your call which order.</p>' +
+      '<div class="mk-tog">' +
+        '<button type="button" data-f="zero"><span class="bx"></span>Start the axis at 0</button>' +
+        '<button type="button" data-f="width"><span class="bx"></span>Make the bars equal widths</button>' +
+        '<button type="button" data-f="labels"><span class="bx"></span>Add a scale and labels</button>' +
+      '</div>' +
+      '<div class="wnote" id="mkMsg" aria-live="polite"></div>' +
+      '<div class="wrow"><button class="btn hidden" type="button" id="mkOn">On to Part 2: spot the trick</button></div>' +
+    '</div>' +
+    '<div class="wpanel hidden" id="mkP2">' +
+      '<div class="mk-head"><span class="mk-pill" id="mkRoundN"></span><span class="mk-stars" id="mkScore"></span></div>' +
+      '<p class="wnote" style="margin-top:0">Headline: <b id="mkHead" style="color:' + CORAL + '"></b></p>' +
+      '<div id="mkRoundSvg" style="text-align:center"></div>' +
+      '<p class="wnote"><b>What is the trick?</b> Tap one.</p>' +
+      '<div class="choices" id="mkOpts"></div>' +
+      '<div class="wnote" id="mkMsg2" aria-live="polite"></div>' +
+      '<div class="wrow"><button class="btn btn-quiet hidden" type="button" id="mkShow">Show me</button>' +
+      '<button class="btn hidden" type="button" id="mkNext">Next chart</button></div>' +
+    '</div>' +
+    '<div class="wpanel hidden mk-end" id="mkEnd"></div>';
+
+  var chart = el.querySelector("#mkChart");
+  var reduce = false;
+  try{ reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  function target(){
+    return { lo: d.fix.zero ? 0 : 40, hi: d.fix.zero ? 60 : 54, wF: d.fix.width ? 80 : 124, wG: d.fix.width ? 80 : 54 };
+  }
+  var cur = target();
+
+  function drawChart(p){
+    var L = 58, R = 346, top = 50, bot = 214;
+    function Y(v){ return bot - (v - p.lo) / (p.hi - p.lo) * (bot - top); }
+    var s = "";
+    var allFixed = d.fix.zero && d.fix.width && d.fix.labels;
+    s += T(180, 26, allFixed ? "Fizzo sells a bit more than Glug" : "FIZZO CRUSHES GLUG!", allFixed ? 18 : 22, { anchor: "middle", lab: true, col: allFixed ? INK : CORAL });
+    if(d.fix.labels){
+      var step = p.hi - p.lo > 20 ? 10 : 2;
+      for(var v = Math.ceil(p.lo / step) * step; v <= p.hi + 1e-9; v += step){
+        var y = Y(v);
+        s += Ln(L, y, R, y, LINE, 1.5) + Ln(L - 5, y, L, y);
+        s += T(L - 8, y + 5, Math.round(v), 14, { anchor: "end" });
+      }
+      s += T(16, (top + bot) / 2, "Cans sold (thousands)", 14, { anchor: "middle", rot: -90 });
+    }
+    s += Ln(L, top - 6, L, bot) + Ln(L, bot, R, bot);
+    var cF = 135, cG = 270;
+    var hF = Math.max(0, bot - Y(VAL_F)), hG = Math.max(0, bot - Y(VAL_G));
+    s += '<rect x="' + (cF - p.wF / 2).toFixed(1) + '" y="' + (bot - hF).toFixed(1) + '" width="' + p.wF.toFixed(1) + '" height="' + hF.toFixed(1) + '" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<rect x="' + (cG - p.wG / 2).toFixed(1) + '" y="' + (bot - hG).toFixed(1) + '" width="' + p.wG.toFixed(1) + '" height="' + hG.toFixed(1) + '" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += T(cF, bot + 22, "Fizzo", 15, { anchor: "middle", lab: true }) + T(cG, bot + 22, "Glug", 15, { anchor: "middle", lab: true });
+    if(d.fix.labels){
+      s += T(cF, bot - hF - 8, VAL_F, 15, { anchor: "middle", lab: true }) + T(cG, bot - hG - 8, VAL_G, 15, { anchor: "middle", lab: true });
+    }
+    chart.innerHTML = s;
+    var looks = (hF * p.wF) / Math.max(1, hG * p.wG);
+    el.querySelector("#mkLooks").textContent = looks.toFixed(1) + " times";
+    el.querySelector("#mkReal").textContent = (VAL_F / VAL_G).toFixed(1) + " times";
+  }
+
+  var anim = null;
+  function animateTo(){
+    var from = { lo: cur.lo, hi: cur.hi, wF: cur.wF, wG: cur.wG }, to = target();
+    if(anim) cancelAnimationFrame(anim);
+    if(reduce){ cur = to; drawChart(cur); return; }
+    var t0 = null;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 520), e = 1 - Math.pow(1 - k, 3);
+      cur = { lo: from.lo + (to.lo - from.lo) * e, hi: from.hi + (to.hi - from.hi) * e, wF: from.wF + (to.wF - from.wF) * e, wG: from.wG + (to.wG - from.wG) * e };
+      drawChart(cur);
+      if(k < 1) anim = requestAnimationFrame(step); else anim = null;
+    }
+    anim = requestAnimationFrame(step);
+  }
+
+  var FIXMSG = {
+    zero: "<b>Axis starts at 0.</b> Starting at 40 chopped off most of both bars, so a small gap looked huge. That is a <b>truncated axis</b>.",
+    width: "<b>Equal widths.</b> A wider bar has more area, and your eye judges area, not just height. Bars should all be the same width.",
+    labels: "<b>Scale and labels on.</b> Now you can actually read it: 52 thousand against 44 thousand. With no scale, nobody can check the claim."
+  };
+  var msg = el.querySelector("#mkMsg"), onBtn = el.querySelector("#mkOn");
+  var togs = el.querySelectorAll(".mk-tog button");
+  function drawTogs(){
+    var n = 0;
+    [].forEach.call(togs, function(b){
+      var on = !!d.fix[b.getAttribute("data-f")];
+      if(on) n++;
+      b.classList.toggle("on", on);
+      b.querySelector(".bx").innerHTML = on ? "&#10003;" : "";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    el.querySelector("#mkFixCount").textContent = n + " of 3 fixed";
+    var all = n === 3;
+    onBtn.classList.toggle("hidden", !(all && d.stage === 1));
+    return all;
+  }
+  [].forEach.call(togs, function(b){
+    b.onclick = function(){
+      var f = b.getAttribute("data-f");
+      d.fix[f] = !d.fix[f]; api.save();
+      var all = drawTogs();
+      msg.innerHTML = d.fix[f] ? FIXMSG[f] : "Switched back off. Have a look at how much worse it gets.";
+      if(all) msg.innerHTML = FIXMSG[f] + '<br><b>All three fixed.</b> The "looks like" number has dropped to the truth: Fizzo sells about 1.2 times as much. Hardly crushing.';
+      animateTo();
+    };
+  });
+  onBtn.onclick = function(){
+    d.stage = 2; api.save();
+    onBtn.classList.add("hidden");
+    showRound();
+    el.querySelector("#mkP2").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  };
+
+  /* ---- part 2 ---- */
+  var p2 = el.querySelector("#mkP2"), opts = el.querySelector("#mkOpts"), msg2 = el.querySelector("#mkMsg2");
+  var showBtn = el.querySelector("#mkShow"), nextBtn = el.querySelector("#mkNext");
+  function firstGoCount(){ return d.solved.filter(function(x, i){ return x && !d.miss[i] && !d.shownR[i]; }).length; }
+  function showRound(){
+    p2.classList.remove("hidden");
+    var k = d.round, r = ROUNDS[k];
+    el.querySelector("#mkRoundN").textContent = "Part 2: chart " + (k + 1) + " of 3";
+    el.querySelector("#mkScore").textContent = "first go: " + firstGoCount();
+    el.querySelector("#mkHead").textContent = r.head;
+    el.querySelector("#mkRoundSvg").innerHTML = '<div class="fig" style="margin:0">' + roundSvg(k) + '</div>';
+    opts.innerHTML = "";
+    TRICKS.forEach(function(t, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.innerHTML = t;
+      b.onclick = function(){ pickTrick(i, b); };
+      opts.appendChild(b);
+    });
+    msg2.innerHTML = "";
+    showBtn.classList.toggle("hidden", !(d.miss[k] && !d.solved[k]));
+    nextBtn.classList.add("hidden");
+    if(d.solved[k]) markSolved(true);
+  }
+  function markSolved(quiet){
+    var k = d.round, r = ROUNDS[k];
+    [].forEach.call(opts.children, function(c, i){ c.classList.remove("no"); if(i === r.ans) c.classList.add("ok"); });
+    var head = d.shownR[k] ? "<b>Here is the trick.</b> " : d.miss[k] ? "<b>Got it on another go.</b> " : "<b>Spotted, first go.</b> ";
+    msg2.innerHTML = head + r.why;
+    showBtn.classList.add("hidden");
+    nextBtn.textContent = k < 2 ? "Next chart" : "See how I did";
+    nextBtn.classList.remove("hidden");
+    el.querySelector("#mkScore").textContent = "first go: " + firstGoCount();
+  }
+  function pickTrick(i, b){
+    var k = d.round, r = ROUNDS[k];
+    if(d.solved[k]) return;
+    if(i === r.ans){
+      d.solved[k] = true; api.save(); markSolved(false); return;
+    }
+    d.miss[k]++; api.save();
+    b.classList.add("no");
+    msg2.innerHTML = "<b>Not that one.</b> " + r.hint;
+    showBtn.classList.remove("hidden");
+  }
+  showBtn.onclick = function(){
+    var k = d.round;
+    d.shownR[k] = true; d.solved[k] = true; api.save(); markSolved(false);
+  };
+  nextBtn.onclick = function(){
+    if(d.round < 2){ d.round++; api.save(); showRound(); return; }
+    finish(true);
+  };
+
+  function finish(fresh){
+    d.stage = 3;
+    if(!d.result){
+      d.result = d.shownR.some(Boolean) ? "shown" : d.miss.some(function(m){ return m > 0; }) ? "right2" : "right1";
+    }
+    api.save();
+    p2.classList.add("hidden");
+    var end = el.querySelector("#mkEnd");
+    end.classList.remove("hidden");
+    var n = firstGoCount();
+    var title = n === 3 ? "Chief graph detective" : n === 2 ? "Sharp eyed sleuth" : n === 1 ? "Detective in training" : "Case files opened";
+    end.innerHTML = '<div class="tiny">Tricks spotted first go</div><div class="wbig">' + n + ' / 3</div>' +
+      '<p class="wnote"><b>' + title + '.</b> The four big tricks to look for: an axis that does not start at 0, pictures or bars that grow in area, uneven scales, and missing labels or totals that do not add up.</p>' +
+      '<div class="wrow" style="justify-content:center"><button class="btn btn-quiet" type="button" id="mkAgain">Play part 2 again (just for fun)</button></div>';
+    el.querySelector("#mkAgain").onclick = function(){
+      d.round = 0; d.miss = [0, 0, 0]; d.shownR = [false, false, false]; d.solved = [false, false, false]; d.stage = 2; api.save();
+      end.classList.add("hidden"); showRound();
+    };
+    if(fresh) api.done(d.result);
+  }
+
+  drawTogs();
+  drawChart(cur);
+  if(d.fix.zero && d.fix.width && d.fix.labels) msg.innerHTML = 'All three fixed. Fizzo sells about 1.2 times as much as Glug. Hardly crushing.';
+  if(d.stage === 3) finish(false);
+  else if(d.stage === 2) showRound();
+}
+
+EGW.run({
+  id: "stats-charts",
+  title: "Tables and charts",
+  subject: "GCSE Statistics",
+  mins: 55,
+  blurb: "Tally and two way tables, bar and pie charts, stem and leaf, cumulative frequency and histograms, a few special charts, and a makeover game for graphs that are trying to fool you.",
+  steps: [
+
+  /* ---------- 1. TABLES ---------- */
+  { type: "learn", topic: "Tables",
+    title: "Tally charts and two way tables",
+    fig: TALLY_TABLE,
+    html: '<p>A <b>tally</b> is a quick way to count as you go. Every fifth mark crosses the four before it, so you can count in fives. The <b>frequency</b> is just how many.</p>' +
+          '<p>A <b>two way table</b> sorts the same people by two things at once, like year group and subject. The last row and column are totals.</p>' +
+          '<ul><li>Each row adds up to its row total.</li>' +
+          '<li>Each column adds up to its column total.</li>' +
+          '<li>The bottom right corner is the grand total, and both ways of adding must agree.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Missing values? Find a row or column with only one gap, fill it, and repeat. Check the grand total both ways at the end.</div>' },
+
+  { type: "num", topic: "Tables",
+    q: "55 students each chose one option subject. Find the missing values a, b, c and d.",
+    fig: TWOWAY_Q,
+    boxes: [
+      { label: "a (Year 10, Music)", a: 6 },
+      { label: "b (Year 11, Art)", a: 9 },
+      { label: "c (Year 11, Drama)", a: 9 },
+      { label: "d (Year 11, Total)", a: 29 }
+    ],
+    hint: "The Year 10 row has only one gap: 14 + a + 6 = 26. The Art column has one gap too.",
+    why: "a: 26 &minus; 14 &minus; 6 = <b>6</b>. b: Art total 23 &minus; 14 = <b>9</b>. c: Drama total 15 &minus; 6 = <b>9</b>. d: 55 &minus; 26 = <b>29</b>.<br>Check: 9 + 11 + 9 = 29, and the Music column 6 + 11 = 17. Both agree, so it is right." },
+
+  /* ---------- 2. BAR CHARTS ---------- */
+  { type: "learn", topic: "Bar charts",
+    title: "Bar charts, three ways (and pictograms)",
+    fig: DUAL,
+    html: '<ul>' +
+          '<li>A plain <b>bar chart</b>: bars of <b>equal width</b>, gaps between them, both axes labelled, frequency axis starting at 0. A <b>vertical line chart</b> uses thin lines instead of bars, handy for discrete data.</li>' +
+          '<li>A <b>multiple</b> (or dual) bar chart, like the one above, puts bars side by side so you can compare groups category by category.</li>' +
+          '<li>A <b>compound</b> (or composite, or stacked) bar chart stacks the parts on top of each other, so each bar shows a total split into parts.</li>' +
+          '</ul>' +
+          '<p>A <b>pictogram</b> uses little pictures, with a <b>key</b> saying what one picture stands for. Half a picture is half the amount.</p>' +
+          '<div class="fig">' + PICTO + '</div>' +
+          '<div class="keep"><b>Keep this</b>Reading a stacked bar? A single part is its top minus its bottom, not just where it ends.</div>' },
+
+  { type: "num", topic: "Bar charts",
+    q: "The compound bar chart shows how students in three tutor groups travel to school.",
+    fig: STACK,
+    boxes: [
+      { label: "How many students in 10B come by bus?", a: 10 },
+      { label: "How many students are in 10C altogether?", a: 28 },
+      { label: "How many more walk in 10C than in 10A?", a: 3 }
+    ],
+    hint: "For 10B, the bus part starts where walk ends (9) and stops at 19. Subtract.",
+    why: "10B bus: 19 &minus; 9 = <b>10</b>. 10C total: the top of the bar, <b>28</b>. Walking: 10C 15 and 10A 12, so <b>3</b> more.<br>The classic slip is to read the top of the bus part (19) as the number of bus users." },
+
+  { type: "mc", topic: "Bar charts",
+    q: "A school wants to show, for each of five clubs, how many members are boys and how many are girls, and also make each club's <b>total</b> easy to see. Which chart is the best fit?",
+    options: ["A pie chart", "A compound (stacked) bar chart", "A pictogram with no key", "A scatter diagram"],
+    answer: 1,
+    hint: "You want a total for each club, split into two parts.",
+    why: "A compound bar chart: the full height of each bar is the club total, and the coloured sections show boys and girls. A multiple bar chart would compare boys and girls well, but hides the totals. A pie chart only shows one whole, and a scatter diagram is for two number variables." },
+
+  /* ---------- 3. PIE CHARTS ---------- */
+  { type: "learn", topic: "Pie charts",
+    title: "Pie charts: everything is out of 360",
+    fig: PIE,
+    html: '<p>30 people picked a favourite fruit: apple 12, banana 9, grape 6, kiwi 3.</p>' +
+          '<ul>' +
+          '<li>A full circle is <b>360&#176;</b>. Each person gets 360 &divide; 30 = <b>12&#176;</b>.</li>' +
+          '<li>Apple: 12 &times; 12 = 144&#176;. Banana: 9 &times; 12 = 108&#176;. Grape 72&#176;, kiwi 36&#176;.</li>' +
+          '<li>Check: 144 + 108 + 72 + 36 = 360. If it does not add to 360, something is off.</li>' +
+          '</ul>' +
+          '<p><b>Reading back</b>: frequency = angle &divide; 360 &times; total. A 90&#176; sector out of 120 people is 90 &divide; 360 &times; 120 = 30 people.</p>' +
+          '<div class="keep"><b>Keep this</b>Angle = frequency &divide; total &times; 360. A pie chart shows <b>proportions</b>; it cannot tell you how many unless you know the total.</div>' },
+
+  { type: "num", topic: "Pie charts",
+    q: "40 students chose a favourite takeaway: pizza 14, Chinese 10, curry 9, fish and chips 7. Work out the angles for a pie chart.",
+    boxes: [
+      { label: "Degrees for each student", a: 9, post: "&#176;" },
+      { label: "Pizza", a: 126, post: "&#176;" },
+      { label: "Chinese", a: 90, post: "&#176;" },
+      { label: "Curry", a: 81, post: "&#176;" },
+      { label: "Fish and chips", a: 63, post: "&#176;" }
+    ],
+    hint: "360 &divide; 40 first. Then times each frequency by that.",
+    why: "360 &divide; 40 = <b>9&#176;</b> per student. Pizza 14 &times; 9 = 126&#176;, Chinese 90&#176;, curry 81&#176;, fish and chips 63&#176;. Check: 126 + 90 + 81 + 63 = 360." },
+
+  { type: "num", topic: "Pie charts",
+    q: "A pie chart shows how 180 people travel to work.",
+    boxes: [
+      { label: "The bus sector is 84&#176;. How many people go by bus?", a: 42 },
+      { label: "45 people drive. What angle is the car sector?", a: 90, post: "&#176;" }
+    ],
+    hint: "Each person is 360 &divide; 180 = 2&#176;.",
+    why: "Each person is 2&#176;. Bus: 84 &divide; 2 = <b>42</b> people (or 84 &divide; 360 &times; 180). Car: 45 &times; 2 = <b>90&#176;</b>, a quarter of the circle, which makes sense because 45 is a quarter of 180." },
+
+  /* ---------- 4. STEM AND LEAF ---------- */
+  { type: "learn", topic: "Stem and leaf",
+    title: "Stem and leaf: a chart that keeps every value",
+    fig: STEM_LEARN,
+    html: '<p>Split each number: the <b>stem</b> is the tens, the <b>leaf</b> is the units. 23 becomes stem 2, leaf 3.</p>' +
+          '<ul>' +
+          '<li>An <b>ordered</b> diagram has each row of leaves in order, smallest first.</li>' +
+          '<li>It must have a <b>key</b>, like "1 | 2 means 12 seconds", or nobody knows if it is 12, 1.2 or 120.</li>' +
+          '<li>Every value is still there, so you can count along to find the median. Here there are 11 values, so the median is the 6th: <b>23</b>.</li>' +
+          '<li>A <b>back to back</b> diagram shares the stems down the middle and puts two groups either side. The left leaves read <b>outwards</b> from the stem, so they go backwards.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Order, key, count. Count the leaves first, so you know where the middle is.</div>' },
+
+  { type: "num", topic: "Stem and leaf",
+    q: "The stem and leaf diagram shows how long 15 students spent on homework.",
+    fig: STEM_Q,
+    boxes: [
+      { label: "Median", a: 39, post: "minutes" },
+      { label: "Mode", a: 46, post: "minutes" },
+      { label: "Range", a: 34, post: "minutes" }
+    ],
+    hint: "15 values, so the median is the 8th. Count leaves from the top: 24, 27, 28, 30 ...",
+    why: "Counting: 24, 27, 28, 30, 32, 32, 35, <b>39</b> is the 8th value, so the median is 39. Mode: 46 appears three times. Range: 58 &minus; 24 = <b>34</b>.<br>Remember to rebuild the full number: the leaf 9 on stem 3 is 39, not 9." },
+
+  { type: "mc", topic: "Stem and leaf", stretch: true,
+    q: "This back to back stem and leaf diagram shows quiz scores for two groups. Which statement is correct?",
+    fig: STEM_B2B,
+    options: [
+      "Group A's lowest score is 19",
+      "Group B scored higher on average: B's median is 24 and A's is 17",
+      "Group A scored higher on average, because they have more leaves",
+      "Both groups have the same range"
+    ],
+    answer: 1,
+    hint: "Group A's leaves read outwards from the stem. Each group has 9 values, so each median is the 5th value.",
+    why: "Group A in order: 11, 13, 14, 16, <b>17</b>, 19, 22, 25, 31. Group B: 12, 15, 18, 21, <b>24</b>, 26, 29, 33, 35. So B's median (24) beats A's (17).<br>The leaf nearest the stem on the left is the smallest, so A's lowest is 11, not 19. More leaves on one row just means more values there, not higher scores. Ranges: A 20, B 23." },
+
+  /* ---------- 5. FREQUENCY GRAPHS ---------- */
+  { type: "learn", topic: "Frequency graphs",
+    title: "Frequency polygons",
+    fig: POLY,
+    html: '<p>A <b>frequency polygon</b> is for grouped data. It is a bit like the tops of the bars, joined up.</p>' +
+          '<ul>' +
+          '<li>Plot each point at the <b>midpoint</b> of its group, at the height of its frequency.</li>' +
+          '<li>Join the points with <b>straight lines</b>, not a curve.</li>' +
+          '<li>Two polygons on one grid are a neat way to compare two groups.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Midpoint across, frequency up. Do not join the last point back to the first.</div>' },
+
+  { type: "mc", topic: "Frequency graphs",
+    q: "One group in a table is 40 &lt; m &le; 60, with frequency 9. Where should its point go on a frequency polygon?",
+    options: ["(40, 9)", "(50, 9)", "(60, 9)", "(9, 50)"],
+    answer: 1,
+    hint: "Which point sits in the middle of the group?",
+    why: "The midpoint of 40 and 60 is 50, so the point is at (50, 9). Plotting at the end of the group (60) is the slip people make most, and (9, 50) has the axes swapped." },
+
+  { type: "learn", topic: "Frequency graphs",
+    title: "Cumulative frequency: a running total",
+    fig: CF_LEARN,
+    html: '<p><b>Cumulative frequency</b> is a running total: how many values so far.</p>' +
+          '<ul>' +
+          '<li>Plot each running total at the <b>top end</b> of its group (not the midpoint), and start at the bottom of the first group with 0.</li>' +
+          '<li>Join with a smooth curve (or straight lines).</li>' +
+          '<li>For n values, read across from <b>n &divide; 2</b> for the median, <b>n &divide; 4</b> for the lower quartile and <b>3n &divide; 4</b> for the upper quartile.</li>' +
+          '</ul>' +
+          '<p>Above, 40 people: across from 20 and down gives a median of <b>30 minutes</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Cumulative frequency: plot at the top of each group. Frequency polygon: plot at the middle. Easy to swap, so check every time.</div>' },
+
+  { type: "num", topic: "Frequency graphs",
+    q: "Complete the cumulative frequency column.",
+    fig: CF_TABLE,
+    boxes: [
+      { label: "Up to 20 minutes", a: 20 },
+      { label: "Up to 30 minutes", a: 42 },
+      { label: "Up to 40 minutes", a: 56 },
+      { label: "Up to 50 minutes", a: 60 }
+    ],
+    hint: "Keep adding the next frequency onto the total so far: 5, then 5 + 15 ...",
+    why: "5, 5 + 15 = <b>20</b>, 20 + 22 = <b>42</b>, 42 + 14 = <b>56</b>, 56 + 4 = <b>60</b>. The last one must equal the total frequency, which is a quick check." },
+
+  { type: "num", topic: "Frequency graphs", stretch: true,
+    q: "The cumulative frequency curve shows the heights of 80 plants. Use it to estimate the median, the quartiles and the interquartile range.",
+    fig: CF_Q,
+    boxes: [
+      { label: "Median", a: 40, tol: 1, post: "cm" },
+      { label: "Lower quartile", a: 30, tol: 1, post: "cm" },
+      { label: "Upper quartile", a: 50, tol: 1, post: "cm" },
+      { label: "Interquartile range", a: 20, tol: 2, post: "cm" }
+    ],
+    hint: "n = 80. Go across from 40 for the median, from 20 for the lower quartile and from 60 for the upper quartile, then down.",
+    why: "80 &divide; 2 = 40, across and down gives <b>40 cm</b>. 80 &divide; 4 = 20 gives the LQ, <b>30 cm</b>. 3 &times; 80 &divide; 4 = 60 gives the UQ, <b>50 cm</b>. IQR = 50 &minus; 30 = <b>20 cm</b>.<br>A common slip is reading <i>up</i> from 40 on the bottom axis instead of across from 40 on the side." },
+
+  /* ---------- 6. HISTOGRAMS ---------- */
+  { type: "learn", topic: "Histograms",
+    title: "Histograms with unequal widths",
+    fig: HIST_LEARN,
+    html: '<p><b>Frequency density may be Higher only</b>, so treat this chunk as stretch. On Foundation, histograms usually have equal widths and a frequency axis.</p>' +
+          '<p>When groups have different widths, a tall bar would be unfair to a narrow group. So the <b>area</b> of each bar shows the frequency, and the height is the <b>frequency density</b>.</p>' +
+          '<ul>' +
+          '<li><b>Frequency density = frequency &divide; class width</b>.</li>' +
+          '<li>Going back: <b>frequency = frequency density &times; class width</b> (the area).</li>' +
+          '<li>No gaps between bars, because the data is continuous.</li>' +
+          '</ul>' +
+          '<p>Above: the 10 to 15 group has 12 values in a width of 5, so its density is 12 &divide; 5 = 2.4. It is the tallest bar, but the widest bar (18 values) has more in it.</p>' +
+          '<div class="keep"><b>Keep this</b>Histogram: area is frequency. Height is frequency density. Divide on the way in, multiply on the way out.</div>' },
+
+  { type: "num", topic: "Histograms", stretch: true,
+    q: "Work out the frequency density for each class, ready to draw a histogram.",
+    fig: FD_TABLE,
+    boxes: [
+      { label: "0 &lt; t &le; 5", a: 2 },
+      { label: "5 &lt; t &le; 10", a: 3.2 },
+      { label: "10 &lt; t &le; 20", a: 2.4 },
+      { label: "20 &lt; t &le; 40", a: 0.6 }
+    ],
+    hint: "Frequency divided by class width, each row.",
+    why: "10 &divide; 5 = <b>2</b>, 16 &divide; 5 = <b>3.2</b>, 24 &divide; 10 = <b>2.4</b>, 12 &divide; 20 = <b>0.6</b>.<br>Notice the last class has a decent frequency (12) but a short bar, because it is spread over a wide class. Plotting the frequency itself is the most common mistake, and it makes wide classes look far too big." },
+
+  { type: "num", topic: "Histograms", stretch: true,
+    q: "The histogram shows how long some people took to finish a puzzle.",
+    fig: HIST_Q,
+    boxes: [
+      { label: "How many took between 20 and 40 minutes?", a: 20 },
+      { label: "How many people altogether?", a: 70 },
+      { label: "Estimate how many took more than 30 minutes", a: 20 }
+    ],
+    hint: "Frequency is the area: density &times; width for each bar. For more than 30 minutes, you need half of the 20 to 40 bar.",
+    why: "Areas: 1.5 &times; 10 = 15, 2.5 &times; 10 = 25, 1 &times; 20 = <b>20</b>, 0.5 &times; 20 = 10. Total <b>70</b>.<br>More than 30: half of the 20 to 40 bar is 10, plus all of the 40 to 60 bar, 10. That gives <b>20</b>. It is an estimate because we assume the values are spread evenly inside the bar." },
+
+  /* ---------- 7. WHICH CHART ---------- */
+  { type: "learn", topic: "Which chart?",
+    title: "Two more charts, and how to choose",
+    fig: PYR,
+    html: '<p>A <b>population pyramid</b> is two bar charts back to back: males one side, females the other, age going up. A wide bottom and narrow top means a young population. Straighter sides mean more older people.</p>' +
+          '<p>A <b>choropleth map</b> shades areas of a map, darker for more, using a key of groups. You can only say which group an area is in, not its exact value.</p>' +
+          '<table class="datatable"><tr><th>You want to show</th><th>Try</th></tr>' +
+          '<tr><td>Parts of one whole</td><td>Pie chart</td></tr>' +
+          '<tr><td>Comparing categories</td><td>Bar chart</td></tr>' +
+          '<tr><td>Change over time</td><td>Line graph (time series)</td></tr>' +
+          '<tr><td>Link between two numbers</td><td>Scatter diagram</td></tr>' +
+          '<tr><td>Shape of grouped data</td><td>Histogram, frequency polygon</td></tr>' +
+          '<tr><td>Every value, plus shape</td><td>Stem and leaf</td></tr>' +
+          '<tr><td>Medians and quartiles</td><td>Box plot, cumulative frequency</td></tr></table>' +
+          '<div class="keep"><b>Keep this</b>Ask: what question is the chart answering? Proportions, comparison, time, link or spread each have a best fit.</div>' },
+
+  { type: "mc", topic: "Which chart?",
+    q: "Which statement does this population pyramid support?",
+    fig: PYR,
+    options: [
+      "There are more females than males aged 0 to 19",
+      "Most of the population is over 60",
+      "The bars shrink as age goes up, so this is a fairly young population",
+      "Exactly 2% of the population is aged 80 or over"
+    ],
+    answer: 2,
+    hint: "Read both sides of each bar. For 80+, add the male and female parts.",
+    why: "The bars get shorter as you go up, so there are more young people than old: a young population. Aged 0 to 19 there are more males (18%) than females (15%). Over 60 is only 6 + 7 + 2 + 3 = 18%. The 80+ group is 2% male plus 3% female, so 5% in all." },
+
+  { type: "mc", topic: "Which chart?",
+    q: "This choropleth map shows rainfall last month. Which district could have had exactly 120 mm of rain?",
+    fig: CHORO,
+    options: ["A", "B", "C", "D"],
+    answer: 3,
+    hint: "120 mm is in which group in the key? Then find the area with that shade.",
+    why: "120 is in the 100 to 149 group, the second darkest shade, and only D has that shade. C is the darkest (150 mm or more), so it had more than 120. A choropleth only tells you the group, so 120 is possible for D but not certain." },
+
+  { type: "sort", topic: "Which chart?",
+    q: "Which kind of chart suits each one best?",
+    buckets: ["Pie chart", "Scatter diagram", "Line graph (time series)", "Stem and leaf"],
+    cards: [
+      ["What fraction of a club's budget goes on each thing", 0],
+      ["How the votes for four class reps split up the whole class", 0],
+      ["Whether taller people tend to have longer arms", 1],
+      ["Is there a link between temperature and ice lolly sales?", 1],
+      ["A town's population every year since 2000", 2],
+      ["Monthly rainfall over two years", 2],
+      ["25 test scores, keeping every exact score but showing the shape", 3],
+      ["Finding the median of 31 exact times while still seeing each one", 3]
+    ],
+    hint: "Parts of a whole, a link between two numbers, change over time, or keeping every value?",
+    why: "Parts of a whole go in a pie chart. A link between two measured things is a scatter diagram. Anything changing over time is a time series line graph. Stem and leaf keeps the raw values, so you can still count along to a median." },
+
+  /* ---------- 8. MISLEADING ---------- */
+  { type: "learn", topic: "Misleading graphs",
+    title: "Graphs that try to fool you",
+    fig: TRUNC_LEARN,
+    html: '<p>Same data, two charts. On the left, A looks three times as tall as B. On the right you can see the truth: 52 against 44.</p>' +
+          '<p>Tricks to watch for:</p>' +
+          '<ul>' +
+          '<li><b>Truncated axis</b>: the axis does not start at 0, so small differences look huge.</li>' +
+          '<li><b>Unequal scales</b>: gaps on an axis that stand for different amounts.</li>' +
+          '<li><b>Distorted sizes</b>: wider bars, 3D effects, or pictures scaled in two directions so the area grows far more than the value.</li>' +
+          '<li><b>Missing labels</b>: no scale, no units, no title, no key.</li>' +
+          '<li>Totals that do not add up, like a pie chart over 100%.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>In an exam, name the trick <b>and</b> say what effect it has: "The axis starts at 40, so the difference looks much bigger than it is."</div>' },
+
+  { type: "widget", topic: "Misleading graphs",
+    title: "Misleading graph makeover",
+    html: "Part 1: give a sneaky advert an honest makeover. Part 2: three more charts, each hiding a trick. Can you spot them?",
+    mount: mountMakeover,
+    report: function(d){
+      var fixes = Object.keys(d.fix || {}).filter(function(k){ return d.fix[k]; }).length;
+      var fg = (d.solved || []).filter(function(x, i){ return x && !(d.miss || [])[i] && !(d.shownR || [])[i]; }).length;
+      var r = { right1: "all three tricks spotted first go", right2: "all three tricks spotted, some on a second go", shown: "used Show me for at least one trick" }[d.result] || "not finished";
+      return "Makeover widget: " + fixes + " of 3 fixes on; " + r + " (" + fg + "/3 first go).";
+    } },
+
+  { type: "write", topic: "Misleading graphs", stretch: true,
+    q: '<p><b>A phone advert uses this chart.</b> It says Zap lasts 10.2 hours and Volt lasts 9.8 hours.</p>' +
+       '<p>Give two reasons the chart is misleading, and say what effect each one has. Not marked here; it goes to Jay if you choose to send it.</p>',
+    fig: BATTERY,
+    starters: [
+      "The vertical axis starts at 9.6, not 0,",
+      "so the difference looks",
+      "The Zap bar is wider than the Volt bar,",
+      "which makes it look",
+      "There is no label on the vertical axis, so",
+      "In fact, Zap only lasts"
+    ],
+    checklist: [
+      "I named one trick (like the axis not starting at 0)",
+      "I named a second, different trick (bar width, missing label)",
+      "For each, I said the effect: what it makes you think",
+      "I used the real numbers: 10.2 against 9.8, only 0.4 hours more",
+      "Stretch: I said how to draw it fairly"
+    ],
+    minWords: 40 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

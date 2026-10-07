@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organisation - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: small tables, practical boxes, the blood route widget */
+.tablewrap{overflow-x:auto;margin:0 0 12px}
+.tablewrap .datatable{font-size:.92rem}
+.tablewrap .datatable td,.tablewrap .datatable th{padding:6px 8px;text-align:left;vertical-align:top}
+.prac{border:2px dashed var(--ink);border-radius:14px;padding:10px 14px;margin:0 0 12px;background:var(--paper)}
+.prac h4{font-size:.95rem;margin:0 0 6px;letter-spacing:.02em}
+.prac ol,.prac ul{margin:0 0 6px;padding-left:22px}
+.prac li{margin-bottom:4px}
+.vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:0 0 12px}
+.vars div{border:2px solid var(--ink);border-radius:12px;padding:8px 10px;font-size:.92rem;line-height:1.4;background:#fff}
+.vars b{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+.route svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.route .part{cursor:pointer}
+.route .part:focus{outline:none}
+.route .part:focus-visible .hl{stroke:var(--blue);stroke-width:5}
+.route .part.beat{animation:thump .4s ease}
+.route .part.oops{animation:wob .35s ease}
+.route .part.hint .hl{stroke:#ffd23f;stroke-width:7;animation:glow .9s ease-in-out infinite}
+.route .part .hl{transition:stroke .2s}
+.route .part.done .hl{stroke:#19c39a;stroke-width:5}
+.route .part.done path.hl{stroke-width:30}
+.route .part.hint path.hl{stroke-width:34}
+.route.expert .lab{visibility:hidden}
+@keyframes thump{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes wob{0%,100%{transform:none}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+@keyframes glow{0%,100%{stroke-opacity:1}50%{stroke-opacity:.3}}
+.route .part.beat,.route .part.oops{transform-box:fill-box;transform-origin:center}
+.rchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.rchip{font-family:var(--display);font-weight:700;font-size:.82rem;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 10px}
+.rchip.sun{background:var(--sun)}
+.rfb{min-height:3.2em;font-size:.98rem;line-height:1.45;margin:8px 0 4px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:#fff}
+.rfb.good{border-color:var(--good);background:rgba(31,157,99,.09)}
+.rfb.nudge{border-color:#f2b705;background:rgba(255,210,63,.2)}
+.rfb.show{border-color:var(--violet);background:rgba(138,92,246,.08)}
+.stars{font-size:1.7rem;letter-spacing:4px;color:#f2b705;line-height:1}
+.stars .off{color:var(--line)}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Organisation</h2>
+    <span>Biology. How cells build tissues, organs and systems: digestion and enzymes, the heart, blood and lungs, health, and how plants move water and food.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6",
+    GREEN = "#2e7d4f", SKIN = "#fde6d2", PINK = "#ffe0e0", PALEBLUE = "#dfe6ff";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '"' + (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : "") +
+    (o.cls ? ' class="' + o.cls + '"' : "") + '>' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function arrowR(x, y, c){ return '<path d="M' + x + ' ' + y + ' l-9 -6 v12 Z" fill="' + (c || INK) + '"/>'; }
+function arrowL(x, y, c){ return '<path d="M' + x + ' ' + y + ' l9 -6 v12 Z" fill="' + (c || INK) + '"/>'; }
+function arrowD(x, y, c){ return '<path d="M' + x + ' ' + y + ' l-6 -9 h12 Z" fill="' + (c || INK) + '"/>'; }
+function box(x, y, w, h, fill, rx){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 12) + '" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+
+/* ---------- figures ---------- */
+var FIG_LEVELS = svg("0 0 400 172", "Levels of organisation: a cell, a tissue, an organ and an organ system",
+  box(4, 6, 90, 112) + box(106, 6, 90, 112) + box(208, 6, 90, 112) + box(310, 6, 86, 112) +
+  '<circle cx="49" cy="62" r="30" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2.5"/><circle cx="53" cy="58" r="9" fill="' + VIOLET + '"/>' +
+  (function(){
+    var s = "";
+    for(var r = 0; r < 3; r++) for(var c = 0; c < 3; c++){
+      s += '<rect x="' + (118 + c * 23) + '" y="' + (28 + r * 23) + '" width="20" height="20" rx="5" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="1.6"/>' +
+           '<circle cx="' + (128 + c * 23) + '" cy="' + (38 + r * 23) + '" r="3.4" fill="' + VIOLET + '"/>';
+    }
+    return s;
+  })() +
+  '<path d="M236 26 Q238 66 256 82 Q282 102 290 78 Q294 60 276 56 Q262 52 258 26 Z" fill="#f6c9c0" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '<path d="M338 18 V44" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
+  '<path d="M332 44 Q334 60 346 64 Q362 68 364 56 Q366 46 352 44 Z" fill="#f6c9c0" stroke="' + INK + '" stroke-width="2"/>' +
+  '<path d="M336 72 q10 -6 20 0 t20 0 M334 84 q10 -6 20 0 t20 0 M334 96 q10 -6 20 0 t20 0" fill="none" stroke="' + CORAL + '" stroke-width="3" stroke-linecap="round"/>' +
+  arrowR(104, 62) + arrowR(206, 62) + arrowR(308, 62) +
+  T(49, 142, "Cell", { s: 16 }) + T(151, 142, "Tissue", { s: 16 }) + T(253, 142, "Organ", { s: 16 }) +
+  T(353, 142, "Organ", { s: 16 }) + T(353, 162, "system", { s: 16 }));
+
+var FIG_GUT = svg("0 0 380 356", "The digestive system as a flow: mouth, stomach, small intestine, large intestine, with the salivary glands, liver, gall bladder and pancreas feeding in",
+  /* main route */
+  box(8, 8, 176, 58, "#f6c9c0") + T(96, 32, "Mouth", { s: 16 }) + T(96, 54, "amylase in saliva", { s: 14, body: true, w: 400 }) +
+  L(96, 68, 96, 92, INK, 3) + arrowD(96, 100) + T(104, 86, "oesophagus", { s: 14, body: true, w: 400, a: "start" }) +
+  box(8, 102, 176, 64, "#f6c9c0") + T(96, 126, "Stomach", { s: 16 }) + T(96, 148, "protease and acid", { s: 14, body: true, w: 400 }) +
+  L(96, 168, 96, 188, INK, 3) + arrowD(96, 196) +
+  box(8, 198, 176, 66, "#f6c9c0") + T(96, 222, "Small intestine", { s: 16 }) + T(96, 244, "digests and absorbs", { s: 14, body: true, w: 400 }) +
+  L(96, 266, 96, 286, INK, 3) + arrowD(96, 294) +
+  box(8, 296, 176, 54, "#f6c9c0") + T(96, 318, "Large intestine", { s: 16 }) + T(96, 340, "absorbs water", { s: 14, body: true, w: 400 }) +
+  /* helpers */
+  box(214, 8, 158, 58, PAPER) + T(293, 32, "Salivary glands", { s: 15 }) + T(293, 54, "make amylase", { s: 14, body: true, w: 400 }) +
+  L(212, 37, 194, 37, INK, 3) + arrowL(186, 37) +
+  box(214, 102, 158, 50, PAPER) + T(293, 124, "Liver", { s: 15 }) + T(293, 143, "makes bile", { s: 14, body: true, w: 400 }) +
+  L(293, 154, 293, 162, INK, 3) + arrowD(293, 170) +
+  box(214, 172, 158, 50, PAPER) + T(293, 194, "Gall bladder", { s: 15 }) + T(293, 213, "stores bile", { s: 14, body: true, w: 400 }) +
+  L(212, 212, 194, 212, MINT, 3) + arrowL(186, 212, MINT) +
+  box(214, 236, 158, 72, PAPER) + T(293, 258, "Pancreas", { s: 15 }) + T(293, 278, "amylase, protease", { s: 14, body: true, w: 400 }) + T(293, 297, "and lipase", { s: 14, body: true, w: 400 }) +
+  L(212, 252, 194, 252, MINT, 3) + arrowL(186, 252, MINT));
+
+var FIG_LOCK = (function(){
+  function enzyme(dx, notch, fill){
+    var n = notch || "L -16 -10 L 0 14 L 16 -10";
+    return '<path transform="translate(' + dx + ' 72)" d="M -46 -10 ' + n + ' L 46 -10 Q 52 -10 52 -4 L 52 34 Q 52 42 44 42 L -44 42 Q -52 42 -52 34 L -52 -4 Q -52 -10 -46 -10 Z" fill="' + (fill || MINT) + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+  }
+  var sub = function(dx, dy){ return '<path transform="translate(' + dx + ' ' + dy + ')" d="M -16 -26 H 16 V -10 L 0 14 L -16 -10 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>'; };
+  var half1 = '<path transform="translate(186 40) rotate(-18)" d="M -16 -26 H 0 V 14 L -16 -10 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+  var half2 = '<path transform="translate(218 40) rotate(18)" d="M 0 -26 H 16 V -10 L 0 14 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+  return svg("0 0 400 176", "Lock and key: the substrate fits the active site, products are released, and a denatured enzyme no longer fits",
+    enzyme(66) + sub(66, 72) + T(66, 110, "enzyme", { s: 14, body: true, w: 400, c: INK }) +
+    enzyme(202) + half1 + half2 +
+    enzyme(336, "Q -14 -2 -4 18 Q 6 -2 18 6 Q 22 -6 16 -10", "#b9e9dc") + sub(336, 22) +
+    L(318, 34, 354, 6, CORAL, 4) + L(318, 6, 354, 34, CORAL, 4) +
+    T(66, 146, "Substrate fits", { s: 15 }) + T(66, 166, "the active site", { s: 15 }) +
+    T(202, 146, "Products", { s: 15 }) + T(202, 166, "released", { s: 15 }) +
+    T(336, 146, "Denatured:", { s: 15 }) + T(336, 166, "no longer fits", { s: 15 }));
+})();
+
+function rateAt(t){
+  if(t <= 40) return 20 * Math.pow(t / 40, Math.log(0.4) / Math.log(0.5));
+  if(t <= 55) return 20 * (1 - Math.pow((t - 40) / 15, 2));
+  return 0;
+}
+var FIG_TEMP = (function(){
+  var X0 = 58, X1 = 362, Y0 = 206, Y1 = 16;
+  function gx(t){ return X0 + t * (X1 - X0) / 60; }
+  function gy(r){ return Y0 - r * (Y0 - Y1) / 24; }
+  var s = '<rect x="' + X0 + '" y="' + Y1 + '" width="' + (X1 - X0) + '" height="' + (Y0 - Y1) + '" fill="' + WHITE + '"/>';
+  for(var t = 0; t <= 60; t += 5) s += L(gx(t), Y1, gx(t), Y0, t % 10 ? "#eceaf3" : LINE, 1);
+  for(var r = 0; r <= 24; r += 2) s += L(X0, gy(r), X1, gy(r), r % 4 ? "#eceaf3" : LINE, 1);
+  for(t = 0; t <= 60; t += 10) s += T(gx(t), Y0 + 20, String(t), { s: 14, body: true, w: 400 });
+  for(r = 0; r <= 24; r += 4) s += T(X0 - 8, gy(r) + 5, String(r), { s: 14, body: true, w: 400, a: "end" });
+  var d = "";
+  for(var k = 0; k <= 600; k++){ var tt = k / 10; d += (k ? " L" : "M") + gx(tt).toFixed(1) + " " + gy(rateAt(tt)).toFixed(1); }
+  s += '<path d="' + d + '" fill="none" stroke="' + BLUE + '" stroke-width="3.5" stroke-linejoin="round"/>';
+  s += L(X0, Y0, X1, Y0, INK, 2.5) + L(X0, Y0, X0, Y1, INK, 2.5);
+  s += T(210, 248, "Temperature (&deg;C)", { s: 15 });
+  s += T(18, 111, "Rate of reaction", { s: 15, rot: -90 });
+  return svg("0 0 380 256", "Graph of rate of reaction against temperature for an enzyme. The rate rises to a peak then falls steeply to zero.", s);
+})();
+
+var FIG_TUBES = (function(){
+  var s = "", groups = [
+    ["Starch", "Iodine", "#c8762a", "#1d2140", ""],
+    ["Sugars", "Benedict&#39;s", "#3a8fe0", "#c0442a", "heat it"],
+    ["Protein", "Biuret", "#4f86e8", "#8a3fc9", ""],
+    ["Lipids", "Sudan III", "#f6f2e4", "#f6f2e4", ""]
+  ];
+  function tube(x, col, top){
+    return '<path d="M' + x + ' 40 V112 a11 11 0 0 0 22 0 V40" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.2"/>' +
+      '<path d="M' + (x + 1.5) + ' 70 V112 a9.5 9.5 0 0 0 19 0 V70 Z" fill="' + col + '"/>' +
+      (top ? '<rect x="' + (x + 1.5) + '" y="62" width="19" height="10" fill="' + top + '"/>' : "") +
+      L(x - 3, 40, x + 25, 40, INK, 2.2);
+  }
+  groups.forEach(function(g, k){
+    var x = 4 + k * 100;
+    s += '<rect x="' + x + '" y="4" width="92" height="186" rx="12" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += T(x + 46, 26, g[0], { s: 16 });
+    s += tube(x + 12, g[2], "") + tube(x + 58, g[3], k === 3 ? "#e0322a" : "");
+    s += L(x + 38, 92, x + 50, 92, INK, 2) + arrowR(x + 56, 92);
+    s += T(x + 46, 156, g[1], { s: 14 });
+    if(g[4]) s += T(x + 46, 178, g[4], { s: 14, body: true, w: 400, c: CORAL });
+  });
+  return svg("0 0 400 194", "Food tests, before and after: iodine turns blue black with starch, Benedict's turns brick red with sugar after heating, biuret turns purple with protein, Sudan III makes a red layer on top with lipids", s);
+})();
+
+var FIG_TILE = (function(){
+  var s = '<rect x="6" y="20" width="368" height="74" rx="14" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  var cols = ["#1d2140", "#1d2140", "#1d2140", "#1d2140", "#c8762a", "#c8762a"];
+  for(var k = 0; k < 6; k++){
+    var cx = 40 + k * 60;
+    s += '<circle cx="' + cx + '" cy="57" r="22" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<circle cx="' + cx + '" cy="57" r="14" fill="' + cols[k] + '"/>';
+    s += T(cx, 118, (k + 1) * 10 + " s", { s: 14, body: true, w: 400 });
+  }
+  s += '<circle cx="280" cy="57" r="27" fill="none" stroke="' + SUN + '" stroke-width="5"/>';
+  s += T(190, 14, "one drop of mixture onto fresh iodine, every 10 s", { s: 14, body: true, w: 400 });
+  return svg("0 0 380 126", "A spotting tile. The iodine turns blue black at 10, 20, 30 and 40 seconds, and stays orange brown at 50 and 60 seconds, so the starch was all broken down by 50 seconds.", s);
+})();
+
+var FIG_HEART = svg("0 0 380 262", "The four chambers of the heart. The right side is on the left of the picture. The pacemaker is in the wall of the right atrium. The left ventricle has the thickest wall.",
+  '<rect x="64" y="34" width="252" height="206" rx="44" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<rect x="84" y="52" width="100" height="74" rx="14" fill="' + PALEBLUE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<rect x="196" y="52" width="100" height="74" rx="14" fill="' + PINK + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<rect x="84" y="136" width="100" height="90" rx="16" fill="' + PALEBLUE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<rect x="198" y="138" width="96" height="86" rx="16" fill="' + PINK + '" stroke="' + INK + '" stroke-width="7"/>' +
+  '<path d="M120 126 L134 140 L148 126" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+  '<path d="M232 126 L246 140 L260 126" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+  T(134, 84, "Right", { s: 15 }) + T(134, 104, "atrium", { s: 15 }) +
+  T(246, 84, "Left", { s: 15 }) + T(246, 104, "atrium", { s: 15 }) +
+  T(134, 178, "Right", { s: 15 }) + T(134, 198, "ventricle", { s: 15 }) +
+  T(246, 178, "Left", { s: 15 }) + T(246, 198, "ventricle", { s: 15 }) +
+  '<path d="M96 60 l4 9 l10 1 l-7 7 l2 10 l-9 -5 l-9 5 l2 -10 l-7 -7 l10 -1 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.5" stroke-linejoin="round"/>' +
+  T(14, 22, "pacemaker cells", { s: 14, body: true, w: 400, a: "start" }) + L(60, 27, 90, 58, INK, 1.5) +
+  T(310, 258, "thick muscle wall", { s: 14, body: true, w: 400, a: "end" }) + L(270, 243, 274, 228, INK, 1.5) +
+  T(366, 22, "valve", { s: 14, body: true, w: 400, a: "end" }) + L(334, 28, 252, 130, INK, 1.5));
+
+var FIG_VESSELS = svg("0 0 400 196", "Cross sections of an artery with a thick wall and narrow lumen, a vein with a thin wall and wide lumen, and a tiny capillary with a wall one cell thick",
+  box(4, 6, 126, 126, PAPER) + box(137, 6, 126, 126, PAPER) + box(270, 6, 126, 126, PAPER) +
+  '<circle cx="67" cy="69" r="44" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/><circle cx="67" cy="69" r="30" fill="#ffb3a8" stroke="' + INK + '" stroke-width="1.5"/><circle cx="67" cy="69" r="14" fill="#c0303a" stroke="' + INK + '" stroke-width="2"/>' +
+  '<ellipse cx="200" cy="69" rx="48" ry="38" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2.5"/><ellipse cx="200" cy="69" rx="40" ry="30" fill="#7c4a8a" stroke="' + INK + '" stroke-width="1.5"/>' +
+  '<circle cx="333" cy="69" r="14" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/><circle cx="333" cy="69" r="10" fill="#c0303a"/>' +
+  T(333, 34, "very small", { s: 14, body: true, w: 400 }) +
+  T(67, 156, "Artery", { s: 16 }) + T(67, 178, "thick wall", { s: 14, body: true, w: 400 }) +
+  T(200, 156, "Vein", { s: 16 }) + T(200, 178, "wide lumen, valves", { s: 14, body: true, w: 400 }) +
+  T(333, 156, "Capillary", { s: 16 }) + T(333, 178, "one cell thick", { s: 14, body: true, w: 400 }));
+
+var FIG_ALV = svg("0 0 380 150", "An alveolus wrapped in a capillary. Oxygen diffuses from the air into the blood, and carbon dioxide diffuses from the blood into the air.",
+  '<path d="M150 6 V30" stroke="' + INK + '" stroke-width="14" stroke-linecap="round"/>' +
+  '<circle cx="150" cy="80" r="52" fill="#e8f6ff" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<path d="M96 110 Q120 150 170 136 Q214 122 206 76" fill="none" stroke="' + CORAL + '" stroke-width="14" stroke-linecap="round"/>' +
+  '<path d="M96 110 Q120 150 170 136 Q214 122 206 76" fill="none" stroke="#c0303a" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round"/>' +
+  T(150, 86, "air", { s: 15, body: true, w: 400 }) +
+  L(136, 96, 136, 116, BLUE, 3) + arrowD(136, 126, BLUE) +
+  L(176, 122, 176, 104, VIOLET, 3) + '<path d="M176 94 l-6 9 h12 Z" fill="' + VIOLET + '"/>' +
+  L(226, 56, 246, 56, BLUE, 4) + T(254, 61, "oxygen: air", { s: 14, body: true, w: 400, a: "start" }) + T(254, 79, "into blood", { s: 14, body: true, w: 400, a: "start" }) +
+  L(226, 104, 246, 104, VIOLET, 4) + T(254, 109, "CO&#8322;: blood", { s: 14, body: true, w: 400, a: "start" }) + T(254, 127, "into air", { s: 14, body: true, w: 400, a: "start" }) +
+  T(40, 146, "capillary", { s: 14, body: true, w: 400, a: "start" }));
+
+var FIG_CHD = (function(){
+  function art(x, inner){
+    return '<g transform="translate(' + x + ' 0)">' +
+      '<rect x="0" y="22" width="120" height="74" rx="10" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+      '<rect x="0" y="38" width="120" height="42" fill="#ffd9d4"/>' + L(0, 38, 120, 38, INK, 1.5) + L(0, 80, 120, 80, INK, 1.5) + inner + '</g>';
+  }
+  var fat = '<path d="M28 38 Q60 70 92 38 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.6"/><path d="M34 80 Q60 58 86 80 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.6"/>';
+  var mesh = "";
+  for(var k = 0; k < 6; k++){ var x = 16 + k * 16; mesh += '<path d="M' + x + ' 40 L' + (x + 8) + ' 59 L' + x + ' 78" fill="none" stroke="' + INK + '" stroke-width="2"/>'; }
+  return svg("0 0 400 150", "Inside a coronary artery: healthy, narrowed by fatty material, and held open by a stent",
+    art(4, "") + art(140, fat) + art(276, '<path d="M28 38 Q60 46 92 38 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.4"/><path d="M34 80 Q60 74 86 80 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.4"/>' + mesh) +
+    T(64, 122, "Healthy", { s: 15 }) + T(200, 122, "Narrowed", { s: 15 }) + T(200, 142, "by fatty material", { s: 14, body: true, w: 400 }) +
+    T(336, 122, "Stent", { s: 15 }) + T(336, 142, "holds it open", { s: 14, body: true, w: 400 }));
+})();
+
+var FIG_LEAF = (function(){
+  var s = "";
+  /* upper epidermis */
+  for(var k = 0; k < 10; k++) s += '<rect x="' + (10 + k * 24) + '" y="14" width="24" height="16" fill="#f3f7e6" stroke="' + INK + '" stroke-width="1.4"/>';
+  /* palisade */
+  for(k = 0; k < 10; k++){
+    s += '<rect x="' + (11 + k * 24) + '" y="32" width="22" height="58" rx="8" fill="#cdeccd" stroke="' + INK + '" stroke-width="1.4"/>';
+    for(var j = 0; j < 4; j++) s += '<circle cx="' + (18 + k * 24 + (j % 2) * 8) + '" cy="' + (42 + j * 12) + '" r="3" fill="' + GREEN + '"/>';
+  }
+  /* spongy */
+  var sp = [[24,108],[60,104],[96,112],[204,106],[236,110],[30,140],[70,138],[196,140],[232,142],[116,146]];
+  sp.forEach(function(p){ s += '<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="15" ry="11" fill="#e2f3dd" stroke="' + INK + '" stroke-width="1.4"/><circle cx="' + (p[0] - 4) + '" cy="' + p[1] + '" r="2.6" fill="' + GREEN + '"/>'; });
+  /* vein: xylem and phloem */
+  s += '<circle cx="150" cy="124" r="24" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="1.6"/>';
+  s += '<circle cx="142" cy="116" r="7" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="1.4"/><circle cx="156" cy="114" r="6" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="1.4"/>';
+  s += '<circle cx="146" cy="134" r="5" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.2"/><circle cx="158" cy="132" r="5" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.2"/>';
+  /* lower epidermis with stoma */
+  for(k = 0; k < 10; k++){ if(k === 4 || k === 5) continue; s += '<rect x="' + (10 + k * 24) + '" y="162" width="24" height="16" fill="#f3f7e6" stroke="' + INK + '" stroke-width="1.4"/>'; }
+  s += '<path d="M106 162 Q120 160 120 170 Q120 180 106 178 Z" fill="#9fd89f" stroke="' + INK + '" stroke-width="1.6"/>';
+  s += '<path d="M154 162 Q140 160 140 170 Q140 180 154 178 Z" fill="#9fd89f" stroke="' + INK + '" stroke-width="1.6"/>';
+  s += L(130, 178, 130, 196, CYAN, 2.5) + '<path d="M130 202 l-5 -8 h10 Z" fill="' + CYAN + '"/>';
+  s += T(138, 214, "water vapour out", { s: 14, body: true, w: 400, a: "start" });
+  /* labels */
+  var labs = [["Upper epidermis", 22, 240, 22], ["Palisade mesophyll", 60, 240, 60], ["Spongy mesophyll", 100, 236, 108], ["Xylem", 128, 160, 114], ["Phloem", 152, 162, 133], ["Stoma, guard cells", 178, 150, 172]];
+  labs.forEach(function(l){ s += L(l[2], l[3], 252, l[1], INK, 1.2) + T(256, l[1] + 5, l[0], { s: 14, a: "start" }); });
+  return svg("0 0 400 222", "Cross section of a leaf: upper epidermis, palisade mesophyll, spongy mesophyll with air spaces, a vein with xylem and phloem, and the lower epidermis with a stoma between two guard cells", s);
+})();
+
+var FIG_POT = svg("0 0 380 132", "A potometer: a leafy shoot in a sealed tube of water joined to a thin capillary tube with an air bubble and a scale",
+  '<path d="M40 8 q-14 10 -6 26 M40 8 q16 6 12 26 M40 8 V44" fill="none" stroke="' + GREEN + '" stroke-width="3" stroke-linecap="round"/>' +
+  '<ellipse cx="24" cy="24" rx="12" ry="7" fill="#9fd89f" stroke="' + INK + '" stroke-width="1.4"/><ellipse cx="58" cy="22" rx="12" ry="7" fill="#9fd89f" stroke="' + INK + '" stroke-width="1.4"/>' +
+  '<rect x="30" y="44" width="20" height="56" rx="6" fill="#d6f0fb" stroke="' + INK + '" stroke-width="2"/>' +
+  '<path d="M50 90 H360" stroke="' + INK + '" stroke-width="10" stroke-linecap="round"/><path d="M50 90 H360" stroke="#d6f0fb" stroke-width="6" stroke-linecap="round"/>' +
+  '<rect x="250" y="86" width="20" height="8" rx="4" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.4"/>' +
+  (function(){ var s = ""; for(var k = 0; k <= 26; k++) s += L(80 + k * 10, 102, 80 + k * 10, k % 5 ? 108 : 114, INK, 1.2); return s; })() +
+  L(274, 72, 320, 72, INK, 2) + arrowL(268, 72) + T(366, 30, "the bubble moves left", { s: 14, body: true, w: 400, a: "end" }) + T(366, 50, "as the shoot takes up water", { s: 14, body: true, w: 400, a: "end" }) +
+  T(220, 128, "scale in mm", { s: 14, body: true, w: 400 }));
+
+/* ---------- the blood route widget ---------- */
+var ROUTE = [
+  { k: "vc", name: "vena cava", way: [[100, 424], [40, 424], [40, 382]],
+    yes: "Deoxygenated blood from the body comes back in the <b>vena cava</b>, a big vein.",
+    hint: "Blood coming back from the body travels in a large vein first. Which tube leaves the body?" },
+  { k: "ra", name: "right atrium", way: [[40, 198], [92, 198], [121, 214]],
+    yes: "Into the <b>right atrium</b>. Atria collect blood coming into the heart.",
+    hint: "Blood always comes into the heart through an atrium. Which atrium is joined to the vena cava?" },
+  { k: "rv", name: "right ventricle", way: [[124, 233], [130, 302]],
+    yes: "Through a valve, down into the <b>right ventricle</b>. Valves stop it flowing backwards.",
+    hint: "From an atrium, blood goes down into the ventricle on the <b>same</b> side." },
+  { k: "pa", name: "pulmonary artery", way: [[160, 262], [168, 236], [168, 98]],
+    yes: "Squeezed out into the <b>pulmonary artery</b>, off to the lungs. Arteries carry blood away from the heart.",
+    hint: "The right ventricle pumps blood to the lungs. Which vessel leaves it?" },
+  { k: "lu", name: "lungs", way: [[168, 72], [196, 58], [240, 58]],
+    yes: "In the <b>lungs</b> it picks up oxygen and drops off carbon dioxide. Bright red now: oxygenated.",
+    hint: "This blood is low in oxygen. Where could it pick some up?" },
+  { k: "pv", name: "pulmonary vein", way: [[280, 45], [320, 45], [320, 64]],
+    yes: "Back towards the heart in the <b>pulmonary vein</b>. Veins carry blood to the heart.",
+    hint: "Blood leaves the lungs in a vein, heading back to the heart." },
+  { k: "la", name: "left atrium", way: [[320, 198], [268, 198], [227, 214]],
+    yes: "Into the <b>left atrium</b>. Second time through the heart this lap.",
+    hint: "The pulmonary vein brings blood into an atrium. Which side is it joined to?" },
+  { k: "lv", name: "left ventricle", way: [[227, 233], [226, 302]],
+    yes: "Down into the <b>left ventricle</b>, the strongest chamber, with the thickest muscle wall.",
+    hint: "From the left atrium, down into the ventricle on the same side." },
+  { k: "ao", name: "aorta", way: [[226, 330], [226, 362]],
+    yes: "Out through the <b>aorta</b>, the biggest artery in the body.",
+    hint: "The left ventricle pumps blood out to the body through the biggest artery." },
+  { k: "bo", name: "body", way: [[226, 392], [256, 410]],
+    yes: "Round the <b>body</b>, dropping off oxygen to the cells. Dark red again: deoxygenated.",
+    hint: "The aorta carries oxygenated blood to... where does it need to go?" }
+];
+var BADGE = { vc: [40, 240], ra: [92, 160], rv: [92, 322], pa: [146, 104], lu: [98, 28], pv: [320, 45], la: [268, 160], lv: [268, 322], ao: [196, 362], bo: [98, 408] };
+
+function routeSVG(){
+  function tube(k, d, col, aria, label, lx, ly, rot, tcol){
+    return '<g class="part" data-k="' + k + '" tabindex="0" role="button" aria-label="' + aria + '">' +
+      '<path d="' + d + '" fill="none" stroke="transparent" stroke-width="34" stroke-linejoin="round"/>' +
+      '<path class="hl" d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"/>' +
+      (label ? T(lx, ly, label, { s: 14, rot: rot, c: tcol || WHITE, cls: "lab" }) : "") + '</g>';
+  }
+  function room(k, x, y, w, h, fill, l1, l2, sw){
+    return '<g class="part" data-k="' + k + '" tabindex="0" role="button" aria-label="' + l1 + " " + l2 + '">' +
+      '<rect class="hl" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + (sw || 2.5) + '"/>' +
+      T(x + w / 2, y + 22, l1, { s: 14, cls: "lab" }) + T(x + w / 2, y + 38, l2, { s: 14, cls: "lab" }) + '</g>';
+  }
+  var s = '<rect width="360" height="468" rx="14" fill="' + PAPER + '"/>';
+  /* lungs */
+  s += '<g class="part" data-k="lu" tabindex="0" role="button" aria-label="Lungs">' +
+    '<rect class="hl" x="80" y="12" width="200" height="66" rx="30" fill="#ffe9ef" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<circle cx="118" cy="56" r="7" fill="#ffc9d6"/><circle cx="134" cy="62" r="6" fill="#ffc9d6"/><circle cx="226" cy="34" r="7" fill="#ffc9d6"/><circle cx="252" cy="44" r="6" fill="#ffc9d6"/>' +
+    T(180, 42, "Lungs", { s: 16 }) + '</g>';
+  /* body */
+  s += '<g class="part" data-k="bo" tabindex="0" role="button" aria-label="Body">' +
+    '<rect class="hl" x="80" y="392" width="200" height="66" rx="18" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    T(170, 418, "Body", { s: 16 }) + T(180, 444, "all the other organs", { s: 14, body: true, w: 400 }) + '</g>';
+  /* vessels */
+  s += tube("vc", "M80 424 H40 V198 H92", BLUE, "Vena cava", "Vena cava", 45, 318, -90);
+  s += tube("pv", "M280 45 H320 V198 H268", CORAL, "Pulmonary vein", "Pulmonary vein", 325, 128, -90, INK);
+  s += tube("ao", "M226 322 V392", CORAL, "Aorta", "", 0, 0, 0);
+  s += T(246, 368, "Aorta", { s: 14, a: "start", cls: "lab" });
+  /* heart */
+  s += '<rect x="84" y="152" width="192" height="178" rx="34" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += tube("pa", "M168 240 V78", BLUE, "Pulmonary artery", "Pulmonary artery", 173, 166, -90);
+  s += room("ra", 92, 160, 58, 70, PALEBLUE, "Right", "atrium");
+  s += room("la", 186, 160, 82, 70, PINK, "Left", "atrium");
+  s += room("rv", 92, 236, 84, 86, PALEBLUE, "Right", "ventricle");
+  s += room("lv", 186, 238, 80, 82, PINK, "Left", "ventricle", 6);
+  s += '<path d="M114 230 L121 238 L128 230" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.8"/><path d="M220 230 L227 238 L234 230" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.8"/>';
+  /* badges and the blood cell */
+  s += '<g id="badges"></g>';
+  s += '<g id="cell"><circle r="11" fill="' + WHITE + '"/><circle id="cellIn" r="8.5" stroke="' + INK + '" stroke-width="1.6"/><ellipse rx="3.6" ry="2.2" fill="rgba(255,255,255,.55)" cx="-2" cy="-2"/></g>';
+  return '<svg id="rSvg" viewBox="0 0 360 468" role="img" aria-label="Diagram of the heart, lungs and body with the blood vessels joining them">' + s + '</svg>';
+}
+
+var BLOODROUTE = {
+  type: "widget", topic: "The heart",
+  title: "Blood route",
+  html: '<p>You are a red blood cell, sitting in the body. Tap the parts in the order blood travels through them, starting from the body and going all the way round. Your cell moves when you get it right.</p><p>One full lap is the challenge. After that, a no labels lap is there if you fancy it.</p>',
+  report: function(d){
+    return "Blood route: " + (d.laps || 0) + " laps finished" + (d.best !== undefined ? ", best lap " + d.best + " misses" : "") +
+      (d.expertDone ? ", no labels lap done" : "") + (d.everShown ? ", used Show me" : "") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(d.step === undefined){ d.step = 0; d.misses = 0; d.shown = false; d.laps = 0; d.score = 0; d.combo = 0; }
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="rchips"><span class="rchip" id="rLap"></span><span class="rchip sun" id="rScore"></span><span class="rchip" id="rCombo"></span></div>' +
+        '<div class="route" id="rWrap">' + routeSVG() + '</div>' +
+        '<p class="tiny">The heart is drawn as if you are facing someone, so its right side is on the left of the picture. Blue means low in oxygen, red means rich in oxygen.</p>' +
+        '<div class="rfb" id="rFb" aria-live="polite"></div>' +
+        '<div class="wrow"><button type="button" class="btn btn-quiet hidden" id="rShow">Show me the next stop</button>' +
+        '<button type="button" class="btn hidden" id="rAgain">Go again</button>' +
+        '<button type="button" class="btn btn-orange hidden" id="rExpert">Try a no labels lap</button></div>' +
+      '</div>';
+    var wrap = el.querySelector("#rWrap"), sv = el.querySelector("#rSvg"), cell = el.querySelector("#cell"), cellIn = el.querySelector("#cellIn");
+    var fb = el.querySelector("#rFb"), showB = el.querySelector("#rShow"), againB = el.querySelector("#rAgain"), expB = el.querySelector("#rExpert");
+    var badges = el.querySelector("#badges");
+    var parts = {};
+    [].forEach.call(el.querySelectorAll(".part"), function(g){ parts[g.getAttribute("data-k")] = g; });
+    var busy = false, pos = [256, 410];
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function oxygenated(step){ return step >= 5 && step <= 9; }
+    function place(p){ pos = p; cell.setAttribute("transform", "translate(" + p[0] + " " + p[1] + ")"); }
+    function colour(){ cellIn.setAttribute("fill", oxygenated(d.step) ? "#e0322a" : "#7a2a5a"); }
+    function restPoint(step){
+      if(step === 0) return d.laps ? ROUTE[9].way[ROUTE[9].way.length - 1] : [256, 410];
+      var w = ROUTE[step - 1].way; return w[w.length - 1];
+    }
+    function drawBadges(){
+      var s = "";
+      for(var n = 0; n < d.step; n++){
+        var b = BADGE[ROUTE[n].k];
+        s += '<circle cx="' + b[0] + '" cy="' + b[1] + '" r="10" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.8"/>' +
+             '<text x="' + b[0] + '" y="' + (b[1] + 4.5) + '" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="13" fill="' + INK + '">' + (n + 1) + '</text>';
+      }
+      badges.innerHTML = s;
+      ROUTE.forEach(function(r, n){ parts[r.k].classList.toggle("done", n < d.step); });
+    }
+    function stars(m, sh){
+      var n = sh ? 1 : m === 0 ? 3 : m <= 2 ? 2 : 1;
+      var s = '<span class="stars" aria-label="' + n + ' of 3 stars">';
+      for(var k = 0; k < 3; k++) s += k < n ? "&#9733;" : '<span class="off">&#9733;</span>';
+      return s + '</span>';
+    }
+    function chips(){
+      el.querySelector("#rLap").textContent = (d.expert ? "No labels lap" : "Lap " + (d.laps + 1)) + ": stop " + Math.min(d.step + 1, 10) + " of 10";
+      el.querySelector("#rScore").textContent = d.score + " beats";
+      el.querySelector("#rCombo").textContent = d.combo >= 2 ? "Combo x" + d.combo : "Misses this lap: " + d.misses;
+      wrap.classList.toggle("expert", !!d.expert);
+    }
+    function lapOver(){
+      var resNow = d.shown ? "shown" : d.misses ? "right2" : "right1";
+      d.laps++;
+      if(!d.shown && (d.best === undefined || d.misses < d.best)) d.best = d.misses;
+      if(d.expert && !d.shown && d.misses === 0) d.expertDone = true;
+      d.lastLap = { misses: d.misses, shown: d.shown, expert: !!d.expert };
+      var line = d.shown ? "Lap done, with a bit of help. That still counts as learning it."
+        : d.misses === 0 ? (d.expert ? "A clean lap with no labels. That is the whole double circulation from memory." : "A clean lap, no misses. Lovely.")
+        : "Lap done with " + d.misses + " miss" + (d.misses === 1 ? "" : "es") + ". The route is in there now.";
+      fb.className = "rfb good";
+      fb.innerHTML = stars(d.misses, d.shown) + '<br><b>' + line + '</b> Blood went through the heart <b>twice</b> on one lap of the body: once on the right side to get to the lungs, once on the left side to get to the body. That is <b>double circulation</b>.';
+      d.done = true;
+      api.save();
+      api.done(resNow);
+      buttons();
+    }
+    function buttons(){
+      var over = !!d.done;
+      showB.classList.toggle("hidden", over || !d.stuck);
+      againB.classList.toggle("hidden", !over);
+      expB.classList.toggle("hidden", !over);
+      againB.textContent = d.expert ? "Another no labels lap" : "Go again";
+      expB.textContent = d.expert ? "Labels back on" : "Try a no labels lap";
+    }
+    function travel(points, done){
+      if(reduce){ place(points[points.length - 1]); done(); return; }
+      busy = true;
+      var segs = [], from = pos, total = 0;
+      points.forEach(function(p){ var len = Math.hypot(p[0] - from[0], p[1] - from[1]); segs.push({ a: from, b: p, len: len }); total += len; from = p; });
+      var t0 = null, speed = 0.42;
+      function frame(ts){
+        if(t0 === null) t0 = ts;
+        var dist = (ts - t0) * speed, acc = 0;
+        for(var k = 0; k < segs.length; k++){
+          var sg = segs[k];
+          if(dist <= acc + sg.len || k === segs.length - 1){
+            var f = sg.len ? Math.min(1, (dist - acc) / sg.len) : 1;
+            place([sg.a[0] + (sg.b[0] - sg.a[0]) * f, sg.a[1] + (sg.b[1] - sg.a[1]) * f]);
+            break;
+          }
+          acc += sg.len;
+        }
+        if(dist >= total){ place(points[points.length - 1]); busy = false; done(); return; }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    function clearHint(){ [].forEach.call(el.querySelectorAll(".part.hint"), function(g){ g.classList.remove("hint"); }); }
+    function tap(k){
+      if(busy || d.done) return;
+      var want = ROUTE[d.step];
+      var g = parts[k];
+      if(k === want.k){
+        clearHint();
+        d.stuck = false;
+        d.step++; d.combo++; d.score += 10 * Math.min(d.combo, 5);
+        api.save();
+        g.classList.remove("beat"); void g.getBoundingClientRect(); g.classList.add("beat");
+        fb.className = "rfb good";
+        fb.innerHTML = '<b>' + (d.combo >= 3 ? "On a roll. " : "") + "Stop " + d.step + ".</b> " + want.yes;
+        drawBadges(); chips(); buttons();
+        travel(want.way, function(){
+          colour();
+          if(d.step >= 10) lapOver();
+        });
+        if(d.step === 5 || d.step === 10) setTimeout(colour, reduce ? 0 : 500);
+      }else{
+        d.misses++; d.combo = 0; d.stuck = true;
+        api.save();
+        g.classList.remove("oops"); void g.getBoundingClientRect(); g.classList.add("oops");
+        var nm = (ROUTE.filter(function(r){ return r.k === k; })[0] || {}).name || "that";
+        fb.className = "rfb nudge";
+        fb.innerHTML = '<b>Not the ' + nm + ' yet.</b> ' + want.hint;
+        chips(); buttons();
+      }
+    }
+    sv.addEventListener("click", function(e){
+      var g = e.target.closest && e.target.closest(".part");
+      if(g) tap(g.getAttribute("data-k"));
+    });
+    sv.addEventListener("keydown", function(e){
+      if(e.key !== "Enter" && e.key !== " ") return;
+      var g = e.target.closest && e.target.closest(".part");
+      if(g){ e.preventDefault(); tap(g.getAttribute("data-k")); }
+    });
+    showB.onclick = function(){
+      if(d.done) return;
+      d.shown = true; d.everShown = true; api.save();
+      var want = ROUTE[d.step];
+      clearHint();
+      parts[want.k].classList.add("hint");
+      fb.className = "rfb show";
+      d.stuck = false; api.save();
+      fb.innerHTML = '<b>Next stop: the ' + want.name + '.</b> It is glowing yellow; tap it to move on. ' + want.hint;
+      buttons();
+    };
+    function newLap(expert){
+      d.step = 0; d.misses = 0; d.shown = false; d.combo = 0; d.done = false; d.stuck = false; d.expert = expert;
+      api.save();
+      clearHint(); drawBadges(); chips(); buttons(); colour();
+      fb.className = "rfb";
+      fb.innerHTML = expert ? "No labels this time. Start from the body: which tube does blood leave it in?" : "Fresh lap. Start from the body: which tube does blood leave it in?";
+    }
+    againB.onclick = function(){ newLap(!!d.expert); };
+    expB.onclick = function(){ newLap(!d.expert); };
+
+    place(restPoint(d.step)); colour(); drawBadges(); chips(); buttons();
+    if(d.done && d.lastLap){
+      fb.className = "rfb good";
+      fb.innerHTML = stars(d.lastLap.misses, d.lastLap.shown) + '<br><b>Lap finished.</b> Through the heart twice on one lap of the body: that is double circulation. Go again if you like.';
+    }else if(d.step === 0){
+      fb.innerHTML = "Your cell is in the body, low in oxygen. Which tube does blood leave the body in, to get back to the heart?";
+    }else{
+      fb.innerHTML = "Carrying on from stop " + d.step + ". Where next?";
+    }
+  }
+};
+
+EGW.run({
+  id: "biology-organisation",
+  title: "Organisation",
+  subject: "Biology",
+  mins: 55,
+  blurb: "From cells to organ systems: digestion and enzymes, two required practicals, the heart, blood and lungs, health and disease, and how water and sugar move through plants. There is a blood route game in the middle.",
+  steps: [
+
+  /* ---------- LEVELS AND DIGESTION ---------- */
+  { type: "learn", topic: "Levels and digestion",
+    title: "Cells to systems, and the digestive system",
+    fig: FIG_LEVELS,
+    html: '<p><b>Cells</b> are the building blocks. A <b>tissue</b> is a group of cells with a similar structure and job, like muscle tissue. An <b>organ</b> is a group of tissues working together, like the stomach. An <b>organ system</b> is a group of organs working together, like the digestive system. Organ systems together make an <b>organism</b>.</p>' +
+          '<p>The <b>digestive system</b> breaks big, insoluble food molecules into small, soluble ones that can be absorbed into the blood. <b>Enzymes</b> do the breaking down.</p>' +
+          '<div class="fig">' + FIG_GUT + '</div>' +
+          '<div class="tablewrap"><table class="datatable"><tr><th>Enzyme</th><th>Breaks down</th><th>Into</th></tr>' +
+          '<tr><td>Carbohydrase, such as <b>amylase</b></td><td>starch</td><td>sugars</td></tr>' +
+          '<tr><td><b>Protease</b></td><td>proteins</td><td>amino acids</td></tr>' +
+          '<tr><td><b>Lipase</b></td><td>lipids (fats and oils)</td><td>fatty acids and glycerol</td></tr></table></div>' +
+          '<p><b>Bile</b> is made in the liver and stored in the gall bladder. It is <b>not an enzyme</b>. It is alkaline, so it <b>neutralises stomach acid</b>, and it <b>emulsifies fats</b>: breaks them into tiny droplets with a bigger surface area, so lipase works faster.</p>' +
+          '<div class="keep"><b>Keep this</b>Amylase: starch to sugars. Protease: proteins to amino acids. Lipase: lipids to fatty acids and glycerol.</div>' },
+
+  { type: "order", topic: "Levels and digestion",
+    q: "Put these in order, from smallest to biggest.",
+    items: ["Cell", "Tissue", "Organ", "Organ system", "Organism"],
+    hint: "Muscle tissue is part of the stomach, and the stomach is part of the digestive system.",
+    why: "Cells make tissues, tissues make organs, organs make organ systems, and systems make the whole organism. A common slip is swapping tissue and organ: an organ is made of several tissues, so it comes after." },
+
+  { type: "match", topic: "Levels and digestion",
+    q: "Match each one to what it does.",
+    pairs: [
+      ["Amylase", "Breaks down starch into sugars"],
+      ["Protease", "Breaks down proteins into amino acids"],
+      ["Lipase", "Breaks down lipids into fatty acids and glycerol"],
+      ["Bile", "Neutralises stomach acid and emulsifies fats"]
+    ],
+    hint: "Three of these are enzymes. The odd one out is made in the liver.",
+    why: "Each enzyme has its own job, because each one only fits its own substrate. Bile is the one that is not an enzyme: it does not break any bonds, it just makes conditions better for lipase by neutralising acid and turning fat into tiny droplets." },
+
+  /* ---------- ENZYMES ---------- */
+  { type: "learn", topic: "Enzymes",
+    title: "How enzymes work",
+    fig: FIG_LOCK,
+    html: '<p><b>Enzymes</b> are biological catalysts: proteins that speed up reactions without being used up. Each one has an <b>active site</b> with a particular shape.</p>' +
+          '<p><b>Lock and key:</b> only the right <b>substrate</b> fits the active site, like a key in a lock. The enzyme breaks it down (or joins molecules together), the products leave, and the enzyme is ready again.</p>' +
+          '<div class="fig">' + FIG_TEMP + '</div>' +
+          '<ul><li>As temperature goes up, the rate goes up: particles move faster and collide more often.</li>' +
+          '<li>The peak is the <b>optimum</b> temperature. Human enzymes work best at around body temperature, 37 &deg;C.</li>' +
+          '<li>Above the optimum, the shape of the active site changes. The substrate no longer fits, and the rate drops fast. The enzyme is <b>denatured</b>, and this is permanent.</li>' +
+          '<li><b>pH</b> works the same way. Each enzyme has an optimum pH; too far either side and it denatures. Stomach protease works best in acid; most other enzymes prefer around neutral.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Enzymes are not alive, so they are never &quot;killed&quot;. Say the active site changes shape, so the substrate no longer fits: denatured.</div>' },
+
+  { type: "multi", topic: "Enzymes",
+    q: "Which <b>two</b> of these can denature an enzyme?",
+    options: [
+      "Heating it well above its optimum temperature",
+      "Putting it in a pH far from its optimum",
+      "Cooling it down in a fridge",
+      "Adding more substrate",
+      "Adding more of the enzyme"
+    ],
+    answers: [0, 1],
+    hint: "Denaturing means the shape of the active site has been changed for good.",
+    why: "High temperature and the wrong pH both change the shape of the active site. Cold is the classic trap: it slows an enzyme down because particles move more slowly, but the shape is not changed, so it speeds up again when it warms. More substrate or more enzyme just changes how fast things go." },
+
+  { type: "num", topic: "Enzymes",
+    q: "Use the graph of rate against temperature.",
+    fig: FIG_TEMP,
+    boxes: [
+      { label: "(a) Optimum temperature", a: 40, tol: 1, post: "&deg;C" },
+      { label: "(b) Rate at 20 &deg;C", a: 8, tol: 0.5, post: "units" },
+      { label: "(c) How many times faster at the optimum than at 20 &deg;C?", a: 2.5, tol: 0.05, post: "times" }
+    ],
+    hint: "The optimum is the temperature at the very top of the curve. For (b), go up from 20 to the line, then across. For (c), divide the top rate by the rate at 20.",
+    why: "The peak is at 40 &deg;C with a rate of 20. At 20 &deg;C the rate is 8. Then 20 &divide; 8 = 2.5, so it is 2.5 times faster at the optimum. A common mix up is reading the rate (20) as the optimum temperature: the optimum is always a temperature, on the x axis." },
+
+  /* ---------- FOOD TESTS (REQUIRED PRACTICAL) ---------- */
+  { type: "learn", topic: "Food tests practical",
+    title: "Required practical: food tests",
+    fig: FIG_TUBES,
+    html: '<div class="prac"><h4>Method</h4><ol>' +
+          '<li>Grind the food with a pestle and mortar, then mix it with a little distilled water.</li>' +
+          '<li>Filter it, and put some of the liquid into each test tube.</li>' +
+          '<li>Add the test reagent and look for a colour change, using the table below.</li></ol></div>' +
+          '<div class="tablewrap"><table class="datatable"><tr><th>Testing for</th><th>Add</th><th>Positive result</th></tr>' +
+          '<tr><td>Starch</td><td>Iodine solution</td><td>orange brown to <b>blue black</b></td></tr>' +
+          '<tr><td>Sugars</td><td>Benedict&#39;s solution, then heat in a water bath (about 75 &deg;C) for a few minutes</td><td>blue to green, yellow or <b>brick red</b> (more sugar, further along)</td></tr>' +
+          '<tr><td>Protein</td><td>Biuret reagent</td><td>blue to <b>purple</b></td></tr>' +
+          '<tr><td>Lipids</td><td>Sudan III stain</td><td>a <b>red layer</b> on top</td></tr>' +
+          '<tr><td>Lipids (other way)</td><td>Shake with ethanol, then pour into water</td><td>a <b>cloudy white</b> emulsion</td></tr></table></div>' +
+          '<div class="vars"><div><b>What it shows</b>Which nutrients a food contains. It is a qualitative test: a colour, not a measurement.</div>' +
+          '<div><b>Control</b>A tube of distilled water with the reagent, to compare colours against.</div>' +
+          '<div><b>Safety</b>Eye protection. Biuret reagent is an irritant. Ethanol is flammable, so keep it away from flames.</div></div>' +
+          '<div class="keep"><b>Keep this</b>Iodine: starch, blue black. Benedict&#39;s plus heat: sugar, brick red. Biuret: protein, purple.</div>' },
+
+  { type: "match", topic: "Food tests practical",
+    q: "Match each reagent to its positive result.",
+    pairs: [
+      ["Iodine solution", "Orange brown to blue black"],
+      ["Benedict&#39;s solution, heated", "Blue to brick red"],
+      ["Biuret reagent", "Blue to purple"],
+      ["Sudan III", "A red layer on top"]
+    ],
+    hint: "Two of these start off blue. Only one is ever heated.",
+    why: "Iodine goes blue black with starch. Benedict&#39;s goes from blue towards brick red with sugars, but only after heating. Biuret goes from blue to purple with protein. Sudan III stains lipids red. Mixing up Benedict&#39;s and biuret is very common: Benedict&#39;s for sugars, biuret for protein." },
+
+  { type: "text", topic: "Food tests practical",
+    q: "Which food test needs heating in a hot water bath, and what does it test for?",
+    need: [["benedict"], ["sugar", "glucose", "reducing"]],
+    model: "The Benedict&#39;s test, which tests for sugars (such as glucose). Blue turns to green, yellow or brick red if sugar is there.",
+    hint: "It is the one that can go brick red.",
+    why: "Benedict&#39;s solution only changes colour when it is heated, so the tube goes into a hot water bath for a few minutes. It tests for sugars. The further the colour goes from blue towards brick red, the more sugar there is." },
+
+  /* ---------- AMYLASE AND PH (REQUIRED PRACTICAL) ---------- */
+  { type: "learn", topic: "Amylase practical",
+    title: "Required practical: pH and amylase",
+    fig: FIG_TILE,
+    html: '<p>Amylase breaks down starch. Iodine shows whether starch is still there. So you time how long it takes for the starch to disappear at different pH values.</p>' +
+          '<div class="prac"><h4>Method</h4><ol>' +
+          '<li>Put a drop of iodine solution into each well of a spotting tile.</li>' +
+          '<li>Put amylase solution and a pH buffer in one test tube, and starch solution in another. Warm both in a water bath (for example 35 &deg;C).</li>' +
+          '<li>Mix the starch into the amylase and buffer, and start the stopwatch.</li>' +
+          '<li>Every 10 seconds, put a drop of the mixture onto a fresh drop of iodine.</li>' +
+          '<li>When the iodine stays orange brown, the starch has all been broken down. Record the time.</li>' +
+          '<li>Repeat with buffers of other pH values.</li></ol></div>' +
+          '<div class="vars"><div><b>Independent</b>pH of the buffer (what you change)</div>' +
+          '<div><b>Dependent</b>Time for the starch to be broken down (what you measure)</div>' +
+          '<div><b>Control</b>Temperature, volume and concentration of amylase and starch, time between drops</div></div>' +
+          '<p><b>What the results show:</b> the shortest time is at the optimum pH, where amylase works fastest. You can turn a time into a rate with <b>rate = 1000 &divide; time</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Iodine stays orange brown = no starch left = timer stops.</div>' },
+
+  { type: "order", topic: "Amylase practical",
+    q: "Put the method in order.",
+    items: [
+      "Put a drop of iodine into each well of a spotting tile",
+      "Warm the amylase with a pH buffer, and the starch, in a water bath",
+      "Mix the starch with the amylase and start the stopwatch",
+      "Every 10 seconds, add a drop of the mixture to fresh iodine",
+      "Stop the clock when the iodine stays orange brown",
+      "Repeat at a different pH"
+    ],
+    hint: "The tile is set up before anything is mixed, so you are ready to test straight away.",
+    why: "Everything is set up and warmed first, so the reaction starts at the right temperature the moment the stopwatch starts. You then sample regularly until there is no starch left. Repeating at other pH values is what lets you compare." },
+
+  { type: "sort", topic: "Amylase practical",
+    q: "Sort these variables for the amylase practical.",
+    buckets: ["Independent", "Dependent", "Control"],
+    cards: [
+      ["The pH of the buffer", 0],
+      ["Time until the iodine stays orange brown", 1],
+      ["Temperature of the water bath", 2],
+      ["Volume of amylase solution", 2],
+      ["Concentration of the starch solution", 2],
+      ["How often a drop is tested", 2]
+    ],
+    hint: "Independent is the one you choose to change. Dependent is the one you measure. Everything else is kept the same.",
+    why: "You change the pH, you measure the time, and you keep everything else the same so pH is the only thing that could explain any difference. Temperature matters a lot here, because temperature changes enzyme activity too." },
+
+  { type: "num", topic: "Amylase practical", stretch: true,
+    q: '<p>Here are some results. Use <b>rate = 1000 &divide; time</b>.</p>' +
+       '<table class="datatable"><tr><th>pH</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr>' +
+       '<tr><th>Time (s)</th><td>over 300</td><td>120</td><td>40</td><td>60</td><td>150</td></tr></table>',
+    boxes: [
+      { label: "(a) Optimum pH in these results", a: 6, tol: 0.01, post: "" },
+      { label: "(b) Rate at pH 6", a: 25, tol: 0.01, post: "" },
+      { label: "(c) Rate at pH 8, to 1 decimal place", a: 1000 / 150, tol: 0.06, post: "", show: "6.7" }
+    ],
+    hint: "The optimum has the shortest time, not the longest. Then divide 1000 by each time.",
+    why: "The shortest time is 40 s at pH 6, so that is the optimum. Rate at pH 6 = 1000 &divide; 40 = 25. Rate at pH 8 = 1000 &divide; 150 = 6.7. A big rate means a fast reaction, so the rate is highest where the time is lowest. Picking pH 8 (the longest time) is the common trap." },
+
+  /* ---------- THE HEART ---------- */
+  { type: "learn", topic: "The heart",
+    title: "The heart and double circulation",
+    fig: FIG_HEART,
+    html: '<p>The heart is an organ made mostly of muscle. It pumps blood round the body in a <b>double circulation</b>: blood goes through the heart <b>twice</b> on every full lap.</p>' +
+          '<ul><li>The <b>right</b> side pumps deoxygenated blood to the <b>lungs</b>, where it picks up oxygen.</li>' +
+          '<li>The <b>left</b> side pumps oxygenated blood to the <b>rest of the body</b>.</li>' +
+          '<li><b>Atria</b> (top) collect blood coming in. <b>Ventricles</b> (bottom) pump it out. <b>Valves</b> stop it flowing backwards.</li>' +
+          '<li>The <b>left ventricle</b> has the thickest muscle wall, because it pumps blood all round the body.</li>' +
+          '<li>The heart muscle gets its own oxygen from the <b>coronary arteries</b>.</li>' +
+          '<li>The natural resting heart rate is controlled by a group of <b>pacemaker</b> cells in the right atrium. An <b>artificial pacemaker</b> is an electrical device that can correct an irregular heartbeat.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Vena cava, right atrium, right ventricle, pulmonary artery, lungs, pulmonary vein, left atrium, left ventricle, aorta, body.</div>' },
+
+  BLOODROUTE,
+
+  { type: "mc", topic: "The heart", stretch: true,
+    q: "Why does the <b>left</b> ventricle have a much thicker muscle wall than the right ventricle?",
+    options: [
+      "It pumps blood all round the body, so it needs to pump at a higher pressure",
+      "It holds a much bigger volume of blood",
+      "It pumps deoxygenated blood, which is thicker",
+      "It contains the pacemaker cells"
+    ],
+    answer: 0,
+    hint: "Where does each ventricle send its blood, and how far does it have to go?",
+    why: "The right ventricle only pumps blood to the lungs, which are close by. The left ventricle pumps blood out through the aorta to the whole body, so it needs more muscle to make a higher pressure. Both ventricles pump the same volume each beat, and the pacemaker is in the right atrium." },
+
+  /* ---------- BLOOD AND LUNGS ---------- */
+  { type: "learn", topic: "Blood and lungs",
+    title: "Vessels, blood and the lungs",
+    fig: FIG_VESSELS,
+    html: '<ul><li><b>Arteries</b> carry blood <b>away</b> from the heart at high pressure. Thick, muscular, elastic walls.</li>' +
+          '<li><b>Veins</b> carry blood <b>back</b> to the heart at low pressure. Thinner walls, a wide lumen, and <b>valves</b> to stop blood flowing backwards.</li>' +
+          '<li><b>Capillaries</b> are tiny, with walls <b>one cell thick</b>, so substances can diffuse quickly between the blood and the cells.</li></ul>' +
+          '<p><b>Blood</b> is a tissue made of: <b>plasma</b> (the liquid, carrying dissolved glucose, carbon dioxide, urea, hormones and the cells); <b>red blood cells</b> (carry oxygen using haemoglobin; no nucleus, so more room); <b>white blood cells</b> (defend against pathogens); and <b>platelets</b> (bits of cells that help blood clot).</p>' +
+          '<div class="fig">' + FIG_ALV + '</div>' +
+          '<p><b>The lungs:</b> air goes down the trachea, into the bronchi, then bronchioles, and ends in millions of tiny air sacs called <b>alveoli</b>. Oxygen diffuses from the alveoli into the blood; carbon dioxide diffuses out. Alveoli have a <b>huge surface area</b>, <b>very thin walls</b> and a <b>good blood supply</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Arteries: Away. Veins: back, with valves. Capillaries: exchange.</div>' },
+
+  { type: "sort", topic: "Blood and lungs",
+    q: "Artery, vein or capillary?",
+    buckets: ["Artery", "Vein", "Capillary"],
+    cards: [
+      ["Thick, muscular, elastic walls", 0],
+      ["Carries blood away from the heart", 0],
+      ["Has valves to stop backflow", 1],
+      ["Carries blood back to the heart at low pressure", 1],
+      ["Walls only one cell thick", 2],
+      ["Where substances are exchanged with body cells", 2]
+    ],
+    hint: "A for arteries, A for away. Exchange needs the thinnest possible wall.",
+    why: "Arteries take the high pressure blood away from the heart, so they need thick, elastic walls. Veins carry low pressure blood back, so they need valves. Capillaries have the thinnest walls, which makes the diffusion distance short. Remember: the pulmonary artery carries deoxygenated blood, so arteries are about direction, not oxygen." },
+
+  { type: "match", topic: "Blood and lungs",
+    q: "Match each part to its job.",
+    pairs: [
+      ["Red blood cells", "Carry oxygen using haemoglobin"],
+      ["White blood cells", "Defend the body against pathogens"],
+      ["Platelets", "Help the blood to clot"],
+      ["Plasma", "Liquid that carries glucose, carbon dioxide and urea"],
+      ["Alveoli", "Air sacs where oxygen diffuses into the blood"]
+    ],
+    hint: "Only one of these is a liquid, and only one is in the lungs rather than the blood.",
+    why: "Red cells carry oxygen, white cells fight pathogens, platelets help clotting, and plasma carries everything that is dissolved. Alveoli are where gas exchange happens: their big surface area, thin walls and rich blood supply make diffusion fast." },
+
+  /* ---------- HEART DISEASE AND HEALTH ---------- */
+  { type: "learn", topic: "Health and disease",
+    title: "Heart disease, health and cancer",
+    fig: FIG_CHD,
+    html: '<p><b>Coronary heart disease</b>: layers of fatty material build up inside the coronary arteries and narrow them. Less blood flows to the heart muscle, so it gets less oxygen.</p>' +
+          '<ul><li><b>Stents</b> are small mesh tubes put inside a narrowed artery to hold it open. Quick to help, but it is an operation, with some risk.</li>' +
+          '<li><b>Statins</b> are drugs that lower cholesterol in the blood, which slows the build up of fatty material. They are taken long term and can have side effects.</li>' +
+          '<li>Faulty <b>valves</b> can be replaced with biological or mechanical valves. If the heart fails, a <b>transplant</b> is possible, and an artificial heart can help while someone waits.</li></ul>' +
+          '<p><b>Health</b> is physical and mental wellbeing. <b>Non communicable</b> diseases are not caught from others, but <b>risk factors</b> make them more likely: smoking (lung disease, lung cancer, heart disease), poor diet and little exercise (cardiovascular disease), obesity (type 2 diabetes), alcohol (liver and brain damage), and <b>carcinogens</b>, including ionising radiation (cancer).</p>' +
+          '<p><b>Cancer</b> is caused by changes in cells that make them grow and divide out of control, forming a tumour. <b>Benign</b> tumours stay in one place, usually inside a membrane. <b>Malignant</b> tumours are cancers: they invade nearby tissue and can spread in the blood to form <b>secondary tumours</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Stent: holds the artery open. Statin: lowers cholesterol.</div>' },
+
+  { type: "sort", topic: "Health and disease",
+    q: "Stent or statin?",
+    buckets: ["Stent", "Statin"],
+    cards: [
+      ["A small mesh tube put inside a coronary artery", 0],
+      ["Holds a narrowed artery open", 0],
+      ["Fitted during an operation", 0],
+      ["A drug taken every day, long term", 1],
+      ["Lowers cholesterol in the blood", 1],
+      ["Slows down the build up of fatty material", 1]
+    ],
+    hint: "One is a tube, one is a tablet.",
+    why: "A stent is a physical fix: it props the artery open straight away. A statin is a drug that works slowly, lowering cholesterol so less fatty material builds up. In an exam you might weigh them up: stents work quickly but need an operation; statins avoid surgery but must be taken for a long time and can have side effects." },
+
+  { type: "match", topic: "Health and disease",
+    q: "Match each risk factor to a disease it is linked to.",
+    pairs: [
+      ["Smoking", "Lung disease and lung cancer"],
+      ["Obesity", "Type 2 diabetes"],
+      ["Drinking a lot of alcohol", "Liver damage"],
+      ["Little exercise and a high fat diet", "Cardiovascular disease"]
+    ],
+    hint: "Think about which organ each one does the most harm to.",
+    why: "These are the links on the specification. A risk factor makes a disease more likely; it does not mean someone will definitely get it. Some, like smoking and lung cancer, have a proven cause and effect." },
+
+  { type: "mc", topic: "Health and disease", stretch: true,
+    q: "Which describes a <b>malignant</b> tumour?",
+    options: [
+      "Cells that invade nearby tissue and can spread in the blood to form secondary tumours",
+      "A growth of abnormal cells that stays in one place, usually inside a membrane",
+      "A tumour caused by a pathogen, which can be caught from someone else",
+      "A tumour that is always harmless"
+    ],
+    answer: 0,
+    hint: "Malignant tumours are the ones that are called cancers. What makes them so dangerous?",
+    why: "Malignant tumours invade neighbouring tissues and spread through the blood, starting secondary tumours elsewhere. The second option describes a benign tumour. Benign does not always mean harmless, though: a benign tumour can still press on an organ and cause problems." },
+
+  /* ---------- PLANTS ---------- */
+  { type: "learn", topic: "Plant transport",
+    title: "Plant tissues, xylem, phloem and transpiration",
+    fig: FIG_LEAF,
+    html: '<p>A leaf is a plant organ. Its tissues: <b>epidermis</b> (covers it), <b>palisade mesophyll</b> (packed with chloroplasts for photosynthesis), <b>spongy mesophyll</b> (air spaces for gases to diffuse), <b>xylem</b> and <b>phloem</b> (transport), and <b>meristem</b> at the growing tips of shoots and roots.</p>' +
+          '<ul><li><b>Xylem</b>: hollow tubes of dead cells, strengthened with lignin. Carry <b>water and mineral ions</b> from the roots <b>up</b> to the leaves.</li>' +
+          '<li><b>Phloem</b>: living cells with pores in the end walls. Carry <b>dissolved sugars</b> from the leaves to the rest of the plant, <b>up or down</b>. This is <b>translocation</b>.</li></ul>' +
+          '<p><b>Transpiration</b>: water evaporates from the leaves and diffuses out through the <b>stomata</b>. This pulls more water up the xylem from the roots: the transpiration stream. <b>Guard cells</b> open and close the stomata, controlling gas exchange and water loss. Most stomata are on the underside of the leaf.</p>' +
+          '<p>Transpiration is <b>faster</b> when it is <b>warmer</b>, <b>drier</b> (low humidity), <b>windier</b>, and <b>brighter</b> (more stomata open). It can be measured with a <b>potometer</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Xylem: water, up only, dead cells. Phloem: sugar, both ways, living cells.</div>' },
+
+  { type: "sort", topic: "Plant transport",
+    q: "Xylem or phloem?",
+    buckets: ["Xylem", "Phloem"],
+    cards: [
+      ["Carries water and mineral ions", 0],
+      ["Made of dead cells strengthened with lignin", 0],
+      ["Flow only goes upwards, from roots to leaves", 0],
+      ["Carries dissolved sugars", 1],
+      ["Living cells with pores in the end walls", 1],
+      ["Moves substances up and down the plant", 1]
+    ],
+    hint: "Phloem carries food. Xylem carries water.",
+    why: "Xylem is the water pipe: dead, hollow, strengthened with lignin, one way only. Phloem moves sugars made in the leaves to wherever they are needed, for use or storage, so it has to go both ways. That movement is translocation." },
+
+  { type: "num", topic: "Plant transport", stretch: true,
+    q: '<p>A student measures transpiration with a potometer. In 4 minutes, the air bubble moves <b>36 mm</b>. Then they switch on a fan, and in the next 4 minutes it moves <b>60 mm</b>.</p>',
+    fig: FIG_POT,
+    boxes: [
+      { label: "(a) Rate without the fan", a: 9, tol: 0.01, post: "mm per minute" },
+      { label: "(b) Rate with the fan", a: 15, tol: 0.01, post: "mm per minute" },
+      { label: "(c) Percentage increase, to 1 decimal place", a: 600 / 9, tol: 0.06, post: "%", show: "66.7" }
+    ],
+    hint: "Rate = distance &divide; time. For the percentage increase: (new &minus; old) &divide; old &times; 100.",
+    why: "(a) 36 &divide; 4 = 9 mm per minute. (b) 60 &divide; 4 = 15 mm per minute. (c) The increase is 15 &minus; 9 = 6, and 6 &divide; 9 &times; 100 = 66.7%. Dividing by the new value (giving 40%) is the usual slip: percentage change always divides by the original. The fan blows away water vapour near the leaf, which keeps the concentration gradient steep, so water diffuses out of the stomata faster. Strictly, a potometer measures water uptake, which is close to the rate of transpiration." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

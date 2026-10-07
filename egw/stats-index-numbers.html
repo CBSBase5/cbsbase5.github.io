@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Index numbers and rates - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Price tracker widget */
+.pt-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.pt-round{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px}
+.pt-stars{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:.08em}
+.pt-stars .on{color:#e0a800}
+.pt-stars .off{color:#c9c8d6}
+.pt-years{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 8px}
+.pt-years span{font-family:var(--display);font-weight:700;font-size:.9rem;margin-right:2px}
+.pt-years button{font-family:var(--display);font-weight:700;font-size:.95rem;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:10px;padding:7px 9px;cursor:pointer;min-width:52px}
+.pt-years button.on{background:var(--sun)}
+.pt-svg{width:100%;max-width:540px;height:auto;display:block;margin:0 auto}
+.pt-chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.pt-chips button{display:flex;align-items:center;gap:8px;font-family:inherit;font-size:.95rem;text-align:left;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer}
+.pt-chips button i{width:14px;height:14px;border-radius:50%;flex:none;border:2px solid var(--ink)}
+.pt-chips button.on{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--ink)}
+.pt-tag{background:#fff;border:2px dashed var(--ink);border-radius:12px;padding:8px 12px;margin:6px 0;font-size:.98rem;min-height:2.2em}
+.pt-prices{border-collapse:collapse;width:100%;font-size:.88rem;margin:6px 0}
+.pt-prices th,.pt-prices td{border:1.5px solid var(--ink);padding:4px 3px;text-align:center;background:#fff}
+.pt-prices th{background:var(--accent-soft)}
+.pt-prices td.base,.pt-prices th.base{background:#fff3c2}
+.pt-ask{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;margin:10px 0 6px}
+.pt-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.pt-opts button{font-family:inherit;font-size:.95rem;border:2px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:10px;padding:9px 8px;cursor:pointer}
+.pt-in{width:110px;text-align:center;padding:9px 8px;font-family:inherit;font-size:1.1rem;border:3px solid rgba(20,26,51,.22);border-radius:12px 10px 14px 10px;background:#fff;color:var(--ink)}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Index numbers and rates</h2>
+    <span>GCSE Statistics. Index numbers, CPI and RPI, rates of change, and stretch chunks on standardised rates, the normal distribution and control charts.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, txt, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" ' + (o.lab ? LAB : BODY) +
+    ' font-weight="' + (o.w || 400) + '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '">' + txt + '</text>';
+}
+function money(v){ return "&pound;" + v.toFixed(2); }
+
+/* ---------- figures ---------- */
+var INDEX_FIG = (function(){
+  var s = '<svg viewBox="0 0 360 178" role="img" aria-label="A bus fare of 1 pound 50 in the base year has index 100. Two years later it costs 1 pound 80, index 120." style="max-width:440px">';
+  function col(x, h, top, price, year, idx, fill){
+    var base = 138;
+    return '<rect x="' + x + '" y="' + (base - h) + '" width="84" height="' + h + '" rx="8" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+      t(x + 42, base - h + 30, idx, { lab: 1, w: 800, s: 26 }) +
+      t(x + 42, base - h - 10, price, { w: 700, s: 16 }) +
+      t(x + 42, base + 22, year, { lab: 1, w: 700, s: 15 });
+  }
+  s += col(40, 80, 0, "&pound;1.50", "2021 (base)", "100", SUN);
+  s += col(236, 96, 0, "&pound;1.80", "2023", "120", CYAN);
+  s += '<path d="M138 92 C170 70 200 70 228 82" fill="none" stroke="' + INK + '" stroke-width="2.5"/><path d="M220 74 L230 83 L218 88" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(183, 64, "&divide; 1.50 &times; 100", { s: 14, w: 700, c: VIOLET });
+  s += '<line x1="20" y1="138" x2="340" y2="138" stroke="' + INK + '" stroke-width="2"/>';
+  return s + '</svg>';
+})();
+
+var NORMAL_FIG = (function(){
+  var L = 18, R = 342, B = 150, T = 18;
+  function X(z){ return L + (z + 3.5) / 7 * (R - L); }
+  function Y(z){ return B - Math.exp(-z * z / 2) * (B - T); }
+  function area(a, b, fill, op){
+    var p = "M" + X(a) + " " + B;
+    for(var z = a; z <= b + 1e-9; z += 0.05) p += " L" + X(z).toFixed(1) + " " + Y(z).toFixed(1);
+    return '<path d="' + p + ' L' + X(b) + ' ' + B + ' Z" fill="' + fill + '" fill-opacity="' + op + '"/>';
+  }
+  var s = '<svg viewBox="0 0 360 262" role="img" aria-label="A symmetrical bell shaped normal curve. About 68% of the data lie within 1 standard deviation of the mean, about 95% within 2, and about 99.7% within 3." style="max-width:460px">';
+  s += area(-3, 3, VIOLET, 0.18) + area(-2, 2, VIOLET, 0.25) + area(-1, 1, VIOLET, 0.4);
+  var p = "";
+  for(var z = -3.5; z <= 3.5 + 1e-9; z += 0.05) p += (p ? " L" : "M") + X(z).toFixed(1) + " " + Y(z).toFixed(1);
+  s += '<path d="' + p + '" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + X(0) + '" y1="' + T + '" x2="' + X(0) + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2" stroke-dasharray="5 4"/>';
+  var labs = ["&minus;3", "&minus;2", "&minus;1", "mean", "+1", "+2", "+3"];
+  for(var k = -3; k <= 3; k++){
+    s += '<line x1="' + X(k) + '" y1="' + B + '" x2="' + X(k) + '" y2="' + (B + 6) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(X(k), B + 22, labs[k + 3], { s: 14, w: k === 0 ? 700 : 400 });
+  }
+  function brace(a, y, txt){
+    return '<path d="M' + X(-a) + ' ' + (y - 6) + ' V' + y + ' H' + X(a) + ' V' + (y - 6) + '" fill="none" stroke="' + INK + '" stroke-width="1.8"/>' +
+      t(X(0), y + 17, txt, { lab: 1, w: 800, s: 14 });
+  }
+  s += brace(1, 186, "about 68% within 1 sd");
+  s += brace(2, 214, "about 95% within 2 sd");
+  s += brace(3, 242, "about 99.7% within 3 sd");
+  return s + '</svg>';
+})();
+
+var QC_MEANS = [250.6, 249.2, 251.1, 248.4, 250.2, 253.6, 252.1, 251.0, 249.7, 255.0];
+var QC_FIG = (function(){
+  var L = 50, R = 284, T = 12, B = 222, LO = 244, HI = 256;
+  function X(i){ return L + (i - 0.5) * (R - L) / 10; }
+  function Y(v){ return B - (v - LO) / (HI - LO) * (B - T); }
+  var s = '<svg viewBox="0 0 360 268" role="img" aria-label="Control chart of 10 sample means. Target 250 g. Warning lines at 247 and 253. Action lines at 245.5 and 254.5. Sample 6 is 253.6, between the upper warning and action lines. Sample 10 is 255.0, above the upper action line." style="max-width:460px">';
+  s += '<rect x="' + L + '" y="' + T + '" width="' + (R - L) + '" height="' + (B - T) + '" fill="' + WHITE + '"/>';
+  for(var v = LO; v <= HI; v += 2){
+    s += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + R + '" y2="' + Y(v) + '" stroke="' + LINE + '" stroke-width="1"/>';
+    s += t(L - 6, Y(v) + 5, v, { a: "end", s: 14 });
+  }
+  [[254.5, CORAL, "action"], [253, "#e0a800", "warning"], [250, MINT, "target"], [247, "#e0a800", "warning"], [245.5, CORAL, "action"]].forEach(function(l){
+    s += '<line x1="' + L + '" y1="' + Y(l[0]) + '" x2="' + R + '" y2="' + Y(l[0]) + '" stroke="' + l[1] + '" stroke-width="2.5"' + (l[2] === "warning" ? ' stroke-dasharray="7 5"' : '') + '/>';
+  });
+  s += '<polyline points="' + QC_MEANS.map(function(m, i){ return X(i + 1) + "," + Y(m); }).join(" ") + '" fill="none" stroke="' + BLUE + '" stroke-width="2"/>';
+  QC_MEANS.forEach(function(m, i){
+    s += '<circle cx="' + X(i + 1) + '" cy="' + Y(m) + '" r="5" fill="' + (m > 254.5 ? CORAL : m > 253 ? SUN : BLUE) + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += t(X(i + 1), B + 19, i + 1, { s: 14 });
+  });
+  s += t((L + R) / 2, B + 40, "Sample number", { lab: 1, w: 700, s: 14 });
+  s += '<text x="14" y="' + ((T + B) / 2) + '" transform="rotate(-90 14 ' + ((T + B) / 2) + ')" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">Sample mean (g)</text>';
+  s += t(R + 5, Y(254.5) + 5, "action", { a: "start", s: 14, w: 700, c: "#d43c3c" });
+  s += t(R + 5, Y(253) + 5, "warning", { a: "start", s: 14, w: 700, c: "#a07800" });
+  s += t(R + 5, Y(250) + 5, "target", { a: "start", s: 14, w: 700, c: "#0f7a5f" });
+  s += t(R + 5, Y(247) + 5, "warning", { a: "start", s: 14, w: 700, c: "#a07800" });
+  s += t(R + 5, Y(245.5) + 5, "action", { a: "start", s: 14, w: 700, c: "#d43c3c" });
+  return s + '</svg>';
+})();
+
+var DEATHS_TABLE =
+'<table class="datatable" style="font-size:.92rem"><tr><th>Age group</th><th>Town B population</th><th>Town B deaths per 1000</th><th>Standard population</th></tr>' +
+'<tr><td>Under 20</td><td>4000</td><td>2</td><td>30%</td></tr>' +
+'<tr><td>20 to 59</td><td>4500</td><td>8</td><td>50%</td></tr>' +
+'<tr><td>60 and over</td><td>1500</td><td>50</td><td>20%</td></tr></table>';
+
+/* ---------- widget: Price tracker ---------- */
+var YEARS = [2021, 2022, 2023, 2024, 2025];
+var ITEMS = [
+  { name: "Bus fare", short: "Bus", col: BLUE, p: [1.50, 1.60, 1.80, 2.00, 2.10] },
+  { name: "Cinema ticket", short: "Cinema", col: VIOLET, p: [7.50, 8.00, 8.40, 9.00, 9.60] },
+  { name: "Phone data (month)", short: "Data", col: CYAN, p: [12.00, 11.00, 10.00, 10.00, 9.00] },
+  { name: "Chocolate bar", short: "Choc", col: CORAL, p: [0.60, 0.65, 0.75, 0.85, 0.90] }
+];
+var PT_ROUNDS = [
+  { kind: "pick", ask: "Which item's price rose <b>fastest</b> from 2021 to 2025? Set the base to 2021 and look at the lines, if you like.", ans: 3,
+    win: "Chocolate: index 150, so up 50%. The cinema ticket went up the most in <b>pounds</b> (&pound;2.10), but only 28% in proportion. Index numbers compare like with like.",
+    nudge: "Not that one. With 2021 as the base, every line starts at 100. Which one finishes highest in 2025?" },
+  { kind: "num", ask: "Change the base year to <b>2022</b>. What is the index number for the <b>cinema ticket</b> in 2025?", ans: 120, tol: 0.5, base: 1,
+    win: "9.60 &divide; 8.00 &times; 100 = 120. With 2022 as the base, the cinema line passes through 100 in 2022 and reaches 120 in 2025: 20% dearer than in 2022.",
+    nudge: "Not quite yet. Index = price that year &divide; price in the base year &times; 100. The base year is now 2022." },
+  { kind: "num", ask: "Phone data got <b>cheaper</b>. Using <b>2021</b> as the base year, what is its index number in 2025?", ans: 75, tol: 0.5, base: 0,
+    win: "9 &divide; 12 &times; 100 = 75. Below 100 means cheaper than the base year: 25% less.",
+    nudge: "Not quite yet. Price in 2025 &divide; price in 2021 &times; 100. A price that falls gives an index below 100." }
+];
+
+function mountTracker(el, api){
+  var d = api.data;
+  if(typeof d.base !== "number") d.base = 0;
+  if(typeof d.sel !== "number") d.sel = -1;
+  d.round = d.round || 0;
+  d.stars = d.stars || [];
+  d.miss = d.miss || 0;
+  d.rt = d.rt || 0;
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="pt-top"><span class="pt-round" id="ptRound"></span><span class="pt-stars" id="ptStars"></span></div>' +
+      '<div class="pt-years" id="ptYears"><span>Base year</span></div>' +
+      '<svg class="pt-svg" id="ptSvg" viewBox="0 0 360 236" role="img" aria-label="Line chart of index numbers for four items from 2021 to 2025. Every line passes through 100 in the chosen base year."></svg>' +
+      '<div class="pt-chips" id="ptChips"></div>' +
+      '<div class="pt-tag" id="ptTag" aria-live="polite"></div>' +
+      '<details><summary class="tiny" style="cursor:pointer">Price list</summary><div id="ptPrices"></div></details>' +
+      '<div class="pt-ask" id="ptAsk"></div>' +
+      '<div class="wnote" id="ptMsg" aria-live="polite"></div>' +
+    '</div>';
+
+  var svg = el.querySelector("#ptSvg"), msg = el.querySelector("#ptMsg"), ask = el.querySelector("#ptAsk");
+  var L = 44, R = 344, T = 12, B = 196, LO = 60, HI = 160;
+  function X(i){ return L + 14 + i * (R - L - 28) / 4; }
+  function Y(v){ return B - (v - LO) / (HI - LO) * (B - T); }
+  function idx(it, i){ return it.p[i] / it.p[d.base] * 100; }
+
+  var yb = el.querySelector("#ptYears");
+  YEARS.forEach(function(y, i){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = y; b.setAttribute("data-y", i);
+    b.onclick = function(){ d.base = i; api.save(); draw(); };
+    yb.appendChild(b);
+  });
+  var cb = el.querySelector("#ptChips");
+  ITEMS.forEach(function(it, k){
+    var b = document.createElement("button"); b.type = "button";
+    b.innerHTML = '<i style="background:' + it.col + '"></i>' + it.name;
+    b.onclick = function(){ d.sel = d.sel === k ? -1 : k; api.save(); draw(); };
+    cb.appendChild(b);
+  });
+
+  function draw(){
+    [].forEach.call(yb.querySelectorAll("button"), function(b, i){ b.classList.toggle("on", i === d.base); });
+    [].forEach.call(cb.querySelectorAll("button"), function(b, i){ b.classList.toggle("on", i === d.sel); });
+    var s = '<rect x="' + L + '" y="' + T + '" width="' + (R - L) + '" height="' + (B - T) + '" fill="' + WHITE + '"/>';
+    s += '<rect x="' + (X(d.base) - 14) + '" y="' + T + '" width="28" height="' + (B - T) + '" fill="' + SUN + '" fill-opacity="0.45"/>';
+    for(var v = LO; v <= HI; v += 20){
+      s += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + R + '" y2="' + Y(v) + '" stroke="' + (v === 100 ? INK : LINE) + '" stroke-width="' + (v === 100 ? 1.6 : 1) + '"' + (v === 100 ? ' stroke-dasharray="5 4"' : '') + '/>';
+      s += t(L - 6, Y(v) + 5, v, { a: "end", s: 14, w: v === 100 ? 800 : 400 });
+    }
+    s += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+    YEARS.forEach(function(y, i){ s += t(X(i), B + 20, y, { s: 14, w: i === d.base ? 800 : 400 }); });
+    s += t(X(d.base), B + 37, "base = 100", { s: 14, w: 700, c: "#8a6a00" });
+    s += '<text x="12" y="' + ((T + B) / 2) + '" transform="rotate(-90 12 ' + ((T + B) / 2) + ')" text-anchor="middle" ' + LAB + ' font-weight="700" font-size="14" fill="' + INK + '">Index</text>';
+    var order = [0, 1, 2, 3].filter(function(k){ return k !== d.sel; });
+    if(d.sel >= 0) order.push(d.sel);
+    order.forEach(function(k){
+      var it = ITEMS[k], dim = d.sel >= 0 && k !== d.sel;
+      var pts = YEARS.map(function(_, i){ return X(i) + "," + Y(idx(it, i)).toFixed(1); }).join(" ");
+      s += '<polyline points="' + pts + '" fill="none" stroke="' + it.col + '" stroke-width="' + (k === d.sel ? 4.5 : 2.5) + '"' + (dim ? ' stroke-opacity="0.3"' : '') + '/>';
+      YEARS.forEach(function(_, i){
+        s += '<circle cx="' + X(i) + '" cy="' + Y(idx(it, i)).toFixed(1) + '" r="' + (k === d.sel ? 5 : 3.5) + '" fill="' + it.col + '" stroke="' + WHITE + '" stroke-width="1.2"' + (dim ? ' fill-opacity="0.3"' : '') + '/>';
+      });
+    });
+    s += '<circle cx="' + X(d.base) + '" cy="' + Y(100) + '" r="7" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+    svg.innerHTML = s;
+
+    var tag = el.querySelector("#ptTag");
+    if(d.sel < 0){
+      tag.innerHTML = "Tap an item to follow its line. Every line goes through 100 in the base year, because the base year is compared with itself.";
+    }else{
+      var it = ITEMS[d.sel], last = 4;
+      var change = idx(it, last) - 100;
+      tag.innerHTML = '<b>' + it.name + '</b>: ' + money(it.p[d.base]) + ' in ' + YEARS[d.base] + ' (the base). In 2025 it is ' + money(it.p[last]) + ', ' +
+        (Math.abs(change) < 0.05 ? 'the same price.' : (change > 0 ? 'dearer' : 'cheaper') + ' than the base year.');
+    }
+    var pr = '<table class="pt-prices"><tr><th></th>' + YEARS.map(function(y, i){ return '<th' + (i === d.base ? ' class="base"' : '') + '>' + y + '</th>'; }).join("") + '</tr>' +
+      ITEMS.map(function(it){ return '<tr><th>' + it.short + '</th>' + it.p.map(function(p, i){ return '<td' + (i === d.base ? ' class="base"' : '') + '>' + p.toFixed(2) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>';
+    el.querySelector("#ptPrices").innerHTML = pr + '<p class="tiny" style="margin:0">Prices in &pound;.</p>';
+    stars();
+  }
+
+  function stars(){
+    var s = "";
+    for(var k = 0; k < PT_ROUNDS.length; k++){
+      var n = d.stars[k] || 0;
+      for(var j = 0; j < 3; j++) s += '<span class="' + (j < n ? "on" : "off") + '">&#9733;</span>';
+      if(k < PT_ROUNDS.length - 1) s += " ";
+    }
+    el.querySelector("#ptStars").innerHTML = s;
+  }
+
+  function challenge(){
+    var rd = el.querySelector("#ptRound");
+    if(d.round >= PT_ROUNDS.length){
+      rd.textContent = "All rounds done";
+      var tot = d.stars.reduce(function(a, b){ return a + b; }, 0);
+      ask.innerHTML = '<b>' + tot + ' stars out of 9.</b> Have a play with the base year: the lines move up and down, but the <b>order</b> of the items in 2025 compared with 2021 never changes. Changing the base changes what you compare with, not which item rose fastest.';
+      return;
+    }
+    var r = PT_ROUNDS[d.round];
+    rd.textContent = "Round " + (d.round + 1) + " of 3";
+    if(r.kind === "pick"){
+      ask.innerHTML = '<p class="wnote" style="margin:0">' + r.ask + '</p><div class="pt-opts">' +
+        ITEMS.map(function(it, k){ return '<button type="button" data-k="' + k + '">' + it.name + '</button>'; }).join("") + '</div>' +
+        (d.rt >= 1 ? '<div class="wrow"><button class="btn btn-quiet" type="button" id="ptShow">Show me</button></div>' : '');
+      [].forEach.call(ask.querySelectorAll("[data-k]"), function(b){
+        b.onclick = function(){ answer(parseInt(b.getAttribute("data-k"), 10)); };
+      });
+    }else{
+      ask.innerHTML = '<p class="wnote" style="margin:0">' + r.ask + '</p>' +
+        '<div class="wrow"><input class="pt-in" id="ptAns" type="text" inputmode="decimal" autocomplete="off" aria-label="Index number">' +
+        '<button class="btn" type="button" id="ptGo">Check</button>' +
+        (d.rt >= 1 ? '<button class="btn btn-quiet" type="button" id="ptShow">Show me</button>' : '') + '</div>';
+      var inp = ask.querySelector("#ptAns");
+      ask.querySelector("#ptGo").onclick = function(){
+        var v = EGW.parseNum(inp.value);
+        if(isNaN(v)){ msg.innerHTML = "Pop a number in first."; return; }
+        answer(v);
+      };
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") ask.querySelector("#ptGo").click(); });
+    }
+    var sh = ask.querySelector("#ptShow");
+    if(sh) sh.onclick = function(){ d.used = true; finishRound(1, '<b>Here it is.</b> ' + r.win); };
+  }
+
+  function answer(v){
+    var r = PT_ROUNDS[d.round];
+    var ok = r.kind === "pick" ? v === r.ans : Math.abs(v - r.ans) <= r.tol;
+    if(ok){
+      finishRound(Math.max(1, 3 - d.rt), '<b>' + ["Spot on.", "Sharp shopping.", "Yes!"][d.round] + '</b> ' + r.win);
+      return;
+    }
+    d.rt++; d.miss++; api.save();
+    var extra = "";
+    if(r.kind === "pick" && v === 1) extra = " Cinema went up the most in pounds, but is that the most <b>in proportion</b>?";
+    if(r.kind === "num" && r.base === 1 && Math.abs(v - 128) < 0.6) extra = " That is the index with 2021 as the base. Switch the base year to 2022.";
+    if(r.kind === "num" && r.base === 0 && Math.abs(v - 133.3) < 0.6) extra = " Careful which way round: the base year price goes on the bottom.";
+    if(r.kind === "num" && r.base === 0 && Math.abs(v - 25) < 0.6) extra = " That is how much it fell, as a percentage. The index itself is 100 minus that.";
+    msg.innerHTML = '<b>' + r.nudge.split(". ")[0] + '.</b> ' + r.nudge.split(". ").slice(1).join(". ") + extra + (d.rt >= 1 ? " Show me is there if you want it." : "");
+    challenge();
+  }
+
+  function finishRound(n, text){
+    d.stars[d.round] = n;
+    if(PT_ROUNDS[d.round].base !== undefined){ d.base = PT_ROUNDS[d.round].base; }
+    d.round++; d.rt = 0;
+    if(d.round >= PT_ROUNDS.length && !d.result){
+      d.result = d.used ? "shown" : (d.miss ? "right2" : "right1");
+      api.save(); api.done(d.result);
+    }
+    api.save();
+    draw(); challenge();
+    msg.innerHTML = text;
+  }
+
+  draw(); challenge();
+}
+
+EGW.run({
+  id: "stats-index-numbers",
+  title: "Index numbers and rates",
+  subject: "GCSE Statistics",
+  mins: 55,
+  blurb: "Index numbers with a base year of 100, CPI and RPI, rates of change, then stretch chunks on chain base and weighted indices, crude and standardised rates, the normal distribution and control charts.",
+  steps: [
+
+  /* ---------- INDEX NUMBERS ---------- */
+  { type: "learn", topic: "Index numbers",
+    title: "Base year = 100",
+    fig: INDEX_FIG,
+    html: '<p>An <b>index number</b> shows how a price (or any amount) has changed compared with a <b>base year</b>. The base year always has index <b>100</b>.</p>' +
+          '<p><b>Index = price this year &divide; price in the base year &times; 100</b></p>' +
+          '<ul>' +
+          '<li>Index 120: the price is 20% higher than in the base year.</li>' +
+          '<li>Index 100: the same as the base year.</li>' +
+          '<li>Index 85: the price is 15% lower than in the base year.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Index minus 100 is the percentage change since the base year. Only since the base year, though.</div>' },
+
+  { type: "num", topic: "Index numbers",
+    q: "A slice of pizza cost <b>&pound;2.75</b> in 2020 and <b>&pound;3.30</b> in 2024. Using 2020 as the base year, work out the index number for 2024.",
+    boxes: [ { label: "Index for 2024", a: 120 } ],
+    hint: "Price this year &divide; price in the base year, then &times; 100.",
+    why: "3.30 &divide; 2.75 &times; 100 = <b>120</b>. So the pizza was 20% dearer in 2024 than in 2020.<br>Doing 2.75 &divide; 3.30 &times; 100 (upside down) gives 83.3, which would wrongly say the price fell." },
+
+  { type: "mc", topic: "Index numbers",
+    q: "Using 2015 as the base year, the index number for a bus fare in 2025 is <b>135</b>. What does this mean?",
+    options: [
+      "The bus fare in 2025 was 35% more than in 2015",
+      "The bus fare in 2025 was &pound;1.35",
+      "The bus fare went up by 35% every year",
+      "The bus fare in 2025 was 135% more than in 2015"
+    ],
+    answer: 0,
+    hint: "The base year is 100. What is the difference between 135 and 100?",
+    why: "135 &minus; 100 = 35, so the fare is <b>35% more</b> than in 2015. It says nothing about each year in between, and an index is not a price. \"135% more\" would be an index of 235." },
+
+  { type: "num", topic: "Index numbers",
+    q: "With 2021 as the base year, the index for a bus fare in 2025 is 135. The fare was <b>&pound;1.80</b> in 2021. What was the fare in 2025?",
+    boxes: [ { label: "Fare in 2025", pre: "&pound;", a: 2.43 } ],
+    hint: "Index 135 means 135% of the base year price.",
+    why: "135% of &pound;1.80 = 1.35 &times; 1.80 = <b>&pound;2.43</b>. Going backwards from an index: multiply the base year price by index &divide; 100." },
+
+  /* ---------- PRICE TRACKER ---------- */
+  { type: "learn", topic: "Comparing prices",
+    title: "Why bother with an index?",
+    html: '<p>A cinema ticket going up by &pound;2.10 sounds like more than a chocolate bar going up by 30p. But the chocolate bar started at 60p, so 30p is half its price again.</p>' +
+          '<ul>' +
+          '<li>Index numbers turn every item into the same scale, so you can compare <b>proportional</b> change fairly.</li>' +
+          '<li>You can choose any year as the base. Changing the base changes the numbers, but not which item rose fastest.</li>' +
+          '<li>Below 100 means cheaper than the base year. Phone data has been getting cheaper, for example.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Compare items with index numbers (or percentages), not with pounds and pence.</div>' },
+
+  { type: "widget", topic: "Comparing prices",
+    title: "Price tracker",
+    html: "A teenage basket of four things, priced every year from 2021 to 2025. Pick a base year and the index lines redraw. Three rounds, up to 9 stars.",
+    mount: mountTracker,
+    report: function(d){
+      var r = { right1: "all rounds right first go", right2: "finished with some second goes", shown: "finished, using Show me" }[d.result] || "not finished (" + (d.round || 0) + " of 3 rounds)";
+      var st = (d.stars || []).reduce(function(a, b){ return a + b; }, 0);
+      return "Price tracker widget: " + r + "; " + st + "/9 stars.";
+    } },
+
+  { type: "num", topic: "Comparing prices",
+    q: "A cinema ticket cost <b>&pound;8.40</b> in 2023 and <b>&pound;9.00</b> in 2024. Using <b>2023</b> as the base year, find the index number for 2024. Give your answer to 1 decimal place.",
+    boxes: [ { label: "Index for 2024", a: 107.1, tol: 0.06 } ],
+    hint: "The base year is 2023, so 8.40 goes on the bottom.",
+    why: "9.00 &divide; 8.40 &times; 100 = 107.142..., so <b>107.1</b>. The ticket was about 7.1% dearer than in 2023." },
+
+  /* ---------- CHAIN BASE ---------- */
+  { type: "learn", topic: "Chain base index",
+    title: "Chain base: compare with last year",
+    html: '<p class="tiny"><b>This chunk may be Higher only.</b></p>' +
+          '<p>A <b>chain base</b> index compares each year with the year <b>before</b>, not with one fixed year.</p>' +
+          '<p><b>Chain base index = price this year &divide; price last year &times; 100</b></p>' +
+          '<table class="datatable"><tr><th>Year</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>' +
+          '<tr><th>Price</th><td>&pound;2.00</td><td>&pound;2.10</td><td>&pound;2.31</td><td>&pound;2.31</td></tr>' +
+          '<tr><th>Chain index</th><td>&ndash;</td><td>105</td><td>110</td><td>100</td></tr></table>' +
+          '<ul><li>110 in Year 3 means 10% up on Year 2.</li>' +
+          '<li>100 in Year 4 means no change since Year 3, <b>not</b> back to the Year 1 price.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>A chain base index below 100 means the price fell since last year. It can still be higher than it was years ago.</div>' },
+
+  { type: "num", topic: "Chain base index", stretch: true,
+    q: "A gym membership cost &pound;25.00 in 2023, &pound;26.00 in 2024 and &pound;27.30 in 2025. Work out the chain base index numbers.",
+    boxes: [
+      { label: "2024", a: 104 },
+      { label: "2025", a: 105 }
+    ],
+    hint: "Each year is divided by the year just before it.",
+    why: "2024: 26.00 &divide; 25.00 &times; 100 = <b>104</b>.<br>2025: 27.30 &divide; 26.00 &times; 100 = <b>105</b>.<br>Using 2023 as a fixed base for 2025 would give 109.2, which is a different (fixed base) index." },
+
+  { type: "mc", topic: "Chain base index", stretch: true,
+    q: "The chain base index numbers for the price of a phone case are: 2023: <b>103</b>, 2024: <b>98</b>, 2025: <b>101</b>. Which statement is true?",
+    options: [
+      "The price fell between 2023 and 2024, but was still higher in 2024 than in 2022",
+      "The price in 2024 was lower than in 2022",
+      "The price went up by 2% between 2023 and 2024",
+      "The price in 2025 was 1% higher than in 2022"
+    ],
+    answer: 0,
+    hint: "98 is compared with 2023, not 2022. Try a price of &pound;100 in 2022 and follow it through.",
+    why: "Start at &pound;100 in 2022. 2023: &times; 1.03 = &pound;103. 2024: &times; 0.98 = &pound;100.94. 2025: &times; 1.01 = &pound;101.95. So it fell in 2024, but stayed above the 2022 price, and by 2025 it was about 2% above 2022, not 1%. Chain changes multiply, they do not add." },
+
+  /* ---------- WEIGHTED, CPI AND RPI ---------- */
+  { type: "learn", topic: "Weighted, CPI, RPI",
+    title: "Weighted index numbers, CPI and RPI",
+    html: '<p class="tiny"><b>Calculating a weighted index may be Higher only.</b> Knowing what CPI and RPI are is useful on any tier.</p>' +
+          '<p>Not everything matters equally. A family spends more on food than on clothes, so food should count more. A <b>weighted index</b> multiplies each index by its weight:</p>' +
+          '<p><b>Weighted index = total of (index &times; weight) &divide; total of weights</b></p>' +
+          '<p>Food 110 (weight 5), travel 125 (weight 2), clothes 104 (weight 3):<br>(550 + 250 + 312) &divide; 10 = 1112 &divide; 10 = <b>111.2</b></p>' +
+          '<ul>' +
+          '<li>The <b>Consumer Price Index (CPI)</b> is a weighted index of the prices of a big "basket" of goods and services that households buy. It is the main UK measure of <b>inflation</b> (how fast prices are rising).</li>' +
+          '<li>The <b>Retail Price Index (RPI)</b> is an older measure. It also includes some housing costs, such as mortgage interest payments, which the CPI leaves out.</li>' +
+          '<li><b>GDP</b> (gross domestic product) measures the value of everything a country produces; it is often shown as an index too.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Weighted index: multiply each by its weight, add, then divide by the total weight. Just like a weighted mean.</div>' },
+
+  { type: "match", topic: "Weighted, CPI, RPI",
+    q: "Match each term to what it means.",
+    pairs: [
+      ["Base year", "The year everything is compared with, with index 100"],
+      ["CPI", "A weighted index of a basket of household goods and services, used to measure inflation"],
+      ["RPI", "An older inflation measure that also includes some housing costs"],
+      ["Inflation", "The rate at which prices in general are rising"],
+      ["Weight", "How important an item is in a combined index"]
+    ],
+    hint: "CPI and RPI are both inflation measures. Which one includes mortgage interest?",
+    why: "The base year has index 100. CPI and RPI both track a basket of prices, but RPI includes some housing costs such as mortgage interest payments. Inflation is the general rise in prices, and weights say how much each item counts." },
+
+  { type: "num", topic: "Weighted, CPI, RPI", stretch: true,
+    q: "A family's spending index uses these index numbers and weights. Work out the weighted index.",
+    fig: '<table class="datatable"><tr><th>Item</th><th>Index</th><th>Weight</th></tr><tr><td>Food</td><td>120</td><td>5</td></tr><tr><td>Fuel</td><td>105</td><td>2</td></tr><tr><td>Rent</td><td>110</td><td>3</td></tr></table>',
+    boxes: [ { label: "Weighted index", a: 114 } ],
+    hint: "Index &times; weight for each row, add them up, then divide by the total of the weights.",
+    why: "120 &times; 5 = 600, 105 &times; 2 = 210, 110 &times; 3 = 330. Total 1140. Weights: 5 + 2 + 3 = 10. 1140 &divide; 10 = <b>114</b>.<br>The plain mean of the three indices would be 111.7; food counts most, so the weighted index is pulled towards 120." },
+
+  /* ---------- RATES OF CHANGE ---------- */
+  { type: "learn", topic: "Rates of change",
+    title: "Rates of change over time",
+    html: '<p>A <b>rate of change</b> tells you how fast something changes over time.</p>' +
+          '<ul>' +
+          '<li><b>Percentage change</b> = change &divide; original &times; 100.</li>' +
+          '<li><b>Average change per year</b> = total change &divide; number of years.</li>' +
+          '<li>Rates are often given <b>per 1000</b> people so places of different sizes can be compared fairly (more on that in the next chunk).</li>' +
+          '</ul>' +
+          '<p>A house worth &pound;200 000 rises to &pound;230 000 over 5 years. Change &pound;30 000. Percentage change 30 000 &divide; 200 000 &times; 100 = <b>15%</b>. Average &pound;6000 a year.</p>' +
+          '<div class="keep"><b>Keep this</b>Always divide by the <b>original</b> value for a percentage change.</div>' },
+
+  { type: "num", topic: "Rates of change",
+    q: "The average wage in a town rose from <b>&pound;52 000</b> to <b>&pound;55 120</b> over 4 years.",
+    boxes: [
+      { label: "Percentage increase", a: 6, post: "%" },
+      { label: "Average increase per year", pre: "&pound;", a: 780 }
+    ],
+    hint: "Find the change first. Then divide by the original wage (for the percentage) or by 4 (for each year).",
+    why: "Change: 55 120 &minus; 52 000 = &pound;3120.<br>Percentage: 3120 &divide; 52 000 &times; 100 = <b>6%</b>.<br>Per year: 3120 &divide; 4 = <b>&pound;780</b>." },
+
+  { type: "mc", topic: "Rates of change",
+    q: "Town A had 600 births last year. Town B had 900. Which is the fairest way to decide which town has the higher birth rate?",
+    options: [
+      "Divide each by its population and multiply by 1000, then compare",
+      "Town B, because 900 is more than 600",
+      "Subtract one from the other",
+      "Compare the number of hospitals in each town"
+    ],
+    answer: 0,
+    hint: "What if Town B has three times as many people?",
+    why: "A bigger town will usually have more births. Turning each into a rate <b>per 1000 people</b> puts them on the same scale. That is a crude birth rate." },
+
+  /* ---------- CRUDE AND STANDARDISED ---------- */
+  { type: "learn", topic: "Crude and standardised",
+    title: "Crude rates and standardised rates",
+    html: '<p class="tiny"><b>This chunk may be Higher only.</b></p>' +
+          '<p><b>Crude rate = number of events &divide; total population &times; 1000</b> (a rate per 1000).</p>' +
+          '<p>A town of 115 000 people has 1380 births: 1380 &divide; 115 000 &times; 1000 = <b>12 per 1000</b>.</p>' +
+          '<p>Crude death rates can mislead. A seaside town full of retired people will have a high crude death rate even if it is a very healthy place, because older people are more likely to die.</p>' +
+          '<p>A <b>standardised rate</b> fixes this. Use each age group\'s own rate, but weight them by a <b>standard population</b> (the same age mix for every town):</p>' +
+          '<p><b>Standardised rate = total of (rate per 1000 for the age group &times; standard population proportion)</b></p>' +
+          '<p>Town A: rates 1, 6 and 40 per 1000 for young, middle, older. Standard population 30%, 50%, 20%.<br>1 &times; 0.3 + 6 &times; 0.5 + 40 &times; 0.2 = 0.3 + 3 + 8 = <b>11.3 per 1000</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Crude rate: whole town, real age mix. Standardised rate: same age mix for everyone, so it is a fair comparison.</div>' },
+
+  { type: "num", topic: "Crude and standardised", stretch: true,
+    q: "Town B has a population of 10 000. The table shows its age groups and death rates, and a standard population.",
+    fig: DEATHS_TABLE,
+    boxes: [
+      { label: "Number of deaths in Town B in the year", a: 119 },
+      { label: "Crude death rate for Town B, per 1000", a: 11.9 },
+      { label: "Standardised death rate for Town B, per 1000", a: 14.6 }
+    ],
+    hint: "Deaths in a group = rate per 1000 &times; population &divide; 1000. For the standardised rate, use 0.3, 0.5 and 0.2 as the weights.",
+    why: "Deaths: 2 &times; 4 + 8 &times; 4.5 + 50 &times; 1.5 = 8 + 36 + 75 = <b>119</b>.<br>Crude rate: 119 &divide; 10 000 &times; 1000 = <b>11.9 per 1000</b>.<br>Standardised: 2 &times; 0.3 + 8 &times; 0.5 + 50 &times; 0.2 = 0.6 + 4 + 10 = <b>14.6 per 1000</b>." },
+
+  { type: "mc", topic: "Crude and standardised", stretch: true,
+    q: "Town A (seaside, lots of older people) has a crude death rate of 22 and a standardised death rate of 11.3. Town B has a crude rate of 11.9 and a standardised rate of 14.6. Which conclusion is best?",
+    options: [
+      "Once age is taken into account, Town B has the higher death rate; Town A's crude rate is high because it has more older people",
+      "Town A is the less healthy town, because its crude rate is higher",
+      "The two towns are equally healthy, because 22 &minus; 11.3 is about 11",
+      "Standardised rates should only be used for birth rates"
+    ],
+    answer: 0,
+    hint: "Which rate takes the age mix into account?",
+    why: "Standardised rates compare the towns as if they had the same age mix, so they are the fair comparison: B 14.6 is higher than A 11.3. A's crude rate is high because many of its residents are older, not because it is a less healthy place." },
+
+  /* ---------- NORMAL DISTRIBUTION ---------- */
+  { type: "learn", topic: "Normal distribution",
+    title: "The normal distribution",
+    fig: NORMAL_FIG,
+    html: '<p class="tiny"><b>This chunk may be Higher only.</b></p>' +
+          '<p>Lots of measured data (heights, masses, times) follow a <b>normal distribution</b>.</p>' +
+          '<ul>' +
+          '<li>Bell shaped and <b>symmetrical</b> about the mean.</li>' +
+          '<li>Mean = median = mode, all in the middle.</li>' +
+          '<li>About <b>68%</b> of values lie within 1 standard deviation of the mean, about <b>95%</b> within 2, and almost all (about <b>99.7%</b>) within 3.</li>' +
+          '<li>A value more than 3 standard deviations from the mean is very unusual.</li>' +
+          '</ul>' +
+          '<p>A standardised score says how many standard deviations a value is from the mean: (value &minus; mean) &divide; standard deviation.</p>' +
+          '<div class="keep"><b>Keep this</b>68, 95, 99.7. One, two, three standard deviations.</div>' },
+
+  { type: "num", topic: "Normal distribution", stretch: true,
+    q: "The heights of 500 Year 11 students are normally distributed with mean 165 cm and standard deviation 8 cm.",
+    fig: NORMAL_FIG,
+    boxes: [
+      { label: "About 95% of heights lie between", a: 149, post: "cm" },
+      { label: "and", a: 181, post: "cm" },
+      { label: "About how many students are taller than 181 cm?", a: 12.5, tol: 0.6, show: "12.5 (about 12 or 13)" }
+    ],
+    hint: "95% means within 2 standard deviations either side. The 5% outside is split equally between the two tails.",
+    why: "2 &times; 8 = 16, so 165 &minus; 16 = <b>149</b> and 165 + 16 = <b>181</b>.<br>5% are outside, half of that above 181: 2.5% of 500 = <b>12.5</b>, so about 12 or 13 students." },
+
+  { type: "mc", topic: "Normal distribution", stretch: true,
+    q: "Using the same heights (mean 165 cm, standard deviation 8 cm), a student is 190 cm tall. What can you say?",
+    options: [
+      "190 is more than 3 standard deviations above the mean, so it is very unusual",
+      "190 is within 2 standard deviations, so it is quite common",
+      "It must be a mistake, because no value can be more than 2 standard deviations away",
+      "190 is exactly 1 standard deviation above the mean"
+    ],
+    answer: 0,
+    hint: "Work out (190 &minus; 165) &divide; 8.",
+    why: "(190 &minus; 165) &divide; 8 = 25 &divide; 8 = 3.125 standard deviations above the mean. More than 3 is very unusual, but not impossible, so it is worth checking rather than deleting." },
+
+  /* ---------- QUALITY CONTROL ---------- */
+  { type: "learn", topic: "Control charts",
+    title: "Quality assurance and control charts",
+    fig: QC_FIG,
+    html: '<p class="tiny"><b>This chunk may be Higher only.</b></p>' +
+          '<p>A factory fills bags of crisps with a target of 250 g. Every so often it takes a small sample of bags and plots the <b>sample mean</b> on a <b>control chart</b>.</p>' +
+          '<ul>' +
+          '<li><b>Warning lines</b> are usually 2 standard deviations (of the sample means) either side of the target. Between the warning and action lines: take another sample straight away.</li>' +
+          '<li><b>Action lines</b> are usually 3 standard deviations either side. Outside an action line: stop the machine and adjust it.</li>' +
+          '<li>Here the standard deviation of the sample means is 1.5 g, so warning lines 250 &plusmn; 3 = 247 and 253; action lines 250 &plusmn; 4.5 = 245.5 and 254.5.</li>' +
+          '</ul>' +
+          '<p>Control charts can also track the sample median or the sample range (to check the machine is consistent).</p>' +
+          '<div class="keep"><b>Keep this</b>Inside warning: carry on. Warning zone: sample again. Past action: stop and fix.</div>' },
+
+  { type: "mc", topic: "Control charts", stretch: true,
+    q: "Look at the control chart. Sample 6 has a mean of 253.6 g, and sample 10 has a mean of 255.0 g. What should happen?",
+    fig: QC_FIG,
+    options: [
+      "After sample 6, take another sample straight away; after sample 10, stop the machine and adjust it",
+      "Stop the machine after sample 6 and again after sample 10",
+      "Nothing: both are above 250 g, so customers get extra crisps",
+      "After sample 10, take another sample and carry on if it is fine"
+    ],
+    answer: 0,
+    hint: "Which zone is each point in: between warning and action, or past action?",
+    why: "253.6 is between the upper warning line (253) and the action line (254.5), so take another sample at once; sample 7 was fine, so the process carried on. 255.0 is past the action line, so stop and adjust. Over filling matters too: it costs the factory money." },
+
+  { type: "num", topic: "Control charts", stretch: true,
+    q: "Exam style. A machine fills bottles with a target of <b>500 ml</b>. The standard deviation of the sample means is <b>4 ml</b>. Warning lines are 2 standard deviations from the target, action lines 3.",
+    boxes: [
+      { label: "(a) Upper warning line", a: 508, post: "ml" },
+      { label: "(b) Lower action line", a: 488, post: "ml" },
+      { label: "(c) A sample mean is 489.6 ml. How many standard deviations below the target is it?", a: 2.6 },
+      { label: "(d) Type 1 for carry on, 2 for take another sample, 3 for stop and adjust", a: 2 }
+    ],
+    hint: "Warning: target &plusmn; 2 &times; 4. Action: target &plusmn; 3 &times; 4. For (c), (500 &minus; 489.6) &divide; 4.",
+    why: "(a) 500 + 2 &times; 4 = <b>508 ml</b>.<br>(b) 500 &minus; 3 &times; 4 = <b>488 ml</b>.<br>(c) (500 &minus; 489.6) &divide; 4 = 10.4 &divide; 4 = <b>2.6</b>.<br>(d) 2.6 is past the warning line (2) but not the action line (3), so <b>2</b>: take another sample straight away." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

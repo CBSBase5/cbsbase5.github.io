@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scatter graphs and correlation - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Best fit challenge widget */
+.bf-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.bf-pill{font-family:var(--display);font-weight:700;font-size:.85rem;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px}
+.bf-live{font-family:var(--display);font-weight:700;color:var(--violet);font-size:.95rem}
+.bf-nudge{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.bf-nudge div{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px}
+.bf-nudge span{font-size:.9rem;font-weight:700}
+.bf-nudge button{font-family:inherit;font-size:1.05rem;width:40px;height:36px;border:2px solid var(--ink);border-radius:10px;background:#fff;cursor:pointer;color:var(--ink)}
+.bf-nudge button:disabled{opacity:.35;cursor:default}
+.bf-score{text-align:center;margin:6px 0}
+.bf-score .wbig{font-size:2.2rem;color:var(--violet)}
+.bf-stars{font-size:1.5rem;letter-spacing:.15em;color:var(--sun);-webkit-text-stroke:1px var(--ink)}
+.bf-input{width:110px;text-align:center;padding:9px 8px;font-family:inherit;font-size:1.15rem;border:3px solid rgba(20,26,51,.22);border-radius:12px 10px 14px 10px;background:#fff;color:var(--ink)}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Scatter graphs and correlation</h2>
+    <span>GCSE Statistics. Spotting links between two things, drawing lines of best fit, making predictions, and putting a number on how strong a link is.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function T(x, y, str, size, opts){
+  opts = opts || {};
+  return '<text x="' + x + '" y="' + y + '"' + (opts.anchor ? ' text-anchor="' + opts.anchor + '"' : '') +
+    ' ' + (opts.lab ? LAB + ' font-weight="700"' : BODY) + ' font-size="' + size + '" fill="' + (opts.col || INK) + '"' +
+    (opts.rot ? ' transform="rotate(' + opts.rot + ' ' + x + ' ' + y + ')"' : '') + '>' + str + '</text>';
+}
+function Ln(x1, y1, x2, y2, col, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>';
+}
+function dot(x, y, col, r){ return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (r || 5.5) + '" fill="' + (col || CYAN) + '" stroke="' + INK + '" stroke-width="2"/>'; }
+function cross(x, y, col, sz){
+  sz = sz || 8;
+  return Ln(x - sz, y - sz, x + sz, y + sz, col, 3.5) + Ln(x - sz, y + sz, x + sz, y - sz, col, 3.5);
+}
+
+/* A scatter diagram.
+   o: {pts, xlo, xhi, xstep, ylo, yhi, ystep, xt, yt, aria, line:[x1,y1,x2,y2], mean:[x,y], tags:[[x,y,label,col]], shade:[x1,x2], odd:[x,y], maxw} */
+function SCAT(o){
+  var L = 54, R = 348, top = 14, bot = 220;
+  function X(v){ return L + (v - o.xlo) / (o.xhi - o.xlo) * (R - L); }
+  function Y(v){ return bot - (v - o.ylo) / (o.yhi - o.ylo) * (bot - top); }
+  var s = '<svg viewBox="0 0 360 272" role="img" aria-label="' + o.aria + '" style="max-width:' + (o.maxw || 460) + 'px">';
+  if(o.shade) s += '<rect x="' + X(o.shade[0]) + '" y="' + top + '" width="' + (X(o.shade[1]) - X(o.shade[0])) + '" height="' + (bot - top) + '" fill="' + SUN + '" fill-opacity="0.22"/>';
+  var v, lab;
+  for(v = o.ylo; v <= o.yhi + 1e-9; v += o.ystep){
+    if(v > o.ylo) s += Ln(L, Y(v), R, Y(v), LINE, 1.4);
+    s += Ln(L - 5, Y(v), L, Y(v)) + T(L - 8, Y(v) + 5, Math.round(v * 10) / 10, 14, { anchor: "end" });
+  }
+  for(v = o.xlo; v <= o.xhi + 1e-9; v += o.xstep){
+    if(v > o.xlo) s += Ln(X(v), top, X(v), bot, LINE, 1.4);
+    s += Ln(X(v), bot, X(v), bot + 5) + T(X(v), bot + 22, Math.round(v * 10) / 10, 14, { anchor: "middle" });
+  }
+  s += Ln(L, top - 4, L, bot) + Ln(L, bot, R + 4, bot);
+  s += T((L + R) / 2, bot + 46, o.xt, 14, { anchor: "middle" });
+  s += T(14, (top + bot) / 2, o.yt, 14, { anchor: "middle", rot: -90 });
+  if(o.line){
+    s += '<clipPath id="c' + (SCAT.n = (SCAT.n || 0) + 1) + '"><rect x="' + L + '" y="' + top + '" width="' + (R - L) + '" height="' + (bot - top) + '"/></clipPath>';
+    s += '<line clip-path="url(#c' + SCAT.n + ')" x1="' + X(o.line[0]) + '" y1="' + Y(o.line[1]) + '" x2="' + X(o.line[2]) + '" y2="' + Y(o.line[3]) + '" stroke="' + VIOLET + '" stroke-width="3.5"/>';
+  }
+  (o.pts || []).forEach(function(p){ s += dot(X(p[0]), Y(p[1]), CYAN); });
+  if(o.odd) s += dot(X(o.odd[0]), Y(o.odd[1]), CYAN);
+  (o.tags || []).forEach(function(t){
+    s += dot(X(t[0]), Y(t[1]), t[3] || CORAL, 7);
+    s += T(X(t[0]) + 10, Y(t[1]) - 8, t[2], 16, { lab: true, col: INK });
+  });
+  if(o.mean) s += cross(X(o.mean[0]), Y(o.mean[1]), CORAL, 8);
+  return s + '</svg>';
+}
+
+/* Three little scatters for the correlation learn card */
+var THREE = (function(){
+  function mini(ox, pts, title, sub){
+    var s = '<rect x="' + ox + '" y="6" width="112" height="112" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+    pts.forEach(function(p){ s += '<circle cx="' + (ox + p[0]) + '" cy="' + (6 + p[1]) + '" r="4.2" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="1.6"/>'; });
+    s += T(ox + 56, 140, title, 15, { anchor: "middle", lab: true });
+    s += T(ox + 56, 158, sub, 14, { anchor: "middle" });
+    return s;
+  }
+  var pos = [[12, 96], [22, 88], [30, 90], [38, 74], [46, 70], [54, 62], [62, 58], [70, 44], [78, 40], [88, 28], [98, 18]];
+  var neg = pos.map(function(p){ return [p[0], 112 - p[1]]; });
+  var none = [[14, 30], [20, 84], [30, 54], [38, 98], [46, 22], [56, 70], [64, 40], [74, 92], [82, 58], [92, 20], [98, 76]];
+  return '<svg viewBox="0 0 360 166" role="img" aria-label="Three small scatter diagrams. Positive: points go up from left to right. Negative: points go down. No correlation: points scattered with no pattern." style="max-width:460px">' +
+    mini(4, pos, "Positive", "both go up") + mini(124, neg, "Negative", "one up, one down") + mini(244, none, "None", "no pattern") + '</svg>';
+})();
+
+/* ---------- figures ---------- */
+var REVISE_PTS = [[1, 30], [2, 35], [2.5, 48], [3, 45], [4, 52], [5, 58], [5.5, 66], [7, 72], [8, 80], [9, 86]];
+var REVISE = SCAT({ pts: REVISE_PTS, xlo: 0, xhi: 10, xstep: 2, ylo: 0, yhi: 100, ystep: 20,
+  xt: "Hours of revision (explanatory)", yt: "Test score (response)",
+  aria: "Scatter diagram of hours of revision against test score. The points go up from left to right." });
+
+var TAGGED = SCAT({ pts: [], xlo: 0, xhi: 10, xstep: 2, ylo: 0, yhi: 100, ystep: 20,
+  xt: "Hours of revision", yt: "Test score",
+  tags: [[6, 70, "A", CORAL], [6, 40, "B", SUN], [4, 60, "C", MINT], [8, 40, "D", VIOLET]],
+  aria: "Scatter diagram with four labelled points. A at 6 hours and 70. B at 6 hours and 40. C at 4 hours and 60. D at 8 hours and 40." });
+
+var PHONE = SCAT({ pts: [[1, 9.2], [1.5, 9.0], [2, 8.9], [2.5, 8.5], [3, 8.2], [3.5, 8.0], [4, 7.6], [4.5, 7.5], [5, 7.1], [5.5, 6.9]],
+  xlo: 0, xhi: 6, xstep: 1, ylo: 6, yhi: 10, ystep: 1,
+  xt: "Phone use in the evening (hours)", yt: "Sleep (hours)",
+  aria: "Scatter diagram of evening phone use against sleep. The points go down in a tight line from about 9.2 hours of sleep at 1 hour of phone use to 6.9 hours at 5.5 hours." });
+
+var BESTFIT = SCAT({ pts: REVISE_PTS, xlo: 0, xhi: 10, xstep: 2, ylo: 0, yhi: 100, ystep: 20,
+  xt: "Hours of revision", yt: "Test score",
+  line: [0, 24.8, 10, 93.8], mean: [4.7, 57.2],
+  aria: "The revision scatter diagram with a line of best fit going up through the double mean point, marked with a cross at 4.7 hours and 57.2 marks." });
+
+var TYPE_PTS = [[2, 33], [3, 36], [3.5, 42], [4, 43], [5, 52], [6, 55], [6.5, 58], [7, 63], [8, 66], [9, 75]];
+var TYPING = SCAT({ pts: TYPE_PTS, xlo: 0, xhi: 10, xstep: 1, ylo: 0, yhi: 90, ystep: 10,
+  xt: "Practice per week (hours)", yt: "Typing speed (words per minute)",
+  line: [0, 20, 10, 80], shade: [2, 9],
+  aria: "Scatter diagram of practice hours against typing speed, data from 2 to 9 hours shaded, with a line of best fit from 20 words per minute at 0 hours to 80 at 10 hours." });
+
+var OUTLIER = SCAT({ pts: [[10, 22], [11, 24], [12, 26], [14, 31], [18.5, 39], [19, 40], [23, 49]],
+  xlo: 8, xhi: 26, xstep: 2, ylo: 10, yhi: 60, ystep: 10,
+  xt: "Plant height, week 1 (cm)", yt: "Plant height, week 4 (cm)",
+  tags: [[13, 52, "P", CORAL], [16, 34, "Q", SUN], [20.5, 44, "R", MINT], [25, 53, "S", VIOLET]],
+  aria: "Scatter diagram with strong positive correlation. Labelled points: P at 13 and 52, well above the others. Q at 16 and 34. R at 20.5 and 44. S at 25 and 53, all following the pattern." });
+
+var CAKES =
+'<table class="datatable"><tr><th>Cake</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>' +
+'<tr><th>Judge 1 score</th><td>8</td><td>6</td><td>9</td><td>4</td><td>7</td><td>5</td></tr>' +
+'<tr><th>Judge 2 score</th><td>7</td><td>5</td><td>9</td><td>6</td><td>8</td><td>3</td></tr></table>' +
+'<p class="tiny" style="text-align:center">Rank 1 = highest score.</p>';
+
+var SPEARMAN_LEARN =
+'<table class="datatable"><tr><th>Singer</th><th>Judge 1</th><th>Judge 2</th><th>d</th><th>d&sup2;</th></tr>' +
+'<tr><td>P</td><td>3</td><td>2</td><td>1</td><td>1</td></tr>' +
+'<tr><td>Q</td><td>5</td><td>5</td><td>0</td><td>0</td></tr>' +
+'<tr><td>R</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>' +
+'<tr><td>S</td><td>4</td><td>3</td><td>1</td><td>1</td></tr>' +
+'<tr><td>T</td><td>2</td><td>4</td><td>&minus;2</td><td>4</td></tr>' +
+'<tr><th colspan="4">&Sigma;d&sup2;</th><th>6</th></tr></table>';
+
+/* ---------- the widget: best fit challenge ---------- */
+var BF = [[14, 24], [16, 26], [17, 33], [19, 35], [21, 45], [23, 48], [24, 50], [26, 60], [28, 62], [32, 77]];
+var BF_MX = 22, BF_MY = 46, HX1 = 11, HX2 = 39;
+var BF_FIT = (function(){
+  var n = BF.length, sx = 0, sy = 0, sxx = 0, sxy = 0;
+  BF.forEach(function(p){ sx += p[0]; sy += p[1]; sxx += p[0] * p[0]; sxy += p[0] * p[1]; });
+  var b = (n * sxy - sx * sy) / (n * sxx - sx * sx), a = (sy - b * sx) / n;
+  var ss = 0;
+  BF.forEach(function(p){ ss += Math.pow(p[1] - a - b * p[0], 2); });
+  return { a: a, b: b, ss: ss };
+})();
+
+function mountBestFit(el, api){
+  var d = api.data;
+  if(typeof d.yL !== "number"){ d.yL = 85; d.yR = 30; }
+  d.stage = d.stage || 1;
+  d.miss = d.miss || [0, 0, 0];
+  d.shown = d.shown || [false, false, false];
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="bf-head"><span class="bf-pill" id="bfStage"></span><span class="bf-live" id="bfLive"></span></div>' +
+      '<svg id="bfSvg" viewBox="0 0 360 300" role="img" aria-label="Scatter diagram of temperature against ice lollies sold, with a line you can move by dragging its two orange handles. The double mean point is shown as a target." style="width:100%;max-width:520px;height:auto;display:block;margin:0 auto;touch-action:none;user-select:none;cursor:pointer"></svg>' +
+      '<div class="bf-nudge" id="bfNudge">' +
+        '<div><span>Left end</span><button type="button" data-h="L" data-d="1" aria-label="Left end up">&uarr;</button><button type="button" data-h="L" data-d="-1" aria-label="Left end down">&darr;</button></div>' +
+        '<div><span>Right end</span><button type="button" data-h="R" data-d="1" aria-label="Right end up">&uarr;</button><button type="button" data-h="R" data-d="-1" aria-label="Right end down">&darr;</button></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="wpanel" id="bfTask"></div>';
+
+  var svg = el.querySelector("#bfSvg"), task = el.querySelector("#bfTask");
+  var L = 50, R = 346, top = 14, bot = 244;
+  function X(v){ return L + (v - 10) / 30 * (R - L); }
+  function Y(v){ return bot - v / 110 * (bot - top); }
+  function lineAt(x){ return d.yL + (d.yR - d.yL) * (x - HX1) / (HX2 - HX1); }
+  function score(){
+    var ss = 0;
+    BF.forEach(function(p){ ss += Math.pow(p[1] - lineAt(p[0]), 2); });
+    return Math.round(100 * BF_FIT.ss / Math.max(ss, 1e-9));
+  }
+  function onTarget(){ return Math.abs(lineAt(BF_MX) - BF_MY) <= 2; }
+  function fmt(n){ return Math.abs(n - Math.round(n)) < 0.05 ? String(Math.round(n)) : n.toFixed(1); }
+
+  function draw(){
+    var s = "", v;
+    if(d.stage >= 3) s += '<rect x="' + X(14) + '" y="' + top + '" width="' + (X(32) - X(14)) + '" height="' + (bot - top) + '" fill="' + SUN + '" fill-opacity="0.22"/>';
+    for(v = 0; v <= 110; v += 10){
+      if(v) s += Ln(L, Y(v), R, Y(v), LINE, 1.3);
+      if(v % 20 === 0){ s += Ln(L - 5, Y(v), L, Y(v)) + T(L - 8, Y(v) + 5, v, 14, { anchor: "end" }); }
+    }
+    for(v = 10; v <= 40; v += 5){
+      if(v > 10) s += Ln(X(v), top, X(v), bot, LINE, 1.3);
+      s += Ln(X(v), bot, X(v), bot + 5) + T(X(v), bot + 21, v, 14, { anchor: "middle" });
+    }
+    s += Ln(L, top - 4, L, bot) + Ln(L, bot, R + 4, bot);
+    s += T((L + R) / 2, bot + 44, "Top temperature (&#176;C)", 14, { anchor: "middle" });
+    s += T(14, (top + bot) / 2, "Ice lollies sold", 14, { anchor: "middle", rot: -90 });
+    if(d.stage >= 3){
+      s += T((X(14) + X(32)) / 2, top + 18, "the data", 14, { anchor: "middle", lab: true, col: "#8a6d00" });
+      s += Ln(X(40) - 2, top, X(40) - 2, bot, CORAL, 2.5, "6 4") + T(X(40) - 8, top + 18, "40?", 15, { anchor: "end", lab: true, col: CORAL });
+    }
+    /* target: the double mean point */
+    var hit = onTarget();
+    s += '<circle cx="' + X(BF_MX) + '" cy="' + Y(BF_MY) + '" r="14" fill="' + (hit ? MINT : WHITE) + '" fill-opacity="' + (hit ? 0.45 : 0.7) + '" stroke="' + (hit ? "#0f8a6b" : CORAL) + '" stroke-width="3"/>';
+    s += '<circle cx="' + X(BF_MX) + '" cy="' + Y(BF_MY) + '" r="6" fill="none" stroke="' + (hit ? "#0f8a6b" : CORAL) + '" stroke-width="2.5"/>';
+    BF.forEach(function(p){ s += dot(X(p[0]), Y(p[1]), CYAN, 5.5); });
+    /* the line, clipped to the plot */
+    s += '<clipPath id="bfClip"><rect x="' + L + '" y="' + top + '" width="' + (R - L) + '" height="' + (bot - top) + '"/></clipPath>';
+    s += '<line clip-path="url(#bfClip)" x1="' + X(10) + '" y1="' + Y(lineAt(10)).toFixed(1) + '" x2="' + X(40) + '" y2="' + Y(lineAt(40)).toFixed(1) + '" stroke="' + VIOLET + '" stroke-width="4"/>';
+    /* interpolation guide */
+    if(d.stage >= 2){
+      var y25 = lineAt(25);
+      s += Ln(X(25), bot, X(25), Y(y25).toFixed(1), BLUE, 2.5, "6 4");
+      if(d.stage >= 3 || d.shown[1]){
+        s += Ln(L, Y(y25).toFixed(1), X(25), Y(y25).toFixed(1), BLUE, 2.5, "6 4");
+        s += T(L + 6, Y(y25) - 7, "about " + Math.round(y25), 14, { lab: true, col: BLUE });
+      }
+    }
+    if(d.stage === 1){
+      [[HX1, d.yL], [HX2, d.yR]].forEach(function(h){
+        s += '<circle cx="' + X(h[0]) + '" cy="' + Y(h[1]).toFixed(1) + '" r="20" fill="' + CORAL + '" fill-opacity="0.18"/>';
+        s += '<circle cx="' + X(h[0]) + '" cy="' + Y(h[1]).toFixed(1) + '" r="10" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/>';
+        s += '<path d="M' + X(h[0]) + ' ' + (Y(h[1]) - 5).toFixed(1) + ' l-3.5 4 h7 z M' + X(h[0]) + ' ' + (Y(h[1]) + 5).toFixed(1) + ' l-3.5 -4 h7 z" fill="' + WHITE + '"/>';
+      });
+    }
+    svg.innerHTML = s;
+    var above = 0, below = 0;
+    BF.forEach(function(p){ var r = p[1] - lineAt(p[0]); if(r > 0.01) above++; else if(r < -0.01) below++; });
+    el.querySelector("#bfLive").innerHTML = d.stage === 1 ?
+      above + " above &middot; " + below + " below &middot; target " + (hit ? '<span style="color:#0f8a6b">hit</span>' : "missed") :
+      "fit score " + (d.best || score());
+    el.querySelector("#bfNudge").classList.toggle("hidden", d.stage !== 1);
+  }
+
+  function setY(which, v){
+    v = Math.max(0, Math.min(110, Math.round(v * 2) / 2));
+    if(which === "L"){ if(v === d.yL) return; d.yL = v; } else { if(v === d.yR) return; d.yR = v; }
+    api.save(); draw();
+  }
+  function toData(e){
+    var pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: 10 + (p.x - L) / (R - L) * 30, y: (bot - p.y) / (bot - top) * 110 };
+  }
+  var drag = null;
+  svg.addEventListener("pointerdown", function(e){
+    if(d.stage !== 1) return;
+    var p = toData(e);
+    drag = p.x < (HX1 + HX2) / 2 ? "L" : "R";
+    try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+    setY(drag, p.y); e.preventDefault();
+  });
+  svg.addEventListener("pointermove", function(e){ if(drag && d.stage === 1) setY(drag, toData(e).y); });
+  svg.addEventListener("pointerup", function(){ drag = null; });
+  svg.addEventListener("pointercancel", function(){ drag = null; });
+  [].forEach.call(el.querySelectorAll("#bfNudge button"), function(b){
+    b.onclick = function(){
+      var h = b.getAttribute("data-h"), dir = +b.getAttribute("data-d");
+      setY(h, (h === "L" ? d.yL : d.yR) + dir);
+    };
+  });
+
+  function stars(sc){ var n = sc >= 90 ? 3 : sc >= 80 ? 2 : sc >= 70 ? 1 : 0; return "&#9733;&#9733;&#9733;".slice(0, n * 7) + '<span style="opacity:.25">' + "&#9733;&#9733;&#9733;".slice(0, (3 - n) * 7) + '</span>'; }
+
+  function render(){
+    var stg = { 1: "Step 1 of 3: fit the line", 2: "Step 2 of 3: predict", 3: "Step 3 of 3: trust it?", 4: "Challenge complete" }[d.stage];
+    el.querySelector("#bfStage").textContent = stg;
+    var h = "";
+    if(d.stage === 1){
+      h = '<p class="wnote" style="margin-top:0"><b>Drag the two orange handles</b> (or use the arrows) to place a line of best fit. The ring is the <b>double mean point</b>: mean temperature 22&#176;C, mean sales 46. A great line goes through it, with roughly as many points above as below.</p>' +
+          '<div class="wrow"><button class="btn" type="button" id="bfLock">Lock in my line</button>' +
+          '<button class="btn btn-quiet' + (d.miss[0] >= 2 ? "" : " hidden") + '" type="button" id="bfShow">Show me</button></div>';
+    }else if(d.stage === 2){
+      h = '<div class="bf-score"><div class="tiny" style="margin:0">Your fit score</div><div class="wbig">' + d.best + '</div><div class="bf-stars">' + stars(d.best) + '</div></div>' +
+          '<p class="wnote"><b>Now use your line.</b> Go up from 25&#176;C to the line (the blue dashes), then across. About how many lollies would you predict on a 25&#176;C day?</p>' +
+          '<div class="wrow"><input class="bf-input" type="text" inputmode="decimal" autocomplete="off" id="bfAns" aria-label="Predicted lollies at 25 degrees"><span class="wnote">lollies</span>' +
+          '<button class="btn" type="button" id="bfCheck">Check</button>' +
+          '<button class="btn btn-quiet' + (d.miss[1] >= 2 ? "" : " hidden") + '" type="button" id="bfShow">Show me</button></div>';
+    }else if(d.stage === 3){
+      h = '<p class="wnote" style="margin-top:0"><b>' + (d.shown[1] ? 'Here is the reading: up from 25 to the line, then across, gives' : 'Yes. Your line at 25&#176;C gives') + ' about ' + Math.round(lineAt(25)) + ' lollies.</b> That is <b>interpolation</b>: 25&#176;C is inside the data (the yellow band).</p>' +
+          '<p class="wnote">Next, someone uses the same line to predict sales on a <b>40&#176;C</b> day: about ' + Math.round(lineAt(40)) + ' lollies. Is that prediction reliable?</p>' +
+          '<div class="choices" id="bfOpts">' +
+            '<button type="button" data-k="0">Yes, it is on the line of best fit, so it is reliable</button>' +
+            '<button type="button" data-k="1">No: 40&#176;C is outside the range of the data, so this is extrapolation and the pattern may not carry on</button>' +
+            '<button type="button" data-k="2">Yes, because the correlation is strong</button>' +
+          '</div>' +
+          '<div class="wrow"><button class="btn btn-quiet' + (d.miss[2] >= 1 ? "" : " hidden") + '" type="button" id="bfShow">Show me</button></div>';
+    }else{
+      var n = d.shown.filter(Boolean).length, m = d.miss.reduce(function(a, b){ return a + b; }, 0);
+      var title = d.best >= 90 && !n && !m ? "Line legend" : d.best >= 80 ? "Sharp shooter" : "Line fitter";
+      h = '<div class="bf-score"><div class="tiny" style="margin:0">Best fit score</div><div class="wbig">' + d.best + '</div><div class="bf-stars">' + stars(d.best) + '</div></div>' +
+          '<p class="wnote"><b>' + title + '.</b> You fitted a line through the double mean point, read a prediction <b>inside</b> the data (interpolation, fairly reliable), and spotted that a prediction <b>outside</b> it (extrapolation) is not. At 40&#176;C the kiosk might sell out, or everyone might stay indoors. The data cannot tell us.</p>' +
+          '<div class="wrow" style="justify-content:center"><button class="btn btn-quiet" type="button" id="bfAgain">Have another go at the line (just for fun)</button></div>';
+    }
+    h += '<div class="wnote" id="bfMsg" aria-live="polite"></div>';
+    task.innerHTML = h;
+    wire();
+    draw();
+  }
+
+  function msg(t){ el.querySelector("#bfMsg").innerHTML = t; }
+  function showBtn(){ var b = el.querySelector("#bfShow"); if(b) b.classList.remove("hidden"); }
+
+  function wire(){
+    var lock = el.querySelector("#bfLock");
+    if(lock) lock.onclick = function(){
+      var sc = score();
+      if(sc >= 70){
+        d.best = Math.max(sc, d.replay ? (d.best || 0) : 0);
+        if(!d.replay) d.best = sc;
+        d.stage = d.replay ? 4 : 2; api.save(); render();
+        msg(sc >= 90 ? "<b>Bullseye!</b> That is about as good as a line gets." : sc >= 80 ? "<b>Lovely fit.</b>" : "<b>That will do nicely.</b> A tiny bit of tweaking could push it higher, but it is a fair line of best fit.");
+        return;
+      }
+      d.miss[0]++; api.save();
+      var tip;
+      if(!onTarget()) tip = "Your line misses the target ring. Get it through the double mean point first, then tilt it.";
+      else tip = "Through the target, nice. Now the slope: try to get roughly as many points above the line as below, all the way along.";
+      msg("<b>Fit score " + sc + ", not quite there (aim for 70 or more).</b> " + tip);
+      if(d.miss[0] >= 2) showBtn();
+    };
+    var chk = el.querySelector("#bfCheck"), inp = el.querySelector("#bfAns");
+    if(chk){
+      var go = function(){
+        var v = EGW.parseNum(inp.value);
+        if(isNaN(v)){ msg("Pop a number in first."); return; }
+        if(Math.abs(v - lineAt(25)) <= 3){
+          d.stage = 3; api.save(); render();
+          return;
+        }
+        d.miss[1]++; api.save();
+        msg(d.miss[1] === 1 ? "<b>Not quite.</b> Follow the blue dashes up from 25 to the violet line, then go straight across to the left axis. Each grid line is 10 lollies." :
+          "<b>Still a little off.</b> Have another go, or tap Show me.");
+        if(d.miss[1] >= 2) showBtn();
+      };
+      chk.onclick = go;
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") go(); });
+    }
+    var opts = el.querySelector("#bfOpts");
+    if(opts) [].forEach.call(opts.children, function(b){
+      b.onclick = function(){
+        var k = +b.getAttribute("data-k");
+        if(k === 1){ b.classList.add("ok"); finish(); return; }
+        d.miss[2]++; api.save();
+        b.classList.add("no");
+        msg("<b>Not that one.</b> Look at the yellow band: that is where the data is. Where is 40&#176;C?");
+        showBtn();
+      };
+    });
+    var sh = el.querySelector("#bfShow");
+    if(sh) sh.onclick = function(){
+      if(d.stage === 1){
+        d.shown[0] = true;
+        d.yL = Math.round((BF_FIT.a + BF_FIT.b * HX1) * 2) / 2; d.yR = Math.round((BF_FIT.a + BF_FIT.b * HX2) * 2) / 2;
+        d.best = d.replay ? Math.max(d.best || 0, score()) : score(); d.stage = d.replay ? 4 : 2; api.save(); render();
+        msg("<b>Here is a best fit line.</b> It goes through the double mean point (22, 46) and has 5 points above it and 5 below.");
+      }else if(d.stage === 2){
+        d.shown[1] = true; d.stage = 3; api.save(); render();
+      }else if(d.stage === 3){
+        d.shown[2] = true; api.save(); finish();
+      }
+    };
+    var again = el.querySelector("#bfAgain");
+    if(again) again.onclick = function(){ d.replay = true; d.stage = 1; api.save(); render(); };
+  }
+
+  function finish(){
+    d.stage = 4;
+    var first = !d.result;
+    if(first) d.result = d.shown.some(Boolean) ? "shown" : d.miss.some(function(m){ return m > 0; }) ? "right2" : "right1";
+    api.save(); render();
+    if(first) api.done(d.result);
+  }
+
+  if(d.replay && d.stage === 1){ d.replay = true; }
+  render();
+}
+
+EGW.run({
+  id: "stats-correlation",
+  title: "Scatter graphs and correlation",
+  subject: "GCSE Statistics",
+  mins: 50,
+  blurb: "Scatter diagrams, correlation and why it is not causation, lines of best fit and predictions, then regression lines and Spearman's rank for the stretch.",
+  steps: [
+
+  /* ---------- 1. SCATTER DIAGRAMS ---------- */
+  { type: "learn", topic: "Scatter diagrams",
+    title: "Two things at once: scatter diagrams",
+    fig: REVISE,
+    html: '<p><b>Bivariate data</b> means two pieces of data about each person or thing, like hours of revision <i>and</i> test score for each student.</p>' +
+          '<ul>' +
+          '<li>Each student becomes one <b>point</b> (x, y). Plot across first, then up.</li>' +
+          '<li>The <b>explanatory</b> (or independent) variable goes on the <b>x axis</b>. It is the one you think might affect the other.</li>' +
+          '<li>The <b>response</b> (or dependent) variable goes on the <b>y axis</b>. It is the one that might respond.</li>' +
+          '<li>Do not join the points up. A scatter diagram is just the dots.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Ask "which one might affect the other?" That one goes along the bottom.</div>' },
+
+  { type: "mc", topic: "Scatter diagrams",
+    q: "A caf&eacute; owner wants to see whether the outside temperature affects how many hot chocolates she sells. Which should go on the x axis?",
+    options: ["Hot chocolates sold, because it is the response", "Temperature, because it is the explanatory variable", "Either; it never matters", "The date, because it is a scatter diagram"],
+    answer: 1,
+    hint: "Which one might change the other? Temperature changing sales, or sales changing the temperature?",
+    why: "The temperature might affect sales, not the other way round, so temperature is the <b>explanatory</b> variable and goes on the x axis. Sales are the <b>response</b> and go on the y axis. Mixing them up still gives a scatter diagram, but loses the mark for choosing axes." },
+
+  { type: "mc", topic: "Scatter diagrams",
+    q: "Which point shows a student who revised for <b>6 hours</b> and scored <b>40</b>?",
+    fig: TAGGED,
+    options: ["A", "B", "C", "D"],
+    answer: 1,
+    hint: "Across the bottom to 6 first, then up to 40.",
+    why: "B is at 6 across and 40 up. A is 6 hours but 70 marks. D is 8 hours and 40, so it has the right score but the wrong hours. Across first, then up." },
+
+  /* ---------- 2. CORRELATION ---------- */
+  { type: "learn", topic: "Correlation",
+    title: "Correlation: is there a pattern?",
+    fig: THREE,
+    html: '<ul>' +
+          '<li><b>Positive correlation</b>: as one goes up, the other tends to go up.</li>' +
+          '<li><b>Negative correlation</b>: as one goes up, the other tends to go down.</li>' +
+          '<li><b>No correlation</b>: no pattern at all.</li>' +
+          '</ul>' +
+          '<p><b>Strength</b> is how close the points are to a straight line. Tight to a line: <b>strong</b>. Loosely spread around one: <b>weak</b>.</p>' +
+          '<p>In an exam, describe it <b>in context</b>: "As hours of revision go up, test scores tend to go up."</p>' +
+          '<div class="keep"><b>Keep this</b>Type (positive, negative, none) plus strength (strong, weak), then one sentence in context.</div>' },
+
+  { type: "sort", topic: "Correlation",
+    q: "What kind of correlation would you expect for each pair?",
+    buckets: ["Positive", "Negative", "No correlation"],
+    cards: [
+      ["Height and shoe size of adults", 0],
+      ["Hours of revision and test mark", 0],
+      ["Age of a car and its value", 1],
+      ["Outside temperature and scarves sold", 1],
+      ["Birthday month and height", 2],
+      ["Shoe size of adults and their maths score", 2]
+    ],
+    hint: "For each pair, ask: if the first goes up, what happens to the second? Up, down, or nothing in particular?",
+    why: "Taller people tend to have bigger feet, and more revision tends to mean better marks: positive. Older cars are worth less, and warmer days sell fewer scarves: negative. Your birthday month has nothing to do with height, and neither does an adult's shoe size with maths: no correlation." },
+
+  { type: "mc", topic: "Correlation",
+    q: "Which is the best description of this scatter diagram?",
+    fig: PHONE,
+    options: [
+      "Strong positive correlation: more phone use, more sleep",
+      "Weak negative correlation",
+      "Strong negative correlation: the more time on a phone in the evening, the less sleep people tend to get",
+      "No correlation, because the sleep axis does not start at 0"
+    ],
+    answer: 2,
+    hint: "Which way do the points go, and how close are they to a straight line?",
+    why: "The points go down from left to right, close to a line: <b>strong negative</b>, and the third option says it in context too. Notice the word \"tend\": it describes a pattern, not a rule for every person. The axis starting at 6 does not change the correlation." },
+
+  /* ---------- 3. NOT CAUSATION ---------- */
+  { type: "learn", topic: "Not causation",
+    title: "Correlation is not causation",
+    html: '<p>Two things moving together does <b>not</b> prove one causes the other. A few real patterns that are a bit silly:</p>' +
+          '<ul>' +
+          '<li>Ice cream sales and sunburn cases are positively correlated. Ice cream does not burn you. <b>Hot sunny weather</b> causes both.</li>' +
+          '<li>Primary school children with bigger feet tend to read better. Big feet do not help reading. <b>Age</b> drives both.</li>' +
+          '<li>The more firefighters at a fire, the more damage. They are not making it worse. <b>Bigger fires</b> need more firefighters <i>and</i> do more damage.</li>' +
+          '</ul>' +
+          '<p>The hidden thing behind both is often called a <b>third variable</b> (or lurking variable). Sometimes it is just coincidence. And often several factors work together.</p>' +
+          '<div class="keep"><b>Keep this</b>"There is a correlation, but that does not mean one causes the other. A third factor, such as ..., could explain both."</div>' },
+
+  { type: "mc", topic: "Not causation",
+    q: "Over one summer, a seaside town found that ice cream sales and shark sightings were strongly positively correlated. What is the best explanation?",
+    options: [
+      "Sharks are attracted by the smell of ice cream",
+      "Seeing a shark makes people want ice cream",
+      "Hot weather brings more people to the beach, so more ice creams are bought and more people are around to spot sharks",
+      "It proves ice cream causes shark sightings, because the correlation is strong"
+    ],
+    answer: 2,
+    hint: "Is there something that would make both of these go up at the same time?",
+    why: "Hot weather is the third variable: more people at the beach means more ice creams sold <i>and</i> more eyes on the water. A strong correlation, however strong, never proves causation by itself." },
+
+  { type: "text", topic: "Not causation",
+    q: "Across lots of towns, the number of churches and the number of pubs have a strong positive correlation. Does building a church cause pubs to open? Explain briefly.",
+    need: [["population", "people", "size", "bigger", "larger", "big town", "more residents", "residents", "inhabitants", "third"]],
+    model: "No. Bigger towns have more people, so they tend to have more churches <i>and</i> more pubs. The population of the town is a third variable that explains both.",
+    hint: "What makes a town have more of everything?",
+    why: "Population (the size of the town) is the third variable. Bigger towns have more of nearly everything: churches, pubs, shops, schools. So the correlation is real, but neither one causes the other." },
+
+  /* ---------- 4. LINE OF BEST FIT ---------- */
+  { type: "learn", topic: "Line of best fit",
+    title: "Lines of best fit and the double mean point",
+    fig: BESTFIT,
+    html: '<p>If there is correlation, you can draw a <b>line of best fit</b>: a straight line that follows the trend.</p>' +
+          '<ul>' +
+          '<li>Work out the <b>mean of the x values</b> and the <b>mean of the y values</b>. Together they make the <b>double mean point</b> (x&#772;, y&#772;). Plot it, often with a cross.</li>' +
+          '<li>Draw your line <b>through the double mean point</b>, following the direction of the points.</li>' +
+          '<li>Aim for roughly as many points above the line as below, spread along its length.</li>' +
+          '<li>It does not have to go through (0, 0), or through any of the data points.</li>' +
+          '</ul>' +
+          '<p>Above: the mean revision time is 4.7 hours and the mean score is 57.2, so the line goes through (4.7, 57.2).</p>' +
+          '<div class="keep"><b>Keep this</b>No correlation? Then no line of best fit. A line only makes sense when there is a trend to follow.</div>' },
+
+  { type: "num", topic: "Line of best fit",
+    q: "Six students recorded their hours of sleep the night before a quiz (x) and their quiz score (y).<br><b>x: 2, 4, 5, 7, 8, 10</b><br><b>y: 15, 22, 24, 30, 35, 42</b><br>Find the double mean point.",
+    boxes: [
+      { label: "Mean of x", a: 6 },
+      { label: "Mean of y", a: 28 }
+    ],
+    hint: "Add up the six x values and divide by 6. Then the same for y.",
+    why: "x: 2 + 4 + 5 + 7 + 8 + 10 = 36, and 36 &divide; 6 = <b>6</b>. y: 15 + 22 + 24 + 30 + 35 + 42 = 168, and 168 &divide; 6 = <b>28</b>. So the double mean point is (6, 28), and the line of best fit should pass through it." },
+
+  { type: "widget", topic: "Line of best fit",
+    title: "Best fit challenge",
+    html: "A beach kiosk recorded the top temperature and ice lollies sold on ten days. Fit the line, then put it to work.",
+    mount: mountBestFit,
+    report: function(d){
+      var r = { right1: "all three steps first go", right2: "finished, some steps on a second go", shown: "used Show me for at least one step" }[d.result] || "not finished";
+      return "Best fit widget: " + r + (d.best ? "; fit score " + d.best : "") + ".";
+    } },
+
+  /* ---------- 5. PREDICTIONS ---------- */
+  { type: "learn", topic: "Predictions",
+    title: "Predictions: inside or outside the data?",
+    fig: TYPING,
+    html: '<p>To predict, go to the value on one axis, across or up to the line, then read off the other axis.</p>' +
+          '<ul>' +
+          '<li><b>Interpolation</b>: predicting <b>inside</b> the range of the data (the yellow band, 2 to 9 hours). Fairly reliable, especially with strong correlation.</li>' +
+          '<li><b>Extrapolation</b>: predicting <b>outside</b> the range. Unreliable, because there is no data to show the pattern carries on. Practise 40 hours a week and the line says 260 words per minute, faster than any human types.</li>' +
+          '</ul>' +
+          '<p>Predictions are also less reliable when the correlation is weak, or the sample is small.</p>' +
+          '<div class="keep"><b>Keep this</b>Inside the data: interpolation, reasonably reliable. Outside: extrapolation, be suspicious, and say why.</div>' },
+
+  { type: "num", topic: "Predictions",
+    q: "Use the line of best fit on this typing graph.",
+    fig: TYPING,
+    boxes: [
+      { label: "Predicted speed for 5 hours of practice", a: 50, tol: 1.5, post: "words per minute" },
+      { label: "Practice needed for a speed of 62 words per minute", a: 7, tol: 0.25, post: "hours" }
+    ],
+    hint: "For the first, go up from 5 to the line, then across. For the second, go across from 62 to the line, then down.",
+    why: "Up from 5 hours to the line, across: <b>50</b> words per minute. Across from 62 to the line, down: <b>7</b> hours. Both are inside the data (2 to 9 hours), so both are interpolation." },
+
+  { type: "sort", topic: "Predictions",
+    q: "The typing data covers <b>2 to 9 hours</b> of practice. Is each prediction interpolation or extrapolation?",
+    buckets: ["Interpolation", "Extrapolation"],
+    cards: [
+      ["Speed after 3 hours", 0],
+      ["Speed after 5.5 hours", 0],
+      ["Hours needed for 60 words per minute", 0],
+      ["Speed after 15 hours", 1],
+      ["Speed after 0 hours", 1],
+      ["Hours needed for 120 words per minute", 1]
+    ],
+    hint: "Is the hours value inside 2 to 9? For a speed, find which hours it would need first.",
+    why: "3, 5.5 and the 60 words per minute prediction (about 6.7 hours) all sit inside 2 to 9 hours, so interpolation. 15 hours and 0 hours are outside the data. 120 words per minute needs about 17 hours, far outside, so extrapolation." },
+
+  /* ---------- 6. OUTLIERS ---------- */
+  { type: "learn", topic: "Outliers",
+    title: "Outliers on a scatter diagram",
+    html: '<p>An <b>outlier</b> on a scatter diagram is a point that does <b>not fit the pattern</b> of the others. It does not have to be the biggest or smallest value; it is the one that sits away from the trend.</p>' +
+          '<ul>' +
+          '<li>It might be a <b>mistake</b>: a misread measurement, or numbers typed the wrong way round.</li>' +
+          '<li>It might be <b>real but unusual</b>: the student who barely revised and still aced it.</li>' +
+          '<li>Either way, <b>ignore it when drawing the line of best fit</b>, so one odd point does not drag the line off course.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Outlier = away from the pattern, not just far from the middle. Check it, mention it, and leave it out of the line.</div>' },
+
+  { type: "mc", topic: "Outliers",
+    q: "Which labelled point is an outlier?",
+    fig: OUTLIER,
+    options: ["P", "Q", "R", "S"],
+    answer: 0,
+    hint: "Look for the point that does not follow the line the others make. It need not be at either end.",
+    why: "P is far above the trend: for a plant 13 cm tall in week 1, the pattern suggests about 28 cm in week 4, not 52. S has the biggest values, but it sits right on the pattern, so it is <b>not</b> an outlier. That is the trap: outlier means off the pattern, not just extreme." },
+
+  { type: "mc", topic: "Outliers",
+    q: "What is the most sensible thing to do with point P when drawing a line of best fit?",
+    options: [
+      "Delete it from the data, because outliers are always mistakes",
+      "Make sure the line of best fit goes through it",
+      "Check whether it is an error, and leave it out when drawing the line of best fit",
+      "Decide there is no correlation, because of P"
+    ],
+    answer: 2,
+    hint: "Could an outlier be real? And what would it do to your line if you included it?",
+    why: "Check it first: it might be a recording error, or a genuine unusual case, so deleting it without a reason is not good statistics. Either way, leave it out when you draw the line, so it does not pull the line away from the other points. One odd point does not cancel out a strong pattern." },
+
+  /* ---------- 7. REGRESSION LINE ---------- */
+  { type: "learn", topic: "Regression line",
+    title: "The regression line y = a + bx",
+    html: '<p><b>This part may be Higher only</b>, so the questions here are stretch.</p>' +
+          '<p>A line of best fit can be written as an equation, <b>y = a + bx</b>. (It is the same as y = mx + c from maths, just written the other way round.)</p>' +
+          '<ul>' +
+          '<li><b>b is the gradient</b>: how much y changes for each increase of 1 in x.</li>' +
+          '<li><b>a is the intercept</b>: the value of y when x = 0.</li>' +
+          '</ul>' +
+          '<p>Example: the value of a model of car is y = 18000 &minus; 1500x, where x is its age in years and y is its value in pounds.</p>' +
+          '<ul>' +
+          '<li>Gradient &minus;1500: the value <b>drops by about &pound;1500 for each extra year</b> of age.</li>' +
+          '<li>Intercept 18000: the value when new (age 0) is about <b>&pound;18 000</b>.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Always interpret in context, with units: "for each extra year, the value goes down by about &pound;1500." If x = 0 is outside the data, the intercept may mean nothing sensible.</div>' },
+
+  { type: "mc", topic: "Regression line", stretch: true,
+    q: "For a class, the regression line of test mark (y) on hours of revision (x) is <b>y = 4.2 + 1.8x</b>. What does the 1.8 tell you?",
+    options: [
+      "Every student scored 1.8 marks",
+      "For each extra hour of revision, the test mark tends to go up by about 1.8 marks",
+      "A student who does no revision scores 1.8 marks",
+      "Revising for 1.8 hours gives the best mark"
+    ],
+    answer: 1,
+    hint: "1.8 is the number multiplying x. Is that the gradient or the intercept?",
+    why: "1.8 is the <b>gradient</b> b: each extra hour goes with about 1.8 more marks. The third option describes the <b>intercept</b>, and the intercept here is 4.2, not 1.8. Saying \"tends to\" or \"about\" is good: the line describes a trend, not a promise." },
+
+  { type: "num", topic: "Regression line", stretch: true,
+    q: "Use the car value line <b>y = 18000 &minus; 1500x</b> (x = age in years, y = value in pounds). The data used to make it was for cars aged 1 to 8 years.",
+    boxes: [
+      { label: "Predicted value at 4 years old", a: 12000, pre: "&pound;" },
+      { label: "How much the value drops over 2 years", a: 3000, pre: "&pound;" },
+      { label: "What the line predicts at 15 years old", a: -4500, pre: "&pound;" }
+    ],
+    hint: "Swap x for the age in the equation. For the drop over 2 years, think about the gradient.",
+    why: "Age 4: 18000 &minus; 1500 &times; 4 = <b>&pound;12 000</b>. Over 2 years: 2 &times; 1500 = <b>&pound;3000</b>. Age 15: 18000 &minus; 1500 &times; 15 = <b>&minus;&pound;4500</b>.<br>A car with a negative value makes no sense. Age 15 is far outside the data (1 to 8 years), so this is extrapolation, and here you can see exactly why it is unreliable." },
+
+  /* ---------- 8. SPEARMAN'S RANK ---------- */
+  { type: "learn", topic: "Spearman's rank",
+    title: "Putting a number on it: correlation coefficients",
+    fig: SPEARMAN_LEARN,
+    html: '<p><b>Calculating Spearman\'s rank may be Higher only</b>, and so is the PMCC. Interpreting a given Spearman\'s value can come up on both tiers. These questions are stretch.</p>' +
+          '<p>A <b>correlation coefficient</b> is a number from <b>&minus;1 to +1</b>. Near +1: strong positive. Near &minus;1: strong negative. Near 0: little or no correlation.</p>' +
+          '<p><b>Spearman\'s rank</b> (r<sub>s</sub>) compares <b>rankings</b>. Two judges ranked five singers (the table shows the ranks each judge gave).</p>' +
+          '<ul>' +
+          '<li>Rank each set (1 = highest, or 1 = lowest, as long as you do the same for both).</li>' +
+          '<li>Find d, the difference in ranks, and square it. Add up the d&sup2; column: &Sigma;d&sup2; = 6.</li>' +
+          '<li>r<sub>s</sub> = 1 &minus; 6&Sigma;d&sup2; &divide; n(n&sup2; &minus; 1) = 1 &minus; 36 &divide; (5 &times; 24) = 1 &minus; 0.3 = <b>0.7</b>. Fairly strong agreement.</li>' +
+          '</ul>' +
+          '<p>The <b>product moment correlation coefficient</b> (PMCC, r) also runs from &minus;1 to +1, but measures how close the points are to a <b>straight line</b>. You only need to interpret it, not work it out.</p>' +
+          '<div class="keep"><b>Keep this</b>Interpret in context: "r<sub>s</sub> = 0.7, so there is fairly strong positive correlation: the two judges mostly agree." A coefficient still never proves causation.</div>' },
+
+  { type: "match", topic: "Spearman's rank", stretch: true,
+    q: "Match each correlation coefficient to the best description.",
+    pairs: [
+      ["0.96", "Strong positive correlation"],
+      ["&minus;0.92", "Strong negative correlation"],
+      ["0.42", "Weak positive correlation"],
+      ["&minus;0.38", "Weak negative correlation"],
+      ["0.03", "Little or no correlation"]
+    ],
+    hint: "The sign gives the direction. How close it is to 1 (ignoring the sign) gives the strength.",
+    why: "Close to &plusmn;1 is strong, around &plusmn;0.4 is weak, and close to 0 is next to nothing. A negative sign does not mean \"weak\"; &minus;0.92 is just as strong as +0.92, only in the other direction." },
+
+  { type: "mc", topic: "Spearman's rank", stretch: true,
+    q: "Two judges ranked eight dancers. Spearman's rank correlation coefficient is <b>&minus;0.85</b>. What does this tell you?",
+    options: [
+      "The judges strongly agree",
+      "The judges strongly disagree: dancers ranked highly by one judge tend to be ranked low by the other",
+      "There is no link between the two judges' rankings",
+      "85% of the dancers were given the same rank by both judges"
+    ],
+    answer: 1,
+    hint: "Negative means opposite directions. 0.85 is close to 1, so how strong is it?",
+    why: "&minus;0.85 is strong negative correlation, which for two judges means strong <b>disagreement</b>: they tend to rank the dancers in nearly opposite orders. It is not a percentage of anything." },
+
+  { type: "num", topic: "Spearman's rank", stretch: true,
+    q: "Two judges each scored six cakes out of 10. Rank each judge's scores (1 = highest), then find Spearman's rank correlation coefficient.",
+    fig: CAKES,
+    boxes: [
+      { label: "Rank of cake D by Judge 1", a: 6 },
+      { label: "Rank of cake D by Judge 2", a: 4 },
+      { label: "&Sigma;d&sup2;", a: 8 },
+      { label: "r<sub>s</sub> (to 3 decimal places)", a: 0.771, tol: 0.0015 }
+    ],
+    hint: "Judge 1 ranks: C is 1st (9), A 2nd (8), E 3rd (7) ... Do the same for Judge 2, then find each d, square it, and add. n = 6, so n(n&sup2; &minus; 1) = 6 &times; 35 = 210.",
+    why: "Judge 1 ranks A to F: 2, 4, 1, <b>6</b>, 3, 5. Judge 2: 3, 5, 1, <b>4</b>, 2, 6.<br>d: &minus;1, &minus;1, 0, 2, 1, &minus;1. d&sup2;: 1, 1, 0, 4, 1, 1, so &Sigma;d&sup2; = <b>8</b>.<br>r<sub>s</sub> = 1 &minus; (6 &times; 8) &divide; 210 = 1 &minus; 48 &divide; 210 = <b>0.771</b>.<br>That is fairly strong positive correlation: the judges mostly agree. Common slips: forgetting to square d (the d values always add up to 0), or using n&sup2; instead of n(n&sup2; &minus; 1)." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

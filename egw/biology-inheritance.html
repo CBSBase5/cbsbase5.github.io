@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inheritance and evolution - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: comparison table, the Punnett square studio */
+.cmp{width:100%;border-collapse:collapse;font-size:.92rem;margin:4px 0 12px}
+.cmp th,.cmp td{border:2px solid var(--ink);padding:6px 8px;text-align:left;vertical-align:top}
+.cmp th{background:var(--accent-soft);font-family:var(--display)}
+.sep{display:inline-block;font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;background:var(--violet);color:#fff;border-radius:999px;padding:2px 9px;margin:2px 0 6px}
+.terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:6px 0 12px}
+.terms div{border:2px solid var(--ink);border-radius:12px;background:var(--white);padding:7px 10px;font-size:.92rem;line-height:1.4}
+.terms b{display:block;font-family:var(--display)}
+.parents{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.par{background:var(--white);border:2px solid var(--ink);border-radius:14px;padding:8px 6px 10px;text-align:center}
+.par h4{margin:0;font-family:var(--display);font-size:.95rem}
+.par svg{width:96px;height:auto;display:block;margin:2px auto}
+.par .ph{font-size:.85rem;color:var(--body-tint);margin:0 0 6px}
+.gbtns{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.gbtns button{font-family:var(--display);font-weight:700;font-size:1rem;min-width:40px;padding:7px 4px;border:2px solid var(--ink);border-radius:10px;background:var(--paper);color:var(--ink);cursor:pointer}
+.gbtns button.on{background:var(--accent);box-shadow:0 3px 0 var(--ink)}
+.psq{display:grid;grid-template-columns:52px repeat(2,minmax(0,112px));gap:6px;justify-content:center;margin:8px 0}
+.psq .gh{font-family:var(--display);font-weight:700;font-size:1.25rem;text-align:center;align-self:stretch;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);border-radius:10px;min-height:40px}
+.psq .corner{font-size:.75rem;font-family:var(--body);font-weight:400;background:none;color:var(--body-tint);line-height:1.2}
+.psq button.cell{font-family:var(--display);font-weight:700;font-size:1.3rem;height:66px;border:2px solid var(--ink);border-radius:12px;background:var(--white);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.psq button.cell.blank{color:var(--body-tint);border-style:dashed}
+.psq button.cell.ok{background:#e3f8f1;border-color:var(--mint)}
+.psq button.cell.no{background:#ffe9e9;border-color:var(--coral);animation:nudge .35s}
+.psq button.cell small{display:block;font-family:var(--body);font-weight:400;font-size:.72rem;color:var(--body-tint)}
+.litter svg{width:100%;max-width:400px;height:auto;display:block;margin:4px auto}
+.counts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.counts span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-size:.88rem}
+.chal{border-top:2px dashed var(--line);padding-top:10px;margin-top:10px}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Inheritance and evolution</h2>
+    <span>Biology. Cell division, DNA and genes, Punnett squares, natural selection, breeding and how living things are classified.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 16) + '" fill="' + (o.c || INK) + '"' + (o.it ? ' font-style="italic"' : "") + '>' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function box(x, y, w, h, fill){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+function head(x, y, dx, dy, c){
+  var a = Math.atan2(dy, dx), s = 9;
+  var p1 = [x - s * Math.cos(a) + s * 0.6 * Math.sin(a), y - s * Math.sin(a) - s * 0.6 * Math.cos(a)];
+  var p2 = [x - s * Math.cos(a) - s * 0.6 * Math.sin(a), y - s * Math.sin(a) + s * 0.6 * Math.cos(a)];
+  return '<path d="M' + x + ' ' + y + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + (c || INK) + '"/>';
+}
+function arrow(x1, y1, x2, y2, c){ return L(x1, y1, x2, y2, c || INK, 3) + head(x2, y2, x2 - x1, y2 - y1, c); }
+function lines(x, y, arr, o){
+  var s = "";
+  arr.forEach(function(t, k){ s += T(x, y + k * ((o && o.gap) || 20), t, o); });
+  return s;
+}
+
+/* a guinea pig, centred on (x, y), about 60 by 40 at scale 1 */
+function pig(x, y, k, black){
+  var f = black ? INK : WHITE, e = black ? WHITE : INK;
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')">' +
+    '<ellipse cx="-12" cy="16" rx="5" ry="3" fill="' + f + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<ellipse cx="12" cy="16" rx="5" ry="3" fill="' + f + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<path d="M-28 6 Q-30 -16 -4 -18 Q20 -20 26 -4 Q32 10 18 16 Q-2 22 -20 16 Q-28 13 -28 6 Z" fill="' + f + '" stroke="' + INK + '" stroke-width="2"/>' +
+    '<ellipse cx="10" cy="-17" rx="6" ry="4.5" fill="' + (black ? "#3b4366" : "#f6d5c8") + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<circle cx="17" cy="-5" r="2.6" fill="' + e + '"/>' +
+    '<circle cx="28" cy="3" r="2.2" fill="' + CORAL + '"/>' +
+    '</g>';
+}
+
+/* ---------- figures ---------- */
+var FIG_DIV = svg("0 0 380 250", "Mitosis makes two cells identical to the parent cell. Meiosis makes four gametes, each with half the number of chromosomes, all genetically different.",
+  (function(){
+    var s = "";
+    function cell(x, y, r, fill, chrom){
+      var c = '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      chrom.forEach(function(ch, k){
+        var dx = (k - (chrom.length - 1) / 2) * 9;
+        c += L(x + dx, y - 9, x + dx, y + 9, ch, 4);
+      });
+      return c;
+    }
+    s += T(95, 22, "Mitosis", { s: 19 }) + T(285, 22, "Meiosis", { s: 19 });
+    s += L(190, 8, 190, 242, LINE, 2, "6 6");
+    s += cell(95, 66, 26, "#e3f8f1", [BLUE, CORAL, BLUE, CORAL]);
+    s += arrow(80, 94, 58, 124) + arrow(110, 94, 132, 124);
+    s += cell(50, 152, 26, "#e3f8f1", [BLUE, CORAL, BLUE, CORAL]) + cell(140, 152, 26, "#e3f8f1", [BLUE, CORAL, BLUE, CORAL]);
+    s += lines(95, 206, ["2 identical cells,", "full set of chromosomes"], { s: 15, body: true, w: 400 });
+    s += cell(285, 66, 26, "#fff6d1", [BLUE, CORAL, BLUE, CORAL]);
+    [214, 261, 308, 355].forEach(function(x, k){
+      s += arrow(285, 94, x, 128);
+      var cols = [[BLUE, CORAL], [CORAL, BLUE], [BLUE, BLUE], [CORAL, CORAL]][k];
+      s += cell(x, 152, 20, "#fff6d1", cols);
+    });
+    s += lines(285, 206, ["4 different gametes,", "half the chromosomes"], { s: 15, body: true, w: 400 });
+    return s;
+  })());
+
+var FIG_DNA = svg("0 0 380 200", "A cell contains a nucleus. The nucleus contains chromosomes. A chromosome is made of DNA, coiled. A gene is a short section of DNA.",
+  (function(){
+    var s = "";
+    s += '<circle cx="54" cy="84" r="46" fill="#e3f8f1" stroke="' + INK + '" stroke-width="2.5"/><circle cx="60" cy="80" r="20" fill="#ece6fd" stroke="' + INK + '" stroke-width="2"/>';
+    s += T(54, 158, "Cell with", { s: 15 }) + T(54, 176, "a nucleus", { s: 15 });
+    s += arrow(104, 84, 128, 84);
+    s += '<path d="M150 50 Q156 84 150 118 M170 50 Q164 84 170 118" fill="none" stroke="' + VIOLET + '" stroke-width="10" stroke-linecap="round"/>';
+    s += '<rect x="146" y="68" width="28" height="10" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += T(160, 158, "Chromosome", { s: 15 });
+    s += arrow(190, 84, 214, 84);
+    var p1 = [], p2 = [], k;
+    for(k = 0; k <= 60; k++){
+      var x = 228 + k * 2.4, y1 = 84 + 26 * Math.sin(k / 60 * Math.PI * 3), y2 = 84 - 26 * Math.sin(k / 60 * Math.PI * 3);
+      p1.push(x.toFixed(1) + " " + y1.toFixed(1)); p2.push(x.toFixed(1) + " " + y2.toFixed(1));
+      if(k % 4 === 2) s += L(x, y1, x, y2, LINE, 2.5);
+    }
+    s += '<rect x="250" y="50" width="56" height="68" rx="8" fill="' + SUN + '" opacity="0.35"/>';
+    s += '<path d="M' + p1.join(" L") + '" fill="none" stroke="' + BLUE + '" stroke-width="4"/><path d="M' + p2.join(" L") + '" fill="none" stroke="' + CORAL + '" stroke-width="4"/>';
+    s += T(300, 158, "DNA: a double helix", { s: 15 });
+    s += T(278, 40, "a gene", { s: 15 });
+    return s;
+  })());
+
+/* Punnett square for Bb x Bb */
+var FIG_PUN = svg("0 0 380 280", "Punnett square for two black guinea pigs, both Bb. Gametes B and b from each. Offspring BB, Bb, Bb and bb: 3 black to 1 white.",
+  (function(){
+    var s = "", X0 = 110, Y0 = 70, C = 80;
+    s += T(190, 22, "Bb &times; Bb (both black)", { s: 18 });
+    s += T(X0 + C / 2, Y0 - 14, "B", { s: 22, c: BLUE }) + T(X0 + C * 1.5, Y0 - 14, "b", { s: 22, c: BLUE });
+    s += T(X0 - 22, Y0 + C / 2 + 8, "B", { s: 22, c: CORAL }) + T(X0 - 22, Y0 + C * 1.5 + 8, "b", { s: 22, c: CORAL });
+    var g = [["BB", "Bb"], ["Bb", "bb"]];
+    for(var r = 0; r < 2; r++) for(var c = 0; c < 2; c++){
+      var black = g[r][c] !== "bb";
+      s += '<rect x="' + (X0 + c * C) + '" y="' + (Y0 + r * C) + '" width="' + C + '" height="' + C + '" fill="' + (black ? "#e6e8f2" : WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      s += T(X0 + c * C + C / 2, Y0 + r * C + 30, g[r][c], { s: 20 });
+      s += pig(X0 + c * C + C / 2, Y0 + r * C + 56, 0.5, black);
+    }
+    s += lines(330, 110, ["3 black", ":", "1 white"], { s: 17, gap: 24 });
+    s += T(X0 + C, Y0 + 2 * C + 28, "parent 1 gametes along the top", { s: 14, body: true, w: 400 });
+    return s;
+  })());
+
+/* ---------- the Punnett square studio ---------- */
+var GENOS = ["BB", "Bb", "bb"];
+function kid(a, b){ return a === "B" || b !== "B" ? a + b : b + a; }
+function isBlack(g){ return g.indexOf("B") >= 0; }
+function cellsFor(p1, p2){
+  /* rows: parent 2 gametes, columns: parent 1 gametes */
+  var out = [];
+  for(var r = 0; r < 2; r++) for(var c = 0; c < 2; c++) out.push(kid(p1[c], p2[r]));
+  return out;
+}
+function ratioFor(p1, p2){
+  var cs = cellsFor(p1, p2), b = cs.filter(isBlack).length;
+  return { black: b, white: 4 - b };
+}
+function ratioText(r){
+  if(r.white === 0) return "all black";
+  if(r.black === 0) return "all white";
+  if(r.black === 3) return "3 black : 1 white";
+  if(r.black === 2) return "1 black : 1 white (2 : 2)";
+  return r.black + " black : " + r.white + " white";
+}
+function sameAs(d, a, b){ return (d.p1 === a && d.p2 === b) || (d.p1 === b && d.p2 === a); }
+
+var CHALS = [
+  { q: "Set the parents so the offspring are expected in a <b>3 black : 1 white</b> ratio. Then tap Check my parents.",
+    ans: ["Bb", "Bb"],
+    hint: "For any white babies, both parents need to pass on a b. For mostly black, think about which parents give one bb box out of four.",
+    why: "<b>Bb &times; Bb</b>. Each parent can pass on B or b, so the square has BB, Bb, Bb and bb: three boxes with a B (black) and one bb (white). Two black parents can have a white baby, because both carry the recessive allele." },
+  { q: "Now set the parents for a <b>1 black : 1 white</b> ratio. Check when ready.",
+    ans: ["Bb", "bb"],
+    hint: "You need half the boxes to be bb. One parent could give only b every time.",
+    why: "<b>Bb &times; bb</b>. The bb parent can only give b, so the babies get B or b from the other parent: Bb, Bb, bb, bb. That is 2 black to 2 white, so 1 : 1, a probability of 0.5 for each colour. This is also how a test cross works: breed a black animal with a white one to find out if it is BB or Bb." }
+];
+
+var STUDIO = {
+  type: "widget", topic: "Punnett squares",
+  title: "Punnett square studio",
+  html: '<p>In these guinea pigs, black fur (<b>B</b>) is dominant to white fur (<b>b</b>). Pick a genotype for each parent, then tap the boxes of the Punnett square to fill them in. When the square is right, breed a litter of 20 and see how close real life gets to the prediction.</p>',
+  report: function(d){
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" }, ch = d.ch || [];
+    return "Punnett studio: squares right " + (d.sqRight || 0) + ", filled for her " + (d.sqShown || 0) + ", litters bred " + ((d.litters || []).length) +
+      "; challenge 3:1 " + (ch[0] && lab[ch[0].done] || "not done") + ", challenge 1:1 " + (ch[1] && lab[ch[1].done] || "not done") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(!d.p1) d.p1 = "BB";
+    if(!d.p2) d.p2 = "bb";
+    if(!d.sq) d.sq = ["", "", "", ""];
+    if(!d.litters) d.litters = [];
+    if(!d.ch) d.ch = [{ tries: 0 }, { tries: 0 }];
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<span class="kicker" style="margin-bottom:6px">1. Pick the parents</span>' +
+        '<div class="parents"><div class="par" id="par1"></div><div class="par" id="par2"></div></div>' +
+      '</div>' +
+      '<div class="wpanel">' +
+        '<span class="kicker" style="margin-bottom:6px">2. Fill the Punnett square</span>' +
+        '<p class="wnote">Tap a box to change it. Each box gets one allele from the top and one from the side.</p>' +
+        '<div class="psq" id="psq"></div>' +
+        '<div class="wrow"><button type="button" class="btn" id="sqCheck">Check my square</button><button type="button" class="btn btn-quiet hidden" id="sqShow">Fill it for me</button></div>' +
+        '<div class="fb hidden" id="sqFb" aria-live="polite"></div>' +
+      '</div>' +
+      '<div class="wpanel">' +
+        '<span class="kicker" style="margin-bottom:6px">3. Breed a litter</span>' +
+        '<div class="wrow"><button type="button" class="btn btn-orange" id="breed">Breed 20 babies</button></div>' +
+        '<div class="litter" id="litter"></div>' +
+        '<div class="counts" id="counts"></div>' +
+        '<p class="wnote" id="lnote" aria-live="polite"></p>' +
+      '</div>' +
+      '<div class="wpanel" id="chal"></div>';
+    var par = [el.querySelector("#par1"), el.querySelector("#par2")], psq = el.querySelector("#psq"),
+        sqCheck = el.querySelector("#sqCheck"), sqShow = el.querySelector("#sqShow"), sqFb = el.querySelector("#sqFb"),
+        breed = el.querySelector("#breed"), litter = el.querySelector("#litter"), counts = el.querySelector("#counts"),
+        lnote = el.querySelector("#lnote"), chal = el.querySelector("#chal");
+    var timer = null;
+
+    function drawParents(){
+      [0, 1].forEach(function(k){
+        var g = k ? d.p2 : d.p1;
+        par[k].innerHTML = '<h4>Parent ' + (k + 1) + '</h4>' +
+          svg("0 0 80 56", "Parent " + (k + 1) + ", a " + (isBlack(g) ? "black" : "white") + " guinea pig", pig(40, 30, 1, isBlack(g))) +
+          '<p class="ph">' + g + ', so ' + (isBlack(g) ? "black" : "white") + '</p>';
+        var row = document.createElement("div"); row.className = "gbtns";
+        GENOS.forEach(function(G){
+          var b = document.createElement("button"); b.type = "button"; b.textContent = G;
+          b.setAttribute("aria-pressed", G === g ? "true" : "false");
+          if(G === g) b.className = "on";
+          b.onclick = function(){
+            if(timer) return;
+            if(k) d.p2 = G; else d.p1 = G;
+            d.sq = ["", "", "", ""]; d.sqOk = false; d.sqTries = 0;
+            api.save(); drawAll();
+          };
+          row.appendChild(b);
+        });
+        par[k].appendChild(row);
+      });
+    }
+    function drawSquare(marks){
+      var want = cellsFor(d.p1, d.p2);
+      psq.innerHTML = "";
+      function gh(t, cls){ var e = document.createElement("div"); e.className = "gh" + (cls ? " " + cls : ""); e.innerHTML = t; psq.appendChild(e); }
+      gh("P2 &darr;<br>P1 &rarr;", "corner"); gh(d.p1[0]); gh(d.p1[1]);
+      for(var r = 0; r < 2; r++){
+        gh(d.p2[r]);
+        for(var c = 0; c < 2; c++){
+          (function(n){
+            var v = d.sq[n];
+            var b = document.createElement("button"); b.type = "button";
+            b.className = "cell" + (v ? "" : " blank") + (marks ? (marks[n] ? " ok" : " no") : (d.sqOk ? " ok" : ""));
+            b.innerHTML = v ? v + '<small>' + (isBlack(v) ? "black" : "white") + '</small>' : "?";
+            b.setAttribute("aria-label", "Box " + (n + 1) + ": " + (v || "empty") + ". Tap to change.");
+            b.onclick = function(){
+              if(d.sqOk || timer) return;
+              var i = GENOS.indexOf(d.sq[n]);
+              d.sq[n] = GENOS[(i + 1) % 3];
+              api.save(); drawSquare();
+            };
+            psq.appendChild(b);
+          })(r * 2 + c);
+        }
+      }
+      sqCheck.classList.toggle("hidden", !!d.sqOk);
+      sqShow.classList.toggle("hidden", !!d.sqOk || !d.sqTries);
+      breed.disabled = !d.sqOk;
+      if(d.sqOk){
+        var rt = ratioFor(d.p1, d.p2);
+        sqFb.className = "fb good";
+        sqFb.innerHTML = "<b>Square sorted.</b> Expected ratio: <b>" + ratioText(rt) + "</b>. Out of 20 babies you would expect about <b>" +
+          (rt.black * 5) + " black</b> and <b>" + (rt.white * 5) + " white</b>. The probability of a white baby is " + rt.white + "/4" +
+          (rt.white === 0 ? " = 0" : rt.white === 4 ? " = 1" : " = " + (rt.white / 4)) + ".";
+      }else if(!marks){
+        sqFb.className = "fb hidden";
+      }
+    }
+    sqCheck.onclick = function(){
+      var want = cellsFor(d.p1, d.p2);
+      if(d.sq.some(function(v){ return !v; })){ sqFb.className = "fb nudge"; sqFb.innerHTML = "Fill all four boxes first, if you like. Tap a box to change it."; return; }
+      var marks = d.sq.map(function(v, n){ return v === want[n]; });
+      if(marks.every(Boolean)){
+        d.sqOk = true; d.sqRight = (d.sqRight || 0) + 1; api.save(); drawSquare(); drawChal(); return;
+      }
+      d.sqTries = (d.sqTries || 0) + 1; api.save();
+      drawSquare(marks);
+      sqFb.className = "fb nudge";
+      sqFb.innerHTML = "<b>Not quite yet.</b> For each box, take the letter above it and the letter beside it. The red boxes need another look." +
+        '<br><span class="tiny">Change them and Check again, or tap Fill it for me.</span>';
+    };
+    sqShow.onclick = function(){
+      d.sq = cellsFor(d.p1, d.p2); d.sqOk = true; d.sqShown = (d.sqShown || 0) + 1; api.save(); drawSquare(); drawChal();
+    };
+
+    function drawLitter(kids, n){
+      var s = '<rect width="400" height="200" rx="14" fill="' + PAPER + '"/>';
+      for(var i = 0; i < 20; i++){
+        var x = 40 + (i % 5) * 80, y = 30 + Math.floor(i / 5) * 46;
+        if(kids && i < n) s += pig(x, y, 0.62, kids[i] === 1);
+        else s += '<ellipse cx="' + x + '" cy="' + y + '" rx="17" ry="11" fill="none" stroke="' + LINE + '" stroke-width="2" stroke-dasharray="4 4"/>';
+      }
+      litter.innerHTML = svg("0 0 400 200", kids ? "A litter of 20 guinea pigs: " + kids.filter(function(k){ return k === 1; }).length + " black and " + kids.filter(function(k){ return k === 0; }).length + " white" : "Space for a litter of 20 babies", s);
+    }
+    function drawCounts(){
+      var last = d.litters[d.litters.length - 1];
+      if(!last){ counts.innerHTML = ""; lnote.innerHTML = d.sqOk ? "Ready when you are." : "Get the square right first, and the breeding button wakes up."; return; }
+      var rt = ratioFor(last.p1, last.p2);
+      var same = d.litters.filter(function(l){ return l.p1 === last.p1 && l.p2 === last.p2; });
+      var tb = 0, tw = 0;
+      same.forEach(function(l){ tb += l.b; tw += l.w; });
+      counts.innerHTML = '<span>' + last.p1 + ' &times; ' + last.p2 + '</span><span>This litter: <b>' + last.b + ' black, ' + last.w + ' white</b></span>' +
+        '<span>Expected: <b>' + (rt.black * 5) + ' black, ' + (rt.white * 5) + ' white</b></span>' +
+        (same.length > 1 ? '<span>All ' + same.length + ' litters: <b>' + tb + ' black, ' + tw + ' white</b> (' + Math.round(tw / (tb + tw) * 100) + '% white, expected ' + (rt.white * 25) + '%)</span>' : "");
+      var off = Math.abs(last.w - rt.white * 5);
+      lnote.innerHTML = (off === 0 ? "Bang on the prediction this time." : off <= 2 ? "Close to the prediction, but not exact." : "That litter wandered a fair way from the prediction.") +
+        " Each baby is a separate chance event, like flipping a coin, so small litters wobble. Breed a few more and watch the total settle towards the expected ratio.";
+    }
+    breed.onclick = function(){
+      if(timer || !d.sqOk) return;
+      var kids = [];
+      for(var i = 0; i < 20; i++){
+        var g = kid(d.p1[Math.random() < 0.5 ? 0 : 1], d.p2[Math.random() < 0.5 ? 0 : 1]);
+        kids.push(isBlack(g) ? 1 : 0);
+      }
+      var b = kids.filter(function(k){ return k === 1; }).length;
+      d.litters.push({ p1: d.p1, p2: d.p2, b: b, w: 20 - b });
+      if(d.litters.length > 60) d.litters.shift();
+      d.kids = kids; api.save();
+      var quick = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if(quick){ drawLitter(kids, 20); drawCounts(); drawChal(); return; }
+      var n = 0; breed.disabled = true;
+      lnote.textContent = "Babies arriving...";
+      counts.innerHTML = "";
+      timer = setInterval(function(){
+        n++; drawLitter(kids, n);
+        if(n >= 20){ clearInterval(timer); timer = null; breed.disabled = false; drawCounts(); drawChal(); }
+      }, 90);
+    };
+
+    function overall(){
+      var r = "right1";
+      for(var k = 0; k < CHALS.length; k++){
+        var st = d.ch[k];
+        if(!st.done) return null;
+        if(st.done === "shown") r = "shown";
+        else if(st.done === "right2" && r === "right1") r = "right2";
+      }
+      return r;
+    }
+    function drawChal(){
+      if(!d.litters.length && !d.ch[0].done){
+        chal.innerHTML = '<span class="kicker">Your challenge</span><p class="wnote">Two small challenges appear here once you have bred your first litter.</p>';
+        return;
+      }
+      chal.innerHTML = '<span class="kicker">Your challenge</span>';
+      for(var k = 0; k < CHALS.length; k++){
+        chal.appendChild(oneChal(k));
+        if(!d.ch[k].done) break;
+      }
+    }
+    function oneChal(k){
+      var c = CHALS[k], st = d.ch[k];
+      var wrap = document.createElement("div"); if(k) wrap.className = "chal";
+      wrap.innerHTML = '<p class="wnote"><b>' + (k + 1) + ' of ' + CHALS.length + '.</b> ' + c.q + '</p>';
+      var nav = document.createElement("div"); nav.className = "wrow";
+      var cb = document.createElement("button"); cb.type = "button"; cb.className = "btn"; cb.textContent = "Check my parents";
+      var sb = document.createElement("button"); sb.type = "button"; sb.className = "btn btn-quiet"; sb.textContent = "Show me";
+      nav.appendChild(cb); nav.appendChild(sb); wrap.appendChild(nav);
+      var fb = document.createElement("div"); fb.className = "fb hidden"; fb.setAttribute("aria-live", "polite");
+      wrap.appendChild(fb);
+      function paint(){
+        cb.classList.toggle("hidden", !!st.done);
+        sb.classList.toggle("hidden", !!st.done || !st.tries);
+        if(st.done){
+          fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+          fb.innerHTML = "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") + '</b><div class="why">' + c.why + "</div>";
+        }
+      }
+      function finish(r){
+        st.done = r; api.save();
+        var o = overall(); if(o) api.done(o);
+        drawChal();
+      }
+      cb.onclick = function(){
+        if(timer) return;
+        if(sameAs(d, c.ans[0], c.ans[1])){ finish(st.tries ? "right2" : "right1"); return; }
+        st.tries++;
+        if(st.tries >= 2){ showAns(); return; }
+        api.save();
+        fb.className = "fb nudge";
+        fb.innerHTML = "<b>Not quite yet.</b> " + d.p1 + " &times; " + d.p2 + " gives " + ratioText(ratioFor(d.p1, d.p2)) + ". " + c.hint +
+          '<br><span class="tiny">Change the parents and Check again, or tap Show me.</span>';
+        paint();
+      };
+      function showAns(){
+        d.p1 = c.ans[0]; d.p2 = c.ans[1]; d.sq = cellsFor(d.p1, d.p2); d.sqOk = true; d.sqTries = 0;
+        drawParents(); drawSquare();
+        finish("shown");
+      }
+      sb.onclick = function(){ if(!timer) showAns(); };
+      paint();
+      return wrap;
+    }
+    function drawAll(){
+      drawParents(); drawSquare();
+      if(d.kids) drawLitter(d.kids, 20); else drawLitter(null, 0);
+      drawCounts(); drawChal();
+    }
+    drawAll();
+  }
+};
+
+EGW.run({
+  id: "biology-inheritance",
+  title: "Inheritance and evolution",
+  subject: "Biology",
+  mins: 55,
+  blurb: "From cells dividing to how species change over millions of years. There is a Punnett square studio in the middle where you breed guinea pigs.",
+  steps: [
+
+  /* ---------- CELL DIVISION ---------- */
+  { type: "learn", topic: "Cell division",
+    title: "Mitosis, meiosis and two kinds of reproduction",
+    fig: FIG_DIV,
+    html: '<p>Body cells contain chromosomes in <b>pairs</b>. Human body cells have <b>46</b> chromosomes (23 pairs).</p>' +
+          '<table class="cmp"><tr><th></th><th>Mitosis</th><th>Meiosis</th></tr>' +
+          '<tr><td><b>Used for</b></td><td>growth, repair, asexual reproduction</td><td>making gametes (sex cells)</td></tr>' +
+          '<tr><td><b>Where</b></td><td>all over the body</td><td>reproductive organs, such as ovaries and testes</td></tr>' +
+          '<tr><td><b>Divides</b></td><td>once</td><td>twice</td></tr>' +
+          '<tr><td><b>Makes</b></td><td>2 cells</td><td>4 gametes</td></tr>' +
+          '<tr><td><b>Chromosomes</b></td><td>full set (46 in humans)</td><td>single set, half (23 in humans)</td></tr>' +
+          '<tr><td><b>Genetically</b></td><td>identical to the parent cell</td><td>all different</td></tr></table>' +
+          '<p>Before a cell divides, it copies its chromosomes. At <b>fertilisation</b>, two gametes join, so the full number of chromosomes is restored. The new cell then divides by mitosis to grow into an embryo.</p>' +
+          '<p><b>Sexual reproduction</b> needs two parents and gametes, so it mixes genetic information and the offspring vary. <b>Asexual reproduction</b> needs one parent and only mitosis, so the offspring are genetically identical: <b>clones</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Mitosis: two identical cells. Meiosis: four different gametes with half the chromosomes.</div>' },
+
+  { type: "sort", topic: "Cell division",
+    q: "Mitosis or meiosis?",
+    buckets: ["Mitosis", "Meiosis"],
+    cards: [
+      ["Used for growth and repair", 0],
+      ["Makes two cells", 0],
+      ["Cells made are genetically identical", 0],
+      ["Used in asexual reproduction", 0],
+      ["Makes gametes", 1],
+      ["Makes four cells", 1],
+      ["Human cells made have 23 chromosomes", 1],
+      ["Leads to variation in offspring", 1]
+    ],
+    hint: "Meiosis is the one that makes sex cells. Mitosis copies.",
+    why: "Mitosis makes two identical cells with the full 46 chromosomes, for growth, repair and asexual reproduction. Meiosis divides twice to make four gametes, each with 23 chromosomes and each genetically different, which is where variation comes from." },
+
+  { type: "learn", topic: "Cell division",
+    title: "Stem cells",
+    html: '<p>A <b>stem cell</b> is an <b>undifferentiated</b> cell. It can divide to make more stem cells, and it can <b>differentiate</b> into other types of cell.</p>' +
+          '<ul>' +
+          '<li><b>Embryonic stem cells</b> can become <b>any</b> type of human cell.</li>' +
+          '<li><b>Adult stem cells</b>, for example in <b>bone marrow</b>, can form many types of cell, including blood cells.</li>' +
+          '<li><b>Meristems</b> in plants, at the tips of roots and shoots, can differentiate into any type of plant cell, for the whole life of the plant.</li>' +
+          '</ul>' +
+          '<p><b>Uses:</b> they may help treat conditions such as diabetes and paralysis. In <b>therapeutic cloning</b>, an embryo is made with the same genes as the patient, so its stem cells are not rejected. Meristems can clone plants quickly and cheaply: rare species, or crops with useful features like disease resistance.</p>' +
+          '<p><b>Concerns:</b> some people have ethical or religious objections to using embryos, and stem cells grown in a lab could carry a virus that passes on an infection.</p>' +
+          '<div class="keep"><b>Keep this</b>Embryonic: any cell. Adult (bone marrow): many cells. Meristem: any plant cell.</div>' },
+
+  { type: "match", topic: "Cell division",
+    q: "Match each type of stem cell to what it can do.",
+    pairs: [
+      ["Embryonic stem cells", "Can become any type of human cell"],
+      ["Adult stem cells in bone marrow", "Can form many types of cell, including blood cells"],
+      ["Meristem cells in plants", "Can become any type of plant cell, throughout the plant's life"]
+    ],
+    hint: "Two of these can become any type of cell, but in different organisms.",
+    why: "Embryonic stem cells are the most flexible human ones. Adult stem cells are more limited. Meristems are the plant version, and they keep working all through the plant's life, which is why gardeners can grow new plants from cuttings." },
+
+  /* ---------- DNA AND GENES ---------- */
+  { type: "learn", topic: "DNA and genes",
+    title: "DNA, genes and the words that go with them",
+    fig: FIG_DNA,
+    html: '<p><b>DNA</b> is a polymer made of two strands twisted into a <b>double helix</b>. It is found in <b>chromosomes</b>, in the nucleus.</p>' +
+          '<p>A <b>gene</b> is a small section of DNA on a chromosome. Each gene codes for a particular sequence of <b>amino acids</b>, to make a specific <b>protein</b>. The <b>genome</b> is all the genetic material of an organism. Studying the human genome helps find genes linked to diseases, understand and treat inherited disorders, and trace how humans migrated long ago.</p>' +
+          '<div class="terms">' +
+          '<div><b>Allele</b>a different version of the same gene</div>' +
+          '<div><b>Dominant</b>shows up even with only one copy (capital letter, B)</div>' +
+          '<div><b>Recessive</b>only shows up with two copies (small letter, b)</div>' +
+          '<div><b>Homozygous</b>two alleles the same: BB or bb</div>' +
+          '<div><b>Heterozygous</b>two different alleles: Bb</div>' +
+          '<div><b>Genotype</b>the alleles you have, such as Bb</div>' +
+          '<div><b>Phenotype</b>the characteristic you see, such as black fur</div>' +
+          '</div>' +
+          '<p>Most characteristics are controlled by several genes working together. A few are controlled by just one gene.</p>' +
+          '<p><span class="sep">Separate Biology only</span><br>DNA is made of repeating units called <b>nucleotides</b>. Each one is a sugar, a phosphate group and one of four <b>bases</b>: A, C, G or T. The bases pair up across the two strands: <b>A with T</b>, and <b>C with G</b>. These are <b>complementary pairs</b>. A sequence of three bases codes for one amino acid.</p>' +
+          '<div class="keep"><b>Keep this</b>Genotype is the letters. Phenotype is what you see.</div>' },
+
+  { type: "order", topic: "DNA and genes",
+    q: "Put these in order of size, smallest first.",
+    items: [
+      "A gene",
+      "A chromosome",
+      "The nucleus",
+      "A cell"
+    ],
+    hint: "Genes sit on chromosomes. Chromosomes sit inside the nucleus.",
+    why: "A gene is a short section of a chromosome. Chromosomes are in the nucleus, and the nucleus is in the cell. The genome is the whole set of genetic material, across all the chromosomes." },
+
+  { type: "match", topic: "DNA and genes",
+    q: "Match each word to its meaning.",
+    pairs: [
+      ["Allele", "A different version of a gene"],
+      ["Homozygous", "Two alleles that are the same"],
+      ["Heterozygous", "Two alleles that are different"],
+      ["Genotype", "The combination of alleles, such as Bb"],
+      ["Phenotype", "The characteristic that shows, such as black fur"],
+      ["Recessive", "Only shows if there are two copies"]
+    ],
+    hint: "Homo means same, hetero means different. Pheno is linked to what appears.",
+    why: "A common slip is to swap genotype and phenotype. The genotype is the letters (the alleles); the phenotype is what you actually see. Homo means same, so BB or bb; hetero means different, so Bb." },
+
+  { type: "mc", topic: "DNA and genes", stretch: true,
+    q: "<b>Separate Biology only.</b> One strand of DNA has the bases <b>A T G C</b>. What are the bases on the matching section of the other strand?",
+    options: ["T A C G", "A T G C", "G C A T", "C G T A"],
+    answer: 0,
+    hint: "A always pairs with T, and C always pairs with G.",
+    why: "A pairs with T, T with A, G with C and C with G, so A T G C pairs with <b>T A C G</b>. These are complementary base pairs. Copying the same letters is the common slip." },
+
+  /* ---------- PUNNETT SQUARES ---------- */
+  { type: "learn", topic: "Punnett squares",
+    title: "Predicting offspring",
+    fig: FIG_PUN,
+    html: '<p>A <b>Punnett square</b> shows all the ways the alleles from two parents can combine.</p>' +
+          '<ol>' +
+          '<li>Write each parent\'s genotype.</li>' +
+          '<li>Split each genotype into the two alleles it can pass on in its gametes. Put one parent along the top and the other down the side.</li>' +
+          '<li>Fill each box with one letter from the top and one from the side. Write the capital first.</li>' +
+          '<li>Count the boxes to get the <b>ratio</b> or the <b>probability</b>.</li>' +
+          '</ol>' +
+          '<p>One box out of four is a probability of <b>1/4</b>, which is <b>0.25</b> or <b>25%</b>, or a ratio of 1 : 3 against the rest.</p>' +
+          '<p>The square gives the <b>chance for each baby</b>. It does not promise that a family of four will have exactly one of each.</p>' +
+          '<div class="keep"><b>Keep this</b>Bb &times; Bb gives 3 : 1. Bb &times; bb gives 1 : 1. BB &times; anything gives all dominant.</div>' },
+
+  STUDIO,
+
+  { type: "num", topic: "Punnett squares",
+    q: "Two black guinea pigs, both <b>Bb</b>, have babies. Black (B) is dominant to white (b).",
+    boxes: [
+      { label: "(a) The probability that a baby is white, as a percentage", a: 25, post: "%" },
+      { label: "(b) They have 12 babies. About how many would you expect to be white?", a: 3 }
+    ],
+    hint: "Draw the square: B and b along the top, B and b down the side. How many of the four boxes are bb?",
+    why: "The square gives BB, Bb, Bb, bb. One box in four is bb, so the probability of white is 1/4 = <b>25%</b>. 12 &times; 1/4 = <b>3</b>. It is an expectation, not a promise: real litters wobble around it, as the studio shows." },
+
+  /* ---------- DISORDERS AND SEX ---------- */
+  { type: "learn", topic: "Disorders and sex",
+    title: "Inherited disorders and boy or girl",
+    html: '<p>Some disorders are caused by inheriting certain alleles.</p>' +
+          '<ul>' +
+          '<li><b>Polydactyly</b> (extra fingers or toes) is caused by a <b>dominant</b> allele. One copy is enough, so a person with it usually has a parent with it too.</li>' +
+          '<li><b>Cystic fibrosis</b> is a disorder of cell membranes caused by a <b>recessive</b> allele. A person needs two copies to have it. Someone with one copy is a <b>carrier</b>: they do not have the disorder but can pass on the allele. Two carriers can have a child with cystic fibrosis.</li>' +
+          '</ul>' +
+          '<p><b>Embryo screening</b> can check embryos for alleles that cause disorders. <b>Gene therapy</b> may one day correct faulty alleles. These raise <b>economic</b>, <b>social</b> and <b>ethical</b> questions, such as the cost, and worries about people choosing embryos for other reasons in future. People hold a range of views, and that is OK.</p>' +
+          '<p><b>Sex determination</b>: human body cells have 23 pairs of chromosomes. One pair is the <b>sex chromosomes</b>. Females are <b>XX</b>; males are <b>XY</b>. Every egg carries an X. Half of sperm carry an X and half a Y, so the chance of a boy is <b>50%</b> each time.</p>' +
+          '<div class="keep"><b>Keep this</b>Polydactyly: dominant. Cystic fibrosis: recessive, so carriers can pass it on without having it.</div>' },
+
+  { type: "num", topic: "Disorders and sex", stretch: true,
+    q: "Two parents are both <b>carriers</b> of cystic fibrosis: both <b>Ff</b>, where f is the recessive allele. Draw a Punnett square in your head or in the working space.",
+    boxes: [
+      { label: "(a) The probability their child has cystic fibrosis, as a percentage", a: 25, post: "%" },
+      { label: "(b) The probability their child is a carrier, like them, as a percentage", a: 50, post: "%" }
+    ],
+    hint: "The square has FF, Ff, Ff and ff. Which boxes have the disorder, and which are carriers?",
+    why: "Only <b>ff</b> has the disorder: 1 box out of 4, so <b>25%</b>. Carriers are <b>Ff</b>: 2 boxes out of 4, so <b>50%</b>. FF (25%) is neither. A common slip is to count Ff as having the disorder: it does not, because f is recessive." },
+
+  { type: "mc", topic: "Disorders and sex",
+    q: "A father has polydactyly and is <b>Dd</b>. The mother does not have it and is <b>dd</b>. What is the chance that their child has polydactyly?",
+    options: ["50%", "25%", "75%", "0%"],
+    answer: 0,
+    hint: "The mother can only pass on d. The father passes on D or d.",
+    why: "The square is Dd, Dd, dd, dd. Polydactyly is dominant, so the two Dd boxes have it: 2 out of 4 = <b>50%</b>. If it were recessive, Dd would not show it, which is why knowing dominant or recessive matters." },
+
+  { type: "mc", topic: "Disorders and sex",
+    q: "Which statement about sex chromosomes is correct?",
+    options: [
+      "All eggs carry an X chromosome, and the sperm decides whether the baby is a boy or a girl",
+      "All sperm carry a Y chromosome",
+      "Females are XY and males are XX",
+      "The egg decides whether the baby is a boy or a girl"
+    ],
+    answer: 0,
+    hint: "Females are XX, so what can every egg carry?",
+    why: "Females are XX, so every egg has an X. Males are XY, so half the sperm carry X and half carry Y. An X sperm gives XX (girl) and a Y sperm gives XY (boy): a 50% chance each time." },
+
+  /* ---------- EVOLUTION ---------- */
+  { type: "learn", topic: "Evolution",
+    title: "Variation, mutation and natural selection",
+    html: '<p><b>Variation</b> is the differences between individuals. It can be caused by <b>genes</b> (genetic), by the <b>environment</b> (conditions they develop in), or usually by <b>both</b>.</p>' +
+          '<p>New variation comes from <b>mutations</b>: changes in DNA, which happen all the time. Most have no effect on the phenotype. Some change it a little. Very rarely, one gives a new phenotype that suits the environment, which can lead to fast change.</p>' +
+          '<p><b>Evolution</b> is a change in the inherited characteristics of a population over time, through <b>natural selection</b>. It can lead to a new <b>species</b>: when two populations are so different they can no longer interbreed to make fertile offspring.</p>' +
+          '<p><b>Evidence</b>: <b>fossils</b>, the remains or traces of organisms from millions of years ago, found in rocks; they form when parts do not decay, or are replaced by minerals, or leave traces like footprints. The record is patchy, because many early organisms were soft bodied. Bacteria evolving <b>antibiotic resistance</b> is evolution we can watch now.</p>' +
+          '<p><b>Extinction</b> is when there are no individuals of a species left. Causes include new predators, new diseases, more successful competitors, catastrophic events like volcanoes or asteroids, and changes to the environment over long periods.</p>' +
+          '<div class="keep"><b>Keep this</b>Variation, then survival of the best suited, then breeding, then passing on alleles. Repeat for many generations.</div>' },
+
+  { type: "sort", topic: "Evolution",
+    q: "What causes each of these differences between people?",
+    buckets: ["Genes only", "Environment only", "Both"],
+    cards: [
+      ["Natural eye colour", 0],
+      ["Blood group", 0],
+      ["A scar", 1],
+      ["Which language you speak", 1],
+      ["Height", 2],
+      ["Body mass", 2]
+    ],
+    hint: "Could it change because of how you live? Could you be born with a tendency towards it?",
+    why: "Eye colour and blood group come from your genes. Scars and languages come from what happens to you. Height and body mass depend on both: your genes set a range, and food, health and exercise affect where you end up in it." },
+
+  { type: "order", topic: "Evolution",
+    q: "A population of hares lives somewhere that becomes snowy for more of the year. Put the steps of natural selection in order.",
+    items: [
+      "There is variation in fur colour, caused by different alleles",
+      "Hares with paler fur are harder for predators to spot in the snow",
+      "So paler hares are more likely to survive and breed",
+      "They pass on the alleles for paler fur to their offspring",
+      "Over many generations, more of the population has pale fur"
+    ],
+    hint: "The variation is already there at the start. Then: survive, breed, pass on.",
+    why: "Variation, advantage, survival and breeding, alleles passed on, repeated over generations. The common slip is to say the hares change their fur because they need to. Individuals do not change; the population changes because some survive and breed more." },
+
+  { type: "multi", topic: "Evolution",
+    q: "Which <b>two</b> are evidence for evolution?",
+    options: [
+      "Fossils showing how organisms changed over millions of years",
+      "Bacteria evolving resistance to antibiotics",
+      "Animals getting stronger when they exercise",
+      "Plants growing taller in more sunlight"
+    ],
+    answers: [0, 1],
+    hint: "Evolution is about inherited changes. Which two are not passed on?",
+    why: "Fossils and antibiotic resistance both show inherited change over generations. Exercise and sunlight change one individual during its life, but those changes are not inherited, so they are not evolution." },
+
+  /* ---------- BREEDING AND GM ---------- */
+  { type: "learn", topic: "Breeding and GM",
+    title: "Selective breeding and genetic engineering",
+    html: '<p><b>Selective breeding</b> (artificial selection) is humans choosing which plants or animals breed, to get a characteristic they want.</p>' +
+          '<ol><li>Choose parents with the characteristic.</li><li>Breed them together.</li><li>Choose the offspring with it most strongly, and breed them.</li><li>Repeat over many generations until all the offspring show it.</li></ol>' +
+          '<p>Examples: crops resistant to disease, animals that give more meat or milk, gentle dogs, big or unusual flowers. A risk is <b>inbreeding</b>: less variation, so some breeds are more likely to get diseases or inherited defects.</p>' +
+          '<p><b>Genetic engineering</b> changes an organism\'s genome by adding a <b>gene from another organism</b>. Bacteria have been engineered to make human <b>insulin</b>. Genetically modified (GM) crops can resist insects or herbicides, or give bigger yields.</p>' +
+          '<p><b>Higher only:</b> <b>enzymes</b> cut out the wanted gene. It is put into a <b>vector</b>, usually a bacterial <b>plasmid</b> or a virus, which carries it into the target cells. In plants and animals this is done at an early stage of development, so all the cells get the gene.</p>' +
+          '<p>Concerns about GM crops include possible effects on wild flowers and insects, and that effects on human health are not fully known yet.</p>' +
+          '<p class="tiny"><span class="sep">Separate Biology only</span> Cloning: plant cuttings and tissue culture, and in animals embryo transplants and adult cell cloning.</p>' +
+          '<div class="keep"><b>Keep this</b>Selective breeding picks parents over many generations. Genetic engineering moves a gene straight in.</div>' },
+
+  { type: "order", topic: "Breeding and GM",
+    q: "A farmer wants cows that give more milk. Put the selective breeding steps in order.",
+    items: [
+      "Choose a cow and a bull from families that give lots of milk",
+      "Breed them together",
+      "Choose the offspring that give the most milk",
+      "Breed those offspring together",
+      "Repeat for many generations"
+    ],
+    hint: "It starts with choosing and ends with a lot of patience.",
+    why: "Choose, breed, choose the best offspring, breed again, and repeat over many generations. It is slow, which is one reason genetic engineering appeals: it can add a feature in one step." },
+
+  { type: "mc", topic: "Breeding and GM", stretch: true,
+    q: "<b>Higher only.</b> In making bacteria that produce human insulin, what is the job of the <b>plasmid</b>?",
+    options: [
+      "It is a vector that carries the insulin gene into the bacterial cell",
+      "It is the enzyme that cuts the insulin gene out of human DNA",
+      "It is the protein the bacteria make",
+      "It kills the bacteria that did not take up the gene"
+    ],
+    answer: 0,
+    hint: "Enzymes do the cutting. What does the cut gene travel in?",
+    why: "The plasmid is a <b>vector</b>: a small ring of bacterial DNA that carries the gene into the cell. Enzymes cut the gene out and help join it into the plasmid. The bacteria then make insulin by following the instructions in the gene." },
+
+  /* ---------- CLASSIFICATION ---------- */
+  { type: "learn", topic: "Classification",
+    title: "Sorting living things",
+    html: '<p><b>Linnaeus</b> sorted living things into groups by their structure and characteristics. From biggest group to smallest:</p>' +
+          '<p style="text-align:center"><b>kingdom &rarr; phylum &rarr; class &rarr; order &rarr; family &rarr; genus &rarr; species</b></p>' +
+          '<p class="tiny" style="text-align:center">One way to remember it: King Penguins Can Often Find Good Snacks.</p>' +
+          '<p>Every species has a two part <b>binomial name</b>: the <b>genus</b> then the <b>species</b>. Humans are <i>Homo sapiens</i>; the genus is <i>Homo</i>. The genus has a capital letter; the species does not.</p>' +
+          '<p>Better microscopes and an understanding of chemical processes changed things. <b>Evolutionary trees</b> use classification data, and fossils, to show how closely related organisms are.</p>' +
+          '<p><b>Stretch:</b> Carl Woese used chemical analysis to propose the <b>three domain system</b>: <b>Archaea</b> (primitive bacteria, often in extreme places such as hot springs), <b>Bacteria</b> (true bacteria) and <b>Eukaryota</b> (protists, fungi, plants and animals).</p>' +
+          '<div class="keep"><b>Keep this</b>Kingdom down to species. Binomial name: Genus species.</div>' },
+
+  { type: "order", topic: "Classification",
+    q: "Put the groups in order, from the biggest group to the smallest.",
+    items: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
+    hint: "King Penguins Can Often Find Good Snacks.",
+    why: "Kingdom, phylum, class, order, family, genus, species. Each step down contains fewer, more closely related organisms. The last two make up the binomial name." },
+
+  { type: "mc", topic: "Classification", stretch: true,
+    q: "The lion is <i>Panthera leo</i> and the tiger is <i>Panthera tigris</i>. Which is correct?",
+    options: [
+      "They are in the same genus but are different species",
+      "They are the same species",
+      "They are in different kingdoms",
+      "<i>leo</i> and <i>tigris</i> are their genus names"
+    ],
+    answer: 0,
+    hint: "The first word of a binomial name is the genus.",
+    why: "Both start with <i>Panthera</i>, so they share a genus and are closely related. The second word is the species, and it differs, so they are different species. In the three domain system they are both in the Eukaryota, like all animals." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your explanation",
+    q: '<p><b>Some bacteria are now resistant to antibiotics. Explain how this is evidence for evolution by natural selection.</b> (about 5 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "In a population of bacteria there is variation",
+      "A random mutation",
+      "When the antibiotic is used,",
+      "The resistant bacteria survive and",
+      "They pass on",
+      "Over many generations,",
+      "This is evidence for evolution because"
+    ],
+    checklist: [
+      "I said the resistance comes from a random mutation",
+      "I said the antibiotic kills the bacteria that are not resistant",
+      "I said resistant bacteria survive and reproduce",
+      "I said the allele (or gene) for resistance is passed on",
+      "I linked it to evolution: the population changes over generations",
+      "Stretch: I said this happens fast because bacteria reproduce so quickly"
+    ],
+    minWords: 70 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

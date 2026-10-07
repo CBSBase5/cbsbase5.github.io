@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probability and risk - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Risk dial widget */
+.rd-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.rd-round{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px}
+.rd-stars{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:.08em}
+.rd-stars .on{color:#e0a800}
+.rd-stars .off{color:#c9c8d6}
+.rd-card{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;margin:6px 0 10px;font-size:1rem;line-height:1.45}
+.rd-svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;touch-action:manipulation;user-select:none;cursor:pointer}
+.rd-dial{width:100%;max-width:300px;height:auto;display:block;margin:4px auto 0}
+.rd-adj{display:flex;justify-content:space-around;gap:6px;flex-wrap:wrap;margin:6px 0}
+.rd-adj span{display:inline-flex;align-items:center;gap:6px;font-size:.95rem}
+.rd-adj .btn{min-width:44px;padding-left:10px;padding-right:10px}
+.rd-in{width:110px;text-align:center;padding:9px 8px;font-family:inherit;font-size:1.1rem;border:3px solid rgba(20,26,51,.22);border-radius:12px 10px 14px 10px;background:#fff;color:var(--ink)}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Probability and risk</h2>
+    <span>GCSE Statistics. Chance, sample spaces, relative frequency, risk, two way tables, Venn diagrams and tree diagrams.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, txt, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" ' + (o.lab ? LAB : BODY) +
+    ' font-weight="' + (o.w || 400) + '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '">' + txt + '</text>';
+}
+
+/* ---------- figures ---------- */
+var SCALE = (function(){
+  var L = 22, R = 338, y = 64;
+  function X(p){ return L + p * (R - L); }
+  var s = '<svg viewBox="0 0 360 150" role="img" aria-label="Probability scale from 0, impossible, through 0.5, even chance, to 1, certain. Unlikely sits between 0 and 0.5, likely between 0.5 and 1." style="max-width:460px">';
+  s += '<defs><linearGradient id="psg" x1="0" x2="1"><stop offset="0" stop-color="' + CORAL + '"/><stop offset="0.5" stop-color="' + SUN + '"/><stop offset="1" stop-color="' + MINT + '"/></linearGradient></defs>';
+  s += '<rect x="' + L + '" y="' + (y - 9) + '" width="' + (R - L) + '" height="18" rx="9" fill="url(#psg)" stroke="' + INK + '" stroke-width="2"/>';
+  [[0, "0"], [0.5, "0.5"], [1, "1"]].forEach(function(p){
+    s += '<line x1="' + X(p[0]) + '" y1="' + (y - 16) + '" x2="' + X(p[0]) + '" y2="' + (y + 16) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(X(p[0]), y - 24, p[1], { lab: 1, w: 800, s: 17 });
+  });
+  s += t(X(0) + 4, y + 38, "impossible", { a: "start", s: 14 });
+  s += t(X(0.5), y + 38, "even chance", { s: 14 });
+  s += t(X(1) - 4, y + 38, "certain", { a: "end", s: 14 });
+  s += t(X(0.25), y + 62, "unlikely", { s: 14, w: 700 });
+  s += t(X(0.75), y + 62, "likely", { s: 14, w: 700 });
+  return s + '</svg>';
+})();
+
+var DICE = (function(){
+  var s = '<svg viewBox="0 0 330 296" role="img" aria-label="Sample space for the total of two dice: a 6 by 6 grid. The four cells with a total of 9 are highlighted: 3 and 6, 4 and 5, 5 and 4, 6 and 3." style="max-width:400px">';
+  var x0 = 64, y0 = 52, c = 42;
+  s += t(x0 + 3 * c, 18, "Dice 1", { lab: 1, w: 800 });
+  s += t(16, y0 + 3 * c, "Dice 2", { lab: 1, w: 800 });
+  for(var a = 1; a <= 6; a++){
+    s += t(x0 + (a - 0.5) * c, y0 - 10, a, { w: 700 });
+    s += t(x0 - 12, y0 + (a - 0.5) * c + 5, a, { w: 700 });
+  }
+  for(var i = 1; i <= 6; i++) for(var j = 1; j <= 6; j++){
+    var on = i + j === 9;
+    s += '<rect x="' + (x0 + (i - 1) * c) + '" y="' + (y0 + (j - 1) * c) + '" width="' + c + '" height="' + c + '" fill="' + (on ? SUN : WHITE) + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += t(x0 + (i - 0.5) * c, y0 + (j - 0.5) * c + 6, i + j, { s: 16, w: on ? 800 : 400 });
+  }
+  return s + '</svg>';
+})();
+
+var VENN = (function(){
+  var s = '<svg viewBox="0 0 360 220" role="img" aria-label="Venn diagram. 50 students. Rap only 15, both rap and pop 8, pop only 11, neither 16." style="max-width:440px">';
+  s += '<rect x="4" y="4" width="352" height="212" rx="12" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += t(20, 28, "&xi; = 50 students", { a: "start", lab: 1, w: 700, s: 14 });
+  s += '<circle cx="140" cy="116" r="78" fill="' + CORAL + '" fill-opacity="0.35" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<circle cx="222" cy="116" r="78" fill="' + CYAN + '" fill-opacity="0.35" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(100, 60, "Rap", { lab: 1, w: 800, s: 16 });
+  s += t(262, 60, "Pop", { lab: 1, w: 800, s: 16 });
+  s += t(104, 124, "15", { lab: 1, w: 800, s: 22 });
+  s += t(181, 124, "8", { lab: 1, w: 800, s: 22 });
+  s += t(258, 124, "11", { lab: 1, w: 800, s: 22 });
+  s += t(330, 200, "16", { lab: 1, w: 800, s: 22 });
+  return s + '</svg>';
+})();
+
+var TWOWAY =
+'<table class="datatable"><tr><th></th><th>Football</th><th>Netball</th><th>Swimming</th><th>Total</th></tr>' +
+'<tr><th>Year 10</th><td>12</td><td>10</td><td>18</td><td>40</td></tr>' +
+'<tr><th>Year 11</th><td>14</td><td>16</td><td>10</td><td>40</td></tr>' +
+'<tr><th>Total</th><td>26</td><td>26</td><td>28</td><td>80</td></tr></table>';
+
+/* two stage tree: first [[label, p]], second rows of [[label, p]] for each first branch */
+function TREE(o){
+  var H = o.h || 236, x0 = 8, x1 = 96, x2 = 162, x3 = 250;
+  var s = '<svg viewBox="0 0 360 ' + H + '" role="img" aria-label="' + o.aria + '" style="max-width:460px">';
+  var n1 = o.first.length;
+  var ys1 = o.first.map(function(_, k){ return (k + 0.5) * H / n1; });
+  var y0 = H / 2;
+  o.first.forEach(function(f, k){
+    s += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + ys1[k] + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t((x0 + x1) / 2 - 2, (y0 + ys1[k]) / 2 + (k ? 22 : -10), f[1], { w: 700, s: 15, c: BLUE });
+    s += t(x1 + 5, ys1[k] + 5, f[0], { a: "start", lab: 1, w: 800, s: 15 });
+    var sec = o.second[k], band = H / n1;
+    sec.forEach(function(g, j){
+      var y2 = ys1[k] - band / 2 + (j + 0.5) * band / sec.length;
+      s += '<line x1="' + x2 + '" y1="' + ys1[k] + '" x2="' + x3 + '" y2="' + y2 + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += t((x2 + x3) / 2, (ys1[k] + y2) / 2 + (j ? 20 : -8), g[1], { w: 700, s: 15, c: BLUE });
+      s += t(x3 + 5, y2 + 5, g[0], { a: "start", lab: 1, w: 800, s: 15 });
+      if(o.out) s += t(356, y2 + 5, o.out[k][j], { a: "end", s: 15, w: 700, c: VIOLET });
+    });
+  });
+  return s + '</svg>';
+}
+
+var TREE_RW = TREE({
+  first: [["R", "0.3"], ["G", "0.7"]],
+  second: [[["R", "0.3"], ["G", "0.7"]], [["R", "0.3"], ["G", "0.7"]]],
+  out: [["0.09", "0.21"], ["0.21", "0.49"]],
+  aria: "Tree diagram for two picks with replacement. First pick red 0.3 or green 0.7. Second pick the same each time: red 0.3, green 0.7. Outcomes: red red 0.09, red green 0.21, green red 0.21, green green 0.49."
+});
+
+var TREE_WO = TREE({
+  first: [["R", "4/10"], ["B", "6/10"]],
+  second: [[["R", "3/9"], ["B", "6/9"]], [["R", "4/9"], ["B", "5/9"]]],
+  aria: "Tree diagram for two picks without replacement from 4 red and 6 blue sweets. First pick red 4/10 or blue 6/10. After red: red 3/9, blue 6/9. After blue: red 4/9, blue 5/9."
+});
+
+var TREE_LATE = TREE({
+  first: [["Rain", "0.3"], ["Dry", "0.7"]],
+  second: [[["Late", "0.6"], ["On time", "0.4"]], [["Late", "0.2"], ["On time", "0.8"]]],
+  aria: "Tree diagram. Rain 0.3, dry 0.7. If rain: late 0.6, on time 0.4. If dry: late 0.2, on time 0.8."
+});
+
+var SCREEN = TREE({
+  h: 236,
+  first: [["Has it", "20"], ["Not", "980"]],
+  second: [[["Pos", "18"], ["Neg", "2"]], [["Pos", "49"], ["Neg", "931"]]],
+  aria: "Frequency tree for 1000 people. 20 have the condition: 18 test positive, 2 negative. 980 do not: 49 test positive, 931 negative."
+});
+
+/* ---------- widget: Risk dial ---------- */
+var ROUNDS = [
+  { title: "Skate park", a: "Skateboarders", b: "Non skateboarders", ta: 6, tb: 2,
+    text: "Out of every 100 teens who skateboard each week, <b>6</b> sprain a wrist in a year. Out of every 100 who do not, <b>2</b> do.",
+    ask: "How many times as likely is a skateboarder to sprain a wrist?", rr: 3,
+    quip: "Three times the risk, but it is still only 6 in 100. Both facts matter." },
+  { title: "Beach day", a: "No sun cream", b: "Sun cream", ta: 40, tb: 10,
+    text: "On a hot beach day, <b>40</b> in every 100 people without sun cream burn. With sun cream, <b>10</b> in 100 do.",
+    ask: "How many times as likely is someone <b>without</b> sun cream to burn?", rr: 4,
+    quip: "Four times the risk, and this time the absolute risk is big too: 40 in 100. Slap it on." },
+  { title: "Cracked screen", a: "No case", b: "Case", ta: 5, tb: 3,
+    text: "Phones in a year: <b>10 out of 200</b> without a case got a cracked screen, and <b>9 out of 300</b> with a case did. Shade each as <b>per 100</b>.",
+    ask: "How many times as likely is a phone <b>without</b> a case to crack? (2 decimal places)", rr: 5 / 3, tol: 0.02, show: "1.67",
+    quip: "About 1.67 times as likely. Different group sizes, so scaling to per 100 made it a fair comparison." }
+];
+
+function mountRisk(el, api){
+  var d = api.data;
+  d.r = d.r || 0;
+  d.na = d.na || 0; d.nb = d.nb || 0;
+  d.stage = d.stage || "shade";
+  d.stars = d.stars || [];
+  d.miss = d.miss || 0;
+  d.tries = d.tries || 0;
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="rd-top"><span class="rd-round" id="rdRound"></span><span class="rd-stars" id="rdStars" aria-label="Stars"></span></div>' +
+      '<div class="rd-card" id="rdText"></div>' +
+      '<svg class="rd-svg" id="rdGrid" viewBox="0 0 360 230" role="img" aria-label="Two groups of 100 people. Tap a person to shade everyone up to that person."></svg>' +
+      '<div class="rd-adj" id="rdAdj">' +
+        '<span><button class="btn btn-quiet" type="button" data-g="a" data-d="-1" aria-label="One fewer in the left group">&minus;</button><button class="btn btn-quiet" type="button" data-g="a" data-d="1" aria-label="One more in the left group">+</button></span>' +
+        '<span><button class="btn btn-quiet" type="button" data-g="b" data-d="-1" aria-label="One fewer in the right group">&minus;</button><button class="btn btn-quiet" type="button" data-g="b" data-d="1" aria-label="One more in the right group">+</button></span>' +
+      '</div>' +
+      '<div id="rdCtl"></div>' +
+      '<svg class="rd-dial" id="rdDial" viewBox="0 0 300 172" role="img" aria-label="Relative risk dial from 0 to 5. 1 means the same risk."></svg>' +
+      '<div class="wnote" id="rdMsg" aria-live="polite"></div>' +
+    '</div>';
+
+  var grid = el.querySelector("#rdGrid"), dial = el.querySelector("#rdDial"), ctl = el.querySelector("#rdCtl"), msg = el.querySelector("#rdMsg");
+  var C = 15.6, GX = [14, 190], GY = 34;
+
+  function R(){ return ROUNDS[Math.min(d.r, ROUNDS.length - 1)]; }
+
+  function person(x, y, on, col){
+    var f = on ? col : WHITE, sk = on ? INK : "#b9b8c9";
+    return '<circle cx="' + x + '" cy="' + (y - 3.4) + '" r="2.6" fill="' + f + '" stroke="' + sk + '" stroke-width="1"/>' +
+      '<path d="M' + (x - 4) + ' ' + (y + 5.5) + ' Q' + x + ' ' + (y - 3.5) + ' ' + (x + 4) + ' ' + (y + 5.5) + ' Z" fill="' + f + '" stroke="' + sk + '" stroke-width="1"/>';
+  }
+
+  function drawGrid(){
+    var r = R(), s = "";
+    [["a", r.a, CORAL], ["b", r.b, CYAN]].forEach(function(g, k){
+      var n = k ? d.nb : d.na, gx = GX[k];
+      s += '<rect x="' + (gx - 6) + '" y="' + (GY - 6) + '" width="' + (10 * C + 12) + '" height="' + (10 * C + 12) + '" rx="8" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += t(gx + 5 * C, 20, g[1], { lab: 1, w: 800, s: 15 });
+      for(var i = 0; i < 100; i++){
+        var cx = gx + (i % 10 + 0.5) * C, cy = GY + (Math.floor(i / 10) + 0.5) * C;
+        s += person(cx, cy, i < n, g[2]);
+      }
+      s += t(gx + 5 * C, GY + 10 * C + 32, n + " in 100", { lab: 1, w: 800, s: 17, c: k ? BLUE : CORAL });
+    });
+    grid.innerHTML = s;
+  }
+
+  function drawDial(val){
+    var cx = 150, cy = 142, r = 110, MAX = 5;
+    function ang(v){ return Math.PI * (1 - Math.min(v, MAX) / MAX); }
+    function P(v, rr){ return [cx + rr * Math.cos(ang(v)), cy - rr * Math.sin(ang(v))]; }
+    var s = "";
+    var segs = [[0, 1, MINT], [1, 2.5, SUN], [2.5, 5, CORAL]];
+    segs.forEach(function(g){
+      var a = P(g[0], r), b = P(g[1], r);
+      s += '<path d="M' + a[0] + ' ' + a[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + b[0] + ' ' + b[1] + '" fill="none" stroke="' + g[2] + '" stroke-width="22"/>';
+    });
+    for(var v = 0; v <= 5; v++){
+      var p = P(v, r + 22);
+      s += t(p[0], p[1] + 5, v, { lab: 1, w: 800, s: 15 });
+    }
+    var one = P(1, r - 22);
+    s += t(one[0] + 14, one[1] + 6, "same", { s: 14 });
+    if(typeof val === "number"){
+      var tip = P(val, r - 8);
+      s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + tip[0] + '" y2="' + tip[1] + '" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>';
+      s += t(cx, cy - 26, "RR " + (Math.round(val * 100) / 100), { lab: 1, w: 800, s: 18 });
+    }else{
+      s += t(cx, cy - 26, "RR ?", { lab: 1, w: 800, s: 18 });
+    }
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="8" fill="' + INK + '"/>';
+    s += t(cx, 168, "relative risk", { s: 14 });
+    dial.innerHTML = s;
+  }
+
+  function stars(){
+    var s = "";
+    for(var k = 0; k < ROUNDS.length; k++){
+      var n = d.stars[k] || 0;
+      for(var j = 0; j < 3; j++) s += '<span class="' + (j < n ? "on" : "off") + '">&#9733;</span>';
+      if(k < ROUNDS.length - 1) s += " ";
+    }
+    el.querySelector("#rdStars").innerHTML = s;
+  }
+
+  function render(){
+    d.between = false;
+    stars();
+    var adj = el.querySelector("#rdAdj");
+    if(d.r >= ROUNDS.length){
+      el.querySelector("#rdRound").textContent = "All rounds done";
+      var tot = d.stars.reduce(function(a, b){ return a + b; }, 0);
+      el.querySelector("#rdText").innerHTML = '<b>' + tot + ' stars out of 9.</b> ' +
+        'Absolute risk tells you how likely something is in a group (6 in 100). Relative risk tells you how many times as likely one group is compared with another (3 times). A headline that only gives one of them is only telling half the story.';
+      grid.style.display = "none"; adj.style.display = "none";
+      ctl.innerHTML = '<div class="wrow"><button class="btn btn-quiet" type="button" id="rdAgain">Play again for fun</button></div>';
+      el.querySelector("#rdAgain").onclick = function(){ d.r = 0; d.na = 0; d.nb = 0; d.stage = "shade"; d.replay = true; api.save(); msg.innerHTML = ""; render(); };
+      drawDial(ROUNDS[ROUNDS.length - 1].rr);
+      return;
+    }
+    grid.style.display = ""; adj.style.display = "";
+    var r = R();
+    el.querySelector("#rdRound").textContent = "Round " + (d.r + 1) + " of 3: " + r.title;
+    el.querySelector("#rdText").innerHTML = r.text;
+    drawGrid();
+    if(d.stage === "shade"){
+      drawDial(null);
+      ctl.innerHTML = '<p class="wnote" style="margin:4px 0">Tap a person to shade everyone up to them, or use the &minus; and + buttons. Shade the people it happens to in each group.</p>' +
+        '<div class="wrow"><button class="btn" type="button" id="rdLock">Lock in</button>' +
+        (d.rt >= 1 ? '<button class="btn btn-quiet" type="button" id="rdShow">Show me</button>' : '') + '</div>';
+      el.querySelector("#rdLock").onclick = function(){
+        if(d.na === r.ta && d.nb === r.tb){
+          d.stage = "rr"; d.rs = d.rt ? 1 : 0; d.rt = 0; api.save();
+          msg.innerHTML = '<b>Locked.</b> Absolute risks: ' + r.ta + ' in 100 (' + r.ta + '%) and ' + r.tb + ' in 100 (' + r.tb + '%).';
+          render(); return;
+        }
+        d.rt = (d.rt || 0) + 1; d.miss++; api.save();
+        msg.innerHTML = d.r === 2 ?
+          '<b>Not quite yet.</b> 10 out of 200 is how many out of 100? Halve both. And 9 out of 300: divide both by 3.' :
+          '<b>Not quite yet.</b> Have another look at the numbers in the story: the left grid is ' + r.a.toLowerCase() + ', the right grid is ' + r.b.toLowerCase() + '.';
+        render();
+      };
+      var sh = el.querySelector("#rdShow");
+      if(sh) sh.onclick = function(){ d.na = r.ta; d.nb = r.tb; d.stage = "rr"; d.rs = 2; d.rt = 0; d.used = true; api.save(); msg.innerHTML = '<b>Here they are.</b> ' + r.ta + ' in 100 and ' + r.tb + ' in 100.'; render(); };
+    }else{
+      drawDial(null);
+      ctl.innerHTML = '<p class="wnote" style="margin:4px 0"><b>Relative risk.</b> ' + r.ask + '</p>' +
+        '<div class="wrow"><input class="rd-in" id="rdAns" type="text" inputmode="decimal" autocomplete="off" aria-label="Relative risk">' +
+        '<button class="btn" type="button" id="rdGo">Spin the dial</button>' +
+        (d.rt >= 1 ? '<button class="btn btn-quiet" type="button" id="rdShow">Show me</button>' : '') + '</div>';
+      var inp = el.querySelector("#rdAns");
+      el.querySelector("#rdGo").onclick = function(){
+        var v = EGW.parseNum(inp.value);
+        if(isNaN(v)){ msg.innerHTML = "Pop a number in first."; return; }
+        if(Math.abs(v - r.rr) <= (r.tol || 0.001)){
+          var lost = (d.rs || 0) + (d.rt ? 1 : 0);
+          finishRound(Math.max(1, 3 - lost), '<b>' + pick(["Bang on.", "Needle nailed it.", "Yes!"]) + '</b> ' + r.ta + ' &divide; ' + r.tb + ' = ' + (r.show || r.rr) + '. ' + r.quip);
+          return;
+        }
+        d.rt = (d.rt || 0) + 1; d.miss++; api.save();
+        drawDial(Math.max(0, Math.min(5, v)));
+        msg.innerHTML = (v < 1 ? '<b>That says less likely.</b> ' : '<b>Not quite yet.</b> ') + 'Relative risk = risk in the first group &divide; risk in the second group. Which group is the question asking about first?';
+        if(d.rt === 1) ctl.querySelector(".wrow").insertAdjacentHTML("beforeend", '<button class="btn btn-quiet" type="button" id="rdShow">Show me</button>');
+        wireShowRR();
+      };
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") el.querySelector("#rdGo").click(); });
+      wireShowRR();
+    }
+  }
+
+  function wireShowRR(){
+    var sh = el.querySelector("#rdShow");
+    var r = R();
+    if(sh && d.stage === "rr") sh.onclick = function(){
+      d.used = true;
+      finishRound(1, '<b>Here it is.</b> ' + r.ta + ' &divide; ' + r.tb + ' = ' + (r.show || r.rr) + '. ' + r.quip);
+    };
+  }
+
+  function finishRound(n, text){
+    var r = R();
+    if(!d.replay) d.stars[d.r] = n;
+    drawDial(r.rr);
+    d.r++; d.na = 0; d.nb = 0; d.stage = "shade"; d.rt = 0; d.rs = 0;
+    if(d.r >= ROUNDS.length && !d.result){
+      d.result = d.used ? "shown" : (d.miss ? "right2" : "right1");
+      api.save(); api.done(d.result);
+    }
+    api.save();
+    var keep = text;
+    if(d.r < ROUNDS.length){
+      d.between = true;
+      ctl.innerHTML = '<div class="wrow"><button class="btn btn-orange" type="button" id="rdNext">Next round</button></div>';
+      stars();
+      el.querySelector("#rdNext").onclick = function(){ msg.innerHTML = ""; render(); };
+      msg.innerHTML = keep;
+    }else{
+      render();
+      msg.innerHTML = keep;
+    }
+  }
+
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+
+  function setN(g, n){
+    if(d.between || d.stage !== "shade" || d.r >= ROUNDS.length) return;
+    n = Math.max(0, Math.min(100, n));
+    if(g === "a") d.na = n; else d.nb = n;
+    api.save(); drawGrid();
+  }
+
+  grid.addEventListener("click", function(e){
+    var p = grid.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    var q = p.matrixTransform(grid.getScreenCTM().inverse());
+    for(var k = 0; k < 2; k++){
+      var col = Math.floor((q.x - GX[k]) / C), row = Math.floor((q.y - GY) / C);
+      if(col >= 0 && col < 10 && row >= 0 && row < 10){
+        var idx = row * 10 + col + 1, g = k ? "b" : "a", cur = k ? d.nb : d.na;
+        setN(g, idx === cur ? idx - 1 : idx);
+        return;
+      }
+    }
+  });
+  [].forEach.call(el.querySelectorAll("[data-g]"), function(b){
+    b.onclick = function(){ var g = b.getAttribute("data-g"); setN(g, (g === "a" ? d.na : d.nb) + parseInt(b.getAttribute("data-d"), 10)); };
+  });
+
+  render();
+}
+
+EGW.run({
+  id: "stats-probability",
+  title: "Probability and risk",
+  subject: "GCSE Statistics",
+  mins: 55,
+  blurb: "The probability scale, sample spaces, experiments and expected frequency, absolute and relative risk, two way tables and Venn diagrams, the addition and multiplication laws, and tree diagrams.",
+  steps: [
+
+  /* ---------- SCALE ---------- */
+  { type: "learn", topic: "The probability scale",
+    title: "From impossible to certain",
+    fig: SCALE,
+    html: '<ul>' +
+          '<li>Probability goes from <b>0</b> (impossible) to <b>1</b> (certain). Write it as a fraction, decimal or percentage. Answers like "3 in 10" or "3:10" can lose the mark.</li>' +
+          '<li>If all outcomes are <b>equally likely</b>: P(event) = number of ways it can happen &divide; total number of outcomes.</li>' +
+          '<li>The probabilities of all the possible outcomes add up to 1, so <b>P(not A) = 1 &minus; P(A)</b>.</li>' +
+          '</ul>' +
+          '<p>A bag has 3 red, 5 blue and 2 green counters. P(blue) = 5/10 = 0.5. P(not green) = 1 &minus; 2/10 = 8/10.</p>' +
+          '<div class="keep"><b>Keep this</b>Any probability bigger than 1, or below 0, is a sign something has gone wrong.</div>' },
+
+  { type: "num", topic: "The probability scale",
+    q: "A bag holds 4 red, 7 yellow and 9 purple sweets. One is picked at random.",
+    boxes: [
+      { label: "P(red)", a: 0.2, show: "4/20 = 0.2" },
+      { label: "P(not purple)", a: 0.55, show: "11/20 = 0.55" }
+    ],
+    hint: "How many sweets altogether? For not purple, count the others, or use 1 &minus; P(purple).",
+    why: "There are 4 + 7 + 9 = 20 sweets.<br>P(red) = 4/20 = <b>0.2</b> (or 1/5).<br>P(not purple) = 1 &minus; 9/20 = 11/20 = <b>0.55</b>.<br>A common slip is using 3 (the number of colours) as the total." },
+
+  { type: "mc", topic: "The probability scale",
+    q: "The weather app says the probability of rain tomorrow is 0.15. What is the probability it does <b>not</b> rain?",
+    options: ["0.15", "0.85", "1.15", "0.5, because it either rains or it does not"],
+    answer: 1,
+    hint: "Rain and no rain cover everything, so they add up to 1.",
+    why: "P(no rain) = 1 &minus; 0.15 = <b>0.85</b>. \"It either happens or it does not, so it is 50:50\" is a famous misconception: two outcomes are only equally likely if there is a reason they should be." },
+
+  /* ---------- SAMPLE SPACES ---------- */
+  { type: "learn", topic: "Sample spaces",
+    title: "List every outcome",
+    fig: DICE,
+    html: '<p>A <b>sample space</b> is a list or table of all the possible outcomes. For two dice, a 6 by 6 grid shows all <b>36</b> equally likely outcomes.</p>' +
+          '<p>The highlighted cells total 9: there are 4 of them, so P(total of 9) = <b>4/36</b> = 1/9.</p>' +
+          '<p>For two coins: HH, HT, TH, TT. Four outcomes, and HT and TH are different, so P(one head and one tail) = 2/4.</p>' +
+          '<div class="keep"><b>Keep this</b>Be systematic: fix the first thing, run through the second, then move on. That way nothing is missed or counted twice.</div>' },
+
+  { type: "num", topic: "Sample spaces",
+    q: "Two fair six sided dice are rolled and the scores are added. Use the grid on the learn card if you like.",
+    fig: DICE,
+    boxes: [
+      { label: "P(total of 7), as a fraction", a: 6 / 36, tol: 0.002, show: "6/36 = 1/6" },
+      { label: "P(a double), as a fraction", a: 6 / 36, tol: 0.002, show: "6/36 = 1/6" },
+      { label: "P(total of 10 or more), as a fraction", a: 6 / 36, tol: 0.002, show: "6/36 = 1/6" }
+    ],
+    hint: "Count the cells in the grid. Totals of 7 run diagonally; doubles run down the other diagonal.",
+    why: "7: (1,6) (2,5) (3,4) (4,3) (5,2) (6,1), so 6/36.<br>Doubles: (1,1) up to (6,6), so 6/36.<br>10 or more: 10 three ways, 11 two ways, 12 one way, so 6/36.<br>All three are <b>1/6</b>, which surprises a lot of people. 7 is the most likely total of all." },
+
+  { type: "mc", topic: "Sample spaces",
+    q: "A cafe meal deal: choose a main (pizza, pasta or wrap) and a drink (juice or water). How many different meal deals are there?",
+    options: ["5", "6", "8", "9"],
+    answer: 1,
+    hint: "List them: pizza and juice, pizza and water, then the pasta ones ...",
+    why: "3 mains, each with 2 drinks: 3 &times; 2 = <b>6</b>. This is the product rule for counting. Adding (3 + 2 = 5) is the usual slip." },
+
+  /* ---------- RELATIVE FREQUENCY ---------- */
+  { type: "learn", topic: "Experiments",
+    title: "Relative frequency and expected frequency",
+    html: '<p>Sometimes you cannot work a probability out, so you <b>experiment</b>.</p>' +
+          '<ul>' +
+          '<li><b>Relative frequency</b> = number of times it happened &divide; number of trials. It is an <b>estimate</b> of the probability (also called experimental probability).</li>' +
+          '<li>More trials give a more reliable estimate.</li>' +
+          '<li>If the relative frequency is a long way from what you expect (say a dice gives 6 in half of 300 rolls), it suggests the dice is <b>biased</b>.</li>' +
+          '<li><b>Expected frequency</b> = probability &times; number of trials. It is what you would expect on average, not a guarantee.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Relative frequency: divide. Expected frequency: multiply.</div>' },
+
+  { type: "num", topic: "Experiments",
+    q: "Zara spins a spinner 200 times. It lands on red 50 times.",
+    boxes: [
+      { label: "Relative frequency of red", a: 0.25 },
+      { label: "Estimated number of reds in 600 spins", a: 150 }
+    ],
+    hint: "Relative frequency: reds &divide; spins. Then use it as the probability and multiply by 600.",
+    why: "50 &divide; 200 = <b>0.25</b>. Expected reds in 600 spins: 0.25 &times; 600 = <b>150</b>. It might be 143 or 160 in real life; expected frequency is the average you would expect." },
+
+  { type: "mc", topic: "Experiments",
+    q: "Four students roll the same dice to estimate P(6). Whose estimate is the most reliable?",
+    options: ["Ben: 3 sixes in 10 rolls", "Cara: 9 sixes in 50 rolls", "Dev: 34 sixes in 200 rolls", "Ella: 1 six in 2 rolls"],
+    answer: 2,
+    hint: "Reliability is about how many trials, not about which answer looks nicest.",
+    why: "Dev did the most trials (200), so his relative frequency (0.17) is the most reliable. Ella's 0.5 from just 2 rolls tells you almost nothing. Combining everyone's results (47 sixes in 262 rolls) would be even better." },
+
+  /* ---------- RISK ---------- */
+  { type: "learn", topic: "Risk",
+    title: "Absolute risk and relative risk",
+    html: '<p class="tiny"><b>Relative risk may be Higher only.</b> Absolute risk is worth knowing on any tier.</p>' +
+          '<ul>' +
+          '<li><b>Absolute risk</b> = the probability something happens in a group. 6 out of 100 skateboarders sprain a wrist: absolute risk 6/100 = <b>0.06</b>. In an expected frequency: 6 in every 100.</li>' +
+          '<li><b>Relative risk</b> = risk in one group &divide; risk in another group. Skateboarders 0.06, non skateboarders 0.02: relative risk = 0.06 &divide; 0.02 = <b>3</b>. Skateboarders are 3 times as likely to sprain a wrist.</li>' +
+          '<li>Relative risk 1 means the same risk; above 1 means more likely; below 1 means less likely.</li>' +
+          '</ul>' +
+          '<p>If the groups are different sizes, turn each into a probability (or "per 100") first.</p>' +
+          '<div class="keep"><b>Keep this</b>"Risk doubles!" sounds scary. Always ask: doubles from what? 1 in 10 000 to 2 in 10 000 is still tiny.</div>' },
+
+  { type: "widget", topic: "Risk",
+    title: "Risk dial",
+    html: "Three rounds. Shade the people it happens to in each group of 100, then spin the dial to the relative risk. Up to 9 stars.",
+    mount: mountRisk,
+    report: function(d){
+      var r = { right1: "all three rounds right first go", right2: "finished with some second goes", shown: "finished, using Show me" }[d.result] || "not finished (" + (d.r || 0) + " of 3 rounds)";
+      var st = (d.stars || []).reduce(function(a, b){ return a + b; }, 0);
+      return "Risk dial widget: " + r + "; " + st + "/9 stars.";
+    } },
+
+  { type: "num", topic: "Risk", stretch: true,
+    q: "In a study, 8 out of 200 people who walk to work caught a cold in one month. 18 out of 300 people who take the bus caught a cold.",
+    boxes: [
+      { label: "Absolute risk for walkers (as a decimal)", a: 0.04 },
+      { label: "Absolute risk for bus users (as a decimal)", a: 0.06 },
+      { label: "Relative risk for bus users compared with walkers", a: 1.5 }
+    ],
+    hint: "Each absolute risk is people with a cold &divide; people in that group. Then divide the bus risk by the walking risk.",
+    why: "Walkers: 8 &divide; 200 = <b>0.04</b>. Bus: 18 &divide; 300 = <b>0.06</b>.<br>Relative risk = 0.06 &divide; 0.04 = <b>1.5</b>. Bus users were 1.5 times as likely to catch a cold.<br>Comparing 8 with 18 directly is the trap: the groups are different sizes." },
+
+  { type: "mc", topic: "Risk",
+    q: "A headline says: \"Eating late at night <b>doubles</b> your risk of a bad dream!\" The study found 2 in 100 people had a bad dream normally, and 4 in 100 after a late snack. Which statement is fairest?",
+    options: [
+      "The relative risk is 2, but the absolute risk only goes from 2% to 4%, so most people are fine either way",
+      "Half of all late night snackers will have a bad dream",
+      "The absolute risk is 2, so everyone is in danger",
+      "The risk has gone up by 200%"
+    ],
+    answer: 0,
+    hint: "Work out both the relative risk and the two absolute risks.",
+    why: "Relative risk = 4/100 &divide; 2/100 = 2, so \"doubles\" is true. But the absolute risk is still small: 4 in 100. A fair report gives both. Doubling is an increase of 100%, not 200%." },
+
+  /* ---------- TABLES AND VENNS ---------- */
+  { type: "learn", topic: "Tables and Venns",
+    title: "Two way tables and Venn diagrams",
+    fig: VENN,
+    html: '<ul>' +
+          '<li><b>Two way tables</b>: find the right cell, then divide by the right total. "Of the Year 10s" means divide by the Year 10 total, not the grand total.</li>' +
+          '<li><b>Venn diagrams</b>: the box (&xi;) is everyone. The overlap is <b>both</b>. Outside the circles is <b>neither</b>.</li>' +
+          '<li>Fill a Venn from the middle out: overlap first, then subtract it from each circle\'s total.</li>' +
+          '</ul>' +
+          '<p>Here: 23 like rap, 19 like pop, 8 like both. Rap only: 23 &minus; 8 = 15. Pop only: 19 &minus; 8 = 11. Neither: 50 &minus; 15 &minus; 8 &minus; 11 = 16.</p>' +
+          '<div class="keep"><b>Keep this</b>Read the question for who you are choosing from. That group\'s total goes on the bottom of the fraction.</div>' },
+
+  { type: "num", topic: "Tables and Venns",
+    q: "The table shows the favourite sport of 80 students. One student is picked at random.",
+    fig: TWOWAY,
+    boxes: [
+      { label: "P(swimming)", a: 0.35, show: "28/80 = 0.35" },
+      { label: "P(Year 11 and netball)", a: 0.2, show: "16/80 = 0.2" }
+    ],
+    hint: "Both are out of all 80 students. Find the right total or cell first.",
+    why: "P(swimming) = 28/80 = <b>0.35</b> (or 7/20).<br>P(Year 11 and netball) = 16/80 = <b>0.2</b> (or 1/5). \"And\" means one cell, not a whole row or column." },
+
+  { type: "num", topic: "Tables and Venns",
+    q: "Use the Venn diagram on the learn card: 50 students, rap and pop. One student is picked at random.",
+    fig: VENN,
+    boxes: [
+      { label: "P(likes neither)", a: 0.32, show: "16/50 = 0.32" },
+      { label: "P(likes rap or pop or both)", a: 0.68, show: "34/50 = 0.68" }
+    ],
+    hint: "Neither is outside both circles. Rap or pop is everything inside the circles.",
+    why: "Neither: 16/50 = <b>0.32</b>. Rap or pop: 15 + 8 + 11 = 34, so 34/50 = <b>0.68</b>. Check: 0.32 + 0.68 = 1.<br>Adding 23 + 19 = 42 counts the 8 in the middle twice." },
+
+  { type: "num", topic: "Tables and Venns", stretch: true,
+    q: "Using the sports table again. A student is chosen <b>from the Year 10s</b>. Then, separately, a student is chosen <b>from those who chose swimming</b>.",
+    fig: TWOWAY,
+    boxes: [
+      { label: "P(swimming, given they are in Year 10)", a: 0.45, show: "18/40 = 0.45" },
+      { label: "P(Year 10, given they chose swimming), as a fraction", a: 18 / 28, tol: 0.002, show: "18/28 = 9/14" }
+    ],
+    hint: "\"Given\" shrinks the group you are choosing from. Which total goes on the bottom?",
+    why: "From the Year 10s: 18 of the 40 chose swimming, so 18/40 = <b>0.45</b>.<br>From the swimmers: 18 of the 28 are in Year 10, so 18/28 = <b>9/14</b> (about 0.64).<br>Same 18 on top, different totals underneath. That is conditional probability." },
+
+  /* ---------- COMBINING EVENTS ---------- */
+  { type: "learn", topic: "Combining events",
+    title: "The addition and multiplication laws",
+    html: '<ul>' +
+          '<li><b>Mutually exclusive</b> events cannot happen at the same time (a dice cannot show 2 and 5 at once). For these: <b>P(A or B) = P(A) + P(B)</b>.</li>' +
+          '<li><b>Independent</b> events do not affect each other (a coin and a dice). For these: <b>P(A and B) = P(A) &times; P(B)</b>.</li>' +
+          '<li>If events can happen together, adding counts the overlap twice. The general addition law fixes it: <b>P(A or B) = P(A) + P(B) &minus; P(A and B)</b>. <span class="tiny">(The general law may be Higher only.)</span></li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>"Or" with mutually exclusive: add. "And" with independent: multiply.</div>' },
+
+  { type: "sort", topic: "Combining events",
+    q: "Are these pairs of events <b>mutually exclusive</b> or <b>not mutually exclusive</b>?",
+    buckets: ["Mutually exclusive", "Not mutually exclusive"],
+    cards: [
+      ["Rolling a 2 and rolling a 5 on one dice roll", 0],
+      ["A match ending in a win and the same match ending in a draw", 0],
+      ["Picking a red card and picking a spade, one card from a pack", 0],
+      ["Rolling an even number and rolling a 6 on one roll", 1],
+      ["Picking a red card and picking a king, one card from a pack", 1],
+      ["It is sunny and it is windy on the same day", 1]
+    ],
+    hint: "Ask: can both happen at the very same time?",
+    why: "2 and 5, win and draw, red and spade: impossible together, so mutually exclusive. Even and 6 overlap (6 is even), the king of hearts is red and a king, and a day can be sunny and windy." },
+
+  { type: "num", topic: "Combining events",
+    q: "Football. A team's next match: P(win) = 0.45, P(draw) = 0.25.<br>Separately, a coin toss and a fair dice: P(head) = 0.5, P(six) = 1/6.",
+    boxes: [
+      { label: "P(win or draw)", a: 0.7 },
+      { label: "P(lose)", a: 0.3 },
+      { label: "P(head and six), as a fraction", a: 1 / 12, tol: 0.002, show: "1/12" }
+    ],
+    hint: "Win and draw are mutually exclusive: add. Win, draw and lose add up to 1. Coin and dice are independent: multiply.",
+    why: "P(win or draw) = 0.45 + 0.25 = <b>0.7</b>.<br>P(lose) = 1 &minus; 0.7 = <b>0.3</b>.<br>P(head and six) = 1/2 &times; 1/6 = <b>1/12</b>.<br>Multiplying 0.45 &times; 0.25 for \"win or draw\" is a mix up of the two laws: a match cannot be both." },
+
+  { type: "num", topic: "Combining events", stretch: true,
+    q: "In a class, P(has a dog) = 0.5, P(has a cat) = 0.4 and P(has a dog and a cat) = 0.15. Find P(has a dog or a cat or both).",
+    boxes: [ { label: "P(dog or cat)", a: 0.75 } ],
+    hint: "These are not mutually exclusive: some people have both. Use the general addition law.",
+    why: "P(dog or cat) = 0.5 + 0.4 &minus; 0.15 = <b>0.75</b>. Without subtracting, 0.9 counts the dog and cat owners twice. A Venn diagram shows it: 0.35 dog only, 0.15 both, 0.25 cat only." },
+
+  /* ---------- TREES ---------- */
+  { type: "learn", topic: "Tree diagrams",
+    title: "Tree diagrams",
+    fig: TREE_RW,
+    html: '<p>A bag has 3 red and 7 green counters. Pick one, <b>put it back</b>, pick again.</p>' +
+          '<ul>' +
+          '<li>Each set of branches adds up to 1.</li>' +
+          '<li><b>Multiply along</b> the branches for "this then that": P(R, R) = 0.3 &times; 0.3 = 0.09.</li>' +
+          '<li><b>Add the end results</b> when more than one route works: P(one of each) = 0.21 + 0.21 = 0.42.</li>' +
+          '<li><b>Without replacement</b>, the second set of branches changes: one counter fewer in the bag, and one fewer of the colour taken. The second pick depends on the first.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Along the branches: multiply. Down the ends: add. All the ends add to 1.</div>' },
+
+  { type: "num", topic: "Tree diagrams",
+    q: "From the tree on the learn card (3 red, 7 green, with replacement):",
+    fig: TREE_RW,
+    boxes: [
+      { label: "P(both green)", a: 0.49 },
+      { label: "P(at least one red)", a: 0.51 }
+    ],
+    hint: "Both green is one path. At least one red is every path except one.",
+    why: "P(G, G) = 0.7 &times; 0.7 = <b>0.49</b>.<br>At least one red = 1 &minus; P(no reds) = 1 &minus; 0.49 = <b>0.51</b>. Or add 0.09 + 0.21 + 0.21 = 0.51. The \"1 minus\" trick is quicker." },
+
+  { type: "num", topic: "Tree diagrams", stretch: true,
+    q: "A bag has 4 red and 6 blue sweets. Ravi takes one, eats it, then takes another. (Without replacement.)",
+    fig: TREE_WO,
+    boxes: [
+      { label: "P(both red), as a fraction", a: 12 / 90, tol: 0.002, show: "12/90 = 2/15" },
+      { label: "P(one of each colour), as a fraction", a: 48 / 90, tol: 0.002, show: "48/90 = 8/15" }
+    ],
+    hint: "Multiply along: 4/10 then 3/9 for red, red. For one of each, there are two routes.",
+    why: "P(R, R) = 4/10 &times; 3/9 = 12/90 = <b>2/15</b>.<br>P(R, B) = 4/10 &times; 6/9 = 24/90 and P(B, R) = 6/10 &times; 4/9 = 24/90. Total 48/90 = <b>8/15</b>.<br>Using 4/10 &times; 4/10 forgets the sweet has been eaten." },
+
+  /* ---------- CONDITIONAL ---------- */
+  { type: "learn", topic: "Conditional probability",
+    title: "Probability given something has happened",
+    fig: TREE_LATE,
+    html: '<p class="tiny"><b>The formula and notation may be Higher only.</b> Simple "given" questions from tables and trees can appear on any tier.</p>' +
+          '<p><b>P(A | B)</b> means the probability of A <b>given</b> that B has happened.</p>' +
+          '<p><b>P(A | B) = P(A and B) &divide; P(B)</b></p>' +
+          '<p>On a tree, the second set of branches are already conditional: P(late | rain) = 0.6.</p>' +
+          '<p>Going backwards needs the formula. P(late) = 0.3 &times; 0.6 + 0.7 &times; 0.2 = 0.18 + 0.14 = 0.32. So P(rain | late) = 0.18 &divide; 0.32 = <b>0.5625</b>.</p>' +
+          '<p>If P(A | B) = P(A), then B makes no difference: A and B are <b>independent</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>"Given" means: cross out everything that did not happen, and work out of what is left.</div>' },
+
+  { type: "num", topic: "Conditional probability", stretch: true,
+    q: "Exam style. A health screening test is offered to <b>1000</b> people. 2% of them have the condition. The test is positive for 90% of people who have it, and (wrongly) positive for 5% of people who do not.",
+    fig: SCREEN,
+    boxes: [
+      { label: "(a) Expected number with the condition", a: 20 },
+      { label: "(b) Expected number with the condition who test positive", a: 18 },
+      { label: "(c) Expected number without the condition who test positive", a: 49 },
+      { label: "(d) P(has the condition | positive test), to 2 decimal places", a: 18 / 67, tol: 0.006, show: "18/67 = 0.27" }
+    ],
+    hint: "Work in people, not decimals: 2% of 1000, then 90% of that, then 5% of everyone else. For (d), the positives are your new group.",
+    why: "(a) 2% of 1000 = <b>20</b>.<br>(b) 90% of 20 = <b>18</b>.<br>(c) 1000 &minus; 20 = 980 without it; 5% of 980 = <b>49</b>.<br>(d) Positives: 18 + 49 = 67, and 18 of those have it: 18/67 = <b>0.27</b>.<br>That surprises most people: even with a good test, most positives here are false alarms, because the condition is rare. It is why a positive screening result usually leads to a second test." }
+  ]
+});
+})();
+</script>
+</body>
+</html>
