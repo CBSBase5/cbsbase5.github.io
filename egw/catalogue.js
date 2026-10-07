@@ -490,8 +490,7 @@ EGWCAT.subjects = [
     { group: "Writing", name: "Show, not tell", often: 0, links: [["english-creative", 4]] },
     { group: "Writing", name: "Viewpoint writing: form, audience, purpose", often: 1, links: [["english-viewpoint", 1], ["english-viewpoint", 4]] },
     { group: "Writing", name: "Persuasive methods and counter arguments", often: 1, links: [["english-viewpoint", 2], ["english-viewpoint", 3]] },
-    { group: "Writing", name: "Sentences, punctuation and spelling", often: 1, links: [["english-viewpoint", 5], ["english-creative", 6]] },
-    { group: "Literature", name: "Set texts, if she sits Literature", often: 0, links: [], ext: ["/practice/animal-farm.html", "Animal Farm on the practice hub"] }
+    { group: "Writing", name: "Sentences, punctuation and spelling", often: 1, links: [["english-viewpoint", 5], ["english-creative", 6]] }
   ] },
 
 { key: "maths", name: "Maths", short: "Maths", acc: "acc-maths",
