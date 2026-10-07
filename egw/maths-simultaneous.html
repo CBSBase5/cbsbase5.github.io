@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simultaneous equations and more - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
+<style>
+/* Cafe price detective (widget on this page only) */
+.pd-case p{margin:0 0 6px}
+.pd-dots{display:flex;gap:6px;margin-bottom:6px}
+.pd-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.pd-dots span.on{background:var(--good)}
+.pd-dots span.now{background:var(--yellow)}
+.pd-pts{font-family:var(--display);font-weight:700;font-size:.85rem;background:var(--sun);border-radius:99px;padding:2px 10px;float:right}
+.pd-rs{display:grid;gap:12px;margin:10px 0 4px}
+@media (min-width:620px){.pd-rs{grid-template-columns:1fr 1fr}}
+.pd-r{position:relative;background:#fff;border:2px solid var(--ink);border-bottom:4px dashed var(--ink);border-radius:12px 12px 4px 4px;padding:8px 12px 12px;transition:box-shadow .15s ease}
+.pd-r.pd-drag{z-index:5;box-shadow:0 14px 30px rgba(20,26,51,.35);transition:none}
+.pd-r.pd-target{outline:4px dashed var(--yellow-deep);outline-offset:3px}
+.pd-rtop{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pd-rtop b{font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;font-size:.85rem;flex:1}
+.pd-grip{display:inline-grid;place-items:center;width:40px;height:40px;border:2px solid var(--ink);border-radius:10px;background:var(--accent-soft);cursor:grab;touch-action:none;flex:none}
+.pd-grip svg{width:18px;height:22px}
+.pd-mult{display:flex;gap:4px}
+.pd-mult button{font-family:var(--display);font-weight:700;font-size:.95rem;min-width:42px;height:38px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+.pd-mult button.on{background:var(--sun)}
+.pd-mult button:disabled{opacity:.45;cursor:default}
+.pd-icons{display:flex;flex-wrap:wrap;align-items:center;gap:2px;min-height:34px;margin:8px 0 4px}
+.pd-icons svg{width:30px;height:30px;display:block}
+.pd-plus{font-family:var(--display);font-weight:700;margin:0 4px}
+.pd-line{font-size:1rem}
+.pd-alg{font-size:.92rem;color:var(--body-tint)}
+.pd-tot{font-family:var(--display);font-weight:700;font-size:1.45rem;margin-top:2px}
+.pd-go{width:100%;justify-content:center;margin-top:12px}
+.pd-tip{font-size:.85rem;color:var(--body-tint);margin:6px 0 0;text-align:center}
+.pd-out{margin-top:10px}
+.pd-out .pd-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}
+.pd-out .pd-row .pd-icons{margin:0}
+.pd-out .pd-sum{font-family:var(--display);font-weight:700}
+.pd-ic{display:inline-block}
+.pd-ic.gone{opacity:.15;transform:scale(.6) rotate(-20deg);filter:grayscale(1);animation:pdpoof .6s ease both;animation-delay:var(--d,0s)}
+@keyframes pdpoof{0%{opacity:1;transform:none;filter:none}45%{opacity:1;transform:scale(1.35)}100%{opacity:.15;transform:scale(.6) rotate(-20deg);filter:grayscale(1)}}
+.pd-found{font-size:1.15rem;margin:8px 0 4px}
+.pd-sub .wrow{margin:6px 0}
+.pd-sub input{font-family:var(--body);font-size:1.15rem;width:110px;text-align:center;padding:8px;border:2px solid var(--line);border-radius:12px;color:var(--ink)}
+.pd-stamp{display:inline-block;transform:rotate(-6deg);border:3px solid var(--good);color:var(--good);font-family:var(--display);font-weight:700;letter-spacing:.14em;padding:3px 12px;border-radius:8px;margin:4px 0 8px;animation:stamp .45s cubic-bezier(.2,1.6,.4,1)}
+.pd-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Simultaneous equations and more</h2>
+    <span>GCSE Maths, Foundation with stretch. Error intervals from rounding and truncating, counting systematically, and simultaneous equations by elimination, from a graph and from real life.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=5"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+
+/* ---------- figures ---------- */
+
+/* Number line for an error interval. lo/hi are the ends, a..b the window shown. */
+function band(o){
+  var W = 380, L = 24, R = 356, y = o.y;
+  function X(v){ return L + (v - o.a) / (o.b - o.a) * (R - L); }
+  var s = '<path d="M' + L + ' ' + y + ' H' + R + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  o.ticks.forEach(function(v){
+    s += '<path d="M' + X(v).toFixed(1) + ' ' + (y - 7) + ' V' + (y + 7) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(X(v).toFixed(1), y + 26, String(v), 15, INK, BODY + ' text-anchor="middle"');
+  });
+  s += '<path d="M' + X(o.lo).toFixed(1) + ' ' + y + ' H' + X(o.hi).toFixed(1) + '" stroke="' + o.col + '" stroke-width="8" stroke-linecap="butt"/>';
+  s += '<circle cx="' + X(o.lo).toFixed(1) + '" cy="' + y + '" r="8" fill="' + o.col + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<circle cx="' + X(o.hi).toFixed(1) + '" cy="' + y + '" r="8" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t((X(o.lo) + X(o.hi)) / 2, y - 16, o.label, 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  return s;
+}
+
+var ROUNDFIG =
+'<svg viewBox="0 0 380 150" role="img" aria-label="Number line from 3.3 to 3.5. Every number from 3.35 up to but not including 3.45 rounds to 3.4. A filled dot at 3.35 means included, an open dot at 3.45 means not included.">' +
+band({ a: 3.3, b: 3.5, lo: 3.35, hi: 3.45, y: 54, col: SUN, ticks: [3.3, 3.35, 3.4, 3.45, 3.5], label: "all of these round to 3.4" }) +
+'<circle cx="34" cy="122" r="7" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' + t(48, 127, "included (&le;)", 15, INK, BODY) +
+'<circle cx="214" cy="122" r="7" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' + t(228, 127, "not included (&lt;)", 15, INK, BODY) +
+'</svg>';
+
+var TRUNCFIG =
+'<svg viewBox="0 0 380 190" role="img" aria-label="Two number lines from 3.3 to 3.5. Rounding to 3.4 covers 3.35 up to but not including 3.45. Truncating to 3.4 covers 3.4 up to but not including 3.5.">' +
+band({ a: 3.3, b: 3.5, lo: 3.35, hi: 3.45, y: 46, col: SUN, ticks: [3.3, 3.35, 3.4, 3.45, 3.5], label: "rounds to 3.4" }) +
+band({ a: 3.3, b: 3.5, lo: 3.4, hi: 3.5, y: 140, col: CYAN, ticks: [3.3, 3.35, 3.4, 3.45, 3.5], label: "truncates to 3.4" }) +
+'</svg>';
+
+/* Two receipts, one taken from the other */
+var RECEIPTS =
+'<svg viewBox="0 0 380 200" role="img" aria-label="Receipt one: 2 coffees and 1 cake cost 7 pounds 50. Receipt two: 1 coffee and 1 cake cost 4 pounds 80. Take receipt two away from receipt one: the cakes cancel, leaving 1 coffee costs 2 pounds 70.">' +
+'<rect x="8" y="8" width="364" height="44" rx="8" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(20, 37, "2 coffees + 1 cake", 17, INK, BODY + ' font-weight="700"') + t(360, 37, "&pound;7.50", 18, INK, LAB + ' font-weight="700" text-anchor="end"') +
+'<rect x="8" y="62" width="364" height="44" rx="8" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(4, 92, "&minus;", 22, CORAL, LAB + ' font-weight="700"') +
+t(20, 91, "1 coffee + 1 cake", 17, INK, BODY + ' font-weight="700"') + t(360, 91, "&pound;4.80", 18, INK, LAB + ' font-weight="700" text-anchor="end"') +
+'<path d="M8 118 H372" stroke="' + INK + '" stroke-width="3"/>' +
+'<rect x="8" y="128" width="364" height="44" rx="8" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(20, 157, "1 coffee + 0 cakes", 17, INK, BODY + ' font-weight="700"') + t(360, 157, "&pound;2.70", 18, INK, LAB + ' font-weight="700" text-anchor="end"') +
+t(190, 192, "the cakes cancel out", 15, CORAL, BODY + ' font-weight="700" text-anchor="middle"') +
+'</svg>';
+
+/* Coordinate grid with straight lines */
+function graph(o){
+  var u = o.u, m = 34, top = 14;
+  var w = (o.x1 - o.x0) * u, hgt = (o.y1 - o.y0) * u;
+  function X(x){ return (m + (x - o.x0) * u).toFixed(1); }
+  function Y(y){ return (top + (o.y1 - y) * u).toFixed(1); }
+  var s = '<svg viewBox="0 0 ' + (w + m + 16) + ' ' + (hgt + top + 30) + '" role="img" aria-label="' + o.aria + '">';
+  s += '<rect x="' + m + '" y="' + top + '" width="' + w + '" height="' + hgt + '" fill="' + WHITE + '"/>';
+  var k;
+  if(o.half){
+    for(k = o.x0 + 0.5; k < o.x1; k += 1) s += '<path d="M' + X(k) + ' ' + Y(o.y0) + ' V' + Y(o.y1) + '" stroke="#eceaf3" stroke-width="1"/>';
+    for(k = o.y0 + 0.5; k < o.y1; k += 1) s += '<path d="M' + X(o.x0) + ' ' + Y(k) + ' H' + X(o.x1) + '" stroke="#eceaf3" stroke-width="1"/>';
+  }
+  for(k = o.x0; k <= o.x1; k++) s += '<path d="M' + X(k) + ' ' + Y(o.y0) + ' V' + Y(o.y1) + '" stroke="' + LINE + '" stroke-width="1.5"/>';
+  for(k = o.y0; k <= o.y1; k++) s += '<path d="M' + X(o.x0) + ' ' + Y(k) + ' H' + X(o.x1) + '" stroke="' + LINE + '" stroke-width="1.5"/>';
+  s += '<path d="M' + X(o.x0) + ' ' + Y(0) + ' H' + X(o.x1) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<path d="M' + X(0) + ' ' + Y(o.y0) + ' V' + Y(o.y1) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  for(k = o.x0; k <= o.x1; k++) if(k !== 0) s += t(X(k), +Y(0) + 18, String(k).replace("-", "&minus;"), 14, INK, BODY + ' text-anchor="middle"');
+  for(k = o.y0; k <= o.y1; k++) if(k !== 0) s += t(+X(0) - 6, +Y(k) + 5, String(k).replace("-", "&minus;"), 14, INK, BODY + ' text-anchor="end"');
+  s += t(+X(0) - 6, +Y(0) + 18, "0", 14, INK, BODY + ' text-anchor="end"');
+  s += t(+X(o.x1) - 4, +Y(0) - 8, "x", 16, INK, LAB + ' font-weight="700" text-anchor="end" font-style="italic"');
+  s += t(+X(0) + 8, +Y(o.y1) + 16, "y", 16, INK, LAB + ' font-weight="700" font-style="italic"');
+  o.lines.forEach(function(ln){
+    s += '<path d="M' + X(ln.p[0]) + ' ' + Y(ln.p[1]) + ' L' + X(ln.p[2]) + ' ' + Y(ln.p[3]) + '" stroke="' + ln.col + '" stroke-width="4" stroke-linecap="round"/>';
+    s += '<rect x="' + (+X(ln.lab[0]) - 4) + '" y="' + (+Y(ln.lab[1]) - 17) + '" width="' + (ln.w + 8) + '" height="23" rx="5" fill="' + WHITE + '" stroke="' + ln.col + '" stroke-width="2"/>';
+    s += t(X(ln.lab[0]), Y(ln.lab[1]), ln.text, 15, INK, LAB + ' font-weight="700"');
+  });
+  if(o.pt){
+    s += '<circle cx="' + X(o.pt[0]) + '" cy="' + Y(o.pt[1]) + '" r="7" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<rect x="' + (+X(o.pt[0]) - 82) + '" y="' + (+Y(o.pt[1]) - 12) + '" width="58" height="23" rx="5" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(+X(o.pt[0]) - 53, +Y(o.pt[1]) + 5, o.pt[2], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '</svg>';
+  return s;
+}
+
+var GRAPH_LEARN = graph({ x0: -1, x1: 6, y0: -1, y1: 6, u: 44,
+  aria: "Graph of y equals x plus 1 and x plus y equals 5. The lines cross at the point 2, 3.",
+  lines: [
+    { p: [-1, 0, 5, 6], col: BLUE, lab: [1.2, 5.3], w: 74, text: "y = x + 1" },
+    { p: [-1, 6, 6, -1], col: CORAL, lab: [3.6, 1.8], w: 74, text: "x + y = 5" }
+  ],
+  pt: [2, 3, "(2, 3)"] });
+
+var GRAPH_Q1 = graph({ x0: -1, x1: 6, y0: -1, y1: 7, u: 40,
+  aria: "Graph of the lines y equals 2x and x plus y equals 6 on a grid from minus 1 to 6 across and minus 1 to 7 up.",
+  lines: [
+    { p: [-0.5, -1, 3.5, 7], col: BLUE, lab: [3.6, 6.3], w: 52, text: "y = 2x" },
+    { p: [-1, 7, 6, 0], col: CORAL, lab: [3.3, 3.4], w: 74, text: "x + y = 6" }
+  ] });
+
+var GRAPH_Q2 = graph({ x0: -1, x1: 5, y0: -1, y1: 5, u: 54, half: true,
+  aria: "Graph of the lines y equals 2x minus 1 and x plus y equals 4 on a grid with half unit lines. They cross between x equals 1.5 and 2.",
+  lines: [
+    { p: [0, -1, 3, 5], col: BLUE, lab: [2.75, 4.6], w: 82, text: "y = 2x &minus; 1" },
+    { p: [-1, 5, 5, -1], col: CORAL, lab: [3.1, 1.6], w: 74, text: "x + y = 4" }
+  ] });
+
+/* Starters and mains grid */
+var MEALS =
+'<table class="datatable" aria-label="Grid of 3 starters by 4 mains giving 12 meals">' +
+'<tr><th></th><th>Pasta</th><th>Curry</th><th>Pie</th><th>Salad</th></tr>' +
+'<tr><th>Soup</th><td>1</td><td>2</td><td>3</td><td>4</td></tr>' +
+'<tr><th>Bread</th><td>5</td><td>6</td><td>7</td><td>8</td></tr>' +
+'<tr><th>Melon</th><td>9</td><td>10</td><td>11</td><td>12</td></tr>' +
+'</table>';
+
+/* ---------- the cafe price detective widget ---------- */
+function ic(inner){ return '<svg viewBox="0 0 30 30" aria-hidden="true">' + inner + '</svg>'; }
+var S2 = '" stroke="' + INK + '" stroke-width="2" stroke-linejoin="round"';
+var ICON = {
+  coffee: ic('<path d="M6 11 H21 V20 Q21 26 13.5 26 Q6 26 6 20 Z" fill="' + CYAN + S2 + '/><path d="M21 13 Q27 13 26 18 Q25 21 21 21" fill="none' + S2 + '/><path d="M10 8 Q8 6 10 3 M15 8 Q13 6 15 3" fill="none" stroke="' + INK + '" stroke-width="1.6" stroke-linecap="round"/>'),
+  cake: ic('<path d="M4 24 L26 24 L26 15 L4 10 Z" fill="' + SUN + S2 + '/><path d="M4 10 L26 15 L26 18 L4 14 Z" fill="' + CORAL + S2 + '/><circle cx="17" cy="9" r="3" fill="' + CORAL + S2 + '/>'),
+  smoothie: ic('<path d="M7 9 H23 L20 27 H10 Z" fill="' + VIOLET + S2 + '/><path d="M16 9 L20 2" stroke="' + INK + '" stroke-width="2.4" stroke-linecap="round"/><path d="M8 13 H22" stroke="' + WHITE + '" stroke-width="2"/>'),
+  cookie: ic('<circle cx="15" cy="15" r="11" fill="#e0a35a' + S2 + '/><circle cx="11" cy="12" r="1.8" fill="' + INK + '"/><circle cx="18" cy="11" r="1.6" fill="' + INK + '"/><circle cx="16" cy="18" r="1.8" fill="' + INK + '"/><circle cx="10" cy="19" r="1.4" fill="' + INK + '"/>'),
+  tea: ic('<path d="M6 9 H20 V23 Q20 26 17 26 H9 Q6 26 6 23 Z" fill="' + MINT + S2 + '/><path d="M20 12 Q26 12 26 16 Q26 20 20 20" fill="none' + S2 + '/><path d="M13 9 V4 H17" fill="none" stroke="' + INK + '" stroke-width="1.6"/>'),
+  sandwich: ic('<path d="M3 25 L15 5 L27 25 Z" fill="#f4e3b5' + S2 + '/><path d="M7 19 L23 19" stroke="' + MINT + '" stroke-width="3.2"/><path d="M9 22 L21 22" stroke="' + CORAL + '" stroke-width="2.4"/>')
+};
+var ITEMS = {
+  coffee: { one: "coffee", many: "coffees", L: "c" },
+  cake: { one: "cake", many: "cakes", L: "k" },
+  smoothie: { one: "smoothie", many: "smoothies", L: "s" },
+  cookie: { one: "cookie", many: "cookies", L: "k" },
+  tea: { one: "tea", many: "teas", L: "t" },
+  sandwich: { one: "sandwich", many: "sandwiches", L: "s" }
+};
+/* prices in pence so nothing goes wobbly */
+var CASES = [
+  { name: "The Corner Cafe", items: ["coffee", "cake"], p: [270, 210], A: [2, 1], B: [1, 1], route: [1, 1],
+    story: "Someone has torn the prices off the Corner Cafe menu. All you have are two receipts. Work out what one coffee and one cake cost." },
+  { name: "The Smoothie Shack", items: ["smoothie", "cookie"], p: [210, 170], A: [3, 2], B: [1, 1], route: [1, 2],
+    story: "Trickier: nothing matches yet. You could use the &times;2 or &times;3 buttons to make one item match on both receipts first." },
+  { name: "Bonus: the Night Owl", items: ["tea", "sandwich"], p: [140, 260], A: [2, 3], B: [3, 2], route: [3, 2],
+    story: "<b>Bonus stretch case.</b> This one might need both receipts multiplying." }
+];
+var GRIP = '<svg viewBox="0 0 18 22" aria-hidden="true"><g fill="' + INK + '"><circle cx="5" cy="4" r="2.2"/><circle cx="13" cy="4" r="2.2"/><circle cx="5" cy="11" r="2.2"/><circle cx="13" cy="11" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="13" cy="18" r="2.2"/></g></svg>';
+
+function money(pence){ return "&pound;" + (pence / 100).toFixed(2); }
+function dp2(pence){ return (pence / 100).toFixed(2); }
+function noun(name, n){ return n === 1 ? ITEMS[name].one : ITEMS[name].many; }
+
+function mountDetective(el, api){
+  var d = api.data;
+  if(typeof d.r !== "number") d.r = 0;
+  if(!d.m) d.m = [1, 1];
+  if(!d.phase) d.phase = "elim";
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(!d.pts) d.pts = [0, 0, 0];
+
+  el.innerHTML =
+    '<div class="wpanel pd-case" data-r="case"></div>' +
+    '<div class="pd-rs" data-r="rs"></div>' +
+    '<button class="btn pd-go" type="button" data-r="go">Take one receipt away from the other</button>' +
+    '<p class="pd-tip" data-r="tip">Or drag a receipt by its dotted handle and drop it on the other one.</p>' +
+    '<div class="wpanel pd-out hidden" data-r="out"></div>' +
+    '<div class="fb pd-fb hidden" data-r="fb" aria-live="polite"></div>' +
+    '<div class="wrow"><button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button></div>';
+
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function C(){ return CASES[d.r]; }
+  function counts(side){ var c = C(), b = side ? c.B : c.A; return [b[0] * d.m[side], b[1] * d.m[side]]; }
+  function total(side){ var c = C(), b = side ? c.B : c.A; return (b[0] * c.p[0] + b[1] * c.p[1]) * d.m[side]; }
+  function words(cn){ var c = C(); return cn[0] + " " + noun(c.items[0], cn[0]) + " + " + cn[1] + " " + noun(c.items[1], cn[1]); }
+  function alg(cn, tot){
+    var c = C();
+    function term(n, L){ return (n === 1 ? "" : n) + "<i>" + L + "</i>"; }
+    return term(cn[0], ITEMS[c.items[0]].L) + " + " + term(cn[1], ITEMS[c.items[1]].L) + " = " + dp2(tot);
+  }
+  function icons(name, n, gone, anim){
+    var s = "";
+    for(var k = 0; k < n; k++){
+      var g = k < (gone || 0);
+      s += '<span class="pd-ic' + (g ? " gone" : "") + '"' + (g ? ' style="--d:' + (anim ? (0.25 + k * 0.18).toFixed(2) : "0") + 's' + (anim ? "" : ";animation:none") + '"' : "") + '>' + ICON[name] + '</span>';
+    }
+    return s;
+  }
+  function locked(){ return d.phase !== "elim"; }
+
+  function drawCase(){
+    var dots = '<div class="pd-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++){
+      var cls = (k < d.r || (k === d.r && d.phase === "closed")) ? "on" : (k === d.r ? "now" : "");
+      dots += '<span class="' + cls + '"></span>';
+    }
+    dots += '</div>';
+    var pts = d.pts[0] + d.pts[1] + d.pts[2];
+    q("case").innerHTML = '<span class="pd-pts">' + pts + ' detective points</span>' + dots +
+      '<p class="tiny" style="margin:0 0 4px">Case ' + (d.r + 1) + ' of 3' + (d.r === 2 ? " (bonus)" : "") + '</p>' +
+      '<p><b>' + C().name + '.</b> ' + C().story + '</p>';
+  }
+
+  function drawReceipts(){
+    var c = C(), s = "";
+    [0, 1].forEach(function(side){
+      var cn = counts(side), tot = total(side);
+      s += '<div class="pd-r" data-side="' + side + '">' +
+        '<div class="pd-rtop"><span class="pd-grip" data-grip="' + side + '" role="button" aria-label="Drag receipt ' + (side ? "B" : "A") + '">' + GRIP + '</span>' +
+        '<b>Receipt ' + (side ? "B" : "A") + '</b>' +
+        '<span class="pd-mult">' + [1, 2, 3].map(function(m){
+          return '<button type="button" data-side="' + side + '" data-m="' + m + '" class="' + (d.m[side] === m ? "on" : "") + '"' + (locked() ? " disabled" : "") + ' aria-label="Receipt ' + (side ? "B" : "A") + ' times ' + m + '">&times;' + m + '</button>';
+        }).join("") + '</span></div>' +
+        '<div class="pd-icons">' + icons(c.items[0], cn[0]) + '<span class="pd-plus">+</span>' + icons(c.items[1], cn[1]) + '</div>' +
+        '<div class="pd-line">' + words(cn) + '</div>' +
+        '<div class="pd-alg">' + alg(cn, tot) + '</div>' +
+        '<div class="pd-tot">' + money(tot) + '</div>' +
+        '</div>';
+    });
+    q("rs").innerHTML = s;
+    [].forEach.call(q("rs").querySelectorAll(".pd-mult button"), function(b){
+      b.onclick = function(){
+        if(locked()) return;
+        d.m[+b.dataset.side] = +b.dataset.m;
+        api.save();
+        drawReceipts();
+      };
+    });
+    [].forEach.call(q("rs").querySelectorAll(".pd-grip"), function(g){ dragger(g); });
+  }
+
+  /* drag a receipt onto the other one */
+  function dragger(g){
+    var side = +g.dataset.grip, card, other, sx, sy, on = false;
+    g.addEventListener("pointerdown", function(e){
+      if(locked()) return;
+      card = g.closest(".pd-r");
+      other = q("rs").querySelector('.pd-r[data-side="' + (1 - side) + '"]');
+      sx = e.clientX; sy = e.clientY; on = true;
+      try{ g.setPointerCapture(e.pointerId); }catch(err){}
+      card.classList.add("pd-drag");
+      e.preventDefault();
+    });
+    g.addEventListener("pointermove", function(e){
+      if(!on) return;
+      card.style.transform = "translate(" + (e.clientX - sx) + "px," + (e.clientY - sy) + "px)";
+      other.classList.toggle("pd-target", overlap(card, other) > 0.3);
+    });
+    function end(){
+      if(!on) return;
+      on = false;
+      var hit = overlap(card, other) > 0.3;
+      card.classList.remove("pd-drag");
+      card.style.transform = "";
+      other.classList.remove("pd-target");
+      if(hit) subtract(false);
+    }
+    g.addEventListener("pointerup", end);
+    g.addEventListener("pointercancel", end);
+  }
+  function overlap(a, b){
+    var r1 = a.getBoundingClientRect(), r2 = b.getBoundingClientRect();
+    var w = Math.max(0, Math.min(r1.right, r2.right) - Math.max(r1.left, r2.left));
+    var hh = Math.max(0, Math.min(r1.bottom, r2.bottom) - Math.max(r1.top, r2.top));
+    return (w * hh) / Math.min(r1.width * r1.height, r2.width * r2.height);
+  }
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb pd-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb pd-fb " + cls;
+    f.innerHTML = html;
+  }
+
+  function lbl(side){ return "receipt " + (side ? "B" : "A") + (d.m[side] > 1 ? " &times;" + d.m[side] : ""); }
+
+  /* the main move: bigger receipt take away smaller receipt */
+  function subtract(byShow){
+    if(locked()) return;
+    var c = C(), ta = total(0), tb = total(1);
+    var big = ta >= tb ? 0 : 1, sm = 1 - big;
+    var P = counts(big), Q = counts(sm);
+    var diff = [P[0] - Q[0], P[1] - Q[1]], dt = Math.abs(ta - tb);
+    if((diff[0] === 0) !== (diff[1] === 0) && diff[0] >= 0 && diff[1] >= 0){
+      var i = diff[0] === 0 ? 1 : 0;
+      d.found = { i: i, n: diff[i], dt: dt, big: big, P: P, Q: Q, tb: [total(big), total(sm)], m: d.m.slice(), by: byShow ? 1 : 0 };
+      d.phase = "sub";
+      api.save();
+      fb(null);
+      drawAll(true);
+      return;
+    }
+    d.miss[d.r]++;
+    api.save();
+    var bits = [0, 1].map(function(k){
+      return cap(ITEMS[c.items[k]].many) + ": " + P[k] + " on " + lbl(big) + ", " + Q[k] + " on " + lbl(sm);
+    });
+    fb("nudge", "<b>Hmm, nothing vanished.</b> " + bits.join(". ") + ". Neither item matches, so taking one receipt from the other still leaves two unknowns. " +
+      "Try the &times;2 or &times;3 buttons until one item has the <b>same number</b> on both receipts, then take away.");
+    drawShow();
+  }
+
+  function drawOut(anim){
+    var out = q("out"), c = C(), f = d.found;
+    if(!f){ out.classList.add("hidden"); out.innerHTML = ""; return; }
+    out.classList.remove("hidden");
+    var known = c.items[f.i], other = c.items[1 - f.i];
+    var price = f.dt / f.n;
+    var s = '<p class="tiny" style="margin:0 0 4px">' + cap(lblFor(f.big, f.m)) + ' take away ' + lblFor(1 - f.big, f.m) + ':</p>';
+    [0, 1].forEach(function(k){
+      s += '<div class="pd-row"><span class="pd-icons">' + icons(c.items[k], f.P[k], f.Q[k], anim) + '</span>' +
+        '<span class="pd-sum">' + f.P[k] + ' &minus; ' + f.Q[k] + ' = ' + (f.P[k] - f.Q[k]) + ' ' + noun(c.items[k], f.P[k] - f.Q[k]) + '</span></div>';
+    });
+    s += '<div class="pd-row"><span class="pd-sum">' + money(f.tb[0]) + ' &minus; ' + money(f.tb[1]) + ' = ' + money(f.dt) + '</span></div>';
+    s += '<p class="pd-found">' + (f.n === 1 ?
+      'So <b>1 ' + ITEMS[known].one + ' = ' + money(price) + '</b>.' :
+      f.n + ' ' + ITEMS[known].many + ' = ' + money(f.dt) + ', so 1 ' + ITEMS[known].one + ' = ' + dp2(f.dt) + ' &divide; ' + f.n + ' = <b>' + money(price) + '</b>.') + '</p>';
+    /* substitute into receipt B as printed */
+    var nk = c.B[f.i], no = c.B[1 - f.i], bt = c.B[0] * c.p[0] + c.B[1] * c.p[1];
+    var part = nk * price;
+    s += '<div class="pd-sub"><p style="margin:8px 0 4px"><b>One price found. Now the ' + ITEMS[other].one + '.</b> Receipt B says ' + words(c.B) + ' = ' + money(bt) + '. ' +
+      'Put in ' + money(price) + ' for ' + (nk === 1 ? 'the ' + ITEMS[known].one : 'each ' + ITEMS[known].one) + ':</p>' +
+      '<p style="margin:0 0 4px">' + (nk === 1 ? "" : nk + ' &times; ' + dp2(price) + ' = ' + dp2(part) + ', so ') + dp2(part) + ' + ' + (no === 1 ? '1 ' + ITEMS[other].one : no + ' ' + ITEMS[other].many) + ' = ' + dp2(bt) + '</p>';
+    if(d.phase === "sub"){
+      s += '<div class="wrow"><span>1 ' + ITEMS[other].one + ' = &pound;</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Price of one ' + ITEMS[other].one + ' in pounds" data-r="ans">' +
+        '<button class="btn" type="button" data-r="chk">Check</button></div>';
+    }else{
+      var op = c.p[1 - f.i];
+      s += '<p style="margin:0 0 4px">' + (no === 1 ? "" : no + ' ' + ITEMS[other].many + ' = ' + dp2(bt) + ' &minus; ' + dp2(part) + ' = ' + dp2(bt - part) + ', so ') +
+        '1 ' + ITEMS[other].one + ' = <b>' + money(op) + '</b></p>';
+    }
+    s += '</div>';
+    out.innerHTML = s;
+    if(d.phase === "sub"){
+      var inp = out.querySelector('[data-r="ans"]');
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") check(); });
+      out.querySelector('[data-r="chk"]').onclick = check;
+      if(anim) setTimeout(function(){ try{ inp.focus({ preventScroll: true }); }catch(err){} }, 900);
+    }
+  }
+  function lblFor(side, m){ return "receipt " + (side ? "B" : "A") + (m[side] > 1 ? " &times;" + m[side] : ""); }
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function check(){
+    if(d.phase !== "sub") return;
+    var c = C(), f = d.found;
+    var raw = q("out").querySelector('[data-r="ans"]').value;
+    var v = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+    var want = c.p[1 - f.i];
+    if(!isNaN(v) && Math.abs(v * 100 - want) < 0.5){ close(false); return; }
+    d.miss[d.r]++;
+    api.save();
+    fb("nudge", "<b>Not quite yet.</b> Take the part you already know away from the receipt total first. If there is more than one " +
+      ITEMS[c.items[1 - f.i]].one + " left, share what is left between them.");
+    drawShow();
+  }
+
+  function close(byShow){
+    var c = C(), f = d.found;
+    if(byShow) d.shown[d.r] = true;
+    d.phase = "closed";
+    d.pts[d.r] = d.shown[d.r] ? 40 : d.miss[d.r] ? 70 : 100;
+    var ta = c.A[0] * c.p[0] + c.A[1] * c.p[1];
+    var chk = 'Check with receipt A: ' + c.A[0] + ' &times; ' + dp2(c.p[0]) + ' + ' + c.A[1] + ' &times; ' + dp2(c.p[1]) + ' = ' +
+      dp2(c.A[0] * c.p[0]) + ' + ' + dp2(c.A[1] * c.p[1]) + ' = <b>' + money(ta) + '</b> &#10003;';
+    if(d.r === 1 && !d.result) d.result = result();
+    api.save();
+    var head = '<span class="pd-stamp">CASE CLOSED</span><br>' +
+      '1 ' + ITEMS[c.items[0]].one + ' = <b>' + money(c.p[0]) + '</b>, 1 ' + ITEMS[c.items[1]].one + ' = <b>' + money(c.p[1]) + '</b>. ' +
+      (byShow ? "Here is how it goes. " : "+" + d.pts[d.r] + " points. ");
+    var tail = '<br>' + chk + '. Putting the prices back into the <b>other</b> receipt is how you check simultaneous equations too.';
+    if(d.r < 2) tail += '<br><button class="btn" type="button" data-r="next">' + (d.r === 0 ? "Next case" : "Try the bonus case") + '</button>';
+    else tail += '<p style="margin:8px 0 0">All three cases cracked. Same trick every time: make one item match, take away, then put the price back in.</p>';
+    fb(byShow ? "show" : "good", head + tail);
+    var nx = q("next");
+    if(nx) nx.onclick = function(){
+      d.r++; d.m = [1, 1]; d.phase = "elim"; d.found = null; api.save();
+      fb(null); drawAll(false);
+      try{ el.scrollIntoView({ behavior: "smooth", block: "start" }); }catch(err){}
+    };
+    drawAll(false, true);
+    if(d.result) api.done(d.result);
+  }
+
+  function result(){
+    if(d.shown[0] || d.shown[1]) return "shown";
+    if(d.miss[0] || d.miss[1]) return "right2";
+    return "right1";
+  }
+
+  function drawShow(){
+    q("show").classList.toggle("hidden", !(d.miss[d.r] > 0 && d.phase !== "closed"));
+  }
+
+  q("show").onclick = function(){
+    if(d.phase === "elim"){
+      d.shown[d.r] = true;
+      d.m = C().route.slice();
+      api.save();
+      fb(null);
+      drawReceipts();
+      subtract(true);
+      fb("show", "<b>Here is one route.</b> Receipt multipliers set to &times;" + d.m[0] + " and &times;" + d.m[1] +
+        " so one item matches. Then take away and that item vanishes. Now have a go at the second price.");
+    }else if(d.phase === "sub"){
+      close(true);
+    }
+  };
+  q("go").onclick = function(){ subtract(false); };
+
+  function drawAll(anim, keepFb){
+    drawCase();
+    drawReceipts();
+    q("go").disabled = locked();
+    q("tip").classList.toggle("hidden", locked());
+    drawOut(anim);
+    drawShow();
+  }
+
+  drawAll(false);
+  if(d.phase === "closed"){
+    /* rebuild the closing message after a reload */
+    d.phase = "sub";
+    var keepShown = d.shown[d.r], pts = d.pts[d.r];
+    close(keepShown);
+    d.pts[d.r] = pts; api.save(); drawCase();
+  }else if(d.result){
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "maths-simultaneous",
+  title: "Simultaneous equations and more",
+  subject: "Maths",
+  mins: 55,
+  blurb: "Error intervals from rounding and truncating, counting things systematically, then simultaneous equations three ways: by elimination, from a graph and from a real life problem. There is a cafe detective game in the middle.",
+  steps: [
+
+  /* ---------- 1 ERROR INTERVALS ---------- */
+  { type: "learn", topic: "Error intervals",
+    title: "Error intervals: where could it really be?",
+    fig: ROUNDFIG,
+    html: '<p>A length is <b>3.4 cm to 1 decimal place</b>. The real length could be anything that rounds to 3.4.</p>' +
+          '<p>Go <b>half a step</b> each way. The step here is 0.1, so half is 0.05: from 3.35 up to 3.45. That gives the <b>error interval</b>:</p>' +
+          '<p style="text-align:center;font-size:1.15rem"><b>3.35 &le; <i>l</i> &lt; 3.45</b></p>' +
+          '<p>3.35 rounds up to 3.4, so it is in (&le;). 3.45 rounds up to 3.5, so it is out (&lt;).</p>' +
+          '<ul><li>7 to the nearest whole number: 6.5 &le; <i>x</i> &lt; 7.5</li>' +
+          '<li>40 to the nearest 10: 35 &le; <i>x</i> &lt; 45</li>' +
+          '<li>3700 to 2 significant figures (step 100): 3650 &le; <i>x</i> &lt; 3750</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Half the step down, half the step up. Bottom end &le;, top end &lt;.</div>' },
+
+  { type: "mc", topic: "Error intervals",
+    q: "The length of a pencil case zip, <i>l</i> cm, is 3.4 cm correct to 1 decimal place. Which is the error interval for <i>l</i>?",
+    options: [
+      "3.35 &le; <i>l</i> &lt; 3.45",
+      "3.35 &lt; <i>l</i> &le; 3.45",
+      "3.35 &le; <i>l</i> &le; 3.45",
+      "3.3 &le; <i>l</i> &lt; 3.5",
+      "3.4 &le; <i>l</i> &lt; 3.5"
+    ],
+    answer: 0,
+    hint: "Half of 0.1 each way. Then ask: does 3.35 round to 3.4? Does 3.45?",
+    why: "Half a step of 0.1 is 0.05, so the interval runs from 3.35 to 3.45. 3.35 rounds to 3.4, so it is included: <b>&le;</b>. 3.45 rounds to 3.5, so it is not: <b>&lt;</b>. That gives <b>3.35 &le; <i>l</i> &lt; 3.45</b>.<br>3.3 to 3.5 uses the whole step instead of half. 3.4 to 3.5 is what you would get from truncating, not rounding." },
+
+  { type: "match", topic: "Error intervals",
+    q: "A mass, <i>m</i> kg, has been rounded. Match each one to its error interval.",
+    pairs: [
+      ["<i>m</i> = 7 to the nearest whole number", "6.5 &le; m &lt; 7.5"],
+      ["<i>m</i> = 70 to the nearest 10", "65 &le; m &lt; 75"],
+      ["<i>m</i> = 0.7 to 1 decimal place", "0.65 &le; m &lt; 0.75"],
+      ["<i>m</i> = 700 to 1 significant figure", "650 &le; m &lt; 750"],
+      ["<i>m</i> = 7.0 to 1 decimal place", "6.95 &le; m &lt; 7.05"]
+    ],
+    hint: "For each one, ask what the step is (1, 10, 0.1 or 100), then go half a step each way.",
+    why: "Nearest whole number: step 1, half is 0.5, so 6.5 to 7.5. Nearest 10: half is 5, so 65 to 75. 1 decimal place: half is 0.05, so 0.65 to 0.75, and 6.95 to 7.05 for 7.0. 700 to 1 significant figure is to the nearest 100, half is 50, so 650 to 750.<br>Notice 7 and 7.0 are different: the .0 says it was rounded to 1 decimal place, so the interval is much narrower." },
+
+  { type: "num", topic: "Error intervals",
+    q: "A footbridge is 3700 m long, correct to 2 significant figures. Complete the error interval for its length, <i>L</i> m.",
+    boxes: [
+      { label: "Bottom end", a: 3650, post: "&le; <i>L</i> &lt;" },
+      { label: "Top end", a: 3750 }
+    ],
+    hint: "In 3700, the second significant figure is the 7, in the hundreds column. So the step is 100. What is half of that?",
+    why: "2 significant figures here means to the nearest 100. Half of 100 is 50, so <b>3650 &le; <i>L</i> &lt; 3750</b>. 3650 rounds up to 3700, so it is in. 3750 rounds up to 3800, so it is out.<br>A common slip is to use the nearest 10 (3695 to 3705): that would be 3 significant figures." },
+
+  /* ---------- 2 TRUNCATION ---------- */
+  { type: "learn", topic: "Truncation",
+    title: "Truncation: just chop it off",
+    fig: TRUNCFIG,
+    html: '<p><b>Truncating</b> means cutting off digits without rounding. 3.47 truncated to 1 decimal place is <b>3.4</b>, even though it would round to 3.5.</p>' +
+          '<p>Your age works like this. Someone who is 15 years and 11 months still says 15.</p>' +
+          '<p>So if <i>x</i> truncated to 1 decimal place is 3.4, then <i>x</i> could be anything from 3.4 up to (but not including) 3.5:</p>' +
+          '<p style="text-align:center;font-size:1.15rem"><b>3.4 &le; <i>x</i> &lt; 3.5</b></p>' +
+          '<div class="keep"><b>Keep this</b>Truncating: the number itself up to a whole step more. Rounding: half a step each side. Both use &le; at the bottom and &lt; at the top.</div>' },
+
+  { type: "sort", topic: "Truncation",
+    q: "Each number gives 3.4 when you <b>round</b> it to 1 decimal place, or when you <b>truncate</b> it to 1 decimal place, or both. Sort them.",
+    buckets: ["Only truncating gives 3.4", "Only rounding gives 3.4", "Both give 3.4"],
+    cards: [
+      ["3.47", 0],
+      ["3.45", 0],
+      ["3.36", 1],
+      ["3.35", 1],
+      ["3.41", 2],
+      ["3.449", 2]
+    ],
+    hint: "For each number, do it twice: chop after the first decimal place, then round to 1 decimal place. Which ones land on 3.4?",
+    why: "3.47 and 3.45 truncate to 3.4 but round to 3.5. 3.36 and 3.35 round to 3.4 but truncate to 3.3. 3.41 and 3.449 give 3.4 both ways.<br>Look at the number lines in the learn card: the overlap is from 3.4 up to 3.45." },
+
+  { type: "num", topic: "Truncation",
+    q: "Sam's calculator answer, <i>x</i>, was truncated to 1 decimal place. The result was 6.2. Complete the error interval for <i>x</i>.",
+    boxes: [
+      { label: "Bottom end", a: 6.2, post: "&le; <i>x</i> &lt;" },
+      { label: "Top end", a: 6.3 }
+    ],
+    hint: "Truncating chops digits off. What is the smallest number that chops to 6.2? What is the first number that chops to 6.3 instead?",
+    why: "Anything from 6.2 up to 6.2999... truncates to 6.2. So <b>6.2 &le; <i>x</i> &lt; 6.3</b>.<br>If you wrote 6.15 and 6.25, that is the rounding interval. Truncating never goes below the number you were given." },
+
+  /* ---------- 3 COUNTING ---------- */
+  { type: "learn", topic: "Counting",
+    title: "Counting: list it, then multiply",
+    fig: MEALS,
+    html: '<p class="tiny"><b>Listing systematically is on both tiers. The product rule is Higher only</b>, so its question here is a stretch.</p>' +
+          '<p><b>List systematically.</b> Fix the first choice, then run through every option for the second. Then move the first choice on. That way nothing gets missed or counted twice.</p>' +
+          '<p>Starters: soup, bread, melon. Mains: pasta, curry, pie, salad. Soup with each main is 4 meals. Bread gives 4 more, melon 4 more: <b>12 meals</b>.</p>' +
+          '<p><b>The product rule</b> skips the list: 3 starters &times; 4 mains = 12.</p>' +
+          '<p>A 3 digit lock code using 0 to 9 has 10 &times; 10 &times; 10 = <b>1000</b> codes (000 to 999).</p>' +
+          '<div class="keep"><b>Keep this</b>Independent choices: multiply the number of options for each one.</div>' },
+
+  { type: "num", topic: "Counting",
+    q: "Make three digit numbers using the cards <b>1</b>, <b>2</b> and <b>3</b>, using each card once in each number. List them systematically. How many different numbers are there?",
+    boxes: [ { label: "How many numbers", a: 6 } ],
+    hint: "Start with every number beginning with 1. How many are there? Then do the ones beginning with 2.",
+    why: "Starting with 1: 123, 132. Starting with 2: 213, 231. Starting with 3: 312, 321. That is <b>6</b>.<br>Product rule check: 3 choices for the first card, then 2 left, then 1, and 3 &times; 2 &times; 1 = 6." },
+
+  { type: "num", topic: "Counting", stretch: true,
+    q: "a) A cafe has 3 starters, 4 mains and 2 desserts. A meal is one starter, one main and one dessert. How many different meals are there?<br>b) A phone PIN has 4 digits. Each digit can be any of 0 to 9, and digits can repeat. How many different PINs are there?",
+    boxes: [
+      { label: "a) Meals", a: 24 },
+      { label: "b) PINs", a: 10000 }
+    ],
+    hint: "Multiply the number of options for each choice. For the PIN, how many options are there for each of the 4 digits?",
+    why: "a) 3 &times; 4 &times; 2 = <b>24</b>.<br>b) 10 options for each digit: 10 &times; 10 &times; 10 &times; 10 = <b>10 000</b> (from 0000 to 9999).<br>A common slip is adding (3 + 4 + 2 = 9). Adding counts single dishes, not whole meals." },
+
+  /* ---------- 4 SIMULTANEOUS EQUATIONS ---------- */
+  { type: "learn", topic: "Simultaneous equations",
+    title: "Simultaneous equations: two facts at once",
+    fig: RECEIPTS,
+    html: '<p><b>Simultaneous equations</b> are two equations that are true at the same time. One pair of values works in both.</p>' +
+          '<p>In algebra the receipts say 2<i>c</i> + <i>k</i> = 7.50 and <i>c</i> + <i>k</i> = 4.80. Both have one <i>k</i>, so take one away from the other and the <i>k</i>s vanish: <i>c</i> = 2.70. This is called <b>elimination</b>.</p>' +
+          '<p>Put <i>c</i> = 2.70 into either one: 2.70 + <i>k</i> = 4.80, so <i>k</i> = 2.10.</p>' +
+          '<p><b>Check</b> in the other: 2 &times; 2.70 + 2.10 = 7.50. Yes.</p>' +
+          '<div class="keep"><b>Keep this</b>Same signs: subtract. Different signs (+2<i>y</i> and &minus;2<i>y</i>): add. Always check in the equation you did not use.</div>' },
+
+  { type: "num", topic: "Simultaneous equations",
+    q: "Solve these simultaneous equations.<br><b>3<i>x</i> + <i>y</i> = 11</b><br><b><i>x</i> + <i>y</i> = 5</b>",
+    boxes: [
+      { label: "<i>x</i> =", a: 3 },
+      { label: "<i>y</i> =", a: 2 }
+    ],
+    hint: "Both equations have +<i>y</i>. What happens to the <i>y</i>s if you take the second equation away from the first?",
+    why: "Subtract: (3<i>x</i> + <i>y</i>) &minus; (<i>x</i> + <i>y</i>) = 11 &minus; 5, so 2<i>x</i> = 6 and <b><i>x</i> = 3</b>.<br>Put it into <i>x</i> + <i>y</i> = 5: 3 + <i>y</i> = 5, so <b><i>y</i> = 2</b>.<br>Check in the first: 3 &times; 3 + 2 = 11. Yes." },
+
+  { type: "mc", topic: "Simultaneous equations",
+    q: "<b>4<i>x</i> + 2<i>y</i> = 20</b><br><b>3<i>x</i> &minus; 2<i>y</i> = 8</b><br>Which move gets rid of <i>y</i> straight away?",
+    options: [
+      "Add the two equations",
+      "Take the second equation away from the first",
+      "Multiply the first equation by 2",
+      "Divide the first equation by 4"
+    ],
+    answer: 0,
+    hint: "Look at the signs in front of the 2<i>y</i>s. What do +2<i>y</i> and &minus;2<i>y</i> make together?",
+    why: "+2<i>y</i> and &minus;2<i>y</i> have different signs, so <b>add</b>: 7<i>x</i> = 28, <i>x</i> = 4. Then 16 + 2<i>y</i> = 20, so <i>y</i> = 2. Check: 3 &times; 4 &minus; 2 &times; 2 = 8. Yes.<br>Taking one away would give 2<i>y</i> &minus; (&minus;2<i>y</i>) = 4<i>y</i>, which does not vanish. Multiplying or dividing one equation alone breaks the match instead of making one." },
+
+  { type: "mc", topic: "Simultaneous equations",
+    q: "Which pair of values solves <b>both</b> of these?<br><b><i>x</i> + <i>y</i> = 7</b><br><b>3<i>x</i> &minus; <i>y</i> = 5</b>",
+    options: [
+      "<i>x</i> = 3, <i>y</i> = 4",
+      "<i>x</i> = 4, <i>y</i> = 3",
+      "<i>x</i> = 2, <i>y</i> = 5",
+      "<i>x</i> = 5, <i>y</i> = 2"
+    ],
+    answer: 0,
+    hint: "Every option works in the first equation. Try each pair in the second one.",
+    why: "All four add to 7, so the second equation decides it. 3 &times; 3 &minus; 4 = <b>5</b>. The others give 3 &times; 4 &minus; 3 = 9, 3 &times; 2 &minus; 5 = 1 and 3 &times; 5 &minus; 2 = 13.<br>This is exactly how you check your own answer: put it back into both equations." },
+
+  /* ---------- 5 MULTIPLY FIRST ---------- */
+  { type: "learn", topic: "Multiply first",
+    title: "When nothing matches: multiply first",
+    html: '<p>Sometimes no letter has the same number in front of it. You can <b>multiply a whole equation</b> to make one match.</p>' +
+          '<p><b>2<i>x</i> + 3<i>y</i> = 13</b> and <b><i>x</i> + <i>y</i> = 5</b>. Double the second: 2<i>x</i> + 2<i>y</i> = 10. Now the <i>x</i>s match.</p>' +
+          '<p>Subtract: (2<i>x</i> + 3<i>y</i>) &minus; (2<i>x</i> + 2<i>y</i>) = 13 &minus; 10, so <i>y</i> = 3. Then <i>x</i> + 3 = 5, so <i>x</i> = 2.</p>' +
+          '<p>Check: 2 &times; 2 + 3 &times; 3 = 13. Yes.</p>' +
+          '<div class="keep"><b>Keep this</b>Multiply <b>every</b> term, including the number after the equals sign. Doubling <i>x</i> + <i>y</i> = 5 gives 2<i>x</i> + 2<i>y</i> = 10, not 2<i>x</i> + 2<i>y</i> = 5.</div>' },
+
+  { type: "widget", topic: "Multiply first",
+    title: "Cafe price detective",
+    html: "Two receipts, two mystery prices. Use &times;2 or &times;3 if you need to, then take one receipt from the other and watch the matching items vanish. Two cases, plus a bonus.",
+    mount: mountDetective,
+    report: function(d){
+      if(!d || !d.result) return "Cafe price detective: " + (d && d.r ? d.r : 0) + " of 2 cases closed.";
+      var lab = { right1: "both cases first go", right2: "both cases, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      var bonus = d.r >= 2 && d.phase === "closed" ? ", bonus case closed" : "";
+      return "Cafe price detective: " + lab + bonus + " (misses " + (d.miss || []).join("/") + ", points " + ((d.pts || [0]).reduce(function(a, b){ return a + b; }, 0)) + ").";
+    } },
+
+  { type: "num", topic: "Multiply first",
+    q: "Solve these simultaneous equations.<br><b>3<i>x</i> + 2<i>y</i> = 16</b><br><b><i>x</i> + <i>y</i> = 7</b>",
+    boxes: [
+      { label: "<i>x</i> =", a: 2 },
+      { label: "<i>y</i> =", a: 5 }
+    ],
+    hint: "Multiply the second equation by 2 so both have 2<i>y</i>. Remember to double the 7 too.",
+    why: "Double the second: 2<i>x</i> + 2<i>y</i> = 14. Subtract from the first: <b><i>x</i> = 2</b>. Then 2 + <i>y</i> = 7, so <b><i>y</i> = 5</b>.<br>Check: 3 &times; 2 + 2 &times; 5 = 16. Yes.<br>If you got <i>x</i> = 9, the 7 probably did not get doubled." },
+
+  { type: "num", topic: "Multiply first", stretch: true,
+    q: "Both equations need multiplying this time. Solve<br><b>3<i>x</i> + 2<i>y</i> = 12</b><br><b>2<i>x</i> + 3<i>y</i> = 13</b>",
+    boxes: [
+      { label: "<i>x</i> =", a: 2 },
+      { label: "<i>y</i> =", a: 3 }
+    ],
+    hint: "To match the <i>x</i>s you could make them both 6<i>x</i>. What do you multiply each equation by?",
+    why: "First &times; 2: 6<i>x</i> + 4<i>y</i> = 24. Second &times; 3: 6<i>x</i> + 9<i>y</i> = 39. Subtract: 5<i>y</i> = 15, so <b><i>y</i> = 3</b>. Then 3<i>x</i> + 6 = 12, so <b><i>x</i> = 2</b>.<br>Check in the second: 4 + 9 = 13. Yes. Matching the <i>y</i>s instead (&times; 3 and &times; 2) works just as well." },
+
+  /* ---------- 6 GRAPHS ---------- */
+  { type: "learn", topic: "Graphs",
+    title: "On a graph: where the lines cross",
+    fig: GRAPH_LEARN,
+    html: '<p>Every point on a straight line fits its equation. So the one point on <b>both</b> lines fits both equations.</p>' +
+          '<p>Here, <i>y</i> = <i>x</i> + 1 and <i>x</i> + <i>y</i> = 5 cross at (2, 3). So the solution is <b><i>x</i> = 2, <i>y</i> = 3</b>.</p>' +
+          '<p>Check: 3 = 2 + 1, and 2 + 3 = 5. Both work.</p>' +
+          '<p>If the lines cross between grid lines, read it as carefully as you can. A graph gives an <b>approximate</b> solution.</p>' +
+          '<div class="keep"><b>Keep this</b>Solution = the crossing point. Read <i>x</i> across first, then <i>y</i> up.</div>' },
+
+  { type: "num", topic: "Graphs",
+    q: "Use the graph to solve the simultaneous equations <b><i>y</i> = 2<i>x</i></b> and <b><i>x</i> + <i>y</i> = 6</b>.",
+    fig: GRAPH_Q1,
+    boxes: [
+      { label: "<i>x</i> =", a: 2 },
+      { label: "<i>y</i> =", a: 4 }
+    ],
+    hint: "Find where the blue and coral lines cross. Go straight down to the <i>x</i> axis, then across to the <i>y</i> axis.",
+    why: "The lines cross at (2, 4), so <b><i>x</i> = 2, <i>y</i> = 4</b>.<br>Check: 4 = 2 &times; 2, and 2 + 4 = 6. Both work.<br>Writing <i>x</i> = 4, <i>y</i> = 2 is the classic swap: <i>x</i> always comes first." },
+
+  { type: "num", topic: "Graphs",
+    q: "The lines <b><i>y</i> = 2<i>x</i> &minus; 1</b> and <b><i>x</i> + <i>y</i> = 4</b> cross between grid lines. The faint lines are every 0.5. Use the graph to estimate the solution, to 1 decimal place.",
+    fig: GRAPH_Q2,
+    boxes: [
+      { label: "<i>x</i> &asymp;", a: 1.7, tol: 0.11 },
+      { label: "<i>y</i> &asymp;", a: 2.3, tol: 0.11 }
+    ],
+    hint: "The crossing is a bit to the right of <i>x</i> = 1.5 and a bit below <i>y</i> = 2.5.",
+    why: "The lines cross at about <b>(1.7, 2.3)</b>. Anything from 1.6 to 1.8 for <i>x</i> and 2.2 to 2.4 for <i>y</i> is a fair reading.<br>The exact answer is <i>x</i> = 5/3 and <i>y</i> = 7/3 (1.666... and 2.333...), which is why a graph only gives an estimate here. Add the equations if you like: 3<i>x</i> = 5." },
+
+  /* ---------- 7 FORMING EQUATIONS ---------- */
+  { type: "learn", topic: "Forming equations",
+    title: "From a story to two equations",
+    html: '<p>Word problems with <b>two unknown prices</b> or amounts are simultaneous equations in disguise.</p>' +
+          '<ul><li><b>Choose letters.</b> <i>a</i> = price of an adult ticket, <i>c</i> = price of a child ticket.</li>' +
+          '<li><b>One equation per fact.</b> &ldquo;2 adults and 3 children cost &pound;36&rdquo; becomes 2<i>a</i> + 3<i>c</i> = 36. &ldquo;1 adult and 3 children cost &pound;27&rdquo; becomes <i>a</i> + 3<i>c</i> = 27.</li></ul>' +
+          '<p><b>Solve.</b> The 3<i>c</i>s match, so subtract: <i>a</i> = 9. Then 9 + 3<i>c</i> = 27, 3<i>c</i> = 18, <i>c</i> = 6.</p>' +
+          '<p><b>Answer the question in words</b>: an adult ticket costs &pound;9 and a child ticket costs &pound;6.</p>' +
+          '<div class="keep"><b>Keep this</b>Letters, two equations, solve, check, then a sentence with units.</div>' },
+
+  { type: "multi", topic: "Forming equations",
+    q: "<b>4 pens and 3 rulers cost &pound;5.10. 2 pens and 1 ruler cost &pound;2.10.</b><br>Let <i>p</i> be the price of a pen and <i>r</i> the price of a ruler, in pounds. Which <b>two</b> equations describe this?",
+    options: [
+      "4<i>p</i> + 3<i>r</i> = 5.10",
+      "2<i>p</i> + <i>r</i> = 2.10",
+      "4<i>p</i> + 2<i>r</i> = 5.10",
+      "7<i>p</i> = 5.10",
+      "2<i>p</i> + 3<i>r</i> = 2.10"
+    ],
+    answers: [0, 1],
+    hint: "Turn each sentence into one equation: the number of each item goes in front of its letter.",
+    why: "4 pens and 3 rulers: <b>4<i>p</i> + 3<i>r</i> = 5.10</b>. 2 pens and 1 ruler: <b>2<i>p</i> + <i>r</i> = 2.10</b>.<br>7<i>p</i> adds pens and rulers together as if they cost the same, which they do not." },
+
+  { type: "num", topic: "Forming equations",
+    q: "Now solve them. <b>4<i>p</i> + 3<i>r</i> = 5.10</b> and <b>2<i>p</i> + <i>r</i> = 2.10</b>. Give each price in pounds.",
+    boxes: [
+      { label: "Pen", a: 0.6, pre: "&pound;", show: "0.60" },
+      { label: "Ruler", a: 0.9, pre: "&pound;", show: "0.90" }
+    ],
+    hint: "Double the second equation so the pens match: 4<i>p</i> + 2<i>r</i> = ?. Then take it away from the first.",
+    why: "Double the second: 4<i>p</i> + 2<i>r</i> = 4.20. Subtract from the first: <i>r</i> = 0.90, so a ruler is <b>&pound;0.90</b>. Then 2<i>p</i> + 0.90 = 2.10, 2<i>p</i> = 1.20, so a pen is <b>&pound;0.60</b>.<br>Check: 4 &times; 0.60 + 3 &times; 0.90 = 2.40 + 2.70 = 5.10. Yes." },
+
+  { type: "num", topic: "Forming equations", stretch: true,
+    q: "A cinema charges &pound;8 for an adult ticket and &pound;5 for a child ticket. One evening it sold 120 tickets and took &pound;750. How many of each ticket did it sell?",
+    boxes: [
+      { label: "Adult tickets", a: 50 },
+      { label: "Child tickets", a: 70 }
+    ],
+    hint: "Let <i>a</i> and <i>c</i> be the numbers of tickets. One equation counts tickets, the other counts money. Then multiply the counting one by 5.",
+    why: "Tickets: <i>a</i> + <i>c</i> = 120. Money: 8<i>a</i> + 5<i>c</i> = 750. Multiply the first by 5: 5<i>a</i> + 5<i>c</i> = 600. Subtract: 3<i>a</i> = 150, so <b><i>a</i> = 50</b> adults and <b><i>c</i> = 70</b> children.<br>Check: 50 &times; 8 + 70 &times; 5 = 400 + 350 = 750. Yes. Here the letters are numbers of tickets, not prices: read the story carefully to see what is unknown." },
+
+  /* ---------- 8 EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "<p>At a cafe, <b>3 teas and 2 muffins cost &pound;8.40</b>. <b>1 tea and 2 muffins cost &pound;5.20</b>.</p>" +
+       "<p>a) Work out the cost of one tea.<br>b) Work out the cost of one muffin.<br>c) How much would 5 teas and 3 muffins cost?<br>d) A muffin weighs 90 g, correct to the nearest 10 g. Write the error interval for its weight, <i>w</i> g.</p>",
+    boxes: [
+      { label: "a) One tea", a: 1.6, pre: "&pound;", show: "1.60" },
+      { label: "b) One muffin", a: 1.8, pre: "&pound;", show: "1.80" },
+      { label: "c) 5 teas and 3 muffins", a: 13.4, pre: "&pound;", show: "13.40" },
+      { label: "d) Bottom end", a: 85, post: "&le; <i>w</i> &lt;" },
+      { label: "d) Top end", a: 95 }
+    ],
+    hint: "a) The muffins already match, so take one receipt from the other. b) Put the tea price into the second fact. d) The step is 10, so go half of that each way.",
+    why: "a) Subtract: 2 teas = 8.40 &minus; 5.20 = 3.20, so one tea is <b>&pound;1.60</b>.<br>b) 1.60 + 2 muffins = 5.20, so 2 muffins = 3.60 and one muffin is <b>&pound;1.80</b>. Check: 3 &times; 1.60 + 2 &times; 1.80 = 4.80 + 3.60 = 8.40. Yes.<br>c) 5 &times; 1.60 + 3 &times; 1.80 = 8.00 + 5.40 = <b>&pound;13.40</b>.<br>d) Half of 10 is 5, so <b>85 &le; <i>w</i> &lt; 95</b>. 85 rounds up to 90, so it is in. 95 rounds up to 100, so it is out.<br>In the exam, show each subtraction and each check: method marks are there even if a sum slips." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

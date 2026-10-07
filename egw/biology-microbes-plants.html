@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microbes and plant health - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
+<style>
+/* Page only: formula box, method lists, the clear zone lab */
+.steps{margin:0 0 10px;padding-left:1.4em}
+.steps li{margin-bottom:4px}
+.formula{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:10px 12px;text-align:center;font-family:var(--display);font-weight:700;margin:6px 0 12px;line-height:1.6}
+.czgrid{display:grid;gap:12px}
+@media (min-width:700px){.czgrid{grid-template-columns:1fr 1fr;align-items:start}}
+.czplate svg{width:100%;max-width:360px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.czplate .czhit{cursor:pointer}
+.czlens svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.czlens .czrul{cursor:grab}
+.czpick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.czpick button{font-family:var(--display);font-weight:700;font-size:.95rem;border:2px solid var(--ink);border-radius:999px;background:var(--white);color:var(--ink);padding:6px 12px;min-height:40px;cursor:pointer}
+.czpick button.on{background:var(--accent-soft);box-shadow:0 3px 0 var(--ink)}
+.czpick button.got{background:#e3f8f1}
+.czclock{font-family:var(--display);font-weight:700;font-size:1.1rem;margin:6px 0}
+#czIn{width:110px}
+.cznudge .btn{padding:8px 12px;font-size:.92rem}
+.czres{margin:4px 0 0}
+.czres td:first-child{font-family:var(--display);font-weight:700}
+.tchips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.tchips button{font-family:inherit;font-size:.95rem;line-height:1.35;text-align:left;color:var(--ink);background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:8px 11px;cursor:pointer}
+.tchips button.no{animation:nudge .35s;border-color:var(--coral);background:#ffe9e9}
+.tseq{margin:6px 0;padding-left:1.6em}
+.tseq li{background:#e3f8f1;border:2px solid var(--mint);border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:.95rem}
+.wq{margin-top:6px}
+.wq + .wq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Microbes and plant health</h2>
+    <span>Biology, almost all Separate Biology only (not on Combined Science). Growing bacteria, the clear zone practical, monoclonal antibodies, plant disease, plant defences and plant hormones.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=5"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var AGAR = "#f2d27a", LAWN = "#fbf7ea", SPECK = "#d2c493";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 16) + '" fill="' + (o.c || INK) + '"' + (o.pe ? ' pointer-events="none"' : '') + '>' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function head(x, y, dx, dy, c){
+  var a = Math.atan2(dy, dx), s = 9;
+  var p1 = [x - s * Math.cos(a) + s * 0.6 * Math.sin(a), y - s * Math.sin(a) - s * 0.6 * Math.cos(a)];
+  var p2 = [x - s * Math.cos(a) - s * 0.6 * Math.sin(a), y - s * Math.sin(a) + s * 0.6 * Math.cos(a)];
+  return '<path d="M' + x + ' ' + y + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + (c || INK) + '"/>';
+}
+function arrow(x1, y1, x2, y2, c){ return L(x1, y1, x2, y2, c || INK, 3) + head(x2, y2, x2 - x1, y2 - y1, c); }
+function lawnPattern(id, sc){
+  sc = sc || 1;
+  var w = 12 * sc;
+  return '<pattern id="' + id + '" width="' + w + '" height="' + w + '" patternUnits="userSpaceOnUse">' +
+    '<rect width="' + w + '" height="' + w + '" fill="' + LAWN + '"/>' +
+    '<circle cx="' + (3 * sc) + '" cy="' + (4 * sc) + '" r="' + (1.3 * sc) + '" fill="' + SPECK + '"/>' +
+    '<circle cx="' + (9 * sc) + '" cy="' + (9 * sc) + '" r="' + (1.1 * sc) + '" fill="' + SPECK + '"/>' +
+    '<circle cx="' + (9.5 * sc) + '" cy="' + (2.5 * sc) + '" r="' + (0.8 * sc) + '" fill="' + SPECK + '"/></pattern>';
+}
+/* points along a cubic Bezier, pushed sideways by off (positive = to the right of the direction of travel, in SVG terms) */
+function bez(p, t){
+  var u = 1 - t;
+  return [u * u * u * p[0] + 3 * u * u * t * p[2] + 3 * u * t * t * p[4] + t * t * t * p[6],
+          u * u * u * p[1] + 3 * u * u * t * p[3] + 3 * u * t * t * p[5] + t * t * t * p[7]];
+}
+function sideDots(p, ts, off, r, c){
+  var s = "";
+  ts.forEach(function(t){
+    var a = bez(p, t - 0.01), b = bez(p, t + 0.01), m = bez(p, t);
+    var tx = b[0] - a[0], ty = b[1] - a[1], n = Math.sqrt(tx * tx + ty * ty);
+    var nx = -ty / n, ny = tx / n;
+    s += '<circle cx="' + (m[0] + nx * off).toFixed(1) + '" cy="' + (m[1] + ny * off).toFixed(1) + '" r="' + r + '" fill="' + c + '" stroke="' + INK + '" stroke-width="1"/>';
+  });
+  return s;
+}
+
+/* ---------- figures ---------- */
+var FIG_DOUBLE = (function(){
+  var s = T(190, 20, "Every 20 minutes, each cell divides in two", { s: 15 });
+  var cols = [[1, "0 min"], [2, "20 min"], [4, "40 min"], [8, "60 min"]];
+  cols.forEach(function(c, k){
+    var cx = 50 + k * 93, n = c[0], two = n >= 4, rows = two ? n / 2 : n;
+    for(var i = 0; i < n; i++){
+      var gx = two ? (i % 2 ? 16 : -16) : 0;
+      var gy = ((two ? Math.floor(i / 2) : i) - (rows - 1) / 2) * 16;
+      s += '<rect x="' + (cx + gx - 13) + '" y="' + (74 + gy - 6) + '" width="26" height="12" rx="6" fill="#e3f8f1" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    if(k < 3) s += arrow(cx + 34, 74, cx + 56, 74, BLUE);
+    s += T(cx, 136, c[1], { s: 15 }) + T(cx, 156, n + (n === 1 ? " cell" : " cells"), { s: 15, body: true, w: 400 });
+  });
+  return svg("0 0 380 166", "Binary fission. At 0 minutes there is 1 cell, at 20 minutes 2 cells, at 40 minutes 4 cells, at 60 minutes 8 cells. The number doubles every 20 minutes.", s);
+})();
+
+var FIG_ZONE = svg("0 0 380 214", "Part of an agar plate. A cloudy layer of bacteria covers the plate except for a clear circle around a paper disc. The diameter of the clear zone is marked. Radius is diameter divided by 2, and area is pi r squared.",
+  '<defs>' + lawnPattern("figLawn", 1.4) + '</defs>' +
+  '<rect x="6" y="6" width="236" height="200" rx="16" fill="url(#figLawn)" stroke="' + INK + '" stroke-width="2"/>' +
+  '<circle cx="124" cy="106" r="80" fill="' + AGAR + '" stroke="#e2c46b" stroke-width="2"/>' +
+  '<circle cx="124" cy="106" r="17" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>' +
+  L(48, 106, 200, 106, INK, 2.5) + head(44, 106, -1, 0) + head(204, 106, 1, 0) +
+  T(124, 140, "diameter", { s: 16 }) +
+  T(124, 46, "clear zone", { s: 15, body: true, w: 400 }) +
+  T(312, 40, "bacteria", { s: 15 }) + T(312, 58, "everywhere else", { s: 14, body: true, w: 400 }) +
+  T(312, 102, "radius =", { s: 15 }) + T(312, 122, "diameter &divide; 2", { s: 15 }) +
+  T(312, 166, "area = &pi;r&sup2;", { s: 18 }));
+
+var FIG_MAB = svg("0 0 380 332", "Making monoclonal antibodies. A mouse lymphocyte, which makes the antibody, is fused with a tumour cell, which keeps dividing. This makes a hybridoma cell. The hybridoma is cloned into lots of identical cells, which all make the same antibody.",
+  '<circle cx="80" cy="46" r="30" fill="#e6ecff" stroke="' + INK + '" stroke-width="2.5"/><circle cx="80" cy="46" r="13" fill="' + BLUE + '" fill-opacity=".55"/>' +
+  '<circle cx="300" cy="46" r="30" fill="#ffe6e6" stroke="' + INK + '" stroke-width="2.5"/><circle cx="300" cy="46" r="13" fill="' + CORAL + '" fill-opacity=".6"/>' +
+  T(190, 54, "+", { s: 30 }) +
+  T(80, 98, "Mouse lymphocyte", { s: 15 }) + T(80, 117, "makes the antibody", { s: 14, body: true, w: 400 }) +
+  T(300, 98, "Tumour cell", { s: 15 }) + T(300, 117, "keeps dividing", { s: 14, body: true, w: 400 }) +
+  arrow(96, 128, 150, 158) + arrow(284, 128, 230, 158) +
+  '<ellipse cx="190" cy="182" rx="40" ry="24" fill="#ece6fd" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<circle cx="178" cy="182" r="9" fill="' + BLUE + '" fill-opacity=".55"/><circle cx="202" cy="182" r="9" fill="' + CORAL + '" fill-opacity=".6"/>' +
+  T(240, 176, "Hybridoma", { s: 15, a: "start" }) + T(240, 195, "does both jobs", { s: 14, a: "start", body: true, w: 400 }) +
+  arrow(190, 210, 190, 238) +
+  [110, 150, 190, 230, 270].map(function(x){
+    return '<ellipse cx="' + x + '" cy="262" rx="16" ry="11" fill="#ece6fd" stroke="' + INK + '" stroke-width="2"/>';
+  }).join("") +
+  T(190, 300, "Cloned: lots of identical cells", { s: 15 }) +
+  T(190, 321, "all making the same antibody", { s: 14, body: true, w: 400 }));
+
+var FIG_TROP = (function(){
+  var s = "";
+  /* left: shoot lit from the left */
+  s += T(100, 18, "Light from one side", { s: 15 });
+  s += '<circle cx="24" cy="72" r="13" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += arrow(42, 80, 66, 92, "#c89a00") + arrow(42, 104, 66, 108, "#c89a00");
+  var shoot = [118, 186, 118, 136, 116, 104, 86, 60];
+  s += '<path d="M' + shoot[0] + ' ' + shoot[1] + ' C' + shoot.slice(2).join(" ") + '" fill="none" stroke="#2f9e5b" stroke-width="9" stroke-linecap="round"/>';
+  s += '<path d="M86 60 q-14 -8 -22 -2 q10 8 22 2 z" fill="' + MINT + '" stroke="' + INK + '" stroke-width="1.5"/>';
+  s += sideDots(shoot, [0.25, 0.42, 0.58, 0.74, 0.88], 10, 4.5, VIOLET);
+  s += '<rect x="86" y="186" width="64" height="30" rx="5" fill="#c98f5a" stroke="' + INK + '" stroke-width="2"/>';
+  s += T(160, 128, "shaded", { s: 14, a: "start", body: true, w: 400 }) + T(160, 146, "side", { s: 14, a: "start", body: true, w: 400 });
+  /* right: root on its side */
+  s += T(292, 18, "Seedling on its side", { s: 15 });
+  var root = [236, 66, 292, 66, 320, 88, 326, 168];
+  s += '<path d="M' + root[0] + ' ' + root[1] + ' C' + root.slice(2).join(" ") + '" fill="none" stroke="#b07b46" stroke-width="7" stroke-linecap="round"/>';
+  s += sideDots(root, [0.15, 0.32, 0.5, 0.68, 0.84], 9, 4.5, VIOLET);
+  s += '<ellipse cx="226" cy="64" rx="16" ry="12" fill="#f6e2a8" stroke="' + INK + '" stroke-width="2"/>';
+  s += T(290, 120, "lower", { s: 14, a: "end", body: true, w: 400 }) + T(290, 138, "side", { s: 14, a: "end", body: true, w: 400 });
+  s += T(300, 194, "root bends down", { s: 14, body: true, w: 400 });
+  /* key */
+  s += '<circle cx="200" cy="222" r="5" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="1"/>' + T(212, 227, "= auxin", { s: 14, a: "start" });
+  return svg("0 0 380 236", "Left: a shoot lit from one side bends towards the light, with auxin collected on the shaded side. Right: a seedling on its side; auxin collects on the lower side of the root, and the root bends down.", s);
+})();
+
+/* small in-widget quiz (mc, number, tap order) */
+function wquiz(host, qs, api){
+  var d = api.data;
+  if(!d.q) d.q = [];
+  var MINUS = new RegExp(String.fromCharCode(8722), "g");
+  function parse(s){
+    s = String(s).replace(/,/g, "").replace(MINUS, "-");
+    var m = s.match(/-?\d*\.?\d+/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function val(x){ return typeof x === "function" ? x() : x; }
+  function overall(){
+    var r = "right1";
+    for(var k = 0; k < qs.length; k++){
+      var st = d.q[k];
+      if(!st || !st.done) return null;
+      if(st.done === "shown") r = "shown";
+      else if(st.done === "right2" && r === "right1") r = "right2";
+    }
+    return r;
+  }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e; }
+  function render(){
+    host.innerHTML = '<span class="kicker" style="margin-bottom:4px">Your challenge</span>';
+    for(var k = 0; k < qs.length; k++){
+      if(!d.q[k]) d.q[k] = { tries: 0 };
+      host.appendChild(one(k));
+      if(!d.q[k].done) break;
+    }
+  }
+  function one(k){
+    var q = qs[k], st = d.q[k];
+    var bx = el("div", "wq", '<p class="wnote"><b>' + (k + 1) + ' of ' + qs.length + '.</b> ' + val(q.q) + '</p>');
+    var picked = st.pick === undefined ? -1 : st.pick, input = null, btns = [];
+    var fb = el("div", "fb hidden"); fb.setAttribute("aria-live", "polite");
+    var nav = el("div", "wrow");
+    var cb = el("button", "btn", "Check"); cb.type = "button";
+    var sb = el("button", "btn btn-quiet", "Show me"); sb.type = "button";
+    function finish(r){
+      st.done = r; api.save();
+      var o = overall();
+      if(o) api.done(o);
+      render();
+    }
+    function whyHtml(){
+      return "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") +
+        '</b><div class="why">' + val(q.why) + "</div>";
+    }
+    if(q.order){
+      /* tap the items in order */
+      if(!st.perm){
+        st.perm = q.order.map(function(t, n){ return n; });
+        for(var i = st.perm.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = st.perm[i]; st.perm[i] = st.perm[j]; st.perm[j] = t; }
+        if(st.perm.join() === q.order.map(function(t, n){ return n; }).join()) st.perm.reverse();
+      }
+      if(!st.got) st.got = 0;
+      var seq = el("ol", "tseq"), chips = el("div", "tchips");
+      bx.appendChild(seq); bx.appendChild(chips);
+      var drawO = function(){
+        seq.innerHTML = q.order.slice(0, st.got).map(function(t){ return "<li>" + t + "</li>"; }).join("");
+        chips.innerHTML = "";
+        st.perm.forEach(function(n){
+          if(n < st.got) return;
+          var b = el("button", "", q.order[n]); b.type = "button";
+          b.onclick = function(){
+            if(st.done) return;
+            if(n === st.got){
+              st.got++; api.save();
+              fb.className = "fb hidden";
+              if(st.got === q.order.length){ finish(st.tries ? "right2" : "right1"); return; }
+              drawO();
+            }else{
+              st.tries++; api.save();
+              b.classList.remove("no"); void b.offsetWidth; b.classList.add("no");
+              fb.className = "fb nudge";
+              fb.innerHTML = "<b>Not that one yet.</b> " + (q.hints ? q.hints[st.got] : q.hint) + '<br><span class="tiny">Tap another, or tap Show me.</span>';
+              sb.classList.remove("hidden");
+            }
+          };
+          chips.appendChild(b);
+        });
+      };
+      if(!st.done) drawO(); else { st.got = q.order.length; drawO(); }
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      sb.onclick = function(){ st.got = q.order.length; finish("shown"); };
+      nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+      if(st.done){ fb.className = "fb " + (st.done === "shown" ? "show" : "good"); fb.innerHTML = whyHtml(); }
+      return bx;
+    }
+    if(q.options){
+      var ch = el("div", "choices");
+      q.options.forEach(function(o, n){
+        var b = el("button", n === picked ? "picked" : "", o); b.type = "button";
+        b.onclick = function(){
+          if(st.done) return;
+          picked = n;
+          btns.forEach(function(x, m){ x.classList.toggle("picked", m === n); x.classList.remove("no"); });
+        };
+        btns.push(b); ch.appendChild(b);
+      });
+      bx.appendChild(ch);
+    }else{
+      var row = el("label", "numrow", q.pre ? '<span class="aff">' + q.pre + '</span>' : "");
+      input = el("input"); input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+      input.setAttribute("aria-label", "Your answer");
+      if(st.val !== undefined) input.value = st.val;
+      input.addEventListener("input", function(){ input.classList.remove("no"); st.val = input.value; });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      row.appendChild(input);
+      if(q.post) row.appendChild(el("span", "aff", q.post));
+      bx.appendChild(row);
+    }
+    nav.appendChild(cb); nav.appendChild(sb); bx.appendChild(nav); bx.appendChild(fb);
+    function right(){
+      if(q.options) return picked === q.answer;
+      return Math.abs(parse(input.value) - val(q.a)) <= (q.tol || 1e-9);
+    }
+    function paint(){
+      cb.classList.toggle("hidden", !!st.done);
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      if(!st.done) return;
+      if(q.options){
+        btns.forEach(function(x, m){ x.classList.remove("no", "ok"); if(m === q.answer) x.classList.add("ok"); });
+      }else{
+        if(st.done === "shown"){ input.value = q.show ? val(q.show) : String(val(q.a)); input.classList.add("given"); }
+        else input.classList.add("ok");
+        input.readOnly = true;
+      }
+      fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+      fb.innerHTML = whyHtml();
+    }
+    cb.onclick = function(){
+      if(q.options ? picked < 0 : !input.value.trim()){
+        fb.className = "fb nudge"; fb.innerHTML = "Pop an answer in first, if you like.";
+        return;
+      }
+      st.pick = picked; if(input) st.val = input.value;
+      if(right()){ finish(st.tries ? "right2" : "right1"); return; }
+      st.tries++;
+      if(st.tries >= 2){ finish("shown"); return; }
+      api.save();
+      var msg = val(q.hint);
+      if(q.options && q.nearOpt && q.nearOpt[picked]) msg = q.nearOpt[picked];
+      if(input) input.classList.add("no"); else btns[picked].classList.add("no");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+      paint();
+    };
+    sb.onclick = function(){ finish("shown"); };
+    paint();
+    return bx;
+  }
+  render();
+  return { refresh: render };
+}
+
+/* ---------- the clear zone lab ----------
+   Plate drawn to scale: 90 mm of agar, 3.6 units per mm.
+   Hand lens: a 40 mm window, 9 units per mm, with a ruler in mm. */
+var LETTERS = ["A", "B", "C", "D"];
+var POS = { A: [119, 119], B: [241, 119], C: [119, 241], D: [241, 241], W: [180, 180] };
+var KP = 3.6, KL = 9, DISC = 6, WIN = 40;
+var DEG = String.fromCharCode(176);
+
+function newPlate(){
+  for(var tries = 0; tries < 500; tries++){
+    var v = LETTERS.map(function(){ return 9 + Math.floor(Math.random() * 22); });   /* 9 to 30 mm */
+    var s = v.slice().sort(function(a, b){ return a - b; }), ok = true;
+    for(var i = 1; i < s.length; i++) if(s[i] - s[i - 1] < 3) ok = false;
+    if(ok){ var z = {}; LETTERS.forEach(function(Lt, k){ z[Lt] = v[k]; }); return z; }
+  }
+  return { A: 12, B: 27, C: 18, D: 22 };
+}
+function areaOf(dmm){ return Math.PI * (dmm / 2) * (dmm / 2); }
+function r1(x){ return Math.round(x * 10) / 10; }
+
+var LAB = {
+  type: "widget", topic: "Clear zones",
+  title: "Clear zone lab",
+  html: '<p>Bacteria have been spread evenly over this agar plate. Paper discs soaked in four antibiotics (<b>A</b> to <b>D</b>, all the same concentration) sit on top, plus one soaked in sterile water (<b>W</b>).</p><p>Pick the incubator temperature, let it grow, then measure each clear zone with the ruler under the hand lens. A challenge appears once all four are measured.</p>',
+  report: function(d){
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" }, m = d.m || {}, q = d.q || [];
+    var meas = LETTERS.map(function(Lt){ return Lt + " " + (m[Lt] && lab[m[Lt].done] || "not done"); }).join(", ");
+    return "Clear zone lab: incubator first pick " + (d.firstTemp ? d.firstTemp + " C" : "not made") +
+      "; measuring " + meas + "; ranking " + (q[0] && lab[q[0].done] || "not done") +
+      ", area " + (q[1] && lab[q[1].done] || "not done") + ", control question " + (q[2] && lab[q[2].done] || "not done") +
+      "; plates finished " + (d.rounds || 0) + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(!d.plate){ d.plate = newPlate(); d.m = {}; d.rx = {}; api.save(); }
+    if(!d.m) d.m = {};
+    if(!d.rx) d.rx = {};
+    var anim = null;
+
+    function plateSvg(p){
+      var holes = "", lawnOn = p > 0;
+      LETTERS.forEach(function(Lt){
+        var c = POS[Lt];
+        holes += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (d.plate[Lt] / 2 * KP).toFixed(1) + '" fill="#000"/>';
+      });
+      var s = '<defs>' + lawnPattern("czLawnP", 1) +
+        '<mask id="czMaskP"><rect width="360" height="360" fill="#fff"/>' + holes + '</mask></defs>';
+      s += '<circle cx="180" cy="180" r="174" fill="#e9eef5" stroke="' + INK + '" stroke-width="3"/>';
+      s += '<circle cx="180" cy="180" r="162" fill="' + AGAR + '"/>';
+      if(lawnOn){
+        s += '<g mask="url(#czMaskP)" opacity="' + p.toFixed(2) + '"><circle cx="180" cy="180" r="162" fill="url(#czLawnP)"/></g>';
+        if(p >= 1) LETTERS.forEach(function(Lt){
+          var c = POS[Lt];
+          s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (d.plate[Lt] / 2 * KP).toFixed(1) + '" fill="none" stroke="#e2c46b" stroke-width="1.5"/>';
+        });
+      }else{
+        s += T(180, 344, "bacteria spread, not grown yet", { s: 14, body: true, w: 400, pe: true });
+      }
+      /* tape: two strips over the rim, not all the way round */
+      s += '<rect x="166" y="0" width="28" height="30" rx="3" fill="#ece8d8" fill-opacity=".9" stroke="#b8b29a" stroke-width="1.5"/>';
+      s += '<rect x="166" y="330" width="28" height="30" rx="3" fill="#ece8d8" fill-opacity=".9" stroke="#b8b29a" stroke-width="1.5"/>';
+      LETTERS.concat(["W"]).forEach(function(Lt){
+        var c = POS[Lt], on = d.sel === Lt;
+        if(on && d.incubated) s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + ((Lt === "W" ? DISC : d.plate[Lt]) / 2 * KP + 6).toFixed(1) + '" fill="none" stroke="' + BLUE + '" stroke-width="3" stroke-dasharray="6 4"/>';
+        s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (DISC / 2 * KP + 1).toFixed(1) + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+        s += T(c[0], c[1] + 5, Lt, { s: 15, pe: true });
+        if(d.incubated) s += '<circle class="czhit" data-l="' + Lt + '" cx="' + c[0] + '" cy="' + c[1] + '" r="30" fill="#fff" fill-opacity="0"><title>Disc ' + Lt + '</title></circle>';
+      });
+      return svg("0 0 360 360", d.incubated ? "The agar plate after incubation. Bacteria cover the plate except for clear zones around discs A to D. Disc W, the water control, has no clear zone. Tap a disc to measure it." : "The agar plate before incubation, with discs A, B, C, D and a water disc W in the middle. The lid is held with two strips of tape.", s);
+    }
+
+    function lensSvg(Lt){
+      var dmm = Lt === "W" ? 0 : d.plate[Lt], cy = 72, cx = WIN / 2 * KL;
+      var s = '<defs>' + lawnPattern("czLawnL", 2.2) + '<clipPath id="czClipL"><rect x="2" y="2" width="356" height="166" rx="14"/></clipPath></defs>';
+      s += '<g clip-path="url(#czClipL)">';
+      s += '<rect width="360" height="170" fill="url(#czLawnL)"/>';
+      if(dmm) s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (dmm / 2 * KL) + '" fill="' + AGAR + '" stroke="#e2c46b" stroke-width="2"/>';
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (DISC / 2 * KL) + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += T(cx, cy - 6, Lt, { s: 18, pe: true });
+      /* ruler, 50 mm long, top edge along the diameter */
+      var r = '<rect x="0" y="' + cy + '" width="' + (50 * KL) + '" height="58" fill="' + WHITE + '" fill-opacity=".94" stroke="' + INK + '" stroke-width="2"/>';
+      for(var m = 0; m <= 50; m++){
+        var len = m % 10 === 0 ? 20 : m % 5 === 0 ? 14 : 8;
+        r += L(m * KL, cy, m * KL, cy + len, INK, m % 5 === 0 ? 2 : 1.2);
+        if(m % 5 === 0) r += T(m * KL, cy + 38, m, { s: 15, pe: true });
+      }
+      r += T(50 * KL - 30, cy + 54, "mm", { s: 14, body: true, w: 400, pe: true });
+      s += '<g class="czrul" id="czRul" transform="translate(' + ((d.rx[Lt] || 0) * KL) + ' 0)">' + r + '</g>';
+      s += '</g><rect x="2" y="2" width="356" height="166" rx="14" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+      return svg("0 0 360 170", "Hand lens view of disc " + Lt + (dmm ? " and its clear zone, with a millimetre ruler along the middle. Drag the ruler or use the arrow buttons to line up 0 with one edge." : ". The bacteria grow right up to the disc: there is no clear zone."), s);
+    }
+
+    function statusOf(Lt){ return d.m[Lt] && d.m[Lt].done; }
+    function allMeasured(){ return LETTERS.every(statusOf); }
+
+    function build(){
+      if(anim){ cancelAnimationFrame(anim); anim = null; }
+      el.innerHTML =
+        '<div class="wpanel">' +
+          '<div class="czgrid">' +
+            '<div><div class="czplate" id="czPlate"></div><div class="czpick" id="czPick"></div></div>' +
+            '<div id="czSide"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="wpanel" id="czRes"></div>' +
+        '<div class="wpanel" id="czQ"></div>' +
+        '<div class="wrow" id="czAgain"></div>';
+      drawPlate(1);
+      drawSide();
+      drawRes();
+    }
+
+    function drawPlate(p){
+      var host = el.querySelector("#czPlate");
+      host.innerHTML = plateSvg(d.incubated ? p : 0);
+      [].forEach.call(host.querySelectorAll(".czhit"), function(c){
+        c.addEventListener("click", function(){ pick(c.getAttribute("data-l")); });
+      });
+      var pk = el.querySelector("#czPick");
+      if(!d.incubated){ pk.innerHTML = ""; return; }
+      pk.innerHTML = "";
+      LETTERS.concat(["W"]).forEach(function(Lt){
+        var st = d.m[Lt], b = document.createElement("button");
+        b.type = "button";
+        b.className = (d.sel === Lt ? "on " : "") + (st && st.done ? "got" : "");
+        b.innerHTML = Lt === "W" ? "W (water)" : st && st.done ? Lt + ": " + d.plate[Lt] + " mm" : "Measure " + Lt;
+        b.onclick = function(){ pick(Lt); };
+        pk.appendChild(b);
+      });
+    }
+
+    function pick(Lt){
+      d.sel = Lt;
+      if(Lt === "W") d.sawW = true;
+      if(Lt !== "W" && d.rx[Lt] === undefined){
+        var left = WIN / 2 - d.plate[Lt] / 2;
+        d.rx[Lt] = left - (1.5 + Math.floor(Math.random() * 6) * 0.5);
+      }
+      api.save();
+      drawPlate(1); drawSide();
+    }
+
+    function drawSide(){
+      var side = el.querySelector("#czSide");
+      if(!d.incubated){
+        side.innerHTML =
+          '<p class="wnote">Your plate is set up with aseptic technique. The lid has two strips of tape (not sealed all the way round) and it goes in upside down.</p>' +
+          '<p class="wnote"><b>Set the incubator.</b> Which temperature?</p>' +
+          '<div class="wrow"><button type="button" class="btn btn-quiet" data-t="25">25 ' + DEG + 'C</button>' +
+          '<button type="button" class="btn btn-quiet" data-t="37">37 ' + DEG + 'C</button></div>' +
+          '<div class="fb hidden" id="czTfb" aria-live="polite"></div>' +
+          '<p class="czclock hidden" id="czClock"></p>';
+        [].forEach.call(side.querySelectorAll("[data-t]"), function(b){
+          b.onclick = function(){ chooseTemp(+b.getAttribute("data-t")); };
+        });
+        if(d.tempMiss){
+          var f = side.querySelector("#czTfb");
+          f.className = "fb nudge";
+          f.innerHTML = tempMsg();
+        }
+        return;
+      }
+      if(!d.sel){
+        side.innerHTML = '<p class="wnote"><b>Grown.</b> The cloudy layer is bacteria. The clear zones are where the antibiotic spread into the agar and killed the bacteria or stopped them growing.</p>' +
+          '<p class="wnote">Tap a disc on the plate, or a button under it, to look through the hand lens.</p>';
+        return;
+      }
+      var Lt = d.sel;
+      side.innerHTML = '<div class="czlens" id="czLens">' + lensSvg(Lt) + '</div>' + '<div id="czM"></div>';
+      var m = side.querySelector("#czM");
+      if(Lt === "W"){
+        m.innerHTML = '<p class="wnote"><b>Disc W, the control.</b> No clear zone: the bacteria grew right up to the disc. So the paper disc on its own does not stop bacteria growing, and the clear zones round A to D are down to the antibiotics.</p>';
+        return;
+      }
+      wireRuler(Lt);
+      var st = d.m[Lt] || (d.m[Lt] = { tries: 0 });
+      m.innerHTML =
+        '<div class="wrow cznudge"><button type="button" class="btn btn-quiet" id="czL">&lsaquo; Ruler left</button>' +
+        '<button type="button" class="btn btn-quiet" id="czR">Ruler right &rsaquo;</button></div>' +
+        '<label class="numrow"><span class="aff">Zone ' + Lt + ' diameter</span><input type="text" inputmode="decimal" autocomplete="off" id="czIn" aria-label="Diameter of clear zone ' + Lt + ' in mm"><span class="aff">mm</span></label>' +
+        '<div class="wrow"><button type="button" class="btn" id="czCheck">Check</button><button type="button" class="btn btn-quiet hidden" id="czShow">Show me</button></div>' +
+        '<div class="fb hidden" id="czFb" aria-live="polite"></div>';
+      var inp = m.querySelector("#czIn"), fb = m.querySelector("#czFb"), cb = m.querySelector("#czCheck"), sb = m.querySelector("#czShow");
+      m.querySelector("#czL").onclick = function(){ moveRuler(Lt, -0.5); };
+      m.querySelector("#czR").onclick = function(){ moveRuler(Lt, 0.5); };
+      if(st.val !== undefined) inp.value = st.val;
+      inp.addEventListener("input", function(){ st.val = inp.value; inp.classList.remove("no"); });
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      function paint(){
+        cb.classList.toggle("hidden", !!st.done);
+        sb.classList.toggle("hidden", !!st.done || !st.tries);
+        if(!st.done) return;
+        inp.readOnly = true;
+        inp.classList.add(st.done === "shown" ? "given" : "ok");
+        if(st.done === "shown") inp.value = d.plate[Lt];
+        fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+        var left = WIN / 2 - d.plate[Lt] / 2;
+        fb.innerHTML = "<b>" + (st.done === "shown" ? "Here it is." : st.done === "right1" ? "Spot on." : "Got there.") + "</b> Zone " + Lt + " is <b>" + d.plate[Lt] + " mm</b> across, disc included." +
+          (st.done === "shown" ? " The ruler now has 0 on the left edge, so the right edge reads straight off." : "") +
+          (allMeasured() ? "" : ' <span class="tiny">Tap another disc when you are ready.</span>');
+        if(st.done === "shown" && Math.abs(d.rx[Lt] - left) > 0.01){ d.rx[Lt] = left; api.save(); setRuler(Lt); }
+      }
+      cb.onclick = function(){
+        var v = parseFloat(String(inp.value).replace(/[^0-9.]/g, ""));
+        if(!inp.value.trim() || isNaN(v)){ fb.className = "fb nudge"; fb.innerHTML = "Pop a number in first, if you like."; return; }
+        st.val = inp.value;
+        var dm = d.plate[Lt];
+        if(Math.abs(v - dm) <= 0.5){ st.done = st.tries ? "right2" : "right1"; after(); return; }
+        st.tries++;
+        if(st.tries >= 2){ st.done = "shown"; after(); return; }
+        api.save();
+        var left = WIN / 2 - dm / 2, rightRead = left + dm - d.rx[Lt];
+        var msg;
+        if(Math.abs(v - dm / 2) <= 0.5) msg = "That looks like the radius. The diameter goes all the way across the clear zone, through the disc.";
+        else if(Math.abs(v - rightRead) <= 0.5 && Math.abs(d.rx[Lt] - left) > 0.4) msg = "That is where the right edge sits on the ruler, but 0 is not on the left edge yet. Slide the ruler so 0 lines up with the left edge, or take the left reading away from the right one.";
+        else if(Math.abs(v - (dm - DISC)) <= 0.5) msg = "Measure the whole clear zone, edge to edge, with the disc included.";
+        else msg = "Line 0 on the ruler up with the left edge of the clear zone (drag the ruler, or use the arrow buttons). Then read where the right edge is.";
+        inp.classList.add("no");
+        fb.className = "fb nudge";
+        fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Have another go, or tap Show me.</span>';
+        paint();
+      };
+      sb.onclick = function(){ st.done = "shown"; after(); };
+      function after(){
+        api.save();
+        drawPlate(1);
+        paint();
+        drawRes();
+      }
+      paint();
+    }
+
+    function setRuler(Lt){
+      var g = el.querySelector("#czRul");
+      if(g) g.setAttribute("transform", "translate(" + (d.rx[Lt] * KL) + " 0)");
+    }
+    function moveRuler(Lt, by){
+      d.rx[Lt] = Math.max(-45, Math.min(38, d.rx[Lt] + by));
+      api.save(); setRuler(Lt);
+    }
+    function wireRuler(Lt){
+      var sv = el.querySelector("#czLens svg"), g = el.querySelector("#czRul");
+      var drag = null;
+      g.addEventListener("pointerdown", function(e){
+        var w = sv.getBoundingClientRect().width || 360;
+        drag = { x: e.clientX, rx: d.rx[Lt], k: 360 / w };
+        try{ g.setPointerCapture(e.pointerId); }catch(err){}
+        e.preventDefault();
+      });
+      g.addEventListener("pointermove", function(e){
+        if(!drag) return;
+        var mm = (e.clientX - drag.x) * drag.k / KL;
+        d.rx[Lt] = Math.max(-45, Math.min(38, Math.round((drag.rx + mm) * 2) / 2));
+        setRuler(Lt);
+      });
+      function end(){ if(drag){ drag = null; api.save(); } }
+      g.addEventListener("pointerup", end);
+      g.addEventListener("pointercancel", end);
+    }
+
+    function tempMsg(){
+      return "<b>Cosy for the wrong bacteria.</b> 37 " + DEG + "C is human body temperature, so bacteria that cause disease in people would grow well. In a school lab the most is 25 " + DEG + "C. Have another pick.";
+    }
+    function chooseTemp(t){
+      if(!d.firstTemp){ d.firstTemp = t; }
+      var f = el.querySelector("#czTfb");
+      if(t === 37){
+        d.tempMiss = true; api.save();
+        f.className = "fb nudge"; f.innerHTML = tempMsg();
+        return;
+      }
+      d.temp = 25; api.save();
+      f.className = "fb good";
+      f.innerHTML = "<b>Good call.</b> 25 " + DEG + "C is warm enough for the bacteria to grow, and harmful pathogens are less likely to grow.";
+      [].forEach.call(el.querySelectorAll("[data-t]"), function(b){ b.disabled = true; });
+      incubate();
+    }
+    function incubate(){
+      var clock = el.querySelector("#czClock");
+      clock.classList.remove("hidden");
+      d.incubated = true;
+      var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function finish(){
+        anim = null; api.save();
+        drawPlate(1); drawSide();
+      }
+      if(reduce){ finish(); return; }
+      var t0 = null, DUR = 2200;
+      function frame(ts){
+        if(t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / DUR);
+        clock.innerHTML = "Incubating at 25 " + DEG + "C: " + Math.round(p * 48) + " hours";
+        el.querySelector("#czPlate").innerHTML = plateSvg(p);
+        if(p < 1) anim = requestAnimationFrame(frame); else setTimeout(finish, 500);
+      }
+      anim = requestAnimationFrame(frame);
+    }
+
+    function drawRes(){
+      var res = el.querySelector("#czRes"), qh = el.querySelector("#czQ"), again = el.querySelector("#czAgain");
+      var got = LETTERS.filter(statusOf);
+      if(!d.incubated || !got.length){
+        res.innerHTML = '<span class="kicker">Results table</span><p class="wnote">Your measurements will go here.</p>';
+        qh.innerHTML = '<span class="kicker">Your challenge</span><p class="wnote">The challenge appears here once all four clear zones are measured.</p>';
+        again.innerHTML = "";
+        return;
+      }
+      var rows = LETTERS.map(function(Lt){
+        return '<tr><td>' + Lt + '</td><td>' + (statusOf(Lt) ? d.plate[Lt] : "&middot;") + '</td></tr>';
+      }).join("") + '<tr><td>W</td><td>no clear zone</td></tr>';
+      res.innerHTML = '<span class="kicker">Results table</span><table class="datatable czres"><tr><th>Disc</th><th>Clear zone diameter (mm)</th></tr>' + rows + '</table>';
+      if(!allMeasured()){
+        qh.innerHTML = '<span class="kicker">Your challenge</span><p class="wnote">' + (4 - got.length) + ' more to measure, then the challenge appears.</p>';
+        again.innerHTML = "";
+        return;
+      }
+      var rank = LETTERS.slice().sort(function(a, b){ return d.plate[b] - d.plate[a]; });
+      var best = rank[0], bd = d.plate[best];
+      wquiz(qh, [
+        { q: "Tap the antibiotics in order, from <b>most</b> effective to <b>least</b> effective.",
+          order: rank.map(function(Lt){ return "Antibiotic " + Lt + " (" + d.plate[Lt] + " mm)"; }),
+          hint: "Look at the clear zone sizes. Which antibiotic stopped bacteria growing over the widest area?",
+          why: "Biggest clear zone first: " + rank.map(function(Lt){ return Lt + " (" + d.plate[Lt] + " mm)"; }).join(", ") + ". A bigger clear zone means the antibiotic killed or stopped more of the bacteria, so it is more effective against this type of bacteria at this concentration." },
+        { q: function(){ return "Antibiotic " + best + " has a clear zone <b>" + bd + " mm</b> across. Work out the <b>area</b> of the clear zone, using &pi;r&sup2;. Give your answer to 1 decimal place."; },
+          a: function(){ return areaOf(bd); }, tol: 1, post: "mm&sup2;",
+          show: function(){ return String(r1(areaOf(bd))); },
+          hint: function(){ return "First halve the diameter to get the radius: " + bd + " &divide; 2. Then square the radius and multiply by &pi;."; },
+          why: function(){ var r = bd / 2; return "Radius = " + bd + " &divide; 2 = " + r + " mm. Area = &pi; &times; " + r + "&sup2; = &pi; &times; " + (r * r) + " = <b>" + r1(areaOf(bd)) + " mm&sup2;</b>. The common slip is to square the diameter, which gives an answer four times too big."; } },
+        { q: "Why does the plate also have disc <b>W</b>, soaked in sterile water?",
+          options: [
+            "It keeps the agar moist so the bacteria do not dry out",
+            "It waters down the antibiotics so the test is fairer",
+            "It is a control: it shows the paper disc on its own does not stop the bacteria growing",
+            "It kills any bacteria left on the inoculating loop"
+          ],
+          answer: 2,
+          hint: "What would you be unsure about if every disc had an antibiotic on it?",
+          why: "Disc W is the <b>control</b>. It has no clear zone, so the paper and water do nothing to the bacteria. That means the clear zones round A to D must be caused by the antibiotics." }
+      ], { data: d, save: api.save, done: function(){
+        var all = LETTERS.map(function(Lt){ return d.m[Lt].done; }).concat(d.q.map(function(x){ return x.done; }));
+        var r = all.indexOf("shown") >= 0 ? "shown" : (all.indexOf("right2") >= 0 || d.tempMiss) ? "right2" : "right1";
+        if(!d.counted){ d.counted = true; d.rounds = (d.rounds || 0) + 1; api.save(); }
+        api.done(r);
+        drawAgain();
+      } });
+      drawAgain();
+    }
+    function drawAgain(){
+      var again = el.querySelector("#czAgain");
+      var finished = d.q && d.q.length === 3 && d.q.every(function(x){ return x && x.done; });
+      if(!finished){ again.innerHTML = ""; return; }
+      again.innerHTML = '<p class="wnote">Lab done' + (d.rounds > 1 ? " (" + d.rounds + " plates so far)" : "") + '. Fancy another plate with different antibiotics? Your call.</p>';
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-quiet"; b.textContent = "Run a fresh plate";
+      b.onclick = function(){
+        d.plate = newPlate(); d.m = {}; d.rx = {}; d.q = []; d.incubated = false; d.temp = null; d.tempMiss = false; d.sel = null; d.counted = false;
+        api.save(); build();
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+      again.appendChild(b);
+    }
+
+    build();
+  }
+};
+
+EGW.run({
+  id: "biology-microbes-plants",
+  title: "Microbes and plant health",
+  subject: "Biology",
+  mins: 45,
+  blurb: "Almost everything here is Separate Biology only, so it is not on Combined Science: growing bacteria, aseptic technique, the clear zone practical, monoclonal antibodies, plant diseases, plant defences and plant hormones. There is a clear zone lab to run in the middle.",
+  steps: [
+
+  /* ---------- GROWING BACTERIA ---------- */
+  { type: "learn", topic: "Growing bacteria",
+    title: "Bacteria split in two",
+    fig: FIG_DOUBLE,
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p>Bacteria multiply by <b>binary fission</b>: one cell divides into two. With enough nutrients and a suitable temperature, this can happen as often as <b>once every 20 minutes</b>.</p>' +
+          '<p>The <b>mean division time</b> is the average time between divisions. Every division doubles the number of bacteria.</p>' +
+          '<div class="formula">divisions = time &divide; mean division time<br>bacteria = start number &times; 2<sup>divisions</sup></div>' +
+          '<p>Example: 1 bacterium dividing every 20 minutes, for 2 hours. 120 &divide; 20 = 6 divisions, and 1 &times; 2<sup>6</sup> = <b>64</b>.</p>' +
+          '<p><b>Separate Biology, Higher only:</b> give big answers in standard form. For example 2<sup>30</sup> = 1 073 741 824, which is about 1.07 &times; 10<sup>9</sup>.</p>' +
+          '<div class="keep"><b>Keep this</b>Put the time in the same units as the division time first, so hours into minutes.</div>' },
+
+  { type: "num", topic: "Growing bacteria",
+    q: "One bacterium is put into a nutrient broth. Its mean division time is <b>20 minutes</b>. How many bacteria are there after <b>3 hours</b>?",
+    boxes: [
+      { label: "Number of divisions", a: 9 },
+      { label: "Number of bacteria", a: 512 }
+    ],
+    hint: "Turn 3 hours into minutes, then see how many 20 minute blocks fit in.",
+    why: "3 hours = 180 minutes, and 180 &divide; 20 = <b>9</b> divisions. Then 1 &times; 2<sup>9</sup> = <b>512</b>.<br>A common slip is 2 &times; 9 = 18. The number doubles every time, so it is a power of 2, not a times table." },
+
+  { type: "num", topic: "Growing bacteria",
+    q: "A culture starts with <b>40</b> bacteria. The mean division time is <b>30 minutes</b>. How many bacteria are there after <b>4 hours</b>?",
+    boxes: [
+      { label: "Number of divisions", a: 8 },
+      { label: "Number of bacteria", a: 10240, show: "10 240" }
+    ],
+    hint: "Find the number of divisions first. Then multiply the starting number by 2 to the power of that.",
+    why: "4 hours = 240 minutes, and 240 &divide; 30 = <b>8</b> divisions. 2<sup>8</sup> = 256, and 40 &times; 256 = <b>10 240</b>.<br>Remember to multiply by the starting number: 256 on its own would be the answer for just one bacterium." },
+
+  { type: "num", topic: "Growing bacteria", stretch: true,
+    q: "<b>Separate Biology, Higher only.</b> One bacterium has a mean division time of <b>25 minutes</b>. How many bacteria will there be after <b>10 hours</b>? Give your answer in standard form, to 3 significant figures.",
+    boxes: [
+      { label: "Number of divisions", a: 24 },
+      { label: "Number before &times; 10 (3 significant figures)", a: 1.68, tol: 0.001, show: "1.68" },
+      { label: "Power of 10", a: 7 }
+    ],
+    hint: "10 hours is 600 minutes. Once you have 2 to the power of the divisions, count how many places the decimal point moves to make a number between 1 and 10.",
+    why: "600 &divide; 25 = <b>24</b> divisions. 2<sup>24</sup> = 16 777 216.<br>To get a number between 1 and 10, the decimal point moves 7 places: 1.6777... &times; 10<sup>7</sup>, which is <b>1.68 &times; 10<sup>7</sup></b> to 3 significant figures." },
+
+  /* ---------- ASEPTIC TECHNIQUE ---------- */
+  { type: "learn", topic: "Aseptic technique",
+    title: "Keeping cultures clean",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>Aseptic technique</b> means working so that no unwanted microorganisms get into your culture. Each step has a reason.</p>' +
+          '<ul class="steps">' +
+          '<li><b>Sterilise</b> the Petri dishes and the agar before use, to kill any microorganisms already there.</li>' +
+          '<li><b>Flame the inoculating loop</b> until it glows red, to kill microorganisms on it. Let it cool, or it kills the bacteria you are moving.</li>' +
+          '</ul>' +
+          '<ul class="steps">' +
+          '<li><b>Tape the lid</b> with a few strips, not sealed all the way round. Microorganisms from the air cannot get in, but oxygen can, so harmful anaerobic bacteria do not grow.</li>' +
+          '<li>Store the dish <b>upside down</b>, so condensation does not drip onto the agar.</li>' +
+          '</ul>' +
+          '<p>Incubate at <b>25 &deg;C at most</b> in school. Bacteria that cause disease in humans grow best near body temperature, 37 &deg;C, so they are less likely to grow.</p>' +
+          '<div class="keep"><b>Keep this</b>Every step either stops contamination or stops harmful bacteria growing.</div>' },
+
+  { type: "match", topic: "Aseptic technique",
+    q: "Match each step to the reason for it.",
+    pairs: [
+      ["Sterilise the Petri dishes and agar", "Kills microorganisms already there, so they cannot contaminate the culture"],
+      ["Pass the inoculating loop through a flame", "Kills microorganisms on the loop before it touches the culture"],
+      ["Tape the lid on, but not all the way round", "Keeps out microorganisms from the air but lets oxygen in"],
+      ["Store the dish upside down", "Stops condensation dripping onto the agar"],
+      ["Incubate at 25 &deg;C or below", "Pathogens that grow well at body temperature are less likely to grow"]
+    ],
+    hint: "Think about what could go wrong without each step: something getting in, or something harmful growing.",
+    why: "Sterilising and flaming kill microorganisms that would contaminate the culture. Taping keeps the air's microorganisms out, while the gaps let oxygen in so harmful anaerobic bacteria do not grow. Upside down stops condensation dripping on. 25 &deg;C keeps human pathogens from thriving." },
+
+  { type: "mc", topic: "Aseptic technique",
+    q: "After flaming the inoculating loop, you wait a few seconds before dipping it into the bacteria. Why?",
+    options: [
+      "A hot loop would kill the bacteria you want to transfer",
+      "The loop needs time to become sterile",
+      "It lets microorganisms from the air settle on the loop",
+      "Bacteria only stick to a cold loop"
+    ],
+    answer: 0,
+    hint: "The flame has already done its job. What would a red hot loop do to the bacteria you pick up?",
+    why: "The flame sterilises the loop straight away. Waiting just lets it cool, because a hot loop would kill the very bacteria you are trying to spread on the agar. Keep the wait short and do not put the loop down, or it can pick up microorganisms again." },
+
+  /* ---------- CLEAR ZONES ---------- */
+  { type: "learn", topic: "Clear zones",
+    title: "The clear zone practical",
+    fig: FIG_ZONE,
+    html: '<p class="tiny"><b>Separate Biology only.</b> This is a required practical.</p>' +
+          '<p>To compare antibiotics or antiseptics, spread bacteria evenly over an agar plate. Add paper discs soaked in each one, all at the same concentration, plus a <b>control</b> disc soaked in sterile water. Tape the lid and incubate at 25 &deg;C for about 2 days.</p>' +
+          '<p>Bacteria grow as a cloudy layer, except where the chemical spread out and killed them or stopped them growing. That leaves a <b>clear zone</b> (a zone of inhibition) round the disc.</p>' +
+          '<p>Measure the <b>diameter</b> of each clear zone. A bigger clear zone means a more effective antibiotic or antiseptic. To find its area, halve the diameter to get the radius, then use &pi;r&sup2;.</p>' +
+          '<div class="keep"><b>Keep this</b>Halve the diameter before you square it.</div>' },
+
+  LAB,
+
+  { type: "sort", topic: "Clear zones",
+    q: "In the clear zone practical comparing antibiotics, sort each variable.",
+    buckets: ["Independent", "Dependent", "Control"],
+    cards: [
+      ["Which antibiotic is on the disc", 0],
+      ["Diameter of the clear zone", 1],
+      ["Area of the clear zone", 1],
+      ["Concentration of each antibiotic", 2],
+      ["Size of the paper discs", 2],
+      ["Type of bacteria on the plate", 2],
+      ["Incubation temperature and time", 2]
+    ],
+    hint: "The independent variable is the one you choose to change. The dependent one is what you measure.",
+    why: "You change <b>which antibiotic</b> is used (independent) and measure the <b>size of the clear zone</b>, as a diameter or an area (dependent). Everything else stays the same so the test is fair: concentration, disc size, type of bacteria, and incubation temperature and time." },
+
+  /* ---------- MONOCLONAL ANTIBODIES ---------- */
+  { type: "learn", topic: "Monoclonal antibodies",
+    title: "Monoclonal antibodies",
+    fig: FIG_MAB,
+    html: '<p class="tiny"><b>Separate Biology, Higher only.</b></p>' +
+          '<p><b>Monoclonal antibodies</b> come from a single clone of cells, so they are all identical. Each one binds to one specific antigen.</p>' +
+          '<p><b>Making them:</b> mouse lymphocytes are stimulated to make a particular antibody, then fused with a tumour cell. This makes a <b>hybridoma</b> cell, which can divide and make the antibody. One hybridoma cell is cloned, and the antibody is collected and purified.</p>' +
+          '<p><b>Uses:</b> pregnancy tests; measuring hormones or chemicals in blood; detecting pathogens in a lab; finding molecules in cells or tissues with a fluorescent dye.</p>' +
+          '<p><b>Cancer:</b> the antibody carries a radioactive substance, a toxic drug or a chemical that stops cells dividing to the cancer cells, without harming other cells.</p>' +
+          '<p><b>The catch:</b> more side effects than expected, so they are not yet as widely used as hoped.</p>' },
+
+  { type: "order", topic: "Monoclonal antibodies", stretch: true,
+    q: "<b>Separate Biology, Higher only.</b> Put the steps for making monoclonal antibodies in order.",
+    items: [
+      "A mouse is given an antigen, so its lymphocytes make the antibody wanted",
+      "The lymphocytes are fused with tumour cells",
+      "This makes hybridoma cells, which divide and make the antibody",
+      "A single hybridoma cell is cloned into lots of identical cells",
+      "The antibody is collected and purified"
+    ],
+    hint: "Start with the cell that knows how to make the antibody. The tumour cell is there to make it keep dividing.",
+    why: "Lymphocytes make the antibody but do not keep dividing. Tumour cells keep dividing. Fusing them gives a <b>hybridoma</b> that does both. Cloning one hybridoma cell means every antibody made is identical: that is what <b>monoclonal</b> means." },
+
+  { type: "multi", topic: "Monoclonal antibodies", stretch: true,
+    q: "<b>Separate Biology, Higher only.</b> Which <b>three</b> statements about monoclonal antibodies are true?",
+    options: [
+      "Each one binds to one specific antigen",
+      "They can carry a radioactive substance or a toxic drug to cancer cells",
+      "They cause more side effects than expected, so they are not as widely used as first hoped",
+      "They are made by many different kinds of lymphocyte mixed together",
+      "They kill viruses inside cells, just like antibiotics kill bacteria",
+      "They only work outside the body, so they cannot be used as treatments"
+    ],
+    answers: [0, 1, 2],
+    hint: "Mono means one. And think about what the cancer treatments do.",
+    why: "They are specific to one antigen, they can deliver a drug or radioactive substance straight to cancer cells, and they have caused more side effects than expected. They come from one clone of cells, not a mixture, and they are not antibiotics." },
+
+  /* ---------- PLANT DISEASES ---------- */
+  { type: "learn", topic: "Plant diseases",
+    title: "When plants get ill",
+    html: '<p class="tiny"><b>Separate Biology only</b>, apart from tobacco mosaic virus and rose black spot, which are on Combined Science too.</p>' +
+          '<p>Plants can be infected by viruses, bacteria and fungi, and damaged by insects. The ones to know:</p>' +
+          '<ul>' +
+          '<li><b>Tobacco mosaic virus</b> (a virus): a mosaic pattern of pale patches on the leaves, so less photosynthesis.</li>' +
+          '<li><b>Rose black spot</b> (a fungus): purple or black spots; leaves turn yellow and drop early.</li>' +
+          '<li><b>Aphids</b> (insects): suck sap from the plant, weakening it.</li>' +
+          '</ul>' +
+          '<p><b>Ion deficiencies</b> do damage too. <b>Nitrate</b> ions are needed for protein synthesis, so a lack causes <b>stunted growth</b>. <b>Magnesium</b> ions are needed to make chlorophyll, so a lack causes <b>chlorosis</b> (yellow leaves).</p>' +
+          '<p><b>Separate Biology, Higher only:</b> signs of disease are stunted growth, spots on leaves, areas of decay (rot), growths, malformed stems or leaves, discolouration, and pests. To identify it, use a gardening manual or website, a lab test, or a testing kit containing monoclonal antibodies.</p>' },
+
+  { type: "match", topic: "Plant diseases",
+    q: "Match each problem to what it is or what it does.",
+    pairs: [
+      ["Tobacco mosaic virus", "A virus: pale mosaic patches on the leaves"],
+      ["Rose black spot", "A fungus: black spots, then yellow leaves that drop"],
+      ["Aphids", "Insects that suck sap from the plant"],
+      ["Nitrate deficiency", "Stunted growth"],
+      ["Magnesium deficiency", "Chlorosis: yellow leaves"]
+    ],
+    hint: "The names help: mosaic is a patchwork pattern, black spot is spots. For the ions, which one is in chlorophyll?",
+    why: "Tobacco mosaic virus gives a patchy mosaic of pale leaf. Rose black spot is a fungus. Aphids are insects that feed on sap. Nitrate is needed for proteins, so without it growth is stunted. Magnesium is needed for chlorophyll, so without it leaves go yellow: chlorosis." },
+
+  { type: "mc", topic: "Plant diseases",
+    q: "Why does a plant short of <b>nitrate</b> ions grow poorly?",
+    options: [
+      "Nitrate is needed to make proteins, which the plant needs to grow",
+      "Nitrate is needed to make chlorophyll, so the plant cannot photosynthesise",
+      "Nitrate is needed to make the waxy cuticle",
+      "Nitrate kills the aphids that feed on the plant"
+    ],
+    answer: 0,
+    hint: "One ion is for chlorophyll and one is for proteins. Which is which?",
+    why: "Nitrate ions are needed for <b>protein synthesis</b>, and proteins are needed for growth, so the plant is stunted. The chlorophyll option describes <b>magnesium</b>: mixing the two up is the most common slip here." },
+
+  { type: "multi", topic: "Plant diseases", stretch: true,
+    q: "<b>Separate Biology, Higher only.</b> A gardener notices stunted tomato plants with spotty leaves. Which <b>three</b> are ways to identify the disease?",
+    options: [
+      "Look it up in a gardening manual or on a gardening website",
+      "Take an infected plant to a laboratory to identify the pathogen",
+      "Use a testing kit containing monoclonal antibodies",
+      "Spray the plants with weedkiller",
+      "Move the plants into the dark for a week",
+      "Count the number of leaves on each plant"
+    ],
+    answers: [0, 1, 2],
+    hint: "Which options would actually tell you the name of the pathogen?",
+    why: "A manual or website, a lab, and a monoclonal antibody testing kit can all identify the pathogen. The monoclonal antibodies bind only to one pathogen's antigens, so the kit shows whether that pathogen is there. The other options would not tell you what the disease is." },
+
+  /* ---------- PLANT DEFENCES ---------- */
+  { type: "learn", topic: "Plant defences",
+    title: "How plants fight back",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p>Plants cannot run away, so they defend themselves in three ways.</p>' +
+          '<p><b>Physical</b> barriers keep pathogens out: <b>cellulose cell walls</b>, a tough <b>waxy cuticle</b> on leaves, and layers of <b>dead cells</b> round stems, such as bark on trees, which fall off.</p>' +
+          '<p><b>Chemical</b> defences: <b>antibacterial chemicals</b>, and <b>poisons</b> that put off herbivores.</p>' +
+          '<p><b>Mechanical</b> adaptations: <b>thorns and hairs</b> put animals off. <b>Leaves that droop or curl</b> when touched can make insects fall off. <b>Mimicry</b> tricks animals: some leaves have spots that look like butterfly eggs, so butterflies do not lay their eggs there.</p>' +
+          '<div class="keep"><b>Keep this</b>Physical: barriers. Chemical: substances. Mechanical: things that move, prick or trick.</div>' },
+
+  { type: "sort", topic: "Plant defences",
+    q: "Sort each plant defence.",
+    buckets: ["Physical", "Chemical", "Mechanical"],
+    cards: [
+      ["Cellulose cell walls", 0],
+      ["A tough waxy cuticle on leaves", 0],
+      ["Bark: layers of dead cells that fall off", 0],
+      ["Antibacterial chemicals", 1],
+      ["Poisons that put off herbivores", 1],
+      ["Thorns and hairs", 2],
+      ["Leaves that droop or curl when touched", 2],
+      ["Mimicry that tricks animals", 2]
+    ],
+    hint: "Physical ones are barriers that are always there. Chemical ones are substances the plant makes. Mechanical ones are features that move, prick or trick.",
+    why: "Physical: cell walls, cuticle and bark are barriers to pathogens. Chemical: antibacterial chemicals and poisons. Mechanical: thorns, hairs, drooping or curling leaves, and mimicry. Thorns feel like a barrier, but on AQA they count as mechanical adaptations." },
+
+  { type: "mc", topic: "Plant defences",
+    q: "How does a waxy cuticle help protect a leaf from disease?",
+    options: [
+      "It is a barrier that stops pathogens getting into the leaf",
+      "It is a poison that kills herbivores",
+      "It makes antibodies against pathogens",
+      "It makes the leaf droop when an insect lands on it"
+    ],
+    answer: 0,
+    hint: "Is the cuticle a substance that attacks, or a layer that blocks?",
+    why: "The waxy cuticle is a <b>physical barrier</b>: pathogens cannot easily get through it into the leaf. Plants do not make antibodies; that is the human immune system." },
+
+  /* ---------- PLANT HORMONES ---------- */
+  { type: "learn", topic: "Plant hormones",
+    title: "Auxin bends shoots and roots",
+    fig: FIG_TROP,
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p>Plants use hormones to control growth and their responses to light (<b>phototropism</b>) and gravity (<b>gravitropism</b>, or geotropism). <b>Auxin</b> is made in the tips of shoots and roots.</p>' +
+          '<p>The big idea: <b>unequal amounts of auxin</b> make one side grow faster than the other, so the shoot or root bends.</p>' +
+          '<ul>' +
+          '<li><b>Shoots:</b> auxin makes cells grow longer. With light from one side, auxin collects on the shaded side, which grows faster, so the shoot bends towards the light. On its side, auxin collects underneath, so the shoot bends up.</li>' +
+          '<li><b>Roots:</b> auxin slows growth. Auxin collects on the lower side, so the upper side grows faster and the root bends down.</li>' +
+          '</ul>' +
+          '<p><b>Required practical:</b> grow seedlings with light from one side, or on their side, and record their lengths and careful labelled drawings.</p>' },
+
+  { type: "mc", topic: "Plant hormones",
+    q: "A seedling shoot is lit from one side only. Which is the best explanation of what happens?",
+    options: [
+      "Auxin collects on the shaded side, cells there grow longer, and the shoot bends towards the light",
+      "Auxin collects on the lit side, cells there grow longer, and the shoot bends towards the light",
+      "Auxin is destroyed on the shaded side, so the shoot bends away from the light",
+      "Light makes the lit side grow faster, so the shoot bends towards the light"
+    ],
+    answer: 0,
+    hint: "If one side grows faster, which way does the shoot curve: towards that side or away from it?",
+    why: "Auxin collects on the <b>shaded</b> side. In shoots auxin makes cells elongate, so the shaded side grows faster and the shoot curves <b>towards</b> the light. If the lit side grew faster, the shoot would bend away, so those options cannot be right." },
+
+  { type: "mc", topic: "Plant hormones",
+    q: "A seedling is laid on its side in the dark. A day later, its root has bent downwards. Why?",
+    options: [
+      "Auxin collects on the lower side of the root and slows growth there, so the upper side grows faster",
+      "Auxin collects on the lower side of the root and speeds up growth there",
+      "Auxin collects on the upper side of the root and slows growth there",
+      "The root is growing towards the light"
+    ],
+    answer: 0,
+    hint: "Auxin does the opposite job in roots to the one it does in shoots.",
+    why: "Gravity makes auxin collect on the <b>lower</b> side. In roots auxin <b>slows</b> growth, so the upper side grows faster and the root curves down. Faster growth underneath would bend it up, which is what happens in a shoot. There is no light, so it cannot be phototropism." },
+
+  { type: "learn", topic: "Plant hormones",
+    title: "Using plant hormones",
+    html: '<p class="tiny"><b>Separate Biology, Higher only.</b></p>' +
+          '<p>Two more plant hormones: <b>gibberellins</b> start seed germination, and <b>ethene</b> controls cell division and the ripening of fruit.</p>' +
+          '<p>Farmers and growers use plant hormones:</p>' +
+          '<ul>' +
+          '<li><b>Auxins:</b> as weedkillers, as rooting powders that help cuttings grow roots, and to promote growth in tissue culture.</li>' +
+          '<li><b>Ethene:</b> to control the ripening of fruit during storage and transport.</li>' +
+          '<li><b>Gibberellins:</b> to end seed dormancy, promote flowering and increase fruit size.</li>' +
+          '</ul>' +
+          '<p>Weedkillers can reduce <b>biodiversity</b>, because they remove wild plants that other species depend on.</p>' +
+          '<div class="keep"><b>Keep this</b>Auxins: weeds and roots. Ethene: ripening. Gibberellins: seeds, flowers and bigger fruit.</div>' },
+
+  { type: "sort", topic: "Plant hormones", stretch: true,
+    q: "<b>Separate Biology, Higher only.</b> Which hormone is used for each job?",
+    buckets: ["Auxins", "Ethene", "Gibberellins"],
+    cards: [
+      ["Weedkillers", 0],
+      ["Rooting powder for cuttings", 0],
+      ["Promoting growth in tissue culture", 0],
+      ["Controlling fruit ripening during transport", 1],
+      ["Ending seed dormancy", 2],
+      ["Promoting flowering", 2],
+      ["Increasing fruit size", 2]
+    ],
+    hint: "Ethene has one job here. Gibberellins are about seeds, flowers and fruit size.",
+    why: "<b>Auxins</b>: weedkillers, rooting powder and tissue culture. <b>Ethene</b>: ripening fruit, so fruit can be picked unripe, shipped, then ripened when needed. <b>Gibberellins</b>: ending seed dormancy, flowering and bigger fruit. Fruit size is gibberellins, but ripening is ethene: that pair is easy to swap." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "write", topic: "Exam style",
+    q: '<p><b>Describe how you could investigate the effect of light from one side on the growth of newly germinated seedlings. Explain the results you would expect.</b> (about 6 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "I would grow two groups of seedlings, such as cress,",
+      "One group would get light from one side only, by",
+      "The control group would",
+      "I would keep the same",
+      "Every day I would measure",
+      "I would also make labelled drawings",
+      "I would expect the shoots lit from one side to",
+      "This is because auxin",
+      "so the cells on the shaded side"
+    ],
+    checklist: [
+      "I described seedlings with light from one side, and a control group (light from above, or all round)",
+      "I kept other things the same, such as type and number of seeds, water and temperature",
+      "I said what I would measure and how: shoot length with a ruler, every day for several days",
+      "I mentioned careful labelled drawings to record the shape",
+      "I predicted the shoots bend towards the light",
+      "I explained it with auxin: more on the shaded side, so cells there grow longer",
+      "Stretch: I said how to make the results more reliable, such as many seedlings and a mean"
+    ],
+    minWords: 80 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

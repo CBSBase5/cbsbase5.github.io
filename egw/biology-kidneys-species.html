@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kidneys, species and food - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
+<style>
+/* Page only: method list and the kidney sorting machine widget */
+.steps{margin:0 0 10px;padding-left:1.4em}
+.steps li{margin-bottom:4px}
+.ks-scene svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.ks-card{display:flex;gap:12px;align-items:center;background:var(--white);border:2px solid var(--ink);border-radius:14px;padding:10px 12px;margin:8px 0}
+.ks-card svg{flex:0 0 52px;width:52px;height:52px}
+.ks-card b{display:block;font-family:var(--display);font-size:1.15rem}
+.ks-card span{font-size:.95rem;line-height:1.4}
+.ks-stats{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.ks-stats span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-size:.88rem}
+.ks-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:8px 0}
+.ks-btns button{font-family:inherit;font-size:.98rem;line-height:1.3;text-align:left;color:var(--ink);background:var(--white);border:2px solid var(--ink);
+  border-radius:12px;padding:10px 12px 10px 38px;cursor:pointer;position:relative;touch-action:manipulation;min-height:48px}
+.ks-btns button i{position:absolute;left:11px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;border:2px solid var(--ink)}
+.ks-btns button:disabled{opacity:.45;cursor:default}
+.ks-btns button.no{animation:nudge .35s;border-color:var(--coral);background:#ffe9e9}
+.ks-btns button.ok{border-color:var(--good);background:rgba(31,157,99,.13)}
+.ks-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:8px 0}
+.ks-sum div{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:8px 10px;font-size:.93rem;line-height:1.4}
+.ks-sum b{display:block;font-family:var(--display);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Kidneys, species and food</h2>
+    <span>Biology, Separate Biology only. Water balance and the kidneys, kidney failure, how new species form, decay and the milk practical, and feeding the world.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=5"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 16) + '" fill="' + (o.c || INK) + '">' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function box(x, y, w, h, fill){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+function head(x, y, dx, dy, c){
+  var a = Math.atan2(dy, dx), s = 9;
+  var p1 = [x - s * Math.cos(a) + s * 0.6 * Math.sin(a), y - s * Math.sin(a) - s * 0.6 * Math.cos(a)];
+  var p2 = [x - s * Math.cos(a) - s * 0.6 * Math.sin(a), y - s * Math.sin(a) + s * 0.6 * Math.cos(a)];
+  return '<path d="M' + x + ' ' + y + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + (c || INK) + '"/>';
+}
+function arrow(x1, y1, x2, y2, c){ return L(x1, y1, x2, y2, c || INK, 3) + head(x2, y2, x2 - x1, y2 - y1, c); }
+function lines(x, y, arr, o){
+  var s = "";
+  arr.forEach(function(t, k){ s += T(x, y + k * ((o && o.gap) || 20), t, o); });
+  return s;
+}
+function tube(d, fill){
+  return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>' +
+         '<path d="' + d + '" fill="none" stroke="' + fill + '" stroke-width="25" stroke-linejoin="round" stroke-linecap="round"/>';
+}
+
+/* ---------- the kidney machine scene (used by the learn card and the widget) ---------- */
+var ROUTES = {
+  A: [[40, 50], [350, 50]],
+  B: [[40, 50], [115, 50], [115, 150], [235, 150], [235, 50], [350, 50]],
+  C: [[40, 50], [115, 50], [115, 150], [330, 150], [330, 214]]
+};
+var RCOL = { A: CORAL, B: MINT, C: SUN };
+function routeD(k){ return "M" + ROUTES[k].map(function(p){ return p[0] + " " + p[1]; }).join(" L"); }
+function sceneInner(){
+  var s = "";
+  s += tube("M235 150 V72", "#e3f8f1");
+  s += tube("M115 72 V150 H330 V198", "#e6ecff");
+  s += '<rect x="10" y="28" width="360" height="44" rx="22" fill="#ffe3e3" stroke="' + INK + '" stroke-width="2.5"/>';
+  /* the filter: a sieve across the bottom of the blood vessel */
+  s += '<rect x="96" y="66" width="38" height="12" rx="3" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += L(103, 66, 103, 78, INK, 1.5) + L(110, 66, 110, 78, INK, 1.5) + L(117, 66, 117, 78, INK, 1.5) + L(124, 66, 124, 78, INK, 1.5) + L(131, 66, 131, 78, INK, 1.5);
+  s += '<rect x="288" y="196" width="84" height="48" rx="12" fill="#fff6d1" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += T(330, 226, "Urine", { s: 17 });
+  s += T(12, 18, "Blood in", { s: 15, a: "start" }) + T(368, 18, "Blood out", { s: 15, a: "end" });
+  s += head(366, 50, 1, 0, CORAL);
+  s += T(136, 104, "Filtration", { s: 15, a: "start" });
+  s += T(250, 104, "Reabsorption", { s: 15, a: "start" });
+  s += T(160, 186, "kidney tubule", { s: 14, body: true, w: 400 });
+  return s;
+}
+var FIG_KIDNEY = svg("0 0 380 250", "A simple kidney model. Blood flows along a blood vessel. Small molecules are filtered out into a kidney tubule. Useful substances are reabsorbed back into the blood. What is left flows on to become urine.", sceneInner());
+
+/* ADH negative feedback loop */
+var FIG_ADH = svg("0 0 380 262", "Negative feedback with ADH. Blood too concentrated, so the pituitary releases more ADH, so the kidney tubules reabsorb more water, so the blood water level goes back to normal. Then less ADH is released.",
+  box(6, 8, 172, 66, "#fff6d1") + lines(92, 36, ["Blood too", "concentrated"], { s: 17 }) +
+  box(202, 8, 172, 66) + lines(288, 36, ["Pituitary releases", "more ADH"], { s: 16 }) +
+  box(202, 112, 172, 86) + lines(288, 138, ["Kidney tubules", "reabsorb more", "water"], { s: 16 }) +
+  box(6, 112, 172, 86, "#e3f8f1") + lines(92, 146, ["Water level", "back to normal"], { s: 17 }) +
+  arrow(178, 41, 198, 41) + arrow(288, 74, 288, 108) + arrow(202, 155, 182, 155) +
+  T(190, 228, "Less urine, and more concentrated.", { s: 15, body: true, w: 400 }) +
+  T(190, 252, "Back to normal: less ADH is released.", { s: 15, body: true, w: 400 }));
+
+/* dialysis: blood and fluid flow opposite ways past a membrane */
+var FIG_DIAL = (function(){
+  var s = "";
+  s += '<rect x="8" y="24" width="364" height="66" rx="14" fill="#ffe3e3" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="8" y="112" width="364" height="66" rx="14" fill="#e6ecff" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += L(14, 101, 366, 101, VIOLET, 5, "10 7");
+  s += T(20, 50, "Blood from the patient", { s: 16, a: "start" }) + arrow(250, 45, 350, 45, CORAL);
+  s += T(20, 166, "Dialysis fluid: no urea", { s: 16, a: "start" }) + arrow(350, 160, 260, 160, BLUE);
+  [70, 160, 250].forEach(function(x){
+    s += '<circle cx="' + x + '" cy="72" r="6" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += arrow(x + 16, 70, x + 16, 128, INK);
+    s += '<circle cx="' + (x + 34) + '" cy="132" r="6" fill="' + SUN + '" stroke="' + INK + '" stroke-width="1.5"/>';
+  });
+  s += T(8, 202, "Yellow dots: urea diffusing out of the blood.", { s: 14, a: "start", body: true, w: 400 });
+  s += T(8, 222, "Dashed line: partially permeable membrane.", { s: 14, a: "start", body: true, w: 400 });
+  return svg("0 0 380 230", "Dialysis. Blood flows one way and dialysis fluid flows the other way, separated by a partially permeable membrane. Urea diffuses from the blood into the fluid.", s);
+})();
+
+/* speciation in three panels */
+var FIG_SPEC = (function(){
+  var s = "";
+  function dots(cx, cy, col, seed){
+    var r = "", pts = [[-22, -10], [0, -18], [20, -8], [-12, 10], [12, 12], [-28, 14], [26, 16]];
+    pts.forEach(function(p, k){ r += '<circle cx="' + (cx + p[0] + (seed ? (k % 2 ? 3 : -3) : 0)) + '" cy="' + (cy + p[1]) + '" r="7" fill="' + (typeof col === "function" ? col(k) : col) + '" stroke="' + INK + '" stroke-width="1.5"/>'; });
+    return r;
+  }
+  s += box(4, 26, 112, 112, "#f6f5f0") + box(134, 26, 112, 112, "#f6f5f0") + box(264, 26, 112, 112, "#f6f5f0");
+  s += dots(60, 82, BLUE, 0);
+  s += '<path d="M168 138 L190 52 L212 138 Z" fill="#c9c4b5" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<g transform="translate(158 68) scale(.48)">' + dots(0, 0, BLUE, 0) + '</g>';
+  s += '<g transform="translate(222 104) scale(.48)">' + dots(0, 0, function(k){ return k % 3 ? BLUE : CYAN; }, 1) + '</g>';
+  s += '<g transform="translate(296 82) scale(.6)">' + dots(0, 0, BLUE, 0) + '</g>';
+  s += '<g transform="translate(346 82) scale(.6)">' + dots(0, 0, CORAL, 1) + '</g>';
+  s += L(320, 34, 320, 130, INK, 2, "4 5");
+  s += arrow(116, 82, 130, 82) + arrow(246, 82, 260, 82);
+  s += T(60, 18, "One species", { s: 15 }) + T(190, 18, "Isolated", { s: 15 }) + T(320, 18, "Two species", { s: 15 });
+  s += T(60, 160, "mix and breed", { s: 14, body: true, w: 400 }) + T(190, 160, "split by a", { s: 14, body: true, w: 400 }) + T(190, 178, "mountain range", { s: 14, body: true, w: 400 }) +
+       T(320, 160, "cannot make", { s: 14, body: true, w: 400 }) + T(320, 178, "fertile offspring", { s: 14, body: true, w: 400 });
+  return svg("0 0 380 188", "Speciation in three steps. One species lives together and breeds. A mountain range splits it into two isolated groups. Over a long time the groups change so much that they cannot interbreed to make fertile offspring: two species.", s);
+})();
+
+/* milk practical: tube goes from pink to colourless */
+var FIG_MILK = (function(){
+  var s = "";
+  function tb(x, fill, lab1, lab2){
+    return '<path d="M' + x + ' 20 V120 Q' + x + ' 140 ' + (x + 20) + ' 140 Q' + (x + 40) + ' 140 ' + (x + 40) + ' 120 V20" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+           '<path d="M' + (x + 2) + ' 50 V120 Q' + (x + 2) + ' 138 ' + (x + 20) + ' 138 Q' + (x + 38) + ' 138 ' + (x + 38) + ' 120 V50 Z" fill="' + fill + '"/>' +
+           T(x + 20, 164, lab1, { s: 15 }) + T(x + 20, 182, lab2, { s: 14, body: true, w: 400 });
+  }
+  s += '<rect x="4" y="60" width="372" height="64" rx="10" fill="#e6ecff" opacity=".7"/>';
+  s += tb(56, "#ffb3d1", "Start", "pink, alkaline");
+  s += arrow(126, 92, 236, 92) + T(181, 80, "lipase added,", { s: 14, body: true, w: 400 }) + T(181, 114, "timer running", { s: 14, body: true, w: 400 });
+  s += tb(264, "#fbf8ee", "End", "colourless");
+  s += T(190, 12, "Water bath at the test temperature", { s: 14, body: true, w: 400 });
+  return svg("0 0 380 190", "Milk practical. A tube of milk with sodium carbonate and phenolphthalein starts pink. Lipase is added in a water bath and a timer runs until the tube goes colourless, showing the pH has fallen.", s);
+})();
+
+var TABLE_K = '<table class="datatable"><tr><th>Substance</th><th>Plasma</th><th>Filtered</th><th>Urine</th></tr>' +
+  '<tr><td>Protein</td><td>80</td><td>0</td><td>0</td></tr>' +
+  '<tr><td>Glucose</td><td>1.0</td><td>1.0</td><td>?</td></tr>' +
+  '<tr><td>Urea</td><td>0.3</td><td>0.3</td><td>20</td></tr>' +
+  '<tr><td>Ions</td><td>7.2</td><td>7.2</td><td>15</td></tr></table>' +
+  '<p class="tiny">Concentrations in g per dm&sup3;: in blood plasma going into the kidney, in the liquid just after filtration, and in urine. Typical values for a healthy person.</p>';
+
+var TABLE_MILK = '<table class="datatable"><tr><th>Temperature (&deg;C)</th><th>Time (s)</th></tr>' +
+  '<tr><td>10</td><td>500</td></tr><tr><td>20</td><td>250</td></tr><tr><td>30</td><td>125</td></tr>' +
+  '<tr><td>40</td><td>80</td></tr><tr><td>60</td><td>400</td></tr></table>';
+
+/* ---------- the kidney sorting machine ---------- */
+var KINDS = {
+  glucose: { name: "Glucose", ctx: "A small sugar molecule. Your cells use it for respiration.", ans: "B", col: MINT, shape: "hex",
+    why: "Glucose is small, so it is <b>filtered</b> out of the blood. The body needs it, so <b>all of it is reabsorbed</b>. A healthy person has no glucose in their urine." },
+  urea: { name: "Urea", ctx: "A small waste molecule made in the liver.", ans: "C", col: SUN, shape: "dot",
+    why: "Urea is small, so it is <b>filtered</b>. It is waste, so it is <b>not reabsorbed</b>: it leaves in the <b>urine</b>." },
+  waterKeep: { name: "Water", ctx: "Your body is running a bit low on water today.", ans: "B", col: CYAN, shape: "drop",
+    why: "Water is filtered, then <b>as much as the body needs is reabsorbed</b>. Low on water? Keep it." },
+  waterExtra: { name: "Water", ctx: "Extra water: you have just finished a big bottle of squash.", ans: "C", col: CYAN, shape: "drop",
+    why: "Water is filtered, and <b>water the body does not need</b> is not reabsorbed. It leaves in the urine, which is why you wee more after lots of drinks." },
+  ionKeep: { name: "Salt ions", ctx: "Ions your body needs to keep at the right level.", ans: "B", col: VIOLET, shape: "ion",
+    why: "Ions are filtered, then <b>some are reabsorbed</b>: the ones the body needs." },
+  ionExtra: { name: "Salt ions", ctx: "Extra ions from a very salty bag of crisps.", ans: "C", col: VIOLET, shape: "ion",
+    why: "Ions are filtered, and <b>excess ions</b> are not reabsorbed. Out they go in the urine." },
+  protein: { name: "Protein", ctx: "A big molecule floating in the blood plasma.", ans: "A", col: CORAL, shape: "blob",
+    why: "Proteins are <b>too big to pass through the filter</b>, so they stay in the blood. Protein in urine can be a sign the kidneys are not working properly." },
+  rbc: { name: "Red blood cell", ctx: "A whole cell, carrying oxygen around the body.", ans: "A", col: CORAL, shape: "disc",
+    why: "A whole cell is <b>far too big to be filtered</b>. Red blood cells stay in the blood." }
+};
+var DECK = ["glucose", "glucose", "urea", "urea", "urea", "waterKeep", "waterKeep", "waterExtra", "ionKeep", "ionExtra", "protein", "rbc"];
+var CHOICE = {
+  A: "Too big: stays in the blood",
+  B: "Filtered, then reabsorbed",
+  C: "Filtered, out in the urine"
+};
+var CHEER = ["Sorted.", "Kidney approved.", "Smooth filtering.", "Your kidney salutes you.", "Clean work.", "Right on the money."];
+
+function token(kind, x, y){
+  var k = KINDS[kind], c = k.col, st = ' stroke="' + INK + '" stroke-width="2"';
+  if(k.shape === "hex") return '<path d="M' + (x - 14) + ' ' + y + ' L' + (x - 7) + ' ' + (y - 12) + ' H' + (x + 7) + ' L' + (x + 14) + ' ' + y + ' L' + (x + 7) + ' ' + (y + 12) + ' H' + (x - 7) + ' Z" fill="' + c + '"' + st + '/>';
+  if(k.shape === "dot") return '<circle cx="' + x + '" cy="' + y + '" r="10" fill="' + c + '"' + st + '/>';
+  if(k.shape === "drop") return '<path d="M' + x + ' ' + (y - 15) + ' Q' + (x + 12) + ' ' + (y + 1) + ' ' + x + ' ' + (y + 12) + ' Q' + (x - 12) + ' ' + (y + 1) + ' ' + x + ' ' + (y - 15) + ' Z" fill="' + c + '"' + st + '/>';
+  if(k.shape === "ion") return '<circle cx="' + x + '" cy="' + y + '" r="11" fill="' + c + '"' + st + '/>' + L(x - 5, y, x + 5, y, WHITE, 2.5) + L(x, y - 5, x, y + 5, WHITE, 2.5);
+  if(k.shape === "blob") return '<path d="M' + (x - 20) + ' ' + y + ' q5 -14 13 -8 q6 -12 14 -2 q12 0 6 10 q8 10 -6 12 q-6 10 -14 2 q-12 4 -13 -14 Z" fill="' + c + '"' + st + '/>';
+  return '<ellipse cx="' + x + '" cy="' + y + '" rx="20" ry="15" fill="' + c + '"' + st + '/><ellipse cx="' + x + '" cy="' + y + '" rx="8" ry="5" fill="#ff8f8f"/>';
+}
+
+var SORTER = {
+  type: "widget", topic: "Water balance",
+  title: "The kidney sorting machine",
+  html: '<p>Molecules arrive in the blood one at a time. You decide where each one goes: does it stay in the blood, get filtered and reabsorbed, or leave in the urine? Read the little card: water and ions depend on what the body needs right now.</p>',
+  report: function(d){
+    return "Kidney sorter: " + (d.rounds || 0) + " round" + (d.rounds === 1 ? "" : "s") + " finished, best score " + (d.best || 0) + " of 120" +
+      (d.deck ? ", current round " + Math.min(d.pos || 0, 12) + " of 12 sorted, " + (d.first || 0) + " first go, " + (d.shown || 0) + " shown" : "") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    function newRound(){
+      var deck = DECK.slice();
+      for(var i = deck.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
+      d.deck = deck; d.pos = 0; d.score = 0; d.first = 0; d.shown = 0; d.streak = 0; d.tries = 0; d.phase = "ask"; d.last = null; d.out = [];
+      api.save();
+    }
+    if(!d.deck) newRound();
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="ks-stats" id="ksStats"></div>' +
+        '<div class="ks-scene" id="ksScene"></div>' +
+        '<div id="ksMain"></div>' +
+      '</div>';
+    var statsEl = el.querySelector("#ksStats"), sceneEl = el.querySelector("#ksScene"), main = el.querySelector("#ksMain");
+    sceneEl.innerHTML = svg("0 0 380 250", "The kidney sorting machine: a blood vessel with a filter, a tubule, a reabsorption tube back to the blood, and a urine collector",
+      sceneInner() + '<path id="ksPrev" d="" fill="none" stroke="' + INK + '" stroke-width="3" stroke-dasharray="6 6" opacity="0"/><g id="ksTok"></g>');
+    var tokG = sceneEl.querySelector("#ksTok"), prev = sceneEl.querySelector("#ksPrev");
+    var busy = false;
+    var reduce = false;
+    try{ reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+    function place(kind, x, y){ tokG.innerHTML = kind ? token(kind, x, y) : ""; }
+    function drawStats(){
+      statsEl.innerHTML = '<span>Molecule <b>' + Math.min(d.pos + 1, 12) + '</b> of 12</span><span>Score <b>' + d.score + '</b></span>' +
+        (d.streak >= 2 ? '<span>Streak <b>' + d.streak + '</b></span>' : "") + (d.best ? '<span>Best <b>' + d.best + '</b></span>' : "");
+    }
+    function animate(kind, k, cb){
+      var pts = ROUTES[k], segs = [], tot = 0;
+      for(var i = 1; i < pts.length; i++){ var len = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segs.push(len); tot += len; }
+      if(reduce){ var e = pts[pts.length - 1]; place(kind, e[0], e[1]); cb(); return; }
+      var dur = 1100, t0 = null;
+      busy = true;
+      function frame(ts){
+        if(t0 === null) t0 = ts;
+        var f = Math.min(1, (ts - t0) / dur), ease = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2, dist = ease * tot, n = 0;
+        while(n < segs.length - 1 && dist > segs[n]){ dist -= segs[n]; n++; }
+        var a = pts[n], b = pts[n + 1], g = segs[n] ? Math.min(1, dist / segs[n]) : 1;
+        place(kind, a[0] + (b[0] - a[0]) * g, a[1] + (b[1] - a[1]) * g);
+        if(f < 1) requestAnimationFrame(frame); else { busy = false; cb(); }
+      }
+      requestAnimationFrame(frame);
+    }
+    function hintFor(kind, pick){
+      var k = KINDS[kind];
+      if(k.ans === "A") return "Think about size. Could something this big squeeze through the filter?";
+      if(pick === "A") return "This one is small enough to get through the filter. Where does it go after that?";
+      if(kind === "glucose") return "Glucose is really useful. Would a healthy body throw it away?";
+      if(kind === "urea") return "Urea is waste. Does the body want it back?";
+      if(kind === "waterKeep" || kind === "ionKeep") return "Read the card again. Does the body need this one right now?";
+      return "Read the card again. This is extra, more than the body needs.";
+    }
+    function card(kind){
+      var k = KINDS[kind];
+      return '<div class="ks-card">' + svg("0 0 52 52", k.name, token(kind, 26, 26)) + '<div><b>' + k.name + '</b><span>' + k.ctx + '</span></div></div>';
+    }
+    function buttons(){
+      var w = document.createElement("div");
+      w.className = "ks-btns";
+      ["A", "B", "C"].forEach(function(k){
+        var b = document.createElement("button");
+        b.type = "button"; b.dataset.k = k;
+        b.innerHTML = '<i style="background:' + RCOL[k] + '"></i>' + CHOICE[k];
+        b.onclick = function(){ choose(k, b); };
+        b.onpointerenter = function(){ prev.setAttribute("d", routeD(k)); prev.setAttribute("opacity", ".55"); };
+        b.onpointerleave = function(){ prev.setAttribute("opacity", "0"); };
+        w.appendChild(b);
+      });
+      return w;
+    }
+    function render(){
+      drawStats();
+      prev.setAttribute("opacity", "0");
+      if(d.phase === "end"){ renderEnd(); return; }
+      var kind = d.deck[d.pos];
+      if(d.phase === "ask"){
+        place(kind, 40, 50);
+        main.innerHTML = card(kind);
+        main.appendChild(buttons());
+        var fb = document.createElement("div"); fb.className = "fb hidden"; fb.id = "ksFb"; fb.setAttribute("aria-live", "polite");
+        main.appendChild(fb);
+        var row = document.createElement("div"); row.className = "wrow";
+        var sm = document.createElement("button"); sm.type = "button"; sm.className = "btn btn-quiet" + (d.tries ? "" : " hidden"); sm.id = "ksShow"; sm.textContent = "Show me";
+        sm.onclick = function(){ if(!busy) settle(null); };
+        row.appendChild(sm); main.appendChild(row);
+        if(d.tries && d.lastPick){
+          fb.className = "fb nudge";
+          fb.innerHTML = "<b>Not that way.</b> " + hintFor(kind, d.lastPick) + '<br><span class="tiny">Pick again, or tap Show me.</span>';
+        }
+      }else{
+        var e = ROUTES[KINDS[kind].ans]; place(kind, e[e.length - 1][0], e[e.length - 1][1]);
+        explain(kind);
+      }
+    }
+    function explain(kind){
+      var k = KINDS[kind], r = d.last || "shown";
+      main.innerHTML = card(kind) +
+        '<div class="fb ' + (r === "shown" ? "show" : "good") + '"><b>' + (r === "shown" ? "Here is where it goes." : r === "right1" ? pick(CHEER) : "Got there. Second go counts.") +
+        '</b> ' + CHOICE[k.ans] + '.<div class="why">' + k.why + '</div></div>';
+      var row = document.createElement("div"); row.className = "wrow";
+      var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn"; nx.id = "ksNext";
+      nx.textContent = d.pos >= 11 ? "See how the round went" : "Next molecule";
+      nx.onclick = function(){
+        d.pos++; d.tries = 0; d.lastPick = null; d.last = null;
+        d.phase = d.pos >= 12 ? "end" : "ask";
+        if(d.phase === "end") endRound();
+        api.save(); render();
+      };
+      row.appendChild(nx); main.appendChild(row);
+    }
+    function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+    function settle(result){
+      var kind = d.deck[d.pos], k = KINDS[kind];
+      if(result === "right1"){ d.score += 10; d.first++; d.streak++; }
+      else if(result === "right2"){ d.score += 5; d.streak = 0; }
+      else { result = "shown"; d.shown++; d.streak = 0; }
+      d.last = result; d.phase = "explain"; d.out.push([kind, result]);
+      api.save();
+      main.querySelectorAll("button").forEach(function(b){ b.disabled = true; if(b.dataset.k === k.ans) b.classList.add("ok"); });
+      animate(kind, k.ans, function(){ drawStats(); explain(kind); });
+    }
+    function choose(k, btn){
+      if(busy || d.phase !== "ask") return;
+      var kind = d.deck[d.pos];
+      if(k === KINDS[kind].ans){ settle(d.tries ? "right2" : "right1"); return; }
+      d.tries++; d.lastPick = k; api.save();
+      btn.classList.remove("no"); void btn.offsetWidth; btn.classList.add("no");
+      if(d.tries >= 2){ settle(null); return; }
+      var fb = main.querySelector("#ksFb");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not that way.</b> " + hintFor(kind, k) + '<br><span class="tiny">Pick again, or tap Show me.</span>';
+      main.querySelector("#ksShow").classList.remove("hidden");
+    }
+    function endRound(){
+      d.rounds = (d.rounds || 0) + 1;
+      if(d.score > (d.best || 0)) d.best = d.score;
+      var res = d.shown ? "shown" : d.first >= 10 ? "right1" : "right2";
+      api.save();
+      api.done(res);
+    }
+    function renderEnd(){
+      place(null);
+      var msg = d.score >= 110 ? "Top class filtering." : d.score >= 90 ? "A very healthy kidney." : d.score >= 60 ? "Solid sorting." : "Every round makes it stick a bit more.";
+      main.innerHTML =
+        '<p class="wbig">' + d.score + ' of 120</p>' +
+        '<p class="wnote"><b>' + msg + '</b> ' + d.first + ' of 12 first go' + (d.shown ? ', ' + d.shown + ' from Show me' : '') + '. Best so far: ' + d.best + '.</p>' +
+        '<div class="ks-sum">' +
+          '<div><b>Never left the blood</b>Protein and red blood cells: too big to be filtered.</div>' +
+          '<div><b>Back to the blood</b>All the glucose, plus the water and ions the body needed.</div>' +
+          '<div><b>Out in the urine</b>Urea, plus the extra water and extra ions.</div>' +
+        '</div>' +
+        '<p class="wnote">That is the whole job: <b>filtration</b>, then <b>selective reabsorption</b> of glucose, some ions and some water, and the rest leaves as <b>urine</b>.</p>';
+      var row = document.createElement("div"); row.className = "wrow";
+      var again = document.createElement("button"); again.type = "button"; again.className = "btn btn-quiet"; again.id = "ksAgain";
+      again.textContent = "Play another round, if you like";
+      again.onclick = function(){ newRound(); render(); };
+      row.appendChild(again); main.appendChild(row);
+    }
+    render();
+  }
+};
+
+EGW.run({
+  id: "biology-kidneys-species",
+  title: "Kidneys, species and food",
+  subject: "Biology",
+  mins: 45,
+  blurb: "Everything here is Separate Biology only, so if you are doing Combined Science none of it is on your papers. The kidneys and kidney failure, how new species form, decay and the milk practical, and how we feed everyone. There is a kidney sorting machine to play with in chunk 1.",
+  steps: [
+
+  /* ---------- 1 WATER BALANCE ---------- */
+  { type: "learn", topic: "Water balance",
+    title: "Water, ions and urea",
+    fig: FIG_KIDNEY,
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p>Your cells need body fluids at the right concentration. If they are too concentrated or too dilute, cells gain or lose too much water by <b>osmosis</b> and stop working efficiently.</p>' +
+          '<p><b>Where things are lost.</b> Water leaves from the <b>lungs</b> when you breathe out. Water, ions and urea are lost from the <b>skin</b> in sweat. The body has no control over these losses.</p>' +
+          '<p>The <b>kidneys</b> remove excess water, ions and urea in <b>urine</b>. They make it in two stages:</p>' +
+          '<ul><li><b>Filtration</b>: small molecules (water, glucose, ions, urea) are filtered out of the blood. Proteins and blood cells are too big.</li>' +
+          '<li><b>Selective reabsorption</b>: useful things go back into the blood: <b>all the glucose</b>, <b>some ions</b> and <b>some water</b>, as much as the body needs.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Filter, take back what is useful, and the rest is urine: urea, excess ions, excess water.</div>' },
+
+  SORTER,
+
+  { type: "mc", topic: "Water balance",
+    q: "Which of these losses can the body <b>not</b> control?",
+    options: [
+      "Water lost from the lungs when you breathe out",
+      "Water removed by the kidneys in urine",
+      "Ions removed by the kidneys in urine",
+      "Urea removed by the kidneys in urine"
+    ],
+    answer: 0,
+    hint: "Three of these are about one organ that adjusts what it lets go. Which loss just happens whenever you breathe?",
+    why: "Water from the lungs, and water, ions and urea in sweat, are lost with no control over the amount. The kidneys are the part that can adjust: they reabsorb what the body needs and let the excess go in urine." },
+
+  { type: "num", topic: "Water balance", stretch: true,
+    q: "Here are typical concentrations in a healthy kidney." + TABLE_K,
+    boxes: [
+      { label: "(a) How many times more concentrated is urea in urine than in plasma? Nearest whole number.", a: 67, tol: 0.4 },
+      { label: "(b) What should the glucose concentration in the urine be?", a: 0, post: "g per dm&sup3;" }
+    ],
+    hint: "(a) Divide the urine value by the plasma value. (b) Glucose is filtered, then what happens to all of it?",
+    why: "(a) 20 &divide; 0.3 = 66.7, so about <b>67 times</b>. Urea is concentrated because lots of water is reabsorbed but the urea is not. Dividing the wrong way round gives 0.015, a sign to swap. (b) <b>0</b>: all the glucose is reabsorbed. The protein row shows filtration: 0 in the filtered liquid because protein is too big to get through." },
+
+  /* ---------- 2 UREA AND ADH (HIGHER) ---------- */
+  { type: "learn", topic: "Urea and ADH",
+    title: "Making urea, and the hormone ADH",
+    fig: FIG_ADH,
+    html: '<p class="tiny"><b>Separate Biology, Higher only.</b></p>' +
+          '<p><b>Making urea.</b> Digesting protein in your food gives <b>excess amino acids</b>, which need to be excreted safely. In the <b>liver</b> they are <b>deaminated</b>: the part containing nitrogen is removed. This forms <b>ammonia</b>, which is toxic, so it is immediately converted to <b>urea</b>. The kidneys then filter the urea out.</p>' +
+          '<p><b>ADH.</b> When the blood is too concentrated, the <b>pituitary gland</b> releases the hormone <b>ADH</b> into the blood. ADH makes the kidney tubules <b>more permeable</b> to water, so more water is reabsorbed back into the blood.</p>' +
+          '<p>This is controlled by <b>negative feedback</b>: when the blood is back to normal, or too dilute, less ADH is released, less water is reabsorbed and more dilute urine is made.</p>' +
+          '<div class="keep"><b>Keep this</b>Too concentrated: more ADH, more water reabsorbed, less urine. ADH comes from the pituitary.</div>' },
+
+  { type: "mc", topic: "Urea and ADH", stretch: true,
+    q: "<b>Higher only.</b> Why is ammonia converted to urea in the liver?",
+    options: [
+      "Ammonia is toxic, so it is converted to urea, which can be excreted safely",
+      "Urea is a useful protein that the body stores for later",
+      "Ammonia is needed by the kidneys to make amino acids",
+      "Urea is made from glucose that the kidneys could not reabsorb"
+    ],
+    answer: 0,
+    hint: "Ammonia comes from deaminating amino acids. What is the problem with ammonia?",
+    why: "Excess amino acids are deaminated in the liver, making ammonia. Ammonia is <b>toxic</b>, so it is quickly turned into <b>urea</b>, which travels in the blood to the kidneys and leaves in urine. Urea is a waste product, not a store, and it has nothing to do with glucose." },
+
+  { type: "sort", topic: "Urea and ADH", stretch: true,
+    q: "<b>Higher only.</b> Sort each situation or result: does it go with <b>more ADH</b> or <b>less ADH</b>?",
+    buckets: ["More ADH", "Less ADH"],
+    cards: [
+      ["A long, hot walk with nothing to drink", 0],
+      ["A very salty meal", 0],
+      ["Kidney tubules become more permeable to water", 0],
+      ["A small volume of concentrated urine", 0],
+      ["Drinking three big glasses of water", 1],
+      ["Less water is reabsorbed into the blood", 1],
+      ["A large volume of dilute urine", 1]
+    ],
+    hint: "Ask: is the blood too concentrated (keep water) or too dilute (let water go)?",
+    why: "Sweating with no drink, or lots of salt, makes the blood too concentrated, so the pituitary releases <b>more ADH</b>: tubules let more water back into the blood and you make a little dark urine. Lots of water makes the blood dilute, so <b>less ADH</b>, less reabsorption and lots of pale urine. A common slip is to think ADH makes more urine: it does the opposite." },
+
+  /* ---------- 3 KIDNEY FAILURE ---------- */
+  { type: "learn", topic: "Kidney failure",
+    title: "Dialysis",
+    fig: FIG_DIAL,
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p>If the kidneys stop working well, urea and excess ions and water build up in the blood. <b>Kidney failure</b> can be treated by <b>dialysis</b> or by an <b>organ transplant</b>.</p>' +
+          '<p><b>In dialysis</b>, the patient\'s blood flows through a machine, past a <b>partially permeable membrane</b>. On the other side is <b>dialysis fluid</b>.</p>' +
+          '<ul><li>The fluid has the <b>same concentration of useful substances</b>, such as glucose and ions, as healthy blood, so these are not lost.</li>' +
+          '<li>It has <b>no urea</b>, so urea <b>diffuses</b> out of the blood. Excess ions and water pass out too.</li>' +
+          '<li>Blood cells and proteins are too big to cross the membrane.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Dialysis fluid: same useful stuff as blood, no urea. Urea diffuses out.</div>' },
+
+  { type: "mc", topic: "Kidney failure",
+    q: "Why does dialysis fluid contain the <b>same concentration of glucose</b> as healthy blood?",
+    options: [
+      "So there is no concentration gradient, and glucose is not lost from the blood",
+      "So that glucose diffuses out of the blood into the fluid",
+      "Because glucose is a waste product that dialysis removes",
+      "So the glucose can power the dialysis machine"
+    ],
+    answer: 0,
+    hint: "Diffusion needs a difference in concentration. What happens if both sides match?",
+    why: "With equal glucose concentrations there is <b>no net diffusion</b>, so the patient keeps their glucose. Urea is different: the fluid has none, so there is a steep gradient and urea diffuses out. Glucose is useful, not waste." },
+
+  { type: "learn", topic: "Kidney failure",
+    title: "Transplants, and comparing the two",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>In a transplant</b>, a healthy kidney from a donor is put into the patient. The donor may have died, or may be a living person, since people can live well with one kidney.</p>' +
+          '<p>The patient\'s immune system may attack the new kidney, because its cells have different <b>antigens</b>. This is called <b>rejection</b>. To reduce the chance:</p>' +
+          '<ul><li>the donor\'s <b>tissue type</b> is matched as closely as possible to the patient\'s</li>' +
+          '<li>the patient takes <b>immunosuppressant drugs</b>, usually for life. These make infections more likely.</li></ul>' +
+          '<p>Both treatments help many people live well. Each has advantages and disadvantages, which the next question sorts out.</p>' +
+          '<div class="keep"><b>Keep this</b>Transplant: tissue match plus immunosuppressants to stop rejection.</div>' },
+
+  { type: "sort", topic: "Kidney failure",
+    q: "Dialysis or transplant? Sort each feature.",
+    buckets: ["Dialysis", "Transplant"],
+    cards: [
+      ["Sessions on a machine lasting a few hours, several times a week", 0],
+      ["Can start without waiting for a matching donor", 0],
+      ["Blood passes a partially permeable membrane", 0],
+      ["No risk of the body rejecting an organ", 0],
+      ["Needs a donor with a close tissue match", 1],
+      ["Immunosuppressant drugs, usually for life", 1],
+      ["Once it is working, no regular sessions on a machine", 1],
+      ["Surgery is needed to put the organ in", 1]
+    ],
+    hint: "Which one uses a machine? Which one puts someone else's cells in the body?",
+    why: "Dialysis is available without a donor and there is nothing to reject, but it takes a few hours several times a week and the diet needs care. A transplant gives more freedom once it works, but needs a matched donor, surgery and lifelong immunosuppressants, which raise the risk of infection. Neither is simply better: exam questions often ask you to weigh up both sides." },
+
+  /* ---------- 4 SPECIATION ---------- */
+  { type: "learn", topic: "Speciation",
+    title: "Darwin, Wallace and new species",
+    fig: FIG_SPEC,
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>Charles Darwin</b> developed the theory of <b>evolution by natural selection</b> after observations on a round the world voyage, backed by years of experiments. <b>Alfred Russel Wallace</b> came up with the same theory <b>independently</b>.</p>' +
+          '<p>In <b>1858</b> they published joint writings, which prompted Darwin to publish <i>On the Origin of Species</i> in <b>1859</b>.</p>' +
+          '<p>Wallace is best known for his work on <b>warning colouration</b> (bright colours that warn predators an animal is poisonous or tastes bad) and his theory of <b>speciation</b>: how new species form.</p>' +
+          '<p>A new species can form when two groups of one species are <b>isolated</b>, for example by a mountain range or the sea. Natural selection changes each group in a different way until they can no longer interbreed to produce <b>fertile offspring</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Isolation, variation, natural selection, then no fertile offspring together: new species.</div>' },
+
+  { type: "mc", topic: "Speciation",
+    q: "What is <b>Alfred Russel Wallace</b> best known for?",
+    options: [
+      "His work on warning colouration in animals and his theory of speciation",
+      "Publishing <i>On the Origin of Species</i> on his own in 1859",
+      "Showing that genes are made of DNA",
+      "The idea that changes gained in a lifetime are passed on to offspring"
+    ],
+    answer: 0,
+    hint: "Think about bright colours on animals, and new species.",
+    why: "Wallace worked out natural selection independently of Darwin, and is best known for <b>warning colouration</b> and <b>speciation</b>. Darwin published <i>On the Origin of Species</i>, prompted by their joint writings in 1858. Passing on changes gained in a lifetime was Lamarck's idea, which is not accepted today." },
+
+  { type: "order", topic: "Speciation", stretch: true,
+    q: "Put the steps of speciation in order.",
+    items: [
+      "A population is split in two by isolation, such as a new river or a mountain range",
+      "Conditions are different on each side, and each group has genetic variation",
+      "In each place, the individuals best suited to the conditions survive and breed",
+      "They pass on their alleles, so the two groups slowly change in different ways",
+      "Eventually the groups cannot interbreed to produce fertile offspring: two species"
+    ],
+    hint: "Nothing can change separately until the groups are kept apart. The last step is the test of a new species.",
+    why: "Isolation first, then variation plus different conditions, then natural selection in each group, then many generations of different alleles being passed on, until the groups can no longer produce fertile offspring together. That last point is what makes them separate species, not just looking different." },
+
+  /* ---------- 5 FOOD SECURITY ---------- */
+  { type: "learn", topic: "Food security",
+    title: "Enough food for everyone",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>Food security</b> means having enough food to feed a population. Things that threaten it:</p>' +
+          '<ul><li>a <b>rising birth rate</b> in some countries</li>' +
+          '<li><b>changing diets</b> in richer countries, so scarce food is transported around the world</li>' +
+          '<li><b>new pests and pathogens</b> that affect farming</li>' +
+          '<li><b>environmental change</b>, such as famine when rains fail</li>' +
+          '<li>the rising <b>cost of agricultural inputs</b>, like feed and fertiliser</li>' +
+          '<li><b>conflicts</b> that affect access to water or food</li></ul>' +
+          '<p><b>Intensive (factory) farming</b> makes meat production more efficient by cutting energy transfer from animals to the environment: limiting their movement and keeping them warm. Some are fed high protein food to grow faster. Some people object on ethical grounds, such as animal welfare in crowded sheds.</p>' +
+          '<div class="keep"><b>Keep this</b>Less movement, more warmth: less energy wasted, more growth.</div>' },
+
+  { type: "multi", topic: "Food security",
+    q: "Which of these <b>threaten</b> food security? Pick all that apply.",
+    options: [
+      "New pests and pathogens",
+      "Conflicts that restrict access to water or food",
+      "Changing diets in richer countries",
+      "A rising birth rate",
+      "Fishing quotas",
+      "Growing mycoprotein from a fungus"
+    ],
+    answers: [0, 1, 2, 3],
+    hint: "Two of these are ways of helping, not threats.",
+    why: "Pests and pathogens, conflict, changing diets and a rising birth rate all make it harder to feed everyone, along with environmental change and the cost of inputs. Fishing quotas and mycoprotein are <b>solutions</b>: they help keep food supplies sustainable." },
+
+  { type: "mc", topic: "Food security",
+    q: "Chickens are kept indoors in warm sheds with little room to move. Why does this make meat production <b>more efficient</b>?",
+    options: [
+      "Less energy is transferred to the surroundings by movement and heat loss, so more goes into growth",
+      "Warm chickens eat less, so they grow faster",
+      "Animals in small spaces cannot catch diseases",
+      "Moving less makes the chickens respire faster"
+    ],
+    answer: 0,
+    hint: "Think about where the energy in an animal's food ends up.",
+    why: "Energy used for moving, or lost as heat keeping warm, does not become new biomass. Cutting those losses means more of the food becomes meat. Crowded sheds can actually spread disease faster, which is one of the reasons some people object to intensive farming." },
+
+  /* ---------- 6 FOOD SOLUTIONS ---------- */
+  { type: "learn", topic: "Food solutions",
+    title: "Fish, fungi and GM crops",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>Sustainable fisheries.</b> Fish stocks in the oceans are falling. They need to stay at a level where fish can keep breeding, or some species may disappear from some areas.</p>' +
+          '<ul><li><b>Fishing quotas</b> limit how many fish of each species can be caught.</li>' +
+          '<li>A bigger <b>net mesh size</b> lets young, small fish escape, so they can grow and breed.</li></ul>' +
+          '<p><b>Biotechnology.</b> Huge amounts of microorganisms can be grown for food. The fungus <b>Fusarium</b> makes <b>mycoprotein</b>, a protein rich food suitable for vegetarians. It is grown on <b>glucose syrup</b> with oxygen (aerobic conditions), then the biomass is harvested and purified.</p>' +
+          '<p><b>GM crops</b> could give more food, or more nutritious food, such as <b>golden rice</b>. A GM bacterium makes human insulin.</p>' +
+          '<div class="keep"><b>Keep this</b>Quotas and mesh size save fish. Fusarium makes mycoprotein.</div>' },
+
+  { type: "sort", topic: "Food solutions",
+    q: "Sort each idea: sustainable fisheries or biotechnology?",
+    buckets: ["Sustainable fisheries", "Biotechnology"],
+    cards: [
+      ["A limit on how many cod can be caught each year", 0],
+      ["Nets with bigger holes", 0],
+      ["Keeping stocks at a level where fish can still breed", 0],
+      ["Fusarium grown on glucose syrup with oxygen", 1],
+      ["Golden rice", 1],
+      ["Human insulin made by a GM bacterium", 1]
+    ],
+    hint: "One group is about leaving enough fish in the sea. The other uses living things to make food or medicine.",
+    why: "Quotas, mesh size and keeping stocks able to breed are all about <b>sustainable fishing</b>. Mycoprotein from Fusarium, golden rice and GM insulin are <b>biotechnology</b>: using or changing microorganisms and crops to meet our needs." },
+
+  { type: "mc", topic: "Food solutions",
+    q: "Why does using a <b>larger mesh size</b> on fishing nets help keep fish stocks sustainable?",
+    options: [
+      "Young, smaller fish escape, so they survive to grow and breed",
+      "More fish can be caught in each net",
+      "The biggest fish can escape, so the population grows",
+      "Fish learn to avoid nets with bigger holes"
+    ],
+    answer: 0,
+    hint: "Which fish fit through bigger holes, and why do they matter for next year?",
+    why: "Bigger holes let the <b>young</b> fish through. They live long enough to <b>breed</b>, so the population can replace the fish that are caught. Big fish are still caught: the point is protecting the next generation." },
+
+  /* ---------- 7 DECAY ---------- */
+  { type: "learn", topic: "Decay",
+    title: "Decomposers, compost and biogas",
+    html: '<p class="tiny"><b>Separate Biology only.</b></p>' +
+          '<p><b>Decomposers</b>, mainly bacteria and fungi, break down dead material and waste. As they respire, carbon dioxide goes back to the air and mineral ions go back to the soil.</p>' +
+          '<p>Three things affect the <b>rate of decay</b>:</p>' +
+          '<ul><li><b>Temperature</b>: warmth speeds up their enzymes. Cold slows them; too hot denatures them.</li>' +
+          '<li><b>Water</b>: decomposers need moisture. Dry material decays slowly.</li>' +
+          '<li><b>Oxygen</b>: most decomposers respire aerobically, so more oxygen means faster decay.</li></ul>' +
+          '<p>Gardeners and farmers keep <b>compost</b> warm, moist and airy to speed up decay. Compost is a natural fertiliser.</p>' +
+          '<p><b>Anaerobic decay</b> (without oxygen) produces <b>methane</b>. <b>Biogas generators</b> use anaerobic decay to make methane gas, which is used as a fuel.</p>' +
+          '<div class="keep"><b>Keep this</b>Warm, wet and airy: fast decay. No oxygen: methane, which is biogas.</div>' },
+
+  { type: "sort", topic: "Decay",
+    q: "Does each one <b>speed up</b> decay or <b>slow it down</b>?",
+    buckets: ["Speeds up decay", "Slows decay down"],
+    cards: [
+      ["Turning a compost heap so air gets in", 0],
+      ["Keeping a compost heap warm", 0],
+      ["Watering a heap that has gone dry", 0],
+      ["Freezing food", 1],
+      ["Drying fruit, like raisins", 1],
+      ["Heating so hot that the decomposers' enzymes denature", 1]
+    ],
+    hint: "Decomposers like it warm (not too hot), damp and with oxygen.",
+    why: "Air, warmth and moisture help decomposers grow and respire, so decay speeds up. Freezing and drying slow them right down, which is why we freeze and dry food to keep it. Very high temperatures denature their enzymes. Warmer is only faster up to a point." },
+
+  { type: "mc", topic: "Decay",
+    q: "A farm puts animal waste in a sealed <b>biogas generator</b>. What does it produce, and why is it sealed from the air?",
+    options: [
+      "Methane, because it is made by anaerobic decay, which happens without oxygen",
+      "Methane, because oxygen is needed for anaerobic decay",
+      "Carbon dioxide only, because sealing it keeps it warm",
+      "Oxygen, because the decomposers photosynthesise inside"
+    ],
+    answer: 0,
+    hint: "Anaerobic means without air. Which gas burns as a fuel?",
+    why: "With no oxygen, microorganisms decay the waste <b>anaerobically</b> and produce <b>methane</b>, which can be burned as a fuel. Anaerobic means <b>without</b> oxygen, so letting air in would stop it. Decomposers do not photosynthesise." },
+
+  /* ---------- 8 MILK PRACTICAL ---------- */
+  { type: "learn", topic: "Milk practical",
+    title: "Required practical: decay of milk",
+    fig: FIG_MILK,
+    html: '<p class="tiny"><b>Separate Biology only. Required practical.</b></p>' +
+          '<p>Aim: find how <b>temperature</b> affects the rate of decay of fresh milk, by measuring <b>pH change</b>. As milk decays, acids are made, so the pH falls. A common method uses the enzyme <b>lipase</b>, which breaks fat in the milk into <b>fatty acids</b>:</p>' +
+          '<ol class="steps"><li>Mix milk with sodium carbonate solution (alkaline) and a few drops of phenolphthalein. It turns <b>pink</b>.</li>' +
+          '<li>Warm this tube and a tube of lipase in a water bath at the test temperature.</li>' +
+          '<li>Add the lipase, start the timer and stir.</li>' +
+          '<li>Stop when the pink disappears: the pH has fallen.</li>' +
+          '<li>Repeat at other temperatures.</li></ol>' +
+          '<p><b>Rate = 1000 &divide; time</b>. You could use 1 &divide; time, but the numbers are tiny, so multiplying by 1000 makes them easier to read and plot.</p>' +
+          '<div class="keep"><b>Keep this</b>Shorter time, faster decay. Rate = 1000 &divide; time.</div>' },
+
+  { type: "mc", topic: "Milk practical",
+    q: "Why are the milk mixture and the lipase put in the water bath <b>separately</b> for a few minutes before they are mixed?",
+    options: [
+      "So both are already at the test temperature when the reaction starts",
+      "So the lipase can break down some fat before it is added",
+      "To make the milk mixture turn pink",
+      "So the pH can fall before the timer starts"
+    ],
+    answer: 0,
+    hint: "The independent variable is temperature. When does it need to be right?",
+    why: "If one tube were still cold, the reaction would start at the wrong temperature and the time would not be a fair measure. Warming both first means the whole reaction happens at the test temperature. The pink comes from the indicator in alkaline conditions, not from warming." },
+
+  { type: "num", topic: "Milk practical",
+    q: "A student times how long the pink takes to disappear at each temperature." + TABLE_MILK + "<p>Use <b>rate = 1000 &divide; time</b>.</p>",
+    boxes: [
+      { label: "(a) Rate at 20 &deg;C", a: 4 },
+      { label: "(b) Rate at 40 &deg;C", a: 12.5 },
+      { label: "(c) Rate at 60 &deg;C", a: 2.5 },
+      { label: "(d) From 10 &deg;C to 30 &deg;C, how many times faster did the rate get?", a: 4, post: "times" }
+    ],
+    hint: "Do 1000 divided by each time. For (d), work out the rates at 10 &deg;C and 30 &deg;C, then divide the bigger by the smaller.",
+    why: "(a) 1000 &divide; 250 = <b>4</b>. (b) 1000 &divide; 80 = <b>12.5</b>. (c) 1000 &divide; 400 = <b>2.5</b>. (d) At 10 &deg;C the rate is 1000 &divide; 500 = 2, and at 30 &deg;C it is 1000 &divide; 125 = 8, so it is <b>4 times</b> faster. The rate rises all the way to 40 &deg;C, because molecules move faster and collide more often, but it is much lower at 60 &deg;C because the enzyme has been denatured. A common slip is to read the biggest time as the fastest: a long time means a slow rate." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

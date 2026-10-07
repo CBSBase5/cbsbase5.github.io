@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Congruence, scale and constructions - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
+<style>
+/* Column vectors, written with tall brackets */
+.cv{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;padding:1px 8px;margin:2px 3px;border-left:2px solid currentColor;border-right:2px solid currentColor;border-radius:11px;line-height:1.15;font-weight:700;min-width:2.2em}
+.cv span{display:block}
+/* Little squared drawings inside answer buttons */
+.choices button svg.opt{display:block;margin:4px auto;width:118px;max-width:100%;height:auto}
+/* Loci treasure hunt (widget on this page only) */
+.lc-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.lc-head b{font-family:var(--display);font-size:1.05rem}
+.lc-gold{font-family:var(--display);font-weight:700;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 12px;font-size:.95rem}
+.lc-dots{display:flex;gap:6px;margin:6px 0 2px}
+.lc-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.lc-dots span.on{background:var(--mint)}
+.lc-dots span.now{background:var(--sun)}
+.lc-clue{display:flex;gap:10px;align-items:flex-start;border-top:2px dashed var(--line);padding:10px 0 4px;margin-top:8px}
+.lc-num{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;color:#fff}
+.lc-clue p{margin:0 0 4px}
+.lc-clue .tiny{margin:2px 0 0}
+.lc-lock{color:var(--body-tint)}
+.lc-ask{font-size:.92rem;margin:6px 0 6px;font-weight:700}
+.lc-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lc-chips button{font:inherit;font-size:.92rem;padding:10px 8px;border:2px solid var(--ink);border-radius:12px;background:#fff;cursor:pointer;line-height:1.2;color:var(--ink)}
+.lc-chips button:hover{background:var(--accent-soft)}
+.lc-chips button.no{border-color:var(--orange-deep);background:rgba(255,93,93,.13)}
+.lc-nudge{font-size:.92rem;margin:8px 0 0;padding:8px 10px;border-radius:10px;background:rgba(255,210,63,.25);border:2px solid var(--yellow-deep)}
+.lc-map{touch-action:none;margin:8px 0;border-radius:14px;outline:none;cursor:crosshair}
+.lc-map:focus-visible{box-shadow:0 0 0 3px var(--blue)}
+.lc-map svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.lc-btns{justify-content:space-between}
+.lc-pos{font-size:.92rem;flex:1 1 140px}
+.lc-fb .btn{margin-top:10px}
+.lc-in{animation:lcIn .6s ease-out}
+@keyframes lcIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.lc-in{animation:none}}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Congruence, scale and constructions</h2>
+    <span>GCSE Maths, Foundation. Congruent and similar shapes, maps and scale drawings, compass constructions, loci, plans and elevations, and column vectors.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=5"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function r1(v){ return Math.round(v * 10) / 10; }
+function f1(v){ return String(r1(v)); }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + r1(x) + '" y="' + r1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(a, b, col, w, extra){
+  return '<line x1="' + r1(a[0]) + '" y1="' + r1(a[1]) + '" x2="' + r1(b[0]) + '" y2="' + r1(b[1]) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linecap="round" ' + (extra || "") + '/>';
+}
+function poly(P, fill, stroke, w){
+  return '<polygon points="' + P.map(function(p){ return r1(p[0]) + "," + r1(p[1]); }).join(" ") + '" fill="' + (fill || "none") + '" stroke="' + (stroke || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linejoin="round"/>';
+}
+function dot(p, r, fill){ return '<circle cx="' + r1(p[0]) + '" cy="' + r1(p[1]) + '" r="' + r + '" fill="' + (fill || INK) + '"/>'; }
+function sub(a, b){ return [a[0] - b[0], a[1] - b[1]]; }
+function add(a, b){ return [a[0] + b[0], a[1] + b[1]]; }
+function mul(a, k){ return [a[0] * k, a[1] * k]; }
+function len(a){ return Math.sqrt(a[0] * a[0] + a[1] * a[1]); }
+function unit(a){ var l = len(a); return [a[0] / l, a[1] / l]; }
+function mid(a, b){ return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; }
+/* screen arc (y down) round c from angle a0 to a1, a1 > a0 */
+function arc(c, r, a0, a1, col, w, extra){
+  var p0 = [c[0] + r * Math.cos(a0), c[1] + r * Math.sin(a0)], p1 = [c[0] + r * Math.cos(a1), c[1] + r * Math.sin(a1)];
+  return '<path d="M' + r1(p0[0]) + ' ' + r1(p0[1]) + ' A' + r1(r) + ' ' + r1(r) + ' 0 0 1 ' + r1(p1[0]) + ' ' + r1(p1[1]) + '" fill="none" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '" ' + (extra || "") + '/>';
+}
+function ang(c, p){ return Math.atan2(p[1] - c[1], p[0] - c[0]); }
+/* arc across the corner at V between the edges to P1 and P2 (short way) */
+function cornerArc(V, P1, P2, r, col, w){
+  var a1 = ang(V, P1), a2 = ang(V, P2);
+  var d = a2 - a1;
+  while(d > Math.PI) d -= 2 * Math.PI;
+  while(d < -Math.PI) d += 2 * Math.PI;
+  return d > 0 ? arc(V, r, a1, a1 + d, col, w) : arc(V, r, a2, a2 - d, col, w);
+}
+function rightMark(V, P1, P2, s){
+  var u = mul(unit(sub(P1, V)), s), v = mul(unit(sub(P2, V)), s);
+  var a = add(V, u), b = add(add(V, u), v), c = add(V, v);
+  return '<path d="M' + r1(a[0]) + ' ' + r1(a[1]) + ' L' + r1(b[0]) + ' ' + r1(b[1]) + ' L' + r1(c[0]) + ' ' + r1(c[1]) + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+}
+function ticks(a, b, n, col){
+  var m = mid(a, b), u = unit(sub(b, a)), nn = [-u[1], u[0]], s = "";
+  for(var k = 0; k < n; k++){
+    var o = add(m, mul(u, (k - (n - 1) / 2) * 6));
+    s += ln(add(o, mul(nn, 7)), add(o, mul(nn, -7)), col || INK, 2.5);
+  }
+  return s;
+}
+/* label a side, pushed away from the centroid */
+function sideLab(a, b, cen, s, off, size, col){
+  var m = mid(a, b), u = unit(sub(b, a)), nn = [-u[1], u[0]];
+  if((m[0] - cen[0]) * nn[0] + (m[1] - cen[1]) * nn[1] < 0) nn = mul(nn, -1);
+  var p = add(m, mul(nn, off || 16));
+  return t(p[0], p[1] + 5, s, size || 15, col || INK, BODY + ' font-weight="700" text-anchor="middle"');
+}
+function cent(P){ return [(P[0][0] + P[1][0] + P[2][0]) / 3, (P[0][1] + P[1][1] + P[2][1]) / 3]; }
+function vlab(P, k, s, off){
+  var c = cent(P), u = unit(sub(P[k], c)), p = add(P[k], mul(u, off || 14));
+  return t(p[0], p[1] + 6, s, 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+}
+function angLab(P, k, s, d, col){
+  var V = P[k], o = [P[(k + 1) % 3], P[(k + 2) % 3]];
+  var b = unit(add(unit(sub(o[0], V)), unit(sub(o[1], V))));
+  var p = add(V, mul(b, d || 36));
+  return t(p[0], p[1] + 5, s, 15, col || BLUE, BODY + ' font-weight="700" text-anchor="middle"');
+}
+function n(v){ return v < 0 ? "&minus;" + (-v) : String(v); }
+function cv(a, b){ return '<span class="cv"><span>' + n(a) + '</span><span>' + n(b) + '</span></span>'; }
+/* filled arrow */
+function arrow(a, b, col, w){
+  var u = unit(sub(b, a)), nn = [-u[1], u[0]];
+  var base = add(b, mul(u, -13));
+  return ln(a, base, col, w || 3.5) + poly([b, add(base, mul(nn, 6.5)), add(base, mul(nn, -6.5))], col, col, 1.5);
+}
+
+/* ================= figures ================= */
+
+/* Four congruence conditions */
+var CONG = (function(){
+  var s = '<svg viewBox="0 0 380 256" role="img" aria-label="Four triangles showing the conditions. SSS: all three sides marked. SAS: two sides and the angle between them. ASA: two angles and the side between them. RHS: a right angle, the hypotenuse and one other side.">';
+  s += ln([190, 6], [190, 250], LINE, 2) + ln([6, 128], [374, 128], LINE, 2);
+  function panel(ox, oy, name){
+    var right = name === "RHS";
+    var P = right ? [[ox + 34, oy + 110], [ox + 172, oy + 110], [ox + 34, oy + 40]] : [[ox + 22, oy + 110], [ox + 170, oy + 110], [ox + 72, oy + 40]];
+    var a = P[0], b = P[1], c = P[2], g = "";
+    g += poly(P, WHITE, INK, 2.5);
+    if(name === "SSS"){ g += ln(a, b, CORAL, 5) + ln(b, c, CORAL, 5) + ln(c, a, CORAL, 5) + ticks(a, b, 1) + ticks(b, c, 2) + ticks(c, a, 3); }
+    if(name === "SAS"){ g += ln(a, b, CORAL, 5) + ln(a, c, CORAL, 5) + ticks(a, b, 1) + ticks(a, c, 2) + cornerArc(a, b, c, 22, BLUE, 3); }
+    if(name === "ASA"){ g += ln(a, b, CORAL, 5) + ticks(a, b, 1) + cornerArc(a, b, c, 22, BLUE, 3) + cornerArc(b, a, c, 22, BLUE, 3) + cornerArc(b, a, c, 28, BLUE, 3); }
+    if(name === "RHS"){ g += ln(b, c, CORAL, 5) + ln(a, b, CORAL, 5) + ticks(b, c, 2) + ticks(a, b, 1) + rightMark(a, b, c, 14); }
+    g += t(ox + 12, oy + 26, name, 18, INK, LAB + ' font-weight="700"');
+    return g;
+  }
+  s += panel(0, 0, "SSS") + panel(190, 0, "SAS") + panel(0, 128, "ASA") + panel(190, 128, "RHS");
+  s += '</svg>';
+  return s;
+})();
+
+/* SAS pair, one turned round */
+var SASFIG = (function(){
+  var k = 17, d40 = 40 * Math.PI / 180;
+  var base = [[0, 0], [7 * k, 0], [5 * k * Math.cos(d40), -5 * k * Math.sin(d40)]];
+  function place(th, cx, cy){
+    var c = cent(base);
+    return base.map(function(p){
+      var x = p[0] - c[0], y = p[1] - c[1];
+      return [cx + x * Math.cos(th) - y * Math.sin(th), cy + x * Math.sin(th) + y * Math.cos(th)];
+    });
+  }
+  var T1 = place(0, 92, 100), T2 = place(2.7, 285, 92);
+  var s = '<svg viewBox="0 0 380 170" role="img" aria-label="Two triangles. Each has sides of 5 centimetres and 7 centimetres with an angle of 40 degrees between them. The second triangle is turned round.">';
+  [T1, T2].forEach(function(T){
+    var c = cent(T);
+    s += poly(T, WHITE, INK, 2.5);
+    s += cornerArc(T[0], T[1], T[2], 20, BLUE, 2.5);
+    s += sideLab(T[0], T[1], c, "7 cm", 15) + sideLab(T[0], T[2], c, "5 cm", 15);
+    s += angLab(T, 0, "40&deg;", 37);
+  });
+  s += '</svg>';
+  return s;
+})();
+
+/* Similar triangles, learn card */
+function triAt(V, b, sLen, angDeg, k){
+  var a = angDeg * Math.PI / 180;
+  return [V, [V[0] + b * k, V[1]], [V[0] + sLen * k * Math.cos(a), V[1] - sLen * k * Math.sin(a)]];
+}
+var SIMLEARN = (function(){
+  var A = triAt([22, 158], 4, 3, 50, 30), B = triAt([166, 158], 4, 3, 50, 45);
+  var s = '<svg viewBox="0 0 380 190" role="img" aria-label="A small triangle with base 4 centimetres and side 3 centimetres, and an enlargement with base 6 centimetres and side x. Both have a 50 degree angle in the same corner. Scale factor 1.5.">';
+  [[A, "4 cm", "3 cm"], [B, "6 cm", "x"]].forEach(function(o){
+    var T = o[0], c = cent(T);
+    s += poly(T, WHITE, INK, 2.5) + cornerArc(T[0], T[1], T[2], 18, BLUE, 2.5);
+    s += sideLab(T[0], T[1], c, o[1], 16) + sideLab(T[0], T[2], c, o[2], 16, 16, o[2] === "x" ? CORAL : INK);
+    s += angLab(T, 0, "50&deg;", 34);
+  });
+  s += arrow([106, 40], [158, 40], VIOLET, 3);
+  s += t(132, 26, "&times; 1.5", 16, VIOLET, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Similar triangles ABC and PQR */
+var SIMQ = (function(){
+  var A = triAt([24, 170], 6, 4, 70, 12), B = triAt([150, 170], 6, 4, 70, 30);
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="Triangle ABC with AB 6 centimetres, BC 4 centimetres and angle B 70 degrees. A similar, larger triangle PQR with PQ 15 centimetres. QR and angle Q are unknown.">';
+  [[A, ["B", "A", "C"], "6 cm", "4 cm", "70&deg;"], [B, ["Q", "P", "R"], "15 cm", "?", "?"]].forEach(function(o){
+    var T = o[0], c = cent(T);
+    s += poly(T, WHITE, INK, 2.5) + cornerArc(T[0], T[1], T[2], 15, BLUE, 2.5);
+    s += sideLab(T[0], T[1], c, o[2], 15) + sideLab(T[0], T[2], c, o[3], 15, 15, o[3] === "?" ? CORAL : INK);
+    s += vlab(T, 0, o[1][0], 15) + vlab(T, 1, o[1][1], 15) + vlab(T, 2, o[1][2], 15);
+    s += angLab(T, 0, o[4], 34, o[4] === "?" ? CORAL : BLUE);
+  });
+  s += '</svg>';
+  return s;
+})();
+
+/* DE parallel to BC */
+var OVERLAP = (function(){
+  var A = [170, 22], B = [40, 196], C = [330, 196];
+  var D = add(A, mul(sub(B, A), 0.4)), E = add(A, mul(sub(C, A), 0.4));
+  var s = '<svg viewBox="0 0 380 226" role="img" aria-label="Triangle ABC with D on AB and E on AC. DE is parallel to BC. AD is 4 centimetres, DB is 6 centimetres, DE is 5 centimetres. BC is unknown.">';
+  s += poly([A, B, C], WHITE, INK, 2.5) + ln(D, E, INK, 2.5);
+  function chev(p, q){
+    var m = mid(p, q), u = unit(sub(q, p)), nn = [-u[1], u[0]];
+    var tip = add(m, mul(u, 6));
+    return '<path d="M' + r1(tip[0] - u[0] * 9 + nn[0] * 6) + ' ' + r1(tip[1] - u[1] * 9 + nn[1] * 6) + ' L' + r1(tip[0]) + ' ' + r1(tip[1]) + ' L' + r1(tip[0] - u[0] * 9 - nn[0] * 6) + ' ' + r1(tip[1] - u[1] * 9 - nn[1] * 6) + '" fill="none" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+  }
+  s += chev(D, E) + chev(B, C);
+  var c = cent([A, B, C]);
+  s += sideLab(A, D, c, "4 cm", 18) + sideLab(D, B, c, "6 cm", 18);
+  s += t((D[0] + E[0]) / 2, D[1] - 9, "5 cm", 15, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t((B[0] + C[0]) / 2, 220, "?", 17, CORAL, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(A[0], A[1] - 4, "A", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(B[0] - 14, B[1] + 6, "B", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(C[0] + 14, C[1] + 6, "C", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(D[0] - 14, D[1] + 4, "D", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(E[0] + 14, E[1] + 4, "E", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Ruler helper: x0 = zero mark, pxcm per cm, n cm long */
+function ruler(x0, y, pxcm, ncm, mm){
+  var s = '<rect x="' + (x0 - 10) + '" y="' + y + '" width="' + (pxcm * ncm + 20) + '" height="38" rx="4" fill="' + SUN + '" fill-opacity=".55" stroke="' + INK + '" stroke-width="2"/>';
+  for(var k = 0; k <= ncm * (mm ? 10 : 1); k++){
+    var x = x0 + k * pxcm / (mm ? 10 : 1), big = !mm || k % 10 === 0, half = mm && k % 5 === 0;
+    s += ln([x, y], [x, y + (big ? 14 : half ? 10 : 6)], INK, big ? 2 : 1.2);
+    if(big) s += t(x, y + 31, String(mm ? k / 10 : k), 14, INK, LAB + ' text-anchor="middle" font-weight="700"');
+  }
+  return s;
+}
+
+/* Map scale, learn card */
+var MAPLEARN = (function(){
+  var s = '<svg viewBox="0 0 380 150" role="img" aria-label="Two villages, Ash and Bry, 6 centimetres apart on a map with scale 1 to 50 000. A ruler underneath shows the 6 centimetres.">';
+  var a = [30, 52], b = [30 + 6 * 40, 52];
+  s += ln(a, b, VIOLET, 3, 'stroke-dasharray="7 6"');
+  s += dot(a, 8, BLUE) + dot(b, 8, BLUE);
+  s += t(a[0], 30, "Ash", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(b[0], 30, "Bry", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(150, 76, "6 cm on the map", 15, VIOLET, BODY + ' font-weight="700" text-anchor="middle"');
+  s += ruler(30, 96, 40, 8, false);
+  s += '</svg>';
+  return s;
+})();
+
+/* Measure then scale */
+var MEASURE = (function(){
+  var x0 = 24, k = 40, hut = [x0, 50], bea = [x0 + 6.4 * k, 50];
+  var s = '<svg viewBox="0 0 380 150" role="img" aria-label="A hut and a beacon on a map, with a centimetre ruler underneath lined up with the hut at zero. The beacon lines up with 6.4 centimetres.">';
+  s += ln(hut, bea, INK, 2.5);
+  s += ln([bea[0], 56], [bea[0], 96], VIOLET, 1.5, 'stroke-dasharray="3 4"') + ln([hut[0], 56], [hut[0], 96], VIOLET, 1.5, 'stroke-dasharray="3 4"');
+  s += '<rect x="' + (hut[0] - 8) + '" y="38" width="16" height="16" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += poly([[bea[0], 34], [bea[0] - 9, 56], [bea[0] + 9, 56]], SUN, INK, 2);
+  s += t(hut[0] + 14, 30, "Hut", 15, INK, LAB + ' font-weight="700"');
+  s += t(bea[0], 26, "Beacon", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(366, 52, "1 : 25 000", 14, INK, BODY + ' font-weight="700" text-anchor="end"');
+  s += ruler(x0, 96, k, 8, true);
+  s += '</svg>';
+  return s;
+})();
+
+/* Perpendicular bisector and angle bisector constructions */
+var CONSTR = (function(){
+  var s = '<svg viewBox="0 0 380 214" role="img" aria-label="Left: line AB with compass arcs from each end crossing above and below, joined by a perpendicular line through the middle. Right: an angle with an arc crossing both arms, two more arcs crossing inside the angle, and the bisector drawn from the corner through that crossing.">';
+  s += ln([190, 8], [190, 206], LINE, 2);
+  /* perpendicular bisector */
+  var A = [25, 100], B = [165, 100], R = 90, hgt = Math.sqrt(R * R - 70 * 70);
+  var X1 = [95, 100 - hgt], X2 = [95, 100 + hgt];
+  [X1, X2].forEach(function(X){
+    var aA = ang(A, X), aB = ang(B, X);
+    s += arc(A, R, aA - 0.22, aA + 0.22, VIOLET, 2.2) + arc(B, R, aB - 0.22, aB + 0.22, VIOLET, 2.2);
+  });
+  s += ln(A, B, INK, 3) + dot(A, 4) + dot(B, 4);
+  s += ln([95, 30], [95, 170], CORAL, 3) + rightMark([95, 100], [165, 100], [95, 30], 11);
+  s += ticks(A, [95, 100], 1) + ticks([95, 100], B, 1);
+  s += t(A[0], A[1] + 24, "A", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(B[0], B[1] + 24, "B", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(95, 200, "Perpendicular bisector", 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  /* angle bisector */
+  var O = [208, 168], a50 = 50 * Math.PI / 180;
+  var arm1 = [372, 168], arm2 = [O[0] + 160 * Math.cos(a50), O[1] - 160 * Math.sin(a50)];
+  var P1 = [O[0] + 70, O[1]], P2 = [O[0] + 70 * Math.cos(a50), O[1] - 70 * Math.sin(a50)];
+  var bi = [Math.cos(a50 / 2), -Math.sin(a50 / 2)], c = Math.cos(a50 / 2), r2 = 55;
+  var dd = (2 * 70 * c + Math.sqrt(4 * 4900 * c * c - 4 * (4900 - r2 * r2))) / 2;
+  var X = add(O, mul(bi, dd));
+  s += ln(O, arm1, INK, 3) + ln(O, arm2, INK, 3);
+  s += arc(O, 70, -a50 - 0.12, 0.12, VIOLET, 2.2);
+  var q1 = ang(P1, X), q2 = ang(P2, X);
+  s += arc(P1, r2, q1 - 0.3, q1 + 0.3, VIOLET, 2.2) + arc(P2, r2, q2 - 0.3, q2 + 0.3, VIOLET, 2.2);
+  s += dot(P1, 3.5) + dot(P2, 3.5);
+  s += ln(O, add(O, mul(bi, 165)), CORAL, 3);
+  s += t(285, 200, "Angle bisector", 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Triangle from three sides */
+var TRICON = (function(){
+  var k = 36, A = [64, 178], B = [64 + 7 * k, 178];
+  var cx = (25 - 36 + 49) / 14, cy = Math.sqrt(25 - cx * cx);
+  var C = [A[0] + cx * k, A[1] - cy * k];
+  var s = '<svg viewBox="0 0 380 210" role="img" aria-label="Constructing a triangle. Side AB is 7 centimetres. An arc of radius 5 centimetres from A and an arc of radius 6 centimetres from B cross at C.">';
+  var aA = ang(A, C), aB = ang(B, C);
+  s += arc(A, 5 * k, aA - 0.25, aA + 0.25, VIOLET, 2.5) + arc(B, 6 * k, aB - 0.2, aB + 0.2, BLUE, 2.5);
+  s += poly([A, B, C], "none", INK, 3);
+  var c = cent([A, B, C]);
+  s += sideLab(A, B, c, "7 cm", 16) + sideLab(A, C, c, "5 cm", 18, 15, VIOLET) + sideLab(B, C, c, "6 cm", 18, 15, BLUE);
+  s += vlab([A, B, C], 0, "A", 14) + vlab([A, B, C], 1, "B", 14) + vlab([A, B, C], 2, "C", 16);
+  s += '</svg>';
+  return s;
+})();
+
+/* Four loci */
+var LOCI = (function(){
+  var s = '<svg viewBox="0 0 380 286" role="img" aria-label="Four loci. A fixed distance from a point is a circle. A fixed distance from a line segment is two parallel lines joined by semicircles. Equidistant from two points is the perpendicular bisector. Equidistant from two lines that meet is the angle bisector.">';
+  s += ln([190, 6], [190, 280], LINE, 2) + ln([6, 143], [374, 143], LINE, 2);
+  var D = 'stroke-dasharray="7 5"';
+  function head(x, y, a, b){ return t(x, y, a, 15, INK, LAB + ' font-weight="700" text-anchor="middle"') + t(x, y + 108, b, 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"'); }
+  /* point */
+  s += head(95, 22, "From a point", "a circle");
+  s += '<circle cx="95" cy="72" r="34" fill="none" stroke="' + CORAL + '" stroke-width="3" ' + D + '/>' + dot([95, 72], 5) + ln([95, 72], [129, 72], INK, 1.5);
+  /* line segment */
+  s += head(285, 22, "From a line", "parallel lines");
+  s += ln([255, 72], [315, 72], INK, 4);
+  s += '<path d="M255 47 H315 A25 25 0 0 1 315 97 H255 A25 25 0 0 1 255 47 Z" fill="none" stroke="' + CORAL + '" stroke-width="3" ' + D + '/>';
+  /* two points */
+  s += head(95, 166, "From two points", "perp. bisector");
+  s += dot([55, 214], 5) + dot([135, 214], 5) + ln([55, 214], [135, 214], INK, 1.2, 'stroke-dasharray="3 4"');
+  s += t(55, 238, "A", 15, INK, LAB + ' font-weight="700" text-anchor="middle"') + t(135, 238, "B", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += ln([95, 178], [95, 252], CORAL, 3, D);
+  /* two lines */
+  s += head(285, 166, "From two lines", "angle bisector");
+  s += ln([225, 250], [350, 250], INK, 3) + ln([225, 250], [305, 182], INK, 3);
+  var a = Math.atan2(68, 80) / 2;
+  s += ln([225, 250], [225 + 130 * Math.cos(a), 250 - 130 * Math.sin(a)], CORAL, 3, D);
+  s += '</svg>';
+  return s;
+})();
+
+/* Regions question */
+var REGION = (function(){
+  var S = 40, OX = 16, OY = 262;
+  function P(x, y){ return [OX + x * S, OY - y * S]; }
+  var Pp = [4.5, 3], Q = [1, 4.5], R = [7, 1.5], M = [4, 3], dir = unit([1, 2]);
+  var s = '<svg viewBox="0 0 370 272" role="img" aria-label="Point P with a dashed circle of radius 2 centimetres round it. Points Q and R with the perpendicular bisector of QR drawn. The lines split the space into four regions numbered 1 to 4.">';
+  s += '<defs><clipPath id="rgclip"><rect x="4" y="4" width="362" height="264"/></clipPath></defs>';
+  s += '<rect x="4" y="4" width="362" height="264" rx="10" fill="' + PAPER + '" stroke="' + LINE + '" stroke-width="2"/>';
+  s += '<g clip-path="url(#rgclip)">';
+  s += ln(P(M[0] - dir[0] * 9, M[1] - dir[1] * 9), P(M[0] + dir[0] * 9, M[1] + dir[1] * 9), BLUE, 3, 'stroke-dasharray="9 6"');
+  s += '</g>';
+  s += '<circle cx="' + P(Pp[0], 0)[0] + '" cy="' + P(0, Pp[1])[1] + '" r="' + 2 * S + '" fill="none" stroke="' + VIOLET + '" stroke-width="3" stroke-dasharray="9 6"/>';
+  s += ln(P(Q[0], Q[1]), P(R[0], R[1]), INK, 1.2, 'stroke-dasharray="3 5"');
+  [[Pp, "P"], [Q, "Q"], [R, "R"]].forEach(function(o){
+    var p = P(o[0][0], o[0][1]);
+    s += dot(p, 5) + t(p[0] + 9, p[1] - 8, o[1], 17, INK, LAB + ' font-weight="700"');
+  });
+  [[1.2, 2.2, "1"], [3.43, 3.54, "2"], [5.39, 2.55, "3"], [7.3, 3.0, "4"]].forEach(function(o){
+    var p = P(o[0], o[1]);
+    s += '<circle cx="' + r1(p[0]) + '" cy="' + r1(p[1]) + '" r="13" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(p[0], p[1] + 6, o[2], 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- cubes: isometric drawing and flat views ---------- */
+/* h[x][z] = number of cubes stacked at column x (left to right), depth z (0 is the front) */
+function iso(h, s, ox, oy, arrows){
+  var c = s * Math.cos(Math.PI / 6), hh = s / 2;
+  function P(x, y, z){ return [ox + (x + z) * c, oy - y * s + (x - z) * hh]; }
+  var cubes = [];
+  h.forEach(function(col, x){ col.forEach(function(ht, z){ for(var y = 0; y < ht; y++) cubes.push([x, y, z]); }); });
+  function has(x, y, z){ return x >= 0 && x < h.length && z >= 0 && z < h[x].length && y < h[x][z]; }
+  cubes.sort(function(a, b){ return (a[0] + a[1] - a[2]) - (b[0] + b[1] - b[2]) || (b[2] - a[2]) || (a[0] - b[0]) || (a[1] - b[1]); });
+  var g = "";
+  cubes.forEach(function(q){
+    var x = q[0], y = q[1], z = q[2];
+    if(!has(x, y + 1, z)) g += poly([P(x, y + 1, z), P(x + 1, y + 1, z), P(x + 1, y + 1, z + 1), P(x, y + 1, z + 1)], SUN, INK, 2);
+    if(!has(x, y, z - 1)) g += poly([P(x, y, z), P(x + 1, y, z), P(x + 1, y + 1, z), P(x, y + 1, z)], CYAN, INK, 2);
+    if(!has(x + 1, y, z)) g += poly([P(x + 1, y, z), P(x + 1, y, z + 1), P(x + 1, y + 1, z + 1), P(x + 1, y + 1, z)], BLUE, INK, 2);
+  });
+  if(arrows){
+    var fz = P(h.length / 2, 0.5, 0), fa = add(fz, [-c * 1.9, hh * 1.9 + 6]);
+    g += arrow(fa, add(fz, [-c * 0.35, hh * 0.35 + 2]), CORAL, 3);
+    g += t(fa[0] - 4, fa[1] + 18, "Front", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  return g;
+}
+function squares(cells, cols, rows, sz, ox, oy, fill){
+  var g = "";
+  for(var cx = 0; cx < cols; cx++) for(var ry = 0; ry < rows; ry++)
+    g += '<rect x="' + (ox + cx * sz) + '" y="' + (oy + (rows - 1 - ry) * sz) + '" width="' + sz + '" height="' + sz + '" fill="none" stroke="' + LINE + '" stroke-width="1.5"/>';
+  cells.forEach(function(q){
+    g += '<rect x="' + (ox + q[0] * sz) + '" y="' + (oy + (rows - 1 - q[1]) * sz) + '" width="' + sz + '" height="' + sz + '" fill="' + (fill || CYAN) + '" stroke="' + INK + '" stroke-width="2"/>';
+  });
+  return g;
+}
+function optSVG(cells, label){
+  return '<svg class="opt" viewBox="0 0 96 76" role="img" aria-label="' + label + '">' + squares(cells, 4, 3, 22, 4, 4) + '</svg>';
+}
+
+var S1 = [[2, 1], [1, 1], [1, 0]];
+var PLANLEARN = (function(){
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="A shape made of six cubes, with its plan, front elevation and side elevation. Plan: three squares at the front, two at the back on the left. Front elevation: a column of two on the left, then one, then one. Side elevation from the right: two on the left (the front), one on the right (the back).">';
+  s += iso(S1, 26, 62, 104, true);
+  s += ln([196, 10], [196, 190], LINE, 2);
+  s += t(240, 22, "Plan", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += squares([[0, 0], [1, 0], [2, 0], [0, 1], [1, 1]], 3, 2, 22, 207, 32, SUN);
+  s += t(285, 50, "from", 14, INK, BODY);
+  s += t(285, 68, "above", 14, INK, BODY);
+  s += t(243, 118, "Front", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += squares([[0, 0], [1, 0], [2, 0], [0, 1]], 3, 2, 22, 210, 128, CYAN);
+  s += t(343, 118, "Side", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += squares([[0, 0], [1, 0], [0, 1]], 2, 2, 22, 321, 128, BLUE);
+  s += t(243, 192, "elevation", 14, INK, BODY + ' text-anchor="middle"');
+  s += t(343, 192, "from right", 14, INK, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+var S2 = [[2, 2], [1, 2], [0, 1]];
+var S2FIG = '<svg viewBox="0 0 260 190" role="img" aria-label="A shape made of eight cubes drawn in 3D. Left column: two cubes high at the front and the back. Middle column: one cube at the front with two at the back. Right column: one cube at the back only. An arrow shows the front.">' + iso(S2, 30, 60, 128, true) + '</svg>';
+
+var NUMPLAN = (function(){
+  var vals = [[2, 1, 0], [3, 1, 1]];
+  var s = '<svg viewBox="0 0 300 170" role="img" aria-label="A plan view, three squares wide and two deep, with the number of cubes stacked on each square. Back row: 3, 1, 1. Front row: 2, 1, 0. The front is at the bottom.">';
+  for(var r = 0; r < 2; r++) for(var c = 0; c < 3; c++){
+    var x = 60 + c * 60, y = 18 + (1 - r) * 54, v = vals[r][c];
+    s += '<rect x="' + x + '" y="' + y + '" width="60" height="54" fill="' + (v ? SUN : WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x + 30, y + 35, String(v), 22, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += arrow([150, 166], [150, 134], CORAL, 3);
+  s += t(178, 158, "Front", 15, CORAL, LAB + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- vectors ---------- */
+function vgrid(cols, rows, sz, ox, oy){
+  var g = "";
+  for(var i = 0; i <= cols; i++) g += ln([ox + i * sz, oy], [ox + i * sz, oy + rows * sz], LINE, 1.2);
+  for(var j = 0; j <= rows; j++) g += ln([ox, oy + j * sz], [ox + cols * sz, oy + j * sz], LINE, 1.2);
+  return g;
+}
+/* a column vector drawn in SVG: label = ( top / bottom ) centred on y */
+function svgCv(x, y, a, b, col, lab){
+  var g = t(x, y + 6, lab + " =", 17, col, LAB + ' font-weight="700"');
+  var w = lab.length > 1 ? 54 : 26, px = x + w;
+  g += '<path d="M' + (px + 8) + ' ' + (y - 24) + ' Q' + px + ' ' + y + ' ' + (px + 8) + ' ' + (y + 24) + '" fill="none" stroke="' + col + '" stroke-width="2.2"/>';
+  g += '<path d="M' + (px + 42) + ' ' + (y - 24) + ' Q' + (px + 50) + ' ' + y + ' ' + (px + 42) + ' ' + (y + 24) + '" fill="none" stroke="' + col + '" stroke-width="2.2"/>';
+  g += t(px + 25, y - 5, n(a), 16, col, LAB + ' font-weight="700" text-anchor="middle"');
+  g += t(px + 25, y + 17, n(b), 16, col, LAB + ' font-weight="700" text-anchor="middle"');
+  return g;
+}
+var VECLEARN = (function(){
+  var sz = 30, ox = 20, oy = 10, rows = 6;
+  function G(x, y){ return [ox + x * sz, oy + (rows - y) * sz]; }
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="On a grid, vector a goes 3 right and 2 up. Vector b goes 2 right and 3 down, starting where a ends. The dashed vector a plus b goes from the start of a to the end of b: 5 right and 1 down.">';
+  s += vgrid(11, 6, sz, ox, oy);
+  s += arrow(G(1, 2), G(6, 1), CORAL, 3);
+  s += arrow(G(1, 2), G(4, 4), BLUE, 4) + arrow(G(4, 4), G(6, 1), VIOLET, 4);
+  s += t(G(2.2, 3.6)[0], G(2.2, 3.6)[1], "a", 20, BLUE, LAB + ' font-weight="700"');
+  s += t(G(5.35, 3)[0], G(5.35, 3)[1], "b", 20, VIOLET, LAB + ' font-weight="700"');
+  s += t(G(3.1, 0.95)[0], G(3.1, 0.95)[1], "a + b", 18, CORAL, LAB + ' font-weight="700"');
+  s += '<rect x="' + (G(7, 6)[0] + 6) + '" y="' + (G(7, 6)[1] + 6) + '" width="' + (4 * sz - 2) + '" height="' + (6 * sz - 12) + '" rx="10" fill="' + WHITE + '" stroke="' + LINE + '" stroke-width="2"/>';
+  s += svgCv(G(7, 5)[0] + 16, G(7, 5)[1] + 2, 3, 2, BLUE, "a");
+  s += svgCv(G(7, 3.2)[0] + 16, G(7, 3.2)[1] + 2, 2, -3, VIOLET, "b");
+  s += svgCv(G(7, 1.4)[0] + 16, G(7, 1.4)[1] + 2, 5, -1, CORAL, "a + b");
+  s += '</svg>';
+  return s;
+})();
+var VECQ = (function(){
+  var sz = 32, ox = 30, oy = 10, rows = 5;
+  function G(x, y){ return [ox + x * sz, oy + (rows - y) * sz]; }
+  var s = '<svg viewBox="0 0 320 182" role="img" aria-label="An arrow on a squared grid. It starts at a point and ends 4 squares to the left and 3 squares up.">';
+  s += vgrid(8, 5, sz, ox, oy);
+  s += dot(G(6, 1), 5, INK) + arrow(G(6, 1), G(2, 4), CORAL, 4);
+  s += '</svg>';
+  return s;
+})();
+
+/* ================= the loci treasure hunt widget ================= */
+var MS = 32, MOX = 12, MOY = 268, MW = 10, MH = 8;
+function mx(x){ return MOX + x * MS; }
+function my(y){ return MOY - y * MS; }
+function mp(p){ return [mx(p[0]), my(p[1])]; }
+function dist(a, b){ return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1])); }
+var EPS = 1e-9;
+
+var KINDS = [["circle", "Circle"], ["perp", "Perpendicular bisector"], ["ang", "Angle bisector"], ["par", "Two parallel lines"]];
+var NUDGE = {
+  circle: "Picture every spot exactly that far from one single place. They go all the way round it, like a ring.",
+  perp: "This clue is about being nearer one place than another. The edge is where you are exactly halfway between the two: a line cutting between them at right angles.",
+  ang: "The river and the canal are two straight lines that meet. Spots the same distance from both lie on the line that splits the angle between them in half.",
+  par: "The road is a straight line. Spots exactly 2 km from it make a line on each side, running alongside it."
+};
+function closer(p, a, b, an, bn){
+  var da = dist(p, a), db = dist(p, b);
+  if(Math.abs(da - db) < 1e-6) return { ok: false, msg: "That spot is exactly the same distance from " + an + " and " + bn + " (" + f1(da) + " km), so it is on the bisector, not closer to " + an + "." };
+  if(da < db) return { ok: true, msg: f1(da) + " km from " + an + ", " + f1(db) + " km from " + bn };
+  return { ok: false, msg: "That spot is " + f1(da) + " km from " + an + " but " + f1(db) + " km from " + bn + ", so it is closer to " + bn + ". Which side of the bisector is " + an + " on?" };
+}
+
+var ISLES = [
+  { name: "Tower Isle",
+    marks: { T: [5, 4], A: [1, 7], B: [9, 2] },
+    clues: [
+      { txt: "The chest is <b>within 3 km of the tower</b>.", kind: "circle", draw: { type: "circle", c: [5, 4], r: 3 },
+        done: "Circle: centre the tower, radius 3 km.",
+        test: function(p){ var d = dist(p, [5, 4]); return d <= 3 + EPS ? { ok: true, msg: f1(d) + " km from the tower" } : { ok: false, msg: "That spot is " + f1(d) + " km from the tower. Within 3 km means on or inside the circle." }; } },
+      { txt: "It is <b>closer to well A than to well B</b>.", kind: "perp", draw: { type: "perp", a: [1, 7], b: [9, 2] },
+        done: "Perpendicular bisector of the line from A to B.",
+        test: function(p){ return closer(p, [1, 7], [9, 2], "well A", "well B"); } }
+    ],
+    region: [{ type: "in", c: [5, 4], r: 3 }, { type: "half", n: [-8, 5], k: -17.5 }],
+    answer: [4, 5] },
+  { name: "Volcano Isle",
+    marks: { V: [6, 2] },
+    clues: [
+      { txt: "The chest is <b>closer to the river than to the canal</b>.", kind: "ang", draw: { type: "ang", o: [0, 0], d1: [1, 0], d2: [0.6, 0.8] },
+        done: "Angle bisector of the angle between the river and the canal.",
+        test: function(p){
+          var dr = p[1], dc = Math.abs(4 * p[0] - 3 * p[1]) / 5;
+          if(Math.abs(dr - dc) < 1e-6) return { ok: false, msg: "That spot is exactly the same distance from the river and the canal (" + f1(dr) + " km), so it is on the bisector, not closer to the river." };
+          if(dr < dc) return { ok: true, msg: f1(dr) + " km from the river, " + f1(dc) + " km from the canal" };
+          return { ok: false, msg: "That spot is " + f1(dr) + " km from the river but " + f1(dc) + " km from the canal, so it is closer to the canal." };
+        } },
+      { txt: "It is <b>more than 3 km from the volcano</b>.", kind: "circle", draw: { type: "circle", c: [6, 2], r: 3 },
+        done: "Circle: centre the volcano, radius 3 km.",
+        test: function(p){ var d = dist(p, [6, 2]); return d > 3 + 1e-6 ? { ok: true, msg: f1(d) + " km from the volcano" } : { ok: false, msg: "That spot is " + (Math.abs(d - 3) < 1e-6 ? "exactly 3 km" : "only " + f1(d) + " km") + " from the volcano. More than 3 km means outside the circle, not on it or in it." }; } }
+    ],
+    region: [{ type: "half", n: [0.5, -1], k: 0 }, { type: "out", c: [6, 2], r: 3 }],
+    answer: [9.5, 1.5] },
+  { name: "Road Isle",
+    marks: { C: [1, 1], D: [9, 2] },
+    clues: [
+      { txt: "The chest is <b>no more than 2 km from the road</b>.", kind: "par", draw: { type: "par", y: 5, w: 2 },
+        done: "Two parallel lines, 2 km either side of the road.",
+        test: function(p){ var d = Math.abs(p[1] - 5); return d <= 2 + EPS ? { ok: true, msg: f1(d) + " km from the road" } : { ok: false, msg: "That spot is " + f1(d) + " km from the road. No more than 2 km means between the two parallel lines (or on them)." }; } },
+      { txt: "It is <b>closer to the cave than to the dock</b>.", kind: "perp", draw: { type: "perp", a: [1, 1], b: [9, 2] },
+        done: "Perpendicular bisector of the line from the cave to the dock.",
+        test: function(p){ return closer(p, [1, 1], [9, 2], "the cave", "the dock"); } }
+    ],
+    region: [{ type: "band", y0: 3, y1: 7 }, { type: "half", n: [-8, -1], k: -41.5 }],
+    answer: [2, 5] }
+];
+var CLUECOL = [VIOLET, BLUE];
+
+function clipHalf(P, nv, k){
+  var out = [];
+  for(var i = 0; i < P.length; i++){
+    var a = P[i], b = P[(i + 1) % P.length];
+    var fa = nv[0] * a[0] + nv[1] * a[1] - k, fb = nv[0] * b[0] + nv[1] * b[1] - k;
+    if(fa >= 0) out.push(a);
+    if((fa >= 0) !== (fb >= 0)){ var tt = fa / (fa - fb); out.push([a[0] + (b[0] - a[0]) * tt, a[1] + (b[1] - a[1]) * tt]); }
+  }
+  return out;
+}
+var MAPRECT = [[0, 0], [MW, 0], [MW, MH], [0, MH]];
+function regionSVG(spec){
+  var defs = "", open = "", close = "";
+  var full = '<rect x="' + mx(0) + '" y="' + my(MH) + '" width="' + MW * MS + '" height="' + MH * MS + '"';
+  spec.forEach(function(r, k){
+    var id = "lcm" + k, inner;
+    if(r.type === "in") inner = full + ' fill="black"/><circle cx="' + mx(r.c[0]) + '" cy="' + my(r.c[1]) + '" r="' + r.r * MS + '" fill="white"/>';
+    else if(r.type === "out") inner = full + ' fill="white"/><circle cx="' + mx(r.c[0]) + '" cy="' + my(r.c[1]) + '" r="' + r.r * MS + '" fill="black"/>';
+    else if(r.type === "band") inner = full + ' fill="black"/><rect x="' + mx(0) + '" y="' + my(r.y1) + '" width="' + MW * MS + '" height="' + (r.y1 - r.y0) * MS + '" fill="white"/>';
+    else {
+      var P = clipHalf(MAPRECT, r.n, r.k).map(mp);
+      inner = full + ' fill="black"/>' + poly(P, "white", "white", 0.1);
+    }
+    defs += '<mask id="' + id + '" maskUnits="userSpaceOnUse" x="0" y="0" width="344" height="284">' + inner + '</mask>';
+    open += '<g mask="url(#' + id + ')">';
+    close += '</g>';
+  });
+  return '<defs>' + defs + '</defs>' + open + full + ' fill="' + MINT + '" fill-opacity=".45"/>' + close;
+}
+function locusSVG(dr, col, fresh){
+  var g = '<g class="' + (fresh ? "lc-in" : "") + '" clip-path="url(#lcclip)">', D = 'stroke-dasharray="9 6"';
+  if(dr.type === "circle"){
+    g += '<circle cx="' + mx(dr.c[0]) + '" cy="' + my(dr.c[1]) + '" r="' + dr.r * MS + '" fill="none" stroke="' + col + '" stroke-width="3.5" ' + D + '/>';
+    var e = [dr.c[0] - dr.r * 0.6, dr.c[1] + dr.r * 0.8];
+    g += ln(mp(dr.c), mp(e), col, 2);
+    g += t(mx((dr.c[0] + e[0]) / 2) - 8, my((dr.c[1] + e[1]) / 2), dr.r + " km", 14, col, BODY + ' font-weight="700" text-anchor="end" stroke="' + PAPER + '" stroke-width="4" paint-order="stroke"');
+  }
+  if(dr.type === "perp"){
+    var M = mid(dr.a, dr.b), ab = sub(dr.b, dr.a), L = len(ab), dv = unit([-ab[1], ab[0]]);
+    var rr = 0.65 * L, hh = Math.sqrt(rr * rr - L * L / 4);
+    [add(M, mul(dv, hh)), add(M, mul(dv, -hh))].forEach(function(X){
+      [dr.a, dr.b].forEach(function(C){
+        var a0 = ang(mp(C), mp(X));
+        g += arc(mp(C), rr * MS, a0 - 0.13, a0 + 0.13, col, 1.8, 'opacity=".75"');
+      });
+    });
+    g += ln(mp(dr.a), mp(dr.b), INK, 1.2, 'stroke-dasharray="3 5"');
+    g += ln(mp(add(M, mul(dv, -20))), mp(add(M, mul(dv, 20))), col, 3.5, D);
+  }
+  if(dr.type === "ang"){
+    var b = unit(add(unit(dr.d1), unit(dr.d2)));
+    var P1 = add(dr.o, mul(unit(dr.d1), 2)), P2 = add(dr.o, mul(unit(dr.d2), 2));
+    var cs = b[0] * unit(dr.d1)[0] + b[1] * unit(dr.d1)[1], r2 = 1.6;
+    var dd = (2 * 2 * cs + Math.sqrt(16 * cs * cs - 4 * (4 - r2 * r2))) / 2, X = add(dr.o, mul(b, dd));
+    var so = mp(dr.o), a1 = -Math.atan2(dr.d1[1], dr.d1[0]), a2 = -Math.atan2(dr.d2[1], dr.d2[0]);
+    g += arc(so, 2 * MS, Math.min(a1, a2) - 0.1, Math.max(a1, a2) + 0.1, col, 1.8, 'opacity=".75"');
+    [P1, P2].forEach(function(C){ var q = ang(mp(C), mp(X)); g += arc(mp(C), r2 * MS, q - 0.3, q + 0.3, col, 1.8, 'opacity=".75"'); });
+    g += ln(mp(dr.o), mp(add(dr.o, mul(b, 20))), col, 3.5, D);
+  }
+  if(dr.type === "par"){
+    g += ln(mp([-1, dr.y + dr.w]), mp([MW + 1, dr.y + dr.w]), col, 3.5, D) + ln(mp([-1, dr.y - dr.w]), mp([MW + 1, dr.y - dr.w]), col, 3.5, D);
+    g += arrow(mp([0.7, dr.y]), mp([0.7, dr.y + dr.w]), col, 2) + arrow(mp([0.7, dr.y]), mp([0.7, dr.y - dr.w]), col, 2);
+    g += t(mx(0.95), my(dr.y + dr.w / 2) + 5, dr.w + " km", 14, col, BODY + ' font-weight="700" stroke="' + PAPER + '" stroke-width="4" paint-order="stroke"');
+  }
+  return g + '</g>';
+}
+function halo(x, y, s, col, anchor){
+  return t(x, y, s, 14, col || INK, LAB + ' font-weight="700" text-anchor="' + (anchor || "middle") + '" stroke="' + PAPER + '" stroke-width="4" paint-order="stroke"');
+}
+function marksSVG(i){
+  var g = "";
+  if(i === 0){
+    var T = mp([5, 4]);
+    g += '<rect x="' + (T[0] - 7) + '" y="' + (T[1] - 18) + '" width="14" height="22" fill="' + INK + '"/>' + ln([T[0], T[1] - 18], [T[0], T[1] - 32], INK, 2) + poly([[T[0], T[1] - 32], [T[0] + 12, T[1] - 28], [T[0], T[1] - 24]], CORAL, INK, 1.5);
+    g += halo(T[0] + 10, T[1] + 18, "Tower", INK, "start");
+    [["A", [1, 7]], ["B", [9, 2]]].forEach(function(o){
+      var p = mp(o[1]);
+      g += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="9" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      g += halo(p[0], p[1] - 14, "Well " + o[0]);
+    });
+  }
+  if(i === 1){
+    g += ln(mp([-0.3, 0]), mp([MW + 0.3, 0]), CYAN, 7) + ln(mp([0, 0]), mp([6, 8]), CYAN, 6);
+    g += halo(mx(8.6), my(0.35), "River") + halo(mx(5.2), my(7.3), "Canal", INK, "end");
+    var V = mp([6, 2]);
+    g += poly([[V[0], V[1] - 16], [V[0] - 15, V[1] + 9], [V[0] + 15, V[1] + 9]], CORAL, INK, 2.5) + poly([[V[0] - 4, V[1] - 16], [V[0], V[1] - 24], [V[0] + 4, V[1] - 16]], SUN, INK, 1.5);
+    g += halo(V[0], V[1] + 26, "Volcano");
+  }
+  if(i === 2){
+    g += ln(mp([-0.3, 5]), mp([MW + 0.3, 5]), "#6b7194", 9) + ln(mp([0, 5]), mp([MW, 5]), WHITE, 1.5, 'stroke-dasharray="8 8"');
+    g += halo(mx(8.8), my(5.35), "Road");
+    var C = mp([1, 1]), Dk = mp([9, 2]);
+    g += '<path d="M' + (C[0] - 13) + ' ' + (C[1] + 8) + ' A13 13 0 0 1 ' + (C[0] + 13) + ' ' + (C[1] + 8) + ' Z" fill="' + INK + '"/>';
+    g += halo(C[0] + 2, C[1] - 12, "Cave");
+    g += '<rect x="' + (Dk[0] - 4) + '" y="' + (Dk[1] - 10) + '" width="22" height="9" fill="#a8763e" stroke="' + INK + '" stroke-width="2"/>' + ln([Dk[0], Dk[1] - 1], [Dk[0], Dk[1] + 8], INK, 2.5) + ln([Dk[0] + 14, Dk[1] - 1], [Dk[0] + 14, Dk[1] + 8], INK, 2.5);
+    g += halo(Dk[0] + 4, Dk[1] - 16, "Dock");
+  }
+  return g;
+}
+
+function mountHunt(el, api){
+  var d = api.data;
+  if(typeof d.i !== "number") d.i = 0;            /* island on screen */
+  if(!d.k) d.k = [0, 0, 0];                       /* clues identified per island */
+  if(!d.pm) d.pm = [0, 0, 0];                     /* wrong construction picks */
+  if(!d.dm) d.dm = [0, 0, 0];                     /* wrong digs */
+  if(!d.sh) d.sh = [false, false, false];         /* Show me used */
+  if(!d.fd) d.fd = [false, false, false];         /* chest found */
+  if(typeof d.gold !== "number") d.gold = 0;
+  if(!d.pos) d.pos = [null, null, null];
+  var nudge = "", wrongPick = -1, fresh = -1, dragging = false;
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="lc-head"><b data-r="isle"></b><span class="lc-gold" data-r="gold"></span></div>' +
+      '<div class="lc-dots" data-r="dots" aria-hidden="true"></div>' +
+      '<div data-r="clues"></div>' +
+    '</div>' +
+    '<div class="lc-map" data-r="map" tabindex="0" role="application" aria-label="Treasure map. Tap or drag to move your X. Arrow keys work too."></div>' +
+    '<div class="wrow lc-btns">' +
+      '<span class="lc-pos" data-r="pos" aria-live="polite"></span>' +
+      '<button class="btn" type="button" data-r="dig">Dig here</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb lc-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  var mapEl = q("map");
+
+  function isle(){ return ISLES[Math.min(d.i, 2)]; }
+  function ready(){ return d.i < 3 && d.k[d.i] >= 2 && !d.fd[d.i]; }
+
+  function drawMap(){
+    var i = Math.min(d.i, 2), I = ISLES[i], g = "";
+    g += '<svg viewBox="0 0 344 284" role="img" aria-label="' + I.name + ' map, 10 km by 8 km, each square 1 km.">';
+    g += '<defs><clipPath id="lcclip"><rect x="' + mx(0) + '" y="' + my(MH) + '" width="' + MW * MS + '" height="' + MH * MS + '"/></clipPath></defs>';
+    g += '<rect x="' + (mx(0) - 6) + '" y="' + (my(MH) - 6) + '" width="' + (MW * MS + 12) + '" height="' + (MH * MS + 12) + '" rx="12" fill="#cfeef8"/>';
+    g += '<rect x="' + mx(0) + '" y="' + my(MH) + '" width="' + MW * MS + '" height="' + MH * MS + '" rx="4" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    for(var x = 1; x < MW; x++) g += ln([mx(x), my(0)], [mx(x), my(MH)], LINE, 1.2);
+    for(var y = 1; y < MH; y++) g += ln([mx(0), my(y)], [mx(MW), my(y)], LINE, 1.2);
+    if(d.fd[i]) g += regionSVG(I.region);
+    for(var c = 0; c < d.k[i]; c++) g += locusSVG(I.clues[c].draw, CLUECOL[c], fresh === c);
+    g += marksSVG(i);
+    var p = d.pos[i];
+    if(p && (d.k[i] >= 2)){
+      var P = mp(p);
+      if(d.fd[i]){
+        g += '<rect x="' + (P[0] - 14) + '" y="' + (P[1] - 11) + '" width="28" height="20" rx="3" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+             ln([P[0] - 14, P[1] - 3], [P[0] + 14, P[1] - 3], INK, 2) + '<rect x="' + (P[0] - 3) + '" y="' + (P[1] - 6) + '" width="6" height="7" fill="' + INK + '"/>';
+      } else {
+        g += ln([P[0] - 10, P[1] - 10], [P[0] + 10, P[1] + 10], WHITE, 9) + ln([P[0] + 10, P[1] - 10], [P[0] - 10, P[1] + 10], WHITE, 9);
+        g += ln([P[0] - 10, P[1] - 10], [P[0] + 10, P[1] + 10], CORAL, 5) + ln([P[0] + 10, P[1] - 10], [P[0] - 10, P[1] + 10], CORAL, 5);
+      }
+    }
+    g += '</svg>';
+    mapEl.innerHTML = g;
+  }
+
+  function drawClues(){
+    if(d.i >= 3){
+      q("clues").innerHTML = '<p style="margin:8px 0 0"><b>All three chests found.</b> Every clue was a locus: a circle, a perpendicular bisector, an angle bisector or a pair of parallel lines. The treasure was wherever the right sides overlapped.</p>';
+      return;
+    }
+    var i = d.i, I = ISLES[i], h = "";
+    I.clues.forEach(function(c, j){
+      var col = CLUECOL[j];
+      h += '<div class="lc-clue"><span class="lc-num" style="background:' + col + '">' + (j + 1) + '</span><div>';
+      if(j < d.k[i]){
+        h += '<p>' + c.txt + '</p><p class="tiny">&#10003; ' + c.done + '</p>';
+      } else if(j === d.k[i]){
+        h += '<p>' + c.txt + '</p><p class="lc-ask">Which construction marks the edge of this clue?</p><div class="lc-chips">';
+        KINDS.forEach(function(kd, m){ h += '<button type="button" data-pick="' + kd[0] + '" class="' + (wrongPick === m ? "no" : "") + '">' + kd[1] + '</button>'; });
+        h += '</div>' + (nudge ? '<p class="lc-nudge">' + nudge + '</p>' : "");
+      } else {
+        h += '<p class="lc-lock">Clue ' + (j + 1) + ' appears when clue ' + j + ' is on the map.</p>';
+      }
+      h += '</div></div>';
+    });
+    q("clues").innerHTML = h;
+    [].forEach.call(q("clues").querySelectorAll("[data-pick]"), function(b){
+      b.onclick = function(){ pick(b.getAttribute("data-pick")); };
+    });
+  }
+
+  function drawTop(){
+    var i = Math.min(d.i, 2);
+    q("isle").innerHTML = d.i >= 3 ? "Treasure hunt complete" : "Island " + (i + 1) + " of 3: " + ISLES[i].name;
+    q("gold").innerHTML = d.gold + " gold";
+    var dots = "";
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (d.fd[k] ? "on" : (k === d.i ? "now" : "")) + '"></span>';
+    q("dots").innerHTML = dots;
+  }
+
+  function drawPos(){
+    var i = d.i;
+    var pos = q("pos");
+    q("dig").classList.toggle("hidden", !ready());
+    q("dig").disabled = !(ready() && d.pos[i]);
+    q("show").classList.toggle("hidden", !(ready() && d.dm[i] > 0));
+    if(d.i >= 3){ pos.innerHTML = ""; return; }
+    if(d.fd[i]){ pos.innerHTML = ""; return; }
+    if(d.k[i] < 2){ pos.innerHTML = "Pick a construction for each clue to draw it on the map."; return; }
+    var p = d.pos[i];
+    pos.innerHTML = p ? "Your X: " + p[0] + " km across, " + p[1] + " km up." : "Tap the map to drop your X. Each square is 1 km.";
+  }
+
+  function draw(){ drawTop(); drawClues(); drawMap(); drawPos(); fresh = -1; }
+
+  function pick(kind){
+    var i = d.i, c = ISLES[i].clues[d.k[i]];
+    if(kind === c.kind){
+      fresh = d.k[i];
+      d.k[i]++; nudge = ""; wrongPick = -1;
+      api.save(); draw();
+      return;
+    }
+    d.pm[i]++;
+    wrongPick = KINDS.map(function(k){ return k[0]; }).indexOf(kind);
+    nudge = "<b>Not that one.</b> " + NUDGE[c.kind];
+    api.save(); drawClues();
+  }
+
+  function fb(cls, html){ var f = q("fb"); f.className = "fb lc-fb " + cls; f.innerHTML = html; }
+  function hideFb(){ q("fb").className = "fb lc-fb hidden"; }
+
+  function result(){
+    if(d.sh.some(Boolean)) return "shown";
+    if(d.pm.some(function(x){ return x > 0; }) || d.dm.some(function(x){ return x > 0; })) return "right2";
+    return "right1";
+  }
+
+  function found(how){
+    var i = d.i, I = ISLES[i], p = d.pos[i];
+    var earn = how === "shown" ? 3 : d.dm[i] ? 6 : 10;
+    d.fd[i] = true; d.gold += earn;
+    var last = i === 2;
+    if(last && !d.result) d.result = result();
+    api.save();
+    var facts = I.clues.map(function(c){ return c.test(p).msg; }).join(", and ");
+    var head = how === "shown" ? "<b>Here is one spot that works.</b> " : "<b>Clunk! Your spade hits the chest.</b> ";
+    fb(how === "shown" ? "show" : "good", head + "+" + earn + " gold. At (" + p[0] + ", " + p[1] + ") both clues are true: " + facts + ". The green patch shows everywhere that works." +
+      '<br><button class="btn" type="button" data-r="next">' + (last ? "See your haul" : "Sail to the next island") + '</button>');
+    q("next").onclick = function(){ d.i = i + 1; api.save(); hideFb(); draw(); if(d.i >= 3) finale(); };
+    draw();
+    if(last) api.done(d.result);
+  }
+
+  function finale(){
+    fb("good", "<b>" + d.gold + " gold out of 30.</b> " +
+      (d.gold >= 30 ? "A perfect haul. Jay will want to know your secret." : "Every chest found, and every one taught a locus.") +
+      ' <br><button class="btn btn-quiet" type="button" data-r="again">Hunt again</button>');
+    q("again").onclick = function(){
+      d.i = 0; d.k = [0, 0, 0]; d.fd = [false, false, false]; d.pos = [null, null, null]; d.gold = 0;
+      d.pm = [0, 0, 0]; d.dm = [0, 0, 0]; d.sh = [false, false, false];
+      api.save(); hideFb(); draw();
+    };
+  }
+
+  q("dig").onclick = function(){
+    if(!ready() || !d.pos[d.i]) return;
+    var i = d.i, p = d.pos[i];
+    var res = ISLES[i].clues.map(function(c){ return c.test(p); });
+    if(res.every(function(r){ return r.ok; })){ found("dug"); return; }
+    d.dm[i]++; api.save();
+    var bad = [];
+    res.forEach(function(r, j){ if(!r.ok) bad.push("<b>Clue " + (j + 1) + ":</b> " + r.msg); });
+    fb("nudge", "<b>Just sand here.</b><br>" + bad.join("<br>") + '<br><span class="tiny">Move your X and dig again, or tap Show me.</span>');
+    drawPos();
+  };
+  q("show").onclick = function(){
+    if(!ready()) return;
+    d.sh[d.i] = true;
+    d.pos[d.i] = ISLES[d.i].answer.slice();
+    found("shown");
+  };
+
+  function placeFrom(e){
+    var svg = mapEl.querySelector("svg");
+    if(!svg || !svg.getScreenCTM) return;
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var m = svg.getScreenCTM(); if(!m) return;
+    var p = pt.matrixTransform(m.inverse());
+    setPos((p.x - MOX) / MS, (MOY - p.y) / MS);
+  }
+  function setPos(x, y){
+    x = Math.max(0, Math.min(MW, Math.round(x * 2) / 2));
+    y = Math.max(0, Math.min(MH, Math.round(y * 2) / 2));
+    var old = d.pos[d.i];
+    if(old && old[0] === x && old[1] === y) return;
+    d.pos[d.i] = [x, y];
+    if(!q("fb").classList.contains("hidden") && !d.fd[d.i]) hideFb();
+    api.save(); drawMap(); drawPos();
+  }
+  mapEl.addEventListener("pointerdown", function(e){
+    if(!ready()){
+      if(d.i < 3 && !d.fd[d.i]) q("pos").innerHTML = "First pick the construction for each clue. Then the X is all yours.";
+      return;
+    }
+    dragging = true;
+    try{ mapEl.setPointerCapture(e.pointerId); }catch(err){}
+    placeFrom(e); e.preventDefault();
+  });
+  mapEl.addEventListener("pointermove", function(e){ if(dragging) placeFrom(e); });
+  mapEl.addEventListener("pointerup", function(){ dragging = false; });
+  mapEl.addEventListener("pointercancel", function(){ dragging = false; });
+  mapEl.addEventListener("keydown", function(e){
+    if(!ready()) return;
+    var p = d.pos[d.i] || [5, 4], dx = 0, dy = 0;
+    if(e.key === "ArrowLeft") dx = -0.5; else if(e.key === "ArrowRight") dx = 0.5;
+    else if(e.key === "ArrowUp") dy = 0.5; else if(e.key === "ArrowDown") dy = -0.5;
+    else if(e.key === "Enter"){ q("dig").click(); e.preventDefault(); return; }
+    else return;
+    e.preventDefault();
+    setPos(p[0] + dx, p[1] + dy);
+  });
+
+  draw();
+  if(d.i < 3 && d.fd[d.i]){
+    fb("good", "<b>Chest found on " + ISLES[d.i].name + ".</b> " + '<button class="btn" type="button" data-r="next">' + (d.i === 2 ? "See your haul" : "Sail to the next island") + '</button>');
+    var i0 = d.i;
+    q("next").onclick = function(){ d.i = i0 + 1; api.save(); hideFb(); draw(); if(d.i >= 3) finale(); };
+  }
+  if(d.i >= 3) finale();
+  if(d.result) api.done(d.result);
+}
+
+/* ================= the steps ================= */
+EGW.run({
+  id: "maths-construct",
+  title: "Congruence, scale and constructions",
+  subject: "Maths",
+  mins: 55,
+  blurb: "The geometry you draw: congruent and similar shapes, maps and scale drawings, compass constructions, loci, plans and elevations, and column vectors, with a loci treasure hunt in the middle.",
+  steps: [
+
+  /* ---------- CONGRUENCE ---------- */
+  { type: "learn", topic: "Congruence",
+    title: "Congruent triangles: same shape, same size",
+    fig: CONG,
+    html: '<p><b>Congruent</b> means exactly the same shape and size. One may be turned or flipped over, but every side and every angle matches.</p>' +
+          '<p>Two triangles are congruent if one of these is true:</p>' +
+          '<ul>' +
+          '<li><b>SSS</b>: all three sides match.</li>' +
+          '<li><b>SAS</b>: two sides and the angle <b>between</b> them match.</li>' +
+          '<li><b>ASA</b> (or AAS): two angles and a matching side.</li>' +
+          '<li><b>RHS</b>: a right angle, the hypotenuse and one other side.</li>' +
+          '</ul>' +
+          '<p><b>AAA is not enough.</b> Three matching angles give the same shape, but one triangle could be bigger. That makes them similar, not congruent.</p>' +
+          '<div class="keep"><b>Keep this</b>Give the condition and say which sides and angles match. The matching parts have to be in the same places in both triangles.</div>' },
+
+  { type: "mc", topic: "Congruence",
+    q: "These two triangles are congruent. Which condition shows it?",
+    fig: SASFIG,
+    options: ["SSS", "SAS", "ASA", "RHS"],
+    fixed: true,
+    answer: 1,
+    hint: "Look at where the 40&deg; angle sits compared with the two marked sides.",
+    why: "Two sides (5 cm and 7 cm) and the angle <b>between</b> them (40&deg;) match, so it is <b>SAS</b>. Turning a triangle round does not change anything.<br>It cannot be SSS because the third sides are not given, ASA needs two angles, and RHS needs a right angle." },
+
+  { type: "match", topic: "Congruence",
+    q: "Each pair of triangles has these facts in common. Match each pair to what it shows.",
+    pairs: [
+      ["Sides 6 cm, 8 cm and 9 cm in both", "SSS"],
+      ["Sides 4 cm and 5 cm with 30&deg; between them in both", "SAS"],
+      ["Angles 50&deg; and 60&deg; with the 7 cm side between them in both", "ASA"],
+      ["A right angle, hypotenuse 10 cm and another side 6 cm in both", "RHS"],
+      ["Angles 40&deg;, 60&deg; and 80&deg; in both", "Not enough to say"]
+    ],
+    hint: "Count what is given: sides, angles, or a right angle. If there are no sides at all, can you be sure of the size?",
+    why: "Three sides: SSS. Two sides with the angle between: SAS. Two angles with a side: ASA. Right angle, hypotenuse and a side: RHS.<br>Only angles (AAA) fixes the shape but not the size, so one triangle could be an enlargement of the other. Not enough to prove congruence." },
+
+  { type: "mc", topic: "Congruence", stretch: true,
+    q: "Triangle PQR has PQ = 7 cm, angle P = 50&deg; and angle Q = 70&deg;.<br>Triangle XYZ has XY = 7 cm, angle X = 50&deg; and angle Z = 70&deg;.<br>Are the triangles congruent?",
+    options: [
+      "Yes, by ASA",
+      "Yes, by AAS",
+      "No: the angles all match, but the 7 cm sides are in different places",
+      "No: you can never prove congruence with angles"
+    ],
+    answer: 2,
+    hint: "Work out the third angle in each triangle. Then look at which angles sit at each end of the 7 cm side.",
+    why: "Both triangles have angles 50&deg;, 60&deg; and 70&deg;. In PQR the 7 cm side PQ is between the 50&deg; and 70&deg; angles, so it is opposite 60&deg;. In XYZ the 7 cm side XY is between 50&deg; and 60&deg; (angle Y = 180 &minus; 50 &minus; 70 = 60&deg;), so it is opposite 70&deg;.<br>The sides do not correspond, so the triangles are <b>not congruent</b>. ASA and AAS only work when the side is in the same place in both." },
+
+  /* ---------- SIMILAR SHAPES ---------- */
+  { type: "learn", topic: "Similar shapes",
+    title: "Similar shapes: one is an enlargement of the other",
+    fig: SIMLEARN,
+    html: '<p><b>Similar</b> shapes are the same shape but can be different sizes. One is an enlargement of the other.</p>' +
+          '<ul>' +
+          '<li>Matching (corresponding) sides are all in the same ratio.</li>' +
+          '<li>Angles stay exactly the same.</li>' +
+          '</ul>' +
+          '<p><b>Scale factor</b> = a length on the new shape &divide; the matching length on the old one. Here 6 &divide; 4 = 1.5, so x = 3 &times; 1.5 = <b>4.5 cm</b>. The 50&deg; angle stays 50&deg;.</p>' +
+          '<div class="keep"><b>Keep this</b>Pair up the matching sides first. Multiply by the scale factor to go big, divide to go small. Angles never change.</div>' },
+
+  { type: "num", topic: "Similar shapes",
+    q: "Triangles ABC and PQR are similar. AB matches PQ, BC matches QR, and angle B matches angle Q.",
+    fig: SIMQ,
+    boxes: [
+      { label: "a) Scale factor from ABC to PQR", a: 2.5 },
+      { label: "b) Length of QR", a: 10, post: "cm" },
+      { label: "c) Size of angle Q", a: 70, post: "&deg;" }
+    ],
+    hint: "AB matches PQ. Divide to get the scale factor, then use it on BC. For the angle: what happens to angles in an enlargement?",
+    why: "a) 15 &divide; 6 = <b>2.5</b>.<br>b) QR matches BC: 4 &times; 2.5 = <b>10 cm</b>.<br>c) Angles do not change in an enlargement, so angle Q = <b>70&deg;</b>. Multiplying the angle by 2.5 is a very common slip." },
+
+  { type: "num", topic: "Similar shapes", stretch: true,
+    q: "DE is parallel to BC, so triangle ADE is similar to triangle ABC. Find BC.",
+    fig: OVERLAP,
+    boxes: [
+      { label: "a) Length of AB", a: 10, post: "cm" },
+      { label: "b) Scale factor from ADE to ABC", a: 2.5 },
+      { label: "c) Length of BC", a: 12.5, post: "cm" }
+    ],
+    hint: "Draw the two triangles separately. The small one has side AD; the big one has the whole side AB, not just DB.",
+    why: "a) AB = 4 + 6 = <b>10 cm</b>.<br>b) AD matches AB, so 10 &divide; 4 = <b>2.5</b>.<br>c) DE matches BC: 5 &times; 2.5 = <b>12.5 cm</b>.<br>The trap is using DB = 6 as the matching side, which gives 6 &divide; 4 = 1.5 and BC = 7.5 cm." },
+
+  /* ---------- MAPS AND SCALES ---------- */
+  { type: "learn", topic: "Maps and scales",
+    title: "Map scales: measure, then multiply",
+    fig: MAPLEARN,
+    html: '<p>A scale of <b>1 : 50 000</b> means 1 cm on the map is 50 000 cm in real life. Here Ash to Bry measures 6 cm, so the real distance is 6 &times; 50 000 = 300 000 cm.</p>' +
+          '<p>Then change the units: &divide; 100 for metres (3000 m), &divide; 1000 again for km (<b>3 km</b>).</p>' +
+          '<p>A scale like <b>1 cm to 2 km</b> skips that step: 6 cm would be 6 &times; 2 = 12 km.</p>' +
+          '<p>Going the other way, real to map, you divide. 9 km at 1 cm to 2 km is 9 &divide; 2 = 4.5 cm.</p>' +
+          '<div class="keep"><b>Keep this</b>Map to real: multiply. Real to map: divide. 1 km = 1000 m = 100 000 cm.</div>' },
+
+  { type: "num", topic: "Maps and scales",
+    q: "Use the ruler to measure from the hut to the beacon. The map scale is 1 : 25 000.",
+    fig: MEASURE,
+    boxes: [
+      { label: "a) Distance on the map", a: 6.4, tol: 0.11, post: "cm" },
+      { label: "b) Real distance in metres", a: 1600, tol: 26, post: "m" },
+      { label: "c) Real distance in kilometres", a: 1.6, tol: 0.026, post: "km" }
+    ],
+    hint: "Read the ruler where the beacon lines up; the small marks are millimetres. Then multiply by 25 000 to get centimetres, and change the units.",
+    why: "a) The beacon lines up with <b>6.4 cm</b>.<br>b) 6.4 &times; 25 000 = 160 000 cm, and 160 000 &divide; 100 = <b>1600 m</b>.<br>c) 1600 &divide; 1000 = <b>1.6 km</b>." },
+
+  { type: "num", topic: "Maps and scales",
+    q: "A walking map uses the scale <b>1 cm to 2 km</b>.",
+    boxes: [
+      { label: "a) Two hills are 4.5 cm apart on the map. Real distance?", a: 9, post: "km" },
+      { label: "b) Two towns are 15 km apart. Distance on the map?", a: 7.5, post: "cm" },
+      { label: "c) On a different map with scale 1 : 25 000, a path is 750 m long. Length on that map?", a: 3, post: "cm" }
+    ],
+    hint: "Map to real, multiply. Real to map, divide. For c), turn the 750 m into centimetres first.",
+    why: "a) 4.5 &times; 2 = <b>9 km</b>.<br>b) 15 &divide; 2 = <b>7.5 cm</b>.<br>c) 750 m = 75 000 cm, and 75 000 &divide; 25 000 = <b>3 cm</b>. Dividing 750 by 25 000 without changing the units first gives a tiny wrong answer." },
+
+  /* ---------- CONSTRUCTIONS ---------- */
+  { type: "learn", topic: "Constructions",
+    title: "Two constructions with compasses",
+    fig: CONSTR,
+    html: '<p>A <b>perpendicular bisector</b> cuts a line segment in half at right angles. Every point on it is the same distance from both ends.</p>' +
+          '<p>Open the compasses to more than half the line. From one end, draw arcs above and below. Keep the same width and do the same from the other end. Join the two crossings with a ruler.</p>' +
+          '<p>An <b>angle bisector</b> cuts an angle in half. From the corner, draw an arc that crosses both arms. From each crossing, draw an arc (same width) so they cross inside the angle. Join the corner to that point.</p>' +
+          '<div class="keep"><b>Keep this</b>Leave every arc showing: they are your working. Keep the compass width the same in each step.</div>' },
+
+  { type: "order", topic: "Constructions",
+    q: "Put the steps for constructing the perpendicular bisector of a line AB in order.",
+    items: [
+      "Open the compasses to more than half the length of AB",
+      "Put the compass point on A and draw an arc above and below the line",
+      "Keep the same width, put the point on B and draw arcs that cross the first ones",
+      "Use a ruler to join the two points where the arcs cross"
+    ],
+    hint: "You have to set the compasses before you draw anything, and the ruler only comes out once there are two crossings to join.",
+    why: "Set the width (more than half, or the arcs will not meet), arcs from A, arcs from B with the same width, then join the crossings. The line you draw meets AB at its midpoint, at 90&deg;." },
+
+  { type: "learn", topic: "Constructions",
+    title: "A triangle from three sides",
+    fig: TRICON,
+    html: '<p>To construct triangle ABC with AB = 7 cm, AC = 5 cm and BC = 6 cm:</p>' +
+          '<ul>' +
+          '<li>Draw AB, 7 cm, with a ruler.</li>' +
+          '<li>Open the compasses to 5 cm. Point on A, draw an arc.</li>' +
+          '<li>Open them to 6 cm. Point on B, draw an arc that crosses the first.</li>' +
+          '<li>The crossing is C. Join it to A and to B.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Leave the arcs showing and measure each side to check. A sharp pencil helps: mark schemes usually allow about 2 mm either way.</div>' },
+
+  { type: "mc", topic: "Constructions", stretch: true,
+    q: "Kai tries to construct a triangle with sides 3 cm, 4 cm and 9 cm. What happens?",
+    options: [
+      "The arcs never meet, so there is no triangle",
+      "It makes a right angled triangle",
+      "It makes a very thin triangle",
+      "It makes an isosceles triangle"
+    ],
+    answer: 0,
+    hint: "Draw the 9 cm side. Could a 3 cm arc from one end and a 4 cm arc from the other end ever reach each other?",
+    why: "The arcs reach at most 3 cm and 4 cm from each end, which covers only 7 cm of the 9 cm gap. They never cross, so <b>no triangle is possible</b>.<br>The two shorter sides always have to add up to more than the longest side. (3, 4, 5 would make a right angled triangle.)" },
+
+  /* ---------- LOCI ---------- */
+  { type: "learn", topic: "Loci",
+    title: "Loci: every point that follows a rule",
+    fig: LOCI,
+    html: '<p>A <b>locus</b> (plural loci) is the set of all points that follow a rule.</p>' +
+          '<ul>' +
+          '<li>A fixed distance from a <b>point</b>: a circle.</li>' +
+          '<li>A fixed distance from a <b>line</b>: parallel lines (round ends if the line has ends).</li>' +
+          '<li>Equidistant from <b>two points</b>: the perpendicular bisector.</li>' +
+          '<li>Equidistant from <b>two lines</b> that meet: the angle bisector.</li>' +
+          '</ul>' +
+          '<p>Distance from a line is always measured at right angles: the shortest way.</p>' +
+          '<p>&ldquo;Within 3 km&rdquo; means on or inside the circle. &ldquo;Closer to A than B&rdquo; means A&rsquo;s side of the bisector.</p>' +
+          '<div class="keep"><b>Keep this</b>Draw each locus, decide which side each rule wants, then shade only where every rule is true.</div>' },
+
+  { type: "widget", topic: "Loci",
+    title: "Loci treasure hunt",
+    html: "Three islands, three hidden chests. For each clue, pick the construction that marks its edge and watch it appear. Then drag the X to anywhere both clues are true and dig. Each square is 1 km.",
+    mount: mountHunt,
+    report: function(d){
+      if(!d || !d.fd) return "Loci treasure hunt: not started.";
+      var n = d.fd.filter(Boolean).length;
+      if(!d.result) return "Loci treasure hunt: " + n + " of 3 chests found.";
+      var lab = { right1: "all three, every pick and dig right first go", right2: "all three, with some second goes", shown: "finished, used Show me at least once" }[d.result];
+      return "Loci treasure hunt: " + lab + " (wrong picks " + (d.pm || []).join("/") + ", wrong digs " + (d.dm || []).join("/") + ").";
+    } },
+
+  { type: "mc", topic: "Loci",
+    q: "Which region is <b>within 2 cm of P</b> and <b>closer to Q than to R</b>?",
+    fig: REGION,
+    options: ["Region 1", "Region 2", "Region 3", "Region 4"],
+    fixed: true,
+    answer: 1,
+    hint: "Within 2 cm of P means inside the circle. Then which side of the dashed straight line is Q on?",
+    why: "Inside the circle are regions 2 and 3. The straight line is the perpendicular bisector of QR, and Q is on the same side as region 2. So <b>region 2</b> is the only one where both rules are true.<br>Region 1 is on Q&rsquo;s side but outside the circle; region 3 is inside the circle but nearer R." },
+
+  /* ---------- PLANS AND ELEVATIONS ---------- */
+  { type: "learn", topic: "Plans and elevations",
+    title: "Plans and elevations: three flat views",
+    fig: PLANLEARN,
+    html: '<p>A 3D shape can be drawn as three flat 2D views:</p>' +
+          '<ul>' +
+          '<li><b>Plan</b>: looking straight down from above.</li>' +
+          '<li><b>Front elevation</b>: looking straight at the front.</li>' +
+          '<li><b>Side elevation</b>: looking straight at one side.</li>' +
+          '</ul>' +
+          '<p>You only see a flat outline from each direction, so a cube hiding behind another one still adds to the height of an elevation if it pokes up above.</p>' +
+          '<div class="keep"><b>Keep this</b>For a plan, the front of the shape goes at the bottom of your drawing. For an elevation, count the tallest stack in each column.</div>' },
+
+  { type: "mc", topic: "Plans and elevations",
+    q: "Which of these is the <b>plan</b> of this shape?",
+    fig: S2FIG,
+    options: [
+      optSVG([[0, 0], [1, 0], [0, 1], [1, 1], [2, 1]], "Three squares at the back, two at the front on the left"),
+      optSVG([[0, 1], [1, 1], [0, 0], [1, 0], [2, 0]], "Three squares at the front, two at the back on the left"),
+      optSVG([[1, 0], [2, 0], [0, 1], [1, 1], [2, 1]], "Three squares at the back, two at the front on the right"),
+      optSVG([[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]], "A full rectangle of six squares")
+    ],
+    answer: 0,
+    hint: "From above, which columns have cubes in the back row, and which have cubes in the front row? The front goes at the bottom of the plan.",
+    why: "From above you see five squares. The back row has all three columns (the right hand cube is only at the back). The front row has just the left two. With the front at the bottom, that is <b>three squares along the top and two at the bottom left</b>.<br>The one with three squares along the bottom is upside down, and the full rectangle forgets the gap at the front right." },
+
+  { type: "mc", topic: "Plans and elevations",
+    q: "Same shape. Which is its <b>front elevation</b>?",
+    fig: S2FIG,
+    options: [
+      optSVG([[0, 0], [1, 0], [2, 0], [0, 1], [1, 1]], "Columns of 2, 2 and 1 from left to right"),
+      optSVG([[0, 0], [1, 0], [2, 0], [0, 1]], "Columns of 2, 1 and 1 from left to right"),
+      optSVG([[0, 0], [1, 0], [2, 0], [1, 1], [2, 1]], "Columns of 1, 2 and 2 from left to right"),
+      optSVG([[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]], "Columns of 2, 2 and 2")
+    ],
+    answer: 0,
+    hint: "From the front, how tall is each column? The middle column has a short stack at the front, but look behind it.",
+    why: "From the front, the left column is 2 high. The middle column has 1 cube at the front but 2 behind it, and you see the taller one, so it looks 2 high. The right column has 1 cube (at the back). So it is <b>2, 2 and 1</b> from left to right.<br>Columns of 2, 1 and 1 forgets the taller stack hiding behind the middle column." },
+
+  { type: "num", topic: "Plans and elevations",
+    q: "This plan shows how many cubes are stacked on each square.",
+    fig: NUMPLAN,
+    boxes: [
+      { label: "a) How many cubes altogether?", a: 8 },
+      { label: "b) How many squares in the front elevation?", a: 5 }
+    ],
+    hint: "a) Add every number. b) From the front, each column looks as tall as its tallest stack, front or back.",
+    why: "a) 3 + 1 + 1 + 2 + 1 + 0 = <b>8</b> cubes.<br>b) Left column: the tallest stack is 3. Middle: 1. Right: 1. So the front elevation has 3 + 1 + 1 = <b>5</b> squares. Adding the front row only (2 + 1 + 0) misses the cubes behind that poke up or show through." },
+
+  /* ---------- VECTORS ---------- */
+  { type: "learn", topic: "Vectors",
+    title: "Column vectors: across, then up or down",
+    fig: VECLEARN,
+    html: '<p>A <b>column vector</b> describes a movement. The top number is across: positive is right, negative is left. The bottom number is up (positive) or down (negative).</p>' +
+          '<p>' + cv(3, -2) + ' means 3 right and 2 down. A translation by a vector moves every point of a shape by that amount.</p>' +
+          '<ul>' +
+          '<li><b>Add</b>: add the tops, add the bottoms. On a diagram, put them nose to tail.</li>' +
+          '<li><b>Subtract</b>: top minus top, bottom minus bottom.</li>' +
+          '<li><b>Multiply by a number</b>: multiply both. 2<b>a</b> is twice as long; &minus;<b>a</b> points the opposite way.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>To draw a vector, start anywhere, count across, then up or down, and put an arrow on the end. Watch double negatives: 2 &minus; (&minus;3) = 5.</div>' },
+
+  { type: "mc", topic: "Vectors",
+    q: "Which column vector describes the arrow?",
+    fig: VECQ,
+    options: [cv(-4, 3), cv(4, -3), cv(3, -4), cv(-3, 4)],
+    answer: 0,
+    hint: "Start at the dot. How many squares left or right to get level with the arrowhead? Then how many up or down?",
+    why: "From the start, the arrow goes 4 squares <b>left</b> (&minus;4) and 3 squares <b>up</b> (+3), so it is " + cv(-4, 3) + ".<br>" + cv(4, -3) + " is the same length but goes the opposite way. Swapping the numbers mixes up across and up." },
+
+  { type: "num", topic: "Vectors",
+    q: "<b>a</b> = " + cv(2, 5) + " and <b>b</b> = " + cv(-3, 1) + ". Work out each vector, one number per box.",
+    boxes: [
+      { label: "a + b: top", a: -1 },
+      { label: "a + b: bottom", a: 6 },
+      { label: "3a: top", a: 6 },
+      { label: "3a: bottom", a: 15 },
+      { label: "a &minus; b: top", a: 5 },
+      { label: "a &minus; b: bottom", a: 4 }
+    ],
+    hint: "Work on the tops and the bottoms separately. For a &minus; b, subtracting a negative is the same as adding.",
+    why: "<b>a + b</b>: 2 + (&minus;3) = &minus;1 and 5 + 1 = 6, so " + cv(-1, 6) + ".<br><b>3a</b>: 3 &times; 2 = 6 and 3 &times; 5 = 15, so " + cv(6, 15) + ".<br><b>a &minus; b</b>: 2 &minus; (&minus;3) = 5 and 5 &minus; 1 = 4, so " + cv(5, 4) + ". Getting &minus;1 for the top means the double negative slipped." },
+
+  { type: "num", topic: "Vectors", stretch: true,
+    q: "<b>a</b> = " + cv(3, -1) + " and <b>b</b> = " + cv(-2, 4) + ".<br>Find 2<b>a</b> &minus; <b>b</b>, and find the vector <b>c</b> where <b>a</b> + <b>c</b> = <b>b</b>.",
+    boxes: [
+      { label: "2a &minus; b: top", a: 8 },
+      { label: "2a &minus; b: bottom", a: -6 },
+      { label: "c: top", a: -5 },
+      { label: "c: bottom", a: 5 }
+    ],
+    hint: "Double a first, then subtract b. For c: what do you add to a to get to b? That is b minus a.",
+    why: "2<b>a</b> = " + cv(6, -2) + ". Then " + cv(6, -2) + " &minus; " + cv(-2, 4) + ": 6 &minus; (&minus;2) = 8 and &minus;2 &minus; 4 = &minus;6, giving " + cv(8, -6) + ".<br><b>c</b> = <b>b</b> &minus; <b>a</b>: &minus;2 &minus; 3 = &minus;5 and 4 &minus; (&minus;1) = 5, giving " + cv(-5, 5) + ". Check: " + cv(3, -1) + " + " + cv(-5, 5) + " = " + cv(-2, 4) + "." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "<p>Ravi makes a scale drawing of his garden. The scale is <b>1 : 50</b>.</p><p>Work through it in parts.</p>",
+    boxes: [
+      { label: "a) The patio is 8 cm long on the drawing. How long is the real patio?", a: 4, post: "m" },
+      { label: "b) The garden is 12 m wide. How wide is it on the drawing?", a: 24, post: "cm" },
+      { label: "c) A pond must be at least 2.5 m from the house. What is the shortest distance on the drawing?", a: 5, post: "cm" },
+      { label: "d) Ravi redraws the plan at 1 : 25. How long is the patio on the new drawing?", a: 16, post: "cm" }
+    ],
+    hint: "1 : 50 means 1 cm on the drawing is 50 cm in real life. Change metres to centimetres (&times; 100) before you divide.",
+    why: "a) 8 &times; 50 = 400 cm = <b>4 m</b>.<br>b) 12 m = 1200 cm, and 1200 &divide; 50 = <b>24 cm</b>.<br>c) 2.5 m = 250 cm, and 250 &divide; 50 = <b>5 cm</b>. On the drawing, the pond has to sit on or beyond a line drawn 5 cm from the house wall, which is a locus.<br>d) The real patio is 400 cm, and 400 &divide; 25 = <b>16 cm</b>. The new drawing is an enlargement of the old one with scale factor 2, so 8 &times; 2 = 16 cm too." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

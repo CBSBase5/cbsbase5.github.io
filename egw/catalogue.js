@@ -120,6 +120,23 @@ EGWCAT.acts = [
   ]
  },
  {
+  "id": "maths-simultaneous",
+  "subject": "maths",
+  "title": "Simultaneous equations and more",
+  "line": "Error intervals, counting, and simultaneous equations with a cafe price detective.",
+  "mins": 55,
+  "chunks": [
+   "Error intervals",
+   "Truncation",
+   "Counting",
+   "Simultaneous equations",
+   "Multiply first",
+   "Graphs",
+   "Forming equations",
+   "Exam style"
+  ]
+ },
+ {
   "id": "maths-graphs",
   "subject": "maths",
   "title": "Sequences and graphs",
@@ -150,6 +167,23 @@ EGWCAT.acts = [
    "Bearings",
    "Transformations",
    "Enlargement",
+   "Exam style"
+  ]
+ },
+ {
+  "id": "maths-construct",
+  "subject": "maths",
+  "title": "Congruence, scale and constructions",
+  "line": "Congruence, similar shapes, map scales, constructions, loci, plans and vectors, with a treasure hunt.",
+  "mins": 55,
+  "chunks": [
+   "Congruence",
+   "Similar shapes",
+   "Maps and scales",
+   "Constructions",
+   "Loci",
+   "Plans and elevations",
+   "Vectors",
    "Exam style"
   ]
  },
@@ -306,6 +340,40 @@ EGWCAT.acts = [
   ]
  },
  {
+  "id": "biology-microbes-plants",
+  "subject": "bio",
+  "title": "Microbes and plant health",
+  "line": "Mostly Separate Biology: growing bacteria, clear zones, monoclonal antibodies, plant diseases and hormones.",
+  "mins": 45,
+  "chunks": [
+   "Growing bacteria",
+   "Aseptic technique",
+   "Clear zones",
+   "Monoclonal antibodies",
+   "Plant diseases",
+   "Plant defences",
+   "Plant hormones",
+   "Exam style"
+  ]
+ },
+ {
+  "id": "biology-kidneys-species",
+  "subject": "bio",
+  "title": "Kidneys, species and food",
+  "line": "Separate Biology only: kidneys, speciation, decay and food security, with a kidney sorting machine.",
+  "mins": 45,
+  "chunks": [
+   "Water balance",
+   "Urea and ADH",
+   "Kidney failure",
+   "Speciation",
+   "Food security",
+   "Food solutions",
+   "Decay",
+   "Milk practical"
+  ]
+ },
+ {
   "id": "stats-sampling",
   "subject": "stats",
   "title": "Sampling and collecting data",
@@ -321,6 +389,23 @@ EGWCAT.acts = [
    "Enquiry cycle",
    "Capture recapture",
    "Two way stratified"
+  ]
+ },
+ {
+  "id": "stats-cleaning",
+  "subject": "stats",
+  "title": "Cleaning and preparing data",
+  "line": "Spotting errors, missing data and outliers, then cleaning a class survey as a data detective.",
+  "mins": 50,
+  "chunks": [
+   "Why clean data",
+   "Spotting errors",
+   "Missing data",
+   "Outlier or error?",
+   "Making it consistent",
+   "Grouping data",
+   "Tables and means",
+   "Exam style"
   ]
  },
  {
@@ -511,7 +596,7 @@ EGWCAT.subjects = [
     { group: "Number", name: "Primes, factors, HCF and LCM", often: 1, links: [["maths-number", 3], ["maths-number", 4]] },
     { group: "Number", name: "Powers, roots and standard form", often: 1, links: [["maths-number", 5], ["maths-number", 6]] },
     { group: "Number", name: "Fractions, decimals and percentages", often: 1, links: [["maths-number", 7], ["maths-number", 8], ["maths-money", 1]] },
-    { group: "Number", name: "Error intervals and the product rule for counting", often: 0, links: [] },
+    { group: "Number", name: "Error intervals, truncation and counting (product rule Higher only)", often: 1, links: [["maths-simultaneous", 1], ["maths-simultaneous", 2], ["maths-simultaneous", 3]] },
     { group: "Algebra", name: "Simplifying, expanding and factorising", often: 1, links: [["maths-algebra", 2], ["maths-algebra", 6]] },
     { group: "Algebra", name: "Solving equations", often: 1, links: [["maths-algebra", 3], ["maths-algebra", 4]] },
     { group: "Algebra", name: "Substitution and formulae", often: 1, links: [["maths-algebra", 4], ["maths-algebra", 6]] },
@@ -519,7 +604,7 @@ EGWCAT.subjects = [
     { group: "Algebra", name: "Sequences and the nth term", often: 1, links: [["maths-graphs", 1], ["maths-graphs", 2]] },
     { group: "Algebra", name: "Coordinates and straight line graphs", often: 1, links: [["maths-graphs", 3], ["maths-graphs", 4], ["maths-graphs", 5]] },
     { group: "Algebra", name: "Real life graphs", often: 1, links: [["maths-graphs", 6]] },
-    { group: "Algebra", name: "Simultaneous equations", often: 0, links: [] },
+    { group: "Algebra", name: "Simultaneous equations", often: 1, links: [["maths-simultaneous", 4], ["maths-simultaneous", 5], ["maths-simultaneous", 6], ["maths-simultaneous", 7]] },
     { group: "Algebra", name: "Quadratics", often: 1, links: [["maths-algebra", 6], ["maths-graphs", 7]] },
     { group: "Ratio and proportion", name: "Percentages and multipliers", often: 1, links: [["maths-money", 1], ["maths-money", 2], ["maths-money", 3]] },
     { group: "Ratio and proportion", name: "Reverse percentages and interest", often: 1, links: [["maths-money", 6]] },
@@ -534,9 +619,10 @@ EGWCAT.subjects = [
     { group: "Geometry", name: "Area, perimeter and circles", often: 1, links: [["maths-measures", 1], ["maths-measures", 2]] },
     { group: "Geometry", name: "Volume and surface area", often: 1, links: [["maths-measures", 3]] },
     { group: "Geometry", name: "Pythagoras and trigonometry", often: 1, links: [["maths-measures", 5], ["maths-measures", 6], ["maths-measures", 7]] },
-    { group: "Geometry", name: "Scale drawings and similar shapes", often: 0, links: [], ext: ["/practice/scale.html", "Scale on the practice hub"] },
-    { group: "Geometry", name: "Constructions, loci, plans and vectors", often: 0, links: [] },
-    { group: "Geometry", name: "Congruence", often: 0, links: [] },
+    { group: "Geometry", name: "Scale drawings, maps and similar shapes", often: 1, links: [["maths-construct", 2], ["maths-construct", 3]], ext: ["/practice/scale.html", "More scale practice on the practice hub"] },
+    { group: "Geometry", name: "Constructions and loci", often: 1, links: [["maths-construct", 4], ["maths-construct", 5]] },
+    { group: "Geometry", name: "Plans, elevations and vectors", often: 1, links: [["maths-construct", 6], ["maths-construct", 7]] },
+    { group: "Geometry", name: "Congruence", often: 0, links: [["maths-construct", 1]] },
     { group: "Probability and statistics", name: "Probability, sample spaces and Venn diagrams", often: 1, links: [["maths-probability", 1], ["maths-probability", 2], ["maths-probability", 3], ["maths-probability", 5]] },
     { group: "Probability and statistics", name: "Relative frequency and tree diagrams", often: 1, links: [["maths-probability", 4], ["maths-probability", 6], ["maths-probability", 7]] },
     { group: "Probability and statistics", name: "Averages and charts", often: 1, links: [["stats-averages", 1], ["stats-averages", 3], ["stats-charts", 2], ["stats-charts", 3]] },
@@ -587,11 +673,11 @@ EGWCAT.subjects = [
     { group: "Required practicals", name: "Photosynthesis and light (pondweed)", often: 1, links: [["biology-bioenergetics", 4]] },
     { group: "Required practicals", name: "Reaction time", often: 1, links: [["biology-homeostasis", 3]] },
     { group: "Required practicals", name: "Sampling with quadrats", often: 1, links: [["biology-ecology", 4]] },
-    { group: "Required practicals", name: "Microbes, plant growth and decay (Separate Biology only)", often: 0, links: [] },
-    { group: "Separate Biology only", name: "Culturing microorganisms and monoclonal antibodies", often: 0, links: [] },
-    { group: "Separate Biology only", name: "Plant diseases and plant hormones", often: 0, links: [] },
-    { group: "Separate Biology only", name: "Kidneys and water balance", often: 0, links: [] },
-    { group: "Separate Biology only", name: "Speciation and food security", often: 0, links: [] }
+    { group: "Required practicals", name: "Microbes, plant growth and decay (Separate Biology only)", often: 0, links: [["biology-microbes-plants", 3], ["biology-microbes-plants", 7], ["biology-kidneys-species", 8]] },
+    { group: "Separate Biology only", name: "Culturing microorganisms and monoclonal antibodies", often: 0, links: [["biology-microbes-plants", 1], ["biology-microbes-plants", 2], ["biology-microbes-plants", 4]] },
+    { group: "Separate Biology only", name: "Plant diseases, defences and hormones", often: 0, links: [["biology-microbes-plants", 5], ["biology-microbes-plants", 6], ["biology-microbes-plants", 7]] },
+    { group: "Separate Biology only", name: "Kidneys and water balance", often: 0, links: [["biology-kidneys-species", 1], ["biology-kidneys-species", 2], ["biology-kidneys-species", 3]] },
+    { group: "Separate Biology only", name: "Speciation, decay and food security", often: 0, links: [["biology-kidneys-species", 4], ["biology-kidneys-species", 7], ["biology-kidneys-species", 5], ["biology-kidneys-species", 6]] }
   ] },
 
 { key: "stats", name: "Statistics", short: "Statistics", acc: "acc-stats",
@@ -610,7 +696,8 @@ EGWCAT.subjects = [
     { group: "Collecting data", name: "Populations, samples and census", often: 1, links: [["stats-sampling", 2]] },
     { group: "Collecting data", name: "Sampling methods (two way stratified Higher only)", often: 1, links: [["stats-sampling", 3], ["stats-sampling", 4], ["stats-sampling", 5], ["stats-sampling", 9]] },
     { group: "Collecting data", name: "Questionnaires and bias", often: 1, links: [["stats-sampling", 6], ["stats-sampling", 5]] },
-    { group: "Collecting data", name: "Cleaning data", often: 0, links: [] },
+    { group: "Collecting data", name: "Cleaning data: errors, missing values and outliers", often: 1, links: [["stats-cleaning", 1], ["stats-cleaning", 2], ["stats-cleaning", 3], ["stats-cleaning", 4], ["stats-cleaning", 5]] },
+    { group: "Collecting data", name: "Grouping data and class intervals", often: 1, links: [["stats-cleaning", 6], ["stats-cleaning", 7]] },
     { group: "Collecting data", name: "Experiments and variables (control groups and matched pairs Higher only)", often: 1, links: [["stats-experiments", 1], ["stats-experiments", 2], ["stats-experiments", 3]] },
     { group: "Collecting data", name: "Reliability, validity and pilot studies", often: 1, links: [["stats-experiments", 4]] },
     { group: "Collecting data", name: "Capture recapture (Higher only)", often: 0, links: [["stats-sampling", 8]] },

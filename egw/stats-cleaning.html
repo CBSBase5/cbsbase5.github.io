@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cleaning and preparing data - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
+<style>
+/* Data detective (widget on this page only) */
+.dd-status{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 8px}
+.dd-status .wbig{font-size:1.35rem}
+.dd-tab{width:100%;border-collapse:collapse;table-layout:fixed;font-size:.95rem;background:#fff}
+.dd-tab th{font-family:var(--display);font-size:.74rem;line-height:1.15;padding:6px 2px;background:var(--accent-soft);border:2px solid var(--ink);font-weight:700}
+.dd-tab td{border:1px solid var(--line);padding:0;text-align:center}
+.dd-tab col.dd-name{width:19%}
+.dd-c{display:block;width:100%;min-height:38px;border:0;background:#fff;font:inherit;color:var(--ink);cursor:pointer;padding:6px 1px;font-variant-numeric:tabular-nums}
+.dd-c:hover{background:var(--accent-soft)}
+.dd-c.sel{outline:3px solid var(--blue);outline-offset:-3px;background:#eef1ff}
+.dd-c.fixed{background:rgba(25,195,154,.2);font-weight:700}
+.dd-c.out{color:#8a8fa8;text-decoration:line-through;background:#f1f1f6}
+.dd-c.kept{background:rgba(255,210,63,.35);font-weight:700}
+.dd-c:disabled{cursor:default}
+.dd-c.nm{font-family:var(--display);font-weight:700;text-align:left;padding-left:6px}
+tr.dd-del .dd-c{text-decoration:line-through;color:#a0a4b8;background:#f1f1f6}
+tr.dd-act td{background:var(--paper);padding:10px 10px 12px;border:2px solid var(--ink);text-align:left}
+.dd-act p{margin:0 0 8px;font-size:.95rem}
+.dd-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+.dd-acts .btn{justify-content:center;padding:9px 6px;font-size:.92rem}
+.dd-chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.dd-chips .btn{padding:8px 16px}
+.dd-say{border-radius:10px;padding:8px 10px;margin:8px 0 0;font-size:.95rem}
+.dd-say.good{background:rgba(31,157,99,.14);border-left:5px solid var(--good)}
+.dd-say.hmm{background:rgba(255,93,93,.12);border-left:5px solid var(--coral)}
+.dd-say.info{background:#fff;border-left:5px solid var(--blue)}
+.dd-foot td{font-family:var(--display);font-weight:700;padding:6px 1px;font-size:.88rem;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.dd-foot td.lab{text-align:left;font-size:.72rem;padding-left:6px;letter-spacing:.02em}
+.dd-foot.now td{background:var(--accent-soft);border-top:2px solid var(--ink)}
+.dd-foot.start td{color:#6b7090;font-weight:500}
+.dd-flash{animation:ddflash .9s ease}
+@keyframes ddflash{0%{background:var(--sun)}100%{background:var(--accent-soft)}}
+.dd-key{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem;margin:8px 0 0;color:var(--body-tint)}
+.dd-key span{display:inline-flex;align-items:center;gap:5px}
+.dd-key i{display:inline-block;width:14px;height:14px;border:1px solid var(--ink);border-radius:3px}
+.dd-sum{margin:6px 0 0;padding-left:20px}
+.dd-sum li{margin-bottom:6px;font-size:.95rem}
+.linkbtn{font:inherit;font-size:.92rem;background:none;border:0;color:var(--blue);text-decoration:underline;cursor:pointer;padding:4px 0}
+@media (max-width:420px){
+  .dd-tab{font-size:.9rem}
+  .dd-tab th{font-size:.68rem}
+  .dd-foot td{font-size:.8rem}
+  .dd-foot td.lab{font-size:.66rem;padding-left:3px}
+  .dd-c.nm{padding-left:3px}
+  .wpanel.dd-panel{padding:10px 6px}
+}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Cleaning and preparing data</h2>
+    <span>GCSE Statistics. Spotting errors, dealing with missing data, deciding about outliers, tidying units and formats, and grouping data before you process it.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=5"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", TEAL = "#3a5cff", BRIGHT = "#22b8e6", ORANGE = "#ff5d5d",
+    YELLOW = "#ffd23f", MINT = "#19c39a", PLUM = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+/* ---------- figures ---------- */
+
+/* The enquiry cycle with the cleaning step picked out */
+var CYCLE = (function(){
+  var s = '<svg viewBox="0 0 360 178" role="img" aria-label="The enquiry cycle: plan, collect, then clean the data, then process and represent, interpret, evaluate, and back to plan. Cleaning sits between collecting and processing." style="max-width:460px">';
+  s += '<defs><marker id="scArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="' + INK + '"/></marker></defs>';
+  function box(x, y, top, sub, fill, bold){
+    var t = '<rect x="' + x + '" y="' + y + '" width="104" height="52" rx="12" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + (bold ? 4 : 2.5) + '"/>';
+    t += '<text x="' + (x + 52) + '" y="' + (y + 22) + '" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="16" fill="' + INK + '">' + top + '</text>';
+    t += '<text x="' + (x + 52) + '" y="' + (y + 41) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + sub + '</text>';
+    return t;
+  }
+  function arr(x1, y1, x2, y2, dash){
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + INK + '" stroke-width="2.5" marker-end="url(#scArr)"' + (dash ? ' stroke-dasharray="5 4"' : '') + '/>';
+  }
+  s += box(6, 10, "Plan", "hypothesis", WHITE);
+  s += box(128, 10, "Collect", "the data", WHITE);
+  s += box(250, 10, "Clean", "find and fix", YELLOW, true);
+  s += box(250, 116, "Process", "and represent", WHITE);
+  s += box(128, 116, "Interpret", "the results", WHITE);
+  s += box(6, 116, "Evaluate", "and refine", WHITE);
+  s += arr(111, 36, 125, 36) + arr(233, 36, 247, 36);
+  s += arr(302, 63, 302, 113);
+  s += arr(249, 142, 235, 142) + arr(127, 142, 113, 142);
+  s += arr(58, 115, 58, 65, true);
+  s += '<text x="180" y="94" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="15" fill="' + PLUM + '">clean first, then calculate</text>';
+  return s + '</svg>';
+})();
+
+/* ---------- tables ---------- */
+var GROUP_Q =
+'<table class="datatable"><tr><th>Time, t (minutes)</th><th>Frequency</th></tr>' +
+'<tr><td>0 &lt; t &le; 10</td><td>?</td></tr><tr><td>10 &lt; t &le; 20</td><td>?</td></tr>' +
+'<tr><td>20 &lt; t &le; 30</td><td>?</td></tr><tr><td>30 &lt; t &le; 40</td><td>?</td></tr></table>';
+
+var RAW_PETS =
+'<table class="datatable"><tr><th>Year</th><th>Answers to &quot;Do you have a pet?&quot;</th></tr>' +
+'<tr><th>Year 10</th><td style="text-align:left">Yes, Y, no, yes, No, Yes</td></tr>' +
+'<tr><th>Year 11</th><td style="text-align:left">y, No, NO, Yes, n, Yes, YES, yes</td></tr></table>';
+
+var TWOWAY_BLANK =
+'<table class="datatable" style="margin-top:10px"><tr><th></th><th>Pet</th><th>No pet</th></tr>' +
+'<tr><th>Year 10</th><td>a</td><td>b</td></tr><tr><th>Year 11</th><td>c</td><td>d</td></tr></table>';
+
+/* ---------- the data detective widget ---------- */
+var COLS = ["Height", "Shoe size", "Travel time", "Pets"];
+var UNITS = [" cm", "", " minutes", ""];
+var DD = [
+  ["Ali", 162, 6, 12, 1],
+  ["Bea", 155, 5, 20, 0],
+  ["Cal", 1.58, 5, 8, 2],
+  ["Dev", 171, 8, 15, 1],
+  ["Dev", 171, 8, 15, 1],
+  ["Eli", 149, 4, 25, 3],
+  ["Fin", 17, 7, 5, 2],
+  ["Gus", 166, 7, 75, 1],
+  ["Hal", 158, 6, 18, null],
+  ["Ivy", 175, 9, "1O", 0],
+  ["Jo", 152, 5, 10, 1],
+  ["Kai", 160, 6, 22, 4],
+  ["Lia", 164, 7, 14, 0],
+  ["Mo", 157, 5, 9, 2]
+];
+/* cases: where they are, the best move, and what the original form says */
+var CASES = {
+  unit:  { r: 2, c: 0, best: "fix", fixTo: 158, chips: ["158", "15.8", "1580"],
+           form: "Cal wrote <b>1.58 m</b>. Everyone else wrote their height in centimetres.",
+           sum: "<b>Cal, 1.58</b>: a unit mix up (metres, not cm). Fixed to 158 cm so every height is in the same unit." },
+  dup:   { r: 3, c: -1, best: "row",
+           form: "There is only one form from Dev. It was typed into the spreadsheet twice.",
+           sum: "<b>Dev, twice</b>: a duplicate row. One copy deleted, otherwise Dev counts double in every mean." },
+  imp:   { r: 6, c: 0, best: "out", okRow: true,
+           form: "Fin's form says 17 as well, so the slip happened on the form. The real height is unknown.",
+           sum: "<b>Fin, 17 cm</b>: an impossible value that cannot be fixed (the form says 17 too). Left out of the height mean." },
+  outl:  { r: 7, c: 2, best: "fine",
+           form: "Gus wrote <b>75</b> and added: &quot;two buses from the next town&quot;. It is real.",
+           sum: "<b>Gus, 75 minutes</b>: an outlier, but a genuine one. It stays." },
+  blank: { r: 8, c: 3, best: "out", okRow: true,
+           form: "Hal left the pets question blank.",
+           sum: "<b>Hal, blank</b>: missing data. A blank is not a zero, so it is left out of the pets mean only." },
+  typo:  { r: 9, c: 2, best: "fix", fixTo: 10, chips: ["10", "1", "100"],
+           form: "Ivy's form says <b>10</b>. The O in the sheet is a letter, typed by mistake.",
+           sum: "<b>Ivy, 1O</b>: a typing error (a letter O, not a zero). A spreadsheet would skip it as text. Fixed to 10." }
+};
+var CASE_IDS = ["unit", "dup", "imp", "outl", "blank", "typo"];
+
+function caseAt(r, c){
+  for(var k = 0; k < CASE_IDS.length; k++){
+    var id = CASE_IDS[k], cs = CASES[id];
+    if(id === "dup"){ if(r === 3 || r === 4) return id; continue; }
+    if(cs.r === r && cs.c === c) return id;
+  }
+  return null;
+}
+function rawShow(v){ return v === null ? "" : String(v); }
+function fmt(x, dp){ return x === null ? "&ndash;" : x.toFixed(dp); }
+function meanOf(vals){
+  if(!vals.length) return null;
+  var t = 0; vals.forEach(function(v){ t += v; });
+  return t / vals.length;
+}
+var DPS = [1, 2, 1, 2];
+var START = COLS.map(function(n, c){
+  var v = DD.map(function(row){ return row[c + 1]; }).filter(function(x){ return typeof x === "number"; });
+  return { mean: meanOf(v), n: v.length };
+});
+
+function mountDetective(el, api){
+  var d = api.data;
+  d.del = d.del || {}; d.fix = d.fix || {}; d.out = d.out || {}; d.kept = d.kept || {}; d.closed = d.closed || {};
+  d.misses = d.misses || 0;
+  var sel = null, say = "", sayCls = "", chips = false, formShown = false;
+  var prevMeans = null;
+
+  el.innerHTML =
+    '<div class="wpanel dd-panel">' +
+      '<div class="dd-status">' +
+        '<div><div class="tiny" style="margin:0">Cases closed</div><div class="wbig"><span id="ddClosed">0</span> of 6</div></div>' +
+        '<div style="text-align:right"><div class="tiny" style="margin:0">Second looks</div><div class="wbig" id="ddMiss">0</div></div>' +
+      '</div>' +
+      '<div id="ddTable"></div>' +
+      '<div class="dd-key"><span><i style="background:rgba(25,195,154,.35)"></i>fixed</span><span><i style="background:#f1f1f6"></i>left out</span><span><i style="background:rgba(255,210,63,.5)"></i>checked, kept</span></div>' +
+    '</div>' +
+    '<div class="wpanel" id="ddEnd">' +
+      '<div class="wrow" style="margin:0"><button class="btn btn-quiet hidden" type="button" id="ddShow">Show me the rest</button></div>' +
+      '<div class="wnote" id="ddMsg" aria-live="polite">Tap any cell you are suspicious of. Tap a name to look at the whole row.</div>' +
+    '</div>';
+
+  var tabHost = el.querySelector("#ddTable");
+  var showBtn = el.querySelector("#ddShow");
+  var msg = el.querySelector("#ddMsg");
+
+  function val(r, c){
+    var k = r + "," + c;
+    if(d.del[r] || d.out[k]) return null;
+    if(d.fix[k] !== undefined) return d.fix[k];
+    return DD[r][c + 1];
+  }
+  function means(){
+    return COLS.map(function(n, c){
+      var v = [];
+      for(var r = 0; r < DD.length; r++){ var x = val(r, c); if(typeof x === "number") v.push(x); }
+      return { mean: meanOf(v), n: v.length };
+    });
+  }
+  function rowCase(r){
+    for(var c = 0; c < 4; c++){ var id = caseAt(r, c); if(id && id !== "dup" && !d.closed[id]) return id; }
+    return null;
+  }
+  function closedCount(){ return CASE_IDS.filter(function(id){ return d.closed[id]; }).length; }
+
+  function draw(){
+    var m = means();
+    var s = '<table class="dd-tab"><colgroup><col class="dd-name"><col><col><col><col></colgroup>' +
+      '<thead><tr><th>Name</th><th>Height<br>(cm)</th><th>Shoe<br>size</th><th>Travel<br>(min)</th><th>Pets</th></tr></thead><tbody>';
+    DD.forEach(function(row, r){
+      var dead = !!d.del[r];
+      s += '<tr' + (dead ? ' class="dd-del"' : '') + '>';
+      s += '<td><button type="button" class="dd-c nm' + (sel && sel.r === r && sel.c === -1 ? " sel" : "") + '" data-r="' + r + '" data-c="-1"' + (dead || d.result ? " disabled" : "") + ' aria-label="Row for ' + row[0] + '">' + row[0] + '</button></td>';
+      for(var c = 0; c < 4; c++){
+        var k = r + "," + c, cls = "dd-c", txt = rawShow(row[c + 1]);
+        if(d.fix[k] !== undefined){ cls += " fixed"; txt = String(d.fix[k]); }
+        else if(d.out[k]) cls += " out";
+        else if(d.kept[k]) cls += " kept";
+        if(sel && sel.r === r && sel.c === c) cls += " sel";
+        var lock = dead || d.result || d.fix[k] !== undefined || d.out[k] || d.kept[k];
+        s += '<td><button type="button" class="' + cls + '" data-r="' + r + '" data-c="' + c + '"' + (lock ? " disabled" : "") +
+             ' aria-label="' + row[0] + ', ' + COLS[c] + ': ' + (txt === "" ? "blank" : txt) + '">' + (txt === "" ? "&nbsp;" : txt) + '</button></td>';
+      }
+      s += '</tr>';
+      if(sel && sel.r === r) s += '<tr class="dd-act"><td colspan="5">' + actHtml() + '</td></tr>';
+    });
+    s += '</tbody><tfoot>';
+    s += '<tr class="dd-foot now"><td class="lab">Mean now</td>';
+    m.forEach(function(x, c){
+      var changed = prevMeans && (prevMeans[c].mean !== x.mean);
+      s += '<td' + (changed ? ' class="dd-flash"' : '') + '>' + fmt(x.mean, DPS[c]) + '</td>';
+    });
+    s += '</tr><tr class="dd-foot"><td class="lab">Values</td>';
+    m.forEach(function(x){ s += '<td>' + x.n + '</td>'; });
+    s += '</tr><tr class="dd-foot start"><td class="lab">Mean at start</td>';
+    START.forEach(function(x, c){ s += '<td>' + fmt(x.mean, DPS[c]) + '</td>'; });
+    s += '</tr></tfoot></table>';
+    tabHost.innerHTML = s;
+    prevMeans = m;
+    el.querySelector("#ddClosed").textContent = closedCount();
+    el.querySelector("#ddMiss").textContent = d.misses;
+    showBtn.classList.toggle("hidden", !!d.result || d.misses < 2);
+    [].forEach.call(tabHost.querySelectorAll("button.dd-c"), function(b){
+      b.onclick = function(){
+        var r = +b.dataset.r, c = +b.dataset.c;
+        if(sel && sel.r === r && sel.c === c){ sel = null; }
+        else { sel = { r: r, c: c }; }
+        say = ""; sayCls = ""; chips = false; formShown = false;
+        draw();
+      };
+    });
+    var act = tabHost.querySelector(".dd-act");
+    if(act){
+      [].forEach.call(act.querySelectorAll("[data-a]"), function(b){
+        b.onclick = function(){ decide(b.dataset.a, b.dataset.v); };
+      });
+      act.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  function actHtml(){
+    var r = sel.r, c = sel.c, row = DD[r];
+    var head = c === -1 ? '<b>' + row[0] + '</b>, the whole row' : '<b>' + row[0] + '</b>, ' + COLS[c].toLowerCase() + ': <b>' + (rawShow(row[c + 1]) || "blank") + '</b>';
+    var s = '<p>' + head + '. What would you like to do?</p>';
+    if(chips){
+      var cs = CASES[caseAt(r, c)];
+      s += '<p>Change it to:</p><div class="dd-chips">';
+      cs.chips.forEach(function(v){ s += '<button type="button" class="btn btn-quiet" data-a="chip" data-v="' + v + '">' + v + '</button>'; });
+      s += '<button type="button" class="linkbtn" data-a="unchip">back</button></div>';
+    }else if(c === -1){
+      s += '<div class="dd-acts"><button type="button" class="btn btn-quiet" data-a="row">Delete the row</button>' +
+           '<button type="button" class="btn btn-quiet" data-a="fine">Row is fine</button></div>';
+    }else{
+      s += '<div class="dd-acts">' +
+        '<button type="button" class="btn btn-quiet" data-a="fix">Fix it</button>' +
+        '<button type="button" class="btn btn-quiet" data-a="out">Leave it out</button>' +
+        '<button type="button" class="btn btn-quiet" data-a="row">Delete the row</button>' +
+        '<button type="button" class="btn btn-quiet" data-a="fine">It is fine</button></div>';
+    }
+    s += '<button type="button" class="linkbtn" data-a="form">' + (formShown ? "Original form:" : "Check the original form") + '</button>';
+    if(formShown){
+      var id = c === -1 ? (r === 3 || r === 4 ? "dup" : null) : caseAt(r, c);
+      if(id && d.closed[id] && id !== "outl") id = null;
+      if(id === "dup" && c === -1) s += '<div class="dd-say info">' + CASES.dup.form + '</div>';
+      else if(id && id !== "dup") s += '<div class="dd-say info">' + CASES[id].form + '</div>';
+      else s += '<div class="dd-say info">The form matches the spreadsheet' + (id === "dup" ? ' for this value' : '') + '.</div>';
+    }
+    if(say) s += '<div class="dd-say ' + sayCls + '">' + say + '</div>';
+    return s;
+  }
+
+  function miss(t){ d.misses++; api.save(); say = t; sayCls = "hmm"; draw(); }
+  function nudge(t){ say = t; sayCls = "info"; draw(); }
+  function close(id, t){
+    d.closed[id] = true; api.save();
+    sel = null; chips = false;
+    msg.innerHTML = '<div class="dd-say good">' + t + '</div>';
+    draw();
+    if(closedCount() === CASE_IDS.length) finish(false);
+  }
+
+  function decide(a, v){
+    var r = sel.r, c = sel.c, row = DD[r];
+    if(a === "form"){ formShown = !formShown; draw(); return; }
+    if(a === "unchip"){ chips = false; draw(); return; }
+    var id = c === -1 ? (r === 3 || r === 4 ? "dup" : null) : caseAt(r, c);
+    if(id && d.closed[id]) id = null;
+    var shown, k;
+
+    if(!id && c === -1 && rowCase(r)){
+      var rc = rowCase(r);
+      if(a === "row" && (rc === "imp" || rc === "blank")){ id = rc; c = CASES[rc].c; }
+    }
+    if(!id && c === -1 && rowCase(r)){
+      if(a === "fine"){ nudge("Are you sure? Have a slow look along " + row[0] + "'s row."); return; }
+      miss("Something in " + row[0] + "'s row does need a look, but deleting the whole row throws the good answers away too. You could tap the cell itself.");
+      return;
+    }
+    k = r + "," + c; shown = rawShow(row[c + 1]);
+    if(!id){
+      /* an ordinary value */
+      if(a === "fine"){ nudge(c === -1 ? "Agreed. Nothing odd about " + row[0] + "'s row." : "Agreed, nothing wrong with that one."); return; }
+      if(c === -1 || a === "row"){ miss("Hmm, " + row[0] + "'s answers all look believable. Deleting real data can bias your results, so only remove what you have a reason to doubt."); return; }
+      if(a === "fix"){ miss("Fix it to what? " + shown + UNITS[c] + " looks believable for a " + COLS[c].toLowerCase() + ". Only change values you have a reason to doubt."); return; }
+      miss("Hmm, " + shown + UNITS[c] + " looks believable. Leaving out real values can bias your results."); return;
+    }
+
+    if(id === "dup"){
+      if(a === "row"){
+        d.del[r] = true;
+        close("dup", "Case closed. Same name, same everything: Dev was typed in twice. Now Dev counts once, and every mean shifts a little.");
+        return;
+      }
+      if(a === "fine"){ nudge(c === -1 ? "Look at the row next to this one. Notice anything?" : "That value is believable on its own."); return; }
+      miss("The value itself looks fine. Is something odd about this whole row? Compare it with its neighbour."); return;
+    }
+
+    var cs = CASES[id];
+    if(id === "unit" || id === "typo"){
+      if(a === "fix"){ chips = true; say = ""; draw(); return; }
+      if(a === "chip"){
+        if(+v === cs.fixTo){
+          d.fix[k] = cs.fixTo;
+          close(id, id === "unit"
+            ? "Case closed. 1.58 m &times; 100 = 158 cm. Watch the height mean jump."
+            : "Case closed. 1O had a letter O in it, so a spreadsheet would treat it as text and skip it. Now it counts as 10.");
+          return;
+        }
+        chips = false;
+        miss(id === "unit" ? "Not quite. There are 100 cm in a metre, so what is 1.58 m in cm?" : "Not quite. You could check the original form, if you like.");
+        return;
+      }
+      if(a === "out"){ miss("You could, but this one can be saved, which keeps more data. " + (id === "unit" ? "What unit do you think Cal used?" : "Try checking the original form.")); return; }
+      if(a === "row"){ miss(row[0] + "'s other answers are fine, so deleting the row throws good data away. Can you rescue this value?"); return; }
+      miss(id === "unit" ? "Look again at 1.58 next to 162 and 155. Same unit?" : "Look closely: is that a zero, or a letter O? A spreadsheet would skip it."); return;
+    }
+    if(id === "imp"){
+      if(a === "out"){ d.out[k] = true; close(id, "Case closed. Nobody is 17 cm tall, and the form says 17 too, so the real height is unknown. Leaving it out is the honest move."); return; }
+      if(a === "row"){ d.del[r] = true; close(id, "Case closed. That works, though Fin's other answers were fine. Leaving out just the height would keep more data."); return; }
+      if(a === "fix"){ miss("Fix it to what? 170? 175? Unless the form tells you, you cannot know. What else could you do?"); return; }
+      miss("A height of 17 cm? That is about the length of a pencil."); return;
+    }
+    if(id === "outl"){
+      if(a === "fine"){ d.kept[k] = true; close(id, "Case closed. Good detective work: 75 minutes is an outlier, but the form shows it is genuine, so it stays."); return; }
+      if(a === "fix"){ miss("Fix it to what? It is a long way from the rest, but is it actually wrong? Try checking the original form."); return; }
+      miss("It is an outlier, but is it an error? Only errors get removed. Try checking the original form."); return;
+    }
+    if(id === "blank"){
+      if(a === "out"){ d.out[k] = true; close(id, "Case closed. A blank does not mean zero. Hal is left out of the pets mean only; his other answers still count."); return; }
+      if(a === "row"){ d.del[r] = true; close(id, "Case closed. That works, but Hal's height, shoe size and travel time were fine. Leaving out just the blank would keep them."); return; }
+      if(a === "fix"){ miss("Fix it to what? A 0 would say Hal has no pets, and you do not know that. A blank is not a zero."); return; }
+      miss("Something is missing here, so it needs a decision too."); return;
+    }
+  }
+
+  function finish(viaShow){
+    if(!d.result){
+      d.result = viaShow ? "shown" : (d.misses === 0 ? "right1" : "right2");
+      api.save();
+      api.done(d.result);
+    }
+    sel = null;
+    var m = means();
+    var lead = d.result === "shown" ? "<b>Here is the whole case file.</b>"
+      : d.result === "right1" ? "<b>All six cases closed, with no second looks. Proper detective work.</b>"
+      : "<b>All six cases closed.</b> A few second looks along the way, which is exactly what checking data is like.";
+    msg.innerHTML = lead +
+      '<ul class="dd-sum">' + CASE_IDS.map(function(id){
+        var t = CASES[id].sum;
+        if(id === "imp" && d.del[6]) t = t.replace("Left out of the height mean.", "You deleted the whole row; leaving out just the height would keep Fin's other answers.");
+        if(id === "blank" && d.del[8]) t = t.replace("left out of the pets mean only.", "left out. You deleted the whole row; leaving out just the blank would keep Hal's other answers.");
+        return '<li>' + t + '</li>'; }).join("") + '</ul>' +
+      '<p class="wnote">Look at the height mean: <b>' + fmt(START[0].mean, 1) + ' cm</b> at the start, <b>' + fmt(m[0].mean, 1) + ' cm</b> now. A unit slip, an impossible value and a duplicate did all that. The travel mean barely moved, because the 75 was real and stayed in.</p>';
+    showBtn.classList.add("hidden");
+    draw();
+  }
+
+  showBtn.onclick = function(){
+    CASE_IDS.forEach(function(id){
+      if(d.closed[id]) return;
+      var cs = CASES[id];
+      if(id === "dup") d.del[4] = true;
+      else if(cs.best === "fix") d.fix[cs.r + "," + cs.c] = cs.fixTo;
+      else if(cs.best === "out") d.out[cs.r + "," + cs.c] = true;
+      else if(cs.best === "fine") d.kept[cs.r + "," + cs.c] = true;
+      d.closed[id] = true;
+    });
+    api.save();
+    finish(true);
+  };
+
+  draw();
+  if(d.result) finish(false);
+}
+
+EGW.run({
+  id: "stats-cleaning",
+  title: "Cleaning and preparing data",
+  subject: "GCSE Statistics",
+  mins: 50,
+  blurb: "Why raw data needs cleaning, how to spot errors, what to do with blanks and outliers, making units and formats consistent, grouping data, and a data detective game to finish.",
+  steps: [
+
+  /* ---------- 1. WHY CLEAN ---------- */
+  { type: "learn", topic: "Why clean data",
+    title: "Raw data is messy",
+    fig: CYCLE,
+    html: '<p>Data straight from a survey or a spreadsheet is <b>raw data</b>. It nearly always has a few problems: typing slips, blanks, odd units, a row typed in twice.</p>' +
+          '<p><b>Cleaning</b> means finding and sorting out those problems <b>before</b> you calculate or draw anything. One bad value can wreck a mean or a graph.</p>' +
+          '<p>In the enquiry cycle, cleaning comes after <b>collect</b> and before <b>process and represent</b>. It is the first job once the data is in.</p>' +
+          '<p>Spreadsheets bring their own issues: a number typed with a letter in it, units typed into a cell (&quot;12 mins&quot;), dates in different formats. A spreadsheet may quietly skip those cells or treat them as text.</p>' +
+          '<div class="keep"><b>Keep this</b>Clean first, calculate second. Keep a note of every change, so someone else could check it.</div>' },
+
+  { type: "mc", topic: "Why clean data",
+    q: "In the statistical enquiry cycle, when should you clean your data?",
+    options: [
+      "After collecting it, before you process and represent it",
+      "Before you write your hypothesis",
+      "After you have drawn your graphs, if they look odd",
+      "Only at the evaluate stage, at the very end"
+    ],
+    answer: 0,
+    hint: "You need the data before you can clean it, and you want it clean before any calculations.",
+    why: "Cleaning sits between collecting and processing. Before the hypothesis there is no data to clean. Waiting until the graphs look odd means some errors slip through unnoticed, and every calculation has to be redone. Evaluating is for looking back at the whole enquiry, not for fixing values." },
+
+  { type: "multi", topic: "Why clean data",
+    q: "Which <b>three</b> of these are reasons a set of data might need cleaning?",
+    options: [
+      "Some people left a question blank",
+      "One height was typed in metres when the rest are in centimetres",
+      "The same response was entered twice",
+      "One value is much bigger than the rest, and has been checked and is genuine",
+      "The sample was chosen at random"
+    ],
+    answers: [0, 1, 2],
+    hint: "Cleaning is about problems with the data itself. A real but unusual value is not a problem.",
+    why: "Blanks, mixed units and duplicates are all problems to sort out. A checked, genuine outlier is real data, so it stays: it is not something to clean away. And random sampling is about how the data was chosen, not a fault in it." },
+
+  /* ---------- 2. SPOTTING ERRORS ---------- */
+  { type: "learn", topic: "Spotting errors",
+    title: "Could that value really happen?",
+    html: '<p>Read down each column and ask: <b>is this possible, and is it sensible?</b></p>' +
+          '<ul><li><b>Impossible values</b>: a height of 17 m, a negative age, 30 hours of sleep in one day.</li>' +
+          '<li><b>Typing errors</b>: 1O (a letter O) instead of 10, or 1550 instead of 155.</li>' +
+          '<li><b>Outside a sensible range</b>: a quiz score of 23 when the quiz is out of 20.</li></ul>' +
+          '<ul><li><b>Inconsistent units</b>: most heights in cm, but one written as 1.58 (metres).</li>' +
+          '<li><b>Inconsistent formats</b>: &quot;Yes&quot;, &quot;Y&quot; and &quot;y&quot; all meaning the same thing, or dates written two ways. A spreadsheet counts them as different answers.</li>' +
+          '<li><b>Duplicates</b>: the same response typed in twice.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Know the context. You can only spot a silly value if you know roughly what sensible looks like.</div>' },
+
+  { type: "sort", topic: "Spotting errors",
+    q: "These are heights of Year 10 students, recorded in centimetres. Sort them.",
+    buckets: ["Looks fine", "Looks like an error"],
+    cards: [
+      ["163", 0], ["148", 0], ["181", 0], ["155", 0],
+      ["1.72", 1], ["16.5", 1], ["&minus;158", 1], ["1570", 1]
+    ],
+    hint: "Most 14 and 15 year olds are somewhere between about 140 cm and 190 cm.",
+    why: "148, 155, 163 and 181 are all believable heights for Year 10. 1.72 looks like metres (172 cm). 16.5 is impossibly small, maybe a slipped decimal point. A height cannot be negative. 1570 looks like an extra digit typed by mistake." },
+
+  { type: "mc", topic: "Spotting errors",
+    q: "A column for &quot;Do you have a pet?&quot; contains: Yes, yes, Y, No, n, NO. What is the problem?",
+    options: [
+      "Inconsistent formats: the same answer is written different ways, so a spreadsheet may count six different answers",
+      "Impossible values: some of the answers cannot happen",
+      "Missing data: some of the answers are blank",
+      "Nothing: the data is fine to count as it is"
+    ],
+    answer: 0,
+    hint: "How many different answers did people actually mean?",
+    why: "People only meant two answers, Yes and No, but they are written six ways. A computer matching exact text would see six categories. None of them are impossible or blank: they just need <b>recoding</b> to one format before you count." },
+
+  /* ---------- 3. MISSING DATA ---------- */
+  { type: "learn", topic: "Missing data",
+    title: "Blanks are not zeros",
+    html: '<p>Some people skip a question, stop halfway through, or never return the survey. That gives <b>missing data</b>: <b>non responses</b> (nothing back at all) and <b>incomplete responses</b> (some answers missing).</p>' +
+          '<p>A blank is <b>not a zero</b>. If Hal left &quot;number of pets&quot; blank, you do not know that he has none.</p>' +
+          '<ul><li>Leave that person <b>out of that calculation</b>, but keep their other answers.</li>' +
+          '<li>The <b>sample size goes down</b> for that calculation, so divide by the number of values you actually used.</li></ul>' +
+          '<p>Say how much was missing when you write up. Lots of missing data makes results less reliable, and can bias them if the people who skipped are different from the rest.</p>' +
+          '<div class="keep"><b>Keep this</b>Mean with a blank: add the values you have, and divide by how many values you have.</div>' },
+
+  { type: "num", topic: "Missing data",
+    q: "Eight students were asked how many pets they have. Their answers were:<br><b>2, 0, 1, (blank), 3, 1, 0, 0</b><br>Work out the mean number of pets, dealing with the blank sensibly.",
+    boxes: [
+      { label: "Number of values you can use", a: 7 },
+      { label: "Total of those values", a: 7 },
+      { label: "Mean", a: 1, post: "pets" }
+    ],
+    hint: "Leave the blank out. How many actual answers are left?",
+    why: "Leave out the blank: 7 values, adding up to 2 + 0 + 1 + 3 + 1 + 0 + 0 = 7. Mean = 7 &divide; 7 = <b>1</b>.<br>Dividing by 8 (counting the blank as a zero) gives 0.875, which is too low, because you would be pretending the student who left it blank has no pets." },
+
+  { type: "mc", topic: "Missing data",
+    q: "30 people were surveyed. 6 of them did not answer the question about weekly spending. What is the best way to find the mean weekly spending?",
+    options: [
+      "Work out the mean of the 24 answers, and say that 6 people did not reply",
+      "Count the 6 blanks as &pound;0 and divide the total by 30",
+      "Add up the 24 answers and divide by 30",
+      "Delete those 6 people from every part of the survey"
+    ],
+    answer: 0,
+    hint: "A blank is not zero, and the other answers those 6 people gave might still be useful.",
+    why: "Use the 24 answers you have and be open about the 6 missing. Counting blanks as &pound;0, or dividing 24 answers by 30, both drag the mean down. Deleting those people everywhere throws away their other answers, which may be perfectly good." },
+
+  /* ---------- 4. OUTLIER OR ERROR ---------- */
+  { type: "learn", topic: "Outlier or error?",
+    title: "Outlier or error?",
+    html: '<p>An <b>outlier</b> is a value a long way from the rest. It might be an <b>error</b> in recording, or a <b>genuine</b> unusual value.</p>' +
+          '<ul><li>Error: a travel time to school of 750 minutes. Fix it if you can, or leave it out.</li>' +
+          '<li>Genuine: 75 minutes, for a student who takes two buses from the next town. It is real, so it <b>stays</b>.</li></ul>' +
+          '<p>To decide, <b>check against the original source</b>: the paper form, the notes, or the person. In the exam, comment on an outlier using the context of the original data.</p>' +
+          '<p class="tiny"><b>Higher only:</b> finding outliers by calculation (below LQ &minus; 1.5 &times; IQR or above UQ + 1.5 &times; IQR). Spotting them by eye is on both tiers.</p>' +
+          '<div class="keep"><b>Keep this</b>Only remove a value if it is an error. Removing real values because they are awkward makes your results less true.</div>' },
+
+  { type: "sort", topic: "Outlier or error?",
+    q: "Each of these is an outlier. Would you keep it, or treat it as an error?",
+    buckets: ["Keep: could be genuine", "Error: fix or leave out"],
+    cards: [
+      ["A house price of &pound;2.1 million on a street where most are about &pound;250 000", 0],
+      ["A Year 11 who scored 98% when most scored 50% to 70%", 0],
+      ["A Year 9 with a hand span of 23 cm when most are 17 cm to 20 cm", 0],
+      ["A 100 metre sprint time of 3.2 seconds", 1],
+      ["An adult's height recorded as 2.95 m", 1],
+      ["Daily phone use of 26 hours", 1]
+    ],
+    hint: "Ask: could this really happen? Unusual is not the same as impossible.",
+    why: "A mansion, a very high score and a big hand are unusual but possible, so they stay. Nobody runs 100 m in 3.2 seconds (the world record is over 9 seconds), the tallest person ever recorded was about 2.72 m, and a day only has 24 hours. Those three are errors." },
+
+  { type: "mc", topic: "Outlier or error?",
+    q: "Travel times to school, in minutes: 10, 12, 15, 8, 14, 11, 65, 9, 13. The 65 has been checked: that student lives on a farm 20 miles away. What should you do with it?",
+    options: [
+      "Keep 65: it is genuine, so it belongs in the data",
+      "Remove 65, because it is an outlier",
+      "Change 65 to 15, the nearest normal value",
+      "Replace 65 with the mean of the other times"
+    ],
+    answer: 0,
+    hint: "It has been checked against the source. Is it an error?",
+    why: "It is an outlier, but a genuine one, so it stays. Being far from the rest is not a reason to remove it. Changing it to 15 or to the mean would be making data up. If it worries you, the median is less affected by it than the mean." },
+
+  { type: "num", topic: "Outlier or error?", stretch: true,
+    q: "<b>Higher only.</b> A set of travel times has lower quartile 12 minutes and upper quartile 20 minutes. Use the 1.5 &times; IQR rule to find the limits for outliers.",
+    boxes: [
+      { label: "IQR", a: 8, post: "minutes" },
+      { label: "Values below this are outliers", a: 0, post: "minutes" },
+      { label: "Values above this are outliers", a: 32, post: "minutes" }
+    ],
+    hint: "IQR = UQ &minus; LQ. Then 1.5 &times; IQR comes off the LQ and goes on to the UQ.",
+    why: "IQR = 20 &minus; 12 = 8. 1.5 &times; 8 = 12. Lower limit 12 &minus; 12 = <b>0</b>, upper limit 20 + 12 = <b>32</b>.<br>So a time of 65 would be an outlier. But the rule only tells you it is unusual. Whether it stays still depends on whether it is genuine." },
+
+  /* ---------- 5. MAKING IT CONSISTENT ---------- */
+  { type: "learn", topic: "Making it consistent",
+    title: "Same column, same style",
+    html: '<p>Before you process, make every value in a column look the same.</p>' +
+          '<ul><li><b>Convert units</b>: choose one unit and convert the rest. 1.58 m becomes 158 cm (&times; 100). 2 hours 15 minutes becomes 135 minutes.</li>' +
+          '<li><b>Round consistently</b>: if heights are to the nearest cm, round 157.4 to 157 to match.</li></ul>' +
+          '<ul><li><b>Recode categories</b>: change Yes, yes, Y and y all to <b>Yes</b>, so they count as one answer. Choose one date format too.</li>' +
+          '<li><b>Strip extra bits</b>: &quot;12 mins&quot; becomes 12, so the spreadsheet sees a number.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Write down what you changed and why. Good cleaning is open, so someone could check it or repeat it.</div>' },
+
+  { type: "match", topic: "Making it consistent",
+    q: "Match each messy value to its cleaned version. Heights are going into a cm column and times into a minutes column.",
+    pairs: [
+      ["1.64 m", "164 cm"],
+      ["0.5 m", "50 cm"],
+      ["1 hour 5 minutes", "65 minutes"],
+      ["1.5 hours", "90 minutes"],
+      ["y", "Yes"],
+      ["12 mins, typed as text", "12"]
+    ],
+    hint: "1 m = 100 cm and 1 hour = 60 minutes. Watch out for 1.5 hours.",
+    why: "1.64 m &times; 100 = 164 cm and 0.5 m = 50 cm. 1 hour 5 minutes = 60 + 5 = 65. 1.5 hours = 60 + 30 = 90 minutes. A common slip is to read it as 1 hour 50 minutes, which would be 110. &quot;y&quot; is recoded to Yes, and &quot;12 mins&quot; loses its text so it can be used as a number." },
+
+  { type: "num", topic: "Making it consistent",
+    q: "Five plant heights were recorded: <b>24 cm, 0.31 m, 27 cm, 290 mm, 0.26 m</b>. Convert them all to cm and find the mean.",
+    boxes: [
+      { label: "0.31 m in cm", a: 31, post: "cm" },
+      { label: "290 mm in cm", a: 29, post: "cm" },
+      { label: "Mean height", a: 27.4, post: "cm" }
+    ],
+    hint: "1 m = 100 cm and 10 mm = 1 cm. Then add all five and divide by 5.",
+    why: "In cm: 24, 31, 27, 29, 26. Total 137, and 137 &divide; 5 = <b>27.4 cm</b>.<br>If you add the raw numbers (24 + 0.31 + 27 + 290 + 0.26) you get nonsense, which is exactly why units are sorted out first." },
+
+  /* ---------- 6. GROUPING DATA ---------- */
+  { type: "learn", topic: "Grouping data",
+    title: "Grouping into class intervals",
+    html: '<p>When there are lots of different values, list them one by one and the table gets very long. So you <b>group</b> the data into <b>class intervals</b>.</p>' +
+          '<ul><li>Use <b>equal widths</b> where you can, such as every class 10 minutes wide.</li>' +
+          '<li><b>No gaps and no overlaps</b>: every value fits in exactly one class. Inequalities make this clear: 10 &lt; t &le; 20.</li>' +
+          '<li>Aim for a sensible number of classes, often about 4 to 8.</li></ul>' +
+          '<p><b>What you lose</b>: once grouped, you do not know the exact values. You can only <b>estimate</b> the mean and range, and you get a modal class instead of a mode.</p>' +
+          '<div class="keep"><b>Keep this</b>Boundary test: if a value like 20 could go in two classes, they overlap. If it fits in none, there is a gap.</div>' },
+
+  { type: "mc", topic: "Grouping data",
+    q: "Travel times go from 0 to 40 minutes, and some were timed to the nearest second. Which set of class intervals is best?",
+    options: [
+      "0 &lt; t &le; 10, 10 &lt; t &le; 20, 20 &lt; t &le; 30, 30 &lt; t &le; 40",
+      "0 to 10, 10 to 20, 20 to 30, 30 to 40",
+      "0 &lt; t &le; 10, 11 &lt; t &le; 20, 21 &lt; t &le; 30, 31 &lt; t &le; 40",
+      "0 &lt; t &le; 5, 5 &lt; t &le; 20, 20 &lt; t &le; 40"
+    ],
+    answer: 0,
+    hint: "Try a time of 10 minutes and a time of 10.5 minutes in each set. Does each one fit exactly one class?",
+    why: "The inequalities with equal widths of 10 work: no gaps, no overlaps. &quot;0 to 10, 10 to 20&quot; overlap, because 10 could go in two classes. The set starting 11 &lt; t leaves a gap: 10.5 minutes fits nowhere. The set starting 0 &lt; t &le; 5 has unequal widths and only three classes, which hides detail for no good reason." },
+
+  { type: "num", topic: "Grouping data",
+    q: "Here are ten cleaned travel times, in minutes:<br><b>5, 12, 18, 25, 9, 14, 20, 31, 16, 10</b><br>Find the frequency for each class.",
+    fig: GROUP_Q,
+    boxes: [
+      { label: "0 &lt; t &le; 10", a: 3 },
+      { label: "10 &lt; t &le; 20", a: 5 },
+      { label: "20 &lt; t &le; 30", a: 1 },
+      { label: "30 &lt; t &le; 40", a: 1 }
+    ],
+    hint: "Watch the boundaries. &le; 10 means 10 itself goes in the first class.",
+    why: "0 &lt; t &le; 10: 5, 9, 10 (<b>3</b>). 10 &lt; t &le; 20: 12, 14, 16, 18, 20 (<b>5</b>). 20 &lt; t &le; 30: 25 (<b>1</b>). 30 &lt; t &le; 40: 31 (<b>1</b>). Check: 3 + 5 + 1 + 1 = 10.<br>The usual slips are putting 10 in the second class or 20 in the third." },
+
+  { type: "multi", topic: "Grouping data", stretch: true,
+    q: "Which <b>two</b> things do you lose when you group data into class intervals?",
+    options: [
+      "The exact values of the data",
+      "The ability to work out the exact mean",
+      "The total frequency",
+      "Knowing which class has the most values"
+    ],
+    answers: [0, 1],
+    hint: "Think about what a grouped table can still tell you, and what it cannot.",
+    why: "Grouping hides the exact values, so the mean can only be estimated using midpoints. You still know the total frequency (add up the frequencies) and the modal class (the class with the highest frequency)." },
+
+  /* ---------- 7. TABLES AND MEANS ---------- */
+  { type: "learn", topic: "Tables and means",
+    title: "Clean first, then count and calculate",
+    html: '<p>Once the data is clean you can organise it: a <b>tally</b> and frequency table for one variable, or a <b>two way table</b> for two at once.</p>' +
+          '<p>Cleaning first matters. Leave &quot;Y&quot; and &quot;Yes&quot; as different answers and the tally splits one group in two. Leave a duplicate in and someone is counted twice.</p>' +
+          '<p>Cleaning changes averages too. Heights in cm: 158, 162, 17, 160, 165. With the error, mean = 662 &divide; 5 = <b>132.4</b>. Leave out the 17: 645 &divide; 4 = <b>161.25</b>.</p>' +
+          '<p>The median only moves from 160 to 161, because the median is not dragged by one extreme value.</p>' +
+          '<div class="keep"><b>Keep this</b>After cleaning, recalculate: new total &divide; new number of values.</div>' },
+
+  { type: "num", topic: "Tables and means",
+    q: "Students in Years 10 and 11 were asked &quot;Do you have a pet?&quot;. Clean the answers, then complete the two way table.",
+    fig: RAW_PETS + TWOWAY_BLANK,
+    boxes: [
+      { label: "a: Year 10, pet", a: 4 },
+      { label: "b: Year 10, no pet", a: 2 },
+      { label: "c: Year 11, pet", a: 5 },
+      { label: "d: Year 11, no pet", a: 3 }
+    ],
+    hint: "Recode first: Yes, yes, Y, y and YES all mean Yes. No, no, NO and n all mean No.",
+    why: "Year 10: Yes, Y, yes, Yes is <b>4</b> pets, and no, No is <b>2</b>. Year 11: y, Yes, Yes, YES, yes is <b>5</b>, and No, NO, n is <b>3</b>. Check: 6 answers in Year 10 and 8 in Year 11 make 14, and 4 + 2 + 5 + 3 = 14.<br>Counting only the answers spelled exactly &quot;Yes&quot; would give 2 and 2." },
+
+  { type: "num", topic: "Tables and means",
+    q: "Six students' times to solve a puzzle, in seconds: <b>48, 52, 45, 5, 50, 47</b>. The original sheet shows the 5 was a typing error for 55.",
+    boxes: [
+      { label: "Mean before cleaning (1 dp)", a: 41.2, tol: 0.05, post: "seconds" },
+      { label: "Mean after fixing the 5 to 55", a: 49.5, post: "seconds" }
+    ],
+    hint: "Before: add all six as they are and divide by 6. After: the total goes up by 50, and there are still 6 values.",
+    why: "Before: 48 + 52 + 45 + 5 + 50 + 47 = 247, and 247 &divide; 6 = 41.166... = <b>41.2</b>. After: 247 + 50 = 297, and 297 &divide; 6 = <b>49.5</b>.<br>Here the value could be <b>fixed</b> from the source, so there are still 6 values. If it could not be fixed, you would leave it out and divide by 5." },
+
+  { type: "widget", topic: "Tables and means",
+    title: "Data detective",
+    html: "Fourteen rows from a class survey, typed into a spreadsheet. <b>Five real problems</b> are hiding in here, plus <b>one value that only looks like a problem</b>. Tap a cell you are suspicious of and decide what to do. The means at the bottom update as you clean. Checking the original form is always allowed.",
+    mount: mountDetective,
+    report: function(d){
+      var closed = d.closed ? Object.keys(d.closed).length : 0;
+      var r = { right1: "all six cases closed with no second looks", right2: "all six cases closed with " + (d.misses || 0) + " second looks", shown: "used Show me after closing " + closed + " cases" }[d.result] || ("in progress: " + closed + " of 6 cases closed");
+      return "Data detective: " + r + ".";
+    } },
+
+  /* ---------- 8. EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "<b>Exam style.</b> Kiran records how long ten students spent on homework last night, in minutes:<br><b>45, 30, 58, 35, 40, &minus;20, 50, 40, 35, 45</b><br>(a) Write down the value that must be an error.<br>(b) Kiran leaves that value out. Work out the mean of the rest.<br>(c) Kiran then finds one more student's form, with a time of 52 minutes. Work out the new mean of all the clean values.",
+    boxes: [
+      { label: "(a) The error", a: -20 },
+      { label: "(b) Mean of the rest", a: 42, post: "minutes" },
+      { label: "(c) New mean", a: 43, post: "minutes" }
+    ],
+    hint: "(a) Can time be negative? (b) Nine values are left. (c) Add 52 to the total from (b), and there are now 10 values.",
+    why: "(a) <b>&minus;20</b>: a time cannot be negative.<br>(b) The other nine add up to 378, and 378 &divide; 9 = <b>42</b>. Including the &minus;20 would give 358 &divide; 10 = 35.8, which is too low.<br>(c) 378 + 52 = 430, and 430 &divide; 10 = <b>43</b>. A useful trick: total = mean &times; number of values, so you can get back to the total from a mean." },
+
+  { type: "text", topic: "Exam style", stretch: true,
+    q: "Another student's homework time is 180 minutes. It is an outlier. Kiran checks the form, and it is genuine: that student had a big project due. Should Kiran remove it before working out the mean? Give a reason.",
+    need: [["no", "not", "keep", "stay", "leave it in", "include", "shouldn"], ["genuine", "real", "true", "correct", "checked", "accurate", "actual", "error", "mistake"]],
+    model: "No. It is an outlier, but it has been checked and is genuine, so it should stay in the data. You only remove a value if it is an error. (You could mention that the median would be less affected by it than the mean.)",
+    hint: "Is it an error? What is the rule for removing values?",
+    why: "Outliers are only removed if they are errors. This one has been checked against the source and is real, so it stays. For extra credit, you could say the median would represent a typical time better than the mean, because the 180 drags the mean up." }
+  ]
+});
+})();
+</script>
+</body>
+</html>
