@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=2">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
 <style>
 /* Papers page only */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -47,6 +47,13 @@
 .qtable td.qm{font-family:var(--display);font-weight:700;white-space:nowrap;width:70px;text-align:right}
 .qtable .links{margin-top:6px}
 
+.tgroup{border-top:1px dashed var(--line)}
+.tgroup > summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center;padding:13px 0;font-family:var(--display);font-weight:700;font-size:1.02rem}
+.tgroup > summary::-webkit-details-marker{display:none}
+.tgroup > summary span{font-weight:500;font-size:.88rem;color:var(--body-tint)}
+.tgroup > summary::after{content:"+";margin-left:auto;font-size:1.25rem}
+.tgroup[open] > summary::after{content:"\2212"}
+.tgroup .topic:first-of-type{border-top:0}
 .grouph{font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;margin:22px 0 4px;color:var(--body-tint)}
 .grouph:first-child{margin-top:4px}
 .topic{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:12px 0;border-top:1px dashed var(--line)}
@@ -159,9 +166,9 @@ function draw(){
     '<p class="lead" style="margin:4px 0 0 !important">' + esc(s.overview) + '</p>' +
     '<p class="note">' + esc(s.boardNote) + '</p>' +
     '<div class="covrow">' +
-      '<div class="cov"><b>' + withLinks + '/' + s.topics.length + '</b><span>topics with practice here</span></div>' +
+      '<div class="cov"><b>' + withLinks + '/' + s.topics.length + '</b><span>topics with an HQ activity</span></div>' +
       '<div class="cov"><b>' + acts.length + '</b><span>activities</span></div>' +
-      '<div class="cov"><b>' + nDone + '/' + nChunks + '</b><span>linked chunks done</span></div>' +
+      (nDone ? '<div class="cov"><b>' + nDone + '</b><span>linked chunks done</span></div>' : '') +
     '</div></div>';
 
   s.papers.forEach(function(p){
@@ -183,16 +190,24 @@ function draw(){
   /* topics */
   var tp = '<div class="card w12 ' + s.acc + '"><span class="kicker">Topics that come up</span>' +
     '<h3>Every topic, and where to practise it</h3>' +
-    '<div class="legend"><span><span class="often">Often</span> turns up most years</span><span><i></i> chunk to try</span><span><i class="d"></i> chunk done</span></div>';
-  var lastGroup = "";
+    '<p class="tiny" style="margin:0 0 6px">Open whichever group you like. Each link goes straight to a chunk.</p>' +
+    '<div class="legend"><span><span class="often">Often</span> turns up most years</span><span><i class="d"></i> chunk done</span></div>';
+  var lastGroup = "", groupOpen = false;
+  var counts = {};
+  s.topics.forEach(function(t){ counts[t.group] = (counts[t.group] || 0) + 1; });
   s.topics.forEach(function(t){
-    if(t.group !== lastGroup){ tp += '<div class="grouph">' + esc(t.group) + '</div>'; lastGroup = t.group; }
+    if(t.group !== lastGroup){
+      if(groupOpen) tp += '</details>';
+      tp += '<details class="tgroup"><summary>' + esc(t.group) + ' <span>' + counts[t.group] + ' topics</span></summary>';
+      lastGroup = t.group; groupOpen = true;
+    }
     var links = t.links.map(linkChip).join("");
     if(t.ext) links += '<a class="lk ext" href="' + t.ext[0] + '"><span>' + esc(t.ext[1]) + '</span></a>';
     if(!t.links.length && !t.ext) links = '<span class="lk none">Not built here yet. Jay can add one.</span>';
     else if(!t.links.length) links = '<span class="lk none">Not in the HQ yet</span>' + links;
     tp += '<div class="topic"><div class="tname">' + esc(t.name) + (t.often ? ' <span class="often">Often</span>' : "") + '</div><div class="links">' + links + '</div></div>';
   });
+  if(groupOpen) tp += '</details>';
   tp += '</div>';
   html += tp;
 
@@ -201,7 +216,7 @@ function draw(){
     acts.map(function(a){
       var st = C.state(a.id);
       var done = st && st.chunksDone ? st.chunksDone : 0;
-      return '<a class="arow" href="' + C.href(a.id) + '"><b>' + esc(a.title) + '</b><span>' + done + ' of ' + a.chunks.length + ' chunks</span></a>';
+      return '<a class="arow" href="' + C.href(a.id) + '"><b>' + esc(a.title) + '</b><span>' + (done ? done + ' of ' + a.chunks.length + ' done' : a.chunks.length + ' chunks') + '</span></a>';
     }).join("") + '</div>';
 
   $("panel").innerHTML = html;

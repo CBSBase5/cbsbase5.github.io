@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=2">
+<link rel="stylesheet" href="/egw/egw.css?v=3">
 <style>
 /* HQ home only. Everything shared lives in egw.css */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -61,6 +61,7 @@
 .bar i.d{background:var(--accent)}
 .bar i.s{background:var(--accent-soft)}
 .act .meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--body-tint);margin-top:6px}
+.act .st:empty{display:none}
 
 /* revision map */
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -95,9 +96,38 @@
 .exam .days small{display:block;font-size:.7rem;font-weight:500}
 
 /* more links */
-.more a{display:flex;justify-content:space-between;gap:10px;text-decoration:none;color:var(--ink);padding:10px 0;border-bottom:1px dashed var(--line)}
-.more a:hover b{text-decoration:underline}
-.more span{color:var(--body-tint);font-size:.88rem;text-align:right}
+.more .inner a{display:flex;justify-content:space-between;gap:10px;text-decoration:none;color:var(--ink);padding:10px 0;border-bottom:1px dashed var(--line)}
+.more .inner a:hover b{text-decoration:underline}
+.more .inner a span{color:var(--body-tint);font-size:.88rem;text-align:right}
+
+/* calmer layout: one subject at a time, everything else folds away */
+.hero h1{font-size:clamp(2.4rem,9vw,4.6rem)}
+.progress{color:var(--mist);font-size:.95rem;margin:14px 0 0;display:flex;gap:14px;flex-wrap:wrap}
+.progress b{color:#fff;font-family:var(--display)}
+.lead2{color:var(--mist);font-size:1rem;margin:26px 0 10px;font-family:var(--display);font-weight:600}
+.subjtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.subjtabs button{font-family:var(--display);font-weight:700;font-size:1rem;cursor:pointer;border-radius:12px;border:2px solid rgba(201,205,240,.35);background:transparent;color:var(--moon);padding:9px 16px}
+.subjtabs button[aria-selected="true"]{background:var(--accent);color:var(--ink);border-color:var(--accent);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.fold{border-radius:16px;background:#fff;color:var(--ink);margin:0 0 10px;box-shadow:0 10px 24px rgba(0,0,0,.22);border-left:6px solid var(--accent)}
+.fold > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:15px 18px}
+.fold > summary::-webkit-details-marker{display:none}
+.fold > summary b{font-family:var(--display);font-size:1.12rem;display:block}
+.fold > summary small{display:block;color:var(--body-tint);font-size:.88rem}
+.fold > summary .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-size:1.3rem;transition:transform .2s ease}
+.fold[open] > summary .chev{transform:rotate(90deg)}
+.fold .inner{padding:0 18px 18px}
+.fold .inner .card{box-shadow:none;border-top:0;padding:0;animation:none}
+a.fold{display:flex;align-items:center;gap:12px;padding:15px 18px;text-decoration:none}
+a.fold b{font-family:var(--display);font-size:1.12rem;display:block}
+a.fold small{display:block;color:var(--body-tint);font-size:.88rem}
+a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-size:1.3rem}
+.mgroup{border-top:1px dashed var(--line)}
+.mgroup > summary{cursor:pointer;padding:11px 0;font-family:var(--display);font-weight:700;display:flex;gap:8px;align-items:center;list-style:none}
+.mgroup > summary::-webkit-details-marker{display:none}
+.mgroup > summary span{font-weight:500;color:var(--body-tint);font-size:.88rem}
+.mgroup > summary::after{content:"+";margin-left:auto;font-size:1.2rem}
+.mgroup[open] > summary::after{content:"\2212"}
+.mgroup .maprow:first-of-type{border-top:0}
 
 @keyframes roll{0%{transform:rotate(0)}40%{transform:rotate(200deg) scale(1.1)}100%{transform:rotate(360deg)}}
 @media (max-width:560px){
@@ -112,28 +142,26 @@
 <header class="hq">
   <div class="hqwrap">
     <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
-    <nav class="hqnav"><a href="/egw/papers.html">Papers</a><a href="#subjects">Subjects</a><a href="#map">Map</a><a href="#plan">Plan</a><a href="/">Base 5</a></nav>
+    <nav class="hqnav"><a href="/egw/papers.html">Papers</a><a href="/">Base 5</a></nav>
   </div>
 </header>
 
 <div class="wrap">
 
   <section class="hero">
-    <h1>EGW's<br><em>GCSE</em> HQ</h1>
-    <p>Your own corner for revision. English, Maths, Biology and Statistics, broken into small chunks you can do in any order, at your pace. Everything saves on this device.</p>
+    <h1>Hi, <em>EGW</em>.</h1>
+    <p>Your revision corner. Small chunks, any order, your pace. Nothing here is timed, and it all saves on this device.</p>
+    <p class="progress" id="progress"></p>
   </section>
 
-  <div class="strip" id="strip"></div>
-
-  <!-- 1. DEAL A CHUNK -->
-  <div class="sech"><span class="num">01</span><h2>Not sure where to start?</h2><span>Let the dice pick. You can always deal again.</span></div>
-  <div class="board">
+  <p class="lead2">Not sure where to start? The dice can choose.</p>
+  <div class="board" style="margin-bottom:0">
     <div class="card w12 acc-stats" id="dealCard">
       <div class="deal">
-        <button class="dice" id="dice" type="button" aria-label="Deal me a chunk">&#9861;</button>
+        <button class="dice" id="dice" type="button" aria-label="Pick a chunk for me">&#9861;</button>
         <div class="dealout" id="dealOut">
-          <span class="kicker">Deal me a chunk</span>
-          <b>Tap the dice.</b>
+          <span class="kicker">Pick for me</span>
+          <b>Tap the dice, if you like.</b>
           <p class="tiny">It picks one chunk you have not finished yet. A chunk is about five to ten minutes.</p>
         </div>
       </div>
@@ -141,37 +169,30 @@
     </div>
   </div>
 
-  <!-- PAPERS -->
-  <div class="board">
-    <a class="card w12" href="/egw/papers.html" id="papersCard" style="--accent:var(--sun);--accent-soft:rgba(255,210,63,.24)">
-      <span class="kicker">New: the real exams</span>
-      <h3>What's on the papers</h3>
-      <p>How each exam is laid out, every topic that comes up, and a link from each topic straight to the chunk that practises it.</p>
-      <div class="filt" style="margin-top:12px"><span class="btn">See the papers</span></div>
-    </a>
-  </div>
-
-  <!-- 2. SUBJECTS -->
-  <div class="sech" id="subjects"><span class="num">02</span><h2>Your subjects</h2><span>Every activity, with a bar that fills as chunks get done.</span></div>
+  <p class="lead2" id="subjects">Or choose a subject.</p>
+  <div class="subjtabs" role="tablist" id="subjTabs"></div>
   <div class="board" id="subjBoard"></div>
 
-  <!-- 3. REVISION MAP -->
-  <div class="sech" id="map"><span class="num">03</span><h2>Revision map</h2><span>How each topic feels right now. Honest is more useful than tidy, and it can change any time.</span></div>
-  <div class="board">
-    <div class="card w12" id="mapCard">
+  <p class="lead2">More, whenever you want it.</p>
+
+  <a class="fold" href="/egw/papers.html" style="--accent:var(--sun)">
+    <span><b>What's on the papers</b><small>How each exam looks, and where to practise every topic.</small></span><span class="chev">&rsaquo;</span>
+  </a>
+
+  <details class="fold acc-bio" id="map">
+    <summary><span><b>Revision map</b><small>How each topic feels right now. It can change any time.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner" id="mapCard">
       <div class="tabs" role="tablist" id="mapTabs"></div>
       <div class="mapsum" id="mapSum"></div>
       <div id="mapList"></div>
-      <p class="tiny" style="margin-top:12px">Practise links jump straight to the right chunk. For every topic and all the links, see <a href="/egw/papers.html">what is on the papers</a>.</p>
+      <p class="tiny" style="margin-top:12px">Practise links jump straight to the right chunk.</p>
     </div>
-  </div>
+  </details>
 
-  <!-- 4. PLAN -->
-  <div class="sech" id="plan"><span class="num">04</span><h2>Plan a session</h2><span>Three taps and you have a plan. Use it, change it or ignore it.</span></div>
-  <div class="board">
-    <div class="card w7 acc-maths" id="planCard">
-      <span class="kicker">Build a session</span>
-      <p class="chiplabel" style="margin-top:4px">Subject</p>
+  <details class="fold acc-maths" id="plan">
+    <summary><span><b>Plan a session</b><small>Three taps for a plan. Use it, change it or ignore it.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner">
+      <p class="chiplabel" style="margin-top:0">Subject</p>
       <div class="pick" id="pSubj"></div>
       <p class="chiplabel">Time</p>
       <div class="pick" id="pTime"></div>
@@ -179,39 +200,37 @@
       <div class="pick" id="pEnergy"></div>
       <div id="planOut"></div>
     </div>
-    <div class="card w5 acc-bio" id="logCard">
-      <span class="kicker">Stuck with me</span>
-      <h3>One thing to remember</h3>
-      <p class="tiny">After a session, jot one thing that stuck. Reading these back is quick revision on its own.</p>
+  </details>
+
+  <details class="fold acc-bio" id="logFold">
+    <summary><span><b>One thing to remember</b><small>Jot down something that stuck. Reading these back is revision too.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner">
       <textarea class="logbox" id="logText" rows="3" aria-label="One thing to remember"></textarea>
       <div class="qnav" style="margin-top:10px"><button class="btn" id="logAdd" type="button">Add it</button></div>
       <div id="logList" style="margin-top:12px"></div>
     </div>
-  </div>
+  </details>
 
-  <!-- 5. EXAMS -->
-  <div class="sech" id="exams"><span class="num">05</span><h2>Exams</h2><span>Just so you know where things sit. No countdown pressure.</span></div>
-  <div class="board">
-    <div class="card w7 acc-eng" id="examCard"></div>
-    <div class="card w5 more">
-      <span class="kicker">Also on Base 5</span>
+  <details class="fold acc-eng" id="exams">
+    <summary><span><b>Exam dates</b><small>Just so you know where things sit.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner"><div class="card" id="examCard"></div></div>
+  </details>
+
+  <details class="fold more" style="--accent:var(--cyan)">
+    <summary><span><b>Also on Base 5</b><small>Whole practice papers and more.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner">
       <a href="/practice/gcse-foundation-paper-1.html"><b>GCSE Foundation Paper 1</b><span>Maths, whole paper</span></a>
       <a href="/practice/gcse-foundation-paper-2.html"><b>GCSE Foundation Paper 2</b><span>Maths, whole paper</span></a>
       <a href="/practice/maths-check-foundation.html"><b>Maths check</b><span>Maths, finds the gaps</span></a>
       <a href="/practice/scale.html"><b>Scale and similar shapes</b><span>Maths drills</span></a>
       <a href="/practice/#english-gcse"><b>English shelf</b><span>Practice hub</span></a>
     </div>
-  </div>
+  </details>
 
-  <!-- 6. SEND -->
-  <div class="board">
-    <div class="card w12" id="sendCard">
-      <span class="kicker">Send to Jay</span>
-      <h3>Share your map and notes</h3>
-      <p class="tiny">Only if you want to. It sends your revision map, the notes you have logged, and how each activity is going.</p>
-      <div id="sendHost"></div>
-    </div>
-  </div>
+  <details class="fold" style="--accent:var(--violet)">
+    <summary><span><b>Send to Jay</b><small>Only if you want to: your map, your notes, how things are going.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner"><div id="sendHost"></div></div>
+  </details>
 
 </div>
 
@@ -254,7 +273,7 @@ var SUBJECTS = EGWCAT.subjects.map(function(cs){
       return { id: a.id, title: a.title, line: a.line, mins: a.mins, chunks: a.chunks.length, names: a.chunks };
     }),
     topics: cs.topics.map(function(t){
-      return [t.name, t.links.length ? t.links[0][0] : (t.ext ? t.ext[0] : ""), t.links.length ? t.links[0][1] : 0, t.often];
+      return [t.name, t.links.length ? t.links[0][0] : (t.ext ? t.ext[0] : ""), t.links.length ? t.links[0][1] : 0, t.often, t.group];
     })
   };
 });
@@ -265,7 +284,7 @@ function loadJSON(k){ try{ var r = localStorage.getItem(k); return r ? JSON.pars
 var hq = loadJSON(HQ_KEY) || { map: {}, log: [], plan: {} };
 if(!hq.map) hq.map = {}; if(!hq.log) hq.log = []; if(!hq.plan) hq.plan = {};
 function saveHQ(){ try{ localStorage.setItem(HQ_KEY, JSON.stringify(hq)); }catch(e){} }
-try{ if(!localStorage.getItem("base5.who.v1")) localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
+try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
 
 function actState(a){
   var st = loadJSON("b5.egw." + a.id + ".v1");
@@ -287,45 +306,51 @@ function allActs(){
   return out;
 }
 
-/* ---------- stats strip ---------- */
+/* ---------- quiet progress line: only once something is done, no totals ---------- */
 function drawStrip(){
-  var acts = allActs(), sparks = 0, done = 0, total = 0, best = 0, started = 0;
-  acts.forEach(function(x){ sparks += x.st.sparks; done += x.st.done; total += x.st.chunks; best = Math.max(best, x.st.best); if(x.st.touched) started++; });
+  var acts = allActs(), sparks = 0, done = 0, best = 0;
+  acts.forEach(function(x){ sparks += x.st.sparks; done += x.st.done; best = Math.max(best, x.st.best); });
   var greens = 0;
   Object.keys(hq.map).forEach(function(k){ if(hq.map[k] === 3) greens++; });
-  $("strip").innerHTML =
-    '<div class="stat hot"><b>' + sparks + '</b><span>sparks earned</span></div>' +
-    '<div class="stat"><b>' + done + '<small style="font-size:1rem;color:#c9cdf0"> / ' + total + '</small></b><span>chunks done</span></div>' +
-    '<div class="stat"><b>' + best + '</b><span>best first go streak</span></div>' +
-    '<div class="stat"><b>' + greens + '</b><span>' + (greens === 1 ? "topic" : "topics") + ' feeling solid</span></div>';
+  var bits = [];
+  if(done) bits.push("<b>" + done + "</b> " + (done === 1 ? "chunk" : "chunks") + " done");
+  if(sparks) bits.push("<b>" + sparks + "</b> sparks");
+  if(greens) bits.push("<b>" + greens + "</b> " + (greens === 1 ? "topic feels" : "topics feel") + " solid");
+  $("progress").innerHTML = bits.length ? bits.map(function(x){ return "<span>" + x + "</span>"; }).join("") : "";
 }
 
-/* ---------- subjects ---------- */
+/* ---------- subjects: one at a time ---------- */
+var subjSel = Math.max(0, SUBJECTS.map(function(s){ return s.key; }).indexOf(hq.lastSubj));
 function drawSubjects(){
-  var board = $("subjBoard");
-  board.innerHTML = "";
-  SUBJECTS.forEach(function(s){
-    var card = document.createElement("div");
-    card.className = "card w6 subj " + s.acc;
-    var html = '<span class="kicker">' + s.name + '</span><h3><span class="dot"></span>' + s.name + '</h3><p class="tiny" style="margin:0">' + s.line + '</p>';
-    s.acts.forEach(function(a){
-      var st = actState(a);
-      var bars = "";
-      for(var k = 0; k < st.chunks; k++){
-        var v = st.states[k];
-        bars += '<i class="' + (v === "done" ? "d" : v === "started" ? "s" : "") + '"></i>';
-      }
-      var label = st.done >= st.chunks ? "All done" : st.touched ? st.done + " of " + st.chunks + " chunks" : "Not started";
-      html += '<a class="act" href="/egw/' + a.id + '.html">' +
-        '<span class="t"><b>' + a.title + '</b><span class="st' + (st.done >= st.chunks ? " done" : "") + '">' + label + '</span></span>' +
-        '<p>' + a.line + '</p>' +
-        '<span class="bar">' + bars + '</span>' +
-        '<span class="meta"><span>' + st.chunks + ' chunks &middot; about ' + a.mins + ' min in all</span><span>' + st.sparks + ' sparks</span></span>' +
-        '</a>';
-    });
-    card.innerHTML = html;
-    board.appendChild(card);
+  var tabs = $("subjTabs");
+  tabs.innerHTML = "";
+  SUBJECTS.forEach(function(s, k){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = s.acc; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", k === subjSel ? "true" : "false");
+    b.textContent = s.name;
+    b.onclick = function(){ subjSel = k; hq.lastSubj = s.key; saveHQ(); drawSubjects(); };
+    tabs.appendChild(b);
   });
+  var s = SUBJECTS[subjSel];
+  var board = $("subjBoard");
+  var html = '<div class="card w12 subj ' + s.acc + '"><span class="kicker">' + s.name + '</span><p class="tiny" style="margin:0">' + s.line + '</p>';
+  s.acts.forEach(function(a){
+    var st = actState(a);
+    var bars = "";
+    for(var k = 0; k < st.chunks; k++){
+      var v = st.states[k];
+      bars += '<i class="' + (v === "done" ? "d" : v === "started" ? "s" : "") + '"></i>';
+    }
+    var label = st.done >= st.chunks ? "All done" : st.done ? st.done + " done" : st.touched ? "Started" : "";
+    html += '<a class="act" href="/egw/' + a.id + '.html">' +
+      '<span class="t"><b>' + a.title + '</b><span class="st' + (st.done >= st.chunks ? " done" : "") + '">' + label + '</span></span>' +
+      '<p>' + a.line + '</p>' +
+      '<span class="bar">' + bars + '</span>' +
+      '</a>';
+  });
+  html += '</div>';
+  board.innerHTML = html;
 }
 
 /* ---------- deal a chunk ---------- */
@@ -354,7 +379,7 @@ function deal(){
   var dice = $("dice");
   dice.classList.remove("roll"); void dice.offsetWidth; dice.classList.add("roll");
   if(!pool.length){
-    out.innerHTML = '<span class="kicker">Deal me a chunk</span><b>Everything here is done.</b><p class="tiny">Genuinely impressive. Any chunk is worth a second go for the stretch questions.</p>';
+    out.innerHTML = '<span class="kicker">Pick for me</span><b>Everything here is done.</b><p class="tiny">Genuinely impressive. Any chunk is worth a second go for the stretch questions.</p>';
     return;
   }
   var p = pool[Math.floor(Math.random() * pool.length)];
@@ -363,8 +388,8 @@ function deal(){
   dice.innerHTML = faces[Math.floor(Math.random() * 6)];
   out.innerHTML = '<span class="kicker">' + p.x.s.name + '</span>' +
     '<b>' + p.x.a.title + '<br>Chunk ' + (p.k + 1) + name + '</b>' +
-    '<p class="tiny">About five to ten minutes. Not feeling it? Roll again.</p>' +
-    '<a class="btn" href="/egw/' + p.x.a.id + '.html#chunk-' + (p.k + 1) + '">Go to this chunk</a>';
+    '<p class="tiny">About five to ten minutes. Not feeling it? Roll again, or leave it.</p>' +
+    '<a class="btn" href="/egw/' + p.x.a.id + '.html#chunk-' + (p.k + 1) + '">Open this chunk</a>';
 }
 
 /* ---------- revision map ---------- */
@@ -383,33 +408,50 @@ function drawMap(){
     tabs.appendChild(b);
   });
   var s = SUBJECTS[mapSubj];
-  $("mapCard").className = "card w12 " + s.acc;
+  $("map").className = "fold " + s.acc;
   var list = $("mapList");
   list.innerHTML = "";
   var counts = [0, 0, 0, 0];
+  var groups = [], byName = {};
   s.topics.forEach(function(t){
-    var key = s.key + ":" + t[0];
-    var v = hq.map[key] || 0;
-    counts[v]++;
-    var row = document.createElement("div");
-    row.className = "maprow";
-    var href = !t[1] ? "" : t[1].charAt(0) === "/" ? t[1] : "/egw/" + t[1] + ".html" + (t[2] ? "#chunk-" + t[2] : "");
-    row.innerHTML = '<span class="tn">' + t[0] + (href ? ' <a href="' + href + '">practise</a>' : ' <span class="tiny" style="margin:0">(not in the HQ yet)</span>') + '</span>';
-    var rag = document.createElement("span");
-    rag.className = "rag";
-    RAG.forEach(function(r){
-      var b = document.createElement("button");
-      b.type = "button"; b.textContent = r[1]; b.dataset.v = r[0];
-      b.className = v === r[0] ? "on" : "";
-      b.setAttribute("aria-pressed", v === r[0] ? "true" : "false");
-      b.onclick = function(){
-        hq.map[key] = hq.map[key] === r[0] ? 0 : r[0];
-        saveHQ(); drawMap(); drawStrip();
-      };
-      rag.appendChild(b);
+    var g = t[4] || "Topics";
+    if(!byName[g]){ byName[g] = { name: g, topics: [] }; groups.push(byName[g]); }
+    byName[g].topics.push(t);
+  });
+  groups.forEach(function(g){
+    var det = document.createElement("details");
+    det.className = "mgroup";
+    if(hq.openGroup === s.key + ":" + g.name) det.open = true;
+    var rated = 0;
+    g.topics.forEach(function(t){ if(hq.map[s.key + ":" + t[0]]) rated++; });
+    det.innerHTML = '<summary>' + g.name + ' <span>' + g.topics.length + ' topics' + (rated ? ", " + rated + " rated" : "") + '</span></summary>';
+    det.addEventListener("toggle", function(){ if(det.open){ hq.openGroup = s.key + ":" + g.name; saveHQ(); } });
+    g.topics.forEach(function(t){
+      var key = s.key + ":" + t[0];
+      var v = hq.map[key] || 0;
+      counts[v]++;
+      var row = document.createElement("div");
+      row.className = "maprow";
+      var href = !t[1] ? "" : t[1].charAt(0) === "/" ? t[1] : "/egw/" + t[1] + ".html" + (t[2] ? "#chunk-" + t[2] : "");
+      row.innerHTML = '<span class="tn">' + t[0] + (href ? ' <a href="' + href + '">practise</a>' : ' <span class="tiny" style="margin:0">(not in the HQ yet)</span>') + '</span>';
+      var rag = document.createElement("span");
+      rag.className = "rag";
+      RAG.forEach(function(r){
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = r[1]; b.dataset.v = r[0];
+        b.className = v === r[0] ? "on" : "";
+        b.setAttribute("aria-pressed", v === r[0] ? "true" : "false");
+        b.onclick = function(){
+          hq.map[key] = hq.map[key] === r[0] ? 0 : r[0];
+          hq.openGroup = s.key + ":" + g.name;
+          saveHQ(); drawMap(); drawStrip();
+        };
+        rag.appendChild(b);
+      });
+      row.appendChild(rag);
+      det.appendChild(row);
     });
-    row.appendChild(rag);
-    list.appendChild(row);
+    list.appendChild(det);
   });
   var n = s.topics.length;
   $("mapSum").innerHTML =
@@ -437,7 +479,7 @@ function drawPlan(){
   pickRow($("pEnergy"), ENERGY, "energy");
   var p = hq.plan;
   if(!p.subj || !p.time || !p.energy){
-    $("planOut").innerHTML = '<p class="tiny" style="margin-top:6px">Pick one of each and a plan appears here.</p>';
+    $("planOut").innerHTML = '<p class="tiny" style="margin-top:6px">Pick one of each and a suggestion appears here.</p>';
     return;
   }
   var subj = p.subj === "any" ? SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)] : SUBJECTS.filter(function(s){ return s.key === p.subj; })[0];
@@ -454,19 +496,19 @@ function drawPlan(){
   var steps = [];
   var t = +p.time;
   if(p.energy === "low"){
-    steps.push(["2 min", "Open your revision map for " + subj.name + " and just look. No need to change anything."]);
-    steps.push([(t - 5) + " min", "Read the learn cards in " + link + ". Answer only the questions that feel easy. Skipping is fine."]);
-    steps.push(["3 min", "Write one thing that stuck in the box on the right. Then stop. That counts."]);
+    steps.push(["2 min", "If you like, open your revision map for " + subj.name + " and just look. No need to change anything."]);
+    steps.push([(t - 5) + " min", "Read the learn cards in " + link + ". Answer only the questions that feel OK. Skipping is fine."]);
+    steps.push(["3 min", "Jot one thing that stuck under One thing to remember. Then stop. That counts."]);
   }else if(p.energy === "some"){
-    steps.push(["3 min", "Warm up: say out loud, or jot down, three things you remember about " + weakTxt + "."]);
-    steps.push([(t - 7) + " min", "Do " + link + ". Use Show me whenever you like."]);
-    steps.push(["4 min", "Update your map if anything changed, and log one thing to remember."]);
+    steps.push(["3 min", "Warm up, if you fancy it: what do you remember about " + weakTxt + "?"]);
+    steps.push([(t - 7) + " min", "Try " + link + ". Show me is there whenever you want it."]);
+    steps.push(["4 min", "Change your map if anything moved, and jot one thing to remember."]);
   }else{
     steps.push(["3 min", "Warm up on " + weakTxt + ": what do you already know?"]);
-    steps.push([(t - 8) + " min", "Do " + link + ", then the next chunk if time allows. Try every stretch question."]);
-    steps.push(["5 min", "Explain one idea out loud as if teaching it, then log it on the right."]);
+    steps.push([(t - 8) + " min", "Try " + link + ", and the next chunk if you are on a roll. Stretch questions are there if you want them."]);
+    steps.push(["5 min", "Explain one idea out loud as if teaching it, then jot it down."]);
   }
-  $("planOut").innerHTML = '<div class="plan"><span class="kicker">Your ' + t + ' minute ' + subj.name + ' session</span><ol>' +
+  $("planOut").innerHTML = '<div class="plan"><span class="kicker">A ' + t + ' minute ' + subj.name + ' idea</span><ol>' +
     steps.map(function(s){ return '<li><span class="when">' + s[0] + '</span>' + s[1] + '</li>'; }).join("") +
     '</ol><p class="tiny" style="margin:6px 0 0">A short break before or after helps it stick. Changing the plan is allowed.</p></div>';
 }
@@ -492,11 +534,11 @@ function drawExams(){
   var card = $("examCard");
   var list = EXAMS.slice().filter(function(e){ return e && e.date; }).sort(function(a, b){ return a.date < b.date ? -1 : 1; });
   if(!list.length){
-    card.innerHTML = '<span class="kicker">Exam dates</span><h3>Coming soon</h3><p>Jay will pop your exam dates in here once they are confirmed. Nothing to do for now.</p>';
+    card.innerHTML = '<p style="margin:0">Jay will pop your exam dates in here once they are confirmed. Nothing to do for now.</p>';
     return;
   }
   var today = new Date(); today.setHours(0, 0, 0, 0);
-  var html = '<span class="kicker">Exam dates</span><h3>Where things sit</h3>';
+  var html = '';
   list.forEach(function(e){
     var d = new Date(e.date + "T00:00:00");
     var days = Math.round((d - today) / 86400000);
@@ -537,6 +579,7 @@ if(window.Base5Send){
 $("dice").onclick = deal;
 drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams();
 window.addEventListener("pageshow", function(){ drawStrip(); drawSubjects(); });
+$("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>
 </body>

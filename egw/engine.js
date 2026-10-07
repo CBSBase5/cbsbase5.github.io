@@ -165,12 +165,12 @@ function build(){
         '<h3>Learn a bit, try a bit</h3>' +
         '<p class="lead">' + cfg.blurb + '</p>' +
         '<ul class="howlist">' +
-          '<li><b>' + chunks.length + ' chunks.</b> Do one, do them all, any order. It saves as you go.</li>' +
-          '<li><b>Two goes</b> at each question, with a nudge in between. <b>Show me</b> is always there too.</li>' +
-          '<li><b>Sparks</b> for everything you try, and a streak for first go answers. <span class="stretch">Stretch</span> questions are a step harder; skip them if you like.</li>' +
+          '<li><b>' + chunks.length + ' short chunks.</b> Any order, any day. It saves itself.</li>' +
+          '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it.</li>' +
+          '<li><span class="stretch">Stretch</span> questions are optional extras.</li>' +
         '</ul>' +
         '<div class="qnav" style="margin-top:4px">' +
-          '<button class="btn" id="beginBtn">Start chunk 1</button>' +
+          '<button class="btn" id="beginBtn">Begin with chunk 1</button>' +
           '<button class="btn btn-quiet hidden" id="resumeBtn">Carry on where I left off</button>' +
         '</div>' +
         '<p class="chiplabel">Or pick a chunk</p>' +
@@ -288,7 +288,7 @@ function showStart(){
   showOnly("startCard");
   var any = !!(state.answers && Object.keys(state.answers).length);
   $("resumeBtn").classList.toggle("hidden", !any);
-  $("beginBtn").textContent = any ? "Start again from scratch" : "Start chunk 1";
+  $("beginBtn").textContent = any ? "Start again from scratch" : "Begin with chunk 1";
   $("beginBtn").className = any ? "btn btn-quiet" : "btn";
   $("resumeBtn").className = any ? "btn" : "btn btn-quiet hidden";
   drawChunkMap();
@@ -328,7 +328,7 @@ function chunkDone(k){
   $("chunkDoneP").textContent = "Chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic) + ". " +
     (sk ? "You skipped " + sk + "; they will be there whenever you fancy them." : "Nothing skipped.");
   $("chunkTally").innerHTML = '<div class="tbox big"><b>+' + sp + '</b><span>sparks</span></div>' +
-    tallyBox(g1, "first go") + tallyBox(g2, "second go") + tallyBox(sh, "learnt from Show me");
+    (g1 ? tallyBox(g1, "first go") : "") + (g2 ? tallyBox(g2, "second go") : "") + (sh ? tallyBox(sh, "learnt from Show me") : "");
   var nk = k + 1;
   $("nextChunkBtn").textContent = "Next: " + stripTags(chunks[nk].topic);
   $("nextChunkBtn").onclick = function(){ go(chunks[nk].from); };
@@ -363,9 +363,12 @@ var cur = null;   // live handle for the current step: {get:fn, mark:fn}
 function drawChips(){
   var st = state.streak || 0;
   var sc = $("streakChip");
-  sc.innerHTML = '<span class="ico">&#9889;</span>Streak ' + st;
+  sc.innerHTML = '<span class="ico">&#9889;</span>' + st + ' in a row';
   sc.classList.toggle("hot", st >= 3);
-  $("sparkChip").innerHTML = '<span class="ico">&#10022;</span>' + summary().sparks + ' sparks';
+  sc.classList.toggle("hidden", st < 2);
+  var sp = summary().sparks;
+  $("sparkChip").innerHTML = '<span class="ico">&#10022;</span>' + sp + ' sparks';
+  $("sparkChip").classList.toggle("hidden", !sp);
 }
 
 function go(i){
@@ -382,7 +385,7 @@ function go(i){
   $("qTopic").innerHTML = s.topic + (s.stretch ? ' <span class="stretch">Stretch</span>' : "");
   var qs = 0, me = 0;
   for(var m = c.from; m <= c.to; m++){ if(steps[m].type !== "learn"){ qs++; if(m <= i) me++; } }
-  $("qCount").textContent = s.type === "learn" ? "Learn card" : "Question " + me + " of " + qs;
+  $("qCount").textContent = "";
 
   var body = $("qBody");
   body.innerHTML = "";
@@ -411,7 +414,7 @@ function setButtons(s, i){
   var tried = !!(state.answers[i] && state.answers[i].tries);
   $("checkBtn").classList.toggle("hidden", !!(learn || write || widget || done));
   $("showBtn").classList.toggle("hidden", !!(learn || write || widget || done || !tried));
-  $("nextBtn").classList.toggle("hidden", !(learn || done || write));
+  $("nextBtn").classList.toggle("hidden", !(learn || done || write) || (learn && revealPending));
   $("skipBtn").classList.toggle("hidden", !!(learn || done));
   var lastInChunk = i === steps.length - 1 || chunkOf[i + 1] !== chunkOf[i];
   $("nextBtn").textContent = learn ? "Got it, next" : (i === steps.length - 1 ? "Finish" : lastInChunk ? "Finish this chunk" : "Next");
@@ -423,11 +426,55 @@ function prompt(s){ return '<div class="prompt">' + s.q + '</div>' + fig(s); }
 
 var R = {};
 
-R.learn = function(s, body){
+/* Learn cards show one short bit at a time, so a long card is
+   never a wall of text. "Show it all" is always there instead. */
+var revealPending = false;
+var BIT_WORDS = 60;
+R.learn = function(s, body, i){
   body.innerHTML = '<h3 class="learnh">' + s.title + '</h3>' +
     (s.fig ? '<div class="fig">' + s.fig + '</div>' : "") +
     '<div class="learnbody">' + s.html + '</div>';
-  state.answers[state.pos] = { status: "done" }; save();
+  var seen = !!state.answers[i];
+  state.answers[i] = { status: "done" }; save();
+  revealPending = false;
+  if(seen) return;
+  var lb = body.querySelector(".learnbody");
+  var kids = [].slice.call(lb.children);
+  function wc(el){ var m = (el.textContent || "").trim().match(/\S+/g); return m ? m.length : 0; }
+  var total = 0; kids.forEach(function(el){ total += wc(el); });
+  if(kids.length < 2 || total <= BIT_WORDS + 30) return;
+  var bits = [], curBit = [], words = 0;
+  kids.forEach(function(el){
+    var w = wc(el);
+    if(curBit.length && words + w > BIT_WORDS){ bits.push(curBit); curBit = []; words = 0; }
+    curBit.push(el); words += w;
+  });
+  if(curBit.length) bits.push(curBit);
+  if(bits.length < 2) return;
+  var shown = 1;
+  var bar = h("div", "readon");
+  var more = h("button", "btn", ""); more.type = "button";
+  var all = h("button", "linkish", "Show it all"); all.type = "button";
+  var dots = h("span", "rdots", "");
+  bar.appendChild(more); bar.appendChild(dots); bar.appendChild(all);
+  lb.parentNode.insertBefore(bar, lb.nextSibling);
+  function draw(scroll){
+    bits.forEach(function(b, k){ b.forEach(function(el){ el.classList.toggle("hidden", k >= shown); if(k === shown - 1 && scroll) el.classList.add("fresh"); }); });
+    var d = "";
+    for(var k = 0; k < bits.length; k++) d += '<i class="' + (k < shown ? "on" : "") + '"></i>';
+    dots.innerHTML = d;
+    more.textContent = "Read on";
+    if(shown >= bits.length){
+      bar.remove();
+      revealPending = false;
+      setButtons(s, i);
+    }
+    if(scroll && bits[shown - 1]) bits[shown - 1][0].scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  more.onclick = function(){ shown++; draw(true); };
+  all.onclick = function(){ shown = bits.length; draw(false); };
+  revealPending = true;
+  draw(false);
 };
 
 R.mc = function(s, body){
@@ -802,7 +849,7 @@ function bump(status, from){
     state.streak = 0;
   }
   save();
-  if(status === "right1" || status === "right2" || status === "done") confetti(from, status === "right1" && state.streak >= 3 ? 24 : 14);
+  if(status === "right1" || status === "right2" || status === "done") confetti(from, status === "right1" && state.streak >= 3 ? 18 : 10);
 }
 
 function showFeedback(s, status, quiet){
@@ -929,7 +976,7 @@ function run(c){
   cfg = c; steps = c.steps; key = PREFIX + c.id + ".v1";
   state = load() || fresh();
   if(!state.widgets) state.widgets = {};
-  try{ if(!localStorage.getItem("base5.who.v1")) localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
+  try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
   document.title = c.title + " - EGW GCSE HQ";
   makeChunks();
   build();
