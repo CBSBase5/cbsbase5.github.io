@@ -60,8 +60,12 @@ function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
 
 /* Numbers: accepts 1,250  1250  12.5%  3/4  2 1/2  -4  .5 and a pound sign */
 function parseNum(s){
-  s = String(s).trim().replace(/[\u00a3$,%]/g, "").replace(/\s+/g, " ");
-  s = s.replace(/^[a-z]\s*=\s*/i, "").replace(/\s*[a-z\u00b0\u00b2\u00b3]+$/i, "").trim();
+  s = String(s).trim().replace(/[\u2212\u2013]/g, "-").replace(/[\u00a3$,%]/g, "").replace(/\s+/g, " ");
+  s = s.replace(/^[a-z]\s*=\s*/i, "");
+  /* trailing units, including ones with a slash like km/h or g/cm3, and the pi sign */
+  s = s.replace(/(\s*[a-z\u00b0\u00b2\u00b3\u03c0]+(\s*\/\s*[a-z\u00b2\u00b3]+)?)+$/i, "").trim();
+  /* 35 000 written with a space for thousands */
+  if(/^-?\d{1,3}( \d{3})+(\.\d+)?$/.test(s)) s = s.replace(/ /g, "");
   var mixed = s.match(/^(-?\d+)\s+(\d+)\/(\d+)$/);
   if(mixed){
     var w = parseFloat(mixed[1]), f = parseFloat(mixed[2]) / parseFloat(mixed[3]);
@@ -424,6 +428,22 @@ function setButtons(s, i){
 function fig(s){ return s.fig ? '<div class="fig">' + s.fig + '</div>' : ""; }
 function prompt(s){ return '<div class="prompt">' + s.q + '</div>' + fig(s); }
 
+/* Options are shown in a shuffled order that stays the same for this
+   step every time (so a saved answer still lines up). s.fixed keeps
+   the written order, for options that are naturally in order. */
+function seeded(str){
+  var h = 2166136261;
+  for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return function(){ h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+}
+function optionOrder(s){
+  var ord = s.options.map(function(o, k){ return k; });
+  if(s.fixed) return ord;
+  var rnd = seeded(cfg.id + ":" + state.pos + ":" + s.options.length);
+  for(var i = ord.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var t = ord[i]; ord[i] = ord[j]; ord[j] = t; }
+  return ord;
+}
+
 var R = {};
 
 /* Learn cards show one short bit at a time, so a long card is
@@ -481,13 +501,15 @@ R.mc = function(s, body){
   body.innerHTML = prompt(s);
   var box = h("div", "choices");
   var picked = -1;
-  s.options.forEach(function(o, k){
-    var b = h("button", "", o); b.type = "button";
+  var btns = {};
+  optionOrder(s).forEach(function(k){
+    var b = h("button", "", s.options[k]); b.type = "button"; b.dataset.k = k;
     b.onclick = function(){
       if(resolved(state.pos)) return;
       picked = k;
-      [].forEach.call(box.children, function(c, n){ c.classList.toggle("picked", n === k); });
+      Object.keys(btns).forEach(function(n){ btns[n].classList.toggle("picked", +n === k); });
     };
+    btns[k] = b;
     box.appendChild(b);
   });
   body.appendChild(box);
@@ -496,14 +518,15 @@ R.mc = function(s, body){
     empty: function(){ return picked < 0; },
     right: function(){ return picked === s.answer; },
     mark: function(final){
-      [].forEach.call(box.children, function(c, n){
+      Object.keys(btns).forEach(function(key){
+        var n = +key, c = btns[key];
         c.classList.remove("ok", "no");
         if(n === picked && picked !== s.answer) c.classList.add("no");
         if(final && n === s.answer) c.classList.add("ok");
         if(!final && n === picked && picked === s.answer) c.classList.add("ok");
       });
     },
-    restore: function(v, fin){ picked = v; if(v >= 0 && box.children[v]) box.children[v].classList.add("picked"); if(fin) this.mark(true); }
+    restore: function(v, fin){ picked = v; if(v >= 0 && btns[v]) btns[v].classList.add("picked"); if(fin) this.mark(true); }
   };
 };
 
@@ -511,12 +534,14 @@ R.multi = function(s, body){
   body.innerHTML = prompt(s) + '<p class="tiny">Pick ' + s.answers.length + '.</p>';
   var box = h("div", "choices");
   var on = {};
-  s.options.forEach(function(o, k){
-    var b = h("button", "", o); b.type = "button";
+  var btns = {};
+  optionOrder(s).forEach(function(k){
+    var b = h("button", "", s.options[k]); b.type = "button"; b.dataset.k = k;
     b.onclick = function(){
       if(resolved(state.pos)) return;
       on[k] = !on[k]; b.classList.toggle("picked", !!on[k]);
     };
+    btns[k] = b;
     box.appendChild(b);
   });
   body.appendChild(box);
@@ -526,7 +551,8 @@ R.multi = function(s, body){
     empty: function(){ return list().length === 0; },
     right: function(){ return list().join() === s.answers.slice().sort().join(); },
     mark: function(final){
-      [].forEach.call(box.children, function(c, n){
+      Object.keys(btns).forEach(function(key){
+        var n = +key, c = btns[key];
         c.classList.remove("ok", "no");
         var should = s.answers.indexOf(n) >= 0;
         if(on[n] && !should) c.classList.add("no");
@@ -534,7 +560,7 @@ R.multi = function(s, body){
         if(final && should) c.classList.add("ok");
       });
     },
-    restore: function(v, fin){ (v || []).forEach(function(k){ on[k] = true; box.children[k].classList.add("picked"); }); if(fin) this.mark(true); }
+    restore: function(v, fin){ (v || []).forEach(function(k){ on[k] = true; if(btns[k]) btns[k].classList.add("picked"); }); if(fin) this.mark(true); }
   };
 };
 
@@ -546,7 +572,7 @@ R.num = function(s, body){
     var row = h("label", "numrow");
     row.innerHTML = (bx.label ? '<span class="nlab">' + bx.label + '</span>' : "") +
       (bx.pre ? '<span class="aff">' + bx.pre + '</span>' : "");
-    var inp = h("input"); inp.type = "text"; inp.inputMode = "decimal"; inp.autocomplete = "off";
+    var inp = h("input"); inp.type = "text"; inp.inputMode = "text"; inp.setAttribute("autocapitalize", "off"); inp.spellcheck = false; inp.autocomplete = "off";
     inp.setAttribute("aria-label", bx.label ? stripTags(bx.label) : "Your answer");
     inp.addEventListener("keydown", function(e){ if(e.key === "Enter") $("checkBtn").click(); });
     row.appendChild(inp);
@@ -985,6 +1011,10 @@ function run(c){
   /* /egw/page.html#chunk-3 opens straight onto chunk 3 */
   var m = (location.hash || "").match(/^#chunk-(\d+)$/);
   if(m && chunks[+m[1] - 1]) go(chunks[+m[1] - 1].from);
+  window.addEventListener("hashchange", function(){
+    var h = (location.hash || "").match(/^#chunk-(\d+)$/);
+    if(h && chunks[+h[1] - 1]) go(chunks[+h[1] - 1].from);
+  });
 }
 
 return { run: run, parseNum: parseNum, norm: norm };
