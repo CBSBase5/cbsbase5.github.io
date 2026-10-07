@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cells and transport - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: the microscope widget and the small tables */
+.mview svg{width:100%;max-width:340px;height:auto;display:block;margin:6px auto 4px}
+.mtabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mtabs .btn{padding:9px 14px;font-size:.8rem}
+.mlab{display:flex;gap:8px;align-items:center;cursor:pointer}
+.mlab input{width:20px;height:20px;accent-color:var(--teal)}
+.wq{margin-top:6px}
+.wq + .wq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+.tablewrap{overflow-x:auto;margin:0 0 12px}
+.tablewrap .datatable{font-size:.92rem}
+.tablewrap .datatable td,.tablewrap .datatable th{padding:6px 8px;text-align:left;vertical-align:top}
+.fin{display:block;font-weight:400;font-size:.8rem;color:var(--body-tint)}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Cells and transport</h2>
+    <span>Biology. Cell structure, specialised cells, microscopes and how substances get in and out of cells.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", TEAL = "#3a5cff", BRIGHT = "#22b8e6", ORANGE = "#ff5d5d",
+    YELLOW = "#ffd23f", PLUM = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", GREEN = "#2e7d4f";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '">' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function arrowHead(x, y, dir, c){
+  /* small solid triangle pointing right (dir 1) or left (dir -1) */
+  return '<path d="M' + x + ' ' + y + ' L' + (x - 9 * dir) + ' ' + (y - 6) + ' L' + (x - 9 * dir) + ' ' + (y + 6) + ' Z" fill="' + (c || INK) + '"/>';
+}
+
+/* ---------- figures ---------- */
+var FIG_THREE = svg("0 0 540 222", "An animal cell, a plant cell and a bacterial cell side by side",
+  /* animal */
+  '<path d="M40 74 Q48 30 98 36 Q152 38 150 92 Q152 142 100 150 Q44 154 36 112 Z" fill="#fde6d2" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<circle cx="96" cy="92" r="19" fill="' + PLUM + '"/>' +
+  '<ellipse cx="62" cy="70" rx="9" ry="5" fill="' + ORANGE + '"/>' +
+  '<ellipse cx="128" cy="118" rx="9" ry="5" fill="' + ORANGE + '" transform="rotate(30 128 118)"/>' +
+  '<ellipse cx="68" cy="128" rx="9" ry="5" fill="' + ORANGE + '" transform="rotate(-20 68 128)"/>' +
+  /* plant */
+  '<rect x="200" y="30" width="136" height="124" rx="4" fill="#f3f7e4" stroke="' + TEAL + '" stroke-width="7"/>' +
+  '<rect x="232" y="54" width="86" height="78" rx="18" fill="#d9f1f7" stroke="' + BRIGHT + '" stroke-width="2"/>' +
+  '<circle cx="216" cy="128" r="11" fill="' + PLUM + '"/>' +
+  '<ellipse cx="225" cy="45" rx="10" ry="5" fill="' + GREEN + '"/><ellipse cx="270" cy="44" rx="10" ry="5" fill="' + GREEN + '"/>' +
+  '<ellipse cx="310" cy="45" rx="10" ry="5" fill="' + GREEN + '"/><ellipse cx="326" cy="95" rx="5" ry="10" fill="' + GREEN + '"/>' +
+  '<ellipse cx="275" cy="143" rx="10" ry="5" fill="' + GREEN + '"/>' +
+  /* bacterium */
+  '<rect x="392" y="66" width="126" height="54" rx="27" fill="#fff1cf" stroke="' + TEAL + '" stroke-width="5"/>' +
+  '<path d="M420 92 q8 -14 18 -4 q10 10 20 -2 q10 -12 18 2 q6 12 -6 14 q-12 2 -20 -6 q-8 -8 -18 4 q-10 10 -12 -8 Z" fill="none" stroke="' + PLUM + '" stroke-width="2.5"/>' +
+  '<circle cx="497" cy="84" r="5" fill="none" stroke="' + ORANGE + '" stroke-width="2.5"/>' +
+  '<circle cx="492" cy="104" r="4" fill="none" stroke="' + ORANGE + '" stroke-width="2.5"/>' +
+  L(446, 106, 420, 146) + T(418, 162, "DNA loop", { s: 15 }) +
+  L(494, 108, 512, 146) + T(538, 162, "plasmids", { s: 15, a: "end" }) +
+  T(94, 190, "Animal cell", { s: 20, w: 800 }) + T(94, 212, "eukaryotic", { s: 16, c: TEAL, body: true }) +
+  T(268, 190, "Plant cell", { s: 20, w: 800 }) + T(268, 212, "eukaryotic", { s: 16, c: TEAL, body: true }) +
+  T(455, 190, "Bacterial cell", { s: 20, w: 800 }) + T(455, 212, "prokaryotic", { s: 16, c: ORANGE, body: true }) +
+  T(536, 16, "not to scale", { a: "end", s: 13, w: 400, body: true }));
+
+var FIG_PLANT = svg("-14 0 448 286", "A labelled plant cell",
+  '<rect x="140" y="20" width="140" height="250" rx="4" fill="' + WHITE + '" stroke="' + TEAL + '" stroke-width="8"/>' +
+  '<rect x="149" y="29" width="122" height="232" rx="3" fill="#f3f7e4" stroke="' + INK + '" stroke-width="1.5"/>' +
+  '<rect x="178" y="70" width="78" height="150" rx="24" fill="#d9f1f7" stroke="' + BRIGHT + '" stroke-width="2"/>' +
+  '<circle cx="172" cy="240" r="13" fill="' + PLUM + '"/>' +
+  '<ellipse cx="166" cy="46" rx="11" ry="6" fill="' + GREEN + '"/><ellipse cx="212" cy="45" rx="11" ry="6" fill="' + GREEN + '"/>' +
+  '<ellipse cx="254" cy="48" rx="11" ry="6" fill="' + GREEN + '"/><ellipse cx="263" cy="112" rx="6" ry="11" fill="' + GREEN + '"/>' +
+  '<ellipse cx="161" cy="128" rx="6" ry="11" fill="' + GREEN + '"/><ellipse cx="212" cy="248" rx="11" ry="6" fill="' + GREEN + '"/>' +
+  '<ellipse cx="264" cy="182" rx="5" ry="10" fill="' + ORANGE + '"/>' +
+  '<circle cx="240" cy="246" r="2.2" fill="' + INK + '"/><circle cx="246" cy="240" r="2.2" fill="' + INK + '"/><circle cx="251" cy="248" r="2.2" fill="' + INK + '"/>' +
+  L(126, 34, 138, 34) + T(122, 40, "Cell wall", { a: "end", s: 17 }) +
+  L(126, 92, 149, 92) + T(122, 98, "Cell membrane", { a: "end", s: 17 }) +
+  L(126, 168, 164, 168) + '<circle cx="164" cy="168" r="2.5" fill="' + INK + '"/>' + T(122, 174, "Cytoplasm", { a: "end", s: 17 }) +
+  L(126, 240, 159, 240) + T(122, 246, "Nucleus", { a: "end", s: 17 }) +
+  L(294, 48, 266, 48) + T(298, 54, "Chloroplast", { a: "start", s: 17 }) +
+  L(294, 140, 240, 140) + T(298, 136, "Permanent", { a: "start", s: 17 }) + T(298, 156, "vacuole", { a: "start", s: 17 }) +
+  L(294, 190, 270, 186) + T(298, 196, "Mitochondrion", { a: "start", s: 17 }) +
+  L(294, 246, 254, 246) + T(298, 252, "Ribosomes", { a: "start", s: 17 }));
+
+var FIG_SPEC = svg("0 0 540 190", "Three specialised cells: a sperm cell, a nerve cell and a root hair cell",
+  /* sperm */
+  '<path d="M96 90 q14 -14 28 0 t28 0 t28 0 t28 0" fill="none" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
+  '<rect x="76" y="84" width="22" height="12" rx="4" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="2"/>' +
+  '<ellipse cx="56" cy="90" rx="24" ry="16" fill="#efe3f4" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<ellipse cx="58" cy="90" rx="13" ry="9" fill="' + PLUM + '"/>' +
+  T(110, 150, "Sperm cell", { s: 19, w: 800 }) + T(110, 174, "tail, mitochondria", { s: 15, body: true, w: 400 }) +
+  /* nerve */
+  '<g stroke="' + INK + '" stroke-width="3" stroke-linecap="round" fill="none">' +
+  '<path d="M262 90 L250 70 M250 70 L240 62 M250 70 L252 56 M262 90 L246 100 M246 100 L236 96 M246 100 L240 112 M268 76 L264 58"/>' +
+  '<path d="M286 90 L396 90"/><path d="M396 90 L410 76 M396 90 L412 90 M396 90 L410 104"/></g>' +
+  '<circle cx="270" cy="90" r="16" fill="#fff1cf" stroke="' + INK + '" stroke-width="2.5"/><circle cx="270" cy="90" r="6" fill="' + PLUM + '"/>' +
+  T(325, 150, "Nerve cell", { s: 19, w: 800 }) + T(325, 174, "long, branched", { s: 15, body: true, w: 400 }) +
+  /* root hair */
+  '<path d="M448 34 H528 V84 H486 V118 Q486 128 476 128 Q466 128 466 118 V84 H448 Z" fill="#fff1cf" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<circle cx="508" cy="58" r="8" fill="' + PLUM + '"/>' +
+  T(476, 150, "Root hair cell", { s: 19, w: 800 }) + T(476, 174, "big surface area", { s: 15, body: true, w: 400 }));
+
+var FIG_MAG = svg("0 0 540 180", "Formula triangle: image size on top, magnification and real size below. Millimetres times 1000 gives micrometres.",
+  '<path d="M120 14 L222 166 L18 166 Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+  L(52, 116, 188, 116, INK, 3) + L(120, 116, 120, 166, INK, 3) +
+  T(120, 96, "image", { s: 21, w: 800 }) + T(80, 150, "mag", { s: 19, w: 800 }) + T(160, 150, "real", { s: 19, w: 800 }) +
+  '<rect x="290" y="40" width="80" height="50" rx="12" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="3"/>' +
+  '<rect x="440" y="40" width="80" height="50" rx="12" fill="' + BRIGHT + '" stroke="' + INK + '" stroke-width="3"/>' +
+  T(330, 73, "mm", { s: 23, w: 800 }) + T(480, 73, "&micro;m", { s: 23, w: 800 }) +
+  L(376, 56, 432, 56, INK, 3) + arrowHead(436, 56, 1) + T(405, 46, "&times; 1000", { s: 16 }) +
+  L(380, 76, 436, 76, INK, 3) + arrowHead(376, 76, -1) + T(405, 104, "&divide; 1000", { s: 16 }) +
+  T(405, 142, "1 mm = 1000 &micro;m", { s: 20, w: 800, c: TEAL }) +
+  T(405, 166, "cover the one you want", { s: 15, body: true, w: 400 }));
+
+function dots(list, r, c){
+  return list.map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + c + '"/>'; }).join("");
+}
+var FIG_MOVE = svg("0 0 540 212", "Diffusion, osmosis and active transport across a membrane",
+  /* panels */
+  '<rect x="4" y="30" width="170" height="120" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>' +
+  '<rect x="185" y="30" width="170" height="120" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>' +
+  '<rect x="366" y="30" width="170" height="120" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>' +
+  L(89, 34, 89, 146, INK, 2, "6 5") + L(270, 34, 270, 146, INK, 2, "6 5") + L(451, 34, 451, 146, INK, 2, "6 5") +
+  T(89, 21, "Diffusion", { s: 19, w: 800 }) + T(270, 21, "Osmosis", { s: 19, w: 800 }) + T(451, 21, "Active transport", { s: 19, w: 800 }) +
+  /* diffusion: lots left, few right */
+  dots([[22,50],[40,64],[60,48],[26,86],[50,96],[72,78],[30,124],[58,128],[76,112],[44,110],[66,60]], 5, ORANGE) +
+  dots([[118,70],[140,118],[156,84]], 5, ORANGE) +
+  /* osmosis: water small blue, solute big plum. Left dilute, right concentrated */
+  dots([[202,52],[222,64],[242,50],[206,90],[230,100],[252,80],[214,124],[240,130],[258,112],[226,80],[250,140]], 3.5, BRIGHT) +
+  dots([[236,116]], 7, PLUM) +
+  dots([[292,56],[318,74],[338,52],[300,100],[330,120],[298,132]], 7, PLUM) +
+  dots([[310,90],[340,96],[288,78]], 3.5, BRIGHT) +
+  /* active: few left, lots right */
+  dots([[396,70],[420,118],[384,104]], 5, GREEN) +
+  dots([[472,50],[490,66],[510,48],[476,86],[500,96],[520,78],[480,124],[506,128],[522,112],[494,110],[516,60]], 5, GREEN) +
+  /* arrows */
+  L(30, 172, 140, 172, INK, 3) + arrowHead(148, 172, 1) +
+  L(211, 172, 321, 172, BRIGHT, 3) + arrowHead(329, 172, 1, BRIGHT) +
+  L(392, 172, 502, 172, INK, 3) + arrowHead(510, 172, 1) +
+  T(89, 202, "high to low", { s: 17, w: 700 }) +
+  T(270, 202, "water only", { s: 17, w: 700, c: TEAL }) +
+  T(451, 202, "low to high", { s: 17, w: 700 }) +
+  '<path d="M444 38 L436 54 L446 54 L440 68 L456 48 L446 48 L452 38 Z" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="1.5"/>');
+
+var FIG_CUBES = svg("0 0 540 172", "A 1 cm cube and a 2 cm cube",
+  /* 1 cm cube */
+  '<path d="M60 100 h40 v40 h-40 Z" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<path d="M60 100 l16 -14 h40 l-16 14 Z" fill="#ffe3a3" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '<path d="M100 100 l16 -14 v40 l-16 14 Z" fill="#e8ac2e" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  T(88, 164, "1 cm cube", { s: 17 }) +
+  /* 2 cm cube */
+  '<path d="M200 60 h80 v80 h-80 Z" fill="' + BRIGHT + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<path d="M200 60 l32 -28 h80 l-32 28 Z" fill="#8fd9ea" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '<path d="M280 60 l32 -28 v80 l-32 28 Z" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  L(240, 60, 240, 140, INK, 1, "4 4") + L(200, 100, 280, 100, INK, 1, "4 4") +
+  T(256, 164, "2 cm cube", { s: 17 }) +
+  T(440, 58, "Bigger cube:", { s: 19, w: 800 }) +
+  T(440, 86, "much more inside,", { s: 17, body: true, w: 400 }) +
+  T(440, 110, "not as much more", { s: 17, body: true, w: 400 }) +
+  T(440, 134, "outside", { s: 17, body: true, w: 400 }));
+
+/* ---------- small in-widget quiz (shared shape with the infection page) ---------- */
+function wquiz(host, qs, api){
+  var d = api.data;
+  if(!d.q) d.q = [];
+  function parse(s){
+    s = String(s).replace(/,/g, "").replace(/\u2212/g, "-");
+    var m = s.match(/-?\d*\.?\d+/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function overall(){
+    var r = "right1";
+    for(var k = 0; k < qs.length; k++){
+      var st = d.q[k];
+      if(!st || !st.done) return null;
+      if(st.done === "shown") r = "shown";
+      else if(st.done === "right2" && r === "right1") r = "right2";
+    }
+    return r;
+  }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e; }
+  function render(){
+    host.innerHTML = '<span class="kicker" style="margin-bottom:4px">Your challenge</span>';
+    for(var k = 0; k < qs.length; k++){
+      if(!d.q[k]) d.q[k] = { tries: 0 };
+      host.appendChild(one(k));
+      if(!d.q[k].done) break;
+    }
+  }
+  function one(k){
+    var q = qs[k], st = d.q[k];
+    var box = el("div", "wq", '<p class="wnote"><b>' + (k + 1) + ' of ' + qs.length + '.</b> ' + q.q + '</p>');
+    var picked = st.pick === undefined ? -1 : st.pick, input = null, btns = [];
+    if(q.options){
+      var ch = el("div", "choices");
+      q.options.forEach(function(o, n){
+        var b = el("button", n === picked ? "picked" : "", o); b.type = "button";
+        b.onclick = function(){
+          if(st.done) return;
+          picked = n;
+          btns.forEach(function(x, m){ x.classList.toggle("picked", m === n); x.classList.remove("no"); });
+        };
+        btns.push(b); ch.appendChild(b);
+      });
+      box.appendChild(ch);
+    }else{
+      var row = el("label", "numrow", q.pre ? '<span class="aff">' + q.pre + '</span>' : "");
+      input = el("input"); input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+      input.setAttribute("aria-label", "Your answer");
+      if(st.val !== undefined) input.value = st.val;
+      input.addEventListener("input", function(){ input.classList.remove("no"); });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      row.appendChild(input);
+      if(q.post) row.appendChild(el("span", "aff", q.post));
+      box.appendChild(row);
+    }
+    var nav = el("div", "wrow");
+    var cb = el("button", "btn", "Check"); cb.type = "button";
+    var sb = el("button", "btn btn-quiet", "Show me"); sb.type = "button";
+    nav.appendChild(cb); nav.appendChild(sb); box.appendChild(nav);
+    var fb = el("div", "fb hidden"); fb.setAttribute("aria-live", "polite");
+    box.appendChild(fb);
+    function right(){
+      if(q.options) return picked === q.answer;
+      return Math.abs(parse(input.value) - q.a) <= (q.tol || 1e-9);
+    }
+    function paint(){
+      cb.classList.toggle("hidden", !!st.done);
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      if(!st.done) return;
+      if(q.options){
+        btns.forEach(function(x, m){
+          x.classList.remove("no", "ok");
+          if(m === q.answer) x.classList.add("ok");
+        });
+      }else{
+        if(st.done === "shown"){ input.value = q.show || String(q.a); input.classList.add("given"); }
+        else input.classList.add("ok");
+        input.readOnly = true;
+      }
+      fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+      fb.innerHTML = "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") +
+        '</b><div class="why">' + q.why + "</div>";
+    }
+    function finish(r){
+      st.done = r; api.save();
+      var o = overall();
+      if(o) api.done(o);
+      render();
+    }
+    cb.onclick = function(){
+      if(q.options ? picked < 0 : !input.value.trim()){
+        fb.className = "fb nudge"; fb.innerHTML = "Pop an answer in first, if you like.";
+        return;
+      }
+      st.pick = picked; if(input) st.val = input.value;
+      if(right()){ finish(st.tries ? "right2" : "right1"); return; }
+      st.tries++;
+      if(st.tries >= 2){ finish("shown"); return; }
+      api.save();
+      var msg = q.hint;
+      if(input && q.near){
+        var v = parse(input.value);
+        q.near.forEach(function(nr){ if(Math.abs(v - nr.v) < 1e-9) msg = nr.msg; });
+      }
+      if(q.options && q.nearOpt && q.nearOpt[picked]) msg = q.nearOpt[picked];
+      if(input) input.classList.add("no"); else btns[picked].classList.add("no");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+      paint();
+    };
+    sb.onclick = function(){ finish("shown"); };
+    paint();
+    return box;
+  }
+  render();
+}
+
+/* ---------- the virtual microscope ---------- */
+var SPEC = {
+  plant: { name: "Plant cell", w: 50, h: 30 },
+  animal: { name: "Animal cell (cheek)", w: 60, h: 60 }
+};
+
+function mulberry(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* cheek cells: fixed scatter so the slide looks the same every time */
+var CHEEK = (function(){
+  var rnd = mulberry(42), out = [];
+  for(var j = -5; j <= 5; j++){
+    for(var i = -5; i <= 5; i++){
+      if(i === 0 && j === 0){ out.push({ x: 0, y: 0, r: 30, f: [1, .95, .92, .96, 1, .93, .9, .95], nx: 9, ny: -9 }); continue; }
+      if(rnd() < 0.22) continue;
+      var f = [];
+      for(var n = 0; n < 8; n++) f.push(0.84 + rnd() * 0.22);
+      out.push({ x: i * 86 + (rnd() - 0.5) * 22, y: j * 86 + (rnd() - 0.5) * 22, r: 24 + rnd() * 8, f: f,
+                 nx: (rnd() - 0.5) * 14, ny: (rnd() - 0.5) * 14 });
+    }
+  }
+  return out;
+})();
+
+function blobPath(cx, cy, r, f, k){
+  /* smooth closed blob through 8 points, in screen units */
+  var pts = [];
+  for(var n = 0; n < 8; n++){
+    var a = n / 8 * Math.PI * 2;
+    pts.push([150 + (cx + Math.cos(a) * r * f[n]) * k, 150 + (cy + Math.sin(a) * r * f[n]) * k]);
+  }
+  var s = "";
+  for(n = 0; n < 8; n++){
+    var p = pts[n], q = pts[(n + 1) % 8];
+    var mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+    if(n === 0){
+      var z = pts[7];
+      s += "M" + ((z[0] + p[0]) / 2).toFixed(1) + " " + ((z[1] + p[1]) / 2).toFixed(1);
+    }
+    s += " Q" + p[0].toFixed(1) + " " + p[1].toFixed(1) + " " + mx.toFixed(1) + " " + my.toFixed(1);
+  }
+  return s + " Z";
+}
+
+function scopeView(spec, obj, labels){
+  var k = obj / 10;              /* screen units per micrometre: x10 eyepiece, 0.01 units per um per x1 */
+  var view = 142 / k;            /* radius of the field in micrometres */
+  var X = function(u){ return (150 + u * k).toFixed(1); };
+  var Y = X;
+  var g = [];
+  if(spec === "plant"){
+    var rows = Math.ceil(view / 30) + 1, cols = Math.ceil(view / 50) + 1;
+    var sw = Math.max(0.8, Math.min(5, 1.3 * k));
+    for(var r = -rows; r <= rows; r++){
+      for(var c = -cols; c <= cols; c++){
+        var cx = c * 50 + (Math.abs(r) % 2 ? 25 : 0), cy = r * 30;
+        if(Math.sqrt(cx * cx + cy * cy) > view + 40) continue;
+        g.push('<rect x="' + X(cx - 25) + '" y="' + Y(cy - 15) + '" width="' + (50 * k).toFixed(1) + '" height="' + (30 * k).toFixed(1) +
+          '" fill="#f3f7e4" stroke="' + TEAL + '" stroke-width="' + sw.toFixed(1) + '"/>');
+        if(k >= 1){
+          g.push('<rect x="' + X(cx - 24) + '" y="' + Y(cy - 14) + '" width="' + (48 * k).toFixed(1) + '" height="' + (28 * k).toFixed(1) +
+            '" fill="none" stroke="' + INK + '" stroke-opacity=".45" stroke-width=".8"/>');
+          g.push('<rect x="' + X(cx - 14) + '" y="' + Y(cy - 9) + '" width="' + (33 * k).toFixed(1) + '" height="' + (18 * k).toFixed(1) +
+            '" rx="' + (6 * k).toFixed(1) + '" fill="#d9f1f7" stroke="' + BRIGHT + '" stroke-width="1"/>');
+          g.push('<circle cx="' + X(cx - 19.5) + '" cy="' + Y(cy) + '" r="' + (3.6 * k).toFixed(1) + '" fill="' + PLUM + '"/>');
+          [[-11, -12, 0], [1, -12, 0], [13, -12, 0], [-3, 12, 0], [10, 12, 0], [22, -3, 1], [22, 7, 1]].forEach(function(p){
+            g.push('<ellipse cx="' + X(cx + p[0]) + '" cy="' + Y(cy + p[1]) + '" rx="' + ((p[2] ? 1.6 : 3.2) * k).toFixed(1) +
+              '" ry="' + ((p[2] ? 3.2 : 1.6) * k).toFixed(1) + '" fill="' + GREEN + '"/>');
+          });
+        }else{
+          g.push('<circle cx="' + X(cx - 19) + '" cy="' + Y(cy) + '" r="' + Math.max(1.2, 3.6 * k).toFixed(1) + '" fill="' + PLUM + '"/>');
+        }
+      }
+    }
+  }else{
+    CHEEK.forEach(function(cl){
+      if(Math.sqrt(cl.x * cl.x + cl.y * cl.y) - cl.r > view + 10) return;
+      g.push('<path d="' + blobPath(cl.x, cl.y, cl.r, cl.f, k) + '" fill="#fde6d2" fill-opacity=".92" stroke="' + INK +
+        '" stroke-opacity=".7" stroke-width="' + Math.max(0.8, Math.min(2, 0.5 * k)).toFixed(1) + '"/>');
+      g.push('<circle cx="' + X(cl.x + cl.nx) + '" cy="' + Y(cl.y + cl.ny) + '" r="' + Math.max(1.3, 4.5 * k).toFixed(1) + '" fill="' + PLUM + '"/>');
+    });
+  }
+  /* measuring arrow across the middle cell */
+  var w = SPEC[spec].w, ay = spec === "plant" ? 15 : 6;
+  var x1 = 150 - w / 2 * k, x2 = 150 + w / 2 * k, yy = 150 + ay * k;
+  var head = Math.min(7, w * k / 5);
+  var arrow =
+    '<line x1="' + x1 + '" y1="' + yy + '" x2="' + x2 + '" y2="' + yy + '" stroke="' + WHITE + '" stroke-width="6"/>' +
+    '<line x1="' + x1 + '" y1="' + yy + '" x2="' + x2 + '" y2="' + yy + '" stroke="' + ORANGE + '" stroke-width="2.5"/>' +
+    '<path d="M' + x1 + ' ' + yy + ' l' + head + ' ' + (-head * 0.7) + ' v' + (head * 1.4) + ' Z M' + x2 + ' ' + yy + ' l' + (-head) + ' ' + (-head * 0.7) + ' v' + (head * 1.4) + ' Z" fill="' + ORANGE + '"/>';
+  /* labels at x400 */
+  var lab = "";
+  if(labels && obj === 40){
+    var list = spec === "plant" ?
+      [["Cell wall", 62, 30, 51, 105], ["Chloroplast", 160, 20, 154, 102], ["Vacuole", 250, 46, 190, 132],
+       ["Nucleus", 52, 268, 72, 156], ["Cytoplasm", 150, 288, 164, 198], ["Cell membrane", 252, 268, 245, 190]] :
+      [["Cell membrane", 70, 26, 59, 87], ["Nucleus", 232, 30, 186, 116], ["Cytoplasm", 80, 278, 112, 196]];
+    list.forEach(function(p){
+      var wd = p[0].length * 7.4 + 14;
+      lab += L(p[1], p[2], p[3], p[4], INK, 1.8) + '<circle cx="' + p[3] + '" cy="' + p[4] + '" r="2.5" fill="' + INK + '"/>' +
+        '<rect x="' + (p[1] - wd / 2).toFixed(1) + '" y="' + (p[2] - 11) + '" width="' + wd.toFixed(1) + '" height="21" rx="10" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+        T(p[1], p[2] + 4.5, p[0], { s: 12.5 });
+    });
+  }
+  return '<rect width="300" height="300" fill="' + INK + '"/>' +
+    '<defs><clipPath id="fovClip"><circle cx="150" cy="150" r="142"/></clipPath></defs>' +
+    '<g clip-path="url(#fovClip)"><rect width="300" height="300" fill="' + PAPER + '"/>' + g.join("") + arrow + '</g>' +
+    '<circle cx="150" cy="150" r="143" fill="none" stroke="#123c47" stroke-width="4"/>' + lab;
+}
+
+var MICRO = {
+  type: "widget", topic: "Microscopes",
+  title: "Virtual microscope",
+  html: '<p>The eyepiece is always x10. Tap an objective lens to change the magnification, and switch slides if you like. Two small challenges sit underneath, whenever you are ready.</p>',
+  report: function(d){
+    var seen = Object.keys(d.seen || {}).map(function(o){ return "x" + (o * 10); }).join(", ");
+    var q = d.q || [];
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" };
+    return "Microscope: looked at " + (seen || "nothing yet") + "; challenge 1 " + (q[0] && lab[q[0].done] || "not done") +
+      ", challenge 2 " + (q[1] && lab[q[1].done] || "not done") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(!d.obj) d.obj = 4;
+    if(!d.spec) d.spec = "plant";
+    if(!d.seen) d.seen = {};
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="mtabs" id="mSpec" role="group" aria-label="Slide"><span class="wnote"><b>Slide</b></span></div>' +
+        '<div class="mview"><svg id="mSvg" viewBox="0 0 300 300" role="img" aria-label="The view down the microscope"></svg></div>' +
+        '<div class="mtabs" id="mObj" role="group" aria-label="Objective lens"><span class="wnote"><b>Objective lens</b></span></div>' +
+        '<p class="wnote" id="mRead" aria-live="polite"></p>' +
+        '<p class="wnote" id="mMeas"></p>' +
+        '<label class="wnote mlab" id="mLabRow"><input type="checkbox" id="mLab"> Show labels</label>' +
+        '<p class="tiny" id="mNote"></p>' +
+      '</div>' +
+      '<div class="wpanel" id="mQuiz"></div>';
+    var specBox = el.querySelector("#mSpec"), objBox = el.querySelector("#mObj");
+    var specBtns = {}, objBtns = {};
+    ["plant", "animal"].forEach(function(s){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = s === "plant" ? "Plant cell" : "Animal cell";
+      b.onclick = function(){ d.spec = s; api.save(); draw(); };
+      specBtns[s] = b; specBox.appendChild(b);
+    });
+    [4, 10, 40].forEach(function(o){
+      var b = document.createElement("button"); b.type = "button"; b.textContent = "x" + o;
+      b.setAttribute("aria-label", "Objective lens x" + o);
+      b.onclick = function(){ d.obj = o; api.save(); draw(); };
+      objBtns[o] = b; objBox.appendChild(b);
+    });
+    var lab = el.querySelector("#mLab");
+    lab.checked = !!d.labels;
+    lab.onchange = function(){ d.labels = lab.checked; api.save(); draw(); };
+
+    function draw(){
+      d.seen[d.obj] = 1;
+      Object.keys(specBtns).forEach(function(s){ specBtns[s].className = "btn" + (s === d.spec ? "" : " btn-quiet"); specBtns[s].setAttribute("aria-pressed", s === d.spec); });
+      Object.keys(objBtns).forEach(function(o){ objBtns[o].className = "btn" + (+o === d.obj ? "" : " btn-quiet"); objBtns[o].setAttribute("aria-pressed", +o === d.obj); });
+      el.querySelector("#mSvg").innerHTML = scopeView(d.spec, d.obj, d.labels);
+      var total = 10 * d.obj;
+      var mm = SPEC[d.spec].w * total / 1000;
+      el.querySelector("#mRead").innerHTML = 'Total magnification <span class="wbig">x' + total + '</span><br>eyepiece x10 &times; objective x' + d.obj + ' = x' + total;
+      el.querySelector("#mMeas").innerHTML = 'Imagine this view printed as a photo. The middle cell (orange arrow) would measure <b>' + mm + ' mm</b> across.';
+      el.querySelector("#mLabRow").classList.toggle("hidden", d.obj !== 40);
+      var note;
+      if(d.obj === 4) note = "Low power: lots of cells, not much detail. This is where you start, to find the bit you want.";
+      else if(d.obj === 10) note = "Medium power: the parts inside each cell start to show.";
+      else note = "High power: one cell fills most of the view. Mitochondria and ribosomes are in there too, but they are too small for a light microscope to show clearly. That needs an electron microscope.";
+      if(d.spec === "animal") note += " Cheek cells have no cell wall, no permanent vacuole and no chloroplasts.";
+      el.querySelector("#mNote").innerHTML = note;
+      api.save();
+    }
+    draw();
+
+    wquiz(el.querySelector("#mQuiz"), [
+      { q: "A different microscope has a <b>x15</b> eyepiece and a <b>x40</b> objective lens. What is its total magnification?",
+        a: 600, pre: "x",
+        hint: "Total magnification is the two lenses multiplied together.",
+        why: "15 &times; 40 = 600, so the total magnification is x600." },
+      { q: "Set the <b>plant cell</b> slide to <b>x400</b> and read how wide the middle cell is on the image. Then work out the <b>real</b> width of that cell in &micro;m.",
+        a: 50, post: "&micro;m",
+        near: [{ v: 0.05, msg: "0.05 is the real size in millimetres, so the hard part is done. Now change it to micrometres." },
+               { v: 8000, msg: "That one multiplied by 400. Real size is smaller than the image, so this time you divide." }],
+        hint: "Real size = image size &divide; magnification. That gives mm, then &times; 1000 turns it into &micro;m.",
+        why: "At x400 the middle cell is 20 mm wide on the image. 20 &divide; 400 = 0.05 mm. Then 0.05 &times; 1000 = 50 &micro;m. Plant cells are usually somewhere around 10 to 100 &micro;m, so 50 is a sensible size." }
+    ], api);
+  }
+};
+
+EGW.run({
+  id: "biology-cells",
+  title: "Cells and transport",
+  subject: "Biology",
+  mins: 50,
+  blurb: "Everything alive is built from cells. This goes through what is inside them, how some are specialised, how microscopes and magnification work, and how things move in and out of cells.",
+  steps: [
+
+  /* ---------- CELL TYPES ---------- */
+  { type: "learn", topic: "Cell types",
+    title: "Two big families of cell",
+    fig: FIG_THREE,
+    html: '<p><b>Eukaryotic cells</b> keep their genetic material inside a <b>nucleus</b>. Animal cells, plant cells and fungus cells (like yeast) are all eukaryotic.</p>' +
+          '<p><b>Prokaryotic cells</b> are bacteria. They have <b>no nucleus</b>. Their DNA is a single loop floating in the cytoplasm, often with extra small rings of DNA called <b>plasmids</b>.</p>' +
+          '<p>Prokaryotic cells are much smaller: often just a few micrometres long, while animal and plant cells are usually tens of micrometres across.</p>' +
+          '<div class="keep"><b>Keep this</b>Pro rhymes with no: no nucleus. Eu sounds like do: they do have a nucleus.</div>' },
+
+  { type: "sort", topic: "Cell types",
+    q: "Sort these into eukaryotic or prokaryotic.",
+    buckets: ["Eukaryotic", "Prokaryotic"],
+    cards: [
+      ["Animal cell", 0],
+      ["Plant cell", 0],
+      ["Yeast cell", 0],
+      ["Bacterial cell", 1],
+      ["Genetic material inside a nucleus", 0],
+      ["Has mitochondria", 0],
+      ["DNA in a single loop, no nucleus", 1],
+      ["Much smaller, often a few micrometres long", 1]
+    ],
+    hint: "Ask one question of each card: is there a nucleus? Bacteria are the only prokaryotes here.",
+    why: "Animal, plant and yeast cells are all eukaryotic: they have a nucleus and mitochondria. Bacteria are prokaryotic: no nucleus, no mitochondria, a single DNA loop and they are much smaller." },
+
+  /* ---------- CELL PARTS ---------- */
+  { type: "learn", topic: "Cell parts",
+    title: "What is inside, and what each part does",
+    fig: FIG_PLANT,
+    html: '<div class="tablewrap"><table class="datatable">' +
+          '<tr><th>Part <span class="fin">found in</span></th><th>What it does</th></tr>' +
+          '<tr><td><b>Nucleus</b><span class="fin">animal, plant</span></td><td>holds the genetic material, controls the cell</td></tr>' +
+          '<tr><td><b>Cytoplasm</b><span class="fin">all three</span></td><td>jelly where most chemical reactions happen</td></tr>' +
+          '<tr><td><b>Cell membrane</b><span class="fin">all three</span></td><td>controls what goes in and out</td></tr>' +
+          '<tr><td><b>Mitochondria</b><span class="fin">animal, plant</span></td><td>aerobic respiration, releasing energy</td></tr>' +
+          '<tr><td><b>Ribosomes</b><span class="fin">all three</span></td><td>where proteins are made</td></tr>' +
+          '<tr><td><b>Cell wall</b><span class="fin">plant, bacteria</span></td><td>strengthens the cell (made of cellulose in plants)</td></tr>' +
+          '<tr><td><b>Chloroplasts</b><span class="fin">plant</span></td><td>absorb light for photosynthesis</td></tr>' +
+          '<tr><td><b>Permanent vacuole</b><span class="fin">plant</span></td><td>filled with cell sap, keeps the cell firm</td></tr>' +
+          '<tr><td><b>DNA loop</b><span class="fin">bacteria</span></td><td>the main genetic material, not in a nucleus</td></tr>' +
+          '<tr><td><b>Plasmids</b><span class="fin">bacteria</span></td><td>small extra rings of DNA</td></tr>' +
+          '</table></div>' +
+          '<div class="keep"><b>Keep this</b>Plant cells have everything an animal cell has, plus three extras: cell wall, chloroplasts, permanent vacuole.</div>' },
+
+  { type: "match", topic: "Cell parts",
+    q: "Match each part of a cell to its job.",
+    pairs: [
+      ["Nucleus", "Holds genetic material and controls the cell"],
+      ["Mitochondria", "Where aerobic respiration releases energy"],
+      ["Ribosomes", "Where proteins are made"],
+      ["Cell membrane", "Controls what goes in and out"],
+      ["Chloroplasts", "Absorb light for photosynthesis"],
+      ["Cell wall", "Strengthens and supports the cell"],
+      ["Permanent vacuole", "Holds cell sap and keeps the cell firm"],
+      ["Cytoplasm", "Jelly where most chemical reactions happen"]
+    ],
+    hint: "Two that often get swapped: mitochondria are about energy, ribosomes are about making proteins.",
+    why: "A common mix up is cell wall and cell membrane. The wall is the tough outer layer that gives strength. The membrane is just inside it and is the gatekeeper, controlling what passes in and out." },
+
+  { type: "multi", topic: "Cell parts",
+    q: "Which <b>three</b> are found in plant cells but not in animal cells?",
+    options: ["Nucleus", "Cell wall", "Mitochondria", "Chloroplasts", "Ribosomes", "Permanent vacuole", "Cell membrane"],
+    answers: [1, 3, 5],
+    hint: "Which parts are about being rigid, or about using light?",
+    why: "Cell wall, chloroplasts and permanent vacuole. Plant cells have mitochondria too: a lot of people think plants only photosynthesise, but they respire all the time as well." },
+
+  { type: "mc", topic: "Cell parts",
+    q: "Which of these is found in bacterial cells, but not in animal or plant cells?",
+    options: ["Ribosomes", "Plasmids", "Cell wall", "Cell membrane"],
+    answer: 1,
+    hint: "Think about the extra bits of DNA.",
+    why: "Plasmids, the small rings of DNA. Cell wall is the tempting one, but plant cells have a cell wall too. Ribosomes and a cell membrane are in all three kinds of cell." },
+
+  /* ---------- SPECIALISED CELLS ---------- */
+  { type: "learn", topic: "Specialised cells",
+    title: "Cells built for one job",
+    fig: FIG_SPEC,
+    html: '<p>Most cells in a plant or animal are <b>specialised</b>: their shape and parts suit one job.</p>' +
+          '<ul>' +
+          '<li><b>Sperm cell</b>: a tail to swim, lots of mitochondria to release energy for swimming, and enzymes in the head to get into the egg.</li>' +
+          '<li><b>Nerve cell</b>: long, to carry electrical impulses a long way, with branched ends to connect to many other cells.</li>' +
+          '<li><b>Muscle cell</b>: special proteins slide over each other so the cell contracts, plus lots of mitochondria.</li>' +
+          '<li><b>Root hair cell</b>: a long hair gives a big surface area to absorb water and mineral ions. No chloroplasts, because there is no light underground.</li>' +
+          '<li><b>Xylem</b>: hollow tubes of dead cells, strengthened by lignin, carrying water and mineral ions up the plant.</li>' +
+          '<li><b>Phloem</b>: living cells with pores in the end walls, carrying dissolved sugars around the plant.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>For any adaptation question: name the feature, then say what it lets the cell do. "Lots of mitochondria, so it releases lots of energy for..."</div>' },
+
+  { type: "match", topic: "Specialised cells",
+    q: "Match each specialised cell to how it is adapted.",
+    pairs: [
+      ["Sperm cell", "Tail to swim and lots of mitochondria"],
+      ["Nerve cell", "Long, with branched ends to connect to other cells"],
+      ["Muscle cell", "Proteins that slide over each other to contract"],
+      ["Root hair cell", "Long projection for a big surface area"],
+      ["Xylem", "Hollow tubes of dead cells that carry water"],
+      ["Phloem", "Living cells with pores in the end walls that carry sugars"]
+    ],
+    hint: "Xylem carries water, phloem carries sugars. Think about which cell needs to swim.",
+    why: "Each adaptation links to a job: swimming (sperm), carrying impulses (nerve), contracting (muscle), absorbing (root hair), transporting water (xylem) and transporting sugars (phloem)." },
+
+  { type: "text", topic: "Specialised cells",
+    q: "A sperm cell has lots of mitochondria. In a sentence, explain why that is useful.",
+    need: [["respiration", "respire", "energy"], ["swim", "tail", "move", "moving", "travel"]],
+    model: "Mitochondria are where respiration happens, so lots of them release lots of energy for the tail to move and the sperm to swim to the egg.",
+    hint: "What do mitochondria do, and what does a sperm cell spend its energy on?",
+    why: "The two ideas that earn the marks: mitochondria carry out respiration to release energy, and the sperm needs that energy to swim (move its tail). Muscle cells have lots of mitochondria for the same kind of reason." },
+
+  /* ---------- MICROSCOPES ---------- */
+  { type: "learn", topic: "Microscopes",
+    title: "Microscopes and magnification",
+    fig: FIG_MAG,
+    html: '<p><b>Total magnification</b> = eyepiece lens &times; objective lens. A x10 eyepiece with a x40 objective gives x400.</p>' +
+          '<p><b>Magnification = image size &divide; real size</b>. Cover the one you want in the triangle: real size = image size &divide; magnification.</p>' +
+          '<p>Cells are tiny, so we use <b>micrometres</b> (&micro;m). <b>1 mm = 1000 &micro;m</b>. Get both sizes into the same unit before you divide.</p>' +
+          '<ul>' +
+          '<li><b>Light microscope</b>: uses light, magnifies up to about x2000, can see cells and nuclei, and can look at living cells.</li>' +
+          '<li><b>Electron microscope</b>: uses a beam of electrons, much higher magnification and <b>resolution</b>, so it shows tiny parts like ribosomes and the detail inside mitochondria.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Resolution is how much fine detail you can see: the ability to tell two points close together apart. Zooming in more does not help if the resolution is poor; it just gets blurry.</div>' },
+
+  MICRO,
+
+  { type: "num", topic: "Microscopes",
+    q: "A cell is 0.02 mm wide. In a drawing it is 8 mm wide. What is the magnification of the drawing?",
+    boxes: [{ label: "Magnification", a: 400, pre: "x", show: "400" }],
+    hint: "Magnification = image size &divide; real size. Both are already in mm.",
+    why: "8 &divide; 0.02 = 400, so x400. A quick check: the image should be bigger than the real thing, so the answer should be bigger than 1." },
+
+  { type: "num", topic: "Microscopes",
+    q: "Convert these. 1 mm = 1000 &micro;m.",
+    boxes: [
+      { label: "0.25 mm =", a: 250, post: "&micro;m" },
+      { label: "7500 &micro;m =", a: 7.5, post: "mm" }
+    ],
+    hint: "mm to &micro;m: &times; 1000 (the number gets bigger). &micro;m to mm: &divide; 1000 (the number gets smaller).",
+    why: "0.25 &times; 1000 = 250 &micro;m. 7500 &divide; 1000 = 7.5 mm. Micrometres are the smaller unit, so you always need more of them: the &micro;m number is the bigger one." },
+
+  { type: "mc", topic: "Microscopes",
+    q: "An electron microscope can show ribosomes clearly, but a light microscope cannot. What is the main reason?",
+    options: [
+      "Electron microscopes have a much higher resolution, so they can show much smaller details",
+      "Electron microscopes use a brighter light",
+      "Ribosomes are only found in dead cells",
+      "Light microscopes can only magnify up to x10"
+    ],
+    answer: 0,
+    hint: "It is not just about how big the image is, but how sharp the detail is.",
+    why: "Resolution. Electron microscopes use electrons, not light at all, which is why the brighter light option does not work. Their higher resolution lets them separate details that a light microscope would blur together." },
+
+  { type: "num", topic: "Microscopes", stretch: true,
+    q: "A mitochondrion is 2 &micro;m long. On an electron micrograph, its image is 40 mm long.",
+    boxes: [
+      { label: "(a) 2 &micro;m in mm", a: 0.002, tol: 0.0000001, post: "mm" },
+      { label: "(b) In standard form, 2 &times; 10<sup>n</sup> mm. What is n?", a: -3, show: "-3" },
+      { label: "(c) The magnification", a: 20000, pre: "x" }
+    ],
+    hint: "&micro;m to mm is &divide; 1000. For standard form, count how many places the decimal point moves. For (c), get both sizes in the same unit first.",
+    why: "<p>(a) 2 &divide; 1000 = 0.002 mm. (b) 0.002 = 2 &times; 10<sup>&minus;3</sup>, because the point moves 3 places. (c) 40 mm = 40000 &micro;m, and 40000 &divide; 2 = 20000. So x20000, or 2 &times; 10<sup>4</sup>.</p><p>You could also do 40 &divide; 0.002 = 20000. Same answer, as long as both sizes are in the same unit.</p>" },
+
+  /* ---------- TRANSPORT ---------- */
+  { type: "learn", topic: "Transport",
+    title: "Diffusion, osmosis, active transport",
+    fig: FIG_MOVE,
+    html: '<ul>' +
+          '<li><b>Diffusion</b>: particles of a gas, or of a substance dissolved in a solution, spread out from where they are at a <b>higher concentration to a lower</b> one. No energy needed. Examples: oxygen from the lungs into the blood, carbon dioxide into a leaf, urea from cells into the blood plasma.</li>' +
+          '<li><b>Osmosis</b>: the diffusion of <b>water</b> from a dilute solution to a more concentrated one, through a <b>partially permeable membrane</b>. No energy needed. Example: water moving from the soil into root hair cells.</li>' +
+          '<li><b>Active transport</b>: moving substances from a <b>lower concentration to a higher</b> one, against the concentration gradient. This <b>needs energy</b> from respiration. Examples: mineral ions into root hair cells, and sugar from the gut into the blood.</li>' +
+          '</ul>' +
+          '<p>Diffusion is faster with a bigger difference in concentration, a higher temperature and a bigger surface area.</p>' +
+          '<div class="keep"><b>Keep this</b>Down the gradient is free. Up the gradient costs energy.</div>' },
+
+  { type: "sort", topic: "Transport",
+    q: "Which process is it? Sort each example.",
+    buckets: ["Diffusion", "Osmosis", "Active transport"],
+    cards: [
+      ["Oxygen moving from the air in the lungs into the blood", 0],
+      ["Carbon dioxide moving into a leaf", 0],
+      ["Water moving from the soil into a root hair cell", 1],
+      ["Water leaving a potato chip in a strong sugar solution", 1],
+      ["Mineral ions moving into a root hair from very dilute soil water", 2],
+      ["Sugar absorbed from the gut into blood that already has more sugar", 2]
+    ],
+    hint: "If it is water through a membrane, it is osmosis. If something moves towards where there is already more of it, it is active transport.",
+    why: "Osmosis is only ever about water. Active transport is the odd one out because it goes against the gradient: mineral ions are more concentrated inside the root hair than in the soil, so the cell spends energy to pull more in." },
+
+  { type: "mc", topic: "Transport",
+    q: "Which is the best description of osmosis?",
+    options: [
+      "The diffusion of water from a dilute solution to a more concentrated solution through a partially permeable membrane",
+      "The movement of water from a concentrated solution to a dilute solution",
+      "The movement of sugar across a membrane using energy",
+      "The spreading of any particles from a high concentration to a low concentration"
+    ],
+    answer: 0,
+    hint: "Osmosis is a special kind of diffusion. Which substance, and which way?",
+    why: "Water moves from the dilute side (lots of water) to the concentrated side (less water). Option two has the direction backwards, which is the most common slip. The last option describes diffusion in general, not osmosis." },
+
+  { type: "order", topic: "Transport",
+    q: "The osmosis practical with potato. Put the method in order.",
+    items: [
+      "Cut potato cylinders the same length and width",
+      "Blot each one dry and weigh it",
+      "Put each one in a different concentration of sugar solution",
+      "Leave them all for the same length of time",
+      "Take them out, gently blot dry and weigh again",
+      "Work out the percentage change in mass for each one"
+    ],
+    hint: "You need a starting mass before anything goes into the solution.",
+    why: "Keeping the size, the time and the blotting the same makes it a fair test, so the only thing changing is the concentration. Percentage change is used because the cylinders may not start at exactly the same mass." },
+
+  { type: "num", topic: "Transport", stretch: true,
+    q: "A potato cylinder had a mass of 2.50 g. After 30 minutes in a strong sugar solution, its mass was 2.20 g.",
+    boxes: [
+      { label: "(a) Change in mass (a loss is negative)", a: -0.3, alts: [0.3], tol: 0.001, post: "g", show: "-0.30" },
+      { label: "(b) Percentage change in mass", a: -12, alts: [12], tol: 0.05, post: "%", show: "-12" }
+    ],
+    hint: "Change = final mass &minus; starting mass. Percentage change = change &divide; starting mass &times; 100.",
+    why: "<p>(a) 2.20 &minus; 2.50 = &minus;0.30 g. (b) &minus;0.30 &divide; 2.50 &times; 100 = &minus;12%. In the exam, write it as &minus;12% so the graph shows a loss below zero.</p><p>The potato lost mass because the sugar solution was more concentrated than the potato cells, so water left the cells by osmosis.</p>" },
+
+  /* ---------- SURFACE AREA ---------- */
+  { type: "learn", topic: "Surface area",
+    title: "Surface area to volume ratio",
+    fig: FIG_CUBES,
+    html: '<p>For a cube with side length s: <b>surface area = 6 &times; s &times; s</b> and <b>volume = s &times; s &times; s</b>. Then write the ratio as <b>something : 1</b> by dividing surface area by volume.</p>' +
+          '<div class="tablewrap"><table class="datatable">' +
+          '<tr><th>Cube</th><th>Surface area</th><th>Volume</th><th>Ratio</th></tr>' +
+          '<tr><td>1 cm</td><td>6 cm&sup2;</td><td>1 cm&sup3;</td><td>6 : 1</td></tr>' +
+          '<tr><td>2 cm</td><td>24 cm&sup2;</td><td>8 cm&sup3;</td><td>3 : 1</td></tr>' +
+          '</table></div>' +
+          '<p>Small things have a <b>big</b> surface area compared with their volume, so diffusion through the surface is enough to supply them. Single celled organisms work like this.</p>' +
+          '<p>Bigger organisms have a <b>smaller</b> ratio, so they need <b>exchange surfaces</b> (lungs, gills, villi in the gut, roots) and <b>transport systems</b> (blood, xylem and phloem).</p>' +
+          '<div class="keep"><b>Keep this</b>As things get bigger, the ratio gets smaller. That is why big animals need lungs and a heart.</div>' },
+
+  { type: "num", topic: "Surface area", stretch: true,
+    q: "A cube has sides of 3 cm. Work out its surface area to volume ratio.",
+    boxes: [
+      { label: "Surface area", a: 54, post: "cm&sup2;" },
+      { label: "Volume", a: 27, post: "cm&sup3;" },
+      { label: "Ratio", a: 2, post: ": 1" }
+    ],
+    hint: "One face is 3 &times; 3. A cube has 6 faces. Volume is 3 &times; 3 &times; 3.",
+    why: "Surface area = 6 &times; 9 = 54 cm&sup2;. Volume = 27 cm&sup3;. 54 &divide; 27 = 2, so the ratio is 2 : 1. Notice the pattern: 6 : 1, then 3 : 1, then 2 : 1. Bigger cube, smaller ratio." },
+
+  { type: "mc", topic: "Surface area", stretch: true,
+    q: "A single celled amoeba gets all its oxygen by diffusion through its surface. A whale cannot. Why not?",
+    options: [
+      "A whale has a much smaller surface area to volume ratio, so diffusion through its skin could not supply all its cells",
+      "A whale has a larger surface area to volume ratio, so oxygen escapes too quickly",
+      "Diffusion does not happen in large animals",
+      "There is no oxygen where whales live"
+    ],
+    answer: 0,
+    hint: "Think about the cubes. What happens to the ratio as things get bigger?",
+    why: "The whale's surface is tiny compared with its huge volume, and most of its cells are a long way from the surface. So it needs lungs as an exchange surface, and blood to carry oxygen around. Option two has the ratio the wrong way round." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your explanation",
+    q: '<p><b>Explain how a root hair cell is adapted to take in water and mineral ions from the soil.</b> (about 4 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "Root hair cells have a long projection, which",
+      "This gives a large surface area, so",
+      "Water moves into the cell by osmosis because",
+      "Mineral ions are taken in by active transport, because",
+      "This needs energy, so the cell has",
+      "Root hair cells have no chloroplasts because"
+    ],
+    checklist: [
+      "I mentioned the large surface area and what it does",
+      "I said water enters by osmosis",
+      "I said mineral ions enter by active transport, against the concentration gradient",
+      "I linked mitochondria to energy for active transport",
+      "Stretch: I explained why there are no chloroplasts"
+    ],
+    minWords: 60 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

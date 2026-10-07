@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EGW's GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* HQ home only. Everything shared lives in egw.css */
+.acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
+.acc-maths{--accent:var(--sun);--accent-soft:rgba(255,210,63,.24)}
+.acc-bio{--accent:var(--mint);--accent-soft:rgba(25,195,154,.16)}
+.acc-stats{--accent:var(--violet);--accent-soft:rgba(138,92,246,.15)}
+
+.hero{padding:22px 0 8px}
+.hero h1{font-size:clamp(2.8rem,10vw,5.6rem);line-height:.92;color:#fff;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;color:var(--sun)}
+.hero p{color:var(--mist);font-size:1.08rem;max-width:52ch;margin:14px 0 0}
+
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0 26px}
+.stat{background:rgba(255,255,255,.06);border:1px solid rgba(201,205,240,.18);border-radius:16px;padding:14px 16px;color:var(--moon)}
+.stat b{display:block;font-family:var(--display);font-size:2.1rem;line-height:1;color:#fff}
+.stat span{font-size:.88rem;color:var(--mist)}
+.stat.hot b{color:var(--sun)}
+
+.sech{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:34px 0 14px}
+.sech h2{font-size:1.7rem;color:#fff}
+.sech span{color:var(--mist);font-size:.95rem}
+.sech .num{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.14em;color:var(--night);background:var(--sun);border-radius:6px;padding:3px 8px}
+
+/* deal a chunk */
+.deal{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.dice{
+  width:88px;height:88px;border-radius:22px;background:var(--sun);border:3px solid var(--ink);
+  display:grid;place-items:center;font-size:2.6rem;cursor:pointer;box-shadow:0 5px 0 var(--ink);
+  transition:transform .15s ease;
+}
+.dice:hover{transform:rotate(-8deg) translateY(-2px)}
+.dice.roll{animation:roll .5s ease}
+.dealout b{font-family:var(--display);font-size:1.3rem;display:block;line-height:1.15;margin:2px 0 4px}
+.dealout .tiny{margin:0 0 10px}
+.filt{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
+.filt button{font-family:var(--display);font-weight:600;font-size:.85rem;border-radius:99px;border:2px solid var(--line);background:#fff;padding:5px 12px;cursor:pointer;color:var(--ink)}
+.filt button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* subjects */
+.subj h3{display:flex;align-items:center;gap:10px}
+.subj h3 .dot{width:16px;height:16px;border-radius:5px;background:var(--accent);border:2px solid var(--ink)}
+.act{display:block;text-decoration:none;color:var(--ink);background:var(--paper);border-radius:14px;padding:14px;margin-top:10px;border:2px solid transparent;transition:border-color .12s ease,transform .12s ease}
+.act:hover{border-color:var(--ink);transform:translateY(-2px)}
+.act .t{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.act b{font-family:var(--display);font-size:1.15rem}
+.act .st{font-family:var(--display);font-weight:600;font-size:.78rem;white-space:nowrap;background:#fff;border-radius:99px;padding:2px 9px}
+.act .st.done{background:var(--accent)}
+.act p{font-size:.92rem;margin:4px 0 8px;color:var(--body-tint)}
+.bar{height:10px;border-radius:99px;background:#fff;overflow:hidden;display:flex;gap:2px;padding:0}
+.bar i{flex:1;background:var(--line)}
+.bar i.d{background:var(--accent)}
+.bar i.s{background:var(--accent-soft)}
+.act .meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--body-tint);margin-top:6px}
+
+/* revision map */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{font-family:var(--display);font-weight:700;font-size:.95rem;border-radius:12px;border:2px solid var(--ink);background:#fff;padding:8px 14px;cursor:pointer;color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--accent);box-shadow:0 4px 0 var(--ink)}
+.maprow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.maprow .tn{font-size:1rem}
+.maprow .tn a{font-size:.82rem;margin-left:6px;color:var(--blue)}
+.rag{display:flex;gap:4px}
+.rag button{font-family:inherit;font-size:.82rem;border-radius:99px;border:2px solid var(--line);background:#fff;padding:5px 10px;cursor:pointer;color:var(--ink);white-space:nowrap}
+.rag button.on[data-v="1"]{background:#ffd9d9;border-color:var(--coral)}
+.rag button.on[data-v="2"]{background:#fff1bf;border-color:var(--yellow-deep)}
+.rag button.on[data-v="3"]{background:#d6f5ea;border-color:var(--good)}
+.mapsum{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:4px 0 14px;background:var(--paper)}
+.mapsum i{display:block;height:100%}
+
+/* planner */
+.pick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.pick button{font-family:inherit;font-size:.95rem;border-radius:12px;border:2px solid var(--line);background:#fff;padding:9px 14px;cursor:pointer;color:var(--ink);text-align:left}
+.pick button.on{border-color:var(--ink);background:var(--accent-soft);font-weight:700}
+.plan{background:var(--paper);border-radius:14px;padding:14px 16px;margin-top:12px}
+.plan ol{margin:6px 0 0;padding-left:20px}
+.plan li{margin-bottom:8px}
+.plan .when{font-family:var(--display);font-weight:700;margin-right:6px}
+.logbox{width:100%;font-family:var(--body);font-size:1.02rem;border:2px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);background:#fff}
+.logitem{padding:9px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+.logitem small{color:var(--body-tint);display:block}
+
+/* exams */
+.exam{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.exam .days{font-family:var(--display);font-weight:700;font-size:1.5rem;min-width:70px;text-align:center;background:var(--paper);border-radius:12px;padding:6px 8px;line-height:1}
+.exam .days small{display:block;font-size:.7rem;font-weight:500}
+
+/* more links */
+.more a{display:flex;justify-content:space-between;gap:10px;text-decoration:none;color:var(--ink);padding:10px 0;border-bottom:1px dashed var(--line)}
+.more a:hover b{text-decoration:underline}
+.more span{color:var(--body-tint);font-size:.88rem;text-align:right}
+
+@keyframes roll{0%{transform:rotate(0)}40%{transform:rotate(200deg) scale(1.1)}100%{transform:rotate(360deg)}}
+@media (max-width:560px){
+  .deal{grid-template-columns:1fr}
+  .maprow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="subj-home">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="#subjects">Subjects</a><a href="#map">Map</a><a href="#plan">Plan</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <h1>EGW's<br><em>GCSE</em> HQ</h1>
+    <p>Your own corner for revision. English, Maths, Biology and Statistics, broken into small chunks you can do in any order, at your pace. Everything saves on this device.</p>
+  </section>
+
+  <div class="strip" id="strip"></div>
+
+  <!-- 1. DEAL A CHUNK -->
+  <div class="sech"><span class="num">01</span><h2>Not sure where to start?</h2><span>Let the dice pick. You can always deal again.</span></div>
+  <div class="board">
+    <div class="card w12 acc-stats" id="dealCard">
+      <div class="deal">
+        <button class="dice" id="dice" type="button" aria-label="Deal me a chunk">&#9861;</button>
+        <div class="dealout" id="dealOut">
+          <span class="kicker">Deal me a chunk</span>
+          <b>Tap the dice.</b>
+          <p class="tiny">It picks one chunk you have not finished yet. A chunk is about five to ten minutes.</p>
+        </div>
+      </div>
+      <div class="filt" id="dealFilt"></div>
+    </div>
+  </div>
+
+  <!-- 2. SUBJECTS -->
+  <div class="sech" id="subjects"><span class="num">02</span><h2>Your subjects</h2><span>Two activities each. The bars fill as chunks get done.</span></div>
+  <div class="board" id="subjBoard"></div>
+
+  <!-- 3. REVISION MAP -->
+  <div class="sech" id="map"><span class="num">03</span><h2>Revision map</h2><span>How each topic feels right now. Honest is more useful than tidy, and it can change any time.</span></div>
+  <div class="board">
+    <div class="card w12" id="mapCard">
+      <div class="tabs" role="tablist" id="mapTabs"></div>
+      <div class="mapsum" id="mapSum"></div>
+      <div id="mapList"></div>
+      <p class="tiny" style="margin-top:12px">Topics with an activity link straight to it. The rest are on the list so you can see the whole picture.</p>
+    </div>
+  </div>
+
+  <!-- 4. PLAN -->
+  <div class="sech" id="plan"><span class="num">04</span><h2>Plan a session</h2><span>Three taps and you have a plan. Use it, change it or ignore it.</span></div>
+  <div class="board">
+    <div class="card w7 acc-maths" id="planCard">
+      <span class="kicker">Build a session</span>
+      <p class="chiplabel" style="margin-top:4px">Subject</p>
+      <div class="pick" id="pSubj"></div>
+      <p class="chiplabel">Time</p>
+      <div class="pick" id="pTime"></div>
+      <p class="chiplabel">Energy</p>
+      <div class="pick" id="pEnergy"></div>
+      <div id="planOut"></div>
+    </div>
+    <div class="card w5 acc-bio" id="logCard">
+      <span class="kicker">Stuck with me</span>
+      <h3>One thing to remember</h3>
+      <p class="tiny">After a session, jot one thing that stuck. Reading these back is quick revision on its own.</p>
+      <textarea class="logbox" id="logText" rows="3" aria-label="One thing to remember"></textarea>
+      <div class="qnav" style="margin-top:10px"><button class="btn" id="logAdd" type="button">Add it</button></div>
+      <div id="logList" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- 5. EXAMS -->
+  <div class="sech" id="exams"><span class="num">05</span><h2>Exams</h2><span>Just so you know where things sit. No countdown pressure.</span></div>
+  <div class="board">
+    <div class="card w7 acc-eng" id="examCard"></div>
+    <div class="card w5 more">
+      <span class="kicker">Also on Base 5</span>
+      <a href="/practice/gcse-foundation-paper-1.html"><b>GCSE Foundation Paper 1</b><span>Maths, whole paper</span></a>
+      <a href="/practice/gcse-foundation-paper-2.html"><b>GCSE Foundation Paper 2</b><span>Maths, whole paper</span></a>
+      <a href="/practice/maths-check-foundation.html"><b>Maths check</b><span>Maths, finds the gaps</span></a>
+      <a href="/practice/scale.html"><b>Scale and similar shapes</b><span>Maths drills</span></a>
+      <a href="/practice/animal-farm.html"><b>Animal Farm</b><span>English reading</span></a>
+      <a href="/practice/#english-gcse"><b>English shelf</b><span>Practice hub</span></a>
+    </div>
+  </div>
+
+  <!-- 6. SEND -->
+  <div class="board">
+    <div class="card w12" id="sendCard">
+      <span class="kicker">Send to Jay</span>
+      <h3>Share your map and notes</h3>
+      <p class="tiny">Only if you want to. It sends your revision map, the notes you have logged, and how each activity is going.</p>
+      <div id="sendHost"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/">Base 5 home</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ==========================================================
+   JAY: EXAM DATES
+   Add EGW's papers here when they are confirmed and they will
+   show on the page with days to go. Leave the list empty and
+   the page simply says the dates are on their way.
+   Example:
+     { subject: "maths", paper: "Maths Paper 1 (no calculator)", date: "2027-05-20" },
+   subject is one of: english, maths, bio, stats
+   ========================================================== */
+var EXAMS = [
+];
+
+var SUBJECTS = [
+  { key: "english", acc: "acc-eng", name: "English", line: "Reading closely, and writing to win an argument.",
+    acts: [
+      { id: "english-language", title: "Language detective", line: "Language and structure in a fiction extract, ending with your own paragraph.", mins: 45, chunks: 6 },
+      { id: "english-viewpoint", title: "Make your case", line: "Viewpoint writing, with a rebuttal rally game in the middle.", mins: 50, chunks: 6 }
+    ],
+    topics: [
+      ["Finding information (retrieval)"],
+      ["Language analysis", "english-language"],
+      ["Structure", "english-language"],
+      ["Evaluating a text"],
+      ["Comparing two writers' views"],
+      ["Descriptive or story writing"],
+      ["Viewpoint writing", "english-viewpoint"],
+      ["Spelling, punctuation and grammar", "english-viewpoint"],
+      ["Set texts: key quotations"],
+      ["Set texts: characters and themes"]
+    ] },
+  { key: "maths", acc: "acc-maths", name: "Maths", line: "Foundation papers, with stretch towards grade 5.",
+    acts: [
+      { id: "maths-money", title: "Percentages and money", line: "Percentages, multipliers, ratio and best buys, plus a multiplier machine.", mins: 50, chunks: 7 },
+      { id: "maths-algebra", title: "Equations and algebra", line: "From tidying expressions to solving equations, with a balance scale.", mins: 50, chunks: 7 }
+    ],
+    topics: [
+      ["Number and place value"],
+      ["Fractions and decimals"],
+      ["Percentages", "maths-money"],
+      ["Ratio and proportion", "maths-money"],
+      ["Expressions and brackets", "maths-algebra"],
+      ["Solving equations", "maths-algebra"],
+      ["Inequalities", "maths-algebra"],
+      ["Sequences"],
+      ["Straight line graphs"],
+      ["Angles and shapes"],
+      ["Area, perimeter and volume"],
+      ["Pythagoras and trigonometry"],
+      ["Probability"],
+      ["Charts and averages"]
+    ] },
+  { key: "bio", acc: "acc-bio", name: "Biology", line: "Cells to whole bodies, and how we fight disease.",
+    acts: [
+      { id: "biology-cells", title: "Cells and transport", line: "Cell parts, microscopes and magnification, diffusion and osmosis.", mins: 50, chunks: 7 },
+      { id: "biology-infection", title: "Infection and response", line: "Pathogens, defences, vaccines and medicines, with an outbreak simulator.", mins: 50, chunks: 8 }
+    ],
+    topics: [
+      ["Cell structure and microscopes", "biology-cells"],
+      ["Transport in cells", "biology-cells"],
+      ["Cell division"],
+      ["Organisation: digestion, heart and lungs"],
+      ["Plant tissues and transport"],
+      ["Infection and response", "biology-infection"],
+      ["Photosynthesis and respiration"],
+      ["Homeostasis and hormones"],
+      ["Inheritance and evolution"],
+      ["Ecology"],
+      ["Required practicals"]
+    ] },
+  { key: "stats", acc: "acc-stats", name: "Statistics", line: "Collecting data fairly, and saying what it shows.",
+    acts: [
+      { id: "stats-averages", title: "Averages, spread and box plots", line: "Averages, quartiles and comparing data, with an outlier tug of war.", mins: 50, chunks: 9 },
+      { id: "stats-sampling", title: "Sampling and collecting data", line: "Types of data, sampling methods and fair questions, with a sampling simulator.", mins: 50, chunks: 9 }
+    ],
+    topics: [
+      ["Planning an investigation", "stats-sampling"],
+      ["Types of data", "stats-sampling"],
+      ["Sampling methods", "stats-sampling"],
+      ["Questionnaires and bias", "stats-sampling"],
+      ["Tables and charts"],
+      ["Averages and spread", "stats-averages"],
+      ["Box plots and comparing", "stats-averages"],
+      ["Scatter graphs and correlation"],
+      ["Time series"],
+      ["Probability"],
+      ["Index numbers"]
+    ] }
+];
+
+var HQ_KEY = "b5.egw.hq.v1";
+function $(id){ return document.getElementById(id); }
+function loadJSON(k){ try{ var r = localStorage.getItem(k); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
+var hq = loadJSON(HQ_KEY) || { map: {}, log: [], plan: {} };
+if(!hq.map) hq.map = {}; if(!hq.log) hq.log = []; if(!hq.plan) hq.plan = {};
+function saveHQ(){ try{ localStorage.setItem(HQ_KEY, JSON.stringify(hq)); }catch(e){} }
+try{ if(!localStorage.getItem("base5.who.v1")) localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
+
+function actState(a){
+  var st = loadJSON("b5.egw." + a.id + ".v1");
+  var sm = st && st.summary ? st.summary : null;
+  return {
+    sm: sm,
+    chunks: sm && sm.chunks ? sm.chunks : a.chunks,
+    states: sm && sm.chunkStates ? sm.chunkStates : [],
+    names: sm && sm.chunkNames ? sm.chunkNames : [],
+    done: sm ? sm.chunksDone || 0 : 0,
+    sparks: sm ? sm.sparks || 0 : 0,
+    best: sm ? sm.best || 0 : 0,
+    touched: !!(sm && sm.done)
+  };
+}
+function allActs(){
+  var out = [];
+  SUBJECTS.forEach(function(s){ s.acts.forEach(function(a){ out.push({ s: s, a: a, st: actState(a) }); }); });
+  return out;
+}
+
+/* ---------- stats strip ---------- */
+function drawStrip(){
+  var acts = allActs(), sparks = 0, done = 0, total = 0, best = 0, started = 0;
+  acts.forEach(function(x){ sparks += x.st.sparks; done += x.st.done; total += x.st.chunks; best = Math.max(best, x.st.best); if(x.st.touched) started++; });
+  var greens = 0;
+  Object.keys(hq.map).forEach(function(k){ if(hq.map[k] === 3) greens++; });
+  $("strip").innerHTML =
+    '<div class="stat hot"><b>' + sparks + '</b><span>sparks earned</span></div>' +
+    '<div class="stat"><b>' + done + '<small style="font-size:1rem;color:#c9cdf0"> / ' + total + '</small></b><span>chunks done</span></div>' +
+    '<div class="stat"><b>' + best + '</b><span>best first go streak</span></div>' +
+    '<div class="stat"><b>' + greens + '</b><span>' + (greens === 1 ? "topic" : "topics") + ' feeling solid</span></div>';
+}
+
+/* ---------- subjects ---------- */
+function drawSubjects(){
+  var board = $("subjBoard");
+  board.innerHTML = "";
+  SUBJECTS.forEach(function(s){
+    var card = document.createElement("div");
+    card.className = "card w6 subj " + s.acc;
+    var html = '<span class="kicker">' + s.name + '</span><h3><span class="dot"></span>' + s.name + '</h3><p class="tiny" style="margin:0">' + s.line + '</p>';
+    s.acts.forEach(function(a){
+      var st = actState(a);
+      var bars = "";
+      for(var k = 0; k < st.chunks; k++){
+        var v = st.states[k];
+        bars += '<i class="' + (v === "done" ? "d" : v === "started" ? "s" : "") + '"></i>';
+      }
+      var label = st.done >= st.chunks ? "All done" : st.touched ? st.done + " of " + st.chunks + " chunks" : "Not started";
+      html += '<a class="act" href="/egw/' + a.id + '.html">' +
+        '<span class="t"><b>' + a.title + '</b><span class="st' + (st.done >= st.chunks ? " done" : "") + '">' + label + '</span></span>' +
+        '<p>' + a.line + '</p>' +
+        '<span class="bar">' + bars + '</span>' +
+        '<span class="meta"><span>' + st.chunks + ' chunks &middot; about ' + a.mins + ' min in all</span><span>' + st.sparks + ' sparks</span></span>' +
+        '</a>';
+    });
+    card.innerHTML = html;
+    board.appendChild(card);
+  });
+}
+
+/* ---------- deal a chunk ---------- */
+var dealSubj = "all";
+function drawDealFilter(){
+  var f = $("dealFilt");
+  f.innerHTML = "";
+  [["all", "Any subject"]].concat(SUBJECTS.map(function(s){ return [s.key, s.name]; })).forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = p[1];
+    b.className = dealSubj === p[0] ? "on" : "";
+    b.onclick = function(){ dealSubj = p[0]; drawDealFilter(); };
+    f.appendChild(b);
+  });
+}
+function deal(){
+  var pool = [];
+  allActs().forEach(function(x){
+    if(dealSubj !== "all" && x.s.key !== dealSubj) return;
+    for(var k = 0; k < x.st.chunks; k++){
+      if(x.st.states[k] === "done") continue;
+      pool.push({ x: x, k: k });
+    }
+  });
+  var out = $("dealOut");
+  var dice = $("dice");
+  dice.classList.remove("roll"); void dice.offsetWidth; dice.classList.add("roll");
+  if(!pool.length){
+    out.innerHTML = '<span class="kicker">Deal me a chunk</span><b>Everything here is done.</b><p class="tiny">Genuinely impressive. Any chunk is worth a second go for the stretch questions.</p>';
+    return;
+  }
+  var p = pool[Math.floor(Math.random() * pool.length)];
+  var name = p.x.st.names[p.k] ? ": " + p.x.st.names[p.k] : "";
+  var faces = ["&#9856;", "&#9857;", "&#9858;", "&#9859;", "&#9860;", "&#9861;"];
+  dice.innerHTML = faces[Math.floor(Math.random() * 6)];
+  out.innerHTML = '<span class="kicker">' + p.x.s.name + '</span>' +
+    '<b>' + p.x.a.title + '<br>Chunk ' + (p.k + 1) + name + '</b>' +
+    '<p class="tiny">About five to ten minutes. Not feeling it? Roll again.</p>' +
+    '<a class="btn" href="/egw/' + p.x.a.id + '.html#chunk-' + (p.k + 1) + '">Go to this chunk</a>';
+}
+
+/* ---------- revision map ---------- */
+var mapSubj = 0;
+var RAG = [[1, "Not yet"], [2, "Getting there"], [3, "Got it"]];
+function drawMap(){
+  var tabs = $("mapTabs");
+  tabs.innerHTML = "";
+  SUBJECTS.forEach(function(s, k){
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", k === mapSubj ? "true" : "false");
+    b.className = s.acc;
+    b.textContent = s.name;
+    b.onclick = function(){ mapSubj = k; drawMap(); };
+    tabs.appendChild(b);
+  });
+  var s = SUBJECTS[mapSubj];
+  $("mapCard").className = "card w12 " + s.acc;
+  var list = $("mapList");
+  list.innerHTML = "";
+  var counts = [0, 0, 0, 0];
+  s.topics.forEach(function(t){
+    var key = s.key + ":" + t[0];
+    var v = hq.map[key] || 0;
+    counts[v]++;
+    var row = document.createElement("div");
+    row.className = "maprow";
+    row.innerHTML = '<span class="tn">' + t[0] + (t[1] ? ' <a href="/egw/' + t[1] + '.html">practise</a>' : "") + '</span>';
+    var rag = document.createElement("span");
+    rag.className = "rag";
+    RAG.forEach(function(r){
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = r[1]; b.dataset.v = r[0];
+      b.className = v === r[0] ? "on" : "";
+      b.setAttribute("aria-pressed", v === r[0] ? "true" : "false");
+      b.onclick = function(){
+        hq.map[key] = hq.map[key] === r[0] ? 0 : r[0];
+        saveHQ(); drawMap(); drawStrip();
+      };
+      rag.appendChild(b);
+    });
+    row.appendChild(rag);
+    list.appendChild(row);
+  });
+  var n = s.topics.length;
+  $("mapSum").innerHTML =
+    '<i style="width:' + (counts[3] / n * 100) + '%;background:var(--good)"></i>' +
+    '<i style="width:' + (counts[2] / n * 100) + '%;background:var(--sun)"></i>' +
+    '<i style="width:' + (counts[1] / n * 100) + '%;background:var(--coral)"></i>';
+}
+
+/* ---------- plan a session ---------- */
+var TIMES = [["15", "15 minutes"], ["25", "25 minutes"], ["40", "40 minutes"]];
+var ENERGY = [["low", "Low battery"], ["some", "Some"], ["lots", "Plenty"]];
+function pickRow(host, opts, field){
+  host.innerHTML = "";
+  opts.forEach(function(o){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = o[1];
+    b.className = hq.plan[field] === o[0] ? "on" : "";
+    b.onclick = function(){ hq.plan[field] = o[0]; saveHQ(); drawPlan(); };
+    host.appendChild(b);
+  });
+}
+function drawPlan(){
+  pickRow($("pSubj"), [["any", "Surprise me"]].concat(SUBJECTS.map(function(s){ return [s.key, s.name]; })), "subj");
+  pickRow($("pTime"), TIMES, "time");
+  pickRow($("pEnergy"), ENERGY, "energy");
+  var p = hq.plan;
+  if(!p.subj || !p.time || !p.energy){
+    $("planOut").innerHTML = '<p class="tiny" style="margin-top:6px">Pick one of each and a plan appears here.</p>';
+    return;
+  }
+  var subj = p.subj === "any" ? SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)] : SUBJECTS.filter(function(s){ return s.key === p.subj; })[0];
+  /* choose the activity with the most left to do */
+  var acts = subj.acts.map(function(a){ return { a: a, st: actState(a) }; });
+  acts.sort(function(x, y){ return (x.st.done / x.st.chunks) - (y.st.done / y.st.chunks); });
+  var act = acts[0];
+  var nextChunk = 1;
+  for(var k = 0; k < act.st.chunks; k++){ if(act.st.states[k] !== "done"){ nextChunk = k + 1; break; } }
+  /* an amber or red topic from the map, if there is one */
+  var weak = subj.topics.filter(function(t){ var v = hq.map[subj.key + ":" + t[0]]; return v === 1 || v === 2; });
+  var weakTxt = weak.length ? '"' + weak[0][0] + '"' : "one topic you have not rated yet";
+  var link = '<a href="/egw/' + act.a.id + '.html#chunk-' + nextChunk + '">' + act.a.title + ', chunk ' + nextChunk + '</a>';
+  var steps = [];
+  var t = +p.time;
+  if(p.energy === "low"){
+    steps.push(["2 min", "Open your revision map for " + subj.name + " and just look. No need to change anything."]);
+    steps.push([(t - 5) + " min", "Read the learn cards in " + link + ". Answer only the questions that feel easy. Skipping is fine."]);
+    steps.push(["3 min", "Write one thing that stuck in the box on the right. Then stop. That counts."]);
+  }else if(p.energy === "some"){
+    steps.push(["3 min", "Warm up: say out loud, or jot down, three things you remember about " + weakTxt + "."]);
+    steps.push([(t - 7) + " min", "Do " + link + ". Use Show me whenever you like."]);
+    steps.push(["4 min", "Update your map if anything changed, and log one thing to remember."]);
+  }else{
+    steps.push(["3 min", "Warm up on " + weakTxt + ": what do you already know?"]);
+    steps.push([(t - 8) + " min", "Do " + link + ", then the next chunk if time allows. Try every stretch question."]);
+    steps.push(["5 min", "Explain one idea out loud as if teaching it, then log it on the right."]);
+  }
+  $("planOut").innerHTML = '<div class="plan"><span class="kicker">Your ' + t + ' minute ' + subj.name + ' session</span><ol>' +
+    steps.map(function(s){ return '<li><span class="when">' + s[0] + '</span>' + s[1] + '</li>'; }).join("") +
+    '</ol><p class="tiny" style="margin:6px 0 0">A short break before or after helps it stick. Changing the plan is allowed.</p></div>';
+}
+
+/* ---------- log ---------- */
+function drawLog(){
+  var list = $("logList");
+  if(!hq.log.length){ list.innerHTML = '<p class="tiny">Nothing logged yet.</p>'; return; }
+  list.innerHTML = hq.log.slice().reverse().slice(0, 8).map(function(l){
+    return '<div class="logitem">' + escapeHtml(l.t) + '<small>' + l.d + '</small></div>';
+  }).join("");
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+$("logAdd").onclick = function(){
+  var t = $("logText").value.trim();
+  if(!t) return;
+  hq.log.push({ t: t, d: new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) });
+  saveHQ(); $("logText").value = ""; drawLog();
+};
+
+/* ---------- exams ---------- */
+function drawExams(){
+  var card = $("examCard");
+  var list = EXAMS.slice().filter(function(e){ return e && e.date; }).sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+  if(!list.length){
+    card.innerHTML = '<span class="kicker">Exam dates</span><h3>Coming soon</h3><p>Jay will pop your exam dates in here once they are confirmed. Nothing to do for now.</p>';
+    return;
+  }
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var html = '<span class="kicker">Exam dates</span><h3>Where things sit</h3>';
+  list.forEach(function(e){
+    var d = new Date(e.date + "T00:00:00");
+    var days = Math.round((d - today) / 86400000);
+    if(days < 0) return;
+    var s = SUBJECTS.filter(function(x){ return x.key === e.subject; })[0];
+    html += '<div class="exam ' + (s ? s.acc : "") + '"><span class="days">' + days + '<small>days</small></span><span><b>' + e.paper + '</b><br><span class="tiny">' +
+      d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + '</span></span></div>';
+  });
+  card.innerHTML = html;
+}
+
+/* ---------- send ---------- */
+function reportText(){
+  var lines = ["EGW's GCSE HQ", ""];
+  lines.push("== Activities ==");
+  allActs().forEach(function(x){
+    lines.push(x.s.name + ": " + x.a.title + "  |  " + (x.st.touched ? x.st.done + " of " + x.st.chunks + " chunks, " + x.st.sparks + " sparks" : "not started"));
+  });
+  lines.push("");
+  lines.push("== Revision map ==");
+  SUBJECTS.forEach(function(s){
+    lines.push(s.name + ":");
+    s.topics.forEach(function(t){
+      var v = hq.map[s.key + ":" + t[0]] || 0;
+      lines.push("  " + ["(not rated)", "Not yet", "Getting there", "Got it"][v] + "  |  " + t[0]);
+    });
+  });
+  lines.push("");
+  lines.push("== Things to remember ==");
+  if(!hq.log.length) lines.push("(none yet)");
+  hq.log.forEach(function(l){ lines.push(l.d + ": " + l.t); });
+  return lines.join("\n");
+}
+if(window.Base5Send){
+  Base5Send.mount($("sendHost"), { tool: "GCSE HQ summary", filename: "egw-gcse-hq", getText: reportText });
+}
+
+$("dice").onclick = deal;
+drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams();
+window.addEventListener("pageshow", function(){ drawStrip(); drawSubjects(); });
+})();
+</script>
+</body>
+</html>

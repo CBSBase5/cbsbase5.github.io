@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Infection and response - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+<style>
+/* Page only: disease cards, the outbreak widget */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 12px}
+.dcard{border:2px solid var(--ink);border-radius:14px 10px 14px 10px;background:var(--white);padding:9px 12px;font-size:.92rem;line-height:1.45}
+.dcard h4{font-size:1.02rem;margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.dcard p{margin:0 0 2px;font-size:inherit}
+.pill{font-family:var(--display);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:999px;color:var(--white);white-space:nowrap}
+.p-bac{background:var(--teal)}.p-vir{background:var(--orange-deep)}.p-fun{background:#2e7d4f}.p-pro{background:var(--plum)}
+.town svg{width:100%;max-width:420px;height:auto;display:block;margin:4px auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.86rem;margin:4px 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend svg{width:18px;height:20px}
+.runlog{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.runlog span{font-size:.82rem;padding:3px 9px;border-radius:999px;border:2px solid var(--ink);background:var(--white)}
+.runlog span.big{background:rgba(255,93,93,.18)}
+.runlog span.small{background:rgba(58,92,255,.14)}
+.vacrow{display:flex;align-items:center;gap:12px}
+.vacrow input{flex:1}
+.wq{margin-top:6px}
+.wq + .wq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+</style>
+</head>
+<body class="subj-bio">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Infection and response</h2>
+    <span>Biology. Pathogens, how the body defends itself, vaccination, antibiotics and how new medicines are tested.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- palette and tiny SVG helpers ---------- */
+var INK = "#141a33", TEAL = "#3a5cff", BRIGHT = "#22b8e6", ORANGE = "#ff5d5d",
+    YELLOW = "#ffd23f", PLUM = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", GREEN = "#2e7d4f";
+
+function T(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" font-family="' +
+    (o.body ? "Atkinson Hyperlegible,Verdana,sans-serif" : "Space Grotesk,Arial,sans-serif") + '" font-weight="' + (o.w || 700) +
+    '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '">' + s + '</text>';
+}
+function L(x1, y1, x2, y2, c, w, dash){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) +
+    '" stroke-width="' + (w || 1.5) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round"/>';
+}
+function svg(vb, label, inner){
+  return '<svg viewBox="' + vb + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function arrowR(x, y, c){
+  return '<path d="M' + x + ' ' + y + ' l-10 -7 v14 Z" fill="' + (c || INK) + '"/>';
+}
+function panel(x, y, w, h){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="14" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+
+/* ---------- figures ---------- */
+var FIG_PATH = svg("0 0 540 200", "The four types of pathogen: bacteria, viruses, fungi and protists",
+  panel(4, 6, 126, 140) + panel(141, 6, 126, 140) + panel(278, 6, 126, 140) + panel(415, 6, 121, 140) +
+  /* bacterium */
+  '<rect x="30" y="56" width="74" height="36" rx="18" fill="#d6eef4" stroke="' + TEAL + '" stroke-width="4"/>' +
+  '<path d="M48 74 q8 -10 16 0 t16 0" fill="none" stroke="' + PLUM + '" stroke-width="2.5"/>' +
+  /* virus */
+  '<g stroke="' + ORANGE + '" stroke-width="3" stroke-linecap="round">' +
+  '<path d="M204 50 v-10 M204 98 v10 M180 74 h-10 M228 74 h10 M187 57 l-7 -7 M221 91 l7 7 M187 91 l-7 7 M221 57 l7 -7"/></g>' +
+  '<circle cx="204" cy="74" r="20" fill="#fde0c8" stroke="' + ORANGE + '" stroke-width="3.5"/>' +
+  '<circle cx="204" cy="74" r="7" fill="none" stroke="' + INK + '" stroke-width="2"/>' +
+  /* fungus: hyphae and spores */
+  '<path d="M300 110 q20 -20 40 -10 t40 -24 M340 100 q4 -24 -6 -46 M360 92 q16 -6 20 -34" fill="none" stroke="' + GREEN + '" stroke-width="3.5" stroke-linecap="round"/>' +
+  '<circle cx="334" cy="50" r="7" fill="' + GREEN + '"/><circle cx="381" cy="53" r="7" fill="' + GREEN + '"/><circle cx="380" cy="76" r="5" fill="' + GREEN + '"/>' +
+  /* protist */
+  '<path d="M440 74 Q444 42 478 46 Q512 48 510 76 Q512 104 476 104 Q440 106 440 74 Z" fill="#efe3f4" stroke="' + PLUM + '" stroke-width="3.5"/>' +
+  '<circle cx="470" cy="72" r="10" fill="' + PLUM + '"/>' +
+  T(67, 130, "Bacteria", { s: 19, w: 800 }) + T(204, 130, "Viruses", { s: 19, w: 800 }) +
+  T(341, 130, "Fungi", { s: 19, w: 800 }) + T(475, 130, "Protists", { s: 19, w: 800 }) +
+  T(67, 170, "cells that", { s: 17, body: true, w: 400 }) + T(67, 192, "make toxins", { s: 17, body: true, w: 400 }) +
+  T(204, 170, "not cells,", { s: 17, body: true, w: 400 }) + T(204, 192, "live in cells", { s: 17, body: true, w: 400 }) +
+  T(341, 170, "threads", { s: 17, body: true, w: 400 }) + T(341, 192, "and spores", { s: 17, body: true, w: 400 }) +
+  T(475, 170, "single cells,", { s: 17, body: true, w: 400 }) + T(475, 192, "some vectors", { s: 17, body: true, w: 400 }));
+
+var FIG_DEF = svg("0 0 540 194", "The body's first defences: skin, nose, trachea and bronchi, stomach",
+  panel(4, 6, 126, 130) + panel(141, 6, 126, 130) + panel(278, 6, 126, 130) + panel(415, 6, 121, 130) +
+  /* skin: layers, pathogens bouncing off */
+  '<rect x="20" y="80" width="94" height="16" rx="3" fill="#f3c8a2" stroke="' + INK + '" stroke-width="2"/>' +
+  '<rect x="20" y="96" width="94" height="22" rx="3" fill="#fde6d2" stroke="' + INK + '" stroke-width="2"/>' +
+  '<circle cx="46" cy="50" r="6" fill="' + ORANGE + '"/><circle cx="84" cy="40" r="6" fill="' + ORANGE + '"/>' +
+  '<path d="M46 60 v10 M84 50 v20" stroke="' + INK + '" stroke-width="2" stroke-dasharray="3 3"/>' +
+  /* nose: profile with hairs */
+  '<path d="M180 30 L212 92 Q214 102 202 102 L186 102" fill="none" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
+  '<path d="M196 100 l-4 -12 M202 100 l0 -12 M208 98 l4 -10" stroke="' + INK + '" stroke-width="1.6"/>' +
+  '<circle cx="228" cy="104" r="5" fill="' + ORANGE + '"/><circle cx="240" cy="92" r="4" fill="' + ORANGE + '"/>' +
+  /* trachea with cilia and mucus moving up */
+  '<rect x="318" y="26" width="46" height="96" rx="8" fill="#fde6d2" stroke="' + INK + '" stroke-width="2.5"/>' +
+  '<path d="M324 40 l6 -3 M324 56 l6 -3 M324 72 l6 -3 M324 88 l6 -3 M324 104 l6 -3 M358 40 l-6 -3 M358 56 l-6 -3 M358 72 l-6 -3 M358 88 l-6 -3 M358 104 l-6 -3" stroke="' + INK + '" stroke-width="1.6"/>' +
+  '<path d="M341 104 V42" stroke="' + GREEN + '" stroke-width="3"/><path d="M341 34 l-7 10 h14 Z" fill="' + GREEN + '"/>' +
+  /* stomach with acid drops */
+  '<path d="M444 36 Q448 74 470 92 Q500 114 516 92 Q526 72 504 64 Q484 58 476 40 Z" fill="#f6d5c8" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '<path d="M488 80 q4 -8 8 0 a4 4 0 1 1 -8 0 Z M500 92 q4 -8 8 0 a4 4 0 1 1 -8 0 Z" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="1.2"/>' +
+  T(67, 162, "Skin", { s: 19, w: 800 }) + T(204, 162, "Nose", { s: 19, w: 800 }) +
+  T(341, 162, "Trachea", { s: 19, w: 800 }) + T(475, 162, "Stomach", { s: 19, w: 800 }) +
+  T(67, 186, "barrier", { s: 17, body: true, w: 400 }) + T(204, 186, "hairs, mucus", { s: 17, body: true, w: 400 }) +
+  T(341, 186, "mucus, cilia", { s: 17, body: true, w: 400 }) + T(475, 186, "acid", { s: 17, body: true, w: 400 }));
+
+function yShape(x, y, rot, c){
+  return '<path transform="translate(' + x + ' ' + y + ') rotate(' + rot + ')" d="M0 10 V0 M0 0 L-6 -8 M0 0 L6 -8" fill="none" stroke="' + (c || TEAL) + '" stroke-width="3" stroke-linecap="round"/>';
+}
+var FIG_WBC = svg("0 0 540 200", "Three ways white blood cells work: phagocytosis, antibodies, antitoxins",
+  panel(4, 6, 170, 140) + panel(185, 6, 170, 140) + panel(366, 6, 170, 140) +
+  /* phagocyte engulfing */
+  '<path d="M40 76 Q40 34 86 34 Q130 34 134 64 L112 70 Q106 60 96 66 Q90 76 98 84 Q106 92 114 84 L134 90 Q130 118 86 118 Q40 118 40 76 Z" fill="#e6f4f8" stroke="' + TEAL + '" stroke-width="3"/>' +
+  '<circle cx="66" cy="76" r="12" fill="' + PLUM + '"/>' +
+  '<rect x="94" y="68" width="18" height="11" rx="5" fill="' + ORANGE + '"/>' +
+  /* antibodies on pathogen */
+  '<rect x="240" y="60" width="60" height="32" rx="16" fill="#fde0c8" stroke="' + ORANGE + '" stroke-width="3"/>' +
+  '<path d="M252 60 v-4 M270 60 v-4 M288 60 v-4 M252 92 v4 M288 92 v4" stroke="' + ORANGE + '" stroke-width="5"/>' +
+  yShape(252, 44, 180) + yShape(288, 44, 180) + yShape(252, 108, 0) + yShape(288, 108, 0) + yShape(214, 76, 90) +
+  /* antitoxin on toxin */
+  '<g fill="' + ORANGE + '"><path d="M410 50 l8 -12 l8 12 Z"/><path d="M470 60 l8 -12 l8 12 Z"/><path d="M430 96 l8 -12 l8 12 Z"/></g>' +
+  '<path d="M410 52 h16 M470 62 h16 M430 98 h16" stroke="' + PLUM + '" stroke-width="5" stroke-linecap="round"/>' +
+  '<path d="M490 100 l8 -12 l8 12 Z" fill="' + ORANGE + '"/>' +
+  T(89, 166, "Phagocytosis", { s: 20, w: 800 }) + T(270, 166, "Antibodies", { s: 20, w: 800 }) + T(451, 166, "Antitoxins", { s: 20, w: 800 }) +
+  T(89, 192, "engulf and digest", { s: 17, body: true, w: 400 }) + T(270, 192, "stick to antigens", { s: 17, body: true, w: 400 }) +
+  T(451, 192, "neutralise toxins", { s: 17, body: true, w: 400 }));
+
+/* primary and secondary response graph, shared by the learn card and the stretch question */
+var GX = function(d){ return 60 + d * 7.4; };          /* days 0 to 60 */
+var GY = function(a){ return 250 - a * 2.1; };         /* antibody 0 to 100 */
+function respCurve(){
+  var pts = [], d, a;
+  for(d = 0; d <= 60; d += 0.5){
+    if(d < 4) a = 0;
+    else if(d <= 10) a = 20 * Math.sin((d - 4) / 6 * Math.PI / 2);
+    else if(d <= 30) a = 2 + 18 * Math.exp(-(d - 10) / 5);
+    else if(d <= 31) a = 2 + 18 * Math.exp(-4);
+    else if(d <= 36) a = 2.3 + (100 - 2.3) * Math.sin((d - 31) / 5 * Math.PI / 2);
+    else a = 100 - (d - 36) * 0.9;
+    pts.push(GX(d).toFixed(1) + " " + GY(a).toFixed(1));
+  }
+  return "M" + pts.join(" L");
+}
+var FIG_GRAPH = (function(){
+  var g = "";
+  for(var a = 0; a <= 100; a += 10){
+    g += L(60, GY(a), GX(60), GY(a), "#d9d8e6", a % 20 ? 0.8 : 1.4);
+    if(a % 20 === 0) g += T(52, GY(a) + 6, a, { a: "end", s: 17, w: 400, body: true });
+  }
+  for(var d = 0; d <= 60; d += 10){
+    g += L(GX(d), GY(0), GX(d), GY(100), "#d9d8e6", 0.8);
+    g += T(GX(d), 274, d, { s: 17, w: 400, body: true });
+  }
+  g += L(60, GY(0), GX(60), GY(0), INK, 2.5) + L(60, GY(0), 60, GY(100), INK, 2.5);
+  g += '<path d="' + respCurve() + '" fill="none" stroke="' + TEAL + '" stroke-width="3.5" stroke-linejoin="round"/>';
+  /* exposure markers */
+  g += L(GX(0), 22, GX(0), GY(0), ORANGE, 2, "6 5") + L(GX(30), 22, GX(30), GY(0), ORANGE, 2, "6 5");
+  g += T(GX(0) + 6, 22, "First infection", { a: "start", s: 17, c: INK });
+  g += T(GX(30) + 6, 22, "Same pathogen again", { a: "start", s: 17, c: INK });
+  g += T(GX(20), GY(27), "primary", { s: 18, c: TEAL }) + T(GX(49), GY(70), "secondary", { s: 18, c: TEAL });
+  g += T(GX(30), 300, "Time (days)", { s: 18 });
+  g += '<text transform="translate(14 ' + GY(50) + ') rotate(-90)" text-anchor="middle" font-family="Space Grotesk,Arial,sans-serif" font-weight="700" font-size="18" fill="' + INK + '">Antibody level (units)</text>';
+  return svg("0 0 520 308", "Graph of antibody level against time. After the first infection the level rises slowly to a small peak then falls. After the second infection with the same pathogen it rises much faster to a much higher peak.", g);
+})();
+
+var FIG_RES = svg("0 0 540 182", "How a population of resistant bacteria builds up",
+  (function(){
+    var s = "", bugs = [[0,-26],[22,-14],[-24,-12],[0,0],[24,10],[-22,14],[0,26],[-10,-40],[12,40]];
+    function dish(cx, list){
+      s += '<circle cx="' + cx + '" cy="80" r="66" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      list.forEach(function(b){
+        s += '<rect x="' + (cx + b[0] - 9) + '" y="' + (80 + b[1] - 5) + '" width="18" height="10" rx="5" fill="' + (b[2] ? ORANGE : (b[3] ? "none" : TEAL)) +
+          '" stroke="' + (b[3] ? "#9fb6bc" : INK) + '" stroke-width="1.5"' + (b[3] ? ' stroke-dasharray="3 2"' : "") + '/>';
+      });
+    }
+    dish(80, bugs.map(function(b, k){ return [b[0], b[1], k === 4]; }));
+    dish(270, bugs.map(function(b, k){ return [b[0], b[1], k === 4, k !== 4]; }));
+    dish(460, bugs.map(function(b){ return [b[0], b[1], true]; }));
+    s += L(152, 80, 190, 80, INK, 3) + arrowR(198, 80) + L(342, 80, 380, 80, INK, 3) + arrowR(388, 80);
+    s += T(80, 172, "one mutant", { s: 18, w: 800 }) + T(270, 172, "antibiotic used", { s: 18, w: 800 }) + T(460, 172, "resistant strain", { s: 18, w: 800 });
+    return s;
+  })());
+
+var FIG_DRUG = svg("0 0 540 204", "Stages of drug testing: cells and tissues, animals, healthy volunteers, patients",
+  (function(){
+    var s = "", xs = [4, 139, 274, 409], names = ["Cells and", "Live", "Healthy", "Patients"], n2 = ["tissues", "animals", "volunteers", "best dose"];
+    s += '<rect x="4" y="6" width="260" height="30" rx="15" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2"/>' + T(134, 27, "Preclinical", { s: 17, w: 800 });
+    s += '<rect x="274" y="6" width="262" height="30" rx="15" fill="' + BRIGHT + '" stroke="' + INK + '" stroke-width="2"/>' + T(405, 27, "Clinical trials", { s: 17, w: 800 });
+    xs.forEach(function(x, k){
+      s += panel(x, 50, 118, 96) + T(x + 59, 92, names[k], { s: 18, w: 800 }) + T(x + 59, 116, n2[k], { s: 18, w: 800 });
+      if(k < 3) s += L(x + 120, 98, x + 128, 98, INK, 3) + arrowR(x + 137, 98);
+    });
+    s += T(333, 174, "low dose first", { s: 17, body: true, w: 400 });
+    s += T(468, 174, "double blind,", { s: 17, body: true, w: 400 }) + T(468, 196, "with a placebo", { s: 17, body: true, w: 400 });
+    s += T(134, 174, "toxicity, efficacy, dose", { s: 17, body: true, w: 400 });
+    return s;
+  })());
+
+/* ---------- small in-widget quiz ---------- */
+function wquiz(host, qs, api){
+  var d = api.data;
+  if(!d.q) d.q = [];
+  function parse(s){
+    s = String(s).replace(/,/g, "").replace(/\u2212/g, "-");
+    var m = s.match(/-?\d*\.?\d+/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function overall(){
+    var r = "right1";
+    for(var k = 0; k < qs.length; k++){
+      var st = d.q[k];
+      if(!st || !st.done) return null;
+      if(st.done === "shown") r = "shown";
+      else if(st.done === "right2" && r === "right1") r = "right2";
+    }
+    return r;
+  }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e; }
+  function render(){
+    host.innerHTML = '<span class="kicker" style="margin-bottom:4px">Your challenge</span>';
+    for(var k = 0; k < qs.length; k++){
+      if(!d.q[k]) d.q[k] = { tries: 0 };
+      host.appendChild(one(k));
+      if(!d.q[k].done) break;
+    }
+  }
+  function one(k){
+    var q = qs[k], st = d.q[k];
+    var box = el("div", "wq", '<p class="wnote"><b>' + (k + 1) + ' of ' + qs.length + '.</b> ' + q.q + '</p>');
+    var picked = st.pick === undefined ? -1 : st.pick, input = null, btns = [];
+    if(q.options){
+      var ch = el("div", "choices");
+      q.options.forEach(function(o, n){
+        var b = el("button", n === picked ? "picked" : "", o); b.type = "button";
+        b.onclick = function(){
+          if(st.done) return;
+          picked = n;
+          btns.forEach(function(x, m){ x.classList.toggle("picked", m === n); x.classList.remove("no"); });
+        };
+        btns.push(b); ch.appendChild(b);
+      });
+      box.appendChild(ch);
+    }else{
+      var row = el("label", "numrow", q.pre ? '<span class="aff">' + q.pre + '</span>' : "");
+      input = el("input"); input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+      input.setAttribute("aria-label", "Your answer");
+      if(st.val !== undefined) input.value = st.val;
+      input.addEventListener("input", function(){ input.classList.remove("no"); });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter") cb.click(); });
+      row.appendChild(input);
+      if(q.post) row.appendChild(el("span", "aff", q.post));
+      box.appendChild(row);
+    }
+    var nav = el("div", "wrow");
+    var cb = el("button", "btn", "Check"); cb.type = "button";
+    var sb = el("button", "btn btn-quiet", "Show me"); sb.type = "button";
+    nav.appendChild(cb); nav.appendChild(sb); box.appendChild(nav);
+    var fb = el("div", "fb hidden"); fb.setAttribute("aria-live", "polite");
+    box.appendChild(fb);
+    function right(){
+      if(q.options) return picked === q.answer;
+      return Math.abs(parse(input.value) - q.a) <= (q.tol || 1e-9);
+    }
+    function paint(){
+      cb.classList.toggle("hidden", !!st.done);
+      sb.classList.toggle("hidden", !!st.done || !st.tries);
+      if(!st.done) return;
+      if(q.options){
+        btns.forEach(function(x, m){
+          x.classList.remove("no", "ok");
+          if(m === q.answer) x.classList.add("ok");
+        });
+      }else{
+        if(st.done === "shown"){ input.value = q.show || String(q.a); input.classList.add("given"); }
+        else input.classList.add("ok");
+        input.readOnly = true;
+      }
+      fb.className = "fb " + (st.done === "shown" ? "show" : "good");
+      fb.innerHTML = "<b>" + (st.done === "shown" ? "Here is how this one works." : st.done === "right1" ? "Spot on." : "Got there. Second go counts.") +
+        '</b><div class="why">' + q.why + "</div>";
+    }
+    function finish(r){
+      st.done = r; api.save();
+      var o = overall();
+      if(o) api.done(o);
+      render();
+    }
+    cb.onclick = function(){
+      if(q.options ? picked < 0 : !input.value.trim()){
+        fb.className = "fb nudge"; fb.innerHTML = "Pop an answer in first, if you like.";
+        return;
+      }
+      st.pick = picked; if(input) st.val = input.value;
+      if(right()){ finish(st.tries ? "right2" : "right1"); return; }
+      st.tries++;
+      if(st.tries >= 2){ finish("shown"); return; }
+      api.save();
+      var msg = q.hint;
+      if(input && q.near){
+        var v = parse(input.value);
+        q.near.forEach(function(nr){ if(Math.abs(v - nr.v) < 1e-9) msg = nr.msg; });
+      }
+      if(q.options && q.nearOpt && q.nearOpt[picked]) msg = q.nearOpt[picked];
+      if(input) input.classList.add("no"); else btns[picked].classList.add("no");
+      fb.className = "fb nudge";
+      fb.innerHTML = "<b>Not quite yet.</b> " + msg + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+      paint();
+    };
+    sb.onclick = function(){ finish("shown"); };
+    paint();
+    return box;
+  }
+  render();
+}
+
+
+/* ---------- the outbreak simulator ---------- */
+var COLS = 12, ROWS = 10, N = COLS * ROWS, P = 0.5, DUR = 2, SMALL = 10, CELL = 30;
+
+function mulberry(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seedFor(v, k){ return 500000 + v * 131 + (k % 10) * 7919; }
+
+/* states: 0 never had it, 1 vaccinated, 2 infectious now, 3 has had it */
+function simulate(vac, seed){
+  var rnd = mulberry(seed), st = [], tm = [], idx = [], i, j, k;
+  for(i = 0; i < N; i++){ idx.push(i); st.push(0); tm.push(0); }
+  for(i = N - 1; i > 0; i--){ j = Math.floor(rnd() * (i + 1)); k = idx[i]; idx[i] = idx[j]; idx[j] = k; }
+  var nv = Math.round(N * vac / 100);
+  for(i = 0; i < nv; i++) st[idx[i]] = 1;
+  var sus = idx.slice(nv);
+  var z = sus[Math.floor(rnd() * sus.length)];
+  var base = st.slice();
+  st[z] = 2; tm[z] = DUR;
+  var frames = [st.slice()], caught = 1;
+  while(true){
+    var any = false, nw = [];
+    for(i = 0; i < N; i++){
+      if(st[i] !== 2) continue;
+      any = true;
+      var x = i % COLS, y = Math.floor(i / COLS);
+      for(var dy = -1; dy <= 1; dy++) for(var dx = -1; dx <= 1; dx++){
+        if(!dx && !dy) continue;
+        var X = x + dx, Y = y + dy;
+        if(X < 0 || Y < 0 || X >= COLS || Y >= ROWS) continue;
+        var n = Y * COLS + X;
+        if(st[n] === 0 && rnd() < P) nw.push(n);
+      }
+    }
+    if(!any) break;
+    for(i = 0; i < N; i++) if(st[i] === 2){ tm[i]--; if(tm[i] <= 0) st[i] = 3; }
+    for(i = 0; i < nw.length; i++) if(st[nw[i]] === 0){ st[nw[i]] = 2; tm[nw[i]] = DUR; caught++; }
+    frames.push(st.slice());
+  }
+  return { base: base, frames: frames, caught: caught, nv: nv, sus: N - nv };
+}
+
+function personSVG(cx, cy, id){
+  return '<g id="' + id + '">' +
+    '<circle class="halo" cx="' + cx + '" cy="' + cy + '" r="14" fill="none" stroke="' + ORANGE + '" stroke-width="2" stroke-dasharray="3 3" visibility="hidden"/>' +
+    '<circle class="hd" cx="' + cx + '" cy="' + (cy - 6) + '" r="4.6" stroke="' + INK + '" stroke-width="1.4"/>' +
+    '<path class="bd" d="M' + (cx - 8.5) + ' ' + (cy + 11) + ' Q' + (cx - 8.5) + ' ' + (cy) + ' ' + cx + ' ' + cy + ' Q' + (cx + 8.5) + ' ' + cy + ' ' + (cx + 8.5) + ' ' + (cy + 11) + ' Z" stroke="' + INK + '" stroke-width="1.4"/>' +
+    '<path class="tk" d="M' + (cx - 3.5) + ' ' + (cy + 5.5) + ' l2.6 2.6 l4.6 -5" fill="none" stroke="' + WHITE + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" visibility="hidden"/>' +
+    '</g>';
+}
+var FILL = [WHITE, TEAL, ORANGE, "#f6c9a6"];
+function legendGlyph(state){
+  var f = FILL[state];
+  return '<svg viewBox="0 0 18 20" aria-hidden="true">' +
+    (state === 2 ? '<circle cx="9" cy="10" r="8.4" fill="none" stroke="' + ORANGE + '" stroke-width="1.4" stroke-dasharray="2 2"/>' : "") +
+    '<circle cx="9" cy="6" r="3.4" fill="' + f + '" stroke="' + INK + '" stroke-width="1.2"/>' +
+    '<path d="M3 18 Q3 10 9 10 Q15 10 15 18 Z" fill="' + f + '" stroke="' + INK + '" stroke-width="1.2"/>' +
+    (state === 1 ? '<path d="M6.5 14 l2 2 l3.4 -3.8" fill="none" stroke="' + WHITE + '" stroke-width="1.6" stroke-linecap="round"/>' : "") +
+    '</svg>';
+}
+
+var OUTBREAK = {
+  type: "widget", topic: "Vaccination",
+  title: "Outbreak simulator",
+  html: '<p>This town has 120 people. Each person who is infectious can pass the pathogen to the 8 people around them. Vaccinated people (teal, with a tick) cannot catch it or pass it on.</p><p>Set how many people are vaccinated, then release one infection and watch. Try a few different levels, your call which.</p>',
+  report: function(d){
+    var runs = d.runs || [], q = d.q || [];
+    var lab = { right1: "first go", right2: "second go", shown: "Show me" };
+    var levels = {};
+    runs.forEach(function(r){ levels[r.v] = 1; });
+    return "Outbreak: " + runs.length + " runs, levels tried " + (Object.keys(levels).sort(function(a, b){ return a - b; }).map(function(v){ return v + "%"; }).join(", ") || "none") +
+      "; challenge 1 " + (q[0] && lab[q[0].done] || "not done") + ", challenge 2 " + (q[1] && lab[q[1].done] || "not done") + ".";
+  },
+  mount: function(el, api){
+    var d = api.data;
+    if(d.vac === undefined) d.vac = 20;
+    if(!d.k) d.k = {};
+    if(!d.runs) d.runs = [];
+    var people = "";
+    for(var i = 0; i < N; i++) people += personSVG((i % COLS) * CELL + 15, Math.floor(i / COLS) * CELL + 15, "pp" + i);
+    el.innerHTML =
+      '<div class="wpanel">' +
+        '<div class="vacrow"><label for="vacR" class="wnote"><b>Vaccinated</b></label><input type="range" id="vacR" min="0" max="95" step="5"><span class="wbig" id="vacV"></span></div>' +
+        '<div class="town"><svg id="town" viewBox="0 0 360 300" role="img" aria-label="A town of 120 people">' +
+          '<rect width="360" height="300" rx="10" fill="' + PAPER + '"/>' + people + '</svg></div>' +
+        '<div class="legend">' +
+          '<span>' + legendGlyph(0) + 'not vaccinated</span><span>' + legendGlyph(1) + 'vaccinated</span>' +
+          '<span>' + legendGlyph(2) + 'infectious now</span><span>' + legendGlyph(3) + 'has had it</span></div>' +
+        '<div class="wrow"><button type="button" class="btn btn-orange" id="goBtn">Release one infection</button></div>' +
+        '<p class="wnote" id="res" aria-live="polite"></p>' +
+        '<div class="runlog" id="log"></div>' +
+        '<p class="tiny">In this model the vaccine always works. Real vaccines are very good, but not perfect.</p>' +
+      '</div>' +
+      '<div class="wpanel" id="oQuiz"></div>';
+    var range = el.querySelector("#vacR"), vv = el.querySelector("#vacV"), go = el.querySelector("#goBtn"),
+        res = el.querySelector("#res"), log = el.querySelector("#log"), quizHost = el.querySelector("#oQuiz");
+    var nodes = [];
+    for(i = 0; i < N; i++){
+      var g = el.querySelector("#pp" + i);
+      nodes.push({ halo: g.querySelector(".halo"), hd: g.querySelector(".hd"), bd: g.querySelector(".bd"), tk: g.querySelector(".tk") });
+    }
+    var timer = null;
+    function paint(st){
+      for(var n = 0; n < N; n++){
+        var s = st[n], o = nodes[n];
+        o.hd.setAttribute("fill", FILL[s]); o.bd.setAttribute("fill", FILL[s]);
+        o.tk.setAttribute("visibility", s === 1 ? "visible" : "hidden");
+        o.halo.setAttribute("visibility", s === 2 ? "visible" : "hidden");
+      }
+    }
+    function nextRun(){ var v = d.vac; return simulate(v, seedFor(v, d.k[v] || 0)); }
+    function preview(){
+      vv.textContent = d.vac + "%";
+      range.value = d.vac;
+      paint(nextRun().base);
+      res.innerHTML = Math.round(N * d.vac / 100) + " vaccinated, " + (N - Math.round(N * d.vac / 100)) + " not. Ready when you are.";
+    }
+    function drawLog(){
+      log.innerHTML = d.runs.slice(-10).map(function(r){
+        return '<span class="' + (r.c <= SMALL ? "small" : "big") + '">' + r.v + '%: ' + r.c + ' caught it</span>';
+      }).join("");
+      if(d.runs.length >= 2 && !quizHost.dataset.on){ quizHost.dataset.on = "1"; startQuiz(); }
+      if(d.runs.length < 2) quizHost.innerHTML = '<p class="wnote">The challenge appears here after a couple of runs.</p>';
+    }
+    function verdict(r, v){
+      return '<b>' + r.caught + ' of the ' + r.sus + ' unvaccinated people caught it</b> at ' + v + '% vaccinated. ' +
+        (r.caught <= SMALL ? "The outbreak stayed small." : "The outbreak spread through the town.");
+    }
+    function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+    range.addEventListener("input", function(){
+      if(timer) return;
+      d.vac = +range.value; api.save(); preview();
+    });
+    go.onclick = function(){
+      if(timer) return;
+      var v = d.vac, k = d.k[v] || 0, r = simulate(v, seedFor(v, k));
+      d.k[v] = k + 1;
+      d.runs.push({ v: v, c: r.caught });
+      d.last = { v: v, k: k };
+      api.save();
+      go.disabled = true; range.disabled = true;
+      var f = 0, quick = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      res.textContent = "Spreading...";
+      function end(){
+        stop();
+        paint(r.frames[r.frames.length - 1]);
+        res.innerHTML = verdict(r, v) + ' <span class="tiny">Press again for a fresh run, or change the level.</span>';
+        go.disabled = false; range.disabled = false;
+        drawLog();
+      }
+      if(quick){ end(); return; }
+      paint(r.frames[0]);
+      timer = setInterval(function(){
+        f++;
+        if(f >= r.frames.length){ end(); return; }
+        paint(r.frames[f]);
+      }, 170);
+    };
+    function startQuiz(){
+      wquiz(quizHost, [
+        { q: "From your runs, roughly what level of vaccination kept the outbreak small <b>most of the time</b> in this town?",
+          options: ["About 20%", "About 45%", "About 70% or more", "Only 100% works"],
+          answer: 2,
+          hint: "Have a look at your run log. If you like, try a few runs at 45% and a few at 70% and compare.",
+          nearOpt: { 1: "At 45% it does sometimes stay small, but often it still spreads a long way. You could try a few runs at 45%, then a few at 70%, and compare.",
+                     3: "It does not need everyone. Try 75% a few times: the outbreak almost always stays small, even with 30 people unvaccinated." },
+          why: "Around 70% or more, nearly every run stays small. You do not need 100%. Real diseases have their own levels: measles spreads very easily, so about 95% of people need to be vaccinated to stop outbreaks." },
+        { q: "At high vaccination levels, most of the <b>unvaccinated</b> people never caught it. Why not?",
+          options: [
+            "They were naturally immune to the pathogen",
+            "The vaccinated people around them could not catch it or pass it on, so the pathogen could not reach them",
+            "The pathogen got weaker each time it spread",
+            "Unvaccinated people make antibodies faster"
+          ],
+          answer: 1,
+          hint: "Look at who is standing around an unvaccinated person when lots of people are vaccinated.",
+          why: "This is <b>herd immunity</b>. When a large proportion of people are immune, the pathogen runs out of people to spread to, so it dies out. That protects people who cannot be vaccinated, such as very young babies or people whose immune system is weakened." }
+      ], api);
+    }
+    if(d.last){
+      var lr = simulate(d.last.v, seedFor(d.last.v, d.last.k));
+      vv.textContent = d.vac + "%"; range.value = d.vac;
+      paint(lr.frames[lr.frames.length - 1]);
+      res.innerHTML = verdict(lr, d.last.v);
+    }else preview();
+    drawLog();
+  }
+};
+
+EGW.run({
+  id: "biology-infection",
+  title: "Infection and response",
+  subject: "Biology",
+  mins: 50,
+  blurb: "How diseases spread, how the body fights back, and how vaccines and medicines help. There is an outbreak simulator in the middle to play with.",
+  steps: [
+
+  /* ---------- PATHOGENS ---------- */
+  { type: "learn", topic: "Pathogens",
+    title: "What causes disease",
+    fig: FIG_PATH,
+    html: '<p><b>Communicable</b> diseases can spread from one person, animal or plant to another. They are caused by <b>pathogens</b>: microorganisms that cause disease.</p>' +
+          '<p><b>Non communicable</b> diseases cannot be caught from someone else. Coronary heart disease and type 2 diabetes are examples.</p>' +
+          '<ul>' +
+          '<li><b>Bacteria</b> are small cells. They reproduce quickly and can make <b>toxins</b> (poisons) that damage tissues and make us feel ill.</li>' +
+          '<li><b>Viruses</b> are not cells and are much smaller. They live and reproduce <b>inside</b> cells, which damages the cells.</li>' +
+          '<li><b>Fungi</b> often grow as threads, and spread by <b>spores</b>.</li>' +
+          '<li><b>Protists</b> are single celled. Some are spread by a <b>vector</b>: an animal that carries them, like a mosquito.</li>' +
+          '</ul>' +
+          '<p>Pathogens spread by direct contact, by water, or by air.</p>' +
+          '<div class="keep"><b>Keep this</b>Bacteria make toxins. Viruses get inside cells. Both make you feel ill, in different ways.</div>' },
+
+  { type: "sort", topic: "Pathogens",
+    q: "Communicable or non communicable?",
+    buckets: ["Communicable (can spread)", "Non communicable"],
+    cards: [
+      ["Measles", 0],
+      ["Malaria", 0],
+      ["Salmonella food poisoning", 0],
+      ["Tobacco mosaic virus in plants", 0],
+      ["Coronary heart disease", 1],
+      ["Type 2 diabetes", 1],
+      ["Asthma", 1]
+    ],
+    hint: "Ask: is there a pathogen that could be passed on?",
+    why: "The communicable ones are all caused by a pathogen. Heart disease, type 2 diabetes and asthma are not caused by pathogens, so you cannot catch them from someone. Lifestyle and genes are linked to them instead." },
+
+  /* ---------- DISEASES ---------- */
+  { type: "learn", topic: "Diseases",
+    title: "Seven diseases worth knowing",
+    html: '<div class="dgrid">' +
+          '<div class="dcard"><h4>Measles <span class="pill p-vir">virus</span></h4><p>Fever and a red skin rash. Can be serious.</p><p><b>Spread:</b> droplets from coughs and sneezes.</p><p><b>Control:</b> vaccination, usually in early childhood.</p></div>' +
+          '<div class="dcard"><h4>HIV <span class="pill p-vir">virus</span></h4><p>Starts like flu, then attacks immune cells.</p><p><b>Spread:</b> sexual contact, or body fluids such as blood (sharing needles).</p><p><b>Control:</b> antiretroviral drugs; condoms; not sharing needles.</p></div>' +
+          '<div class="dcard"><h4>Tobacco mosaic virus <span class="pill p-vir">virus</span></h4><p>Plants, such as tomatoes. Patchy pale leaves, so less photosynthesis and poor growth.</p><p><b>Spread:</b> contact between plants, and on hands and tools.</p><p><b>Control:</b> remove infected plants, wash hands and tools.</p></div>' +
+          '<div class="dcard"><h4>Salmonella <span class="pill p-bac">bacteria</span></h4><p>Food poisoning: fever, stomach cramps, vomiting, diarrhoea, caused by toxins.</p><p><b>Spread:</b> undercooked or contaminated food.</p><p><b>Control:</b> cook food properly, good hygiene, vaccinate poultry.</p></div>' +
+          '<div class="dcard"><h4>Gonorrhoea <span class="pill p-bac">bacteria</span></h4><p>A sexually transmitted disease; can cause pain when urinating.</p><p><b>Spread:</b> sexual contact.</p><p><b>Control:</b> antibiotics (many strains are now resistant); condoms.</p></div>' +
+          '<div class="dcard"><h4>Rose black spot <span class="pill p-fun">fungus</span></h4><p>Purple or black spots on leaves, which turn yellow and drop early.</p><p><b>Spread:</b> spores carried by wind or water.</p><p><b>Control:</b> fungicides; remove and destroy affected leaves.</p></div>' +
+          '<div class="dcard"><h4>Malaria <span class="pill p-pro">protist</span></h4><p>Repeated bouts of fever.</p><p><b>Spread:</b> mosquitoes (the vector) when they bite.</p><p><b>Control:</b> stop mosquitoes breeding, mosquito nets, antimalarial drugs.</p></div>' +
+          '</div>' +
+          '<div class="keep"><b>Keep this</b>For control, think about breaking the route: block the way it spreads, kill the pathogen, or make people immune.</div>' },
+
+  { type: "sort", topic: "Diseases",
+    q: "Which type of pathogen causes each disease?",
+    buckets: ["Bacteria", "Virus", "Fungus", "Protist"],
+    cards: [
+      ["Salmonella", 0],
+      ["Gonorrhoea", 0],
+      ["Measles", 1],
+      ["HIV", 1],
+      ["Tobacco mosaic virus", 1],
+      ["Rose black spot", 2],
+      ["Malaria", 3]
+    ],
+    hint: "Three viruses, two bacteria, one fungus, one protist. Tobacco mosaic virus gives itself away.",
+    why: "Measles, HIV and tobacco mosaic virus are viruses. Salmonella and gonorrhoea are bacteria. Rose black spot is a fungus. Malaria is a protist, which surprises a lot of people: it is not a virus or a bacterium." },
+
+  { type: "match", topic: "Diseases",
+    q: "Match each disease to how it spreads.",
+    pairs: [
+      ["Measles", "Droplets from coughs and sneezes"],
+      ["HIV", "Sexual contact or body fluids such as blood"],
+      ["Tobacco mosaic virus", "Contact between infected and healthy plants"],
+      ["Salmonella", "Eating undercooked or contaminated food"],
+      ["Rose black spot", "Spores carried by wind or water"],
+      ["Malaria", "Mosquitoes, when they bite"]
+    ],
+    hint: "Two of these affect plants. One needs an animal vector.",
+    why: "Knowing the route is what lets you suggest a control. Mosquitoes carry malaria, so nets help. Spores blow about, so removing infected leaves helps. Droplets spread measles, so vaccination is the main defence." },
+
+  { type: "mc", topic: "Diseases",
+    q: "Which of these would best reduce the spread of <b>malaria</b>?",
+    options: [
+      "Spraying fungicide on leaves",
+      "Using mosquito nets and stopping mosquitoes breeding in still water",
+      "Vaccinating chickens",
+      "Washing hands and tools after touching plants"
+    ],
+    answer: 1,
+    hint: "Malaria is spread by a vector. Which option stops the vector?",
+    why: "Mosquitoes are the vector, so stopping them breeding and stopping them biting breaks the route. The other options are real controls, just for other diseases: fungicide for rose black spot, vaccinating chickens for salmonella, washing hands and tools for tobacco mosaic virus." },
+
+  /* ---------- FIRST DEFENCES ---------- */
+  { type: "learn", topic: "First defences",
+    title: "Keeping pathogens out",
+    fig: FIG_DEF,
+    html: '<p>Your body has <b>non specific</b> defences. They work against any pathogen, and their job is to stop pathogens getting in.</p>' +
+          '<ul>' +
+          '<li><b>Skin</b>: a physical barrier, and it makes antimicrobial secretions that kill pathogens.</li>' +
+          '<li><b>Nose</b>: hairs and mucus trap particles that might contain pathogens.</li>' +
+          '<li><b>Trachea and bronchi</b>: make <b>mucus</b> to trap pathogens, and are lined with <b>cilia</b>, tiny hairs that sweep the mucus up to the throat, where it is swallowed.</li>' +
+          '<li><b>Stomach</b>: makes <b>hydrochloric acid</b>, which kills pathogens in food and drink.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Mucus traps, cilia sweep, acid kills, skin blocks.</div>' },
+
+  { type: "match", topic: "First defences",
+    q: "Match each part of the body to how it defends you.",
+    pairs: [
+      ["Skin", "A barrier that also makes antimicrobial secretions"],
+      ["Nose", "Hairs and mucus trap particles"],
+      ["Trachea and bronchi", "Mucus traps pathogens and cilia move it up to the throat"],
+      ["Stomach", "Acid kills pathogens"]
+    ],
+    hint: "Only one of them uses cilia. Only one makes acid.",
+    why: "A common slip is to think cilia trap pathogens. The mucus does the trapping; cilia are the movers, sweeping the mucus up and away from the lungs." },
+
+  /* ---------- WHITE BLOOD CELLS ---------- */
+  { type: "learn", topic: "White blood cells",
+    title: "When pathogens get in",
+    fig: FIG_WBC,
+    html: '<p>If a pathogen gets past the first defences, <b>white blood cells</b> fight it in three ways.</p>' +
+          '<ul>' +
+          '<li><b>Phagocytosis</b>: a white blood cell surrounds the pathogen, takes it in and digests it.</li>' +
+          '<li><b>Antibodies</b>: pathogens have molecules on their surface called <b>antigens</b>. White blood cells make antibodies that fit those antigens exactly, sticking to the pathogens so they can be destroyed.</li>' +
+          '<li><b>Antitoxins</b>: these counteract the toxins that bacteria make.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Antibodies are <b>specific</b>: each one only fits one kind of antigen, like a key that fits one lock.</div>' },
+
+  { type: "multi", topic: "White blood cells",
+    q: "Which <b>three</b> are things white blood cells do?",
+    options: [
+      "Engulf and digest pathogens (phagocytosis)",
+      "Make antibodies",
+      "Make antitoxins",
+      "Make hydrochloric acid",
+      "Carry oxygen around the body",
+      "Trap dust with tiny hairs"
+    ],
+    answers: [0, 1, 2],
+    hint: "Two of the wrong ones are other first defences. One is the job of red blood cells.",
+    why: "Phagocytosis, antibodies and antitoxins. Acid is the stomach and the hairs are in the nose: those are non specific defences. Carrying oxygen is what red blood cells do." },
+
+  { type: "mc", topic: "White blood cells",
+    q: "Antibodies are <b>specific</b>. What does that mean?",
+    options: [
+      "Each antibody fits the antigens on one particular kind of pathogen",
+      "Antibodies only work in one specific part of the body",
+      "One antibody can destroy every kind of pathogen",
+      "Antibodies are only made by specific people"
+    ],
+    answer: 0,
+    hint: "Think about the key and lock.",
+    why: "An antibody has a shape that fits one antigen. So the antibodies made against measles do nothing against a cold virus. That is why you need a different vaccine for each disease." },
+
+  /* ---------- VACCINATION ---------- */
+  { type: "learn", topic: "Vaccination",
+    title: "How vaccines work",
+    fig: FIG_GRAPH,
+    html: '<p>A vaccine contains a small amount of a <b>dead or inactive</b> form of a pathogen (or just part of it). It carries the pathogen\'s <b>antigens</b> but cannot make you ill.</p>' +
+          '<ul>' +
+          '<li>White blood cells respond by making the right <b>antibodies</b>, slowly, as in a first infection.</li>' +
+          '<li><b>Memory cells</b> stay in the blood afterwards.</li>' +
+          '<li>If the real pathogen arrives, the white blood cells make the right antibodies <b>much faster and in much larger amounts</b>. The pathogen is destroyed before you feel ill. You are <b>immune</b>.</li>' +
+          '</ul>' +
+          '<p>The graph shows this: the <b>secondary response</b> is faster and bigger than the primary one.</p>' +
+          '<p><b>Herd immunity</b>: if a large proportion of people are immune, the pathogen struggles to spread, which also protects people who are not vaccinated.</p>' +
+          '<div class="keep"><b>Keep this</b>A vaccine is a safe practice run, so the real thing gets a fast, big response.</div>' },
+
+  OUTBREAK,
+
+  { type: "num", topic: "Vaccination", stretch: true,
+    q: "Use the graph of antibody levels.",
+    fig: FIG_GRAPH,
+    boxes: [
+      { label: "(a) Highest antibody level after the first infection", a: 20, tol: 1, post: "units" },
+      { label: "(b) Highest antibody level after the second infection", a: 100, tol: 1, post: "units" },
+      { label: "(c) How many times higher is the second peak?", a: 5, tol: 0.05, post: "times" }
+    ],
+    hint: "Find the top of each hump and read across to the left hand axis. Then divide the bigger peak by the smaller one.",
+    why: "The first peak is 20 units, the second is 100 units. 100 &divide; 20 = 5, so the secondary response is 5 times higher. It also starts sooner and rises faster, reaching its peak about 6 days after the second infection instead of about 10." },
+
+  { type: "mc", topic: "Vaccination", stretch: true,
+    q: "Why is the response to the second infection so much faster?",
+    options: [
+      "Memory cells from the first infection recognise the antigen and quickly make lots of the right antibody",
+      "The pathogen is weaker the second time",
+      "Antibodies from the first infection stayed at a high level in the blood",
+      "The body makes antitoxins instead of antibodies the second time"
+    ],
+    answer: 0,
+    hint: "Look at the graph just before the second infection. Is the antibody level high?",
+    why: "Memory cells. The graph shows the antibody level had dropped low again before day 30, so it is not leftover antibodies that protect you. It is the memory cells, ready to make the right antibody fast." },
+
+  /* ---------- ANTIBIOTICS ---------- */
+  { type: "learn", topic: "Antibiotics",
+    title: "Antibiotics, painkillers and resistance",
+    fig: FIG_RES,
+    html: '<p><b>Antibiotics</b>, such as penicillin, <b>kill bacteria</b> inside the body. Different bacteria need different antibiotics.</p>' +
+          '<p><b>Antibiotics do not kill viruses.</b> They only work on bacteria. Drugs that kill viruses are hard to develop, because viruses live inside your own cells and a drug could damage those cells too.</p>' +
+          '<p><b>Painkillers</b>, such as paracetamol, treat <b>symptoms</b>, but they do not kill pathogens.</p>' +
+          '<p><b>Resistance</b>: bacteria can mutate. Sometimes a mutation means an antibiotic no longer kills that bacterium. When the antibiotic is used, the others die but the resistant ones survive and reproduce, so a resistant strain builds up. MRSA is one example.</p>' +
+          '<div class="keep"><b>Keep this</b>The antibiotic does not cause the mutation. The mutation happens by chance; the antibiotic just removes the competition.</div>' },
+
+  { type: "sort", topic: "Antibiotics",
+    q: "Antibiotic or painkiller?",
+    buckets: ["Antibiotics", "Painkillers"],
+    cards: [
+      ["Penicillin", 0],
+      ["Kill bacteria inside the body", 0],
+      ["A different type may be needed for different bacteria", 0],
+      ["Paracetamol", 1],
+      ["Ease symptoms but do not kill pathogens", 1],
+      ["Can help with the aches of a cold, but do not cure it", 1]
+    ],
+    hint: "Ask: does it kill anything, or does it just help you feel better?",
+    why: "Antibiotics kill bacteria. Painkillers make symptoms easier to live with while your immune system does the real work." },
+
+  { type: "mc", topic: "Antibiotics",
+    q: "Someone has a cold, which is caused by a virus. Why would antibiotics not help?",
+    options: [
+      "Antibiotics have no effect on viruses, only on bacteria",
+      "The cold virus has become resistant to antibiotics",
+      "Colds are too mild for antibiotics to work",
+      "Antibiotics only work on fungi"
+    ],
+    answer: 0,
+    hint: "What do antibiotics kill?",
+    why: "Antibiotics kill bacteria and do nothing to viruses. The resistance option is a common mix up: resistance is something bacteria develop. Using antibiotics for a cold can actually make resistance in bacteria more likely." },
+
+  { type: "order", topic: "Antibiotics", stretch: true,
+    q: "Put these in order to explain how a resistant strain of bacteria develops.",
+    items: [
+      "By chance, a mutation makes one bacterium resistant to an antibiotic",
+      "A person takes the antibiotic",
+      "The bacteria without the mutation are killed",
+      "The resistant bacterium survives and reproduces",
+      "Soon there is a large population of resistant bacteria, which can spread"
+    ],
+    hint: "The mutation is already there before the antibiotic arrives.",
+    why: "This is natural selection. The mutation comes first, by chance. The antibiotic then kills the others, the resistant ones survive and reproduce, and their offspring inherit the resistance." },
+
+  { type: "multi", topic: "Antibiotics",
+    q: "Which <b>three</b> help to slow down antibiotic resistance?",
+    options: [
+      "Doctors only prescribing antibiotics when they are really needed",
+      "Taking antibiotics for colds and flu, just in case",
+      "Patients finishing the course, as prescribed",
+      "Stopping the antibiotics as soon as you feel better",
+      "Limiting the use of antibiotics in farming",
+      "Saving leftover antibiotics for next time"
+    ],
+    answers: [0, 2, 4],
+    hint: "The aim is fewer antibiotics used, and no bacteria left alive to become resistant.",
+    why: "Less unnecessary use means fewer chances for resistant bacteria to be selected. Finishing the course, as the doctor says, means all the bacteria are killed, so none are left to mutate and form resistant strains. Farm animals are a big user of antibiotics too." },
+
+  /* ---------- NEW MEDICINES ---------- */
+  { type: "learn", topic: "New medicines",
+    title: "Testing a new drug",
+    fig: FIG_DRUG,
+    html: '<p>A new drug is tested for three things: <b>toxicity</b> (is it harmful?), <b>efficacy</b> (does it work?) and <b>dose</b> (how much?).</p>' +
+          '<ul>' +
+          '<li><b>Preclinical testing</b>: in a lab on <b>cells and tissues</b>, then on <b>live animals</b>.</li>' +
+          '<li><b>Clinical trials</b>: first on <b>healthy volunteers</b> at a <b>very low dose</b>, to check it is safe. Then on <b>patients</b> with the illness, to find the best dose.</li>' +
+          '<li>Some patients get a <b>placebo</b>: something that looks the same but has no drug in it. Comparing the two groups shows whether the drug really works.</li>' +
+          '<li><b>Double blind</b>: neither the patients nor the doctors know who has the drug and who has the placebo.</li>' +
+          '<li>The results are <b>peer reviewed</b> by other scientists before being published.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Cells, animals, healthy people, patients. Safety first, then does it work, then how much.</div>' },
+
+  { type: "order", topic: "New medicines", stretch: true,
+    q: "Put the stages of testing a new drug in order.",
+    items: [
+      "Tested on cells and tissues in a lab",
+      "Tested on live animals",
+      "Tested on a small number of healthy volunteers at a very low dose",
+      "Tested on patients with the illness, to find the best dose",
+      "Results peer reviewed, then the drug can be licensed"
+    ],
+    hint: "The tests get closer and closer to the real patients who need it.",
+    why: "Each stage only happens if the one before shows the drug is safe enough. Healthy volunteers come before patients, and at a low dose, because the main question at that stage is safety." },
+
+  { type: "mc", topic: "New medicines",
+    q: "What is a <b>double blind</b> trial?",
+    options: [
+      "The patients do not know whether they have the drug, but the doctors do",
+      "Neither the patients nor the doctors know who has the drug and who has the placebo",
+      "Every patient gets the drug twice",
+      "The drug is tested on animals and people at the same time"
+    ],
+    answer: 1,
+    hint: "Double means two groups of people are kept in the dark.",
+    why: "Both the patients and the doctors are kept unaware. If doctors knew, they might treat people differently or read the results hopefully, without meaning to. The first option is a single blind trial." },
+
+  /* ---------- YOUR TURN ---------- */
+  { type: "write", topic: "Your explanation",
+    q: '<p><b>Explain how a vaccine protects a person from measles, and why vaccinating most people also protects people who have not been vaccinated.</b> (about 6 marks)</p><p>This one is not marked here. It goes to Jay if you choose to send it.</p>',
+    starters: [
+      "The vaccine contains a dead or inactive form of",
+      "White blood cells respond by",
+      "Memory cells",
+      "If the real measles virus enters the body,",
+      "so the person does not become ill.",
+      "If most people are vaccinated,",
+      "This is called herd immunity."
+    ],
+    checklist: [
+      "I said what is in the vaccine (dead or inactive pathogen, with its antigens)",
+      "I said white blood cells make antibodies",
+      "I mentioned memory cells and a faster, bigger response next time",
+      "I explained that the virus cannot spread easily if most people are immune",
+      "Stretch: I said who herd immunity helps, for example babies too young to be vaccinated"
+    ],
+    minWords: 80 }
+  ]
+});
+})();
+</script>
+</body>
+</html>

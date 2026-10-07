@@ -1,0 +1,944 @@
+/* ==========================================================
+   EGW's GCSE HQ - activity engine
+   Every activity page in /egw/ hands this a list of steps and
+   the engine does the rest: one step at a time, two tries with
+   a nudge in between, a worked answer if it is still not there,
+   autosave, a "how it went" page, and send to Jay.
+
+   Use:
+     EGW.run({
+       id: "maths-money",            // storage key b5.egw.<id>.v1
+       title: "Money maths",
+       subject: "Maths",
+       blurb: "One line for the start card",
+       mins: 40,                     // rough time, shown on start card
+       steps: [ ...see below... ]
+     });
+
+   Step types (all take topic, and optional stretch:true):
+     learn  {title, html, fig}                     unscored explainer
+     mc     {q, fig, options:[], answer:i, hint, why}
+     multi  {q, fig, options:[], answers:[i,j], hint, why}
+     num    {q, fig, boxes:[{label, a, tol, pre, post, alts}], hint, why}
+     text   {q, fig, need:[[any of these],[and any of these]], model, hint, why}
+     sort   {q, buckets:[], cards:[[text, bucketIndex]], hint, why}
+     order  {q, items:[in the right order], hint, why}
+     match  {q, pairs:[[left, right]], hint, why}
+     write  {q, fig, starters:[], checklist:[], minWords}  sent to Jay, unmarked
+     widget {title, html, mount:function(el, api)}  custom interactive
+            api.data   object saved with the page
+            api.save() save api.data
+            api.done(result)  result: "right1" | "right2" | "shown" | "done"
+   ========================================================== */
+
+var EGW = (function(){
+"use strict";
+
+var PREFIX = "b5.egw.";
+var cfg, steps, state, key;
+
+/* ---------- small helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function h(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function stripTags(s){
+  var d = document.createElement("div");
+  d.innerHTML = String(s);
+  return (d.textContent || "").replace(/\s+/g, " ").trim();
+}
+function norm(s){
+  return String(s).toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[^a-z0-9.'\/ ]/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+
+/* Numbers: accepts 1,250  1250  12.5%  3/4  2 1/2  -4  .5 and a pound sign */
+function parseNum(s){
+  s = String(s).trim().replace(/[\u00a3$,%]/g, "").replace(/\s+/g, " ");
+  s = s.replace(/^[a-z]\s*=\s*/i, "").replace(/\s*[a-z\u00b0\u00b2\u00b3]+$/i, "").trim();
+  var mixed = s.match(/^(-?\d+)\s+(\d+)\/(\d+)$/);
+  if(mixed){
+    var w = parseFloat(mixed[1]), f = parseFloat(mixed[2]) / parseFloat(mixed[3]);
+    return w < 0 ? w - f : w + f;
+  }
+  var frac = s.match(/^(-?\d*\.?\d+)\/(\d*\.?\d+)$/);
+  if(frac) return parseFloat(frac[1]) / parseFloat(frac[2]);
+  if(/^-?\d*\.?\d+$/.test(s)) return parseFloat(s);
+  return NaN;
+}
+
+var GOOD = ["Spot on.", "Yes, that is it.", "Nailed it.", "Exactly right.", "That is the one.", "Yep, you have got it."];
+var NUDGE = ["Not quite yet.", "Close, but not there yet.", "Nearly. Have another look."];
+
+/* ---------- storage ---------- */
+function load(){
+  try{
+    var r = localStorage.getItem(key);
+    if(r){ var d = JSON.parse(r); if(d && d.answers) return d; }
+  }catch(e){}
+  return null;
+}
+function fresh(){
+  return { pos: 0, answers: {}, widgets: {}, started: new Date().toISOString() };
+}
+function save(){
+  state.summary = summary();
+  state.updated = new Date().toISOString();
+  try{ localStorage.setItem(key, JSON.stringify(state)); }catch(e){}
+}
+
+function scored(s){ return ["learn", "write"].indexOf(s.type) < 0 && !(s.type === "widget" && s.unscored); }
+
+/* Sparks: everything you do earns some. Learning from Show me still counts. */
+var SPARK = { right1: 10, right2: 6, shown: 3, done: 8 };
+
+function summary(){
+  var total = 0, marked = 0, got1 = 0, got2 = 0, shown = 0, done = 0, skipped = 0, sparks = 0;
+  steps.forEach(function(s, i){
+    var a = state.answers[i];
+    if(s.type === "learn") return;
+    total++;
+    if(scored(s)) marked++;
+    if(!a) return;
+    sparks += SPARK[a.status] || 0;
+    if(a.status === "right1"){ got1++; done++; }
+    else if(a.status === "right2"){ got2++; done++; }
+    else if(a.status === "shown"){ shown++; done++; }
+    else if(a.status === "done"){ done++; }
+    else if(a.status === "skipped"){ skipped++; }
+  });
+  var ch = chunks.map(function(c){ return chunkState(c); });
+  return { total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
+           sparks: sparks, best: state.best || 0,
+           chunkStates: ch, chunkNames: chunks.map(function(c){ return stripTags(c.topic); }),
+           chunks: ch.length, chunksDone: ch.filter(function(x){ return x === "done"; }).length,
+           finished: !!state.finished, title: cfg.title };
+}
+
+/* ---------- chunks ----------
+   A chunk is a run of steps that share a topic. Each one is a
+   small sitting: a learn card or two and a few questions. */
+var chunks = [], chunkOf = [];
+function makeChunks(){
+  chunks = []; chunkOf = [];
+  steps.forEach(function(s, i){
+    var last = chunks[chunks.length - 1];
+    if(!last || last.topic !== s.topic){
+      last = { topic: s.topic, from: i, to: i };
+      chunks.push(last);
+    }
+    last.to = i;
+    chunkOf[i] = chunks.length - 1;
+  });
+}
+function chunkState(c){
+  var any = false, all = true, hasQ = false;
+  for(var i = c.from; i <= c.to; i++){
+    if(steps[i].type === "learn"){ if(state.answers[i]) any = true; continue; }
+    hasQ = true;
+    var a = state.answers[i];
+    if(a) any = true;
+    if(!a || !(resolved(i) || a.status === "skipped")) all = false;
+  }
+  if(!hasQ) return any ? "done" : "new";
+  return all && any ? "done" : any ? "started" : "new";
+}
+function chunkQs(c){
+  var n = 0;
+  for(var i = c.from; i <= c.to; i++) if(steps[i].type !== "learn") n++;
+  return n;
+}
+
+/* ---------- page scaffold ---------- */
+function build(){
+  var root = $("egwApp");
+  root.innerHTML =
+    '<div class="board">' +
+      '<div class="card w12" id="startCard">' +
+        '<span class="kicker">' + cfg.subject + (cfg.mins ? ' &middot; about ' + cfg.mins + ' minutes in all' : '') + '</span>' +
+        '<h3>Learn a bit, try a bit</h3>' +
+        '<p class="lead">' + cfg.blurb + '</p>' +
+        '<ul class="howlist">' +
+          '<li><b>' + chunks.length + ' chunks.</b> Do one, do them all, any order. It saves as you go.</li>' +
+          '<li><b>Two goes</b> at each question, with a nudge in between. <b>Show me</b> is always there too.</li>' +
+          '<li><b>Sparks</b> for everything you try, and a streak for first go answers. <span class="stretch">Stretch</span> questions are a step harder; skip them if you like.</li>' +
+        '</ul>' +
+        '<div class="qnav" style="margin-top:4px">' +
+          '<button class="btn" id="beginBtn">Start chunk 1</button>' +
+          '<button class="btn btn-quiet hidden" id="resumeBtn">Carry on where I left off</button>' +
+        '</div>' +
+        '<p class="chiplabel">Or pick a chunk</p>' +
+        '<div class="chunkmap" id="chunkMap"></div>' +
+        '<p class="tiny" id="startStats"></p>' +
+      '</div>' +
+      '<div class="card w12 hidden" id="qCard">' +
+        '<div class="qtop">' +
+          '<span class="chunklabel" id="chunkLabel"></span>' +
+          '<span class="chips"><span class="chipstat" id="streakChip"></span><span class="chipstat" id="sparkChip"></span></span>' +
+        '</div>' +
+        '<div class="dots" id="dots"></div>' +
+        '<div class="qprogress"><span id="progFill"></span></div>' +
+        '<div class="qtop" style="margin-bottom:6px"><span class="kicker" id="qTopic" style="margin:0"></span><span class="qcount" id="qCount"></span></div>' +
+        '<div id="qBody"></div>' +
+        '<div class="fb hidden" id="qFb" aria-live="polite"></div>' +
+        '<div class="qnav">' +
+          '<button class="btn btn-quiet" id="backBtn">Back</button>' +
+          '<button class="btn btn-quiet" id="skipBtn">Skip for now</button>' +
+          '<button class="btn btn-quiet hidden" id="showBtn">Show me</button>' +
+          '<button class="btn" id="checkBtn">Check</button>' +
+          '<button class="btn btn-orange hidden" id="nextBtn">Next</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card w12 hidden" id="chunkCard">' +
+        '<div class="stampwrap">' +
+          '<div class="stamp" id="stampNum"></div>' +
+          '<h3 id="chunkDoneH"></h3>' +
+          '<p id="chunkDoneP"></p>' +
+        '</div>' +
+        '<div class="tally" id="chunkTally"></div>' +
+        '<div class="qnav" style="justify-content:center">' +
+          '<button class="btn" id="nextChunkBtn"></button>' +
+          '<button class="btn btn-quiet" id="breakBtn">Stop here for now</button>' +
+        '</div>' +
+        '<p class="tiny" style="text-align:center;margin-top:12px">Stopping is completely fine. Everything is saved on this device.</p>' +
+      '</div>' +
+      '<div class="card w12 hidden" id="resultCard">' +
+        '<span class="kicker">How it went</span>' +
+        '<h3 id="scoreLine"></h3>' +
+        '<p class="lead" id="scoreNote"></p>' +
+        '<div class="tally" id="tally"></div>' +
+        '<div class="topicbar" id="topicBars"></div>' +
+        '<details class="review"><summary>See each question</summary><div id="reviewList"></div></details>' +
+        '<div class="qnav" style="margin-top:18px">' +
+          '<button class="btn btn-quiet" id="againBtn">Back to the chunks</button>' +
+          '<button class="btn btn-quiet" id="freshBtn">Start fresh</button>' +
+          '<a class="btn" href="/egw/">Back to GCSE HQ</a>' +
+        '</div>' +
+        '<div id="sendHost"></div>' +
+      '</div>' +
+    '</div>';
+
+  $("beginBtn").onclick = function(){
+    if(state.answers && Object.keys(state.answers).length){
+      if(!confirm("Start again from the beginning? Your answers and sparks on this activity will be cleared.")) return;
+      state = fresh(); save();
+    }
+    go(0);
+  };
+  $("resumeBtn").onclick = function(){ go(Math.min(state.pos || 0, steps.length - 1)); };
+  $("backBtn").onclick = function(){ if(state.pos > 0) go(state.pos - 1); else showStart(); };
+  $("skipBtn").onclick = function(){
+    var s = steps[state.pos];
+    if(s.type !== "learn" && !resolved(state.pos)){
+      state.answers[state.pos] = { status: "skipped" };
+      state.streak = 0;
+      save();
+    }
+    advance();
+  };
+  $("nextBtn").onclick = advance;
+  $("checkBtn").onclick = function(){ check(false); };
+  $("showBtn").onclick = function(){ check(true); };
+  $("againBtn").onclick = showStart;
+  $("breakBtn").onclick = showStart;
+  $("freshBtn").onclick = function(){
+    if(!confirm("Clear everything on this activity and start fresh?")) return;
+    state = fresh(); save(); showStart();
+  };
+
+  if(window.Base5Send){
+    Base5Send.mount($("sendHost"), {
+      tool: "GCSE HQ: " + cfg.title,
+      filename: "egw-" + cfg.id,
+      getText: reportText
+    });
+  }
+}
+
+function drawChunkMap(){
+  var map = $("chunkMap");
+  map.innerHTML = "";
+  chunks.forEach(function(c, k){
+    var st = chunkState(c);
+    var b = h("button", "chunk " + st);
+    b.type = "button";
+    var n = chunkQs(c);
+    b.innerHTML = '<span class="cn"><span>' + (k + 1) + '</span></span><span><b>' + c.topic + '</b><small>' +
+      (n ? n + " question" + (n === 1 ? "" : "s") : "a quick read") + " &middot; " +
+      ({ "new": "not started", started: "started", done: "done" })[st] + '</small></span>';
+    b.onclick = function(){ go(c.from); };
+    map.appendChild(b);
+  });
+}
+
+function showOnly(id){
+  ["startCard", "qCard", "chunkCard", "resultCard"].forEach(function(x){
+    $(x).classList.toggle("hidden", x !== id);
+  });
+  window.scrollTo(0, 0);
+}
+
+function showStart(){
+  showOnly("startCard");
+  var any = !!(state.answers && Object.keys(state.answers).length);
+  $("resumeBtn").classList.toggle("hidden", !any);
+  $("beginBtn").textContent = any ? "Start again from scratch" : "Start chunk 1";
+  $("beginBtn").className = any ? "btn btn-quiet" : "btn";
+  $("resumeBtn").className = any ? "btn" : "btn btn-quiet hidden";
+  drawChunkMap();
+  var sm = summary();
+  $("startStats").innerHTML = any ? sm.chunksDone + " of " + sm.chunks + " chunks done &middot; " + sm.sparks + " sparks &middot; best streak " + sm.best : "";
+}
+
+function resolved(i){
+  var a = state.answers[i];
+  return !!(a && ["right1", "right2", "shown", "done"].indexOf(a.status) >= 0);
+}
+
+function advance(){
+  var i = state.pos;
+  if(i >= steps.length - 1){ finish(); return; }
+  if(chunkOf[i + 1] !== chunkOf[i] && steps[i].type !== "learn"){ chunkDone(chunkOf[i]); return; }
+  go(i + 1);
+}
+
+/* ---------- the little celebration between chunks ---------- */
+var CHEERS = ["Chunk done.", "That is one more in the bag.", "Done and dusted.", "Look at that.", "Another one sorted."];
+function chunkDone(k){
+  var c = chunks[k];
+  var g1 = 0, g2 = 0, sh = 0, sk = 0, sp = 0;
+  for(var i = c.from; i <= c.to; i++){
+    var a = state.answers[i];
+    if(!a || steps[i].type === "learn") continue;
+    sp += SPARK[a.status] || 0;
+    if(a.status === "right1") g1++;
+    else if(a.status === "right2") g2++;
+    else if(a.status === "shown") sh++;
+    else if(a.status === "skipped") sk++;
+  }
+  showOnly("chunkCard");
+  $("stampNum").textContent = String(k + 1);
+  $("chunkDoneH").textContent = pick(CHEERS);
+  $("chunkDoneP").textContent = "Chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic) + ". " +
+    (sk ? "You skipped " + sk + "; they will be there whenever you fancy them." : "Nothing skipped.");
+  $("chunkTally").innerHTML = '<div class="tbox big"><b>+' + sp + '</b><span>sparks</span></div>' +
+    tallyBox(g1, "first go") + tallyBox(g2, "second go") + tallyBox(sh, "learnt from Show me");
+  var nk = k + 1;
+  $("nextChunkBtn").textContent = "Next: " + stripTags(chunks[nk].topic);
+  $("nextChunkBtn").onclick = function(){ go(chunks[nk].from); };
+  confetti($("stampNum"), 26);
+  state.pos = chunks[nk].from; save();
+}
+
+function confetti(from, n){
+  try{
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var r = from.getBoundingClientRect();
+    var cols = ["#3a5cff", "#ff5d5d", "#ffd23f", "#19c39a", "#8a5cf6", "#22b8e6"];
+    for(var k = 0; k < (n || 16); k++){
+      var b = document.createElement("i");
+      b.className = "bit";
+      b.style.left = (r.left + r.width / 2) + "px";
+      b.style.top = (r.top + r.height / 2) + "px";
+      b.style.background = cols[k % cols.length];
+      var ang = Math.random() * Math.PI * 2, dist = 70 + Math.random() * 130;
+      b.style.setProperty("--dx", Math.round(Math.cos(ang) * dist) + "px");
+      b.style.setProperty("--dy", Math.round(Math.sin(ang) * dist + 90) + "px");
+      b.style.setProperty("--rot", Math.round(Math.random() * 720 - 360) + "deg");
+      document.body.appendChild(b);
+      setTimeout((function(el){ return function(){ el.remove(); }; })(b), 1100);
+    }
+  }catch(e){}
+}
+
+/* ---------- render one step ---------- */
+var cur = null;   // live handle for the current step: {get:fn, mark:fn}
+
+function drawChips(){
+  var st = state.streak || 0;
+  var sc = $("streakChip");
+  sc.innerHTML = '<span class="ico">&#9889;</span>Streak ' + st;
+  sc.classList.toggle("hot", st >= 3);
+  $("sparkChip").innerHTML = '<span class="ico">&#10022;</span>' + summary().sparks + ' sparks';
+}
+
+function go(i){
+  state.pos = i; save();
+  showOnly("qCard");
+
+  var s = steps[i];
+  var k = chunkOf[i], c = chunks[k];
+  $("chunkLabel").innerHTML = "Chunk " + (k + 1) + " <span>of " + chunks.length + "</span>";
+  var dots = "";
+  for(var j = c.from; j <= c.to; j++) dots += '<i class="' + (j < i ? "past" : j === i ? "now" : "") + '"></i>';
+  $("dots").innerHTML = dots;
+  drawChips();
+  $("qTopic").innerHTML = s.topic + (s.stretch ? ' <span class="stretch">Stretch</span>' : "");
+  var qs = 0, me = 0;
+  for(var m = c.from; m <= c.to; m++){ if(steps[m].type !== "learn"){ qs++; if(m <= i) me++; } }
+  $("qCount").textContent = s.type === "learn" ? "Learn card" : "Question " + me + " of " + qs;
+
+  var body = $("qBody");
+  body.innerHTML = "";
+  var fb = $("qFb");
+  fb.className = "fb hidden"; fb.innerHTML = "";
+
+  cur = null;
+  var renderer = R[s.type];
+  renderer(s, body, i);
+
+  var a = state.answers[i];
+  setButtons(s, i);
+  if(a && resolved(i) && s.type !== "learn" && s.type !== "write" && s.type !== "widget"){
+    showFeedback(s, a.status, true);
+    if(cur && cur.restore) cur.restore(a.value, true);
+  }else if(a && a.value !== undefined && cur && cur.restore){
+    cur.restore(a.value, false);
+  }
+}
+
+function setButtons(s, i){
+  var done = resolved(i);
+  var learn = s.type === "learn";
+  var write = s.type === "write";
+  var widget = s.type === "widget";
+  var tried = !!(state.answers[i] && state.answers[i].tries);
+  $("checkBtn").classList.toggle("hidden", !!(learn || write || widget || done));
+  $("showBtn").classList.toggle("hidden", !!(learn || write || widget || done || !tried));
+  $("nextBtn").classList.toggle("hidden", !(learn || done || write));
+  $("skipBtn").classList.toggle("hidden", !!(learn || done));
+  var lastInChunk = i === steps.length - 1 || chunkOf[i + 1] !== chunkOf[i];
+  $("nextBtn").textContent = learn ? "Got it, next" : (i === steps.length - 1 ? "Finish" : lastInChunk ? "Finish this chunk" : "Next");
+  if(write) $("skipBtn").classList.add("hidden");
+}
+
+function fig(s){ return s.fig ? '<div class="fig">' + s.fig + '</div>' : ""; }
+function prompt(s){ return '<div class="prompt">' + s.q + '</div>' + fig(s); }
+
+var R = {};
+
+R.learn = function(s, body){
+  body.innerHTML = '<h3 class="learnh">' + s.title + '</h3>' +
+    (s.fig ? '<div class="fig">' + s.fig + '</div>' : "") +
+    '<div class="learnbody">' + s.html + '</div>';
+  state.answers[state.pos] = { status: "done" }; save();
+};
+
+R.mc = function(s, body){
+  body.innerHTML = prompt(s);
+  var box = h("div", "choices");
+  var picked = -1;
+  s.options.forEach(function(o, k){
+    var b = h("button", "", o); b.type = "button";
+    b.onclick = function(){
+      if(resolved(state.pos)) return;
+      picked = k;
+      [].forEach.call(box.children, function(c, n){ c.classList.toggle("picked", n === k); });
+    };
+    box.appendChild(b);
+  });
+  body.appendChild(box);
+  cur = {
+    get: function(){ return picked; },
+    empty: function(){ return picked < 0; },
+    right: function(){ return picked === s.answer; },
+    mark: function(final){
+      [].forEach.call(box.children, function(c, n){
+        c.classList.remove("ok", "no");
+        if(n === picked && picked !== s.answer) c.classList.add("no");
+        if(final && n === s.answer) c.classList.add("ok");
+        if(!final && n === picked && picked === s.answer) c.classList.add("ok");
+      });
+    },
+    restore: function(v, fin){ picked = v; if(v >= 0 && box.children[v]) box.children[v].classList.add("picked"); if(fin) this.mark(true); }
+  };
+};
+
+R.multi = function(s, body){
+  body.innerHTML = prompt(s) + '<p class="tiny">Pick ' + s.answers.length + '.</p>';
+  var box = h("div", "choices");
+  var on = {};
+  s.options.forEach(function(o, k){
+    var b = h("button", "", o); b.type = "button";
+    b.onclick = function(){
+      if(resolved(state.pos)) return;
+      on[k] = !on[k]; b.classList.toggle("picked", !!on[k]);
+    };
+    box.appendChild(b);
+  });
+  body.appendChild(box);
+  function list(){ return Object.keys(on).filter(function(k){ return on[k]; }).map(Number).sort(); }
+  cur = {
+    get: list,
+    empty: function(){ return list().length === 0; },
+    right: function(){ return list().join() === s.answers.slice().sort().join(); },
+    mark: function(final){
+      [].forEach.call(box.children, function(c, n){
+        c.classList.remove("ok", "no");
+        var should = s.answers.indexOf(n) >= 0;
+        if(on[n] && !should) c.classList.add("no");
+        if(on[n] && should) c.classList.add("ok");
+        if(final && should) c.classList.add("ok");
+      });
+    },
+    restore: function(v, fin){ (v || []).forEach(function(k){ on[k] = true; box.children[k].classList.add("picked"); }); if(fin) this.mark(true); }
+  };
+};
+
+R.num = function(s, body){
+  body.innerHTML = prompt(s);
+  var wrap = h("div", "numboxes");
+  var ins = [];
+  s.boxes.forEach(function(bx){
+    var row = h("label", "numrow");
+    row.innerHTML = (bx.label ? '<span class="nlab">' + bx.label + '</span>' : "") +
+      (bx.pre ? '<span class="aff">' + bx.pre + '</span>' : "");
+    var inp = h("input"); inp.type = "text"; inp.inputMode = "decimal"; inp.autocomplete = "off";
+    inp.setAttribute("aria-label", bx.label ? stripTags(bx.label) : "Your answer");
+    inp.addEventListener("keydown", function(e){ if(e.key === "Enter") $("checkBtn").click(); });
+    row.appendChild(inp);
+    if(bx.post) row.appendChild(h("span", "aff", bx.post));
+    wrap.appendChild(row); ins.push(inp);
+  });
+  body.appendChild(wrap);
+  var work = h("details", "working");
+  work.innerHTML = '<summary>Working space (optional)</summary><textarea rows="3" aria-label="Working"></textarea>';
+  body.appendChild(work);
+  var wta = work.querySelector("textarea");
+  function okBox(k){
+    var bx = s.boxes[k], v = parseNum(ins[k].value);
+    if(isNaN(v)) return false;
+    var tol = bx.tol !== undefined ? bx.tol : 0.0001;
+    var targets = [bx.a].concat(bx.alts || []);
+    return targets.some(function(t){ return Math.abs(v - t) <= tol; });
+  }
+  cur = {
+    get: function(){ return { v: ins.map(function(x){ return x.value; }), w: wta.value }; },
+    empty: function(){ return ins.some(function(x){ return !x.value.trim(); }); },
+    right: function(){ return ins.every(function(x, k){ return okBox(k); }); },
+    mark: function(final){
+      ins.forEach(function(x, k){
+        var ok = okBox(k);
+        x.classList.toggle("ok", !!ok); x.classList.toggle("no", !ok);
+        if(final && !ok){ x.value = String(s.boxes[k].show || s.boxes[k].a); x.classList.remove("no"); x.classList.add("given"); }
+      });
+    },
+    restore: function(v, fin){
+      if(!v) return;
+      (v.v || []).forEach(function(t, k){ if(ins[k]) ins[k].value = t; });
+      wta.value = v.w || ""; if(v.w) work.open = true;
+      if(fin) this.mark(true);
+    }
+  };
+};
+
+R.text = function(s, body){
+  body.innerHTML = prompt(s);
+  var ta = h("textarea", "shortans"); ta.rows = 2; ta.setAttribute("aria-label", "Your answer");
+  body.appendChild(ta);
+  function hit(){
+    var t = " " + norm(ta.value) + " ";
+    return s.need.every(function(group){
+      /* match from the start of a word, so "all" does not hit "really" */
+      return group.some(function(w){ return t.indexOf(" " + norm(w)) >= 0; });
+    });
+  }
+  cur = {
+    get: function(){ return ta.value; },
+    empty: function(){ return !ta.value.trim(); },
+    right: hit,
+    mark: function(final){ ta.classList.toggle("ok", !!hit()); ta.classList.toggle("no", !hit() && !final); },
+    restore: function(v){ ta.value = v || ""; }
+  };
+};
+
+R.sort = function(s, body){
+  body.innerHTML = prompt(s) + '<p class="tiny">Tap a card, then tap the box it belongs in. Tap a placed card to take it back out.</p>';
+  var pool = h("div", "pool");
+  var bins = h("div", "bins");
+  var place = {}; // card index -> bucket index
+  var sel = -1;
+  var cardEls = [];
+  var binEls = s.buckets.map(function(name, b){
+    var bin = h("div", "bin");
+    bin.innerHTML = '<div class="binname">' + name + '</div><div class="binbody"></div>';
+    bin.onclick = function(e){
+      if(resolved(state.pos)) return;
+      if(e.target.closest(".scard")) return;
+      if(sel >= 0){ place[sel] = b; sel = -1; draw(); }
+    };
+    bins.appendChild(bin);
+    return bin;
+  });
+  var order = s.cards.map(function(c, k){ return k; });
+  if(!s.keepOrder) order.sort(function(){ return Math.random() - 0.5; });
+  order.forEach(function(k){
+    var c = s.cards[k];
+    var el = h("button", "scard", c[0]); el.type = "button";
+    el.onclick = function(){
+      if(resolved(state.pos)) return;
+      if(place[k] !== undefined){ delete place[k]; sel = -1; }
+      else sel = sel === k ? -1 : k;
+      draw();
+    };
+    cardEls[k] = el;
+  });
+  function draw(){
+    order.forEach(function(k){
+      var el = cardEls[k];
+      el.classList.toggle("sel", sel === k);
+      var target = place[k] === undefined ? pool : binEls[place[k]].querySelector(".binbody");
+      if(el.parentNode !== target) target.appendChild(el);
+    });
+    pool.classList.toggle("emptypool", Object.keys(place).length === s.cards.length);
+  }
+  body.appendChild(pool); body.appendChild(bins);
+  draw();
+  cur = {
+    get: function(){ return JSON.parse(JSON.stringify(place)); },
+    empty: function(){ return Object.keys(place).length < s.cards.length; },
+    emptyMsg: "Pop every card into a box first.",
+    right: function(){ return s.cards.every(function(c, k){ return place[k] === c[1]; }); },
+    mark: function(final){
+      s.cards.forEach(function(c, k){
+        var el = cardEls[k];
+        el.classList.remove("ok", "no");
+        if(final){ place[k] = c[1]; el.classList.add("ok"); }
+        else el.classList.add(place[k] === c[1] ? "ok" : "no");
+      });
+      if(final) draw();
+    },
+    restore: function(v, fin){ if(v){ place = v; draw(); } if(fin) this.mark(true); }
+  };
+};
+
+R.order = function(s, body){
+  body.innerHTML = prompt(s) + '<p class="tiny">Use the arrows to move things up and down until they are in order.</p>';
+  var list = h("ol", "orderlist");
+  var now = s.items.map(function(t, k){ return k; });
+  var tries = 0;
+  do { now.sort(function(){ return Math.random() - 0.5; }); tries++; }
+  while(now.join() === s.items.map(function(t, k){ return k; }).join() && tries < 20);
+  function draw(marks){
+    list.innerHTML = "";
+    now.forEach(function(k, pos){
+      var li = h("li", marks ? (marks[pos] ? "ok" : "no") : "");
+      li.innerHTML = '<span class="otext">' + s.items[k] + '</span>';
+      var up = h("button", "obtn", "&uarr;"); up.type = "button"; up.setAttribute("aria-label", "Move up");
+      var dn = h("button", "obtn", "&darr;"); dn.type = "button"; dn.setAttribute("aria-label", "Move down");
+      up.disabled = pos === 0; dn.disabled = pos === now.length - 1;
+      up.onclick = function(){ if(resolved(state.pos)) return; var t = now[pos - 1]; now[pos - 1] = now[pos]; now[pos] = t; draw(); };
+      dn.onclick = function(){ if(resolved(state.pos)) return; var t = now[pos + 1]; now[pos + 1] = now[pos]; now[pos] = t; draw(); };
+      li.appendChild(up); li.appendChild(dn);
+      list.appendChild(li);
+    });
+  }
+  draw();
+  body.appendChild(list);
+  cur = {
+    get: function(){ return now.slice(); },
+    empty: function(){ return false; },
+    right: function(){ return now.every(function(k, p){ return k === p; }); },
+    mark: function(final){
+      if(final){ now = s.items.map(function(t, k){ return k; }); draw(now.map(function(){ return true; })); }
+      else draw(now.map(function(k, p){ return k === p; }));
+    },
+    restore: function(v, fin){ if(v && v.length === now.length) now = v; draw(); if(fin) this.mark(true); }
+  };
+};
+
+R.match = function(s, body){
+  body.innerHTML = prompt(s);
+  var rights = s.pairs.map(function(p){ return p[1]; });
+  var opts = rights.slice().sort();
+  var grid = h("div", "matchgrid");
+  var sels = s.pairs.map(function(p){
+    var row = h("div", "mrow");
+    row.innerHTML = '<div class="mleft">' + p[0] + '</div>';
+    var se = h("select");
+    se.innerHTML = '<option value="">Choose...</option>' + opts.map(function(o){
+      return '<option value="' + stripTags(o).replace(/"/g, "&quot;") + '">' + stripTags(o) + '</option>';
+    }).join("");
+    row.appendChild(se); grid.appendChild(row);
+    return se;
+  });
+  body.appendChild(grid);
+  cur = {
+    get: function(){ return sels.map(function(x){ return x.value; }); },
+    empty: function(){ return sels.some(function(x){ return !x.value; }); },
+    right: function(){ return sels.every(function(x, k){ return x.value === stripTags(rights[k]); }); },
+    mark: function(final){
+      sels.forEach(function(x, k){
+        var ok = x.value === stripTags(rights[k]);
+        if(final && !ok){ x.value = stripTags(rights[k]); ok = true; }
+        x.classList.toggle("ok", !!ok); x.classList.toggle("no", !ok);
+      });
+    },
+    restore: function(v, fin){ (v || []).forEach(function(t, k){ if(sels[k]) sels[k].value = t; }); if(fin) this.mark(true); }
+  };
+};
+
+R.write = function(s, body, i){
+  body.innerHTML = prompt(s);
+  if(s.starters && s.starters.length){
+    body.appendChild(h("p", "tiny", "Stuck? Tap a starter to drop it in."));
+    var chips = h("div", "starters");
+    s.starters.forEach(function(t){
+      var b = h("button", "", t); b.type = "button";
+      b.onclick = function(){
+        var was = ta.value;
+        ta.value = was + (was && !/\s$/.test(was) ? " " : "") + t + " ";
+        ta.focus(); keep();
+      };
+      chips.appendChild(b);
+    });
+    body.appendChild(chips);
+  }
+  var ta = h("textarea", "writebox"); ta.rows = 9; ta.setAttribute("aria-label", "Your writing");
+  body.appendChild(ta);
+  var wc = h("p", "tiny wc");
+  body.appendChild(wc);
+  var ticks = [];
+  if(s.checklist && s.checklist.length){
+    body.appendChild(h("p", "chiplabel", "Check it over"));
+    var cl = h("div", "checklist");
+    s.checklist.forEach(function(t, k){
+      var lab = h("label", "");
+      var cb = h("input"); cb.type = "checkbox";
+      cb.onchange = keep;
+      lab.appendChild(cb); lab.appendChild(h("span", "", t));
+      cl.appendChild(lab); ticks.push(cb);
+    });
+    body.appendChild(cl);
+  }
+  var prev = state.answers[i] || {};
+  if(prev.value){ ta.value = prev.value.text || ""; (prev.value.ticks || []).forEach(function(v, k){ if(ticks[k]) ticks[k].checked = v; }); }
+  function words(){ var m = ta.value.trim().match(/\S+/g); return m ? m.length : 0; }
+  function keep(){
+    var n = words();
+    wc.textContent = n + " word" + (n === 1 ? "" : "s") + (s.minWords ? " (aim for about " + s.minWords + ")" : "") + ". Saves as you type.";
+    state.answers[i] = { status: n > 0 ? "done" : "skipped", value: { text: ta.value, ticks: ticks.map(function(t){ return t.checked; }) } };
+    save();
+  }
+  ta.addEventListener("input", keep);
+  keep();
+  if(!ta.value) delete state.answers[i];
+};
+
+R.widget = function(s, body, i){
+  body.innerHTML = (s.title ? '<h3 class="learnh">' + s.title + '</h3>' : "") + (s.html ? '<div class="prompt">' + s.html + '</div>' : "");
+  var host = h("div", "widget");
+  body.appendChild(host);
+  if(!state.widgets[i]) state.widgets[i] = {};
+  var api = {
+    data: state.widgets[i],
+    save: save,
+    done: function(result){
+      var prev = state.answers[i];
+      var first = !(prev && resolved(i));
+      if(!(prev && resolved(i) && rank(prev.status) >= rank(result))) state.answers[i] = { status: result || "done" };
+      if(first) bump(result || "done", host);
+      save();
+      setButtons(s, i);
+      drawChips();
+    },
+    resolved: function(){ return resolved(i); }
+  };
+  s.mount(host, api);
+};
+
+function rank(st){ return { right1: 4, right2: 3, done: 2, shown: 1 }[st] || 0; }
+
+/* ---------- checking ---------- */
+function check(giveUp){
+  var i = state.pos, s = steps[i];
+  if(!cur) return;
+  var a = state.answers[i] || { tries: 0 };
+  if(!giveUp && cur.empty()){
+    flash(cur.emptyMsg || "Pop an answer in first, or tap Skip for now.");
+    return;
+  }
+  if(giveUp){
+    a.status = "shown";
+  }else if(cur.right()){
+    a.status = a.tries ? "right2" : "right1";
+  }else{
+    a.tries = (a.tries || 0) + 1;
+    if(a.tries >= 2) a.status = "shown";
+    else a.status = "trying";
+  }
+  a.value = cur.get();
+  state.answers[i] = a;
+  save();
+
+  if(a.status === "trying"){
+    cur.mark(false);
+    var fb = $("qFb");
+    fb.className = "fb nudge";
+    fb.innerHTML = '<b>' + pick(NUDGE) + '</b> ' + (s.hint || "Have another look at the question, then try again.") +
+      '<br><span class="tiny">Change your answer and press Check again, or tap Show me.</span>';
+    setButtons(s, i);
+    return;
+  }
+  cur.mark(a.status === "shown");
+  bump(a.status, $("checkBtn"));
+  showFeedback(s, a.status, false);
+  setButtons(s, i);
+  drawChips();
+}
+
+/* streak and confetti when something lands */
+function bump(status, from){
+  if(status === "right1"){
+    state.streak = (state.streak || 0) + 1;
+    if(state.streak > (state.best || 0)) state.best = state.streak;
+  }else if(status !== "done"){
+    state.streak = 0;
+  }
+  save();
+  if(status === "right1" || status === "right2" || status === "done") confetti(from, status === "right1" && state.streak >= 3 ? 24 : 14);
+}
+
+function showFeedback(s, status, quiet){
+  var fb = $("qFb");
+  var head;
+  if(status === "right1") head = '<b>' + (quiet ? "You got this one first go." : pick(GOOD)) + '</b>';
+  else if(status === "right2") head = '<b>' + (quiet ? "Got there on the second go." : "Got there. Second go counts.") + '</b>';
+  else head = '<b>Here is how this one works.</b>';
+  var extra = "";
+  if(status === "shown" && s.model) extra = '<div class="model"><span class="tiny">A good answer:</span> ' + s.model + '</div>';
+  fb.className = "fb " + (status === "shown" ? "show" : "good");
+  var plus = quiet ? "" : '<span class="plus">+' + (SPARK[status] || 0) + ' sparks</span>';
+  var streak = !quiet && status === "right1" && state.streak >= 3 ? ' <span class="tiny">That is ' + state.streak + ' first go in a row.</span>' : "";
+  fb.innerHTML = plus + head + streak + (s.why ? '<div class="why">' + s.why + '</div>' : "") + extra;
+}
+
+function flash(msg){
+  var fb = $("qFb");
+  fb.className = "fb nudge";
+  fb.innerHTML = msg;
+}
+
+/* ---------- results ---------- */
+function finish(){
+  state.finished = true; save();
+  showOnly("resultCard");
+  var sm = summary();
+  var marked = sm.got1 + sm.got2 + sm.shown;
+  $("scoreLine").textContent = (sm.got1 + sm.got2) + " out of " + (marked || 0) + " worked out";
+  var note;
+  var pct = marked ? (sm.got1 + sm.got2) / marked : 0;
+  if(!marked) note = "Nothing answered yet, and that is fine. Dip back in whenever.";
+  else if(pct >= 0.85) note = "That is strong. The stretch questions are where the higher grades live, so those are worth another look if any slipped.";
+  else if(pct >= 0.6) note = "Solid. The sections below with shorter bars are the ones worth a second visit on another day.";
+  else note = "Every Show me you used is something you now know more about than before. Coming back to this in a few days is exactly how revision sticks.";
+  $("scoreNote").textContent = note;
+
+  $("tally").innerHTML =
+    '<div class="tbox big"><b>' + sm.sparks + '</b><span>sparks</span></div>' +
+    tallyBox(sm.best, "best streak") +
+    tallyBox(sm.got1, "first go") + tallyBox(sm.got2, "second go") +
+    tallyBox(sm.shown, "learnt from Show me") + tallyBox(sm.skipped, "skipped for now");
+
+  var topics = {}, tOrder = [];
+  steps.forEach(function(s, i){
+    if(!scored(s)) return;
+    if(!topics[s.topic]){ topics[s.topic] = { got: 0, n: 0 }; tOrder.push(s.topic); }
+    var a = state.answers[i];
+    if(a && ["right1", "right2", "shown"].indexOf(a.status) >= 0){
+      topics[s.topic].n++;
+      if(a.status !== "shown") topics[s.topic].got++;
+    }
+  });
+  var bars = $("topicBars"); bars.innerHTML = "";
+  tOrder.forEach(function(t){
+    var o = topics[t];
+    var p = o.n ? Math.round(o.got / o.n * 100) : 0;
+    var col = !o.n ? "#d9d8e6" : p >= 75 ? "#1f9d63" : p >= 50 ? "#ffd23f" : "#ff5d5d";
+    var row = h("div", "row");
+    row.innerHTML = '<span class="name">' + t + '</span><span class="track"><span class="fill" style="width:' + (o.n ? Math.max(p, 4) : 0) + '%;background:' + col + '"></span></span><span class="score">' + (o.n ? o.got + "/" + o.n : "not tried") + '</span>';
+    bars.appendChild(row);
+  });
+
+  var rl = $("reviewList"); rl.innerHTML = "";
+  var n = 0;
+  steps.forEach(function(s, i){
+    if(s.type === "learn") return;
+    n++;
+    var a = state.answers[i];
+    var st = a ? a.status : "not tried";
+    var lab = { right1: "First go", right2: "Second go", shown: "Learnt from Show me", done: "Done", skipped: "Skipped", trying: "Started" }[st] || "Not tried";
+    var cls = st === "right1" || st === "right2" || st === "done" ? "right" : "diff";
+    var item = h("div", "review-item");
+    item.innerHTML = '<span class="tag ' + cls + '">Q' + n + ' ' + lab + '.</span> ' + stripTags(s.q || s.title || s.html || "").slice(0, 140);
+    var jump = h("button", "linkish", "Go to it"); jump.type = "button";
+    jump.onclick = function(){ go(i); };
+    item.appendChild(jump);
+    rl.appendChild(item);
+  });
+  confetti($("scoreLine"), 30);
+}
+
+function tallyBox(n, label){
+  return '<div class="tbox"><b>' + n + '</b><span>' + label + '</span></div>';
+}
+
+function reportText(){
+  var sm = summary();
+  var lines = [];
+  lines.push(cfg.subject + ": " + cfg.title);
+  lines.push("First go: " + sm.got1 + ", second go: " + sm.got2 + ", learnt from Show me: " + sm.shown + ", skipped: " + sm.skipped + " (of " + sm.marked + " marked questions)");
+  lines.push("Sparks: " + sm.sparks + ", best streak: " + sm.best + ", chunks done: " + sm.chunksDone + " of " + sm.chunks);
+  lines.push("");
+  var n = 0, lastTopic = "";
+  steps.forEach(function(s, i){
+    if(s.type === "learn") return;
+    n++;
+    if(s.topic !== lastTopic){ lines.push("== " + s.topic + " =="); lastTopic = s.topic; }
+    var a = state.answers[i];
+    var st = a ? a.status : "not tried";
+    var lab = { right1: "first go", right2: "second go", shown: "Show me", done: "done", skipped: "skipped", trying: "started" }[st] || "not tried";
+    lines.push("Q" + n + (s.stretch ? " (stretch)" : "") + ": " + lab + "  |  " + stripTags(s.q || s.title || "").slice(0, 90));
+    if(s.type === "write" && a && a.value && a.value.text){
+      lines.push("");
+      lines.push(a.value.text);
+      lines.push("");
+    }
+    if(s.type === "num" && a && a.value && a.value.w){
+      lines.push("   working: " + a.value.w.replace(/\s+/g, " "));
+    }
+    if(s.type === "text" && a && a.value){
+      lines.push("   answer: " + String(a.value).replace(/\s+/g, " "));
+    }
+    if(s.type === "widget" && s.report){
+      var r = s.report(state.widgets[i] || {});
+      if(r) lines.push("   " + r);
+    }
+  });
+  return lines.join("\n");
+}
+
+/* ---------- start ---------- */
+function run(c){
+  cfg = c; steps = c.steps; key = PREFIX + c.id + ".v1";
+  state = load() || fresh();
+  if(!state.widgets) state.widgets = {};
+  try{ if(!localStorage.getItem("base5.who.v1")) localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
+  document.title = c.title + " - EGW GCSE HQ";
+  makeChunks();
+  build();
+  showStart();
+  save();
+  /* /egw/page.html#chunk-3 opens straight onto chunk 3 */
+  var m = (location.hash || "").match(/^#chunk-(\d+)$/);
+  if(m && chunks[+m[1] - 1]) go(chunks[+m[1] - 1].from);
+}
+
+return { run: run, parseNum: parseNum, norm: norm };
+})();

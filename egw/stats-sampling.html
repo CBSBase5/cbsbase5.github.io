@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sampling and collecting data - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=2">
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Sampling and collecting data</h2>
+    <span>GCSE Statistics. Types of data, choosing who to ask, asking good questions, and the enquiry cycle.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=2"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", TEAL = "#3a5cff", BRIGHT = "#22b8e6", ORANGE = "#ff5d5d",
+    YELLOW = "#ffd23f", PLUM = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function box(x, y, w, hgt, fill, title, sub){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + hgt + '" rx="12" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<text x="' + (x + w / 2) + '" y="' + (y + (sub ? hgt / 2 - 3 : hgt / 2 + 6)) + '" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="17" fill="' + INK + '">' + title + '</text>' +
+    (sub ? '<text x="' + (x + w / 2) + '" y="' + (y + hgt / 2 + 16) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">' + sub + '</text>' : "");
+}
+function arrow(x1, y1, x2, y2){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + INK + '" stroke-width="2.5"/>';
+}
+
+/* ---------- figures (narrow viewBoxes so text stays readable on a phone) ---------- */
+var TYPES =
+'<svg viewBox="0 0 360 216" role="img" aria-label="Data splits into qualitative (words) and quantitative (numbers). Quantitative splits into discrete (counted) and continuous (measured)." style="max-width:440px">' +
+box(130, 4, 100, 38, PAPER, "Data") +
+arrow(160, 42, 85, 70) + arrow(200, 42, 270, 70) +
+box(4, 70, 162, 54, YELLOW, "Qualitative", "words or categories") +
+box(190, 70, 166, 54, BRIGHT, "Quantitative", "numbers") +
+arrow(245, 124, 180, 152) + arrow(300, 124, 300, 152) +
+box(104, 152, 124, 58, WHITE, "Discrete", "counted") +
+box(238, 152, 118, 58, WHITE, "Continuous", "measured") +
+'</svg>';
+
+var POPSAMPLE = (function(){
+  var s = '<svg viewBox="0 0 360 170" role="img" aria-label="A large population of dots. A few are picked out and moved into a smaller sample circle." style="max-width:440px">';
+  s += '<ellipse cx="112" cy="78" rx="106" ry="66" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  var picked = [3, 11, 17, 24, 30, 38];
+  var k = 0;
+  for(var r = 0; r < 5; r++){
+    for(var c = 0; c < 9; c++){
+      var x = 30 + c * 21 + (r % 2 ? 10 : 0), y = 36 + r * 21;
+      if(Math.pow((x - 112) / 98, 2) + Math.pow((y - 78) / 58, 2) > 1) { k++; continue; }
+      var on = picked.indexOf(k) >= 0;
+      s += '<circle cx="' + x + '" cy="' + y + '" r="6.5" fill="' + (on ? ORANGE : BRIGHT) + '" stroke="' + INK + '" stroke-width="' + (on ? 2.2 : 1.4) + '"/>';
+      k++;
+    }
+  }
+  s += '<text x="112" y="164" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="18" fill="' + INK + '">Population</text>';
+  s += '<path d="M224 78 H260" stroke="' + INK + '" stroke-width="3"/><path d="M252 70 L262 78 L252 86" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<circle cx="310" cy="78" r="44" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  [[294, 62], [316, 56], [332, 78], [294, 90], [318, 100], [310, 78]].forEach(function(p){
+    s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6.5" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="2.2"/>';
+  });
+  s += '<text x="310" y="164" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="18" fill="' + INK + '">Sample</text>';
+  return s + '</svg>';
+})();
+
+var SYSTEMATIC = (function(){
+  var s = '<svg viewBox="0 0 360 132" role="img" aria-label="Numbers 1 to 20 in two rows. Starting at 3, every 5th number is picked: 3, 8, 13, 18." style="max-width:440px">';
+  for(var i = 1; i <= 20; i++){
+    var row = i <= 10 ? 0 : 1, col = (i - 1) % 10;
+    var x = 6 + col * 35, y = 6 + row * 44, on = i % 5 === 3;
+    s += '<rect x="' + x + '" y="' + y + '" width="31" height="36" rx="6" fill="' + (on ? ORANGE : WHITE) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<text x="' + (x + 15.5) + '" y="' + (y + 24) + '" text-anchor="middle" ' + BODY + ' font-size="16" font-weight="700" fill="' + INK + '">' + i + '</text>';
+  }
+  s += '<text x="6" y="118" ' + BODY + ' font-size="16" fill="' + INK + '">Random start <tspan font-weight="700">3</tspan>, then every 5th:</text>';
+  s += '<text x="354" y="118" text-anchor="end" ' + LAB + ' font-weight="800" font-size="16" fill="' + ORANGE + '">3, 8, 13, 18</text>';
+  return s + '</svg>';
+})();
+
+var CYCLE = (function(){
+  var names = [["Plan", "hypothesis"], ["Collect", "the data"], ["Process", "and represent"], ["Interpret", "the results"], ["Evaluate", "and refine"]];
+  var cols = [YELLOW, BRIGHT, WHITE, ORANGE, PLUM];
+  var cx = 180, cy = 128, r = 92;
+  var s = '<svg viewBox="0 0 360 262" role="img" aria-label="The statistical enquiry cycle: plan, collect, process and represent, interpret, evaluate, then back to plan." style="max-width:440px">';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + INK + '" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  names.forEach(function(n, k){
+    var a = -Math.PI / 2 + k * 2 * Math.PI / 5;
+    var px = cx + r * 1.05 * Math.cos(a), py = cy + r * 1.05 * Math.sin(a);
+    var w = 108, hh = 50;
+    px = Math.max(w / 2 + 3, Math.min(360 - w / 2 - 3, px));
+    s += '<rect x="' + (px - w / 2) + '" y="' + (py - hh / 2) + '" width="' + w + '" height="' + hh + '" rx="12" fill="' + cols[k] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<text x="' + px + '" y="' + (py - 3) + '" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="16" fill="' + (k === 4 ? WHITE : INK) + '">' + (k + 1) + '. ' + n[0] + '</text>';
+    s += '<text x="' + px + '" y="' + (py + 16) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + (k === 4 ? WHITE : INK) + '">' + n[1] + '</text>';
+  });
+  s += '<text x="' + cx + '" y="' + (cy + 34) + '" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="16" fill="' + TEAL + '">and round again</text>';
+  return s + '</svg>';
+})();
+
+var CAPTURE = (function(){
+  function fish(x, y, col){
+    return '<path d="M' + x + ' ' + y + ' q14 -14 28 0 q-14 14 -28 0 z M' + (x + 28) + ' ' + y + ' l9 -8 v16 z" fill="' + col + '" stroke="' + INK + '" stroke-width="1.8"/>';
+  }
+  var s = '<svg viewBox="0 0 360 176" role="img" aria-label="Day 1: catch 40 fish, mark them, release them. Day 2: catch 50 fish, 8 of them are marked." style="max-width:440px">';
+  s += '<rect x="4" y="4" width="170" height="168" rx="14" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="186" y="4" width="170" height="168" rx="14" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<text x="89" y="32" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="19" fill="' + INK + '">Day 1</text>';
+  s += '<text x="271" y="32" text-anchor="middle" ' + LAB + ' font-weight="800" font-size="19" fill="' + INK + '">Day 2</text>';
+  s += '<text x="89" y="58" text-anchor="middle" ' + BODY + ' font-size="16" fill="' + INK + '">catch <tspan font-weight="700">40</tspan></text>';
+  s += '<text x="89" y="78" text-anchor="middle" ' + BODY + ' font-size="16" fill="' + INK + '">mark, let go</text>';
+  s += '<text x="271" y="58" text-anchor="middle" ' + BODY + ' font-size="16" fill="' + INK + '">catch <tspan font-weight="700">50</tspan></text>';
+  s += '<text x="271" y="78" text-anchor="middle" ' + BODY + ' font-size="16" fill="' + INK + '"><tspan font-weight="700">8</tspan> are marked</text>';
+  [[24, 112], [74, 112], [124, 112], [48, 146], [98, 146]].forEach(function(p){ s += fish(p[0], p[1], ORANGE); });
+  [[206, 112], [256, 112], [306, 112], [230, 146], [280, 146]].forEach(function(p, k){ s += fish(p[0], p[1], k === 1 ? ORANGE : BRIGHT); });
+  return s + '</svg>';
+})();
+
+var LUNCHBOXES =
+'<div class="extract" style="max-height:none">' +
+'<p><b>How much did you spend on lunch yesterday?</b></p>' +
+'<p>&#9744; &pound;0 to &pound;2 &nbsp;&nbsp; &#9744; &pound;2 to &pound;4 &nbsp;&nbsp; &#9744; &pound;4 to &pound;5</p>' +
+'</div>';
+
+var TWOWAY =
+'<table class="datatable"><tr><th></th><th>Boys</th><th>Girls</th></tr>' +
+'<tr><th>Year 10</th><td>84</td><td>96</td></tr>' +
+'<tr><th>Year 11</th><td>102</td><td>78</td></tr></table>';
+
+var YEARS700 =
+'<table class="datatable"><tr><th>Year</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th></tr>' +
+'<tr><th>Students</th><td>180</td><td>160</td><td>140</td><td>120</td><td>100</td></tr></table>';
+
+/* ---------- widget: Sample the school ---------- */
+var GROUPS = [
+  { name: "Y7", n: 72, col: TEAL },
+  { name: "Y8", n: 60, col: BRIGHT },
+  { name: "Y9", n: 48, col: YELLOW },
+  { name: "Y10", n: 36, col: ORANGE },
+  { name: "Y11", n: 24, col: PLUM }
+];
+var POP = [];
+GROUPS.forEach(function(g, k){ for(var i = 0; i < g.n; i++) POP.push(k); });  /* 240 students */
+var SAMPLE_N = 20;
+
+function shuffle(a){
+  for(var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function mountSchool(el, api){
+  var d = api.data;
+  d.sample = d.sample || [];
+  d.log = d.log || [];
+  d.nRandom = d.nRandom || 0;
+  d.nStrat = d.nStrat || 0;
+  d.tries = d.tries || 0;
+
+  var legend = GROUPS.map(function(g){
+    return '<span style="display:inline-flex;align-items:center;gap:5px;margin-right:10px;font-size:.88rem">' +
+      '<span style="width:13px;height:13px;border-radius:50%;background:' + g.col + ';border:2px solid ' + INK + '"></span>' + g.name.replace("Y", "Year ") + '</span>';
+  }).join("");
+
+  el.innerHTML =
+    '<div class="wpanel">' +
+      '<div class="wnote" style="margin-top:0">240 students. Each dot is one student. ' + legend + '</div>' +
+      '<svg id="ssPop" viewBox="0 0 360 212" role="img" aria-label="240 dots coloured by year group. Sampled students are drawn larger with a dark ring." style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto"></svg>' +
+      '<div class="wrow">' +
+        '<button class="btn" type="button" id="ssRand">Random sample of 20</button>' +
+        '<button class="btn btn-orange" type="button" id="ssStrat">Stratified sample of 20</button>' +
+        '<button class="btn btn-quiet" type="button" id="ssClear">Clear</button>' +
+      '</div>' +
+      '<div class="wnote" id="ssWhat" aria-live="polite"></div>' +
+      '<div class="wnote" style="margin:10px 0 4px"><b>Top bar:</b> whole school. <b>Bottom bar:</b> your sample.</div>' +
+      '<svg id="ssBars" viewBox="0 0 300 200" role="img" aria-label="Bar chart comparing the percentage of each year group in the population and in the sample." style="width:100%;max-width:440px;height:auto;display:block"></svg>' +
+      '<div class="wnote" id="ssLog"></div>' +
+    '</div>' +
+    '<div class="wpanel">' +
+      '<p class="wnote" style="margin-top:0"><b>Have a play first.</b> Take a few random samples and watch the Year 10 bar jump about. Then try a stratified one, a few times.</p>' +
+      '<p class="wnote"><b>Challenge:</b> there are 36 Year 10s out of 240 students. How many Year 10s should be in a stratified sample of 20?</p>' +
+      '<div class="wrow">' +
+        '<input type="text" inputmode="decimal" autocomplete="off" id="ssAns" aria-label="Number of Year 10s" style="width:110px;text-align:center;padding:9px 8px;font-family:inherit;font-size:1.15rem;border:3px solid rgba(20,26,51,.22);border-radius:12px 10px 14px 10px;background:' + WHITE + ';color:' + INK + '">' +
+        '<span class="wnote">Year 10s</span>' +
+        '<button class="btn" type="button" id="ssCheck">Check</button>' +
+        '<button class="btn btn-quiet hidden" type="button" id="ssShow">Show me</button>' +
+      '</div>' +
+      '<div class="wnote" id="ssMsg" aria-live="polite"></div>' +
+    '</div>';
+
+  var popSvg = el.querySelector("#ssPop"), barSvg = el.querySelector("#ssBars");
+  var COLS = 20, GAP = 17.4, R0 = 6;
+
+  function drawPop(){
+    var inS = {};
+    d.sample.forEach(function(i){ inS[i] = 1; });
+    var any = d.sample.length > 0;
+    var s = "";
+    POP.forEach(function(g, i){
+      var x = 15 + (i % COLS) * GAP, y = 9 + Math.floor(i / COLS) * GAP;
+      var on = !!inS[i];
+      s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (on ? 7.6 : R0) + '" fill="' + GROUPS[g].col + '"' +
+        (any && !on ? ' fill-opacity="0.28"' : '') +
+        ' stroke="' + INK + '" stroke-width="' + (on ? 2.6 : 0.8) + '"' + (any && !on ? ' stroke-opacity="0.3"' : '') + '/>';
+    });
+    popSvg.innerHTML = s;
+  }
+
+  function counts(){
+    var c = [0, 0, 0, 0, 0];
+    d.sample.forEach(function(i){ c[POP[i]]++; });
+    return c;
+  }
+
+  function drawBars(){
+    var c = counts(), n = d.sample.length;
+    var L = 40, W = 150, s = "";
+    GROUPS.forEach(function(g, k){
+      var y = 4 + k * 39;
+      var pp = g.n / POP.length, sp = n ? c[k] / n : 0;
+      s += '<text x="0" y="' + (y + 21) + '" ' + LAB + ' font-weight="800" font-size="15" fill="' + INK + '">' + g.name + '</text>';
+      s += '<rect x="' + L + '" y="' + y + '" width="' + (pp / 0.6 * W) + '" height="15" rx="3" fill="' + g.col + '" fill-opacity="0.3" stroke="' + INK + '" stroke-width="1"/>';
+      if(n) s += '<rect x="' + L + '" y="' + (y + 17) + '" width="' + Math.min(W, Math.max(sp / 0.6 * W, 1.5)) + '" height="15" rx="3" fill="' + g.col + '" stroke="' + INK + '" stroke-width="1.5"/>';
+      s += '<text x="' + (L + W + 8) + '" y="' + (y + 13) + '" ' + BODY + ' font-size="13" fill="' + INK + '">' + Math.round(pp * 100) + '% (' + g.n + ')</text>';
+      if(n) s += '<text x="' + (L + W + 8) + '" y="' + (y + 30) + '" ' + BODY + ' font-weight="700" font-size="13" fill="' + INK + '">' + Math.round(sp * 100) + '% (' + c[k] + ')</text>';
+    });
+    if(!n) s += '<text x="150" y="196" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">Take a sample to see its bars.</text>';
+    barSvg.innerHTML = s;
+  }
+
+  function drawText(){
+    var what = el.querySelector("#ssWhat");
+    if(!d.sample.length) what.innerHTML = "No sample yet.";
+    else if(d.kind === "random") what.innerHTML = "<b>Random sample:</b> every student had the same chance. The mix is down to luck.";
+    else what.innerHTML = "<b>Stratified sample:</b> picked at random <i>within</i> each year group, in proportion to its size. The mix matches the school every time.";
+    var lg = el.querySelector("#ssLog");
+    lg.innerHTML = d.log.length ? "Year 10s in your random samples so far: <b>" + d.log.join(", ") + "</b>" + (d.nStrat ? ". In every stratified sample: <b>3</b>." : ".") : "";
+  }
+
+  function draw(){ drawPop(); drawBars(); drawText(); }
+
+  el.querySelector("#ssRand").onclick = function(){
+    var idx = shuffle(POP.map(function(_, i){ return i; })).slice(0, SAMPLE_N);
+    d.sample = idx; d.kind = "random"; d.nRandom++;
+    var y10 = idx.filter(function(i){ return POP[i] === 3; }).length;
+    d.log.push(y10); if(d.log.length > 10) d.log.shift();
+    api.save(); draw();
+  };
+  el.querySelector("#ssStrat").onclick = function(){
+    var idx = [], start = 0;
+    GROUPS.forEach(function(g){
+      var take = Math.round(g.n / POP.length * SAMPLE_N);
+      var mine = [];
+      for(var i = 0; i < g.n; i++) mine.push(start + i);
+      idx = idx.concat(shuffle(mine).slice(0, take));
+      start += g.n;
+    });
+    d.sample = idx; d.kind = "strat"; d.nStrat++;
+    api.save(); draw();
+  };
+  el.querySelector("#ssClear").onclick = function(){ d.sample = []; d.kind = ""; api.save(); draw(); };
+
+  var inp = el.querySelector("#ssAns"), msg = el.querySelector("#ssMsg");
+  var checkBtn = el.querySelector("#ssCheck"), showBtn = el.querySelector("#ssShow");
+  var WHY = "36 out of 240 is 36 &divide; 240 = 0.15 of the school. 0.15 &times; 20 = <b>3</b>. Or: 36 &divide; 240 &times; 20 = 3. " +
+            "Tap Stratified sample a few times: there are always exactly 3 orange Year 10 dots, while a random sample might give 0, or 6.";
+
+  function finished(){
+    checkBtn.classList.add("hidden"); showBtn.classList.add("hidden");
+    inp.disabled = true; inp.value = "3";
+    inp.style.borderColor = d.result === "shown" ? PLUM : "#2e7d4f";
+    msg.innerHTML = (d.result === "shown" ? "<b>Here is how it works.</b> " : "<b>Yes, 3.</b> ") + WHY;
+  }
+  function attempt(){
+    var v = EGW.parseNum(inp.value);
+    if(!inp.value.trim()){ msg.innerHTML = "Pop a number in first."; return; }
+    d.ans = inp.value;
+    if(v === 3){
+      d.result = d.tries ? "right2" : "right1"; api.save();
+      api.done(d.result); finished(); return;
+    }
+    d.tries++; api.save();
+    if(d.tries === 1){
+      msg.innerHTML = "<b>Not quite yet.</b> What fraction of the whole school are the Year 10s? Then take that fraction of 20.";
+    }else{
+      msg.innerHTML = "<b>Not that one.</b> Have another go if you like, or tap Show me.";
+      showBtn.classList.remove("hidden");
+    }
+  }
+  checkBtn.onclick = attempt;
+  inp.addEventListener("keydown", function(e){ if(e.key === "Enter") attempt(); });
+  showBtn.onclick = function(){ d.result = "shown"; api.save(); api.done("shown"); finished(); };
+
+  if(d.ans && !d.result) inp.value = d.ans;
+  draw();
+  if(d.result) finished();
+  else if(d.tries >= 2) showBtn.classList.remove("hidden");
+}
+
+EGW.run({
+  id: "stats-sampling",
+  title: "Sampling and collecting data",
+  subject: "GCSE Statistics",
+  mins: 50,
+  blurb: "Types of data, populations and samples, the different ways to pick a sample, writing fair questions, and the enquiry cycle that holds it all together.",
+  steps: [
+
+  /* ---------- TYPES OF DATA ---------- */
+  { type: "learn", topic: "Types of data",
+    title: "What kind of data is it?",
+    fig: TYPES,
+    html: '<ul>' +
+          '<li><b>Qualitative</b>: described in words. Eye colour, favourite band.</li>' +
+          '<li><b>Quantitative</b>: numbers. This splits in two:' +
+            '<ul><li><b>Discrete</b>: can only take certain values, usually counted. Number of siblings, shoe size.</li>' +
+            '<li><b>Continuous</b>: measured, any value in a range. Height, time, mass.</li></ul></li>' +
+          '<li><b>Primary</b> data you collect yourself. <b>Secondary</b> data someone else collected (websites, books, a newspaper).</li>' +
+          '<li><b>Raw data</b> is data as it was collected, before it has been sorted or processed.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Counted? Discrete. Measured? Continuous. A quick test: could it be 1.37...? If yes, it is continuous.</div>' },
+
+  { type: "sort", topic: "Types of data",
+    q: "Sort these into qualitative, discrete or continuous.",
+    buckets: ["Qualitative", "Discrete", "Continuous"],
+    cards: [
+      ["Favourite colour", 0],
+      ["Type of pet", 0],
+      ["Number of siblings", 1],
+      ["Shoe size", 1],
+      ["Goals scored in a match", 1],
+      ["Height of a plant", 2],
+      ["Time to run 100 m", 2],
+      ["Mass of an apple", 2]
+    ],
+    hint: "Words go in qualitative. For numbers, ask: is it counted, or measured?",
+    why: "Colour and pet type are words. Siblings and goals are counted. Shoe size is discrete too, because it only comes in set values like 5 or 5&frac12;, never 5.27. Height, time and mass are measured, so continuous." },
+
+  { type: "multi", topic: "Types of data",
+    q: "A student is looking at how much screen time teenagers have. Which <b>two</b> of these are <b>secondary</b> data?",
+    options: [
+      "Figures she downloads from a government statistics website",
+      "Answers to a questionnaire she hands out herself",
+      "A table in a newspaper article about screen time",
+      "Her own record of her screen time for a week",
+      "Times she measures by watching her friends"
+    ],
+    answers: [0, 2],
+    hint: "Secondary means somebody else collected it.",
+    why: "The website and the newspaper table were collected by someone else, so they are secondary. Secondary data is quick and cheap, but you cannot be sure how it was collected. Everything she gathered herself is primary." },
+
+  /* ---------- POPULATION AND SAMPLE ---------- */
+  { type: "learn", topic: "Population and sample",
+    title: "Population, sample, census",
+    fig: POPSAMPLE,
+    html: '<ul>' +
+          '<li>The <b>population</b> is everyone (or everything) you want to find out about.</li>' +
+          '<li>A <b>census</b> collects data from <b>every</b> member of the population.</li>' +
+          '<li>A <b>sample</b> collects data from <b>some</b> of the population.</li>' +
+          '<li>A <b>sampling frame</b> is a list of every member of the population, so you can choose from it.</li>' +
+          '</ul>' +
+          '<table class="datatable"><tr><th></th><th>Census</th><th>Sample</th></tr>' +
+          '<tr><td>Good</td><td>Complete, accurate picture</td><td>Quicker, cheaper, less data to deal with</td></tr>' +
+          '<tr><td>Not so good</td><td>Slow, expensive, hard with big populations</td><td>Might not represent the population</td></tr></table>' +
+          '<div class="keep"><b>Keep this</b>If testing destroys the item (how long a battery lasts, how hard a crash test hits a car), you can only use a sample.</div>' },
+
+  { type: "match", topic: "Population and sample",
+    q: "Match each word to what it means.",
+    pairs: [
+      ["Population", "Everyone or everything you want to find out about"],
+      ["Census", "Data from every member of the population"],
+      ["Sample", "Data from part of the population"],
+      ["Sampling frame", "A list of all the members of the population"],
+      ["Raw data", "Data before it has been sorted or processed"]
+    ],
+    hint: "Census and sample are opposites. The frame is the list you pick from.",
+    why: "These five words come up in nearly every paper, often as one mark definitions. A sampling frame is worth extra care: if the list is missing people, your sample can never include them." },
+
+  { type: "sort", topic: "Population and sample",
+    q: "Is each one an advantage of a <b>census</b> or of a <b>sample</b>?",
+    buckets: ["Advantage of a census", "Advantage of a sample"],
+    cards: [
+      ["Gives a complete picture of the whole population", 0],
+      ["Nobody is left out, so the result is not affected by who happened to be chosen", 0],
+      ["Sensible when the population is very small, like a class of 12", 0],
+      ["Quicker to collect", 1],
+      ["Cheaper to carry out", 1],
+      ["The only option when testing destroys the item", 1]
+    ],
+    hint: "A census includes everyone. What does that buy you, and what does it cost?",
+    why: "A census is complete, so it cannot be skewed by who was picked, and for a tiny population it is easy anyway. A sample saves time and money, and when testing destroys the item a census would leave you nothing to sell." },
+
+  /* ---------- RANDOM AND SYSTEMATIC ---------- */
+  { type: "learn", topic: "Random and systematic",
+    title: "Random and systematic sampling",
+    fig: SYSTEMATIC,
+    html: '<p><b>Simple random sampling</b>: every member has an <b>equal chance</b> of being chosen.</p>' +
+          '<ul><li>Number everyone on the sampling frame.</li>' +
+          '<li>Use a calculator or computer to generate random numbers.</li>' +
+          '<li>Pick those people, skipping repeats and numbers not on the list.</li></ul>' +
+          '<p><b>Systematic sampling</b>: pick every <b>k</b>th member from a list, after a random start.</p>' +
+          '<ul><li>k = population size &divide; sample size. 100 people, sample of 20: k = 5.</li>' +
+          '<li>Choose a random start from 1 to 5, say 3. Then 3, 8, 13, 18 ...</li></ul>' +
+          '<div class="keep"><b>Keep this</b>"Random" in statistics does not mean "whoever". It means every member had the same chance.</div>' },
+
+  { type: "order", topic: "Random and systematic",
+    q: "Put the steps for taking a simple random sample of 50 students from a school in order.",
+    items: [
+      "Get a list of every student in the school (the sampling frame)",
+      "Give each student on the list a different number",
+      "Generate random numbers on a calculator or computer",
+      "Choose the students whose numbers come up, ignoring repeats, until you have 50"
+    ],
+    hint: "You cannot number people until you have a list of them.",
+    why: "List, number, generate, pick. In an exam, describing these steps clearly is often worth two marks, and \"ignore repeats\" is the detail people forget." },
+
+  { type: "num", topic: "Random and systematic",
+    q: "A school has a list of 600 students. A systematic sample of 30 is wanted.",
+    boxes: [
+      { label: "Pick every kth student. k =", a: 20 },
+      { label: "If the random start is 7, the 2nd student is number", a: 27 },
+      { label: "and the 3rd is number", a: 47 }
+    ],
+    hint: "k is the population divided by the sample size. Then keep adding k to the start.",
+    why: "600 &divide; 30 = 20, so every 20th student. Start at 7: 7, 27, 47, 67 and so on, up to 587." },
+
+  /* ---------- STRATIFIED ---------- */
+  { type: "learn", topic: "Stratified sampling",
+    title: "Stratified sampling: fair shares",
+    html: '<p>Split the population into groups (<b>strata</b>), like year groups. Then sample each group <b>in proportion to its size</b>, choosing randomly within each group.</p>' +
+          '<p>A club has 200 members: 120 under 16 and 80 aged 16 or over. A sample of 30:</p>' +
+          '<ul><li>Under 16: 120 &divide; 200 &times; 30 = <b>18</b></li>' +
+          '<li>16 and over: 80 &divide; 200 &times; 30 = <b>12</b></li></ul>' +
+          '<p>Often the answers are not whole numbers. Round each to the nearest whole number, then <b>check they add up</b> to the sample size.</p>' +
+          '<div class="keep"><b>Keep this</b>Group size &divide; population size &times; sample size. The sample then has the same mix as the population.</div>' },
+
+  { type: "widget", topic: "Stratified sampling",
+    title: "Sample the school",
+    html: "A school of 240 students in five year groups of different sizes. Take samples of 20 and compare the bars.",
+    mount: mountSchool,
+    report: function(d){
+      var r = { right1: "Year 10 share correct first go", right2: "Year 10 share correct second go", shown: "used Show me for the Year 10 share" }[d.result] || "challenge not finished";
+      return "Sampling widget: " + r + "; took " + (d.nRandom || 0) + " random and " + (d.nStrat || 0) + " stratified samples.";
+    } },
+
+  { type: "num", topic: "Stratified sampling",
+    q: "A school wants a stratified sample of 50 students by year group.",
+    fig: YEARS700,
+    boxes: [
+      { label: "Year 7", a: 13, post: "students" },
+      { label: "Year 10", a: 9, post: "students" },
+      { label: "Year 11", a: 7, post: "students" }
+    ],
+    hint: "The whole school is 700. For Year 7: 180 &divide; 700 &times; 50, then round.",
+    why: "Total: 700.<br>Year 7: 180 &divide; 700 &times; 50 = 12.86, so <b>13</b>.<br>Year 10: 120 &divide; 700 &times; 50 = 8.57, so <b>9</b>.<br>Year 11: 100 &divide; 700 &times; 50 = 7.14, so <b>7</b>.<br>Check: with Year 8 (11) and Year 9 (10) the total is 13 + 11 + 10 + 9 + 7 = 50." },
+
+  /* ---------- OTHER METHODS AND BIAS ---------- */
+  { type: "learn", topic: "Other methods and bias",
+    title: "More methods, and the enemy: bias",
+    html: '<ul>' +
+          '<li><b>Quota</b>: the interviewer is told how many to ask from each group (say 20 men and 20 women) but chooses <i>who</i> themselves. Quick, no sampling frame needed, but not random.</li>' +
+          '<li><b>Cluster</b>: split the population into natural groups (like tutor groups or towns), pick some groups at random, and survey the people in those groups. Cheap when people are spread out.</li>' +
+          '<li><b>Opportunity</b> (or convenience): ask whoever is handy. Very easy, very likely to be biased.</li>' +
+          '</ul>' +
+          '<p><b>Bias</b> means the sample does not fairly represent the population, so the results lean one way.</p>' +
+          '<p>Ways to reduce it: use a random method, use a complete sampling frame, and stratify so every group is fairly represented. A bigger sample makes results more reliable, but it does not fix a biased method.</p>' +
+          '<div class="keep"><b>Keep this</b>To spot bias, ask: who is left out, and who is more likely to be included? Then say how that would change the answer.</div>' },
+
+  { type: "match", topic: "Other methods and bias",
+    q: "Match each sampling method to its description.",
+    pairs: [
+      ["Simple random", "Every member has an equal chance of being chosen"],
+      ["Systematic", "Every kth member from a list, after a random start"],
+      ["Stratified", "Each group sampled in proportion to its size"],
+      ["Quota", "A set number from each group, but the interviewer picks who"],
+      ["Cluster", "Some natural groups chosen at random, then people in those groups surveyed"],
+      ["Opportunity", "Whoever is available at the time"]
+    ],
+    hint: "Stratified and quota both use groups. Which one leaves the choosing to the interviewer?",
+    why: "Stratified and quota look alike, but stratified chooses randomly within each group and quota does not. That is why stratified is usually less biased." },
+
+  { type: "mc", topic: "Other methods and bias", stretch: true,
+    q: "To estimate how much exercise adults in a town do each week, a student asks the first 50 adults leaving a gym on a Monday morning. What is the biggest problem?",
+    options: [
+      "50 people is far too many to ask",
+      "People leaving a gym probably exercise more than most adults, so the estimate will be too high",
+      "She should have done a census of the whole town instead",
+      "Asking on a Monday means the data is secondary"
+    ],
+    answer: 1,
+    hint: "Who is she most likely to meet at a gym? Are they typical of the whole town?",
+    why: "This is an opportunity sample with built in bias: gym users are not typical, so the result leans high. A Monday morning also leaves out most people at work. A fairer plan: take a random sample from a list of the town's adults. A census would be fair but is far too expensive here, and the day has nothing to do with primary or secondary data." },
+
+  /* ---------- QUESTIONNAIRES ---------- */
+  { type: "learn", topic: "Questionnaires",
+    title: "Asking good questions",
+    html: '<ul>' +
+          '<li><b>Leading questions</b> push people towards an answer. "Don\'t you agree that ...?" Keep the wording neutral.</li>' +
+          '<li><b>Response boxes</b> should not <b>overlap</b> (no number in two boxes), and should have <b>no gaps</b> (every answer has a box, often with "more than ..." at the end).</li>' +
+          '<li>Give a <b>time frame</b>: "in the last week", not "usually".</li>' +
+          '<li><b>Closed questions</b> give set options. Easy to analyse, but they limit answers. <b>Open questions</b> let people say anything: richer, but harder to process.</li>' +
+          '</ul>' +
+          '<p>A <b>pilot study</b> is a small trial run before the real survey, to find problems with the questions or the method and fix them.</p>' +
+          '<div class="keep"><b>Keep this</b>For a response box question, check three things: overlaps, gaps, and a time frame.</div>' },
+
+  { type: "mc", topic: "Questionnaires",
+    q: "Which of these questions is <b>leading</b>?",
+    options: [
+      "Do you agree that school lunches are far too expensive?",
+      "How many portions of fruit did you eat yesterday?",
+      "Which of these subjects is your favourite?",
+      "How long, in minutes, was your journey to school today?"
+    ],
+    answer: 0,
+    hint: "Which one has an opinion built into the question?",
+    why: "\"Do you agree ... far too expensive\" tells people what to think. A neutral version: \"What do you think of the price of school lunches?\" with boxes from very cheap to very expensive." },
+
+  { type: "multi", topic: "Questionnaires",
+    q: "Here is a question from a survey. Which <b>two</b> things are wrong with the response boxes?",
+    fig: LUNCHBOXES,
+    options: [
+      "&pound;2 and &pound;4 each fit in two boxes",
+      "There is no box for someone who spent more than &pound;5",
+      "It is a closed question",
+      "It asks about money",
+      "It gives a time frame"
+    ],
+    answers: [0, 1],
+    hint: "Check for overlaps and for gaps.",
+    why: "Overlap: someone who spent exactly &pound;2 could tick two boxes. Gap: someone who spent &pound;6 has nowhere to go. A fix: &pound;0 to &pound;1.99, &pound;2 to &pound;3.99, &pound;4 to &pound;5.99, &pound;6 or more. Being closed, and having a time frame, are fine." },
+
+  { type: "text", topic: "Questionnaires",
+    q: "A student plans to hand a questionnaire to 200 people. Why might they do a <b>pilot study</b> first? One sentence is plenty.",
+    need: [["problem", "issue", "mistake", "error", "confus", "unclear", "understand", "improve", "fix", "change", "check", "test", "work", "wrong", "trial", "sense"]],
+    model: "To try the questionnaire on a few people first, so any confusing questions or other problems can be found and fixed before the real survey.",
+    hint: "A pilot study is a small trial run. What might a trial run show up?",
+    why: "A pilot study finds the problems while they are still cheap to fix: unclear wording, missing response boxes, questions that take too long. It can also check the method, like whether the sampling plan actually works." },
+
+  /* ---------- ENQUIRY CYCLE ---------- */
+  { type: "learn", topic: "Enquiry cycle",
+    title: "Hypotheses and the enquiry cycle",
+    fig: CYCLE,
+    html: '<p>A <b>hypothesis</b> is a <b>statement</b> you can test with data, not a question. "Year 11 students sleep less than Year 7 students."</p>' +
+          '<p>The <b>statistical enquiry cycle</b>:</p>' +
+          '<ul>' +
+          '<li><b>Plan</b>: write the hypothesis, decide what data you need and how to sample.</li>' +
+          '<li><b>Collect</b> the data.</li>' +
+          '<li><b>Process and represent</b>: calculations, tables, graphs.</li>' +
+          '<li><b>Interpret</b>: what do the results say about the hypothesis?</li>' +
+          '<li><b>Evaluate</b>: what were the limits, what could be better? This can lead to a new cycle.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>A hypothesis is a sentence that could turn out to be wrong. That is what makes it testable.</div>' },
+
+  { type: "order", topic: "Enquiry cycle",
+    q: "Put the stages of a statistical enquiry in order.",
+    items: [
+      "Plan: write a hypothesis and decide what data to collect",
+      "Collect the data",
+      "Process and represent: work out averages, draw graphs",
+      "Interpret: decide what the results say about the hypothesis",
+      "Evaluate: think about problems and improvements"
+    ],
+    hint: "You cannot draw a graph of data you have not collected yet.",
+    why: "Plan, collect, process and represent, interpret, evaluate. Evaluating often sends you back to planning, which is why it is drawn as a cycle." },
+
+  /* ---------- CAPTURE RECAPTURE ---------- */
+  { type: "learn", topic: "Capture recapture",
+    title: "Counting fish you cannot see",
+    fig: CAPTURE,
+    html: '<p>You cannot count every fish in a lake. So you estimate the population size, N, with the <b>Petersen capture recapture</b> method.</p>' +
+          '<ul><li>Catch some, <b>mark</b> them, release them: M = 40.</li>' +
+          '<li>Later, catch another sample: C = 50. Count how many are <b>recaptured</b> (marked): R = 8.</li></ul>' +
+          '<p>The idea: the fraction marked in the second catch should match the fraction marked in the whole lake. 8 out of 50 marked suggests 40 out of N.</p>' +
+          '<p><b>N = (M &times; C) &divide; R</b> = (40 &times; 50) &divide; 8 = <b>250</b> fish.</p>' +
+          '<div class="keep"><b>Keep this</b>It assumes the population does not change in between, marks do not come off, and marked fish mix back in so every fish has the same chance of being caught.</div>' },
+
+  { type: "num", topic: "Capture recapture", stretch: true,
+    q: "A scientist catches 60 newts in a pond, marks them and releases them. A week later she catches 45 newts, and 9 of them are marked. Estimate the number of newts in the pond.",
+    boxes: [ { label: "Estimate", a: 300, post: "newts" } ],
+    hint: "M is how many were marked first time, C is the size of the second catch, R is how many of those were marked. N = (M &times; C) &divide; R.",
+    why: "M = 60, C = 45, R = 9.<br>N = (60 &times; 45) &divide; 9 = 2700 &divide; 9 = <b>300</b> newts.<br>Check: 9 out of 45 is one fifth marked, and 60 is one fifth of 300." },
+
+  /* ---------- FINAL ---------- */
+  { type: "num", topic: "Two way stratified", stretch: true,
+    q: "A head teacher wants a stratified sample of 50 students from Years 10 and 11, stratified by <b>year group and gender</b>. The table shows how many students there are.",
+    fig: TWOWAY,
+    boxes: [
+      { label: "(a) Total students in Years 10 and 11", a: 360 },
+      { label: "(b) Year 10 girls in the sample", a: 13 },
+      { label: "(c) Year 11 boys in the sample", a: 14 }
+    ],
+    hint: "Each cell of the table is its own stratum. Use cell &divide; total &times; 50 for each one, then round.",
+    why: "(a) 84 + 96 + 102 + 78 = <b>360</b>.<br>(b) 96 &divide; 360 &times; 50 = 13.33, so <b>13</b>.<br>(c) 102 &divide; 360 &times; 50 = 14.17, so <b>14</b>.<br>The other two: Year 10 boys 11.67 so 12, Year 11 girls 10.83 so 11. Check: 12 + 13 + 14 + 11 = 50." }
+  ]
+});
+})();
+</script>
+</body>
+</html>
