@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=3">
+<link rel="stylesheet" href="/egw/egw.css?v=4">
 <style>
 /* HQ home only. Everything shared lives in egw.css */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -134,6 +134,11 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
   .deal{grid-template-columns:1fr}
   .maprow{grid-template-columns:1fr}
 }
+/* second look and moving devices */
+.slook .act .t .st{background:var(--sun)}
+.codebox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;word-break:break-all;margin-top:8px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.okmsg{color:var(--good);font-weight:700}
 </style>
 </head>
 <body class="subj-home">
@@ -154,6 +159,8 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
     <p class="tiny" style="color:var(--mist);margin-top:8px">Sparks are a little score for anything you try, even using Show me.</p>
     <p class="progress" id="progress"></p>
   </section>
+
+  <div id="secondLook"></div>
 
   <p class="lead2">Not sure where to start? The dice can choose.</p>
   <div class="board" style="margin-bottom:0">
@@ -229,8 +236,27 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
     </div>
   </details>
 
+  <details class="fold" id="deviceFold" style="--accent:var(--cyan)">
+    <summary><span><b>Move to another device</b><small>Your progress lives on this device. A save code carries it over.</small></span><span class="chev">&rsaquo;</span></summary>
+    <div class="inner">
+      <p class="chiplabel" style="margin-top:0">From this device</p>
+      <p class="tiny">Make a save code, then copy it (emailing it to yourself works) or save it as a file.</p>
+      <div class="qnav" style="margin-top:6px"><button class="btn" id="mkCode" type="button">Make a save code</button></div>
+      <div id="codeOut" class="hidden">
+        <textarea class="logbox codebox" id="codeBox" rows="4" readonly aria-label="Your save code"></textarea>
+        <div class="qnav" style="margin-top:8px"><button class="btn btn-quiet" id="copyCode" type="button">Copy it</button><button class="btn btn-quiet" id="dlCode" type="button">Save as a file</button></div>
+        <p class="tiny" id="codeMsg"></p>
+      </div>
+      <p class="chiplabel">On the other device</p>
+      <p class="tiny">Open this page there, paste the code or choose the file, and tap Load. Anything newer on that device is kept, so nothing gets lost.</p>
+      <textarea class="logbox codebox" id="loadBox" rows="3" placeholder="Paste a save code here" aria-label="Paste a save code"></textarea>
+      <div class="qnav" style="margin-top:8px"><button class="btn" id="loadCode" type="button">Load</button><label class="btn btn-quiet" for="loadFile">Choose a file</label><input type="file" id="loadFile" class="vh" accept=".txt,text/plain"></div>
+      <p class="tiny" id="loadMsg"></p>
+    </div>
+  </details>
+
   <details class="fold" style="--accent:var(--violet)">
-    <summary><span><b>Send to Jay</b><small>Only if you want to: your map, your notes, how things are going.</small></span><span class="chev">&rsaquo;</span></summary>
+    <summary><span><b>Send to Jay</b><small>Only if you want to: how things are going, with a progress code for Jay's view.</small></span><span class="chev">&rsaquo;</span></summary>
     <div class="inner"><div id="sendHost"></div></div>
   </details>
 
@@ -239,12 +265,13 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
 <footer>
   <div class="wrap">
     <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
-    <a href="/">Base 5 home</a>
+    <span><a href="/">Base 5 home</a> &middot; <a href="/egw/teacher.html">Jay's view</a></span>
   </div>
 </footer>
 
 <script src="/data/send.js"></script>
 <script src="/egw/catalogue.js?v=4"></script>
+<script src="/egw/progress.js?v=3"></script>
 <script>
 (function(){
 "use strict";
@@ -285,7 +312,7 @@ function $(id){ return document.getElementById(id); }
 function loadJSON(k){ try{ var r = localStorage.getItem(k); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
 var hq = loadJSON(HQ_KEY) || { map: {}, log: [], plan: {} };
 if(!hq.map) hq.map = {}; if(!hq.log) hq.log = []; if(!hq.plan) hq.plan = {};
-function saveHQ(){ try{ localStorage.setItem(HQ_KEY, JSON.stringify(hq)); }catch(e){} }
+function saveHQ(){ hq.updated = new Date().toISOString(); try{ localStorage.setItem(HQ_KEY, JSON.stringify(hq)); }catch(e){} refreshJayCode(); }
 try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
 
 function actState(a){
@@ -318,6 +345,8 @@ function drawStrip(){
   if(done) bits.push("<b>" + done + "</b> " + (done === 1 ? "chunk" : "chunks") + " done");
   if(sparks) bits.push("<b>" + sparks + "</b> sparks");
   if(greens) bits.push("<b>" + greens + "</b> " + (greens === 1 ? "topic feels" : "topics feel") + " solid");
+  var rv = EGWPROG.reviewInfo();
+  if(!rv.due.length && rv.waiting.length) bits.push("<b>" + rv.waiting.length + "</b> coming back for a second look soon");
   $("progress").innerHTML = bits.length ? bits.map(function(x){ return "<span>" + x + "</span>"; }).join("") : "";
 }
 
@@ -552,35 +581,125 @@ function drawExams(){
   card.innerHTML = html;
 }
 
+/* ---------- second look ---------- */
+function drawSecondLook(){
+  var rv = EGWPROG.reviewInfo(), host = $("secondLook");
+  if(!rv.due.length){ host.innerHTML = ""; return; }
+  var byAct = {}, order = [];
+  rv.due.forEach(function(it){
+    if(!byAct[it.id]){ byAct[it.id] = { n: 0, topics: [] }; order.push(it.id); }
+    byAct[it.id].n++;
+    if(byAct[it.id].topics.indexOf(it.topic) < 0) byAct[it.id].topics.push(it.topic);
+  });
+  var html = '<p class="lead2">Something to come back to, if you fancy it.</p><div class="board" style="margin-bottom:0"><div class="card w12 slook" style="--accent:var(--sun);--accent-soft:rgba(255,210,63,.24)">' +
+    '<span class="kicker">Second look</span><h3>A few questions are back for another go</h3>' +
+    '<p class="tiny" style="margin:0">They needed Show me or a second go last time. Trying them again a few days later is how they stick.</p>';
+  order.forEach(function(id){
+    var a = EGWCAT.act(id), o = byAct[id];
+    if(!a) return;
+    html += '<a class="act" href="/egw/' + id + '.html#review"><span class="t"><b>' + a.title + '</b><span class="st">' + o.n + ' question' + (o.n === 1 ? "" : "s") + '</span></span>' +
+      '<p style="margin-bottom:0">' + o.topics.slice(0, 3).join(", ") + '</p></a>';
+  });
+  host.innerHTML = html + '</div></div>';
+}
+
+/* ---------- moving to another device ---------- */
+var lastCode = "";
+$("mkCode").onclick = function(){
+  $("codeMsg").textContent = "Making it...";
+  EGWPROG.encode("SAVE", EGWPROG.backup()).then(function(code){
+    lastCode = code;
+    $("codeBox").value = code;
+    $("codeOut").classList.remove("hidden");
+    $("codeMsg").textContent = "Here it is. It holds everything saved on this device.";
+  });
+};
+$("copyCode").onclick = function(){
+  var done = function(){ $("codeMsg").innerHTML = '<span class="okmsg">Copied.</span> Paste it wherever you like, then load it on the other device.'; };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(lastCode).then(done, function(){ $("codeBox").select(); });
+  else { $("codeBox").select(); try{ document.execCommand("copy"); done(); }catch(e){} }
+};
+$("dlCode").onclick = function(){
+  var name = "egw-save-" + EGWPROG.today() + ".txt";
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([lastCode + "\n"], { type: "text/plain" }));
+  link.download = name;
+  document.body.appendChild(link); link.click();
+  setTimeout(function(){ URL.revokeObjectURL(link.href); link.remove(); }, 500);
+  $("codeMsg").innerHTML = '<span class="okmsg">Saved</span> to your downloads as ' + name + '.';
+};
+function loadFrom(text){
+  var msg = $("loadMsg");
+  EGWPROG.decode(text).then(function(res){
+    if(res.kind !== "save"){ msg.textContent = "That is a progress code for Jay's view, not a save code. Try the code from Make a save code."; return; }
+    var r = EGWPROG.restore(res.data);
+    hq = loadJSON(HQ_KEY) || { map: {}, log: [], plan: {} };
+    if(!hq.map) hq.map = {}; if(!hq.log) hq.log = []; if(!hq.plan) hq.plan = {};
+    drawAll();
+    refreshJayCode();
+    var bits = [];
+    if(r.added) bits.push(r.added + " brought over");
+    if(r.updated) bits.push(r.updated + " updated");
+    msg.innerHTML = '<span class="okmsg">Loaded.</span> ' + (bits.length ? bits.join(", ") + ". Anything newer on this device was kept." : "Everything here was already up to date.");
+    $("loadBox").value = "";
+  }, function(err){
+    msg.textContent = "That did not work: " + err.message + ". Check the whole code was copied, including the full stop at the end.";
+  });
+}
+$("loadCode").onclick = function(){ loadFrom($("loadBox").value); };
+$("loadFile").onchange = function(){
+  var f = this.files && this.files[0];
+  if(!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){ loadFrom(String(rd.result)); };
+  rd.readAsText(f);
+  this.value = "";
+};
+
 /* ---------- send ---------- */
+var jayCode = "";
+function refreshJayCode(){
+  EGWPROG.encode("JAY", EGWPROG.report()).then(function(c){ jayCode = c; });
+}
 function reportText(){
   var lines = ["EGW's GCSE HQ", ""];
   lines.push("== Activities ==");
-  allActs().forEach(function(x){
-    lines.push(x.s.name + ": " + x.a.title + "  |  " + (x.st.touched ? x.st.done + " of " + x.st.chunks + " chunks, " + x.st.sparks + " sparks" : "not started"));
+  SUBJECTS.forEach(function(s){
+    var acts = s.acts.map(function(a){ return actState(a); });
+    var started = acts.filter(function(x){ return x.touched; }).length;
+    var done = 0, total = 0;
+    acts.forEach(function(x){ done += x.done; total += x.chunks; });
+    lines.push(s.name + ": " + started + " of " + acts.length + " activities started, " + done + " of " + total + " chunks done");
   });
   lines.push("");
   lines.push("== Revision map ==");
+  var notYet = [];
   SUBJECTS.forEach(function(s){
-    lines.push(s.name + ":");
-    s.topics.forEach(function(t){
-      var v = hq.map[s.key + ":" + t[0]] || 0;
-      lines.push("  " + ["(not rated)", "Not yet", "Getting there", "Got it"][v] + "  |  " + t[0]);
-    });
+    var c = [0, 0, 0, 0];
+    s.topics.forEach(function(t){ var v = hq.map[s.key + ":" + t[0]] || 0; c[v]++; if(v === 1) notYet.push(t[0]); });
+    lines.push(s.name + ": " + c[3] + " got it, " + c[2] + " getting there, " + c[1] + " not yet, " + c[0] + " not rated");
   });
+  if(notYet.length) lines.push("Not yet: " + notYet.slice(0, 12).join("; ") + (notYet.length > 12 ? " and " + (notYet.length - 12) + " more" : ""));
   lines.push("");
-  lines.push("== Things to remember ==");
+  lines.push("== Things to remember (latest) ==");
   if(!hq.log.length) lines.push("(none yet)");
-  hq.log.forEach(function(l){ lines.push(l.d + ": " + l.t); });
+  hq.log.slice(-5).forEach(function(l){ lines.push(l.d + ": " + l.t); });
+  lines.push("");
+  lines.push("== For Jay's view ==");
+  lines.push("Paste this whole email at cbsbase5.github.io/egw/teacher.html");
+  lines.push(jayCode || EGWPROG.encodeSync("JAY", EGWPROG.report()));
   return lines.join("\n");
 }
 if(window.Base5Send){
   Base5Send.mount($("sendHost"), { tool: "GCSE HQ summary", filename: "egw-gcse-hq", getText: reportText });
 }
 
+function drawAll(){ drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
+
 $("dice").onclick = deal;
-drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams();
-window.addEventListener("pageshow", function(){ drawStrip(); drawSubjects(); });
+drawAll();
+refreshJayCode();
+window.addEventListener("pageshow", function(){ drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
 $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>

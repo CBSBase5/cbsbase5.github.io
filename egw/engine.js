@@ -99,6 +99,55 @@ function save(){
 
 function scored(s){ return ["learn", "write"].indexOf(s.type) < 0 && !(s.type === "widget" && s.unscored); }
 
+/* ---------- second look ----------
+   A question that needed Show me or a second go comes back a couple
+   of days later. Right first time on a second look pushes it further
+   out (2, then 5, then 12 days); after that it drops off the list.
+   Stretch questions, widgets and writing are left out. */
+var REVIEW_KEY = PREFIX + "review.v1";
+var REVIEW_GAP = [0, 2, 5, 12];
+function dayStr(d){
+  var m = d.getMonth() + 1, dd = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd;
+}
+function addDays(n){ var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return dayStr(d); }
+function loadReview(){
+  try{ var r = localStorage.getItem(REVIEW_KEY); var d = r ? JSON.parse(r) : null; if(d && d.items) return d; }catch(e){}
+  return { items: {} };
+}
+function saveReview(d){ d.updated = new Date().toISOString(); try{ localStorage.setItem(REVIEW_KEY, JSON.stringify(d)); }catch(e){} }
+function reviewable(s){ return !!s && !s.stretch && ["mc", "multi", "num", "sort", "order", "match", "text"].indexOf(s.type) >= 0; }
+function noteForReview(i, status){
+  var s = steps[i];
+  if(cfg.review || !reviewable(s) || (status !== "shown" && status !== "right2")) return;
+  var d = loadReview(), k = cfg.id + ":" + i;
+  if(d.items[k]) return;
+  d.items[k] = { id: cfg.id, i: i, box: 1, due: addDays(REVIEW_GAP[1]), added: addDays(0),
+    title: cfg.title, subject: cfg.subject, topic: stripTags(s.topic), q: stripTags(s.q || "").slice(0, 90) };
+  saveReview(d);
+}
+function reviewResult(orig, status){
+  var d = loadReview(), k = cfg.id + ":" + orig, it = d.items[k];
+  if(!it) return;
+  it.last = addDays(0); it.seen = (it.seen || 0) + 1;
+  if(status === "right1"){
+    it.box++;
+    if(it.box >= REVIEW_GAP.length){ delete d.items[k]; d.learnt = (d.learnt || 0) + 1; }
+    else it.due = addDays(REVIEW_GAP[it.box]);
+  }else{
+    if(status === "shown") it.box = 1;
+    it.due = addDays(REVIEW_GAP[1]);
+  }
+  saveReview(d);
+}
+/* the nearest learn card before a question, for a reminder */
+function findLearn(all, i){
+  for(var j = i - 1; j >= 0 && all[j].topic === all[i].topic; j--){
+    if(all[j].type === "learn") return { title: all[j].title, html: all[j].html, fig: all[j].fig };
+  }
+  return null;
+}
+
 /* Sparks: everything you do earns some. Learning from Show me still counts. */
 var SPARK = { right1: 10, right2: 6, shown: 3, done: 8 };
 
@@ -118,7 +167,22 @@ function summary(){
     else if(a.status === "skipped"){ skipped++; }
   });
   var ch = chunks.map(function(c){ return chunkState(c); });
-  return { total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
+  /* per chunk: [first go, second go, Show me, skipped, questions] */
+  var ct = chunks.map(function(c){
+    var t = [0, 0, 0, 0, 0];
+    for(var i = c.from; i <= c.to; i++){
+      if(steps[i].type === "learn") continue;
+      t[4]++;
+      var a = state.answers[i];
+      if(!a) continue;
+      if(a.status === "right1") t[0]++;
+      else if(a.status === "right2") t[1]++;
+      else if(a.status === "shown") t[2]++;
+      else if(a.status === "skipped") t[3]++;
+    }
+    return t;
+  });
+  return { id: cfg.id, subject: cfg.subject, chunkTally: ct, total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
            sparks: sparks, best: state.best || 0,
            chunkStates: ch, chunkNames: chunks.map(function(c){ return stripTags(c.topic); }),
            chunks: ch.length, chunksDone: ch.filter(function(x){ return x === "done"; }).length,
@@ -131,6 +195,11 @@ function summary(){
 var chunks = [], chunkOf = [];
 function makeChunks(){
   chunks = []; chunkOf = [];
+  if(cfg.review){
+    if(steps.length) chunks.push({ topic: "Second look", from: 0, to: steps.length - 1 });
+    steps.forEach(function(s, i){ chunkOf[i] = 0; });
+    return;
+  }
   steps.forEach(function(s, i){
     var last = chunks[chunks.length - 1];
     if(!last || last.topic !== s.topic){
@@ -258,7 +327,7 @@ function build(){
 
   if(window.Base5Send){
     Base5Send.mount($("sendHost"), {
-      tool: "GCSE HQ: " + cfg.title,
+      tool: "GCSE HQ: " + (cfg.review ? "Second look, " : "") + cfg.title,
       filename: "egw-" + cfg.id,
       getText: reportText
     });
@@ -290,6 +359,7 @@ function showOnly(id){
 
 function showStart(){
   showOnly("startCard");
+  if(cfg.review) return;
   var any = !!(state.answers && Object.keys(state.answers).length);
   $("resumeBtn").classList.toggle("hidden", !any);
   $("beginBtn").textContent = any ? "Start again from scratch" : "Begin with chunk 1";
@@ -381,7 +451,8 @@ function go(i){
 
   var s = steps[i];
   var k = chunkOf[i], c = chunks[k];
-  $("chunkLabel").innerHTML = "Chunk " + (k + 1) + " <span>of " + chunks.length + "</span>";
+  $("chunkLabel").innerHTML = cfg.review ? "Second look <span>" + (i + 1) + " of " + steps.length + "</span>" :
+    "Chunk " + (k + 1) + " <span>of " + chunks.length + "</span>";
   var dots = "";
   for(var j = c.from; j <= c.to; j++) dots += '<i class="' + (j < i ? "past" : j === i ? "now" : "") + '"></i>';
   $("dots").innerHTML = dots;
@@ -399,6 +470,13 @@ function go(i){
   cur = null;
   var renderer = R[s.type];
   renderer(s, body, i);
+  if(cfg.review && s._remind){
+    var rem = h("details", "working remind");
+    rem.innerHTML = '<summary>Want a reminder? Tap for the idea behind this one.</summary>' +
+      '<div class="remindbody"><b>' + s._remind.title + '</b>' + (s._remind.fig ? '<div class="fig">' + s._remind.fig + '</div>' : "") +
+      '<div class="learnbody">' + s._remind.html + '</div></div>';
+    body.appendChild(rem);
+  }
 
   var a = state.answers[i];
   setButtons(s, i);
@@ -439,7 +517,7 @@ function seeded(str){
 function optionOrder(s){
   var ord = s.options.map(function(o, k){ return k; });
   if(s.fixed) return ord;
-  var rnd = seeded(cfg.id + ":" + state.pos + ":" + s.options.length);
+  var rnd = seeded(cfg.id + ":" + (s._orig !== undefined ? s._orig : state.pos) + ":" + s.options.length);
   for(var i = ord.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var t = ord[i]; ord[i] = ord[j]; ord[j] = t; }
   return ord;
 }
@@ -860,6 +938,7 @@ function check(giveUp){
     return;
   }
   cur.mark(a.status === "shown");
+  if(cfg.review) reviewResult(s._orig, a.status); else noteForReview(i, a.status);
   bump(a.status, $("checkBtn"));
   showFeedback(s, a.status, false);
   setButtons(s, i);
@@ -902,6 +981,7 @@ function flash(msg){
 function finish(){
   state.finished = true; save();
   showOnly("resultCard");
+  if(cfg.review){ finishReview(); return; }
   var sm = summary();
   var marked = sm.got1 + sm.got2 + sm.shown;
   $("scoreLine").textContent = (sm.got1 + sm.got2) + " out of " + (marked || 0) + " worked out";
@@ -958,6 +1038,28 @@ function finish(){
   confetti($("scoreLine"), 30);
 }
 
+function finishReview(){
+  var g1 = 0, g2 = 0, sh = 0, sk = 0;
+  steps.forEach(function(s, i){
+    var a = state.answers[i];
+    if(!a) return;
+    if(a.status === "right1") g1++; else if(a.status === "right2") g2++;
+    else if(a.status === "shown") sh++; else if(a.status === "skipped") sk++;
+  });
+  var n = g1 + g2 + sh;
+  $("scoreLine").textContent = n ? (g1 + g2) + " out of " + n + " this time" : "Nothing answered, and that is fine";
+  $("scoreNote").textContent = "Anything you got first go will come back once more, further apart, then drop off the list. " +
+    "Anything that needed Show me or a second go will come back in a couple of days.";
+  $("tally").innerHTML = (g1 ? tallyBox(g1, "first go") : "") + (g2 ? tallyBox(g2, "second go") : "") +
+    (sh ? tallyBox(sh, "learnt from Show me") : "") + (sk ? tallyBox(sk, "skipped for now") : "");
+  $("topicBars").innerHTML = "";
+  $("reviewList").innerHTML = "";
+  document.querySelector("#resultCard details.review").classList.add("hidden");
+  $("againBtn").classList.add("hidden");
+  $("freshBtn").classList.add("hidden");
+  if(n) confetti($("scoreLine"), 20);
+}
+
 function tallyBox(n, label){
   return '<div class="tbox"><b>' + n + '</b><span>' + label + '</span></div>';
 }
@@ -965,7 +1067,7 @@ function tallyBox(n, label){
 function reportText(){
   var sm = summary();
   var lines = [];
-  lines.push(cfg.subject + ": " + cfg.title);
+  lines.push(cfg.subject + ": " + (cfg.review ? "Second look, " : "") + cfg.title);
   lines.push("First go: " + sm.got1 + ", second go: " + sm.got2 + ", learnt from Show me: " + sm.shown + ", skipped: " + sm.skipped + " (of " + sm.marked + " marked questions)");
   lines.push("Sparks: " + sm.sparks + ", best streak: " + sm.best + ", chunks done: " + sm.chunksDone + " of " + sm.chunks);
   lines.push("");
@@ -997,17 +1099,58 @@ function reportText(){
   return lines.join("\n");
 }
 
+/* ---------- second look start card ---------- */
+function buildReviewStart(){
+  var sc = $("startCard");
+  var n = steps.length;
+  sc.innerHTML = '<span class="kicker">' + cfg.subject + ' &middot; second look</span>' +
+    '<h3>A second look</h3>' +
+    (n ? '<p class="lead">' + n + ' question' + (n === 1 ? "" : "s") + ' from <b>' + cfg.title + '</b> that needed Show me or a second go last time. ' +
+      'Same as before: two goes, and Show me whenever you want it.</p>' +
+      '<p class="tiny">Each one has a reminder of the idea tucked underneath, if you would like it.</p>' +
+      '<div class="qnav"><button class="btn" id="beginBtn">Start</button><a class="btn btn-quiet" href="/egw/">Not now</a></div>'
+    : '<p class="lead">Nothing from this activity is waiting for a second look right now.</p>' +
+      '<div class="qnav"><a class="btn" href="/egw/' + cfg.id + '.html">Open the activity</a><a class="btn btn-quiet" href="/egw/">Back to HQ</a></div>');
+  if(n) $("beginBtn").onclick = function(){ go(0); };
+}
+
 /* ---------- start ---------- */
 function run(c){
-  cfg = c; steps = c.steps; key = PREFIX + c.id + ".v1";
-  state = load() || fresh();
+  var reviewMode = (location.hash || "") === "#review";
+  if(reviewMode){
+    var d = loadReview(), today = addDays(0), list = [];
+    Object.keys(d.items).forEach(function(k){
+      var it = d.items[k];
+      if(it.id === c.id && it.due <= today && reviewable(c.steps[it.i])) list.push(it);
+    });
+    list.sort(function(a, b){ return a.i - b.i; });
+    cfg = {}; Object.keys(c).forEach(function(k){ cfg[k] = c[k]; });
+    cfg.review = true;
+    steps = list.map(function(it){
+      var copy = {}, src = c.steps[it.i];
+      Object.keys(src).forEach(function(k){ copy[k] = src[k]; });
+      copy._orig = it.i;
+      copy._remind = findLearn(c.steps, it.i);
+      return copy;
+    });
+    key = PREFIX + c.id + ".review.v1";
+    state = fresh();
+  }else{
+    cfg = c; steps = c.steps; key = PREFIX + c.id + ".v1";
+    state = load() || fresh();
+  }
   if(!state.widgets) state.widgets = {};
   try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
   document.title = c.title + " - EGW GCSE HQ";
   makeChunks();
   build();
+  if(cfg.review) buildReviewStart();
   showStart();
   save();
+  window.addEventListener("hashchange", function(){
+    if(((location.hash || "") === "#review") !== !!cfg.review) location.reload();
+  });
+  if(cfg.review) return;
   /* /egw/page.html#chunk-3 opens straight onto chunk 3 */
   var m = (location.hash || "").match(/^#chunk-(\d+)$/);
   if(m && chunks[+m[1] - 1]) go(chunks[+m[1] - 1].from);
