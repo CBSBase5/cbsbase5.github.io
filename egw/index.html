@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=5">
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<script src="/egw/skin.js?v=1"></script>
 <style>
 /* HQ home only. Everything shared lives in egw.css */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -245,6 +246,14 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
     <span><b>Swipe deck</b><small>Quick true or false cards. Flick, flip, learn. Good for restless moments.</small></span><span class="chev">&rsaquo;</span>
   </a>
 
+  <a class="fold" href="/egw/bonnie.html" style="--accent:#b07a52">
+    <span><b>Study with Bonnie</b><small>A quiet room with a snoozing poodle, optional rain sounds and a timer you set. Good for getting started.</small></span><span class="chev">&rsaquo;</span>
+  </a>
+
+  <a class="fold" href="/egw/looks.html" style="--accent:var(--cyan)">
+    <span><b>Change the look</b><small id="looksRow">New colours for your whole HQ. Sparks open more of them.</small></span><span class="chev">&rsaquo;</span>
+  </a>
+
   <a class="fold" href="/egw/papers.html" style="--accent:var(--sun)">
     <span><b>What's on the papers</b><small>How each exam looks, and where to practise every topic.</small></span><span class="chev">&rsaquo;</span>
   </a>
@@ -334,8 +343,8 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
 </footer>
 
 <script src="/data/send.js"></script>
-<script src="/egw/catalogue.js?v=5"></script>
-<script src="/egw/progress.js?v=6"></script>
+<script src="/egw/catalogue.js?v=6"></script>
+<script src="/egw/progress.js?v=7"></script>
 <script>
 (function(){
 "use strict";
@@ -418,7 +427,7 @@ function drawStrip(){
 var EXTRA = { key: "extra", acc: "acc-stats", name: "Something different", line: "Games and challenges that mix everything up. Dip in whenever.",
   acts: (EGWCAT.extras || []).map(function(a){ return { id: a.id, title: a.title, line: a.line, mins: a.mins, chunks: a.chunks.length, names: a.chunks, kind: a.kind }; }) };
 var TABS = SUBJECTS.concat(EXTRA.acts.length ? [EXTRA] : []);
-var KINDS = { escape: "Escape room", mark: "You are the examiner", pack: "Mixed subjects" };
+var KINDS = { escape: "Escape room", mark: "You are the examiner", pack: "Mixed subjects", "case": "Case files" };
 function fmtT(sec){ var m = Math.floor(sec / 60), s2 = sec % 60; return m + ":" + (s2 < 10 ? "0" : "") + s2; }
 var subjSel = Math.max(0, TABS.map(function(s){ return s.key; }).indexOf(hq.lastSubj));
 function drawSubjects(){
@@ -716,6 +725,7 @@ function drawMood(){
     var items = [];
     items.push('<a href="/egw/daily.html"><span><b>' + (dropDone ? "Today\'s drop: done" : "Today\'s drop") + '</b><small>' + (dropDone ? "Already done. Nice." : "One question, about a minute.") + '</small></span><span>&rsaquo;</span></a>');
     items.push('<a href="/egw/swipe.html?n=5"><span><b>Five swipe cards</b><small>True or false, no typing.</small></span><span>&rsaquo;</span></a>');
+    items.push('<a href="/egw/bonnie.html"><span><b>Sit with Bonnie</b><small>She snoozes, you do a little bit of anything. Ten minutes is plenty.</small></span><span>&rsaquo;</span></a>');
     if(rv.due.length){
       var it = rv.due[0], a = EGWCAT.act(it.id);
       items.push('<a href="/egw/' + it.id + '.html#review"><span><b>A second look</b><small>' + (a ? a.title : "") + ', with a reminder under each one.</small></span><span>&rsaquo;</span></a>');
@@ -726,6 +736,7 @@ function drawMood(){
     var ideas = [];
     (EGWCAT.extras || []).forEach(function(x){
       var st = actState({ id: x.id, chunks: x.chunks.length });
+      if(x.kind === "case" && st.done < x.chunks.length) ideas.push('<a href="/egw/' + x.id + '.html"><span><b>' + x.title + '</b><small>Six case files. Statistics with a magnifying glass.</small></span><span>&rsaquo;</span></a>');
       if(x.kind === "escape" && !(st.sm && st.sm.escaped)) ideas.push('<a href="/egw/' + x.id + '.html"><span><b>' + x.title + '</b><small>Escape room. Four rooms, one door.</small></span><span>&rsaquo;</span></a>');
     });
     ideas = ideas.sort(function(){ return Math.random() - 0.5; }).slice(0, 1);
@@ -869,12 +880,18 @@ function drawSkyRow(){
   SUBJECTS.forEach(function(sj){ sj.acts.forEach(function(a){ var st = actState(a); total += a.chunks; lit += st.done; }); });
   $("skyRow").textContent = lit ? lit + " of " + total + " stars lit so far. Tap to see them." : "One star for every chunk. Each one you finish lights up.";
 }
-function drawAll(){ drawMood(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
+function drawLooksRow(){
+  if(typeof EGWSKIN === "undefined") return;
+  var f = EGWSKIN.fresh(), cur = EGWSKIN.list.filter(function(x){ return x.id === EGWSKIN.current(); })[0];
+  $("looksRow").textContent = f.length ? "New look ready: " + f.map(function(x){ return x.name; }).join(" and ") + ". Tap to try it, if you like." :
+    "Wearing: " + cur.name + ". New colours for your whole HQ; sparks open more of them.";
+}
+function drawAll(){ drawLooksRow(); drawMood(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
 
 $("dice").onclick = deal;
 drawAll();
 refreshJayCode();
-window.addEventListener("pageshow", function(){ drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
+window.addEventListener("pageshow", function(){ drawLooksRow(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
 $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>

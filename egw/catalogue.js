@@ -820,6 +820,22 @@ EGWCAT.extras = [
    "The year 2080",
    "Back home: should we?"
   ]
+ },
+ {
+  "id": "data-detective",
+  "kind": "case",
+  "subject": "stats",
+  "title": "Data Detective",
+  "line": "Six case files at the Base 5 Data Bureau. Crack dodgy surveys, messy data and lying graphs.",
+  "mins": 40,
+  "chunks": [
+   "Case 1: The suspicious survey",
+   "Case 2: The messy spreadsheet",
+   "Case 3: The graph that lied",
+   "Case 4: The alibi averages",
+   "Case 5: The ice cream conspiracy",
+   "Case 6: The final report"
+  ]
  }
 ];
 

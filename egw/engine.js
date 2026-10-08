@@ -35,6 +35,10 @@
    to the config. Every chunk except the last is a room; finishing a
    room reveals its digit. The last chunk holds the unlock step.
    A clock is offered on the start card, off unless she turns it on.
+
+   Packs can word their own chunk ending with
+     chunkMsg: function(k, topic, n){ return {stamp, head, text, wide}; }
+   (wide:true draws a rubber stamp instead of the round number).
      widget {title, html, mount:function(el, api)}  custom interactive
             api.data   object saved with the page
             api.save() save api.data
@@ -454,7 +458,15 @@ function chunkDone(k){
     else if(a.status === "skipped") sk++;
   }
   showOnly("chunkCard");
-  if(cfg.escape){
+  $("stampNum").className = "stamp";
+  if(cfg.chunkMsg){
+    /* a pack can word its own chunk ending: {stamp, head, text, wide} */
+    var cm = cfg.chunkMsg(k, stripTags(c.topic), chunks.length) || {};
+    $("stampNum").textContent = cm.stamp || String(k + 1);
+    if(cm.wide) $("stampNum").className = "stamp wide";
+    $("chunkDoneH").textContent = cm.head || pick(CHEERS);
+    $("chunkDoneP").textContent = (cm.text || "") + (sk ? " You skipped " + sk + "; they will be there whenever you fancy them." : "");
+  }else if(cfg.escape){
     $("stampNum").textContent = escDigit(k);
     $("chunkDoneH").textContent = pick(["Lock open.", "A digit drops out.", "Room cleared.", "Click. Something unlocks."]);
     $("chunkDoneP").textContent = "Room " + (k + 1) + ": " + stripTags(c.topic) + ". The digit is " + escDigit(k) + ". " +

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Detective - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<script src="/egw/skin.js?v=1"></script>
+<style>
+/* Case file tag at the top of each learn card */
+.learnbody p.dd-tag,.dd-tag{display:inline-block;font-family:"Courier New",Courier,monospace;font-weight:700;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;background:#f3e3b5;color:#141a33;border-left:5px solid #c0262d;padding:4px 10px;margin:0 0 12px}
+/* Magnifying glass (widget on this page only) */
+.mg{background:var(--ink);color:#fff;border-color:var(--ink);border-radius:16px;padding:14px}
+.mg-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--display);font-weight:700;margin-bottom:8px}
+.mg-top b{color:var(--sun)}
+.mg-dots{display:flex;gap:6px}
+.mg-dots i{display:block;width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,.35)}
+.mg-dots i.on{border-color:var(--sun);background:rgba(255,210,63,.35)}
+.mg-board{max-width:520px;margin:0 auto;border-radius:12px;overflow:hidden;touch-action:none;outline:none;background:#f2f1ec}
+.mg-board:focus-visible{box-shadow:0 0 0 3px var(--cyan)}
+.mg-board > svg{display:block;width:100%;height:auto;cursor:grab}
+.mg-board.drag > svg{cursor:grabbing}
+.mg-help{font-size:.9rem;color:rgba(255,255,255,.8);margin:8px 0 10px}
+.mg-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mg-btns .btn{padding:10px 16px}
+.mg-quiet{font-family:inherit;font-size:.9rem;background:none;border:0;color:#fff;text-decoration:underline;cursor:pointer;padding:6px}
+.mg-msg{margin-top:10px;font-size:.98rem;line-height:1.5;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px}
+.mg-msg b{color:var(--sun)}
+.mg-msg:empty{display:none}
+.mg-list{margin:10px 0 0;padding-left:22px;font-size:.95rem;line-height:1.5}
+.mg-list li{margin-bottom:4px}
+.mg-list b{color:var(--sun)}
+.mg-list:empty{display:none}
+</style>
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Data Detective</h2>
+    <span>Six case files from the Base 5 Data Bureau. Rain on the window, a magnifying glass on the desk, and GCSE Statistics to crack each case: surveys, messy data, lying graphs, averages, correlation and a final report.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=8"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec",
+    WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = "font-family=\"Space Grotesk,Arial\"", BODY = "font-family=\"Atkinson Hyperlegible,Verdana\"";
+
+/* ---------- figures ---------- */
+
+/* Case 2: the youth club spreadsheet */
+var SHEET =
+  '<table class="datatable"><tr><th>Row</th><th>Age (years)</th><th>Height (cm)</th></tr>' +
+  '<tr><td>A</td><td>14</td><td>158</td></tr>' +
+  '<tr><td>B</td><td>15</td><td>1.62</td></tr>' +
+  '<tr><td>C</td><td>13</td><td>149</td></tr>' +
+  '<tr><td>D</td><td>250</td><td>171</td></tr>' +
+  '<tr><td>E</td><td>16</td><td>166</td></tr>' +
+  '<tr><td>E</td><td>16</td><td>166</td></tr>' +
+  '<tr><td>F</td><td>14</td><td></td></tr>' +
+  '<tr><td>G</td><td>15</td><td>160</td></tr>' +
+  '<tr><td>H</td><td>13</td><td>155</td></tr>' +
+  '<tr><td>I</td><td>16</td><td>188</td></tr></table>';
+
+/* Case 3: a 3D pie chart, four equal slices, the front one looks biggest */
+var FIG_PIE3D = (function(){
+  var cx = 180, cy = 84, rx = 150, ry = 60, dep = 46;
+  function P(t, dy){ var a = t * Math.PI / 180; return (cx + rx * Math.cos(a)).toFixed(1) + " " + (cy + ry * Math.sin(a) + (dy || 0)).toFixed(1); }
+  function wall(a, b, col){
+    return '<path d="M' + P(a) + ' A' + rx + ' ' + ry + ' 0 0 1 ' + P(b) + ' L' + P(b, dep) + ' A' + rx + ' ' + ry + ' 0 0 0 ' + P(a, dep) + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="1.5" stroke-linejoin="round"/>';
+  }
+  function top(a, b, col){
+    return '<path d="M' + cx + ' ' + cy + ' L' + P(a) + ' A' + rx + ' ' + ry + ' 0 0 1 ' + P(b) + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="1.5" stroke-linejoin="round"/>';
+  }
+  function label(m, name, col){
+    var a = m * Math.PI / 180, x = cx + 0.6 * rx * Math.cos(a), y = cy + 0.6 * ry * Math.sin(a);
+    return '<text x="' + x.toFixed(1) + '" y="' + (y - 2).toFixed(1) + '" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + col + '">' + name + '</text>' +
+           '<text x="' + x.toFixed(1) + '" y="' + (y + 15).toFixed(1) + '" text-anchor="middle" ' + LAB + ' font-size="14" fill="' + col + '">25%</text>';
+  }
+  var s = '<svg viewBox="0 0 360 196" role="img" aria-label="A 3D pie chart of how Bureau staff get to work, tilted towards you. Four slices, each labelled 25 percent: Walk at the front, Bus at the back, Car on the right and Cycle on the left. The front slice shows its thick side as well as its top.">';
+  s += wall(0, 45, "#d9ad1f") + wall(45, 135, "#c94444") + wall(135, 180, "#12957a");
+  s += top(-45, 45, SUN) + top(45, 135, CORAL) + top(135, 225, MINT) + top(225, 315, BLUE);
+  s += label(0, "Car", INK) + label(90, "Walk", INK) + label(180, "Cycle", INK) + label(270, "Bus", WHITE);
+  return s + '</svg>';
+})();
+
+/* Case 3: a pictogram drawn by area */
+var FIG_PICTO = (function(){
+  function glass(x, y, k){
+    return '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')">' +
+      '<line x1="14" y1="14" x2="34" y2="34" stroke="' + INK + '" stroke-width="8" stroke-linecap="round"/>' +
+      '<circle cx="0" cy="0" r="20" fill="' + CYAN + '" fill-opacity=".35" stroke="' + INK + '" stroke-width="4"/>' +
+      '<path d="M-10 -8 A12 12 0 0 1 2 -14" fill="none" stroke="' + WHITE + '" stroke-width="3" stroke-linecap="round"/></g>';
+  }
+  var s = '<svg viewBox="0 0 360 220" role="img" aria-label="A pictogram headed Cases solved. 2023 has a small magnifying glass for 20 cases. 2024 has a magnifying glass twice as tall and twice as wide for 40 cases.">';
+  s += '<rect x="0" y="0" width="360" height="220" rx="8" fill="' + PAPER + '"/>';
+  s += '<text x="180" y="26" text-anchor="middle" ' + LAB + ' font-size="17" font-weight="700" fill="' + INK + '">Cases solved</text>';
+  s += glass(78, 120, 1) + glass(232, 96, 2);
+  s += '<text x="88" y="196" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">2023: 20 cases</text>';
+  s += '<text x="250" y="196" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">2024: 40 cases</text>';
+  return s + '</svg>';
+})();
+
+/* Case 3: a line graph with no title and no vertical label */
+var FIG_NOLABEL = (function(){
+  var L = 48, R = 336, T = 18, B = 196, V = [12, 18, 15, 25, 31, 40], M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  function X(k){ return L + 20 + k * (R - L - 40) / 5; }
+  function Y(v){ return B - v / 50 * (B - T); }
+  var s = '<svg viewBox="0 0 360 246" role="img" aria-label="A line graph with no title. The horizontal axis is labelled Month, from January to June. The vertical axis has numbers 0 to 50 but no label and no units. The line rises from 12 in January to 40 in June.">';
+  s += '<rect x="0" y="0" width="360" height="246" rx="8" fill="' + PAPER + '"/>';
+  for(var v = 0; v <= 50; v += 10){
+    s += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + R + '" y2="' + Y(v) + '" stroke="' + LINE + '" stroke-width="1"/>';
+    s += '<text x="' + (L - 7) + '" y="' + (Y(v) + 5) + '" text-anchor="end" ' + LAB + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+  }
+  s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  var pts = V.map(function(v, k){ return X(k).toFixed(1) + "," + Y(v).toFixed(1); }).join(" ");
+  s += '<polyline points="' + pts + '" fill="none" stroke="' + BLUE + '" stroke-width="3" stroke-linejoin="round"/>';
+  V.forEach(function(v, k){
+    s += '<circle cx="' + X(k).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="5" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += '<text x="' + X(k).toFixed(1) + '" y="' + (B + 20) + '" text-anchor="middle" ' + LAB + ' font-size="14" fill="' + INK + '">' + M[k] + '</text>';
+  });
+  s += '<text x="' + ((L + R) / 2) + '" y="' + (B + 42) + '" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">Month</text>';
+  return s + '</svg>';
+})();
+
+/* Case 4: clues found per case */
+var CLUES =
+  '<table class="datatable"><tr><th>Clues found</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>' +
+  '<tr><th>Number of cases</th><td>2</td><td>7</td><td>6</td><td>4</td><td>1</td></tr></table>';
+
+/* Case 5: three small scatter diagrams */
+var FIG_THREE = (function(){
+  var sets = [
+    ["Positive", [[10, 78], [20, 70], [28, 72], [38, 56], [46, 50], [56, 40], [64, 36], [74, 22], [84, 18]]],
+    ["Negative", [[10, 18], [20, 26], [28, 22], [38, 38], [46, 44], [56, 52], [64, 58], [74, 70], [84, 76]]],
+    ["None", [[12, 30], [20, 70], [30, 50], [40, 20], [48, 64], [58, 36], [66, 76], [76, 46], [84, 24]]]
+  ];
+  var s = '<svg viewBox="0 0 360 140" role="img" aria-label="Three small scatter diagrams. Positive correlation: the points go up from left to right. Negative correlation: the points go down from left to right. No correlation: the points are scattered with no pattern.">';
+  sets.forEach(function(st, k){
+    var x0 = 14 + k * 116, y0 = 10;
+    s += '<rect x="' + x0 + '" y="' + y0 + '" width="100" height="92" fill="' + PAPER + '"/>';
+    s += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + (y0 + 92) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<line x1="' + x0 + '" y1="' + (y0 + 92) + '" x2="' + (x0 + 100) + '" y2="' + (y0 + 92) + '" stroke="' + INK + '" stroke-width="2"/>';
+    st[1].forEach(function(p){
+      s += '<circle cx="' + (x0 + p[0]) + '" cy="' + (y0 + p[1]) + '" r="4" fill="' + [MINT, CORAL, VIOLET][k] + '" stroke="' + INK + '" stroke-width="1"/>';
+    });
+    s += '<text x="' + (x0 + 50) + '" y="126" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">' + st[0] + '</text>';
+  });
+  return s + '</svg>';
+})();
+
+/* Case 5: temperature and ice cream sales, with an outlier and a line of best fit */
+var ICE = [[16, 40], [18, 52], [19, 50], [21, 62], [22, 70], [24, 75], [25, 84], [27, 90], [28, 100], [30, 108]];
+var ICE_ODD = [17, 110];
+var FIG_ICE = (function(){
+  var L = 58, R = 344, T = 14, B = 246, X0 = 14, X1 = 32, Y0 = 0, Y1 = 120;
+  function X(v){ return L + (v - X0) / (X1 - X0) * (R - L); }
+  function Y(v){ return B - (v - Y0) / (Y1 - Y0) * (B - T); }
+  /* least squares line through the mean point of the ten usual days */
+  var mx = 0, my = 0, sxy = 0, sxx = 0;
+  ICE.forEach(function(p){ mx += p[0] / ICE.length; my += p[1] / ICE.length; });
+  ICE.forEach(function(p){ sxy += (p[0] - mx) * (p[1] - my); sxx += (p[0] - mx) * (p[0] - mx); });
+  var b = sxy / sxx, a = my - b * mx;
+  var s = '<svg viewBox="0 0 360 300" role="img" aria-label="A scatter diagram of temperature in degrees Celsius against ice creams sold. Ten points rise from about 40 sold at 16 degrees to about 108 sold at 30 degrees. One point sits apart at 17 degrees with 110 sold. A straight line of best fit runs through the ten rising points.">';
+  s += '<rect x="0" y="0" width="360" height="300" fill="' + WHITE + '"/>';
+  var v;
+  for(v = Y0; v <= Y1; v += 10){
+    s += '<line x1="' + L + '" y1="' + Y(v).toFixed(1) + '" x2="' + R + '" y2="' + Y(v).toFixed(1) + '" stroke="' + LINE + '" stroke-width="' + (v % 20 ? 0.8 : 1.4) + '"/>';
+    if(v % 20 === 0) s += '<text x="' + (L - 6) + '" y="' + (Y(v) + 5).toFixed(1) + '" text-anchor="end" ' + LAB + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+  }
+  for(v = X0; v <= X1; v += 2){
+    s += '<line x1="' + X(v).toFixed(1) + '" y1="' + T + '" x2="' + X(v).toFixed(1) + '" y2="' + B + '" stroke="' + LINE + '" stroke-width="1"/>';
+    s += '<text x="' + X(v).toFixed(1) + '" y="' + (B + 19) + '" text-anchor="middle" ' + LAB + ' font-size="14" fill="' + INK + '">' + v + '</text>';
+  }
+  s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + X(15).toFixed(1) + '" y1="' + Y(a + b * 15).toFixed(1) + '" x2="' + X(31).toFixed(1) + '" y2="' + Y(a + b * 31).toFixed(1) + '" stroke="' + CORAL + '" stroke-width="3" stroke-linecap="round"/>';
+  ICE.concat([ICE_ODD]).forEach(function(p){
+    s += '<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '" r="5.5" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="1.5"/>';
+  });
+  s += '<text x="' + ((L + R) / 2) + '" y="' + (B + 44) + '" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">Temperature (&deg;C)</text>';
+  s += '<text transform="translate(16 ' + ((T + B) / 2) + ') rotate(-90)" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">Ice creams sold</text>';
+  return s + '</svg>';
+})();
+
+/* ---------- the magnifying glass (widget) ---------- */
+var MG = { L: 70, R: 345, T: 72, B: 252, W: 360, H: 312, LENS: 40 };
+var MG_TICKS = [40, 44, 48, 50, 52];
+var MG_SALES = [["2020", 42], ["2021", 44], ["2022", 47], ["2024", 52]];
+function mgY(v){
+  var step = (MG.B - MG.T) / (MG_TICKS.length - 1);
+  for(var k = 0; k < MG_TICKS.length - 1; k++){
+    if(v <= MG_TICKS[k + 1]) return MG.B - (k + (v - MG_TICKS[k]) / (MG_TICKS[k + 1] - MG_TICKS[k])) * step;
+  }
+  return MG.T;
+}
+function mgX(k){ return MG.L + (MG.R - MG.L) / 4 * (k + 0.5); }
+
+var MG_CHART = (function(){
+  var s = '<rect x="0" y="0" width="' + MG.W + '" height="' + MG.H + '" fill="' + PAPER + '"/>';
+  s += '<text x="200" y="28" text-anchor="middle" ' + LAB + ' font-size="18" font-weight="700" fill="' + INK + '">Crunch Bar sales are rocketing!</text>';
+  s += '<text x="200" y="50" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">Bars sold each year, in thousands</text>';
+  MG_TICKS.forEach(function(v){
+    var y = mgY(v);
+    s += '<line x1="' + MG.L + '" y1="' + y + '" x2="' + MG.R + '" y2="' + y + '" stroke="' + LINE + '" stroke-width="1.2"/>';
+    s += '<text x="' + (MG.L - 8) + '" y="' + (y + 5) + '" text-anchor="end" ' + LAB + ' font-size="15" fill="' + INK + '">' + v + '</text>';
+  });
+  MG_SALES.forEach(function(p, k){
+    var x = mgX(k), y = mgY(p[1]);
+    s += '<rect x="' + (x - 20) + '" y="' + y + '" width="40" height="' + (MG.B - y) + '" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    s += '<text x="' + x + '" y="' + (y - 6) + '" text-anchor="middle" ' + LAB + ' font-size="14" font-weight="700" fill="' + INK + '">' + p[1] + '</text>';
+    s += '<text x="' + x + '" y="' + (MG.B + 22) + '" text-anchor="middle" ' + LAB + ' font-size="15" fill="' + INK + '">' + p[0] + '</text>';
+  });
+  s += '<line x1="' + MG.L + '" y1="' + (MG.T - 6) + '" x2="' + MG.L + '" y2="' + MG.B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<line x1="' + MG.L + '" y1="' + MG.B + '" x2="' + MG.R + '" y2="' + MG.B + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<text transform="translate(20 ' + ((MG.T + MG.B) / 2) + ') rotate(-90)" text-anchor="middle" ' + LAB + ' font-size="14" fill="' + INK + '">Sales (thousands)</text>';
+  s += '<text x="' + ((MG.L + MG.R) / 2) + '" y="' + (MG.B + 46) + '" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">Year</text>';
+  return s;
+})();
+
+/* places the glass can land: three tricks, the rest are honest */
+var MG_SPOTS = [
+  { k: "start", trick: true, x: 28, y: MG.B - 16, w: 50, h: 34, name: "The axis starts at 40",
+    note: "The vertical axis starts at <b>40</b>, not 0. Chop off the bottom and a small rise looks enormous." },
+  { k: "uneven", trick: true, x: 28, y: MG.T - 14, w: 50, h: 106, name: "An uneven scale",
+    note: "The scale goes up in 4s (40, 44, 48), then sneaks into 2s (48, 50, 52). The top of the chart is <b>stretched</b>, so 2024 shoots up." },
+  { k: "gap", trick: true, x: 205, y: MG.B + 4, w: 150, h: 28, name: "A missing year",
+    note: "The years jump from 2022 to <b>2024</b>. Where is 2023? A bad year can quietly vanish." },
+  { k: "title", x: 20, y: 6, w: 340, h: 52,
+    note: "The title is loud, but the subtitle says what is shown and gives the units. The words are not the trick here." },
+  { k: "vlab", x: 0, y: 80, w: 27, h: 170,
+    note: "The vertical axis has a label with units. Nothing shady there." },
+  { k: "xlab", x: MG.L, y: MG.B + 33, w: MG.R - MG.L, h: 26,
+    note: "The horizontal axis is labelled. That part is fine." }
+].concat(MG_SALES.map(function(p, k){
+  return { k: "bar" + k, x: mgX(k) - 24, y: mgY(p[1]) - 26, w: 48, h: MG.B - mgY(p[1]) + 26,
+    note: "This bar lines up with its number on the axis. The bar is not the liar." };
+}));
+var MG_TRICKS = MG_SPOTS.filter(function(sp){ return sp.trick; });
+
+function mountGlass(el, api){
+  var d = api.data;
+  if(typeof d.lx !== "number"){ d.lx = 206; d.ly = 150; }
+  d.found = d.found || [];
+  d.miss = d.miss || 0;
+
+  el.innerHTML =
+    '<div class="wpanel mg">' +
+      '<div class="mg-top"><span>Tricks found: <b id="mgCount"></b> of 3</span><span class="mg-dots" id="mgDots" aria-hidden="true"></span></div>' +
+      '<div class="mg-board" id="mgBoard" tabindex="0" role="application" aria-label="A bar chart with a magnifying glass on it. Arrow keys move the glass. Enter marks what is under it as suspicious.">' +
+        '<svg id="mgSvg" viewBox="0 0 ' + MG.W + ' ' + MG.H + '" role="img" aria-label="A bar chart titled Crunch Bar sales are rocketing. Bars for 2020, 2021, 2022 and 2024 show 42, 44, 47 and 52 thousand. The vertical axis is labelled 40, 44, 48, 50, 52 with equal gaps."></svg>' +
+      '</div>' +
+      '<p class="mg-help">Drag the glass, or tap the chart to send it there. Arrow keys work too.</p>' +
+      '<div class="mg-btns" id="mgBtns"></div>' +
+      '<div class="mg-msg" id="mgMsg" aria-live="polite"></div>' +
+      '<ol class="mg-list" id="mgList"></ol>' +
+    '</div>';
+
+  var board = el.querySelector("#mgBoard"), svg = el.querySelector("#mgSvg"), btns = el.querySelector("#mgBtns"),
+      msg = el.querySelector("#mgMsg"), list = el.querySelector("#mgList");
+
+  function spotAt(x, y){
+    for(var k = 0; k < MG_SPOTS.length; k++){
+      var sp = MG_SPOTS[k];
+      if(x >= sp.x && x <= sp.x + sp.w && y >= sp.y && y <= sp.y + sp.h) return sp;
+    }
+    return null;
+  }
+  function trickByKey(k){ for(var j = 0; j < MG_TRICKS.length; j++) if(MG_TRICKS[j].k === k) return MG_TRICKS[j]; return null; }
+
+  function draw(){
+    var r = MG.LENS, x = d.lx, y = d.ly, s = MG_CHART;
+    d.found.forEach(function(k, n){
+      var sp = trickByKey(k);
+      if(!sp) return;
+      s += '<rect x="' + (sp.x + 2) + '" y="' + (sp.y + 2) + '" width="' + (sp.w - 4) + '" height="' + (sp.h - 4) + '" rx="8" fill="' + CORAL + '" fill-opacity=".12" stroke="#c0262d" stroke-width="2.5" stroke-dasharray="6 4"/>';
+      s += '<circle cx="' + (sp.x + sp.w - 4) + '" cy="' + (sp.y + 4) + '" r="10" fill="#c0262d"/>';
+      s += '<text x="' + (sp.x + sp.w - 4) + '" y="' + (sp.y + 9) + '" text-anchor="middle" ' + LAB + ' font-size="14" font-weight="700" fill="' + WHITE + '">' + (n + 1) + '</text>';
+    });
+    s += '<clipPath id="mgClip"><circle cx="' + x + '" cy="' + y + '" r="' + (r - 2) + '"/></clipPath>';
+    s += '<g clip-path="url(#mgClip)"><g transform="translate(' + x + ' ' + y + ') scale(2) translate(' + (-x) + ' ' + (-y) + ')">' + MG_CHART + '</g></g>';
+    s += '<line x1="' + (x + r * 0.72) + '" y1="' + (y + r * 0.72) + '" x2="' + (x + r * 1.3) + '" y2="' + (y + r * 1.3) + '" stroke="' + INK + '" stroke-width="10" stroke-linecap="round"/>';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + INK + '" stroke-width="5"/>';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="' + (r - 4) + '" fill="none" stroke="' + CYAN + '" stroke-width="2"/>';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="2.5" fill="#c0262d"/>';
+    svg.innerHTML = s;
+
+    el.querySelector("#mgCount").textContent = d.found.length;
+    var dots = "";
+    for(var k = 0; k < 3; k++) dots += '<i class="' + (k < d.found.length ? "on" : "") + '"></i>';
+    el.querySelector("#mgDots").innerHTML = dots;
+    list.innerHTML = d.found.map(function(k){ var sp = trickByKey(k); return sp ? '<li><b>' + sp.name + '.</b> ' + sp.note + '</li>' : ''; }).join("");
+  }
+
+  function drawBtns(){
+    btns.innerHTML = "";
+    var go = document.createElement("button");
+    go.type = "button"; go.className = "btn btn-orange"; go.textContent = "Suspicious!";
+    go.onclick = accuse;
+    btns.appendChild(go);
+    if(d.miss > 0 && !d.result){
+      var sh = document.createElement("button");
+      sh.type = "button"; sh.className = "mg-quiet"; sh.textContent = "Show me";
+      sh.onclick = showMe;
+      btns.appendChild(sh);
+    }
+  }
+
+  function left(){ var n = 3 - d.found.length; return n === 1 ? "One to go." : n + " to go."; }
+
+  function accuse(){
+    var sp = spotAt(d.lx, d.ly);
+    if(!sp){
+      msg.innerHTML = "Just plain paper under the glass there. You could try an axis, a label or a bar.";
+      return;
+    }
+    if(sp.trick){
+      if(d.found.indexOf(sp.k) >= 0){
+        msg.innerHTML = "That one is already in the case file. " + (d.found.length < 3 ? left() : "");
+        return;
+      }
+      d.found.push(sp.k);
+      if(d.found.length === 3 && !d.result){
+        d.result = d.miss ? "right2" : "right1";
+        api.save(); draw(); drawBtns();
+        msg.innerHTML = "<b>Case cracked.</b> All three tricks are in the file. Bonnie gives the chart a long, disappointed sniff.";
+        api.done(d.result);
+        return;
+      }
+      msg.innerHTML = "<b>Gotcha.</b> " + sp.note + " " + (d.found.length < 3 ? left() : "");
+    }else{
+      d.miss++;
+      msg.innerHTML = sp.note + " " + (d.miss === 1 ? "Outrageous to accuse it, but no harm done." : "No harm done. Keep looking.") + " " + left();
+    }
+    api.save(); draw(); drawBtns();
+  }
+
+  function showMe(){
+    MG_TRICKS.forEach(function(sp){ if(d.found.indexOf(sp.k) < 0) d.found.push(sp.k); });
+    d.result = "shown";
+    api.save(); draw(); drawBtns();
+    msg.innerHTML = "Here they are, ringed in red: where the axis starts, how the steps change size, and the year that went missing. Each one makes the rise look bigger than it really is.";
+    api.done("shown");
+  }
+
+  function moveTo(x, y){
+    d.lx = Math.max(8, Math.min(MG.W - 8, Math.round(x)));
+    d.ly = Math.max(8, Math.min(MG.H - 8, Math.round(y)));
+    draw();
+  }
+
+  var dragging = false;
+  function fromEvent(e){
+    var r = svg.getBoundingClientRect();
+    moveTo((e.clientX - r.left) / r.width * MG.W, (e.clientY - r.top) / r.height * MG.H);
+  }
+  board.addEventListener("pointerdown", function(e){
+    dragging = true; board.classList.add("drag");
+    try{ board.setPointerCapture(e.pointerId); }catch(err){}
+    fromEvent(e); e.preventDefault();
+    board.focus({ preventScroll: true });
+  });
+  board.addEventListener("pointermove", function(e){ if(dragging) fromEvent(e); });
+  function endDrag(){ if(dragging){ dragging = false; board.classList.remove("drag"); api.save(); } }
+  board.addEventListener("pointerup", endDrag);
+  board.addEventListener("pointercancel", endDrag);
+  board.addEventListener("keydown", function(e){
+    var step = e.shiftKey ? 2 : 8;
+    var mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if(mv){ e.preventDefault(); moveTo(d.lx + mv[0], d.ly + mv[1]); api.save(); return; }
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); accuse(); }
+  });
+
+  draw(); drawBtns();
+  if(d.result) msg.innerHTML = "<b>Case cracked.</b> All three tricks are in the file. Move the glass about if you like.";
+  else if(d.found.length) msg.innerHTML = "Back on the case. " + left();
+  else msg.innerHTML = "Three tricks are hiding in this chart. Move the glass onto something fishy and tap <b>Suspicious!</b>";
+}
+
+/* ---------- the steps ---------- */
+EGW.run({
+  id: "data-detective",
+  title: "Data Detective",
+  subject: "Statistics",
+  blurb: "Join the Base 5 Data Bureau as a junior detective and crack six case files with GCSE Statistics, one folder at a time.",
+  mins: 40,
+  chunkMsg: function(k, topic, n){
+    return { stamp: "Case closed", wide: true,
+             head: ["Solved.", "Another one solved.", "The Bureau is impressed."][k % 3],
+             text: topic + ". " + (k + 1 < n ? "The next folder is on the desk whenever you fancy it." : "") };
+  },
+  steps: [
+
+  /* ---------- CASE 1 ---------- */
+  { type: "learn", topic: "Case 1: The suspicious survey",
+    title: "The suspicious survey",
+    html: '<p class="dd-tag">Case file 01 &middot; rain on the window</p>' +
+          '<p>A sign in the window of Bean There cafe: <b>"9 out of 10 people in town prefer our coffee!"</b> They asked 50 customers, inside the cafe. EGW opens a fresh folder.</p>' +
+          '<ul><li>The <b>population</b> is everyone you want to know about: here, all the adults in the town.</li>' +
+          '<li>A <b>sample</b> is the part you actually ask. A <b>sampling frame</b> is a full list of the population to pick from.</li></ul>' +
+          '<ul><li><b>Bias</b>: the sample leans one way, so the results do too. It can come from who gets asked, or from a <b>leading question</b> that pushes people towards an answer.</li>' +
+          '<li><b>Random sample</b>: everyone on the frame has the same chance of being picked.</li>' +
+          '<li><b>Stratified sample</b>: split the population into groups and sample each group in proportion to its size.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Stratified: group size &divide; population size &times; sample size. And always ask: who got asked, and who got left out?</div>' },
+
+  { type: "match", topic: "Case 1: The suspicious survey",
+    q: "Match each word to what it means in the Bean There case.",
+    pairs: [
+      ["Population", "Every adult who lives in the town"],
+      ["Sample", "The 50 people the cafe actually asked"],
+      ["Sampling frame", "A full list of the town's adults to pick from"],
+      ["Bias", "Results leaning one way because of who was asked or how"],
+      ["Random sample", "Everyone on the list has the same chance of being picked"]
+    ],
+    hint: "The population is who you want to know about. The sample is who you actually asked.",
+    why: "The cafe wanted to say something about the whole <b>population</b> (the town), but its <b>sample</b> was 50 people already inside. There was no <b>sampling frame</b> at all, so most of the town never had a chance of being asked. A common mix up: the sample is not the population, however many people you ask." },
+
+  { type: "mc", topic: "Case 1: The suspicious survey",
+    q: "Why is the cafe's survey biased?",
+    options: [
+      "It only asked people already in the cafe, who are likely to like its coffee",
+      "50 people is always too few to tell you anything",
+      "Coffee preference is qualitative data, so it cannot be surveyed",
+      "It should have asked people who drink tea instead"
+    ],
+    answer: 0,
+    hint: "Who was in the room when the question was asked? Are they typical of the whole town?",
+    why: "People inside Bean There have already chosen Bean There, so they are far more likely to prefer its coffee. The sample leans one way, so the result leans too. Fifty people can be useful if they are chosen fairly, and qualitative data (like a favourite cafe) can be surveyed perfectly well." },
+
+  { type: "sort", topic: "Case 1: The suspicious survey",
+    q: "A pile of old survey plans has turned up in the filing cabinet. Which are <b>biased</b>, and which are <b>fair enough</b>?",
+    buckets: ["Biased", "Fair enough"],
+    cards: [
+      ["An online poll on a gaming website about how much time teenagers spend gaming", 0],
+      ["Asking: \"Don't you agree our new park is wonderful?\"", 0],
+      ["Asking the first 30 people off the 7:15 train how people in town get to work", 0],
+      ["A radio phone in asking listeners what they think of the radio station", 0],
+      ["Picking 40 names at random from a full list of the town's adults", 1],
+      ["A stratified sample by age group, chosen at random from the town's register", 1]
+    ],
+    hint: "For each one, ask: who is more likely to answer, and who is left out? Is the question pushing an answer?",
+    why: "The gaming site reaches keen gamers, so the time spent looks high. \"Don't you agree...\" is a <b>leading question</b>. The 7:15 train only catches train commuters. A phone in only hears from people who chose to ring, and listeners already like the station. The two random methods use a full list, so everyone has a fair chance." },
+
+  { type: "mc", topic: "Case 1: The suspicious survey",
+    q: "EGW wants a fair question about coffee. Which is the best one to use?",
+    options: [
+      "Which cafe in town do you prefer for coffee? (a list of the cafes, plus \"Other\" and \"None\")",
+      "Don't you agree that Bean There makes the best coffee in town?",
+      "Bean There's coffee has won awards. Do you like it?",
+      "Why is Bean There's coffee the best in town?"
+    ],
+    answer: 0,
+    hint: "A fair question does not tell people what to think, and gives everyone a box to tick.",
+    why: "The fair version names several cafes and has \"Other\" and \"None\" boxes, so every answer has a place. The others are <b>leading</b>: \"Don't you agree\" pushes for a yes, mentioning awards sways people first, and \"Why is it the best\" assumes the answer before anyone speaks." },
+
+  { type: "num", topic: "Case 1: The suspicious survey",
+    q: "The Bureau redoes the survey properly. The town has <b>3600</b> adults: <b>900</b> aged 18 to 34, <b>1620</b> aged 35 to 59 and <b>1080</b> aged 60 and over. EGW takes a <b>stratified sample of 60</b> by age group. How many from each group?",
+    boxes: [
+      { label: "Aged 18 to 34", a: 15, post: "people" },
+      { label: "Aged 35 to 59", a: 27, post: "people" },
+      { label: "Aged 60 and over", a: 18, post: "people" }
+    ],
+    hint: "Group size &divide; 3600 &times; 60 for each group. For the youngest group: 900 &divide; 3600 &times; 60.",
+    why: "18 to 34: 900 &divide; 3600 &times; 60 = <b>15</b>.<br>35 to 59: 1620 &divide; 3600 &times; 60 = <b>27</b>.<br>60 and over: 1080 &divide; 3600 &times; 60 = <b>18</b>.<br>Check: 15 + 27 + 18 = 60. A common slip is splitting 60 equally (20 each), which ignores that the groups are different sizes. Within each group the people are then picked at random." },
+
+  { type: "multi", topic: "Case 1: The suspicious survey",
+    q: "How could the cafe's survey be fixed? Pick <b>two</b>.",
+    options: [
+      "Choose adults at random from a full list of the town's adults",
+      "Ask a neutral question that names several cafes",
+      "Ask 500 customers inside the cafe instead of 50",
+      "Only ask people who say they really like coffee",
+      "Ask the cafe's own staff what customers think"
+    ],
+    answers: [0, 1],
+    hint: "Fix who gets asked, and fix how they are asked.",
+    why: "A random sample from a full sampling frame fixes <b>who</b> is asked, and a neutral question fixes <b>how</b>. Asking 500 people inside the cafe is a bigger sample with exactly the same bias: more data does not cure a biased method. Picking coffee lovers or asking staff just swaps one bias for another." },
+
+  /* ---------- CASE 2 ---------- */
+  { type: "learn", topic: "Case 2: The messy spreadsheet",
+    title: "The messy spreadsheet",
+    html: '<p class="dd-tag">Case file 02</p>' +
+          '<p>The youth club\'s spreadsheet of ages and heights lands on the desk. Bonnie, the Bureau\'s sniffer dog, takes one sniff and growls. Something is off.</p>' +
+          '<ul><li><b>Impossible values</b>, like an age of 250. Check the original form and correct it.</li>' +
+          '<li><b>Unit slips</b>: 1.62 among heights in cm was really typed in metres. It is 162 cm.</li>' +
+          '<li><b>Duplicates</b>: the same row typed twice. Delete one copy.</li></ul>' +
+          '<ul><li><b>Missing values</b>: a blank cell. Leave it out of the calculation and say so. Typing 0 would drag the mean down.</li>' +
+          '<li><b>Outliers</b>: values far from the rest. If it is possible (a very tall 16 year old), keep it. If it cannot be true, it is an error.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Clean first, then calculate. And write down what you changed and why.</div>' },
+
+  { type: "multi", topic: "Case 2: The messy spreadsheet",
+    q: "Here is the spreadsheet. Which rows need a closer look? Pick <b>all</b> the problem rows.",
+    fig: SHEET,
+    options: [
+      "Row B",
+      "Row C",
+      "Row D",
+      "The second row E",
+      "Row F",
+      "Row I"
+    ],
+    answers: [0, 2, 3, 4],
+    hint: "Look for a height that is not in cm, an age nobody could be, a row typed twice, and a gap.",
+    why: "<b>B</b>: 1.62 is in metres, not cm. <b>D</b>: nobody is 250 years old. <b>The second E</b> is a copy of the first. <b>F</b> has no height. Row I (16 years old, 188 cm) is tall, but tall 16 year olds exist, so it is a real outlier to keep. Row C is perfectly ordinary." },
+
+  { type: "match", topic: "Case 2: The messy spreadsheet",
+    q: "Match each problem to a sensible fix.",
+    pairs: [
+      ["Row D: age 250", "Check the original form and correct it"],
+      ["Row B: height 1.62", "Change metres to centimetres: 162"],
+      ["Row E typed twice", "Delete one of the two copies"],
+      ["Row F: height blank", "Leave it out of the height mean and note it"],
+      ["Row I: height 188 cm", "Keep it: unusual, but possible"]
+    ],
+    hint: "Only one of these is fine as it is. Which one is unusual but could really happen?",
+    why: "Each fix keeps as much real data as possible. Deleting every odd looking value would throw away real information (like row I). Filling a blank with 0 would be a new error, and deleting just the age 250 cell loses the height, which is fine. Whatever you change, say so in your write up." },
+
+  { type: "sort", topic: "Case 2: The messy spreadsheet",
+    q: "More values from other clubs. Is each one an <b>error</b>, or a <b>real outlier</b> to keep?",
+    buckets: ["Error: correct or remove", "Real outlier: keep it"],
+    cards: [
+      ["A 14 year old who is 15 cm tall", 0],
+      ["A height typed as 1660 cm", 0],
+      ["An age of 3 in a club for 11 to 18 year olds", 0],
+      ["A 16 year old who is 191 cm tall", 1],
+      ["A 12 year old with a shoe size of 9", 1],
+      ["One member who walked 12 km to get there", 1]
+    ],
+    hint: "Ask: could this really happen? If yes, it is a real outlier, even if it is rare.",
+    why: "15 cm is the size of a pencil, 1660 cm is taller than a house (probably 166 cm with an extra digit), and a 3 year old cannot be in an 11 to 18 club. The others are unusual but possible: tall teenagers, big feet and very keen walkers all exist. A real outlier stays in, though you might mention it." },
+
+  { type: "num", topic: "Case 2: The messy spreadsheet",
+    q: "Detective work in numbers. Give each mean to 1 decimal place.<br><b>Before:</b> the mean height using every number exactly as typed (the blank left out, so 9 values).<br><b>After cleaning:</b> B becomes 162, one copy of E is removed, F stays out. D\'s age is fixed from the form; its height was fine. That leaves 8 heights.",
+    fig: SHEET,
+    boxes: [
+      { label: "Mean before", a: 146.1, tol: 0.06, post: "cm" },
+      { label: "Mean after", a: 163.6, tol: 0.06, post: "cm" }
+    ],
+    hint: "Before: add the nine heights as typed (1.62 included) and divide by 9. After: add the eight cleaned heights and divide by 8.",
+    why: "Before: 158 + 1.62 + 149 + 171 + 166 + 166 + 160 + 155 + 188 = 1314.62. 1314.62 &divide; 9 = <b>146.1 cm</b>.<br>After: 158 + 162 + 149 + 171 + 166 + 160 + 155 + 188 = 1309. 1309 &divide; 8 = 163.625, so <b>163.6 cm</b>.<br>Cleaning moved the mean by about 17.5 cm. Dividing by 10 rows (counting the blank) is a common slip." },
+
+  { type: "mc", topic: "Case 2: The messy spreadsheet", stretch: true,
+    q: "Which single fix changed the mean height the most?",
+    options: [
+      "Changing 1.62 to 162",
+      "Removing the copy of row E",
+      "Leaving row F out",
+      "Correcting row D's age"
+    ],
+    answer: 0,
+    hint: "Which value was furthest away from all the others before it was fixed?",
+    why: "1.62 was about 160 cm below every other height, so it dragged the mean right down. Fixing only that gives 1475 &divide; 9 = 163.9 cm, a jump of nearly 18 cm. Removing the duplicate 166 shifts the mean by only a couple of cm, F was never in the height mean, and D's age does not touch the heights at all. The mean feels every value, so one big error can wreck it." },
+
+  /* ---------- CASE 3 ---------- */
+  { type: "learn", topic: "Case 3: The graph that lied",
+    title: "The graph that lied",
+    html: '<p class="dd-tag">Case file 03</p>' +
+          '<p>A poster in the corridor shouts that Crunch Bar sales are rocketing. The chart looks dramatic. Too dramatic. Graphs can tell the truth in a misleading way.</p>' +
+          '<ul><li><b>Truncated axis</b>: the vertical axis starts above 0, so small differences look huge.</li>' +
+          '<li><b>Uneven scale</b>: the steps on an axis change size part way up.</li>' +
+          '<li><b>3D pie charts</b>: the tilt makes the front slices look bigger.</li></ul>' +
+          '<ul><li><b>Pictograms drawn by area</b>: double the height and the width, and the picture looks 4 times as big, not 2.</li>' +
+          '<li><b>Missing labels or data</b>: no title, no units, or a year quietly left out.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Before you believe a chart, check where the axis starts, whether the steps are equal, the labels, and whether size means length or area.</div>' },
+
+  { type: "widget", topic: "Case 3: The graph that lied",
+    title: "Under the magnifying glass",
+    html: "Three tricks are hiding in the Crunch Bar poster. Move the glass over the chart, and when something looks fishy, tap <b>Suspicious!</b>",
+    mount: mountGlass,
+    report: function(d){
+      var r = { right1: "found all three tricks with no wrong guesses", right2: "found all three tricks after a wrong guess or two", shown: "used Show me" }[d.result] || ("found " + (d.found || []).length + " of 3 so far");
+      return "Magnifying glass: " + r + ".";
+    } },
+
+  { type: "mc", topic: "Case 3: The graph that lied",
+    q: "Every slice of this 3D pie chart is exactly <b>25%</b>. So why does Walk look like the biggest slice?",
+    fig: FIG_PIE3D,
+    options: [
+      "The tilt stretches the front slice and shows its thick side too, so it covers more of the picture",
+      "More staff walk to work than use any other way",
+      "Every pie chart makes the bottom slice look bigger",
+      "The percentages must have been added up wrongly"
+    ],
+    answer: 0,
+    hint: "The numbers say all four slices are equal. What is different about the slice nearest to you?",
+    why: "The data are equal, so the difference is all in the drawing. A 3D tilt shows the side of the front slice as well as its top, so it takes up more ink. A flat pie chart has no front, so equal slices look equal. That is why examiners like you to spot 3D effects as misleading." },
+
+  { type: "num", topic: "Case 3: The graph that lied",
+    q: "This pictogram shows cases solved. The 2024 glass is drawn <b>twice as tall</b> and <b>twice as wide</b> as the 2023 one.",
+    fig: FIG_PICTO,
+    boxes: [
+      { label: "How many times as many cases were solved in 2024?", a: 2, post: "times" },
+      { label: "How many times as much space does the 2024 glass take up?", a: 4, post: "times" }
+    ],
+    hint: "For the space, think of a square: double both sides. How many of the old squares fit inside?",
+    why: "Cases: 40 &divide; 20 = <b>2</b> times as many.<br>Space: twice as tall and twice as wide is 2 &times; 2 = <b>4</b> times the area. Our eyes judge the area, so 2024 looks like four times the work. An honest pictogram uses lots of same sized icons, each worth the same number of cases." },
+
+  { type: "multi", topic: "Case 3: The graph that lied",
+    q: "This graph turned up with no explanation. What is missing? Pick <b>two</b>.",
+    fig: FIG_NOLABEL,
+    options: [
+      "A title, so we know what it shows",
+      "A label and units on the vertical axis",
+      "Labels on the horizontal axis",
+      "A vertical axis that starts at 0",
+      "Points joined by a line"
+    ],
+    answers: [0, 1],
+    hint: "Look at what IS there first: months, numbers, a line. What would you need to know to understand it?",
+    why: "With no <b>title</b> and no <b>vertical label or units</b>, 40 could be 40 cases, 40 degrees or 40 thousand pounds. The months are labelled, the axis already starts at 0, and joining points is fine for data over time. A chart cannot mislead you so easily if you insist on a title, axis labels and units." },
+
+  { type: "sort", topic: "Case 3: The graph that lied",
+    q: "Honest, or misleading?",
+    buckets: ["Honest", "Misleading"],
+    cards: [
+      ["A bar chart whose vertical axis starts at 0 and goes up in equal steps", 0],
+      ["A pictogram where every icon is the same size and stands for 5 cases", 0],
+      ["A flat pie chart with a key and the percentages shown", 0],
+      ["A vertical axis labelled 0, 10, 20, 50, 100 with equal gaps", 1],
+      ["A pictogram where the bigger number gets one bigger icon", 1],
+      ["A 3D pie chart tilted towards you", 1],
+      ["A line graph with no title and no units", 1]
+    ],
+    hint: "Run through the checklist: axis start, equal steps, labels, and length versus area.",
+    why: "Equal steps from 0, same sized icons and a flat pie with percentages all let you compare fairly. Labels 0, 10, 20, 50, 100 with equal gaps squash the top of the scale. One bigger icon is judged by area. A 3D tilt inflates the front, and no title or units means you cannot tell what you are looking at." },
+
+  { type: "num", topic: "Case 3: The graph that lied", stretch: true,
+    q: "A Mega Mints advert shows a bar chart of taste scores out of 100: Mega Mints <b>98</b>, Brand X <b>96</b>. The vertical axis starts at <b>94</b>, so above the axis the Mega Mints bar is 4 units tall and the Brand X bar is 2 units tall.",
+    boxes: [
+      { label: "The Mega Mints bar looks how many times as tall?", a: 2, post: "times" },
+      { label: "By what percentage is 98 really higher than 96? (1 decimal place)", a: 2.1, tol: 0.06, post: "%" }
+    ],
+    hint: "Percentage increase: the difference, divided by the ORIGINAL amount, times 100.",
+    why: "Above the axis: 4 &divide; 2 = <b>2</b>, so it looks twice as good.<br>Really: 98 &minus; 96 = 2. 2 &divide; 96 &times; 100 = 2.08..., so <b>2.1%</b>.<br>Starting the axis at 94 turns a 2% difference into a bar that looks double. Dividing by 98 instead of 96 is the classic slip: always compare with where you started." },
+
+  /* ---------- CASE 4 ---------- */
+  { type: "learn", topic: "Case 4: The alibi averages",
+    title: "The alibi averages",
+    html: '<p class="dd-tag">Case file 04</p>' +
+          '<p>Zoom Deliveries says its deliveries are speedy. Its rival says Zoom is slow. Same data, and both claim the average is on their side. They just picked different averages.</p>' +
+          '<ul><li><b>Mean</b>: add them all up, divide by how many.</li>' +
+          '<li><b>Median</b>: the middle value once they are in order.</li>' +
+          '<li><b>Mode</b>: the most common value.</li>' +
+          '<li><b>Range</b>: biggest minus smallest.</li></ul>' +
+          '<p>The <b>interquartile range</b> (IQR) is the spread of the middle half. With n values in order, the lower quartile is value number (n + 1) &divide; 4 and the upper quartile is value number 3(n + 1) &divide; 4. IQR = upper quartile &minus; lower quartile.</p>' +
+          '<div class="keep"><b>Keep this</b>One extreme value drags the mean and the range a long way. The median and the IQR barely notice it.</div>' },
+
+  { type: "num", topic: "Case 4: The alibi averages",
+    q: "Zoom Deliveries' last 11 delivery times, in minutes:<br><b>18, 15, 82, 12, 21, 15, 24, 17, 14, 20, 15</b>",
+    boxes: [
+      { label: "Mean", a: 23, post: "minutes" },
+      { label: "Median", a: 17, post: "minutes" },
+      { label: "Mode", a: 15, post: "minutes" },
+      { label: "Range", a: 70, post: "minutes" }
+    ],
+    hint: "Put them in order first: 12, 14, 15, ... The median is value number (11 + 1) &divide; 2.",
+    why: "In order: 12, 14, 15, 15, 15, 17, 18, 20, 21, 24, 82.<br>Mean: total 253 &divide; 11 = <b>23</b>.<br>Median: the 6th value, <b>17</b>.<br>Mode: 15 appears three times, so <b>15</b>.<br>Range: 82 &minus; 12 = <b>70</b>.<br>Taking the middle of the unordered list (15) is a common slip for the median." },
+
+  { type: "num", topic: "Case 4: The alibi averages",
+    q: "Same 11 times, in order: <b>12, 14, 15, 15, 15, 17, 18, 20, 21, 24, 82</b>. Find the quartiles and the interquartile range.",
+    boxes: [
+      { label: "Lower quartile", a: 15, post: "minutes" },
+      { label: "Upper quartile", a: 21, post: "minutes" },
+      { label: "Interquartile range", a: 6, post: "minutes" }
+    ],
+    hint: "With 11 values, (n + 1) &divide; 4 = 3. So the lower quartile is the 3rd value. The upper quartile is value number 9.",
+    why: "(11 + 1) &divide; 4 = 3, so the lower quartile is the 3rd value: <b>15</b>.<br>3 &times; 12 &divide; 4 = 9, so the upper quartile is the 9th value: <b>21</b>.<br>IQR = 21 &minus; 15 = <b>6</b> minutes. Compare that with the range of 70: the IQR ignores the 82 at the end, so it shows how consistent the usual deliveries are." },
+
+  { type: "mc", topic: "Case 4: The alibi averages",
+    q: "The rival firm wants Zoom to sound <b>slow</b>. Which figure would it quote as Zoom's average delivery time?",
+    options: [
+      "The mean, 23 minutes",
+      "The median, 17 minutes",
+      "The mode, 15 minutes",
+      "The range, 70 minutes"
+    ],
+    answer: 0,
+    hint: "Which of the three averages is the biggest, and why is it so big?",
+    why: "The <b>mean</b> (23) is the biggest average, because the one 82 minute delivery drags it up. Zoom itself would quote the mode (15). The range is a measure of spread, not an average, so quoting it as \"the average time\" would be a fib, not just a clever choice." },
+
+  { type: "mc", topic: "Case 4: The alibi averages", stretch: true,
+    q: "The 82 minute delivery was a van breakdown. If it had taken <b>32</b> minutes instead, what would happen to the mean and the median?",
+    options: [
+      "The mean drops to about 18.5 minutes; the median stays at 17",
+      "The mean and the median both drop",
+      "The median drops, but the mean stays at 23",
+      "Nothing changes, because it is only one value"
+    ],
+    answer: 0,
+    hint: "Does 82 or 32 change which value is in the middle? Does it change the total?",
+    why: "The total falls by 50, to 203. 203 &divide; 11 = 18.45..., so the mean drops to about <b>18.5</b>. In order, 32 is still the biggest value, so the middle value is still the 6th, <b>17</b>. That is why the median <b>resists outliers</b>: it only cares about the order, not how far away the end value is." },
+
+  { type: "num", topic: "Case 4: The alibi averages",
+    q: "The Bureau has worked on 20 cases. The table shows how many clues were found on each case.",
+    fig: CLUES,
+    boxes: [
+      { label: "Mean number of clues", a: 1.75, post: "clues" },
+      { label: "Median", a: 2, post: "clues" },
+      { label: "Mode", a: 1, post: "clue" }
+    ],
+    hint: "Mean: multiply each number of clues by its number of cases, add those up, then divide by 20 (not by 5).",
+    why: "Clues &times; cases: 0 + 7 + 12 + 12 + 4 = 35. 35 &divide; 20 = <b>1.75</b>.<br>Median: the 10th and 11th values. The first 2 are 0, the next 7 are 1 (up to the 9th), then 2s run from the 10th to the 15th. So the median is <b>2</b>.<br>Mode: the highest frequency is 7, for <b>1</b> clue.<br>Dividing by 5 (the number of columns) is the usual trap." },
+
+  { type: "match", topic: "Case 4: The alibi averages",
+    q: "Which measure fits each job best?",
+    pairs: [
+      ["A shoe shop deciding which size to stock the most of", "Mode"],
+      ["A typical house price in a street with one huge mansion", "Median"],
+      ["Sharing the total cost of a trip fairly between everyone", "Mean"],
+      ["How consistent two firms are, when one had a freak result", "Interquartile range"],
+      ["The gap between the fastest and slowest delivery", "Range"]
+    ],
+    hint: "Which jobs need the most common value? Which need to ignore an extreme value?",
+    why: "Shoe sizes: the shop wants the most popular, the <b>mode</b>. One mansion would drag the mean up, so the <b>median</b> is more typical. Sharing a total equally is exactly what the <b>mean</b> does. The <b>IQR</b> measures spread without the freak results, while the <b>range</b> is built from the two extremes." },
+
+  /* ---------- CASE 5 ---------- */
+  { type: "learn", topic: "Case 5: The ice cream conspiracy",
+    title: "The ice cream conspiracy",
+    fig: FIG_THREE,
+    html: '<p class="dd-tag">Case file 05</p>' +
+          '<p>The Daily Scoop headline: <b>"ICE CREAM CAUSES SUNBURN!"</b> On days when a beach kiosk sells more ice cream, the first aid hut sees more sunburn. Suspicious.</p>' +
+          '<p>A <b>scatter diagram</b> plots pairs of values. <b>Positive correlation</b>: as one goes up, so does the other. <b>Negative</b>: as one goes up, the other goes down. <b>None</b>: no pattern.</p>' +
+          '<p><b>Correlation does not prove causation.</b> Two things can rise together because a <b>third variable</b> drives both: here, hot sunny weather.</p>' +
+          '<p>A <b>line of best fit</b> follows the trend (through the mean point, if you know it) and ignores outliers. Reading off it inside the data is <b>interpolation</b>: fairly reliable. Going beyond the data is <b>extrapolation</b>: risky.</p>' +
+          '<div class="keep"><b>Keep this</b>Before you believe "A causes B", ask: could something else be causing both?</div>' },
+
+  { type: "mc", topic: "Case 5: The ice cream conspiracy",
+    q: "The kiosk's records: temperature and ice creams sold on 11 days. What type of correlation does it show?",
+    fig: FIG_ICE,
+    options: [
+      "Positive correlation",
+      "Negative correlation",
+      "No correlation"
+    ],
+    answer: 0,
+    hint: "Follow the points from left to right. Do they tend to go up, down, or nowhere in particular?",
+    why: "As the temperature goes up, the number sold tends to go up too: <b>positive correlation</b>. The points cluster close to a straight line, so it is fairly strong. One point does not follow the pattern, and that is the next clue." },
+
+  { type: "sort", topic: "Case 5: The ice cream conspiracy",
+    q: "What correlation would you expect between each pair?",
+    buckets: ["Positive", "Negative", "None"],
+    cards: [
+      ["Height and shoe size", 0],
+      ["Hours of revision and test score", 0],
+      ["Temperature and hot chocolates sold", 1],
+      ["Age of a car and its value", 1],
+      ["Shoe size and favourite number", 2],
+      ["House number and height of the person living there", 2]
+    ],
+    hint: "Ask: as the first one goes up, what tends to happen to the second?",
+    why: "Taller people tend to have bigger feet, and more revision tends to mean higher scores: positive. Warmer days mean fewer hot chocolates, and older cars are usually worth less: negative. Favourite numbers and house numbers have nothing to do with feet or height: none. \"Tends to\" matters: correlation is about a pattern, not a rule for every single case." },
+
+  { type: "mc", topic: "Case 5: The ice cream conspiracy",
+    q: "One point does not fit the pattern. Which day is the outlier?",
+    fig: FIG_ICE,
+    options: [
+      "The day at 17 &deg;C with 110 ice creams sold",
+      "The day at 30 &deg;C with 108 ice creams sold",
+      "The day at 16 &deg;C with 40 ice creams sold",
+      "The day at 24 &deg;C with 75 ice creams sold"
+    ],
+    answer: 0,
+    hint: "Look for a point sitting far away from the line of best fit, not just at the end of the pattern.",
+    why: "A cool 17 &deg;C day selling as many as the hottest day is way off the trend. Maybe a coach trip stopped by. The 30 &deg;C and 16 &deg;C days are at the ends of the pattern but still follow it. A real outlier is checked and explained, not just deleted, and the line of best fit is drawn ignoring it." },
+
+  { type: "num", topic: "Case 5: The ice cream conspiracy",
+    q: "Use the line of best fit to estimate how many ice creams are sold on a <b>20 &deg;C</b> day.",
+    fig: FIG_ICE,
+    boxes: [
+      { label: "Estimate", a: 58.5, tol: 5, post: "ice creams" }
+    ],
+    hint: "Go up from 20 on the temperature axis to the red line, then straight across to the sales axis.",
+    why: "Up from 20 &deg;C to the line, then across: about <b>58</b> (anything from about 54 to 63 is a fair reading). This is <b>interpolation</b>, because 20 &deg;C is inside the data (16 to 30 &deg;C), so it is a fairly reliable estimate. Reading across from the point instead of the line is a common slip." },
+
+  { type: "text", topic: "Case 5: The ice cream conspiracy",
+    q: "The Daily Scoop says ice cream causes sunburn, because both go up together. In one sentence, what is a better explanation?",
+    need: [["hot", "heat", "sunny", "sunshine", "the sun", "weather", "temperatur", "warm", "summer", "third variable", "other variable", "another variable", "lurking", "confound"]],
+    model: "Both are caused by a third variable: on hot sunny days more people buy ice cream and more people get sunburnt, but eating ice cream does not cause sunburn.",
+    hint: "What kind of day makes people buy ice cream AND makes people burn?",
+    why: "Hot sunny weather is the <b>third variable</b>: it pushes up ice cream sales and sunburn at the same time. The correlation is real, but the cause is not ice cream. Correlation shows two things move together; it does not prove that one causes the other." },
+
+  { type: "mc", topic: "Case 5: The ice cream conspiracy", stretch: true,
+    q: "The kiosk owner uses the line to predict sales on a <b>40 &deg;C</b> day: about 156 ice creams. How reliable is that?",
+    fig: FIG_ICE,
+    options: [
+      "Not very reliable: 40 &deg;C is outside the data (16 to 30 &deg;C), so it is extrapolation",
+      "Very reliable, because the line of best fit is straight",
+      "Very reliable, because the correlation is positive",
+      "Not reliable, because a line of best fit can never be used to estimate anything"
+    ],
+    answer: 0,
+    hint: "Is 40 &deg;C inside or outside the temperatures in the data?",
+    why: "40 &deg;C is well beyond the hottest day recorded (30 &deg;C), so this is <b>extrapolation</b>. The pattern might not carry on: the kiosk might sell out, or people might stay indoors in extreme heat. Inside the data (interpolation), a line of best fit gives a fair estimate, so it is not useless, just risky outside its range." },
+
+  /* ---------- CASE 6 ---------- */
+  { type: "learn", topic: "Case 6: The final report",
+    title: "The final report",
+    html: '<p class="dd-tag">Case file 06 &middot; the last folder</p>' +
+          '<p>Time to write it all up for Jay. Good investigations follow the <b>data handling cycle</b> (also called the statistical enquiry cycle):</p>' +
+          '<ul><li><b>Plan</b>: write a hypothesis and decide what data you need.</li>' +
+          '<li><b>Collect</b> the data.</li>' +
+          '<li><b>Process and represent</b>: calculations and charts.</li>' +
+          '<li><b>Interpret</b>: what do the results say about the hypothesis?</li>' +
+          '<li><b>Evaluate</b>: what were the limits? What would you improve?</li></ul>' +
+          '<p>A <b>hypothesis</b> is a statement you can test, not a question. <b>Primary data</b> you collect yourself. <b>Secondary data</b> someone else collected: websites, newspapers, official records.</p>' +
+          '<div class="keep"><b>Keep this</b>A good conclusion matches the evidence. Say "the data suggest", not "this proves".</div>' },
+
+  { type: "order", topic: "Case 6: The final report",
+    q: "EGW's next investigation is about sleep and test scores. Put her steps in order.",
+    items: [
+      "Write the hypothesis: students who sleep for longer get higher test scores",
+      "Hand out a sleep survey and collect the test scores",
+      "Draw a scatter diagram and work out some averages",
+      "Decide whether the results support the hypothesis",
+      "Think about the sample size and what could be done better"
+    ],
+    hint: "You cannot draw a diagram of data you have not collected yet.",
+    why: "Plan (the hypothesis), collect, process and represent (the scatter diagram), interpret (does it support the hypothesis?), evaluate (limits and improvements). Evaluating often leads to a new, better plan, which is why it is drawn as a cycle." },
+
+  { type: "mc", topic: "Case 6: The final report",
+    q: "Which of these is a proper <b>hypothesis</b>?",
+    options: [
+      "Students who sleep for longer get higher test scores.",
+      "Does sleep affect test scores?",
+      "I am going to find out about sleep.",
+      "Sleep is the best thing ever."
+    ],
+    answer: 0,
+    hint: "A hypothesis is a statement that data could show to be right or wrong.",
+    why: "\"Students who sleep for longer get higher test scores\" is a <b>statement</b> you can test with data, and it could turn out to be wrong. \"Does sleep affect...?\" is a question, \"I am going to find out...\" is an aim, and \"the best thing ever\" is an opinion nobody can measure." },
+
+  { type: "sort", topic: "Case 6: The final report",
+    q: "Primary or secondary data?",
+    buckets: ["Primary", "Secondary"],
+    cards: [
+      ["EGW times her friends' reactions with a stopwatch", 0],
+      ["A survey EGW hands out in Base 5", 0],
+      ["Counting the cars that pass the school gate", 0],
+      ["Weather records downloaded from a national weather website", 1],
+      ["Census results from a government website", 1],
+      ["A table of house prices printed in a newspaper", 1]
+    ],
+    hint: "Who collected it? If it was EGW, it is primary.",
+    why: "<b>Primary</b>: EGW collects it herself, so she knows exactly how it was done, but it takes time. <b>Secondary</b>: someone else collected it, so it is quick and often huge, but she has to trust their methods, and it might be out of date or not quite what she needs." },
+
+  { type: "mc", topic: "Case 6: The final report", stretch: true,
+    q: "The Bureau's fair cafe survey: a random sample of <b>60</b> adults from a full list of the town. <b>38</b> of them preferred Bean There's coffee. Which conclusion matches the evidence best?",
+    options: [
+      "The data suggest most adults in town prefer Bean There: 38 out of 60 is about 63% of the sample",
+      "This proves every adult in town prefers Bean There",
+      "The sign was right: 9 out of 10 people prefer Bean There",
+      "Bean There makes the best coffee in the country"
+    ],
+    answer: 0,
+    hint: "Work out 38 out of 60 as a percentage. Then ask which conclusion stays within what a sample of one town can show.",
+    why: "38 &divide; 60 = 0.633..., about <b>63%</b>, which is most of the sample, so \"the data suggest most adults\" fits. A sample cannot <b>prove</b> anything about every adult, 63% is a long way short of 9 out of 10, and one town says nothing about the whole country. Case closed: the sign was exaggerating." },
+
+  { type: "write", topic: "Case 6: The final report",
+    q: '<p><b>Your case report for Jay.</b> Pick any one of the six cases and write it up in <b>3 to 5 sentences</b>: what the suspect claimed, what you checked, what the evidence showed, and your verdict.</p>' +
+       '<p>It goes to Jay only if you choose to send it. Noir detective voice is optional, but very welcome.</p>',
+    starters: [
+      "The suspect claimed that",
+      "I checked",
+      "The evidence shows",
+      "However,",
+      "My verdict:",
+      "To be more sure, I would"
+    ],
+    checklist: [
+      "What the claim was",
+      "One piece of evidence, with a number in it",
+      "A statistics word used properly (sample, bias, median, correlation...)",
+      "A verdict that matches the evidence, without overclaiming",
+      "One thing that would make the evidence stronger"
+    ],
+    minWords: 40 }
+  ]
+});
+})();
+</script>
+</body>
+</html>
