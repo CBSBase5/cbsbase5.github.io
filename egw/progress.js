@@ -225,7 +225,13 @@ function report(src){
     last += rec ? (rec.r === "right1" ? "1" : rec.r === "right2" ? "2" : "s") : ".";
   }
   return { v: 1, who: "EGW", made: new Date().toISOString(), acts: acts,
-    mp: pm.mp, mf: pm.mf, mx: pm.mx, dd: { n: Object.keys(dd.days || {}).length, last: last }, log: (hq.log || []).slice(-20), rv: { items: items, learnt: rv.learnt || 0 } };
+    mp: pm.mp, mf: pm.mf, mx: pm.mx, dd: { n: Object.keys(dd.days || {}).length, last: last }, sw: swipeInfo(src), log: (hq.log || []).slice(-20), rv: { items: items, learnt: rv.learnt || 0 } };
+}
+/* swipe deck: cards met, how many right last time, rounds played */
+function swipeInfo(src){
+  var d = src.read(PREFIX + "swipe.v1") || { cards: {} }, n = 0, ok = 0;
+  Object.keys(d.cards || {}).forEach(function(k){ n++; if(d.cards[k].lastOk) ok++; });
+  return { n: n, ok: ok, rounds: d.rounds || 0 };
 }
 /* A save code can stand in for a progress code */
 function reportFromBackup(bk){ var r = report(objectSource(bk.store)); r.made = bk.made; return r; }
