@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the museum - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=5">
+<style>
+/* room banners on this page only */
+.fig svg.roomban{max-width:560px;border-radius:14px}
+.plaque{background:#f6e7b4;border:3px solid #c9a646;border-radius:12px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the museum</h2>
+    <span>GCSE Maths, Foundation. An escape room: four rooms of mixed exam style questions, the way the real papers mix them, and one digit hiding in each.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=7"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec",
+    WHITE = "#ffffff", LINE = "#d9d8e6", FUR = "#9a6b4a", FUR2 = "#7a5238";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function svg(w, hgt, label, inner, cls){
+  return '<svg ' + (cls ? 'class="' + cls + '" ' : '') + 'viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+
+/* Bonnie: a small brown toy poodle, no tail. (x, y) is where her feet touch the floor. */
+function bonnie(x, y, s){
+  s = s || 1;
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    /* legs with pom feet */
+    '<rect x="-16" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="-6" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<rect x="8" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="16" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<circle cx="-13" cy="-2" r="4" fill="' + FUR + '"/><circle cx="-3" cy="-2" r="4" fill="' + FUR + '"/>' +
+    '<circle cx="11" cy="-2" r="4" fill="' + FUR + '"/><circle cx="19" cy="-2" r="4" fill="' + FUR + '"/>' +
+    /* fluffy body, no tail */
+    '<ellipse cx="2" cy="-22" rx="22" ry="11" fill="' + FUR + '"/>' +
+    '<circle cx="-14" cy="-26" r="8" fill="' + FUR + '"/><circle cx="16" cy="-26" r="8" fill="' + FUR + '"/>' +
+    /* head, topknot, ear, snout */
+    '<circle cx="26" cy="-40" r="10" fill="' + FUR + '"/>' +
+    '<circle cx="24" cy="-51" r="6" fill="' + FUR + '"/>' +
+    '<ellipse cx="20" cy="-35" rx="5" ry="9" fill="' + FUR2 + '"/>' +
+    '<ellipse cx="36" cy="-37" rx="6" ry="4" fill="' + FUR + '"/>' +
+    '<circle cx="41" cy="-38" r="2" fill="' + INK + '"/>' +
+    '<circle cx="30" cy="-43" r="1.8" fill="' + INK + '"/>' +
+  '</g>';
+}
+
+function stars(list){
+  return list.map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (p[2] || 1.6) + '" fill="' + WHITE + '"/>'; }).join("");
+}
+
+/* ---------- room banners ---------- */
+var BAN_EGYPT = svg(380, 130, "The Egyptian gallery at night: a pyramid painting, a painted coffin, a cat statue and Bonnie the poodle",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="#232a4d"/>' +
+  /* pyramid painting on the wall */
+  '<rect x="18" y="20" width="110" height="70" rx="4" fill="#232a4d" stroke="' + SUN + '" stroke-width="3"/>' +
+  '<polygon points="30,82 62,36 94,82" fill="' + SUN + '"/>' +
+  '<polygon points="70,82 94,50 118,82" fill="#e0b52c"/>' +
+  '<circle cx="108" cy="34" r="7" fill="' + CORAL + '"/>' +
+  /* painted coffin in a glass case */
+  '<rect x="150" y="18" width="70" height="96" rx="6" fill="none" stroke="' + CYAN + '" stroke-width="2" opacity="0.7"/>' +
+  '<rect x="164" y="26" width="42" height="84" rx="20" fill="' + SUN + '"/>' +
+  '<circle cx="185" cy="46" r="11" fill="#e0b52c"/>' +
+  '<rect x="170" y="64" width="30" height="5" fill="' + BLUE + '"/><rect x="170" y="74" width="30" height="5" fill="' + BLUE + '"/><rect x="170" y="84" width="30" height="5" fill="' + BLUE + '"/>' +
+  /* cat statue */
+  '<rect x="244" y="96" width="44" height="16" fill="' + LINE + '"/>' +
+  '<path d="M252 96 C250 70 256 60 262 56 L260 44 L266 50 L272 50 L278 44 L276 56 C282 62 286 72 284 96 Z" fill="' + VIOLET + '"/>' +
+  bonnie(322, 114, 0.9));
+
+var BAN_DINO = svg(380, 130, "The dinosaur hall at night: a huge skeleton on a plinth, with Bonnie looking up at it",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="#232a4d"/>' +
+  '<rect x="40" y="104" width="250" height="10" fill="' + LINE + '"/>' +
+  /* spine and tail */
+  '<path d="M60 70 C110 40 190 38 240 52 C262 58 280 50 296 34" fill="none" stroke="' + PAPER + '" stroke-width="5" stroke-linecap="round"/>' +
+  /* ribs */
+  '<path d="M150 44 C146 60 150 72 158 78 M170 42 C166 60 170 74 178 80 M190 43 C188 60 192 74 198 79 M210 46 C208 60 212 72 218 76" fill="none" stroke="' + PAPER + '" stroke-width="3" stroke-linecap="round"/>' +
+  /* skull */
+  '<path d="M296 34 L330 30 C340 30 344 38 340 44 L314 50 L300 46 Z" fill="' + PAPER + '"/>' +
+  '<circle cx="320" cy="37" r="3" fill="' + INK + '"/>' +
+  '<path d="M314 48 L318 54 M322 47 L325 53 M330 45 L332 51" stroke="' + PAPER + '" stroke-width="2"/>' +
+  /* legs */
+  '<path d="M170 76 L162 104 M210 74 L222 104 M150 60 L130 82" fill="none" stroke="' + PAPER + '" stroke-width="4" stroke-linecap="round"/>' +
+  stars([[30,20],[340,90,1.2],[20,60,1.2]]) +
+  bonnie(342, 122, 0.75));
+
+var BAN_SHOP = svg(380, 130, "The gift shop at night: shelves of toys and gifts, a SALE sign, and Bonnie holding a squeaky dinosaur",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="#232a4d"/>' +
+  /* shelves */
+  '<rect x="20" y="30" width="190" height="6" fill="' + LINE + '"/><rect x="20" y="70" width="190" height="6" fill="' + LINE + '"/><rect x="20" y="108" width="190" height="6" fill="' + LINE + '"/>' +
+  '<rect x="30" y="14" width="18" height="16" rx="3" fill="' + CORAL + '"/><rect x="54" y="10" width="14" height="20" rx="3" fill="' + MINT + '"/>' +
+  '<polygon points="76,30 88,12 100,30" fill="' + SUN + '"/><rect x="108" y="16" width="24" height="14" rx="3" fill="' + CYAN + '"/>' +
+  '<circle cx="152" cy="22" r="8" fill="' + VIOLET + '"/><rect x="170" y="12" width="28" height="18" rx="3" fill="' + BLUE + '"/>' +
+  /* owls on the middle shelf */
+  '<ellipse cx="44" cy="58" rx="12" ry="13" fill="' + SUN + '"/><circle cx="40" cy="54" r="3.5" fill="' + WHITE + '"/><circle cx="48" cy="54" r="3.5" fill="' + WHITE + '"/><circle cx="40" cy="54" r="1.5" fill="' + INK + '"/><circle cx="48" cy="54" r="1.5" fill="' + INK + '"/>' +
+  '<ellipse cx="78" cy="58" rx="12" ry="13" fill="' + MINT + '"/><circle cx="74" cy="54" r="3.5" fill="' + WHITE + '"/><circle cx="82" cy="54" r="3.5" fill="' + WHITE + '"/><circle cx="74" cy="54" r="1.5" fill="' + INK + '"/><circle cx="82" cy="54" r="1.5" fill="' + INK + '"/>' +
+  '<rect x="104" y="50" width="40" height="20" rx="3" fill="' + PAPER + '"/><rect x="152" y="46" width="12" height="24" rx="2" fill="' + CORAL + '"/><rect x="168" y="46" width="12" height="24" rx="2" fill="' + BLUE + '"/><rect x="184" y="46" width="12" height="24" rx="2" fill="' + MINT + '"/>' +
+  '<rect x="30" y="90" width="50" height="18" rx="3" fill="' + VIOLET + '"/><rect x="92" y="86" width="40" height="22" rx="3" fill="' + SUN + '"/><rect x="144" y="92" width="56" height="16" rx="3" fill="' + CYAN + '"/>' +
+  /* sale sign */
+  '<g transform="rotate(-6 280 40)"><rect x="236" y="20" width="96" height="40" rx="6" fill="' + CORAL + '"/>' +
+  '<text x="284" y="48" text-anchor="middle" ' + LAB + ' font-size="22" font-weight="700" fill="' + WHITE + '">SALE</text></g>' +
+  bonnie(300, 118, 0.85) +
+  /* squeaky toy dinosaur in her mouth */
+  '<path d="M332 84 L346 78 L352 84 L346 88 Z" fill="' + MINT + '"/>');
+
+var BAN_OBS = svg(380, 130, "The observatory at night: a dome with a slit open to the stars, a brass telescope, an owl on the rail and Bonnie asleep on a rug",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  stars([[30,18],[70,40,1.2],[120,14],[250,22,1.2],[300,12],[350,34],[200,8,1.2],[340,70,1.2]]) +
+  /* dome */
+  '<path d="M90 100 A100 80 0 0 1 290 100 Z" fill="#232a4d" stroke="' + LINE + '" stroke-width="2"/>' +
+  '<path d="M180 22 L200 22 L200 100 L180 100 Z" fill="' + INK + '"/>' +
+  /* telescope */
+  '<line x1="176" y1="100" x2="190" y2="82" stroke="' + LINE + '" stroke-width="4"/>' +
+  '<line x1="204" y1="100" x2="190" y2="82" stroke="' + LINE + '" stroke-width="4"/>' +
+  '<line x1="170" y1="92" x2="214" y2="44" stroke="' + SUN + '" stroke-width="10" stroke-linecap="round"/>' +
+  /* floor and rail */
+  '<rect x="0" y="100" width="380" height="30" fill="#232a4d"/>' +
+  '<rect x="300" y="78" width="70" height="5" fill="' + LINE + '"/>' +
+  /* owl on the rail */
+  '<ellipse cx="336" cy="66" rx="11" ry="13" fill="' + PAPER + '"/><circle cx="332" cy="62" r="3.5" fill="' + SUN + '"/><circle cx="340" cy="62" r="3.5" fill="' + SUN + '"/><circle cx="332" cy="62" r="1.5" fill="' + INK + '"/><circle cx="340" cy="62" r="1.5" fill="' + INK + '"/><polygon points="334,67 338,67 336,71" fill="' + CORAL + '"/>' +
+  /* rug and sleeping Bonnie */
+  '<ellipse cx="70" cy="118" rx="52" ry="8" fill="' + CORAL + '"/>' +
+  '<ellipse cx="66" cy="108" rx="24" ry="9" fill="' + FUR + '"/><circle cx="50" cy="104" r="8" fill="' + FUR + '"/><circle cx="82" cy="104" r="8" fill="' + FUR + '"/>' +
+  '<circle cx="94" cy="108" r="9" fill="' + FUR + '"/><ellipse cx="90" cy="112" rx="5" ry="7" fill="' + FUR2 + '"/><ellipse cx="103" cy="111" rx="5" ry="4" fill="' + FUR + '"/>' +
+  '<path d="M94 106 q3 2 6 0" stroke="' + INK + '" stroke-width="1.5" fill="none"/>' +
+  '<text x="110" y="92" ' + LAB + ' font-size="14" fill="' + LINE + '">z z z</text>');
+
+/* ---------- question figures ---------- */
+var PYRAMID = svg(380, 220, "A square based pyramid with base edges 6 cm and 6 cm and a vertical height of 10 cm",
+  '<polygon points="150,140 290,140 230,180 90,180" fill="' + PAPER + '"/>' +
+  '<polygon points="190,30 90,180 230,180" fill="' + SUN + '" opacity="0.55"/>' +
+  '<polygon points="190,30 230,180 290,140" fill="' + SUN + '" opacity="0.85"/>' +
+  /* hidden edges */
+  '<path d="M150 140 L90 180 M150 140 L290 140 M150 140 L190 30" fill="none" stroke="' + INK + '" stroke-width="2" stroke-dasharray="6 5"/>' +
+  /* visible edges */
+  '<path d="M90 180 L230 180 L290 140 M190 30 L90 180 M190 30 L230 180 M190 30 L290 140" fill="none" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+  /* height */
+  '<line x1="190" y1="30" x2="190" y2="160" stroke="' + CORAL + '" stroke-width="2.5" stroke-dasharray="5 4"/>' +
+  '<path d="M190 150 L200 150 L200 160" fill="none" stroke="' + CORAL + '" stroke-width="2"/>' +
+  '<line x1="118" y1="90" x2="186" y2="90" stroke="' + CORAL + '" stroke-width="1.5"/>' +
+  '<text x="114" y="96" text-anchor="end" ' + LAB + ' font-size="16" font-weight="700" fill="' + CORAL + '">10 cm</text>' +
+  '<text x="160" y="204" text-anchor="middle" ' + LAB + ' font-size="16" fill="' + INK + '">6 cm</text>' +
+  '<text x="270" y="176" ' + LAB + ' font-size="16" fill="' + INK + '">6 cm</text>');
+
+var BEARING = svg(380, 210, "A map. A north line at the museum, M, and a north line at the lighthouse, L. The bearing of L from M is 65 degrees, measured clockwise from north.",
+  '<rect width="380" height="210" rx="12" fill="' + PAPER + '"/>' +
+  '<line x1="110" y1="170" x2="110" y2="48" stroke="' + INK + '" stroke-width="2"/>' +
+  '<polygon points="110,40 104,54 116,54" fill="' + INK + '"/>' +
+  '<text x="110" y="32" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">N</text>' +
+  '<line x1="273" y1="94" x2="273" y2="38" stroke="' + INK + '" stroke-width="2"/>' +
+  '<polygon points="273,30 267,44 279,44" fill="' + INK + '"/>' +
+  '<text x="273" y="24" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">N</text>' +
+  '<line x1="110" y1="170" x2="273" y2="94" stroke="' + BLUE + '" stroke-width="3"/>' +
+  '<path d="M110 130 A40 40 0 0 1 146.3 153.1" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>' +
+  '<text x="134" y="122" ' + LAB + ' font-size="16" font-weight="700" fill="' + CORAL + '">65&deg;</text>' +
+  '<circle cx="110" cy="170" r="6" fill="' + INK + '"/>' +
+  '<text x="96" y="194" ' + LAB + ' font-size="16" fill="' + INK + '">Museum (M)</text>' +
+  '<circle cx="273" cy="94" r="6" fill="' + INK + '"/>' +
+  '<text x="284" y="112" ' + LAB + ' font-size="16" fill="' + INK + '">Lighthouse</text>' +
+  '<text x="284" y="130" ' + LAB + ' font-size="16" fill="' + INK + '">(L)</text>' +
+  '<text x="366" y="198" text-anchor="end" ' + BODY + ' font-size="14" fill="' + INK + '" opacity="0.7">Not drawn accurately</text>');
+
+var SCOPE = svg(380, 220, "A right angled triangle. The telescope tube is the hypotenuse, 2 metres long. Its top end is 1.2 metres higher than its bottom end. The angle x is between the tube and the horizontal.",
+  '<line x1="70" y1="180" x2="250" y2="180" stroke="' + INK + '" stroke-width="2" stroke-dasharray="6 5"/>' +
+  '<line x1="250" y1="60" x2="250" y2="180" stroke="' + INK + '" stroke-width="2" stroke-dasharray="6 5"/>' +
+  '<path d="M238 180 L238 168 L250 168" fill="none" stroke="' + INK + '" stroke-width="2"/>' +
+  '<line x1="70" y1="180" x2="250" y2="60" stroke="' + SUN + '" stroke-width="12" stroke-linecap="round"/>' +
+  '<line x1="70" y1="180" x2="250" y2="60" stroke="' + INK + '" stroke-width="2"/>' +
+  '<path d="M120 180 A50 50 0 0 0 111.6 152.3" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>' +
+  '<text x="126" y="172" ' + LAB + ' font-size="18" font-weight="700" fill="' + CORAL + '">x</text>' +
+  '<text x="134" y="110" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">2 m</text>' +
+  '<text x="260" y="126" ' + LAB + ' font-size="16" fill="' + INK + '">1.2 m</text>' +
+  '<circle cx="70" cy="180" r="6" fill="' + INK + '"/>' +
+  '<text x="20" y="208" ' + BODY + ' font-size="14" fill="' + INK + '" opacity="0.7">Not drawn accurately</text>');
+
+EGW.run({
+  id: "escape-maths",
+  title: "Escape the museum",
+  subject: "Maths",
+  mins: 35,
+  blurb: "A maths escape room: four museum rooms of mixed Foundation questions, one digit in each, and a final door to open.",
+  escape: {
+    digits: ["5", "8", "3", "6"],
+    intro: "<p>You lingered a little too long by the mummies. The lights go out, and every door in the museum locks with a heavy clunk.</p>" +
+           "<p>Taped to the guard's desk is a note: <i>Four rooms. Each one hides a digit. Find all four and the final door will let you out.</i></p>" +
+           "<p>Something small and fluffy sneezes in the dark. Bonnie, a little brown toy poodle with no tail, has somehow wandered in too.</p>",
+    outro: "<p>The final door swings open onto cool night air. Bonnie trots out first, as if escaping was her plan all along, and an owl hoots from the museum roof. Mixed questions from all over the course, and you got through every room. Outrageous, in the best way.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: EGYPTIAN GALLERY ---------- */
+  { type: "learn", topic: "Egyptian gallery",
+    title: "Room 1: the Egyptian gallery",
+    fig: BAN_EGYPT.replace("<svg ", '<svg class="roomban" '),
+    html: "<p>Glass cases glow faintly in the dark: a painted coffin, a cat statue, rows of tiny clay figures.</p>" +
+          "<p>Bonnie sniffs her way along the cases, then sits by a small brass lock on the gallery door. Three puzzles are carved beside it.</p>" +
+          "<p>A pencil and some paper will help. A calculator is fine whenever you want one.</p>" },
+
+  { type: "mc", topic: "Egyptian gallery",
+    q: "<p>A label explains that the ancient Egyptians wrote fractions as sums of different <b>unit fractions</b> (fractions with 1 on top). For example, they wrote 3/4 as 1/2 + 1/4.</p><p>Which of these sums is equal to <b>5/6</b>?</p>",
+    options: ["1/2 + 1/3", "1/3 + 1/4", "1/2 + 1/6", "1/5 + 1/6"],
+    answer: 0,
+    hint: "To add fractions, change them to the same denominator first. Sixths or twelfths work well here.",
+    why: "1/2 = 3/6 and 1/3 = 2/6, so 1/2 + 1/3 = <b>5/6</b>.<br>The others: 1/3 + 1/4 = 4/12 + 3/12 = 7/12; 1/2 + 1/6 = 3/6 + 1/6 = 4/6 = 2/3; 1/5 + 1/6 = 6/30 + 5/30 = 11/30.<br>The classic slip is adding the tops and the bottoms. You need a common denominator first, then add the tops only." },
+
+  { type: "num", topic: "Egyptian gallery",
+    q: "A wall painting shows a procession of guards and servants. The ratio of guards to servants is <b>2 : 5</b>. There are 35 figures in the procession altogether.",
+    boxes: [
+      { label: "Number of guards", a: 10 },
+      { label: "Number of servants", a: 25 }
+    ],
+    hint: "How many parts are there in the ratio altogether? Share the 35 between those parts first.",
+    why: "2 + 5 = 7 parts. 35 &divide; 7 = 5 figures in each part.<br>Guards: 2 &times; 5 = <b>10</b>. Servants: 5 &times; 5 = <b>25</b>.<br>Check: 10 + 25 = 35. A common slip is dividing 35 by 2 or by 5; the total is shared by the total number of parts." },
+
+  { type: "num", topic: "Egyptian gallery",
+    q: "<p>Bonnie is very interested in a gift box shaped like a pyramid. It has a square base, 6 cm by 6 cm, and it is 10 cm tall.</p><p>Volume of a pyramid = 1/3 &times; area of base &times; height</p>",
+    fig: PYRAMID,
+    boxes: [
+      { label: "Area of the base", a: 36, post: "cm&sup2;" },
+      { label: "Volume of the box", a: 120, post: "cm&sup3;" }
+    ],
+    hint: "The base is a square, so its area is side times side. Then use the formula: do not forget the 1/3.",
+    why: "Area of the base: 6 &times; 6 = <b>36 cm&sup2;</b>.<br>Volume: 1/3 &times; 36 &times; 10 = 360 &divide; 3 = <b>120 cm&sup3;</b>.<br>Leaving out the 1/3 gives 360 cm&sup3;, which is the volume of a cuboid with the same base and height. A pyramid fills exactly a third of that box." },
+
+  /* ---------- ROOM 2: DINOSAUR HALL ---------- */
+  { type: "learn", topic: "Dinosaur hall",
+    title: "Room 2: the dinosaur hall",
+    fig: BAN_DINO.replace("<svg ", '<svg class="roomban" '),
+    html: "<p>Through a stone archway, an enormous skeleton looms over you. Its ribs are like the hull of an upturned boat, and its teeth catch the green glow of the exit sign.</p>" +
+          "<p>Bonnie gives it one small, brave growl, then hides behind your legs.</p>" +
+          "<p>Pinned to the plinth is a scrap of paper with some working on it. It looks a lot like Jay's handwriting.</p>" },
+
+  { type: "num", topic: "Dinosaur hall",
+    q: "A glass case holds a model of the skeleton, made to a scale of <b>1 : 40</b>. The model is 30 cm long. How long is the real skeleton?",
+    boxes: [
+      { label: "Real length in centimetres", a: 1200, post: "cm" },
+      { label: "Real length in metres", a: 12, post: "m" }
+    ],
+    hint: "1 : 40 means every 1 cm on the model is 40 cm in real life. Then there are 100 cm in a metre.",
+    why: "Real length = 30 &times; 40 = <b>1200 cm</b>. 1200 &divide; 100 = <b>12 m</b>.<br>Model to real, multiply by the scale factor; real to model, divide. If an answer comes out at 0.75 cm, the division went the wrong way." },
+
+  { type: "num", topic: "Dinosaur hall",
+    q: "The sign says this dinosaur lived about <b>68 000 000</b> years ago. Write 68 000 000 in standard form, A &times; 10<sup>n</sup>.",
+    boxes: [
+      { label: "A", a: 6.8 },
+      { label: "n, the power of 10", a: 7 }
+    ],
+    hint: "In standard form, A is at least 1 and less than 10. Put the decimal point just after the first digit, then count how many places it has moved.",
+    why: "A must be between 1 and 10, so A = <b>6.8</b>. Going from 6.8 to 68 000 000 moves the digits 7 places, so 68 000 000 = 6.8 &times; 10<sup>7</sup>, giving n = <b>7</b>.<br>68 &times; 10<sup>6</sup> has the right value but is not standard form, because 68 is bigger than 10." },
+
+  { type: "mark", topic: "Dinosaur hall",
+    q: "<p>A raptor skeleton is <i>x</i> metres long. The big skeleton is 12 m long, which is 1.5 m more than three times the length of the raptor.</p><p>Form an equation and solve it to find <i>x</i>. <b>(3 marks)</b></p>",
+    note: "Jay did this one on the back of a museum map.",
+    jay: ["3x + 1.5 = 12", "3x = 12 + 1.5", "3x = 13.5", "x = 4.5"],
+    wrong: 1, max: 3, award: 1,
+    hint: "Check each line by asking: what did Jay do to both sides? Marks here are usually one for the equation, one for a correct step towards solving it, and one for the answer.",
+    why: "A typical mark scheme: M1 for forming 3x + 1.5 = 12, M1 for a correct first step to solve it (3x = 12 &minus; 1.5), A1 for x = 3.5.<br>Jay&rsquo;s equation is right, so <b>M1</b>.<br>Line 2 is where it goes wrong: to undo + 1.5 you subtract 1.5 from both sides, so it should be 3x = 12 &minus; 1.5 = 10.5. The second M1 is lost, and so is the <b>A1</b>: the answer should be x = 10.5 &divide; 3 = 3.5.<br>So <b>1 mark out of 3</b>. Moving a number across and keeping its sign is a very ordinary slip; Jay says checking with 3 &times; 4.5 + 1.5 = 15, not 12, would have caught it." },
+
+  /* ---------- ROOM 3: GIFT SHOP ---------- */
+  { type: "learn", topic: "Gift shop",
+    title: "Room 3: the gift shop",
+    fig: BAN_SHOP.replace("<svg ", '<svg class="roomban" '),
+    html: "<p>The gift shop shutter is half open. You duck under it. Shelves of fossils, pyramid rubbers and a whole row of cuddly owls stare back at you.</p>" +
+          "<p>Bonnie finds a squeaky toy dinosaur and decides it is hers now. Squeak. Squeak. Squeak.</p>" +
+          "<p>On the till is a sticky note: <i>the digit is under the best deal.</i></p>" },
+
+  { type: "num", topic: "Gift shop",
+    q: "A cuddly owl costs &pound;18. The sale sign says <b>15% off</b>. Work out the sale price.",
+    boxes: [
+      { label: "15% of &pound;18", a: 2.7, pre: "&pound;", show: "2.70" },
+      { label: "Sale price", a: 15.3, pre: "&pound;", show: "15.30" }
+    ],
+    hint: "Build 15% from 10% and 5%. Then take the discount away from the original price.",
+    why: "10% of 18 = 1.80 and 5% is half of that, 0.90. So 15% = <b>&pound;2.70</b>.<br>Sale price = 18 &minus; 2.70 = <b>&pound;15.30</b>.<br>With a calculator you could use a multiplier instead: 100% &minus; 15% = 85%, and 18 &times; 0.85 = 15.30. Stopping at &pound;2.70 is the common slip: that is the discount, not the price." },
+
+  { type: "mc", topic: "Gift shop",
+    q: "<p>Museum pencils come in three packs:</p><ul><li>6 pencils for &pound;1.50</li><li>10 pencils for &pound;2.30</li><li>15 pencils for &pound;3.60</li></ul><p>Which pack is the best value for money?</p>",
+    options: ["The pack of 10 for &pound;2.30", "The pack of 6 for &pound;1.50", "The pack of 15 for &pound;3.60", "They are all the same value"],
+    answer: 0,
+    hint: "Work out the cost of one pencil in each pack. Pence might be easier than pounds.",
+    why: "Cost per pencil: 150 &divide; 6 = 25p, 230 &divide; 10 = 23p, 360 &divide; 15 = 24p.<br>The cheapest per pencil is the <b>pack of 10</b> at 23p each. The biggest pack is not always the best deal, and the cheapest price on the shelf is not either. In the exam, show the cost per item for every pack, then say which one wins." },
+
+  { type: "num", topic: "Gift shop",
+    q: "A lucky dip barrel holds 20 toy dinosaurs: 9 green, 5 red and the rest blue. You take one at random.",
+    boxes: [
+      { label: "a) The probability that it is blue (as a fraction or decimal)", a: 0.3, tol: 0.001, show: "6/20 = 3/10" },
+      { label: "b) 60 people each take one and put it back. How many blue dinosaurs would you expect?", a: 18 }
+    ],
+    hint: "First find how many are blue: 20 minus the green and red ones. For part b, multiply the probability by the number of goes.",
+    why: "Blue: 20 &minus; 9 &minus; 5 = 6. So P(blue) = <b>6/20</b>, which is 3/10 or 0.3.<br>Expected number = probability &times; number of goes = 0.3 &times; 60 = <b>18</b>.<br>An expected number is a best guess, not a promise: you might really get 16 or 21." },
+
+  /* ---------- ROOM 4: OBSERVATORY ---------- */
+  { type: "learn", topic: "Observatory",
+    title: "Room 4: the observatory",
+    fig: BAN_OBS.replace("<svg ", '<svg class="roomban" '),
+    html: "<p>A spiral staircase leads up to the observatory. The dome has a slit open to the stars, and a brass telescope points at the sky.</p>" +
+          "<p>An owl is perched on the rail, watching you with great interest. Bonnie curls up on a warm rug and falls asleep.</p>" +
+          "<p>The last lock is on the telescope. These puzzles are a little harder, so take your time.</p>" },
+
+  { type: "num", topic: "Observatory",
+    q: "The observatory floor is a <b>regular octagon</b>: 8 equal sides and 8 equal angles. Work out the size of one exterior angle and one interior angle.",
+    boxes: [
+      { label: "One exterior angle", a: 45, post: "&deg;" },
+      { label: "One interior angle", a: 135, post: "&deg;" }
+    ],
+    hint: "The exterior angles of any polygon add up to 360&deg;. An interior angle and its exterior angle sit on a straight line.",
+    why: "Exterior angle = 360 &divide; 8 = <b>45&deg;</b>. Interior angle = 180 &minus; 45 = <b>135&deg;</b>.<br>Another way: the interior angles of an octagon add up to (8 &minus; 2) &times; 180 = 1080&deg;, and 1080 &divide; 8 = 135&deg;." },
+
+  { type: "num", topic: "Observatory",
+    q: "A map on the wall shows the museum, M, and a lighthouse, L. The bearing of L from M is <b>065&deg;</b>. Work out the bearing of M from L.",
+    fig: BEARING,
+    boxes: [
+      { label: "Bearing of M from L", a: 245, post: "&deg;" }
+    ],
+    hint: "Stand at L and face north. Which way would you turn to face M, and how far? The two north lines are parallel.",
+    why: "The two north lines are parallel, and the way back from L to M points in exactly the opposite direction to the way out. Opposite directions are 180&deg; apart, so for a back bearing you add 180&deg; (or subtract 180&deg; if the bearing is already more than 180&deg;).<br>65 + 180 = <b>245&deg;</b>. Bearings are measured clockwise from north and written with three figures, so 065&deg;, not 65&deg;." },
+
+  { type: "num", topic: "Observatory", stretch: true,
+    q: "The telescope tube is 2 m long. Its top end is 1.2 m higher than its bottom end. Work out the angle <i>x</i> between the telescope and the horizontal. Give your answer to 1 decimal place.",
+    fig: SCOPE,
+    boxes: [
+      { label: "Angle x", a: 36.9, tol: 0.05, post: "&deg;" }
+    ],
+    hint: "Label the sides from the angle x: the 1.2 m side is opposite x and the 2 m tube is the hypotenuse. Which of sin, cos and tan uses those two?",
+    why: "Opposite and hypotenuse means sin: sin x = 1.2 &divide; 2 = 0.6.<br>x = sin<sup>&minus;1</sup>(0.6) = 36.869...&deg; = <b>36.9&deg;</b> to 1 decimal place.<br>If you got 0.64, your calculator is in radians, not degrees. If you got about 0.01, that is sin of 0.6 rather than the inverse: use shift sin." },
+
+  /* ---------- THE FINAL DOOR ---------- */
+  { type: "unlock", topic: "The final door",
+    q: "<p>The final door has a brass plaque. One corner is slightly chewed. Bonnie looks very innocent.</p>" +
+       '<div class="plaque">Use each room&rsquo;s digit once. The code is the <b>largest even number</b> you can make.</div>',
+    code: "8536",
+    hint: "Biggest digits at the front usually make the biggest number. But an even number has to end in 0, 2, 4, 6 or 8, so check the last digit.",
+    why: "The four digits are 5, 8, 3 and 6. Biggest first gives 8653, but that ends in 3, so it is odd.<br>To be even, the code must end in 6 or 8. Ending in 6, the biggest you can make from 8, 5 and 3 is 853, giving <b>8536</b>. Ending in 8 gives 6538, which is smaller. So the door opens with <b>8536</b>." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

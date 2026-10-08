@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=4">
+<link rel="stylesheet" href="/egw/egw.css?v=5">
 <style>
 /* Jay's view only */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -54,6 +54,9 @@
 .log div{padding:8px 0;border-top:1px dashed var(--line);font-size:.95rem}
 .log small{color:var(--body-tint);display:block}
 .empty{color:var(--body-tint);font-size:.92rem}
+.ddgrid{display:flex;gap:5px;flex-wrap:wrap}
+.ddgrid i{width:22px;height:22px;border-radius:6px;border:2px dashed var(--line);display:block}
+.ddgrid i.r1{background:var(--mint);border:0}.ddgrid i.r2{background:var(--sun);border:0}.ddgrid i.sh{background:var(--violet);border:0}
 @media print{
   body{background:#fff}
   .grain,.hq,#loadCard,footer,.noprint{display:none !important}
@@ -100,8 +103,8 @@
   </div>
 </footer>
 
-<script src="/egw/catalogue.js?v=4"></script>
-<script src="/egw/progress.js?v=3"></script>
+<script src="/egw/catalogue.js?v=5"></script>
+<script src="/egw/progress.js?v=4"></script>
 <script>
 (function(){
 "use strict";
@@ -164,7 +167,10 @@ $("fileIn").onchange = function(){
 function totals(r){
   var t = { cd: 0, cn: 0, ans: 0, g1: 0, g2: 0, sh: 0, sk: 0, last: "" };
   C.acts.forEach(function(a){ t.cn += a.chunks.length; });
+  var core = {};
+  C.acts.forEach(function(a){ core[a.id] = 1; });
   Object.keys(r.acts || {}).forEach(function(id){
+    if(!core[id]) return;
     var a = r.acts[id];
     t.cd += a.cd; t.g1 += a.g1; t.g2 += a.g2; t.sh += a.sh; t.sk += a.sk;
     if(a.u > t.last) t.last = a.u;
@@ -271,6 +277,26 @@ function draw(){
     html += '</div>';
   });
   html += '</div>';
+
+  /* the extras and the daily drop */
+  var ex = C.extras || [];
+  if(ex.length || r.dd){
+    html += '<div class="board"><div class="card w6"><span class="kicker">Something different</span>';
+    ex.forEach(function(a){
+      var d = r.acts && r.acts[a.id];
+      var info = !d ? "not opened" : (a.kind === "escape" && d.e ? "escaped" + (d.bt ? ", best time " + Math.floor(d.bt / 60) + ":" + ("0" + d.bt % 60).slice(-2) : "") : d.cd + " of " + a.chunks.length + " parts done");
+      html += '<div class="arow' + (d ? "" : " untouched") + '"><div class="top"><b>' + esc(a.title) + '</b><span class="when">' + info + '</span></div>' +
+        (d ? '<div class="counts">First go ' + d.g1 + ', second go ' + d.g2 + ', Show me ' + d.sh + ', skipped ' + d.sk + '</div>' : "") + '</div>';
+    });
+    html += '</div><div class="card w6"><span class="kicker">Daily drop</span>';
+    var dd = r.dd || { n: 0, last: "" };
+    html += '<p style="margin:0 0 10px"><b>' + dd.n + '</b> drop' + (dd.n === 1 ? "" : "s") + ' done so far.</p><div class="ddgrid">';
+    for(var q = 0; q < dd.last.length; q++){
+      var c = dd.last.charAt(q);
+      html += '<i class="' + (c === "1" ? "r1" : c === "2" ? "r2" : c === "s" ? "sh" : "") + '" title="' + (13 - q) + ' days before this was sent"></i>';
+    }
+    html += '</div><p class="msg">The last 14 days, oldest first. Green first go, yellow second go, purple Show me, empty not played.</p></div></div>';
+  }
 
   /* second look and notes */
   html += '<div class="board"><div class="card w6"><span class="kicker">Second look</span>';

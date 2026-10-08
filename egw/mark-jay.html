@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mark Jay's work - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=5">
+<style>
+/* Mark Jay's work (this page only) */
+.mj-ladder{list-style:none;padding:0;margin:0 0 10px}
+.mj-ladder li{border-left:5px solid var(--line);padding:4px 10px;margin-bottom:4px}
+.mj-ladder li b{font-family:var(--display)}
+.mj-scheme{background:var(--paper);border-radius:12px;padding:8px 12px;margin:8px 0;font-size:.92rem}
+.mj-scheme p{margin:0 0 4px}
+</style>
+</head>
+<body class="subj-home">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Mark Jay's work</h2>
+    <span>Mixed subjects. Jay has had a go at some GCSE questions in Maths, Biology, Statistics and English. You are the examiner: find where he slips and decide what he has earned.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=7"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + '>' + s + '</text>';
+}
+
+/* A marked piece of working: M1 earned, A0 lost */
+var MARKED =
+'<svg viewBox="0 0 380 176" role="img" aria-label="Working for 15 percent of 60. The method lines earn M1. The last line adds 6 and 3 to get 8, so the accuracy mark is lost: A0.">' +
+'<rect x="2" y="2" width="376" height="172" rx="14" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2"/>' +
+t(16, 30, "Work out 15% of 60.", LAB + ' font-size="16" font-weight="700" fill="' + INK + '"') +
+t(24, 66, "10% = 6", BODY + ' font-size="18" fill="' + BLUE + '"') +
+t(24, 98, "5% = 3", BODY + ' font-size="18" fill="' + BLUE + '"') +
+t(24, 132, "15% = 6 + 3 = 8", BODY + ' font-size="18" textLength="124" lengthAdjust="spacingAndGlyphs" fill="' + BLUE + '"') +
+'<ellipse cx="143" cy="126" rx="12" ry="15" fill="none" stroke="' + CORAL + '" stroke-width="3"/>' +
+'<path d="M236 62 L246 74 L266 50" fill="none" stroke="' + MINT + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+t(276, 72, "M1", LAB + ' font-size="20" font-weight="700" fill="' + INK + '"') +
+'<path d="M238 118 L258 138 M258 118 L238 138" fill="none" stroke="' + CORAL + '" stroke-width="4" stroke-linecap="round"/>' +
+t(276, 135, "A0", LAB + ' font-size="20" font-weight="700" fill="' + INK + '"') +
+t(16, 162, "Method right, so M1. Answer wrong (it is 9), so A0.", BODY + ' font-size="14" fill="' + INK + '"') +
+'</svg>';
+
+/* Circle with a diameter of 12 cm */
+var CIRCLE =
+'<svg viewBox="0 0 380 170" role="img" aria-label="A circle with a diameter of 12 centimetres drawn across it">' +
+'<circle cx="190" cy="85" r="72" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>' +
+'<line x1="118" y1="85" x2="262" y2="85" stroke="' + BLUE + '" stroke-width="3"/>' +
+'<circle cx="190" cy="85" r="4" fill="' + INK + '"/>' +
+t(190, 74, "12 cm", LAB + ' font-size="17" font-weight="700" text-anchor="middle" fill="' + INK + '"') +
+'</svg>';
+
+/* Right angled triangle: hypotenuse 13.5 cm, base 8.2 cm, height x */
+var TRI =
+'<svg viewBox="0 0 380 210" role="img" aria-label="A right angled triangle. The hypotenuse is 13.5 centimetres, the base is 8.2 centimetres and the vertical side is x. Not drawn accurately.">' +
+'<path d="M90 180 L90 30 L280 180 Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+'<path d="M90 162 L108 162 L108 180" fill="none" stroke="' + INK + '" stroke-width="2"/>' +
+t(185, 202, "8.2 cm", LAB + ' font-size="17" font-weight="700" text-anchor="middle" fill="' + INK + '"') +
+t(78, 112, "x", BODY + ' font-size="20" font-style="italic" text-anchor="end" fill="' + BLUE + '"') +
+t(200, 96, "13.5 cm", LAB + ' font-size="17" font-weight="700" fill="' + INK + '"') +
+t(372, 30, "Not drawn", BODY + ' font-size="14" text-anchor="end" fill="' + INK + '"') +
+t(372, 48, "accurately", BODY + ' font-size="14" text-anchor="end" fill="' + INK + '"') +
+'</svg>';
+
+/* Frequency table for the bird feeder */
+var BIRDS =
+'<table class="datatable"><tr><th>Number of birds</th><th>Frequency</th></tr>' +
+'<tr><td>0</td><td>6</td></tr><tr><td>1</td><td>9</td></tr><tr><td>2</td><td>7</td></tr>' +
+'<tr><td>3</td><td>5</td></tr><tr><td>4</td><td>3</td></tr></table>';
+
+/* Two box plots on a scale from 10 to 60 */
+function bx(v){ return 40 + (v - 10) * 6.4; }
+function boxplot(y, five, fill, name){
+  var s = "";
+  s += '<line x1="' + bx(five[0]) + '" y1="' + (y + 15) + '" x2="' + bx(five[1]) + '" y2="' + (y + 15) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<line x1="' + bx(five[3]) + '" y1="' + (y + 15) + '" x2="' + bx(five[4]) + '" y2="' + (y + 15) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<line x1="' + bx(five[0]) + '" y1="' + (y + 5) + '" x2="' + bx(five[0]) + '" y2="' + (y + 25) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<line x1="' + bx(five[4]) + '" y1="' + (y + 5) + '" x2="' + bx(five[4]) + '" y2="' + (y + 25) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="' + bx(five[1]) + '" y="' + y + '" width="' + (bx(five[3]) - bx(five[1])) + '" height="30" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<line x1="' + bx(five[2]) + '" y1="' + y + '" x2="' + bx(five[2]) + '" y2="' + (y + 30) + '" stroke="' + INK + '" stroke-width="3.5"/>';
+  s += t(14, y + 21, name, LAB + ' font-size="17" font-weight="700" fill="' + INK + '"');
+  return s;
+}
+var BOXES = (function(){
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="Box plots of quiz scores. Group A: lowest 12, lower quartile 20, median 28, upper quartile 40, highest 52. Group B: lowest 18, lower quartile 30, median 35, upper quartile 39, highest 46.">';
+  s += '<line x1="' + bx(10) + '" y1="150" x2="' + bx(60) + '" y2="150" stroke="' + INK + '" stroke-width="2"/>';
+  for(var v = 10; v <= 60; v++){
+    var big = v % 10 === 0, mid = v % 5 === 0;
+    if(mid) s += '<line x1="' + bx(v) + '" y1="18" x2="' + bx(v) + '" y2="150" stroke="' + LINE + '" stroke-width="1.5"/>';
+    s += '<line x1="' + bx(v) + '" y1="150" x2="' + bx(v) + '" y2="' + (big ? 160 : (mid ? 157 : 154)) + '" stroke="' + INK + '" stroke-width="' + (mid ? 2 : 1) + '"/>';
+    if(big) s += t(bx(v), 175, String(v), BODY + ' font-size="14" text-anchor="middle" fill="' + INK + '"');
+  }
+  s += boxplot(26, [12, 20, 28, 40, 52], CYAN, "A");
+  s += boxplot(88, [18, 30, 35, 39, 46], SUN, "B");
+  s += t(200, 196, "Quiz score", LAB + ' font-size="14" text-anchor="middle" fill="' + INK + '"');
+  return s + '</svg>';
+})();
+
+/* English extracts (original, written for this page) */
+var HARBOUR =
+'<div class="extract"><p>The harbour was quiet that morning. Fishing boats sat in a crooked line along the wall, their paint peeling in long strips. A single gull stood on a post, watching the water. Further along the quay, the chip shop was still shut, its chairs stacked on the tables. Out at sea, grey clouds were gathering.</p></div>';
+var STORM =
+'<div class="extract"><p>By nightfall the storm had arrived. The wind screamed across the bay. Waves clawed at the harbour wall, and the little boats huddled together like frightened sheep.</p></div>';
+
+/* Simplified levels for the six mark biology answer */
+var GLUCOSE_LEVELS =
+'<div class="mj-scheme"><p><b>Simplified levels for this question</b></p>' +
+'<p><b>Level 3 (5 or 6):</b> explains what happens when glucose rises AND when it falls, in a logical order, with no errors in the science.</p>' +
+'<p><b>Level 2 (3 or 4):</b> explains both, but with an error; or explains one of them clearly.</p>' +
+'<p><b>Level 1 (1 or 2):</b> some relevant facts, not linked together.</p>' +
+'<p>Within a level: the top mark if the answer fully fits, the bottom mark if it only just fits.</p></div>';
+
+EGW.run({
+  id: "mark-jay",
+  title: "Mark Jay's work",
+  subject: "Mixed",
+  mins: 40,
+  blurb: "The tables are turned: Jay has answered some GCSE questions in Maths, Biology, Statistics and English, and you are the examiner. Spot where he first slips, then decide what he has earned. It is the quickest way to see how marks are really given.",
+  steps: [
+
+  /* ---------- HOW MARKING WORKS ---------- */
+  { type: "learn", topic: "How marking works",
+    title: "You are the examiner today",
+    fig: MARKED,
+    html: '<p>Jay has had a go at some exam questions. Your job: tap the line where he first goes wrong (or say it is all right), then give it a mark.</p>' +
+          '<p>Maths and science marks each have a letter.</p>' +
+          '<ul><li><b>M</b>: a correct method, even if the sum slips later.</li>' +
+          '<li><b>A</b>: an accurate answer. It usually needs the M mark first.</li>' +
+          '<li><b>B</b>: a correct fact or answer on its own.</li></ul>' +
+          '<p><b>Follow through (ft):</b> if an early answer is wrong but you use it correctly later, many mark schemes still give the later marks.</p>' +
+          '<p>A right answer usually gets full marks. A wrong answer with no working gets nothing; with good working it can still score.</p>' +
+          '<div class="keep"><b>Keep this</b>Working is where the examiner finds marks to give you.</div>' },
+
+  { type: "mark", topic: "How marking works",
+    q: "<p>Work out 15% of 80.</p><p class='tiny'>(2 marks, no calculator)</p>",
+    note: "Jay is very confident about this one.",
+    jay: ["10% of 80 = 8", "5% of 80 = 4", "15% of 80 = 8 + 4 = 12"],
+    wrong: -1, max: 2, award: 2,
+    hint: "Check each line on its own: is 10% of 80 really 8, and is 5% half of that?",
+    why: "Every line is right. <b>M1</b> for a correct method (10% and 5%, then add), <b>A1</b> for 12. So <b>2 out of 2</b>.<br>Sometimes the answer in front of you is simply right, and saying so is part of the examiner's job too." },
+
+  { type: "mark", topic: "How marking works",
+    q: "<p>Write these numbers in order of size. Start with the smallest.</p><p><b>0.6 &nbsp; 0.06 &nbsp; 0.66 &nbsp; 0.606</b></p><p class='tiny'>(1 mark)</p>",
+    note: "Jay says decimals are his favourite.",
+    jay: ["The smallest is 0.06, because it has 0 tenths.", "0.06, 0.6, 0.66, 0.606"],
+    wrong: 1, max: 1, award: 0,
+    hint: "Try writing every number with three decimal places, so they are easier to compare.",
+    why: "Line 1 is fine. Line 2 puts 0.606 last, as if a longer decimal must be bigger. With three places: 0.600, 0.060, 0.660, 0.606, so the order is <b>0.06, 0.6, 0.606, 0.66</b>.<br>This is a <b>B1</b>: one mark for the whole order, no method marks. Nearly right still scores <b>0 out of 1</b>." },
+
+  /* ---------- MATHS, NO CALCULATOR ---------- */
+  { type: "mark", topic: "Maths, no calculator",
+    q: "<p>Work out 2/3 + 1/4</p><p class='tiny'>(2 marks, Edexcel Foundation style, no calculator)</p>",
+    note: "Jay did this one on the bus.",
+    jay: ["2/3 + 1/4 = (2 + 1)/(3 + 4)", "= 3/7"],
+    wrong: 0, max: 2, award: 0,
+    hint: "Can you add fractions straight away when the bottom numbers are different?",
+    why: "The very first line adds the tops and adds the bottoms, which is not a method for adding fractions. The right way: use a common denominator of 12, so 8/12 + 3/12 = <b>11/12</b>.<br>Mark scheme: <b>M1</b> for both fractions over a common denominator, <b>A1</b> for 11/12. Jay has neither: <b>0 out of 2</b>.<br>Quick sense check: 3/7 is less than a half, but 2/3 on its own is already more than a half." },
+
+  { type: "mark", topic: "Maths, no calculator",
+    q: "<p>Work out 35% of 260.</p><p class='tiny'>(2 marks, no calculator)</p>",
+    note: "Jay did this one in his head first, then wrote it down.",
+    jay: ["10% of 260 = 26", "30% = 26 &times; 3 = 78", "5% = 26 &divide; 2 = 13", "35% = 78 + 13 = 81"],
+    wrong: 3, max: 2, award: 1,
+    hint: "The method looks sensible. Check the arithmetic on every line, especially the last one.",
+    why: "Everything is right until the last line: 78 + 13 = <b>91</b>, not 81.<br>Mark scheme: <b>M1</b> for a complete correct method (building 35% from 10% and 5%), <b>A1</b> for 91. The method is all there, so Jay keeps the M1: <b>1 out of 2</b>. That is the mark his working saved him." },
+
+  { type: "mark", topic: "Maths, no calculator",
+    q: "<p>Work out the value of 3a&sup2; + 2b when a = 4 and b = &minus;5</p><p class='tiny'>(2 marks, no calculator)</p>",
+    note: "Jay says letters in maths are fine, actually.",
+    jay: ["2b = 2 &times; &minus;5 = &minus;10", "3a&sup2; = (3 &times; 4)&sup2; = 144", "3a&sup2; + 2b = 144 &minus; 10 = 134"],
+    wrong: 1, max: 2, award: 1,
+    hint: "In 3a&sup2;, which gets squared: just the a, or 3 times a?",
+    why: "Line 1 is right. Line 2 multiplies before squaring, but powers come first (BIDMAS): 3a&sup2; means 3 &times; 4&sup2; = 3 &times; 16 = 48. The answer is 48 &minus; 10 = <b>38</b>.<br>A typical scheme: <b>M1</b> for one term worked out correctly (48 or &minus;10), <b>A1</b> for 38. Jay's &minus;10 earns the M1: <b>1 out of 2</b>." },
+
+  { type: "mark", topic: "Maths, no calculator",
+    q: "<p>Solve 4(x + 3) = 30</p><p class='tiny'>(2 marks, no calculator)</p>",
+    note: "Jay finished this one with a little cheer.",
+    jay: ["x + 3 = 30 &divide; 4", "x + 3 = 7.5", "x = 4.5"],
+    wrong: -1, max: 2, award: 2,
+    hint: "Put Jay's answer back into 4(x + 3) and see if you get 30.",
+    why: "All correct. Dividing both sides by 4 first is a perfectly good method; expanding to 4x + 12 = 30 works too.<br><b>M1</b> for a correct first step, <b>A1</b> for 4.5. Check: 4 &times; (4.5 + 3) = 4 &times; 7.5 = 30. So <b>2 out of 2</b>." },
+
+  /* ---------- MATHS, CALCULATOR ---------- */
+  { type: "mark", topic: "Maths, calculator",
+    q: "<p>The diameter of this circle is 12 cm. Work out the area of the circle. Give your answer correct to 1 decimal place.</p><p class='tiny'>(2 marks, calculator allowed)</p>",
+    fig: CIRCLE,
+    note: "Jay drew the circle very neatly.",
+    jay: ["Area = &pi;r&sup2;", "r = 12", "Area = &pi; &times; 144", "= 452.4 cm&sup2;"],
+    wrong: 1, max: 2, award: 0,
+    hint: "Is 12 cm the radius or the diameter?",
+    why: "The formula on line 1 is right, but line 2 uses the diameter as the radius. The radius is 12 &divide; 2 = 6, so the area is &pi; &times; 6&sup2; = 113.097... = <b>113.1 cm&sup2;</b>.<br>Mark scheme: <b>M1</b> for &pi; &times; 6&sup2;, <b>A1</b> for 113.1. Writing the formula on its own earns nothing; the M1 needs the right numbers in it. So <b>0 out of 2</b>." },
+
+  { type: "mark", topic: "Maths, calculator",
+    q: "<p>Work out the length x. Give your answer correct to 1 decimal place.</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    fig: TRI,
+    note: "Jay checked this one twice.",
+    jay: ["x&sup2; = 13.5&sup2; &minus; 8.2&sup2;", "x&sup2; = 182.25 &minus; 67.24 = 115.01", "x = &radic;115.01 = 10.724...", "x = 10.7 cm"],
+    wrong: -1, max: 3, award: 3,
+    hint: "13.5 cm is the hypotenuse (opposite the right angle). So should Jay add the squares or subtract them?",
+    why: "All right. Finding a shorter side, so subtract: 13.5&sup2; &minus; 8.2&sup2; = 115.01, and &radic;115.01 = 10.72... = <b>10.7 cm</b>.<br><b>M1</b> for 13.5&sup2; &minus; 8.2&sup2;, <b>M1</b> for the square root, <b>A1</b> for 10.7. <b>3 out of 3</b>. Jay also kept the full calculator value until the end, which is exactly what you want." },
+
+  { type: "mark", topic: "Maths, calculator", stretch: true,
+    q: "<p>Jay invests &pound;2400 in a savings account. It pays 3.5% compound interest per year. Work out the value of the account after 4 years. Give your answer to the nearest penny.</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    note: "Jay was in a hurry to get to the answer.",
+    jay: ["Multiplier = 1 + 0.035 = 1.035", "1.035<sup>4</sup> = 1.15", "2400 &times; 1.15 = &pound;2760"],
+    wrong: 1, max: 3, award: 2,
+    hint: "Type 1.035<sup>4</sup> into a calculator. Is it exactly 1.15?",
+    why: "1.035<sup>4</sup> = 1.14752..., not 1.15. Jay rounded too early. Keeping the full value: 2400 &times; 1.035<sup>4</sup> = 2754.055... = <b>&pound;2754.06</b>.<br>Mark scheme: <b>M1</b> for using the multiplier 1.035, <b>M1</b> for 2400 &times; 1.035<sup>4</sup>, <b>A1</b> for &pound;2754.06. His method is all there, so both M marks; rounding early gives a wrong answer, so no A mark. <b>2 out of 3</b>." },
+
+  { type: "mark", topic: "Maths, calculator",
+    q: "<p>Jay mixes blue paint and white paint in the ratio 2 : 3. He makes 1.2 litres of paint altogether. How many millilitres of white paint does he use?</p><p class='tiny'>(2 marks, calculator allowed)</p>",
+    note: "Jay is painting his shed a very calm blue.",
+    jay: ["1.2 litres = 1200 ml", "2 + 3 = 5 parts", "1200 &divide; 5 = 240 ml", "White = 240 &times; 2 = 480 ml"],
+    wrong: 3, max: 2, award: 1,
+    hint: "In the ratio blue : white = 2 : 3, how many parts are white?",
+    why: "All good until the last line: white is the 3 in 2 : 3, so it is 240 &times; 3 = <b>720 ml</b>. Jay worked out the blue paint instead.<br>Mark scheme: <b>M1</b> for 1200 &divide; 5 (or 240 seen), <b>A1</b> for 720. <b>1 out of 2</b>. A quick reread of the question at the end catches this one." },
+
+  /* ---------- BIOLOGY ---------- */
+  { type: "learn", topic: "Biology",
+    title: "Science answers are marked in points",
+    html: '<p>Short biology answers are marked against a list of points. Each correct, relevant point earns a mark, up to the total.</p>' +
+          '<ul><li>Two marks usually means two separate ideas, often what happens and why.</li>' +
+          '<li>A wrong statement that contradicts a right one can cancel it out.</li>' +
+          '<li>Exact words matter. Respiration <b>releases</b> or <b>transfers</b> energy. AQA does not accept that it &ldquo;makes&rdquo; or &ldquo;produces&rdquo; energy.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Count the marks, then give at least that many clear points.</div>' },
+
+  { type: "mark", topic: "Biology",
+    q: "<p>Explain why muscle cells contain many mitochondria.</p><p class='tiny'>(2 marks, AQA style)</p>",
+    note: "Jay wrote this one quickly before lunch.",
+    jay: ["Mitochondria are where aerobic respiration happens.", "Respiration makes energy, so the muscles can contract."],
+    wrong: 1, max: 2, award: 1,
+    hint: "Look closely at the verb Jay uses about energy.",
+    why: "Line 1 earns a mark: mitochondria are the site of aerobic respiration. Line 2 says respiration <i>makes</i> energy. Energy cannot be made; AQA wants respiration <b>releases</b> (or transfers) energy for muscle contraction.<br>So <b>1 out of 2</b>. One word cost Jay a mark: a very common way to lose one." },
+
+  { type: "mark", topic: "Biology",
+    q: "<p>In a micrograph, a cell is 24 mm long. The magnification is &times;400.</p><p>Calculate the real length of the cell in micrometres (&micro;m).</p><p class='tiny'>(3 marks, AQA style)</p>",
+    note: "Jay says units are a conspiracy.",
+    jay: ["real size = image size &divide; magnification", "= 24 &divide; 400", "= 0.06 mm", "= 6 &micro;m"],
+    wrong: 3, max: 3, award: 2,
+    hint: "How many micrometres are there in 1 mm?",
+    why: "All right until the last step. 1 mm = 1000 &micro;m, so 0.06 mm = 0.06 &times; 1000 = <b>60 &micro;m</b>. Jay multiplied by 100.<br>Mark scheme: <b>1</b> for 24 &divide; 400, <b>1</b> for 0.06 mm, <b>1</b> for 60 &micro;m. <b>2 out of 3</b>. Sense check: a typical cell is tens of micrometres long, so 60 is believable." },
+
+  { type: "mark", topic: "Biology", stretch: true,
+    q: "<p>A student puts some potato cylinders into a concentrated sugar solution. After an hour, the cylinders have lost mass.</p><p>Explain why.</p><p class='tiny'>(3 marks, AQA style)</p>",
+    note: "Jay is very sure about osmosis.",
+    jay: ["The potato loses mass because water moves out of the potato cells.", "This happens by osmosis, through a partially permeable membrane.", "Water moves from a concentrated solution to a more dilute one."],
+    wrong: 2, max: 3, award: 2,
+    hint: "In osmosis, does water move towards the more concentrated solution, or away from it?",
+    why: "Lines 1 and 2 earn a mark each: water moves out of the cells, by osmosis. Line 3 has the direction backwards. Water moves from a <b>dilute</b> solution to a more <b>concentrated</b> one. The sugar solution outside is more concentrated than the inside of the cells, so water leaves.<br><b>2 out of 3</b>: the reason mark is lost." },
+
+  { type: "mark", topic: "Biology",
+    q: "<p>Describe how you could test a food sample for starch. Give the result if starch is present.</p><p class='tiny'>(2 marks, AQA style)</p>",
+    note: "Jay remembers the colour from the practical.",
+    jay: ["Add a few drops of iodine solution to the food.", "If starch is there, it turns from orange to blue black."],
+    wrong: -1, max: 2, award: 2,
+    hint: "Which reagent tests for starch, and what colour shows it is there?",
+    why: "Both points are there: <b>1</b> for iodine solution, <b>1</b> for the colour change to blue black. <b>2 out of 2</b>.<br>Benedict's is for sugars and biuret is for protein, so mixing those up is the usual way this one goes wrong." },
+
+  /* ---------- STATISTICS ---------- */
+  { type: "mark", topic: "Statistics",
+    q: "<p>Jay counted the birds at his feeder each morning for 30 mornings. Work out the mean number of birds per morning.</p><p class='tiny'>(3 marks, Edexcel Statistics style)</p>",
+    fig: BIRDS,
+    note: "Jay counted every single bird himself.",
+    jay: ["f &times; x: 0, 9, 14, 15, 12", "Total of f &times; x = 50", "Mean = 50 &divide; 5 = 10"],
+    wrong: 2, max: 3, award: 1,
+    hint: "How many mornings were there altogether? And could the mean really be bigger than the most birds he ever saw?",
+    why: "Lines 1 and 2 are right. Line 3 divides by 5 (the number of rows) instead of 30 (the number of mornings, the total frequency). Mean = 50 &divide; 30 = <b>1.67</b> (to 2 decimal places).<br>Mark scheme: <b>M1</b> for working out &Sigma;fx, <b>M1</b> for dividing by &Sigma;f, <b>A1</b> for 1.67. <b>1 out of 3</b>.<br>Sense check: a mean of 10 birds is impossible when he never saw more than 4." },
+
+  { type: "mark", topic: "Statistics",
+    q: "<p>The box plots show the scores in a quiz for Group A and Group B. Compare the distributions of the scores.</p><p class='tiny'>(2 marks, Edexcel Statistics style)</p>",
+    fig: BOXES,
+    note: "Jay thinks this is a full answer.",
+    jay: ["The median for A is 28 and the median for B is 35.", "So on average, Group B scored higher than Group A.", "B&rsquo;s box is further to the right, so B&rsquo;s scores are more spread out."],
+    wrong: 2, max: 2, award: 1,
+    hint: "Spread is about how wide the box (or the whole plot) is, not where it sits on the scale.",
+    why: "Lines 1 and 2 compare the medians in context: <b>B1</b>. Line 3 mixes up position and spread. A box further right means higher scores, not wider ones. IQR for A is 40 &minus; 20 = 20; for B it is 39 &minus; 30 = 9. So <b>A</b> is more spread out, and B&rsquo;s scores are more consistent.<br>Mark scheme: <b>B1</b> for comparing an average, <b>B1</b> for comparing a spread (IQR or range), both in context. <b>1 out of 2</b>." },
+
+  { type: "mark", topic: "Statistics",
+    q: "<p>A school has 840 students. 312 of them are in Year 9. Jay takes a sample of 60 students, stratified by year group.</p><p>How many students from Year 9 should be in the sample?</p><p class='tiny'>(2 marks, Edexcel Statistics style)</p>",
+    note: "Jay does not like the idea of 0.28 of a student.",
+    jay: ["312 &divide; 840 = 0.3714...", "0.3714... &times; 60 = 22.28...", "You cannot have part of a person, so round up: 23 students"],
+    wrong: 2, max: 2, award: 1,
+    hint: "22.28 is closer to which whole number?",
+    why: "The method is spot on, but 22.28... rounds to the nearest whole number, which is <b>22</b>. In a stratified sample you round normally; there is no rule that says round up.<br>Mark scheme: <b>M1</b> for 312 &divide; 840 &times; 60, <b>A1</b> for 22. <b>1 out of 2</b>." },
+
+  { type: "mark", topic: "Statistics",
+    q: "<p>A bag has 4 red, 5 blue and 3 green counters. One counter is taken at random. Work out the probability that it is <b>not</b> blue.</p><p class='tiny'>(2 marks)</p>",
+    note: "Jay says probability is just organised guessing.",
+    jay: ["Total = 4 + 5 + 3 = 12", "P(blue) = 5/12", "P(not blue) = 1 &minus; 5/12 = 7/12"],
+    wrong: -1, max: 2, award: 2,
+    hint: "Check the total, then check the subtraction from 1.",
+    why: "All correct. There are 12 counters and 7 of them are not blue, so <b>7/12</b>. Subtracting from 1 works just as well as counting.<br><b>M1</b> for 12 as the total (or 1 &minus; 5/12), <b>A1</b> for 7/12. <b>2 out of 2</b>." },
+
+  /* ---------- ENGLISH ---------- */
+  { type: "learn", topic: "English",
+    title: "English is marked by levels",
+    html: '<p>Most English answers are not marked line by line. The examiner reads the whole answer and decides which description fits it best. For AQA Paper 1 Question 2 (language) the levels are:</p>' +
+          '<ul class="mj-ladder"><li><b>Level 1</b> simple: names things or retells.</li>' +
+          '<li><b>Level 2</b> some: starts to comment on effects.</li>' +
+          '<li><b>Level 3</b> clear: explains effects, with well chosen quotes and accurate terms.</li>' +
+          '<li><b>Level 4</b> detailed: explores precise words and what they suggest.</li></ul>' +
+          '<p>This is a simplified version. Here a level becomes a mark out of 4. In the real exam Question 2 is out of 8, two marks per level.</p>' +
+          '<p>Question 1 is different: one mark for each correct thing you list.</p>' +
+          '<div class="keep"><b>Keep this</b>Marks come from explaining effects, not from naming techniques.</div>' },
+
+  { type: "mark", topic: "English",
+    q: HARBOUR + "<p>List <b>four</b> things from this part of the source about the harbour.</p><p class='tiny'>(4 marks, AQA Paper 1 Question 1 style)</p>",
+    note: "Jay read the extract twice. Mostly.",
+    jay: ["The harbour was quiet.", "The boats were in a crooked line.", "The fishermen were mending their nets.", "A gull was standing on a post."],
+    wrong: 2, max: 4, award: 3,
+    hint: "Check every line against the extract. Is each one actually there?",
+    why: "Question 1 is marked one point at a time, so it works like science. Lines 1, 2 and 4 are all in the extract. Line 3 is not: there are no fishermen in it at all. Jay added a detail that sounds right but is invented.<br><b>3 out of 4</b>. Picking true details straight from the text is the whole job here." },
+
+  { type: "mark", topic: "English",
+    q: STORM + "<p>How does the writer use language here to describe the storm?</p><p class='tiny'>(Paper 1 Question 2 style. Here a level becomes a mark out of 4.)</p>",
+    note: "Jay got a bit carried away on this one.",
+    jay: ["The writer uses a simile: &lsquo;huddled together like frightened sheep&rsquo;.", "This makes the boats seem small and scared, as if they need protecting.", "When I was in China, I saw a storm that was even bigger than this.", "The writer also uses personification."],
+    wrong: 2, max: 4, award: 2,
+    hint: "Look for the first line that stops answering the question about the writer&rsquo;s language.",
+    why: "Lines 1 and 2 are good: a relevant quote, a correct term, and a comment on the effect. Line 3 is where it goes off track: a story about China, however exciting, says nothing about the writer&rsquo;s language. Line 4 is feature spotting: no quote and no effect, so it earns nothing either.<br>Overall it shows <b>some</b> understanding with one effect explained: <b>Level 2</b>, so <b>2 out of 4</b> on our scale. Examiners do not take marks off for the anecdote: it just uses up time that could have earned more." },
+
+  { type: "mc", topic: "English",
+    q: "<p>Jay has another go:</p><div class='jaycard'><p>&ldquo;The writer uses the verb &lsquo;clawed&rsquo; to describe the waves. This personifies them as a wild animal attacking the harbour, so the storm seems vicious and alive. The simile &lsquo;like frightened sheep&rsquo; makes the boats seem helpless, as if the storm is hunting them.&rdquo;</p></div><p>Which level fits best, and why?</p>",
+    options: [
+      "Level 1, because it only names techniques",
+      "Level 2, because it uses no subject terms",
+      "Level 3, because it clearly explains the effects of well chosen quotes, using accurate terms",
+      "Level 4, because it uses the word &lsquo;personifies&rsquo;"
+    ],
+    answer: 2, fixed: true,
+    hint: "Check each reason against the answer. Is the reason actually true?",
+    why: "Level 3. Both quotes are short and relevant, the terms (verb, personifies, simile) are accurate, and each effect is clearly explained.<br>Level 1 and Level 2 have reasons that are not true of this answer: it explains effects and it does use terms. Using a term never lifts an answer to Level 4 on its own; Level 4 needs detailed, perceptive exploration of several words across the extract." },
+
+  { type: "sort", topic: "English",
+    q: "Which of these would move Jay&rsquo;s Question 2 answer up a level?",
+    buckets: ["Moves it up", "Does not help"],
+    cards: [
+      ["Zoom in on one word and what it suggests", 0],
+      ["Explain the effect on the reader", 0],
+      ["Use short, precise quotes", 0],
+      ["Link each effect back to the storm", 0],
+      ["Name more techniques without explaining them", 1],
+      ["Retell what happens in the extract", 1],
+      ["Add a story about your own holiday", 1],
+      ["Write about structure (that is Question 3&rsquo;s job)", 1]
+    ],
+    hint: "Ask of each one: does it explain how the writer&rsquo;s language works?",
+    why: "The marks are for explaining how language creates an effect, so zooming in on words, explaining effects, short quotes and linking back to the question all lift an answer. Naming techniques, retelling, personal stories and structure (which Question 3 asks about) do not earn Question 2 marks." },
+
+  /* ---------- EXAM STYLE FINISH ---------- */
+  { type: "learn", topic: "Exam style finish",
+    title: "Two bigger ones",
+    html: '<p><b>Follow through.</b> When a later part uses an earlier answer, mark schemes often let you earn the later marks if you use your wrong number correctly. One slip should not cost a whole question.</p>' +
+          '<p><b>Six mark answers</b> in science are marked by level, like English. The examiner decides the level first, then the mark within it.</p>' +
+          '<div class="keep"><b>Keep this</b>Even if part (a) went wrong, carry on: part (b) can still score.</div>' },
+
+  { type: "mark", topic: "Exam style finish", stretch: true,
+    q: "<p>Jay&rsquo;s garden is a rectangle 12 m long and 7.5 m wide. He wants a fence all the way round so that Bonnie cannot wander off, leaving a gap 1.2 m wide for a gate.</p>" +
+       "<p>(a) Work out the perimeter of the garden. <span class='tiny'>(2 marks)</span></p>" +
+       "<p>(b) Fencing costs &pound;18.40 per metre. Work out the cost of the fencing. <span class='tiny'>(3 marks)</span></p>",
+    note: "Bonnie supervised this one.",
+    jay: ["(a) Perimeter = 2 &times; 12 + 2 &times; 7.5", "= 24 + 14 = 38 m", "(b) Fencing = 38 &minus; 1.2 = 36.8 m", "Cost = 36.8 &times; 18.40 = &pound;677.12"],
+    wrong: 1, max: 5, award: 4,
+    hint: "Check 2 &times; 7.5 carefully. Then ask: did Jay use his own number correctly after that?",
+    why: "Line 2 slips: 2 &times; 7.5 = 15, so the perimeter is 39 m. After that, Jay uses his 38 perfectly.<br>(a) <b>M1</b> for 2 &times; 12 + 2 &times; 7.5, <b>A0</b> because 38 is wrong.<br>(b) <b>M1</b> for their perimeter &minus; 1.2, <b>M1</b> for &times; 18.40, <b>A1ft</b> because &pound;677.12 is right for his 38 (follow through).<br>Total <b>4 out of 5</b>. The correct answers are 39 m and 37.8 &times; 18.40 = &pound;695.52." },
+
+  { type: "mark", topic: "Exam style finish", stretch: true,
+    q: "<p>Explain how the body controls blood glucose concentration. <span class='tiny'>(6 marks, AQA style. Glucagon is Higher tier only.)</span></p>" + GLUCOSE_LEVELS,
+    note: "Jay&rsquo;s longest answer of the day.",
+    jay: ["When blood glucose concentration rises, the pancreas detects it.", "The pancreas releases insulin into the blood.", "Insulin makes liver and muscle cells take in glucose from the blood.", "In the liver, the extra glucose is turned into glucagon and stored.", "If blood glucose falls too low, the pancreas releases glucagon.", "Glucagon makes the liver turn glycogen back into glucose, which goes into the blood."],
+    wrong: 3, max: 6, award: 4,
+    hint: "Two words that look alike: one is a hormone, one is a storage molecule. Which is which?",
+    why: "Line 4 is the slip: glucose is stored as <b>glycogen</b>, not glucagon. Glucagon is the hormone (and Jay uses it correctly on line 5, so it is a mix up, not a gap). Everything else is right and in a sensible order.<br>He explains both a rise and a fall, but with an error, so it fully fits <b>Level 2</b>: the top of that level, <b>4 out of 6</b>. Without the glycogen slip it would be Level 3.<br>Real level marking takes judgement; on this simplified scheme it is 4." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

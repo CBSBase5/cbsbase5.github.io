@@ -25,6 +25,16 @@
      order  {q, items:[in the right order], hint, why}
      match  {q, pairs:[[left, right]], hint, why}
      write  {q, fig, starters:[], checklist:[], minWords}  sent to Jay, unmarked
+     mark   {q, fig, jay:[lines of Jay's answer], wrong:i or -1 if all right,
+             max: marks available, award: marks it deserves, hint, why}
+            "Mark Jay's work": she taps where Jay first goes wrong (or says
+            it is all right), then gives it a mark.
+     unlock {q, code:"7294", hint, why}  the final door in an escape room
+
+   Escape rooms: add  escape: { digits:["7","2","9","4"], intro:"html" }
+   to the config. Every chunk except the last is a room; finishing a
+   room reveals its digit. The last chunk holds the unlock step.
+   A clock is offered on the start card, off unless she turns it on.
      widget {title, html, mount:function(el, api)}  custom interactive
             api.data   object saved with the page
             api.save() save api.data
@@ -116,7 +126,7 @@ function loadReview(){
   return { items: {} };
 }
 function saveReview(d){ d.updated = new Date().toISOString(); try{ localStorage.setItem(REVIEW_KEY, JSON.stringify(d)); }catch(e){} }
-function reviewable(s){ return !!s && !s.stretch && ["mc", "multi", "num", "sort", "order", "match", "text"].indexOf(s.type) >= 0; }
+function reviewable(s){ return !!s && !s.stretch && ["mc", "multi", "num", "sort", "order", "match", "text", "mark"].indexOf(s.type) >= 0; }
 function noteForReview(i, status){
   var s = steps[i];
   if(cfg.review || !reviewable(s) || (status !== "shown" && status !== "right2")) return;
@@ -182,7 +192,7 @@ function summary(){
     }
     return t;
   });
-  return { id: cfg.id, subject: cfg.subject, chunkTally: ct, total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
+  return { id: cfg.id, subject: cfg.subject, chunkTally: ct, escaped: !!state.escaped, bestTime: state.bestTime || 0, total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
            sparks: sparks, best: state.best || 0,
            chunkStates: ch, chunkNames: chunks.map(function(c){ return stripTags(c.topic); }),
            chunks: ch.length, chunksDone: ch.filter(function(x){ return x === "done"; }).length,
@@ -235,13 +245,22 @@ function build(){
     '<div class="board">' +
       '<div class="card w12" id="startCard">' +
         '<span class="kicker">' + cfg.subject + (cfg.mins ? ' &middot; about ' + cfg.mins + ' minutes in all' : '') + '</span>' +
-        '<h3>Learn a bit, try a bit</h3>' +
-        '<p class="lead">' + cfg.blurb + '</p>' +
-        '<ul class="howlist">' +
-          '<li><b>' + chunks.length + ' short chunks.</b> Any order, any day. It saves itself.</li>' +
-          '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it.</li>' +
-          '<li><span class="stretch">Stretch</span> questions are optional extras.</li>' +
-        '</ul>' +
+        (cfg.escape ?
+          '<h3>Escape room</h3>' +
+          '<div class="lead escapeintro">' + (cfg.escape.intro || cfg.blurb) + '</div>' +
+          '<ul class="howlist">' +
+            '<li><b>' + (chunks.length - 1) + ' rooms</b>, each hiding one digit of the final code. Any order. It saves itself.</li>' +
+            '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it. You still get the digit.</li>' +
+            '<li>A clock is <b id="clockState">off</b>. <button class="linkish" id="clockBtn" type="button">Turn it on</button> if you fancy racing yourself.</li>' +
+          '</ul>'
+        :
+          '<h3>Learn a bit, try a bit</h3>' +
+          '<p class="lead">' + cfg.blurb + '</p>' +
+          '<ul class="howlist">' +
+            '<li><b>' + chunks.length + ' short chunks.</b> Any order, any day. It saves itself.</li>' +
+            '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it.</li>' +
+            '<li><span class="stretch">Stretch</span> questions are optional extras.</li>' +
+          '</ul>') +
         '<div class="qnav" style="margin-top:4px">' +
           '<button class="btn" id="beginBtn">Begin with chunk 1</button>' +
           '<button class="btn btn-quiet hidden" id="resumeBtn">Carry on where I left off</button>' +
@@ -253,7 +272,7 @@ function build(){
       '<div class="card w12 hidden" id="qCard">' +
         '<div class="qtop">' +
           '<span class="chunklabel" id="chunkLabel"></span>' +
-          '<span class="chips"><span class="chipstat" id="streakChip"></span><span class="chipstat" id="sparkChip"></span></span>' +
+          '<span class="chips"><span class="chipstat hidden" id="lockChip"></span><span class="chipstat hidden" id="clockChip"></span><span class="chipstat" id="streakChip"></span><span class="chipstat" id="sparkChip"></span></span>' +
         '</div>' +
         '<div class="dots" id="dots"></div>' +
         '<div class="qprogress"><span id="progFill"></span></div>' +
@@ -325,6 +344,16 @@ function build(){
     state = fresh(); save(); showStart();
   };
 
+  if(cfg.escape){
+    var drawClockState = function(){
+      $("clockState").textContent = state.clock ? "on" : "off";
+      $("clockBtn").textContent = state.clock ? "Turn it off" : "Turn it on";
+    };
+    $("clockBtn").onclick = function(){ state.clock = !state.clock; save(); drawClockState(); };
+    drawClockState();
+    setInterval(tickClock, 1000);
+  }
+
   if(window.Base5Send){
     Base5Send.mount($("sendHost"), {
       tool: "GCSE HQ: " + (cfg.review ? "Second look, " : "") + cfg.title,
@@ -342,7 +371,8 @@ function drawChunkMap(){
     var b = h("button", "chunk " + st);
     b.type = "button";
     var n = chunkQs(c);
-    b.innerHTML = '<span class="cn"><span>' + (k + 1) + '</span></span><span><b>' + c.topic + '</b><small>' +
+    var label = cfg.escape ? (k === chunks.length - 1 ? "&#9906;" : (st === "done" ? escDigit(k) : "?")) : (k + 1);
+    b.innerHTML = '<span class="cn"><span>' + label + '</span></span><span><b>' + c.topic + '</b><small>' +
       (n ? n + " question" + (n === 1 ? "" : "s") : "a quick read") + " &middot; " +
       ({ "new": "not started", started: "started", done: "done" })[st] + '</small></span>';
     b.onclick = function(){ go(c.from); };
@@ -362,7 +392,7 @@ function showStart(){
   if(cfg.review) return;
   var any = !!(state.answers && Object.keys(state.answers).length);
   $("resumeBtn").classList.toggle("hidden", !any);
-  $("beginBtn").textContent = any ? "Start again from scratch" : "Begin with chunk 1";
+  $("beginBtn").textContent = any ? "Start again from scratch" : (cfg.escape ? "Enter the first room" : "Begin with chunk 1");
   $("beginBtn").className = any ? "btn btn-quiet" : "btn";
   $("resumeBtn").className = any ? "btn" : "btn btn-quiet hidden";
   drawChunkMap();
@@ -382,6 +412,33 @@ function advance(){
   go(i + 1);
 }
 
+/* ---------- escape rooms ---------- */
+function escDigit(k){ return cfg.escape && cfg.escape.digits ? String(cfg.escape.digits[k] || "?") : "?"; }
+function roomsFound(){
+  var out = [];
+  for(var k = 0; k < chunks.length - 1; k++) out.push(chunkState(chunks[k]) === "done" ? escDigit(k) : null);
+  return out;
+}
+function fmtTime(sec){ sec = Math.max(0, Math.round(sec || 0)); var m = Math.floor(sec / 60), s2 = sec % 60; return m + ":" + (s2 < 10 ? "0" : "") + s2; }
+function tickClock(){
+  if(!cfg.escape || !state.clock || state.escaped) return;
+  if(document.hidden || $("qCard").classList.contains("hidden")) return;
+  state.elapsed = (state.elapsed || 0) + 1;
+  var c = $("clockChip");
+  c.innerHTML = '<span class="ico">&#9201;</span>' + fmtTime(state.elapsed);
+  if(state.elapsed % 10 === 0) save();
+}
+function drawLock(){
+  if(!cfg.escape) return;
+  var found = roomsFound();
+  var lc = $("lockChip");
+  lc.classList.remove("hidden");
+  lc.innerHTML = '<span class="ico">&#128274;</span>' + found.map(function(d){ return d === null ? "_" : d; }).join(" ");
+  var cc = $("clockChip");
+  cc.classList.toggle("hidden", !state.clock);
+  if(state.clock) cc.innerHTML = '<span class="ico">&#9201;</span>' + fmtTime(state.elapsed);
+}
+
 /* ---------- the little celebration between chunks ---------- */
 var CHEERS = ["Chunk done.", "That is one more in the bag.", "Done and dusted.", "Look at that.", "Another one sorted."];
 function chunkDone(k){
@@ -397,10 +454,18 @@ function chunkDone(k){
     else if(a.status === "skipped") sk++;
   }
   showOnly("chunkCard");
-  $("stampNum").textContent = String(k + 1);
-  $("chunkDoneH").textContent = pick(CHEERS);
-  $("chunkDoneP").textContent = "Chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic) + ". " +
-    (sk ? "You skipped " + sk + "; they will be there whenever you fancy them." : "Nothing skipped.");
+  if(cfg.escape){
+    $("stampNum").textContent = escDigit(k);
+    $("chunkDoneH").textContent = pick(["Lock open.", "A digit drops out.", "Room cleared.", "Click. Something unlocks."]);
+    $("chunkDoneP").textContent = "Room " + (k + 1) + ": " + stripTags(c.topic) + ". The digit is " + escDigit(k) + ". " +
+      "The final door needs every digit; the padlock at the top keeps track for you.";
+  }else{
+    $("stampNum").textContent = String(k + 1);
+    $("chunkDoneH").textContent = pick(CHEERS);
+    $("chunkDoneP").textContent = "Chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic) + ". " +
+      (sk ? "You skipped " + sk + "; they will be there whenever you fancy them." : "Nothing skipped.") +
+      (cfg.extra ? "" : " A new star is lit in your sky.");
+  }
   $("chunkTally").innerHTML = '<div class="tbox big"><b>+' + sp + '</b><span>sparks</span></div>' +
     (g1 ? tallyBox(g1, "first go") : "") + (g2 ? tallyBox(g2, "second go") : "") + (sh ? tallyBox(sh, "learnt from Show me") : "");
   var nk = k + 1;
@@ -443,6 +508,7 @@ function drawChips(){
   var sp = summary().sparks;
   $("sparkChip").innerHTML = '<span class="ico">&#10022;</span>' + sp + ' sparks';
   $("sparkChip").classList.toggle("hidden", !sp);
+  drawLock();
 }
 
 function go(i){
@@ -452,6 +518,7 @@ function go(i){
   var s = steps[i];
   var k = chunkOf[i], c = chunks[k];
   $("chunkLabel").innerHTML = cfg.review ? "Second look <span>" + (i + 1) + " of " + steps.length + "</span>" :
+    cfg.escape ? (k === chunks.length - 1 ? "The final door" : "Room " + (k + 1) + " <span>of " + (chunks.length - 1) + "</span>") :
     "Chunk " + (k + 1) + " <span>of " + chunks.length + "</span>";
   var dots = "";
   for(var j = c.from; j <= c.to; j++) dots += '<i class="' + (j < i ? "past" : j === i ? "now" : "") + '"></i>';
@@ -882,6 +949,112 @@ R.write = function(s, body, i){
   if(!ta.value) delete state.answers[i];
 };
 
+/* Jay's face, drawn small: messy brown hair, big eyebrows */
+var JAYFACE = '<svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true">' +
+  '<circle cx="20" cy="22" r="13" fill="#f3c9a4" stroke="#141a33" stroke-width="2"/>' +
+  '<path d="M6 19 C5 8 14 4 20 6 C25 3 35 7 34 18 C31 13 28 15 25 11 C23 15 18 12 16 15 C13 12 10 16 6 19 Z" fill="#7a4b2a" stroke="#141a33" stroke-width="2" stroke-linejoin="round"/>' +
+  '<path d="M12 19 L18 18 M22 18 L28 19" stroke="#3b2414" stroke-width="3" stroke-linecap="round"/>' +
+  '<circle cx="15.5" cy="22.5" r="1.6" fill="#141a33"/><circle cx="24.5" cy="22.5" r="1.6" fill="#141a33"/>' +
+  '<path d="M16 29 Q20 31.5 24 29" fill="none" stroke="#141a33" stroke-width="2" stroke-linecap="round"/></svg>';
+
+R.mark = function(s, body){
+  body.innerHTML = '<div class="prompt">' + s.q + '</div>' + fig(s);
+  var card = h("div", "jaycard");
+  card.innerHTML = '<div class="jayhead">' + JAYFACE + '<span><b>Jay&rsquo;s answer</b><small>' + (s.note || "Mark it like an examiner.") + '</small></span></div>';
+  var list = h("ol", "jaylines");
+  var lines = [];
+  s.jay.forEach(function(t, k){
+    var li = h("li", "", '<button type="button">' + t + '</button>');
+    li.querySelector("button").onclick = function(){ if(resolved(state.pos)) return; pickLine = k; draw(); };
+    list.appendChild(li); lines.push(li);
+  });
+  card.appendChild(list);
+  body.appendChild(card);
+  body.appendChild(h("p", "chiplabel", "1. Tap the line where Jay first goes wrong"));
+  var allRight = h("button", "jayok", "Jay got it all right"); allRight.type = "button";
+  allRight.onclick = function(){ if(resolved(state.pos)) return; pickLine = -1; draw(); };
+  body.appendChild(allRight);
+  body.appendChild(h("p", "chiplabel", "2. How many marks would you give, out of " + s.max + "?"));
+  var mk = h("div", "markpick");
+  var mbtn = [];
+  for(var m = 0; m <= s.max; m++){
+    (function(m){
+      var b = h("button", "", String(m)); b.type = "button";
+      b.onclick = function(){ if(resolved(state.pos)) return; pickMark = m; draw(); };
+      mk.appendChild(b); mbtn.push(b);
+    })(m);
+  }
+  body.appendChild(mk);
+  var pickLine = -2, pickMark = -1;
+  function draw(){
+    lines.forEach(function(li, k){ li.classList.toggle("picked", pickLine === k); });
+    allRight.classList.toggle("picked", pickLine === -1);
+    mbtn.forEach(function(b, m){ b.classList.toggle("picked", pickMark === m); });
+  }
+  cur = {
+    get: function(){ return { l: pickLine, m: pickMark }; },
+    empty: function(){ return pickLine === -2 || pickMark < 0; },
+    emptyMsg: "Pick a line (or Jay got it all right) and a mark first.",
+    right: function(){ return pickLine === s.wrong && pickMark === s.award; },
+    mark: function(final){
+      lines.forEach(function(li, k){
+        li.classList.remove("ok", "no");
+        if(k === pickLine && k !== s.wrong) li.classList.add("no");
+        if(k === s.wrong && (final || pickLine === k)) li.classList.add("ok");
+      });
+      allRight.classList.remove("ok", "no");
+      if(pickLine === -1) allRight.classList.add(s.wrong === -1 ? "ok" : "no");
+      if(final && s.wrong === -1) allRight.classList.add("ok");
+      mbtn.forEach(function(b, m){
+        b.classList.remove("ok", "no");
+        if(m === pickMark && m !== s.award) b.classList.add("no");
+        if(m === s.award && (final || pickMark === m)) b.classList.add("ok");
+      });
+    },
+    restore: function(v, fin){ if(v){ pickLine = v.l; pickMark = v.m; draw(); } if(fin) this.mark(true); }
+  };
+};
+
+R.unlock = function(s, body){
+  var found = roomsFound();
+  body.innerHTML = '<div class="prompt">' + s.q + '</div>';
+  var got = h("div", "foundrow");
+  got.innerHTML = found.map(function(d, k){
+    return '<span class="found' + (d === null ? " missing" : "") + '"><small>' + stripTags(chunks[k].topic) + '</small><b>' + (d === null ? "?" : d) + '</b></span>';
+  }).join("");
+  body.appendChild(got);
+  if(found.indexOf(null) >= 0) body.appendChild(h("p", "tiny", "A question mark means that room is not finished yet. You can go back for it any time, or try the door anyway."));
+  var lock = h("div", "lockboxes");
+  var ins = [];
+  for(var k = 0; k < s.code.length; k++){
+    var inp = h("input"); inp.type = "text"; inp.maxLength = 1; inp.autocomplete = "off"; inp.inputMode = "text";
+    inp.setAttribute("aria-label", "Code character " + (k + 1));
+    (function(k, inp){
+      inp.addEventListener("input", function(){ if(inp.value && ins[k + 1]) ins[k + 1].focus(); });
+      inp.addEventListener("keydown", function(e){
+        if(e.key === "Backspace" && !inp.value && ins[k - 1]) ins[k - 1].focus();
+        if(e.key === "Enter") $("checkBtn").click();
+      });
+    })(k, inp);
+    lock.appendChild(inp); ins.push(inp);
+  }
+  body.appendChild(lock);
+  function val(){ return ins.map(function(x){ return x.value.trim(); }).join(""); }
+  cur = {
+    get: val,
+    empty: function(){ return val().length < s.code.length; },
+    emptyMsg: "Fill every box in the lock first.",
+    right: function(){ return val().toLowerCase() === String(s.code).toLowerCase(); },
+    mark: function(final){
+      var ok = val().toLowerCase() === String(s.code).toLowerCase();
+      if(final && !ok) ins.forEach(function(x, k){ x.value = String(s.code).charAt(k); });
+      ins.forEach(function(x){ x.classList.toggle("ok", ok || final); x.classList.toggle("no", !ok && !final); });
+      if(ok || final){ state.escaped = true; save(); }
+    },
+    restore: function(v){ String(v || "").split("").forEach(function(c, k){ if(ins[k]) ins[k].value = c; }); }
+  };
+};
+
 R.widget = function(s, body, i){
   body.innerHTML = (s.title ? '<h3 class="learnh">' + s.title + '</h3>' : "") + (s.html ? '<div class="prompt">' + s.html + '</div>' : "");
   var host = h("div", "widget");
@@ -985,9 +1158,14 @@ function finish(){
   var sm = summary();
   var marked = sm.got1 + sm.got2 + sm.shown;
   $("scoreLine").textContent = (sm.got1 + sm.got2) + " out of " + (marked || 0) + " worked out";
+  if(cfg.escape && state.escaped){
+    $("scoreLine").textContent = "You escaped" + (state.clock && state.elapsed ? " in " + fmtTime(state.elapsed) : "") + ".";
+    if(state.clock && state.elapsed && (!state.bestTime || state.elapsed < state.bestTime)){ state.bestTime = state.elapsed; save(); }
+  }
   var note;
   var pct = marked ? (sm.got1 + sm.got2) / marked : 0;
-  if(!marked) note = "Nothing answered yet, and that is fine. Dip back in whenever.";
+  if(cfg.escape && state.escaped) note = (cfg.escape.outro ? stripTags(cfg.escape.outro) + " " : "") + "Every room is still here if you want another go, or to beat your time.";
+  else if(!marked) note = "Nothing answered yet, and that is fine. Dip back in whenever.";
   else if(pct >= 0.85) note = "That is strong. The stretch questions are where the higher grades live, so those are worth another look if any slipped.";
   else if(pct >= 0.6) note = "Solid. The sections below with shorter bars are the ones worth a second visit on another day.";
   else note = "Every Show me you used is something you now know more about than before. Coming back to this in a few days is exactly how revision sticks.";

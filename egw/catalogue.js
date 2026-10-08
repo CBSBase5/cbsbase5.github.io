@@ -725,8 +725,106 @@ EGWCAT.subjects = [
   ] }
 ];
 
+/* Extras: not tied to one topic, so not on the papers page or in the sky */
+EGWCAT.extras = [
+ {
+  "id": "mark-jay",
+  "kind": "mark",
+  "subject": "mixed",
+  "title": "Mark Jay's work",
+  "line": "Flip it round: Jay has had a go at some exam questions. Find his mistakes and decide his marks.",
+  "mins": 40,
+  "chunks": [
+   "How marking works",
+   "Maths, no calculator",
+   "Maths, calculator",
+   "Biology",
+   "Statistics",
+   "English",
+   "Exam style finish"
+  ]
+ },
+ {
+  "id": "escape-maths",
+  "kind": "escape",
+  "subject": "maths",
+  "title": "Escape the museum",
+  "line": "Locked in a museum after hours. Four rooms of mixed maths, one digit each.",
+  "mins": 35,
+  "chunks": [
+   "Egyptian gallery",
+   "Dinosaur hall",
+   "Gift shop",
+   "Observatory",
+   "The final door"
+  ]
+ },
+ {
+  "id": "escape-english",
+  "kind": "escape",
+  "subject": "english",
+  "title": "Escape the lighthouse",
+  "line": "A stormy night in an old lighthouse. Read, notice and write your way out.",
+  "mins": 35,
+  "chunks": [
+   "The boot room",
+   "The spiral stair",
+   "The watch room",
+   "The lamp room",
+   "The final door"
+  ]
+ },
+ {
+  "id": "escape-bio",
+  "kind": "escape",
+  "subject": "bio",
+  "title": "Escape the research station",
+  "line": "A research station in lockdown. Biology from both papers opens the doors.",
+  "mins": 35,
+  "chunks": [
+   "The microscope lab",
+   "The greenhouse",
+   "The medical bay",
+   "The field survey hut",
+   "The final door"
+  ]
+ },
+ {
+  "id": "escape-stats",
+  "kind": "escape",
+  "subject": "stats",
+  "title": "Escape the game show",
+  "line": "Trapped on a late night game show hosted by a parrot. Statistics is the way out.",
+  "mins": 35,
+  "chunks": [
+   "The audience",
+   "The scoreboard",
+   "The wheel",
+   "The ratings room",
+   "The final door"
+  ]
+ },
+ {
+  "id": "time-travel",
+  "kind": "pack",
+  "subject": "mixed",
+  "title": "The time travel pack",
+  "line": "Travel through history with Bonnie, using all four subjects, then argue whether we should.",
+  "mins": 45,
+  "chunks": [
+   "Launch day",
+   "Ancient Egypt, about 2560 BC",
+   "London, 1665",
+   "The seaside, 1872",
+   "The Moon landing, July 1969",
+   "The year 2080",
+   "Back home: should we?"
+  ]
+ }
+];
+
 /* Small helpers both pages use */
-EGWCAT.act = function(id){ for(var i = 0; i < EGWCAT.acts.length; i++) if(EGWCAT.acts[i].id === id) return EGWCAT.acts[i]; return null; };
+EGWCAT.act = function(id){ var all = EGWCAT.acts.concat(EGWCAT.extras || []); for(var i = 0; i < all.length; i++) if(all[i].id === id) return all[i]; return null; };
 EGWCAT.href = function(id, chunk){ return "/egw/" + id + ".html" + (chunk ? "#chunk-" + chunk : ""); };
 EGWCAT.state = function(id){
   try{

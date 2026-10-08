@@ -205,7 +205,8 @@ function report(src){
       g1: s.got1 || 0, g2: s.got2 || 0, sh: s.shown || 0, sk: s.skipped || 0, mk: s.marked || 0,
       sp: s.sparks || 0, b: s.best || 0, cd: s.chunksDone || 0, cn: s.chunks || 0,
       cs: (s.chunkStates || []).map(function(x){ return x.charAt(0); }).join(""),
-      ct: s.chunkTally || null
+      ct: s.chunkTally || null,
+      e: s.escaped ? 1 : 0, bt: s.bestTime || 0
     };
   });
   var hq = src.read(HQ_KEY) || {};
@@ -215,8 +216,16 @@ function report(src){
     return [it.id, it.i, it.box, it.due, it.topic, (it.q || "").slice(0, 50)];
   });
   var pm = packMap(hq.map || {});
+  /* daily drop: how many, and the last 14 days as one letter each */
+  var dd = src.read(PREFIX + "daily.v1") || { days: {} }, last = "";
+  var base = new Date(); base.setHours(12, 0, 0, 0);
+  for(var k = 13; k >= 0; k--){
+    var dt = new Date(base); dt.setDate(dt.getDate() - k);
+    var rec = (dd.days || {})[dayStr(dt)];
+    last += rec ? (rec.r === "right1" ? "1" : rec.r === "right2" ? "2" : "s") : ".";
+  }
   return { v: 1, who: "EGW", made: new Date().toISOString(), acts: acts,
-    mp: pm.mp, mf: pm.mf, mx: pm.mx, log: (hq.log || []).slice(-20), rv: { items: items, learnt: rv.learnt || 0 } };
+    mp: pm.mp, mf: pm.mf, mx: pm.mx, dd: { n: Object.keys(dd.days || {}).length, last: last }, log: (hq.log || []).slice(-20), rv: { items: items, learnt: rv.learnt || 0 } };
 }
 /* A save code can stand in for a progress code */
 function reportFromBackup(bk){ var r = report(objectSource(bk.store)); r.made = bk.made; return r; }

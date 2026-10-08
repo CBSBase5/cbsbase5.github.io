@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The daily drop - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=5">
+<style>
+/* Daily drop only */
+.acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
+.acc-maths{--accent:var(--sun);--accent-soft:rgba(255,210,63,.24)}
+.acc-bio{--accent:var(--mint);--accent-soft:rgba(25,195,154,.16)}
+.acc-stats{--accent:var(--violet);--accent-soft:rgba(138,92,246,.15)}
+.dhero{padding:20px 0 6px}
+.dhero h1{font-size:clamp(2.3rem,8vw,3.6rem);color:#fff;line-height:1}
+.dhero h1 em{font-style:normal;color:var(--sun)}
+.dhero p{color:var(--mist);margin:10px 0 0;max-width:52ch}
+.week{display:flex;gap:8px;margin:18px 0 18px;flex-wrap:wrap}
+.day{
+  display:flex;flex-direction:column;align-items:center;gap:4px;min-width:42px;
+  font-family:var(--display);font-weight:600;font-size:.78rem;color:var(--mist);background:none;border:0;padding:0;cursor:default;
+}
+.day i{display:block;width:38px;height:38px;border-radius:10px;border:2px solid rgba(201,205,240,.3);background:rgba(255,255,255,.04)}
+.day.r1 i{background:var(--mint);border-color:var(--mint)}
+.day.r2 i{background:var(--sun);border-color:var(--sun)}
+.day.sh i{background:var(--violet);border-color:var(--violet)}
+.day.miss{cursor:pointer}
+.day.miss i{border-style:dashed}
+.day.miss:hover i{border-color:var(--sun)}
+.day.today i{box-shadow:0 0 0 3px var(--night),0 0 0 5px #fff}
+.day.future{opacity:.35}
+.day.sel span{color:#fff}
+.dropnum{font-family:var(--display);font-weight:700;font-size:.85rem;color:var(--body-tint)}
+.donebox{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px;background:var(--paper);border-radius:14px}
+.donebox .sq{width:52px;height:52px;border-radius:12px;flex:none}
+.donebox .sq.r1{background:var(--mint)}.donebox .sq.r2{background:var(--sun)}.donebox .sq.sh{background:var(--violet)}
+.donebox b{font-family:var(--display);font-size:1.15rem;display:block}
+.donebox small{color:var(--body-tint)}
+.practise{display:inline-flex;gap:8px;align-items:center;margin-top:12px;font-weight:700;color:var(--blue)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mist);font-size:.82rem;margin:-6px 0 14px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body class="subj-home">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <section class="dhero">
+    <h1>The daily <em>drop</em></h1>
+    <p>One question a day, from any of your four subjects. That is it. Missed a day? No problem: tap an empty square to catch up, or just leave it.</p>
+  </section>
+
+  <div class="week" id="week"></div>
+  <div class="legend"><span><i style="background:var(--mint)"></i>first go</span><span><i style="background:var(--sun)"></i>second go</span><span><i style="background:var(--violet)"></i>learnt from Show me</span></div>
+
+  <div class="board">
+    <div class="card w12" id="dropCard"></div>
+  </div>
+
+  <div class="board">
+    <div class="card w12 hidden" id="shareCard">
+      <span class="kicker">Send to Jay</span>
+      <p class="tiny" style="margin-top:0">Only if you want to: your squares for this week.</p>
+      <div id="sendHost"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=7"></script>
+<script src="/egw/catalogue.js?v=5"></script>
+<script src="/egw/daily-bank-maths.js?v=1"></script>
+<script src="/egw/daily-bank-english.js?v=1"></script>
+<script src="/egw/daily-bank-bio.js?v=1"></script>
+<script src="/egw/daily-bank-stats.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.egw.daily.v1";
+var START = "2026-10-08";              /* drop 1 */
+var CYCLE = ["maths", "english", "bio", "stats"];
+var NAMES = { maths: "Maths", english: "English", bio: "Biology", stats: "Statistics" };
+var ACC = { maths: "acc-maths", english: "acc-eng", bio: "acc-bio", stats: "acc-stats" };
+var BANK = window.EGWDAILY || [];
+function $(id){ return document.getElementById(id); }
+try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
+
+/* ---------- dates ---------- */
+function noon(str){ var p = str.split("-"); return new Date(+p[0], +p[1] - 1, +p[2], 12); }
+function dayStr(d){ var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd; }
+function today(){ var d = new Date(); d.setHours(12, 0, 0, 0); return dayStr(d); }
+function addDays(str, n){ var d = noon(str); d.setDate(d.getDate() + n); return dayStr(d); }
+function dayNum(str){ return Math.round((noon(str) - noon(START)) / 86400000); }
+
+/* ---------- which question is on which day ---------- */
+function seeded(str){
+  var h = 2166136261;
+  for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return function(){ h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+}
+var bySubj = {};
+CYCLE.forEach(function(sj){
+  var list = BANK.map(function(q, k){ return k; }).filter(function(k){ return BANK[k].s === sj; });
+  var rnd = seeded("egw-daily-" + sj);
+  for(var i = list.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var t = list[i]; list[i] = list[j]; list[j] = t; }
+  bySubj[sj] = list;
+});
+function itemFor(str){
+  var n = Math.max(0, dayNum(str));
+  var sj = CYCLE[n % CYCLE.length], list = bySubj[sj];
+  if(!list || !list.length) return null;
+  return { k: list[Math.floor(n / CYCLE.length) % list.length], n: n + 1, s: sj };
+}
+
+/* ---------- storage ---------- */
+function load(){ try{ var r = localStorage.getItem(KEY); var d = r ? JSON.parse(r) : null; if(d && d.days) return d; }catch(e){} return { days: {} }; }
+function save(){ store.updated = new Date().toISOString(); try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+var store = load();
+
+/* ---------- the week strip ---------- */
+var t0 = today();
+var sel = (location.search.match(/day=(\d{4}-\d\d-\d\d)/) || [])[1] || t0;
+if(sel > t0 || sel < START) sel = t0;
+function drawWeek(){
+  var w = $("week"), html = "";
+  for(var k = -6; k <= 0; k++){
+    var d = addDays(t0, k);
+    var label = noon(d).toLocaleDateString("en-GB", { weekday: "short" });
+    var rec = store.days[d];
+    var cls = "day";
+    if(d < START) cls += " future";
+    else if(rec) cls += rec.r === "right1" ? " r1" : rec.r === "right2" ? " r2" : " sh";
+    else if(d !== t0) cls += " miss";
+    if(d === t0) cls += " today";
+    if(d === sel) cls += " sel";
+    html += '<button class="' + cls + '" type="button" data-d="' + d + '"' + (d < START ? " disabled" : "") +
+      ' aria-label="' + noon(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) + (rec ? ", done" : "") + '"><i></i><span>' + label + '</span></button>';
+  }
+  w.innerHTML = html;
+  [].forEach.call(w.querySelectorAll(".day:not([disabled])"), function(b){
+    b.onclick = function(){ sel = b.dataset.d; drawWeek(); drawDrop(); };
+  });
+}
+
+/* ---------- one question ---------- */
+var tries = 0, picked = -1, ins = [];
+function drawDrop(){
+  var card = $("dropCard");
+  var it = itemFor(sel);
+  if(!it){ card.innerHTML = '<p>The question bank did not load. Try refreshing the page.</p>'; return; }
+  var q = BANK[it.k], rec = store.days[sel];
+  card.className = "card w12 " + ACC[q.s];
+  var when = sel === t0 ? "Today" : noon(sel).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  var html = '<div class="qtop"><span class="kicker" style="margin:0">' + NAMES[q.s] + '</span><span class="dropnum">Drop ' + it.n + ' &middot; ' + when + '</span></div>' +
+    '<div class="prompt" style="margin-top:12px">' + q.q + '</div>' + (q.fig ? '<div class="fig">' + q.fig + '</div>' : "") + '<div id="ans"></div>' +
+    '<div class="fb hidden" id="fb" aria-live="polite"></div>' +
+    '<div class="qnav" id="nav"><button class="btn btn-quiet hidden" id="showBtn" type="button">Show me</button><button class="btn" id="checkBtn" type="button">Check</button></div>' +
+    '<div id="after"></div>';
+  card.innerHTML = html;
+  tries = 0; picked = -1; ins = [];
+  var ans = $("ans");
+  if(q.type === "mc"){
+    var box = document.createElement("div"); box.className = "choices";
+    var ord = q.options.map(function(o, k){ return k; });
+    var rnd = seeded("drop-" + sel);
+    for(var i = ord.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var tt = ord[i]; ord[i] = ord[j]; ord[j] = tt; }
+    ord.forEach(function(k){
+      var b = document.createElement("button"); b.type = "button"; b.innerHTML = q.options[k]; b.dataset.k = k;
+      b.onclick = function(){ if(store.days[sel]) return; picked = k; [].forEach.call(box.children, function(c){ c.classList.toggle("picked", +c.dataset.k === k); }); };
+      box.appendChild(b);
+    });
+    ans.appendChild(box);
+  }else{
+    var wrap = document.createElement("div"); wrap.className = "numboxes";
+    q.boxes.forEach(function(bx){
+      var row = document.createElement("label"); row.className = "numrow";
+      row.innerHTML = (bx.label ? '<span class="nlab">' + bx.label + '</span>' : "") + (bx.pre ? '<span class="aff">' + bx.pre + '</span>' : "");
+      var inp = document.createElement("input"); inp.type = "text"; inp.autocomplete = "off";
+      inp.addEventListener("keydown", function(e){ if(e.key === "Enter") $("checkBtn").click(); });
+      row.appendChild(inp);
+      if(bx.post){ var sp = document.createElement("span"); sp.className = "aff"; sp.innerHTML = bx.post; row.appendChild(sp); }
+      wrap.appendChild(row); ins.push(inp);
+    });
+    ans.appendChild(wrap);
+  }
+  $("checkBtn").onclick = function(){ check(false); };
+  $("showBtn").onclick = function(){ check(true); };
+  if(rec) showDone(q, rec.r, true);
+}
+function okBox(q, k){
+  var bx = q.boxes[k], v = EGW.parseNum(ins[k].value);
+  if(isNaN(v)) return false;
+  var tol = bx.tol !== undefined ? bx.tol : 0.0001;
+  return [bx.a].concat(bx.alts || []).some(function(t){ return Math.abs(v - t) <= tol; });
+}
+function check(giveUp){
+  var it = itemFor(sel), q = BANK[it.k], fb = $("fb");
+  var empty = q.type === "mc" ? picked < 0 : ins.some(function(x){ return !x.value.trim(); });
+  if(!giveUp && empty){ fb.className = "fb nudge"; fb.textContent = "Pop an answer in first."; return; }
+  var right = !giveUp && (q.type === "mc" ? picked === q.answer : ins.every(function(x, k){ return okBox(q, k); }));
+  if(!giveUp && !right && tries === 0){
+    tries = 1;
+    fb.className = "fb nudge";
+    fb.innerHTML = '<b>Not quite yet.</b> ' + (q.hint || "Have another look.") + '<br><span class="tiny">Change your answer and Check again, or tap Show me.</span>';
+    if(q.type === "mc") markMc(q, false); else ins.forEach(function(x, k){ x.classList.toggle("no", !okBox(q, k)); x.classList.toggle("ok", okBox(q, k)); });
+    $("showBtn").classList.remove("hidden");
+    return;
+  }
+  var r = right ? (tries ? "right2" : "right1") : "shown";
+  store.days[sel] = { r: r, k: it.k, n: it.n };
+  save();
+  showDone(q, r, false);
+  drawWeek();
+}
+function markMc(q, final){
+  [].forEach.call(document.querySelectorAll("#ans .choices button"), function(c){
+    var k = +c.dataset.k;
+    c.classList.remove("ok", "no");
+    if(k === picked && k !== q.answer) c.classList.add("no");
+    if(k === q.answer && (final || picked === k)) c.classList.add("ok");
+  });
+}
+function showDone(q, r, quiet){
+  var fb = $("fb");
+  if(q.type === "mc"){ if(quiet) picked = -1; markMc(q, true); }
+  else ins.forEach(function(x, k){ if(!okBox(q, k)) x.value = String(q.boxes[k].show || q.boxes[k].a); x.classList.remove("no"); x.classList.add("ok"); x.disabled = true; });
+  var head = r === "right1" ? "First go. Lovely." : r === "right2" ? "Got there on the second go." : "Here is how this one works.";
+  fb.className = "fb " + (r === "shown" ? "show" : "good");
+  fb.innerHTML = '<b>' + head + '</b>' + (q.why ? '<div class="why">' + q.why + '</div>' : "");
+  $("nav").classList.add("hidden");
+  var act = q.link ? EGWCAT.act(q.link[0]) : null;
+  var done = Object.keys(store.days).length;
+  $("after").innerHTML = '<div class="donebox"><span class="sq ' + (r === "right1" ? "r1" : r === "right2" ? "r2" : "sh") + '"></span><span><b>' +
+    (sel === t0 ? "That is today done." : "Caught up.") + '</b><small>' + done + ' drop' + (done === 1 ? "" : "s") + ' so far. ' + (sel === t0 ? "A new one lands tomorrow." : "") + '</small></span></div>' +
+    (act ? '<a class="practise" href="/egw/' + q.link[0] + '.html#chunk-' + q.link[1] + '">More like this: ' + act.title + ', ' + act.chunks[q.link[1] - 1] + ' &rsaquo;</a>' : "");
+  $("shareCard").classList.remove("hidden");
+}
+
+/* ---------- squares to send ---------- */
+function squares(){
+  var G = String.fromCodePoint(0x1F7E9), Y = String.fromCodePoint(0x1F7E8), P = String.fromCodePoint(0x1F7EA), W = String.fromCodePoint(0x2B1C);
+  var line = "", words = [];
+  for(var k = -6; k <= 0; k++){
+    var d = addDays(t0, k), rec = store.days[d];
+    if(d < START) continue;
+    line += rec ? (rec.r === "right1" ? G : rec.r === "right2" ? Y : P) : W;
+    words.push(noon(d).toLocaleDateString("en-GB", { weekday: "short" }) + ": " + (rec ? { right1: "first go", right2: "second go", shown: "Show me" }[rec.r] : "not played"));
+  }
+  return "EGW's daily drop, week to " + noon(t0).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) + "\n" + line + "\n\n" + words.join("\n") +
+    "\n\nGreen first go, yellow second go, purple learnt from Show me.";
+}
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool: "Daily drop", filename: "egw-daily-drop", getText: squares });
+
+drawWeek();
+drawDrop();
+})();
+</script>
+</body>
+</html>

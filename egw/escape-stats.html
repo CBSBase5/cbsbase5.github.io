@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the game show - EGW GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/egw/egw.css?v=5">
+</head>
+<body class="subj-stats">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/egw/"><span class="hqlogo">EGW</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/egw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the game show</h2>
+    <span>GCSE Statistics escape room. Sampling, averages, box plots, charts, probability, time series, index numbers and scatter graphs, all mixed up.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>EGW's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/egw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=7"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, txt, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "middle") + '" ' + (o.lab ? LAB : BODY) +
+    ' font-weight="' + (o.w || 400) + '" font-size="' + (o.s || 15) + '" fill="' + (o.c || INK) + '"' +
+    (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : '') + '>' + txt + '</text>';
+}
+function ln(x1, y1, x2, y2, c, w){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (c || INK) + '" stroke-width="' + (w || 2) + '"/>';
+}
+function r1(n){ return Math.round(n * 10) / 10; }
+
+/* ---------- the data (every chart is drawn from these) ---------- */
+var BONNIE = [11, 4, 16, 8, 25, 9, 13, 8, 14];          /* points per round, rounds 1 to 9 */
+var FEATHER = [10, 18, 24, 30, 38], CLAW = [14, 22, 26, 28, 34];  /* min, LQ, median, UQ, max */
+var VOTES = [["Polly", 52], ["Corvina", 48]];
+var VIEWERS = [52, 38, 30, 48, 56, 42, 34, 52];          /* thousands, Year 1 Q1 to Year 2 Q4 */
+var BIRDS = [[1, 30], [2, 34], [3, 33], [4, 40], [5, 41], [6, 46], [7, 45], [8, 52]];
+
+/* ---------- figures ---------- */
+var SEATS = (function(){
+  var s = '<svg viewBox="0 0 380 206" role="img" aria-label="The studio: the balcony holds 160 people, the stalls hold 240 people, and the stage is at the front.">';
+  s += '<rect x="70" y="10" width="240" height="56" rx="12" fill="#e8e1fd" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+  s += t(190, 33, "Balcony", { lab: 1, w: 700, s: 16, c: VIOLET });
+  s += t(190, 55, "160 people", { s: 15 });
+  s += '<rect x="24" y="80" width="332" height="74" rx="12" fill="#dcf3fb" stroke="' + CYAN + '" stroke-width="2.5"/>';
+  s += t(190, 110, "Stalls", { lab: 1, w: 700, s: 16, c: "#0d7fa3" });
+  s += t(190, 134, "240 people", { s: 15 });
+  s += '<rect x="110" y="166" width="160" height="32" rx="8" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += t(190, 188, "Stage", { lab: 1, w: 700, s: 15 });
+  return s + '</svg>';
+})();
+
+var BOARD = (function(){
+  var s = '<svg viewBox="0 0 380 128" role="img" aria-label="Scoreboard showing Bonnie\'s points in rounds 1 to 9: ' + BONNIE.join(", ") + '.">';
+  s += '<rect x="2" y="2" width="376" height="124" rx="14" fill="' + INK + '"/>';
+  s += t(190, 30, "BONNIE: POINTS PER ROUND", { lab: 1, w: 700, s: 15, c: SUN });
+  BONNIE.forEach(function(v, i){
+    var x = 12 + i * 40;
+    s += '<rect x="' + x + '" y="44" width="36" height="42" rx="7" fill="#202852" stroke="' + SUN + '" stroke-width="2"/>';
+    s += t(x + 18, 72, v, { lab: 1, w: 700, s: 19, c: WHITE });
+  });
+  s += t(190, 112, "Rounds 1 to 9, left to right", { s: 14, c: "#c9cbe0" });
+  return s + '</svg>';
+})();
+
+var BOXES = (function(){
+  var L = 20, R = 360, AX = 186;
+  function X(v){ return r1(L + v / 40 * (R - L)); }
+  var s = '<svg viewBox="0 0 380 238" role="img" aria-label="Box plots of points scored. Team Feather: minimum ' + FEATHER[0] + ', lower quartile ' + FEATHER[1] + ', median ' + FEATHER[2] + ', upper quartile ' + FEATHER[3] + ', maximum ' + FEATHER[4] + '. Team Claw: minimum ' + CLAW[0] + ', lower quartile ' + CLAW[1] + ', median ' + CLAW[2] + ', upper quartile ' + CLAW[3] + ', maximum ' + CLAW[4] + '.">';
+  for(var g = 0; g <= 40; g += 2) s += ln(X(g), 14, X(g), AX, g % 10 === 0 ? "#b9b8cc" : LINE, 1);
+  function plot(d, cy, name, col, fill){
+    s += '<rect x="' + (L - 2) + '" y="' + (cy - 44) + '" width="' + (name.length * 9 + 8) + '" height="22" rx="4" fill="' + WHITE + '"/>';
+    s += t(L + 2, cy - 27, name, { a: "start", lab: 1, w: 700, s: 15, c: col });
+    s += ln(X(d[0]), cy, X(d[1]), cy, INK, 2.5) + ln(X(d[3]), cy, X(d[4]), cy, INK, 2.5);
+    s += ln(X(d[0]), cy - 10, X(d[0]), cy + 10, INK, 2.5) + ln(X(d[4]), cy - 10, X(d[4]), cy + 10, INK, 2.5);
+    s += '<rect x="' + X(d[1]) + '" y="' + (cy - 17) + '" width="' + r1(X(d[3]) - X(d[1])) + '" height="34" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += ln(X(d[2]), cy - 17, X(d[2]), cy + 17, col, 4);
+  }
+  plot(FEATHER, 64, "Team Feather", BLUE, "#dfe5ff");
+  plot(CLAW, 144, "Team Claw", "#c23b3b", "#ffe1e1");
+  s += ln(L, AX, R, AX, INK, 2);
+  for(var k = 0; k <= 40; k += 10){
+    s += ln(X(k), AX, X(k), AX + 7, INK, 2);
+    s += t(X(k), AX + 24, k, { s: 14 });
+  }
+  s += t(190, AX + 46, "Points scored (each grid gap is 2 points)", { s: 14 });
+  return s + '</svg>';
+})();
+
+var BARS = (function(){
+  var T = 52, B = 190, L = 70, R = 350, LO = 46, HI = 52;
+  function Y(v){ return r1(B - (v - LO) / (HI - LO) * (B - T)); }
+  var s = '<svg viewBox="0 0 380 236" role="img" aria-label="Polly\'s bar chart titled Best host: audience votes. The vertical axis starts at 46 and goes up in steps of 2 to 52. Polly has 52 votes and Corvina has 48, so Polly\'s bar looks three times as tall.">';
+  s += t(200, 24, "Best host: audience votes", { lab: 1, w: 700, s: 16 });
+  for(var v = LO; v <= HI; v += 2){
+    s += ln(L, Y(v), R, Y(v), LINE, 1);
+    s += ln(L - 6, Y(v), L, Y(v), INK, 2);
+    s += t(L - 10, Y(v) + 5, v, { a: "end", s: 14 });
+  }
+  var cols = [VIOLET, "#5b6175"];
+  VOTES.forEach(function(p, i){
+    var x = 116 + i * 120;
+    s += '<rect x="' + x + '" y="' + Y(p[1]) + '" width="80" height="' + r1(B - Y(p[1])) + '" fill="' + cols[i] + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(x + 40, B + 22, p[0], { lab: 1, w: 700, s: 15 });
+  });
+  s += ln(L, T - 6, L, B, INK, 2) + ln(L, B, R, B, INK, 2);
+  s += t(22, (T + B) / 2, "Votes", { s: 15, rot: -90 });
+  return s + '</svg>';
+})();
+
+var WHEEL = (function(){
+  var cx = 130, cy = 108, r = 86;
+  var fills = [BLUE, SUN, CORAL, MINT, VIOLET], ink = [WHITE, INK, INK, INK, WHITE];
+  var s = '<svg viewBox="0 0 380 210" role="img" aria-label="A wheel with five equal sections numbered 1 to 5, and a fair six sided dice.">';
+  function pt(a, rr){ var q = (a - 90) * Math.PI / 180; return [r1(cx + rr * Math.cos(q)), r1(cy + rr * Math.sin(q))]; }
+  for(var k = 0; k < 5; k++){
+    var a0 = k * 72, a1 = a0 + 72, p0 = pt(a0, r), p1 = pt(a1, r), m = pt(a0 + 36, 56);
+    s += '<path d="M' + cx + ' ' + cy + ' L' + p0[0] + ' ' + p0[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + p1[0] + ' ' + p1[1] + ' Z" fill="' + fills[k] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(m[0], m[1] + 8, k + 1, { lab: 1, w: 700, s: 24, c: ink[k] });
+  }
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="9" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<path d="M' + (cx - 11) + ' 6 L' + (cx + 11) + ' 6 L' + cx + ' 30 Z" fill="' + INK + '"/>';
+  /* the dice, showing six */
+  var dx = 258, dy = 62, ds = 92;
+  s += '<rect x="' + dx + '" y="' + dy + '" width="' + ds + '" height="' + ds + '" rx="16" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+  [[0.28, 0.25], [0.28, 0.5], [0.28, 0.75], [0.72, 0.25], [0.72, 0.5], [0.72, 0.75]].forEach(function(p){
+    s += '<circle cx="' + r1(dx + p[0] * ds) + '" cy="' + r1(dy + p[1] * ds) + '" r="7" fill="' + INK + '"/>';
+  });
+  s += t(dx + ds / 2, dy + ds + 26, "fair dice, 1 to 6", { s: 14 });
+  return s + '</svg>';
+})();
+
+var VENN = (function(){
+  var s = '<svg viewBox="0 0 380 222" role="img" aria-label="Venn diagram for 60 contestants. Circles for whistle and juggle. The overlap is 9. Whistle only is a, juggle only is b, and outside both circles is c.">';
+  s += '<rect x="6" y="6" width="368" height="210" rx="10" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(16, 32, "&#958; = 60", { a: "start", lab: 1, w: 700, s: 15 });
+  s += '<circle cx="152" cy="130" r="70" fill="' + BLUE + '" fill-opacity="0.16" stroke="' + BLUE + '" stroke-width="3"/>';
+  s += '<circle cx="228" cy="130" r="70" fill="' + CORAL + '" fill-opacity="0.16" stroke="#d63c3c" stroke-width="3"/>';
+  s += t(120, 50, "Whistle", { lab: 1, w: 700, s: 15, c: BLUE });
+  s += t(262, 50, "Juggle", { lab: 1, w: 700, s: 15, c: "#c23b3b" });
+  s += t(118, 137, "a", { lab: 1, w: 700, s: 22, c: BLUE });
+  s += t(190, 137, "9", { lab: 1, w: 700, s: 22 });
+  s += t(262, 137, "b", { lab: 1, w: 700, s: 22, c: "#c23b3b" });
+  s += t(340, 200, "c", { lab: 1, w: 700, s: 22, c: VIOLET });
+  return s + '</svg>';
+})();
+
+var TREE = (function(){
+  var s = '<svg viewBox="0 0 380 232" role="img" aria-label="Tree diagram for two rounds. Each round, gold has probability 0.4 and not gold has a missing probability shown as a question mark.">';
+  s += t(80, 18, "Round 1", { lab: 1, w: 700, s: 14, c: "#5b6175" });
+  s += t(250, 18, "Round 2", { lab: 1, w: 700, s: 14, c: "#5b6175" });
+  function br(x1, y1, x2, y2, p, up){
+    s += ln(x1, y1, x2, y2, INK, 2.5);
+    s += t((x1 + x2) / 2, (y1 + y2) / 2 + (up ? -8 : 20), p, { lab: 1, w: 700, s: 15, c: p === "?" ? "#c23b3b" : BLUE });
+  }
+  br(16, 124, 124, 68, "0.4", 1);
+  br(16, 124, 124, 180, "?", 0);
+  s += t(130, 74, "Gold", { a: "start", s: 15, w: 700 });
+  s += t(130, 186, "Not gold", { a: "start", s: 15, w: 700 });
+  [[68], [180]].forEach(function(r){
+    var y = r[0];
+    br(206, y, 290, y - 30, "0.4", 1);
+    br(206, y, 290, y + 30, "?", 0);
+    s += t(296, y - 25, "Gold", { a: "start", s: 15 });
+    s += t(296, y + 35, "Not gold", { a: "start", s: 15 });
+  });
+  return s + '</svg>';
+})();
+
+var TS = (function(){
+  var L = 56, R = 366, T = 18, B = 186;
+  function X(i){ return r1(L + 20 + i * (R - L - 40) / 7); }
+  function Y(v){ return r1(B - v / 60 * (B - T)); }
+  var s = '<svg viewBox="0 0 380 252" role="img" aria-label="Time series of viewers in thousands, each quarter for two years. Year 1: ' + VIEWERS.slice(0, 4).join(", ") + '. Year 2: ' + VIEWERS.slice(4).join(", ") + '.">';
+  for(var v = 0; v <= 60; v += 10){
+    s += ln(L, Y(v), R, Y(v), v ? LINE : INK, v ? 1 : 2);
+    s += t(L - 8, Y(v) + 5, v, { a: "end", s: 14 });
+  }
+  s += ln(L, T, L, B, INK, 2);
+  var d = "";
+  VIEWERS.forEach(function(v, i){ d += (i ? " L" : "M") + X(i) + " " + Y(v); });
+  s += '<path d="' + d + '" fill="none" stroke="' + BLUE + '" stroke-width="3"/>';
+  VIEWERS.forEach(function(v, i){
+    s += '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="5" fill="' + WHITE + '" stroke="' + BLUE + '" stroke-width="3"/>';
+    s += t(X(i), B + 20, "Q" + (i % 4 + 1), { s: 14 });
+  });
+  s += t((X(0) + X(3)) / 2, B + 42, "Year 1", { lab: 1, w: 700, s: 14 });
+  s += t((X(4) + X(7)) / 2, B + 42, "Year 2", { lab: 1, w: 700, s: 14 });
+  s += ln(r1((X(3) + X(4)) / 2), B + 6, r1((X(3) + X(4)) / 2), B + 48, "#b9b8cc", 1.5);
+  s += t(18, (T + B) / 2, "Viewers (thousands)", { s: 14, rot: -90 });
+  return s + '</svg>';
+})();
+
+var SCATTER = (function(){
+  var L = 56, R = 364, T = 16, B = 206;
+  function X(v){ return r1(L + v / 9 * (R - L)); }
+  function Y(v){ return r1(B - v / 60 * (B - T)); }
+  var s = '<svg viewBox="0 0 380 262" role="img" aria-label="Scatter graph of birds on screen against viewers in thousands for eight episodes: ' + BIRDS.map(function(p){ return "(" + p[0] + ", " + p[1] + ")"; }).join(", ") + '.">';
+  for(var v = 0; v <= 60; v += 10){
+    s += ln(L, Y(v), R, Y(v), v ? LINE : INK, v ? 1 : 2);
+    s += t(L - 8, Y(v) + 5, v, { a: "end", s: 14 });
+  }
+  for(var x = 1; x <= 9; x++){
+    s += ln(X(x), T, X(x), B, LINE, 1) + ln(X(x), B, X(x), B + 6, INK, 2);
+    s += t(X(x), B + 22, x, { s: 14 });
+  }
+  s += t(L, B + 22, 0, { s: 14 });
+  s += ln(L, T, L, B, INK, 2);
+  BIRDS.forEach(function(p){
+    var px = X(p[0]), py = Y(p[1]);
+    s += ln(px - 6, py - 6, px + 6, py + 6, VIOLET, 3) + ln(px - 6, py + 6, px + 6, py - 6, VIOLET, 3);
+  });
+  s += t((L + R) / 2, B + 46, "Birds on screen in the episode", { s: 14 });
+  s += t(18, (T + B) / 2, "Viewers (thousands)", { s: 14, rot: -90 });
+  return s + '</svg>';
+})();
+
+EGW.run({
+  id: "escape-stats",
+  title: "Escape the game show",
+  subject: "Statistics",
+  mins: 35,
+  blurb: "A late night TV game show has locked its contestants in. Four rooms of mixed Statistics, one digit each, then the final door.",
+  escape: {
+    digits: ["4", "9", "2", "6"],
+    intro: '<p>It is very late. You flick past a channel where a grey parrot in a sequinned bow tie is hosting a quiz show, and somehow you are now standing in the studio.</p>' +
+           '<p>The host, <b>Polly Graph</b>, has locked every door of <b>Odds On</b>. Four rooms each hide one digit. Find all four, then have a go at the final door.</p>',
+    outro: '<p>The final door swings open onto a quiet car park and a cool night. Behind you, Polly squawks, "Same time next week?" Perhaps not.</p>'
+  },
+  steps: [
+
+  /* ---------- ROOM 1: THE AUDIENCE ---------- */
+  { type: "learn", topic: "The audience",
+    title: "Lights, camera, parrot",
+    fig: SEATS,
+    html: '<p>The studio lights snap on. A grey parrot in a sequinned bow tie lands on the desk. "Good evening, night owls! I am Polly Graph, and this is <b>Odds On</b>, the show nobody leaves."</p>' +
+          '<p>The doors click shut. "First, my audience votes. There are 400 of them, and I only have time to ask 40."</p>' +
+          '<div class="keep"><b>Keep this</b>A good sample represents the whole audience, not just one corner of it.</div>' },
+
+  { type: "num", topic: "The audience",
+    q: 'Polly wants a <b>stratified sample</b> of 40 people from the 400 in the audience, split by where they sit: 240 in the stalls and 160 in the balcony. How many should come from each part?',
+    fig: SEATS,
+    boxes: [
+      { label: "From the stalls", a: 24 },
+      { label: "From the balcony", a: 16 }
+    ],
+    hint: "Each part's share of the 40 should match its share of the 400. What fraction of the audience is in the stalls?",
+    why: "Group size &divide; population &times; sample size.<br>Stalls: 240 &divide; 400 &times; 40 = <b>24</b>.<br>Balcony: 160 &divide; 400 &times; 40 = <b>16</b>.<br>Check: 24 + 16 = 40. Then pick people at random within each part. A common slip is 20 and 20: equal numbers, but not in proportion to the audience." },
+
+  { type: "mc", topic: "The audience",
+    q: 'Polly\'s producer, a pigeon called Derek, has another idea: "Just ask the 40 people in the front row. They queued all day for those seats!" What is the main problem with Derek\'s sample?',
+    options: [
+      "It is likely to be biased: the keenest fans may vote differently from the rest of the audience.",
+      "40 people is too few to count as a sample.",
+      "It is a census, so it would take far too long.",
+      "It is a random sample, so the results would be unpredictable."
+    ],
+    answer: 0,
+    hint: "Who has no chance at all of being picked? Would they vote the same way?",
+    why: "This is an <b>opportunity</b> (convenience) sample. Nobody outside the front row can be picked, and the front row are the keenest fans, so the vote would lean their way: that is <b>bias</b>. It is not random, and it is not a census (a census asks everyone). Asking more front row fans would not help either: a bigger sample does not fix a biased method." },
+
+  { type: "mc", topic: "The audience",
+    q: "Polly wants to investigate her audience with some data. Which of these is a <b>hypothesis</b> she could test?",
+    options: [
+      "People in the balcony clap for longer than people in the stalls.",
+      "Do people in the balcony clap for longer?",
+      "Clapping is the best part of the show.",
+      "How long does the audience clap for?"
+    ],
+    answer: 0,
+    hint: "A hypothesis is a statement, not a question, and data could show it to be wrong.",
+    why: "A hypothesis is a <b>statement</b> you can test with data: time the clapping in both parts and compare. The two questions are not hypotheses (they are questions), and \"the best part of the show\" is an opinion you cannot measure. Writing the hypothesis is the <b>Plan</b> stage of the statistical enquiry cycle." },
+
+  /* ---------- ROOM 2: THE SCOREBOARD ---------- */
+  { type: "learn", topic: "The scoreboard",
+    title: "A wall of bulbs",
+    fig: BOARD,
+    html: '<p>A wall of bulbs flickers into life. "The scoreboard!" squawks Polly. "Last week\'s champion was our studio mascot, a small brown toy poodle called Bonnie. Nine rounds of Beat the Buzzer, and look at those points."</p>' +
+          '<p>"Averages tonight, darlings. And nobody touch my charts."</p>' +
+          '<div class="keep"><b>Keep this</b>Put a list in order before you find the median or the range.</div>' },
+
+  { type: "num", topic: "The scoreboard",
+    q: "Bonnie's points in the nine rounds were:<br><b>11, 4, 16, 8, 25, 9, 13, 8, 14</b><br>Find the median, the mean and the range.",
+    fig: BOARD,
+    boxes: [
+      { label: "Median", a: 11 },
+      { label: "Mean", a: 12 },
+      { label: "Range", a: 21 }
+    ],
+    hint: "Order them first: 4, 8, 8, ... With nine values, the median is the 5th. For the mean, add them all and divide by 9.",
+    why: "In order: 4, 8, 8, 9, <b>11</b>, 13, 14, 16, 25.<br>Median: the 5th of 9 values = <b>11</b>.<br>Mean: total 108 &divide; 9 = <b>12</b>.<br>Range: 25 &minus; 4 = <b>21</b>.<br>The mean is above the median because one big round (25) drags it up. A common slip is taking the middle of the unordered list (25), which is why ordering comes first." },
+
+  { type: "mc", topic: "The scoreboard",
+    q: "Two teams also played. The box plots show their points. Which comparison is correct?",
+    fig: BOXES,
+    options: [
+      "Team Claw has the higher median and the smaller interquartile range, so it scored higher on average and more consistently.",
+      "Team Claw has the higher median but the larger interquartile range, so it scored higher on average but less consistently.",
+      "Team Feather has the higher median and the smaller interquartile range, so it scored higher on average and more consistently.",
+      "Team Feather has the higher median but the larger interquartile range, so it scored higher on average but less consistently."
+    ],
+    answer: 0,
+    hint: "The thick line inside each box is the median. The width of the box is the interquartile range. Read both off the scale.",
+    why: "Medians: Team Feather <b>24</b>, Team Claw <b>26</b>, so Claw scored higher on average.<br>Interquartile ranges: Feather 30 &minus; 18 = <b>12</b>, Claw 28 &minus; 22 = <b>6</b>. A smaller IQR means more consistent, so Claw was also more consistent.<br>Compare median with median and IQR with IQR, and say what it means in context. Do not judge by the longest whisker: Feather's maximum (38) is just one score." },
+
+  { type: "mc", topic: "The scoreboard",
+    q: 'Polly shows this chart and says, "Look, the audience likes me three times as much as Corvina the crow!" Polly got 52 votes and Corvina got 48. What makes the chart misleading?',
+    fig: BARS,
+    options: [
+      "The vertical axis starts at 46, not 0, so a small difference looks huge.",
+      "The vertical axis goes up in uneven steps.",
+      "The chart has no title and no axis label.",
+      "There are gaps between the bars."
+    ],
+    answer: 0,
+    hint: "Look at the number at the bottom of the vertical axis. Where would the bars start if it were 0?",
+    why: "Outrageous. 52 against 48 is only 4 more votes, about 8% more. But the axis starts at <b>46</b> (a truncated axis), so Polly's bar shows 6 votes above the bottom and Corvina's only 2: it looks three times as tall. The steps (46, 48, 50, 52) are even, the chart has a title and a label, and gaps between bars are normal for a bar chart. In an exam, name the trick and its effect: \"The axis does not start at 0, so the difference looks much bigger than it is.\"" },
+
+  /* ---------- ROOM 3: THE WHEEL ---------- */
+  { type: "learn", topic: "The wheel",
+    title: "Spin to win",
+    fig: WHEEL,
+    html: '<p>A giant wheel rolls out of the wings: five equal sections, numbered 1 to 5. Beside it sits a fair six sided dice the size of a fridge.</p>' +
+          '<p>"Spin the wheel, roll the dice, add the two numbers," says Polly. "Ten or more wins a prize. What are the chances?"</p>' +
+          '<div class="keep"><b>Keep this</b>List every outcome in a grid first, then count the ones you want.</div>' },
+
+  { type: "num", topic: "The wheel",
+    q: "Spin the wheel (1 to 5) and roll the fair dice (1 to 6), then add the two numbers. All outcomes are equally likely.",
+    fig: WHEEL,
+    boxes: [
+      { label: "(a) How many outcomes are in the sample space?", a: 30 },
+      { label: "(b) P(total of 10 or more)", a: 0.1, tol: 0.001, show: "3/30 = 1/10" }
+    ],
+    hint: "A grid with 5 rows (the wheel) and 6 columns (the dice). Which pairs make 10, 11 or more? The biggest wheel number is only 5.",
+    why: "(a) 5 &times; 6 = <b>30</b> outcomes.<br>(b) Totals of 10 or more: wheel 4 and dice 6 (10), wheel 5 and dice 5 (10), wheel 5 and dice 6 (11). That is 3 outcomes, so P = 3/30 = <b>1/10</b> (0.1).<br>Working systematically (fix the wheel number, then run through the dice) means nothing is missed or counted twice." },
+
+  { type: "num", topic: "The wheel",
+    q: "This season there were 60 contestants. 34 can whistle, 25 can juggle, and 9 can do both. Complete the Venn diagram, then answer (d).",
+    fig: VENN,
+    boxes: [
+      { label: "a (whistle only)", a: 25 },
+      { label: "b (juggle only)", a: 16 },
+      { label: "c (neither)", a: 10 },
+      { label: "(d) One contestant is picked at random. P(can juggle but not whistle)", a: 16 / 60, tol: 0.005, show: "16/60 = 4/15" }
+    ],
+    hint: "Start from the middle: the 9 who do both are already in the 34 and the 25. Take them off each circle's total first.",
+    why: "Fill from the middle out.<br>a: 34 &minus; 9 = <b>25</b>.<br>b: 25 &minus; 9 = <b>16</b>.<br>c: 60 &minus; 25 &minus; 9 &minus; 16 = <b>10</b>.<br>(d) Juggle but not whistle is region b: 16 out of 60, so P = <b>16/60 = 4/15</b> (about 0.27).<br>The usual slip is putting 34 and 25 in the outer parts, which counts the 9 twice." },
+
+  { type: "num", topic: "The wheel",
+    q: "In each round of Golden Buzzer, the gold light comes on with probability <b>0.4</b>. Rounds are independent. A contestant plays two rounds. Use the tree diagram.",
+    fig: TREE,
+    boxes: [
+      { label: "(a) P(not gold) in one round, the ?", a: 0.6, tol: 0.001 },
+      { label: "(b) P(gold in both rounds)", a: 0.16, tol: 0.001 },
+      { label: "(c) P(gold in exactly one round)", a: 0.48, tol: 0.001 }
+    ],
+    hint: "Each pair of branches adds up to 1. Multiply along the branches. For exactly one gold, two different routes work.",
+    why: "(a) 1 &minus; 0.4 = <b>0.6</b>.<br>(b) Along the top: 0.4 &times; 0.4 = <b>0.16</b>.<br>(c) Gold then not gold: 0.4 &times; 0.6 = 0.24. Not gold then gold: 0.6 &times; 0.4 = 0.24. Add the two routes: <b>0.48</b>.<br>Check: all four ends are 0.16 + 0.24 + 0.24 + 0.36 = 1. A common slip is to count only one of the two routes for (c)." },
+
+  /* ---------- ROOM 4: THE RATINGS ROOM ---------- */
+  { type: "learn", topic: "The ratings room",
+    title: "Magnificent, obviously",
+    fig: TS,
+    html: '<p>Behind a velvet curtain, a wall of screens shows the viewing figures. Polly preens. "My ratings. Magnificent, obviously."</p>' +
+          '<p>The graph shows viewers, in thousands, each quarter for two years. Winter nights are long, and more people stay up to watch a parrot.</p>' +
+          '<div class="keep"><b>Keep this</b>Read a time series for the trend first, then the pattern that repeats each year.</div>' },
+
+  { type: "num", topic: "The ratings room",
+    q: "The viewers (thousands), quarter by quarter:<br>Year 1: <b>52, 38, 30, 48</b><br>Year 2: <b>56, 42, 34, 52</b><br>Work out the first and the last 4 point moving averages.",
+    fig: TS,
+    boxes: [
+      { label: "First 4 point moving average", a: 42 },
+      { label: "Last 4 point moving average", a: 46 }
+    ],
+    hint: "The first uses the first four values. Slide along one at a time; the last one uses the final four values.",
+    why: "First: (52 + 38 + 30 + 48) &divide; 4 = 168 &divide; 4 = <b>42</b>.<br>Last: (56 + 42 + 34 + 52) &divide; 4 = 184 &divide; 4 = <b>46</b>.<br>All five are 42, 43, 44, 45, 46, so the <b>trend is rising</b> by about 1 thousand viewers a quarter. Each window holds one of every quarter, which is why the seasonal ups and downs (high in Q1, low in Q3) cancel out." },
+
+  { type: "num", topic: "The ratings room",
+    q: "A 30 second advert during <i>Odds On</i> cost &pound;400 in 2023 and &pound;460 in 2025. Using 2023 as the base year:",
+    boxes: [
+      { label: "(a) The index number for 2025", a: 115 },
+      { label: "(b) The percentage increase since 2023", a: 15, post: "%" }
+    ],
+    hint: "Index = price this year &divide; price in the base year &times; 100. The base year is always 100.",
+    why: "(a) 460 &divide; 400 &times; 100 = <b>115</b>.<br>(b) Index minus 100: 115 &minus; 100 = <b>15%</b> more than in 2023.<br>A common slip is dividing the wrong way round (400 &divide; 460 &times; 100 = 87), which would mean the price had fallen." },
+
+  { type: "mc", topic: "The ratings room",
+    q: 'Polly plots the birds on screen against the viewers for eight episodes. "See? More birds bring more viewers!" Which statement is right?',
+    fig: SCATTER,
+    options: [
+      "There is positive correlation: episodes with more birds tended to have more viewers, but that does not prove the birds caused it.",
+      "There is positive correlation, which proves that putting more birds on screen causes more viewers.",
+      "There is negative correlation: the more birds, the fewer viewers.",
+      "There is no correlation, because the points are not exactly on a straight line."
+    ],
+    answer: 0,
+    hint: "As you go right, do the crosses tend to go up or down? Then ask: does a pattern ever prove a cause?",
+    why: "The crosses go up from left to right and sit close to a line: <b>positive correlation</b>. But correlation does not prove causation. A third factor could explain both: perhaps the bird episodes were shown in winter, when more people watch anyway (look back at the time series). Points do not need to be exactly on a line for there to be correlation; that would just make it perfect." },
+
+  /* ---------- THE FINAL DOOR ---------- */
+  { type: "unlock", topic: "The final door",
+    q: '<p>The last door has a four digit lock, and a card in Polly\'s handwriting (well, claw writing):</p>' +
+       '<p><i>"Before you find a median, you put the numbers in order. Do the same here: enter the four room digits from <b>smallest to largest</b>."</i></p>',
+    code: "2469",
+    hint: "Look at the digit under each room name, then sort them, smallest first.",
+    why: "The rooms gave 4, 9, 2 and 6. Smallest to largest: 2, 4, 6, 9, so the code is <b>2469</b>. Ordering first is the same habit that makes medians and quartiles easy." }
+  ]
+});
+})();
+</script>
+</body>
+</html>
