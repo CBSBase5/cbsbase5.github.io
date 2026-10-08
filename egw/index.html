@@ -134,17 +134,7 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
   .deal{grid-template-columns:1fr}
   .maprow{grid-template-columns:1fr}
 }
-/* the night sky */
-.skycard{background:radial-gradient(120% 90% at 50% 0%, #1d2550 0%, #0b0f24 70%);color:var(--moon);border-top-color:#2a3570;padding:16px 16px 14px}
-.skytop{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.skycard .kicker{background:rgba(255,255,255,.08);color:var(--moon)}
-.skycount{font-family:var(--display);font-weight:600;font-size:.88rem;color:var(--mist)}
-#sky svg{display:block;width:100%;height:auto;margin:6px 0 2px;touch-action:manipulation}
-.skyinfo{font-size:.92rem;color:var(--mist);margin:4px 0 0 !important;min-height:2.6em}
-.skyinfo a{color:var(--sun);font-weight:700}
-.star-lit{animation:twinkle 4s ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.55}}
-.dropbar{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(201,205,240,.18);text-decoration:none;color:var(--moon)}
+.dropbar{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(201,205,240,.18);text-decoration:none;color:var(--moon)}
 .dropbar:hover{border-color:var(--sun)}
 .dropbar .sq{width:34px;height:34px;border-radius:9px;flex:none;border:2px dashed rgba(201,205,240,.5)}
 .dropbar .sq.r1{background:var(--mint);border:0}.dropbar .sq.r2{background:var(--sun);border:0}.dropbar .sq.sh{background:var(--violet);border:0}
@@ -152,7 +142,6 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
 .dropbar small{color:var(--mist)}
 .dropbar .chev{margin-left:auto;font-family:var(--display);font-size:1.3rem}
 .act .kind{font-family:var(--display);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--body-tint)}
-@media (prefers-reduced-motion:reduce){.star-lit{animation:none}}
 
 /* second look and moving devices */
 .slook .act .t .st{background:var(--sun)}
@@ -180,14 +169,7 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
     <p class="progress" id="progress"></p>
   </section>
 
-  <div class="board" style="margin-bottom:0">
-    <div class="card w12 skycard" id="skyCard">
-      <div class="skytop"><span class="kicker">Your sky</span><span class="skycount" id="skyCount"></span></div>
-      <div id="sky"></div>
-      <p class="skyinfo" id="skyInfo"></p>
-      <a class="dropbar" id="dropBar" href="/egw/daily.html"></a>
-    </div>
-  </div>
+  <a class="dropbar" id="dropBar" href="/egw/daily.html"></a>
 
   <div id="secondLook"></div>
 
@@ -211,6 +193,10 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
   <div class="board" id="subjBoard"></div>
 
   <p class="lead2">More, whenever you want it.</p>
+
+  <a class="fold" href="/egw/sky.html" style="--accent:#2a3570">
+    <span><b>Your sky</b><small id="skyRow">One star for every chunk. Each one you finish lights up.</small></span><span class="chev">&rsaquo;</span>
+  </a>
 
   <a class="fold" href="/egw/papers.html" style="--accent:var(--sun)">
     <span><b>What's on the papers</b><small>How each exam looks, and where to practise every topic.</small></span><span class="chev">&rsaquo;</span>
@@ -616,96 +602,6 @@ function drawExams(){
   card.innerHTML = html;
 }
 
-/* ---------- the night sky ----------
-   Every chunk is a star. Each activity is a little constellation,
-   and its lines appear as neighbouring chunks get done. */
-var SKY = null;
-function skySeed(str){
-  var h = 2166136261;
-  for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return function(){ h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
-}
-var SKYCOL = { english: "#ff7a7a", maths: "#ffd23f", bio: "#2fe0b4", stats: "#a98bff" };
-function layoutSky(){
-  var W = 400, H = 300, regions = [[8, 22], [204, 22], [8, 166], [204, 166]], RW = 188, RH = 124;
-  var out = { W: W, H: H, regions: [], stars: [], dust: [] };
-  var rd = skySeed("egw-sky-dust");
-  for(var d = 0; d < 110; d++) out.dust.push([rd() * W, rd() * H, 0.3 + rd() * 0.6, 0.15 + rd() * 0.35]);
-  SUBJECTS.forEach(function(sj, si){
-    var r0 = regions[si], acts = sj.acts, n = acts.length;
-    out.regions.push({ x: r0[0], y: r0[1], name: sj.name, key: sj.key });
-    var cols = n <= 4 ? 2 : 3, rows = Math.ceil(n / cols), cw = RW / cols, ch = (RH - 8) / rows;
-    acts.forEach(function(a, ai){
-      var rnd = skySeed("egw-sky-" + a.id);
-      var cx = r0[0] + cw * (ai % cols) + cw / 2 + (rnd() - 0.5) * cw * 0.25;
-      var cy = r0[1] + 10 + ch * Math.floor(ai / cols) + ch / 2 + (rnd() - 0.5) * ch * 0.25;
-      var minX = r0[0] + cw * (ai % cols) + 5, maxX = minX + cw - 10;
-      var minY = r0[1] + 12 + ch * Math.floor(ai / cols), maxY = minY + ch - 6;
-      var pts = [], x = cx - cw * 0.22, y = cy + (rnd() - 0.5) * ch * 0.3, ang = rnd() * Math.PI * 2;
-      for(var k = 0; k < a.chunks; k++){
-        if(k){
-          var best = null;
-          for(var tr = 0; tr < 14; tr++){
-            var a2 = ang + (rnd() - 0.5) * 2.2, step = 7 + rnd() * 5;
-            var nx = Math.min(maxX, Math.max(minX, x + Math.cos(a2) * step)), ny = Math.min(maxY, Math.max(minY, y + Math.sin(a2) * step));
-            var dmin = pts.reduce(function(m, p){ return Math.min(m, Math.hypot(p[0] - nx, p[1] - ny)); }, 99);
-            if(!best || dmin > best[2]){ best = [nx, ny, dmin, a2]; }
-            if(dmin >= 6) break;
-          }
-          x = best[0]; y = best[1]; ang = best[3];
-        }else{
-          x = Math.min(maxX, Math.max(minX, x)); y = Math.min(maxY, Math.max(minY, y));
-        }
-        pts.push([x, y]);
-        out.stars.push({ x: x, y: y, subj: sj.key, sname: sj.name, id: a.id, title: a.title, k: k, name: a.names[k] || ("Chunk " + (k + 1)), tw: (rnd() * 4).toFixed(2) });
-      }
-    });
-  });
-  return out;
-}
-function drawSky(){
-  if(!SKY) SKY = layoutSky();
-  var st = {};
-  SUBJECTS.forEach(function(sj){ sj.acts.forEach(function(a){ st[a.id] = actState(a).states; }); });
-  var lit = 0, total = SKY.stars.length;
-  var s = '<svg viewBox="0 0 ' + SKY.W + ' ' + SKY.H + '" role="img" aria-label="Your sky: one star for every chunk, lit when it is done">';
-  SKY.dust.forEach(function(d){ s += '<circle cx="' + d[0].toFixed(1) + '" cy="' + d[1].toFixed(1) + '" r="' + d[2].toFixed(2) + '" fill="#c9cdf0" opacity="' + d[3].toFixed(2) + '"/>'; });
-  SKY.regions.forEach(function(r){
-    s += '<text x="' + (r.x + 4) + '" y="' + (r.y + 4) + '" font-family="Space Grotesk,Arial" font-size="10" font-weight="700" letter-spacing="1.2" fill="' + SKYCOL[r.key] + '" opacity=".75">' + r.name.toUpperCase() + '</text>';
-  });
-  /* lines between neighbouring done chunks */
-  for(var i = 1; i < SKY.stars.length; i++){
-    var p = SKY.stars[i - 1], q = SKY.stars[i];
-    if(p.id !== q.id) continue;
-    if((st[p.id] || [])[p.k] === "done" && (st[q.id] || [])[q.k] === "done")
-      s += '<line x1="' + p.x.toFixed(1) + '" y1="' + p.y.toFixed(1) + '" x2="' + q.x.toFixed(1) + '" y2="' + q.y.toFixed(1) + '" stroke="' + SKYCOL[p.subj] + '" stroke-width=".9" opacity=".55"/>';
-  }
-  SKY.stars.forEach(function(t, n){
-    var v = (st[t.id] || [])[t.k], c = SKYCOL[t.subj];
-    if(v === "done"){
-      lit++;
-      s += '<circle cx="' + t.x.toFixed(1) + '" cy="' + t.y.toFixed(1) + '" r="5.5" fill="' + c + '" opacity=".16"/>' +
-        '<circle class="star-lit" style="animation-delay:' + t.tw + 's" cx="' + t.x.toFixed(1) + '" cy="' + t.y.toFixed(1) + '" r="2.5" fill="' + c + '"/>';
-    }else if(v === "started"){
-      s += '<circle cx="' + t.x.toFixed(1) + '" cy="' + t.y.toFixed(1) + '" r="1.8" fill="' + c + '" opacity=".55"/>';
-    }else{
-      s += '<circle cx="' + t.x.toFixed(1) + '" cy="' + t.y.toFixed(1) + '" r="1.25" fill="#c9cdf0" opacity=".38"/>';
-    }
-    s += '<circle cx="' + t.x.toFixed(1) + '" cy="' + t.y.toFixed(1) + '" r="6" fill="transparent" data-n="' + n + '" style="cursor:pointer"/>';
-  });
-  s += '</svg>';
-  $("sky").innerHTML = s;
-  $("skyCount").textContent = lit ? lit + " of " + total + " lit" : "";
-  $("skyInfo").innerHTML = lit ? "Every chunk you finish lights a star. Tap any star to see what it is." :
-    "Every chunk you finish lights a star here. Tap any star to see what it is.";
-  $("sky").querySelector("svg").onclick = function(e){
-    var n = e.target.getAttribute("data-n");
-    if(n === null) return;
-    var t = SKY.stars[+n], v = (st[t.id] || [])[t.k];
-    $("skyInfo").innerHTML = t.sname + " &middot; " + t.title + " &middot; " + t.name + " (" + (v === "done" ? "lit" : v === "started" ? "started" : "not yet") + ") " +
-      '<a href="/egw/' + t.id + '.html#chunk-' + (t.k + 1) + '">Open it</a>';
-  };
-}
 function drawDropBar(){
   var d = loadJSON("b5.egw.daily.v1") || { days: {} }, t = EGWPROG.today(), rec = d.days && d.days[t];
   var n = Object.keys(d.days || {}).length;
@@ -827,12 +723,17 @@ if(window.Base5Send){
   Base5Send.mount($("sendHost"), { tool: "GCSE HQ summary", filename: "egw-gcse-hq", getText: reportText });
 }
 
-function drawAll(){ drawSky(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
+function drawSkyRow(){
+  var lit = 0, total = 0;
+  SUBJECTS.forEach(function(sj){ sj.acts.forEach(function(a){ var st = actState(a); total += a.chunks; lit += st.done; }); });
+  $("skyRow").textContent = lit ? lit + " of " + total + " stars lit so far. Tap to see them." : "One star for every chunk. Each one you finish lights up.";
+}
+function drawAll(){ drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
 
 $("dice").onclick = deal;
 drawAll();
 refreshJayCode();
-window.addEventListener("pageshow", function(){ drawSky(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
+window.addEventListener("pageshow", function(){ drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
 $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>
