@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<!-- BUILT by lp/_build/build_lp.py from the shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equations and algebra - LP GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/lp/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lp/lp.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* Written fractions */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;margin:0 2px}
+.fr > span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+.alg{font-family:"Atkinson Hyperlegible",Verdana,sans-serif;white-space:nowrap}
+/* Balance scale (widget on this page only) */
+.sc-svg svg{width:100%;max-width:460px;height:auto;display:block;margin:0 auto}
+.sc-eq{text-align:center;margin:2px 0 6px}
+.sc-ops{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.sc-op{font-family:inherit;font-size:1rem;line-height:1.3;padding:10px 12px;border:3px solid var(--ink);border-radius:12px;background:var(--white);color:var(--ink);cursor:pointer;text-align:left}
+.sc-op:hover{border-color:var(--teal)}
+.sc-op:disabled{opacity:.45;cursor:default}
+.sc-log{margin:0;padding:0;list-style:none}
+.sc-log li{padding:3px 0;font-size:1.05rem}
+.sc-log li span{font-size:.86rem;color:var(--body-tint);margin-left:8px}
+.sc-fb .btn{margin-top:10px}
+.choices button svg{display:block;width:100%;max-width:300px;height:auto}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lp/"><span class="hqlogo">LP</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/lp/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Equations and algebra</h2>
+    <span>GCSE Maths, Foundation. The words, tidying expressions, brackets, solving equations, inequalities and a little rearranging.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LP's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lp/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=9"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", TEAL = "#3a5cff", BRIGHT = "#22b8e6", ORANGE = "#ff5d5d",
+    YELLOW = "#ffd23f", PLUM = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function fr(top, bot){ return '<span class="fr"><span>' + top + '</span><span>' + bot + '</span></span>'; }
+
+/* ---------- figures ---------- */
+
+/* Anatomy of an expression */
+var TERMS =
+'<svg viewBox="0 0 520 150" role="img" aria-label="The expression 4x plus 3y minus 7 has three terms: 4x, plus 3y and minus 7. In 4x, 4 is the coefficient and x is the variable.">' +
+'<rect x="40" y="30" width="110" height="56" rx="12" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="3"/>' +
+'<rect x="200" y="30" width="130" height="56" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>' +
+'<rect x="380" y="30" width="100" height="56" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>' +
+t(95, 68, "4x", 28, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(265, 68, "+ 3y", 28, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(430, 68, "&minus; 7", 28, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(260, 20, "three terms", 17, TEAL, LAB + ' font-weight="800" text-anchor="middle" letter-spacing="1"') +
+'<path d="M78 92 V110" stroke="' + ORANGE + '" stroke-width="2.5"/><path d="M110 92 V110" stroke="' + PLUM + '" stroke-width="2.5"/>' +
+t(60, 132, "coefficient", 18, ORANGE, BODY + ' font-weight="700" text-anchor="middle"') +
+t(140, 132, "variable", 18, PLUM, BODY + ' font-weight="700" text-anchor="middle"') +
+t(430, 120, "constant", 18, INK, BODY + ' font-weight="700" text-anchor="middle"') +
+t(430, 142, "(just a number)", 16, INK, BODY + ' text-anchor="middle"') +
+'</svg>';
+
+/* Expand and factorise arrows */
+var EXPAND =
+'<svg viewBox="0 0 520 150" role="img" aria-label="3 times (x plus 4) expands to 3x plus 12. Going back the other way is factorising.">' +
+t(110, 78, "3(x + 4)", 30, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(410, 78, "3x + 12", 30, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+'<path d="M200 50 Q260 18 320 50" fill="none" stroke="' + TEAL + '" stroke-width="3"/><path d="M309 40 L321 51 L306 54" fill="none" stroke="' + TEAL + '" stroke-width="3"/>' +
+t(260, 22, "EXPAND", 17, TEAL, LAB + ' font-weight="800" text-anchor="middle" letter-spacing="1.5"') +
+'<path d="M320 98 Q260 130 200 98" fill="none" stroke="' + ORANGE + '" stroke-width="3"/><path d="M211 108 L199 97 L214 94" fill="none" stroke="' + ORANGE + '" stroke-width="3"/>' +
+t(260, 145, "FACTORISE", 17, ORANGE, LAB + ' font-weight="800" text-anchor="middle" letter-spacing="1.5"') +
+'<path d="M62 50 Q75 30 92 50" fill="none" stroke="' + PLUM + '" stroke-width="2" stroke-dasharray="4 3"/>' +
+'<path d="M62 50 Q100 14 145 50" fill="none" stroke="' + PLUM + '" stroke-width="2" stroke-dasharray="4 3"/>' +
+'</svg>';
+
+/* Balance picture for the solving card */
+var BAL_SMALL =
+'<svg viewBox="0 0 520 150" role="img" aria-label="A level balance with 2x plus 3 on the left and 11 on the right.">' +
+'<path d="M260 50 L240 140 H280 Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+'<rect x="60" y="44" width="400" height="10" rx="5" fill="' + INK + '"/>' +
+'<circle cx="260" cy="49" r="7" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="70" y="10" width="34" height="34" rx="5" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="2"/>' +
+'<rect x="108" y="10" width="34" height="34" rx="5" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="2"/>' +
+t(87, 33, "x", 18, WHITE, LAB + ' font-weight="800" text-anchor="middle"') +
+t(125, 33, "x", 18, WHITE, LAB + ' font-weight="800" text-anchor="middle"') +
+(function(){ var s = ""; for(var k = 0; k < 3; k++) s += '<rect x="' + (150 + k * 18) + '" y="28" width="15" height="15" rx="2" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="1.5"/>'; return s; })() +
+(function(){ var s = ""; for(var k = 0; k < 11; k++){ var c = k % 6, r = Math.floor(k / 6); s += '<rect x="' + (340 + c * 18) + '" y="' + (28 - r * 18) + '" width="15" height="15" rx="2" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="1.5"/>'; } return s; })() +
+t(120, 84, "2x + 3", 24, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(390, 84, "11", 24, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(260, 82, "=", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+'</svg>';
+
+/* Triangle for forming an equation */
+var TRI =
+'<svg viewBox="0 0 520 220" role="img" aria-label="A triangle with angles x, 2x and x plus 40 degrees. Not drawn accurately.">' +
+'<path d="M60 190 L460 190 L190 30 Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+'<path d="M110 190 A50 50 0 0 0 87 149" fill="none" stroke="' + TEAL + '" stroke-width="2.5"/>' +
+'<path d="M415 190 A45 45 0 0 1 422 168" fill="none" stroke="' + ORANGE + '" stroke-width="2.5"/>' +
+'<path d="M171 59 A34 34 0 0 0 219 47" fill="none" stroke="' + PLUM + '" stroke-width="2.5"/>' +
+t(122, 180, "2x", 28, TEAL, LAB + ' font-weight="800"') +
+t(360, 182, "x", 28, ORANGE, LAB + ' font-weight="800"') +
+t(160, 96, "x + 40", 24, PLUM, LAB + ' font-weight="800"') +
+t(510, 214, "Not drawn accurately", 16, INK, BODY + ' text-anchor="end"') +
+'</svg>';
+
+/* Rectangle for the exam question */
+var RECT =
+'<svg viewBox="0 0 520 190" role="img" aria-label="A rectangle with length 2x plus 3 centimetres and width x plus 1 centimetres. Not drawn accurately.">' +
+'<rect x="50" y="34" width="330" height="120" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3"/>' +
+t(215, 24, "(2x + 3) cm", 24, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(390, 102, "(x + 1) cm", 24, INK, LAB + ' font-weight="800"') +
+'<path d="M50 34 h14 v14 h-14" fill="none" stroke="' + INK + '" stroke-width="2"/>' +
+t(510, 182, "Not drawn accurately", 16, INK, BODY + ' text-anchor="end"') +
+'</svg>';
+
+/* Number lines */
+function numberLine(lo, hi, marks, aria, w){
+  // marks: [{v, filled}], plus optional {from, to} shading via arrow
+  w = w || 520;
+  var pad = 30, step = (w - 2 * pad) / (hi - lo);
+  function X(v){ return pad + (v - lo) * step; }
+  var s = '<svg viewBox="0 0 ' + w + ' 80" role="img" aria-label="' + aria + '">';
+  s += '<path d="M' + (pad - 18) + ' 40 H' + (w - pad + 18) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  for(var v = lo; v <= hi; v++){
+    s += '<path d="M' + X(v) + ' 33 V47" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(X(v), 72, v < 0 ? "&minus;" + (-v) : String(v), 19, INK, BODY + ' text-anchor="middle"');
+  }
+  marks.forEach(function(m){
+    if(m.line){
+      var a = X(m.line[0]), b = m.line[1] === "L" ? pad - 14 : m.line[1] === "R" ? w - pad + 14 : X(m.line[1]);
+      s += '<path d="M' + a + ' 20 H' + b + '" stroke="' + TEAL + '" stroke-width="4"/>';
+      if(m.line[1] === "L") s += '<path d="M' + (b + 9) + ' 13 L' + b + ' 20 L' + (b + 9) + ' 27" fill="none" stroke="' + TEAL + '" stroke-width="4"/>';
+      if(m.line[1] === "R") s += '<path d="M' + (b - 9) + ' 13 L' + b + ' 20 L' + (b - 9) + ' 27" fill="none" stroke="' + TEAL + '" stroke-width="4"/>';
+    }
+  });
+  marks.forEach(function(m){
+    if(m.v !== undefined) s += '<circle cx="' + X(m.v) + '" cy="20" r="7" fill="' + (m.filled ? TEAL : WHITE) + '" stroke="' + TEAL + '" stroke-width="3"/>';
+  });
+  s += '</svg>';
+  return s;
+}
+
+var NL_LEARN = numberLine(-3, 5, [{ line: [-1, 3] }, { v: -1, filled: false }, { v: 3, filled: true }],
+  "Number line showing minus 1 less than x, less than or equal to 3: open circle at minus 1, filled circle at 3, joined by a line.");
+
+/* Grid for double brackets */
+var GRID =
+'<svg viewBox="0 0 520 190" role="img" aria-label="Grid method for (x plus 3)(x plus 5): x squared, 5x, 3x and 15.">' +
+t(170, 28, "x", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(290, 28, "+5", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(84, 82, "x", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(84, 147, "+3", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+'<rect x="110" y="40" width="120" height="65" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="230" y="40" width="120" height="65" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="110" y="105" width="120" height="65" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="230" y="105" width="120" height="65" fill="' + BRIGHT + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(170, 81, "x&sup2;", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(290, 81, "5x", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(170, 146, "3x", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(290, 146, "15", 22, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+t(440, 100, "x&sup2; + 8x + 15", 21, TEAL, LAB + ' font-weight="800" text-anchor="middle"') +
+t(440, 126, "5x + 3x = 8x", 17, INK, BODY + ' text-anchor="middle"') +
+'</svg>';
+
+/* ---------- the balance scale widget ---------- */
+var PUZ = [
+  { s: { a: 3, b: 5, c: 0, d: 20 }, X: 5,
+    ops: [
+      { k: "subU", n: 5, label: "Take 5 from both sides" },
+      { k: "div", n: 3, label: "Divide both sides by 3" },
+      { k: "addU", n: 5, label: "Add 5 to both sides" },
+      { k: "subUL", n: 5, label: "Take 5 from the left side only" },
+      { k: "subU", n: 3, label: "Take 3 from both sides" }
+    ],
+    check: "Check: 3 &times; 5 + 5 = 15 + 5 = 20. It works." },
+  { s: { a: 5, b: 2, c: 2, d: 14 }, X: 4,
+    ops: [
+      { k: "subX", n: 2, label: "Take 2x from both sides" },
+      { k: "subU", n: 2, label: "Take 2 from both sides" },
+      { k: "div", n: 3, label: "Divide both sides by 3" },
+      { k: "subXL", n: 2, label: "Take 2x from the left side only" },
+      { k: "addX", n: 2, label: "Add 2x to both sides" },
+      { k: "subU", n: 14, label: "Take 14 from both sides" }
+    ],
+    check: "Check: left 5 &times; 4 + 2 = 22, right 2 &times; 4 + 14 = 22. Balanced." }
+];
+
+function side(a, b){
+  var x = a === 0 ? "" : (a === 1 ? "x" : a + "x");
+  if(!x) return String(b);
+  return b ? x + " + " + b : x;
+}
+function eqStr(s){ return side(s.a, s.b) + " = " + side(s.c, s.d); }
+function score(s){ return (s.b ? 1 : 0) + (s.c ? 1 : 0) + (s.a !== 1 ? 1 : 0); }
+function solvedSt(s){ return s.a === 1 && !s.b && !s.c; }
+function cp(s){ return { a: s.a, b: s.b, c: s.c, d: s.d }; }
+
+function tryOp(s, op){
+  var n = op.n, r = cp(s);
+  if(op.k === "addU" || op.k === "addX"){
+    return { kind: "meh", msg: "That would keep it balanced, because it does the same to both sides. But it puts <b>more</b> on each side, not less, so x would be further from being on its own." };
+  }
+  if(op.k === "subUL" || op.k === "subXL"){
+    if(op.k === "subUL") r.b = Math.max(0, r.b - n); else r.a = Math.max(0, r.a - n);
+    return { kind: "tip", st: r, msg: "The scale tips. Taking weight off <b>one side only</b> means the two sides are no longer equal, so it is not an equation any more. Whatever you do to one side, do to the other." };
+  }
+  if(op.k === "subU"){
+    if(s.b < n) return { kind: "cant", msg: s.b === 0 ? "There are no loose units on the left any more, so there is nothing to take away there." :
+      "There are only " + s.b + " units on the left, so taking " + n + " from both sides would leave a negative, which this scale cannot show. Look for a move that clears something away exactly." };
+    r.b -= n; r.d -= n;
+  }else if(op.k === "subX"){
+    if(s.c < n) return { kind: "cant", msg: s.c === 0 ? "There are no x blocks on the right now, so you cannot take 2x from both sides." : "There are not enough x blocks on the right for that." };
+    r.a -= n; r.c -= n;
+  }else if(op.k === "div"){
+    if(s.a % n || s.b % n || s.c % n || s.d % n) return { kind: "cant", msg: "Not yet. Dividing now would split some of the weights into fractions (try sharing " + (s.b % n ? s.b : s.a) + " between " + n + "). Clear away the loose units and the extra x blocks first, then divide." };
+    r.a /= n; r.b /= n; r.c /= n; r.d /= n;
+  }
+  if(score(r) < score(s)) return { kind: "good", st: r };
+  return { kind: "meh", st: r, msg: "That would keep the scale balanced, but x would be no closer to being on its own. Look for a move that clears one kind of weight away completely." };
+}
+
+function mountScale(el, api){
+  var d = api.data;
+  if(typeof d.p !== "number") d.p = 0;
+  if(!d.st) d.st = cp(PUZ[0].s);
+  if(!d.log) d.log = [{ eq: eqStr(PUZ[0].s) }];
+  if(!d.miss) d.miss = [0, 0];
+  if(!d.shown) d.shown = [false, false];
+  var busy = false;
+  var angle = 0;
+  var reduce = false;
+  try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  el.innerHTML =
+    '<div class="wpanel" data-r="task"></div>' +
+    '<div class="sc-svg" data-r="svg"></div>' +
+    '<div class="sc-eq wbig" data-r="eq"></div>' +
+    '<div class="sc-ops" data-r="ops"></div>' +
+    '<div class="wrow"><button class="btn btn-quiet hidden" type="button" data-r="show">Show me the next move</button></div>' +
+    '<div class="fb sc-fb hidden" data-r="fb" aria-live="polite"></div>' +
+    '<div class="wpanel"><p class="wnote" style="margin-top:0"><b>Your working</b>, written the way the exam likes it:</p><ul class="sc-log" data-r="log"></ul></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function scaleSvg(s, ang){
+    var cx = 180, by = 40, R = 108;
+    var rad = ang * Math.PI / 180;
+    var L = { x: cx - R * Math.cos(rad), y: by - R * Math.sin(rad) };
+    var Rt = { x: cx + R * Math.cos(rad), y: by + R * Math.sin(rad) };
+    var drop = 100;
+    var out = '<svg viewBox="0 0 360 196" role="img" aria-label="Balance scale showing ' + eqStr(s).replace(/x/g, " x") + '">';
+    out += '<path d="M' + cx + ' ' + by + ' L' + (cx - 26) + ' 186 H' + (cx + 26) + ' Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
+    out += '<path d="M20 188 H340" stroke="' + INK + '" stroke-width="2" opacity=".35"/>';
+    function pan(p, a, b){
+      var py = p.y + drop, hw = 66;
+      var g = '<path d="M' + p.x + ' ' + p.y + ' L' + (p.x - hw) + ' ' + py + ' M' + p.x + ' ' + p.y + ' L' + (p.x + hw) + ' ' + py + '" stroke="' + INK + '" stroke-width="1.5" opacity=".55"/>';
+      // contents
+      var bw = 20, bp = 23, us = 12, up = 14;
+      var blocksW = a ? a * bp - 3 : 0;
+      var avail = 2 * hw - 8 - blocksW - (a && b ? 6 : 0);
+      var cols = b ? Math.max(1, Math.min(b, Math.floor((avail + 2) / up))) : 0;
+      var unitsW = cols ? cols * up - 2 : 0;
+      var total = blocksW + (a && b ? 6 : 0) + unitsW;
+      var x0 = p.x - total / 2;
+      for(var k = 0; k < a; k++){
+        var bx = x0 + k * bp;
+        g += '<rect x="' + bx.toFixed(1) + '" y="' + (py - 34) + '" width="' + bw + '" height="32" rx="4" fill="' + TEAL + '" stroke="' + INK + '" stroke-width="2"/>';
+        g += t((bx + bw / 2).toFixed(1), py - 13, "x", 15, WHITE, LAB + ' font-weight="800" text-anchor="middle"');
+      }
+      var ux = x0 + blocksW + (a && b ? 6 : 0);
+      for(var u = 0; u < b; u++){
+        var c = u % cols, r = Math.floor(u / cols);
+        g += '<rect x="' + (ux + c * up).toFixed(1) + '" y="' + (py - 2 - us - r * up) + '" width="' + us + '" height="' + us + '" rx="2" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="1.5"/>';
+      }
+      g += '<path d="M' + (p.x - hw - 4) + ' ' + py + ' H' + (p.x + hw + 4) + ' l-8 8 H' + (p.x - hw + 4) + ' Z" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+      return g;
+    }
+    out += pan(L, s.a, s.b) + pan(Rt, s.c, s.d);
+    out += '<path d="M' + L.x.toFixed(1) + ' ' + L.y.toFixed(1) + ' L' + Rt.x.toFixed(1) + ' ' + Rt.y.toFixed(1) + '" stroke="' + INK + '" stroke-width="9" stroke-linecap="round"/>';
+    out += '<circle cx="' + cx + '" cy="' + by + '" r="7" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    out += '</svg>';
+    return out;
+  }
+
+  function weight(s, X){ return [s.a * X + s.b, s.c * X + s.d]; }
+  function targetAngle(s){
+    var w = weight(s, PUZ[Math.min(d.p, 1)].X), diff = w[1] - w[0];
+    if(!diff) return 0;
+    var a = diff * 1.2;
+    if(Math.abs(a) < 7) a = a < 0 ? -7 : 7;
+    return Math.max(-12, Math.min(12, a));
+  }
+
+  function paint(s, ang){
+    q("svg").innerHTML = scaleSvg(s, ang);
+    q("eq").innerHTML = eqStr(s);
+  }
+
+  function animate(s, to, cb){
+    if(reduce){ angle = to; paint(s, angle); if(cb) cb(); return; }
+    var from = angle, t0 = null;
+    function f(ts){
+      if(t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 380);
+      var e = 1 - Math.pow(1 - k, 3);
+      angle = from + (to - from) * e;
+      paint(s, angle);
+      if(k < 1) requestAnimationFrame(f); else if(cb) cb();
+    }
+    requestAnimationFrame(f);
+  }
+
+  function task(){
+    if(d.p >= 2){
+      return '<p style="margin:0"><b>Both equations solved.</b> The scale is a picture of the rule: do the same to both sides and it stays balanced.</p>';
+    }
+    return '<p class="tiny" style="margin:0 0 4px">Equation ' + (d.p + 1) + ' of 2</p>' +
+      '<p style="margin:0">Each <b style="color:' + TEAL + '">teal block</b> weighs x. Each <b style="color:#e04848">orange square</b> weighs 1. Pick moves that keep the scale balanced until a single x is alone on one side.</p>';
+  }
+
+  function drawLog(){
+    q("log").innerHTML = d.log.map(function(l){
+      return '<li><span class="alg">' + l.eq + '</span>' + (l.op ? '<span>' + l.op + '</span>' : "") + '</li>';
+    }).join("");
+  }
+
+  function drawOps(){
+    var box = q("ops");
+    box.innerHTML = "";
+    if(d.p >= 2) return;
+    PUZ[d.p].ops.forEach(function(op, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "sc-op"; b.innerHTML = op.label;
+      b.disabled = busy || solvedSt(d.st);
+      b.onclick = function(){ choose(i, false); };
+      box.appendChild(b);
+    });
+    q("show").classList.toggle("hidden", !(d.p < 2 && d.miss[d.p] > 0 && !solvedSt(d.st)));
+  }
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb sc-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb sc-fb " + cls; f.innerHTML = html;
+  }
+
+  function result(){
+    if(d.shown[0] || d.shown[1]) return "shown";
+    if(d.miss[0] || d.miss[1]) return "right2";
+    return "right1";
+  }
+
+  function finishPuzzle(){
+    var P = PUZ[d.p];
+    var last = d.p === 1;
+    var html = "<b>x = " + d.st.d + ".</b> " + P.check;
+    if(last){
+      d.result = result();
+      html += '<p style="margin:8px 0 0">With x on both sides, the trick is to clear the <b>smaller</b> number of x blocks first, so you never end up with negative x.</p>';
+    }else{
+      html += '<br><button class="btn" type="button" data-r="next">Next equation, x on both sides</button>';
+    }
+    api.save();
+    fb("good", html);
+    if(!last){
+      q("next").onclick = function(){
+        d.p = 1; d.st = cp(PUZ[1].s); d.log = [{ eq: eqStr(PUZ[1].s) }];
+        api.save(); fb(null); angle = 0; render();
+      };
+    }else{
+      d.p = 2; api.save();
+      drawOps(); q("task").innerHTML = task();
+      api.done(d.result);
+    }
+  }
+
+  function choose(i, viaShow){
+    if(busy || d.p >= 2 || solvedSt(d.st)) return;
+    var op = PUZ[d.p].ops[i];
+    var r = tryOp(d.st, op);
+    if(r.kind === "good"){
+      d.st = r.st;
+      d.log.push({ eq: eqStr(r.st), op: op.label.toLowerCase() });
+      api.save();
+      fb(viaShow ? "show" : null, viaShow ? "<b>Here is the next move:</b> " + op.label.toLowerCase() + ". " +
+        (op.k === "div" ? "Once the x blocks are alone, share both sides equally." : op.k === "subX" ? "Clear the smaller pile of x blocks so x is only on one side." : "Clear the loose units away from the x side.") : "");
+      paint(d.st, 0); drawLog(); drawOps();
+      if(solvedSt(d.st)) finishPuzzle();
+      return;
+    }
+    d.miss[d.p]++;
+    api.save();
+    if(r.kind === "tip"){
+      busy = true; drawOps();
+      fb("nudge", "<b>Whoa.</b> " + r.msg);
+      animate(r.st, targetAngle(r.st), function(){
+        setTimeout(function(){
+          animate(d.st, 0, function(){ busy = false; drawOps(); });
+        }, 1100);
+      });
+      return;
+    }
+    fb("nudge", "<b>Not that one yet.</b> " + r.msg);
+    drawOps();
+  }
+
+  q("show").onclick = function(){
+    if(d.p >= 2) return;
+    var ops = PUZ[d.p].ops;
+    for(var i = 0; i < ops.length; i++){
+      if(tryOp(d.st, ops[i]).kind === "good"){ d.shown[d.p] = true; choose(i, true); return; }
+    }
+  };
+
+  function render(){
+    q("task").innerHTML = task();
+    paint(d.st, 0);
+    drawLog(); drawOps();
+  }
+
+  render();
+  if(d.p >= 2 && d.result){
+    fb("good", "<b>Both equations solved.</b> x = 5 and then x = 4. Do the same to both sides, every time.");
+    api.done(d.result);
+  }else if(solvedSt(d.st) && d.p < 2){
+    finishPuzzle();
+  }
+}
+
+EGW.run({
+  id: "maths-algebra",
+  title: "Equations and algebra",
+  subject: "Maths",
+  mins: 50,
+  blurb: "Algebra is worth a lot of marks on both Foundation papers. This goes from the key words and tidying expressions through to solving equations and inequalities, with a balance scale to play with and stretch questions on quadratics and rearranging.",
+  steps: [
+
+  /* ---------- WORDS ---------- */
+  { type: "learn", topic: "The words",
+    title: "Five words the exam uses on purpose",
+    fig: TERMS,
+    html: '<ul>' +
+          '<li><b>Term</b>: one chunk, like 4x or &minus;7. Terms are separated by + and &minus; signs.</li>' +
+          '<li><b>Expression</b>: terms put together, with <b>no equals sign</b>. 4x + 3y &minus; 7. You can simplify it, but not solve it.</li>' +
+          '<li><b>Equation</b>: has an equals sign and is only true for certain values. 2x + 1 = 9 is only true when x = 4.</li>' +
+          '<li><b>Formula</b>: a rule linking different quantities. P = 2l + 2w for a perimeter. Put numbers in (<b>substitute</b>): l = 5, w = 3 gives P = 10 + 6 = 16.</li>' +
+          '<li><b>Identity</b>: true for <b>every</b> value. 2(x + 3) &equiv; 2x + 6. The &equiv; sign means "identical to".</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>No equals sign: expression. Equals sign, solve for x: equation. Letters for real quantities: formula. Always true: identity.</div>' },
+
+  { type: "sort", topic: "The words",
+    q: "Sort each one into the right box.",
+    buckets: ["Expression", "Equation", "Formula", "Identity"],
+    cards: [
+      ["4x + 7", 0],
+      ["3a &minus; 2b + 5", 0],
+      ["5x &minus; 1 = 19", 1],
+      ["2(y + 3) = 14", 1],
+      ["A = l &times; w", 2],
+      ["v = u + at", 2],
+      ["2(x + 3) &equiv; 2x + 6", 3],
+      ["n + n &equiv; 2n", 3]
+    ],
+    hint: "First look for an equals sign. Then ask: is it true for every value (identity), a rule for working something out (formula), or true for just one value (equation)?",
+    why: "No equals sign: 4x + 7 and 3a &minus; 2b + 5 are expressions.<br>5x &minus; 1 = 19 only works for x = 4, and 2(y + 3) = 14 only for y = 4: equations.<br>A = l &times; w (area) and v = u + at (velocity) are rules linking quantities: formulae.<br>The &equiv; ones are true whatever the letter is: identities." },
+
+  /* ---------- TIDYING ---------- */
+  { type: "learn", topic: "Tidying up",
+    title: "Collect, expand, factorise",
+    fig: EXPAND,
+    html: '<p><b>Collecting like terms.</b> Only add terms with exactly the same letters. 5a + 3b &minus; 2a = 3a + 3b. The sign in front belongs to the term.</p>' +
+          '<p><b>Expanding a bracket.</b> Multiply <b>everything</b> inside by the number outside. 3(x + 4) = 3x + 12.</p>' +
+          '<p><b>Factorising</b> is expanding backwards. Find the biggest number (and letter) that goes into every term, put it outside, and work out what is left inside. 6x + 9 = 3(2x + 3).</p>' +
+          '<div class="keep"><b>Keep this</b>You can always check a factorised answer by expanding it again. "Factorise fully" means take out the <b>highest</b> common factor.</div>' },
+
+  { type: "mc", topic: "Tidying up",
+    q: "Simplify <span class=\"alg\">5a + 3b &minus; 2a + b</span>",
+    options: ["3a + 4b", "7a + 4b", "3a + 3b", "7ab"],
+    answer: 0,
+    hint: "Group the a terms and the b terms separately. Remember b on its own means 1b, and the minus belongs to the 2a.",
+    why: "a terms: 5a &minus; 2a = 3a. b terms: 3b + b = 3b + 1b = 4b. So <b>3a + 4b</b>.<br>7a + 4b ignores the minus sign, 3a + 3b forgets the lone b, and 7ab joins unlike terms, which you cannot do." },
+
+  { type: "match", topic: "Tidying up",
+    q: "Match each bracket to its expanded form.",
+    pairs: [
+      ["3(x + 4)", "3x + 12"],
+      ["5(2y &minus; 1)", "10y &minus; 5"],
+      ["x(x + 6)", "x&sup2; + 6x"],
+      ["4(3 &minus; 2n)", "12 &minus; 8n"],
+      ["&minus;2(a &minus; 3)", "&minus;2a + 6"]
+    ],
+    hint: "Multiply the outside by each term inside, one at a time. For the last one, minus times minus makes plus.",
+    why: "3 &times; x + 3 &times; 4 = 3x + 12. 5 &times; 2y &minus; 5 &times; 1 = 10y &minus; 5. x &times; x = x&sup2; and x &times; 6 = 6x. 4 &times; 3 &minus; 4 &times; 2n = 12 &minus; 8n. &minus;2 &times; a = &minus;2a and &minus;2 &times; &minus;3 = +6." },
+
+  { type: "mc", topic: "Tidying up",
+    q: "Factorise fully <span class=\"alg\">12x + 18</span>",
+    options: ["2(6x + 9)", "3(4x + 6)", "6(2x + 3)", "6(2x + 18)"],
+    answer: 2,
+    hint: "What is the biggest number that goes into both 12 and 18?",
+    why: "The highest common factor of 12 and 18 is 6. 12x &divide; 6 = 2x and 18 &divide; 6 = 3, so <b>6(2x + 3)</b>. Check: 6 &times; 2x + 6 &times; 3 = 12x + 18.<br>2(6x + 9) and 3(4x + 6) are correct but not <b>fully</b> factorised, because 6x + 9 and 4x + 6 still have a common factor." },
+
+  /* ---------- SOLVING ---------- */
+  { type: "learn", topic: "Solving",
+    title: "An equation is a balance",
+    fig: BAL_SMALL,
+    html: '<p>The equals sign means both sides weigh the same. You can do anything you like, as long as you do it to <b>both sides</b>.</p>' +
+          '<p>To get x on its own, undo things in reverse order:</p>' +
+          '<ul>' +
+          '<li>2x + 3 = 11</li>' +
+          '<li>Take 3 from both sides: 2x = 8</li>' +
+          '<li>Divide both sides by 2: <b>x = 4</b></li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Undo adding and subtracting first, then multiplying and dividing. Check by putting your answer back in: 2 &times; 4 + 3 = 11.</div>' },
+
+  { type: "widget", topic: "Solving",
+    title: "The balance scale",
+    html: "Two equations to solve by choosing moves. Some moves help, some keep it balanced but do not help, and some tip the scale. Have a play.",
+    mount: mountScale,
+    report: function(d){
+      if(!d || !d.result) return "Balance scale: " + (d && d.p ? d.p : 0) + " of 2 equations solved.";
+      var lab = { right1: "both solved with no wasted moves", right2: "both solved, with a few unhelpful moves on the way", shown: "both solved, used Show me" }[d.result];
+      return "Balance scale: " + lab + " (unhelpful moves " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Solving",
+    q: "Solve each equation.<br>a) <span class=\"alg\">4x &minus; 7 = 21</span><br>b) " + fr("x", "3") + " + 2 = 6",
+    boxes: [
+      { label: "a) x =", a: 7 },
+      { label: "b) x =", a: 12 }
+    ],
+    hint: "a) Undo the &minus; 7 first by adding 7 to both sides. b) Take away the 2 first, then undo the divide by 3.",
+    why: "a) Add 7: 4x = 28. Divide by 4: <b>x = 7</b>. Check: 4 &times; 7 &minus; 7 = 21.<br>b) Take 2: x &divide; 3 = 4. Multiply by 3: <b>x = 12</b>. Check: 12 &divide; 3 + 2 = 6." },
+
+  { type: "order", topic: "Solving",
+    q: "Here is the working for <span class=\"alg\">7x &minus; 4 = 3x + 20</span>, jumbled up. Put the lines in order.",
+    items: [
+      "7x &minus; 4 = 3x + 20",
+      "4x &minus; 4 = 20 (take 3x from both sides)",
+      "4x = 24 (add 4 to both sides)",
+      "x = 6 (divide both sides by 4)"
+    ],
+    hint: "Get the x terms onto one side first. Clear the smaller number of x, which is the 3x.",
+    why: "Take the smaller x term from both sides so x is only on the left, then clear the number, then divide. Check: 7 &times; 6 &minus; 4 = 38 and 3 &times; 6 + 20 = 38." },
+
+  { type: "num", topic: "Solving",
+    q: "Solve each equation. Your answer could be a decimal or a fraction.<br>a) <span class=\"alg\">3(x &minus; 2) = 18</span><br>b) <span class=\"alg\">6x + 1 = 2x + 19</span>",
+    boxes: [
+      { label: "a) x =", a: 8 },
+      { label: "b) x =", a: 4.5, show: "4.5" }
+    ],
+    hint: "a) Expand the bracket first (or divide both sides by 3). b) Take 2x from both sides, then carry on as normal.",
+    why: "a) Expand: 3x &minus; 6 = 18. Add 6: 3x = 24. Divide by 3: <b>x = 8</b>. (Or divide by 3 first: x &minus; 2 = 6, so x = 8.)<br>b) Take 2x: 4x + 1 = 19. Take 1: 4x = 18. Divide by 4: <b>x = 4.5</b>, which is also 4&frac12; or 9/2. Answers do not have to be whole numbers." },
+
+  { type: "text", topic: "Solving",
+    q: "A student solves <span class=\"alg\">2(x + 4) = 14</span> like this:<br><span class=\"alg\">2x + 4 = 14</span>, so <span class=\"alg\">2x = 10</span>, so <span class=\"alg\">x = 5</span>.<br>What went wrong? Explain in a sentence.",
+    need: [["8", "the 4", "4 by", "times 4", "times the 4", "both terms", "both numbers", "each term", "every term", "everything", "inside"]],
+    model: "When they expanded the bracket they only multiplied the x by 2. The 2 multiplies everything inside, so 2(x + 4) = 2x + 8. Then 2x = 6 and x = 3.",
+    hint: "Look at the very first line. What should 2 &times; 4 be?",
+    why: "The 2 outside multiplies <b>both</b> terms in the bracket: 2(x + 4) = 2x + 8, not 2x + 4. Then 2x = 6, so x = 3. Check: 2 &times; (3 + 4) = 14." },
+
+  /* ---------- FORMING ---------- */
+  { type: "learn", topic: "Forming equations",
+    title: "Turn the words into an equation",
+    fig: TRI,
+    html: '<p>Some questions hide the equation in a fact you already know. Write that fact using the letters, then solve.</p>' +
+          '<ul>' +
+          '<li>Angles in a triangle add to 180&deg;.</li>' +
+          '<li>Angles on a straight line add to 180&deg;; around a point, 360&deg;.</li>' +
+          '<li>Perimeter: add up every side.</li>' +
+          '</ul>' +
+          '<div class="keep"><b>Keep this</b>Three moves: write the fact as an equation, solve for x, then go back and answer the actual question (it often wants an angle or a length, not x).</div>' },
+
+  { type: "num", topic: "Forming equations",
+    q: "The angles in this triangle are x, 2x and x + 40, in degrees. Not drawn accurately.",
+    fig: TRI,
+    boxes: [
+      { label: "x =", a: 35, post: "&deg;" },
+      { label: "Largest angle", a: 75, post: "&deg;" }
+    ],
+    hint: "Add the three angles and set them equal to 180. Collect the x terms: x + 2x + x is how many x?",
+    why: "x + 2x + x + 40 = 180, so 4x + 40 = 180. Take 40: 4x = 140. Divide by 4: <b>x = 35</b>.<br>The angles are 35&deg;, 70&deg; and 35 + 40 = 75&deg;, so the largest is <b>75&deg;</b>. Check: 35 + 70 + 75 = 180." },
+
+  { type: "num", topic: "Forming equations",
+    q: "Substitute into each formula.<br>a) A taxi fare is <span class=\"alg\">C = 2.5 + 1.8m</span>, where C is the cost in pounds and m is the number of miles. Find C when m = 6.<br>b) <span class=\"alg\">T = 3a&sup2; &minus; 2b</span>. Find T when a = 4 and b = &minus;5.",
+    boxes: [
+      { label: "a) C =", a: 13.3, pre: "&pound;", show: "13.30" },
+      { label: "b) T =", a: 58 }
+    ],
+    hint: "Swap each letter for its number, in brackets if it is negative. Do powers first, then multiplying, then adding and subtracting.",
+    why: "a) C = 2.5 + 1.8 &times; 6 = 2.5 + 10.8 = <b>&pound;13.30</b>.<br>b) T = 3 &times; 4&sup2; &minus; 2 &times; (&minus;5) = 3 &times; 16 + 10 = 48 + 10 = <b>58</b>. Square first, then multiply by 3. Taking away a negative is the same as adding." },
+
+  /* ---------- INEQUALITIES ---------- */
+  { type: "learn", topic: "Inequalities",
+    title: "Inequalities: a range of answers",
+    fig: NL_LEARN,
+    html: '<ul>' +
+          '<li><b>&lt;</b> less than, <b>&gt;</b> greater than, <b>&le;</b> less than or equal to, <b>&ge;</b> greater than or equal to.</li>' +
+          '<li>Solve them just like equations: 2x + 1 &gt; 7 gives 2x &gt; 6, so x &gt; 3.</li>' +
+          '<li>On a number line: <b>open circle</b> for &lt; or &gt; (not included), <b>filled circle</b> for &le; or &ge; (included).</li>' +
+          '<li><b>Integer</b> means whole number, which can be negative or zero.</li>' +
+          '</ul>' +
+          '<p>The line above shows &minus;1 &lt; x &le; 3. The integers that fit are 0, 1, 2, 3.</p>' +
+          '<div class="keep"><b>Keep this</b>Filled in means "the end number counts". One extra rule for later: multiply or divide by a negative number and the sign flips round.</div>' },
+
+  { type: "mc", topic: "Inequalities",
+    q: "Solve <span class=\"alg\">3x + 4 &lt; 19</span>. Which number line shows the answer?",
+    options: [
+      numberLine(0, 8, [{ line: [5, "L"] }, { v: 5, filled: false }], "Open circle at 5, arrow to the left", 320),
+      numberLine(0, 8, [{ line: [5, "L"] }, { v: 5, filled: true }], "Filled circle at 5, arrow to the left", 320),
+      numberLine(0, 8, [{ line: [5, "R"] }, { v: 5, filled: false }], "Open circle at 5, arrow to the right", 320),
+      numberLine(0, 8, [{ line: [7, "L"] }, { v: 7, filled: false }], "Open circle at 7, arrow to the left", 320)
+    ],
+    answer: 0,
+    hint: "Solve it like an equation first: take 4, then divide by 3. Then think: open or filled circle, and which way?",
+    why: "3x + 4 &lt; 19. Take 4: 3x &lt; 15. Divide by 3: <b>x &lt; 5</b>. Less than, so the arrow points left. 5 itself is not included, so the circle is <b>open</b>.<br>A filled circle would mean x &le; 5." },
+
+  { type: "multi", topic: "Inequalities",
+    q: "n is an integer and <span class=\"alg\">&minus;2 &lt; n &le; 3</span>. Pick every value n could be.",
+    options: ["&minus;2", "&minus;1", "0", "1", "2", "3", "4"],
+    fixed: true,
+    answers: [1, 2, 3, 4, 5],
+    hint: "Read it as: bigger than &minus;2, and up to and including 3. Is &minus;2 itself allowed? Is 3?",
+    why: "&minus;2 &lt; n means n is bigger than &minus;2, so &minus;2 is <b>not</b> included. n &le; 3 means 3 <b>is</b> included. So n = <b>&minus;1, 0, 1, 2, 3</b>. Zero counts as an integer, and it is easy to forget." },
+
+  /* ---------- STRETCH ---------- */
+  { type: "learn", topic: "Stretch: quadratics and more", stretch: true,
+    title: "Stretch: double brackets and rearranging",
+    fig: GRID,
+    html: '<p><b>Double brackets.</b> Every term in the first bracket multiplies every term in the second. A grid keeps track. (x + 3)(x + 5) = x&sup2; + 5x + 3x + 15 = <b>x&sup2; + 8x + 15</b>.</p>' +
+          '<p><b>Factorising x&sup2; + bx + c.</b> Go backwards: find two numbers that <b>multiply</b> to c and <b>add</b> to b. For x&sup2; + 8x + 15: 3 &times; 5 = 15 and 3 + 5 = 8, so (x + 3)(x + 5).</p>' +
+          '<p><b>Fractions in equations.</b> Multiply both sides by the bottom number first. ' + fr("x + 1", "2") + ' = 4 gives x + 1 = 8, so x = 7.</p>' +
+          '<p><b>Rearranging</b> is solving with letters. Make x the subject of y = 2x &minus; 1: add 1, then divide by 2, so x = ' + fr("y + 1", "2") + '.</p>' +
+          '<div class="keep"><b>Keep this</b>Four terms, then collect the middle two. Multiply to c, add to b.</div>' },
+
+  { type: "mc", topic: "Stretch: quadratics and more", stretch: true,
+    q: "Expand and simplify <span class=\"alg\">(x + 4)(x &minus; 2)</span>",
+    options: ["x&sup2; + 2x &minus; 8", "x&sup2; &minus; 8", "x&sup2; &minus; 2x &minus; 8", "x&sup2; + 2x + 8"],
+    answer: 0,
+    hint: "Four multiplications: x &times; x, x &times; &minus;2, 4 &times; x, 4 &times; &minus;2. Then collect the two x terms.",
+    why: "x &times; x = x&sup2;, x &times; &minus;2 = &minus;2x, 4 &times; x = 4x, 4 &times; &minus;2 = &minus;8. Middle terms: &minus;2x + 4x = 2x. So <b>x&sup2; + 2x &minus; 8</b>.<br>x&sup2; &minus; 8 forgets the middle terms, which is the most common slip." },
+
+  { type: "mc", topic: "Stretch: quadratics and more", stretch: true,
+    q: "Factorise <span class=\"alg\">x&sup2; + 7x + 12</span>",
+    options: ["(x + 3)(x + 4)", "(x + 2)(x + 6)", "(x + 1)(x + 12)", "x(x + 7) + 12"],
+    answer: 0,
+    hint: "List pairs that multiply to 12: 1 and 12, 2 and 6, 3 and 4. Which pair adds to 7?",
+    why: "3 &times; 4 = 12 and 3 + 4 = 7, so <b>(x + 3)(x + 4)</b>. Check by expanding: x&sup2; + 4x + 3x + 12.<br>2 and 6 multiply to 12 but add to 8; 1 and 12 add to 13. x(x + 7) + 12 is not fully factorised because it is not one product." },
+
+  { type: "num", topic: "Stretch: quadratics and more", stretch: true,
+    q: "Solve " + fr("2x + 1", "3") + " = 4. A fraction or a decimal is fine.",
+    boxes: [ { label: "x =", a: 5.5, show: "5.5" } ],
+    hint: "Multiply both sides by 3 first to get rid of the fraction. Then it is a normal two step equation.",
+    why: "Multiply both sides by 3: 2x + 1 = 12. Take 1: 2x = 11. Divide by 2: <b>x = 5.5</b> (or 5&frac12;, or 11/2). Check: 2 &times; 5.5 + 1 = 12, and 12 &divide; 3 = 4." },
+
+  { type: "mc", topic: "Stretch: quadratics and more", stretch: true,
+    q: "Make x the subject of <span class=\"alg\">y = 3x + 5</span>",
+    options: [
+      "x = " + fr("y &minus; 5", "3"),
+      "x = " + fr("y", "3") + " &minus; 5",
+      "x = " + fr("y + 5", "3"),
+      "x = 3y &minus; 5"
+    ],
+    answer: 0,
+    hint: "Treat it like solving for x. What is the first thing you would undo from 3x + 5?",
+    why: "Take 5 from both sides: y &minus; 5 = 3x. Divide both sides by 3: <b>x = (y &minus; 5) &divide; 3</b>.<br>y &divide; 3 &minus; 5 divides first and subtracts after, which undoes things in the wrong order. Check with numbers: if x = 2, y = 11, and (11 &minus; 5) &divide; 3 = 2." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "The rectangle has length (2x + 3) cm and width (x + 1) cm. Its perimeter is 38 cm. Work through it in parts.",
+    fig: RECT,
+    boxes: [
+      { label: "a) Perimeter, simplified: 6x +", a: 8 },
+      { label: "b) x =", a: 5 },
+      { label: "c) Length", a: 13, post: "cm" },
+      { label: "d) Area", a: 78, post: "cm&sup2;" }
+    ],
+    hint: "There are two lengths and two widths. Add all four sides and collect like terms, then set it equal to 38.",
+    why: "a) (2x + 3) + (2x + 3) + (x + 1) + (x + 1) = <b>6x + 8</b>.<br>b) 6x + 8 = 38. Take 8: 6x = 30. Divide by 6: <b>x = 5</b>.<br>c) Length 2 &times; 5 + 3 = <b>13 cm</b>, and the width is 5 + 1 = 6 cm. Check: 13 + 13 + 6 + 6 = 38.<br>d) Area 13 &times; 6 = <b>78 cm&sup2;</b>. Notice the exam asked for x, then used it: always go back and answer the actual question." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

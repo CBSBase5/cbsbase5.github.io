@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<!-- BUILT by lp/_build/build_lp.py from the shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Area, volume and triangles - LP GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/lp/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lp/lp.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+.formula{text-align:center;font-size:1.12rem;margin:6px 0 12px}
+.learnbody .datatable td,.learnbody .datatable th{padding:6px 9px}
+/* Ladder rescue (widget on this page only) */
+.lr{background:var(--ink);color:#fff;border-radius:16px;padding:14px;margin:6px 0}
+.lr-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+.lr-top span{background:rgba(255,255,255,.12);border-radius:99px;padding:4px 11px}
+.lr-top .sc{color:var(--sun)}
+.lr-msg{margin:10px 0;font-size:1rem;line-height:1.45}
+.lr-msg b.k{color:var(--sun)}
+.lr-svg{border-radius:12px;overflow:hidden;background:#dff4fb;max-width:440px;margin:0 auto}
+.lr-svg svg{width:100%;height:auto;display:block;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.lr-ctl{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;margin-top:10px}
+.lr-ctl .k{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--display);font-weight:700;opacity:.75;margin:2px 0 4px}
+.lr-step{display:flex;align-items:center;gap:10px}
+.lr-step button{width:44px;height:44px;border-radius:10px;border:2px solid #fff;background:transparent;color:#fff;font-size:1.35rem;font-weight:700;cursor:pointer;flex:none}
+.lr-step button:active{background:rgba(255,255,255,.18)}
+.lr-step .val{flex:1;text-align:center;font-family:var(--display);font-weight:700;font-size:1.5rem;color:var(--sun)}
+.lr-ctl input[type=range]{width:100%;height:34px;margin:6px 0 0;accent-color:#ffd23f}
+.lr-go{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.lr-go .btn{min-width:110px}
+.lr-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lp/"><span class="hqlogo">LP</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/lp/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Area, volume and triangles</h2>
+    <span>GCSE Maths, Foundation. Area and perimeter, circles, volume, units and compound measures, Pythagoras and trigonometry.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LP's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lp/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=9"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var MINUS = "&minus;";
+
+/* ---------- small SVG helpers ---------- */
+function r1(v){ return Math.round(v * 10) / 10; }
+function rad(d){ return d * Math.PI / 180; }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + r1(x) + '" y="' + r1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function bold(x, y, s, size, fill, anchor){ return t(x, y, s, size, fill, LAB + ' font-weight="700" text-anchor="' + (anchor || "middle") + '"'); }
+function ln(a, b, col, w, extra){
+  return '<path d="M' + r1(a[0]) + ' ' + r1(a[1]) + ' L' + r1(b[0]) + ' ' + r1(b[1]) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linecap="round" fill="none" ' + (extra || "") + '/>';
+}
+function poly(pts, fill, stroke, w, extra){
+  return '<path d="M' + pts.map(function(p){ return r1(p[0]) + ' ' + r1(p[1]); }).join(" L") + ' Z" fill="' + fill + '" stroke="' + (stroke || INK) + '" stroke-width="' + (w || 2.5) + '" stroke-linejoin="round" ' + (extra || "") + '/>';
+}
+/* right angle box at corner c, with sx and sy giving which way the two sides run (+1 or -1) */
+function sq(c, sx, sy, n){
+  n = n || 12;
+  return '<path d="M' + (c[0] + sx * n) + ' ' + c[1] + ' V' + (c[1] + sy * n) + ' H' + c[0] + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+}
+function arcAt(c, r, a1, a2, col){
+  /* screen angles in degrees, measured anticlockwise from the positive x direction */
+  var p = [c[0] + r * Math.cos(rad(a1)), c[1] - r * Math.sin(rad(a1))], q = [c[0] + r * Math.cos(rad(a2)), c[1] - r * Math.sin(rad(a2))];
+  return '<path d="M' + r1(p[0]) + ' ' + r1(p[1]) + ' A' + r + ' ' + r + ' 0 0 0 ' + r1(q[0]) + ' ' + r1(q[1]) + '" fill="none" stroke="' + (col || INK) + '" stroke-width="2.5"/>';
+}
+function nda(x, y, anchor){ return t(x, y, "Not drawn accurately", 14, INK, BODY + ' font-style="italic" opacity=".7" text-anchor="' + (anchor || "end") + '"'); }
+function svg(w, h, label, inner){ return '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + label + '">' + inner + '</svg>'; }
+function lab(x, y, s, col, anchor){ return t(x, y, s, 15, col || INK, BODY + ' font-weight="700" text-anchor="' + (anchor || "middle") + '"'); }
+
+/* ---------- figures ---------- */
+
+/* four area formulas */
+var AREAS = (function(){
+  var s = "";
+  s += poly([[14, 30], [124, 30], [124, 92], [14, 92]], "rgba(58,92,255,.12)", INK);
+  s += lab(69, 112, "length") + lab(132, 66, "width", INK, "start");
+  s += bold(90, 140, "length &times; width", 15);
+
+  s += poly([[230, 92], [360, 92], [270, 28]], "rgba(255,93,93,.12)", INK);
+  s += ln([270, 28], [270, 92], CORAL, 2, 'stroke-dasharray="5 4"') + sq([270, 92], 1, -1, 10);
+  s += lab(295, 112, "base") + lab(276, 66, "h", "#d13b3b", "start");
+  s += bold(290, 140, "&frac12; &times; base &times; height", 15);
+
+  s += poly([[14, 238], [124, 238], [160, 176], [50, 176]], "rgba(25,195,154,.14)", INK);
+  s += ln([50, 176], [50, 238], "#0f8a6c", 2, 'stroke-dasharray="5 4"') + sq([50, 238], 1, -1, 10);
+  s += lab(69, 258, "base") + lab(56, 214, "h", "#0f8a6c", "start");
+  s += bold(90, 286, "base &times; height", 15);
+
+  s += poly([[220, 238], [360, 238], [320, 176], [256, 176]], "rgba(255,210,63,.35)", INK);
+  s += ln([256, 176], [256, 238], INK, 2, 'stroke-dasharray="5 4"') + sq([256, 238], 1, -1, 10);
+  s += lab(288, 170, "a") + lab(290, 258, "b") + lab(262, 214, "h", INK, "start");
+  s += bold(290, 286, "&frac12;(a + b) &times; h", 15);
+  return svg(380, 296, "Area formulas. Rectangle: length times width. Triangle: half times base times perpendicular height. Parallelogram: base times perpendicular height. Trapezium: half of a plus b, times the height, where a and b are the parallel sides.", s);
+})();
+
+/* Q: trapezium and triangle with distracting slant lengths */
+var TRAPTRI = (function(){
+  var s = "";
+  s += poly([[14, 140], [174, 140], [142, 60], [46, 60]], "rgba(255,210,63,.35)", INK);
+  s += ln([46, 60], [46, 140], INK, 2, 'stroke-dasharray="5 4"') + sq([46, 140], 1, -1, 10);
+  s += lab(94, 52, "6 cm") + lab(94, 162, "10 cm") + lab(52, 106, "5 cm", INK, "start");
+  s += t(170, 96, "5.4 cm", 14, INK, BODY + ' text-anchor="start"');
+  s += bold(94, 24, "A", 17);
+
+  s += poly([[206, 140], [356, 140], [256, 40]], "rgba(58,92,255,.12)", INK);
+  s += ln([256, 40], [256, 140], BLUE, 2, 'stroke-dasharray="5 4"') + sq([256, 140], 1, -1, 10);
+  s += lab(281, 162, "9 cm") + lab(262, 100, "6 cm", BLUE, "start");
+  s += t(222, 84, "6.7 cm", 14, INK, BODY + ' text-anchor="end"') + t(310, 84, "8.5 cm", 14, INK, BODY + ' text-anchor="start"');
+  s += bold(281, 24, "B", 17);
+  s += nda(372, 190);
+  return svg(380, 196, "Shape A is a trapezium with parallel sides 6 centimetres and 10 centimetres, perpendicular height 5 centimetres and sloping sides of 5.4 centimetres. Shape B is a triangle with base 9 centimetres, perpendicular height 6 centimetres and sloping sides 6.7 and 8.5 centimetres.", s);
+})();
+
+/* Q: L shape */
+var LSHAPE = (function(){
+  var k = 19, x0 = 90, y0 = 20;
+  function P(x, y){ return [x0 + x * k, y0 + (8 - y) * k]; }
+  var s = poly([P(0, 0), P(10, 0), P(10, 5), P(6, 5), P(6, 8), P(0, 8)], "rgba(25,195,154,.16)", INK);
+  s += lab(x0 + 5 * k, y0 + 8 * k + 20, "10 cm") + lab(x0 - 8, y0 + 4 * k + 5, "8 cm", INK, "end");
+  s += lab(x0 + 3 * k, y0 - 6, "6 cm") + lab(x0 + 10 * k + 8, y0 + 5.5 * k + 5, "5 cm", INK, "start");
+  s += nda(372, 214);
+  return svg(380, 220, "An L shape. The bottom is 10 centimetres, the left side is 8 centimetres, the top is 6 centimetres and the right side is 5 centimetres. A rectangle has been cut out of the top right corner.", s);
+})();
+
+/* circle parts */
+var CIRC = (function(){
+  var c = [92, 104], R = 74, s = "";
+  s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + R + '" fill="rgba(34,184,230,.15)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += ln([c[0] - R, c[1]], [c[0] + R, c[1]], BLUE, 3) + ln(c, [c[0] + R * Math.cos(rad(55)), c[1] - R * Math.sin(rad(55))], CORAL, 3);
+  s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="4" fill="' + INK + '"/>';
+  s += lab(c[0], c[1] + 22, "diameter d", BLUE) + t(c[0] + 34, c[1] - 30, "radius r", 15, "#d13b3b", BODY + ' font-weight="700"');
+  var x = 196;
+  s += bold(x, 34, "Circumference", 16, INK, "start") + t(x, 56, "C = &pi;d = 2&pi;r", 16, INK, BODY + ' font-weight="700"');
+  s += bold(x, 98, "Area", 16, INK, "start") + t(x, 120, "A = &pi;r&sup2;", 16, INK, BODY + ' font-weight="700"');
+  s += bold(x, 162, "d = 2r", 16, INK, "start") + t(x, 184, "r = d &divide; 2", 16, INK, BODY + ' font-weight="700"');
+  return svg(380, 196, "A circle with a diameter across the middle and a radius from the centre. Circumference C equals pi d, or 2 pi r. Area A equals pi r squared. The diameter is twice the radius.", s);
+})();
+
+/* Q: semicircle */
+var SEMI = (function(){
+  var c = [190, 150], R = 120, s = "";
+  s += '<path d="M' + (c[0] - R) + ' ' + c[1] + ' A' + R + ' ' + R + ' 0 0 1 ' + (c[0] + R) + ' ' + c[1] + ' Z" fill="rgba(255,210,63,.35)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += lab(c[0], c[1] + 24, "12 cm");
+  s += nda(372, 196);
+  return svg(380, 202, "A semicircle with a straight edge, the diameter, of 12 centimetres.", s);
+})();
+
+/* Q: quarter circle */
+var QUART = (function(){
+  var c = [110, 170], R = 140, s = "";
+  s += '<path d="M' + c[0] + ' ' + c[1] + ' H' + (c[0] + R) + ' A' + R + ' ' + R + ' 0 0 0 ' + c[0] + ' ' + (c[1] - R) + ' Z" fill="rgba(138,92,246,.14)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += sq(c, 1, -1, 14);
+  s += lab(c[0] + R / 2, c[1] + 22, "6 cm") + lab(c[0] - 8, c[1] - R / 2, "6 cm", INK, "end");
+  s += nda(372, 196);
+  return svg(380, 202, "A quarter circle with two straight edges, each a radius of 6 centimetres.", s);
+})();
+
+/* cuboid drawn in 3D */
+function box3(x, y, w, h, dx, dy, fill){
+  var s = "";
+  s += poly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fill, INK);
+  s += poly([[x, y], [x + dx, y - dy], [x + w + dx, y - dy], [x + w, y]], "rgba(255,255,255,.55)", INK);
+  s += poly([[x + w, y], [x + w + dx, y - dy], [x + w + dx, y + h - dy], [x + w, y + h]], "rgba(20,26,51,.12)", INK);
+  return s;
+}
+var CUBOID = (function(){
+  var s = box3(60, 70, 170, 100, 70, 46, "rgba(58,92,255,.22)");
+  s += lab(145, 192, "5 cm") + lab(310, 140, "4 cm", INK, "start") + lab(262, 40, "3 cm", INK, "start");
+  s += nda(372, 214);
+  return svg(380, 220, "A cuboid 5 centimetres long, 3 centimetres deep and 4 centimetres tall.", s);
+})();
+
+/* prisms: volume rule */
+var PRISMS = (function(){
+  var s = "";
+  /* triangular prism */
+  var A = [20, 150], B = [110, 150], C = [44, 82], dx = 60, dy = 44;
+  s += poly([B, [B[0] + dx, B[1] - dy], [C[0] + dx, C[1] - dy], C], "rgba(20,26,51,.08)", INK);
+  s += poly([A, B, C], "rgba(255,93,93,.45)", INK);
+  s += ln(A, [A[0] + dx, A[1] - dy], INK, 2, 'stroke-dasharray="5 4"') + ln([A[0] + dx, A[1] - dy], [B[0] + dx, B[1] - dy], INK, 2, 'stroke-dasharray="5 4"') + ln([A[0] + dx, A[1] - dy], [C[0] + dx, C[1] - dy], INK, 2, 'stroke-dasharray="5 4"');
+  s += bold(95, 186, "Prism", 16) + t(95, 206, "area of the end &times; length", 14, INK, BODY + ' text-anchor="middle"');
+  /* cylinder */
+  var cx = 290, top = 50, bot = 140, rx = 52, ry = 16;
+  s += '<path d="M' + (cx - rx) + ' ' + top + ' V' + bot + ' A' + rx + ' ' + ry + ' 0 0 0 ' + (cx + rx) + ' ' + bot + ' V' + top + '" fill="rgba(34,184,230,.2)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<ellipse cx="' + cx + '" cy="' + top + '" rx="' + rx + '" ry="' + ry + '" fill="rgba(34,184,230,.45)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += ln([cx, top], [cx + rx, top], CORAL, 2.5) + t(cx + 22, top - 4, "r", 15, "#d13b3b", LAB + ' font-weight="700" text-anchor="middle"');
+  s += ln([cx + rx + 12, top], [cx + rx + 12, bot], INK, 1.5) + t(cx + rx + 18, (top + bot) / 2 + 5, "h", 15, INK, LAB + ' font-weight="700"');
+  s += bold(290, 186, "Cylinder", 16) + t(290, 206, "&pi;r&sup2; &times; h", 14, INK, BODY + ' text-anchor="middle"');
+  return svg(380, 214, "A triangular prism: volume is the area of the triangular end times the length. A cylinder with radius r and height h: volume is pi r squared times h.", s);
+})();
+
+/* Q: triangular prism and cylinder */
+var PRISMQ = (function(){
+  var s = "";
+  var A = [52, 160], B = [148, 160], C = [52, 96], dx = 50, dy = 40;
+  s += poly([B, [B[0] + dx, B[1] - dy], [C[0] + dx, C[1] - dy], C], "rgba(20,26,51,.08)", INK);
+  s += poly([A, B, C], "rgba(255,93,93,.45)", INK) + sq(A, 1, -1, 10);
+  s += ln(A, [A[0] + dx, A[1] - dy], INK, 2, 'stroke-dasharray="5 4"') + ln([A[0] + dx, A[1] - dy], [B[0] + dx, B[1] - dy], INK, 2, 'stroke-dasharray="5 4"') + ln([A[0] + dx, A[1] - dy], [C[0] + dx, C[1] - dy], INK, 2, 'stroke-dasharray="5 4"');
+  s += lab(100, 182, "6 cm") + lab(46, 134, "4 cm", INK, "end") + lab(172, 156, "10 cm", INK, "start");
+  s += bold(40, 40, "A", 17, INK, "start");
+  var cx = 300, top = 66, bot = 160, rx = 40, ry = 12;
+  s += '<path d="M' + (cx - rx) + ' ' + top + ' V' + bot + ' A' + rx + ' ' + ry + ' 0 0 0 ' + (cx + rx) + ' ' + bot + ' V' + top + '" fill="rgba(34,184,230,.2)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<ellipse cx="' + cx + '" cy="' + top + '" rx="' + rx + '" ry="' + ry + '" fill="rgba(34,184,230,.45)" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += ln([cx, top], [cx + rx, top], CORAL, 2.5) + t(cx + 20, top - 18, "3 cm", 14, "#d13b3b", LAB + ' font-weight="700" text-anchor="middle"');
+  s += ln([cx + rx + 10, top], [cx + rx + 10, bot], INK, 1.5) + lab(cx + rx + 8, bot + 30, "10 cm", INK, "end");
+  s += bold(244, 40, "B", 17, INK, "start");
+  s += nda(372, 214);
+  return svg(380, 220, "Shape A: a triangular prism. The end is a right angled triangle with base 6 centimetres and height 4 centimetres, and the prism is 10 centimetres long. Shape B: a cylinder with radius 3 centimetres and height 10 centimetres.", s);
+})();
+
+/* formula triangles */
+function tri(x, top, bottomL, bottomR, col){
+  var s = poly([[x, 18], [x - 56, 108], [x + 56, 108]], col, INK);
+  s += ln([x - 30, 66], [x + 30, 66], INK, 2) + ln([x, 66], [x, 108], INK, 2);
+  s += bold(x, 54, top, 17) + bold(x - 18, 96, bottomL, 17) + bold(x + 18, 96, bottomR, 17);
+  return s;
+}
+var RATES = (function(){
+  var s = tri(64, "D", "S", "T", "rgba(58,92,255,.18)") + tri(190, "M", "D", "V", "rgba(255,93,93,.2)") + tri(316, "F", "P", "A", "rgba(25,195,154,.2)");
+  s += bold(64, 132, "Speed", 15) + t(64, 152, "distance &divide; time", 14, INK, BODY + ' text-anchor="middle"');
+  s += bold(190, 132, "Density", 15) + t(190, 152, "mass &divide; volume", 14, INK, BODY + ' text-anchor="middle"');
+  s += bold(316, 132, "Pressure", 15) + t(316, 152, "force &divide; area", 14, INK, BODY + ' text-anchor="middle"');
+  return svg(380, 162, "Three formula triangles. Distance over speed times time. Mass over density times volume. Force over pressure times area. Cover the one you want: speed is distance divided by time, density is mass divided by volume, pressure is force divided by area.", s);
+})();
+
+/* Pythagoras with squares on the sides */
+var PYTH = (function(){
+  var k = 20, A = [90, 150], B = [90 + 4 * k, 150], C = [90, 150 - 3 * k], s = "";
+  s += poly([A, B, [B[0], B[1] + 4 * k], [A[0], A[1] + 4 * k]], "rgba(58,92,255,.2)", INK, 2);
+  s += poly([A, C, [C[0] - 3 * k, C[1]], [A[0] - 3 * k, A[1]]], "rgba(255,93,93,.22)", INK, 2);
+  var dx = B[0] - C[0], dy = B[1] - C[1];
+  s += poly([C, B, [B[0] - dy, B[1] + dx], [C[0] - dy, C[1] + dx]].map(function(p, i){ return i < 2 ? p : [p[0] + 2 * dy, p[1] - 2 * dx]; }), "rgba(25,195,154,.25)", INK, 2);
+  s += poly([A, B, C], WHITE, INK, 2.5) + sq(A, 1, -1, 10);
+  s += bold(A[0] + 2 * k, A[1] + 2 * k + 6, "16", 17, BLUE) + bold(A[0] - 1.5 * k, A[1] - 1.5 * k + 6, "9", 17, "#d13b3b");
+  s += bold(176, 64, "25", 17, "#0f8a6c");
+  s += lab(A[0] + 2 * k, A[1] - 6, "4") + lab(A[0] + 8, A[1] - 1.5 * k + 5, "3", INK, "start") + lab(140, 108, "5", INK, "start");
+  s += t(262, 120, "9 + 16 = 25", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(262, 146, "a&sup2; + b&sup2; = c&sup2;", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  return svg(380, 236, "A right angled triangle with sides 3, 4 and 5. Squares drawn on the sides have areas 9, 16 and 25. The two smaller squares add up to the biggest: a squared plus b squared equals c squared.", s);
+})();
+
+/* Q: two right triangles for Pythagoras */
+var PYQ = (function(){
+  var s = "";
+  var A = [50, 160], B = [180, 160], C = [50, 70];
+  s += poly([A, B, C], "rgba(58,92,255,.14)", INK) + sq(A, 1, -1, 12);
+  s += lab(115, 182, "10 cm") + lab(44, 120, "7 cm", INK, "end") + bold(128, 104, "x", 18, "#d13b3b");
+  s += bold(40, 40, "A", 17, INK, "start");
+  var D = [210, 160], E = [326, 160], F = [326, 60];
+  s += poly([D, E, F], "rgba(255,93,93,.16)", INK) + sq(E, -1, -1, 12);
+  s += bold(268, 184, "y", 18, "#d13b3b") + lab(332, 115, "8 cm", INK, "start") + t(262, 100, "13 cm", 15, INK, BODY + ' font-weight="700" text-anchor="end"');
+  s += bold(206, 40, "B", 17, INK, "start");
+  s += nda(372, 214);
+  return svg(380, 220, "Triangle A is right angled with shorter sides 7 centimetres and 10 centimetres; x is the hypotenuse. Triangle B is right angled with hypotenuse 13 centimetres and one shorter side 8 centimetres; y is the other shorter side.", s);
+})();
+
+/* SOHCAHTOA labelling */
+var SOH = (function(){
+  var A = [30, 170], B = [230, 170], C = [230, 50], s = "";
+  s += poly([A, B, C], "rgba(255,210,63,.3)", INK) + sq(B, -1, -1, 12);
+  s += arcAt(A, 36, 0, Math.atan2(120, 200) * 180 / Math.PI, CORAL) + bold(80, 160, "&theta;", 17, "#d13b3b");
+  s += t(122, 98, "hypotenuse", 15, INK, BODY + ' font-weight="700" text-anchor="end" transform="rotate(-31 122 98)"');
+  s += lab(130, 194, "adjacent", BLUE) + t(240, 116, "opposite", 15, "#0f8a6c", BODY + ' font-weight="700"');
+  return svg(320, 204, "A right angled triangle with angle theta in the bottom left. The hypotenuse is the longest side, opposite the right angle. The adjacent side is next to theta. The opposite side is across from theta.", s);
+})();
+
+/* Q: trig side and trig angle */
+var TRIGQ = (function(){
+  var s = "";
+  var A = [16, 160], B = [160, 160], C = [160, 59.2];
+  s += poly([A, B, C], "rgba(58,92,255,.14)", INK) + sq(B, -1, -1, 12);
+  s += arcAt(A, 32, 0, 35, INK) + t(54, 152, "35&deg;", 15, INK, BODY + ' font-weight="700"');
+  s += t(80, 98, "12 cm", 15, INK, BODY + ' font-weight="700" text-anchor="end"') + bold(170, 116, "x", 18, "#d13b3b", "start");
+  s += bold(14, 40, "A", 17, INK, "start");
+  var D = [218, 160], E = [346, 160], F = [346, 80];
+  s += poly([D, E, F], "rgba(255,93,93,.16)", INK) + sq(E, -1, -1, 12);
+  s += arcAt(D, 34, 0, 32, CORAL) + bold(264, 152, "&theta;", 18, "#d13b3b");
+  s += lab(282, 182, "8 cm") + lab(352, 126, "5 cm", INK, "start");
+  s += bold(216, 40, "B", 17, INK, "start");
+  s += nda(372, 214);
+  return svg(380, 220, "Triangle A is right angled with hypotenuse 12 centimetres and an angle of 35 degrees; x is the side opposite the 35 degree angle. Triangle B is right angled with the side next to angle theta 8 centimetres and the side opposite theta 5 centimetres.", s);
+})();
+
+/* Q: which ratio */
+var WHICHQ = (function(){
+  var A = [30, 160], B = [250, 160], C = [250, 60], s = "";
+  s += poly([A, B, C], "rgba(25,195,154,.16)", INK) + sq(B, -1, -1, 12);
+  s += arcAt(A, 40, 0, 24, INK) + t(76, 152, "40&deg;", 15, INK, BODY + ' font-weight="700"');
+  s += lab(140, 184, "9 m") + bold(262, 116, "y", 18, "#d13b3b", "start");
+  s += nda(372, 196);
+  return svg(380, 202, "A right angled triangle with an angle of 40 degrees. The side next to the 40 degree angle, not the hypotenuse, is 9 metres. y is the side opposite the 40 degree angle.", s);
+})();
+
+/* exact value triangles */
+var EXACT = (function(){
+  var s = "";
+  var A = [20, 170], B = [170, 170], C = [20, 40];
+  s += poly([A, B, C], "rgba(58,92,255,.14)", INK) + sq(A, 1, -1, 12);
+  s += lab(95, 192, "1") + lab(14, 110, "1", INK, "end") + t(104, 98, "&radic;2", 16, INK, BODY + ' font-weight="700"');
+  s += t(118, 164, "45&deg;", 14, INK, BODY + ' font-weight="700"') + t(26, 80, "45&deg;", 14, INK, BODY + ' font-weight="700"');
+  var D = [220, 170], E = [310, 170], F = [220, 14];
+  s += poly([D, E, F], "rgba(255,93,93,.16)", INK) + sq(D, 1, -1, 12);
+  s += lab(265, 192, "1") + lab(214, 98, "&radic;3", INK, "end") + t(274, 90, "2", 16, INK, BODY + ' font-weight="700"');
+  s += t(266, 164, "60&deg;", 14, INK, BODY + ' font-weight="700"') + t(225, 64, "30&deg;", 14, INK, BODY + ' font-weight="700"');
+  return svg(340, 200, "Two triangles for exact values. A right angled isosceles triangle with shorter sides 1 and 1 and hypotenuse root 2, with two 45 degree angles. Half of an equilateral triangle: hypotenuse 2, short side 1, long side root 3, with angles of 30 and 60 degrees.", s);
+})();
+
+/* exam: skate ramp */
+var RAMP = (function(){
+  var s = "";
+  var A = [30, 170], B = [250, 170], C = [250, 106], dx = 80, dy = 56;
+  s += poly([B, [B[0] + dx, B[1] - dy], [C[0] + dx, C[1] - dy], C], "rgba(20,26,51,.12)", INK);
+  s += poly([A, C, [C[0] + dx, C[1] - dy], [A[0] + dx, A[1] - dy]], "rgba(255,210,63,.45)", INK);
+  s += poly([A, B, C], "rgba(255,93,93,.4)", INK) + sq(B, -1, -1, 12);
+  s += lab(140, 192, "2.4 m") + lab(244, 146, "0.7 m", INK, "end") + lab(300, 160, "1.5 m", INK, "start");
+  s += arcAt(A, 44, 0, 16.3, INK) + t(80, 164, "x", 16, "#d13b3b", LAB + ' font-weight="700"');
+  s += nda(372, 214);
+  return svg(380, 220, "A skate ramp shaped like a triangular prism. The end is a right angled triangle 2.4 metres along the ground and 0.7 metres high. The ramp is 1.5 metres wide. Angle x is between the slope and the ground.", s);
+})();
+
+/* ---------- the ladder rescue widget ---------- */
+var LEVELS = [
+  { L: 6.5, mode: "d", target: 25, win: 6.0, hide: "h",
+    intro: "<b>Level 1: Pythagoras.</b> A kitten is stuck on a window ledge <b class='k'>6.0 m</b> up. The ladder is <b class='k'>6.5 m</b> long. How far from the wall should the foot go so the top lands exactly on the ledge? Work it out, set it, then send the climber up.",
+    hint: "The ladder is the hypotenuse. Shorter side: square, subtract, square root. 6.5&sup2; &minus; 6&sup2; = ?",
+    work: "Ladder is the hypotenuse: d&sup2; = 6.5&sup2; &minus; 6.0&sup2; = 42.25 &minus; 36 = 6.25, so d = &radic;6.25 = <b>2.5 m</b>." },
+  { L: 8, mode: "d", target: 21, ang: 75, hide: "ah",
+    intro: "<b>Level 2: cos.</b> Safety rule: an <b class='k'>8 m</b> ladder must make <b class='k'>75&deg;</b> with the ground, or the kitten stays put. How far from the wall should the foot go? Set it to 1 decimal place.",
+    hint: "You know the hypotenuse (8 m) and the angle. The distance along the ground is next to the angle, so it is the adjacent: use cos.",
+    work: "Adjacent and hypotenuse: CAH. cos 75&deg; = d &divide; 8, so d = 8 &times; cos 75&deg; = 2.070..., which is <b>2.1 m</b> to 1 decimal place. (The picture shows 74.8&deg; because 2.1 m is rounded.)" },
+  { L: 9, mode: "a", target: 69, win: 8.4, hide: "h",
+    intro: "<b>Level 3: finding the angle.</b> The ledge is <b class='k'>8.4 m</b> up and the ladder is <b class='k'>9 m</b>. What angle should the ladder make with the ground? Set it to the nearest degree.",
+    hint: "Height is opposite the angle, ladder is the hypotenuse: SOH. sin &theta; = 8.4 &divide; 9, then use sin<sup>&minus;1</sup> on your calculator.",
+    work: "Opposite and hypotenuse: SOH. sin &theta; = 8.4 &divide; 9 = 0.9333..., so &theta; = sin<sup>&minus;1</sup>(0.9333...) = 68.96...&deg;, which is <b>69&deg;</b> to the nearest degree." }
+];
+
+function mountLadder(el, api){
+  var d = api.data;
+  if(typeof d.lv !== "number") d.lv = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(typeof d.score !== "number") d.score = 0;
+  function startVal(k){ return k >= 3 ? 30 : LEVELS[k].mode === "a" ? 50 : 40; }
+  if(typeof d.v !== "number" || d.vlv !== d.lv){ d.v = startVal(d.lv); d.vlv = d.lv; }
+  var view = d.lv;
+  var busy = false, landed = false, lastTry = null, climbF = -1, dragging = false;
+  var reduce = false;
+  try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  el.innerHTML =
+    '<div class="lr">' +
+      '<div class="lr-top"><span data-r="lvl"></span><span class="sc" data-r="score"></span></div>' +
+      '<p class="lr-msg" data-r="msg"></p>' +
+      '<div class="lr-svg" data-r="svg"></div>' +
+      '<div class="lr-ctl">' +
+        '<p class="k" data-r="ck"></p>' +
+        '<div class="lr-step">' +
+          '<button type="button" data-act="dec" aria-label="Decrease">' + MINUS + '</button>' +
+          '<span class="val" data-r="val"></span>' +
+          '<button type="button" data-act="inc" aria-label="Increase">+</button>' +
+        '</div>' +
+        '<input type="range" data-r="range" aria-label="Ladder setting">' +
+      '</div>' +
+      '<div class="lr-go">' +
+        '<button class="btn btn-orange" type="button" data-act="climb">Climb!</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-act="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb lr-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  var range = q("range");
+
+  function lev(){ return view < 3 ? LEVELS[view] : { L: 9, mode: "d", hide: "", win: null }; }
+  function range0(){
+    var L = lev().L;
+    return lev().mode === "a" ? [30, 85] : [5, Math.round((L - 0.4) * 10)];
+  }
+  /* current geometry from the control value */
+  function geom(v){
+    var L = lev().L, dist, ang;
+    if(lev().mode === "a"){ ang = v; dist = L * Math.cos(rad(v)); }
+    else { dist = v / 10; ang = Math.acos(dist / L) * 180 / Math.PI; }
+    return { d: dist, h: Math.sqrt(Math.max(0, L * L - dist * dist)), a: ang, L: L };
+  }
+  function f1(x){ return (Math.round(x * 100) / 100).toFixed(2).replace(/0$/, ""); }
+
+  var S = 25, WX = 286, G = 288;
+  function scene(){
+    var lv = lev(), g = geom(d.v), s = "";
+    var foot = [WX - S * g.d, G], top = [WX, G - S * g.h];
+    /* sky, sun, ground */
+    s += '<rect x="0" y="0" width="360" height="320" fill="#dff4fb"/>';
+    s += '<circle cx="40" cy="40" r="18" fill="' + SUN + '"/>';
+    s += '<rect x="0" y="' + G + '" width="360" height="32" fill="' + MINT + '"/>';
+    /* house */
+    s += '<rect x="' + WX + '" y="40" width="74" height="' + (G - 40) + '" fill="#ffe0d6" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<path d="M' + (WX - 8) + ' 42 L' + (WX + 37) + ' 8 L' + (WX + 82) + ' 42 Z" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+    s += '<rect x="' + (WX + 22) + '" y="' + (G - 44) + '" width="28" height="44" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2"/>';
+    /* window ledge and kitten */
+    var winH = lv.win !== null && lv.win !== undefined ? lv.win : (lv.ang ? lv.L * Math.sin(rad(lv.ang)) : null);
+    if(winH !== null){
+      var wy = G - S * winH;
+      s += '<rect x="' + (WX + 14) + '" y="' + (wy - 40) + '" width="44" height="40" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += ln([WX + 36, wy - 40], [WX + 36, wy], INK, 1.5) + ln([WX + 14, wy - 20], [WX + 58, wy - 20], INK, 1.5);
+      s += '<rect x="' + (WX - 4) + '" y="' + (wy - 3) + '" width="68" height="6" fill="' + INK + '"/>';
+      if(view < 3 && !landed) s += ln([6, wy], [WX - 4, wy], VIOLET, 2, 'stroke-dasharray="6 5" opacity=".7"');
+      if(view < 3 && lv.win) s += t(12, wy - 6, "ledge " + lv.win.toFixed(1) + " m", 14, VIOLET, LAB + ' font-weight="700"');
+      /* kitten: on the ledge, or with the climber once rescued */
+      var kx = landed ? foot[0] - 46 : WX + 6, ky = landed ? G : wy - 3;
+      if(view < 3 || landed) s += kitten(kx, ky);
+    }
+    /* ladder: two rails and rungs */
+    var ux = (top[0] - foot[0]) / (S * g.L), uy = (top[1] - foot[1]) / (S * g.L), nx = -uy * 6, ny = ux * 6;
+    s += ln([foot[0] + nx, foot[1] + ny], [top[0] + nx, top[1] + ny], "#7a4b1e", 4) + ln([foot[0] - nx, foot[1] - ny], [top[0] - nx, top[1] - ny], "#7a4b1e", 4);
+    for(var m = 0.4; m < g.L; m += 0.5){
+      var px = foot[0] + ux * S * m, py = foot[1] + uy * S * m;
+      s += ln([px + nx, py + ny], [px - nx, py - ny], "#7a4b1e", 3);
+    }
+    /* labels */
+    var showD = !(lv.mode === "a" && view < 3 && !landed);
+    var showH = lv.hide.indexOf("h") < 0 || landed;
+    var showA = lv.hide.indexOf("a") < 0 || landed;
+    s += ln([foot[0], G + 12], [WX, G + 12], INK, 1.5);
+    s += t((foot[0] + WX) / 2, G + 28, showD ? f1(g.d) + " m" : "? m", 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += arcAt(foot, 26, 0, g.a, CORAL);
+    s += t(foot[0] + 30, foot[1] - 8, showA ? (lv.mode === "a" ? Math.round(g.a) : g.a.toFixed(1)) + "&deg;" : "?&deg;", 14, "#d13b3b", LAB + ' font-weight="700"');
+    var mx = (foot[0] + top[0]) / 2 - 14, my = (foot[1] + top[1]) / 2;
+    s += t(mx, my, g.L + " m", 15, INK, LAB + ' font-weight="800" text-anchor="end"');
+    s += t(WX - 6, top[1] - 8, showH ? "top " + f1(g.h) + " m" : "top ? m", 14, INK, LAB + ' font-weight="700" text-anchor="end"');
+    /* climber */
+    if(climbF >= 0){
+      var cx = foot[0] + (top[0] - foot[0]) * climbF, cy = foot[1] + (top[1] - foot[1]) * climbF;
+      s += '<circle cx="' + r1(cx - 4) + '" cy="' + r1(cy - 26) + '" r="7" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += '<rect x="' + r1(cx - 10) + '" y="' + r1(cy - 19) + '" width="12" height="17" rx="4" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    /* drag handle */
+    if(!busy && !landed){
+      s += '<circle cx="' + r1(foot[0]) + '" cy="' + G + '" r="12" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      s += '<path d="M' + r1(foot[0] - 5) + ' ' + (G - 4) + ' l-4 4 l4 4 M' + r1(foot[0] + 5) + ' ' + (G - 4) + ' l4 4 l-4 4" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    if(landed && view < 3){
+      s += t(foot[0] - 40, G - 34, "&#9829;", 22, CORAL, 'text-anchor="middle"') + t(foot[0] - 20, G - 48, "&#9829;", 16, CORAL, 'text-anchor="middle"');
+    }
+    return '<svg viewBox="0 0 360 320" role="img" aria-label="A ladder ' + g.L + ' metres long leans against a house. Drag the yellow foot of the ladder to move it.">' + s + '</svg>';
+  }
+  function kitten(x, y){
+    var s = '<ellipse cx="' + r1(x + 12) + '" cy="' + r1(y - 8) + '" rx="11" ry="8" fill="' + INK + '"/>';
+    s += '<circle cx="' + r1(x + 22) + '" cy="' + r1(y - 18) + '" r="7" fill="' + INK + '"/>';
+    s += '<path d="M' + r1(x + 17) + ' ' + r1(y - 22) + ' l1 -8 l5 5 Z M' + r1(x + 23) + ' ' + r1(y - 23) + ' l4 -7 l3 7 Z" fill="' + INK + '"/>';
+    s += '<circle cx="' + r1(x + 24) + '" cy="' + r1(y - 19) + '" r="1.6" fill="' + SUN + '"/>';
+    s += '<path d="M' + r1(x + 2) + ' ' + r1(y - 8) + ' q-8 -2 -6 -12" fill="none" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>';
+    return s;
+  }
+
+  function stars(){ var s = ""; for(var k = 0; k < 3; k++) s += k < Math.min(d.lv, 3) ? "&#9733;" : "&#9734;"; return s; }
+  function render(){
+    var lv = lev(), rg = range0();
+    d.v = Math.max(rg[0], Math.min(rg[1], d.v));
+    q("lvl").innerHTML = view < 3 ? "Level " + (view + 1) + " of 3 " + stars() : "Free play " + stars();
+    q("score").innerHTML = "Kittens saved " + Math.min(d.lv, 3);
+    q("msg").innerHTML = view < 3 ? lv.intro : "<b>Free play.</b> All three kittens are safe. Drag the 9 m ladder about and watch the height, angle and distance change together. Notice the steeper the ladder, the higher it reaches.";
+    q("ck").innerHTML = lv.mode === "a" ? "Angle with the ground" : "Foot distance from the wall";
+    q("val").innerHTML = lv.mode === "a" ? d.v + "&deg;" : (d.v / 10).toFixed(1) + " m";
+    range.min = rg[0]; range.max = rg[1]; range.step = 1; range.value = d.v;
+    q("svg").innerHTML = scene();
+    var waiting = busy || landed;
+    el.querySelector('[data-act="climb"]').disabled = waiting;
+    el.querySelector('[data-act="climb"]').classList.toggle("hidden", view >= 3);
+    el.querySelector('[data-act="show"]').classList.toggle("hidden", waiting || view >= 3 || !d.miss[view]);
+    [].forEach.call(el.querySelectorAll('[data-act="inc"],[data-act="dec"]'), function(b){ b.disabled = waiting; });
+    range.disabled = waiting;
+  }
+  function paintScene(){ q("svg").innerHTML = scene(); }
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb lr-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb lr-fb " + cls; f.innerHTML = html;
+  }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+
+  function set(v){ if(busy || landed) return; var rg = range0(); d.v = Math.max(rg[0], Math.min(rg[1], Math.round(v))); api.save(); render(); }
+
+  function climb(viaShow){
+    if(busy || landed || view >= 3) return;
+    busy = true; fb(null); render();
+    function after(){
+      climbF = -1; busy = false;
+      var lv = LEVELS[view], g = geom(d.v);
+      if(d.v === lv.target){ win(viaShow); return; }
+      d.miss[view]++; api.save();
+      var msg;
+      if(view === 0){
+        var gap = g.h - lv.win;
+        msg = "The top reached <b>" + f1(g.h) + " m</b>, " + (gap < 0 ? f1(-gap) + " m below the ledge. The foot needs to come <b>closer</b> to the wall." : f1(gap) + " m above the ledge. Move the foot <b>further out</b>.");
+      }else if(view === 1){
+        msg = "That makes the angle <b>" + f1(g.a) + "&deg;</b>, " + (g.a > lv.ang ? "too steep. Move the foot <b>further out</b>." : "too shallow. Bring the foot <b>closer</b> to the wall.");
+      }else{
+        msg = "At " + d.v + "&deg; the top reaches <b>" + f1(g.h) + " m</b>. " + (g.h < lv.win ? "Not high enough: the ladder needs to be <b>steeper</b>." : "Too high: make the angle a little <b>smaller</b>.");
+      }
+      fb("nudge", "<b>" + ["Wobble! Not quite.", "Mrow? Not there yet.", "So close."][Math.floor(Math.random() * 3)] + "</b> " + msg + " " + lv.hint +
+        '<br><span class="tiny">Change the setting and climb again, or tap Show me.</span>');
+      render();
+    }
+    if(reduce){ climbF = 1; paintScene(); setTimeout(after, 250); return; }
+    var t0 = null;
+    function step(ts){
+      if(t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 1100);
+      climbF = k; paintScene();
+      if(k < 1) requestAnimationFrame(step); else setTimeout(after, 150);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function win(viaShow){
+    var k = view, lv = LEVELS[k];
+    landed = true;
+    if(viaShow) d.shown[k] = true;
+    d.lv = k + 1;
+    if(d.lv >= 3) d.result = result();
+    api.save();
+    var head = viaShow ? "<b>Here is how this one works.</b> " : "<b>" + ["Rescued!", "Kitten saved!", "Purrfect."][k] + "</b> ";
+    var more = k < 2 ? '<br><button class="btn" type="button" data-act="next">Next kitten</button>' :
+      '<p style="margin:8px 0 0">All three kittens saved. Pythagoras when you know two sides and want the third; SOHCAHTOA when an angle is involved.</p><button class="btn" type="button" data-act="next">Free play</button>';
+    fb(viaShow ? "show" : "good", head + lv.work + more);
+    render();
+    if(k === 2) api.done(d.result);
+  }
+
+  /* dragging the foot of the ladder */
+  function fromPointer(e){
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var r = sv.getBoundingClientRect();
+    var ux = (e.clientX - r.left) * 360 / r.width;
+    var dist = (WX - ux) / S;
+    var lv = lev();
+    if(lv.mode === "a"){
+      var c = Math.max(-1, Math.min(1, dist / lv.L));
+      set(Math.acos(c) * 180 / Math.PI);
+    }else set(dist * 10);
+  }
+  q("svg").addEventListener("pointerdown", function(e){
+    if(busy || landed) return;
+    dragging = true;
+    try{ q("svg").setPointerCapture(e.pointerId); }catch(err){}
+    fromPointer(e);
+    e.preventDefault();
+  });
+  q("svg").addEventListener("pointermove", function(e){ if(dragging) fromPointer(e); });
+  function stop(){ dragging = false; }
+  q("svg").addEventListener("pointerup", stop);
+  q("svg").addEventListener("pointercancel", stop);
+  range.addEventListener("input", function(){ set(parseInt(range.value, 10)); });
+
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("[data-act]");
+    if(!b || !el.contains(b)) return;
+    var act = b.getAttribute("data-act");
+    if(act === "inc") set(d.v + 1);
+    else if(act === "dec") set(d.v - 1);
+    else if(act === "climb") climb(false);
+    else if(act === "show"){
+      if(busy || landed || view >= 3) return;
+      d.v = LEVELS[view].target; api.save(); render();
+      climb(true);
+    }else if(act === "next"){
+      landed = false; fb(null);
+      view = d.lv; d.v = startVal(view); d.vlv = view; api.save(); render();
+    }
+  });
+
+  render();
+  if(d.lv >= 3 && d.result){
+    fb("good", "<b>All three kittens saved.</b> Free play is open: drag the ladder and watch the numbers.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "maths-measures",
+  title: "Area, volume and triangles",
+  subject: "Maths",
+  mins: 55,
+  blurb: "Measures and right angled triangles turn up on every Foundation paper. This goes from area and circles through volume and compound measures to Pythagoras and SOHCAHTOA, with a ladder rescue game and stretch questions on exact trig values.",
+  steps: [
+
+  /* ---------- AREA AND PERIMETER ---------- */
+  { type: "learn", topic: "Area and perimeter",
+    title: "Four area formulas",
+    fig: AREAS,
+    html: "<p><b>Perimeter</b> is the distance all the way round the edge: add up every side. <b>Area</b> is the space inside, measured in squares: cm&sup2; or m&sup2;.</p>" +
+          "<p>The height in these formulas is always the <b>perpendicular</b> height: straight up at right angles to the base, the dashed line. A sloping side is not the height.</p>" +
+          "<p>For a <b>compound shape</b>, split it into rectangles (or add a missing bit and take it away), find each area, then add.</p>" +
+          "<div class='keep'><b>Keep this</b>Triangle: half of base times height. Trapezium: add the parallel sides, halve, times the height. Area units are squared.</div>" },
+
+  { type: "match", topic: "Area and perimeter",
+    q: "Match each shape to the way you find its area.",
+    pairs: [
+      ["Rectangle", "length &times; width"],
+      ["Triangle", "&frac12; &times; base &times; perpendicular height"],
+      ["Parallelogram", "base &times; perpendicular height"],
+      ["Trapezium", "&frac12; &times; (sum of the parallel sides) &times; height"]
+    ],
+    hint: "Two of them have a half in front. One of those has two parallel sides to add first.",
+    why: "Rectangle: length &times; width. Parallelogram: base &times; perpendicular height (it is a rectangle with a slice moved). Triangle: half of that, since two triangles make a parallelogram. Trapezium: average the parallel sides, then times the height." },
+
+  { type: "num", topic: "Area and perimeter",
+    q: "Work out the area of each shape.",
+    fig: TRAPTRI,
+    boxes: [
+      { label: "Area of trapezium A", a: 40, post: "cm&sup2;" },
+      { label: "Area of triangle B", a: 27, post: "cm&sup2;" }
+    ],
+    hint: "Ignore the sloping lengths: they are there to tempt you. Use the dashed perpendicular heights.",
+    why: "A: &frac12; &times; (6 + 10) &times; 5 = &frac12; &times; 16 &times; 5 = <b>40 cm&sup2;</b>.<br>B: &frac12; &times; 9 &times; 6 = <b>27 cm&sup2;</b>.<br>Using a sloping side, like 5.4 or 8.5, is the most common slip. The height must meet the base at a right angle." },
+
+  { type: "num", topic: "Area and perimeter",
+    q: "All the corners of this shape are right angles. Work out its area and its perimeter.",
+    fig: LSHAPE,
+    boxes: [
+      { label: "Area", a: 68, post: "cm&sup2;" },
+      { label: "Perimeter", a: 36, post: "cm" }
+    ],
+    hint: "Find the two missing sides first: the bottom is 10 and the top is 6, so the step across is 10 &minus; 6. Then split into two rectangles.",
+    why: "Missing sides: 10 &minus; 6 = 4 across and 8 &minus; 5 = 3 down.<br>Area: the full 10 by 8 rectangle is 80, take away the missing 4 by 3 corner, 12: <b>68 cm&sup2;</b>. (Or split it: 6 &times; 8 + 4 &times; 5 = 48 + 20 = 68.)<br>Perimeter: 10 + 5 + 4 + 3 + 6 + 8 = <b>36 cm</b>. Missing out the two little sides is the usual slip." },
+
+  /* ---------- CIRCLES ---------- */
+  { type: "learn", topic: "Circles",
+    title: "Circles: circumference and area",
+    fig: CIRC,
+    html: "<p>Use the &pi; button on your calculator (&pi; is about 3.14).</p>" +
+          "<ul><li><b>Circumference</b>, the distance round: C = &pi; &times; diameter.</li>" +
+          "<li><b>Area</b>: A = &pi; &times; radius &times; radius. Square the radius first, then times by &pi;.</li></ul>" +
+          "<p><b>Semicircles and quarter circles</b>: halve or quarter the circle's area. For the perimeter, take half or a quarter of the circumference, then add the straight edges.</p>" +
+          "<p><b>Stretch: in terms of &pi;.</b> Leave &pi; as a letter instead of pressing the button. A circle with radius 3 has area 9&pi; cm&sup2;. This is an exact answer.</p>" +
+          "<div class='keep'><b>Keep this</b>Check which one you have been given. Area needs the radius; if you are given the diameter, halve it first.</div>" },
+
+  { type: "multi", topic: "Circles",
+    q: "A circle has a radius of 5 cm. Which <b>two</b> calculations give its circumference?",
+    options: [
+      "&pi; &times; 10",
+      "2 &times; &pi; &times; 5",
+      "&pi; &times; 5&sup2;",
+      "&pi; &times; 25",
+      "2 &times; 5"
+    ],
+    answers: [0, 1],
+    hint: "Circumference is &pi; times the diameter. What is the diameter if the radius is 5?",
+    why: "Diameter = 2 &times; 5 = 10, so C = &pi; &times; 10 = 2 &times; &pi; &times; 5 = 31.4 cm to 1 d.p.<br>&pi; &times; 5&sup2; and &pi; &times; 25 are the same thing: that is the <b>area</b>. Mixing the two up is the classic circle slip; squared means area." },
+
+  { type: "num", topic: "Circles",
+    q: "This is a semicircle. Give each answer to 1 decimal place.",
+    fig: SEMI,
+    boxes: [
+      { label: "Area", a: 56.5, tol: 0.05, post: "cm&sup2;" },
+      { label: "Perimeter", a: 30.8, tol: 0.05, post: "cm" }
+    ],
+    hint: "The 12 cm is the diameter, so the radius is 6. For the perimeter: half the circumference, then do not forget the straight edge.",
+    why: "Area: &pi; &times; 6&sup2; = 113.097..., halved is 56.548..., so <b>56.5 cm&sup2;</b>.<br>Perimeter: curved part is &pi; &times; 12 &divide; 2 = 18.849...; add the straight 12 cm: 30.849..., so <b>30.8 cm</b>.<br>Stopping at 18.8 misses the straight edge. Using 12 as the radius gives an area four times too big." },
+
+  { type: "num", topic: "Circles", stretch: true,
+    q: "This is a quarter circle with radius 6 cm. Give your answers <b>in terms of &pi;</b>: just type the number that goes in front of &pi;.",
+    fig: QUART,
+    boxes: [
+      { label: "Area = ? &pi;", a: 9, post: "&pi; cm&sup2;" },
+      { label: "Curved edge = ? &pi;", a: 3, post: "&pi; cm" },
+      { label: "Perimeter = 3&pi; + ?", a: 12, post: "cm" }
+    ],
+    hint: "Whole circle area: &pi; &times; 6&sup2; = 36&pi;. Whole circumference: &pi; &times; 12 = 12&pi;. Now take a quarter of each, and add the two straight radii for the perimeter.",
+    why: "Area: 36&pi; &divide; 4 = <b>9&pi; cm&sup2;</b>.<br>Curved edge: 12&pi; &divide; 4 = <b>3&pi; cm</b>.<br>Perimeter: 3&pi; + 6 + 6 = <b>3&pi; + 12 cm</b>. You cannot add the 3&pi; and the 12 together without a calculator, so it stays as two terms." },
+
+  /* ---------- VOLUME ---------- */
+  { type: "learn", topic: "Volume",
+    title: "Volume and surface area",
+    fig: PRISMS,
+    html: "<p>A <b>prism</b> has the same shape all the way through, like a loaf of bread. That shape is the <b>cross section</b>.</p>" +
+          "<p class='formula'><b>volume of a prism = area of cross section &times; length</b></p>" +
+          "<ul><li><b>Cuboid</b>: length &times; width &times; height.</li><li><b>Cylinder</b>: the cross section is a circle, so &pi;r&sup2; &times; h.</li></ul>" +
+          "<p><b>Surface area</b> is the total area of all the faces, as if you unfolded it into a net. A cuboid has 6 faces in 3 matching pairs.</p>" +
+          "<div class='keep'><b>Keep this</b>Volume is cubed units: cm&sup3;, m&sup3;. Surface area is squared: cm&sup2;. The units are a free check on which one you have found.</div>" },
+
+  { type: "num", topic: "Volume",
+    q: "Work out the volume and the surface area of this cuboid.",
+    fig: CUBOID,
+    boxes: [
+      { label: "Volume", a: 60, post: "cm&sup3;" },
+      { label: "Surface area", a: 94, post: "cm&sup2;" }
+    ],
+    hint: "Volume: multiply the three lengths. Surface area: find the front, top and side faces, add them, then double, because each has a twin opposite.",
+    why: "Volume: 5 &times; 3 &times; 4 = <b>60 cm&sup3;</b>.<br>Faces: front 5 &times; 4 = 20, top 5 &times; 3 = 15, side 3 &times; 4 = 12. One of each: 20 + 15 + 12 = 47. Doubled: <b>94 cm&sup2;</b>.<br>Forgetting to double, 47, is the common slip." },
+
+  { type: "num", topic: "Volume",
+    q: "Work out the volume of each shape. Give the cylinder to 1 decimal place.",
+    fig: PRISMQ,
+    boxes: [
+      { label: "Volume of prism A", a: 120, post: "cm&sup3;" },
+      { label: "Volume of cylinder B", a: 282.7, tol: 0.05, post: "cm&sup3;" }
+    ],
+    hint: "A: the cross section is the triangle. Find its area (half base times height), then times by the length. B: area of the circle, then times by the height.",
+    why: "A: triangle area &frac12; &times; 6 &times; 4 = 12 cm&sup2;. Times the length: 12 &times; 10 = <b>120 cm&sup3;</b>. (6 &times; 4 &times; 10 = 240 forgets the half.)<br>B: circle area &pi; &times; 3&sup2; = 28.274... cm&sup2;. Times the height: 282.743..., so <b>282.7 cm&sup3;</b>." },
+
+  /* ---------- UNITS AND RATES ---------- */
+  { type: "learn", topic: "Units and rates",
+    title: "Units, and measures that compare two things",
+    fig: RATES,
+    html: "<p><b>Length</b>: 10 mm = 1 cm, 100 cm = 1 m, 1000 m = 1 km. To go to a smaller unit, multiply; to a bigger one, divide.</p>" +
+          "<p><b>Compound measures</b> combine two units:</p>" +
+          "<ul><li><b>Speed</b> = distance &divide; time (km/h, m/s, mph)</li><li><b>Density</b> = mass &divide; volume (g/cm&sup3;)</li><li><b>Pressure</b> = force &divide; area (N/m&sup2;)</li></ul>" +
+          "<p>Time trap: 2 hours 30 minutes is <b>2.5 hours</b>, not 2.3. Divide the minutes by 60.</p>" +
+          "<p><b>Stretch: area units.</b> 1 m = 100 cm, so 1 m&sup2; = 100 &times; 100 = <b>10 000 cm&sup2;</b>. Square the length conversion.</p>" +
+          "<div class='keep'><b>Keep this</b>The unit tells you the formula: km per hour means km &divide; hours. Grams per cm&sup3; means grams &divide; cm&sup3;.</div>" },
+
+  { type: "num", topic: "Units and rates",
+    q: "A coach travels 150 km in 2 hours 30 minutes.<br>a) Write 2 hours 30 minutes in hours, as a decimal.<br>b) Work out the coach's average speed.<br>c) A cyclist rides at 18 km/h for 40 minutes. How far do they go?",
+    boxes: [
+      { label: "a) Time", a: 2.5, post: "hours" },
+      { label: "b) Average speed", a: 60, post: "km/h" },
+      { label: "c) Distance", a: 12, post: "km" }
+    ],
+    hint: "30 minutes is half an hour. Speed is distance &divide; time. For c, 40 minutes is 40 &divide; 60 of an hour; then distance is speed &times; time.",
+    why: "a) 30 &divide; 60 = 0.5, so <b>2.5 hours</b>.<br>b) 150 &divide; 2.5 = <b>60 km/h</b>. (Using 2.3 gives 65.2, the time trap.)<br>c) 40 minutes = 40 &divide; 60 = &frac23; of an hour. 18 &times; &frac23; = <b>12 km</b>." },
+
+  { type: "num", topic: "Units and rates",
+    q: "a) A block of metal has a mass of 540 g and a volume of 200 cm&sup3;. Work out its density.<br>b) A box pushes down with a force of 120 N on an area of 0.4 m&sup2;. Work out the pressure.",
+    boxes: [
+      { label: "a) Density", a: 2.7, post: "g/cm&sup3;" },
+      { label: "b) Pressure", a: 300, post: "N/m&sup2;" }
+    ],
+    hint: "Read the units: grams per cm&sup3; is grams &divide; cm&sup3;. Newtons per m&sup2; is newtons &divide; m&sup2;.",
+    why: "a) Density = mass &divide; volume = 540 &divide; 200 = <b>2.7 g/cm&sup3;</b>.<br>b) Pressure = force &divide; area = 120 &divide; 0.4 = <b>300 N/m&sup2;</b>. Dividing by a number less than 1 makes the answer bigger, which is why it is more than 120. The same force on a smaller area gives more pressure." },
+
+  { type: "num", topic: "Units and rates", stretch: true,
+    q: "A rug has an area of 3.5 m&sup2;. Work out its area in cm&sup2;, one step at a time.",
+    boxes: [
+      { label: "1 m = ? cm", a: 100, post: "cm" },
+      { label: "1 m&sup2; = ? cm&sup2;", a: 10000, post: "cm&sup2;" },
+      { label: "3.5 m&sup2; = ? cm&sup2;", a: 35000, post: "cm&sup2;" }
+    ],
+    hint: "Picture a 1 m by 1 m square. Each side is 100 cm. How many 1 cm squares fit inside?",
+    why: "1 m = 100 cm, so 1 m&sup2; = 100 cm &times; 100 cm = <b>10 000 cm&sup2;</b>. Then 3.5 &times; 10 000 = <b>35 000 cm&sup2;</b>.<br>Multiplying by 100 only, giving 350, is the trap: area conversions use the length factor squared (and volume uses it cubed)." },
+
+  /* ---------- PYTHAGORAS ---------- */
+  { type: "learn", topic: "Pythagoras",
+    title: "Pythagoras: right angled triangles",
+    fig: PYTH,
+    html: "<p>In a right angled triangle, the <b>hypotenuse</b> is the longest side, opposite the right angle. Call it c.</p>" +
+          "<p class='formula'><b>a&sup2; + b&sup2; = c&sup2;</b></p>" +
+          "<ul><li><b>Finding the hypotenuse</b>: square both, <b>add</b>, square root.</li>" +
+          "<li><b>Finding a shorter side</b>: square both, <b>subtract</b> (big take small), square root.</li></ul>" +
+          "<p><b>Between two coordinates</b>: sketch a right angled triangle. Count across and up, then use Pythagoras.</p>" +
+          "<div class='keep'><b>Keep this</b>Sense check every time: the hypotenuse must be the longest side. If your shorter side comes out longer than the hypotenuse, it was probably added instead of taken away.</div>" },
+
+  { type: "num", topic: "Pythagoras",
+    q: "Work out the lengths x and y. Give each answer to 1 decimal place.",
+    fig: PYQ,
+    boxes: [
+      { label: "x", a: 12.2, tol: 0.05, post: "cm" },
+      { label: "y", a: 10.2, tol: 0.05, post: "cm" }
+    ],
+    hint: "In A, x is opposite the right angle, so it is the hypotenuse: add. In B, the 13 cm is the hypotenuse and y is a shorter side: subtract.",
+    why: "x: 7&sup2; + 10&sup2; = 49 + 100 = 149, &radic;149 = 12.206..., so <b>12.2 cm</b>.<br>y: 13&sup2; &minus; 8&sup2; = 169 &minus; 64 = 105, &radic;105 = 10.246..., so <b>10.2 cm</b>.<br>Check: 12.2 is longer than 7 and 10, and 10.2 is shorter than 13. Adding in B would give 15.3, longer than the hypotenuse, so that cannot be right." },
+
+  { type: "num", topic: "Pythagoras",
+    q: "A is the point (1, 2) and B is the point (6, 14). Work out the length of the line AB.",
+    boxes: [
+      { label: "Distance across (x)", a: 5 },
+      { label: "Distance up (y)", a: 12 },
+      { label: "Length AB", a: 13 }
+    ],
+    hint: "Across is the difference in the x coordinates, up is the difference in the y coordinates. Those are the two shorter sides of a right angled triangle.",
+    why: "Across: 6 &minus; 1 = <b>5</b>. Up: 14 &minus; 2 = <b>12</b>.<br>AB is the hypotenuse: 5&sup2; + 12&sup2; = 25 + 144 = 169, and &radic;169 = <b>13</b>.<br>Adding 5 + 12 = 17 is walking round two sides; the straight line is shorter." },
+
+  /* ---------- TRIGONOMETRY ---------- */
+  { type: "learn", topic: "Trigonometry",
+    title: "SOHCAHTOA: sides and angles",
+    fig: SOH,
+    html: "<p>Use trigonometry when a right angled triangle involves an <b>angle</b>. First label the sides from the angle &theta;: <b>hypotenuse</b> (longest), <b>opposite</b> (across from &theta;), <b>adjacent</b> (next to &theta;).</p>" +
+          "<ul><li><b>SOH</b>: sin &theta; = opposite &divide; hypotenuse</li><li><b>CAH</b>: cos &theta; = adjacent &divide; hypotenuse</li><li><b>TOA</b>: tan &theta; = opposite &divide; adjacent</li></ul>" +
+          "<p>Pick the one that uses the two sides you are dealing with. To find a <b>side</b>, rearrange: opposite = hypotenuse &times; sin &theta;. To find an <b>angle</b>, use the inverse: &theta; = sin<sup>&minus;1</sup>(opposite &divide; hypotenuse).</p>" +
+          "<div class='keep'><b>Keep this</b>Label, choose, substitute, solve. And check the calculator is in degrees (a small D on the screen).</div>" },
+
+  { type: "mc", topic: "Trigonometry",
+    q: "You want to find y. Which should you use?",
+    fig: WHICHQ,
+    options: [
+      "tan, because you have the adjacent and want the opposite",
+      "sin, because you have the hypotenuse and want the opposite",
+      "cos, because you have the adjacent and want the hypotenuse",
+      "Pythagoras, because it is a right angled triangle"
+    ],
+    answer: 0,
+    hint: "Label the sides from the 40&deg; angle. Is the 9 m side the hypotenuse, or just next to the angle?",
+    why: "The 9 m side is next to the 40&deg; and is not the longest side, so it is the <b>adjacent</b>. y is across from the angle: the <b>opposite</b>. Opposite and adjacent: TOA. y = 9 &times; tan 40&deg; = 7.55 m to 2 d.p.<br>Pythagoras needs two sides already; here you only have one side and an angle." },
+
+  { type: "num", topic: "Trigonometry",
+    q: "Work out x and &theta;. Give each answer to 1 decimal place.",
+    fig: TRIGQ,
+    boxes: [
+      { label: "x", a: 6.9, tol: 0.05, post: "cm" },
+      { label: "&theta;", a: 32.0, tol: 0.05, post: "&deg;", show: "32.0" }
+    ],
+    hint: "A: you have the hypotenuse and want the opposite: SOH. B: you have the opposite and the adjacent and want the angle: TOA, then the inverse tan button.",
+    why: "A: sin 35&deg; = x &divide; 12, so x = 12 &times; sin 35&deg; = 6.882..., <b>6.9 cm</b>.<br>B: tan &theta; = 5 &divide; 8 = 0.625, so &theta; = tan<sup>&minus;1</sup>(0.625) = 32.005..., <b>32.0&deg;</b>.<br>If you got &minus;5.1 for x, the calculator is in radians. If you got 0.6 for &theta;, you stopped at 5 &divide; 8 (press tan<sup>&minus;1</sup> next), or the calculator is in radians." },
+
+  { type: "widget", topic: "Trigonometry",
+    title: "Ladder rescue",
+    html: "Three kittens, three ladders. Work out where the ladder needs to go, set it by dragging the yellow foot or tapping the buttons, then tap Climb!",
+    mount: mountLadder,
+    report: function(d){
+      if(!d || !d.result) return "Ladder rescue: " + (d && d.lv ? Math.min(d.lv, 3) : 0) + " of 3 kittens saved.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Ladder rescue: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  /* ---------- EXACT VALUES (STRETCH) ---------- */
+  { type: "learn", topic: "Exact trig values", stretch: true,
+    title: "Stretch: exact values with no calculator",
+    fig: EXACT,
+    html: "<p>On the non calculator paper you may need these. They all come from the two triangles above.</p>" +
+          "<table class='datatable'><tr><th></th><th>0&deg;</th><th>30&deg;</th><th>45&deg;</th><th>60&deg;</th><th>90&deg;</th></tr>" +
+          "<tr><th>sin</th><td>0</td><td>&frac12;</td><td>&radic;2/2</td><td>&radic;3/2</td><td>1</td></tr>" +
+          "<tr><th>cos</th><td>1</td><td>&radic;3/2</td><td>&radic;2/2</td><td>&frac12;</td><td>0</td></tr>" +
+          "<tr><th>tan</th><td>0</td><td>&radic;3/3</td><td>1</td><td>&radic;3</td><td>none</td></tr></table>" +
+          "<p>Patterns help: sin goes up 0, &frac12;, &radic;2/2, &radic;3/2, 1, and cos is the same list backwards. &radic;2/2 can also be written 1/&radic;2, and &radic;3/3 can be written 1/&radic;3. tan 90&deg; does not exist.</p>" +
+          "<div class='keep'><b>Keep this</b>sin 30&deg; = &frac12;, cos 60&deg; = &frac12;, tan 45&deg; = 1. Learn those three first, and the rest follow from the triangles.</div>" },
+
+  { type: "match", topic: "Exact trig values", stretch: true,
+    q: "Match each one to its exact value.",
+    pairs: [
+      ["sin 30&deg;", "&frac12;"],
+      ["cos 30&deg;", "&radic;3/2"],
+      ["tan 45&deg;", "1"],
+      ["cos 90&deg;", "0"],
+      ["tan 60&deg;", "&radic;3"],
+      ["sin 45&deg;", "&radic;2/2"]
+    ],
+    hint: "Use the half equilateral triangle for 30&deg; and 60&deg; (sides 1, &radic;3, 2) and the isosceles one for 45&deg; (sides 1, 1, &radic;2).",
+    why: "sin 30&deg; = opp &divide; hyp = 1 &divide; 2 = &frac12;. cos 30&deg; = &radic;3 &divide; 2. tan 45&deg; = 1 &divide; 1 = 1. cos 90&deg; = 0. tan 60&deg; = &radic;3 &divide; 1 = &radic;3. sin 45&deg; = 1 &divide; &radic;2, which is the same as &radic;2/2." },
+
+  { type: "num", topic: "Exact trig values", stretch: true,
+    q: "No calculator for this one.<br>a) A right angled triangle has hypotenuse 10 cm and an angle of 30&deg;. Work out the side opposite the 30&deg; angle.<br>b) A right angled triangle has an angle of 45&deg;. The side adjacent to it is 7 cm. Work out the side opposite the 45&deg; angle.",
+    boxes: [
+      { label: "a) Opposite side", a: 5, post: "cm" },
+      { label: "b) Opposite side", a: 7, post: "cm" }
+    ],
+    hint: "a) opposite = hypotenuse &times; sin 30&deg;, and sin 30&deg; is a nice fraction. b) opposite = adjacent &times; tan 45&deg;.",
+    why: "a) 10 &times; sin 30&deg; = 10 &times; &frac12; = <b>5 cm</b>.<br>b) 7 &times; tan 45&deg; = 7 &times; 1 = <b>7 cm</b>. That makes sense: a right angled triangle with a 45&deg; angle is isosceles, so the two shorter sides match." },
+
+  /* ---------- EXAM STYLE ---------- */
+  { type: "num", topic: "Exam style",
+    q: "<p>A skate ramp is a triangular prism, as shown. A calculator is allowed.</p><p>Work through it in parts.</p>",
+    fig: RAMP,
+    boxes: [
+      { label: "a) Length of the sloping surface", a: 2.5, post: "m" },
+      { label: "b) Angle x, to 1 decimal place", a: 16.3, tol: 0.05, post: "&deg;" },
+      { label: "c) Volume of the ramp", a: 1.26, post: "m&sup3;" },
+      { label: "d) Area of the sloping top surface", a: 3.75, post: "m&sup2;" }
+    ],
+    hint: "a) Pythagoras with 2.4 and 0.7: the slope is the hypotenuse. b) You know the opposite and adjacent to x: tan. c) Triangle area times the width. d) The top is a rectangle: slope length times width.",
+    why: "a) 2.4&sup2; + 0.7&sup2; = 5.76 + 0.49 = 6.25, &radic;6.25 = <b>2.5 m</b>.<br>b) tan x = 0.7 &divide; 2.4, x = tan<sup>&minus;1</sup>(0.2916...) = 16.26...&deg;, so <b>16.3&deg;</b>.<br>c) Cross section: &frac12; &times; 2.4 &times; 0.7 = 0.84 m&sup2;. Times the width: 0.84 &times; 1.5 = <b>1.26 m&sup3;</b>.<br>d) 2.5 &times; 1.5 = <b>3.75 m&sup2;</b>.<br>Four topics in one question is normal at GCSE. Spotting which tool each part needs is half the marks." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

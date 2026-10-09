@@ -841,10 +841,10 @@ EGWCAT.extras = [
 
 /* Small helpers both pages use */
 EGWCAT.act = function(id){ var all = EGWCAT.acts.concat(EGWCAT.extras || []); for(var i = 0; i < all.length; i++) if(all[i].id === id) return all[i]; return null; };
-EGWCAT.href = function(id, chunk){ return "/egw/" + id + ".html" + (chunk ? "#chunk-" + chunk : ""); };
+EGWCAT.href = function(id, chunk){ return ((window.HQ && HQ.base) || "/egw/") + id + ".html" + (chunk ? "#chunk-" + chunk : ""); };
 EGWCAT.state = function(id){
   try{
-    var r = localStorage.getItem("b5.egw." + id + ".v1");
+    var r = localStorage.getItem(((window.HQ && HQ.prefix) || "b5.egw.") + id + ".v1");
     var d = r ? JSON.parse(r) : null;
     return d && d.summary ? d.summary : null;
   }catch(e){ return null; }

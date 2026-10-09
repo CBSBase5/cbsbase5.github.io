@@ -48,7 +48,10 @@
 var EGW = (function(){
 "use strict";
 
-var PREFIX = "b5.egw.";
+/* Which HQ this is. EGW's pages have no config; another student's
+   HQ sets window.HQ in its conf.js before this file loads. */
+var HQ = window.HQ || { who: "EGW", prefix: "b5.egw.", base: "/egw/" };
+var PREFIX = HQ.prefix;
 var cfg, steps, state, key;
 
 /* ---------- small helpers ---------- */
@@ -314,7 +317,7 @@ function build(){
         '<div class="qnav" style="margin-top:18px">' +
           '<button class="btn btn-quiet" id="againBtn">Back to the chunks</button>' +
           '<button class="btn btn-quiet" id="freshBtn">Start fresh</button>' +
-          '<a class="btn" href="/egw/">Back to GCSE HQ</a>' +
+          '<a class="btn" href="' + HQ.base + '">Back to GCSE HQ</a>' +
         '</div>' +
         '<div id="sendHost"></div>' +
       '</div>' +
@@ -361,7 +364,7 @@ function build(){
   if(window.Base5Send){
     Base5Send.mount($("sendHost"), {
       tool: "GCSE HQ: " + (cfg.review ? "Second look, " : "") + cfg.title,
-      filename: "egw-" + cfg.id,
+      filename: HQ.who.toLowerCase() + "-" + cfg.id,
       getText: reportText
     });
   }
@@ -1298,9 +1301,9 @@ function buildReviewStart(){
     (n ? '<p class="lead">' + n + ' question' + (n === 1 ? "" : "s") + ' from <b>' + cfg.title + '</b> that needed Show me or a second go last time. ' +
       'Same as before: two goes, and Show me whenever you want it.</p>' +
       '<p class="tiny">Each one has a reminder of the idea tucked underneath, if you would like it.</p>' +
-      '<div class="qnav"><button class="btn" id="beginBtn">Start</button><a class="btn btn-quiet" href="/egw/">Not now</a></div>'
+      '<div class="qnav"><button class="btn" id="beginBtn">Start</button><a class="btn btn-quiet" href="' + HQ.base + '">Not now</a></div>'
     : '<p class="lead">Nothing from this activity is waiting for a second look right now.</p>' +
-      '<div class="qnav"><a class="btn" href="/egw/' + cfg.id + '.html">Open the activity</a><a class="btn btn-quiet" href="/egw/">Back to HQ</a></div>');
+      '<div class="qnav"><a class="btn" href="' + HQ.base + cfg.id + '.html">Open the activity</a><a class="btn btn-quiet" href="' + HQ.base + '">Back to HQ</a></div>');
   if(n) $("beginBtn").onclick = function(){ go(0); };
 }
 
@@ -1330,8 +1333,8 @@ function run(c){
     state = load() || fresh();
   }
   if(!state.widgets) state.widgets = {};
-  try{ localStorage.setItem("base5.who.v1", "EGW"); }catch(e){}
-  document.title = c.title + " - EGW GCSE HQ";
+  try{ localStorage.setItem("base5.who.v1", HQ.who); }catch(e){}
+  document.title = c.title + " - " + HQ.who + " GCSE HQ";
   makeChunks();
   build();
   if(cfg.review) buildReviewStart();

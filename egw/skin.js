@@ -8,7 +8,8 @@
    ========================================================== */
 var EGWSKIN = (function(){
 "use strict";
-var KEY = "b5.egw.skin.v1";
+var HQ = window.HQ || { prefix: "b5.egw." };
+var KEY = HQ.prefix + "skin.v1";
 var LIST = [
   { id: "night",   name: "Night desk",     need: 0,    line: "The original. A notebook at night." },
   { id: "paper",   name: "Paper and ink",  need: 0,    line: "Light and calm, like a clean page." },
@@ -18,6 +19,8 @@ var LIST = [
   { id: "pixel",   name: "Pixel arcade",   need: 1000, line: "Scanlines, square corners, insert coin." },
   { id: "paws",    name: "Bonnie's den",   need: 1500, line: "Cocoa brown, with tiny paw prints everywhere." }
 ];
+/* another student's HQ can name its own starting look */
+if(HQ.look){ LIST[0].name = HQ.look.name; LIST[0].line = HQ.look.line; }
 function read(){
   try{ var d = JSON.parse(localStorage.getItem(KEY) || "null"); return d && typeof d === "object" ? d : {}; }catch(e){ return {}; }
 }
@@ -39,7 +42,7 @@ function sparks(){
   try{
     for(var i = 0; i < localStorage.length; i++){
       var k = localStorage.key(i);
-      if(!/^b5\.egw\.[a-z0-9\-]+\.v1$/.test(k)) continue;
+      if(k.indexOf(HQ.prefix) !== 0 || !/^[a-z0-9\-]+\.v1$/.test(k.slice(HQ.prefix.length))) continue;
       var d = JSON.parse(localStorage.getItem(k) || "null");
       if(d && d.summary && d.summary.sparks) n += d.summary.sparks;
     }

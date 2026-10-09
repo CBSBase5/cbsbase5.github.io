@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<!-- BUILT by lp/_build/build_lp.py from the shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Number skills - LP GCSE HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/lp/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lp/lp.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* Written fractions and recurring dots */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;margin:0 2px}
+.fr > span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+.rec{position:relative;display:inline-block}
+.rec::after{content:"";position:absolute;top:-2px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:currentColor}
+.nocalc{display:inline-block;font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:99px;padding:3px 10px;margin:0 6px 4px 0;vertical-align:middle}
+.matchgrid .mleft .fr{font-size:1.05rem}
+/* Factor tree builder (widget on this page only) */
+.ft-steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.ft-steps span{font-family:var(--display);font-weight:700;font-size:.78rem;border:2px solid var(--ink);border-radius:99px;padding:3px 10px;background:var(--white)}
+.ft-steps span.on{background:var(--mint);color:var(--ink)}
+.ft-steps span.now{background:var(--sun)}
+.ft-svg svg{width:100%;max-width:440px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.ft-svg g[data-p]{cursor:pointer}
+.ft-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ft-acts button{font-family:var(--display);font-weight:700;font-size:1.05rem;padding:10px 14px;border:3px solid var(--ink);border-radius:12px;background:var(--white);color:var(--ink);cursor:pointer;min-width:74px}
+.ft-acts button:hover{background:var(--accent-soft)}
+.ft-acts button.ring{background:var(--mint)}
+.ft-acts button.sel{background:var(--sun);box-shadow:0 3px 0 var(--ink)}
+.ft-acts button.placed{opacity:.55}
+.ft-score{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.ft-score .chipstat{background:var(--white);border:2px solid var(--ink)}
+.ft-in{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.ft-in input{font-family:inherit;font-size:1.15rem;width:110px;text-align:center;padding:8px;border:3px solid var(--ink);border-radius:10px}
+.ft-in input.ok{border-color:var(--good);background:rgba(31,157,99,.1)}
+.ft-in input.no{border-color:var(--orange-deep);background:rgba(255,93,93,.1)}
+.ft-prod{font-size:1rem;margin:4px 0}
+.ft-prod .tick{color:var(--good);font-weight:700}
+.ft-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lp/"><span class="hqlogo">LP</span><span class="hqname">GCSE HQ<small>revision and planning</small></span></a>
+    <nav class="hqnav"><a href="/lp/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Number skills</h2>
+    <span>GCSE Maths, Foundation. Ordering, negatives, rounding, BIDMAS, primes, HCF and LCM, powers, standard form and fractions.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LP's GCSE HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lp/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=9"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var NC = '<span class="nocalc">No calculator</span> ';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function fr(top, bot){ return '<span class="fr"><span>' + top + '</span><span>' + bot + '</span></span>'; }
+function rec(d){ return '<span class="rec">' + d + '</span>'; }
+
+/* ---------- figures ---------- */
+
+/* Number line for negatives */
+var NL = (function(){
+  var s = '<svg viewBox="0 0 520 120" role="img" aria-label="Number line from minus 5 to 5. Minus 4 is further left than minus 1, so minus 4 is smaller.">';
+  function X(v){ return 40 + (v + 5) * 44; }
+  s += '<path d="M22 70 H498" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<path d="M30 63 L20 70 L30 77" fill="none" stroke="' + INK + '" stroke-width="3"/><path d="M490 63 L500 70 L490 77" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  for(var v = -5; v <= 5; v++){
+    s += '<path d="M' + X(v) + ' 62 V78" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(X(v), 104, v < 0 ? "&minus;" + (-v) : String(v), 19, INK, BODY + ' text-anchor="middle"');
+  }
+  s += '<circle cx="' + X(-4) + '" cy="70" r="9" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<circle cx="' + X(-1) + '" cy="70" r="9" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += t((X(-4) + X(-1)) / 2, 40, "&minus;4 &lt; &minus;1", 20, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(24, 30, "&#8592; smaller", 18, CORAL, LAB + ' font-weight="700"');
+  s += t(496, 30, "bigger &#8594;", 18, BLUE, LAB + ' font-weight="700" text-anchor="end"');
+  s += '</svg>';
+  return s;
+})();
+
+/* BIDMAS staircase */
+var BIDMAS = (function(){
+  var rows = [["B", "Brackets", BLUE], ["I", "Indices: powers, roots", CYAN], ["DM", "&divide; and &times;, left to right", VIOLET], ["AS", "+ and &minus;, left to right", CORAL]];
+  var s = '<svg viewBox="0 0 400 216" role="img" aria-label="BIDMAS as a staircase: brackets first, then indices, then division and multiplication left to right, then addition and subtraction left to right.">';
+  rows.forEach(function(r, k){
+    var x = 4 + k * 22, y = 4 + k * 53;
+    s += '<rect x="' + x + '" y="' + y + '" width="' + (392 - x) + '" height="46" rx="10" fill="' + r[2] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x + 14, y + 31, r[0], 21, WHITE, LAB + ' font-weight="700"');
+    s += t(x + 58, y + 30, r[1], 18, WHITE, BODY + ' font-weight="700"');
+  });
+  s += '</svg>';
+  return s;
+})();
+
+/* Significant figures */
+var SF = (function(){
+  var s = '<svg viewBox="0 0 400 214" role="img" aria-label="In 0.004637 the zeros at the front are not significant. The 4 is the first significant figure and the 6 is the second. To 2 significant figures it is 0.0046.">';
+  var digs = ["0", ".", "0", "0", "4", "6", "3", "7"];
+  digs.forEach(function(dg, k){
+    var x = 60 + k * 38;
+    var sig = k >= 4;
+    if(dg !== "."){
+      s += '<rect x="' + (x - 16) + '" y="10" width="32" height="44" rx="7" fill="' + (k === 4 || k === 5 ? SUN : sig ? WHITE : PAPER) + '" stroke="' + (sig ? INK : LINE) + '" stroke-width="2.5"/>';
+    }
+    s += t(x, 42, dg, 26, sig ? INK : "#8a8fa8", LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += '<path d="M44 64 H190" stroke="#8a8fa8" stroke-width="2"/>';
+  s += t(117, 86, "not significant", 16, "#6a6f88", BODY + ' text-anchor="middle"');
+  s += '<path d="M212 60 V70" stroke="' + INK + '" stroke-width="2"/><path d="M250 60 V70" stroke="' + INK + '" stroke-width="2"/>';
+  s += t(212, 88, "1st", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(250, 88, "2nd", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(200, 128, "To 2 sf: 0.0046", 24, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(200, 154, "the next digit is 3, so the 6 stays", 17, INK, BODY + ' text-anchor="middle"');
+  s += t(200, 198, "34 782 to 2 sf = 35 000", 20, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* A finished factor tree for 90 */
+function treeNode(x, y, v, prime){
+  return (prime ? '<circle cx="' + x + '" cy="' + y + '" r="27" fill="none" stroke="' + MINT + '" stroke-width="3"/>' : "") +
+    '<circle cx="' + x + '" cy="' + y + '" r="22" fill="' + (prime ? MINT : PAPER) + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    t(x, y + 6, v, 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+}
+var FT90 =
+'<svg viewBox="0 0 520 250" role="img" aria-label="Factor tree. 90 splits into 9 and 10. 9 splits into 3 and 3. 10 splits into 2 and 5. The primes are ringed. 90 equals 2 times 3 squared times 5.">' +
+'<path d="M200 34 L130 100 M200 34 L270 100 M130 100 L90 168 M130 100 L170 168 M270 100 L230 168 M270 100 L310 168" stroke="' + INK + '" stroke-width="2.5"/>' +
+treeNode(200, 34, "90") + treeNode(130, 100, "9") + treeNode(270, 100, "10") +
+treeNode(90, 168, "3", true) + treeNode(170, 168, "3", true) + treeNode(230, 168, "2", true) + treeNode(310, 168, "5", true) +
+t(430, 100, "ring the", 16, INK, BODY + ' text-anchor="middle"') + t(430, 120, "primes", 16, INK, BODY + ' text-anchor="middle"') +
+'<path d="M378 140 L340 160" stroke="' + MINT + '" stroke-width="3"/>' +
+t(260, 236, "90 = 2 &times; 3 &times; 3 &times; 5 = 2 &times; 3&sup2; &times; 5", 20, BLUE, LAB + ' font-weight="700" text-anchor="middle"') +
+'</svg>';
+
+/* Venn for 18 and 24 */
+function vennSvg(a, b, left, mid, right, foot, aria){
+  var s = '<svg viewBox="60 0 400 ' + (216 + [].concat(foot).length * 26) + '" role="img" aria-label="' + aria + '">';
+  s += '<circle cx="200" cy="112" r="96" fill="' + BLUE + '" fill-opacity=".12" stroke="' + BLUE + '" stroke-width="3"/>';
+  s += '<circle cx="320" cy="112" r="96" fill="' + CORAL + '" fill-opacity=".12" stroke="' + CORAL + '" stroke-width="3"/>';
+  s += t(118, 30, a, 22, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(402, 30, b, 22, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  function stack(arr, x){
+    var o = "", y0 = 112 - (arr.length - 1) * 17;
+    arr.forEach(function(v, k){ o += t(x, y0 + k * 34 + 8, v, 24, INK, LAB + ' font-weight="700" text-anchor="middle"'); });
+    return o;
+  }
+  s += stack(left, 150) + stack(mid, 260) + stack(right, 370);
+  [].concat(foot).forEach(function(f, k){ s += t(260, 236 + k * 26, f, 19, INK, BODY + ' font-weight="700" text-anchor="middle"'); });
+  s += '</svg>';
+  return s;
+}
+var VENN = vennSvg("18", "24", ["3"], ["2", "3"], ["2", "2"], ["HCF = 2 &times; 3 = 6", "LCM = 3 &times; 2 &times; 3 &times; 2 &times; 2 = 72"],
+  "Venn diagram. 18 only holds a 3. The middle holds 2 and 3. 24 only holds 2 and 2. HCF is 6 and LCM is 72.");
+
+/* Squares and cubes */
+var POW = (function(){
+  var s = '<svg viewBox="0 0 520 180" role="img" aria-label="Three squared is a 3 by 3 square of 9 small squares. Two cubed is a 2 by 2 by 2 cube of 8 small cubes.">';
+  for(var r = 0; r < 3; r++) for(var c = 0; c < 3; c++){
+    s += '<rect x="' + (40 + c * 36) + '" y="' + (20 + r * 36) + '" width="36" height="36" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += t(94, 162, "3&sup2; = 3 &times; 3 = 9", 21, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  // isometric 2x2x2 cube
+  var ox = 330, oy = 120, u = 34, dx = 17, dy = 14;
+  function P(x, y){ return x.toFixed(1) + " " + y.toFixed(1); }
+  for(var i = 0; i < 2; i++) for(var j = 0; j < 2; j++){
+    var x = ox + i * u, y = oy - j * u;
+    s += '<path d="M' + P(x, y) + ' L' + P(x + u, y) + ' L' + P(x + u, y - u) + ' L' + P(x, y - u) + ' Z" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  for(var i2 = 0; i2 < 2; i2++) for(var k = 0; k < 2; k++){
+    var tx = ox + i2 * u + k * dx, ty = oy - 2 * u - k * dy;
+    s += '<path d="M' + P(tx, ty) + ' L' + P(tx + u, ty) + ' L' + P(tx + u + dx, ty - dy) + ' L' + P(tx + dx, ty - dy) + ' Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  for(var j2 = 0; j2 < 2; j2++) for(var k2 = 0; k2 < 2; k2++){
+    var sx = ox + 2 * u + k2 * dx, sy = oy - j2 * u - k2 * dy;
+    s += '<path d="M' + P(sx, sy) + ' L' + P(sx + dx, sy - dy) + ' L' + P(sx + dx, sy - dy - u) + ' L' + P(sx, sy - u) + ' Z" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += t(370, 162, "2&sup3; = 2 &times; 2 &times; 2 = 8", 21, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Standard form hops */
+var SFORM = (function(){
+  var s = '<svg viewBox="0 0 520 170" role="img" aria-label="34000 written as 3.4 times 10 to the power 4. The decimal point hops 4 places.">';
+  var dg = ["3", "4", "0", "0", "0"];
+  dg.forEach(function(v, k){
+    var x = 70 + k * 56;
+    s += '<rect x="' + (x - 22) + '" y="56" width="44" height="52" rx="8" fill="' + (k < 2 ? SUN : WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x, 92, v, 28, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += '<circle cx="98" cy="104" r="5" fill="' + CORAL + '"/>';
+  s += '<circle cx="322" cy="104" r="5" fill="' + INK + '" opacity=".35"/>';
+  for(var h = 0; h < 4; h++){
+    var x1 = 322 - h * 56, x2 = x1 - 56;
+    s += '<path d="M' + x1 + ' 50 Q' + ((x1 + x2) / 2) + ' 18 ' + x2 + ' 50" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>';
+    s += t((x1 + x2) / 2, 30, String(h + 1), 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += t(470, 72, "4 hops", 18, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(260, 152, '34 000 = 3.4 &times; 10<tspan dy="-12" font-size="18">4</tspan>', 26, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Fraction bars: 1/3 + 1/4 = 7/12 */
+var FBARS = (function(){
+  var s = '<svg viewBox="0 0 520 200" role="img" aria-label="Fraction bars. One third is the same as four twelfths. One quarter is three twelfths. Together they make seven twelfths.">';
+  function bar(y, parts, shaded, col, label){
+    var w = 360 / parts, o = "";
+    for(var k = 0; k < parts; k++){
+      o += '<rect x="' + (120 + k * w).toFixed(1) + '" y="' + y + '" width="' + w.toFixed(1) + '" height="36" fill="' + (k < shaded ? col : WHITE) + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    o += t(104, y + 26, label, 20, INK, LAB + ' font-weight="700" text-anchor="end"');
+    return o;
+  }
+  s += bar(10, 3, 1, BLUE, "1/3");
+  s += bar(56, 4, 1, CORAL, "1/4");
+  var w = 30, o = "";
+  for(var k = 0; k < 12; k++){
+    var col = k < 4 ? BLUE : k < 7 ? CORAL : WHITE;
+    o += '<rect x="' + (120 + k * w) + '" y="120" width="' + w + '" height="36" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += o + t(104, 146, "7/12", 20, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += t(300, 188, "4 twelfths + 3 twelfths = 7 twelfths", 20, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+var FDP_TABLE = '<table class="datatable"><tr><th>Fraction</th><th>Decimal</th><th>Percentage</th></tr>' +
+  '<tr><td>1/2</td><td>0.5</td><td>50%</td></tr>' +
+  '<tr><td>1/4</td><td>0.25</td><td>25%</td></tr>' +
+  '<tr><td>3/4</td><td>0.75</td><td>75%</td></tr>' +
+  '<tr><td>1/5</td><td>0.2</td><td>20%</td></tr>' +
+  '<tr><td>1/10</td><td>0.1</td><td>10%</td></tr>' +
+  '<tr><td>1/8</td><td>0.125</td><td>12.5%</td></tr>' +
+  '<tr><td>1/3</td><td>0.' + rec("3") + '</td><td>33.3...%</td></tr>' +
+  '</table>';
+
+/* ---------- the factor tree builder ---------- */
+function isPrime(n){ if(n < 2) return false; for(var a = 2; a * a <= n; a++) if(n % a === 0) return false; return true; }
+function pairsOf(n){ var r = []; for(var a = 2; a * a <= n; a++) if(n % a === 0) r.push([a, n / a]); return r; }
+function nodeAt(root, path){ var n = root; for(var k = 0; k < path.length; k++) n = n.k[+path.charAt(k)]; return n; }
+function leafList(n, path, out){
+  out = out || [];
+  if(n.k){ leafList(n.k[0], path + "0", out); leafList(n.k[1], path + "1", out); }
+  else out.push({ n: n, p: path });
+  return out;
+}
+function depth(n){ return n.k ? 1 + Math.max(depth(n.k[0]), depth(n.k[1])) : 0; }
+function firstOpen(root){ var L = leafList(root, ""); for(var k = 0; k < L.length; k++) if(!L[k].n.r) return L[k].p; return null; }
+function primesOf(root){ return leafList(root, "").map(function(o){ return o.n.v; }).sort(function(a, b){ return a - b; }); }
+function indexForm(ps){
+  var out = [], k = 0;
+  while(k < ps.length){
+    var j = k; while(j < ps.length && ps[j] === ps[k]) j++;
+    var c = j - k;
+    out.push(ps[k] + (c > 1 ? (c === 2 ? "&sup2;" : c === 3 ? "&sup3;" : "<sup>" + c + "</sup>") : ""));
+    k = j;
+  }
+  return out.join(" &times; ");
+}
+
+var TREES = [60, 84];
+var CHIPS = [2, 2, 3, 5, 7];
+var BONUS = [72, 90, 126, 150, 180, 210, 252, 96, 120, 200];
+var ZONES = ["Only in 60", "In both", "Only in 84"];
+
+function mountTree(el, api){
+  var d = api.data;
+  if(typeof d.stage !== "number") d.stage = 0;   // 0 tree 60, 1 tree 84, 2 Venn, 3 HCF and LCM, 4 done
+  if(!d.trees) d.trees = [{ v: 60 }, { v: 84 }];
+  if(typeof d.miss !== "number") d.miss = 0;
+  if(typeof d.grown !== "number") d.grown = 0;
+  if(!d.venn) d.venn = [-1, -1, -1, -1, -1];
+  if(typeof d.bonus !== "number") d.bonus = 0;
+  var sel = null, chip = -1;
+
+  el.innerHTML =
+    '<div class="wpanel" data-r="task"></div>' +
+    '<div class="ft-svg" data-r="svg"></div>' +
+    '<div class="wpanel" data-r="acts"></div>' +
+    '<div class="wrow"><button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button></div>' +
+    '<div class="fb ft-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb ft-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb ft-fb " + cls; f.innerHTML = html;
+  }
+
+  function curTree(){
+    if(d.stage < 2) return d.trees[d.stage];
+    if(d.stage === 4 && d.bt) return d.bt;
+    return null;
+  }
+
+  /* ----- drawing a tree ----- */
+  function treeSvg(root){
+    var L = leafList(root, ""), n = L.length, D = depth(root);
+    var W = 360, slot = W / n, dy = D ? Math.min(66, Math.max(52, 190 / D)) : 0;
+    var H = 34 + D * dy + 36;
+    var pos = {}, idx = 0;
+    (function place(node, path, dep){
+      if(node.k){
+        place(node.k[0], path + "0", dep + 1); place(node.k[1], path + "1", dep + 1);
+        pos[path] = { x: (pos[path + "0"].x + pos[path + "1"].x) / 2, y: 32 + dep * dy };
+      }else{
+        pos[path] = { x: (idx++ + 0.5) * slot, y: 32 + dep * dy };
+      }
+    })(root, "", 0);
+    var s = '<svg viewBox="0 0 360 ' + Math.round(H) + '" role="img" aria-label="Factor tree for ' + root.v + '. Leaves: ' +
+      L.map(function(o){ return o.n.v + (o.n.r ? " ringed" : ""); }).join(", ") + '">';
+    (function lines(node, path){
+      if(!node.k) return;
+      for(var c = 0; c < 2; c++){
+        var a = pos[path], b = pos[path + c];
+        s += '<path d="M' + a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ' L' + b.x.toFixed(1) + ' ' + b.y.toFixed(1) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+        lines(node.k[c], path + c);
+      }
+    })(root, "");
+    (function nodes(node, path){
+      var p = pos[path], open = !node.k && !node.r, isSel = open && path === sel;
+      var fill = node.r ? MINT : node.k ? PAPER : isSel ? SUN : WHITE;
+      s += '<g' + (open ? ' data-p="' + path + '" role="button" aria-label="' + node.v + '"' : "") + '>';
+      if(node.r) s += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="27" fill="none" stroke="' + MINT + '" stroke-width="3"/>';
+      if(isSel) s += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="28" fill="none" stroke="' + SUN + '" stroke-width="4" stroke-dasharray="5 4"/>';
+      s += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="22" fill="' + fill + '" stroke="' + (open && !isSel ? BLUE : INK) + '" stroke-width="' + (open ? 3 : 2.5) + '"/>';
+      s += t(p.x.toFixed(1), (p.y + 6).toFixed(1), node.v, node.v >= 100 ? 16 : 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+      s += '</g>';
+      if(node.k){ nodes(node.k[0], path + "0"); nodes(node.k[1], path + "1"); }
+    })(root, "");
+    s += '</svg>';
+    return s;
+  }
+
+  /* ----- drawing the Venn ----- */
+  function vennLive(){
+    var Lz = [], Mz = [], Rz = [];
+    d.venn.forEach(function(z, i){ if(z === 0) Lz.push(CHIPS[i]); else if(z === 1) Mz.push(CHIPS[i]); else if(z === 2) Rz.push(CHIPS[i]); });
+    var s = '<svg viewBox="0 0 360 200" role="img" aria-label="Venn diagram for 60 and 84. Only 60: ' + (Lz.join(", ") || "empty") + '. Both: ' + (Mz.join(", ") || "empty") + '. Only 84: ' + (Rz.join(", ") || "empty") + '.">';
+    s += '<circle cx="140" cy="104" r="84" fill="' + BLUE + '" fill-opacity=".12" stroke="' + BLUE + '" stroke-width="3"/>';
+    s += '<circle cx="220" cy="104" r="84" fill="' + CORAL + '" fill-opacity=".12" stroke="' + CORAL + '" stroke-width="3"/>';
+    s += t(60, 26, "60", 20, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+    s += t(300, 26, "84", 20, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+    function stack(arr, x){
+      var o = "", y0 = 104 - (arr.length - 1) * 15;
+      arr.forEach(function(v, k){
+        o += '<circle cx="' + x + '" cy="' + (y0 + k * 30) + '" r="13" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+        o += t(x, y0 + k * 30 + 6, v, 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+      });
+      return o;
+    }
+    s += stack(Lz, 98) + stack(Mz, 180) + stack(Rz, 262);
+    s += '</svg>';
+    return { svg: s, L: Lz, M: Mz, R: Rz };
+  }
+  function prod(a){ return a.reduce(function(x, y){ return x * y; }, 1); }
+
+  /* ----- panels ----- */
+  function stepsBar(){
+    var names = ["Tree 60", "Tree 84", "Venn", "HCF and LCM"];
+    return '<div class="ft-steps" aria-hidden="true">' + names.map(function(nm, k){
+      return '<span class="' + (k < d.stage ? "on" : k === d.stage ? "now" : "") + '">' + nm + '</span>';
+    }).join("") + '</div>';
+  }
+  function scoreRow(){
+    return '<div class="ft-score"><span class="chipstat">Primes ringed: ' + d.grown + '</span><span class="chipstat">Slips: ' + d.miss + '</span>' +
+      (d.bonus ? '<span class="chipstat">Bonus trees: ' + d.bonus + '</span>' : "") + '</div>';
+  }
+
+  function drawTask(){
+    var h = stepsBar();
+    if(d.stage < 2){
+      h += '<p style="margin:0 0 6px"><b>Grow a factor tree for ' + TREES[d.stage] + '.</b> Tap a number, then split it into a factor pair or ring it if it is prime. Keep going until every branch ends in a ringed prime.</p>';
+    }else if(d.stage === 2){
+      h += '<p style="margin:0 0 6px"><b>Venn time.</b> 60 = 2 &times; 2 &times; 3 &times; 5 and 84 = 2 &times; 2 &times; 3 &times; 7. Pop each prime into the Venn. Primes that both numbers share go in the middle, once. Tap a prime, then tap where it goes.</p>';
+    }else if(d.stage === 3){
+      h += '<p style="margin:0 0 6px"><b>Read it off.</b> Use your Venn to find the HCF and the LCM of 60 and 84.</p>';
+    }else{
+      h += '<p style="margin:0 0 6px"><b>All done.</b> HCF of 60 and 84 is 12, LCM is 420. Fancy growing a bonus tree? No pressure.</p>';
+    }
+    q("task").innerHTML = h + scoreRow();
+  }
+
+  function drawTreeStage(){
+    var root = curTree();
+    if(sel === null || !nodeAt(root, sel) || nodeAt(root, sel).k || nodeAt(root, sel).r) sel = firstOpen(root);
+    q("svg").innerHTML = treeSvg(root);
+    [].forEach.call(q("svg").querySelectorAll("g[data-p]"), function(g){
+      g.addEventListener("click", function(){ sel = g.getAttribute("data-p"); draw(); });
+    });
+    var acts = q("acts");
+    if(sel === null){
+      var ps = primesOf(root);
+      acts.innerHTML = '<p class="wnote" style="margin:0"><b>' + root.v + ' = ' + ps.join(" &times; ") + ' = ' + indexForm(ps) + '</b></p>';
+      return;
+    }
+    var n = nodeAt(root, sel);
+    var opts = pairsOf(n.v).map(function(pr){ return { pr: pr, lab: pr[0] + " &times; " + pr[1] }; });
+    opts.push({ pr: [1, n.v], lab: "1 &times; " + n.v });
+    var h = '<p class="wnote" style="margin:0 0 8px">What will you do with <b>' + n.v + '</b>?</p><div class="ft-acts">';
+    opts.forEach(function(o, k){ h += '<button type="button" data-o="' + k + '">Split ' + o.lab + '</button>'; });
+    h += '<button type="button" class="ring" data-o="ring">It is prime: ring it</button></div>';
+    acts.innerHTML = h;
+    [].forEach.call(acts.querySelectorAll("button[data-o]"), function(b){
+      b.onclick = function(){
+        var o = b.getAttribute("data-o");
+        if(o === "ring") act(n, "ring"); else act(n, opts[+o].pr);
+      };
+    });
+  }
+
+  function act(n, what, viaShow){
+    var bonus = d.stage === 4;
+    var root = curTree();
+    if(what === "ring"){
+      if(!isPrime(n.v)){
+        if(!bonus){ d.miss++; }
+        var pr = pairsOf(n.v)[0];
+        fb("nudge", "<b>Not prime.</b> " + n.v + " = " + pr[0] + " &times; " + pr[1] + ", so it has more factors than just 1 and itself. Split it instead.");
+        api.save(); draw(); return;
+      }
+      n.r = true; d.grown++;
+      fb(viaShow ? "show" : "good", viaShow ? "<b>Here is the move:</b> " + n.v + " only has the factors 1 and " + n.v + ", so it is prime. Ring it." : "<b>" + n.v + " ringed.</b> " + pick(["Prime spotted.", "That one is done growing.", "Nice spot.", "Prime, and proud of it."]));
+    }else if(what[0] === 1){
+      if(!bonus){ d.miss++; }
+      if(isPrime(n.v)) fb("nudge", "<b>Ha, nearly.</b> 1 &times; " + n.v + " is the <b>only</b> way to split " + n.v + ", and that is exactly what makes it prime. Ring it instead.");
+      else fb("nudge", "<b>That branch would never end.</b> " + n.v + " = 1 &times; " + n.v + " = 1 &times; 1 &times; " + n.v + "... and 1 is not prime, so it does not belong in a factor tree. Pick a pair without a 1.");
+      api.save(); draw(); return;
+    }else{
+      n.k = [{ v: what[0] }, { v: what[1] }];
+      fb(viaShow ? "show" : null, viaShow ? "<b>Here is the move:</b> " + n.v + " = " + what[0] + " &times; " + what[1] + ". Any factor pair works; the smallest prime is a safe start." : "");
+    }
+    sel = firstOpen(root);
+    api.save();
+    if(sel === null) treeFinished(root, viaShow);
+    draw();
+  }
+
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+
+  function treeFinished(root){
+    var ps = primesOf(root);
+    var line = "<b>Every branch is prime.</b> " + root.v + " = " + ps.join(" &times; ") + " = <b>" + indexForm(ps) + "</b>.";
+    if(d.stage === 4){
+      d.bonus++; api.save();
+      fb("good", line + ' Bonus tree done.<br><button class="btn" type="button" data-r="again">Grow another</button>');
+      return;
+    }
+    fb("good", line + " Whichever pair you start with, you always land on the same primes." +
+      '<br><button class="btn" type="button" data-r="go">' + (d.stage === 0 ? "Next: grow 84" : "Next: the Venn") + '</button>');
+  }
+
+  function drawVennStage(){
+    var v = vennLive();
+    q("svg").innerHTML = v.svg;
+    var left = v.L.concat(v.M), right = v.M.concat(v.R);
+    function line(name, arr, target){
+      if(!arr.length) return '<p class="ft-prod">' + name + ' circle: empty so far</p>';
+      var p = prod(arr);
+      return '<p class="ft-prod">' + name + ' circle multiplies to ' + arr.join(" &times; ") + ' = <b>' + p + '</b>' + (p === target ? ' <span class="tick">&#10003;</span>' : "") + '</p>';
+    }
+    var h = '<div class="ft-acts" style="margin-bottom:8px">';
+    CHIPS.forEach(function(c, i){
+      h += '<button type="button" data-c="' + i + '" class="' + (chip === i ? "sel" : d.venn[i] >= 0 ? "placed" : "") + '" aria-label="Prime ' + c + (d.venn[i] >= 0 ? ", now " + ZONES[d.venn[i]] : "") + '">' + c + '</button>';
+    });
+    h += '</div><p class="wnote" style="margin:0 0 6px">' + (chip >= 0 ? "Where does this " + CHIPS[chip] + " go?" : "Tap a prime first.") + '</p><div class="ft-acts">';
+    ZONES.forEach(function(z, k){ h += '<button type="button" data-z="' + k + '"' + (chip < 0 ? " disabled" : "") + '>' + z + '</button>'; });
+    h += '</div>' + line("60", left, 60) + line("84", right, 84) +
+      '<div class="wrow"><button class="btn" type="button" data-r="vcheck"' + (d.venn.indexOf(-1) >= 0 ? " disabled" : "") + '>Check my Venn</button></div>';
+    var acts = q("acts");
+    acts.innerHTML = h;
+    [].forEach.call(acts.querySelectorAll("button[data-c]"), function(b){
+      b.onclick = function(){ var i = +b.getAttribute("data-c"); chip = chip === i ? -1 : i; draw(); };
+    });
+    [].forEach.call(acts.querySelectorAll("button[data-z]"), function(b){
+      b.onclick = function(){
+        if(chip < 0) return;
+        d.venn[chip] = +b.getAttribute("data-z");
+        var nx = d.venn.indexOf(-1); chip = nx;
+        api.save(); fb(null); draw();
+      };
+    });
+    q("vcheck").onclick = checkVenn;
+  }
+
+  function vennRight(){
+    var v = vennLive();
+    return v.L.join() === "5" && v.R.join() === "7" && v.M.slice().sort().join() === "2,2,3";
+  }
+  function checkVenn(){
+    if(vennRight()){
+      d.stage = 3; api.save();
+      fb("good", "<b>That Venn is spot on.</b> The middle holds what 60 and 84 share: 2, 2 and 3. The 5 only belongs to 60 and the 7 only to 84.");
+      draw(); return;
+    }
+    d.miss++; api.save();
+    fb("nudge", "<b>Not quite.</b> Everything inside the 60 circle, middle included, should multiply to 60, and the same for 84. Shared primes go in the middle just once.");
+    draw();
+  }
+
+  function drawHcfStage(){
+    var v = vennLive();
+    q("svg").innerHTML = v.svg;
+    var done = d.stage === 4;
+    var a = d.ans || ["", ""];
+    q("acts").innerHTML =
+      '<div class="ft-in"><label for="ftH"><b>HCF</b></label><input id="ftH" type="text" inputmode="numeric" autocomplete="off" value="' + a[0] + '"' + (done ? " disabled" : "") + '>' +
+      '<label for="ftL"><b>LCM</b></label><input id="ftL" type="text" inputmode="numeric" autocomplete="off" value="' + a[1] + '"' + (done ? " disabled" : "") + '></div>' +
+      '<p class="wnote" style="margin:4px 0 0">HCF: multiply the middle. LCM: multiply everything in the Venn.</p>' +
+      (done ? "" : '<div class="wrow"><button class="btn" type="button" data-r="hcheck">Check</button></div>');
+    if(done){ el.querySelector("#ftH").classList.add("ok"); el.querySelector("#ftL").classList.add("ok"); return; }
+    q("hcheck").onclick = function(){
+      var H = EGW.parseNum(el.querySelector("#ftH").value), L = EGW.parseNum(el.querySelector("#ftL").value);
+      d.ans = [el.querySelector("#ftH").value, el.querySelector("#ftL").value];
+      el.querySelector("#ftH").classList.toggle("ok", H === 12); el.querySelector("#ftH").classList.toggle("no", H !== 12);
+      el.querySelector("#ftL").classList.toggle("ok", L === 420); el.querySelector("#ftL").classList.toggle("no", L !== 420);
+      if(H === 12 && L === 420){ finishAll(false); return; }
+      d.miss++; api.save();
+      var msg = [];
+      if(H !== 12) msg.push("For the HCF, multiply only the numbers in the middle.");
+      if(L !== 420) msg.push("For the LCM, multiply every number in the Venn, each one once.");
+      fb("nudge", "<b>Close.</b> " + msg.join(" "));
+      draw();
+    };
+  }
+
+  function result(){ return d.shown ? "shown" : d.miss ? "right2" : "right1"; }
+
+  function finishAll(viaShow){
+    d.ans = ["12", "420"];
+    d.stage = 4; d.result = result(); api.save();
+    fb(viaShow ? "show" : "good", (viaShow ? "<b>Here it is.</b> " : "<b>Tree tamer.</b> ") +
+      "HCF = 2 &times; 2 &times; 3 = <b>12</b>, the biggest number that goes into both 60 and 84. LCM = 5 &times; 2 &times; 2 &times; 3 &times; 7 = <b>420</b>, the smallest number both go into." +
+      '<br><button class="btn btn-quiet" type="button" data-r="again">Grow a bonus tree</button>');
+    draw();
+    api.done(d.result);
+  }
+
+  function draw(){
+    drawTask();
+    var tree = curTree();
+    if(tree) drawTreeStage();
+    else if(d.stage === 2) drawVennStage();
+    else drawHcfStage();
+    q("show").classList.toggle("hidden", !(d.stage < 4 && d.miss > 0));
+    var go = q("go");
+    if(go) go.onclick = function(){ d.stage++; sel = null; chip = d.stage === 2 ? 0 : -1; api.save(); fb(null); draw(); };
+    var again = q("again");
+    if(again) again.onclick = function(){
+      var pool = BONUS.filter(function(v){ return v !== (d.lastBonus || 0); });
+      var v = pool[Math.floor(Math.random() * pool.length)];
+      d.bt = { v: v }; d.lastBonus = v; sel = null; api.save(); fb(null); draw();
+    };
+  }
+
+  q("show").onclick = function(){
+    if(d.stage >= 4) return;
+    d.shown = true;
+    if(d.stage < 2){
+      var root = curTree(), path = sel !== null ? sel : firstOpen(root);
+      if(path === null) return;
+      var n = nodeAt(root, path);
+      if(isPrime(n.v)) act(n, "ring", true);
+      else act(n, pairsOf(n.v)[0], true);
+    }else if(d.stage === 2){
+      d.venn = [1, 1, 1, 0, 2]; chip = -1; d.stage = 3; api.save();
+      fb("show", "<b>Here is the Venn.</b> 60 and 84 share 2, 2 and 3, so those go in the middle once. The 5 is only in 60 and the 7 is only in 84. Check: 5 &times; 2 &times; 2 &times; 3 = 60 and 2 &times; 2 &times; 3 &times; 7 = 84.");
+      draw();
+    }else{
+      finishAll(true);
+    }
+  };
+
+  if(d.stage === 2 && chip < 0) chip = d.venn.indexOf(-1);
+  draw();
+  if(d.stage === 4 && d.result){
+    if(d.bt && firstOpen(d.bt) === null) fb("good", "<b>Bonus tree done.</b> " + d.bt.v + " = " + indexForm(primesOf(d.bt)) + '<br><button class="btn" type="button" data-r="again">Grow another</button>');
+    else if(!d.bt) fb("good", "<b>Finished.</b> HCF of 60 and 84 = <b>12</b>, LCM = <b>420</b>." + '<br><button class="btn btn-quiet" type="button" data-r="again">Grow a bonus tree</button>');
+    draw();
+    api.done(d.result);
+  }else if(d.stage < 2 && firstOpen(curTree()) === null){
+    treeFinished(curTree()); draw();
+  }
+}
+
+EGW.run({
+  id: "maths-number",
+  title: "Number skills",
+  subject: "Maths",
+  mins: 55,
+  blurb: "The number toolkit that props up both Foundation papers: ordering and negatives, rounding, BIDMAS, primes, HCF and LCM, powers, standard form and fractions, with a factor tree to grow and stretch questions up towards grade 5.",
+  steps: [
+
+  /* ---------- ORDERING AND BIDMAS ---------- */
+  { type: "learn", topic: "Ordering and BIDMAS",
+    title: "Where numbers sit, and what goes first",
+    fig: NL,
+    html: '<p><b>Ordering decimals.</b> Line up the decimal points and compare digit by digit from the left. Fill gaps with zeros if it helps: 0.5 is 0.50, which beats 0.45. More digits does not mean bigger.</p>' +
+          '<p><b>Negative numbers.</b> Further left on the number line means smaller, so &minus;4 &lt; &minus;1. Subtracting a negative is the same as adding: 3 &minus; (&minus;5) = 3 + 5 = 8. When you multiply or divide, the same signs give a positive answer and different signs give a negative one.</p>' +
+          '<p><b>Order of operations</b>, or BIDMAS:</p>' +
+          '<div class="fig">' + BIDMAS + '</div>' +
+          '<div class="keep"><b>Keep this</b>Two minus signs side by side make a plus. Dividing and multiplying are a team, and so are adding and subtracting: inside a team, just go left to right.</div>' },
+
+  { type: "order", topic: "Ordering and BIDMAS",
+    q: "Put these in order, smallest first.",
+    items: ["&minus;2.5", "&minus;0.8", "0.09", "0.4", "0.45", "1.2"],
+    hint: "Negatives first: the bigger the number after the minus sign, the further left it sits. For the decimals, pad them out to two places each.",
+    why: "&minus;2.5 is further left than &minus;0.8, so it is smaller. Padding the decimals gives 0.09, 0.40, 0.45, then 1.20.<br>Two common slips: thinking 0.09 beats 0.4 because 9 is bigger than 4, and thinking &minus;0.8 is smaller than &minus;2.5 because 8 is bigger than 2." },
+
+  { type: "num", topic: "Ordering and BIDMAS",
+    q: NC + "a) At midnight it is &minus;4&deg;C. By noon the temperature has gone up by 9 degrees. What is the temperature at noon?<br>b) &minus;3 &minus; (&minus;7)<br>c) (&minus;6) &times; (&minus;4)",
+    boxes: [
+      { label: "a)", a: 5, post: "&deg;C" },
+      { label: "b)", a: 4 },
+      { label: "c)", a: 24 }
+    ],
+    hint: "a) Count up from &minus;4: four steps get you to zero, then keep going. b) Subtracting a negative is adding. c) Same signs or different signs?",
+    why: "a) &minus;4 + 9 = <b>5&deg;C</b>: 4 up to zero, then 5 more.<br>b) &minus;3 &minus; (&minus;7) = &minus;3 + 7 = <b>4</b>.<br>c) Two negatives multiplied give a positive: <b>24</b>. A very common slip is &minus;24, which would need the signs to be different." },
+
+  { type: "mc", topic: "Ordering and BIDMAS",
+    q: NC + "Work out 20 &minus; 12 &divide; 4 + 3&sup2;",
+    options: ["26", "11", "8", "23"],
+    answer: 0,
+    hint: "Indices first, then the division. Then add and subtract from left to right.",
+    why: "3&sup2; = 9 and 12 &divide; 4 = 3, so it becomes 20 &minus; 3 + 9. Left to right: 17 + 9 = <b>26</b>.<br>11 comes from going straight left to right (20 &minus; 12 = 8, then &divide; 4 = 2, then + 9). 8 comes from adding before subtracting: 20 &minus; (3 + 9). 23 treats 3&sup2; as 3 &times; 2." },
+
+  /* ---------- ROUNDING ---------- */
+  { type: "learn", topic: "Rounding",
+    title: "Rounding and estimating",
+    fig: SF,
+    html: '<p><b>Decimal places</b> count the digits after the decimal point. To round, look at the next digit along: 5 or more rounds up, 4 or less leaves it. 7.3864 to 2 dp: the next digit is 6, so 7.39.</p>' +
+          '<p><b>Significant figures</b> start at the first digit that is not zero. 34 782 to 2 sf is 35 000: the zeros keep each digit in its proper place, so they stay. 0.004637 to 2 sf is 0.0046: the zeros at the front are not significant.</p>' +
+          '<p><b>Estimating</b>: round every number to 1 significant figure, then work it out. 6.8 &times; 41 &asymp; 7 &times; 40 = 280.</p>' +
+          '<div class="keep"><b>Keep this</b>For an estimate, round to 1 sf first and show those rounded numbers. The marks are for the rounded working, not the exact answer.</div>' },
+
+  { type: "num", topic: "Rounding",
+    q: "a) Round 7.3864 to 2 decimal places.<br>b) Round 7.3864 to 1 decimal place.<br>c) Round 34 782 to 2 significant figures.<br>d) Round 0.004637 to 2 significant figures.",
+    boxes: [
+      { label: "a)", a: 7.39, tol: 0.000001 },
+      { label: "b)", a: 7.4, tol: 0.000001 },
+      { label: "c)", a: 35000, tol: 0.5, show: "35,000" },
+      { label: "d)", a: 0.0046, tol: 0.0000001 }
+    ],
+    hint: "Find the last digit you are keeping, then look one place to the right of it. For c) and d), count from the first digit that is not zero.",
+    why: "a) 7.38|64: the next digit is 6, so round up to <b>7.39</b>.<br>b) 7.3|864: the next digit is 8, so <b>7.4</b>.<br>c) 34|782: the next digit is 7, so 34 becomes 35, and the zeros hold the place: <b>35 000</b> (not 35).<br>d) The first significant figure is the 4: 0.0046|37, the next digit is 3, so <b>0.0046</b>." },
+
+  { type: "mc", topic: "Rounding",
+    q: NC + "Estimate the value of " + fr("31.8 &times; 4.12", "0.49"),
+    options: ["240", "60", "267", "24"],
+    answer: 0,
+    hint: "Round each number to 1 significant figure. What does dividing by 0.5 do to a number?",
+    why: "31.8 &asymp; 30, 4.12 &asymp; 4 and 0.49 &asymp; 0.5. 30 &times; 4 = 120, and 120 &divide; 0.5 = <b>240</b>, because dividing by a half doubles.<br>60 halves instead of doubling, the classic slip with dividing by a decimal. 267 is the exact calculator answer (267.38...), which is not an estimate. 24 has lost a place value." },
+
+  /* ---------- PRIMES AND FACTORS ---------- */
+  { type: "learn", topic: "Primes and factors",
+    title: "Factors, multiples, primes",
+    fig: FT90,
+    html: '<p><b>Factors</b> go into a number exactly: the factors of 12 are 1, 2, 3, 4, 6 and 12. <b>Multiples</b> are the times table: multiples of 12 are 12, 24, 36 and so on.</p>' +
+          '<p>A <b>prime</b> has exactly two factors, 1 and itself: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29... So 1 is not prime (it has only one factor) and 2 is the only even prime.</p>' +
+          '<p>A <b>factor tree</b> splits a number into any factor pair, then keeps splitting until every branch ends in a prime. Ring the primes as you go. Multiply them back together and you have the <b>product of prime factors</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>90 = 2 &times; 3 &times; 3 &times; 5 = 2 &times; 3&sup2; &times; 5. Any starting pair gives the same primes in the end. Index form just means using powers for the repeats.</div>' },
+
+  { type: "multi", topic: "Primes and factors",
+    q: "Pick all the prime numbers.",
+    options: ["1", "2", "9", "15", "17", "21", "23", "27", "29", "39"],
+    fixed: true,
+    answers: [1, 4, 6, 8],
+    hint: "For each odd one, try dividing by 3, 5 and 7. And think carefully about 1.",
+    why: "<b>2, 17, 23 and 29</b> are prime. 1 has only one factor, so it is not prime. 9 = 3 &times; 3, 15 = 3 &times; 5, 21 = 3 &times; 7, 27 = 3 &times; 9 and 39 = 3 &times; 13. Being odd is not enough: 21, 27 and 39 are the sneaky ones." },
+
+  { type: "num", topic: "Primes and factors",
+    q: NC + "Write 72 as a product of its prime factors in index form.<br>72 = 2<sup>a</sup> &times; 3<sup>b</sup>. What are a and b?",
+    boxes: [
+      { label: "a =", a: 3 },
+      { label: "b =", a: 2 }
+    ],
+    hint: "Start with any pair, such as 8 &times; 9, and keep splitting until every branch is prime. Then count the 2s and the 3s.",
+    why: "72 = 8 &times; 9 = 2 &times; 2 &times; 2 &times; 3 &times; 3 = <b>2&sup3; &times; 3&sup2;</b>, so a = 3 and b = 2. Check: 8 &times; 9 = 72. A common slip is writing 2 &times; 3 for 2&sup3;: the power counts how many 2s, it does not multiply." },
+
+  /* ---------- HCF AND LCM ---------- */
+  { type: "learn", topic: "HCF and LCM",
+    title: "Highest common factor, lowest common multiple",
+    fig: VENN,
+    html: '<p><b>HCF</b>, highest common factor: the biggest number that goes into both. <b>LCM</b>, lowest common multiple: the smallest number that both go into.</p>' +
+          '<p>For small numbers, list them. Factors of 18: 1, 2, 3, <b>6</b>, 9, 18. Factors of 24: 1, 2, 3, 4, <b>6</b>, 8, 12, 24. HCF = 6. Multiples of 18: 18, 36, 54, <b>72</b>. Multiples of 24: 24, 48, <b>72</b>. LCM = 72.</p>' +
+          '<p>For bigger numbers, use primes and a Venn. 18 = 2 &times; 3 &times; 3 and 24 = 2 &times; 2 &times; 2 &times; 3. The primes they share (one 2 and one 3) go in the middle, once.</p>' +
+          '<div class="keep"><b>Keep this</b>HCF: multiply the middle. LCM: multiply everything in the Venn. In word problems, "at the same time again" or "the same number of each" means LCM; "the biggest equal groups" means HCF.</div>' },
+
+  { type: "widget", topic: "HCF and LCM",
+    title: "Factor tree builder",
+    html: "Grow factor trees for 60 and 84, then sort their primes into a Venn diagram to find the HCF and LCM. Tap a number to split it or ring it. Any route works.",
+    mount: mountTree,
+    report: function(d){
+      if(!d || !d.result) return "Factor tree builder: reached step " + ((d && d.stage) || 0) + " of 4.";
+      var lab = { right1: "trees, Venn, HCF and LCM all with no slips", right2: "finished with " + d.miss + " slip" + (d.miss === 1 ? "" : "s"), shown: "finished, used Show me" }[d.result];
+      return "Factor tree builder: " + lab + (d.bonus ? ", plus " + d.bonus + " bonus tree" + (d.bonus === 1 ? "" : "s") : "") + ".";
+    } },
+
+  { type: "num", topic: "HCF and LCM",
+    q: NC + "a) Bus A leaves the station every 12 minutes and bus B every 20 minutes. They both leave at 9:00. How many minutes until they next leave together?<br>b) Sausages come in packs of 8 and rolls in packs of 6. Ali wants exactly the same number of sausages and rolls, buying as few as possible. How many packs of each?",
+    boxes: [
+      { label: "a)", a: 60, post: "minutes" },
+      { label: "b) Packs of sausages", a: 3 },
+      { label: "b) Packs of rolls", a: 4 }
+    ],
+    hint: "Both of these are LCM questions. List the multiples of each number until you hit one in both lists. For b), the question wants packs, not sausages.",
+    why: "a) Multiples of 12: 12, 24, 36, 48, <b>60</b>. Multiples of 20: 20, 40, <b>60</b>. LCM = 60, so they next leave together at 10:00.<br>b) Multiples of 8: 8, 16, <b>24</b>. Multiples of 6: 6, 12, 18, <b>24</b>. So 24 of each: 24 &divide; 8 = <b>3 packs of sausages</b> and 24 &divide; 6 = <b>4 packs of rolls</b>. Writing 24 is the common slip: always answer the question that was asked." },
+
+  /* ---------- POWERS AND ROOTS ---------- */
+  { type: "learn", topic: "Powers and roots",
+    title: "Powers, roots and index laws",
+    fig: POW,
+    html: '<p><b>Square numbers</b>: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225. <b>Cube numbers</b>: 1, 8, 27, 64, 125 and 1000 are the ones to know.</p>' +
+          '<p><b>Roots</b> go backwards: &radic;49 = 7 because 7&sup2; = 49, and the cube root of 27 is 3 because 3&sup3; = 27.</p>' +
+          '<p><b>Index laws</b> work when the base number is the same:</p>' +
+          '<ul><li>Multiplying: <b>add</b> the powers. 3&sup2; &times; 3<sup>5</sup> = 3<sup>7</sup></li>' +
+          '<li>Dividing: <b>subtract</b> the powers. 6<sup>8</sup> &divide; 6&sup2; = 6<sup>6</sup></li>' +
+          '<li>Power of a power: <b>multiply</b> the powers. (4&sup2;)&sup3; = 4<sup>6</sup></li></ul>' +
+          '<p><b>Stretch:</b> anything (except 0) to the power 0 is 1, and a negative power means "one over": 2<sup>&minus;3</sup> = ' + fr("1", "2&sup3;") + ' = ' + fr("1", "8") + '.</p>' +
+          '<div class="keep"><b>Keep this</b>2&sup3; means 2 &times; 2 &times; 2 = 8, not 2 &times; 3. Same base: add the powers to multiply, subtract them to divide.</div>' },
+
+  { type: "num", topic: "Powers and roots",
+    q: NC + "a) &radic;81<br>b) 2<sup>5</sup><br>c) the cube root of 125<br>d) 5&sup3; &times; 5<sup>4</sup> = 5<sup>?</sup><br>e) 7<sup>9</sup> &divide; 7&sup3; = 7<sup>?</sup>",
+    boxes: [
+      { label: "a)", a: 9 },
+      { label: "b)", a: 32 },
+      { label: "c)", a: 5 },
+      { label: "d) power", a: 7 },
+      { label: "e) power", a: 6 }
+    ],
+    hint: "b) Write out five 2s and multiply them. d) and e) Same base, so add or subtract the powers.",
+    why: "a) 9 &times; 9 = 81, so <b>9</b>.<br>b) 2 &times; 2 &times; 2 &times; 2 &times; 2 = <b>32</b> (not 10).<br>c) 5 &times; 5 &times; 5 = 125, so <b>5</b>.<br>d) Multiplying, so add: 3 + 4 = <b>7</b>. Multiplying the powers to get 12 is the classic slip.<br>e) Dividing, so subtract: 9 &minus; 3 = <b>6</b> (not 3)." },
+
+  { type: "num", topic: "Powers and roots", stretch: true,
+    q: NC + "a) 9<sup>0</sup><br>b) 2<sup>&minus;3</sup>, as a fraction or a decimal<br>c) 10<sup>&minus;2</sup>, as a decimal<br>d) 4<sup>5</sup> &times; 4<sup>&minus;2</sup> = 4<sup>?</sup>",
+    boxes: [
+      { label: "a)", a: 1 },
+      { label: "b)", a: 0.125, tol: 0.000001, show: "1/8" },
+      { label: "c)", a: 0.01, tol: 0.0000001 },
+      { label: "d) power", a: 3 }
+    ],
+    hint: "Power 0 gives the same answer for every base. A negative power means one over the positive power.",
+    why: "a) Anything (except 0) to the power 0 is <b>1</b>. Not 0, and not 9. You can see why: 9&sup2; &divide; 9&sup2; = 9<sup>0</sup>, and anything divided by itself is 1.<br>b) 2<sup>&minus;3</sup> = 1 &divide; 2&sup3; = <b>1/8 = 0.125</b>. A negative power never makes the answer negative.<br>c) 10<sup>&minus;2</sup> = 1 &divide; 100 = <b>0.01</b>.<br>d) 5 + (&minus;2) = <b>3</b>." },
+
+  /* ---------- STANDARD FORM ---------- */
+  { type: "learn", topic: "Standard form",
+    title: "Standard form: big and tiny numbers",
+    fig: SFORM,
+    html: '<p>Standard form writes a number as <b>A &times; 10<sup>n</sup></b>, where A is at least 1 and less than 10. So there is exactly one digit, not zero, before the decimal point.</p>' +
+          '<ul><li>Big numbers: 34 000 = 3.4 &times; 10<sup>4</sup>. The point hops 4 places, so the power is 4.</li>' +
+          '<li>Small numbers: 0.00052 = 5.2 &times; 10<sup>&minus;4</sup>. Numbers smaller than 1 get a negative power.</li>' +
+          '<li>Back to ordinary: 6.1 &times; 10&sup3; = 6100. A positive power makes it bigger; a negative power makes it smaller.</li></ul>' +
+          '<p><b>Calculating</b>: multiply the numbers, add the powers, then tidy up. (2 &times; 10&sup3;) &times; (4 &times; 10<sup>5</sup>) = 8 &times; 10<sup>8</sup>.</p>' +
+          '<div class="keep"><b>Keep this</b>35 &times; 10<sup>4</sup> is not standard form, because 35 is not between 1 and 10. Tidy it: 3.5 &times; 10<sup>5</sup>.</div>' },
+
+  { type: "num", topic: "Standard form",
+    q: "Write each number in standard form. Put the number and the power of 10 in separate boxes.<br>a) 6 700 000<br>b) 0.00038<br>c) Write 2.05 &times; 10&sup3; as an ordinary number.",
+    boxes: [
+      { label: "a) number", a: 6.7, post: "&times; 10 to the power" },
+      { label: "a) power", a: 6 },
+      { label: "b) number", a: 3.8, post: "&times; 10 to the power" },
+      { label: "b) power", a: -4, show: "-4" },
+      { label: "c)", a: 2050 }
+    ],
+    hint: "Move the point until there is one digit in front of it, and count the hops. Small numbers get a negative power.",
+    why: "a) 6 700 000 = <b>6.7 &times; 10<sup>6</sup></b>: the point hops 6 places.<br>b) 0.00038 = <b>3.8 &times; 10<sup>&minus;4</sup></b>: the point hops 4 places to the right, and the number is less than 1, so the power is negative.<br>c) 2.05 &times; 1000 = <b>2050</b>. Watch the zero: 2.05 becomes 2050, not 2500." },
+
+  { type: "num", topic: "Standard form", stretch: true,
+    q: NC + "Give each answer in standard form.<br>a) (4 &times; 10<sup>5</sup>) &times; (6 &times; 10&sup3;)<br>b) (9 &times; 10<sup>7</sup>) &divide; (3 &times; 10&sup2;)",
+    boxes: [
+      { label: "a) number", a: 2.4 },
+      { label: "a) power", a: 9 },
+      { label: "b) number", a: 3 },
+      { label: "b) power", a: 5 }
+    ],
+    hint: "Deal with the numbers and the powers of 10 separately. Then check the number is between 1 and 10.",
+    why: "a) 4 &times; 6 = 24 and 10<sup>5</sup> &times; 10&sup3; = 10<sup>8</sup>, giving 24 &times; 10<sup>8</sup>. But 24 is too big, so 24 = 2.4 &times; 10, and the answer is <b>2.4 &times; 10<sup>9</sup></b>. Stopping at 24 &times; 10<sup>8</sup> is the usual dropped mark.<br>b) 9 &divide; 3 = 3 and 10<sup>7</sup> &divide; 10&sup2; = 10<sup>5</sup>, so <b>3 &times; 10<sup>5</sup></b>." },
+
+  /* ---------- FRACTIONS ---------- */
+  { type: "learn", topic: "Fractions",
+    title: "Adding, taking away, multiplying, dividing",
+    fig: FBARS,
+    html: '<p><b>Adding and subtracting</b>: make the bottoms (denominators) the same, then add or subtract the tops. ' + fr(1, 3) + ' + ' + fr(1, 4) + ' = ' + fr(4, 12) + ' + ' + fr(3, 12) + ' = ' + fr(7, 12) + '</p>' +
+          '<p><b>Multiplying</b>: tops times tops, bottoms times bottoms. ' + fr(2, 3) + ' &times; ' + fr(4, 5) + ' = ' + fr(8, 15) + '</p>' +
+          '<p><b>Dividing</b>: keep the first, change &divide; to &times;, flip the second. ' + fr(3, 4) + ' &divide; ' + fr(1, 2) + ' = ' + fr(3, 4) + ' &times; ' + fr(2, 1) + ' = ' + fr(6, 4) + ' = 1' + fr(1, 2) + '</p>' +
+          '<p><b>Mixed numbers</b>: turn them into top heavy (improper) fractions first. 2' + fr(1, 3) + ' = ' + fr(7, 3) + ' because 2 &times; 3 + 1 = 7.</p>' +
+          '<div class="keep"><b>Keep this</b>Never add the bottoms: 1/3 + 1/4 is not 2/7. Simplify at the end by dividing the top and bottom by the same number.</div>' },
+
+  { type: "num", topic: "Fractions",
+    q: NC + "Give each answer as a fraction in its simplest form, or a mixed number. Type fractions like 3/4 and mixed numbers like 2 1/3.<br>a) " + fr(2, 3) + " + " + fr(1, 4) + "<br>b) 3" + fr(1, 2) + " &minus; 1" + fr(2, 3) + "<br>c) " + fr(3, 5) + " &times; " + fr(10, 9),
+    boxes: [
+      { label: "a)", a: 11 / 12, show: "11/12" },
+      { label: "b)", a: 11 / 6, show: "1 5/6" },
+      { label: "c)", a: 2 / 3, show: "2/3" }
+    ],
+    hint: "a) and b) need a common denominator: 12 for a), 6 for b). For b), turn both mixed numbers into top heavy fractions first.",
+    why: "a) " + fr(8, 12) + " + " + fr(3, 12) + " = <b>" + fr(11, 12) + "</b>.<br>b) " + fr(7, 2) + " &minus; " + fr(5, 3) + " = " + fr(21, 6) + " &minus; " + fr(10, 6) + " = " + fr(11, 6) + " = <b>1" + fr(5, 6) + "</b>. Subtracting the whole numbers and the fractions separately gets tangled here, because " + fr(2, 3) + " is bigger than " + fr(1, 2) + ".<br>c) " + fr(30, 45) + " = <b>" + fr(2, 3) + "</b> (divide top and bottom by 15). You could cancel first: the 5 and the 10, and the 3 and the 9." },
+
+  { type: "num", topic: "Fractions", stretch: true,
+    q: NC + "a) 2" + fr(1, 4) + " &divide; 1" + fr(1, 2) + "<br>b) A bag holds 6 kg of rice. How many " + fr(3, 8) + " kg portions can be filled from it?",
+    boxes: [
+      { label: "a)", a: 1.5, show: "1 1/2" },
+      { label: "b)", a: 16, post: "portions" }
+    ],
+    hint: "Top heavy fractions first, then keep, change, flip. b) is a division: how many 3/8s fit into 6?",
+    why: "a) " + fr(9, 4) + " &divide; " + fr(3, 2) + " = " + fr(9, 4) + " &times; " + fr(2, 3) + " = " + fr(18, 12) + " = <b>1" + fr(1, 2) + "</b>. Dividing the wholes and the fractions separately (2 &divide; 1 and " + fr(1, 4) + " &divide; " + fr(1, 2) + ") does not work.<br>b) 6 &divide; " + fr(3, 8) + " = 6 &times; " + fr(8, 3) + " = " + fr(48, 3) + " = <b>16</b>. Sense check: 3/8 is a bit less than half, so a bit more than 12 portions fit." },
+
+  /* ---------- CONVERTING ---------- */
+  { type: "learn", topic: "Converting",
+    title: "Fractions, decimals, percentages",
+    html: '<p>Three ways of writing the same amount.</p>' +
+          '<ul><li>Fraction to decimal: divide the top by the bottom. 3/8 = 3 &divide; 8 = 0.375.</li>' +
+          '<li>Decimal to percentage: multiply by 100. 0.375 = 37.5%.</li>' +
+          '<li>Percentage to fraction: put it over 100 and simplify. 35% = 35/100 = 7/20.</li></ul>' +
+          '<div class="fig">' + FDP_TABLE + '</div>' +
+          '<p><b>Recurring decimals</b> go on forever, and a dot marks the repeating digits: 1/3 = 0.333... = 0.' + rec("3") + ', and 3/11 = 0.272727... = 0.' + rec("2") + rec("7") + '.</p>' +
+          '<p><b>Stretch, Higher only:</b> turning a recurring decimal into a fraction. Let x = 0.272727... Then 100x = 27.272727... Subtract: 99x = 27, so x = 27/99 = 3/11.</p>' +
+          '<div class="keep"><b>Keep this</b>Learn the table above by heart; it saves time on Paper 1. To compare a mix of fractions, decimals and percentages, turn them all into decimals.</div>' },
+
+  { type: "match", topic: "Converting",
+    q: "Match each one to the same amount as a percentage.",
+    pairs: [
+      [fr(3, 4), "75%"],
+      ["0.05", "5%"],
+      [fr(2, 5), "40%"],
+      ["0.125", "12.5%"],
+      [fr(7, 20), "35%"],
+      ["0.6", "60%"]
+    ],
+    hint: "Decimals: multiply by 100. Fractions: make the bottom 100, or divide top by bottom first.",
+    why: "3/4 = 0.75 = 75%. 0.05 &times; 100 = 5% (not 50%). 2/5 = 4/10 = 40%. 0.125 = 12.5%. 7/20 = 35/100 = 35%. 0.6 = 0.60 = 60% (not 6%). The two traps are 0.05 and 0.6: pad to two decimal places and read off the percentage." },
+
+  { type: "mc", topic: "Converting", stretch: true,
+    q: "Which fraction is equal to 0." + rec("2") + rec("7") + ", which is 0.272727...?",
+    options: [fr(27, 100), fr(3, 11), fr(27, 90), fr(2, 7)],
+    answer: 1,
+    hint: "Two digits repeat, so multiply by 100 and subtract the original.",
+    why: "x = 0.2727..., 100x = 27.2727..., so 99x = 27 and x = 27/99 = <b>3/11</b>. Check: 3 &divide; 11 = 0.272727...<br>27/100 is 0.27 exactly, which stops. 27/90 = 0.3, from using 90 instead of 99. 2/7 = 0.285714..., close but not it." },
+
+  { type: "num", topic: "Converting",
+    q: NC + "<b>Exam style.</b> A Paper 1 warm up.<br>a) Write " + fr(3, 8) + " as a percentage.<br>b) Write 0.65 as a fraction in its simplest form.<br>c) Work out " + fr(2, 5) + " of &pound;45.<br>d) Work out 1" + fr(3, 4) + " + 2" + fr(2, 3) + ". Give your answer as a mixed number.",
+    boxes: [
+      { label: "a)", a: 37.5, post: "%" },
+      { label: "b) top", a: 13 },
+      { label: "b) bottom", a: 20 },
+      { label: "c)", a: 18, pre: "&pound;" },
+      { label: "d)", a: 53 / 12, show: "4 5/12" }
+    ],
+    hint: "a) 3 &divide; 8 using short division. b) Over 100, then simplify. c) Find one fifth first. d) Top heavy fractions, then a common denominator of 12.",
+    why: "a) 3 &divide; 8 = 0.375 = <b>37.5%</b>.<br>b) 0.65 = 65/100. Divide top and bottom by 5: <b>13/20</b>.<br>c) 45 &divide; 5 = 9, so one fifth is &pound;9 and two fifths is <b>&pound;18</b>.<br>d) " + fr(7, 4) + " + " + fr(8, 3) + " = " + fr(21, 12) + " + " + fr(32, 12) + " = " + fr(53, 12) + " = <b>4" + fr(5, 12) + "</b>. Or add the wholes (3) and the fractions (" + fr(9, 12) + " + " + fr(8, 12) + " = 1" + fr(5, 12) + ") to get the same." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

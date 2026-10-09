@@ -16,7 +16,9 @@
 var EGWPROG = (function(){
 "use strict";
 
-var PREFIX = "b5.egw.";
+var HQ = window.HQ || { who: "EGW", prefix: "b5.egw.", base: "/egw/" };
+var PREFIX = HQ.prefix;
+var TAG = HQ.who;
 var HQ_KEY = PREFIX + "hq.v1";
 var REVIEW_KEY = PREFIX + "review.v1";
 
@@ -89,17 +91,17 @@ function inflate(bytes){
   var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
   return new Response(stream).arrayBuffer().then(function(b){ return new TextDecoder().decode(b); });
 }
-function encodeSync(tag, obj){ return "EGW" + tag + "1:J" + toB64(utf8(JSON.stringify(obj))) + "."; }
+function encodeSync(tag, obj){ return TAG + tag + "1:J" + toB64(utf8(JSON.stringify(obj))) + "."; }
 function encode(tag, obj){
   var bytes = utf8(JSON.stringify(obj));
-  if(!canSquash()) return Promise.resolve("EGW" + tag + "1:J" + toB64(bytes) + ".");
+  if(!canSquash()) return Promise.resolve(TAG + tag + "1:J" + toB64(bytes) + ".");
   return deflate(bytes).then(function(z){
-    return "EGW" + tag + "1:Z" + toB64(z) + ".";
-  }, function(){ return "EGW" + tag + "1:J" + toB64(bytes) + "."; });
+    return TAG + tag + "1:Z" + toB64(z) + ".";
+  }, function(){ return TAG + tag + "1:J" + toB64(bytes) + "."; });
 }
 /* Finds a code anywhere in pasted text (a whole email is fine) */
 function decode(text){
-  var m = String(text || "").match(/EGW(SAVE|JAY)1:([ZJ])([A-Za-z0-9_\-\s>]+?)\./);
+  var m = String(text || "").match(new RegExp(TAG + "(SAVE|JAY)1:([ZJ])([A-Za-z0-9_\\-\\s>]+?)\\."));
   if(!m) return Promise.reject(new Error("No code found"));
   var bytes;
   try{ bytes = fromB64(m[3].replace(/[\s>]+/g, "")); }catch(e){ return Promise.reject(new Error("That code looks damaged")); }
@@ -112,7 +114,7 @@ function decode(text){
 function backup(){
   var src = localSource(), store = {};
   src.keys().forEach(function(k){ var v = src.read(k); if(v !== null) store[k] = v; });
-  return { v: 1, who: "EGW", made: new Date().toISOString(), store: store };
+  return { v: 1, who: TAG, made: new Date().toISOString(), store: store };
 }
 /* Puts a backup into this browser. Newer wins for each activity,
    so nothing done on this device is lost. */
@@ -195,7 +197,7 @@ function report(src){
   src = src || localSource();
   var acts = {};
   src.keys().forEach(function(k){
-    var m = k.match(/^b5\.egw\.([a-z0-9\-]+)\.v1$/);
+    var m = k.indexOf(PREFIX) === 0 ? k.slice(PREFIX.length).match(/^([a-z0-9\-]+)\.v1$/) : null;
     if(!m || m[1] === "hq" || m[1] === "review") return;
     var st = src.read(k);
     if(!st || !st.summary) return;
@@ -224,7 +226,7 @@ function report(src){
     var rec = (dd.days || {})[dayStr(dt)];
     last += rec ? (rec.r === "right1" ? "1" : rec.r === "right2" ? "2" : "s") : ".";
   }
-  return { v: 1, who: "EGW", made: new Date().toISOString(), acts: acts,
+  return { v: 1, who: TAG, made: new Date().toISOString(), acts: acts,
     mp: pm.mp, mf: pm.mf, mx: pm.mx, dd: { n: Object.keys(dd.days || {}).length, last: last }, sw: swipeInfo(src), bn: bonnieInfo(src), log: (hq.log || []).slice(-20), rv: { items: items, learnt: rv.learnt || 0 } };
 }
 /* swipe deck: cards met, how many right last time, rounds played */
