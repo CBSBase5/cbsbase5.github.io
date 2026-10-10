@@ -342,7 +342,7 @@ textarea.note{font-family:var(--body);font-size:1rem;width:100%;min-height:96px;
 
   <section class="who" aria-labelledby="whoH">
     <h2 id="whoH">Who is this? <span class="small">(optional)</span></h2>
-    <p>Pick your initials and the lab will show your two goals and a good place to start. Every experiment stays open to everyone.</p>
+    <p>Pick your initials and the lab will show a good place to start. Every experiment stays open to everyone.</p>
     <div class="whochips" id="whoChips" role="group" aria-label="Pick your initials"></div>
     <div class="mslist hidden" id="msBox" aria-live="polite"></div>
   </section>
@@ -486,23 +486,7 @@ var MOVE = {
 };
 function moveIcon(m){ var d = MOVE[m]; return "<svg viewBox='0 0 36 36' aria-hidden='true'><circle cx='18' cy='18' r='17' fill='" + d.c + "' opacity='.28'/>" + d.i + "</svg>" }
 
-/* ---------------- milestones ---------------- */
-var MS = {
-  LC:["Show that you are listening when someone else is talking.", "Take turns in a chat, and wait for your go to speak."],
-  JT:["Take turns in a chat without jumping in over people.", "Show you listened by asking a question or saying something about what they shared."],
-  LW:["Say back what someone told you, to show you understood.", "Notice how someone is feeling while they talk, and answer with care."],
-  LP:["Spot how someone might be feeling and respond in a way that fits.", "Ask questions to find out more about someone's life, background or point of view."],
-  EGW:["Change how you listen and reply depending on what the other person feels and needs.", "Show respect and understanding to people whose backgrounds, cultures or opinions are different to yours."],
-  HK:["Use listening and kindness to help a chat with a friend go well.", "Find out about a background or culture different to yours, and share something you found interesting."]
-};
-var MSFULL = {
-  LC:["I can show that I am listening when someone else is speaking.", "I can take turns in a conversation and wait for my turn to speak."],
-  JT:["I can take turns in a conversation and avoid interrupting.", "I can show I have listened by asking a question or commenting on what someone has shared."],
-  LW:["I can repeat or summarise what someone has said to show I have understood.", "I can notice how someone is feeling while they talk and respond with care."],
-  LP:["I can recognise how another person might be feeling and respond appropriately.", "I can ask questions to find out more about someone else's experiences, background or point of view."],
-  EGW:["I can adapt how I listen and respond depending on another person's feelings, needs and point of view.", "I can show respect and understanding towards people whose backgrounds, cultures or opinions are different from mine."],
-  HK:["I can use active listening skills and empathy to support positive conversations with peers.", "I can learn about a background or culture different from my own and share something I found interesting."]
-};
+/* ---------------- good places to start (stage numbers only) ---------------- */
 var BEST = { LC:[1, 2], JT:[2, 5], LW:[3, 4], LP:[4, 5], EGW:[6, 4], HK:[6, 7] };
 
 /* ---------------- stages ---------------- */
@@ -542,9 +526,9 @@ function drawWho(){
     box.appendChild(b);
   });
   var ms = $("msBox");
-  if(MS[who]){
+  if(BEST[who]){
     var names = BEST[who].map(function(n){ return "<b>" + STAGES[n - 1].t + "</b>" });
-    ms.innerHTML = "<p><b>Goal 1:</b> " + MS[who][0] + "</p><p><b>Goal 2:</b> " + MS[who][1] + "</p><p>Good places to start: " + names.join(" and ") + ". They have a yellow badge on the map.</p>";
+    ms.innerHTML = "<p><b>Hi " + who + ".</b> Good places to start: " + names.join(" and ") + ". They have a yellow badge on the map.</p><p>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p>";
     ms.classList.remove("hidden");
   } else ms.classList.add("hidden");
 }
@@ -1234,7 +1218,7 @@ function summary(){
   var o = [], w = getWho();
   o.push("THE LISTENING LAB");
   o.push("Target: I can begin to practise active listening and empathy towards peers, and show understanding towards people from different backgrounds and cultures.");
-  if(MSFULL[w]){ o.push("", "Milestones this links to (" + w + "):"); o.push("- " + MSFULL[w][0]); o.push("- " + MSFULL[w][1]) }
+  if(BEST[w]){ o.push("Student: " + w); var bs = BEST[w].filter(function(n){ return st.tried[n] }).map(function(n){ return STAGES[n - 1].t }); if(bs.length) o.push("Badged experiments tried: " + bs.join(", ")) }
   o.push("", "Experiments tried: " + (STAGES.filter(function(s){ return st.tried[s.n] }).map(function(s){ return s.t }).join(", ") || "none yet"));
   var nS = Object.keys(st.spot).length;
   if(nS || st.sigs.length){
@@ -1290,7 +1274,7 @@ $("heroA").innerHTML = "<g transform='translate(20 72)'>" + avInner(LOOK.priya, 
 $("heroB").innerHTML = avInner(LOOK.callum, "excited", { nobg:true });
 if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"The Listening Lab", filename:"listening-lab", getText:summary });
 var inp = document.getElementById("b5who");
-if(inp) inp.addEventListener("input", function(){ var v = inp.value.trim().toUpperCase(); if(MS[v] && v !== who){ who = v; drawWho(); drawTiles() } });
+if(inp) inp.addEventListener("input", function(){ var v = inp.value.trim().toUpperCase(); if(BEST[v] && v !== who){ who = v; drawWho(); drawTiles() } });
 $("restartBtn").onclick = function(){
   if(!confirm("Clear everything you have done in the Listening Lab on this device?")) return;
   try{ localStorage.removeItem(STORE) }catch(e){}

@@ -325,7 +325,7 @@ textarea.wr{min-height:84px;resize:vertical}
 
   <div class="whobox">
     <h3>Who is this? <span style="font-weight:400;font-family:var(--body);font-size:.85rem">(optional)</span></h3>
-    <p class="sub">Pick your initials to see your two milestones and a good place to start. Every stage stays open either way.</p>
+    <p class="sub">Pick your initials to see a good place to start. Every stage stays open either way.</p>
     <div class="whorow" id="whoRow"></div>
     <div id="whoMiles"></div>
   </div>
@@ -388,21 +388,8 @@ function getWho(){ try{ return localStorage.getItem(WHO_KEY) || "" }catch(e){ re
 function setWho(v){ try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){} }
 function tried(id){ if(!S.seen[id]){ S.seen[id] = true; drawMap() } }
 
-/* ================= students (copied exactly from The Confidence Dial) ================= */
-var WHO = {
-  JT:{ m:["Make a simple choice for yourself at home, school or work.", "Say why you made a choice and how you felt about it afterwards."],
-       full:["I can make a simple choice for myself at home, school or work.", "I can explain why I made a choice and how I felt about it afterwards."], best:["sorter","story"] },
-  LW:{ m:["Explain why you made a decision and look back at how it went.", "Spot how confidence can push your actions in helpful and unhelpful ways."],
-       full:["I can explain why I have made a particular decision and reflect on how it went.", "I can recognise how confidence can influence my actions in both helpful and unhelpful ways."], best:["story","spot"] },
-  EGW:{ m:["Use your strengths and past experiences to take on new challenges with more confidence.", "Explain how too much or too little confidence can lead to poor choices, and how to find the balance."],
-       full:["I can use my strengths and previous experiences to approach new challenges with greater confidence.", "I can explain how overconfidence or low confidence might lead to poor choices, and how to find a balance."], best:["jar","spot"] },
-  LP:{ m:["Make decisions on your own, check how they turned out, and change your approach when you need to.", "Explain, with examples, how too little or too much confidence affects the choices people make."],
-       full:["I can make informed decisions independently, evaluate the outcome, and adapt my approach when needed.", "I can explain, with examples, how too little or too much confidence can affect the choices people make."], best:["mis","spot"] },
-  HK:{ m:["Find strategies that help you feel more confident when making decisions.", "Use a strategy when making a decision and say how it helped."],
-       full:["I can identify strategies that help me feel more confident when making decisions.", "I can use a strategy that helps me feel confident when making a decision and say how it helped."], best:["shop","reh"] },
-  LC:{ m:["Spot something you are good at or feel confident doing.", "Talk about how feeling confident helps you try something new."],
-       full:["I can recognise something I am good at or feel confident doing.", "I can talk about how feeling confident helps me try something new."], best:["jar","reh"] }
-};
+/* ================= initials to good starting stages, nothing else per student ================= */
+var WHO = { JT:["sorter","story"], LW:["story","spot"], EGW:["jar","spot"], LP:["mis","spot"], HK:["shop","reh"], LC:["jar","reh"] };
 var ORDER = ["JT","LW","EGW","LP","LC","HK"];
 
 var STAGES = [
@@ -416,17 +403,16 @@ var STAGES = [
 ];
 function stageById(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return STAGES[i]; return null }
 
-/* stage number -> what it covers (initials and milestone number) */
+/* stage number -> what it covers */
 var MILESTONE_STAGES = {
-  1:{ id:"story", what:"Robin makes choices at home, school and work; both meters show how confidence helps and hurts", covers:["JT m1","LW m2","EGW m2","LP m2","LC m2"] },
-  2:{ id:"jar", what:"Things I have done and am good at, matched to a new challenge", covers:["LC m1","LC m2","EGW m1"] },
-  3:{ id:"shop", what:"Matching confidence strategies to situations, then picking one for a decision of my own", covers:["HK m1","HK m2"] },
-  4:{ id:"sorter", what:"Deciding fake it, plan it or skip it, then making and explaining my own choice", covers:["JT m1","JT m2","LP m1","LW m1"] },
-  5:{ id:"reh", what:"Rehearsing as a strategy, rating confidence before and after", covers:["HK m1","HK m2","LC m2","JT m1"] },
-  6:{ id:"spot", what:"Good confident against risky confident, with the clue that tips it, and examples", covers:["LW m2","EGW m2","LP m2"] },
-  7:{ id:"mis", what:"Choosing a brave bit, using a strategy, then looking back and adapting", covers:["JT m1","JT m2","LW m1","LP m1","HK m2","EGW m1"] }
+  1:{ id:"story", what:"Robin makes choices at home, school and work; both meters show how confidence helps and hurts" },
+  2:{ id:"jar", what:"Things I have done and am good at, matched to a new challenge" },
+  3:{ id:"shop", what:"Matching confidence strategies to situations, then picking one for a decision of my own" },
+  4:{ id:"sorter", what:"Deciding fake it, plan it or skip it, then making and explaining my own choice" },
+  5:{ id:"reh", what:"Rehearsing as a strategy, rating confidence before and after" },
+  6:{ id:"spot", what:"Good confident against risky confident, with the clue that tips it, and examples" },
+  7:{ id:"mis", what:"Choosing a brave bit, using a strategy, then looking back and adapting" }
 };
-function stagesFor(w){ var out = []; Object.keys(MILESTONE_STAGES).forEach(function(n){ var ms = MILESTONE_STAGES[n]; if(ms.covers.some(function(c){ return c.split(" ")[0] === w })) out.push(+n) }); return out }
 
 /* ================= people ================= */
 function hairPath(style, col){
@@ -482,7 +468,7 @@ function drawWho(){
   row.innerHTML = html;
   var box = el("whoMiles");
   if(WHO[w]){
-    box.innerHTML = "<div class='miles pop'><b>" + w + ", your two steps:</b><ol><li>" + esc(WHO[w].m[0]) + "</li><li>" + esc(WHO[w].m[1]) + "</li></ol><p class='note' style='margin:6px 0 0!important'>Good places to start: " + WHO[w].best.map(function(id){ var s = stageById(id); return "<b>" + esc(s.t) + "</b>" }).join(" and ") + ". They have a yellow sticker on the map. Your steps also turn up in stages " + stagesFor(w).join(", ") + ".</p></div>";
+    box.innerHTML = "<div class='miles pop'><b>Hi " + w + ".</b> Good places to start: " + WHO[w].map(function(id){ var s = stageById(id); return "<b>" + esc(s.t) + "</b>" }).join(" and ") + ". They have a yellow sticker on the map. Every stage stays open.<p class='note' style='margin:6px 0 0!important'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
   } else box.innerHTML = "";
 }
 el("whoRow").addEventListener("click", function(e){
@@ -494,7 +480,7 @@ el("whoRow").addEventListener("click", function(e){
 
 /* ================= map ================= */
 function drawMap(){
-  var w = getWho().toUpperCase(), best = WHO[w] ? WHO[w].best : [];
+  var w = getWho().toUpperCase(), best = WHO[w] || [];
   el("smap").innerHTML = STAGES.map(function(s){
     return "<button type='button' class='tile " + s.cls + (S.stage === s.id ? " cur" : "") + "' data-stage='" + s.id + "'>" +
       (best.indexOf(s.id) >= 0 ? "<span class='tag start'>Good place to start</span>" : "") +
@@ -510,7 +496,7 @@ function openStage(id, scroll){
   if(scroll){ var t = el("stageHost").getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top:t, behavior: reduce ? "auto" : "smooth" }) }
 }
 function stageShell(s, intro, body){
-  var w = getWho().toUpperCase(), isBest = WHO[w] && WHO[w].best.indexOf(s.id) >= 0;
+  var w = getWho().toUpperCase(), isBest = WHO[w] && WHO[w].indexOf(s.id) >= 0;
   var i = STAGES.indexOf(s), nx = STAGES[i + 1], pv = STAGES[i - 1];
   return "<section class='stage' aria-labelledby='h_" + s.id + "'><div class='sh'>" + ICON[s.id].replace("<svg", "<svg style='background:" + tileBg(s.cls) + ";border-radius:16px;border:3px solid " + INK + ";padding:4px'") +
     "<div class='shtxt'><span class='kicker'>Stage " + s.n + " of 7" + (isBest ? " &middot; good place to start for " + w : "") + "</span><h2 id='h_" + s.id + "' tabindex='-1'>" + esc(s.t) + "</h2><p>" + intro + "</p></div></div>" +
@@ -1268,10 +1254,10 @@ ACT.mis = function(a){
 function summary(){
   var o = [], w = getWho().toUpperCase();
   o.push("Target: I can explore ways of building confidence in personal abilities and decisions at home and at school or work. I can recognise how confidence can influence actions both good and bad.");
-  if(WHO[w]) o.push("", "My milestones (" + w + "):", "1. " + WHO[w].full[0], "2. " + WHO[w].full[1]);
+  if(WHO[w]) o.push("", "Student: " + w + ". Badged stages tried: " + (WHO[w].filter(function(id){ return S.seen[id] }).map(function(id){ return stageById(id).t }).join(", ") || "none yet"));
   var triedList = STAGES.filter(function(s){ return S.seen[s.id] }).map(function(s){ return s.t });
   o.push("", "Stages tried: " + (triedList.length ? triedList.join(", ") : "none yet"));
-  function head(n){ var ms = MILESTONE_STAGES[n], st = stageById(ms.id); o.push("", "== " + n + ". " + st.t + " ==", "(Covers: " + ms.covers.join(", ") + ")") }
+  function head(n){ var ms = MILESTONE_STAGES[n], st = stageById(ms.id); o.push("", "== " + n + ". " + st.t + " ==", "(Covers: " + ms.what + ")") }
 
   if(S.seen.story){
     head(1); var st = S.story, ser = storySeries();
@@ -1333,8 +1319,6 @@ function summary(){
     if(m.help) o.push("Did the tool help: " + m.help);
     if(m.keep) o.push("Next time: " + m.keep);
   }
-  var rel = {}; Object.keys(MILESTONE_STAGES).forEach(function(n){ var ms = MILESTONE_STAGES[n]; if(S.seen[ms.id]) ms.covers.forEach(function(c){ rel[c.split(" ")[0]] = 1 }) });
-  if(Object.keys(rel).length) o.push("", "Milestones this work links to: " + ORDER.filter(function(k){ return rel[k] }).join(", ") + (WHO[w] ? (rel[w] ? " (including mine)" : "") : ""));
   return o.join("\n");
 }
 if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Brave Bit", filename:"the-brave-bit", getText:summary });

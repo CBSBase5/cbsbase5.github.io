@@ -363,24 +363,8 @@ function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(
 function has(a, v){ return a && a.indexOf(v) >= 0 }
 var INK = "#0a2f38";
 
-/* =================== people and milestones =================== */
+/* =================== people: good places to start (stage numbers only) =================== */
 var PEOPLE = ["JT","LW","EGW","LP","LC","HK"];
-var MS = {
-  LC: ["I can explore different sculpture materials and tools.", "I can choose a material and tool and use them to make a simple shape or form."],
-  LP: ["I can develop an idea for a small-scale sculpture through sketches or models.", "I can turn my chosen idea into a sculpture, choosing materials that suit my design."],
-  LW: ["I can create a small-scale sculpture using techniques I have practised.", "I can evaluate my sculpture and talk about what I would change next time."],
-  EGW:["I can experiment with different ways to shape, join and build materials.", "I can use the joining and building methods I have tried to create a small sculpture."],
-  HK: ["I can evaluate my sculpture and identify what works well and what could be improved.", "I can make changes to my sculpture based on my evaluation."],
-  JT: ["I can make changes based on my evaluation and explain how my sculpture developed.", "I can present my finished sculpture and review the whole process from first idea to final piece."]
-};
-var MSF = {
-  LC: ["Have a poke around the sculpture materials and tools.", "Pick one material and one tool, and use them to make a simple form."],
-  LP: ["Grow an idea for a small sculpture with sketches or a tiny test model.", "Turn that idea into a real sculpture, picking materials that suit it."],
-  LW: ["Make a small sculpture using techniques you have practised.", "Look at your sculpture and say what you would change next time."],
-  EGW:["Experiment with ways to shape, join and build.", "Use the joins and building methods you tried to make a small sculpture."],
-  HK: ["Look at your sculpture: what works well, and what could be better?", "Make some changes to your sculpture based on what you noticed."],
-  JT: ["Make changes after evaluating, and explain how your sculpture grew.", "Present your finished sculpture and tell its story from first idea to final piece."]
-};
 var REC = { LC:[1,2], LP:[4,5], LW:[5,6], EGW:[2,3,5], HK:[6], JT:[6,7] };
 var TARGET = "Sculpture and ceramics: I can create a small-scale sculpture through experimentation, evaluation, and review.";
 
@@ -813,9 +797,9 @@ function drawWho(){
   h += "<button type='button' data-who='' aria-pressed='" + (st.whoSet && !st.who) + "'>just looking</button>";
   $("who").innerHTML = h;
   var m = $("whoMs");
-  if(st.who && MSF[st.who]){
+  if(st.who && REC[st.who]){
     var rec = REC[st.who].map(function(n){ return "<b>" + n + " " + STAGES[n - 1].name + "</b>" }).join(", ");
-    m.innerHTML = "<div class='ss-ms'><b>Hi " + st.who + ".</b> Your two steps:<ol><li>" + esc(MSF[st.who][0]) + "</li><li>" + esc(MSF[st.who][1]) + "</li></ol>Good places to start: " + rec + ". Everything else is open too.</div>";
+    m.innerHTML = "<div class='ss-ms'><b>Hi " + st.who + ".</b> Good places to start: " + rec + ". Everything else is open too.<p style='margin:6px 0 0'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
   } else m.innerHTML = "";
 }
 $("who").addEventListener("click", function(e){
@@ -1396,7 +1380,7 @@ $("storyPrint").addEventListener("click", function(){ buildStory(); try{ window.
 /* =================== send =================== */
 function summary(){
   var out = ["Sculpture Studio", "Target: " + TARGET, ""];
-  if(st.who && MS[st.who]) out.push("Milestones for " + st.who + ":", "  1. " + MS[st.who][0], "  2. " + MS[st.who][1], "");
+  if(st.who && REC[st.who]){ out.push("Student: " + st.who); var bs = REC[st.who].filter(function(n){ return st.tried[n] }).map(function(n){ return n + " " + STAGES[n - 1].name }); if(bs.length) out.push("Badged stages tried: " + bs.join(", ")); out.push("") }
   var tr = []; for(var i = 1; i <= 7; i++) if(st.tried[i]) tr.push(i + " " + STAGES[i - 1].name);
   out.push("Stages tried: " + (tr.length ? tr.join(", ") : "none yet"), "");
   if(st.tried[1]){
@@ -1453,8 +1437,8 @@ function summary(){
     if(st.story.proud) out.push("Most proud of: " + st.story.proud);
     out.push("");
   }
-  out.push("Links to milestones:");
-  var LINKS = { 1:"exploring materials and tools (LC)", 2:"choosing a material and tool to make a form (LC, EGW)", 3:"experimenting with shaping, joining and building (EGW, LW)", 4:"developing an idea through sketches or models and choosing materials (LP)", 5:"making the sculpture with practised techniques and joins (LW, EGW, LP)", 6:"evaluating, and making changes (HK, LW, JT)", 7:"explaining how it developed and presenting it (JT)" };
+  out.push("What each stage covers:");
+  var LINKS = { 1:"exploring materials and tools", 2:"choosing a material and tool to make a form", 3:"experimenting with shaping, joining and building", 4:"developing an idea through sketches or models and choosing materials", 5:"making the sculpture with practised techniques and joins", 6:"evaluating, and making changes", 7:"explaining how it developed and presenting it" };
   var any = false; for(var j = 1; j <= 7; j++) if(st.tried[j]){ out.push("- " + STAGES[j - 1].name + ": " + LINKS[j]); any = true }
   if(!any) out.push("- nothing tried yet");
   return out.join("\n");

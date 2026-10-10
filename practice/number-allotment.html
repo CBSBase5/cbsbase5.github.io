@@ -735,29 +735,18 @@ var TARGET_LINES = {
   seq: "I can generate terms and nth term of linear sequences."
 };
 var WHO = {
-  JT:{ m:["Simplifying, comparing and changing fractions, including mixed numbers, and explaining how you did it"], s:[5,6,7],
-       o:["I can confidently simplify, compare and manipulate equivalent fractions, including converting between improper fractions and mixed numbers and explaining the methods I use."] },
-  LW:{ m:["Making equivalent fractions by multiplying or dividing the top and bottom by the same number","Simplifying fractions all the way to simplest form"], s:[5,7],
-       o:["I can generate equivalent fractions by multiplying or dividing the numerator and denominator by the same number.","I can simplify fractions to their simplest form."] },
-  EGW:{ m:["Making the terms of a sequence and finding its nth term","Using the nth term to find any term, and checking whether a number belongs"], s:[3,4],
-       o:["I can generate terms and nth term of linear sequences.","I can use the nth term to find any term in a sequence and check whether a number belongs to it."] },
-  LP:{ m:["Squaring one digit and two digit numbers","Making the terms of a sequence from a rule"], s:[1,2,3],
-       o:["I can calculate the square of one-digit and two-digit numbers.","I can generate the terms of a linear sequence from a given rule."] },
-  LC:{ m:["Changing top heavy fractions into mixed numbers and back again","Finding equivalent fractions and simplifying them"], s:[6,5],
-       o:["I can recognise, convert and work with improper fractions and mixed numbers.","I can find and simplify equivalent fractions."] },
-  HK:{ m:["Simplifying fractions and explaining how you know they are equivalent","Changing between top heavy fractions and mixed numbers"], s:[5,6,7],
-       o:["I can simplify fractions to their simplest form and explain how I know they are equivalent.","I can convert between improper fractions and mixed numbers."] }
+  JT:{ s:[5,6,7] }, LW:{ s:[5,7] }, EGW:{ s:[3,4] }, LP:{ s:[1,2,3] }, LC:{ s:[6,5] }, HK:{ s:[5,6,7] }
 };
 var ORDER = ["JT","LW","EGW","LP","LC","HK"];
-/* Which stage covers which milestone. Used for the badges and in the summary sent to Jay. */
+/* What each stage covers. Used in the summary sent to Jay. */
 var MILESTONE_STAGES = {
-  1:{ covers:"Squares of one digit numbers and some up to 20, square roots, spotting square numbers", who:["LP"], t:"sq" },
-  2:{ covers:"Squares of two digit numbers, counted in strips of 10 rows", who:["LP"], t:"sq" },
-  3:{ covers:"Next and missing terms, term to term rules, making terms from a given rule", who:["LP","EGW"], t:"seq" },
-  4:{ covers:"Finding the nth term, using it for any term, checking whether a number belongs", who:["EGW"], t:"seq" },
-  5:{ covers:"Making equivalent fractions (multiply and divide), simplest form, comparing, explaining equivalence", who:["LW","LC","HK","JT"], t:"fr" },
-  6:{ covers:"Improper fractions to mixed numbers and back, comparing them, explaining the method", who:["LC","HK","JT"], t:"fr" },
-  7:{ covers:"Spotting and explaining mistakes in squares, sequences and fractions, plus a mixed harvest", who:["JT","HK","LW","LC","EGW","LP"], t:"all" }
+  1:{ covers:"Squares of one digit numbers and some up to 20, square roots, spotting square numbers", t:"sq" },
+  2:{ covers:"Squares of two digit numbers, counted in strips of 10 rows", t:"sq" },
+  3:{ covers:"Next and missing terms, term to term rules, making terms from a given rule", t:"seq" },
+  4:{ covers:"Finding the nth term, using it for any term, checking whether a number belongs", t:"seq" },
+  5:{ covers:"Making equivalent fractions (multiply and divide), simplest form, comparing, explaining equivalence", t:"fr" },
+  6:{ covers:"Improper fractions to mixed numbers and back, comparing them, explaining the method", t:"fr" },
+  7:{ covers:"Spotting and explaining mistakes in squares, sequences and fractions, plus a mixed harvest", t:"all" }
 };
 
 /* ---------- stage icons ---------- */
@@ -819,7 +808,7 @@ function drawWho(){
   }
   if(!info){ out.innerHTML = whoPicked ? '<p class="smallnote">No problem. Every job is open, have a wander round the plot.</p>' : ""; return }
   var names = info.s.map(function(s){ return S[s].name }).join(", ");
-  out.innerHTML = '<div class="mile"><b>Hi ' + who + '.</b> ' + (info.m.length > 1 ? "Your two steps are:" : "Your step is:") + '<ol>' + info.m.map(function(t){ return "<li>" + t + "</li>" }).join("") + '</ol>Good places to start: <b>' + names + '</b>. They have a badge. Every other job is open too, in any order.</div>';
+  out.innerHTML = '<div class="mile"><b>Hi ' + who + '.</b> Good places to start: <b>' + names + '</b>. They have a badge. Every other job is open too, in any order. Your own targets are on <a href="/my-targets.html">My targets</a>, behind your PIN.</div>';
 }
 function setWho(w, user){
   who = w; whoPicked = true;
@@ -1642,7 +1631,7 @@ function plain(s){ return String(s).replace(/<[^>]+>/g, "").replace(/&times;/g, 
 function summary(){
   var out = ["The Number Allotment (squares, fractions and sequences)", ""];
   var info = WHO[who];
-  if(info){ out.push("Milestones (" + who + "):"); info.o.forEach(function(o){ out.push("  * " + o) }); out.push("") }
+  out.push("Initials: " + (info ? who : "not picked"), "");
   var used = { sq:false, fr:false, seq:false }, s;
   for(s = 1; s <= 7; s++) if(st.tried[s]){ var t = MILESTONE_STAGES[s].t; if(t === "all"){ used.sq = used.fr = used.seq = true } else used[t] = true }
   var tl = []; if(used.sq) tl.push(TARGET_LINES.sq); if(used.fr) tl.push(TARGET_LINES.fr); if(used.seq) tl.push(TARGET_LINES.seq);
@@ -1653,9 +1642,9 @@ function summary(){
     var rows = Object.keys(st.q).filter(function(k){ return st.q[k].s === s }).sort(function(x, y){ return x.localeCompare(y, "en", { numeric:true }) });
     var wk = st.w["w" + s];
     if(!st.tried[s] && !rows.length && !(wk && wk.trim())) continue;
-    var ms = MILESTONE_STAGES[s], mine = info && ms.who.indexOf(who) >= 0;
+    var ms = MILESTONE_STAGES[s], mine = info && info.s.indexOf(s) >= 0;
     out.push("", "Job " + s + ": " + S[s].name);
-    out.push("  Covers: " + ms.covers + " (" + ms.who.join(", ") + ")" + (mine ? ", one of " + who + "'s milestones" : ""));
+    out.push("  Covers: " + ms.covers + (mine ? " (badged for " + who + ")" : ""));
     if(!rows.length && !(wk && wk.trim())) out.push("  * Played with the toy, no questions answered yet");
     rows.forEach(function(k){
       var r = st.q[k], how;

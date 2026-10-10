@@ -728,18 +728,12 @@ var MISSIONS = {
 var MORDER = ["week","school","picnic","tight"];
 
 var STUDENTS = {
-  LC:{ ms:["I can identify some items needed for a specific shopping task.","I can find the price of each item on my shopping list."],
-       f:["Spot some of the things you need for a shopping job.","Find the price of each thing on your list."], st:["s1","s2"] },
-  LP:{ ms:["I can compare prices and make sensible choices to get everything needed within budget.","I can plan a basic weekly meal plan and create a shopping list for it within a set budget."],
-       f:["Compare prices and make sensible choices so everything fits the budget.","Plan a week of meals and make a shopping list for it that fits the budget."], st:["s3","s4","s6"] },
-  LW:{ ms:["I can create a shopping list that stays within a provided budget.","I can identify essential food items for a basic weekly meal plan and keep my list within budget."],
-       f:["Make a shopping list that stays inside a budget.","Pick out the essential foods for a week of meals and keep the list inside the budget."], st:["s1","s3","s4"] },
-  EGW:{ ms:["I can create and justify a cost-effective shopping list, adjusting quantities or choices to meet the purpose while staying within budget.","I can plan meals for a week, including essentials, and explain how I would adapt the plan if the budget changed."],
-       f:["Make a good value list and explain your choices, changing amounts or swapping things to fit the budget.","Plan a week of meals with the essentials, and explain how you would change it if the budget changed."], st:["s3","s6","s7"] },
-  HK:{ ms:["I can choose appropriate items for a shopping list from a selection.","I can add up the cost of my shopping list and check whether it is within budget."],
-       f:["Choose the right things for a shopping list from a selection.","Add up your list and check if it fits the budget."], st:["s1","s4","s5"] },
-  JT:{ ms:["I can create a simple shopping list and check the prices of the items.","I can add up my shopping list and remove or swap items to keep within a budget."],
-       f:["Make a simple shopping list and check the prices.","Add up your list, then take out or swap things to stay in budget."], st:["s2","s4","s5"] }
+  LC:{ st:["s1","s2"] },
+  LP:{ st:["s3","s4","s6"] },
+  LW:{ st:["s1","s3","s4"] },
+  EGW:{ st:["s3","s6","s7"] },
+  HK:{ st:["s1","s4","s5"] },
+  JT:{ st:["s2","s4","s5"] }
 };
 var WHOS = ["JT","LW","EGW","LP","LC","HK"];
 var STAGES = [
@@ -971,13 +965,13 @@ function drawWho(){
   var s = STUDENTS[st.who];
   if(!s){ $("whoMs").innerHTML = ""; return }
   var names = s.st.map(function(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return (i + 1) + " " + STAGES[i].n }).join(", ");
-  $("whoMs").innerHTML = '<div class="bm-ms"><div><b>Step one</b>' + s.f[0] + '</div><div><b>Step two</b>' + s.f[1] + '</div></div>' +
-    '<p style="margin-top:10px">Good places to start: <b>' + names + '</b>. They have a yellow dot on the tabs. Everything else is open too.</p>';
+  $("whoMs").innerHTML = '<p style="margin-top:10px"><b>Hi ' + st.who + '.</b> Good places to start: <b>' + names + '</b>. They have a yellow dot on the tabs. Everything else is open too.</p>' +
+    '<p style="margin-top:6px">Your own targets are on <a href="/my-targets.html">My targets</a>, behind your PIN.</p>';
 }
 $("whoPills").addEventListener("click", function(e){
   var b = e.target.closest("[data-who]"); if(!b) return;
   st.who = b.getAttribute("data-who"); st.whoSet = true; save();
-  try{ if(st.who) localStorage.setItem(WHOKEY, st.who) }catch(err){}
+  try{ if(st.who) localStorage.setItem(WHOKEY, st.who); else localStorage.removeItem(WHOKEY) }catch(err){}
   drawWho(); drawTabs();
 });
 function drawMode(){ document.querySelectorAll("#modePills [data-mode]").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-mode") === st.mode ? "true" : "false") }) }
@@ -1694,8 +1688,7 @@ function summaryText(){
   out.push("");
   out.push("TARGET: I can create a shopping list for a specific purpose that follows a provided budget.");
   var s = STUDENTS[st.who];
-  if(s){ out.push("Milestones for " + st.who + ":"); out.push("  1. " + s.ms[0]); out.push("  2. " + s.ms[1]) }
-  else out.push("Milestones: identify items for a task, find and add up prices, plan meals and a list within budget, compare and justify choices, adapt if the budget changes.");
+  if(s){ out.push("Student: " + st.who); var bs = s.st.filter(function(id){ return st.tried[id] }).map(function(id){ var n = id; STAGES.forEach(function(x){ if(x.id === id) n = x.n }); return n }); if(bs.length) out.push("Badged stages tried: " + bs.join(", ")) }
   return out.join("\n");
 }
 RENDER.send = function(){

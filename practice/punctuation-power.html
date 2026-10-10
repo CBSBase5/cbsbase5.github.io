@@ -650,24 +650,12 @@ var STAGES = [
   { id:"s7", t:"Explain it", glyph:"Aa", sub:"Say how punctuation changed the meaning", cls:"c7" }
 ];
 var WHO = {
-  JT:{ f:["Pick the right end mark for statements, questions and commands.", "Spot brackets and apostrophes and say why they are there."],
-       o:["I can choose appropriate punctuation for different sentence types, including statements, questions and commands.", "I can identify brackets and apostrophes and say why they have been used."],
-       best:["s1", "s6", "s4"] },
-  LW:{ f:["Use punctuation to get meaning, purpose and tone across, and explain it, in your writing and in what you read.", "Use lots of kinds of punctuation, including brackets, to add extra information in your own writing."],
-       o:["I can use and explain punctuation accurately to communicate meaning, purpose and tone in my own writing and in texts I read.", "I can use a range of punctuation, including brackets, to add extra information in my own writing."],
-       best:["s3", "s6", "s7"] },
-  EGW:{ f:["Spot what job a punctuation mark is doing in a sentence.", "Explain how punctuation changes what a sentence means."],
-       o:["I can identify the purpose of punctuation in a sentence.", "I can explain the impact punctuation has on the meaning of a sentence."],
-       best:["s1", "s2", "s7"] },
-  LP:{ f:["Spot trickier punctuation like brackets and apostrophes.", "Explain how brackets and apostrophes change what a sentence means."],
-       o:["I can identify more complex punctuation such as brackets and apostrophes.", "I can explain the impact of brackets and apostrophes on the meaning of a sentence."],
-       best:["s3", "s5", "s7"] },
-  LC:{ f:["Use the punctuation to tell if a sentence is a statement, question or command.", "Say what brackets and apostrophes do in a sentence."],
-       o:["I can identify how punctuation helps me understand whether a sentence is a statement, question or command.", "I can explain what brackets and apostrophes do in a sentence."],
-       best:["s1", "s3", "s4"] },
-  HK:{ f:["Explain how changing punctuation can change the meaning or tone of a sentence.", "Choose punctuation in your own writing to create a tone or effect."],
-       o:["I can explain how changing punctuation can alter the meaning or tone of a sentence.", "I can choose punctuation in my own writing to create a particular tone or effect."],
-       best:["s2", "s6", "s7"] }
+  JT:{ best:["s1", "s6", "s4"] },
+  LW:{ best:["s3", "s6", "s7"] },
+  EGW:{ best:["s1", "s2", "s7"] },
+  LP:{ best:["s3", "s5", "s7"] },
+  LC:{ best:["s1", "s3", "s4"] },
+  HK:{ best:["s2", "s6", "s7"] }
 };
 var COHORT = ["JT", "LW", "EGW", "LP", "LC", "HK"];
 
@@ -1307,7 +1295,7 @@ function drawWho(){
     var v = c === "Just looking" ? "" : c;
     var b = btn("pill", c, function(){
       ST.who = v; ST.whoSeen = true; save();
-      try{ if(v) localStorage.setItem(WHO_KEY, v) }catch(e){}
+      try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){}
       var inp = document.getElementById("b5who"); if(inp && v) inp.value = v;
       drawWho(); drawMap();
     });
@@ -1317,7 +1305,7 @@ function drawWho(){
   var box = $("whoBox"), w = WHO[ST.who];
   if(w){
     box.classList.remove("hidden");
-    box.innerHTML = "<b>Hi " + ST.who + ".</b> These stages link to what you are working on:<ul><li>" + w.f[0] + "</li><li>" + w.f[1] + "</li></ul><span class='small'>The &ldquo;good place to start&rdquo; stages suit you best, but every stage is open.</span>";
+    box.innerHTML = "<b>Hi " + ST.who + ".</b> The &ldquo;good place to start&rdquo; stages suit you best, but every stage is open. <span class='small'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</span>";
   } else box.classList.add("hidden");
 }
 function drawMap(){
@@ -1381,7 +1369,8 @@ function summary(){
   L.push("PUNCTUATION POWER (English practice)");
   L.push("Target: I can identify the purpose of punctuation in a sentence, such as why brackets are used, and explain the impact.");
   var w = WHO[ST.who];
-  if(w){ L.push(""); L.push("Milestones for " + ST.who + ":"); w.o.forEach(function(m){ L.push("- " + m) }) }
+  L.push("Initials: " + (ST.who || "not picked"));
+  if(w){ var bt = STAGES.filter(function(s){ return w.best.indexOf(s.id) >= 0 && ST.tried[s.id] }).map(function(s){ return s.t }); L.push("Badged stages tried: " + (bt.length ? bt.join(", ") : "none yet")) }
   L.push("");
   var tr = STAGES.filter(function(s){ return ST.tried[s.id] }).map(function(s, i){ return s.t });
   L.push("Stages tried: " + (tr.length ? tr.join(", ") : "none yet"));

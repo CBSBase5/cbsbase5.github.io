@@ -399,7 +399,7 @@ textarea.note{min-height:92px;resize:vertical}
 
   <section class="who" aria-labelledby="whoH">
     <h2 id="whoH">Who is hosting? <span class="small">(optional)</span></h2>
-    <p>Pick your initials and the show will show your two goals and a good place to start. Every segment stays open to everyone.</p>
+    <p>Pick your initials and the show will mark a good place to start. Every segment stays open to everyone.</p>
     <div class="whochips" id="whoChips" role="group" aria-label="Pick your initials"></div>
     <div class="mslist hidden" id="msBox" aria-live="polite"></div>
   </section>
@@ -447,38 +447,20 @@ function getWho(){ try{ return localStorage.getItem(WHO) || "" }catch(e){ return
 function setWho(v){ try{ localStorage.setItem(WHO, v) }catch(e){} }
 function tried(n){ if(!st.tried[n]){ st.tried[n] = true; save(); drawTiles(); drawEnd() } }
 
-/* ---------------- milestones (copied exactly from the Listening Lab) ---------------- */
-var MS = {
-  LC:["Show that you are listening when someone else is talking.", "Take turns in a chat, and wait for your go to speak."],
-  JT:["Take turns in a chat without jumping in over people.", "Show you listened by asking a question or saying something about what they shared."],
-  LW:["Say back what someone told you, to show you understood.", "Notice how someone is feeling while they talk, and answer with care."],
-  LP:["Spot how someone might be feeling and respond in a way that fits.", "Ask questions to find out more about someone's life, background or point of view."],
-  EGW:["Change how you listen and reply depending on what the other person feels and needs.", "Show respect and understanding to people whose backgrounds, cultures or opinions are different to yours."],
-  HK:["Use listening and kindness to help a chat with a friend go well.", "Find out about a background or culture different to yours, and share something you found interesting."]
-};
-var MSFULL = {
-  LC:["I can show that I am listening when someone else is speaking.", "I can take turns in a conversation and wait for my turn to speak."],
-  JT:["I can take turns in a conversation and avoid interrupting.", "I can show I have listened by asking a question or commenting on what someone has shared."],
-  LW:["I can repeat or summarise what someone has said to show I have understood.", "I can notice how someone is feeling while they talk and respond with care."],
-  LP:["I can recognise how another person might be feeling and respond appropriately.", "I can ask questions to find out more about someone else's experiences, background or point of view."],
-  EGW:["I can adapt how I listen and respond depending on another person's feelings, needs and point of view.", "I can show respect and understanding towards people whose backgrounds, cultures or opinions are different from mine."],
-  HK:["I can use active listening skills and empathy to support positive conversations with peers.", "I can learn about a background or culture different from my own and share something I found interesting."]
-};
 var TARGET = "I can begin to practise active listening and empathy towards peers, and show understanding towards people from different backgrounds and cultures.";
 
-/* stage number -> what it covers, and which milestone (1 or 2) of which student */
+/* stage number -> what it covers */
 var MILESTONE_STAGES = {
-  1:{ covers:"Showing you are listening, not jumping in, reflecting back, noticing feelings, choosing a reply that fits, helping a peer's chat go well", ms:{ LC:[1, 2], JT:[1, 2], LW:[1, 2], LP:[1, 2], EGW:[1, 2], HK:[1] } },
-  2:{ covers:"Hearing feelings in pace, pauses and volume, and changing your own voice to fit", ms:{ LW:[2], LP:[1], EGW:[1] } },
-  3:{ covers:"Comfortable silence, waiting for your turn, not filling every gap, adapting to what each caller needs", ms:{ LC:[1, 2], JT:[1], EGW:[1] } },
-  4:{ covers:"Curious questions about other cultures, spotting assumptions, follow up questions, sharing something interesting", ms:{ JT:[2], LP:[2], EGW:[2], HK:[2] } },
-  5:{ covers:"Summarising what a caller said, leaving out made up bits and your own opinions", ms:{ LW:[1], LC:[1], JT:[2] } },
-  6:{ covers:"Planning open, respectful questions for someone whose life is different from yours", ms:{ JT:[2], LP:[2], EGW:[2], HK:[2] } },
-  7:{ covers:"Doing it for real with a partner: listening signals, turn taking, recapping and supporting a positive chat", ms:{ LC:[1, 2], JT:[1, 2], LW:[1], HK:[1] } }
+  1:"Showing you are listening, not jumping in, reflecting back, noticing feelings, choosing a reply that fits, helping a peer's chat go well",
+  2:"Hearing feelings in pace, pauses and volume, and changing your own voice to fit",
+  3:"Comfortable silence, waiting for your turn, not filling every gap, adapting to what each caller needs",
+  4:"Curious questions about other cultures, spotting assumptions, follow up questions, sharing something interesting",
+  5:"Summarising what a caller said, leaving out made up bits and your own opinions",
+  6:"Planning open, respectful questions for someone whose life is different from yours",
+  7:"Doing it for real with a partner: listening signals, turn taking, recapping and supporting a positive chat"
 };
 var BEST = { LC:[3, 7], JT:[3, 4], LW:[5, 2], LP:[2, 6], EGW:[2, 4], HK:[1, 4] };
-function stagesFor(w, i){ var out = []; Object.keys(MILESTONE_STAGES).forEach(function(n){ var m = MILESTONE_STAGES[n].ms[w]; if(m && m.indexOf(i) >= 0) out.push(+n) }); return out }
-function coversLine(n){ var m = MILESTONE_STAGES[n].ms, bits = []; Object.keys(m).forEach(function(w){ bits.push(w + " goal " + m[w].join(" and ")) }); return bits.join(", ") }
+function coversLine(n){ return MILESTONE_STAGES[n] }
 
 /* ---------------- icons ---------------- */
 var ICON = {
@@ -534,10 +516,9 @@ function drawWho(){
     box.appendChild(b);
   });
   var ms = $("msBox");
-  if(MS[who]){
+  if(BEST[who]){
     var names = BEST[who].map(function(n){ return "<b>" + STAGES[n - 1].t + "</b>" });
-    function where(i){ return " <span class='small'>(practised in: " + stagesFor(who, i).map(function(n){ return STAGES[n - 1].t }).join(", ") + ")</span>" }
-    ms.innerHTML = "<p><b>Goal 1:</b> " + MS[who][0] + where(1) + "</p><p><b>Goal 2:</b> " + MS[who][1] + where(2) + "</p><p>Good places to start: " + names.join(" and ") + ". They have a yellow badge in the running order.</p>";
+    ms.innerHTML = "<p><b>Hi " + who + ".</b> Good places to start: " + names.join(" and ") + ". They have a yellow badge in the running order.</p><p class='small'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p>";
     ms.classList.remove("hidden");
   } else ms.classList.add("hidden");
 }
@@ -1366,9 +1347,8 @@ function summary(){
   var o = [], w = getWho();
   o.push("LATE NIGHT RADIO");
   o.push("Target: " + TARGET);
-  if(MSFULL[w]){
-    o.push("", "Milestones this links to (" + w + "):");
-    [1, 2].forEach(function(i){ var ss = stagesFor(w, i); o.push("- " + MSFULL[w][i - 1] + " (practised in: " + ss.map(function(n){ return STAGES[n - 1].t + (st.tried[n] ? " [tried]" : "") }).join(", ") + ")") });
+  if(BEST[w]){
+    o.push("", "Host: " + w + ". Badged segments tried: " + (BEST[w].filter(function(n){ return st.tried[n] }).map(function(n){ return STAGES[n - 1].t }).join(", ") || "none yet"));
   }
   o.push("", "Segments tried: " + (STAGES.filter(function(s){ return st.tried[s.n] }).map(function(s){ return s.t }).join(", ") || "none yet"));
   function head(n){ o.push("", n + ". " + STAGES[n - 1].t.toUpperCase()); o.push("Covers: " + coversLine(n)) }
@@ -1436,7 +1416,7 @@ STAGES.forEach(function(sg){ stagesBox.appendChild(frame(sg)) });
 drawWho(); drawTiles(); drawEnd();
 if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"Late Night Radio", filename:"late-night-radio", getText:summary });
 var inp = document.getElementById("b5who");
-if(inp) inp.addEventListener("input", function(){ var v = inp.value.trim().toUpperCase(); if(MS[v] && v !== who){ who = v; drawWho(); drawTiles() } });
+if(inp) inp.addEventListener("input", function(){ var v = inp.value.trim().toUpperCase(); if(BEST[v] && v !== who){ who = v; drawWho(); drawTiles() } });
 var armed = false;
 $("restartBtn").onclick = function(){
   if(!armed){ armed = true; this.textContent = "Tap again to clear it all"; $("restartNote").textContent = "This wipes your progress on this device."; return }

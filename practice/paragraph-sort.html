@@ -409,7 +409,7 @@ button.slip:hover{background:#fff6e3}
 
   <section class="whobox" aria-labelledby="whoh">
     <h2 id="whoh">Who is this?</h2>
-    <p>Optional. Pick your initials to see your two steps and where to start, or just have a look around.</p>
+    <p>Optional. Pick your initials to see where to start, or just have a look around.</p>
     <div class="whochips" id="whochips"></div>
     <div id="whoms"></div>
   </section>
@@ -710,12 +710,12 @@ var BLADE = '<svg viewBox="0 0 64 80" aria-hidden="true"><rect x="26" y="1" widt
 
 /* ---------------- who is this ---------------- */
 var STUDENTS = {
-  JT:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], start:[1], next:[3] },
-  LW:{ m:["I can use paragraphs to group sentences that belong together.", "I can start each paragraph with a clear topic sentence."], start:[1], next:[2] },
-  EGW:{ m:["I can organise my ideas into clear paragraphs.", "I can link my paragraphs so my writing flows from one idea to the next."], start:[1], next:[4, 6] },
-  LP:{ m:["I can organise my writing into clear paragraphs.", "I can use linking words and phrases to connect ideas between my paragraphs."], start:[1], next:[4, 6] },
-  LC:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], start:[1], next:[3] },
-  HK:{ m:["I can use paragraphs to group sentences that belong together.", "I can plan my writing in sections before I write it in paragraphs."], start:[1], next:[5, 6] }
+  JT:{ start:[1], next:[3] },
+  LW:{ start:[1], next:[2] },
+  EGW:{ start:[1], next:[4, 6] },
+  LP:{ start:[1], next:[4, 6] },
+  LC:{ start:[1], next:[3] },
+  HK:{ start:[1], next:[5, 6] }
 };
 var ORDER = ["JT", "LW", "EGW", "LP", "LC", "HK"];
 function getWho(){ try{ return (localStorage.getItem(WHOKEY) || "").trim().toUpperCase() }catch(e){ return "" } }
@@ -727,9 +727,9 @@ function drawWho(){
     '<button type="button" class="whochip look" data-w="" aria-pressed="' + (!known && st.looking) + '">Just looking</button>';
   if(known){
     var S = STUDENTS[known];
-    $("whoms").innerHTML = '<ul class="mslist"><li><span class="badge">Good place to start</span> ' + esc(S.m[0]) + ' <span class="where">Bay ' + S.start.join(" and ") + '</span></li>' +
-      '<li><span class="badge next">Your next step</span> ' + esc(S.m[1]) + ' <span class="where">Bay ' + S.next.join(" and ") + '</span></li></ul>' +
-      '<p class="smallnote">Every bay stays open, in any order. These are only suggestions.</p>';
+    $("whoms").innerHTML = '<ul class="mslist"><li><span class="badge">Good place to start</span> <span class="where">Bay ' + S.start.join(" and ") + '</span></li>' +
+      '<li><span class="badge next">Your next step</span> <span class="where">Bay ' + S.next.join(" and ") + '</span></li></ul>' +
+      '<p class="smallnote">Hi ' + esc(known) + '. Every bay stays open, in any order. These are only suggestions. Your own targets are on <a href="/my-targets.html">My targets</a>, behind your PIN.</p>';
   } else $("whoms").innerHTML = st.looking ? '<p class="smallnote">No problem. Wander into any bay you like.</p>' : "";
   for(var n = 1; n <= 6; n++){
     var t = badgeFor(n), bd = $("badge" + n);
@@ -1344,8 +1344,9 @@ function summary(){
   var w = getWho(), S = STUDENTS[w], out = [], tried = [];
   out.push("The Sorting Office: using paragraphs to group related material");
   out.push("");
-  if(S){ out.push("My milestones:"); out.push("- " + S.m[0]); out.push("- " + S.m[1]) }
-  else out.push("Target: I can use paragraphs as a way to group related material.");
+  out.push("Target: I can use paragraphs as a way to group related material.");
+  out.push("Initials: " + (S ? w : "not picked"));
+  if(S){ var bt = S.start.concat(S.next).filter(function(n){ return st.tried[n] }); out.push("Badged bays tried: " + (bt.length ? bt.join(", ") : "none yet")) }
   for(var n = 1; n <= 6; n++) if(st.tried[n]) tried.push(n);
   out.push("");
   out.push("Bays I tried: " + (tried.length ? tried.map(function(n){ return n + " (" + BAYS[n - 1][1] + ")" }).join(", ") : "none yet"));

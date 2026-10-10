@@ -805,22 +805,16 @@ var STATUS = [
 ];
 var DAYCH = ["Not done it yet","I did the challenge!","Not going this time, still trained for it","Picked a new challenge"];
 
-var STUD = {
-  JT: {ms:["Set a realistic goal and say how you will measure your progress.","Record how you are getting on and say what you will do next."], st:[3,4,7]},
-  LW: {ms:["Choose a simple training goal for a sport.","Say what you would practise to reach your goal."], st:[1,2,4,6]},
-  EGW:{ms:["Set goals that stretch you but are still doable, explain why, and change the plan as you go.","Look back over a training period and set new goals for the next stage."], st:[4,7]},
-  LP: {ms:["Make a short training plan with clear goals, practice ideas and ways to check how it is going.","Follow the plan, record how it goes and change your goals if you need to."], st:[4,6,7]},
-  LC: {ms:["Pick a sport you want to get better at and name one skill in it.","Choose a simple goal to help you get better at that skill."], st:[1,4]},
-  HK: {ms:["Set a clear training goal and say what you need to practise.","Explain how you will measure your progress towards it."], st:[2,3,4]}
-};
+/* initials to good starting stages, nothing else per student */
+var STUD = { JT:[3,4,7], LW:[1,2,4,6], EGW:[4,7], LP:[4,6,7], LC:[1,4], HK:[2,3,4] };
 var MILESTONE_STAGES = {
-  1:"Picking a challenge and naming the one bit to get better at (LC, LW)",
-  2:"Working out what to practise from the gaps (HK, LW, LC)",
-  3:"Testing yourself and measuring progress fairly (JT, HK, LP)",
-  4:"Setting a clear goal that stretches but is doable, and saying why (LC, LW, JT, HK, EGW, LP)",
-  5:"Warm up and cool down as part of a training plan (LP, LW)",
-  6:"A weekly plan with practice ideas, rest and a check in day (LP, LW, HK, EGW)",
-  7:"Recording progress, changing the plan, looking back and setting the next goal (JT, EGW, LP)"
+  1:"Picking a challenge and naming the one bit to get better at",
+  2:"Working out what to practise from the gaps",
+  3:"Testing yourself and measuring progress fairly",
+  4:"Setting a clear goal that stretches but is doable, and saying why",
+  5:"Warm up and cool down as part of a training plan",
+  6:"A weekly plan with practice ideas, rest and a check in day",
+  7:"Recording progress, changing the plan, looking back and setting the next goal"
 };
 var STAGES = [
   {n:1, t:"Choose your challenge", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", ic:'<path d="M8 36V6" stroke="' + INK + '" stroke-width="3"/><path d="M8 7h24l-6 7 6 7H8z" fill="#ffc247"' + SW + '/>'},
@@ -857,7 +851,7 @@ try{
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
 function tried(n){ if(!st.tried[n]){ st.tried[n] = 1; drawMap() } save(); drawPass() }
 function getWho(){ try{ return localStorage.getItem(WHO) || "" }catch(e){ return "" } }
-function setWho(v){ try{ localStorage.setItem(WHO, v) }catch(e){} }
+function setWho(v){ try{ if(v) localStorage.setItem(WHO, v); else localStorage.removeItem(WHO) }catch(e){} }
 
 function chal(){ return CBY[st.ch] || null }
 function chalName(){ var c = chal(); if(!c) return ""; return c.id === "own" ? (st.ownCh.trim() || "my own challenge") : c.name }
@@ -900,21 +894,21 @@ function drawWho(){
   var row = el("whoRow"); row.innerHTML = "";
   ["JT","LW","EGW","LP","LC","HK"].forEach(function(w){
     var b = btn("whobtn", w, who === w);
-    b.addEventListener("click", function(){ who = (who === w) ? "" : w; if(who) setWho(who); st.look = false; save(); drawWho(); drawMap(); drawPass() });
+    b.addEventListener("click", function(){ who = (who === w) ? "" : w; setWho(who); st.look = false; save(); drawWho(); drawMap(); drawPass() });
     row.appendChild(b);
   });
   var lk = btn("whobtn", "Just looking", !who && st.look);
-  lk.addEventListener("click", function(){ who = ""; st.look = true; save(); drawWho(); drawMap(); drawPass() });
+  lk.addEventListener("click", function(){ who = ""; setWho(""); st.look = true; save(); drawWho(); drawMap(); drawPass() });
   row.appendChild(lk);
   var ms = el("msList");
   if(who){
     ms.hidden = false;
-    ms.innerHTML = "<li><b>Step one</b>" + esc(STUD[who].ms[0]) + "</li><li><b>Step two</b>" + esc(STUD[who].ms[1]) + "</li>" +
-      "<li style='border-style:solid;border-color:var(--yellow-deep);background:#fff4d9'>Stages marked <b style='display:inline;color:var(--ink)'>good place to start</b> suit these best. Everything stays open, in any order.</li>";
+    ms.innerHTML = "<li style='border-style:solid;border-color:var(--yellow-deep);background:#fff4d9'><b>Good places to start</b>Hi " + who + ". Stages marked <b style='display:inline;color:var(--ink)'>good place to start</b> are a good place to begin. Everything stays open, in any order.</li>" +
+      "<li><b>My targets</b>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</li>";
   }else ms.hidden = true;
   document.querySelectorAll(".stage").forEach(function(d){
     var n = +d.getAttribute("data-n");
-    d.classList.toggle("suits", !!(who && STUD[who].st.indexOf(n) > -1));
+    d.classList.toggle("suits", !!(who && STUD[who].indexOf(n) > -1));
   });
 }
 function drawMap(){
@@ -923,8 +917,8 @@ function drawMap(){
     var b = btn("smbtn" + (s.lt ? " lt" : ""), '<span class="n">Stage ' + s.n + '</span>' + svg("0 0 40 40", s.ic) + '<span>' + esc(s.t) + '</span><span class="gps">Good place to start</span><span class="tick">' + TICK + '</span>');
     b.style.background = s.bg;
     if(st.tried[s.n]) b.classList.add("done");
-    if(who && STUD[who].st.indexOf(s.n) > -1) b.classList.add("suits");
-    b.setAttribute("aria-label", "Stage " + s.n + ", " + s.t + (st.tried[s.n] ? ", tried" : "") + (who && STUD[who].st.indexOf(s.n) > -1 ? ", good place to start" : ""));
+    if(who && STUD[who].indexOf(s.n) > -1) b.classList.add("suits");
+    b.setAttribute("aria-label", "Stage " + s.n + ", " + s.t + (st.tried[s.n] ? ", tried" : "") + (who && STUD[who].indexOf(s.n) > -1 ? ", good place to start" : ""));
     b.addEventListener("click", function(){ openStage(s.n) });
     box.appendChild(b);
   });
@@ -1704,7 +1698,7 @@ function summary(){
   var L = [], c = chal();
   L.push("TRAINING CAMP");
   L.push("Target: I can set training goals for a particular sport.");
-  if(who){ L.push("Milestones this relates to (" + who + "):"); STUD[who].ms.forEach(function(m){ L.push("  * " + m) }) }
+  if(who){ L.push("Student: " + who + ". Badged stages tried: " + (STUD[who].filter(function(n){ return st.tried[n] }).join(", ") || "none yet")) }
   var done = STAGES.filter(function(x){ return st.tried[x.n] }).map(function(x){ return x.n + " " + x.t });
   L.push("Stages tried: " + (done.length ? done.join(", ") : "none yet"));
   if(st.tried[1]){
