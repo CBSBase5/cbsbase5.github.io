@@ -387,7 +387,9 @@ button.lilac:active{box-shadow:0 1px 0 #8a6fd1}
 .doo-col.on{border-color:#fff4e3!important;transform:translateY(-2px)}
 #dooSizes button.on{border-color:#ffd23f!important}
 #dvImg{width:100%;max-width:320px;align-self:center;border-radius:12px;border:3px solid var(--line);background:#fffdf6;image-rendering:auto}
-.av-sheet{width:min(720px,100%)}
+.av-sheet{width:min(760px,100%)}
+.mk-opt.locked{opacity:.55;border-style:dashed!important}
+.mk-opt.locked::before{content:'?';display:inline-block;margin-right:5px;font-weight:700;color:#ffd23f}
 .av-wrap{display:grid;grid-template-columns:220px 1fr;gap:14px;align-items:start}
 #avPrev{width:220px;height:260px;border-radius:14px;border:3px solid var(--line);background:radial-gradient(circle at 50% 40%,#3d3470,#16132a)}
 #avSkin .mk-opt,#avHairCol .mk-opt,#avTop .mk-opt{width:30px;height:28px;padding:0!important}
@@ -1105,16 +1107,19 @@ button.lilac:active{box-shadow:0 1px 0 #8a6fd1}
   <div class="modal" id="mAvatar" hidden>
     <div class="sheet av-sheet" role="dialog" aria-modal="true" aria-labelledby="avTitle">
       <h2 id="avTitle">Make yourself</h2>
-      <p class="sub">Make a little you. They will wander about the house, sit on things and wave.</p>
+      <p class="sub">Make a little you. They follow you around the house, join in with things and potter about. Finding secrets adds more to the dressing up box.</p>
       <div class="av-wrap">
         <canvas id="avPrev" width="440" height="520" role="img" aria-label="A preview of your character"></canvas>
         <div>
           <div class="mk-row"><span>Skin</span><div class="mk-opts" id="avSkin"></div></div>
           <div class="mk-row"><span>Hair</span><div class="mk-opts" id="avHair"></div></div>
           <div class="mk-row"><span>Hair colour</span><div class="mk-opts" id="avHairCol"></div></div>
-          <div class="mk-row"><span>Top</span><div class="mk-opts" id="avTop"></div></div>
+          <div class="mk-row"><span>Top colour</span><div class="mk-opts" id="avTop"></div></div>
+          <div class="mk-row"><span>Top</span><div class="mk-opts" id="avStyle"></div></div>
           <div class="mk-row"><span>On your head</span><div class="mk-opts" id="avHat"></div></div>
+          <div class="mk-row"><span>On your back</span><div class="mk-opts" id="avBack"></div></div>
           <div class="mk-row"><span>Holding</span><div class="mk-opts" id="avHold"></div></div>
+          <p class="mk-msg" id="avMsg" aria-live="polite"></p>
         </div>
       </div>
       <div class="row"><button class="alt" data-close>Close</button><button class="alt" id="avRandom">Surprise me</button><button class="gold" id="avSave">That is me</button></div>
@@ -8928,74 +8933,9 @@ var AV_SPOTS = {
   attic:[[-0.6, 0.0, 'wave', 0, 0.6], [1.6, -1.6, 'look', 0, Math.PI]],
   green:[[0.6, 0.2, 'wave', 0, 0.6], [-0.4, -2.4, 'look', 0, Math.PI]]
 };
-function avBuild(d, parent){
-  var g = new THREE.Group(), sk = new THREE.Color(AVO.skin[d.skin]).getHex(), hc = new THREE.Color(AVO.hairCol[d.hairCol]).getHex(), tc = new THREE.Color(AVO.top[d.top]).getHex();
-  var legs = new THREE.Group(); g.add(legs); cyl(0.07, 0.07, 0.55, 0x2a2246, -0.09, 0.28, 0, {flat:false}, legs); cyl(0.07, 0.07, 0.55, 0x2a2246, 0.09, 0.28, 0, {flat:false}, legs);
-  box(0.12, 0.06, 0.2, 0xfff4e3, -0.09, 0.03, 0.04, null, legs); box(0.12, 0.06, 0.2, 0xfff4e3, 0.09, 0.03, 0.04, null, legs);
-  cyl(0.2, 0.24, 0.55, tc, 0, 0.82, 0, {flat:false}, g);
-  var armL = new THREE.Group(); armL.position.set(-0.27, 1.05, 0); g.add(armL); cyl(0.055, 0.055, 0.45, tc, 0, -0.2, 0, {flat:false}, armL); sph(0.06, sk, 0, -0.44, 0, {flat:false}, armL);
-  var armR = new THREE.Group(); armR.position.set(0.27, 1.05, 0); g.add(armR); cyl(0.055, 0.055, 0.45, tc, 0, -0.2, 0, {flat:false}, armR); sph(0.06, sk, 0, -0.44, 0, {flat:false}, armR);
-  var head = new THREE.Group(); head.position.set(0, 1.35, 0); g.add(head);
-  sph(0.23, sk, 0, 0, 0, {flat:false}, head); sph(0.028, 0x16132a, -0.08, 0.03, 0.2, null, head); sph(0.028, 0x16132a, 0.08, 0.03, 0.2, null, head);
-  var sm = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 6, 12, Math.PI), new THREE.MeshStandardMaterial({color:0x16132a})); sm.position.set(0, -0.06, 0.205); sm.rotation.z = Math.PI; head.add(sm);
-  sph(0.035, 0xff9ac4, -0.13, -0.04, 0.17, null, head); sph(0.035, 0xff9ac4, 0.13, -0.04, 0.17, null, head);
-  var hm = {flat:false};
-  if (d.hair !== 'buzz') { var cap = mesh(new THREE.SphereGeometry(0.245, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), hc, 0, 0.02, -0.015, hm, head); cap.rotation.x = -0.25; }
-  else { var cap2 = mesh(new THREE.SphereGeometry(0.235, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.42), hc, 0, 0.0, -0.01, hm, head); cap2.rotation.x = -0.2; }
-  if (d.hair === 'curly') for (var c = 0; c < 9; c++) { var a = c / 9 * Math.PI * 2; sph(0.075, hc, Math.cos(a) * 0.17, 0.15 + Math.sin(c) * 0.03, Math.sin(a) * 0.15 - 0.03, hm, head); }
-  if (d.hair === 'long') box(0.44, 0.45, 0.12, hc, 0, -0.15, -0.16, null, head);
-  if (d.hair === 'bun') sph(0.1, hc, 0, 0.24, -0.12, hm, head);
-  if (d.hair === 'spiky') for (var p = 0; p < 6; p++) { var sp = mesh(new THREE.ConeGeometry(0.05, 0.16, 5), hc, -0.15 + p * 0.06, 0.22, -0.02 - (p % 2) * 0.06, null, head); sp.rotation.z = (p - 2.5) * 0.15; }
-  if (d.hat === 'beanie') { mesh(new THREE.SphereGeometry(0.255, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), 0xff8a3d, 0, 0.04, 0, hm, head); cyl(0.26, 0.26, 0.06, 0xffd23f, 0, 0.04, 0, null, head); sph(0.05, 0xfff4e3, 0, 0.3, 0, hm, head); }
-  if (d.hat === 'cap') { var cp = mesh(new THREE.SphereGeometry(0.25, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), 0x6cc8ff, 0, 0.05, 0, hm, head); box(0.22, 0.02, 0.16, 0x6cc8ff, 0, 0.09, 0.27, null, head); }
-  if (d.hat === 'crown') { cyl(0.16, 0.16, 0.1, 0xffd23f, 0, 0.27, 0, {m:0.4, em:0x3a2a00}, head); for (var k = 0; k < 5; k++) { var ka = k / 5 * Math.PI * 2; mesh(new THREE.ConeGeometry(0.035, 0.09, 4), 0xffd23f, Math.cos(ka) * 0.14, 0.36, Math.sin(ka) * 0.14, {m:0.4, em:0x3a2a00}, head); } }
-  if (d.hat === 'flower') { for (var f = 0; f < 5; f++) { var fa = f / 5 * Math.PI * 2; sph(0.04, 0xff5fa2, 0.17 + Math.cos(fa) * 0.05, 0.14 + Math.sin(fa) * 0.05, 0.1, hm, head); } sph(0.035, 0xffd23f, 0.17, 0.14, 0.12, hm, head); }
-  if (d.hat === 'phones') { var band = mesh(new THREE.TorusGeometry(0.25, 0.025, 6, 20, Math.PI), 0x2a2246, 0, 0.02, 0, null, head); cyl(0.07, 0.07, 0.06, 0xff5fa2, -0.25, 0, 0, null, head).rotation.z = Math.PI / 2; cyl(0.07, 0.07, 0.06, 0xff5fa2, 0.25, 0, 0, null, head).rotation.z = Math.PI / 2; }
-  var hand = new THREE.Group(); hand.position.set(0, -0.46, 0.04); armR.add(hand);
-  if (d.hold === 'balloon') { cyl(0.004, 0.004, 0.8, 0xfff4e3, 0, 0.4, 0, null, hand); sph(0.17, 0xff5fa2, 0, 0.9, 0, {flat:false}, hand).scale.y = 1.2; }
-  if (d.hold === 'book') box(0.2, 0.26, 0.05, 0xb28dff, 0, 0, 0.05, null, hand);
-  if (d.hold === 'ball') { sph(0.12, 0xffffff, 0, -0.04, 0.08, {flat:false}, hand); sph(0.04, 0x16132a, 0, 0.0, 0.19, null, hand); }
-  if (d.hold === 'plant') { cyl(0.07, 0.05, 0.1, 0xe46b4f, 0, -0.02, 0.06, null, hand); sph(0.08, 0x4fbf7f, 0, 0.08, 0.06, null, hand); }
-  if (d.hold === 'star') { var stS = new THREE.Shape(); for (var q = 0; q < 10; q++) { var qa = -Math.PI / 2 + q * Math.PI / 5, qr = q % 2 ? 0.05 : 0.12; if (q) stS.lineTo(Math.cos(qa) * qr, -Math.sin(qa) * qr); else stS.moveTo(Math.cos(qa) * qr, -Math.sin(qa) * qr); } var stG = new THREE.ExtrudeGeometry(stS, {depth:0.03, bevelEnabled:false}); stG.center(); var stM = new THREE.Mesh(stG, new THREE.MeshStandardMaterial({color:0xffd23f, emissive:0x8a6a10, emissiveIntensity:0.6})); stM.position.set(0, 0.08, 0.06); hand.add(stM); }
-  g.userData = {action:'avatar', label:'You!'};
-  g.userData.parts = {legs:legs, armL:armL, armR:armR, head:head};
-  return g;
-}
-function avPlace(){
-  if (!state.avatar) { if (AV.g) AV.g.visible = false; return; }
-  var spots = AV_SPOTS[room], parent = ROOM_GROUPS()[room];
-  if (!spots || !parent) { if (AV.g) AV.g.visible = false; return; }
-  if (AV.g.parent !== parent) parent.add(AV.g);
-  AV.room = room; AV.spot = (AV.spot + 1 + Math.floor(Math.random() * Math.max(1, spots.length - 1))) % spots.length;
-  var s = spots[AV.spot]; AV.g.position.set(s[0], s[3], s[1]); AV.g.rotation.y = s[4]; AV.act = s[2];
-  var P = AV.g.userData.parts; P.legs.rotation.x = AV.act === 'sit' ? -1.3 : 0; P.legs.position.set(0, AV.act === 'sit' ? 0.40 : 0, AV.act === 'sit' ? 0.535 : 0);
-  AV.next = rand(9, 15);
-}
-function avRebuild(){ var parent = AV.g ? AV.g.parent : null; if (AV.g && parent) parent.remove(AV.g); AV.g = avBuild(state.avatar || AV.d); (parent || roomG).add(AV.g); AV.room = null; AV.spot = -1; avPlace(); }
-function avHop(){
-  var g = AV.g; if (!g) return; var w0 = objWorld(g);
-  anim(0.25, function(u){ g.scale.setScalar(Math.max(0.01, 1 - u)); }, function(){ avPlace(); burst(w0.x, w0.y + 0.6, w0.z, 6, 0.6, 0, [0xffffff, 0xb28dff], 0.3); anim(0.3, function(u){ g.scale.setScalar(Math.max(0.01, u)); }); });
-}
-function avTap(){
-  var P = AV.g.userData.parts; sfx('boing'); var w = objWorld(AV.g); var sp = toScreen(new V3(w.x, w.y + 1.8, w.z)); pop(pick(['Hello!', 'Hi!', 'Oh, hello.', 'You again!', 'Nice day for it.']), 'tiny', sp.x, sp.y, 0);
-  anim(1.0, function(u){ P.armR.rotation.z = Math.sin(u * Math.PI * 4) * 0.5 + 2.4 * Math.sin(Math.PI * u) * 0.5; });
-  AV.taps.push(realT); AV.taps = AV.taps.filter(function(x){ return realT - x < 4; }); if (AV.taps.length >= 5) { AV.taps = []; unlock('avatarwave', w); }
-}
-function updAvatar(dt){
-  if (!state.avatar) return;
-  if (!AV.g) { AV.g = avBuild(state.avatar); roomG.add(AV.g); avPlace(); }
-  AV.g.visible = isHub(mode) && !!AV_SPOTS[room];
-  if (AV.room !== room) avPlace();
-  if (!AV.g.visible) return;
-  var P = AV.g.userData.parts; AV.t += dt;
-  if (AV.act === 'wave') P.armR.rotation.z = 2.4 + Math.sin(realT * 6) * 0.35; else if (AV.act !== 'wave' && P.armR.rotation.z > 0.01 && Math.abs(P.armR.rotation.z - 2.4) < 1) P.armR.rotation.z *= 0.9;
-  P.head.rotation.y = Math.sin(realT * 0.7) * 0.25; P.head.position.y = 1.35 + Math.sin(realT * 2) * 0.01;
-  if (AV.act === 'stand') AV.g.rotation.z = Math.sin(realT * 1.3) * 0.02;
-  AV.next -= dt; if (AV.next <= 0 && !anyModal()) { AV.next = 99; avHop(); }
-}
 function avSel(id, list, key, swatch){
   var host = $(id); host.innerHTML = '';
-  list.forEach(function(o, i){ var b = document.createElement('button'); b.type = 'button'; b.className = 'mk-opt'; var v = swatch ? i : o[0]; if (swatch) { b.style.setProperty('background', o, 'important'); b.setAttribute('aria-label', ({skin:'Skin tone', hairCol:'Hair colour', top:'Top colour'})[key] + ' ' + (i + 1)); } else b.textContent = o[1]; if (AV.d[key] === v) b.classList.add('on'); b.addEventListener('click', function(){ AV.d[key] = v; sfx('blip', i + 2); avRender(); }); host.appendChild(b); });
+  list.forEach(function(o, i){ var b = document.createElement('button'); b.type = 'button'; b.className = 'mk-opt'; var v = swatch ? i : o[0]; if (swatch) { b.style.setProperty('background', o, 'important'); b.setAttribute('aria-label', ({skin:'Skin tone', hairCol:'Hair colour', top:'Top colour'})[key] + ' ' + (i + 1)); } else b.textContent = o[1]; var lk = !swatch && avLocked(key, v); if (lk) { b.classList.add('locked'); b.setAttribute('aria-label', o[1] + ', not found yet'); } if (AV.d[key] === v) b.classList.add('on'); b.addEventListener('click', function(){ if (lk) { sfx('tick', 2); $('avMsg').textContent = o[1] + ': ' + avLockHint(lk); return; } $('avMsg').textContent = ''; AV.d[key] = v; sfx('blip', i + 2); avRender(); }); host.appendChild(b); });
 }
 var AVP = {r:null, s:null, c:null, g:null};
 function avPreviewInit(){
@@ -9005,12 +8945,12 @@ function avPreviewInit(){
   AVP.c = new THREE.PerspectiveCamera(30, 220 / 260, 0.1, 50); AVP.c.position.set(0, 1.0, 4.2); AVP.c.lookAt(0, 0.85, 0);
 }
 function avPreview(){ avPreviewInit(); if (AVP.g) AVP.s.remove(AVP.g); AVP.g = avBuild(AV.d); AVP.s.add(AVP.g); AVP.g.rotation.y = 0.35; AVP.r.render(AVP.s, AVP.c); }
-function avRender(){ avSel('avSkin', AVO.skin, 'skin', true); avSel('avHair', AVO.hair, 'hair'); avSel('avHairCol', AVO.hairCol, 'hairCol', true); avSel('avTop', AVO.top, 'top', true); avSel('avHat', AVO.hat, 'hat'); avSel('avHold', AVO.hold, 'hold'); avPreview(); }
-function openAvatar(){ audioInit(); AV.d = state.avatar ? JSON.parse(JSON.stringify(state.avatar)) : AV.d; avRender(); openModal('mAvatar'); }
-$('avRandom').addEventListener('click', function(){ sfx('boing'); AV.d = {skin:Math.floor(Math.random() * 6), hair:pick(AVO.hair)[0], hairCol:Math.floor(Math.random() * 6), top:Math.floor(Math.random() * 6), hat:pick(AVO.hat)[0], hold:pick(AVO.hold)[0]}; avRender(); });
+function avRender(){ avSel('avSkin', AVO.skin, 'skin', true); avSel('avHair', AVO.hair, 'hair'); avSel('avHairCol', AVO.hairCol, 'hairCol', true); avSel('avTop', AVO.top, 'top', true); avSel('avStyle', AVO.style, 'style'); avSel('avHat', AVO.hat, 'hat'); avSel('avBack', AVO.back, 'back'); avSel('avHold', AVO.hold, 'hold'); avPreview(); }
+function openAvatar(){ audioInit(); AV.d = avDef(state.avatar ? JSON.parse(JSON.stringify(state.avatar)) : AV.d); $('avMsg').textContent = ''; avRender(); openModal('mAvatar'); }
+$('avRandom').addEventListener('click', function(){ sfx('boing'); var fr = function(k){ return pick(AVO[k].filter(function(o){ return !avLocked(k, o[0]); }))[0]; }; AV.d = {skin:Math.floor(Math.random() * 6), hair:pick(AVO.hair)[0], hairCol:Math.floor(Math.random() * 6), top:Math.floor(Math.random() * 6), style:fr('style'), hat:fr('hat'), back:fr('back'), hold:fr('hold')}; $('avMsg').textContent = ''; avRender(); });
 $('avSave').addEventListener('click', function(){
   var first = !state.avatar; state.avatar = JSON.parse(JSON.stringify(AV.d)); save(); closeModals(); avRebuild(); sfx('megaping');
-  narrate(first ? 'A little you has moved into the house. It will wander about, sit on things and wave. Very you.' : 'A fresh new look. The house approves.', 7000);
+  narrate(first ? 'A little you has moved into the house. They will wander from room to room with you, join in, and potter about when things are quiet. Very you.' : 'A fresh new look. The house approves.', 7000);
   unlock('avatar'); petAdd(4);
 });
 $('setAvatar').addEventListener('click', function(){ sfx('click'); openAvatar(); });
@@ -9702,6 +9642,370 @@ function updGreen(dt){
 applyGreenGens();
 SECRET2.splice(SECRET2.length - 1, 0, ['frogprince', 'Royal ribbit', 'You visited the greenhouse frog wearing a crown.', 'Frogs and royalty go back a long way. The right hat might help.']);
 S2_BY.frogprince = {id:'frogprince', name:'Royal ribbit', desc:'You visited the greenhouse frog wearing a crown.', hint:'Frogs and royalty go back a long way. The right hat might help.'};
+
+/* =========================================================
+   AVATAR LIFE: walking about, joining in, outfits from secrets, idle life
+   ========================================================= */
+/* ---------- outfits unlocked by secrets ---------- */
+AVO.style = [['plain', 'Plain'], ['hoodie', 'Hoodie'], ['stripes', 'Stripes'], ['base5', 'Base 5 top'], ['stars', 'Starry'], ['raincoat', 'Raincoat'], ['tux', 'Fancy suit'], ['dino', 'Dinosaur'], ['apron', 'Apron']];
+AVO.back = [['none', 'Nothing'], ['backpack', 'Backpack'], ['scarf', 'Scarf'], ['cape', 'Cape'], ['wings', 'Cloud wings']];
+AVO.hat = AVO.hat.concat([['party', 'Party hat'], ['chef', 'Chef hat'], ['gnome', 'Gnome hat'], ['hardhat', 'Hard hat'], ['tophat', 'Top hat'], ['pirate', 'Pirate hat'], ['flytrap', 'Flytrap hat'], ['astro', 'Space helmet'], ['lanternc', 'Lantern crown']]);
+AVO.hold = AVO.hold.concat([['record', 'A record'], ['mister', 'Plant mister'], ['lantern', 'Paper lantern'], ['duck', 'Rubber duck'], ['tomato', 'Tomato'], ['letter', 'Old letter']]);
+var AV_UNLOCKS = [
+  ['hat', 'party', 'ballroom'], ['hat', 'chef', 'toasty'], ['hat', 'gnome', 'gnome'], ['hat', 'hardhat', 'sanded'], ['hat', 'tophat', 'hats'], ['hat', 'pirate', 'ahoy'], ['hat', 'flytrap', 'snappy'], ['hat', 'astro', 'ufo'], ['hat', 'lanternc', 'lanterns20'],
+  ['style', 'stripes', 'stripes'], ['style', 'base5', 'spirit'], ['style', 'stars', 'allconst'], ['style', 'raincoat', 'allweather'], ['style', 'tux', 'dj'], ['style', 'dino', 'treasure12'], ['style', 'apron', 'fullshelf'],
+  ['back', 'scarf', 'petgrown'], ['back', 'cape', 'goldstar'], ['back', 'wings', 'credits'],
+  ['hold', 'record', 'allrecords'], ['hold', 'mister', 'allbloom'], ['hold', 'lantern', 'firstlantern'], ['hold', 'duck', 'captain'], ['hold', 'tomato', 'tomatoes'], ['hold', 'letter', 'letters']
+];
+var AV_LOCK = {}, AV_BY_SECRET = {};
+AV_UNLOCKS.forEach(function(u){ AV_LOCK[u[0] + ':' + u[1]] = u[2]; (AV_BY_SECRET[u[2]] = AV_BY_SECRET[u[2]] || []).push(u); });
+function avOptName(key, v){ var l = AVO[key] || []; for (var i = 0; i < l.length; i++) if (l[i][0] === v) return l[i][1]; return v; }
+function avLocked(key, v){ var s = AV_LOCK[key + ':' + v]; return s && !state.secrets[s] ? s : null; }
+function avLockHint(sid){
+  var sec = null; SECRETS.forEach(function(s){ if (s[0] === sid) sec = s; });
+  var rm = SEC_ROOM_NAME[secRoom(sid)] || 'the house';
+  return 'This turns up when you find a secret' + (secRoom(sid) === 'any' ? '' : ' in ' + (rm.indexOf('The ') === 0 ? rm.toLowerCase() : 'the ' + rm.toLowerCase())) + '. ' + (sec ? 'Hint: ' + sec[3] : '');
+}
+var _unlockAv = unlock;
+unlock = function(id, w){
+  var had = !!state.secrets[id], r = _unlockAv(id, w);
+  if (!had && state.secrets[id] && AV_BY_SECRET[id]) setTimeout(function(){ var names = AV_BY_SECRET[id].map(function(u){ return avOptName(u[0], u[1]); }).join(' and '); pkNote('New in the dressing up box', names + '. Pop it on whenever you like.', 6000); }, 2600);
+  return r;
+};
+function avDef(d){ d = d || {}; if (d.style == null) d.style = 'plain'; if (d.back == null) d.back = 'none'; return d; }
+avDef(AV.d); if (state.avatar) avDef(state.avatar);
+
+/* ---------- torso textures ---------- */
+var AV_TEX = {};
+function avTorsoTex(style, colHex){
+  var key = style + colHex; if (AV_TEX[key]) return AV_TEX[key];
+  var col = '#' + ('000000' + colHex.toString(16)).slice(-6);
+  var t = canvasTex(256, 128, function(g, w, h){
+    if (style === 'stripes') { g.fillStyle = '#fff4e3'; g.fillRect(0, 0, w, h); g.fillStyle = col; for (var y = 0; y < h; y += 26) g.fillRect(0, y, w, 13); }
+    else if (style === 'base5') { g.fillStyle = col; g.fillRect(0, 0, w, h); g.fillStyle = '#fff4e3'; g.font = 'bold 40px Arial Black, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('B5', w / 2, h / 2 - 6); g.fillRect(w / 2 - 34, h / 2 + 22, 68, 5); }
+    else if (style === 'stars') { g.fillStyle = '#1f2a5c'; g.fillRect(0, 0, w, h); g.fillStyle = '#ffd23f'; for (var i = 0; i < 22; i++) { var x = (i * 53) % w, y2 = (i * 37) % h; g.beginPath(); for (var k = 0; k < 10; k++) { var a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 3 : 7; g.lineTo(x + Math.cos(a) * r, y2 + Math.sin(a) * r); } g.fill(); } }
+    else if (style === 'raincoat') { g.fillStyle = '#ffd23f'; g.fillRect(0, 0, w, h); g.fillStyle = '#e0a800'; g.fillRect(w / 2 - 2, 0, 4, h); g.fillStyle = '#16132a'; [30, 62, 94].forEach(function(y){ g.beginPath(); g.arc(w / 2 + 12, y, 5, 0, Math.PI * 2); g.fill(); }); }
+    else if (style === 'tux') { g.fillStyle = '#16132a'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff4e3'; g.beginPath(); g.moveTo(w / 2 - 30, 0); g.lineTo(w / 2 + 30, 0); g.lineTo(w / 2, h); g.fill(); g.fillStyle = '#ff3b6b'; g.beginPath(); g.moveTo(w / 2, 14); g.lineTo(w / 2 - 22, 4); g.lineTo(w / 2 - 22, 24); g.fill(); g.beginPath(); g.moveTo(w / 2, 14); g.lineTo(w / 2 + 22, 4); g.lineTo(w / 2 + 22, 24); g.fill(); }
+    else if (style === 'dino') { g.fillStyle = '#5fbf5a'; g.fillRect(0, 0, w, h); g.fillStyle = '#4a9a48'; for (var j = 0; j < 14; j++) { g.beginPath(); g.arc((j * 61) % w, (j * 29) % h, 9, 0, Math.PI * 2); g.fill(); } g.fillStyle = '#d9f2b0'; g.beginPath(); g.ellipse(w / 2, h / 2 + 10, 30, 44, 0, 0, Math.PI * 2); g.fill(); }
+    else if (style === 'apron') { g.fillStyle = col; g.fillRect(0, 0, w, h); g.fillStyle = '#fff4e3'; g.fillRect(w / 2 - 34, 18, 68, h - 18); g.fillStyle = '#ff5fa2'; g.fillRect(w / 2 - 20, 60, 40, 22); }
+    else if (style === 'hoodie') { g.fillStyle = col; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(w / 2 - 36, 70, 72, 34); g.fillStyle = '#fff4e3'; g.fillRect(w / 2 - 12, 4, 3, 34); g.fillRect(w / 2 + 9, 4, 3, 34); }
+    else { g.fillStyle = col; g.fillRect(0, 0, w, h); }
+  });
+  AV_TEX[key] = t; return t;
+}
+
+/* ---------- the build ---------- */
+function avBuild(d, parent){
+  d = avDef(JSON.parse(JSON.stringify(d)));
+  var g = new THREE.Group(), sk = new THREE.Color(AVO.skin[d.skin]).getHex(), hc = new THREE.Color(AVO.hairCol[d.hairCol]).getHex(), tc = new THREE.Color(AVO.top[d.top]).getHex();
+  var body = new THREE.Group(); g.add(body);
+  var legs = new THREE.Group(); body.add(legs);
+  var pants = d.style === 'tux' ? 0x16132a : 0x2a2246;
+  var legL = new THREE.Group(), legR = new THREE.Group(); legL.position.set(-0.09, 0.55, 0); legR.position.set(0.09, 0.55, 0); legs.add(legL); legs.add(legR);
+  [legL, legR].forEach(function(L){ cyl(0.07, 0.07, 0.55, pants, 0, -0.275, 0, {flat:false}, L); box(0.12, 0.06, 0.2, d.style === 'raincoat' ? 0xff5f5f : 0xfff4e3, 0, -0.52, 0.04, null, L); });
+  var tm = new THREE.MeshStandardMaterial({map:avTorsoTex(d.style, tc), roughness:0.8});
+  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.55, 24), [tm, mat(d.style === 'tux' ? 0x16132a : tc, {flat:false}), mat(d.style === 'tux' ? 0x16132a : tc, {flat:false})]); torso.position.y = 0.82; torso.rotation.y = Math.PI; body.add(torso);
+  var sleeve = d.style === 'stripes' || d.style === 'base5' || d.style === 'apron' || d.style === 'hoodie' || d.style === 'plain' ? tc : ({stars:0x1f2a5c, raincoat:0xffd23f, tux:0x16132a, dino:0x5fbf5a})[d.style];
+  var armL = new THREE.Group(); armL.position.set(-0.27, 1.05, 0); body.add(armL); cyl(0.055, 0.055, 0.45, sleeve, 0, -0.2, 0, {flat:false}, armL); sph(0.06, sk, 0, -0.44, 0, {flat:false}, armL);
+  var armR = new THREE.Group(); armR.position.set(0.27, 1.05, 0); body.add(armR); cyl(0.055, 0.055, 0.45, sleeve, 0, -0.2, 0, {flat:false}, armR); sph(0.06, sk, 0, -0.44, 0, {flat:false}, armR);
+  if (d.style === 'hoodie') { var hood = mesh(new THREE.TorusGeometry(0.15, 0.06, 8, 16, Math.PI), tc, 0, 1.12, -0.12, {flat:false}, body); hood.rotation.x = -0.4; }
+  if (d.style === 'dino') for (var sp2 = 0; sp2 < 4; sp2++) { mesh(new THREE.ConeGeometry(0.05, 0.12, 4), 0x3f8f3a, 0, 1.02 - sp2 * 0.14, -0.22, null, body).rotation.x = -1.3; }
+  var head = new THREE.Group(); head.position.set(0, 1.35, 0); body.add(head);
+  sph(0.23, sk, 0, 0, 0, {flat:false}, head);
+  var eyes = new THREE.Group(); head.add(eyes); sph(0.028, 0x16132a, -0.08, 0.03, 0.2, null, eyes); sph(0.028, 0x16132a, 0.08, 0.03, 0.2, null, eyes);
+  var sm = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 6, 12, Math.PI), new THREE.MeshStandardMaterial({color:0x16132a})); sm.position.set(0, -0.06, 0.205); sm.rotation.z = Math.PI; head.add(sm);
+  sph(0.035, 0xff9ac4, -0.13, -0.04, 0.17, null, head); sph(0.035, 0xff9ac4, 0.13, -0.04, 0.17, null, head);
+  var hm = {flat:false};
+  var hatHides = d.hat === 'astro' || d.hat === 'chef' || d.hat === 'gnome' || d.hat === 'tophat' || d.hat === 'pirate';
+  if (!hatHides || d.hair === 'long') {
+    if (d.hair !== 'buzz') { var cap = mesh(new THREE.SphereGeometry(0.245, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), hc, 0, 0.02, -0.015, hm, head); cap.rotation.x = -0.25; }
+    else { var cap2 = mesh(new THREE.SphereGeometry(0.235, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.42), hc, 0, 0.0, -0.01, hm, head); cap2.rotation.x = -0.2; }
+  }
+  if (d.hair === 'curly' && !hatHides) for (var c = 0; c < 9; c++) { var a = c / 9 * Math.PI * 2; sph(0.075, hc, Math.cos(a) * 0.17, 0.15 + Math.sin(c) * 0.03, Math.sin(a) * 0.15 - 0.03, hm, head); }
+  if (d.hair === 'long') box(0.44, 0.45, 0.12, hc, 0, -0.15, -0.16, null, head);
+  if (d.hair === 'bun' && !hatHides) sph(0.1, hc, 0, 0.24, -0.12, hm, head);
+  if (d.hair === 'spiky' && !hatHides) for (var p = 0; p < 6; p++) { var spk2 = mesh(new THREE.ConeGeometry(0.05, 0.16, 5), hc, -0.15 + p * 0.06, 0.22, -0.02 - (p % 2) * 0.06, null, head); spk2.rotation.z = (p - 2.5) * 0.15; }
+  if (d.hat === 'beanie') { mesh(new THREE.SphereGeometry(0.255, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), 0xff8a3d, 0, 0.04, 0, hm, head); cyl(0.26, 0.26, 0.06, 0xffd23f, 0, 0.04, 0, null, head); sph(0.05, 0xfff4e3, 0, 0.3, 0, hm, head); }
+  if (d.hat === 'cap') { mesh(new THREE.SphereGeometry(0.25, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), 0x6cc8ff, 0, 0.05, 0, hm, head); box(0.22, 0.02, 0.16, 0x6cc8ff, 0, 0.09, 0.27, null, head); }
+  if (d.hat === 'crown') { cyl(0.16, 0.16, 0.1, 0xffd23f, 0, 0.27, 0, {m:0.4, em:0x3a2a00}, head); for (var k = 0; k < 5; k++) { var ka = k / 5 * Math.PI * 2; mesh(new THREE.ConeGeometry(0.035, 0.09, 4), 0xffd23f, Math.cos(ka) * 0.14, 0.36, Math.sin(ka) * 0.14, {m:0.4, em:0x3a2a00}, head); } }
+  if (d.hat === 'flower') { for (var f = 0; f < 5; f++) { var fa = f / 5 * Math.PI * 2; sph(0.04, 0xff5fa2, 0.17 + Math.cos(fa) * 0.05, 0.14 + Math.sin(fa) * 0.05, 0.1, hm, head); } sph(0.035, 0xffd23f, 0.17, 0.14, 0.12, hm, head); }
+  if (d.hat === 'phones') { mesh(new THREE.TorusGeometry(0.25, 0.025, 6, 20, Math.PI), 0x2a2246, 0, 0.02, 0, null, head); cyl(0.07, 0.07, 0.06, 0xff5fa2, -0.25, 0, 0, null, head).rotation.z = Math.PI / 2; cyl(0.07, 0.07, 0.06, 0xff5fa2, 0.25, 0, 0, null, head).rotation.z = Math.PI / 2; }
+  if (d.hat === 'party') { mesh(new THREE.ConeGeometry(0.11, 0.3, 14), 0x4fe3b5, 0.04, 0.33, 0, null, head).rotation.z = -0.15; sph(0.04, 0xffd23f, 0.06, 0.49, 0, null, head); }
+  if (d.hat === 'chef') { cyl(0.2, 0.2, 0.16, 0xffffff, 0, 0.2, 0, hm, head); sph(0.24, 0xffffff, 0, 0.36, 0, hm, head).scale.y = 0.6; }
+  if (d.hat === 'gnome') { cyl(0.25, 0.25, 0.05, 0xff3b3b, 0, 0.1, 0, null, head); mesh(new THREE.ConeGeometry(0.24, 0.55, 14), 0xff3b3b, 0, 0.4, -0.04, hm, head).rotation.x = -0.15; var bd = mesh(new THREE.ConeGeometry(0.14, 0.26, 12), 0xfff4e3, 0, -0.27, 0.11, hm, head); bd.rotation.x = Math.PI + 0.25; }
+  if (d.hat === 'hardhat') { mesh(new THREE.SphereGeometry(0.26, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), 0xffd23f, 0, 0.05, 0, hm, head); cyl(0.31, 0.31, 0.03, 0xffd23f, 0, 0.06, 0.02, null, head); }
+  if (d.hat === 'tophat') { cyl(0.17, 0.17, 0.32, 0x16132a, 0, 0.32, 0, null, head); cyl(0.3, 0.3, 0.03, 0x16132a, 0, 0.17, 0, null, head); cyl(0.175, 0.175, 0.06, 0xff5fa2, 0, 0.21, 0, null, head); }
+  if (d.hat === 'pirate') { var ph = mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.16, 3), 0x16132a, 0, 0.24, 0, null, head); ph.rotation.y = Math.PI / 2; box(0.1, 0.07, 0.01, 0xfff4e3, 0, 0.26, 0.19, null, head); }
+  if (d.hat === 'flytrap') { [-1, 1].forEach(function(sd){ var j = mesh(new THREE.SphereGeometry(0.16, 12, 8, 0, Math.PI), 0x4fbf6f, 0, 0.3, 0, {flat:false, side:THREE.DoubleSide}, head); j.rotation.z = sd > 0 ? 0.5 : Math.PI - 0.5; j.scale.set(1, 0.6, 1); for (var t2 = 0; t2 < 5; t2++) { var tz = (t2 / 4 - 0.5) * 0.24; mesh(new THREE.ConeGeometry(0.012, 0.06, 4), 0xfff4e3, sd * 0.14, 0.38, tz, null, head); } }); }
+  if (d.hat === 'astro') { var dome = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 14), new THREE.MeshStandardMaterial({color:0xcfefff, transparent:true, opacity:0.35, roughness:0.05, depthWrite:false})); dome.position.y = 0.02; head.add(dome); cyl(0.3, 0.3, 0.08, 0xfff4e3, 0, -0.27, 0, null, head); }
+  if (d.hat === 'lanternc') for (var lc = 0; lc < 5; lc++) { var la = lc / 5 * Math.PI * 2, lm = sph(0.06, 0xffb36b, Math.cos(la) * 0.16, 0.3, Math.sin(la) * 0.16, {flat:false, em:0xff8a3d, ei:0.8}, head); lm.scale.y = 1.3; }
+  /* back */
+  var back = new THREE.Group(); back.position.set(0, 0.85, -0.22); body.add(back);
+  if (d.back === 'backpack') { box(0.32, 0.36, 0.14, 0x4fe3b5, 0, 0.05, -0.05, null, back); box(0.24, 0.12, 0.05, 0x2f9c7c, 0, -0.04, -0.13, null, back); }
+  if (d.back === 'scarf') { mesh(new THREE.TorusGeometry(0.17, 0.05, 8, 18), 0xff5fa2, 0, 0.28, 0.22, {flat:false}, back).rotation.x = Math.PI / 2; box(0.08, 0.3, 0.04, 0xff5fa2, 0.1, 0.12, 0.4, null, back); }
+  if (d.back === 'cape') { var cape = mesh(new THREE.PlaneGeometry(0.5, 0.8), 0xff3b3b, 0, -0.1, -0.02, {side:THREE.DoubleSide}, back); cape.rotation.x = 0.12; }
+  if (d.back === 'wings') { [-1, 1].forEach(function(sd){ var wg = sph(0.2, 0xffffff, sd * 0.2, 0.1, -0.06, {flat:false}, back); wg.scale.set(1.2, 0.8, 0.3); wg.rotation.z = sd * 0.5; wg.userData.wing = sd; }); }
+  /* hand */
+  var hand = new THREE.Group(); hand.position.set(0, -0.46, 0.04); armR.add(hand);
+  var held = new THREE.Group(); hand.add(held);
+  if (d.hold === 'balloon') { cyl(0.004, 0.004, 0.8, 0xfff4e3, 0, 0.4, 0, null, held); sph(0.17, 0xff5fa2, 0, 0.9, 0, {flat:false}, held).scale.y = 1.2; }
+  if (d.hold === 'book') box(0.2, 0.26, 0.05, 0xb28dff, 0, 0, 0.05, null, held);
+  if (d.hold === 'ball') { sph(0.12, 0xffffff, 0, -0.04, 0.08, {flat:false}, held); sph(0.04, 0x16132a, 0, 0.0, 0.19, null, held); }
+  if (d.hold === 'plant') { cyl(0.07, 0.05, 0.1, 0xe46b4f, 0, -0.02, 0.06, null, held); sph(0.08, 0x4fbf7f, 0, 0.08, 0.06, null, held); }
+  if (d.hold === 'star') { var stS = new THREE.Shape(); for (var q = 0; q < 10; q++) { var qa = -Math.PI / 2 + q * Math.PI / 5, qr = q % 2 ? 0.05 : 0.12; if (q) stS.lineTo(Math.cos(qa) * qr, -Math.sin(qa) * qr); else stS.moveTo(Math.cos(qa) * qr, -Math.sin(qa) * qr); } var stG = new THREE.ExtrudeGeometry(stS, {depth:0.03, bevelEnabled:false}); stG.center(); var stM = new THREE.Mesh(stG, mat(0xffd23f, {em:0x6a5200, ei:0.6})); stM.position.set(0, 0.05, 0.08); held.add(stM); }
+  if (d.hold === 'record') { cyl(0.16, 0.16, 0.01, 0x16132a, 0, 0, 0.08, null, held).rotation.x = Math.PI / 2; cyl(0.05, 0.05, 0.012, 0xff5fa2, 0, 0, 0.08, null, held).rotation.x = Math.PI / 2; }
+  if (d.hold === 'mister') { cyl(0.05, 0.055, 0.16, 0x6cc8ff, 0, 0.06, 0.06, {flat:false}, held); box(0.04, 0.04, 0.1, 0xff5fa2, 0, 0.16, 0.09, null, held); }
+  if (d.hold === 'lantern') { cyl(0.004, 0.004, 0.3, 0xfff4e3, 0, 0.15, 0, null, held); sph(0.12, 0xffb36b, 0, 0.36, 0, {flat:false, em:0xff8a3d, ei:0.9}, held).scale.y = 1.3; }
+  if (d.hold === 'duck') { sph(0.08, 0xffd23f, 0, 0.0, 0.08, {flat:false}, held); sph(0.05, 0xffd23f, 0, 0.08, 0.12, {flat:false}, held); mesh(new THREE.ConeGeometry(0.02, 0.05, 6), 0xff8a3d, 0, 0.08, 0.18, null, held).rotation.x = Math.PI / 2; }
+  if (d.hold === 'tomato') sph(0.08, 0xe8322e, 0, -0.02, 0.08, {flat:false, r:0.4}, held);
+  if (d.hold === 'letter') box(0.2, 0.14, 0.01, 0xfff4e3, 0, 0, 0.08, null, held);
+  var prop = new THREE.Group(); hand.add(prop);
+  g.userData = {action:'avatar', label:'You!'};
+  g.userData.parts = {body:body, legs:legs, legL:legL, legR:legR, armL:armL, armR:armR, head:head, eyes:eyes, hand:hand, held:held, prop:prop, back:back};
+  return g;
+}
+
+/* ---------- props for activities ---------- */
+function avProp(kind){
+  var P = AV.g.userData.parts; while (P.prop.children.length) P.prop.remove(P.prop.children[0]);
+  P.held.visible = !kind;
+  if (kind === 'book') { var bk = new THREE.Group(); bk.position.set(-0.12, 0.02, 0.14); P.prop.add(bk); box(0.18, 0.24, 0.02, 0xb28dff, -0.09, 0, 0, null, bk).rotation.y = 0.5; box(0.18, 0.24, 0.02, 0xb28dff, 0.09, 0, 0, null, bk).rotation.y = -0.5; box(0.16, 0.22, 0.02, 0xfff4e3, -0.08, 0, 0.012, null, bk).rotation.y = 0.5; box(0.16, 0.22, 0.02, 0xfff4e3, 0.08, 0, 0.012, null, bk).rotation.y = -0.5; }
+  if (kind === 'can') { cyl(0.08, 0.09, 0.16, 0x4fe3b5, 0, -0.04, 0.08, {m:0.3}, P.prop); var spo = cyl(0.012, 0.02, 0.2, 0x4fe3b5, 0, 0.0, 0.22, {m:0.3}, P.prop); spo.rotation.x = 1.1; }
+  if (kind === 'mister') { cyl(0.05, 0.055, 0.16, 0x6cc8ff, 0, 0.06, 0.06, {flat:false}, P.prop); box(0.04, 0.04, 0.1, 0xff5fa2, 0, 0.16, 0.09, null, P.prop); }
+}
+
+/* ---------- little floating Zs and music notes ---------- */
+var AVFX = [];
+var avZTex = canvasTex(64, 64, function(g, w, h){ g.fillStyle = '#fff4e3'; g.font = 'bold 48px Arial Black, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('z', 32, 34); });
+var avNoteTex = canvasTex(64, 64, function(g, w, h){ g.fillStyle = '#ffd23f'; g.beginPath(); g.ellipse(22, 46, 11, 8, -0.4, 0, Math.PI * 2); g.fill(); g.fillRect(30, 10, 5, 36); g.fillRect(30, 10, 18, 6); });
+for (var avf = 0; avf < 8; avf++) { var avs = new THREE.Sprite(new THREE.SpriteMaterial({map:avZTex, transparent:true, depthWrite:false})); avs.visible = false; avs.scale.setScalar(0.22); scene.add(avs); AVFX.push({s:avs, t:0, life:0, vx:0}); }
+function avFx(kind){
+  var f = AVFX.filter(function(x){ return x.life <= 0; })[0]; if (!f || !AV.g) return;
+  var w = objWorld(AV.g.userData.parts.head); f.s.material.map = kind === 'z' ? avZTex : avNoteTex; f.s.material.needsUpdate = true;
+  f.s.position.set(w.x + 0.15, w.y + 0.25, w.z); f.life = 2.2; f.t = 0; f.vx = rand(-0.1, 0.25); f.s.visible = true;
+}
+function updAvFx(dt){ AVFX.forEach(function(f){ if (f.life <= 0) return; f.life -= dt; f.t += dt; f.s.position.y += dt * 0.35; f.s.position.x += f.vx * dt; f.s.material.opacity = Math.min(1, f.life) * Math.min(1, f.t * 3); if (f.life <= 0 || !AV.g || !AV.g.visible) { f.life = 0; f.s.visible = false; } }); }
+
+/* ---------- where the avatar can walk: a grid per room ---------- */
+var AVG = {room:null, n:50, cell:0.2, block:null};
+function avGridBuild(r){
+  var n = AVG.n, cs = AVG.cell, bl = new Uint8Array(n * n), g = ROOM_GROUPS()[r], b3 = new THREE.Box3(), sz = new V3();
+  for (var i = 0; i < n; i++) { bl[i] = bl[(n - 1) * n + i] = bl[i * n] = bl[i * n + n - 1] = 1; }
+  function mark(o, depth){
+    if (!o.visible || o === AV.g || o.isLight || o.isPoints || o.isSprite || o.isCamera) return;
+    b3.setFromObject(o); if (b3.isEmpty() || !isFinite(b3.min.x)) return; b3.getSize(sz);
+    if (b3.max.y < 0.12 || b3.min.y > 1.25) return;
+    if ((sz.x > 2.6 || sz.z > 2.6) && depth < 5 && o.children.length) { o.children.forEach(function(c){ mark(c, depth + 1); }); return; }
+    if (sz.x > 2.6 && sz.z > 2.6) return;
+    var pad = 0.2, x0 = Math.floor((b3.min.x - pad + 5) / cs), x1 = Math.floor((b3.max.x + pad + 5) / cs), z0 = Math.floor((b3.min.z - pad + 5) / cs), z1 = Math.floor((b3.max.z + pad + 5) / cs);
+    for (var x = Math.max(0, x0); x <= Math.min(n - 1, x1); x++) for (var z = Math.max(0, z0); z <= Math.min(n - 1, z1); z++) bl[z * n + x] = 1;
+  }
+  if (g && r !== 'sky') g.children.forEach(function(c){ mark(c, 0); });
+  for (var e = 0; e < n; e++) { bl[n + e] = bl[(n - 2) * n + e] = bl[e * n + 1] = bl[e * n + n - 2] = 1; }
+  AVG.room = r; AVG.block = bl;
+}
+function avCellOf(x, z){ return {x:clamp(Math.floor((x + 5) / AVG.cell), 0, AVG.n - 1), z:clamp(Math.floor((z + 5) / AVG.cell), 0, AVG.n - 1)}; }
+function avFree(cx, cz){ return cx >= 0 && cz >= 0 && cx < AVG.n && cz < AVG.n && !AVG.block[cz * AVG.n + cx]; }
+function avNearestFree(c){ if (avFree(c.x, c.z)) return c; for (var r = 1; r < 14; r++) { var best = null, bd = 1e9; for (var dx = -r; dx <= r; dx++) for (var dz = -r; dz <= r; dz++) { if (Math.max(Math.abs(dx), Math.abs(dz)) !== r) continue; if (avFree(c.x + dx, c.z + dz)) { var dd = dx * dx + dz * dz; if (dd < bd) { bd = dd; best = {x:c.x + dx, z:c.z + dz}; } } } if (best) return best; } return c; }
+function avCellPos(c){ return new V3(-5 + (c.x + 0.5) * AVG.cell, 0, -5 + (c.z + 0.5) * AVG.cell); }
+function avLOS(a, b){ var d = Math.hypot(b.x - a.x, b.z - a.z), steps = Math.ceil(d / 0.08); for (var i = 1; i < steps; i++) { var t = i / steps, c = avCellOf(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t); if (!avFree(c.x, c.z)) return false; } return true; }
+function avPath(from, to){
+  if (AVG.room !== room) avGridBuild(room);
+  var n = AVG.n, s = avNearestFree(avCellOf(from.x, from.z)), e = avNearestFree(avCellOf(to.x, to.z));
+  var si = s.z * n + s.x, ei = e.z * n + e.x, gS = new Float32Array(n * n).fill(1e9), came = new Int32Array(n * n).fill(-1), open = [si], inO = new Uint8Array(n * n), closed = new Uint8Array(n * n); gS[si] = 0; inO[si] = 1;
+  var hh = function(i){ var x = i % n, z = (i / n) | 0; return Math.hypot(x - e.x, z - e.z); };
+  var found = false, guard = 0;
+  while (open.length && guard++ < 6000) {
+    var bi = 0, bf = 1e9; for (var k = 0; k < open.length; k++) { var f = gS[open[k]] + hh(open[k]); if (f < bf) { bf = f; bi = k; } }
+    var cur = open[bi]; open.splice(bi, 1); inO[cur] = 0; closed[cur] = 1; if (cur === ei) { found = true; break; }
+    var cx = cur % n, cz = (cur / n) | 0;
+    for (var dx = -1; dx <= 1; dx++) for (var dz = -1; dz <= 1; dz++) {
+      if (!dx && !dz) continue; var nx = cx + dx, nz = cz + dz; if (!avFree(nx, nz)) continue; if (dx && dz && (!avFree(cx + dx, cz) || !avFree(cx, cz + dz))) continue;
+      var ni = nz * n + nx; if (closed[ni]) continue; var ng = gS[cur] + (dx && dz ? 1.414 : 1);
+      if (ng < gS[ni]) { gS[ni] = ng; came[ni] = cur; if (!inO[ni]) { open.push(ni); inO[ni] = 1; } }
+    }
+  }
+  var pts = [];
+  if (found) { var c2 = ei; while (c2 !== -1 && c2 !== si) { pts.unshift(avCellPos({x:c2 % n, z:(c2 / n) | 0})); c2 = came[c2]; } }
+  else pts.push(avCellPos(e));
+  var sm = [new V3(from.x, 0, from.z)];
+  for (var j = 0; j < pts.length; j++) { var last = sm[sm.length - 1]; if (j === pts.length - 1 || !avLOS(last, pts[j + 1])) sm.push(pts[j]); }
+  sm.shift(); sm.push(new V3(to.x, 0, to.z));
+  return sm;
+}
+
+/* ---------- spots, entry points, station spots ---------- */
+var AV_FLOOR = {sky:0.35};
+AV_SPOTS.attic.push([2.0, 2.0, 'dance', 0, 0.9]);
+AV_SPOTS.green.push([0.5, -2.55, 'water', 0, Math.PI]);
+AV_SPOTS.garden.push([1.2, -1.6, 'stretch', 0, 0.5]);
+function avExitObj(r){
+  var m = {bedroom:typeof doorG !== 'undefined' && doorG, kitchen:typeof kDoorG !== 'undefined' && kDoorG, garden:typeof gDoorG !== 'undefined' && gDoorG, living:typeof lDoorG !== 'undefined' && lDoorG, weird:typeof wExitG !== 'undefined' && wExitG, roof:typeof rHatchG !== 'undefined' && rHatchG, shed:typeof shExitG !== 'undefined' && shExitG, bath:typeof bExitG !== 'undefined' && bExitG, attic:typeof atExitG !== 'undefined' && atExitG, green:typeof grExitG !== 'undefined' && grExitG};
+  return m[r] || null;
+}
+function avEntry(r){
+  var o = avExitObj(r), p = new V3(3.6, 0, 3.6);
+  if (o) { var b3 = new THREE.Box3().setFromObject(o); if (!b3.isEmpty()) { b3.getCenter(p); p.y = 0; var toC = new V3(-p.x, 0, -p.z); if (toC.length() > 0.01) p.add(toC.normalize().multiplyScalar(0.7)); } }
+  p.x = clamp(p.x, -4.4, 4.4); p.z = clamp(p.z, -4.4, 4.4); return p;
+}
+var AV_STN = {}, AV_NOJOIN = {wash:1, sheets:1}, AV_STN_FIX = {record:[2.1, -0.6], lantern:[2.9, -1.4], slime:[-0.35, -3.5], sand:[0.75, -3.75], brulee:[3.1, -3.65]};
+function avStationSpot(m){
+  var key = m + ':' + (camera.aspect < 0.8 ? 'p' : 'd');
+  if (AV_STN[key] !== undefined) return AV_STN[key];
+  var v = views()[m], r = ROOM_OF[HUB_OF[m]]; if (!v || !r || !AV_SPOTS[r] || AV_NOJOIN[m]) return (AV_STN[key] = null);
+  if (camera.aspect >= 0.8 && AV_STN_FIX[m]) { var fx = AV_STN_FIX[m], fl0 = AV_FLOOR[r] || 0, fc = v.look.clone().lerp(v.pos, 0.35); return (AV_STN[key] = [fx[0], fx[1], 'watch', fl0, Math.atan2(fc.x - fx[0], fc.z - fx[1])]); }
+  if (AVG.room !== r) avGridBuild(r);
+  var cam = new THREE.PerspectiveCamera(v.fov, camera.aspect, 0.1, 200); cam.position.copy(v.pos); cam.lookAt(v.look); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+  var f = v.look.clone().sub(v.pos); f.y = 0; var dist = f.length(); if (dist < 0.05) return (AV_STN[key] = null); f.normalize();
+  var R = new V3(-f.z, 0, f.x), L0 = new V3(v.look.x, 0, v.look.z), phone = camera.aspect < 0.8, fl = AV_FLOOR[r] || 0;
+  var rc = new THREE.Raycaster(), meshes = []; ROOM_GROUPS()[r].traverse(function(o){ if (o.isMesh && o.visible) meshes.push(o); });
+  var best = null, bs = -1e9;
+  for (var s = -2.6; s <= 2.6; s += 0.4) for (var k = -1.6; k <= 1.2; k += 0.4) {
+    var P = L0.clone().addScaledVector(R, s).addScaledVector(f, k); if (Math.abs(P.x) > 4.4 || Math.abs(P.z) > 4.4) continue;
+    var c = avCellOf(P.x, P.z); if (!avFree(c.x, c.z)) continue;
+    var feet = new V3(P.x, fl, P.z).project(cam), head = new V3(P.x, fl + 1.65, P.z).project(cam), mid = new V3(P.x, fl + 0.9, P.z).project(cam);
+    if (head.z > 1 || feet.z > 1 || head.z < -1) continue;
+    var hy = (1 - head.y) / 2, fy = (1 - feet.y) / 2, mx = (mid.x + 1) / 2, ht = fy - hy;
+    var xa = (new V3(P.x, fl + 0.9, P.z).addScaledVector(R, -0.32).project(cam).x + 1) / 2, xb = (new V3(P.x, fl + 0.9, P.z).addScaledVector(R, 0.32).project(cam).x + 1) / 2, x0 = Math.min(xa, xb), x1 = Math.max(xa, xb);
+    if (hy < 0.12 || x0 < 0.04 || x1 > (phone ? 0.96 : 0.8)) continue;
+    if (x1 > (phone ? 0.3 : 0.34) && x0 < (phone ? 0.7 : 0.66)) continue;
+    if (ht < 0.12 || ht > 0.5) continue;
+    var bot = phone ? 0.7 : 0.86, cut = Math.max(0, fy - bot); if (hy > bot - 0.2) continue;
+    var hp = new V3(P.x, fl + 1.3, P.z), dir = hp.clone().sub(v.pos), dl = dir.length(); rc.set(v.pos, dir.normalize()); rc.far = dl; var hits = rc.intersectObjects(meshes, false);
+    if (hits.length && hits[0].distance < dl - 0.25) continue;
+    var sc = -Math.abs(ht - (phone ? 0.28 : 0.34)) * 3 - cut * 2.5 - Math.abs(Math.abs(mx - 0.5) - 0.3);
+    if (sc > bs) { bs = sc; best = P; }
+  }
+  if (!best) return (AV_STN[key] = null);
+  var face = v.look.clone().lerp(v.pos, 0.35); var yaw = Math.atan2(face.x - best.x, face.z - best.z);
+  return (AV_STN[key] = [best.x, best.z, 'watch', fl, yaw]);
+}
+
+/* ---------- the brain ---------- */
+AV.state = 'idle'; AV.path = []; AV.tgt = null; AV.ph = 0; AV.sitK = 0; AV.cheerT = 0; AV.tapT = 0; AV.actT = 0; AV.fxT = 0; AV.inStn = null; AV.enterT = 0; AV.yaw = 0;
+function avResolveAct(spot){
+  var a = spot[2], idle = realT - lastInput > 25, music = (room === 'attic' && typeof REC !== 'undefined' && REC.on) || (state.mix && state.mix.on);
+  if (a === 'sit') return pick(idle ? ['doze', 'read', 'sit'] : ['sit', 'read', 'sit']);
+  if (a === 'look') return 'gaze';
+  if (a === 'dance') return music ? 'dance' : 'stretch';
+  if (a === 'water') return 'water';
+  if (a === 'wave') return idle ? pick(['stretch', 'stand']) : 'wave';
+  if (a === 'stand' || a === 'stretch') return music ? 'dance' : pick(['stand', 'stretch']);
+  return a;
+}
+function avSitting(a){ return a === 'sit' || a === 'read' || a === 'doze'; }
+function avGo(spot, act){
+  var fl = AV_FLOOR[room] || 0, P = AV.g.userData.parts;
+  AV.tgt = {x:spot[0], z:spot[1], y:spot[3], rot:spot[4], act:act || avResolveAct(spot), raw:spot[2]};
+  var dest = new V3(AV.tgt.x, 0, AV.tgt.z);
+  if (avSitting(AV.tgt.act)) dest.add(new V3(Math.sin(AV.tgt.rot), 0, Math.cos(AV.tgt.rot)).multiplyScalar(0.5));
+  AV.tgt.app = dest; avProp(null);
+  if (AV.sitK > 0.01) { AV.state = 'standup'; AV.upU = 0; AV.upFrom = AV.g.position.clone(); AV.upTo = AV.g.position.clone().add(new V3(Math.sin(AV.g.rotation.y), 0, Math.cos(AV.g.rotation.y)).multiplyScalar(0.5)); AV.upTo.y = fl; AV.path = []; }
+  else { AV.state = 'walk'; AV.path = avPath(AV.g.position, dest); }
+}
+function avPickSpot(){
+  var spots = AV_SPOTS[room]; if (!spots) return;
+  var i = AV.spot, tries = 0; while ((i === AV.spot || i < 0) && tries++ < 8) i = Math.floor(Math.random() * spots.length);
+  AV.spot = i; avGo(spots[i]);
+}
+function avEnterRoom(){
+  var parent = ROOM_GROUPS()[room]; AV.room = room; AV.inStn = null; avGridBuild(room);
+  if (!parent || !AV_SPOTS[room]) return;
+  if (AV.g.parent !== parent) parent.add(AV.g);
+  var e = avEntry(room), fl = AV_FLOOR[room] || 0; AV.g.position.set(e.x, fl, e.z); AV.sitK = 0; avPose(0);
+  AV.enterT = 0.5; AV.rise = room === 'attic' || room === 'roof';
+  AV.spot = -1; avPickSpot(); AV.next = rand(12, 18);
+}
+function avPlace(){ if (AV.g) avEnterRoom(); }
+function avRebuild(){ var parent = AV.g ? AV.g.parent : null, pos = AV.g ? AV.g.position.clone() : null, ry = AV.g ? AV.g.rotation.y : 0; if (AV.g && parent) parent.remove(AV.g); AV.g = avBuild(state.avatar || AV.d); if (parent && pos) { parent.add(AV.g); AV.g.position.copy(pos); AV.g.rotation.y = ry; avPose(AV.sitK); } else { AV.room = null; } }
+function avHop(){ avPickSpot(); }
+function avTap(){
+  var sp = toScreen(objWorld(AV.g).add(new V3(0, 1.9, 0))); sfx('boing'); pop(pick(['Hello!', 'Hi!', 'Oh, hello.', 'You again!', 'Nice day for it.', 'Hello, me!']), 'tiny', sp.x, sp.y, 0); AV.tapT = 1.1;
+  AV.taps.push(realT); AV.taps = AV.taps.filter(function(x){ return realT - x < 4; }); if (AV.taps.length >= 5) { AV.taps = []; unlock('avatarwave', objWorld(AV.g)); }
+}
+function avCheer(lvl){ if (!AV.g || !AV.g.visible) return; AV.cheerT = 1.0 + (lvl || 0) * 0.25; if (AV.state === 'idle' && AV.tgt && AV.tgt.act === 'doze') AV.tgt.act = 'sit'; }
+var _hypeAv = hype;
+hype = function(lvl, w, text, o){ var r = _hypeAv.apply(this, arguments); if (!(o && o.quiet)) avCheer(lvl); return r; };
+function avPose(k){
+  var P = AV.g.userData.parts; P.legL.rotation.x = P.legR.rotation.x = -1.45 * k;
+}
+function avAngle(a, b, t){ var d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI; return a + d * t; }
+function updAvatar(dt){
+  updAvFx(dt);
+  if (!state.avatar) { if (AV.g) AV.g.visible = false; return; }
+  if (!AV.g) { AV.g = avBuild(state.avatar); roomG.add(AV.g); AV.room = null; }
+  if (AV.room !== room) avEnterRoom();
+  var parent = ROOM_GROUPS()[room], g = AV.g, P = g.userData.parts, fl = AV_FLOOR[room] || 0;
+  if (!parent || !AV_SPOTS[room]) { g.visible = false; return; }
+  /* stations */
+  var st = !isHub(mode);
+  if (st && AV.inStn !== mode) { AV.inStn = mode; var ss = avStationSpot(mode); AV.stnOk = !!ss; if (ss) { avGo(ss, 'watch'); AV.tgt.stn = true; } }
+  if (!st && AV.inStn) { AV.inStn = null; AV.stnOk = false; avPickSpot(); AV.next = rand(12, 18); }
+  g.visible = !st || AV.stnOk;
+  if (!g.visible) return;
+  if (AV.enterT > 0) { AV.enterT -= dt; var eu = 1 - Math.max(0, AV.enterT) / 0.5; if (AV.rise) { g.scale.setScalar(1); g.position.y = fl - 1.4 * (1 - eu); } else g.scale.setScalar(Math.max(0.01, eu)); } else g.scale.setScalar(1);
+  var tg = AV.tgt, walking = false;
+  if (AV.state === 'standup') {
+    AV.upU = Math.min(1, AV.upU + dt * 2.2); var uu = AV.upU * AV.upU * (3 - 2 * AV.upU);
+    g.position.lerpVectors(AV.upFrom, AV.upTo, uu); AV.sitK = 1 - uu;
+    if (AV.upU >= 1) { AV.sitK = 0; AV.state = 'walk'; AV.path = tg ? avPath(g.position, tg.app) : []; }
+  }
+  else if (AV.state === 'walk') {
+    if (!AV.path.length) AV.state = 'arrive';
+    else {
+      var nx = AV.path[0], dx = nx.x - g.position.x, dz = nx.z - g.position.z, d = Math.hypot(dx, dz), spd = AV.spd || 1.15;
+      if (d < 0.04) AV.path.shift();
+      else { var stp = Math.min(d, spd * dt); g.position.x += dx / d * stp; g.position.z += dz / d * stp; g.rotation.y = avAngle(g.rotation.y, Math.atan2(dx, dz), Math.min(1, dt * 10)); walking = true; }
+    }
+    if (AV.enterT <= 0) g.position.y = fl;
+  }
+  else if (AV.state === 'arrive' && tg) {
+    g.rotation.y = avAngle(g.rotation.y, tg.rot, Math.min(1, dt * 14));
+    var left = Math.abs(avAngle(g.rotation.y, tg.rot, 1) - g.rotation.y);
+    if (left < 0.15) {
+      g.rotation.y = tg.rot;
+      if (avSitting(tg.act)) { AV.state = 'sitdown'; AV.sitFrom = g.position.clone(); AV.sitU = 0; }
+      else { AV.state = 'idle'; AV.actT = 0; avProp(tg.act === 'water' ? 'can' : (tg.stn && mode === 'mist' ? 'mister' : null)); }
+    }
+  }
+  else if (AV.state === 'sitdown' && tg) {
+    AV.sitU = Math.min(1, AV.sitU + dt * 2); var su = AV.sitU * AV.sitU * (3 - 2 * AV.sitU);
+    g.position.x = AV.sitFrom.x + (tg.x - AV.sitFrom.x) * su; g.position.z = AV.sitFrom.z + (tg.z - AV.sitFrom.z) * su; g.position.y = fl + (tg.y - fl) * su; AV.sitK = su;
+    if (AV.sitU >= 1) { AV.state = 'idle'; AV.actT = 0; avProp(tg.act === 'read' ? 'book' : null); }
+  }
+  avPose(AV.sitK);
+  /* animate */
+  var act = AV.state === 'idle' && tg ? tg.act : (walking ? 'walk' : 'stand'), body = P.body;
+  AV.actT += dt; AV.fxT -= dt;
+  var armLx = 0, armRx = 0, armLz = 0, armRz = 0, headX = 0, headY = Math.sin(realT * 0.7) * 0.2, bodyY = 0, bodyZ = 0, bodyX = 0;
+  if (walking) { AV.ph += dt * 9; P.legL.rotation.x = Math.sin(AV.ph) * 0.55; P.legR.rotation.x = -Math.sin(AV.ph) * 0.55; armLx = -Math.sin(AV.ph) * 0.5; armRx = Math.sin(AV.ph) * 0.5; bodyY = Math.abs(Math.sin(AV.ph)) * 0.04; headY = 0; }
+  if (act === 'stand') bodyZ = Math.sin(realT * 1.3) * 0.02;
+  if (act === 'wave') armRz = 2.4 + Math.sin(realT * 6) * 0.35;
+  if (act === 'gaze') { headX = -0.15; armLx = armRx = 0.25; bodyZ = Math.sin(realT * 0.8) * 0.015; }
+  if (act === 'stretch') { var sc2 = AV.actT % 6, up = sc2 < 2 ? Math.sin(Math.min(1, sc2 / 0.6) * Math.PI / 2) * (sc2 > 1.4 ? Math.max(0, (2 - sc2) / 0.6) : 1) : 0; armLz = -2.9 * up; armRz = 2.9 * up; bodyX = -0.12 * up; bodyY = 0.03 * up; }
+  if (act === 'read') { headX = 0.35; armLx = armRx = -1.0; armLz = 0.35; armRz = -0.35; if (AV.actT % 7 < 0.4 && P.prop.children[0]) P.prop.children[0].rotation.z = Math.sin(AV.actT % 7 / 0.4 * Math.PI) * 0.3; }
+  if (act === 'doze') { headX = 0.45 + Math.sin(realT * 1.2) * 0.05; headY = 0; P.eyes.scale.y = 0.2; if (AV.fxT <= 0) { AV.fxT = 1.4; avFx('z'); } } else P.eyes.scale.y = (realT % 4.2 < 0.12) ? 0.15 : 1;
+  if (act === 'sit') { headY = Math.sin(realT * 0.5) * 0.3; }
+  if (act === 'water') { var wc = AV.actT % 5, tip = wc > 1 && wc < 3 ? Math.sin((wc - 1) / 2 * Math.PI) : 0; armRx = -1.2; P.prop.rotation.x = tip * 0.9; headX = 0.25; if (tip > 0.8 && AV.fxT <= 0) { AV.fxT = 0.25; var sw = objWorld(P.prop).add(new V3(Math.sin(g.rotation.y) * 0.25, -0.1, Math.cos(g.rotation.y) * 0.25)); burst(sw.x, sw.y, sw.z, 4, 0.4, 0, [0xbfe8ff, 0x6cc8ff], 0.25); } }
+  else P.prop.rotation.x = 0;
+  if (act === 'dance') { var db = realT * 4.2; bodyY = Math.abs(Math.sin(db)) * 0.08; bodyZ = Math.sin(db) * 0.12; armLz = -1.8 - Math.sin(db) * 0.8; armRz = 1.8 - Math.sin(db) * 0.8; headY = Math.sin(db) * 0.3; if (AV.fxT <= 0) { AV.fxT = 1.1; avFx('note'); } }
+  if (act === 'watch') {
+    headY = 0; bodyZ = Math.sin(realT * 1.1) * 0.015;
+    if (mode === 'mist' && typeof MIST !== 'undefined' && (MIST.on || MIST.kb)) { armRx = -1.3; if (AV.fxT <= 0) { AV.fxT = 0.15; var mw = objWorld(P.prop).add(new V3(Math.sin(g.rotation.y) * 0.2, 0.15, Math.cos(g.rotation.y) * 0.2)); burst(mw.x, mw.y, mw.z, 3, 0.5, 0, [0xd8f4ff], 0.2); } }
+    else if (mode === 'record' && typeof REC !== 'undefined' && REC.on) { var db2 = realT * 4.2; bodyY = Math.abs(Math.sin(db2)) * 0.06; bodyZ = Math.sin(db2) * 0.1; armLz = -1.2 - Math.sin(db2) * 0.6; armRz = 1.2 - Math.sin(db2) * 0.6; if (AV.fxT <= 0) { AV.fxT = 1.2; avFx('note'); } }
+    else if (pressing) { headX = 0.1; armLx = armRx = -0.5; armLz = 0.5; armRz = -0.5; }
+  }
+  if (AV.tapT > 0) { AV.tapT -= dt; armRz = 2.4 + Math.sin(realT * 9) * 0.4; }
+  if (AV.cheerT > 0) { AV.cheerT -= dt; var cu = Math.min(1, AV.cheerT * 3); armLz = -2.7 * cu; armRz = 2.7 * cu; armLx = armRx = 0; if (AV.sitK <= 0 && !walking) bodyY = Math.abs(Math.sin(AV.cheerT * 9)) * 0.22 * cu; }
+  var ease = Math.min(1, dt * 10);
+  P.armL.rotation.x += (armLx - P.armL.rotation.x) * ease; P.armR.rotation.x += (armRx - P.armR.rotation.x) * ease;
+  P.armL.rotation.z += (armLz - P.armL.rotation.z) * ease; P.armR.rotation.z += (armRz - P.armR.rotation.z) * ease;
+  P.head.rotation.x += (headX - P.head.rotation.x) * ease; P.head.rotation.y += (headY - P.head.rotation.y) * Math.min(1, dt * 4);
+  body.position.y = bodyY; body.rotation.z = bodyZ; body.rotation.x += (bodyX - body.rotation.x) * ease;
+  P.back.children.forEach(function(c){ if (c.userData.wing) c.rotation.y = c.userData.wing * (0.3 + Math.sin(realT * 3) * 0.2); });
+  /* choose what to do next */
+  if (!st && AV.state === 'idle') { AV.next -= dt; if (AV.next <= 0 && !anyModal()) { var idle = realT - lastInput > 25; AV.next = idle ? rand(22, 34) : rand(12, 20); avPickSpot(); } }
+}
 
 /* =========================================================
    MILESTONES
