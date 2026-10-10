@@ -322,7 +322,7 @@ textarea.wr{min-height:84px;resize:vertical}
 
   <div class="whobox">
     <h3>Who is this? <span style="font-weight:400;font-family:var(--body);font-size:.85rem">(optional)</span></h3>
-    <p class="sub">Pick your initials to see your two milestones and a good place to start. Every stage stays open either way.</p>
+    <p class="sub">Pick your initials to see a good place to start. Every stage stays open either way.</p>
     <div class="whorow" id="whoRow"></div>
     <div id="whoMiles"></div>
   </div>
@@ -389,18 +389,12 @@ function tried(id){ if(!S.seen[id]){ S.seen[id] = true; drawMap() } }
 
 /* ================= students ================= */
 var WHO = {
-  JT:{ m:["Make a simple choice for yourself at home, school or work.", "Say why you made a choice and how you felt about it afterwards."],
-       full:["I can make a simple choice for myself at home, school or work.", "I can explain why I made a choice and how I felt about it afterwards."], best:["decide","strengths"] },
-  LW:{ m:["Explain why you made a decision and look back at how it went.", "Spot how confidence can push your actions in helpful and unhelpful ways."],
-       full:["I can explain why I have made a particular decision and reflect on how it went.", "I can recognise how confidence can influence my actions in both helpful and unhelpful ways."], best:["dial","decide"] },
-  EGW:{ m:["Use your strengths and past experiences to take on new challenges with more confidence.", "Explain how too much or too little confidence can lead to poor choices, and how to find the balance."],
-       full:["I can use my strengths and previous experiences to approach new challenges with greater confidence.", "I can explain how overconfidence or low confidence might lead to poor choices, and how to find a balance."], best:["wins","sort"] },
-  LP:{ m:["Make decisions on your own, check how they turned out, and change your approach when you need to.", "Explain, with examples, how too little or too much confidence affects the choices people make."],
-       full:["I can make informed decisions independently, evaluate the outcome, and adapt my approach when needed.", "I can explain, with examples, how too little or too much confidence can affect the choices people make."], best:["decide","sort"] },
-  HK:{ m:["Find strategies that help you feel more confident when making decisions.", "Use a strategy when making a decision and say how it helped."],
-       full:["I can identify strategies that help me feel more confident when making decisions.", "I can use a strategy that helps me feel confident when making a decision and say how it helped."], best:["tools","decide"] },
-  LC:{ m:["Spot something you are good at or feel confident doing.", "Talk about how feeling confident helps you try something new."],
-       full:["I can recognise something I am good at or feel confident doing.", "I can talk about how feeling confident helps me try something new."], best:["strengths","dial"] }
+  JT:{ best:["decide","strengths"] },
+  LW:{ best:["dial","decide"] },
+  EGW:{ best:["wins","sort"] },
+  LP:{ best:["decide","sort"] },
+  HK:{ best:["tools","decide"] },
+  LC:{ best:["strengths","dial"] }
 };
 var ORDER = ["JT","LW","EGW","LP","LC","HK"];
 
@@ -434,7 +428,7 @@ function drawWho(){
   row.innerHTML = html;
   var box = el("whoMiles");
   if(WHO[w]){
-    box.innerHTML = "<div class='miles pop'><b>" + w + ", your two steps:</b><ol><li>" + esc(WHO[w].m[0]) + "</li><li>" + esc(WHO[w].m[1]) + "</li></ol><p class='note' style='margin:6px 0 0!important'>Good places to start: " + WHO[w].best.map(function(id){ var s = stageById(id); return "<b>" + s.t + "</b>" }).join(" and ") + ". They have a yellow sticker on the map.</p></div>";
+    box.innerHTML = "<div class='miles pop'><b>Hi " + w + ".</b> Good places to start: " + WHO[w].best.map(function(id){ var s = stageById(id); return "<b>" + s.t + "</b>" }).join(" and ") + ". They have a yellow sticker on the map.<p class='note' style='margin:6px 0 0!important'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
   } else box.innerHTML = "";
 }
 el("whoRow").addEventListener("click", function(e){
@@ -1103,11 +1097,10 @@ ACT.plan = function(a){
 };
 
 /* ================= send ================= */
-var STAGE_MILES = { strengths:["LC","EGW"], dial:["LW","LC","EGW","LP"], sort:["LP","EGW","LW"], tools:["HK"], wins:["EGW","LC"], decide:["JT","LW","LP","HK"], plan:["LC","EGW","LP"] };
 function summary(){
   var o = [], w = getWho().toUpperCase();
   o.push("Target: I can explore ways of building confidence in personal abilities and decisions at home and at school or work. I can recognise how confidence can influence actions both good and bad.");
-  if(WHO[w]) o.push("", "My milestones (" + w + "):", "1. " + WHO[w].full[0], "2. " + WHO[w].full[1]);
+  if(WHO[w]) o.push("", "Student: " + w);
   var triedList = STAGES.filter(function(s){ return S.seen[s.id] }).map(function(s){ return s.t });
   o.push("", "Stages tried: " + (triedList.length ? triedList.join(", ") : "none yet"));
 
@@ -1181,8 +1174,7 @@ function summary(){
     if(p.txtNew) o.push("Confidence helps me try new things: " + p.txtNew);
     if(p.txtBal) o.push("Finding the balance: " + p.txtBal);
   }
-  var rel = {}; STAGES.forEach(function(s){ if(S.seen[s.id]) STAGE_MILES[s.id].forEach(function(k){ rel[k] = 1 }) });
-  if(Object.keys(rel).length) o.push("", "Milestones this work links to: " + ORDER.filter(function(k){ return rel[k] }).join(", ") + (WHO[w] ? (rel[w] ? " (including mine)" : "") : ""));
+  if(WHO[w]){ var bs = WHO[w].best.filter(function(id){ return S.seen[id] }).map(function(id){ return stageById(id).t }); if(bs.length) o.push("", "Badged stages tried: " + bs.join(", ")) }
   return o.join("\n");
 }
 if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Confidence Dial", filename:"confidence-dial", getText:summary });

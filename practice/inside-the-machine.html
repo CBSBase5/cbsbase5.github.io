@@ -649,24 +649,16 @@ function robin(x, y, s){
 }
 
 /* ---------- who ---------- */
-var MS = {
-  LC:["I can recognise and name some basic parts of a computer, such as the screen, keyboard and mouse.","I can describe the job of some basic computer parts."],
-  LP:["I can explain how a range of computer components work together as a system and choose appropriate parts for different tasks.","I can compare two computers or devices and explain which components make one better suited to a task."],
-  LW:["I can explain how different computer parts work together to help me complete a task.","I can identify input, output and storage devices and explain what each one does."],
-  EGW:["I can identify input, output and storage devices and explain their different purposes.","I can explain how the processor and memory work with input, output and storage devices."],
-  JT:["I can describe the job of common computer parts, such as the keyboard, mouse, monitor and speakers.","I can sort computer parts into input, output and storage devices."],
-  HK:["I can match different computer parts to their names.","I can describe the job of some computer parts, such as the keyboard, mouse and screen."]
-};
 var TARGET = "I can understand that a computer is made up of different parts and each has a special job.";
 var GOOD = { LC:["ride","whatif"], HK:["ride","whatif"], JT:["whatif","museum"], LW:["ride","museum"], EGW:["kitchen","desk"], LP:["spec","ride"] };
 var MILESTONE_STAGES = {
-  1:"The ride: naming parts (LC, HK), the jobs of the keyboard, mouse, monitor and speakers (JT, LC, HK), parts working together on a task (LW, LP, EGW)",
-  2:"The CPU kitchen: the processor and memory working with input, output and storage (EGW, LW, LP)",
-  3:"Desk and filing cabinet: what memory and storage are each for (EGW, LW), the processor and memory working with storage (EGW)",
-  4:"What if it was gone?: describing the jobs of parts (LC, HK, JT), parts working as a system (LP, LW)",
-  5:"Spec match: choosing parts for a task and comparing computers (LP), parts working together (LW)",
-  6:"Then and now museum: sorting input, output and storage (JT, LW, EGW), comparing devices (LP), matching parts to names (HK)",
-  7:"Postcard home: describing a part's job in your own words (LC, HK, JT)"
+  1:"The ride: naming parts, the jobs of the keyboard, mouse, monitor and speakers, parts working together on a task",
+  2:"The CPU kitchen: the processor and memory working with input, output and storage",
+  3:"Desk and filing cabinet: what memory and storage are each for, the processor and memory working with storage",
+  4:"What if it was gone?: describing the jobs of parts, parts working as a system",
+  5:"Spec match: choosing parts for a task and comparing computers, parts working together",
+  6:"Then and now museum: sorting input, output and storage, comparing devices, matching parts to names",
+  7:"Postcard home: describing a part's job in your own words"
 };
 var WHOS = ["JT","LW","EGW","LP","LC","HK"];
 try{ var wk = localStorage.getItem(WHOKEY); if(wk && WHOS.indexOf(wk.toUpperCase()) >= 0) st.who = wk.toUpperCase() }catch(e){}
@@ -684,9 +676,9 @@ function drawWho(){
     box.appendChild(b);
   });
   var m = $("whoMs");
-  if(st.who && MS[st.who]){
+  if(st.who && GOOD[st.who]){
     var names = GOOD[st.who].map(function(id){ return stageById(id).n }).join(" and ");
-    m.innerHTML = "<b>Hi " + st.who + ". You are working towards:</b><ul><li>" + MS[st.who][0] + "</li><li>" + MS[st.who][1] + "</li></ul><p style='margin:6px 0 0'>Good places to start: <b>" + names + "</b>. They have an orange badge. Every stage is open, so go wherever you like.</p>";
+    m.innerHTML = "<b>Hi " + st.who + ".</b> Good places to start: <b>" + names + "</b>. They have an orange badge. Every stage is open, so go wherever you like.<p style='margin:6px 0 0'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p>";
     m.classList.remove("hidden");
   } else if(st.who === "look"){ m.innerHTML = "Have a wander. Every stage is open."; m.classList.remove("hidden") }
   else m.classList.add("hidden");
@@ -1675,10 +1667,9 @@ function summaryLines(){
   var L = [], who = st.who && st.who !== "look" ? st.who : "";
   L.push("INSIDE THE MACHINE" + (who ? " (" + who + ")" : ""));
   L.push("Target: " + TARGET);
-  if(who && MS[who]){
-    L.push("Milestones for " + who + ":"); L.push("* " + MS[who][0]); L.push("* " + MS[who][1]);
-    var link = Object.keys(MILESTONE_STAGES).filter(function(n){ return new RegExp("\\b" + who + "\\b").test(MILESTONE_STAGES[n]) }).map(function(n){ return n + " " + STAGES[n - 1].n });
-    L.push("Stages that link to these: " + link.join(", "));
+  if(who && GOOD[who]){
+    var bt = GOOD[who].filter(function(id){ return st.tried[id] }).map(function(id){ return stageById(id).n });
+    L.push("Badged stages tried: " + (bt.length ? bt.join(", ") : "none yet"));
   }
   L.push("");
   L.push("Stages tried: " + (STAGES.filter(function(s){ return st.tried[s.id] }).map(function(s){ return s.n }).join(", ") || "none yet"));

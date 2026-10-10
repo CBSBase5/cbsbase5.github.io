@@ -1126,32 +1126,7 @@ function toast(msg){
   clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 2600);
 }
 
-/* ---------------- milestones ---------------- */
-var MS = {
-  LC:["Spot and name things around here that people have made or changed.","Say what one of those things is used for."],
-  LP:["Weigh up how people have shaped a place over time, using evidence from what you see, maps or other sources.","Suggest how a place could change in future, and what that would mean for people and nature."],
-  LW:["Explain why people changed parts of a place, and what the changes are used for.","Compare the good and bad effects of one change people made."],
-  EGW:["Compare different changes people have made, and their good and bad effects.","Use maps or old pictures to show how a place changed, and explain why."],
-  JT:["Describe how a place has been changed by people.","Explain why people made a change, and who it helps."],
-  HK:["Find examples of how people changed a place, like roads, buildings, paths and parks.","Say what those changes are used for, and how they help people."]
-};
-var MS_FULL = {
-  LC:["I can notice and name features in the local environment that have been made or changed by people.","I can describe what a feature made by people in the local area is used for."],
-  LP:["I can evaluate how human activity has shaped the local environment over time, using evidence from observations, maps or other sources.","I can suggest how the local environment could change in the future and explain the possible impact on people and nature."],
-  LW:["I can explain why people have changed parts of the local environment and what those changes are used for.","I can compare the positive and negative effects of a change people have made to the local environment."],
-  EGW:["I can compare different examples of human changes in the local area and explain their positive and negative effects.","I can use maps or old photographs to show how the local area has changed over time and explain why."],
-  JT:["I can describe how a local place has been changed by human activity.","I can explain why people made a change to a local place and who it helps."],
-  HK:["I can identify examples of how humans have physically changed the local area, such as roads, buildings, paths and parks.","I can describe what these changes are used for and how they help people."]
-};
-var STAGE_MS = {
-  s1:["LC1","HK1","JT1","LC2","HK2"],
-  s2:["LC2","HK2","LW1","JT2"],
-  s3:["LW2","EGW1"],
-  s4:["EGW1","LW2","LP1"],
-  s5:["EGW2","LP1","JT1"],
-  s6:["LP2","LP1"],
-  s7:["LC1","HK1","HK2","LC2","LP1","JT1"]
-};
+/* ---------------- good places to start (stage ids only) ---------------- */
 var BEST = { LC:["s1","s2"], LP:["s5","s6"], LW:["s2","s3"], EGW:["s4","s5"], JT:["s1","s2"], HK:["s1","s7"] };
 
 /* ---------------- tiles ---------------- */
@@ -1200,10 +1175,6 @@ function refreshTiles(){
   TILES.forEach(function(t){ var i = document.createElement("i"); if(st.tried[t.id]){ i.className = "on"; n++; } dots.appendChild(i); });
   $("tryText").textContent = n === 0 ? "Nothing tried yet. Pick any stage." :
     (n === 7 ? "You have had a go at all seven stages. Brilliant." : "You have had a go at " + n + " of 7 stages.");
-  TILES.forEach(function(t){
-    var span = $("ms-" + t.id); if(!span) return;
-    span.innerHTML = STAGE_MS[t.id].map(function(c){ return '<span class="mtag">' + c + '</span>'; }).join("");
-  });
 }
 function markTried(id){
   if(!st.tried[id]){ st.tried[id] = true; save(); refreshTiles(); }
@@ -1247,8 +1218,8 @@ function drawWho(){
   if(who){
     mm.className = "mymiles on";
     var best = BEST[who].map(function(s){ return TILES[+s.slice(1) - 1].name; });
-    mm.innerHTML = '<div class="mile"><b>Step 1</b>' + MS[who][0] + '</div><div class="mile"><b>Step 2</b>' + MS[who][1] + '</div>' +
-      '<div class="mile" style="background:var(--yellow)"><b>Good places to start</b>' + best.join(" and ") + '. Everything else is open too.</div>';
+    mm.innerHTML = '<div class="mile" style="background:var(--yellow)"><b>Hi ' + who + '</b>Good places to start: ' + best.join(" and ") + '. Everything else is open too.</div>' +
+      '<div class="mile"><b>Your targets</b>Your own targets are on <a href="/my-targets.html">My targets</a>, behind your PIN.</div>';
   } else { mm.className = "mymiles"; mm.innerHTML = ""; }
 }
 
@@ -2106,12 +2077,8 @@ function buildText(){
   if(who){
     L.push("");
     L.push("Picked initials: " + who);
-    MS_FULL[who].forEach(function(m, i){
-      var code = who + (i + 1);
-      var where = TILES.filter(function(t){ return st.tried[t.id] && STAGE_MS[t.id].indexOf(code) > -1; }).map(function(t){ return t.name; });
-      L.push(" Milestone " + (i + 1) + ": " + m);
-      L.push("   Worked on in: " + (where.length ? where.join(", ") : "not yet"));
-    });
+    var bs = BEST[who].filter(function(id){ return st.tried[id]; }).map(function(id){ return TILES[+id.slice(1) - 1].name; });
+    L.push("Badged stages tried: " + (bs.length ? bs.join(", ") : "not yet"));
   }
 
   L.push(""); L.push("1. TIME MACHINE");
@@ -2187,10 +2154,6 @@ function buildText(){
   if(T.nBest) L.push(" Most interesting thing: " + T.nBest);
   if(T.nChange) L.push(" Something that changed: " + T.nChange);
   if(T.nIdea) L.push(" A change I would make: " + T.nIdea);
-
-  var codes = [];
-  tried.forEach(function(t){ STAGE_MS[t.id].forEach(function(c){ if(codes.indexOf(c) < 0) codes.push(c); }); });
-  L.push(""); L.push("Milestone codes this work touches: " + (codes.length ? codes.join(", ") : "none yet"));
   return L.join("\n");
 }
 

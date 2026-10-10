@@ -555,22 +555,16 @@ var STAGES = [
   { n:7, name:"The tomato loop", col:"#f7b2a6", blurb:"From flower to rot and round again." }
 ];
 var MILESTONE_STAGES = {
-  1:"Decomposers: which microbes rot things, where they live and what they need (LP, EGW)",
-  2:"Yeast, a fungus: what it is like, how it feeds and reproduces, its job in food, and fair tests (LP, EGW)",
-  3:"Mould, a fungus: how its spores spread, where it grows, and planning a fair investigation (LP, EGW)",
-  4:"Bacteria, fungi and viruses in everyday life: food, medicine, illness and hygiene (EGW, LP)",
-  5:"Growing from a seed: what each part looks like, where it is and what it does (JT, LC, LW)",
-  6:"Plants built for their homes: comparing plants and a tree, and how structure helps survival (HK, LC, JT, LW)",
-  7:"The tomato loop: the life cycle from flower to seed and back, with decomposers and nutrients (LW, JT, LC, LP)"
+  1:"Decomposers: which microbes rot things, where they live and what they need",
+  2:"Yeast, a fungus: what it is like, how it feeds and reproduces, its job in food, and fair tests",
+  3:"Mould, a fungus: how its spores spread, where it grows, and planning a fair investigation",
+  4:"Bacteria, fungi and viruses in everyday life: food, medicine, illness and hygiene",
+  5:"Growing from a seed: what each part looks like, where it is and what it does",
+  6:"Plants built for their homes: comparing plants and a tree, and how structure helps survival",
+  7:"The tomato loop: the life cycle from flower to seed and back, with decomposers and nutrients"
 };
-var PEOPLE = {
-  LC:{ m:["Say where each part of a plant is found and what it looks like.", "Explain what some parts of a plant do, like the roots, stem and flower."], s:[5, 6] },
-  LP:{ m:["Describe what microorganisms are like, where they are found and how they spread or reproduce.", "Explain the jobs microorganisms do in food, medicine and the environment."], s:[3, 4] },
-  LW:{ m:["Use science words to explain how plant parts work together for growth, reproduction and survival.", "Explain the life cycle of a flowering plant, from seed to flower and back to seed."], s:[7, 5] },
-  EGW:{ m:["Name different types of microorganism: bacteria, fungi and viruses.", "Describe what each type is like and where it can be found."], s:[4, 1] },
-  JT:{ m:["Explain the basic job of each plant part, like roots taking in water and stems holding the plant up.", "Explain how a plant grows from a seed, naming the parts that help it grow."], s:[5, 7] },
-  HK:{ m:["Compare the parts of different plants and trees, and say how they are similar or different.", "Explain how the structure of a plant or tree helps it survive where it lives."], s:[6] }
-};
+/* initials to good starting jars, nothing else per student */
+var PEOPLE = { LC:[5, 6], LP:[3, 4], LW:[7, 5], EGW:[4, 1], JT:[5, 7], HK:[6] };
 var ORDER = ["JT", "LW", "EGW", "LP", "LC", "HK"];
 function getWho(){ try{ return (localStorage.getItem(WHO_KEY) || "").trim().toUpperCase() }catch(e){ return "" } }
 function setWho(v){ try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){} }
@@ -586,8 +580,7 @@ function drawWho(){
   });
   var info = el("whoInfo");
   if(PEOPLE[w]){
-    var P = PEOPLE[w];
-    info.innerHTML = "<div class='mbox'><b>Hi " + w + ".</b> Your two steps for this target:<ul><li>" + P.m[0] + "</li><li>" + P.m[1] + "</li></ul><p class='small' style='margin:6px 0 0'>Jars marked <b>good place to start</b> fit these best. Every jar is still open, in any order.</p></div>";
+    info.innerHTML = "<div class='mbox'><b>Hi " + w + ".</b> Jars marked <b>good place to start</b> are a good place to begin. Every jar is still open, in any order.<p class='small' style='margin:6px 0 0'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
   } else info.innerHTML = "";
 }
 
@@ -629,7 +622,7 @@ function statusWord(n){ var p = progress(n); if(!tried(n)) return "Not tried yet
 
 function drawMap(){
   var box = el("map"); if(!box) return;
-  var w = getWho(), suits = PEOPLE[w] ? PEOPLE[w].s : [];
+  var w = getWho(), suits = PEOPLE[w] || [];
   box.innerHTML = "";
   STAGES.forEach(function(S){
     var t = tried(S.n);
@@ -1602,7 +1595,7 @@ function summary(){
   var w = getWho(), out = [], s;
   out.push("ROT LAB: microorganisms and plant life");
   out.push("Target: plant parts (flower, root, stem, trunk, branch, seed) and microorganisms (types, characteristics, roles in daily life, health and hygiene).");
-  if(PEOPLE[w]){ out.push("", "Milestones for " + w + ":"); PEOPLE[w].m.forEach(function(m){ out.push("- " + m) }) }
+  if(PEOPLE[w]){ var bt = PEOPLE[w].filter(tried); out.push("", "Student: " + w + ". Badged jars tried: " + (bt.length ? bt.join(", ") : "none yet")) }
   out.push("", "JARS");
   STAGES.forEach(function(S){ out.push(S.n + ". " + S.name + ": " + statusWord(S.n).toLowerCase()) });
   var any = false;

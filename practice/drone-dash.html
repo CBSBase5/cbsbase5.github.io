@@ -541,7 +541,7 @@ function triedIn(stage){
   return n;
 }
 
-/* ---------- stages and milestones ---------- */
+/* ---------- stages ---------- */
 var STAGES = [
   { n:1, name:"Flight school", sub:"Read and write vectors" },
   { n:2, name:"No fly zones", sub:"Add vectors, plan routes" },
@@ -551,29 +551,18 @@ var STAGES = [
   { n:6, name:"Describe the move", sub:"Full descriptions" },
   { n:7, name:"Delivery run", sub:"A bit of everything" }
 ];
-/* Milestone wording copied exactly from the Week 6 sister (The Tile Shop). */
+/* Stages that suit each student. Stage numbers only. */
 var MS = {
-  LC: { m:[ ["I can recognise and create simple tessellating patterns using repeating shapes.", "Spot shapes that tile with no gaps, and make a simple tiling pattern.", [5,7]],
-            ["I can use rotations and reflections to create a repeating pattern.", "Use turns and flips to make a repeating pattern.", [4,5]] ], best:[5,4] },
-  LP: { m:[ ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts like 5%, 15%, 25% and 35% off.", [3,7]],
-            ["I can use vector notation to describe a translation on a grid.", "Use a vector to describe a slide on a grid.", [1,2]] ], best:[3,1] },
-  LW: { m:[ ["I can describe how rotations, reflections and translations have been used to create a repeating pattern.", "Say how a pattern was made from slides, turns and flips.", [6]],
-            ["I can create my own repeating pattern using rotations, reflections and translations.", "Make your own repeating pattern with slides, turns and flips.", [5]] ], best:[6,5] },
-  EGW: { m:[ ["Use and read vector notation", "Read and write vectors in their tall brackets.", [1,2,7]],
-             ["I can use vectors to describe translations of shapes on a coordinate grid.", "Use vectors to describe how a shape slides on a coordinate grid.", [1,4]] ], best:[1,2] },
-  JT: { m:[ ["I can create and analyse complex repeating patterns, combining transformations and explaining why particular shapes tessellate successfully.", "Make and pick apart trickier patterns, and explain why some shapes tile.", [5,6]],
-            ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts in steps of 5%.", [3,7]] ], best:[5,3] },
-  HK: { m:[ ["I can rotate and reflect shapes accurately using a grid or practical resources.", "Turn and flip shapes accurately on a grid.", [4]],
-            ["I can use translations to move shapes on a grid and create a simple repeating pattern.", "Slide shapes on a grid to make a simple repeating pattern.", [4,5]] ], best:[4,5] }
+  LC: { best:[5,4] }, LP: { best:[3,1] }, LW: { best:[6,5] }, EGW: { best:[1,2] }, JT: { best:[5,3] }, HK: { best:[4,5] }
 };
 var MILESTONE_STAGES = {
-  1: "Reading and writing column vectors, and translating a drone formation on a coordinate grid (EGW, LP)",
-  2: "Adding vectors and planning routes with vectors (EGW, LP)",
-  3: "Discounts in multiples of 5% to the penny, and spotting wrong sale labels (LP, JT)",
-  4: "Reflecting, rotating and translating parcels on a grid, checked square by square (HK, LC, EGW)",
-  5: "Tessellating landing pads, and creating repeating van wrap patterns with slides, flips and turns (LC, JT, HK, LW)",
-  6: "Fully describing transformations, and analysing how repeating door patterns were made (LW, JT)",
-  7: "Mixed delivery run: vectors, discounts and tessellation (EGW, LP, JT, LC)"
+  1: "Reading and writing column vectors, and translating a drone formation on a coordinate grid",
+  2: "Adding vectors and planning routes with vectors",
+  3: "Discounts in multiples of 5% to the penny, and spotting wrong sale labels",
+  4: "Reflecting, rotating and translating parcels on a grid, checked square by square",
+  5: "Tessellating landing pads, and creating repeating van wrap patterns with slides, flips and turns",
+  6: "Fully describing transformations, and analysing how repeating door patterns were made",
+  7: "Mixed delivery run: vectors, discounts and tessellation"
 };
 var WHOS = ["JT","LW","EGW","LP","LC","HK"];
 function getWho(){ try{ var w = localStorage.getItem(WHO) || ""; return MS[w.toUpperCase()] ? w.toUpperCase() : "" }catch(e){ return "" } }
@@ -605,10 +594,8 @@ function drawWho(){
   });
   var info = el("whoInfo");
   if(!who){ info.innerHTML = ""; return }
-  var m = MS[who];
-  info.innerHTML = "<div class='mlist'><p><b>Hi " + who + ".</b> Your two milestones for this one:</p>" +
-    m.m.map(function(x, i){ return "<p>" + (i + 1) + ". " + x[1] + " <span class='hint'>(stage " + x[2].join(" and ") + ")</span></p>" }).join("") +
-    "<p class='hint'>Stages marked <b>good place to start</b> suit you best. Everything else is open too.</p></div>";
+  info.innerHTML = "<div class='mlist'><p><b>Hi " + who + ".</b> Stages marked <b>good place to start</b> suit you best. Everything else is open too.</p>" +
+    "<p class='hint'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
 }
 function drawMap(){
   var map = el("map"); map.innerHTML = "";
@@ -628,8 +615,7 @@ function drawGoodFor(){
   STAGES.forEach(function(s){
     var g = document.querySelector("#st" + s.n + " .gf"); if(!g) return;
     if(!who){ g.innerHTML = ""; return }
-    var hits = MS[who].m.filter(function(x){ return x[2].indexOf(s.n) >= 0 });
-    g.innerHTML = hits.length ? "<span class='goodfor'>" + who + ": " + hits.map(function(x){ return x[1] }).join(" ") + "</span>" : "";
+    g.innerHTML = MS[who].best.indexOf(s.n) >= 0 ? "<span class='goodfor'>" + who + ": good place to start</span>" : "";
   });
 }
 var OPENERS = {};
@@ -1763,16 +1749,16 @@ OPENERS[7] = function(){
    ====================================================== */
 function summary(){
   var out = ["Drone Dash (vectors, 5% discounts, rotations, reflections and tessellations)", ""];
-  if(who){ out.push("Milestones for " + who + ":"); MS[who].m.forEach(function(m, i){ out.push("  " + (i + 1) + ". " + m[0] + " (stages " + m[2].join(", ") + ")") }); out.push("") }
-  else out.push("Target: Use and read vector notation. Calculate discounts in multiples of 5%. Explore rotations, reflections and tessellations to make repeating patterns.", "");
+  out.push("Initials: " + (who || "not picked"));
+  if(who) out.push("Badged stages for " + who + ": " + MS[who].best.join(", "));
+  out.push("Target: Use and read vector notation. Calculate discounts in multiples of 5%. Explore rotations, reflections and tessellations to make repeating patterns.", "");
   var any = false;
   STAGES.forEach(function(s){
     var items = Object.keys(st.ans).filter(function(k){ return st.ans[k].s === s.n }).map(function(k){ return st.ans[k] });
     var writes = Object.keys(st.txt).filter(function(k){ return TXTSTAGE[k] === s.n && st.txt[k] && st.txt[k].trim() });
     if(!items.length && !writes.length){ out.push("Stage " + s.n + ", " + s.name + ": not tried this time"); return }
     any = true;
-    var rel = WHOS.filter(function(w){ return MS[w].m.some(function(m){ return m[2].indexOf(s.n) >= 0 }) });
-    out.push("Stage " + s.n + ", " + s.name + " (" + s.sub + "). Covers: " + MILESTONE_STAGES[s.n] + ". Milestones for: " + rel.join(", "));
+    out.push("Stage " + s.n + ", " + s.name + " (" + s.sub + "). Covers: " + MILESTONE_STAGES[s.n] + (who && MS[who].best.indexOf(s.n) >= 0 ? ". Badged for " + who : ""));
     items.forEach(function(r){
       var tag = r.ok === true ? (r.n === 1 ? "got it first go" : "got there in the end") : r.ok === false ? "had a go, still working on it" : "explored";
       out.push("  - " + r.l.replace(/<[^>]+>/g, "") + ": " + String(r.a).replace(/<[^>]+>/g, "") + " [" + tag + "]");

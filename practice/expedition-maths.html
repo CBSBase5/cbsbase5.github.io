@@ -372,7 +372,7 @@
     <div class="card w7 fill-yellow" id="whoCard">
       <span class="kicker">Who is this?</span>
       <h3>Pick your initials, if you like</h3>
-      <p>It shows your two steps and the stops that suit them. Every stop stays open to everyone.</p>
+      <p>It marks the stops that suit you. Every stop stays open to everyone.</p>
       <div class="whochips" id="whoChips" role="group" aria-label="Your initials">
         <button type="button" class="cb" data-who="JT" aria-pressed="false">JT</button>
         <button type="button" class="cb" data-who="LW" aria-pressed="false">LW</button>
@@ -863,35 +863,6 @@ var BEST = {
   JT:["water","trail","supply"], LW:["water","trail"], EGW:["map","plan"],
   LP:["hire","map","plan"], LC:["supply","trail","bag"], HK:["bag"]
 };
-var MS = {
-  JT:["Find what makes a number up to 100, and add or take away two digit numbers in your head, with a helper if you like.",
-      "Add and take away two digit numbers in your head on your own, and multiply whole numbers by 10 and 100."],
-  LW:["Find what makes a number up to 100, and add or take away two digit numbers in your head, with a helper if you like.",
-      "Add and take away two digit numbers in your head on your own."],
-  EGW:["Use scale factors, scale drawings and maps.",
-       "Use a map scale to work out real distances when you plan a route."],
-  LP:["Use simple formulas written in words, with one or two steps.",
-      "Use scale factors to make a shape bigger, and read distances from a scale drawing or a map."],
-  LC:["Multiply whole numbers by 10, 100 and 1,000 in your head, and pick quick ways to add and take away.",
-      "Add and take away multiples of 10, 100 and 1,000 using your bonds to 10."],
-  HK:["Remember your number bonds to 10 and use them for quick sums.",
-      "Use bonds to 10 to find bonds to 100 with tens, like 30 + 70."]
-};
-var MS_RAW = {
-  LC:["I can multiply whole numbers mentally by 10, 100 and 1,000 and choose efficient mental strategies for addition and subtraction.",
-      "I can find the sum and difference of multiples of 10, 100 and 1,000 using my knowledge of bonds to 10."],
-  LP:["I can use simple formulas expressed in words for one or two step operations.",
-      "I can use scale factors to enlarge a shape and read distances from a scale diagram or map."],
-  LW:["I can find the complement of a number to 100 and mentally add or subtract two 2 digit numbers with support.",
-      "I can mentally add and subtract two 2 digit numbers independently."],
-  EGW:["I can use scale factors, scale diagrams and maps.",
-       "I can use a map scale to work out real distances in a practical problem, such as planning a route."],
-  JT:["I can find the complement of a number to 100 and mentally add or subtract two 2 digit numbers with support.",
-      "I can mentally add and subtract two 2 digit numbers independently and multiply whole numbers by 10 and 100."],
-  HK:["I can recall number bonds to 10 and use them to solve simple mental calculations.",
-      "I can use number bonds to 10 to find bonds to 100 using multiples of 10."]
-};
-
 /* ---------------------------------------------------------
    State
    --------------------------------------------------------- */
@@ -1142,10 +1113,10 @@ function renderWho(){
   var who = getWho();
   $$("#whoChips .cb").forEach(function(b){ b.setAttribute("aria-pressed", (b.getAttribute("data-who") === who && (who || b.dataset.picked)) ? "true" : "false"); });
   var out = $("#msOut");
-  if (who && MS[who]){
-    var names = (BEST[who] || []).map(function(id){ return stageById(id).name; });
-    out.innerHTML = "<b>" + esc(who) + ", your two steps:</b><ol><li>" + MS[who][0] + "</li><li>" + MS[who][1] + "</li></ol>" +
-      "<p>Good places to start: <b>" + names.join(", ") + "</b>. They have a purple tag.</p>";
+  if (who && BEST[who]){
+    var names = BEST[who].map(function(id){ return stageById(id).name; });
+    out.innerHTML = "<p>Hi " + esc(who) + ". Good places to start: <b>" + names.join(", ") + "</b>. They have a purple tag. " +
+      "Your own targets are on <a href=\"/my-targets.html\">My targets</a>, behind your PIN.</p>";
   } else out.innerHTML = "";
   var si = document.getElementById("b5who"); if (si) si.value = who;
 }
@@ -2275,12 +2246,10 @@ function summary(noFlush){
   if (S.why && S.why.trim()){ L.push("Which route and why (in their words):"); L.push("  " + S.why.trim()); L.push(""); }
   if (S.myTent) L.push("Pitched their own tent on the camp plan at column " + (S.myTent.c + 1) + ", row " + (S.myTent.r + 1) + ".");
   L.push("");
-  L.push("Milestones this links to:");
-  if (who && MS_RAW[who]){ L.push("  " + who + " 1: " + MS_RAW[who][0]); L.push("  " + who + " 2: " + MS_RAW[who][1]); }
-  else {
-    L.push("  Target: I can use scale factors, scale diagrams and maps.");
-    L.push("  I can work out mentally sums and differences of two 2 digit numbers, complements to 100, sums and differences of multiples of 10, 100 and 1,000 using bonds to 10, and multiply by 10, 100 and 1,000.");
-    L.push("  I can use simple formulas expressed in words for one or two step operations.");
+  L.push("Target: I can use scale factors, scale diagrams and maps.");
+  if (who && BEST[who]){
+    var bt = BEST[who].filter(function(id){ return S.tried[id]; }).map(function(id){ return stageById(id).name; });
+    L.push("Badged stops tried: " + (bt.length ? bt.join(", ") : "none yet"));
   }
   return L.join("\n");
 }

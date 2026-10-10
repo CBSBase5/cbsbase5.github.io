@@ -702,20 +702,7 @@ var STAGES = [
   { n:6, name:"Case board", blurb:"Pin quotes under each suspect.", fill:"fill-teal" },
   { n:7, name:"Solve it", blurb:"Name who did it and prove it.", fill:"fill-orange" }
 ];
-var WHO = {
-  LC:{ f:["Find clues about a person, a place or an event.", "Find what a character says, and use it to show what they are like."], s:[1,4],
-       o:["I can find evidence about a person, place or event.", "I can find what a character says in a text and use it to show what they are like."] },
-  LP:{ f:["Find clues linked to an idea.", "Pick the strongest clue and explain why you chose it."], s:[3,5,7],
-       o:["I can find evidence linked to a given idea or theme.", "I can select the most relevant evidence to support an idea and explain why I chose it."] },
-  LW:{ f:["Find clues about a person, a place or an event.", "Find clues linked to an idea."], s:[1,3,6],
-       o:["I can find evidence about a person, place or event.", "I can find evidence linked to a given idea."] },
-  EGW:{ f:["Find the line that answers a question.", "Find clues linked to an idea and use them to back up your answer."], s:[2,3,7],
-       o:["I can locate evidence that answers a question.", "I can find evidence linked to an idea and use it to support my answer."] },
-  JT:{ f:["Find clues about a person, a place or an event.", "Find speech and say what it tells you about a character."], s:[1,4],
-       o:["I can find evidence about a person, place or event.", "I can find speech in a text and explain what it tells me about a character."] },
-  HK:{ f:["Find clues about a person, a place or an event.", "Find the line that answers a simple question."], s:[1,2],
-       o:["I can find evidence about a person, place or event.", "I can find evidence that answers a simple question about a text."] }
-};
+var WHO = { LC:{ s:[1,4] }, LP:{ s:[3,5,7] }, LW:{ s:[1,3,6] }, EGW:{ s:[2,3,7] }, JT:{ s:[1,4] }, HK:{ s:[1,2] } };
 
 /* ================= STATE ================= */
 function fresh(){
@@ -814,15 +801,15 @@ function drawWho(){
   var m = $("mbox"), w = WHO[st.who];
   if(w){
     m.hidden = false;
-    m.innerHTML = "<b>" + st.who + ", your two steps:</b><ul><li>" + w.f[0] + "</li><li>" + w.f[1] + "</li></ul>" +
-      "<span class='small'>Good places to start: " + w.s.map(function(n){ return "stage " + n + ", " + STAGES[n - 1].name }).join("; ") + ". Every stage is open though.</span>";
+    m.innerHTML = "<b>Hi " + st.who + ".</b> Good places to start: " + w.s.map(function(n){ return "stage " + n + ", " + STAGES[n - 1].name }).join("; ") + ". Every stage is open though." +
+      "<br><span class='small'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</span>";
   } else m.hidden = true;
   drawTiles();
 }
 $("who").addEventListener("click", function(e){
   var b = e.target.closest("button"); if(!b) return;
   st.who = b.getAttribute("data-who"); st.whoSet = true; save();
-  if(st.who){ try{ localStorage.setItem(WHO_KEY, st.who) }catch(err){} var inp = $("b5who"); if(inp) inp.value = st.who }
+  if(st.who){ try{ localStorage.setItem(WHO_KEY, st.who) }catch(err){} var inp = $("b5who"); if(inp) inp.value = st.who } else { try{ localStorage.removeItem(WHO_KEY) }catch(err){} }
   drawWho();
 });
 
@@ -1403,7 +1390,8 @@ function summary(){
   var o = [], w = WHO[st.who];
   o.push("CASE FILE: THE MISSING BIRD");
   o.push("Target: I can identify and retrieve relevant textual evidence from texts to support ideas.");
-  if(w){ o.push("Milestones (" + st.who + "):"); w.o.forEach(function(m){ o.push("  * " + m) }) }
+  o.push("Initials: " + (st.who || "not picked"));
+  if(w){ var bt = w.s.filter(function(n){ return st.tried[n] }).map(function(n){ return n + " " + STAGES[n - 1].name }); o.push("Badged stages tried: " + (bt.length ? bt.join(", ") : "none yet")) }
   var opened = []; STAGES.forEach(function(s){ if(st.tried[s.n]) opened.push(s.n + " " + s.name) });
   o.push("Stages opened: " + (opened.length ? opened.join(", ") : "none yet"));
   o.push("");

@@ -631,7 +631,7 @@ var ICONS = {
   7:"<svg width='44' height='44' viewBox='0 0 44 44' aria-hidden='true'><path d='M10 40 L14 18 H30 L34 40Z' fill='#8a5a32' stroke='#0a2f38' stroke-width='2.5' stroke-linejoin='round'/><rect x='8' y='12' width='28' height='8' rx='2' fill='#fffdf8' stroke='#0a2f38' stroke-width='2'/><path d='M22 12 V4' stroke='#0a2f38' stroke-width='2'/><circle cx='22' cy='4' r='3' fill='#ef7724' stroke='#0a2f38' stroke-width='1.5'/></svg>"
 };
 
-/* ================= STAGES, WHO, MILESTONES ================= */
+/* ================= STAGES, WHO ================= */
 var STAGES = [
   { n:1, name:"Take the stand", blurb:"The judge asks. You highlight the answer.", fill:"fill-yellow" },
   { n:2, name:"In their own words", blurb:"Find what someone says. What does it show?", fill:"fill-teal" },
@@ -642,21 +642,16 @@ var STAGES = [
   { n:7, name:"Closing speech", blurb:"Point, evidence, explain. Win the case.", fill:"fill-orange" }
 ];
 var MILESTONE_STAGES = {
-  1:"Finding evidence about a person, place or event; locating evidence that answers a simple question (HK, LC, LW, JT, EGW)",
-  2:"Finding what a character says and using it to show what they are like (LC, JT)",
-  3:"Finding evidence linked to a given idea: stated or worked out (LP, LW)",
-  4:"Selecting the most relevant evidence for an idea and explaining why (LP, LW, EGW)",
-  5:"Explaining why evidence does or does not support a point (LP, LW, EGW)",
-  6:"Locating the exact words that answer a question or point (EGW, HK)",
-  7:"Using evidence to support an answer: point, evidence, explain, and explaining why it was chosen (EGW, LP)"
+  1:"Finding evidence about a person, place or event; locating evidence that answers a simple question",
+  2:"Finding what a character says and using it to show what they are like",
+  3:"Finding evidence linked to a given idea: stated or worked out",
+  4:"Selecting the most relevant evidence for an idea and explaining why",
+  5:"Explaining why evidence does or does not support a point",
+  6:"Locating the exact words that answer a question or point",
+  7:"Using evidence to support an answer: point, evidence, explain, and explaining why it was chosen"
 };
 var WHO = {
-  JT:{ o:["I can find evidence about a person, place or event.", "I can find speech in a text and explain what it tells me about a character."], m:[[1],[2]], s:[1,2] },
-  LW:{ o:["I can find evidence about a person, place or event.", "I can find evidence linked to a given idea."], m:[[1],[3,4,5]], s:[1,3,4] },
-  EGW:{ o:["I can locate evidence that answers a question.", "I can find evidence linked to an idea and use it to support my answer."], m:[[1,6],[4,5,7]], s:[1,4,7] },
-  LP:{ o:["I can find evidence linked to a given idea or theme.", "I can select the most relevant evidence to support an idea and explain why I chose it."], m:[[3,4],[4,5,7]], s:[3,4,5] },
-  LC:{ o:["I can find evidence about a person, place or event.", "I can find what a character says in a text and use it to show what they are like."], m:[[1],[2]], s:[1,2] },
-  HK:{ o:["I can find evidence about a person, place or event.", "I can find evidence that answers a simple question about a text."], m:[[1],[1,6]], s:[1,6] }
+  JT:{ s:[1,2] }, LW:{ s:[1,3,4] }, EGW:{ s:[1,4,7] }, LP:{ s:[3,4,5] }, LC:{ s:[1,2] }, HK:{ s:[1,6] }
 };
 
 /* ================= STATE ================= */
@@ -799,16 +794,16 @@ function drawWho(){
   var m = $("mbox"), w = WHO[st.who];
   if(w){
     m.hidden = false;
-    m.innerHTML = "<b>" + st.who + ", your milestones:</b><ul>" + w.o.map(function(t, k){
-      return "<li>" + esc(t) + "<small>Try: " + w.m[k].map(function(n){ return "stage " + n + ", " + STAGES[n - 1].name }).join("; ") + "</small></li>" }).join("") + "</ul>" +
-      "<span class='small'>Good places to start are marked on the map. Every stage is open though.</span>";
+    m.innerHTML = "<b>Hi " + st.who + ".</b> Good places to start are marked on the map. Every stage is open though. " +
+      "<span class='small'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</span>";
   } else m.hidden = true;
   drawTiles();
 }
 $("who").addEventListener("click", function(e){
   var b = e.target.closest("button"); if(!b) return;
   st.who = b.getAttribute("data-who"); st.whoSet = true; save();
-  if(st.who){ try{ localStorage.setItem(WHO_KEY, st.who) }catch(err){} var inp = $("b5who"); if(inp) inp.value = st.who }
+  try{ if(st.who) localStorage.setItem(WHO_KEY, st.who); else localStorage.removeItem(WHO_KEY) }catch(err){}
+  var inp = $("b5who"); if(inp) inp.value = st.who;
   drawWho();
 });
 
@@ -1435,7 +1430,8 @@ function summary(){
   var o = [], w = WHO[st.who];
   o.push("OBJECTION! THE SQUASHED LEMON TOWER");
   o.push("Target: " + TARGET);
-  if(w){ o.push("Milestones (" + st.who + "):"); w.o.forEach(function(m, k){ o.push("  * " + m + " (stages " + w.m[k].join(", ") + ")") }) }
+  o.push("Initials: " + (w ? st.who : "not picked"));
+  if(w) o.push("Badged stages for " + st.who + ": " + w.s.join(", "));
   var opened = []; STAGES.forEach(function(s){ if(st.tried[s.n]) opened.push(s.n + " " + s.name) });
   o.push("Stages tried: " + (opened.length ? opened.join(", ") : "none yet"));
   function head(n){ o.push(""); o.push("STAGE " + n + ", " + STAGES[n - 1].name.toUpperCase()); o.push("  Covers: " + MILESTONE_STAGES[n]) }

@@ -388,7 +388,7 @@ textarea.tw{min-height:96px;resize:vertical}
 
   <section class="whobox" aria-labelledby="whoh">
     <h2 id="whoh">Who is this?</h2>
-    <p>Optional. Pick your initials to see your two steps and good pages to start on, or just have a look around.</p>
+    <p>Optional. Pick your initials to see good pages to start on, or just have a look around.</p>
     <div class="whochips" id="whochips"></div>
     <div id="whoms"></div>
   </section>
@@ -763,21 +763,17 @@ var TILEIC = {
 
 /* ---------------- who is this ---------------- */
 var STUDENTS = {
-  JT:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], w:[[1], [3, 5]] },
-  LW:{ m:["I can use paragraphs to group sentences that belong together.", "I can start each paragraph with a clear topic sentence."], w:[[1, 6], [2, 7]] },
-  EGW:{ m:["I can organise my ideas into clear paragraphs.", "I can link my paragraphs so my writing flows from one idea to the next."], w:[[1, 6], [4, 5]] },
-  LP:{ m:["I can organise my writing into clear paragraphs.", "I can use linking words and phrases to connect ideas between my paragraphs."], w:[[6], [4, 7]] },
-  LC:{ m:["I can use paragraphs to group sentences that belong together.", "I can start a new paragraph when my writing moves to a new idea, time or place."], w:[[1], [3, 5]] },
-  HK:{ m:["I can use paragraphs to group sentences that belong together.", "I can plan my writing in sections before I write it in paragraphs."], w:[[1, 6], [7]] }
+  JT:{ w:[[1], [3, 5]] }, LW:{ w:[[1, 6], [2, 7]] }, EGW:{ w:[[1, 6], [4, 5]] },
+  LP:{ w:[[6], [4, 7]] }, LC:{ w:[[1], [3, 5]] }, HK:{ w:[[1, 6], [7]] }
 };
 var MILESTONE_STAGES = {
-  1:"grouping sentences that belong together (JT, LW, LC, HK); organising ideas into clear paragraphs (EGW)",
-  2:"starting each paragraph with a clear topic sentence (LW)",
-  3:"starting a new paragraph for a new time, place, topic or person (JT, LC); grouping sentences that belong together (JT, LC)",
-  4:"linking paragraphs so writing flows (EGW); linking words and phrases between paragraphs (LP)",
-  5:"new paragraph for a new time, place or person (JT, LC); paragraphs that flow in order (EGW)",
-  6:"organising ideas and writing into clear paragraphs (EGW, LP); grouping related material (LW, HK)",
-  7:"planning in sections before writing in paragraphs (HK); topic sentences (LW); organising writing into clear, linked paragraphs (LP)"
+  1:"grouping sentences that belong together; organising ideas into clear paragraphs",
+  2:"starting each paragraph with a clear topic sentence",
+  3:"starting a new paragraph for a new time, place, topic or person; grouping sentences that belong together",
+  4:"linking paragraphs so writing flows; linking words and phrases between paragraphs",
+  5:"new paragraph for a new time, place or person; paragraphs that flow in order",
+  6:"organising ideas and writing into clear paragraphs; grouping related material",
+  7:"planning in sections before writing in paragraphs; topic sentences; organising writing into clear, linked paragraphs"
 };
 var ORDER = ["JT", "LW", "EGW", "LP", "LC", "HK"];
 function getWho(){ try{ return (localStorage.getItem(WHOKEY) || "").trim().toUpperCase() }catch(e){ return "" } }
@@ -789,9 +785,8 @@ function drawWho(){
     '<button type="button" class="whochip look" data-w="" aria-pressed="' + (!known && st.looking) + '">Just looking</button>';
   if(known){
     var S = STUDENTS[known];
-    $("whoms").innerHTML = '<ul class="mslist"><li><span class="badge">Good place to start</span> ' + esc(S.m[0]) + ' <span class="where">Page ' + S.w[0].join(" and ") + '</span></li>' +
-      '<li><span class="badge next">Your next step</span> ' + esc(S.m[1]) + ' <span class="where">Page ' + S.w[1].join(" and ") + '</span></li></ul>' +
-      '<p class="smallnote">Every page stays open, in any order. These are only suggestions.</p>';
+    $("whoms").innerHTML = '<p class="smallnote">Hi ' + known + '. <span class="badge">Good place to start</span> <span class="where">Page ' + S.w[0].join(" and ") + '</span> and <span class="badge next">Your next step</span> <span class="where">Page ' + S.w[1].join(" and ") + '</span>. ' +
+      'Every page stays open, in any order. These are only suggestions. Your own targets are on <a href="/my-targets.html">My targets</a>, behind your PIN.</p>';
   } else $("whoms").innerHTML = st.looking ? '<p class="smallnote">No problem. Open any page you like.</p>' : "";
   for(var n = 1; n <= 7; n++){
     var t = badgeFor(n), bd = $("badge" + n);
@@ -1487,8 +1482,9 @@ function summary(){
   var w = getWho(), S = STUDENTS[w], out = [], tried = [];
   out.push("Break It Up: using paragraphs to group related material (a mini zine)");
   out.push("");
-  if(S){ out.push("My milestones:"); out.push("- " + S.m[0] + " (page" + (S.w[0].length > 1 ? "s " : " ") + S.w[0].join(" and ") + ")"); out.push("- " + S.m[1] + " (page" + (S.w[1].length > 1 ? "s " : " ") + S.w[1].join(" and ") + ")") }
-  else out.push("Target: I can use paragraphs as a way to group related material.");
+  out.push("Initials: " + (S ? w : "not picked"));
+  if(S) out.push("Badged pages for " + w + ": start " + S.w[0].join(" and ") + "; next step " + S.w[1].join(" and "));
+  out.push("Target: I can use paragraphs as a way to group related material.");
   for(var n = 1; n <= 7; n++) if(st.tried[n]) tried.push(n);
   out.push("");
   out.push("Pages I tried: " + (tried.length ? tried.map(function(n){ return n + " (" + PAGES[n - 1][1] + ")" }).join(", ") : "none yet"));

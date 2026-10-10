@@ -615,7 +615,7 @@ function triedIn(stage){
 }
 var TXTSTAGE = { w_tess:1, w_studio:6, w_deal:7, w_det:5 };
 
-/* ---------- stages and milestones ---------- */
+/* ---------- stages and good places to start ---------- */
 var STAGES = [
   { n:1, name:"Will it tile?", sub:"Tessellations" },
   { n:2, name:"Turn and flip", sub:"Rotations and reflections" },
@@ -625,20 +625,7 @@ var STAGES = [
   { n:6, name:"Pattern studio", sub:"Make your own floor" },
   { n:7, name:"Good deal?", sub:"Compare and decide" }
 ];
-var MS = {
-  LC: { m:[ ["I can recognise and create simple tessellating patterns using repeating shapes.", "Spot shapes that tile with no gaps, and make a simple tiling pattern.", [1,6]],
-            ["I can use rotations and reflections to create a repeating pattern.", "Use turns and flips to make a repeating pattern.", [2,6]] ], best:[1,2] },
-  LP: { m:[ ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts like 5%, 15%, 25% and 35% off.", [4,7]],
-            ["I can use vector notation to describe a translation on a grid.", "Use a vector to describe a slide on a grid.", [3]] ], best:[3,4] },
-  LW: { m:[ ["I can describe how rotations, reflections and translations have been used to create a repeating pattern.", "Say how a pattern was made from slides, turns and flips.", [5]],
-            ["I can create my own repeating pattern using rotations, reflections and translations.", "Make your own repeating pattern with slides, turns and flips.", [6]] ], best:[5,6] },
-  EGW: { m:[ ["Use and read vector notation", "Read and write vectors in their tall brackets.", [3]],
-             ["I can use vectors to describe translations of shapes on a coordinate grid.", "Use vectors to describe how a shape slides on a coordinate grid.", [3]] ], best:[3] },
-  JT: { m:[ ["I can create and analyse complex repeating patterns, combining transformations and explaining why particular shapes tessellate successfully.", "Make and pick apart trickier patterns, and explain why some shapes tile.", [1,5,6]],
-            ["I can calculate discounts in multiples of 5% on amounts of money.", "Work out discounts in steps of 5%.", [4,7]] ], best:[1,7] },
-  HK: { m:[ ["I can rotate and reflect shapes accurately using a grid or practical resources.", "Turn and flip shapes accurately on a grid.", [2]],
-            ["I can use translations to move shapes on a grid and create a simple repeating pattern.", "Slide shapes on a grid to make a simple repeating pattern.", [3,6]] ], best:[2,3] }
-};
+var MS = { LC:{ best:[1,2] }, LP:{ best:[3,4] }, LW:{ best:[5,6] }, EGW:{ best:[3] }, JT:{ best:[1,7] }, HK:{ best:[2,3] } };
 var WHOS = ["JT","LW","EGW","LP","LC","HK"];
 function getWho(){ try{ var w = localStorage.getItem(WHO) || ""; return MS[w.toUpperCase()] ? w.toUpperCase() : "" }catch(e){ return "" } }
 var who = getWho();
@@ -661,7 +648,7 @@ function drawWho(){
     b.setAttribute("aria-pressed", (w === who || (w === "look" && !who)) ? "true" : "false");
     b.onclick = function(){
       who = w === "look" ? "" : w;
-      try{ if(who) localStorage.setItem(WHO, who); }catch(e){}
+      try{ if(who) localStorage.setItem(WHO, who); else localStorage.removeItem(WHO); }catch(e){}
       drawWho(); drawMap(); drawGoodFor();
       var bw = document.getElementById("b5who"); if(bw && who) bw.value = who;
     };
@@ -669,10 +656,8 @@ function drawWho(){
   });
   var info = el("whoInfo");
   if(!who){ info.innerHTML = ""; return }
-  var m = MS[who];
-  info.innerHTML = "<div class='mlist'><p><b>Hi " + who + ".</b> Your two milestones for this one:</p>" +
-    m.m.map(function(x, i){ return "<p>" + (i + 1) + ". " + x[1] + " <span class='hint'>(stage " + x[2].join(" and ") + ")</span></p>" }).join("") +
-    "<p class='hint'>Stages marked <b>good place to start</b> suit you best. Everything else is open too.</p></div>";
+  info.innerHTML = "<div class='mlist'><p><b>Hi " + who + ".</b> Stages marked <b>good place to start</b> suit you best. Everything else is open too.</p>" +
+    "<p class='hint'>Your own targets are on <a href='/my-targets.html'>My targets</a>, behind your PIN.</p></div>";
 }
 
 function drawMap(){
@@ -691,8 +676,7 @@ function drawGoodFor(){
   STAGES.forEach(function(s){
     var g = document.querySelector("#st" + s.n + " .gf"); if(!g) return;
     if(!who){ g.innerHTML = ""; return }
-    var hits = MS[who].m.filter(function(x){ return x[2].indexOf(s.n) >= 0 });
-    g.innerHTML = hits.length ? "<span class='goodfor'>" + who + ": " + hits.map(function(x){ return x[1] }).join(" ") + "</span>" : "";
+    g.innerHTML = MS[who].best.indexOf(s.n) >= 0 ? "<span class='goodfor'>" + who + ": good place to start</span>" : "";
   });
 }
 function openStage(n, scroll){
@@ -1608,16 +1592,16 @@ OPENERS[7] = function(){ if(!stepper7) stepper7 = Stepper(el("dealHost"), DEALS,
    ====================================================== */
 function summary(){
   var out = ["The Tile Shop (tessellations, transformations, vectors and 5% discounts)", ""];
-  if(who){ out.push("Milestones for " + who + ":"); MS[who].m.forEach(function(m, i){ out.push("  " + (i + 1) + ". " + m[0] + " (stages " + m[2].join(", ") + ")") }); out.push("") }
-  else out.push("Target: Use and read vector notation. Calculate discounts in multiples of 5%. Explore rotations, reflections and tessellations to make repeating patterns.", "");
+  out.push("Initials: " + (who || "not picked"));
+  if(who){ var bt = MS[who].best.filter(function(n){ return triedIn(n) }).map(function(n){ return n + ". " + STAGES[n - 1].name }); out.push("Badged stages tried: " + (bt.length ? bt.join(", ") : "none yet")) }
+  out.push("Target: Use and read vector notation. Calculate discounts in multiples of 5%. Explore rotations, reflections and tessellations to make repeating patterns.", "");
   var any = false;
   STAGES.forEach(function(s){
     var items = Object.keys(st.ans).filter(function(k){ return st.ans[k].s === s.n }).map(function(k){ return st.ans[k] });
     var writes = Object.keys(st.txt).filter(function(k){ return TXTSTAGE[k] === s.n && st.txt[k] && st.txt[k].trim() });
     if(!items.length && !writes.length){ out.push("Stage " + s.n + ", " + s.name + ": not tried this time"); return }
     any = true;
-    var rel = WHOS.filter(function(w){ return MS[w].m.some(function(m){ return m[2].indexOf(s.n) >= 0 }) });
-    out.push("Stage " + s.n + ", " + s.name + " (" + s.sub + "). Links to milestones for: " + rel.join(", "));
+    out.push("Stage " + s.n + ", " + s.name + " (" + s.sub + ")" + (who && MS[who].best.indexOf(s.n) >= 0 ? ". Badged for " + who : ""));
     items.forEach(function(r){
       var tag = r.ok === true ? (r.n === 1 ? "got it first go" : "got there in the end") : r.ok === false ? "had a go, still working on it" : "explored";
       out.push("  - " + r.l + ": " + r.a + " [" + tag + "]");
