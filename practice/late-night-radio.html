@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Night Radio - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Late Night Radio only. Shell, cards and buttons come from style.css */
+.lnr{max-width:900px;margin:0 auto}
+.hidden{display:none!important}
+.herogrid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:center}
+.heroart{width:100%;height:auto;display:block}
+@media (max-width:760px){.herogrid{grid-template-columns:1fr}.heroart{max-width:420px;margin:0 auto}}
+.twinkle{animation:tw 2.8s ease-in-out infinite}
+.twinkle.t2{animation-delay:.9s}.twinkle.t3{animation-delay:1.7s}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.glowsign{animation:gl 2.2s ease-in-out infinite}
+@keyframes gl{0%,100%{opacity:1}50%{opacity:.78}}
+.rwave{animation:rw 2.4s ease-in-out infinite}
+.rwave.w2{animation-delay:.4s}.rwave.w3{animation-delay:.8s}
+@keyframes rw{0%,100%{opacity:.2}50%{opacity:1}}
+.steam{animation:st 3s ease-in-out infinite;transform-box:fill-box}
+@keyframes st{0%{opacity:0;transform:translateY(4px)}40%{opacity:.9}100%{opacity:0;transform:translateY(-10px)}}
+.zz{animation:zz 3.4s ease-in-out infinite;transform-box:fill-box}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}30%{opacity:1}100%{opacity:0;transform:translate(8px,-14px)}}
+
+/* panels */
+.intro{background:var(--white);border:var(--border) solid var(--ink);border-left-width:11px;border-left-color:var(--orange);border-radius:0 var(--r) var(--r) 0;padding:16px 20px;margin:0 0 18px;box-shadow:var(--lift);transform:rotate(-.3deg)}
+.intro p{margin:0 0 8px;max-width:64ch}
+.intro p:last-child{margin:0}
+.who{background:var(--white);border:var(--border) dashed var(--teal);border-radius:var(--r-alt);padding:16px 20px;margin:0 0 20px}
+.who h2{font-size:1.15rem;font-variation-settings:"wdth" 116,"wght" 800;margin:0 0 4px}
+.who p{margin:0;font-size:.93rem}
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.chipbtn{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.86rem;letter-spacing:.06em;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);border-radius:999px;padding:8px 15px;cursor:pointer;box-shadow:2px 3px 0 rgba(10,47,56,.25);min-height:42px}
+.chipbtn[aria-pressed="true"]{background:var(--teal);color:var(--paper);box-shadow:3px 4px 0 var(--ink)}
+.chipbtn:hover{transform:translateY(-1px)}
+.mslist{margin:12px 0 0;padding:12px 14px;border-radius:14px;background:var(--paper);border:2px solid var(--line)}
+.mslist p{margin:0 0 6px;font-size:.95rem}
+.mslist p:last-child{margin:0}
+.mslist b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+
+/* running order map */
+.maphead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.maphead h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.5rem}
+.maphead span{font-size:.9rem;color:var(--body-tint)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin:0 0 22px}
+.tile{position:relative;text-align:left;font:inherit;color:var(--ink);cursor:pointer;border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:18px 14px 14px;box-shadow:var(--lift);display:flex;gap:12px;align-items:center;transition:transform .15s ease,box-shadow .15s ease;min-height:100px}
+.tile:nth-child(odd){transform:rotate(.5deg)}
+.tile:nth-child(even){transform:rotate(-.45deg)}
+.tile:hover{transform:rotate(0) translateY(-3px);box-shadow:var(--lift-hi)}
+.tile svg{flex:none;width:58px;height:58px}
+.tile .tn{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.tile b{display:block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;font-size:1.08rem;line-height:1.08;margin:1px 0 3px}
+.tile .ts{display:block;font-size:.82rem;line-height:1.3}
+.tile.fill-bright,.tile.fill-teal,.tile.fill-plum,.tile.fill-ink{color:var(--paper)}
+.tile.on{outline:4px dashed var(--ink);outline-offset:4px}
+.badges{position:absolute;top:-11px;right:8px;display:flex;gap:5px}
+.badge{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:2px solid var(--ink);border-radius:999px;padding:3px 8px;background:var(--white);color:var(--ink)}
+.badge.start{background:var(--yellow)}
+.badge.tried{background:#e9f4ec}
+
+/* stage frame */
+.stage{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);margin:0 0 20px;overflow:hidden}
+.stagehead{padding:16px 20px;border-bottom:var(--border) solid var(--ink);display:flex;gap:14px;align-items:center}
+.stagehead svg{flex:none;width:56px;height:56px}
+.stagehead h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:clamp(1.35rem,4vw,1.9rem);line-height:1.04;margin:0}
+.stagehead h2:focus{outline:none}
+.stagehead .sn{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:3px}
+.stagehead p{margin:4px 0 0;font-size:.93rem}
+.stagebody{padding:18px 20px 22px}
+.stagenav{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding-top:16px;border-top:3px dashed var(--line)}
+.stagenav .sp{flex:1}
+.skipnote{font-size:.85rem;opacity:.75;margin:6px 0 0!important}
+
+/* the idea card */
+.idea{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center;background:linear-gradient(160deg,#123c47,#06222a);color:var(--paper);border:2.5px solid var(--ink);border-radius:14px 20px 12px 18px;padding:14px 16px;margin:0 0 16px}
+.idea svg{width:100%;height:auto}
+.idea .lk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;background:#e5463b;color:var(--white);border:2px solid var(--ink);border-radius:6px;padding:3px 10px;display:inline-block;margin-bottom:6px}
+.idea p{margin:0 0 6px;font-size:.98rem}
+.idea p:last-child{margin:0}
+.idea b{color:var(--yellow)}
+@media (max-width:600px){.idea{grid-template-columns:1fr}.idea svg{max-width:220px;margin:0 auto}}
+.tryhead{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin:20px 0 10px;display:flex;align-items:center;gap:10px}
+.tryhead::after{content:"";flex:1;height:3px;background:var(--line)}
+
+/* shared bits */
+.fb{margin:8px 0 6px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:.98rem;line-height:1.45;color:var(--ink)}
+.fb:empty{display:none}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.soft{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.small{font-size:.88rem;opacity:.85}
+.btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none}
+.btn.ghost{background:transparent;box-shadow:none;border-width:2.5px}
+.btn.ghost:hover{background:var(--white)}
+.btn.sm{font-size:.76rem;padding:9px 14px}
+textarea.note,input.field{font-family:var(--body);font-size:1rem;width:100%;border:2.5px solid var(--ink);border-radius:14px;padding:10px 13px;background:var(--paper);color:var(--ink);line-height:1.45}
+textarea.note{min-height:92px;resize:vertical}
+.starters{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.starter{font-family:var(--body);font-size:.88rem;background:var(--white);border:2px dashed var(--orange);color:var(--ink);border-radius:999px;padding:7px 12px;cursor:pointer}
+.starter:hover{background:#fff1e4}
+.savedmsg{font-size:.88rem;color:var(--teal);min-height:1.2em;margin:6px 0 0}
+.lab{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin:12px 0 6px}
+.ticks{display:grid;gap:7px;margin:8px 0}
+.tick{display:flex;gap:10px;align-items:center;background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:9px 12px;cursor:pointer;font-size:.97rem}
+.tick input{width:22px;height:22px;accent-color:var(--teal);flex:none}
+
+/* console */
+.console{background:linear-gradient(160deg,#123c47,#06222a);color:var(--paper);border:3px solid var(--ink);border-radius:22px 18px 24px 16px;padding:14px;box-shadow:var(--lift);margin:0 0 12px;position:relative}
+.console .lab{color:var(--yellow)}
+.deck{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:0 0 10px}
+.onair{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;letter-spacing:.16em;font-size:.95rem;padding:7px 14px;border:3px solid var(--ink);border-radius:10px;background:#4b2421;color:#b98d88;transition:background .3s,color .3s,box-shadow .3s}
+.onair i{width:12px;height:12px;border-radius:50%;background:#6d3a35;border:2px solid var(--ink);display:inline-block}
+.onair.lit{background:#e5463b;color:#fff8f0;box-shadow:0 0 0 4px rgba(229,70,59,.25),0 0 22px rgba(229,70,59,.7)}
+.onair.lit i{background:#fff3c4}
+.onair.lit.flicker{animation:flick .7s steps(2) infinite}
+@keyframes flick{0%{opacity:1}50%{opacity:.45}}
+.vu{width:200px;max-width:100%;height:auto;display:block}
+.vu .needle{transition:transform .8s cubic-bezier(.2,1.4,.4,1);transform-origin:100px 108px}
+.vuword{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.85rem;letter-spacing:.06em;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:3px 12px}
+.lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 12px}
+.linebtn{font:inherit;text-align:left;color:var(--paper);cursor:pointer;background:#0e3640;border:2.5px solid #2d5a66;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;position:relative}
+.linebtn:hover{border-color:var(--yellow)}
+.linebtn[aria-pressed="true"]{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,194,71,.35)}
+.linebtn .lamp{flex:none;width:16px;height:16px;border-radius:50%;background:#3aa66a;border:2px solid var(--ink);animation:blink 1.1s steps(2) infinite}
+.linebtn.done .lamp{animation:none;background:#5f7a82}
+@keyframes blink{0%{opacity:1}50%{opacity:.25}}
+.linebtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem}
+.linebtn span.ls{display:block;font-size:.8rem;opacity:.85;line-height:1.25}
+.linebtn .tag{position:absolute;top:-9px;right:8px;font-family:var(--display);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;background:#e9f4ec;color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:1px 7px}
+.callhead{display:flex;gap:12px;align-items:center;margin:0 0 8px}
+.callhead svg{flex:none;width:64px;height:64px}
+.callhead h3{font-variation-settings:"wdth" 118,"wght" 800;font-size:1.3rem;margin:0;color:var(--paper)}
+.callhead p{margin:0;font-size:.88rem;opacity:.85}
+.log{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.lb{max-width:88%;padding:10px 13px;border:2.5px solid var(--ink);font-size:1rem;line-height:1.42;color:var(--ink)}
+.lb.them{align-self:flex-start;background:var(--white);border-radius:4px 18px 18px 18px}
+.lb.me{align-self:flex-end;background:#ffe2c7;border-radius:18px 4px 18px 18px}
+.lb.note{align-self:center;background:transparent;color:var(--paper);border:2px dashed #5f8a96;font-size:.9rem;border-radius:12px;max-width:94%}
+.lb.gap{align-self:center;background:transparent;border:0;color:var(--paper);font-size:.85rem;padding:2px 6px;display:flex;align-items:center;gap:8px}
+.lb .nm{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-bottom:2px}
+.moves{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin:8px 0}
+.move{display:flex;gap:10px;align-items:flex-start;text-align:left;font:inherit;color:var(--ink);background:var(--white);border:2.5px solid var(--ink);border-radius:16px 12px 16px 10px;padding:10px 12px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.3)}
+.move:hover{background:#fff6e0}
+.move svg{flex:none;width:34px;height:34px}
+.move .mk{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.move .ml2{display:block;font-size:.96rem;line-height:1.35}
+.wavebars{display:inline-flex;gap:3px;align-items:center;height:26px}
+.wavebars i{display:block;width:4px;background:var(--yellow);border-radius:2px;height:8px}
+.wavebars.live i{animation:wb .8s ease-in-out infinite}
+.wavebars.live i:nth-child(2){animation-delay:.1s}.wavebars.live i:nth-child(3){animation-delay:.25s}.wavebars.live i:nth-child(4){animation-delay:.4s}.wavebars.live i:nth-child(5){animation-delay:.15s}.wavebars.live i:nth-child(6){animation-delay:.32s}
+@keyframes wb{0%,100%{height:6px}50%{height:24px}}
+
+/* stage 2 */
+.cliptabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.clipwave{display:block;width:100%;height:auto;margin:4px 0 8px}
+.transcript{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 10px}
+.chunk2{font-family:var(--body);font-size:1rem;line-height:1.3;background:var(--white);color:var(--ink);border:2.5px solid var(--white);border-radius:10px;padding:7px 10px;cursor:pointer;text-align:left}
+.chunk2.cue{font-style:italic;background:#e6eef0;border-color:#e6eef0}
+.chunk2[aria-pressed="true"]{border-color:var(--yellow);box-shadow:0 0 0 3px var(--yellow)}
+.chunk2.isclue{background:#fff1c7;border-color:#fff1c7}
+.chunk2.isclue::after{content:" \2605";color:var(--orange-deep)}
+.cluenotes{margin:6px 0 0;padding-left:20px;font-size:.95rem}
+.cluenotes li{margin:0 0 4px}
+.feelrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.feel{font-family:var(--body);font-size:.97rem;border:2.5px solid var(--ink);background:var(--white);color:var(--ink);border-radius:999px;padding:8px 15px;cursor:pointer}
+.feel[aria-pressed="true"]{background:#e9dcf0;box-shadow:2px 3px 0 var(--ink)}
+.feel.fits{background:#e9f4ec;border-color:#2e7d4f}
+.voicebox{color:var(--ink);background:var(--paper);border:2.5px solid var(--ink);border-radius:18px 14px 18px 12px;padding:12px 14px;margin:10px 0}
+.voicebox input[type=range]{width:100%;accent-color:var(--orange);height:32px}
+.vlabels{display:flex;justify-content:space-between;font-size:.74rem;gap:4px}
+.vlabels span{flex:1;text-align:center}
+.vlabels span:first-child{text-align:left}.vlabels span:last-child{text-align:right}
+.vnow{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.05rem;margin:4px 0 6px}
+.step{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;margin-right:6px}
+
+/* stage 3 */
+.deadctl{background:var(--paper);border:2.5px solid var(--ink);border-radius:16px 20px 14px 18px;padding:12px 14px;margin:10px 0;color:var(--ink)}
+.deadctl input[type=range]{width:100%;accent-color:var(--teal);height:32px}
+.secs{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.6rem;line-height:1}
+.silbar{flex:1;min-width:120px;height:14px;border:2px solid #5f8a96;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}
+.silbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--bright),var(--yellow));transition:width .9s linear}
+.mrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--white);border:2px solid var(--ink);border-radius:14px;padding:9px 12px;margin:0 0 8px}
+.mrow .qt{flex:1 1 240px;font-size:1rem}
+.mrow .qb{display:flex;gap:6px}
+.mrow .qb button{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 12px;cursor:pointer;min-height:38px}
+.mrow .qb button[aria-pressed="true"]{background:var(--yellow)}
+.mrow .qf{flex-basis:100%;font-size:.9rem;margin:0}
+.mrow .qf:empty{display:none}
+.mrow.right{border-color:#2e7d4f;background:#f3faf5}
+.mrow.notyet{border-color:#d75f10;background:#fff8f1}
+
+/* stage 4 */
+.booth{display:flex;gap:12px;align-items:center;background:#0e3640;border:2.5px solid #2d5a66;border-radius:14px;padding:8px 12px;margin:0 0 10px}
+.booth svg{flex:none;width:86px;height:62px}
+.booth .bt{font-size:.88rem;line-height:1.35}
+.alarm{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border:2px solid var(--ink);border-radius:6px;background:#3d2a12;color:#a08660}
+.alarm.go{background:var(--yellow);color:var(--ink);animation:al .35s steps(2) 6}
+@keyframes al{50%{background:#e5463b;color:var(--white)}}
+.qopt{display:block;width:100%;text-align:left;font-family:var(--body);font-size:1rem;line-height:1.35;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);border-radius:16px 12px 16px 10px;padding:10px 14px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.3);margin:0 0 8px}
+.qopt:hover{background:#fff6e0}
+.qopt.good{background:#e9f4ec;border-color:#2e7d4f}
+.qopt.meh{background:#fdf0e5;border-color:#d75f10}
+.factcard{background:linear-gradient(150deg,var(--yellow),var(--yellow-deep));color:var(--ink);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:14px 16px;margin:12px 0 4px;box-shadow:4px 5px 0 rgba(0,0,0,.35);transform:rotate(-.5deg)}
+.factcard h4{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;font-size:1.15rem;margin:0 0 6px}
+.factcard p{margin:0 0 6px;font-size:.96rem}
+.factcard p:last-child{margin:0}
+.notes{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.notes span{font-size:.86rem;border:2px solid var(--ink);border-radius:8px;padding:5px 10px;background:var(--white)}
+.notes span:nth-child(odd){transform:rotate(-1.5deg);background:#fff1c7}
+.notes span:nth-child(even){transform:rotate(1.2deg);background:#e3f3f7}
+
+/* stage 5 */
+.slots{display:grid;gap:9px;margin:10px 0}
+.slot{display:grid;grid-template-columns:160px 1fr;gap:10px;align-items:center;font:inherit;text-align:left;color:var(--ink);background:var(--white);border:2.5px dashed var(--ink);border-radius:14px;padding:9px 12px;cursor:pointer;min-height:54px;width:100%}
+.slot .sl{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.slot .sv{font-size:1rem}
+.slot .sv:empty::before{content:"(tap a card, then tap here)";opacity:.5;font-style:italic}
+.slot.filled{border-style:solid;background:#fff6e0}
+.slot.right{background:#e9f4ec;border-color:#2e7d4f;border-style:solid}
+.slot.notyet{background:#fdf0e5;border-color:#d75f10;border-style:solid}
+.slot.hot{box-shadow:0 0 0 4px var(--yellow)}
+@media (max-width:520px){.slot{grid-template-columns:1fr;gap:2px}}
+.pile{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.rcard{font-family:var(--body);font-size:.95rem;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);border-radius:10px 14px 10px 12px;padding:8px 12px;cursor:grab;box-shadow:2px 3px 0 rgba(0,0,0,.3);touch-action:none;user-select:none;text-align:left}
+.rcard:nth-child(odd){transform:rotate(-1deg)}
+.rcard:nth-child(even){transform:rotate(1deg)}
+.rcard[aria-pressed="true"]{background:var(--yellow);transform:rotate(0) translateY(-3px)}
+.dragghost{position:fixed;z-index:50;pointer-events:none;opacity:.9;transform:rotate(-3deg);box-shadow:6px 8px 0 rgba(0,0,0,.3)}
+.recapline{background:var(--white);color:var(--ink);border:2.5px solid var(--ink);border-radius:14px;padding:11px 14px;margin:10px 0;font-size:1.02rem}
+.recapline .nm{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+
+/* stage 6 */
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media (max-width:720px){.plan{grid-template-columns:1fr}}
+.pchips{display:flex;flex-wrap:wrap;gap:7px}
+.pchip{font-family:var(--body);font-size:.9rem;border:2px solid var(--ink);background:var(--white);color:var(--ink);border-radius:12px;padding:7px 11px;cursor:pointer}
+.pchip[aria-pressed="true"]{background:var(--teal);color:var(--paper)}
+.qcheck{font-size:.86rem;margin:4px 0 10px;min-height:1.2em}
+.qcheck.ok{color:#2e7d4f}.qcheck.warn{color:var(--orange-deep)}
+.cue{background:var(--white);border:var(--border) solid var(--ink);border-radius:8px;box-shadow:var(--lift);transform:rotate(.6deg);overflow:hidden;position:sticky;top:12px}
+.cue .ch{background:var(--ink);color:var(--paper);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.cue .ch b{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.1rem;letter-spacing:.04em}
+.cue ol{list-style:none;margin:0;padding:6px 0}
+.cue li{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:7px 14px;border-bottom:2px dashed var(--line);font-size:.93rem;line-height:1.35}
+.cue li:last-child{border-bottom:0}
+.cue li .tm{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.8rem;color:var(--teal)}
+.cue li .em{opacity:.45;font-style:italic}
+
+/* stage 7 */
+.bingo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:520px;margin:10px auto}
+.bsq{font:inherit;font-size:.9rem;line-height:1.25;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);border-radius:12px;cursor:pointer;position:relative;box-shadow:3px 4px 0 rgba(10,47,56,.2)}
+.bsq[aria-pressed="true"]{background:var(--orange);box-shadow:inset 0 0 0 4px var(--white),3px 4px 0 var(--ink)}
+.bsq[aria-pressed="true"]::after{content:"";position:absolute;inset:14%;border:4px solid rgba(10,47,56,.55);border-radius:50%;transform:rotate(-12deg)}
+.bsq.free{background:#e5463b;color:var(--white);font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;letter-spacing:.12em;cursor:default}
+.bsq.free::after{display:none}
+@media (max-width:420px){.bsq{font-size:.78rem;padding:5px}}
+.house{text-align:center;font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.8rem;color:var(--orange-deep);text-shadow:2px 2px 0 var(--ink);min-height:1.2em;margin:4px 0}
+.house.pop{animation:hp .7s ease-out}
+@keyframes hp{0%{transform:scale(.5) rotate(-6deg);opacity:0}40%{transform:scale(1.15) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-3deg)}}
+.topiccard{background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:18px;text-align:center;box-shadow:var(--lift);margin:0 0 10px;transform:rotate(.5deg)}
+.topiccard .pk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
+.topiccard .pt{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;font-size:clamp(1.2rem,4.2vw,1.7rem);line-height:1.12;margin:6px 0 0}
+.verdict{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0}
+
+/* end */
+.endcard{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:18px 20px;box-shadow:var(--lift);margin:0 0 14px}
+.endcard h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.45rem;margin:0 0 6px}
+.triedlist{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.triedlist span{font-size:.86rem;border:2px solid var(--ink);border-radius:999px;padding:5px 11px;background:var(--paper)}
+.triedlist span.yes{background:#e9f4ec;border-color:#2e7d4f}
+.restart{font:inherit;font-size:.86rem;background:none;border:0;color:var(--body-tint);text-decoration:underline;cursor:pointer;padding:6px 2px}
+
+@media (max-width:480px){
+  .stagebody{padding:14px 12px 18px}
+  .stagehead{padding:14px}
+  .console{padding:12px 10px}
+  .lb{max-width:96%}
+  .tiles{grid-template-columns:1fr}
+  .callhead svg{width:50px;height:50px}
+}
+@media (prefers-reduced-motion:reduce){.vu .needle{transition:none}.silbar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap lnr">
+    <div class="herogrid">
+      <div>
+        <h1>LATE NIGHT <span class="accent">RADIO</span></h1>
+        <div class="line">
+          <span class="chip">PHSE</span>
+          <p>Base 5 FM, after dark. The lines are open and you are the host. Your job: make every caller feel heard.</p>
+        </div>
+      </div>
+      <svg class="heroart" viewBox="0 0 360 240" role="img" aria-label="A late night radio studio with a glowing On Air sign, a microphone, a robin perched on the sign and a small brown poodle asleep under the desk">
+        <rect x="196" y="10" width="156" height="104" rx="12" fill="#0a2f38" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="202" y="16" width="144" height="92" rx="8" fill="#123c47"/>
+        <circle cx="314" cy="44" r="16" fill="#fff3c4"/><circle cx="321" cy="39" r="14" fill="#123c47"/>
+        <circle class="twinkle" cx="226" cy="34" r="2.4" fill="#fff3c4"/>
+        <circle class="twinkle t2" cx="262" cy="56" r="2" fill="#fff3c4"/>
+        <circle class="twinkle t3" cx="240" cy="84" r="2.6" fill="#fff3c4"/>
+        <circle class="twinkle" cx="290" cy="88" r="1.8" fill="#fff3c4"/>
+        <circle class="twinkle t2" cx="334" cy="92" r="2.2" fill="#fff3c4"/>
+        <path d="M206 108 L226 90 L244 100 L266 82 L290 98 L312 86 L342 104 L342 108 Z" fill="#0a2f38"/>
+        <g class="glowsign">
+          <rect x="16" y="20" width="118" height="42" rx="9" fill="#e5463b" stroke="#0a2f38" stroke-width="3.5"/>
+          <text x="75" y="49" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="21" letter-spacing="3" fill="#fff8f0">ON AIR</text>
+        </g>
+        <g transform="translate(104 -2)">
+          <ellipse cx="12" cy="14" rx="12" ry="9" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.5"/>
+          <path d="M14 12 Q22 14 20 22 Q12 24 8 18 Z" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/>
+          <circle cx="20" cy="6" r="6.5" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.5"/>
+          <path d="M22 8 Q26 9 22 13" fill="#ef7724"/>
+          <circle cx="22" cy="5" r="1.5" fill="#0a2f38"/>
+          <path d="M26 6 L31 7.5 L26 9 Z" fill="#ffc247" stroke="#0a2f38" stroke-width="1.4"/>
+          <path d="M0 13 L-8 10 L-6 17 Z" fill="#6b4329" stroke="#0a2f38" stroke-width="1.5"/>
+          <line x1="9" y1="22" x2="9" y2="23" stroke="#0a2f38" stroke-width="2"/><line x1="14" y1="22" x2="14" y2="23" stroke="#0a2f38" stroke-width="2"/>
+        </g>
+        <rect x="0" y="182" width="360" height="14" rx="4" fill="#0a2f38"/>
+        <rect x="14" y="196" width="332" height="40" fill="#d9a066" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="150" y="196" width="120" height="40" fill="#5c3b22" stroke="#0a2f38" stroke-width="3"/>
+        <g transform="translate(186 208)">
+          <circle cx="12" cy="16" r="10" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.2"/>
+          <circle cx="24" cy="12" r="10" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.2"/>
+          <circle cx="36" cy="16" r="10" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.2"/>
+          <circle cx="46" cy="12" r="9" fill="#9c6a47" stroke="#0a2f38" stroke-width="2.2"/>
+          <ellipse cx="52" cy="18" rx="5" ry="8" fill="#6b4329" stroke="#0a2f38" stroke-width="2"/>
+          <path d="M42 12 Q45 14 48 12" fill="none" stroke="#0a2f38" stroke-width="2" stroke-linecap="round"/>
+          <text class="zz" x="56" y="2" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="11" fill="#fff3c4">z</text>
+        </g>
+        <path d="M86 182 L86 120" stroke="#0a2f38" stroke-width="5" stroke-linecap="round"/>
+        <path d="M86 122 L112 96" stroke="#0a2f38" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="86" cy="182" rx="22" ry="5" fill="#0a2f38"/>
+        <g transform="rotate(-38 118 88)">
+          <rect x="104" y="64" width="28" height="48" rx="14" fill="#9aa5b1" stroke="#0a2f38" stroke-width="3.5"/>
+          <path d="M108 74 H128 M108 82 H128 M108 90 H128" stroke="#0a2f38" stroke-width="2" opacity=".6"/>
+        </g>
+        <path class="rwave" d="M146 70 Q154 80 146 90" fill="none" stroke="#ef7724" stroke-width="5" stroke-linecap="round"/>
+        <path class="rwave w2" d="M158 62 Q170 80 158 98" fill="none" stroke="#ffc247" stroke-width="5" stroke-linecap="round"/>
+        <path class="rwave w3" d="M170 54 Q186 80 170 106" fill="none" stroke="#00a6c9" stroke-width="5" stroke-linecap="round"/>
+        <g transform="translate(206 140)">
+          <path d="M6 30 Q4 4 30 4 Q56 4 54 30" fill="none" stroke="#0a2f38" stroke-width="6"/>
+          <rect x="0" y="24" width="14" height="20" rx="6" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>
+          <rect x="46" y="24" width="14" height="20" rx="6" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>
+        </g>
+        <g transform="translate(286 140)">
+          <path d="M4 10 H38 L34 42 H8 Z" fill="#007291" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M38 16 Q50 18 46 30 Q42 34 36 32" fill="none" stroke="#0a2f38" stroke-width="3"/>
+          <path class="steam" d="M14 4 Q10 -4 16 -10" fill="none" stroke="#9aa5b1" stroke-width="2.5" stroke-linecap="round"/>
+          <path class="steam" style="animation-delay:1.2s" d="M26 4 Q22 -4 28 -10" fill="none" stroke="#9aa5b1" stroke-width="2.5" stroke-linecap="round"/>
+        </g>
+        <g transform="translate(20 150)">
+          <rect x="0" y="10" width="44" height="22" rx="6" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/>
+          <path d="M4 10 Q4 0 22 0 Q40 0 40 10" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/>
+          <circle class="twinkle" cx="36" cy="21" r="3.5" fill="#3aa66a" stroke="#0a2f38" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="wrap lnr">
+
+  <div class="intro">
+    <p><b>Good evening, and welcome to Base 5 FM.</b> It is late, the kettle is on, and the phone lines are open. You are the host. Jay is producing from the booth, with a cup of tea and Bonnie asleep under the desk.</p>
+    <p>Seven segments, any order. Mostly tapping, a little typing. Skip anything that is not for you tonight. It saves as you go, and nothing reaches Jay unless you press the button at the end.</p>
+  </div>
+
+  <section class="who" aria-labelledby="whoH">
+    <h2 id="whoH">Who is hosting? <span class="small">(optional)</span></h2>
+    <p>Pick your initials and the show will show your two goals and a good place to start. Every segment stays open to everyone.</p>
+    <div class="whochips" id="whoChips" role="group" aria-label="Pick your initials"></div>
+    <div class="mslist hidden" id="msBox" aria-live="polite"></div>
+  </section>
+
+  <div class="maphead"><h2 id="mapH" tabindex="-1">Tonight's running order</h2><span>Tap a segment to go on air.</span></div>
+  <div class="tiles" id="tiles"></div>
+
+  <div id="stages"></div>
+
+  <section class="endcard" id="endCard" aria-labelledby="endH">
+    <h2 id="endH">What you have tried so far</h2>
+    <div class="triedlist" id="triedList"></div>
+    <p class="small">This is a record of what you have had a go at, not a score.</p>
+    <div id="sendHost"></div>
+    <p class="small">Your progress stays saved on this device. <button class="restart" id="restartBtn" type="button">Start again</button> <span id="restartNote" aria-live="polite"></span></p>
+  </section>
+
+  <a class="backlink" href="/practice/#phse-standard">Back to PHSE</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.late-night-radio.v1", WHO = "base5.who.v1";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;") }
+function mk(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html !== undefined) e.innerHTML = html; return e }
+function each(list, fn){ Array.prototype.forEach.call(list, fn) }
+
+/* ---------------- state ---------------- */
+function fresh(){ return { tried:{}, calls:{}, read:{}, dead:{ plays:{}, myth:{} }, world:{}, worldNote:"", recap:{}, myRecap:"", recapTicks:{}, plan:{ guest:"", diff:[], title:"", qs:["", "", ""], assume:"", moves:[], song:"" }, bingo:{ card:[], marks:{}, lines:0, verdict:null, notes:"", topic:"" } } }
+var st = fresh();
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} }
+try{ var raw = localStorage.getItem(STORE); if(raw){ var s0 = JSON.parse(raw); if(s0 && typeof s0 === "object"){ for(var k in s0) if(s0.hasOwnProperty(k) && st.hasOwnProperty(k)) st[k] = s0[k] } } }catch(e){}
+function getWho(){ try{ return localStorage.getItem(WHO) || "" }catch(e){ return "" } }
+function setWho(v){ try{ localStorage.setItem(WHO, v) }catch(e){} }
+function tried(n){ if(!st.tried[n]){ st.tried[n] = true; save(); drawTiles(); drawEnd() } }
+
+/* ---------------- milestones (copied exactly from the Listening Lab) ---------------- */
+var MS = {
+  LC:["Show that you are listening when someone else is talking.", "Take turns in a chat, and wait for your go to speak."],
+  JT:["Take turns in a chat without jumping in over people.", "Show you listened by asking a question or saying something about what they shared."],
+  LW:["Say back what someone told you, to show you understood.", "Notice how someone is feeling while they talk, and answer with care."],
+  LP:["Spot how someone might be feeling and respond in a way that fits.", "Ask questions to find out more about someone's life, background or point of view."],
+  EGW:["Change how you listen and reply depending on what the other person feels and needs.", "Show respect and understanding to people whose backgrounds, cultures or opinions are different to yours."],
+  HK:["Use listening and kindness to help a chat with a friend go well.", "Find out about a background or culture different to yours, and share something you found interesting."]
+};
+var MSFULL = {
+  LC:["I can show that I am listening when someone else is speaking.", "I can take turns in a conversation and wait for my turn to speak."],
+  JT:["I can take turns in a conversation and avoid interrupting.", "I can show I have listened by asking a question or commenting on what someone has shared."],
+  LW:["I can repeat or summarise what someone has said to show I have understood.", "I can notice how someone is feeling while they talk and respond with care."],
+  LP:["I can recognise how another person might be feeling and respond appropriately.", "I can ask questions to find out more about someone else's experiences, background or point of view."],
+  EGW:["I can adapt how I listen and respond depending on another person's feelings, needs and point of view.", "I can show respect and understanding towards people whose backgrounds, cultures or opinions are different from mine."],
+  HK:["I can use active listening skills and empathy to support positive conversations with peers.", "I can learn about a background or culture different from my own and share something I found interesting."]
+};
+var TARGET = "I can begin to practise active listening and empathy towards peers, and show understanding towards people from different backgrounds and cultures.";
+
+/* stage number -> what it covers, and which milestone (1 or 2) of which student */
+var MILESTONE_STAGES = {
+  1:{ covers:"Showing you are listening, not jumping in, reflecting back, noticing feelings, choosing a reply that fits, helping a peer's chat go well", ms:{ LC:[1, 2], JT:[1, 2], LW:[1, 2], LP:[1, 2], EGW:[1, 2], HK:[1] } },
+  2:{ covers:"Hearing feelings in pace, pauses and volume, and changing your own voice to fit", ms:{ LW:[2], LP:[1], EGW:[1] } },
+  3:{ covers:"Comfortable silence, waiting for your turn, not filling every gap, adapting to what each caller needs", ms:{ LC:[1, 2], JT:[1], EGW:[1] } },
+  4:{ covers:"Curious questions about other cultures, spotting assumptions, follow up questions, sharing something interesting", ms:{ JT:[2], LP:[2], EGW:[2], HK:[2] } },
+  5:{ covers:"Summarising what a caller said, leaving out made up bits and your own opinions", ms:{ LW:[1], LC:[1], JT:[2] } },
+  6:{ covers:"Planning open, respectful questions for someone whose life is different from yours", ms:{ JT:[2], LP:[2], EGW:[2], HK:[2] } },
+  7:{ covers:"Doing it for real with a partner: listening signals, turn taking, recapping and supporting a positive chat", ms:{ LC:[1, 2], JT:[1, 2], LW:[1], HK:[1] } }
+};
+var BEST = { LC:[3, 7], JT:[3, 4], LW:[5, 2], LP:[2, 6], EGW:[2, 4], HK:[1, 4] };
+function stagesFor(w, i){ var out = []; Object.keys(MILESTONE_STAGES).forEach(function(n){ var m = MILESTONE_STAGES[n].ms[w]; if(m && m.indexOf(i) >= 0) out.push(+n) }); return out }
+function coversLine(n){ var m = MILESTONE_STAGES[n].ms, bits = []; Object.keys(m).forEach(function(w){ bits.push(w + " goal " + m[w].join(" and ")) }); return bits.join(", ") }
+
+/* ---------------- icons ---------------- */
+var ICON = {
+  phone:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#ffe2c7' stroke='#0a2f38' stroke-width='3'/><path d='M16 22 Q16 14 24 14 L28 22 L24 26 Q28 34 34 36 L38 32 L46 36 Q46 44 38 44 Q18 42 16 22 Z' fill='#e5463b' stroke='#0a2f38' stroke-width='2.8' stroke-linejoin='round'/><path d='M36 16 Q44 18 46 26 M36 22 Q40 23 41 27' fill='none' stroke='#0a2f38' stroke-width='2.5' stroke-linecap='round'/></svg>",
+  read:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#eadcf1' stroke='#0a2f38' stroke-width='3'/><g stroke='#0a2f38' stroke-width='4' stroke-linecap='round'><path d='M14 30 V30'/><path d='M20 24 V36'/><path d='M26 18 V42'/><path d='M32 27 V33'/><path d='M38 30 V30'/><path d='M44 22 V38'/></g><circle cx='35' cy='30' r='2' fill='#ef7724'/></svg>",
+  dead:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#d6f1f7' stroke='#0a2f38' stroke-width='3'/><path d='M10 30 H20 M40 30 H50' stroke='#0a2f38' stroke-width='4' stroke-linecap='round'/><rect x='23' y='20' width='5' height='20' rx='2' fill='#007291' stroke='#0a2f38' stroke-width='2'/><rect x='32' y='20' width='5' height='20' rx='2' fill='#007291' stroke='#0a2f38' stroke-width='2'/></svg>",
+  world:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#fff0c4' stroke='#0a2f38' stroke-width='3'/><circle cx='30' cy='30' r='16' fill='#00a6c9' stroke='#0a2f38' stroke-width='3'/><path d='M22 20 Q28 24 24 30 Q20 34 24 40 M36 16 Q34 24 40 26 Q44 30 40 38' fill='#3aa66a' stroke='#0a2f38' stroke-width='2.2'/><path d='M44 10 Q50 12 50 18' fill='none' stroke='#ef7724' stroke-width='3' stroke-linecap='round'/></svg>",
+  recap:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#fffdf8' stroke='#0a2f38' stroke-width='3'/><rect x='12' y='18' width='36' height='24' rx='4' fill='#ef7724' stroke='#0a2f38' stroke-width='2.8'/><circle cx='22' cy='30' r='5' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.2'/><circle cx='38' cy='30' r='5' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.2'/><path d='M22 30 H38' stroke='#0a2f38' stroke-width='2'/></svg>",
+  plan:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#e3f3f7' stroke='#0a2f38' stroke-width='3'/><rect x='17' y='12' width='26' height='36' rx='3' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.8'/><rect x='24' y='9' width='12' height='6' rx='2' fill='#0a2f38'/><path d='M22 24 H38 M22 31 H38 M22 38 H32' stroke='#007291' stroke-width='3' stroke-linecap='round'/></svg>",
+  bingo:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='28' fill='#ffc247' stroke='#0a2f38' stroke-width='3'/><rect x='14' y='14' width='32' height='32' rx='4' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.8'/><path d='M24.7 14 V46 M35.3 14 V46 M14 24.7 H46 M14 35.3 H46' stroke='#0a2f38' stroke-width='2'/><circle cx='19.3' cy='19.3' r='3.5' fill='#e5463b'/><circle cx='30' cy='30' r='3.5' fill='#e5463b'/><circle cx='40.7' cy='40.7' r='3.5' fill='#e5463b'/></svg>"
+};
+
+/* caller badge: a voice, not a face */
+function badge(col, initial, live){
+  return "<svg viewBox='0 0 64 64' aria-hidden='true'><circle cx='32' cy='32' r='29' fill='" + col + "' stroke='#0a2f38' stroke-width='3'/><circle cx='32' cy='32' r='20' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.5'/><text x='32' y='40' text-anchor='middle' font-family='Archivo, Arial Black, sans-serif' font-weight='900' font-size='22' fill='#0a2f38'>" + esc(initial) + "</text>" + (live ? "<path class='rwave' d='M54 22 Q60 32 54 42' fill='none' stroke='#ffc247' stroke-width='3.5' stroke-linecap='round'/>" : "") + "</svg>";
+}
+function bars(live){ return "<span class='wavebars" + (live && !reduce ? " live" : "") + "' aria-hidden='true'><i></i><i></i><i></i><i></i><i></i><i></i></span>" }
+
+/* ---------------- stages ---------------- */
+var STAGES = [
+  { n:1, id:"phone", t:"The phone lines", s:"Four callers. Pick your reply and watch the meter.", ic:"phone", fill:"fill-orange" },
+  { n:2, id:"read", t:"Read the room", s:"No faces on radio. Hear feelings in pace and pauses.", ic:"read", fill:"fill-plum" },
+  { n:3, id:"dead", t:"Dead air", s:"How long do you leave a silence? Slide and find out.", ic:"dead", fill:"fill-bright" },
+  { n:4, id:"world", t:"World on the line", s:"Callers share a tradition. Ask curious, not assumptions.", ic:"world", fill:"fill-yellow" },
+  { n:5, id:"recap", t:"The recap", s:"For listeners just tuning in: build the short version.", ic:"recap", fill:"fill-teal" },
+  { n:6, id:"plan", t:"Plan your show", s:"Your own segment about someone different from you.", ic:"plan", fill:"fill-ink" },
+  { n:7, id:"bingo", t:"Listening bingo", s:"Off screen, with a partner. Dab a square when you do it.", ic:"bingo", fill:"fill-orange" }
+];
+var who = getWho();
+function bestFor(n){ var b = BEST[who]; return b && b.indexOf(n) >= 0 }
+
+function drawTiles(){
+  var box = $("tiles"); box.innerHTML = "";
+  STAGES.forEach(function(sg){
+    var b = mk("button", "tile " + sg.fill); b.type = "button";
+    if(cur === sg.n) b.classList.add("on");
+    var bad = "";
+    if(bestFor(sg.n)) bad += "<span class='badge start'>Good place to start</span>";
+    if(st.tried[sg.n]) bad += "<span class='badge tried'>Tried &#10003;</span>";
+    b.innerHTML = (bad ? "<span class='badges'>" + bad + "</span>" : "") + ICON[sg.ic] + "<span><span class='tn'>Segment " + sg.n + "</span><b>" + sg.t + "</b><span class='ts'>" + sg.s + "</span></span>";
+    b.setAttribute("aria-label", "Segment " + sg.n + ": " + sg.t + (bestFor(sg.n) ? ", good place to start" : "") + (st.tried[sg.n] ? ", tried" : ""));
+    b.onclick = function(){ openStage(sg.n) };
+    box.appendChild(b);
+  });
+}
+
+function drawWho(){
+  var box = $("whoChips"); box.innerHTML = "";
+  ["JT", "LW", "EGW", "LP", "LC", "HK", ""].forEach(function(v){
+    var b = mk("button", "chipbtn", v || "Just looking"); b.type = "button";
+    b.setAttribute("aria-pressed", String(v === who));
+    b.onclick = function(){ who = v; setWho(v); var inp = document.getElementById("b5who"); if(inp) inp.value = v; drawWho(); drawTiles() };
+    box.appendChild(b);
+  });
+  var ms = $("msBox");
+  if(MS[who]){
+    var names = BEST[who].map(function(n){ return "<b>" + STAGES[n - 1].t + "</b>" });
+    function where(i){ return " <span class='small'>(practised in: " + stagesFor(who, i).map(function(n){ return STAGES[n - 1].t }).join(", ") + ")</span>" }
+    ms.innerHTML = "<p><b>Goal 1:</b> " + MS[who][0] + where(1) + "</p><p><b>Goal 2:</b> " + MS[who][1] + where(2) + "</p><p>Good places to start: " + names.join(" and ") + ". They have a yellow badge in the running order.</p>";
+    ms.classList.remove("hidden");
+  } else ms.classList.add("hidden");
+}
+
+var cur = 0, built = {};
+function frame(sg){
+  var sec = mk("section", "stage hidden"); sec.id = "stage" + sg.n; sec.setAttribute("aria-labelledby", "sh" + sg.n);
+  sec.innerHTML = "<div class='stagehead " + sg.fill + "'>" + ICON[sg.ic] + "<div><span class='sn'>Segment " + sg.n + " of 7</span><h2 id='sh" + sg.n + "' tabindex='-1'>" + sg.t + "</h2><p>" + sg.s + "</p></div></div><div class='stagebody'><div class='inner'></div><div class='stagenav'><button class='btn btn-quiet sm' type='button' data-go='map'>Back to the running order</button><span class='sp'></span>" + (sg.n < 7 ? "<button class='btn sm' type='button' data-go='next'>Next segment</button>" : "<button class='btn sm' type='button' data-go='end'>See what I tried</button>") + "</div><p class='skipnote'>Not feeling this one? Skipping it is completely fine.</p></div>";
+  sec.querySelector(".stagenav").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-go]"); if(!b) return;
+    var g = b.getAttribute("data-go");
+    if(g === "map"){ closeStages(); $("mapH").focus(); window.scrollTo({ top:$("mapH").getBoundingClientRect().top + window.scrollY - 20 }) }
+    if(g === "next") openStage(sg.n + 1);
+    if(g === "end"){ closeStages(); $("endH").scrollIntoView() }
+  });
+  return sec;
+}
+function closeStages(){ stopPlay(); STAGES.forEach(function(sg){ $("stage" + sg.n).classList.add("hidden") }); cur = 0; drawTiles() }
+function openStage(n){
+  stopPlay();
+  STAGES.forEach(function(sg){ $("stage" + sg.n).classList.toggle("hidden", sg.n !== n) });
+  cur = n;
+  if(!built[n]){ BUILD[n]($("stage" + n).querySelector(".inner")); built[n] = true }
+  drawTiles();
+  var h = $("sh" + n); window.scrollTo({ top:$("stage" + n).getBoundingClientRect().top + window.scrollY - 12 }); try{ h.focus({ preventScroll:true }) }catch(e){ h.focus() }
+}
+function idea(svg, html){ return "<div class='idea'>" + svg + "<div><span class='lk'>The idea</span>" + html + "</div></div>" }
+function tryHead(t){ return "<div class='tryhead'>" + t + "</div>" }
+function starters(boxId, list, ta, onChange){
+  list.forEach(function(s){ var b = mk("button", "starter", esc(s)); b.type = "button"; b.onclick = function(){ ta.value = (ta.value ? ta.value.replace(/\s*$/, " ") : "") + s.replace("...", " "); ta.focus(); onChange() }; $(boxId).appendChild(b) });
+}
+var playTok = 0;
+function stopPlay(){ playTok++ }
+
+var BUILD = {};
+
+/* ================= STAGE 1: the phone lines ================= */
+var MOVES = {
+  reflect:{ k:"Reflect back", c:"#007291", i:"<path d='M8 15 A10 10 0 0 1 27 11 M28 21 A10 10 0 0 1 9 25' fill='none' stroke='#0a2f38' stroke-width='2.6' stroke-linecap='round'/><path d='M24 6 L28 12 L22 14 M12 30 L8 24 L14 22' fill='none' stroke='#0a2f38' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>" },
+  question:{ k:"Ask an open question", c:"#7b4b8f", i:"<path d='M12 12 Q12 5 18 5 Q24 5 24 11 Q24 16 19 18 L19 22' fill='none' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/><circle cx='19' cy='29' r='2.4' fill='#0a2f38'/>" },
+  advice:{ k:"Jump in with advice", c:"#ef7724", i:"<path d='M18 6 Q28 6 28 15 Q28 21 22 24 L22 27 H14 L14 24 Q8 21 8 15 Q8 6 18 6 Z' fill='#ffc247' stroke='#0a2f38' stroke-width='2.4'/><path d='M14 31 H22' stroke='#0a2f38' stroke-width='2.4' stroke-linecap='round'/>" },
+  subject:{ k:"Change the subject", c:"#9aa5b1", i:"<path d='M6 26 H18 Q24 26 24 20 V10' fill='none' stroke='#0a2f38' stroke-width='2.8' stroke-linecap='round'/><path d='M19 14 L24 8 L29 14' fill='none' stroke='#0a2f38' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/>" },
+  me:{ k:"Make it about me", c:"#e5463b", i:"<circle cx='18' cy='12' r='6' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.4'/><path d='M7 31 Q8 20 18 20 Q28 20 29 31' fill='#fffdf8' stroke='#0a2f38' stroke-width='2.4'/><path d='M28 4 L31 9 M33 14 L28 14' stroke='#0a2f38' stroke-width='2.4' stroke-linecap='round'/>" }
+};
+var MOVE_ORDER = ["reflect", "question", "advice", "subject", "me"];
+function moveIcon(m){ var d = MOVES[m]; return "<svg viewBox='0 0 36 36' aria-hidden='true'><circle cx='18' cy='18' r='17' fill='" + d.c + "' opacity='.3'/>" + d.i + "</svg>" }
+
+var CALLERS = [
+  { id:"ellis", name:"Ellis", place:"Swindon", col:"#00a6c9", topic:"Fallen out with a best mate", rounds:[
+    { say:"Hi. Um. So me and my best mate have not spoken for a week. He posted a joke about my haircut in the group chat, everyone laughed, and I said something really mean back. Now it is just... silence.", o:{
+      reflect:{ t:"So a joke about you went round the group, you snapped back, and now neither of you is talking. That sounds like a rotten week.", d:18, r:"Yeah. Rotten is the word. I miss him, honestly.", w:"You handed back the main bits and the feeling. Ellis can tell you took it in." },
+      question:{ t:"What has this week been like without him?", d:18, r:"Weird. We usually walk home together, so I have been going the long way round so I do not bump into him.", w:"An open question about his experience. He told you something he had not planned to say." },
+      advice:{ t:"Just say sorry. Sorted. Next caller!", d:-12, r:"...It is not that easy though.", w:"Advice before you have heard the whole story can feel like being rushed off the phone. He had not asked for it yet." },
+      subject:{ t:"Moving on, did anyone catch the match last night?", d:-15, r:"Oh. Right. Okay then.", w:"He has just shared something that hurts. Switching topic straight away tells him it did not matter." },
+      me:{ t:"Oh, I fell out with my mate once and it was SO much worse. Let me tell you...", d:-12, r:"...Is this my call or yours?", w:"Your story can wait. Right now the mic belongs to Ellis." } } },
+    { say:"The thing is, I think I was out of order too. What would you do?", o:{
+      reflect:{ t:"So part of you thinks you both got it a bit wrong.", d:10, r:"Yeah... so what do I do though?", w:"Kind and accurate, but he asked you a straight question. This time he wants your idea too." },
+      question:{ t:"What do you think he would say if you messaged him first?", d:16, r:"Probably 'finally'. He is rubbish at going first. So am I.", w:"You helped him find his own answer. That often works better than being told." },
+      advice:{ t:"If it were me, I might message him: 'That joke got to me, but what I said was out of order too. Sorry.' Only if that feels right for you though.", d:18, r:"That is actually good. I could send that. Maybe.", w:"He asked for advice, so advice fits now. Offering it as an option, not an order, keeps it his choice." },
+      subject:{ t:"Let us play a song and come back to that.", d:-10, r:"Oh. Okay. I might not be here when you get back.", w:"He asked you something directly. Dodging it leaves him hanging." },
+      me:{ t:"I never say sorry first. Ever. Stand your ground.", d:-15, r:"Hmm. Standing my ground is kind of how I got here.", w:"That is your rule, not what Ellis said he wants. He told you he thinks he was out of order too." } } } ],
+    bye:["Thanks for listening. I am going to message him tonight.", "Okay. Bye then."] },
+  { id:"bea", name:"Bea", place:"Plymouth", col:"#ef7724", topic:"New school, again", rounds:[
+    { say:"Hiya. I started a new school on Monday. It is my fourth school, because my dad is in the Navy and we move when he gets posted somewhere new. Everyone is really nice, but they have all known each other since they were tiny.", o:{
+      reflect:{ t:"Fourth school, and everyone else already has years of history together. Nice people, but you are on the outside of all that for now.", d:18, r:"Exactly that. They have all these in jokes I do not get yet.", w:"You caught the feeling under the facts: nice, but outside. That is careful listening." },
+      question:{ t:"What is it like, being the new one again?", d:18, r:"Tiring, honestly. You start from zero every time. Who sits where, which teachers are strict, all of it.", w:"An open question. She got to explain it in her own way." },
+      advice:{ t:"Join a club! Clubs fix everything.", d:-8, r:"I mean, maybe. I only got here on Monday.", w:"Clubs might help one day, but she had not asked, and it skipped past how she feels right now." },
+      subject:{ t:"Plymouth! Do you live near the sea?", d:-10, r:"...Yeah. Near the sea.", w:"A friendly question, but it slides away from what she was telling you." },
+      me:{ t:"I moved school once in Year 3, so I totally get it.", d:-6, r:"...Yeah, maybe.", w:"Wanting to connect is kind. But one move is not four, and 'I totally get it' can make someone's story feel smaller. Finding out more first works better." } } },
+    { say:"The worst bit is when people ask where I am from. I never know what to say.", o:{
+      reflect:{ t:"So a simple question has a really complicated answer for you.", d:18, r:"Yes! Thank you. Nobody gets that it is complicated.", w:"You named the tricky bit. She feels understood." },
+      question:{ t:"What would you like to say when people ask?", d:18, r:"Maybe: 'Lots of places. Ask me about the best one.' That is Scotland, by the way. We lived by a loch.", w:"You let her decide her own answer. And now you know her favourite place." },
+      advice:{ t:"Just say Plymouth. Easy.", d:-10, r:"But I have lived here for about five days.", w:"It sounds simple to you, but she just said it is not simple for her." },
+      subject:{ t:"Anyway, what music are you into?", d:-10, r:"Um. Lots of stuff, I guess.", w:"Her worry did not get an answer. She might not bring it up again." },
+      me:{ t:"I am from here, born and raised. Never moved once.", d:-8, r:"Lucky you.", w:"True, but it turns the spotlight onto you just as she was explaining something hard." } } } ],
+    bye:["Thanks. That actually made me feel a bit less new.", "Okay. I should go."] },
+  { id:"ana", name:"Ana", place:"Luton", col:"#3aa66a", topic:"Missing home after moving country", rounds:[
+    { say:"Oi! That means hi. I moved here from Brazil eight months ago with my mum. My English is getting better, but by the end of the day I am so tired from thinking in two languages. And I really miss my grandma.", o:{
+      reflect:{ t:"So life here is going alright, but thinking in two languages all day wears you out. And you miss your grandma.", d:18, r:"Yes! You get it. By home time my brain is like a phone on two percent.", w:"You caught both parts: the tiredness and the missing. She felt properly heard." },
+      question:{ t:"What is your grandma like?", d:20, r:"Small and very loud! She video calls every Sunday and asks if I am wearing a coat. Every Sunday.", w:"A curious question about someone she loves. She lit up." },
+      advice:{ t:"Just think in English all the time, then you will not get tired.", d:-15, r:"It does not really work like that.", w:"Learning a language takes years, and her first language is part of who she is. This brushes that off." },
+      subject:{ t:"Brazil! Bet you are amazing at football.", d:-15, r:"Not every Brazilian plays football...", w:"That is a stereotype about a whole country, and it skipped right past her grandma." },
+      me:{ t:"Hola! I know a bit of Spanish too.", d:-10, r:"I speak Portuguese, actually. But thank you for trying.", w:"In Brazil the main language is Portuguese. Asking is better than guessing." } } },
+    { say:"Sometimes people laugh when I mix up English words. I know they do not mean it badly, but then I stop talking.", o:{
+      reflect:{ t:"So even friendly laughing makes you want to go quiet.", d:18, r:"Yes. Then people think I am shy. I am not shy! In Portuguese I never stop talking.", w:"You noticed how it feels for her, not just what happens." },
+      question:{ t:"Would it help if people asked you to teach them some Portuguese, so it goes both ways?", d:18, r:"Oh, I like that. Then they can mix up words too, and we all laugh together.", w:"A kind idea, asked as a question so she gets to choose." },
+      advice:{ t:"Just ignore them.", d:-6, r:"Easy to say.", w:"Short advice she did not ask for. It does not really touch how it feels." },
+      subject:{ t:"So what is the weather like in Brazil?", d:-12, r:"...Hot. Can we go back to what I said?", w:"She shared something that bothers her, and the chat moved on without it." },
+      me:{ t:"People laugh at me all the time. I do not care.", d:-10, r:"Okay. Good for you, I guess.", w:"That makes it about you, and hints she should not care either. She does, and that is okay." } } } ],
+    bye:["Obrigada! That means thank you. This was nice.", "Okay. Tchau."] },
+  { id:"kit", name:"Kit", place:"Derby", col:"#7b4b8f", topic:"Left out of a sleepover", rounds:[
+    { say:"Yeah, hi. So everyone in my friendship group went to a sleepover on Saturday. I was not invited. I only found out from the photos. It is fine. I was not that bothered.", o:{
+      reflect:{ t:"You found out from the photos that everyone went without you. Even if it is fine, that sounds like it stung.", d:20, r:"...Yeah. It did a bit, actually.", w:"His words said fine, but the story did not. You noticed gently, and he opened up." },
+      question:{ t:"How did it feel, seeing those photos?", d:18, r:"Like being on the outside of a window, looking in.", w:"An open question about feelings, asked kindly. He found the words for it." },
+      advice:{ t:"Make some new friends then!", d:-15, r:"Wow. Okay.", w:"Fast advice to a sore feeling can sting. He needed to be heard first." },
+      subject:{ t:"Right! Who has got exciting weekend plans?", d:-12, r:"Not me, apparently.", w:"Weekend plans is the exact sore spot. Oops." },
+      me:{ t:"Ugh, sleepovers are rubbish anyway. Nobody actually sleeps.", d:-10, r:"Yeah, well. I would have liked to be asked.", w:"Trying to make it seem small does not make the hurt smaller." } } },
+    { say:"Do you think I should say something to them, or just leave it?", o:{
+      reflect:{ t:"So you are stuck between saying something and keeping the peace.", d:12, r:"Yeah, exactly. So which one?", w:"Good reflecting. He asked a direct question though, so he might want your thoughts too." },
+      question:{ t:"What do you think would feel better for you?", d:18, r:"Maybe asking one of them, quietly. Not the whole group.", w:"You helped him find his own answer, and it is a sensible one." },
+      advice:{ t:"You could ask one person you trust, quietly, whether it was on purpose or a mix up. Sometimes it really is a mix up. Your call though.", d:18, r:"Yeah. I could ask Jaz. She would tell me straight.", w:"He asked, so advice fits. You kept it gentle and left the choice with him." },
+      subject:{ t:"Let us go over to the travel news.", d:-10, r:"Oh. Sure.", w:"He asked for help, and the chat moved on without him." },
+      me:{ t:"I would just leave the group. Done.", d:-12, r:"I do not really want to lose all my friends though.", w:"That is what you might do, and it is a big step. It does not fit what he said he wants." } } } ],
+    bye:["Thanks. I feel a bit less rubbish now.", "Right. Bye."] }
+];
+var LEVELS = ["About to hang up", "Unsure", "Okay", "Opening up", "Really heard"];
+function lvl(v){ return v < 20 ? 0 : v < 40 ? 1 : v < 60 ? 2 : v < 80 ? 3 : 4 }
+function vuSVG(v){
+  var ang = -60 + v * 1.2;
+  return "<svg class='vu' viewBox='0 0 200 124' role='img' aria-label='Caller mood meter: " + LEVELS[lvl(v)] + "'>" +
+    "<rect x='2' y='2' width='196' height='120' rx='14' fill='#fff3c4' stroke='#0a2f38' stroke-width='3'/>" +
+    "<path d='M30 98 A80 80 0 0 1 58 46' fill='none' stroke='#e5463b' stroke-width='10'/>" +
+    "<path d='M60 44 A80 80 0 0 1 140 44' fill='none' stroke='#ffc247' stroke-width='10'/>" +
+    "<path d='M142 46 A80 80 0 0 1 170 98' fill='none' stroke='#3aa66a' stroke-width='10'/>" +
+    "<text x='22' y='116' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='10' fill='#0a2f38'>hanging up</text>" +
+    "<text x='178' y='116' text-anchor='end' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='10' fill='#0a2f38'>really heard</text>" +
+    "<text x='100' y='80' text-anchor='middle' font-family='Archivo, Arial Black, sans-serif' font-weight='900' font-size='11' letter-spacing='2' fill='#0a2f38'>MOOD</text>" +
+    "<g class='needle' style='transform:rotate(" + ang + "deg)'><path d='M100 108 L100 34' stroke='#0a2f38' stroke-width='4' stroke-linecap='round'/></g>" +
+    "<circle cx='100' cy='108' r='8' fill='#ef7724' stroke='#0a2f38' stroke-width='2.5'/></svg>";
+}
+var call = null;
+BUILD[1] = function(box){
+  box.innerHTML = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' fill='#fff3c4'><text x='18' y='34'>reflect back</text><text x='18' y='54'>open question</text></g><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' fill='#9fb6bc'><text x='18' y='76'>advice (when asked)</text><text x='18' y='96'>change subject, me me me</text></g><circle cx='158' cy='30' r='7' fill='#3aa66a'/><circle cx='158' cy='50' r='7' fill='#3aa66a'/><circle cx='158' cy='72' r='7' fill='#ffc247'/><circle cx='158' cy='92' r='7' fill='#e5463b'/></svg>",
+    "<p>A good host does not fix every problem. They help the caller feel <b>heard</b>.</p><p>Reflecting back and open questions usually help. Advice helps <b>when someone asks for it</b>. Changing the subject or turning it into your story usually makes callers go quiet.</p>") +
+    tryHead("Pick a line") + "<div class='console'><div class='lab'>Callers waiting</div><div class='lines' id='lineBox'></div><div id='callBox'></div></div>";
+  drawLines();
+  if(!call) $("callBox").innerHTML = "<p class='small' style='margin:4px 0'>Tap a flashing line to put a caller on air.</p>";
+};
+function drawLines(){
+  var bx = $("lineBox"); if(!bx) return; bx.innerHTML = "";
+  CALLERS.forEach(function(c, k){
+    var done = st.calls[c.id] && st.calls[c.id].done;
+    var b = mk("button", "linebtn" + (done ? " done" : "")); b.type = "button";
+    b.setAttribute("aria-pressed", String(!!(call && call.c.id === c.id)));
+    b.innerHTML = (done ? "<span class='tag'>Taken</span>" : "") + "<span class='lamp' aria-hidden='true'></span><span><b>Line " + (k + 1) + ": " + c.name + "</b><span class='ls'>" + c.place + " &middot; " + c.topic + "</span></span>";
+    b.onclick = function(){ startCall(c) };
+    bx.appendChild(b);
+  });
+}
+function startCall(c){
+  tried(1);
+  call = { c:c, r:0, v:45, log:[], picks:[], rw:0 };
+  drawLines(); renderCall();
+  $("callBox").scrollIntoView({ block:"start", behavior:reduce ? "auto" : "smooth" });
+}
+function renderCall(after){
+  var c = call.c, rd = c.rounds[call.r], v = call.v;
+  var h = "<div class='deck'><span class='onair lit" + (v < 25 ? " flicker" : "") + "' id='onAir'><i></i>ON AIR</span><div style='text-align:center'>" + vuSVG(after ? after.v0 : v) + "<span class='vuword' id='vuWord' aria-live='polite'>" + LEVELS[lvl(v)] + "</span></div></div>";
+  h += "<div class='callhead'>" + badge(c.col, c.name.charAt(0), !after) + "<div><h3>" + c.name + " in " + c.place + "</h3><p>" + c.topic + "</p></div></div>";
+  h += "<div class='log'><div class='lb note'>Line " + (CALLERS.indexOf(c) + 1) + " is live. " + bars(!after) + "</div>";
+  call.log.forEach(function(l){ h += "<div class='lb " + l[0] + "'><span class='nm'>" + (l[0] === "them" ? c.name : "You, the host") + "</span>" + esc(l[1]) + "</div>" });
+  if(!after) h += "<div class='lb them'><span class='nm'>" + c.name + "</span>" + esc(rd.say) + "</div>";
+  h += "</div>";
+  if(after){
+    var o = after.o, good = o.d >= 15, okish = o.d > 0 && o.d < 15;
+    h += "<div class='fb " + (good ? "ok" : okish ? "tell" : "soft") + "' aria-live='polite'><b>" + MOVES[after.m].k + ": " + (good ? "the needle swings up." : okish ? "a little nudge up." : "the needle dipped.") + "</b> " + esc(o.w) + (o.d <= 0 ? " Want to rewind the tape and try another move?" : "") + "</div>";
+    if(o.d <= 0) h += "<div class='row'><button class='btn sm' type='button' id='callRe'>Rewind the tape</button><button class='btn ghost sm' type='button' id='callOn' style='color:var(--paper);border-color:var(--paper)'>Carry on anyway</button></div>";
+    else h += "<div class='row'><button class='btn sm' type='button' id='callOn'>" + (call.r + 1 < c.rounds.length ? "Carry on" : "Wrap up the call") + "</button><button class='btn ghost sm' type='button' id='callRe' style='color:var(--paper);border-color:var(--paper)'>Rewind and try another</button></div>";
+  } else {
+    h += "<p style='margin:6px 0 4px'><b>Your move, host.</b></p><div class='moves' id='moveBox'></div>";
+  }
+  $("callBox").innerHTML = h;
+  if(after){
+    var nd = $("callBox").querySelector(".needle");
+    setTimeout(function(){ if(nd) nd.style.transform = "rotate(" + (-60 + v * 1.2) + "deg)" }, reduce ? 0 : 60);
+    $("callRe").onclick = function(){ call.v = after.v0; call.log = call.log.slice(0, after.n); call.picks[call.picks.length - 1] += " (then rewound)"; call.rw++; renderCall() };
+    $("callOn").onclick = function(){ call.r++; if(call.r >= c.rounds.length) endCall(); else renderCall() };
+    return;
+  }
+  var mv = $("moveBox");
+  MOVE_ORDER.forEach(function(m){
+    var o = rd.o[m], b = mk("button", "move"); b.type = "button";
+    b.innerHTML = moveIcon(m) + "<span><span class='mk'>" + MOVES[m].k + "</span><span class='ml2'>" + esc(o.t) + "</span></span>";
+    b.onclick = function(){
+      var v0 = call.v, n = call.log.length;
+      call.log.push(["them", rd.say]); call.log.push(["me", o.t]); call.log.push(["them", o.r]);
+      call.v = Math.max(0, Math.min(100, call.v + o.d));
+      call.picks.push("Round " + (call.r + 1) + ": " + MOVES[m].k + (o.d >= 15 ? " (needle up)" : o.d > 0 ? " (small nudge up)" : " (needle dipped)"));
+      renderCall({ o:o, m:m, v0:v0, n:n });
+    };
+    mv.appendChild(b);
+  });
+}
+function endCall(){
+  var c = call.c, v = call.v, happy = v >= 60;
+  st.calls[c.id] = { done:true, v:v, picks:call.picks.slice(-8), rewinds:call.rw };
+  save(); drawLines();
+  var next = CALLERS.filter(function(x){ return !(st.calls[x.id] && st.calls[x.id].done) })[0];
+  $("callBox").innerHTML = "<div class='deck'><span class='onair' id='onAir'><i></i>ON AIR</span><div style='text-align:center'>" + vuSVG(v) + "<span class='vuword'>" + LEVELS[lvl(v)] + "</span></div></div>" +
+    "<div class='callhead'>" + badge(c.col, c.name.charAt(0), false) + "<div><h3>" + c.name + " has hung up</h3><p>Ended feeling: " + LEVELS[lvl(v)].toLowerCase() + "</p></div></div>" +
+    "<div class='lb them' style='max-width:100%'><span class='nm'>" + c.name + "'s last words</span>" + esc(c.bye[happy ? 0 : 1]) + "</div>" +
+    "<div class='fb " + (happy ? "ok" : "tell") + "'>" + (happy ? "<b>Lovely hosting.</b> " + c.name + " leaves the show feeling better than when they rang." : "<b>The call is over.</b> You can always ring " + c.name + " back and try different moves. Rewinding is allowed on this show.") + "</div>" +
+    "<div class='row'>" + (next ? "<button class='btn sm' type='button' id='nextLine'>Next line: " + next.name + "</button>" : "<span class='small'>All four lines taken. Brilliant shift.</span>") + "<button class='btn ghost sm' type='button' id='again' style='color:var(--paper);border-color:var(--paper)'>Ring " + c.name + " back</button></div>";
+  if(next) $("nextLine").onclick = function(){ startCall(next) };
+  $("again").onclick = function(){ startCall(c) };
+  call = null; drawLines();
+}
+
+/* ================= STAGE 2: read the room ================= */
+var ZONES = ["Whisper soft", "Soft and slow", "Calm and steady", "Upbeat", "Bright and bouncy"];
+var CLIPS = [
+  { id:"jordan", name:"Jordan", place:"Bolton", col:"#7b4b8f", wave:[2,1,0,0,0,3,2,1,0,0,1,0,0,0,1,1], chunks:[
+      ["So, um.", "Hesitating before the news. Something is hard to say."],
+      ["[long pause]", "A long pause before the main bit. The words are hard to get out."],
+      ["I did not get the part in the school play.", null],
+      ["[voice goes quiet]", "Going quiet often means something matters and hurts a bit."],
+      ["Which is...", null],
+      ["[pause]", "Another pause, trailing off."],
+      ["fine.", "The word says fine, but everything around it says something else."] ],
+    feels:["disappointed", "embarrassed", "excited", "bored"], fit:["disappointed", "embarrassed"],
+    feelHint:"Listen to the quiet bits and the long pauses. Does that sound like a happy voice?",
+    zone:[0, 2], tooHigh:"A big bouncy voice would clash with how quiet Jordan has gone. Try bringing it down.",
+    good:"Something like: 'That is a real shame, Jordan. You sound gutted. Do you want to talk about it?'" },
+  { id:"tia", name:"Tia", place:"Exeter", col:"#ef7724", wave:[4,5,4,5,5,3,5,4,5,5,4,5,3,5,4,5], chunks:[
+      ["[talking really fast]", "Fast talking can mean excited or nervous. The rest tells you which."],
+      ["My little brother's hamster escaped", null],
+      ["and we found it INSIDE the sofa", "Capitals mean loud. Getting louder usually means big feelings, here the fun kind."],
+      ["[laughing]", "Laughing tells you this is a funny story, not a worried one."],
+      ["and it had made a nest out of Dad's socks!", null],
+      ["[still laughing]", "Still laughing. Definitely the fun kind of chaos."] ],
+    feels:["amused", "excited", "worried", "lonely"], fit:["amused", "excited"],
+    feelHint:"What does the laughing tell you?",
+    zone:[3, 4], tooLow:"A quiet, soft voice might sound like you are not enjoying the story. Tia is buzzing. Try matching her energy.",
+    good:"Something like: 'A sock nest! That hamster has style. Is it back in its cage now?'" },
+  { id:"owen", name:"Owen", place:"Wrexham", col:"#9aa5b1", wave:[2,2,2,0,0,2,0,0,2,2,2,2,2,0,1,1], chunks:[
+      ["[flat voice, no ups and downs]", "A flat voice can mean someone is fed up or has switched off."],
+      ["Yeah.", null],
+      ["[pause]", "Short words with pauses between. He is not giving much away."],
+      ["Whatever.", "'Whatever' often means 'I have given up trying'."],
+      ["Nobody listens to what I think anyway.", "The big clue: he feels ignored."],
+      ["[sighs]", "A sigh can mean tired, fed up or let down."] ],
+    feels:["fed up", "ignored", "proud", "excited"], fit:["fed up", "ignored"],
+    feelHint:"Look at the last thing he says. How does it feel when nobody listens?",
+    zone:[1, 2], tooLow:"Whispering might feel a bit odd here. Owen wants to be taken seriously. Try a little stronger.", tooHigh:"Too bouncy might sound like you are not taking him seriously. Try bringing it down.",
+    good:"Something like: 'I am listening now, Owen. What is it you think?'" },
+  { id:"lola", name:"Lola", place:"Leicester", col:"#00a6c9", wave:[5,4,5,5,4,5,5,5,4,5,5,1,5,4,5,5], chunks:[
+      ["[talking very fast]", "Very fast, all in one breath. Often a sign of nerves."],
+      ["I have got to do a reading in assembly tomorrow in front of the whole school", null],
+      ["and what if I lose my place and", "The 'what if' worries are tumbling out one after another."],
+      ["everyone stares and", "'And... and...' with no full stops. The worries are piling up."],
+      ["[big breath]", "Gasping for breath mid sentence."],
+      ["sorry, I am talking really fast.", "She has noticed it herself. A big clue she is wound up."] ],
+    feels:["nervous", "overwhelmed", "bored", "angry"], fit:["nervous", "overwhelmed"],
+    feelHint:"All those 'what ifs' and running out of breath. Which feeling makes people talk like that?",
+    zone:[0, 2], tooHigh:"A big bouncy voice could wind her up even more. A slower, calmer voice can help someone slow down too.",
+    good:"Something like: 'No need to say sorry. Take a breath. That is a lot of what ifs. Which one is the biggest?'" },
+  { id:"arlo", name:"Arlo", place:"Carlisle", col:"#3aa66a", wave:[2,3,2,3,3,2,0,0,2,3,2,3,3,2,3,2], chunks:[
+      ["[slowly, warmly]", "Slow AND warm. Slow does not always mean sad."],
+      ["I finally finished the model railway", "'Finally' tells you it has been a long job."],
+      ["I have been building with my grandad.", null],
+      ["[pause]", "This pause is a happy one: letting it sink in."],
+      ["Took us two years.", null],
+      ["[you can hear a smile]", "A smile you can hear. Big clue."] ],
+    feels:["proud", "happy", "nervous", "annoyed"], fit:["proud", "happy"],
+    feelHint:"Slow and warm, with a smile in the voice. How does it feel to finish something big?",
+    zone:[2, 3], tooLow:"Very soft might sound a bit sad, and this is good news. Try a warmer, brighter voice.", tooHigh:"Very bouncy might rush his calm, happy moment. Try a notch lower.",
+    good:"Something like: 'Two years! You and your grandad must be so proud. What is your favourite bit?'" }
+];
+function clipWave(cl){
+  var s = "<svg class='clipwave' viewBox='0 0 320 50' aria-hidden='true'><rect x='0' y='0' width='320' height='50' rx='10' fill='#0e3640'/>";
+  cl.wave.forEach(function(h, i){ var hh = 4 + h * 8; s += "<rect x='" + (12 + i * 19) + "' y='" + (25 - hh / 2) + "' width='9' height='" + hh + "' rx='4' fill='" + (h ? cl.col : "#2d5a66") + "'/>" });
+  return s + "</svg>";
+}
+var clipCur = 0;
+BUILD[2] = function(box){
+  var h = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><g fill='#ffc247'><rect x='20' y='44' width='6' height='12' rx='3'/><rect x='30' y='36' width='6' height='28' rx='3'/><rect x='40' y='48' width='6' height='4' rx='2'/></g><text x='54' y='56' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12' fill='#fff3c4'>...pause...</text><g fill='#ef7724'><rect x='128' y='30' width='6' height='40' rx='3'/><rect x='138' y='24' width='6' height='52' rx='3'/><rect x='148' y='32' width='6' height='36' rx='3'/></g><text x='20' y='96' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='11' fill='#9fb6bc'>pace, pauses, volume</text></svg>",
+    "<p>On the radio you cannot see a face. You get <b>how</b> someone talks: fast or slow, loud or quiet, long pauses, sighs, laughs.</p><p>Those are clues, not certainties. And once you have a guess, you can <b>change your own voice</b> to fit.</p>");
+  h += tryHead("Pick a clip") + "<div class='cliptabs' id='clipTabs'></div><div class='console' id='clipBox'></div>";
+  box.innerHTML = h;
+  var tabs = $("clipTabs");
+  CLIPS.forEach(function(cl, k){ var b = mk("button", "chipbtn", (k + 1) + ". " + cl.name); b.type = "button"; b.onclick = function(){ clipCur = k; showClip() }; tabs.appendChild(b) });
+  showClip();
+};
+function showClip(){
+  var cl = CLIPS[clipCur], d = st.read[cl.id] || (st.read[cl.id] = { clues:[], checked:false, feels:[], feelOk:false, zone:null, zoneOk:false });
+  each($("clipTabs").children, function(x, j){ x.setAttribute("aria-pressed", String(j === clipCur)) });
+  var h = "<div class='callhead'>" + badge(cl.col, cl.name.charAt(0), false) + "<div><h3>" + cl.name + " in " + cl.place + "</h3><p>Clip " + (clipCur + 1) + " of " + CLIPS.length + ". Bits in square brackets tell you how it sounded.</p></div></div>" + clipWave(cl);
+  h += "<p style='margin:6px 0'><span class='step'>1</span>Tap the bits that tell you how " + cl.name + " <b>feels</b> (not just what happened).</p><div class='transcript' id='chunks'></div>";
+  h += "<div class='row'><button class='btn sm' type='button' id='clueChk'>Check my clues</button></div><div class='fb' id='clueFb' aria-live='polite'></div>";
+  h += "<div id='feelPart'><p style='margin:12px 0 4px'><span class='step'>2</span>What might " + cl.name + " be feeling? Pick one or two.</p><div class='feelrow' id='feelRow'></div><div class='row'><button class='btn sm' type='button' id='feelChk'>Try that feeling</button></div><div class='fb' id='feelFb' aria-live='polite'></div></div>";
+  h += "<div id='voicePart'><p style='margin:12px 0 4px'><span class='step'>3</span>Set your host voice. Slide to the voice that fits.</p><div class='voicebox'><div class='vnow' id='vNow'></div><input type='range' id='vSlide' min='0' max='4' step='1' aria-label='Host voice, from whisper soft to bright and bouncy'><div class='vlabels'><span>Whisper soft</span><span>Calm</span><span>Bright and bouncy</span></div></div><div class='row'><button class='btn sm' type='button' id='vChk'>Use this voice</button></div><div class='fb' id='vFb' aria-live='polite'></div></div>";
+  h += clipCur < CLIPS.length - 1 ? "<div class='row' style='margin-top:12px'><button class='btn ghost sm' type='button' id='clipNext' style='color:var(--paper);border-color:var(--paper)'>Next clip</button></div>" : "<p class='small' style='margin-top:10px'>That is all five clips.</p>";
+  $("clipBox").innerHTML = h;
+  var ch = $("chunks");
+  cl.chunks.forEach(function(c, j){
+    var b = mk("button", "chunk2" + (/^\[/.test(c[0]) ? " cue" : ""), esc(c[0])); b.type = "button";
+    b.setAttribute("aria-pressed", String(d.clues.indexOf(j) >= 0));
+    b.onclick = function(){ var i = d.clues.indexOf(j); if(i >= 0) d.clues.splice(i, 1); else d.clues.push(j); b.setAttribute("aria-pressed", String(i < 0)); save(); tried(2) };
+    ch.appendChild(b);
+  });
+  function checkClues(){
+    if(!d.clues.length){ $("clueFb").className = "fb tell"; $("clueFb").innerHTML = "Tap a bit or two first. Anything in square brackets is a good place to look."; return }
+    d.checked = true; save(); tried(2);
+    var notes = [], hit = [], miss = [];
+    cl.chunks.forEach(function(c, j){ var b = ch.children[j]; b.classList.toggle("isclue", !!c[1]); if(c[1]){ notes.push("<li><b>" + esc(c[0]) + "</b> " + esc(c[1]) + "</li>"); if(d.clues.indexOf(j) >= 0) hit.push(j) } else if(d.clues.indexOf(j) >= 0) miss.push(c[0]) });
+    var f = $("clueFb");
+    f.className = "fb " + (hit.length ? "ok" : "tell");
+    f.innerHTML = (hit.length ? "<b>Good ears.</b> The starred bits are the feeling clues, and you caught some of them." : "<b>Have another listen.</b> The starred bits are the feeling clues. Fancy tapping a couple of them?") + (miss.length ? " (" + esc(miss.join(" / ")) + " is more what happened than how it felt.)" : "") + "<ul class='cluenotes'>" + notes.join("") + "</ul>";
+  }
+  $("clueChk").onclick = checkClues;
+  if(d.checked) checkClues();
+  var fr = $("feelRow");
+  cl.feels.forEach(function(f){
+    var b = mk("button", "feel", f); b.type = "button"; b.setAttribute("aria-pressed", String(d.feels.indexOf(f) >= 0));
+    b.onclick = function(){ var i = d.feels.indexOf(f); if(i >= 0) d.feels.splice(i, 1); else { if(d.feels.length >= 2) d.feels.shift(); d.feels.push(f) } each(fr.children, function(x){ x.setAttribute("aria-pressed", String(d.feels.indexOf(x.textContent) >= 0)) }); save(); tried(2) };
+    fr.appendChild(b);
+  });
+  function checkFeel(){
+    var e = $("feelFb");
+    if(!d.feels.length){ e.className = "fb tell"; e.innerHTML = "Tap a feeling first."; return }
+    var hits = d.feels.filter(function(f){ return cl.fit.indexOf(f) >= 0 });
+    d.feelOk = hits.length > 0; save(); tried(2);
+    if(d.feelOk){ each(fr.children, function(x){ x.classList.toggle("fits", cl.fit.indexOf(x.textContent) >= 0) }); e.className = "fb ok"; e.innerHTML = "<b>That fits the clues.</b> " + cl.name + " sounds " + cl.fit.join(" or ") + ". You can never be totally sure, so a good host checks gently." }
+    else { e.className = "fb soft"; e.innerHTML = "<b>Hmm, maybe not that one.</b> " + cl.feelHint + " Want to try another?" }
+  }
+  $("feelChk").onclick = checkFeel;
+  if(d.feelOk) checkFeel();
+  var sl = $("vSlide");
+  sl.value = d.zone === null ? 2 : d.zone;
+  function vnow(){ $("vNow").textContent = "Your voice: " + ZONES[+sl.value] }
+  sl.oninput = function(){ vnow(); $("vFb").innerHTML = ""; $("vFb").className = "fb" };
+  vnow();
+  function checkVoice(){
+    var z = +sl.value, e = $("vFb"); d.zone = z; tried(2);
+    var ok = z >= cl.zone[0] && z <= cl.zone[1]; d.zoneOk = ok || d.zoneOk; save();
+    if(ok){ e.className = "fb ok"; e.innerHTML = "<b>" + ZONES[z] + " fits.</b> " + esc(cl.good) }
+    else { e.className = "fb soft"; e.innerHTML = "<b>Not quite the vibe.</b> " + esc(z < cl.zone[0] ? cl.tooLow : cl.tooHigh) + " Slide and try again." }
+  }
+  $("vChk").onclick = checkVoice;
+  if(d.zone !== null) checkVoice();
+  if($("clipNext")) $("clipNext").onclick = function(){ clipCur++; showClip(); $("clipTabs").scrollIntoView({ block:"start" }) };
+}
+
+/* ================= STAGE 3: dead air ================= */
+var SOUNDS = ["", "Mm.", "Take your time.", "I am still here."];
+var SOUND_LABELS = ["Stay quiet", "'Mm.'", "'Take your time.'", "'I am still here.'"];
+var DEAD = [
+  { id:"rhys", name:"Rhys", place:"Swansea", col:"#ffc247", say:"There is something I have been wanting to tell someone for ages, and I think...", share:"...I have started learning the drums. Nobody at school knows. I practise on pillows so the neighbours do not complain." },
+  { id:"grace", name:"Grace", place:"Ipswich", col:"#e5463b", say:"Sorry, I am rubbish at this. I just...", share:"...I just wanted to say I joined a choir. I was really scared, and it is going alright actually." },
+  { id:"dom", name:"Dom", place:"Grimsby", col:"#007291", say:"So there is a coding club after school and I am thinking of joining. What do you reckon, should I go for it?", answer:"Honestly? Go for it. You could try one session and see how it feels.", share:"Yeah? Okay. I will try one session. Cheers!" }
+];
+function deadOutcome(c, w, s){
+  var L = [], snd = SOUNDS[s];
+  function host(t){ L.push(["me", t]) }
+  function them(t){ L.push(["them", t]) }
+  if(c.id === "rhys"){
+    if(w < 2 && !snd){ host("So... anyway! Shall we play a song?"); them("Oh. Yeah. Never mind."); return { L:L, tone:"soft", fb:"The gap was Rhys thinking. Taking the mic back that fast meant he lost his nerve. Try sliding the silence a bit longer." } }
+    if(w < 2){ host(snd); them("Oh, er... where was I? Never mind."); return { L:L, tone:"tell", fb:"A small sound is a lovely idea, but this one came almost instantly and knocked him off his thought. Try leaving a little more quiet first." } }
+    if(w <= 5){ if(snd) host(snd); them(c.share); return { L:L, tone:"ok", best:true, fb:"That is comfortable silence. You gave him time to find his words, and he told you something nobody at school knows." } }
+    if(!snd){ them("...Hello? Have I been cut off?"); return { L:L, tone:"tell", fb:"A long silence with nothing at all. On a phone, long silence can feel like nobody is there. Try a small sound, or a slightly shorter gap." } }
+    host(snd); them(c.share); return { L:L, tone:"ok", best:true, fb:"A long gap, but your small sound told him you were still there. That gave him the time he needed." };
+  }
+  if(c.id === "grace"){
+    if(!snd && w < 2){ host("No worries! So, moving on..."); them("Oh. Okay."); return { L:L, tone:"soft", fb:"Grace was working up to something. Moving on that fast meant she did not get to say it." } }
+    if(!snd){ them("Sorry, sorry, this is awkward. I will go."); return { L:L, tone:"tell", fb:"Waiting is often kind, but Grace is worried about the silence itself. A little sound tells her the silence is okay. Try adding one." } }
+    if(w < 1){ host(snd); them("Oh! Um. Sorry, I lost it."); return { L:L, tone:"tell", fb:"The right idea, just a touch quick. Give her a moment of quiet before the sound." } }
+    host(snd); them(c.share); return { L:L, tone:"ok", best:true, fb:"Some people need a little sound to feel okay in a silence. Yours told Grace there was no rush, and she found her words." };
+  }
+  if(w <= 2 && !snd){ host(c.answer); them(c.share); return { L:L, tone:"ok", best:true, fb:"Dom asked you a question, so the gap was your turn. Answering promptly was the right call. Not every silence is a thinking silence." } }
+  if(w <= 2){ host(snd); them(snd === "Take your time." ? "Take MY time? I asked YOU!" : "...Is that a yes or a no?"); host(c.answer); return { L:L, tone:"tell", fb:"He asked you a question, so the turn is yours. A small sound on its own leaves him waiting. Try staying quiet and just answering." } }
+  if(w <= 5){ if(snd) host(snd); them("...Hello? I asked you something."); host(c.answer); return { L:L, tone:"tell", fb:"A question passes the turn to you. A long gap here feels like you did not hear. Try a shorter wait." } }
+  if(snd) host(snd); them("Hello? Did I break the radio?"); return { L:L, tone:"soft", fb:"A really long silence after a question can feel like being ignored. Slide it right down and answer." };
+}
+var MYTHS = [
+  ["A silence in a chat always means something has gone wrong.", "m", "Silence can mean thinking, feeling something, or just a comfy moment. It is not always a problem."],
+  ["A pause can give someone time to find the words for something hard.", "t", "Some of the most important things come out after a pause."],
+  ["Good listeners fill every gap so the chat never goes quiet.", "m", "Filling every gap can squash what the other person was about to say."],
+  ["A small sound like 'mm' can show you are still there without taking over.", "t", "It keeps the line open and leaves the turn with them."],
+  ["If someone has just asked you a question, a long silence is the polite thing.", "m", "A question hands the turn to you. A quick answer, even 'let me think', is kinder than a long wait."],
+  ["Some people feel uneasy in silence, so a quick 'take your time' can help.", "t", "It tells them the silence is okay and there is no rush."]
+];
+var deadCur = 0, deadW = 1, deadS = 0;
+BUILD[3] = function(box){
+  box.innerHTML = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><g fill='#00a6c9'><rect x='18' y='44' width='6' height='24' rx='3'/><rect x='28' y='36' width='6' height='40' rx='3'/><rect x='38' y='46' width='6' height='20' rx='3'/></g><path d='M54 56 H120' stroke='#5f8a96' stroke-width='3' stroke-dasharray='4 6'/><text x='62' y='48' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='11' fill='#fff3c4'>dead air</text><g fill='#ffc247'><rect x='130' y='40' width='6' height='32' rx='3'/><rect x='140' y='30' width='6' height='52' rx='3'/><rect x='150' y='42' width='6' height='28' rx='3'/></g><text x='18' y='98' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='11' fill='#9fb6bc'>sometimes the best bit comes next</text></svg>",
+    "<p>Radio people call silence <b>dead air</b> and panic about it. In real chats, a pause is often someone <b>thinking</b>, and the good stuff comes after.</p><p>But not every gap is the same. Some people need a little sound to know you are still there. And if they just asked you something, the gap is <b>your turn</b>.</p>") +
+    tryHead("The silence slider") +
+    "<div class='cliptabs' id='deadTabs'></div><div class='console' id='deadBox'></div>" +
+    tryHead("True or myth?") + "<p>Six things people say about silence. Tap what you think.</p><div id='mythBox'></div>";
+  var tabs = $("deadTabs");
+  DEAD.forEach(function(c, k){ var b = mk("button", "chipbtn", (k + 1) + ". " + c.name); b.type = "button"; b.onclick = function(){ stopPlay(); deadCur = k; showDead() }; tabs.appendChild(b) });
+  showDead();
+  var mb = $("mythBox");
+  MYTHS.forEach(function(it, k){
+    var r = mk("div", "mrow"); r.innerHTML = "<span class='qt'>" + esc(it[0]) + "</span><span class='qb'></span><p class='qf'></p>";
+    var qb = r.querySelector(".qb");
+    [["t", "True"], ["m", "Myth"]].forEach(function(L){ var b = mk("button", "", L[1]); b.type = "button"; b.onclick = function(){ st.dead.myth[k] = L[0]; save(); tried(3); paint() }; qb.appendChild(b) });
+    function paint(){
+      var v = st.dead.myth[k];
+      each(qb.children, function(x, j){ x.setAttribute("aria-pressed", String(v === ["t", "m"][j])) });
+      if(v === undefined) return;
+      var ok = v === it[1];
+      r.className = "mrow " + (ok ? "right" : "notyet");
+      r.querySelector(".qf").textContent = ok ? (it[1] === "t" ? "True. " : "Myth. ") + it[2] : "Have another think. " + (it[1] === "t" ? "This one is worth trusting." : "This one sounds sensible but does not hold up.") + " Tap the other button if you change your mind.";
+    }
+    paint(); mb.appendChild(r);
+  });
+};
+function showDead(){
+  var c = DEAD[deadCur], d = st.dead.plays[c.id];
+  each($("deadTabs").children, function(x, j){ x.setAttribute("aria-pressed", String(j === deadCur)) });
+  if(d){ deadW = d.w; deadS = d.s }
+  var h = "<div class='callhead'>" + badge(c.col, c.name.charAt(0), false) + "<div><h3>" + c.name + " in " + c.place + "</h3><p>Then " + (c.id === "dom" ? "he" : c.id === "grace" ? "she" : "he") + " stops talking...</p></div></div>";
+  h += "<div class='lb them' style='max-width:100%'><span class='nm'>" + c.name + "</span>" + esc(c.say) + " <i>[stops]</i></div>";
+  h += "<div class='deadctl'><span class='lab' style='color:var(--ink);margin-top:0'>How long before you take the mic back?</span><div class='row'><span class='secs' id='secs'></span><span class='small'>pretend seconds (nothing is timed)</span></div><input type='range' id='deadW' min='0' max='8' step='1' aria-label='Seconds of silence before the host speaks'><div class='vlabels'><span>straight away</span><span>a few seconds</span><span>ages</span></div>";
+  h += "<span class='lab' style='color:var(--ink)'>During the gap, the host...</span><div class='pchips' id='deadS'></div></div>";
+  h += "<div class='row'><button class='btn btn-orange' type='button' id='deadPlay'>Play it</button></div><div class='log' id='deadLog' aria-live='polite'></div><div class='fb' id='deadFb'></div>";
+  $("deadBox").innerHTML = h;
+  var sl = $("deadW"); sl.value = deadW;
+  function secs(){ $("secs").textContent = sl.value + " sec" + (sl.value === "1" ? "" : "s") }
+  sl.oninput = function(){ deadW = +sl.value; secs() }; secs();
+  var sb = $("deadS");
+  SOUND_LABELS.forEach(function(lb, k){ var b = mk("button", "pchip", esc(lb)); b.type = "button"; b.setAttribute("aria-pressed", String(k === deadS)); b.onclick = function(){ deadS = k; each(sb.children, function(x, j){ x.setAttribute("aria-pressed", String(j === k)) }) }; sb.appendChild(b) });
+  $("deadPlay").onclick = function(){ playDead(c) };
+  if(d) playDead(c, true);
+}
+function playDead(c, instant){
+  stopPlay(); var tok = playTok;
+  var w = deadW, s = deadS, out = deadOutcome(c, w, s);
+  if(!instant){
+    tried(3);
+    var prev = st.dead.plays[c.id] || {};
+    st.dead.plays[c.id] = { w:w, s:s, best:!!out.best || !!prev.best, tries:(prev.tries || 0) + 1, last:out.best ? "found the sweet spot" : "not quite yet" };
+    save();
+  }
+  var lg = $("deadLog"), fb = $("deadFb"); lg.innerHTML = ""; fb.className = "fb"; fb.innerHTML = "";
+  var gap = mk("div", "lb gap", "<span>silence</span><span class='silbar'><i></i></span><span>" + w + "s</span>");
+  var steps = [function(){ lg.appendChild(gap); var bar = gap.querySelector("i"); setTimeout(function(){ bar.style.width = Math.max(4, w / 8 * 100) + "%" }, 30) }];
+  out.L.forEach(function(l){ steps.push(function(){ lg.insertAdjacentHTML("beforeend", "<div class='lb " + l[0] + "'><span class='nm'>" + (l[0] === "me" ? "You, the host" : c.name) + "</span>" + esc(l[1]) + "</div>") }) });
+  steps.push(function(){ fb.className = "fb " + out.tone; fb.innerHTML = "<b>" + (out.best ? "Sweet spot." : out.tone === "tell" ? "Nearly." : "Hmm.") + "</b> " + esc(out.fb) });
+  if(instant || reduce){ steps.forEach(function(f){ f() }); return }
+  var i = 0;
+  (function next(){ if(tok !== playTok) return; steps[i++](); if(i < steps.length) setTimeout(next, i === 1 ? 300 + w * 120 : 650) })();
+}
+
+/* ================= STAGE 4: world on the line ================= */
+var WORLD = [
+  { id:"shirin", name:"Shirin", place:"Manchester", col:"#3aa66a", topic:"Nowruz",
+    say:"Hi! In March my family celebrates Nowruz. It is Persian New Year, on the first day of spring. Nobody at my school has heard of it, so I thought I would ring in.",
+    q1:[ { t:"What does your family do for Nowruz?", k:"good", r:"We set up a haft sin table. Seven things whose names start with an 'S' sound in Persian, like apples, garlic and green sprouts. Each one stands for something, like health or new life.", w:"An open question about her family's way of doing it. She gets to be the expert." },
+         { t:"So it is basically just like our New Year then?", k:"assume", w:"'Basically just like ours' squashes it into something you already know before you have heard about it. Find out first, compare later." },
+         { t:"Do you get presents?", k:"closed", r:"Sometimes older relatives give you money, in a crisp new note.", w:"A fair question, but it could get a one word answer. 'What' or 'how' questions open it up more." },
+         { t:"Is that even a real holiday?", k:"judge", w:"Asking if it is 'real' sounds like doubting her. Millions of people celebrate it. Curious beats doubtful." } ],
+    q2:[ { t:"Which of the seven things is your favourite, and why?", k:"good", r:"The sprouts! We grow them ourselves from lentils, a couple of weeks before. Watching them grow feels like spring is coming.", w:"You picked up a detail she shared and asked more. That shows you really listened." },
+         { t:"Cool. Anyway, what is your favourite subject?", k:"off", w:"She was mid story. Jumping to a new topic tells her the table was not interesting." },
+         { t:"Garlic on a table? That is weird.", k:"judge", w:"Different is not the same as weird. Asking what the garlic stands for would be the curious move." } ],
+    fact:["Nowruz means 'new day'. It falls on the spring equinox, around 20 or 21 March.", "It is celebrated in Iran, Afghanistan, parts of Central Asia, by Kurdish communities, and by families all over the world, including the UK."] },
+  { id:"gethin", name:"Gethin", place:"Aberystwyth", col:"#e5463b", topic:"Speaking Welsh",
+    say:"Shwmae! That is hello in Welsh. I speak Welsh at home, and most of my lessons are in Welsh too. People in England sometimes do not realise Welsh is a whole living language.",
+    q1:[ { t:"What is it like switching between Welsh and English?", k:"good", r:"Normal for me! I dream in both. Some things just sound better in Welsh, like 'cwtch'. It is a cuddle, but cosier.", w:"An open question about his everyday life. He got to share something he loves." },
+         { t:"Isn't Welsh basically dead though?", k:"assume", w:"He just told you it is a living language, and over half a million people in Wales speak it. Listening means believing what someone tells you about their own life." },
+         { t:"Can you say something in Welsh?", k:"closed", r:"Sure. 'Nos da'. It means good night. Perfect for this show.", w:"Friendly, and fine. Asking about his life as well as words gets you even further." },
+         { t:"Why not just speak English? It is easier.", k:"judge", w:"Easier for who? Welsh is part of who he is. This makes his language sound like a problem." } ],
+    q2:[ { t:"Cwtch sounds lovely. Are there other Welsh words you wish English had?", k:"good", r:"'Hiraeth'. It is a deep kind of longing for home. English does not really have a word for it.", w:"You picked up his word and asked for more. Perfect follow up." },
+         { t:"Do you even like England?", k:"judge", w:"That assumes Welsh means anti English. He has not said anything like that." },
+         { t:"What is your favourite crisp flavour?", k:"off", w:"Fun, but it drops the thing he was proud to share." } ],
+    fact:["Welsh and English are both official languages in Wales, so road signs show both.", "In the 2021 census, over half a million people in Wales said they could speak Welsh. The National Eisteddfod, a huge festival of music, poetry and performance, happens every August."] },
+  { id:"adwoa", name:"Adwoa", place:"Croydon", col:"#ef7724", topic:"Sunday jollof",
+    say:"Hi! My mum is Ghanaian, and on Sundays she cooks jollof rice for the whole family. It is rice cooked in a spicy tomato sauce. My Nigerian mate says Nigerian jollof is better, so I need backup.",
+    q1:[ { t:"What makes your mum's jollof so good?", k:"good", r:"She cooks it slowly so the bottom gets a little bit crispy. And she never writes the recipe down. You just have to watch her.", w:"Curious about her family, not just the food. She told you something really personal and warm." },
+         { t:"All African food is pretty much the same, isn't it?", k:"assume", w:"Africa is a continent of more than 50 countries, each with its own food. Lumping them together is a stereotype." },
+         { t:"Is it spicy?", k:"closed", r:"A bit! Depends who is cooking.", w:"Fine, but short answer guaranteed. 'What' or 'how' gets you the story." },
+         { t:"Spicy food? No thanks, sounds gross.", k:"judge", w:"You are allowed not to like spicy food. Calling her mum's cooking gross on air is a different thing." } ],
+    q2:[ { t:"So you learn it by watching. Has your mum started teaching you?", k:"good", r:"Last Sunday she let me stir! Big promotion.", w:"You picked up 'you just have to watch her' and followed it. That is listening." },
+         { t:"Do you ever eat normal food?", k:"judge", w:"'Normal' to who? Jollof is normal Sunday food in her house." },
+         { t:"What is your favourite takeaway?", k:"off", w:"Food, yes, but it skips past her mum and the Sunday tradition." } ],
+    fact:["Jollof rice is loved across West Africa, especially in Ghana, Nigeria, Senegal and the Gambia.", "Ghana and Nigeria have a famous friendly rivalry over whose jollof is best. Many people trace the dish back to the Wolof people of Senegal and the Gambia."] },
+  { id:"harpreet", name:"Harpreet", place:"Southall", col:"#ffc247", topic:"Vaisakhi and langar",
+    say:"Hi. I am Sikh, and in April we celebrate Vaisakhi. Our gurdwara has a big procession through the streets with music, and there is loads of food. Honestly the food is my favourite part.",
+    q1:[ { t:"What happens with the food?", k:"good", r:"It is called langar. It is a free meal at the gurdwara, and anyone can come, Sikh or not. Everyone sits together, often on the floor, and eats the same food. That is the point: everyone is equal.", w:"You followed what she said she loves most. Great way in." },
+         { t:"So you must be really religious then?", k:"assume", w:"People of every faith are religious in different amounts. 'What does Vaisakhi mean to you?' lets her tell you." },
+         { t:"Is it like a parade?", k:"closed", r:"Kind of, yes. It is called a nagar kirtan.", w:"Fine question, short answer. An open question would get more." },
+         { t:"Sounds noisy. I would hate that.", k:"judge", w:"Your view, but it lands on her favourite day like a wet blanket." } ],
+    q2:[ { t:"Anyone can come? Even me?", k:"good", r:"Yes! Take your shoes off, cover your head (they have scarves you can borrow) and come hungry. Volunteers cook it.", w:"You picked up 'anyone can come' and asked about it. She was delighted." },
+         { t:"Free food? What is the catch?", k:"judge", w:"There is no catch. Assuming there must be one can sound suspicious of her community." },
+         { t:"Do they do chips?", k:"off", w:"Ha. Fair, but it does not really follow what she said about everyone being equal." } ],
+    fact:["Vaisakhi is in April. For Sikhs it marks the founding of the Khalsa in 1699, and it is also a harvest festival in the Punjab.", "Langar is served in gurdwaras all over the world, every day in many of them, free to anyone. It is always vegetarian, so everyone can share the same meal."] },
+  { id:"ezra", name:"Ezra", place:"Gateshead", col:"#00a6c9", topic:"Friday night Shabbat",
+    say:"Hi. I am Jewish, and every Friday night my family has Shabbat dinner. We light candles, say blessings, and eat challah, which is a plaited bread. Then in my family it is no phones until Saturday night.",
+    q1:[ { t:"What is Friday night like in your house?", k:"good", r:"Loud! My grandparents come, my little cousins fight over the end bit of the challah, and nobody is on their phone, so we actually talk.", w:"An open question about his real life. You got a proper picture of it." },
+         { t:"No phones for a whole day? You must hate it.", k:"assume", w:"That decides how he feels for him. Lots of people love the break. Ask how it feels instead." },
+         { t:"Do you go to synagogue?", k:"closed", r:"Sometimes, on Saturday morning.", w:"Fine, but it gets a short answer. Try asking about what he described." },
+         { t:"Isn't that a bit old fashioned?", k:"judge", w:"Old traditions can matter a lot to people. 'Old fashioned' sounds like a put down." } ],
+    q2:[ { t:"So no phones means you actually talk. What do you all talk about?", k:"good", r:"Everything. Last week we argued for an hour about whether a hot dog is a sandwich.", w:"You picked up his detail and asked more. Lovely listening." },
+         { t:"Can you text me on Saturday afternoon then?", k:"off", w:"He literally just said no phones until Saturday night. Oops." },
+         { t:"What is your favourite app?", k:"off", w:"Phones again, right after he explained why they are off." } ],
+    fact:["Shabbat is the Jewish day of rest. It starts at sunset on Friday and ends after nightfall on Saturday.", "Families keep it in different ways: some follow every rule, some just have a special Friday dinner. Challah is a plaited bread often eaten on Shabbat."] }
+];
+var worldCur = 0;
+function boothSVG(){
+  return "<svg viewBox='0 0 86 62' aria-hidden='true'><rect x='2' y='2' width='82' height='58' rx='8' fill='#123c47' stroke='#5f8a96' stroke-width='2'/><path d='M24 58 Q24 40 43 40 Q62 40 62 58' fill='#007291' stroke='#0a2f38' stroke-width='2.5'/><circle cx='43' cy='28' r='12' fill='#e2b48e' stroke='#0a2f38' stroke-width='2.5'/><path d='M30 26 Q28 12 43 13 Q58 12 56 26 Q52 18 46 20 Q40 16 34 21 Q32 22 30 26 Z' fill='#6b3f22' stroke='#0a2f38' stroke-width='2'/><path d='M35 24 L41 23 M45 23 L51 24' stroke='#3b2a20' stroke-width='3' stroke-linecap='round'/><circle cx='38' cy='28' r='1.6' fill='#0a2f38'/><circle cx='48' cy='28' r='1.6' fill='#0a2f38'/><path d='M39 34 Q43 36 47 34' fill='none' stroke='#0a2f38' stroke-width='1.8' stroke-linecap='round'/><path d='M29 28 Q29 12 43 12 Q57 12 57 28' fill='none' stroke='#0a2f38' stroke-width='3'/><rect x='26' y='25' width='6' height='9' rx='3' fill='#ef7724' stroke='#0a2f38' stroke-width='1.5'/><rect x='54' y='25' width='6' height='9' rx='3' fill='#ef7724' stroke='#0a2f38' stroke-width='1.5'/><rect x='66' y='40' width='12' height='14' rx='2' fill='#fffdf8' stroke='#0a2f38' stroke-width='2'/></svg>";
+}
+BUILD[4] = function(box){
+  box.innerHTML = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><circle cx='52' cy='60' r='30' fill='#00a6c9' stroke='#fff3c4' stroke-width='2.5'/><path d='M38 44 Q48 50 42 60 Q36 68 44 76 M60 36 Q58 48 68 50 Q74 56 68 68' fill='#3aa66a'/><g font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='12'><text x='96' y='46' fill='#3aa66a'>curious</text><text x='96' y='66' fill='#fff3c4'>follow up</text><text x='96' y='86' fill='#e5463b'>assume</text></g></svg>",
+    "<p>Tonight's callers each share a tradition, a food, a language or a festival from their life.</p><p>A <b>curious question</b> asks about their experience. An <b>assumption</b> decides the answer before they have said it. Jay is in the booth with the assumption alarm. Then a <b>follow up</b> that picks up what they said shows you really listened.</p>") +
+    tryHead("Callers on the world line") + "<div class='cliptabs' id='worldTabs'></div><div class='console' id='worldBox'></div>" +
+    tryHead("Show notes") + "<div class='notes' id='worldNotes'></div>" +
+    tryHead("Have a go: share something interesting") +
+    "<p>Pick one thing you heard tonight that you found interesting, and say why. A sentence is plenty. You could share it with Jay, HB or a friend too.</p><div class='starters' id='wnSt'></div><label class='lab' for='wnTxt'>Something I found interesting</label><textarea class='note' id='wnTxt' placeholder='Something that caught my ear was...'></textarea><p class='savedmsg' id='wnMsg' aria-live='polite'></p>";
+  var tabs = $("worldTabs");
+  WORLD.forEach(function(c, k){ var b = mk("button", "chipbtn", (k + 1) + ". " + c.name); b.type = "button"; b.onclick = function(){ worldCur = k; showWorld() }; tabs.appendChild(b) });
+  showWorld(); drawNotes();
+  var ta = $("wnTxt"); ta.value = st.worldNote || "";
+  function upd(){ st.worldNote = ta.value; save(); tried(4); $("wnMsg").textContent = "Saved." }
+  starters("wnSt", ["Something that caught my ear was...", "I did not know that...", "I would love to ask more about...", "It made me think about my own family because..."], ta, upd);
+  ta.addEventListener("input", upd);
+};
+function drawNotes(){
+  var n = $("worldNotes"); if(!n) return; n.innerHTML = "";
+  var done = WORLD.filter(function(c){ return st.world[c.id] && st.world[c.id].done });
+  if(!done.length){ n.innerHTML = "<span>Finish a call to pin a note here.</span>"; return }
+  done.forEach(function(c){ n.insertAdjacentHTML("beforeend", "<span>" + c.name + ": " + c.topic + "</span>") });
+}
+function showWorld(){
+  var c = WORLD[worldCur], d = st.world[c.id] || (st.world[c.id] = { q1:[], q2:[], step:1, done:false });
+  each($("worldTabs").children, function(x, j){ x.setAttribute("aria-pressed", String(j === worldCur)) });
+  var h = "<div class='booth'>" + boothSVG() + "<div class='bt'><span class='alarm' id='alarm'>Assumption alarm</span><br>Jay is in the booth. Bonnie is asleep. The alarm only goes off for assumptions.</div></div>";
+  h += "<div class='callhead'>" + badge(c.col, c.name.charAt(0), true) + "<div><h3>" + c.name + " in " + c.place + "</h3><p>" + c.topic + "</p></div></div>";
+  h += "<div class='log' id='wLog'><div class='lb them'><span class='nm'>" + c.name + "</span>" + esc(c.say) + "</div></div><div id='wAsk'></div><div class='fb' id='wFb' aria-live='polite'></div><div id='wFact'></div>";
+  $("worldBox").innerHTML = h;
+  var lg = $("wLog");
+  function addLine(cls, nm, t){ lg.insertAdjacentHTML("beforeend", "<div class='lb " + cls + "'><span class='nm'>" + nm + "</span>" + esc(t) + "</div>") }
+  function ask(round){
+    var opts = round === 1 ? c.q1 : c.q2, a = $("wAsk");
+    a.innerHTML = "<p style='margin:6px 0'><b>" + (round === 1 ? "What do you ask?" : "Now a follow up. Which one shows you listened?") + "</b></p>";
+    opts.forEach(function(o, j){
+      var b = mk("button", "qopt", esc(o.t)); b.type = "button";
+      b.onclick = function(){ pick(round, o, j, b) };
+      a.appendChild(b);
+    });
+  }
+  function pick(round, o, j, b, replay){
+    var rec = round === 1 ? d.q1 : d.q2, f = $("wFb");
+    if(!replay){ rec.push(j); tried(4) }
+    each($("wAsk").children, function(x){ x.classList && x.classList.remove("good", "meh") });
+    if(o.k === "good"){
+      b.classList.add("good");
+      addLine("me", "You, the host", o.t); addLine("them", c.name, o.r);
+      f.className = "fb ok"; f.innerHTML = "<b>Curious and kind.</b> " + esc(o.w);
+      if(round === 1){ d.step = 2; save(); ask(2) }
+      else { d.step = 3; d.done = true; save(); $("wAsk").innerHTML = ""; finishWorld() }
+    } else if(o.k === "closed"){
+      b.classList.add("meh");
+      f.className = "fb tell"; f.innerHTML = "<b>" + c.name + " says:</b> '" + esc(o.r) + "' " + esc(o.w) + " Fancy trying a more open one?";
+      if(!replay) save();
+    } else {
+      b.classList.add("meh");
+      if(o.k === "assume" || o.k === "judge"){ var al = $("alarm"); al.classList.remove("go"); void al.offsetWidth; if(!reduce) al.classList.add("go") }
+      f.className = "fb soft"; f.innerHTML = "<b>" + (o.k === "assume" ? "Beep beep, assumption alarm." : o.k === "judge" ? "Ooh, that might sting." : "Hmm, that drifts away.") + "</b> " + esc(o.w) + " Have another go.";
+      if(!replay) save();
+    }
+  }
+  function finishWorld(){
+    $("wFact").innerHTML = "<div class='factcard'><h4>Tonight's fact: " + esc(c.topic) + "</h4>" + c.fact.map(function(x){ return "<p>" + esc(x) + "</p>" }).join("") + "</div>" + (worldCur < WORLD.length - 1 ? "<div class='row' style='margin-top:10px'><button class='btn sm' type='button' id='wNext'>Next caller</button></div>" : "<p class='small'>That is the whole world line for tonight.</p>");
+    if($("wNext")) $("wNext").onclick = function(){ worldCur++; showWorld(); $("worldTabs").scrollIntoView({ block:"start" }) };
+    drawNotes();
+  }
+  if(d.done){
+    var g1 = c.q1.filter(function(o){ return o.k === "good" })[0], g2 = c.q2.filter(function(o){ return o.k === "good" })[0];
+    addLine("me", "You, the host", g1.t); addLine("them", c.name, g1.r); addLine("me", "You, the host", g2.t); addLine("them", c.name, g2.r);
+    $("wFb").className = "fb ok"; $("wFb").innerHTML = "<b>Call done.</b> You can replay it below if you fancy.";
+    finishWorld();
+    $("wFact").insertAdjacentHTML("beforeend", "<div class='row' style='margin-top:8px'><button class='btn ghost sm' type='button' id='wReplay' style='color:var(--paper);border-color:var(--paper)'>Replay this call</button></div>");
+    $("wReplay").onclick = function(){ st.world[c.id] = { q1:[], q2:[], step:1, done:false }; save(); showWorld() };
+  } else if(d.step === 2){
+    var g = c.q1.filter(function(o){ return o.k === "good" })[0];
+    addLine("me", "You, the host", g.t); addLine("them", c.name, g.r); ask(2);
+  } else ask(1);
+}
+
+/* ================= STAGE 5: the recap ================= */
+var TRAPS = { made:"Did the caller say that? Have another look at the call. It might be made up.", opinion:"That sounds like the host's own opinion. A recap is about what they said, not what you think.", detail:"So close, but one detail is off. Check the call again.", guess:"That is a guess about the feeling that does not match what they said." };
+var RECAPS = [
+  { id:"callie", name:"Callie", place:"Hull", col:"#ef7724", say:"I have been learning to skateboard for three months. Yesterday I finally landed my first ollie! But nobody was there to see it, so I am telling the whole radio instead.",
+    slots:["What has been going on", "The big moment", "How she seems to feel"],
+    cards:[ { t:"learning to skateboard for three months", s:0 }, { t:"finally landed her first ollie yesterday", s:1 }, { t:"proud, and a bit gutted nobody saw it", s:2 },
+            { t:"fell off and hurt her wrist", trap:"made" }, { t:"skateboarding is a bit dangerous really", trap:"opinion" }, { t:"learning to skateboard for three years", trap:"detail" } ],
+    reply:"Yes! That is exactly it. Now the whole of Base 5 FM knows." },
+  { id:"idris", name:"Idris", place:"Cardiff", col:"#007291", say:"My big sister moved away to university last week. The house is so quiet now. I keep going to knock on her door to show her something, and then I remember she is not there.",
+    slots:["What happened", "The detail that stood out", "How he seems to feel"],
+    cards:[ { t:"his big sister moved away to university", s:0 }, { t:"he keeps going to knock on her door", s:1 }, { t:"missing her, and the house feels empty", s:2 },
+            { t:"glad to finally have more space", trap:"guess" }, { t:"university is a waste of money", trap:"opinion" }, { t:"his big brother moved away", trap:"detail" } ],
+    reply:"Yeah. That is it. Thanks for getting it." },
+  { id:"pip", name:"Pip", place:"Norwich", col:"#3aa66a", say:"I volunteered at the animal rescue on Saturday. I was meant to walk the dogs, but they put me on cleaning out the guinea pigs instead. And honestly? The guinea pigs were the best bit. They squeak when they hear the food bag.",
+    slots:["What happened", "The twist", "How she seems to feel"],
+    cards:[ { t:"volunteered at an animal rescue on Saturday", s:0 }, { t:"ended up with the guinea pigs instead of the dogs", s:1 }, { t:"surprised, and really happy about it", s:2 },
+            { t:"annoyed about missing the dogs", trap:"guess" }, { t:"guinea pigs are boring pets", trap:"opinion" }, { t:"she is adopting one", trap:"made" } ],
+    reply:"Ha, yes! Exactly. I am going back next week." }
+];
+var OWNCALL = { name:"Jasmine", place:"Coventry", say:"Every Saturday I do the shopping for my next door neighbour. She is 84. It started as a favour, but now it is my favourite bit of the week, because she tells me stories about growing up in Jamaica and coming to England when she was a little girl." };
+var RTICKS = ["I said what happened", "I picked out a detail that matters", "I named a feeling", "I left out my own opinion"];
+var recCur = 0, held = null, suppressClick = false;
+function shuffleIdx(n, seed){ var a = []; for(var i = 0; i < n; i++) a.push(i); var x = seed; for(var j = n - 1; j > 0; j--){ x = (x * 9301 + 49297) % 233280; var r = Math.floor(x / 233280 * (j + 1)); var t = a[j]; a[j] = a[r]; a[r] = t } return a }
+BUILD[5] = function(box){
+  box.innerHTML = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><rect x='20' y='26' width='64' height='42' rx='6' fill='#ef7724' stroke='#fff3c4' stroke-width='2'/><circle cx='38' cy='47' r='8' fill='#fff3c4'/><circle cx='66' cy='47' r='8' fill='#fff3c4'/><path d='M96 47 H124' stroke='#ffc247' stroke-width='4' stroke-linecap='round'/><path d='M118 40 L126 47 L118 54' fill='none' stroke='#ffc247' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><rect x='134' y='34' width='28' height='26' rx='5' fill='#fff3c4'/><text x='20' y='94' font-family='Atkinson Hyperlegible, Verdana, sans-serif' font-size='11' fill='#9fb6bc'>long call in, short recap out</text></svg>",
+    "<p>Hosts do a <b>recap</b> for anyone just tuning in: the short version of what the caller said.</p><p>A good recap has what happened, a detail that matters, and how they seem to feel. It leaves out anything <b>made up</b>, and the host's own <b>opinions</b>.</p>") +
+    tryHead("Build the recap") + "<p class='small'>Tap a card, then tap a slot. Or drag it. Tap a filled slot to send the card back.</p><div class='cliptabs' id='recTabs'></div><div class='console' id='recBox'></div>" +
+    tryHead("Have a go: your turn on the mic") +
+    "<div class='lb them' style='max-width:100%;margin:0 0 10px'><span class='nm'>" + OWNCALL.name + " in " + OWNCALL.place + "</span>" + esc(OWNCALL.say) + "</div>" +
+    "<p>Write your own recap for listeners just tuning in. A sentence or two is plenty.</p><div class='starters' id='myRecSt'></div><label class='lab' for='myRec'>My recap</label><textarea class='note' id='myRec' placeholder='For anyone just tuning in...'></textarea><p class='savedmsg' id='myRecMsg' aria-live='polite'></p>" +
+    "<p style='margin:10px 0 4px'>Check your own recap. Tick what you managed. Nobody needs all four.</p><div class='ticks' id='recTicks'></div>";
+  var tabs = $("recTabs");
+  RECAPS.forEach(function(c, k){ var b = mk("button", "chipbtn", (k + 1) + ". " + c.name); b.type = "button"; b.onclick = function(){ recCur = k; held = null; showRecap() }; tabs.appendChild(b) });
+  showRecap();
+  var ta = $("myRec"); ta.value = st.myRecap || "";
+  function upd(){ st.myRecap = ta.value; save(); tried(5); $("myRecMsg").textContent = "Saved." }
+  starters("myRecSt", ["For anyone just tuning in...", "So what I am hearing is...", "The main thing Jasmine told us is...", "And she seems to feel..."], ta, upd);
+  ta.addEventListener("input", upd);
+  var tk = $("recTicks");
+  RTICKS.forEach(function(t, k){ var l = mk("label", "tick"); l.innerHTML = "<input type='checkbox'" + (st.recapTicks[k] ? " checked" : "") + "><span>" + esc(t) + "</span>"; l.querySelector("input").onchange = function(){ st.recapTicks[k] = this.checked; save(); tried(5) }; tk.appendChild(l) });
+};
+function showRecap(){
+  var c = RECAPS[recCur], d = st.recap[c.id] || (st.recap[c.id] = { slots:{}, checks:0, done:false });
+  each($("recTabs").children, function(x, j){ x.setAttribute("aria-pressed", String(j === recCur)) });
+  var h = "<div class='callhead'>" + badge(c.col, c.name.charAt(0), false) + "<div><h3>" + c.name + " in " + c.place + "</h3><p>Call " + (recCur + 1) + " of " + RECAPS.length + "</p></div></div>";
+  h += "<div class='lb them' style='max-width:100%'><span class='nm'>" + c.name + "</span>" + esc(c.say) + "</div>";
+  h += "<span class='lab'>Cards</span><div class='pile' id='pile'></div><span class='lab'>The recap</span><div class='slots' id='slotBox'></div>";
+  h += "<div class='row'><button class='btn sm' type='button' id='recChk'>Read it out on air</button></div><div class='fb' id='recFb' aria-live='polite'></div><div id='recOut'></div>";
+  $("recBox").innerHTML = h;
+  drawRecap(c, d);
+  $("recChk").onclick = function(){ checkRecap(c, d) };
+  if(d.done) checkRecap(c, d, true);
+}
+function drawRecap(c, d){
+  var pile = $("pile"), sb = $("slotBox"); pile.innerHTML = ""; sb.innerHTML = "";
+  var used = {}; Object.keys(d.slots).forEach(function(s){ used[d.slots[s]] = true });
+  shuffleIdx(c.cards.length, recCur + 7).forEach(function(i){
+    if(used[i]) return;
+    var b = mk("button", "rcard", esc(c.cards[i].t)); b.type = "button"; b.setAttribute("data-i", i);
+    b.setAttribute("aria-pressed", String(held === i));
+    b.onclick = function(){ if(suppressClick){ suppressClick = false; return } held = held === i ? null : i; each(pile.children, function(x){ x.setAttribute("aria-pressed", String(+x.getAttribute("data-i") === held)) }); each(sb.children, function(x){ x.classList.toggle("hot", held !== null) }) };
+    dragify(b, i, c, d);
+    pile.appendChild(b);
+  });
+  if(!pile.children.length) pile.innerHTML = "<span class='small'>All cards placed.</span>";
+  c.slots.forEach(function(name, s){
+    var v = d.slots[s], b = mk("button", "slot" + (v !== undefined ? " filled" : "") + (held !== null ? " hot" : "")); b.type = "button"; b.setAttribute("data-s", s);
+    b.innerHTML = "<span class='sl'>" + esc(name) + "</span><span class='sv'>" + (v !== undefined ? esc(c.cards[v].t) : "") + "</span>";
+    b.setAttribute("aria-label", name + ": " + (v !== undefined ? c.cards[v].t : "empty") + (held !== null ? ". Tap to place the picked card here." : ""));
+    b.onclick = function(){ placeAt(s, c, d) };
+    sb.appendChild(b);
+  });
+}
+function placeAt(s, c, d){
+  tried(5);
+  if(held !== null){ d.slots[s] = held; held = null }
+  else if(d.slots[s] !== undefined) delete d.slots[s];
+  else return;
+  d.done = false; save(); $("recFb").className = "fb"; $("recFb").innerHTML = ""; $("recOut").innerHTML = "";
+  drawRecap(c, d);
+}
+function dragify(el, i, c, d){
+  var sx = 0, sy = 0, dragging = false, ghost = null, pid = null;
+  el.addEventListener("pointerdown", function(e){ if(e.button > 0) return; sx = e.clientX; sy = e.clientY; dragging = false; pid = e.pointerId });
+  el.addEventListener("pointermove", function(e){
+    if(pid !== e.pointerId) return;
+    if(!dragging && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8){
+      dragging = true; try{ el.setPointerCapture(pid) }catch(x){}
+      ghost = el.cloneNode(true); ghost.classList.add("dragghost"); ghost.style.width = el.offsetWidth + "px"; document.body.appendChild(ghost);
+      held = i; each($("slotBox").children, function(x){ x.classList.add("hot") });
+    }
+    if(dragging){ ghost.style.left = (e.clientX - 20) + "px"; ghost.style.top = (e.clientY - 18) + "px" }
+  });
+  function end(e){
+    if(pid !== e.pointerId) return; pid = null;
+    if(!dragging) return;
+    dragging = false; suppressClick = true; setTimeout(function(){ suppressClick = false }, 50);
+    if(ghost){ ghost.remove(); ghost = null }
+    var t = document.elementFromPoint(e.clientX, e.clientY), sl = t && t.closest ? t.closest(".slot") : null;
+    if(sl && e.type === "pointerup") placeAt(+sl.getAttribute("data-s"), c, d);
+    else { held = null; drawRecap(c, d) }
+  }
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+}
+function checkRecap(c, d, quiet){
+  var f = $("recFb"), sb = $("slotBox"), filled = Object.keys(d.slots).length;
+  if(filled < c.slots.length){ f.className = "fb tell"; f.innerHTML = "Fill all " + c.slots.length + " slots first, then read it out."; return }
+  if(!quiet){ d.checks++; tried(5) }
+  var hints = [], right = 0;
+  c.slots.forEach(function(name, s){
+    var card = c.cards[d.slots[s]], ok = card.s === s;
+    sb.children[s].classList.remove("filled"); sb.children[s].classList.add(ok ? "right" : "notyet");
+    if(ok) right++; else hints.push("<b>" + esc(name) + ":</b> " + (card.trap ? TRAPS[card.trap] : "That card is true, but it fits a different slot better."));
+  });
+  if(right === c.slots.length){
+    d.done = true; save();
+    var a0 = c.cards[d.slots[0]].t, sent = "For listeners just tuning in: " + c.name + " in " + c.place + ". " + a0.charAt(0).toUpperCase() + a0.slice(1) + ", and " + c.cards[d.slots[1]].t + ". Sounds like: " + c.cards[d.slots[2]].t + ".";
+    f.className = "fb ok"; f.innerHTML = "<b>On air and spot on.</b> No made up bits, no opinions, just what " + c.name + " said.";
+    $("recOut").innerHTML = "<div class='recapline'><span class='nm'>You, the host</span>" + esc(sent) + "</div><div class='lb them'><span class='nm'>" + c.name + "</span>" + esc(c.reply) + "</div>" + (recCur < RECAPS.length - 1 ? "<div class='row' style='margin-top:10px'><button class='btn sm' type='button' id='recNext'>Next call</button></div>" : "");
+    if($("recNext")) $("recNext").onclick = function(){ recCur++; held = null; showRecap(); $("recTabs").scrollIntoView({ block:"start" }) };
+  } else {
+    save();
+    f.className = "fb soft"; f.innerHTML = "<b>" + c.name + " says: 'Not quite what I said...'</b> Tap an orange slot to send the card back, then try another.<br>" + hints.join("<br>");
+  }
+}
+
+/* ================= STAGE 6: plan your show ================= */
+var GUESTS = ["Someone in my class", "Someone in my family", "A neighbour", "HB", "Jay", "Someone I have not talked to much", "An older person I know"];
+var DIFFS = ["Grew up somewhere else", "Speaks another language", "Different religion or festivals", "Different age or generation", "Different hobbies", "Different opinion on something", "Different family traditions", "Different food at home"];
+var TITLES = ["The Night Shift", "Night Owls", "Voices After Dark", "The Long Way Round", "Kettle On", "Small Hours", "Moonlight Mixtape", "Robin's Late Show"];
+var QSTART = ["What does ... mean to you?", "Talk me through...", "What is the best thing about...", "What do you wish people knew about...", "When did you first...", "What would you want listeners to know about..."];
+var PMOVES = ["Reflect back", "Open questions", "Leave comfy silences", "Notice feelings", "Follow up questions", "Do a recap at the end"];
+function qCheck(q){
+  q = (q || "").trim();
+  if(!q) return ["", ""];
+  var m = q.match(/\b(all|always|never|weird|normal|basically|must be|just like)\b/i);
+  if(m) return ["warn", "Careful: '" + m[1].toLowerCase() + "' might sneak in an assumption. Could you ask it more openly?"];
+  if(/^why\b/i.test(q)) return ["warn", "'Why' can sometimes sound like a challenge. 'What made you...' or 'What does it mean to you...' is softer."];
+  if(/^(what|how|tell|talk|when|where|which|who|describe|in what)\b/i.test(q)) return ["ok", "Open question. It invites a proper answer."];
+  return ["warn", "This might get a short answer. Starting with 'what' or 'how' opens it up."];
+}
+BUILD[6] = function(box){
+  var p = st.plan;
+  box.innerHTML = idea("<svg viewBox='0 0 180 120' aria-hidden='true'><rect x='6' y='10' width='168' height='100' rx='14' fill='#0e3640' stroke='#5f8a96' stroke-width='2.5'/><rect x='54' y='18' width='72' height='86' rx='4' fill='#fffdf8'/><rect x='54' y='18' width='72' height='16' rx='4' fill='#e5463b'/><g stroke='#007291' stroke-width='3' stroke-linecap='round'><path d='M62 46 H118'/><path d='M62 58 H110'/><path d='M62 70 H118'/><path d='M62 82 H100'/><path d='M62 94 H112'/></g></svg>",
+    "<p>Now it is your show. Plan a segment where you interview someone whose life is <b>different from yours</b> in some way.</p><p>Pick a guest, plan three open questions, and spot any assumptions before you go on air. The running order fills in as you go. You do not have to actually do the interview, but you can if you fancy.</p>") +
+    "<div class='plan'><div>" +
+    "<span class='lab'>1. Your guest</span><p class='small' style='margin:0 0 6px'>Use a role or initials, not a full name.</p><div class='pchips' id='pGuest'></div><input class='field' id='pGuestOwn' style='margin-top:8px' placeholder='Or type your own, like my cousin' maxlength='40' aria-label='Your own guest'>" +
+    "<span class='lab'>2. How their life is different from yours</span><div class='pchips' id='pDiff'></div>" +
+    "<span class='lab'>3. Show title</span><div class='row'><input class='field' id='pTitle' style='flex:1 1 180px' maxlength='40' aria-label='Show title' placeholder='Your show title'><button class='btn btn-quiet sm' type='button' id='pTitleGo'>Spin a title</button></div>" +
+    "<span class='lab'>4. Three questions</span><div class='starters' id='pQSt'></div><p class='small' style='margin:0 0 6px'>Tap a starter to add it to the next empty question.</p>" +
+    [0, 1, 2].map(function(i){ return "<label class='lab' for='pQ" + i + "' style='margin-top:6px'>Question " + (i + 1) + "</label><input class='field' id='pQ" + i + "' maxlength='140'><p class='qcheck' id='pQc" + i + "' aria-live='polite'></p>" }).join("") +
+    "<span class='lab'>5. One thing I might be assuming</span><p class='small' style='margin:0 0 6px'>Everyone assumes things. Spotting yours is the clever bit. You could ask about it instead of guessing.</p><input class='field' id='pAssume' maxlength='140' placeholder='I might be assuming that...'>" +
+    "<span class='lab'>6. Listening moves I will use</span><div class='pchips' id='pMoves'></div>" +
+    "<span class='lab'>7. A song your guest might pick (optional)</span><input class='field' id='pSong' maxlength='60' placeholder='Ask them!'>" +
+    "</div><div><div class='cue' id='cueSheet'></div></div></div><p class='savedmsg' id='pMsg' aria-live='polite'></p>";
+  function chipset(id, list, multi, key, ownId){
+    var bx = $(id);
+    list.forEach(function(t){
+      var b = mk("button", "pchip", esc(t)); b.type = "button";
+      b.onclick = function(){
+        if(multi){ var i = p[key].indexOf(t); if(i >= 0) p[key].splice(i, 1); else p[key].push(t) }
+        else { p[key] = p[key] === t ? "" : t; if(ownId) $(ownId).value = "" }
+        paint(); upd();
+      };
+      bx.appendChild(b);
+    });
+    function paint(){ each(bx.children, function(x){ var t = x.textContent; x.setAttribute("aria-pressed", String(multi ? p[key].indexOf(t) >= 0 : p[key] === t)) }) }
+    paint(); return paint;
+  }
+  var paintGuest = chipset("pGuest", GUESTS, false, "guest", "pGuestOwn");
+  chipset("pDiff", DIFFS, true, "diff");
+  chipset("pMoves", PMOVES, true, "moves");
+  var own = $("pGuestOwn"); if(GUESTS.indexOf(p.guest) < 0) own.value = p.guest || "";
+  own.addEventListener("input", function(){ p.guest = own.value.trim(); paintGuest(); upd() });
+  var ti = $("pTitle"); ti.value = p.title || "";
+  ti.addEventListener("input", function(){ p.title = ti.value; upd() });
+  $("pTitleGo").onclick = function(){ var t; do { t = TITLES[Math.floor(Math.random() * TITLES.length)] } while(t === p.title && TITLES.length > 1); p.title = t; ti.value = t; upd() };
+  [0, 1, 2].forEach(function(i){ var q = $("pQ" + i); q.value = p.qs[i] || ""; q.addEventListener("input", function(){ p.qs[i] = q.value; chk(i); upd() }); chk(i) });
+  function chk(i){ var r = qCheck(p.qs[i]), e = $("pQc" + i); e.className = "qcheck " + r[0]; e.textContent = r[1] }
+  QSTART.forEach(function(s){ var b = mk("button", "starter", esc(s)); b.type = "button"; b.onclick = function(){ var i = [0, 1, 2].filter(function(k){ return !(p.qs[k] || "").trim() })[0]; if(i === undefined) i = 2; var q = $("pQ" + i); q.value = s.replace(/\.\.\.$/, " ").replace("... ", "... "); p.qs[i] = q.value; q.focus(); chk(i); upd() }; $("pQSt").appendChild(b) });
+  var as = $("pAssume"); as.value = p.assume || ""; as.addEventListener("input", function(){ p.assume = as.value; upd() });
+  var sg = $("pSong"); sg.value = p.song || ""; sg.addEventListener("input", function(){ p.song = sg.value; upd() });
+  function upd(){ save(); tried(6); drawCue(); $("pMsg").textContent = "Saved." }
+  drawCue();
+};
+function drawCue(){
+  var p = st.plan, c = $("cueSheet"); if(!c) return;
+  function v(x, empty){ x = (x || "").trim(); return x ? esc(x) : "<span class='em'>" + empty + "</span>" }
+  var rows = [
+    ["9:00pm", "<b>" + v(p.title, "Your show title") + "</b> on Base 5 FM. Jingle."],
+    ["9:01pm", "Welcome to my guest: " + v(p.guest, "who?") + (p.diff.length ? "<br><span class='small'>" + esc(p.diff.join(", ")) + "</span>" : "")],
+    ["9:03pm", "Q1: " + v(p.qs[0], "first question")],
+    ["9:07pm", "Q2: " + v(p.qs[1], "second question")],
+    ["9:11pm", "Q3: " + v(p.qs[2], "third question")],
+    ["9:15pm", "Check my assumption: " + v(p.assume, "what might I be assuming?")],
+    ["9:17pm", "Song: " + v(p.song, "guest's pick")],
+    ["9:21pm", "Recap for listeners just tuning in. Thank my guest."]
+  ];
+  c.innerHTML = "<div class='ch'><b>RUNNING ORDER</b><span class='onair lit' style='font-size:.7rem;padding:3px 9px'><i></i>ON AIR</span></div><ol>" + rows.map(function(r){ return "<li><span class='tm'>" + r[0] + "</span><span>" + r[1] + "</span></li>" }).join("") + "</ol>" + (p.moves.length ? "<div style='padding:6px 14px 12px;font-size:.85rem'><b>Host moves:</b> " + esc(p.moves.join(", ")) + "</div>" : "");
+}
+
+/* ================= STAGE 7: listening bingo ================= */
+var SQUARES = ["Let them finish a sentence", "Asked an open question", "Said back what they told me", "Left a comfy silence", "Noticed a feeling out loud", "Asked a follow up question", "Learnt something new about them", "Said 'mm' or nodded", "Did not give advice unless asked", "Did not turn it into my story", "Got a detail right in my recap", "Asked what something means to them"];
+var TOPICS = ["A food that tastes like home", "A word or saying only your family uses", "Where your family's story started: a town, a country, a street", "A song that reminds you of someone", "Something you know loads about", "A day in the year your family looks forward to", "A place that feels calm", "Something you have taught yourself"];
+var VERDICT = ["About to hang up", "Unsure", "Okay", "Opening up", "Really heard"];
+var LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function dealCard(){ var a = SQUARES.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t } a = a.slice(0, 8); a.splice(4, 0, "FREE"); return a }
+var dealArmed = false;
+BUILD[7] = function(box){
+  var b = st.bingo;
+  if(!b.card || b.card.length !== 9){ b.card = dealCard(); b.marks = {}; save() }
+  box.innerHTML = "<div class='intro' style='border-left-color:var(--plum)'><p><b>This one happens off the screen.</b> Find a partner (a friend, HB, Jay, whoever is up for it). They are the caller. You are the host. Then swap if you both fancy it.</p><p>When you do something on the card, dab it. A line of three is a bingo. There is no clock, and no need to fill the card.</p></div>" +
+    tryHead("Tonight's phone in topic") + "<div class='topiccard' aria-live='polite'><span class='pk'>The caller talks about</span><div class='pt' id='bTopic'></div></div><div class='row'><button class='btn btn-orange sm' type='button' id='bTopicNew'>New topic</button><span class='small'>The caller can pass on any topic.</span></div>" +
+    tryHead("Your bingo card") + "<div class='house' id='house' aria-live='polite'></div><div class='bingo' id='bingoGrid' role='group' aria-label='Listening bingo card'></div><div class='row' style='justify-content:center'><button class='btn btn-quiet sm' type='button' id='bDeal'>Deal a new card</button></div>" +
+    tryHead("Caller's verdict") + "<p>Hand the device to your caller. How heard did they feel?</p><div class='verdict' id='bVerdict'></div>" +
+    "<label class='lab' for='bNotes'>Optional: one thing my caller told me</label><textarea class='note' id='bNotes' placeholder='My caller told me...'></textarea><p class='savedmsg' id='bMsg' aria-live='polite'></p>";
+  var tp = TOPICS.indexOf(b.topic); if(tp < 0) tp = Math.floor(Math.random() * TOPICS.length);
+  function topic(){ b.topic = TOPICS[tp % TOPICS.length]; $("bTopic").textContent = b.topic; save() }
+  $("bTopicNew").onclick = function(){ tp++; topic(); tried(7) };
+  topic();
+  drawBingo(false);
+  $("bDeal").onclick = function(){
+    var any = Object.keys(b.marks).some(function(k){ return b.marks[k] });
+    if(any && !dealArmed){ dealArmed = true; this.textContent = "Tap again to clear this card"; return }
+    dealArmed = false; this.textContent = "Deal a new card";
+    b.card = dealCard(); b.marks = {}; save(); tried(7); drawBingo(false);
+  };
+  var vb = $("bVerdict");
+  VERDICT.forEach(function(t, k){ var x = mk("button", "chipbtn", esc(t)); x.type = "button"; x.setAttribute("aria-pressed", String(b.verdict === k)); x.onclick = function(){ b.verdict = k; save(); tried(7); each(vb.children, function(y, j){ y.setAttribute("aria-pressed", String(j === k)) }) }; vb.appendChild(x) });
+  var nt = $("bNotes"); nt.value = b.notes || "";
+  nt.addEventListener("input", function(){ b.notes = nt.value; save(); tried(7); $("bMsg").textContent = "Saved." });
+};
+function countLines(){ var b = st.bingo; return LINES.filter(function(L){ return L.every(function(i){ return i === 4 || b.marks[i] }) }).length }
+function drawBingo(celebrate){
+  var b = st.bingo, g = $("bingoGrid"); if(!g) return; g.innerHTML = "";
+  b.card.forEach(function(t, i){
+    var x = mk("button", "bsq" + (i === 4 ? " free" : ""), i === 4 ? "ON AIR" : esc(t)); x.type = "button";
+    if(i === 4){ x.setAttribute("aria-label", "Free square: on air"); x.disabled = true }
+    else {
+      x.setAttribute("aria-pressed", String(!!b.marks[i]));
+      x.onclick = function(){ var before = countLines(); b.marks[i] = !b.marks[i]; b.lines = countLines(); save(); tried(7); dealArmed = false; $("bDeal").textContent = "Deal a new card"; drawBingo(b.lines > before) };
+    }
+    g.appendChild(x);
+  });
+  var h = $("house"), n = countLines();
+  h.textContent = n ? (n === 1 ? "BINGO! One line." : "BINGO! " + n + " lines.") : "";
+  if(celebrate && !reduce){ h.classList.remove("pop"); void h.offsetWidth; h.classList.add("pop") }
+}
+
+/* ================= end and send ================= */
+function drawEnd(){
+  var t = $("triedList"); if(!t) return; t.innerHTML = "";
+  STAGES.forEach(function(sg){ t.insertAdjacentHTML("beforeend", "<span class='" + (st.tried[sg.n] ? "yes" : "") + "'>" + (st.tried[sg.n] ? "Tried: " : "") + sg.t + "</span>") });
+}
+function summary(){
+  var o = [], w = getWho();
+  o.push("LATE NIGHT RADIO");
+  o.push("Target: " + TARGET);
+  if(MSFULL[w]){
+    o.push("", "Milestones this links to (" + w + "):");
+    [1, 2].forEach(function(i){ var ss = stagesFor(w, i); o.push("- " + MSFULL[w][i - 1] + " (practised in: " + ss.map(function(n){ return STAGES[n - 1].t + (st.tried[n] ? " [tried]" : "") }).join(", ") + ")") });
+  }
+  o.push("", "Segments tried: " + (STAGES.filter(function(s){ return st.tried[s.n] }).map(function(s){ return s.t }).join(", ") || "none yet"));
+  function head(n){ o.push("", n + ". " + STAGES[n - 1].t.toUpperCase()); o.push("Covers: " + coversLine(n)) }
+  var ck = Object.keys(st.calls);
+  if(st.tried[1] || ck.length){
+    head(1);
+    if(!ck.length) o.push("Opened a line but did not finish a call yet.");
+    CALLERS.forEach(function(c){ var r = st.calls[c.id]; if(!r) return; o.push(c.name + " (" + c.topic + "): ended feeling " + LEVELS[lvl(r.v)].toLowerCase() + (r.rewinds ? ", rewound " + r.rewinds + " time" + (r.rewinds === 1 ? "" : "s") : "")); (r.picks || []).forEach(function(x){ o.push("  " + x) }) });
+  }
+  var rk = CLIPS.filter(function(c){ var d = st.read[c.id]; return d && (d.clues.length || d.feels.length || d.zone !== null) });
+  if(st.tried[2] || rk.length){
+    head(2);
+    rk.forEach(function(c){ var d = st.read[c.id]; o.push(c.name + ": clues tapped " + d.clues.length + (d.checked ? " (checked)" : "") + "; feeling picked: " + (d.feels.join(", ") || "none yet") + (d.feelOk ? " (fits the clues)" : "") + "; host voice: " + (d.zone !== null ? (d.zoneOk ? "found one that fits" : "still looking") + " (last go: " + ZONES[d.zone] + ")" : "not set")) });
+  }
+  var dk = Object.keys(st.dead.plays), mk2 = Object.keys(st.dead.myth);
+  if(st.tried[3] || dk.length || mk2.length){
+    head(3);
+    DEAD.forEach(function(c){ var d = st.dead.plays[c.id]; if(!d) return; o.push(c.name + ": played " + d.tries + " time" + (d.tries === 1 ? "" : "s") + (d.best ? ", found the sweet spot" : ", still exploring") + " (last go: " + d.w + "s silence, " + SOUND_LABELS[d.s] + ")") });
+    if(mk2.length){ var m = mk2.filter(function(k){ return st.dead.myth[k] === MYTHS[k][1] }).length; o.push("True or myth: tried " + mk2.length + " of " + MYTHS.length + ", " + m + " matching") }
+  }
+  var wk = WORLD.filter(function(c){ var d = st.world[c.id]; return d && (d.q1.length || d.done) });
+  if(st.tried[4] || wk.length || st.worldNote){
+    head(4);
+    wk.forEach(function(c){
+      var d = st.world[c.id], tries = d.q1.concat(d.q2).length;
+      var alarms = d.q1.filter(function(j){ return c.q1[j].k === "assume" || c.q1[j].k === "judge" }).length + d.q2.filter(function(j){ return c.q2[j].k === "assume" || c.q2[j].k === "judge" }).length;
+      o.push(c.name + " (" + c.topic + "): " + (d.done ? "finished the call with a curious question and a follow up" : "in progress") + "; " + tries + " question" + (tries === 1 ? "" : "s") + " tried" + (alarms ? ", set off the assumption alarm " + alarms + " time" + (alarms === 1 ? "" : "s") + " then tried again" : ""));
+    });
+    if(st.worldNote.trim()) o.push("Something I found interesting: " + st.worldNote.trim());
+  }
+  var rc = RECAPS.filter(function(c){ var d = st.recap[c.id]; return d && (Object.keys(d.slots).length || d.done) });
+  var rt = Object.keys(st.recapTicks).filter(function(k){ return st.recapTicks[k] });
+  if(st.tried[5] || rc.length || st.myRecap){
+    head(5);
+    rc.forEach(function(c){ var d = st.recap[c.id]; o.push(c.name + ": " + (d.done ? "recap built with no made up bits or opinions" : "recap in progress") + (d.checks ? " (" + d.checks + " read out" + (d.checks === 1 ? "" : "s") + ")" : "")) });
+    if(st.myRecap.trim()) o.push("My own recap of Jasmine: " + st.myRecap.trim());
+    if(rt.length) o.push("My self check: " + rt.map(function(k){ return RTICKS[k] }).join("; "));
+  }
+  var p = st.plan, pq = p.qs.filter(function(q){ return (q || "").trim() });
+  if(st.tried[6] || p.guest || pq.length){
+    head(6);
+    if(p.title) o.push("Show title: " + p.title);
+    if(p.guest) o.push("Guest: " + p.guest);
+    if(p.diff.length) o.push("How their life is different: " + p.diff.join(", "));
+    if(pq.length){ o.push("My questions:"); pq.forEach(function(q){ var r = qCheck(q); o.push("- " + q.trim() + (r[0] === "ok" ? " (open)" : "")) }) }
+    if(p.assume.trim()) o.push("Something I might be assuming: " + p.assume.trim());
+    if(p.moves.length) o.push("Listening moves I plan to use: " + p.moves.join(", "));
+    if(p.song.trim()) o.push("Song: " + p.song.trim());
+  }
+  var b = st.bingo, marked = b.card ? b.card.filter(function(t, i){ return i !== 4 && b.marks[i] }) : [];
+  if(st.tried[7] || marked.length || b.notes){
+    head(7);
+    if(marked.length){ o.push("Bingo squares dabbed:"); marked.forEach(function(t){ o.push("- " + t) }) }
+    var nl = countLines(); if(nl) o.push("Bingo lines: " + nl);
+    if(b.topic) o.push("Last topic: " + b.topic);
+    if(b.verdict !== null && b.verdict !== undefined) o.push("Caller's verdict: " + VERDICT[b.verdict].toLowerCase());
+    if(b.notes.trim()) o.push("One thing my caller told me: " + b.notes.trim());
+  }
+  return o.join("\n");
+}
+
+/* ---------------- boot ---------------- */
+var stagesBox = $("stages");
+STAGES.forEach(function(sg){ stagesBox.appendChild(frame(sg)) });
+drawWho(); drawTiles(); drawEnd();
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"Late Night Radio", filename:"late-night-radio", getText:summary });
+var inp = document.getElementById("b5who");
+if(inp) inp.addEventListener("input", function(){ var v = inp.value.trim().toUpperCase(); if(MS[v] && v !== who){ who = v; drawWho(); drawTiles() } });
+var armed = false;
+$("restartBtn").onclick = function(){
+  if(!armed){ armed = true; this.textContent = "Tap again to clear it all"; $("restartNote").textContent = "This wipes your progress on this device."; return }
+  try{ localStorage.removeItem(STORE) }catch(e){}
+  location.reload();
+};
+window.__lnr = { st:function(){ return st }, summary:summary, openStage:openStage, MILESTONE_STAGES:MILESTONE_STAGES };
+})();
+</script>
+</body>
+</html>
