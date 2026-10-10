@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Camp - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Training Camp only. Shell, cards and buttons come from style.css */
+:root{--green:#2f9e6a;--green-deep:#1f6b45;--red:#e0443a;--pink:#e85d9a;--leaf:#4bbf7f;--bark:#8a5a3b}
+[hidden]{display:none!important}
+.tc p{max-width:64ch}
+.small{font-size:.88rem;opacity:.85}
+.lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;margin:22px 0 9px;display:block}
+.hint{font-size:.9rem;color:var(--body-tint);margin:6px 0 0}
+.ctr{text-align:center;margin-left:auto;margin-right:auto}
+
+/* hero scene */
+.heroscene{width:100%;max-width:560px;height:auto;display:block;margin:6px 0 0}
+.zipper{animation:zip 5.5s ease-in infinite}
+@keyframes zip{0%{transform:translate(0,0)}70%{transform:translate(206px,92px)}71%,100%{transform:translate(206px,92px);opacity:0}}
+.flap{animation:flap 1.6s ease-in-out infinite alternate;transform-origin:62px 40px}
+@keyframes flap{from{transform:rotate(-4deg)}to{transform:rotate(5deg)}}
+
+/* who picker */
+.whobox{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;margin:0 0 20px;box-shadow:var(--lift)}
+.whobox .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.whobtn{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.9rem;letter-spacing:.1em;background:var(--paper);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:44px}
+.whobtn[aria-pressed="true"]{background:var(--plum);color:var(--paper)}
+.mslist{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.mslist li{background:var(--paper);border:2px dashed var(--plum);border-radius:14px;padding:10px 14px;font-size:.95rem}
+.mslist li b{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--plum);display:block}
+
+/* stage map: trail signs */
+.smap{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px;margin:0 0 24px}
+.smbtn{position:relative;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem;line-height:1.15;color:var(--ink);border:var(--border) solid var(--ink);border-radius:8px 22px 22px 8px;padding:12px 12px 10px;cursor:pointer;text-align:left;box-shadow:3px 4px 0 var(--ink);display:flex;flex-direction:column;gap:6px;transition:transform .14s}
+.smbtn:nth-child(odd){transform:rotate(-1.2deg)}
+.smbtn:nth-child(even){transform:rotate(1deg)}
+.smbtn:hover{transform:translateY(-3px) rotate(0)}
+.smbtn .n{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.smbtn svg{width:36px;height:36px}
+.smbtn .tick{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:none;align-items:center;justify-content:center}
+.smbtn.done .tick{display:flex}
+.smbtn.lt{color:var(--paper)}
+.gps{display:none;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:2px 8px;align-self:flex-start;font-family:var(--display);font-variation-settings:"wght" 800}
+.suits .gps{display:inline-block}
+.smbtn.suits{outline:4px dashed var(--plum);outline-offset:3px}
+
+/* stage accordions */
+.stage summary .num{flex:none;width:52px;height:52px;border-radius:12px 50% 50% 12px;background:var(--white);color:var(--ink);border:var(--border) solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.4rem}
+.stage summary .gps{margin-top:6px}
+.stage.suits summary .gps{display:inline-block}
+.stage .body{background:var(--white)}
+.stage .chev{stroke:currentColor}
+.learn{background:var(--paper);border:var(--border) solid var(--ink);border-left-width:10px;border-left-color:var(--green);border-radius:0 18px 18px 0;padding:14px 18px;margin:0 0 18px}
+.learn .lk{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--green-deep)}
+.learn p{margin:6px 0}
+.tryk{display:inline-block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;background:var(--leaf);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;margin:22px 0 8px;transform:rotate(-1deg)}
+.skipnote{font-size:.85rem;color:var(--body-tint);margin:24px 0 0}
+h3.sub{font-size:1.25rem;font-variation-settings:"wdth" 116,"wght" 800;margin:0 0 6px}
+
+/* chips */
+.picks{display:flex;gap:8px;flex-wrap:wrap}
+.pk{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.86rem;background:var(--paper);color:var(--ink);border:var(--border) solid var(--ink);border-radius:999px;padding:10px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);text-align:left;min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.pk:active{transform:translate(2px,3px);box-shadow:0 0 0}
+.pk[aria-pressed="true"]{background:var(--yellow)}
+.pk.good{background:#bfe8cf;border-color:var(--green-deep)}
+.pk.miss{background:#fde0cf;border-style:dashed}
+.pk.sel{background:var(--plum);color:var(--paper);animation:jitter .4s}
+.pk svg{width:22px;height:22px;flex:none}
+.starters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.st{font-family:var(--body);font-size:.85rem;background:var(--white);border:2px dashed var(--teal);border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--ink);min-height:36px}
+textarea,input[type=text],input[type=number],input[type=date]{font-family:var(--body);font-size:1rem;border:var(--border) solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);max-width:100%}
+textarea{width:100%;min-height:90px;resize:vertical}
+input.num{width:110px;text-align:center;font-size:1.15rem}
+input.wide{width:min(460px,100%)}
+.fb{margin:10px 0 0;font-size:.97rem;min-height:1.4em}
+.fb.good{color:var(--green-deep);font-variation-settings:"wght" 700}
+.fb.soft{color:var(--orange-deep)}
+.endrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0 0}
+.dots{display:flex;gap:6px;margin:10px 0 0;flex-wrap:wrap}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.dots i.on{background:var(--green)}
+.dots i.cur{background:var(--yellow)}
+
+/* stage 1: challenges */
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.chal{border:var(--border) solid var(--ink);border-radius:18px 26px 16px 24px;padding:10px 8px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);box-shadow:3px 4px 0 var(--ink);font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.9rem;line-height:1.1;text-align:center;transition:transform .15s}
+.chal:nth-child(3n+1){transform:rotate(-1.4deg)}
+.chal:nth-child(3n+2){transform:rotate(.9deg)}
+.chal:hover{transform:translateY(-3px) rotate(0)}
+.chal.lt{color:var(--paper)}
+.chal svg{width:72px;height:56px}
+.chal small{font-family:var(--body);font-variation-settings:normal;font-size:.75rem;opacity:.9}
+.chal[aria-pressed="true"]{outline:5px solid var(--ink);outline-offset:3px;animation:boing .5s ease}
+@keyframes boing{0%{transform:scale(1)}30%{transform:scale(1.1) rotate(-3deg)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+.scenebox{margin:16px 0 0;border:var(--border) solid var(--ink);border-radius:var(--r-alt);overflow:hidden;background:#dff3f8;box-shadow:var(--lift)}
+.scene{width:100%;height:auto;display:block}
+.mk circle{transition:r .2s}
+.mk.on circle{fill:var(--yellow);animation:pulse 1.2s ease-in-out infinite alternate}
+@keyframes pulse{from{stroke-width:3}to{stroke-width:6}}
+.secs{display:grid;gap:8px;margin:12px 0 0}
+.sec{display:flex;align-items:center;gap:10px;text-align:left;background:var(--paper);border:var(--border) solid var(--ink);border-radius:14px;padding:8px 12px;cursor:pointer;font-family:var(--body);font-size:.95rem;color:var(--ink);min-height:44px}
+.sec b{flex:none;width:30px;height:30px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 900}
+.sec[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.sortbox{background:var(--paper);border:var(--border) solid var(--ink);border-radius:18px;padding:14px 16px}
+.sortq{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1.15rem;margin:4px 0 12px}
+
+/* stage 2: power wheel */
+.wheelwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:780px){.wheelwrap{grid-template-columns:1fr}}
+.wheel{width:100%;max-width:470px;height:auto;display:block;margin:0 auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin:6px 0 0;justify-content:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:20px;height:12px;border-radius:4px;border:2px solid var(--ink)}
+.prow{border-bottom:2px dashed var(--line);padding:8px 0}
+.prow .pn{display:flex;align-items:center;gap:8px;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.9rem}
+.prow .pn svg{width:26px;height:26px}
+.prow .pn small{font-family:var(--body);font-variation-settings:normal;font-size:.78rem;opacity:.75}
+.lv{display:flex;align-items:center;gap:6px;margin:4px 0 0;flex-wrap:wrap}
+.lv span{font-size:.75rem;width:62px;flex:none}
+.lv button{width:36px;height:36px;border-radius:10px;border:2px solid var(--ink);background:var(--white);cursor:pointer;font-family:var(--display);font-variation-settings:"wght" 800;color:var(--ink);font-size:.85rem}
+.lv button.on{background:var(--bright);color:var(--white)}
+.lv.need button.on{background:var(--orange);color:var(--ink)}
+.gaps{display:grid;gap:8px;margin:10px 0 0}
+.gap{display:flex;align-items:center;gap:10px;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:8px 12px;font-size:.9rem;flex-wrap:wrap}
+.gap svg{width:28px;height:28px;flex:none}
+.gap .bar{flex:1;height:12px;border-radius:999px;background:rgba(10,47,56,.12);overflow:hidden;min-width:60px}
+.gap .bar span{display:block;height:100%;background:repeating-linear-gradient(45deg,var(--orange) 0 6px,var(--yellow) 6px 12px)}
+
+/* stage 3: drills */
+.drills{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.drill{border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:var(--paper);padding:14px 16px;box-shadow:var(--lift);display:flex;flex-direction:column;gap:6px}
+.drill:nth-child(odd){transform:rotate(-.4deg)}
+.drill:nth-child(even){transform:rotate(.35deg)}
+.drill.focus{background:#fff4d9;outline:4px dashed var(--orange);outline-offset:2px}
+.drill h4{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:0}
+.drill .pic{width:100%;height:96px;background:var(--white);border:2px solid var(--ink);border-radius:14px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;border:2px solid var(--ink);border-radius:999px;padding:2px 9px;background:var(--white);align-self:flex-start}
+.badge svg{width:16px;height:16px}
+.drill p{margin:0;font-size:.88rem}
+.drill .safe{font-size:.82rem;color:var(--body-tint)}
+.timer{background:var(--white);border:2px solid var(--ink);border-radius:14px;padding:10px;text-align:center}
+.clock{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.2rem;line-height:1;margin:2px 0 8px}
+.rec{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rec input{width:96px}
+.hist{display:flex;gap:6px;flex-wrap:wrap;font-size:.78rem}
+.hist span{background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:2px 9px}
+.hist span.first{background:#cdeef6}
+.fair{display:grid;gap:10px}
+.fcard{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:12px 14px}
+.fcard p{margin:0 0 8px}
+
+/* stage 4: plans + graph */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:640px){.plans{grid-template-columns:1fr}}
+.plan{border:var(--border) solid var(--ink);border-radius:16px;background:var(--paper);padding:8px;cursor:pointer;color:var(--ink);font-family:var(--body);text-align:left;box-shadow:3px 4px 0 var(--ink)}
+.plan b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;display:block;font-size:.95rem}
+.plan svg{width:100%;height:auto;display:block;background:var(--white);border-radius:10px;border:2px solid var(--ink);margin:6px 0 0}
+.plan.good{background:#bfe8cf}
+.plan.miss{background:#fde0cf;border-style:dashed}
+.graph{width:100%;height:auto;display:block;background:var(--paper);border:2px solid var(--ink);border-radius:16px}
+.ctl{display:grid;gap:10px;margin:8px 0 0}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+.ctl input[type=range]{width:100%;accent-color:var(--orange);min-height:34px}
+.goalcard{position:relative;background:linear-gradient(150deg,var(--yellow),var(--yellow-deep));border:var(--border) dashed var(--ink);border-radius:18px;padding:16px 20px;margin:18px 0 12px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:1.12rem;line-height:1.3;box-shadow:var(--lift)}
+.goalcard .tk{display:block;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;opacity:.75;margin:0 0 6px}
+.goalcard.empty{background:var(--paper);font-variation-settings:"wght" 600;font-size:1rem}
+.meter{position:relative;height:34px;border:var(--border) solid var(--ink);border-radius:999px;overflow:hidden;display:flex;margin:10px 0 4px}
+.meter i{flex:1;display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.meter .pin{position:absolute;top:-4px;width:8px;height:40px;margin-left:-4px;background:var(--ink);border-radius:4px;transition:left .5s cubic-bezier(.3,1.5,.5,1)}
+
+/* stage 5: routine builder */
+.rb{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.rb{grid-template-columns:1fr}}
+.tray{display:flex;flex-direction:column;gap:8px;background:var(--paper);border:2px dashed var(--ink);border-radius:16px;padding:10px;min-height:80px}
+.card5{font-family:var(--body);font-size:.88rem;text-align:left;background:var(--white);color:var(--ink);border:var(--border) solid var(--ink);border-radius:14px;padding:8px 12px;cursor:grab;box-shadow:3px 4px 0 var(--ink);touch-action:none;user-select:none;-webkit-user-select:none}
+.card5 b{display:block;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.95rem}
+.card5.sel{background:var(--plum);color:var(--paper);outline:3px solid var(--yellow)}
+.card5.locked{background:#bfe8cf;cursor:default;box-shadow:none;border-color:var(--green-deep)}
+.slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:flex;gap:8px;align-items:stretch}
+.slot .sn{flex:none;width:36px;border-radius:10px;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 900;background:var(--yellow)}
+.slot .drop{flex:1;min-height:58px;border:2px dashed var(--ink);border-radius:14px;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--body-tint);cursor:pointer;padding:4px;font-family:var(--body)}
+.slot .drop.hot{background:#fff4d9;border-style:solid}
+.slot .drop .card5{width:100%}
+.dropbtn{border:0;background:transparent;width:100%;min-height:54px;font-family:var(--body);font-size:.85rem;color:var(--body-tint);cursor:pointer;border-radius:12px}
+.backbtn{font-family:var(--body);font-size:.85rem;border:2px dashed var(--plum);background:var(--white);color:var(--ink);border-radius:12px;padding:8px;cursor:pointer;min-height:44px}
+.ghost{position:fixed;z-index:9500;pointer-events:none;opacity:.9;transform:rotate(-3deg);width:240px}
+.routine{background:var(--white);border:var(--border) solid var(--ink);border-radius:18px;padding:12px 14px}
+.routine h4{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.1rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.routine h4 svg{width:30px;height:30px}
+
+/* stage 6: week */
+.tokens{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.tok{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.82rem;border:var(--border) solid var(--ink);border-radius:12px;padding:8px 12px;cursor:pointer;color:var(--ink);box-shadow:3px 4px 0 var(--ink);min-height:44px;touch-action:none;user-select:none;-webkit-user-select:none}
+.tok svg{width:24px;height:24px}
+.tok.sel{outline:4px solid var(--plum);outline-offset:2px;animation:jitter .4s}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+@media (max-width:640px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.day{border:var(--border) solid var(--ink);border-radius:14px;background:var(--paper);min-height:108px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.8rem;color:var(--ink);text-align:center}
+.day .dn{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+.day svg{width:36px;height:36px}
+.day .dt{font-size:.68rem;line-height:1.1;font-variation-settings:"wght" 700}
+.day.hot{background:#fff4d9;border-style:dashed}
+.day.rest svg .chg{animation:chg 1.4s steps(4) infinite}
+@keyframes chg{from{opacity:.2}to{opacity:1}}
+.coachbox{background:var(--white);border:var(--border) solid var(--ink);border-left-width:10px;border-left-color:var(--orange);border-radius:0 16px 16px 0;padding:12px 16px;margin:14px 0 0}
+.coachbox.ok{border-left-color:var(--green)}
+.coachbox ul{margin:6px 0 0;padding-left:20px}
+.coachbox li{margin:0 0 6px}
+.mini7{display:flex;gap:3px;margin:6px 0}
+.mini7 i{flex:1;height:22px;border:2px solid var(--ink);border-radius:5px;font-style:normal;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 800}
+
+/* stage 7 */
+.cmp{display:grid;gap:10px;margin:10px 0 0}
+.cmprow{background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:10px 12px;font-size:.88rem}
+.cmprow .bars{display:grid;grid-template-columns:62px 1fr 62px;gap:4px 8px;align-items:center;margin:6px 0}
+.cmprow .bars i{display:block;height:14px;border-radius:999px;border:2px solid var(--ink)}
+.advice{background:var(--white);border:var(--border) solid var(--ink);border-left-width:10px;border-left-color:var(--green);border-radius:0 16px 16px 0;padding:12px 16px;margin:12px 0 0}
+.numrow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.numrow label{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+select{font-family:var(--body);font-size:1rem;border:var(--border) solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);max-width:100%}
+
+/* camp pass */
+.pass{position:relative;border:4px solid var(--ink);border-radius:26px 20px 28px 18px;background:linear-gradient(160deg,#e3f6ea 0%,var(--white) 50%,#fff4d9 100%);padding:22px;box-shadow:var(--lift-hi);overflow:hidden;max-width:720px}
+.pass:before{content:"";position:absolute;left:50%;top:-14px;width:60px;height:28px;margin-left:-30px;border:4px solid var(--ink);border-radius:0 0 30px 30px;background:var(--paper)}
+.passtop{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.passtop svg{width:84px;height:64px;flex:none}
+.passtop h3{font-variation-settings:"wdth" 122,"wght" 900;font-size:1.6rem;line-height:1}
+.pline{margin:10px 0 0;font-size:.93rem}
+.pline b{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+
+/* confetti */
+.bit{position:fixed;width:10px;height:14px;border-radius:3px;pointer-events:none;z-index:9000;animation:fly .9s ease-out forwards}
+@keyframes fly{from{transform:translate(0,0) rotate(0)}to{transform:translate(var(--dx),var(--dy)) rotate(540deg);opacity:0}}
+@media (max-width:520px){.stage summary{padding:16px 14px;gap:12px}.stage summary .num{width:42px;height:42px;font-size:1.15rem}.acc .body{padding:16px 14px 20px}.lv span{width:100%}.drills{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>TRAINING <span class="accent">CAMP</span></h1>
+    <div class="line">
+      <span class="chip">PE &middot; training goals</span>
+      <p>Pick a challenge, work out what it asks of you, test yourself, then plan the weeks that get you ready.</p>
+    </div>
+    <svg class="heroscene" viewBox="0 0 560 150" aria-hidden="true">
+      <path d="M0 150 Q140 118 280 136 T560 128 V150Z" fill="#4bbf7f" stroke="#0a2f38" stroke-width="3"/>
+      <rect x="54" y="30" width="16" height="112" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/>
+      <circle cx="62" cy="30" r="32" fill="#2f9e6a" stroke="#0a2f38" stroke-width="3"/>
+      <circle cx="40" cy="44" r="18" fill="#4bbf7f" stroke="#0a2f38" stroke-width="3"/>
+      <rect x="36" y="58" width="56" height="7" rx="2" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/>
+      <rect x="296" y="62" width="14" height="80" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/>
+      <circle cx="303" cy="58" r="26" fill="#2f9e6a" stroke="#0a2f38" stroke-width="3"/>
+      <line x1="92" y1="52" x2="300" y2="144" stroke="#0a2f38" stroke-width="2.5"/>
+      <g class="zipper">
+        <circle cx="96" cy="54" r="4" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/>
+        <line x1="96" y1="56" x2="96" y2="68" stroke="#0a2f38" stroke-width="2.5"/>
+        <circle cx="96" cy="73" r="6" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/>
+        <path d="M96 79v12M96 84l-8 4M96 91l-6 8M96 91l7 7" fill="none" stroke="#0a2f38" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <g class="flap"><path d="M52 6 q10 -8 20 0 q-10 -2 -10 6z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/></g>
+      <path d="M380 40 h150" stroke="#0a2f38" stroke-width="2" stroke-dasharray="2 6"/>
+      <path d="M380 40 l12 18 l12 -18 l12 18 l12 -18 l12 18 l12 -18 l12 18 l12 -18 l12 18 l12 -18 l12 18 l12 -18" fill="none" stroke="#ef7724" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M420 136 l40 -62 l40 62z" fill="#ef7724" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M460 74 v62 M448 136 l12 -24 l12 24" fill="#ffc247" stroke="#0a2f38" stroke-width="3" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</header>
+
+<div class="wrap tc">
+
+  <div class="panel panel-teal">
+    <p><strong>How camp works.</strong> Seven stages, any order you fancy. Skip anything that is not for you. It saves on this device, so you can stop and come back.</p>
+    <p>Not going on the ropes trip? <span class="hl">Totally fine.</span> Pick any challenge, or make up your own. How hard you go is always your call, and if something hurts in a sharp way, stop.</p>
+  </div>
+
+  <div class="whobox">
+    <span class="lab" style="margin-top:0">Who is this? (optional)</span>
+    <div class="row" id="whoRow"></div>
+    <ul class="mslist" id="msList" hidden></ul>
+  </div>
+
+  <div class="smap" id="smap"></div>
+
+  <!-- ================= STAGE 1 ================= -->
+  <details class="acc acc-orange stage" id="st1" data-n="1">
+    <summary>
+      <span class="num">1</span>
+      <div class="txt"><h2>Choose your challenge</h2><p>Pick something to train for, then the bit you most want to nail.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <p>Every challenge is made of smaller bits. Pick one to train for. Anything counts.</p>
+      <div class="chgrid" id="chGrid"></div>
+      <div id="ownChBox" hidden style="margin-top:14px">
+        <label class="lab" for="ownCh">My challenge is</label>
+        <input type="text" class="wide" id="ownCh" maxlength="50" placeholder="e.g. swim a length, a bike ride to the park">
+      </div>
+      <div id="sceneWrap"></div>
+      <span class="lab" id="secLab">Tap the bit you most want to get better at</span>
+      <div class="secs" id="secs"></div>
+      <div id="ownBitBox" hidden style="margin-top:10px">
+        <input type="text" class="wide" id="ownBit" maxlength="60" placeholder="the bit I most want to get better at">
+      </div>
+      <p class="fb good" id="s1fb"></p>
+
+      <span class="tryk">Game, if you fancy: course sort</span>
+      <h3 class="sub">What does each bit lean on most?</h3>
+      <p class="small" id="sortNote">Tap the power you think each bit needs most. Some bits have more than one good answer.</p>
+      <div class="sortbox">
+        <div class="small" id="sortCount"></div>
+        <p class="sortq" id="sortQ"></p>
+        <div class="picks" id="sortOpts"></div>
+        <p class="fb" id="sortFb" aria-live="polite"></p>
+        <div class="endrow" style="margin-top:8px"><button class="btn btn-quiet" id="sortPrev" type="button">Back one</button><button class="btn" id="sortNext" type="button">Next bit</button></div>
+        <div class="dots" id="sortDots"></div>
+      </div>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 2 ================= -->
+  <details class="acc acc-yellow stage" id="st2" data-n="2">
+    <summary>
+      <span class="num">2</span>
+      <div class="txt"><h2>The power wheel</h2><p>What the challenge needs, what you have now, and the gap.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>Camp splits fitness into seven <b>powers</b>. The dashed orange line is what your challenge needs. The blue is you, right now. The striped bit between them is the <b>gap</b>, and gaps are where training helps most.</p>
+      </div>
+      <div class="wheelwrap">
+        <div>
+          <div id="wheelBox"></div>
+          <div class="legend"><span><i style="background:#fff;border-style:dashed;border-color:#ef7724"></i>Challenge needs</span><span><i style="background:#00a6c9"></i>Me now</span><span><i style="background:repeating-linear-gradient(45deg,#ef7724 0 4px,#ffc247 4px 8px)"></i>The gap</span></div>
+          <p class="hint ctr" id="wheelNote"></p>
+        </div>
+        <div>
+          <span class="lab" style="margin-top:0">Me now: tap a level for each power</span>
+          <p class="small" style="margin:-4px 0 4px">1 is just starting, 5 is a real strength. Kind and honest. Nobody sees this unless you send it.</p>
+          <div id="powRows"></div>
+          <div class="endrow"><button class="btn btn-quiet" id="needToggle" type="button" aria-pressed="false">I want to change what the challenge needs</button></div>
+        </div>
+      </div>
+
+      <span class="lab">Biggest gaps</span>
+      <div class="gaps" id="gaps"></div>
+      <span class="lab">Pick one or two powers to focus on</span>
+      <div class="picks" id="focusChips"></div>
+      <p class="hint" id="focusHint"></p>
+
+      <label class="lab" for="practise">So what would you practise?</label>
+      <div class="starters" data-for="practise">
+        <button class="st" type="button">To get better at my challenge I would practise </button>
+        <button class="st" type="button">My biggest gap is </button>
+        <button class="st" type="button">so I could try </button>
+        <button class="st" type="button">because that bit needs </button>
+      </div>
+      <textarea id="practise" placeholder="Short is fine. Your own words."></textarea>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 3 ================= -->
+  <details class="acc acc-teal stage" id="st3" data-n="3">
+    <summary>
+      <span class="num">3</span>
+      <div class="txt"><h2>Drill library</h2><p>Test yourself at home or in PE, log it, and keep it fair.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>A <b>drill</b> is a small test you can repeat. Your <b>first go</b> is your starting point. Do it again in a week or two and you can <b>see</b> if training is working.</p>
+        <p class="small">Away from the screen is fine. Do the drill, come back, pop the number in. Timers are there only if you want one.</p>
+      </div>
+      <div class="drills" id="drills"></div>
+
+      <span class="tryk">Game: fair test or not?</span>
+      <h3 class="sub">Is this a fair way to compare?</h3>
+      <p>To compare two goes fairly, everything stays the same except you. Have a look at each one.</p>
+      <div class="fair" id="fair"></div>
+
+      <span class="lab">How I will keep my test fair (pick any)</span>
+      <div class="picks" id="fairChips"></div>
+      <label class="lab" for="measure">How will you measure your progress?</label>
+      <div class="starters" data-for="measure">
+        <button class="st" type="button">I will measure it by </button>
+        <button class="st" type="button">I will count </button>
+        <button class="st" type="button">I will retest every </button>
+        <button class="st" type="button">To keep it fair I will </button>
+      </div>
+      <textarea id="measure" placeholder="What you will count or time, and how often."></textarea>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 4 ================= -->
+  <details class="acc acc-plum stage" id="st4" data-n="4">
+    <summary>
+      <span class="num">4</span>
+      <div class="txt"><h2>Little by little</h2><p>Build a goal from a small step each week, and watch it add up.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>Bodies get stronger by doing <b>a little more than last time</b>, then resting so they can rebuild. Coaches call it <b>progressive overload</b>. Small steps, every week, add up to a lot.</p>
+      </div>
+
+      <span class="tryk">Game: which plan will work?</span>
+      <p id="pgTitle" class="sortq" style="font-size:1.05rem"></p>
+      <div class="plans" id="plans"></div>
+      <p class="fb" id="pgFb" aria-live="polite"></p>
+      <div class="endrow" style="margin-top:6px"><button class="btn btn-quiet" id="pgNext" type="button">Next round</button></div>
+
+      <span class="tryk">Build your goal</span>
+      <span class="lab" style="margin-top:4px">1. Which drill?</span>
+      <div class="picks" id="gDrill"></div>
+      <div class="ctl">
+        <label>2. Where you are now (your first go)<span class="numrow"><input type="text" class="num" id="gStart" inputmode="decimal" aria-label="Where I am now"><span class="small" id="gUnit"></span></span></label>
+        <label><span>3. How much to add each week: <b id="gStepOut"></b></span><input type="range" id="gStep" min="0" max="10" step="1" value="0"></label>
+      </div>
+      <span class="lab">4. For how many weeks?</span>
+      <div class="picks" id="gWeeks"></div>
+      <div id="graphBox" style="margin-top:14px"></div>
+      <div class="goalcard" id="goalCard"></div>
+
+      <span class="lab">Stretch check (a rough camp guide)</span>
+      <div class="meter" aria-hidden="true"><i style="background:#cdeef6">Gentle</i><i style="background:#c6ead6">Stretch</i><i style="background:#fbd2c6">Big jump</i><span class="pin" id="pin" style="left:8%"></span></div>
+      <p class="fb" id="stretchFb"></p>
+      <span class="lab">What do you reckon?</span>
+      <div class="picks" id="myVerdict"></div>
+      <label class="lab" for="why4">Why? Say it your way</label>
+      <div class="starters" data-for="why4">
+        <button class="st" type="button">I think it is doable because </button>
+        <button class="st" type="button">It will stretch me because </button>
+        <button class="st" type="button">I picked this step because </button>
+        <button class="st" type="button">If it feels too much I will </button>
+      </div>
+      <textarea id="why4" placeholder="A sentence or two is plenty."></textarea>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 5 ================= -->
+  <details class="acc acc-bright stage" id="st5" data-n="5">
+    <summary>
+      <span class="num">5</span>
+      <div class="txt"><h2>Warm up, cool down</h2><p>Put the parts in the right order and make them yours.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>A <b>warm up</b> gets your body ready, step by step. A <b>cool down</b> brings it back gently. The order matters.</p>
+      </div>
+      <p>Drag a card into a numbered slot, or tap a card and then tap a slot. Sneaky: one card in each pile does not belong anywhere.</p>
+      <div class="rb">
+        <div class="routine">
+          <h4><span id="icoWarm"></span>Warm up</h4>
+          <div class="slots" id="wSlots"></div>
+          <span class="lab">Cards</span>
+          <div class="tray" id="wTray" data-tray="w"></div>
+          <div class="endrow"><button class="btn" id="wCheck" type="button">Check my order</button></div>
+          <p class="fb" id="wFb" aria-live="polite"></p>
+        </div>
+        <div class="routine">
+          <h4><span id="icoCool"></span>Cool down</h4>
+          <div class="slots" id="cSlots"></div>
+          <span class="lab">Cards</span>
+          <div class="tray" id="cTray" data-tray="c"></div>
+          <div class="endrow"><button class="btn" id="cCheck" type="button">Check my order</button></div>
+          <p class="fb" id="cFb" aria-live="polite"></p>
+        </div>
+      </div>
+      <div id="movesBox"></div>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 6 ================= -->
+  <details class="acc acc-orange stage" id="st6" data-n="6">
+    <summary>
+      <span class="num">6</span>
+      <div class="txt"><h2>Build the week</h2><p>Sessions, rest days, and a coach who checks the plan.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p><b>Rest days are training too.</b> Your body does its rebuilding while you rest. A good week mixes different sessions and spreads the hard ones out.</p>
+      </div>
+
+      <span class="tryk">Game: fix the plan</span>
+      <div class="sortbox">
+        <div class="small" id="fpCount"></div>
+        <p class="sortq" id="fpQ"></p>
+        <div class="mini7" id="fpWeek"></div>
+        <p class="small" id="fpNote"></p>
+        <div class="picks" id="fpOpts"></div>
+        <p class="fb" id="fpFb" aria-live="polite"></p>
+        <div class="endrow" style="margin-top:8px"><button class="btn" id="fpNext" type="button">Next plan</button></div>
+      </div>
+
+      <span class="tryk">Your week</span>
+      <p>Drag a session onto a day, or tap a session and then tap a day. Tap a day with nothing picked to clear it.</p>
+      <div class="tokens" id="tokens"></div>
+      <div class="week" id="week"></div>
+      <div class="coachbox" id="coachbox" aria-live="polite"></div>
+
+      <span class="lab">How long for each session?</span>
+      <div class="picks" id="lenChips"></div>
+      <span class="lab">Which day will you retest your drill?</span>
+      <div class="picks" id="checkChips"></div>
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <!-- ================= STAGE 7 ================= -->
+  <details class="acc acc-teal stage" id="st7" data-n="7">
+    <summary>
+      <span class="num">7</span>
+      <div class="txt"><h2>Camp review</h2><p>First go against latest go, what to change, what is next.</p><span class="gps">Good place to start</span></div>
+      <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <span class="lk">Learn a bit</span>
+        <p>Come back after a week or two of training. Add a new go, compare it with your first, and decide what to <b>keep</b> and what to <b>change</b>.</p>
+      </div>
+      <span class="lab">Add a later go</span>
+      <div class="numrow">
+        <label>Drill<select id="rvDrill"></select></label>
+        <label>Result<input type="text" class="num" id="rvN" inputmode="decimal"></label>
+        <button class="btn btn-orange" id="rvAdd" type="button">Log it</button>
+      </div>
+      <p class="fb" id="rvFb"></p>
+      <span class="lab">First go and latest go</span>
+      <div class="cmp" id="cmp"></div>
+      <p class="fb" id="goalProg"></p>
+
+      <span class="lab">How did it go?</span>
+      <div class="picks" id="statusChips"></div>
+      <div id="advice"></div>
+      <div id="changeList" class="small" style="margin-top:8px"></div>
+
+      <span class="lab">The challenge itself</span>
+      <div class="picks" id="dayChips"></div>
+
+      <label class="lab" for="reflect">Look back</label>
+      <div class="starters" data-for="reflect">
+        <button class="st" type="button">Over the last few weeks I </button>
+        <button class="st" type="button">Compared with my first go, </button>
+        <button class="st" type="button">The thing that helped most was </button>
+        <button class="st" type="button">Next time I would change </button>
+      </div>
+      <textarea id="reflect" placeholder="What happened, what helped, what you would change."></textarea>
+      <label class="lab" for="nextGoal">My next goal, for the next stage</label>
+      <input type="text" class="wide" id="nextGoal" maxlength="140" placeholder="e.g. a 60 second wall sit by the end of term">
+      <p class="skipnote">Skip any of this if it is not for you.</p>
+    </div>
+  </details>
+
+  <hr class="rule">
+
+  <div class="weektheme"><h2>Your camp pass</h2><span>Builds itself from whatever you have tried. Gaps are fine.</span></div>
+  <div class="pass" id="pass"></div>
+
+  <div id="sendHost"></div>
+
+  <div class="endrow">
+    <button class="btn btn-quiet" id="resetBtn" type="button">Start again</button>
+    <span class="small" id="resetMsg"></span>
+  </div>
+
+  <a class="backlink" href="/practice/#pe-standard">Back to PE</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.training-camp.v1", WHO = "base5.who.v1";
+var INK = "#0a2f38";
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c] }) }
+var RM = false;
+try{ RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function r1(v){ return Math.round(v * 10) / 10 }
+function numOr(v){ if(v == null) return null; var s = String(v).trim().replace(",", ".").replace(/\s+/g, " "); if(s === "") return null;
+  var fr = s.match(/^(-?\d*\.?\d+)\s*\/\s*(\d*\.?\d+)$/); if(fr){ var dn = parseFloat(fr[2]); return dn ? r1(parseFloat(fr[1]) / dn * 100) / 100 : null }
+  var n = parseFloat(s); return isNaN(n) ? null : n }
+function today(){ var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) }
+function prettyDate(iso){ if(!iso) return ""; var p = iso.split("-"); var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return (+p[2]) + " " + m[(+p[1]) - 1] }
+
+/* ---------------- icons ---------------- */
+var SW = ' stroke="' + INK + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+function svg(vb, inner){ return '<svg viewBox="' + vb + '" aria-hidden="true">' + inner + '</svg>' }
+var PICON = {
+  stamina: '<path d="M20 35S5 25 5 14a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 11-15 21-15 21z" fill="#e0443a"' + SW + '/><path d="M9 19h6l3-5 4 9 3-4h6" fill="none" stroke="#fffdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  strength: '<path d="M12 20h16" fill="none" stroke="' + INK + '" stroke-width="5"/><rect x="4" y="11" width="8" height="18" rx="2" fill="#007291"' + SW + '/><rect x="28" y="11" width="8" height="18" rx="2" fill="#007291"' + SW + '/>',
+  grip: '<path d="M10 34V16a3 3 0 0 1 6 0v8V12a3 3 0 0 1 6 0v12V14a3 3 0 0 1 6 0v12v-6a3 3 0 0 1 6 0v8c0 6-4 10-10 10h-6c-5 0-8-2-8-4z" fill="#c9a4d8"' + SW + '/><path d="M4 8h32" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>',
+  balance: '<path d="M20 23l-7 12h14z" fill="#ef7724"' + SW + '/><path d="M4 22h32" fill="none"' + SW + '/><circle cx="10" cy="15" r="5" fill="#00a6c9"' + SW + '/><circle cx="30" cy="15" r="5" fill="#00a6c9"' + SW + '/>',
+  flex: '<path d="M7 32 Q20 -4 33 32" fill="none" stroke="#e85d9a" stroke-width="5" stroke-linecap="round"/><circle cx="7" cy="32" r="4" fill="#ffc247"' + SW + '/><circle cx="33" cy="32" r="4" fill="#ffc247"' + SW + '/>',
+  speed: '<path d="M23 3L8 23h9l-3 14 17-21h-9z" fill="#ffc247"' + SW + '/>',
+  coord: '<path d="M8 30 Q20 -2 32 30" fill="none" stroke="' + INK + '" stroke-width="2" stroke-dasharray="3 4"/><circle cx="8" cy="31" r="5" fill="#2f9e6a"' + SW + '/><circle cx="20" cy="9" r="5" fill="#ffc247"' + SW + '/><circle cx="32" cy="31" r="5" fill="#e85d9a"' + SW + '/>'
+};
+function pIcon(id){ return svg("0 0 40 40", PICON[id]) }
+var TICK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="#2f9e6a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------------- data ---------------- */
+var POW = [
+  {id:"stamina", name:"Stamina", what:"keeping going for a long time", col:"#e0443a"},
+  {id:"strength", name:"Strength", what:"pushing, pulling and holding yourself up", col:"#007291"},
+  {id:"grip", name:"Grip", what:"holding on with your hands and fingers", col:"#7b4b8f"},
+  {id:"balance", name:"Balance", what:"staying steady when things wobble", col:"#ef7724"},
+  {id:"flex", name:"Flexibility", what:"how far you can bend and reach", col:"#e85d9a"},
+  {id:"speed", name:"Speed", what:"moving quickly from one place to another", col:"#f0a80f"},
+  {id:"coord", name:"Coordination", what:"body parts working together smoothly", col:"#2f9e6a"}
+];
+var PBY = {}; POW.forEach(function(p, i){ p.i = i; PBY[p.id] = p });
+
+/* need order: stamina strength grip balance flex speed coord */
+var CH = [
+  {id:"ropes", name:"Treetop rope course", short:"the rope course", note:"zip wires and wobbly bridges", bg:"linear-gradient(150deg,#4bbf7f,#2f9e6a)", need:[2,3,5,5,3,1,4],
+   rehearse:"Heel to toe walks along a line, and a few gentle hangs",
+   sec:[
+    {t:"Ladder up to the first platform", a:["grip","strength"], why:"Hands hold the rungs while arms and legs push and pull you up.", hint:"Think about what your hands and arms are doing on a ladder."},
+    {t:"Wobbly log bridge", a:["balance","coord"], why:"The logs swing, so staying steady is the big one. Hands on the side ropes help.", hint:"The logs move under your feet."},
+    {t:"Cargo net climb", a:["grip","strength","coord"], why:"Hands grip the net, arms pull, and feet hunt for the next square.", hint:"You hang on with your hands the whole way up."},
+    {t:"Tightrope with a hand line", a:["balance"], why:"One wire under your feet. Balance does most of the work.", hint:"One thin wire, and it wobbles."},
+    {t:"Zip wire down to the ground", a:["coord","grip"], why:"The harness holds you. Holding the strap and lifting your legs for the landing is the skill. Mostly it takes nerve!", hint:"The harness does the holding up. What do you do for the landing?"}
+   ]},
+  {id:"run", name:"5k park run", short:"the 5k", note:"five kilometres, walk or run", bg:"linear-gradient(150deg,var(--yellow),var(--yellow-deep))", need:[5,2,1,2,2,3,2],
+   rehearse:"A few short, easy strides at the pace you want to run",
+   sec:[
+    {t:"First kilometre: finding a pace you can keep", a:["stamina"], why:"Starting steady saves energy for later. That is stamina thinking.", hint:"It is a long way. What keeps you going?"},
+    {t:"The hill", a:["strength","stamina"], why:"Legs push you up the slope, and stamina keeps you going over the top.", hint:"Your legs are lifting you uphill."},
+    {t:"Muddy, bumpy path", a:["balance","coord"], why:"Uneven ground means lots of tiny wobbles to catch.", hint:"The ground is not flat."},
+    {t:"Kilometres 2 to 4", a:["stamina"], why:"The long middle is all about keeping going.", hint:"The middle is the longest part."},
+    {t:"Sprint finish", a:["speed"], why:"A burst to the line, if you fancy it.", hint:"A quick dash at the end."}
+   ]},
+  {id:"climb", name:"Climbing wall", short:"the climbing wall", note:"ropes, harness, colourful holds", bg:"linear-gradient(150deg,#a77bb9,var(--plum))", lt:1, need:[3,4,5,4,4,1,4],
+   rehearse:"An easy traverse along the bottom of the wall",
+   sec:[
+    {t:"Reaching for a far hold", a:["flex","balance"], why:"Stretching a long way while keeping your feet on.", hint:"It is a long reach."},
+    {t:"Hanging on to tiny holds", a:["grip"], why:"Small holds are all about fingers.", hint:"Fingers, fingers, fingers."},
+    {t:"Pulling up to the next hold", a:["strength","grip"], why:"Arms and back pull you up.", hint:"Arms doing the pulling."},
+    {t:"Standing on a tiny foothold", a:["balance"], why:"Staying steady on a small edge is balance.", hint:"A small edge under one foot."},
+    {t:"Moving hands and feet smoothly", a:["coord"], why:"Hands and feet working together is coordination.", hint:"Lots of body parts at once."},
+    {t:"A long route to the top", a:["stamina","grip"], why:"Long routes tire your arms, so keeping going matters.", hint:"It goes on for ages."}
+   ]},
+  {id:"football", name:"Football skills test", short:"the skills test", note:"cones, keepy uppies, shooting", bg:"linear-gradient(150deg,#7fd3e6,var(--bright))", need:[3,2,1,3,2,4,5],
+   rehearse:"Gentle dribbling and a few easy passes",
+   sec:[
+    {t:"Dribbling through the cones", a:["coord","speed"], why:"Feet, eyes and ball working together, ideally at pace.", hint:"Feet and eyes and ball, all at once."},
+    {t:"Sprint to the line", a:["speed"], why:"Getting there quickly is speed.", hint:"A quick dash."},
+    {t:"Keepy uppies", a:["coord","balance"], why:"Lots of touches on one leg means coordination and balance.", hint:"Ball in the air, one foot on the floor."},
+    {t:"Shooting at a target", a:["coord","strength"], why:"Aim needs coordination, and a strong kick helps.", hint:"Aim, then kick."},
+    {t:"Quick turns", a:["balance","speed","coord"], why:"Changing direction fast without falling over.", hint:"Changing direction without falling over."}
+   ]},
+  {id:"dance", name:"Dance routine", short:"the routine", note:"steps, turns and a big finish", bg:"linear-gradient(150deg,#f08ab8,var(--pink))", need:[4,2,1,4,4,3,5],
+   rehearse:"Mark the routine at half speed",
+   sec:[
+    {t:"Steps in time to the beat", a:["coord"], why:"Moving with the music is coordination.", hint:"Body and music together."},
+    {t:"Holding a pose on one leg", a:["balance"], why:"Staying still on one leg is balance.", hint:"One leg, not moving."},
+    {t:"A high kick", a:["flex"], why:"How high a leg can go is flexibility.", hint:"How high can that leg go?"},
+    {t:"Fast footwork", a:["speed","coord"], why:"Quick feet that still land in the right place.", hint:"Quick feet."},
+    {t:"Jumps", a:["strength","speed"], why:"Legs pushing you off the floor, quickly.", hint:"Legs push you up."},
+    {t:"Keeping going to the end of the song", a:["stamina"], why:"The last chorus needs stamina.", hint:"The song is long."}
+   ]},
+  {id:"own", name:"My own challenge", short:"my challenge", note:"anything you like", bg:"linear-gradient(150deg,#fffdf8,#efe6d6)", need:[3,3,3,3,3,3,3],
+   rehearse:"The moves from your challenge, at half speed",
+   sec:[]}
+];
+var CBY = {}; CH.forEach(function(c){ CBY[c.id] = c });
+
+var DRILLS = [
+  {id:"wallsit", name:"Wall sit", p:"strength", u:"seconds", lo:2, hi:5, inc:1, timer:"watch", kit:"A wall",
+   how:"Back flat against a wall. Slide down until your knees are bent, only as low as feels okay. Hold.", safe:"Higher up is easier. Stop when your legs say stop."},
+  {id:"hang", name:"Hang or squeeze", p:"grip", u:"seconds", lo:2, hi:5, inc:1, timer:"watch", kit:"A low bar in PE, or a rolled up towel",
+   how:"In PE: hang from a low bar where your feet can touch the floor. At home: squeeze a rolled up towel hard and hold.", safe:"Let go whenever you like. Feet near the floor."},
+  {id:"line", name:"Heel to toe walk", p:"balance", u:"steps in a row", lo:1, hi:3, inc:1, kit:"A straight line, like tape or a floor line",
+   how:"Walk along a line, putting your heel right in front of your toes each step. Count steps before you step off.", safe:"Near a wall or a chair is fine."},
+  {id:"reach", name:"Sit and reach", p:"flex", u:"cm past your toes", lo:0.5, hi:1, inc:0.5, neg:1, kit:"A ruler and a wall or box",
+   how:"Sit with legs straight, feet flat against a box or wall. Reach forward slowly along a ruler. Your toes are 0. Short of your toes counts as minus.", safe:"Warm up first. Reach gently, no bouncing."},
+  {id:"step", name:"Step test", p:"stamina", u:"minutes", lo:0.5, hi:2, inc:0.5, timer:"watch", kit:"The bottom stair or a low step",
+   how:"Step up and down at a pace where you could still chat. Count the minutes you keep going.", safe:"Your pace, your choice. Stop whenever you like."},
+  {id:"touch", name:"Line touches", p:"speed", u:"touches in 20 seconds", lo:1, hi:2, inc:1, timer:"count", kit:"Two lines 5 metres apart, in PE or outside",
+   how:"Run to one line and touch it, then back to the other. Count the touches in 20 seconds.", safe:"Clear space, good shoes. Someone can time it for you, or use the timer."},
+  {id:"catch", name:"Wall catch", p:"coord", u:"catches in a row", lo:1, hi:5, inc:1, kit:"A soft ball or rolled up socks",
+   how:"Stand about 2 metres from a wall. Throw and catch. Count catches in a row. Fancy harder? Swap hands each throw.", safe:"Check nothing breakable is nearby."}
+];
+var DBY = {}; DRILLS.forEach(function(d){ DBY[d.id] = d });
+
+var FAIR = [
+  {t:"Sit and reach. First go: straight off the bus, cold. Second go: after a proper warm up.", a:"no", why:"Warm muscles reach further, so part of the change is the warm up, not the training."},
+  {t:"Wall catch. Both goes: same rolled up socks, same wall, standing on the same spot.", a:"yes", why:"Everything stays the same except you. That is a fair test."},
+  {t:"Line touches. First go: lines 5 metres apart. Second go: lines 3 metres apart.", a:"no", why:"Shorter distance means more touches anyway. Keep the lines in the same place."},
+  {t:"Hang. Both goes: same bar, start of PE, HB timing with the same stopwatch.", a:"yes", why:"Same bar, same time of day, same timer. Fair."},
+  {t:"Step test. First go: counted minutes. Second go: counted how many steps.", a:"no", why:"Different things were measured, so they cannot be compared."},
+  {t:"Wall sit. First go: after a long walk with Bonnie the poodle. Second go: fresh, before anything else.", a:"no", why:"Tired legs on the first go make the second look better than it really is."}
+];
+var FAIRCHIPS = ["Same time of day","Same kit and place","After the same warm up","Same person counting","Write it down straight away","Same rules every time"];
+
+var PGAME = [
+  {title:"Wall sit plans, starting at 20 seconds. Which one is most likely to work?", unit:"s", plans:[
+    {who:"Badger", v:[20,20,20,20,20,20], ok:0, why:"The same every week. Nothing new for the body to get used to, so not much changes."},
+    {who:"Bonnie the poodle", v:[20,25,30,35,40,45], ok:1, why:"A small step every week. Bodies like that. This is the one most likely to work."},
+    {who:"Otter", v:[20,60,100,140,180,220], ok:0, why:"Adding 40 seconds every week is a huge jump. Legs would be wrecked and it would stop being fun fast."}]},
+  {title:"Wall catch plans, starting at 6 catches in a row. Which one is most likely to work?", unit:"", plans:[
+    {who:"Hedgehog", v:[6,6,6,6,30], ok:0, why:"Nothing for weeks, then a giant leap at the end. Cramming does not work for bodies."},
+    {who:"Fox", v:[6,40,80,120,160], ok:0, why:"Going from 6 to 40 in one week is a massive first step."},
+    {who:"Squirrel", v:[6,8,10,12,14], ok:1, why:"Two more each week. Steady, doable, and it adds up to more than double."}]}
+];
+
+var WU = [
+  {id:"pulse", t:"Pulse raiser", d:"Gentle jog on the spot, marching or skipping. Heart up, muscles warm.", slot:0},
+  {id:"mob", t:"Loosen the joints", d:"Arm circles, hip circles, ankle rolls.", slot:1},
+  {id:"dyn", t:"Moving stretches", d:"Leg swings, walking lunges, reaching high and low as you move.", slot:2},
+  {id:"reh", t:"Practise the moves, gently", d:"", slot:3},
+  {id:"xw", t:"Flat out sprint, straight away", d:"From sitting still to top speed.", slot:-1, hint:"Cold muscles and a flat out sprint are not friends. This one stays out of the warm up."}
+];
+var WHINT = ["The pulse raiser goes first: warm everything up before anything else.", "Loosening the joints comes once your heart is going.", "Moving stretches come once you are warm and loose.", "Practising the real moves comes last, when your body is ready."];
+var CD = [
+  {id:"slow", t:"Ease off", d:"Walk or jog slowly, getting slower, so your heart rate comes down bit by bit.", slot:0},
+  {id:"stat", t:"Still stretches", d:"Gentle stretches held still for about 15 to 30 seconds. No bouncing.", slot:1},
+  {id:"chk", t:"Drink and check in", d:"Sip some water and notice how your body feels.", slot:2},
+  {id:"xc", t:"Stop dead and flop on the sofa", d:"Straight from hard work to lying down.", slot:-1, hint:"Stopping suddenly after hard work can leave some people dizzy. Easing off is kinder."}
+];
+var CHINT = ["Ease off first, so your heart slows down bit by bit.", "Still stretches work best on warm muscles, after easing off.", "Drink and check in is the finishing touch."];
+var MOVES = {
+  pulse:["Jog on the spot","Marching","Skipping","Slow star jumps"],
+  mob:["Arm circles","Hip circles","Ankle rolls","Shoulder rolls"],
+  dyn:["Leg swings","Walking lunges","Side steps","Reach high, reach low"],
+  slow:["Slow walk","Easy jog, getting slower"],
+  stat:["Calf stretch","Thigh stretch","Shoulder stretch","Back of the leg stretch"],
+  chk:["Water","Notice my breathing","Rate how I feel out of 5"]
+};
+
+var TOK = [
+  {id:"drill", t:"Drill session", s:"drill", bg:"var(--orange)", ic:'<rect x="4" y="12" width="32" height="18" rx="4" fill="#ffc247"' + SW + '/><path d="M10 21h20M20 15v12" stroke="' + INK + '" stroke-width="3"/>'},
+  {id:"prac", t:"Challenge practice", s:"practice", bg:"var(--yellow)", ic:'<circle cx="20" cy="20" r="15" fill="#e0443a"' + SW + '/><circle cx="20" cy="20" r="9" fill="#fffdf8"' + SW + '/><circle cx="20" cy="20" r="3" fill="#e0443a"/>'},
+  {id:"fun", t:"Active fun", s:"fun", bg:"#bfe8cf", ic:'<circle cx="20" cy="20" r="15" fill="#4bbf7f"' + SW + '/><path d="M13 17h2M25 17h2M12 24q8 7 16 0" fill="none"' + SW + '/>'},
+  {id:"pe", t:"PE lesson", s:"PE", bg:"#cdeef6", ic:'<path d="M8 34V14l12-8 12 8v20z" fill="#00a6c9"' + SW + '/><rect x="16" y="22" width="8" height="12" fill="#fffdf8"' + SW + '/>'},
+  {id:"rest", t:"Rest day", s:"rest", bg:"#e7dcf0", ic:'<rect x="6" y="11" width="26" height="18" rx="4" fill="#fffdf8"' + SW + '/><rect x="32" y="16" width="4" height="8" rx="1" fill="' + INK + '"/><rect class="chg" x="10" y="15" width="6" height="10" fill="#2f9e6a"/><rect class="chg" x="18" y="15" width="6" height="10" fill="#2f9e6a" style="animation-delay:.3s"/><rect class="chg" x="26" y="15" width="3" height="10" fill="#2f9e6a" style="animation-delay:.6s"/>'}
+];
+var TBY = {}; TOK.forEach(function(t){ TBY[t.id] = t });
+var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var FIXP = [
+  {q:"Badger's week", w:["drill","drill","drill","drill","drill","drill","drill"], note:"A wall sit drill every single day.", o:["No rest, and the same thing every day","Too many rest days","It looks balanced"], a:0, hints:["", "Count the rest days. Are there any?", "Look again: is there any rest, and is there any variety?"], why:"No rest and no variety. Bodies rebuild on rest days, and the same drill every day gets boring."},
+  {q:"Otter's week", w:["rest","rest","rest","rest","rest","rest","drill"], note:"Nothing all week, then three hours of drills on Sunday.", o:["No rest at all","Everything crammed into one day","It looks balanced"], a:1, hints:["Plenty of rest here. Look at Sunday.", "", "Three hours in one go, once a week? Have another look at Sunday."], why:"All crammed into one day. Shorter sessions spread across the week work better and are kinder to your body."},
+  {q:"Squirrel's week", w:["drill","rest","prac","fun","drill","rest","rest"], note:"Drills, practice, some fun, rest days between.", o:["Too many rest days","The same thing every day","It looks balanced"], a:2, hints:["Rest days are part of training. Three is fine, especially to start.", "Look at the colours: they are all different.", ""], why:"Mixed sessions, hard days spread out, rest in between. A cracking week."}
+];
+var LENS = ["10 minutes","15 minutes","20 minutes","30 minutes"];
+var CHECKD = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun","Every two weeks"];
+
+var STATUS = [
+  {id:"easy", t:"It felt easy, I am ahead", a:"Outrageous! Your body has caught up. You could make the weekly step a bit bigger.", act:"bigger", al:"Make the weekly step bigger"},
+  {id:"steady", t:"Getting there bit by bit", a:"That is exactly how training is meant to feel. Keep the plan as it is.", act:"keep", al:"Keep the plan"},
+  {id:"stuck", t:"Stuck on the same number", a:"Plateaus happen to everyone. Give it a bit longer, or swap one drill day for challenge practice.", act:"longer", al:"Give it two more weeks"},
+  {id:"sore", t:"Achy for days after", a:"That is a sign to ease off. A smaller step and an extra rest day is a smart change, not giving up.", act:"smaller", al:"Make the step smaller and add a rest day"},
+  {id:"bored", t:"It got boring", a:"Enjoying it is what keeps people going. Swap to a different drill, or add some active fun.", act:"swap", al:"Pick a different drill"},
+  {id:"busy", t:"Life got busy", a:"Fair enough. Fewer, shorter sessions still count. Give it more time.", act:"longer", al:"Give it two more weeks"}
+];
+var DAYCH = ["Not done it yet","I did the challenge!","Not going this time, still trained for it","Picked a new challenge"];
+
+var STUD = {
+  JT: {ms:["Set a realistic goal and say how you will measure your progress.","Record how you are getting on and say what you will do next."], st:[3,4,7]},
+  LW: {ms:["Choose a simple training goal for a sport.","Say what you would practise to reach your goal."], st:[1,2,4,6]},
+  EGW:{ms:["Set goals that stretch you but are still doable, explain why, and change the plan as you go.","Look back over a training period and set new goals for the next stage."], st:[4,7]},
+  LP: {ms:["Make a short training plan with clear goals, practice ideas and ways to check how it is going.","Follow the plan, record how it goes and change your goals if you need to."], st:[4,6,7]},
+  LC: {ms:["Pick a sport you want to get better at and name one skill in it.","Choose a simple goal to help you get better at that skill."], st:[1,4]},
+  HK: {ms:["Set a clear training goal and say what you need to practise.","Explain how you will measure your progress towards it."], st:[2,3,4]}
+};
+var MILESTONE_STAGES = {
+  1:"Picking a challenge and naming the one bit to get better at (LC, LW)",
+  2:"Working out what to practise from the gaps (HK, LW, LC)",
+  3:"Testing yourself and measuring progress fairly (JT, HK, LP)",
+  4:"Setting a clear goal that stretches but is doable, and saying why (LC, LW, JT, HK, EGW, LP)",
+  5:"Warm up and cool down as part of a training plan (LP, LW)",
+  6:"A weekly plan with practice ideas, rest and a check in day (LP, LW, HK, EGW)",
+  7:"Recording progress, changing the plan, looking back and setting the next goal (JT, EGW, LP)"
+};
+var STAGES = [
+  {n:1, t:"Choose your challenge", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", ic:'<path d="M8 36V6" stroke="' + INK + '" stroke-width="3"/><path d="M8 7h24l-6 7 6 7H8z" fill="#ffc247"' + SW + '/>'},
+  {n:2, t:"The power wheel", bg:"linear-gradient(150deg,var(--yellow),var(--yellow-deep))", ic:'<circle cx="20" cy="20" r="16" fill="#fffdf8"' + SW + '/><path d="M20 20V4A16 16 0 0 1 35 15z" fill="#00a6c9"' + SW + '/><path d="M20 20L35 15A16 16 0 0 1 30 32z" fill="#ef7724"' + SW + '/>'},
+  {n:3, t:"Drill library", bg:"linear-gradient(150deg,var(--teal),#005a73)", lt:1, ic:'<rect x="6" y="5" width="28" height="31" rx="4" fill="#fffdf8"' + SW + '/><path d="M12 14h16M12 21h16M12 28h10" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>'},
+  {n:4, t:"Little by little", bg:"linear-gradient(150deg,var(--plum),#5c3269)", lt:1, ic:'<rect x="3" y="3" width="34" height="34" rx="5" fill="#fffdf8"' + SW + '/><path d="M8 31l7-5 7-4 7-6 6-7" fill="none" stroke="#ef7724" stroke-width="3.5" stroke-linecap="round"/><circle cx="35" cy="9" r="3" fill="#ffc247"' + SW + '/>'},
+  {n:5, t:"Warm up, cool down", bg:"linear-gradient(150deg,var(--bright),var(--teal))", lt:1, ic:'<rect x="15" y="4" width="10" height="26" rx="5" fill="#fffdf8"' + SW + '/><circle cx="20" cy="31" r="7" fill="#e0443a"' + SW + '/><path d="M20 30V14" stroke="#e0443a" stroke-width="4"/>'},
+  {n:6, t:"Build the week", bg:"linear-gradient(150deg,var(--orange),var(--orange-deep))", ic:'<rect x="4" y="7" width="32" height="28" rx="4" fill="#fffdf8"' + SW + '/><path d="M4 15h32M12 4v6M28 4v6" stroke="' + INK + '" stroke-width="3"/><rect x="9" y="19" width="6" height="5" fill="#2f9e6a"/><rect x="17" y="19" width="6" height="5" fill="#ef7724"/><rect x="25" y="26" width="6" height="5" fill="#7b4b8f"/>'},
+  {n:7, t:"Camp review", bg:"linear-gradient(150deg,var(--teal),#005a73)", lt:1, ic:'<circle cx="17" cy="17" r="11" fill="#fffdf8"' + SW + '/><path d="M25 25l10 10" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/><path d="M12 19l4-4 3 3 4-5" fill="none" stroke="#ef7724" stroke-width="3" stroke-linecap="round"/>'}
+];
+
+/* ---------------- state ---------------- */
+function fresh(){
+  return {ch:"", ownCh:"", bit:-1, ownBit:"", sort:{}, si:0,
+    need:{}, me:[0,0,0,0,0,0,0], focus:[], practise:"", needOpen:false,
+    logs:{}, fair:{}, fairChips:[], measure:"",
+    pg:{}, pgi:0, goal:{drill:"", start:"", step:0, weeks:6}, verdict:"", why4:"",
+    wu:{w:[null,null,null,null], c:[null,null,null,null], wok:false, cok:false, moves:{}},
+    week:[null,null,null,null,null,null,null], fix:{}, fi:0, len:"", checkDay:"",
+    status:"", changes:[], dayc:"", reflect:"", next:"", tried:{}, look:false};
+}
+var st = fresh();
+try{
+  var raw = JSON.parse(localStorage.getItem(KEY));
+  if(raw && typeof raw === "object"){
+    var f = fresh();
+    for(var k in f){ if(raw[k] !== undefined) f[k] = raw[k] }
+    ["goal","wu"].forEach(function(o){ var d = fresh()[o]; if(!f[o] || typeof f[o] !== "object") f[o] = d; for(var kk in d){ if(f[o][kk] === undefined) f[o][kk] = d[kk] } });
+    if(!Array.isArray(f.me) || f.me.length !== 7) f.me = [0,0,0,0,0,0,0];
+    if(!Array.isArray(f.week) || f.week.length !== 7) f.week = [null,null,null,null,null,null,null];
+    st = f;
+  }
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
+function tried(n){ if(!st.tried[n]){ st.tried[n] = 1; drawMap() } save(); drawPass() }
+function getWho(){ try{ return localStorage.getItem(WHO) || "" }catch(e){ return "" } }
+function setWho(v){ try{ localStorage.setItem(WHO, v) }catch(e){} }
+
+function chal(){ return CBY[st.ch] || null }
+function chalName(){ var c = chal(); if(!c) return ""; return c.id === "own" ? (st.ownCh.trim() || "my own challenge") : c.name }
+function bitName(){ var c = chal(); if(!c) return ""; if(c.id === "own") return st.ownBit.trim(); return st.bit > -1 && c.sec[st.bit] ? c.sec[st.bit].t : "" }
+function needArr(){ var c = chal(); if(!c) return null; var n = st.need[c.id]; return (n && n.length === 7) ? n : c.need.slice() }
+function meTouched(){ return st.me.some(function(v){ return v > 0 }) }
+function logsFor(id){ return st.logs[id] || [] }
+function firstGo(id){ var L = logsFor(id); return L.length ? L[0] : null }
+function latestGo(id){ var L = logsFor(id); return L.length ? L[L.length - 1] : null }
+
+/* confetti */
+function burst(target){
+  if(RM || !target || !target.getBoundingClientRect) return;
+  var r = target.getBoundingClientRect(), cols = ["#ef7724","#ffc247","#00a6c9","#7b4b8f","#2f9e6a","#e85d9a"];
+  for(var i = 0; i < 16; i++){
+    var b = document.createElement("span"); b.className = "bit";
+    b.style.left = (r.left + r.width / 2) + "px"; b.style.top = (r.top + r.height / 2) + "px";
+    b.style.background = cols[i % cols.length];
+    var a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 80;
+    b.style.setProperty("--dx", Math.round(Math.cos(a) * d) + "px");
+    b.style.setProperty("--dy", Math.round(Math.sin(a) * d - 30) + "px");
+    document.body.appendChild(b);
+    (function(x){ setTimeout(function(){ if(x.parentNode) x.parentNode.removeChild(x) }, 950) })(b);
+  }
+}
+function btn(cls, html, pressed){ var b = document.createElement("button"); b.type = "button"; b.className = cls; b.innerHTML = html; if(pressed !== undefined) b.setAttribute("aria-pressed", pressed ? "true" : "false"); return b }
+function chipList(box, items, isOn, onTap){
+  box.innerHTML = "";
+  items.forEach(function(it, i){
+    var b = btn("pk", esc(it), isOn(it, i));
+    b.addEventListener("click", function(){ onTap(it, i, b) });
+    box.appendChild(b);
+  });
+}
+function setFb(id, cls, txt){ var f = el(id); f.className = "fb" + (cls ? " " + cls : ""); f.textContent = txt }
+
+/* ---------------- who + map ---------------- */
+var who = (function(){ var w = getWho().toUpperCase(); return STUD[w] ? w : "" })();
+function drawWho(){
+  var row = el("whoRow"); row.innerHTML = "";
+  ["JT","LW","EGW","LP","LC","HK"].forEach(function(w){
+    var b = btn("whobtn", w, who === w);
+    b.addEventListener("click", function(){ who = (who === w) ? "" : w; if(who) setWho(who); st.look = false; save(); drawWho(); drawMap(); drawPass() });
+    row.appendChild(b);
+  });
+  var lk = btn("whobtn", "Just looking", !who && st.look);
+  lk.addEventListener("click", function(){ who = ""; st.look = true; save(); drawWho(); drawMap(); drawPass() });
+  row.appendChild(lk);
+  var ms = el("msList");
+  if(who){
+    ms.hidden = false;
+    ms.innerHTML = "<li><b>Step one</b>" + esc(STUD[who].ms[0]) + "</li><li><b>Step two</b>" + esc(STUD[who].ms[1]) + "</li>" +
+      "<li style='border-style:solid;border-color:var(--yellow-deep);background:#fff4d9'>Stages marked <b style='display:inline;color:var(--ink)'>good place to start</b> suit these best. Everything stays open, in any order.</li>";
+  }else ms.hidden = true;
+  document.querySelectorAll(".stage").forEach(function(d){
+    var n = +d.getAttribute("data-n");
+    d.classList.toggle("suits", !!(who && STUD[who].st.indexOf(n) > -1));
+  });
+}
+function drawMap(){
+  var box = el("smap"); box.innerHTML = "";
+  STAGES.forEach(function(s){
+    var b = btn("smbtn" + (s.lt ? " lt" : ""), '<span class="n">Stage ' + s.n + '</span>' + svg("0 0 40 40", s.ic) + '<span>' + esc(s.t) + '</span><span class="gps">Good place to start</span><span class="tick">' + TICK + '</span>');
+    b.style.background = s.bg;
+    if(st.tried[s.n]) b.classList.add("done");
+    if(who && STUD[who].st.indexOf(s.n) > -1) b.classList.add("suits");
+    b.setAttribute("aria-label", "Stage " + s.n + ", " + s.t + (st.tried[s.n] ? ", tried" : "") + (who && STUD[who].st.indexOf(s.n) > -1 ? ", good place to start" : ""));
+    b.addEventListener("click", function(){ openStage(s.n) });
+    box.appendChild(b);
+  });
+}
+function openStage(n){
+  var d = el("st" + n); d.open = true;
+  setTimeout(function(){ d.scrollIntoView({behavior: RM ? "auto" : "smooth", block:"start"}) }, 30);
+}
+
+/* ---------------- stage 1: challenge ---------------- */
+var CHTHUMB = {
+  ropes:'<rect x="6" y="10" width="8" height="46" fill="#8a5a3b"' + SW + '/><rect x="62" y="10" width="8" height="46" fill="#8a5a3b"' + SW + '/><path d="M14 24 Q38 36 62 24" fill="none"' + SW + '/><path d="M20 28v6M28 31v6M36 32v6M44 31v6M52 28v6" stroke="' + INK + '" stroke-width="3"/><circle cx="10" cy="10" r="9" fill="#2f9e6a"' + SW + '/><circle cx="66" cy="10" r="9" fill="#2f9e6a"' + SW + '/>',
+  run:'<path d="M4 50 C20 50 24 20 40 22 S60 46 72 40" fill="none" stroke="#ef7724" stroke-width="5" stroke-linecap="round"/><path d="M60 40V14" stroke="' + INK + '" stroke-width="3"/><path d="M60 14h12l-4 5 4 5H60z" fill="#e0443a"' + SW + '/><text x="14" y="24" font-family="Archivo,Arial" font-weight="900" font-size="16" fill="' + INK + '">5K</text>',
+  climb:'<rect x="10" y="4" width="56" height="50" rx="4" fill="#d6c9b6"' + SW + '/><circle cx="22" cy="16" r="4" fill="#ef7724"' + SW + '/><circle cx="44" cy="22" r="4" fill="#00a6c9"' + SW + '/><circle cx="28" cy="36" r="4" fill="#2f9e6a"' + SW + '/><circle cx="52" cy="42" r="4" fill="#ffc247"' + SW + '/><path d="M40 4v20" stroke="#e0443a" stroke-width="2.5"/>',
+  football:'<rect x="4" y="30" width="68" height="24" rx="3" fill="#4bbf7f"' + SW + '/><path d="M14 46l5-10 5 10zM30 46l5-10 5 10zM46 46l5-10 5 10z" fill="#ef7724"' + SW + '/><circle cx="60" cy="18" r="10" fill="#fffdf8"' + SW + '/><path d="M60 13l4 3-1.5 5h-5L56 16z" fill="' + INK + '"/>',
+  dance:'<path d="M4 54h68" stroke="' + INK + '" stroke-width="3"/><path d="M14 4l-8 46h28z" fill="#ffc247" opacity=".55"/><path d="M60 4l-14 46h24z" fill="#ffc247" opacity=".55"/><path d="M34 32V12l16-4v20" fill="none"' + SW + '/><circle cx="30" cy="33" r="5" fill="#7b4b8f"' + SW + '/><circle cx="46" cy="29" r="5" fill="#7b4b8f"' + SW + '/>',
+  own:'<path d="M4 54l22-32 14 18 10-12 22 26z" fill="#4bbf7f"' + SW + '/><path d="M50 28V6" stroke="' + INK + '" stroke-width="3"/><path d="M50 6h14l-4 5 4 5H50z" fill="#ffc247"' + SW + '/>'
+};
+function drawChallenges(){
+  var g = el("chGrid"); g.innerHTML = "";
+  CH.forEach(function(c){
+    var b = btn("chal" + (c.lt ? " lt" : ""), svg("0 0 76 58", CHTHUMB[c.id]) + '<span>' + esc(c.name) + '</span><small>' + esc(c.note) + '</small>', st.ch === c.id);
+    b.style.background = c.bg;
+    b.addEventListener("click", function(){
+      if(st.ch !== c.id){ st.ch = c.id; st.bit = -1; st.si = 0 }
+      tried(1); drawChallenges(); drawScene(); drawSort(); afterChallenge(); burst(b);
+    });
+    g.appendChild(b);
+  });
+  el("ownChBox").hidden = st.ch !== "own";
+}
+
+/* scenes: 400 x 220 */
+var MK = {
+  ropes:[[44,160],[108,116],[192,80],[228,34],[344,118]],
+  run:[[50,166],[150,48],[222,170],[300,100],[368,148]],
+  climb:[[110,54],[210,140],[160,96],[256,182],[292,86],[318,30]],
+  football:[[120,150],[60,70],[210,70],[340,110],[270,170]],
+  dance:[[70,150],[150,90],[220,70],[290,150],[200,160],[340,60]],
+  own:[]
+};
+function sceneSVG(id, sel){
+  var o = ['<svg class="scene" viewBox="0 0 400 220" role="img" aria-label="Picture of ' + esc(CBY[id].name) + ' with numbered bits">'];
+  o.push('<rect width="400" height="220" fill="#dff3f8"/>');
+  if(id === "ropes"){
+    o.push('<path d="M0 205 Q200 190 400 205 V220 H0z" fill="#4bbf7f"' + SW + '/>');
+    [[42,20],[157,10],[272,10]].forEach(function(t){ o.push('<rect x="' + t[0] + '" y="' + (t[1] + 14) + '" width="16" height="' + (200 - t[1]) + '" fill="#8a5a3b"' + SW + '/><circle cx="' + (t[0] + 8) + '" cy="' + (t[1] + 6) + '" r="26" fill="#2f9e6a"' + SW + '/><circle cx="' + (t[0] - 10) + '" cy="' + (t[1] + 18) + '" r="14" fill="#4bbf7f"' + SW + '/>') });
+    o.push('<rect x="28" y="100" width="44" height="7" rx="2" fill="#ffc247"' + SW + '/>');
+    o.push('<path d="M30 107V204M44 107V204" stroke="' + INK + '" stroke-width="3"/>');
+    for(var y = 118; y < 204; y += 13) o.push('<path d="M30 ' + y + 'H44" stroke="' + INK + '" stroke-width="3"/>');
+    o.push('<path d="M72 80 Q114 92 157 80" fill="none" stroke="' + INK + '" stroke-width="2"/>');
+    for(var x = 76; x < 156; x += 11){ var yy = 100 + Math.sin((x - 72) / 85 * Math.PI) * 10; o.push('<rect x="' + x + '" y="' + yy.toFixed(1) + '" width="9" height="6" rx="2" fill="#c98b5c" stroke="' + INK + '" stroke-width="2"/>') }
+    o.push('<rect x="143" y="100" width="44" height="7" rx="2" fill="#ffc247"' + SW + '/><rect x="143" y="50" width="44" height="7" rx="2" fill="#ffc247"' + SW + '/>');
+    for(var nx = 176; nx <= 206; nx += 8) o.push('<path d="M' + nx + ' 57 L' + (nx + 8) + ' 100" stroke="' + INK + '" stroke-width="1.5"/><path d="M' + (nx + 8) + ' 57 L' + nx + ' 100" stroke="' + INK + '" stroke-width="1.5"/>');
+    o.push('<path d="M187 52 L272 52" stroke="' + INK + '" stroke-width="2.5"/><path d="M187 30 Q230 36 272 30" fill="none" stroke="' + INK + '" stroke-width="2" stroke-dasharray="4 3"/>');
+    o.push('<rect x="258" y="50" width="44" height="7" rx="2" fill="#ffc247"' + SW + '/>');
+    o.push('<path d="M300 46 L398 200" stroke="' + INK + '" stroke-width="2.5"/>');
+    o.push('<path d="M120 22 q6 -6 12 0 q-6 -1 -6 4z" fill="#7b4b8f" stroke="' + INK + '" stroke-width="1.5"/>');
+  }else if(id === "run"){
+    o.push('<path d="M0 120 Q100 110 200 120 T400 115 V220 H0z" fill="#4bbf7f"' + SW + '/>');
+    o.push('<path d="M100 120 Q150 30 210 120z" fill="#2f9e6a"' + SW + '/>');
+    o.push('<path d="M20 182 C80 182 100 64 156 64 S230 184 270 168 S330 92 380 160" fill="none" stroke="#c98b5c" stroke-width="14" stroke-linecap="round"/>');
+    o.push('<path d="M20 182 C80 182 100 64 156 64 S230 184 270 168 S330 92 380 160" fill="none" stroke="#fffdf8" stroke-width="2" stroke-dasharray="6 6"/>');
+    o.push('<ellipse cx="240" cy="178" rx="18" ry="6" fill="#8a5a3b" opacity=".6"/><ellipse cx="206" cy="160" rx="10" ry="4" fill="#8a5a3b" opacity=".6"/>');
+    o.push('<path d="M360 170V116M396 170V116" stroke="' + INK + '" stroke-width="3"/><rect x="356" y="106" width="44" height="14" fill="#ef7724"' + SW + '/><text x="378" y="117" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="9" fill="' + INK + '">FINISH</text>');
+    [[90,140,"1"],[180,96,"2"],[262,166,"3"],[318,118,"4"]].forEach(function(k){ o.push('<path d="M' + k[0] + ' ' + k[1] + 'v-22" stroke="' + INK + '" stroke-width="2"/><rect x="' + k[0] + '" y="' + (k[1] - 22) + '" width="16" height="11" fill="#fffdf8" stroke="' + INK + '" stroke-width="2"/><text x="' + (k[0] + 8) + '" y="' + (k[1] - 13) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="8" fill="' + INK + '">' + k[2] + 'K</text>') });
+  }else if(id === "climb"){
+    o.push('<path d="M60 220 L70 6 H340 L330 220z" fill="#d6c9b6"' + SW + '/>');
+    var holds = [[96,40,"#ef7724"],[130,70,"#00a6c9"],[150,120,"#2f9e6a"],[190,40,"#7b4b8f"],[230,110,"#ffc247"],[270,60,"#e85d9a"],[300,140,"#ef7724"],[120,180,"#7b4b8f"],[200,190,"#2f9e6a"],[290,190,"#00a6c9"],[250,30,"#2f9e6a"],[180,150,"#e0443a"]];
+    holds.forEach(function(h){ o.push('<ellipse cx="' + h[0] + '" cy="' + h[1] + '" rx="7" ry="5" fill="' + h[2] + '" stroke="' + INK + '" stroke-width="2"/>') });
+    o.push('<path d="M320 6 V220" stroke="#e0443a" stroke-width="2.5"/><path d="M200 6 V220" stroke="#007291" stroke-width="2.5" stroke-dasharray="1 0"/>');
+  }else if(id === "football"){
+    o.push('<rect width="400" height="220" fill="#4bbf7f"/><path d="M0 0H400" stroke="' + INK + '"/><rect x="10" y="10" width="380" height="200" fill="none" stroke="#fffdf8" stroke-width="3"/><path d="M200 10V210" stroke="#fffdf8" stroke-width="3"/>');
+    [[90,140],[120,170],[150,140],[180,170]].forEach(function(c){ o.push('<path d="M' + (c[0] - 7) + ' ' + c[1] + 'l7 -16l7 16z" fill="#ef7724" stroke="' + INK + '" stroke-width="2"/>') });
+    o.push('<path d="M30 54 H120" stroke="#fffdf8" stroke-width="3" stroke-dasharray="6 4"/><path d="M120 44 v20" stroke="#ffc247" stroke-width="4"/>');
+    o.push('<rect x="360" y="70" width="30" height="80" fill="none" stroke="#fffdf8" stroke-width="4"/><circle cx="378" cy="88" r="8" fill="none" stroke="#e0443a" stroke-width="3"/>');
+    o.push('<circle cx="210" cy="50" r="9" fill="#fffdf8"' + SW + '/><path d="M210 66 q8 18 0 30" fill="none" stroke="#fffdf8" stroke-width="2" stroke-dasharray="3 3"/>');
+    o.push('<path d="M250 180 q20 -30 40 0" fill="none" stroke="#fffdf8" stroke-width="3"/>');
+  }else if(id === "dance"){
+    o.push('<rect width="400" height="220" fill="#3b2050"/><path d="M0 170 H400 V220 H0z" fill="#8a5a3b"' + SW + '/>');
+    o.push('<path d="M60 0 L20 170 H140z" fill="#ffc247" opacity=".35"/><path d="M330 0 L260 170 H390z" fill="#ffc247" opacity=".35"/><path d="M200 0 L150 170 H250z" fill="#e85d9a" opacity=".3"/>');
+    o.push('<path d="M110 40V20l20-5v20" fill="none" stroke="#fffdf8" stroke-width="3"/><circle cx="106" cy="41" r="5" fill="#fffdf8"/><circle cx="126" cy="36" r="5" fill="#fffdf8"/>');
+    o.push('<path d="M300 110 V92 l14 -4 v18" fill="none" stroke="#fffdf8" stroke-width="3"/><circle cx="296" cy="111" r="4" fill="#fffdf8"/><circle cx="310" cy="107" r="4" fill="#fffdf8"/>');
+    o.push('<g stroke="#fffdf8" stroke-width="4" stroke-linecap="round" fill="none"><circle cx="200" cy="104" r="9" fill="#fffdf8"/><path d="M200 113v28M200 122l-16 -10M200 122l18 -12M200 141l-12 26M200 141l26 -10"/></g>');
+  }else{
+    o.push('<path d="M0 220 L120 70 L200 160 L270 90 L400 220z" fill="#4bbf7f"' + SW + '/><path d="M270 90V30" stroke="' + INK + '" stroke-width="3"/><path d="M270 30h34l-8 9 8 9h-34z" fill="#ffc247"' + SW + '/>');
+    o.push('<path d="M30 210 Q120 150 160 170 T270 96" fill="none" stroke="#fffdf8" stroke-width="3" stroke-dasharray="6 6"/>');
+  }
+  (MK[id] || []).forEach(function(p, i){
+    o.push('<g class="mk' + (sel === i ? ' on' : '') + '"><circle cx="' + p[0] + '" cy="' + p[1] + '" r="13" fill="#fffdf8" stroke="' + INK + '" stroke-width="3"/><text x="' + p[0] + '" y="' + (p[1] + 5) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="14" fill="' + INK + '">' + (i + 1) + '</text></g>');
+  });
+  o.push("</svg>");
+  return o.join("");
+}
+function drawScene(){
+  var c = chal();
+  el("sceneWrap").innerHTML = c ? '<div class="scenebox">' + sceneSVG(c.id, c.id === "own" ? -1 : st.bit) + '</div>' : "";
+  var box = el("secs"); box.innerHTML = "";
+  el("secLab").textContent = c ? (c.id === "own" ? "What is the bit you most want to get better at?" : "Tap the bit you most want to get better at") : "Pick a challenge and its bits show up here";
+  el("ownBitBox").hidden = !(c && c.id === "own");
+  if(c && c.id !== "own"){
+    c.sec.forEach(function(s, i){
+      var b = btn("sec", '<b>' + (i + 1) + '</b><span>' + esc(s.t) + '</span>', st.bit === i);
+      b.addEventListener("click", function(){ st.bit = st.bit === i ? -1 : i; tried(1); drawScene(); drawS1fb(); afterChallenge(); if(st.bit === i) burst(b) });
+      box.appendChild(b);
+    });
+  }
+  drawS1fb();
+}
+function drawS1fb(){
+  var c = chal(), b = bitName();
+  el("s1fb").textContent = c && b ? "Training for: " + chalName() + ". The bit to nail: " + b.toLowerCase() + "." : (c ? "Good pick. Now the one bit you most want to get better at." : "");
+}
+/* course sort */
+function sortChal(){ var c = chal(); return (c && c.id !== "own") ? c : CBY.ropes }
+function drawSort(){
+  var c = sortChal(), S = c.sec; if(st.si >= S.length) st.si = 0;
+  var q = S[st.si], done = st.sort[c.id] || {};
+  el("sortNote").textContent = (chal() && chal().id === "own") || !chal() ? "Using the rope course for this game. Tap the power you think each bit needs most. Some bits have more than one good answer." : "Tap the power you think each bit needs most. Some bits have more than one good answer.";
+  el("sortCount").textContent = c.name + ": bit " + (st.si + 1) + " of " + S.length;
+  el("sortQ").textContent = q.t;
+  var box = el("sortOpts"); box.innerHTML = "";
+  POW.forEach(function(p){
+    var isGood = done[st.si] && q.a.indexOf(p.id) > -1;
+    var b = btn("pk" + (isGood ? " good" : ""), pIcon(p.id) + "<span>" + esc(p.name) + "</span>");
+    b.addEventListener("click", function(){
+      if(q.a.indexOf(p.id) > -1){
+        if(!st.sort[c.id]) st.sort[c.id] = {};
+        st.sort[c.id][st.si] = 1; tried(1);
+        var others = q.a.filter(function(x){ return x !== p.id }).map(function(x){ return PBY[x].name.toLowerCase() });
+        setFb("sortFb", "good", "Yes, " + p.name.toLowerCase() + ". " + q.why + (others.length ? " (" + others.join(" and ") + " would count too.)" : ""));
+        drawSortBits(); burst(b);
+        box.querySelectorAll(".pk").forEach(function(x, j){ if(q.a.indexOf(POW[j].id) > -1) x.classList.add("good") });
+      }else{
+        b.classList.add("miss"); tried(1);
+        setFb("sortFb", "soft", p.name + " is " + p.what + ". Clue: " + q.hint + " Have another go.");
+      }
+    });
+    box.appendChild(b);
+  });
+  if(done[st.si]) setFb("sortFb", "good", "Sorted already. " + q.why); else setFb("sortFb", "", "");
+  drawSortBits();
+}
+function drawSortBits(){
+  var c = sortChal(), d = el("sortDots"), done = st.sort[c.id] || {}; d.innerHTML = "";
+  c.sec.forEach(function(s, i){ var x = document.createElement("i"); if(done[i]) x.className = "on"; else if(i === st.si) x.className = "cur"; d.appendChild(x) });
+}
+el("sortNext").addEventListener("click", function(){ st.si = (st.si + 1) % sortChal().sec.length; save(); drawSort() });
+el("sortPrev").addEventListener("click", function(){ var n = sortChal().sec.length; st.si = (st.si + n - 1) % n; save(); drawSort() });
+function sortTotal(){ var t = 0; Object.keys(st.sort).forEach(function(k){ t += Object.keys(st.sort[k]).length }); return t }
+
+/* ---------------- stage 2: power wheel ---------------- */
+function arcPt(r, a){ return (Math.cos(a) * r).toFixed(1) + " " + (Math.sin(a) * r).toFixed(1) }
+function wheelSVG(need, me, labels){
+  var R = 100, n = 7, step = 2 * Math.PI / n, o = [];
+  var vb = labels ? "-205 -132 410 264" : "-106 -106 212 212";
+  o.push('<svg class="wheel" viewBox="' + vb + '" role="img" aria-label="Power wheel: what the challenge needs and where I am now">');
+  o.push('<defs><pattern id="hatch' + (labels ? "L" : "S") + '" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#ffc247"/><rect width="4" height="8" fill="#ef7724"/></pattern></defs>');
+  for(var i = 0; i < n; i++){
+    var a0 = -Math.PI / 2 + i * step + 0.03, a1 = a0 + step - 0.06;
+    o.push('<path d="M0 0 L' + arcPt(R, a0) + ' A' + R + ' ' + R + ' 0 0 1 ' + arcPt(R, a1) + ' Z" fill="' + (i % 2 ? "#f2ead9" : "#fffdf8") + '" stroke="#d6c9b6" stroke-width="1.5"/>');
+    for(var ring = 1; ring < 5; ring++){ var rr = R * ring / 5; o.push('<path d="M' + arcPt(rr, a0) + ' A' + rr + ' ' + rr + ' 0 0 1 ' + arcPt(rr, a1) + '" fill="none" stroke="#d6c9b6" stroke-width="1"/>') }
+    var m = me ? me[i] : 0, nd = need ? need[i] : 0, rm = R * m / 5, rn = R * nd / 5;
+    if(m > 0) o.push('<path d="M0 0 L' + arcPt(rm, a0) + ' A' + rm + ' ' + rm + ' 0 0 1 ' + arcPt(rm, a1) + ' Z" fill="#00a6c9" stroke="' + INK + '" stroke-width="2"/>');
+    if(nd > m && m > 0){ o.push('<path d="M' + arcPt(rm, a0) + ' L' + arcPt(rn, a0) + ' A' + rn + ' ' + rn + ' 0 0 1 ' + arcPt(rn, a1) + ' L' + arcPt(rm, a1) + (rm > 0 ? ' A' + rm + ' ' + rm + ' 0 0 0 ' + arcPt(rm, a0) : '') + ' Z" fill="url(#hatch' + (labels ? "L" : "S") + ')" opacity=".85"/>') }
+    if(nd > 0) o.push('<path d="M' + arcPt(rn, a0) + ' A' + rn + ' ' + rn + ' 0 0 1 ' + arcPt(rn, a1) + '" fill="none" stroke="#d75f10" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="round"/>');
+    if(labels){
+      var am = a0 + step / 2 - 0.03, lx = Math.cos(am) * 114, ly = Math.sin(am) * 114 + 5, anc = Math.abs(lx) < 12 ? "middle" : (lx > 0 ? "start" : "end");
+      if(Math.abs(lx) < 12) ly -= 4;
+      o.push('<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anc + '" font-family="Archivo,Arial" font-weight="800" font-size="14" fill="' + INK + '">' + POW[i].name + '</text>');
+    }
+  }
+  o.push('<circle r="7" fill="#ffc247" stroke="' + INK + '" stroke-width="2.5"/></svg>');
+  return o.join("");
+}
+function drawWheel(){
+  var need = needArr();
+  el("wheelBox").innerHTML = wheelSVG(need, st.me, true);
+  el("wheelNote").textContent = chal() ? "Needs for " + chalName() + " are a rough camp guess. You can change them." : "Pick a challenge in stage 1 and its needs appear as the dashed orange line.";
+  drawGaps(); drawPass();
+}
+function drawPowRows(){
+  var box = el("powRows"); box.innerHTML = "";
+  var need = needArr();
+  POW.forEach(function(p, i){
+    var row = document.createElement("div"); row.className = "prow";
+    row.innerHTML = '<div class="pn">' + pIcon(p.id) + '<span>' + esc(p.name) + ' <small>' + esc(p.what) + '</small></span></div>';
+    function lvRow(cls, lab, val, on){
+      var d = document.createElement("div"); d.className = "lv " + cls;
+      d.innerHTML = "<span>" + lab + "</span>";
+      for(var v = 1; v <= 5; v++){
+        (function(v){
+          var b = btn(val === v ? "on" : "", String(v)); b.setAttribute("aria-label", p.name + ", " + lab + ", " + v + " out of 5"); b.setAttribute("aria-pressed", val === v ? "true" : "false");
+          b.addEventListener("click", function(){ on(v) });
+          d.appendChild(b);
+        })(v);
+      }
+      row.appendChild(d);
+    }
+    lvRow("me", "Me now", st.me[i], function(v){ st.me[i] = v; tried(2); drawPowRows(); drawWheel() });
+    if(st.needOpen && need) lvRow("need", "Needs", need[i], function(v){ var a = needArr(); a[i] = v; st.need[st.ch] = a; tried(2); drawPowRows(); drawWheel() });
+    box.appendChild(row);
+  });
+  var t = el("needToggle"); t.setAttribute("aria-pressed", st.needOpen ? "true" : "false");
+  t.textContent = st.needOpen ? "Hide the needs" : "I want to change what the challenge needs";
+  t.hidden = !chal();
+}
+el("needToggle").addEventListener("click", function(){ st.needOpen = !st.needOpen; save(); drawPowRows() });
+function gapList(){
+  var n = needArr(); if(!n || !meTouched()) return [];
+  return POW.map(function(p, i){ return {p:p, g:n[i] - (st.me[i] || 0), need:n[i], rated:st.me[i] > 0} }).filter(function(x){ return x.rated && x.g > 0 }).sort(function(a, b){ return b.g - a.g || b.need - a.need });
+}
+function drawGaps(){
+  var box = el("gaps"), g = gapList();
+  if(!chal()) box.innerHTML = "<p class='small'>Pick a challenge and rate yourself, and the gaps show up here.</p>";
+  else if(!meTouched()) box.innerHTML = "<p class='small'>Tap a level for a few powers and the gaps show up here.</p>";
+  else if(!g.length) box.innerHTML = "<p class='small'>No gaps on the powers you rated. Outrageous! Pick one to make even stronger, or rate a few more.</p>";
+  else box.innerHTML = g.slice(0, 3).map(function(x){ return '<div class="gap">' + pIcon(x.p.id) + '<b style="min-width:96px">' + esc(x.p.name) + '</b><div class="bar"><span style="width:' + Math.min(100, x.g * 25) + '%"></span></div><span class="small">gap of ' + x.g + '</span></div>' }).join("");
+  var big = g.slice(0, 2).map(function(x){ return x.p.id });
+  chipList(el("focusChips"), POW.map(function(p){ return p.name }), function(it, i){ return st.focus.indexOf(POW[i].id) > -1 }, function(it, i){
+    var id = POW[i].id, k = st.focus.indexOf(id);
+    if(k > -1) st.focus.splice(k, 1); else { st.focus.push(id); if(st.focus.length > 2) st.focus.shift() }
+    tried(2); drawGaps(); drawDrills(); drawGoalDrill(); drawWeek();
+  });
+  el("focusChips").querySelectorAll(".pk").forEach(function(b, i){ b.insertAdjacentHTML("afterbegin", pIcon(POW[i].id)); if(big.indexOf(POW[i].id) > -1 && st.focus.indexOf(POW[i].id) < 0) b.style.borderStyle = "dashed" });
+  var fd = st.focus.map(function(id){ var d = DRILLS.filter(function(x){ return x.p === id })[0]; return d ? d.name.toLowerCase() : "" }).filter(Boolean);
+  el("focusHint").textContent = st.focus.length ? "Drills that train this: " + fd.join(" and ") + ". They are in the drill library, stage 3." : (big.length ? "Dashed ones are your biggest gaps. Any pick is fine though." : "");
+}
+
+/* ---------------- stage 3: drills ---------------- */
+var PIC = {
+  wallsit:'<path d="M30 6V92" stroke="' + INK + '" stroke-width="4"/><path d="M4 92H196" stroke="' + INK + '" stroke-width="3"/><circle cx="42" cy="26" r="8" fill="#ffc247"' + SW + '/><path d="M38 34V58H66V90M38 46l18 6" fill="none"' + SW + ' stroke-width="4"/><path d="M110 40h70M110 60h50" stroke="#d6c9b6" stroke-width="3" stroke-dasharray="4 5"/>',
+  hang:'<path d="M20 12H180" stroke="' + INK + '" stroke-width="5" stroke-linecap="round"/><path d="M90 14l0 10M110 14l0 10" stroke="' + INK + '" stroke-width="4"/><circle cx="100" cy="34" r="8" fill="#ffc247"' + SW + '/><path d="M90 24l10 18M110 24l-10 18M100 42v24M100 66l-6 20M100 66l6 20" fill="none"' + SW + ' stroke-width="4"/><path d="M4 92H196" stroke="' + INK + '" stroke-width="3"/>',
+  line:'<path d="M10 80H190" stroke="#ef7724" stroke-width="5"/><circle cx="100" cy="18" r="8" fill="#ffc247"' + SW + '/><path d="M100 26v30M100 34l-22 8M100 34l22 8M100 56l-4 22M100 56l6 22" fill="none"' + SW + ' stroke-width="4"/><path d="M140 70l8 -6M152 70l8 -6M164 70l8 -6" stroke="' + INK + '" stroke-width="2"/>',
+  reach:'<path d="M4 88H196" stroke="' + INK + '" stroke-width="3"/><rect x="150" y="62" width="30" height="26" fill="#d6c9b6"' + SW + '/><path d="M110 60H190" stroke="#007291" stroke-width="4"/><circle cx="60" cy="48" r="8" fill="#ffc247"' + SW + '/><path d="M58 56L50 84H146M60 60l66 0" fill="none"' + SW + ' stroke-width="4"/>',
+  step:'<path d="M4 90H196" stroke="' + INK + '" stroke-width="3"/><rect x="90" y="68" width="70" height="22" fill="#c98b5c"' + SW + '/><circle cx="100" cy="20" r="8" fill="#ffc247"' + SW + '/><path d="M100 28v26M100 36l-12 12M100 36l12 12M100 54l12 14M100 54l-14 36" fill="none"' + SW + ' stroke-width="4"/><path d="M40 40 v-18 l-6 6 M40 22 l6 6" fill="none" stroke="#ef7724" stroke-width="3"/>',
+  touch:'<path d="M20 20V90M180 20V90" stroke="#ef7724" stroke-width="5"/><circle cx="100" cy="28" r="8" fill="#ffc247"' + SW + '/><path d="M100 36l-4 24M98 44l-14 6M98 44l14 -4M96 60l-14 18M96 60l16 14" fill="none"' + SW + ' stroke-width="4"/><path d="M40 84H160M40 84l8 -5M40 84l8 5M160 84l-8 -5M160 84l-8 5" fill="none" stroke="' + INK + '" stroke-width="2.5"/>',
+  "catch":'<path d="M176 6V92" stroke="' + INK + '" stroke-width="5"/><path d="M4 92H196" stroke="' + INK + '" stroke-width="3"/><circle cx="50" cy="30" r="8" fill="#ffc247"' + SW + '/><path d="M50 38v28M50 46l16 -8M50 46l14 8M50 66l-8 24M50 66l8 24" fill="none"' + SW + ' stroke-width="4"/><path d="M72 36 Q120 0 172 40" fill="none" stroke="' + INK + '" stroke-width="2" stroke-dasharray="4 4"/><circle cx="130" cy="20" r="7" fill="#e85d9a"' + SW + '/>'
+};
+var timers = {}, drillMsg = {};
+function unitShort(d){ return d.u }
+function drawDrills(){
+  var box = el("drills");
+  Object.keys(timers).forEach(function(k){ if(timers[k] && timers[k].iv){ clearInterval(timers[k].iv); timers[k].iv = null } });
+  box.innerHTML = "";
+  DRILLS.forEach(function(d){
+    var c = document.createElement("div"); c.className = "drill" + (st.focus.indexOf(d.p) > -1 ? " focus" : "");
+    var L = logsFor(d.id);
+    c.innerHTML = '<span class="badge">' + pIcon(d.p) + esc(PBY[d.p].name) + '</span>' +
+      '<h4>' + esc(d.name) + '</h4>' + svg("0 0 200 96", PIC[d.id]).replace("<svg ", '<svg class="pic" ') +
+      '<p>' + esc(d.how) + '</p><p class="small"><b>Kit:</b> ' + esc(d.kit) + '</p><p class="safe">' + esc(d.safe) + '</p>' +
+      (d.timer ? '<div><button class="btn btn-quiet" type="button" data-t="tog" aria-pressed="false">Use a timer</button></div><div class="timer" data-t="box" hidden><div class="clock" data-t="clock">' + (d.timer === "count" ? "20.0" : "0.0") + '</div><button class="btn btn-orange" type="button" data-t="go">Start</button></div>' : "") +
+      '<span class="lab" style="margin:8px 0 2px">Log a go (' + esc(d.u) + ')</span>' +
+      '<div class="rec"><input type="text" inputmode="decimal" class="num" aria-label="' + esc(d.name) + ' result in ' + esc(d.u) + '" data-t="in"><button class="btn" type="button" data-t="save">Save it</button></div>' +
+      '<p class="fb' + (drillMsg[d.id] ? " " + drillMsg[d.id][0] : "") + '" data-t="fb">' + (drillMsg[d.id] ? esc(drillMsg[d.id][1]) : "") + '</p>' +
+      '<div class="hist">' + (L.length ? L.map(function(e, i){ return '<span class="' + (i === 0 ? "first" : "") + '">' + (i === 0 ? "First go " : "") + esc(prettyDate(e.d)) + ": <b>" + esc(e.v) + "</b></span>" }).join("") : '<span>No goes logged yet</span>') + '</div>';
+    box.appendChild(c);
+    var inp = c.querySelector('[data-t="in"]'), fb = c.querySelector('[data-t="fb"]');
+    c.querySelector('[data-t="save"]').addEventListener("click", function(){
+      var v = numOr(inp.value);
+      drillMsg[d.id] = null;
+      if(v === null){ fb.className = "fb soft"; fb.textContent = "Pop a number in first. Just the number is fine, like 25."; return }
+      if(v < 0 && !d.neg){ fb.className = "fb soft"; fb.textContent = "This one counts up from 0, so the number cannot be below 0. Have another look?"; return }
+      var was = logsFor(d.id).length;
+      drillMsg[d.id] = ["good", was ? "Saved. Have a look in camp review to compare with your first go." : "Saved as your first go. That is your starting point."];
+      burst(c.querySelector('[data-t="save"]'));
+      addLog(d.id, v);
+    });
+    if(d.timer){
+      var tog = c.querySelector('[data-t="tog"]'), tb = c.querySelector('[data-t="box"]'), clk = c.querySelector('[data-t="clock"]'), go = c.querySelector('[data-t="go"]');
+      tog.addEventListener("click", function(){ tb.hidden = !tb.hidden; tog.setAttribute("aria-pressed", tb.hidden ? "false" : "true"); tog.textContent = tb.hidden ? "Use a timer" : "Hide the timer" });
+      go.addEventListener("click", function(){ timerTap(d, clk, go, inp) });
+    }
+  });
+}
+function timerTap(d, clk, go, inp){
+  var t = timers[d.id];
+  if(t && t.iv){
+    clearInterval(t.iv); t.iv = null;
+    var secs = (performance.now() - t.t0) / 1000;
+    if(d.timer === "watch"){ var v = d.u === "minutes" ? r1(secs / 60) : Math.round(secs); inp.value = v; go.textContent = "Start again"; clk.textContent = secs.toFixed(1) }
+    else{ go.textContent = "Start again"; clk.textContent = "20.0" }
+    return;
+  }
+  timers[d.id] = t = {t0:performance.now(), iv:null};
+  go.textContent = d.timer === "watch" ? "Stop" : "Stop early";
+  t.iv = setInterval(function(){
+    var s = (performance.now() - t.t0) / 1000;
+    if(d.timer === "count"){
+      var left = Math.max(0, 20 - s); clk.textContent = left.toFixed(1);
+      if(left <= 0){ clearInterval(t.iv); t.iv = null; clk.textContent = "Time!"; go.textContent = "Start again"; inp.focus() }
+    }else{
+      clk.textContent = d.u === "minutes" ? Math.floor(s / 60) + ":" + ("0" + Math.floor(s % 60)).slice(-2) : s.toFixed(1);
+      if(s >= 600){ clearInterval(t.iv); t.iv = null; go.textContent = "Start again" }
+    }
+  }, 100);
+}
+function addLog(id, v){
+  if(!st.logs[id]) st.logs[id] = [];
+  st.logs[id].push({d:today(), v:v});
+  if(!st.goal.drill){ st.goal.drill = id }
+  if(st.goal.drill === id && (st.goal.start === "" || st.goal.start == null)) st.goal.start = String(st.logs[id][0].v);
+  tried(3); drawDrills(); drawGoalDrill(); drawReview();
+}
+function drawFair(){
+  var box = el("fair"); box.innerHTML = "";
+  FAIR.forEach(function(q, i){
+    var c = document.createElement("div"); c.className = "fcard";
+    c.innerHTML = "<p>" + esc(q.t) + "</p>";
+    var pk = document.createElement("div"); pk.className = "picks";
+    var fb = document.createElement("p"); fb.className = "fb";
+    [["yes","Fair"],["no","Not fair"]].forEach(function(o){
+      var b = btn("pk" + (st.fair[i] && q.a === o[0] ? " good" : ""), o[1]);
+      b.addEventListener("click", function(){
+        if(o[0] === q.a){ st.fair[i] = 1; tried(3); b.classList.add("good"); fb.className = "fb good"; fb.textContent = "Spot on. " + q.why; burst(b) }
+        else{ b.classList.add("miss"); tried(3); fb.className = "fb soft"; fb.textContent = q.a === "no" ? "Have another think. Is anything different between the two goes, apart from you?" : "Have another think. What is different between the two goes? Maybe nothing." }
+      });
+      pk.appendChild(b);
+    });
+    if(st.fair[i]){ fb.className = "fb good"; fb.textContent = q.why }
+    c.appendChild(pk); c.appendChild(fb); box.appendChild(c);
+  });
+}
+function drawFairChips(){
+  chipList(el("fairChips"), FAIRCHIPS, function(it){ return st.fairChips.indexOf(it) > -1 }, function(it){ var k = st.fairChips.indexOf(it); if(k > -1) st.fairChips.splice(k, 1); else st.fairChips.push(it); tried(3); drawFairChips() });
+}
+
+/* ---------------- stage 4: little by little ---------------- */
+function lineSVG(v, W, H, opt){
+  opt = opt || {};
+  var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
+  if(opt.lo != null) lo = Math.min(lo, opt.lo); if(opt.hi != null) hi = Math.max(hi, opt.hi);
+  if(hi === lo){ hi = lo + 1; lo = lo - 1 }
+  var pad = (hi - lo) * .12; lo -= pad; hi += pad;
+  var x0 = opt.x0 || 34, x1 = W - (opt.rpad || 14), y0 = opt.top || 14, y1 = H - (opt.bot || 24), ip = opt.ip || 0;
+  function X(i){ return v.length === 1 ? (x0 + x1) / 2 : x0 + ip + i * (x1 - x0 - ip) / (v.length - 1) }
+  function Y(n){ return y1 - (n - lo) / (hi - lo) * (y1 - y0) }
+  var o = [];
+  o.push('<line x1="' + x0 + '" y1="' + y1 + '" x2="' + x1 + '" y2="' + y1 + '" stroke="' + INK + '" stroke-width="2"/><line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + y1 + '" stroke="' + INK + '" stroke-width="2"/>');
+  if(opt.extra) o.push(opt.extra(X, Y, x0, x1, y0, y1));
+  o.push('<polyline points="' + v.map(function(n, i){ return X(i).toFixed(1) + "," + Y(n).toFixed(1) }).join(" ") + '" fill="none" stroke="' + (opt.col || "#7b4b8f") + '" stroke-width="' + (opt.sw || 4) + '" stroke-linejoin="round" stroke-linecap="round"/>');
+  v.forEach(function(n, i){
+    o.push('<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(n).toFixed(1) + '" r="' + (opt.r || 5) + '" fill="#ffc247" stroke="' + INK + '" stroke-width="2"/>');
+    if(opt.vals) o.push('<text x="' + X(i).toFixed(1) + '" y="' + (Y(n) - 10).toFixed(1) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="' + (opt.fs || 12) + '" fill="' + INK + '">' + esc(r1(n)) + '</text>');
+    if(opt.xl) o.push('<text x="' + X(i).toFixed(1) + '" y="' + (y1 + 16) + '" text-anchor="middle" font-family="Archivo,Arial" font-weight="700" font-size="' + (opt.fs || 12) + '" fill="' + INK + '">' + esc(opt.xl(i)) + '</text>');
+  });
+  return o.join("");
+}
+function drawPGame(){
+  var R = PGAME[st.pgi], box = el("plans"); box.innerHTML = "";
+  el("pgTitle").textContent = "Round " + (st.pgi + 1) + " of " + PGAME.length + ": " + R.title;
+  var done = st.pg[st.pgi];
+  var hi = 0; R.plans.forEach(function(p){ hi = Math.max(hi, Math.max.apply(null, p.v)) });
+  R.plans.forEach(function(p, j){
+    var b = btn("plan" + (done && p.ok ? " good" : ""), '<b>' + esc(p.who) + '</b><span class="small">' + p.v.join(", ") + '</span><svg viewBox="0 0 200 110" aria-hidden="true">' + lineSVG(p.v, 200, 110, {lo:0, hi:hi, vals:false, x0:16, bot:16}) + '</svg>');
+    b.setAttribute("aria-label", p.who + "'s plan: " + p.v.join(", "));
+    b.addEventListener("click", function(){
+      if(p.ok){ st.pg[st.pgi] = 1; tried(4); b.classList.add("good"); setFb("pgFb", "good", "Yes! " + p.why); burst(b) }
+      else{ b.classList.add("miss"); tried(4); setFb("pgFb", "soft", p.why + " Which one might work better?") }
+    });
+    box.appendChild(b);
+  });
+  if(done){ var ok = R.plans.filter(function(p){ return p.ok })[0]; setFb("pgFb", "good", "Solved. " + ok.why) } else setFb("pgFb", "", "");
+}
+el("pgNext").addEventListener("click", function(){ st.pgi = (st.pgi + 1) % PGAME.length; save(); drawPGame() });
+
+function gDrill(){ return DBY[st.goal.drill] || null }
+function goalVals(){
+  var d = gDrill(), s = numOr(st.goal.start); if(!d || s === null) return null;
+  var out = []; for(var w = 0; w <= st.goal.weeks; w++) out.push(r1(s + st.goal.step * w));
+  return out;
+}
+function goalTarget(){ var v = goalVals(); return v ? v[v.length - 1] : null }
+function goalSentence(){
+  var d = gDrill(), s = numOr(st.goal.start); if(!d || s === null) return "";
+  var t = goalTarget();
+  if(st.goal.step === 0) return "Keep my " + d.name.toLowerCase() + " at " + s + " " + d.u + " for " + st.goal.weeks + " weeks.";
+  return "In " + st.goal.weeks + " weeks, get my " + d.name.toLowerCase() + " from " + s + " to " + t + " " + d.u + ", adding about " + r1(st.goal.step) + " each week.";
+}
+function stretchZone(){ var d = gDrill(); if(!d || numOr(st.goal.start) === null) return ""; var s = st.goal.step; if(s === 0) return "none"; if(s < d.lo) return "gentle"; if(s <= d.hi) return "stretch"; return "big" }
+function drawGoalDrill(){
+  var box = el("gDrill"); box.innerHTML = "";
+  DRILLS.forEach(function(d){
+    var fg = firstGo(d.id);
+    var b = btn("pk" + (st.focus.indexOf(d.p) > -1 && st.goal.drill !== d.id ? " " : ""), pIcon(d.p) + "<span>" + esc(d.name) + (fg ? " (" + esc(fg.v) + ")" : "") + "</span>", st.goal.drill === d.id);
+    if(st.focus.indexOf(d.p) > -1 && st.goal.drill !== d.id) b.style.borderStyle = "dashed";
+    b.addEventListener("click", function(){
+      st.goal.drill = d.id; st.goal.start = fg ? String(fg.v) : ""; st.goal.step = d.inc * Math.max(1, Math.round(d.lo / d.inc));
+      tried(4); drawGoalDrill(); drawGoal();
+    });
+    box.appendChild(b);
+  });
+  drawGoal();
+}
+function drawGoal(){
+  var d = gDrill(), rng = el("gStep");
+  if(document.activeElement !== el("gStart")) el("gStart").value = st.goal.start;
+  el("gUnit").textContent = d ? d.u + (firstGo(d.id) ? "" : ". No first go logged yet, so pop in a guess or try the drill in stage 3.") : "Pick a drill first";
+  if(d){ rng.min = 0; rng.step = d.inc; rng.max = r1(d.hi * 3); rng.value = st.goal.step; rng.disabled = false }
+  else{ rng.disabled = true }
+  el("gStepOut").textContent = d ? (st.goal.step === 0 ? "nothing yet" : r1(st.goal.step) + " " + d.u) : "";
+  chipList(el("gWeeks"), ["2 weeks","3 weeks","4 weeks","6 weeks","8 weeks"], function(it){ return parseInt(it, 10) === st.goal.weeks }, function(it){ st.goal.weeks = parseInt(it, 10); tried(4); drawGoal() });
+  var v = goalVals(), rest = st.week.filter(function(x){ return x === "rest" }).length;
+  if(!v){ el("graphBox").innerHTML = "<p class='small'>Pick a drill and pop in where you are now. Your line will grow here.</p>" }
+  else{
+    var W = 620, H = 250;
+    var extra = function(X, Y, x0, x1, y0, y1){
+      var o = "";
+      for(var i = 1; i < v.length; i++){ var xm = (X(i - 1) + X(i)) / 2; o += '<g transform="translate(' + (xm - 9).toFixed(1) + ',' + (y1 - 22) + ')"><rect width="16" height="10" rx="2" fill="#fffdf8" stroke="' + INK + '" stroke-width="1.5"/><rect x="16" y="3" width="2" height="4" fill="' + INK + '"/><rect x="2" y="2" width="' + (rest ? Math.min(12, rest * 4) : 2) + '" height="6" fill="#2f9e6a"/></g>' }
+      return o;
+    };
+    el("graphBox").innerHTML = '<svg class="graph" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Line graph of my weekly targets">' +
+      lineSVG(v, W, H, {lo:Math.min(0, v[0]), vals:true, xl:function(i){ return i === 0 ? "Now" : "Wk " + i }, x0:30, bot:30, top:30, rpad:30, ip:30, r:7, fs:13, extra:extra}) + '</svg>' +
+      '<p class="hint">Little batteries between weeks are your rest days recharging you' + (rest ? " (" + rest + " rest day" + (rest === 1 ? "" : "s") + " in your week plan)" : ". Add rest days in stage 6 and they fill up") + '.</p>';
+  }
+  var gc = el("goalCard"), gs = goalSentence();
+  gc.className = "goalcard" + (gs ? "" : " empty");
+  gc.innerHTML = '<span class="tk">My goal' + (chal() ? " &middot; training for " + esc(chalName()) : "") + '</span>' + esc(gs || "Your goal writes itself here as you build it.");
+  var z = stretchZone(), pin = el("pin"), fb = el("stretchFb");
+  if(!z){ pin.style.left = "3%"; setFb("stretchFb", "", "") }
+  else if(z === "none"){ pin.style.left = "3%"; setFb("stretchFb", "", "Adding nothing keeps you where you are. Slide the step up a little if you want to improve.") }
+  else{
+    var frac = Math.min(1, st.goal.step / (d.hi * 3)); var pos;
+    if(z === "gentle") pos = 4 + 29 * (st.goal.step / d.lo);
+    else if(z === "stretch") pos = 34 + 32 * ((st.goal.step - d.lo) / Math.max(.0001, d.hi - d.lo));
+    else pos = 67 + 30 * Math.min(1, (st.goal.step - d.hi) / Math.max(.0001, d.hi * 2));
+    pin.style.left = Math.max(3, Math.min(97, pos)) + "%";
+    if(z === "gentle") setFb("stretchFb", "", "Gentle. A nice easy start, and you can always add more later.");
+    else if(z === "stretch") setFb("stretchFb", "good", "Stretchy but doable. That is the sweet spot for most people.");
+    else setFb("stretchFb", "soft", "That is a big jump each week for " + d.name.toLowerCase() + ". It might feel like a lot. Your call though.");
+  }
+  chipList(el("myVerdict"), ["Too easy for me","Just right for me","A bit much for me"], function(it){ return st.verdict === it }, function(it){ st.verdict = st.verdict === it ? "" : it; tried(4); drawGoal() });
+  drawPass();
+}
+el("gStart").addEventListener("input", function(){ st.goal.start = this.value.trim(); tried(4); drawGoalLight() });
+el("gStep").addEventListener("input", function(){ var d = gDrill(); if(!d) return; st.goal.step = r1(+this.value); tried(4); drawGoalLight() });
+function drawGoalLight(){ drawGoal() }
+
+/* ---------------- stage 5: warm up, cool down ---------------- */
+el("icoWarm").innerHTML = svg("0 0 40 40", '<path d="M20 4c6 8 10 12 10 19a10 10 0 0 1-20 0c0-5 3-8 5-11 1 4 3 5 5 5-2-5-1-9 0-13z" fill="#ef7724"' + SW + '/>');
+el("icoCool").innerHTML = svg("0 0 40 40", '<path d="M20 4v32M6 12l28 16M6 28l28-16" stroke="#00a6c9" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="5" fill="#fffdf8"' + SW + '/>');
+var pickC = null; /* {r:"w"|"c", id} */
+function rdata(r){ return r === "w" ? WU : CD }
+function rslots(r){ return r === "w" ? st.wu.w : st.wu.c }
+function cardText(r, c){ var d = c.d; if(c.id === "reh"){ var ch = chal() || CBY.own; d = ch.rehearse + ", at half speed." } return '<b>' + esc(c.t) + '</b>' + esc(d) }
+function lockedR(r, i){ var s = rslots(r)[i]; if(!s) return false; var c = rdata(r).filter(function(x){ return x.id === s })[0]; return (r === "w" ? st.wu.wok : st.wu.cok) || (c && c.slot === i && st.wu["lk" + r] && st.wu["lk" + r][i]) }
+function drawRoutine(r){
+  var data = rdata(r), slots = rslots(r), n = r === "w" ? 4 : 3;
+  var sb = el(r + "Slots"); sb.innerHTML = "";
+  for(var i = 0; i < n; i++){
+    (function(i){
+      var row = document.createElement("div"); row.className = "slot";
+      row.innerHTML = '<span class="sn">' + (i + 1) + '</span>';
+      var drop = document.createElement("div"); drop.className = "drop"; drop.setAttribute("data-r", r); drop.setAttribute("data-i", i);
+      var id = slots[i];
+      if(id){
+        var c = data.filter(function(x){ return x.id === id })[0];
+        var lk = lockedR(r, i);
+        var cb = btn("card5" + (lk ? " locked" : "") + (pickC && pickC.r === r && pickC.id === id ? " sel" : ""), cardText(r, c));
+        cb.setAttribute("data-id", id); cb.setAttribute("data-r", r);
+        if(lk) cb.disabled = true; else wireCard(cb, r, id);
+        drop.appendChild(cb);
+      }else{
+        var hb = btn("dropbtn", "Slot " + (i + 1) + (pickC && pickC.r === r ? ": tap to place here" : ": empty"));
+        hb.addEventListener("click", function(){ placeCard(r, i) });
+        drop.appendChild(hb);
+      }
+      row.appendChild(drop); sb.appendChild(row);
+    })(i);
+  }
+  var tray = el(r + "Tray"); tray.innerHTML = "";
+  var used = slots.filter(Boolean);
+  data.forEach(function(c){
+    if(used.indexOf(c.id) > -1) return;
+    var cb = btn("card5" + (pickC && pickC.r === r && pickC.id === c.id ? " sel" : ""), cardText(r, c));
+    cb.setAttribute("data-id", c.id); cb.setAttribute("data-r", r);
+    wireCard(cb, r, c.id);
+    tray.appendChild(cb);
+  });
+  if(!tray.children.length) tray.innerHTML = "<p class='small' style='margin:0'>All placed.</p>";
+  if(pickC && pickC.r === r && slots.indexOf(pickC.id) > -1){
+    var bk = btn("backbtn", "Send the picked card back here");
+    bk.addEventListener("click", function(){ unplace(r, pickC.id) });
+    tray.appendChild(bk);
+  }
+  var ok = r === "w" ? st.wu.wok : st.wu.cok;
+  el(r + "Check").hidden = ok;
+  if(ok && !el(r + "Fb").textContent) setFb(r + "Fb", "good", (r === "w" ? "Warm up sorted. " : "Cool down sorted. ") + "Pick your own moves below if you fancy.");
+}
+el("wTray").addEventListener("click", function(e){ if(e.target === this && pickC && pickC.r === "w") unplace("w", pickC.id) });
+el("cTray").addEventListener("click", function(e){ if(e.target === this && pickC && pickC.r === "c") unplace("c", pickC.id) });
+function unplace(r, id){ var s = rslots(r), k = s.indexOf(id); if(k > -1) s[k] = null; pickC = null; save(); drawRoutine(r) }
+function placeCard(r, i, id){
+  id = id || (pickC && pickC.r === r ? pickC.id : null);
+  if(!id) { setFb(r + "Fb", "", "Tap a card first, then a slot."); return }
+  if(lockedR(r, i)) return;
+  var s = rslots(r), k = s.indexOf(id);
+  var prev = s[i];
+  if(k > -1) s[k] = prev && k !== i ? prev : null;
+  else if(prev){ /* prev goes back to tray */ }
+  s[i] = id; pickC = null; tried(5); setFb(r + "Fb", "", ""); drawRoutine(r);
+}
+function wireCard(cb, r, id){
+  var sx = 0, sy = 0, drag = false, ghost = null, moved = false, pid = null;
+  cb.addEventListener("pointerdown", function(e){
+    if(e.button !== undefined && e.button !== 0) return;
+    sx = e.clientX; sy = e.clientY; drag = true; moved = false; pid = e.pointerId;
+  });
+  cb.addEventListener("pointermove", function(e){
+    if(!drag || e.pointerId !== pid) return;
+    if(!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8){
+      moved = true; try{ cb.setPointerCapture(pid) }catch(er){}
+      ghost = cb.cloneNode(true); ghost.classList.add("ghost"); ghost.classList.remove("sel"); document.body.appendChild(ghost);
+    }
+    if(moved && ghost){
+      ghost.style.left = (e.clientX - 40) + "px"; ghost.style.top = (e.clientY - 20) + "px";
+      document.querySelectorAll(".drop.hot").forEach(function(x){ x.classList.remove("hot") });
+      var t = hitDrop(e.clientX, e.clientY, r); if(t) t.classList.add("hot");
+    }
+  });
+  function end(e){
+    if(!drag) return; drag = false;
+    if(ghost){ ghost.parentNode.removeChild(ghost); ghost = null }
+    document.querySelectorAll(".drop.hot").forEach(function(x){ x.classList.remove("hot") });
+    if(moved){
+      cb._skip = true; setTimeout(function(){ cb._skip = false }, 50);
+      var t = hitDrop(e.clientX, e.clientY, r);
+      if(t) placeCard(r, +t.getAttribute("data-i"), id);
+      else{ var tr = document.elementFromPoint(e.clientX, e.clientY); if(tr && tr.closest && tr.closest("#" + r + "Tray")) unplace(r, id) }
+    }
+  }
+  cb.addEventListener("pointerup", end);
+  cb.addEventListener("pointercancel", function(){ drag = false; if(ghost){ ghost.parentNode.removeChild(ghost); ghost = null } });
+  cb.addEventListener("click", function(){
+    if(cb._skip) return;
+    if(pickC && pickC.r === r && pickC.id === id){ pickC = null; drawRoutine(r); return }
+    var s = rslots(r);
+    if(pickC && pickC.r === r && s.indexOf(id) > -1){ placeCard(r, s.indexOf(id)); return }
+    pickC = {r:r, id:id}; setFb(r + "Fb", "", "Now tap a slot, or send it back to the cards."); drawRoutine(r);
+  });
+}
+function hitDrop(x, y, r){
+  var t = document.elementFromPoint(x, y); if(!t || !t.closest) return null;
+  var d = t.closest(".drop"); if(d && d.getAttribute("data-r") === r) return d.closest(".slot") ? d.closest(".slot").querySelector(".drop") : d;
+  return null;
+}
+function checkRoutine(r){
+  var data = rdata(r), s = rslots(r), n = r === "w" ? 4 : 3, hints = r === "w" ? WHINT : CHINT;
+  var key = "lk" + r; if(!st.wu[key]) st.wu[key] = {};
+  var msgs = [], allOk = true;
+  for(var i = 0; i < n; i++){
+    var id = s[i];
+    if(!id){ allOk = false; continue }
+    var c = data.filter(function(x){ return x.id === id })[0];
+    if(c.slot === i){ st.wu[key][i] = 1 }
+    else{ allOk = false; s[i] = null; msgs.push(c.slot < 0 ? c.hint : c.t + ": " + hints[c.slot]) }
+  }
+  tried(5);
+  if(allOk){
+    if(r === "w") st.wu.wok = true; else st.wu.cok = true;
+    save(); setFb(r + "Fb", "good", (r === "w" ? "Warm up in the right order. " : "Cool down in the right order. ") + "Outrageous! Pick your own moves below if you fancy."); burst(el(r + "Slots"));
+  }else{
+    var empty = s.filter(function(x){ return !x }).length;
+    setFb(r + "Fb", "soft", (msgs.length ? msgs.join(" ") + " " : "") + (msgs.length ? "Those went back to the cards. " : "") + (empty ? "Fill the empty slots and check again when you are ready." : ""));
+    if(!msgs.length && !empty) setFb(r + "Fb", "soft", "Have another look.");
+  }
+  save(); drawRoutine(r); drawMoves();
+}
+el("wCheck").addEventListener("click", function(){ checkRoutine("w") });
+el("cCheck").addEventListener("click", function(){ checkRoutine("c") });
+function drawMoves(){
+  var box = el("movesBox");
+  if(!st.wu.wok && !st.wu.cok){ box.innerHTML = ""; return }
+  box.innerHTML = '<span class="tryk">Make it yours</span><p>Pick a move for each part, if you fancy.</p>';
+  var parts = [];
+  if(st.wu.wok) parts = parts.concat([["pulse","Pulse raiser"],["mob","Loosen the joints"],["dyn","Moving stretches"]]);
+  if(st.wu.cok) parts = parts.concat([["slow","Ease off"],["stat","Still stretches"],["chk","Drink and check in"]]);
+  parts.forEach(function(p){
+    var l = document.createElement("span"); l.className = "lab"; l.textContent = p[1]; box.appendChild(l);
+    var pk = document.createElement("div"); pk.className = "picks"; box.appendChild(pk);
+    chipList(pk, MOVES[p[0]], function(it){ return st.wu.moves[p[0]] === it }, function(it){ st.wu.moves[p[0]] = st.wu.moves[p[0]] === it ? "" : it; tried(5); drawMoves() });
+  });
+  drawPass();
+}
+
+/* ---------------- stage 6: week ---------------- */
+var pickT = null;
+function tokLabel(id){ var t = TBY[id]; if(id === "drill"){ var d = gDrill() || (st.focus.length ? DRILLS.filter(function(x){ return x.p === st.focus[0] })[0] : null); return d ? d.name : t.t } if(id === "prac"){ var b = bitName(); return b ? "Practise: " + b.toLowerCase() : t.t } return t.t }
+function drawTokens(){
+  var box = el("tokens"); box.innerHTML = "";
+  TOK.forEach(function(t){
+    var b = btn("tok" + (pickT === t.id ? " sel" : ""), svg("0 0 40 40", t.ic) + "<span>" + esc(t.t) + "</span>");
+    b.style.background = t.bg; b.setAttribute("aria-pressed", pickT === t.id ? "true" : "false");
+    wireTok(b, t.id);
+    box.appendChild(b);
+  });
+}
+function wireTok(b, id){
+  var sx = 0, sy = 0, drag = false, moved = false, ghost = null, pid = null;
+  b.addEventListener("pointerdown", function(e){ if(e.button !== undefined && e.button !== 0) return; sx = e.clientX; sy = e.clientY; drag = true; moved = false; pid = e.pointerId });
+  b.addEventListener("pointermove", function(e){
+    if(!drag || e.pointerId !== pid) return;
+    if(!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8){ moved = true; try{ b.setPointerCapture(pid) }catch(er){}; ghost = b.cloneNode(true); ghost.classList.add("ghost"); ghost.style.width = "auto"; document.body.appendChild(ghost) }
+    if(moved && ghost){ ghost.style.left = (e.clientX - 30) + "px"; ghost.style.top = (e.clientY - 20) + "px";
+      document.querySelectorAll(".day.hot").forEach(function(x){ x.classList.remove("hot") });
+      var t = document.elementFromPoint(e.clientX, e.clientY); var dd = t && t.closest ? t.closest(".day") : null; if(dd) dd.classList.add("hot") }
+  });
+  b.addEventListener("pointerup", function(e){
+    if(!drag) return; drag = false;
+    if(ghost){ ghost.parentNode.removeChild(ghost); ghost = null }
+    document.querySelectorAll(".day.hot").forEach(function(x){ x.classList.remove("hot") });
+    if(moved){ b._skip = true; setTimeout(function(){ b._skip = false }, 50);
+      var t = document.elementFromPoint(e.clientX, e.clientY); var dd = t && t.closest ? t.closest(".day") : null;
+      if(dd) setDay(+dd.getAttribute("data-i"), id) }
+  });
+  b.addEventListener("pointercancel", function(){ drag = false; if(ghost){ ghost.parentNode.removeChild(ghost); ghost = null } });
+  b.addEventListener("click", function(){ if(b._skip) return; pickT = pickT === id ? null : id; drawTokens(); drawWeek() });
+}
+function setDay(i, id){ st.week[i] = id; tried(6); drawWeek(); drawGoal() }
+function drawWeek(){
+  var box = el("week"); box.innerHTML = "";
+  DAYS.forEach(function(dn, i){
+    var id = st.week[i], t = id ? TBY[id] : null;
+    var b = btn("day" + (id === "rest" ? " rest" : "") + (pickT ? " hot" : ""), '<span class="dn">' + dn + '</span>' + (t ? svg("0 0 40 40", t.ic) + '<span class="dt">' + esc(tokLabel(id)) + '</span>' : '<span class="dt" style="opacity:.6">' + (pickT ? "tap to add" : "empty") + '</span>'));
+    b.setAttribute("data-i", i);
+    if(t) b.style.background = t.bg;
+    b.setAttribute("aria-label", dn + ": " + (t ? tokLabel(id) : "empty") + (pickT ? ". Tap to put " + TBY[pickT].t + " here" : ""));
+    b.addEventListener("click", function(){
+      if(pickT){ setDay(i, pickT) }
+      else if(st.week[i]){ st.week[i] = null; tried(6); drawWeek(); drawGoal() }
+    });
+    box.appendChild(b);
+  });
+  drawCoach();
+}
+function planCheck(w, focus){
+  var tips = [], filled = w.filter(Boolean).length;
+  if(!filled) return {ok:false, tips:["Pop a few sessions on the week and the coach will have a look."], empty:true};
+  var rest = w.filter(function(x){ return x === "rest" }).length, empty = 7 - filled;
+  var act = w.filter(function(x){ return x && x !== "rest" });
+  var kinds = {}; act.forEach(function(x){ kinds[x] = 1 });
+  if(!act.length) return {ok:false, tips:["Only rest so far. Rest is great, and a session or two on other days would turn it into a training week."]};
+  if(rest === 0 && empty === 0) tips.push("No rest days. Bodies rebuild and get stronger on rest days, so they are part of training. Try adding one or two.");
+  else if(rest === 0 && empty > 0) tips.push("Empty days work as rest, but you could mark them as rest days so the plan shows it.");
+  if(act.length >= 4 && Object.keys(kinds).length === 1) tips.push("The same thing every day. Mixing in different sessions works different powers and keeps it fun.");
+  var run = 0, maxRun = 0; w.forEach(function(x){ if(x === "drill"){ run++; maxRun = Math.max(maxRun, run) } else run = 0 });
+  if(maxRun >= 3) tips.push(maxRun + " drill days in a row. Your body might like a lighter day or a rest between them.");
+  if(act.length && !kinds.drill && !kinds.prac) tips.push("Nothing here trains your " + (focus ? focus + " " : "") + "challenge directly. A drill or a practice session would help.");
+  if(act.length === 1) tips.push("One session is a fine start. Two or three spread out usually works even better.");
+  var ok = !tips.length || (tips.length === 1 && rest === 0 && empty > 0 && act.length >= 2);
+  return {ok:ok, tips:tips};
+}
+function drawCoach(){
+  var f = st.focus.length ? PBY[st.focus[0]].name.toLowerCase() : "";
+  var r = planCheck(st.week, f), box = el("coachbox");
+  box.className = "coachbox" + (r.ok ? " ok" : "");
+  if(r.empty){ box.innerHTML = '<b>Plan check coach</b><p class="small" style="margin:4px 0 0">' + esc(r.tips[0]) + '</p>'; return }
+  if(r.ok && !r.tips.length) box.innerHTML = '<b>Plan check coach</b><p style="margin:4px 0 0">Balanced week: practice, some variety, and rest built in. Cracking.</p>';
+  else box.innerHTML = '<b>Plan check coach</b>' + (r.ok ? '<p style="margin:4px 0 0">Looks good. One small idea:</p>' : '<p class="small" style="margin:4px 0 0">A few things to think about. Your plan, your call.</p>') + '<ul>' + r.tips.map(function(t){ return "<li>" + esc(t) + "</li>" }).join("") + '</ul>';
+  drawPass();
+}
+function drawFix(){
+  var q = FIXP[st.fi];
+  el("fpCount").textContent = "Plan " + (st.fi + 1) + " of " + FIXP.length;
+  el("fpQ").textContent = q.q + ". What is the problem, if any?";
+  el("fpWeek").innerHTML = q.w.map(function(x, i){ return '<i style="background:' + TBY[x].bg + '" title="' + DAYS[i] + '">' + DAYS[i] + '</i>' }).join("");
+  el("fpNote").textContent = q.note;
+  var box = el("fpOpts"); box.innerHTML = "";
+  q.o.forEach(function(o, j){
+    var b = btn("pk" + (st.fix[st.fi] && j === q.a ? " good" : ""), esc(o));
+    b.addEventListener("click", function(){
+      if(j === q.a){ st.fix[st.fi] = 1; tried(6); b.classList.add("good"); setFb("fpFb", "good", "Yes. " + q.why); burst(b) }
+      else{ b.classList.add("miss"); tried(6); setFb("fpFb", "soft", q.hints[j] + " Have another go.") }
+    });
+    box.appendChild(b);
+  });
+  if(st.fix[st.fi]) setFb("fpFb", "good", q.why); else setFb("fpFb", "", "");
+}
+el("fpNext").addEventListener("click", function(){ st.fi = (st.fi + 1) % FIXP.length; save(); drawFix() });
+function drawLen(){
+  chipList(el("lenChips"), LENS, function(it){ return st.len === it }, function(it){ st.len = st.len === it ? "" : it; tried(6); drawLen(); drawPass() });
+  chipList(el("checkChips"), CHECKD, function(it){ return st.checkDay === it }, function(it){ st.checkDay = st.checkDay === it ? "" : it; tried(6); drawLen(); drawPass() });
+}
+
+/* ---------------- stage 7: review ---------------- */
+function drawReview(){
+  var sel = el("rvDrill"), cur = sel.value || st.goal.drill || "";
+  sel.innerHTML = DRILLS.map(function(d){ return '<option value="' + d.id + '">' + esc(d.name) + ' (' + esc(d.u) + ')</option>' }).join("");
+  if(cur) sel.value = cur;
+  var box = el("cmp"), out = [];
+  DRILLS.forEach(function(d){
+    var L = logsFor(d.id); if(!L.length) return;
+    var a = L[0], b = L[L.length - 1];
+    if(L.length === 1){ out.push('<div class="cmprow"><b>' + esc(d.name) + '</b>: first go ' + esc(a.v) + ' ' + esc(d.u) + ' on ' + esc(prettyDate(a.d)) + '. Add a later go to compare.</div>'); return }
+    var lo = Math.min(0, a.v, b.v), mx = Math.max(a.v, b.v) - lo || 1, diff = r1(b.v - a.v);
+    var msg = diff === 0 ? "Exactly the same. Holding steady counts." : diff > 0 ? "Up by " + diff + ". That is your training showing." : "A bit below your first go this time. Tired days happen, and one go is just one day.";
+    out.push('<div class="cmprow"><b>' + esc(d.name) + '</b> <span class="small">(' + esc(d.u) + ', ' + L.length + ' goes)</span><div class="bars"><span class="small">First</span><i style="width:' + Math.max(4, (a.v - lo) / mx * 100) + '%;background:#9fd9e8"></i><b>' + esc(a.v) + '</b><span class="small">Latest</span><i style="width:' + Math.max(4, (b.v - lo) / mx * 100) + '%;background:' + (diff > 0 ? "#2f9e6a" : "#ffc247") + '"></i><b>' + esc(b.v) + '</b></div>' + esc(msg) + '</div>');
+  });
+  box.innerHTML = out.length ? out.join("") : "<p class='small'>Log a first go in the drill library, then come back after some training and add a later go here.</p>";
+  var d = gDrill(), s = numOr(st.goal.start), t = goalTarget(), lg = d ? latestGo(d.id) : null, gp = el("goalProg");
+  if(d && s !== null && t !== null && lg && logsFor(d.id).length > 1 && t !== s){
+    var frac = (lg.v - s) / (t - s);
+    if(frac >= 1) setFb("goalProg", "good", "Goal check: latest " + d.name.toLowerCase() + " is " + lg.v + ". Goal of " + t + " reached!");
+    else if(frac > 0) setFb("goalProg", "good", "Goal check: about " + Math.round(frac * 100) + "% of the way from " + s + " to " + t + ".");
+    else setFb("goalProg", "", "Goal check: not moving up yet. Really common early on. Have a look at the options below.");
+  }else setFb("goalProg", "", "");
+  drawPass();
+}
+el("rvAdd").addEventListener("click", function(){
+  var id = el("rvDrill").value, d = DBY[id], v = numOr(el("rvN").value);
+  if(v === null){ setFb("rvFb", "soft", "Pop a number in first, then log it."); return }
+  if(v < 0 && !d.neg){ setFb("rvFb", "soft", "This one counts up from 0, so it cannot be below 0. Have another look?"); return }
+  addLog(id, v); tried(7); el("rvN").value = "";
+  setFb("rvFb", "good", "Logged. " + (logsFor(id).length > 1 ? "Your first and latest goes line up below." : "That is your first go for this drill."));
+  burst(el("rvAdd"));
+});
+function drawStatus(){
+  chipList(el("statusChips"), STATUS.map(function(s){ return s.t }), function(it, i){ return st.status === STATUS[i].id }, function(it, i){ st.status = STATUS[i].id; tried(7); drawStatus() });
+  var s = null; STATUS.forEach(function(x){ if(x.id === st.status) s = x });
+  var a = el("advice");
+  if(!s){ a.innerHTML = ""; drawChanges(); return }
+  a.innerHTML = '<div class="advice">' + esc(s.a) + '<div class="endrow" style="margin-top:10px"><button class="btn" type="button" id="doChange">' + esc(s.al) + '</button></div></div>';
+  el("doChange").addEventListener("click", function(){ applyChange(s) });
+  drawChanges();
+}
+function applyChange(s){
+  var d = gDrill(), what = "";
+  if(s.act === "bigger"){ if(!d){ what = "Wanted a bigger step (no goal built yet)" } else { st.goal.step = r1(st.goal.step + d.inc); what = "Weekly step up to " + st.goal.step + " " + d.u } }
+  else if(s.act === "smaller"){ var oldStep = st.goal.step; if(d){ st.goal.step = r1(Math.max(d.inc, st.goal.step - d.inc)); if(st.goal.step > oldStep) st.goal.step = oldStep } var k = st.week.indexOf(null); if(k < 0){ for(var i = 0; i < 7; i++){ if(st.week[i] === "drill"){ k = i; break } } } if(k > -1) st.week[k] = "rest"; what = (d ? (st.goal.step < oldStep ? "Weekly step down to " + st.goal.step + " " + d.u + ", " : "Weekly step already as small as it goes, ") : "") + (k > -1 ? "rest day added on " + DAYS[k] : "no room for another rest day") }
+  else if(s.act === "longer"){ var opts = [2,3,4,6,8], w = 8; for(var oi = 0; oi < opts.length; oi++){ if(opts[oi] >= st.goal.weeks + 2){ w = opts[oi]; break } } what = w === st.goal.weeks ? "Kept it at 8 weeks, the longest option" : "Goal now over " + w + " weeks"; st.goal.weeks = w }
+  else if(s.act === "swap"){ what = "Swapping to a different drill"; openStage(4) }
+  else what = "Kept the plan as it is";
+  st.changes.push({d:today(), what:what});
+  tried(7); drawGoal(); drawWeek(); drawChanges(); drawReview();
+  burst(el("doChange"));
+}
+function drawChanges(){
+  el("changeList").innerHTML = st.changes.length ? "<b>Changes so far:</b><br>" + st.changes.map(function(c){ return esc(prettyDate(c.d) + ": " + c.what) }).join("<br>") : "";
+}
+function drawDayCh(){ chipList(el("dayChips"), DAYCH, function(it){ return st.dayc === it }, function(it){ st.dayc = st.dayc === it ? "" : it; tried(7); drawDayCh(); drawPass(); if(st.dayc === "I did the challenge!") burst(el("dayChips")) }) }
+
+/* ---------------- text areas ---------------- */
+[["practise","practise",2],["measure","measure",3],["why4","why4",4],["reflect","reflect",7],["nextGoal","next",7]].forEach(function(a){
+  var t = el(a[0]); t.value = st[a[1]] || "";
+  t.addEventListener("input", function(){ st[a[1]] = t.value; tried(a[2]) });
+});
+document.querySelectorAll(".starters").forEach(function(box){
+  box.addEventListener("click", function(e){
+    var b = e.target.closest(".st"); if(!b) return;
+    var t = el(box.getAttribute("data-for")), add = b.textContent;
+    t.value = t.value + (t.value && !/\s$/.test(t.value) ? " " : "") + add; t.focus();
+    t.dispatchEvent(new Event("input"));
+  });
+});
+el("ownCh").value = st.ownCh; el("ownCh").addEventListener("input", function(){ st.ownCh = this.value; tried(1); drawS1fb(); drawWheel(); drawGoalLightSafe() });
+el("ownBit").value = st.ownBit; el("ownBit").addEventListener("input", function(){ st.ownBit = this.value; tried(1); drawS1fb(); drawPass() });
+function drawGoalLightSafe(){ var gc = el("goalCard"); if(gc) { var gs = goalSentence(); gc.innerHTML = '<span class="tk">My goal' + (chal() ? " &middot; training for " + esc(chalName()) : "") + '</span>' + esc(gs || "Your goal writes itself here as you build it.") } }
+
+/* ---------------- camp pass ---------------- */
+function drawPass(){
+  var c = chal(), h = [];
+  h.push('<div class="passtop">' + svg("0 0 76 58", CHTHUMB[c ? c.id : "own"]) + '<div><span class="kicker" style="margin:0">Camp pass' + (who ? " &middot; " + who : "") + '</span><h3>' + esc(c ? chalName() : "Challenge not picked yet") + '</h3><span>' + esc(bitName() ? "The bit to nail: " + bitName() : "No bit picked yet") + '</span></div></div>');
+  if(st.focus.length) h.push('<p class="pline"><b>Focus powers</b>' + esc(st.focus.map(function(id){ return PBY[id].name }).join(" and ")) + '</p>');
+  else { var g = gapList(); if(g.length) h.push('<p class="pline"><b>Biggest gaps</b>' + esc(g.slice(0, 2).map(function(x){ return x.p.name }).join(" and ")) + '</p>') }
+  var firsts = DRILLS.filter(function(d){ return logsFor(d.id).length }).map(function(d){ var L = logsFor(d.id); return d.name + ": " + L[0].v + (L.length > 1 ? " then " + L[L.length - 1].v : "") });
+  if(firsts.length) h.push('<p class="pline"><b>Drills</b>' + esc(firsts.join(" | ")) + '</p>');
+  var gs = goalSentence(); if(gs) h.push('<p class="pline"><b>My goal</b>' + esc(gs) + (st.verdict ? " (" + esc(st.verdict.toLowerCase()) + ")" : "") + '</p>');
+  if(st.wu.wok || st.wu.cok){ var mv = []; ["pulse","mob","dyn","slow","stat","chk"].forEach(function(k){ if(st.wu.moves[k]) mv.push(st.wu.moves[k]) }); h.push('<p class="pline"><b>Warm up and cool down</b>' + esc((st.wu.wok ? "Warm up sorted" : "") + (st.wu.wok && st.wu.cok ? ", " : "") + (st.wu.cok ? "cool down sorted" : "")) + (mv.length ? ": " + esc(mv.join(", ")) : "") + '</p>') }
+  if(st.week.some(Boolean)) h.push('<p class="pline"><b>My week</b></p><div class="mini7">' + st.week.map(function(x, i){ return '<i style="background:' + (x ? TBY[x].bg : "#fffdf8") + '" title="' + DAYS[i] + ': ' + (x ? esc(TBY[x].t) : "empty") + '">' + DAYS[i].charAt(0) + '</i>' }).join("") + '</div>' + (st.len || st.checkDay ? '<p class="small" style="margin:0">' + esc((st.len ? st.len + " sessions" : "") + (st.len && st.checkDay ? ", " : "") + (st.checkDay ? "retest " + (st.checkDay === "Every two weeks" ? "every two weeks" : "on " + st.checkDay) : "")) + '</p>' : ""));
+  if(st.dayc) h.push('<p class="pline"><b>Challenge day</b>' + esc(st.dayc) + '</p>');
+  if(st.next.trim()) h.push('<p class="pline"><b>Next goal</b>' + esc(st.next.trim()) + '</p>');
+  el("pass").innerHTML = h.join("");
+}
+
+/* ---------------- send ---------------- */
+function summary(){
+  var L = [], c = chal();
+  L.push("TRAINING CAMP");
+  L.push("Target: I can set training goals for a particular sport.");
+  if(who){ L.push("Milestones this relates to (" + who + "):"); STUD[who].ms.forEach(function(m){ L.push("  * " + m) }) }
+  var done = STAGES.filter(function(x){ return st.tried[x.n] }).map(function(x){ return x.n + " " + x.t });
+  L.push("Stages tried: " + (done.length ? done.join(", ") : "none yet"));
+  if(st.tried[1]){
+    L.push(""); L.push("1. CHOOSE YOUR CHALLENGE [" + MILESTONE_STAGES[1] + "]");
+    L.push("  Challenge: " + (c ? chalName() : "not picked") + " | Bit to get better at: " + (bitName() || "not picked"));
+    L.push("  Course sort: " + sortTotal() + " bits sorted");
+  }
+  if(st.tried[2]){
+    L.push(""); L.push("2. THE POWER WHEEL [" + MILESTONE_STAGES[2] + "]");
+    var n = needArr(); if(n) L.push("  Challenge needs (1 to 5): " + POW.map(function(p, i){ return p.name + " " + n[i] }).join(", "));
+    if(meTouched()) L.push("  Me now (1 to 5): " + POW.map(function(p, i){ return p.name + " " + (st.me[i] || "not rated") }).join(", "));
+    var g = gapList(); if(g.length) L.push("  Biggest gaps: " + g.slice(0, 3).map(function(x){ return x.p.name + " (" + x.g + ")" }).join(", "));
+    if(st.focus.length) L.push("  Focus picked: " + st.focus.map(function(id){ return PBY[id].name }).join(", "));
+    if(st.practise.trim()) L.push("  What I would practise: " + st.practise.trim());
+  }
+  if(st.tried[3]){
+    L.push(""); L.push("3. DRILL LIBRARY [" + MILESTONE_STAGES[3] + "]");
+    var any = false;
+    DRILLS.forEach(function(d){ var lg = logsFor(d.id); if(!lg.length) return; any = true; L.push("  " + d.name + " (" + d.u + "): " + lg.map(function(e){ return e.d + " = " + e.v }).join(", ")) });
+    if(!any) L.push("  No drill results logged yet");
+    L.push("  Fair test game: " + Object.keys(st.fair).length + " of " + FAIR.length + " spotted");
+    if(st.fairChips.length) L.push("  Keeping it fair: " + st.fairChips.join(", "));
+    if(st.measure.trim()) L.push("  How I will measure: " + st.measure.trim());
+  }
+  if(st.tried[4]){
+    L.push(""); L.push("4. LITTLE BY LITTLE [" + MILESTONE_STAGES[4] + "]");
+    L.push("  Which plan will work: " + Object.keys(st.pg).length + " of " + PGAME.length + " rounds solved");
+    L.push("  My goal: " + (goalSentence() || "not built yet"));
+    var v = goalVals(); if(v) L.push("  Week by week: " + v.join(", "));
+    var z = stretchZone(); if(z) L.push("  Camp stretch guide: " + ({none:"no change", gentle:"gentle", stretch:"stretchy but doable", big:"big jump"})[z]);
+    if(st.verdict) L.push("  I think it is: " + st.verdict);
+    if(st.why4.trim()) L.push("  Why: " + st.why4.trim());
+  }
+  if(st.tried[5]){
+    L.push(""); L.push("5. WARM UP, COOL DOWN [" + MILESTONE_STAGES[5] + "]");
+    L.push("  Warm up order: " + (st.wu.wok ? "sorted" : "still working on it") + " | Cool down order: " + (st.wu.cok ? "sorted" : "still working on it"));
+    var mv = []; [["pulse","Pulse raiser"],["mob","Joints"],["dyn","Moving stretches"],["slow","Ease off"],["stat","Still stretches"],["chk","Check in"]].forEach(function(p){ if(st.wu.moves[p[0]]) mv.push(p[1] + ": " + st.wu.moves[p[0]]) });
+    if(mv.length) L.push("  My moves: " + mv.join(", "));
+  }
+  if(st.tried[6]){
+    L.push(""); L.push("6. BUILD THE WEEK [" + MILESTONE_STAGES[6] + "]");
+    L.push("  Fix the plan: " + Object.keys(st.fix).length + " of " + FIXP.length + " spotted");
+    L.push("  My week: " + DAYS.map(function(dn, i){ return dn + " " + (st.week[i] ? tokLabel(st.week[i]) : "-") }).join(", "));
+    var pc = planCheck(st.week, ""); if(!pc.empty) L.push("  Plan check: " + (pc.tips.length ? pc.tips.join(" ") : "balanced week"));
+    if(st.len) L.push("  Session length: " + st.len);
+    if(st.checkDay) L.push("  Retest day: " + st.checkDay);
+  }
+  if(st.tried[7]){
+    L.push(""); L.push("7. CAMP REVIEW [" + MILESTONE_STAGES[7] + "]");
+    DRILLS.forEach(function(d){ var lg = logsFor(d.id); if(lg.length > 1) L.push("  " + d.name + ": first " + lg[0].v + ", latest " + lg[lg.length - 1].v + " " + d.u) });
+    var stt = ""; STATUS.forEach(function(x){ if(x.id === st.status) stt = x.t }); if(stt) L.push("  How it went: " + stt);
+    st.changes.forEach(function(ch){ L.push("  Change " + ch.d + ": " + ch.what) });
+    if(st.dayc) L.push("  The challenge: " + st.dayc);
+    if(st.reflect.trim()) L.push("  Look back: " + st.reflect.trim());
+    if(st.next.trim()) L.push("  Next goal: " + st.next.trim());
+  }
+  return L.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"Training Camp", filename:"training-camp", getText:summary });
+
+/* ---------------- reset ---------------- */
+var armed = false;
+el("resetBtn").addEventListener("click", function(){
+  if(!armed){ armed = true; el("resetBtn").textContent = "Tap again to clear it all"; el("resetMsg").textContent = "This wipes your challenge, drills and plan on this device."; setTimeout(function(){ armed = false; el("resetBtn").textContent = "Start again"; el("resetMsg").textContent = "" }, 4000); return }
+  try{ localStorage.removeItem(KEY) }catch(e){}
+  location.reload();
+});
+
+/* ---------------- boot ---------------- */
+function afterChallenge(){ drawPowRows(); drawWheel(); drawRoutine("w"); drawWeek(); drawGoalLightSafe(); drawPass() }
+drawWho(); drawMap(); drawChallenges(); drawScene(); drawSort();
+drawPowRows(); drawWheel(); drawDrills(); drawFair(); drawFairChips();
+drawPGame(); drawGoalDrill(); drawRoutine("w"); drawRoutine("c"); drawMoves();
+drawTokens(); drawWeek(); drawFix(); drawLen(); drawReview(); drawStatus(); drawDayCh(); drawPass();
+if(!Object.keys(st.tried).length) el("st1").open = true;
+window.__tc = {st:function(){ return st }, summary:summary, planCheck:planCheck, goalVals:goalVals, stretchZone:stretchZone, place:placeCard, setDay:setDay};
+})();
+</script>
+</body>
+</html>

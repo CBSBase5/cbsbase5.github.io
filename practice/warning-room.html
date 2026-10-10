@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Warning Room - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Warning Room only. Shell, cards and buttons come from style.css */
+.wr{max-width:980px;margin:0 auto}
+.hidden{display:none!important}
+.lead{font-size:1.05rem;line-height:1.55;margin:6px 0 10px!important;max-width:62ch}
+.small{font-size:.9rem;opacity:.8}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* who picker */
+.whobar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px}
+.whobar button{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.08em;padding:8px 14px;border-radius:999px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.whobar button[aria-pressed="true"]{background:var(--ink);color:var(--yellow)}
+.whobar button.look{font-size:.78rem;border-style:dashed}
+.goals{margin:12px 0 0;padding:12px 16px;border-radius:16px 12px 18px 12px;background:rgba(255,194,71,.28);border:2px dashed var(--yellow-deep)}
+.goals b{font-family:var(--display)}
+.goals ul{margin:6px 0 0;padding-left:20px}
+.goals li{margin:4px 0}
+
+/* shift clock strip */
+.shift{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 2px}
+.shift span{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.12em;padding:4px 9px;border-radius:8px;background:#0a2f38;color:#9fe3f2}
+
+/* stage map */
+.smap{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:14px 0 4px}
+.stile{position:relative;text-align:left;font-family:var(--body);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 12px 10px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .14s ease,box-shadow .14s ease;min-height:150px;display:flex;flex-direction:column;gap:4px}
+.stile:nth-child(odd){transform:rotate(-.6deg)}
+.stile:nth-child(even){transform:rotate(.5deg)}
+.stile:hover{transform:translate(-2px,-3px) rotate(-1deg);box-shadow:5px 7px 0 var(--ink)}
+.stile svg{width:54px;height:54px;flex:none}
+.stile .num{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.stile .nm{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.05rem;line-height:1.05}
+.stile .ds{font-size:.82rem;line-height:1.3}
+.stile.on{outline:4px solid var(--plum);outline-offset:3px}
+.stile .badge{position:absolute;top:-10px;right:-6px;background:var(--plum);color:#fff;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;border:2px solid var(--ink);transform:rotate(3deg)}
+.stile .tried{position:absolute;bottom:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#2e7d4f;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-size:.8rem}
+.s1c{background:linear-gradient(150deg,#5fd0e6,#00a6c9)}
+.s2c{background:linear-gradient(150deg,#ffd877,#ffc247)}
+.s3c{background:linear-gradient(150deg,#ff9b52,#ef7724)}
+.s4c{background:linear-gradient(150deg,#b98ad0,#9467a8);color:#fff}
+.s5c{background:linear-gradient(150deg,#8ed3a8,#4ba36f)}
+.s6c{background:linear-gradient(150deg,#2c5a6b,#0a2f38);color:#fff}
+.s7c{background:linear-gradient(150deg,#ff8f7a,#e2553e);color:#fff}
+.s4c .nm,.s6c .nm,.s7c .nm{color:#fff}
+
+/* stage shell */
+.stage{border:3px solid var(--ink);border-radius:var(--r-alt);background:var(--white);box-shadow:var(--lift);padding:20px;margin:18px 0}
+.stagehead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.stagehead svg{width:60px;height:60px;flex:none}
+.stagehead h2{font-variation-settings:"wdth" 122,"wght" 900;font-size:clamp(1.6rem,4.6vw,2.3rem);line-height:1}
+.stagehead .kicker{margin-bottom:4px}
+.part{margin:18px 0 0;padding:16px;border-radius:18px 14px 20px 14px;background:rgba(10,47,56,.04);border:2px solid rgba(10,47,56,.1)}
+.part h3{font-variation-settings:"wdth" 116,"wght" 800;font-size:1.25rem;margin:0 0 6px}
+.learn{margin:12px 0 0;padding:14px;border-radius:18px 14px 20px 14px;background:linear-gradient(150deg,rgba(0,166,201,.14),rgba(0,114,145,.06));border:2px solid rgba(0,114,145,.3);transform:rotate(-.3deg)}
+.learn .kicker{color:var(--teal);opacity:1}
+.learn ul{margin:4px 0 0;padding-left:18px}
+.learn li{margin:5px 0;font-size:.98rem;line-height:1.45}
+.stagefoot{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:3px dashed rgba(10,47,56,.18)}
+
+/* feedback */
+.fb{margin:10px 0 4px;padding:11px 14px;border-radius:14px 10px 14px 10px;font-size:.98rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #9fcdab}
+.fb.nope{background:#fdf0e5;border:2px solid #f2c79f}
+.fb.tell{background:#eef4f6;border:2px solid #bcd6de}
+.fb b{font-family:var(--display)}
+@keyframes boing{0%{transform:scale(.96)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+.fb{animation:boing .3s ease}
+
+/* tiles and drag */
+.tile{font-family:var(--body);font-size:.93rem;line-height:1.3;text-align:left;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:12px 9px 13px 9px;padding:8px 11px;cursor:grab;box-shadow:2px 3px 0 rgba(10,47,56,.25);touch-action:none;user-select:none;-webkit-user-select:none}
+.tile:hover{background:#fffaf0}
+.tile.held{background:var(--yellow);box-shadow:0 0 0 4px rgba(123,75,143,.45);transform:rotate(-1.5deg)}
+.tile.dragging{opacity:.35}
+.tile.placed{cursor:default;box-shadow:none;border-color:#2e7d4f;background:#e9f4ec}
+.tile.name{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem}
+.dragghost{position:fixed;z-index:10000;pointer-events:none;transform:rotate(-3deg) scale(1.04);box-shadow:6px 8px 0 rgba(10,47,56,.3)!important;max-width:260px}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;padding:10px;border-radius:14px;background:rgba(255,194,71,.18);min-height:48px}
+.holding .drop{outline:3px dashed var(--plum);outline-offset:2px}
+.drop.hover{background:rgba(123,75,143,.14)!important}
+.choices{display:grid;gap:8px;margin-top:8px}
+.choices button{text-align:left;font:inherit;font-size:.96rem;padding:10px 14px;border:2px solid rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer}
+.choices button:hover{background:#fff7e8}
+.choices button[aria-pressed="true"]{border-color:var(--teal);background:rgba(0,114,145,.12);font-weight:700}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec;font-weight:700}
+.choices button.tryagain{border-color:var(--orange);border-style:dashed;background:#fdf6ee}
+.pickrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pickbtn{font:inherit;font-size:.92rem;font-weight:700;padding:8px 14px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.pickbtn:hover{background:#fff3d6}
+.pickbtn[aria-pressed="true"]{background:var(--teal);color:#fff}
+.pickbtn.good{background:#e9f4ec;border-color:#2e7d4f}
+.pickbtn.tryagain{border-style:dashed;border-color:var(--orange)}
+
+/* stage 1: hazard wall */
+.wall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;border-radius:18px;background:linear-gradient(160deg,#16323c,#0a1f27);border:3px solid var(--ink)}
+@media (max-width:760px){.wall{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.wall{grid-template-columns:1fr}}
+.scr{position:relative;display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:12px;background:#1f3d48;border:2px solid #4f7380;cursor:pointer;color:#e8f6fa;text-align:left;font:inherit}
+.scr>svg{display:block;width:100%;height:auto;border-radius:8px;border:2px solid #0a1f27}
+.scr .tg{position:absolute;left:12px;top:10px;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.6rem;letter-spacing:.16em;color:#9fe3f2;background:rgba(10,31,39,.75);padding:2px 6px;border-radius:5px}
+.scr .lbl{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;min-height:1.3em;color:#ffc247}
+.scr .lbl.empty{color:#7fa3ae;font-size:.8rem;font-variation-settings:"wght" 600}
+.scr .fx{display:flex;flex-direction:column;gap:4px}
+.scr .fx span{font-size:.76rem;line-height:1.25;background:#e9f4ec;color:var(--ink);border-radius:8px;padding:4px 7px;border:2px solid #9fcdab}
+.scr.drop.hover{background:#355c69!important}
+.holding .scr.drop{outline-color:#ffc247}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.tabs button{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:999px;border:3px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--yellow)}
+@keyframes spinccw{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:spinccw var(--dur,14s) linear infinite}
+@keyframes flick{0%,100%{opacity:1}50%{opacity:.55}}
+.flick{animation:flick 1.8s ease-in-out infinite}
+@keyframes slideband{from{transform:translate(-8px,6px)}to{transform:translate(8px,-6px)}}
+.slideband{animation:slideband 3.5s ease-in-out infinite alternate}
+
+/* stage 2: chart */
+.chartlab{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;margin-top:12px;align-items:start}
+@media (max-width:760px){.chartlab{grid-template-columns:1fr}}
+.chart{border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#d8eef5}
+.chart>svg{display:block;width:100%;height:auto}
+.hotg{cursor:pointer}
+.hotg:focus{outline:none}
+.hotg:focus-visible circle.ring,.hotg:focus-visible rect.ring{stroke:var(--plum);stroke-width:5}
+.hotg.hover circle.ring,.hotg.hover rect.ring{fill:#ffc247}
+.holding .hotg circle.ring,.holding .hotg rect.ring{stroke:#ef7724;stroke-width:4}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.pz{transform-box:fill-box;transform-origin:center;animation:pulse 1.8s ease-in-out infinite}
+.qcard{border:3px solid var(--ink);border-radius:16px 12px 18px 12px;background:#fff;padding:12px 14px}
+.qcard .qn{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.qcard .qq{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.15rem;line-height:1.15;margin:2px 0 6px}
+.qdone{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qdone span{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;background:#e9f4ec;border:2px solid #9fcdab}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+.orbit{transform-box:fill-box;transform-origin:center;animation:orbit 9s linear infinite}
+.symtile{display:inline-flex;align-items:center;gap:8px}
+.symtile svg{width:34px;height:34px;flex:none}
+
+/* stage 3: matrix */
+.mx{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:5px;max-width:460px}
+.mx .ax{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px}
+.mx .cl{min-height:52px;border-radius:10px;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;position:relative}
+.cl.none{background:#e7efe9;color:#4a6a55}
+.cl.yellow{background:#ffd84d}
+.cl.amber{background:#f39a2b}
+.cl.red{background:#d9412e;color:#fff}
+.cl.tick::after{content:"";position:absolute;inset:-6px;border:4px solid var(--plum);border-radius:14px;animation:boing .4s ease}
+.mxwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start;margin-top:12px}
+@media (max-width:760px){.mxwrap{grid-template-columns:1fr}}
+.fcast{border:3px solid var(--ink);border-radius:16px 12px 18px 12px;background:#0a2f38;color:#e8f6fa;padding:14px}
+.fcast .kick{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#9fe3f2}
+.fcast .big{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.3rem;line-height:1.1;margin:4px 0;color:#ffc247}
+.fcast p{margin:4px 0 0;font-size:.98rem;line-height:1.5}
+.scenrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.scenrow button{font:inherit;font-weight:700;font-size:.88rem;padding:7px 12px;border-radius:12px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px}
+.scenrow button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--plum)}
+.scenrow button i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff;display:inline-block}
+.scenrow button i.yellow{background:#ffd84d}.scenrow button i.amber{background:#f39a2b}.scenrow button i.red{background:#d9412e}.scenrow button i.none{background:#cfe0d4}
+.town{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-top:10px;background:#9cc3d3}
+.town>svg{display:block;width:100%;height:auto}
+.resp{list-style:none;padding:0;margin:8px 0 0}
+.resp li{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed rgba(10,47,56,.2);font-size:.94rem;line-height:1.35}
+.resp li::before{content:"";flex:none;width:12px;height:12px;margin-top:5px;border-radius:50%;background:var(--c,#ffc247);border:2px solid var(--ink)}
+.wbanner{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:10px;border:3px solid var(--ink);transform:rotate(-1.5deg)}
+.wbanner.yellow{background:#ffd84d}.wbanner.amber{background:#f39a2b}.wbanner.red{background:#d9412e;color:#fff}.wbanner.none{background:#e7efe9}
+
+/* stage 4: naming */
+.namelist{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.namelist button{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.86rem;padding:6px 11px;border-radius:10px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.namelist button.used{text-decoration:line-through;opacity:.5;background:#eee}
+.namelist button.tryagain{border-style:dashed;border-color:var(--orange)}
+.lowcard{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center;border:3px solid var(--ink);border-radius:18px 14px 20px 14px;background:#fff;padding:12px;transform:rotate(-.4deg)}
+@media (max-width:520px){.lowcard{grid-template-columns:1fr}.lowcard>svg{max-width:170px}}
+.lowcard>svg{width:100%;height:auto;display:block}
+.lowcard .d{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.3rem;line-height:1.05}
+.stat{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.stat span{font-size:.82rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(10,47,56,.07)}
+.queue{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.queue span{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.75rem;padding:4px 10px;border-radius:999px;border:2px solid var(--ink);background:#fff}
+.queue span.now{background:var(--yellow)}
+.queue span.named{background:var(--plum);color:#fff}
+.queue span.skip{background:#e7efe9}
+.owngrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+.owngrid label{display:flex;align-items:center;gap:6px;font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.2rem}
+.owngrid input{flex:1;min-width:0;font:inherit;font-size:1rem;padding:8px 10px;border:2px solid var(--ink);border-radius:10px;background:#fffdf8;color:var(--ink)}
+.tagcard{display:inline-flex;align-items:center;gap:8px;margin:4px 6px 0 0;padding:6px 12px;border-radius:12px;border:2px solid var(--ink);background:var(--yellow);font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;transform:rotate(-1deg)}
+
+/* stage 5: town */
+.prepgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.prep{display:flex;gap:8px;align-items:flex-start;text-align:left;font:inherit;font-size:.92rem;line-height:1.3;padding:9px 11px;border-radius:14px 10px 14px 10px;border:2px solid rgba(10,47,56,.35);background:#fff;color:var(--ink);cursor:pointer}
+.prep .cost{flex:none;font-family:var(--display);font-variation-settings:"wght" 900;font-size:.8rem;min-width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffd877;border:2px solid var(--ink)}
+.prep[aria-pressed="true"]{border-color:var(--teal);background:rgba(0,114,145,.12);font-weight:700}
+.prep[aria-pressed="true"] .cost{background:var(--teal);color:#fff}
+.budget{display:flex;gap:4px;margin:8px 0}
+.budget i{flex:1;height:16px;border-radius:5px;background:#ffd877;border:2px solid var(--ink)}
+.budget i.spent{background:rgba(10,47,56,.15);border-style:dashed}
+.causes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px}
+.causes div{background:#fff;border:2px solid var(--ink);border-radius:14px 10px 14px 10px;padding:8px 10px;font-size:.9rem;line-height:1.35}
+.causes div b{display:block;font-family:var(--display);color:var(--teal)}
+.log{display:grid;gap:8px;margin-top:10px}
+.ev{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;align-items:start;padding:9px 12px;border-radius:14px;border:2px solid rgba(10,47,56,.2);background:#fff;animation:boing .3s ease}
+.ev .t{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:.95rem;color:var(--teal)}
+.ev.good{border-color:#9fcdab;background:#f1f9f3}
+.ev.bad{border-color:#f2c79f;background:#fdf6ee}
+.ev .who{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:999px;margin-left:4px;background:rgba(10,47,56,.08)}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.res > div{border:3px solid var(--ink);border-radius:16px 12px 18px 12px;background:#fff;padding:10px 12px}
+.res h4{font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin:0 0 4px}
+.res ul{margin:0;padding-left:18px;font-size:.9rem}
+.res li{margin:3px 0}
+@keyframes rainfall{from{transform:translateY(-22px)}to{transform:translateY(0)}}
+.rainy{animation:rainfall .5s linear infinite}
+@keyframes sway2{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+.swayt{transform-box:fill-box;transform-origin:bottom center;animation:sway2 1.2s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.waveup{animation:wave 1.4s ease-in-out infinite}
+@keyframes flyaway{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(140px,-60px) rotate(240deg)}}
+.flyaway{transform-box:fill-box;transform-origin:center;animation:flyaway 2.6s ease-in infinite}
+
+/* stage 6: world */
+.dominoes{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:10px 0}
+.dom{position:relative;flex:1 1 150px;max-width:220px;min-height:92px;border:3px solid var(--ink);border-radius:12px;background:#fff;padding:8px 10px 8px 14px;font-size:.86rem;line-height:1.3;box-shadow:3px 4px 0 var(--ink);transform-origin:bottom left;animation:topple .55s cubic-bezier(.3,1.4,.5,1)}
+.dom::before{content:"";position:absolute;left:4px;top:8px;bottom:8px;width:4px;border-radius:3px;background:var(--dc,#ef7724)}
+.dom .k{display:block;font-family:var(--display);font-variation-settings:"wght" 900;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;opacity:.65}
+.dom.end{background:var(--yellow)}
+.dom.next{border-style:dashed;box-shadow:none;background:transparent;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.6rem;animation:none;color:rgba(10,47,56,.4)}
+@keyframes topple{from{transform:rotate(-65deg);opacity:0}to{transform:rotate(0);opacity:1}}
+.chainpick{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chainlab{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:760px){.chainlab{grid-template-columns:1fr}}
+.growpic{border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#0b2a45}
+.growpic>svg{display:block;width:100%;height:auto}
+.growpic .cap{font-size:.8rem;color:#cfe8ee;padding:6px 10px;background:#0a1f27}
+.world{border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#2b5d8a}
+.world>svg{display:block;width:100%;height:auto}
+.ppcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin:10px 0}
+.ppcards button{font:inherit;font-size:.86rem;font-weight:700;text-align:left;padding:8px 10px;border-radius:12px 9px 12px 9px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;line-height:1.25}
+.ppcards button .m{display:block;font-weight:400;font-size:.78rem;opacity:.75}
+.ppcards button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--plum);background:#fff3d6}
+.ppcards button.done{border-color:#2e7d4f;background:#e9f4ec}
+.stamp{display:inline-block;margin-top:6px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;color:var(--plum);border:3px solid var(--plum);border-radius:8px;padding:3px 10px;transform:rotate(-4deg);animation:boing .4s ease}
+
+/* stage 7: news */
+.storypick{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.storypick button{text-align:left;font:inherit;color:inherit;border:3px solid var(--ink);border-radius:16px 12px 18px 12px;padding:10px 12px;background:#fff;cursor:pointer;box-shadow:3px 4px 0 var(--ink)}
+.storypick button b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800}
+.storypick button[aria-pressed="true"]{background:var(--yellow)}
+.sbox{margin-top:12px}
+.sbox label{display:block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem;margin-bottom:4px}
+.sbox label span{font-family:var(--body);font-weight:400;font-size:.82rem;opacity:.75;margin-left:6px}
+textarea.write{width:100%;min-height:84px;font:inherit;font-size:1rem;line-height:1.5;padding:10px 12px;border:3px solid var(--ink);border-radius:14px 10px 16px 10px;background:#fffdf8;color:var(--ink);resize:vertical}
+input.write{width:100%;font:inherit;font-size:1.05rem;padding:10px 12px;border:3px solid var(--ink);border-radius:14px 10px 16px 10px;background:#fffdf8;color:var(--ink)}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.starters button{font:inherit;font-size:.86rem;padding:5px 10px;border-radius:999px;border:2px solid var(--teal);background:#fff;color:var(--ink);cursor:pointer}
+.starters button.w{border-color:var(--plum);border-style:dashed}
+.spot{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.spot span{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(123,75,143,.14);border:2px solid rgba(123,75,143,.4)}
+.tv{margin-top:14px;border:6px solid #0a2f38;border-radius:22px;background:#0a1f27;overflow:hidden;box-shadow:6px 8px 0 rgba(10,47,56,.3)}
+.tv .scrn{position:relative;background:linear-gradient(160deg,#173f4d,#0a2f38);color:#fff;padding:14px 16px 0;min-height:220px}
+.tv .live{display:inline-block;background:#d9412e;color:#fff;font-family:var(--display);font-variation-settings:"wght" 900;font-size:.7rem;letter-spacing:.16em;padding:3px 8px;border-radius:5px}
+.tv .prompter{max-height:180px;overflow:auto;margin:10px 0 0;font-size:1.15rem;line-height:1.6;padding-bottom:14px}
+.tv .prompter p{margin:0 0 10px}
+.tv .third{background:var(--yellow);color:var(--ink);font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.05rem;padding:8px 14px;border-top:4px solid var(--orange)}
+.tv .third small{display:block;font-family:var(--body);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.svgtext{font-family:"Atkinson Hyperlegible",Verdana,sans-serif}
+@media (max-width:480px){.stage{padding:14px}.part{padding:12px}}
+@media (prefers-reduced-motion:reduce){.spin,.flick,.slideband,.pz,.orbit,.rainy,.swayt,.waveup,.flyaway,.dom,.fb{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE WARNING <span class="accent">ROOM</span></h1>
+    <div class="line">
+      <span class="chip">Human and social</span>
+      <p>Take the night shift at the weather centre. Spot the hazards, read the charts, set the warnings and get a town ready.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap wr">
+
+  <div class="stage" id="introCard">
+    <span class="kicker">Night shift, 22:00 to 06:00</span>
+    <h3 style="font-variation-settings:'wdth' 120,'wght' 800;font-size:1.5rem">Seven desks. Any order. Skip anything.</h3>
+    <p class="lead">You are on the night shift at a weather centre. Each desk is a game or a puzzle about weather hazards. Pick whichever looks good. Nothing is timed, and wrong answers just get a hint.</p>
+    <div class="shift" aria-hidden="true"><span>22:00</span><span>23:00</span><span>00:00</span><span>01:00</span><span>02:00</span><span>03:00</span><span>05:00</span></div>
+    <p class="small" style="margin:10px 0 2px"><b>Who is this?</b> Optional. It shows your targets and a good place to start.</p>
+    <div class="whobar" id="whoBar"></div>
+    <div id="goals"></div>
+    <div class="smap" id="smap"></div>
+    <div class="row"><button class="btn btn-quiet sm" id="resetBtn" type="button">Start again</button><span class="small" id="resetMsg"></span></div>
+  </div>
+
+  <div id="stageHost"></div>
+
+  <div class="stage" id="sendCard">
+    <span class="kicker">End of the shift</span>
+    <h3 style="font-variation-settings:'wdth' 120,'wght' 800;font-size:1.4rem">Send your shift report to Jay</h3>
+    <p class="small">It picks up whatever you have tried so far, even if it is only one desk.</p>
+    <div id="sendHost"></div>
+  </div>
+
+  <a class="backlink" href="/practice/#hs-standard">Back to Human and social</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.warning-room.v1", WHOKEY = "base5.who.v1";
+var DEG = "\u00b0C";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") }
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t } return a }
+function fbHTML(kind, html){ return "<div class='fb " + kind + "'>" + html + "</div>" }
+function setFb(id, kind, html){ var x = el(id); if(x) x.innerHTML = fbHTML(kind, html) }
+function each(list, fn){ Array.prototype.forEach.call(list, fn) }
+function byId(arr, id){ for(var i = 0; i < arr.length; i++) if(arr[i].id === id) return arr[i]; return null }
+function keyClick(node){ node.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); node.dispatchEvent(new MouseEvent("click", { bubbles:true })) } }) }
+
+/* ---------- state ---------- */
+function fresh(){ return {
+  s1:{ lab:{}, labTries:0, fx:{}, fxTries:0 },
+  s2:{ q:{}, qFirst:{}, qTries:0, sym:{}, symTries:0 },
+  s3:{ done:{}, tries:0 },
+  s4:{ idx:0, dec:{}, names:{}, tries:0, why:"", own:{} },
+  s5:{ picks:{}, runs:[], links:{}, linkTries:0 },
+  s6:{ chain:{ t:0, u:0 }, chainTries:0, pass:{}, expl:"" },
+  s7:{ story:"", h:"", c:"", e:"", a:"" },
+  opened:{}
+} }
+var st = fresh();
+try{
+  var raw = localStorage.getItem(STORE);
+  if(raw){ var p = JSON.parse(raw); if(p && p.s1){ var f = fresh(); for(var k in f){ if(p[k] === undefined || typeof p[k] !== "object") p[k] = f[k]; else for(var k2 in f[k]) if(p[k][k2] === undefined) p[k][k2] = f[k][k2] } st = p } }
+}catch(e){}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(st)) }catch(e){} drawMap() }
+
+var who = ""; try{ who = (localStorage.getItem(WHOKEY) || "").toUpperCase() }catch(e){}
+
+/* ---------- students and milestones (same as Storm Lab) ---------- */
+var KIDS = {
+  LC:{ m:["Name different weather hazards, like hurricanes, tropical storms and deep depressions.", "Describe what happens during a weather hazard, like strong winds, heavy rain or flooding."], go:[1, 3, 5] },
+  HK:{ m:["Describe what happens during a weather hazard, including strong winds, heavy rain and flooding.", "Spot some of the conditions that cause weather hazards, like warm oceans and low air pressure."], go:[1, 2, 4] },
+  JT:{ m:["Spot some of the conditions that cause severe weather hazards, like warm oceans, low pressure and strong winds.", "Explain how warm oceans, low pressure and strong winds work together to make a tropical storm."], go:[2, 4, 6] },
+  LW:{ m:["Explain how different conditions work together to make weather hazards, including tropical storms and UK depressions.", "Use a diagram to explain how a tropical storm forms and grows stronger."], go:[2, 6, 7] },
+  EGW:{ m:["Compare the causes of tropical storms with the storms that hit the UK.", "Explain why tropical storms rarely reach the UK at full strength, and what happens to them on the way."], go:[6, 7] },
+  LP:{ m:["Discuss in detail why weather hazards develop, using geography words for pressure, ocean temperature, moisture and global circulation.", "Use a case study to explain how the causes of a weather hazard led to its effects on people and places."], go:[5, 6, 7] }
+};
+var MILESTONE_STAGES = {
+  1:"Naming weather hazards and describing what they do (LC, HK)",
+  2:"Reading a pressure chart: low pressure, isobars and strong winds (HK, JT, LW, LP)",
+  3:"Describing what a hazard does to a town, and judging the warning (LC, HK)",
+  4:"Spotting the conditions that make a storm dangerous enough to name (HK, JT)",
+  5:"A made up case study: how causes led to effects on people and places (LC, HK, LP)",
+  6:"How conditions work together (with a growing storm diagram), comparing tropical storms with UK storms, location and season, why storms weaken before the UK (JT, LW, EGW, LP)",
+  7:"Explaining causes and effects in a broadcast with geography words (JT, LW, EGW, LP)"
+};
+
+/* ---------- icons ---------- */
+var ICON = {
+  1:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='3' y='6' width='26' height='20' rx='3' fill='#0b2a45' stroke='#0a2f38' stroke-width='2.5'/><rect x='31' y='6' width='26' height='20' rx='3' fill='#2a3a2f' stroke='#0a2f38' stroke-width='2.5'/><rect x='3' y='30' width='26' height='20' rx='3' fill='#2a3a2f' stroke='#0a2f38' stroke-width='2.5'/><rect x='31' y='30' width='26' height='20' rx='3' fill='#0b2a45' stroke='#0a2f38' stroke-width='2.5'/><circle cx='16' cy='16' r='6' fill='none' stroke='#fff' stroke-width='3'/><circle cx='16' cy='16' r='1.6' fill='#0b2a45'/><path d='M36 22l14-12' stroke='#ffc247' stroke-width='5' stroke-linecap='round'/><path d='M38 20l10-8' stroke='#e2553e' stroke-width='2' stroke-linecap='round'/><circle cx='12' cy='40' r='3' fill='#d9412e'/><circle cx='20' cy='44' r='2.5' fill='#ffc247'/><circle cx='44' cy='40' r='5' fill='#ffc247'/><path d='M14 56h32' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/></svg>",
+  2:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='3' y='3' width='54' height='54' rx='10' fill='#d8eef5' stroke='#0a2f38' stroke-width='3'/><g fill='none' stroke='#0a2f38' stroke-width='2'><ellipse cx='20' cy='20' rx='6' ry='5'/><ellipse cx='20' cy='20' rx='11' ry='9'/><ellipse cx='21' cy='21' rx='17' ry='14'/><ellipse cx='23' cy='23' rx='25' ry='21'/></g><text x='15.5' y='25' font-size='13' font-weight='900' fill='#e2553e' font-family='Archivo,Arial Black,sans-serif'>L</text><path d='M38 44l12-4-6 10z' fill='#007291'/></svg>",
+  3:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='4' y='4' width='52' height='52' rx='8' fill='#fff' stroke='#0a2f38' stroke-width='3'/><rect x='9' y='9' width='13' height='13' rx='2' fill='#ffd84d'/><rect x='24' y='9' width='13' height='13' rx='2' fill='#f39a2b'/><rect x='39' y='9' width='13' height='13' rx='2' fill='#d9412e'/><rect x='9' y='24' width='13' height='13' rx='2' fill='#ffd84d'/><rect x='24' y='24' width='13' height='13' rx='2' fill='#f39a2b'/><rect x='39' y='24' width='13' height='13' rx='2' fill='#f39a2b'/><rect x='9' y='39' width='13' height='13' rx='2' fill='#e7efe9'/><rect x='24' y='39' width='13' height='13' rx='2' fill='#ffd84d'/><rect x='39' y='39' width='13' height='13' rx='2' fill='#ffd84d'/><path d='M41 13l4 5 7-9' fill='none' stroke='#0a2f38' stroke-width='3' stroke-linecap='round'/></svg>",
+  4:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M8 18h32l14 12-14 12H8z' fill='#ffc247' stroke='#0a2f38' stroke-width='3' stroke-linejoin='round'/><circle cx='44' cy='30' r='3.5' fill='#0a2f38'/><text x='12' y='36' font-size='17' font-weight='900' fill='#0a2f38' font-family='Archivo,Arial Black,sans-serif'>Wren</text></svg>",
+  5:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='3' y='3' width='54' height='54' rx='10' fill='#bfe6f2' stroke='#0a2f38' stroke-width='3'/><path d='M10 40V28l9-8 9 8v12z' fill='#ffd877' stroke='#0a2f38' stroke-width='2.5'/><path d='M30 40V26l9-8 9 8v14z' fill='#fff' stroke='#0a2f38' stroke-width='2.5'/><rect x='3' y='42' width='54' height='15' fill='#2f6f95'/><g fill='#8a5a33' stroke='#0a2f38' stroke-width='1.5'><rect x='13' y='37' width='8' height='5' rx='2'/><rect x='17' y='33' width='8' height='5' rx='2'/></g><path d='M6 46q6 -4 12 0t12 0 12 0 12 0' fill='none' stroke='#fff' stroke-width='2'/></svg>",
+  6:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='26' fill='#2b5d8a' stroke='#0a2f38' stroke-width='3'/><path d='M14 14q8 4 10 12t-4 14q-6 -4 -8 -12t2 -14z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='1.5'/><path d='M34 10q10 2 14 10t-2 12q-8 2 -12 -6t0 -16z' fill='#8ed3a8' stroke='#0a2f38' stroke-width='1.5'/><path d='M4 30h52' stroke='#ffc247' stroke-width='2' stroke-dasharray='4 3'/><g transform='translate(38 42)'><circle r='7' fill='#fff' opacity='.9'/><path d='M0 0c0-4 4-6 7-3M0 0c0 4-4 6-7 3' fill='none' stroke='#0a2f38' stroke-width='2'/></g></svg>",
+  7:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='4' y='8' width='52' height='36' rx='6' fill='#0a2f38' stroke='#0a2f38' stroke-width='3'/><rect x='8' y='12' width='44' height='22' rx='3' fill='#173f4d'/><rect x='8' y='28' width='44' height='6' fill='#ffc247'/><rect x='10' y='14' width='12' height='5' rx='2' fill='#d9412e'/><path d='M22 52h16M30 44v8' stroke='#0a2f38' stroke-width='4' stroke-linecap='round'/></svg>"
+};
+var STAGES = [
+  null,
+  { n:"Hazard wall", t:"22:00", d:"Satellite and radar screens. What is each one showing?", cls:"s1c" },
+  { n:"Chart reader", t:"23:00", d:"Read the isobars. Place the wind and rain.", cls:"s2c" },
+  { n:"Warning grid", t:"00:00", d:"Yellow, amber or red? Set the warning, see the town react.", cls:"s3c" },
+  { n:"Naming desk", t:"01:00", d:"Which storms get a name, and which name is next?", cls:"s4c" },
+  { n:"Ready the town", t:"02:00", d:"Prepare Saltmouth, then watch the storm hit.", cls:"s5c" },
+  { n:"World desk", t:"03:00", d:"Storm engines, and a storm passport round the world.", cls:"s6c" },
+  { n:"News desk", t:"05:00", d:"Write the early morning broadcast.", cls:"s7c" }
+];
+function tried(n){
+  var s = st["s" + n];
+  if(n === 1) return Object.keys(s.lab).length > 0 || Object.keys(s.fx).length > 0;
+  if(n === 2) return Object.keys(s.q).length > 0 || Object.keys(s.sym).length > 0 || s.qTries > 0;
+  if(n === 3) return Object.keys(s.done).length > 0;
+  if(n === 4) return Object.keys(s.dec).length > 0 || ownCount() > 0 || !!s.why;
+  if(n === 5) return s.runs.length > 0 || Object.keys(s.links).length > 0;
+  if(n === 6) return s.chain.t > 0 || s.chain.u > 0 || Object.keys(s.pass).length > 0 || !!s.expl;
+  if(n === 7) return !!(s.h.trim() || s.c.trim() || s.e.trim() || s.a.trim());
+}
+function ownCount(){ var n = 0, o = st.s4.own; for(var k in o) if(o[k] && String(o[k]).trim()) n++; return n }
+
+/* ---------- who picker ---------- */
+function drawWho(){
+  var b = el("whoBar"), h = "";
+  ["JT", "LW", "EGW", "LP", "LC", "HK"].forEach(function(k){ h += "<button type='button' data-w='" + k + "' aria-pressed='" + (who === k) + "'>" + k + "</button>" });
+  h += "<button type='button' class='look' data-w='' aria-pressed='" + (!KIDS[who]) + "'>Just looking</button>";
+  b.innerHTML = h;
+  var g = el("goals");
+  if(KIDS[who]){
+    var K = KIDS[who];
+    g.innerHTML = "<div class='goals'><b>Hi " + who + ". Your two weather targets:</b><ul><li>" + K.m[0] + "</li><li>" + K.m[1] + "</li></ul><p class='small' style='margin:6px 0 0'>Good places to start have a purple badge. Every desk is open, so go wherever you like.</p></div>";
+  } else g.innerHTML = "";
+}
+el("whoBar").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-w]"); if(!b) return;
+  who = b.getAttribute("data-w");
+  try{ localStorage.setItem(WHOKEY, who) }catch(err){}
+  var inp = document.getElementById("b5who"); if(inp) inp.value = who;
+  drawWho(); drawMap();
+});
+
+/* ---------- stage map ---------- */
+var current = 0;
+function drawMap(){
+  var h = "", go = KIDS[who] ? KIDS[who].go : [];
+  for(var i = 1; i <= 7; i++){
+    var S = STAGES[i];
+    h += "<button type='button' class='stile " + S.cls + (current === i ? " on" : "") + "' data-s='" + i + "'>" + ICON[i] +
+      "<span class='num'>Desk " + i + " &middot; " + S.t + "</span><span class='nm'>" + S.n + "</span><span class='ds'>" + S.d + "</span>" +
+      (go.indexOf(i) >= 0 ? "<span class='badge'>Good place to start</span>" : "") +
+      (tried(i) ? "<span class='tried' title='You have tried this'>&#10003;</span>" : "") + "</button>";
+  }
+  el("smap").innerHTML = h;
+}
+el("smap").addEventListener("click", function(e){ var b = e.target.closest("[data-s]"); if(b) openStage(+b.getAttribute("data-s")) });
+
+var RENDER = {};
+function openStage(n){
+  current = n; st.opened[n] = 1; save();
+  var S = STAGES[n];
+  var nav = "<div class='stagefoot'>" + (n > 1 ? "<button class='btn btn-quiet' type='button' data-go='" + (n - 1) + "'>Desk " + (n - 1) + "</button>" : "") +
+    (n < 7 ? "<button class='btn' type='button' data-go='" + (n + 1) + "'>Next desk</button>" : "<button class='btn' type='button' data-go='send'>Send to Jay</button>") +
+    "<button class='btn btn-quiet' type='button' data-go='map'>Back to the map</button></div>";
+  el("stageHost").innerHTML = "<section class='stage' id='stageCard'><div class='stagehead'>" + ICON[n] + "<div><span class='kicker'>Desk " + n + " of 7 &middot; " + S.t + "</span><h2>" + S.n + "</h2></div></div><div id='stageBody'></div>" + nav + "</section>";
+  RENDER[n](el("stageBody"));
+  var top = el("stageCard").getBoundingClientRect().top + window.scrollY - 12;
+  try{ window.scrollTo({ top:top, behavior: reduce ? "auto" : "smooth" }) }catch(e){ window.scrollTo(0, top) }
+}
+el("stageHost").addEventListener("click", function(e){
+  var b = e.target.closest("[data-go]"); if(!b) return;
+  var g = b.getAttribute("data-go");
+  if(g === "map"){ current = 0; drawMap(); window.scrollTo({ top: el("introCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+  if(g === "send"){ window.scrollTo({ top: el("sendCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+  openStage(+g);
+});
+
+/* ---------- tap or drag helper ---------- */
+function dnd(root, tileSel, dropSel, onDrop){
+  var held = null, drag = null, lastHover = null;
+  function setHeld(t){
+    if(held){ held.classList.remove("held"); held.setAttribute("aria-pressed", "false") }
+    held = t;
+    if(t){ t.classList.add("held"); t.setAttribute("aria-pressed", "true") }
+    root.classList.toggle("holding", !!t);
+  }
+  root.addEventListener("click", function(e){
+    if(drag && drag.done){ drag = null; return }
+    var t = e.target.closest(tileSel);
+    if(t && root.contains(t) && !t.classList.contains("placed")){
+      var inDrop = t.closest(dropSel);
+      if(held && held !== t && inDrop && root.contains(inDrop)){ var h0 = held; setHeld(null); onDrop(h0, inDrop); return }
+      setHeld(held === t ? null : t); return }
+    var d = e.target.closest(dropSel);
+    if(d && root.contains(d) && held){ var hh = held; setHeld(null); onDrop(hh, d) }
+  });
+  root.addEventListener("pointerdown", function(e){
+    var t = e.target.closest(tileSel);
+    if(!t || !root.contains(t) || t.classList.contains("placed") || (e.button && e.button > 0)) return;
+    drag = { t:t, x:e.clientX, y:e.clientY, g:null };
+  });
+  window.addEventListener("pointermove", function(e){
+    if(!drag || drag.done || !document.body.contains(root)) return;
+    if(!drag.g){
+      if(Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 10) return;
+      drag.g = drag.t.cloneNode(true); drag.g.classList.add("dragghost"); drag.g.classList.remove("held");
+      drag.g.style.width = drag.t.offsetWidth + "px";
+      document.body.appendChild(drag.g); drag.t.classList.add("dragging"); root.classList.add("holding");
+    }
+    drag.g.style.left = (e.clientX - 20) + "px"; drag.g.style.top = (e.clientY - 16) + "px";
+    var u = document.elementFromPoint(e.clientX, e.clientY), d = u && u.closest(dropSel);
+    if(lastHover && lastHover !== d) lastHover.classList.remove("hover");
+    if(d && root.contains(d)){ d.classList.add("hover"); lastHover = d }
+  });
+  function end(e){
+    if(!drag || drag.done) return;
+    if(drag.g){
+      drag.g.remove(); drag.t.classList.remove("dragging");
+      if(lastHover){ lastHover.classList.remove("hover"); lastHover = null }
+      var u = e.type === "pointercancel" ? null : document.elementFromPoint(e.clientX, e.clientY), d = u && u.closest(dropSel), t = drag.t;
+      drag = { done:true }; setTimeout(function(){ if(drag && drag.done) drag = null }, 30);
+      setHeld(null);
+      if(d && root.contains(d)) onDrop(t, d);
+    } else drag = null;
+  }
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+}
+
+/* ---------- map helpers ---------- */
+var GB = [[-5.7,50.05],[-5,50.15],[-4.2,50.35],[-3.4,50.6],[-2.4,50.6],[-1.3,50.75],[0.2,50.75],[1.4,51.15],[0.9,51.6],[1.7,52.4],[1.7,52.75],[0.4,52.95],[0.3,53.5],[-0.1,54.1],[-0.6,54.5],[-1.3,54.9],[-1.6,55.6],[-2.1,55.9],[-3.1,56.05],[-2.6,56.3],[-2.3,56.8],[-1.8,57.5],[-2,57.7],[-3.3,57.7],[-4.1,57.6],[-3.1,58.6],[-4.4,58.55],[-5,58.6],[-5.3,58.2],[-5.7,57.6],[-5.6,57],[-6.2,56.6],[-5.6,56.3],[-5.8,55.5],[-5.1,55],[-5.2,54.6],[-4.4,54.8],[-3.6,54.9],[-3.4,54.4],[-3.2,54.1],[-2.9,53.8],[-3.1,53.4],[-3.6,53.3],[-4.6,53.3],[-4.2,52.9],[-4.1,52.3],[-4.7,52.1],[-5.2,51.8],[-4.4,51.6],[-3.4,51.4],[-2.7,51.55],[-3.1,51.2],[-4.2,51.2],[-4.6,50.9],[-5.2,50.5]];
+var IE = [[-6,52.1],[-6.2,52.9],[-6.1,53.6],[-6.4,54],[-5.6,54.4],[-5.8,54.8],[-6.2,55.2],[-7.4,55.3],[-8.3,55.1],[-8.6,54.6],[-10,54.2],[-9.9,53.5],[-9.3,53.2],[-9.9,52.6],[-10.4,51.9],[-9.7,51.5],[-8.5,51.6],[-7,52.1]];
+var HEB = [[-7.6,56.8],[-7.1,57.2],[-7.4,57.7],[-6.2,58.5],[-6.9,58.3],[-7.4,57.9],[-7.5,57.3]];
+var FR = [[8,55.6],[8.6,54.9],[8.9,53.9],[7,53.6],[5.5,53.4],[4.7,52.9],[4,51.9],[3.4,51.4],[2.5,51.1],[1.6,50.8],[1.6,50.2],[0.2,49.7],[-1.2,49.6],[-1.6,49.7],[-1.5,48.7],[-3,48.8],[-4.7,48.4],[-4.3,47.8],[-2.5,47.3],[-2.1,46.8],[-1.5,46],[8,46]];
+function mkProj(lon0, lon1, lat0, lat1, W){
+  var r = Math.PI / 180;
+  function my(l){ return Math.log(Math.tan(Math.PI / 4 + l * r / 2)) }
+  var x0 = lon0 * r, x1 = lon1 * r, y0 = my(lat0), y1 = my(lat1), H = W * (y1 - y0) / (x1 - x0);
+  return { W:W, H:Math.round(H), p:function(lon, lat){ return [(lon * r - x0) / (x1 - x0) * W, (y1 - my(lat)) / (y1 - y0) * H] } };
+}
+function polyD(P, pts){ return pts.map(function(q, i){ var a = P.p(q[0], q[1]); return (i ? "L" : "M") + a[0].toFixed(1) + " " + a[1].toFixed(1) }).join("") + "Z" }
+function ukLand(P, fill, stroke, sw){
+  return "<g fill='" + fill + "' stroke='" + stroke + "' stroke-width='" + sw + "' stroke-linejoin='round'><path d='" + polyD(P, GB) + "'/><path d='" + polyD(P, IE) + "'/><path d='" + polyD(P, HEB) + "'/><path d='" + polyD(P, FR) + "'/></g>";
+}
+
+/* =========================================================
+   DESK 1: Hazard wall
+   ========================================================= */
+var SCREENS = [
+  { id:"hu", kind:"SATELLITE", n:"Hurricane", hint:"Look for the small dark hole in the middle. A clear eye means a very strong tropical storm: a hurricane." },
+  { id:"dd", kind:"SATELLITE", n:"UK deep depression", hint:"A long curl of cloud shaped like a comma, swinging in from the Atlantic towards the UK. That is a UK depression." },
+  { id:"rain", kind:"RADAR", n:"Band of heavy rain", hint:"On the radar, colours show rain. A long band of yellow and orange is a band of heavy rain." },
+  { id:"ts", kind:"SATELLITE", n:"Tropical storm", hint:"A spinning mass of cloud over a warm sea, but with no clear eye yet. One step below a hurricane." },
+  { id:"heat", kind:"SATELLITE", n:"Heatwave", hint:"No cloud at all, a big area of high pressure, and a very hot reading. That is a heatwave." },
+  { id:"thun", kind:"RADAR", n:"Summer thunderstorms", hint:"Small, bright, scattered spots of very heavy rain with red middles. Those are thunderstorms." }
+];
+var EFFECTS = [
+  { id:"e1", t:"Winds over 100 mph rip the roofs off whole streets", ok:["hu"], hint:"Over 100 mph is far stronger than a UK gale. Only one screen shows a storm that strong." },
+  { id:"e2", t:"Torrential rain for days brings flash floods and mudslides", ok:["ts", "hu"], hint:"Think of a big spinning storm over a warm tropical sea. Hurricanes and tropical storms both do this." },
+  { id:"e3", t:"Gales across the whole country close bridges and cancel ferries", ok:["dd"], hint:"A storm that covers the whole UK at once. The comma shaped cloud is huge." },
+  { id:"e4", t:"After a day of steady rain, rivers rise and burst their banks", ok:["rain", "dd"], hint:"Steady rain for a long time. Look for a long band of rain on the radar, or a big UK storm." },
+  { id:"e5", t:"Lightning, big hailstones and a street flooded in under an hour", ok:["thun"], hint:"Short, violent bursts of rain with lightning. Look for the small bright spots." },
+  { id:"e6", t:"Heatstroke, especially for babies and older people", ok:["heat"], hint:"This is about the body getting too hot." },
+  { id:"e7", t:"Railway lines get so hot that trains have to slow down", ok:["heat"], hint:"Metal expands when it gets hot. Which screen is all about heat?" },
+  { id:"e8", t:"Trees fall onto power lines and thousands of homes lose power", ok:["hu", "ts", "dd"], hint:"Strong winds do this. Any of the big spinning storms could." },
+  { id:"e9", t:"Surface water floods roads and underpasses", ok:["rain", "thun", "dd", "ts", "hu"], hint:"Lots of rain falling faster than the drains can take it. Which screens bring heavy rain?" }
+];
+var P1 = mkProj(-12, 4, 49.5, 59.5, 220);
+function screenSVG(id){
+  var W = 220, H = 150, s = "<svg viewBox='0 0 " + W + " " + H + "' aria-hidden='true'>";
+  if(id === "hu" || id === "ts"){
+    s += "<rect width='" + W + "' height='" + H + "' fill='#0b2a45'/><path d='M0 120 q30 -8 60 0 t60 0 t60 0 t60 0' fill='none' stroke='#16406a' stroke-width='3'/>";
+    var arms = id === "hu" ? 5 : 3, out = id === "hu" ? 62 : 46, g = "";
+    for(var a = 0; a < arms; a++){
+      var a0 = a * 2 * Math.PI / arms, d = "";
+      for(var t = 0; t <= 1.0001; t += .05){ var r = 12 + t * out, an = a0 + t * 3.4; d += (t ? "L" : "M") + (110 + Math.cos(an) * r).toFixed(1) + " " + (75 + Math.sin(an) * r * .9).toFixed(1) }
+      g += "<path d='" + d + "' fill='none' stroke='#fff' stroke-width='" + (id === "hu" ? 9 : 11) + "' stroke-linecap='round' opacity='.78'/>";
+    }
+    g += "<circle cx='110' cy='75' r='" + (id === "hu" ? 22 : 20) + "' fill='#fff' opacity='.95'/>";
+    if(id === "hu") g += "<circle cx='110' cy='75' r='5.5' fill='#0b2a45'/>";
+    else g += "<circle cx='100' cy='70' r='12' fill='#e9f2f4'/><circle cx='121' cy='82' r='10' fill='#e9f2f4'/>";
+    s += "<g class='spin' style='--dur:" + (id === "hu" ? 10 : 16) + "s'>" + g + "</g>";
+  } else if(id === "dd"){
+    s += "<rect width='" + W + "' height='" + H + "' fill='#0b2a45'/>" + ukLand(mkProj(-30, 6, 44, 62, 220), "#3d6b4f", "#5b8a6d", 1);
+    s += "<g class='flick'><path d='M18 120 Q40 90 60 70 T90 40 Q110 22 130 28 Q150 36 140 54 Q128 70 106 62 Q92 56 98 44' fill='none' stroke='#fff' stroke-width='16' stroke-linecap='round' opacity='.85'/><path d='M10 134 Q30 112 48 92' fill='none' stroke='#fff' stroke-width='10' stroke-linecap='round' opacity='.6'/></g>";
+  } else if(id === "rain" || id === "thun"){
+    s += "<rect width='" + W + "' height='" + H + "' fill='#26332c'/>" + ukLand(P1, "#3a4a3f", "#6b8070", 1.2);
+    if(id === "rain"){
+      s += "<g class='slideband'><path d='M30 140 Q80 90 120 60 T200 6' fill='none' stroke='#3f7fd6' stroke-width='34' stroke-linecap='round' opacity='.85'/><path d='M38 132 Q82 92 120 62 T194 12' fill='none' stroke='#ffd84d' stroke-width='16' stroke-linecap='round'/><path d='M70 104 Q100 80 124 60 T160 34' fill='none' stroke='#f39a2b' stroke-width='7' stroke-linecap='round'/></g>";
+    } else {
+      [[70,110],[118,92],[150,120],[96,62],[170,80],[132,40]].forEach(function(c, i){
+        s += "<g class='flick' style='animation-delay:" + (i * .3) + "s'><circle cx='" + c[0] + "' cy='" + c[1] + "' r='12' fill='#3f7fd6'/><circle cx='" + c[0] + "' cy='" + c[1] + "' r='8' fill='#ffd84d'/><circle cx='" + c[0] + "' cy='" + c[1] + "' r='4.5' fill='#d9412e'/><circle cx='" + c[0] + "' cy='" + c[1] + "' r='1.8' fill='#e070d0'/></g>";
+      });
+      s += "<path d='M186 30l-8 14h7l-6 12' fill='none' stroke='#ffc247' stroke-width='3' stroke-linecap='round'/>";
+    }
+  } else if(id === "heat"){
+    s += "<rect width='" + W + "' height='" + H + "' fill='#1b4a72'/>" + ukLand(P1, "#9aa65a", "#6f7a3c", 1.2);
+    s += "<text x='170' y='52' font-size='40' font-weight='900' fill='#fff' stroke='#0a2f38' stroke-width='2' paint-order='stroke' font-family='Archivo,Arial Black,sans-serif'>H</text>";
+    s += "<g transform='translate(36 34)'><circle r='14' fill='#ffc247'/><g stroke='#ffc247' stroke-width='3' stroke-linecap='round'><path d='M0 -22v-6M0 22v6M-22 0h-6M22 0h6M15 15l4 4M-15 -15l-4 -4M15 -15l4 -4M-15 15l-4 4'/></g></g>";
+    s += "<rect x='150' y='100' width='60' height='26' rx='8' fill='#d9412e' stroke='#fff' stroke-width='2'/><text x='180' y='118' text-anchor='middle' font-size='15' font-weight='900' fill='#fff' font-family='Archivo,Arial Black,sans-serif'>34&#176;C</text>";
+  }
+  return s + "</svg>";
+}
+var wallTab = "lab";
+RENDER[1] = function(b){
+  var h = "<p class='lead'>Your shift starts. Six screens, six weather hazards. Name each screen, then work out what each hazard does on the ground.</p>";
+  h += "<div class='learn'><span class='kicker'>Reading the screens</span><ul><li><b>Satellite</b> pictures show cloud from space. Bright white is thick cloud.</li><li><b>Radar</b> shows rain. On our radar, blue is light rain, yellow and orange are heavy, red is very heavy.</li><li>A <b>hazard</b> is weather that can hurt people or damage places.</li></ul></div>";
+  h += "<div class='part' id='p1'><div class='wall' id='wall'></div>";
+  h += "<div class='tabs' role='tablist'><button type='button' role='tab' data-tab='lab'>Step 1: name the screens</button><button type='button' role='tab' data-tab='fx'>Step 2: what does it do?</button></div>";
+  h += "<p class='small' id='wallHow'></p><div class='pool' id='wallPool'></div><div id='fb1'></div></div>";
+  b.innerHTML = h;
+  drawWall();
+  each(b.querySelectorAll("[data-tab]"), function(x){ x.onclick = function(){ wallTab = x.getAttribute("data-tab"); drawWall() } });
+  dnd(el("p1"), "#wallPool .tile", ".scr", function(t, d){
+    var S = st.s1, sid = d.getAttribute("data-scr");
+    if(t.hasAttribute("data-lab")){
+      var lid = t.getAttribute("data-lab"); S.labTries++;
+      if(S.lab[sid]){ save(); setFb("fb1", "tell", "That screen already has a name. Try an empty one."); return }
+      if(lid === sid){ S.lab[sid] = 1; save(); drawWall(); var left = SCREENS.length - Object.keys(S.lab).length;
+        setFb("fb1", "ok", "<b>Yes, " + byId(SCREENS, sid).n.toLowerCase().replace(/\buk\b/, "UK") + ".</b> " + byId(SCREENS, sid).hint + (left ? "" : " <b>All six named.</b> Step 2 is next, if you fancy it."));
+      } else { save(); setFb("fb1", "nope", "<b>Not that one.</b> " + byId(SCREENS, sid).hint + " Have another go.") }
+    } else {
+      var eid = t.getAttribute("data-fx"), E = byId(EFFECTS, eid); S.fxTries++;
+      if(E.ok.indexOf(sid) >= 0){ S.fx[eid] = sid; save(); drawWall(); var l2 = EFFECTS.length - Object.keys(S.fx).length;
+        setFb("fb1", "ok", "<b>Yes.</b> " + (E.ok.length > 1 ? "That one could go on " + E.ok.length + " screens: " + E.ok.map(function(k){ return byId(SCREENS, k).n.toLowerCase().replace(/\buk\b/, "UK") }).join(", ") + ". " : "") + (l2 ? l2 + " cards to go." : "<b>All nine placed. Outrageous.</b> You can describe what each hazard does."));
+      } else { save(); setFb("fb1", "nope", "<b>Not that screen.</b> " + E.hint) }
+    }
+  });
+};
+function drawWall(){
+  var S = st.s1, w = "";
+  SCREENS.forEach(function(sc, i){
+    var fx = EFFECTS.filter(function(e){ return S.fx[e.id] === sc.id });
+    w += "<div class='scr drop' data-scr='" + sc.id + "' role='button' tabindex='0' aria-label='Screen " + (i + 1) + (S.lab[sc.id] ? ", " + sc.n : "") + "'>" + screenSVG(sc.id) + "<span class='tg'>" + sc.kind + " " + (i + 1) + "</span>" +
+      "<span class='lbl" + (S.lab[sc.id] ? "" : " empty") + "'>" + (S.lab[sc.id] ? sc.n : "Screen " + (i + 1) + ": no name yet") + "</span>" +
+      (fx.length ? "<span class='fx'>" + fx.map(function(e){ return "<span>" + e.t + "</span>" }).join("") + "</span>" : "") + "</div>";
+  });
+  el("wall").innerHTML = w;
+  each(el("wall").querySelectorAll(".scr"), keyClick);
+  each(document.querySelectorAll("#p1 [data-tab]"), function(x){ x.setAttribute("aria-selected", x.getAttribute("data-tab") === wallTab) });
+  var pool = "";
+  if(wallTab === "lab"){
+    el("wallHow").textContent = "Drag a name onto a screen, or tap a name and then tap a screen.";
+    if(!drawWall.o) drawWall.o = shuffle(SCREENS);
+    drawWall.o.forEach(function(sc){ if(!S.lab[sc.id]) pool += "<button type='button' class='tile name' data-lab='" + sc.id + "' aria-pressed='false'>" + sc.n + "</button>" });
+    el("wallPool").innerHTML = pool || "<span class='small'>All six named.</span>";
+  } else {
+    el("wallHow").textContent = "Drag each effect onto a screen that could cause it, or tap and tap. Some fit more than one.";
+    if(!drawWall.e) drawWall.e = shuffle(EFFECTS);
+    drawWall.e.forEach(function(e){ if(!S.fx[e.id]) pool += "<button type='button' class='tile' data-fx='" + e.id + "' aria-pressed='false'>" + e.t + "</button>" });
+    el("wallPool").innerHTML = pool || "<span class='small'>All placed.</span>";
+  }
+}
+
+/* =========================================================
+   DESK 2: Chart reader
+   ========================================================= */
+var CP = mkProj(-24, 6, 47, 61.5, 600);
+var LOWC = CP.p(-15.5, 59.6), HIGHC = CP.p(1.5, 48.6);
+var SL = 120, SH = 190;
+function pressureAt(x, y){
+  var dl = (x - LOWC[0]) * (x - LOWC[0]) + (y - LOWC[1]) * (y - LOWC[1]), dh = (x - HIGHC[0]) * (x - HIGHC[0]) + (y - HIGHC[1]) * (y - HIGHC[1]);
+  return 1010 - 56 * Math.exp(-dl / (2 * SL * SL)) + 20 * Math.exp(-dh / (2 * SH * SH));
+}
+function gradAt(x, y){ var e = 2; var gx = (pressureAt(x + e, y) - pressureAt(x - e, y)) / (2 * e), gy = (pressureAt(x, y + e) - pressureAt(x, y - e)) / (2 * e); return Math.sqrt(gx * gx + gy * gy) }
+var PLACES = [
+  { id:"A", n:"Western Isles", ll:[-7.2, 57.6] },
+  { id:"B", n:"Northern Ireland", ll:[-6.6, 54.6] },
+  { id:"C", n:"Midlands", ll:[-1.6, 52.6] },
+  { id:"D", n:"South coast", ll:[-0.8, 50.95] }
+];
+PLACES.forEach(function(p){ p.xy = CP.p(p.ll[0], p.ll[1]) });
+var SYMS = [
+  { id:"sg", n:"Severe gale, heavy rain", to:"A", ic:"<svg viewBox='0 0 34 34'><g fill='none' stroke='#0a2f38' stroke-width='2.6' stroke-linecap='round'><path d='M3 8h18a4 4 0 1 0-4-4'/><path d='M3 15h24a4 4 0 1 1-4 4'/><path d='M3 22h14'/></g><g stroke='#2d6fd6' stroke-width='2.6' stroke-linecap='round'><path d='M22 26l-2 6M27 25l-2 6M32 25l-2 6'/></g></svg>" },
+  { id:"sw", n:"Strong wind, rain at times", to:"B", ic:"<svg viewBox='0 0 34 34'><g fill='none' stroke='#0a2f38' stroke-width='2.6' stroke-linecap='round'><path d='M3 10h18a4 4 0 1 0-4-4'/><path d='M3 18h20a4 4 0 1 1-4 4'/></g><path d='M26 27l-2 5' stroke='#2d6fd6' stroke-width='2.6' stroke-linecap='round'/></svg>" },
+  { id:"br", n:"Breezy, a few showers", to:"C", ic:"<svg viewBox='0 0 34 34'><path d='M6 18a6 6 0 0 1 6-6 8 8 0 0 1 15 2 5 5 0 0 1 0 10H8a4 4 0 0 1-2-6z' fill='#fff' stroke='#0a2f38' stroke-width='2.2'/><path d='M14 28l-1 4' stroke='#2d6fd6' stroke-width='2.6' stroke-linecap='round'/><path d='M2 8h10' stroke='#0a2f38' stroke-width='2.2' stroke-linecap='round'/></svg>" },
+  { id:"ca", n:"Light wind, dry and sunny", to:"D", ic:"<svg viewBox='0 0 34 34'><circle cx='17' cy='17' r='7' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/><g stroke='#f0a80f' stroke-width='2.6' stroke-linecap='round'><path d='M17 3v4M17 27v4M3 17h4M27 17h4M7 7l3 3M24 24l3 3M7 27l3-3M24 10l3-3'/></g></svg>" }
+];
+var CQ = [
+  { id:"low", q:"Two centres on the chart. Which one is the low?", how:"Tap a centre on the chart (the ? circles). Read the numbers on the lines near it." },
+  { id:"tight", q:"Where are the isobars closest together?", how:"Tap a place letter on the chart." },
+  { id:"calm", q:"Where will the wind be lightest?", how:"Tap a place letter on the chart." },
+  { id:"spin", q:"Which way does the wind blow round a low in the northern hemisphere?", how:"Pick one.", o:["Anticlockwise, round and slightly in towards the low", "Clockwise, round and out from the low", "Straight into the middle, like water down a plughole"], a:0 },
+  { id:"why", q:"Why is the wind strongest where the isobars are close together?", how:"Pick the best explanation.", o:["The pressure changes a lot over a short distance, so air rushes from high to low pressure faster", "The lines are drawn thicker there, so there is more wind", "Places further north always have more wind"], a:0 },
+  { id:"rain", q:"Why does a low bring cloud and rain?", how:"Pick the best explanation.", o:["Air rises in a low. As it rises it cools, and its water vapour condenses into cloud and rain", "Air sinks in a low, which squeezes rain out of it", "The sea is lower there, so water floods in"], a:0 }
+];
+var CQHINT = {
+  low:"Pressure is lowest in the middle of a low. Look at the numbers: are they in the 960s or the 1020s?",
+  tight:"Look for where the lines are squashed together, with the least space between them.",
+  calm:"Light winds come where the isobars are spread far apart, near the high.",
+  spin:"In the northern hemisphere, the Earth's spin bends the wind so it circles a low anticlockwise.",
+  why:"Close isobars mean a big drop in pressure over a short distance. Air rushes from high to low.",
+  rain:"Think of what happens to warm, moist air when it goes up."
+};
+var isoCache = null;
+function isobars(){
+  if(isoCache) return isoCache;
+  var W = CP.W, H = CP.H, step = 6, nx = Math.ceil(W / step) + 1, ny = Math.ceil(H / step) + 1, v = [];
+  for(var j = 0; j < ny; j++){ v[j] = []; for(var i = 0; i < nx; i++) v[j][i] = pressureAt(i * step, j * step) }
+  var out = {};
+  for(var L = 960; L <= 1028; L += 4){
+    var d = "";
+    for(j = 0; j < ny - 1; j++) for(i = 0; i < nx - 1; i++){
+      var a = v[j][i], b2 = v[j][i + 1], c = v[j + 1][i + 1], dd = v[j + 1][i], pts = [];
+      function cr(p1, p2, x1, y1, x2, y2){ if((p1 < L) !== (p2 < L)){ var t = (L - p1) / (p2 - p1); pts.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t]) } }
+      var x = i * step, y = j * step;
+      cr(a, b2, x, y, x + step, y); cr(b2, c, x + step, y, x + step, y + step); cr(dd, c, x, y + step, x + step, y + step); cr(a, dd, x, y, x, y + step);
+      if(pts.length >= 2) d += "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1) + "L" + pts[1][0].toFixed(1) + " " + pts[1][1].toFixed(1);
+      if(pts.length === 4) d += "M" + pts[2][0].toFixed(1) + " " + pts[2][1].toFixed(1) + "L" + pts[3][0].toFixed(1) + " " + pts[3][1].toFixed(1);
+    }
+    if(d) out[L] = d;
+  }
+  isoCache = out; return out;
+}
+function rayLabel(L, c, dx, dy){
+  var prev = pressureAt(c[0], c[1]);
+  for(var r = 4; r < 600; r += 2){
+    var x = c[0] + dx * r, y = c[1] + dy * r;
+    if(x < 14 || y < 12 || x > CP.W - 14 || y > CP.H - 12) return null;
+    var p = pressureAt(x, y);
+    if((prev < L) !== (p < L)) return [x, y];
+    prev = p;
+  }
+  return null;
+}
+function chartSVG(){
+  var S = st.s2, s = "<svg viewBox='0 0 " + CP.W + " " + CP.H + "' role='img' aria-label='Pressure chart of the UK and Ireland with isobars, two pressure centres and four places A to D'>";
+  s += "<rect width='" + CP.W + "' height='" + CP.H + "' fill='#d8eef5'/>" + ukLand(CP, "#f3e9d2", "#8a7a5a", 1.4);
+  var iso = isobars();
+  s += "<g fill='none' stroke='#0a2f38' stroke-width='1.8' stroke-linecap='round'>";
+  for(var L in iso) s += "<path d='" + iso[L] + "'" + (L % 8 ? " opacity='.55'" : "") + "/>";
+  s += "</g><g class='svgtext' font-size='13' font-weight='700' fill='#0a2f38'>";
+  for(L = 960; L <= 1028; L += 8){
+    var pt = L < 1012 ? rayLabel(L, LOWC, -.55, .83) : rayLabel(L, HIGHC, -.96, -.28);
+    if(pt) s += "<rect x='" + (pt[0] - 17).toFixed(1) + "' y='" + (pt[1] - 9).toFixed(1) + "' width='34' height='17' rx='4' fill='#d8eef5'/><text x='" + pt[0].toFixed(1) + "' y='" + (pt[1] + 4.5).toFixed(1) + "' text-anchor='middle'>" + L + "</text>";
+  }
+  s += "</g>";
+  if(S.q.spin){
+    s += "<g transform='translate(" + LOWC[0].toFixed(1) + " " + LOWC[1].toFixed(1) + ")'><g class='orbit'>";
+    for(var k = 0; k < 4; k++){ var an = k * Math.PI / 2; s += "<g transform='rotate(" + (-k * 90) + ")'><path d='M80 -18 A82 82 0 0 0 52 -64' fill='none' stroke='#007291' stroke-width='5' stroke-linecap='round'/><path d='M44 -60 L54 -68 L56 -55 Z' fill='#007291'/></g>" }
+    s += "</g></g>";
+  }
+  var lowKnown = !!S.q.low;
+  [["low", LOWC], ["high", HIGHC]].forEach(function(c, i){
+    var x = c[1][0], y = c[1][1];
+    s += "<g class='hotg' data-centre='" + c[0] + "' tabindex='0' role='button' aria-label='Centre " + (i + 1) + "'><g class='" + (lowKnown ? "" : "pz") + "'><circle class='ring' cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' r='22' fill='#fff' stroke='#0a2f38' stroke-width='3'/>" +
+      "<text x='" + x.toFixed(1) + "' y='" + (y + 9).toFixed(1) + "' text-anchor='middle' font-size='26' font-weight='900' fill='" + (lowKnown ? (c[0] === "low" ? "#e2553e" : "#2d6fd6") : "#0a2f38") + "' font-family='Archivo,Arial Black,sans-serif'>" + (lowKnown ? (c[0] === "low" ? "L" : "H") : "?") + "</text></g></g>";
+  });
+  PLACES.forEach(function(p){
+    var x = p.xy[0], y = p.xy[1], sym = null;
+    for(var k2 in S.sym) if(S.sym[k2] === p.id) sym = byId(SYMS, k2);
+    s += "<g class='hotg place drop' data-place='" + p.id + "' tabindex='0' role='button' aria-label='Place " + p.id + ", " + p.n + "'><circle class='ring' cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' r='17' fill='#7b4b8f' stroke='#fff' stroke-width='3'/><text x='" + x.toFixed(1) + "' y='" + (y + 6).toFixed(1) + "' text-anchor='middle' font-size='17' font-weight='900' fill='#fff' font-family='Archivo,Arial Black,sans-serif'>" + p.id + "</text>";
+    if(sym) s += "<g transform='translate(" + (x + 16).toFixed(1) + " " + (y - 40).toFixed(1) + ")'><rect width='42' height='42' rx='9' fill='#fff' stroke='#2e7d4f' stroke-width='3'/><g transform='translate(4 4)'>" + sym.ic.replace("<svg viewBox='0 0 34 34'>", "<svg width='34' height='34' viewBox='0 0 34 34'>") + "</g></g>";
+    s += "</g>";
+  });
+  return s + "</svg>";
+}
+RENDER[2] = function(b){
+  var h = "<p class='lead'>The 23:00 chart has just come in. The lines are <b>isobars</b>: lines joining places with the same air pressure, in hectopascals (hPa).</p>";
+  h += "<div class='learn'><span class='kicker'>Chart rules</span><ul><li><b>Low pressure</b>: air rising, cloud and rain. Numbers get smaller towards the middle.</li><li><b>High pressure</b>: air sinking, usually dry and settled.</li><li><b>Isobars close together</b> = strong wind. Far apart = light wind.</li></ul></div>";
+  h += "<div class='part' id='p2'><div class='chartlab'><div class='chart' id='chart'></div><div><div class='qcard' id='qcard' aria-live='polite'></div><div id='fb2'></div><div class='qdone' id='qdone'></div></div></div></div>";
+  h += "<div class='part' id='p2b'><h3>Place the weather</h3><p class='small'>Drag each symbol onto a place on the chart, or tap a symbol and then tap a letter. Use the isobars and how near each place is to the low.</p><div class='pool' id='symPool'></div><div id='fb2b'></div></div>";
+  b.innerHTML = h;
+  drawChart();
+  el("chart").addEventListener("click", function(e){
+    if(el("stageBody").classList.contains("holding")) return;
+    var S = st.s2, q = nextQ(); if(!q) return;
+    var c = e.target.closest("[data-centre]"), pl = e.target.closest("[data-place]");
+    if(q.id === "low" && c){ answerQ(q, c.getAttribute("data-centre") === "low") }
+    else if(q.id === "tight" && pl){ answerQ(q, pl.getAttribute("data-place") === "A") }
+    else if(q.id === "calm" && pl){ answerQ(q, pl.getAttribute("data-place") === "D") }
+  });
+  dnd(el("stageBody"), "#symPool .tile", ".place", function(t, d){
+    var S = st.s2, id = t.getAttribute("data-sym"), pid = d.getAttribute("data-place"), sym = byId(SYMS, id);
+    S.symTries++;
+    for(var k in S.sym) if(S.sym[k] === pid){ save(); setFb("fb2b", "tell", "Place " + pid + " already has its weather. Try another letter."); return }
+    if(sym.to === pid){ S.sym[id] = pid; save(); drawChart(); var left = SYMS.length - Object.keys(S.sym).length;
+      setFb("fb2b", "ok", "<b>Yes.</b> " + { A:"A is closest to the low, with the isobars packed tight. Wild wind and heavy rain.", B:"B is still near the low and the isobars are fairly close. Strong wind and some rain.", C:"C is further from the low. The isobars are spreading out, so it is only breezy.", D:"D is near the high. Isobars far apart, sinking air, light wind and dry." }[pid] + (left ? "" : " <b>Chart done.</b>"));
+    } else { save(); setFb("fb2b", "nope", "<b>Not quite.</b> " + (sym.to === "A" || sym.to === "B" ? "That weather needs isobars close together and somewhere near the low." : "That weather needs isobars further apart, nearer the high.") + " Have another go.") }
+  });
+};
+function nextQ(){ var S = st.s2; for(var i = 0; i < CQ.length; i++) if(!S.q[CQ[i].id]) return CQ[i]; return null }
+function answerQ(q, right, pick){
+  var S = st.s2; S.qTries++;
+  if(S.qFirst[q.id] === undefined) S.qFirst[q.id] = right;
+  if(right){ S.q[q.id] = 1; save(); drawChart();
+    setFb("fb2", "ok", "<b>Yes.</b> " + { low:"Centre 1 is about 955 hPa. That is a deep low. The other is a high, over 1028 hPa.", tight:"A, the Western Isles. The lines are squeezed together there, so the wind will be fierce.", calm:"D, the south coast. It is near the high and the isobars are far apart.", spin:"Anticlockwise, spiralling slightly inwards. Watch the arrows on the chart.", why:"Air always moves from high to low pressure. A big difference over a short distance makes it move fast.", rain:"Rising air cools, and the water vapour in it condenses into clouds and rain." }[q.id]);
+  } else { save(); if(pick != null) markTry(pick); setFb("fb2", "nope", "<b>Have another look.</b> " + CQHINT[q.id]) }
+}
+function markTry(i){ var x = document.querySelector("#qcard [data-o='" + i + "']"); if(x) x.classList.add("tryagain") }
+function drawChart(){
+  var S = st.s2;
+  el("chart").innerHTML = chartSVG();
+  each(el("chart").querySelectorAll(".hotg"), keyClick);
+  var q = nextQ();
+  if(q){
+    var idx = CQ.indexOf(q);
+    el("qcard").innerHTML = "<span class='qn'>Question " + (idx + 1) + " of " + CQ.length + "</span><div class='qq'>" + q.q + "</div><p class='small' style='margin:0'>" + q.how + "</p>" + (q.o ? "<div class='choices'>" + q.o.map(function(o, i){ return "<button type='button' data-o='" + i + "'>" + o + "</button>" }).join("") + "</div>" : "") +
+      "<div class='row'><button type='button' class='btn btn-quiet sm' id='qSkip'>Skip this one</button></div>";
+    each(el("qcard").querySelectorAll("[data-o]"), function(x){ x.onclick = function(){ var i = +x.getAttribute("data-o"); answerQ(q, i === q.a, i) } });
+    el("qSkip").onclick = function(){ S.q[q.id] = "skip"; save(); drawChart(); setFb("fb2", "tell", "Skipped. " + CQHINT[q.id]) };
+  } else el("qcard").innerHTML = "<span class='qn'>Chart questions</span><div class='qq'>All six looked at. Nice reading.</div><p class='small' style='margin:0'>Place the weather symbols below, if you have not yet.</p>";
+  el("qdone").innerHTML = CQ.filter(function(x){ return S.q[x.id] }).map(function(x){ return "<span>" + { low:"Found the low", tight:"Tight isobars", calm:"Light winds", spin:"Anticlockwise", why:"Why it is windy", rain:"Why it rains" }[x.id] + (S.q[x.id] === "skip" ? " (skipped)" : "") + "</span>" }).join("");
+  var pool = "";
+  if(!drawChart.o) drawChart.o = shuffle(SYMS);
+  drawChart.o.forEach(function(sy){ if(!S.sym[sy.id]) pool += "<button type='button' class='tile symtile' data-sym='" + sy.id + "' aria-pressed='false'>" + sy.ic + sy.n + "</button>" });
+  if(el("symPool")) el("symPool").innerHTML = pool || "<span class='small'>All four placed.</span>";
+}
+
+/* =========================================================
+   DESK 3: Warning grid
+   ========================================================= */
+var LEV = ["low", "medium", "high"];
+var GRID = { high:{ low:"yellow", medium:"amber", high:"red" }, medium:{ low:"yellow", medium:"amber", high:"amber" }, low:{ low:"none", medium:"yellow", high:"yellow" } };
+var WNAME = { none:"No warning", yellow:"Yellow warning", amber:"Amber warning", red:"Red warning" };
+var WSAY = { none:"Nothing to warn about.", yellow:"Be aware.", amber:"Be prepared.", red:"Take action." };
+var WRESP = {
+  none:["Saltmouth carries on as normal."],
+  yellow:["People check the forecast before going out.", "Drivers leave a bit more time for journeys.", "Most things carry on as normal."],
+  amber:["Families put sandbags by doors on River Row.", "The ferry is cancelled and school trips are put off.", "Neighbours check on older people.", "Power crews get ready."],
+  red:["The sea front road is closed and people stay indoors.", "Schools close and people avoid travel.", "The leisure centre opens as a rest centre.", "Emergency services are ready to rescue people."]
+};
+var SCEN = [
+  { id:"sh", n:"Showers", f:"Heavy showers are almost certain this afternoon. Expect puddles and spray on the roads, and journeys taking a bit longer.", l:"high", i:"low",
+    lh:"'Almost certain' means it is very likely to happen.", ih:"Puddles and slower journeys are a nuisance, not a danger." },
+  { id:"hill", n:"Hill rain", f:"There is a small chance a band of very heavy rain gets stuck over the hills. If it does, homes by the river could flood badly and some villages could be cut off.", l:"low", i:"high",
+    lh:"Look for the words 'small chance'.", ih:"Homes flooding badly and villages cut off is serious. That is a high impact." },
+  { id:"gale", n:"Gales", f:"A deep low is fairly likely to bring gusts of 70 mph. Some trees could come down, with power cuts for some homes and delays to trains and ferries.", l:"medium", i:"medium",
+    lh:"'Fairly likely' is in the middle.", ih:"Power cuts and delays are real disruption, but not yet a danger to life everywhere. That is medium." },
+  { id:"coast", n:"Coastal storm", f:"Gusts of 90 mph and huge waves at high tide are very likely. Flying debris and waves breaking over the sea wall could be a danger to life.", l:"high", i:"high",
+    lh:"'Very likely' is as sure as forecasters get.", ih:"'Danger to life' is the highest impact there is." },
+  { id:"snow", n:"Snow", f:"Snow is very likely overnight, 5 to 10 cm. Some roads and railway lines could close, and a few villages could be cut off for a day.", l:"high", i:"medium",
+    lh:"'Very likely' means high.", ih:"Closed roads and villages cut off for a day is disruption: medium impact." }
+];
+var curScen = null, pickL = null, pickI = null;
+RENDER[3] = function(b){
+  var h = "<p class='lead'>Midnight. Five forecasts on your desk. For each one, decide how <b>likely</b> it is and how bad the <b>impact</b> could be. The grid gives the warning colour.</p>";
+  h += "<div class='learn'><span class='kicker'>How warnings work</span><ul><li>A warning colour depends on <b>two</b> things: how likely the weather is, and what it could do.</li><li><b>Yellow</b>: be aware. <b>Amber</b>: be prepared. <b>Red</b>: take action.</li><li>Our desk uses a simple 3 by 3 grid. The real UK grid is bigger, but it works the same way.</li></ul></div>";
+  h += "<div class='part' id='p3'><div class='scenrow' id='scenRow'></div><div class='mxwrap'><div id='fcast'></div><div><div class='mx' id='mx'></div></div></div><div id='fb3'></div><div id='townOut'></div></div>";
+  b.innerHTML = h;
+  if(!curScen){ curScen = SCEN[0].id; for(var i = 0; i < SCEN.length; i++) if(!st.s3.done[SCEN[i].id]){ curScen = SCEN[i].id; break } }
+  drawScen();
+};
+function drawScen(){
+  var S = st.s3, sc = byId(SCEN, curScen), done = S.done[curScen];
+  el("scenRow").innerHTML = SCEN.map(function(x, i){ var d = S.done[x.id]; return "<button type='button' data-sc='" + x.id + "' aria-pressed='" + (x.id === curScen) + "'><i class='" + (d ? GRID[x.i][x.l] : "") + "'></i>" + (i + 1) + ". " + x.n + "</button>" }).join("");
+  each(el("scenRow").querySelectorAll("[data-sc]"), function(x){ x.onclick = function(){ curScen = x.getAttribute("data-sc"); pickL = pickI = null; el("fb3").innerHTML = ""; drawScen() } });
+  if(done){ pickL = sc.l; pickI = sc.i }
+  var h = "<div class='fcast'><span class='kick'>Forecast for Saltmouth</span><div class='big'>" + sc.n + "</div><p>" + sc.f + "</p></div>";
+  h += "<p class='small' style='margin:10px 0 0'><b>1. How likely?</b></p><div class='pickrow' id='pl'>" + LEV.map(function(l){ return "<button type='button' class='pickbtn" + (pickL === l ? " good" : "") + "' data-l='" + l + "'>" + l[0].toUpperCase() + l.slice(1) + "</button>" }).join("") + "</div>";
+  h += "<p class='small' style='margin:10px 0 0'><b>2. How bad could the impact be?</b></p><div class='pickrow' id='pi'>" + LEV.map(function(l){ return "<button type='button' class='pickbtn" + (pickI === l ? " good" : "") + "' data-i='" + l + "'>" + { low:"Low: a nuisance", medium:"Medium: disruption", high:"High: danger to life" }[l] + "</button>" }).join("") + "</div>";
+  el("fcast").innerHTML = h;
+  each(el("pl").querySelectorAll("[data-l]"), function(x){ x.onclick = function(){ var l = x.getAttribute("data-l"); if(l === sc.l){ pickL = l; tryFinish(sc) } else { S.tries++; save(); x.classList.add("tryagain"); setFb("fb3", "nope", "<b>Have another read.</b> " + sc.lh) } } });
+  each(el("pi").querySelectorAll("[data-i]"), function(x){ x.onclick = function(){ var l = x.getAttribute("data-i"); if(l === sc.i){ pickI = l; tryFinish(sc) } else { S.tries++; save(); x.classList.add("tryagain"); setFb("fb3", "nope", "<b>Have another read.</b> " + sc.ih) } } });
+  drawGrid(); drawTown3();
+}
+function tryFinish(sc){
+  var S = st.s3;
+  if(pickL && pickI && !S.done[sc.id]){ S.done[sc.id] = 1; save() }
+  if(pickL && pickI){ var c = GRID[pickI][pickL]; setFb("fb3", "ok", "<b>" + WNAME[c] + ".</b> " + pickL[0].toUpperCase() + pickL.slice(1) + " likelihood, " + pickI + " impact. " + (sc.id === "hill" ? "Interesting one: yellow can mean a <b>small chance of something serious</b>." : "") + (Object.keys(S.done).length === SCEN.length ? " <b>All five warnings set.</b>" : "")) }
+  else setFb("fb3", "ok", "<b>Yes.</b> Now the other one.");
+  drawScen();
+}
+function drawGrid(){
+  var sc = byId(SCEN, curScen), h = "<div class='ax' style='grid-row:span 1'></div>";
+  h = "";
+  ["high", "medium", "low"].forEach(function(im, r){
+    h += "<div class='ax'>" + (r === 0 ? "Impact " : "") + im + "</div>";
+    LEV.forEach(function(lk){ var c = GRID[im][lk], tick = pickL === lk && pickI === im; h += "<div class='cl " + c + (tick ? " tick" : "") + "' aria-label='" + im + " impact, " + lk + " likelihood: " + WNAME[c] + "'>" + (tick ? "&#10003; " : "") + (c === "none" ? "none" : c) + "</div>" });
+  });
+  h += "<div class='ax'></div>" + LEV.map(function(lk){ return "<div class='ax'>" + lk + "</div>" }).join("");
+  h += "<div class='ax'></div><div class='ax' style='grid-column:span 3'>Likelihood &rarr;</div>";
+  el("mx").innerHTML = h;
+}
+function drawTown3(){
+  var sc = byId(SCEN, curScen);
+  if(!(pickL && pickI)){ el("townOut").innerHTML = "<div class='town'>" + townSVG({ calm:true }) + "</div><p class='small'>Saltmouth is waiting for your warning.</p>"; return }
+  var c = GRID[pickI][pickL];
+  var o = { warn:c, rain:sc.id !== "snow", snow:sc.id === "snow", wind:sc.id === "gale" || sc.id === "coast", people:c === "none" || c === "yellow", umbrellas:c === "yellow", sandbags:c === "amber" || c === "red", ferry:c === "amber", barrier:c === "red", rest:c === "red", lightsOn:true };
+  el("townOut").innerHTML = "<div class='town'>" + townSVG(o) + "</div><div class='row'><span class='wbanner " + c + "'>" + WNAME[c] + ": " + WSAY[c] + "</span></div><p class='small' style='margin:8px 0 0'><b>What Saltmouth does:</b></p><ul class='resp' style='--c:" + { none:"#cfe0d4", yellow:"#ffd84d", amber:"#f39a2b", red:"#d9412e" }[c] + "'>" + WRESP[c].map(function(r){ return "<li>" + r + "</li>" }).join("") + "</ul>";
+}
+
+/* ---------- Saltmouth town picture (desks 3 and 5) ---------- */
+function townSVG(o){
+  o = o || {};
+  var s = "<svg viewBox='0 0 800 360' role='img' aria-label='The town of Saltmouth: a care home on the hill, River Row houses by the river, a car park, the high street and the sea wall'>";
+  var sky = o.calm ? "#9cc3d3" : o.warn === "red" || o.dark ? "#4a5a6b" : o.warn === "amber" ? "#6f8394" : "#8eaabb";
+  s += "<rect width='800' height='360' fill='" + sky + "'/>";
+  if(!o.calm) s += "<g><ellipse cx='220' cy='40' rx='170' ry='34' fill='#5b6d80'/><ellipse cx='520' cy='34' rx='190' ry='32' fill='#56687a'/><ellipse cx='700' cy='50' rx='120' ry='26' fill='#5b6d80'/></g>";
+  else s += "<circle cx='700' cy='60' r='26' fill='#ffd877'/>";
+  // hill with care home and leisure centre
+  s += "<path d='M0 130 Q90 110 190 170 L210 300 L0 300Z' fill='#6f9a5c' stroke='#0a2f38' stroke-width='3'/>";
+  s += "<g><rect x='24' y='96' width='86' height='40' fill='#fff3d6' stroke='#0a2f38' stroke-width='3'/><path d='M18 96 L67 72 L116 96Z' fill='#7b4b8f' stroke='#0a2f38' stroke-width='3'/><text x='67' y='122' text-anchor='middle' font-size='12' font-weight='700' fill='#0a2f38' class='svgtext'>CARE HOME</text></g>";
+  s += "<g><rect x='120' y='140' width='70' height='34' fill='#cfe8ee' stroke='#0a2f38' stroke-width='3'/><text x='155' y='162' text-anchor='middle' font-size='10' font-weight='700' fill='#0a2f38' class='svgtext'>LEISURE</text></g>";
+  if(o.rest) s += "<g><rect x='112' y='116' width='88' height='20' rx='5' fill='#2e7d4f' stroke='#0a2f38' stroke-width='2'/><text x='156' y='130' text-anchor='middle' font-size='11' font-weight='700' fill='#fff' class='svgtext'>REST CENTRE</text></g>";
+  // windows lit
+  var lit = o.lightsOn !== false && !o.powerOut, win = lit ? "#ffe9a8" : "#2a3a44";
+  s += "<g fill='" + (o.careCold ? "#2a3a44" : win) + "' stroke='#0a2f38' stroke-width='1.5'><rect x='36' y='104' width='12' height='10'/><rect x='86' y='104' width='12' height='10'/></g>";
+  // river valley and River Row
+  var fl = o.flood || 0;
+  s += "<rect x='200' y='240' width='240' height='60' fill='#7b7f6c'/>";
+  s += "<rect x='330' y='250' width='60' height='50' fill='#4f7f9c'/>"; // river channel
+  function house(x, c){ var h = "<g><rect x='" + x + "' y='206' width='34' height='42' fill='" + c + "' stroke='#0a2f38' stroke-width='2.5'/><path d='M" + (x - 4) + " 206 L" + (x + 17) + " 186 L" + (x + 38) + " 206Z' fill='#a0412d' stroke='#0a2f38' stroke-width='2.5'/><rect x='" + (x + 6) + "' y='214' width='9' height='9' fill='" + win + "' stroke='#0a2f38' stroke-width='1.5'/><rect x='" + (x + 19) + "' y='226' width='9' height='22' fill='#0a2f38'/></g>"; if(o.sandbags) h += "<g fill='#8a5a33' stroke='#0a2f38' stroke-width='1.2'><rect x='" + (x + 14) + "' y='242' width='12' height='6' rx='2'/><rect x='" + (x + 20) + "' y='237' width='12' height='6' rx='2'/></g>"; return h }
+  s += house(212, "#ffd877") + house(252, "#f3dfb3") + house(292, "#cfe8ee");
+  s += "<text x='270' y='182' text-anchor='middle' font-size='12' font-weight='700' fill='#fff' stroke='#0a2f38' stroke-width='3' paint-order='stroke' class='svgtext'>RIVER ROW</text>";
+  // bridge
+  s += "<path d='M326 248 Q360 226 394 248' fill='none' stroke='#5b4a3a' stroke-width='6'/>";
+  // car park
+  s += "<rect x='400' y='246' width='90' height='4' fill='#d6c9b6'/><text x='445' y='274' text-anchor='middle' font-size='10' font-weight='700' fill='#fff' class='svgtext'>CAR PARK</text>";
+  if(o.cars !== false){ [408, 446].forEach(function(x){ s += "<g><rect x='" + x + "' y='232' width='32' height='13' rx='4' fill='#e2553e' stroke='#0a2f38' stroke-width='2'/><circle cx='" + (x + 8) + "' cy='246' r='4' fill='#0a2f38'/><circle cx='" + (x + 24) + "' cy='246' r='4' fill='#0a2f38'/></g>" }) }
+  // flood water
+  if(fl > 0){ var top = fl === 1 ? 244 : 228; s += "<rect x='196' y='" + top + "' width='" + (fl === 1 ? 120 : 300) + "' height='" + (300 - top) + "' fill='#4f7f9c' opacity='.82' class='" + (reduce ? "" : "waveup") + "'/>" }
+  if(o.riverHigh) s += "<rect x='326' y='238' width='68' height='14' fill='#4f7f9c' opacity='.9'/>";
+  if(o.street) s += "<rect x='496' y='238' width='110' height='12' fill='#4f7f9c' opacity='.8'/>";
+  // high street
+  [[500, "#ffd877", "SHOP"], [540, "#ff9b52", "CAFE"], [580, "#b98ad0", "BANK"]].forEach(function(sh){ s += "<g><rect x='" + sh[0] + "' y='196' width='36' height='54' fill='" + sh[1] + "' stroke='#0a2f38' stroke-width='2.5'/><rect x='" + (sh[0] + 6) + "' y='206' width='24' height='12' fill='" + win + "' stroke='#0a2f38' stroke-width='1.5'/><text x='" + (sh[0] + 18) + "' y='236' text-anchor='middle' font-size='9' font-weight='700' fill='#0a2f38' class='svgtext'>" + sh[2] + "</text></g>" });
+  // power line and tree
+  s += "<g stroke='#5b3a1e' stroke-width='5'><line x1='180' y1='174' x2='180' y2='120'/><line x1='470' y1='246' x2='470' y2='150'/></g><path d='M180 124 Q330 170 470 154' fill='none' stroke='#0a2f38' stroke-width='2'/>";
+  if(o.lineDown) s += "<path d='M470 154 Q480 200 452 244' fill='none' stroke='#0a2f38' stroke-width='2.5'/><path d='M446 240l8 6 4-10' fill='none' stroke='#ffc247' stroke-width='3'/>";
+  s += "<g class='" + (o.wind && !reduce ? "swayt" : "") + "'><rect x='483' y='200' width='8' height='48' fill='#5b3a1e'/><ellipse cx='487' cy='190' rx='22' ry='18' fill='#4ba36f' stroke='#0a2f38' stroke-width='2.5'/></g>";
+  // promenade, sea wall, sea
+  s += "<rect x='610' y='244' width='50' height='6' fill='#9aa5b1'/><rect x='656' y='226' width='14' height='74' fill='#9aa5b1' stroke='#0a2f38' stroke-width='2.5'/>";
+  s += "<rect x='670' y='252' width='130' height='108' fill='#2f6f8f'/>";
+  if(o.surge) s += "<g class='" + (reduce ? "" : "waveup") + "'><path d='M800 228 Q760 200 720 226 T660 222 Q640 214 620 240 L800 256Z' fill='#3f87a8' stroke='#e9f2f4' stroke-width='3'/></g>";
+  else s += "<path d='M670 252 q16 -8 32 0 t32 0 t32 0 t32 0' fill='none' stroke='#e9f2f4' stroke-width='2.5'/>";
+  if(o.ferry) s += "<g><rect x='700' y='170' width='86' height='22' rx='5' fill='#fff' stroke='#0a2f38' stroke-width='2'/><text x='743' y='185' text-anchor='middle' font-size='10' font-weight='700' fill='#d9412e' class='svgtext'>FERRY CANCELLED</text></g>";
+  if(o.barrier) s += "<g><rect x='604' y='224' width='46' height='10' fill='#fff' stroke='#d9412e' stroke-width='3'/><line x1='610' y1='234' x2='610' y2='250' stroke='#0a2f38' stroke-width='3'/><line x1='644' y1='234' x2='644' y2='250' stroke='#0a2f38' stroke-width='3'/><text x='627' y='218' text-anchor='middle' font-size='10' font-weight='700' fill='#fff' stroke='#0a2f38' stroke-width='3' paint-order='stroke' class='svgtext'>ROAD CLOSED</text></g>";
+  if(o.carOnProm) s += "<g><rect x='612' y='232' width='30' height='12' rx='4' fill='#ffc247' stroke='#0a2f38' stroke-width='2'/></g>";
+  if(o.tramp) s += "<g class='" + (reduce ? "" : "flyaway") + "'><ellipse cx='240' cy='120' rx='22' ry='7' fill='#0a2f38'/><ellipse cx='240' cy='118' rx='18' ry='5' fill='#2d6fd6'/></g>";
+  // ground
+  s += "<rect x='0' y='300' width='670' height='60' fill='#6c6f5e'/>";
+  // people
+  if(o.people){ [[520, 270], [560, 272], [250, 272]].forEach(function(p){ s += "<g><circle cx='" + p[0] + "' cy='" + (p[1] - 18) + "' r='5' fill='#0a2f38'/><line x1='" + p[0] + "' y1='" + (p[1] - 13) + "' x2='" + p[0] + "' y2='" + p[1] + "' stroke='#0a2f38' stroke-width='3'/>" + (o.umbrellas ? "<path d='M" + (p[0] - 12) + " " + (p[1] - 22) + " Q" + p[0] + " " + (p[1] - 40) + " " + (p[0] + 12) + " " + (p[1] - 22) + "Z' fill='#ef7724' stroke='#0a2f38' stroke-width='1.5'/>" : "") + "</g>" }) }
+  // weather overlay
+  if(o.rain){ s += "<defs><pattern id='rp" + (o.id || "") + "' width='16' height='22' patternUnits='userSpaceOnUse' patternTransform='rotate(" + (o.wind ? 26 : 10) + ")'><line x1='4' y1='0' x2='4' y2='12' stroke='#e9f2f4' stroke-width='2' opacity='.7'/></pattern></defs><g class='" + (reduce ? "" : "rainy") + "'><rect x='0' y='40' width='800' height='280' fill='url(#rp" + (o.id || "") + ")'/></g>" }
+  if(o.snow){ for(var i = 0; i < 40; i++){ s += "<circle cx='" + ((i * 97) % 800) + "' cy='" + (50 + (i * 53) % 260) + "' r='3' fill='#fff'/>" } }
+  if(o.warn && o.warn !== "none"){ var wc = { yellow:"#ffd84d", amber:"#f39a2b", red:"#d9412e" }[o.warn]; s += "<g><rect x='14' y='12' width='190' height='34' rx='8' fill='" + wc + "' stroke='#0a2f38' stroke-width='3'/><text x='109' y='35' text-anchor='middle' font-size='16' font-weight='900' fill='" + (o.warn === "red" ? "#fff" : "#0a2f38") + "' font-family='Archivo,Arial Black,sans-serif'>" + WNAME[o.warn].toUpperCase() + "</text></g>" }
+  return s + "</svg>";
+}
+
+/* =========================================================
+   DESK 4: Naming desk
+   ========================================================= */
+var NAMES = ["Alder", "Bryn", "Cerys", "Dougal", "Esme", "Fergus", "Gwen", "Harris", "Isla", "Jago", "Kezia", "Lorcan", "Morven", "Nye", "Orla", "Piran", "Rhona", "Sully", "Tegan", "Vince", "Wren"];
+var USED0 = ["Alder", "Bryn"];
+var LOWS = [
+  { id:"l1", p:1004, rings:2, gap:22, gust:"30 mph", rain:"A few showers", risk:"Very low impact", name:false, why:"1004 hPa is only a shallow low, and the isobars are far apart. At most a yellow warning, so no name." },
+  { id:"l2", p:958, rings:6, gap:9, gust:"80 mph likely", rain:"Heavy rain", risk:"Trees down, power cuts, roads closed", name:true, why:"958 hPa is very deep and the isobars are packed tight. Likely an amber warning, so it gets a name." },
+  { id:"l3", p:992, rings:3, gap:16, gust:"45 mph", rain:"A day of rain", risk:"Small chance of minor road flooding", name:false, why:"A nuisance at most. A yellow warning, so no name." },
+  { id:"l4", p:946, rings:7, gap:8, gust:"90 mph very likely", rain:"Heavy rain and huge waves at high tide", risk:"Danger to life on the coast", name:true, why:"946 hPa, very tight isobars and danger to life. That is a red warning, so it definitely gets a name." },
+  { id:"l5", p:972, rings:5, gap:11, gust:"55 mph", rain:"Very heavy rain on ground that is already soaked", risk:"Homes flooding is fairly likely", name:true, why:"Rain on soaked ground, with homes likely to flood. That is an amber warning, so it gets a name." }
+];
+function lowSVG(L){
+  var s = "<svg viewBox='0 0 160 140' aria-hidden='true'><rect width='160' height='140' rx='12' fill='#d8eef5'/>";
+  for(var i = L.rings; i >= 1; i--) s += "<ellipse cx='80' cy='70' rx='" + (8 + i * L.gap) + "' ry='" + (6 + i * L.gap * .8) + "' fill='none' stroke='#0a2f38' stroke-width='1.8'/>";
+  s += "<circle cx='80' cy='70' r='13' fill='#fff' stroke='#0a2f38' stroke-width='2'/><text x='80' y='77' text-anchor='middle' font-size='18' font-weight='900' fill='#e2553e' font-family='Archivo,Arial Black,sans-serif'>L</text>";
+  s += "<text x='80' y='132' text-anchor='middle' font-size='14' font-weight='700' fill='#0a2f38' class='svgtext'>" + L.p + " hPa</text>";
+  return s + "</svg>";
+}
+function usedNames(){ var u = USED0.slice(), S = st.s4; LOWS.forEach(function(L){ if(S.names[L.id]) u.push(S.names[L.id]) }); return u }
+function nextName(){ var u = usedNames(); for(var i = 0; i < NAMES.length; i++) if(u.indexOf(NAMES[i]) < 0) return NAMES[i]; return "" }
+var naming = false;
+RENDER[4] = function(b){
+  var h = "<p class='lead'>01:00. Five lows are heading for the UK. Only the dangerous ones get a name. Which ones, and what are they called?</p>";
+  h += "<div class='learn'><span class='kicker'>Naming rules</span><ul><li>In the UK, a storm gets a name when it could bring an <b>amber or red</b> warning.</li><li>Names go in <b>A to Z order</b> through a list, and a new list starts each September.</li><li>The letters <b>Q, U, X, Y and Z</b> are skipped.</li></ul></div>";
+  h += "<div class='part'><h3>The incoming queue</h3><div class='queue' id='queue'></div><div id='lowHost'></div><div id='fb4'></div><p class='small' style='margin:12px 0 0'><b>This season's list.</b> Crossed out names are used.</p><div class='namelist' id='nameList'></div></div>";
+  h += "<div class='part'><h3>Why name storms at all?</h3><div class='choices' id='whyName'></div><div id='fb4b'></div></div>";
+  h += "<div class='part'><h3>Your own storm list</h3><p class='small'>If you fancy it: invent the first five names for next season. People, pets, birds, anything. Jay's poodle Bonnie would make a good B.</p><div class='owngrid' id='own'></div><div id='ownShow'></div></div>";
+  b.innerHTML = h;
+  drawNaming(); drawWhyName(); drawOwn();
+};
+var WHYN = [
+  { t:"A name helps people notice the warnings and take them seriously, and makes it easier to talk about one storm", y:true },
+  { t:"Naming a storm makes it weaker", y:false },
+  { t:"Only storms with names can cause damage", y:false }
+];
+function drawWhyName(){
+  var S = st.s4;
+  el("whyName").innerHTML = WHYN.map(function(w, i){ return "<button type='button' data-w='" + i + "' class='" + (S.why === "ok" && w.y ? "good" : "") + "'>" + w.t + "</button>" }).join("");
+  each(el("whyName").querySelectorAll("[data-w]"), function(x){ x.onclick = function(){ var w = WHYN[+x.getAttribute("data-w")];
+    if(w.y){ S.why = "ok"; save(); drawWhyName(); setFb("fb4b", "ok", "<b>Yes.</b> A name makes a storm stick in people's minds, so they are more likely to act on the warning.") }
+    else { if(!S.why) S.why = "tried"; save(); x.classList.add("tryagain"); setFb("fb4b", "nope", "<b>Not that one.</b> A name cannot change the weather. Think about the people listening to the forecast.") } } });
+}
+function drawNaming(){
+  var S = st.s4, used = usedNames();
+  el("queue").innerHTML = LOWS.map(function(L, i){ var d = S.dec[L.id], cls = i === S.idx && !naming ? "now" : d === "name" ? "named" : d === "none" ? "skip" : ""; if(i === S.idx && naming) cls = "now"; return "<span class='" + cls + "'>Low " + (i + 1) + (S.names[L.id] ? ": Storm " + S.names[L.id] : d === "none" ? ": no name" : "") + "</span>" }).join("");
+  el("nameList").innerHTML = NAMES.map(function(n){ return "<button type='button' data-n='" + n + "' class='" + (used.indexOf(n) >= 0 ? "used" : "") + "'" + (naming ? "" : " tabindex='-1'") + ">" + n + "</button>" }).join("");
+  if(S.idx >= LOWS.length){
+    el("lowHost").innerHTML = "<div class='fb ok'><b>Queue cleared.</b> Tonight's named storms: " + LOWS.filter(function(L){ return S.names[L.id] }).map(function(L){ return "<span class='tagcard'>Storm " + S.names[L.id] + "</span>" }).join(" ") + "</div><div class='row'><button type='button' class='btn btn-quiet sm' id='reQ'>Run the queue again</button></div>";
+    el("reQ").onclick = function(){ S.idx = 0; S.dec = {}; S.names = {}; save(); naming = false; drawNaming(); el("fb4").innerHTML = "" };
+    return;
+  }
+  var L = LOWS[S.idx];
+  el("lowHost").innerHTML = "<div class='lowcard'>" + lowSVG(L) + "<div><div class='d'>Low " + (S.idx + 1) + " of " + LOWS.length + "</div><div class='stat'><span>Centre " + L.p + " hPa</span><span>Gusts " + L.gust + "</span></div><p style='margin:4px 0'>" + L.rain + ". " + L.risk + ".</p>" +
+    (naming ? "<p class='small' style='margin:6px 0 0'><b>Tap the next name on the list below.</b></p>" : "<div class='row'><button type='button' class='btn' id='doName'>Name it</button><button type='button' class='btn btn-quiet' id='noName'>No name needed</button></div>") + "</div></div>";
+  if(!naming){
+    el("doName").onclick = function(){ S.tries++; if(L.name){ naming = true; save(); drawNaming(); setFb("fb4", "ok", "<b>Yes, this one is dangerous.</b> " + L.why + " Which name is next on the list?") } else { save(); setFb("fb4", "nope", "<b>Have another look.</b> Is it deep (a low number), with tight isobars? Could it bring an amber or red warning?") } };
+    el("noName").onclick = function(){ S.tries++; if(!L.name){ S.dec[L.id] = "none"; S.idx++; save(); drawNaming(); setFb("fb4", "ok", "<b>Right, no name.</b> " + L.why) } else { save(); setFb("fb4", "nope", "<b>Have another look.</b> Check the pressure and the risks. Could this bring an amber or red warning?") } };
+  } else {
+    each(el("nameList").querySelectorAll("[data-n]"), function(x){ x.onclick = function(){ var n = x.getAttribute("data-n"); if(x.classList.contains("used")){ setFb("fb4", "tell", "Storm " + n + " has been used already this season."); return }
+      S.tries++;
+      if(n === nextName()){ S.names[L.id] = n; S.dec[L.id] = "name"; S.idx++; naming = false; save(); drawNaming(); setFb("fb4", "ok", "<b>Storm " + n + " it is.</b> " + (n === "Wren" ? "A bird name. Jay approves." : "Next on the list, in order.")) }
+      else { save(); x.classList.add("tryagain"); setFb("fb4", "nope", "<b>Not that one yet.</b> Names go in order. Find the first name on the list that is not crossed out.") } } });
+  }
+}
+var SKIP = ["Q", "U", "X", "Y", "Z"];
+function drawOwn(){
+  var S = st.s4, letters = ["A", "B", "C", "D", "E"];
+  el("own").innerHTML = letters.map(function(L){ return "<label>" + L + "<input type='text' maxlength='16' data-own='" + L + "' value='" + esc(S.own[L] || "") + "' aria-label='Storm name starting with " + L + "'></label>" }).join("");
+  each(el("own").querySelectorAll("input"), function(inp){ inp.oninput = function(){ S.own[inp.getAttribute("data-own")] = inp.value; save(); showOwn() } });
+  showOwn();
+}
+function showOwn(){
+  var S = st.s4, out = [], bad = [];
+  ["A", "B", "C", "D", "E"].forEach(function(L){ var v = (S.own[L] || "").trim(); if(!v) return; if(v[0].toUpperCase() === L) out.push(v); else bad.push(L) });
+  el("ownShow").innerHTML = (out.length ? "<div style='margin-top:10px'>" + out.map(function(n){ return "<span class='tagcard'>Storm " + esc(n) + "</span>" }).join("") + "</div>" : "") + (bad.length ? "<p class='small'>Tip: the name for " + bad.join(", ") + " could start with that letter, so the list stays in order.</p>" : "");
+}
+
+/* =========================================================
+   DESK 5: Ready the town
+   ========================================================= */
+var BUDGET = 10;
+var PREPS = [
+  { id:"bags", c:3, t:"Sandbags and flood doors for the 24 homes on River Row" },
+  { id:"drains", c:1, t:"Clear the drains and gullies on the high street" },
+  { id:"check", c:1, t:"Phone round older and disabled people. Plan who checks on them" },
+  { id:"tie", c:1, t:"Tell everyone to tie down bins, trampolines and garden furniture" },
+  { id:"prom", c:2, t:"Close the sea front road and promenade" },
+  { id:"cars", c:1, t:"Ask people to move cars out of the riverside car park" },
+  { id:"gen", c:2, t:"Backup generator for the care home" },
+  { id:"rest", c:2, t:"Open the leisure centre as a rest centre" },
+  { id:"school", c:1, t:"Close schools for the day and tell families the night before" },
+  { id:"crews", c:2, t:"Power and tree crews on standby in town" }
+];
+var CAUSES = [
+  { id:"deep", n:"A very deep low", d:"952 hPa with tight isobars. Gusts up to 85 mph." },
+  { id:"tide", n:"High tide at 4 am", d:"The strongest winds blow onshore just as the tide is highest." },
+  { id:"soak", n:"Soaked ground", d:"October was very wet. The ground cannot hold any more water." },
+  { id:"hills", n:"Rain on the hills", d:"12 hours of heavy rain on the hills upstream of Saltmouth." }
+];
+function runStorm(P){
+  var ev = [];
+  ev.push({ t:"21:00", who:"places", good:!!P.tie, x:P.tie ? "The wind picks up. Bins and trampolines are tied down and stay put." : "The wind picks up. A trampoline takes off and smashes a greenhouse and a car window.", o:{ wind:true, rain:true, tramp:!P.tie } });
+  ev.push({ t:"00:00", who:"places", good:!!P.drains, x:P.drains ? "Heavy rain. The cleared drains carry the water away from the high street." : "Heavy rain. Blocked drains flood the high street and two shops are damaged.", o:{ wind:true, rain:true, street:!P.drains } });
+  ev.push({ t:"02:00", who:"people", good:!!P.bags, x:P.bags ? "The river bursts its banks. Behind sandbags and flood doors, 21 of the 24 homes on River Row stay dry. 3 get some water in." : "The river bursts its banks. Water pours into all 24 homes on River Row. Families carry what they can upstairs.", o:{ wind:true, rain:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, cars:!P.cars } });
+  ev.push({ t:"02:30", who:"places", good:!!P.cars, x:P.cars ? "The riverside car park floods, but it is empty." : "The riverside car park floods. 40 cars are under water and ruined.", o:{ wind:true, rain:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, cars:!P.cars } });
+  ev.push({ t:"04:00", who:"people", good:!!P.prom, x:P.prom ? "High tide. Waves crash over the sea wall and throw stones across the empty promenade road. Nobody is there." : "High tide. Waves crash over the sea wall and throw stones across the promenade road. A driver is caught by a wave and is lucky to get out.", o:{ wind:true, rain:true, surge:true, barrier:!!P.prom, carOnProm:!P.prom, flood:P.bags ? 1 : 2, sandbags:!!P.bags } });
+  ev.push({ t:"05:00", who:"places", good:!!P.crews, x:P.crews ? "A tree falls on the power line. 3,000 homes lose power, but the crews in town have it back by lunchtime." : "A tree falls on the power line. 3,000 homes lose power, and it takes two days to fix.", o:{ wind:true, rain:true, lineDown:true, powerOut:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, barrier:!!P.prom } });
+  ev.push({ t:"05:30", who:"people", good:!!P.gen, x:P.gen ? "The care home generator kicks in. Heating and lights stay on for the residents." : "The care home has no heating. Residents get cold and some have to be moved.", o:{ wind:true, rain:true, lineDown:true, powerOut:true, careCold:!P.gen, flood:P.bags ? 1 : 2, sandbags:!!P.bags, barrier:!!P.prom } });
+  ev.push({ t:"07:00", who:"people", good:!!P.check, x:P.check ? "Neighbours check on everyone on the list. Everybody is safe and accounted for." : "An older man on River Row is stuck upstairs with no phone signal until a neighbour notices at midday.", o:{ rain:true, lineDown:true, powerOut:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, rest:!!P.rest } });
+  ev.push({ t:"08:00", who:"people", good:!!P.rest, x:P.rest ? "Flooded families go to the rest centre for hot food, dry clothes and a bed." : "Flooded families have nowhere obvious to go. Some sleep in their cars.", o:{ rain:true, lineDown:true, powerOut:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, rest:!!P.rest } });
+  ev.push({ t:"08:30", who:"people", good:!!P.school, x:P.school ? "Schools are closed and families knew last night, so nobody sets off." : "School buses cannot get through flooded roads. Children are sent home mid morning and some parents cannot get there.", o:{ rain:true, lineDown:true, powerOut:true, flood:P.bags ? 1 : 2, sandbags:!!P.bags, rest:!!P.rest } });
+  ev.forEach(function(x){ if(x.o.cars === undefined) x.o.cars = !P.cars });
+  return ev;
+}
+var simStep = -1, simEv = null;
+RENDER[5] = function(b){
+  var h = "<p class='lead'>02:00 is coming. Storm Gwen will hit Saltmouth tonight. You have <b>10 points</b> to spend getting the town ready. Choose, then run the storm and see what happens to people and places.</p>";
+  h += "<div class='part'><h3>Why Storm Gwen is so dangerous</h3><div class='causes'>" + CAUSES.map(function(c, i){ return "<div><b>" + (i + 1) + ". " + c.n + "</b>" + c.d + "</div>" }).join("") + "</div><p class='small' style='margin:8px 0 0'>Saltmouth is made up, but storms like Gwen really happen in the UK.</p></div>";
+  h += "<div class='part' id='p5a'><h3>Spend your 10 points</h3><div class='budget' id='budget'></div><p class='small' id='budgetTxt'></p><div class='prepgrid' id='preps'></div><div class='row'><button type='button' class='btn btn-orange' id='runBtn'>Run the storm</button></div></div>";
+  h += "<div class='part' id='p5b'><h3>The night of the storm</h3><div class='town' id='simTown'></div><div class='row' id='simCtl'></div><div class='log' id='simLog'></div><div id='simRes'></div></div>";
+  h += "<div class='part'><h3>Why was it so bad?</h3><p class='small'>Link each effect back to the cause. Tap a cause for each one. Some have two right answers.</p><div id='links'></div><div id='fb5'></div></div>";
+  b.innerHTML = h;
+  simStep = -1; simEv = null;
+  drawPreps(); drawSim(); drawLinks();
+  el("runBtn").onclick = function(){ drawSim.saved = false; simEv = runStorm(st.s5.picks); simStep = 0; drawSim(); el("p5b").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" }) };
+};
+function spent(){ var n = 0, P = st.s5.picks; PREPS.forEach(function(p){ if(P[p.id]) n += p.c }); return n }
+function drawPreps(){
+  var S = st.s5, sp = spent(), bud = "";
+  for(var i = 0; i < BUDGET; i++) bud += "<i class='" + (i < sp ? "spent" : "") + "'></i>";
+  el("budget").innerHTML = bud;
+  el("budgetTxt").textContent = (BUDGET - sp) + " of 10 points left." + (sp === 0 ? " Tap a job to choose it. Tap again to drop it." : "");
+  el("preps").innerHTML = PREPS.map(function(p){ return "<button type='button' class='prep' data-p='" + p.id + "' aria-pressed='" + !!S.picks[p.id] + "'><span class='cost'>" + p.c + "</span><span>" + p.t + "</span></button>" }).join("");
+  each(el("preps").querySelectorAll("[data-p]"), function(x){ x.onclick = function(){ var id = x.getAttribute("data-p"), p = byId(PREPS, id);
+    if(S.picks[id]) delete S.picks[id];
+    else if(spent() + p.c > BUDGET){ el("budgetTxt").textContent = "Not enough points left for that one. Drop something else first, if you like."; return }
+    else S.picks[id] = 1;
+    save(); drawPreps() } });
+}
+function drawSim(){
+  var S = st.s5;
+  if(!simEv){
+    el("simTown").innerHTML = townSVG({ calm:true, people:true, id:"s5" });
+    var last = S.runs[S.runs.length - 1];
+    el("simCtl").innerHTML = "<span class='small'>Choose your jobs above, then press Run the storm.</span>";
+    el("simLog").innerHTML = ""; el("simRes").innerHTML = last ? resultsHTML(last, true) : "";
+    return;
+  }
+  var e = simEv[simStep], o = {}; for(var k in e.o) o[k] = e.o[k]; o.id = "s5"; o.warn = "red";
+  el("simTown").innerHTML = townSVG(o);
+  el("simLog").innerHTML = simEv.slice(0, simStep + 1).map(function(x){ return "<div class='ev " + (x.good ? "good" : "bad") + "'><span class='t'>" + x.t + "</span><span>" + x.x + "<span class='who'>" + x.who + "</span></span></div>" }).reverse().join("");
+  if(simStep < simEv.length - 1){
+    el("simCtl").innerHTML = "<button type='button' class='btn' id='simNext'>Next</button><button type='button' class='btn btn-quiet sm' id='simEnd'>Skip to the morning</button>";
+    el("simNext").onclick = function(){ simStep++; drawSim() };
+    el("simEnd").onclick = function(){ simStep = simEv.length - 1; drawSim() };
+    el("simRes").innerHTML = "";
+  } else {
+    var run = { picks:Object.keys(S.picks), good:simEv.filter(function(x){ return x.good }).map(function(x){ return x.t }), homes:S.picks.bags ? 3 : 24, cars:S.picks.cars ? 0 : 40, power:S.picks.crews ? "until lunchtime" : "for two days" };
+    if(!drawSim.saved){ S.runs.push(run); if(S.runs.length > 5) S.runs.shift(); drawSim.saved = true; save() }
+    el("simCtl").innerHTML = "<button type='button' class='btn btn-quiet' id='simAgain'>Try different jobs</button>";
+    el("simAgain").onclick = function(){ simEv = null; simStep = -1; drawSim.saved = false; drawSim(); el("p5a").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" }) };
+    el("simRes").innerHTML = resultsHTML(run, false);
+  }
+}
+function resultsHTML(run, old){
+  var P = {}; run.picks.forEach(function(k){ P[k] = 1 });
+  var ev = runStorm(P), ppl = ev.filter(function(x){ return x.who === "people" }), plc = ev.filter(function(x){ return x.who === "places" });
+  function li(x){ return "<li>" + (x.good ? "&#10003; " : "&#9888; ") + x.x.replace(/^[^.]*\.\s*/, "") + "</li>" }
+  return "<div class='fb tell' style='margin-top:12px'><b>" + (old ? "Your last run." : "Morning in Saltmouth.") + "</b> " + run.homes + " homes flooded on River Row. " + (run.cars ? run.cars + " cars ruined. " : "No cars lost. ") + "Power off " + run.power + ".</div>" +
+    "<div class='res'><div><h4>Effects on people</h4><ul>" + ppl.map(li).join("") + "</ul></div><div><h4>Effects on places</h4><ul>" + plc.map(li).join("") + "</ul></div><div><h4>The months after</h4><ul><li>Flooded homes can take months to dry out and repair.</li><li>Some families live somewhere else while that happens.</li><li>Clearing up and repairs cost the town a lot of money.</li></ul></div></div>" +
+    "<p class='small'>No town can stop a storm like Gwen. Preparing changes how badly it hurts people and places.</p>";
+}
+var LINKS = [
+  { id:"k1", t:"Trees and power lines came down", ok:["deep"], why:"A very deep low has tight isobars, which means very strong winds." },
+  { id:"k2", t:"Waves came over the sea wall", ok:["tide", "deep"], why:"Strong onshore winds and low pressure push the sea up. At high tide it goes over the wall." },
+  { id:"k3", t:"The river rose very fast and burst its banks", ok:["soak", "hills"], why:"Rain could not soak into the saturated ground, so it ran straight into the river, which was already filling with rain from the hills." },
+  { id:"k4", t:"The high street drains could not cope", ok:["soak", "hills", "deep"], why:"So much rain fell, so fast, that drains overflowed." }
+];
+function drawLinks(){
+  var S = st.s5;
+  el("links").innerHTML = LINKS.map(function(L){ var done = S.links[L.id]; return "<div class='qcard' style='margin-top:8px'><div class='qq' style='font-size:1rem'>" + L.t + "</div>" + (done ? "<p style='margin:0'>&#10003; <b>" + byId(CAUSES, done).n + ".</b> " + L.why + "</p>" : "<div class='pickrow'>" + CAUSES.map(function(c){ return "<button type='button' class='pickbtn' data-k='" + L.id + "' data-c='" + c.id + "'>" + c.n + "</button>" }).join("") + "</div>") + "</div>" }).join("");
+  each(el("links").querySelectorAll("[data-k]"), function(x){ x.onclick = function(){ var L = byId(LINKS, x.getAttribute("data-k")), c = x.getAttribute("data-c"); S.linkTries++;
+    if(L.ok.indexOf(c) >= 0){ S.links[L.id] = c; save(); drawLinks(); setFb("fb5", "ok", "<b>Yes.</b> " + L.why) }
+    else { save(); x.classList.add("tryagain"); setFb("fb5", "nope", "<b>Have another think.</b> " + { k1:"Which cause is about wind?", k2:"Which cause is about the sea?", k3:"Which causes are about water on the land?", k4:"Which causes are about lots of rain?" }[L.id]) } } });
+}
+
+/* =========================================================
+   DESK 6: World desk
+   ========================================================= */
+var CHAINS = {
+  t:{ n:"Tropical storm engine", col:"#ef7724", start:"The sea is at least 26.5 " + DEG + ". It is about 10 degrees north of the equator.", end:"A tropical storm. Keep it over warm water with light winds high up, and it can grow into a hurricane.",
+    steps:[
+      { y:"Lots of water evaporates, so the air above the sea is warm and moist", n:["The sea freezes and the air above goes cold", "The air above the sea becomes cold and dry"] },
+      { y:"The warm, moist air rises quickly", n:["The air sinks down onto the sea", "The air stays perfectly still"] },
+      { y:"Rising air leaves low pressure at the sea surface", n:["Rising air makes high pressure at the surface", "The pressure at the surface does not change"] },
+      { y:"Air rushes in towards the low, and the Earth's spin twists it into a spiral", n:["Air rushes away from the low in straight lines", "Air spins because the sea is spinning"] },
+      { y:"As water vapour condenses into cloud it gives out heat. The air rises faster, the pressure drops more, and the winds get stronger", n:["The clouds cool the sea at once and the storm stops", "Condensing water makes the air heavy, so it sinks"] }
+    ] },
+  u:{ n:"UK winter storm engine", col:"#2d6fd6", start:"Over the Atlantic, cold polar air from the north meets warm tropical air from the south. This meeting line is the polar front.", end:"A UK winter storm: a deep depression, with gales and bands of heavy rain.",
+    steps:[
+      { y:"The warm air is lighter, so it rises up over the cold air", n:["The warm air sinks under the cold air", "The two air masses mix at once and calm down"] },
+      { y:"Rising air makes an area of low pressure", n:["Rising air makes an area of high pressure", "Rising air makes the pressure go up and down"] },
+      { y:"A strong jet stream high above pulls air away from the top of the low", n:["The jet stream pushes air down into the low", "The jet stream is too high up to make any difference"] },
+      { y:"So the pressure keeps falling, the isobars get tighter and the winds get stronger", n:["So the pressure rises and the wind dies down", "So the isobars spread out"] },
+      { y:"Warm and cold fronts swing round the low, bringing bands of heavy rain", n:["The fronts bring clear blue skies", "The low grows an eye in the middle"] }
+    ] }
+};
+var chainSel = "t", chainOrder = {};
+function growSVG(k, n){
+  var s = "<svg viewBox='0 0 240 170' aria-hidden='true'>";
+  if(k === "t"){
+    s += "<rect width='240' height='170' fill='#0b2a45'/><text x='8' y='162' font-size='10' fill='#9fe3f2' class='svgtext'>Satellite view</text>";
+    var r = 14 + n * 9, arms = Math.min(n + 1, 5), g = "";
+    for(var a = 0; a < arms && n >= 2; a++){ var a0 = a * 2 * Math.PI / arms, d = ""; for(var t = 0; t <= 1.0001; t += .05){ var rr = 8 + t * (r + 10), an = a0 + t * 3.2; d += (t ? "L" : "M") + (120 + Math.cos(an) * rr).toFixed(1) + " " + (82 + Math.sin(an) * rr * .9).toFixed(1) } g += "<path d='" + d + "' fill='none' stroke='#fff' stroke-width='8' stroke-linecap='round' opacity='.75'/>" }
+    if(n < 2){ for(var c = 0; c <= n * 2 + 2; c++) g += "<circle cx='" + (100 + (c * 37) % 50) + "' cy='" + (66 + (c * 23) % 34) + "' r='" + (7 + c) + "' fill='#e9f2f4' opacity='.85'/>" }
+    else g += "<circle cx='120' cy='82' r='" + (10 + n * 3) + "' fill='#fff' opacity='.95'/>";
+    if(n >= 5) g += "<circle cx='120' cy='82' r='4.5' fill='#0b2a45'/>";
+    s += "<g class='" + (n >= 3 ? "spin" : "") + "' style='--dur:" + (16 - n * 2) + "s'>" + g + "</g>";
+    s += "<rect x='160' y='8' width='72' height='20' rx='6' fill='#ef7724'/><text x='196' y='22' text-anchor='middle' font-size='11' font-weight='700' fill='#0a2f38' class='svgtext'>sea " + (n ? "28" : "27") + DEG + "</text>";
+  } else {
+    s += "<rect width='240' height='170' fill='#d8eef5'/><rect x='0' y='0' width='240' height='40' fill='#9fd3ef' opacity='.6'/><rect x='0' y='130' width='240' height='40' fill='#ef7724' opacity='.25'/>";
+    s += "<text x='8' y='14' font-size='10' fill='#0a2f38' class='svgtext'>cold polar air</text><text x='8' y='164' font-size='10' fill='#0a2f38' class='svgtext'>warm tropical air</text>";
+    var rings = n >= 4 ? 6 : n >= 2 ? 3 : n >= 1 ? 1 : 0, gap = n >= 4 ? 9 : 13;
+    for(var i = rings; i >= 1; i--) s += "<ellipse cx='110' cy='82' rx='" + (8 + i * gap) + "' ry='" + (6 + i * gap * .75) + "' fill='none' stroke='#0a2f38' stroke-width='1.6'/>";
+    if(n >= 3) s += "<path d='M0 40 Q60 20 120 44 T240 30' fill='none' stroke='#ffc247' stroke-width='8' opacity='.85'/><text x='180' y='24' font-size='10' font-weight='700' fill='#0a2f38' class='svgtext'>jet stream</text>";
+    if(n >= 5) s += "<path d='M114 86 L190 110' stroke='#e2553e' stroke-width='3.5'/><path d='M112 90 L80 150' stroke='#2d6fd6' stroke-width='3.5'/><g fill='#e2553e'><circle cx='140' cy='94' r='5'/><circle cx='166' cy='102' r='5'/></g><g fill='#2d6fd6'><path d='M104 106l8 4-6 6z'/><path d='M94 126l8 4-6 6z'/></g>";
+    else if(n === 0) s += "<path d='M0 86 Q120 70 240 90' fill='none' stroke='#7b4b8f' stroke-width='3' stroke-dasharray='6 5'/>";
+    if(n >= 2) s += "<circle cx='110' cy='82' r='11' fill='#fff' stroke='#0a2f38' stroke-width='2'/><text x='110' y='88' text-anchor='middle' font-size='15' font-weight='900' fill='#e2553e' font-family='Archivo,Arial Black,sans-serif'>L</text>";
+  }
+  return s + "</svg>";
+}
+var GROWCAP = { t:["Warm sea. A few clouds.", "Moist air. Clouds building.", "Tall clouds. Pressure falling.", "Starting to spin.", "A spiral of cloud.", "Stronger and stronger. An eye forms."], u:["Two air masses meet at the polar front.", "Warm air rides up over cold air.", "A low forms.", "The jet stream deepens it.", "Isobars tighten. Gales.", "Fronts bring heavy rain."] };
+var WORLD = { W:640, lon0:-180, lon1:180, lat0:-60, lat1:75 };
+function wp(lon, lat){ return [(lon - WORLD.lon0) / (WORLD.lon1 - WORLD.lon0) * WORLD.W, (WORLD.lat1 - lat) / (WORLD.lat1 - WORLD.lat0) * WH] }
+var WH = Math.round(640 * 135 / 360);
+var CONT = [
+  [[-168,66],[-140,70],[-95,72],[-80,65],[-62,56],[-56,50],[-66,45],[-70,42],[-76,35],[-81,31],[-80,25],[-83,29],[-90,30],[-97,27],[-97,21],[-90,21],[-87,21],[-88,16],[-83,15],[-83,10],[-78,8],[-80,7],[-86,12],[-92,14],[-105,20],[-110,24],[-112,30],[-118,34],[-124,40],[-124,48],[-135,58],[-150,60],[-165,62]],
+  [[-50,60],[-42,60],[-22,70],[-20,80],[-60,82],[-70,78],[-55,70]],
+  [[-77,8],[-60,10],[-50,0],[-35,-6],[-38,-13],[-40,-22],[-48,-26],[-53,-34],[-58,-38],[-65,-42],[-68,-52],[-72,-50],[-74,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-5],[-80,0]],
+  [[-10,36],[-9,43],[-2,44],[-5,48],[2,51],[8,54],[10,58],[5,60],[10,64],[16,69],[28,71],[40,67],[60,70],[80,73],[100,77],[140,72],[180,68],[178,64],[160,60],[142,53],[140,46],[132,42],[127,38],[122,40],[121,31],[118,24],[110,20],[108,12],[104,10],[100,13],[98,8],[103,1],[100,6],[98,16],[94,17],[90,22],[86,20],[80,15],[77,8],[73,18],[68,24],[57,25],[52,28],[48,30],[56,24],[59,22],[52,16],[44,12],[39,20],[35,28],[33,31],[36,36],[27,37],[26,41],[22,37],[19,41],[13,45],[12,44],[9,44],[3,43],[-4,37]],
+  [[-17,21],[-16,12],[-8,4],[5,5],[9,4],[10,-2],[13,-12],[12,-18],[15,-27],[18,-34],[25,-34],[33,-28],[36,-20],[40,-15],[40,-5],[43,0],[51,11],[44,11],[39,16],[34,27],[32,31],[20,32],[10,37],[0,36],[-6,36],[-10,30],[-16,24]],
+  [[114,-22],[122,-18],[130,-12],[137,-12],[137,-16],[142,-11],[146,-19],[153,-25],[151,-34],[146,-39],[140,-38],[135,-35],[130,-32],[115,-34],[113,-26]],
+  [[-5.7,50],[1.7,52.4],[-1.6,55.6],[-3.3,58.6],[-6.2,56.6],[-3.1,53.4],[-5.2,51.8]],
+  [[-6,52.1],[-6.2,55.2],[-10,54.2],[-10.4,51.9]],
+  [[130,31],[140,35],[142,40],[141,45],[139,38],[132,34]],
+  [[44,-25],[50,-15],[49,-12],[44,-16]],
+  [[95,5],[106,-6],[120,-9],[118,-3],[110,1],[104,3]],
+  [[132,-2],[150,-6],[145,-9],[138,-8]],
+  [[166,-46],[174,-41],[178,-38],[173,-35],[172,-41],[168,-46]],
+  [[-24,64],[-14,64.4],[-14,66.2],[-22,66.4]]
+];
+var PASS = [
+  { id:"car", n:"Caribbean Sea", m:"September", ll:[-82, 17], a:0, why:"The sea is about 29 " + DEG + ", it is 15 degrees from the equator, and September is the peak of the Atlantic hurricane season (June to November)." },
+  { id:"bob", n:"Bay of Bengal", m:"November", ll:[88, 15], a:0, why:"A warm tropical sea. The Bay of Bengal gets most of its cyclones in the months just before and just after the summer monsoon, and November is one of them." },
+  { id:"eq", n:"Pacific, on the equator", m:"March, sea 29 " + DEG, ll:[-150, 0], a:2, why:"Warm enough, but right on the equator the Earth's spin has almost no twisting effect, so the air cannot start to spiral. Tropical cyclones almost never form within about 5 degrees of the equator." },
+  { id:"ire", n:"Atlantic, west of Ireland", m:"January", ll:[-20, 56], a:1, why:"Winter: a big difference between polar and tropical air, a strong jet stream and the polar front close to the UK. Perfect for deep depressions." },
+  { id:"aus", n:"Off north west Australia", m:"February", ll:[118, -15], a:0, why:"In the southern hemisphere the seasons are the other way round. February is summer there, and the cyclone season runs roughly November to April. Its storms spin clockwise." },
+  { id:"carw", n:"Caribbean Sea", m:"February", ll:[-64, 12], a:2, why:"Same place as before, wrong time. February is outside the hurricane season: the sea is cooler and the winds high up are stronger." },
+  { id:"irs", n:"Atlantic, west of Ireland", m:"July", ll:[-36, 52], a:2, why:"Lows still come in summer, but the difference between polar and tropical air is smaller and the jet stream is weaker, so big storms are much less likely." },
+  { id:"exh", n:"A hurricane heading for the UK", m:"October, sea about 17 " + DEG, ll:[-26, 46], a:3, why:"The sea is far below 26.5 " + DEG + ", so it loses its fuel of warm, moist air. Cold air and the jet stream change its shape. It arrives as an ordinary low, an ex hurricane, though it can still bring gales and heavy rain." }
+];
+var POPT = ["Tropical cyclone likely", "Big winter storm likely", "Big storms unlikely"];
+var POPT_EXH = ["It keeps its full strength all the way", "It turns into a heatwave", "It gets stronger over the cold sea", "It weakens and changes into an ordinary low"];
+var passSel = null;
+function worldSVG(){
+  var S = st.s6, s = "<svg viewBox='0 0 640 " + WH + "' role='img' aria-label='World map with eight storm passport pins'>";
+  s += "<rect width='640' height='" + WH + "' fill='#2b5d8a'/>";
+  var t1 = wp(0, 30)[1], t2 = wp(0, 5)[1], t3 = wp(0, -5)[1], t4 = wp(0, -30)[1];
+  s += "<rect x='0' y='" + t1.toFixed(1) + "' width='640' height='" + (t2 - t1).toFixed(1) + "' fill='#ef7724' opacity='.16'/><rect x='0' y='" + t3.toFixed(1) + "' width='640' height='" + (t4 - t3).toFixed(1) + "' fill='#ef7724' opacity='.16'/>";
+  s += "<g fill='#8ed3a8' stroke='#0a2f38' stroke-width='1.2' stroke-linejoin='round'>" + CONT.map(function(c){ return "<path d='" + c.map(function(q, i){ var a = wp(q[0], q[1]); return (i ? "L" : "M") + a[0].toFixed(1) + " " + a[1].toFixed(1) }).join("") + "Z'/>" }).join("") + "</g>";
+  var eq = wp(0, 0)[1];
+  s += "<line x1='0' y1='" + eq.toFixed(1) + "' x2='640' y2='" + eq.toFixed(1) + "' stroke='#ffc247' stroke-width='1.6' stroke-dasharray='6 4'/><text x='6' y='" + (eq - 4).toFixed(1) + "' font-size='10' fill='#fff' class='svgtext'>equator</text>";
+  s += "<text x='6' y='" + (t1 + 12).toFixed(1) + "' font-size='10' fill='#ffd8b8' class='svgtext'>5 to 30 degrees: warm seas</text>";
+  PASS.forEach(function(p, i){ var a = wp(p.ll[0], p.ll[1]), done = S.pass[p.id] && S.pass[p.id].ok;
+    s += "<g class='hotg' data-pp='" + p.id + "' tabindex='0' role='button' aria-label='Pin " + (i + 1) + ": " + p.n + ", " + p.m + "'><circle class='ring' cx='" + a[0].toFixed(1) + "' cy='" + a[1].toFixed(1) + "' r='" + (passSel === p.id ? 12 : 10) + "' fill='" + (done ? "#2e7d4f" : passSel === p.id ? "#ffc247" : "#7b4b8f") + "' stroke='#fff' stroke-width='2.5'/><text x='" + a[0].toFixed(1) + "' y='" + (a[1] + 4).toFixed(1) + "' text-anchor='middle' font-size='11' font-weight='900' fill='" + (passSel === p.id && !done ? "#0a2f38" : "#fff") + "' font-family='Archivo,Arial Black,sans-serif'>" + (i + 1) + "</text></g>" });
+  return s + "</svg>";
+}
+RENDER[6] = function(b){
+  var h = "<p class='lead'>03:00. The world desk. Two kinds of storm engine, and a storm passport: where and when can big storms happen?</p>";
+  h += "<div class='learn'><span class='kicker'>Big picture</span><ul><li>Air moves round the planet in giant loops: <b>global atmospheric circulation</b>. Rising air gives low pressure near the equator and near 60 degrees north, where the UK is.</li><li><b>Tropical storms</b> run on heat and moisture from warm seas.</li><li><b>UK storms</b> run on the clash between cold and warm air, helped by the <b>jet stream</b>.</li></ul></div>";
+  h += "<div class='part' id='p6a'><h3>Storm engines</h3><p class='small'>Pick an engine. Tap the domino that comes next. Watch the picture grow.</p><div class='chainpick' id='chainPick'></div><div class='chainlab'><div><div class='dominoes' id='doms'></div><div class='choices' id='domOpts'></div><div id='fb6a'></div></div><div class='growpic' id='grow'></div></div></div>";
+  h += "<div class='part' id='p6b'><h3>Storm passport</h3><p class='small'>Tap a pin on the map, or a card below. Decide what the weather desk should expect there.</p><div class='world' id='world'></div><div class='ppcards' id='ppCards'></div><div id='ppQ'></div><div id='fb6b'></div></div>";
+  h += "<div class='part'><h3>One last call</h3><p class='small'>A caller asks: <b>why does the UK get winter storms but not hurricanes?</b> Pick the best answer.</p><div class='choices' id='expl'></div><div id='fb6c'></div></div>";
+  b.innerHTML = h;
+  drawChain(); drawPass(); drawExpl();
+  el("world").addEventListener("click", function(e){ var g = e.target.closest("[data-pp]"); if(g){ passSel = g.getAttribute("data-pp"); drawPass() } });
+};
+function drawChain(){
+  var S = st.s6, C = CHAINS[chainSel], n = S.chain[chainSel];
+  el("chainPick").innerHTML = ["t", "u"].map(function(k){ return "<button type='button' class='pickbtn' data-ch='" + k + "' aria-pressed='" + (chainSel === k) + "'>" + CHAINS[k].n + (S.chain[k] >= 5 ? " &#10003;" : "") + "</button>" }).join("");
+  each(el("chainPick").querySelectorAll("[data-ch]"), function(x){ x.onclick = function(){ chainSel = x.getAttribute("data-ch"); el("fb6a").innerHTML = ""; drawChain() } });
+  var d = "<div class='dom' style='--dc:" + C.col + "'><span class='k'>Start</span>" + C.start + "</div>";
+  for(var i = 0; i < n; i++) d += "<div class='dom' style='--dc:" + C.col + "'><span class='k'>Then</span>" + C.steps[i].y + "</div>";
+  if(n >= C.steps.length) d += "<div class='dom end' style='--dc:" + C.col + "'><span class='k'>Result</span>" + C.end + "</div>";
+  else d += "<div class='dom next' aria-hidden='true'>?</div>";
+  el("doms").innerHTML = d;
+  el("grow").innerHTML = growSVG(chainSel, n) + "<div class='cap'>" + GROWCAP[chainSel][n] + "</div>";
+  if(n < C.steps.length){
+    var key = chainSel + n; if(!chainOrder[key]) chainOrder[key] = shuffle([0, 1, 2]);
+    var opts = [C.steps[n].y].concat(C.steps[n].n);
+    el("domOpts").innerHTML = "<p class='small' style='margin:0'><b>What happens next?</b></p>" + chainOrder[key].map(function(i){ return "<button type='button' data-d='" + i + "'>" + opts[i] + "</button>" }).join("");
+    each(el("domOpts").querySelectorAll("[data-d]"), function(x){ x.onclick = function(){ S.chainTries++;
+      if(x.getAttribute("data-d") === "0"){ S.chain[chainSel] = n + 1; save(); drawChain(); setFb("fb6a", "ok", n + 1 >= C.steps.length ? "<b>Engine complete.</b> " + (chainSel === "t" ? "Warm ocean, low pressure and strong winds all feed each other. That loop is what makes a tropical storm grow." : "The clash of air masses plus the jet stream makes the low deepen. That is how UK storms grow.") : "<b>Yes.</b> Domino down.") }
+      else { save(); x.classList.add("tryagain"); setFb("fb6a", "nope", "<b>That domino does not fit.</b> " + chainHint(chainSel, n)) } } });
+  } else el("domOpts").innerHTML = "<div class='row'><button type='button' class='btn btn-quiet sm' id='chReplay'>Knock them over again</button>" + (S.chain[chainSel === "t" ? "u" : "t"] < 5 ? "<button type='button' class='btn sm' id='chOther'>Try the other engine</button>" : "") + "</div>";
+  if(el("chReplay")) el("chReplay").onclick = function(){ S.chain[chainSel] = 0; save(); drawChain() };
+  if(el("chOther")) el("chOther").onclick = function(){ chainSel = chainSel === "t" ? "u" : "t"; drawChain() };
+}
+function chainHint(k, n){
+  return { t:["Warm water and air: what does heat do to water?", "Warm air is lighter than cold air.", "When air rises away from the surface, does it leave more or less air pushing down?", "Air moves from high to low pressure, and the Earth's spin bends it.", "Condensing releases heat. Heat makes air rise. What does that do to the storm?"], u:["Warm air is lighter than cold air.", "Rising air means less air pushing down on the surface.", "The jet stream is a fast river of air high up. It carries air away.", "Less air above, lower pressure, tighter isobars...", "Fronts are where warm and cold air meet. Air is forced up there."] }[k][n];
+}
+function drawPass(){
+  var S = st.s6;
+  el("world").innerHTML = worldSVG();
+  each(el("world").querySelectorAll(".hotg"), keyClick);
+  el("ppCards").innerHTML = PASS.map(function(p, i){ var d = S.pass[p.id] && S.pass[p.id].ok; return "<button type='button' data-pc='" + p.id + "' aria-pressed='" + (passSel === p.id) + "' class='" + (d ? "done" : "") + "'>" + (i + 1) + ". " + p.n + "<span class='m'>" + p.m + (d ? " &#10003;" : "") + "</span></button>" }).join("");
+  each(el("ppCards").querySelectorAll("[data-pc]"), function(x){ x.onclick = function(){ passSel = x.getAttribute("data-pc"); el("fb6b").innerHTML = ""; drawPass() } });
+  if(!passSel){ el("ppQ").innerHTML = ""; return }
+  var p = byId(PASS, passSel), rec = S.pass[p.id], opts = p.id === "exh" ? POPT_EXH : POPT;
+  if(rec && rec.ok){ el("ppQ").innerHTML = "<div class='qcard'><div class='qq'>" + p.n + ", " + p.m + "</div><span class='stamp'>" + opts[p.a] + "</span><p style='margin:8px 0 0'>" + p.why + "</p></div>"; return }
+  el("ppQ").innerHTML = "<div class='qcard'><div class='qq'>" + p.n + ", " + p.m + "</div><p class='small' style='margin:0'>" + (p.id === "exh" ? "What happens to it on the way?" : "What should the desk expect?") + "</p><div class='choices'>" + opts.map(function(o, i){ return "<button type='button' data-po='" + i + "'>" + o + "</button>" }).join("") + "</div></div>";
+  each(el("ppQ").querySelectorAll("[data-po]"), function(x){ x.onclick = function(){ var i = +x.getAttribute("data-po"); if(!S.pass[p.id]) S.pass[p.id] = { first:i, ok:false };
+    if(i === p.a){ S.pass[p.id].ok = true; save(); drawPass(); setFb("fb6b", "ok", "<b>Stamped.</b> " + (Object.keys(S.pass).filter(function(k){ return S.pass[k].ok }).length === PASS.length ? "Passport full. Location and season both matter." : "")) }
+    else { save(); x.classList.add("tryagain"); setFb("fb6b", "nope", "<b>Have another think.</b> " + passHint(p)) } } });
+}
+function passHint(p){
+  return { car:"Is the sea warm? Is it 5 to 30 degrees from the equator? Is it hurricane season?", bob:"A warm tropical sea, in one of its busy months.", eq:"Warm sea, yes. But look at where the pin is. What does a storm need to start spinning?", ire:"Winter, near the polar front, strong jet stream.", aus:"Southern hemisphere: February is their summer.", carw:"The Atlantic hurricane season runs June to November.", irs:"Summer near the UK: smaller clash of air masses, weaker jet stream.", exh:"What is its fuel? Is there any of that fuel in a 17 " + DEG + " sea?" }[p.id];
+}
+var EXPL = [
+  { t:"The seas round the UK are far too cool to power a hurricane (they need about 26.5 " + DEG + "), and the UK is too far from the equator. Instead, the UK sits on the polar front, where cold and warm air clash and the jet stream builds deep lows.", y:true },
+  { t:"Because the UK is an island.", y:false, h:"Plenty of islands get hurricanes. Think about the sea temperature and where the UK is." },
+  { t:"Because it is too windy in the UK for hurricanes.", y:false, h:"Think about what a hurricane uses as fuel, and whether the UK's seas have it." }
+];
+function drawExpl(){
+  var S = st.s6;
+  el("expl").innerHTML = EXPL.map(function(x, i){ return "<button type='button' data-x='" + i + "' class='" + (S.expl === "ok" && x.y ? "good" : "") + "'>" + x.t + "</button>" }).join("");
+  each(el("expl").querySelectorAll("[data-x]"), function(x){ x.onclick = function(){ var E = EXPL[+x.getAttribute("data-x")];
+    if(E.y){ S.expl = "ok"; save(); drawExpl(); setFb("fb6c", "ok", "<b>Exactly.</b> Location sets the ingredients: warm seas near the tropics, clashing air masses at the polar front.") }
+    else { if(!S.expl) S.expl = "tried"; save(); x.classList.add("tryagain"); setFb("fb6c", "nope", "<b>Not quite.</b> " + E.h) } } });
+}
+
+/* =========================================================
+   DESK 7: News desk
+   ========================================================= */
+var STORIES = [
+  { id:"gwen", n:"Storm Gwen hits Saltmouth", d:"A UK winter storm. Causes and effects on people and places.",
+    s:{ h:["Storm Gwen batters...", "Floods and gales hit..."], c:["Storm Gwen is a deep depression that formed when...", "The low pressure was so deep that...", "The flooding was worse because the ground..."], e:["In Saltmouth, people...", "The river burst its banks and...", "Places were damaged when...", "Thousands of homes lost..."], a:["If you live near the river...", "Please check on...", "Avoid the sea front because..."] } },
+  { id:"trop", n:"A tropical storm is growing", d:"Over a warm ocean, far from the UK. How does it form and grow?",
+    s:{ h:["New tropical storm forms over...", "Storm grows stronger over warm..."], c:["It formed because the sea is...", "Warm, moist air is rising, which...", "Low pressure at the surface means...", "The Earth's spin is..."], e:["If it reaches land, people could...", "A storm surge could...", "Heavy rain could cause..."], a:["People on the coast should be ready to...", "Listen for warnings and..."] } },
+  { id:"exh", n:"Ex hurricane heads for the UK", d:"Why will it be weaker by the time it gets here?",
+    s:{ h:["Ex hurricane on its way to...", "Remains of a hurricane bring..."], c:["As it moved north over cooler water...", "Without warm water it lost...", "The jet stream..."], e:["It will still bring...", "It could cause..."], a:["Keep an eye on the warnings...", "Tie down anything loose because..."] } }
+];
+var WORDS = ["low pressure", "isobars", "jet stream", "polar front", "warm front", "cold front", "evaporation", "condensation", "water vapour", "moist air", "26.5 degrees", "Earth's spin", "storm surge", "saturated", "global circulation", "amber warning", "red warning", "deep depression", "ex hurricane"];
+var lastBox = "c";
+RENDER[7] = function(b){
+  var S = st.s7;
+  var h = "<p class='lead'>05:00. The early morning news wants a short weather broadcast from you. Pick a story, write four short bits, then go on air.</p>";
+  h += "<div class='storypick' id='storyPick'></div><div id='newsBody'></div>";
+  b.innerHTML = h;
+  drawStoryPick(); drawNews();
+};
+function drawStoryPick(){
+  var S = st.s7;
+  el("storyPick").innerHTML = STORIES.map(function(x){ return "<button type='button' data-st='" + x.id + "' aria-pressed='" + (S.story === x.id) + "'><b>" + x.n + "</b><span class='small'>" + x.d + "</span></button>" }).join("") + "<button type='button' data-st='own' aria-pressed='" + (S.story === "own") + "'><b>My own story</b><span class='small'>Any weather hazard you like.</span></button>";
+  each(el("storyPick").querySelectorAll("[data-st]"), function(x){ x.onclick = function(){ S.story = x.getAttribute("data-st"); save(); drawStoryPick(); drawNews() } });
+}
+function drawNews(){
+  var S = st.s7, St = byId(STORIES, S.story);
+  if(!S.story){ el("newsBody").innerHTML = "<p class='small' style='margin-top:10px'>Pick a story above to get sentence starters.</p>"; return }
+  var sv = St ? St.s : { h:["Breaking news:..."], c:["This is happening because...", "The main cause is..."], e:["People could...", "Places could..."], a:["If you live nearby..."] };
+  var boxes = [["h", "Headline", "one short line"], ["c", "What is causing it", "the geography"], ["e", "What it does to people and places", "the effects"], ["a", "What people should do", "the advice"]];
+  var h = "<div class='part'><p class='small' style='margin:0'><b>Geography words.</b> Tap one to drop it into the box you were last in.</p><div class='starters'>" + WORDS.map(function(w){ return "<button type='button' class='w' data-word='" + esc(w) + "'>" + w + "</button>" }).join("") + "</div>";
+  boxes.forEach(function(bx){
+    h += "<div class='sbox'><label for='nb_" + bx[0] + "'>" + bx[1] + "<span>" + bx[2] + "</span></label><div class='starters'>" + sv[bx[0]].map(function(s){ return "<button type='button' data-into='" + bx[0] + "' data-ins='" + esc(s.replace("...", " ")) + "'>" + s + "</button>" }).join("") + "</div>" +
+      (bx[0] === "h" ? "<input class='write' id='nb_h' maxlength='120' placeholder='Your headline'>" : "<textarea class='write' id='nb_" + bx[0] + "' placeholder='A sentence or two is plenty'></textarea>") + "</div>";
+  });
+  h += "<div class='spot' id='spot'></div><p class='small' id='wCount'></p><div class='row'><button type='button' class='btn btn-orange' id='onAir'>Go on air</button><span class='small'>It saves as you type.</span></div><div id='tvHost'></div></div>";
+  el("newsBody").innerHTML = h;
+  ["h", "c", "e", "a"].forEach(function(k){ var t = el("nb_" + k); t.value = S[k] || ""; t.oninput = function(){ S[k] = t.value; save(); spot() }; t.onfocus = function(){ lastBox = k } });
+  each(el("newsBody").querySelectorAll("[data-ins],[data-word]"), function(x){ x.onclick = function(){
+    var k = x.getAttribute("data-into") || lastBox, ta = el("nb_" + k), ins = x.getAttribute("data-ins") || (x.getAttribute("data-word") + " ");
+    var v = ta.value, p = ta.selectionStart == null ? v.length : ta.selectionStart; if(document.activeElement !== ta && x.hasAttribute("data-into")) p = v.length;
+    var before = v.slice(0, p), lead = before && !/\s$/.test(before) ? " " : "";
+    ta.value = before + lead + ins + v.slice(p); S[k] = ta.value; save(); ta.focus(); var np = (before + lead + ins).length; try{ ta.setSelectionRange(np, np) }catch(e){} lastBox = k; spot();
+  } });
+  el("onAir").onclick = onAir;
+  spot();
+}
+function foundWords(){ var S = st.s7, all = (S.h + " " + S.c + " " + S.e + " " + S.a).toLowerCase(); return WORDS.filter(function(w){ return all.indexOf(w.toLowerCase()) >= 0 || (w === "26.5 degrees" && all.indexOf("26.5") >= 0) || (w === "isobars" && all.indexOf("isobar") >= 0) }) }
+function spot(){
+  var S = st.s7, f = foundWords(), w = ((S.h + " " + S.c + " " + S.e + " " + S.a).trim().match(/\S+/g) || []).length;
+  el("spot").innerHTML = f.length ? "<span style='background:none;border:0;padding:3px 0'>Geography words you used:</span>" + f.map(function(v){ return "<span>" + esc(v) + "</span>" }).join("") : "";
+  el("wCount").textContent = w ? w + " words so far." : "";
+}
+var scrollTimer = null;
+function onAir(){
+  var S = st.s7;
+  if(!(S.h.trim() || S.c.trim() || S.e.trim() || S.a.trim())){ el("tvHost").innerHTML = fbHTML("tell", "Write a little in any box first, then go on air."); return }
+  var paras = [S.c, S.e, S.a].filter(function(x){ return x.trim() }).map(function(x){ return "<p>" + esc(x.trim()) + "</p>" }).join("");
+  el("tvHost").innerHTML = "<div class='tv'><div class='scrn'><span class='live'>LIVE</span> <span class='small' style='color:#cfe8ee'>05:00 weather</span><div class='prompter' id='prompter' tabindex='0' aria-label='Your script'>" + (paras || "<p>...</p>") + "</div></div><div class='third'><small>Weather centre</small>" + esc(S.h.trim() || "Weather update") + "</div></div>" +
+    "<div class='row'><button type='button' class='btn btn-quiet sm' id='autoScroll'>Scroll it for me</button><span class='small'>Read it out loud to HB or Jay, if you fancy.</span></div>";
+  el("autoScroll").onclick = function(){
+    var pr = el("prompter");
+    if(scrollTimer){ clearInterval(scrollTimer); scrollTimer = null; el("autoScroll").textContent = "Scroll it for me"; return }
+    el("autoScroll").textContent = "Stop scrolling";
+    scrollTimer = setInterval(function(){ if(!document.body.contains(pr)){ clearInterval(scrollTimer); scrollTimer = null; return } pr.scrollTop += 1; if(pr.scrollTop + pr.clientHeight >= pr.scrollHeight - 1){ clearInterval(scrollTimer); scrollTimer = null; if(el("autoScroll")) el("autoScroll").textContent = "Scroll it for me" } }, 60);
+  };
+}
+
+/* =========================================================
+   Send to Jay
+   ========================================================= */
+function summary(){
+  var L = [], w = KIDS[who] ? who : "";
+  L.push("The Warning Room (weather hazards)");
+  if(w){ L.push("Targets for " + w + ":"); L.push("  1. " + KIDS[w].m[0]); L.push("  2. " + KIDS[w].m[1]) }
+  L.push("");
+  var any = false;
+  for(var i = 1; i <= 7; i++) if(tried(i)) any = true;
+  if(!any) L.push("Nothing tried yet.");
+  var s1 = st.s1;
+  if(tried(1)){
+    L.push("DESK 1: Hazard wall [" + MILESTONE_STAGES[1] + "]");
+    L.push("  Screens named: " + Object.keys(s1.lab).length + " of " + SCREENS.length + (Object.keys(s1.lab).length ? " (" + SCREENS.filter(function(x){ return s1.lab[x.id] }).map(function(x){ return x.n }).join(", ") + ")" : "") + ", " + s1.labTries + " goes");
+    L.push("  Effects matched to hazards: " + Object.keys(s1.fx).length + " of " + EFFECTS.length + ", " + s1.fxTries + " goes");
+    EFFECTS.forEach(function(e){ if(s1.fx[e.id]) L.push("    - " + e.t + " -> " + byId(SCREENS, s1.fx[e.id]).n) });
+    L.push("");
+  }
+  var s2 = st.s2;
+  if(tried(2)){
+    L.push("DESK 2: Chart reader [" + MILESTONE_STAGES[2] + "]");
+    CQ.forEach(function(q){ if(s2.q[q.id]) L.push("  " + q.q + " " + (s2.q[q.id] === "skip" ? "Skipped." : s2.qFirst[q.id] ? "Got it first time." : "Got there after a hint.")) });
+    L.push("  Weather symbols placed on the chart: " + Object.keys(s2.sym).length + " of " + SYMS.length + ", " + s2.symTries + " goes");
+    L.push("");
+  }
+  var s3 = st.s3;
+  if(tried(3)){
+    L.push("DESK 3: Warning grid [" + MILESTONE_STAGES[3] + "]");
+    SCEN.forEach(function(sc){ if(s3.done[sc.id]) L.push("  " + sc.n + ": " + sc.l + " likelihood, " + sc.i + " impact = " + WNAME[GRID[sc.i][sc.l]]) });
+    L.push("  Wrong picks along the way (each got a hint): " + s3.tries);
+    L.push("");
+  }
+  var s4 = st.s4;
+  if(tried(4)){
+    L.push("DESK 4: Naming desk [" + MILESTONE_STAGES[4] + "]");
+    L.push("  Lows decided: " + Object.keys(s4.dec).length + " of " + LOWS.length + ", " + s4.tries + " goes");
+    LOWS.forEach(function(Lo, i){ if(s4.dec[Lo.id]) L.push("    Low " + (i + 1) + " (" + Lo.p + " hPa): " + (s4.names[Lo.id] ? "named Storm " + s4.names[Lo.id] : "no name")) });
+    if(s4.why) L.push("  Why we name storms: " + (s4.why === "ok" ? "found the reason" : "had a go"));
+    var own = ["A", "B", "C", "D", "E"].map(function(k){ return (s4.own[k] || "").trim() }).filter(function(x){ return x });
+    if(own.length) L.push("  Their own storm names: " + own.join(", "));
+    L.push("");
+  }
+  var s5 = st.s5;
+  if(tried(5)){
+    L.push("DESK 5: Ready the town [" + MILESTONE_STAGES[5] + "]");
+    L.push("  Storm runs: " + s5.runs.length);
+    s5.runs.forEach(function(r, i){ L.push("    Run " + (i + 1) + ": chose " + (r.picks.length ? r.picks.map(function(k){ return byId(PREPS, k).t }).join("; ") : "nothing") + ". Result: " + r.homes + " homes flooded, " + r.cars + " cars lost, power off " + r.power + "."); });
+    var lk = Object.keys(s5.links);
+    L.push("  Effects linked to causes: " + lk.length + " of " + LINKS.length + ", " + s5.linkTries + " goes");
+    LINKS.forEach(function(x){ if(s5.links[x.id]) L.push("    - " + x.t + " <- " + byId(CAUSES, s5.links[x.id]).n) });
+    L.push("");
+  }
+  var s6 = st.s6;
+  if(tried(6)){
+    L.push("DESK 6: World desk [" + MILESTONE_STAGES[6] + "]");
+    L.push("  Tropical storm engine: " + s6.chain.t + " of 5 dominoes" + (s6.chain.t >= 5 ? " (complete)" : ""));
+    L.push("  UK winter storm engine: " + s6.chain.u + " of 5 dominoes" + (s6.chain.u >= 5 ? " (complete)" : ""));
+    var pk = PASS.filter(function(p){ return s6.pass[p.id] });
+    L.push("  Storm passport stamps: " + pk.filter(function(p){ return s6.pass[p.id].ok }).length + " of " + PASS.length);
+    pk.forEach(function(p){ var r = s6.pass[p.id], opts = p.id === "exh" ? POPT_EXH : POPT; L.push("    - " + p.n + ", " + p.m + ": " + (r.ok ? opts[p.a] : "not yet") + (r.first === p.a ? " (first go)" : " (after a hint)")) });
+    if(s6.expl) L.push("  Why the UK gets winter storms, not hurricanes: " + (s6.expl === "ok" ? "picked the full explanation" : "had a go"));
+    L.push("");
+  }
+  var s7 = st.s7;
+  if(tried(7)){
+    var St = byId(STORIES, s7.story);
+    L.push("DESK 7: News desk [" + MILESTONE_STAGES[7] + "]");
+    L.push("  Story: " + (St ? St.n : "their own story"));
+    [["h", "Headline"], ["c", "Cause"], ["e", "Effects"], ["a", "Advice"]].forEach(function(p){ if(s7[p[0]].trim()){ L.push("  " + p[1] + ":"); s7[p[0]].trim().split(/\n+/).forEach(function(line){ L.push("    " + line) }) } });
+    var fw = foundWords(); if(fw.length) L.push("  Geography words used: " + fw.join(", "));
+    L.push("");
+  }
+  return L.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Warning Room", filename:"warning-room", getText:summary });
+
+/* ---------- start again ---------- */
+el("resetBtn").onclick = function(){
+  if(el("resetBtn").getAttribute("data-sure") !== "1"){ el("resetBtn").setAttribute("data-sure", "1"); el("resetBtn").textContent = "Yes, clear my shift"; el("resetMsg").textContent = "Tap again to clear everything on this page."; return }
+  st = fresh(); save(); el("resetBtn").removeAttribute("data-sure"); el("resetBtn").textContent = "Start again"; el("resetMsg").textContent = "Cleared. Fresh shift.";
+  el("stageHost").innerHTML = ""; current = 0; curScen = null; pickL = pickI = null; naming = false; simEv = null; passSel = null; drawMap();
+};
+
+drawWho(); drawMap();
+window.__wr = { st:function(){ return st }, open:openStage, summary:summary, pressureAt:pressureAt, gradAt:gradAt, PLACES:PLACES, LOWC:LOWC, HIGHC:HIGHC, runStorm:runStorm, nextName:nextName, GRID:GRID, SCEN:SCEN };
+})();
+</script>
+
+</body>
+</html>

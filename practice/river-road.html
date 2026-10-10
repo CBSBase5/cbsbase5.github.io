@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>River Road - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* River Road only. Shell, cards and buttons come from style.css */
+.rr{max-width:1000px;margin:0 auto}
+.intro{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.intro svg{width:160px;height:auto}
+@media (max-width:620px){.intro{grid-template-columns:1fr}.intro svg{display:none}}
+.intro p{margin:0 0 10px}
+.intro p:last-child{margin:0}
+
+/* who picker */
+.whobox{margin:0 0 22px}
+.whorow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.who{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;letter-spacing:.08em;
+  background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r-pill);padding:8px 16px;cursor:pointer;
+  box-shadow:2px 3px 0 rgba(10,47,56,.2);transition:transform .12s}
+.who:hover{transform:translateY(-2px) rotate(-1deg)}
+.who[aria-pressed="true"]{background:var(--teal);color:var(--paper);box-shadow:3px 4px 0 var(--ink)}
+.who.quiet{font-size:.8rem;border-style:dashed}
+.mymiles{margin:14px 0 0;display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mymiles.on{display:grid}
+.mile{background:var(--paper);border:2px solid var(--ink);border-radius:16px 12px 18px 10px;padding:12px 14px;font-size:.95rem}
+.mile b{display:block;font-family:var(--display);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+
+/* stage tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 10px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{position:relative;text-align:left;cursor:pointer;border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 12px 34px;
+  color:var(--ink);box-shadow:var(--lift);transition:transform .16s cubic-bezier(.2,1.2,.4,1),box-shadow .16s;font-family:var(--body);font-size:.85rem;line-height:1.35}
+.tile:nth-child(odd){transform:rotate(-.7deg)}
+.tile:nth-child(even){transform:rotate(.6deg)}
+.tile:hover{transform:translateY(-4px) rotate(0);box-shadow:var(--lift-hi)}
+.tile[aria-current="true"]{outline:4px dashed var(--ink);outline-offset:4px}
+.tile svg{display:block;width:100%;height:60px;margin:0 0 6px}
+.tile .tn{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.tile .tt{display:block;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 850;font-size:1.1rem;line-height:1.05;margin:2px 0 4px}
+.tile.c1{background:linear-gradient(150deg,#22b8d6,var(--teal));color:var(--paper)}
+.tile.c2{background:linear-gradient(150deg,#ffd76e,var(--yellow-deep))}
+.tile.c3{background:linear-gradient(150deg,#7fd3a0,#2e8b5c)}
+.tile.c4{background:linear-gradient(150deg,#9465a8,#5c3269);color:var(--paper)}
+.tile.c5{background:linear-gradient(150deg,#f68b3e,var(--orange-deep))}
+.tile.c6{background:linear-gradient(150deg,#204e5a,var(--ink));color:var(--paper)}
+.badge{position:absolute;top:-12px;right:-6px;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;
+  font-family:var(--display);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;transform:rotate(4deg);display:none;
+  font-variation-settings:"wght" 800}
+.tile.best .badge{display:block}
+.tick{position:absolute;bottom:8px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:none;align-items:center;justify-content:center}
+.tile.tried .tick{display:flex}
+.trybar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 26px;font-size:.9rem;color:var(--body-tint)}
+.trydots{display:flex;gap:6px}
+.trydots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);background:transparent;display:block}
+.trydots i.on{background:var(--teal)}
+
+/* stage shell */
+.stage{background:var(--white);border:3px solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);margin:0 0 26px;overflow:hidden}
+.stage[hidden]{display:none}
+.shead{padding:16px 20px;border-bottom:3px solid var(--ink);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.shead h2{font-variation-settings:"wdth" 120,"wght" 850;font-size:clamp(1.5rem,4.4vw,2.2rem);line-height:1}
+.shead .sk{font-family:var(--display);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-variation-settings:"wght" 800;display:block;opacity:.85;margin-bottom:3px}
+.shead p{margin:4px 0 0;font-size:.95rem;max-width:60ch}
+.shead .stxt{flex:1;min-width:200px}
+.shead svg{flex:none;width:86px;height:60px}
+@media (max-width:520px){.shead svg{display:none}}
+.sbody{padding:20px}
+.sfoot{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 20px;align-items:center}
+.sfoot .spacer{margin-left:auto}
+.mtag{display:inline-block;font-size:.72rem;font-family:var(--display);letter-spacing:.08em;font-variation-settings:"wght" 700;background:rgba(10,47,56,.08);border-radius:999px;padding:3px 9px;margin:6px 4px 0 0}
+
+/* learn a bit */
+.learn{border:3px dashed var(--teal);border-radius:var(--r-alt);background:#eef8fb;padding:14px 16px;margin:0 0 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;align-items:center}
+.learn h3{font-variation-settings:"wdth" 114,"wght" 800;font-size:1.15rem;margin:0 0 6px}
+.learn p{margin:0 0 6px;font-size:.95rem}
+.learn svg{width:100%;height:auto;display:block}
+.learn .lk{font-family:var(--display);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-variation-settings:"wght" 800}
+@media (max-width:680px){.learn{grid-template-columns:1fr}}
+.tryhead{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:20px 0 8px;display:flex;align-items:center;gap:10px}
+.tryhead::before{content:"";width:16px;height:10px;border-radius:50%;background:var(--bright);border:2px solid var(--ink)}
+.small{font-size:.88rem;color:var(--body-tint);margin:0 0 10px}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0;align-items:center}
+
+/* era controls and scene */
+.erabar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 10px}
+.erabig{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:clamp(2.2rem,8vw,3.4rem);line-height:.9;color:var(--teal);text-shadow:3px 3px 0 rgba(239,119,36,.25);min-width:3.4ch}
+.erasub{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 750;font-size:1rem}
+.erabtns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.erab{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.85rem;letter-spacing:.06em;border:3px solid var(--ink);border-radius:999px;padding:7px 12px;background:var(--white);color:var(--ink);cursor:pointer}
+.erab[aria-pressed="true"]{background:var(--teal);color:var(--paper)}
+.erab.future{border-style:dashed}
+input[type=range]{accent-color:var(--teal);width:100%;height:28px;cursor:pointer}
+.slideticks{display:flex;justify-content:space-between;font-size:.72rem;font-family:var(--display);letter-spacing:.06em;color:var(--body-tint);padding:0 4px;margin:0 0 8px}
+.scenewrap{border:4px solid var(--ink);border-radius:20px;overflow-x:auto;overflow-y:hidden;background:#cfeaf5;position:relative;-webkit-overflow-scrolling:touch;box-shadow:5px 6px 0 rgba(10,47,56,.18)}
+.scenewrap svg{display:block;width:100%;min-width:760px;height:auto;transition:filter .5s}
+.scenewrap[data-era="0"] svg{filter:sepia(.7) saturate(.8) contrast(.95)}
+.scenewrap[data-era="1"] svg{filter:sepia(.45) saturate(.85)}
+.scenewrap[data-era="2"] svg{filter:saturate(.55) contrast(1.02)}
+.scenewrap[data-era="4"]{border-style:dashed;border-color:var(--teal)}
+.stamp{position:absolute;top:10px;left:12px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--white);border:2px solid var(--ink);border-radius:8px;padding:3px 10px;transform:rotate(-3deg);pointer-events:none}
+.swipehint{display:none;font-size:.8rem;color:var(--body-tint);margin:4px 0 0}
+@media (max-width:800px){.swipehint{display:block}}
+.ft{cursor:pointer;outline:none}
+.ft:hover,.ft:focus{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 6px #ef7724)}
+.ft.pulse{animation:glow 1.1s ease-in-out 4}
+@keyframes glow{0%,100%{filter:none}50%{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px #ef7724)}}
+.flow{stroke-dasharray:14 22;animation:flow 3.5s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-72}}
+.wheel{transform-box:fill-box;transform-origin:center;animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.smoke{animation:puff 4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.smoke.s2{animation-delay:1.3s}.smoke.s3{animation-delay:2.6s}
+@keyframes puff{0%{opacity:.8;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(16px,-40px) scale(1.7)}}
+.cloud{animation:drift 50s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(160px)}}
+.leap{animation:leap 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes leap{0%,60%,100%{transform:translate(0,10px) rotate(20deg);opacity:0}70%{opacity:1}80%{transform:translate(8px,-10px) rotate(-10deg);opacity:1}92%{transform:translate(16px,6px) rotate(-30deg);opacity:1}}
+.bob{animation:bob 2.6s ease-in-out infinite;transform-box:fill-box}
+@keyframes bob{50%{transform:translateY(2px)}}
+.trickle{stroke-dasharray:3 4;animation:flow 1.2s linear infinite}
+
+.foundbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;font-size:.92rem}
+.fdots{display:flex;gap:6px}
+.fdots i{width:22px;height:22px;border-radius:50%;border:3px solid var(--ink);display:block;background:var(--white)}
+.fdots i.on{background:var(--orange)}
+.infocard{border:3px solid var(--ink);border-radius:var(--r-alt);padding:14px 16px;background:var(--paper);min-height:100px;box-shadow:3px 4px 0 rgba(10,47,56,.15);margin:12px 0 0}
+.infocard h3{font-variation-settings:"wdth" 118,"wght" 850;font-size:1.3rem;margin:0 0 4px}
+.infocard p{margin:4px 0;font-size:.97rem}
+.kind{display:inline-block;font-family:var(--display);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:3px 10px;border:2px solid var(--ink);font-variation-settings:"wght" 800;margin-bottom:6px}
+.kind.h{background:var(--orange)}
+.kind.n{background:#7fd3a0}
+.kind.f{background:var(--yellow)}
+.fact{background:var(--white);border-left:6px solid var(--bright);padding:6px 10px;border-radius:0 10px 10px 0;font-size:.92rem;margin-top:8px}
+.qopts{display:grid;gap:6px;margin:8px 0 0}
+.qopt{text-align:left;font-family:var(--body);font-size:.93rem;border:2px solid var(--ink);border-radius:12px 9px 13px 8px;padding:8px 12px;background:var(--white);color:var(--ink);cursor:pointer;line-height:1.3}
+.qopt:hover{background:#eef8fb}
+.qopt.yes{background:#c9f0d6;border-color:#2e8b5c}
+.qopt.hmm{background:#ffe6cf}
+.fbline{min-height:1.4em;margin:12px 0 0;padding:10px 14px;border-radius:14px;font-size:.95rem;background:rgba(10,47,56,.05)}
+.fbline:empty{display:none}
+.fbline.good{background:#d8f3e2}
+.fbline.hmm{background:#ffe6cf}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* written answers */
+textarea.note,input.note{font-family:var(--body);font-size:1rem;width:100%;min-height:84px;border:3px solid var(--ink);border-radius:14px 12px 16px 10px;padding:11px 14px;background:var(--white);color:var(--ink);line-height:1.5}
+input.note{min-height:0}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.starter{font-family:var(--body);font-size:.84rem;border:2px dashed var(--teal);background:var(--white);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.starter:hover{background:#e3f6fa}
+.lab{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.82rem;letter-spacing:.05em;margin:14px 0 4px}
+.writebox{background:rgba(0,166,201,.1);border-radius:18px;padding:14px 16px;margin:18px 0 0}
+
+/* sorter: four jars */
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:50px;padding:10px;border:3px dashed var(--line);border-radius:16px;margin:0 0 12px;background:rgba(255,255,255,.6)}
+.tray:empty::after{content:"All sorted. Lovely work.";font-size:.9rem;color:var(--body-tint);padding:6px}
+.scard{font-family:var(--body);font-size:.9rem;line-height:1.3;text-align:left;border:3px solid var(--ink);border-radius:12px 9px 14px 8px;padding:8px 11px;background:var(--white);color:var(--ink);cursor:grab;max-width:250px;box-shadow:2px 3px 0 rgba(10,47,56,.2);display:flex;gap:8px;align-items:center}
+.scard svg{flex:none;width:30px;height:30px}
+.scard[aria-pressed="true"]{background:var(--yellow);transform:rotate(-1.5deg) scale(1.03);box-shadow:4px 5px 0 var(--ink)}
+.jars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.jars{grid-template-columns:1fr 1fr}}
+.jar{position:relative;border:3px solid var(--ink);border-radius:14px 14px 26px 26px;padding:44px 8px 10px;min-height:150px;cursor:pointer;text-align:left;font-family:var(--body);color:var(--ink);display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.jar::before{content:"";position:absolute;left:-3px;right:-3px;top:-3px;height:14px;background:var(--ink);border-radius:12px 12px 0 0}
+.jar .jt{position:absolute;top:16px;left:10px;right:8px;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:.95rem;display:flex;gap:6px;align-items:center}
+.jar.good{background:linear-gradient(#ffffff 0,#d6f3e1 100%)}
+.jar.bad{background:linear-gradient(#ffffff 0,#fbd9c8 100%)}
+.jar.both{background:linear-gradient(#ffffff 0,#ffeab3 100%)}
+.jar.dep{background:linear-gradient(#ffffff 0,#e3d6ec 100%)}
+.jar.ready{outline:4px dashed var(--orange);outline-offset:2px}
+.jar.over{outline:4px solid var(--orange)}
+.placed{font-size:.8rem;line-height:1.25;background:rgba(255,253,248,.92);border:2px solid var(--ink);border-radius:9px;padding:4px 7px}
+.why{font-size:.88rem;margin:6px 0 0}
+.undo{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.pick{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.82rem;letter-spacing:.04em;border:3px solid var(--ink);border-radius:999px;padding:7px 13px;background:var(--white);color:var(--ink);cursor:pointer;text-align:left}
+.pick[aria-pressed="true"]{background:var(--teal);color:var(--paper);box-shadow:3px 3px 0 var(--ink)}
+
+/* river lab */
+.labgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.labgrid{grid-template-columns:1fr}}
+.tank{border:4px solid var(--ink);border-radius:20px;overflow:hidden;background:#cfeaf5}
+.tank svg{display:block;width:100%;height:auto}
+.crit{transition:opacity .6s,transform .6s}
+.crit.off{opacity:0;transform:translateY(8px)}
+.toggles{display:grid;gap:8px}
+.tog{display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--body);font-size:.92rem;border:3px solid var(--ink);border-radius:14px;padding:8px 10px;background:var(--white);color:var(--ink);cursor:pointer;line-height:1.25}
+.tog svg{flex:none;width:34px;height:34px}
+.tog .sw{flex:none;margin-left:auto;width:44px;height:24px;border-radius:999px;border:2px solid var(--ink);background:#e8e2d6;position:relative}
+.tog .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--white);border:2px solid var(--ink);transition:left .2s}
+.tog[aria-pressed="true"] .sw::after{left:20px}
+.tog.bad[aria-pressed="true"]{background:#fde3d6}
+.tog.bad[aria-pressed="true"] .sw{background:var(--orange)}
+.tog.good[aria-pressed="true"]{background:#d6f3e1}
+.tog.good[aria-pressed="true"] .sw{background:#2e8b5c}
+.tog .tg{display:block;font-family:var(--display);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;opacity:.75;font-variation-settings:"wght" 800}
+.health{border:3px solid var(--ink);border-radius:16px;padding:10px 12px;background:var(--paper);margin:0 0 10px}
+.hbar{height:18px;border-radius:999px;border:2px solid var(--ink);background:#eee6d8;overflow:hidden;margin:6px 0 4px}
+.hbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a6a3a,#c9b45a,#3fb27f,#1f9fd0);background-size:400px 100%;transition:width .5s}
+.hword{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.15rem}
+.lives{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.life{font-size:.8rem;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;background:var(--white)}
+.life.new{background:var(--yellow)}
+.goals{display:grid;gap:8px;margin:10px 0 0}
+.goal{display:flex;gap:10px;align-items:center;border:2px dashed var(--ink);border-radius:14px;padding:8px 12px;font-size:.92rem;background:var(--white)}
+.goal i{flex:none;width:24px;height:24px;border-radius:50%;border:3px solid var(--ink);background:var(--white);display:flex;align-items:center;justify-content:center}
+.goal.done{border-style:solid;background:#d6f3e1}
+.goal.done i{background:#2e8b5c}
+.qblock{border:3px solid var(--ink);border-radius:var(--r-alt);padding:12px 14px;margin:12px 0 0;background:var(--paper)}
+.qblock h4{font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;margin:0 0 4px}
+
+/* floodplain */
+.fpgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:0 0 12px}
+@media (max-width:620px){.fpgrid{grid-template-columns:1fr}}
+.chcard{display:flex;gap:10px;align-items:center;text-align:left;cursor:pointer;border:3px solid var(--ink);border-radius:var(--r-alt);padding:10px 12px;background:var(--white);color:var(--ink);font-family:var(--body);font-size:.88rem;line-height:1.3;width:100%}
+.chcard svg{flex:none;width:64px;height:48px}
+.chcard b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:1rem}
+.chcard[aria-pressed="true"]{background:var(--yellow);box-shadow:4px 5px 0 var(--ink)}
+.chcol{display:grid;gap:8px;align-content:start}
+.valley{border:4px solid var(--ink);border-radius:20px;overflow:hidden;background:#d4eef8;margin:12px 0 0}
+.valley svg{display:block;width:100%;height:auto}
+#fpWater{transition:transform 3s cubic-bezier(.3,.1,.3,1)}
+.rain line{stroke:#2f80bf;stroke-width:2;stroke-linecap:round;animation:rain .6s linear infinite}
+@keyframes rain{from{transform:translate(0,-30px)}to{transform:translate(-6px,30px)}}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 0}
+.rcell{border:3px solid var(--ink);border-radius:16px;padding:10px 12px;background:var(--white);font-size:.9rem}
+.rcell b{display:block;font-family:var(--display);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.rcell span{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.15rem}
+.rcell.ok{background:#d6f3e1}.rcell.warn{background:#ffe6cf}
+.runs{font-size:.88rem;margin:10px 0 0;padding-left:20px}
+
+/* walk tally */
+.safety{display:flex;gap:12px;align-items:center;background:#e6f6fb;border:3px solid var(--ink);border-radius:var(--r-alt);padding:10px 14px;margin:0 0 14px;font-size:.93rem}
+.safety svg{flex:none;width:52px;height:52px}
+.gtabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.tallies{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.tcell{border:3px solid var(--ink);border-radius:16px;background:var(--white);padding:8px;text-align:center}
+.tcell svg{width:40px;height:34px;display:block;margin:0 auto}
+.tcell .tl{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.8rem;display:block;margin:2px 0 4px;line-height:1.15}
+.tcount{display:flex;align-items:center;justify-content:center;gap:8px}
+.tcount b{font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.5rem;min-width:2ch}
+.tb{width:40px;height:40px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-family:var(--display);font-size:1.2rem;font-weight:900;cursor:pointer;line-height:1;color:var(--ink)}
+.tb.minus{background:var(--white);width:30px;height:30px;font-size:1rem}
+.tcell.has{background:#fff6dc}
+.chartbox{border:3px solid var(--ink);border-radius:var(--r-alt);background:var(--white);padding:12px 14px;margin:14px 0 0}
+.chartbox h4{font-variation-settings:"wdth" 114,"wght" 850;font-size:1.05rem;margin:0 0 2px}
+.chartbox svg{display:block;width:100%;height:auto}
+.chartbox .bar:hover rect.b{opacity:.8}
+.sample{font-size:.8rem;background:var(--yellow);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;display:inline-block;margin:6px 0 0}
+#paperSheet{display:none}
+
+/* fix the river */
+.budget{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--ink);color:var(--paper);border-radius:var(--r-alt);padding:12px 16px;margin:0 0 12px}
+.budget .big{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.2rem;color:var(--yellow);line-height:1}
+.coins{display:flex;flex-wrap:wrap;gap:4px;flex:1;min-width:160px}
+.coins i{width:16px;height:16px;border-radius:50%;border:2px solid var(--yellow);display:block}
+.coins i.used{background:var(--yellow)}
+.fixes{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.fix{position:relative;text-align:left;cursor:pointer;border:3px solid var(--ink);border-radius:var(--r-alt);padding:10px;background:var(--white);color:var(--ink);font-family:var(--body);font-size:.84rem;line-height:1.3}
+.fix svg{display:block;width:100%;height:54px;margin:0 0 6px}
+.fix b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;font-size:.98rem;margin-bottom:2px}
+.fix .cost{position:absolute;top:-10px;right:-6px;background:var(--yellow);border:2px solid var(--ink);border-radius:999px;font-family:var(--display);font-variation-settings:"wght" 900;font-size:.75rem;padding:2px 9px;transform:rotate(5deg)}
+.fix[aria-pressed="true"]{background:#d6f3e1;box-shadow:4px 5px 0 var(--ink);transform:rotate(-.8deg)}
+.meters{display:grid;gap:8px;margin:14px 0 0}
+.mrow{display:grid;grid-template-columns:130px 1fr 52px;gap:10px;align-items:center;font-size:.88rem}
+@media (max-width:480px){.mrow{grid-template-columns:96px 1fr 44px;font-size:.8rem}}
+.mrow b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+.mtrack{position:relative;height:20px;border:2px solid var(--ink);border-radius:999px;background:#eee6d8;overflow:hidden}
+.mtrack span{position:absolute;left:0;top:0;bottom:0;background:var(--teal);transition:width .4s}
+.mtrack em{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--orange)}
+.mkey{font-size:.8rem;color:var(--body-tint);display:flex;gap:14px;flex-wrap:wrap;margin:4px 0 0}
+.mkey i{display:inline-block;width:14px;height:10px;vertical-align:middle;margin-right:4px;border:1px solid var(--ink)}
+.comment{background:rgba(0,166,201,.12);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:.93rem}
+#s6scene{margin:14px 0 0}
+
+.restart{background:none;border:0;font-family:var(--body);font-size:.85rem;text-decoration:underline;color:var(--body-tint);cursor:pointer;padding:6px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(240%);visibility:hidden;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:.92rem;z-index:50;transition:transform .3s;max-width:90vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0);visibility:visible}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){.flow,.trickle{stroke-dasharray:none}#fpWater{transition:none}.crit{transition:none}}
+@media print{
+  body.print-sheet > *{display:none !important}
+  body.print-sheet #paperSheet{display:block !important;font-family:Arial,sans-serif;color:#000}
+  #paperSheet table{border-collapse:collapse;width:100%;margin:0 0 18px}
+  #paperSheet td,#paperSheet th{border:1px solid #000;padding:8px;text-align:left;font-size:14px}
+  #paperSheet td.box{width:55%}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <g id="rrTree"><rect x="-2" y="0" width="4" height="10" fill="#6b4a2e"/><circle cx="0" cy="-4" r="9" fill="#3f8a4a"/><circle cx="-5" cy="0" r="6" fill="#357a40"/></g>
+  <g id="rrTreeS"><rect x="-1.5" y="0" width="3" height="7" fill="#6b4a2e"/><circle cx="0" cy="-3" r="6" fill="#4f9a52"/></g>
+  <g id="rrHouse"><rect x="0" y="0" width="18" height="14" fill="#f2ebdc" stroke="#6b5a48" stroke-width="1"/><path d="M-2 1 L9 -8 L20 1Z" fill="#9a4f3c"/><rect x="3" y="4" width="4" height="4" fill="#7fc6e6"/><rect x="11" y="4" width="4" height="4" fill="#7fc6e6"/><rect x="7" y="9" width="4" height="5" fill="#5a4a3a"/></g>
+  <g id="rrTer"><rect x="0" y="0" width="12" height="12" fill="#b9573a" stroke="#6b3a2a" stroke-width=".8"/><rect x="3" y="3" width="3" height="3" fill="#ffe7a8"/><rect x="7" y="7" width="3" height="5" fill="#3a2a2a"/></g>
+  <g id="rrReed"><path d="M0 0 L-3 -14 M3 0 L4 -16 M-4 0 L-8 -11 M6 0 L9 -12" stroke="#5f8a3a" stroke-width="1.8"/><rect x="3" y="-21" width="2.6" height="7" rx="1.2" fill="#7a5638"/><rect x="-4" y="-19" width="2.6" height="6" rx="1.2" fill="#7a5638"/></g>
+  <g id="rrCow"><ellipse cx="0" cy="0" rx="8" ry="4.5" fill="#fff"/><circle cx="-2" cy="-1" r="2.2" fill="#222"/><circle cx="8" cy="-2" r="2.8" fill="#fff"/><rect x="-6" y="3" width="1.8" height="5" fill="#222"/><rect x="3" y="3" width="1.8" height="5" fill="#222"/></g>
+  <g id="rrCar"><rect x="-8" y="-4" width="16" height="7" rx="2"/><rect x="-4" y="-8" width="8" height="5" rx="1.5" fill="#cfeaf5"/><circle cx="-4" cy="3.5" r="2" fill="#222"/><circle cx="4" cy="3.5" r="2" fill="#222"/></g>
+</defs></svg>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+      <a href="/baselines/">Baselines</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>RIVER <span class="accent">ROAD</span></h1>
+    <div class="line">
+      <span class="chip">Physical world</span>
+      <p>One river, 200 years of people. Weirs, drains, houses, pipes and plastic. What did we do to it, and what could we do next?</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap rr">
+
+  <div class="panel panel-teal intro">
+    <div>
+      <p><b>Meet the River Fennick.</b> A made up river in an English valley. Follow it from quiet farmland in the 1800s, through mills and factories, new houses and a road, to today. Then you get to design its future.</p>
+      <p>Six stages, any order. Skip anything that is not for you today. One of them takes you outside for a real walk round school.</p>
+      <p>It saves as you go, and nothing reaches Jay unless you send it.</p>
+    </div>
+    <svg viewBox="0 0 160 120" aria-hidden="true">
+      <rect x="0" y="0" width="160" height="120" rx="16" fill="#cfeaf5"/>
+      <circle cx="130" cy="24" r="12" fill="#ffc247"/>
+      <path d="M0 58 Q40 40 80 54 T160 48 V120 H0Z" fill="#92c477"/>
+      <path d="M-4 70 C30 60 50 100 80 92 S120 62 164 80" stroke="#3b9bd6" stroke-width="13" fill="none"/>
+      <path d="M-4 70 C30 60 50 100 80 92 S120 62 164 80" stroke="#fff" stroke-width="2" stroke-dasharray="6 9" fill="none" opacity=".7"/>
+      <rect x="28" y="38" width="16" height="14" fill="#b9573a"/><path d="M26 40 L36 30 L46 40Z" fill="#56606a"/>
+      <circle cx="44" cy="58" r="8" fill="none" stroke="#6b4a2e" stroke-width="2.5"/>
+      <rect x="104" y="30" width="22" height="22" fill="#8a8f93"/><rect x="118" y="12" width="5" height="20" fill="#6d757a"/>
+      <circle cx="122" cy="8" r="4" fill="#d9dde0"/>
+      <path d="M60 104 l8 -6 l8 6 l8 -6 l8 6" stroke="#0a2f38" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="card whobox" style="transform:rotate(-.3deg)">
+    <span class="kicker">Who is this? (only if you want)</span>
+    <div class="whorow" id="whoRow" role="group" aria-label="Pick your initials"></div>
+    <div class="mymiles" id="myMiles" aria-live="polite"></div>
+  </div>
+
+  <div class="weektheme">
+    <h2>Six stages</h2>
+    <span>Tap one to open it. Any order is fine.</span>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="trybar"><div class="trydots" id="tryDots"></div><span id="tryText">Nothing tried yet. Pick any stage.</span></div>
+
+  <!-- ================= STAGE 1 ================= -->
+  <section class="stage" id="s1" hidden aria-labelledby="h-s1">
+    <div class="shead fill-bright">
+      <div class="stxt"><span class="sk">Stage 1</span><h2 id="h-s1">Down the years</h2>
+        <p>Slide the valley through time, like flicking through old pictures. Each time, spot what people changed.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="erabar">
+        <div class="erabig" id="eraBig">1820</div>
+        <div class="erasub" id="eraSub">Farmland</div>
+        <div class="erabtns" id="eraBtns" role="group" aria-label="Jump to a time"></div>
+      </div>
+      <label class="sr" for="eraSlide">Time</label>
+      <input type="range" id="eraSlide" min="0" max="4" step="1" value="0">
+      <div class="slideticks"><span>1820</span><span>1880</span><span>1960</span><span>Today</span><span>Future</span></div>
+
+      <div class="scenewrap" id="sceneWrap" data-era="0">
+        <span class="stamp" id="stamp">1820</span>
+<svg id="scene" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="The Fennick valley. Tap things to find out about them.">
+<defs>
+  <linearGradient id="rrSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86d2ef"/><stop offset=".6" stop-color="#dcf1f6"/><stop offset="1" stop-color="#fff3d6"/></linearGradient>
+</defs>
+
+<rect width="1000" height="560" fill="url(#rrSky)"/>
+<circle cx="880" cy="66" r="32" fill="#ffd35c"/><circle cx="880" cy="66" r="44" fill="#ffd35c" opacity=".25"/>
+<g class="cloud"><path d="M90 70 q10 -22 32 -12 q14 -18 34 -2 q22 -4 22 16 q-2 12 -18 12 h-64 q-20 -2 -6 -14z" fill="#fff" opacity=".9"/></g>
+<g class="cloud" style="animation-duration:70s"><path d="M520 46 q8 -18 26 -10 q12 -14 28 -2 q18 -2 18 14 q-2 10 -14 10 h-52 q-16 -2 -6 -12z" fill="#fff" opacity=".85"/></g>
+<path d="M330 70 q6 -6 12 0 q6 -6 12 0 M368 88 q4 -4 8 0 q4 -4 8 0" stroke="#0a2f38" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+
+<!-- land -->
+<path d="M0 175 Q130 120 270 150 T540 140 T800 125 T1000 150 V300 H0Z" fill="#a8cf92"/>
+<path d="M0 215 C180 200 340 250 520 270 C700 250 840 205 1000 215 V560 H0Z" fill="#92c477"/>
+<path d="M0 318 C150 312 330 290 500 292 C690 292 850 312 1000 330 V470 C820 480 640 472 500 476 C320 480 160 472 0 468Z" fill="#bcdc8f"/>
+<path d="M0 468 C160 472 320 480 500 476 C640 472 820 480 1000 470 V560 H0Z" fill="#a3cf7f"/>
+
+<!-- THE RIVER -->
+<g id="riverStraight" data-river="straight" pointer-events="none">
+  <path d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C450 360 610 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#6d9a4a" stroke-width="36" fill="none"/>
+  <path class="water" d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C450 360 610 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#3b9bd6" stroke-width="26" fill="none"/>
+  <path class="flow" d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C450 360 610 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#fff" stroke-width="2.5" fill="none" opacity=".55"/>
+</g>
+<g id="riverMeander" data-river="meander" pointer-events="none">
+  <path d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C400 356 420 300 470 300 C530 300 520 430 580 440 C640 450 660 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#6d9a4a" stroke-width="36" fill="none"/>
+  <path class="water" d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C400 356 420 300 470 300 C530 300 520 430 580 440 C640 450 660 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#3b9bd6" stroke-width="26" fill="none"/>
+  <path class="flow" d="M-10 360 C70 330 140 420 230 398 C290 384 320 356 360 356 C400 356 420 300 470 300 C530 300 520 430 580 440 C640 450 660 380 700 380 C760 380 800 360 850 375 C920 395 960 420 1010 415" stroke="#fff" stroke-width="2.5" fill="none" opacity=".55"/>
+</g>
+
+<!-- trees that stay -->
+<g><use href="#rrTree" x="880" y="196"/><use href="#rrTree" x="910" y="200"/><use href="#rrTreeS" x="940" y="198"/><use href="#rrTree" x="18" y="200"/></g>
+
+<!-- wild wood, 1820 only -->
+<g class="ft" data-c="wildwood" data-e="0-0" tabindex="0" role="button" aria-label="Wild woodland">
+  <use href="#rrTree" x="160" y="222"/><use href="#rrTree" x="190" y="226"/><use href="#rrTree" x="222" y="232"/><use href="#rrTree" x="256" y="238"/><use href="#rrTreeS" x="290" y="242"/>
+  <use href="#rrTree" x="400" y="250"/><use href="#rrTree" x="436" y="256"/><use href="#rrTree" x="470" y="260"/><use href="#rrTreeS" x="505" y="262"/>
+  <use href="#rrTree" x="820" y="214"/><use href="#rrTree" x="850" y="210"/><use href="#rrTreeS" x="972" y="206"/>
+</g>
+
+<!-- fields and hedges (people, 1820 on) -->
+<g class="ft" data-c="fields" data-e="0-4" tabindex="0" role="button" aria-label="Fields and hedges">
+  <path d="M10 250 C60 244 110 244 150 250 L144 300 C100 300 50 304 8 306Z" fill="#c7d97a"/>
+  <path d="M150 250 C200 256 250 262 300 272 L296 318 C246 312 196 304 144 300Z" fill="#a9cf6e"/>
+  <path d="M10 250 C60 244 110 244 150 250 C200 256 250 262 300 272 M150 250 L144 300 M8 306 C50 304 100 300 144 300 C196 304 246 312 296 318" stroke="#3f7a3a" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="1 5"/>
+  <path d="M10 250 C60 244 110 244 150 250 C200 256 250 262 300 272 M150 250 L144 300 M8 306 C50 304 100 300 144 300 C196 304 246 312 296 318" stroke="#3f7a3a" stroke-width="2" fill="none"/>
+</g>
+
+<!-- field drains, 1880 on -->
+<g class="ft" data-c="drains" data-e="1-4" tabindex="0" role="button" aria-label="Field drains">
+  <path d="M30 262 L70 296 M70 256 L95 296 M110 254 L118 298 M180 262 L170 304 M230 268 L210 310 M268 276 L240 314" stroke="#7a5638" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+  <path d="M20 300 C80 300 130 300 296 316" stroke="#7a5638" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+  <path d="M128 316 L128 362" stroke="#7a5638" stroke-width="2.5" stroke-dasharray="4 3"/>
+  <rect x="121" y="358" width="14" height="8" rx="2" fill="#5b5f63"/>
+  <path d="M128 366 L130 378" stroke="#7fbde0" stroke-width="3" class="trickle"/>
+  <rect x="100" y="250" width="200" height="70" fill="#000" fill-opacity="0"/>
+</g>
+
+<!-- farm -->
+<g class="ft" data-c="farm" data-e="0-4" tabindex="0" role="button" aria-label="The farm">
+  <rect x="54" y="214" width="34" height="24" fill="#d8c8a0" stroke="#6b5a48" stroke-width="1.2"/><path d="M50 216 L71 200 L92 216Z" fill="#7a4b3b"/>
+  <rect x="62" y="222" width="6" height="6" fill="#7fc6e6"/><rect x="74" y="228" width="7" height="10" fill="#5a4a3a"/>
+  <rect x="94" y="222" width="30" height="18" fill="#a0523d" stroke="#6b3a2a" stroke-width="1"/><path d="M92 224 L109 212 L126 224Z" fill="#5c3a2e"/>
+</g>
+
+<!-- terraced houses -->
+<g class="ft" data-c="terraces" data-e="1-4" tabindex="0" role="button" aria-label="Terraced houses">
+  <use href="#rrTer" x="380" y="236"/><use href="#rrTer" x="392" y="237"/><use href="#rrTer" x="404" y="238"/><use href="#rrTer" x="416" y="239"/><use href="#rrTer" x="428" y="240"/><use href="#rrTer" x="440" y="241"/>
+  <use href="#rrTer" x="400" y="256"/><use href="#rrTer" x="412" y="257"/><use href="#rrTer" x="424" y="258"/><use href="#rrTer" x="436" y="259"/><use href="#rrTer" x="448" y="260"/><use href="#rrTer" x="460" y="261"/><use href="#rrTer" x="472" y="262"/>
+  <path d="M378 236 L454 241 M398 256 L486 262" stroke="#5c3a2e" stroke-width="3"/>
+</g>
+
+<!-- factory -->
+<g class="ft" data-c="outfall" data-e="1-2" tabindex="0" role="button" aria-label="Factory and waste pipe">
+  <rect x="592" y="150" width="12" height="62" fill="#7a3f30"/>
+  <circle class="smoke" cx="598" cy="144" r="8" fill="#9aa1a6"/><circle class="smoke s2" cx="598" cy="144" r="8" fill="#9aa1a6"/><circle class="smoke s3" cx="598" cy="144" r="8" fill="#9aa1a6"/>
+  <path d="M520 212 L520 200 L540 188 L540 200 L560 188 L560 200 L580 188 L580 200 L612 200 L612 260 L520 260Z" fill="#8a4a3a" stroke="#4a2a20" stroke-width="1.5"/>
+  <rect x="528" y="218" width="10" height="10" fill="#ffe7a8"/><rect x="546" y="218" width="10" height="10" fill="#ffe7a8"/><rect x="564" y="218" width="10" height="10" fill="#ffe7a8"/><rect x="584" y="218" width="10" height="10" fill="#ffe7a8"/>
+  <path d="M556 260 L556 362" stroke="#5b5f63" stroke-width="6"/>
+  <rect x="549" y="356" width="14" height="9" rx="2" fill="#43474a"/>
+  <path d="M556 365 L560 376" stroke="#8a4a9a" stroke-width="4" class="trickle"/>
+</g>
+<g class="ft" data-c="flats" data-e="3-4" tabindex="0" role="button" aria-label="Old factory, now flats">
+  <path d="M520 212 L520 200 L540 188 L540 200 L560 188 L560 200 L580 188 L580 200 L612 200 L612 260 L520 260Z" fill="#c9a78a" stroke="#6b5a48" stroke-width="1.5"/>
+  <rect x="528" y="218" width="10" height="12" fill="#7fc6e6"/><rect x="546" y="218" width="10" height="12" fill="#7fc6e6"/><rect x="564" y="218" width="10" height="12" fill="#7fc6e6"/><rect x="584" y="218" width="10" height="12" fill="#7fc6e6"/>
+  <rect x="528" y="238" width="10" height="12" fill="#7fc6e6"/><rect x="546" y="238" width="10" height="12" fill="#7fc6e6"/><rect x="564" y="238" width="10" height="12" fill="#7fc6e6"/><rect x="584" y="238" width="10" height="12" fill="#7fc6e6"/>
+  <text x="566" y="276" text-anchor="middle" font-family="Arial" font-size="10" fill="#0a2f38">old factory, now flats</text>
+</g>
+
+<!-- side stream, top part always -->
+<path d="M985 180 C975 205 970 220 965 240" stroke="#3b9bd6" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path data-e="0-1" d="M965 240 C955 275 975 300 948 325 C928 348 915 368 905 390" stroke="#3b9bd6" stroke-width="6" fill="none" stroke-linecap="round"/>
+<g data-e="4-4" data-fix="culvert"><g class="ft" data-c="fx-culvert" tabindex="0" role="button" aria-label="Stream freed from its pipe"><path d="M965 240 C955 275 975 300 948 325 C928 348 915 368 905 390" stroke="#3b9bd6" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M965 240 C955 275 975 300 948 325 C928 348 915 368 905 390" stroke="#000" stroke-opacity="0" stroke-width="24" fill="none"/></g></g>
+<g data-e="4-4" data-fix="leaky"><g class="ft" data-c="fx-leaky" tabindex="0" role="button" aria-label="Leaky wooden dams">
+  <path d="M972 196 L996 192 M970 202 L994 198 M962 226 L984 222 M960 232 L982 228" stroke="#6b4a2e" stroke-width="4" stroke-linecap="round"/></g></g>
+
+<!-- road and bridge, 1960 on -->
+<g class="ft" data-c="road" data-e="2-4" tabindex="0" role="button" aria-label="The road and bridge">
+  <path d="M1004 238 C930 258 840 300 806 340 L800 400 C795 450 782 500 772 564" stroke="#4f5357" stroke-width="22" fill="none"/>
+  <path d="M1004 238 C930 258 840 300 806 340 L800 400 C795 450 782 500 772 564" stroke="#fff" stroke-width="2" stroke-dasharray="10 10" fill="none"/>
+  <rect x="784" y="348" width="34" height="46" fill="#8d8f8c" stroke="#4f5357" stroke-width="2"/>
+  <path d="M784 352 V390 M818 352 V390" stroke="#d8d4cc" stroke-width="4"/>
+  <use href="#rrCar" x="900" y="272" fill="#ef7724"/><use href="#rrCar" x="790" y="470" fill="#007291"/>
+</g>
+
+<!-- housing estate on floodplain -->
+<g class="ft" data-c="estate" data-e="2-4" tabindex="0" role="button" aria-label="Houses on the floodplain">
+  <rect x="676" y="292" width="110" height="64" rx="6" fill="#d9e8c4"/>
+  <use href="#rrHouse" x="682" y="300"/><use href="#rrHouse" x="708" y="300"/><use href="#rrHouse" x="734" y="300"/><use href="#rrHouse" x="760" y="300"/>
+  <use href="#rrHouse" x="690" y="328"/><use href="#rrHouse" x="716" y="328"/><use href="#rrHouse" x="742" y="328"/>
+</g>
+
+<!-- car park, today on -->
+<g class="ft" data-c="carpark" data-e="3-4" tabindex="0" role="button" aria-label="Car park">
+  <rect x="584" y="318" width="86" height="36" rx="3" fill="#6d7276"/>
+  <path d="M600 320 V352 M616 320 V352 M632 320 V352 M648 320 V352" stroke="#fff" stroke-width="1.5"/>
+  <use href="#rrCar" x="592" y="337" fill="#c94a3a"/><use href="#rrCar" x="624" y="337" fill="#ffc247"/><use href="#rrCar" x="658" y="337" fill="#2f6fc0"/>
+</g>
+
+<!-- ploughed field vs meadow, foreground left -->
+<g data-e="0-2">
+  <use href="#rrCow" x="80" y="452"/><use href="#rrCow" x="150" y="470"/><use href="#rrCow" x="230" y="448"/>
+</g>
+<g class="ft" data-c="plough" data-e="3-4" tabindex="0" role="button" aria-label="Field ploughed to the river edge">
+  <path d="M0 414 C80 420 160 432 250 425 C290 420 320 404 340 398 L340 540 L0 540Z" fill="#a9824f"/>
+  <path d="M0 434 C90 440 170 452 340 418 M0 456 C90 462 170 474 340 440 M0 478 C90 484 170 494 340 462 M0 500 C90 506 170 514 340 486 M0 522 C90 528 170 534 340 510" stroke="#7d5a32" stroke-width="3" fill="none"/>
+  <path data-nofix="buffer" d="M190 432 L194 414 M240 428 L246 410" stroke="#8a6a3a" stroke-width="4" class="trickle"/>
+</g>
+<g data-e="4-4" data-fix="buffer"><g class="ft" data-c="fx-buffer" tabindex="0" role="button" aria-label="Grass buffer strip">
+  <path d="M0 412 C80 418 160 430 250 423 C290 418 320 402 340 396 L340 420 C320 424 290 440 250 446 C160 452 80 440 0 436Z" fill="#6fbf5a"/>
+  <path d="M20 428 l2 -6 l2 6 M70 432 l2 -6 l2 6 M120 438 l2 -6 l2 6 M170 442 l2 -6 l2 6 M220 440 l2 -6 l2 6 M280 428 l2 -6 l2 6" stroke="#2e7a3a" stroke-width="1.5" fill="none"/></g></g>
+
+<!-- wetland park, future option -->
+<g data-e="4-4" data-fix="wetland"><g class="ft" data-c="fx-wetland" tabindex="0" role="button" aria-label="Wetland park">
+  <ellipse cx="560" cy="500" rx="50" ry="14" fill="#5fb0dd"/><ellipse cx="650" cy="512" rx="38" ry="11" fill="#5fb0dd"/><ellipse cx="480" cy="514" rx="30" ry="9" fill="#5fb0dd"/>
+  <use href="#rrReed" x="520" y="500"/><use href="#rrReed" x="604" y="506"/><use href="#rrReed" x="680" y="516"/><use href="#rrReed" x="455" y="516"/>
+  <path d="M540 480 q4 -4 8 0 q4 -4 8 0" stroke="#0a2f38" stroke-width="2" fill="none"/></g></g>
+
+<!-- wet meadow, 1820 -->
+<g class="ft" data-c="wetmeadow" data-e="0-0" tabindex="0" role="button" aria-label="Wet meadow">
+  <ellipse cx="560" cy="480" rx="90" ry="16" fill="#8fc7a8" opacity=".8"/><ellipse cx="620" cy="320" rx="60" ry="12" fill="#8fc7a8" opacity=".8"/>
+  <use href="#rrReed" x="520" y="482"/><use href="#rrReed" x="580" y="486"/><use href="#rrReed" x="630" y="478"/><use href="#rrReed" x="600" y="324"/><use href="#rrReed" x="650" y="322"/>
+</g>
+
+<!-- sewage works, 1960 on -->
+<g class="ft" data-c="sewage" data-e="2-4" tabindex="0" role="button" aria-label="Sewage works">
+  <rect x="846" y="436" width="122" height="62" rx="6" fill="#c9cfc6" stroke="#6d757a" stroke-width="1.5"/>
+  <ellipse cx="878" cy="466" rx="22" ry="12" fill="#7d8f80" stroke="#43474a" stroke-width="2"/><ellipse cx="932" cy="466" rx="22" ry="12" fill="#7d8f80" stroke="#43474a" stroke-width="2"/>
+  <rect x="900" y="478" width="18" height="14" fill="#a7a9a6"/>
+</g>
+<g data-e="4-4" data-fix="sewage"><g class="ft" data-c="fx-sewage" tabindex="0" role="button" aria-label="Bigger storm tank">
+  <ellipse cx="905" cy="520" rx="44" ry="14" fill="#6aa08a" stroke="#43474a" stroke-width="2"/><text x="905" y="524" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="#fff">STORM TANK</text></g></g>
+<g class="ft" data-c="overflow" data-e="3-4" data-nofix="sewage" tabindex="0" role="button" aria-label="Storm overflow pipe">
+  <path d="M905 436 L905 412" stroke="#5b5f63" stroke-width="6"/>
+  <rect x="897" y="406" width="16" height="9" rx="2" fill="#43474a"/>
+  <ellipse cx="925" cy="410" rx="26" ry="7" fill="#7a5a32" opacity=".7"/>
+  <path d="M905 406 L908 398" stroke="#7a5a32" stroke-width="4" class="trickle"/>
+</g>
+
+<!-- tap zones on the river -->
+<g class="ft" data-c="meanders" data-e="0-0" tabindex="0" role="button" aria-label="Bends in the river">
+  <path d="M360 356 C400 356 420 300 470 300 C530 300 520 430 580 440 C640 450 660 380 700 380" stroke="#000" stroke-opacity="0" stroke-width="40" fill="none"/>
+</g>
+<g class="ft" data-c="straight" data-e="1-4" data-nofix="meander" tabindex="0" role="button" aria-label="Straightened river">
+  <path d="M360 356 C450 360 610 380 700 380" stroke="#000" stroke-opacity="0" stroke-width="40" fill="none"/>
+  <path d="M380 344 L380 368 M440 348 L440 372 M500 352 L500 376 M620 360 L620 384" stroke="#fff" stroke-width="1.5" opacity=".0"/>
+</g>
+<g data-e="4-4" data-fix="meander"><g class="ft" data-c="fx-meander" tabindex="0" role="button" aria-label="Bends put back">
+  <path d="M360 356 C400 356 420 300 470 300 C530 300 520 430 580 440 C640 450 660 380 700 380" stroke="#000" stroke-opacity="0" stroke-width="40" fill="none"/></g></g>
+
+<!-- concrete banks -->
+<g class="ft" data-c="concrete" data-e="2-4" tabindex="0" role="button" aria-label="Concrete banks">
+  <path d="M690 364 C740 364 770 352 792 352" stroke="#b4b6b2" stroke-width="8" fill="none"/>
+  <path d="M690 396 C740 396 770 386 792 386" stroke="#b4b6b2" stroke-width="8" fill="none"/>
+  <path d="M700 364 v-4 M720 364 v-4 M740 363 v-4 M760 359 v-4 M780 354 v-4" stroke="#7d807c" stroke-width="2"/>
+</g>
+
+<!-- mill and weir -->
+<g class="ft" data-c="weir" data-e="1-4" tabindex="0" role="button" aria-label="Weir and watermill">
+  <rect x="250" y="316" width="52" height="44" fill="#cdb58f" stroke="#6b5a48" stroke-width="1.5"/><path d="M246 318 L276 296 L306 318Z" fill="#5c4a3e"/>
+  <rect x="260" y="326" width="8" height="8" fill="#7fc6e6"/><rect x="282" y="326" width="8" height="8" fill="#7fc6e6"/><rect x="270" y="344" width="10" height="16" fill="#5a4a3a"/>
+  <g class="wheel"><circle cx="312" cy="364" r="15" fill="none" stroke="#6b4a2e" stroke-width="4"/><path d="M297 364 H327 M312 349 V379 M301 353 L323 375 M323 353 L301 375" stroke="#6b4a2e" stroke-width="2.5"/></g>
+  <path d="M332 340 L346 376" stroke="#e2dccd" stroke-width="8" stroke-linecap="round"/>
+  <path d="M342 342 q4 4 0 8 q-4 4 0 8 q4 4 0 8 q-4 4 0 8" stroke="#fff" stroke-width="2.5" fill="none"/>
+</g>
+<g data-e="4-4" data-fix="fishpass"><g class="ft" data-c="fx-fishpass" tabindex="0" role="button" aria-label="Fish pass">
+  <path d="M346 378 h10 v-5 h10 v-5 h10 v-5" stroke="#e2dccd" stroke-width="5" fill="none"/>
+  <path d="M356 376 q6 -6 12 0 q-6 4 -12 0z" fill="#c9cfd4" stroke="#0a2f38" stroke-width="1"/></g></g>
+
+<!-- footbridge, 1820 to 1880 -->
+<g class="ft" data-c="footbridge" data-e="0-1" tabindex="0" role="button" aria-label="Wooden footbridge">
+  <path d="M826 384 Q845 352 866 384" stroke="#8b5a2b" stroke-width="6" fill="none"/>
+  <path d="M828 374 Q845 346 864 374" stroke="#8b5a2b" stroke-width="2" fill="none"/>
+  <path d="M834 371 V380 M845 360 V372 M856 366 V378" stroke="#8b5a2b" stroke-width="2"/>
+</g>
+
+<!-- culvert -->
+<g class="ft" data-c="culvert" data-e="2-4" data-nofix="culvert" tabindex="0" role="button" aria-label="Culvert">
+  <path d="M965 246 C955 280 960 320 905 384" stroke="#000" stroke-opacity="0" stroke-width="20" fill="none"/>
+  <path d="M965 246 C955 280 960 320 905 384" stroke="#5b5f63" stroke-width="2" stroke-dasharray="5 5" fill="none"/>
+  <path d="M956 246 A9 9 0 0 1 974 246 Z" fill="#2a2e30" stroke="#8d8f8c" stroke-width="3"/>
+  <path d="M896 388 A9 9 0 0 1 914 388 Z" fill="#2a2e30" stroke="#8d8f8c" stroke-width="3"/>
+</g>
+
+<!-- river path and bench, today -->
+<g class="ft" data-c="path" data-e="3-4" data-nofix="meander" tabindex="0" role="button" aria-label="River path and benches">
+  <path d="M360 384 C450 388 520 396 572 398" stroke="#e7d7b0" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <rect x="452" y="398" width="22" height="4" fill="#8b5a2b"/><path d="M455 402 v6 M471 402 v6" stroke="#8b5a2b" stroke-width="2"/>
+  <circle cx="520" cy="380" r="4" fill="#ef7724"/><path d="M520 384 v10 M520 394 l-4 7 M520 394 l4 7 M516 388 h8" stroke="#0a2f38" stroke-width="2"/>
+  <path d="M528 392 q4 -3 8 0 l1 4" stroke="#7a5a3a" stroke-width="2.5" fill="none"/>
+</g>
+
+<!-- litter -->
+<g class="ft" data-c="litter" data-e="3-4" data-nofix="litter" tabindex="0" role="button" aria-label="Litter in the river">
+  <g fill="#000" fill-opacity="0"><circle cx="459" cy="361" r="16"/><circle cx="242" cy="394" r="16"/><circle cx="647" cy="370" r="16"/><circle cx="517" cy="360" r="18"/><circle cx="865" cy="380" r="16"/></g>
+  <rect x="452" y="358" width="14" height="6" rx="2" fill="#7fd0e8" stroke="#0a2f38" stroke-width="1" transform="rotate(-15 459 361)"/>
+  <rect x="236" y="392" width="12" height="5" rx="2" fill="#c94a3a" stroke="#0a2f38" stroke-width="1"/>
+  <path d="M640 372 q8 -8 14 0 q-4 6 -14 0z" fill="#f4f4f0" stroke="#0a2f38" stroke-width="1"/>
+  <g transform="translate(506 352) rotate(12)"><path d="M0 0 h22 l-3 12 h-16z" fill="none" stroke="#9aa1a6" stroke-width="2"/><path d="M5 0 v12 M11 0 v12 M17 0 v12" stroke="#9aa1a6" stroke-width="1"/><circle cx="4" cy="16" r="2" fill="#43474a"/></g>
+  <rect x="860" y="378" width="10" height="5" rx="2" fill="#2e8b5c" stroke="#0a2f38" stroke-width="1"/>
+</g>
+<g data-e="4-4" data-fix="litter"><g class="ft" data-c="fx-litter" tabindex="0" role="button" aria-label="Bins and a litter pick">
+  <rect x="420" y="404" width="12" height="16" rx="2" fill="#2e8b5c" stroke="#0a2f38" stroke-width="1.5"/><rect x="418" y="401" width="16" height="4" fill="#0a2f38"/>
+  <rect x="682" y="356" width="12" height="16" rx="2" fill="#2e8b5c" stroke="#0a2f38" stroke-width="1.5"/><rect x="680" y="353" width="16" height="4" fill="#0a2f38"/></g></g>
+
+<!-- reed beds, 1820 natural and future option -->
+<g class="ft" data-c="reedbeds" data-e="0-0" tabindex="0" role="button" aria-label="Reed beds">
+  <use href="#rrReed" x="120" y="372"/><use href="#rrReed" x="134" y="370"/><use href="#rrReed" x="300" y="382"/><use href="#rrReed" x="700" y="364"/><use href="#rrReed" x="716" y="364"/><use href="#rrReed" x="900" y="404"/>
+</g>
+<g data-e="4-4" data-fix="reeds"><g class="ft" data-c="fx-reeds" tabindex="0" role="button" aria-label="Reed beds">
+  <use href="#rrReed" x="116" y="372"/><use href="#rrReed" x="132" y="372"/><use href="#rrReed" x="146" y="374"/><use href="#rrReed" x="196" y="418"/><use href="#rrReed" x="212" y="418"/><use href="#rrReed" x="934" y="420"/><use href="#rrReed" x="948" y="422"/></g></g>
+
+<!-- bankside trees, future option -->
+<g data-e="4-4" data-fix="trees"><g class="ft" data-c="fx-trees" tabindex="0" role="button" aria-label="New trees by the river">
+  <use href="#rrTree" x="40" y="336"/><use href="#rrTree" x="84" y="330"/><use href="#rrTree" x="168" y="424"/><use href="#rrTree" x="262" y="414"/><use href="#rrTree" x="380" y="402"/>
+  <use href="#rrTree" x="604" y="394"/><use href="#rrTree" x="866" y="352"/><use href="#rrTree" x="980" y="396"/><use href="#rrTreeS" x="200" y="236"/><use href="#rrTreeS" x="240" y="244"/><use href="#rrTreeS" x="840" y="214"/></g></g>
+
+<!-- wildlife -->
+<g class="ft" data-c="heron" data-e="0-4" tabindex="0" role="button" aria-label="Grey heron">
+  <path d="M650 382 L648 394 M656 382 L658 394" stroke="#5b5f63" stroke-width="1.6"/>
+  <ellipse cx="653" cy="376" rx="9" ry="6" fill="#b8c0c6"/><path d="M658 372 Q664 360 660 352" stroke="#b8c0c6" stroke-width="3" fill="none"/><circle cx="660" cy="351" r="3" fill="#dfe4e8"/><path d="M662 351 L672 353" stroke="#e8b33a" stroke-width="2"/>
+</g>
+<g class="ft" data-c="ducks" data-e="2-4" tabindex="0" role="button" aria-label="Ducks">
+  <g class="bob"><ellipse cx="420" cy="360" rx="7" ry="4" fill="#7a5a3a"/><circle cx="426" cy="356" r="3" fill="#2e7a3a"/><path d="M428 356 l4 1" stroke="#e8b33a" stroke-width="2"/></g>
+  <g class="bob" style="animation-delay:.7s"><ellipse cx="438" cy="364" rx="6" ry="3.5" fill="#9a7a5a"/><circle cx="443" cy="360" r="2.6" fill="#9a7a5a"/></g>
+</g>
+<g class="ft" data-c="kingfisher" data-wild="kingfisher" data-e="0-0" tabindex="0" role="button" aria-label="Kingfisher">
+  <path d="M196 352 L232 360" stroke="#6b4a2e" stroke-width="3"/>
+  <ellipse cx="214" cy="350" rx="7" ry="5" fill="#1f9fd0"/><ellipse cx="214" cy="353" rx="5" ry="3" fill="#ef7724"/><circle cx="220" cy="346" r="3.5" fill="#1f9fd0"/><path d="M223 346 l7 1" stroke="#222" stroke-width="2"/><path d="M207 351 l-5 3" stroke="#1f9fd0" stroke-width="3"/>
+</g>
+<g class="ft" data-c="otter" data-wild="otter" data-e="0-0" tabindex="0" role="button" aria-label="Otter">
+  <path d="M40 338 C50 330 70 330 80 336 C76 342 52 344 40 338Z" fill="#6b4a2e"/><circle cx="82" cy="334" r="5" fill="#6b4a2e"/><circle cx="84" cy="333" r="1" fill="#000"/><path d="M40 338 Q30 340 24 346" stroke="#6b4a2e" stroke-width="4" fill="none"/>
+</g>
+<g class="ft" data-c="trout" data-wild="trout" data-e="0-0" tabindex="0" role="button" aria-label="Trout">
+  <g class="leap"><path d="M170 392 q10 -8 22 0 q-10 7 -22 0z M170 392 l-6 -5 v10z" fill="#8a6a3a" stroke="#0a2f38" stroke-width="1"/><circle cx="186" cy="391" r="1.2" fill="#000"/><circle cx="178" cy="390" r="1" fill="#4a2a1a"/></g>
+  <rect x="150" y="370" width="50" height="34" fill="#000" fill-opacity="0"/>
+</g>
+
+<!-- empty future message -->
+<g class="emptyfuture" data-e="4-4">
+  <rect x="300" y="110" width="400" height="76" rx="16" fill="#fffdf8" stroke="#007291" stroke-width="3" stroke-dasharray="8 5"/>
+  <text x="500" y="142" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="20" fill="#0a2f38">This is today, for now.</text>
+  <text x="500" y="168" text-anchor="middle" font-family="Arial" font-size="15" fill="#0a2f38">Design the future in stage 6 and it shows up here.</text>
+</g>
+</svg>
+      </div>
+      <p class="swipehint">Swipe the picture sideways to see all of the valley.</p>
+
+      <div class="foundbar"><span class="fdots" id="fDots"></span><span id="fText"></span></div>
+      <div class="toolrow">
+        <button class="btn btn-quiet sm" id="hintBtn" type="button">Show me one</button>
+        <button class="btn btn-quiet sm" id="flipBtn" type="button" aria-pressed="false">Flip back and forth</button>
+        <button class="btn sm" id="toS6" type="button" style="display:none">Design the future</button>
+      </div>
+      <div class="infocard" id="info" aria-live="polite">
+        <h3>Tap anything in the picture</h3>
+        <p>Try the river, the buildings, the fields, even the animals. Things people made or changed glow orange when you point at them.</p>
+      </div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s1">If you fancy: describe how one part of the valley changed, and why</label>
+        <p class="small">Pick anywhere: the river bends, the little stream, the fields by the water. Slide back and forth to check.</p>
+        <div class="starters" data-for="t-s1"><button class="starter">In 1820 the river </button><button class="starter">By 1880 people had </button><button class="starter">In 1960 </button><button class="starter">Today </button><button class="starter">People did this because </button><button class="starter">It helped </button></div>
+        <textarea class="note" id="t-s1" data-save="s1text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s1"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s2">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 2 ================= -->
+  <section class="stage" id="s2" hidden aria-labelledby="h-s2">
+    <div class="shead fill-yellow">
+      <div class="stxt"><span class="sk">Stage 2</span><h2 id="h-s2">Four jars</h2>
+        <p>Twelve things people did to the river. Is each one good, bad, both, or does it depend?</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>Both and depends are not the same</h3>
+          <p><b>Both</b>: it always brings something good and something bad at the same time.</p>
+          <p><b>Depends</b>: it could be fine or harmful, depending on how much, when, or how people do it.</p>
+        </div>
+        <svg viewBox="0 0 360 140" role="img" aria-label="Four jars labelled good, bad, both and depends">
+          <g font-family="Archivo,Arial" font-weight="800" font-size="13" fill="#0a2f38" text-anchor="middle">
+            <g transform="translate(10 10)"><rect x="0" y="10" width="74" height="100" rx="14" fill="#d6f3e1" stroke="#0a2f38" stroke-width="3"/><rect x="-2" y="0" width="78" height="14" rx="6" fill="#0a2f38"/><text x="37" y="128">GOOD</text><path d="M22 62 l10 10 l20 -22" stroke="#2e8b5c" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+            <g transform="translate(98 10)"><rect x="0" y="10" width="74" height="100" rx="14" fill="#fbd9c8" stroke="#0a2f38" stroke-width="3"/><rect x="-2" y="0" width="78" height="14" rx="6" fill="#0a2f38"/><text x="37" y="128">BAD</text><path d="M24 48 l26 26 M50 48 l-26 26" stroke="#d75f10" stroke-width="6" stroke-linecap="round"/></g>
+            <g transform="translate(186 10)"><rect x="0" y="10" width="74" height="100" rx="14" fill="#ffeab3" stroke="#0a2f38" stroke-width="3"/><rect x="-2" y="0" width="78" height="14" rx="6" fill="#0a2f38"/><text x="37" y="128">BOTH</text><path d="M14 60 l6 6 l12 -12" stroke="#2e8b5c" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M44 52 l16 16 M60 52 l-16 16" stroke="#d75f10" stroke-width="5" stroke-linecap="round"/></g>
+            <g transform="translate(274 10)"><rect x="0" y="10" width="74" height="100" rx="14" fill="#e3d6ec" stroke="#0a2f38" stroke-width="3"/><rect x="-2" y="0" width="78" height="14" rx="6" fill="#0a2f38"/><text x="37" y="128">DEPENDS</text><text x="37" y="76" font-size="38" fill="#7b4b8f">?</text></g>
+          </g>
+        </svg>
+      </div>
+      <p class="small">Tap a card, then tap a jar. On a computer you can drag too. Changed your mind? With nothing in your hand, tap a card in a jar to take it back out.</p>
+      <div class="tray" id="tray"></div>
+      <div class="jars" id="jars"></div>
+      <p class="fbline" id="jFb" aria-live="polite"></p>
+      <div class="writebox">
+        <label class="lab" for="t-s2">If you fancy: pick one card and give your reason</label>
+        <div class="starters" data-for="t-s2"><button class="starter">I put </button><button class="starter">in the jar because </button><button class="starter">It is good for people because </button><button class="starter">But for the river </button><button class="starter">It depends on </button></div>
+        <textarea class="note" id="t-s2" data-save="s2text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s2"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s3">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 3 ================= -->
+  <section class="stage" id="s3" hidden aria-labelledby="h-s3">
+    <div class="shead" style="background:linear-gradient(150deg,#7fd3a0,#2e8b5c)">
+      <div class="stxt"><span class="sk">Stage 3</span><h2 id="h-s3">River lab</h2>
+        <p>Switch things on and off. Watch the water change, and see which creatures move in or move out.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>Creatures are clues</h3>
+          <p>Scientists check a river by looking at the tiny creatures living in it. Some only live in very clean water. Some can cope with dirty water.</p>
+          <p>So the creatures tell you how healthy the river is.</p>
+        </div>
+        <svg viewBox="0 0 360 120" role="img" aria-label="A scale from dirty water to clean water. Rat tailed maggots at the dirty end, freshwater shrimp in the middle, mayfly nymphs at the clean end.">
+          <defs><linearGradient id="rrScaleG" x1="0" x2="1"><stop offset="0" stop-color="#8a6a3a"/><stop offset=".5" stop-color="#9cc77a"/><stop offset="1" stop-color="#1f9fd0"/></linearGradient></defs>
+          <rect x="10" y="80" width="340" height="16" rx="8" fill="url(#rrScaleG)" stroke="#0a2f38" stroke-width="2"/>
+          <g font-family="Arial" font-size="11" fill="#0a2f38"><text x="10" y="114">dirty</text><text x="350" y="114" text-anchor="end">very clean</text></g>
+          <g transform="translate(50 52)"><ellipse cx="0" cy="0" rx="12" ry="6" fill="#f0e6c8" stroke="#0a2f38" stroke-width="1.5"/><path d="M-12 0 Q-26 -4 -34 6" stroke="#0a2f38" stroke-width="1.5" fill="none"/><text x="0" y="-12" text-anchor="middle" font-family="Arial" font-size="10" fill="#0a2f38">rat tailed maggot</text></g>
+          <g transform="translate(180 52)"><path d="M-12 4 Q0 -14 12 4" stroke="#c9a06a" stroke-width="7" fill="none" stroke-linecap="round"/><text x="0" y="-14" text-anchor="middle" font-family="Arial" font-size="10" fill="#0a2f38">freshwater shrimp</text></g>
+          <g transform="translate(310 52)"><ellipse cx="0" cy="0" rx="10" ry="4" fill="#8a7a4a" stroke="#0a2f38" stroke-width="1.5"/><path d="M-10 0 l-12 -5 M-10 0 l-13 0 M-10 0 l-12 5" stroke="#0a2f38" stroke-width="1.2"/><text x="0" y="-12" text-anchor="middle" font-family="Arial" font-size="10" fill="#0a2f38">mayfly nymph</text></g>
+        </svg>
+      </div>
+
+      <div class="labgrid">
+        <div>
+          <div class="tank">
+<svg id="tank" viewBox="0 0 600 340" role="img" aria-label="A cutaway of the river showing the water and the creatures living in it">
+  <defs><linearGradient id="rrBank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fbf5a"/><stop offset="1" stop-color="#5a8a3a"/></linearGradient></defs>
+  <rect width="600" height="340" fill="#d8f0f6"/>
+  <circle cx="540" cy="36" r="20" fill="#ffd35c"/>
+  <!-- banks -->
+  <path d="M0 70 L120 70 L150 110 L0 110Z" fill="url(#rrBank)"/>
+  <path d="M600 70 L470 70 L440 110 L600 110Z" fill="url(#rrBank)"/>
+  <!-- water body -->
+  <path id="tankWater" d="M0 110 L600 110 L600 340 L0 340Z" fill="#3b9bd6"/>
+  <path d="M0 300 Q60 290 120 304 T240 300 T360 306 T480 298 T600 304 V340 H0Z" fill="#b59a6a"/>
+  <g fill="#8d8579"><ellipse cx="90" cy="306" rx="16" ry="8"/><ellipse cx="200" cy="310" rx="12" ry="6"/><ellipse cx="330" cy="308" rx="18" ry="8"/><ellipse cx="470" cy="304" rx="14" ry="7"/></g>
+  <path class="flow" d="M0 140 C150 130 300 150 600 136" stroke="#fff" stroke-width="2" fill="none" opacity=".4"/>
+  <path class="flow" d="M0 210 C150 200 300 220 600 206" stroke="#fff" stroke-width="2" fill="none" opacity=".3"/>
+
+  <!-- algae mat -->
+  <g class="crit off" data-k="algae"><path d="M40 112 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 q20 8 40 0 V122 H40Z" fill="#5fa832" opacity=".85"/><circle cx="120" cy="130" r="5" fill="#5fa832" opacity=".6"/><circle cx="300" cy="134" r="6" fill="#5fa832" opacity=".6"/><circle cx="460" cy="128" r="4" fill="#5fa832" opacity=".6"/></g>
+
+  <!-- trees toggle -->
+  <g class="crit off" data-k="trees">
+    <rect x="40" y="20" width="6" height="52" fill="#6b4a2e"/><circle cx="43" cy="22" r="22" fill="#3f8a4a"/><circle cx="26" cy="34" r="14" fill="#357a40"/>
+    <rect x="520" y="26" width="6" height="46" fill="#6b4a2e"/><circle cx="523" cy="28" r="20" fill="#3f8a4a"/><circle cx="540" cy="40" r="13" fill="#357a40"/>
+    <path d="M60 110 L150 110 L170 200 L40 200Z M440 110 L560 110 L580 190 L460 190Z" fill="#0a2f38" opacity=".08"/>
+  </g>
+  <!-- reeds toggle -->
+  <g class="crit off" data-k="reeds">
+    <g stroke="#4f7a2a" stroke-width="2.5"><path d="M100 300 L96 88 M110 300 L112 84 M120 302 L124 92 M132 302 L130 96 M142 304 L148 100"/></g>
+    <g fill="#7a5638"><rect x="94" y="80" width="5" height="14" rx="2"/><rect x="110" y="76" width="5" height="14" rx="2"/><rect x="122" y="84" width="5" height="14" rx="2"/><rect x="146" y="92" width="5" height="12" rx="2"/></g>
+  </g>
+  <!-- weir and fish pass -->
+  <path d="M410 110 L430 110 L440 300 L400 300Z" fill="#c7c0b0" stroke="#6b5a48" stroke-width="2"/>
+  <text x="420" y="104" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#0a2f38">WEIR</text>
+  <g class="crit off" data-k="fishpass"><path d="M440 290 h20 v-30 h20 v-30 h20 v-30 h20 v-30" stroke="#e2dccd" stroke-width="7" fill="none"/><text x="490" y="290" font-family="Arial" font-size="10" font-weight="700" fill="#0a2f38">fish pass</text></g>
+
+  <!-- pollution sources -->
+  <g class="crit off" data-k="sewage"><rect x="0" y="126" width="34" height="14" fill="#5b5f63"/><path d="M34 133 C60 136 90 150 140 160 C190 170 240 168 280 176" stroke="#7a5a32" stroke-width="12" fill="none" opacity=".55" stroke-linecap="round"/><text x="4" y="122" font-family="Arial" font-size="10" font-weight="700" fill="#0a2f38">overflow</text></g>
+  <g class="crit off" data-k="farm"><path d="M470 70 l40 -10 l50 0 l40 6" stroke="#a9824f" stroke-width="6"/><path d="M450 96 C430 110 400 116 360 118" stroke="#9a7a3a" stroke-width="6" fill="none" opacity=".6" class="trickle"/><text x="520" y="94" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="#0a2f38">fertiliser</text></g>
+  <g class="crit off" data-k="plastic"><rect x="230" y="112" width="18" height="7" rx="3" fill="#7fd0e8" stroke="#0a2f38" stroke-width="1"/><path d="M300 116 q10 -10 18 0 q-6 8 -18 0z" fill="#fff" stroke="#0a2f38" stroke-width="1"/><rect x="360" y="290" width="16" height="7" rx="3" fill="#c94a3a" stroke="#0a2f38" stroke-width="1" transform="rotate(20 368 293)"/><rect x="170" y="240" width="14" height="6" rx="3" fill="#ffc247" stroke="#0a2f38" stroke-width="1"/></g>
+
+  <!-- creatures -->
+  <g class="crit" data-k="bloodworm"><path d="M240 296 q4 -6 8 0 q4 6 8 0 q4 -6 8 0" stroke="#c0392b" stroke-width="3" fill="none"/><path d="M60 300 q4 -6 8 0 q4 6 8 0" stroke="#c0392b" stroke-width="3" fill="none"/></g>
+  <g class="crit off" data-k="maggot"><ellipse cx="300" cy="292" rx="10" ry="5" fill="#f0e6c8" stroke="#0a2f38" stroke-width="1.2"/><path d="M290 292 Q276 280 266 250" stroke="#0a2f38" stroke-width="1.2" fill="none"/><ellipse cx="160" cy="296" rx="9" ry="4.5" fill="#f0e6c8" stroke="#0a2f38" stroke-width="1.2"/><path d="M151 296 Q140 286 132 262" stroke="#0a2f38" stroke-width="1.2" fill="none"/></g>
+  <g class="crit off" data-k="shrimp"><path d="M190 290 Q200 274 210 290" stroke="#c9a06a" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M350 286 Q360 270 370 286" stroke="#c9a06a" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M270 282 Q278 270 286 282" stroke="#c9a06a" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g class="crit off" data-k="caddis"><rect x="100" y="288" width="18" height="8" rx="3" fill="#8d8579" stroke="#0a2f38" stroke-width="1"/><circle cx="104" cy="292" r="1.5" fill="#5a5048"/><circle cx="110" cy="291" r="1.5" fill="#5a5048"/><circle cx="121" cy="292" r="2.5" fill="#3a2a1a"/><rect x="380" y="294" width="16" height="7" rx="3" fill="#8d8579" stroke="#0a2f38" stroke-width="1"/><circle cx="398" cy="297" r="2.2" fill="#3a2a1a"/></g>
+  <g class="crit off" data-k="mayfly"><g transform="translate(330 296)"><ellipse rx="10" ry="4" fill="#8a7a4a" stroke="#0a2f38" stroke-width="1.2"/><path d="M-10 0 l-12 -5 M-10 0 l-13 0 M-10 0 l-12 5" stroke="#0a2f38" stroke-width="1.2"/></g><g transform="translate(220 300)"><ellipse rx="9" ry="3.5" fill="#8a7a4a" stroke="#0a2f38" stroke-width="1.2"/><path d="M-9 0 l-11 -4 M-9 0 l-12 0 M-9 0 l-11 4" stroke="#0a2f38" stroke-width="1.2"/></g><g transform="translate(70 70)" opacity=".9"><path d="M0 0 l14 -4" stroke="#0a2f38" stroke-width="2"/><path d="M6 -2 q2 -12 8 -10 q-2 6 -8 10z" fill="#fff" stroke="#0a2f38" stroke-width="1"/></g></g>
+  <g class="crit off" data-k="trout"><g class="bob"><path d="M200 200 q24 -16 50 0 q-26 14 -50 0z M200 200 l-14 -10 v20z" fill="#8a6a3a" stroke="#0a2f38" stroke-width="1.5"/><circle cx="240" cy="198" r="2" fill="#000"/><circle cx="222" cy="196" r="1.5" fill="#4a2a1a"/><circle cx="230" cy="203" r="1.5" fill="#4a2a1a"/></g><g class="bob" style="animation-delay:1s"><path d="M290 240 q18 -12 38 0 q-20 10 -38 0z M290 240 l-10 -8 v16z" fill="#8a6a3a" stroke="#0a2f38" stroke-width="1.5"/><circle cx="320" cy="238" r="1.6" fill="#000"/></g></g>
+  <g class="crit off" data-k="salmon"><g class="bob"><path d="M520 150 q26 -16 54 0 q-28 14 -54 0z M520 150 l-14 -10 v20z" fill="#c9cfd4" stroke="#0a2f38" stroke-width="1.5"/><circle cx="562" cy="148" r="2" fill="#000"/></g><path d="M500 130 q4 -8 0 -16" stroke="#fff" stroke-width="2" fill="none"/></g>
+  <g class="crit off" data-k="kingfisher"><path d="M150 60 L210 72" stroke="#6b4a2e" stroke-width="4"/><ellipse cx="180" cy="58" rx="10" ry="7" fill="#1f9fd0"/><ellipse cx="180" cy="62" rx="7" ry="4" fill="#ef7724"/><circle cx="189" cy="52" r="5" fill="#1f9fd0"/><path d="M193 52 l10 2" stroke="#222" stroke-width="2.5"/><path d="M170 60 l-8 5" stroke="#1f9fd0" stroke-width="4"/></g>
+  <g class="crit off" data-k="otter"><path d="M480 64 C494 52 524 52 540 60 C534 70 498 72 480 64Z" fill="#6b4a2e"/><circle cx="544" cy="58" r="7" fill="#6b4a2e"/><circle cx="547" cy="56" r="1.4" fill="#000"/><path d="M480 64 Q466 66 458 76" stroke="#6b4a2e" stroke-width="5" fill="none"/></g>
+  <g class="crit off" data-k="dragonfly"><g transform="translate(150 50)"><path d="M0 0 L30 0" stroke="#1f6fb0" stroke-width="3"/><ellipse cx="8" cy="-6" rx="8" ry="3" fill="#cfeaf5" stroke="#0a2f38" stroke-width=".8"/><ellipse cx="8" cy="6" rx="8" ry="3" fill="#cfeaf5" stroke="#0a2f38" stroke-width=".8"/><ellipse cx="18" cy="-6" rx="7" ry="2.6" fill="#cfeaf5" stroke="#0a2f38" stroke-width=".8"/><ellipse cx="18" cy="6" rx="7" ry="2.6" fill="#cfeaf5" stroke="#0a2f38" stroke-width=".8"/></g></g>
+</svg>
+          </div>
+          <div class="lives" id="lives" aria-live="polite"></div>
+        </div>
+        <div>
+          <div class="health">
+            <span class="lab" style="margin:0">Water health</span>
+            <div class="hbar"><span id="hBar"></span></div>
+            <span class="hword" id="hWord"></span>
+          </div>
+          <div class="toggles" id="toggles"></div>
+        </div>
+      </div>
+
+      <p class="tryhead">Little challenges</p>
+      <p class="small">They tick themselves when they happen. Do any, all, or none.</p>
+      <div class="goals" id="goals"></div>
+
+      <p class="tryhead">What did the lab show?</p>
+      <div id="labQs"></div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s3">If you fancy: which change hurt the river most, and which fix helped most?</label>
+        <div class="starters" data-for="t-s3"><button class="starter">The worst thing for the river was </button><button class="starter">because </button><button class="starter">The best fix was </button><button class="starter">When I switched off </button><button class="starter">the creatures </button></div>
+        <textarea class="note" id="t-s3" data-save="s3text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s3"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s4">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 4 ================= -->
+  <section class="stage" id="s4" hidden aria-labelledby="h-s4">
+    <div class="shead fill-plum">
+      <div class="stxt"><span class="sk">Stage 4</span><h2 id="h-s4">Where do the homes go?</h2>
+        <p>The valley needs 40 new homes. You make the calls, then send in a big storm and see what happens.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="learn">
+        <div>
+          <span class="lk">Learn a bit</span>
+          <h3>The floodplain</h3>
+          <p>The flat land beside a river is its <b>floodplain</b>. When the river is too full, it spreads out over it. That is normal: it is what the land is for.</p>
+          <p>Grass, trees and soil soak rain up. Tarmac and concrete do not, so rain runs off them fast.</p>
+        </div>
+        <svg viewBox="0 0 360 130" role="img" aria-label="Cross section of a valley. The river in the middle, the flat floodplain either side, and the valley sides rising up.">
+          <rect width="360" height="130" fill="#d4eef8" rx="12"/>
+          <path d="M0 30 L80 80 L150 92 L165 108 L195 108 L210 92 L280 80 L360 30 V130 H0Z" fill="#92c477" stroke="#0a2f38" stroke-width="2"/>
+          <path d="M165 104 L195 104 L195 108 L165 108Z" fill="#3b9bd6"/>
+          <path d="M84 90 L150 92 M210 92 L276 90" stroke="#ef7724" stroke-width="3" stroke-dasharray="5 4"/>
+          <g font-family="Arial" font-size="11" fill="#0a2f38"><text x="110" y="76" text-anchor="middle">floodplain</text><text x="246" y="76" text-anchor="middle">floodplain</text><text x="180" y="124" text-anchor="middle">river</text><text x="30" y="20">valley side</text></g>
+        </svg>
+      </div>
+
+      <div class="fpgrid">
+        <div class="chcol"><span class="lab" style="margin:0">1. Where do the homes go?</span><div class="chcol" id="ch-homes"></div></div>
+        <div class="chcol"><span class="lab" style="margin:0">2. Drives and gardens</span><div class="chcol" id="ch-surf"></div></div>
+        <div class="chcol"><span class="lab" style="margin:0">3. The rest of the floodplain</span><div class="chcol" id="ch-rest"></div></div>
+        <div class="chcol"><span class="lab" style="margin:0">4. Up the valley, upstream</span><div class="chcol" id="ch-up"></div></div>
+      </div>
+      <p class="lab">Your guess: will the new homes stay dry?</p>
+      <div class="undo" id="predRow" role="group" aria-label="Your guess"></div>
+      <div class="toolrow"><button class="btn btn-orange" id="stormBtn" type="button">Send the storm</button><span class="small" style="margin:0">Change anything and send it again as often as you like.</span></div>
+
+      <div class="valley">
+<svg id="valley" viewBox="0 0 800 300" role="img" aria-label="Cross section of the valley showing where the water reaches">
+  <rect width="800" height="300" fill="#d4eef8"/>
+  <g id="rainG" class="rain" style="display:none"><line x1="60" y1="20" x2="54" y2="38"/><line x1="140" y1="40" x2="134" y2="58"/><line x1="220" y1="16" x2="214" y2="34"/><line x1="300" y1="44" x2="294" y2="62"/><line x1="380" y1="22" x2="374" y2="40"/><line x1="460" y1="48" x2="454" y2="66"/><line x1="540" y1="18" x2="534" y2="36"/><line x1="620" y1="40" x2="614" y2="58"/><line x1="700" y1="24" x2="694" y2="42"/><line x1="760" y1="56" x2="754" y2="74"/></g>
+  <g id="cloudG" style="display:none"><path d="M60 30 q10 -22 40 -12 q20 -18 46 0 q30 -6 30 16 q-2 14 -24 14 h-80 q-22 -4 -12 -18z M420 30 q10 -22 40 -12 q20 -18 46 0 q30 -6 30 16 q-2 14 -24 14 h-80 q-22 -4 -12 -18z" fill="#8a96a0"/></g>
+  <rect id="fpWater" x="0" y="0" width="800" height="300" fill="#3b9bd6" opacity=".85" transform="translate(0 252)"/>
+  <path d="M0 90 L110 170 L200 232 L340 236 L360 260 L420 260 L440 236 L560 232 L640 180 L740 120 L800 100 V300 H0Z" fill="#92c477" stroke="#0a2f38" stroke-width="2.5"/>
+  <path d="M0 90 L110 170 L200 232 L340 236 L360 260 L420 260 L440 236 L560 232 L640 180 L740 120 L800 100" stroke="#5a8a3a" stroke-width="6" fill="none" opacity=".4"/>
+  <g id="upWoods" style="display:none"><g transform="translate(40 110)"><rect x="-2" y="0" width="4" height="12" fill="#6b4a2e"/><circle cy="-4" r="10" fill="#3f8a4a"/></g><g transform="translate(76 136)"><rect x="-2" y="0" width="4" height="12" fill="#6b4a2e"/><circle cy="-4" r="10" fill="#3f8a4a"/></g><path d="M100 168 l16 -6 M104 174 l16 -6" stroke="#6b4a2e" stroke-width="4"/></g>
+  <g id="restCar" style="display:none"><rect x="450" y="224" width="100" height="9" fill="#5b5f63"/><use href="#rrCar" x="470" y="219" fill="#c94a3a"/><use href="#rrCar" x="510" y="219" fill="#ffc247"/></g>
+  <g id="restWet" style="display:none"><ellipse cx="500" cy="232" rx="50" ry="5" fill="#5fb0dd"/><use href="#rrReed" x="470" y="232"/><use href="#rrReed" x="530" y="232"/></g>
+  <g id="homesFP" style="display:none"><use href="#rrHouse" x="220" y="218"/><use href="#rrHouse" x="246" y="219"/><use href="#rrHouse" x="272" y="220"/><use href="#rrHouse" x="298" y="221"/><rect id="surfFP" x="214" y="232" width="110" height="5" fill="#5b5f63"/></g>
+  <g id="homesHill" style="display:none"><use href="#rrHouse" x="640" y="166"/><use href="#rrHouse" x="664" y="152"/><use href="#rrHouse" x="690" y="137"/><use href="#rrHouse" x="714" y="123"/><path id="surfHill" d="M636 182 L740 120" stroke="#5b5f63" stroke-width="5"/></g>
+  <g font-family="Arial" font-size="12" fill="#0a2f38"><text x="390" y="290" text-anchor="middle">river</text><text x="270" y="270" text-anchor="middle">floodplain</text><text x="500" y="270" text-anchor="middle">floodplain</text><text x="700" y="210" text-anchor="middle">valley side</text><text x="60" y="190" text-anchor="middle">upstream</text></g>
+  <g id="gauge"><rect x="760" y="140" width="28" height="140" rx="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><rect id="gaugeFill" x="763" y="277" width="22" height="0" fill="#3b9bd6"/><text x="774" y="134" text-anchor="middle" font-family="Arial" font-size="10" fill="#0a2f38">TOWN</text><line x1="760" y1="196" x2="788" y2="196" stroke="#c94a3a" stroke-width="2" stroke-dasharray="3 2"/></g>
+</svg>
+      </div>
+      <div class="result" id="fpResult" aria-live="polite"></div>
+      <ol class="runs" id="runs"></ol>
+
+      <div id="fpQs"></div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s4">If you fancy: where should the homes go, and why?</label>
+        <div class="starters" data-for="t-s4"><button class="starter">I would build the homes </button><button class="starter">because </button><button class="starter">This helps people because </button><button class="starter">For the river and nature, </button><button class="starter">The downside is </button></div>
+        <textarea class="note" id="t-s4" data-save="s4text"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s4"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s5">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 5 ================= -->
+  <section class="stage" id="s5" hidden aria-labelledby="h-s5">
+    <div class="shead fill-orange">
+      <div class="stxt"><span class="sk">Stage 5</span><h2 id="h-s5">Litter and life walk</h2>
+        <p>A real walk round school. Count the litter people left, and the living things. Then turn it into bar charts.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="safety">
+        <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><path d="M18 18 h16 l-2 22 h-12z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M16 18 h20" stroke="#0a2f38" stroke-width="3"/><path d="M22 24 v12 M26 24 v12 M30 24 v12" stroke="#0a2f38" stroke-width="1.5"/></svg>
+        <span>Walks happen with Jay or HB. <b>Count litter, do not pick it up</b> unless an adult gives you gloves and a grabber. Keep to paths. No walk today? Count from a window, or try the sample numbers.</span>
+      </div>
+      <div class="toolrow" style="margin:0 0 12px">
+        <button class="btn btn-quiet sm" id="paperBtn" type="button">Print a paper tally sheet</button>
+        <button class="btn btn-quiet sm" id="sampleBtn" type="button">Try sample numbers</button>
+      </div>
+      <p class="small">On paper? Walk with the sheet, then pop your numbers in here with the + buttons when you are back.</p>
+
+      <p class="tryhead">Litter people left</p>
+      <div class="tallies" id="tLitter"></div>
+      <p class="tryhead">Living things</p>
+      <div class="tallies" id="tLife"></div>
+
+      <div class="chartbox"><h4>Litter we counted</h4><p class="small" style="margin:0">Number of pieces of each kind.</p><svg id="chLitter" viewBox="0 0 520 260" role="img" aria-label="Bar chart of litter counted"></svg><div id="chLitterNote"></div></div>
+      <div class="chartbox"><h4>Living things we counted</h4><p class="small" style="margin:0">Number of each kind spotted.</p><svg id="chLife" viewBox="0 0 520 260" role="img" aria-label="Bar chart of living things counted"></svg><div id="chLifeNote"></div></div>
+
+      <p class="tryhead">Notes from the walk</p>
+      <label class="lab" for="n-where">Where did you go?</label>
+      <input class="note" id="n-where" data-save="nWhere" placeholder="for example: round the field and past the bins">
+      <p class="lab">Who came with you?</p>
+      <div class="undo" id="walkWith" role="group" aria-label="Who came with you"></div>
+      <label class="lab" for="n-chart">What does your chart show?</label>
+      <div class="starters" data-for="n-chart"><button class="starter">The tallest bar is </button><button class="starter">We found the most litter near </button><button class="starter">There were more </button><button class="starter">I was surprised that </button></div>
+      <textarea class="note" id="n-chart" data-save="nChart"></textarea>
+      <label class="lab" for="n-people">What have people done to this place? Good or bad.</label>
+      <div class="starters" data-for="n-people"><button class="starter">People have built </button><button class="starter">People have planted </button><button class="starter">The litter probably came from </button><button class="starter">To help, we could </button></div>
+      <textarea class="note" id="n-people" data-save="nPeople"></textarea>
+    </div>
+    <div class="sfoot"><span id="ms-s5"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn sm" data-goto="s6">Next stage</button></div>
+  </section>
+
+  <!-- ================= STAGE 6 ================= -->
+  <section class="stage" id="s6" hidden aria-labelledby="h-s6">
+    <div class="shead fill-ink">
+      <div class="stxt"><span class="sk" style="color:var(--yellow)">Stage 6</span><h2 id="h-s6" style="color:var(--yellow)">Fix the river</h2>
+        <p>You have 12 points to spend on the River Fennick. Pick your fixes and watch the meters. Your future shows up in stage 1 too.</p></div>
+    </div>
+    <div class="sbody">
+      <div class="budget"><div><div class="big" id="bLeft">12</div><span style="font-size:.8rem">points left</span></div><div class="coins" id="coins" aria-hidden="true"></div></div>
+      <div class="fixes" id="fixes" role="group" aria-label="Fixes to pick"></div>
+      <p class="fbline" id="fixFb" aria-live="polite"></p>
+      <div class="meters" id="meters"></div>
+      <div class="mkey"><span><i style="background:#007291"></i>with your fixes</span><span><i style="background:#ef7724"></i>today</span></div>
+      <div class="comment" id="fixComment"></div>
+      <p class="small" style="margin-top:10px">A challenge, only if you fancy it: can you get all four meters to 50 or more?</p>
+      <div class="toolrow"><button class="btn btn-quiet sm" id="seeFuture" type="button">See your future river in stage 1</button></div>
+
+      <div class="writebox">
+        <label class="lab" for="t-s6a">If you fancy: what did people do to the River Fennick over the years?</label>
+        <p class="small">Use the old pictures in stage 1 as your evidence.</p>
+        <div class="starters" data-for="t-s6a"><button class="starter">In 1820 the river was </button><button class="starter">Then people </button><button class="starter">This was because </button><button class="starter">The evidence is </button><button class="starter">Overall, people have </button></div>
+        <textarea class="note" id="t-s6a" data-save="s6a"></textarea>
+        <label class="lab" for="t-s6b">What could be done now, and what would it mean for people and nature?</label>
+        <div class="starters" data-for="t-s6b"><button class="starter">I picked </button><button class="starter">This would help nature because </button><button class="starter">For people it would </button><button class="starter">A problem might be </button><button class="starter">The most important fix is </button></div>
+        <textarea class="note" id="t-s6b" data-save="s6b"></textarea>
+      </div>
+    </div>
+    <div class="sfoot"><span id="ms-s6"></span><span class="spacer"></span><button class="btn btn-quiet sm" data-goto="tiles">All stages</button><button class="btn btn-orange sm" data-goto="sendHost">Send to Jay</button></div>
+  </section>
+
+  <div id="sendHost"></div>
+  <p><button class="restart" id="restart" type="button">Start again (clears everything on this page)</button></p>
+
+  <a class="backlink" href="/practice/#pw-standard">&larr; Back to Physical world</a>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div id="paperSheet"></div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+var KEY = "b5.practice.river-road.v1";
+var WHO_KEY = "base5.who.v1";
+var PEOPLE = ["JT","LW","EGW","LP","LC","HK"];
+var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function $(id){ return document.getElementById(id); }
+function qa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+/* ---------------- state ---------------- */
+function fresh(){
+  return { open:"s1", era:0, seen:{0:true}, found:{}, why:{}, texts:{},
+    jars:{}, jarTries:{},
+    lab:{sewage:true, farm:true, plastic:true, trees:false, reeds:false, fishpass:false}, labMoved:false, labSeen:{}, goals:{}, labQ:{},
+    fp:{homes:"", surf:"", rest:"", up:""}, pred:"", runs:[], fpQ:{},
+    tally:{}, sampleSeen:false, walkWith:"", printed:false,
+    fixes:{}, tried:{} };
+}
+var st = fresh();
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){ var o = JSON.parse(raw); if(o && typeof o === "object"){ for(var k in o) st[k] = o[k]; } }
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+
+var who = "";
+try{ var w0 = (localStorage.getItem(WHO_KEY) || "").toUpperCase().trim(); if(PEOPLE.indexOf(w0) > -1) who = w0; }catch(e){}
+
+var toastT;
+function toast(msg){
+  var t = $("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 2600);
+}
+function shake(el){ if(!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+
+/* ---------------- milestones (copied exactly from Shaped by People) ---------------- */
+var MS = {
+  LC:["Spot and name things around here that people have made or changed.","Say what one of those things is used for."],
+  LP:["Weigh up how people have shaped a place over time, using evidence from what you see, maps or other sources.","Suggest how a place could change in future, and what that would mean for people and nature."],
+  LW:["Explain why people changed parts of a place, and what the changes are used for.","Compare the good and bad effects of one change people made."],
+  EGW:["Compare different changes people have made, and their good and bad effects.","Use maps or old pictures to show how a place changed, and explain why."],
+  JT:["Describe how a place has been changed by people.","Explain why people made a change, and who it helps."],
+  HK:["Find examples of how people changed a place, like roads, buildings, paths and parks.","Say what those changes are used for, and how they help people."]
+};
+var MS_FULL = {
+  LC:["I can notice and name features in the local environment that have been made or changed by people.","I can describe what a feature made by people in the local area is used for."],
+  LP:["I can evaluate how human activity has shaped the local environment over time, using evidence from observations, maps or other sources.","I can suggest how the local environment could change in the future and explain the possible impact on people and nature."],
+  LW:["I can explain why people have changed parts of the local environment and what those changes are used for.","I can compare the positive and negative effects of a change people have made to the local environment."],
+  EGW:["I can compare different examples of human changes in the local area and explain their positive and negative effects.","I can use maps or old photographs to show how the local area has changed over time and explain why."],
+  JT:["I can describe how a local place has been changed by human activity.","I can explain why people made a change to a local place and who it helps."],
+  HK:["I can identify examples of how humans have physically changed the local area, such as roads, buildings, paths and parks.","I can describe what these changes are used for and how they help people."]
+};
+/* stage number -> milestone codes it covers */
+var MILESTONE_STAGES = {
+  s1:["LC1","HK1","LC2","HK2","JT1","JT2","LW1","EGW2","LP1"],
+  s2:["LW2","EGW1","LP1"],
+  s3:["EGW1","LW2","LP2","LP1"],
+  s4:["LP2","LW2","JT2","LW1","EGW1"],
+  s5:["LC1","HK1","LC2","HK2","JT1","LP1"],
+  s6:["LP2","LP1","JT1","EGW1","EGW2"]
+};
+var BEST = { LC:["s1","s5"], HK:["s1","s5"], JT:["s1","s4"], LW:["s2","s4"], EGW:["s1","s2"], LP:["s3","s6"] };
+
+/* ---------------- tiles ---------------- */
+var TILES = [
+  {id:"s1", c:"c1", name:"Down the years", d:"Slide the river through 200 years. Spot every change people made.",
+   icon:'<rect x="6" y="6" width="108" height="48" rx="8" fill="#cfeaf5" stroke="#0a2f38" stroke-width="2.5"/><path d="M6 36 C30 26 44 52 64 44 S96 30 114 40" stroke="#3b9bd6" stroke-width="7" fill="none"/><rect x="24" y="16" width="14" height="12" fill="#cdb58f" stroke="#0a2f38"/><rect x="80" y="14" width="16" height="14" fill="#8a4a3a" stroke="#0a2f38"/><rect x="90" y="6" width="4" height="10" fill="#7a3f30"/><path d="M14 54 H106" stroke="#fffdf8" stroke-width="3"/><circle cx="60" cy="54" r="5" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/>'},
+  {id:"s2", c:"c2", name:"Four jars", d:"Good, bad, both or depends? Sort twelve things people did.",
+   icon:'<g stroke="#0a2f38" stroke-width="2.5"><rect x="8" y="14" width="22" height="38" rx="6" fill="#d6f3e1"/><rect x="36" y="14" width="22" height="38" rx="6" fill="#fbd9c8"/><rect x="64" y="14" width="22" height="38" rx="6" fill="#ffeab3"/><rect x="92" y="14" width="22" height="38" rx="6" fill="#e3d6ec"/></g><g fill="#0a2f38"><rect x="6" y="8" width="26" height="7" rx="3"/><rect x="34" y="8" width="26" height="7" rx="3"/><rect x="62" y="8" width="26" height="7" rx="3"/><rect x="90" y="8" width="26" height="7" rx="3"/></g><text x="103" y="40" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="16" fill="#7b4b8f">?</text>'},
+  {id:"s3", c:"c3", name:"River lab", d:"Switch pollution and fixes on and off. Who moves in?",
+   icon:'<rect x="6" y="10" width="108" height="44" rx="8" fill="#3b9bd6" stroke="#0a2f38" stroke-width="2.5"/><path d="M6 46 Q40 40 70 46 T114 44 V54 H6Z" fill="#b59a6a"/><path d="M40 28 q12 -8 24 0 q-12 7 -24 0z M40 28 l-7 -5 v10z" fill="#8a6a3a" stroke="#0a2f38" stroke-width="1.5"/><g transform="translate(88 44)"><ellipse rx="8" ry="3" fill="#8a7a4a" stroke="#0a2f38"/><path d="M-8 0 l-8 -3 M-8 0 l-9 0 M-8 0 l-8 3" stroke="#0a2f38"/></g><path d="M88 8 l4 -4 l4 4 M100 8 l4 -4 l4 4" stroke="#fffdf8" stroke-width="2" fill="none"/>'},
+  {id:"s4", c:"c4", name:"Where do the homes go?", d:"Build 40 homes, then send in a storm.",
+   icon:'<rect x="6" y="6" width="108" height="48" rx="8" fill="#d4eef8" stroke="#0a2f38" stroke-width="2.5"/><path d="M6 20 L36 40 L52 42 L56 50 L66 50 L70 42 L90 40 L114 18 V54 H6Z" fill="#92c477" stroke="#0a2f38" stroke-width="1.5"/><path d="M40 42 H86 V50 H40Z" fill="#3b9bd6" opacity=".8"/><rect x="92" y="22" width="10" height="9" fill="#f2ebdc" stroke="#0a2f38"/><path d="M90 23 L97 17 L104 23Z" fill="#9a4f3c"/><g stroke="#2f80bf" stroke-width="2"><path d="M20 10 l-3 6 M34 12 l-3 6 M48 10 l-3 6"/></g>'},
+  {id:"s5", c:"c5", name:"Litter and life walk", d:"Go outside. Count litter and living things. Make bar charts.",
+   icon:'<rect x="8" y="8" width="104" height="46" rx="6" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><path d="M18 46 H102" stroke="#0a2f38" stroke-width="2"/><g stroke="#0a2f38" stroke-width="1.5"><rect x="24" y="26" width="12" height="20" fill="#ef7724"/><rect x="42" y="16" width="12" height="30" fill="#ef7724"/><rect x="60" y="34" width="12" height="12" fill="#ef7724"/><rect x="78" y="22" width="12" height="24" fill="#2e8b5c"/></g>'},
+  {id:"s6", c:"c6", name:"Fix the river", d:"12 points to spend. Design the river's future and explain it.",
+   icon:'<rect x="6" y="8" width="108" height="44" rx="8" fill="#123c47" stroke="#ffc247" stroke-width="2.5" stroke-dasharray="5 3"/><path d="M8 40 C30 30 44 50 64 42 S96 30 112 36" stroke="#3b9bd6" stroke-width="6" fill="none"/><g transform="translate(30 30)"><rect x="-1.5" y="0" width="3" height="8" fill="#6b4a2e"/><circle cy="-3" r="7" fill="#3f8a4a"/></g><g fill="#ffc247" stroke="#0a2f38" stroke-width="1.5"><circle cx="80" cy="20" r="6"/><circle cx="94" cy="20" r="6"/><circle cx="87" cy="14" r="6"/></g>'}
+];
+var NTILES = TILES.length;
+
+function drawTiles(){
+  var box = $("tiles"); box.innerHTML = "";
+  TILES.forEach(function(t, i){
+    var b = document.createElement("button");
+    b.className = "tile " + t.c; b.type = "button"; b.dataset.s = t.id;
+    b.innerHTML = '<span class="badge">Good place to start</span><svg viewBox="0 0 120 60" aria-hidden="true">' + t.icon + '</svg>' +
+      '<span class="tn">Stage ' + (i + 1) + '</span><span class="tt">' + t.name + '</span>' + t.d +
+      '<span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8 l3 3 l7 -7" stroke="#2e8b5c" stroke-width="3" fill="none"/></svg></span>';
+    b.addEventListener("click", function(){ openStage(t.id, true); });
+    box.appendChild(b);
+  });
+  refreshTiles();
+}
+function refreshTiles(){
+  var best = who ? BEST[who] : [];
+  qa(".tile").forEach(function(b){
+    var id = b.dataset.s;
+    b.classList.toggle("best", best.indexOf(id) > -1);
+    b.classList.toggle("tried", !!st.tried[id]);
+    b.setAttribute("aria-current", st.open === id ? "true" : "false");
+    var lab = b.querySelector(".tt").textContent + (best.indexOf(id) > -1 ? ", good place to start" : "") + (st.tried[id] ? ", tried" : "");
+    b.setAttribute("aria-label", "Stage " + id.slice(1) + ": " + lab);
+  });
+  var dots = $("tryDots"); dots.innerHTML = "";
+  var n = 0;
+  TILES.forEach(function(t){ var i = document.createElement("i"); if(st.tried[t.id]){ i.className = "on"; n++; } dots.appendChild(i); });
+  $("tryText").textContent = n === 0 ? "Nothing tried yet. Pick any stage." :
+    (n === NTILES ? "You have had a go at all six stages. Brilliant." : "You have had a go at " + n + " of " + NTILES + " stages.");
+  TILES.forEach(function(t){
+    var span = $("ms-" + t.id); if(!span) return;
+    span.innerHTML = MILESTONE_STAGES[t.id].map(function(c){ return '<span class="mtag">' + c + '</span>'; }).join("");
+  });
+}
+function markTried(id){
+  if(!st.tried[id]){ st.tried[id] = true; save(); refreshTiles(); }
+}
+
+function openStage(id, scroll){
+  qa(".stage").forEach(function(s){ s.hidden = s.id !== id; });
+  st.open = id; save(); refreshTiles();
+  if(id === "s1") renderScene();
+  if(id === "s3") renderLab();
+  if(id === "s4") drawValley();
+  if(id === "s5") drawCharts();
+  if(id === "s6") renderFix();
+  if(id !== "s1") stopFlip();
+  if(scroll){
+    var el = $(id);
+    el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"start" });
+  }
+}
+qa("[data-goto]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var g = b.dataset.goto;
+    if(g === "tiles"){ $("tiles").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"center" }); return; }
+    if(g === "sendHost"){ $("sendHost").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block:"start" }); return; }
+    openStage(g, true);
+  });
+});
+
+/* ---------------- who ---------------- */
+function drawWho(){
+  var row = $("whoRow"); row.innerHTML = "";
+  PEOPLE.concat(["just looking"]).forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "who" + (p === "just looking" ? " quiet" : ""); b.textContent = p;
+    b.setAttribute("aria-pressed", (p === who || (p === "just looking" && !who)) ? "true" : "false");
+    b.addEventListener("click", function(){
+      who = p === "just looking" ? "" : p;
+      try{ if(who) localStorage.setItem(WHO_KEY, who); else localStorage.removeItem(WHO_KEY); }catch(e){}
+      var inp = document.getElementById("b5who"); if(inp) inp.value = who;
+      drawWho(); refreshTiles();
+    });
+    row.appendChild(b);
+  });
+  var mm = $("myMiles");
+  if(who){
+    mm.className = "mymiles on";
+    var best = BEST[who].map(function(s){ return TILES[+s.slice(1) - 1].name; });
+    mm.innerHTML = '<div class="mile"><b>Step 1</b>' + MS[who][0] + '</div><div class="mile"><b>Step 2</b>' + MS[who][1] + '</div>' +
+      '<div class="mile" style="background:var(--yellow)"><b>Good places to start</b>' + best.join(" and ") + '. Everything else is open too.</div>';
+  } else { mm.className = "mymiles"; mm.innerHTML = ""; }
+}
+
+/* ---------------- writing helpers ---------------- */
+var TEXT_STAGE = { s1text:"s1", s2text:"s2", s3text:"s3", s4text:"s4", nWhere:"s5", nChart:"s5", nPeople:"s5", s6a:"s6", s6b:"s6" };
+qa("[data-save]").forEach(function(el){
+  var k = el.dataset.save;
+  if(st.texts[k]) el.value = st.texts[k];
+  el.addEventListener("input", function(){ st.texts[k] = el.value; save(); if(el.value.trim()) markTried(TEXT_STAGE[k]); });
+});
+qa(".starters").forEach(function(box){
+  var target = $(box.dataset.for);
+  qa(".starter", box).forEach(function(b){
+    b.type = "button";
+    b.addEventListener("click", function(){
+      var v = target.value;
+      if(v && !/\s$/.test(v)) v += " ";
+      target.value = v + b.textContent;
+      target.focus();
+      try{ target.setSelectionRange(target.value.length, target.value.length); }catch(e){}
+      target.dispatchEvent(new Event("input"));
+    });
+  });
+});
+
+/* =========================================================
+   STAGE 1  Down the years
+   ========================================================= */
+var ERAS = [
+  {y:"1820", sub:"Farmland", nudge:"Quiet farmland. Most of what you see is nature, but not all of it. Can you find the three things people had already made?"},
+  {y:"1880", sub:"Mill and factory", nudge:"Look at the shape of the river. Something big happened to it. Five new changes to spot."},
+  {y:"1960", sub:"New houses and a road", nudge:"After the war people needed homes and roads. Where did they put them? Five new changes to spot."},
+  {y:"Today", sub:"The river now", nudge:"Some changes are big, some are tiny and floating. Six new changes to spot."},
+  {y:"Future", sub:"Your design", nudge:""}
+];
+var TARGETS = {0:["fields","farm","footbridge"], 1:["drains","terraces","outfall","straight","weir"], 2:["road","estate","culvert","sewage","concrete"], 3:["carpark","litter","overflow","plough","path","flats"]};
+var FEAT = {
+  fields:{n:"Fields and hedges", k:"h", from:0,
+    what:"People cleared the wild land and planted hedges in lines to make fields.",
+    use:"Growing crops and keeping cows in.", helps:"Farmers, and everyone who eats the food.",
+    eff:"The grass still soaks up rain, so the river is not hurt much yet.",
+    why:[["To grow food and keep animals in",1],["To stop the river flooding",0],["So people could have parties",0]], hint:"Think about what fields are used for. What is in them?"},
+  farm:{n:"The farm", k:"h", from:0,
+    what:"A farmhouse and a barn, built near the river.", use:"A home for the farmer, and a barn for animals and hay.",
+    helps:"The farmer's family.", eff:"Farms were built near rivers so animals had water to drink.",
+    why:[["The river gave water for people and animals",1],["The river was good for skating",0],["To watch the fish",0]], hint:"What does a farm need lots of every day?"},
+  footbridge:{n:"Wooden footbridge", k:"h", from:0,
+    what:"A simple wooden bridge over the river.", use:"Getting people and animals across without wading.",
+    helps:"Farmers, walkers, and anyone going to market on the other side.",
+    eff:"Small and light. It hardly changes the river at all.",
+    why:[["To get across the river without getting wet",1],["To catch fish from",0],["To slow the river down",0]], hint:"What is on the other side, and how else would you get there?"},
+  wildwood:{n:"Wild woodland", k:"n", what:"Trees that grew here on their own.",
+    eff:"Trees soak up rain and their roots hold the soil together, so less mud washes into the river."},
+  meanders:{n:"Bends in the river", k:"n", what:"Rivers naturally wind about in loops called meanders.",
+    eff:"A bendy river flows more slowly than a straight one, and its pools and shallows are homes for fish and insects."},
+  reedbeds:{n:"Reed beds", k:"n", what:"Tall reeds growing in the shallow edges.",
+    eff:"Reeds slow the water down and trap mud and some pollution. Lots of birds and insects live in them."},
+  wetmeadow:{n:"Wet meadow", k:"n", what:"Low, damp grassland by the river. In winter it floods.",
+    eff:"It holds flood water like a sponge, so less of it rushes downstream."},
+  kingfisher:{n:"Kingfisher", k:"n", what:"A small, bright blue and orange bird.",
+    eff:"Kingfishers dive for small fish, so they need clean water with plenty of fish in it."},
+  otter:{n:"Otter", k:"n", what:"A furry animal that swims and eats fish.",
+    eff:"Otters vanished from most English rivers by the 1970s, mainly because farm chemicals poisoned them. As rivers got cleaner, they came back."},
+  trout:{n:"Brown trout", k:"n", what:"A fish that needs clean, cool water with lots of oxygen.",
+    eff:"Trout are a sign of a healthy river."},
+  heron:{n:"Grey heron", k:"n", what:"A tall grey bird that stands very still, then stabs at fish.",
+    eff:"Herons eat fish, frogs and even small mammals, so they cope with lots of changes. Jay would tell you it is the best bird on the river."},
+  ducks:{n:"Mallard ducks", k:"n", what:"The most common duck in the UK.",
+    eff:"Mallards can live on almost any pond, lake or river, clean or not so clean."},
+  drains:{n:"Field drains", k:"h", from:1,
+    what:"Pipes and ditches dug under the fields, all leading to the river.", use:"Drying out wet soil so farmers can grow more crops.",
+    helps:"Farmers, who get more food from the same field.",
+    eff:"Rain now reaches the river much faster after a storm.",
+    why:[["To dry out the soggy fields so more crops would grow",1],["To give worms somewhere to live",0],["To water the crops in summer",0]], hint:"Drains take water away. Why would a farmer want less water in a field?"},
+  terraces:{n:"Terraced houses", k:"h", from:1,
+    what:"Rows of brick houses joined together.", use:"Homes for the workers at the mill and the factory.",
+    helps:"Workers and their families, who could live close to work.",
+    eff:"More people living by the river means more waste going into it.",
+    why:[["So factory and mill workers had homes close to work",1],["To keep the wind off the fields",0],["Because bricks float",0]], hint:"Who started coming to the valley in 1880? Where did they live?"},
+  outfall:{n:"Factory and waste pipe", k:"h", from:1,
+    what:"A factory with a tall chimney. Its waste pipe runs straight into the river.", use:"Making goods to sell, and giving people jobs.",
+    helps:"The owners and the workers who earned wages there.",
+    eff:"Back then it was normal to tip waste into rivers. Dirty water kills the creatures that need clean water.",
+    why:[["The river was an easy, free way to get rid of waste",1],["To feed the fish",0],["To make the water warmer for swimming",0]], hint:"Look where the pipe ends. What was the factory using the river for?"},
+  straight:{n:"Straightened river", k:"h", from:1,
+    what:"People dug a new, straight channel and cut off the bends.", use:"Draining the land beside it and moving water away quickly.",
+    helps:"Farmers and builders, who got more dry land to use.",
+    eff:"Water now rushes through faster, so floods can be worse further downstream. Fewer pools and shallows for wildlife.",
+    why:[["To drain the land so it could be farmed or built on",1],["To make the river longer",0],["Because straight lines look tidier on maps",0]], hint:"What did people get more of when the bends went?"},
+  weir:{n:"Weir and watermill", k:"h", from:1,
+    what:"A low wall across the river that holds water back, next to a mill with a water wheel.", use:"The falling water turns the wheel, which powered machines to grind grain into flour.",
+    helps:"The miller, and the bakers and families who needed flour.",
+    eff:"Fish like salmon and trout swim upstream to lay eggs. The weir blocks their way.",
+    why:[["To hold water back so it could turn the mill wheel",1],["To stop boats getting through",0],["To make a waterfall for tourists",0]], hint:"Look at the wheel on the side of the mill. What makes it spin?"},
+  road:{n:"Main road and bridge", k:"h", from:2,
+    what:"A wide tarmac road and a concrete bridge across the valley.", use:"Cars, buses and lorries carrying people and goods.",
+    helps:"Drivers, bus passengers, shops and businesses.",
+    eff:"Tarmac does not soak up rain. Water runs off fast, carrying oil and dirt from tyres into the river.",
+    why:[["More people had cars and lorries, and needed a way across the valley",1],["To stop the cows wandering",0],["To keep the river warm",0]], hint:"What changed about how people travelled after 1900?"},
+  estate:{n:"Houses on the floodplain", k:"h", from:2,
+    what:"A new estate of houses on the flat land right beside the river.", use:"Homes for families.",
+    helps:"Families who needed somewhere to live after the war.",
+    eff:"This flat land is the floodplain: where the river spreads out when it is full. These homes are at risk of flooding.",
+    why:[["The land was flat and easy to build on, and lots of homes were needed",1],["People wanted to live in the river",0],["The hills were made of chocolate",0]], hint:"Building on a slope is hard. What is this land like?"},
+  culvert:{n:"Culvert", k:"h", from:2,
+    what:"The little stream was put into a pipe under the road and houses.", use:"Making space to build on top.",
+    helps:"Builders and road makers.",
+    eff:"Very little can live in a dark pipe, and pipes can block with rubbish and cause flooding.",
+    why:[["To make room for the road and houses on top",1],["To keep the stream warm",0],["To give fish a tunnel to play in",0]], hint:"What is built on top of where the stream used to be?"},
+  sewage:{n:"Sewage works", k:"h", from:2,
+    what:"Big round tanks where dirty water from toilets, sinks and showers is cleaned.", use:"Cleaning waste water before it goes back into the river.",
+    helps:"Everyone in the valley, and the river too.",
+    eff:"A huge help for river health. Before this, a lot of this waste went straight in.",
+    why:[["To clean dirty water before it goes back into the river",1],["To make tap water fizzy",0],["To store rain for the summer",0]], hint:"Where does the water go when you flush a toilet?"},
+  concrete:{n:"Concrete banks", k:"h", from:2,
+    what:"The river banks near the houses were lined with concrete.", use:"Stopping the river eating away the land near the homes.",
+    helps:"People living in the houses next to the river.",
+    eff:"Plants and animals cannot live on bare concrete.",
+    why:[["To stop the river wearing away the land under the houses",1],["To make the river look grey",0],["So people could draw on them",0]], hint:"What is right next to these banks?"},
+  carpark:{n:"Car park", k:"h", from:3,
+    what:"A tarmac car park on the flat land by the river.", use:"Parking for the shops and flats.",
+    helps:"Drivers and shoppers.",
+    eff:"Tarmac does not soak up rain, so water runs straight off into drains and the river.",
+    why:[["More people drive, and they need somewhere to park near the shops",1],["To give ducks somewhere to sunbathe",0],["To stop the grass growing",0]], hint:"Who uses a car park, and why do they need one here?"},
+  litter:{n:"Litter in the river", k:"h", from:3,
+    what:"Bottles, wrappers, a bag, even a shopping trolley.", use:"Nothing. It is rubbish.",
+    helps:"Nobody.",
+    eff:"Plastic does not rot away. It breaks into tiny pieces that animals swallow.",
+    why:[["People dropped it, or it blew out of bins and washed in",1],["The river grows it",0],["Fish collect it",0]], hint:"Litter does not appear by magic. How does it get into a river?"},
+  overflow:{n:"Storm overflow", k:"h", from:3,
+    what:"A pipe from the sewage works that can spill into the river.", use:"When heavy rain fills the sewers, dirty water spills out here so it does not back up into homes and streets.",
+    helps:"People whose homes would otherwise flood with sewage.",
+    eff:"The river gets untreated sewage in it, which harms fish and makes the water unsafe to paddle in.",
+    why:[["So sewers do not overflow into homes in heavy rain",1],["To water the reeds",0],["To make the river deeper for boats",0]], hint:"Think about what happens to sewers in a big storm."},
+  plough:{n:"Ploughed right to the edge", k:"h", from:3,
+    what:"The field is ploughed all the way to the river bank.", use:"Growing as many crops as possible.",
+    helps:"The farmer, who gets more crops to sell.",
+    eff:"When it rains, soil and fertiliser wash straight into the water.",
+    why:[["To grow as many crops as possible",1],["To help the river flow",0],["So the cows have mud to play in",0]], hint:"More field means more of what?"},
+  path:{n:"Riverside path and bench", k:"h", from:3,
+    what:"A path along the river with benches.", use:"Walking, running, cycling and walking dogs.",
+    helps:"Local people, who get fresh air and exercise. Bonnie would approve.",
+    eff:"Good for people. Most wildlife is fine with it, as long as people take their litter home.",
+    why:[["So people can enjoy the river and get exercise",1],["To stop the river escaping",0],["To give the heron a runway",0]], hint:"Who is using it in the picture?"},
+  flats:{n:"Old factory, now flats", k:"h", from:3,
+    what:"The factory closed years ago. The building was turned into flats.", use:"Homes.",
+    helps:"People who needed somewhere to live.",
+    eff:"Good news for the river: no more waste pipe.",
+    why:[["The factory closed, and people needed homes",1],["The chimney got too tall",0],["Flats are better at floating",0]], hint:"What happened to the factory? What is it used for now?"}
+};
+
+function featInfo(id){ return FEAT[id] || (id.indexOf("fx-") === 0 ? fixAsFeat(id.slice(3)) : null); }
+
+var featEls = qa("#scene [data-e], #scene [data-fix]");
+function parseE(el){ var e = el.getAttribute("data-e"); if(!e) return [0,4]; var p = e.split("-"); return [+p[0], +p[1]]; }
+function nFixes(){ return Object.keys(st.fixes).filter(function(k){ return st.fixes[k]; }).length; }
+
+var hitsDone = false;
+function ensureHits(){
+  if(hitsDone || !$("sceneWrap").offsetParent) return;
+  hitsDone = true;
+  qa("#scene .ft").forEach(function(g){
+    /* small or open shapes get an invisible hit area so they are easy to tap */
+    var chain = [], el = g;
+    while(el && el.id !== "scene"){ chain.push([el, el.style.display]); el.style.display = ""; el = el.parentNode; }
+    try{
+      var bb = g.getBBox();
+      if(bb.width > 0 && bb.width * bb.height < 3600){
+        var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        r.setAttribute("x", (bb.x - 6).toFixed(1)); r.setAttribute("y", (bb.y - 6).toFixed(1));
+        r.setAttribute("width", (bb.width + 12).toFixed(1)); r.setAttribute("height", (bb.height + 12).toFixed(1));
+        r.setAttribute("fill", "#000"); r.setAttribute("fill-opacity", "0");
+        g.insertBefore(r, g.firstChild);
+      }
+    }catch(e){}
+    chain.forEach(function(c){ c[0].style.display = c[1]; });
+  });
+}
+function renderScene(){
+  ensureHits();
+  var era = st.era;
+  $("eraBig").textContent = ERAS[era].y;
+  $("stamp").textContent = ERAS[era].y;
+  $("eraSub").textContent = era === 4 ? (nFixes() ? "Your design" : "Not designed yet") : ERAS[era].sub;
+  $("eraSlide").value = era;
+  $("sceneWrap").setAttribute("data-era", era);
+  qa(".erab").forEach(function(b){ b.setAttribute("aria-pressed", +b.dataset.e === era ? "true" : "false"); });
+  var meander = era === 0 || (era === 4 && !!st.fixes.meander);
+  $("riverMeander").style.display = meander ? "" : "none";
+  $("riverStraight").style.display = meander ? "none" : "";
+  qa("#scene [data-e], #scene [data-fix], #scene [data-nofix]").forEach(function(el){
+    var r = parseE(el), vis = era >= r[0] && era <= r[1];
+    var fx = el.getAttribute("data-fix"); if(fx) vis = vis && era === 4 && !!st.fixes[fx];
+    var nf = el.getAttribute("data-nofix"); if(nf && era === 4 && st.fixes[nf]) vis = false;
+    var wl = el.getAttribute("data-wild"); if(wl && era === 4) vis = wildOK(wl);
+    if(el.classList.contains("emptyfuture")) vis = era === 4 && nFixes() === 0;
+    el.style.display = vis ? "" : "none";
+  });
+  drawFound();
+  $("toS6").style.display = era === 4 ? "" : "none";
+}
+function drawFound(){
+  var era = st.era, d = $("fDots"); d.innerHTML = "";
+  var T = TARGETS[era];
+  if(!T){
+    var n = nFixes();
+    $("fText").textContent = n ? "Your future river: " + n + " fix" + (n === 1 ? "" : "es") + " on show. Tap them." : "Nothing designed yet. Stage 6 is where you design it.";
+    return;
+  }
+  var f = st.found[era] || {}, got = 0;
+  T.forEach(function(id){ var i = document.createElement("i"); if(f[id]){ i.className = "on"; got++; } d.appendChild(i); });
+  $("fText").textContent = era === 0 ? "Made by people in 1820: spotted " + got + " of " + T.length + "." :
+    "New since " + ERAS[era - 1].y + ": spotted " + got + " of " + T.length + " changes." + (got === T.length ? " All found!" : "");
+}
+function wildOK(name){
+  var m = meters();
+  if(name === "trout") return m.water >= 45;
+  if(name === "kingfisher") return m.wild >= 50 && !!st.fixes.trees;
+  if(name === "otter") return m.wild >= 65 && m.water >= 50;
+  return false;
+}
+function setEra(e, fromUser){
+  st.era = e; st.seen[e] = true;
+  if(fromUser){ stopFlip(); if(e !== 0) markTried("s1"); }
+  save(); renderScene();
+  var info = $("info");
+  if(e === 4){
+    info.innerHTML = nFixes() ? '<h3>Your future river</h3><p>Everything you picked in stage 6 is in the picture. Tap anything to find out what it does.</p>' :
+      '<h3>The future is blank</h3><p>This is today, for now. Pop over to stage 6, spend your points, and your river shows up here.</p>';
+  } else {
+    info.innerHTML = '<h3>' + ERAS[e].y + ': ' + ERAS[e].sub + '</h3><p>' + ERAS[e].nudge + '</p>';
+  }
+}
+function showFeat(id){
+  var F = featInfo(id); if(!F) return;
+  var era = st.era, info = $("info"), h = "";
+  markTried("s1");
+  if(F.k === "h") h += '<span class="kind h">Made or changed by people</span>';
+  else if(F.k === "n") h += '<span class="kind n">Made by nature</span>';
+  else h += '<span class="kind f">Your fix</span>';
+  h += '<h3>' + F.n + '</h3><p>' + F.what + '</p>';
+  if(F.use) h += '<p><b>Used for:</b> ' + F.use + '</p>';
+  if(F.helps) h += '<p><b>Helps:</b> ' + F.helps + '</p>';
+  if(F.eff) h += '<div class="fact">' + F.eff + '</div>';
+  var T = TARGETS[era] || [];
+  var isT = T.indexOf(id) > -1;
+  if(F.k === "h" && !isT && F.from < era) h += '<p class="small" style="margin-top:8px">Not new: this was already here in ' + ERAS[F.from].y + '.</p>';
+  if(isT){
+    var f = st.found[era] = st.found[era] || {};
+    if(!f[id]){
+      f[id] = true; save(); drawFound();
+      var got = T.filter(function(x){ return f[x]; }).length;
+      toast(got === T.length ? "Spotted them all for " + ERAS[era].y + ". Nice one." : "Spotted! " + got + " of " + T.length + ".");
+    }
+  }
+  if(F.why && F.k === "h"){
+    h += '<p class="lab">Why do you think people did this?</p><div class="qopts" id="whyOpts"></div><p class="fbline" id="whyFb" aria-live="polite"></p>';
+  }
+  info.innerHTML = h;
+  if(F.why && F.k === "h"){
+    var box = $("whyOpts");
+    var order = shuffleFixed(F.why.length, id);
+    order.forEach(function(i){
+      var o = F.why[i];
+      var b = document.createElement("button"); b.type = "button"; b.className = "qopt"; b.textContent = o[0];
+      if(st.why[id] && o[1]) b.classList.add("yes");
+      b.addEventListener("click", function(){
+        var fb = $("whyFb");
+        if(o[1]){ st.why[id] = true; save(); b.classList.add("yes"); fb.className = "fbline good"; fb.textContent = "That's the main reason. " + (F.helps ? "It helped " + lowerFirst(F.helps) : ""); }
+        else { b.classList.add("hmm"); fb.className = "fbline hmm"; fb.textContent = F.hint + " Have another go."; shake(b); }
+      });
+      box.appendChild(b);
+    });
+  }
+}
+function lowerFirst(s){ return s.charAt(0).toLowerCase() + s.slice(1); }
+function shuffleFixed(n, seed){
+  var a = []; for(var i = 0; i < n; i++) a.push(i);
+  var h = 0; for(var j = 0; j < seed.length; j++) h = (h * 31 + seed.charCodeAt(j)) % 997;
+  var r = h % n; return a.slice(r).concat(a.slice(0, r));
+}
+function bindScene(){
+  var eb = $("eraBtns");
+  ERAS.forEach(function(E, i){
+    var b = document.createElement("button"); b.type = "button"; b.className = "erab" + (i === 4 ? " future" : ""); b.dataset.e = i; b.textContent = E.y;
+    b.addEventListener("click", function(){ setEra(i, true); });
+    eb.appendChild(b);
+  });
+  $("eraSlide").addEventListener("input", function(){ setEra(+this.value, true); });
+  qa("#scene .ft").forEach(function(g){
+    var id = g.getAttribute("data-c");
+    g.addEventListener("click", function(){ showFeat(id); });
+    g.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); showFeat(id); } });
+  });
+  $("hintBtn").addEventListener("click", function(){
+    var era = st.era, T = TARGETS[era], f = st.found[era] || {};
+    var pool = T ? T.filter(function(x){ return !f[x]; }) : Object.keys(st.fixes).filter(function(k){ return st.fixes[k]; }).map(function(k){ return "fx-" + k; });
+    if(!pool.length){ toast(T ? "All found in this one. Try another time." : "Nothing to show yet. Design it in stage 6."); return; }
+    var id = pool[0];
+    var els = qa('#scene .ft[data-c="' + id + '"]');
+    els.forEach(function(g){ g.classList.remove("pulse"); void g.getBoundingClientRect(); g.classList.add("pulse"); setTimeout(function(){ g.classList.remove("pulse"); }, 4600); });
+    var bb = els[0] && els[0].getBBox ? els[0].getBBox() : null, wrap = $("sceneWrap");
+    if(bb && wrap.scrollWidth > wrap.clientWidth){ wrap.scrollLeft = Math.max(0, bb.x / 1000 * wrap.scrollWidth - wrap.clientWidth / 2); }
+    toast(REDUCED && FEAT[id] ? "Have a look for: " + FEAT[id].n.toLowerCase() + "." : "Look for the glow.");
+  });
+  $("flipBtn").addEventListener("click", function(){ if(flipT) stopFlip(); else startFlip(); });
+  $("toS6").addEventListener("click", function(){ openStage("s6", true); });
+}
+var flipT = null, flipBase = 0;
+function startFlip(){
+  flipBase = st.era; var other = flipBase === 0 ? 1 : flipBase - 1, on = false;
+  $("flipBtn").setAttribute("aria-pressed", "true"); $("flipBtn").textContent = "Stop flipping";
+  markTried("s1");
+  flipT = setInterval(function(){ on = !on; st.era = on ? other : flipBase; st.seen[st.era] = true; renderScene(); }, 1400);
+}
+function stopFlip(){
+  if(!flipT) return;
+  clearInterval(flipT); flipT = null; st.era = flipBase; save(); renderScene();
+  $("flipBtn").setAttribute("aria-pressed", "false"); $("flipBtn").textContent = "Flip back and forth";
+}
+
+/* =========================================================
+   STAGE 2  Four jars
+   ========================================================= */
+var JARS = [["good","Good"],["bad","Bad"],["both","Both"],["dep","Depends"]];
+var JAR_ICON = {
+  good:'<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M4 11 l5 5 l9 -10" stroke="#2e8b5c" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>',
+  bad:'<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M5 5 l12 12 M17 5 l-12 12" stroke="#d75f10" stroke-width="3.5" stroke-linecap="round"/></svg>',
+  both:'<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2 11 l3 3 l5 -6" stroke="#2e8b5c" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M13 7 l7 7 M20 7 l-7 7" stroke="#d75f10" stroke-width="3" stroke-linecap="round"/></svg>',
+  dep:'<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><text x="11" y="18" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="18" fill="#7b4b8f">?</text></svg>'
+};
+var CI = {
+  pipe:'<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="10" width="26" height="10" rx="5" fill="#8d8f8c" stroke="#0a2f38" stroke-width="1.5"/><ellipse cx="25" cy="15" rx="3" ry="5" fill="#2a2e30"/></svg>',
+  tank:'<svg viewBox="0 0 30 30" aria-hidden="true"><ellipse cx="15" cy="17" rx="12" ry="7" fill="#7d8f80" stroke="#0a2f38" stroke-width="1.5"/><ellipse cx="15" cy="15" rx="12" ry="6" fill="#a9c2b0" stroke="#0a2f38" stroke-width="1.5"/></svg>',
+  ruler:'<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M2 15 H28" stroke="#3b9bd6" stroke-width="7"/><path d="M8 11 v8 M15 11 v8 M22 11 v8" stroke="#0a2f38" stroke-width="1.5"/></svg>',
+  tree:'<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="13" y="16" width="4" height="12" fill="#6b4a2e"/><circle cx="15" cy="12" r="10" fill="#3f8a4a" stroke="#0a2f38" stroke-width="1.5"/></svg>',
+  litter:'<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="5" y="10" width="20" height="9" rx="4" fill="#7fd0e8" stroke="#0a2f38" stroke-width="1.5" transform="rotate(-20 15 15)"/><rect x="10" y="10" width="5" height="9" fill="#fff" transform="rotate(-20 15 15)"/></svg>',
+  field:'<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="26" height="18" rx="3" fill="#a9824f" stroke="#0a2f38" stroke-width="1.5"/><path d="M2 11 H28 M2 16 H28 M2 21 H28" stroke="#7d5a32" stroke-width="1.5"/></svg>',
+  weir:'<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="11" cy="13" r="9" fill="none" stroke="#6b4a2e" stroke-width="2.5"/><path d="M2 13 H20 M11 4 V22" stroke="#6b4a2e" stroke-width="2"/><path d="M22 6 L27 26" stroke="#c7c0b0" stroke-width="4"/></svg>',
+  house:'<svg viewBox="0 0 30 30" aria-hidden="true"><rect x="6" y="12" width="18" height="12" fill="#f2ebdc" stroke="#0a2f38" stroke-width="1.5"/><path d="M4 13 L15 4 L26 13Z" fill="#9a4f3c" stroke="#0a2f38" stroke-width="1.5"/><path d="M0 27 H30" stroke="#3b9bd6" stroke-width="4"/></svg>',
+  storm:'<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M6 14 q2 -8 10 -6 q8 -4 9 4 q4 2 1 6 h-18 q-5 -1 -2 -4z" fill="#8a96a0" stroke="#0a2f38" stroke-width="1.5"/><path d="M10 22 l-2 5 M16 22 l-2 5 M22 22 l-2 5" stroke="#2f80bf" stroke-width="2"/></svg>',
+  fish:'<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M6 15 q10 -9 20 0 q-10 8 -20 0z M6 15 l-5 -5 v10z" fill="#8a6a3a" stroke="#0a2f38" stroke-width="1.5"/><circle cx="21" cy="14" r="1.5"/></svg>',
+  tap:'<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 8 H18 V14" stroke="#6d757a" stroke-width="5" fill="none"/><rect x="8" y="3" width="6" height="4" fill="#6d757a"/><path d="M18 18 q-2 4 0 6 q2 -2 0 -6z" fill="#3b9bd6"/></svg>',
+  hand:'<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M6 26 L18 8" stroke="#0a2f38" stroke-width="3"/><path d="M16 6 l6 -2 l1 4 l-5 3z" fill="#ef7724" stroke="#0a2f38" stroke-width="1"/><rect x="18" y="16" width="9" height="11" rx="2" fill="#2e8b5c" stroke="#0a2f38" stroke-width="1.5"/></svg>'
+};
+var CARDS = [
+  {t:"Putting a stream into a pipe under a road", ic:"pipe", ok:["both","bad"],
+   why:"It saves space for the road, but very little can live in a dark pipe and pipes can block and flood.",
+   hint:"Is there anything good about it at all? And anything bad?"},
+  {t:"Building a sewage works", ic:"tank", ok:["good","both"],
+   why:"It cleans dirty water before it goes back in the river. The river gets much healthier.",
+   hint:"Think about what goes into the river with it, and without it."},
+  {t:"Straightening a river", ic:"ruler", ok:["both","bad"],
+   why:"It drains land for farms and homes, but water rushes through faster and wildlife loses its pools and bends.",
+   hint:"Who wins, and what does the river lose?"},
+  {t:"Planting trees along the banks", ic:"tree", ok:["good"],
+   why:"Shade keeps the water cool, roots hold the banks together, and they slow rain down.",
+   hint:"Trees by a river: can you think of anything they harm?"},
+  {t:"Dropping litter by the river", ic:"litter", ok:["bad"],
+   why:"It helps nobody. Plastic breaks into tiny pieces that animals swallow.",
+   hint:"Who does litter help? Anyone?"},
+  {t:"Spreading fertiliser on fields by a river", ic:"field", ok:["dep","both"],
+   why:"It helps crops grow. A little, at the right time, is fine. Too much, or just before rain, and it washes in and feeds green algae.",
+   hint:"Does it matter how much is used, or when?"},
+  {t:"Building a weir for a watermill", ic:"weir", ok:["both"],
+   why:"It powered the mill and made flour, but it blocks fish swimming upstream.",
+   hint:"It did a useful job for people. What about the fish?"},
+  {t:"Building houses on the floodplain", ic:"house", ok:["both","bad"],
+   why:"People need homes, but they are at risk of flooding and the river loses room to spread out.",
+   hint:"Good for who? And what happens when the river is full?"},
+  {t:"Storm overflows letting sewage into the river", ic:"storm", ok:["bad","both"],
+   why:"It stops sewage backing up into homes, but the river and its wildlife pay for it.",
+   hint:"Is it good for the river? Is it good for anyone?"},
+  {t:"Fishing in the river", ic:"fish", ok:["dep"],
+   why:"With rules and limits it is fine, and lots of anglers put fish back. Too much and fish numbers drop.",
+   hint:"Would a few people fishing be different to hundreds taking every fish?"},
+  {t:"Taking water out of the river for homes and farms", ic:"tap", ok:["dep","both"],
+   why:"In a wet winter it is fine. In a dry summer, taking too much can leave the river low and the fish struggling.",
+   hint:"Would it matter more in a wet winter or a dry summer?"},
+  {t:"A litter pick on the river bank", ic:"hand", ok:["good"],
+   why:"Less plastic in the water, a nicer place for people and wildlife.",
+   hint:"Who loses out when litter is picked up?"}
+];
+var jSel = null;
+function jarName(k){ return JARS.filter(function(j){ return j[0] === k; })[0][1]; }
+function drawJars(){
+  var tray = $("tray"); tray.innerHTML = "";
+  CARDS.forEach(function(c, i){
+    if(st.jars[i]) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "scard";
+    b.innerHTML = CI[c.ic] + '<span>' + esc(c.t) + '</span>';
+    b.draggable = true;
+    b.setAttribute("aria-pressed", jSel === i ? "true" : "false");
+    b.addEventListener("click", function(){ jSel = (jSel === i ? null : i); drawJars(); });
+    b.addEventListener("dragstart", function(ev){ jSel = i; try{ ev.dataTransfer.setData("text/plain", String(i)); }catch(e){} qa(".jar").forEach(function(x){ x.classList.add("ready"); }); });
+    b.addEventListener("dragend", function(){ qa(".jar").forEach(function(x){ x.classList.remove("ready","over"); }); });
+    tray.appendChild(b);
+  });
+  var box = $("jars"); box.innerHTML = "";
+  JARS.forEach(function(J){
+    var d = document.createElement("div"); d.className = "jar " + J[0] + (jSel !== null ? " ready" : "");
+    d.setAttribute("role", "button"); d.tabIndex = 0;
+    d.setAttribute("aria-label", J[1] + " jar" + (jSel !== null ? ". Put the card here." : ""));
+    d.innerHTML = '<span class="jt">' + JAR_ICON[J[0]] + J[1] + '</span>';
+    CARDS.forEach(function(c, i){
+      if(st.jars[i] !== J[0]) return;
+      var p = document.createElement("button"); p.type = "button"; p.className = "placed"; p.textContent = c.t;
+      p.setAttribute("aria-label", c.t + ", in the " + J[1].toLowerCase() + " jar. With no card in your hand, tap to take it back out.");
+      p.addEventListener("click", function(ev){ ev.stopPropagation(); if(jSel !== null){ placeJar(J[0]); return; } delete st.jars[i]; save(); jSel = i; drawJars(); $("jFb").className = "fbline"; $("jFb").textContent = "Back in your hand. Tap a jar to put it somewhere."; });
+      d.appendChild(p);
+    });
+    d.addEventListener("click", function(){ placeJar(J[0]); });
+    d.addEventListener("keydown", function(ev){ if(ev.target === d && (ev.key === "Enter" || ev.key === " ")){ ev.preventDefault(); placeJar(J[0]); } });
+    d.addEventListener("dragover", function(ev){ ev.preventDefault(); d.classList.add("over"); });
+    d.addEventListener("dragleave", function(){ d.classList.remove("over"); });
+    d.addEventListener("drop", function(ev){ ev.preventDefault(); placeJar(J[0]); });
+    box.appendChild(d);
+  });
+}
+function placeJar(jar){
+  var fb = $("jFb");
+  if(jSel === null){ fb.className = "fbline"; fb.textContent = "Tap a card first, then tap a jar."; return; }
+  markTried("s2");
+  var c = CARDS[jSel];
+  if(c.ok.indexOf(jar) > -1){
+    st.jars[jSel] = jar; save();
+    var extra = c.ok.length > 1 ? " Some people would put it in " + c.ok.filter(function(x){ return x !== jar; }).map(function(x){ return jarName(x).toLowerCase(); }).join(" or ") + ", and that works too." : "";
+    jSel = null; drawJars();
+    var n = Object.keys(st.jars).length;
+    fb.className = "fbline good";
+    fb.textContent = (n === CARDS.length ? "All twelve sorted! " : "That works. ") + c.why + extra;
+  } else {
+    st.jarTries[jSel] = (st.jarTries[jSel] || 0) + 1; save();
+    fb.className = "fbline hmm"; fb.textContent = "Hmm, have another think. " + c.hint;
+    shake(qa(".jar." + jar)[0]);
+  }
+}
+
+/* =========================================================
+   STAGE 3  River lab
+   ========================================================= */
+var TOG = [
+  {k:"sewage", n:"Sewage overflow", bad:1, d:"Dirty water spills in when it storms",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="12" width="16" height="9" fill="#5b5f63"/><path d="M18 16 q8 0 12 10" stroke="#7a5a32" stroke-width="5" fill="none"/></svg>'},
+  {k:"farm", n:"Farm runoff", bad:1, d:"Fertiliser and soil wash off the fields",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="6" width="26" height="14" fill="#a9824f" stroke="#0a2f38"/><path d="M2 10 H28 M2 14 H28" stroke="#7d5a32"/><path d="M20 22 l3 8 M26 22 l2 8" stroke="#9a7a3a" stroke-width="3"/></svg>'},
+  {k:"plastic", n:"Plastic litter", bad:1, d:"Bottles, bags and wrappers",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><rect x="5" y="12" width="22" height="9" rx="4" fill="#7fd0e8" stroke="#0a2f38" transform="rotate(-20 16 16)"/></svg>'},
+  {k:"trees", n:"Trees on the banks", d:"Shade, roots and falling leaves",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><rect x="15" y="18" width="4" height="13" fill="#6b4a2e"/><circle cx="17" cy="13" r="11" fill="#3f8a4a" stroke="#0a2f38"/></svg>'},
+  {k:"reeds", n:"Reed beds", d:"Slow the water and filter pollution",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><path d="M8 32 L6 8 M15 32 L16 4 M22 32 L25 9" stroke="#4f7a2a" stroke-width="2.5"/><rect x="14" y="2" width="4" height="9" rx="2" fill="#7a5638"/><rect x="5" y="6" width="3.5" height="8" rx="1.7" fill="#7a5638"/></svg>'},
+  {k:"fishpass", n:"Fish pass", d:"Steps so fish can get past the weir",
+   ic:'<svg viewBox="0 0 34 34" aria-hidden="true"><path d="M2 30 h8 v-7 h8 v-7 h8 v-7 h6" stroke="#8d8579" stroke-width="4" fill="none"/><path d="M12 16 q5 -4 10 0 q-5 3 -10 0z" fill="#c9cfd4" stroke="#0a2f38"/></svg>'}
+];
+var CRIT = [
+  ["bloodworm","Bloodworms"],["maggot","Rat tailed maggots"],["shrimp","Freshwater shrimp"],["caddis","Caddisfly larvae"],["mayfly","Mayfly nymphs"],
+  ["trout","Brown trout"],["salmon","Salmon"],["kingfisher","Kingfisher"],["otter","Otter"],["dragonfly","Dragonflies"]
+];
+function labQuality(L){
+  var q = 70 - (L.sewage ? 30 : 0) - (L.farm ? 20 : 0) - (L.plastic ? 8 : 0) + (L.trees ? 10 : 0) + (L.reeds ? 12 : 0);
+  if(L.reeds && L.farm) q += 6;
+  if(L.trees && L.farm) q += 4;
+  return Math.max(5, Math.min(100, q));
+}
+function labLife(L){
+  var q = labQuality(L), v = {};
+  v.bloodworm = true;
+  v.maggot = q < 35;
+  v.shrimp = q >= 40;
+  v.caddis = q >= 55;
+  v.mayfly = q >= 70;
+  v.trout = q >= 65;
+  v.salmon = q >= 70 && !!L.fishpass;
+  v.kingfisher = q >= 60 && !!L.trees;
+  v.otter = q >= 75 && (!!L.trees || !!L.reeds);
+  v.dragonfly = q >= 45 && !!L.reeds;
+  v.algae = (!!L.farm || !!L.sewage) && q < 50;
+  return v;
+}
+function hWord(q){ return q < 25 ? "Very poorly" : q < 45 ? "Struggling" : q < 65 ? "Getting better" : q < 80 ? "Healthy" : "Thriving"; }
+function hCol(q){ return q < 25 ? "#8a6a3a" : q < 45 ? "#c9a640" : q < 65 ? "#8cbf62" : q < 80 ? "#3fb27f" : "#1f9fd0"; }
+function mix(a, b, t){
+  function p(h){ return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)]; }
+  var A = p(a), B = p(b), o = "#";
+  for(var i = 0; i < 3; i++){ var v = Math.round(A[i] + (B[i] - A[i]) * t).toString(16); o += v.length < 2 ? "0" + v : v; }
+  return o;
+}
+var lastLife = null;
+function renderLab(){
+  var L = st.lab, q = labQuality(L), v = labLife(L);
+  $("hBar").style.width = q + "%"; $("hBar").style.background = hCol(q);
+  $("hWord").textContent = hWord(q) + " (" + q + " out of 100)";
+  $("tankWater").setAttribute("fill", mix("#7a7a48", "#3b9bd6", Math.max(0, Math.min(1, (q - 10) / 75))));
+  qa("#tank .crit").forEach(function(g){
+    var k = g.getAttribute("data-k");
+    var on = v.hasOwnProperty(k) ? v[k] : !!L[k];
+    g.classList.toggle("off", !on);
+  });
+  var box = $("toggles"); box.innerHTML = "";
+  TOG.forEach(function(T){
+    var b = document.createElement("button"); b.type = "button"; b.className = "tog " + (T.bad ? "bad" : "good");
+    b.setAttribute("aria-pressed", L[T.k] ? "true" : "false");
+    b.innerHTML = T.ic + '<span><span class="tg">' + (T.bad ? "Problem" : "Fix") + '</span>' + T.n + '<br><span class="small" style="font-size:.78rem">' + T.d + '</span></span><span class="sw" aria-hidden="true"></span>';
+    b.setAttribute("aria-label", T.n + ", " + (L[T.k] ? "on" : "off"));
+    b.addEventListener("click", function(){ L[T.k] = !L[T.k]; st.labMoved = true; markTried("s3"); save(); renderLab(); });
+    box.appendChild(b);
+  });
+  var lives = $("lives"), h = "", kinds = 0;
+  CRIT.forEach(function(c){
+    if(!v[c[0]]) return;
+    kinds++; st.labSeen[c[0]] = true;
+    var isNew = lastLife && !lastLife[c[0]];
+    h += '<span class="life' + (isNew ? " new" : "") + '">' + c[1] + (isNew ? ", just arrived" : "") + '</span>';
+  });
+  if(v.algae) h += '<span class="life" style="background:#cfe8a8">Green algae bloom</span>';
+  lives.innerHTML = '<span class="lab" style="margin:0 6px 0 0">Living here now (' + kinds + ' kinds):</span>' + h;
+  if(lastLife){
+    var gone = CRIT.filter(function(c){ return lastLife[c[0]] && !v[c[0]]; }).map(function(c){ return c[1]; });
+    if(gone.length) toast("Gone: " + gone.join(", ") + ".");
+  }
+  lastLife = v;
+  if(st.labMoved){
+    if(v.mayfly) st.goals.mayfly = true;
+    if(v.algae) st.goals.algae = true;
+    if(v.salmon) st.goals.salmon = true;
+    if(kinds >= 8) st.goals.eight = true;
+    save();
+  }
+  drawGoals();
+}
+var GOALS = [["mayfly","Bring the mayfly nymphs back"],["algae","Find out what makes green algae grow"],["salmon","Help a salmon get past the weir"],["eight","Get 8 kinds of wildlife living there at once"]];
+function drawGoals(){
+  $("goals").innerHTML = GOALS.map(function(g){
+    var d = !!st.goals[g[0]];
+    return '<div class="goal' + (d ? " done" : "") + '"><i>' + (d ? '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8 l3 3 l7 -7" stroke="#fff" stroke-width="3" fill="none"/></svg>' : '') + '</i>' + g[1] + (d ? '<span class="sr"> (done)</span>' : '') + '</div>';
+  }).join("");
+}
+var LABQ = [
+  {id:"q1", q:"The mayfly nymphs vanished. What does that tell you?",
+   o:[["The water got dirtier",1],["The water got colder",0],["Mayflies do not like reeds",0]], hint:"Look back at the creature scale. Which end are mayflies at?"},
+  {id:"q2", q:"Why did the salmon only turn up with the fish pass on?",
+   o:[["Salmon swim upstream, and the weir was blocking them",1],["The fish pass makes the water cleaner",0],["Salmon like climbing stairs for fun",0]], hint:"What is the weir doing to fish trying to swim up the river?"},
+  {id:"q3", q:"Reed beds help the river because they...",
+   o:[["slow the water and filter out some pollution",1],["make the water warmer",0],["scare off the herons",0]], hint:"Think about what water has to do to get through a thick bed of reeds."}
+];
+function drawQs(list, hostId, store, stage){
+  var host = $(hostId); host.innerHTML = "";
+  list.forEach(function(Q){
+    var d = document.createElement("div"); d.className = "qblock";
+    d.innerHTML = '<h4>' + Q.q + '</h4><div class="qopts"></div><p class="fbline" aria-live="polite"></p>';
+    var ob = d.querySelector(".qopts"), fb = d.querySelector(".fbline");
+    Q.o.forEach(function(o){
+      var b = document.createElement("button"); b.type = "button"; b.className = "qopt" + (store[Q.id] && o[1] ? " yes" : ""); b.textContent = o[0];
+      b.addEventListener("click", function(){
+        markTried(stage);
+        if(o[1]){ store[Q.id] = true; save(); b.classList.add("yes"); fb.className = "fbline good"; fb.textContent = "Yes, that is it."; }
+        else { b.classList.add("hmm"); fb.className = "fbline hmm"; fb.textContent = Q.hint + " Have another go."; shake(b); }
+      });
+      ob.appendChild(b);
+    });
+    host.appendChild(d);
+  });
+}
+
+/* =========================================================
+   STAGE 4  Where do the homes go?
+   ========================================================= */
+var CH = {
+  homes:[["fp","On the floodplain","Flat, cheap to build on, close to the shops"],["hill","Up on the valley side","Higher up, a bit further from town"]],
+  surf:[["hard","Tarmac drives, paved gardens","Tidy and easy to park on"],["soft","Gravel, grass and trees","Rain can soak in"]],
+  rest:[["car","A big car park","Lots of parking for the shops"],["wet","Keep it as wet meadow","Room for the river to spread out"]],
+  up:[["bare","Leave the hills bare","Drained fields, no trees"],["woods","Woods and leaky dams","Slow the water before it gets here"]]
+};
+var CH_IC = {
+  fp:'<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M0 34 H64 V48 H0Z" fill="#92c477"/><path d="M0 40 H64" stroke="#3b9bd6" stroke-width="5"/><rect x="10" y="20" width="14" height="12" fill="#f2ebdc" stroke="#0a2f38"/><path d="M8 21 L17 13 L26 21Z" fill="#9a4f3c"/><rect x="34" y="20" width="14" height="12" fill="#f2ebdc" stroke="#0a2f38"/><path d="M32 21 L41 13 L50 21Z" fill="#9a4f3c"/></svg>',
+  hill:'<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M0 44 L64 8 V48 H0Z" fill="#92c477"/><path d="M0 46 H30" stroke="#3b9bd6" stroke-width="4"/><rect x="40" y="10" width="12" height="10" fill="#f2ebdc" stroke="#0a2f38"/><path d="M38 11 L46 4 L54 11Z" fill="#9a4f3c"/></svg>',
+  hard:'<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="4" y="22" width="56" height="20" fill="#5b5f63"/><path d="M10 30 l-4 12 M30 18 l0 10 M50 18 l0 10" stroke="#3b9bd6" stroke-width="2"/><path d="M8 36 H56" stroke="#3b9bd6" stroke-width="3"/></svg>',
+  soft:'<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="4" y="26" width="56" height="16" fill="#92c477"/><g fill="#c9b99a"><circle cx="12" cy="34" r="2"/><circle cx="18" cy="38" r="2"/><circle cx="24" cy="33" r="2"/></g><rect x="44" y="18" width="3" height="10" fill="#6b4a2e"/><circle cx="45" cy="16" r="7" fill="#3f8a4a"/><path d="M30 16 v14 M36 16 v14" stroke="#3b9bd6" stroke-width="2" stroke-dasharray="3 3"/></svg>',
+  car:'<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="4" y="16" width="56" height="26" fill="#6d7276"/><path d="M18 16 v26 M32 16 v26 M46 16 v26" stroke="#fff" stroke-width="1.5"/><rect x="7" y="26" width="9" height="7" rx="2" fill="#c94a3a"/><rect x="35" y="26" width="9" height="7" rx="2" fill="#ffc247"/></svg>',
+  wet:'<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="4" y="22" width="56" height="20" fill="#9cc77a"/><ellipse cx="30" cy="34" rx="16" ry="5" fill="#5fb0dd"/><path d="M12 36 L10 18 M16 36 L17 16 M50 36 L52 20" stroke="#4f7a2a" stroke-width="2"/><rect x="15.5" y="14" width="3" height="7" rx="1.5" fill="#7a5638"/></svg>',
+  bare:'<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M0 44 L40 10 L64 20 V48 H0Z" fill="#c7d97a"/><path d="M8 40 L44 14" stroke="#7a5638" stroke-width="2" stroke-dasharray="4 3"/><path d="M14 44 L50 18" stroke="#7a5638" stroke-width="2" stroke-dasharray="4 3"/></svg>',
+  woods:'<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M0 44 L40 10 L64 20 V48 H0Z" fill="#92c477"/><g><rect x="18" y="26" width="3" height="8" fill="#6b4a2e"/><circle cx="19.5" cy="24" r="7" fill="#3f8a4a"/><rect x="34" y="16" width="3" height="8" fill="#6b4a2e"/><circle cx="35.5" cy="14" r="7" fill="#3f8a4a"/></g><path d="M44 38 l14 -4 M44 42 l14 -4" stroke="#6b4a2e" stroke-width="3"/></svg>'
+};
+var BOX = {homes:"ch-homes", surf:"ch-surf", rest:"ch-rest", up:"ch-up"};
+function drawChoices(){
+  Object.keys(CH).forEach(function(g){
+    var box = $(BOX[g]); box.innerHTML = "";
+    CH[g].forEach(function(c){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chcard";
+      b.setAttribute("aria-pressed", st.fp[g] === c[0] ? "true" : "false");
+      b.innerHTML = CH_IC[c[0]] + '<span><b>' + c[1] + '</b>' + c[2] + '</span>';
+      b.addEventListener("click", function(){ st.fp[g] = c[0]; markTried("s4"); save(); drawChoices(); drawValley(); });
+      box.appendChild(b);
+    });
+  });
+  var pr = $("predRow"); pr.innerHTML = "";
+  ["They will stay dry","They will get wet","Not sure"].forEach(function(p){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = p;
+    b.setAttribute("aria-pressed", st.pred === p ? "true" : "false");
+    b.addEventListener("click", function(){ st.pred = p; save(); drawChoices(); });
+    pr.appendChild(b);
+  });
+}
+function stormLevel(c){
+  return 50 + (c.surf === "hard" ? 10 : 0) + (c.rest === "car" ? 12 : 0) - (c.rest === "wet" ? 10 : 0) - (c.up === "woods" ? 12 : 0);
+}
+function waterY(L){ return 262 - L * 0.62; }
+function drawValley(level){
+  var c = st.fp;
+  $("homesFP").style.display = c.homes === "fp" ? "" : "none";
+  $("homesHill").style.display = c.homes === "hill" ? "" : "none";
+  $("surfFP").style.display = c.surf === "hard" ? "" : "none";
+  $("surfHill").style.display = c.surf === "hard" ? "" : "none";
+  $("restCar").style.display = c.rest === "car" ? "" : "none";
+  $("restWet").style.display = c.rest === "wet" ? "" : "none";
+  $("upWoods").style.display = c.up === "woods" ? "" : "none";
+  var y = level === undefined ? 252 : waterY(level);
+  $("fpWater").setAttribute("transform", "translate(0 " + y.toFixed(1) + ")");
+  var gh = level === undefined ? 10 : Math.min(134, level * 1.3);
+  $("gaugeFill").setAttribute("y", (277 - gh).toFixed(1)); $("gaugeFill").setAttribute("height", gh.toFixed(1));
+}
+function outcome(c, L){
+  var homes = c.homes === "hill" ? "Dry, high above the water" : L >= 55 ? "Flooded inside" : L >= 46 ? "Gardens and road flooded" : L >= 41 ? "Water right up to the edge" : "Dry this time";
+  var river = L <= 40 ? "Stayed in its banks" : L < 46 ? "Just spilled over" : "Spread over the floodplain";
+  var town = L >= 62 ? "Flooded" : "Safe";
+  var ns = (c.rest === "wet" ? 1 : 0) + (c.up === "woods" ? 1 : 0) + (c.surf === "soft" ? 1 : 0) + (c.homes === "hill" ? 1 : 0);
+  var nature = ns <= 1 ? "Not much room for wildlife" : ns === 2 ? "Some wildlife" : "Lots of wildlife";
+  var dry = c.homes === "hill" || L < 46;
+  return {homes:homes, river:river, town:town, nature:nature, dry:dry};
+}
+var stormT = null;
+function sendStorm(){
+  var c = st.fp, fb = $("fpResult");
+  if(!c.homes || !c.surf || !c.rest || !c.up){
+    fb.innerHTML = '<p class="fbline hmm" style="grid-column:1/-1">Pick one card in each of the four boxes first. Any will do, you can change them after.</p>';
+    return;
+  }
+  markTried("s4");
+  var L = stormLevel(c), O = outcome(c, L);
+  clearTimeout(stormT);
+  fb.innerHTML = '<p class="fbline" style="grid-column:1/-1">Here comes the rain...</p>';
+  if(!REDUCED){ $("rainG").style.display = ""; }
+  $("cloudG").style.display = "";
+  drawValley(L);
+  stormT = setTimeout(function(){
+    $("rainG").style.display = "none";
+    var guess = "";
+    if(st.pred === "They will stay dry") guess = O.dry ? "You guessed they would stay dry, and they did." : "You guessed they would stay dry. Not this time.";
+    else if(st.pred === "They will get wet") guess = O.dry ? "You guessed they would get wet. They stayed dry!" : "You guessed they would get wet, and they did.";
+    var cells = [["New homes", O.homes, O.dry], ["The river", O.river, L <= 45], ["Town downstream", O.town, O.town === "Safe"], ["Nature", O.nature, O.nature !== "Not much room for wildlife"]];
+    fb.innerHTML = cells.map(function(x){ return '<div class="rcell ' + (x[2] ? "ok" : "warn") + '"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("") +
+      '<p class="small" style="grid-column:1/-1;margin:0">' + (guess ? guess + " " : "") + (c.homes === "hill" ? "Safe homes, but a longer walk to the shops and buses." : "Handy for the shops, but they sit where the river spreads out.") + '</p>';
+    st.runs.push({c:{homes:c.homes, surf:c.surf, rest:c.rest, up:c.up}, L:L, homes:O.homes, town:O.town, nature:O.nature, pred:st.pred});
+    if(st.runs.length > 6) st.runs = st.runs.slice(-6);
+    save(); drawRuns();
+  }, REDUCED ? 50 : 3100);
+}
+function chName(g, v){ var c = CH[g].filter(function(x){ return x[0] === v; })[0]; return c ? c[1] : v; }
+function runLine(r){ return chName("homes", r.c.homes) + "; " + chName("surf", r.c.surf).toLowerCase() + "; " + chName("rest", r.c.rest).toLowerCase() + "; " + chName("up", r.c.up).toLowerCase() + ". Homes: " + r.homes.toLowerCase() + ". Town: " + r.town.toLowerCase() + ". " + r.nature + "."; }
+function drawRuns(){
+  $("runs").innerHTML = st.runs.length ? st.runs.map(function(r){ return '<li>' + esc(runLine(r)) + '</li>'; }).join("") : "";
+  if(st.runs.length) $("runs").insertAdjacentHTML("afterbegin", '<span class="lab" style="margin-left:-20px">Your storms so far</span>');
+}
+var FPQ = [
+  {id:"f1", q:"Why does keeping a wet meadow make the flood lower?",
+   o:[["It soaks up and holds flood water, like a sponge",1],["It stops the rain falling",0],["Cows drink the extra water",0]], hint:"Where can the water go when the river spreads onto a meadow?"},
+  {id:"f2", q:"Why do tarmac drives and car parks make floods worse?",
+   o:[["Rain cannot soak in, so it runs off fast into drains and the river",1],["Tarmac is heavy and pushes the river up",0],["Tarmac makes it rain more",0]], hint:"Pour water on grass, then on a playground. What is different?"},
+  {id:"f3", q:"Who do houses on the floodplain help most?",
+   o:[["Families who need homes near the town",1],["Fish in the river",0],["Nobody at all",0]], hint:"Homes are for people. Which people?"}
+];
+
+/* =========================================================
+   STAGE 5  Litter and life walk
+   ========================================================= */
+var LITTER = [["wrap","Wrappers"],["bottle","Plastic bottles"],["can","Cans"],["paper","Paper and card"],["food","Food waste"],["lother","Other litter"]];
+var LIFE = [["tree","Trees"],["bush","Bushes and hedges"],["flower","Wild flowers and weeds"],["bird","Birds"],["bug","Minibeasts"],["animal","Other animals"]];
+var T_IC = {
+  wrap:'<rect x="6" y="10" width="28" height="14" rx="3" fill="#ef7724" stroke="#0a2f38" stroke-width="1.5"/><path d="M6 10 l-4 -3 M6 24 l-4 3 M34 10 l4 -3 M34 24 l4 3" stroke="#0a2f38" stroke-width="1.5"/>',
+  bottle:'<rect x="14" y="2" width="8" height="5" fill="#2f6fc0"/><path d="M13 8 h10 l3 6 v18 h-16 v-18z" fill="#bfe6f5" stroke="#0a2f38" stroke-width="1.5"/>',
+  can:'<rect x="11" y="4" width="16" height="26" rx="3" fill="#c94a3a" stroke="#0a2f38" stroke-width="1.5"/><path d="M11 12 H27 M11 22 H27" stroke="#fff" stroke-width="1.5"/>',
+  paper:'<path d="M8 4 h18 l6 6 v22 h-24z" fill="#fffdf8" stroke="#0a2f38" stroke-width="1.5"/><path d="M12 14 H28 M12 19 H28 M12 24 H24" stroke="#9aa1a6" stroke-width="1.5"/>',
+  food:'<circle cx="19" cy="18" r="11" fill="#e8c26a" stroke="#0a2f38" stroke-width="1.5"/><path d="M19 7 q4 -5 8 -2" stroke="#3f8a4a" stroke-width="2.5" fill="none"/><path d="M26 12 a6 6 0 0 0 4 8" fill="#fffdf8" stroke="#0a2f38"/>',
+  lother:'<text x="19" y="25" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="20" fill="#0a2f38">?</text>',
+  tree:'<rect x="17" y="18" width="4" height="14" fill="#6b4a2e"/><circle cx="19" cy="13" r="11" fill="#3f8a4a" stroke="#0a2f38" stroke-width="1.5"/>',
+  bush:'<ellipse cx="19" cy="22" rx="16" ry="10" fill="#4f9a52" stroke="#0a2f38" stroke-width="1.5"/><circle cx="12" cy="20" r="2" fill="#c94a3a"/><circle cx="25" cy="24" r="2" fill="#c94a3a"/>',
+  flower:'<path d="M19 32 V16" stroke="#3f8a4a" stroke-width="2.5"/><g fill="#ffc247" stroke="#0a2f38" stroke-width="1"><circle cx="19" cy="8" r="4"/><circle cx="25" cy="13" r="4"/><circle cx="13" cy="13" r="4"/><circle cx="19" cy="17" r="4"/></g><circle cx="19" cy="13" r="3" fill="#ef7724"/>',
+  bird:'<ellipse cx="19" cy="20" rx="11" ry="8" fill="#7a5a3a" stroke="#0a2f38" stroke-width="1.5"/><circle cx="28" cy="13" r="5" fill="#7a5a3a" stroke="#0a2f38" stroke-width="1.5"/><path d="M32 13 l5 1" stroke="#e8b33a" stroke-width="2.5"/><circle cx="29" cy="12" r="1"/>',
+  bug:'<ellipse cx="19" cy="20" rx="9" ry="11" fill="#c94a3a" stroke="#0a2f38" stroke-width="1.5"/><path d="M19 9 V31" stroke="#0a2f38" stroke-width="1.5"/><circle cx="15" cy="17" r="2"/><circle cx="23" cy="23" r="2"/><circle cx="19" cy="7" r="4" fill="#0a2f38"/>',
+  animal:'<ellipse cx="18" cy="22" rx="11" ry="7" fill="#9a7a5a" stroke="#0a2f38" stroke-width="1.5"/><circle cx="29" cy="15" r="5" fill="#9a7a5a" stroke="#0a2f38" stroke-width="1.5"/><path d="M7 20 q-6 -10 2 -14" stroke="#9a7a5a" stroke-width="4" fill="none"/>'
+};
+var SAMPLE = {wrap:9, bottle:4, can:3, paper:6, food:2, lother:1, tree:7, bush:5, flower:12, bird:8, bug:15, animal:1};
+var sampleOn = false;
+function drawTallies(){
+  [["tLitter", LITTER],["tLife", LIFE]].forEach(function(p){
+    var box = $(p[0]); box.innerHTML = "";
+    p[1].forEach(function(it){
+      var n = st.tally[it[0]] || 0;
+      var d = document.createElement("div"); d.className = "tcell" + (n ? " has" : "");
+      d.innerHTML = '<svg viewBox="0 0 38 34" aria-hidden="true">' + T_IC[it[0]] + '</svg><span class="tl">' + it[1] + '</span>' +
+        '<div class="tcount"><button type="button" class="tb minus" data-t="' + it[0] + '" data-d="-1" aria-label="One less ' + it[1] + '">&minus;</button><b id="tc-' + it[0] + '">' + n + '</b><button type="button" class="tb" data-t="' + it[0] + '" data-d="1" aria-label="One more ' + it[1] + '">+</button></div>';
+      box.appendChild(d);
+    });
+  });
+}
+function tallyClick(ev){
+  var b = ev.target.closest(".tb"); if(!b) return;
+  var k = b.dataset.t, n = (st.tally[k] || 0) + (+b.dataset.d);
+  st.tally[k] = Math.max(0, Math.min(999, n));
+  if(sampleOn){ sampleOn = false; $("sampleBtn").textContent = "Try sample numbers"; }
+  markTried("s5"); save();
+  $("tc-" + k).textContent = st.tally[k];
+  b.closest(".tcell").classList.toggle("has", st.tally[k] > 0);
+  drawCharts();
+}
+function niceMax(m){ if(m <= 5) return 5; if(m <= 10) return 10; if(m <= 20) return 20; if(m <= 50) return Math.ceil(m / 10) * 10; return Math.ceil(m / 25) * 25; }
+function barChart(svgId, items, data, col, noteId){
+  var svg = $(svgId), W = 520, H = 260, l = 40, r = 10, t = 22, b = 56;
+  var vals = items.map(function(it){ return data[it[0]] || 0; });
+  var mx = Math.max.apply(null, vals), top = niceMax(mx), step = top <= 5 ? 1 : top <= 10 ? 2 : top / 5;
+  var ph = H - t - b, pw = W - l - r, band = pw / items.length, bw = Math.min(46, band * 0.58);
+  var h = '<g font-family="Atkinson Hyperlegible,Verdana,Arial" font-size="12" fill="#3d5b64">';
+  for(var v = 0; v <= top + 0.001; v += step){
+    var y = t + ph - v / top * ph;
+    h += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="#0a2f38" stroke-opacity="' + (v === 0 ? .6 : .1) + '" stroke-width="' + (v === 0 ? 1.5 : 1) + '"/>';
+    h += '<text x="' + (l - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end">' + Math.round(v) + '</text>';
+  }
+  h += '<text x="12" y="' + (t + ph / 2) + '" transform="rotate(-90 12 ' + (t + ph / 2) + ')" text-anchor="middle" font-size="11">number counted</text>';
+  items.forEach(function(it, i){
+    var val = vals[i], cx = l + band * i + band / 2, bh = val / top * ph, x = cx - bw / 2, y0 = t + ph;
+    if(val > 0){
+      var rr = Math.min(4, bh);
+      h += '<g class="bar"><title>' + it[1] + ': ' + val + '</title><rect x="' + (cx - band / 2) + '" y="' + t + '" width="' + band + '" height="' + ph + '" fill="transparent"/>' +
+        '<path class="b" d="M' + x.toFixed(1) + ' ' + y0 + ' V' + (y0 - bh + rr).toFixed(1) + ' Q' + x.toFixed(1) + ' ' + (y0 - bh).toFixed(1) + ' ' + (x + rr).toFixed(1) + ' ' + (y0 - bh).toFixed(1) +
+        ' H' + (x + bw - rr).toFixed(1) + ' Q' + (x + bw).toFixed(1) + ' ' + (y0 - bh).toFixed(1) + ' ' + (x + bw).toFixed(1) + ' ' + (y0 - bh + rr).toFixed(1) + ' V' + y0 + 'Z" fill="' + col + '"/>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (y0 - bh - 6).toFixed(1) + '" text-anchor="middle" font-weight="700" fill="#0a2f38">' + val + '</text></g>';
+    }
+    var words = it[1].split(" "), lines = [], cur = "";
+    words.forEach(function(w){ if((cur + " " + w).trim().length > 10 && cur){ lines.push(cur); cur = w; } else cur = (cur + " " + w).trim(); });
+    lines.push(cur);
+    lines.forEach(function(ln, j){ h += '<text x="' + cx.toFixed(1) + '" y="' + (y0 + 16 + j * 13) + '" text-anchor="middle" fill="#0a2f38" font-size="11.5">' + esc(ln) + '</text>'; });
+  });
+  if(mx === 0) h += '<text x="' + (l + pw / 2) + '" y="' + (t + ph / 2) + '" text-anchor="middle" font-size="14" fill="#3d5b64">Tap + to count, and your bars grow here.</text>';
+  h += '</g>';
+  svg.innerHTML = h;
+  var note = $(noteId);
+  if(mx === 0){ note.innerHTML = ""; return; }
+  var tops = items.filter(function(it, i){ return vals[i] === mx; }).map(function(it){ return it[1].toLowerCase(); });
+  var total = vals.reduce(function(a, c){ return a + c; }, 0);
+  note.innerHTML = (sampleOn ? '<span class="sample">Sample numbers, not your walk</span> ' : '') + '<p class="small" style="margin:6px 0 0">Total: <b>' + total + '</b>. Tallest bar: <b>' + tops.join(" and ") + '</b> (' + mx + ').</p>';
+}
+function drawCharts(){
+  var d = sampleOn ? SAMPLE : st.tally;
+  barChart("chLitter", LITTER, d, "#d75f10", "chLitterNote");
+  barChart("chLife", LIFE, d, "#2e8b5c", "chLifeNote");
+}
+function drawWalkWith(){
+  var r = $("walkWith"); r.innerHTML = "";
+  ["Jay","HB","Someone else","From a window"].forEach(function(v){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pick"; b.textContent = v;
+    b.setAttribute("aria-pressed", st.walkWith === v ? "true" : "false");
+    b.addEventListener("click", function(){ st.walkWith = v; save(); markTried("s5"); drawWalkWith(); });
+    r.appendChild(b);
+  });
+}
+function printSheet(){
+  var row = function(it){ return '<tr><td>' + it[1] + '</td><td class="box"></td><td style="width:15%">Total:</td></tr>'; };
+  $("paperSheet").innerHTML = '<h1 style="font-size:22px;margin:0 0 4px">River Road: litter and life walk</h1>' +
+    '<p style="margin:0 0 14px">Make a tally mark for each one you see. Count litter, do not touch it. Name or initials: ________</p>' +
+    '<h2 style="font-size:17px">Litter people left</h2><table><tr><th>Kind</th><th>Tally</th><th>Total</th></tr>' + LITTER.map(row).join("") + '</table>' +
+    '<h2 style="font-size:17px">Living things</h2><table><tr><th>Kind</th><th>Tally</th><th>Total</th></tr>' + LIFE.map(row).join("") + '</table>' +
+    '<p>Where we went: ____________________________________________</p><p>One thing people have done to this place: ____________________________________________</p>';
+  document.body.classList.add("print-sheet");
+  st.printed = true; save(); markTried("s5");
+  var done = function(){ document.body.classList.remove("print-sheet"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  try{ window.print(); }catch(e){}
+  setTimeout(done, 1500);
+}
+
+/* =========================================================
+   STAGE 6  Fix the river
+   ========================================================= */
+var BUDGET = 12;
+var BASE = {water:20, wild:20, flood:25, people:35};
+var MNAMES = [["water","Water quality"],["wild","Wildlife"],["flood","Flood safety"],["people","People enjoying it"]];
+var FIX = [
+  {k:"sewage", n:"Bigger storm tank", cost:4, d:"Holds storm sewage until the works can clean it, so far less spills into the river.", e:{water:25, wild:8, people:8},
+   ic:'<ellipse cx="60" cy="34" rx="40" ry="14" fill="#6aa08a" stroke="#0a2f38" stroke-width="2.5"/><ellipse cx="60" cy="28" rx="40" ry="12" fill="#a9c2b0" stroke="#0a2f38" stroke-width="2.5"/><path d="M10 50 H110" stroke="#3b9bd6" stroke-width="5"/>'},
+  {k:"meander", n:"Put the bends back", cost:4, d:"Dig the old meanders out again. Slower water, pools for fish, more room in a flood.", e:{wild:15, flood:12, people:6},
+   ic:'<path d="M6 30 C30 6 40 54 60 30 S90 6 114 30" stroke="#3b9bd6" stroke-width="9" fill="none"/><path d="M6 30 C30 6 40 54 60 30 S90 6 114 30" stroke="#fff" stroke-width="2" stroke-dasharray="6 8" fill="none"/>'},
+  {k:"culvert", n:"Free the stream", cost:3, d:"Take the stream out of its pipe and give it open banks again. Nothing to block.", e:{wild:10, flood:6, people:4},
+   ic:'<rect x="6" y="20" width="40" height="16" rx="8" fill="#8d8f8c" stroke="#0a2f38" stroke-width="2"/><path d="M46 28 C70 20 86 40 114 28" stroke="#3b9bd6" stroke-width="8" fill="none"/>'},
+  {k:"wetland", n:"Wetland park", cost:3, d:"Ponds and reeds on the floodplain. Holds flood water, filters it, and it is a great place to walk.", e:{flood:18, wild:12, people:8, water:6},
+   ic:'<ellipse cx="44" cy="36" rx="34" ry="10" fill="#5fb0dd"/><ellipse cx="90" cy="40" rx="22" ry="7" fill="#5fb0dd"/><path d="M20 40 L18 12 M26 40 L28 10 M100 42 L102 18" stroke="#4f7a2a" stroke-width="3"/><rect x="26.5" y="6" width="4" height="10" rx="2" fill="#7a5638"/>'},
+  {k:"trees", n:"Trees on the banks", cost:2, d:"Shade keeps the water cool, roots hold the banks, and they slow the rain down.", e:{water:10, wild:15, flood:8, people:5},
+   ic:'<g><rect x="27" y="28" width="5" height="18" fill="#6b4a2e"/><circle cx="30" cy="22" r="14" fill="#3f8a4a" stroke="#0a2f38" stroke-width="2"/><rect x="77" y="28" width="5" height="18" fill="#6b4a2e"/><circle cx="80" cy="22" r="14" fill="#3f8a4a" stroke="#0a2f38" stroke-width="2"/></g><path d="M4 50 H116" stroke="#3b9bd6" stroke-width="5"/>'},
+  {k:"reeds", n:"Reed beds", cost:2, d:"Reeds slow the water and trap mud and some pollution. Homes for birds and insects.", e:{water:15, wild:12, flood:5},
+   ic:'<path d="M20 52 L16 12 M30 52 L32 8 M40 52 L46 14 M74 52 L70 16 M84 52 L88 10 M94 52 L100 18" stroke="#4f7a2a" stroke-width="3"/><g fill="#7a5638"><rect x="29.5" y="4" width="5" height="12" rx="2"/><rect x="85.5" y="6" width="5" height="12" rx="2"/></g>'},
+  {k:"fishpass", n:"Fish pass", cost:2, d:"A set of steps beside the weir so salmon and trout can swim upstream again.", e:{wild:12},
+   ic:'<path d="M10 52 h20 v-10 h20 v-10 h20 v-10 h20 v-10 h20" stroke="#8d8579" stroke-width="7" fill="none"/><path d="M44 26 q10 -9 20 0 q-10 7 -20 0z" fill="#c9cfd4" stroke="#0a2f38" stroke-width="1.5"/>'},
+  {k:"buffer", n:"Grass strip by the field", cost:1, d:"A strip of grass between the ploughed field and the water catches soil and fertiliser.", e:{water:10, wild:5, flood:3},
+   ic:'<rect x="6" y="8" width="108" height="22" fill="#a9824f"/><path d="M6 14 H114 M6 20 H114 M6 26 H114" stroke="#7d5a32" stroke-width="2"/><rect x="6" y="30" width="108" height="12" fill="#6fbf5a"/><path d="M6 48 H114" stroke="#3b9bd6" stroke-width="6"/>'},
+  {k:"litter", n:"Bins and a litter pick", cost:1, d:"More bins on the path and a monthly litter pick by local people.", e:{water:6, wild:4, people:10},
+   ic:'<rect x="44" y="18" width="32" height="34" rx="4" fill="#2e8b5c" stroke="#0a2f38" stroke-width="2.5"/><rect x="40" y="12" width="40" height="8" rx="2" fill="#0a2f38"/><path d="M54 26 V46 M60 26 V46 M66 26 V46" stroke="#fffdf8" stroke-width="2"/>'},
+  {k:"leaky", n:"Leaky dams upstream", cost:1, d:"Logs across little streams in the hills. Water still flows, just more slowly after a storm.", e:{flood:8, wild:3},
+   ic:'<path d="M6 40 C40 30 80 50 114 40" stroke="#3b9bd6" stroke-width="10" fill="none"/><path d="M40 22 L52 52 M60 20 L70 52" stroke="#6b4a2e" stroke-width="7" stroke-linecap="round"/>'}
+];
+function fixByK(k){ return FIX.filter(function(f){ return f.k === k; })[0]; }
+function fixAsFeat(k){ var f = fixByK(k); if(!f) return null; return {n:f.n, k:"f", what:f.d, eff:"Costs " + f.cost + " point" + (f.cost === 1 ? "" : "s") + ". " + effText(f)}; }
+function effText(f){ return "Boosts " + Object.keys(f.e).map(function(m){ return MNAMES.filter(function(x){ return x[0] === m; })[0][1].toLowerCase() + " +" + f.e[m]; }).join(", ") + "."; }
+function spent(){ return FIX.reduce(function(a, f){ return a + (st.fixes[f.k] ? f.cost : 0); }, 0); }
+function meters(){
+  var m = {water:BASE.water, wild:BASE.wild, flood:BASE.flood, people:BASE.people};
+  FIX.forEach(function(f){ if(st.fixes[f.k]) Object.keys(f.e).forEach(function(x){ m[x] += f.e[x]; }); });
+  Object.keys(m).forEach(function(x){ m[x] = Math.min(100, m[x]); });
+  return m;
+}
+function renderFix(){
+  var left = BUDGET - spent();
+  $("bLeft").textContent = left;
+  var c = ""; for(var i = 0; i < BUDGET; i++) c += '<i class="' + (i < BUDGET - left ? "used" : "") + '"></i>'; $("coins").innerHTML = c;
+  var box = $("fixes"); box.innerHTML = "";
+  FIX.forEach(function(f){
+    var b = document.createElement("button"); b.type = "button"; b.className = "fix";
+    b.setAttribute("aria-pressed", st.fixes[f.k] ? "true" : "false");
+    b.innerHTML = '<span class="cost">' + f.cost + ' pt' + (f.cost === 1 ? "" : "s") + '</span><svg viewBox="0 0 120 56" aria-hidden="true">' + f.ic + '</svg><b>' + f.n + '</b>' + f.d;
+    b.addEventListener("click", function(){ toggleFix(f, b); });
+    box.appendChild(b);
+  });
+  var m = meters(), mh = "";
+  MNAMES.forEach(function(x){
+    mh += '<div class="mrow"><b>' + x[1] + '</b><div class="mtrack" role="img" aria-label="' + x[1] + ' ' + m[x[0]] + ' out of 100, today ' + BASE[x[0]] + '"><span style="width:' + m[x[0]] + '%"></span><em style="left:' + BASE[x[0]] + '%"></em></div><span>' + m[x[0]] + '</span></div>';
+  });
+  $("meters").innerHTML = mh;
+  $("fixComment").innerHTML = fixComment(m);
+}
+function toggleFix(f, btn){
+  var fb = $("fixFb");
+  markTried("s6");
+  if(st.fixes[f.k]){ delete st.fixes[f.k]; fb.className = "fbline"; fb.textContent = f.n + " taken off. " + (BUDGET - spent()) + " points to spend."; }
+  else {
+    var left = BUDGET - spent();
+    if(f.cost > left){ fb.className = "fbline hmm"; fb.textContent = f.n + " costs " + f.cost + " and you have " + left + " left. Take something off first, or pick a cheaper one."; shake(btn); return; }
+    st.fixes[f.k] = true; fb.className = "fbline good"; fb.textContent = f.n + ": " + effText(f);
+  }
+  save(); renderFix();
+}
+function fixComment(m){
+  var n = nFixes();
+  if(!n) return "Today's river. The orange marks show where each meter is now. Pick a fix and watch them move.";
+  var lows = MNAMES.filter(function(x){ return m[x[0]] < 50; });
+  if(!lows.length) return "All four meters at 50 or more. Outrageous! That is a river people and wildlife would both love.";
+  var low = lows.sort(function(a, b){ return m[a[0]] - m[b[0]]; })[0][0];
+  var tip = {
+    water:"Water quality is still low. In this river the biggest source of dirt is the storm overflow, then the field runoff.",
+    wild:"Wildlife is still low. Creatures need clean water, places to hide, and a way past the weir.",
+    flood:"Flood safety is still low. Think about giving the water somewhere to go, or slowing it down before it arrives.",
+    people:"People enjoying it is still low. What would make you want to walk by this river?"
+  };
+  return tip[low];
+}
+
+/* =========================================================
+   SEND
+   ========================================================= */
+function buildText(){
+  var L = [], T = st.texts;
+  L.push("RIVER ROAD (the River Fennick, a made up English river, plus a real walk round school)");
+  var tried = TILES.filter(function(t){ return st.tried[t.id]; });
+  L.push("Stages tried: " + tried.length + " of " + NTILES + (tried.length ? " (" + tried.map(function(t){ return t.name; }).join(", ") + ")" : ""));
+  if(who){
+    L.push(""); L.push("Picked initials: " + who);
+    MS_FULL[who].forEach(function(m, i){
+      var code = who + (i + 1);
+      var where = TILES.filter(function(t){ return st.tried[t.id] && MILESTONE_STAGES[t.id].indexOf(code) > -1; }).map(function(t){ return t.name; });
+      L.push(" Milestone " + (i + 1) + ": " + m);
+      L.push("   Worked on in: " + (where.length ? where.join(", ") : "not yet"));
+    });
+  }
+
+  if(st.tried.s1){
+    L.push(""); L.push("1. DOWN THE YEARS");
+    L.push(" Times looked at: " + Object.keys(st.seen || {}).sort().map(function(e){ return ERAS[+e].y; }).join(", "));
+    [0,1,2,3].forEach(function(e){
+      var f = st.found[e] || {}, ids = TARGETS[e].filter(function(id){ return f[id]; });
+      if(!ids.length) return;
+      L.push(" " + ERAS[e].y + ": spotted " + ids.length + " of " + TARGETS[e].length + (e === 0 ? " things people made: " : " new changes: ") + ids.map(function(id){ return FEAT[id].n; }).join(", "));
+    });
+    var w = Object.keys(st.why).filter(function(id){ return st.why[id] && FEAT[id]; });
+    if(w.length) L.push(" Picked the main reason why people made: " + w.map(function(id){ return FEAT[id].n; }).join(", "));
+    if(T.s1text) L.push(" How part of the valley changed: " + T.s1text);
+  }
+
+  if(st.tried.s2){
+    L.push(""); L.push("2. FOUR JARS");
+    var placed = Object.keys(st.jars);
+    L.push(" Sorted " + placed.length + " of " + CARDS.length + " cards.");
+    JARS.forEach(function(J){
+      var inJ = CARDS.filter(function(c, i){ return st.jars[i] === J[0]; }).map(function(c){ return c.t; });
+      if(inJ.length) L.push("  " + J[1] + ": " + inJ.join("; "));
+    });
+    var hard = CARDS.filter(function(c, i){ return (st.jarTries[i] || 0) > 0; }).map(function(c){ return c.t; });
+    if(hard.length) L.push(" Needed a hint on: " + hard.join("; "));
+    if(T.s2text) L.push(" Reason: " + T.s2text);
+  }
+
+  if(st.tried.s3){
+    L.push(""); L.push("3. RIVER LAB");
+    var on = TOG.filter(function(t){ return st.lab[t.k]; }).map(function(t){ return t.n; });
+    var q = labQuality(st.lab);
+    L.push(" Last set up: " + (on.length ? on.join(", ") : "everything off") + ". Water health " + q + " out of 100 (" + hWord(q).toLowerCase() + ").");
+    var seen = CRIT.filter(function(c){ return st.labSeen[c[0]]; }).map(function(c){ return c[1]; });
+    if(seen.length) L.push(" Creatures seen: " + seen.join(", "));
+    var g = GOALS.filter(function(x){ return st.goals[x[0]]; }).map(function(x){ return x[1]; });
+    if(g.length) L.push(" Challenges done: " + g.join("; "));
+    var lq = LABQ.filter(function(x){ return st.labQ[x.id]; }).map(function(x){ return x.q + " " + x.o.filter(function(o){ return o[1]; })[0][0]; });
+    if(lq.length){ L.push(" Questions answered:"); lq.forEach(function(x){ L.push("  " + x); }); }
+    if(T.s3text) L.push(" Worst change and best fix: " + T.s3text);
+  }
+
+  if(st.tried.s4){
+    L.push(""); L.push("4. WHERE DO THE HOMES GO?");
+    if(st.runs.length){ L.push(" Storms sent: " + st.runs.length); st.runs.forEach(function(r, i){ L.push("  " + (i + 1) + ". " + runLine(r) + (r.pred ? " Guess: " + r.pred.toLowerCase() + "." : "")); }); }
+    else L.push(" Picked: " + Object.keys(CH).filter(function(g){ return st.fp[g]; }).map(function(g){ return chName(g, st.fp[g]); }).join("; ") + ". No storm sent yet.");
+    var fq = FPQ.filter(function(x){ return st.fpQ[x.id]; }).map(function(x){ return x.q + " " + x.o.filter(function(o){ return o[1]; })[0][0]; });
+    if(fq.length){ L.push(" Questions answered:"); fq.forEach(function(x){ L.push("  " + x); }); }
+    if(T.s4text) L.push(" Where the homes should go: " + T.s4text);
+  }
+
+  if(st.tried.s5){
+    L.push(""); L.push("5. LITTER AND LIFE WALK (real walk)");
+    if(st.walkWith) L.push(" With: " + st.walkWith);
+    if(T.nWhere) L.push(" Where: " + T.nWhere);
+    if(st.printed) L.push(" Printed a paper tally sheet.");
+    var lt = LITTER.filter(function(x){ return st.tally[x[0]]; }).map(function(x){ return x[1] + " " + st.tally[x[0]]; });
+    var lf = LIFE.filter(function(x){ return st.tally[x[0]]; }).map(function(x){ return x[1] + " " + st.tally[x[0]]; });
+    L.push(" Litter counted: " + (lt.length ? lt.join(", ") : "none entered"));
+    L.push(" Living things counted: " + (lf.length ? lf.join(", ") : "none entered"));
+    if(T.nChart) L.push(" What the chart shows: " + T.nChart);
+    if(T.nPeople) L.push(" What people have done here: " + T.nPeople);
+  }
+
+  if(st.tried.s6){
+    L.push(""); L.push("6. FIX THE RIVER");
+    var fx = FIX.filter(function(f){ return st.fixes[f.k]; });
+    L.push(" Spent " + spent() + " of " + BUDGET + " points on: " + (fx.length ? fx.map(function(f){ return f.n + " (" + f.cost + ")"; }).join(", ") : "nothing yet"));
+    var m = meters();
+    L.push(" Meters: " + MNAMES.map(function(x){ return x[1] + " " + m[x[0]] + " (today " + BASE[x[0]] + ")"; }).join(", "));
+    if(T.s6a) L.push(" What people did to the river: " + T.s6a);
+    if(T.s6b) L.push(" What could be done now: " + T.s6b);
+  }
+
+  var codes = [];
+  tried.forEach(function(t){ MILESTONE_STAGES[t.id].forEach(function(c){ if(codes.indexOf(c) < 0) codes.push(c); }); });
+  L.push(""); L.push("Milestone codes this work touches: " + (codes.length ? codes.join(", ") : "none yet"));
+  return L.join("\n");
+}
+
+/* ---------------- restart ---------------- */
+var armed = false;
+$("restart").addEventListener("click", function(){
+  var me = this;
+  if(!armed){ armed = true; me.textContent = "Sure? Tap again to clear everything on this page"; setTimeout(function(){ armed = false; me.textContent = "Start again (clears everything on this page)"; }, 4000); return; }
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  stopFlip();
+  st = fresh(); armed = false; me.textContent = "Start again (clears everything on this page)";
+  qa("[data-save]").forEach(function(el){ el.value = ""; });
+  jSel = null; lastLife = null; sampleOn = false;
+  initAll(); setEra(0, false); openStage("s1", false); window.scrollTo(0, 0);
+  toast("All cleared. Fresh start.");
+});
+
+/* ---------------- init ---------------- */
+function initAll(){
+  drawWho(); drawTiles();
+  drawJars();
+  drawQs(LABQ, "labQs", st.labQ, "s3");
+  drawChoices(); drawRuns(); drawQs(FPQ, "fpQs", st.fpQ, "s4"); $("fpResult").innerHTML = ""; drawValley();
+  drawTallies(); drawWalkWith(); drawCharts();
+  renderFix();
+  renderLab();
+}
+bindScene();
+$("stormBtn").addEventListener("click", sendStorm);
+$("tLitter").addEventListener("click", tallyClick);
+$("tLife").addEventListener("click", tallyClick);
+$("paperBtn").addEventListener("click", printSheet);
+$("sampleBtn").addEventListener("click", function(){
+  sampleOn = !sampleOn; st.sampleSeen = true; save();
+  this.textContent = sampleOn ? "Back to my numbers" : "Try sample numbers";
+  drawCharts();
+});
+$("seeFuture").addEventListener("click", function(){ openStage("s1", true); setEra(4, true); });
+initAll();
+setEra(st.era || 0, false);
+openStage(st.open && $(st.open) ? st.open : "s1", false);
+
+if(window.Base5Send) Base5Send.mount($("sendHost"), {
+  tool: "River Road", filename: "river-road",
+  getText: buildText
+});
+var whoIn = document.getElementById("b5who");
+if(whoIn) whoIn.addEventListener("input", function(){
+  var v = whoIn.value.trim().toUpperCase();
+  var nw = PEOPLE.indexOf(v) > -1 ? v : "";
+  if(nw !== who){ who = nw; drawWho(); refreshTiles(); }
+});
+
+window.__rr = { st:function(){ return st; }, buildText:buildText, labQuality:labQuality, labLife:labLife, stormLevel:stormLevel, outcome:outcome, meters:meters, TARGETS:TARGETS, CARDS:CARDS, FIX:FIX };
+})();
+</script>
+
+</body>
+</html>

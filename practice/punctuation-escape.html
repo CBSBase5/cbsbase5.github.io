@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Punctuation Escape Room - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Punctuation Escape Room only. Shell, cards and buttons come from style.css */
+.pe{max-width:900px;margin:0 auto}
+.pe .card{cursor:default}
+.hidden{display:none!important}
+.lead{font-size:1.06rem;line-height:1.55;margin:6px 0 10px!important;max-width:62ch}
+.small{font-size:.9rem;opacity:.8}
+.hero-sm h1.peh{font-size:clamp(1.9rem,7.2vw,4.4rem)}
+
+/* who picker */
+.whorow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 6px}
+.whorow .lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-right:4px}
+.pill{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.9rem;letter-spacing:.05em;padding:8px 14px;min-height:40px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.pill:hover{background:#fff1d6}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.pill .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#2e7d4f;margin-left:6px;vertical-align:middle}
+.whobox{margin:10px 0 4px;padding:12px 16px;border-radius:16px 12px 18px 12px;background:#fff6dc;border:2px dashed var(--yellow-deep);font-size:.98rem}
+.whobox ul{margin:6px 0 0;padding-left:20px}
+.whobox li{margin-bottom:4px}
+
+/* intro art */
+.introart{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:center;margin:10px 0 4px}
+.introart svg{width:100%;height:auto;display:block}
+.housebox svg{border-radius:18px;border:3px solid var(--ink);box-shadow:4px 5px 0 rgba(10,47,56,.2);transform:rotate(-.6deg)}
+.ringbox{text-align:center}
+.ringbox .rl{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+.keychips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:4px}
+.keychips span{font-size:.78rem;padding:3px 9px;border-radius:999px;border:2px dashed rgba(10,47,56,.25);opacity:.65}
+.keychips span.got{border-style:solid;border-color:var(--ink);opacity:1;background:var(--white)}
+.ghostbob{animation:bob 3s ease-in-out infinite;transform-box:fill-box}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* stage map: doors */
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin:18px 0 8px}
+.tile{position:relative;text-align:left;font-family:var(--body);border:3px solid var(--ink);border-radius:80px 80px 16px 16px/50px 50px 16px 16px;padding:24px 16px 14px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .14s,box-shadow .14s;color:var(--ink);min-height:150px;display:flex;flex-direction:column;gap:3px;background:var(--white);padding-right:26px}
+.tile:hover{transform:translate(-2px,-2px) rotate(-1deg);box-shadow:5px 7px 0 var(--ink)}
+.tile:nth-child(odd){transform:rotate(-.6deg)}
+.tile:nth-child(even){transform:rotate(.5deg)}
+.tile .glyph{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:2.1rem;line-height:1;letter-spacing:.04em;margin-bottom:4px;min-height:40px}
+.tile .num{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
+.tile .tt{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.08rem;line-height:1.1}
+.tile .ts{font-size:.85rem;line-height:1.35;opacity:.9}
+.tile .knob{position:absolute;right:9px;top:58%;width:11px;height:11px;border-radius:50%;background:var(--ink);opacity:.45}
+.tile .tick{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--white);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.tile .kgot{position:absolute;top:14px;right:50px;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:2px 5px;line-height:0}
+.tile .badge{box-shadow:0 0 0 2px var(--white);align-self:flex-start;margin-top:6px;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;background:var(--ink);color:var(--yellow);border-radius:999px;padding:4px 10px}
+.c1{background:linear-gradient(150deg,var(--yellow),var(--yellow-deep))}
+.c2{background:linear-gradient(150deg,var(--orange),var(--orange-deep))}
+.c3{background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper)}
+.c4{background:linear-gradient(150deg,var(--bright),var(--teal));color:var(--paper)}
+.c5{background:linear-gradient(150deg,#7fd1c3,#3aa7a0)}
+.c6{background:linear-gradient(150deg,#123c47,var(--ink));color:var(--paper)}
+.c6 .glyph{color:var(--yellow)}
+.c3 .knob,.c4 .knob,.c6 .knob{background:var(--paper)}
+
+/* stage card */
+.shead{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.shead .sn{flex:none;width:52px;height:52px;border-radius:50%;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.5rem;background:var(--yellow)}
+.shead .sn{color:var(--ink)!important}
+.shead h3{font-size:clamp(1.4rem,4.6vw,2rem)!important;margin:0!important}
+.navrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:14px;border-top:3px dashed rgba(10,47,56,.2)}
+.btn.ghost{background:transparent;color:#005a73;border:2px solid rgba(0,114,145,.45);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.blk{margin:18px 0 0;padding:16px 16px 14px;border-radius:18px 14px 20px 14px}
+.learn{background:#eef7f9;border:2px solid #cfe0e6}
+.try{background:#fffdfb;border:2px dashed rgba(10,47,56,.28)}
+.blk .k{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:6px}
+.learn .k{background:var(--teal);color:var(--paper)}
+.try .k{background:var(--orange);color:var(--ink)}
+.blk h4{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.22rem;margin:0 0 4px}
+.blk p{margin:6px 0;font-size:1rem;line-height:1.5;max-width:64ch}
+.fig{margin:8px 0 2px;text-align:center}
+.fig svg{width:100%;max-width:560px;height:auto}
+.skipnote{font-size:.85rem;opacity:.7;margin-top:8px!important}
+
+/* feedback and choices */
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.opts{display:grid;gap:8px;margin:8px 0}
+.opt{text-align:left;font-family:inherit;font-size:1.02rem;padding:11px 15px;border:2px solid rgba(10,47,56,.22);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer;line-height:1.4}
+.opt:hover{border-color:var(--teal)}
+.opt.good{border-color:#2e7d4f;background:#e9f4ec;font-weight:700}
+.opt.bad{border-color:#d75f10;background:#fdf0e5}
+.qlist{display:grid;gap:12px;margin-top:8px}
+.qi{padding:12px 14px;border-radius:14px;background:var(--white);border:2px solid rgba(10,47,56,.14)}
+.qi .qt{font-size:1.1rem;margin-bottom:6px;line-height:1.45}
+.qi .row{margin:4px 0 0}
+.qi .fb{margin-top:8px}
+.mk{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.3rem;min-width:52px;height:52px;padding:0 12px;border-radius:16px 12px 18px 12px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.mk:hover{transform:translate(-1px,-2px) rotate(-2deg)}
+.mk[aria-pressed="true"]{background:var(--yellow);transform:translate(1px,2px);box-shadow:1px 1px 0 var(--ink)}
+b.cm{color:var(--orange-deep);font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.3em;padding:0 2px}
+.sent{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 700;font-size:clamp(1.2rem,4.2vw,1.75rem);line-height:1.35;margin:12px 0 8px;padding:10px 14px;border-radius:14px;background:#fff6dc;border:2px solid var(--yellow-deep)}
+.sent .pm{color:var(--orange-deep);font-variation-settings:"wght" 900}
+.cap{font-size:1rem;margin:6px 0 0;padding:10px 14px;border-radius:12px;background:var(--paper);border-left:6px solid var(--orange)}
+
+/* punctuation pen */
+.pal{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 6px;padding:10px;border-radius:14px;background:rgba(10,47,56,.06)}
+.pal .lab,.floor .lab{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;flex-basis:100%}
+.pmk{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:1.5rem;min-width:50px;height:50px;padding:0 10px;border-radius:14px 10px 16px 10px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.pmk:hover{transform:translate(-1px,-2px) rotate(-2deg)}
+.pmk[aria-pressed="true"]{background:var(--yellow);transform:translate(1px,2px);box-shadow:1px 1px 0 var(--ink)}
+.pmk.rub{font-family:var(--body);font-size:.9rem;font-weight:700;background:#ffe3ea}
+.pmk.rub[aria-pressed="true"]{background:#ffb8c8}
+.pline{display:flex;flex-wrap:wrap;align-items:center;row-gap:8px;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 700;font-size:clamp(1.12rem,4vw,1.55rem);line-height:1.2;margin:10px 0;padding:14px 10px;border-radius:14px;background:#fffdf3;border:2px solid rgba(10,47,56,.15)}
+.pw{padding:0 2px}
+.pw.capd{color:var(--teal);animation:pop2 .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop2{0%{transform:scale(1.5)}100%{transform:none}}
+.pw,.pslot{display:inline-block}
+.pslot{min-width:24px;height:44px;margin:0 2px;border:2px dashed rgba(0,114,145,.45);border-radius:8px;background:transparent;cursor:pointer;font:inherit;color:var(--orange-deep);padding:0 3px;display:inline-flex;align-items:center;justify-content:center;font-variation-settings:"wght" 900}
+.pslot:hover{background:#e3f4f8;border-color:var(--teal)}
+.pslot.full{border-color:var(--orange);background:#fff3e6;border-style:solid}
+.pslot.peek,.lgap.peek{box-shadow:0 0 0 4px rgba(239,119,36,.5);animation:peek 1s ease-in-out 3}
+@keyframes peek{0%,100%{transform:none}50%{transform:translateY(-4px)}}
+
+/* fridge notes and counting */
+.basket{max-width:420px;margin:6px auto 0}
+.basket svg{width:100%;height:auto}
+
+/* shop signs */
+.signs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:10px}
+.signq{text-align:center;background:#fff8ec}
+.signwrap{position:relative;padding-top:30px}
+.signwrap::before{content:"";position:absolute;top:4px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--ink)}
+.signwrap::after{content:"";position:absolute;top:10px;left:50%;width:80px;height:24px;margin-left:-40px;border-top:2px solid #8a5230;border-left:2px solid #8a5230;border-right:2px solid #8a5230;border-radius:40px 40px 0 0;transform:scaleY(.9)}
+.sign{position:relative;z-index:1;display:inline-block;max-width:100%;background:#1f3b36;color:#f4f1e6;border:7px solid #8a5230;border-radius:10px;padding:12px 12px;box-shadow:4px 6px 0 rgba(10,47,56,.3);transform-origin:50% -24px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:clamp(1.15rem,4.4vw,1.5rem);line-height:1.5}
+.sign.fixed{background:#24483f;box-shadow:4px 6px 0 rgba(46,125,79,.5)}
+.sign.swing{animation:swing 1.1s ease-out}
+@keyframes swing{0%{transform:rotate(0)}20%{transform:rotate(7deg)}40%{transform:rotate(-5deg)}60%{transform:rotate(3deg)}80%{transform:rotate(-1deg)}100%{transform:rotate(0)}}
+.sword{display:inline-block;margin:0 4px}
+.stok{font:inherit;color:inherit;background:rgba(255,255,255,.06);border:0;border-bottom:3px dashed rgba(255,194,71,.85);padding:1px 5px;margin:0 3px;cursor:pointer;border-radius:6px 6px 0 0}
+.stok:hover{background:rgba(255,255,255,.16)}
+.stok:disabled{cursor:default;border-bottom-color:transparent;background:transparent}
+.sign .ap{color:var(--yellow)}
+.swaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:8px}
+.swapc{padding:12px;border-radius:14px;border:2px solid rgba(10,47,56,.18);background:var(--white);text-align:center}
+.swapc .sboard{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:1.2rem;background:#1f3b36;color:#f4f1e6;border:5px solid #8a5230;border-radius:8px;padding:8px;margin-bottom:8px}
+.swapc .sboard .ap{color:var(--yellow)}
+.swapc svg{width:110px;height:auto;display:block;margin:4px auto}
+.swapc p{font-size:.92rem;margin:6px 0}
+.swapc .btn{font-size:.72rem;padding:8px 12px}
+
+/* comic */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.panelbtn{position:relative;padding:0;border:3px solid var(--ink);border-radius:8px;background:#fff;cursor:pointer;overflow:hidden;line-height:0}
+.panelbtn svg{display:block;width:100%;height:auto}
+.panelbtn[aria-pressed="true"]{outline:4px solid var(--orange);outline-offset:2px}
+.panelbtn .pt{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#2e7d4f;display:flex;align-items:center;justify-content:center}
+.panelbig{max-width:360px;margin:6px auto 0;border:3px solid var(--ink);border-radius:10px;overflow:hidden;line-height:0}
+.panelbig svg{width:100%;height:auto}
+
+/* radio */
+.radio{max-width:420px;margin:6px auto}
+.radio svg{width:100%;height:auto;display:block}
+.radio .wave{animation:wave 1.6s ease-in-out infinite}
+.radio .wave.w2{animation-delay:.3s}.radio .wave.w3{animation-delay:.6s}
+@keyframes wave{0%,100%{opacity:.15}50%{opacity:1}}
+.dial{max-width:440px;margin:8px auto 0}
+.dial svg{width:100%;height:auto;display:block}
+.dialsent{font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:clamp(1.15rem,4.2vw,1.6rem);text-align:center;margin:10px 0 4px;padding:12px;border-radius:12px;background:var(--ink);color:#bff3e6;letter-spacing:.02em}
+.stations{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stations .pill{padding:8px 6px;font-size:.82rem}
+.dialdots{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:4px 0}
+.dialdots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--white)}
+.dialdots span.on{background:#2e7d4f}
+.dialdots span.cur{box-shadow:0 0 0 3px var(--orange)}
+
+/* library */
+.shelf{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:center;padding:14px 10px 0;border-bottom:12px solid #8a5230;border-radius:6px;background:linear-gradient(#f3e3c3,#ead6b0)}
+.spine{width:74px;height:150px;border:3px solid var(--ink);border-radius:6px 6px 2px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 4px;font-family:var(--display);color:var(--ink);transition:transform .25s cubic-bezier(.2,1.4,.4,1);box-shadow:inset -8px 0 0 rgba(0,0,0,.08)}
+.spine .sm{font-variation-settings:"wdth" 125,"wght" 900;font-size:1.9rem;line-height:1}
+.spine .sn2{font-variation-settings:"wdth" 100,"wght" 800;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
+.spine[aria-pressed="true"]{transform:translateY(-18px) rotate(-3deg)}
+.spine:hover{transform:translateY(-6px)}
+.bookcard{margin-top:12px;padding:12px 14px;border-radius:10px;background:#fbf3df;border:2px solid #d6c9b6;box-shadow:3px 4px 0 rgba(10,47,56,.12)}
+.bookcard .ex{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 700;font-size:1.15rem;margin-top:6px}
+.bookcard .ex b{color:var(--orange-deep)}
+.floor{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border-radius:12px;background:repeating-linear-gradient(90deg,#c98a4b 0 60px,#b9773a 60px 62px);margin:8px 0;min-height:70px}
+.floor .lab{color:var(--white)}
+.floor .small{color:var(--white);opacity:1}
+.pmk.sel{outline:4px solid var(--orange);outline-offset:2px;transform:translateY(-3px) rotate(-2deg)}
+.page{position:relative;background:#fbf3df;border:2px solid #d6c9b6;padding:18px 16px 18px 20px;border-radius:4px 4px 22px 4px;box-shadow:4px 6px 0 rgba(10,47,56,.15);font-size:1.15rem;line-height:2.4;transform:rotate(-.4deg)}
+.page::before{content:"";position:absolute;left:8px;top:10px;bottom:10px;border-left:2px solid rgba(239,119,36,.35)}
+.lgap{min-width:34px;height:40px;vertical-align:middle;margin:0 3px;border:2px dashed rgba(123,75,143,.6);border-radius:8px;background:#fff;cursor:pointer;font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.3rem;color:var(--plum);padding:0 6px}
+.lgap.ready{border-color:var(--orange);background:#fff3e6}
+.lgap.full{border-style:solid;border-color:var(--plum);background:#f3eef7}
+.lgap:disabled{cursor:default}
+.jobkey{margin:8px 0 0;padding-left:20px}
+.jobkey li{margin-bottom:4px}
+
+/* writing */
+.ta{width:100%;min-height:110px;font-family:inherit;font-size:1.05rem;line-height:1.5;padding:12px;border:2px solid rgba(10,47,56,.25);border-radius:14px;background:#fffdfb;color:var(--ink);resize:vertical}
+.ta.short{min-height:70px}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.starters button{font-family:inherit;font-size:.9rem;padding:6px 11px;border-radius:999px;border:2px solid rgba(123,75,143,.45);background:#f7f1fa;color:var(--ink);cursor:pointer}
+.starters button:hover{background:#ecdff3}
+.starters .mkchip{font-family:var(--display);font-variation-settings:"wght" 900;min-width:38px}
+.gentle{margin:8px 0;padding:10px 14px;border-radius:12px;background:#f3eef7;border:2px solid #dccbe6;font-size:1rem}
+.gentle .lbl{display:block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:2px}
+.gentle ul{margin:4px 0 0;padding-left:20px}
+
+/* attic */
+.attic{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:center}
+.door svg{width:100%;max-width:260px;height:auto;display:block;margin:0 auto}
+.door .dp{transition:transform 1.4s cubic-bezier(.3,1.1,.4,1);transform-box:fill-box;transform-origin:left center}
+.door.open .dp{transform:scaleX(.12)}
+.lamps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.lamp{font-size:.85rem;padding:5px 10px;border-radius:999px;border:2px dashed rgba(10,47,56,.3);background:var(--white);opacity:.6}
+.lamp.on{opacity:1;border-style:solid;border-color:#2e7d4f;background:#e9f4ec}
+.lamp b{font-family:var(--display);font-variation-settings:"wght" 900;margin-right:5px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,240px);visibility:hidden;background:var(--ink);color:var(--paper);border-radius:18px;padding:12px 18px;display:flex;gap:12px;align-items:center;z-index:60;transition:transform .45s cubic-bezier(.2,1.4,.4,1);max-width:calc(100% - 32px);box-shadow:4px 6px 0 rgba(10,47,56,.3);font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+
+/* summary */
+.donebar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.donebar span{font-size:.85rem;padding:5px 10px;border-radius:999px;border:2px solid rgba(10,47,56,.25);background:var(--white)}
+.donebar span.on{background:#e9f4ec;border-color:#2e7d4f}
+.resetrow{margin-top:14px}
+.linkish{background:none;border:0;padding:4px 0;font:inherit;font-size:.9rem;color:#005a73;text-decoration:underline;cursor:pointer}
+
+.pe button:focus-visible,.pe textarea:focus-visible,.pe input:focus-visible{outline:4px solid var(--plum);outline-offset:3px}
+
+@media (max-width:700px){
+  .introart{grid-template-columns:1fr}
+  .attic{grid-template-columns:1fr}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .stations{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:480px){
+  .card{padding:16px}
+  .blk{padding:14px 10px 12px}
+  .map{grid-template-columns:1fr 1fr;gap:10px}
+  .tile{min-height:130px;padding:22px 10px 10px}
+  .tile .glyph{font-size:1.7rem}
+  .tile .ts{display:none}
+  .pline{padding:12px 6px}
+  .pslot{min-width:20px;height:40px;margin:0 1px}
+  .pmk{min-width:46px;height:46px;font-size:1.3rem}
+  .spine{width:62px;height:132px}
+  .page{font-size:1.05rem;padding:14px 10px 14px 16px}
+  .sign{padding:10px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ghostbob,.radio .wave{animation:none}
+  .door .dp{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1 class="peh">THE PUNCTUATION <span class="accent">ESCAPE ROOM</span></h1>
+    <div class="line">
+      <span class="chip">English</span>
+      <p>A creaky old house, six locked rooms and a key ring. Every room opens with a punctuation puzzle.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap pe">
+
+  <div class="board">
+
+    <div class="card w12" id="introCard">
+      <span class="kicker">Before you start</span>
+      <h3>Find the keys, open the attic, escape</h3>
+      <p class="lead">Pick any room, in any order, and skip anything that is not for you. Nothing is timed. A wrong turn just gets a hint and another go. The attic door opens whenever you fancy, keys or no keys.</p>
+
+      <div class="introart">
+        <div class="housebox" id="houseBox"></div>
+        <div class="ringbox"><p class="rl">Your key ring</p><div id="ringBox"></div><div class="keychips" id="keyChips"></div></div>
+      </div>
+
+      <div class="whorow" id="whoRow" role="group" aria-label="Who is this? Optional">
+        <span class="lab">Who is this? (optional)</span>
+      </div>
+      <div class="whobox hidden" id="whoBox" aria-live="polite"></div>
+
+      <div class="map" id="stageMap"></div>
+      <div class="resetrow" id="resetRow"></div>
+    </div>
+
+    <div class="card w12 hidden" id="stageCard">
+      <div id="stageHost"></div>
+      <div class="navrow">
+        <button class="btn ghost" type="button" id="mapBtn">Back to the map</button>
+        <button class="btn" type="button" id="nextBtn">Next room</button>
+      </div>
+    </div>
+
+    <div class="card w12" id="sendCard">
+      <span class="kicker">When you are ready</span>
+      <h3>What you have tried so far</h3>
+      <div class="donebar" id="doneBar"></div>
+      <p class="small">Your progress stays saved on this device. Sending it to Jay is up to you.</p>
+      <div id="sendHost"></div>
+    </div>
+
+  </div>
+
+  <a class="backlink" href="/practice/#english-standard">Back to English</a>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.punctuation-escape.v1";
+var WHO_KEY = "base5.who.v1";
+var INK = "#0a2f38", TEAL = "#007291", ORANGE = "#ef7724", YEL = "#ffc247", PLUM = "#7b4b8f", PAPER = "#fffdf8", GREEN = "#2e7d4f";
+var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+var FD = "font-family='Archivo, Arial Black, sans-serif' font-weight='900'";
+var RSQ = "\u2019", LDQ = "\u201C", RDQ = "\u201D", DASH = "\u2013";
+
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c] }) }
+function h(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html != null) e.innerHTML = html; return e }
+function btn(cls, html, fn){ var b = h("button", cls, html); b.type = "button"; if(fn) b.addEventListener("click", fn); return b }
+function plain(s){ return String(s).replace(/<[^>]+>/g, "").replace(/&rsquo;/g, RSQ).replace(/&ldquo;/g, LDQ).replace(/&rdquo;/g, RDQ).replace(/&ndash;/g, DASH).replace(/&nbsp;/g, " ").replace(/&amp;/g, "&") }
+function svg(vb, label, inner){ return "<svg viewBox='" + vb + "' role='img' aria-label='" + esc(label) + "'>" + inner + "</svg>" }
+function curly(s){ return String(s).replace(/'/g, RSQ) }
+
+var MARKNAME = { ".":"full stop", "?":"question mark", "!":"exclamation mark", ",":"comma", ":":"colon", ";":"semicolon", "(":"open bracket", ")":"close bracket", rub:"Rubber" };
+MARKNAME[LDQ] = "open speech marks"; MARKNAME[RDQ] = "close speech marks"; MARKNAME[DASH] = "dash"; MARKNAME[RSQ] = "apostrophe";
+
+/* ---------------- state ---------------- */
+function fresh(){
+  return { who:"", whoSeen:false, cur:"", tried:{}, keys:{}, mc:{}, pen:{}, sign:{}, page:{}, toy:{}, w:{} };
+}
+var ST = fresh();
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){ var got = JSON.parse(raw); if(got && typeof got === "object"){ for(var k in ST) if(got[k] !== undefined && got[k] !== null) ST[k] = got[k] } }
+}catch(e){}
+try{
+  var w0 = localStorage.getItem(WHO_KEY);
+  if(w0 && !ST.who) ST.who = w0;
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(ST)) }catch(e){} }
+function tried(id){ if(!ST.tried[id]){ ST.tried[id] = true; drawMap(); drawDone() } save() }
+
+/* ---------------- stages, students, milestones ---------------- */
+var STAGES = [
+  { id:"s1", t:"The kitchen", glyph:",", sub:"Commas on the fridge notes", cls:"c1", key:"Comma key", kc:YEL },
+  { id:"s2", t:"The shop downstairs", glyph:RSQ, sub:"Fix the apostrophes on the signs", cls:"c2", key:"Apostrophe key", kc:ORANGE },
+  { id:"s3", t:"The comic room", glyph:LDQ + " " + RDQ, sub:"Speech marks in a comic strip", cls:"c3", key:"Speech key", kc:"#c79be0" },
+  { id:"s4", t:"The radio room", glyph:". ? !", sub:"Fix a crackly run on message", cls:"c4", key:"Signal key", kc:"#00a6c9" },
+  { id:"s5", t:"The library", glyph:"( ) : ;", sub:"Brackets, colons, semicolons and dashes", cls:"c5", key:"Library key", kc:"#3aa7a0" },
+  { id:"s6", t:"The attic door", glyph:"<svg width='30' height='38' viewBox='0 0 30 38' aria-hidden='true'><circle cx='15' cy='12' r='9' fill='currentColor'/><path d='M10 16 L20 16 L23 35 L7 35 Z' fill='currentColor'/></svg>", sub:"Write your escape note", cls:"c6", key:"", kc:YEL }
+];
+var WHO = {
+  JT:{ f:["Pick the right end mark for statements, questions and commands.", "Spot brackets and apostrophes and say why they are there."],
+       o:["I can choose appropriate punctuation for different sentence types, including statements, questions and commands.", "I can identify brackets and apostrophes and say why they have been used."],
+       best:["s4", "s2", "s5"] },
+  LW:{ f:["Use punctuation to get meaning, purpose and tone across, and explain it, in your writing and in what you read.", "Use lots of kinds of punctuation, including brackets, to add extra information in your own writing."],
+       o:["I can use and explain punctuation accurately to communicate meaning, purpose and tone in my own writing and in texts I read.", "I can use a range of punctuation, including brackets, to add extra information in my own writing."],
+       best:["s6", "s5", "s3"] },
+  EGW:{ f:["Spot what job a punctuation mark is doing in a sentence.", "Explain how punctuation changes what a sentence means."],
+       o:["I can identify the purpose of punctuation in a sentence.", "I can explain the impact punctuation has on the meaning of a sentence."],
+       best:["s1", "s2", "s6"] },
+  LP:{ f:["Spot trickier punctuation like brackets and apostrophes.", "Explain how brackets and apostrophes change what a sentence means."],
+       o:["I can identify more complex punctuation such as brackets and apostrophes.", "I can explain the impact of brackets and apostrophes on the meaning of a sentence."],
+       best:["s2", "s5"] },
+  LC:{ f:["Use the punctuation to tell if a sentence is a statement, question or command.", "Say what brackets and apostrophes do in a sentence."],
+       o:["I can identify how punctuation helps me understand whether a sentence is a statement, question or command.", "I can explain what brackets and apostrophes do in a sentence."],
+       best:["s4", "s2", "s5"] },
+  HK:{ f:["Explain how changing punctuation can change the meaning or tone of a sentence.", "Choose punctuation in your own writing to create a tone or effect."],
+       o:["I can explain how changing punctuation can alter the meaning or tone of a sentence.", "I can choose punctuation in my own writing to create a particular tone or effect."],
+       best:["s1", "s4", "s6"] }
+};
+var COHORT = ["JT", "LW", "EGW", "LP", "LC", "HK"];
+var TARGET = "I can identify the purpose of punctuation in a sentence, such as why brackets are used, and explain the impact.";
+/* stage number -> what it covers, and whose milestones it links to */
+var MILESTONE_STAGES = {
+  1:{ what:"what job each comma is doing, how a comma changes the meaning of a shopping list, explaining that change in writing", who:["EGW", "HK", "LW"] },
+  2:{ what:"spotting and fixing apostrophes, saying whether each one shows owning or missing letters, how a missing apostrophe turns a word into a different word", who:["JT", "LP", "LC", "EGW"] },
+  3:{ what:"speech marks and the punctuation inside them, reading speech and writing a line of speech", who:["LW", "HK"] },
+  4:{ what:"full stops, question marks and exclamation marks for statements, questions, commands and exclamations, and how ! changes the tone", who:["JT", "LC", "HK"] },
+  5:{ what:"brackets, colons, semicolons and dashes, what each bracket is doing and what it adds for the reader, plus writing own sentence with brackets", who:["JT", "LP", "LC", "LW", "EGW"] },
+  6:{ what:"own escape note with a range of punctuation (brackets included), chosen for a mood, plus explaining one choice", who:["LW", "HK", "EGW"] }
+};
+
+/* ---------------- small builders ---------------- */
+function block(kind, title, html){
+  var b = h("div", "blk " + kind);
+  b.appendChild(h("span", "k", kind === "learn" ? "Clue" : "Puzzle"));
+  if(title) b.appendChild(h("h4", "", title));
+  if(html) b.appendChild(h("div", "", html));
+  return b;
+}
+function fbBox(host, kind, html){ host.innerHTML = ""; if(!kind) return; host.appendChild(h("div", "fb " + kind, html)) }
+
+/* choice question. cfg = {q, o:[], a:[ok indices], ok, no, style, yes} */
+function pick(host, key, cfg, stage){
+  var wrap = h("div", cfg.wcls === undefined ? "qi" : cfg.wcls), box = h("div", cfg.style === "opt" ? "opts" : "row"), fb = h("div", "");
+  if(cfg.q) wrap.appendChild(h("div", "qt", cfg.q));
+  wrap.appendChild(box); wrap.appendChild(fb);
+  var rec = ST.mc[key] || { picks:[], done:false };
+  function good(i){ return cfg.a.indexOf(i) >= 0 }
+  function draw(){
+    box.innerHTML = "";
+    var last = rec.picks.length ? rec.picks[rec.picks.length - 1] : -1;
+    cfg.o.forEach(function(t, i){
+      var b = btn(cfg.style === "opt" ? "opt" : (cfg.style || "pill"), t, function(){
+        rec.picks.push(i); if(good(i)) rec.done = true; ST.mc[key] = rec; tried(stage); draw();
+        if(good(i) && cfg.onDone) cfg.onDone();
+      });
+      if(cfg.style === "opt"){ if(rec.picks.indexOf(i) >= 0) b.classList.add(good(i) ? "good" : "bad") }
+      else b.setAttribute("aria-pressed", last === i ? "true" : "false");
+      if(cfg.labels) b.setAttribute("aria-label", cfg.labels[i]);
+      box.appendChild(b);
+    });
+    if(last < 0) fbBox(fb);
+    else if(good(last)) fbBox(fb, "ok", "<b>" + (cfg.yes || "Yes.") + "</b> " + (typeof cfg.ok === "function" ? cfg.ok(last) : (cfg.ok || "")));
+    else fbBox(fb, "nope", "<b>Not quite.</b> " + (typeof cfg.no === "function" ? cfg.no(last) : ((cfg.no && cfg.no[last]) || "Have another look.")) + " Have another go if you fancy.");
+  }
+  draw(); host.appendChild(wrap);
+  return wrap;
+}
+
+/* writing box with starter chips */
+function writer(host, key, ph, starters, rows, onIn, stage){
+  var ta = h("textarea", "ta" + (rows === "short" ? " short" : ""));
+  ta.placeholder = ph; ta.value = ST.w[key] || ""; ta.setAttribute("aria-label", ph);
+  var chips = h("div", "starters");
+  (starters || []).forEach(function(s){
+    var b = btn(s.length <= 3 ? "mkchip" : "", esc(s), function(){
+      var st = ta.selectionStart != null ? ta.selectionStart : ta.value.length, en = ta.selectionEnd != null ? ta.selectionEnd : st;
+      var before = ta.value.slice(0, st), after = ta.value.slice(en);
+      var ins = s.length <= 3 ? s : ((before && !/\s$/.test(before) ? " " : "") + s + " ");
+      ta.value = before + ins + after;
+      var pos = before.length + ins.length;
+      ta.focus(); try{ ta.setSelectionRange(pos, pos) }catch(e){}
+      changed();
+    });
+    if(s.length <= 3) b.setAttribute("aria-label", "Add " + (MARKNAME[s] || s));
+    b.addEventListener("mousedown", function(e){ e.preventDefault() });
+    chips.appendChild(b);
+  });
+  function changed(){ ST.w[key] = ta.value; if(ta.value.trim()) tried(stage); else save(); if(onIn) onIn(ta.value) }
+  ta.addEventListener("input", changed);
+  host.appendChild(chips); host.appendChild(ta);
+  if(onIn) onIn(ta.value);
+  return ta;
+}
+
+/* ---------------- punctuation pen: marks into gaps between words ---------------- */
+function render(item, s, html){
+  var out = "", n = item.words.length;
+  for(var i = 0; i <= n; i++){
+    var m = (s && s[i]) || "", cl = "", op = "";
+    for(var j = 0; j < m.length; j++){ var c = m.charAt(j); if(c === LDQ || c === "(") op += c; else cl += c }
+    var W = i < n ? capWord(item, s, i) : "";
+    if(html){ cl = cl ? "<b class='pm'>" + esc(cl) + "</b>" : ""; op = op ? "<b class='pm'>" + esc(op) + "</b>" : ""; W = esc(W) }
+    out += cl + (i > 0 && i < n ? " " : "") + op + W;
+  }
+  return out + (item.tail || "");
+}
+function capWord(item, s, i){
+  var w = item.words[i];
+  if(item.cap && (i === 0 || /[.?!]/.test((s && s[i]) || ""))) w = w.charAt(0).toUpperCase() + w.slice(1);
+  return w;
+}
+function penExp(item, i){ return item.key[i] || [""] }
+function penHint(item, i, cur){
+  var ex = penExp(item, i);
+  if(cur.length === 2){ var rev = cur.charAt(1) + cur.charAt(0); if(ex.indexOf(rev) >= 0) return "Right marks, wrong order. Which one comes first?" }
+  if(item.hints && item.hints[i]) return item.hints[i];
+  if(ex.length === 1 && ex[0] === "") return item.pal.length === 1 ? "This gap does not want a comma. Tap it to take it out." : "This gap does not want a mark. Pick the Rubber and tap it.";
+  if(cur === ",") return "A comma is not strong enough to end a whole sentence.";
+  if(cur === "") return "This gap is missing something.";
+  return "Something here is not quite right. Rub it out and try another mark.";
+}
+function pen(host, key, item, stage, onDone){
+  var n = item.words.length;
+  var rec = ST.pen[key] || { s:[], tries:0, done:false, shown:false };
+  for(var i = 0; i <= n; i++) if(typeof rec.s[i] !== "string") rec.s[i] = "";
+  var tool = item.pal[0], peek = -1, justCap = {};
+  var wrap = h("div", "pen"), pal = h("div", "pal"), line = h("div", "pline"), act = h("div", "row"), fb = h("div", ""), out = h("p", "sent");
+  line.setAttribute("role", "group"); line.setAttribute("aria-label", "Sentence with gaps");
+  out.setAttribute("aria-live", "polite");
+  function shows(i){ return item.show ? item.show.indexOf(i) >= 0 : true }
+  function ok(i){ return penExp(item, i).indexOf(rec.s[i]) >= 0 }
+  function put(i, t){
+    if(rec.done) return;
+    var wasCap = i < n ? capWord(item, rec.s, i) !== item.words[i] : false;
+    if(t === "rub") rec.s[i] = "";
+    else if(item.pal.length === 1) rec.s[i] = rec.s[i] === t ? "" : t;
+    else if(rec.s[i].length >= 2) rec.s[i] = t;
+    else rec.s[i] += t;
+    justCap = {}; if(i < n && !wasCap && capWord(item, rec.s, i) !== item.words[i]) justCap[i] = 1;
+    peek = -1; ST.pen[key] = rec; tried(stage); drawLine(); fbBox(fb);
+    var again = line.querySelector("[data-slot='" + i + "']"); if(again) again.focus();
+  }
+  function drawPal(){
+    pal.innerHTML = "";
+    pal.classList.toggle("hidden", !!rec.done);
+    if(rec.done) return;
+    if(item.pal.length === 1){ pal.appendChild(h("span", "lab", "Tap a gap to add a comma. Tap it again to take it out.")); return }
+    pal.appendChild(h("span", "lab", "Pick a mark, then tap a gap. You can drag marks too." + (item.palNote ? " " + item.palNote : "")));
+    item.pal.concat(["rub"]).forEach(function(m){
+      var b = btn("pmk" + (m === "rub" ? " rub" : ""), m === "rub" ? "Rubber" : esc(m), function(){ tool = m; drawPal() });
+      b.setAttribute("aria-pressed", tool === m ? "true" : "false");
+      b.setAttribute("aria-label", MARKNAME[m] || m);
+      if(m !== "rub"){ b.draggable = true; b.addEventListener("dragstart", function(e){ try{ e.dataTransfer.setData("text/plain", m) }catch(er){} }) }
+      pal.appendChild(b);
+    });
+  }
+  function drawLine(){
+    line.innerHTML = "";
+    line.classList.toggle("hidden", !!rec.done);
+    for(var i = 0; i <= n; i++){
+      if(shows(i)){
+        (function(i){
+          var s = btn("pslot" + (rec.s[i] ? " full" : "") + (peek === i ? " peek" : ""), esc(rec.s[i]), function(){ put(i, tool) });
+          s.setAttribute("data-slot", i);
+          s.setAttribute("aria-label", (rec.s[i] ? "Gap holding " + rec.s[i].split("").map(function(c){ return MARKNAME[c] || c }).join(" then ") : "Empty gap") + (i < n ? ", before " + item.words[i] : ", at the end"));
+          s.addEventListener("dragover", function(e){ e.preventDefault() });
+          s.addEventListener("drop", function(e){ e.preventDefault(); var m = ""; try{ m = e.dataTransfer.getData("text/plain") }catch(er){} if(m && item.pal.indexOf(m) >= 0){ tool = m; drawPal(); put(i, m) } });
+          line.appendChild(s);
+        })(i);
+      }
+      if(i < n){
+        var w = capWord(item, rec.s, i);
+        line.appendChild(h("span", "pw" + (item.cap && w !== item.words[i] && justCap[i] ? " capd" : ""), esc(w)));
+      }
+    }
+    if(item.tail) line.appendChild(h("span", "pw", esc(item.tail)));
+  }
+  function finish(shown){
+    rec.done = true; rec.shown = !!shown; ST.pen[key] = rec; save(); redraw();
+    fbBox(fb, shown ? "tell" : "ok", "<b>" + (shown ? "Here it is." : (item.yes || "Unlocked.")) + "</b> " + item.ok);
+    if(onDone) onDone();
+  }
+  function check(){
+    var wrong = [];
+    for(var i = 0; i <= n; i++) if(!ok(i)) wrong.push(i);
+    tried(stage);
+    if(!wrong.length){ finish(false); return }
+    rec.tries++; ST.pen[key] = rec; save();
+    var i0 = wrong[0]; peek = shows(i0) ? i0 : -1;
+    var hint = penHint(item, i0, rec.s[i0]);
+    drawLine(); drawAct();
+    fbBox(fb, "nope", "<b>" + (wrong.length === 1 ? "Nearly. One gap to look at." : "Not yet. " + wrong.length + " gaps to look at.") + "</b> Start with the glowing gap. " + hint + (rec.tries >= 2 ? " Or tap Show me." : ""));
+  }
+  function drawAct(){
+    act.innerHTML = "";
+    if(rec.done) return;
+    act.appendChild(btn("btn btn-orange", item.checkLabel || "Check it", check));
+    if(rec.tries >= 2) act.appendChild(btn("btn btn-quiet", "Show me", function(){ for(var i = 0; i <= n; i++) rec.s[i] = penExp(item, i)[0]; finish(true) }));
+  }
+  function drawOut(){ out.innerHTML = rec.done ? render(item, rec.s, true) : ""; out.classList.toggle("hidden", !rec.done) }
+  function redraw(){ drawPal(); drawLine(); drawAct(); drawOut() }
+  wrap.appendChild(pal); wrap.appendChild(line); wrap.appendChild(out); wrap.appendChild(act); wrap.appendChild(fb);
+  redraw();
+  if(rec.done) fbBox(fb, rec.shown ? "tell" : "ok", "<b>" + (rec.shown ? "Shown." : (item.yes || "Unlocked.")) + "</b> " + item.ok);
+  host.appendChild(wrap);
+  return wrap;
+}
+
+/* ---------------- keys ---------------- */
+var toastT = null;
+function keySmall(col){
+  return "<svg width='38' height='20' viewBox='0 0 38 20' aria-hidden='true'><circle cx='9' cy='10' r='7' fill='" + col + "' stroke='" + INK + "' stroke-width='2'/><circle cx='9' cy='10' r='2.5' fill='" + PAPER + "'/><path d='M16 8 h20 v4 h-3 v4 h-3 v-4 h-3 v3 h-3 v-3 h-8 Z' fill='" + col + "' stroke='" + INK + "' stroke-width='1.6' stroke-linejoin='round'/></svg>";
+}
+function giveKey(id){
+  if(ST.keys[id]) return;
+  ST.keys[id] = true; save();
+  var s = STAGES.filter(function(x){ return x.id === id })[0];
+  drawMap(); drawRing(); drawHouse(); drawDone();
+  var d = document.querySelector(".door"); if(d) drawDoorInto(d);
+  var t = $("toast");
+  t.innerHTML = keySmall(s.kc) + "<span>You found the " + esc(s.key) + "! It is on your key ring.</span>";
+  t.classList.add("show");
+  if(toastT) clearTimeout(toastT);
+  toastT = setTimeout(function(){ t.classList.remove("show") }, 3600);
+}
+function keyShape(x, y, col, got){
+  var f = got ? col : "none", st = got ? INK : "#8b98a0", da = got ? "" : " stroke-dasharray='5 4'";
+  return "<circle cx='" + x + "' cy='" + (y + 12) + "' r='12' fill='" + f + "' stroke='" + st + "' stroke-width='3'" + da + "/>" +
+    "<circle cx='" + x + "' cy='" + (y + 12) + "' r='4' fill='" + (got ? PAPER : "none") + "' stroke='" + st + "' stroke-width='2'/>" +
+    "<path d='M" + (x - 4) + " " + (y + 24) + " h8 v58 h10 v6 h-6 v6 h-4 v4 h-8 Z' fill='" + f + "' stroke='" + st + "' stroke-width='3'" + da + " stroke-linejoin='round'/>";
+}
+function keyRingSVG(){
+  var s = "<circle cx='150' cy='34' r='22' fill='none' stroke='#8b98a0' stroke-width='6'/><circle cx='150' cy='34' r='22' fill='none' stroke='#fff' stroke-width='1.5' opacity='.6' stroke-dasharray='10 50'/>";
+  var ang = [-56, -28, 0, 28, 56], n = 0;
+  for(var i = 0; i < 5; i++){
+    var st = STAGES[i], got = !!ST.keys[st.id]; if(got) n++;
+    s += "<g transform='rotate(" + ang[i] + " 150 52)'>" + keyShape(150, 58, st.kc, got) + "</g>";
+  }
+  return svg("0 0 300 170", "Key ring holding " + n + " of 5 keys", s);
+}
+function drawRing(){
+  var r = $("ringBox"); if(r) r.innerHTML = keyRingSVG();
+  var c = $("keyChips");
+  if(c){ c.innerHTML = ""; STAGES.slice(0, 5).forEach(function(s){ c.appendChild(h("span", ST.keys[s.id] ? "got" : "", (ST.keys[s.id] ? "&#10003; " : "") + esc(s.key))) }) }
+}
+
+/* ---------------- house picture ---------------- */
+function houseSVG(){
+  var K = ST.keys, s = "";
+  s += "<rect width='360' height='300' fill='#1d3f5a'/>";
+  [[24,30],[70,18],[110,44],[262,22],[340,90],[20,120],[336,150],[290,64]].forEach(function(p){ s += "<circle cx='" + p[0] + "' cy='" + p[1] + "' r='2' fill='#fff3c4'/>" });
+  s += "<circle cx='312' cy='40' r='20' fill='#fff3c4'/><circle cx='321' cy='34' r='18' fill='#1d3f5a'/>";
+  s += "<rect y='276' width='360' height='24' fill='#2f5d3a'/>";
+  s += "<rect x='238' y='40' width='22' height='50' fill='#8a5230' stroke='" + INK + "' stroke-width='3'/>";
+  s += "<polygon points='34,112 180,22 326,112' fill='#5c3269' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/>";
+  s += "<path d='M70 100 L120 70 M250 72 L296 100' stroke='#3f2148' stroke-width='3'/>";
+  s += "<rect x='50' y='110' width='260' height='168' fill='#f3e3c3' stroke='" + INK + "' stroke-width='3'/>";
+  s += "<path d='M50 165 H310 M50 221 H310 M180 110 V221' stroke='" + INK + "' stroke-width='2' opacity='.55'/>";
+  s += "<path d='M52 112 L74 112 M52 112 L52 134 M52 112 L72 132 M58 112 Q60 122 52 126 M66 112 Q66 124 52 130' stroke='#9aa5a8' stroke-width='1' fill='none'/>";
+  function win(x, y, w, hh, lab, lit){
+    var r = "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + hh + "' rx='3' fill='" + (lit ? YEL : "#2c4a63") + "' stroke='" + INK + "' stroke-width='2.5'/>";
+    r += "<path d='M" + (x + w / 2) + " " + y + " V" + (y + hh) + " M" + x + " " + (y + hh / 2) + " H" + (x + w) + "' stroke='" + INK + "' stroke-width='1.6'/>";
+    if(lit) r += "<rect x='" + (x - 4) + "' y='" + (y - 4) + "' width='" + (w + 8) + "' height='" + (hh + 8) + "' rx='6' fill='none' stroke='" + YEL + "' stroke-width='2' opacity='.5'/>";
+    r += "<text x='" + (x + w / 2) + "' y='" + (y + hh + 13) + "' text-anchor='middle' font-size='10' " + FF + " font-weight='700' fill='" + INK + "'>" + lab + "</text>";
+    return r;
+  }
+  s += win(76, 120, 76, 28, "Library", K.s5) + win(208, 120, 76, 28, "Comic room", K.s3);
+  s += win(76, 175, 76, 28, "Radio room", K.s4) + win(208, 175, 76, 28, "Kitchen", K.s1);
+  s += "<path d='M58 226 h132 l-8 12 h-116 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2'/>";
+  for(var i = 0; i < 6; i++) s += "<rect x='" + (66 + i * 20) + "' y='227' width='10' height='10' fill='" + PAPER + "' opacity='.85'/>";
+  s += win(66, 242, 116, 20, "Shop", K.s2);
+  s += "<rect x='232' y='230' width='44' height='48' rx='4' fill='#7a4a22' stroke='" + INK + "' stroke-width='2.5'/><circle cx='268' cy='256' r='3' fill='" + YEL + "'/>";
+  var att = !!ST.toy.door;
+  s += "<circle cx='180' cy='78' r='18' fill='" + (att ? YEL : "#2c4a63") + "' stroke='" + INK + "' stroke-width='3'/><path d='M180 60 V96 M162 78 H198' stroke='" + INK + "' stroke-width='1.6'/>";
+  s += "<text x='180' y='108' text-anchor='middle' font-size='10' " + FF + " font-weight='700' fill='" + PAPER + "'>Attic</text>";
+  s += "<g transform='translate(176 20)'><ellipse cx='0' cy='0' rx='10' ry='6' fill='#14141a'/><circle cx='8' cy='-5' r='5' fill='#14141a'/><path d='M12 -6 l6 2 l-6 2 Z' fill='#6b6b6b'/><circle cx='9' cy='-6' r='1.2' fill='#fff'/><path d='M-8 0 l-8 4 l7 1 Z' fill='#14141a'/></g>";
+  s += "<g class='ghostbob'><path d='M22 210 V186 Q22 168 38 168 Q54 168 54 186 V210 L48 204 L42 210 L36 204 L30 210 Z' fill='#fff' stroke='" + INK + "' stroke-width='2' opacity='.92'/><circle cx='33' cy='184' r='3' fill='" + INK + "'/><circle cx='44' cy='184' r='3' fill='" + INK + "'/><ellipse cx='38.5' cy='194' rx='3' ry='4' fill='" + INK + "'/></g>";
+  var n = 0; STAGES.slice(0, 5).forEach(function(x){ if(K[x.id]) n++ });
+  return svg("0 0 360 300", "A creaky old house at night with a crow on the roof and a ghost floating by. " + n + " of 5 rooms have their lights on because you found their key.", s);
+}
+function drawHouse(){ var b = $("houseBox"); if(b) b.innerHTML = houseSVG() }
+
+/* ================= STAGE 1: THE KITCHEN ================= */
+var NOTES = [
+  { words:["Please", "buy", "carrots", "onions", "rice", "and", "a", "melon"], show:[1, 2, 3, 4, 5, 6, 7], pal:[","], tail:".",
+    key:{ 3:[","], 4:[","], 5:["", ","] }, basket:["carrots", "onions", "rice", "a melon"],
+    hints:{ 1:"Please buy belongs together. The list has not started yet.", 2:"The list starts after buy. No comma before the first thing.", 6:"And already joins the last thing on. No comma after and.", 7:"A melon is one thing. Keep a and melon together.", 3:"Carrots and onions are two separate things in the basket.", 4:"Onions and rice are two separate things in the basket." },
+    ok:"Four things, just like the basket: carrots, onions, rice and a melon. A comma before and is optional in a list, so both ways work.", yes:"That matches the basket." },
+  { words:["We", "need", "fish", "fingers", "chips", "frozen", "peas", "and", "ketchup"], show:[1, 2, 3, 4, 5, 6, 7, 8], pal:[","], tail:".",
+    key:{ 4:[","], 5:[","], 7:["", ","] }, basket:["fish fingers", "chips", "frozen peas", "ketchup"],
+    hints:{ 1:"We need belongs together. The list has not started yet.", 2:"The list starts after need. No comma before the first thing.", 3:"Look at the basket. Fish fingers come in one box. Is that one thing or two?", 6:"Frozen peas is one thing: peas that are frozen.", 8:"And already joins ketchup on. No comma after and.", 4:"Fish fingers and chips are two separate things in the basket.", 5:"Chips and frozen peas are two separate things in the basket." },
+    ok:"Fish fingers, chips, frozen peas and ketchup. Four things. Put a comma between fish and fingers and you would be shopping for a fish and some fingers.", yes:"That matches the basket." }
+];
+var COUNT = [
+  { t:"Buy fruit salad<b class='cm'>,</b> yoghurt and grapes.", a:3, why:"Fruit salad is one thing, then yoghurt, then grapes. Three." },
+  { t:"Buy fruit<b class='cm'>,</b> salad<b class='cm'>,</b> yoghurt and grapes.", a:4, why:"The new comma splits fruit from salad. Now they are two different things. Four." },
+  { t:"Pack cheese sandwiches<b class='cm'>,</b> apples and crisps.", a:3, why:"Cheese sandwiches are one thing: sandwiches with cheese in. Three." },
+  { t:"Pack cheese<b class='cm'>,</b> sandwiches<b class='cm'>,</b> apples and crisps.", a:4, why:"Now the cheese gets its own comma, so it is packed on its own. A lump of cheese and some plain sandwiches. Four." }
+];
+var JOBS = ["Keeps a list apart", "Ends an opening chunk", "Shows who is spoken to", "Holds extra information"];
+var JOBHINT = ["Is there a list of things here?", "Is there an opening chunk before the main part of the sentence?", "Is someone being spoken to by name?", "Could you lift a bit out and still have a sentence?"];
+var CJOBS = [
+  { t:"Stir in the sugar<b class='cm'>,</b> the flour and the milk.", a:0, why:"It keeps the things in the list apart: sugar, flour, milk." },
+  { t:"When the timer beeps<b class='cm'>,</b> take the tray out.", a:1, why:"When the timer beeps is the opening chunk. The comma shows where it ends and the instruction starts." },
+  { t:"HB<b class='cm'>,</b> can you pass the whisk?", a:2, why:"HB is the person being spoken to, so the comma goes after the name." },
+  { t:"The oven<b class='cm'>,</b> which is very old<b class='cm'>,</b> makes a clanking noise.", a:3, why:"The pair of commas holds extra information. Lift out which is very old and the sentence still works." },
+  { t:"Bonnie<b class='cm'>,</b> stay out of the kitchen!", a:2, why:"Bonnie is the one being spoken to. Probably about the sausages." },
+  { t:"Before you start<b class='cm'>,</b> wash your hands.", a:1, why:"Before you start is the opening chunk. The comma marks where it ends." }
+];
+var SVG_FRIDGE = (function(){
+  var s = "<rect width='480' height='200' rx='16' fill='#eaf5f0'/><rect y='170' width='480' height='30' fill='#d9c4a0'/>";
+  s += "<rect x='40' y='14' width='120' height='170' rx='12' fill='#f4f7f8' stroke='" + INK + "' stroke-width='3'/><path d='M40 74 H160' stroke='" + INK + "' stroke-width='3'/><rect x='146' y='34' width='6' height='26' rx='3' fill='#9aa5a8'/><rect x='146' y='88' width='6' height='40' rx='3' fill='#9aa5a8'/>";
+  s += "<g transform='rotate(-4 90 120)'><rect x='56' y='90' width='70' height='62' fill='#fff6a8' stroke='" + INK + "' stroke-width='1.5'/><circle cx='91' cy='92' r='6' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='1.5'/>";
+  s += "<text x='62' y='112' font-size='10' " + FF + " fill='" + INK + "'>carrots<tspan fill='" + ORANGE + "' font-weight='700'>,</tspan></text><text x='62' y='126' font-size='10' " + FF + " fill='" + INK + "'>onions<tspan fill='" + ORANGE + "' font-weight='700'>,</tspan></text><text x='62' y='140' font-size='10' " + FF + " fill='" + INK + "'>rice and...</text></g>";
+  s += "<text x='300' y='60' text-anchor='middle' font-size='22' " + FF + " font-weight='700' fill='" + INK + "'>fruit salad</text><text x='300' y='86' text-anchor='middle' font-size='14' " + FF + " fill='" + INK + "' opacity='.75'>one thing</text>";
+  s += "<text x='300' y='132' text-anchor='middle' font-size='22' " + FF + " font-weight='700' fill='" + INK + "'>fruit<tspan fill='" + ORANGE + "' font-size='30'>,</tspan> salad</text><text x='300' y='158' text-anchor='middle' font-size='14' " + FF + " fill='" + INK + "' opacity='.75'>two things</text>";
+  s += "<path d='M196 100 H404' stroke='" + INK + "' stroke-width='2' stroke-dasharray='5 5' opacity='.4'/>";
+  return svg("0 0 480 200", "A fridge with a shopping note: carrots, onions, rice and more, with orange commas. Beside it, fruit salad is one thing, but fruit comma salad is two things", s);
+})();
+function basketSVG(items, label){
+  var s = "", cols = [YEL, "#ffd9bf", "#7fd1c3", "#e6d4f0"];
+  items.forEach(function(t, i){
+    var x = 6 + i * 88;
+    s += "<rect x='" + x + "' y='8' width='84' height='34' rx='10' fill='" + cols[i % 4] + "' stroke='" + INK + "' stroke-width='2'/>";
+    s += "<text x='" + (x + 42) + "' y='30' text-anchor='middle' font-size='12.5' " + FF + " font-weight='700' fill='" + INK + "'>" + esc(t) + "</text>";
+    s += "<path d='M" + (x + 42) + " 46 L" + (180 + (i - 1.5) * 40) + " 74' stroke='" + INK + "' stroke-width='1.5' stroke-dasharray='3 3' opacity='.5'/>";
+  });
+  s += "<path d='M74 76 H286 L266 134 H94 Z' fill='#c98a4b' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/>";
+  s += "<path d='M84 94 H276 M90 112 H270 M126 76 L136 134 M180 76 V134 M234 76 L224 134' stroke='#8a5230' stroke-width='2'/>";
+  s += "<path d='M110 76 Q180 30 250 76' fill='none' stroke='#8a5230' stroke-width='5'/>";
+  s += "<text x='320' y='112' text-anchor='middle' font-size='26' " + FD + " fill='" + ORANGE + "'>" + items.length + "</text><text x='320' y='130' text-anchor='middle' font-size='12' " + FF + " font-weight='700' fill='" + INK + "'>things</text>";
+  return svg("0 0 360 140", label || ("A basket holding " + items.length + " things: " + items.join(", ")), s);
+}
+function allPen(prefix, n){ for(var i = 0; i < n; i++){ var r = ST.pen[prefix + i]; if(!r || !r.done) return false } return true }
+function buildS1(box){
+  box.appendChild(block("learn", "Commas keep things apart", "<div class='fig'>" + SVG_FRIDGE + "</div><p>In a list, a comma goes between the things so they do not glue together. Leave one out and two things become one. Add an extra one and one thing splits into two.</p><p>A comma before <b>and</b> at the end of a list is optional. Both ways are fine.</p>"));
+  NOTES.forEach(function(item, n){
+    var t = block("try", "Fridge note " + (n + 1), "<p>The kitchen lock wants the note to match the basket. Tap a gap to add a comma.</p>");
+    var bk = h("div", "basket", basketSVG(item.basket));
+    t.appendChild(bk);
+    pen(t, "k" + n, item, "s1", function(){ if(allPen("k", NOTES.length)) giveKey("s1") });
+    box.appendChild(t);
+  });
+
+  var c = block("try", "How many things?", "<p>Same words, different commas. Count the things in each bag.</p>");
+  var cl = h("div", "qlist");
+  COUNT.forEach(function(item, n){
+    pick(cl, "s1_count" + n, { q:item.t, o:["2", "3", "4", "5"], a:[item.a - 2], style:"mk", yes:item.a + " things.", ok:item.why,
+      labels:["2 things", "3 things", "4 things", "5 things"],
+      no:function(){ return "Count the chunks between the commas, and the one after and. Is any chunk one thing made of two words?" } }, "s1");
+  });
+  c.appendChild(cl);
+  var ex = h("div", "");
+  ex.appendChild(h("p", "", "<b>If you fancy:</b> how did the comma change the shopping? Pick fruit salad or cheese sandwiches."));
+  writer(ex, "s1_explain", "Without the comma... With the comma...", ["Without the comma,", "With the comma,", "the reader thinks", "The comma shows", "so there are", "This changes the meaning because"], "short", null, "s1");
+  c.appendChild(ex);
+  box.appendChild(c);
+
+  var j = block("try", "What is that comma doing?", "<p>A recipe card full of commas. Pick the job each orange comma is doing.</p>");
+  var jl = h("div", "qlist");
+  CJOBS.forEach(function(item, n){
+    pick(jl, "s1_job" + n, { q:item.t, o:JOBS, a:[item.a], ok:item.why, no:function(){ return "A clue: " + JOBHINT[item.a] } }, "s1");
+  });
+  j.appendChild(jl);
+  box.appendChild(j);
+}
+
+/* ================= STAGE 2: THE SHOP DOWNSTAIRS ================= */
+function T(forms, start, ok, hint){ return { f:forms, s:start, a:ok, hint:hint } }
+var SIGNS = [
+  { toks:[T(["Apples", "Apple's", "Apples'"], 1, [0], "More than one apple, and nothing belongs to the apples. Just more than one never needs an apostrophe."), "60p", "each"],
+    ok:"Apples just means more than one apple. No apostrophe needed." },
+  { toks:["Fresh", T(["carrots", "carrot's", "carrots'"], 1, [0], "Lots of carrots, and the carrots do not own anything."), "and", T(["leeks", "leek's", "leeks'"], 1, [0], "Lots of leeks, and the leeks do not own anything.")],
+    ok:"Carrots and leeks: more than one of each, nothing owned, no apostrophes." },
+  { toks:["Shut", "on", T(["Sundays", "Sunday's", "Sundays'"], 1, [0], "Shut on lots of Sundays. That is just more than one Sunday.")],
+    ok:"Sundays just means every Sunday. No apostrophe." },
+  { toks:[T(["Doris", "Doris's", "Doris'"], 0, [1, 2], "This is the shop that belongs to Doris. Owning needs an apostrophe."), "Fruit", "and", "Veg"],
+    ok:"The shop belongs to Doris. For a name ending in s, Doris's and Doris' are both used, so either is fine.",
+    why:{ w:"Doris" + RSQ + "s", sw:"the Doris sign", a:0, ok:"Doris owns the shop. The apostrophe shows that." } },
+  { toks:[T(["Were", "We're"], 0, [1], "Say it in full: we are open. A letter is missing."), "open!", T(["Dont", "Don't"], 0, [1], "Dont is short for do not. A letter is missing."), "miss", "the", "sale"],
+    ok:"We're is short for we are. Don't is short for do not.",
+    why:{ w:"We" + RSQ + "re and Don" + RSQ + "t", a:1, ok:"Both are squashed words. The apostrophe sits where the missing letter was: we are, do not." } },
+  { toks:[T(["Mens", "Men's", "Mens'"], 0, [1], "The coats are for men. Men already means more than one and does not end in s, so add an apostrophe then s."), T(["coats", "coat's", "coats'"], 0, [0], "Lots of coats, and the coats do not own anything."), "upstairs"],
+    ok:"Men's coats: coats that belong to men. Coats is just more than one coat.",
+    why:{ w:"Men" + RSQ + "s", a:0, ok:"The coats are for the men, so the apostrophe shows owning." } },
+  { toks:["Sorry,", T(["Ive", "I've"], 0, [1], "Say it in full: I have popped out. Some letters are missing."), "popped", "out"],
+    ok:"I've is short for I have.",
+    why:{ w:"I" + RSQ + "ve", a:1, ok:"I have, squashed. The apostrophe sits where ha used to be." } }
+];
+var SWAPS = [
+  { on:"We'll be back at two.", off:"Well be back at two.", onc:"We will be back at two o'clock.", offc:"A well is a hole for water. Why is a well coming back at two?", art:"well" },
+  { on:"She'll be right with you.", off:"Shell be right with you.", onc:"She will be right with you.", offc:"A shell will be right with you. Very slowly.", art:"shell" },
+  { on:"I'll fetch more bread.", off:"Ill fetch more bread.", onc:"I will fetch more bread.", offc:"Ill means poorly. Now the sign sounds like a poorly person is fetching bread.", art:"ill" },
+  { on:"We're closing early.", off:"Were closing early.", onc:"We are closing early today.", offc:"Were is a different word, like in we were. The sign stops making sense.", art:"were" }
+];
+function swapArt(k, on){
+  var s = "<rect width='120' height='80' rx='10' fill='" + (on ? "#e9f4ec" : "#fdf0e5") + "'/>";
+  if(on){
+    s += "<circle cx='60' cy='30' r='14' fill='#f1c7a3' stroke='" + INK + "' stroke-width='2'/><circle cx='55' cy='28' r='2' fill='" + INK + "'/><circle cx='65' cy='28' r='2' fill='" + INK + "'/><path d='M54 35 Q60 40 66 35' stroke='" + INK + "' stroke-width='2' fill='none'/><rect x='46' y='46' width='28' height='26' rx='8' fill='" + TEAL + "'/>";
+    return svg("0 0 120 80", "A shopkeeper, smiling", s);
+  }
+  if(k === "well") s += "<rect x='36' y='40' width='48' height='30' fill='#b9c4c7' stroke='" + INK + "' stroke-width='2'/><path d='M36 50 H84 M36 60 H84' stroke='" + INK + "' stroke-width='1'/><path d='M40 40 V14 M80 40 V14 M34 14 H86' stroke='#8a5230' stroke-width='4'/><path d='M60 14 V30' stroke='" + INK + "' stroke-width='1.5'/><rect x='54' y='30' width='12' height='9' fill='#8a5230'/>";
+  if(k === "shell") s += "<path d='M30 62 Q30 22 60 20 Q92 22 90 62 Z' fill='#ffd9bf' stroke='" + INK + "' stroke-width='2'/><path d='M60 22 V62 M45 26 L50 62 M75 26 L70 62 M36 38 L42 62 M84 38 L78 62' stroke='" + INK + "' stroke-width='1.3'/><rect x='54' y='60' width='12' height='8' fill='#ffd9bf' stroke='" + INK + "' stroke-width='2'/>";
+  if(k === "ill") s += "<circle cx='60' cy='36' r='18' fill='#cfe8b4' stroke='" + INK + "' stroke-width='2'/><path d='M52 32 l4 2 M68 32 l-4 2' stroke='" + INK + "' stroke-width='2'/><path d='M53 45 Q60 40 67 45' stroke='" + INK + "' stroke-width='2' fill='none'/><rect x='70' y='40' width='22' height='5' rx='2.5' fill='#fff' stroke='" + INK + "' stroke-width='1.5' transform='rotate(-20 70 40)'/><circle cx='70' cy='42' r='3' fill='#e8473b'/>";
+  if(k === "were") s += "<circle cx='60' cy='40' r='24' fill='#fff' stroke='" + INK + "' stroke-width='2.5'/><path d='M60 40 V24 M60 40 L50 46' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><path d='M30 22 A34 34 0 0 1 50 10' stroke='" + ORANGE + "' stroke-width='3' fill='none'/><path d='M30 14 L30 23 L39 22' stroke='" + ORANGE + "' stroke-width='3' fill='none'/>";
+  s += "<text x='104' y='22' font-size='20' " + FD + " fill='" + ORANGE + "'>?</text>";
+  return svg("0 0 120 80", { well:"A well with a bucket", shell:"A seashell", ill:"A poorly face with a thermometer", were:"A clock going backwards into the past" }[k], s);
+}
+var SVG_SHOP = (function(){
+  var s = "<rect width='480' height='210' rx='16' fill='" + PAPER + "'/><rect y='186' width='480' height='24' fill='#d9c4a0'/>";
+  s += "<rect x='30' y='40' width='280' height='146' fill='#f3e3c3' stroke='" + INK + "' stroke-width='3'/>";
+  s += "<rect x='40' y='14' width='260' height='30' rx='4' fill='" + INK + "'/><text x='170' y='35' text-anchor='middle' font-size='16' " + FD + " fill='" + PAPER + "'>DORIS<tspan fill='" + YEL + "'>" + RSQ + "</tspan>S FRUIT AND VEG</text>";
+  s += "<path d='M30 44 h280 l-12 18 h-256 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2'/>";
+  for(var i = 0; i < 8; i++) s += "<rect x='" + (40 + i * 34) + "' y='45' width='16' height='15' fill='" + PAPER + "' opacity='.85'/>";
+  s += "<rect x='46' y='76' width='160' height='70' fill='#cfe9f2' stroke='" + INK + "' stroke-width='2.5'/>";
+  s += "<rect x='54' y='120' width='66' height='22' fill='#c98a4b' stroke='" + INK + "' stroke-width='1.5'/><rect x='128' y='120' width='66' height='22' fill='#c98a4b' stroke='" + INK + "' stroke-width='1.5'/>";
+  [64, 78, 92, 106, 71, 85, 99].forEach(function(x, j){ s += "<circle cx='" + x + "' cy='" + (j < 4 ? 116 : 106) + "' r='7' fill='#d63b30' stroke='" + INK + "' stroke-width='1'/>" });
+  [138, 152, 166, 180].forEach(function(x){ s += "<path d='M" + x + " 118 l4 -18 l4 18 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='1'/>" });
+  s += "<rect x='230' y='80' width='60' height='106' fill='#7a4a22' stroke='" + INK + "' stroke-width='2.5'/><circle cx='280' cy='134' r='3' fill='" + YEL + "'/>";
+  s += "<path d='M346 186 L370 96 L394 186 M436 186 L412 96 L388 186' stroke='#8a5230' stroke-width='4' fill='none'/><rect x='352' y='96' width='88' height='70' rx='4' fill='#1f3b36' stroke='#8a5230' stroke-width='4'/>";
+  s += "<text x='396' y='124' text-anchor='middle' font-size='17' " + FD + " fill='#f4f1e6'>Apple<tspan fill='" + YEL + "'>" + RSQ + "</tspan>s</text><text x='396' y='148' text-anchor='middle' font-size='15' " + FD + " fill='#f4f1e6'>60p</text>";
+  s += "<path d='M402 104 l12 14 M414 104 l-12 14' stroke='" + ORANGE + "' stroke-width='3.5' stroke-linecap='round'/>";
+  return svg("0 0 480 210", "A shop called Doris's Fruit and Veg, which needs its apostrophe, and a chalkboard saying Apple's 60p, with the apostrophe crossed out", s);
+})();
+function buildSign(host, n){
+  var S = SIGNS[n];
+  var rec = ST.sign[n] || { st:null, tries:0, done:false, shown:false };
+  if(!rec.st || rec.st.length !== S.toks.length) rec.st = S.toks.map(function(t){ return typeof t === "string" ? 0 : t.s });
+  var qi = h("div", "qi signq"), sw = h("div", "signwrap"), sg = h("div", "sign"), act = h("div", "row"), fb = h("div", ""), why = h("div", "");
+  act.style.justifyContent = "center";
+  var whyBuilt = false;
+  function txtOf(t, i){ return typeof t === "string" ? t : t.f[rec.st[i]] }
+  function bad(){ var w = []; S.toks.forEach(function(t, i){ if(typeof t !== "string" && t.a.indexOf(rec.st[i]) < 0) w.push(i) }); return w }
+  function fixedText(){ return S.toks.map(function(t, i){ return curly(txtOf(t, i)) }).join(" ") }
+  function draw(anim, focusI){
+    sg.innerHTML = "";
+    sg.className = "sign" + (rec.done ? " fixed" : "") + (anim ? " swing" : "");
+    S.toks.forEach(function(t, i){
+      var txt = txtOf(t, i), shown = esc(txt).replace(/'/g, "<span class='ap'>" + RSQ + "</span>");
+      if(typeof t === "string"){ sg.appendChild(h("span", "sword", shown)); return }
+      var b = btn("stok", shown, function(){
+        rec.st[i] = (rec.st[i] + 1) % t.f.length; ST.sign[n] = rec; tried("s2"); fbBox(fb); draw(false, i);
+      });
+      b.setAttribute("data-i", i);
+      b.setAttribute("aria-label", "Word " + txt.replace(/'/g, " apostrophe ") + ". Tap to try another version");
+      if(rec.done) b.disabled = true;
+      sg.appendChild(b);
+    });
+    act.innerHTML = "";
+    if(!rec.done){
+      act.appendChild(btn("btn btn-orange", "Hang it up", check));
+      if(rec.tries >= 2) act.appendChild(btn("btn btn-quiet", "Show me", function(){
+        S.toks.forEach(function(t, i){ if(typeof t !== "string") rec.st[i] = t.a[0] });
+        rec.done = true; rec.shown = true; ST.sign[n] = rec; save(); draw(true); fbBox(fb, "tell", "<b>Here it is.</b> " + S.ok); afterDone();
+      }));
+    }
+    if(focusI != null){ var f = sg.querySelector("[data-i='" + focusI + "']"); if(f) f.focus() }
+    if(rec.done && !whyBuilt) buildWhy();
+  }
+  function buildWhy(){
+    whyBuilt = true; why.innerHTML = "";
+    if(S.why){
+      pick(why, "s2_why" + n, { wcls:"", q:"What is the apostrophe " + (S.why.sw ? "on <b>" + S.why.sw + "</b>" : "in <b>" + S.why.w + "</b>") + " doing?", o:["Shows something belongs to someone", "Shows letters are missing"], a:[S.why.a], ok:S.why.ok,
+        no:function(i){ return i === 0 ? "Say it the long way. Does it turn into two words, like we are?" : "Try saying it the long way. If it does not turn into two words, something might belong to someone." } }, "s2");
+    }
+  }
+  function afterDone(){
+    var all = SIGNS.every(function(x, j){ return ST.sign[j] && ST.sign[j].done });
+    if(all) giveKey("s2");
+  }
+  function check(){
+    var w = bad(); tried("s2");
+    if(!w.length){ rec.done = true; ST.sign[n] = rec; save(); draw(true); fbBox(fb, "ok", "<b>Fixed. Up it goes.</b> " + S.ok); afterDone(); return }
+    rec.tries++; ST.sign[n] = rec; save(); draw(false);
+    fbBox(fb, "nope", "<b>Not ready to hang yet.</b> Look at <b>" + esc(curly(txtOf(S.toks[w[0]], w[0]))) + "</b>. " + S.toks[w[0]].hint + (rec.tries >= 2 ? " Or tap Show me." : ""));
+  }
+  sw.appendChild(sg); qi.appendChild(sw); qi.appendChild(act); qi.appendChild(fb); qi.appendChild(why);
+  draw(false);
+  if(rec.done) fbBox(fb, rec.shown ? "tell" : "ok", "<b>" + (rec.shown ? "Shown." : "Fixed.") + "</b> " + S.ok);
+  host.appendChild(qi);
+  qi.fixedText = fixedText;
+}
+function buildS2(box){
+  box.appendChild(block("learn", "An apostrophe has two jobs", "<div class='fig'>" + SVG_SHOP + "</div><p><b>Owning:</b> Doris" + RSQ + "s shop is the shop that belongs to Doris.</p><p><b>Missing letters:</b> we" + RSQ + "re is we are, squashed.</p><p>Just more than one thing? <b>No apostrophe.</b> Apples, Sundays, leeks. Wrong apostrophes on plurals turn up on shop signs so often they have a nickname: the greengrocer" + RSQ + "s apostrophe.</p>"));
+  var t = block("try", "Fix the signs", "<p>Tap a dashed word to swap between versions. When the sign looks right, hang it up.</p>");
+  var g = h("div", "signs");
+  SIGNS.forEach(function(s, n){ buildSign(g, n) });
+  t.appendChild(g);
+  box.appendChild(t);
+
+  var sw = block("try", "One tiny mark, a whole new word", "<p>Take the apostrophe out of these signs and see what they turn into.</p>");
+  var sg = h("div", "swaps");
+  if(!ST.toy.swap) ST.toy.swap = {};
+  SWAPS.forEach(function(x, i){
+    var c = h("div", "swapc"), bd = h("div", "sboard"), art = h("div", ""), cap = h("p", ""), b = btn("btn btn-quiet", "", null);
+    bd.setAttribute("aria-live", "polite");
+    function draw(){
+      var off = ST.toy.swap[i] === "off";
+      bd.innerHTML = esc(off ? x.off : x.on).replace(/'/g, "<span class='ap'>" + RSQ + "</span>");
+      art.innerHTML = swapArt(x.art, !off);
+      cap.innerHTML = off ? x.offc : esc(curly(x.onc));
+      b.textContent = off ? "Put it back" : "Take the apostrophe out";
+    }
+    b.addEventListener("click", function(){ ST.toy.swap[i] = ST.toy.swap[i] === "off" ? "on" : "off"; tried("s2"); draw() });
+    c.appendChild(bd); c.appendChild(art); c.appendChild(cap); c.appendChild(b); sg.appendChild(c); draw();
+  });
+  sw.appendChild(sg);
+  pick(sw, "s2_swapjob", { style:"opt", q:"So what are these apostrophes doing to the meaning?", a:[0],
+    o:["They show letters are missing. Take one away and the word turns into a different word.", "They show that something belongs to someone.", "They make the word sound louder."],
+    ok:"We" + RSQ + "ll is we will. Without the apostrophe it is well, a totally different word.",
+    no:["", "Nothing is owned here. Say We" + RSQ + "ll the long way.", "Volume is more of an exclamation mark job. Say We" + RSQ + "ll the long way."] }, "s2");
+  var ex = h("div", "");
+  ex.appendChild(h("p", "", "<b>If you fancy:</b> pick one sign and say what the apostrophe changes."));
+  writer(ex, "s2_explain", "Without the apostrophe...", ["Without the apostrophe,", "With the apostrophe,", "it shows", "letters are missing", "it belongs to", "so the reader"], "short", null, "s2");
+  sw.appendChild(ex);
+  box.appendChild(sw);
+}
+
+/* ================= STAGE 3: THE COMIC ROOM ================= */
+var CPAL = [LDQ, RDQ, ",", ".", "?", "!"];
+var COMIC = [
+  { words:["Is", "anyone", "there", "asked", "the", "ghost"], pal:CPAL, palNote:"A gap can hold two marks, like ?" + RDQ + ".",
+    key:{ 0:[LDQ], 3:["?" + RDQ], 6:["."] },
+    hints:{ 0:"Speech marks open just before the first word the ghost says.", 3:"The question mark belongs to what the ghost says, so it goes inside, then the speech marks close.", 6:"The whole sentence ends after ghost. It wants an end mark." },
+    ok:"The question mark is part of the ghost" + RSQ + "s words, so it sits inside the speech marks." },
+  { words:["The", "crow", "said", "Nobody", "here", "but", "me"], pal:CPAL, palNote:"A gap can hold two marks, like ," + LDQ + ".",
+    key:{ 3:["," + LDQ], 7:["." + RDQ, "!" + RDQ] },
+    hints:{ 3:"After said, a comma, then the speech marks open.", 7:"End the crow" + RSQ + "s words with an end mark inside the speech marks, then close them." },
+    ok:"When the speaker comes first, a comma goes after said, then the speech marks open." },
+  { words:["Outrageous", "said", "the", "knight", "Who", "left", "the", "lights", "on"], pal:CPAL, palNote:"A gap can hold two marks.",
+    key:{ 0:[LDQ], 1:["!" + RDQ, "," + RDQ], 4:["." + LDQ], 9:["?" + RDQ] },
+    hints:{ 0:"Speech marks open before the first word spoken.", 1:"The knight" + RSQ + "s first words end here. A mark inside, then close the speech marks.", 4:"The sentence about the knight ends here, then new speech starts. An end mark, then open the speech marks.", 9:"Who left the lights on is a question. Mark inside, then close." },
+    ok:"Two bits of speech, two sets of speech marks. The ! after Outrageous shows how the knight said it. A comma there works too, it just sounds calmer." },
+  { words:["When", "I", "was", "in", "China", "said", "Jay", "nobody", "stole", "my", "torch"], pal:CPAL, palNote:"A gap can hold two marks.",
+    key:{ 0:[LDQ], 5:["," + RDQ], 7:["," + LDQ], 11:["." + RDQ, "!" + RDQ] },
+    hints:{ 0:"Speech marks open before the first word Jay says.", 5:"Jay has not finished his sentence yet, so a comma goes inside the speech marks, not a full stop.", 7:"Jay carries on with the same sentence. Comma after Jay, then open the speech marks again. Spot the small n on nobody.", 11:"End of what Jay says: end mark inside, then close." },
+    ok:"Jay" + RSQ + "s sentence is split in two. The commas, and the small n on nobody, show it is still one sentence." }
+];
+var BUB = [["Is anyone there?"], ["Nobody here", "but me."], ["Outrageous!", "Who left the lights on?"], ["When I was in China,", "nobody stole my torch."]];
+function sbub(x, y, w, hh, lines, tx, ty, fs){
+  var cx = x + w / 2, f = fs || 13;
+  var s = "<path d='M" + (cx - 9) + " " + (y + hh - 2) + " L" + tx + " " + ty + " L" + (cx + 9) + " " + (y + hh - 2) + " Z' fill='#fff' stroke='" + INK + "' stroke-width='2.2' stroke-linejoin='round'/>";
+  s += "<rect x='" + x + "' y='" + y + "' width='" + w + "' height='" + hh + "' rx='13' fill='#fff' stroke='" + INK + "' stroke-width='2.2'/>";
+  s += "<path d='M" + (cx - 7) + " " + (y + hh - 1.2) + " L" + (cx + 7) + " " + (y + hh - 1.2) + "' stroke='#fff' stroke-width='3.5'/>";
+  var ly = y + hh / 2 - (lines.length - 1) * (f * .62) + f * .36;
+  lines.forEach(function(t, i){ s += "<text x='" + cx + "' y='" + (ly + i * f * 1.24) + "' text-anchor='middle' font-size='" + f + "' " + FF + " font-weight='700' fill='" + INK + "'>" + esc(t) + "</text>" });
+  return s;
+}
+function ghostG(x, y, s){
+  return "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'><path d='M-30 40 V-10 Q-30 -45 0 -45 Q30 -45 30 -10 V40 L20 30 L10 40 L0 30 L-10 40 L-20 30 Z' fill='#fff' stroke='" + INK + "' stroke-width='3'/><ellipse cx='-10' cy='-12' rx='5' ry='7' fill='" + INK + "'/><ellipse cx='10' cy='-12' rx='5' ry='7' fill='" + INK + "'/><ellipse cx='0' cy='8' rx='6' ry='8' fill='" + INK + "'/><path d='M-30 6 Q-44 0 -46 -10 M30 6 Q44 0 46 -10' stroke='" + INK + "' stroke-width='3' fill='none'/></g>";
+}
+function crowG(x, y, s, torch){
+  var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+  g += "<path d='M-22 8 L-44 20 L-22 18 Z' fill='#1d1d24'/><ellipse cx='0' cy='6' rx='24' ry='16' fill='#1d1d24'/><circle cx='20' cy='-10' r='12' fill='#1d1d24'/>";
+  g += "<path d='M30 -13 L46 -8 L30 -4 Z' fill='#6b6b6b'/><circle cx='23' cy='-13' r='3' fill='#fff'/><circle cx='24' cy='-13' r='1.4' fill='" + INK + "'/>";
+  g += "<path d='M-8 2 Q4 -10 14 6' stroke='#4a4a5a' stroke-width='3' fill='none'/><path d='M-4 21 v10 M6 21 v10' stroke='#6b6b6b' stroke-width='3'/>";
+  if(torch) g += "<polygon points='58,-10 104,-30 104,12 58,-3' fill='" + YEL + "' opacity='.55'/><rect x='40' y='-11' width='19' height='8' rx='2' fill='#9aa5a8' stroke='" + INK + "' stroke-width='1.5'/>";
+  return g + "</g>";
+}
+function knightG(x, y, s){
+  var m = "#b9c4c7", d = "#7e8b91";
+  var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>";
+  g += "<rect x='-16' y='-40' width='12' height='40' rx='4' fill='" + d + "' stroke='" + INK + "' stroke-width='2'/><rect x='4' y='-40' width='12' height='40' rx='4' fill='" + d + "' stroke='" + INK + "' stroke-width='2'/>";
+  g += "<path d='M-18 -84 L-40 -116 M18 -84 L40 -116' stroke='" + m + "' stroke-width='11' stroke-linecap='round'/><path d='M-18 -84 L-40 -116 M18 -84 L40 -116' stroke='" + INK + "' stroke-width='1.5' fill='none'/>";
+  g += "<rect x='-22' y='-90' width='44' height='54' rx='10' fill='" + m + "' stroke='" + INK + "' stroke-width='2.5'/><path d='M0 -88 V-38' stroke='" + d + "' stroke-width='2'/>";
+  g += "<rect x='-16' y='-124' width='32' height='36' rx='12' fill='" + m + "' stroke='" + INK + "' stroke-width='2.5'/><rect x='-11' y='-110' width='22' height='5' rx='2' fill='" + INK + "'/>";
+  g += "<path d='M0 -124 Q4 -144 20 -142 Q10 -134 6 -124 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='1.5'/>";
+  return g + "</g>";
+}
+function jayG(x, y, s){
+  var g = "<g transform='translate(" + x + " " + y + ") scale(" + s + ")'>", sk = "#f1c7a3";
+  g += "<rect x='-13' y='-42' width='10' height='42' rx='5' fill='#2b3f63'/><rect x='3' y='-42' width='10' height='42' rx='5' fill='#2b3f63'/>";
+  g += "<path d='M-14 -80 L-30 -60 M14 -80 L32 -60' stroke='" + TEAL + "' stroke-width='10' stroke-linecap='round'/><circle cx='-32' cy='-57' r='6' fill='" + sk + "'/><circle cx='34' cy='-57' r='6' fill='" + sk + "'/>";
+  g += "<rect x='-19' y='-90' width='38' height='54' rx='15' fill='" + TEAL + "'/>";
+  g += "<circle cx='0' cy='-108' r='18' fill='" + sk + "'/>";
+  g += "<path d='M-20 -108 L-22 -122 L-14 -118 L-12 -132 L-4 -122 L2 -134 L6 -122 L14 -132 L14 -118 L22 -124 L19 -108 Q8 -122 -20 -110 Z' fill='#6b4226'/>";
+  g += "<path d='M-12 -115 L-3 -113 M3 -113 L12 -115' stroke='#4a2d18' stroke-width='3.4' stroke-linecap='round'/>";
+  g += "<circle cx='-7' cy='-108' r='2.4' fill='" + INK + "'/><circle cx='7' cy='-108' r='2.4' fill='" + INK + "'/><path d='M-6 -98 Q0 -102 6 -98' stroke='" + INK + "' stroke-width='2.2' fill='none' stroke-linecap='round'/>";
+  return g + "</g>";
+}
+function panelSVG(i){
+  var s = "";
+  if(i === 0){
+    s = "<rect width='220' height='170' fill='#2b3a55'/><rect y='150' width='220' height='20' fill='#3d2a18'/><path d='M0 156 H220 M40 150 V170 M110 150 V170 M180 150 V170' stroke='#2a1c10' stroke-width='1.5'/>";
+    s += "<rect x='176' y='118' width='10' height='32' fill='#fff3c4'/><path d='M181 118 q-6 -10 0 -16 q6 6 0 16' fill='" + YEL + "'/><circle cx='181' cy='108' r='16' fill='" + YEL + "' opacity='.2'/>";
+    s += ghostG(118, 108, .85) + sbub(10, 10, 124, 30, BUB[0], 100, 62);
+  } else if(i === 1){
+    s = "<rect width='220' height='170' fill='#f3eef7'/><rect y='150' width='220' height='20' fill='#dccbe6'/>";
+    s += "<path d='M150 150 V100' stroke='" + INK + "' stroke-width='4'/><rect x='134' y='146' width='32' height='6' rx='3' fill='" + INK + "'/><path d='M118 100 L182 100 L170 72 L130 72 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2.5' stroke-linejoin='round'/>";
+    s += crowG(148, 50, .75, false) + sbub(10, 10, 104, 40, BUB[1], 110, 50);
+  } else if(i === 2){
+    s = "<rect width='220' height='170' fill='#fff1d6'/><rect y='150' width='220' height='20' fill='#e9c99b'/>";
+    s += knightG(110, 160, .72) + sbub(8, 6, 204, 40, BUB[2], 112, 62);
+    s += "<path d='M30 120 l-8 -6 M30 128 l-10 0 M190 120 l8 -6 M190 128 l10 0' stroke='" + ORANGE + "' stroke-width='3' stroke-linecap='round'/>";
+  } else {
+    s = "<rect width='220' height='170' fill='#e6f2f5'/><rect y='150' width='220' height='20' fill='#c9d8dc'/>";
+    s += jayG(62, 162, .66) + crowG(140, 110, .62, true) + sbub(8, 6, 204, 40, BUB[3], 64, 62, 12.5);
+  }
+  return svg("0 0 220 170", ["Panel 1. A ghost in a dark hallway says: Is anyone there?", "Panel 2. A crow on a lampshade says: Nobody here but me.", "Panel 3. A suit of armour throws its arms up and says: Outrageous! Who left the lights on?", "Panel 4. Jay says: When I was in China, nobody stole my torch. The crow is holding the torch."][i], s);
+}
+var SVG_SPEECH = (function(){
+  var s = "<rect width='480' height='180' rx='16' fill='" + PAPER + "'/>";
+  s += "<rect x='14' y='14' width='170' height='150' rx='10' fill='#2b3a55'/>" + ghostG(100, 118, .7) + sbub(24, 22, 124, 30, ["Is anyone there?"], 96, 76);
+  s += "<text x='99' y='176' text-anchor='middle' font-size='12' " + FF + " fill='" + INK + "' opacity='.75'>comic: the bubble shows who</text>";
+  s += "<path d='M196 90 H246 M234 78 L248 90 L234 102' stroke='" + ORANGE + "' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/>";
+  s += "<rect x='258' y='40' width='210' height='96' rx='8' fill='#fff' stroke='" + INK + "' stroke-width='2'/><path d='M272 62 H454 M272 84 H454 M272 106 H454 M272 128 H400' stroke='#cfe0e6' stroke-width='1'/>";
+  s += "<text x='272' y='78' font-size='19' " + FF + " font-weight='700' fill='" + INK + "'><tspan fill='" + ORANGE + "'>" + LDQ + "</tspan>Is anyone there<tspan fill='" + ORANGE + "'>?" + RDQ + "</tspan></text>";
+  s += "<text x='272' y='110' font-size='19' " + FF + " font-weight='700' fill='" + INK + "'>asked the ghost.</text>";
+  s += "<text x='363' y='158' text-anchor='middle' font-size='12' " + FF + " fill='" + INK + "' opacity='.75'>story: speech marks show who</text>";
+  return svg("0 0 480 180", "A comic panel where the ghost says Is anyone there in a bubble, turned into story writing with speech marks", s);
+})();
+function buildS3(box){
+  box.appendChild(block("learn", "From bubble to story", "<div class='fig'>" + SVG_SPEECH + "</div><p>In a comic, the bubble shows who is talking. In a story, <b>speech marks</b> do that job. They go round the exact words someone says.</p><p>The punctuation that belongs to the spoken words (like the <b>?</b>) goes <b>inside</b> the speech marks.</p>"));
+  var t = block("try", "Write up the comic", "<p>Pick a panel. Turn the bubble into story writing by putting the marks in the gaps.</p>");
+  var strip = h("div", "strip"), big = h("div", "panelbig"), host = h("div", "");
+  var cur = ST.toy.s3p || 0;
+  function drawStrip(){
+    strip.innerHTML = "";
+    COMIC.forEach(function(c, i){
+      var r = ST.pen["c" + i];
+      var b = btn("panelbtn", panelSVG(i) + (r && r.done ? "<span class='pt' aria-hidden='true'><svg width='14' height='14' viewBox='0 0 14 14'><path d='M2 7 l3 3 l7 -8' stroke='#fff' stroke-width='2.5' fill='none'/></svg></span>" : ""), function(){ cur = i; ST.toy.s3p = i; save(); drawStrip(); drawPanel() });
+      b.setAttribute("aria-pressed", cur === i ? "true" : "false");
+      b.setAttribute("aria-label", "Panel " + (i + 1) + (r && r.done ? ", done" : ""));
+      strip.appendChild(b);
+    });
+  }
+  function drawPanel(){
+    host.innerHTML = "";
+    big.innerHTML = panelSVG(cur);
+    host.appendChild(h("p", "small", "Panel " + (cur + 1) + " of 4"));
+    pen(host, "c" + cur, COMIC[cur], "s3", function(){ drawStrip(); if(allPen("c", COMIC.length)) giveKey("s3") });
+  }
+  t.appendChild(strip); t.appendChild(big); t.appendChild(host);
+  drawStrip(); drawPanel();
+  box.appendChild(t);
+
+  var q = block("try", "Read it like a detective", "");
+  pick(q, "s3_china", { style:"opt", wcls:"", q:LDQ + "When I was in China," + RDQ + " said Jay, " + LDQ + "nobody stole my torch." + RDQ + "<br>Why is there a comma after China, not a full stop?", a:[0],
+    o:["Jay has not finished his sentence yet. It carries on after said Jay.", "Because China is a question.", "To show that China owns something."],
+    ok:"A full stop would end Jay" + RSQ + "s sentence too early. The comma tells the reader there is more coming.",
+    no:["", "There is no question here. Look at what comes after said Jay.", "Owning is an apostrophe job. Look at what comes after said Jay."] }, "s3");
+  box.appendChild(q);
+
+  var w = block("try", "Your own panel", "<p>Bonnie (Jay" + RSQ + "s poodle) trots into the comic. What does she say? Write it as a story sentence with speech marks. Anything goes.</p>");
+  var test = h("div", "gentle");
+  writer(w, "s3_own", "For example: " + LDQ + "Has anyone seen my biscuit?" + RDQ + " asked Bonnie.", [LDQ, RDQ, ",", ".", "?", "!", "said Bonnie", "asked Bonnie", "barked Bonnie"], "short", function(v){
+    var t2 = v.trim();
+    if(!t2){ test.innerHTML = "<span class='lbl'>Speech check</span>Your line will get a friendly look here."; return }
+    var o = (t2.match(/\u201C/g) || []).length + (t2.match(/"/g) || []).length;
+    var c = (t2.match(/\u201D/g) || []).length;
+    var tips = [];
+    if(!o) tips.push("No speech marks yet. The " + LDQ + " and " + RDQ + " chips are above, if you fancy.");
+    else if((t2.match(/\u201C/g) || []).length !== c || ((t2.match(/"/g) || []).length % 2)) tips.push("Speech marks come in pairs: one to open, one to close.");
+    else if(!/[.,?!][\u201D"]/.test(t2)) tips.push("Is there a mark just inside the closing speech marks, like ? or , or !");
+    test.innerHTML = "<span class='lbl'>Speech check</span>" + (tips.length ? tips[0] : "Speech marks in pairs, with a mark tucked inside. Lovely.");
+  }, "s3");
+  w.appendChild(test);
+  box.appendChild(w);
+}
+
+/* ================= STAGE 4: THE RADIO ROOM ================= */
+var RPAL = [".", "?", "!", ","];
+function words(s){ return s.split(" ") }
+function range(a, b){ var r = []; for(var i = a; i <= b; i++) r.push(i); return r }
+var RADIO = [
+  { words:words("hello is anyone listening we are stuck in the attic please send help"), pal:RPAL, cap:true,
+    key:{ 1:[".", "!", ","], 4:["?"], 10:[".", "!"], 13:[".", "!"] },
+    hints:{ 1:"Hello is a greeting. It could end with a full stop or an exclamation mark, or take a comma.", 4:"Is anyone listening is asking something.", 10:"We are stuck in the attic is a whole statement. It ends before please.", 13:"Please send help is a command. A full stop or an exclamation mark both work." } },
+  { words:words("the door is locked where is the key we found a map"), pal:RPAL, cap:true,
+    key:{ 4:[".", "!"], 8:["?"], 12:[".", "!"] },
+    hints:{ 4:"The door is locked is a whole statement.", 8:"Where is the key wants an answer.", 12:"We found a map tells you something. It still wants an ending." } },
+  { words:words("what a storm the lights went out can you hear me"), pal:RPAL, cap:true,
+    key:{ 3:["!", "."], 7:[".", "!"], 11:["?"] },
+    hints:{ 3:"What a storm shows a big feeling, so an exclamation mark suits it best.", 7:"The lights went out tells you what happened.", 11:"Can you hear me wants an answer." } },
+  { words:words("stay where you are do not open the red door who keeps singing"), pal:RPAL, cap:true,
+    key:{ 4:[".", "!"], 10:[".", "!"], 13:["?"] },
+    hints:{ 4:"Stay where you are is a command. It tells someone what to do.", 10:"Do not open the red door is a command too. A full stop or an exclamation mark both work.", 13:"Who keeps singing wants an answer." } }
+];
+RADIO.forEach(function(r){ r.show = range(1, r.words.length); r.ok = "Message clear. Each sentence has an ending, and each new one starts with a capital."; r.yes = "Signal clear!" });
+var STN = [ { k:"st", n:"Statement", m:".", j:"tells you something" }, { k:"q", n:"Question", m:"?", j:"asks something" }, { k:"cm", n:"Command", m:". or !", j:"tells someone to do something" }, { k:"ex", n:"Exclamation", m:"!", j:"big feeling, starts What or How" } ];
+var ANG = { st:-60, q:-20, cm:20, ex:60 };
+var DIAL = [
+  { t:"The radio has a cracked dial.", a:"st" },
+  { t:"Turn the volume down.", a:"cm" },
+  { t:"Who is singing on channel nine?", a:"q" },
+  { t:"How spooky that song is!", a:"ex" },
+  { t:"Is the attic door still open?", a:"q" },
+  { t:"Get out of the attic now!", a:"cm", note:"It ends with !, but it still tells someone what to do. Commands can end with . or !" },
+  { t:"What a racket that is!", a:"ex" },
+  { t:"The batteries are flat.", a:"st" },
+  { t:"Wind the handle three times.", a:"cm" }
+];
+var DHINT = { st:"This one just tells you something.", q:"This one wants an answer. Look at the mark at the end.", cm:"This one tells someone what to do. Look for a bossy verb at the start, like Turn, Get or Wind.", ex:"This one is a big feeling. It starts with What or How and ends with !" };
+function radioSVG(on){
+  var s = "";
+  if(on){ s += "<path class='wave' d='M70 30 Q90 14 110 30' stroke='" + TEAL + "' stroke-width='4' fill='none' stroke-linecap='round'/><path class='wave w2' d='M58 20 Q90 -6 122 20' stroke='" + TEAL + "' stroke-width='4' fill='none' stroke-linecap='round'/><path class='wave w3' d='M46 10 Q90 -24 134 10' stroke='" + TEAL + "' stroke-width='4' fill='none' stroke-linecap='round'/>" }
+  s += "<path d='M300 44 L346 8' stroke='" + INK + "' stroke-width='4' stroke-linecap='round'/><circle cx='346' cy='8' r='5' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2'/>";
+  s += "<rect x='40' y='40' width='320' height='150' rx='26' fill='#b0703c' stroke='" + INK + "' stroke-width='4'/><rect x='56' y='56' width='288' height='118' rx='16' fill='#d9a066' stroke='" + INK + "' stroke-width='2'/>";
+  s += "<circle cx='130' cy='115' r='46' fill='#5c3a1e' stroke='" + INK + "' stroke-width='3'/>";
+  for(var k = -3; k <= 3; k++){ var y = 115 + k * 12, half = Math.sqrt(46 * 46 - k * 12 * k * 12) - 6; s += "<path d='M" + (130 - half).toFixed(1) + " " + y + " H" + (130 + half).toFixed(1) + "' stroke='#c98a4b' stroke-width='3' stroke-linecap='round'/>" }
+  s += "<rect x='200' y='72' width='128' height='44' rx='8' fill='#fff3c4' stroke='" + INK + "' stroke-width='3'/>";
+  for(var t = 0; t < 11; t++) s += "<path d='M" + (210 + t * 10.8).toFixed(1) + " 80 v" + (t % 5 === 0 ? 12 : 7) + "' stroke='" + INK + "' stroke-width='1.5'/>";
+  s += "<path d='M" + (on ? 256 : 236) + " 76 V112' stroke='#d63b30' stroke-width='3'/>";
+  s += "<circle cx='232' cy='148' r='14' fill='#3d2a18' stroke='" + INK + "' stroke-width='2'/><circle cx='298' cy='148' r='14' fill='#3d2a18' stroke='" + INK + "' stroke-width='2'/><path d='M232 136 V144 M298 136 V144' stroke='#fff3c4' stroke-width='2.5'/>";
+  s += "<rect x='70' y='188' width='30' height='10' rx='3' fill='" + INK + "'/><rect x='300' y='188' width='30' height='10' rx='3' fill='" + INK + "'/>";
+  return svg("0 0 400 200", on ? "An old wooden radio crackling with a message" : "An old wooden radio, quiet now", s);
+}
+function buildS4(box){
+  box.appendChild(block("learn", "Every sentence wants an ending", "<p><b>.</b> Statements, and most commands. <b>?</b> Questions. <b>!</b> Big feelings, and commands said loudly.</p><p>After an end mark, the next sentence starts with a capital letter. In this room, the capitals appear by themselves.</p>"));
+  var t = block("try", "Fix the crackly messages", "<p>The radio is picking up messages with no punctuation at all. Pick a message, then put the end marks where each sentence stops.</p>");
+  var tabs = h("div", "row"), rad = h("div", "radio"), host = h("div", "");
+  var cur = ST.toy.s4m || 0;
+  function drawTabs(){
+    tabs.innerHTML = "";
+    RADIO.forEach(function(r, i){
+      var d = ST.pen["r" + i];
+      var b = btn("pill", "Message " + (i + 1) + (d && d.done ? "<span class='dot' aria-hidden='true'></span>" : ""), function(){ cur = i; ST.toy.s4m = i; save(); drawTabs(); drawMsg() });
+      b.setAttribute("aria-pressed", cur === i ? "true" : "false");
+      tabs.appendChild(b);
+    });
+  }
+  function drawMsg(){
+    var d = ST.pen["r" + cur];
+    rad.innerHTML = radioSVG(!(d && d.done));
+    host.innerHTML = "";
+    pen(host, "r" + cur, RADIO[cur], "s4", function(){ drawTabs(); rad.innerHTML = radioSVG(false); if(allPen("r", RADIO.length)) giveKey("s4") });
+  }
+  t.appendChild(tabs); t.appendChild(rad); t.appendChild(host);
+  drawTabs(); drawMsg();
+  box.appendChild(t);
+
+  /* tuning dial */
+  var dg = block("try", "Tune the dial", "<p>The radio has four stations. Turn the dial to the right one for each sentence. The punctuation is your clue.</p>");
+  var dots = h("div", "dialdots"), sent = h("div", "dialsent"), dial = h("div", "dial"), st = h("div", "stations"), fb = h("div", ""), nav = h("div", "row");
+  sent.setAttribute("aria-live", "polite");
+  var di = ST.toy.dial || 0;
+  var dsv = "<rect width='400' height='220' rx='18' fill='#5c3a1e'/><path d='M40 204 A160 160 0 0 1 360 204 Z' fill='#fff3c4' stroke='" + INK + "' stroke-width='4'/>";
+  for(var a = -80; a <= 80; a += 10){ var r1 = a * Math.PI / 180; dsv += "<path d='M" + (200 + 150 * Math.sin(r1)).toFixed(1) + " " + (204 - 150 * Math.cos(r1)).toFixed(1) + " L" + (200 + 140 * Math.sin(r1)).toFixed(1) + " " + (204 - 140 * Math.cos(r1)).toFixed(1) + "' stroke='" + INK + "' stroke-width='2'/>" }
+  STN.forEach(function(x){
+    var r2 = ANG[x.k] * Math.PI / 180;
+    dsv += "<text x='" + (200 + 120 * Math.sin(r2)).toFixed(1) + "' y='" + (210 - 120 * Math.cos(r2)).toFixed(1) + "' text-anchor='middle' font-size='" + (x.m.length > 1 ? 15 : 26) + "' " + FD + " fill='" + ORANGE + "'>" + x.m + "</text>";
+    dsv += "<text x='" + (200 + 92 * Math.sin(r2)).toFixed(1) + "' y='" + (212 - 92 * Math.cos(r2)).toFixed(1) + "' text-anchor='middle' font-size='12' " + FF + " font-weight='700' fill='" + INK + "'>" + x.n + "</text>";
+  });
+  dsv += "<g id='needle' style='transform:rotate(-85deg);transform-origin:200px 204px;transform-box:view-box;transition:transform .6s cubic-bezier(.2,1.4,.4,1)'><path d='M195 204 L200 70 L205 204 Z' fill='" + ORANGE + "' stroke='" + INK + "' stroke-width='2'/></g><circle cx='200' cy='204' r='13' fill='" + INK + "'/>";
+  dial.innerHTML = svg("0 0 400 220", "A tuning dial with four stations: statement, question, command and exclamation", dsv);
+  function needle(k){ var n = dial.querySelector("#needle"); if(n) n.style.transform = "rotate(" + (k ? ANG[k] : -85) + "deg)" }
+  function drawDial(){
+    var item = DIAL[di], rec = ST.mc["s4_dial" + di] || { picks:[], done:false }, last = rec.picks[rec.picks.length - 1];
+    dots.innerHTML = "";
+    DIAL.forEach(function(x, i){ var r = ST.mc["s4_dial" + i]; dots.appendChild(h("span", (r && r.done ? "on" : "") + (i === di ? " cur" : ""))) });
+    sent.textContent = item.t;
+    st.innerHTML = "";
+    STN.forEach(function(x){
+      var b = btn("pill", x.n, function(){
+        rec.picks.push(x.k); if(x.k === item.a) rec.done = true; ST.mc["s4_dial" + di] = rec; tried("s4"); drawDial();
+      });
+      b.setAttribute("aria-pressed", last === x.k ? "true" : "false");
+      b.setAttribute("aria-label", x.n + ": " + x.j);
+      st.appendChild(b);
+    });
+    needle(last);
+    if(!last) fbBox(fb, "tell", "Which station? Tap one.");
+    else if(last === item.a) fbBox(fb, "ok", "<b>Tuned in. " + STN.filter(function(x){ return x.k === item.a })[0].n + ".</b> " + (item.note || DHINT[item.a]));
+    else fbBox(fb, "nope", "<b>Just static.</b> " + DHINT[item.a] + " Try another station.");
+    nav.innerHTML = "";
+    if(di > 0) nav.appendChild(btn("btn btn-quiet", "Back one", function(){ di--; ST.toy.dial = di; save(); drawDial() }));
+    if(di < DIAL.length - 1) nav.appendChild(btn("btn", "Next sentence", function(){ di++; ST.toy.dial = di; save(); drawDial() }));
+  }
+  dg.appendChild(dots); dg.appendChild(sent); dg.appendChild(dial); dg.appendChild(st); dg.appendChild(fb); dg.appendChild(nav);
+  drawDial();
+  box.appendChild(dg);
+
+  /* tone switch */
+  var tn = block("try", "Turn the volume up", "<p>Swap the end mark and listen to how the warning changes.</p>");
+  var ts = h("p", "sent"), tb = btn("btn btn-orange", "", null), tc = h("p", "cap");
+  ts.setAttribute("aria-live", "polite");
+  function drawTone(){
+    var loud = ST.toy.s4tone === "!";
+    ts.innerHTML = "Do not open the red door<b class='pm'>" + (loud ? "!" : ".") + "</b>";
+    tb.textContent = loud ? "Swap to a full stop" : "Swap to an exclamation mark";
+    tc.innerHTML = loud ? "<b>Exclamation mark:</b> loud and urgent, like someone shouting a warning." : "<b>Full stop:</b> calm and firm, like a rule on a sign.";
+  }
+  tb.addEventListener("click", function(){ ST.toy.s4tone = ST.toy.s4tone === "!" ? "." : "!"; tried("s4"); drawTone() });
+  tn.appendChild(ts); tn.appendChild(tb); tn.appendChild(tc); drawTone();
+  pick(tn, "s4_tone", { style:"opt", wcls:"", q:"What does swapping the full stop for an exclamation mark change?", a:[0],
+    o:["It sounds more urgent, like a warning someone is shouting.", "It turns the command into a question.", "It changes who is speaking."],
+    ok:"Same words, same command. The ! just turns the volume up.",
+    no:["", "A question would need a question mark. It is still telling someone what to do.", "Nobody new is speaking. It is the same warning, just louder."] }, "s4");
+  box.appendChild(tn);
+}
+
+/* ================= STAGE 5: THE LIBRARY ================= */
+var BOOKS = [
+  { m:"( )", n:"Brackets", c:"#ffd9bf", j:"Hold extra information, like a quiet side note. Lift the brackets out and the sentence still works.", ex:"The house <b>(</b>which is very creaky<b>)</b> is for sale." },
+  { m:":", n:"Colon", c:"#cfe9f2", j:"Points forward at what comes next: a list, an explanation or an answer.", ex:"The ghost has one hobby<b>:</b> reading." },
+  { m:";", n:"Semicolon", c:"#e6d4f0", j:"Joins two whole sentences that belong together. Each side could stand on its own.", ex:"The stairs creak<b>;</b> the floor groans." },
+  { m:DASH, n:"Dash", c:"#fff3c4", j:"A longer line than a hyphen. A pair of dashes can hold extra information, a bit louder than brackets would.", ex:"The crow <b>" + DASH + "</b> a very nosy bird <b>" + DASH + "</b> stole the key." }
+];
+var PAGES = [
+  { parts:["The library has one rule", " no talking above a whisper. Some books are dusty", " others look brand new. The oldest book ", "nearly 200 years old", " is about birds."],
+    gaps:[":", ";", "(", ")"], tiles:[";", ")", ":", "("],
+    jobs:[": points forward at the rule.", "; joins two whole sentences that belong together.", "( ) hold extra information about the oldest book."] },
+  { parts:["The torch ", " the only one in the house ", " has flat batteries. Jay packed two things for the attic", " a cheese sandwich and a spare bulb."],
+    gaps:[DASH, DASH, ":"], tiles:[":", DASH, DASH],
+    jobs:["The pair of dashes holds extra information about the torch and makes it stand out.", ": points forward at the two things Jay packed."] }
+];
+var GAPHINT = { ":":"This gap points forward at what comes next.", ";":"Both sides of this gap are whole sentences that belong together.", "(":"Extra information starts here.", ")":"Extra information ends here." };
+GAPHINT[DASH] = "A matching pair of marks could wrap the extra information here.";
+var BJOBS = ["Adds a date or number", "Explains a word", "Gives examples", "Adds a funny aside"];
+var BCARDS = [
+  { t:"This house was built in the reign of Queen Victoria <b class='cm'>(1837 to 1901)</b>.", a:0, why:"The brackets add the years, for readers who want them." },
+  { t:"A kiwi <b class='cm'>(a bird from New Zealand)</b> cannot fly.", a:1, why:"The brackets explain what a kiwi is, so nobody pictures a fruit." },
+  { t:"Pack something warm <b class='cm'>(a jumper or a coat)</b> for the attic.", a:2, why:"The brackets give examples of something warm." },
+  { t:"The ghost librarian is very strict <b class='cm'>(she once shushed a thunderstorm)</b>.", a:3, why:"The brackets add a little joke on the side." }
+];
+function buildPage(host, n){
+  var P = PAGES[n];
+  var rec = ST.page[n] || { pl:null, tries:0, done:false, shown:false };
+  if(!rec.pl || rec.pl.length !== P.gaps.length) rec.pl = P.gaps.map(function(){ return -1 });
+  var sel = null, peek = -1;
+  var qi = h("div", "qi"), floor = h("div", "floor"), pg = h("div", "page"), act = h("div", "row"), fb = h("div", ""), key = h("div", "");
+  function used(ti){ return rec.pl.indexOf(ti) >= 0 }
+  function place(g){
+    if(rec.done) return;
+    if(sel === null){ if(rec.pl[g] >= 0){ rec.pl[g] = -1; ST.page[n] = rec; tried("s5"); draw() } return }
+    var prev = rec.pl.indexOf(sel); if(prev >= 0) rec.pl[prev] = -1;
+    rec.pl[g] = sel; sel = null; peek = -1; ST.page[n] = rec; tried("s5"); draw(); fbBox(fb);
+    var again = pg.querySelector("[data-g='" + g + "']"); if(again) again.focus();
+  }
+  function draw(){
+    floor.innerHTML = ""; pg.innerHTML = "";
+    floor.classList.toggle("hidden", !!rec.done);
+    if(!rec.done){
+      floor.appendChild(h("span", "lab", "Marks on the floor: tap one, then tap a gap"));
+      P.tiles.forEach(function(m, ti){
+        if(used(ti)) return;
+        var b = btn("pmk" + (sel === ti ? " sel" : ""), esc(m), function(){ sel = sel === ti ? null : ti; draw(); var f = floor.querySelector("[data-t='" + ti + "']"); if(f) f.focus() });
+        b.setAttribute("data-t", ti);
+        b.setAttribute("aria-pressed", sel === ti ? "true" : "false"); b.setAttribute("aria-label", MARKNAME[m]);
+        b.draggable = true; b.addEventListener("dragstart", function(e){ try{ e.dataTransfer.setData("text/plain", "t" + ti) }catch(er){} sel = ti });
+        floor.appendChild(b);
+      });
+      if(rec.pl.every(function(x){ return x >= 0 })) floor.appendChild(h("span", "small", "All picked up. Check the page when you are ready. Tap a filled gap to lift a mark back out."));
+    }
+    P.parts.forEach(function(part, i){
+      pg.appendChild(document.createTextNode(part));
+      if(i < P.gaps.length){
+        (function(g){
+          var ti = rec.pl[g], m = ti >= 0 ? P.tiles[ti] : "";
+          var b = btn("lgap" + (m ? " full" : "") + (peek === g ? " peek" : "") + (sel !== null && !rec.done ? " ready" : ""), m ? esc(m) : "&nbsp;", function(){ place(g) });
+          b.setAttribute("data-g", g);
+          b.setAttribute("aria-label", m ? "Gap holding " + MARKNAME[m] + (rec.done ? "" : ". Tap to lift it out") : "Empty gap " + (g + 1));
+          if(rec.done) b.disabled = true;
+          b.addEventListener("dragover", function(e){ e.preventDefault() });
+          b.addEventListener("drop", function(e){ e.preventDefault(); var d = ""; try{ d = e.dataTransfer.getData("text/plain") }catch(er){} if(/^t\d+$/.test(d)){ sel = parseInt(d.slice(1), 10); place(g) } });
+          pg.appendChild(b);
+        })(i);
+      }
+    });
+    act.innerHTML = "";
+    if(!rec.done){
+      act.appendChild(btn("btn btn-orange", "Check the page", check));
+      if(rec.tries >= 2) act.appendChild(btn("btn btn-quiet", "Show me", function(){
+        var left = P.tiles.map(function(m, i){ return i });
+        rec.pl = P.gaps.map(function(m){ for(var j = 0; j < left.length; j++){ if(P.tiles[left[j]] === m){ return left.splice(j, 1)[0] } } return -1 });
+        rec.done = true; rec.shown = true; ST.page[n] = rec; save(); draw(); fbBox(fb, "tell", "<b>Here it is.</b> The page is mended."); afterDone();
+      }));
+    }
+    key.innerHTML = rec.done ? "<ul class='jobkey'>" + P.jobs.map(function(j){ return "<li>" + esc(j) + "</li>" }).join("") + "</ul>" : "";
+  }
+  function afterDone(){ if(PAGES.every(function(x, j){ return ST.page[j] && ST.page[j].done })) giveKey("s5") }
+  function check(){
+    tried("s5");
+    var wrong = [];
+    P.gaps.forEach(function(m, g){ if(rec.pl[g] < 0 || P.tiles[rec.pl[g]] !== m) wrong.push(g) });
+    if(!wrong.length){ rec.done = true; ST.page[n] = rec; save(); draw(); fbBox(fb, "ok", "<b>The page is mended.</b> Here is what each mark is doing:"); afterDone(); return }
+    rec.tries++; ST.page[n] = rec; save();
+    var g0 = wrong[0]; peek = g0; draw();
+    fbBox(fb, "nope", "<b>" + (wrong.length === 1 ? "Nearly. One gap to look at." : "Not yet. " + wrong.length + " gaps to look at.") + "</b> " + (rec.pl[g0] < 0 ? "The glowing gap is still empty. " : "Start with the glowing gap. ") + GAPHINT[P.gaps[g0]] + (rec.tries >= 2 ? " Or tap Show me." : ""));
+  }
+  qi.appendChild(h("p", "qp", "<b>Torn page " + (n + 1) + "</b>"));
+  qi.appendChild(floor); qi.appendChild(pg); qi.appendChild(act); qi.appendChild(fb); qi.appendChild(key);
+  draw();
+  if(rec.done) fbBox(fb, rec.shown ? "tell" : "ok", "<b>" + (rec.shown ? "Shown." : "The page is mended.") + "</b> Here is what each mark is doing:");
+  host.appendChild(qi);
+}
+function buildS5(box){
+  var b = block("learn", "The locked bookcase", "<p>Four books, four marks. Tap a book to pull it off the shelf.</p>");
+  var shelf = h("div", "shelf"), card = h("div", "bookcard");
+  card.setAttribute("aria-live", "polite");
+  if(!ST.toy.books) ST.toy.books = {};
+  var curB = -1;
+  function drawB(){
+    shelf.innerHTML = "";
+    BOOKS.forEach(function(bk, i){
+      var s = btn("spine", "<span class='sm'>" + esc(bk.m) + "</span><span class='sn2'>" + bk.n + "</span>", function(){ curB = curB === i ? -1 : i; ST.toy.books[i] = 1; tried("s5"); drawB() });
+      s.style.background = bk.c;
+      s.setAttribute("aria-pressed", curB === i ? "true" : "false");
+      s.setAttribute("aria-label", bk.n);
+      shelf.appendChild(s);
+    });
+    if(curB < 0){ card.innerHTML = "<span class='small'>Pick a book.</span>"; return }
+    var bk = BOOKS[curB];
+    card.innerHTML = "<b>" + bk.n + " " + esc(bk.m) + "</b><br>" + bk.j + "<div class='ex'>" + bk.ex + "</div>";
+  }
+  b.appendChild(shelf); b.appendChild(card); drawB();
+  box.appendChild(b);
+
+  var t = block("try", "Mend the torn pages", "<p>The marks have fallen out of two pages and are lying on the floor. Put each one back where it belongs. Every mark gets used once.</p>");
+  PAGES.forEach(function(p, n){ buildPage(t, n) });
+  box.appendChild(t);
+
+  var c = block("try", "The catalogue cards", "<p>Each card has a bit in brackets. What job are the brackets doing?</p>");
+  var cl = h("div", "qlist");
+  BCARDS.forEach(function(item, n){
+    pick(cl, "s5_card" + n, { q:item.t, o:BJOBS, a:[item.a], ok:item.why, no:function(){ return "Read just the bit in brackets. What does it add for the reader?" } }, "s5");
+  });
+  c.appendChild(cl);
+  pick(c, "s5_why", { style:"opt", wcls:"", q:"Why might a writer use brackets instead of writing a whole new sentence?", a:[0],
+    o:["To slip in extra information without stopping the main sentence.", "To show the exact words someone said.", "To turn the sentence into a question."],
+    ok:"The reader gets the bonus detail, and the main sentence keeps going.",
+    no:["", "That is the job of speech marks.", "That is the job of a question mark."] }, "s5");
+  box.appendChild(c);
+
+  var w = block("try", "Write a card of your own", "<p>Add a new card to the catalogue. Write a sentence about any book, game, film or place you like, with some extra information tucked into brackets. The lift out test below shows your sentence without the brackets.</p>");
+  var test = h("div", "gentle");
+  writer(w, "s5_own", "For example: My favourite game (which I have played for years) has dragons in it.", ["(", ")", "(which is", "(who is", "(for example", "(my favourite)"], "short", function(v){
+    var t2 = v.trim();
+    if(!t2){ test.innerHTML = "<span class='lbl'>Lift out test</span>Your card will show up here."; return }
+    var m = t2.match(/\(([^()]*)\)/);
+    if(!m){ test.innerHTML = "<span class='lbl'>Lift out test</span>No brackets yet. Want to add some? The ( and ) chips are above."; return }
+    var without = t2.replace(/\s*\([^()]*\)/g, "").replace(/\s+([.,!?;:])/g, "$1").replace(/\s+/g, " ").trim();
+    test.innerHTML = "<span class='lbl'>Lift out test</span>The extra bit: <b>(" + esc(m[1]) + ")</b><br>Without it: <i>" + esc(without) + "</i><br><span class='small'>Read it out. If it still makes sense, your brackets are doing their job.</span>";
+  }, "s5");
+  w.appendChild(test);
+  box.appendChild(w);
+}
+
+/* ================= STAGE 6: THE ATTIC DOOR ================= */
+var MOODS = [ { k:"calm", t:"Calm" }, { k:"panic", t:"Panicky" }, { k:"funny", t:"Funny" }, { k:"myst", t:"Mysterious" } ];
+var FAM = [
+  { k:"end", g:". ? !", n:"end marks", re:/[.?!]/ },
+  { k:"comma", g:",", n:"commas", re:/,/ },
+  { k:"apos", g:RSQ, n:"apostrophes", re:/[a-z]['\u2019][a-z]/i },
+  { k:"speech", g:LDQ + RDQ, n:"speech marks", re:/["\u201C\u201D]/ },
+  { k:"brk", g:"( )", n:"brackets", re:/[()]/ },
+  { k:"colon", g:":", n:"colon", re:/:/ },
+  { k:"semi", g:";", n:"semicolon", re:/;/ },
+  { k:"dash", g:DASH, n:"dash", re:/\s[-\u2013\u2014]\s|[\u2013\u2014]/ },
+  { k:"ell", g:"...", n:"ellipsis", re:/\.\.\.|\u2026/ }
+];
+function analyse(text){
+  var t = String(text || "").trim(), used = [], tips = [];
+  FAM.forEach(function(f){ if(f.re.test(t)) used.push(f.k) });
+  if(!t) return { used:used, tips:tips };
+  if(/^[a-z]/.test(t)) tips.push("Fancy a capital letter at the very start?");
+  if(!/[.?!]["\u201D')]*$/.test(t)) tips.push("The last sentence might like an end mark: . ? or !");
+  if(/(^|[^.])[.?!]\s+[a-z]/.test(t)) tips.push("After . ? or ! the next sentence usually starts with a capital letter.");
+  if(/(^|\s)i(\s|'|\u2019|$)/.test(t)) tips.push("When you mean yourself, I is always a capital.");
+  var oq = (t.match(/\u201C/g) || []).length, cq = (t.match(/\u201D/g) || []).length, sq = (t.match(/"/g) || []).length;
+  if(oq !== cq || sq % 2) tips.push("Speech marks come in pairs: one to open, one to close.");
+  if((t.match(/\(/g) || []).length !== (t.match(/\)/g) || []).length) tips.push("Brackets come in pairs too: ( to open and ) to close.");
+  return { used:used, tips:tips };
+}
+function moodNote(m, t){
+  if(!m || !t.trim()) return "";
+  if(m === "panic") return /!/.test(t) ? "Those exclamation marks make it sound properly panicky." : "Want it more panicky? An exclamation mark or two turns the volume up.";
+  if(m === "calm") return /!/.test(t) ? "The exclamation marks make it a bit loud for calm. Full stops sound steadier, if you fancy swapping." : "Full stops keep it nice and steady. Very calm.";
+  if(m === "funny") return /\(/.test(t) ? "Brackets are a great spot for a sneaky joke." : "Funny idea: hide a joke in brackets, like a whisper to the reader.";
+  if(m === "myst") return /\.\.\.|\u2026|\u2013|\u2014|\s-\s/.test(t) ? "The trailing dots or the dash leave the reader wondering. Mysterious." : "For mystery, try three dots so a sentence trails off...";
+  return "";
+}
+function doorSVG(open){
+  var s = "<rect width='240' height='300' rx='14' fill='#3a2a40'/><path d='M0 30 L120 0 L240 30' stroke='#2a1c30' stroke-width='10' fill='none'/>";
+  s += "<rect x='60' y='50' width='120' height='220' fill='#ffe7a6'/><circle cx='120' cy='120' r='28' fill='" + YEL + "'/><path d='M60 232 Q120 204 180 232 V270 H60 Z' fill='#7fd1c3'/>";
+  s += "<path d='M84 92 q6 -6 12 0 q6 -6 12 0 M132 80 q5 -5 10 0 q5 -5 10 0' stroke='" + INK + "' stroke-width='2.5' fill='none' stroke-linecap='round'/>";
+  s += "<g class='dp'><rect x='60' y='50' width='120' height='220' fill='#7a4a22' stroke='" + INK + "' stroke-width='3'/><path d='M90 52 V268 M120 52 V268 M150 52 V268' stroke='#5e3818' stroke-width='2'/>";
+  for(var i = 0; i < 5; i++){
+    var st = STAGES[i], got = !!ST.keys[st.id], y = 80 + i * 32;
+    s += "<circle cx='160' cy='" + y + "' r='10' fill='" + (got ? st.kc : "#3d2a18") + "' stroke='" + (got ? GREEN : INK) + "' stroke-width='" + (got ? 3 : 2) + "'/><path d='M158 " + (y - 3) + " h4 v7 h-4 Z' fill='" + INK + "'/>";
+  }
+  s += "<circle cx='76' cy='166' r='7' fill='" + YEL + "' stroke='" + INK + "' stroke-width='2'/></g>";
+  s += "<rect x='54' y='44' width='132' height='230' fill='none' stroke='#8a5230' stroke-width='10'/><rect y='274' width='240' height='26' fill='#5e3818'/>";
+  return svg("0 0 240 300", open ? "The attic door is open. Sunshine and birds outside." : "The attic door, with five locks. Locks with a key in them are coloured.", s);
+}
+function drawDoorInto(d){
+  d.innerHTML = doorSVG(!!ST.toy.door); d.classList.toggle("open", !!ST.toy.door);
+  var r = document.querySelector(".atticring"); if(r) r.innerHTML = "<p class='small' style='margin:0 0 4px'>Keys on your ring:</p>" + keyRingSVG();
+}
+function buildS6(box){
+  box.appendChild(block("learn", "The last door", "<p>The attic door has five locks, one for each key. But here is the secret: this door also opens for a good note. Write an escape note using any marks you like, and it will listen.</p>"));
+  var t = block("try", "Your escape note", "");
+  var at = h("div", "attic"), left = h("div", ""), door = h("div", "door");
+  left.className = "atticring";
+  left.innerHTML = "<p class='small' style='margin:0 0 4px'>Keys on your ring:</p>" + keyRingSVG();
+  drawDoorInto(door);
+  at.appendChild(door); at.appendChild(left);
+  t.appendChild(at);
+
+  t.appendChild(h("p", "qp", "Pick a mood for your note, if you fancy:"));
+  var mrow = h("div", "row");
+  function drawMood(){
+    mrow.innerHTML = "";
+    MOODS.forEach(function(m){ var b = btn("pill", m.t, function(){ ST.w.s6_mood = ST.w.s6_mood === m.k ? "" : m.k; tried("s6"); drawMood(); upd(ST.w.s6_note || "") }); b.setAttribute("aria-pressed", ST.w.s6_mood === m.k ? "true" : "false"); mrow.appendChild(b) });
+  }
+  t.appendChild(mrow);
+  t.appendChild(h("p", "", "Who is it for? Whoever finds it, HB, Bonnie, a ghost... Say how you escaped, what you found, or what to do next. The chips add marks or starters."));
+  t.appendChild(h("p", "small", "Bonus idea: sneak some extra information into brackets, or let someone in your note speak with speech marks."));
+  var lamps = h("div", "lamps"), gentle = h("div", "gentle"), mood = h("p", "cap");
+  function upd(v){
+    var a = analyse(v);
+    lamps.innerHTML = "";
+    FAM.forEach(function(f){ var on = a.used.indexOf(f.k) >= 0; var l = h("span", "lamp" + (on ? " on" : ""), "<b>" + esc(f.g) + "</b>" + f.n); lamps.appendChild(l) });
+    if(!v.trim()) gentle.innerHTML = "<span class='lbl'>Gentle checker</span>Your note gets a friendly look here as you write.";
+    else if(!a.tips.length) gentle.innerHTML = "<span class='lbl'>Gentle checker</span>Looking good. " + (a.used.length >= 3 ? "That is " + a.used.length + " kinds of punctuation. Outrageous." : "Want to try another kind of mark? The lamps show what you have used.");
+    else gentle.innerHTML = "<span class='lbl'>Gentle checker</span>Things you might like to look at:<ul>" + a.tips.slice(0, 2).map(function(x){ return "<li>" + esc(x) + "</li>" }).join("") + "</ul>";
+    var mn = moodNote(ST.w.s6_mood, v);
+    mood.innerHTML = mn ? "<b>Mood: " + MOODS.filter(function(m){ return m.k === ST.w.s6_mood })[0].t + ".</b> " + esc(mn) : "";
+    mood.classList.toggle("hidden", !mn);
+  }
+  writer(t, "s6_note", "Dear whoever finds this...", [".", "?", "!", ",", RSQ, LDQ, RDQ, "(", ")", ":", ";", DASH, "...", "Dear whoever finds this,", "Help!", "We found", "(and", "When I was in China,", "Do not"], "", upd, "s6");
+  t.appendChild(lamps); t.appendChild(gentle); t.appendChild(mood);
+  drawMood();
+  var drow = h("div", "row"), dfb = h("div", "");
+  drow.appendChild(btn("btn btn-orange", "Try the door", function(){
+    var v = (ST.w.s6_note || "").trim(), nw = v ? v.split(/\s+/).length : 0;
+    tried("s6");
+    if(nw < 3){ fbBox(dfb, "tell", "The door is listening. Write a few words first, if you fancy, then try again."); return }
+    var first = !ST.toy.door;
+    ST.toy.door = true; save(); drawDoorInto(door); drawHouse(); drawMap();
+    var kc = 0; STAGES.slice(0, 5).forEach(function(s){ if(ST.keys[s.id]) kc++ });
+    fbBox(dfb, "ok", "<b>" + (first ? "Creeeak. The door swings open. You escaped!" : "The door is wide open.") + "</b> " + (kc ? "You had " + kc + " of 5 keys on the ring, plus a note the door liked." : "No keys needed. The note did it.") + " Jay would love to read it, if you fancy sending it.");
+  }));
+  t.appendChild(drow); t.appendChild(dfb);
+  if(ST.toy.door) fbBox(dfb, "ok", "<b>The door is open.</b> You can keep editing your note as much as you like.");
+  box.appendChild(t);
+
+  var w = block("try", "Why that mark?", "<p>Pick one mark you used in your note. Why that one? What does it do for the reader?</p>");
+  writer(w, "s6_why", "I used...", ["I used", "because", "The exclamation mark makes it sound", "The brackets add", "The question mark shows", "The speech marks show", "so the reader"], "short", null, "s6");
+  box.appendChild(w);
+}
+
+/* ---------------- map, who, nav ---------------- */
+var BUILD = { s1:buildS1, s2:buildS2, s3:buildS3, s4:buildS4, s5:buildS5, s6:buildS6 };
+var built = {};
+function drawWho(){
+  var row = $("whoRow");
+  row.querySelectorAll("button").forEach(function(b){ b.remove() });
+  COHORT.concat(["Just looking"]).forEach(function(c){
+    var v = c === "Just looking" ? "" : c;
+    var b = btn("pill", c, function(){
+      ST.who = v; ST.whoSeen = true; save();
+      try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){}
+      var inp = document.getElementById("b5who"); if(inp && v) inp.value = v;
+      drawWho(); drawMap();
+    });
+    b.setAttribute("aria-pressed", (ST.who || "") === v && (v || ST.whoSeen) ? "true" : "false");
+    row.appendChild(b);
+  });
+  var box = $("whoBox"), w = WHO[ST.who];
+  if(w){
+    box.classList.remove("hidden");
+    box.innerHTML = "<b>Hi " + ST.who + ".</b> These rooms link to what you are working on:<ul><li>" + w.f[0] + "</li><li>" + w.f[1] + "</li></ul><span class='small'>The &ldquo;good place to start&rdquo; rooms suit you best, but every room is open.</span>";
+  } else box.classList.add("hidden");
+}
+function drawMap(){
+  var map = $("stageMap"); if(!map) return; map.innerHTML = "";
+  var w = WHO[ST.who];
+  STAGES.forEach(function(s, i){
+    var b = btn("tile " + s.cls, "", function(){ openStage(s.id) });
+    var kg = s.key ? ST.keys[s.id] : ST.toy.door;
+    b.innerHTML = "<span class='knob' aria-hidden='true'></span>" + (kg ? "<span class='kgot' title='" + (s.key ? "Key found" : "Escaped") + "'>" + keySmall(s.kc) + "</span>" : "") +
+      "<span class='glyph' aria-hidden='true'>" + s.glyph + "</span><span class='num'>Room " + (i + 1) + "</span><span class='tt'>" + s.t + "</span><span class='ts'>" + s.sub + "</span>" +
+      (ST.tried[s.id] ? "<span class='tick' title='Tried'><svg width='18' height='18' viewBox='0 0 18 18' aria-hidden='true'><path d='M3 9 l4 4 l8 -9' stroke='#2e7d4f' stroke-width='3' fill='none' stroke-linecap='round'/></svg></span>" : "") +
+      (w && w.best.indexOf(s.id) >= 0 ? "<span class='badge'>good place to start</span>" : "");
+    b.setAttribute("aria-label", "Room " + (i + 1) + ": " + s.t + (ST.tried[s.id] ? ", tried" : "") + (kg ? (s.key ? ", key found" : ", escaped") : "") + (w && w.best.indexOf(s.id) >= 0 ? ", good place to start" : ""));
+    map.appendChild(b);
+  });
+}
+function drawDone(){
+  var d = $("doneBar"); if(!d) return; d.innerHTML = "";
+  STAGES.forEach(function(s, i){ d.appendChild(h("span", ST.tried[s.id] ? "on" : "", (ST.tried[s.id] ? "&#10003; " : "") + (i + 1) + ". " + s.t)) });
+}
+function openStage(id, noScroll){
+  var host = $("stageHost");
+  STAGES.forEach(function(s){ if(built[s.id]) built[s.id].classList.add("hidden") });
+  if(!built[id]){
+    var s = STAGES.filter(function(x){ return x.id === id })[0], n = STAGES.indexOf(s) + 1;
+    var box = h("div", "stage");
+    box.appendChild(h("div", "shead", "<span class='sn " + s.cls + "'>" + n + "</span><h3>" + s.t + "</h3>"));
+    box.appendChild(h("p", "skipnote", "Skip any part of this room that is not for you."));
+    try{ BUILD[id](box) }catch(e){ box.appendChild(h("p", "", "This room had a hiccup loading. Try another room.")); if(window.console) console.error(e) }
+    host.appendChild(box); built[id] = box;
+  } else if(id === "s6"){
+    var d = built[id].querySelector(".door"); if(d) drawDoorInto(d);
+  }
+  built[id].classList.remove("hidden");
+  $("stageCard").classList.remove("hidden");
+  ST.cur = id; save();
+  var i = STAGES.map(function(x){ return x.id }).indexOf(id);
+  $("nextBtn").textContent = i < STAGES.length - 1 ? "Next room" : "To the send box";
+  if(!noScroll){ try{ $("stageCard").scrollIntoView({ behavior:"smooth", block:"start" }) }catch(e){ $("stageCard").scrollIntoView() } }
+}
+$("mapBtn").addEventListener("click", function(){ $("stageCard").classList.add("hidden"); ST.cur = ""; save(); try{ $("introCard").scrollIntoView({ behavior:"smooth" }) }catch(e){} });
+$("nextBtn").addEventListener("click", function(){
+  var i = STAGES.map(function(x){ return x.id }).indexOf(ST.cur);
+  if(i >= 0 && i < STAGES.length - 1) openStage(STAGES[i + 1].id);
+  else try{ $("sendCard").scrollIntoView({ behavior:"smooth" }) }catch(e){}
+});
+
+/* start again */
+function drawReset(confirming){
+  var r = $("resetRow"); r.innerHTML = "";
+  if(!confirming){ r.appendChild(btn("linkish", "Start again", function(){ drawReset(true) })); return }
+  r.appendChild(h("span", "small", "Clear everything on this page, keys too, and start fresh? "));
+  r.appendChild(btn("linkish", "Yes, start again", function(){
+    var keepWho = ST.who, seen = ST.whoSeen; ST = fresh(); ST.who = keepWho; ST.whoSeen = seen; save();
+    $("stageHost").innerHTML = ""; built = {}; $("stageCard").classList.add("hidden");
+    drawMap(); drawDone(); drawRing(); drawHouse(); drawReset(false);
+  }));
+  r.appendChild(document.createTextNode(" "));
+  r.appendChild(btn("linkish", "No, keep it", function(){ drawReset(false) }));
+}
+
+/* ---------------- summary for Jay ---------------- */
+function triesText(r){ return r.shown ? "shown after " + r.tries + " checks" : (r.tries ? "after " + (r.tries + 1) + " checks" : "first go") }
+function penLine(key, item){
+  var r = ST.pen[key]; if(!r) return null;
+  var txt = render(item, r.s, false);
+  return (r.done ? "done (" + triesText(r) + ")" : "working on it (" + r.tries + " checks so far)") + ": " + txt;
+}
+function pickSum(key, label, answerText){
+  var r = ST.mc[key]; if(!r || !r.picks.length) return null;
+  return label + " -> " + (r.done ? answerText + (r.picks.length > 1 ? " (after " + r.picks.length + " tries)" : " (first go)") : "still thinking");
+}
+function wText(k){ return (ST.w[k] || "").trim() }
+function summary(){
+  var L = [];
+  L.push("THE PUNCTUATION ESCAPE ROOM (English practice)");
+  L.push("Target: " + TARGET);
+  var w = WHO[ST.who];
+  if(w){
+    L.push(""); L.push("Milestones for " + ST.who + ":"); w.o.forEach(function(m){ L.push("- " + m) });
+    var mine = []; for(var n in MILESTONE_STAGES) if(MILESTONE_STAGES[n].who.indexOf(ST.who) >= 0) mine.push(n + ". " + STAGES[n - 1].t + (ST.tried[STAGES[n - 1].id] ? " (tried)" : " (not tried yet)"));
+    L.push("Rooms that link to these milestones: " + mine.join(", "));
+  }
+  L.push("");
+  var tr = STAGES.filter(function(s){ return ST.tried[s.id] }).map(function(s){ return s.t });
+  L.push("Rooms tried: " + (tr.length ? tr.join(", ") : "none yet"));
+  var ks = STAGES.slice(0, 5).filter(function(s){ return ST.keys[s.id] }).map(function(s){ return s.key });
+  L.push("Keys found: " + (ks.length ? ks.join(", ") : "none yet") + (ST.toy.door ? ". Escaped through the attic door." : ""));
+
+  if(ST.tried.s1){
+    L.push(""); L.push("1. THE KITCHEN (commas)");
+    NOTES.forEach(function(item, i){ var l = penLine("k" + i, item); if(l) L.push("- Fridge note " + (i + 1) + ": " + l) });
+    var cd = 0, cl = [];
+    COUNT.forEach(function(c, i){ var r = ST.mc["s1_count" + i]; if(r && r.done) cd++; if(r && r.picks.length > 1) cl.push("   " + plain(c.t) + " -> " + c.a + (r.done ? " (after " + r.picks.length + " tries, picked " + r.picks.map(function(p){ return p + 2 }).join(", ") + ")" : " (still thinking)")) });
+    L.push("- How many things: " + cd + " of " + COUNT.length + " counted"); cl.forEach(function(x){ L.push(x) });
+    var jd = 0, jl = [];
+    CJOBS.forEach(function(c, i){ var r = ST.mc["s1_job" + i]; if(r && r.done) jd++; if(r && r.picks.length > 1) jl.push("   " + plain(c.t) + " -> " + JOBS[c.a] + (r.done ? " (after " + r.picks.length + " tries)" : " (still thinking)")) });
+    L.push("- Comma jobs: " + jd + " of " + CJOBS.length + " named"); jl.forEach(function(x){ L.push(x) });
+    if(wText("s1_explain")) L.push("- Explained: " + wText("s1_explain"));
+  }
+  if(ST.tried.s2){
+    L.push(""); L.push("2. THE SHOP DOWNSTAIRS (apostrophes)");
+    var sd = 0;
+    SIGNS.forEach(function(S, i){
+      var r = ST.sign[i]; if(!r) return;
+      if(r.done) sd++;
+      var txt = S.toks.map(function(t, j){ return curly(typeof t === "string" ? t : t.f[r.st[j]]) }).join(" ");
+      L.push("- Sign " + (i + 1) + ": " + (r.done ? "fixed (" + triesText(r) + ")" : "working on it") + ": " + txt);
+      if(S.why){ var l = pickSum("s2_why" + i, "   Apostrophe job in " + (S.why.sw || S.why.w), S.why.a ? "missing letters" : "owning"); if(l) L.push(l) }
+    });
+    L.push("- Signs fixed: " + sd + " of " + SIGNS.length);
+    var sw = ST.toy.swap ? Object.keys(ST.toy.swap).length : 0; if(sw) L.push("- Played with " + sw + " of " + SWAPS.length + " word swap signs");
+    var l2 = pickSum("s2_swapjob", "- What these apostrophes do", "letters missing, word changes"); if(l2) L.push(l2);
+    if(wText("s2_explain")) L.push("- Explained: " + wText("s2_explain"));
+  }
+  if(ST.tried.s3){
+    L.push(""); L.push("3. THE COMIC ROOM (speech marks)");
+    COMIC.forEach(function(item, i){ var l = penLine("c" + i, item); if(l) L.push("- Panel " + (i + 1) + ": " + l) });
+    var l3 = pickSum("s3_china", "- Why a comma after China", "Jay has not finished his sentence"); if(l3) L.push(l3);
+    if(wText("s3_own")) L.push("- My own panel: " + wText("s3_own"));
+  }
+  if(ST.tried.s4){
+    L.push(""); L.push("4. THE RADIO ROOM (. ? ! and sentence types)");
+    RADIO.forEach(function(item, i){ var l = penLine("r" + i, item); if(l) L.push("- Message " + (i + 1) + ": " + l) });
+    var dd = 0, dl = [], NM = { st:"Statement", q:"Question", cm:"Command", ex:"Exclamation" };
+    DIAL.forEach(function(d, i){ var r = ST.mc["s4_dial" + i]; if(r && r.done) dd++; if(r && r.picks.length > 1) dl.push("   " + d.t + " -> " + NM[d.a] + (r.done ? " (after " + r.picks.length + " tries, tried " + r.picks.map(function(p){ return NM[p] }).join(", ") + ")" : " (still thinking)")) });
+    L.push("- Tune the dial: " + dd + " of " + DIAL.length + " tuned"); dl.forEach(function(x){ L.push(x) });
+    var l4 = pickSum("s4_tone", "- What ! does to Do not open the red door", "more urgent, like a shouted warning"); if(l4) L.push(l4);
+  }
+  if(ST.tried.s5){
+    L.push(""); L.push("5. THE LIBRARY (brackets, colons, semicolons, dashes)");
+    var bs = ST.toy.books ? Object.keys(ST.toy.books).length : 0; if(bs) L.push("- Opened " + bs + " of " + BOOKS.length + " mark books");
+    PAGES.forEach(function(P, i){
+      var r = ST.page[i]; if(!r) return;
+      var txt = P.parts.map(function(p, j){ return p + (j < P.gaps.length ? (r.pl[j] >= 0 ? P.tiles[r.pl[j]] : "_") : "") }).join("");
+      L.push("- Torn page " + (i + 1) + ": " + (r.done ? "mended (" + triesText(r) + ")" : "working on it") + ": " + txt);
+    });
+    var bd = 0, bl = [];
+    BCARDS.forEach(function(c, i){ var r = ST.mc["s5_card" + i]; if(r && r.done) bd++; if(r && r.picks.length > 1) bl.push("   " + plain(c.t) + " -> " + BJOBS[c.a] + (r.done ? " (after " + r.picks.length + " tries)" : " (still thinking)")) });
+    L.push("- Bracket jobs on catalogue cards: " + bd + " of " + BCARDS.length); bl.forEach(function(x){ L.push(x) });
+    var l5 = pickSum("s5_why", "- Why use brackets", "slip in extra information without stopping the sentence"); if(l5) L.push(l5);
+    if(wText("s5_own")) L.push("- My own catalogue card: " + wText("s5_own"));
+  }
+  if(ST.tried.s6){
+    L.push(""); L.push("6. THE ATTIC DOOR (own writing)");
+    var note = wText("s6_note");
+    if(ST.w.s6_mood) L.push("- Mood chosen: " + MOODS.filter(function(m){ return m.k === ST.w.s6_mood })[0].t);
+    if(note){
+      L.push("- Escape note: " + note);
+      var a = analyse(note);
+      L.push("   Punctuation used: " + (a.used.length ? FAM.filter(function(f){ return a.used.indexOf(f.k) >= 0 }).map(function(f){ return f.n }).join(", ") : "none yet"));
+      if(a.tips.length) L.push("   Checker suggestions: " + a.tips.join(" "));
+    } else L.push("- No note written yet");
+    if(ST.toy.door) L.push("- Opened the attic door");
+    if(wText("s6_why")) L.push("- Why that mark: " + wText("s6_why"));
+  }
+  L.push(""); L.push("Which room covers what:");
+  for(var m in MILESTONE_STAGES) L.push(m + ". " + STAGES[m - 1].t + ": " + MILESTONE_STAGES[m].what + " (" + MILESTONE_STAGES[m].who.join(", ") + ")");
+  return L.join("\n");
+}
+
+/* ---------------- go ---------------- */
+drawHouse(); drawRing(); drawWho(); drawMap(); drawDone(); drawReset(false);
+if(ST.cur && BUILD[ST.cur]) openStage(ST.cur, true);
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"Punctuation Escape Room", filename:"punctuation-escape", getText:summary });
+window.__pe = { summary:summary, state:function(){ return ST }, analyse:analyse, render:render, NOTES:NOTES, COMIC:COMIC, RADIO:RADIO, PAGES:PAGES, SIGNS:SIGNS, COUNT:COUNT, CJOBS:CJOBS, DIAL:DIAL, BCARDS:BCARDS, MILESTONE_STAGES:MILESTONE_STAGES };
+})();
+</script>
+</body>
+</html>

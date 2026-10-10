@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Brave Bit - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Brave Bit only. Shell, cards and buttons come from style.css */
+.bb{max-width:940px;margin:0 auto}
+.hidden{display:none!important}
+.bb p{max-width:64ch}
+.intro{display:grid;grid-template-columns:1fr 250px;gap:18px;align-items:center}
+.intro .panel{margin:0;max-width:none}
+.intro .panel p{margin:0 0 10px}
+.introsvg{width:100%;height:auto}
+.introsvg .hop{animation:hop 3.2s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
+.introsvg .flag{animation:flap 1.6s ease-in-out infinite;transform-origin:0 50%;transform-box:fill-box}
+@keyframes hop{0%,60%,100%{transform:translateY(0)}70%{transform:translateY(-14px)}80%{transform:translateY(0)}86%{transform:translateY(-5px)}}
+@keyframes flap{0%,100%{transform:skewY(0)}50%{transform:skewY(-8deg)}}
+@media (max-width:680px){.intro{grid-template-columns:1fr}.introsvg{max-width:230px;margin:0 auto;display:block}}
+
+/* who picker */
+.whobox{background:var(--white);border:var(--border) dashed var(--plum);border-radius:var(--r-alt);padding:16px 18px;margin:18px 0}
+.whobox h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.1rem;margin:0 0 4px}
+.whobox .sub{font-size:.9rem;color:var(--body-tint);margin:0 0 10px}
+.whorow{display:flex;flex-wrap:wrap;gap:8px}
+.whob{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:.95rem;letter-spacing:.1em;min-width:58px;padding:9px 14px;border-radius:999px;border:var(--border) solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+.whob[aria-pressed="true"]{background:var(--plum);color:var(--paper);box-shadow:3px 4px 0 var(--ink)}
+.whob.look{letter-spacing:.04em;font-size:.82rem}
+.miles{margin:12px 0 0;padding:12px 14px;background:linear-gradient(150deg,#f4eaf8,#fbf6fc);border:2px solid var(--plum);border-radius:16px 12px 16px 12px}
+.miles b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.miles ol{margin:6px 0 0;padding-left:22px}
+.miles li{margin:3px 0}
+
+/* stage map */
+.maptitle{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 10px}
+.maptitle h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.6rem}
+.maptitle span{font-size:.92rem;color:var(--body-tint)}
+.smap{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 20px}
+.tile{position:relative;text-align:left;font-family:var(--body);color:var(--ink);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:12px;cursor:pointer;box-shadow:var(--lift);transition:transform .15s ease,box-shadow .15s ease;display:flex;flex-direction:column;gap:4px;min-height:150px;min-width:0}
+.tile:nth-child(odd){transform:rotate(-.7deg)}
+.tile:nth-child(even){transform:rotate(.6deg)}
+.tile:hover{transform:translateY(-4px) rotate(0);box-shadow:var(--lift-hi)}
+.tile svg{width:56px;height:56px}
+.tile .tn{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.tile .tt{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.05rem;line-height:1.08;overflow-wrap:anywhere}
+.tile .tst{font-size:.8rem;margin-top:auto}
+.tile.cur{outline:4px dashed var(--ink);outline-offset:4px}
+.t1{background:linear-gradient(150deg,#ffd77e,var(--yellow))}
+.t2{background:linear-gradient(150deg,#ff9f5c,var(--orange))}
+.t3{background:linear-gradient(150deg,#a77ab9,var(--plum));color:var(--paper)}
+.t4{background:linear-gradient(150deg,#3fbfdc,var(--bright))}
+.t5{background:linear-gradient(150deg,#ffe3a3,#ffcf6a)}
+.t6{background:linear-gradient(150deg,#1a8fae,var(--teal));color:var(--paper)}
+.t7{background:linear-gradient(150deg,#1d4f5c,var(--ink));color:var(--paper)}
+.t3 .tt,.t6 .tt,.t7 .tt{color:var(--paper)}
+.tag{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--white);color:var(--ink);border:2px solid var(--ink)}
+.tile .start{position:absolute;top:-10px;right:-6px;background:var(--yellow);transform:rotate(4deg);box-shadow:2px 3px 0 var(--ink)}
+.tag.done{background:#e9f4ec}
+
+/* stages */
+.stage{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:24px;margin:0 0 20px;box-shadow:var(--lift)}
+.stage>.sh{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:0 0 6px}
+.stage>.sh svg{width:62px;height:62px;flex:none}
+.stage>.sh .shtxt{flex:1;min-width:200px}
+.stage h2{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 800;font-size:clamp(1.45rem,4vw,1.9rem);line-height:1.05;margin:2px 0 6px}
+.stage .shtxt p{margin:0;font-size:1rem}
+.stage h3.part{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.15rem;margin:24px 0 8px;display:flex;align-items:center;gap:10px}
+.stage h3.part .pn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:.85rem;flex:none}
+.stagenav{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 0;padding-top:16px;border-top:3px dashed var(--line)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn.sm{font-size:.74rem;padding:8px 14px}
+
+.chipset{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 8px}
+.cb{font-family:var(--body);font-size:.95rem;font-weight:700;text-align:left;padding:9px 14px;border-radius:999px;border:2px solid rgba(10,47,56,.35);background:var(--white);color:var(--ink);cursor:pointer;line-height:1.25;max-width:100%}
+.cb:hover{border-color:var(--ink)}
+.cb[aria-pressed="true"]{background:var(--teal);color:var(--paper);border-color:var(--ink);box-shadow:2px 3px 0 var(--ink)}
+.cb.starter{border-style:dashed;font-weight:400;font-size:.9rem}
+.cb.starter:hover{background:#fff6df}
+textarea.wr,input.wr{width:100%;font-family:var(--body);font-size:1rem;line-height:1.5;padding:10px 12px;border:2px solid rgba(10,47,56,.3);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+textarea.wr{min-height:84px;resize:vertical}
+.wrlab{display:block;font-weight:700;margin:12px 0 4px}
+.note{font-size:.9rem;color:var(--body-tint);margin:6px 0!important}
+.fb{margin:10px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800}
+.pop{animation:popin .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes popin{from{transform:scale(.9);opacity:.2}to{transform:scale(1);opacity:1}}
+.shake{animation:shake .45s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(8px) rotate(2deg)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.ghost{position:fixed;z-index:10000;pointer-events:none;opacity:.9;transform:rotate(-3deg) scale(1.03);box-shadow:6px 8px 0 rgba(10,47,56,.3)}
+.dropping{outline:4px dashed var(--orange)!important;outline-offset:3px}
+
+/* STAGE 1: story */
+.daytabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.dayb{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border-radius:12px 9px 12px 9px;border:var(--border) solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.dayb[aria-pressed="true"]{background:var(--orange);box-shadow:3px 4px 0 var(--ink)}
+.dayb .tk{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:.7rem}
+.comic{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:14px;align-items:stretch}
+@media (max-width:600px){.comic{grid-template-columns:minmax(0,1fr) 92px;gap:8px}}
+.panelbox{border:4px solid var(--ink);border-radius:8px;background:var(--white);overflow:hidden;box-shadow:6px 7px 0 var(--ink);transform:rotate(-.4deg)}
+.panelbox svg{display:block;width:100%;height:auto}
+.caption{background:var(--yellow);border-top:4px solid var(--ink);padding:8px 12px;font-size:.98rem}
+.caption b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;display:block}
+.meters{border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;background:linear-gradient(170deg,#fff7ea,#fdeedd);padding:6px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.meters svg{width:100%;height:auto;max-width:130px}
+.mfill{transform-box:fill-box;transform-origin:50% 100%;transition:transform .8s cubic-bezier(.3,1.4,.5,1)}
+.choices{display:grid;gap:8px;margin:12px 0}
+.choice{font-family:var(--body);font-size:1rem;text-align:left;padding:12px 14px;border:var(--border) solid var(--ink);border-radius:16px 12px 16px 12px;background:var(--white);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:3px 3px 0 rgba(10,47,56,.18)}
+.choice:hover{background:#fff6df}
+.choice[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.choice .ltr{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);font-family:var(--display);font-weight:800}
+.choice .tri{margin-left:auto;font-size:.7rem}
+.result{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;padding:12px;margin:10px 0;background:var(--white)}
+.result svg{width:96px;height:auto}
+.result p{margin:0 0 6px}
+.result .verdict{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin:0 0 6px;border:2px solid var(--ink)}
+.v-low{background:#cfeffa}.v-mid{background:#dff0d6}.v-high{background:#fbd9c2}
+.delta{font-size:.85rem;font-weight:700}
+.weekbox{border:var(--border) solid var(--ink);border-radius:20px 14px 20px 14px;padding:14px;background:linear-gradient(160deg,#f2fafc,#fffdf8)}
+.weekbox svg{width:100%;max-width:560px;height:auto;display:block;margin:0 auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.88rem;margin:4px 0}
+.legend i{display:inline-block;width:22px;height:5px;border-radius:3px;vertical-align:middle;margin-right:6px}
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0}
+.strip div{border:2px solid var(--ink);border-radius:10px;padding:6px 4px;text-align:center;font-size:.72rem;line-height:1.2;background:var(--white)}
+.strip b{display:block;font-family:var(--display);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* STAGE 2: jar */
+.jargrid{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:18px;align-items:start}
+@media (max-width:700px){.jargrid{grid-template-columns:1fr}}
+.jarwrap{border:var(--border) dashed var(--teal);border-radius:24px 18px 24px 18px;padding:8px;background:#f5fbfc;text-align:center;position:sticky;top:10px}
+.jarwrap svg{width:100%;max-width:220px;height:auto}
+@media (max-width:700px){.jarwrap{position:static}.jarwrap svg{max-width:180px}}
+.drop{animation:drop .6s cubic-bezier(.3,1.3,.5,1)}
+@keyframes drop{from{transform:translateY(-230px)}70%{transform:translateY(5px)}to{transform:translateY(0)}}
+.proofs{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{font-family:var(--body);font-size:.93rem;font-weight:700;text-align:left;padding:8px 12px 8px 8px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px;line-height:1.2;max-width:100%}
+.pchip i{width:18px;height:18px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.pchip[aria-pressed="true"]{background:#fff3c9;box-shadow:2px 3px 0 var(--ink);text-decoration:none}
+.pchip[aria-pressed="true"]:after{content:"in the jar";font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--display);background:var(--ink);color:var(--paper);border-radius:999px;padding:2px 7px}
+@media (pointer:fine){.pchip{cursor:grab}}
+.skrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.sk{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;border:2px solid var(--ink);border-radius:999px;padding:3px 9px;background:var(--white)}
+.sk i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ink)}
+.sk.zero{opacity:.45;border-style:dashed}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0}
+.slot{border:3px solid var(--ink);border-radius:16px 12px 16px 12px;padding:10px 12px;background:var(--white);font-size:.9rem}
+.slot b{display:block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800}
+.slot.gap{border-style:dashed;background:var(--paper)}
+.slot.got{background:#e9f4ec}
+.ticket{border:4px solid var(--ink);border-radius:20px;background:repeating-linear-gradient(135deg,#fff8e6 0 14px,#fff3d6 14px 28px);padding:18px 18px 16px;box-shadow:8px 9px 0 var(--ink);margin:14px 0;position:relative;overflow:hidden}
+.ticket:before,.ticket:after{content:"";position:absolute;top:50%;width:26px;height:26px;border-radius:50%;background:var(--white);border:4px solid var(--ink);transform:translateY(-50%)}
+.ticket:before{left:-17px}.ticket:after{right:-17px}
+.ticket h4{font-family:var(--display);font-variation-settings:"wdth" 124,"wght" 900;font-size:1.6rem;margin:0 0 8px;line-height:1;letter-spacing:.02em}
+.ticket .stamp{position:absolute;right:16px;top:12px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;color:var(--orange);border:3px solid var(--orange);border-radius:8px;padding:2px 8px;transform:rotate(8deg);font-size:.8rem;letter-spacing:.12em;background:rgba(255,255,255,.6)}
+.ticket ul{margin:6px 0;padding-left:20px}
+.ticket .big{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 700;font-size:1.1rem;line-height:1.3;background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:10px 12px;margin:8px 0}
+.ticket .empty{opacity:.55;font-style:italic}
+@media (max-width:480px){.ticket h4{font-size:1.25rem;padding-right:70px}.ticket .stamp{font-size:.65rem}}
+
+/* STAGE 3: shop */
+.counter{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:end;background:linear-gradient(180deg,#eaf6f9 0,#eaf6f9 70%,#d6c9b6 70%);border:var(--border) solid var(--ink);border-radius:20px 14px 20px 14px;padding:12px 14px 0;overflow:hidden}
+.counter svg.cust{width:140px;height:auto;display:block}
+@media (max-width:520px){.counter{grid-template-columns:90px 1fr}.counter svg.cust{width:90px}}
+.say{position:relative;background:var(--white);border:var(--border) solid var(--ink);border-radius:20px;padding:12px 14px;margin:0 0 18px;font-size:1.02rem}
+.say:after{content:"";position:absolute;left:-14px;bottom:16px;border:10px solid transparent;border-right-color:var(--ink);border-left:0}
+.say b{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;display:block;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase}
+.custrow{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.shelf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 10px 10px;background:linear-gradient(180deg,transparent 0,transparent 47%,var(--ink) 47%,var(--ink) 49%,transparent 49%,transparent 97%,var(--ink) 97%);border:var(--border) solid var(--ink);border-radius:16px;background-color:#fff7ea;margin:12px 0}
+@media (max-width:560px){.shelf{grid-template-columns:repeat(2,minmax(0,1fr));background:#fff7ea}}
+.prod{font-family:var(--body);color:var(--ink);background:var(--white);border:var(--border) solid var(--ink);border-radius:14px 10px 14px 10px;padding:8px 6px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .15s ease;min-width:0}
+.prod:nth-child(odd){transform:rotate(-1deg)}
+.prod:nth-child(even){transform:rotate(1deg)}
+.prod:hover{transform:translateY(-4px) rotate(0)}
+.prod svg{width:52px;height:52px}
+.prod b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.86rem;line-height:1.1}
+.prod span{font-size:.72rem;line-height:1.2;opacity:.8}
+.prod.gave{background:#fff3c9}
+.prod.star{background:#e9f4ec}
+.pricetag{display:inline-block;background:var(--orange);color:var(--ink);font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;border:2px solid var(--ink);transform:rotate(-3deg)}
+
+/* STAGE 4: sorter */
+.deckarea{display:flex;justify-content:center;margin:10px 0 6px;min-height:150px}
+.dcard{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1.2rem;line-height:1.2;max-width:460px;width:100%;text-align:center;padding:22px 18px;border:4px solid var(--ink);border-radius:22px 16px 24px 16px;background:var(--white);color:var(--ink);cursor:grab;box-shadow:7px 8px 0 rgba(10,47,56,.25);touch-action:none;transform:rotate(-1.2deg)}
+.dcard[aria-pressed="true"]{background:var(--yellow);box-shadow:7px 8px 0 var(--ink)}
+.dcard small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;margin-top:8px;opacity:.75}
+.doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+@media (max-width:560px){.doors{gap:6px}}
+.door{font-family:var(--body);color:var(--ink);border:var(--border) solid var(--ink);border-radius:60px 60px 10px 10px;padding:12px 6px 10px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:150px;min-width:0}
+.door svg{width:54px;height:54px}
+.door b{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 900;font-size:1.05rem;text-transform:uppercase;letter-spacing:.04em}
+.door span.d{font-size:.74rem;line-height:1.25}
+.door.fake{background:linear-gradient(170deg,#ffe3a3,var(--yellow))}
+.door.plan{background:linear-gradient(170deg,#bfe4f0,#7cc3dd)}
+.door.skip{background:linear-gradient(170deg,#f8c9bc,#ef9a7a)}
+.door .cnt{font-family:var(--display);font-weight:800;font-size:.8rem;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:1px 9px;margin-top:auto}
+.door[aria-pressed="true"]{box-shadow:0 0 0 4px var(--ink)}
+.piles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.piles{grid-template-columns:1fr}}
+.pile{border:2px dashed var(--ink);border-radius:12px;padding:8px;font-size:.84rem;background:var(--paper)}
+.pile b{font-family:var(--display);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.pile ul{margin:4px 0 0;padding-left:18px}
+.pile button{font:inherit;background:none;border:0;padding:0;color:var(--ink);text-decoration:underline dotted;cursor:pointer;text-align:left}
+
+/* STAGE 5: rehearsal */
+.scenetabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0 12px}
+.sceneb{font-family:var(--body);text-align:center;border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;background:var(--white);padding:8px 6px;cursor:pointer;color:var(--ink);font-size:.88rem;font-weight:700;line-height:1.2;min-width:0}
+.sceneb svg{width:44px;height:44px;display:block;margin:0 auto 4px}
+.sceneb[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.script{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+.sline{max-width:86%;border:var(--border) solid var(--ink);border-radius:18px;padding:10px 12px;background:var(--white)}
+.sline .who{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7;display:block}
+.sline.them{align-self:flex-start;background:#eef4f6;border-bottom-left-radius:4px}
+.sline.you{align-self:flex-end;background:#fff6df;border-bottom-right-radius:4px}
+.sline.curve{align-self:flex-start;background:#f4eaf8;border-color:var(--plum);border-width:4px}
+.sline .chipset{margin:6px 0 0}
+.sline .cb{font-size:.88rem;padding:7px 11px}
+.stagebox{position:relative;border:4px solid var(--ink);border-radius:20px 20px 8px 8px;overflow:hidden;background:#2a1a33;color:var(--paper);padding:0;margin:10px 0}
+.stagebox svg.curtain{display:block;width:100%;height:60px}
+.cue{min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px 20px 22px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 700;font-size:clamp(1.15rem,3.6vw,1.6rem);line-height:1.25;background:radial-gradient(closest-side,rgba(255,194,71,.35),transparent)}
+.cue .whoc{display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:6px}
+.cuebar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 10px 14px}
+.reps{font-size:1.4rem;letter-spacing:.1em;color:var(--orange-deep)}
+.slide{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}
+.slide input[type=range]{flex:1;min-width:160px;max-width:320px;accent-color:var(--orange);height:30px}
+.slide output{font-family:var(--display);font-weight:800;font-size:1.3rem;min-width:2ch}
+.ba{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;max-width:420px;margin:8px 0}
+.ba .bar{height:18px;border:2px solid var(--ink);border-radius:999px;background:rgba(10,47,56,.08);overflow:hidden}
+.ba .bar span{display:block;height:100%;transition:width .5s ease}
+
+/* STAGE 6: spotter */
+.spotcard{border:4px solid var(--ink);border-radius:24px 18px 24px 18px;background:var(--white);padding:18px;box-shadow:7px 8px 0 rgba(10,47,56,.2);display:grid;grid-template-columns:80px minmax(0,1fr);gap:14px;align-items:center}
+.spotcard svg{width:80px;height:auto}
+.spotcard p.st{overflow-wrap:break-word;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 700;font-size:1.15rem;line-height:1.3;margin:0}
+.slidein{animation:slidein .4s cubic-bezier(.2,1.2,.4,1)}
+@keyframes slidein{from{transform:translateY(18px) rotate(2deg) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.side{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;border:var(--border) solid var(--ink);border-radius:18px 14px 18px 14px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink);min-width:0}
+.side svg{width:44px;height:44px;flex:none}
+.side.good{background:linear-gradient(160deg,#dff0d6,#a9d68a)}
+.side.risky{background:linear-gradient(160deg,#fde3cf,#f39250)}
+.side[aria-pressed="true"]{box-shadow:4px 5px 0 var(--ink)}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.dot{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--white);font-family:var(--display);font-weight:800;font-size:.8rem;cursor:pointer;color:var(--ink)}
+.dot.done{background:var(--teal);color:var(--paper)}
+.dot.cur{outline:3px dashed var(--orange);outline-offset:2px}
+
+/* STAGE 7: mission */
+.faces{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.faceb{border:var(--border) solid var(--ink);border-radius:16px;background:var(--white);padding:4px 6px 6px;cursor:pointer;font-family:var(--body);font-size:.75rem;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;min-width:62px}
+.faceb svg{width:40px;height:40px}
+.faceb[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.mtk .row{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:5px 0;border-bottom:2px dashed rgba(10,47,56,.2);font-size:.95rem}
+.mtk .row:last-child{border-bottom:0}
+.mtk .row span:first-child{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;opacity:.75;padding-top:3px}
+@media (max-width:480px){.mtk .row{grid-template-columns:1fr;gap:0}}
+
+.restart{margin:24px 0 0;text-align:right}
+.restart button{background:none;border:0;color:var(--body-tint);text-decoration:underline;cursor:pointer;font-family:var(--body);font-size:.88rem;padding:8px}
+.restart button.arm{color:var(--paper);background:var(--orange-deep);text-decoration:none;border-radius:999px;padding:8px 14px;font-weight:700}
+
+@media (max-width:760px){.smap{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:480px){.stage{padding:16px}.tile{min-height:132px}.smap{grid-template-columns:repeat(2,1fr)}.result{grid-template-columns:70px 1fr}.result svg{width:70px}.spotcard{grid-template-columns:56px minmax(0,1fr);padding:14px}.spotcard svg{width:56px}}
+@media (prefers-reduced-motion:reduce){.introsvg .hop,.introsvg .flag{animation:none}.mfill{transition:none}.pop,.shake,.drop,.slidein{animation:none!important}}
+@media print{.top,.hero,footer,.grain,.whobox,.smap,.maptitle,.intro,.stagenav,#sendCard,.restart,.noprint{display:none!important}.stage{box-shadow:none;border:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE BRAVE <span class="accent">BIT</span></h1>
+    <div class="line">
+      <span class="chip">Preparation for adulthood</span>
+      <p>Every new thing has a brave bit. Here is how to get through it without freezing or face planting.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap bb">
+
+  <div class="intro">
+    <div class="panel panel-orange">
+      <p><strong>Confidence is not about never being nervous.</strong> It is about getting through the brave bit: the first word, the first step, the first go.</p>
+      <p>Seven stages: follow Robin through a week, fill a proof jar, run a shop, sort some decisions, rehearse a script, spot risky confidence and pick your own brave bit. Any order, skip anything, and it saves as you go.</p>
+    </div>
+    <svg class="introsvg" viewBox="0 0 250 190" role="img" aria-label="Robin holding a little flag that says brave bit, hopping onto a step">
+      <rect x="20" y="150" width="70" height="30" rx="4" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/>
+      <rect x="90" y="128" width="70" height="52" rx="4" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>
+      <rect x="160" y="104" width="70" height="76" rx="4" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3"/>
+      <text x="195" y="150" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="12" fill="#fffdf8">NEW</text>
+      <text x="195" y="164" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="12" fill="#fffdf8">THING</text>
+      <g class="hop" id="introRobin"></g>
+    </svg>
+  </div>
+
+  <div class="whobox">
+    <h3>Who is this? <span style="font-weight:400;font-family:var(--body);font-size:.85rem">(optional)</span></h3>
+    <p class="sub">Pick your initials to see your two milestones and a good place to start. Every stage stays open either way.</p>
+    <div class="whorow" id="whoRow"></div>
+    <div id="whoMiles"></div>
+  </div>
+
+  <div class="maptitle"><h2>Pick a stage</h2><span>Any order. Each one is about five to ten minutes.</span></div>
+  <div class="smap" id="smap"></div>
+
+  <div id="stageHost"></div>
+
+  <div class="stage" id="sendCard">
+    <div class="sh"><div class="shtxt"><span class="kicker">When you are ready</span><h2>Send it to Jay</h2><p>It sends whatever you have tried so far, from any stage. Half done is completely fine.</p></div></div>
+    <div id="sendHost"></div>
+    <p class="note">Your work also stays saved on this device.</p>
+  </div>
+
+  <div class="restart"><button type="button" id="restartBtn">Start again (clears everything on this page)</button></div>
+
+  <a class="backlink" href="/practice/#pfa-standard">Back to Preparation for adulthood</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var STORE = "b5.practice.the-brave-bit.v1", WHO_KEY = "base5.who.v1";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c] }) }
+var FD = "font-family='Archivo, Arial Black, sans-serif'";
+var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+var INK = "#0a2f38";
+
+/* ================= state ================= */
+var S = blank();
+function blank(){
+  return { seen:{}, stage:null,
+    story:{ day:"mon", pick:{}, tried:{}, notice:{}, change:"", txt:"" },
+    jar:{ items:[], own:[], ch:"", top:[], good:"", could:"", draft:"" },
+    shop:{ cur:0, tries:{}, served:{}, bag:[], dec:"", tool:"", how:"" },
+    sorter:{ placed:{}, wrong:{}, dec:"", decOwn:"", bin:"", why:"", feel:"" },
+    reh:{ cur:"shop", s:{} },
+    spot:{ i:0, side:{}, tell:{}, miss:{}, ex:"" },
+    mis:{ bit:"", own:"", where:"", type:"", tool:"", why:"", status:"", went:0, feel:{}, help:"", keep:"" } };
+}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(S)) }catch(e){} }
+try{
+  var raw = localStorage.getItem(STORE);
+  if(raw){ var got = JSON.parse(raw), b = blank();
+    if(got && typeof got === "object"){ Object.keys(b).forEach(function(k){ if(got[k] !== undefined && got[k] !== null){ if(b[k] && typeof b[k] === "object" && !Array.isArray(b[k])){ Object.keys(b[k]).forEach(function(kk){ if(got[k][kk] === undefined) got[k][kk] = b[k][kk] }) } b[k] = got[k] } }); S = b }
+  }
+}catch(e){}
+function getWho(){ try{ return localStorage.getItem(WHO_KEY) || "" }catch(e){ return "" } }
+function setWho(v){ try{ if(v) localStorage.setItem(WHO_KEY, v); else localStorage.removeItem(WHO_KEY) }catch(e){} }
+function tried(id){ if(!S.seen[id]){ S.seen[id] = true; drawMap() } }
+
+/* ================= students (copied exactly from The Confidence Dial) ================= */
+var WHO = {
+  JT:{ m:["Make a simple choice for yourself at home, school or work.", "Say why you made a choice and how you felt about it afterwards."],
+       full:["I can make a simple choice for myself at home, school or work.", "I can explain why I made a choice and how I felt about it afterwards."], best:["sorter","story"] },
+  LW:{ m:["Explain why you made a decision and look back at how it went.", "Spot how confidence can push your actions in helpful and unhelpful ways."],
+       full:["I can explain why I have made a particular decision and reflect on how it went.", "I can recognise how confidence can influence my actions in both helpful and unhelpful ways."], best:["story","spot"] },
+  EGW:{ m:["Use your strengths and past experiences to take on new challenges with more confidence.", "Explain how too much or too little confidence can lead to poor choices, and how to find the balance."],
+       full:["I can use my strengths and previous experiences to approach new challenges with greater confidence.", "I can explain how overconfidence or low confidence might lead to poor choices, and how to find a balance."], best:["jar","spot"] },
+  LP:{ m:["Make decisions on your own, check how they turned out, and change your approach when you need to.", "Explain, with examples, how too little or too much confidence affects the choices people make."],
+       full:["I can make informed decisions independently, evaluate the outcome, and adapt my approach when needed.", "I can explain, with examples, how too little or too much confidence can affect the choices people make."], best:["mis","spot"] },
+  HK:{ m:["Find strategies that help you feel more confident when making decisions.", "Use a strategy when making a decision and say how it helped."],
+       full:["I can identify strategies that help me feel more confident when making decisions.", "I can use a strategy that helps me feel confident when making a decision and say how it helped."], best:["shop","reh"] },
+  LC:{ m:["Spot something you are good at or feel confident doing.", "Talk about how feeling confident helps you try something new."],
+       full:["I can recognise something I am good at or feel confident doing.", "I can talk about how feeling confident helps me try something new."], best:["jar","reh"] }
+};
+var ORDER = ["JT","LW","EGW","LP","LC","HK"];
+
+var STAGES = [
+  { id:"story", n:1, t:"Robin's week", d:"Five days, five choices. Watch two meters move.", cls:"t2" },
+  { id:"jar", n:2, t:"Proof I can", d:"Fill a jar with things you have actually done.", cls:"t1" },
+  { id:"shop", n:3, t:"The bravery shop", d:"Hand each customer the right confidence tool.", cls:"t4" },
+  { id:"sorter", n:4, t:"Fake it, plan it, skip it", d:"Ten decisions, three doors.", cls:"t3" },
+  { id:"reh", n:5, t:"Rehearsal room", d:"Build a script, then run it.", cls:"t5" },
+  { id:"spot", n:6, t:"Good or risky?", d:"Spot good confident from risky confident.", cls:"t6" },
+  { id:"mis", n:7, t:"My brave bit", d:"Pick one small brave thing. Try it. Look back.", cls:"t7" }
+];
+function stageById(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return STAGES[i]; return null }
+
+/* stage number -> what it covers (initials and milestone number) */
+var MILESTONE_STAGES = {
+  1:{ id:"story", what:"Robin makes choices at home, school and work; both meters show how confidence helps and hurts", covers:["JT m1","LW m2","EGW m2","LP m2","LC m2"] },
+  2:{ id:"jar", what:"Things I have done and am good at, matched to a new challenge", covers:["LC m1","LC m2","EGW m1"] },
+  3:{ id:"shop", what:"Matching confidence strategies to situations, then picking one for a decision of my own", covers:["HK m1","HK m2"] },
+  4:{ id:"sorter", what:"Deciding fake it, plan it or skip it, then making and explaining my own choice", covers:["JT m1","JT m2","LP m1","LW m1"] },
+  5:{ id:"reh", what:"Rehearsing as a strategy, rating confidence before and after", covers:["HK m1","HK m2","LC m2","JT m1"] },
+  6:{ id:"spot", what:"Good confident against risky confident, with the clue that tips it, and examples", covers:["LW m2","EGW m2","LP m2"] },
+  7:{ id:"mis", what:"Choosing a brave bit, using a strategy, then looking back and adapting", covers:["JT m1","JT m2","LW m1","LP m1","HK m2","EGW m1"] }
+};
+function stagesFor(w){ var out = []; Object.keys(MILESTONE_STAGES).forEach(function(n){ var ms = MILESTONE_STAGES[n]; if(ms.covers.some(function(c){ return c.split(" ")[0] === w })) out.push(+n) }); return out }
+
+/* ================= people ================= */
+function hairPath(style, col){
+  var st = " fill='" + col + "' stroke='" + INK + "' stroke-width='2.5' stroke-linejoin='round'";
+  if(style === "spiky") return "<path d='M22 52 L24 30 L33 36 L36 18 L45 30 L51 14 L57 29 L66 18 L68 33 L77 28 L78 52 Q70 38 50 38 Q30 38 22 52 Z'" + st + "/>";
+  if(style === "long") return "<path d='M22 52 Q18 22 50 22 Q82 22 78 52 L80 96 L68 96 L66 52 L34 52 L32 96 L20 96 Z'" + st + "/>";
+  if(style === "bun") return "<circle cx='50' cy='20' r='10'" + st + "/><path d='M22 52 Q20 26 50 26 Q80 26 78 52 Q70 36 50 36 Q30 36 22 52 Z'" + st + "/>";
+  if(style === "curly") return "<g" + st + "><circle cx='28' cy='40' r='9'/><circle cx='36' cy='29' r='10'/><circle cx='50' cy='25' r='11'/><circle cx='64' cy='29' r='10'/><circle cx='72' cy='40' r='9'/></g>";
+  if(style === "cap") return "<path d='M22 46 Q22 22 50 22 Q78 22 78 46 Z'" + st + "/><path d='M74 44 H94 Q94 50 74 50 Z'" + st + "/>";
+  return "<path d='M22 50 Q20 22 50 22 Q80 22 78 50 Q72 34 50 34 Q28 34 22 50 Z'" + st + "/>";
+}
+function faceBits(mood){
+  var e = "<circle cx='40' cy='56' r='3.5' fill='" + INK + "'/><circle cx='60' cy='56' r='3.5' fill='" + INK + "'/>";
+  if(mood === "low") return "<circle cx='40' cy='59' r='3' fill='" + INK + "'/><circle cx='60' cy='59' r='3' fill='" + INK + "'/><path d='M33 50 L44 46 M67 50 L56 46' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><path d='M40 73 Q45 69 50 73 Q55 77 60 73' fill='none' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><path d='M80 40 Q85 49 80 52 Q75 49 80 40 Z' fill='#cfeffa' stroke='" + INK + "' stroke-width='1.8'/>";
+  if(mood === "mid") return e + "<path d='M40 68 Q50 78 60 68' fill='none' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/><circle cx='32' cy='66' r='4.5' fill='#f6a5a0' opacity='.7'/><circle cx='68' cy='66' r='4.5' fill='#f6a5a0' opacity='.7'/>";
+  if(mood === "high") return e + "<path d='M33 47 L45 49 M55 45 L67 42' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><path d='M37 65 Q50 84 63 65 Z' fill='" + INK + "'/><path d='M44 67 H56' stroke='#fff' stroke-width='2'/><path d='M88 22 L90 28 L96 30 L90 32 L88 38 L86 32 L80 30 L86 28 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='1.5'/>";
+  if(mood === "oops") return "<circle cx='40' cy='56' r='6.5' fill='#fff' stroke='" + INK + "' stroke-width='2.5'/><circle cx='60' cy='56' r='6.5' fill='#fff' stroke='" + INK + "' stroke-width='2.5'/><circle cx='40' cy='56' r='2.5' fill='" + INK + "'/><circle cx='60' cy='56' r='2.5' fill='" + INK + "'/><path d='M33 44 L45 46 M55 46 L67 44' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><ellipse cx='50' cy='73' rx='5' ry='6' fill='" + INK + "'/>";
+  if(mood === "worried") return e + "<path d='M33 49 L44 46 M67 49 L56 46' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/><path d='M42 72 Q50 67 58 72' fill='none' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/>";
+  return e + "<path d='M43 70 H57' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/>";
+}
+function personG(o, mood){
+  var s = "";
+  if(o.hair === "long") s += hairPath("long", o.hc);
+  s += "<path d='M18 130 Q20 90 50 87 Q80 90 82 130 Z' fill='" + o.top + "' stroke='" + INK + "' stroke-width='3'/>";
+  s += "<path d='M44 90 L46 104 M56 90 L54 104' stroke='#fffdf8' stroke-width='2' stroke-linecap='round'/>";
+  s += "<circle cx='50' cy='57' r='28' fill='" + o.skin + "' stroke='" + INK + "' stroke-width='3'/>";
+  if(o.hair === "long") s += "<path d='M24 50 Q26 30 50 28 Q74 30 76 50 Q66 38 50 40 Q34 38 24 50 Z' fill='" + o.hc + "' stroke='" + INK + "' stroke-width='2.5'/>";
+  else s += hairPath(o.hair, o.hc);
+  if(o.specs) s += "<circle cx='40' cy='56' r='8' fill='none' stroke='" + INK + "' stroke-width='2'/><circle cx='60' cy='56' r='8' fill='none' stroke='" + INK + "' stroke-width='2'/><path d='M48 56 H52' stroke='" + INK + "' stroke-width='2'/>";
+  return s + faceBits(mood);
+}
+function person(o, mood, cls){ return "<svg class='" + (cls || "") + "' viewBox='0 0 100 130' aria-hidden='true'>" + personG(o, mood) + "</svg>" }
+var ROBIN = { skin:"#e0a77c", hair:"spiky", hc:"#3a2a1e", top:"#007291" };
+el("introRobin").innerHTML = "<g transform='translate(168 6) scale(.75)'>" + personG(ROBIN, "mid") + "<path d='M86 100 V40' stroke='" + INK + "' stroke-width='3'/><g class='flag'><path d='M86 40 L126 48 L86 58 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/></g></g>";
+
+/* ================= icons ================= */
+var ICON = {
+  story:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='5' y='8' width='22' height='20' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><rect x='31' y='8' width='24' height='20' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><rect x='5' y='32' width='50' height='20' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M10 40 H34 M10 46 H26' stroke='" + INK + "' stroke-width='2.5'/><circle cx='45' cy='42' r='6' fill='#007291' stroke='" + INK + "' stroke-width='2'/></svg>",
+  jar:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='17' y='4' width='26' height='8' rx='2' fill='#ef7724' stroke='" + INK + "' stroke-width='2.5'/><path d='M14 14 H46 Q52 14 52 22 V50 Q52 56 46 56 H14 Q8 56 8 50 V22 Q8 14 14 14 Z' fill='#e3f3f8' stroke='" + INK + "' stroke-width='3'/><circle cx='20' cy='48' r='5' fill='#7b4b8f' stroke='" + INK + "' stroke-width='2'/><circle cx='31' cy='48' r='5' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><circle cx='42' cy='48' r='5' fill='#007291' stroke='" + INK + "' stroke-width='2'/><circle cx='26' cy='39' r='5' fill='#ef7724' stroke='" + INK + "' stroke-width='2'/><circle cx='37' cy='39' r='5' fill='#2e7d4f' stroke='" + INK + "' stroke-width='2'/></svg>",
+  shop:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M6 22 L12 8 H48 L54 22 Z' fill='#ef7724' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><path d='M14 8 L12 22 M24 8 L23 22 M36 8 L37 22 M46 8 L48 22' stroke='" + INK + "' stroke-width='2'/><rect x='9' y='22' width='42' height='32' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><rect x='16' y='30' width='12' height='24' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/><rect x='33' y='30' width='12' height='10' fill='#cfeefa' stroke='" + INK + "' stroke-width='2.5'/></svg>",
+  sorter:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M4 56 V22 Q4 12 12 12 Q20 12 20 22 V56 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/><path d='M22 56 V22 Q22 12 30 12 Q38 12 38 22 V56 Z' fill='#7cc3dd' stroke='" + INK + "' stroke-width='2.5'/><path d='M40 56 V22 Q40 12 48 12 Q56 12 56 22 V56 Z' fill='#ef9a7a' stroke='" + INK + "' stroke-width='2.5'/><circle cx='16' cy='36' r='2' fill='" + INK + "'/><circle cx='34' cy='36' r='2' fill='" + INK + "'/><circle cx='52' cy='36' r='2' fill='" + INK + "'/></svg>",
+  reh:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M2 4 H58 V12 Q46 22 40 12 Q30 22 20 12 Q14 22 2 12 Z' fill='#d2401f' stroke='" + INK + "' stroke-width='2.5'/><rect x='24' y='22' width='12' height='18' rx='6' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M20 34 Q20 46 30 46 Q40 46 40 34 M30 46 V54 M22 55 H38' fill='none' stroke='" + INK + "' stroke-width='3' stroke-linecap='round'/></svg>",
+  spot:"<svg viewBox='0 0 60 60' aria-hidden='true'><circle cx='24' cy='24' r='15' fill='#fffdf8' stroke='" + INK + "' stroke-width='3.5'/><path d='M35 35 L52 52' stroke='" + INK + "' stroke-width='6' stroke-linecap='round'/><path d='M17 24 L22 29 L31 19' fill='none' stroke='#2e7d4f' stroke-width='3.5' stroke-linecap='round'/></svg>",
+  mis:"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M6 16 H54 V26 Q48 30 54 34 V44 H6 V34 Q12 30 6 26 Z' fill='#ffc247' stroke='#fffdf8' stroke-width='3' stroke-linejoin='round'/><path d='M20 16 V44' stroke='" + INK + "' stroke-width='2' stroke-dasharray='3 3'/><path d='M36 22 L38.5 28 L45 28.5 L40 32.5 L41.5 39 L36 35.5 L30.5 39 L32 32.5 L27 28.5 L33.5 28 Z' fill='" + INK + "'/></svg>"
+};
+function tileBg(c){ return { t1:"#ffc247", t2:"#ef7724", t3:"#7b4b8f", t4:"#00a6c9", t5:"#ffcf6a", t6:"#007291", t7:"#0a2f38" }[c] }
+
+/* ================= who picker ================= */
+function drawWho(){
+  var w = getWho().toUpperCase(), row = el("whoRow"), html = "";
+  ORDER.forEach(function(k){ html += "<button type='button' class='whob' data-who='" + k + "' aria-pressed='" + (w === k) + "'>" + k + "</button>" });
+  html += "<button type='button' class='whob look' data-who='' aria-pressed='" + (!WHO[w]) + "'>Just looking</button>";
+  row.innerHTML = html;
+  var box = el("whoMiles");
+  if(WHO[w]){
+    box.innerHTML = "<div class='miles pop'><b>" + w + ", your two steps:</b><ol><li>" + esc(WHO[w].m[0]) + "</li><li>" + esc(WHO[w].m[1]) + "</li></ol><p class='note' style='margin:6px 0 0!important'>Good places to start: " + WHO[w].best.map(function(id){ var s = stageById(id); return "<b>" + esc(s.t) + "</b>" }).join(" and ") + ". They have a yellow sticker on the map. Your steps also turn up in stages " + stagesFor(w).join(", ") + ".</p></div>";
+  } else box.innerHTML = "";
+}
+el("whoRow").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-who]"); if(!b) return;
+  setWho(b.dataset.who); drawWho(); drawMap(); if(S.stage) renderStage();
+  var sw = el("b5who"); if(sw) sw.value = b.dataset.who;
+  var nb = el("whoRow").querySelector("button[data-who='" + b.dataset.who + "']"); if(nb) nb.focus();
+});
+
+/* ================= map ================= */
+function drawMap(){
+  var w = getWho().toUpperCase(), best = WHO[w] ? WHO[w].best : [];
+  el("smap").innerHTML = STAGES.map(function(s){
+    return "<button type='button' class='tile " + s.cls + (S.stage === s.id ? " cur" : "") + "' data-stage='" + s.id + "'>" +
+      (best.indexOf(s.id) >= 0 ? "<span class='tag start'>Good place to start</span>" : "") +
+      ICON[s.id] + "<span class='tn'>Stage " + s.n + "</span><span class='tt'>" + esc(s.t) + "</span>" +
+      "<span class='tst'>" + (S.seen[s.id] ? "<span class='tag done'>&#10003; Tried</span>" : esc(s.d)) + "</span></button>";
+  }).join("");
+}
+el("smap").addEventListener("click", function(e){ var b = e.target.closest("button[data-stage]"); if(b) openStage(b.dataset.stage, true) });
+
+function openStage(id, scroll){
+  S.stage = id; save(); drawMap();
+  renderStage();
+  if(scroll){ var t = el("stageHost").getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top:t, behavior: reduce ? "auto" : "smooth" }) }
+}
+function stageShell(s, intro, body){
+  var w = getWho().toUpperCase(), isBest = WHO[w] && WHO[w].best.indexOf(s.id) >= 0;
+  var i = STAGES.indexOf(s), nx = STAGES[i + 1], pv = STAGES[i - 1];
+  return "<section class='stage' aria-labelledby='h_" + s.id + "'><div class='sh'>" + ICON[s.id].replace("<svg", "<svg style='background:" + tileBg(s.cls) + ";border-radius:16px;border:3px solid " + INK + ";padding:4px'") +
+    "<div class='shtxt'><span class='kicker'>Stage " + s.n + " of 7" + (isBest ? " &middot; good place to start for " + w : "") + "</span><h2 id='h_" + s.id + "' tabindex='-1'>" + esc(s.t) + "</h2><p>" + intro + "</p></div></div>" +
+    body +
+    "<div class='stagenav'>" + (pv ? "<button type='button' class='btn btn-quiet sm' data-go='" + pv.id + "'>Back: " + esc(pv.t) + "</button>" : "") +
+    (nx ? "<button type='button' class='btn sm' data-go='" + nx.id + "'>Next: " + esc(nx.t) + "</button>" : "<button type='button' class='btn btn-orange sm' data-go='send'>Go to send</button>") +
+    "<button type='button' class='btn btn-quiet sm' data-go='map'>Back to the map</button></div></section>";
+}
+
+var R = {}, ACT = {}, AFTER = {}, LIVE = {};
+var focusKey = null;
+function renderStage(){
+  var host = el("stageHost");
+  if(!S.stage || !stageById(S.stage)){ host.innerHTML = ""; return }
+  var s = stageById(S.stage);
+  host.innerHTML = R[s.id](s);
+  if(focusKey){ try{ var f = host.querySelector("[data-k='" + focusKey + "']"); if(f) f.focus({ preventScroll:true }) }catch(e){} focusKey = null }
+  if(AFTER[s.id]) AFTER[s.id]();
+}
+function rerender(k){ focusKey = k || null; save(); renderStage() }
+
+el("stageHost").addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]");
+  if(g){
+    var to = g.dataset.go;
+    if(to === "map"){ window.scrollTo({ top: el("smap").getBoundingClientRect().top + window.scrollY - 60, behavior: reduce ? "auto" : "smooth" }); return }
+    if(to === "send"){ window.scrollTo({ top: el("sendCard").getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? "auto" : "smooth" }); return }
+    openStage(to, true); var h = el("h_" + to); if(h) h.focus({ preventScroll:true }); return;
+  }
+  var a = e.target.closest("[data-a]");
+  if(!a) return;
+  if(a.dataset.a === "starter"){ doStarter(a); return }
+  if(ACT[S.stage]) ACT[S.stage](a, e);
+});
+el("stageHost").addEventListener("input", function(e){
+  var t = e.target; if(!t.dataset || !t.dataset.f) return;
+  setPath(t.dataset.f, t.type === "range" ? parseInt(t.value, 10) : t.value); tried(S.stage); save();
+  if(LIVE[S.stage]) LIVE[S.stage](t);
+});
+function setPath(p, v){ var parts = p.split("."), o = S; for(var i = 0; i < parts.length - 1; i++){ if(o[parts[i]] == null) o[parts[i]] = {}; o = o[parts[i]] } o[parts[parts.length - 1]] = v }
+function getPath(p){ var parts = p.split("."), o = S; for(var i = 0; i < parts.length; i++){ if(o == null) return ""; o = o[parts[i]] } return o == null ? "" : o }
+
+/* shared bits */
+function fid(f){ return "f_" + f.replace(/\./g, "_") }
+function starters(field, list){
+  return "<div class='chipset'>" + list.map(function(t){ return "<button type='button' class='cb starter' data-a='starter' data-f='" + field + "' data-t='" + esc(t) + "'>" + esc(t) + "...</button>" }).join("") + "</div>";
+}
+function textBox(field, label, ph){
+  return "<label class='wrlab' for='" + fid(field) + "'>" + label + "</label><textarea class='wr' id='" + fid(field) + "' data-f='" + field + "' placeholder='" + esc(ph || "") + "'>" + esc(getPath(field)) + "</textarea>";
+}
+function doStarter(a){
+  var f = a.dataset.f, t = a.dataset.t, box = el(fid(f));
+  if(!box) return;
+  var v = box.value; if(v && !/\s$/.test(v)) v += " ";
+  box.value = v + t + " "; setPath(f, box.value); tried(S.stage); save();
+  box.focus(); try{ box.setSelectionRange(box.value.length, box.value.length) }catch(e){}
+  if(LIVE[S.stage]) LIVE[S.stage](box);
+}
+function chip(k, label, on, extra){ return "<button type='button' class='cb' data-k='" + esc(k) + "' aria-pressed='" + (!!on) + "'" + (extra || "") + ">" + esc(label) + "</button>" }
+function part(n, t){ return "<h3 class='part'><span class='pn'>" + n + "</span>" + t + "</h3>" }
+
+/* ================= drag helper (tap to pick and place always works too) ================= */
+var drag = null, eatClick = false;
+document.addEventListener("pointerdown", function(e){
+  var d = e.target.closest && e.target.closest("[data-drag]"); if(!d || e.button > 0) return;
+  if(e.pointerType === "touch" && d.dataset.touch !== "yes") return;
+  drag = { el:d, x:e.clientX, y:e.clientY, id:d.dataset.drag, moved:false, ghost:null, over:null };
+});
+document.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if(!drag.moved && dx * dx + dy * dy > 100){
+    drag.moved = true; var r = drag.el.getBoundingClientRect();
+    var g = drag.el.cloneNode(true); g.classList.add("ghost"); g.removeAttribute("id"); g.style.width = r.width + "px"; g.style.margin = "0";
+    drag.ox = drag.x - r.left; drag.oy = drag.y - r.top; document.body.appendChild(g); drag.ghost = g; drag.el.style.opacity = ".35";
+  }
+  if(drag.moved){
+    e.preventDefault();
+    drag.ghost.style.left = (e.clientX - drag.ox) + "px"; drag.ghost.style.top = (e.clientY - drag.oy) + "px";
+    var t = document.elementFromPoint(e.clientX, e.clientY), tg = t && t.closest("[data-drop]");
+    if(drag.over && drag.over !== tg) drag.over.classList.remove("dropping");
+    if(tg){ tg.classList.add("dropping"); drag.over = tg } else drag.over = null;
+  }
+}, { passive:false });
+function endDrag(e, cancel){
+  if(!drag) return;
+  var d = drag; drag = null;
+  if(d.moved){
+    if(d.ghost) d.ghost.remove(); d.el.style.opacity = "";
+    if(d.over) d.over.classList.remove("dropping");
+    eatClick = true; setTimeout(function(){ eatClick = false }, 60);
+    if(!cancel){ var t = document.elementFromPoint(e.clientX, e.clientY), tg = t && t.closest("[data-drop]"); if(tg) onDrop(d.id, tg.dataset.drop) }
+  }
+}
+document.addEventListener("pointerup", function(e){ endDrag(e, false) });
+document.addEventListener("pointercancel", function(e){ endDrag(e, true) });
+document.addEventListener("click", function(e){ if(eatClick){ e.stopPropagation(); e.preventDefault(); eatClick = false } }, true);
+function onDrop(id, target){
+  if(S.stage === "jar" && target === "jar" && id.indexOf("p:") === 0){ jarAdd(id.slice(2), true); return }
+  if(S.stage === "sorter" && id.indexOf("s:") === 0){ sortPlace(id.slice(2), target); return }
+}
+
+/* ================= STAGE 1: Robin's week ================= */
+var DAYS = [
+  { id:"mon", day:"Monday", place:"Home", title:"Tea is on Robin", sit:"Dad is working late, so tea is on Robin tonight. There is pasta, sauce, cheese and a recipe stuck on the fridge.",
+    o:[ { k:"high", t:"Ignore the recipe. Oven on full blast so it is quicker.", c:1, r:-2, res:"Black on top, cold in the middle. The smoke alarm has opinions." },
+        { k:"mid", t:"Follow the recipe, and text Dad to check the oven setting.", c:2, r:2, res:"Pasta bake. A bit crunchy on top. Dad has seconds and says it beats his." },
+        { k:"low", t:"Say \"I cannot cook\" and have cereal instead.", c:-1, r:-1, res:"Cereal for tea. The milk is on the turn. Dad gets home hungry too." } ] },
+  { id:"tue", day:"Tuesday", place:"School", title:"The ideas wall", sit:"The school council wants ideas for the new chill out room. Robin has one: a fish tank.",
+    o:[ { k:"low", t:"Keep the idea quiet. It is probably rubbish.", c:-1, r:-1, res:"Someone suggests beanbags. Beanbags win. Robin still thinks fish would be better." },
+        { k:"high", t:"Stand on a chair and announce there will be sharks.", c:1, r:-2, res:"Big laugh. Chair confiscated. Nobody takes the fish idea seriously now." },
+        { k:"mid", t:"Write it on the ideas wall with a reason: watching fish is calming.", c:2, r:1, res:"It makes the shortlist. HB stops to say it is a good shout." } ] },
+  { id:"wed", day:"Wednesday", place:"Work", title:"Bakery taster day", sit:"Robin has a work taster day at a bakery. The supervisor says: watch first, and ask before using the big mixer.",
+    o:[ { k:"mid", t:"Watch first, ask one question, then have a go at shaping rolls.", c:2, r:2, res:"The rolls are a bit wonky. The supervisor says: come back in the summer if you fancy it." },
+        { k:"low", t:"Too nervous to ask anything. Stand by the door all morning.", c:-2, r:-1, res:"The feedback sheet says: polite, very quiet, hard to tell if interested." },
+        { k:"high", t:"\"Seen this on telly.\" Switch on the big mixer without asking.", c:1, r:-2, res:"Flour cloud. Robin spends the afternoon sweeping." } ] },
+  { id:"thu", day:"Thursday", place:"Out with mates", title:"The bus home", sit:"A man is asleep on the bus. Robin's mate says: take a photo of him and post it. Dare you.",
+    o:[ { k:"high", t:"Post it with a funny caption, to look good.", c:1, r:-3, res:"Someone recognises him. He is a mate's uncle. Robin deletes it within the hour, but people have screenshots." },
+        { k:"mid", t:"\"Nah, that is not fair on him.\" Change the subject to the new game.", c:2, r:2, res:"The mate shrugs: fair. By the next stop they are arguing about the game instead." },
+        { k:"low", t:"Robin does not want to, but cannot get the word no out. Takes the photo.", c:-2, r:-1, res:"Robin does not post it, but feels rubbish all evening. The mate keeps going on about it." } ] },
+  { id:"fri", day:"Friday", place:"Out and about", title:"Climbing wall taster", sit:"The leisure centre has a climbing wall taster session on Saturday, and it costs nothing. There is a short safety talk first.",
+    o:[ { k:"low", t:"Nope. Might be rubbish at it. Stay in.", c:-1, r:-1, res:"Robin spends Saturday watching other people's climbing videos." },
+        { k:"mid", t:"Go along, listen to the safety talk, climb halfway on the first go.", c:3, r:2, res:"On the third go, Robin reaches the top. Books another session." },
+        { k:"high", t:"Skip the safety talk. It is basically a ladder.", c:1, r:-2, res:"Staff say: no talk, no climbing. Robin watches from the bench." } ] }
+];
+var VERDICT = { low:["Too little confidence", "v-low", "Robin missed out. Playing it safe can still cost something."], mid:["Steady confidence", "v-mid", "Brave enough to try, sensible enough to check."], high:["Too much confidence", "v-high", "Robin felt great for about a minute. Then it went wrong."] };
+var STORY_NOTICE = ["Feeling confident did not always mean it went well", "Saying no to everything kept Robin safe but bored", "The steady choices pushed both meters up", "Sometimes the brave bit is saying no", "Watching or asking first is not the same as being scared", "Having a go made the next go easier"];
+function dayById(id){ for(var i = 0; i < DAYS.length; i++) if(DAYS[i].id === id) return DAYS[i]; return DAYS[0] }
+function optByK(d, k){ for(var i = 0; i < d.o.length; i++) if(d.o[i].k === k) return d.o[i]; return null }
+function clamp(v){ return Math.max(0, Math.min(10, v)) }
+function storySeries(){
+  var c = 5, r = 5, cs = [5], rs = [5];
+  DAYS.forEach(function(d){ var p = S.story.pick[d.id], o = p ? optByK(d, p) : null; if(o){ c = clamp(c + o.c); r = clamp(r + o.r) } cs.push(c); rs.push(r) });
+  return { c:cs, r:rs };
+}
+var meterShown = null;
+function sceneSVG(id, k){
+  var s = "<svg viewBox='0 0 320 190' role='img' aria-label='" + esc(dayById(id).title) + "'>";
+  var st = " stroke='" + INK + "' stroke-width='2.5'";
+  if(id === "mon"){
+    s += "<rect width='320' height='190' fill='#fff3db'/><rect x='16' y='14' width='84' height='58' fill='#cfeefa'" + st + "/><path d='M58 14 V72 M16 43 H100' stroke='" + INK + "' stroke-width='2'/>" +
+      "<g transform='rotate(4 140 50)'><rect x='118' y='22' width='46' height='56' fill='#fffdf8'" + st + "/><text x='141' y='38' text-anchor='middle' " + FD + " font-size='9' font-weight='800' fill='" + INK + "'>RECIPE</text><path d='M124 48 H158 M124 56 H152 M124 64 H156' stroke='" + INK + "' stroke-width='1.6'/></g>" +
+      "<rect x='0' y='126' width='200' height='8' fill='#d6c9b6'" + st + "/><rect x='0' y='134' width='200' height='56' fill='#ffe3a3'" + st + "/>" +
+      "<rect x='112' y='138' width='70' height='50' fill='#fffdf8'" + st + "/><rect x='122' y='154' width='50' height='26' rx='3' fill='#3d5b64'/><circle cx='126' cy='145' r='3' fill='" + INK + "'/><circle cx='138' cy='145' r='3' fill='" + INK + "'/>" +
+      "<rect x='26' y='110' width='50' height='16' rx='3' fill='#3d5b64'" + st + "/><path d='M76 116 H100' stroke='" + INK + "' stroke-width='4' stroke-linecap='round'/>";
+    if(k === "high") s += "<g fill='#9aa5b1' stroke='" + INK + "' stroke-width='2' opacity='.95'><circle cx='140' cy='120' r='12'/><circle cx='156' cy='104' r='15'/><circle cx='136' cy='92' r='12'/><circle cx='160' cy='80' r='10'/></g><text x='170' y='22' " + FD + " font-size='13' font-weight='900' fill='#d2401f'>BEEP BEEP</text>";
+    if(k === "mid") s += "<rect x='30' y='98' width='44' height='14' rx='4' fill='#ef7724'" + st + "/><path d='M40 92 Q36 84 42 78 M52 92 Q48 84 54 78 M64 92 Q60 84 66 78' fill='none' stroke='#9aa5b1' stroke-width='2.5' stroke-linecap='round'/>";
+    if(k === "low") s += "<path d='M30 100 H74 Q72 118 52 118 Q32 118 30 100 Z' fill='#fffdf8'" + st + "/><circle cx='42' cy='99' r='3' fill='#ffc247'/><circle cx='52' cy='97' r='3' fill='#ffc247'/><circle cx='62' cy='99' r='3' fill='#ffc247'/>";
+  }
+  if(id === "tue"){
+    s += "<rect width='320' height='190' fill='#eaf6f9'/><rect x='12' y='12' width='176' height='100' fill='#2f5d50'" + st + "/><text x='24' y='32' " + FD + " font-size='12' font-weight='800' fill='#fffdf8'>IDEAS WALL</text>" +
+      "<rect x='24' y='42' width='34' height='30' fill='#ffc247' transform='rotate(-5 41 57)'/><rect x='68' y='46' width='34' height='30' fill='#f6a5a0' transform='rotate(4 85 61)'/><rect x='112' y='40' width='34' height='30' fill='#a7d8c9' transform='rotate(-3 129 55)'/>" +
+      "<rect x='0' y='150' width='200' height='40' fill='#d6c9b6'" + st + "/>";
+    if(k === "mid") s += "<g transform='rotate(6 150 92)'><rect x='130' y='76' width='44' height='32' fill='#ef7724' stroke='" + INK + "' stroke-width='2'/><path d='M140 92 Q150 84 160 92 Q150 100 140 92 Z M160 92 L166 87 V97 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='1.5'/></g>";
+    if(k === "high") s += "<text x='14' y='138' " + FD + " font-size='18' font-weight='900' fill='#d2401f'>SHARKS!!</text><path d='M100 132 L112 116 L118 132 Z' fill='#9aa5b1' stroke='" + INK + "' stroke-width='2'/>";
+    if(k === "low") s += "<path d='M30 150 Q20 120 50 118 Q80 116 74 150 Z' fill='#7b4b8f'" + st + "/><text x='14' y='138' " + FF + " font-size='11' fill='" + INK + "'>beanbags won</text>";
+  }
+  if(id === "wed"){
+    s += "<rect width='320' height='190' fill='#fdeedd'/><path d='M8 46 H186 M8 92 H186' stroke='" + INK + "' stroke-width='4'/>" +
+      "<g fill='#e0a050' stroke='" + INK + "' stroke-width='2'><ellipse cx='26' cy='38' rx='14' ry='8'/><ellipse cx='58' cy='38' rx='14' ry='8'/><ellipse cx='90' cy='38' rx='14' ry='8'/><ellipse cx='26' cy='84' rx='14' ry='8'/><ellipse cx='58' cy='84' rx='14' ry='8'/></g>" +
+      "<rect x='112' y='96' width='12' height='60' fill='#9aa5b1'" + st + "/><path d='M100 96 H170 V108 H100 Z' fill='#bfc7cf'" + st + "/><path d='M118 130 H170 Q168 156 144 156 Q120 156 118 130 Z' fill='#e9edf0'" + st + "/><rect x='96' y='156' width='84' height='10' fill='#9aa5b1'" + st + "/>" +
+      "<rect x='14' y='120' width='54' height='62' rx='8' fill='#fffdf8'" + st + "/><text x='41' y='155' text-anchor='middle' " + FD + " font-size='11' font-weight='800' fill='" + INK + "'>FLOUR</text>";
+    if(k === "high") s += "<g fill='#fffdf8' stroke='#d6c9b6' stroke-width='2'><circle cx='140' cy='118' r='22'/><circle cx='168' cy='98' r='20'/><circle cx='118' cy='96' r='18'/><circle cx='150' cy='76' r='16'/><circle cx='186' cy='122' r='14'/></g>";
+    if(k === "mid") s += "<rect x='130' y='170' width='60' height='10' fill='#9aa5b1'" + st + "/><g fill='#f0c070' stroke='" + INK + "' stroke-width='1.5'><ellipse cx='142' cy='166' rx='8' ry='5' transform='rotate(-10 142 166)'/><ellipse cx='160' cy='166' rx='7' ry='5'/><ellipse cx='177' cy='166' rx='8' ry='4' transform='rotate(12 177 166)'/></g>";
+    if(k === "low") s += "<rect x='186' y='20' width='6' height='160' fill='#a77ab9'/><text x='120' y='186' " + FF + " font-size='10' fill='" + INK + "'>the door</text>";
+  }
+  if(id === "thu"){
+    s += "<rect width='320' height='190' fill='#e3f3f8'/><rect x='6' y='14' width='190' height='54' rx='6' fill='#bfe4f0'" + st + "/><path d='M70 14 V68 M134 14 V68' stroke='" + INK + "' stroke-width='3'/>" +
+      "<rect x='14' y='104' width='70' height='60' rx='8' fill='#7b4b8f'" + st + "/><rect x='14' y='160' width='86' height='14' rx='4' fill='#5c3269'" + st + "/>" +
+      "<circle cx='52' cy='100' r='18' fill='#c68a5e'" + st + " /><path d='M38 92 Q52 78 66 92' fill='#3d5b64' stroke='" + INK + "' stroke-width='2'/><path d='M44 102 Q47 105 50 102 M56 102 Q59 105 62 102' fill='none' stroke='" + INK + "' stroke-width='2'/>" +
+      "<text x='72' y='92' " + FD + " font-size='12' font-weight='800' fill='" + INK + "'>z z z</text><rect x='0' y='176' width='200' height='14' fill='#9aa5b1'/>";
+    if(k === "high") s += "<rect x='142' y='92' width='30' height='50' rx='5' fill='" + INK + "'/><rect x='146' y='98' width='22' height='34' fill='#cfeefa'/><text x='176' y='96' " + FD + " font-size='12' font-weight='900' fill='#d2401f'>LOL?</text><path d='M150 108 L156 116 L164 104' stroke='#d2401f' stroke-width='2' fill='none'/>";
+    if(k === "mid") s += "<rect x='120' y='80' width='70' height='40' rx='14' fill='#fffdf8'" + st + "/><rect x='136' y='92' width='38' height='18' rx='8' fill='#3d5b64'/><circle cx='144' cy='101' r='3' fill='#fffdf8'/><circle cx='166' cy='101' r='3' fill='#ffc247'/>";
+    if(k === "low") s += "<rect x='142' y='92' width='30' height='50' rx='5' fill='" + INK + "'/><rect x='146' y='98' width='22' height='34' fill='#cfeefa'/><path d='M150 106 L164 124 M164 106 L150 124' stroke='#d2401f' stroke-width='3'/>";
+  }
+  if(id === "fri"){
+    s += "<rect width='320' height='190' fill='#f4eaf8'/><path d='M20 190 L36 6 H176 L190 190 Z' fill='#d6c9b6'" + st + "/>" +
+      "<g stroke='" + INK + "' stroke-width='2'><circle cx='60' cy='160' r='7' fill='#ef7724'/><circle cx='96' cy='134' r='6' fill='#007291'/><circle cx='70' cy='108' r='7' fill='#ffc247'/><circle cx='116' cy='88' r='6' fill='#7b4b8f'/><circle cx='84' cy='62' r='7' fill='#2e7d4f'/><circle cx='130' cy='40' r='6' fill='#ef7724'/><circle cx='150' cy='120' r='7' fill='#ffc247'/><circle cx='100' cy='24' r='6' fill='#007291'/></g>" +
+      "<path d='M108 6 V190' stroke='#d2401f' stroke-width='2' stroke-dasharray='6 4'/>";
+    if(k === "mid") s += "<path d='M100 24 V0' stroke='" + INK + "' stroke-width='2.5'/><path d='M100 2 L124 8 L100 14 Z' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><text x='130' y='16' " + FD + " font-size='12' font-weight='900' fill='#2e7d4f'>TOP!</text>";
+    if(k === "high") s += "<rect x='30' y='150' width='110' height='14' rx='4' fill='#3d5b64'" + st + "/><text x='34' y='144' " + FF + " font-size='11' font-weight='700' fill='" + INK + "'>the bench</text>";
+    if(k === "low") s += "<rect x='34' y='120' width='96' height='60' rx='6' fill='" + INK + "'/><rect x='40' y='126' width='84' height='46' fill='#7cc3dd'/><path d='M76 140 L90 149 L76 158 Z' fill='#fffdf8'/>";
+  }
+  var mood = !k ? "neutral" : k === "mid" ? "mid" : k === "low" ? "low" : "oops";
+  s += "<g transform='translate(208 58)'>" + personG(ROBIN, mood) + "</g>";
+  return s + "</svg>";
+}
+function meterSVG(from, to){
+  function tube(x, v, nv, col, lab){
+    return "<rect x='" + x + "' y='12' width='40' height='150' rx='20' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/>" +
+      "<rect class='mfill' x='" + (x + 5) + "' y='17' width='30' height='140' rx='15' fill='" + col + "' data-to='" + (nv / 10) + "' style='transform:scaleY(" + (v / 10) + ")'/>" +
+      "<circle cx='" + (x + 20) + "' cy='162' r='14' fill='#ffc247' stroke='" + INK + "' stroke-width='3'/><text x='" + (x + 20) + "' y='167' text-anchor='middle' " + FD + " font-size='13' font-weight='800' fill='" + INK + "' class='mnum'>" + nv + "</text>" +
+      "<text x='" + (x + 20) + "' y='194' text-anchor='middle' " + FD + " font-size='10' font-weight='800' fill='" + INK + "'>" + lab + "</text>";
+  }
+  return "<svg viewBox='0 0 120 200' role='img' aria-label='Robin feels " + to.c + " out of 10. How it went: " + to.r + " out of 10.'>" + tube(8, from.c, to.c, "#ef7724", "FEELS") + tube(70, from.r, to.r, "#007291", "WENT") + "</svg>";
+}
+function weekChart(){
+  var ser = storySeries(), lab = ["Start", "Mon", "Tue", "Wed", "Thu", "Fri"];
+  function X(i){ return 40 + i * 56 } function Y(v){ return 150 - v * 13 }
+  var s = "<svg viewBox='0 0 340 182' role='img' aria-label='Robin across the week. Feels: " + ser.c.join(", ") + ". How it went: " + ser.r.join(", ") + ".'>";
+  for(var v = 0; v <= 10; v += 5){ s += "<line x1='34' x2='326' y1='" + Y(v) + "' y2='" + Y(v) + "' stroke='#d6c9b6' stroke-width='1.5'/><text x='26' y='" + (Y(v) + 4) + "' text-anchor='end' " + FF + " font-size='10' fill='#3d5b64'>" + v + "</text>" }
+  lab.forEach(function(l, i){ s += "<text x='" + X(i) + "' y='174' text-anchor='middle' " + FF + " font-size='11' fill='" + INK + "'>" + l + "</text>" });
+  [["c", "#ef7724", 0], ["r", "#007291", 3]].forEach(function(p){
+    var pts = ser[p[0]].map(function(v, i){ return X(i) + "," + (Y(v) + (p[0] === "r" ? 2 : -2)) }).join(" ");
+    s += "<polyline points='" + pts + "' fill='none' stroke='" + p[1] + "' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'" + (p[0] === "r" ? " stroke-dasharray='8 5'" : "") + "/>";
+    ser[p[0]].forEach(function(v, i){ s += "<circle cx='" + X(i) + "' cy='" + (Y(v) + (p[0] === "r" ? 2 : -2)) + "' r='5' fill='" + p[1] + "' stroke='" + INK + "' stroke-width='2'/>" });
+  });
+  return s + "</svg>";
+}
+R.story = function(s){
+  var st = S.story, d = dayById(st.day), pk = st.pick[d.id], o = pk ? optByK(d, pk) : null, body = "";
+  body += part(1, "Pick a day");
+  body += "<div class='daytabs'>" + DAYS.map(function(x){ return "<button type='button' class='dayb' data-a='day' data-id='" + x.id + "' data-k='dy_" + x.id + "' aria-pressed='" + (x.id === d.id) + "'>" + (st.pick[x.id] ? "<span class='tk' aria-hidden='true'>&#10003;</span>" : "") + x.day.slice(0, 3) + "<span class='sr'>" + x.day + (st.pick[x.id] ? ", done" : "") + "</span></button>" }).join("") + "</div>";
+  var ser = storySeries(), idx = DAYS.indexOf(d) + 1, to = { c:ser.c[idx], r:ser.r[idx] };
+  var from = meterShown || { c:ser.c[idx - 1], r:ser.r[idx - 1] };
+  body += "<div class='comic'><div class='panelbox'>" + sceneSVG(d.id, pk) + "<div class='caption'><b>" + d.day + " &middot; " + esc(d.place) + "</b>" + esc(d.sit) + "</div></div>" +
+    "<div class='meters'>" + meterSVG(from, to) + "</div></div>";
+  meterShown = to;
+  body += part(2, "What does Robin do?");
+  body += "<div class='choices'>" + d.o.map(function(x, i){ var tr = st.tried[d.id] && st.tried[d.id][x.k]; return "<button type='button' class='choice' data-a='pick' data-v='" + x.k + "' data-k='ch_" + x.k + "' aria-pressed='" + (pk === x.k) + "'><span class='ltr'>" + "ABC".charAt(i) + "</span><span>" + esc(x.t) + "</span>" + (tr && pk !== x.k ? "<span class='tag tri'>tried</span>" : "") + "</button>" }).join("") + "</div>";
+  if(o){
+    var v = VERDICT[o.k];
+    body += "<div class='result pop' aria-live='polite'>" + person(ROBIN, o.k === "mid" ? "mid" : o.k === "low" ? "low" : "oops") + "<div><span class='verdict " + v[1] + "'>" + v[0] + "</span><p>" + esc(o.res) + "</p>" +
+      "<p class='delta'>Feels " + (o.c > 0 ? "+" : "") + o.c + " &middot; How it went " + (o.r > 0 ? "+" : "") + o.r + "</p>" +
+      "<p class='note'>" + (d.id === "thu" && o.k === "mid" ? "Plot twist: here, the confident move was saying no." : v[2]) + "</p></div></div>";
+    var nx = DAYS[DAYS.indexOf(d) + 1];
+    body += "<div class='chipset'><button type='button' class='btn btn-quiet sm' data-a='redo' data-k='redo'>Try a different choice</button>" + (nx ? "<button type='button' class='btn sm' data-a='day' data-id='" + nx.id + "' data-k='next'>On to " + nx.day + "</button>" : "") + "</div>";
+  } else {
+    body += "<p class='note'>No wrong answers. You could even pick the worst one on purpose, just to see.</p>";
+  }
+  var done = DAYS.filter(function(x){ return st.pick[x.id] }).length;
+  body += part(3, "Robin's week so far");
+  if(!done) body += "<p class='note'>Pick a choice for a day or two and the week fills in here.</p>";
+  else {
+    var cnt = { low:0, mid:0, high:0 }; DAYS.forEach(function(x){ if(st.pick[x.id]) cnt[st.pick[x.id]]++ });
+    body += "<div class='weekbox'><div class='legend'><span><i style='background:#ef7724'></i>How Robin feels</span><span><i style='background:#007291'></i>How it went (dashed)</span></div>" + weekChart() +
+      "<div class='strip'>" + DAYS.map(function(x){ var p = st.pick[x.id]; return "<div style='background:" + (p ? (p === "mid" ? "#dff0d6" : p === "low" ? "#cfeffa" : "#fbd9c2") : "#fffdf8") + "'><b>" + x.day.slice(0, 3) + "</b>" + (p ? VERDICT[p][0].replace(" confidence", "") : "not yet") + "</div>" }).join("") + "</div>" +
+      "<p style='margin:0'>" + done + " of 5 days picked: " + cnt.mid + " steady, " + cnt.high + " too much, " + cnt.low + " too little." + (cnt.high && !cnt.mid && !cnt.low ? " Robin felt brilliant all week. Look at the dashed line though." : "") + "</p></div>";
+  }
+  body += part(4, "What did you notice?");
+  body += "<div class='chipset'>" + STORY_NOTICE.map(function(n, i){ return chip("sn" + i, n, st.notice[i], " data-a='notice' data-i='" + i + "'") }).join("") + "</div>";
+  body += "<p style='margin:12px 0 4px'><b>Which day would you change, if any?</b></p><div class='chipset'>" + DAYS.map(function(x){ return chip("cg_" + x.id, x.day, st.change === x.id, " data-a='change' data-v='" + x.id + "'") }).concat([chip("cg_none", "None, I would keep them all", st.change === "none", " data-a='change' data-v='none'")]).join("") + "</div>";
+  body += textBox("story.txt", "Why? (optional)", "I would change Wednesday because...") + starters("story.txt", ["I would change it because", "Too much confidence made Robin", "Too little confidence made Robin", "Feeling confident helped Robin try", "The best choice was"]);
+  return stageShell(s, "Robin is a fictional teenager having a week. You choose what Robin does each day. Watch two meters: how Robin <b>feels</b>, and how things actually <b>went</b>.", body);
+};
+AFTER.story = function(){
+  var fills = document.querySelectorAll("#stageHost .mfill");
+  if(!fills.length) return;
+  var go = function(){ Array.prototype.forEach.call(fills, function(f){ f.style.transform = "scaleY(" + f.dataset.to + ")" }) };
+  if(reduce) go(); else requestAnimationFrame(function(){ requestAnimationFrame(go) });
+};
+ACT.story = function(a){
+  var st = S.story, act = a.dataset.a; tried("story");
+  if(act === "day"){ st.day = a.dataset.id; meterShown = null; return rerender(a.dataset.k === "next" ? "dy_" + a.dataset.id : a.dataset.k) }
+  if(act === "pick"){ st.pick[st.day] = a.dataset.v; (st.tried[st.day] = st.tried[st.day] || {})[a.dataset.v] = true; return rerender(a.dataset.k) }
+  if(act === "redo"){ return rerender("ch_" + (st.pick[st.day] === "low" ? "mid" : "low")) }
+  if(act === "notice"){ st.notice[a.dataset.i] = !st.notice[a.dataset.i]; return rerender(a.dataset.k) }
+  if(act === "change"){ st.change = st.change === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+};
+
+/* ================= STAGE 2: proof jar ================= */
+var SK = { plan:["Planning","#ef7724"], way:["Finding my way","#007291"], talk:["Talking to people","#7b4b8f"], stick:["Sticking at it","#ffc247"], money:["Handling money","#2e7d4f"], care:["Looking after others","#d2401f"], learn:["Learning new stuff","#00a6c9"], change:["Coping with change","#a77ab9"] };
+var SKO = ["plan","way","talk","stick","money","care","learn","change"];
+var PROOF = [
+  ["bus","Got a bus on my own",["way","plan"]],
+  ["food","Made food for someone else",["care","plan"]],
+  ["pay","Paid for something in a shop",["money","talk"]],
+  ["level","Finished a level I was stuck on for ages",["stick","learn"]],
+  ["newplace","Started somewhere new",["change","talk"]],
+  ["pet","Looked after a pet or a younger kid",["care","stick"]],
+  ["fix","Fixed or built something",["learn","stick"]],
+  ["hi","Said hi to someone I did not know",["talk"]],
+  ["save","Saved up for something",["money","stick","plan"]],
+  ["videos","Taught myself something from videos",["learn"]],
+  ["plans","Coped when plans changed at the last minute",["change"]],
+  ["route","Found my way round a new place",["way","change"]],
+  ["door","Answered the door to a delivery driver",["talk"]]
+];
+var CH = [
+  { id:"taster", t:"A work taster day", need:["way","talk","learn","change"] },
+  { id:"open", t:"A college open day on my own", need:["plan","way","talk"] },
+  { id:"lunch", t:"Making my own lunches for a week", need:["plan","money","stick"] },
+  { id:"club", t:"Joining a new club", need:["talk","change","stick"] },
+  { id:"event", t:"Helping at a school event", need:["care","talk","plan"] },
+  { id:"job", t:"A Saturday job", need:["money","talk","stick","learn"] }
+];
+var ownSk = [], lastDrop = null, ownOpen = false;
+function proofById(id){
+  for(var i = 0; i < PROOF.length; i++) if(PROOF[i][0] === id) return PROOF[i];
+  if(id.indexOf("own") === 0){ var o = S.jar.own[+id.slice(3)]; if(o) return [id, o.t, o.sk.length ? o.sk : ["learn"], true] }
+  return null;
+}
+function jarAll(){ return S.jar.items.map(proofById).filter(Boolean) }
+function jarSVG(){
+  var items = jarAll(), s = "<svg viewBox='0 0 220 260' role='img' aria-label='Proof jar with " + items.length + " thing" + (items.length === 1 ? "" : "s") + " in it'>";
+  s += "<path d='M50 40 H170 Q192 40 192 70 V230 Q192 252 170 252 H50 Q28 252 28 230 V70 Q28 40 50 40 Z' fill='#e3f3f8' stroke='" + INK + "' stroke-width='4'/>";
+  items.forEach(function(p, i){
+    var r = Math.floor(i / 7), c = i % 7, x = 54 + c * 19 + (r % 2) * 9, y = 233 - r * 19;
+    if(r % 2 && c === 6) x -= 4;
+    var col = SK[p[2][0]] ? SK[p[2][0]][1] : "#00a6c9";
+    s += "<g class='" + (p[0] === lastDrop && !reduce ? "drop" : "") + "'><circle cx='" + x + "' cy='" + y + "' r='9' fill='" + col + "' stroke='" + INK + "' stroke-width='2.5'/><circle cx='" + (x - 3) + "' cy='" + (y - 3) + "' r='2.5' fill='#fff' opacity='.8'/></g>";
+  });
+  s += "<path d='M40 80 Q38 150 44 220' stroke='#fff' stroke-width='6' stroke-linecap='round' opacity='.7' fill='none'/>";
+  s += "<rect x='58' y='14' width='104' height='28' rx='7' fill='#ef7724' stroke='" + INK + "' stroke-width='4'/><path d='M70 20 V36 M86 20 V36 M102 20 V36 M118 20 V36 M134 20 V36 M150 20 V36' stroke='" + INK + "' stroke-width='1.5' opacity='.5'/>";
+  s += "<g transform='rotate(-4 110 82)'><rect x='60' y='64' width='100' height='38' rx='6' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><text x='110' y='80' text-anchor='middle' " + FD + " font-size='12' font-weight='900' fill='" + INK + "'>PROOF</text><text x='110' y='95' text-anchor='middle' " + FD + " font-size='12' font-weight='900' fill='#ef7724'>I CAN</text></g>";
+  s += "<text x='110' y='160' text-anchor='middle' " + FD + " font-size='" + (items.length ? 30 : 13) + "' font-weight='900' fill='" + INK + "' opacity='.18'>" + (items.length ? items.length : "drop things in") + "</text>";
+  return s + "</svg>";
+}
+function skillCounts(){ var c = {}; jarAll().forEach(function(p){ p[2].forEach(function(k){ (c[k] = c[k] || []).push(p[1]) }) }); return c }
+function jarAdd(id, fromDrag){
+  var j = S.jar, i = j.items.indexOf(id); tried("jar");
+  if(i >= 0 && !fromDrag){ j.items.splice(i, 1); j.top = j.top.filter(function(x){ return x !== id }); lastDrop = null }
+  else if(i < 0){ j.items.push(id); lastDrop = id }
+  rerender("pr_" + id);
+}
+R.jar = function(s){
+  var j = S.jar, body = "";
+  body += "<div class='jargrid'><div>" + part(1, "What have you actually done?");
+  body += "<p>Tap anything that is true for you. It drops into the jar. Small stuff counts. Tap again to take it out.</p><div class='proofs'>" +
+    PROOF.map(function(p){ var on = j.items.indexOf(p[0]) >= 0; return "<button type='button' class='pchip' data-a='proof' data-id='" + p[0] + "' data-drag='p:" + p[0] + "' data-k='pr_" + p[0] + "' aria-pressed='" + on + "'><i style='background:" + SK[p[2][0]][1] + "' aria-hidden='true'></i>" + esc(p[1]) + "</button>" }).join("") +
+    j.own.map(function(o, i){ var id = "own" + i, on = j.items.indexOf(id) >= 0; return "<button type='button' class='pchip' data-a='proof' data-id='" + id + "' data-drag='p:" + id + "' data-k='pr_" + id + "' aria-pressed='" + on + "'><i style='background:" + (SK[o.sk[0]] ? SK[o.sk[0]][1] : "#00a6c9") + "' aria-hidden='true'></i>" + esc(o.t) + " (mine)</button>" }).join("") + "</div>";
+  body += "<details style='margin-top:12px'" + (j.own.length || ownSk.length || ownOpen || j.draft ? " open" : "") + "><summary class='cb' style='display:inline-block;list-style:none'>+ Add one of your own</summary><div style='margin-top:10px'><label class='wrlab' for='ownProof' style='margin-top:0'>Something you have done</label><input class='wr' id='ownProof' data-f='jar.draft' maxlength='60' value='" + esc(j.draft) + "' placeholder='e.g. Got to level 3 in swimming'>" +
+    "<p class='note'>What does it prove? Pick up to three.</p><div class='chipset'>" + SKO.map(function(k){ return chip("os_" + k, SK[k][0], ownSk.indexOf(k) >= 0, " data-a='ownsk' data-v='" + k + "'") }).join("") + "</div>" +
+    "<button type='button' class='btn sm' data-a='addown' data-k='addown'>Drop it in</button><div id='ownFb' aria-live='polite'></div></div></details>";
+  body += "</div><div class='jarwrap' data-drop='jar'>" + jarSVG() + "<p class='note' style='margin:0!important'>" + (j.items.length ? j.items.length + " bit" + (j.items.length === 1 ? "" : "s") + " of proof" : "Empty for now") + "</p></div></div>";
+
+  var cnt = skillCounts();
+  body += part(2, "What your jar proves");
+  body += "<div class='skrow'>" + SKO.map(function(k){ var n = (cnt[k] || []).length; return "<span class='sk" + (n ? "" : " zero") + "'><i style='background:" + SK[k][1] + "'></i>" + SK[k][0] + (n ? " &times;" + n : "") + "</span>" }).join("") + "</div>";
+  if(!j.items.length) body += "<p class='note'>Fill the jar a bit and the skills light up.</p>";
+
+  body += part(3, "Try it against a new challenge");
+  body += "<div class='chipset'>" + CH.map(function(c){ return chip("ch_" + c.id, c.t, j.ch === c.id, " data-a='ch' data-v='" + c.id + "'") }).join("") + "</div>";
+  var ch = CH.filter(function(c){ return c.id === j.ch })[0];
+  if(ch){
+    var have = ch.need.filter(function(k){ return cnt[k] });
+    body += "<div class='slots'>" + ch.need.map(function(k){ var p = cnt[k]; return "<div class='slot " + (p ? "got" : "gap") + "'><b><span style='color:" + SK[k][1] + "' aria-hidden='true'>&#9679;</span> " + SK[k][0] + "</b>" + (p ? "&#10003; Proof: " + esc(p[0]) + (p.length > 1 ? " and " + (p.length - 1) + " more" : "") : "No proof yet. This is the bit to plan for or ask about.") + "</div>" }).join("") + "</div>";
+    body += "<div class='fb " + (have.length === ch.need.length ? "ok" : "tell") + " pop'><b>You have proof for " + have.length + " of " + ch.need.length + ".</b> " + (have.length === ch.need.length ? "You have basically done all the pieces already, just not in one go." : have.length ? "That is most of it. The gaps are where a bit of help or practice goes." : "Nothing yet, and that is fine. Add a few things to the jar and look again.") + "</div>";
+  }
+
+  body += part(4, "Make your Proof I Can card");
+  var pool = jarAll();
+  if(pool.length){ body += "<p class='note'>Star up to three for the card.</p><div class='chipset'>" + pool.map(function(p){ return chip("tp_" + p[0], p[1], j.top.indexOf(p[0]) >= 0, " data-a='top' data-v='" + p[0] + "'") }).join("") + "</div>" }
+  body += textBox("jar.good", "Something I am good at, or feel confident doing", "I am good at...") + starters("jar.good", ["I am good at", "I feel confident when I", "People say I am good at"]);
+  body += textBox("jar.could", "How could feeling confident help you try the new challenge? (optional)", "Feeling confident would help me...") + starters("jar.could", ["Feeling confident would help me", "Because I have already", "I would be more likely to try it if"]);
+  body += "<div id='jarCard'>" + jarCardHTML() + "</div>";
+  return stageShell(s, "Confidence is easier when you have proof. Fill the jar with things you have already done, then see what they prove.", body);
+};
+function jarTop(){ var j = S.jar, t = j.top.filter(function(id){ return j.items.indexOf(id) >= 0 }); if(!t.length) t = j.items.slice(0, 3); return t.map(proofById).filter(Boolean) }
+function jarCardHTML(){
+  var j = S.jar, top = jarTop(), ch = CH.filter(function(c){ return c.id === j.ch })[0];
+  var sent = top.length && ch ? (top[0][3] ? "I have already done this: " + top[0][1] : "I have already " + top[0][1].charAt(0).toLowerCase() + top[0][1].slice(1)) + ". So I reckon I could handle " + ch.t.charAt(0).toLowerCase() + ch.t.slice(1) + "." : "";
+  return "<div class='ticket'><span class='stamp'>PROVEN</span><h4>PROOF I CAN</h4>" +
+    "<b>Things I have done</b>" + (top.length ? "<ul>" + top.map(function(p){ return "<li>" + esc(p[1]) + "</li>" }).join("") + "</ul>" : "<p class='empty'>Drop a few things in the jar.</p>") +
+    "<b>Good at</b><p" + (j.good ? "" : " class='empty'") + " style='margin:2px 0 8px'>" + esc(j.good || "Write something above.") + "</p>" +
+    (sent ? "<div class='big'>" + esc(sent) + "</div>" : "<p class='empty'>Pick a challenge in part 3 and the big sentence appears here.</p>") +
+    (j.could ? "<p style='margin:0'><b>Confidence would help because:</b> " + esc(j.could) + "</p>" : "") + "</div>";
+}
+LIVE.jar = function(){ var c = el("jarCard"); if(c) c.innerHTML = jarCardHTML() };
+AFTER.jar = function(){ lastDrop = null };
+ACT.jar = function(a){
+  var j = S.jar, act = a.dataset.a;
+  if(act === "proof") return jarAdd(a.dataset.id, false);
+  tried("jar");
+  if(act === "ownsk"){ var k = a.dataset.v, i = ownSk.indexOf(k); if(i >= 0) ownSk.splice(i, 1); else if(ownSk.length < 3) ownSk.push(k); ownOpen = true; return rerender(a.dataset.k) }
+  if(act === "addown"){
+    var inp = el("ownProof"), t = inp ? inp.value.trim() : "";
+    if(!t){ el("ownFb").innerHTML = "<div class='fb tell pop'>Type what you did first, then drop it in.</div>"; inp.focus(); return }
+    if(j.own.length >= 8){ el("ownFb").innerHTML = "<div class='fb tell pop'>That is plenty of your own. Outrageous amounts of proof.</div>"; return }
+    j.own.push({ t:t, sk:ownSk.length ? ownSk.slice() : ["learn"] }); var id = "own" + (j.own.length - 1); j.items.push(id); lastDrop = id; ownSk = []; j.draft = ""; ownOpen = true;
+    return rerender("addown");
+  }
+  if(act === "ch"){ j.ch = j.ch === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "top"){ var id2 = a.dataset.v, ix = j.top.indexOf(id2); if(ix >= 0) j.top.splice(ix, 1); else { j.top.push(id2); if(j.top.length > 3) j.top.shift() } return rerender(a.dataset.k) }
+};
+
+/* ================= STAGE 3: the bravery shop ================= */
+var TOOLS = [
+  { id:"rehearse", t:"Practice Run", d:"Say it or do it a few times before it counts." },
+  { id:"steps", t:"Small Steps", d:"Chop a big thing into little bits." },
+  { id:"ask", t:"Ask Someone", d:"Get help, info or company." },
+  { id:"mate", t:"Mate Voice", d:"Talk to yourself like a good mate would." },
+  { id:"prep", t:"Homework Kit", d:"Find out the facts first: where, when, what." },
+  { id:"win", t:"Past Win", d:"Remember something hard you already did." },
+  { id:"pause", t:"Pause Button", d:"Stop, breathe, then decide." },
+  { id:"planb", t:"Plan B", d:"Know what you will do if it goes wrong." }
+];
+function toolById(id){ for(var i = 0; i < TOOLS.length; i++) if(TOOLS[i].id === id) return TOOLS[i]; return null }
+function toolIcon(id){
+  var w = " stroke='" + INK + "' stroke-width='2.5'", s = "<svg viewBox='0 0 60 60' aria-hidden='true'>";
+  if(id === "rehearse") s += "<rect x='22' y='6' width='16' height='26' rx='8' fill='#ef7724'" + w + "/><path d='M16 26 Q16 42 30 42 Q44 42 44 26 M30 42 V52 M20 54 H40' fill='none'" + w + " stroke-linecap='round'/>";
+  if(id === "steps") s += "<rect x='8' y='14' width='44' height='40' rx='6' fill='#ffc247'" + w + "/><path d='M14 48 H24 V40 H32 V32 H40 V24 H48' fill='none'" + w + " stroke-width='3.5'/>";
+  if(id === "ask") s += "<path d='M6 10 H36 V30 H18 L10 38 V30 H6 Z' fill='#7cc3dd'" + w + " stroke-linejoin='round'/><path d='M24 26 H54 V46 H50 V54 L42 46 H24 Z' fill='#fffdf8'" + w + " stroke-linejoin='round'/><text x='21' y='26' text-anchor='middle' " + FD + " font-size='14' font-weight='900' fill='" + INK + "'>?</text>";
+  if(id === "mate") s += "<path d='M30 52 C8 38 4 26 12 16 C20 8 28 12 30 20 C32 12 40 8 48 16 C56 26 52 38 30 52 Z' fill='#d2401f'" + w + " stroke-linejoin='round'/><path d='M22 28 Q30 34 38 28' fill='none' stroke='#fffdf8' stroke-width='3' stroke-linecap='round'/>";
+  if(id === "prep") s += "<rect x='6' y='12' width='36' height='40' fill='#a9d68a'" + w + "/><path d='M12 22 H34 M12 30 H30' stroke='" + INK + "' stroke-width='2'/><circle cx='38' cy='34' r='11' fill='#fffdf8'" + w + " stroke-width='3'/><path d='M46 42 L56 52' stroke='" + INK + "' stroke-width='5' stroke-linecap='round'/>";
+  if(id === "win") s += "<rect x='18' y='6' width='24' height='7' rx='2' fill='#ef7724'" + w + "/><path d='M14 14 H46 Q50 14 50 20 V50 Q50 55 45 55 H15 Q10 55 10 50 V20 Q10 14 14 14 Z' fill='#e3f3f8'" + w + "/><path d='M30 22 L34 32 L44 32 L36 38 L39 48 L30 42 L21 48 L24 38 L16 32 L26 32 Z' fill='#ffc247'" + w + " stroke-width='2' stroke-linejoin='round'/>";
+  if(id === "pause") s += "<circle cx='30' cy='30' r='24' fill='#7b4b8f'" + w + " stroke-width='3'/><rect x='21' y='18' width='6' height='24' rx='2' fill='#fffdf8'/><rect x='33' y='18' width='6' height='24' rx='2' fill='#fffdf8'/>";
+  if(id === "planb") s += "<path d='M30 56 V8' stroke='" + INK + "' stroke-width='4'/><path d='M30 12 H50 L56 18 L50 24 H30 Z' fill='#ffc247'" + w + " stroke-linejoin='round'/><path d='M30 28 H10 L4 34 L10 40 H30 Z' fill='#00a6c9'" + w + " stroke-linejoin='round'/><text x='42' y='22' text-anchor='middle' " + FD + " font-size='10' font-weight='900' fill='" + INK + "'>A</text><text x='18' y='38' text-anchor='middle' " + FD + " font-size='10' font-weight='900' fill='" + INK + "'>B</text>";
+  return s + "</svg>";
+}
+var CUST = [
+  { id:"zara", name:"Zara", look:{ skin:"#8d5a3b", hair:"bun", hc:"#1e130c", top:"#7b4b8f" }, says:"I am reading my poem out at the open evening. My voice goes all wobbly just thinking about it.",
+    fit:{ rehearse:2, steps:1, mate:1, pause:1, ask:1, win:1, prep:0, planb:0 },
+    happy:{ rehearse:"Read it out loud five times at home, then the real one is just number six. Nice." },
+    hint:"Think about what makes a voice steadier: doing it lots before it counts." },
+  { id:"finn", name:"Finn", look:{ skin:"#f2c9a5", hair:"cap", hc:"#ef7724", top:"#2e7d4f" }, says:"I want to go swimming at the leisure centre on my own, but I do not know where anything is.",
+    fit:{ prep:2, ask:2, steps:1, planb:1, win:1, rehearse:0, mate:0, pause:0 },
+    happy:{ prep:"Check the website for times and what to bring. No surprises. Sorted.", ask:"I will ask at reception. They must get asked that all day." },
+    hint:"Finn's worry is not knowing. What gets rid of not knowing?" },
+  { id:"priya", name:"Priya", look:{ skin:"#b07850", hair:"long", hc:"#1e130c", top:"#ef7724" }, says:"My mates want me to decide right now if I am going to the party. My head is spinning.",
+    fit:{ pause:2, mate:1, ask:1, planb:0, rehearse:0, steps:0, prep:0, win:0 },
+    happy:{ pause:"Breathe. Then: give me ten minutes and I will let you know. Calmer already." },
+    hint:"Priya is being rushed. Which tool slows things down?" },
+  { id:"ollie", name:"Ollie", look:{ skin:"#f2c9a5", hair:"curly", hc:"#c0702a", top:"#00a6c9", specs:true }, says:"I start volunteering at the animal rescue on Saturday. I keep thinking I will mess it all up.",
+    fit:{ win:2, mate:2, prep:1, ask:1, steps:1, rehearse:0, pause:0, planb:0 },
+    happy:{ win:"I looked after my nan's dog for a whole week. I can do this.", mate:"If my mate said this, I would tell them: you love animals, you will be fine. So... I will be fine." },
+    hint:"Ollie's head keeps saying \"you will mess up\". What answers that thought?" },
+  { id:"jess", name:"Jess", look:{ skin:"#e8b48c", hair:"short", hc:"#7b4b8f", top:"#ffc247" }, says:"I want to decorate my bedroom, but it feels like a massive job. I do not know where to start.",
+    fit:{ steps:2, ask:1, prep:1, win:1, mate:0, rehearse:0, pause:0, planb:0 },
+    happy:{ steps:"Step one: clear the walls. That is it for today. I can do that." },
+    hint:"Jess is stuck because it all feels huge. What makes huge things smaller?" },
+  { id:"theo", name:"Theo", look:{ skin:"#5e3b26", hair:"short", hc:"#120c08", top:"#d2401f" }, says:"I am getting the bus to the cinema with my cousin. What if the bus does not come?",
+    fit:{ planb:2, prep:2, ask:1, mate:1, win:1, steps:0, rehearse:0, pause:0 },
+    happy:{ planb:"If it does not come in 15 minutes, we get the next one and see the later film. Fine.", prep:"Check the times now and leave early. If one is cancelled, there is still time." },
+    hint:"Theo is worried about one thing going wrong. Which tool is made for exactly that?" }
+];
+var MYDEC = ["Whether to go to a party", "Whether to try a new club", "Asking about a part time job", "Going somewhere new on my own", "Picking a college course", "Speaking up about something that bugs me"];
+R.shop = function(s){
+  var sh = S.shop, c = CUST[sh.cur] || CUST[0], tr = sh.tries[c.id] || [], body = "";
+  body += "<p><span class='pricetag'>Everything free</span> &nbsp;You run the shop. Customers bring a worry to the counter. Hand them the tool that fits best.</p>";
+  body += part(1, "Serve the customers");
+  body += "<div class='custrow'>" + CUST.map(function(x, i){ return chip("cu_" + x.id, (sh.served[x.id] ? "\u2713 " : "") + x.name, i === sh.cur, " data-a='cust' data-i='" + i + "'") }).join("") + "</div>";
+  body += "<div class='counter'>" + person(c.look, sh.served[c.id] ? "mid" : "worried", "cust") + "<div class='say pop'><b>" + esc(c.name) + "</b>" + esc(c.says) + "</div></div>";
+  body += "<div class='shelf'>" + TOOLS.map(function(t){ var g = tr.indexOf(t.id) >= 0; return "<button type='button' class='prod" + (g ? " gave" : "") + (g && c.fit[t.id] === 2 ? " star" : "") + "' data-a='give' data-v='" + t.id + "' data-k='gv_" + t.id + "'>" + toolIcon(t.id) + "<b>" + esc(t.t) + "</b><span>" + esc(t.d) + "</span></button>" }).join("") + "</div>";
+  body += "<div id='shopFb' aria-live='polite'>";
+  var last = tr[tr.length - 1];
+  if(last){
+    var f = c.fit[last], t = toolById(last);
+    if(f === 2) body += "<div class='fb ok pop'><b>" + esc(c.name) + " takes the " + esc(t.t) + ".</b> &ldquo;" + esc(c.happy[last] || "That will help. Cheers.") + "&rdquo;</div>";
+    else if(f === 1) body += "<div class='fb nope pop'><b>That helps a bit.</b> Is there something on the shelf made for this? " + esc(c.hint) + "</div>";
+    else body += "<div class='fb nope pop'><b>Hmm, " + esc(c.name) + " is not sure that fixes this one.</b> " + esc(c.hint) + "</div>";
+    if(f === 2){ var nxt = nextUnserved(); body += "<div class='chipset'>" + (nxt >= 0 ? "<button type='button' class='btn sm' data-a='cust' data-i='" + nxt + "' data-k='nextcust'>Next customer</button>" : "<span class='tag done'>Everyone served</span>") + "</div>" }
+  }
+  body += "</div>";
+  var served = CUST.filter(function(x){ return sh.served[x.id] }).length;
+  body += "<p class='note'>" + served + " of " + CUST.length + " customers served.</p>";
+  body += part(2, "Your own basket");
+  body += "<p>Which tools would you take home for yourself? Pick up to three.</p><div class='chipset'>" + TOOLS.map(function(t){ return chip("bg_" + t.id, t.t, sh.bag.indexOf(t.id) >= 0, " data-a='bag' data-v='" + t.id + "'") }).join("") + "</div>";
+  body += part(3, "Your turn at the counter");
+  body += "<p>Think of a decision coming up for you. Which one is closest?</p><div class='chipset'>" + MYDEC.map(function(x){ return chip("md_" + x, x, sh.dec === x, " data-a='mydec' data-v='" + esc(x) + "'") }).join("") + "</div>";
+  body += "<p style='margin:10px 0 4px'><b>Which tool would you use for it?</b></p><div class='chipset'>" + TOOLS.map(function(t){ return chip("mt_" + t.id, t.t, sh.tool === t.id, " data-a='mytool' data-v='" + t.id + "'") }).join("") + "</div>";
+  body += textBox("shop.how", "How would it help? (optional)", "It would help because...") + starters("shop.how", ["It would help because", "I would feel calmer if", "Last time I tried this", "It helped me when"]);
+  return stageShell(s, "The Bravery Shop sells confidence tools. Well, gives them away. Outrageous business model.", body);
+};
+function nextUnserved(){ var sh = S.shop; for(var k = 1; k <= CUST.length; k++){ var i = (sh.cur + k) % CUST.length; if(!sh.served[CUST[i].id]) return i } return -1 }
+ACT.shop = function(a){
+  var sh = S.shop, act = a.dataset.a; tried("shop");
+  if(act === "cust"){ sh.cur = +a.dataset.i; return rerender(a.dataset.k === "nextcust" ? "cu_" + CUST[sh.cur].id : a.dataset.k) }
+  if(act === "give"){ var c = CUST[sh.cur], t = a.dataset.v, tr = sh.tries[c.id] = sh.tries[c.id] || []; var ix = tr.indexOf(t); if(ix >= 0) tr.splice(ix, 1); tr.push(t); if(c.fit[t] === 2) sh.served[c.id] = true; return rerender(a.dataset.k) }
+  if(act === "bag"){ var v = a.dataset.v, i = sh.bag.indexOf(v); if(i >= 0) sh.bag.splice(i, 1); else { sh.bag.push(v); if(sh.bag.length > 3) sh.bag.shift() } return rerender(a.dataset.k) }
+  if(act === "mydec"){ sh.dec = sh.dec === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "mytool"){ sh.tool = sh.tool === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+};
+
+/* ================= STAGE 4: fake it, plan it, skip it ================= */
+var BINS = {
+  fake:{ t:"Fake it", d:"Safe to try. It is just nerves. Act brave and go." },
+  plan:{ t:"Plan it", d:"Worth doing. Get ready first." },
+  skip:{ t:"Skip it", d:"Risky or not right. No is the brave bit." }
+};
+var BIN_ORDER = ["fake", "plan", "skip"];
+var HINT = {
+  fake:"What is the worst that could actually happen here? Is it dangerous, or just a bit scary?",
+  plan:"Is it actually dangerous, or just new? And is there anything worth checking first?",
+  skip:"Could someone get hurt, or lose something big? Think about that one again."
+};
+var SORTC = [
+  { id:"kick", t:"Asking to join a kickabout in the park", ok:["fake"], why:"Worst case, they say no. The worry is just nerves, so act brave and ask." },
+  { id:"trainers", t:"Wearing the trainers you love, even though nobody else has them", ok:["fake"], why:"Nobody gets hurt. Owning your style is good confident." },
+  { id:"hi", t:"Saying hi to the new person in your group", ok:["fake"], why:"Low risk, and it might make their day. Fake the brave and go." },
+  { id:"train", t:"Getting a train to a city you have never been to", ok:["plan"], why:"Worth doing. Check the times, the ticket and how you get home first." },
+  { id:"dye", t:"Dyeing your hair at home with a box dye", ok:["plan"], why:"Fine to do, but the box says to do a skin allergy test 48 hours before. That is the plan bit." },
+  { id:"interview", t:"Going to an interview for a Saturday job", ok:["plan", "fake"], why:"Plan it: know where it is and what they might ask. Then a bit of fake it on the day helps too." },
+  { id:"river", t:"Jumping in a river on a hot day because your mates are", ok:["skip"], why:"Rivers can be very cold, fast and deeper than they look. Cold water shock is real. Confident no." },
+  { id:"lift", t:"A lift from someone who passed their test last week and wants to show you how fast the car goes", ok:["skip"], why:"Showing off at speed is how crashes happen. Getting out of that one is the brave bit." },
+  { id:"card", t:"Lending your bank card and PIN to a mate \"just for one thing\"", ok:["skip"], why:"Never share your PIN, even with mates. Banks say the same." },
+  { id:"show", t:"Trying out for the school show", ok:["fake", "plan"], why:"Either works. Plan a bit (learn a few lines), then fake the brave on the day." }
+];
+var MYOWN = ["Going to a party", "Trying a new club", "Asking about a part time job", "Going somewhere new on my own", "Trying a food I am not sure about", "Speaking up about something that bugs me"];
+var FEEL = ["Excited", "Nervous but OK", "Calm", "Proud", "Not sure yet", "Relieved"];
+var sortPick = false, sortCur = null, sortMsg = "";
+function doorSVG(b){
+  var w = " stroke='" + INK + "' stroke-width='2.5'";
+  if(b === "fake") return "<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M8 14 Q30 4 52 14 Q54 38 30 54 Q6 38 8 14 Z' fill='#fffdf8'" + w + "/><path d='M16 24 Q21 19 26 24 M34 24 Q39 19 44 24' fill='none'" + w + " stroke-linecap='round'/><path d='M18 34 Q30 48 42 34 Z' fill='" + INK + "'/></svg>";
+  if(b === "plan") return "<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='10' y='8' width='40' height='48' rx='4' fill='#fffdf8'" + w + "/><rect x='22' y='4' width='16' height='8' rx='2' fill='#ffc247'" + w + "/><path d='M16 24 L20 28 L26 20 M16 36 L20 40 L26 32' fill='none' stroke='#2e7d4f' stroke-width='3'/><path d='M30 25 H44 M30 37 H44 M16 48 H38' stroke='" + INK + "' stroke-width='2.5'/></svg>";
+  return "<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M30 54 C14 54 12 40 12 30 V18 Q12 14 16 14 Q20 14 20 18 V28 V12 Q20 8 24 8 Q28 8 28 12 V26 V10 Q28 6 32 6 Q36 6 36 10 V26 V14 Q36 10 40 10 Q44 10 44 14 V36 Q44 54 30 54 Z' fill='#fffdf8'" + w + " stroke-linejoin='round'/></svg>";
+}
+function sortLeft(){ return SORTC.filter(function(c){ return !S.sorter.placed[c.id] }) }
+function sortPlace(id, bin){
+  var so = S.sorter, c = SORTC.filter(function(x){ return x.id === id })[0]; if(!c || !BINS[bin]) return; tried("sorter");
+  if(c.ok.indexOf(bin) >= 0){
+    so.placed[id] = bin; sortPick = false; sortCur = null;
+    sortMsg = "<div class='fb ok pop'><b>" + BINS[bin].t + ".</b> " + esc(c.why) + (c.ok.length > 1 ? " (" + BINS[c.ok.filter(function(b){ return b !== bin })[0]].t + " works here too.)" : "") + "</div>";
+    var left = sortLeft(); rerender(left.length ? "card" : "dr_" + bin);
+  } else {
+    so.wrong[id] = (so.wrong[id] || 0) + 1; sortPick = false;
+    sortMsg = "<div class='fb nope pop'><b>Hmm, maybe not " + BINS[bin].t.toLowerCase() + ".</b> " + HINT[c.ok[0]] + " Have another go.</div>";
+    rerender("dr_" + bin);
+    var cd = el("sortCard"); if(cd && !reduce){ cd.classList.remove("shake"); void cd.offsetWidth; cd.classList.add("shake") }
+  }
+}
+R.sorter = function(s){
+  var so = S.sorter, left = sortLeft(), body = "";
+  if(!sortCur || so.placed[sortCur]) sortCur = left.length ? left[0].id : null;
+  var c = SORTC.filter(function(x){ return x.id === sortCur })[0];
+  body += part(1, "Sort the decisions");
+  body += "<p>Tap the card, then tap a door. Or drag it there.</p>";
+  body += "<div class='deckarea'>" + (c ? "<button type='button' class='dcard pop' id='sortCard' data-a='pickcard' data-k='card' data-drag='s:" + c.id + "' data-touch='yes' aria-pressed='" + sortPick + "'>" + esc(c.t) + "<small>Card " + (SORTC.length - left.length + 1) + " of " + SORTC.length + (sortPick ? " &middot; picked up, now tap a door" : "") + "</small></button>" : "<div class='fb ok' style='align-self:center'><b>All ten sorted.</b> Tap any card in a pile below to have another look.</div>") + "</div>";
+  body += "<div class='doors'>" + BIN_ORDER.map(function(b){ var n = SORTC.filter(function(x){ return so.placed[x.id] === b }).length; return "<button type='button' class='door " + b + "' data-a='door' data-b='" + b + "' data-drop='" + b + "' data-k='dr_" + b + "' aria-label='" + BINS[b].t + ": " + BINS[b].d + "'>" + doorSVG(b) + "<b>" + BINS[b].t + "</b><span class='d'>" + BINS[b].d + "</span><span class='cnt'>" + n + "</span></button>" }).join("") + "</div>";
+  body += "<div id='sortFb' aria-live='polite'>" + sortMsg + "</div>";
+  if(left.length < SORTC.length){
+    body += "<div class='piles'>" + BIN_ORDER.map(function(b){ var inn = SORTC.filter(function(x){ return so.placed[x.id] === b }); return "<div class='pile'><b>" + BINS[b].t + "</b>" + (inn.length ? "<ul>" + inn.map(function(x){ return "<li><button type='button' data-a='unplace' data-id='" + x.id + "' data-k='up_" + x.id + "'>" + esc(x.t) + "</button></li>" }).join("") + "</ul>" : "<p class='note'>Nothing yet</p>") + "</div>" }).join("") + "</div>";
+  }
+  body += part(2, "Now one of yours");
+  body += "<p>Pick a decision you might make soon, or type your own.</p><div class='chipset'>" + MYOWN.map(function(x){ return chip("mo_" + x, x, so.dec === x, " data-a='mydec' data-v='" + esc(x) + "'") }).join("") + "</div>";
+  body += "<label class='wrlab' for='" + fid("sorter.decOwn") + "'>Or my own (optional)</label><input class='wr' id='" + fid("sorter.decOwn") + "' data-f='sorter.decOwn' maxlength='80' value='" + esc(so.decOwn) + "' placeholder='A decision of my own'>";
+  body += "<p style='margin:12px 0 4px'><b>Which door?</b></p><div class='chipset'>" + BIN_ORDER.map(function(b){ return chip("mb_" + b, BINS[b].t, so.bin === b, " data-a='mybin' data-v='" + b + "'") }).join("") + "</div>";
+  body += textBox("sorter.why", "Why that door?", "I picked this because...") + starters("sorter.why", ["I picked this because", "The worst that could happen is", "To plan it, I would", "Saying no is OK because"]);
+  body += "<p style='margin:12px 0 4px'><b>How do you feel about that choice now?</b></p><div class='chipset'>" + FEEL.map(function(x){ return chip("fl_" + x, x, so.feel === x, " data-a='feel' data-v='" + esc(x) + "'") }).join("") + "</div>";
+  return stageShell(s, "Three doors for every decision. <b>Fake it</b> when it is just nerves, <b>plan it</b> when it is worth getting ready, <b>skip it</b> when no is the brave answer.", body);
+};
+AFTER.sorter = function(){ sortMsg = sortMsg.replace(" pop'", "'") };
+ACT.sorter = function(a){
+  var so = S.sorter, act = a.dataset.a; tried("sorter");
+  if(act === "pickcard"){ sortPick = !sortPick; sortMsg = sortPick ? "<div class='fb tell'>Picked up. Now tap a door.</div>" : ""; return rerender("card") }
+  if(act === "door"){ if(!sortCur){ sortMsg = "<div class='fb tell'>All sorted already. Tap a card in a pile to move it.</div>"; return rerender(a.dataset.k) } return sortPlace(sortCur, a.dataset.b) }
+  if(act === "unplace"){ delete so.placed[a.dataset.id]; sortCur = a.dataset.id; sortPick = true; sortMsg = "<div class='fb tell'>Back on top of the pile. Tap a door to put it somewhere.</div>"; return rerender("card") }
+  if(act === "mydec"){ so.dec = so.dec === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "mybin"){ so.bin = so.bin === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+  if(act === "feel"){ so.feel = so.feel === a.dataset.v ? "" : a.dataset.v; return rerender(a.dataset.k) }
+};
+
+/* ================= STAGE 5: rehearsal room ================= */
+var SCN = [
+  { id:"shop", t:"Asking in a shop", lines:[
+      { who:"you", key:"a", opts:["Excuse me,", "Hi, sorry to bother you,", "Hiya,"] },
+      { who:"you", key:"b", opts:["where would I find batteries, please?", "do you sell AA batteries?", "could you point me to the batteries?"] },
+      { who:"them", t:"Aisle 4, by the tills. Oh, wait..." },
+      { who:"curve", t:"Actually, I think we have run out. Sorry.", resp:[["Do you know when you will have more in?", true], ["Is there another shop near here that might have them?", true], ["Say nothing and walk off.", false, "That works, but you leave with no batteries. Is there a question that could still get you some?"]] },
+      { who:"you", key:"c", opts:["Thanks for your help.", "Cheers, thank you.", "Brilliant, thanks."] } ] },
+  { id:"phone", t:"Phoning about a job", lines:[
+      { who:"them", t:"Hello, garden centre, how can I help?" },
+      { who:"you", key:"a", opts:["Hello, my name is NAME.", "Hi, it is NAME here."] },
+      { who:"you", key:"b", opts:["I am calling about the Saturday helper job.", "I saw your advert for a Saturday helper."] },
+      { who:"you", key:"c", opts:["Is it still going?", "Are you still looking for someone?"] },
+      { who:"curve", t:"Yes, it is. Could you come in for a chat on Tuesday at 4?", resp:[["Yes, I can. Where should I come to?", true], ["Can I check and call you back today?", true], ["Hang up, because it was a surprise.", false, "Totally understandable, and you could ring back. Is there something to say that buys you a bit of time?"]] },
+      { who:"you", key:"d", opts:["Thank you, bye.", "Great, thanks for your time."] } ] },
+  { id:"return", t:"Taking something back", lines:[
+      { who:"you", key:"a", opts:["Hi, I would like to return this, please.", "Hello, could I swap this hoodie?"] },
+      { who:"you", key:"b", opts:["It is the wrong size.", "It is too small. I have the receipt."] },
+      { who:"curve", t:"We have not got the bigger size, sorry. Would you like a refund?", resp:[["Yes please, a refund is fine.", true], ["Could you check if another branch has it?", true], ["Say \"whatever\" and leave the hoodie on the counter.", false, "That way you lose the hoodie and the money. What could you ask for instead?"]] },
+      { who:"you", key:"c", opts:["Thanks for sorting it.", "Cheers, thank you."] } ] }
+];
+var SCN_ICON = {
+  shop:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='10' y='20' width='40' height='32' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><path d='M6 20 L12 8 H48 L54 20 Z' fill='#00a6c9' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><rect x='18' y='30' width='8' height='16' rx='2' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/><rect x='30' y='30' width='8' height='16' rx='2' fill='#ffc247' stroke='" + INK + "' stroke-width='2'/></svg>",
+  phone:"<svg viewBox='0 0 60 60' aria-hidden='true'><rect x='18' y='4' width='24' height='52' rx='5' fill='" + INK + "'/><rect x='21' y='10' width='18' height='36' fill='#cfeefa'/><path d='M44 16 Q52 22 44 28 M48 12 Q60 22 48 32' fill='none' stroke='#ef7724' stroke-width='3' stroke-linecap='round'/></svg>",
+  "return":"<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M16 10 L24 6 Q30 12 36 6 L44 10 L54 22 L46 28 L44 24 V54 H16 V24 L14 28 L6 22 Z' fill='#7b4b8f' stroke='" + INK + "' stroke-width='3' stroke-linejoin='round'/><path d='M22 38 H38 M30 30 L22 38 L30 46' fill='none' stroke='#fffdf8' stroke-width='3' stroke-linecap='round'/></svg>"
+};
+var runIdx = -1;
+function rstate(id){ return S.reh.s[id] || (S.reh.s[id] = { pick:{}, curve:null, ctried:[], before:null, after:null, reps:0, how:"" }) }
+function scnById(id){ for(var i = 0; i < SCN.length; i++) if(SCN[i].id === id) return SCN[i]; return SCN[0] }
+function myName(){ var w = getWho(); return w ? w.toUpperCase() : "(your name)" }
+function scriptLines(sc, rs){
+  var out = [];
+  sc.lines.forEach(function(l){
+    if(l.who === "them") out.push({ who:"them", t:l.t });
+    else if(l.who === "curve"){ out.push({ who:"them", t:l.t }); if(rs.curve != null && l.resp[rs.curve][1]) out.push({ who:"you", t:l.resp[rs.curve][0] }) }
+    else out.push({ who:"you", t:(l.opts[rs.pick[l.key] != null ? rs.pick[l.key] : 0]).replace("NAME", myName()) });
+  });
+  return out;
+}
+function scriptReady(sc, rs){ var ok = true; sc.lines.forEach(function(l){ if(l.who === "you" && rs.pick[l.key] == null) ok = false; if(l.who === "curve" && (rs.curve == null || !l.resp[rs.curve][1])) ok = false }); return ok }
+R.reh = function(s){
+  var sc = scnById(S.reh.cur), rs = rstate(sc.id), body = "";
+  body += "<div class='scenetabs'>" + SCN.map(function(x){ var r = S.reh.s[x.id]; return "<button type='button' class='sceneb' data-a='scene' data-id='" + x.id + "' data-k='sc_" + x.id + "' aria-pressed='" + (x.id === sc.id) + "'>" + SCN_ICON[x.id] + esc(x.t) + (r && r.reps ? "<span class='tag' style='display:block;margin:4px auto 0;width:max-content'>run " + r.reps + "&times;</span>" : "") + "</button>" }).join("") + "</div>";
+  body += part(1, "Build your script");
+  body += "<p>Pick the words that sound like you. All of them work.</p><div class='script'>";
+  sc.lines.forEach(function(l){
+    if(l.who === "them") body += "<div class='sline them'><span class='who'>Them</span>" + esc(l.t) + "</div>";
+    else if(l.who === "you") body += "<div class='sline you'><span class='who'>You</span><div class='chipset'>" + l.opts.map(function(o, i){ return chip("ln_" + l.key + i, o.replace("NAME", myName()), rs.pick[l.key] === i, " data-a='line' data-key='" + l.key + "' data-i='" + i + "'") }).join("") + "</div></div>";
+    else {
+      body += "<div class='sline curve'><span class='who'>Curveball!</span>" + esc(l.t) + "</div><div class='sline you'><span class='who'>You</span><div class='chipset'>" + l.resp.map(function(r, i){ return chip("cv_" + i, r[0], rs.curve === i, " data-a='curve' data-i='" + i + "'") }).join("") + "</div>";
+      if(rs.curve != null) body += l.resp[rs.curve][1] ? "<div class='fb ok pop'><b>Nice save.</b> Curveballs happen. Having a line ready means they do not knock you over.</div>" : "<div class='fb nope pop'><b>Hmm.</b> " + esc(l.resp[rs.curve][2]) + "</div>";
+      body += "</div>";
+    }
+  });
+  body += "</div>";
+  var ready = scriptReady(sc, rs);
+  body += part(2, "Rehearse it");
+  if(!ready) body += "<p class='note'>Pick a line for each of your turns, and an answer to the curveball, then the stage opens. (Or peek now, it still works.)</p>";
+  body += "<div class='slide'><label for='rb_before'><b>Before:</b> how confident would you feel saying this for real?</label></div><div class='slide'><input type='range' min='0' max='10' id='rb_before' data-f='reh.s." + sc.id + ".before' value='" + (rs.before != null ? rs.before : 5) + "'><output id='o_before'>" + (rs.before != null ? rs.before : "?") + "</output></div>";
+  var lines = scriptLines(sc, rs);
+  body += "<div class='stagebox'><svg class='curtain' viewBox='0 0 400 60' preserveAspectRatio='none' aria-hidden='true'><path d='M0 0 H400 V30 Q380 50 360 30 Q340 50 320 30 Q300 50 280 30 Q260 50 240 30 Q220 50 200 30 Q180 50 160 30 Q140 50 120 30 Q100 50 80 30 Q60 50 40 30 Q20 50 0 30 Z' fill='#d2401f' stroke='#0a2f38' stroke-width='3'/><circle cx='200' cy='56' r='3' fill='#ffc247'/></svg>";
+  if(runIdx < 0){
+    body += "<div class='cue'><span><span class='whoc'>Rehearsal room</span>Say it out loud, whisper it, or read it in your head. All of them count.</span></div><div class='cuebar'><button type='button' class='btn btn-orange' data-a='run' data-k='run'>Run it" + (rs.reps ? " again" : "") + "</button></div>";
+  } else {
+    var ln = lines[runIdx];
+    body += "<div class='cue' aria-live='polite'><span><span class='whoc'>" + (ln.who === "you" ? "Your line" : "They say") + " &middot; " + (runIdx + 1) + " of " + lines.length + "</span>" + esc(ln.t) + "</span></div><div class='cuebar'>" + (runIdx > 0 ? "<button type='button' class='btn btn-quiet sm' data-a='rback' data-k='rback'>Back</button>" : "") + "<button type='button' class='btn sm' data-a='rnext' data-k='rnext'>" + (runIdx < lines.length - 1 ? "Next line" : "Finish the run") + "</button><button type='button' class='btn btn-quiet sm' data-a='rstop' data-k='rstop'>Stop</button></div>";
+  }
+  body += "</div>";
+  body += "<p>Runs so far: <span class='reps' aria-label='" + rs.reps + " runs'>" + (rs.reps ? new Array(Math.min(rs.reps, 10) + 1).join("&#9733;") : "none yet") + "</span></p>";
+  if(rs.reps){
+    body += "<div class='slide'><label for='rb_after'><b>After:</b> how confident do you feel now?</label></div><div class='slide'><input type='range' min='0' max='10' id='rb_after' data-f='reh.s." + sc.id + ".after' value='" + (rs.after != null ? rs.after : 5) + "'><output id='o_after'>" + (rs.after != null ? rs.after : "?") + "</output></div>";
+    body += "<div id='baBox'>" + baHTML(rs) + "</div>";
+    body += textBox("reh.s." + sc.id + ".how", "How did practising help, if it did? (optional)", "Practising helped because...") + starters("reh.s." + sc.id + ".how", ["Practising helped because", "Now I know what to say if", "It felt less scary when", "It did not help much because"]);
+  }
+  return stageShell(s, "Actors rehearse so the real thing feels like a repeat. Build a script for a real life moment, then run it as many times as you fancy.", body);
+};
+function baHTML(rs){
+  if(rs.before == null || rs.after == null) return "<p class='note'>Move both sliders to compare before and after.</p>";
+  var d = rs.after - rs.before;
+  return "<div class='ba'><b>Before</b><div class='bar'><span style='width:" + rs.before * 10 + "%;background:#7cc3dd'></span></div><b>After</b><div class='bar'><span style='width:" + rs.after * 10 + "%;background:#ef7724'></span></div></div><p class='note'>" + (d > 0 ? "Up " + d + ". Rehearsing did something." : d === 0 ? "No change. That is useful to know too. Another tool might suit this one better." : "Down " + (-d) + ". Fair enough. Sometimes practising shows you the tricky bit, and that is useful too.") + "</p>";
+}
+LIVE.reh = function(t){
+  var rs = rstate(S.reh.cur);
+  if(t.id === "rb_before") el("o_before").textContent = t.value;
+  if(t.id === "rb_after") el("o_after").textContent = t.value;
+  var b = el("baBox"); if(b) b.innerHTML = baHTML(rs);
+};
+ACT.reh = function(a){
+  var sc = scnById(S.reh.cur), rs = rstate(sc.id), act = a.dataset.a; tried("reh");
+  if(act === "scene"){ S.reh.cur = a.dataset.id; runIdx = -1; return rerender(a.dataset.k) }
+  if(act === "line"){ rs.pick[a.dataset.key] = +a.dataset.i; return rerender(a.dataset.k) }
+  if(act === "curve"){ rs.curve = +a.dataset.i; if(rs.ctried.indexOf(rs.curve) < 0) rs.ctried.push(rs.curve); return rerender(a.dataset.k) }
+  if(act === "run"){ runIdx = 0; return rerender("rnext") }
+  if(act === "rnext"){ var n = scriptLines(sc, rs).length; if(runIdx < n - 1){ runIdx++; return rerender("rnext") } runIdx = -1; rs.reps++; return rerender("run") }
+  if(act === "rback"){ if(runIdx > 0) runIdx--; return rerender(runIdx > 0 ? "rback" : "rnext") }
+  if(act === "rstop"){ runIdx = -1; return rerender("run") }
+};
+
+/* ================= STAGE 6: good or risky ================= */
+var GOODT = { checked:"Checked or asked first", listened:"Listened to advice", own:"Own choice, not for show", small:"Started small", plan:"Made a plan" };
+var RISKT = { show:"Showing off", ignored:"Ignored advice or rules", pushed:"Pushed by other people", noplan:"No back up plan", unsafe:"Could end up hurt or unsafe" };
+var SPOT = [
+  { id:"nia", n:"Nia", t:"Nia asks the lifeguard how deep the water is before trying the diving board.", side:"good", tells:["checked"], why:"She still has a go. She just finds out first." },
+  { id:"callum", n:"Callum", t:"Callum does a backflip off a bench because his mates are filming.", side:"risky", tells:["show","pushed","unsafe"], why:"For the camera, no practice, onto concrete. Confidence for the wrong reasons." },
+  { id:"ruby", n:"Ruby", t:"Ruby offers to run the cake stall at the school fair and writes a list of everything she will need.", side:"good", tells:["plan","own"], why:"Brave enough to volunteer, organised enough to make it work." },
+  { id:"jake", n:"Jake", t:"Jake runs across a wet floor, right past the sign, to prove he will not slip.", side:"risky", tells:["show","ignored","unsafe"], why:"The sign is there for a reason. Proving a point is not worth a broken wrist." },
+  { id:"amir", n:"Amir", t:"On his first shift, Amir tells the manager he has never used a till and asks to be shown.", side:"good", tells:["checked","listened"], why:"Saying \"I do not know this yet\" takes real confidence. It also stops mistakes." },
+  { id:"lola", n:"Lola", t:"Lola agrees to meet someone she has only talked to online, on her own, because they seem nice.", side:"risky", tells:["unsafe","noplan","ignored"], why:"People online are not always who they say they are. Tell a trusted adult, take someone with you and meet somewhere public." },
+  { id:"sid", n:"Sid", t:"Sid learns three songs before putting his name down for the open mic night.", side:"good", tells:["small","plan"], why:"Ready enough to enjoy it, without waiting forever to be perfect." },
+  { id:"grace", n:"Grace", t:"Grace skips the training video at her new job because she is \"a quick learner\".", side:"risky", tells:["ignored","noplan"], why:"Being a quick learner is great. Skipping the bit where you learn is not." },
+  { id:"kofi", n:"Kofi", t:"Kofi keeps playing football on a twisted ankle because the team are counting on him.", side:"risky", tells:["pushed","unsafe"], why:"Playing on an injury can turn a small one into a long one. Sitting out is the stronger choice." },
+  { id:"mia", n:"Mia", t:"Mia says no to a lift home with a driver who has been drinking, and rings her dad instead.", side:"good", tells:["own","plan"], why:"Saying no and sorting another way home is about as confident as it gets." }
+];
+var spotSide = null, spotFb = "";
+function spotAvatar(c){
+  var cols = ["#ef7724","#007291","#7b4b8f","#ffc247","#2e7d4f","#d2401f","#00a6c9"], i = SPOT.indexOf(c);
+  var looks = [["bun","#1e130c","#8d5a3b"],["short","#3a2a1e","#f2c9a5"],["long","#c0702a","#f2c9a5"],["spiky","#120c08","#b07850"],["short","#120c08","#8d5a3b"],["long","#3a2a1e","#e8b48c"],["curly","#1e130c","#5e3b26"],["bun","#c0702a","#f2c9a5"],["short","#120c08","#5e3b26"],["long","#1e130c","#b07850"]][i];
+  return person({ skin:looks[2], hair:looks[0], hc:looks[1], top:cols[i % cols.length] }, S.spot.side[c.id] ? (c.side === "good" ? "mid" : "oops") : "neutral");
+}
+R.spot = function(s){
+  var sp = S.spot, c = SPOT[sp.i] || SPOT[0], body = "";
+  body += part(1, "Good confident, or risky confident?");
+  body += "<div class='dots'>" + SPOT.map(function(x, i){ var done = sp.tell[x.id]; return "<button type='button' class='dot" + (done ? " done" : "") + (i === sp.i ? " cur" : "") + "' data-a='goto' data-i='" + i + "' data-k='dot" + i + "' aria-label='Card " + (i + 1) + (done ? ", done" : "") + "'>" + (i + 1) + "</button>" }).join("") + "</div>";
+  body += "<div class='spotcard slidein'>" + spotAvatar(c) + "<p class='st'>" + esc(c.t) + "</p></div>";
+  var gotSide = sp.side[c.id];
+  body += "<div class='sides'><button type='button' class='side good' data-a='side' data-v='good' data-k='sd_good' aria-pressed='" + (gotSide && c.side === "good") + "'><svg viewBox='0 0 60 60' aria-hidden='true'><path d='M30 4 Q42 14 42 34 L36 44 H24 L18 34 Q18 14 30 4 Z' fill='#fffdf8' stroke='" + INK + "' stroke-width='3'/><circle cx='30' cy='24' r='5' fill='#7cc3dd' stroke='" + INK + "' stroke-width='2'/><path d='M24 44 L22 56 L30 50 L38 56 L36 44' fill='#ef7724' stroke='" + INK + "' stroke-width='2.5' stroke-linejoin='round'/></svg>Good confident</button>" +
+    "<button type='button' class='side risky' data-a='side' data-v='risky' data-k='sd_risky' aria-pressed='" + (gotSide && c.side === "risky") + "'><svg viewBox='0 0 60 60' aria-hidden='true'><rect x='14' y='42' width='26' height='14' fill='#ffc247' stroke='" + INK + "' stroke-width='2.5'/><rect x='18' y='28' width='24' height='14' fill='#fffdf8' stroke='" + INK + "' stroke-width='2.5' transform='rotate(6 30 35)'/><rect x='22' y='12' width='22' height='14' fill='#7b4b8f' stroke='" + INK + "' stroke-width='2.5' transform='rotate(16 33 19)'/><path d='M48 10 Q52 14 50 18 M52 24 Q56 26 54 30' fill='none' stroke='" + INK + "' stroke-width='2.5' stroke-linecap='round'/></svg>Risky confident</button></div>";
+  body += "<div id='spotFb' aria-live='polite'>" + spotFb;
+  if(gotSide){
+    var T = c.side === "good" ? GOODT : RISKT;
+    body += "<p style='margin:10px 0 4px'><b>What is the clue?</b> Tap the one that tips it.</p><div class='chipset'>" + Object.keys(T).map(function(k){ return chip("tl_" + k, T[k], sp.tell[c.id] === k, " data-a='tell' data-v='" + k + "'") }).join("") + "</div>";
+    if(sp.tell[c.id]){
+      var more = c.tells.filter(function(k){ return k !== sp.tell[c.id] });
+      body += "<div class='fb ok pop'><b>" + esc(T[sp.tell[c.id]]) + ".</b> " + esc(c.why) + (more.length ? " <span class='note'>Also a clue: " + more.map(function(k){ return T[k].toLowerCase() }).join(", ") + ".</span>" : "") + "</div>";
+      var nx = nextSpot(); body += "<div class='chipset'>" + (nx >= 0 ? "<button type='button' class='btn sm' data-a='goto' data-i='" + nx + "' data-k='nextspot'>Next card</button>" : "<span class='tag done'>All ten spotted</span>") + "</div>";
+    }
+  }
+  body += "</div>";
+  var dn = SPOT.filter(function(x){ return sp.tell[x.id] }).length;
+  body += "<p class='note'>" + dn + " of " + SPOT.length + " spotted.</p>";
+  body += part(2, "Explain it, with an example");
+  body += "<p>Stretch, if you fancy. How can too much confidence, or too little, lead to a poor choice? What does the balance look like? Robin's week has examples too.</p>";
+  body += textBox("spot.ex", "Your explanation", "Too much confidence can make people... For example... Too little confidence can...") + starters("spot.ex", ["Too much confidence can make people", "For example,", "Too little confidence can make people", "The balance is", "Good confident means", "You can tell it is risky when"]);
+  return stageShell(s, "Confidence can be good or risky. Same feeling, very different endings. Spot which is which, then find the clue.", body);
+};
+function nextSpot(){ var sp = S.spot; for(var k = 1; k <= SPOT.length; k++){ var i = (sp.i + k) % SPOT.length; if(!sp.tell[SPOT[i].id]) return i } return -1 }
+AFTER.spot = function(){ spotFb = spotFb.replace(" pop'", "'") };
+ACT.spot = function(a){
+  var sp = S.spot, c = SPOT[sp.i], act = a.dataset.a; tried("spot");
+  if(act === "goto"){ sp.i = +a.dataset.i; spotFb = ""; return rerender(a.dataset.k === "nextspot" ? "sd_good" : a.dataset.k) }
+  if(act === "side"){
+    if(a.dataset.v === c.side){ sp.side[c.id] = true; spotFb = "<div class='fb ok pop'><b>Yes, " + (c.side === "good" ? "good" : "risky") + " confident.</b></div>" }
+    else { sp.miss[c.id] = (sp.miss[c.id] || 0) + 1; spotFb = "<div class='fb nope pop'><b>Have another look.</b> " + (c.side === "good" ? "Is anyone at risk here? Or is " + c.n + " just being sensible about something new?" : "Ask: why is " + c.n + " doing it, and what could happen?") + "</div>" }
+    return rerender(a.dataset.k);
+  }
+  if(act === "tell"){
+    var v = a.dataset.v;
+    if(c.tells.indexOf(v) >= 0){ sp.tell[c.id] = v; spotFb = "" }
+    else { sp.miss[c.id] = (sp.miss[c.id] || 0) + 1; spotFb = "<div class='fb nope pop'><b>Could be, but there is a bigger clue.</b> Look again at exactly what " + c.n + " does.</div>" }
+    return rerender(a.dataset.k);
+  }
+};
+
+/* ================= STAGE 7: my brave bit ================= */
+var BITS = ["Ask a question in a shop", "Try a food I have not had before", "Say hi to someone new", "Put my hand up once", "Make a phone call myself", "Go to a club or group", "Say no to something I do not want to do"];
+var WHERE = ["Home", "School", "Work", "Out and about"];
+var STATUS = [["did", "I did it"], ["imag", "I imagined it"], ["notyet", "Not yet"]];
+var WENT = ["Rough", "Meh", "OK", "Good", "Brilliant"];
+function wentFace(i){ var m = ["low", "worried", "neutral", "mid", "high"][i]; return "<svg viewBox='18 24 64 64' aria-hidden='true'><circle cx='50' cy='57' r='28' fill='" + ["#7cc3dd", "#a7d8c9", "#fff3c9", "#a9d68a", "#ffc247"][i] + "' stroke='" + INK + "' stroke-width='3'/>" + faceBits(m).replace(/<path d='M88 22[^>]*>/, "").replace(/<path d='M80 40[^>]*>/, "") + "</svg>" }
+function misBit(){ var m = S.mis; return m.own ? m.own : m.bit }
+R.mis = function(s){
+  var m = S.mis, body = "";
+  body += part(1, "Pick your brave bit");
+  body += "<p>Something small. Small is the point.</p><div class='chipset'>" + BITS.map(function(x){ return chip("bt_" + x, x, m.bit === x && !m.own, " data-a='bit' data-v='" + esc(x) + "'") }).join("") + "</div>";
+  body += "<label class='wrlab' for='" + fid("mis.own") + "'>Or my own (optional)</label><input class='wr' id='" + fid("mis.own") + "' data-f='mis.own' maxlength='80' value='" + esc(m.own) + "' placeholder='My own brave bit'>";
+  body += "<p style='margin:12px 0 4px'><b>Where?</b></p><div class='chipset'>" + WHERE.map(function(x){ return chip("wh_" + x, x, m.where === x, " data-a='where' data-v='" + x + "'") }).join("") + "</div>";
+  body += "<p style='margin:12px 0 4px'><b>Fake it or plan it?</b> <span class='note'>(If it feels like a skip it, pick a different brave bit.)</span></p><div class='chipset'>" + ["fake", "plan"].map(function(b){ return chip("ty_" + b, BINS[b].t, m.type === b, " data-a='type' data-v='" + b + "'") }).join("") + "</div>";
+  body += part(2, "Pick a tool");
+  var bag = S.shop.bag;
+  body += (bag.length ? "<p class='note'>The ones with a star are in your basket from the bravery shop.</p>" : "") + "<div class='chipset'>" + TOOLS.map(function(t){ return chip("tt_" + t.id, (bag.indexOf(t.id) >= 0 ? "\u2605 " : "") + t.t, m.tool === t.id, " data-a='tool' data-v='" + t.id + "'") }).join("") + "</div>";
+  body += textBox("mis.why", "Why this brave bit, and why this tool?", "I picked it because...") + starters("mis.why", ["I picked it because", "It feels the right size because", "The tool will help because", "I have done something like it before when"]);
+  body += part(3, "Afterwards");
+  body += "<p>Come back after you have tried it. It saves. Imagining it counts too.</p><div class='chipset'>" + STATUS.map(function(x){ return chip("st_" + x[0], x[1], m.status === x[0], " data-a='status' data-v='" + x[0] + "'") }).join("") + "</div>";
+  if(m.status === "did" || m.status === "imag"){
+    body += "<p style='margin:12px 0 4px'><b>How did it go?</b></p><div class='faces'>" + WENT.map(function(x, i){ return "<button type='button' class='faceb' data-a='went' data-v='" + (i + 1) + "' data-k='wt_" + i + "' aria-pressed='" + (m.went === i + 1) + "'>" + wentFace(i) + x + "</button>" }).join("") + "</div>";
+    body += "<p style='margin:12px 0 4px'><b>How did you feel afterwards?</b> Pick any.</p><div class='chipset'>" + FEEL.concat(["Glad it is over", "Want to do it again"]).map(function(x){ return chip("mf_" + x, x, m.feel[x], " data-a='feel' data-v='" + esc(x) + "'") }).join("") + "</div>";
+    body += textBox("mis.help", "Did the tool help? How?", "The tool helped because...") + starters("mis.help", ["The tool helped because", "It did not help much because", "Next time I would use"]);
+    body += textBox("mis.keep", "Next time I would keep... and change...", "Next time I would keep... I would change...") + starters("mis.keep", ["Next time I would keep", "I would change", "I would try a bigger brave bit, like", "I would try it again but"]);
+  } else if(m.status === "notyet"){
+    body += "<div class='fb tell pop'><b>That is fine.</b> The plan is saved. Come back when you have had a go, or not. No rush.</div>";
+  }
+  body += "<div id='misCard'>" + misCardHTML() + "</div>";
+  return stageShell(s, "Your turn. One small brave thing, at home, school, work or out and about. Plan it, try it if you fancy, then look back.", body);
+};
+function misCardHTML(){
+  var m = S.mis, t = toolById(m.tool), bit = misBit(), fl = Object.keys(m.feel).filter(function(k){ return m.feel[k] });
+  function row(k, v){ return "<div class='row'><span>" + k + "</span><span" + (v ? "" : " class='empty'") + ">" + (v ? esc(v) : "not yet") + "</span></div>" }
+  var stamp = m.status === "did" ? "TRIED IT" : m.status === "imag" ? "IMAGINED IT" : m.status === "notyet" ? "COMING SOON" : "PLANNING";
+  return "<div class='ticket mtk'><span class='stamp'>" + stamp + "</span><h4>MY BRAVE BIT</h4>" +
+    row("Brave bit", bit) + row("Where", m.where) + row("Type", m.type ? BINS[m.type].t : "") + row("Tool", t ? t.t : "") + row("Why", m.why) +
+    (m.went ? row("How it went", WENT[m.went - 1]) : "") + (fl.length ? row("Felt", fl.join(", ")) : "") + (m.help ? row("Tool helped?", m.help) : "") + (m.keep ? row("Next time", m.keep) : "") + "</div>";
+}
+LIVE.mis = function(){ var c = el("misCard"); if(c) c.innerHTML = misCardHTML() };
+ACT.mis = function(a){
+  var m = S.mis, act = a.dataset.a, v = a.dataset.v; tried("mis");
+  if(act === "bit"){ m.bit = (m.bit === v && !m.own) ? "" : v; m.own = ""; return rerender(a.dataset.k) }
+  if(act === "where" || act === "type" || act === "tool" || act === "status"){ m[act] = m[act] === v ? "" : v; return rerender(a.dataset.k) }
+  if(act === "went"){ m.went = +v; return rerender(a.dataset.k) }
+  if(act === "feel"){ m.feel[v] = !m.feel[v]; return rerender(a.dataset.k) }
+};
+
+/* ================= send ================= */
+function summary(){
+  var o = [], w = getWho().toUpperCase();
+  o.push("Target: I can explore ways of building confidence in personal abilities and decisions at home and at school or work. I can recognise how confidence can influence actions both good and bad.");
+  if(WHO[w]) o.push("", "My milestones (" + w + "):", "1. " + WHO[w].full[0], "2. " + WHO[w].full[1]);
+  var triedList = STAGES.filter(function(s){ return S.seen[s.id] }).map(function(s){ return s.t });
+  o.push("", "Stages tried: " + (triedList.length ? triedList.join(", ") : "none yet"));
+  function head(n){ var ms = MILESTONE_STAGES[n], st = stageById(ms.id); o.push("", "== " + n + ". " + st.t + " ==", "(Covers: " + ms.covers.join(", ") + ")") }
+
+  if(S.seen.story){
+    head(1); var st = S.story, ser = storySeries();
+    DAYS.forEach(function(d){ var p = st.pick[d.id]; if(p){ var op = optByK(d, p), others = Object.keys(st.tried[d.id] || {}).filter(function(k){ return k !== p }); o.push(d.day + " (" + d.place + "): " + op.t + " [" + VERDICT[p][0].toLowerCase() + "]" + (others.length ? " Also tried: " + others.map(function(k){ return VERDICT[k][0].toLowerCase() }).join(", ") : "")) } });
+    o.push("End of week meters: feels " + ser.c[5] + "/10, how it went " + ser.r[5] + "/10.");
+    var nt = STORY_NOTICE.filter(function(n, i){ return st.notice[i] }); if(nt.length) o.push("I noticed: " + nt.join("; "));
+    if(st.change) o.push("Day I would change: " + (st.change === "none" ? "none" : dayById(st.change).day));
+    if(st.txt) o.push("Why: " + st.txt);
+  }
+  if(S.seen.jar){
+    head(2); var j = S.jar, all = jarAll();
+    o.push("In my proof jar (" + all.length + "): " + (all.map(function(p){ return p[1] + (p[3] ? " (my own)" : "") }).join("; ") || "nothing yet"));
+    var cnt = skillCounts(); var sk = SKO.filter(function(k){ return cnt[k] }).map(function(k){ return SK[k][0] + " x" + cnt[k].length }); if(sk.length) o.push("Skills it proves: " + sk.join(", "));
+    var ch = CH.filter(function(c){ return c.id === j.ch })[0];
+    if(ch){ var have = ch.need.filter(function(k){ return cnt[k] }), gaps = ch.need.filter(function(k){ return !cnt[k] }); o.push("Challenge: " + ch.t + ". Proof for " + have.length + " of " + ch.need.length + " skills" + (gaps.length ? " (gaps: " + gaps.map(function(k){ return SK[k][0].toLowerCase() }).join(", ") + ")" : "") + ".") }
+    var tp = jarTop(); if(tp.length) o.push("On my card: " + tp.map(function(p){ return p[1] }).join("; "));
+    if(j.good) o.push("Something I am good at: " + j.good);
+    if(j.could) o.push("How confidence would help: " + j.could);
+  }
+  if(S.seen.shop){
+    head(3); var sh = S.shop;
+    CUST.forEach(function(c){ var tr = sh.tries[c.id]; if(tr && tr.length){ var best = tr.filter(function(t){ return c.fit[t] === 2 }); o.push(c.name + ": tried " + tr.length + " tool(s)" + (best.length ? ", served with " + best.map(function(t){ return toolById(t).t }).join(" and ") : ", not served yet")) } });
+    if(sh.bag.length) o.push("My basket: " + sh.bag.map(function(t){ return toolById(t).t }).join(", "));
+    if(sh.dec || sh.tool) o.push("My decision: " + (sh.dec || "not picked") + ". Tool: " + (sh.tool ? toolById(sh.tool).t : "not picked"));
+    if(sh.how) o.push("How it would help: " + sh.how);
+  }
+  if(S.seen.sorter){
+    head(4); var so = S.sorter;
+    var pl = SORTC.filter(function(c){ return so.placed[c.id] });
+    o.push("Sorted " + pl.length + " of " + SORTC.length + " decisions" + (pl.length ? ": " + pl.map(function(c){ return c.t + " > " + BINS[so.placed[c.id]].t + (so.wrong[c.id] ? " (after " + so.wrong[c.id] + " hint" + (so.wrong[c.id] > 1 ? "s" : "") + ")" : "") }).join("; ") : ""));
+    var dec = so.decOwn || so.dec; if(dec) o.push("My decision: " + dec + (so.bin ? " > " + BINS[so.bin].t : ""));
+    if(so.why) o.push("Why: " + so.why);
+    if(so.feel) o.push("How I feel about it: " + so.feel);
+  }
+  if(S.seen.reh){
+    head(5);
+    SCN.forEach(function(sc){ var rs = S.reh.s[sc.id]; if(!rs) return; var any = Object.keys(rs.pick).length || rs.curve != null || rs.reps; if(!any) return;
+      o.push(sc.t + ": ran it " + rs.reps + " time(s)." + (rs.before != null ? " Confidence before " + rs.before + "/10" : "") + (rs.after != null ? ", after " + rs.after + "/10." : ""));
+      if(rs.curve != null){ var cl = sc.lines.filter(function(l){ return l.who === "curve" })[0]; o.push("  Curveball answer: " + cl.resp[rs.curve][0] + (rs.ctried.length > 1 ? " (" + rs.ctried.length + " tries)" : "")) }
+      if(scriptReady(sc, rs)) o.push("  My script: " + scriptLines(sc, rs).filter(function(l){ return l.who === "you" }).map(function(l){ return l.t }).join(" / "));
+      if(rs.how) o.push("  How practising helped: " + rs.how);
+    });
+  }
+  if(S.seen.spot){
+    head(6); var sp = S.spot;
+    var dn = SPOT.filter(function(c){ return sp.tell[c.id] });
+    o.push("Spotted " + dn.length + " of " + SPOT.length + ".");
+    dn.forEach(function(c){ var T = c.side === "good" ? GOODT : RISKT; o.push("  " + c.n + ": " + c.side + " confident, clue: " + T[sp.tell[c.id]].toLowerCase() + (sp.miss[c.id] ? " (after " + sp.miss[c.id] + " hint" + (sp.miss[c.id] > 1 ? "s" : "") + ")" : "")) });
+    if(sp.ex) o.push("My explanation: " + sp.ex);
+  }
+  if(S.seen.mis){
+    head(7); var m = S.mis, fl = Object.keys(m.feel).filter(function(k){ return m.feel[k] });
+    if(misBit()) o.push("My brave bit: " + misBit() + (m.where ? " (" + m.where + ")" : "") + (m.type ? ", " + BINS[m.type].t.toLowerCase() : ""));
+    if(m.tool) o.push("Tool: " + toolById(m.tool).t);
+    if(m.why) o.push("Why: " + m.why);
+    if(m.status) o.push("Status: " + STATUS.filter(function(x){ return x[0] === m.status })[0][1]);
+    if(m.went) o.push("How it went: " + WENT[m.went - 1]);
+    if(fl.length) o.push("Felt afterwards: " + fl.join(", "));
+    if(m.help) o.push("Did the tool help: " + m.help);
+    if(m.keep) o.push("Next time: " + m.keep);
+  }
+  var rel = {}; Object.keys(MILESTONE_STAGES).forEach(function(n){ var ms = MILESTONE_STAGES[n]; if(S.seen[ms.id]) ms.covers.forEach(function(c){ rel[c.split(" ")[0]] = 1 }) });
+  if(Object.keys(rel).length) o.push("", "Milestones this work links to: " + ORDER.filter(function(k){ return rel[k] }).join(", ") + (WHO[w] ? (rel[w] ? " (including mine)" : "") : ""));
+  return o.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Brave Bit", filename:"the-brave-bit", getText:summary });
+el("sendHost").addEventListener("input", function(e){ if(e.target.id === "b5who"){ drawWho(); drawMap() } });
+
+/* two tap start again */
+var armT = null;
+el("restartBtn").onclick = function(){
+  var b = el("restartBtn");
+  if(!b.classList.contains("arm")){ b.classList.add("arm"); b.textContent = "Sure? Tap again to clear this page"; clearTimeout(armT); armT = setTimeout(function(){ b.classList.remove("arm"); b.textContent = "Start again (clears everything on this page)" }, 4000); return }
+  clearTimeout(armT); b.classList.remove("arm"); b.textContent = "Start again (clears everything on this page)";
+  S = blank(); ownSk = []; ownOpen = false; sortPick = false; sortCur = null; sortMsg = ""; spotFb = ""; runIdx = -1; meterShown = null;
+  save(); drawMap(); renderStage(); window.scrollTo({ top:0 });
+};
+
+drawWho(); drawMap(); if(S.stage) renderStage();
+window.__bravebit = { S:function(){ return S }, summary:summary, open:openStage, MILESTONE_STAGES:MILESTONE_STAGES, WHO:WHO, SORTC:SORTC, SPOT:SPOT, CUST:CUST };
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny Town - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* Tiny Town only. Shell, cards and buttons come from style.css */
+:root{--grass:#8cc56a;--grass-deep:#4f9a46;--road:#5d6d71;--brick:#c8553d;--okbg:#dff5ea;--okline:#2f9e6e;--nobg:#fff1e0;--sky:#bfe6f2}
+.tt{max-width:1000px;margin:0 auto}
+.tt .card{cursor:default}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hidden{display:none!important}
+
+/* hero town */
+.town{margin:6px 0 18px;border:3px solid var(--ink);border-radius:var(--r-alt);overflow:hidden;box-shadow:var(--lift);background:var(--sky)}
+.town svg{display:block;width:100%;height:auto}
+.bld{cursor:pointer}
+.bld:focus{outline:none}
+.bld:focus-visible .bring{stroke:var(--plum);stroke-width:6}
+.bld .win{fill:#3d5b64;transition:fill .4s}
+.bld.tried .win{fill:var(--yellow)}
+.bld .bstar{opacity:0}
+.bld.best .bstar{opacity:1}
+.bld:hover .bbody{transform:translateY(-4px)}
+.bbody{transition:transform .2s}
+.drive{animation:drive 14s linear infinite}
+@keyframes drive{from{transform:translateX(-120px)}to{transform:translateX(1120px)}}
+.drive2{animation:drive2 19s linear infinite}
+@keyframes drive2{from{transform:translateX(1120px) scaleX(-1)}to{transform:translateX(-120px) scaleX(-1)}}
+.birdbob{animation:bob 2.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center bottom}
+@keyframes bob{from{transform:rotate(-4deg)}to{transform:rotate(4deg) translateY(-2px)}}
+
+/* who and intro */
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.cb{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.86rem;letter-spacing:.06em;
+  border:var(--border) solid var(--ink);border-radius:var(--r-pill);background:var(--white);color:var(--ink);
+  padding:8px 14px;cursor:pointer;box-shadow:2px 3px 0 rgba(10,47,56,.25);transition:transform .12s}
+.cb:hover{transform:translateY(-2px) rotate(-1deg)}
+.cb[aria-pressed="true"]{background:var(--orange);box-shadow:3px 4px 0 var(--ink)}
+.fill-ink .cb{border-color:var(--paper)}
+.msout{margin-top:12px}
+.msout ol{margin:6px 0 0;padding-left:22px}
+.msout li{margin-bottom:6px;font-size:.95rem}
+.howlist{margin:8px 0 0;padding-left:20px;font-size:.95rem}
+.howlist li{margin-bottom:6px}
+
+/* stage tiles */
+.wps{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 26px}
+.wp{position:relative;text-align:left;font-family:var(--body);color:var(--ink);background:var(--white);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:12px;cursor:pointer;
+  box-shadow:3px 4px 0 rgba(10,47,56,.2);transition:transform .14s,box-shadow .14s;min-height:118px}
+.wp:nth-child(odd){transform:rotate(-.6deg)}
+.wp:nth-child(even){transform:rotate(.5deg)}
+.wp:hover{transform:translateY(-3px) rotate(0);box-shadow:5px 7px 0 var(--ink)}
+.wp[aria-current="true"]{background:var(--yellow);box-shadow:5px 6px 0 var(--ink)}
+.wp svg{width:36px;height:36px;display:block;margin-bottom:4px}
+.wp .wn{position:absolute;top:8px;right:10px;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.3rem;opacity:.35}
+.wp b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.98rem;line-height:1.1}
+.wp small{display:block;font-size:.78rem;line-height:1.3;margin-top:3px;color:var(--body-tint)}
+.wp .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:3px 8px}
+.tag-start{background:var(--plum);color:var(--paper)}
+.tag-tried{background:var(--okline);color:#fff}
+
+/* stage shell */
+.stage{margin:0 0 20px;scroll-margin-top:12px}
+.stagehead{display:flex;align-items:center;gap:14px;padding:16px 18px;border:var(--border) solid var(--ink);border-radius:var(--r-alt);box-shadow:var(--lift);margin-bottom:14px}
+.stagehead .stn{flex:none;width:52px;height:52px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);display:grid;place-items:center;
+  font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.6rem;color:var(--ink)}
+.stagehead h2{font-variation-settings:"wdth" 122,"wght" 900;font-size:clamp(1.5rem,4.4vw,2.3rem);line-height:1}
+.stagehead p{margin:4px 0 0;font-size:.95rem}
+.stagehead .tag{margin-left:6px;vertical-align:middle}
+.sh-orange{background:linear-gradient(150deg,var(--orange),var(--orange-deep))}
+.sh-bright{background:linear-gradient(150deg,var(--bright),var(--teal));color:var(--paper)}
+.sh-yellow{background:linear-gradient(150deg,var(--yellow),var(--yellow-deep))}
+.sh-plum{background:linear-gradient(150deg,var(--plum),#5c3269);color:var(--paper)}
+.sh-teal{background:linear-gradient(150deg,var(--teal),#005a73);color:var(--paper)}
+.sh-grass{background:linear-gradient(150deg,var(--grass),var(--grass-deep))}
+.sh-brick{background:linear-gradient(150deg,#e07a5f,var(--brick));color:var(--paper)}
+
+.learn{border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:#fdf6d8;margin:0 0 14px;box-shadow:var(--lift)}
+.learn summary{cursor:pointer;list-style:none;padding:13px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.learn summary::-webkit-details-marker{display:none}
+.learn summary b{font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 800;font-size:1.05rem}
+.learn summary span{font-size:.85rem;color:var(--body-tint)}
+.learn summary::before{content:"+";font-family:var(--display);font-weight:900;font-size:1.2rem;width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;background:var(--white);flex:none}
+.learn[open] summary::before{content:"\2212"}
+.lbody{padding:0 18px 16px}
+.lbody p{margin:8px 0;max-width:60ch}
+.lfig{text-align:center;margin:6px 0}
+.lfig svg{width:100%;max-width:560px;height:auto}
+
+.try{margin:0 0 14px}
+.try h3{font-size:1.3rem;margin-bottom:4px}
+.try .lead{margin:0 0 10px;font-size:.98rem;max-width:62ch}
+.stagefoot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin:6px 0 30px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;align-items:center}
+.chiprow .lab{font-size:.85rem;color:var(--body-tint)}
+
+/* question runner */
+.qtag{margin:0 0 4px;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);min-height:1em}
+.qtext{font-size:1.18rem;line-height:1.45;margin:0 0 10px}
+.qtext .big{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:clamp(1.7rem,7vw,2.5rem);letter-spacing:.02em;display:inline-block;margin:2px 0}
+.qvis{margin:0 0 10px}
+.qvis svg{max-width:100%;height:auto}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.arow input,.fin{width:150px;font-size:1.3rem;font-family:var(--body);text-align:center;padding:10px 8px;border:3px solid var(--ink);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.uchips{display:inline-flex;gap:6px;align-items:center}
+.uchip{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.9rem;border:2px solid var(--ink);background:var(--white);border-radius:10px;padding:8px 11px;cursor:pointer;min-width:44px;color:var(--ink)}
+.uchip[aria-pressed="true"]{background:var(--yellow)}
+.usuf{font-weight:700}
+.qnav{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.fb{border-radius:14px;margin:8px 0 0}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);border:2px solid var(--okline);padding:12px 14px}
+.fb.no{background:var(--nobg);border:2px dashed var(--orange);padding:12px 14px}
+.fb.info{background:#eaf6fa;border:2px solid var(--bright);padding:12px 14px}
+.mth{margin-top:8px;background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:10px 12px;font-size:1rem;line-height:1.6}
+.mthk{display:block;font-family:var(--display);font-variation-settings:"wght" 800;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--plum);margin-bottom:2px}
+.runner{position:relative}
+.spark{position:absolute;width:12px;height:12px;border-radius:3px;pointer-events:none;animation:sparkup .9s ease-out forwards}
+@keyframes sparkup{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(260deg)}}
+.helper{font-size:.95rem;background:#fdf6d8;border:2px dashed var(--yellow-deep);border-radius:12px;padding:7px 12px;display:inline-block}
+
+/* model maker */
+.objs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin:0 0 12px}
+.obj{border:3px solid var(--ink);border-radius:16px 13px 17px 12px;background:var(--white);padding:8px 6px 6px;cursor:pointer;font-family:var(--body);color:var(--ink);text-align:center;box-shadow:2px 3px 0 rgba(10,47,56,.2);transition:transform .15s}
+.obj svg{width:44px;height:40px;display:block;margin:0 auto}
+.obj b{display:block;font-size:.82rem;line-height:1.15}
+.obj small{display:block;font-size:.72rem;color:var(--body-tint)}
+.obj[aria-pressed="true"]{background:var(--yellow);transform:translateY(-3px) rotate(-1.5deg);box-shadow:4px 5px 0 var(--ink)}
+.obj.made{border-style:solid;background:#e7f6dd}
+.obj.made[aria-pressed="true"]{background:var(--yellow)}
+.bench svg{display:block;width:100%;max-width:640px;height:auto;border:3px solid var(--ink);border-radius:18px;background:#fdf1dc}
+.mdl{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.mdl.grow{animation:growin .7s cubic-bezier(.3,1.5,.5,1)}
+@keyframes growin{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.mdl{transform-box:fill-box;transform-origin:50% 100%}
+.mread{font-size:1.05rem;margin:8px 0 0;min-height:1.4em}
+
+/* plan grid */
+.planwrap{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:14px;align-items:start}
+.pgrid{display:grid;grid-template-columns:repeat(12,1fr);border:3px solid var(--ink);border-radius:14px;overflow:hidden;background:#e4f0d6;touch-action:manipulation}
+.pc{position:relative;aspect-ratio:1/1;border:0;border-right:1px solid #b8d2a2;border-bottom:1px solid #b8d2a2;background:transparent;padding:0;cursor:pointer;min-width:0;color:var(--ink)}
+.pc.road{background:#cfd6d4}
+.pc:hover{background:rgba(255,194,71,.45)}
+.pc:focus-visible{outline:3px solid var(--plum);outline-offset:-3px;z-index:2}
+.pc svg{position:absolute;inset:6%;width:88%;height:88%}
+.pc.fixed{cursor:default}
+.pc.ring{box-shadow:inset 0 0 0 3px var(--orange)}
+.pc.target{animation:pulseb 1.2s ease-in-out infinite}
+@keyframes pulseb{0%,100%{box-shadow:inset 0 0 0 2px var(--plum)}50%{box-shadow:inset 0 0 0 5px var(--plum)}}
+.palette{display:flex;flex-direction:column;gap:8px}
+.palette .lab{font-size:.85rem;color:var(--body-tint)}
+.pal{display:flex;align-items:center;gap:8px;font-family:var(--body);font-size:.92rem;border:3px solid var(--ink);border-radius:14px;background:var(--white);padding:6px 10px;cursor:pointer;color:var(--ink);text-align:left}
+.pal svg{width:30px;height:30px;flex:none}
+.pal[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 4px 0 var(--ink)}
+.pal small{display:block;font-size:.72rem;color:var(--body-tint)}
+.scalebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.92rem;margin:8px 0 0}
+.scalebar svg{width:220px;height:auto}
+.pkey{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 0;font-size:.88rem}
+.pkey span{display:inline-flex;align-items:center;gap:4px}
+.pkey svg{width:24px;height:24px}
+.roadkey{display:inline-block;width:20px;height:14px;background:#cfd6d4;border:1px solid #9aa9ad}
+.brief{background:var(--white);border:3px solid var(--ink);border-left:10px solid var(--orange);border-radius:0 14px 14px 0;padding:10px 14px;margin:0 0 10px;font-size:1.05rem}
+
+/* map */
+.mapbox{position:relative;border:3px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:var(--lift);background:#eef3dc}
+.mapbox svg{display:block;width:100%;height:auto}
+.jn{cursor:pointer}
+.jn:focus{outline:none}
+.jn .jring{opacity:0}
+.jn:focus-visible .jring{opacity:1;stroke:var(--plum)}
+.jn.next .jring{opacity:1;animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{0%,100%{stroke-width:3}50%{stroke-width:7}}
+.legs{margin:8px 0;padding:0;list-style:none}
+.legs li{display:inline-block;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;margin:0 6px 6px 0;font-size:.9rem}
+.routegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0}
+.routegrid label{display:block;font-weight:700;font-size:.92rem;margin-bottom:4px}
+.routegrid .fin{width:100%;max-width:200px}
+.saved{margin:10px 0 0;padding:0;list-style:none}
+.saved li{background:#eaf6fa;border:2px solid var(--bright);border-radius:12px;padding:6px 12px;margin:0 0 6px;font-size:.92rem}
+
+/* cafe */
+.counter{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;align-items:start}
+.menuboard{background:#21403f;color:#fdf6d8;border:6px solid #8a5a33;border-radius:12px;padding:12px 14px;box-shadow:var(--lift);font-size:.92rem}
+.menuboard h4{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 800;color:var(--yellow);font-size:1.05rem;margin:0 0 6px;letter-spacing:.06em}
+.menuboard ul{margin:0;padding:0;list-style:none}
+.menuboard li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed rgba(253,246,216,.3);padding:3px 0}
+.menuboard small{display:block;margin-top:6px;opacity:.8}
+.ticket{background:#fffdf8;border:2px solid var(--ink);border-radius:6px 6px 0 0;padding:10px 12px 14px;margin:0 0 10px;position:relative;box-shadow:3px 4px 0 rgba(10,47,56,.18);
+  background-image:linear-gradient(135deg,transparent 75%,var(--paper) 75%),linear-gradient(225deg,transparent 75%,var(--paper) 75%);background-size:12px 12px;background-position:bottom left;background-repeat:repeat-x}
+.ticket .tray{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 6px}
+.ticket .tray svg{width:38px;height:38px}
+.ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0 0}
+.way{text-align:left;font-family:var(--body);font-size:.95rem;line-height:1.5;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:16px 12px 16px 12px;padding:10px 12px;cursor:pointer;box-shadow:2px 3px 0 rgba(10,47,56,.2)}
+.way b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:.95rem;color:var(--plum)}
+.way[aria-pressed="true"]{background:var(--yellow);box-shadow:4px 5px 0 var(--ink)}
+.waysq{font-family:var(--display);font-variation-settings:"wght" 800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:12px 0 0;color:var(--teal)}
+.streak{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 0;min-height:24px}
+.streak span{width:22px;height:22px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);display:inline-block;animation:coin .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes coin{from{transform:translateY(-14px) scale(.4)}to{transform:none}}
+.why textarea{width:100%;min-height:100px;font-family:var(--body);font-size:1.02rem;padding:12px;border:3px solid var(--ink);border-radius:14px;background:#fffdfb;color:var(--ink)}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.starters button{font-family:var(--body);font-size:.88rem;border:2px dashed var(--teal);background:var(--white);border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+
+/* toy shop */
+.shelf svg{display:block;width:100%;height:auto;border:3px solid var(--ink);border-radius:16px;background:#fbe3d2}
+.ptag{cursor:pointer}
+.ptag:focus{outline:none}
+.ptag:focus-visible .ptb{stroke:var(--plum);stroke-width:5}
+.ptag.on .ptb{fill:var(--yellow)}
+.tagwords{font-size:1.08rem;background:var(--white);border:2px solid var(--ink);border-left:10px solid var(--plum);border-radius:0 12px 12px 0;padding:8px 12px;margin:10px 0}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--white);font-size:1.4rem;font-weight:700;cursor:pointer;color:var(--ink)}
+.stepper output{min-width:46px;text-align:center;font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.5rem}
+.receipt{font-family:"Courier New",monospace;background:#fffdf8;border:2px dashed var(--ink);border-radius:8px;padding:10px 14px;margin:10px 0 0;max-width:420px;font-size:1rem;line-height:1.6}
+.receipt .rl{display:block;opacity:0;transform:translateY(-6px);animation:rin .35s forwards}
+@keyframes rin{to{opacity:1;transform:none}}
+.crates{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 8px;max-width:420px}
+.crates i{display:inline-block;width:16px;height:14px;background:var(--orange);border:2px solid var(--ink);border-radius:3px}
+.crates.h i{width:6px;height:10px;border-width:1px}
+
+/* enlargement */
+.growwrap{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;align-items:start}
+.orig svg{width:100%;height:auto;display:block;border:3px solid var(--ink);border-radius:14px;background:var(--white)}
+.egrid{display:grid;grid-template-columns:repeat(12,1fr);border:3px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--white);touch-action:none;max-width:480px}
+.ec{aspect-ratio:1/1;border:0;border-right:1px solid #cfdfe3;border-bottom:1px solid #cfdfe3;background:transparent;padding:0;cursor:pointer;min-width:0}
+.ec.on{background:var(--orange)}
+.ec.ghost{background-image:radial-gradient(circle,var(--plum) 0 22%,transparent 24%)}
+.ec.on.ghost{background-image:none}
+.ec:focus-visible{outline:3px solid var(--plum);outline-offset:-3px;position:relative;z-index:2}
+.paintbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pick3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+.pick3 button{border:3px solid var(--ink);border-radius:16px;background:var(--white);padding:8px;cursor:pointer;color:var(--ink);font-family:var(--display);font-variation-settings:"wght" 800;font-size:1rem}
+.pick3 button svg{display:block;width:100%;height:auto;margin-bottom:4px}
+.pick3 button.yes{background:var(--okbg);border-color:var(--okline)}
+.pick3 button.nope{background:var(--nobg);border-style:dashed}
+
+/* mistakes */
+.note{background:#fffbea;border:3px solid var(--ink);border-radius:6px 18px 6px 18px;padding:14px 16px 12px 46px;position:relative;box-shadow:var(--lift)}
+.note::before{content:"";position:absolute;left:30px;top:0;bottom:0;width:2px;background:#ef9a9a}
+.note h4{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.1rem;margin:0 0 6px}
+.nline{display:block;width:100%;text-align:left;font-family:var(--body);font-size:1.05rem;color:var(--ink);background:transparent;border:2px solid transparent;border-radius:10px;padding:4px 8px;margin:0 0 2px;cursor:pointer;line-height:1.6}
+.nline:hover{border-color:var(--line);background:rgba(255,255,255,.6)}
+.nline[aria-pressed="true"]{border-color:var(--orange);background:#fff1e0}
+.nline.fixed{border-color:var(--okline);background:var(--okbg)}
+.stamp{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;letter-spacing:.1em;text-transform:uppercase;border:3px solid var(--okline);color:var(--okline);border-radius:8px;padding:2px 10px;transform:rotate(-6deg);animation:stampin .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stampin{from{transform:rotate(-6deg) scale(2);opacity:0}to{transform:rotate(-6deg) scale(1);opacity:1}}
+
+.sendwrap{margin-top:6px}
+.restart{margin:6px 0 0}
+.sumprev{white-space:pre-wrap;font-size:.85rem;background:var(--white);border:2px dashed var(--line);border-radius:12px;padding:10px 12px;max-height:240px;overflow:auto;margin:10px 0 0}
+
+@media (max-width:760px){
+  .planwrap,.counter,.growwrap{grid-template-columns:minmax(0,1fr)}
+  .palette{flex-direction:row;flex-wrap:wrap}
+  .palette .lab{width:100%}
+  .orig{max-width:220px}
+}
+@media (max-width:600px){
+  #busBox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #busBox svg{min-width:520px}
+  .swipehint{display:block}
+}
+.swipehint{display:none;font-size:.9rem;margin:0 0 6px}
+@media (max-width:420px){
+  .stagehead{padding:12px}
+  .stagehead .stn{width:42px;height:42px;font-size:1.3rem}
+  .qtext{font-size:1.06rem}
+  .objs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pick3{gap:6px}
+  .note{padding-left:38px}
+  .note::before{left:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  .drive,.drive2,.birdbob,.jn.next .jring,.pc.target{animation:none!important}
+  .receipt .rl{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <!-- stage icons -->
+  <symbol id="i-saw" viewBox="0 0 40 40"><path d="M4 26l22-16 6 8-22 16z" fill="#c9d3d6" stroke="#0a2f38" stroke-width="2.4" stroke-linejoin="round"/><path d="M6 30l2 3 3-2 2 3 3-2 2 3 3-2" fill="none" stroke="#0a2f38" stroke-width="1.6"/><rect x="26" y="4" width="10" height="16" rx="4" transform="rotate(35 31 12)" fill="#ef7724" stroke="#0a2f38" stroke-width="2.4"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 40 40"><rect x="4" y="5" width="32" height="30" rx="3" fill="#e4f0d6" stroke="#0a2f38" stroke-width="2.4"/><path d="M12 5v30M20 5v30M28 5v30M4 15h32M4 25h32" stroke="#8cb87a" stroke-width="1.4"/><rect x="12" y="15" width="8" height="10" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><rect x="28" y="25" width="8" height="10" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="i-map" viewBox="0 0 40 40"><path d="M3 9l11 4 12-4 11 4v22l-11-4-12 4-11-4z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.2" stroke-linejoin="round"/><path d="M6 30l8-8 6 4 8-10 6 4" fill="none" stroke="#007291" stroke-width="2.6" stroke-linejoin="round"/><circle cx="6" cy="30" r="2.6" fill="#ef7724"/><circle cx="34" cy="20" r="2.6" fill="#ef7724"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 40 40"><path d="M14 4c-3 4 3 5 0 9M21 4c-3 4 3 5 0 9" fill="none" stroke="#9aa9ad" stroke-width="2.2" stroke-linecap="round"/><path d="M6 16h24v8a12 12 0 0 1-24 0z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.6"/><path d="M30 19h3a4 4 0 0 1 0 8h-3" fill="none" stroke="#0a2f38" stroke-width="2.6"/><rect x="2" y="34" width="32" height="3" rx="1.5" fill="#0a2f38"/></symbol>
+  <symbol id="i-kite" viewBox="0 0 40 40"><path d="M20 3l11 13-11 16-11-16z" fill="#ef7724" stroke="#0a2f38" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 3v29M9 16h22" stroke="#0a2f38" stroke-width="1.6"/><path d="M20 32c-3 3 3 4 0 7" fill="none" stroke="#7b4b8f" stroke-width="2.4"/></symbol>
+  <symbol id="i-grow" viewBox="0 0 40 40"><rect x="3" y="24" width="9" height="9" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><rect x="17" y="6" width="20" height="27" fill="#ef7724" stroke="#0a2f38" stroke-width="2.4"/><path d="M13 22l4-4" stroke="#0a2f38" stroke-width="2.4"/><path d="M17 18v-4M17 18h-4" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 40 40"><rect x="5" y="4" width="24" height="32" rx="3" fill="#fffbea" stroke="#0a2f38" stroke-width="2.2"/><path d="M9 12h16M9 18h16M9 24h10" stroke="#9cc3d1" stroke-width="2"/><path d="M24 30l10-14 4 3-10 14-5 1z" fill="#ffc247" stroke="#0a2f38" stroke-width="2" stroke-linejoin="round"/><circle cx="13" cy="24" r="5" fill="none" stroke="#d75f10" stroke-width="2.2"/></symbol>
+
+  <!-- real world objects for the model maker. Each viewBox has the shape of the thing. -->
+  <symbol id="o-house" viewBox="0 0 40 40"><path d="M3 18L20 3l17 15z" fill="#c8553d" stroke="#0a2f38" stroke-width="2"/><rect x="6" y="18" width="28" height="22" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><rect x="17" y="27" width="7" height="13" fill="#7b4b8f"/><rect x="9" y="22" width="6" height="6" fill="#bfe6f2" stroke="#0a2f38" stroke-width="1.2"/><rect x="26" y="22" width="6" height="6" fill="#bfe6f2" stroke="#0a2f38" stroke-width="1.2"/></symbol>
+  <symbol id="o-tree" viewBox="0 0 30 50"><rect x="12" y="30" width="6" height="20" fill="#8a5a33"/><circle cx="15" cy="17" r="13" fill="#4f9a46" stroke="#0a2f38" stroke-width="2"/><circle cx="10" cy="13" r="3" fill="#8cc56a"/></symbol>
+  <symbol id="o-bus" viewBox="0 0 60 24"><rect x="1" y="1" width="58" height="18" rx="4" fill="#e0402a" stroke="#0a2f38" stroke-width="2"/><path d="M5 5h8v6H5zM16 5h8v6h-8zM27 5h8v6h-8zM38 5h8v6h-8zM49 5h7v8h-7z" fill="#bfe6f2"/><circle cx="13" cy="20" r="3.6" fill="#0a2f38"/><circle cx="47" cy="20" r="3.6" fill="#0a2f38"/></symbol>
+  <symbol id="o-car" viewBox="0 0 50 22"><path d="M2 16v-5l7-1 7-8h16l8 8 8 1v5z" fill="#007291" stroke="#0a2f38" stroke-width="2" stroke-linejoin="round"/><path d="M18 4h6v6h-11zM27 4h4l6 6h-10z" fill="#bfe6f2"/><circle cx="13" cy="17" r="4.4" fill="#0a2f38"/><circle cx="38" cy="17" r="4.4" fill="#0a2f38"/></symbol>
+  <symbol id="o-lamp" viewBox="0 0 16 60"><rect x="6.5" y="8" width="3" height="52" fill="#3d5b64"/><path d="M2 8h12l-2-6H4z" fill="#ffc247" stroke="#0a2f38" stroke-width="1.6"/></symbol>
+  <symbol id="o-person" viewBox="0 0 20 50"><circle cx="10" cy="6" r="5.4" fill="#f2c9a5" stroke="#0a2f38" stroke-width="1.6"/><path d="M4 13h12v17H4z" fill="#ef7724" stroke="#0a2f38" stroke-width="1.6"/><path d="M6 30h3v20H6zM11 30h3v20h-3z" fill="#0a2f38"/></symbol>
+  <symbol id="o-dog" viewBox="0 0 40 36"><circle cx="31" cy="9" r="7" fill="#f7f2e9" stroke="#0a2f38" stroke-width="1.6"/><circle cx="34" cy="8" r="1.4" fill="#0a2f38"/><ellipse cx="19" cy="19" rx="13" ry="7" fill="#f7f2e9" stroke="#0a2f38" stroke-width="1.6"/><circle cx="4" cy="13" r="3.4" fill="#f7f2e9" stroke="#0a2f38" stroke-width="1.4"/><path d="M10 24v12M15 25v11M24 25v11M29 24v12" stroke="#0a2f38" stroke-width="2.6"/></symbol>
+  <symbol id="o-bench" viewBox="0 0 50 22"><rect x="1" y="2" width="48" height="5" rx="1" fill="#c08a52" stroke="#0a2f38" stroke-width="1.6"/><rect x="1" y="10" width="48" height="5" rx="1" fill="#c08a52" stroke="#0a2f38" stroke-width="1.6"/><path d="M5 15v7M45 15v7" stroke="#0a2f38" stroke-width="3"/></symbol>
+
+  <!-- plan pieces -->
+  <symbol id="p-hall" viewBox="0 0 40 40"><path d="M4 14L20 4l16 10z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/><rect x="6" y="14" width="28" height="22" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><path d="M11 18v14M17 18v14M23 18v14M29 18v14" stroke="#0a2f38" stroke-width="2"/><circle cx="20" cy="10" r="2.4" fill="#ffc247"/></symbol>
+  <symbol id="p-fountain" viewBox="0 0 40 40"><ellipse cx="20" cy="30" rx="16" ry="7" fill="#00a6c9" stroke="#0a2f38" stroke-width="2"/><path d="M20 28V12M20 12c-6 0-8 6-10 10M20 12c6 0 8 6 10 10" fill="none" stroke="#00a6c9" stroke-width="3" stroke-linecap="round"/></symbol>
+  <symbol id="p-library" viewBox="0 0 40 40"><rect x="5" y="8" width="30" height="28" fill="#007291" stroke="#0a2f38" stroke-width="2"/><path d="M10 14h5v16h-5zM17 14h5v16h-5zM24 14h5v16h-5z" fill="#ffc247" stroke="#0a2f38" stroke-width="1.2"/></symbol>
+  <symbol id="p-school" viewBox="0 0 40 40"><rect x="4" y="12" width="32" height="24" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><path d="M20 3v9" stroke="#0a2f38" stroke-width="2"/><path d="M20 3h9l-2 3 2 3h-9" fill="#ffc247" stroke="#0a2f38" stroke-width="1.4"/><rect x="16" y="24" width="8" height="12" fill="#fffdf8"/></symbol>
+  <symbol id="p-stop" viewBox="0 0 40 40"><path d="M10 4v34" stroke="#0a2f38" stroke-width="3"/><circle cx="10" cy="10" r="7" fill="#e0402a" stroke="#0a2f38" stroke-width="2"/><rect x="18" y="16" width="18" height="14" rx="2" fill="#bfe6f2" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="p-bakery" viewBox="0 0 40 40"><rect x="5" y="14" width="30" height="22" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><path d="M5 14h30l-3-8H8z" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><ellipse cx="20" cy="26" rx="9" ry="5" fill="#d8a45c" stroke="#0a2f38" stroke-width="1.6"/></symbol>
+  <symbol id="p-band" viewBox="0 0 40 40"><path d="M4 16L20 4l16 12z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/><path d="M8 16v16M32 16v16M20 16v16" stroke="#0a2f38" stroke-width="2.4"/><rect x="4" y="32" width="32" height="5" fill="#c08a52" stroke="#0a2f38" stroke-width="1.6"/></symbol>
+  <symbol id="p-post" viewBox="0 0 40 40"><rect x="12" y="6" width="16" height="30" rx="8" fill="#e0402a" stroke="#0a2f38" stroke-width="2"/><rect x="15" y="14" width="10" height="3" fill="#0a2f38"/></symbol>
+  <symbol id="p-play" viewBox="0 0 40 40"><path d="M6 36L14 6h4l8 30" fill="none" stroke="#0a2f38" stroke-width="2.4"/><path d="M14 10l20 22" stroke="#ef7724" stroke-width="5" stroke-linecap="round"/></symbol>
+  <symbol id="p-bike" viewBox="0 0 40 40"><circle cx="10" cy="26" r="7" fill="none" stroke="#0a2f38" stroke-width="2.6"/><circle cx="30" cy="26" r="7" fill="none" stroke="#0a2f38" stroke-width="2.6"/><path d="M10 26l7-12h10l3 12M17 14l5 12" fill="none" stroke="#007291" stroke-width="2.6"/></symbol>
+  <symbol id="p-pond" viewBox="0 0 40 40"><path d="M6 22c0-9 10-12 18-10s12 8 9 14-12 8-19 6-8-5-8-10z" fill="#00a6c9" stroke="#0a2f38" stroke-width="2"/><path d="M14 20q3-3 6 0" fill="none" stroke="#fffdf8" stroke-width="2"/></symbol>
+  <symbol id="p-tree" viewBox="0 0 40 40"><rect x="18" y="24" width="4" height="12" fill="#8a5a33"/><circle cx="20" cy="17" r="12" fill="#4f9a46" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="p-home" viewBox="0 0 40 40"><path d="M4 18L20 5l16 13z" fill="#c8553d" stroke="#0a2f38" stroke-width="2"/><rect x="8" y="18" width="24" height="18" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><rect x="17" y="26" width="6" height="10" fill="#7b4b8f"/></symbol>
+  <symbol id="p-benchs" viewBox="0 0 40 40"><rect x="4" y="14" width="32" height="5" fill="#c08a52" stroke="#0a2f38" stroke-width="1.6"/><rect x="4" y="22" width="32" height="5" fill="#c08a52" stroke="#0a2f38" stroke-width="1.6"/><path d="M8 27v8M32 27v8" stroke="#0a2f38" stroke-width="3"/></symbol>
+
+  <!-- cafe food. Nut free, every one. -->
+  <symbol id="f-tea" viewBox="0 0 40 40"><path d="M7 14h22v9a11 11 0 0 1-22 0z" fill="#c08a52" stroke="#0a2f38" stroke-width="2.4"/><path d="M29 17h3a4 4 0 0 1 0 8h-3" fill="none" stroke="#0a2f38" stroke-width="2.4"/></symbol>
+  <symbol id="f-choc" viewBox="0 0 40 40"><path d="M9 10h20l-2 26H11z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2.4" stroke-linejoin="round"/><ellipse cx="19" cy="10" rx="10" ry="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="f-toast" viewBox="0 0 40 40"><path d="M8 36V16a12 10 0 1 1 24 0v20z" fill="#d8a45c" stroke="#0a2f38" stroke-width="2.4"/><path d="M13 34V18a7 6 0 1 1 14 0v16z" fill="#f6dfae"/></symbol>
+  <symbol id="f-flap" viewBox="0 0 40 40"><path d="M4 28l6-14h26l-6 14z" fill="#e2b45a" stroke="#0a2f38" stroke-width="2.4" stroke-linejoin="round"/><path d="M4 28h26v6H4zM30 28l6-14v6l-6 14z" fill="#c8923a" stroke="#0a2f38" stroke-width="2"/></symbol>
+  <symbol id="f-fruit" viewBox="0 0 40 40"><path d="M6 18h28l-4 18H10z" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.4"/><circle cx="14" cy="16" r="5" fill="#e0402a"/><circle cx="24" cy="14" r="6" fill="#ffc247"/><circle cx="20" cy="18" r="4" fill="#4f9a46"/></symbol>
+  <symbol id="f-soup" viewBox="0 0 40 40"><path d="M4 18h32a16 14 0 0 1-32 0z" fill="#ef7724" stroke="#0a2f38" stroke-width="2.4"/><path d="M28 6l-6 14" stroke="#9aa9ad" stroke-width="3" stroke-linecap="round"/></symbol>
+  <symbol id="f-juice" viewBox="0 0 40 40"><path d="M11 10h18l-2 26H13z" fill="#ffc247" stroke="#0a2f38" stroke-width="2.4"/><path d="M22 10l5-8" stroke="#e0402a" stroke-width="2.6"/></symbol>
+  <symbol id="f-cake" viewBox="0 0 40 40"><path d="M9 20h22l-3 16H12z" fill="#ef7724" stroke="#0a2f38" stroke-width="2.2"/><path d="M8 21c0-9 24-9 24 0z" fill="#f7c6d9" stroke="#0a2f38" stroke-width="2.2"/><circle cx="20" cy="10" r="3" fill="#e0402a"/></symbol>
+
+  <symbol id="jaybird" viewBox="0 0 64 52">
+    <path d="M4 34l20-8 3 9-21 7z" fill="#1f2326"/>
+    <ellipse cx="32" cy="30" rx="15" ry="11.5" fill="#c99a86"/>
+    <path d="M22 25c8-6 18-5 22 2-4 6-14 8-22 5z" fill="#8f7469"/>
+    <path d="M30 24l10 1-1 6-10-1z" fill="#2f7fd6"/>
+    <circle cx="46" cy="19" r="9" fill="#d6ad97"/>
+    <path d="M54 18l8 2-8 3z" fill="#3a3f44"/>
+    <circle cx="49.5" cy="18" r="2.6" fill="#cfe7f7"/><circle cx="50" cy="18" r="1.3" fill="#111"/>
+    <path d="M30 41l-1 7M36 41l1 7" stroke="#b07c64" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+</defs>
+</svg>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap tt">
+
+  <div class="hero hero-sm">
+    <h1>Tiny <span class="accent">Town</span></h1>
+    <div class="line">
+      <span class="chip">Maths</span>
+      <p>Build a model village. Shrink things to scale, plan the street, run the cafe and the toy shop. Seven buildings, any order.</p>
+    </div>
+  </div>
+
+  <div class="town">
+    <svg id="townSvg" viewBox="0 0 1000 300" role="group" aria-label="Tiny Town. Each building is a stage. Tap a building to go in.">
+      <defs><linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd8ec"/><stop offset="1" stop-color="#fde6b3"/></linearGradient></defs>
+      <rect width="1000" height="300" fill="url(#skyG)"/>
+      <circle cx="780" cy="56" r="34" fill="#ffc247"/><circle cx="780" cy="56" r="48" fill="#ffc247" opacity=".25"/>
+      <g fill="#fffdf8" opacity=".9"><ellipse cx="150" cy="44" rx="44" ry="13"/><ellipse cx="178" cy="36" rx="28" ry="13"/><ellipse cx="610" cy="34" rx="38" ry="11"/></g>
+      <path d="M0 150 Q160 100 330 140 T660 128 T1000 140 V300 H0z" fill="#8cc56a" opacity=".55"/>
+      <rect x="0" y="232" width="1000" height="68" fill="#4f9a46"/>
+      <rect x="0" y="246" width="1000" height="38" fill="#5d6d71"/>
+      <path d="M0 265 H1000" stroke="#fffdf8" stroke-width="3" stroke-dasharray="22 18"/>
+      <g id="blds"></g>
+      <g class="drive"><use href="#o-car" x="0" y="250" width="70" height="31"/></g>
+      <g class="drive2"><use href="#o-bus" x="0" y="246" width="96" height="38"/></g>
+      <g transform="translate(916 84)"><g class="birdbob"><use href="#jaybird" x="-24" y="-38" width="48" height="40"/></g></g>
+    </svg>
+  </div>
+
+  <div class="board">
+    <div class="card w7 fill-yellow" id="whoCard">
+      <span class="kicker">Who is this?</span>
+      <h3>Pick your initials, if you like</h3>
+      <p>It shows your two steps and the buildings that suit them. Every building stays open to everyone.</p>
+      <div class="whochips" id="whoChips" role="group" aria-label="Your initials">
+        <button type="button" class="cb" data-who="JT" aria-pressed="false">JT</button>
+        <button type="button" class="cb" data-who="LW" aria-pressed="false">LW</button>
+        <button type="button" class="cb" data-who="EGW" aria-pressed="false">EGW</button>
+        <button type="button" class="cb" data-who="LP" aria-pressed="false">LP</button>
+        <button type="button" class="cb" data-who="LC" aria-pressed="false">LC</button>
+        <button type="button" class="cb" data-who="HK" aria-pressed="false">HK</button>
+        <button type="button" class="cb" data-who="" aria-pressed="false">Just looking</button>
+      </div>
+      <div class="msout" id="msOut" aria-live="polite"></div>
+    </div>
+    <div class="card w5 fill-ink">
+      <span class="kicker">How it works</span>
+      <h3>Seven buildings, any order</h3>
+      <ul class="howlist">
+        <li>Tap a building in the town, or a tile below.</li>
+        <li>Each one has a small <b>learn a bit</b> card, then things to make and try.</li>
+        <li><b>Show me how</b> is always there. Skip anything that is not for you.</li>
+        <li>Windows light up yellow for places you have tried. It saves as you go.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wps" id="wps" aria-label="Buildings in Tiny Town"></div>
+
+  <!-- ================= 1 MODEL WORKSHOP ================= -->
+  <section class="stage" id="st-model" hidden aria-labelledby="h-model">
+    <div class="stagehead sh-orange"><span class="stn">1</span><div><h2 id="h-model">Model workshop</h2><p>Shrink real things to a scale. Get it wrong and the model comes out silly.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>skip it if you know this already</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 170" role="img" aria-label="A real house 8 metres tall is 800 centimetres. At scale 1 to 100 the model is 800 divided by 100, which is 8 centimetres.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">
+              <use href="#o-house" x="20" y="20" width="120" height="120"/>
+              <text x="80" y="160" text-anchor="middle" font-size="16">real: 8 m = 800 cm</text>
+              <path d="M160 80h120" stroke="#ef7724" stroke-width="5"/><path d="M276 70l16 10-16 10z" fill="#ef7724"/>
+              <text x="220" y="62" text-anchor="middle" font-size="18" fill="#d75f10">scale 1 : 100</text>
+              <text x="220" y="112" text-anchor="middle" font-size="16">&#247; 100</text>
+              <use href="#o-house" x="330" y="104" width="36" height="36"/>
+              <path d="M310 140h240" stroke="#0a2f38" stroke-width="4"/>
+              <text x="348" y="160" text-anchor="middle" font-size="16">8 cm</text>
+              <text x="450" y="76" font-size="15" text-anchor="middle">1 : 100 means</text>
+              <text x="450" y="96" font-size="15" text-anchor="middle">model is 100 times</text>
+              <text x="450" y="116" font-size="15" text-anchor="middle">smaller</text>
+            </g>
+          </svg>
+        </div>
+        <p><b>1 : 100</b> means 1 cm on the model stands for 100 cm in real life. So divide by 100. For <b>1 : 50</b> divide by 50, and for <b>1 : 10</b> divide by 10.</p>
+        <p>Handy trick: dividing by 50 is the same as dividing by 100, then doubling.</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Make it &middot; The workbench</span>
+      <h3>Pick a thing and a scale</h3>
+      <div class="chiprow" id="mDir" role="group" aria-label="Which way">
+        <button type="button" class="cb" data-dir="shrink" aria-pressed="true">Shrink it (real to model)</button>
+        <button type="button" class="cb" data-dir="grow" aria-pressed="false">Grow it back (model to real)</button>
+      </div>
+      <div class="chiprow" id="mScales" role="group" aria-label="Scale">
+        <span class="lab">Scale:</span>
+        <button type="button" class="cb" data-sc="10" aria-pressed="false">1 : 10</button>
+        <button type="button" class="cb" data-sc="50" aria-pressed="false">1 : 50</button>
+        <button type="button" class="cb" data-sc="100" aria-pressed="true">1 : 100</button>
+      </div>
+      <div class="objs" id="mObjs" role="group" aria-label="Real things to make"></div>
+      <div class="bench"><svg id="benchSvg" viewBox="0 0 600 260" role="img" aria-label="The workbench"></svg></div>
+      <p class="mread" id="mRead" aria-live="polite"></p>
+      <div id="runModel" style="margin-top:10px"></div>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="plan">Next: Planning office</button></div>
+  </section>
+
+  <!-- ================= 2 PLANNING OFFICE ================= -->
+  <section class="stage" id="st-plan" hidden aria-labelledby="h-plan">
+    <div class="stagehead sh-grass"><span class="stn">2</span><div><h2 id="h-plan">Planning office</h2><p>Lay out the town square on a plan drawn to scale. Then measure real distances off it.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>skip it if you know this already</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 120" role="img" aria-label="On this plan each square is 1 centimetre, which stands for 5 metres. 4 squares is 20 metres.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">
+              <g stroke="#0a2f38" stroke-width="2.5" fill="#e4f0d6">
+                <rect x="40" y="30" width="50" height="50"/><rect x="90" y="30" width="50" height="50"/><rect x="140" y="30" width="50" height="50"/><rect x="190" y="30" width="50" height="50"/>
+              </g>
+              <g font-size="15" text-anchor="middle"><text x="65" y="60">5 m</text><text x="115" y="60">5 m</text><text x="165" y="60">5 m</text><text x="215" y="60">5 m</text></g>
+              <text x="140" y="108" text-anchor="middle" font-size="17">4 squares = 4 &#215; 5 = 20 m</text>
+              <text x="400" y="50" text-anchor="middle" font-size="18">Scale 1 : 500</text>
+              <text x="400" y="78" text-anchor="middle" font-size="15">1 cm = 500 cm = 5 m</text>
+            </g>
+          </svg>
+        </div>
+        <p>Count squares from the middle of one thing to the middle of the other, along a row or a column. Then times by 5 for metres.</p>
+        <p>Going the other way, from real metres onto the plan, divide by 5.</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Build it &middot; The town square</span>
+      <h3>Follow the council's brief</h3>
+      <p class="brief" id="planBrief"></p>
+      <div class="planwrap">
+        <div>
+          <div class="pgrid" id="pGrid" role="grid" aria-label="Town plan, 12 squares across and 8 down. Arrow keys move, Enter places."></div>
+          <div class="scalebar">
+            <svg viewBox="0 0 220 40" aria-hidden="true"><g font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="12" fill="#0a2f38"><rect x="10" y="6" width="40" height="10" fill="#0a2f38"/><rect x="50" y="6" width="40" height="10" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><rect x="90" y="6" width="40" height="10" fill="#0a2f38"/><rect x="130" y="6" width="40" height="10" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><text x="10" y="32" text-anchor="middle">0</text><text x="90" y="32" text-anchor="middle">10 m</text><text x="170" y="32" text-anchor="middle">20 m</text></g></svg>
+            <span>Each block is 1 square = 5 m. North is up.</span>
+          </div>
+          <p class="pkey" aria-hidden="true"><span><svg><use href="#p-hall"/></svg>Town hall</span><span><svg><use href="#p-library"/></svg>Library</span><span><svg><use href="#p-fountain"/></svg>Fountain</span><span><svg><use href="#p-school"/></svg>School</span><span><svg><use href="#p-stop"/></svg>Bus stop</span><span><i class="roadkey"></i>Road</span></p>
+        </div>
+        <div class="palette" id="pPal" role="group" aria-label="Pieces to place">
+          <span class="lab">Tap a piece, then a square.</span>
+        </div>
+      </div>
+      <div class="fb" id="planFb" role="status" aria-live="polite"></div>
+      <div class="qnav"><button type="button" class="btn btn-quiet" id="planHow">Show me how</button><button type="button" class="btn btn-quiet" id="planSkip">Next brief</button><button type="button" class="btn btn-quiet" id="planClear">Clear my pieces</button></div>
+    </div>
+
+    <div class="card try">
+      <span class="kicker">Try a bit &middot; Measure the plan</span>
+      <h3>How far in real life?</h3>
+      <div id="runPlan"></div>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="map">Next: Bus depot</button></div>
+  </section>
+
+  <!-- ================= 3 BUS DEPOT ================= -->
+  <section class="stage" id="st-map" hidden aria-labelledby="h-map">
+    <div class="stagehead sh-teal"><span class="stn">3</span><div><h2 id="h-map">Bus depot</h2><p>Plan the Tiny Town bus loop on the town map, then turn map centimetres into real distance.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>skip it if you know this already</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 130" role="img" aria-label="Scale 1 to 10,000. 1 centimetre on the map is 10,000 centimetres, which is 100 metres. 5 centimetres is 500 metres.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">
+              <text x="280" y="22" text-anchor="middle" font-size="18">Scale 1 : 10,000</text>
+              <rect x="30" y="40" width="100" height="18" fill="#0a2f38"/><rect x="130" y="40" width="100" height="18" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><rect x="230" y="40" width="100" height="18" fill="#0a2f38"/><rect x="330" y="40" width="100" height="18" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><rect x="430" y="40" width="100" height="18" fill="#0a2f38"/>
+              <g font-size="14" text-anchor="middle"><text x="30" y="78">0</text><text x="130" y="78">100 m</text><text x="230" y="78">200 m</text><text x="330" y="78">300 m</text><text x="430" y="78">400 m</text><text x="530" y="78">500 m</text></g>
+              <text x="280" y="112" text-anchor="middle" font-size="16">1 cm = 10,000 cm = 100 m</text>
+            </g>
+          </svg>
+        </div>
+        <p>So the number of map centimetres, times 100, gives real metres. 1,000 m is 1 km.</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Plan it &middot; The bus loop</span>
+      <h3>Start at the depot, visit three stops, come home</h3>
+      <p class="lead">The loop has to pass the <b>Station</b>, the <b>Leisure centre</b> and the <b>Library</b> (the red stops). Tap junctions along the streets, or the name buttons under the map. Numbers on the streets are map centimetres.</p>
+      <p class="swipehint">The map is wide: slide it sideways to see the whole town.</p>
+      <div class="mapbox" id="busBox"></div>
+      <div class="chiprow" id="busBtns" style="margin-top:10px"></div>
+      <div class="fb" id="busMsg" role="status" aria-live="polite"></div>
+      <ul class="legs" id="busLegs"></ul>
+      <div id="busSums" class="hidden">
+        <div class="routegrid">
+          <div><label for="bCm">Loop length on the map (cm)</label><input class="fin" id="bCm" type="text" inputmode="decimal" autocomplete="off"></div>
+          <div><label for="bKm">Real length (km or m)</label><input class="fin" id="bKm" type="text" inputmode="decimal" autocomplete="off"></div>
+          <div><label for="bDay">10 loops a day, how far? (km)</label><input class="fin" id="bDay" type="text" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <button type="button" class="btn" id="bCheck">Check my loop sums</button>
+        <button type="button" class="btn btn-quiet" id="bShow">Show me how</button>
+        <div class="fb" id="bFb" role="status" aria-live="polite"></div>
+      </div>
+      <div class="qnav"><button type="button" class="btn btn-quiet" id="bUndo">Undo last junction</button><button type="button" class="btn btn-quiet" id="bClear">Start the loop again</button></div>
+      <ul class="saved" id="busSaved"></ul>
+    </div>
+
+    <div class="card try">
+      <span class="kicker">Try a bit &middot; Read the map</span>
+      <h3>Map centimetres into real life</h3>
+      <div id="runMap"></div>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="cafe">Next: The cafe</button></div>
+  </section>
+
+  <!-- ================= 4 THE CAFE ================= -->
+  <section class="stage" id="st-cafe" hidden aria-labelledby="h-cafe">
+    <div class="stagehead sh-yellow"><span class="stn">4</span><div><h2 id="h-cafe">The cafe</h2><p>Serve the customers in your head. Bonds, change from &pound;1, and two things added up.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>lots of ways work, pick your favourite</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 200" role="img" aria-label="Change from 1 pound for 64p. Count up 6 to 70p, then 30 to 100p. 6 plus 30 is 36p. Check: the ones make 10 and the tens make 9.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">
+              <text x="280" y="24" text-anchor="middle" font-size="18">Change from &#163;1 for a 64p tea</text>
+              <line x1="40" y1="120" x2="520" y2="120" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/>
+              <line x1="50" y1="110" x2="50" y2="130" stroke="#0a2f38" stroke-width="3"/><text x="50" y="152" text-anchor="middle" font-size="17">64p</text>
+              <line x1="130" y1="110" x2="130" y2="130" stroke="#0a2f38" stroke-width="3"/><text x="130" y="152" text-anchor="middle" font-size="17">70p</text>
+              <line x1="510" y1="110" x2="510" y2="130" stroke="#0a2f38" stroke-width="3"/><text x="510" y="152" text-anchor="middle" font-size="17">100p</text>
+              <path d="M50 114 Q90 70 130 114" fill="none" stroke="#ef7724" stroke-width="4"/><text x="90" y="72" text-anchor="middle" font-size="19" fill="#d75f10">+6</text>
+              <path d="M130 114 Q320 20 510 114" fill="none" stroke="#007291" stroke-width="4"/><text x="320" y="56" text-anchor="middle" font-size="19" fill="#007291">+30</text>
+              <text x="280" y="186" text-anchor="middle" font-size="16">6 + 30 = 36p. Check: 4 + 6 = 10 and 6 + 3 = 9.</text>
+            </g>
+          </svg>
+        </div>
+        <p>Adding two prices? Split them into tens and ones, or round one to a ten and adjust, or spot a near double (45 + 46 is double 45, plus 1).</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Play &middot; Behind the counter</span>
+      <h3>Who is next in the queue?</h3>
+      <div class="counter">
+        <div>
+          <div class="chiprow" id="cafeModes" role="group" aria-label="Kind of customer">
+            <button type="button" class="cb" data-cm="bonds" aria-pressed="false">Bonds</button>
+            <button type="button" class="cb" data-cm="change" aria-pressed="true">Change from &pound;1</button>
+            <button type="button" class="cb" data-cm="add" aria-pressed="false">Two things</button>
+            <button type="button" class="cb" data-cm="diff" aria-pressed="false">How much more</button>
+            <button type="button" class="cb" id="cafeHelp" aria-pressed="false">Helper</button>
+          </div>
+          <div id="runCafe"></div>
+          <p class="waysq">Coins in the tip jar</p>
+          <div class="streak" id="cafeJar" aria-live="polite"></div>
+        </div>
+        <div class="menuboard" aria-label="Cafe menu">
+          <h4>TINY TOWN CAFE</h4>
+          <ul id="menuList"></ul>
+          <small>Everything here is nut free.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card try why">
+      <span class="kicker">If you fancy &middot; Your way</span>
+      <h3>Which way do you like best, and why?</h3>
+      <p class="lead">There is no wrong answer. Some people love splitting, some love rounding. What works in your head?</p>
+      <div class="starters" id="cafeStarters">
+        <button type="button">I like splitting because</button>
+        <button type="button">I like rounding and adjusting because</button>
+        <button type="button">Counting up works for me when</button>
+        <button type="button">I find it tricky when</button>
+        <button type="button">A helper is useful for</button>
+      </div>
+      <label class="sr" for="cafeWhy">Your way</label>
+      <textarea id="cafeWhy" placeholder="Type here if you like. It saves on this device."></textarea>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="toy">Next: The toy shop</button></div>
+  </section>
+
+  <!-- ================= 5 THE TOY SHOP ================= -->
+  <section class="stage" id="st-toy" hidden aria-labelledby="h-toy">
+    <div class="stagehead sh-plum"><span class="stn">5</span><div><h2 id="h-toy">The toy shop</h2><p>Stock up in tens, hundreds and thousands. Use quick tricks. Build a train set from a price rule.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>four handy tricks</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 220" role="img" aria-label="Four tricks. Times 100: digits move 2 places left, 36 times 100 is 3,600. Doubling: 4 times 35 is double 35 is 70, double 70 is 140. Near multiples: 9 times 24 is 10 times 24 take away 24, which is 216. Big bonds: 3 plus 7 is 10 so 300 plus 700 is 1,000.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">
+              <rect x="6" y="6" width="270" height="100" rx="16" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>
+              <rect x="284" y="6" width="270" height="100" rx="16" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>
+              <rect x="6" y="114" width="270" height="100" rx="16" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>
+              <rect x="284" y="114" width="270" height="100" rx="16" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/>
+              <text x="141" y="34" text-anchor="middle" font-size="17" fill="#7b4b8f">&#215; 10, 100, 1,000</text>
+              <text x="141" y="62" text-anchor="middle" font-size="16">36 &#215; 100 = 3,600</text>
+              <text x="141" y="88" text-anchor="middle" font-size="14">digits slide 2 places left</text>
+              <text x="419" y="34" text-anchor="middle" font-size="17" fill="#d75f10">Double, double</text>
+              <text x="419" y="62" text-anchor="middle" font-size="16">4 &#215; 35: 35, 70, 140</text>
+              <text x="419" y="88" text-anchor="middle" font-size="14">&#215; 4 is double, then double again</text>
+              <text x="141" y="142" text-anchor="middle" font-size="17" fill="#007291">Near multiples</text>
+              <text x="141" y="170" text-anchor="middle" font-size="16">9 &#215; 24 = 240 &#8722; 24 = 216</text>
+              <text x="141" y="196" text-anchor="middle" font-size="14">do 10 lots, take one lot off</text>
+              <text x="419" y="142" text-anchor="middle" font-size="17" fill="#4f9a46">Big bonds</text>
+              <text x="419" y="170" text-anchor="middle" font-size="16">300 + 700 = 1,000</text>
+              <text x="419" y="196" text-anchor="middle" font-size="14">because 3 + 7 = 10</text>
+            </g>
+          </svg>
+        </div>
+        <p>Halving works too: 5 &#215; 48 is the same as 10 &#215; 48, halved. 480 halved is 240.</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Play &middot; The stock room</span>
+      <h3>Fill the shelves</h3>
+      <div class="shelf"><svg id="shelfSvg" viewBox="0 0 600 150" aria-hidden="true"></svg></div>
+      <div class="chiprow" id="toyModes" role="group" aria-label="Kind of sum" style="margin-top:10px">
+        <button type="button" class="cb" data-tm="ten" aria-pressed="true">&#215; 10, 100, 1,000</button>
+        <button type="button" class="cb" data-tm="bond" aria-pressed="false">Big bonds</button>
+        <button type="button" class="cb" data-tm="dbl" aria-pressed="false">Doubling and halving</button>
+        <button type="button" class="cb" data-tm="near" aria-pressed="false">Near multiples</button>
+      </div>
+      <div id="runToy"></div>
+    </div>
+
+    <div class="card try">
+      <span class="kicker">Make it &middot; Price rules in words</span>
+      <h3>Build a train set</h3>
+      <p class="tagwords" id="ruleWords"></p>
+      <div class="chiprow" id="ruleChips" role="group" aria-label="Price rules"></div>
+      <div class="shelf"><svg id="trainSvg" viewBox="0 0 600 120" role="img" aria-label="The train set"></svg></div>
+      <div class="chiprow" style="margin-top:10px">
+        <span class="stepper"><button type="button" id="tMinus" aria-label="One fewer">&#8722;</button><output id="tN" aria-live="polite">3</output><button type="button" id="tPlus" aria-label="One more">+</button></span>
+        <span id="tNWord">carriages</span>
+        <button type="button" class="btn btn-orange" id="tRing">Ring it up</button>
+      </div>
+      <div class="receipt hidden" id="tReceipt" aria-live="polite"></div>
+      <div id="runRule" style="margin-top:14px"></div>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="grow">Next: Sign workshop</button></div>
+  </section>
+
+  <!-- ================= 6 SIGN WORKSHOP ================= -->
+  <section class="stage" id="st-grow" hidden aria-labelledby="h-grow">
+    <div class="stagehead sh-bright"><span class="stn">6</span><div><h2 id="h-grow">Sign workshop</h2><p>Enlarge the shop signs on squared paper. Scale factor 2, 3 or one half.</p></div></div>
+
+    <details class="learn" open>
+      <summary><b>Learn a bit</b><span>skip it if you know this already</span></summary>
+      <div class="lbody">
+        <div class="lfig">
+          <svg viewBox="0 0 560 160" role="img" aria-label="An arrow 3 squares wide made bigger with scale factor 2 is 6 squares wide. With scale factor one half, a 4 square side becomes 2 squares.">
+            <g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38" font-size="15">
+              <g fill="#ffc247" stroke="#0a2f38" stroke-width="2"><rect x="30" y="60" width="20" height="20"/><rect x="50" y="60" width="20" height="20"/><rect x="70" y="60" width="20" height="20"/><rect x="50" y="40" width="20" height="20"/></g>
+              <text x="60" y="104" text-anchor="middle">3 wide</text>
+              <path d="M110 70h50" stroke="#ef7724" stroke-width="4"/><path d="M156 62l12 8-12 8z" fill="#ef7724"/>
+              <text x="140" y="52" text-anchor="middle" fill="#d75f10">&#215; 2</text>
+              <g fill="#ef7724" stroke="#0a2f38" stroke-width="2"><rect x="190" y="70" width="120" height="40"/><rect x="230" y="30" width="40" height="40"/></g>
+              <text x="250" y="134" text-anchor="middle">6 wide, 4 tall</text>
+              <text x="440" y="60" text-anchor="middle">Scale factor &#189;</text>
+              <text x="440" y="84" text-anchor="middle">halves every length</text>
+              <text x="440" y="108" text-anchor="middle">4 squares becomes 2</text>
+            </g>
+          </svg>
+        </div>
+        <p>Every length gets multiplied by the scale factor. The shape stays the same shape, just bigger (or smaller). Adding the same amount to each side does not work: it changes the shape.</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Make it &middot; Squared paper</span>
+      <h3>Paint the enlarged sign</h3>
+      <div class="chiprow" id="signPick" role="group" aria-label="Pick a sign"></div>
+      <div class="growwrap">
+        <div class="orig"><svg id="origSvg" viewBox="0 0 160 160" role="img" aria-label="The original sign"></svg><p class="mread" id="origWords"></p></div>
+        <div>
+          <div class="egrid" id="eGrid" role="grid" aria-label="Squared paper, 12 by 12. Tap squares to paint them."></div>
+          <div class="paintbar">
+            <button type="button" class="btn" id="eCheck">Check my sign</button>
+            <button type="button" class="btn btn-quiet" id="eDots">Show a dotted guide</button>
+            <button type="button" class="btn btn-quiet" id="eClear">Clear the paper</button>
+          </div>
+        </div>
+      </div>
+      <div class="fb" id="eFb" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="card try">
+      <span class="kicker">Try a bit &middot; Which one is right?</span>
+      <h3>Spot the true enlargement</h3>
+      <p class="lead" id="p3Lead"></p>
+      <div class="pick3" id="p3"></div>
+      <div class="fb" id="p3Fb" role="status" aria-live="polite"></div>
+      <div class="qnav"><button type="button" class="btn btn-quiet" id="p3Next">Another one</button></div>
+    </div>
+
+    <div class="card try">
+      <span class="kicker">Try a bit &middot; Sign sums</span>
+      <h3>Lengths without the paper</h3>
+      <div id="runGrow"></div>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="oops">Next: Pip's notebook</button></div>
+  </section>
+
+  <!-- ================= 7 PIP'S NOTEBOOK ================= -->
+  <section class="stage" id="st-oops" hidden aria-labelledby="h-oops">
+    <div class="stagehead sh-brick"><span class="stn">7</span><div><h2 id="h-oops">Pip's notebook</h2><p>Pip builds models too, but rushes. Find the line where each sum goes wrong, then fix it.</p></div></div>
+
+    <details class="learn">
+      <summary><b>Learn a bit</b><span>how to hunt for a mistake</span></summary>
+      <div class="lbody">
+        <p>Ask: <b>is the answer silly?</b> A model bus 500 m long is bigger than the real bus. Something went wrong.</p>
+        <p>Then check each line on its own. Did it multiply when it should divide? Add when it should multiply? Count the zeros?</p>
+      </div>
+    </details>
+
+    <div class="card try">
+      <span class="kicker">Puzzle &middot; Page <span id="oPageN">1</span> of <span id="oPageT">9</span></span>
+      <h3 id="oTitle"></h3>
+      <div class="note" id="oNote"></div>
+      <div class="fb" id="oFb" role="status" aria-live="polite"></div>
+      <div id="oFix" class="hidden" style="margin-top:10px">
+        <div class="arow"><label for="oIn"><b>What should the answer be?</b></label><input id="oIn" type="text" autocomplete="off" spellcheck="false"><span class="usuf" id="oUnit"></span><button type="button" class="btn" id="oCheck">Fix it</button></div>
+      </div>
+      <div class="qnav"><button type="button" class="btn btn-quiet" id="oHow">Show me how</button><button type="button" class="btn btn-quiet" id="oPrev">Previous page</button><button type="button" class="btn btn-quiet" id="oNext">Next page</button></div>
+    </div>
+
+    <div class="card try why">
+      <span class="kicker">If you fancy &middot; Leave Pip a note</span>
+      <h3>A tip for Pip</h3>
+      <p class="lead">What would you tell Pip, so the next model comes out right?</p>
+      <div class="starters" id="pipStarters">
+        <button type="button">Pip, check if the answer is silly:</button>
+        <button type="button">When you shrink to a scale, you</button>
+        <button type="button">Scale factor means</button>
+        <button type="button">Do the steps in order:</button>
+        <button type="button">Count the zeros when</button>
+      </div>
+      <label class="sr" for="pipTxt">Your tip for Pip</label>
+      <textarea id="pipTxt" placeholder="Type here if you like. It saves on this device."></textarea>
+    </div>
+
+    <div class="stagefoot"><button type="button" class="btn btn-quiet" data-go="top">Back to the town</button><button type="button" class="btn" data-go="send">Next: send it to Jay</button></div>
+  </section>
+
+  <!-- ================= SEND ================= -->
+  <section id="sendSec" class="sendwrap" aria-labelledby="h-send">
+    <hr class="rule">
+    <div class="weektheme"><h2 id="h-send">Town log</h2><span id="sumLine">Nothing tried yet. That is fine.</span></div>
+    <div id="sendHost"></div>
+    <details class="learn" style="max-width:640px;margin-top:14px">
+      <summary><b>Peek at what gets sent</b></summary>
+      <div class="lbody"><div class="sumprev" id="sumPrev"></div></div>
+    </details>
+    <button type="button" class="btn btn-quiet restart" id="restartBtn">Start again</button>
+  </section>
+
+  <a class="backlink" href="/practice/#maths-standard">Back to Maths</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------
+   Basics
+   --------------------------------------------------------- */
+var STORE = "b5.practice.tiny-town.v1";
+var WHOKEY = "base5.who.v1";
+var RM = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+var X = "\u00d7", MIN = "\u2212", PD = "\u00a3", DIV = "\u00f7", HALF = "\u00bd";
+
+function $(s, r){ return (r || document).querySelector(s); }
+function $$(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+function rnd(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+function shuffle(a){ for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function fmt(n){
+  var neg = n < 0; n = Math.abs(n);
+  var s = String(Math.round(n * 1000) / 1000), p = s.split(".");
+  p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? MIN : "") + p.join(".");
+}
+function money(p){ /* pence in, nice string out */
+  p = Math.round(p);
+  if (p < 100) return p + "p";
+  var s = (p / 100).toFixed(2);
+  return PD + (s.slice(-3) === ".00" ? s.slice(0, -3) : s);
+}
+function plainText(h){ var d = document.createElement("div"); d.innerHTML = h; return d.textContent.replace(/\s+/g, " ").trim(); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+var STAGES = [
+  {id:"model", n:1, name:"Model workshop", sub:"Shrink things to 1 : 10, 1 : 50, 1 : 100", icon:"i-saw",    col:"#ef7724", roof:"saw"},
+  {id:"plan",  n:2, name:"Planning office", sub:"Build the square on a scale plan", icon:"i-plan",          col:"#8cc56a", roof:"flat"},
+  {id:"map",   n:3, name:"Bus depot",      sub:"Plan a bus loop on the town map", icon:"i-map",             col:"#00a6c9", roof:"arch"},
+  {id:"cafe",  n:4, name:"The cafe",       sub:"Bonds, change and sums in your head", icon:"i-cup",        col:"#ffc247", roof:"awning"},
+  {id:"toy",   n:5, name:"The toy shop",   sub:"Times 10, 100, 1,000, tricks and price rules", icon:"i-kite", col:"#7b4b8f", roof:"peak"},
+  {id:"grow",  n:6, name:"Sign workshop",  sub:"Enlarge by 2, 3 or one half", icon:"i-grow",               col:"#007291", roof:"flat"},
+  {id:"oops",  n:7, name:"Pip's notebook", sub:"Spot the mistake and fix it", icon:"i-pencil",            col:"#c8553d", roof:"peak"}
+];
+function stageById(id){ for (var i = 0; i < STAGES.length; i++) if (STAGES[i].id === id) return STAGES[i]; return null; }
+
+var BEST = {
+  JT:["cafe","toy"], LW:["cafe","oops"], EGW:["model","plan","map"],
+  LP:["toy","grow","plan"], LC:["toy","cafe"], HK:["cafe","toy"]
+};
+var MS = {
+  JT:["Find what makes a number up to 100, and add or take away two digit numbers in your head, with a helper if you like.",
+      "Add and take away two digit numbers in your head on your own, and multiply whole numbers by 10 and 100."],
+  LW:["Find what makes a number up to 100, and add or take away two digit numbers in your head, with a helper if you like.",
+      "Add and take away two digit numbers in your head on your own."],
+  EGW:["Use scale factors, scale drawings and maps.",
+       "Use a map scale to work out real distances when you plan a route."],
+  LP:["Use simple formulas written in words, with one or two steps.",
+      "Use scale factors to make a shape bigger, and read distances from a scale drawing or a map."],
+  LC:["Multiply whole numbers by 10, 100 and 1,000 in your head, and pick quick ways to add and take away.",
+      "Add and take away multiples of 10, 100 and 1,000 using your bonds to 10."],
+  HK:["Remember your number bonds to 10 and use them for quick sums.",
+      "Use bonds to 10 to find bonds to 100 with tens, like 30 + 70."]
+};
+var MS_RAW = {
+  LC:["I can multiply whole numbers mentally by 10, 100 and 1,000 and choose efficient mental strategies for addition and subtraction.",
+      "I can find the sum and difference of multiples of 10, 100 and 1,000 using my knowledge of bonds to 10."],
+  LP:["I can use simple formulas expressed in words for one or two step operations.",
+      "I can use scale factors to enlarge a shape and read distances from a scale diagram or map."],
+  LW:["I can find the complement of a number to 100 and mentally add or subtract two 2 digit numbers with support.",
+      "I can mentally add and subtract two 2 digit numbers independently."],
+  EGW:["I can use scale factors, scale diagrams and maps.",
+       "I can use a map scale to work out real distances in a practical problem, such as planning a route."],
+  JT:["I can find the complement of a number to 100 and mentally add or subtract two 2 digit numbers with support.",
+      "I can mentally add and subtract two 2 digit numbers independently and multiply whole numbers by 10 and 100."],
+  HK:["I can recall number bonds to 10 and use them to solve simple mental calculations.",
+      "I can use number bonds to 10 to find bonds to 100 using multiples of 10."]
+};
+/* Which stage covers which milestone. Used in the summary for Jay. */
+var MILESTONE_STAGES = {
+  1: "Model workshop: shrinking and growing at 1 : 10, 1 : 50 and 1 : 100 (EGW 1, LP 2; dividing and multiplying by 10 and 100 for LC 1 and JT 2)",
+  2: "Planning office: placing buildings on a scale plan and reading real distances off it (EGW 1, LP 2)",
+  3: "Bus depot: a route on a map with a scale, real distances in m and km (EGW 1, EGW 2, LP 2)",
+  4: "The cafe: bonds to 10 and 100, change from 1 pound, adding and taking away two digit prices with or without a helper, more than one mental method (HK 1, HK 2, JT 1, JT 2, LW 1, LW 2, LC 1)",
+  5: "The toy shop: times 10, 100 and 1,000, big bonds, doubling and halving, near multiples, and a price rule in words (LC 1, LC 2, JT 2, HK 2, LP 1)",
+  6: "Sign workshop: enlarging shapes on squared paper by scale factor 2, 3 and one half (LP 2, EGW 1)",
+  7: "Pip's notebook: finding and fixing mistakes in scale, map, formula and mental sums (EGW 1, EGW 2, LP 1, LP 2, JT 2, LW 2, LC 1, LC 2, HK 2)"
+};
+
+/* ---------------------------------------------------------
+   State
+   --------------------------------------------------------- */
+var S = {cur:"model", tried:{}, log:{}, mDir:"shrink", mSc:100, made:{}, placed:{}, deco:[], brief:0,
+         loops:{}, cafeMode:"change", cafeHelp:false, jar:0, cafeWhy:"", toyMode:"ten", stock:0,
+         rule:"carr", tN:3, sign:0, painted:[], signsDone:{}, oPage:0, oops:{}, pipTxt:"", wins:{}};
+function load(){
+  try {
+    var raw = localStorage.getItem(STORE);
+    if (raw){ var o = JSON.parse(raw); if (o && typeof o === "object") for (var k in o) if (o.hasOwnProperty(k)) S[k] = o[k]; }
+  } catch(e){}
+}
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e){} }
+function note(stage, line){
+  if (!S.log[stage]) S.log[stage] = [];
+  S.log[stage].push(line);
+  if (S.log[stage].length > 40) S.log[stage].shift();
+  S.tried[stage] = (S.tried[stage] || 0) + 1;
+  save(); refreshProgress();
+}
+function win(stage){ S.wins[stage] = (S.wins[stage] || 0) + 1; save(); }
+function getWho(){ try { return localStorage.getItem(WHOKEY) || ""; } catch(e){ return ""; } }
+function setWho(v){ try { if (v) localStorage.setItem(WHOKEY, v); else localStorage.removeItem(WHOKEY); } catch(e){} }
+load();
+
+/* ---------------------------------------------------------
+   Reading answers. Lots of forms accepted.
+   --------------------------------------------------------- */
+function cleanNum(r){
+  return String(r).toLowerCase().replace(/\u00a3/g, "").replace(/(\d)[\s,](?=\d{3}(?!\d))/g, "$1").trim();
+}
+function numOf(s){
+  s = String(s);
+  if (/\u00bd|\bhalf\b|\bone half\b/.test(s) && !/\d/.test(s)) return 0.5;
+  var f = s.match(/(-?\d+)\s*\/\s*(\d+)/);
+  if (f && +f[2] !== 0) return +f[1] / +f[2];
+  var m = s.match(/-?\d*\.?\d+/);
+  return m ? parseFloat(m[0]) : null;
+}
+var UNIT_M = {km:1000, m:1, cm:0.01, mm:0.001};
+function unitOf(s){
+  var m = s.match(/(kilomet\w*|kms?|centimet\w*|cm|millimet\w*|mm|met\w*|m)(?![a-z])/);
+  if (!m) return null;
+  var u = m[1];
+  if (/^k/.test(u)) return "km";
+  if (/^c/.test(u)) return "cm";
+  if (/^mm|^mil/.test(u)) return "mm";
+  return "m";
+}
+function toMetres(r, def){
+  var s = cleanNum(r);
+  var two = s.match(/(\d*\.?\d+)\s*(?:m|met\w*)\s*(?:and\s*)?(\d*\.?\d+)\s*(?:cm|centimet\w*)/);
+  if (two) return parseFloat(two[1]) + parseFloat(two[2]) / 100;
+  two = s.match(/(\d*\.?\d+)\s*(?:km|kilomet\w*)\s*(?:and\s*)?(\d*\.?\d+)\s*(?:m|met\w*)(?![a-z])/);
+  if (two) return parseFloat(two[1]) * 1000 + parseFloat(two[2]);
+  var v = numOf(s); if (v === null) return null;
+  var u = unitOf(s.replace(/-?\d*\.?\d+/, " ")) || def || "m";
+  return v * UNIT_M[u];
+}
+var PARSE = {
+  num: function(r){ return numOf(cleanNum(r)); },
+  scale: function(r){ var m = cleanNum(r).match(/:\s*(\d*\.?\d+)/); return m ? parseFloat(m[1]) : numOf(cleanNum(r)); },
+  cm: function(r, u){ var v = toMetres(r, u || "cm"); return v === null ? null : Math.round(v * 100 * 1e6) / 1e6; },
+  m: function(r, u){ var v = toMetres(r, u || "m"); return v === null ? null : Math.round(v * 1e6) / 1e6; },
+  pence: function(r){
+    var raw = String(r).toLowerCase(), s = cleanNum(r), v = numOf(s);
+    if (v === null) return null;
+    if (/p\b|pence|penny/.test(raw) && raw.indexOf("\u00a3") < 0) return Math.round(v * 1e6) / 1e6;
+    if (raw.indexOf("\u00a3") >= 0 || /pound/.test(raw) || /\d\.\d/.test(s) || /^\.\d/.test(s)) return Math.round(v * 100 * 1e6) / 1e6;
+    return v;
+  }
+};
+
+/* ---------------------------------------------------------
+   Feedback bits
+   --------------------------------------------------------- */
+var YES = ["Spot on.", "Yes, that is it.", "Nailed it.", "Lovely work.", "Exactly right.", "Bang on."];
+var TRY = ["Not quite yet.", "Close, have another look.", "Not this time.", "Nearly. Have another go."];
+function methodBox(q){
+  if (q.ways){
+    var h = '<div class="mth"><span class="mthk">How I did it in my head (any of these works)</span><div class="ways">';
+    q.ways.forEach(function(w, i){ h += '<button type="button" class="way" data-w="' + i + '" aria-pressed="false"><b>' + w[0] + "</b>" + w[1] + "</button>"; });
+    return h + '</div><p class="mread" style="font-size:.9rem;margin-top:6px">Tap the one that is most like yours, if you like. Did it another way? That counts too.</p></div>';
+  }
+  var m = typeof q.method === "function" ? q.method() : q.method;
+  return '<div class="mth"><span class="mthk">One way to do it</span>' + m + "</div>";
+}
+function sparkle(host){
+  if (RM || !host) return;
+  var cols = ["#ef7724", "#ffc247", "#00a6c9", "#7b4b8f", "#8cc56a"];
+  for (var i = 0; i < 14; i++){
+    var s = document.createElement("span");
+    s.className = "spark";
+    s.style.left = (30 + Math.random() * 40) + "%";
+    s.style.top = (40 + Math.random() * 30) + "%";
+    s.style.background = pick(cols);
+    s.style.setProperty("--dx", (Math.random() * 160 - 80) + "px");
+    s.style.setProperty("--dy", (-60 - Math.random() * 90) + "px");
+    host.appendChild(s);
+    (function(n){ setTimeout(function(){ if (n.parentNode) n.parentNode.removeChild(n); }, 1000); })(s);
+  }
+}
+
+/* ---------------------------------------------------------
+   Question runner, used by most stages
+   q: {text, ans, kind (num|cm|m|pence), units, suffix, hint(v), method|ways, log, tag}
+   --------------------------------------------------------- */
+var RUNNERS = [];
+function Runner(host, o){
+  host.classList.add("runner");
+  host.innerHTML =
+    '<p class="qtag"></p><p class="qtext"></p><div class="qvis"></div>' +
+    '<div class="arow"><input type="text" autocomplete="off" spellcheck="false" aria-label="Your answer">' +
+    '<span class="uchips"></span><button type="button" class="btn chk">' + (o.checkLabel || "Check") + '</button></div>' +
+    '<div class="fb" role="status" aria-live="polite"></div>' +
+    '<div class="qnav"><button type="button" class="btn btn-quiet how">Show me how</button>' +
+    '<button type="button" class="btn btn-quiet nxt">' + (o.nextLabel || "Another one") + '</button></div>';
+  var qtag = $(".qtag", host), qtext = $(".qtext", host), qvis = $(".qvis", host),
+      inp = $("input", host), uch = $(".uchips", host), fbx = $(".fb", host);
+  var i = 0, q = null, tries = [], settled = false, unit = null, flushed = 0;
+
+  function say(cls, h){ fbx.className = "fb " + cls; fbx.innerHTML = h; }
+  function setUnits(){
+    uch.innerHTML = "";
+    if (q.units && q.units.length > 1){
+      q.units.forEach(function(u){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "uchip"; b.textContent = u;
+        b.setAttribute("aria-pressed", u === unit ? "true" : "false");
+        b.setAttribute("aria-label", "Answer in " + u);
+        b.addEventListener("click", function(){ unit = u; setUnits(); });
+        uch.appendChild(b);
+      });
+    } else if (q.suffix || (q.units && q.units[0])){
+      uch.innerHTML = '<span class="usuf">' + (q.suffix || q.units[0]) + "</span>";
+    }
+  }
+  function flush(){
+    if (q && !settled && tries.length > flushed){ var t = tries.slice(flushed); note(o.stage, q.log + ": had a go with " + t.join(", ")); }
+    flushed = tries.length;
+  }
+  function show(){
+    flush();
+    q = o.gen(i++); tries = []; settled = false; flushed = 0;
+    unit = q.units ? q.units[0] : null;
+    qtag.innerHTML = q.tag || "";
+    qtext.innerHTML = q.text;
+    qvis.innerHTML = q.vis || "";
+    inp.value = "";
+    inp.setAttribute("inputmode", q.im || "decimal");
+    fbx.className = "fb"; fbx.innerHTML = "";
+    setUnits();
+    if (o.onShow) o.onShow(q, qvis);
+  }
+  function check(){
+    var raw = inp.value.trim();
+    if (!raw){ say("info", "Pop an answer in the box first, whenever you are ready."); return; }
+    var v = PARSE[q.kind || "num"](raw, unit);
+    if (v === null || isNaN(v)){ say("info", "I could not read that as a number. Digits work best, like 250."); return; }
+    tries.push(raw + (q.units && q.units.length > 1 && !/[a-z]/i.test(raw) ? " " + unit : ""));
+    var ok = q.ok ? q.ok(v) : Math.abs(v - q.ans) < 1e-6;
+    if (ok){
+      say("ok", "<b>" + pick(YES) + "</b> " + (q.okNote || "") + methodBox(q));
+      sparkle(host);
+      if (!settled){
+        settled = true;
+        note(o.stage, q.log + ": said " + tries.join(", then ") + (tries.length === 1 ? " (right first go)" : " (got there)"));
+        win(o.stage);
+        if (o.onSettle) o.onSettle(q, false);
+      }
+    } else {
+      var h = q.hint ? q.hint(v) : "";
+      say("no", "<b>" + pick(TRY) + "</b> " + (h || "Have another go, or tap Show me how."));
+    }
+    if (o.onCheck) o.onCheck(q, v, ok, qvis, false);
+  }
+  function how(){
+    say("info", "<b>Here is one way.</b> The answer is <b>" + (q.ansText || fmt(q.ans)) + "</b>." + methodBox(q));
+    if (!settled){
+      settled = true;
+      note(o.stage, q.log + ": looked at the method" + (tries.length ? " after trying " + tries.join(", ") : ""));
+      if (o.onSettle) o.onSettle(q, true);
+    }
+    if (o.onCheck) o.onCheck(q, q.ans, true, qvis, true);
+  }
+  $(".chk", host).addEventListener("click", check);
+  $(".how", host).addEventListener("click", how);
+  $(".nxt", host).addEventListener("click", function(){ if (o.preNext) o.preNext(); show(); inp.focus(); });
+  inp.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); check(); } });
+  host.addEventListener("click", function(e){
+    var w = e.target.closest ? e.target.closest(".way") : null;
+    if (!w || !q || !q.ways) return;
+    $$(".way", host).forEach(function(x){ x.setAttribute("aria-pressed", x === w ? "true" : "false"); });
+    note(o.stage, q.log + ": said their way was like \"" + q.ways[+w.getAttribute("data-w")][0] + "\"");
+  });
+  var api = {next:show, flush:flush, current:function(){ return q; }, input:inp, check:check, how:how};
+  RUNNERS.push(api);
+  show();
+  return api;
+}
+
+/* =========================================================
+   TOWN BANNER AND TILES
+   ========================================================= */
+function buildingSVG(s, i){
+  var w = 112, x = 18 + i * 140, hs = [150, 120, 140, 128, 156, 122, 134], h = hs[i], base = 246, top = base - h, g = "";
+  var c = s.col, ink = "#0a2f38";
+  g += '<g class="bbody">';
+  g += '<rect class="bring" x="' + (x - 4) + '" y="' + (top - 30) + '" width="' + (w + 8) + '" height="' + (h + 34) + '" rx="12" fill="transparent" stroke="transparent" stroke-width="4"/>';
+  if (s.roof === "peak") g += '<path d="M' + (x - 6) + " " + top + "L" + (x + w / 2) + " " + (top - 30) + "L" + (x + w + 6) + " " + top + 'z" fill="#c8553d" stroke="' + ink + '" stroke-width="3" stroke-linejoin="round"/>';
+  if (s.roof === "saw") g += '<path d="M' + x + " " + top + "l0 -22 l37 22 l0 -22 l37 22 l0 -22 l38 22z" + '" fill="#5d6d71" stroke="' + ink + '" stroke-width="3" stroke-linejoin="round"/>';
+  if (s.roof === "arch") g += '<path d="M' + x + " " + top + "Q" + (x + w / 2) + " " + (top - 40) + " " + (x + w) + " " + top + 'z" fill="#5d6d71" stroke="' + ink + '" stroke-width="3"/>';
+  if (s.roof === "flat") g += '<rect x="' + (x - 5) + '" y="' + (top - 10) + '" width="' + (w + 10) + '" height="12" fill="#3d5b64" stroke="' + ink + '" stroke-width="3"/>';
+  g += '<rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + h + '" fill="' + c + '" stroke="' + ink + '" stroke-width="3"/>';
+  if (s.roof === "awning"){
+    for (var a = 0; a < 7; a++) g += '<path d="M' + (x - 4 + a * 17.1) + " " + (top + 34) + "h17.1v14a8.5 8.5 0 0 1-17.1 0z" + '" fill="' + (a % 2 ? "#fffdf8" : "#ef7724") + '" stroke="' + ink + '" stroke-width="2"/>';
+  }
+  /* windows */
+  var wy = top + (s.roof === "awning" ? 66 : 18);
+  for (var r = 0; r < 2; r++) for (var k = 0; k < 2; k++){
+    var yy = wy + r * 34; if (yy + 24 > base - 44) continue;
+    g += '<rect class="win" x="' + (x + 16 + k * 56) + '" y="' + yy + '" width="24" height="22" rx="3" stroke="' + ink + '" stroke-width="2"/>';
+  }
+  /* door */
+  g += '<rect x="' + (x + w / 2 - 14) + '" y="' + (base - 40) + '" width="28" height="40" rx="3" fill="#fffdf8" stroke="' + ink + '" stroke-width="2.5"/>';
+  /* sign */
+  g += '<rect x="' + (x + 6) + '" y="' + (top + 4 + (s.roof === "awning" ? 4 : 0)) + '" width="' + (w - 12) + '" height="0" fill="none"/>';
+  g += '<circle cx="' + (x + w / 2) + '" cy="' + (base - 54) + '" r="13" fill="' + ink + '"/><text x="' + (x + w / 2) + '" y="' + (base - 48) + '" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="15" fill="#fffdf8">' + s.n + "</text>";
+  g += '<path class="bstar" d="M' + (x + w - 6) + " " + (top - 26) + "l4 8 8 1-6 6 1.5 8-7.5-4-7.5 4 1.5-8-6-6 8-1z" + '" fill="#7b4b8f" stroke="#fffdf8" stroke-width="1.5"/>';
+  g += "</g>";
+  return '<g class="bld" data-go="' + s.id + '" role="button" tabindex="0" aria-label="Building ' + s.n + ", " + s.name + '">' + g + "</g>";
+}
+function buildTown(){
+  var h = "";
+  STAGES.forEach(function(s, i){ h += buildingSVG(s, i); });
+  $("#blds").innerHTML = h;
+  $$(".bld").forEach(function(b){
+    b.addEventListener("click", function(){ go(b.getAttribute("data-go"), true); });
+    b.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(b.getAttribute("data-go"), true); } });
+  });
+}
+function buildTiles(){
+  var h = "";
+  STAGES.forEach(function(s){
+    h += '<button type="button" class="wp" data-go="' + s.id + '"><span class="wn" aria-hidden="true">' + s.n + "</span>" +
+      '<svg aria-hidden="true"><use href="#' + s.icon + '"/></svg><b>' + s.name + "</b><small>" + s.sub + "</small>" +
+      '<span class="tags"></span></button>';
+  });
+  $("#wps").innerHTML = h;
+}
+function refreshProgress(){
+  var who = getWho(), best = BEST[who] || [], n = 0;
+  STAGES.forEach(function(s){
+    var t = S.tried[s.id] || 0; if (t) n++;
+    var wp = $('.wp[data-go="' + s.id + '"]');
+    if (wp){
+      var tags = "";
+      if (best.indexOf(s.id) >= 0) tags += '<span class="tag tag-start">good place to start</span>';
+      if (t) tags += '<span class="tag tag-tried">tried &#10003;</span>';
+      $(".tags", wp).innerHTML = tags;
+      wp.setAttribute("aria-current", S.cur === s.id ? "true" : "false");
+    }
+    var b = $('.bld[data-go="' + s.id + '"]');
+    if (b){ b.classList.toggle("tried", !!t); b.classList.toggle("best", best.indexOf(s.id) >= 0); }
+    var head = $("#st-" + s.id + " .stagehead h2");
+    if (head){
+      var old = $(".tag", head); if (old) head.removeChild(old);
+      if (best.indexOf(s.id) >= 0){ var sp = document.createElement("span"); sp.className = "tag tag-start"; sp.textContent = "good place to start"; head.appendChild(sp); }
+    }
+  });
+  $("#sumLine").textContent = n ? ("You have tried something in " + n + " of 7 buildings. Nice going.") : "Nothing tried yet. That is fine.";
+  var prev = $("#sumPrev"); if (prev && prev.offsetParent) prev.textContent = summary(true);
+}
+var ONSHOW = {};
+function go(id, scroll){
+  if (id === "top"){ $(".town").scrollIntoView({behavior: RM ? "auto" : "smooth", block:"start"}); return; }
+  if (id === "send"){ $("#sendSec").scrollIntoView({behavior: RM ? "auto" : "smooth", block:"start"}); return; }
+  RUNNERS.forEach(function(r){ r.flush(); });
+  STAGES.forEach(function(s){ $("#st-" + s.id).hidden = (s.id !== id); });
+  S.cur = id; save(); refreshProgress();
+  if (ONSHOW[id]) ONSHOW[id]();
+  if (scroll) $("#st-" + id).scrollIntoView({behavior: RM ? "auto" : "smooth", block:"start"});
+}
+document.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button[data-go]") : null;
+  if (b) go(b.getAttribute("data-go"), true);
+});
+
+/* Who picker */
+function renderWho(){
+  var who = getWho();
+  $$("#whoChips .cb").forEach(function(b){ b.setAttribute("aria-pressed", (b.getAttribute("data-who") === who && (who || b.dataset.picked)) ? "true" : "false"); });
+  var out = $("#msOut");
+  if (who && MS[who]){
+    var names = (BEST[who] || []).map(function(id){ return stageById(id).name; });
+    out.innerHTML = "<b>" + esc(who) + ", your two steps:</b><ol><li>" + MS[who][0] + "</li><li>" + MS[who][1] + "</li></ol>" +
+      "<p>Good places to start: <b>" + names.join(", ") + "</b>. They have a purple tag and a purple star in the town.</p>";
+  } else out.innerHTML = "";
+  var si = document.getElementById("b5who"); if (si) si.value = who;
+}
+$$("#whoChips .cb").forEach(function(b){
+  b.addEventListener("click", function(){
+    $$("#whoChips .cb").forEach(function(x){ delete x.dataset.picked; });
+    b.dataset.picked = "1";
+    setWho(b.getAttribute("data-who")); renderWho(); refreshProgress();
+  });
+});
+
+/* Sentence starter chips, used by all the writing boxes */
+function wireWriting(boxId, chipsId, key){
+  var t = $("#" + boxId);
+  t.value = S[key] || "";
+  t.addEventListener("input", function(){ S[key] = t.value; save(); });
+  t.addEventListener("change", function(){ if (t.value.trim()) note(boxId === "cafeWhy" ? "cafe" : "oops", "Wrote something in the box (it is in the summary)"); });
+  $("#" + chipsId).addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    var v = t.value;
+    t.value = v + (v && !/\s$/.test(v) ? " " : "") + b.textContent + " ";
+    S[key] = t.value; save(); t.focus();
+  });
+}
+
+
+/* =========================================================
+   1. MODEL WORKSHOP
+   Real sizes are in cm. dim says which way we measure.
+   ========================================================= */
+var OBJ = [
+  {id:"house",  name:"House",     real:800,  dim:"tall", sym:"o-house",  ar:1,     what:"a house 8 m tall"},
+  {id:"tree",   name:"Tree",      real:900,  dim:"tall", sym:"o-tree",   ar:0.6,   what:"a tree 9 m tall"},
+  {id:"bus",    name:"Bus",       real:1200, dim:"long", sym:"o-bus",    ar:2.5,   what:"a bus 12 m long"},
+  {id:"car",    name:"Car",       real:400,  dim:"long", sym:"o-car",    ar:2.27,  what:"a car 4 m long"},
+  {id:"lamp",   name:"Lamp post", real:600,  dim:"tall", sym:"o-lamp",   ar:0.267, what:"a lamp post 6 m tall"},
+  {id:"person", name:"Person",    real:170,  dim:"tall", sym:"o-person", ar:0.4,   what:"a person 1.7 m tall"},
+  {id:"dog",    name:"Dog",       real:50,   dim:"tall", sym:"o-dog",    ar:1.11,  what:"a dog 50 cm tall"},
+  {id:"bench",  name:"Bench",     real:200,  dim:"long", sym:"o-bench",  ar:2.27,  what:"a bench 2 m long"}
+];
+function objById(id){ for (var i = 0; i < OBJ.length; i++) if (OBJ[i].id === id) return OBJ[i]; return OBJ[0]; }
+function realWords(o){ return o.real >= 100 ? fmt(o.real / 100) + " m" : o.real + " cm"; }
+var M = {obj:"house", chosen:true};
+function renderObjs(){
+  var h = "";
+  OBJ.forEach(function(o){
+    var made = S.made[o.id + ":" + S.mSc];
+    h += '<button type="button" class="obj' + (made ? " made" : "") + '" data-o="' + o.id + '" aria-pressed="' + (M.obj === o.id ? "true" : "false") + '">' +
+      '<svg aria-hidden="true"><use href="#' + o.sym + '"/></svg><b>' + o.name + (made ? " &#10003;" : "") + "</b><small>" + realWords(o) + (o.dim === "tall" ? " tall" : " long") + "</small></button>";
+  });
+  $("#mObjs").innerHTML = h;
+}
+function drawBench(o, val, unitWord){
+  /* val is what the student said (or the right answer), in the same unit as the right answer */
+  var grow = S.mDir === "grow", sc = S.mSc;
+  var right = grow ? o.real / 100 : o.real / sc;           /* m when growing, cm when shrinking */
+  var person = grow ? 1.7 : 170 / sc;
+  var H = 190, W = 330, f = o.dim === "tall" ? Math.min(H / right, H / person) : Math.min(W / right, H / person);
+  var g = '<g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">';
+  g += grow ? '<rect x="0" y="0" width="600" height="230" fill="#bfe6f2"/><rect x="0" y="230" width="600" height="30" fill="#8cc56a"/>'
+            : '<rect x="0" y="230" width="600" height="30" fill="#c08a52"/><path d="M0 230h600" stroke="#0a2f38" stroke-width="3"/>';
+  /* reference person */
+  var ph = person * f, clipP = ph > 225;
+  if (clipP) ph = 225;
+  g += '<use href="#o-person" x="' + (40 - ph * 0.2) + '" y="' + (230 - ph) + '" width="' + (ph * 0.4) + '" height="' + ph + '"/>';
+  g += '<text x="12" y="252" font-size="14" fill="' + (grow ? "#0a2f38" : "#fffdf8") + '">' + (grow ? "real person 1.7 m" : "model person " + fmt(person) + " cm") + "</text>";
+  var msg = "";
+  if (val !== null && val !== undefined && !isNaN(val) && val > 0){
+    var d = val * f, ow, oh, clip = false;
+    if (o.dim === "tall"){ oh = d; if (oh > 225){ oh = 225; clip = true; } ow = oh * o.ar; }
+    else { ow = d; if (ow > 480){ ow = 480; clip = true; } oh = ow / o.ar; if (oh > 225){ oh = 225; clip = true; } }
+    var tiny = d < 4;
+    if (tiny){ ow = 6; oh = 6; }
+    var x = 110 + (o.dim === "tall" ? 120 - ow / 2 : 0);
+    g += '<g class="mdl' + (RM ? "" : " grow") + '"><use href="#' + o.sym + '" x="' + x + '" y="' + (230 - oh) + '" width="' + ow + '" height="' + oh + '"/></g>';
+    if (clip) g += '<text x="560" y="40" text-anchor="end" font-size="18" fill="#d75f10">too big for the ' + (grow ? "street" : "bench") + "!</text>";
+    if (tiny) g += '<text x="' + (x + 12) + '" y="222" font-size="15" fill="#d75f10">ant sized!</text>';
+    g += '<text x="' + Math.min(560, x + ow / 2) + '" y="' + Math.max(18, 222 - oh) + '" text-anchor="middle" font-size="15">' + fmt(val) + " " + unitWord + "</text>";
+    var ratio = val / (grow ? 1.7 : person) * (o.dim === "tall" ? 1 : 1);
+    msg = "Your " + (grow ? "real " : "model ") + o.name.toLowerCase() + " is " + fmt(val) + " " + unitWord + (o.dim === "tall" ? " tall" : " long") + ". The " + (grow ? "real" : "model") + " person is " + fmt(grow ? 1.7 : person) + " " + unitWord + ".";
+    if (ratio >= 20) msg += " That is over " + Math.floor(ratio) + " people " + (o.dim === "tall" ? "tall" : "long") + ". Outrageous!";
+    else if (ratio < 0.06) msg += " The person towers over it. Hmm.";
+  }
+  g += "</g>";
+  $("#benchSvg").innerHTML = g;
+  return msg;
+}
+function genModel(i){
+  var o, q = {}, picked = M.chosen;
+  if (M.chosen){ o = objById(M.obj); M.chosen = false; }
+  else { o = pick(OBJ.filter(function(x){ return x.id !== M.obj; })); M.obj = o.id; renderObjs(); }
+  var sc = S.mSc, grow = S.mDir === "grow";
+  q.o = o; q.sc = sc;
+  if (!grow && !picked && Math.random() < 0.2 && i > 1){
+    /* find the scale */
+    var s2 = pick([10, 50, 100]);
+    q.tag = "Find the scale";
+    q.text = "The real thing is " + o.what + ". Pip's model of it is <b>" + fmt(o.real / s2) + " cm</b>. What is the scale? Type the missing number in 1 : ?";
+    q.ans = s2; q.kind = "scale"; q.suffix = ""; q.findScale = true;
+    q.method = (o.real >= 100 ? realWords(o) + " is " + fmt(o.real) + " cm. " : "") + "How many times smaller? " + fmt(o.real) + " " + DIV + " " + fmt(o.real / s2) + " = <b>" + s2 + "</b>, so the scale is 1 : " + s2 + ".";
+    q.hint = function(v){ return "Turn the real size into cm first (" + realWords(o) + " = " + fmt(o.real) + " cm). How many times smaller is the model?"; };
+  } else if (!grow){
+    q.tag = "Shrink it &middot; scale 1 : " + sc;
+    q.text = "Make a model of " + o.what + " at <b>1 : " + sc + "</b>. How " + (o.dim === "tall" ? "tall" : "long") + " is the model?";
+    q.ans = o.real / sc; q.kind = "cm"; q.units = ["cm", "mm"];
+    var m = realWords(o) + " = " + fmt(o.real) + " cm. Divide by " + sc + ": " + fmt(o.real) + " " + DIV + " " + sc + " = <b>" + fmt(o.real / sc) + " cm</b>.";
+    if (sc === 50) m += "<br>Quick way: " + DIV + " 100 gives " + fmt(o.real / 100) + ", then double it: " + fmt(o.real / 50) + ".";
+    if (sc === 100 && o.real >= 100) m += "<br>Quick way: at 1 : 100, every real metre is 1 cm on the model.";
+    q.method = m;
+    q.hint = function(v){
+      var r = o.real;
+      if (Math.abs(v - r) < 1e-6) return "That is the real size in cm. A model is smaller, so divide by " + sc + ".";
+      if (Math.abs(v - r * sc) < 1e-6 || Math.abs(v - r * sc / 100) < 1e-6) return "That multiplied. A model is smaller, so divide by " + sc + ".";
+      if (Math.abs(v - r / 100 / sc) < 1e-6) return "Check the units: turn " + realWords(o) + " into cm first (" + fmt(r) + " cm), then divide.";
+      if (Math.abs(v - r / sc * 10) < 1e-6 || Math.abs(v - r / sc / 10) < 1e-6) return "The digits are right. Check the zeros: " + fmt(r) + " " + DIV + " " + sc + ".";
+      if (Math.abs(v - r / 10) < 1e-6 || Math.abs(v - r / 100) < 1e-6) return "Check which scale you used. This one is 1 : " + sc + ".";
+      return "Change " + realWords(o) + " into cm, then divide by " + sc + ". Look at the bench to see if it looks sensible.";
+    };
+  } else {
+    q.tag = "Grow it back &middot; scale 1 : " + sc;
+    q.text = "A model " + o.name.toLowerCase() + " at <b>1 : " + sc + "</b> is " + fmt(o.real / sc) + " cm " + (o.dim === "tall" ? "tall" : "long") + ". How big is the real one?";
+    q.ans = o.real / 100; q.kind = "m"; q.units = ["m", "cm"];
+    q.method = fmt(o.real / sc) + " " + X + " " + sc + " = " + fmt(o.real) + " cm. 100 cm is 1 m, so that is <b>" + fmt(o.real / 100) + " m</b>.";
+    q.hint = function(v){
+      if (Math.abs(v - o.real / sc / 100 / sc) < 1e-6 || v < o.real / sc / 100) return "That got smaller. Real things are bigger than models, so multiply by " + sc + ".";
+      if (Math.abs(v - o.real) < 1e-6) return "Nearly: that is " + fmt(o.real) + " cm typed as metres. Tap the cm chip, or change it to metres.";
+      return "Multiply the model size by " + sc + ", then turn cm into m.";
+    };
+  }
+  q.log = plainText(q.text);
+  return q;
+}
+var runModel;
+function modelCheck(q, v, ok, vis, shown){
+  if (q.findScale){ $("#mRead").textContent = ok ? "Yes. 1 : " + q.ans + "." : ""; return; }
+  var grow = S.mDir === "grow", unitWord = grow ? "m" : "cm";
+  var val = grow ? v : v; /* parse already gives m or cm */
+  var msg = drawBench(q.o, val, unitWord);
+  if (ok){
+    S.made[q.o.id + ":" + q.sc] = 1; save(); renderObjs();
+    msg = (shown ? "Here it is. " : "It fits nicely. ") + msg;
+  }
+  $("#mRead").textContent = msg;
+}
+function modelShow(q){
+  if (q.findScale){ $("#benchSvg").innerHTML = ""; drawBenchBlank(); $("#mRead").textContent = ""; return; }
+  drawBench(q.o, null, ""); $("#mRead").textContent = "Your " + (S.mDir === "grow" ? "real " : "model ") + q.o.name.toLowerCase() + " appears on the " + (S.mDir === "grow" ? "street" : "bench") + " when you check.";
+}
+function drawBenchBlank(){ $("#benchSvg").innerHTML = '<rect x="0" y="230" width="600" height="30" fill="#c08a52"/><path d="M0 230h600" stroke="#0a2f38" stroke-width="3"/><g font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="40" fill="#0a2f38" opacity=".25"><text x="300" y="150" text-anchor="middle">1 : ?</text></g>'; }
+$("#mObjs").addEventListener("click", function(e){
+  var b = e.target.closest(".obj"); if (!b) return;
+  M.obj = b.getAttribute("data-o"); M.chosen = true; renderObjs();
+  runModel.next(); $('.obj[data-o="' + M.obj + '"]').focus();
+});
+$$("#mScales .cb").forEach(function(b){
+  b.addEventListener("click", function(){
+    S.mSc = +b.getAttribute("data-sc"); save();
+    $$("#mScales .cb").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    M.chosen = true; renderObjs(); runModel.next();
+  });
+});
+$$("#mDir .cb").forEach(function(b){
+  b.addEventListener("click", function(){
+    S.mDir = b.getAttribute("data-dir"); save();
+    $$("#mDir .cb").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    M.chosen = true; runModel.next();
+  });
+});
+
+/* =========================================================
+   2. PLANNING OFFICE
+   Grid 12 x 8. 1 square = 5 m (1 : 500). Row 7 is the road.
+   ========================================================= */
+var PW = 12, PH = 8, SQ = 5;
+var FIXED = [
+  {k:"hall", name:"Town hall", c:2, r:1, sym:"p-hall"},
+  {k:"fountain", name:"Fountain", c:6, r:3, sym:"p-fountain"},
+  {k:"library", name:"Library", c:10, r:1, sym:"p-library"},
+  {k:"school", name:"School", c:1, r:6, sym:"p-school"},
+  {k:"stop", name:"Bus stop", c:11, r:6, sym:"p-stop"}
+];
+function fx(k){ for (var i = 0; i < FIXED.length; i++) if (FIXED[i].k === k) return FIXED[i]; return null; }
+function sqd(a, c, r){ return Math.hypot(a.c - c, a.r - r); }
+function inLine(a, c, r){ return a.c === c || a.r === r; }
+var BRIEFS = [
+  {k:"band", name:"Bandstand", sym:"p-band", text:"Put the <b>bandstand</b> 20 m west of the fountain. (West is to the left.)",
+   ok:function(c, r){ return c === 2 && r === 3; }, how:"20 " + DIV + " 5 = 4 squares. Count 4 squares left from the fountain.",
+   near:function(c, r){ var f = fx("fountain"); return r === f.r && c < f.c ? "That is " + (f.c - c) + " squares west, which is " + (f.c - c) * SQ + " m. 20 m is how many squares?" : "Stay on the fountain's row and go left. Each square is 5 m."; }},
+  {k:"bakery", name:"Bakery", sym:"p-bakery", text:"Put the <b>bakery</b> 15 m south of the town hall. (South is down.)",
+   ok:function(c, r){ return c === 2 && r === 4; }, how:"15 " + DIV + " 5 = 3 squares. Count 3 squares down from the town hall.",
+   near:function(c, r){ var h = fx("hall"); return c === h.c && r > h.r ? "That is " + (r - h.r) + " squares south, which is " + (r - h.r) * SQ + " m. 15 m is how many squares?" : "Stay in the town hall's column and go down. Each square is 5 m."; }},
+  {k:"post", name:"Post box", sym:"p-post", text:"Put the <b>post box</b> exactly 10 m from the library, along a row or a column. There is more than one good spot.",
+   ok:function(c, r){ var l = fx("library"); return inLine(l, c, r) && Math.abs(l.c - c) + Math.abs(l.r - r) === 2; }, how:"10 " + DIV + " 5 = 2 squares. Count 2 squares left, right, up or down from the library.",
+   near:function(c, r){ var l = fx("library"); return inLine(l, c, r) ? "That is " + (Math.abs(l.c - c) + Math.abs(l.r - r)) + " squares from the library, which is " + (Math.abs(l.c - c) + Math.abs(l.r - r)) * SQ + " m." : "Line it up with the library first, in its row or its column."; }},
+  {k:"play", name:"Play area", sym:"p-play", text:"Put the <b>play area</b> on the school's row, 25 m from the school and 25 m from the bus stop.",
+   ok:function(c, r){ return c === 6 && r === 6; }, how:"School to bus stop is 10 squares, so 50 m. Half of 50 is 25 m, which is 5 squares from each.",
+   near:function(c, r){ var s = fx("school"); return r === s.r ? "That is " + Math.abs(c - s.c) * SQ + " m from the school and " + Math.abs(11 - c) * SQ + " m from the bus stop. Look for the spot where they match." : "Stay on the school's row."; }},
+  {k:"bike", name:"Bike rack", sym:"p-bike", text:"Put the <b>bike rack</b> 5 m from the bus stop. Not on the road.",
+   ok:function(c, r){ var b = fx("stop"); return Math.abs(b.c - c) + Math.abs(b.r - r) === 1; }, how:"5 m is 1 square. Right next to the bus stop, above it or to its left.",
+   near:function(c, r){ var b = fx("stop"); var d = Math.abs(b.c - c) + Math.abs(b.r - r); return "That is " + d + " squares away by the paths, " + d * SQ + " m. 5 m is just 1 square."; }},
+  {k:"pond", name:"Duck pond", sym:"p-pond", text:"Put the <b>duck pond</b> 15 m north of the fountain. (North is up.)",
+   ok:function(c, r){ return c === 6 && r === 0; }, how:"15 " + DIV + " 5 = 3 squares. Count 3 squares up from the fountain.",
+   near:function(c, r){ var f = fx("fountain"); return c === f.c && r < f.r ? "That is " + (f.r - r) + " squares north, " + (f.r - r) * SQ + " m. 15 m is how many squares?" : "Stay in the fountain's column and go up."; }},
+  {k:"benchs", name:"Bench", sym:"p-benchs", text:"Put a <b>bench</b> anywhere at least 20 m (in a straight line) from both the town hall and the school. Lots of spots work.",
+   ok:function(c, r){ return sqd(fx("hall"), c, r) * SQ >= 20 - 1e-9 && sqd(fx("school"), c, r) * SQ >= 20 - 1e-9; },
+   how:"20 m is 4 squares. Any square 4 or more squares away from both (a corner on the far side is safe).",
+   near:function(c, r){ var a = sqd(fx("hall"), c, r) * SQ, b = sqd(fx("school"), c, r) * SQ; return "From there the town hall is about " + Math.round(a) + " m and the school about " + Math.round(b) + " m away. Both need to be 20 m or more."; }}
+];
+var PL = {sel:null, cur:{c:0, r:0}, shown:false};
+function occupied(c, r){
+  if (r === 7) return "road";
+  for (var i = 0; i < FIXED.length; i++) if (FIXED[i].c === c && FIXED[i].r === r) return FIXED[i].name;
+  for (var k in S.placed) if (S.placed.hasOwnProperty(k) && S.placed[k].c === c && S.placed[k].r === r) return briefByKey(k).name;
+  for (var j = 0; j < S.deco.length; j++) if (S.deco[j].c === c && S.deco[j].r === r) return "Tree";
+  return null;
+}
+function briefByKey(k){ for (var i = 0; i < BRIEFS.length; i++) if (BRIEFS[i].k === k) return BRIEFS[i]; return null; }
+function renderPlan(){
+  var h = "", B = BRIEFS[S.brief % BRIEFS.length];
+  for (var r = 0; r < PH; r++) for (var c = 0; c < PW; c++){
+    var sym = null, lab = "empty", fixed = false;
+    FIXED.forEach(function(f){ if (f.c === c && f.r === r){ sym = f.sym; lab = f.name; fixed = true; } });
+    for (var k in S.placed) if (S.placed.hasOwnProperty(k) && S.placed[k].c === c && S.placed[k].r === r){ sym = briefByKey(k).sym; lab = briefByKey(k).name; }
+    S.deco.forEach(function(d){ if (d.c === c && d.r === r){ sym = "p-tree"; lab = "tree"; } });
+    var cls = "pc" + (r === 7 ? " road" : "") + (fixed ? " fixed" : "") + (PL.shown && B.ok(c, r) && !occupied(c, r) ? " target" : "");
+    var tab = (c === PL.cur.c && r === PL.cur.r) ? 0 : -1;
+    h += '<button type="button" role="gridcell" class="' + cls + '" data-c="' + c + '" data-r="' + r + '" tabindex="' + tab + '" aria-label="Column ' + (c + 1) + ", row " + (r + 1) + ", " + (r === 7 && !sym ? "road" : lab) + '">' +
+      (sym ? '<svg aria-hidden="true"><use href="#' + sym + '"/></svg>' : "") + "</button>";
+  }
+  $("#pGrid").innerHTML = h;
+  $("#planBrief").innerHTML = "<b>Brief " + ((S.brief % BRIEFS.length) + 1) + " of " + BRIEFS.length + ":</b> " + B.text + (S.placed[B.k] ? " <b>Done &#10003;</b>" : "");
+  var p = '<span class="lab">Tap a piece, then a square.</span>';
+  p += '<button type="button" class="pal" data-p="' + B.k + '" aria-pressed="' + (PL.sel === B.k ? "true" : "false") + '"><svg aria-hidden="true"><use href="#' + B.sym + '"/></svg><span>' + B.name + "<small>for this brief</small></span></button>";
+  p += '<button type="button" class="pal" data-p="tree" aria-pressed="' + (PL.sel === "tree" ? "true" : "false") + '"><svg aria-hidden="true"><use href="#p-tree"/></svg><span>Tree<small>just for fun, anywhere</small></span></button>';
+  p += '<button type="button" class="pal" data-p="rubber" aria-pressed="' + (PL.sel === "rubber" ? "true" : "false") + '"><svg aria-hidden="true" viewBox="0 0 40 40"><rect x="6" y="14" width="28" height="14" rx="3" transform="rotate(-20 20 20)" fill="#f7c6d9" stroke="#0a2f38" stroke-width="2.4"/></svg><span>Rubber<small>remove a tree or piece</small></span></button>';
+  $("#pPal").innerHTML = p;
+}
+function planPlace(c, r){
+  var B = BRIEFS[S.brief % BRIEFS.length], fb = $("#planFb"), occ = occupied(c, r);
+  if (!PL.sel){ PL.sel = B.k; }
+  if (PL.sel === "rubber"){
+    var gone = false;
+    S.deco = S.deco.filter(function(d){ if (d.c === c && d.r === r){ gone = true; return false; } return true; });
+    for (var k in S.placed) if (S.placed.hasOwnProperty(k) && S.placed[k].c === c && S.placed[k].r === r){ delete S.placed[k]; gone = true; }
+    save(); renderPlan(); focusCell(c, r);
+    fb.className = "fb info"; fb.textContent = gone ? "Rubbed out." : "Nothing of yours to rub out there.";
+    return;
+  }
+  if (PL.sel === "tree"){
+    if (occ){ fb.className = "fb info"; fb.textContent = "That square has the " + occ.toLowerCase() + " on it. Pick an empty one."; return; }
+    S.deco.push({c:c, r:r}); save(); renderPlan(); focusCell(c, r);
+    fb.className = "fb info"; fb.textContent = "A tree. Lovely. Jay says birds will love it.";
+    return;
+  }
+  if (occ && !(S.placed[B.k] && S.placed[B.k].c === c && S.placed[B.k].r === r)){ fb.className = "fb info"; fb.textContent = "That square has the " + occ.toLowerCase() + " on it. Pick an empty one."; return; }
+  if (B.ok(c, r)){
+    var first = !S.placed[B.k];
+    S.placed[B.k] = {c:c, r:r}; PL.shown = false; save(); renderPlan(); focusCell(c, r);
+    fb.className = "fb ok"; fb.innerHTML = "<b>" + pick(YES) + "</b> The " + B.name.toLowerCase() + " is in. " + B.how;
+    sparkle($("#pGrid").parentNode);
+    if (first){ note("plan", "Brief " + ((S.brief % BRIEFS.length) + 1) + " (" + B.name + "): placed it right"); win("plan"); }
+  } else {
+    fb.className = "fb no"; fb.innerHTML = "<b>" + pick(TRY) + "</b> " + B.near(c, r);
+    note("plan", "Brief " + ((S.brief % BRIEFS.length) + 1) + " (" + B.name + "): tried column " + (c + 1) + ", row " + (r + 1));
+  }
+}
+function focusCell(c, r){ PL.cur = {c:c, r:r}; $$("#pGrid .pc").forEach(function(b){ b.tabIndex = (+b.getAttribute("data-c") === c && +b.getAttribute("data-r") === r) ? 0 : -1; }); var t = $('#pGrid .pc[data-c="' + c + '"][data-r="' + r + '"]'); if (t) t.focus(); }
+$("#pGrid").addEventListener("click", function(e){ var b = e.target.closest(".pc"); if (b) planPlace(+b.getAttribute("data-c"), +b.getAttribute("data-r")); });
+$("#pGrid").addEventListener("keydown", function(e){
+  var c = PL.cur.c, r = PL.cur.r;
+  if (e.key === "ArrowLeft") c = Math.max(0, c - 1); else if (e.key === "ArrowRight") c = Math.min(PW - 1, c + 1);
+  else if (e.key === "ArrowUp") r = Math.max(0, r - 1); else if (e.key === "ArrowDown") r = Math.min(PH - 1, r + 1);
+  else return;
+  e.preventDefault(); focusCell(c, r);
+});
+$("#pPal").addEventListener("click", function(e){ var b = e.target.closest(".pal"); if (!b) return; PL.sel = b.getAttribute("data-p"); renderPlan(); var nb = $('.pal[data-p="' + PL.sel + '"]'); if (nb) nb.focus(); });
+$("#planHow").addEventListener("click", function(){
+  var B = BRIEFS[S.brief % BRIEFS.length]; PL.shown = true; renderPlan();
+  $("#planFb").className = "fb info"; $("#planFb").innerHTML = "<b>Here is one way.</b> " + B.how + " Good spots are pulsing purple.";
+  note("plan", "Brief " + ((S.brief % BRIEFS.length) + 1) + " (" + B.name + "): looked at the method");
+});
+$("#planSkip").addEventListener("click", function(){ S.brief = (S.brief + 1) % BRIEFS.length; PL.sel = BRIEFS[S.brief].k; PL.shown = false; save(); renderPlan(); $("#planFb").className = "fb"; $("#planFb").innerHTML = ""; });
+$("#planClear").addEventListener("click", function(){ S.placed = {}; S.deco = []; PL.shown = false; save(); renderPlan(); $("#planFb").className = "fb info"; $("#planFb").textContent = "Cleared. The council buildings stay."; });
+
+var PLANQ = [
+  {text:"On the plan, how far is the <b>town hall</b> from the <b>library</b> in real life? (Count squares along the row.)", ans:40, how:"8 squares " + X + " 5 m = <b>40 m</b>.", sq:8},
+  {text:"How far is the <b>school</b> from the <b>bus stop</b> in real life?", ans:50, how:"10 squares " + X + " 5 m = <b>50 m</b>.", sq:10},
+  {text:"The whole plan is 12 squares wide. How wide is the real town square?", ans:60, how:"12 " + X + " 5 = <b>60 m</b>.", sq:12},
+  {text:"The plan is 8 squares tall. How tall is the real area, north to south?", ans:40, how:"8 " + X + " 5 = <b>40 m</b>.", sq:8},
+  {text:"Walk from the <b>town hall</b> to the <b>fountain</b> along the grid: 4 squares east, then 2 squares south. How far do you walk?", ans:30, how:"4 + 2 = 6 squares. 6 " + X + " 5 = <b>30 m</b>.", sq:6},
+  {text:"A new path will be 35 m long in real life. How many squares long is it on the plan?", ans:7, kind:"num", suffix:"squares", how:"Going onto the plan, divide: 35 " + DIV + " 5 = <b>7 squares</b>.", back:true},
+  {text:"The plan is 1 : 500. So 1 cm on the plan is 500 cm in real life. How many <b>metres</b> is that?", ans:5, how:"100 cm is 1 m, so 500 cm " + DIV + " 100 = <b>5 m</b>."},
+  {text:"The duck pond will be 15 m from the fountain. How many squares is that on the plan?", ans:3, kind:"num", suffix:"squares", how:"15 " + DIV + " 5 = <b>3 squares</b>.", back:true}
+];
+function genPlan(i){
+  var b = PLANQ[i % PLANQ.length], q = {};
+  q.tag = "Measure &middot; " + ((i % PLANQ.length) + 1) + " of " + PLANQ.length;
+  q.text = b.text; q.ans = b.ans; q.kind = b.kind || "m"; q.method = b.how;
+  if (b.suffix) q.suffix = b.suffix; else q.units = ["m"];
+  q.hint = function(v){
+    if (b.back){ if (Math.abs(v - b.ans * 25) < 1e-6) return "That multiplied. Going from real metres onto the plan, divide by 5."; return "Each square is 5 m. How many 5s make it?"; }
+    if (b.sq && Math.abs(v - b.sq) < 1e-6) return b.sq + " is the number of squares. Each square is 5 m, so times by 5.";
+    return "Count the squares, then times by 5 for metres.";
+  };
+  q.log = plainText(b.text);
+  return q;
+}
+
+/* =========================================================
+   3. BUS DEPOT
+   Junction positions in map cm. Scale 1 : 10,000, so 1 cm = 100 m.
+   Every street length is a whole number of cm (the two
+   diagonals are 3, 4, 5 triangles).
+   ========================================================= */
+var JN = {
+  D:{x:1, y:1, name:"Depot"},      A:{x:5, y:1, name:"Market"},     B:{x:9, y:1, name:"Station", must:1},   C:{x:12, y:1, name:"Clock tower"},
+  E:{x:1, y:5, name:"Park gate"},  F:{x:5, y:5, name:"Crossroads"}, G:{x:9, y:5, name:"Cinema"},    H:{x:12, y:5, name:"Leisure centre", must:1},
+  I:{x:1, y:8, name:"Allotments"}, J:{x:5, y:8, name:"Library", must:1}, K:{x:9, y:8, name:"Pool"}, L:{x:12, y:8, name:"Hospital"}
+};
+var STREETS = [["D","A"],["A","B"],["B","C"],["E","F"],["F","G"],["G","H"],["I","J"],["J","K"],["K","L"],
+  ["D","E"],["E","I"],["A","F"],["F","J"],["B","G"],["G","K"],["C","H"],["H","L"],["E","J"],["F","K"]];
+function slen(a, b){ return Math.round(Math.hypot(JN[a].x - JN[b].x, JN[a].y - JN[b].y)); }
+function street(a, b){ return STREETS.some(function(s){ return (s[0] === a && s[1] === b) || (s[0] === b && s[1] === a); }); }
+var MPX = 44, MOX = 20, MOY = 14;
+function mx(k){ return MOX + JN[k].x * MPX; }
+function my(k){ return MOY + JN[k].y * MPX; }
+var BUS = {path:["D"], done:false};
+function busSVG(){
+  var s = '<svg viewBox="0 0 600 476" role="img" aria-label="Map of Tiny Town with streets between junctions. Scale 1 to 10,000."><g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">';
+  s += '<rect width="600" height="476" fill="#eef3dc"/>';
+  /* park and river decoration */
+  s += '<rect x="' + (mx("E") + 10) + '" y="' + (my("E") + 12) + '" width="140" height="100" rx="18" fill="#cfe5b4"/>';
+  s += '<path d="M600 40 C576 90 580 160 600 200" fill="none" stroke="#9fd3ec" stroke-width="14" opacity=".8"/>';
+  STREETS.forEach(function(st){
+    var a = st[0], b = st[1];
+    s += '<line x1="' + mx(a) + '" y1="' + my(a) + '" x2="' + mx(b) + '" y2="' + my(b) + '" stroke="#b9b2a4" stroke-width="16" stroke-linecap="round"/>';
+  });
+  STREETS.forEach(function(st){
+    var a = st[0], b = st[1], d = slen(a, b), x = (mx(a) + mx(b)) / 2, y = (my(a) + my(b)) / 2;
+    s += '<line x1="' + mx(a) + '" y1="' + my(a) + '" x2="' + mx(b) + '" y2="' + my(b) + '" stroke="#fffdf8" stroke-width="2" stroke-dasharray="6 6"/>';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="13" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><text x="' + x + '" y="' + (y + 6) + '" text-anchor="middle" font-size="16">' + d + "</text>";
+  });
+  /* route so far */
+  for (var i = 1; i < BUS.path.length; i++){
+    var p = BUS.path[i - 1], q = BUS.path[i];
+    s += '<line x1="' + mx(p) + '" y1="' + my(p) + '" x2="' + mx(q) + '" y2="' + my(q) + '" stroke="#ef7724" stroke-width="8" stroke-linecap="round" opacity=".85"/>';
+  }
+  var last = BUS.path[BUS.path.length - 1];
+  Object.keys(JN).forEach(function(k){
+    var j = JN[k], x = mx(k), y = my(k), isNext = !BUS.done && street(last, k), col = k === "D" ? "#ffc247" : j.must ? "#e0402a" : "#fffdf8";
+    s += '<g class="jn' + (isNext ? " next" : "") + '" data-j="' + k + '" role="button" tabindex="0" aria-label="' + j.name + (j.must ? ", a stop the bus has to visit" : "") + (isNext ? ", you can go here next" : "") + '">';
+    s += '<circle class="jring" cx="' + x + '" cy="' + y + '" r="22" fill="none" stroke="#7b4b8f" stroke-width="4"/>';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="15" fill="' + col + '" stroke="#0a2f38" stroke-width="3"/>';
+    s += '<text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle" font-size="14" fill="' + (j.must ? "#fffdf8" : "#0a2f38") + '">' + k + "</text>";
+    var ly = j.y === 8 ? y + 36 : y - 22, anchor = j.x === 12 ? "end" : j.x === 1 ? "start" : "middle", lx = j.x === 12 ? x + 14 : j.x === 1 ? x - 14 : x;
+    s += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" font-size="15" stroke="#eef3dc" stroke-width="4" paint-order="stroke">' + j.name + "</text>";
+    s += "</g>";
+  });
+  /* bus */
+  s += '<use href="#o-bus" x="' + (mx(last) + 4) + '" y="' + (JN[last].y === 8 ? my(last) - 36 : my(last) + 14) + '" width="44" height="18"/>';
+  /* scale bar */
+  s += '<g transform="translate(30 456)"><rect x="0" y="-8" width="44" height="9" fill="#0a2f38"/><rect x="44" y="-8" width="44" height="9" fill="#fffdf8" stroke="#0a2f38" stroke-width="2"/><rect x="88" y="-8" width="44" height="9" fill="#0a2f38"/>' +
+       '<text x="0" y="18" font-size="13" text-anchor="middle">0</text><text x="132" y="18" font-size="13" text-anchor="middle">300 m</text><text x="150" y="0" font-size="15">Scale 1 : 10,000 (1 cm = 100 m)</text></g>';
+  s += "</g></svg>";
+  return s;
+}
+function busLen(){ var t = 0; for (var i = 1; i < BUS.path.length; i++) t += slen(BUS.path[i - 1], BUS.path[i]); return t; }
+function busRender(){
+  $("#busBox").innerHTML = busSVG();
+  var h = '<span class="lab">Or tap a name:</span>', last = BUS.path[BUS.path.length - 1];
+  Object.keys(JN).forEach(function(k){ if (!BUS.done && street(last, k)) h += '<button type="button" class="cb" data-j="' + k + '">' + JN[k].name + " (" + slen(last, k) + " cm)</button>"; });
+  $("#busBtns").innerHTML = BUS.done ? "" : h;
+  var legs = "";
+  for (var i = 1; i < BUS.path.length; i++) legs += "<li>" + JN[BUS.path[i - 1]].name + " to " + JN[BUS.path[i]].name + ": " + slen(BUS.path[i - 1], BUS.path[i]) + " cm</li>";
+  $("#busLegs").innerHTML = legs;
+  $("#busSums").classList.toggle("hidden", !BUS.done);
+  var sv = "";
+  Object.keys(S.loops || {}).forEach(function(k){ var L = S.loops[k]; sv += "<li><b>" + L.name + "</b>: " + L.cm + " cm on the map, " + fmt(L.cm / 10) + " km" + (L.allOk ? " &#10003;" : "") + "</li>"; });
+  $("#busSaved").innerHTML = sv ? "<li><b>Your loops so far</b></li>" + sv : "";
+}
+function busStep(k){
+  var msg = $("#busMsg"), last = BUS.path[BUS.path.length - 1];
+  if (BUS.done){ msg.className = "fb info"; msg.textContent = "This loop is finished. Tap Start the loop again to try another."; return; }
+  if (!street(last, k)){ msg.className = "fb info"; msg.textContent = "There is no street straight from " + JN[last].name + " to " + JN[k].name + ". Pick one of the pulsing junctions."; return; }
+  if (k !== "D" && BUS.path.indexOf(k) >= 0){ msg.className = "fb info"; msg.textContent = "The bus has been to " + JN[k].name + " already. Try a different street."; return; }
+  if (k === "D"){
+    var missing = Object.keys(JN).filter(function(x){ return JN[x].must && BUS.path.indexOf(x) < 0; });
+    if (missing.length){ msg.className = "fb no"; msg.innerHTML = "<b>Not home yet.</b> The bus still needs to visit " + missing.map(function(x){ return JN[x].name; }).join(" and ") + "."; return; }
+  }
+  BUS.path.push(k);
+  if (k === "D"){
+    BUS.done = true;
+    msg.className = "fb ok"; msg.innerHTML = "<b>Back at the depot.</b> Loop made. Fancy working out how long it is?";
+    note("map", "Planned a bus loop: " + BUS.path.map(function(x){ return JN[x].name; }).join(", "));
+    sparkle($("#busBox").parentNode);
+  } else { msg.className = "fb"; msg.innerHTML = ""; }
+  busRender();
+  if (!BUS.done){ var n = $('#busBox .jn.next'); }
+}
+function loopKey(){ var p = BUS.path.slice(0, -1), r = p.slice().reverse(); r.unshift(r.pop()); var a = p.join(""), b = r.join(""); return a < b ? a : b; }
+$("#busBox").addEventListener("click", function(e){ var g = e.target.closest(".jn"); if (g) busStep(g.getAttribute("data-j")); });
+$("#busBox").addEventListener("keydown", function(e){ var g = e.target.closest(".jn"); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); var k = g.getAttribute("data-j"); busStep(k); var again = $('#busBox .jn[data-j="' + k + '"]'); if (again) again.focus(); } });
+$("#busBtns").addEventListener("click", function(e){ var b = e.target.closest("button[data-j]"); if (b){ busStep(b.getAttribute("data-j")); var f = $("#busBtns button"); if (f) f.focus(); } });
+$("#bUndo").addEventListener("click", function(){ if (BUS.path.length > 1){ BUS.path.pop(); BUS.done = false; busRender(); $("#busMsg").className = "fb"; $("#busMsg").innerHTML = ""; } });
+$("#bClear").addEventListener("click", function(){ BUS.path = ["D"]; BUS.done = false; ["bCm","bKm","bDay"].forEach(function(id){ $("#" + id).value = ""; }); $("#bFb").className = "fb"; $("#bFb").innerHTML = ""; busRender(); $("#busMsg").className = "fb"; $("#busMsg").innerHTML = ""; });
+function busCheck(show){
+  var cm = busLen(), fb = $("#bFb"), key = loopKey();
+  var vCm = PARSE.cm($("#bCm").value, "cm"), vKm = toMetres(cleanNum($("#bKm").value), "km"), vDay = toMetres(cleanNum($("#bDay").value), "km");
+  /* a bare number with no unit counts if it is right in km or in m */
+  function bareM(id){ var r = $("#" + id).value; return /[a-z]/i.test(r) ? null : toMetres(cleanNum(r), "m"); }
+  var mKm = bareM("bKm"), mDay = bareM("bDay");
+  var okCm = vCm !== null && Math.abs(vCm - cm) < 1e-6,
+      okKm = (vKm !== null && Math.abs(vKm - cm * 100) < 1e-6) || (mKm !== null && Math.abs(mKm - cm * 100) < 1e-6),
+      okDay = (vDay !== null && Math.abs(vDay - cm * 1000) < 1e-6) || (mDay !== null && Math.abs(mDay - cm * 1000) < 1e-6);
+  var how = "<div class=\"mth\"><span class=\"mthk\">One way to do it</span>Add the legs: " + BUS.path.slice(1).map(function(k, i){ return slen(BUS.path[i], k); }).join(" + ") + " = <b>" + cm + " cm</b>.<br>" +
+    "1 cm is 100 m, so " + cm + " " + X + " 100 = " + fmt(cm * 100) + " m = <b>" + fmt(cm / 10) + " km</b>.<br>" +
+    "10 loops: " + fmt(cm / 10) + " " + X + " 10 = <b>" + fmt(cm) + " km</b>. (Neat: the same number as the map cm.)</div>";
+  if (show){
+    fb.className = "fb info"; fb.innerHTML = "<b>Here is one way.</b>" + how;
+  } else if (okCm && okKm && okDay){
+    fb.className = "fb ok"; fb.innerHTML = "<b>" + pick(YES) + "</b> All three right. The bus drives " + fmt(cm) + " km a day." + how;
+    sparkle(fb.parentNode); win("map");
+  } else {
+    var t = [];
+    if (!okCm) t.push(vCm === null ? "Pop the map total in the first box." : "Map total: add up the leg numbers in the list above the boxes.");
+    else t.push("Map total is right.");
+    if (!okKm) t.push(vKm !== null && Math.abs(vKm - cm * 1000) < 1e-6 ? "Real length: check the zeros. 1 cm is 100 m, not 1 km." : vKm !== null && Math.abs(vKm - cm) < 1e-6 ? "Real length: that is the map cm. Times by 100 for metres." : "Real length: times the map cm by 100 for metres, then divide by 1,000 for km.");
+    else t.push("Real length is right.");
+    if (!okDay) t.push("10 loops: times the real length by 10. Give it in km.");
+    else t.push("10 loops is right.");
+    fb.className = "fb no"; fb.innerHTML = "<b>" + (okCm || okKm || okDay ? "Some of that is right." : "Not quite yet.") + "</b> " + t.join(" ");
+  }
+  var prev = S.loops[key] || {};
+  S.loops[key] = {name:BUS.path.map(function(x){ return JN[x].name; }).join(" > "), cm:cm, said:{cm:$("#bCm").value, km:$("#bKm").value, day:$("#bDay").value},
+    allOk:(okCm && okKm && okDay) || !!prev.allOk, shown:!!show || !!prev.shown};
+  note("map", "Loop " + cm + " cm: said map " + ($("#bCm").value || "-") + (okCm ? " (right)" : "") + ", real " + ($("#bKm").value || "-") + (okKm ? " (right)" : "") + ", 10 loops " + ($("#bDay").value || "-") + (okDay ? " (right)" : "") + (show ? ", looked at the method" : ""));
+  busRender();
+}
+$("#bCheck").addEventListener("click", function(){ busCheck(false); });
+$("#bShow").addEventListener("click", function(){ busCheck(true); });
+
+var MAPQ = [
+  {text:"Look at the scale. How far is <b>1 cm</b> on this map in real life?", ans:100, units:["m","km"], how:"1 : 10,000 means 1 cm is 10,000 cm. 10,000 " + DIV + " 100 = <b>100 m</b>."},
+  {text:"The street from the <b>Depot</b> to the <b>Market</b> is 4 cm on the map. How long is it in real life?", ans:400, units:["m","km"], how:"4 " + X + " 100 = <b>400 m</b>."},
+  {text:"<b>Station</b> to <b>Clock tower</b> is 3 cm on the map. How far is that really?", ans:300, units:["m","km"], how:"3 " + X + " 100 = <b>300 m</b>."},
+  {text:"Along the top street: <b>Depot</b> to <b>Market</b> to <b>Station</b> to <b>Clock tower</b>. How far is that in real life?", ans:1100, units:["m","km"], how:"4 + 4 + 3 = 11 cm. 11 " + X + " 100 = 1,100 m, which is <b>1.1 km</b>."},
+  {text:"A fun run is <b>1.2 km</b>. How long would it be on this map?", ans:0.12, kind:"m", units:["cm"], cmAns:12, how:"1.2 km = 1,200 m. Each cm is 100 m, so 1,200 " + DIV + " 100 = <b>12 cm</b>."},
+  {text:"From <b>Park gate</b> to <b>Library</b>: the diagonal path is 5 cm. Going round by the Allotments is 3 cm + 4 cm. How much further is going round, in real life?", ans:200, units:["m","km"], how:"Round is 3 + 4 = 7 cm. Diagonal is 5 cm. 7 " + MIN + " 5 = 2 cm, and 2 " + X + " 100 = <b>200 m</b>."},
+  {text:"<b>Cinema</b> to <b>Hospital</b>: the bus goes 3 cm east then 3 cm south. How far does the bus drive?", ans:600, units:["m","km"], how:"3 + 3 = 6 cm. 6 " + X + " 100 = <b>600 m</b>."},
+  {text:"A different map shows Tiny Town at <b>1 : 20,000</b>. Everything is half as long. How many cm would the 4 cm Depot to Market street be on that map?", ans:0.02, kind:"m", units:["cm"], cmAns:2, how:"1 : 20,000 is twice as zoomed out, so lengths halve: 4 " + DIV + " 2 = <b>2 cm</b>."}
+];
+function genMap(i){
+  var b = MAPQ[i % MAPQ.length], q = {};
+  q.tag = "Map task &middot; " + ((i % MAPQ.length) + 1) + " of " + MAPQ.length;
+  q.text = b.text; q.units = b.units; q.method = b.how;
+  if (b.cmAns){ q.kind = "cm"; q.ans = b.cmAns; }
+  else { q.kind = "m"; q.ans = b.ans; q.ansText = fmt(b.ans) + " m"; }
+  q.hint = function(v){
+    if (b.cmAns){ if (Math.abs(v - b.cmAns * 100) < 1e-6) return "That multiplied. Going onto the map, things get smaller, so divide."; return "How many lots of 100 m are in it?"; }
+    if (Math.abs(v - b.ans * 1000) < 1e-6 || Math.abs(v - b.ans / 1000) < 1e-6) return "The digits are right. Check the unit chip: is that m or km?";
+    if (Math.abs(v - b.ans / 100) < 1e-6) return "That is the map cm. Each cm is 100 m, so times by 100.";
+    return "Each map cm is 100 m in real life.";
+  };
+  q.log = plainText(b.text);
+  return q;
+}
+
+/* =========================================================
+   4. THE CAFE
+   ========================================================= */
+var MENU = [["f-tea","Tea",64],["f-choc","Hot chocolate",85],["f-toast","Toast",48],["f-flap","Flapjack",57],
+  ["f-fruit","Fruit pot",76],["f-juice","Orange juice",39],["f-cake","Cupcake",63],["f-soup","Tomato soup",94]];
+var GUESTS = ["A customer", "HB", "Jay", "A bus driver", "A shopkeeper", "A tourist", "Someone from the library"];
+function tens(n){ return n - n % 10; }
+function addWays(a, b){
+  var w = [];
+  w.push(["Split", tens(a) + " + " + tens(b) + " = " + (tens(a) + tens(b)) + ", then " + (a % 10) + " + " + (b % 10) + " = " + (a % 10 + b % 10) + ". " + (tens(a) + tens(b)) + " + " + (a % 10 + b % 10) + " = <b>" + (a + b) + "</b>."]);
+  w.push(["Jump", a + " + " + tens(b) + " = " + (a + tens(b)) + ", then add " + (b % 10) + ": <b>" + (a + b) + "</b>."]);
+  var r = Math.ceil(b / 10) * 10;
+  if (b % 10 >= 6) w.push(["Round and adjust", b + " is nearly " + r + ". " + a + " + " + r + " = " + (a + r) + ", then take off " + (r - b) + ": <b>" + (a + b) + "</b>."]);
+  if (Math.abs(a - b) <= 2) { var m = Math.min(a, b); w.push(["Near double", "Double " + m + " is " + (2 * m) + ", then add " + Math.abs(a - b) + ": <b>" + (a + b) + "</b>."]); }
+  return w;
+}
+function subWays(a, b){
+  var w = [];
+  w.push(["Jump back", a + " " + MIN + " " + tens(b) + " = " + (a - tens(b)) + ", then take " + (b % 10) + ": <b>" + (a - b) + "</b>."]);
+  var up1 = Math.ceil(b / 10) * 10, steps = [];
+  if (up1 > a) steps.push((a - b) + " to " + a);
+  else {
+    if (up1 > b) steps.push((up1 - b) + " to " + up1);
+    var t = tens(a); if (t > up1) steps.push((t - up1) + " to " + t);
+    if (a > Math.max(t, up1)) steps.push((a - Math.max(t, up1)) + " to " + a);
+  }
+  w.push(["Count up", "From " + b + ": " + steps.join(", ") + ". That is <b>" + (a - b) + "</b>."]);
+  if (b % 10 >= 6){ var r = up1; w.push(["Round and adjust", a + " " + MIN + " " + r + " = " + (a - r) + ", but that took " + (r - b) + " too many, so add it back: <b>" + (a - b) + "</b>."]); }
+  return w;
+}
+function changeWays(p){
+  var c = 100 - p, T = Math.ceil(p / 10) * 10, w = [];
+  if (p % 10) w.push(["Count up", p + "p + " + (T - p) + "p = " + T + "p, then " + T + "p + " + (100 - T) + "p = 100p. " + (T - p) + " + " + (100 - T) + " = <b>" + c + "p</b>."]);
+  if (p % 10) w.push(["Bonds check", "Ones make 10 (" + (p % 10) + " + " + (c % 10) + "), tens make 9 (" + Math.floor(p / 10) + " + " + Math.floor(c / 10) + "). So <b>" + c + "p</b>."]);
+  else w.push(["Bonds to 10", (p / 10) + " + " + (10 - p / 10) + " = 10, so " + p + "p + " + c + "p = 100p. <b>" + c + "p</b>."]);
+  w.push(["Take away", "100 " + MIN + " " + p + ": 100 " + MIN + " " + tens(p) + " = " + (100 - tens(p)) + (p % 10 ? ", then " + MIN + " " + (p % 10) + " = " + c : "") + ". <b>" + c + "p</b>."]);
+  return w;
+}
+function tray(items){ return '<div class="ticket"><div class="tray">' + items.map(function(m){ return '<svg aria-hidden="true"><use href="#' + m[0] + '"/></svg>'; }).join("") + "</div>"; }
+function genCafe(){
+  var mode = S.cafeMode, q = {}, g = pick(GUESTS);
+  if (mode === "bonds"){
+    var a = rnd(1, 9), big = Math.random() < 0.55;
+    if (big){
+      q.tag = "Bonds to 100";
+      var it = pick([["tea bags", "f-tea"], ["cupcake cases", "f-cake"], ["paper cups", "f-juice"]]);
+      q.text = tray([[it[1]]]) + "A box holds <b>100</b> " + it[0] + ". There are " + (a * 10) + " left. How many have been used?</div>";
+      q.ans = 100 - a * 10; q.suffix = it[0];
+      q.ways = [["Bonds to 10", a + " + " + (10 - a) + " = 10, so " + a + " tens + " + (10 - a) + " tens = 10 tens. <b>" + q.ans + "</b>."],
+                ["Count up in tens", "From " + (a * 10) + ", count up in tens to 100: that is " + (10 - a) + " tens, which is <b>" + q.ans + "</b>."]];
+      q.hint = function(v){ return v === 10 - a ? "That is the bond to 10. Now make it tens: " + (10 - a) + " tens." : "Think: " + a + " and what make 10? Then make it tens."; };
+      q.help = "Helper: " + a + " + ? = 10";
+    } else {
+      q.tag = "Bonds to 10";
+      q.text = tray([["f-cake"]]) + "The cake stand holds <b>10</b> cupcakes. " + g + " counts " + a + " on it. How many more fill it up?</div>";
+      q.ans = 10 - a; q.suffix = "cupcakes";
+      q.ways = [["Bond to 10", a + " + " + (10 - a) + " = 10. <b>" + (10 - a) + "</b>."], ["Count on", "Count on from " + a + " to 10 on your fingers: <b>" + (10 - a) + "</b>."]];
+      q.help = "Helper: the bonds to 10 are 1 + 9, 2 + 8, 3 + 7, 4 + 6, 5 + 5.";
+    }
+    q.kind = "num";
+  } else if (mode === "change"){
+    var m = pick(MENU), p = m[2];
+    if (Math.random() < 0.5){ do { p = rnd(11, 96); } while (p % 10 === 0 && Math.random() < 0.7); m = [m[0], m[1], p]; }
+    q.tag = "Change from " + PD + "1";
+    q.text = tray([m]) + g + " buys " + (/^[AEIOU]/i.test(m[1]) ? "an " : "a ") + m[1].toLowerCase() + " for <b>" + p + "p</b> and pays with a " + PD + "1 coin. How much change?</div>";
+    q.ans = 100 - p; q.kind = "pence"; q.suffix = "p"; q.ansText = (100 - p) + "p";
+    q.ways = changeWays(p);
+    q.help = "Helper: " + p + "p + " + (Math.ceil(p / 10) * 10 - p) + "p = " + Math.ceil(p / 10) * 10 + "p. Now jump in tens to 100p.";
+    q.hint = function(v){
+      var c = 100 - p;
+      if (p % 10 === 0){ if (Math.abs(v - c) === 10) return "So close. Check the tens: " + (p / 10) + " and what make 10?"; return "Think of bonds to 10: " + (p / 10) + " tens and how many tens make 10 tens?"; }
+      if (Math.abs(v - c) === 10) return "So close. The ones are right. Check the tens: they should make 9 with the " + Math.floor(p / 10) + ".";
+      if (v + p === 110) return "That makes 110p. Remember the tens make 9, not 10, because the ones already made a ten.";
+      return "Count up from " + p + "p to the next ten, then on to 100p.";
+    };
+  } else if (mode === "add"){
+    var two = shuffle(MENU.slice()).slice(0, 2), x = two[0][2], y = two[1][2];
+    q.tag = "Two things";
+    q.text = tray(two) + g + " orders " + two[0][1].toLowerCase() + " (" + x + "p) and " + two[1][1].toLowerCase() + " (" + y + "p). What is the total?</div>";
+    q.ans = x + y; q.kind = "pence"; q.units = null; q.suffix = "p"; q.ansText = money(x + y) + (x + y >= 100 ? " (" + (x + y) + "p)" : "");
+    q.ways = addWays(x, y);
+    q.help = "Helper: " + x + " + " + tens(y) + " = " + (x + tens(y)) + ". Now add " + (y % 10) + ".";
+    q.hint = function(v){ var d = v - (x + y); if (Math.abs(d) === 10) return "Really close, the ones are right. Check the tens."; if (Math.abs(d) < 10) return "Really close, only " + Math.abs(d) + "p out. Look at the ones again."; return "Add the tens, then the ones. Or try one of the helper ways."; };
+  } else {
+    var pr = shuffle(MENU.slice()).slice(0, 2).sort(function(u, v){ return v[2] - u[2]; }), hi = pr[0][2], lo = pr[1][2];
+    q.tag = "How much more";
+    q.text = tray(pr) + "How much more is " + pr[0][1].toLowerCase() + " (" + hi + "p) than " + pr[1][1].toLowerCase() + " (" + lo + "p)?</div>";
+    q.ans = hi - lo; q.kind = "pence"; q.suffix = "p"; q.ansText = (hi - lo) + "p";
+    q.ways = subWays(hi, lo);
+    q.help = "Helper: " + hi + " " + MIN + " " + tens(lo) + " = " + (hi - tens(lo)) + ". Now take away " + (lo % 10) + ".";
+    q.hint = function(v){ if (v === hi + lo) return "That added them. How much more means the difference: take away, or count up."; var d = v - (hi - lo); if (Math.abs(d) < 10) return "Close, " + Math.abs(d) + "p out. Check the ones."; return "Count up from " + lo + "p to " + hi + "p."; };
+  }
+  q.vis = S.cafeHelp && q.help ? '<p class="helper">' + q.help + "</p>" : "";
+  q.log = plainText(q.text) + (S.cafeHelp ? " [helper on]" : "");
+  return q;
+}
+function drawJar(){ var n = Math.min(S.jar || 0, 30), h = ""; for (var i = 0; i < n; i++) h += "<span></span>"; $("#cafeJar").innerHTML = h + (S.jar > 30 ? " +" + (S.jar - 30) : ""); }
+function drawMenu(){ $("#menuList").innerHTML = MENU.map(function(m){ return "<li><span>" + m[1] + "</span><span>" + m[2] + "p</span></li>"; }).join(""); }
+var runCafe;
+$$("#cafeModes [data-cm]").forEach(function(b){
+  b.addEventListener("click", function(){
+    S.cafeMode = b.getAttribute("data-cm"); save();
+    $$("#cafeModes [data-cm]").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    runCafe.next();
+  });
+});
+$("#cafeHelp").addEventListener("click", function(){
+  S.cafeHelp = !S.cafeHelp; save(); this.setAttribute("aria-pressed", S.cafeHelp ? "true" : "false");
+  var q = runCafe.current(); if (q) $("#runCafe .qvis").innerHTML = S.cafeHelp && q.help ? '<p class="helper">' + q.help + "</p>" : "";
+});
+
+/* =========================================================
+   5. THE TOY SHOP
+   ========================================================= */
+var TOYS = [["o-car","toy cars"],["i-kite","kites"],["o-bus","toy buses"],["o-dog","toy dogs"],["o-tree","model trees"],["o-house","model houses"]];
+function bw(m){ return m === 10 ? "tens" : m === 100 ? "hundreds" : "thousands"; }
+function genToy(){
+  var mode = S.toyMode, q = {}, t = pick(TOYS);
+  if (mode === "ten"){
+    var a = rnd(3, 99), m = pick([10, 100, 1000]), k = rnd(1, 4), pl = String(m).length - 1;
+    if (k === 1){ q.text = "A crate holds <b>" + a + "</b> " + t[1] + ". The shop orders <b>" + fmt(m) + "</b> crates. How many " + t[1] + "?"; q.suffix = t[1]; }
+    else if (k === 2){ a = rnd(2, 45); q.text = "Stickers come in packs of " + a + ". How many stickers in <b>" + fmt(m) + "</b> packs?"; q.suffix = "stickers"; }
+    else if (k === 3){ m = pick([10, 100]); a = rnd(12, 95); q.text = "A model train costs " + PD + a + ". How much for <b>" + m + "</b> of them?"; q.suffix = "pounds"; }
+    else { q.text = '<span class="big">' + a + " " + X + " " + fmt(m) + "</span>"; }
+    q.ans = a * m; q.kind = "num";
+    q.ways = [["Slide the digits", "Every digit moves " + pl + " place" + (pl > 1 ? "s" : "") + " to the left, and zeros fill the gaps: <b>" + fmt(a * m) + "</b>."]];
+    if (m > 10) q.ways.push(["Ten at a time", a + " " + X + " 10 = " + fmt(a * 10) + (m >= 100 ? ", " + X + " 10 again = " + fmt(a * 100) : "") + (m === 1000 ? ", " + X + " 10 again = " + fmt(a * 1000) : "") + "."]);
+    q.hint = function(v){ if (v * 10 === a * m) return "One place short. " + X + " " + fmt(m) + " moves the digits " + pl + " places."; if (v === a * m * 10) return "One place too far. Count the zeros in " + fmt(m) + "."; return "Times by 10 means one place left. Count the zeros in " + fmt(m) + "."; };
+    q.tag = X + " " + fmt(m);
+  } else if (mode === "bond"){
+    var mm = pick([10, 100, 1000]), w = bw(mm), kk = rnd(1, 4), x, y;
+    if (kk === 1){ x = rnd(1, 9); q.text = "The shop wants <b>" + fmt(10 * mm) + "</b> marbles. It has " + fmt(x * mm) + ". How many more does it need?"; q.ans = (10 - x) * mm; q.suffix = "marbles";
+      q.ways = [["Bonds to 10", x + " + " + (10 - x) + " = 10, so " + fmt(x * mm) + " + <b>" + fmt((10 - x) * mm) + "</b> = " + fmt(10 * mm) + "."], ["Count up in " + w, "From " + fmt(x * mm) + ", count up " + (10 - x) + " " + w + " to " + fmt(10 * mm) + "."]];
+      q.hint = function(v){ return v === 10 - x ? "That is the bond. Now make it " + w + "." : "Start with the bond: " + x + " + ? = 10."; };
+    } else if (kk === 2){ x = rnd(3, 9); y = rnd(2, 9); q.text = "Saturday the shop sells " + fmt(x * mm) + " stickers. Sunday it sells " + fmt(y * mm) + ". How many altogether?"; q.ans = (x + y) * mm; q.suffix = "stickers";
+      q.ways = [["Small sum first", x + " + " + y + " = " + (x + y) + ", so " + x + " " + w + " + " + y + " " + w + " = " + (x + y) + " " + w + ": <b>" + fmt((x + y) * mm) + "</b>."]];
+      if (x + y > 10) q.ways.push(["Make 10 first", x + " + " + (10 - x) + " = 10, then " + (y - (10 - x)) + " more: " + (x + y) + " " + w + "."]);
+      q.hint = function(v){ return "Do " + x + " + " + y + " first, then make it " + w + "."; };
+    } else if (kk === 3){ x = rnd(5, 9); y = rnd(1, x - 1); q.text = "There were " + fmt(x * mm) + " balloons. " + fmt(y * mm) + " have gone. How many are left?"; q.ans = (x - y) * mm; q.suffix = "balloons";
+      q.ways = [["Small sum first", x + " " + MIN + " " + y + " = " + (x - y) + ", so " + fmt((x - y) * mm) + "."], ["Count up", "From " + fmt(y * mm) + " count up in " + w + " to " + fmt(x * mm) + ": " + (x - y) + " " + w + "."]];
+      q.hint = function(v){ return "Do " + x + " " + MIN + " " + y + " first, then make it " + w + "."; };
+    } else { x = rnd(1, 9); q.text = '<span class="big">' + fmt(10 * mm) + " " + MIN + " " + fmt(x * mm) + "</span>"; q.ans = (10 - x) * mm;
+      q.ways = [["Bonds to 10", fmt(10 * mm) + " is 10 " + w + ". 10 " + MIN + " " + x + " = " + (10 - x) + ", so <b>" + fmt((10 - x) * mm) + "</b>."]];
+      q.hint = function(v){ return "10 " + w + " take away " + x + " " + w + "."; };
+    }
+    q.kind = "num"; q.tag = "Big bonds &middot; " + w;
+  } else if (mode === "dbl"){
+    var kd = rnd(1, 4), n;
+    if (kd === 1){ n = rnd(13, 49); q.text = "Yo-yos are " + n + "p each. How much for <b>2</b>?"; q.ans = 2 * n; q.kind = "pence"; q.suffix = "p"; q.ansText = money(2 * n);
+      q.ways = [["Double the tens and ones", "Double " + tens(n) + " is " + 2 * tens(n) + ", double " + (n % 10) + " is " + 2 * (n % 10) + ": <b>" + (2 * n) + "p</b>."], ["Add it twice", n + " + " + n + " = " + (2 * n) + "."]];
+    } else if (kd === 2){ n = rnd(12, 45); q.text = "A board game has " + n + " pieces. How many pieces in <b>4</b> games?"; q.ans = 4 * n; q.suffix = "pieces";
+      q.ways = [["Double, double", "Double " + n + " is " + 2 * n + ", double again is <b>" + 4 * n + "</b>."], ["Split", "4 " + X + " " + tens(n) + " = " + 4 * tens(n) + ", 4 " + X + " " + (n % 10) + " = " + 4 * (n % 10) + ", total <b>" + 4 * n + "</b>."]];
+    } else if (kd === 3){ n = rnd(6, 48) * 2; q.text = "A puzzle costs " + PD + n + ". Half price in the sale! What does it cost now?"; q.ans = n / 2; q.suffix = "pounds";
+      q.ways = [["Halve the tens and ones", "Half of " + tens(n) + " is " + tens(n) / 2 + ", half of " + (n % 10) + " is " + (n % 10) / 2 + ": <b>" + PD + (n / 2) + "</b>."], ["Think of doubles", "What doubles to make " + n + "? " + (n / 2) + " + " + (n / 2) + " = " + n + "."]];
+      if (tens(n) % 20 && n > 20) q.ways[0] = ["Split it nicely", n + " = " + (tens(n) - 10) + " + " + (n % 10 + 10) + ". Half of each: " + (tens(n) - 10) / 2 + " + " + (n % 10 + 10) / 2 + " = <b>" + PD + (n / 2) + "</b>."];
+    } else { n = rnd(12, 48) * 2; q.text = "Bouncy balls come in nets of " + n + ". How many in <b>5</b> nets?"; q.ans = 5 * n; q.suffix = "balls";
+      q.ways = [["Times 10, then halve", "10 " + X + " " + n + " = " + 10 * n + ", half of that is <b>" + 5 * n + "</b>."], ["Halve, then times 10", "Half of " + n + " is " + n / 2 + ", " + X + " 10 = <b>" + 5 * n + "</b>."]];
+    }
+    q.kind = q.kind || "num"; q.tag = "Doubling and halving";
+    q.hint = function(v){ return "Try doubling (or halving) the tens, then the ones."; };
+  } else {
+    var kn = rnd(1, 3), b2;
+    if (kn === 1){ b2 = rnd(12, 39); var nine = pick([9, 11]); q.text = "Bags of " + b2 + " marbles. How many marbles in <b>" + nine + "</b> bags?"; q.ans = nine * b2; q.suffix = "marbles";
+      q.ways = [["Do 10, then adjust", "10 " + X + " " + b2 + " = " + 10 * b2 + ", then " + (nine === 9 ? MIN : "+") + " one more " + b2 + ": <b>" + nine * b2 + "</b>."], ["Split", nine + " " + X + " " + tens(b2) + " = " + nine * tens(b2) + ", " + nine + " " + X + " " + (b2 % 10) + " = " + nine * (b2 % 10) + ", total <b>" + nine * b2 + "</b>."]];
+      q.hint = function(v){ if (v === 10 * b2) return "That is 10 bags. Now " + (nine === 9 ? "take one bag off" : "add one more bag") + "."; return "Try 10 bags first, then adjust by one bag."; };
+    } else if (kn === 2){ var cnt = rnd(2, 6), pr2 = pick([99, 199, 299]); q.text = "Toy cars cost " + money(pr2) + " each. How much for <b>" + cnt + "</b>?"; q.ans = cnt * pr2; q.kind = "pence"; q.suffix = "(pounds or pence)"; q.ansText = money(cnt * pr2);
+      q.ways = [["Round and adjust", money(pr2 + 1) + " each would be " + money(cnt * (pr2 + 1)) + ". That is " + cnt + "p too much, so <b>" + money(cnt * pr2) + "</b>."], ["Split", cnt + " " + X + " " + money(pr2 + 1) + ", take away " + cnt + " " + X + " 1p."]];
+      q.hint = function(v){ if (v === cnt * (pr2 + 1)) return "That treats them as " + money(pr2 + 1) + ". Take off 1p for each car."; return "Pretend they cost " + money(pr2 + 1) + ", then take 1p off for each one."; };
+    } else { var aa = rnd(120, 480), bb = pick([99, 199, 98]); q.text = "The shop had " + aa + " stickers and gets <b>" + bb + "</b> more. How many now?"; q.ans = aa + bb; q.suffix = "stickers";
+      var rr = Math.ceil(bb / 100) * 100; q.ways = [["Round and adjust", aa + " + " + rr + " = " + (aa + rr) + ", then take off " + (rr - bb) + ": <b>" + (aa + bb) + "</b>."], ["Split", aa + " + " + (bb - bb % 10) + " = " + (aa + bb - bb % 10) + ", + " + (bb % 10) + " = " + (aa + bb) + "."]];
+      q.hint = function(v){ return bb + " is nearly " + rr + ". Add " + rr + ", then take off " + (rr - bb) + "."; };
+    }
+    q.kind = q.kind || "num"; q.tag = "Near multiples";
+  }
+  q.log = plainText(q.text);
+  return q;
+}
+function drawShelf(){
+  var n = Math.min(S.stock || 0, 24), s = '<rect x="0" y="0" width="600" height="150" fill="#fbe3d2"/>';
+  s += '<rect x="10" y="66" width="580" height="8" fill="#8a5a33"/><rect x="10" y="136" width="580" height="8" fill="#8a5a33"/>';
+  for (var i = 0; i < n; i++){
+    var t = TOYS[i % TOYS.length], row = i < 12 ? 0 : 1, col = i % 12;
+    s += '<use href="#' + t[0] + '" x="' + (18 + col * 47) + '" y="' + (row ? 96 : 26) + '" width="40" height="40"/>';
+  }
+  s += '<text x="590" y="20" text-anchor="end" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="15" fill="#0a2f38">' + (n ? (S.stock || 0) + " on the shelves" : "Empty shelves. Every right answer adds a toy.") + "</text>";
+  $("#shelfSvg").innerHTML = s;
+}
+var runToy;
+$$("#toyModes .cb").forEach(function(b){
+  b.addEventListener("click", function(){
+    S.toyMode = b.getAttribute("data-tm"); save();
+    $$("#toyModes .cb").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    runToy.next();
+  });
+});
+
+/* Price rules in words */
+var RULES = {
+  carr:  {name:"Train set", words:"Cost in pounds = number of carriages " + X + " 4, plus 6 pounds for the engine", steps:[["x",4],["+",6]], inw:"carriages", outw:"pounds", lo:1, hi:9, sym:"carr"},
+  track: {name:"Track pieces", words:"Cost in pence = number of track pieces " + X + " 30", steps:[["x",30]], inw:"track pieces", outw:"pence", lo:1, hi:9, sym:"track"},
+  party: {name:"Party bags", words:"Cost in pounds = number of party bags " + X + " 3, take away 2 pounds off the whole order", steps:[["x",3],["-",2]], inw:"party bags", outw:"pounds", lo:2, hi:9, sym:"bag"}
+};
+function runR(r, n){ var v = n, out = [v]; r.steps.forEach(function(s){ v = s[0] === "x" ? v * s[1] : s[0] === "+" ? v + s[1] : v - s[1]; out.push(v); }); return out; }
+function rOut(r, v){ return r.outw === "pence" ? money(v) : PD + v; }
+function ruleUI(){
+  var r = RULES[S.rule];
+  $("#ruleWords").innerHTML = "<b>" + r.name + ":</b> " + r.words + ".";
+  var h = ""; Object.keys(RULES).forEach(function(k){ h += '<button type="button" class="cb" data-rule="' + k + '" aria-pressed="' + (k === S.rule ? "true" : "false") + '">' + RULES[k].name + "</button>"; });
+  $("#ruleChips").innerHTML = h;
+  S.tN = Math.max(r.lo, Math.min(r.hi, S.tN || 3));
+  $("#tN").textContent = S.tN; $("#tNWord").textContent = r.inw;
+  drawTrain();
+}
+function drawTrain(){
+  var r = RULES[S.rule], n = S.tN, s = '<rect width="600" height="120" fill="#fbe3d2"/><path d="M0 100h600" stroke="#8a5a33" stroke-width="5"/>';
+  for (var x = 4; x < 600; x += 18) s += '<rect x="' + x + '" y="100" width="10" height="6" fill="#8a5a33"/>';
+  var g = '<g font-family="Archivo, Arial, sans-serif" font-weight="800" fill="#0a2f38">';
+  if (r.sym === "carr"){
+    g += '<rect x="8" y="50" width="56" height="44" rx="6" fill="#e0402a" stroke="#0a2f38" stroke-width="2.5"/><rect x="38" y="32" width="22" height="22" fill="#e0402a" stroke="#0a2f38" stroke-width="2.5"/><rect x="14" y="38" width="12" height="14" fill="#3d5b64"/><circle cx="22" cy="96" r="8" fill="#0a2f38"/><circle cx="50" cy="96" r="8" fill="#0a2f38"/><text x="36" y="80" text-anchor="middle" font-size="13" fill="#fffdf8">' + PD + "6</text>";
+    for (var i = 0; i < n; i++){ var cx = 70 + i * 58; g += '<rect x="' + cx + '" y="56" width="52" height="38" rx="5" fill="' + ["#ffc247","#00a6c9","#7b4b8f","#8cc56a"][i % 4] + '" stroke="#0a2f38" stroke-width="2.5"/><circle cx="' + (cx + 12) + '" cy="96" r="7" fill="#0a2f38"/><circle cx="' + (cx + 40) + '" cy="96" r="7" fill="#0a2f38"/><text x="' + (cx + 26) + '" y="80" text-anchor="middle" font-size="13">' + PD + "4</text>"; }
+  } else if (r.sym === "track"){
+    for (var j = 0; j < n; j++){ var tx = 10 + j * 64; g += '<path d="M' + tx + " 70h58v20h-58z" + '" fill="#c08a52" stroke="#0a2f38" stroke-width="2.5"/><path d="M' + tx + " 76h58M" + tx + ' 84h58" stroke="#5d6d71" stroke-width="2.5"/><text x="' + (tx + 29) + '" y="62" text-anchor="middle" font-size="13">30p</text>'; }
+  } else {
+    for (var k = 0; k < n; k++){ var bx = 10 + k * 64; g += '<path d="M' + (bx + 6) + " 50h46l6 44h-58z" + '" fill="' + ["#ef7724","#7b4b8f","#00a6c9"][k % 3] + '" stroke="#0a2f38" stroke-width="2.5"/><path d="M' + (bx + 18) + " 50a11 11 0 0 1 22 0" + '" fill="none" stroke="#0a2f38" stroke-width="2.5"/><text x="' + (bx + 29) + '" y="80" text-anchor="middle" font-size="13" fill="#fffdf8">' + PD + "3</text>"; }
+    g += '<text x="590" y="30" text-anchor="end" font-size="14">' + MIN + " " + PD + "2 off the order</text>";
+  }
+  $("#trainSvg").innerHTML = '<g>' + s + g + "</g></g>";
+}
+function ring(){
+  var r = RULES[S.rule], n = S.tN, o = runR(r, n), lines = [], cur = n;
+  lines.push(n + " " + r.inw);
+  r.steps.forEach(function(st, i){ lines.push((st[0] === "x" ? X : st[0] === "+" ? "+" : MIN) + " " + st[1] + "  =  " + o[i + 1]); });
+  lines.push("TOTAL  " + rOut(r, o[o.length - 1]));
+  var box = $("#tReceipt"); box.classList.remove("hidden");
+  box.innerHTML = lines.map(function(l, i){ return '<span class="rl" style="animation-delay:' + (RM ? 0 : i * 0.25) + 's">' + esc(l) + "</span>"; }).join("");
+  note("toy", r.name + " till: " + n + " " + r.inw + " comes to " + rOut(r, o[o.length - 1]));
+}
+$("#ruleChips").addEventListener("click", function(e){ var b = e.target.closest("button[data-rule]"); if (!b) return; S.rule = b.getAttribute("data-rule"); save(); ruleUI(); $("#tReceipt").classList.add("hidden"); var nb = $('#ruleChips [data-rule="' + S.rule + '"]'); if (nb) nb.focus(); });
+$("#tMinus").addEventListener("click", function(){ var r = RULES[S.rule]; if (S.tN > r.lo){ S.tN--; save(); $("#tN").textContent = S.tN; drawTrain(); } });
+$("#tPlus").addEventListener("click", function(){ var r = RULES[S.rule]; if (S.tN < r.hi){ S.tN++; save(); $("#tN").textContent = S.tN; drawTrain(); } });
+$("#tRing").addEventListener("click", ring);
+function genRule(i){
+  var keys = Object.keys(RULES), r = RULES[keys[i % keys.length]], key = keys[i % keys.length], n = rnd(r.lo + 1, r.hi), o = runR(r, n), out = o[o.length - 1], q = {rk:key, n:n};
+  var back = r.steps.length === 2 && Math.random() < 0.35; q.back = back;
+  q.tag = r.name + (back ? " &middot; work backwards" : "");
+  if (!back){
+    q.text = r.words + ".<br>How much for <b>" + n + " " + r.inw + "</b>?";
+    q.ans = out; q.kind = r.outw === "pence" ? "pence" : "num"; q.suffix = r.outw === "pence" ? "p" : "pounds"; q.ansText = rOut(r, out);
+    var m = n + " " + r.inw; r.steps.forEach(function(st, j){ m += " " + AR(st) + " " + o[j + 1]; });
+    q.method = "Do the steps in order. " + m + ". So <b>" + rOut(r, out) + "</b>.";
+    q.hint = function(v){
+      if (r.steps.length === 2){ var wrongOrder = r.steps[1][0] === "+" ? (n + r.steps[1][1]) * r.steps[0][1] : (n - r.steps[1][1]) * r.steps[0][1]; if (Math.abs(v - wrongOrder) < 1e-6) return "That did the steps the other way round. Multiply first, then " + (r.steps[1][0] === "+" ? "add" : "take away") + "."; if (Math.abs(v - o[1]) < 1e-6) return "That is the first step done. Now the second step."; }
+      return "Start with " + n + " and do the steps in the order they are written.";
+    };
+  } else {
+    q.text = r.words + ".<br>Someone paid <b>" + rOut(r, out) + "</b>. How many " + r.inw + " did they buy?";
+    q.ans = n; q.kind = "num"; q.suffix = r.inw;
+    var undo = r.steps[1][0] === "+" ? "take away " + r.steps[1][1] : "add " + r.steps[1][1];
+    q.method = "Undo the steps backwards. " + out + ", " + undo + " = " + o[1] + ", then " + DIV + " " + r.steps[0][1] + " = <b>" + n + "</b>. Check: " + n + " " + X + " " + r.steps[0][1] + " = " + o[1] + ", " + (r.steps[1][0] === "+" ? "+" : MIN) + " " + r.steps[1][1] + " = " + out + ".";
+    q.hint = function(v){ return "Undo the last step first (" + undo + "), then divide by " + r.steps[0][1] + "."; };
+  }
+  q.log = plainText(q.text.replace("<br>", " "));
+  return q;
+}
+function AR(st){ return (st[0] === "x" ? X : st[0] === "+" ? "+" : MIN) + " " + st[1] + " ="; }
+
+/* =========================================================
+   6. SIGN WORKSHOP
+   Each sign has a base shape B (cells) and a scale factor k.
+   k >= 1: original is B, target is B made k times bigger.
+   k = 0.5: original is B made twice as big, target is B.
+   ========================================================= */
+var SIGNS = [
+  {name:"Arrow",  k:2,   col:"#ef7724", B:[[1,0],[0,1],[1,1],[2,1]]},
+  {name:"L sign", k:3,   col:"#7b4b8f", B:[[0,0],[0,1],[1,1]]},
+  {name:"T sign", k:2,   col:"#007291", B:[[0,0],[1,0],[2,0],[1,1],[1,2]]},
+  {name:"Gate",   k:0.5, col:"#4f9a46", B:[[0,0],[1,0],[2,0],[3,0],[0,1],[3,1]]},
+  {name:"Plus",   k:3,   col:"#e0402a", B:[[1,0],[0,1],[1,1],[2,1],[1,2]]},
+  {name:"Steps",  k:2,   col:"#f0a80f", B:[[0,0],[0,1],[1,1],[0,2],[1,2],[2,2]]}
+];
+function blowUp(B, s){ var out = []; B.forEach(function(c){ for (var i = 0; i < s; i++) for (var j = 0; j < s; j++) out.push([c[0] * s + i, c[1] * s + j]); }); return out; }
+function signOrig(sg){ return sg.k >= 1 ? sg.B : blowUp(sg.B, 2); }
+function signTarget(sg){ return sg.k >= 1 ? blowUp(sg.B, sg.k) : sg.B; }
+function dims(cells){ var xs = cells.map(function(c){ return c[0]; }), ys = cells.map(function(c){ return c[1]; }); return {w:Math.max.apply(null, xs) - Math.min.apply(null, xs) + 1, h:Math.max.apply(null, ys) - Math.min.apply(null, ys) + 1, x0:Math.min.apply(null, xs), y0:Math.min.apply(null, ys)}; }
+function norm(cells){ var d = dims(cells); return cells.map(function(c){ return (c[0] - d.x0) + "," + (c[1] - d.y0); }).sort().join(";"); }
+function kWord(k){ return k === 0.5 ? "one half" : String(k); }
+var EG = 12, EGD = {mode:null, dots:false, cur:{c:0, r:0}};
+function signUI(){
+  var h = ""; SIGNS.forEach(function(sg, i){ h += '<button type="button" class="cb" data-sign="' + i + '" aria-pressed="' + (i === S.sign ? "true" : "false") + '">' + sg.name + " &#215; " + (sg.k === 0.5 ? "&#189;" : sg.k) + (S.signsDone[i] ? " &#10003;" : "") + "</button>"; });
+  $("#signPick").innerHTML = h;
+  var sg = SIGNS[S.sign], o = signOrig(sg), d = dims(o), u = Math.floor(140 / Math.max(d.w, d.h, 4)), s = "";
+  var gw = Math.max(d.w, 4), gh = Math.max(d.h, 4);
+  for (var x = 0; x <= gw; x++) s += '<line x1="' + (10 + x * u) + '" y1="10" x2="' + (10 + x * u) + '" y2="' + (10 + gh * u) + '" stroke="#cfdfe3" stroke-width="1"/>';
+  for (var y = 0; y <= gh; y++) s += '<line x1="10" y1="' + (10 + y * u) + '" x2="' + (10 + gw * u) + '" y2="' + (10 + y * u) + '" stroke="#cfdfe3" stroke-width="1"/>';
+  o.forEach(function(c){ s += '<rect x="' + (10 + c[0] * u) + '" y="' + (10 + c[1] * u) + '" width="' + u + '" height="' + u + '" fill="' + sg.col + '" stroke="#0a2f38" stroke-width="1.5"/>'; });
+  $("#origSvg").innerHTML = s;
+  $("#origSvg").setAttribute("aria-label", "The original " + sg.name.toLowerCase() + ", " + d.w + " squares wide and " + d.h + " squares tall, made of " + o.length + " squares.");
+  $("#origWords").innerHTML = "<b>" + sg.name + "</b>: " + d.w + " wide, " + d.h + " tall. Make it with <b>scale factor " + (sg.k === 0.5 ? "&#189;" : sg.k) + "</b>.";
+  renderEGrid();
+}
+function paintedSet(){ var m = {}; (S.painted || []).forEach(function(k){ m[k] = 1; }); return m; }
+function renderEGrid(){
+  var p = paintedSet(), ghost = {}, sg = SIGNS[S.sign];
+  if (EGD.dots) signTarget(sg).forEach(function(c){ ghost[(c[0] + 1) + "," + (c[1] + 1)] = 1; });
+  var h = "";
+  for (var r = 0; r < EG; r++) for (var c = 0; c < EG; c++){
+    var k = c + "," + r;
+    h += '<button type="button" role="gridcell" class="ec' + (p[k] ? " on" : "") + (ghost[k] ? " ghost" : "") + '" data-k="' + k + '" tabindex="' + (c === EGD.cur.c && r === EGD.cur.r ? 0 : -1) + '" aria-pressed="' + (p[k] ? "true" : "false") + '" aria-label="Column ' + (c + 1) + ", row " + (r + 1) + '"></button>';
+  }
+  $("#eGrid").innerHTML = h;
+}
+function setCell(k, on){
+  var p = paintedSet();
+  if (on) p[k] = 1; else delete p[k];
+  S.painted = Object.keys(p); save();
+  var b = $('#eGrid .ec[data-k="' + k + '"]'); if (b){ b.classList.toggle("on", !!on); b.setAttribute("aria-pressed", on ? "true" : "false"); }
+}
+var eg = $("#eGrid");
+eg.addEventListener("pointerdown", function(e){
+  var b = e.target.closest(".ec"); if (!b) return;
+  e.preventDefault();
+  var k = b.getAttribute("data-k"), on = !paintedSet()[k];
+  EGD.mode = on; setCell(k, on);
+  var c = k.split(","); EGD.cur = {c:+c[0], r:+c[1]};
+});
+eg.addEventListener("pointermove", function(e){
+  if (EGD.mode === null) return;
+  var el = document.elementFromPoint(e.clientX, e.clientY), b = el && el.closest ? el.closest(".ec") : null;
+  if (b && eg.contains(b)) setCell(b.getAttribute("data-k"), EGD.mode);
+});
+document.addEventListener("pointerup", function(){ EGD.mode = null; });
+document.addEventListener("pointercancel", function(){ EGD.mode = null; });
+eg.addEventListener("click", function(e){
+  if (e.detail !== 0) return; /* mouse and touch are handled by pointerdown */
+  var b = e.target.closest(".ec"); if (!b) return;
+  var k = b.getAttribute("data-k"); setCell(k, !paintedSet()[k]);
+});
+eg.addEventListener("keydown", function(e){
+  var c = EGD.cur.c, r = EGD.cur.r;
+  if (e.key === "ArrowLeft") c = Math.max(0, c - 1); else if (e.key === "ArrowRight") c = Math.min(EG - 1, c + 1);
+  else if (e.key === "ArrowUp") r = Math.max(0, r - 1); else if (e.key === "ArrowDown") r = Math.min(EG - 1, r + 1);
+  else return;
+  e.preventDefault(); EGD.cur = {c:c, r:r};
+  $$("#eGrid .ec").forEach(function(b){ b.tabIndex = -1; });
+  var t = $('#eGrid .ec[data-k="' + c + "," + r + '"]'); t.tabIndex = 0; t.focus();
+});
+$("#signPick").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-sign]"); if (!b) return;
+  S.sign = +b.getAttribute("data-sign"); S.painted = []; EGD.dots = false; save(); signUI();
+  $("#eFb").className = "fb"; $("#eFb").innerHTML = ""; $("#eDots").textContent = "Show a dotted guide";
+  var nb = $('#signPick [data-sign="' + S.sign + '"]'); if (nb) nb.focus();
+});
+$("#eClear").addEventListener("click", function(){ S.painted = []; save(); renderEGrid(); $("#eFb").className = "fb"; $("#eFb").innerHTML = ""; });
+$("#eDots").addEventListener("click", function(){
+  EGD.dots = !EGD.dots; renderEGrid(); this.textContent = EGD.dots ? "Hide the dotted guide" : "Show a dotted guide";
+  if (EGD.dots) note("grow", SIGNS[S.sign].name + ": used the dotted guide");
+});
+function signCheck(){
+  var sg = SIGNS[S.sign], fb = $("#eFb"), cells = (S.painted || []).map(function(k){ var p = k.split(","); return [+p[0], +p[1]]; });
+  if (!cells.length){ fb.className = "fb info"; fb.textContent = "Paint some squares first, whenever you are ready. Tap or drag on the squared paper."; return; }
+  var t = signTarget(sg), d = dims(cells), td = dims(t), od = dims(signOrig(sg));
+  if (norm(cells) === norm(t)){
+    fb.className = "fb ok";
+    fb.innerHTML = "<b>" + pick(YES) + "</b> " + od.w + " " + X + " " + kWord(sg.k) + " = " + td.w + " wide and " + od.h + " " + X + " " + kWord(sg.k) + " = " + td.h + " tall. Same shape, " + (sg.k < 1 ? "smaller" : "bigger") + ". Sign up!";
+    sparkle(fb.parentNode);
+    if (!S.signsDone[S.sign]){ S.signsDone[S.sign] = 1; win("grow"); }
+    note("grow", sg.name + " " + X + " " + kWord(sg.k) + ": painted it right" + (EGD.dots ? " (with the guide)" : ""));
+    signUI();
+  } else {
+    var tips = [];
+    if (d.w !== td.w || d.h !== td.h) tips.push("Yours is " + d.w + " wide and " + d.h + " tall. The original is " + od.w + " wide and " + od.h + " tall, so " + X + " " + kWord(sg.k) + " makes it " + td.w + " by " + td.h + ".");
+    if (cells.length !== t.length) tips.push("You painted " + cells.length + " squares." + (sg.k > 1 ? " Each original square becomes a " + sg.k + " by " + sg.k + " block." : " Each 2 by 2 block of the original becomes 1 square."));
+    if (!tips.length) tips.push("The size is right. Check the shape: compare each part with the original.");
+    fb.className = "fb no"; fb.innerHTML = "<b>" + pick(TRY) + "</b> " + tips.join(" ") + " The dotted guide is there if you want it.";
+    note("grow", sg.name + " " + X + " " + kWord(sg.k) + ": had a go (" + d.w + " by " + d.h + ", " + cells.length + " squares)");
+  }
+}
+$("#eCheck").addEventListener("click", signCheck);
+
+/* Spot the true enlargement */
+var P3 = null;
+function rectSVG(w, h, col, u){ var W = 9 * u, H = 9 * u, s = '<svg viewBox="0 0 ' + (W + 4) + " " + (H + 4) + '" aria-hidden="true">'; for (var i = 0; i <= 9; i++){ s += '<line x1="' + (2 + i * u) + '" y1="2" x2="' + (2 + i * u) + '" y2="' + (H + 2) + '" stroke="#e1e8ea"/><line x1="2" y1="' + (2 + i * u) + '" x2="' + (W + 2) + '" y2="' + (2 + i * u) + '" stroke="#e1e8ea"/>'; }
+  return s + '<rect x="2" y="' + (H + 2 - h * u) + '" width="' + w * u + '" height="' + h * u + '" fill="' + col + '" stroke="#0a2f38" stroke-width="2"/></svg>'; }
+function p3New(){
+  var w, h, k = pick([2, 3, 0.5]), c, a, b;
+  if (k === 0.5){ do { w = pick([2, 4, 6, 8]); h = pick([2, 4, 6, 8]); } while (w === h); }
+  else { do { w = rnd(1, 3); h = rnd(1, 3); } while (w === h || w * k > 9 || h * k > 9); }
+  c = [w * k, h * k];
+  var dw = c[0] - w; a = [w + dw, h + dw];            /* added the same amount: wrong shape */
+  b = Math.random() < 0.5 ? [c[0], h] : [w, c[1]];      /* only one side changed */
+  var whyA = "that " + (dw < 0 ? "took " + (-dw) + " off" : "added " + dw + " to") + " each side instead of " + (k === 0.5 ? "halving" : "multiplying") + ", so the shape changed";
+  if (a[1] < 1 || a[1] > 9){ a = [c[0] + 1, c[1]]; whyA = "the height is right, but the width should be " + w + " " + X + " " + kWord(k) + " = " + c[0]; }
+  var opts = shuffle([{d:c, ok:true}, {d:a, why:whyA}, {d:b, why:"only one side was " + (k === 0.5 ? "halved" : "multiplied")}]);
+  P3 = {w:w, h:h, k:k, opts:opts, tries:[]};
+  $("#p3Lead").innerHTML = "The shop sign is <b>" + w + " by " + h + "</b>. Which one is it made with <b>scale factor " + (k === 0.5 ? "&#189;" : k) + "</b>?";
+  var u = 14, hh = "";
+  opts.forEach(function(o, i){ hh += '<button type="button" data-p3="' + i + '" aria-label="Option ' + "ABC"[i] + ": " + o.d[0] + " by " + o.d[1] + '">' + rectSVG(o.d[0], o.d[1], "#00a6c9", u) + "ABC"[i] + "</button>"; });
+  $("#p3").innerHTML = '<div style="grid-column:1/-1;font-size:.9rem">Original: ' + w + " wide, " + h + " tall</div>" + hh;
+  $("#p3Fb").className = "fb"; $("#p3Fb").innerHTML = "";
+}
+$("#p3").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-p3]"); if (!b || !P3) return;
+  var o = P3.opts[+b.getAttribute("data-p3")], fb = $("#p3Fb");
+  P3.tries.push(o.d[0] + " by " + o.d[1]);
+  if (o.ok){
+    b.classList.add("yes"); fb.className = "fb ok";
+    fb.innerHTML = "<b>" + pick(YES) + "</b> " + P3.w + " " + X + " " + kWord(P3.k) + " = " + o.d[0] + " and " + P3.h + " " + X + " " + kWord(P3.k) + " = " + o.d[1] + ". Both sides, same factor.";
+    note("grow", "Spot the enlargement (" + P3.w + " by " + P3.h + ", " + X + " " + kWord(P3.k) + "): picked " + P3.tries.join(", then ") + (P3.tries.length === 1 ? " (right first go)" : " (got there)"));
+    if (P3.tries.length === 1) win("grow");
+  } else {
+    b.classList.add("nope"); fb.className = "fb no"; fb.innerHTML = "<b>Not that one.</b> " + o.d[0] + " by " + o.d[1] + ": " + o.why + ". Have another look.";
+  }
+});
+$("#p3Next").addEventListener("click", p3New);
+
+function genGrow(i){
+  var t = i % 5, q = {};
+  if (t === 0){ var w = rnd(2, 9), k = pick([2, 3, 10]); q.text = "A sign is <b>" + w + " cm</b> wide. Enlarge it by scale factor <b>" + k + "</b>. How wide is it now?"; q.ans = w * k; q.kind = "cm"; q.units = ["cm"];
+    q.method = w + " " + X + " " + k + " = <b>" + w * k + " cm</b>."; q.hint = function(v){ return v === w + k ? "That added " + k + ". A scale factor multiplies." : "Multiply by " + k + "."; }; }
+  else if (t === 1){ var a = rnd(2, 6), kk = pick([2, 3, 4]); q.text = "A small sign is " + a + " squares tall. The big copy is <b>" + a * kk + " squares</b> tall, same shape. What is the scale factor?"; q.ans = kk; q.kind = "num"; q.suffix = "";
+    q.method = "How many times bigger? " + a * kk + " " + DIV + " " + a + " = <b>" + kk + "</b>."; q.hint = function(v){ return v === a * kk - a ? "That is how much taller it got. The scale factor is how many times bigger." : "Divide the new length by the old one."; }; }
+  else if (t === 2){ var e = rnd(2, 12) * 2; q.text = "A poster is <b>" + e + " cm</b> long. Shrink it with scale factor <b>one half</b>. How long now?"; q.ans = e / 2; q.kind = "cm"; q.units = ["cm"];
+    q.method = "Scale factor &#189; halves every length: " + e + " " + DIV + " 2 = <b>" + e / 2 + " cm</b>."; q.hint = function(v){ return v === e * 2 ? "That doubled it. One half makes it smaller." : "Halve it."; }; }
+  else if (t === 3){ var bw2 = rnd(2, 5), bh = rnd(2, 5); q.text = "A sign is " + bw2 + " cm by " + bh + " cm. With scale factor 3, what is the <b>perimeter</b> of the new sign (all the way round)?"; q.ans = 2 * 3 * (bw2 + bh); q.kind = "cm"; q.units = ["cm"];
+    q.method = "New sides: " + bw2 * 3 + " cm and " + bh * 3 + " cm. Round the edge: " + bw2 * 3 + " + " + bh * 3 + " + " + bw2 * 3 + " + " + bh * 3 + " = <b>" + 2 * 3 * (bw2 + bh) + " cm</b>."; q.hint = function(v){ return v === 2 * (bw2 + bh) ? "That is the old perimeter. Make the sides 3 times bigger first." : "Multiply both sides by 3, then add all four sides."; }; }
+  else { var mw = pick([3, 4, 5, 6]); q.text = "The model library is " + mw + " cm wide. The real library is scale factor <b>100</b> bigger. How wide is the real library?"; q.ans = mw; q.kind = "m"; q.units = ["m", "cm"];
+    q.method = mw + " " + X + " 100 = " + mw * 100 + " cm, which is <b>" + mw + " m</b>."; q.hint = function(v){ return "Multiply by 100, then change cm into m."; }; }
+  q.tag = "Sign sums &middot; " + (t + 1) + " of 5";
+  q.log = plainText(q.text);
+  return q;
+}
+
+/* =========================================================
+   7. PIP'S NOTEBOOK
+   ========================================================= */
+var PAGES = [
+  {title:"Model bus at 1 : 50", lines:["The real bus is 12 m long.", "12 m is 1,200 cm.", "1 : 50 means multiply by 50.", "1,200 " + X + " 50 = 60,000 cm. My model bus is 600 m long!"], bad:2,
+   ask:"How long should Pip's model bus be?", ans:24, kind:"cm", unit:"cm", why:"A model is smaller, so divide: 1,200 " + DIV + " 50 = 24 cm. (Divide by 100 is 12, double it is 24.)"},
+  {title:"Bus route on the 1 : 10,000 map", lines:["On the map: 3 cm + 4 cm + 2 cm.", "That is 9 cm altogether.", "1 cm is 100 m, so 9 " + X + " 100 = 90 m."], bad:2,
+   ask:"How long is the real route?", ans:900, kind:"m", unit:"m", why:"9 " + X + " 100 = 900 m, which is 0.9 km. Times 100 adds two zeros."},
+  {title:"Town square plan", lines:["The pond is 6 squares from the hall.", "Each square is 5 m.", "6 + 5 = 11, so the pond is 11 m away."], bad:2,
+   ask:"How far is the pond really?", ans:30, kind:"m", unit:"m", why:"6 squares of 5 m each: 6 " + X + " 5 = 30 m."},
+  {title:"Bigger shop sign", lines:["The sign is 2 squares by 3 squares.", "Scale factor 3, so add 3 to each side.", "The new sign is 5 by 6."], bad:1,
+   ask:"What should the 3 square side become?", ans:9, kind:"num", unit:"squares", why:"A scale factor multiplies: 3 " + X + " 3 = 9 (and 2 " + X + " 3 = 6). Adding changes the shape."},
+  {title:"Train set price", lines:["Cost = carriages " + X + " 4, plus 6 pounds.", "I want 5 carriages.", "5 + 6 = 11, then 11 " + X + " 4 = 44.", "So it costs " + PD + "44."], bad:2,
+   ask:"What should the train set cost?", ans:26, kind:"num", unit:"pounds", why:"Do the steps in the order written: 5 " + X + " 4 = 20, then add 6: " + PD + "26."},
+  {title:"Toy car crates", lines:["A crate holds 45 toy cars.", "100 crates is 45 " + X + " 100.", "45 " + X + " 100 = 450."], bad:2,
+   ask:"How many toy cars in 100 crates?", ans:4500, kind:"num", unit:"cars", why:X + " 100 moves every digit two places left: 4,500. 450 is only " + X + " 10."},
+  {title:"Cafe bill", lines:["Tea is 64p and a flapjack is 57p.", "60 + 50 = 110.", "4 + 7 = 11.", "110 + 11 = 111p."], bad:3,
+   ask:"What is the real total?", ans:121, kind:"pence", unit:"p", why:"110 + 11 = 121p, which is " + PD + "1.21. The split was right, the last add slipped."},
+  {title:"Change from " + PD + "1", lines:["Toast is 48p. I paid with " + PD + "1.", "48 up to 50 is 2.", "50 up to 100 is 50.", "Change is 2 + 50 = 62p."], bad:3,
+   ask:"How much change should Pip get?", ans:52, kind:"pence", unit:"p", why:"2 + 50 = 52p. Check: ones 8 + 2 = 10, tens 4 + 5 = 9."},
+  {title:"Balloon order", lines:["3,000 red balloons and 7,000 blue.", "3 + 7 = 10.", "So 3,000 + 7,000 = 1,000."], bad:2,
+   ask:"How many balloons altogether?", ans:10000, kind:"num", unit:"balloons", why:"3 thousands + 7 thousands = 10 thousands, which is 10,000."},
+  {title:"Halving the poster", lines:["The big poster is 8 squares by 6.", "Scale factor one half means halve each side.", "8 halved is 4, 6 halved is 2."], bad:2,
+   ask:"What should the 6 square side become?", ans:3, kind:"num", unit:"squares", why:"Half of 6 is 3. So the small poster is 4 by 3."}
+];
+var OP = {sel:-1};
+function oRender(){
+  var i = S.oPage % PAGES.length, P = PAGES[i], st = S.oops[i] || {};
+  $("#oPageN").textContent = i + 1; $("#oPageT").textContent = PAGES.length;
+  $("#oTitle").textContent = P.title;
+  var h = "<h4>Pip's working</h4><p style=\"margin:0 0 6px;font-size:.92rem\">Tap the line where it goes wrong.</p>";
+  P.lines.forEach(function(l, j){ h += '<button type="button" class="nline' + (st.found && j === P.bad ? (st.fixed ? " fixed" : "") : "") + '" data-l="' + j + '" aria-pressed="' + (st.found && j === P.bad ? "true" : "false") + '">' + esc(l) + "</button>"; });
+  if (st.fixed) h += '<p style="margin:8px 0 0"><span class="stamp">Fixed</span></p>';
+  $("#oNote").innerHTML = h;
+  $("#oFix").classList.toggle("hidden", !st.found || !!st.fixed);
+  $("#oUnit").textContent = P.unit; $("#oIn").value = "";
+  $("label[for=oIn] b").textContent = P.ask;
+  var fb = $("#oFb");
+  if (st.fixed){ fb.className = "fb ok"; fb.innerHTML = "<b>Sorted.</b> " + P.why; }
+  else if (st.found){ fb.className = "fb info"; fb.innerHTML = "<b>Yes, that is the wrong line.</b> Now fix it below."; }
+  else { fb.className = "fb"; fb.innerHTML = ""; }
+}
+$("#oNote").addEventListener("click", function(e){
+  var b = e.target.closest(".nline"); if (!b) return;
+  var i = S.oPage % PAGES.length, P = PAGES[i], j = +b.getAttribute("data-l"), st = S.oops[i] || (S.oops[i] = {tries:[]});
+  if (st.found){ return; }
+  if (j === P.bad){
+    st.found = true; save(); oRender();
+    note("oops", "Page " + (i + 1) + " (" + P.title + "): found the wrong line" + (st.tries.length ? " after checking " + st.tries.length + " other line" + (st.tries.length > 1 ? "s" : "") : " first go"));
+    $("#oIn").focus();
+  } else {
+    st.tries.push(j); save();
+    b.setAttribute("aria-pressed", "false");
+    $("#oFb").className = "fb no"; $("#oFb").innerHTML = "<b>That line is fine.</b> " + (j === 0 ? "It just tells us the facts." : "That bit checks out.") + " Is any answer silly? Try another line.";
+  }
+});
+function oCheck(){
+  var i = S.oPage % PAGES.length, P = PAGES[i], st = S.oops[i] || (S.oops[i] = {tries:[]}), raw = $("#oIn").value.trim(), fb = $("#oFb");
+  if (!raw){ fb.className = "fb info"; fb.textContent = "Pop an answer in the box first, whenever you are ready."; return; }
+  var v = PARSE[P.kind](raw, P.kind === "cm" ? "cm" : P.kind === "m" ? "m" : null);
+  if (v === null || isNaN(v)){ fb.className = "fb info"; fb.textContent = "I could not read that as a number. Digits work best."; return; }
+  st.said = (st.said || []).concat([raw]);
+  if (Math.abs(v - P.ans) < 1e-6){
+    st.fixed = true; save(); oRender(); sparkle($("#oNote")); win("oops");
+    note("oops", "Page " + (i + 1) + " (" + P.title + "): fixed it, said " + st.said.join(", then "));
+  } else {
+    save();
+    fb.className = "fb no"; fb.innerHTML = "<b>" + pick(TRY) + "</b> Redo just that line the right way. Is your answer sensible for a " + P.title.toLowerCase() + "?";
+  }
+}
+$("#oCheck").addEventListener("click", oCheck);
+$("#oIn").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); oCheck(); } });
+$("#oHow").addEventListener("click", function(){
+  var i = S.oPage % PAGES.length, P = PAGES[i], st = S.oops[i] || (S.oops[i] = {tries:[]});
+  st.found = true; st.shown = true; save(); oRender();
+  $("#oFb").className = "fb info"; $("#oFb").innerHTML = "<b>Here is one way.</b> The slip is in line " + (P.bad + 1) + ". " + P.why;
+  note("oops", "Page " + (i + 1) + " (" + P.title + "): looked at the method");
+});
+$("#oNext").addEventListener("click", function(){ S.oPage = (S.oPage + 1) % PAGES.length; save(); oRender(); });
+$("#oPrev").addEventListener("click", function(){ S.oPage = (S.oPage + PAGES.length - 1) % PAGES.length; save(); oRender(); });
+
+/* =========================================================
+   Summary and send
+   ========================================================= */
+function summary(noFlush){
+  if (!noFlush) RUNNERS.forEach(function(r){ r.flush(); });
+  var who = getWho(), L = [];
+  L.push("Tiny Town: build a model village (scale, maps, mental maths and formulas in words)");
+  L.push("Initials: " + (who || "not picked"));
+  L.push("");
+  L.push("Buildings tried:");
+  STAGES.forEach(function(s){
+    var n = S.tried[s.id] || 0, w = S.wins[s.id] || 0;
+    L.push("  " + s.n + ". " + s.name + ": " + (n ? n + " thing" + (n === 1 ? "" : "s") + " tried" + (w ? ", " + w + " sorted" : "") : "not tried this time"));
+  });
+  L.push("");
+  var made = Object.keys(S.made || {});
+  if (made.length) L.push("Models made: " + made.map(function(k){ var p = k.split(":"); return objById(p[0]).name.toLowerCase() + " at 1 : " + p[1]; }).join(", "));
+  var pl = Object.keys(S.placed || {});
+  if (pl.length) L.push("Plan briefs done: " + pl.map(function(k){ return briefByKey(k).name; }).join(", ") + (S.deco && S.deco.length ? " (plus " + S.deco.length + " tree" + (S.deco.length > 1 ? "s" : "") + " for fun)" : ""));
+  var sd = Object.keys(S.signsDone || {});
+  if (sd.length) L.push("Signs enlarged right: " + sd.map(function(i){ var g = SIGNS[+i]; return g.name + " " + X + " " + kWord(g.k); }).join(", "));
+  var fixed = Object.keys(S.oops || {}).filter(function(i){ return S.oops[i].fixed; });
+  if (fixed.length) L.push("Pip's pages fixed: " + fixed.map(function(i){ return +i + 1; }).join(", "));
+  if (S.jar) L.push("Cafe tips jar: " + S.jar + " customers served right");
+  if (S.stock) L.push("Toy shop shelves: " + S.stock + " stocked");
+  if (made.length || pl.length || sd.length || fixed.length || S.jar || S.stock) L.push("");
+  STAGES.forEach(function(s){
+    var lg = S.log[s.id];
+    if (lg && lg.length){ L.push("--- " + s.name + " ---"); lg.forEach(function(x){ L.push("  " + x); }); L.push(""); }
+  });
+  var lk = Object.keys(S.loops || {});
+  if (lk.length){
+    L.push("--- Bus loops planned ---");
+    lk.forEach(function(k){
+      var r = S.loops[k];
+      L.push("  " + r.name + " (" + r.cm + " cm on the map = " + fmt(r.cm * 100) + " m = " + fmt(r.cm / 10) + " km; 10 loops = " + fmt(r.cm) + " km)");
+      L.push("    said: map " + (r.said.cm || "-") + ", real " + (r.said.km || "-") + ", 10 loops " + (r.said.day || "-") + (r.allOk ? " (all right)" : "") + (r.shown ? ", looked at the method" : ""));
+    });
+    L.push("");
+  }
+  if (S.cafeWhy && S.cafeWhy.trim()){ L.push("Favourite mental method (in their words):"); L.push("  " + S.cafeWhy.trim()); L.push(""); }
+  if (S.pipTxt && S.pipTxt.trim()){ L.push("Tip for Pip (in their words):"); L.push("  " + S.pipTxt.trim()); L.push(""); }
+  L.push("Which building covers what:");
+  Object.keys(MILESTONE_STAGES).forEach(function(n){ var t = S.tried[STAGES[+n - 1].id] ? " [tried]" : ""; L.push("  " + n + ". " + MILESTONE_STAGES[n] + t); });
+  L.push("");
+  L.push("Milestones this links to:");
+  if (who && MS_RAW[who]){ L.push("  " + who + " 1: " + MS_RAW[who][0]); L.push("  " + who + " 2: " + MS_RAW[who][1]); }
+  else {
+    L.push("  Target: I can use scale factors, scale diagrams and maps.");
+    L.push("  I can work out mentally sums and differences of two 2 digit numbers, complements to 100, sums and differences of multiples of 10, 100 and 1,000 using bonds to 10, and multiply by 10, 100 and 1,000.");
+    L.push("  I can use simple formulas expressed in words for one or two step operations.");
+  }
+  return L.join("\n");
+}
+
+/* Start again */
+var rsArmed = false, rsT = null;
+$("#restartBtn").addEventListener("click", function(){
+  var b = this;
+  if (!rsArmed){ rsArmed = true; b.textContent = "Sure? Tap again to clear this page"; rsT = setTimeout(function(){ rsArmed = false; b.textContent = "Start again"; }, 4000); return; }
+  clearTimeout(rsT);
+  try { localStorage.removeItem(STORE); } catch(e){}
+  location.reload();
+});
+
+/* =========================================================
+   Boot
+   ========================================================= */
+buildTown();
+buildTiles();
+renderWho();
+
+$$("#mScales .cb").forEach(function(x){ x.setAttribute("aria-pressed", +x.getAttribute("data-sc") === S.mSc ? "true" : "false"); });
+$$("#mDir .cb").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-dir") === S.mDir ? "true" : "false"); });
+renderObjs();
+runModel = Runner($("#runModel"), {stage:"model", gen:genModel, onShow:modelShow, onCheck:modelCheck, nextLabel:"Another thing"});
+
+PL.sel = BRIEFS[S.brief % BRIEFS.length].k;
+renderPlan();
+Runner($("#runPlan"), {stage:"plan", gen:genPlan, nextLabel:"Next plan question"});
+
+busRender();
+Runner($("#runMap"), {stage:"map", gen:genMap, nextLabel:"Next map task"});
+
+drawMenu(); drawJar();
+$$("#cafeModes [data-cm]").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cm") === S.cafeMode ? "true" : "false"); });
+$("#cafeHelp").setAttribute("aria-pressed", S.cafeHelp ? "true" : "false");
+runCafe = Runner($("#runCafe"), {stage:"cafe", gen:genCafe, nextLabel:"Next customer", checkLabel:"Serve",
+  onSettle:function(q, shown){ if (!shown){ S.jar = (S.jar || 0) + 1; save(); drawJar(); } }});
+wireWriting("cafeWhy", "cafeStarters", "cafeWhy");
+
+drawShelf();
+$$("#toyModes .cb").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-tm") === S.toyMode ? "true" : "false"); });
+runToy = Runner($("#runToy"), {stage:"toy", gen:genToy, nextLabel:"Next order",
+  onSettle:function(q, shown){ if (!shown){ S.stock = (S.stock || 0) + 1; save(); drawShelf(); } }});
+ruleUI();
+Runner($("#runRule"), {stage:"toy", gen:genRule, nextLabel:"Another customer",
+  onShow:function(q){ S.rule = q.rk; if (!q.back) S.tN = q.n; ruleUI(); $("#tReceipt").classList.add("hidden"); },
+  onCheck:function(q, v, ok){ if (ok && !q.back) ring(); }});
+
+signUI(); p3New();
+Runner($("#runGrow"), {stage:"grow", gen:genGrow});
+
+oRender();
+wireWriting("pipTxt", "pipStarters", "pipTxt");
+
+if (window.Base5Send) Base5Send.mount(document.getElementById("sendHost"), {
+  tool: "Tiny Town", filename: "tiny-town",
+  getText: function(){ return summary(); }
+});
+var sw = document.getElementById("b5who");
+if (sw) sw.addEventListener("input", function(){ renderWho(); refreshProgress(); });
+$("#sumPrev").parentNode.parentNode.addEventListener("toggle", function(){ $("#sumPrev").textContent = summary(); });
+
+if (!stageById(S.cur)) S.cur = "model";
+go(S.cur, false);
+
+window.__tinytown = {S:S, go:go, summary:summary, PARSE:PARSE, gens:{model:genModel, plan:genPlan, map:genMap, cafe:genCafe, toy:genToy, rule:genRule, grow:genGrow},
+  BRIEFS:BRIEFS, PAGES:PAGES, SIGNS:SIGNS, signTarget:signTarget, JN:JN, slen:slen, busLen:busLen, BUS:BUS, P3:function(){ return P3; }, MILESTONE_STAGES:MILESTONE_STAGES, RUNNERS:RUNNERS};
+})();
+</script>
+</body>
+</html>

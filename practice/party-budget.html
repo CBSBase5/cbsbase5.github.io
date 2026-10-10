@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Party Budget - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Party Budget only. Shell, cards, tabs and buttons come from style.css */
+.pb .card{cursor:default}
+.pb .card p{font-size:1rem}
+.hidden{display:none!important}
+.pb-lead{font-size:1.04rem!important;line-height:1.55;max-width:62ch;margin:6px 0 10px!important}
+.pb-art svg{width:100%;height:auto;display:block}
+.pb-float{animation:pbFloat 3.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.pb-float.b{animation-delay:-1.2s;animation-duration:3.9s}
+.pb-float.c{animation-delay:-2.1s;animation-duration:3.1s}
+@keyframes pbFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(2deg)}}
+.pb-sway{animation:pbSway 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
+@keyframes pbSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.pb-hop{animation:pbHop 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes pbHop{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-6px) rotate(-5deg)}90%{transform:translateY(0)}}
+
+/* pills, picker */
+.pb-pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.pb-pill{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:.86rem;letter-spacing:.06em;padding:9px 15px;border-radius:999px;border:3px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:2px 3px 0 rgba(10,47,56,.2)}
+.pb-pill[aria-pressed="true"]{background:var(--orange);box-shadow:3px 4px 0 var(--ink)}
+.pb-ms{margin:14px 0 0;display:grid;gap:8px}
+.pb-ms div{background:rgba(255,255,255,.7);border:2px dashed var(--ink);border-radius:14px 10px 14px 10px;padding:10px 14px;font-size:.98rem}
+.pb-ms b{font-family:var(--display);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;display:block;opacity:.75}
+.pb-badge{display:inline-block;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;transform:rotate(-2deg);white-space:nowrap}
+.wtab .pb-star{display:inline-block;margin-left:6px;width:10px;height:10px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);vertical-align:middle}
+.wtab .pb-tick{margin-left:6px;color:#2e7d4f;font-weight:900}
+.wtab[aria-selected="true"] .pb-tick{color:var(--ink)}
+
+/* party picker: invitations */
+.pb-events{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:12px 0 4px}
+.pb-ev{display:flex;gap:12px;align-items:center;text-align:left;padding:12px;border:3px solid var(--ink);border-radius:6px;background:var(--white);color:var(--ink);cursor:pointer;font:inherit;box-shadow:3px 4px 0 rgba(10,47,56,.18);position:relative;transition:transform .14s;outline:2px dashed rgba(10,47,56,.25);outline-offset:-9px}
+.pb-ev:nth-child(1){transform:rotate(-1deg)}.pb-ev:nth-child(2){transform:rotate(.8deg)}.pb-ev:nth-child(3){transform:rotate(-.5deg)}
+.pb-ev:hover{transform:translateY(-3px) rotate(0)}
+.pb-ev svg{width:62px;height:62px;flex:none}
+.pb-ev b{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;display:block;font-size:1.02rem;line-height:1.1}
+.pb-ev small{display:block;font-size:.84rem;opacity:.85;margin-top:3px}
+.pb-ev .pb-money{display:inline-block;margin-top:6px;background:var(--plum);color:#fff;border-radius:999px;padding:2px 10px;font-family:var(--display);font-size:.8rem;letter-spacing:.06em}
+.pb-ev[aria-pressed="true"]{background:linear-gradient(150deg,#ffe4f0,#ffd0e3);box-shadow:4px 5px 0 var(--ink)}
+.pb-ev[aria-pressed="true"]::after{content:"Your party";position:absolute;top:-11px;right:10px;background:var(--orange);border:2px solid var(--ink);border-radius:8px;padding:1px 8px;font-family:var(--display);font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;transform:rotate(4deg)}
+
+/* stage shells */
+.pb-stage{margin:0 0 10px}
+.pb-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
+.pb-num{flex:none;width:58px;height:66px;display:grid;place-items:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.6rem;position:relative}
+.pb-num svg{position:absolute;inset:0;width:100%;height:100%}
+.pb-num span{position:relative;margin-top:-10px;color:#fff}
+.pb-head h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.05}
+.pb-head p{margin:2px 0 0;color:var(--body-tint);max-width:58ch}
+.pb-head .pb-htxt{flex:1;min-width:200px}
+.pb-card{background:var(--white);border:3px solid var(--ink);border-radius:var(--r-alt);padding:20px;box-shadow:var(--lift);margin:0 0 14px}
+.pb-card h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.3rem;line-height:1.1;margin:0 0 6px}
+.pb-card.learn{background:linear-gradient(150deg,#fff6dc,#ffe9b0);transform:rotate(-.3deg)}
+.pb-card.fun{background:linear-gradient(150deg,#f6eefa,#eadcf2)}
+.pb-card.teal{background:linear-gradient(150deg,#e8f6fa,#d3edf4)}
+.pb-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:16px 0 6px;align-items:center}
+.pb-nav .note{font-size:.88rem;color:var(--body-tint)}
+.pb-acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.btn.ghost{background:transparent;box-shadow:none;border-color:rgba(10,47,56,.5)}
+.btn.small{font-size:.74rem;padding:8px 13px}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.pb-fb{margin:12px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.pb-fb.ok{background:#e9f4ec;border:2px solid #9fcfab}
+.pb-fb.nope{background:#fdf0e5;border:2px solid #f0c9a3}
+.pb-fb.tell{background:#eef4f6;border:2px solid #bcd7e0}
+.pb-fb b{font-family:var(--display)}
+.pb-fb:empty{display:none}
+.pb-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;align-items:start}
+@media (max-width:760px){.pb-split{grid-template-columns:1fr}}
+.pb-rounds{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.pb-rounds button{font-family:var(--display);font-weight:800;font-size:.85rem;min-width:40px;padding:6px 10px;border-radius:999px;border:2px solid rgba(10,47,56,.35);background:var(--white);color:var(--ink);cursor:pointer}
+.pb-rounds button.on{border-color:var(--ink);background:var(--yellow)}
+.pb-rounds button.done{background:#e9f4ec;border-color:#2e7d4f}
+.pb-rounds button.on.done{background:var(--yellow)}
+.pb-ctx{background:#fff3c4;border:2px dashed var(--ink);border-radius:12px;padding:8px 12px;font-size:.98rem;margin:10px 0 6px}
+.pb-in{font-family:var(--body);font-size:1.15rem;padding:8px 10px;width:120px;border:3px solid var(--ink);border-radius:12px;background:#fffdfb;color:var(--ink)}
+.pb-in.ok{border-color:#2e7d4f;background:#f2faf4}
+.pb-quiet{font-size:.85rem;background:none;border:0;color:var(--teal);text-decoration:underline;cursor:pointer;font-family:inherit;padding:4px}
+
+/* tiles and the party bag */
+.pb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.pb-tile{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:2px solid rgba(10,47,56,.25);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer;font:inherit;font-size:.86rem;line-height:1.2;text-align:center;user-select:none;-webkit-user-select:none;transition:transform .12s;position:relative}
+.pb-tile svg{width:54px;height:54px}
+.pb-tile:hover{transform:translateY(-2px) rotate(-1deg)}
+.pb-tile.picked{border-color:var(--teal);background:#e3f3f7;box-shadow:inset 0 0 0 2px #9fd3e0}
+.pb-tile.good{border-color:#2e7d4f;background:#e9f4ec}
+.pb-tile.maybe{border-color:var(--orange-deep);background:#fdf0e5}
+.pb-tile .pb-mini{font-size:.72rem;color:var(--body-tint)}
+.pb-bag{margin-top:12px;min-height:140px;border:3px dashed var(--ink);border-radius:18px 18px 34px 34px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,208,227,.55));display:block;width:100%;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.pb-bag.hot{background:#fff3c4}
+.pb-bag h4{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.pb-bag h4 svg{width:44px;height:44px}
+.pb-bag .pb-tiles{grid-template-columns:repeat(auto-fill,minmax(86px,1fr))}
+.pb-bag .pb-tile svg{width:42px;height:42px}
+.pb-ghost{position:fixed;z-index:9000;pointer-events:none;opacity:.92;transform:rotate(-5deg);box-shadow:6px 8px 0 rgba(10,47,56,.25)}
+body.pb-dragging{cursor:grabbing}
+
+/* swing tags on a bunting line */
+.pb-line{position:relative;padding:26px 8px 10px;border:3px solid var(--ink);border-radius:16px;background:linear-gradient(180deg,#fdf7ee,#f4ead9);overflow:hidden}
+.pb-line::before{content:"";position:absolute;left:0;right:0;top:12px;height:3px;background:var(--ink);opacity:.6}
+.pb-hangs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:14px 8px}
+.pb-hang{display:flex;flex-direction:column;align-items:center;position:relative}
+.pb-hang svg.pic{width:62px;height:62px}
+.pb-hang .nm{font-size:.82rem;text-align:center;line-height:1.15;min-height:2.3em;margin-top:2px}
+.pb-swing{display:block;position:relative;margin-top:10px;background:#fff;border:2px solid var(--ink);border-radius:4px 4px 12px 12px;padding:16px 10px 6px;min-width:76px;text-align:center;box-shadow:2px 3px 0 rgba(10,47,56,.2);transform-origin:50% -10px}
+.pb-swing::before{content:"";position:absolute;top:4px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;border:2px solid var(--ink);background:var(--paper)}
+.pb-swing::after{content:"";position:absolute;top:-12px;left:50%;width:2px;height:16px;background:var(--ink)}
+.pb-swing b{display:block;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:1.3rem;line-height:1.1;margin-top:4px}
+.pb-swing small{display:block;font-size:.66rem;opacity:.85}
+.pb-swing.deal{background:#ffe14d}
+.pb-hang:nth-child(odd) .pb-swing{transform:rotate(-4deg)}
+.pb-hang:nth-child(even) .pb-swing{transform:rotate(3deg)}
+.pb-plist{background:#fffef6;border:3px solid var(--ink);border-radius:6px 14px 8px 16px;padding:12px 14px 10px;box-shadow:3px 4px 0 rgba(10,47,56,.16)}
+.pb-plist h4{font-family:var(--display);font-size:1rem;margin:0 0 8px}
+.pb-prow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:2px dotted rgba(10,47,56,.15)}
+.pb-prow svg{width:32px;height:32px;flex:none}
+.pb-prow .nm{flex:1;min-width:110px;font-size:.95rem}
+.pb-prow .pb-in{width:96px;font-size:1.05rem;padding:6px 8px}
+.pb-prow .ok{color:#2e7d4f;font-weight:900}
+
+/* guests */
+.pb-guest{display:flex;gap:14px;align-items:center;background:#fff;border:3px solid var(--ink);border-radius:8px;padding:12px 14px 14px;box-shadow:4px 5px 0 rgba(10,47,56,.2);transform:rotate(-1deg);max-width:420px}
+.pb-guest svg{width:86px;height:86px;flex:none}
+.pb-guest b{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.4rem;display:block;line-height:1}
+.pb-guest .need{display:inline-block;margin-top:6px;background:var(--yellow);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.9rem}
+.pb-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:8px}
+.pb-legend div{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.75);border:2px solid var(--ink);border-radius:12px;padding:8px 10px;font-size:.92rem}
+.pb-legend svg{width:40px;height:40px;flex:none}
+
+/* people and packs */
+.pb-people{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;padding:10px;border:3px solid var(--ink);border-radius:16px;background:linear-gradient(180deg,#f3f9fb,#e2f1f5)}
+.pb-person{display:flex;flex-direction:column;align-items:center;width:52px;font-size:.7rem;line-height:1.1;text-align:center}
+.pb-person svg{width:40px;height:48px}
+.pb-person.fed svg .face{fill:#ffe08a}
+.pb-person .got{font-family:var(--display);font-weight:900;font-size:.78rem}
+.pb-packs{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;min-height:70px;margin:8px 0}
+.pb-packs svg{width:56px;height:56px}
+.pb-packs .pk{animation:pbDrop .3s ease both}
+@keyframes pbDrop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+.pb-step{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.pb-step button.r{width:46px;height:46px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-family:var(--display);font-weight:900;font-size:1.4rem;cursor:pointer;color:var(--ink);line-height:1;padding:0}
+.pb-step .n{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:2rem;min-width:44px;text-align:center}
+.pb-maths{font-family:"Courier New",Courier,monospace;background:#fff;border:2px solid var(--ink);border-radius:8px;padding:8px 12px;font-size:1rem;display:inline-block;margin:4px 0}
+
+/* seesaw */
+.pb-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+@media (max-width:520px){.pb-opts{grid-template-columns:1fr}}
+.pb-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 10px 14px;border:3px solid var(--ink);border-radius:18px 14px 18px 12px;background:#fff;cursor:pointer;font:inherit;color:var(--ink);box-shadow:3px 4px 0 rgba(10,47,56,.18);text-align:center}
+.pb-opt svg.pic{width:70px;height:70px}
+.pb-opt .nm{font-weight:700;line-height:1.2}
+.pb-opt .sz{font-size:.85rem;color:var(--body-tint)}
+.pb-opt.good{background:#e9f4ec;border-color:#2e7d4f}
+.pb-opt.tried{background:#fdf0e5}
+.pb-opt .pb-swing{margin-top:12px}
+.pb-saw{max-width:520px;margin:6px auto 0}
+.pb-saw svg{width:100%;height:auto;display:block}
+.pb-beam{transition:transform 1s cubic-bezier(.3,1.5,.5,1);transform-origin:200px 120px}
+.pb-calc{font-size:.95rem;line-height:1.6;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 14px;margin:8px 0}
+.pb-calc b{font-family:var(--display);color:var(--yellow)}
+
+/* party list builder */
+.pb-shop{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.pb-shop{grid-template-columns:1fr}}
+.pb-sec{margin:0 0 12px}
+.pb-sechead{border:3px solid var(--ink);border-radius:14px 14px 0 0;padding:6px 12px;color:#fff;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.1rem;letter-spacing:.03em;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pb-sechead small{font-family:var(--body);font-size:.82rem;font-weight:700;letter-spacing:0;background:rgba(255,255,255,.9);color:var(--ink);border-radius:999px;padding:1px 9px}
+.pb-secbody{border:3px solid var(--ink);border-top:0;border-radius:0 0 16px 16px;background:#fbf8f2;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pb-prod{background:#fff;border:2px solid rgba(10,47,56,.3);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-width:0}
+.pb-prod.inl{border-color:var(--plum);box-shadow:0 0 0 3px #d9c2e6}
+.pb-prod.sold{opacity:.5}
+.pb-prod svg.pic{width:58px;height:58px}
+.pb-prod .nm{font-size:.84rem;line-height:1.15;font-weight:700}
+.pb-prod .sz{font-size:.74rem;color:var(--body-tint)}
+.pb-prod .pr{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:1.15rem}
+.pb-prod .deal{font-size:.7rem;font-weight:900;background:#ffe14d;border:2px solid var(--ink);border-radius:6px;padding:0 6px;transform:rotate(-3deg)}
+.pb-prod .up{font-size:.7rem;font-weight:700;color:#8a3c0c}
+.pb-qty{display:flex;align-items:center;gap:6px;margin-top:3px}
+.pb-qty button{width:36px;height:36px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-family:var(--display);font-weight:900;font-size:1.1rem;cursor:pointer;color:var(--ink);line-height:1;padding:0}
+.pb-qty button.add{width:auto;border-radius:999px;padding:0 14px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}
+.pb-qty span{min-width:22px;font-family:var(--display);font-weight:900;font-size:1.1rem}
+.pb-side{position:sticky;top:10px}
+@media (max-width:860px){.pb-side{position:static}}
+.pb-checks{background:#fffef6;border:3px solid var(--ink);border-radius:8px 16px 10px 18px;padding:10px 12px;box-shadow:3px 4px 0 rgba(10,47,56,.16)}
+.pb-checks h4{font-family:var(--display);font-size:1rem;margin:0 0 6px}
+.pb-ck{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:2px dotted rgba(10,47,56,.15);font-size:.9rem;line-height:1.3}
+.pb-ck i{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--ink);display:grid;place-items:center;font-style:normal;font-weight:900;font-size:.8rem;background:#fff;margin-top:1px}
+.pb-ck.ok i{background:#2e7d4f;color:#fff}
+.pb-ck.short i{background:#ffe1c4}
+.pb-ck small{display:block;color:var(--body-tint)}
+.pb-lines{margin-top:10px;font-size:.88rem}
+.pb-lines div{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(10,47,56,.2)}
+.pb-lines .off{color:#2e7d4f}
+.pb-till{position:sticky;bottom:10px;z-index:30;margin-top:14px;background:var(--ink);color:var(--paper);border:3px solid var(--ink);border-radius:18px 14px 18px 14px;padding:10px 14px;box-shadow:4px 6px 0 rgba(10,47,56,.3);display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.pb-till svg{width:46px;height:60px}
+.pb-till .tt{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.4rem;line-height:1}
+.pb-till .tt small{font-size:.8rem;font-weight:600;opacity:.85}
+.pb-till .msg{font-size:.88rem;margin-top:4px}
+.pb-bar{height:14px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:6px;position:relative}
+.pb-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#4fc08d,#2e9e6a);transition:width .3s}
+.pb-bar.warn i{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.pb-bar.over i{background:linear-gradient(90deg,#c9a3dd,var(--plum))}
+.pb-swaps{margin-top:12px}
+.pb-swap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;margin:6px 0;border:2px solid var(--plum);border-radius:12px;background:#f8f2fb}
+.pb-swap span{flex:1;min-width:160px;font-size:.92rem}
+
+/* surprise deck */
+.pb-deckwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pb-flip{width:190px;height:250px;perspective:900px;flex:none}
+.pb-flip .in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d}
+.pb-flip.on .in{transform:rotateY(180deg)}
+.pb-flip .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 6px 0 rgba(10,47,56,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center}
+.pb-flip .back{background:repeating-linear-gradient(45deg,var(--plum) 0 14px,#8d5fa1 14px 28px);color:#fff}
+.pb-flip .back b{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:2.4rem;background:var(--ink);border-radius:12px;padding:4px 14px}
+.pb-flip .front{transform:rotateY(180deg);background:#fff}
+.pb-flip .front svg{width:90px;height:90px}
+.pb-flip .front b{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;font-size:1.3rem;line-height:1.05;margin:6px 0 4px}
+.pb-flip .front span{font-size:.9rem;line-height:1.3}
+.pb-deckside{flex:1;min-width:220px}
+
+/* receipt and cash */
+.pb-receipt{font-family:"Courier New",Courier,monospace;background:#fff;color:#222;max-width:380px;margin:10px auto 4px;padding:16px 14px 20px;border:2px solid #cfcfcf;box-shadow:4px 6px 0 rgba(10,47,56,.15);font-size:.92rem;border-top:6px dotted #cfcfcf;border-bottom:6px dotted #cfcfcf}
+.pb-receipt .c{text-align:center}
+.pb-rl{display:flex;justify-content:space-between;gap:10px;width:100%;font:inherit;color:inherit;background:none;border:2px solid transparent;border-radius:6px;padding:3px 4px;cursor:pointer;text-align:left}
+.pb-rl:hover{background:#fff3c4}
+.pb-rl.hit{background:#ffe1c4;border-color:var(--orange-deep);text-decoration:line-through}
+.pb-rl.miss{background:#eef4f6}
+.pb-rl span:first-child{overflow:hidden;text-overflow:ellipsis}
+.pb-receipt .off{color:#2e7d4f}
+.pb-receipt hr{border:0;border-top:2px dashed #999;margin:8px 0}
+.pb-receipt .big{font-weight:700;font-size:1.05rem;display:flex;justify-content:space-between;padding:0 6px}
+.pb-cash{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pb-cash button{font-family:var(--display);font-weight:900;cursor:pointer;color:var(--ink);border:3px solid var(--ink);box-shadow:2px 3px 0 rgba(10,47,56,.2)}
+.pb-cash .note{width:92px;height:50px;border-radius:6px;font-size:1.1rem}
+.pb-cash .coin{width:54px;height:54px;border-radius:50%;font-size:.95rem;background:#e9d27a}
+.pb-tray{min-height:62px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;border:3px dashed var(--ink);border-radius:14px;background:rgba(255,255,255,.6)}
+.pb-tray .t{font-family:var(--display);font-weight:900;font-size:.85rem;padding:4px 8px;border:2px solid var(--ink);border-radius:6px;animation:pbDrop .25s ease both}
+
+/* writing */
+.pb-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pb-chips button{font:inherit;font-size:.88rem;padding:6px 12px;border-radius:999px;border:2px solid rgba(10,47,56,.35);background:#fffdfb;color:var(--ink);cursor:pointer}
+.pb-chips button:hover{background:#fff3c4}
+.pb-chips button[aria-pressed="true"]{background:var(--plum);color:#fff;border-color:var(--plum)}
+.pb textarea{width:100%;min-height:120px;font:inherit;font-size:1rem;padding:10px 12px;border:3px solid var(--ink);border-radius:14px 10px 14px 10px;background:#fffef6;color:var(--ink);resize:vertical}
+.pb-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin:10px 0}
+.pb-fact{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:8px 10px;text-align:center}
+.pb-fact b{display:block;font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.35rem}
+.pb-fact span{font-size:.8rem;color:var(--body-tint)}
+.pb *:focus-visible{outline:4px solid var(--plum);outline-offset:3px}
+
+@media (max-width:480px){
+  .pb-card{padding:15px}
+  .pb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pb-bag .pb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pb-hangs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pb-secbody{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pb-num{width:48px;height:56px;font-size:1.3rem}
+  .pb-flip{width:160px;height:220px}
+  .pb-person{width:44px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pb-float,.pb-sway,.pb-hop,.pb-packs .pk,.pb-tray .t{animation:none!important}
+  .pb-flip .in,.pb-beam,.pb-bar i{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>The Party <span class="accent">Budget</span></h1>
+    <div class="line">
+      <span class="chip">Preparation for adulthood</span>
+      <p>Plan a party for a group. Feed everyone, keep every guest happy, and make the money last.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap pb">
+
+  <div class="board">
+    <div class="card w7">
+      <span class="kicker">Party time</span>
+      <h3>One party, one budget, a whole group to feed</h3>
+      <p class="pb-lead">Pick a party below. The number of guests and the money change with it. Then plan, compare, build the list and pay at Hilltop Market, a pretend shop with real 2026 style prices.</p>
+      <p class="pb-lead">Seven stages. Go in any order, skip anything, come back later. It saves on this device as you go. Every food here is nut free, like everything at Chilton Bridge.</p>
+    </div>
+    <div class="card w5 fill-plum pb-art" id="partyArt"></div>
+    <div class="card w12">
+      <span class="kicker">Who is this? (only if you want)</span>
+      <div class="pb-pills" id="whoPills"></div>
+      <div id="whoMs"></div>
+    </div>
+    <div class="card w12">
+      <span class="kicker">Your party</span>
+      <h3>Pick a party</h3>
+      <p>You can change it any time. Each party keeps its own list.</p>
+      <div class="pb-events" id="evHost"></div>
+    </div>
+  </div>
+
+  <div class="weekbar" role="tablist" aria-label="Stages" id="tabbar"></div>
+
+  <!-- ============ 1 ============ -->
+  <section class="wpanel pb-stage" id="panel-s1" role="tabpanel" aria-labelledby="tab-s1">
+    <div class="pb-head"><span class="pb-num" data-num="1"></span><div class="pb-htxt"><span class="kicker">Stage 1 &middot; Spotting</span><h2>Party shelf</h2><p>Spot what a party needs, then read the price tags.</p></div><span class="pb-badge hidden" data-badge="s1">Good place to start</span></div>
+    <div class="pb-card">
+      <span class="kicker">Try a bit &middot; Fill the party bag</span>
+      <h3 id="s1Title">What goes in the party bag?</h3>
+      <p>Some of these are for the party. Some are someone else's shopping. Tap a thing to drop it in the bag (or drag it). Tap it again to take it out.</p>
+      <div class="pb-tiles" id="s1Shelf" style="margin-top:12px"></div>
+      <div class="pb-bag" role="button" tabindex="0" data-drop="bag" id="s1Bag" aria-label="Party bag"></div>
+      <div class="pb-acts"><button class="btn btn-orange" id="s1Check">Check my bag</button><button class="btn ghost" id="s1Empty">Empty the bag</button></div>
+      <div class="pb-fb" id="s1Fb"></div>
+    </div>
+    <div class="pb-card teal">
+      <span class="kicker">Try a bit &middot; Price tags</span>
+      <h3>Read the swing tags</h3>
+      <p>Prices hang off the shelf on little tags. Read each tag and write the price on the list.</p>
+      <div class="pb-split" style="margin-top:12px">
+        <div class="pb-plist" id="s1List"></div>
+        <div class="pb-line"><div class="pb-hangs" id="s1Tags"></div></div>
+      </div>
+      <div class="pb-acts"><button class="btn btn-orange" id="s1PCheck">Check my prices</button></div>
+      <div class="pb-fb" id="s1PFb"></div>
+      <div id="s1Sum"></div>
+    </div>
+    <div class="pb-nav"><span class="note">Skipping is fine. Every stage stays open.</span><button class="btn" data-go="s2">Next stage</button></div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section class="wpanel pb-stage" id="panel-s2" role="tabpanel" aria-labelledby="tab-s2" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="2"></span><div class="pb-htxt"><span class="kicker">Stage 2 &middot; Choosing</span><h2>Guest list</h2><p>Three guests have something to think about. Read the packs and make sure nobody goes hungry.</p></div><span class="pb-badge hidden" data-badge="s2">Good place to start</span></div>
+    <div class="pb-card learn">
+      <span class="kicker">Learn a bit</span>
+      <h3>What the pack tells you</h3>
+      <div class="pb-legend" id="s2Legend"></div>
+    </div>
+    <div class="pb-card">
+      <span class="kicker">Try a bit &middot; Feed the guest</span>
+      <div class="pb-rounds" id="s2Rounds"></div>
+      <div id="s2Guest"></div>
+      <p style="margin:12px 0 8px">Tap everything this guest can have. Tap again to put it back.</p>
+      <div class="pb-tiles" id="s2Tray"></div>
+      <div class="pb-acts"><button class="btn btn-orange" id="s2Check">Check</button><button class="btn ghost" id="s2Show">Show me</button><button class="btn" id="s2Next">Next guest</button></div>
+      <div class="pb-fb" id="s2Fb"></div>
+    </div>
+    <div class="pb-card fun">
+      <span class="kicker">Try a bit &middot; One for all</span>
+      <h3>One snack that all three can share</h3>
+      <p>Robin, Wren and Finch are sharing one bowl. Which of these works for all three?</p>
+      <div class="pb-tiles" id="s2One" style="margin-top:10px"></div>
+      <div class="pb-fb" id="s2OneFb"></div>
+    </div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s1">Back a stage</button><button class="btn" data-go="s3">Next stage</button></div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section class="wpanel pb-stage" id="panel-s3" role="tabpanel" aria-labelledby="tab-s3" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="3"></span><div class="pb-htxt"><span class="kicker">Stage 3 &middot; How many?</span><h2>Packs and people</h2><p>Things come in packs of 6, 8, 10. Work out how many packs so everyone gets their share.</p></div><span class="pb-badge hidden" data-badge="s3">Good place to start</span></div>
+    <div class="pb-card">
+      <span class="kicker">Try a bit &middot; Share it out</span>
+      <div class="pb-rounds" id="s3Rounds"></div>
+      <div id="s3Round"></div>
+    </div>
+    <div class="pb-card fun">
+      <span class="kicker">Try a bit &middot; Per person</span>
+      <h3>How much money per guest?</h3>
+      <div id="s3Pp"></div>
+    </div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s2">Back a stage</button><button class="btn" data-go="s4">Next stage</button></div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section class="wpanel pb-stage" id="panel-s4" role="tabpanel" aria-labelledby="tab-s4" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="4"></span><div class="pb-htxt"><span class="kicker">Stage 4 &middot; Comparing</span><h2>Deal or steal</h2><p>Big packs, 3 for 2, 2 for &pound;3. Which one really costs less for what you need?</p></div><span class="pb-badge hidden" data-badge="s4">Good place to start</span></div>
+    <div class="pb-card learn">
+      <span class="kicker">Learn a bit</span>
+      <h3>Price what you will actually buy</h3>
+      <p>Do not just compare the tags. Work out what <b>you</b> would pay at the till to get what you need. Sometimes the big pack wins, sometimes the deal wins, sometimes neither.</p>
+    </div>
+    <div class="pb-card">
+      <span class="kicker">Try a bit &middot; The price seesaw</span>
+      <div class="pb-rounds" id="s4Rounds"></div>
+      <div id="s4Round"></div>
+    </div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s3">Back a stage</button><button class="btn" data-go="s5">Next stage</button></div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section class="wpanel pb-stage" id="panel-s5" role="tabpanel" aria-labelledby="tab-s5" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="5"></span><div class="pb-htxt"><span class="kicker">Stage 5 &middot; Building</span><h2>Party list</h2><p>Plan the party menu, part by part. Watch the checklist and the money as you go.</p></div><span class="pb-badge hidden" data-badge="s5">Good place to start</span></div>
+    <div class="pb-card teal" id="s5Top"></div>
+    <div class="pb-shop">
+      <div id="s5Menu"></div>
+      <div class="pb-side"><div class="pb-checks" id="s5Checks"></div><div class="pb-swaps" id="s5Swaps"></div></div>
+    </div>
+    <div class="pb-till" id="s5Till" aria-live="polite"></div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s4">Back a stage</button><button class="btn" data-go="s6">Next stage</button></div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section class="wpanel pb-stage" id="panel-s6" role="tabpanel" aria-labelledby="tab-s6" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="6"></span><div class="pb-htxt"><span class="kicker">Stage 6 &middot; Adapting</span><h2>Surprise!</h2><p>Plans change. Draw a card and fix your list so it still works.</p></div><span class="pb-badge hidden" data-badge="s6">Good place to start</span></div>
+    <div class="pb-card fun">
+      <span class="kicker">The surprise deck</span>
+      <div class="pb-deckwrap">
+        <div class="pb-flip" id="s6Flip"></div>
+        <div class="pb-deckside">
+          <div class="pb-acts" style="margin-top:0"><button class="btn btn-orange" id="s6Draw">Draw a card</button></div>
+          <p style="margin:10px 0 4px;font-size:.9rem">Or pick one:</p>
+          <div class="pb-chips" id="s6Pick"></div>
+          <div id="s6Out"></div>
+        </div>
+      </div>
+    </div>
+    <div id="s6Work" class="hidden">
+      <div class="pb-shop">
+        <div id="s6Menu"></div>
+        <div class="pb-side"><div class="pb-checks" id="s6Checks"></div><div class="pb-swaps" id="s6Swaps"></div></div>
+      </div>
+      <div class="pb-till" id="s6Till" aria-live="polite"></div>
+      <div class="pb-card" style="margin-top:14px">
+        <span class="kicker">Say what you did</span>
+        <h3>What did you change, and why?</h3>
+        <div class="pb-chips" id="s6Chips"></div>
+        <textarea id="s6Why" aria-label="What you changed and why"></textarea>
+      </div>
+    </div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s5">Back a stage</button><button class="btn" data-go="s7">Next stage</button></div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section class="wpanel pb-stage" id="panel-s7" role="tabpanel" aria-labelledby="tab-s7" hidden>
+    <div class="pb-head"><span class="pb-num" data-num="7"></span><div class="pb-htxt"><span class="kicker">Stage 7 &middot; Checking</span><h2>Checkout</h2><p>Check the receipt, pay, count the change, then say why your list works.</p></div><span class="pb-badge hidden" data-badge="s7">Good place to start</span></div>
+    <div id="s7Note"></div>
+    <div class="pb-split">
+      <div id="s7Receipt"></div>
+      <div>
+        <div class="pb-card">
+          <span class="kicker">Check 1 &middot; Spot the slip</span>
+          <h3>Something went through twice</h3>
+          <p>Tills make mistakes. One thing has been scanned twice. Tap that line on the receipt.</p>
+          <div class="pb-fb" id="s7DupFb"></div>
+        </div>
+        <div class="pb-card teal">
+          <span class="kicker">Check 2 &middot; The real total</span>
+          <h3>What should it come to?</h3>
+          <div id="s7Tot"></div>
+        </div>
+        <div class="pb-card learn">
+          <span class="kicker">Check 3 &middot; Pay and change</span>
+          <h3>Pay with cash</h3>
+          <div id="s7Pay"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pb-card fun">
+      <span class="kicker">Say why</span>
+      <h3>Why does your list work?</h3>
+      <div class="pb-facts" id="s7Facts"></div>
+      <p>Tap a starter to drop it in, then finish the sentence. A few lines is plenty.</p>
+      <div class="pb-chips" id="s7Chips"></div>
+      <textarea id="s7Why" aria-label="Why your party list fits the party and the budget"></textarea>
+    </div>
+    <div class="pb-nav"><button class="btn ghost" data-go="s6">Back a stage</button><button class="btn" data-go="send">Send to Jay</button></div>
+  </section>
+
+  <!-- ============ SEND ============ -->
+  <section class="wpanel pb-stage" id="panel-send" role="tabpanel" aria-labelledby="tab-send" hidden>
+    <div class="weektheme"><h2>Done, or done enough</h2><span>Whatever you tried is in the message. Gaps are fine.</span></div>
+    <div class="pb-card">
+      <span class="kicker">What you tried</span>
+      <div id="sendSummary"></div>
+    </div>
+    <div id="sendHost"></div>
+    <p style="font-size:.9rem;color:var(--body-tint);margin:8px 0">Your work also stays saved on this device.</p>
+    <div class="pb-acts"><button class="btn ghost small" id="resetBtn">Start again</button><span id="resetMsg" style="font-size:.88rem"></span></div>
+  </section>
+
+  <a class="backlink" href="/practice/#pfa-standard">Back to Preparation for adulthood</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.party-budget.v1", WHOKEY = "base5.who.v1";
+var PD = "\u00a3", INK = "#0a2f38";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c] }) }
+function money(p){ return (p < 0 ? "-" : "") + PD + (Math.abs(p) / 100).toFixed(2) }
+function tagPrice(p){ return p < 100 ? p + "p" : money(p) }
+function plural(n, a, b){ return n + " " + (n === 1 ? a : (b || a + "s")) }
+/* accepts 3, 3.00, 3.0, \u00a33, 300p, 300, .75, 0,75 ; returns candidate pence values */
+function parseMoney(s){
+  s = String(s || "").toLowerCase().replace(/\s+/g, "").replace(/\u00a3/g, "").replace(/,/g, ".");
+  if(!s) return [];
+  var m = /^(\d*\.?\d+)p$/.exec(s); if(m) return [Math.round(parseFloat(m[1]))];
+  if(!/^\d*\.?\d+$/.test(s)) return [];
+  if(s.indexOf(".") > -1) return [Math.round(parseFloat(s) * 100)];
+  var n = parseInt(s, 10); return [n * 100, n];
+}
+function moneyIs(s, target){ return parseMoney(s).indexOf(target) > -1 }
+
+/* =========================================================
+   DATA
+   ========================================================= */
+var EVENTS = {
+  film:{ n:"End of half term film afternoon", s:"Films, snacks and a sit down. 8 people, you included.", guests:8, budget:2000 },
+  birthday:{ n:"Birthday tea", s:"A birthday tea after school. 12 people, you included.", guests:12, budget:2400 },
+  games:{ n:"Games night", s:"Board games and video games. 6 people, you included.", guests:6, budget:1800 }
+};
+var EORDER = ["film","birthday","games"];
+
+var SECS = [
+  { id:"sav", n:"Savoury", c:"#c8402f", u:"portion", need:"1 portion each", food:1 },
+  { id:"snk", n:"Snacks", c:"#d9631a", u:"share", need:"1 bag (or share) each", food:1 },
+  { id:"drk", n:"Drinks", c:"#0090b0", u:"drink", need:"2 drinks each (a drink is 250ml)" },
+  { id:"swt", n:"Something sweet", c:"#7b4b8f", u:"sweet", need:"1 each", food:1 },
+  { id:"kit", n:"Plates and cups", c:"#3f8f4e", u:"", need:"1 plate and 1 cup each" }
+];
+var SBY = {}; SECS.forEach(function(s){ SBY[s.id] = s });
+/* products: s serves (units of its section), p pence, v veggie, gf gluten free, fz fizzy, d deal */
+var PRODUCTS = [];
+function pr(id, sec, n, pk, s, p, fl, d, ic){ var o = { id:id, sec:sec, n:n, pk:pk, s:s, p:p, v:fl.indexOf("v") > -1, gf:fl.indexOf("g") > -1, fz:fl.indexOf("f") > -1, d:d || null, ic:ic }; PRODUCTS.push(o) }
+pr("pzc","sav","Cheese and tomato pizza","12 inch, 8 slices, serves 4",4,300,"v",{ k:"32", t:"3 for 2" },"pizza");
+pr("pzp","sav","Pepperoni pizza","12 inch, 8 slices, serves 4",4,325,"",null,"pizzap");
+pr("pzg","sav","Gluten free cheese pizza","7 inch, 4 slices, serves 2",2,300,"vg",null,"pizzag");
+pr("vsr","sav","Veggie sausage rolls","12 mini rolls, serves 4",4,275,"v",null,"rollv");
+pr("psr","sav","Pork sausage rolls","12 mini rolls, serves 4",4,250,"",null,"roll");
+pr("drm","sav","Chicken drumsticks","10 cooked, serves 5",5,400,"g",null,"drum");
+pr("crs","snk","Ready salted crisps","6 bags",6,150,"vg",{ k:"2f", n:2, price:250, t:"2 for " + PD + "2.50" },"crisps");
+pr("chp","snk","Cheese puffs","6 bags",6,175,"v",null,"puffs");
+pr("tor","snk","Tortilla chips","200g sharing bag, serves 4",4,125,"vg",null,"tortilla");
+pr("pop","snk","Sweet popcorn","6 bags",6,200,"vg",null,"popcorn");
+pr("col","drk","Cola","2 litres, 8 drinks",8,175,"vf",{ k:"2f", n:2, price:300, t:"2 for " + PD + "3" },"cola");
+pr("lem","drk","Lemonade","2 litres, 8 drinks",8,75,"vf",null,"lemonade");
+pr("oj","drk","Orange juice","1 litre, 4 drinks",4,120,"v",null,"oj");
+pr("sq","drk","Blackcurrant squash","1 litre, add water, makes 20 drinks",20,100,"v",null,"squash");
+pr("jc","drk","Apple juice cartons","6 x 200ml, 6 drinks",6,160,"v",null,"cartons");
+pr("dn","swt","Jam doughnuts","5 pack",5,100,"v",null,"doughnut");
+pr("cc","swt","Chocolate cupcakes","6 pack",6,225,"v",{ k:"2f", n:2, price:400, t:"2 for " + PD + "4" },"cupcake");
+pr("br","swt","Gluten free brownies","4 pack",4,275,"vg",null,"brownie");
+pr("sb","swt","Strawberries","400g punnet, serves 4",4,200,"vg",null,"strawberry");
+pr("ck","swt","Celebration cake","serves 12",12,550,"v",null,"cake");
+pr("pl","kit","Paper plates","20 pack",20,125,"",null,"plates");
+pr("cu","kit","Paper cups","20 pack",20,100,"",null,"cups");
+var PBY = {}; PRODUCTS.forEach(function(p){ PBY[p.id] = p });
+
+var STUDENTS = {
+  LC:{ ms:["I can identify some items needed for a specific shopping task.","I can find the price of each item on my shopping list."],
+       f:["Spot some of the things you need for a shopping job.","Find the price of each thing on your list."], st:["s1","s2"] },
+  LP:{ ms:["I can compare prices and make sensible choices to get everything needed within budget.","I can plan a basic weekly meal plan and create a shopping list for it within a set budget."],
+       f:["Compare prices and make sensible choices so everything fits the budget.","Plan a week of meals and make a shopping list for it that fits the budget."], st:["s4","s5"] },
+  LW:{ ms:["I can create a shopping list that stays within a provided budget.","I can identify essential food items for a basic weekly meal plan and keep my list within budget."],
+       f:["Make a shopping list that stays inside a budget.","Pick out the essential foods for a week of meals and keep the list inside the budget."], st:["s2","s5"] },
+  EGW:{ ms:["I can create and justify a cost-effective shopping list, adjusting quantities or choices to meet the purpose while staying within budget.","I can plan meals for a week, including essentials, and explain how I would adapt the plan if the budget changed."],
+       f:["Make a good value list and explain your choices, changing amounts or swapping things to fit the budget.","Plan a week of meals with the essentials, and explain how you would change it if the budget changed."], st:["s3","s6","s7"] },
+  HK:{ ms:["I can choose appropriate items for a shopping list from a selection.","I can add up the cost of my shopping list and check whether it is within budget."],
+       f:["Choose the right things for a shopping list from a selection.","Add up your list and check if it fits the budget."], st:["s1","s2","s7"] },
+  JT:{ ms:["I can create a simple shopping list and check the prices of the items.","I can add up my shopping list and remove or swap items to keep within a budget."],
+       f:["Make a simple shopping list and check the prices.","Add up your list, then take out or swap things to stay in budget."], st:["s1","s5","s6"] }
+};
+var WHOS = ["JT","LW","EGW","LP","LC","HK"];
+var STAGES = [
+  { id:"s1", n:"Party shelf", d:"spot it, price it" },
+  { id:"s2", n:"Guest list", d:"who needs what" },
+  { id:"s3", n:"Packs and people", d:"how many?" },
+  { id:"s4", n:"Deal or steal", d:"compare prices" },
+  { id:"s5", n:"Party list", d:"build it in budget" },
+  { id:"s6", n:"Surprise!", d:"adapt the list" },
+  { id:"s7", n:"Checkout", d:"receipt, change, why" },
+  { id:"send", n:"Send to Jay", d:"if you want to" }
+];
+var MILESTONE_STAGES = {
+  s1:"identify items for a party shop, choose from a selection, find and add up prices (LC, HK, JT)",
+  s2:"choose the right items for each guest, essentials for the purpose (LC, HK, LW)",
+  s3:"work out quantities per person and pack cost, adjust amounts to the purpose (EGW, LP, LW)",
+  s4:"compare prices and deals, make sensible good value choices (LP, EGW)",
+  s5:"plan a party menu and build a list within a set budget, add up, swap or remove to fit (LW, LP, JT, HK, EGW)",
+  s6:"adapt the list when the budget, prices or guests change, and explain how (EGW, JT, LW)",
+  s7:"check prices on a receipt, add up and check the budget, justify the list (HK, LC, JT, EGW)"
+};
+
+/* =========================================================
+   STATE
+   ========================================================= */
+var st = { who:"", whoSet:false, ev:"film", tab:"s1", tried:{},
+  s1:{ bag:[], tries:0, done:0, first:null, pr:{}, prOk:{}, pTried:0, sum:"", sumOk:null },
+  s2:{ r:0, picks:{}, res:{}, one:"", oneFirst:null },
+  s3:{ r:0, packs:{}, res:{}, cost:{}, pp:{} },
+  s4:{ r:0, res:{} },
+  lists:{}, log5:[],
+  s6:{ card:"", list:{}, start:0, why:"", log:[] },
+  s7:{ sig:"", dup:null, dupTries:0, tot:"", totOk:null, tray:[], paid:0, change:"", changeOk:null, why:"" } };
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){ var o = JSON.parse(raw); if(o && typeof o === "object") for(var k in o) if(Object.prototype.hasOwnProperty.call(st, k) && o[k] !== null && typeof o[k] === typeof st[k]) st[k] = o[k] }
+}catch(e){}
+try{ var w0 = localStorage.getItem(WHOKEY); if(w0 && WHOS.indexOf(w0.toUpperCase()) > -1) st.who = w0.toUpperCase() }catch(e){}
+if(!EVENTS[st.ev]) st.ev = "film";
+var saveT = null;
+function save(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 120) }
+function saveNow(){ try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
+window.addEventListener("pagehide", saveNow);
+function E(){ return EVENTS[st.ev] }
+function list5(){ return st.lists[st.ev] || (st.lists[st.ev] = {}) }
+var cur = { bagSel:null, flipping:false };
+function markTried(id){ if(!st.tried[id]){ st.tried[id] = 1; drawTabs() } }
+function fb(el, kind, html){ var e = typeof el === "string" ? $(el) : el; if(!e) return; e.className = "pb-fb " + kind; e.innerHTML = html }
+
+/* =========================================================
+   ICONS
+   ========================================================= */
+var SW = ' stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"';
+var SW2 = ' stroke="' + INK + '" stroke-width="1.8"';
+function svgw(inner, cls){ return '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"' + (cls ? ' class="' + cls + '"' : "") + '>' + inner + '</svg>' }
+function pizza(top, gf){
+  var s = '<circle cx="32" cy="34" r="25" fill="#e3b56e"' + SW + '/><circle cx="32" cy="34" r="20" fill="#f5c842" stroke="#d9952f" stroke-width="2"/>';
+  s += top;
+  s += '<path d="M32 14v40M12 34h40M18 20l28 28M46 20L18 48" stroke="#b07a3a" stroke-width="1.2" opacity=".6"/>';
+  if(gf) s += '<circle cx="52" cy="12" r="9" fill="#fff" stroke="' + INK + '" stroke-width="2"/><text x="52" y="15.5" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="9" fill="' + INK + '">GF</text>';
+  return s;
+}
+function bottle(body, cap, label, bub){
+  var s = '<path d="M26 6h12v8l6 8v34a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4V22l6-8z" fill="' + body + '"' + SW + '/><rect x="25" y="3" width="14" height="6" rx="2" fill="' + cap + '"' + SW + '/><rect x="20" y="30" width="24" height="14" fill="' + label + '" stroke="' + INK + '" stroke-width="2"/>';
+  if(bub) s += '<circle cx="27" cy="52" r="1.8" fill="#fff"/><circle cx="34" cy="48" r="1.4" fill="#fff"/><circle cx="37" cy="54" r="1.6" fill="#fff"/><circle cx="31" cy="25" r="1.4" fill="#fff"/>';
+  return s;
+}
+function bag6(col, acc){ return '<path d="M12 8l5 4 5-4 5 4 5-4 5 4 5-4 5 4 5-4v46l-5 4-5-4-5 4-5-4-5 4-5-4-5 4-5-4z" fill="' + col + '"' + SW + '/><circle cx="32" cy="32" r="10" fill="' + acc + '"' + SW2 + '/>' }
+var IC = {
+  pizza: function(){ return pizza('<circle cx="24" cy="28" r="3.5" fill="#d9473a"/><circle cx="38" cy="30" r="3.5" fill="#d9473a"/><circle cx="30" cy="42" r="3.5" fill="#d9473a"/><path d="M40 40l3 2M22 36l3-1" stroke="#3f8f4e" stroke-width="2.5"/>') },
+  pizzap: function(){ return pizza('<circle cx="24" cy="28" r="4.5" fill="#b8402f"' + SW2 + '/><circle cx="39" cy="29" r="4.5" fill="#b8402f"' + SW2 + '/><circle cx="31" cy="41" r="4.5" fill="#b8402f"' + SW2 + '/><circle cx="43" cy="42" r="3.5" fill="#b8402f"' + SW2 + '/>') },
+  pizzag: function(){ return pizza('<circle cx="26" cy="30" r="3" fill="#d9473a"/><circle cx="38" cy="38" r="3" fill="#d9473a"/>', true) },
+  roll: function(){ return '<rect x="6" y="20" width="52" height="34" rx="6" fill="#e9eef0"' + SW + '/><g fill="#e3b56e"' + SW2 + '><rect x="10" y="26" width="20" height="10" rx="5"/><rect x="34" y="26" width="20" height="10" rx="5"/><rect x="10" y="40" width="20" height="10" rx="5"/><rect x="34" y="40" width="20" height="10" rx="5"/></g><g fill="#b8644a"><circle cx="30" cy="31" r="3"/><circle cx="54" cy="31" r="3"/><circle cx="30" cy="45" r="3"/><circle cx="54" cy="45" r="3"/></g>' },
+  rollv: function(){ return IC.roll().replace(/#b8644a/g, "#8cc65a") + '<path d="M44 6c10 0 14 6 14 12-8 2-16-2-14-12z" fill="#3f8f4e"' + SW2 + '/>' },
+  drum: function(){ return '<rect x="6" y="22" width="52" height="32" rx="7" fill="#e9eef0"' + SW + '/><g' + SW2 + '><path d="M14 44c-2-10 8-16 16-10l6 6-4 4-6-2c-4 4-10 6-12 2z" fill="#c9824a"/><path d="M30 34c0-10 12-12 18-6l4 6-4 4-6-2c-4 6-12 4-12-2z" fill="#d99a5f"/></g><g fill="#fff"' + SW2 + '><circle cx="37" cy="44" r="2.5"/><circle cx="53" cy="36" r="2.5"/></g>' },
+  crisps: function(){ return bag6("#f5c842", "#fff3c4") },
+  puffs: function(){ return bag6("#ef7724", "#ffd58a") + '<path d="M27 30q5-4 10 0M28 35q4 3 8 0" stroke="#d9631a" stroke-width="2" fill="none"/>' },
+  tortilla: function(){ return bag6("#3f8f4e", "#f1dfb0") + '<path d="M26 37l6-11 6 11z" fill="#e8b979"' + SW2 + '/>' },
+  popcorn: function(){ return '<path d="M16 22h32l-5 36H21z" fill="#fff"' + SW + '/><path d="M20 22l3 36M28 22l1 36M36 22l-1 36M44 22l-3 36" stroke="#d9473a" stroke-width="3"/><g fill="#fff6d0"' + SW2 + '><circle cx="22" cy="18" r="6"/><circle cx="32" cy="14" r="7"/><circle cx="42" cy="18" r="6"/><circle cx="27" cy="9" r="4"/><circle cx="38" cy="9" r="4"/></g>' },
+  cola: function(){ return bottle("#4a2b1c", "#d9473a", "#d9473a", 1) },
+  lemonade: function(){ return bottle("#e6f4d9", "#3f8f4e", "#f6d33c", 1) },
+  oj: function(){ return '<path d="M18 16h28l4 8v32a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V24z" fill="#ffb347"' + SW + '/><rect x="22" y="6" width="12" height="10" rx="2" fill="#fff"' + SW + '/><circle cx="32" cy="40" r="9" fill="#ef7724"' + SW2 + '/><path d="M32 31v18M23 40h18" stroke="#ffd58a" stroke-width="1.5"/>' },
+  applej: function(){ return '<path d="M18 16h28l4 8v32a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V24z" fill="#f4e7a1"' + SW + '/><rect x="22" y="6" width="12" height="10" rx="2" fill="#3f8f4e"' + SW + '/><circle cx="32" cy="41" r="9" fill="#8cc65a"' + SW2 + '/><path d="M32 32v-4" stroke="#6b4a1a" stroke-width="2.5"/>' },
+  squash: function(){ return bottle("#7b2d5a", "#fff", "#e9c6e0") },
+  cartons: function(){ var s = ""; [[8,0],[24,0],[40,0]].forEach(function(p){ s += '<rect x="' + p[0] + '" y="22" width="15" height="32" rx="2" fill="#8cc65a"' + SW2 + '/><rect x="' + (p[0] + 3) + '" y="34" width="9" height="9" rx="4.5" fill="#d9473a"/>' }); return s + '<path d="M19 22l4-12" stroke="' + INK + '" stroke-width="2"/><rect x="4" y="44" width="56" height="12" rx="3" fill="rgba(255,255,255,.6)"' + SW2 + '/>' },
+  doughnut: function(){ return '<ellipse cx="32" cy="36" rx="24" ry="18" fill="#e3a25a"' + SW + '/><ellipse cx="32" cy="34" rx="20" ry="14" fill="#f4d9a8"/><g fill="#fff"><circle cx="22" cy="30" r="1.5"/><circle cx="38" cy="28" r="1.5"/><circle cx="30" cy="38" r="1.5"/><circle cx="42" cy="38" r="1.5"/></g><path d="M50 30q6-4 8 2" stroke="#d63a4a" stroke-width="4" fill="none" stroke-linecap="round"/>' },
+  cupcake: function(){ return '<path d="M16 34h32l-5 24H21z" fill="#f2a0a6"' + SW + '/><path d="M22 34v24M32 34v24M42 34v24" stroke="#d9787f" stroke-width="2"/><path d="M14 34c0-10 6-18 18-18s18 8 18 18z" fill="#7a4a24"' + SW + '/><circle cx="32" cy="12" r="4" fill="#d9473a"' + SW2 + '/><g fill="#ffc247"><rect x="22" y="24" width="4" height="2" rx="1"/><rect x="36" y="22" width="4" height="2" rx="1"/><rect x="30" y="28" width="4" height="2" rx="1"/></g>' },
+  brownie: function(){ return '<rect x="8" y="22" width="22" height="18" rx="2" fill="#6b3d2a"' + SW2 + '/><rect x="34" y="22" width="22" height="18" rx="2" fill="#6b3d2a"' + SW2 + '/><rect x="8" y="42" width="22" height="16" rx="2" fill="#7a4a30"' + SW2 + '/><rect x="34" y="42" width="22" height="16" rx="2" fill="#7a4a30"' + SW2 + '/><circle cx="52" cy="12" r="9" fill="#fff" stroke="' + INK + '" stroke-width="2"/><text x="52" y="15.5" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="9" fill="' + INK + '">GF</text>' },
+  strawberry: function(){ return '<path d="M8 32h48l-4 24H12z" fill="#d3edf4"' + SW + '/><g fill="#e0453a"' + SW2 + '><path d="M18 18c6 0 9 4 7 12-2 6-6 8-8 8s-6-6-6-12c0-4 3-8 7-8z"/><path d="M36 14c6 0 10 4 8 12-2 6-6 8-8 8s-6-6-6-12c0-4 3-8 6-8z"/><path d="M48 22c5 0 8 3 6 10-2 5-5 6-6 6s-5-4-5-10c0-3 2-6 5-6z"/></g><path d="M14 18l4 2 4-2M32 14l4 2 4-2" stroke="#3f8f4e" stroke-width="2.5" fill="none"/>' },
+  cake: function(){ return '<rect x="8" y="30" width="48" height="24" rx="4" fill="#fbe7c2"' + SW + '/><path d="M8 36q6 6 12 0t12 0 12 0 12 0" fill="#f7a6c4"' + SW2 + '/><rect x="6" y="52" width="52" height="6" rx="3" fill="#cfd8db"' + SW2 + '/><g stroke="' + INK + '" stroke-width="1.5"><rect x="20" y="16" width="4" height="14" fill="#2a9bb5"/><rect x="30" y="14" width="4" height="16" fill="#ffc247"/><rect x="40" y="16" width="4" height="14" fill="#7b4b8f"/></g><g fill="#ef7724"><path d="M22 10q3 3 0 6-3-3 0-6z"/><path d="M32 8q3 3 0 6-3-3 0-6z"/><path d="M42 10q3 3 0 6-3-3 0-6z"/></g>' },
+  plates: function(){ return '<ellipse cx="32" cy="44" rx="26" ry="10" fill="#fff"' + SW + '/><ellipse cx="32" cy="38" rx="26" ry="10" fill="#fff"' + SW + '/><ellipse cx="32" cy="32" rx="26" ry="10" fill="#fff"' + SW + '/><ellipse cx="32" cy="32" rx="16" ry="5.5" fill="none" stroke="#ef7724" stroke-width="2" stroke-dasharray="3 3"/>' },
+  cups: function(){ return '<path d="M16 14h32l-5 44H21z" fill="#fff"' + SW + '/><path d="M18 22h28M19 30h26" stroke="#00a6c9" stroke-width="3"/><path d="M20 38h24" stroke="#ef7724" stroke-width="3"/><ellipse cx="32" cy="14" rx="16" ry="3" fill="#f3f7f8"' + SW2 + '/>' },
+  toothpaste: function(){ return '<path d="M8 26h40l8 6-8 6H8z" fill="#fff"' + SW + '/><rect x="4" y="26" width="6" height="12" rx="1" fill="#2a9bb5"' + SW2 + '/><path d="M16 30h24" stroke="#d9473a" stroke-width="3"/>' },
+  powder: function(){ return '<rect x="10" y="12" width="44" height="46" rx="4" fill="#4f7fc4"' + SW + '/><circle cx="32" cy="38" r="12" fill="#fff"' + SW2 + '/><path d="M26 36q6-6 12 0" stroke="#4f7fc4" stroke-width="2" fill="none"/><rect x="24" y="6" width="16" height="8" rx="2" fill="#ffc247"' + SW2 + '/>' },
+  dogfood: function(){ return '<rect x="12" y="14" width="40" height="44" rx="5" fill="#cfd8db"' + SW + '/><rect x="12" y="24" width="40" height="24" fill="#b8402f" stroke="' + INK + '" stroke-width="2"/><g fill="#fff"><circle cx="32" cy="38" r="4"/><circle cx="25" cy="31" r="2.5"/><circle cx="32" cy="29" r="2.5"/><circle cx="39" cy="31" r="2.5"/></g>' },
+  bulbs: function(){ return '<path d="M32 6c-12 0-18 8-18 16 0 8 8 12 8 20h20c0-8 8-12 8-20 0-8-6-16-18-16z" fill="#fff3a6"' + SW + '/><rect x="22" y="42" width="20" height="12" rx="2" fill="#cfd8db"' + SW + '/><path d="M24 46h16M24 50h16" stroke="' + INK + '" stroke-width="1.5"/>' },
+  shampoo: function(){ return '<rect x="18" y="16" width="28" height="42" rx="8" fill="#9fd3e0"' + SW + '/><rect x="26" y="6" width="12" height="11" rx="2" fill="#7b4b8f"' + SW + '/><circle cx="32" cy="38" r="6" fill="#fff"/>' },
+  box12: function(){ return '<rect x="6" y="18" width="52" height="38" rx="4" fill="#d9631a"' + SW + '/><path d="M6 28h52" stroke="' + INK + '" stroke-width="2"/><text x="32" y="48" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="15" fill="#fff">12</text><g fill="#f5c842"' + SW2 + '><rect x="12" y="8" width="10" height="12" rx="2"/><rect x="27" y="6" width="10" height="14" rx="2"/><rect x="42" y="8" width="10" height="12" rx="2"/></g>' }
+};
+function icon(k, cls){ return svgw(IC[k] ? IC[k]() : "", cls) }
+function pIcon(p, cls){ return icon(p.ic, cls) }
+/* little bird guests in party hats */
+function birdSVG(body, belly, hat){
+  return '<svg viewBox="0 0 90 90" aria-hidden="true"><g class="pb-hop"><path d="M14 58c0-20 14-32 32-30 14 1 24 12 24 26 0 12-10 18-26 18H26z" fill="' + body + '" stroke="' + INK + '" stroke-width="3"/>' +
+    '<path d="M30 60c4-10 16-12 24-6 4 4 2 12-6 14-8 2-16-2-18-8z" fill="' + belly + '"/>' +
+    '<path d="M60 40l16 4-14 6z" fill="#f0a80f" stroke="' + INK + '" stroke-width="2"/><circle cx="52" cy="38" r="3.4" fill="' + INK + '"/><circle cx="53" cy="37" r="1" fill="#fff"/>' +
+    '<path d="M16 54l-12-2 8 10z" fill="' + body + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<path d="M38 72v8M48 72v8M34 80h8M44 80h8" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<path d="M38 30l10-24 10 22z" fill="' + hat + '" stroke="' + INK + '" stroke-width="2.5"/><circle cx="48" cy="6" r="4" fill="#ffc247" stroke="' + INK + '" stroke-width="2"/><path d="M42 22l10 2M44 16l8 2" stroke="#fff" stroke-width="2"/></g></svg>';
+}
+var GUESTS = [
+  { id:"robin", n:"Robin", need:"Vegetarian", body:"#8a6a4a", belly:"#e2662f", hat:"#3f8f4e", rule:"v",
+    say:"I do not eat meat or fish. Anything with the green V is fine for me.", tray:["pizza","pizzap","rollv","roll","drum","puffs","doughnut","cupcake"] },
+  { id:"wren", n:"Wren", need:"Gluten free", body:"#a07a52", belly:"#e8cfa6", hat:"#00a6c9", rule:"g",
+    say:"Gluten makes me poorly. I need the GF mark, or food that never has gluten in it.", tray:["pizza","pizzag","drum","rollv","tortilla","puffs","brownie","strawberry","doughnut"] },
+  { id:"finch", n:"Finch", need:"Hates fizzy drinks", body:"#c8a23a", belly:"#f6e08a", hat:"#d9473a", rule:"nf",
+    say:"Bubbles go up my nose. Any drink is fine, as long as it is not fizzy.", tray:["cola","lemonade","oj","squash","cartons"] }
+];
+/* tray items for stage 2: icon key -> product id */
+var ICP = {}; PRODUCTS.forEach(function(p){ ICP[p.ic] = p });
+
+/* hero art */
+$("partyArt").innerHTML = '<svg viewBox="0 0 420 260" role="img" aria-label="A party table with pizza, drinks and a cake, bunting above and a robin in a party hat">' +
+  '<path d="M0 30 Q105 70 210 30 T420 30" fill="none" stroke="#fffdf8" stroke-width="3"/>' +
+  (function(){ var s = "", cols = ["#ffc247","#ef7724","#00a6c9","#fffdf8","#ffc247","#ef7724","#00a6c9","#fffdf8"]; for(var i = 0; i < 8; i++){ var x = 14 + i * 52, y = 30 + Math.sin((x / 420) * Math.PI * 2) * -14 + 14; s += '<g class="pb-sway' + '" style="animation-delay:-' + (i * .35) + 's"><path d="M' + x + ' ' + (y - 6) + 'l26 0-13 28z" fill="' + cols[i] + '" stroke="#0a2f38" stroke-width="2.5"/></g>' } return s })() +
+  '<g class="pb-float"><ellipse cx="60" cy="96" rx="20" ry="25" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/><path d="M60 121l-4 6h8z" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><path d="M60 127q8 30-4 60" fill="none" stroke="#fffdf8" stroke-width="2"/></g>' +
+  '<g class="pb-float b"><ellipse cx="364" cy="88" rx="20" ry="25" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><path d="M364 113l-4 6h8z" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/><path d="M364 119q-8 30 4 60" fill="none" stroke="#fffdf8" stroke-width="2"/></g>' +
+  '<g class="pb-float c"><ellipse cx="320" cy="70" rx="15" ry="19" fill="#00a6c9" stroke="#0a2f38" stroke-width="3"/><path d="M320 89q6 20-2 40" fill="none" stroke="#fffdf8" stroke-width="2"/></g>' +
+  '<rect x="30" y="196" width="360" height="16" rx="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><path d="M60 212v36M360 212v36" stroke="#0a2f38" stroke-width="5"/>' +
+  '<g transform="translate(70 150) scale(.9)">' + IC.pizza() + '</g>' +
+  '<g transform="translate(130 140) scale(.95)">' + IC.cola() + '</g>' +
+  '<g transform="translate(176 120) scale(1.25)">' + IC.cake() + '</g>' +
+  '<g transform="translate(260 144) scale(.85)">' + IC.cupcake() + '</g>' +
+  '<g transform="translate(306 150) scale(.8)">' + IC.popcorn() + '</g>' +
+  '<g transform="translate(330 112) scale(.9)"><g class="pb-hop"><path d="M14 58c0-20 14-32 32-30 14 1 24 12 24 26 0 12-10 18-26 18H26z" fill="#8a6a4a" stroke="#0a2f38" stroke-width="3"/><path d="M30 60c4-10 16-12 24-6 4 4 2 12-6 14-8 2-16-2-18-8z" fill="#e2662f"/><path d="M60 40l16 4-14 6z" fill="#f0a80f" stroke="#0a2f38" stroke-width="2"/><circle cx="52" cy="38" r="3.4" fill="#0a2f38"/><path d="M38 30l10-24 10 22z" fill="#3f8f4e" stroke="#0a2f38" stroke-width="2.5"/><circle cx="48" cy="6" r="4" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/></g></g>' +
+  '</svg>';
+var NUMSVG = '<svg viewBox="0 0 58 66" aria-hidden="true"><ellipse cx="29" cy="26" rx="23" ry="25" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3"/><path d="M29 51l-4 6h8z" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/><path d="M29 57q4 4 0 9" fill="none" stroke="#0a2f38" stroke-width="2"/><ellipse cx="20" cy="16" rx="5" ry="7" fill="#fff" opacity=".35"/></svg>';
+document.querySelectorAll("[data-num]").forEach(function(n){ n.innerHTML = NUMSVG + '<span>' + n.getAttribute("data-num") + '</span>' });
+
+/* =========================================================
+   TABS, WHO, EVENTS
+   ========================================================= */
+function goodStages(){ var s = STUDENTS[st.who]; return s ? s.st : [] }
+function drawTabs(){
+  var g = goodStages(), h = "";
+  STAGES.forEach(function(s, i){
+    var on = st.tab === s.id;
+    h += '<button class="wtab" role="tab" id="tab-' + s.id + '" aria-controls="panel-' + s.id + '" aria-selected="' + on + '"' + (on ? "" : ' tabindex="-1"') + '>' +
+      (s.id === "send" ? "" : (i + 1) + " ") + s.n + (g.indexOf(s.id) > -1 ? '<span class="pb-star" title="Good place to start"></span>' : "") + (st.tried[s.id] ? '<span class="pb-tick" aria-label="tried">&#10003;</span>' : "") +
+      '<span class="dates">' + s.d + '</span></button>';
+  });
+  $("tabbar").innerHTML = h;
+  document.querySelectorAll("[data-badge]").forEach(function(b){ b.classList.toggle("hidden", g.indexOf(b.getAttribute("data-badge")) < 0) });
+}
+var RENDER = {};
+function show(id, scroll){
+  if(!$("panel-" + id)) id = "s1";
+  st.tab = id; save();
+  STAGES.forEach(function(s){ var p = $("panel-" + s.id); if(p) p.hidden = s.id !== id });
+  drawTabs();
+  if(RENDER[id]) RENDER[id]();
+  if(scroll){ var t = $("tabbar"); window.scrollTo({ top:t.getBoundingClientRect().top + window.scrollY - 8, behavior:reduce ? "auto" : "smooth" }) }
+}
+$("tabbar").addEventListener("click", function(e){ var b = e.target.closest(".wtab"); if(b) show(b.id.replace("tab-", "")) });
+$("tabbar").addEventListener("keydown", function(e){
+  var ids = STAGES.map(function(s){ return s.id }), i = ids.indexOf(st.tab), n = null;
+  if(e.key === "ArrowRight") n = ids[(i + 1) % ids.length]; else if(e.key === "ArrowLeft") n = ids[(i - 1 + ids.length) % ids.length];
+  if(n){ e.preventDefault(); show(n); $("tab-" + n).focus() }
+});
+document.addEventListener("click", function(e){ var g = e.target.closest("[data-go]"); if(g) show(g.getAttribute("data-go"), true) });
+
+function drawWho(){
+  var h = "";
+  WHOS.concat([""]).forEach(function(w){ h += '<button type="button" class="pb-pill" data-who="' + w + '" aria-pressed="' + (st.who === w && (w || st.whoSet) ? "true" : "false") + '">' + (w || "Just looking") + '</button>' });
+  $("whoPills").innerHTML = h;
+  var s = STUDENTS[st.who];
+  if(!s){ $("whoMs").innerHTML = ""; return }
+  var names = s.st.map(function(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return (i + 1) + " " + STAGES[i].n }).join(", ");
+  $("whoMs").innerHTML = '<div class="pb-ms"><div><b>Step one</b>' + s.f[0] + '</div><div><b>Step two</b>' + s.f[1] + '</div></div>' +
+    '<p style="margin-top:10px">Good places to start: <b>' + names + '</b>. They have a yellow dot on the tabs. Everything else is open too.</p>';
+}
+$("whoPills").addEventListener("click", function(e){
+  var b = e.target.closest("[data-who]"); if(!b) return;
+  st.who = b.getAttribute("data-who"); st.whoSet = true; save();
+  try{ if(st.who) localStorage.setItem(WHOKEY, st.who) }catch(err){}
+  drawWho(); drawTabs();
+});
+var EVICON = {
+  film:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="14" width="52" height="36" rx="4" fill="#0a2f38" stroke="#0a2f38" stroke-width="3"/><rect x="11" y="19" width="42" height="26" rx="2" fill="#00a6c9"/><path d="M28 25l10 7-10 7z" fill="#fffdf8"/><path d="M22 58l10-8 10 8" fill="none" stroke="#0a2f38" stroke-width="3"/></svg>',
+  birthday:'<svg viewBox="0 0 64 64" aria-hidden="true">' + IC.cake() + '</svg>',
+  games:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="22" width="48" height="26" rx="13" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3"/><path d="M18 35h10M23 30v10" stroke="#fff" stroke-width="3"/><circle cx="42" cy="32" r="3" fill="#ffc247"/><circle cx="48" cy="38" r="3" fill="#ef7724"/><rect x="40" y="4" width="16" height="16" rx="3" fill="#fff" stroke="#0a2f38" stroke-width="2.5" transform="rotate(12 48 12)"/><circle cx="45" cy="9" r="1.6" fill="#0a2f38"/><circle cx="51" cy="15" r="1.6" fill="#0a2f38"/></svg>'
+};
+function drawEvents(){
+  var h = "";
+  EORDER.forEach(function(id){ var e = EVENTS[id];
+    h += '<button type="button" class="pb-ev" data-ev="' + id + '" aria-pressed="' + (st.ev === id) + '">' + EVICON[id] + '<span><b>' + e.n + '</b><small>' + e.s + '</small><span class="pb-money">' + e.guests + ' guests &middot; ' + money(e.budget) + '</span></span></button>' });
+  $("evHost").innerHTML = h;
+}
+$("evHost").addEventListener("click", function(e){
+  var b = e.target.closest("[data-ev]"); if(!b) return;
+  st.ev = b.getAttribute("data-ev"); save(); drawEvents();
+  if(RENDER[st.tab]) RENDER[st.tab]();
+});
+/* mark a stage tried on any button press inside it */
+document.querySelectorAll(".pb-stage").forEach(function(sec){
+  sec.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b || b.hasAttribute("data-go")) return;
+    markTried(sec.id.replace("panel-", "")); save();
+  });
+});
+
+/* =========================================================
+   DRAG (mouse and pen; touch uses tap)
+   ========================================================= */
+var drag = null, suppress = false, DROP = {};
+document.addEventListener("pointerdown", function(e){
+  var t = e.target.closest("[data-drag]"); if(!t || e.pointerType === "touch" || e.button !== 0) return;
+  drag = { el:t, x:e.clientX, y:e.clientY, on:false, ghost:null, hot:null };
+});
+document.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  if(!drag.on){
+    if(Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 8) return;
+    drag.on = true; var g = drag.el.cloneNode(true); g.classList.add("pb-ghost"); g.removeAttribute("id"); g.style.width = drag.el.offsetWidth + "px";
+    document.body.appendChild(g); drag.ghost = g; document.body.classList.add("pb-dragging");
+  }
+  e.preventDefault();
+  drag.ghost.style.left = (e.clientX - 24) + "px"; drag.ghost.style.top = (e.clientY - 24) + "px";
+  var over = document.elementFromPoint(e.clientX, e.clientY), z = over && over.closest("[data-drop]");
+  if(drag.hot && drag.hot !== z) drag.hot.classList.remove("hot");
+  if(z){ z.classList.add("hot"); drag.hot = z }
+});
+document.addEventListener("pointerup", function(e){
+  if(!drag) return; var d = drag; drag = null; if(!d.on) return;
+  d.ghost.remove(); document.body.classList.remove("pb-dragging"); if(d.hot) d.hot.classList.remove("hot");
+  suppress = true; setTimeout(function(){ suppress = false }, 30);
+  var over = document.elementFromPoint(e.clientX, e.clientY), z = over && over.closest("[data-drop]");
+  if(z && DROP[z.getAttribute("data-drop")]) DROP[z.getAttribute("data-drop")](d.el.getAttribute("data-drag"), z);
+});
+
+/* =========================================================
+   STAGE 1: party shelf
+   ========================================================= */
+var S1PARTY = ["pizza","crisps","lemonade","cupcake","cups","plates","popcorn","rollv"];
+var S1OTHER = { toothpaste:"Toothpaste", powder:"Washing powder", dogfood:"Dog food", bulbs:"Light bulbs", shampoo:"Shampoo" };
+var S1ORDER = ["pizza","toothpaste","crisps","lemonade","powder","cupcake","cups","dogfood","plates","bulbs","popcorn","shampoo","rollv"];
+function s1Name(k){ return S1OTHER[k] || ICP[k].n }
+function s1Tile(k, cls){ return '<button type="button" class="pb-tile' + (cls ? " " + cls : "") + (cur.bagSel === k ? " picked" : "") + '" data-drag="' + k + '" data-s1k="' + k + '">' + icon(k) + '<span>' + esc(s1Name(k)) + '</span></button>' }
+var S1TAGS = [ { id:"pzc" }, { id:"crs" }, { id:"lem" }, { id:"dn" }, { id:"cu" } ];
+var S1SUM = 725, S1BUD = 800;
+RENDER.s1 = function(){
+  var bag = st.s1.bag, chk = st.s1.checked, h = "";
+  S1ORDER.forEach(function(k){ if(bag.indexOf(k) < 0) h += s1Tile(k) });
+  $("s1Shelf").innerHTML = h || '<p style="grid-column:1/-1;margin:0">The shelf is empty. Everything is in the bag.</p>';
+  var bh = "";
+  bag.forEach(function(k){ bh += s1Tile(k, chk ? (S1PARTY.indexOf(k) > -1 ? "good" : "maybe") : "") });
+  $("s1Bag").innerHTML = '<h4><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 22h44l-4 36H14z" fill="#f7a6c4" stroke="#0a2f38" stroke-width="3"/><path d="M22 22c0-12 20-12 20 0" fill="none" stroke="#0a2f38" stroke-width="3"/><path d="M24 34l4 6 4-6 4 6 4-6" fill="none" stroke="#fff" stroke-width="2.5"/></svg>Party bag &middot; ' + plural(bag.length, "thing") + '</h4>' +
+    (bag.length ? '<div class="pb-tiles">' + bh + '</div>' : '<span style="font-size:.9rem;color:var(--body-tint)">Tap things on the shelf to drop them in here.</span>');
+  /* price list */
+  var lh = '<h4>Mini party list</h4>';
+  S1TAGS.forEach(function(t, i){ var p = PBY[t.id], v = st.s1.pr[i] || "", ok = st.s1.prOk[i];
+    lh += '<div class="pb-prow">' + pIcon(p) + '<span class="nm">' + esc(p.n) + '</span><input class="pb-in' + (ok ? " ok" : "") + '" aria-label="Price of ' + esc(p.n) + '" data-s1pr="' + i + '" inputmode="decimal" autocomplete="off" value="' + esc(v) + '" placeholder="' + PD + '">' + (ok ? '<span class="ok" aria-label="matches the tag">&#10003;</span>' : "") + '</div>' });
+  $("s1List").innerHTML = lh;
+  var th = "";
+  S1TAGS.forEach(function(t){ var p = PBY[t.id];
+    th += '<div class="pb-hang">' + pIcon(p, "pic") + '<span class="nm">' + esc(p.n) + '<br><small>' + esc(p.pk) + '</small></span><span class="pb-swing"><small>Hilltop</small><b>' + tagPrice(p.p) + '</b></span></div>' });
+  /* add two distractor tags so it is a real hunt */
+  ["pzp","chp","sq"].forEach(function(id){ var p = PBY[id]; th += '<div class="pb-hang">' + pIcon(p, "pic") + '<span class="nm">' + esc(p.n) + '<br><small>' + esc(p.pk) + '</small></span><span class="pb-swing"><small>Hilltop</small><b>' + tagPrice(p.p) + '</b></span></div>' });
+  $("s1Tags").innerHTML = th;
+  s1SumDraw();
+};
+function s1SumDraw(){
+  var all = S1TAGS.every(function(t, i){ return st.s1.prOk[i] });
+  if(!all && st.s1.sumOk === null){ $("s1Sum").innerHTML = '<p style="font-size:.9rem;color:var(--body-tint);margin-top:10px">When all five prices are on the list, there is an adding up bit here.</p>'; return }
+  var h = '<div class="pb-ctx" style="margin-top:14px"><b>Add them up.</b> What do the five things on the list cost altogether?</div>' +
+    '<div class="pb-acts" style="margin-top:4px"><input class="pb-in' + (st.s1.sumOk ? " ok" : "") + '" id="s1SumIn" inputmode="decimal" autocomplete="off" aria-label="Total of the mini party list" value="' + esc(st.s1.sum) + '" placeholder="' + PD + '"><button class="btn small btn-orange" id="s1SumBtn">Check total</button></div><div class="pb-fb" id="s1SumFb"></div>';
+  if(st.s1.sumOk){
+    h += '<p style="margin:12px 0 4px"><b>The mini party has ' + money(S1BUD) + '. Is the list within budget?</b></p><div class="pb-chips"><button type="button" data-s1in="yes" aria-pressed="' + (st.s1.within === "yes") + '">Yes, within budget</button><button type="button" data-s1in="no" aria-pressed="' + (st.s1.within === "no") + '">No, over budget</button></div><div class="pb-fb" id="s1InFb"></div>';
+  }
+  $("s1Sum").innerHTML = h;
+  if(st.s1.sumOk) fb("s1SumFb", "ok", "<b>" + money(S1SUM) + ".</b> 300 + 150 + 75 + 100 + 100 = 725p.");
+  if(st.s1.within) s1WithinFb();
+}
+function s1WithinFb(){
+  if(st.s1.within === "yes") fb("s1InFb", "ok", "<b>Yes.</b> " + money(S1SUM) + " is less than " + money(S1BUD) + ", with " + money(S1BUD - S1SUM) + " to spare.");
+  else fb("s1InFb", "nope", "Have another look. Is " + money(S1SUM) + " more or less than " + money(S1BUD) + "?");
+}
+function s1Place(k){
+  var bag = st.s1.bag, i = bag.indexOf(k);
+  if(i > -1) bag.splice(i, 1); else bag.push(k);
+  st.s1.checked = 0; cur.bagSel = null; markTried("s1"); save(); RENDER.s1(); $("s1Fb").className = "pb-fb"; $("s1Fb").innerHTML = "";
+}
+DROP.bag = function(k){ if(st.s1.bag.indexOf(k) < 0) s1Place(k) };
+$("panel-s1").addEventListener("click", function(e){
+  if(suppress) return;
+  var t = e.target.closest("[data-s1k]"); if(t){ s1Place(t.getAttribute("data-s1k")); return }
+  var w = e.target.closest("[data-s1in]"); if(w){ st.s1.within = w.getAttribute("data-s1in"); save(); s1SumDraw(); return }
+  if(e.target.id === "s1SumBtn"){
+    st.s1.sum = $("s1SumIn").value;
+    if(moneyIs(st.s1.sum, S1SUM)){ st.s1.sumOk = true; save(); s1SumDraw(); return }
+    st.s1.sumOk = false; st.s1.sumTries = (st.s1.sumTries || 0) + 1; save();
+    fb("s1SumFb", "nope", st.s1.sumTries > 1 ? "Try it in pence: 300 + 150 + 75 + 100 + 100. Then turn the pence back into pounds." : "Not quite yet. Have another go. Tip: change every price to pence first, then add.");
+  }
+});
+$("s1Check").addEventListener("click", function(){
+  var bag = st.s1.bag;
+  if(!bag.length){ fb("s1Fb", "tell", "Pop a few things in the bag first, then check."); return }
+  st.s1.tries++; st.s1.checked = 1;
+  var good = bag.filter(function(k){ return S1PARTY.indexOf(k) > -1 }), odd = bag.filter(function(k){ return S1PARTY.indexOf(k) < 0 }), miss = S1PARTY.filter(function(k){ return bag.indexOf(k) < 0 });
+  if(!odd.length && !miss.length){ st.s1.done = 1; if(st.s1.first === null) st.s1.first = true; save(); RENDER.s1(); fb("s1Fb", "ok", "<b>Party sorted!</b> Food, snacks, a drink, something sweet, plates and cups. That is a party shop."); return }
+  if(st.s1.first === null) st.s1.first = false;
+  save(); RENDER.s1();
+  var m = "<b>" + good.length + " of " + S1PARTY.length + " party things in the bag.</b> ";
+  if(odd.length) m += "The orange ones are not really party shopping (" + odd.map(function(k){ return s1Name(k).toLowerCase() }).join(", ") + "). Tap them to take them out. ";
+  if(miss.length) m += plural(miss.length, "party thing") + " still on the shelf. Picture the party table: what would people eat, drink and use?";
+  fb("s1Fb", "nope", m);
+});
+$("s1Empty").addEventListener("click", function(){ st.s1.bag = []; st.s1.checked = 0; save(); RENDER.s1(); $("s1Fb").className = "pb-fb"; $("s1Fb").innerHTML = "" });
+$("s1Bag").addEventListener("keydown", function(e){ if((e.key === "Enter" || e.key === " ") && e.target === this){ e.preventDefault() } });
+$("s1PCheck").addEventListener("click", function(){
+  st.s1.pTried = 1; var right = 0, wrong = [], empty = 0;
+  S1TAGS.forEach(function(t, i){ var v = (st.s1.pr[i] || "").trim(), p = PBY[t.id];
+    if(!v){ empty++; st.s1.prOk[i] = false; return }
+    if(moneyIs(v, p.p)){ st.s1.prOk[i] = true; right++ } else { st.s1.prOk[i] = false; wrong.push(p.n) } });
+  save(); RENDER.s1();
+  if(right === S1TAGS.length){ fb("s1PFb", "ok", "<b>All five match the tags.</b> Nice reading. The adding up bit is just below."); return }
+  var m = "<b>" + right + " of " + S1TAGS.length + " match.</b> ";
+  if(wrong.length) m += "Have another look at the tag for " + wrong.join(" and ") + ". Check it is the right thing: there are tags for other things on the line too. ";
+  if(empty) m += plural(empty, "price") + " still blank. Skip any you like.";
+  fb("s1PFb", "nope", m);
+});
+$("panel-s1").addEventListener("input", function(e){
+  var t = e.target;
+  if(t.hasAttribute("data-s1pr")){ var i = +t.getAttribute("data-s1pr"); st.s1.pr[i] = t.value; if(st.s1.prOk[i]){ st.s1.prOk[i] = false; t.classList.remove("ok") } save() }
+  if(t.id === "s1SumIn"){ st.s1.sum = t.value; save() }
+});
+
+/* =========================================================
+   STAGE 2: guest list
+   ========================================================= */
+function okFor(g, p){ if(g.rule === "v") return p.v; if(g.rule === "g") return p.gf; return !p.fz }
+function marks(p){ var m = []; if(p.v) m.push('<b style="color:#2e7d4f">V</b>'); if(p.gf) m.push('<b style="color:#007291">GF</b>'); if(p.sec === "drk") m.push(p.fz ? '<b style="color:#d75f10">Fizzy</b>' : '<b style="color:#7b4b8f">Still</b>'); return m.join(" &middot; ") }
+$("s2Legend").innerHTML =
+  '<div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#e9f4ec" stroke="#0a2f38" stroke-width="2.5"/><text x="20" y="26" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="17" fill="#2e7d4f">V</text></svg><span><b>V</b> means vegetarian: no meat or fish.</span></div>' +
+  '<div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#e3f3f7" stroke="#0a2f38" stroke-width="2.5"/><text x="20" y="25" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="13" fill="#007291">GF</text></svg><span><b>GF</b> means gluten free. Most bread, pastry and cake has gluten.</span></div>' +
+  '<div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#fdf0e5" stroke="#0a2f38" stroke-width="2.5"/><circle cx="15" cy="24" r="3" fill="#d75f10"/><circle cx="23" cy="17" r="2.4" fill="#d75f10"/><circle cx="25" cy="26" r="2" fill="#d75f10"/></svg><span><b>Fizzy</b> drinks have bubbles. <b>Still</b> drinks do not.</span></div>' +
+  '<div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#fff3c4" stroke="#0a2f38" stroke-width="2.5"/><path d="M12 20l6 6 10-12" fill="none" stroke="#0a2f38" stroke-width="3"/></svg><span>Every item at Hilltop Market is <b>nut free</b>, like our school.</span></div>';
+RENDER.s2 = function(){
+  var r = st.s2.r, g = GUESTS[r], picks = st.s2.picks[r] || [], res = st.s2.res[r], h = "";
+  GUESTS.forEach(function(x, i){ var rs = st.s2.res[i]; h += '<button type="button" class="' + (i === r ? "on " : "") + (rs && rs.done ? "done" : "") + '" data-s2r="' + i + '">' + x.n + '</button>' });
+  $("s2Rounds").innerHTML = h;
+  $("s2Guest").innerHTML = '<div class="pb-guest">' + birdSVG(g.body, g.belly, g.hat) + '<div><b>' + g.n + '</b><span class="need">' + g.need + '</span><p style="margin:8px 0 0;font-size:.95rem">&ldquo;' + g.say + '&rdquo;</p></div></div>';
+  h = "";
+  g.tray.forEach(function(k){ var p = ICP[k], on = picks.indexOf(k) > -1, cls = on ? "picked" : "";
+    if(res && res.shown && on) cls = okFor(g, p) ? "good" : "maybe";
+    h += '<button type="button" class="pb-tile ' + cls + '" data-s2k="' + k + '" aria-pressed="' + on + '">' + pIcon(p) + '<span>' + esc(p.n) + '</span><span class="pb-mini">' + (marks(p) || "no marks") + '</span></button>' });
+  $("s2Tray").innerHTML = h;
+  $("s2Next").textContent = r === GUESTS.length - 1 ? "Back to Robin" : "Next guest";
+  $("s2Fb").className = "pb-fb"; $("s2Fb").innerHTML = "";
+  if(res && res.done) fb("s2Fb", "ok", res.told ? "<b>Here is " + g.n + "'s plate.</b> Everything green works for " + g.n + "." : "<b>" + g.n + " is sorted.</b> Everything you picked works, and nothing that does is left out.");
+  h = "";
+  S2ONE.forEach(function(k){ var p = ICP[k], cls = st.s2.one === k ? (k === "tortilla" ? "good" : "maybe") : "";
+    h += '<button type="button" class="pb-tile ' + cls + '" data-s2one="' + k + '">' + pIcon(p) + '<span>' + esc(p.n) + '</span><span class="pb-mini">' + (marks(p) || "no marks") + '</span></button>' });
+  $("s2One").innerHTML = h;
+  if(st.s2.one) s2OneFb();
+};
+var S2ONE = ["puffs","roll","tortilla","doughnut"];
+function s2OneFb(){
+  var k = st.s2.one, p = ICP[k];
+  if(k === "tortilla"){ fb("s2OneFb", "ok", "<b>Tortilla chips it is.</b> V and GF, so Robin and Wren are fine, and Finch only worries about drinks."); return }
+  var why = !p.v ? "it is not V, so Robin cannot have it" : "it has no GF mark, so Wren cannot have it";
+  fb("s2OneFb", "nope", "Close, but " + why + ". Look for one with both marks.");
+}
+$("panel-s2").addEventListener("click", function(e){
+  var t = e.target;
+  var rb = t.closest("[data-s2r]"); if(rb){ st.s2.r = +rb.getAttribute("data-s2r"); save(); RENDER.s2(); return }
+  var k = t.closest("[data-s2k]"); if(k){ var r = st.s2.r, a = st.s2.picks[r] || (st.s2.picks[r] = []), key = k.getAttribute("data-s2k"), i = a.indexOf(key);
+    if(i > -1) a.splice(i, 1); else a.push(key); if(st.s2.res[r]) st.s2.res[r].shown = false; save(); RENDER.s2(); return }
+  var o = t.closest("[data-s2one]"); if(o){ st.s2.one = o.getAttribute("data-s2one"); if(st.s2.oneFirst === null) st.s2.oneFirst = st.s2.one === "tortilla"; save(); RENDER.s2(); return }
+});
+function s2Check(showMe){
+  var r = st.s2.r, g = GUESTS[r], picks = st.s2.picks[r] || [], res = st.s2.res[r] || (st.s2.res[r] = { tries:0 });
+  var right = g.tray.filter(function(k){ return okFor(g, ICP[k]) });
+  if(showMe){ st.s2.picks[r] = right.slice(); res.shown = true; res.done = true; res.told = true; save(); RENDER.s2(); return }
+  if(!picks.length){ fb("s2Fb", "tell", "Tap the things " + g.n + " can have first."); return }
+  res.tries++; res.shown = true;
+  var bad = picks.filter(function(k){ return !okFor(g, ICP[k]) }), miss = right.filter(function(k){ return picks.indexOf(k) < 0 });
+  if(!bad.length && !miss.length){ res.done = true; if(res.first === undefined) res.first = true; save(); RENDER.s2(); return }
+  if(res.first === undefined) res.first = false;
+  save(); RENDER.s2();
+  var m = "";
+  if(bad.length) m += "<b>Hmm, check the orange ones.</b> Not for " + g.n + ": " + bad.map(function(k){ return ICP[k].n.toLowerCase() }).join(", ") + ". Look at the marks under each one. ";
+  if(miss.length) m += (bad.length ? "Also, " : "<b>Good so far.</b> ") + plural(miss.length, "more thing") + " on the tray would be fine for " + g.n + ".";
+  fb("s2Fb", "nope", m);
+}
+$("s2Check").addEventListener("click", function(){ s2Check(false) });
+$("s2Show").addEventListener("click", function(){ s2Check(true) });
+$("s2Next").addEventListener("click", function(){ st.s2.r = (st.s2.r + 1) % GUESTS.length; save(); RENDER.s2() });
+
+/* =========================================================
+   STAGE 3: packs and people
+   ========================================================= */
+/* each round: product, how many units each person gets */
+var S3R = [
+  { id:"pzc", each:1, unit:"portion", say:"Each pizza has 8 slices. 2 slices each is one portion, so one pizza feeds 4." },
+  { id:"crs", each:1, unit:"bag", say:"One bag of crisps each." },
+  { id:"lem", each:2, unit:"drink", pw:"bottle", say:"Two drinks each. A 2 litre bottle pours 8 drinks." },
+  { id:"cc", each:1, unit:"cupcake", say:"One cupcake each. They come in 6 packs." }
+];
+function s3Need(r){ return E().guests * S3R[r].each }
+function s3Packs(r){ return Math.ceil(s3Need(r) / PBY[S3R[r].id].s) }
+function personSVG(fed, col){ return '<svg viewBox="0 0 40 48" aria-hidden="true"><circle class="face" cx="20" cy="14" r="10" fill="' + (fed ? "#ffe08a" : "#f3ece0") + '" stroke="#0a2f38" stroke-width="2.5"/><path d="M4 46c0-12 7-18 16-18s16 6 16 18z" fill="' + col + '" stroke="#0a2f38" stroke-width="2.5"/>' + (fed ? '<path d="M15 16q5 5 10 0" fill="none" stroke="#0a2f38" stroke-width="2"/>' : '<path d="M15 18h10" stroke="#0a2f38" stroke-width="2"/>') + '<circle cx="16" cy="11" r="1.4" fill="#0a2f38"/><circle cx="24" cy="11" r="1.4" fill="#0a2f38"/></svg>' }
+var PCOLS = ["#00a6c9","#ef7724","#7b4b8f","#3f8f4e","#ffc247","#d9473a"];
+RENDER.s3 = function(){
+  var r = st.s3.r, R = S3R[r], p = PBY[R.id], e = E(), key = st.ev + r, res = st.s3.res[key] || {}, n = st.s3.packs[key] || 0;
+  var h = "";
+  S3R.forEach(function(x, i){ var rr = st.s3.res[st.ev + i]; h += '<button type="button" class="' + (i === r ? "on " : "") + (rr && rr.costOk ? "done" : "") + '" data-s3r="' + i + '">' + esc(PBY[x.id].n.split(" ").slice(-1)[0].replace(/^./, function(c){ return c.toUpperCase() })) + '</button>' });
+  $("s3Rounds").innerHTML = h;
+  var need = s3Need(r), have = n * p.s, packsH = "";
+  for(var i = 0; i < n; i++) packsH += '<span class="pk">' + pIcon(p) + '</span>';
+  var ppl = "";
+  for(var j = 0; j < e.guests; j++){ var got = Math.max(0, Math.min(R.each, have - j * R.each)); ppl += '<div class="pb-person' + (got >= R.each ? " fed" : "") + '">' + personSVG(got >= R.each, PCOLS[j % PCOLS.length]) + '<span class="got">' + got + '/' + R.each + '</span></div>' }
+  h = '<h3>' + esc(p.n) + ' for ' + e.guests + ' people</h3>' +
+    '<p style="margin:0 0 4px">' + R.say + ' Hilltop sells them as <b>' + esc(p.pk) + '</b>, ' + tagPrice(p.p) + ' a pack.</p>' +
+    '<div class="pb-people" aria-label="The guests">' + ppl + '</div>' +
+    '<div class="pb-step"><button type="button" class="r" data-s3n="-1" aria-label="One pack fewer">&minus;</button><span class="n" aria-live="polite">' + n + '</span><button type="button" class="r" data-s3n="1" aria-label="One more">+</button><span>' + (n === 1 ? (R.pw || "pack") : (R.pw || "pack") + "s") + ' = <b>' + plural(have, R.unit) + '</b> for ' + plural(need, R.unit) + ' needed</span></div>' +
+    '<div class="pb-packs">' + (packsH || '<span style="color:var(--body-tint);font-size:.9rem">No packs yet. Press + to add one.</span>') + '</div>' +
+    '<div class="pb-acts"><button class="btn btn-orange" id="s3Check">Is that enough?</button></div><div class="pb-fb" id="s3Fb"></div>';
+  if(res.packsOk){
+    h += '<div class="pb-ctx"><b>Now the cost.</b> ' + plural(s3Packs(r), R.pw || "pack") + ' at ' + tagPrice(p.p) + ' each. What does that come to? (No offers this time, just the shelf price.)</div>' +
+      '<div class="pb-acts" style="margin-top:4px"><input class="pb-in' + (res.costOk ? " ok" : "") + '" id="s3Cost" inputmode="decimal" autocomplete="off" aria-label="Cost of the packs" value="' + esc(st.s3.cost[key] || "") + '" placeholder="' + PD + '"><button class="btn small btn-orange" id="s3CostBtn">Check</button>' + (res.costOk ? '<button class="btn small" id="s3Next">' + (r === S3R.length - 1 ? "Back to the first" : "Next one") + '</button>' : "") + '</div><div class="pb-fb" id="s3CostFb"></div>';
+  }
+  $("s3Round").innerHTML = h;
+  if(res.packsOk) fb("s3Fb", "ok", s3OkMsg(r));
+  if(res.costOk){ var cp = s3Packs(r); fb("s3CostFb", "ok", "<b>" + money(cp * p.p) + ".</b> " + cp + " &times; " + tagPrice(p.p) + " = " + money(cp * p.p) + ". That is the shopping list line for " + esc(p.n.toLowerCase()) + ".") }
+  s3PpDraw();
+};
+function s3OkMsg(r){
+  var R = S3R[r], p = PBY[R.id], k = s3Packs(r), have = k * p.s, need = s3Need(r), left = have - need;
+  return "<b>That does it: " + plural(k, S3R[r].pw || "pack") + ".</b> " + plural(have, R.unit) + " for " + need + " needed" + (left ? ", with " + left + " spare. You cannot buy part of a pack, so a few spare is normal." : ", exactly. No waste.");
+}
+$("panel-s3").addEventListener("click", function(e){
+  var t = e.target, r = st.s3.r, key = st.ev + r, res = st.s3.res[key] || (st.s3.res[key] = {});
+  var rb = t.closest("[data-s3r]"); if(rb){ st.s3.r = +rb.getAttribute("data-s3r"); save(); RENDER.s3(); return }
+  var nb = t.closest("[data-s3n]"); if(nb){ var n = (st.s3.packs[key] || 0) + (+nb.getAttribute("data-s3n")); st.s3.packs[key] = Math.max(0, Math.min(8, n)); save(); RENDER.s3(); var f = $("s3Round").querySelector('[data-s3n="' + nb.getAttribute("data-s3n") + '"]'); if(f) f.focus(); return }
+  if(t.id === "s3Check"){
+    var n2 = st.s3.packs[key] || 0, R = S3R[r], p = PBY[R.id], have = n2 * p.s, need = s3Need(r);
+    res.tries = (res.tries || 0) + 1;
+    if(n2 === s3Packs(r)){ res.packsOk = 1; if(res.first === undefined) res.first = true; save(); RENDER.s3(); return }
+    if(res.first === undefined) res.first = false; save();
+    if(have < need){ var hungry = Math.ceil((need - have) / R.each); fb("s3Fb", "nope", "<b>Not quite enough yet.</b> " + plural(hungry, "person", "people") + " would go without. Count the faces that are not smiling. One more pack?") }
+    else fb("s3Fb", "nope", "<b>Everyone is fed, with " + (have - need) + " spare.</b> Could you take a pack away and still feed everyone? Spare costs money.");
+    return;
+  }
+  if(t.id === "s3CostBtn"){
+    var v = $("s3Cost").value; st.s3.cost[key] = v; var want = s3Packs(r) * PBY[S3R[r].id].p;
+    if(moneyIs(v, want)){ res.costOk = 1; save(); RENDER.s3(); return }
+    res.costTries = (res.costTries || 0) + 1; save();
+    fb("s3CostFb", "nope", res.costTries > 1 ? "Try adding the price once for every pack: " + Array(s3Packs(r) + 1).join(tagPrice(PBY[S3R[r].id].p) + " + ").replace(/ \+ $/, "") + "." : "Have another go. It is the number of packs times the price of one pack.");
+    return;
+  }
+  if(t.id === "s3Next"){ st.s3.r = (r + 1) % S3R.length; save(); RENDER.s3(); return }
+  if(t.id === "s3PpBtn"){ s3PpCheck(); return }
+});
+$("panel-s3").addEventListener("input", function(e){ var t = e.target; if(t.id === "s3Cost"){ st.s3.cost[st.ev + st.s3.r] = t.value; save() } if(t.hasAttribute("data-pp")){ st.s3.pp[st.ev + t.getAttribute("data-pp")] = { v:t.value }; save() } });
+/* per person questions */
+function PPQ(){ var e = E(), per = e.budget / e.guests; return [
+  { q:"The budget is " + money(e.budget) + " for " + e.guests + " people. How much is that per person?", a:per, hint:money(e.budget) + " &divide; " + e.guests + ". Try it in pence: " + e.budget + " &divide; " + e.guests + "." },
+  { q:"A cheese pizza is " + money(300) + " and feeds 4. How much is that per person?", a:75, hint:"300p &divide; 4." },
+  { q:"Crisps are " + money(150) + " for 6 bags. How much is one bag?", a:25, hint:"150p &divide; 6." },
+  { q:"Pizza and crisps cost 75p + 25p = " + money(100) + " per person. How much of each person's " + money(per) + " is left for drinks, sweets, plates and cups?", a:per - 100, hint:money(per) + " take away " + money(100) + "." }
+] }
+function s3PpDraw(){
+  var Q = PPQ(), h = '<p style="margin:0 0 8px">Splitting the money tells you roughly what each person can have. Have a go at any of these.</p>';
+  Q.forEach(function(q, i){ var k = st.ev + i, s = st.s3.pp[k] || {};
+    h += '<div class="pb-prow" style="align-items:center"><span class="nm" style="min-width:200px">' + q.q + '</span><input class="pb-in' + (s.ok ? " ok" : "") + '" data-pp="' + i + '" inputmode="decimal" autocomplete="off" aria-label="Answer ' + (i + 1) + '" value="' + esc(s.v || "") + '" placeholder="' + PD + '">' + (s.ok ? '<span class="ok">&#10003;</span>' : "") + '</div>' });
+  h += '<div class="pb-acts"><button class="btn small btn-orange" id="s3PpBtn">Check these</button></div><div class="pb-fb" id="s3PpFb"></div>';
+  $("s3Pp").innerHTML = h;
+}
+function s3PpCheck(){
+  var Q = PPQ(), right = 0, hints = [], tried = 0;
+  Q.forEach(function(q, i){ var k = st.ev + i, s = st.s3.pp[k] || (st.s3.pp[k] = {}); var inp = $("s3Pp").querySelector('[data-pp="' + i + '"]'); s.v = inp ? inp.value : s.v || "";
+    if(!String(s.v).trim()) return; tried++;
+    if(moneyIs(s.v, q.a)){ s.ok = 1; right++ } else { s.ok = 0; s.missed = 1; hints.push("Number " + (i + 1) + ": " + q.hint) } });
+  save(); s3PpDraw();
+  if(!tried){ fb("s3PpFb", "tell", "Fill in any of them first. Skip any you like."); return }
+  if(!hints.length) fb("s3PpFb", "ok", "<b>" + right + " checked, all spot on.</b>" + (right === Q.length ? " That is how much each guest's share of the money is, and what is left after the basics." : ""));
+  else fb("s3PpFb", "nope", "<b>" + right + " spot on.</b> Another go at these if you fancy:<br>" + hints.join("<br>"));
+}
+
+/* =========================================================
+   STAGE 4: deal or steal (price seesaw)
+   ========================================================= */
+var S4R = [
+  { title:"Pizza for 8 people", ctx:"You need 2 cheese pizzas (each feeds 4). Cheese pizzas are on <b>3 for 2</b>.",
+    o:[ { id:"pzc", q:2, lab:"Buy 2 cheese pizzas", pay:600, calc:"2 &times; " + PD + "3.00 = " + PD + "6.00. The deal only starts at 3." },
+        { id:"pzc", q:3, lab:"Buy 3 on the 3 for 2", pay:600, calc:"3 for the price of 2 = 2 &times; " + PD + "3.00 = " + PD + "6.00." } ],
+    same:true, hint:"Work out what you would actually hand over at the till for each one. With 3 for 2, how many do you pay for?",
+    win:"<b>They cost exactly the same.</b> The third pizza is free, so you may as well take it: 4 more portions for nothing. Spare pizza freezes well, or goes in someone's lunch." },
+  { title:"Drinks for 8 people", ctx:"2 drinks each, so 16 drinks. Each 2 litre bottle pours 8. Cola has a bright <b>2 for " + PD + "3</b> tag.",
+    o:[ { id:"col", q:2, lab:"2 colas on 2 for " + PD + "3", pay:300, calc:"2 for " + PD + "3.00 = " + PD + "3.00." },
+        { id:"lem", q:2, lab:"2 lemonades", pay:150, calc:"2 &times; 75p = " + PD + "1.50." } ],
+    best:1, hint:"The deal tag shouts the loudest. Ignore it for a second and work out what 2 bottles of each costs.",
+    win:"<b>Lemonade wins by " + PD + "1.50.</b> A deal is only a bargain if the thing was good value to start with. Same 16 drinks, half the price." },
+  { title:"A still drink for Finch and friends", ctx:"Compare the cost of <b>one drink</b>. Squash is mixed with tap water.",
+    o:[ { id:"sq", q:1, lab:"Blackcurrant squash", pay:5, unit:true, calc:PD + "1.00 &divide; 20 drinks = 5p a drink." },
+        { id:"oj", q:1, lab:"Orange juice", pay:30, unit:true, calc:PD + "1.20 &divide; 4 drinks = 30p a drink." } ],
+    best:0, hint:"Divide the price by the number of drinks in each one.",
+    win:"<b>Squash, at 5p a drink.</b> Orange juice is 6 times the price per drink. Juice is a treat; squash goes much further." },
+  { title:"Crisps for 12 people", ctx:"1 bag each, so 12. Crisps are 6 bags for " + PD + "1.50, on <b>2 for " + PD + "2.50</b>. Tortilla sharing bags feed 4.",
+    o:[ { id:"crs", q:2, lab:"2 packs of crisps on 2 for " + PD + "2.50", pay:250, calc:"2 packs, 12 bags, for " + PD + "2.50." },
+        { id:"tor", q:3, lab:"3 tortilla sharing bags", pay:375, calc:"12 people &divide; 4 = 3 bags. 3 &times; " + PD + "1.25 = " + PD + "3.75." } ],
+    best:0, hint:"How many tortilla bags would 12 people need? Then what do they cost altogether?",
+    win:"<b>The crisp deal wins by " + PD + "1.25.</b> The tortilla bag looked cheaper on the tag, but you need 3 of them." },
+  { title:"Something sweet for 12", ctx:"One each. Cupcakes are " + PD + "2.25 a 6 pack, on <b>2 for " + PD + "4</b>. Jam doughnuts are " + PD + "1 for 5.",
+    o:[ { id:"cc", q:2, lab:"2 packs of cupcakes on 2 for " + PD + "4", pay:400, calc:"12 cupcakes for " + PD + "4.00." },
+        { id:"dn", q:3, lab:"3 packs of doughnuts", pay:300, calc:"12 &divide; 5 does not go exactly, so 3 packs (15 doughnuts). 3 &times; " + PD + "1.00 = " + PD + "3.00." } ],
+    best:1, hint:"You cannot buy part of a pack. How many doughnut packs give at least 12?",
+    win:"<b>Doughnuts, even with 3 spare.</b> " + PD + "3.00 against " + PD + "4.00. Three packs sounds like more, but it costs less." }
+];
+function sawSVG(a, b){
+  var diff = a - b, ang = diff === 0 ? 0 : Math.max(-14, Math.min(14, -diff / Math.max(a, b) * 22));
+  var start = reduce ? ang : 0;
+  return '<svg viewBox="0 0 400 170" aria-hidden="true"><path d="M170 160l30-40 30 40z" fill="#ffc247" stroke="#0a2f38" stroke-width="3"/><rect x="20" y="160" width="360" height="6" rx="3" fill="#0a2f38"/>' +
+    '<g class="pb-beam" style="transform:rotate(' + start + 'deg)" data-ang="' + ang + '"><rect x="30" y="114" width="340" height="12" rx="6" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3"/>' +
+    '<rect x="34" y="70" width="90" height="44" rx="8" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><text x="79" y="99" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="20" fill="#0a2f38">' + tagPrice(a) + '</text>' +
+    '<rect x="276" y="70" width="90" height="44" rx="8" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><text x="321" y="99" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="20" fill="#0a2f38">' + tagPrice(b) + '</text></g>' +
+    '<text x="200" y="22" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="800" font-size="13" fill="#0a2f38">' + (diff === 0 ? "Perfectly level" : "The dearer side sinks") + '</text></svg>';
+}
+RENDER.s4 = function(){
+  var r = st.s4.r, R = S4R[r], res = st.s4.res[r] || {}, h = "";
+  S4R.forEach(function(x, i){ var rr = st.s4.res[i]; h += '<button type="button" class="' + (i === r ? "on " : "") + (rr && rr.done ? "done" : "") + '" data-s4r="' + i + '" aria-label="Round ' + (i + 1) + '">' + (i + 1) + '</button>' });
+  $("s4Rounds").innerHTML = h;
+  h = '<h3>' + R.title + '</h3><div class="pb-ctx">' + R.ctx + '</div><p style="margin:8px 0 0"><b>' + (R.o[0].unit ? "Which costs less per drink?" : "Which costs less at the till for what you need?") + '</b> Tap one.</p><div class="pb-opts">';
+  R.o.forEach(function(o, i){ var p = PBY[o.id], cls = res.done ? ((R.same || i === R.best) ? " good" : "") : ((res.wrong || []).indexOf(i) > -1 ? " tried" : "");
+    h += '<button type="button" class="pb-opt' + cls + '" data-s4a="' + i + '">' + pIcon(p, "pic") + '<span class="nm">' + o.lab + '</span><span class="sz">' + esc(p.pk) + '</span><span class="pb-swing' + (p.d ? " deal" : "") + '"><small>' + (p.d ? esc(p.d.t) : "Hilltop") + '</small><b>' + tagPrice(p.p) + '</b></span></button>' });
+  h += '</div>';
+  if(R.same || R.same === false) h += '<div class="pb-acts" style="margin-top:0"><button type="button" class="btn btn-quiet small" data-s4a="same">They cost the same</button></div>';
+  h += '<div class="pb-acts"><button class="btn ghost small" id="s4Show">Show me</button></div><div class="pb-fb" id="s4Fb"></div>';
+  if(res.done){
+    h += '<div class="pb-saw">' + sawSVG(R.o[0].pay, R.o[1].pay) + '</div><div class="pb-calc">' + R.o.map(function(o){ return "<b>" + o.lab + ":</b> " + o.calc }).join("<br>") + '</div>' +
+      '<div class="pb-acts"><button class="btn small" id="s4Next">' + (r === S4R.length - 1 ? "Back to round 1" : "Next round") + '</button></div>';
+  }
+  $("s4Round").innerHTML = h;
+  if(res.done) fb("s4Fb", res.told ? "tell" : "ok", R.win);
+  else if(res.wrong && res.wrong.length) fb("s4Fb", "nope", "<b>Have another look.</b> " + R.hint);
+  if(res.done && !reduce) requestAnimationFrame(function(){ requestAnimationFrame(function(){ var b = $("s4Round").querySelector(".pb-beam"); if(b) b.style.transform = "rotate(" + b.getAttribute("data-ang") + "deg)" }) });
+};
+if(S4R[0]) S4R.forEach(function(R){ if(!R.same) R.same = false });
+$("panel-s4").addEventListener("click", function(e){
+  var t = e.target, r = st.s4.r, R = S4R[r], res = st.s4.res[r] || (st.s4.res[r] = {});
+  var rb = t.closest("[data-s4r]"); if(rb){ st.s4.r = +rb.getAttribute("data-s4r"); save(); RENDER.s4(); return }
+  var a = t.closest("[data-s4a]"); if(a){ if(res.done) return; var v = a.getAttribute("data-s4a");
+    var right = R.same ? v === "same" : String(R.best) === v;
+    if(right){ res.done = 1; if(res.first === undefined) res.first = true }
+    else { if(res.first === undefined) res.first = false; res.wrong = res.wrong || []; if(v !== "same") res.wrong.push(+v); else res.saidSame = 1 }
+    save(); RENDER.s4(); return }
+  if(t.id === "s4Show"){ res.done = 1; res.told = 1; if(res.first === undefined) res.first = false; save(); RENDER.s4(); return }
+  if(t.id === "s4Next"){ st.s4.r = (r + 1) % S4R.length; save(); RENDER.s4(); return }
+});
+
+/* =========================================================
+   LIST MATHS (all pence)
+   ========================================================= */
+function unitP(p, ctx){ return p.p + ((ctx && ctx.up && ctx.up[p.id]) || 0) }
+function lineFull(p, q, ctx){ return unitP(p, ctx) * q }
+function lineCost(p, q, ctx){
+  var u = unitP(p, ctx);
+  if(p.d && p.d.k === "32") return u * (q - Math.floor(q / 3));
+  if(p.d && p.d.k === "2f") return Math.floor(q / 2) * (p.d.price + 2 * ((ctx && ctx.up && ctx.up[p.id]) || 0)) + (q % 2) * u;
+  return u * q;
+}
+function lines(list){ var o = []; PRODUCTS.forEach(function(p){ if(list[p.id] > 0) o.push({ p:p, q:list[p.id] }) }); return o }
+function total(list, ctx){ var t = 0; lines(list).forEach(function(l){ t += lineCost(l.p, l.q, ctx) }); return t }
+function served(list, sec){ var n = 0; lines(list).forEach(function(l){ if(l.p.sec === sec) n += l.p.s * l.q }); return n }
+function has(list, f){ return lines(list).some(function(l){ return f(l.p) }) }
+function ctx5(){ return { guests:E().guests, budget:E().budget, up:{}, sold:{} } }
+function checks(list, ctx){
+  var G = ctx.guests, out = [];
+  out.push({ id:"sav", t:"Savoury for " + G, ok:served(list, "sav") >= G, s:served(list, "sav") + " of " + G + " portions" });
+  out.push({ id:"snk", t:"Snacks for " + G, ok:served(list, "snk") >= G, s:served(list, "snk") + " of " + G });
+  out.push({ id:"drk", t:"2 drinks each", ok:served(list, "drk") >= 2 * G, s:served(list, "drk") + " of " + (2 * G) + " drinks" });
+  out.push({ id:"swt", t:"Something sweet for " + G, ok:served(list, "swt") >= G, s:served(list, "swt") + " of " + G });
+  var pl = (list.pl || 0) * 20, cu = (list.cu || 0) * 20;
+  out.push({ id:"kit", t:"Plates and cups for " + G, ok:pl >= G && cu >= G, s:pl + " plates, " + cu + " cups" });
+  out.push({ id:"robin", t:"Robin: something savoury that is V", ok:has(list, function(p){ return p.sec === "sav" && p.v }), s:"vegetarian" });
+  out.push({ id:"wren", t:"Wren: savoury and sweet with GF", ok:has(list, function(p){ return p.sec === "sav" && p.gf }) && has(list, function(p){ return p.sec === "swt" && p.gf }), s:"gluten free" });
+  out.push({ id:"finch", t:"Finch: a still drink", ok:has(list, function(p){ return p.sec === "drk" && !p.fz }), s:"no fizz" });
+  var t = total(list, ctx);
+  out.push({ id:"bud", t:"Within " + money(ctx.budget), ok:t <= ctx.budget, s:t <= ctx.budget ? money(ctx.budget - t) + " to spare" : money(t - ctx.budget) + " over" });
+  return out;
+}
+function allOk(list, ctx){ return checks(list, ctx).every(function(c){ return c.ok }) }
+/* ready made lists that pass every check */
+var READY = {
+  film:{ pzc:1, drm:1, tor:2, sq:1, dn:1, sb:1, pl:1, cu:1 },
+  birthday:{ pzc:3, pzg:1, crs:2, sq:1, lem:1, dn:3, sb:1, pl:1, cu:1 },
+  games:{ pzc:1, pzg:1, crs:1, sq:1, dn:1, sb:1, pl:1, cu:1 }
+};
+/* swap ideas: cheaper way to get the same servings in a section, or drop spare packs */
+function swapIdeas(list, ctx){
+  var ideas = [], t0 = total(list, ctx);
+  function nm(p, q){ return q + " &times; " + p.n.toLowerCase() }
+  lines(list).forEach(function(l){
+    var p = l.p, sec = p.sec; if(sec === "kit") return;
+    var need = sec === "drk" ? 2 * ctx.guests : ctx.guests, others = served(list, sec) - p.s * l.q;
+    var qmin = Math.max(0, Math.ceil((need - others) / p.s));
+    if(qmin < l.q){
+      var nl = JSON.parse(JSON.stringify(list)); if(qmin) nl[p.id] = qmin; else delete nl[p.id];
+      var sv = t0 - total(nl, ctx);
+      if(sv > 0 && guestsKept(list, nl, ctx)) ideas.push({ kind:"drop", from:p.id, n:l.q - qmin, save:sv, txt:"Take " + nm(p, l.q - qmin) + " off. There is still enough " + SBY[sec].n.toLowerCase() + ".", nl:nl });
+    }
+    PRODUCTS.forEach(function(o){
+      if(o.sec !== sec || o.id === p.id || (ctx.sold && ctx.sold[o.id])) return;
+      var have2 = others + (list[o.id] || 0) * o.s, q2 = Math.max(0, Math.ceil((need - have2) / o.s));
+      if(!q2) return;
+      var nl = JSON.parse(JSON.stringify(list)); delete nl[p.id]; nl[o.id] = (nl[o.id] || 0) + q2;
+      var sv = t0 - total(nl, ctx);
+      if(sv > 0 && guestsKept(list, nl, ctx)) ideas.push({ kind:"swap", from:p.id, to:o.id, q:q2, save:sv, txt:"Swap " + nm(p, l.q) + " for " + nm(o, q2) + ".", nl:nl });
+    });
+  });
+  ideas.sort(function(a, b){ return b.save - a.save });
+  var seen = {}, out = [];
+  ideas.forEach(function(i){ var k = i.from + (i.to || "-"); if(!seen[k] && out.length < 4){ seen[k] = 1; out.push(i) } });
+  return out;
+}
+function guestsKept(a, b, ctx){
+  var ca = checks(a, ctx), cb = checks(b, ctx), ok = true;
+  ca.forEach(function(c, i){ if(c.id !== "bud" && c.ok && !cb[i].ok) ok = false });
+  return ok;
+}
+
+/* =========================================================
+   SHARED LIST BUILDER (stage 5 and stage 6)
+   ========================================================= */
+var BUILD = {
+  "5":{ list:function(){ return list5() }, ctx:ctx5, menu:"s5Menu", checks:"s5Checks", swaps:"s5Swaps", till:"s5Till", log:function(){ return st.log5 } },
+  "6":{ list:function(){ return st.s6.list }, ctx:function(){ return ctx6() }, menu:"s6Menu", checks:"s6Checks", swaps:"s6Swaps", till:"s6Till", log:function(){ return st.s6.log } }
+};
+var showSave = { "5":false, "6":false };
+function drawMenu(b){
+  var B = BUILD[b], list = B.list(), ctx = B.ctx(), h = "";
+  SECS.forEach(function(s){
+    var need = s.id === "drk" ? 2 * ctx.guests : ctx.guests, have = served(list, s.id);
+    h += '<div class="pb-sec"><div class="pb-sechead" style="background:' + s.c + '"><span>' + s.n + '</span><small>' + s.need + '</small></div><div class="pb-secbody">';
+    PRODUCTS.forEach(function(p){ if(p.sec !== s.id) return;
+      var q = list[p.id] || 0, sold = ctx.sold && ctx.sold[p.id], up = ctx.up && ctx.up[p.id];
+      h += '<div class="pb-prod' + (q ? " inl" : "") + (sold ? " sold" : "") + '">' + pIcon(p, "pic") + '<span class="nm">' + esc(p.n) + '</span><span class="sz">' + esc(p.pk) + '</span><span class="pb-mini" style="font-size:.72rem">' + (marks(p) || "&nbsp;") + '</span>' +
+        '<span class="pr">' + tagPrice(unitP(p, ctx)) + '</span>' + (up ? '<span class="up">up ' + up + 'p</span>' : "") + (p.d ? '<span class="deal">' + esc(p.d.t) + '</span>' : "") +
+        (sold ? '<b style="font-size:.8rem">Sold out</b>' : '<div class="pb-qty">' + (q ? '<button type="button" data-b="' + b + '" data-sub="' + p.id + '" aria-label="One less ' + esc(p.n) + '">&minus;</button><span>' + q + '</span><button type="button" data-b="' + b + '" data-add="' + p.id + '" aria-label="One more ' + esc(p.n) + '">+</button>' : '<button type="button" class="add" data-b="' + b + '" data-add="' + p.id + '" aria-label="Add ' + esc(p.n) + '">Add</button>') + '</div>') + '</div>' });
+    h += '</div></div>';
+  });
+  $(B.menu).innerHTML = h;
+}
+function drawChecks(b){
+  var B = BUILD[b], list = B.list(), ctx = B.ctx(), cs = checks(list, ctx), n = cs.filter(function(c){ return c.ok }).length, h = '<h4>Party checklist &middot; ' + n + ' of ' + cs.length + '</h4>';
+  cs.forEach(function(c){ h += '<div class="pb-ck ' + (c.ok ? "ok" : "short") + '"><i>' + (c.ok ? "&#10003;" : "") + '</i><span>' + c.t + '<small>' + c.s + '</small></span></div>' });
+  var L = lines(list);
+  if(L.length){ h += '<div class="pb-lines">'; L.forEach(function(l){ var full = lineFull(l.p, l.q, ctx), c = lineCost(l.p, l.q, ctx); h += '<div><span>' + l.q + ' &times; ' + esc(l.p.n) + '</span><span>' + money(c) + '</span></div>' + (full > c ? '<div class="off"><span>&nbsp;&nbsp;' + esc(l.p.d.t) + ' saves</span><span>-' + money(full - c) + '</span></div>' : "") }); h += '</div>' }
+  $(B.checks).innerHTML = h;
+  var t = total(list, ctx), over = t > ctx.budget, h2 = "";
+  if(over || showSave[b]){
+    var ideas = swapIdeas(list, ctx);
+    h2 = '<div class="pb-card fun" style="padding:12px 14px;margin:12px 0 0"><h3 style="font-size:1.05rem">' + (over ? "Ways to get back under" : "Ways to save") + '</h3>';
+    if(!ideas.length) h2 += '<p style="font-size:.9rem">No easy swaps found that keep every guest happy. You could take out something that is more than needed, or pick a cheaper pack in one section.</p>';
+    ideas.forEach(function(i, k){ h2 += '<div class="pb-swap"><span>' + i.txt + ' Saves <b>' + money(i.save) + '</b>.</span><button class="btn small" data-b="' + b + '" data-idea="' + k + '">Do it</button></div>' });
+    h2 += '</div>';
+  } else if(L.length) h2 = '<div class="pb-acts"><button class="btn btn-quiet small" data-b="' + b + '" data-findsave="1">Find savings anyway</button></div>';
+  $(B.swaps).innerHTML = h2;
+}
+function drawTill(b, bump){
+  var B = BUILD[b], list = B.list(), ctx = B.ctx(), t = total(list, ctx), pct = Math.min(100, t / ctx.budget * 100), left = ctx.budget - t, L = lines(list);
+  var cls = t > ctx.budget ? "over" : (t > ctx.budget * .9 ? "warn" : "");
+  var msg = !L.length ? "Nothing on the list yet. Budget " + money(ctx.budget) + "." : (left >= 0 ? money(left) + " left. " + (allOk(list, ctx) ? "Every box ticked." : "Some boxes still to tick.") : money(-left) + " over, which happens to everyone. The swap ideas can help.");
+  $(B.till).innerHTML = '<svg viewBox="0 0 46 60" aria-hidden="true"' + (bump && !reduce ? ' class="pb-hop"' : "") + '><path d="M6 6h34v48l-5-4-6 4-6-4-6 4-6-4-5 4z" fill="#fffdf8" stroke="#ffc247" stroke-width="3"/><path d="M12 16h22M12 24h22M12 32h14" stroke="#0a2f38" stroke-width="2.5"/></svg>' +
+    '<div><div class="tt">' + money(t) + ' <small>of ' + money(ctx.budget) + ' &middot; ' + plural(L.reduce(function(a, l){ return a + l.q }, 0), "item") + '</small></div><div class="pb-bar ' + cls + '"><i style="width:' + pct + '%"></i></div><div class="msg">' + msg + '</div></div>';
+}
+function drawBuilder(b, bump){ drawMenu(b); drawChecks(b); drawTill(b, bump) }
+function builderClick(e){
+  var t = e.target, bEl = t.closest("[data-b]"); if(!bEl) return;
+  var b = bEl.getAttribute("data-b"), B = BUILD[b], list = B.list(), ctx = B.ctx();
+  if(bEl.hasAttribute("data-add")){ var id = bEl.getAttribute("data-add"); list[id] = (list[id] || 0) + 1; save(); drawBuilder(b, true); refocus(b, '[data-add="' + id + '"]'); return }
+  if(bEl.hasAttribute("data-sub")){ var id2 = bEl.getAttribute("data-sub"); list[id2] = Math.max(0, (list[id2] || 0) - 1); if(!list[id2]) delete list[id2]; save(); drawBuilder(b); refocus(b, list[id2] ? '[data-sub="' + id2 + '"]' : '[data-add="' + id2 + '"]'); return }
+  if(bEl.hasAttribute("data-findsave")){ showSave[b] = true; drawChecks(b); return }
+  if(bEl.hasAttribute("data-idea")){
+    var idea = swapIdeas(list, ctx)[+bEl.getAttribute("data-idea")]; if(!idea) return;
+    Object.keys(list).forEach(function(k){ delete list[k] }); Object.keys(idea.nl).forEach(function(k){ list[k] = idea.nl[k] });
+    B.log().push((idea.kind === "drop" ? "took " + idea.n + " x " + PBY[idea.from].n + " off" : "swapped " + PBY[idea.from].n + " for " + idea.q + " x " + PBY[idea.to].n) + " (saved " + money(idea.save) + ")");
+    save(); drawBuilder(b); return;
+  }
+}
+function refocus(b, sel){ var el = $(BUILD[b].menu).querySelector(sel); if(el) el.focus({ preventScroll:true }) }
+$("panel-s5").addEventListener("click", builderClick);
+$("panel-s6").addEventListener("click", builderClick);
+
+/* =========================================================
+   STAGE 5
+   ========================================================= */
+RENDER.s5 = function(){
+  var e = E();
+  $("s5Top").innerHTML = '<b>' + e.n + '</b> &middot; ' + e.guests + ' guests (Robin, Wren and Finch are coming) &middot; budget <b>' + money(e.budget) + '</b>.' +
+    '<p style="margin:6px 0 0;font-size:.95rem">Add things section by section. The checklist ticks as you go. Want a head start? Use a ready made list and change it to suit you.</p>' +
+    '<div class="pb-acts" style="margin-top:8px"><button class="btn btn-quiet small" id="s5Ready">Use a ready made list</button><button class="btn ghost small" id="s5Clear">Clear my list</button></div>';
+  drawBuilder("5");
+};
+$("panel-s5").addEventListener("click", function(e){
+  if(e.target.id === "s5Ready"){ st.lists[st.ev] = JSON.parse(JSON.stringify(READY[st.ev])); st.log5.push("used the ready made list for " + E().n); save(); RENDER.s5(); return }
+  if(e.target.id === "s5Clear"){ st.lists[st.ev] = {}; save(); RENDER.s5(); return }
+});
+
+/* =========================================================
+   STAGE 6: surprise deck
+   ========================================================= */
+var CARDS = [
+  { id:"cut", n:"Budget cut", d:"Some of the money is needed for something else. You have " + PD + "3 less.", c:"#d75f10",
+    pic:'<circle cx="45" cy="45" r="32" fill="#ffc247" stroke="#0a2f38" stroke-width="4"/><text x="45" y="56" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="900" font-size="30" fill="#0a2f38">-3</text>' },
+  { id:"rise", n:"Prices went up", d:"Every pizza is 25p more. Every drink is 10p more.", c:"#ef7724",
+    pic:'<path d="M45 10l28 34H57v34H33V44H17z" fill="#ef7724" stroke="#0a2f38" stroke-width="4" stroke-linejoin="round"/>' },
+  { id:"guests", n:"Two more guests", d:"Two more friends are coming. Same budget, more people.", c:"#7b4b8f",
+    pic:'<circle cx="30" cy="30" r="12" fill="#ffe08a" stroke="#0a2f38" stroke-width="3"/><path d="M10 78c0-18 9-26 20-26s20 8 20 26z" fill="#00a6c9" stroke="#0a2f38" stroke-width="3"/><circle cx="60" cy="30" r="12" fill="#ffe08a" stroke="#0a2f38" stroke-width="3"/><path d="M40 78c0-18 9-26 20-26s20 8 20 26z" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>' },
+  { id:"sold", n:"Sold out", d:"Hilltop has sold out of cheese and tomato pizza. Outrageous!", c:"#0a2f38",
+    pic:'<g transform="translate(13 13)">' + IC.pizza() + '</g><path d="M14 14l62 62M76 14L14 76" stroke="#d75f10" stroke-width="7" stroke-linecap="round"/>' }
+];
+var CBY = {}; CARDS.forEach(function(c){ CBY[c.id] = c });
+function ctx6(){
+  var e = E(), c = { guests:e.guests, budget:e.budget, up:{}, sold:{} };
+  if(st.s6.card === "cut") c.budget -= 300;
+  if(st.s6.card === "guests") c.guests += 2;
+  if(st.s6.card === "rise") PRODUCTS.forEach(function(p){ if(p.sec === "sav" && /pizza/i.test(p.n)) c.up[p.id] = 25; if(p.sec === "drk") c.up[p.id] = 10 });
+  if(st.s6.card === "sold") c.sold.pzc = 1;
+  return c;
+}
+var S6CHIPS = ["The surprise was", "Before the surprise my list", "I swapped ... for ... because", "I took out ... because", "I added ... because", "I kept ... because", "My list still works because", "Now it costs ... which leaves"];
+function startCard(id){
+  if(st.s6.card && CBY[st.s6.card]){ var oc = ctx6(), ot = total(st.s6.list, oc); st.s6.hist = st.s6.hist || []; st.s6.hist.push(CBY[st.s6.card].n + ": ended on " + money(ot) + " of " + money(oc.budget) + (allOk(st.s6.list, oc) ? ", every box ticked" : ", some boxes still to tick") + (st.s6.log.length ? " (" + st.s6.log.join("; ") + ")" : "")); if(st.s6.hist.length > 6) st.s6.hist.shift() }
+  st.s6.card = id;
+  var base = Object.keys(list5()).length ? list5() : READY[st.ev];
+  st.s6.list = JSON.parse(JSON.stringify(base));
+  st.s6.from = Object.keys(list5()).length ? "my list" : "the ready made list";
+  st.s6.log = [];
+  if(id === "sold" && st.s6.list.pzc){ var n = st.s6.list.pzc; delete st.s6.list.pzc; st.s6.log.push("cheese pizza sold out, " + n + " taken off the list") }
+  st.s6.start = total(st.s6.list, ctx6());
+  save();
+}
+RENDER.s6 = function(){
+  var c = CBY[st.s6.card];
+  $("s6Flip").innerHTML = '<div class="in"><div class="face back"><b>?</b><span style="margin-top:10px;font-weight:700">Surprise deck</span></div><div class="face front" style="border-color:' + (c ? c.c : INK) + '">' + (c ? '<svg viewBox="0 0 90 90" aria-hidden="true">' + c.pic + '</svg><b>' + c.n + '</b><span>' + c.d + '</span>' : "") + '</div></div>';
+  if(c){ $("s6Flip").classList.add("on") } else $("s6Flip").classList.remove("on");
+  $("s6Pick").innerHTML = CARDS.map(function(x){ return '<button type="button" data-card="' + x.id + '" aria-pressed="' + (st.s6.card === x.id) + '">' + x.n + '</button>' }).join("");
+  if(!c){ $("s6Out").innerHTML = '<p style="font-size:.92rem;color:var(--body-tint);margin-top:10px">Your party list from stage 5 comes with you. No list yet? You get the ready made one.</p>'; $("s6Work").classList.add("hidden"); return }
+  var ctx = ctx6(), t = total(st.s6.list, ctx), ok = allOk(st.s6.list, ctx);
+  $("s6Out").innerHTML = '<div class="pb-ctx" style="border-color:' + c.c + '"><b>' + c.n + ':</b> ' + c.d + '<br>Starting from ' + (st.s6.from || "my list") + '. Now: ' + ctx.guests + ' guests, budget ' + money(ctx.budget) + ', list ' + money(t) + '. ' + (ok ? "<b>Every box is ticked again.</b>" : "Have a go at changing the list below until every box is ticked.") + '</div>';
+  $("s6Work").classList.remove("hidden");
+  drawBuilder("6");
+  $("s6Chips").innerHTML = S6CHIPS.map(function(w){ return '<button type="button" data-ins="s6Why">' + w + '</button>' }).join("");
+  if(document.activeElement !== $("s6Why")) $("s6Why").value = st.s6.why;
+};
+var _dt6 = drawTill; drawTill = function(b, bump){ _dt6(b, bump); if(b === "6" && st.s6.card){ var c = CBY[st.s6.card], ctx = ctx6(), t = total(st.s6.list, ctx), ok = allOk(st.s6.list, ctx); var o = $("s6Out").querySelector(".pb-ctx"); if(o) o.innerHTML = '<b>' + c.n + ':</b> ' + c.d + '<br>Starting from ' + (st.s6.from || "my list") + '. Now: ' + ctx.guests + ' guests, budget ' + money(ctx.budget) + ', list ' + money(t) + '. ' + (ok ? "<b>Every box is ticked again.</b>" : "Have a go at changing the list below until every box is ticked.") } };
+$("panel-s6").addEventListener("click", function(e){
+  var t = e.target;
+  var ins = t.closest("[data-ins]"); if(ins){ insertChip(ins); return }
+  var pk = t.closest("[data-card]"); if(pk){ startCard(pk.getAttribute("data-card")); RENDER.s6(); return }
+  if(t.id === "s6Draw"){
+    if(cur.flipping) return;
+    var pool = CARDS.filter(function(c){ return c.id !== st.s6.card }), c = pool[Math.floor(Math.random() * pool.length)];
+    if(reduce){ startCard(c.id); RENDER.s6(); return }
+    cur.flipping = true; $("s6Flip").classList.remove("on");
+    setTimeout(function(){ startCard(c.id); RENDER.s6(); cur.flipping = false }, 450);
+  }
+});
+$("s6Why").addEventListener("input", function(){ st.s6.why = this.value; save() });
+function insertChip(ins){ var ta = $(ins.getAttribute("data-ins")); ta.value = (ta.value && !/\s$/.test(ta.value) ? ta.value + (/[.!?]$/.test(ta.value) ? " " : ". ") : ta.value) + ins.textContent + " "; ta.focus(); ta.dispatchEvent(new Event("input")) }
+
+/* =========================================================
+   STAGE 7: checkout
+   ========================================================= */
+function s7List(){ var l = list5(); return Object.keys(l).length ? l : READY[st.ev] }
+function s7Receipt(){
+  var list = s7List(), ctx = ctx5(), L = lines(list), dup = null;
+  L.forEach(function(l){ if(!dup && l.q === 1 && !l.p.d) dup = l.p });
+  if(!dup) L.forEach(function(l){ if(!dup && !l.p.d) dup = l.p });
+  if(!dup) dup = L[0].p;
+  var real = total(list, ctx);
+  return { L:L, dup:dup, real:real, wrong:real + dup.p, ctx:ctx };
+}
+function isDup(r, R){ return r.p.id === R.dup.id && (r.dup || r.q === 1) }
+var CASH = [2000, 1000, 500, 200, 100, 50];
+RENDER.s7 = function(){
+  var sig = st.ev + JSON.stringify(s7List());
+  if(st.s7.sig !== sig){ var w = st.s7.why; st.s7 = { sig:sig, dup:null, dupTries:0, tot:"", totOk:null, tray:[], paid:0, change:"", changeOk:null, why:w }; save() }
+  var R = s7Receipt(), s = st.s7;
+  $("s7Note").innerHTML = Object.keys(list5()).length ? "" : '<div class="pb-ctx">No list from stage 5 yet, so this is the ready made list for <b>' + E().n + '</b>. Build your own in stage 5 and it will show up here.</div>';
+  var h = '<div class="pb-receipt" aria-label="Receipt"><div class="c"><b>HILLTOP MARKET</b><br>Chilton Road<br>' + E().n + '</div><hr>';
+  var rows = [];
+  R.L.forEach(function(l){ rows.push({ p:l.p, q:l.q, dup:false }); if(l.p.id === R.dup.id) rows.push({ p:l.p, q:1, dup:true, single:l.q > 1 }) });
+  rows.forEach(function(r, i){
+    var cost = r.dup ? r.p.p : lineFull(r.p, r.q, R.ctx), cls = "";
+    if(s.dup !== null && s.dup === i) cls = isDup(r, R) ? " hit" : " miss";
+    if(s.dupOk && r.dup) cls = " hit";
+    h += '<button type="button" class="pb-rl' + cls + '" data-rl="' + i + '"><span>' + r.q + ' x ' + esc(r.p.n) + '</span><span>' + money(cost) + '</span></button>';
+    if(!r.dup && r.p.d){ var full = lineFull(r.p, r.q, R.ctx), c = lineCost(r.p, r.q, R.ctx); if(full > c) h += '<div class="pb-rl off" style="cursor:default"><span>&nbsp; ' + esc(r.p.d.t) + '</span><span>-' + money(full - c) + '</span></div>' }
+  });
+  h += '<hr><div class="big"><span>TOTAL</span><span>' + money(R.wrong) + '</span></div>';
+  if(s.dupOk && s.totOk) h += '<div class="big off" style="font-weight:400"><span>REFUND DOUBLE SCAN</span><span>-' + money(R.dup.p) + '</span></div><div class="big"><span>NEW TOTAL</span><span>' + money(R.real) + '</span></div>';
+  if(s.paid) h += '<div class="big" style="font-weight:400"><span>CASH</span><span>' + money(s.paid) + '</span></div>' + (s.changeOk ? '<div class="big" style="font-weight:400"><span>CHANGE</span><span>' + money(s.paid - R.real) + '</span></div>' : "");
+  h += '<hr><div class="c">Thank you for shopping<br>at Hilltop</div></div>';
+  $("s7Receipt").innerHTML = h;
+  cur.rows = rows;
+  if(s.dupOk) fb("s7DupFb", "ok", "<b>Spotted.</b> " + esc(R.dup.n) + " went through twice. That is " + money(R.dup.p) + " you would have paid for nothing.");
+  else if(s.dup !== null) fb("s7DupFb", "nope", "That line looks right. Look for two lines that say exactly the same thing" + (R.dup && R.L.some(function(l){ return l.p.id === R.dup.id && l.q > 1 }) ? ", or a thing that shows up more often than you put on the list." : "."));
+  else { $("s7DupFb").className = "pb-fb"; $("s7DupFb").innerHTML = "" }
+  /* total */
+  $("s7Tot").innerHTML = '<p style="margin:0 0 6px">The receipt says ' + money(R.wrong) + '. Take off the line that went through twice. What should the total be?</p><div class="pb-acts" style="margin-top:4px"><input class="pb-in' + (s.totOk ? " ok" : "") + '" id="s7TotIn" inputmode="decimal" autocomplete="off" aria-label="The real total" value="' + esc(s.tot) + '" placeholder="' + PD + '"><button class="btn small btn-orange" id="s7TotBtn">Check</button></div><div class="pb-fb" id="s7TotFb"></div>';
+  if(s.totOk) fb("s7TotFb", "ok", "<b>" + money(R.real) + ".</b> " + money(R.wrong) + " take away " + money(R.dup.p) + ". The budget was " + money(E().budget) + ", so that is " + (R.real <= E().budget ? money(E().budget - R.real) + " under budget." : money(R.real - E().budget) + " over budget."));
+  else if(s.totOk === false) fb("s7TotFb", "nope", (s.totTries > 1 ? "Try " + money(R.wrong) + " take away " + money(R.dup.p) + "." : "Not quite. Have another go: start from the receipt total and take off the double line.") + (s.dupOk ? "" : " Spotting the double line first helps."));
+  /* pay */
+  var trayV = s.tray.reduce(function(a, b){ return a + b }, 0);
+  var ph = '<p style="margin:0 0 6px">Tap notes and coins to pay the real total of <b>' + (s.totOk ? money(R.real) : "the real total") + '</b>. Paying a bit over is normal; then work out the change.</p><div class="pb-cash">';
+  CASH.forEach(function(v){ ph += '<button type="button" class="' + (v >= 500 ? "note" : "coin") + '" data-cash="' + v + '" style="' + (v >= 500 ? "background:" + ({ 2000:"#d9a0c8", 1000:"#e8b979", 500:"#9fd3e0" })[v] : "") + '">' + (v >= 100 ? PD + v / 100 : v + "p") + '</button>' });
+  ph += '</div><div class="pb-tray" aria-live="polite">' + (s.tray.length ? s.tray.map(function(v){ return '<span class="t" style="background:' + (v >= 500 ? "#fffdf8" : "#e9d27a") + '">' + (v >= 100 ? PD + v / 100 : v + "p") + '</span>' }).join("") + ' <b style="margin-left:auto">' + money(trayV) + '</b>' : '<span style="font-size:.9rem;color:var(--body-tint)">Your money goes here.</span>') + '</div>' +
+    '<div class="pb-acts"><button class="btn btn-orange small" id="s7PayBtn">Hand it over</button><button class="btn ghost small" id="s7Back">Take it back</button></div><div class="pb-fb" id="s7PayFb"></div>';
+  if(s.paid){
+    ph += '<p style="margin:12px 0 4px"><b>You paid ' + money(s.paid) + '. How much change?</b></p><div class="pb-acts" style="margin-top:4px"><input class="pb-in' + (s.changeOk ? " ok" : "") + '" id="s7ChIn" inputmode="decimal" autocomplete="off" aria-label="Change" value="' + esc(s.change) + '" placeholder="' + PD + '"><button class="btn small btn-orange" id="s7ChBtn">Check</button></div><div class="pb-fb" id="s7ChFb"></div>';
+  }
+  $("s7Pay").innerHTML = ph;
+  if(s.paid) fb("s7PayFb", s.payExtra ? "tell" : "ok", "Handed over " + money(s.paid) + "." + (s.payExtra ? " That works. You could have kept back one of them and still had enough." : ""));
+  if(s.changeOk) fb("s7ChFb", "ok", "<b>" + money(s.paid - R.real) + " change.</b> " + money(s.paid) + " take away " + money(R.real) + ". Count it before you walk away.");
+  else if(s.changeOk === false) fb("s7ChFb", "nope", s.chTries > 1 ? "Try counting up from " + money(R.real) + " to " + money(s.paid) + "." : "Have another go. Change is what you paid take away the real total.");
+  /* facts and why */
+  var list = s7List(), cs = checks(list, ctx5()), dealSave = 0;
+  lines(list).forEach(function(l){ dealSave += lineFull(l.p, l.q, R.ctx) - lineCost(l.p, l.q, R.ctx) });
+  $("s7Facts").innerHTML = '<div class="pb-fact"><b>' + money(R.real) + '</b><span>list total</span></div><div class="pb-fact"><b>' + money(Math.abs(E().budget - R.real)) + '</b><span>' + (R.real <= E().budget ? "under" : "over") + ' ' + money(E().budget) + '</span></div><div class="pb-fact"><b>' + money(Math.round(R.real / E().guests)) + '</b><span>about per guest</span></div><div class="pb-fact"><b>' + cs.filter(function(c){ return c.ok }).length + '/' + cs.length + '</b><span>checklist ticks</span></div><div class="pb-fact"><b>' + money(dealSave) + '</b><span>saved on deals</span></div>';
+  $("s7Chips").innerHTML = S7CHIPS.map(function(w){ return '<button type="button" data-ins="s7Why">' + w + '</button>' }).join("");
+  if(document.activeElement !== $("s7Why")) $("s7Why").value = st.s7.why;
+};
+var S7CHIPS = ["My list fits the party because", "Everyone gets", "Robin, Wren and Finch are OK because", "I stayed within budget by", "I chose ... instead of ... because", "The deal I used was", "I did not buy ... because", "If I did it again I would"];
+$("panel-s7").addEventListener("click", function(e){
+  var t = e.target, s = st.s7, R = s7Receipt();
+  var ins = t.closest("[data-ins]"); if(ins){ insertChip(ins); return }
+  var rl = t.closest("[data-rl]"); if(rl){ var i = +rl.getAttribute("data-rl"), row = cur.rows[i]; s.dup = i; s.dupTries++;
+    if(row && isDup(row, R)){ s.dupOk = 1; if(s.dupFirst === undefined) s.dupFirst = s.dupTries === 1 } save(); RENDER.s7(); return }
+  if(t.id === "s7TotBtn"){ s.tot = $("s7TotIn").value; if(moneyIs(s.tot, R.real)) s.totOk = true; else { s.totOk = false; s.totTries = (s.totTries || 0) + 1 } save(); RENDER.s7(); return }
+  var c = t.closest("[data-cash]"); if(c){ if(s.paid) return; if(s.tray.length < 12) s.tray.push(+c.getAttribute("data-cash")); save(); RENDER.s7(); var f = $("s7Pay").querySelector('[data-cash="' + c.getAttribute("data-cash") + '"]'); if(f) f.focus(); return }
+  if(t.id === "s7Back"){ s.tray = []; s.paid = 0; s.change = ""; s.changeOk = null; save(); RENDER.s7(); return }
+  if(t.id === "s7PayBtn"){ var v = s.tray.reduce(function(a, b){ return a + b }, 0);
+    if(!v){ fb("s7PayFb", "tell", "Tap some notes or coins first."); return }
+    if(v < R.real){ fb("s7PayFb", "nope", "That is " + money(v) + ", and the real total is " + money(R.real) + ". " + money(R.real - v) + " more to go."); return }
+    var big = s.tray.slice().sort(function(a, b){ return a - b }), extra = v - big[0] >= R.real;
+    s.paid = v; s.payExtra = extra; save(); RENDER.s7();
+    return }
+  if(t.id === "s7ChBtn"){ s.change = $("s7ChIn").value; if(moneyIs(s.change, s.paid - R.real)) s.changeOk = true; else { s.changeOk = false; s.chTries = (s.chTries || 0) + 1 } save(); RENDER.s7(); return }
+});
+$("panel-s7").addEventListener("input", function(e){ var t = e.target; if(t.id === "s7TotIn"){ st.s7.tot = t.value; save() } if(t.id === "s7ChIn"){ st.s7.change = t.value; save() } });
+$("s7Why").addEventListener("input", function(){ st.s7.why = this.value; save() });
+
+/* =========================================================
+   SEND
+   ========================================================= */
+function summaryText(){
+  var out = [], e = E();
+  out.push("The Party Budget");
+  out.push("Party: " + e.n + ", " + e.guests + " guests, budget " + money(e.budget));
+  var tried = STAGES.filter(function(s){ return st.tried[s.id] && s.id !== "send" });
+  out.push("Stages tried: " + (tried.length ? tried.map(function(s){ return s.n }).join(", ") : "none yet"));
+  out.push("");
+  function head(i){ var s = STAGES[i]; out.push((i + 1) + " " + s.n.toUpperCase() + (st.tried[s.id] ? "" : " (not tried)")); out.push("  Covers: " + MILESTONE_STAGES[s.id]) }
+  head(0);
+  if(st.s1.tries) out.push("  Party bag: " + (st.s1.done ? (st.s1.first ? "all party things spotted first go" : "all party things spotted after another go") : "had a go, " + st.s1.bag.filter(function(k){ return S1PARTY.indexOf(k) > -1 }).length + " of " + S1PARTY.length + " party things in the bag"));
+  if(st.s1.pTried){ var pr = S1TAGS.filter(function(t, i){ return st.s1.prOk[i] }).length; out.push("  Price tags read: " + pr + " of " + S1TAGS.length + " match") }
+  if(st.s1.sumOk !== null) out.push("  Added up the mini list: " + (st.s1.sumOk ? "correct, " + money(S1SUM) : "had a go (" + (st.s1.sum || "no answer") + ")"));
+  if(st.s1.within) out.push("  Within " + money(S1BUD) + "? said " + st.s1.within + (st.s1.within === "yes" ? " (right)" : " (had another look)"));
+  out.push("");
+  head(1);
+  GUESTS.forEach(function(g, i){ var r = st.s2.res[i]; if(r) out.push("  " + g.n + " (" + g.need.toLowerCase() + "): " + (r.done ? (r.told ? "looked at the answer" : (r.first ? "right first go" : "right after another go")) : "had a go")) });
+  if(st.s2.one) out.push("  One snack for all three: " + (st.s2.one === "tortilla" ? (st.s2.oneFirst ? "tortilla chips, first go" : "tortilla chips, after another go") : "picked " + ICP[st.s2.one].n + ", still looking"));
+  out.push("");
+  head(2);
+  EORDER.forEach(function(ev){ S3R.forEach(function(R, i){ var r = st.s3.res[ev + i]; if(r && (r.packsOk || r.tries)) out.push("  " + EVENTS[ev].guests + " guests, " + PBY[R.id].n + ": " + (r.packsOk ? "right number of packs" + (r.first ? " first go" : " after another go") : "had a go at packs") + (r.costOk ? ", cost worked out" : "")) }) });
+  var ppr = 0, ppt = 0; Object.keys(st.s3.pp).forEach(function(k){ var s = st.s3.pp[k]; if(s && String(s.v || "").trim()){ ppt++; if(s.ok) ppr++ } });
+  if(ppt) out.push("  Per person money: " + ppr + " of " + ppt + " answered right");
+  out.push("");
+  head(3);
+  S4R.forEach(function(R, i){ var r = st.s4.res[i]; if(r && (r.done || r.wrong)) out.push("  " + R.title + ": " + (r.done ? (r.told ? "looked at the answer" : (r.first ? "spotted first go" : "spotted after another go")) : "still thinking")) });
+  out.push("");
+  head(4);
+  var L5 = lines(list5()), c5 = ctx5();
+  if(!L5.length) out.push("  list empty");
+  L5.forEach(function(l){ out.push("  " + l.q + " x " + l.p.n + " (" + l.p.pk + ") " + money(lineCost(l.p, l.q, c5)) + (l.p.d && lineFull(l.p, l.q, c5) > lineCost(l.p, l.q, c5) ? " [" + l.p.d.t + "]" : "")) });
+  if(L5.length){ var t5 = total(list5(), c5); out.push("  TOTAL " + money(t5) + " of " + money(e.budget) + ": " + (t5 <= e.budget ? money(e.budget - t5) + " left, within budget" : money(t5 - e.budget) + " over budget"));
+    var miss = checks(list5(), c5).filter(function(c){ return !c.ok }).map(function(c){ return c.t }); out.push("  Checklist: " + (miss.length ? "still to tick: " + miss.join("; ") : "every box ticked")) }
+  if(st.log5.length) out.push("  Changes: " + st.log5.join("; "));
+  out.push("");
+  head(5);
+  if(st.s6.card){ var c6 = ctx6(), t6 = total(st.s6.list, c6); out.push("  Card: " + CBY[st.s6.card].n + ". " + CBY[st.s6.card].d);
+    out.push("  After the surprise: " + money(t6) + " of " + money(c6.budget) + " for " + c6.guests + " guests, " + (allOk(st.s6.list, c6) ? "every box ticked" : "some boxes still to tick"));
+    if(st.s6.log.length) out.push("  Changes: " + st.s6.log.join("; "));
+    out.push("  What I changed and why: " + (st.s6.why.trim() || "(nothing written)")) }
+  if(st.s6.hist && st.s6.hist.length) out.push("  Earlier cards: " + st.s6.hist.join(" | "));
+  out.push("");
+  head(6);
+  if(st.s7.dup !== null) out.push("  Spotted the double scan: " + (st.s7.dupOk ? (st.s7.dupFirst ? "yes, first go" : "yes, after another look") : "still looking"));
+  if(st.s7.totOk !== null) out.push("  Real total: " + (st.s7.totOk ? "correct" : "had a go (" + (st.s7.tot || "no answer") + ")"));
+  if(st.s7.paid) out.push("  Paid " + money(st.s7.paid) + "; change: " + (st.s7.changeOk ? "correct" : (st.s7.changeOk === false ? "had a go (" + (st.s7.change || "no answer") + ")" : "not worked out")));
+  out.push("  Why my list works: " + (st.s7.why.trim() || "(nothing written)"));
+  out.push("");
+  out.push("TARGET: I can create a shopping list for a specific purpose that follows a provided budget.");
+  var s = STUDENTS[st.who];
+  if(s){ out.push("Milestones for " + st.who + ":"); out.push("  1. " + s.ms[0]); out.push("  2. " + s.ms[1]); out.push("  Good places to start for " + st.who + ": " + s.st.map(function(id){ for(var i = 0; i < STAGES.length; i++) if(STAGES[i].id === id) return (i + 1) + " " + STAGES[i].n }).join(", ")) }
+  else out.push("Milestones: identify items for a task, find and add up prices, choose and compare, keep a list within budget, adapt and justify it.");
+  return out.join("\n");
+}
+RENDER.send = function(){
+  var tried = STAGES.filter(function(s){ return st.tried[s.id] && s.id !== "send" }), L = lines(list5()), t = total(list5(), ctx5()), e = E();
+  $("sendSummary").innerHTML = '<p>' + (tried.length ? "You had a go at <b>" + tried.map(function(s){ return s.n }).join(", ") + "</b>." : "Nothing tried yet, and that is fine. Have a look at any stage first if you fancy.") + '</p>' +
+    (L.length ? '<p style="margin-top:6px">Party list for <b>' + e.n + '</b>: <b>' + money(t) + '</b> of ' + money(e.budget) + (t <= e.budget ? ", within budget." : ", over budget.") + '</p>' : "");
+};
+if(window.Base5Send) Base5Send.mount($("sendHost"), { tool:"The Party Budget", filename:"party-budget", getText:summaryText });
+var resetArm = false;
+$("resetBtn").addEventListener("click", function(){
+  if(!resetArm){ resetArm = true; this.textContent = "Sure? Tap again"; $("resetMsg").textContent = "This clears this page on this device."; return }
+  clearTimeout(saveT); try{ localStorage.removeItem(KEY) }catch(e){}
+  window.removeEventListener("pagehide", saveNow);
+  location.reload();
+});
+
+/* =========================================================
+   GO
+   ========================================================= */
+drawWho(); drawEvents(); show(st.tab || "s1");
+window.__pb = { st:function(){ return st }, PBY:PBY, EVENTS:EVENTS, READY:READY, total:total, checks:checks, allOk:allOk, ctx5:ctx5, ctx6:ctx6, lineCost:lineCost, s7Receipt:s7Receipt, swapIdeas:swapIdeas, summaryText:summaryText, S4R:S4R, MILESTONE_STAGES:MILESTONE_STAGES };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Number Allotment - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=7">
+<style>
+/* The Number Allotment only. Shell, cards and buttons come from style.css */
+.na{max-width:920px}
+.hidden{display:none!important}
+.na .panel{max-width:none}
+
+/* who is this */
+.whobox{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:16px 18px;box-shadow:var(--lift);margin:0 0 20px;transform:rotate(.3deg)}
+.whobox h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.15rem;margin:0 0 4px}
+.whobox p{margin:0;font-size:.95rem}
+.whochips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.whochips button{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;letter-spacing:.08em;font-size:.9rem;padding:8px 14px;border-radius:999px;border:3px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;min-width:54px;min-height:44px}
+.whochips button[aria-pressed="true"]{background:var(--orange);box-shadow:3px 3px 0 var(--ink)}
+.mile{margin:12px 0 0;padding:12px 14px;border-radius:14px 10px 16px 10px;background:#eef6e6;border:2px solid #c7dfb5}
+.mile ol{margin:6px 0 6px;padding-left:22px}
+.mile li{margin-bottom:4px}
+
+/* the plot map */
+.plot{background:linear-gradient(180deg,#fff3d6 0%,#e6f1dc 100%);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:0 0 16px;overflow:hidden;box-shadow:var(--lift);margin:0 0 22px;transform:rotate(-.25deg)}
+.plot svg.scene{display:block;width:100%;height:auto}
+.plotsay{margin:4px 16px 12px;font-size:.95rem}
+.plotsay b{color:var(--teal)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:0 16px}
+.sbtn{position:relative;text-align:left;font-family:var(--body);background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:16px 12px 18px 12px;padding:10px 34px 10px 12px;cursor:pointer;box-shadow:3px 4px 0 rgba(10,47,56,.3);transition:transform .14s ease;min-height:44px}
+.sbtn:nth-child(odd){transform:rotate(-.6deg)}
+.sbtn:nth-child(even){transform:rotate(.5deg)}
+.sbtn:hover{transform:translateY(-3px) rotate(-1deg)}
+.sbtn .no{font-family:var(--display);font-variation-settings:"wght" 900;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65;display:block}
+.sbtn b{display:block;font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1rem;line-height:1.1;margin:2px 0}
+.sbtn small{font-size:.8rem;opacity:.8;display:block;line-height:1.3}
+.tick{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:2px dashed rgba(10,47,56,.35);background:#fff}
+.tick svg{display:none;width:100%;height:100%}
+.sbtn.done .tick{background:#2e7d4f;border:2px solid var(--ink)}
+.sbtn.done .tick svg{display:block}
+.sbtn.suit{outline:4px dashed var(--orange);outline-offset:3px}
+.badge{display:inline-block;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;background:var(--plum);color:#fff;border-radius:999px;padding:3px 9px;margin-top:6px;border:2px solid var(--ink)}
+.lay{transition:opacity .6s ease}
+.lay.ghost{opacity:.2}
+.lay.ghost .gl{stroke-dasharray:6 5}
+.robin{transform-box:fill-box;transform-origin:bottom center;animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+.sway{transform-box:fill-box;transform-origin:bottom center;animation:sway2 3.4s ease-in-out infinite alternate}
+@keyframes sway2{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.cloud{animation:drift 22s linear infinite alternate}
+@keyframes drift{from{transform:translateX(-20px)}to{transform:translateX(40px)}}
+
+/* stages */
+.acc summary .ico{flex:none;width:52px;height:52px;display:block}
+.acc summary .ico svg{width:52px;height:52px;display:block}
+.sno{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;opacity:.8;display:block}
+.acc .body{background:var(--white)}
+.lk{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:4px}
+.part{margin:22px 0 0;padding-top:18px;border-top:3px dashed var(--line)}
+.part h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.part > p{margin:0 0 10px;max-width:62ch}
+.learn{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:center;background:#f4f8ec;border:3px dashed #5f9a3c;border-radius:var(--r-alt);padding:14px 16px}
+.learn p{margin:0 0 8px;font-size:1rem}
+.learn p:last-child{margin-bottom:0}
+.lfig{text-align:center}
+.lfig svg{max-width:100%;height:auto}
+.snav{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:640px){.learn{grid-template-columns:1fr}}
+
+/* shared bits */
+.btn.sm{font-size:.78rem;padding:9px 15px}
+.btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:2px 2px 0 var(--ink)}
+.num{width:90px;font-size:1.3rem;font-family:var(--body);font-weight:700;text-align:center;padding:8px 6px;border:3px solid var(--ink);border-radius:12px 10px 14px 10px;background:#fffdfb;color:var(--ink)}
+.num.sm{width:72px;font-size:1.15rem;padding:6px 4px}
+.num.wide{width:170px}
+.pre{font-weight:700}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 3px;font-weight:700}
+.fr > span{padding:1px 5px;display:block;text-align:center}
+.fr > span:first-child{border-bottom:3px solid currentColor}
+.mixed{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;font-weight:700}
+.prompt{font-size:1.15rem;line-height:1.5;margin:4px 0 12px}
+.arow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:10px 0}
+.fb{margin:12px 0 4px;padding:12px 14px;border-radius:14px 10px 14px 10px;font-size:1rem;line-height:1.5}
+.fb.ok{background:#e9f4ec;border:2px solid #bcdcc4}
+.fb.nope{background:#fdf0e5;border:2px solid #f2d5b8}
+.fb.tell{background:#eef4f6;border:2px solid #cfe0e6}
+.fb b{font-family:var(--display)}
+.smallnote{font-size:.88rem;opacity:.8;margin:8px 0 0}
+.vis{margin:0 0 6px}
+.vis svg{max-width:100%;height:auto;display:block}
+.work{font-family:var(--body);background:#fff;border:2px dashed var(--teal);border-radius:12px;padding:8px 12px;margin:8px 0 0;line-height:1.7}
+
+/* runner */
+.rq{background:#fffaf1;border:3px solid var(--ink);border-radius:18px 14px 20px 14px;padding:14px 16px;box-shadow:3px 4px 0 rgba(10,47,56,.14)}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;align-items:center}
+.dots .dl{font-size:.8rem;opacity:.7;margin-right:4px}
+.dot{width:32px;height:32px;border-radius:50%;border:2px solid rgba(10,47,56,.35);background:#fff;font-family:var(--display);font-weight:800;font-size:.8rem;cursor:pointer;color:var(--ink);padding:0}
+.dot.tried{border-color:var(--orange);border-width:3px}
+.dot.solved{background:#2e7d4f;border-color:#2e7d4f;color:#fff}
+.dot.cur{box-shadow:0 0 0 3px var(--ink)}
+.rnav{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* toys */
+.toy{background:#fffaf1;border:3px solid var(--ink);border-radius:18px 14px 20px 14px;padding:14px 16px}
+.ctlrow{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:4px 0 10px}
+.step{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.step b{min-width:30px;text-align:center;font-size:1.3rem}
+.rb{width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--yellow);font-size:1.3rem;font-weight:700;cursor:pointer;color:var(--ink);line-height:1;padding:0}
+.rb.wide{width:auto;border-radius:999px;padding:0 12px;font-size:1rem;font-family:var(--display);font-weight:800}
+.readout{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.25rem;line-height:1.3;margin:8px 0}
+.readout .hi{color:var(--orange-deep)}
+.readout .sq{color:#2e7d4f}
+
+/* patio */
+.patiorig{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.patiorig > svg{width:330px;max-width:100%;height:auto;flex:none;touch-action:none;cursor:crosshair;border-radius:12px}
+.patioctl{flex:1;min-width:200px}
+
+/* seed packets */
+.packets{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px;margin:8px 0}
+.pk{position:relative;min-height:92px;border:3px solid var(--ink);border-radius:8px 8px 14px 14px;background:linear-gradient(180deg,#fff 0 30%,#f8e7c4 30%);cursor:pointer;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 900;font-size:1.45rem;color:var(--ink);padding:26px 4px 8px;box-shadow:2px 3px 0 var(--ink);transition:transform .15s ease}
+.pk::before{content:"";position:absolute;top:6px;left:50%;width:22px;height:14px;margin-left:-11px;border-radius:50% 50% 40% 40%;background:#5f9a3c}
+.pk:nth-child(3n){background:linear-gradient(180deg,#fff 0 30%,#d8eef4 30%)}
+.pk:nth-child(3n+1){background:linear-gradient(180deg,#fff 0 30%,#f1dcef 30%)}
+.pk[aria-pressed="true"]{transform:translateY(-6px) rotate(-3deg);box-shadow:4px 6px 0 var(--orange-deep);border-color:var(--orange-deep)}
+.pk[aria-pressed="true"]::after{content:"square";position:absolute;bottom:-10px;left:50%;transform:translateX(-50%) rotate(-4deg);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;background:var(--orange);border:2px solid var(--ink);border-radius:999px;padding:1px 7px}
+.pk.miss{outline:3px dashed var(--teal);outline-offset:2px}
+
+/* big patio */
+.bprig{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.bprig > svg{width:320px;max-width:100%;height:auto;flex:none}
+.bpctl{flex:1;min-width:200px}
+.bpctl input[type=range]{width:100%;accent-color:var(--orange);height:32px}
+.strips{display:grid;grid-template-columns:auto auto;gap:8px 10px;align-items:center;justify-content:start;margin:8px 0}
+.strips .sl{font-weight:700}
+
+/* seedling rows */
+.rinputs{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.rinputs label{font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.rchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.rchip{font-family:var(--display);font-weight:800;font-size:.95rem;min-height:44px;padding:6px 14px;border-radius:999px;border:3px solid var(--ink);background:#fff;cursor:pointer;color:var(--ink)}
+.rchip.good{background:#bfe3c9}
+.rchip.bad{background:#fdf0e5}
+.grow{transform-box:fill-box;transform-origin:bottom center;animation:grow .7s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes grow{from{transform:scale(0)}}
+.label{display:inline-block;background:#fff;border:3px solid var(--ink);border-radius:6px 14px 6px 14px;padding:8px 14px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1.15rem;box-shadow:3px 4px 0 var(--ink);transform:rotate(-1deg);margin:4px 0 10px;max-width:100%}
+.label small{display:block;font-family:var(--body);font-weight:700;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.prow{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;margin:6px 0;padding:4px 0;border-bottom:2px dotted var(--line)}
+.prow .rl{font-weight:700;font-size:.95rem}
+.prow svg{width:100%;height:30px;display:block}
+.prow .pc{display:flex;align-items:center;gap:4px}
+.prow .pc b{min-width:28px;text-align:center;font-size:1.2rem}
+.prow .rb{width:40px;height:40px;font-size:1.15rem}
+.prow .rb.wide{width:auto;padding:0 8px;font-size:.85rem}
+@media (max-width:480px){.prow{grid-template-columns:52px minmax(0,1fr)}.prow .pc{grid-column:1 / -1;justify-content:flex-end}}
+
+/* chart */
+.chartwrap svg{width:100%;max-width:440px;height:auto;display:block}
+.ownrow{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:4px 0 8px}
+
+/* beds */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:8px 0}
+.bedcard{border:3px solid var(--ink);border-radius:14px 10px 16px 10px;background:#fff;cursor:pointer;padding:8px;color:var(--ink);font-family:var(--body);text-align:center;min-height:44px;transition:transform .14s ease}
+.bedcard svg{width:100%;height:auto;display:block}
+.bedcard .bl{font-size:1.2rem;font-weight:700;display:block;margin-top:4px}
+.bedcard[aria-pressed="true"]{transform:translateY(-4px) rotate(-1.5deg);box-shadow:4px 6px 0 var(--orange);border-color:var(--orange-deep)}
+.bedcard.matched{background:#e9f4ec;border-color:#2e7d4f;cursor:default}
+.bedcard .ord{display:inline-block;min-width:30px;height:30px;line-height:26px;border-radius:50%;background:var(--orange);border:2px solid var(--ink);font-family:var(--display);font-weight:900}
+.pgrid{display:grid;gap:6px;margin:8px 0;max-width:420px}
+.plotb{aspect-ratio:1;min-height:44px;border:3px solid var(--ink);border-radius:8px;background:#9a6a48;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.plotb svg{width:70%;height:70%}
+.plotb[aria-pressed="true"]{background:#c9e6b0}
+.fences{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.fences button{min-height:44px}
+.fences button[aria-pressed="true"]{background:var(--orange)}
+
+/* cans */
+.canrig svg{width:100%;max-width:460px;height:auto;display:block}
+.kchips{display:flex;flex-wrap:wrap;gap:6px}
+.kchip{min-height:44px;padding:4px 12px;border-radius:999px;border:3px solid var(--ink);background:#fff;font-family:var(--display);font-weight:800;cursor:pointer;color:var(--ink)}
+.kchip[aria-pressed="true"]{background:var(--bright);color:#fff}
+
+/* weeds */
+.sign{background:#fff7e3;border:3px solid var(--ink);border-radius:10px 16px 10px 16px;padding:10px 12px;box-shadow:3px 4px 0 rgba(10,47,56,.2)}
+.sign .who{font-size:.85rem;font-weight:700;opacity:.75;margin:0 0 6px}
+.wl{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font-family:var(--body);font-size:1.05rem;background:#fff;border:2px solid rgba(10,47,56,.25);border-radius:12px;padding:10px 12px;margin:6px 0;cursor:pointer;color:var(--ink);min-height:44px}
+.wl .wn{flex:none;width:26px;height:26px;border-radius:50%;background:#e6f1dc;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem}
+.wl.ok{background:#f4f8ec}
+.wl.pulled{background:#fdf0e5;border-color:var(--orange-deep);text-decoration:line-through;text-decoration-color:var(--orange-deep)}
+.wl.pulled .wn{background:var(--orange)}
+.weedy{animation:pull .6s ease}
+@keyframes pull{30%{transform:translateY(-6px) rotate(-2deg)}100%{transform:none}}
+
+/* choices and writing */
+.choices{display:grid;gap:10px;margin:8px 0}
+.choices button{text-align:left;font-size:1.02rem;font-family:inherit;padding:12px 16px;border:2px solid rgba(10,47,56,.25);border-radius:14px 10px 14px 10px;background:#fffdfb;color:var(--ink);cursor:pointer;min-height:44px}
+.choices button.good{border-color:#2e7d4f;background:#e9f4ec;font-weight:700}
+.choices button.bad{border-color:#d75f10;background:#fdf0e5}
+.starters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.starters button{font-family:var(--body);font-size:.92rem;padding:7px 12px;border-radius:999px;border:2px dashed var(--teal);background:#fff;cursor:pointer;color:var(--ink);min-height:40px}
+textarea.wr{width:100%;min-height:110px;font-family:var(--body);font-size:1.05rem;line-height:1.5;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:#fffdfb;color:var(--ink)}
+
+.restart{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 0}
+.restart p{margin:0;font-size:.9rem}
+
+@media (max-width:480px){
+  .prompt{font-size:1.05rem}
+  .acc summary{padding:16px 14px;gap:10px}
+  .acc .body{padding:16px 14px 20px}
+  .rq,.toy{padding:12px 10px}
+  .acc summary .ico,.acc summary .ico svg{width:42px;height:42px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .packets{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .robin,.sway,.cloud,.grow,.weedy{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/my-targets.html">My targets</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <h1>THE NUMBER <span class="accent">ALLOTMENT</span></h1>
+    <div class="line">
+      <span class="chip">Squares, fractions, sequences</span>
+      <p>An empty plot that fills up as you work: a patio, seedlings, sunflowers, beds and a harvest. Dig in anywhere.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap na">
+
+  <div class="panel panel-orange">
+    <p><strong>What this is.</strong> Seven jobs on an allotment. Each one has a little bit to learn, something to play with, then a few to try.</p>
+    <p>Any job, any order, skip whatever is not for you. Your plot fills in as you go, and it saves itself on this device. When you are ready, you can send what you did to Jay.</p>
+  </div>
+
+  <div class="whobox">
+    <h3>Who is this?</h3>
+    <p>Optional. Pick your initials and the jobs that suit you best get a badge.</p>
+    <div class="whochips" id="whoChips" role="group" aria-label="Pick your initials"></div>
+    <div id="whoOut"></div>
+  </div>
+
+  <div class="plot">
+    <svg class="scene" viewBox="0 0 800 250" role="img" aria-label="An allotment plot. Each part fills in when you have a go at that job.">
+      <defs>
+        <pattern id="slabpat" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#d8cfc0"/><rect x="1" y="1" width="14" height="14" fill="#e7dfd2" stroke="#9c8f7c" stroke-width="1"/></pattern>
+      </defs>
+      <rect x="0" y="0" width="800" height="250" fill="#fff3d6"/>
+      <circle cx="736" cy="38" r="24" fill="#ffc247"/>
+      <g class="cloud" fill="#fffdf8" opacity=".9"><ellipse cx="160" cy="34" rx="34" ry="12"/><ellipse cx="184" cy="26" rx="22" ry="12"/><ellipse cx="470" cy="28" rx="30" ry="10"/><ellipse cx="490" cy="22" rx="18" ry="10"/></g>
+      <rect x="0" y="104" width="800" height="146" fill="#a9cf7d"/>
+      <rect x="0" y="104" width="800" height="8" fill="#93bd66"/>
+      <g stroke="#8a5a3b" stroke-width="4"><line x1="0" y1="92" x2="800" y2="92"/><line x1="0" y1="80" x2="800" y2="80"/></g>
+      <g fill="#a87148" stroke="#0a2f38" stroke-width="2">
+        <rect x="16" y="70" width="8" height="40"/><rect x="216" y="70" width="8" height="40"/><rect x="416" y="70" width="8" height="40"/><rect x="616" y="70" width="8" height="40"/><rect x="776" y="70" width="8" height="40"/>
+      </g>
+      <!-- shed -->
+      <g>
+        <rect x="30" y="46" width="96" height="76" fill="#7b4b8f" stroke="#0a2f38" stroke-width="3"/>
+        <path d="M22 50 L78 18 L134 50 Z" fill="#5c3269" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="64" y="72" width="28" height="50" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="38" y="62" width="18" height="16" fill="#cfe9f0" stroke="#0a2f38" stroke-width="2"/>
+      </g>
+      <!-- robin on post -->
+      <g class="robin">
+        <ellipse cx="420" cy="58" rx="13" ry="10" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.5"/>
+        <ellipse cx="426" cy="60" rx="7" ry="7" fill="#ef7724"/>
+        <circle cx="430" cy="48" r="7" fill="#8a5a3b" stroke="#0a2f38" stroke-width="2.5"/>
+        <circle cx="432" cy="46" r="1.8" fill="#0a2f38"/>
+        <path d="M436 48 L443 50 L436 52 Z" fill="#ffc247" stroke="#0a2f38" stroke-width="1.5"/>
+        <path d="M408 56 L398 50 L400 62 Z" fill="#6e452c" stroke="#0a2f38" stroke-width="2"/>
+        <path d="M416 67 V72 M423 67 V72" stroke="#0a2f38" stroke-width="2.5"/>
+      </g>
+      <!-- 1 patio -->
+      <g class="lay ghost" id="lay1">
+        <rect class="gl" x="140" y="126" width="80" height="80" fill="url(#slabpat)" stroke="#0a2f38" stroke-width="3"/>
+        <g fill="#ffd08a" stroke="#0a2f38" stroke-width="1.5"><rect x="140" y="126" width="20" height="20"/><rect x="160" y="126" width="20" height="20"/><rect x="140" y="146" width="20" height="20"/><rect x="160" y="146" width="20" height="20"/></g>
+      </g>
+      <!-- 2 big patio path -->
+      <g class="lay ghost" id="lay2">
+        <g fill="#e7dfd2" stroke="#0a2f38" stroke-width="2" class="gl">
+          <rect x="72" y="128" width="22" height="22"/><rect x="80" y="156" width="22" height="22"/><rect x="92" y="184" width="22" height="22"/><rect x="108" y="212" width="22" height="22"/>
+        </g>
+        <g stroke="#0a2f38" stroke-width="2"><rect x="150" y="214" width="56" height="10" fill="#a87148"/><rect x="154" y="224" width="6" height="12" fill="#a87148"/><rect x="196" y="224" width="6" height="12" fill="#a87148"/></g>
+      </g>
+      <!-- 3 seedling rows -->
+      <g class="lay ghost" id="lay3">
+        <g fill="#8a5a3b" stroke="#0a2f38" stroke-width="2" class="gl">
+          <rect x="240" y="128" width="150" height="16" rx="8"/><rect x="240" y="156" width="150" height="16" rx="8"/><rect x="240" y="184" width="150" height="16" rx="8"/><rect x="240" y="212" width="150" height="16" rx="8"/>
+        </g>
+        <g fill="#3f9a4a">
+          <circle cx="256" cy="130" r="5"/><circle cx="276" cy="130" r="5"/>
+          <circle cx="256" cy="158" r="5"/><circle cx="276" cy="158" r="5"/><circle cx="296" cy="158" r="5"/><circle cx="316" cy="158" r="5"/>
+          <circle cx="256" cy="186" r="5"/><circle cx="276" cy="186" r="5"/><circle cx="296" cy="186" r="5"/><circle cx="316" cy="186" r="5"/><circle cx="336" cy="186" r="5"/><circle cx="356" cy="186" r="5"/>
+          <circle cx="256" cy="214" r="5"/><circle cx="276" cy="214" r="5"/><circle cx="296" cy="214" r="5"/><circle cx="316" cy="214" r="5"/><circle cx="336" cy="214" r="5"/><circle cx="356" cy="214" r="5"/><circle cx="376" cy="214" r="5"/>
+        </g>
+      </g>
+      <!-- 4 sunflowers -->
+      <g class="lay ghost" id="lay4">
+        <g class="sway"><path class="gl" d="M420 230 V180" stroke="#2e7d4f" stroke-width="5"/><circle cx="420" cy="176" r="10" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><circle cx="420" cy="176" r="4" fill="#6e452c"/></g>
+        <g class="sway"><path class="gl" d="M448 230 V160" stroke="#2e7d4f" stroke-width="5"/><circle cx="448" cy="156" r="11" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><circle cx="448" cy="156" r="4.5" fill="#6e452c"/></g>
+        <g class="sway"><path class="gl" d="M478 230 V140" stroke="#2e7d4f" stroke-width="5"/><circle cx="478" cy="136" r="12" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><circle cx="478" cy="136" r="5" fill="#6e452c"/></g>
+        <g class="sway"><path class="gl" d="M510 230 V120" stroke="#2e7d4f" stroke-width="5"/><circle cx="510" cy="116" r="13" fill="#ffc247" stroke="#0a2f38" stroke-width="2.5"/><circle cx="510" cy="116" r="5.5" fill="#6e452c"/></g>
+      </g>
+      <!-- 5 beds -->
+      <g class="lay ghost" id="lay5">
+        <rect class="gl" x="540" y="140" width="120" height="44" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="540" y="140" width="80" height="44" fill="#7fbf5f"/>
+        <path d="M580 140 V184 M620 140 V184" stroke="#a87148" stroke-width="4"/>
+        <rect class="gl" x="540" y="194" width="120" height="40" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="540" y="194" width="90" height="40" fill="#7fbf5f"/>
+        <path d="M570 194 V234 M600 194 V234 M630 194 V234" stroke="#a87148" stroke-width="4"/>
+        <rect x="540" y="140" width="120" height="44" fill="none" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="540" y="194" width="120" height="40" fill="none" stroke="#0a2f38" stroke-width="3"/>
+      </g>
+      <!-- 6 water butt and can -->
+      <g class="lay ghost" id="lay6">
+        <rect class="gl" x="684" y="120" width="44" height="66" rx="8" fill="#00a6c9" stroke="#0a2f38" stroke-width="3"/>
+        <rect x="684" y="136" width="44" height="6" fill="#007291"/>
+        <path d="M740 214 h34 v-26 h-34 Z M774 194 l16 -10" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/>
+        <path d="M744 188 q13 -18 26 0" fill="none" stroke="#0a2f38" stroke-width="3"/>
+      </g>
+      <!-- 7 weeds and harvest -->
+      <g class="lay ghost" id="lay7">
+        <path class="gl" d="M680 232 q30 18 70 0 l-6 -22 h-58 Z" fill="#c98a4a" stroke="#0a2f38" stroke-width="3"/>
+        <circle cx="700" cy="208" r="8" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/>
+        <circle cx="716" cy="204" r="9" fill="#d23c3c" stroke="#0a2f38" stroke-width="2"/>
+        <circle cx="732" cy="208" r="8" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/>
+        <path d="M700 200 l-3 -8 M716 195 l2 -8" stroke="#2e7d4f" stroke-width="3"/>
+      </g>
+      <g font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="15" text-anchor="middle">
+        <g><circle cx="180" cy="120" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="180" y="125" fill="#0a2f38">1</text></g>
+        <g><circle cx="118" cy="214" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="118" y="219" fill="#0a2f38">2</text></g>
+        <g><circle cx="315" cy="118" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="315" y="123" fill="#0a2f38">3</text></g>
+        <g><circle cx="404" cy="140" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="404" y="145" fill="#0a2f38">4</text></g>
+        <g><circle cx="600" cy="128" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="600" y="133" fill="#0a2f38">5</text></g>
+        <g><circle cx="706" cy="108" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="706" y="113" fill="#0a2f38">6</text></g>
+        <g><circle cx="668" cy="206" r="12" fill="#fffdf8" stroke="#0a2f38" stroke-width="2.5"/><text x="668" y="211" fill="#0a2f38">7</text></g>
+      </g>
+    </svg>
+    <p class="plotsay">The allotment robin says: <b>any job, any order.</b> A tick appears, and that part of the plot fills in, once you have had a go.</p>
+    <div class="sgrid" id="sgrid"></div>
+  </div>
+
+  <!-- ============ STAGE 1 ============ -->
+  <details class="acc acc-yellow stage" id="s1" data-s="1">
+    <summary>
+      <span class="ico" data-i="1"></span>
+      <span class="txt"><span class="sno">Job 1</span><h2>The Square Patio</h2><p>Lay square patios to order and spot square numbers on seed packets.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l1"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>A square patio has the same number of slabs across and down.</p>
+          <p>6 across and 6 down is 6 &times; 6 = <b>36</b> slabs. We write 6&sup2; and say &ldquo;6 squared&rdquo;.</p>
+          <p>Going backwards: 36 slabs make a 6 by 6 square, so the <b>square root</b> of 36 is 6. We write &radic;36 = 6.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Have a play, then take orders</span>
+        <h3>Lay the patio</h3>
+        <p>Tap or drag on the grass to set the far corner. Or use the buttons.</p>
+        <div class="toy">
+          <div class="patiorig">
+            <svg id="patioSvg" viewBox="0 0 324 324" role="img" aria-label="Patio grid"></svg>
+            <div class="patioctl">
+              <div class="ctlrow"><span class="step">Across <button class="rb" type="button" id="pwm" aria-label="Fewer across">&minus;</button><b id="pwv">3</b><button class="rb" type="button" id="pwp" aria-label="More across">+</button></span></div>
+              <div class="ctlrow"><span class="step">Down <button class="rb" type="button" id="phm" aria-label="Fewer down">&minus;</button><b id="phv">3</b><button class="rb" type="button" id="php" aria-label="More down">+</button></span></div>
+              <p class="readout" id="patioOut" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px" id="r1a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit more</span>
+        <h3>The seed packet sort</h3>
+        <p>Square numbers get planted in the square patio pots. Tap every packet with a square number, then check. Tap again to put one back.</p>
+        <div id="r1b"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="2">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 2 ============ -->
+  <details class="acc acc-orange stage" id="s2" data-s="2">
+    <summary>
+      <span class="ico" data-i="2"></span>
+      <span class="txt"><span class="sno">Job 2</span><h2>The Big Patio</h2><p>Square two digit numbers by counting the patio in strips of 10 rows.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l2"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>A 27 by 27 patio has 27 rows, with 27 slabs in each row.</p>
+          <p>Count it in strips. 10 rows is 270 slabs. Another 10 rows is 270 more. The last 7 rows are 7 &times; 27 = 189.</p>
+          <p>270 + 270 + 189 = <b>729</b>, so 27&sup2; = 729.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Have a play</span>
+        <h3>Stretch the patio</h3>
+        <div class="toy">
+          <div class="bprig">
+            <svg id="bpSvg" viewBox="0 0 330 236" role="img" aria-label="A big square patio split into strips of rows"></svg>
+            <div class="bpctl">
+              <label for="bpN" style="font-weight:700">How many slabs along each side?</label>
+              <input type="range" id="bpN" min="11" max="60" value="27">
+              <div class="readout" id="bpOut" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>Patio quotes</h3>
+        <p>Customers want big square patios. How many slabs? The strip boxes are there if they help. Only the total matters.</p>
+        <div id="r2"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="3">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 3 ============ -->
+  <details class="acc acc-teal stage" id="s3" data-s="3">
+    <summary>
+      <span class="ico" data-i="3"></span>
+      <span class="txt"><span class="sno">Job 3</span><h2>Seedling Rows</h2><p>Rows that grow in a pattern. Find the next and missing rows, then plant from a seed packet rule.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l3"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>These rows have 3, 5, 7 seedlings. Each row has <b>2 more</b> than the row before.</p>
+          <p>&ldquo;Add 2 each time&rdquo; is the <b>term to term rule</b>. Each number in the list is a <b>term</b>.</p>
+          <p>So the next row will have 7 + 2 = 9.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>What comes up?</h3>
+        <p>Some rows are still seeds. How many seedlings will come up there? Picking the rule is optional.</p>
+        <div id="r3a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit more</span>
+        <h3>Plant from the packet</h3>
+        <p>Each seed packet has a planting rule. Plant rows 1 to 4 to match it. In a rule like <b>3n + 1</b>, n is the row number.</p>
+        <div id="r3b"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="4">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 4 ============ -->
+  <details class="acc acc-bright stage" id="s4" data-s="4">
+    <summary>
+      <span class="ico" data-i="4"></span>
+      <span class="txt"><span class="sno">Job 4</span><h2>The Growth Chart</h2><p>Write the nth term for a growing plant, predict far ahead, and make your own chart.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l4"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>A seedling is 6, 10, 14, 18 cm tall in weeks 1, 2, 3, 4. It grows <b>4 cm</b> a week.</p>
+          <p>So start with <b>4n</b>: that gives 4, 8, 12, 16. Every height is 2 more, so add 2.</p>
+          <p>The nth term is <b>4n + 2</b>. In week 10 it is 4 &times; 10 + 2 = 42 cm.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>Read the chart</h3>
+        <p>Write the nth term for each chart. Any way of writing it that works is fine, like 4n + 2 or 2 + 4n.</p>
+        <div id="r4a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Use it</span>
+        <h3>Look into the future</h3>
+        <p>Use the rule to find any week, or to check if a height ever happens exactly.</p>
+        <div id="r4b"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Make one</span>
+        <h3>Your own plant</h3>
+        <p>Invent a plant. Set how tall it is in week 1 and how much it grows each week. Then write its nth term.</p>
+        <div class="toy" id="own"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Say it your way</span>
+        <h3>How do you find it?</h3>
+        <div id="w4"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="5">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 5 ============ -->
+  <details class="acc acc-plum stage" id="s5" data-s="5">
+    <summary>
+      <span class="ico" data-i="5"></span>
+      <span class="txt"><span class="sno">Job 5</span><h2>The Plot Divider</h2><p>Beds split into plots: matching, planting to match, taking fences out and lining beds up.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l5"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>This bed is split into 3 plots and 2 are planted: <b>2/3</b> planted.</p>
+          <p>Put a fence down the middle of every plot. Now there are 6 plots and 4 are planted: <b>4/6</b>. Same amount of bed.</p>
+          <p>Fractions that show the same amount are <b>equivalent</b>. Taking fences out again gets back to the <b>simplest form</b>.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>Matching beds</h3>
+        <p>Tap two beds with the same amount planted. Find all four pairs.</p>
+        <div id="r5a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>Plant to match</h3>
+        <p>Plant the new bed so it has the same amount planted as the old one. Tap plots to plant or unplant them.</p>
+        <div id="r5b"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit more</span>
+        <h3>Fewest fences</h3>
+        <p>Try taking fences out. A choice only works if no section ends up only part planted. Then write the simplest form.</p>
+        <div id="r5c"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Line them up</span>
+        <h3>Least to most</h3>
+        <p>Tap the beds in order, from least planted to most planted.</p>
+        <div id="r5d"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Say it your way</span>
+        <h3>How do you know?</h3>
+        <div id="w5"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="6">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 6 ============ -->
+  <details class="acc acc-teal stage" id="s6" data-s="6">
+    <summary>
+      <span class="ico" data-i="6"></span>
+      <span class="txt"><span class="sno">Job 6</span><h2>The Watering Cans</h2><p>Top heavy fractions and mixed numbers, poured out one jug at a time.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l6"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>The jug holds a <b>third</b> of a can. 7 jugs is <b>7/3</b> of a can. The top is bigger than the bottom, so it is <b>top heavy</b> (improper).</p>
+          <p>3 jugs fill a can. 7 jugs fill 2 cans with 1 jug left over.</p>
+          <p>So 7/3 = <b>2 1/3</b> cans. That is a <b>mixed number</b>: whole cans and a bit.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Have a play</span>
+        <h3>Pour some jugs</h3>
+        <div class="toy" id="canToy"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>How many cans?</h3>
+        <p>Top heavy into a mixed number. Pour it in if you want to see it.</p>
+        <div id="r6a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit more</span>
+        <h3>How many jugs?</h3>
+        <p>Now the other way: a mixed number into a top heavy fraction.</p>
+        <div id="r6b"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Stretch</span>
+        <h3>Which waters more?</h3>
+        <div id="r6c"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Say it your way</span>
+        <h3>Explain the pour</h3>
+        <div id="w6"></div>
+      </div>
+      <div class="snav"><button class="btn btn-quiet sm nexts" type="button" data-to="7">Next job</button></div>
+    </div>
+  </details>
+
+  <!-- ============ STAGE 7 ============ -->
+  <details class="acc acc-orange stage" id="s7" data-s="7">
+    <summary>
+      <span class="ico" data-i="7"></span>
+      <span class="txt"><span class="sno">Job 7</span><h2>Weeds and Harvest</h2><p>Pull the weeds out of other gardeners' working, then a harvest of everything mixed.</p><span class="badge hidden">Good place to start</span></span>
+      <svg class="chev" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l8 7-8 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">
+      <div class="learn">
+        <div class="lfig" id="l7"></div>
+        <div><span class="lk">Learn a bit</span>
+          <p>A <b>weed</b> is the first line where the working goes wrong.</p>
+          <p>Read each line and ask: does this follow from the line before?</p>
+          <p>Tap the weedy line to pull it out. The fixed version will grow in its place.</p>
+        </div>
+      </div>
+      <div class="part">
+        <span class="lk">Try a bit</span>
+        <h3>Pull the weeds</h3>
+        <div id="r7a"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Mixed bag</span>
+        <h3>The harvest</h3>
+        <p>A bit of everything from the plot. Pick any of them, in any order.</p>
+        <div id="r7b"></div>
+      </div>
+      <div class="part">
+        <span class="lk">Say it your way</span>
+        <h3>Help a gardener</h3>
+        <div id="w7"></div>
+      </div>
+    </div>
+  </details>
+
+  <div id="sendHost"></div>
+
+  <div class="restart">
+    <button class="btn btn-quiet sm" type="button" id="restartBtn">Start again</button>
+    <p id="restartMsg" class="hidden">This clears your answers on this device. <button class="btn btn-orange sm" type="button" id="restartYes">Yes, clear it</button> <button class="btn btn-quiet sm" type="button" id="restartNo">Keep them</button></p>
+  </div>
+
+  <a class="backlink" href="/practice/#maths-standard">Back to Maths</a>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY = "b5.practice.number-allotment.v1", WHOKEY = "base5.who.v1";
+var INK = "#0a2f38", TEAL = "#007291", BRIGHT = "#00a6c9", ORANGE = "#ef7724", YELLOW = "#ffc247", PLUM = "#7b4b8f", GREEN = "#2e7d4f";
+var SOIL = "#8a5a3b", SOIL2 = "#6e452c", LEAF = "#3f9a4a", LEAF2 = "#2e7d4f", WOOD = "#a87148", PLANTED = "#7fbf5f";
+var FF = "font-family='Atkinson Hyperlegible, Verdana, sans-serif'";
+var reduce = false; try{ reduce = matchMedia("(prefers-reduced-motion: reduce)").matches }catch(e){}
+function el(id){ return document.getElementById(id) }
+function each(list, fn){ Array.prototype.forEach.call(list, fn) }
+function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = b; b = a % b; a = t } return a }
+function lcm(a, b){ return a / gcd(a, b) * b }
+function f1(x){ return Math.round(x * 10) / 10 }
+function fr(n, d){ return '<span class="fr"><span>' + n + '</span><span>' + d + '</span></span>' }
+function mx(w, n, d){ return '<span class="mixed">' + w + ' ' + fr(n, d) + '</span>' }
+function sn(v){ return v < 0 ? "&minus;" + (-v) : String(v) }
+function rule(a, b, plain){
+  var m = plain ? "-" : "&minus;";
+  var an = a === 1 ? "n" : a === -1 ? m + "n" : (a < 0 ? m + (-a) : a) + "n";
+  if(a < 0 && b > 0) return b + " " + m + " " + (a === -1 ? "n" : (-a) + "n");
+  if(b === 0) return an;
+  return an + (b > 0 ? " + " + b : " " + m + " " + (-b));
+}
+function restartAnim(node, cls){ if(reduce || !node) return; node.classList.remove(cls); void node.getBoundingClientRect(); node.classList.add(cls) }
+var PRAISE = ["Spot on.", "Lovely.", "Yes.", "Nice growing.", "Outrageous. That is right.", "That is it."], pi = 0;
+function praise(){ pi = (pi + 1) % PRAISE.length; return "<b>" + PRAISE[pi] + "</b> " }
+var CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- state ---------- */
+var st = { q:{}, pos:{}, tried:{}, w:{} };
+try{ var raw = JSON.parse(localStorage.getItem(KEY) || "null"); if(raw && typeof raw === "object"){ st.q = raw.q || {}; st.pos = raw.pos || {}; st.tried = raw.tried || {}; st.w = raw.w || {} } }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
+function markTried(s){ if(!st.tried[s]){ st.tried[s] = 1; save(); ticks() } }
+function record(s, id, label, given, ok){
+  var k = s + "." + id, r = st.q[k];
+  if(!r) r = st.q[k] = { s:s, l:label, a:[], ok:false };
+  r.l = label;
+  if(!r.ok){ r.a.push(String(given)); if(r.a.length > 5) r.a.splice(1, 1); if(ok) r.ok = true }
+  markTried(s); save();
+}
+function recShown(s, id, label){ var k = s + "." + id, r = st.q[k]; if(!r) r = st.q[k] = { s:s, l:label, a:[], ok:false }; r.l = label; r.shown = true; markTried(s); save() }
+
+/* ---------- stages, targets, students ---------- */
+var S = [null,
+  { name:"The Square Patio", short:"Squares and square roots" },
+  { name:"The Big Patio", short:"Two digit squares" },
+  { name:"Seedling Rows", short:"Next terms, rules from a packet" },
+  { name:"The Growth Chart", short:"nth term, any term, belongs" },
+  { name:"The Plot Divider", short:"Equivalent, simplest, compare" },
+  { name:"The Watering Cans", short:"Mixed numbers both ways" },
+  { name:"Weeds and Harvest", short:"Spot mistakes, mixed bag" }];
+var TARGET_LINES = {
+  sq: "I can calculate the square of one-digit and two-digit numbers.",
+  fr: "I can find, recognise, and simplify equivalent fractions, working confidently with fractions as mixed numbers.",
+  seq: "I can generate terms and nth term of linear sequences."
+};
+var WHO = {
+  JT:{ m:["Simplifying, comparing and changing fractions, including mixed numbers, and explaining how you did it"], s:[5,6,7],
+       o:["I can confidently simplify, compare and manipulate equivalent fractions, including converting between improper fractions and mixed numbers and explaining the methods I use."] },
+  LW:{ m:["Making equivalent fractions by multiplying or dividing the top and bottom by the same number","Simplifying fractions all the way to simplest form"], s:[5,7],
+       o:["I can generate equivalent fractions by multiplying or dividing the numerator and denominator by the same number.","I can simplify fractions to their simplest form."] },
+  EGW:{ m:["Making the terms of a sequence and finding its nth term","Using the nth term to find any term, and checking whether a number belongs"], s:[3,4],
+       o:["I can generate terms and nth term of linear sequences.","I can use the nth term to find any term in a sequence and check whether a number belongs to it."] },
+  LP:{ m:["Squaring one digit and two digit numbers","Making the terms of a sequence from a rule"], s:[1,2,3],
+       o:["I can calculate the square of one-digit and two-digit numbers.","I can generate the terms of a linear sequence from a given rule."] },
+  LC:{ m:["Changing top heavy fractions into mixed numbers and back again","Finding equivalent fractions and simplifying them"], s:[6,5],
+       o:["I can recognise, convert and work with improper fractions and mixed numbers.","I can find and simplify equivalent fractions."] },
+  HK:{ m:["Simplifying fractions and explaining how you know they are equivalent","Changing between top heavy fractions and mixed numbers"], s:[5,6,7],
+       o:["I can simplify fractions to their simplest form and explain how I know they are equivalent.","I can convert between improper fractions and mixed numbers."] }
+};
+var ORDER = ["JT","LW","EGW","LP","LC","HK"];
+/* Which stage covers which milestone. Used for the badges and in the summary sent to Jay. */
+var MILESTONE_STAGES = {
+  1:{ covers:"Squares of one digit numbers and some up to 20, square roots, spotting square numbers", who:["LP"], t:"sq" },
+  2:{ covers:"Squares of two digit numbers, counted in strips of 10 rows", who:["LP"], t:"sq" },
+  3:{ covers:"Next and missing terms, term to term rules, making terms from a given rule", who:["LP","EGW"], t:"seq" },
+  4:{ covers:"Finding the nth term, using it for any term, checking whether a number belongs", who:["EGW"], t:"seq" },
+  5:{ covers:"Making equivalent fractions (multiply and divide), simplest form, comparing, explaining equivalence", who:["LW","LC","HK","JT"], t:"fr" },
+  6:{ covers:"Improper fractions to mixed numbers and back, comparing them, explaining the method", who:["LC","HK","JT"], t:"fr" },
+  7:{ covers:"Spotting and explaining mistakes in squares, sequences and fractions, plus a mixed harvest", who:["JT","HK","LW","LC","EGW","LP"], t:"all" }
+};
+
+/* ---------- stage icons ---------- */
+var ICONS = {
+  1:'<svg viewBox="0 0 52 52" aria-hidden="true"><rect x="6" y="6" width="40" height="40" rx="4" fill="#fffdf8" stroke="#0a2f38" stroke-width="3"/><path d="M19.3 6v40M32.6 6v40M6 19.3h40M6 32.6h40" stroke="#0a2f38" stroke-width="2"/><rect x="7.5" y="7.5" width="10.5" height="10.5" fill="#ef7724"/></svg>',
+  2:'<svg viewBox="0 0 52 52" aria-hidden="true"><rect x="6" y="6" width="40" height="40" fill="#e7dfd2" stroke="#0a2f38" stroke-width="3"/><rect x="6" y="6" width="40" height="17" fill="#d8c7a8" stroke="#0a2f38" stroke-width="2"/><rect x="6" y="23" width="40" height="17" fill="#e9dcc6" stroke="#0a2f38" stroke-width="2"/><rect x="6" y="40" width="40" height="6" fill="#ffd08a" stroke="#0a2f38" stroke-width="2"/></svg>',
+  3:'<svg viewBox="0 0 52 52" aria-hidden="true"><rect x="4" y="34" width="44" height="12" rx="6" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/><g class="sway"><path d="M26 36V16" stroke="#2e7d4f" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="18" cy="18" rx="8" ry="4.5" fill="#3f9a4a" stroke="#0a2f38" stroke-width="2" transform="rotate(-25 18 18)"/><ellipse cx="34" cy="14" rx="8" ry="4.5" fill="#3f9a4a" stroke="#0a2f38" stroke-width="2" transform="rotate(25 34 14)"/></g></svg>',
+  4:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M6 46h40" stroke="#0a2f38" stroke-width="3"/><rect x="9" y="34" width="8" height="12" fill="#3f9a4a" stroke="#0a2f38" stroke-width="2"/><rect x="22" y="24" width="8" height="22" fill="#3f9a4a" stroke="#0a2f38" stroke-width="2"/><rect x="35" y="14" width="8" height="32" fill="#3f9a4a" stroke="#0a2f38" stroke-width="2"/><circle cx="39" cy="11" r="6" fill="#ffc247" stroke="#0a2f38" stroke-width="2"/></svg>',
+  5:'<svg viewBox="0 0 52 52" aria-hidden="true"><rect x="5" y="12" width="42" height="28" fill="#8a5a3b" stroke="#0a2f38" stroke-width="3"/><rect x="6.5" y="13.5" width="26" height="25" fill="#7fbf5f"/><path d="M19 12v28M33 12v28" stroke="#a87148" stroke-width="4"/><rect x="5" y="12" width="42" height="28" fill="none" stroke="#0a2f38" stroke-width="3"/></svg>',
+  6:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M10 44h26V20H10Z" fill="#ef7724" stroke="#0a2f38" stroke-width="3"/><path d="M10 44h26V32H10Z" fill="#00a6c9" stroke="#0a2f38" stroke-width="2"/><path d="M36 26l12-10" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/><path d="M14 20q9-14 18 0" fill="none" stroke="#0a2f38" stroke-width="3"/></svg>',
+  7:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M6 32q20 22 40 0l-4-8H10Z" fill="#c98a4a" stroke="#0a2f38" stroke-width="3"/><circle cx="18" cy="22" r="6" fill="#ef7724" stroke="#0a2f38" stroke-width="2"/><circle cx="30" cy="20" r="7" fill="#d23c3c" stroke="#0a2f38" stroke-width="2"/><circle cx="38" cy="25" r="5" fill="#7b4b8f" stroke="#0a2f38" stroke-width="2"/></svg>'
+};
+each(document.querySelectorAll(".ico"), function(s){ s.innerHTML = ICONS[s.getAttribute("data-i")] });
+
+/* ---------- tiles, ticks, layers ---------- */
+function drawTiles(){
+  var g = el("sgrid"); g.innerHTML = "";
+  for(var s = 1; s <= 7; s++){
+    var b = document.createElement("button"); b.type = "button"; b.className = "sbtn"; b.id = "sb" + s;
+    b.innerHTML = '<span class="tick" aria-hidden="true">' + CHECK_SVG + '</span><span class="no">Job ' + s + '</span><b>' + S[s].name + '</b><small>' + S[s].short + '</small><span class="badge hidden">Good place to start</span>';
+    (function(ss){ b.onclick = function(){ openStage(ss) } })(s);
+    g.appendChild(b);
+  }
+  ticks();
+}
+function ticks(){
+  for(var s = 1; s <= 7; s++){
+    var b = el("sb" + s); if(!b) continue;
+    b.classList.toggle("done", !!st.tried[s]);
+    b.setAttribute("aria-label", "Job " + s + ", " + S[s].name + (st.tried[s] ? ", tried" : ""));
+    var lay = el("lay" + s); if(lay) lay.classList.toggle("ghost", !st.tried[s]);
+  }
+}
+function openStage(s){
+  var d = el("s" + s); d.open = true;
+  setTimeout(function(){ d.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" }) }, 30);
+}
+each(document.querySelectorAll(".nexts"), function(b){ b.onclick = function(){ openStage(+b.getAttribute("data-to")) } });
+
+/* ---------- who is this ---------- */
+var who = "";
+try{ who = (localStorage.getItem(WHOKEY) || "").trim().toUpperCase() }catch(e){}
+var whoPicked = !!who;
+function drawWho(){
+  var box = el("whoChips"); box.innerHTML = "";
+  ORDER.concat(["Just looking"]).forEach(function(w){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = w;
+    var on = (w === "Just looking") ? (who === "" || !WHO[who]) && whoPicked : who === w;
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.onclick = function(){ setWho(w === "Just looking" ? "" : w, true) };
+    box.appendChild(b);
+  });
+  var out = el("whoOut"), info = WHO[who];
+  for(var s = 1; s <= 7; s++){
+    var suit = !!(info && info.s.indexOf(s) >= 0);
+    el("sb" + s).classList.toggle("suit", suit);
+    el("sb" + s).querySelector(".badge").classList.toggle("hidden", !suit);
+    el("s" + s).querySelector("summary .badge").classList.toggle("hidden", !suit);
+  }
+  if(!info){ out.innerHTML = whoPicked ? '<p class="smallnote">No problem. Every job is open, have a wander round the plot.</p>' : ""; return }
+  var names = info.s.map(function(s){ return S[s].name }).join(", ");
+  out.innerHTML = '<div class="mile"><b>Hi ' + who + '.</b> ' + (info.m.length > 1 ? "Your two steps are:" : "Your step is:") + '<ol>' + info.m.map(function(t){ return "<li>" + t + "</li>" }).join("") + '</ol>Good places to start: <b>' + names + '</b>. They have a badge. Every other job is open too, in any order.</div>';
+}
+function setWho(w, user){
+  who = w; whoPicked = true;
+  if(user){ try{ localStorage.setItem(WHOKEY, w) }catch(e){} var inp = el("b5who"); if(inp) inp.value = w }
+  drawWho();
+}
+
+/* ---------- runner ---------- */
+function Runner(host, s, part, items, render, opts){
+  opts = opts || {};
+  var key = s + part, i = Math.min(st.pos[key] || 0, items.length - 1);
+  host.className = "rq";
+  host.innerHTML = '<div class="dots"></div><div class="qbody"></div><div class="fb hidden" role="status"></div><div class="rnav"><button class="btn btn-quiet sm" type="button" data-r="back">Back</button><button class="btn sm" type="button" data-r="next">Next one</button></div>';
+  var dotsEl = host.querySelector(".dots"), body = host.querySelector(".qbody"), fbEl = host.querySelector(".fb");
+  var backB = host.querySelector("[data-r=back]"), nextB = host.querySelector("[data-r=next]");
+  function qid(j){ return part + (j + 1) }
+  function dots(){
+    dotsEl.innerHTML = '<span class="dl">' + (opts.label || "Questions") + '</span>';
+    items.forEach(function(_, j){
+      var r = st.q[s + "." + qid(j)], b = document.createElement("button"); b.type = "button"; b.className = "dot"; b.textContent = j + 1;
+      if(r && r.ok) b.classList.add("solved"); else if(r && (r.a.length || r.shown)) b.classList.add("tried");
+      if(j === i) b.classList.add("cur");
+      b.setAttribute("aria-label", "Number " + (j + 1) + (r && r.ok ? ", done" : r ? ", tried" : ""));
+      b.onclick = function(){ go(j) };
+      dotsEl.appendChild(b);
+    });
+  }
+  var api = {
+    s:s, body:body,
+    fb:function(kind, html){ fbEl.className = "fb " + kind; fbEl.innerHTML = html },
+    clear:function(){ fbEl.className = "fb hidden"; fbEl.innerHTML = "" },
+    rec:function(label, given, ok){ record(s, qid(i), label, given, ok); dots() },
+    recSub:function(sub, label, given, ok){ record(s, qid(i) + sub, label, given, ok) },
+    shown:function(label){ recShown(s, qid(i), label); dots() },
+    done:function(){ var r = st.q[s + "." + qid(i)]; return !!(r && r.ok) },
+    q:function(sel){ return body.querySelector(sel) },
+    qa:function(sel){ return body.querySelectorAll(sel) }
+  };
+  function go(j){
+    i = Math.max(0, Math.min(items.length - 1, j)); st.pos[key] = i; save();
+    api.clear(); body.innerHTML = ""; dots();
+    backB.disabled = i === 0;
+    nextB.textContent = i === items.length - 1 ? "That is the last one" : "Next one";
+    render(items[i], api, i);
+  }
+  backB.onclick = function(){ go(i - 1) };
+  nextB.onclick = function(){
+    if(i === items.length - 1){ api.fb("tell", "That is all of this part. Tap any number above to go back to one, or pick another job."); return }
+    go(i + 1);
+  };
+  go(i);
+  return { go:go };
+}
+function enter(inputs, fn){ each(inputs, function(x){ x.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); fn() } }) }) }
+function numIn(cls, label, isNum, ph){ return '<input class="num ' + (cls || "") + '" type="text" inputmode="' + (isNum === false ? "text" : "numeric") + '" autocomplete="off" spellcheck="false" aria-label="' + label + '"' + (ph ? ' placeholder="' + ph + '"' : '') + '>' }
+
+/* ---------- reading answers ---------- */
+function mkv(n, d, kind){ if(d < 0){ n = -n; d = -d } var g = gcd(n, d) || 1; return { n:n / g, d:d / g, kind:kind } }
+function decv(s){ var neg = s.charAt(0) === "-"; if(neg) s = s.slice(1); var p = s.split("."); var den = Math.pow(10, (p[1] || "").length); var num = parseInt((p[0] || "0") + (p[1] || ""), 10); return [neg ? -num : num, den] }
+function parseVal(raw){
+  var s = String(raw == null ? "" : raw).toLowerCase().replace(/[\u2212\u2013\u2014]/g, "-").replace(/,/g, "").trim().replace(/\s+/g, " ");
+  s = s.replace(/\s*\/\s*/g, "/").replace(/ and /g, " ").replace(/\s*\+\s*(?=\d+\/)/g, " ").replace(/(\d)\s*[a-z][a-z ]*$/, "$1").replace(/^(week|term|row|n ?=) ?/, "");
+  var m, r, q;
+  if((m = /^(-?\d*\.?\d+) ?%$/.exec(s))){ q = decv(m[1]); return mkv(q[0], q[1] * 100, "pct") }
+  if((m = /^(\d+) (\d+)\/(\d+)$/.exec(s))){ var w = +m[1], n = +m[2], d = +m[3]; if(!d) return null; r = mkv(w * d + n, d, "mixed"); r.w = w; r.pn = n; r.pd = d; return r }
+  if((m = /^(-?\d+)\/(\d+)$/.exec(s))){ if(+m[2] === 0) return null; r = mkv(+m[1], +m[2], "frac"); r.pn = +m[1]; r.pd = +m[2]; return r }
+  if(/^-?(\d+\.?\d*|\.\d+)$/.test(s)){ q = decv(s.replace(/\.$/, "")); return mkv(q[0], q[1], s.indexOf(".") >= 0 ? "dec" : "int") }
+  return null;
+}
+function same(v, n, d){ return !!v && v.n * d === v.d * n }
+function parseRule(raw){
+  var s = String(raw == null ? "" : raw).toLowerCase().replace(/[\u2212\u2013\u2014]/g, "-").replace(/\u00d7/g, "*").replace(/\s+/g, "");
+  if(s.indexOf("=") >= 0) s = s.slice(s.lastIndexOf("=") + 1);
+  if(s.indexOf("n") < 0) s = s.replace(/x/g, "n");
+  s = s.replace(/(\d)\*?x?\*?n/g, "$1n").replace(/\*/g, "");
+  if(!s) return null;
+  var a = 0, b = 0, i = 0, first = true, hasN = false;
+  while(i < s.length){
+    var sign = 1, c = s.charAt(i);
+    if(c === "+" || c === "-"){ if(c === "-") sign = -1; i++ } else if(!first) return null;
+    var j = i; while(j < s.length && /[0-9]/.test(s.charAt(j))) j++;
+    var dg = s.slice(i, j); i = j;
+    if(s.charAt(i) === "n"){ i++; a += sign * (dg === "" ? 1 : parseInt(dg, 10)); hasN = true }
+    else { if(dg === "") return null; b += sign * parseInt(dg, 10) }
+    first = false;
+  }
+  return [a, b, hasN];
+}
+
+/* judge: one place that marks every typed answer.
+   kinds: int, fv (any equal value), fs (simplest form), mxd (mixed number), imp (top heavy), rule, bel (which term, or never) */
+function judge(it, raw, never){
+  var k = it.k, v, s = String(raw == null ? "" : raw).trim();
+  if(k === "bel"){
+    var a = it.r[0], b = it.r[1], top = it.x - b, ans = (top % a === 0 && top / a >= 1) ? top / a : null;
+    if(never) return ans === null ? { st:"ok", g:"never exactly" } : { st:"no", g:"never exactly", m:"It does happen. Undo the rule: " + (b >= 0 ? "take away " + b : "add " + (-b)) + ", then divide by " + a + "." };
+    v = parseVal(s); if(!v || v.d !== 1) return { st:"tell", m:"Type a whole number for the " + (it.unit || "term") + ", or tap Never exactly." };
+    if(ans !== null && v.n === ans) return { st:"ok", g:s };
+    if(ans === null) return { st:"no", g:s, m:"Try your number in the rule: " + rule(a, b) + " with n = " + v.n + " gives " + (a * v.n + b) + ", not " + it.x + ". Could it be that no " + (it.unit || "term") + " hits it exactly?" };
+    return { st:"no", g:s, m:"Put n = " + v.n + " into " + rule(a, b) + ": that gives " + (a * v.n + b) + ". Undo the rule instead: " + (b >= 0 ? "take away " + b : "add " + (-b)) + ", then divide by " + a + "." };
+  }
+  if(k === "rule"){
+    var r = parseRule(s);
+    if(!r) return { st:"tell", m:"Write it like 4n + 1, using n for the position." };
+    if(r[0] === it.a && r[1] === it.b) return { st:"ok", g:s };
+    if(!r[2]) return { st:"no", g:s, m:"That looks like the term to term rule. The nth term starts with " + (it.a === 1 ? "n" : sn(it.a) + "n") + ", because it goes " + (it.a > 0 ? "up" : "down") + " by " + Math.abs(it.a) + " each time." };
+    if(r[0] === it.a) return { st:"no", g:s, m:"The " + sn(it.a) + "n part is right. Now check the number on the end. When n = 1, " + sn(it.a) + "n gives " + it.a + ", but the first term is " + (it.a + it.b) + "." };
+    return { st:"no", g:s, m:"Look at the gap between terms. It goes " + (it.a > 0 ? "up" : "down") + " by " + Math.abs(it.a) + " each time, so start with " + sn(it.a) + "n." };
+  }
+  v = parseVal(s);
+  if(k === "int"){
+    if(!v || v.d !== 1) return { st:"tell", m:"Pop a whole number in the box." };
+    if(v.n === it.a) return { st:"ok", g:s };
+    return { st:"no", g:s, m:(it.hint ? it.hint(v.n) : it.h) || "Not quite. Have another go." };
+  }
+  var n = it.a[0], d = it.a[1];
+  if(!v) return { st:"tell", m:"Type a fraction like 3/4" + (k === "mxd" ? ", or a mixed number like 2 1/4 (with a space)." : ".") };
+  var eq = same(v, n, d);
+  if(k === "fv"){ return eq ? { st:"ok", g:s } : { st:"no", g:s, m:it.h || "Not quite. Have another go." } }
+  if(k === "fs"){
+    if(eq && v.kind === "frac" && gcd(v.pn, v.pd) === 1) return { st:"ok", g:s };
+    if(eq && v.kind === "int" && v.d === 1) return { st:"ok", g:s };
+    if(eq && v.kind === "frac") return { st:"no", g:s, m:"That is the same amount, so it is equivalent. It can go simpler though: " + gcd(v.pn, v.pd) + " still goes into the top and the bottom." };
+    if(eq) return { st:"no", g:s, m:"Same amount. Can you write it as a fraction with a top and a bottom?" };
+    return { st:"no", g:s, m:it.h || "That is a different amount. Find a number that goes into the top and the bottom, and divide both by it." };
+  }
+  if(k === "mxd"){
+    if(eq && v.kind === "mixed" && v.pn > 0 && v.pn < v.pd) return { st:"ok", g:s, x: gcd(v.pn, v.pd) > 1 ? " You could also write that as " + mx(v.w, v.pn / gcd(v.pn, v.pd), v.pd / gcd(v.pn, v.pd)) + "." : "" };
+    if(eq && v.kind === "frac") return { st:"no", g:s, m:"That is the right amount, still top heavy. How many whole cans, and how many jugs over?" };
+    if(eq) return { st:"no", g:s, m:"Right amount. Can you write it as whole cans and a fraction, like 2 1/4?" };
+    return { st:"no", g:s, m:it.h || "Not quite. How many times does " + d + " go into " + n + "? What is left over?" };
+  }
+  if(k === "imp"){
+    if(eq && v.kind === "frac" && v.pn > v.pd) return { st:"ok", g:s, x: gcd(v.pn, v.pd) > 1 ? " That is the same as " + fr(n, d) + "." : "" };
+    if(v.kind === "int" && v.n === n) return { st:"no", g:s, m:"Yes, " + n + " jugs. Each jug is " + fr(1, d) + " of a can, so write it as a fraction: " + n + " over " + d + "." };
+    if(eq) return { st:"no", g:s, m:"Right amount. Can you write it top heavy, as one fraction?" };
+    return { st:"no", g:s, m:it.h || "Not quite. How many jugs fill one can? Times that by the whole cans, then add the extra jugs." };
+  }
+  return { st:"tell", m:"Have a go." };
+}
+
+/* ask: a standard question card that uses judge */
+function ask(it, api){
+  var h = (it.vis ? '<div class="vis">' + it.vis + '</div>' : '') + '<p class="prompt">' + it.p + '</p>';
+  if(it.k === "ch"){ chRender(it, api, h); return }
+  var isNum = it.k === "int" || it.k === "bel";
+  h += '<div class="arow">' + (it.pre ? '<span class="pre">' + it.pre + '</span>' : '') + numIn(isNum ? "" : "wide", "Your answer", isNum, it.ph) + (it.post ? '<span class="pre">' + it.post + '</span>' : '') + '</div>' +
+    '<div class="arow"><button class="btn sm" type="button" data-a="check">Check</button>' + (it.k === "bel" ? '<button class="btn btn-quiet sm" type="button" data-a="never">Never exactly</button>' : '') + '<button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  api.body.innerHTML = h;
+  if(it.after) it.after(api);
+  var inp = api.q("input");
+  function go(never){
+    var r = judge(it, inp.value, never);
+    if(r.st === "tell"){ api.fb("tell", r.m); return }
+    api.rec(it.l, r.g, r.st === "ok");
+    if(r.st === "ok") api.fb("ok", praise() + (it.why || "") + (r.x && !/simplif|same as/.test(it.why || "") ? r.x : ""));
+    else api.fb("nope", r.m + " Have another go if you fancy.");
+  }
+  enter([inp], function(){ go(false) });
+  api.q("[data-a=check]").onclick = function(){ go(false) };
+  if(it.k === "bel") api.q("[data-a=never]").onclick = function(){ go(true) };
+  api.q("[data-a=show]").onclick = function(){ if(it.sa != null) inp.value = it.sa; api.shown(it.l); api.fb("tell", it.w || it.why || "") };
+}
+function chRender(it, api, head){
+  api.body.innerHTML = head + '<div class="choices"></div>';
+  var box = api.q(".choices");
+  it.o.forEach(function(o){
+    var b = document.createElement("button"); b.type = "button"; b.innerHTML = o[0];
+    b.onclick = function(){
+      each(box.children, function(c){ c.classList.remove("bad") });
+      if(o[1]){ b.classList.add("good"); api.fb("ok", praise() + o[2]) }
+      else { b.classList.add("bad"); api.fb("nope", "<b>Not that one.</b> " + o[2] + " Have another look.") }
+      api.rec(it.l, htmlText(o[0]), o[1]);
+    };
+    box.appendChild(b);
+  });
+}
+
+function htmlText(h){ return String(h).replace(/<span class="fr"><span>([^<]*)<\/span><span>([^<]*)<\/span><\/span>/g, "$1/$2").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/g, " ").replace(/\s+/g, " ").trim() }
+/* ---------- writing boxes ---------- */
+function writeBox(host, s, key, prompt, starters){
+  host.innerHTML = '<p class="prompt">' + prompt + '</p><div class="starters" aria-label="Sentence starters"></div><label class="smallnote" for="wr' + key + '" style="display:block;margin-bottom:4px">Tap a starter to drop it in, or write your own. Skip this if it is not for you.</label><textarea class="wr" id="wr' + key + '"></textarea><p class="smallnote" aria-live="polite"></p>';
+  var ta = host.querySelector("textarea"), sb = host.querySelector(".starters"), note = host.querySelectorAll(".smallnote")[1];
+  ta.value = st.w[key] || "";
+  starters.forEach(function(t){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = t;
+    b.onclick = function(){ ta.value = (ta.value.trim() ? ta.value.replace(/\s*$/, " ") : "") + t + " "; ta.focus(); keep() };
+    sb.appendChild(b);
+  });
+  var tm = null;
+  function keep(){ st.w[key] = ta.value; if(ta.value.trim()) markTried(s); save(); note.textContent = ta.value.trim() ? "Saved on this device." : "" }
+  ta.addEventListener("input", function(){ clearTimeout(tm); tm = setTimeout(keep, 300) });
+}
+
+/* ---------- drawing helpers ---------- */
+function sprout(x, y, cls, sc){
+  sc = sc || 1;
+  return '<g transform="translate(' + f1(x) + ' ' + f1(y) + ') scale(' + sc + ')"><g' + (cls ? ' class="' + cls + '"' : '') + '><path d="M0 0 V-10" stroke="' + LEAF2 + '" stroke-width="2" stroke-linecap="round"/><ellipse cx="-3.5" cy="-9" rx="4" ry="2.2" fill="' + LEAF + '" transform="rotate(-30 -3.5 -9)"/><ellipse cx="3.5" cy="-11" rx="4" ry="2.2" fill="' + LEAF + '" transform="rotate(30 3.5 -11)"/></g></g>';
+}
+function bedSVG(p, q, w, h){
+  w = w || 150; h = h || 60;
+  var sw = (w - 6) / q, s = '<svg viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true"><rect x="3" y="3" width="' + (w - 6) + '" height="' + (h - 6) + '" fill="' + SOIL + '"/>';
+  for(var i = 0; i < q; i++){
+    var x = 3 + i * sw;
+    if(i < p){ s += '<rect x="' + f1(x) + '" y="3" width="' + f1(sw) + '" height="' + (h - 6) + '" fill="' + PLANTED + '"/>'; if(sw >= 9) s += sprout(x + sw / 2, h / 2 + 8, "", Math.min(1, sw / 14)) }
+    if(i > 0) s += '<line x1="' + f1(x) + '" y1="3" x2="' + f1(x) + '" y2="' + (h - 3) + '" stroke="' + WOOD + '" stroke-width="' + (sw < 9 ? 1.6 : 2.6) + '"/>';
+  }
+  return s + '<rect x="3" y="3" width="' + (w - 6) + '" height="' + (h - 6) + '" fill="none" stroke="' + INK + '" stroke-width="3"/></svg>';
+}
+
+/* ================= STAGE 1: SQUARE PATIO ================= */
+var PC = 32, PG = 10;
+function slabGrid(w, h, cell, ox, oy, sqCol){
+  var s = "";
+  for(var r = 0; r < h; r++) for(var c = 0; c < w; c++)
+    s += '<rect x="' + f1(ox + c * cell + 1) + '" y="' + f1(oy + r * cell + 1) + '" width="' + f1(cell - 2) + '" height="' + f1(cell - 2) + '" rx="3" fill="' + ((r + c) % 2 ? "#e7dfd2" : (sqCol || "#d8cfc0")) + '" stroke="' + INK + '" stroke-width="1.4"/>';
+  return s;
+}
+el("l1").innerHTML = '<svg viewBox="0 0 230 170" width="230" role="img" aria-label="A 6 by 6 patio of 36 slabs">' + '<rect x="6" y="6" width="158" height="158" rx="8" fill="#a9cf7d"/>' + slabGrid(6, 6, 24, 13, 13, "#ffd08a") +
+  '<text x="172" y="66" ' + FF + ' font-size="22" font-weight="700" fill="' + INK + '">6&sup2;</text><text x="172" y="92" ' + FF + ' font-size="15" fill="' + INK + '">6 &times; 6</text><text x="172" y="120" ' + FF + ' font-size="22" font-weight="700" fill="' + ORANGE + '">= 36</text></svg>';
+var patio = { w:3, h:3 };
+function drawPatio(){
+  var w = patio.w, h = patio.h, sq = w === h, s = '<rect x="0" y="0" width="324" height="324" rx="12" fill="#a9cf7d"/>';
+  for(var r = 0; r < PG; r++) for(var c = 0; c < PG; c++){
+    if(c < w && r < h) continue;
+    s += '<rect x="' + (2 + c * PC + 12) + '" y="' + (2 + r * PC + 12) + '" width="8" height="8" rx="4" fill="#93bd66"/>';
+  }
+  s += slabGrid(w, h, PC, 2, 2, sq ? "#ffd08a" : "#d8cfc0");
+  s += '<circle cx="' + (2 + w * PC - 4) + '" cy="' + (2 + h * PC - 4) + '" r="9" fill="' + ORANGE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  el("patioSvg").innerHTML = s;
+  el("pwv").textContent = w; el("phv").textContent = h;
+  el("patioOut").innerHTML = w + " across, " + h + " down: <span class=\"hi\">" + (w * h) + "</span> slabs." + (sq ? '<br><span class="sq">A square patio! ' + w + '&sup2; = ' + (w * w) + '</span>' : '<br>Not square yet.');
+}
+function setPatio(w, h){ patio.w = Math.max(1, Math.min(PG, w)); patio.h = Math.max(1, Math.min(PG, h)); drawPatio(); markTried(1) }
+(function(){
+  var svg = el("patioSvg"), drag = false;
+  function at(e){
+    var b = svg.getBoundingClientRect(), sc = 324 / b.width;
+    var c = Math.floor(((e.clientX - b.left) * sc - 2) / PC), r = Math.floor(((e.clientY - b.top) * sc - 2) / PC);
+    setPatio(c + 1, r + 1);
+  }
+  svg.addEventListener("pointerdown", function(e){ drag = true; try{ svg.setPointerCapture(e.pointerId) }catch(x){} at(e) });
+  svg.addEventListener("pointermove", function(e){ if(drag) at(e) });
+  svg.addEventListener("pointerup", function(){ drag = false });
+  svg.addEventListener("pointercancel", function(){ drag = false });
+  el("pwm").onclick = function(){ setPatio(patio.w - 1, patio.h) };
+  el("pwp").onclick = function(){ setPatio(patio.w + 1, patio.h) };
+  el("phm").onclick = function(){ setPatio(patio.w, patio.h - 1) };
+  el("php").onclick = function(){ setPatio(patio.w, patio.h + 1) };
+})();
+drawPatio();
+
+var R1A = [{c:4},{b:36},{c:5},{b:49},{b:81},{c:10},{b:9},{b:25},{c:16},{b:100},{c:20},{b:4}];
+Runner(el("r1a"), 1, "a", R1A, function(it, api){
+  if(it.c){
+    var n = it.c, a = n * n;
+    ask({ k:"int", a:a, l:n + " by " + n + " patio (" + n + " squared)", p:'Order: a patio <b>' + n + ' slabs by ' + n + ' slabs</b>. How many slabs is that?' + (n > 10 ? ' (Too big for the grid, so work it out.)' : ''),
+      post:"slabs", sa:a, why:n + "&sup2; = " + n + " &times; " + n + " = " + a + ".", w:n + " rows of " + n + ": " + n + " &times; " + n + " = <b>" + a + "</b>.",
+      hint:function(v){ return v === n * 2 ? "That is " + n + " &times; 2. Squaring means " + n + " &times; " + n + "." : v === n + n ? "That is " + n + " + " + n + "." : "Not quite. It is " + n + " rows with " + n + " slabs in each row." },
+      after:function(){ if(n <= PG){ var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-quiet sm"; b.textContent = "Lay it on the grid"; b.onclick = function(){ setPatio(n, n) }; api.q(".arow").appendChild(b) } } }, api);
+    return;
+  }
+  var t = it.b, r = Math.round(Math.sqrt(t)), lab = "Square patio from " + t + " slabs (square root of " + t + ")";
+  api.body.innerHTML = '<p class="prompt">Order: a <b>square</b> patio using exactly <b>' + t + '</b> slabs. Lay it on the grid above, then tap Lay it.</p>' +
+    '<div class="arow"><button class="btn sm" type="button" data-a="check">Lay it</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  api.q("[data-a=check]").onclick = function(){
+    var w = patio.w, h = patio.h, ok = w === h && w * h === t;
+    api.rec(lab, w + " by " + h, ok);
+    if(ok) api.fb("ok", praise() + w + " by " + w + " = " + t + " slabs. So &radic;" + t + " = <b>" + w + "</b>.");
+    else if(w * h === t) api.fb("nope", "That is " + t + " slabs, but " + w + " by " + h + " is not square. Same number across and down.");
+    else if(w === h) api.fb("nope", "Square, yes. " + w + " by " + w + " is " + (w * w) + " slabs, which is " + (w * w < t ? "too few" : "too many") + ". Try a " + (w * w < t ? "bigger" : "smaller") + " one.");
+    else api.fb("nope", "That is " + (w * h) + " slabs and not square yet. Which number times itself makes " + t + "?");
+  };
+  api.q("[data-a=show]").onclick = function(){ setPatio(r, r); api.shown(lab); api.fb("tell", r + " &times; " + r + " = " + t + ", so the patio is " + r + " by " + r + " and &radic;" + t + " = <b>" + r + "</b>.") };
+}, { label:"Orders" });
+
+var R1B = [
+  [4,10,16,21,25,30,36,40,49,50,64,72],
+  [1,12,18,81,90,100,110,121,125,144,150,169],
+  [196,200,225,250,256,289,300,324,360,400,441,500]
+];
+function isSq(x){ var r = Math.round(Math.sqrt(x)); return r * r === x }
+Runner(el("r1b"), 1, "b", R1B, function(list, api, i){
+  var lab = "Seed packet sort, shelf " + (i + 1);
+  api.body.innerHTML = (i === 2 ? '<p class="smallnote" style="margin-top:0">A stretch shelf: bigger squares, up to 21&sup2;.</p>' : '') + '<div class="packets"></div><div class="arow"><button class="btn sm" type="button" data-a="check">Check my pots</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  var box = api.q(".packets");
+  list.forEach(function(x){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pk"; b.textContent = x; b.setAttribute("aria-pressed", "false"); b.setAttribute("data-x", x);
+    b.onclick = function(){ b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true"); b.classList.remove("miss") };
+    box.appendChild(b);
+  });
+  api.q("[data-a=check]").onclick = function(){
+    var picked = [], wrong = [], missed = 0;
+    each(box.children, function(b){ var x = +b.getAttribute("data-x"), on = b.getAttribute("aria-pressed") === "true"; if(on) picked.push(x); if(on && !isSq(x)) wrong.push(x); if(!on && isSq(x)) missed++ });
+    var ok = !wrong.length && !missed;
+    api.rec(lab, picked.length ? picked.join(" ") : "none picked", ok);
+    if(ok){ api.fb("ok", praise() + "Every square is potted: " + picked.map(function(x){ return x + " = " + Math.round(Math.sqrt(x)) + "&sup2;" }).join(", ") + "."); return }
+    var m = [];
+    if(wrong.length){ var x = wrong[0], lo = Math.floor(Math.sqrt(x)); m.push(x + " sits between " + (lo * lo) + " (" + lo + "&sup2;) and " + ((lo + 1) * (lo + 1)) + " (" + (lo + 1) + "&sup2;), so it is not square" + (wrong.length > 1 ? ". " + (wrong.length - 1) + " more picked one" + (wrong.length > 2 ? "s are" : " is") + " not square either" : "") + ".") }
+    if(missed) m.push(missed === 1 ? "One square number is still on the shelf." : missed + " square numbers are still on the shelf.");
+    api.fb("nope", m.join(" ") + " Tap to swap and check again.");
+  };
+  api.q("[data-a=show]").onclick = function(){
+    each(box.children, function(b){ var sq = isSq(+b.getAttribute("data-x")); b.setAttribute("aria-pressed", sq ? "true" : "false") });
+    api.shown(lab); api.fb("tell", "The squares here: " + list.filter(isSq).map(function(x){ return x + " = " + Math.round(Math.sqrt(x)) + "&sup2;" }).join(", ") + ".");
+  };
+}, { label:"Shelves" });
+
+/* ================= STAGE 2: BIG PATIO ================= */
+var bpId = 0;
+function bigPatio(n){
+  var id = "bpp" + (++bpId), S = 220, cs = S / n, tens = Math.floor(n / 10), ones = n % 10, ox = 6, oy = 6, s = "";
+  s += '<defs><pattern id="' + id + '" x="' + ox + '" y="' + oy + '" width="' + f1(cs * 1000) / 1000 + '" height="' + f1(cs * 1000) / 1000 + '" patternUnits="userSpaceOnUse"><rect width="' + cs + '" height="' + cs + '" fill="none" stroke="rgba(10,47,56,.32)" stroke-width="' + Math.min(1, cs / 5) + '"/></pattern></defs>';
+  for(var t = 0; t < tens; t++){
+    var y = oy + t * 10 * cs, h = 10 * cs;
+    s += '<rect x="' + ox + '" y="' + f1(y) + '" width="' + S + '" height="' + f1(h) + '" fill="' + (t % 2 ? "#e9dcc6" : "#d8c7a8") + '"/>';
+    s += '<text x="' + (ox + S + 8) + '" y="' + f1(y + h / 2 + 5) + '" ' + FF + ' font-size="13" font-weight="700" fill="' + INK + '">10 rows</text>';
+  }
+  if(ones){
+    var y2 = oy + tens * 10 * cs, h2 = ones * cs;
+    s += '<rect x="' + ox + '" y="' + f1(y2) + '" width="' + S + '" height="' + f1(h2) + '" fill="#ffd08a"/>';
+    s += '<text x="' + (ox + S + 8) + '" y="' + f1(y2 + h2 / 2 + 5) + '" ' + FF + ' font-size="13" font-weight="700" fill="' + ORANGE + '">' + ones + ' row' + (ones > 1 ? "s" : "") + '</text>';
+  }
+  s += '<rect x="' + ox + '" y="' + oy + '" width="' + S + '" height="' + S + '" fill="url(#' + id + ')"/>';
+  for(t = 1; t <= tens; t++) if(t * 10 < n) s += '<line x1="' + ox + '" x2="' + (ox + S) + '" y1="' + f1(oy + t * 10 * cs) + '" y2="' + f1(oy + t * 10 * cs) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="' + ox + '" y="' + oy + '" width="' + S + '" height="' + S + '" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  return s;
+}
+function stripText(n){
+  var tens = Math.floor(n / 10), ones = n % 10, parts = [];
+  for(var t = 0; t < tens; t++) parts.push(10 * n);
+  if(ones) parts.push(ones * n);
+  return { parts:parts, tensTotal:tens * 10 * n, onesTotal:ones * n, tens:tens, ones:ones };
+}
+el("l2").innerHTML = '<svg viewBox="0 0 330 236" width="300" role="img" aria-label="A 27 by 27 patio in strips: 10 rows, 10 rows, 7 rows">' + bigPatio(27) + '</svg>';
+function drawBP(){
+  var n = +el("bpN").value, x = stripText(n);
+  el("bpSvg").innerHTML = bigPatio(n);
+  el("bpOut").innerHTML = n + " rows of " + n + ".<br>" + x.parts.join(" + ") + " = <span class=\"hi\">" + (n * n) + "</span><br>So " + n + "&sup2; = " + (n * n);
+}
+el("bpN").addEventListener("input", function(){ drawBP(); markTried(2) });
+drawBP();
+
+var R2 = [22, 18, 31, 25, 19, 42, 35, 50, 77, 28];
+Runner(el("r2"), 2, "a", R2, function(n, api){
+  var x = stripText(n), lab = n + " squared", ans = n * n;
+  var h = '<div class="vis"><svg viewBox="0 0 330 236" style="max-width:300px" role="img" aria-label="' + n + ' by ' + n + ' patio">' + bigPatio(n) + '</svg></div>' +
+    '<p class="prompt">A square patio, <b>' + n + ' by ' + n + '</b>. How many slabs is ' + n + '&sup2;?</p><div class="strips">';
+  h += '<span class="sl">' + (x.tens * 10) + ' rows of ' + n + ' =</span>' + numIn("sm st1", (x.tens * 10) + " rows of " + n);
+  if(x.ones) h += '<span class="sl">' + x.ones + ' row' + (x.ones > 1 ? "s" : "") + ' of ' + n + ' =</span>' + numIn("sm st2", x.ones + " rows of " + n);
+  h += '<span class="sl">Total slabs =</span>' + numIn("st3", "Total slabs") + '</div>' +
+    '<div class="arow"><button class="btn sm" type="button" data-a="check">Check</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  api.body.innerHTML = h;
+  var i1 = api.q(".st1"), i2 = api.q(".st2"), i3 = api.q(".st3");
+  function val(inp){ if(!inp || !inp.value.trim()) return null; var v = parseVal(inp.value); return v && v.d === 1 ? v.n : NaN }
+  function check(){
+    var a = val(i1), b = val(i2), t = val(i3), notes = [];
+    if(a !== null && a !== x.tensTotal) notes.push("The 10 row strips: " + x.tens + " lot" + (x.tens > 1 ? "s" : "") + " of 10 rows, and each 10 rows is 10 &times; " + n + " = " + (10 * n) + ".");
+    if(b !== null && b !== x.onesTotal) notes.push("The last " + x.ones + " rows: " + x.ones + " &times; " + n + ".");
+    if(t === null){
+      if(a === null && b === null){ api.fb("tell", "Pop a number in any box. The total is the one that counts."); return }
+      if(!notes.length){ api.fb("tell", "Those strips look good. Add them up for the total."); return }
+      api.fb("nope", notes.join(" ")); return;
+    }
+    if(isNaN(t)){ api.fb("tell", "Pop a whole number in the total box."); return }
+    api.rec(lab, t, t === ans);
+    if(t === ans) api.fb("ok", praise() + x.parts.join(" + ") + " = " + ans + ". So " + n + "&sup2; = <b>" + ans + "</b>.");
+    else if(t === 2 * n) api.fb("nope", "That is " + n + " &times; 2. Squaring means " + n + " rows of " + n + ".");
+    else api.fb("nope", (notes.length ? notes.join(" ") + " " : "") + "Fill the strip boxes if it helps, then add them up.");
+  }
+  enter(api.qa("input"), check);
+  api.q("[data-a=check]").onclick = check;
+  api.q("[data-a=show]").onclick = function(){ i1.value = x.tensTotal; if(i2) i2.value = x.onesTotal; i3.value = ans; api.shown(lab); api.fb("tell", x.parts.join(" + ") + " = <b>" + ans + "</b>.") };
+}, { label:"Quotes" });
+
+/* ================= STAGE 3: SEEDLING ROWS ================= */
+function rowsSVG(vals, hid, grown){
+  var RH = 40, W = 400, H = vals.length * RH + 6, s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Rows of seedlings: ' + vals.map(function(v, i){ return hid.indexOf(i) >= 0 && !grown ? "unknown" : v }).join(", ") + '">';
+  vals.forEach(function(v, i){
+    var y = 4 + i * RH, hidden = hid.indexOf(i) >= 0 && !grown, fresh = grown && hid.indexOf(i) >= 0;
+    s += '<text x="2" y="' + (y + 27) + '" ' + FF + ' font-size="13" font-weight="700" fill="' + INK + '">Row ' + (i + 1) + '</text>';
+    s += '<rect x="50" y="' + (y + 18) + '" width="302" height="16" rx="8" fill="' + SOIL + '" stroke="' + INK + '" stroke-width="2"/>';
+    if(hidden){
+      for(var j = 0; j < 14; j++) s += '<ellipse cx="' + (62 + j * 20) + '" cy="' + (y + 26) + '" rx="2.5" ry="1.8" fill="#f3e3c8"/>';
+      s += '<rect x="358" y="' + (y + 12) + '" width="38" height="26" rx="6" fill="' + YELLOW + '" stroke="' + INK + '" stroke-width="2"/><text x="377" y="' + (y + 31) + '" text-anchor="middle" ' + FF + ' font-size="17" font-weight="700" fill="' + INK + '">?</text>';
+    } else {
+      var sp = Math.min(16, 286 / Math.max(v, 1));
+      for(var k = 0; k < v; k++) s += sprout(58 + k * sp + sp / 2 - 2, y + 25, fresh ? "grow" : "", Math.min(1, sp / 12 + .2));
+      s += '<rect x="358" y="' + (y + 12) + '" width="38" height="26" rx="6" fill="#fff" stroke="' + INK + '" stroke-width="2"/><text x="377" y="' + (y + 31) + '" text-anchor="middle" ' + FF + ' font-size="16" font-weight="700" fill="' + INK + '">' + v + '</text>';
+    }
+  });
+  return s + '</svg>';
+}
+el("l3").innerHTML = rowsSVG([3, 5, 7, 9], [3], false);
+function ruleWord(d){ return d > 0 ? "add " + d : "take away " + (-d) }
+
+var R3A = [
+  { v:[3,5,7,9], h:[3] }, { v:[4,7,10,13], h:[3] }, { v:[2,6,10,14], h:[3] }, { v:[25,21,17,13], h:[3], slug:1 },
+  { v:[5,9,13,17], h:[1] }, { v:[6,11,16,21,26], h:[2,4] }, { v:[4,12,20,28], h:[0] }, { v:[30,27,24,21,18], h:[2,4], slug:1 }
+];
+Runner(el("r3a"), 3, "a", R3A, function(it, api){
+  var d = it.v[1] - it.v[0], lab = it.v.map(function(v, i){ return it.h.indexOf(i) >= 0 ? "_" : v }).join(", ");
+  var opts = [d, d > 0 ? d + 1 : d - 1, -d, d > 0 ? d * 2 : d * 2];
+  opts = opts.filter(function(o, i){ return opts.indexOf(o) === i && o !== 0 }).sort(function(a, b){ return a - b });
+  api.body.innerHTML = (it.slug ? '<p class="smallnote" style="margin-top:0">Slugs have been at these rows. Each row has fewer.</p>' : '') + '<div class="vis rv">' + rowsSVG(it.v, it.h, false) + '</div>' +
+    '<div class="rinputs">' + it.h.map(function(i){ return '<label>Row ' + (i + 1) + numIn("sm", "Row " + (i + 1)) + '</label>' }).join("") + '</div>' +
+    '<p class="smallnote" style="margin:4px 0 0">The rule, if you fancy:</p><div class="rchips">' + opts.map(function(o){ return '<button class="rchip" type="button" data-d="' + o + '">' + ruleWord(o) + '</button>' }).join("") + '</div>' +
+    '<div class="arow"><button class="btn sm" type="button" data-a="check">Check</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  each(api.qa(".rchip"), function(b){
+    b.onclick = function(){
+      var g = +b.getAttribute("data-d"), ok = g === d;
+      each(api.qa(".rchip"), function(c){ c.classList.remove("bad") });
+      b.classList.add(ok ? "good" : "bad");
+      api.recSub("r", "Term to term rule for " + lab, ruleWord(g), ok);
+      var p0 = 0; while(it.h.indexOf(p0) >= 0 || it.h.indexOf(p0 + 1) >= 0) p0++;
+      api.fb(ok ? "ok" : "nope", ok ? praise() + "The rule is <b>" + ruleWord(d) + "</b> each row." : "Not that one. Look at row " + (p0 + 1) + " and row " + (p0 + 2) + ": how do you get from " + it.v[p0] + " to " + it.v[p0 + 1] + "?");
+    };
+  });
+  var ins = api.qa(".rinputs input");
+  function check(){
+    var vals = [], bad = [], blank = false;
+    each(ins, function(inp, j){ var v = parseVal(inp.value); if(!v || v.d !== 1){ blank = true; return } vals.push(v.n); if(v.n !== it.v[it.h[j]]) bad.push(j) });
+    if(blank){ api.fb("tell", "Pop a whole number in each box."); return }
+    var ok = !bad.length;
+    api.rec("Missing rows in " + lab, vals.join(", "), ok);
+    if(ok){ api.q(".rv").innerHTML = rowsSVG(it.v, it.h, true); api.fb("ok", praise() + "The rows go " + it.v.join(", ") + ". The rule is " + ruleWord(d) + " each row."); return }
+    var j = it.h[bad[0]];
+    api.fb("nope", "Row " + (j + 1) + " is not quite right. Look at the gap between two rows next to each other, then " + (j === 0 ? "work backwards from row 2." : "use the row before."));
+  }
+  enter(ins, check);
+  api.q("[data-a=check]").onclick = check;
+  api.q("[data-a=show]").onclick = function(){ each(ins, function(inp, j){ inp.value = it.v[it.h[j]] }); api.q(".rv").innerHTML = rowsSVG(it.v, it.h, true); api.shown("Missing rows in " + lab); api.fb("tell", "The rule is " + ruleWord(d) + " each row, so the rows go " + it.v.join(", ") + ".") };
+}, { label:"Beds" });
+
+var R3B = [
+  { s:4, d:2 }, { a:3, b:1 }, { a:2, b:5 }, { s:20, d:-3 }, { a:5, b:-2 }, { a:4, b:0 }, { a:6, b:-5 }
+];
+function soilRow(v){
+  var sp = Math.min(14, 190 / Math.max(v, 1)), s = '<svg viewBox="0 0 200 30" aria-hidden="true"><rect x="2" y="15" width="196" height="12" rx="6" fill="' + SOIL + '" stroke="' + INK + '" stroke-width="1.6"/>';
+  for(var k = 0; k < v; k++) s += sprout(6 + k * sp + sp / 2 - 1, 21, "", Math.min(1, sp / 12 + .15));
+  return s + '</svg>';
+}
+Runner(el("r3b"), 3, "b", R3B, function(it, api){
+  var want = [], rtxt, rplain;
+  for(var n = 1; n <= 4; n++) want.push(it.a != null ? it.a * n + it.b : it.s + (n - 1) * it.d);
+  if(it.a != null){ rtxt = "Row n gets <b>" + rule(it.a, it.b) + "</b> plants"; rplain = "Row n gets " + rule(it.a, it.b, true) }
+  else { rtxt = "Row 1 gets <b>" + it.s + "</b>, then <b>" + ruleWord(it.d) + "</b> each row"; rplain = "Start " + it.s + ", " + ruleWord(it.d) + " each row" }
+  var lab = "Plant rows 1 to 4: " + rplain, counts = [0, 0, 0, 0];
+  var h = '<div class="label"><small>Seed packet</small>' + rtxt + '</div>';
+  for(n = 0; n < 4; n++) h += '<div class="prow" data-r="' + n + '"><span class="rl">Row ' + (n + 1) + '</span><span class="rs">' + soilRow(0) + '</span><span class="pc"><button class="rb" type="button" data-p="-1" aria-label="Row ' + (n + 1) + ' one fewer">&minus;</button><b aria-live="polite">0</b><button class="rb" type="button" data-p="1" aria-label="Row ' + (n + 1) + ' one more">+</button><button class="rb wide" type="button" data-p="5" aria-label="Row ' + (n + 1) + ' five more">+5</button></span></div>';
+  h += '<div class="arow"><button class="btn sm" type="button" data-a="check">Check my rows</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  api.body.innerHTML = h;
+  function draw(){ each(api.qa(".prow"), function(row, j){ row.querySelector(".rs").innerHTML = soilRow(counts[j]); row.querySelector("b").textContent = counts[j] }) }
+  each(api.qa(".prow"), function(row, j){
+    each(row.querySelectorAll("[data-p]"), function(b){ b.onclick = function(){ counts[j] = Math.max(0, Math.min(40, counts[j] + +b.getAttribute("data-p"))); draw(); markTried(3) } });
+  });
+  api.q("[data-a=check]").onclick = function(){
+    var bad = -1; for(var j = 0; j < 4; j++) if(counts[j] !== want[j]){ bad = j; break }
+    api.rec(lab, counts.join(", "), bad < 0);
+    if(bad < 0){ api.fb("ok", praise() + "Rows of " + want.join(", ") + ". " + (it.a != null ? "Each row goes up by " + it.a + ", the number in front of n." : "That is " + ruleWord(it.d) + " every time.")); return }
+    var n1 = bad + 1;
+    if(it.a != null) api.fb("nope", "Row " + n1 + " needs another look. Put n = " + n1 + " into the rule: " + it.a + " &times; " + n1 + (it.b ? (it.b > 0 ? " + " + it.b : " &minus; " + (-it.b)) : "") + ".");
+    else api.fb("nope", "Row " + n1 + " needs another look. " + (n1 === 1 ? "Row 1 is the start number." : "Take row " + bad + " and " + ruleWord(it.d) + "."));
+  };
+  api.q("[data-a=show]").onclick = function(){ counts = want.slice(); draw(); api.shown(lab); api.fb("tell", "Rows of <b>" + want.join(", ") + "</b>.") };
+}, { label:"Packets" });
+
+/* ================= STAGE 4: GROWTH CHART ================= */
+function chartSVG(vals, o){
+  o = o || {};
+  var W = 360, H = 230, L = 40, B = 196, T = 14, n = vals.length;
+  var mxv = Math.max.apply(null, vals), max = o.max || Math.max(10, Math.ceil(mxv / 10) * 10), step = max <= 40 ? 5 : 10;
+  var slot = (W - L - 8) / n, bw = Math.min(44, slot - 16), s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + (o.aria || "Chart") + ': ' + vals.join(", ") + '">';
+  for(var g = 0; g <= max; g += step){
+    var gy = B - (B - T) * g / max;
+    s += '<line x1="' + L + '" x2="' + (W - 6) + '" y1="' + f1(gy) + '" y2="' + f1(gy) + '" stroke="rgba(10,47,56,.15)" stroke-width="1"/><text x="' + (L - 6) + '" y="' + f1(gy + 4) + '" text-anchor="end" ' + FF + ' font-size="11" fill="' + INK + '">' + g + '</text>';
+  }
+  vals.forEach(function(v, i){
+    var x = L + i * slot + (slot - bw) / 2, h = (B - T) * v / max, y = B - h, cx = x + bw / 2;
+    if(o.water) s += '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + f1(bw) + '" height="' + f1(h) + '" rx="4" fill="' + BRIGHT + '" stroke="' + INK + '" stroke-width="2"/>';
+    else {
+      s += '<rect x="' + f1(cx - 4) + '" y="' + f1(y) + '" width="8" height="' + f1(h) + '" fill="' + LEAF2 + '"/>';
+      for(var lf = y + 22; lf < B - 6; lf += 26) s += '<ellipse cx="' + f1(cx + ((lf / 26 | 0) % 2 ? 9 : -9)) + '" cy="' + f1(lf) + '" rx="9" ry="4" fill="' + LEAF + '" stroke="' + INK + '" stroke-width="1.2"/>';
+      s += '<circle cx="' + f1(cx) + '" cy="' + f1(y) + '" r="' + (o.flower || 8) + '" fill="' + (o.col || YELLOW) + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    s += '<text x="' + f1(cx) + '" y="' + f1(y - (o.water ? 6 : 12)) + '" text-anchor="middle" ' + FF + ' font-size="13" font-weight="700" fill="' + INK + '">' + v + '</text>';
+    s += '<text x="' + f1(cx) + '" y="' + (B + 16) + '" text-anchor="middle" ' + FF + ' font-size="11" fill="' + INK + '">Wk ' + (i + 1) + '</text>';
+  });
+  s += '<line x1="' + L + '" x2="' + (W - 6) + '" y1="' + B + '" y2="' + B + '" stroke="' + INK + '" stroke-width="2.5"/><text x="4" y="10" ' + FF + ' font-size="11" fill="' + INK + '">' + (o.unit || "cm") + '</text>';
+  return s + '</svg>';
+}
+function series(a, b, k){ var o = []; for(var n = 1; n <= k; n++) o.push(a * n + b); return o }
+el("l4").innerHTML = '<div class="chartwrap">' + chartSVG([6, 10, 14, 18], { aria:"Seedling heights", max:20 }) + '</div>';
+
+var PLANTS = [
+  { name:"sunflower", a:6, b:4 }, { name:"runner bean", a:5, b:2, col:"#d23c3c" }, { name:"tomato plant", a:3, b:8, col:"#d23c3c" },
+  { name:"pumpkin vine", a:8, b:-3, col:ORANGE }, { name:"leek", a:2, b:9, col:"#cfe9f0" }, { name:"water butt", a:-4, b:40, water:1 }
+];
+Runner(el("r4a"), 4, "a", PLANTS, function(pl, api){
+  var v = series(pl.a, pl.b, 4), R = rule(pl.a, pl.b);
+  var it = { k:"rule", a:pl.a, b:pl.b, l:"nth term for " + v.join(", "), sa:rule(pl.a, pl.b, true),
+    vis:'<div class="chartwrap">' + chartSVG(v, { aria:pl.name, col:pl.col, water:pl.water, unit:pl.water ? "litres" : "cm" }) + '</div>',
+    p: pl.water ? "No rain! The <b>water butt</b> has this many litres left at the end of each week. Write the nth term." : "How tall the <b>" + pl.name + "</b> is each week. Write the nth term.",
+    pre:"nth term =", why:"It goes " + (pl.a > 0 ? "up" : "down") + " " + Math.abs(pl.a) + " each week, so " + sn(pl.a) + "n, then " + (pl.b >= 0 ? "add " + pl.b : "take away " + (-pl.b)) + ": <b>" + R + "</b>.",
+    w:"It goes " + (pl.a > 0 ? "up" : "down") + " by " + Math.abs(pl.a) + ", so start with " + sn(pl.a) + "n: " + series(pl.a, 0, 4).map(sn).join(", ") + ". The real values are " + (pl.b >= 0 ? pl.b + " more" : (-pl.b) + " less") + ". So the nth term is <b>" + R + "</b>." };
+  ask(it, api);
+}, { label:"Charts" });
+
+var R4B = [
+  { k:"int", r:[6,4], n:15, nm:"sunflower" }, { k:"bel", r:[6,4], x:100, nm:"sunflower" },
+  { k:"int", r:[5,2], n:30, nm:"runner bean" }, { k:"bel", r:[5,2], x:75, nm:"runner bean" },
+  { k:"bel", r:[8,-3], x:157, nm:"pumpkin vine" }, { k:"int", r:[3,8], n:50, nm:"tomato plant" },
+  { k:"bel", r:[3,8], x:60, nm:"tomato plant" }, { k:"bel", r:[2,9], x:40, nm:"leek" },
+  { k:"bel", r:[-4,40], x:0, nm:"water butt", water:1 }
+];
+Runner(el("r4b"), 4, "b", R4B, function(q, api){
+  var a = q.r[0], b = q.r[1], R = rule(a, b), Rp = rule(a, b, true), unit = q.water ? " litres" : " cm";
+  if(q.k === "int"){
+    var ans = a * q.n + b, work = a + " &times; " + q.n + (b >= 0 ? " + " + b : " &minus; " + (-b));
+    ask({ k:"int", a:ans, l:"Week " + q.n + " of " + Rp, sa:ans, post:unit.trim(),
+      p:"The " + q.nm + " is <b>" + R + "</b>" + unit + " in week n. How tall in week <b>" + q.n + "</b>?",
+      why:"n = " + q.n + ": " + work + " = " + ans + unit + ".", w:work + " = <b>" + ans + "</b>" + unit + ".",
+      hint:function(v){ return v === q.n + a + b ? "Careful: " + a + "n means " + a + " &times; n. Try " + work + "." : "Put n = " + q.n + " into the rule: " + work + "." } }, api);
+    return;
+  }
+  var top = q.x - b, n = top / a, yes = top % a === 0 && n >= 1;
+  var undo = q.x + (b >= 0 ? " &minus; " + b : " + " + (-b)) + " = " + top + ", then " + top + " &divide; " + a + " = " + (yes ? n : f1(n) + (Math.abs(n * 10 - Math.round(n * 10)) > 1e-9 ? "..." : ""));
+  ask({ k:"bel", r:q.r, x:q.x, unit:"week", l:"Does " + Rp + " ever equal " + q.x, sa:yes ? n : "", pre:"Week",
+    p: q.water ? "The water butt has <b>" + R + "</b> litres left in week n. In which week is it empty (<b>0</b> litres)?" : "The " + q.nm + " is <b>" + R + "</b> cm in week n. Is it ever exactly <b>" + q.x + " cm</b>? Type the week, or tap Never exactly.",
+    why: yes ? "Undo the rule: " + undo + ". A whole number, so it happens in week <b>" + n + "</b>." : "Undo the rule: " + undo + ". Not a whole number, so it never hits " + q.x + " exactly.",
+    w: yes ? undo + ". So it is week <b>" + n + "</b>. Check: " + a + " &times; " + n + (b >= 0 ? " + " + b : " &minus; " + (-b)) + " = " + q.x + "." : undo + ". Not a whole week, so <b>never exactly</b>. Week " + Math.floor(n) + " is " + (a * Math.floor(n) + b) + " and week " + (Math.floor(n) + 1) + " is " + (a * (Math.floor(n) + 1) + b) + "." }, api);
+}, { label:"Predictions" });
+
+(function(){
+  var own = { s:5, g:3 }, host = el("own");
+  host.innerHTML = '<div class="ownrow"><span class="step">Week 1 height <button class="rb" type="button" data-o="s-" aria-label="Shorter in week 1">&minus;</button><b id="ownS"></b><button class="rb" type="button" data-o="s+" aria-label="Taller in week 1">+</button></span>' +
+    '<span class="step">Grows each week <button class="rb" type="button" data-o="g-" aria-label="Grows less">&minus;</button><b id="ownG"></b><button class="rb" type="button" data-o="g+" aria-label="Grows more">+</button></span></div>' +
+    '<div class="chartwrap" id="ownChart"></div><div class="arow"><span class="pre">nth term =</span>' + numIn("wide", "Your nth term", false) + '<button class="btn sm" type="button" id="ownCheck">Check</button></div><div class="fb hidden" id="ownFb" role="status"></div>';
+  var inp = host.querySelector("input"), fb = el("ownFb");
+  function draw(){ el("ownS").textContent = own.s; el("ownG").textContent = own.g; el("ownChart").innerHTML = chartSVG(series(own.g, own.s - own.g, 5), { aria:"Your plant", col:PLUM }); fb.className = "fb hidden" }
+  each(host.querySelectorAll("[data-o]"), function(b){
+    b.onclick = function(){ var o = b.getAttribute("data-o"), k = o.charAt(0), d = o.charAt(1) === "+" ? 1 : -1;
+      if(k === "s") own.s = Math.max(1, Math.min(20, own.s + d)); else own.g = Math.max(1, Math.min(9, own.g + d)); draw(); markTried(4) };
+  });
+  function check(){
+    var it = { k:"rule", a:own.g, b:own.s - own.g }, r = judge(it, inp.value);
+    if(r.st === "tell"){ fb.className = "fb tell"; fb.innerHTML = r.m; return }
+    record(4, "own" + own.s + "_" + own.g, "Own plant (week 1 = " + own.s + " cm, grows " + own.g + " cm a week)", r.g, r.st === "ok");
+    fb.className = "fb " + (r.st === "ok" ? "ok" : "nope");
+    fb.innerHTML = r.st === "ok" ? praise() + "Your plant is <b>" + rule(own.g, own.s - own.g) + "</b>. In week 100 it would be " + (own.g * 100 + own.s - own.g) + " cm. Outrageous plant. Change the buttons and make another if you fancy." : r.m + " Have another go if you fancy.";
+  }
+  enter([inp], check);
+  el("ownCheck").onclick = check;
+  draw();
+})();
+writeBox(el("w4"), 4, "w4", "How do you find the nth term from a chart or a list? Say it your way, using one of the plants as an example if you like.",
+  ["First I look at...", "It goes up by...", "So I start with...", "Then I check the first term...", "To find week 100 I would..."]);
+
+/* ================= STAGE 5: PLOT DIVIDER ================= */
+el("l5").innerHTML = '<div style="display:grid;gap:6px;justify-items:center">' + bedSVG(2, 3, 210, 60) + '<b>2/3</b>' + bedSVG(4, 6, 210, 60) + '<b>4/6</b></div>';
+var R5A = [
+  [[1,2],[5,10],[2,3],[6,9],[1,4],[2,8],[3,5],[6,10]],
+  [[1,3],[4,12],[5,6],[10,12],[2,5],[6,15],[3,8],[6,16]]
+];
+var MIX = [[3,6,1,4,0,7,2,5],[5,2,7,0,4,1,6,3]];
+Runner(el("r5a"), 5, "a", R5A, function(set, api, ri){
+  var lab = "Matching beds, round " + (ri + 1), pick = null, found = 0, slips = 0;
+  api.body.innerHTML = '<div class="cards"></div>';
+  var box = api.q(".cards"), done = api.done();
+  MIX[ri].forEach(function(ix){
+    var f = set[ix], b = document.createElement("button"); b.type = "button"; b.className = "bedcard"; b.setAttribute("aria-pressed", "false"); b.setAttribute("data-i", ix);
+    b.setAttribute("aria-label", "Bed with " + f[0] + " of " + f[1] + " plots planted");
+    b.innerHTML = bedSVG(f[0], f[1], 150, 56) + '<span class="bl">' + f[0] + '/' + f[1] + '</span>';
+    if(done){ b.classList.add("matched"); b.disabled = true }
+    b.onclick = function(){
+      if(b.classList.contains("matched")) return;
+      markTried(5);
+      if(pick === null){ pick = b; b.setAttribute("aria-pressed", "true"); api.clear(); return }
+      if(pick === b){ pick = null; b.setAttribute("aria-pressed", "false"); return }
+      var a = set[+pick.getAttribute("data-i")], c = f;
+      if(a[0] * c[1] === c[0] * a[1]){
+        pick.classList.add("matched"); b.classList.add("matched"); pick.setAttribute("aria-pressed", "false"); pick.disabled = true; b.disabled = true;
+        found++; markTried(5);
+        var big = a[1] > c[1] ? a : c, sm = big === a ? c : a, k = big[1] / sm[1];
+        if(found === 4){ api.rec(lab, "all 4 pairs" + (slips ? " (" + slips + " near miss" + (slips > 1 ? "es" : "") + " on the way)" : ""), true); api.fb("ok", praise() + "All four pairs found. Every pair is the same fraction with the top and bottom multiplied by the same number.") }
+        else api.fb("ok", praise() + fr(sm[0], sm[1]) + " = " + fr(big[0], big[1]) + ". Top and bottom both &times; " + k + ".");
+      } else {
+        slips++;
+        var bigger = a[0] / a[1] > c[0] / c[1];
+        api.fb("nope", fr(a[0], a[1]) + " and " + fr(c[0], c[1]) + " are different amounts. " + fr(bigger ? a[0] : c[0], bigger ? a[1] : c[1]) + " has more planted. Have another look.");
+        pick.setAttribute("aria-pressed", "false");
+      }
+      pick = null;
+    };
+    box.appendChild(b);
+  });
+  if(done) api.fb("ok", "You matched all of these. Have another round, or another part.");
+}, { label:"Rounds" });
+
+var R5B = [[3,4,20],[1,3,9],[3,5,10],[5,6,18],[4,5,15],[8,12,3],[6,10,5],[3,7,14]];
+function gridCols(q){ if(q <= 6) return q; var c = [6, 5, 7, 4, 3]; for(var i = 0; i < c.length; i++) if(q % c[i] === 0) return c[i]; return 6 }
+Runner(el("r5b"), 5, "b", R5B, function(it, api){
+  var p = it[0], q = it[1], Q = it[2], want = p * Q / q, lab = p + "/" + q + " planted, new bed of " + Q + " plots";
+  var down = Q < q, k = down ? q / Q : Q / q;
+  api.body.innerHTML = '<p class="prompt"><b>Old bed:</b> ' + fr(p, q) + ' planted.</p><div class="vis" style="max-width:340px">' + bedSVG(p, q, 320, 60) + '</div>' +
+    '<p class="prompt"><b>New bed:</b> ' + Q + ' plots. Plant it to match.</p><div class="pgrid" style="grid-template-columns:repeat(' + gridCols(Q) + ',minmax(0,1fr))"></div>' +
+    '<div class="arow"><button class="btn sm" type="button" data-a="check">Check</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  var g = api.q(".pgrid");
+  for(var i = 0; i < Q; i++){
+    var b = document.createElement("button"); b.type = "button"; b.className = "plotb"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "Plot " + (i + 1));
+    b.onclick = function(){ var on = this.getAttribute("aria-pressed") !== "true"; this.setAttribute("aria-pressed", on ? "true" : "false"); this.innerHTML = on ? '<svg viewBox="-10 -16 20 18" aria-hidden="true">' + sprout(0, 0, "grow", 1) + '</svg>' : ""; markTried(5) };
+    g.appendChild(b);
+  }
+  function count(){ var c = 0; each(g.children, function(b){ if(b.getAttribute("aria-pressed") === "true") c++ }); return c }
+  api.q("[data-a=check]").onclick = function(){
+    var c = count(), ok = c === want;
+    api.rec(lab, c + "/" + Q, ok);
+    if(ok) api.fb("ok", praise() + fr(p, q) + " = " + fr(want, Q) + ". " + (down ? "Top and bottom both &divide; " + k + "." : "Top and bottom both &times; " + k + "."));
+    else if(down) api.fb("nope", "You have " + fr(c, Q) + ". The new plots are bigger: every " + k + " old plots make 1 new plot. So " + q + " &divide; " + k + " = " + Q + " on the bottom. Do the same to the top.");
+    else api.fb("nope", "You have " + fr(c, Q) + ". The new bed has " + k + " times as many plots, so each old plot is now " + k + " small plots. Do the same to the planted ones.");
+  };
+  api.q("[data-a=show]").onclick = function(){ each(g.children, function(b, j){ var on = j < want; b.setAttribute("aria-pressed", on ? "true" : "false"); b.innerHTML = on ? '<svg viewBox="-10 -16 20 18" aria-hidden="true">' + sprout(0, 0, "", 1) + '</svg>' : "" }); api.shown(lab); api.fb("tell", fr(p, q) + " = " + fr(want, Q) + ". " + (down ? "&divide;" : "&times;") + " " + k + " on the top and the bottom.") };
+}, { label:"Beds" });
+
+var R5C = [[8,12],[9,15],[12,16],[10,14],[15,18],[14,20],[16,20],[6,18]];
+function fenceSVG(p, q, sec){
+  var W = 340, H = 76, sw = (W - 6) / q, g = q / sec, s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + p + ' of ' + q + ' strips planted, in ' + sec + ' sections">';
+  s += '<rect x="3" y="10" width="' + (W - 6) + '" height="' + (H - 20) + '" fill="' + SOIL + '"/>';
+  s += '<rect x="3" y="10" width="' + f1(p * sw) + '" height="' + (H - 20) + '" fill="' + PLANTED + '"/>';
+  for(var i = 1; i < q; i++) s += '<line x1="' + f1(3 + i * sw) + '" x2="' + f1(3 + i * sw) + '" y1="10" y2="' + (H - 10) + '" stroke="rgba(10,47,56,.25)" stroke-width="1" stroke-dasharray="3 3"/>';
+  var ok = p % g === 0;
+  if(!ok){ var cut = Math.floor(p / g); s += '<rect x="' + f1(3 + cut * g * sw) + '" y="8" width="' + f1(g * sw) + '" height="' + (H - 16) + '" fill="none" stroke="' + ORANGE + '" stroke-width="4" stroke-dasharray="7 5"/>' }
+  for(var j = 1; j < sec; j++){ var x = 3 + j * g * sw; s += '<line x1="' + f1(x) + '" x2="' + f1(x) + '" y1="6" y2="' + (H - 6) + '" stroke="' + WOOD + '" stroke-width="4"/><rect x="' + f1(x - 3) + '" y="2" width="6" height="8" fill="' + WOOD + '" stroke="' + INK + '" stroke-width="1"/>' }
+  return s + '<rect x="3" y="10" width="' + (W - 6) + '" height="' + (H - 20) + '" fill="none" stroke="' + INK + '" stroke-width="3"/></svg>';
+}
+Runner(el("r5c"), 5, "c", R5C, function(it, api){
+  var p = it[0], q = it[1], h = gcd(p, q), sp = p / h, sq = q / h, lab = "Simplest form of " + p + "/" + q;
+  var secs = []; for(var d = q; d >= 1; d--) if(q % d === 0) secs.push(d);
+  api.body.innerHTML = '<p class="prompt">This bed has <b>' + fr(p, q) + '</b> planted. Take fences out to make fewer, bigger sections.</p><div class="vis fv">' + fenceSVG(p, q, q) + '</div>' +
+    '<p class="smallnote fn" aria-live="polite" style="margin-top:0">' + q + ' sections, ' + p + ' planted.</p><div class="fences">' + secs.map(function(d){ return '<button class="btn btn-quiet sm" type="button" aria-pressed="' + (d === q) + '" data-s="' + d + '">' + d + ' section' + (d > 1 ? "s" : "") + '</button>' }).join("") + '</div>' +
+    '<div class="arow"><span class="pre">Simplest form:</span>' + numIn("wide", "Simplest form", false) + '</div><div class="arow"><button class="btn sm" type="button" data-a="check">Check</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  each(api.qa(".fences button"), function(b){
+    b.onclick = function(){
+      var sec = +b.getAttribute("data-s"), g = q / sec, ok = p % g === 0;
+      each(api.qa(".fences button"), function(c){ c.setAttribute("aria-pressed", c === b ? "true" : "false") });
+      api.q(".fv").innerHTML = fenceSVG(p, q, sec);
+      api.q(".fn").innerHTML = ok ? sec + " sections, " + (p / g) + " planted: " + fr(p / g, sec) + ". Works! Each section is " + g + " strips." : sec + " sections would leave the dashed section only part planted. That one does not work, because " + g + " does not go into " + p + ".";
+      markTried(5);
+    };
+  });
+  var inp = api.q("input"), it2 = { k:"fs", a:[p, q] };
+  function check(){
+    var r = judge(it2, inp.value);
+    if(r.st === "tell"){ api.fb("tell", r.m); return }
+    api.rec(lab, r.g, r.st === "ok");
+    if(r.st === "ok") api.fb("ok", praise() + fr(p, q) + " = " + fr(sp, sq) + ". " + h + " is the biggest number that goes into " + p + " and " + q + ", so " + sq + " sections is the fewest that works.");
+    else api.fb("nope", r.m + " Have another go if you fancy.");
+  }
+  enter([inp], check);
+  api.q("[data-a=check]").onclick = check;
+  api.q("[data-a=show]").onclick = function(){ var b = api.q('.fences [data-s="' + sq + '"]'); if(b) b.onclick(); inp.value = sp + "/" + sq; api.shown(lab); api.fb("tell", "Divide top and bottom by " + h + ": " + fr(p, q) + " = <b>" + fr(sp, sq) + "</b>. Only 1 goes into " + sp + " and " + sq + ", so it is in simplest form.") };
+}, { label:"Beds" });
+
+var R5D = [[[3,4],[5,8],[2,3]], [[1,2],[3,5],[4,10]], [[5,6],[7,9],[3,4]], [[2,3],[7,12],[3,4]], [[3,10],[1,4],[2,5]]];
+Runner(el("r5d"), 5, "d", R5D, function(set, api){
+  var lab = "Order " + set.map(function(f){ return f[0] + "/" + f[1] }).join(", "), order = [], miss = 0;
+  var L = set.reduce(function(acc, f){ return lcm(acc, f[1]) }, 1);
+  var sorted = set.slice().sort(function(a, b){ return a[0] / a[1] - b[0] / b[1] });
+  api.body.innerHTML = '<div class="cards"></div><div class="arow"><button class="btn btn-quiet sm" type="button" data-a="clear">Clear</button><button class="btn btn-quiet sm" type="button" data-a="show">Show me</button></div>';
+  var box = api.q(".cards");
+  function draw(){
+    box.innerHTML = "";
+    set.forEach(function(f, i){
+      var b = document.createElement("button"); b.type = "button"; b.className = "bedcard"; var pos = order.indexOf(i);
+      b.setAttribute("aria-label", f[0] + " out of " + f[1] + " planted" + (pos >= 0 ? ", placed " + (pos + 1) : ""));
+      b.innerHTML = bedSVG(f[0], f[1], 150, 56) + '<span class="bl">' + fr(f[0], f[1]) + '</span>' + (pos >= 0 ? '<span class="ord">' + (pos + 1) + '</span>' : '');
+      b.onclick = function(){ if(order.indexOf(i) >= 0) return; order.push(i); draw(); markTried(5); if(order.length === 3) check() };
+      box.appendChild(b);
+    });
+  }
+  function conv(){ return set.map(function(f){ return fr(f[0], f[1]) + " = " + fr(f[0] * L / f[1], L) }).join(", ") }
+  function check(){
+    var got = order.map(function(i){ return set[i] }), ok = got.every(function(f, j){ return f === sorted[j] });
+    api.rec(lab, got.map(function(f){ return f[0] + "/" + f[1] }).join(" < "), ok);
+    if(ok){ api.fb("ok", praise() + "With the same bottom number: " + conv() + "."); return }
+    miss++;
+    if(miss === 1) api.fb("nope", "Not that order yet. Try giving them all the same bottom number. " + L + " works for all three. Tap Clear to have another go.");
+    else api.fb("nope", "Here they are with the same bottom number: " + conv() + ". Now compare the tops. Tap Clear to have another go.");
+  }
+  api.q("[data-a=clear]").onclick = function(){ order = []; draw(); api.clear() };
+  api.q("[data-a=show]").onclick = function(){ order = sorted.map(function(f){ return set.indexOf(f) }); draw(); api.shown(lab); api.fb("tell", conv() + ". So least to most: " + sorted.map(function(f){ return fr(f[0], f[1]) }).join(", ") + ".") };
+  draw();
+}, { label:"Sets" });
+writeBox(el("w5"), 5, "w5", "How do you know " + fr(10, 16) + " and " + fr(5, 8) + " plant the same amount of bed? Say it your way.",
+  ["I know because...", "If I divide the top and bottom by...", "If I multiply the top and bottom by...", "Taking out fences...", "They both simplify to..."]);
+
+/* ================= STAGE 6: WATERING CANS ================= */
+function cansSVG(parts, k, ncan, o){
+  o = o || {};
+  var CW = 44, gp = 22, W = Math.max(ncan * (CW + gp) + 24, 140), H = 120, s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + ncan + ' watering cans, ' + parts + ' jugs of 1/' + k + ' poured">';
+  for(var i = 0; i < ncan; i++){
+    var x = 10 + i * (CW + gp), y = 34, h = 64, f = Math.max(0, Math.min(k, parts - i * k));
+    s += '<path d="M' + (x + 8) + ' ' + y + ' Q' + (x + CW / 2) + ' ' + (y - 26) + ' ' + (x + CW - 8) + ' ' + y + '" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<path d="M' + (x + CW) + ' ' + (y + 22) + ' L' + (x + CW + 14) + ' ' + (y + 4) + '" stroke="' + INK + '" stroke-width="5" stroke-linecap="round"/>';
+    s += '<rect x="' + x + '" y="' + y + '" width="' + CW + '" height="' + h + '" rx="5" fill="#fffdf8"/>';
+    if(f) s += '<rect x="' + x + '" y="' + f1(y + h - h * f / k) + '" width="' + CW + '" height="' + f1(h * f / k) + '" fill="' + BRIGHT + '"' + (o.anim ? ' class="grow"' : '') + '/>';
+    for(var j = 1; j < k; j++) s += '<line x1="' + x + '" x2="' + (x + 12) + '" y1="' + f1(y + h - h * j / k) + '" y2="' + f1(y + h - h * j / k) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<rect x="' + x + '" y="' + y + '" width="' + CW + '" height="' + h + '" rx="5" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<text x="' + (x + CW / 2) + '" y="' + (H - 4) + '" text-anchor="middle" ' + FF + ' font-size="12" font-weight="700" fill="' + INK + '">' + (f === k ? "full" : f ? f + "/" + k : "empty") + '</text>';
+  }
+  return s + '</svg>';
+}
+el("l6").innerHTML = '<div class="canrig">' + cansSVG(7, 3, 3) + '</div>';
+(function(){
+  var t = { k:3, n:7 }, host = el("canToy"), KS = [[2,"a half"],[3,"a third"],[4,"a quarter"],[5,"a fifth"],[6,"a sixth"],[8,"an eighth"]];
+  host.innerHTML = '<p style="margin:0 0 6px;font-weight:700">The jug holds this much of a can:</p><div class="kchips" role="group" aria-label="Jug size">' + KS.map(function(x){ return '<button class="kchip" type="button" data-k="' + x[0] + '" aria-pressed="false">' + x[1] + '</button>' }).join("") + '</div>' +
+    '<div class="canrig" id="ctSvg" style="margin-top:8px"></div><div class="ctlrow"><button class="rb" type="button" id="ctm" aria-label="One jug fewer">&minus;</button><button class="btn sm" type="button" id="ctp">Pour a jug</button><button class="btn btn-quiet sm" type="button" id="cte">Empty them</button></div><p class="readout" id="ctOut" aria-live="polite"></p>';
+  function draw(){
+    each(host.querySelectorAll(".kchip"), function(b){ b.setAttribute("aria-pressed", +b.getAttribute("data-k") === t.k ? "true" : "false") });
+    var nc = Math.max(1, Math.ceil(t.n / t.k)); if(t.n % t.k === 0 && t.n) nc = t.n / t.k;
+    el("ctSvg").innerHTML = cansSVG(t.n, t.k, Math.min(6, Math.max(nc, 1)));
+    var w = Math.floor(t.n / t.k), r = t.n % t.k, out = t.n + " jug" + (t.n === 1 ? "" : "s") + " of " + fr(1, t.k) + " = " + fr(t.n, t.k);
+    if(t.n >= t.k) out += " = " + (r ? mx(w, r, t.k) : '<span class="hi">' + w + '</span>') + " can" + (w === 1 && !r ? "" : "s");
+    else if(t.n) out += " of a can";
+    el("ctOut").innerHTML = out + (t.n > t.k && r ? '<br><span class="sq">Top heavy turned into a mixed number.</span>' : '');
+  }
+  each(host.querySelectorAll(".kchip"), function(b){ b.onclick = function(){ t.k = +b.getAttribute("data-k"); t.n = Math.min(t.n, t.k * 6); draw(); markTried(6) } });
+  el("ctp").onclick = function(){ if(t.n < t.k * 6) t.n++; draw(); markTried(6) };
+  el("ctm").onclick = function(){ if(t.n > 0) t.n--; draw(); markTried(6) };
+  el("cte").onclick = function(){ t.n = 0; draw() };
+  draw();
+})();
+var R6A = [[8,3],[9,4],[11,5],[15,4],[17,5],[14,3],[21,8],[10,6],[18,4]];
+Runner(el("r6a"), 6, "a", R6A, function(f, api){
+  var n = f[0], d = f[1], w = Math.floor(n / d), r = n % d, nc = Math.ceil(n / d), g = gcd(r, d);
+  ask({ k:"mxd", a:[n, d], l:n + "/" + d + " as a mixed number", sa:w + " " + r + "/" + d, ph:"e.g. 2 1/4",
+    vis:'<div class="canrig cv">' + cansSVG(0, d, nc) + '</div>',
+    p:"<b>" + n + "</b> jugs, each " + fr(1, d) + " of a can, so " + fr(n, d) + " cans. Write it as a mixed number.",
+    why:d + " jugs fill a can. " + n + " &divide; " + d + " = " + w + " with " + r + " left over, so " + fr(n, d) + " = " + mx(w, r, d) + (g > 1 ? ", which simplifies to " + mx(w, r / g, d / g) : "") + ".",
+    w:n + " &divide; " + d + " = " + w + " remainder " + r + ". So " + fr(n, d) + " = <b>" + mx(w, r, d) + "</b>" + (g > 1 ? " = <b>" + mx(w, r / g, d / g) + "</b>" : "") + " cans.",
+    after:function(api2){ var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-quiet sm"; b.textContent = "Pour it in"; b.onclick = function(){ api2.q(".cv").innerHTML = cansSVG(n, d, nc, { anim:true }); markTried(6) }; api2.q(".arow").appendChild(b) } }, api);
+}, { label:"Pours" });
+var R6B = [[1,5,6],[2,2,3],[3,1,4],[2,4,5],[4,1,3],[1,7,8],[6,1,2]];
+Runner(el("r6b"), 6, "b", R6B, function(m, api){
+  var w = m[0], n = m[1], d = m[2], top = w * d + n;
+  ask({ k:"imp", a:[top, d], l:w + " " + n + "/" + d + " as a top heavy fraction", sa:top + "/" + d, ph:"e.g. 11/4",
+    vis:'<div class="canrig">' + cansSVG(top, d, w + 1) + '</div>',
+    p:"The tomato feed needs " + mx(w, n, d) + " cans. The jug holds " + fr(1, d) + " of a can. How many jugs is that? Write it as a top heavy fraction.",
+    why:w + " full cans is " + w + " &times; " + d + " = " + (w * d) + " jugs, plus " + n + " more makes " + top + ". So " + mx(w, n, d) + " = " + fr(top, d) + ".",
+    w:w + " &times; " + d + " = " + (w * d) + ", then + " + n + " = " + top + ". So " + mx(w, n, d) + " = <b>" + fr(top, d) + "</b>." }, api);
+}, { label:"Feeds" });
+var R6C = [
+  { a:[9,4], b:[2,1,3] }, { a:[11,3], b:[3,1,2] }, { a:[13,5], b:[2,3,5] }, { a:[17,6], b:[2,3,4] }
+];
+Runner(el("r6c"), 6, "c", R6C, function(c, api){
+  var A = c.a, B = c.b, bt = B[0] * B[2] + B[1], L = lcm(A[1], B[2]), an = A[0] * L / A[1], bn = bt * L / B[2];
+  var which = an > bn ? 0 : an < bn ? 1 : 2, conv = fr(A[0], A[1]) + " = " + fr(an, L) + " and " + mx(B[0], B[1], B[2]) + " = " + fr(bt, B[2]) + (L !== B[2] ? " = " + fr(bn, L) : "") + ".";
+  ask({ k:"ch", l:"Which is more, " + A[0] + "/" + A[1] + " or " + B[0] + " " + B[1] + "/" + B[2], p:"Two watering jobs. Which uses more water?",
+    o:[[fr(A[0], A[1]) + " cans", which === 0, conv], [mx(B[0], B[1], B[2]) + " cans", which === 1, conv], ["They are the same", which === 2, conv]] }, api);
+}, { label:"Pairs" });
+writeBox(el("w6"), 6, "w6", "Someone new to the allotment asks how to turn " + fr(17, 5) + " cans into a mixed number. How would you explain it?",
+  ["First I would...", "5 jugs fill...", "17 divided by 5 is...", "The leftover jugs...", "So the answer is..."]);
+
+/* ================= STAGE 7: WEEDS AND HARVEST ================= */
+el("l7").innerHTML = '<svg viewBox="0 0 200 150" width="200" aria-hidden="true"><rect x="10" y="100" width="180" height="20" rx="10" fill="' + SOIL + '" stroke="' + INK + '" stroke-width="2"/>' +
+  sprout(40, 108, "", 2) + sprout(80, 108, "", 2) + sprout(160, 108, "", 2) +
+  '<g class="sway"><path d="M120 108 C112 80 130 70 118 46" stroke="#6b8e23" stroke-width="4" fill="none"/><path d="M118 70 l-16 -8 M121 86 l15 -10 M118 52 l-12 -12" stroke="#6b8e23" stroke-width="4" stroke-linecap="round"/><circle cx="118" cy="44" r="6" fill="#ffc247" stroke="' + INK + '" stroke-width="2"/></g>' +
+  '<text x="100" y="140" text-anchor="middle" ' + FF + ' font-size="13" font-weight="700" fill="' + INK + '">spot the weed</text></svg>';
+var WEEDS = [
+  { who:"Plot 2", t:"17 squared", lines:["The patio is 17 slabs by 17 slabs.", "Slabs = 17 &times; 2", "= 34 slabs"], bad:1, fix:"Slabs = 17 &times; 17 = <b>289</b>. Squaring means times itself, not times 2." },
+  { who:"Plot 4", t:"24 squared", lines:["24&sup2; is 24 rows of 24.", "20 rows of 24 = 480", "4 rows of 24 = 96", "480 + 96 = 566"], bad:3, fix:"480 + 96 = <b>576</b>. The strips were right; the adding slipped." },
+  { who:"Plot 6", t:"nth term of 3, 8, 13, 18", lines:["3, 8, 13, 18", "It goes up 5 each time.", "So the nth term is n + 5."], bad:2, fix:"Up 5 each time means start with <b>5n</b>: 5, 10, 15, 20. Each term is 2 less, so <b>5n &minus; 2</b>." },
+  { who:"Plot 8", t:"Term 10 of 3n - 1", lines:["The rule is 3n &minus; 1.", "Term 10 = 3 &times; 10 &minus; 1", "= 31"], bad:2, fix:"3 &times; 10 = 30, and 30 &minus; 1 = <b>29</b>." },
+  { who:"Plot 9", t:"Is 50 in 4n + 2", lines:["Is 50 in the sequence 4n + 2?", "50 &minus; 2 = 48", "48 &divide; 4 = 12", "So 50 is not in the sequence."], bad:3, fix:"12 is a whole number, so 50 <b>is</b> in it: it is term 12. Check: 4 &times; 12 + 2 = 50." },
+  { who:"Plot 11", t:"2/3 = ?/12", lines:["I want " + fr(2, 3) + " with 12 on the bottom.", "3 + 9 = 12, so I add 9 to the top too.", "So " + fr(2, 3) + " = " + fr(11, 12)], bad:1, fix:"Adding changes the amount. 3 &times; 4 = 12, so times the top by 4 too: " + fr(2, 3) + " = <b>" + fr(8, 12) + "</b>." },
+  { who:"Plot 12", t:"Simplify 18/30", lines:["Simplify " + fr(18, 30) + ".", "Divide top and bottom by 3: " + fr(6, 10), fr(6, 10) + " is in its simplest form."], bad:2, fix:"2 still goes into 6 and 10, so " + fr(6, 10) + " = <b>" + fr(3, 5) + "</b>. Dividing by 6 (the HCF) gets there in one go." },
+  { who:"Plot 14", t:"19/4 as a mixed number", lines:["4 goes into 19 four times. That makes 16.", "19 &minus; 16 = 3 left over.", "So " + fr(19, 4) + " = " + mx(4, 3, 16)], bad:2, fix:"The leftover is 3 <b>quarters</b>, so " + fr(19, 4) + " = <b>" + mx(4, 3, 4) + "</b>. The bottom number stays 4." },
+  { who:"Plot 15", t:"3 2/5 as top heavy", lines:["Turn " + mx(3, 2, 5) + " top heavy.", "3 &times; 5 = 15 fifths in the whole ones.", "15 + 2 = 17", "So " + mx(3, 2, 5) + " = " + fr(17, 2)], bad:3, fix:"They are still fifths: " + mx(3, 2, 5) + " = <b>" + fr(17, 5) + "</b>." },
+  { who:"Plot 16", t:"2/3 or 3/5", lines:["Which is bigger, " + fr(2, 3) + " or " + fr(3, 5) + "?", "5 is bigger than 3, so fifths are bigger pieces.", "So " + fr(3, 5) + " is bigger."], bad:1, fix:"A bigger bottom number means <b>smaller</b> pieces. Over 15: " + fr(10, 15) + " and " + fr(9, 15) + ", so " + fr(2, 3) + " is bigger." }
+];
+Runner(el("r7a"), 7, "a", WEEDS, function(wd, api){
+  var lab = "Weed in: " + wd.t;
+  api.body.innerHTML = '<div class="sign"><p class="who">' + wd.who + ' worked this out. Tap the first line that goes wrong.</p><div class="wls"></div></div>';
+  var box = api.q(".wls"), done = api.done();
+  wd.lines.forEach(function(L, j){
+    var b = document.createElement("button"); b.type = "button"; b.className = "wl"; b.innerHTML = '<span class="wn">' + (j + 1) + '</span><span>' + L + '</span>';
+    if(done && j === wd.bad) b.classList.add("pulled");
+    b.onclick = function(){
+      var ok = j === wd.bad;
+      api.rec(lab, "line " + (j + 1), ok);
+      if(ok){ b.classList.add("pulled"); restartAnim(b, "weedy"); api.fb("ok", praise() + "Weed pulled. " + wd.fix) }
+      else { b.classList.add("ok"); api.fb("nope", "Line " + (j + 1) + " is healthy. Have another look further " + (j < wd.bad ? "down." : "up.")) }
+    };
+    box.appendChild(b);
+  });
+  if(done) api.fb("ok", "Already pulled. " + wd.fix);
+}, { label:"Weeds" });
+
+var HARVEST = [
+  { k:"int", a:676, l:"26 squared (harvest)", p:"A square bed of strawberries, <b>26 by 26</b>. How many plants?", sa:676, why:"26 &times; 26: 10 rows of 26 = 260, another 10 rows = 260, 6 rows of 26 = 156. 260 + 260 + 156 = 676.", w:"260 + 260 + 156 = <b>676</b>.", h:"Think of it in strips: 10 rows of 26, another 10 rows of 26, then 6 rows of 26." },
+  { k:"int", a:11, l:"Square root of 121 (harvest)", p:"A square patio uses <b>121</b> slabs. How many slabs along each side?", sa:11, why:"11 &times; 11 = 121, so &radic;121 = 11.", w:"11 &times; 11 = 121, so <b>11</b>.", h:"Which number times itself makes 121? 10 &times; 10 is 100, so a bit more." },
+  { k:"rule", a:7, b:2, l:"nth term of 9, 16, 23, 30 (harvest)", p:"Crates of apples: 9, 16, 23, 30. Write the nth term.", pre:"nth term =", sa:"7n + 2", why:"Up 7 each time, so 7n, then add 2: <b>7n + 2</b>.", w:"7n gives 7, 14, 21, 28. Each is 2 short, so <b>7n + 2</b>." },
+  { k:"bel", r:[6,1], x:85, unit:"term", l:"Is 85 in 6n + 1 (harvest)", p:"Pea pods follow <b>6n + 1</b>. Is <b>85</b> a term? Type which term, or tap Never exactly.", pre:"Term", sa:14, why:"85 &minus; 1 = 84, 84 &divide; 6 = 14. A whole number, so it is term <b>14</b>.", w:"84 &divide; 6 = <b>14</b>." },
+  { k:"fs", a:[3,5], l:"Simplest form of 12/20 (harvest)", p:"12 of the 20 marrows are ripe. Write " + fr(12, 20) + " in its simplest form.", sa:"3/5", why:"Divide top and bottom by 4: " + fr(3, 5) + ".", w:fr(12, 20) + " &divide; 4 = <b>" + fr(3, 5) + "</b>." },
+  { k:"fv", a:[6,8], l:"Fraction of the bed planted, 6 of 8 (harvest)", vis:'<div style="max-width:320px">' + bedSVG(6, 8, 300, 60) + '</div>', p:"What fraction of this bed is planted? Any way of writing it is fine.", sa:"3/4", why:"6 of 8 plots is " + fr(6, 8) + ", which is the same as " + fr(3, 4) + " (or 0.75, or 75%).", w:fr(6, 8) + " = <b>" + fr(3, 4) + "</b>.", h:"Count the planted plots and all the plots. Planted goes on top." },
+  { k:"int", a:28, l:"5/7 = 20/? (harvest)", p:"Fill the gap: " + fr(5, 7) + " = " + fr(20, "?"), pre:"? =", sa:28, why:"5 &times; 4 = 20, so 7 &times; 4 = 28.", w:"Top &times; 4, so bottom &times; 4: <b>28</b>.", h:"What did 5 get multiplied by to make 20? Do the same to 7." },
+  { k:"mxd", a:[23,6], l:"23/6 as a mixed number (harvest)", p:"The onion harvest fills " + fr(23, 6) + " trays. Write that as a mixed number.", sa:"3 5/6", ph:"e.g. 2 1/4", why:"23 &divide; 6 = 3 remainder 5, so " + mx(3, 5, 6) + ".", w:"<b>" + mx(3, 5, 6) + "</b>." },
+  { k:"imp", a:[14,3], l:"4 2/3 as top heavy (harvest)", p:"Write " + mx(4, 2, 3) + " sacks of potatoes as a top heavy fraction.", sa:"14/3", ph:"e.g. 11/4", why:"4 &times; 3 = 12, plus 2 = 14, so " + fr(14, 3) + ".", w:"<b>" + fr(14, 3) + "</b>." },
+  { k:"ch", l:"Which is more, 7/4 or 1 2/3 (harvest)", p:"Which basket holds more: " + fr(7, 4) + " kg of beans, or " + mx(1, 2, 3) + " kg?", o:[
+    [fr(7, 4) + " kg", true, fr(7, 4) + " = " + mx(1, 3, 4) + ". Compare " + fr(3, 4) + " and " + fr(2, 3) + " over 12: " + fr(9, 12) + " is more than " + fr(8, 12) + "."],
+    [mx(1, 2, 3) + " kg", false, "Turn " + fr(7, 4) + " into " + mx(1, 3, 4) + ", then compare " + fr(3, 4) + " and " + fr(2, 3) + " with the same bottom number."],
+    ["The same", false, "Turn " + fr(7, 4) + " into a mixed number, then compare the fraction parts."]] }
+];
+Runner(el("r7b"), 7, "b", HARVEST, function(it, api){ ask(it, api) }, { label:"Baskets" });
+writeBox(el("w7"), 7, "w7", "Pick one weed you pulled. What would you say to that gardener to help them next time?",
+  ["The mistake was...", "It goes wrong on line...", "Next time, try...", "You can check it by...", "Outrageous, but easy to fix:"]);
+
+/* ================= send, restart ================= */
+function plain(s){ return String(s).replace(/<[^>]+>/g, "").replace(/&times;/g, "x").replace(/&divide;/g, "/").replace(/&minus;/g, "-").replace(/&sup2;/g, "^2").replace(/&radic;/g, "root ").replace(/&[a-z]+;/g, "") }
+function summary(){
+  var out = ["The Number Allotment (squares, fractions and sequences)", ""];
+  var info = WHO[who];
+  if(info){ out.push("Milestones (" + who + "):"); info.o.forEach(function(o){ out.push("  * " + o) }); out.push("") }
+  var used = { sq:false, fr:false, seq:false }, s;
+  for(s = 1; s <= 7; s++) if(st.tried[s]){ var t = MILESTONE_STAGES[s].t; if(t === "all"){ used.sq = used.fr = used.seq = true } else used[t] = true }
+  var tl = []; if(used.sq) tl.push(TARGET_LINES.sq); if(used.fr) tl.push(TARGET_LINES.fr); if(used.seq) tl.push(TARGET_LINES.seq);
+  if(tl.length){ out.push("Target statements this work relates to:"); tl.forEach(function(x){ out.push("  * " + x) }); out.push("") }
+  var tried = []; for(s = 1; s <= 7; s++) if(st.tried[s]) tried.push(S[s].name);
+  out.push("Jobs tried: " + (tried.length ? tried.join(", ") : "none yet"));
+  for(s = 1; s <= 7; s++){
+    var rows = Object.keys(st.q).filter(function(k){ return st.q[k].s === s }).sort(function(x, y){ return x.localeCompare(y, "en", { numeric:true }) });
+    var wk = st.w["w" + s];
+    if(!st.tried[s] && !rows.length && !(wk && wk.trim())) continue;
+    var ms = MILESTONE_STAGES[s], mine = info && ms.who.indexOf(who) >= 0;
+    out.push("", "Job " + s + ": " + S[s].name);
+    out.push("  Covers: " + ms.covers + " (" + ms.who.join(", ") + ")" + (mine ? ", one of " + who + "'s milestones" : ""));
+    if(!rows.length && !(wk && wk.trim())) out.push("  * Played with the toy, no questions answered yet");
+    rows.forEach(function(k){
+      var r = st.q[k], how;
+      if(r.ok) how = r.a.length === 1 ? "got it first go" : "got there after another go";
+      else if(r.shown) how = "looked at the answer";
+      else how = "still working on it";
+      out.push("  * " + plain(r.l) + ": " + (r.a.length ? r.a.join(" then ") : "no answer typed") + " (" + how + ")");
+    });
+    if(wk && wk.trim()) out.push("  * In their own words: " + wk.trim());
+  }
+  return out.join("\n");
+}
+if(window.Base5Send) Base5Send.mount(el("sendHost"), { tool:"The Number Allotment", filename:"number-allotment", getText:summary });
+el("restartBtn").onclick = function(){ el("restartMsg").classList.remove("hidden") };
+el("restartNo").onclick = function(){ el("restartMsg").classList.add("hidden") };
+el("restartYes").onclick = function(){ try{ localStorage.removeItem(KEY) }catch(e){} location.reload() };
+
+drawTiles();
+drawWho();
+window.__allot = { parseVal:parseVal, parseRule:parseRule, judge:judge, summary:summary, st:function(){ return st }, patio:function(w, h){ setPatio(w, h) } };
+})();
+</script>
+
+</body>
+</html>
