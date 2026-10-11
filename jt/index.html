@@ -197,6 +197,34 @@ td:first-child,th:first-child{width:34px;text-align:center}
 .final{background:#0d2a1f;border:1px solid #235a43;border-radius:14px;padding:12px 14px;margin-top:12px}
 .hide{display:none!important}
 
+/* ---------- setup wizard ---------- */
+.wzdots{display:flex;gap:8px;align-items:center;margin:0 0 6px}
+.wzdots i{width:34px;height:8px;border-radius:5px;background:#243759}
+.wzdots i.on{background:var(--green)}
+.wzin{background:#0b1424;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:1.1rem;width:100%;max-width:420px}
+.swatches,.crests,.opts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+.swatch{width:54px;height:40px;border-radius:10px;border:3px solid transparent;padding:0;position:relative;overflow:hidden}
+.swatch i{position:absolute;right:0;top:0;bottom:0;width:40%}
+.swatch[aria-pressed="true"]{border-color:var(--gold)}
+.crests button{background:var(--panel2);border:3px solid var(--line);border-radius:12px;padding:6px 10px}
+.crests button[aria-pressed="true"],.opts button[aria-pressed="true"]{border-color:var(--gold);background:#243214}
+.opts button{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:9px 14px;font-weight:700}
+.wzprev{display:flex;align-items:center;gap:14px;background:#07101e;border-radius:14px;padding:12px 16px;margin:8px 0 14px}
+.wzprev .nm{font-family:var(--disp);font-weight:900;font-size:1.5rem;line-height:1.05}
+.how{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0 14px}
+.how div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.how b.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--green);color:#04210f;font-family:var(--disp);margin-right:8px}
+.demo{background:#07101e;border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center}
+.drow{display:grid;grid-template-columns:1fr 112px;gap:10px;align-items:center;margin:6px 0;padding:6px 8px;border-radius:10px;border:2px solid transparent}
+.drow.on{border-color:var(--gold)}
+.drow .track{height:14px;background:#0b1424;border-radius:99px;overflow:hidden;margin-top:4px}
+.drow .track i{display:block;height:100%;background:linear-gradient(90deg,var(--green2),var(--green))}
+.drow b{text-align:right;color:var(--gold)}
+.wzfoot{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.moments{margin:10px 0 0;padding:0;list-style:none;font-size:.92rem}
+.moments li{padding:4px 0;border-bottom:1px solid var(--line)}
+@media (max-width:900px){.how{grid-template-columns:1fr}.demo{grid-template-columns:1fr}}
+
 /* ---------- phone ---------- */
 @media (max-width:900px){
   .app{grid-template-columns:1fr}
@@ -216,12 +244,9 @@ td:first-child,th:first-child{width:34px;text-align:center}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="club">
-      <svg width="46" height="52" viewBox="0 0 46 52" aria-hidden="true"><path d="M3 4h40v26c0 10-9 17-20 21C12 47 3 40 3 30z" fill="#0c3b27" stroke="#2fd27a" stroke-width="3"/><path d="M13 30c3-9 9-14 19-15-3 3-4 5-4 8 3 0 5 1 6 3-4 0-6 1-8 4-2 5-8 6-13 0z" fill="#ffcf4a"/><circle cx="31" cy="21" r="1.6" fill="#0c3b27"/></svg>
-      <div><b>Base 5 United</b><small>Manager: JT</small></div>
-    </div>
+    <div class="club" id="clubbox"></div>
     <nav class="nav" id="nav" aria-label="Sections"></nav>
-    <div class="foot">Bonnie the mascot says hello.<a href="/">Back to the Base 5 home page</a></div>
+    <div class="foot"><button class="btn" data-act="help" style="width:100%">How to play</button>Bonnie the mascot says hello.<a href="/">Back to the Base 5 home page</a></div>
   </aside>
   <main>
     <div class="top">
@@ -232,6 +257,7 @@ td:first-child,th:first-child{width:34px;text-align:center}
   </main>
 </div>
 
+<div class="ov" id="wiz" role="dialog" aria-modal="true" aria-label="Set up your club"><div class="match" id="wizbox"></div></div>
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="Match day"><div class="match" id="match"></div></div>
 
 <script src="/jt/sim.js"></script>
@@ -277,9 +303,22 @@ function beats(){
 }
 var st = rawLoad();
 if(!st || st.v !== 1 || !st.played){
-  st = { v: 1, seed: 1 + Math.floor(Math.random() * 2000000000), formation: "4-3-3", xi: [], used: [], played: [], inbox: [], trained: {}, unlocked: {}, nid: 1, openedMsgs: 0 };
+  st = { v: 1, setup: false, club: null, me: null, seed: 1 + Math.floor(Math.random() * 2000000000), formation: "4-3-3", xi: [], used: [], played: [], inbox: [], trained: {}, unlocked: {}, nid: 1, openedMsgs: 0 };
   post("Welcome to the dugout", "The Chairman (Jay)", "Your squad is ready and the league is waiting. Pick your team in Squad if you fancy, then have a go at any training session. Each session you try earns a match, and the more you do in it, the better your luck and your players get. There is no rush and no wrong order.");
 }
+if(!st.club) st.club = { name: "Base 5 United", c1: "#0c3b27", c2: "#2fd27a", crest: "bird" };
+if(!st.me) st.me = { name: "", pos: "MID", note: "Never gives up" };
+function clubName(){ return (st.club.name || "").trim() || "Base 5 United" }
+function applyMe(){
+  var i, ix = -1;
+  for(i = 0; i < S.PLAYERS.length; i++) if(S.PLAYERS[i].id === "me") ix = i;
+  var nm = (st.me.name || "").trim();
+  if(!nm){ if(ix >= 0) S.PLAYERS.splice(ix, 1); return }
+  var pl = { id: "me", name: nm, pos: st.me.pos, r: 70, note: st.me.note + " (your player)" };
+  if(ix >= 0) S.PLAYERS[ix] = pl; else S.PLAYERS.push(pl);
+}
+function applyClub(){ S.setHomeName(clubName()) }
+applyMe(); applyClub();
 var view = "dugout", sel = null, posFilter = "ALL", ctxCache = null;
 
 function post(title, from, body){
@@ -354,7 +393,7 @@ function sync(){
   S.PLAYERS.forEach(function(p){
     if(p.fp && c.tr.fp >= p.fp && !st.unlocked[p.id]){
       st.unlocked[p.id] = 1;
-      post("New signing: " + p.name, "Transfer news", p.name + " (" + p.pos + ", rated " + p.r + ") has joined Base 5 United. " + p.note + ". Pop into Squad if you fancy putting them in your side.");
+      post("New signing: " + p.name, "Transfer news", p.name + " (" + p.pos + ", rated " + p.r + ") has joined " + clubName() + ". " + p.note + ". Pop into Squad if you fancy putting them in your side.");
       changed = true;
     }
   });
@@ -373,6 +412,17 @@ function sync(){
 }
 
 /* ---------- rendering ---------- */
+function crestSvg(w, plain){
+  var c1 = st.club.c1, c2 = st.club.c2, k = st.club.crest, em;
+  if(k === "star") em = '<polygon points="23,12 27,22 38,23 30,30 32,41 23,35 14,41 16,30 8,23 19,22" fill="' + c2 + '"/>';
+  else if(k === "bolt") em = '<path d="M27 9L13 30h9l-3 13 15-21h-9z" fill="' + c2 + '"/>';
+  else if(k === "ball") em = '<circle cx="23" cy="26" r="12" fill="none" stroke="' + c2 + '" stroke-width="3"/><polygon points="23,19 29,24 27,31 19,31 17,24" fill="' + c2 + '"/>';
+  else em = '<path d="M13 30c3-9 9-14 19-15-3 3-4 5-4 8 3 0 5 1 6 3-4 0-6 1-8 4-2 5-8 6-13 0z" fill="' + c2 + '"/><circle cx="31" cy="21" r="1.6" fill="' + c1 + '"/>';
+  return '<svg ' + (plain ? 'style="flex:none" width="' + w + '" height="' + Math.round(w * 1.13) + '"' : 'class="badge-crest" style="width:' + w + 'px;height:' + Math.round(w * 1.13) + 'px"') + ' viewBox="0 0 46 52" aria-hidden="true"><path d="M3 4h40v26c0 10-9 17-20 21C12 47 3 40 3 30z" fill="' + c1 + '" stroke="' + c2 + '" stroke-width="3"/>' + em + '</svg>';
+}
+function renderClub(){
+  $("clubbox").innerHTML = crestSvg(44, true) + '<div><b>' + esc(clubName()) + '</b><small>Manager: JT</small></div>';
+}
 function icon(n){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[n] + '</svg>' }
 function renderNav(){
   var unread = st.inbox.filter(function(m){ return !m.read }).length;
@@ -394,7 +444,8 @@ function render(){
   var c = sync();
   var V = VIEWS.filter(function(v){ return v.id === view })[0];
   $("title").textContent = V.title;
-  renderNav(); renderPills(c);
+  renderNav(); renderPills(c); renderClub();
+  if(wiz.on) wizDraw(c);
   var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, inbox: vInbox, send: vSend }[view];
   $("view").innerHTML = fn(c);
   if(view === "send") mountSend();
@@ -441,7 +492,7 @@ function vDugout(c){
   if(done < ROUNDS){
     var fx = S.ourFixture(done), opp = S.clubTeam(fx.opp - 1), col = clubColours(fx.opp);
     h += '<div class="card next s8"><h3>Next match</h3><div class="vs">' +
-      '<div><svg class="badge-crest" viewBox="0 0 46 52" aria-hidden="true"><path d="M3 4h40v26c0 10-9 17-20 21C12 47 3 40 3 30z" fill="#0c3b27" stroke="#2fd27a" stroke-width="3"/><path d="M13 30c3-9 9-14 19-15-3 3-4 5-4 8 3 0 5 1 6 3-4 0-6 1-8 4-2 5-8 6-13 0z" fill="#ffcf4a"/></svg><div class="tm">Base 5 United</div></div>' +
+      '<div>' + crestSvg(40) + '<div class="tm">' + esc(clubName()) + '</div></div>' +
       '<div class="mid">Matchday ' + (done + 1) + '<br>' + (fx.home ? "at home" : "away") + '</div>' +
       '<div>' + crest(col[0], col[1]) + '<div class="tm">' + esc(opp.name) + '</div></div></div>' +
       compareBars(t, opp);
@@ -479,10 +530,10 @@ function vDugout(c){
   /* last result */
   if(done){
     var m = st.played[done - 1], o = S.CLUBS[S.ourFixture(m.round).opp - 1];
-    h += '<div class="card s6"><h3>Last result</h3><div class="resline"><span><span class="res ' + resultOf(m) + '">' + resultOf(m) + '</span> ' + (m.home ? "Base 5 United " + m.hs + ", " + esc(o.name) + " " + m.as : esc(o.name) + " " + m.hs + ", Base 5 United " + m.as) + '</span><button class="btn btn-quiet" data-act="replay" data-i="' + (done - 1) + '">Read the report</button></div></div>';
+    h += '<div class="card s6"><h3>Last result</h3><div class="resline"><span><span class="res ' + resultOf(m) + '">' + resultOf(m) + '</span> ' + (m.home ? esc(clubName()) + " " + m.hs + ", " + esc(o.name) + " " + m.as : esc(o.name) + " " + m.hs + ", " + esc(clubName()) + " " + m.as) + '</span><button class="btn btn-quiet" data-act="replay" data-i="' + (done - 1) + '">Read the report</button></div></div>';
   }
   /* how it works */
-  h += '<div class="card s6"><h3>How it works</h3><ol style="margin:0;padding-left:1.2em"><li>Pick your best side in <b>Squad</b>.</li><li>Try any <b>training</b> session. It opens in this tab and a button brings you back.</li><li>Each session you try earns a <b>match</b>. Doing more in it turns up the luck dial and sharpens your players.</li><li>Fifteen matches, fifteen sessions. Top of the table wins the league.</li></ol></div>';
+  h += '<div class="card s6"><h3>How it works</h3><ol style="margin:0;padding-left:1.2em"><li>Pick your best side in <b>Squad</b>.</li><li>Try any <b>training</b> session. It opens in this tab and a button brings you back.</li><li>Each session you try earns a <b>match</b>. Doing more in it turns up the luck dial and sharpens your players.</li><li>Fifteen matches, fifteen sessions. Top of the table wins the league.</li></ol><button class="btn" data-act="help" style="margin-top:8px">Show me how to play</button></div>';
   /* inbox */
   h += '<div class="card s12"><h3>Latest news</h3>' + st.inbox.slice(0, 3).map(msgHtml).join("") + '</div>';
   h += '</div>';
@@ -491,9 +542,9 @@ function vDugout(c){
 function ord(n){ var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]) }
 function msgHtml(m){ return '<div class="msg' + (m.read ? "" : " unread") + '"><h4>' + esc(m.title) + '</h4><small>' + esc(m.from) + '</small><p style="margin:6px 0 0">' + esc(m.body) + '</p></div>' }
 
-function vSquad(c){
-  var F = S.FORMATIONS[st.formation], t = teamNow(c), tally = goalTally(), i;
-  var h = '<div class="grid"><div class="card s7"><h3>Formation</h3><div class="formrow">' +
+function pitchCard(c, cls){
+  var F = S.FORMATIONS[st.formation], t = teamNow(c), i;
+  var h = '<div class="card ' + cls + '"><h3>Formation</h3><div class="formrow">' +
     Object.keys(S.FORMATIONS).map(function(k){ return '<button data-act="form" data-f="' + k + '" aria-pressed="' + (k === st.formation) + '">' + k + '<small>' + S.FORMATIONS[k].note + '</small></button>' }).join("") + '</div>';
   var tn = [["atk","ATK"],["mid","MID"],["def","DEF"],["gk","GK"]];
   h += '<div class="strip">' + tn.map(function(k){ return '<div><b>' + r1(t[k[0]]) + '</b><small>' + k[1] + '</small>' + (c.tr.boost[k[0]] > 0.04 ? '<br><em>' + plus(c.tr.boost[k[0]]) + ' training</em>' : '') + '</div>' }).join("") + '</div>';
@@ -505,8 +556,11 @@ function vSquad(c){
   }
   h += '</div><p class="hint" style="margin-top:10px">Tap a spot on the pitch, then tap a player to put them there. A gold number means a player is out of position and plays a bit below their rating.</p>' +
     '<div class="mbtns"><button class="btn" data-act="auto">Pick the best side for me</button></div></div>';
-  /* players */
-  h += '<div class="card s5"><h3>Squad</h3><div class="chips">' + ["ALL","GK","DEF","MID","FWD"].map(function(k){ return '<button data-act="pf" data-k="' + k + '" aria-pressed="' + (posFilter === k) + '">' + (k === "ALL" ? "All" : k) + '</button>' }).join("") + '</div><div class="plist">';
+  return h;
+}
+function listCard(c, cls){
+  var tally = goalTally();
+  var h = '<div class="card ' + cls + '"><h3>Squad</h3><div class="chips">' + ["ALL","GK","DEF","MID","FWD"].map(function(k){ return '<button data-act="pf" data-k="' + k + '" aria-pressed="' + (posFilter === k) + '">' + (k === "ALL" ? "All" : k) + '</button>' }).join("") + '</div><div class="plist">';
   S.PLAYERS.filter(function(p){ return posFilter === "ALL" || p.pos === posFilter }).sort(function(a, b){ var la = a.fp && c.tr.fp < a.fp ? 1 : 0, lb = b.fp && c.tr.fp < b.fp ? 1 : 0; return (la - lb) || (b.r - a.r) }).forEach(function(p){
     var open = !p.fp || c.tr.fp >= p.fp, at = st.xi.indexOf(p.id);
     if(!open){
@@ -516,8 +570,10 @@ function vSquad(c){
       h += '<button class="prow' + (at >= 0 ? " inxi" : "") + (sel && sel.player === p.id ? " sel" : "") + '" data-act="player" data-id="' + p.id + '"><span class="pp ' + p.pos + '">' + p.pos + '</span><span><b>' + esc(p.name) + '</b><small>' + esc(p.note) + (g ? " &middot; " + g + (g === 1 ? " goal" : " goals") : "") + (at >= 0 ? " &middot; in the side" : "") + '</small></span><span class="rt">' + p.r + '</span></button>';
     }
   });
-  h += '</div></div></div>';
-  return h;
+  return h + '</div></div>';
+}
+function vSquad(c){
+  return '<div class="grid">' + pitchCard(c, "s7") + listCard(c, "s5") + '<div class="card s12"><h3>Your club</h3><div class="mbtns" style="margin:0"><button class="btn" data-act="wzedit">Change club name, colours or my player</button><button class="btn" data-act="help">How to play</button></div></div></div>';
 }
 
 function vTrain(c){
@@ -571,7 +627,7 @@ function reportText(){
   var c = ctx(), tb = S.table(st.seed, st.played), pos = 0, w = 0, d = 0, l = 0, gf = 0, ga = 0;
   tb.forEach(function(r, i){ if(r.id === 0) pos = i + 1 });
   st.played.forEach(function(m){ var x = resultOf(m); if(x === "W") w++; else if(x === "D") d++; else l++; gf += ourGoals(m); ga += theirGoals(m) });
-  var lines = ["Manager: JT", "Club: Base 5 United", "",
+  var lines = ["Manager: JT", "Club: " + clubName(), "",
     "Matches played: " + st.played.length + " of " + ROUNDS,
     "Record: won " + w + ", drawn " + d + ", lost " + l + ", goals " + gf + " for and " + ga + " against",
     "League position: " + (st.played.length ? ord(pos) : "not started"),
@@ -582,7 +638,7 @@ function reportText(){
   S.ACTS.forEach(function(a){ var lv = c.tr.levels[a.slug]; if(lv){ any = true; lines.push("- " + a.title + " (" + a.pillar + "), level " + lv + " of " + S.CAP) } });
   if(!any) lines.push("- none yet");
   var tally = goalTally(), names = Object.keys(tally).sort(function(a, b){ return tally[b] - tally[a] });
-  if(names.length){ lines.push("", "Top scorers:"); names.slice(0, 3).forEach(function(n){ lines.push("- " + n + " " + tally[n]) }) }
+  if(names.length){ lines.push("", "Top scorers:"); names.slice(0, 3).forEach(function(n){ lines.push("- " + (st.me.name && n === st.me.name.trim() ? "Own player" : n) + " " + tally[n]) }) }
   return lines.join("\n");
 }
 function mountSend(){
@@ -642,7 +698,7 @@ function playMatch(m, animate){
   var p = playing, evs = m.events, idx = 0, shownH = 0, shownA = 0, mm = 0, last = evs[evs.length - 1].m;
   var ourS = ourSide(m);
   $("match").innerHTML = '<div class="mhead"><h2>Matchday ' + (m.round + 1) + '</h2><div class="mbtns" style="margin:0"><button class="btn" id="skipb" data-act="skip">Skip to the end</button></div></div>' +
-    '<div class="board"><div class="tm' + (m.home ? " us" : "") + '">' + esc(p ? p.home.name : (m.home ? "Base 5 United" : S.CLUBS[m.opp - 1].name)) + '</div><div class="sc" aria-live="polite"><span id="sh">0</span><i></i><span id="sa">0</span></div><div class="tm' + (m.home ? "" : " us") + '">' + esc(p ? p.away.name : (m.home ? S.CLUBS[m.opp - 1].name : "Base 5 United")) + '</div></div>' +
+    '<div class="board"><div class="tm' + (m.home ? " us" : "") + '">' + esc(p ? p.home.name : (m.home ? clubName() : S.CLUBS[m.opp - 1].name)) + '</div><div class="sc" aria-live="polite"><span id="sh">0</span><i></i><span id="sa">0</span></div><div class="tm' + (m.home ? "" : " us") + '">' + esc(p ? p.away.name : (m.home ? S.CLUBS[m.opp - 1].name : clubName())) + '</div></div>' +
     '<div style="text-align:center;font-weight:700;color:var(--gold)" id="clk">0 min</div>' +
     '<div class="strip2"><span class="gl" style="left:0"></span><span class="gl" style="right:0"></span><span class="ball" id="ball" style="left:50%"></span></div>' +
     '<div class="feed" id="feed" aria-live="off"></div><div id="fin"></div>';
@@ -694,11 +750,120 @@ function replay(i){
   playMatch(m, false);
 }
 
+
+/* ---------- set up your club, then how to play ---------- */
+var wiz = { on: false, step: 0, mode: "setup", timer: null };
+var SWATCH = [["#0c3b27","#2fd27a"],["#1f3b7a","#ffd23f"],["#7a1f2b","#ffffff"],["#4a1f7a","#ffcf4a"],["#151515","#ff6b6b"],["#0b5a73","#ffffff"],["#7a4a0f","#ffe3b0"],["#1b1b6b","#6fe3c8"]];
+var CRESTS = ["bird","star","bolt","ball"];
+var TRAITS = ["Never gives up","Fast and fearless","Calm under pressure","Scores when it matters","Reads the game","Keeps the ball"];
+var POSN = { GK: "Goalkeeper", DEF: "Defender", MID: "Midfielder", FWD: "Forward" };
+function wizOpen(step, mode){
+  wiz.on = true; wiz.step = step; wiz.mode = mode;
+  $("wiz").classList.add("on"); wizDraw();
+  var f = $("wizbox").querySelector("input,button"); if(f) try{ f.focus() }catch(e){}
+}
+function wizStop(){ if(wiz.timer){ clearInterval(wiz.timer); wiz.timer = null } }
+function wizClose(){
+  wizStop(); wiz.on = false; $("wiz").classList.remove("on");
+  applyMe(); applyClub();
+  st.setup = true; save(); render();
+}
+function demoNumbers(){
+  var opp = S.clubTeam(0), pool = S.PLAYERS.filter(function(p){ return !p.fp });
+  var xi = autoPick(st.formation, pool), N = 30, out = [], b, i, j;
+  var levels = [["No sessions yet", 0], ["One go at every session", 1], ["Lots of doing in every session", 4]];
+  var sample = null;
+  levels.forEach(function(L){
+    b = {}; S.ACTS.forEach(function(a){ b[a.slug] = { n: L[1] } });
+    var tr = S.training(b), team = S.buildTeam(st.formation, xi, tr.boost, tr.luck), w = 0, d = 0, lk = 0;
+    for(i = 0; i < N; i++){
+      var r = S.simulate(team, opp, 5000 + i * 17);
+      if(r.hs > r.as) w++; else if(r.hs === r.as) d++;
+      var ln = r.events.filter(function(e){ return e.k === "luck" || e.lucky }).length; lk += ln;
+      if(L[1] === 4 && !sample && ln >= 2 && r.hs > r.as) sample = r.events.filter(function(e){ return e.k === "goal" || e.k === "luck" }).slice(0, 6);
+    }
+    out.push({ label: L[0], luck: tr.luck, w: w, N: N, lk: lk / N });
+  });
+  return { rows: out, sample: sample || [] };
+}
+function wizDraw(){
+  if(!wiz.on) return;
+  wizStop();
+  var box = $("wizbox"), step = wiz.step, h = "", last = step === 3, full = wiz.mode !== "help";
+  var titles = ["Name your club", "Build your player", "Pick your side", "How to play"];
+  if(full){ h += '<div class="wzdots" aria-label="Step ' + (step + 1) + ' of 4">' + [0,1,2,3].map(function(i){ return '<i class="' + (i <= step ? "on" : "") + '"></i>' }).join("") + '</div>'; }
+  h += '<div class="mhead"><h2>' + titles[step] + '</h2>' + (full ? '<button class="btn btn-quiet" data-act="wzclose">' + (last ? "Close" : "Skip for now") + '</button>' : '') + '</div>';
+  if(step === 0){
+    h += '<p class="hint">You are the manager. Make the club yours. You can change any of this later.</p>' +
+      '<label class="sendlab" for="wzname">Club name</label><br><input class="wzin" id="wzname" maxlength="24" value="' + esc(clubName() === "Base 5 United" && !st.club.name ? "" : st.club.name) + '" placeholder="Base 5 United">' +
+      '<h3 style="margin-top:14px">Kit colours</h3><div class="swatches">' + SWATCH.map(function(sw, i){
+        return '<button class="swatch" data-act="wzcol" data-i="' + i + '" aria-pressed="' + (st.club.c1 === sw[0] && st.club.c2 === sw[1]) + '" aria-label="Colour set ' + (i + 1) + '" style="background:' + sw[0] + '"><i style="background:' + sw[1] + '"></i></button>';
+      }).join("") + '</div><h3>Badge</h3><div class="crests">' + CRESTS.map(function(k){
+        var keep = st.club.crest; st.club.crest = k; var svg = crestSvg(40, true); st.club.crest = keep;
+        return '<button data-act="wzcrest" data-k="' + k + '" aria-pressed="' + (keep === k) + '" aria-label="Badge ' + k + '">' + svg + '</button>';
+      }).join("") + '</div><div class="wzprev">' + crestSvg(56, true) + '<div><div class="nm" id="wzshow">' + esc(clubName()) + '</div><span class="hint">Your club</span></div></div>';
+  } else if(step === 1){
+    h += '<p class="hint">Make a player of your own. They join the squad rated 70, a touch better than the rest to start with. Made up names work well. You can skip this too.</p>' +
+      '<label class="sendlab" for="wzpl">Player name</label><br><input class="wzin" id="wzpl" maxlength="22" value="' + esc(st.me.name) + '" placeholder="e.g. Rocket Rory">' +
+      '<h3 style="margin-top:14px">Position</h3><div class="opts">' + ["GK","DEF","MID","FWD"].map(function(k){ return '<button data-act="wzpos" data-k="' + k + '" aria-pressed="' + (st.me.pos === k) + '">' + POSN[k] + '</button>' }).join("") + '</div>' +
+      '<h3>Their style</h3><div class="opts">' + TRAITS.map(function(k, i){ return '<button data-act="wztrait" data-i="' + i + '" aria-pressed="' + (st.me.note === k) + '">' + k + '</button>' }).join("") + '</div>' +
+      '<div class="wzprev"><span class="pp ' + st.me.pos + '" style="padding:6px 10px;border-radius:8px;font-weight:900;color:#04101f">' + st.me.pos + '</span><div><div class="nm" id="wzpshow">' + esc(st.me.name || "Your player") + '</div><span class="hint">' + esc(st.me.note) + '. Rated 70.</span></div></div>';
+  } else if(step === 2){
+    var c = ctx();
+    h += '<p class="hint">Choose a formation, then tap a spot and a player to build your side. Or let the computer pick, then change what you like. There is no wrong answer.</p><div class="grid" style="gap:12px">' + pitchCard(c, "s12") + listCard(c, "s12") + '</div>';
+  } else {
+    var D = demoNumbers();
+    h += '<div class="how">' +
+      '<div><b class="n">1</b><b>Build your side.</b><br>Done. You can change it any time in Squad.</div>' +
+      '<div><b class="n">2</b><b>Try a training session.</b><br>Any one, in any order. Each opens in this tab with a button to bring you back.</div>' +
+      '<div><b class="n">3</b><b>Each session earns a match.</b><br>Kick off when you fancy, then watch or skip to the score.</div>' +
+      '<div><b class="n">4</b><b>More doing, more luck.</b><br>Every bit of doing in a session turns the luck dial and sharpens your players.</div></div>' +
+      '<h3>See it for yourself</h3><p class="hint">The same side plays the same strong club 30 times. The only thing that changes is how much training has been done.</p>' +
+      '<div class="demo"><div class="dial">' + dialSvg(0) + '<div class="num" id="wznum">0%</div></div><div id="wzrows">' +
+      D.rows.map(function(r, i){ return '<div class="drow" data-i="' + i + '"><div><b>' + r.label + '</b><div class="track"><i style="width:' + (100 * r.w / r.N) + '%"></i></div></div><b>' + r.w + ' wins of ' + r.N + '</b></div>' }).join("") + '</div></div>' +
+      (D.sample.length ? '<h3 style="margin-top:14px">A game with lots of training</h3><ul class="moments">' + D.sample.map(function(e){ return '<li><b>' + e.m + "'</b> " + (e.k === "luck" || e.lucky ? '<span class="tag">LUCK</span>' : "") + esc(e.text) + '</li>' }).join("") + '</ul>' : "") +
+      '<p class="hint" style="margin-top:10px">Real matches are shuffled by luck, so any single game can go either way. Over a whole season, doing more helps.</p>';
+    wiz.demo = D;
+  }
+  h += '<div class="wzfoot">' + (full && step > 0 ? '<button class="btn" data-act="wzback">Back</button>' : '<span></span>') +
+    (last ? '<button class="btn btn-go btn-big" data-act="wzclose">' + (full ? "Start managing" : "Got it") + '</button>' : '<button class="btn btn-go btn-big" data-act="wznext">Next</button>') + '</div>';
+  box.innerHTML = h;
+  if(step === 3 && !reduce){
+    var vals = [0, 0.25, 1], k = 0;
+    var tick = function(){
+      var r = wiz.demo.rows[k], nd = box.querySelector(".needle"), nm = $("wznum");
+      if(nd) nd.style.transform = "rotate(" + (-90 + 180 * r.luck) + "deg)";
+      if(nm) nm.textContent = Math.round(r.luck * 100) + "%";
+      var rows = box.querySelectorAll(".drow"); for(var i = 0; i < rows.length; i++) rows[i].classList.toggle("on", i === k);
+      k = (k + 1) % 3;
+    };
+    tick(); wiz.timer = setInterval(tick, 2200);
+  } else if(step === 3){
+    var nd2 = box.querySelector(".needle"); if(nd2) nd2.style.transform = "rotate(90deg)"; var n2 = $("wznum"); if(n2) n2.textContent = "100%";
+  }
+}
+document.addEventListener("input", function(e){
+  if(e.target.id === "wzname"){ st.club.name = e.target.value; applyClub(); var sh = $("wzshow"); if(sh) sh.textContent = clubName(); save(); renderClub() }
+  if(e.target.id === "wzpl"){ st.me.name = e.target.value; var ps = $("wzpshow"); if(ps) ps.textContent = st.me.name.trim() || "Your player"; save() }
+});
+
 /* ---------- clicks ---------- */
 document.addEventListener("click", function(e){
   var b = e.target.closest("[data-act]");
   if(!b) return;
   var a = b.getAttribute("data-act"), c;
+  if(a === "help"){ wizOpen(3, "help"); return }
+  if(a === "wzedit"){ wizOpen(0, "edit"); return }
+  if(a === "wzclose"){ wizClose(); return }
+  if(a === "wzback"){ wiz.step = Math.max(0, wiz.step - 1); wizDraw(); return }
+  if(a === "wznext"){
+    if(wiz.step === 1){ applyMe(); var cc = ctx(); st.xi = autoPick(st.formation, cc.avail, st.xi.filter(function(id){ return id && id !== "me" }).concat(st.me.name.trim() ? ["me"] : [])); save() }
+    wiz.step = Math.min(3, wiz.step + 1); wizDraw(); return;
+  }
+  if(a === "wzcol"){ var sw = SWATCH[+b.getAttribute("data-i")]; st.club.c1 = sw[0]; st.club.c2 = sw[1]; save(); renderClub(); wizDraw(); return }
+  if(a === "wzcrest"){ st.club.crest = b.getAttribute("data-k"); save(); renderClub(); wizDraw(); return }
+  if(a === "wzpos"){ st.me.pos = b.getAttribute("data-k"); save(); wizDraw(); return }
+  if(a === "wztrait"){ st.me.note = TRAITS[+b.getAttribute("data-i")]; save(); wizDraw(); return }
   if(a === "view"){ view = b.getAttribute("data-v"); sel = null; try{ history.replaceState(null, "", "#" + view) }catch(er){} render(); window.scrollTo(0, 0); return }
   if(a === "kick"){ openMatch(); return }
   if(a === "start"){ startMatch(b.getAttribute("data-w") === "1"); return }
@@ -728,10 +893,10 @@ function place(pid, slot){
   if(j >= 0 && j !== slot) st.xi[j] = old || "";
   st.xi[slot] = pid; save();
 }
-document.addEventListener("keydown", function(e){ if(e.key === "Escape" && $("ov").classList.contains("on")) closeMatch() });
+document.addEventListener("keydown", function(e){ if(e.key !== "Escape") return; if(wiz.on) wizClose(); else if($("ov").classList.contains("on")) closeMatch() });
 
 /* when the student comes back from a training page, refresh */
-function refresh(){ if(!$("ov").classList.contains("on")) render() }
+function refresh(){ if(!$("ov").classList.contains("on") && !wiz.on) render() }
 window.addEventListener("pageshow", refresh);
 window.addEventListener("focus", refresh);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh() });
@@ -741,6 +906,7 @@ var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
 window.__dugout = { st: function(){ return st }, ctx: ctx, render: render };
 render();
+if(!st.setup) wizOpen(0, "setup");
 })();
 </script>
 </body>
