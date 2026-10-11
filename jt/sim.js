@@ -189,7 +189,7 @@ function createMatch(home, away, seed, opts){
   opts = opts || {};
   var r = rng(seed);
   var M = { home: home, away: away, r: r, hs: 0, as: 0, events: [], m: 0, add: 91 + Math.floor(r() * 4),
-    done: false, pause: null, our: opts.our || "", interactive: !!opts.interactive, cup: !!opts.cup,
+    done: false, pause: null, our: opts.our || "", interactive: !!opts.interactive, cup: !!opts.cup, fk: opts.fk || "",
     halfDone: false, spDone: false, pens: null, winner: "" };
   M.spMin = M.our ? 12 + Math.floor(r() * 62) : 0;
   M.events.push({ m: 0, k: "kick", side: "", text: "Kick off. " + home.name + " against " + away.name + "." });
@@ -218,7 +218,7 @@ function step(M){
   if(M.our && M.interactive && !M.spDone && m >= M.spMin){
     M.spDone = true;
     var us = ourTeamOf(M), takers = us.players.filter(function(p){ return p.pos === "MID" || p.pos === "FWD"; });
-    takers.sort(function(a, b){ return b.r - a.r; });
+    takers.sort(function(a, b){ return (b.name === M.fk ? 1000 : b.r) - (a.name === M.fk ? 1000 : a.r); });
     var opts = takers.slice(0, 3).map(function(p){ return { label: p.name + " takes it", sub: "Rated " + p.r, taker: p.name, rate: p.r }; });
     opts.push({ label: "Play it short", sub: "Build a move instead", short: true });
     M.pause = { k: "setpiece", minute: m, title: "Free kick in a good spot", def: 0, options: opts };
