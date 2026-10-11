@@ -48,12 +48,40 @@ if(slug && window.Storage && Storage.prototype && !window.__b5engage){
           var o = read(), e = o[slug] || { n: 0, last: 0 };
           if(now - e.last >= BEAT_MS || e.n === 0){
             e.n += 1; e.last = now; o[slug] = e; write(o);
+            try{ luckToast(o) }catch(er){}
           }
         }
       }
     }catch(err){}
     return r;
   };
+}
+
+/* when the student came from JT's dugout, show how the team is getting on */
+function calmMotion(){
+  try{ var h = JSON.parse(localStorage.getItem("b5.jt.hq.v1") || "{}"); return !(h.set && h.set.motion === "lively") }catch(e){ return true }
+}
+function fromJT(){ try{ return sessionStorage.getItem("b5.from") === "jt" }catch(e){ return false } }
+function luckNow(o){
+  var fp = 0, k; for(k in o){ if(o.hasOwnProperty(k) && o[k] && o[k].n) fp += Math.min(4, o[k].n) }
+  return Math.round(100 * Math.min(1, fp / 60));
+}
+var toastTimer = null;
+function luckToast(o){
+  if(!fromJT()) return;
+  var pct = luckNow(o), t = document.getElementById("b5toast");
+  if(!t){
+    t = document.createElement("div"); t.id = "b5toast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite");
+    t.setAttribute("style",
+      "position:fixed;left:12px;bottom:62px;z-index:2147483000;background:#1b2538;color:#e8edf6;" +
+      "font:700 15px/1.3 'Atkinson Hyperlegible',Arial,sans-serif;padding:10px 14px;border-radius:12px;" +
+      "border:2px solid #74c9a0;max-width:270px;box-shadow:0 4px 14px rgba(0,0,0,.3)");
+    document.body.appendChild(t);
+  }
+  t.textContent = "Nice. Your team's luck is now " + pct + "%.";
+  t.style.display = "block";
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.style.display = "none" }, 3500);
 }
 
 /* a way back, when the student came from their own HQ */
@@ -68,9 +96,9 @@ try{
       var a = document.createElement("a");
       a.id = "b5backpill"; a.href = HOMES[from].href; a.textContent = HOMES[from].label;
       a.setAttribute("style",
-        "position:fixed;left:12px;bottom:12px;z-index:2147483000;background:#0b1220;color:#fff;" +
+        "position:fixed;left:12px;bottom:12px;z-index:2147483000;background:#1b2538;color:#fff;" +
         "font:700 14px/1 'Atkinson Hyperlegible',Arial,sans-serif;letter-spacing:.02em;padding:11px 16px;" +
-        "border-radius:999px;border:2px solid #2fd27a;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.35)");
+        "border-radius:999px;border:2px solid #74c9a0;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.35)");
       document.body.appendChild(a);
     };
     if(document.body) add(); else document.addEventListener("DOMContentLoaded", add);
