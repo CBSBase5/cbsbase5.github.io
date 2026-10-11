@@ -557,7 +557,7 @@ h1,h2,h3{font-family:var(--display)}
 .stage{border-top:5px solid var(--world,var(--line))}
 .newv2{margin:6px 0 34px}
 .newv2 h2{font:700 1.5rem var(--display);margin:0 0 12px;display:flex;align-items:center;gap:12px}
-.newgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
+.newgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}
 .newtile{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 12px;align-items:center;text-align:left;background:var(--bench);border:2px solid var(--line);border-radius:16px;padding:12px;color:var(--text);cursor:pointer;font:inherit}
 .newtile:hover{border-color:var(--mint)}
 .newtile b{font:600 1.12rem/1.2 var(--display)}
@@ -579,6 +579,44 @@ h1,h2,h3{font-family:var(--display)}
   .hero h1{max-width:none}
   .logo{font-size:1.5rem}
 }
+/* cutscenes, title screens, full screen */
+.scenebar{position:absolute;right:12px;bottom:12px;display:flex;gap:8px;line-height:1.2;z-index:3}
+.titlebox{position:absolute;left:50%;top:58%;transform:translateX(-50%);line-height:1.2;z-index:3}
+.titlebox .btn{font-size:1.35rem;padding:.85rem 2rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.fsexit{position:absolute;top:10px;right:10px;z-index:6;line-height:1.2;background:rgba(12,15,40,.78);color:#fff;border:2px solid rgba(255,255,255,.45);border-radius:999px;padding:.4rem .9rem;font:600 .9rem var(--display);cursor:pointer}
+.stage.fs{position:fixed;inset:0;top:0;z-index:70;margin:0;border:0;border-radius:0;background:#000;padding:0;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:0;max-width:none}
+.stage.fs>*:not(.screen):not(.pad){display:none!important}
+.stage.fs .screen{flex:1 1 auto;display:flex;align-items:center;justify-content:center;border-radius:0;background:#000;min-height:0}
+.stage.fs #cv{flex:none}
+.stage.fs .pad{padding:8px 12px 12px;background:#0b0b18}
+.stage.fs .keyhint{display:none}
+@media (hover:hover) and (pointer:fine){ .stage.fs .pad{display:none!important} }
+body.fsbody{overflow:hidden}
+:root.nocode .editor{grid-template-columns:1fr}
+:root.nocode .panel{display:none}
+:root.player .blk .icon[title="Cutscene maker"]{display:none}
+.scenepv{width:100%;height:auto;border-radius:12px;border:2px solid var(--line);display:block}
+.slidestrip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.slidechip{flex:none;display:grid;gap:2px;justify-items:start;min-width:84px;max-width:120px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--ink);color:var(--text);cursor:pointer;text-align:left;font-size:.8rem}
+.slidechip b{font:700 1rem var(--display)}
+.slidechip span{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.slidechip.on{border-color:var(--sun);background:var(--raised)}
+.slidechip.add{border-style:dashed;place-items:center;color:var(--muted);font-weight:700}
+.bgpick{gap:6px}
+.bgbtn{display:grid;gap:2px;justify-items:center;padding:4px;border-radius:10px;border:2px solid transparent;background:var(--ink);color:var(--text);font-size:.78rem;font-weight:700;cursor:pointer;width:64px}
+.bgbtn i{display:block;width:52px;height:30px;border-radius:6px}
+.bgbtn[aria-pressed="true"]{border-color:var(--sun)}
+.colsw{width:36px;height:36px;border-radius:50%;border:3px solid var(--line);cursor:pointer;padding:0}
+.colsw[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 3px var(--sun)}
+.chsel{display:flex;align-items:center;gap:8px;font-weight:700}
+.chsel select,.scenename{font:inherit;background:var(--ink);color:var(--text);border:2px solid var(--line);border-radius:10px;padding:.4rem .6rem}
+.scenecode{display:grid;gap:6px;background:var(--ink);border-radius:12px;padding:10px}
+.scenetabs{gap:6px}
+.newscene{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.newscene input{width:9rem;font:inherit;background:var(--ink);color:var(--text);border:2px solid var(--line);border-radius:10px;padding:.35rem .6rem}
+.sheet .card .opt{background:var(--bench)}
+.sheet .icon.x{color:var(--text);background:var(--raised)}
+.sheet .card .field input[type=text]{background:var(--bench)}
 </style>
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -632,7 +670,7 @@ img{max-width:100%}
       <div id="banner" class="banner" hidden></div>
       <div id="freebar" class="freebar" hidden>
         <h2>Free build</h2>
-        <div class="row"><button class="btn small sun" id="newGameBtn">+ New game</button><button class="btn small ghost" id="saveGameBtn">Save to My games</button></div>
+        <div class="row"><button class="btn small sun" id="newGameBtn">+ New game</button><button class="btn small ghost" id="saveGameBtn">Save to My games</button><button class="btn small" id="sceneBtn">Cutscenes</button><button class="btn small sun" id="pubBtn">Publish</button></div>
       </div>
       <div class="editor">
         <div class="stage" id="stage">
@@ -641,6 +679,7 @@ img{max-width:100%}
             <div class="row">
               <button class="btn small ghost" id="setBtn">&#9881; Settings</button>
               <button class="btn small ghost" id="stepTog" aria-pressed="false">Step by step</button>
+              <button class="btn small ghost" id="fsBtn">Full screen</button>
               <div class="seg" role="group" aria-label="Mode">
                 <button id="mBuild" aria-pressed="true">&#9998; Build</button>
                 <button id="mPlay" aria-pressed="false">&#9654; Play</button>
@@ -650,6 +689,9 @@ img{max-width:100%}
           <div class="screen">
             <canvas id="cv" role="img" aria-label="Game level"></canvas>
             <div id="over" class="over" hidden></div>
+            <div id="scenebar" class="scenebar" hidden><button class="btn small ghost" id="sceneSkip">Skip</button><button class="btn sun" id="sceneNext">Next &#9654;</button></div>
+            <div id="titlebox" class="titlebox" hidden><button class="btn sun big" id="titlePlay">&#9654; Play</button></div>
+            <button id="fsExit" class="fsexit" type="button" hidden>&#10005; Leave full screen</button>
             <div id="askbox" class="askbox" hidden role="dialog" aria-labelledby="askq">
               <p id="askq"></p>
               <div class="askbtns"><button class="btn sun big" id="askA">Yes</button><button class="btn big pinkbtn" id="askB">No</button></div>
@@ -813,6 +855,12 @@ function kindOf(g){ return g&&KINDMAP[g.kind]?g.kind:"platform"; }
 function isFree(k){ return k==="maze"||k==="space"; }
 var WEATHERS=["none","rain","snow","leaves","stars"];
 var HATS=["none","cap","crown","bow","wizard","box"], HATNAME={none:"None",cap:"Cap",crown:"Crown",bow:"Bow",wizard:"Wizard",box:"Box"};
+var SCENE_BGS=[["level","Level 1","linear-gradient(#7fd0ff,#3fbf58)"],["day","Day","linear-gradient(#7fd0ff,#dff6ff)"],["sunset","Sunset","linear-gradient(#ff7a5c,#ffd47e)"],["night","Night","linear-gradient(#0a1140,#2b3c80)"],["cave","Cave","linear-gradient(#24170f,#4b3326)"],["space","Space","linear-gradient(#05061a,#1a1050)"],["black","Dark","#0b0b18"]];
+var SCENE_BG_IDS=SCENE_BGS.map(function(b){ return b[0]; });
+var SCENE_CHARS=[["none","Nobody"],["hero","Hero"],["bolt","Bolt"],["pip","Pip"],["moss","Moss"],["baddie","Baddie"],["boss","Boss"],["box","Box"]];
+var SCENE_CHAR_IDS=SCENE_CHARS.map(function(c){ return c[0]; }), SCENE_CHAR_NAME={}; SCENE_CHARS.forEach(function(c){ SCENE_CHAR_NAME[c[0]]=c[1]; });
+var SCENE_CHAR_COL={hero:"#ffb347",bolt:"#b8d4f0",pip:"#ffd23f",moss:"#7ddc8a",baddie:"#c9a6ff",boss:"#ff8a9a",box:"#e3c08a"};
+var TCOLS={sun:"#ffd23f",white:"#ffffff",mint:"#5cf2c4",pink:"#ff6ab0",orange:"#ff9a2e",sky:"#7fd0ff"};
 var VARIDS=VARS.map(function(v){ return v.id; });
 var VARMAP={}; VARS.forEach(function(v){ VARMAP[v.id]=v; });
 var COLOURS={red:"#ff4d4d",orange:"#ff9a2e",yellow:"#ffd23f",green:"#3ddc84",blue:"#4a8cff",purple:"#a66bff",pink:"#ff6ab0",white:"#f4f4ff",black:"#2c2c3c"};
@@ -835,6 +883,7 @@ var FUNCS={
   "confetti":{op:"confetti"},
   "music":{op:"music",arg:"str",what:"some notes, like C E G"},
   "stopMusic":{op:"stopmusic"},
+  "cutscene":{op:"scene",arg:"str",what:"the name of a cutscene"},
   "baddie.jump":{op:"bjump",arg:"num"},
   "baddie.turn":{op:"bturn"},
   "baddie.chase":{op:"bchase"},
@@ -867,7 +916,7 @@ var PALETTE=[
   {op:"set",v:"world.gravity",n:3},{op:"set",v:"enemies.speed",n:4},{op:"set",v:"platforms.speed",n:4},{op:"open"},{op:"shake"},
   {op:"set",v:"player.size",n:2},{op:"set",v:"player.jumps",n:2},{op:"set",v:"player.shield",n:5},{op:"shoot"},
   {op:"change",v:"boss.health",n:-1},{op:"weather",s:"snow"},{op:"explode"},{op:"confetti"},
-  {op:"say",s:"Nice one!"},{op:"fsay",s:"Hello there!"},{op:"ask",s:"Will you help me?",a:"Yes",b:"No"},{op:"fleave"},{op:"sound",s:"coin"},{op:"music",s:"C E G E C E G c"},{op:"stopmusic"},
+  {op:"say",s:"Nice one!"},{op:"fsay",s:"Hello there!"},{op:"ask",s:"Will you help me?",a:"Yes",b:"No"},{op:"fleave"},{op:"scene",s:"intro"},{op:"sound",s:"coin"},{op:"music",s:"C E G E C E G c"},{op:"stopmusic"},
   {op:"next"},
   {op:"bjump",n:10},{op:"bturn"},{op:"bchase"},{op:"bwalk"},{op:"bstop"},{op:"bshoot"},
   {op:"win"},{op:"lose"},
@@ -961,7 +1010,7 @@ function S(v,n){ return {op:"set",v:v,n:n}; }
 function C(v,n){ return {op:"change",v:v,n:n}; }
 function snd(s){ return {op:"sound",s:s}; }
 function newGame(name,w,sky,tiles,rules,extra){
-  var g={gid:newGid(),name:name,w:w,sky:sky||"day",tiles:tiles,rules:rules,kind:"platform",vars:[],funcs:[]};
+  var g={gid:newGid(),name:name,w:w,sky:sky||"day",tiles:tiles,rules:rules,kind:"platform",vars:[],funcs:[],scenes:[],publish:null};
   if(extra) for(var k in extra) g[k]=extra[k];
   return g;
 }
@@ -1199,6 +1248,26 @@ var MISSIONS=[
       ["Add When a baddie gets within 4 tiles",function(g){ return rulesOf(g,"baddieNear").length>0; }],
       ["Make it chase you",function(g){ return hasDeep(g,"baddieNear",function(a){ return a.op==="bchase"; }); }],
       ["Play and watch them think",function(g,t,f){ return !!(f.ran_baddieEvery||f.ran_baddieNear); }]
+    ]},
+  {id:"story",isNew:true,title:"Tell a story",icon:"film",goal:"Make a cutscene with two slides or more, and play it when the game starts.",
+    hint:"Tap Settings, then Cutscenes. Make one called intro, then tap + Slide. Choose who is talking and type their words. Then tap Play it when the game starts.",
+    make:function(){
+      var w=30,t=floorLevel(w); put(t,w,2,11,10); put(t,w,12,11,16);
+      [5,7,9,16,18,20].forEach(function(x){ put(t,w,x,10,5); }); put(t,w,27,11,9);
+      return newGame("Tell a story",w,"day",t,[R("start",[S("lives",3)]),R("coin",[C("score",1),snd("coin")]),R("flag",[snd("win"),{op:"win"}])]); },
+    checks:[
+      ["Make a cutscene",function(g){ return (g.scenes||[]).length>0; }],
+      ["Give it 2 slides or more",function(g){ return (g.scenes||[]).some(function(s){ return s.slides.length>=2; }); }],
+      ["Play it when the game starts",function(g){ return hasDeep(g,"start",function(a){ return a.op==="scene"; }); }],
+      ["Play and watch it",function(g,t,f){ return !!f.ran_scene; }]
+    ]},
+  {id:"publish",isNew:true,title:"Ready to publish",icon:"poster",goal:"Make a title screen with your initials on it, then try your game full screen.",
+    hint:"Tap Settings, then Publish. Give your game a title and put your initials in Made by. Then tap Try it like a player.",
+    make:function(){ return newGame("My big game",60,"day",starterTiles(),defaultRules()); },
+    checks:[
+      ["Give it a title",function(g){ return !!(g.publish&&(g.publish.title||g.publish.sub)); }],
+      ["Add who made it",function(g){ return !!(g.publish&&g.publish.by); }],
+      ["Try it full screen",function(g,t,f){ return !!f.fsTried; }]
     ]}
 ];
 
@@ -1224,6 +1293,7 @@ function cleanActs(as,d,env){
       case "open": case "shoot": case "next": case "explode": case "confetti": case "stopmusic": case "bturn": case "bchase": case "bwalk": case "bstop": case "bshoot": out.push({op:a.op}); break;
       case "bjump": out.push({op:"bjump",n:num(a.n,10)}); break;
       case "send": out.push({op:"send",s:msgName(a.s)}); break;
+      case "scene": out.push({op:"scene",s:msgName(a.s)}); break;
       case "music": out.push({op:"music",s:cleanNotes(a.s)}); break;
       case "weather": if(WEATHERS.indexOf(a.s)>=0) out.push({op:"weather",s:a.s}); break;
       case "colour": if(COLOURS[a.s]) out.push({op:"colour",s:a.s}); break;
@@ -1284,13 +1354,13 @@ function cleanGame(o){
   }
   var vf=cleanVarsFuncs(o);
   return {gid:typeof o.gid==="string"?o.gid.slice(0,40):newGid(),name:String(o.name||"My game").slice(0,40),w:L.w,sky:L.sky,hat:HATS.indexOf(o.hat)>=0?o.hat:"none",tiles:L.tiles,rules:cleanRules(o.rules,vf.env),levels:levels,cur:cur,art:art,best:best,
-    kind:L.kind,vars:vf.vars,funcs:vf.funcs};
+    kind:L.kind,vars:vf.vars,funcs:vf.funcs,scenes:cleanScenes(o.scenes),publish:cleanPublish(o.publish)};
 }
 function ensureLevels(g){
   if(!KINDMAP[g.kind]) g.kind="platform";
   if(!g.levels||!g.levels.length){ g.levels=[{w:g.w,tiles:g.tiles,sky:g.sky,kind:g.kind}]; g.cur=0; }
   g.levels.forEach(function(L){ if(!KINDMAP[L.kind]) L.kind=g.kind; });
-  if(!g.art) g.art={}; if(!g.vars) g.vars=[]; if(!g.funcs) g.funcs=[];
+  if(!g.art) g.art={}; if(!g.vars) g.vars=[]; if(!g.funcs) g.funcs=[]; if(!g.scenes) g.scenes=[];
 }
 function syncLevel(g){ if(!g) return; ensureLevels(g); g.levels[g.cur]={w:g.w,tiles:g.tiles,sky:g.sky,kind:kindOf(g)}; }
 function switchLevel(g,k){ syncLevel(g); g.cur=clamp(k,0,g.levels.length-1); var L=g.levels[g.cur]; g.w=L.w; g.tiles=L.tiles; g.sky=L.sky; g.kind=L.kind; }
@@ -1324,7 +1394,9 @@ var PICS={
   myblock:function(){ return {names:{funcs:["party"]},pills:[{ic:"puzzle",t:"Make a block"}],code:'function party() {\n  confetti();\n  sound("win");\n}',rules:[R("coin",[C("score",1),{op:"call",s:"party"}])]}; },
   friend:function(){ return {rules:[RS("meet","Pip",[{op:"fsay",s:"Hi, I am Pip!"},{op:"ask",s:"Want a big jump?",a:"Yes",b:"No"}]),RS("message","Yes",[{op:"bounce",n:18}])]}; },
   maze:function(){ return {pills:[{ic:"k:platform",t:"Platform"},{ic:"k:maze",t:"Maze"},{ic:"\u25b6",t:"Play"}]}; },
-  brains:function(){ return {rules:[R("baddieEvery",[{op:"bjump",n:10}],2),R("baddieNear",[{op:"bchase"}],4)]}; }
+  brains:function(){ return {rules:[R("baddieEvery",[{op:"bjump",n:10}],2),R("baddieNear",[{op:"bchase"}],4)]}; },
+  story:function(){ return {pills:[{ic:"\u2699",t:"Settings"},{ic:"film",t:"Cutscenes"},{t:"+ Slide"}],rules:[R("start",[{op:"scene",s:"intro"}])]}; },
+  publish:function(){ return {pills:[{ic:"\u2699",t:"Settings"},{ic:"poster",t:"Publish"},{t:"\u25b6 Try it like a player"}]}; }
 };
 var OLD_IDS=["gap","pay","jump","ouch","read","win","baddies","write","swap"];
 ["done","games","tests"].forEach(function(k){ var o=prog[k], n={}; Object.keys(o).forEach(function(key){ var id=/^\d+$/.test(key)?OLD_IDS[+key]:key; if(id&&n[id]==null) n[id]=o[key]; }); prog[k]=n; });
@@ -1378,6 +1450,7 @@ function genAct(a,ind){
     case "bstop": return ind+"baddie.stop();";
     case "bshoot": return ind+"baddie.shoot();";
     case "send": return ind+"send("+qstr(a.s)+");";
+    case "scene": return ind+"cutscene("+qstr(a.s)+");";
     case "music": return ind+"music("+qstr(a.s)+");";
     case "weather": return ind+"world.weather = "+qstr(a.s)+";";
     case "colour": return ind+"player.colour = "+qstr(a.s)+";";
@@ -1446,6 +1519,7 @@ function blockText(a){
     case "bstop": return "baddie stands still";
     case "bshoot": return "baddie shoots at me";
     case "send": return "send message "+a.s;
+    case "scene": return "play cutscene "+a.s;
     case "music": return "play music "+a.s;
     case "weather": return "set weather to "+a.s;
     case "colour": return "make me "+a.s;
@@ -1466,7 +1540,7 @@ function catOf(a){
   switch(a.op){
     case "set": case "change": return varInfo(a.v).cat;
     case "call": return "func";
-    case "fsay": case "fleave": case "ask": return "talk";
+    case "fsay": case "fleave": case "ask": case "scene": return "talk";
     case "colour": case "bounce": case "respawn": case "shoot": return "player";
     case "shake": case "open": case "explode": case "confetti": case "weather": return "world";
     case "say": case "sound": case "music": case "stopmusic": return "talk";
@@ -1648,7 +1722,7 @@ function parse(src,mode){
       if(f.arg==="str"){
         res.s=string(f.what).slice(0,80);
         if(f.op==="sound"){ res.s=res.s.toLowerCase(); if(SOUNDS.indexOf(res.s)<0) throw perr(k.line,'I do not know the sound "'+res.s+'". Try: '+SOUNDS.join(", ")+"."); }
-        if(f.op==="send") res.s=msgName(res.s);
+        if(f.op==="send"||f.op==="scene") res.s=msgName(res.s);
         if(f.op==="music"){ if(!noteList(res.s).length) throw perr(k.line,'Music needs notes, like "C E G". Use the letters A to G, and - for a rest.'); res.s=noteList(res.s).join(" "); }
       } else if(f.arg==="num"){ res.n=number(); }
       want(")","a ) to finish "+w+"(");
@@ -2533,6 +2607,21 @@ function drawIcon0(canvas,t){
     c.beginPath(); c.moveTo(9,15); c.lineTo(18,15); c.arc(22,13,5,Math.PI,0); c.lineTo(35,15); c.lineTo(35,23); c.arc(37,28,5,-Math.PI/2,Math.PI/2); c.lineTo(35,37); c.lineTo(9,37); c.closePath(); c.fill(); c.stroke();
     c.setTransform(1,0,0,1,0,0); return;
   }
+  if(t==="film"){
+    c.fillStyle="#2c2c3c"; rr(c,6,17,32,21,3); c.fill();
+    c.save(); c.translate(6,10); c.rotate(-0.2); c.fillStyle="#2c2c3c"; c.fillRect(0,0,32,8); c.fillStyle="#ffffff";
+    for(var fi2=0;fi2<4;fi2++){ c.beginPath(); c.moveTo(3+fi2*8,0); c.lineTo(7+fi2*8,0); c.lineTo(4+fi2*8,8); c.lineTo(0+fi2*8,8); c.closePath(); c.fill(); }
+    c.restore(); c.fillStyle="#ffd23f"; c.fillRect(11,23,22,3); c.fillRect(11,30,14,3);
+    c.setTransform(1,0,0,1,0,0); return;
+  }
+  if(t==="poster"){
+    c.fillStyle="#1d2a6e"; rr(c,4,7,36,30,4); c.fill();
+    c.fillStyle="#3fbf58"; c.fillRect(4,30,36,7);
+    c.fillStyle="#ffd23f"; rr(c,9,12,26,8,2); c.fill();
+    c.fillStyle="#ffffff"; c.fillRect(13,23,18,3);
+    c.fillStyle="#ff9a2e"; rr(c,8,24,6,6,2); c.fill();
+    c.setTransform(1,0,0,1,0,0); return;
+  }
   if(t==="ask"){
     c.fillStyle="#ffffff"; rr(c,5,5,34,22,6); c.fill();
     c.beginPath(); c.moveTo(12,26); c.lineTo(10,32); c.lineTo(18,26); c.fill();
@@ -2610,6 +2699,7 @@ function iconFor(a){
     case "fsay": return 16;
     case "fleave": return "Bye";
     case "ask": return "ask";
+    case "scene": return "film";
     case "open": return 12;
     case "bjump": case "bturn": case "bchase": case "bwalk": case "bstop": return 8;
     case "bshoot": return "boom";
@@ -2636,7 +2726,7 @@ function iconFor(a){
 }
 var icoCache={};
 function iconURL(k,kind){ var ck=k+"|"+(kind||""); if(!icoCache[ck]){ var c=document.createElement("canvas"); c.width=c.height=88; drawIcon(c,k,kind); icoCache[ck]=c.toDataURL(); } return icoCache[ck]; }
-var ICONS_CANVAS=["bug","dice","crown","msg","boom","confetti","cloud","shield","clock","grow","box","puzzle","ask"];
+var ICONS_CANVAS=["bug","dice","crown","msg","boom","confetti","cloud","shield","clock","grow","box","puzzle","ask","film","poster"];
 function iconEl(k,cls){
   var el=h("span",{class:"ico"+(cls?" "+cls:""),"aria-hidden":"true"});
   if(k&&typeof k==="object"){ el.classList.add("sw"); el.style.background=k.sw; }
@@ -2751,7 +2841,8 @@ function buildWorlds(){
     {ic:"k:space",t:"Mix them in one game",code:"nextLevel(); // now it's space!",tpl:"tour"},
     {ic:"t32",t:"Draw and animate your own look",code:"// frame 1, frame 2, frame 1 ...",draw:true},
     {ic:8,t:"Baddies with their own code",code:"baddie.chase();",job:"brains"},
-    {ic:21,t:"Switches, portals and more",code:'on("switch", () => {',tpl:"cave"}
+    {ic:"film",t:"Cutscenes that tell a story",code:'cutscene("intro");',job:"story"},
+    {ic:"poster",t:"Title screens and full screen",code:'titleScreen.by = "LW";',job:"publish"}
   ];
   var grid=$("newgrid"); grid.innerHTML="";
   NEWV2.forEach(function(n){
@@ -2765,7 +2856,7 @@ function buildWorlds(){
 }
 
 /* ---------- state ---------- */
-var state={screen:"workshop",ctx:null,game:null,mode:"build",tool:1,camX:0};
+var state={screen:"workshop",ctx:null,game:null,mode:"build",tool:1,camX:0,title:false};
 var codeView={}, drafts={}, progText="", progDirty=false;
 var undoStack=[];
 var rt=null;
@@ -2844,6 +2935,7 @@ function doAct(a,rid,path){
     case "ask": rt.asks.push({q:a.s,a:a.a,b:a.b}); if(!rt.ask) nextAsk(); break;
     case "next": goToLevel(rt.lv+1); break;
     case "send": rt.q.push({msg:msgName(a.s)}); break;
+    case "scene": playScene(a.s); break;
     case "explode": explodeFx(); break;
     case "confetti": confettiFx(); break;
     case "music": startMusic(a.s); break;
@@ -2943,6 +3035,7 @@ function friendNow(){
 function friendSay(s){ var f=friendNow(); if(f){ f.msg=s; f.msgT=190; } else { rt.msg=s; rt.msgT=170; } }
 function friendLeave(){ var f=friendNow(); if(!f) return; f.gone=true; f.fade=24; f.msgT=0; burst(f.x+13,f.y+15,"#ffffff",12); if(rt.friend===f) rt.friend=null; }
 function nextAsk(){
+  if(rt.scene){ rt.ask=null; return; }
   rt.ask=rt.asks.shift()||null;
   var box=$("askbox");
   if(!rt.ask){ box.hidden=true; return; }
@@ -3145,7 +3238,7 @@ function makeRuntime(g){
   var rulesTxt=JSON.stringify(g.rules)+JSON.stringify(g.funcs||[]);
   var uv={}; (g.vars||[]).forEach(function(v){ uv[v.name]=v.n; });
   var funcs=clone(g.funcs||[]), fmap={}, fnById={}; funcs.forEach(function(f){ fmap[f.name]=f; fnById[f.id]=f; });
-  var r={kind:"platform",loop:false,uv:uv,funcs:funcs,fmap:fmap,fnById:fnById,ops:0,halt:false,depth:0,asks:[],ask:null,friends:[],friend:null,scroll:2,cam:0,fx:1,fy:0,safe:[],
+  var r={kind:"platform",loop:false,scene:null,sceneQ:[],pendingOver:null,uv:uv,funcs:funcs,fmap:fmap,fnById:fnById,ops:0,halt:false,depth:0,asks:[],ask:null,friends:[],friend:null,scroll:2,cam:0,fx:1,fy:0,safe:[],
     bpw:PW,bph:PH,levels:g.levels,lv:g.cur,lvStart:g.cur,score:0,maxScore:0,lives:3,speed:5,jump:10,gravity:5,enemySpeed:2,platSpeed:2,colour:COLOURS.orange,
     size:1,pw:PW,ph:PH,maxJumps:1,airJumps:0,shield:0,bossHealth:5,bossMax:5,time:0,weather:"none",wx:[],shots:[],shotCool:0,
     usesTime:rulesTxt.indexOf('"time"')>=0,hat:g.hat||"none",art:g.art||{},
@@ -3582,7 +3675,7 @@ function endGame(kind){
     var g=G();
     if(g&&rt.lvStart===0&&!rt.touched.time&&(!g.best||rt.time<g.best.t)&&rt.rec.length){ g.best={t:Math.round(rt.time*10)/10,lv0:rt.lvStart,f:rt.rec.slice()}; rt.newBest=true; saveSoon(); }
   }
-  showOver(kind);
+  if(rt.scene) rt.pendingOver=kind; else showOver(kind);
 }
 function noteTest(what,val){
   if(!state.ctx||state.ctx.kind!=="mission") return;
@@ -3599,6 +3692,7 @@ function render(ts){
   if(cv.width!==CW*dpr){ cv.width=CW*dpr; cv.height=CH*dpr; }
   ctx.setTransform(dpr,0,0,dpr,0,0);
   var g=G(); if(!g) return;
+  if(state.title){ drawTitleScreen(ctx,g,ts/16.67); return; }
   var playing=state.mode==="play"&&rt;
   curHat=g.hat||"none"; curArt=g.art||{};
   var kind=playing?rt.kind:kindOf(g); curKind=kind;
@@ -3724,6 +3818,7 @@ function render(ts){
       ctx.fillStyle="#ffd23f"; ctx.fillText(rt.banner.toUpperCase(),CW/2,CH/2);
       ctx.restore();
     }
+    if(rt.scene){ var ssc=rt.scene, ssl=ssc.sc.slides[ssc.i]; if(ssl){ drawScene(ctx,ssl,ssc.t,g); ssc.t++; } }
   } else {
     ctx.font="bold 12px Fredoka, 'Arial Black', sans-serif";
     var bm=(g.levels&&g.levels.length>1)?"BUILD: LEVEL "+(g.cur+1):"BUILD MODE";
@@ -3755,7 +3850,7 @@ function loop(ts){
   requestAnimationFrame(loop);
   if(state.screen!=="editor"){ if(state.screen==="workshop") drawHero(ts); last=ts; return; }
   var dt=Math.min(100,ts-(last||ts)); last=ts;
-  if(state.mode==="play"&&rt&&!rt.over&&!rt.frames.length&&!rt.ask){ accT+=dt; var n=0; while(accT>=STEP&&n<6&&!rt.frames.length&&!rt.over&&!rt.ask){ step(); accT-=STEP; n++; } if(n>=6) accT=0; }
+  if(state.mode==="play"&&rt&&!rt.over&&!rt.frames.length&&!rt.ask&&!rt.scene){ accT+=dt; var n=0; while(accT>=STEP&&n<6&&!rt.frames.length&&!rt.over&&!rt.ask&&!rt.scene){ step(); accT-=STEP; n++; } if(n>=6) accT=0; }
   else accT=0;
   render(ts);
 }
@@ -3768,7 +3863,7 @@ function cellOf(e){
   return {tx:Math.floor(x/T),ty:Math.floor(y/T)};
 }
 var hist=[];
-function snapKey(){ var g=G(); return JSON.stringify({w:g.w,t:g.tiles,r:g.rules,v:g.vars||[],f:g.funcs||[],k:kindOf(g)}); }
+function snapKey(){ var g=G(); return JSON.stringify({w:g.w,t:g.tiles,r:g.rules,v:g.vars||[],f:g.funcs||[],k:kindOf(g),s:g.scenes||[]}); }
 function record(){
   var g=G(); if(!g) return;
   var k=snapKey(), top=hist[hist.length-1];
@@ -3784,7 +3879,7 @@ function undo(){
   if(!(hist.length>=2&&hist[hist.length-2].gid===g.gid)){ toast("Nothing to undo"); return; }
   hist.pop();
   var snap=JSON.parse(hist[hist.length-1].k);
-  g.w=snap.w; g.tiles=snap.t; g.rules=snap.r; g.vars=snap.v||[]; g.funcs=snap.f||[]; g.kind=snap.k||"platform";
+  g.w=snap.w; g.tiles=snap.t; g.rules=snap.r; g.vars=snap.v||[]; g.funcs=snap.f||[]; g.kind=snap.k||"platform"; g.scenes=snap.s||[];
   editing=false; syncScroll(); renderTools(); paintKind(); renderLevels(); paintPad(); renderRules(); liveRules(); saveSoon(); refreshMission(); paintUndo(); toast("Undone");
 }
 var lastCell=null;
@@ -3805,6 +3900,8 @@ function paintAt(e){
 }
 cv.addEventListener("contextmenu",function(e){ e.preventDefault(); });
 cv.addEventListener("pointerdown",function(e){
+  if(state.title){ e.preventDefault(); startFromTitle(); return; }
+  if(state.mode==="play"&&rt&&rt.scene){ e.preventDefault(); sceneNext(); return; }
   if(state.mode!=="build") return;
   if(e.pointerType==="mouse"&&e.button!==0) return;
   e.preventDefault();
@@ -3849,6 +3946,15 @@ window.addEventListener("keydown",function(e){
     return;
   }
   if(typingTarget(e)) return;
+  var ae0=document.activeElement, onCtl0=ae0&&ae0!==document.body&&ae0!==cv&&/^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(ae0.tagName);
+  if((k===" "||k==="Enter")&&e.target&&e.target.closest&&e.target.closest("#scenebar,#titlebox,#fsExit")) return;
+  if(fsOn&&k==="Escape"&&!(rt&&rt.scene)){ e.preventDefault(); exitFS(); return; }
+  if(state.title){ if((k===" "||k==="Enter")&&!onCtl0){ e.preventDefault(); startFromTitle(); } return; }
+  if(state.mode==="play"&&rt&&rt.scene){
+    if(((k===" "||k==="Enter")&&!onCtl0)||k==="ArrowRight"){ e.preventDefault(); if(!e.repeat) sceneNext(); }
+    else if(k==="Escape"){ e.preventDefault(); sceneSkip(); }
+    if(!onCtl0||k==="ArrowRight"||k==="Escape") return;
+  }
   if(state.mode==="play"&&rt&&rt.ask){ if(k==="1"||k==="2"){ e.preventDefault(); answer(k==="2"?1:0); } else if(k==="Escape"&&!PLAYER) setMode("build"); return; }
   if((e.ctrlKey||e.metaKey)&&(k==="z"||k==="Z")&&state.mode==="build"){ e.preventDefault(); undo(); return; }
   var ae=document.activeElement, onCtl=ae&&ae!==document.body&&ae!==cv&&/^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(ae.tagName);
@@ -3905,8 +4011,9 @@ Array.prototype.forEach.call(document.querySelectorAll(".padbtn"),function(b){
 
 /* ---------- modes ---------- */
 function setMode(m){
+  if(m==="play"&&editing&&view==="code"&&!applyCode()){ toast("Fix the code first, then play."); return; }
+  state.title=false; $("titlebox").hidden=true; stopTitleTune(); hideSceneBar();
   if(m==="play"){
-    if(editing&&view==="code"&&!applyCode()){ toast("Fix the code first, then play."); return; }
     if(document.activeElement&&document.activeElement.blur&&document.activeElement!==document.body) document.activeElement.blur();
     stopMusic(); audio(); releaseKeys(); state.mode="play"; rt=makeRuntime(G()); hideOver(); hideAsk(); resetLog(); paintPad(); paintKind(rt.kind); emit("start"); emit("levelstart"); pump();
   }
@@ -3920,6 +4027,7 @@ function setMode(m){
   renderStep();
   $("stage").classList.toggle("playing",state.mode==="play");
   if(state.mode==="build") syncScroll();
+  if(fsOn) fsSize();
 }
 $("mBuild").addEventListener("click",function(){ setMode("build"); });
 $("mPlay").addEventListener("click",function(){ setMode("play"); });
@@ -3933,6 +4041,7 @@ function showOver(kind){
     rt.newBest?h("p",{class:"chip",text:"New best time! Race your ghost next time."}):null,
     h("div",{class:"row"},
       h("button",{class:"btn sun",id:"againBtn",text:"Play again",onclick:function(){ setMode("play"); }}),
+      (PLAYER||fsOn)&&publishOf(G()).on?h("button",{class:"btn",text:"Title screen",onclick:function(){ showTitle(); }}):null,
       h("button",{class:"btn ghost",id:"backBuild",text:"Back to building",onclick:function(){ setMode("build"); }}))));
   o.hidden=false;
   try{ $("againBtn").focus({preventScroll:true}); }catch(e){}
@@ -3940,7 +4049,7 @@ function showOver(kind){
 
 /* ---------- screens ---------- */
 function show(scr){
-  if(state.screen==="editor"&&scr!=="editor") setMode("build");
+  if(state.screen==="editor"&&scr!=="editor"){ exitFS(); setMode("build"); }
   state.screen=scr;
   $("scr-workshop").hidden=scr!=="workshop";
   $("scr-editor").hidden=scr!=="editor";
@@ -4017,7 +4126,7 @@ function fitView(){
   var nv=(w>0&&w<560)?12:20;
   if(nv!==VW){ VW=nv; CW=VW*T; cv.style.aspectRatio=CW+" / "+CH; if(state.screen==="editor") syncScroll(); }
 }
-window.addEventListener("resize",function(){ if(state.screen==="editor") fitView(); });
+window.addEventListener("resize",function(){ if(state.screen==="editor") fitView(); if(fsOn) fsSize(); });
 function liveRules(){
   if(state.mode!=="play"||!rt) return;
   var g=G();
@@ -4180,6 +4289,7 @@ var WHY_FN={
   "baddie.shoot":"A command. The baddie shoots at you. If it hits, it is the same as a baddie getting you.",
   "openDoors":"A command. It opens every door in the level.",
   "friend.say":"A command. Your friend says the words in a bubble.",
+  "cutscene":"A command. It plays one of your cutscenes: pictures and words that tell your story. The game waits until it ends.",
   "friend.leave":"A command. Your friend waves goodbye and goes.",
   "ask":"A command. It asks a question with two buttons. The button you pick is sent as a message.",
   "random":"Picks a surprise whole number between the two numbers. It can be different every time."
@@ -4229,6 +4339,7 @@ function whyOf(v,type,ctx){
     if(ctx==="askq") return ["words","The question to ask."];
     if(ctx==="askbtn") return ["words","A button. Picking it sends these words as a message."];
     if(ctx==="fsay") return ["words","The words your friend says."];
+    if(ctx==="scene") return ["words","The name of the cutscene to play. Make cutscenes in Settings, Cutscenes."];
     if(ctx==="friend") return ["words","The friend this rule waits for."];
     return ["words","Words in quotes. The computer uses them exactly as written."];
   }
@@ -4281,6 +4392,7 @@ function codeToks(line){
       else if(p1==="("&&p2==="ask"){ ctx="askq"; askN=1; }
       else if(p1===","&&askN){ ctx="askbtn"; }
       else if(p1==="("&&p2==="friend.say") ctx="fsay";
+      else if(p1==="("&&p2==="cutscene") ctx="scene";
     }
     if(type==="n"&&p1==="="&&(seen[seen.length-3]==="let"||seen[seen.length-3]==="var"||seen[seen.length-3]==="const")) ctx="letn";
     if(type==="w"&&(p1==="let"||p1==="var"||p1==="const")) ctx="letname";
@@ -4409,6 +4521,12 @@ function blockEl(a,arr,path,rid){
       row.append("is",selIn(CMPS.map(function(c){ return [c,CMPWORD[c]]; }),a.c,"op",after,"Comparison"),numIn(a.c,"n",after)); break;
     case "repeat": row.append("repeat",numIn(a,"n",after,true),"times"); break;
     case "send": row.append("send message",textIn(a,"s",after)); break;
+    case "scene":
+      var sn=(g0.scenes||[]).map(function(s){ return [s.name,s.name]; });
+      if(sn.length){ if(!sn.some(function(o){ return o[0]===a.s; })) sn.unshift([a.s,a.s+" (not made yet)"]); row.append("play cutscene",selIn(sn,a,"s",after,"Which cutscene")); }
+      else row.append("play cutscene",textIn(a,"s",after,30));
+      row.append(h("button",{class:"icon",type:"button","aria-label":"Open the cutscene maker",title:"Cutscene maker",text:"\u270e",onclick:function(){ var ix=-1; (g0.scenes||[]).forEach(function(s,i){ if(s.name===a.s) ix=i; }); if(ix>=0) sceneSel={i:ix,s:0}; cutsceneSheet(); }}));
+      break;
     case "music":
       var mi=textIn(a,"s",after);
       mi.addEventListener("blur",function(){ var c=cleanNotes(a.s); if(c!==a.s){ a.s=c; blocksChanged(true); } });
@@ -4672,6 +4790,7 @@ var CHEAT=[
   ["friend.leave();","Your friend goes"],
   ["if (distance >= 100) {\n  win();\n}","How far you ran"],
   ["world.speed = 4;","Space game scroll speed"],
+  ['cutscene("intro");',"Play a cutscene you made"],
   ['on("baddieEvery", 2, () => {\n  baddie.jump(10);\n});',"Every baddie jumps every 2 seconds"],
   ['on("baddieNear", 4, () => {\n  baddie.chase();\n});',"A baddie chases you when it gets close"],
   ['on("bossEvery", 3, () => {\n  baddie.shoot();\n});',"The boss shoots every 3 seconds"],
@@ -4731,7 +4850,7 @@ function openSheet(title,body){
   $("sheet").hidden=false;
   var f=b.querySelector("button"); if(f) f.focus();
 }
-function closeSheet(){ $("sheet").hidden=true; if(sheetReturn&&sheetReturn.focus&&document.body.contains(sheetReturn)) try{ sheetReturn.focus(); }catch(e){} sheetReturn=null; }
+function closeSheet(){ $("sheet").hidden=true; if(sheetReturn&&sheetReturn.focus&&document.body.contains(sheetReturn)) try{ sheetReturn.focus(); }catch(e){} sheetReturn=null; $("sheetBody").innerHTML=""; }
 $("sheetClose").addEventListener("click",closeSheet);
 $("sheet").addEventListener("click",function(e){ if(e.target===$("sheet")) closeSheet(); });
 function pickCode(text,extra){ var c=h("code",{class:"cl"+(extra?" "+extra:"")}); c.innerHTML=codeHTML(text); return c; }
@@ -4803,7 +4922,7 @@ function blockSheet(arr,fk){
     } else if(cat[0]==="func"){
       items=(g.funcs||[]).map(function(f){ return {op:"call",s:f.name}; });
       extra=h("button",{class:"btn small ghost",type:"button",onclick:function(){ closeSheet(); funcSheet(); }},iconEl("puzzle"),"+ Make a block");
-    } else items=PALETTE.filter(function(a){ return catOf(a)===cat[0]; });
+    } else items=PALETTE.filter(function(a){ return catOf(a)===cat[0]; }).map(function(a){ return a.op==="scene"&&g.scenes&&g.scenes.length?{op:"scene",s:g.scenes[0].name}:a; });
     if(!items.length&&!extra) return;
     var grp=h("div",{class:"pgroup"},h("div",{class:"kicker",text:cat[1]}));
     items.forEach(function(a){
@@ -4839,7 +4958,8 @@ function settingsSheet(){
   f.append(h("div",{class:"field"},h("span",{class:"kicker",text:g.levels&&g.levels.length>1?"Game type for level "+(g.cur+1):"Game type"}),kinds));
   f.append(h("div",{class:"row"},
     h("button",{class:"btn",text:"\u270e Draw your own look",onclick:function(){ artSheet("hero"); }}),
-    h("button",{class:"btn",text:"\u2197 Make a web page",onclick:graduateSheet})));
+    h("button",{class:"btn",text:"Cutscenes",onclick:function(){ cutsceneSheet(); }}),
+    h("button",{class:"btn sun",text:"Publish",onclick:function(){ publishSheet(); }})));
   if(g.best) f.append(h("div",{class:"row"},h("span",{class:"chip",text:"Best time "+g.best.t.toFixed(1)+"s"}),confirmBtn("Forget my best time","Yes, forget it",function(){ g.best=null; saveSoon(); toast("Best time forgotten."); closeSheet(); })));
   if(state.ctx&&state.ctx.kind==="free"&&g.levels&&g.levels.length>1) f.append(h("div",{},confirmBtn("Remove level "+(g.cur+1),"Yes, remove it",function(){ closeSheet(); removeLevel(); })));
   var name=h("input",{type:"text",id:"gname",value:g.name,maxlength:"40",autocomplete:"off"});
@@ -5102,12 +5222,392 @@ function musicSheet(a){
   openSheet("Make a tune",f);
 }
 
+/* ---------- cutscenes and title screens ---------- */
+function msgOk(s,n){ return String(s==null?"":s).replace(/[\u0000-\u001f]/g,"").slice(0,n||40); }
+function cleanSlide(o){
+  o=o&&typeof o==="object"?o:{};
+  return {bg:SCENE_BG_IDS.indexOf(o.bg)>=0?o.bg:"day",l:SCENE_CHAR_IDS.indexOf(o.l)>=0?o.l:"none",r:SCENE_CHAR_IDS.indexOf(o.r)>=0?o.r:"none",sp:["l","r","n"].indexOf(o.sp)>=0?o.sp:"l",text:msgOk(o.text,90)};
+}
+function cleanScenes(a){
+  var out=[], names=[];
+  (Array.isArray(a)?a:[]).slice(0,8).forEach(function(s){
+    if(!s||typeof s!=="object") return;
+    var n=msgName(s.name); if(names.indexOf(n.toLowerCase())>=0) return; names.push(n.toLowerCase());
+    out.push({id:uid(),name:n,slides:(Array.isArray(s.slides)?s.slides:[]).slice(0,12).map(cleanSlide)});
+  });
+  return out;
+}
+function cleanPublish(o){
+  if(!o||typeof o!=="object") return null;
+  return {on:o.on!==false,title:msgOk(o.title,40),sub:msgOk(o.sub,60),by:msgOk(o.by,30),hero:msgOk(o.hero,20),
+    bg:SCENE_BG_IDS.indexOf(o.bg)>=0?o.bg:"level",col:TCOLS[o.col]?o.col:"sun",sh:o.sh!==false,sb:o.sb!==false,sf:!!o.sf,
+    btn:msgOk(o.btn,16)||"Play",tune:o.tune?(noteList(o.tune).length?noteList(o.tune).join(" "):""):"",fs:!!o.fs,code:o.code!==false};
+}
+function publishOf(g){ return (g&&g.publish)||cleanPublish({}); }
+function heroName(g){ var p=g&&g.publish; return (p&&p.hero)||"Hero"; }
+function charName(id,g){ return id==="hero"?heroName(g):SCENE_CHAR_NAME[id]; }
+function sceneByName(g,name){ var k=String(name||"").toLowerCase(), f=null; (g.scenes||[]).forEach(function(s){ if(s.name.toLowerCase()===k) f=s; }); return f; }
+
+/* drawing */
+function withCtx(c,fn){ var keep=ctx; ctx=c; try{ fn(); } finally { ctx=keep; } }
+function levelZero(g){ ensureLevels(g); syncLevel(g); return g.levels[0]; }
+function drawSceneBg(c,bg,g,anim){
+  withCtx(c,function(){
+    if(bg==="black"){ c.fillStyle="#0b0b18"; c.fillRect(0,0,CW,CH); return; }
+    if(bg==="level"){
+      var L=levelZero(g), kk=curKind; curKind=L.kind;
+      try{
+        drawSky(L.sky,0,anim,L.kind);
+        for(var ty=0;ty<H;ty++) for(var tx=0;tx<Math.min(L.w,VW+1);tx++){ var t=L.tiles[ty*L.w+tx]; if(t&&t!==10) drawTile(c,t,tx*T,ty*T,anim,topOpen(L.tiles,L.w,tx,ty)); }
+      } finally { curKind=kk; }
+      c.fillStyle="rgba(10,8,30,.28)"; c.fillRect(0,0,CW,CH);
+      return;
+    }
+    drawSky(bg,0,anim,"platform");
+    if(bg!=="space"){ var kk2=curKind; curKind="platform"; for(var x=0;x<=VW;x++){ drawTile(c,1,x*T,CH-2*T,anim,true); drawTile(c,1,x*T,CH-T,anim,false); } curKind=kk2; }
+  });
+}
+function drawCharAt(c,who,cx,gy,sc,face,t,g){
+  if(!who||who==="none") return;
+  c.save(); c.translate(cx,gy); c.scale(sc,sc);
+  switch(who){
+    case "hero": drawHeroUnit(c,face,"#ff9a2e",0,g.hat||"none"); break;
+    case "bolt": drawFriend(c,16,-13,-31,t,face); break;
+    case "pip": drawFriend(c,17,-13,-31,t,face); break;
+    case "moss": drawFriend(c,18,-13,-31,t,face); break;
+    case "baddie": drawBaddie(c,-EW/2,-EH,t,0,face); break;
+    case "boss": c.scale(0.62,0.62); drawBoss(c,-BW/2,-BH,t,false,face); break;
+    case "box": drawTile(c,32,-16,-T,t,true); break;
+  }
+  c.restore();
+}
+function wrapLines(c,text,maxW,maxLines){
+  var words=String(text).split(/\s+/), lines=[], line="";
+  words.forEach(function(wd){ var tryL=line?line+" "+wd:wd; if(c.measureText(tryL).width>maxW&&line){ lines.push(line); line=wd; } else line=tryL; });
+  if(line) lines.push(line);
+  return lines.slice(0,maxLines);
+}
+function drawScene(c,sl,t,g){
+  var kk=curKind, ka=curArt, kh=curHat, anim=reduceMotion?0:t;
+  curArt=g.art||{}; curHat=g.hat||"none";
+  curKind=sl.bg==="level"?levelZero(g).kind:(sl.bg==="space"?"space":"platform");
+  try{
+    drawSceneBg(c,sl.bg,g,anim);
+    var gy=CH-2*T, lx=CW*0.27, rx=CW*0.73, bob=reduceMotion?0:Math.abs(Math.sin(t*0.18))*6;
+    [["l",sl.l,lx,1],["r",sl.r,rx,-1]].forEach(function(q){
+      if(q[1]==="none") return;
+      var talking=sl.sp===q[0];
+      c.save(); if(!talking&&sl.sp!=="n") c.globalAlpha=0.82;
+      drawCharAt(c,q[1],q[2],gy-(talking?bob:0),q[1]==="boss"?3:3,q[3],anim,g);
+      c.restore();
+    });
+    if(sl.text){
+      var px=14, pw=CW-28, py=14, full=sl.text, n=reduceMotion?full.length:Math.min(full.length,Math.floor(t*1.3)), shown=full.slice(0,n);
+      c.font="bold 20px 'Atkinson Hyperlegible', Arial, sans-serif";
+      var lines=wrapLines(c,shown,pw-32,3), allLines=wrapLines(c,full,pw-32,3), ph=36+allLines.length*26;
+      c.fillStyle="rgba(255,255,255,.97)"; rr(c,px,py,pw,ph,14); c.fill();
+      c.strokeStyle="#141833"; c.lineWidth=3; rr(c,px,py,pw,ph,14); c.stroke();
+      var spx=sl.sp==="l"?lx:(sl.sp==="r"?rx:null), who=sl.sp==="l"?sl.l:(sl.sp==="r"?sl.r:"none");
+      if(spx!=null&&who!=="none"){
+        c.fillStyle="#ffffff"; c.beginPath(); c.moveTo(spx-10,py+ph-2); c.lineTo(spx,py+ph+14); c.lineTo(spx+10,py+ph-2); c.closePath(); c.fill();
+        c.strokeStyle="#141833"; c.beginPath(); c.moveTo(spx-10,py+ph); c.lineTo(spx,py+ph+14); c.lineTo(spx+10,py+ph); c.stroke();
+        c.font="bold 15px Fredoka, Arial, sans-serif"; var nm=charName(who,g), nw=c.measureText(nm).width+20;
+        c.fillStyle=SCENE_CHAR_COL[who]||"#ffd23f"; rr(c,px+14,py-10,nw,24,8); c.fill();
+        c.fillStyle="#141833"; c.fillText(nm,px+24,py+7);
+      }
+      c.font=(spx==null||who==="none"?"italic ":"")+"bold 20px 'Atkinson Hyperlegible', Arial, sans-serif"; c.fillStyle="#141833";
+      lines.forEach(function(L,i){ c.fillText(L,px+18,py+34+i*26); });
+      if(n>=full.length&&!reduceMotion&&Math.floor(t/20)%2===0){ c.fillStyle="#ff70ab"; c.beginPath(); c.moveTo(px+pw-26,py+ph-20); c.lineTo(px+pw-14,py+ph-14); c.lineTo(px+pw-26,py+ph-8); c.closePath(); c.fill(); }
+    }
+  } finally { curKind=kk; curArt=ka; curHat=kh; }
+}
+function drawTitleScreen(c,g,t){
+  var P=publishOf(g), kk=curKind, ka=curArt, kh=curHat, L=levelZero(g), anim=reduceMotion?0:t;
+  curArt=g.art||{}; curHat=g.hat||"none"; curKind=P.bg==="level"?L.kind:(P.bg==="space"?"space":"platform");
+  try{
+    drawSceneBg(c,P.bg,g,anim);
+    var gr=c.createLinearGradient(0,0,0,CH*0.62); gr.addColorStop(0,"rgba(10,8,30,.62)"); gr.addColorStop(1,"rgba(10,8,30,0)");
+    c.fillStyle=gr; c.fillRect(0,0,CW,CH);
+    var gy=CH-2*T;
+    if(P.sh){ var hop=reduceMotion?0:Math.abs(Math.sin(t*0.05))*40; drawCharAt(c,"hero",CW*0.2,gy-hop,2.6,1,anim,g); }
+    if(P.sf) drawCharAt(c,"pip",CW*0.58,gy,2.4,-1,anim,g);
+    if(P.sb){ var bx=CW*0.8+(reduceMotion?0:Math.sin(t*0.02)*24); drawCharAt(c,"baddie",bx,gy,2.4,Math.cos(t*0.02)>0?1:-1,anim,g); }
+    var title=P.title||g.name||"My game", size=64;
+    c.save(); c.textAlign="center"; c.lineJoin="round";
+    c.font="bold "+size+"px Fredoka, 'Arial Black', sans-serif";
+    while(c.measureText(title).width>CW-48&&size>22){ size-=2; c.font="bold "+size+"px Fredoka, 'Arial Black', sans-serif"; }
+    var ty=CH*0.27+(reduceMotion?0:Math.sin(t*0.05)*4);
+    c.lineWidth=Math.max(6,size*0.16); c.strokeStyle="#141833"; c.strokeText(title,CW/2,ty);
+    c.fillStyle=TCOLS[P.col]||"#ffd23f"; c.fillText(title,CW/2,ty);
+    var y2=ty+size*0.62;
+    if(P.sub){ c.font="bold 21px Fredoka, Arial, sans-serif"; c.lineWidth=5; c.strokeText(P.sub,CW/2,y2); c.fillStyle="#ffffff"; c.fillText(P.sub,CW/2,y2); y2+=28; }
+    if(P.by){ c.font="bold 16px 'Atkinson Hyperlegible', Arial, sans-serif"; c.lineWidth=4; c.strokeText("A game by "+P.by,CW/2,y2); c.fillStyle="#e8ecff"; c.fillText("A game by "+P.by,CW/2,y2); }
+    var hint=(KEYHINT[L.kind]||"").replace(/^Keyboard: /,""); hint=hint.charAt(0).toUpperCase()+hint.slice(1);
+    c.font="bold 13px 'Atkinson Hyperlegible', Arial, sans-serif"; var hw=c.measureText(hint).width+24;
+    c.fillStyle="rgba(12,15,40,.75)"; rr(c,CW/2-hw/2,CH-30,hw,22,8); c.fill(); c.fillStyle="#ffffff"; c.fillText(hint,CW/2,CH-14);
+    c.restore();
+    if(g.best){ c.save(); c.textAlign="right"; c.font="bold 13px Fredoka, Arial, sans-serif"; var bl="BEST TIME "+g.best.t.toFixed(1)+"s", bw=c.measureText(bl).width+18; c.fillStyle="rgba(12,15,40,.75)"; rr(c,CW-10-bw,10,bw,22,8); c.fill(); c.fillStyle="#ffd23f"; c.fillText(bl,CW-19,26); c.restore(); }
+  } finally { curKind=kk; curArt=ka; curHat=kh; }
+}
+
+/* playing a cutscene */
+function playScene(name){
+  var g=G(), sc=sceneByName(g,name);
+  if(!sc||!sc.slides.length){ rt.msg='No cutscene called "'+name+'" yet'; rt.msgT=150; return; }
+  if(rt.scene){ rt.sceneQ.push(sc); return; }
+  rt.scene={sc:sc,i:0,t:0}; releaseKeys();
+  $("scenebar").hidden=false; try{ $("sceneNext").focus({preventScroll:true}); }catch(e){}
+}
+function sceneNext(){
+  if(!rt||!rt.scene) return;
+  var s=rt.scene, sl=s.sc.slides[s.i], n=Math.floor(s.t*1.3);
+  if(!reduceMotion&&sl&&sl.text&&n<sl.text.length){ s.t=999; return; }
+  s.i++; s.t=0; sfx("snap");
+  if(s.i>=s.sc.slides.length){ ranFlag("scene"); endScene(); }
+}
+function endScene(){
+  if(!rt) return;
+  rt.scene=null;
+  if(rt.sceneQ.length){ var nx=rt.sceneQ.shift(); rt.scene={sc:nx,i:0,t:0}; return; }
+  $("scenebar").hidden=true;
+  try{ cv.focus({preventScroll:true}); }catch(e){} if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
+  if(rt.over&&rt.pendingOver){ var k=rt.pendingOver; rt.pendingOver=null; showOver(k); return; }
+  if(!rt.ask&&rt.asks.length) nextAsk();
+}
+function sceneSkip(){ if(!rt||!rt.scene) return; rt.sceneQ=[]; endScene(); }
+function hideSceneBar(){ var b=$("scenebar"); if(b) b.hidden=true; }
+
+/* the title screen */
+var titleMusic=null;
+function showTitle(){
+  var g=G(); if(!g) return;
+  if(state.mode==="play"||rt) setMode("build");
+  state.title=true; $("titlebox").hidden=false;
+  $("titlePlay").textContent="\u25b6 "+(publishOf(g).btn||"Play");
+  if(!AC||AC.state!=="running"){ var wake=function(){ audio(); document.removeEventListener("pointerdown",wake,true); document.removeEventListener("keydown",wake,true); }; document.addEventListener("pointerdown",wake,true); document.addEventListener("keydown",wake,true); }
+  try{ $("titlePlay").focus({preventScroll:true}); }catch(e){}
+  playTitleTune();
+}
+function playTitleTune(){
+  stopTitleTune();
+  var tune=noteList(publishOf(G()).tune); if(!tune.length) return;
+  var i=0;
+  titleMusic=setInterval(function(){
+    if(!state.title){ stopTitleTune(); return; }
+    if(!prefs.sound) return;
+    var a=AC; if(!a||a.state!=="running") return;
+    var n=tune[i++%tune.length]; if(n!=="-") try{ tone(NOTEF[n],NOTEF[n],0.22,"triangle",0.05); }catch(e){}
+  },260);
+}
+function stopTitleTune(){ if(titleMusic) clearInterval(titleMusic); titleMusic=null; }
+function startFromTitle(){
+  var P=publishOf(G());
+  audio(); stopTitleTune();
+  state.title=false; $("titlebox").hidden=true;
+  if(P.fs&&!fsOn) enterFS();
+  setMode("play");
+}
+
+/* full screen */
+var fsOn=false;
+function enterFS(){
+  var st=$("stage"); if(fsOn) return;
+  if(stepOn){ stepOn=false; paintStepTog(); if(rt) finishAllSteps(); }
+  fsOn=true; st.classList.add("fs"); document.body.classList.add("fsbody"); $("fsExit").hidden=false;
+  try{ var p=st.requestFullscreen?st.requestFullscreen():(st.webkitRequestFullscreen?st.webkitRequestFullscreen():null); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+  if(state.ctx&&state.ctx.kind==="mission") markFlag("fsTried"); else flags.fsTried=true;
+  fitView(); setTimeout(fsSize,60); fsSize();
+}
+function exitFS(){
+  if(!fsOn) return;
+  fsOn=false; $("stage").classList.remove("fs"); document.body.classList.remove("fsbody"); $("fsExit").hidden=true; cv.style.width="";
+  try{ if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen(); }catch(e){}
+  fitView();
+}
+function fsSize(){
+  if(!fsOn){ cv.style.width=""; return; }
+  var pad=$("pad"), ph=pad&&!pad.hidden?pad.offsetHeight:0;
+  var w=Math.min(window.innerWidth,(window.innerHeight-ph)*CW/CH);
+  cv.style.width=Math.max(200,Math.floor(w))+"px";
+}
+document.addEventListener("fullscreenchange",function(){ if(!document.fullscreenElement&&fsOn) exitFS(); else fsSize(); });
+document.addEventListener("webkitfullscreenchange",function(){ if(!document.webkitFullscreenElement&&fsOn) exitFS(); else fsSize(); });
+
+/* the cutscene maker */
+var sceneSel={i:0,s:0};
+function sceneCode(name){ return 'cutscene("'+name+'");'; }
+function addSceneTo(g,ev,name){
+  var r=null; g.rules.forEach(function(x){ if(!r&&x.ev===ev) r=x; });
+  if(!r){ r={id:uid(),ev:ev,acts:[]}; g.rules.unshift(r); }
+  if(r.acts.some(function(a){ return a.op==="scene"&&a.s===name; })){ toast("It is already there."); return; }
+  r.acts.unshift({op:"scene",s:name});
+  record(); liveRules(); saveSoon(); renderRules(); refreshMission();
+  toast("Added "+sceneCode(name)+" to "+EVMAP[ev].label+".");
+}
+function cutsceneSheet(){
+  var g=G(); ensureLevels(g);
+  var f=h("div",{class:"pane"});
+  if(!g.scenes.length){
+    f.append(h("div",{class:"explain"},h("div",{class:"row"},iconEl("film","big"),h("p",{text:"A cutscene is a little story between the action: pictures and words, one slide at a time. Your code plays it with cutscene(\"name\")."}))));
+  }
+  var tabs=h("div",{class:"row scenetabs"});
+  g.scenes.forEach(function(s,i){ tabs.append(h("button",{class:"btn small"+(i===sceneSel.i?" sun":" ghost"),type:"button",text:s.name,onclick:function(){ sceneSel={i:i,s:0}; cutsceneSheet(); }})); });
+  var nameIn=h("input",{type:"text",id:"newScene",maxlength:"30",placeholder:g.scenes.length?"another name":"intro",autocomplete:"off"});
+  function make(){
+    var nm=msgName(nameIn.value.trim()||(g.scenes.length?"scene"+(g.scenes.length+1):"intro"));
+    if(sceneByName(g,nm)){ toast("You already have a cutscene called "+nm+"."); return; }
+    if(g.scenes.length>=8){ toast("You can make up to 8 cutscenes."); return; }
+    g.scenes.push({id:uid(),name:nm,slides:[{bg:"day",l:"hero",r:"bolt",sp:"r",text:"Hello! Are you ready?"}]});
+    sceneSel={i:g.scenes.length-1,s:0}; record(); saveSoon(); cutsceneSheet(); refreshMission();
+  }
+  nameIn.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); make(); } });
+  tabs.append(h("span",{class:"newscene"},nameIn,h("button",{class:"btn small sun",type:"button",text:"+ New cutscene",onclick:make})));
+  f.append(tabs);
+  var sc=g.scenes[sceneSel.i];
+  if(!sc){ openSheet("Cutscenes",f); return; }
+  if(sceneSel.s>=sc.slides.length) sceneSel.s=Math.max(0,sc.slides.length-1);
+  var sl=sc.slides[sceneSel.s];
+  /* name and code */
+  var rn=h("input",{type:"text",value:sc.name,maxlength:"30","aria-label":"Cutscene name",autocomplete:"off",class:"scenename"});
+  rn.addEventListener("change",function(){
+    var nv=msgName(rn.value.trim()); if(nv===sc.name) return;
+    if(sceneByName(g,nv)){ toast("You already have a cutscene called "+nv+"."); rn.value=sc.name; return; }
+    var old=sc.name; sc.name=nv;
+    allActs(g,function(a){ if(a.op==="scene"&&a.s===old) a.s=nv; });
+    record(); liveRules(); saveSoon(); renderRules(); toast("Renamed. Your code uses the new name too.");
+    var tb=tabs.children[sceneSel.i]; if(tb) tb.textContent=nv;
+    var cc=f.querySelector(".scenecode .cl"); if(cc){ var nc=pickCode(sceneCode(nv)); cc.replaceWith(nc); }
+  });
+  f.append(h("div",{class:"row between"},h("div",{class:"row"},h("b",{text:"Name"}),rn),
+    armX("Remove this cutscene",function(){ g.scenes.splice(sceneSel.i,1); sceneSel={i:0,s:0}; record(); saveSoon(); cutsceneSheet(); toast("Cutscene removed. Undo brings it back."); })));
+  f.append(h("div",{class:"scenecode"},h("span",{class:"muted",text:"Your code plays it with:"}),pickCode(sceneCode(sc.name)),
+    h("div",{class:"row"},
+      h("button",{class:"btn small",type:"button",text:"Play it when the game starts",onclick:function(){ addSceneTo(g,"start",sc.name); }}),
+      h("button",{class:"btn small",type:"button",text:"Play it at the flag",onclick:function(){ addSceneTo(g,"flag",sc.name); }}))));
+  /* slide strip */
+  var strip=h("div",{class:"slidestrip"});
+  sc.slides.forEach(function(s,i){
+    var b=h("button",{class:"slidechip"+(i===sceneSel.s?" on":""),type:"button","aria-label":"Slide "+(i+1),onclick:function(){ sceneSel.s=i; cutsceneSheet(); }},h("b",{text:String(i+1)}),h("span",{text:s.text?s.text.slice(0,14):"..."}));
+    strip.append(b);
+  });
+  if(sc.slides.length<12) strip.append(h("button",{class:"slidechip add",type:"button",text:"+ Slide",onclick:function(){ var base=sc.slides[sceneSel.s]||{bg:"day",l:"hero",r:"none",sp:"l",text:""}; sc.slides.splice(sceneSel.s+1,0,{bg:base.bg,l:base.l,r:base.r,sp:base.sp==="l"?"r":"l",text:""}); sceneSel.s++; record(); saveSoon(); cutsceneSheet(); refreshMission(); try{ $("slideText").focus(); }catch(e){} }}));
+  f.append(strip);
+  if(!sl){ openSheet("Cutscenes",f); return; }
+  /* the slide editor */
+  var dpr=Math.min(2,window.devicePixelRatio||1), pv=h("canvas",{class:"scenepv",width:CW*dpr,height:CH*dpr,"aria-label":"Slide preview"});
+  var t0=0, live=true;
+  function drawPv(){ var c=pv.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); drawScene(c,sl,t0,g); }
+  (function anim(){ if(!live) return; if((!document.body.contains(pv)||$("sheet").hidden)&&t0>2){ live=false; return; } t0++; drawPv(); requestAnimationFrame(anim); })();
+  function changed(){ t0=0; record(); saveSoon(); drawPv(); var chip=strip.children[sceneSel.s]; if(chip) chip.lastChild.textContent=sl.text?sl.text.slice(0,14):"..."; }
+  var bgs=h("div",{class:"row bgpick",role:"group","aria-label":"Background"});
+  SCENE_BGS.forEach(function(b){ bgs.append(h("button",{class:"bgbtn","aria-pressed":String(sl.bg===b[0]),type:"button",onclick:function(){ sl.bg=b[0]; Array.prototype.forEach.call(bgs.children,function(x){ x.setAttribute("aria-pressed",String(x.getAttribute("data-bg")===b[0])); }); changed(); },"data-bg":b[0]},h("i",{style:"background:"+b[2]}),h("span",{text:b[1]}))); });
+  function charSel(key,label){
+    var s=h("select",{"aria-label":label});
+    SCENE_CHARS.forEach(function(ch){ s.append(h("option",{value:ch[0],selected:sl[key]===ch[0],text:ch[0]==="hero"?heroName(g):ch[1]})); });
+    s.addEventListener("change",function(){ sl[key]=s.value; changed(); });
+    return s;
+  }
+  var spk=h("div",{class:"seg",role:"group","aria-label":"Who is talking"});
+  [["l","Left"],["r","Right"],["n","Nobody"]].forEach(function(o){ spk.append(h("button",{type:"button","aria-pressed":String(sl.sp===o[0]),text:o[1],onclick:function(){ sl.sp=o[0]; Array.prototype.forEach.call(spk.children,function(x,ix){ x.setAttribute("aria-pressed",String(["l","r","n"][ix]===o[0])); }); changed(); }})); });
+  var txt=h("input",{type:"text",id:"slideText",maxlength:"90",value:sl.text,placeholder:"What do they say?",autocomplete:"off"});
+  txt.addEventListener("input",function(){ sl.text=txt.value; t0=999; drawPv(); var chip=strip.children[sceneSel.s]; if(chip) chip.lastChild.textContent=sl.text?sl.text.slice(0,14):"..."; });
+  txt.addEventListener("change",function(){ record(); saveSoon(); refreshMission(); });
+  var tools=h("div",{class:"row"},
+    h("button",{class:"btn small ghost",type:"button",text:"\u25c0 Earlier",disabled:sceneSel.s===0,onclick:function(){ var i=sceneSel.s; sc.slides.splice(i-1,0,sc.slides.splice(i,1)[0]); sceneSel.s--; record(); saveSoon(); cutsceneSheet(); }}),
+    h("button",{class:"btn small ghost",type:"button",text:"Later \u25b6",disabled:sceneSel.s>=sc.slides.length-1,onclick:function(){ var i=sceneSel.s; sc.slides.splice(i+1,0,sc.slides.splice(i,1)[0]); sceneSel.s++; record(); saveSoon(); cutsceneSheet(); }}),
+    confirmBtn("Remove slide","Yes, remove it",function(){ sc.slides.splice(sceneSel.s,1); sceneSel.s=Math.max(0,sceneSel.s-1); record(); saveSoon(); cutsceneSheet(); }));
+  f.append(pv,
+    h("div",{class:"field"},h("span",{class:"kicker",text:"Background"}),bgs),
+    h("div",{class:"row"},h("label",{class:"chsel"},h("span",{text:"Left"}),charSel("l","Left character")),h("label",{class:"chsel"},h("span",{text:"Right"}),charSel("r","Right character"))),
+    h("div",{class:"row"},h("span",{class:"kicker",text:"Who is talking?"}),spk),
+    h("div",{class:"field"},h("label",{for:"slideText",text:"Words"}),txt),
+    tools);
+  openSheet("Cutscenes",f);
+}
+
+/* publishing */
+function pageButtons(g){
+  var html=null, box=h("textarea",{class:"share",readonly:true,hidden:true,"aria-label":"Your web page"});
+  function get(){ if(!html) html=buildExport(g); return html; }
+  return h("div",{class:"field"},h("div",{class:"row"},
+      h("button",{class:"btn sun",text:"\u2193 Download my game",onclick:function(){
+        try{
+          var blob=new Blob([get()],{type:"text/html"}), url=URL.createObjectURL(blob), a=h("a",{href:url,download:fileName(g.name)});
+          document.body.append(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },8000);
+          toast("Downloading "+fileName(g.name)+". If nothing happens, use Copy.");
+        }catch(e){ toast("Downloads do not work here. Use Copy instead."); }
+      }}),
+      h("button",{class:"btn",text:"Copy the page",onclick:function(){
+        var v=get();
+        function fallback(){ box.value=v; box.hidden=false; box.focus(); box.select(); toast("Selected. Copy it, then ask Jay to help you save it."); }
+        try{ navigator.clipboard.writeText(v).then(function(){ toast("Copied! Ask Jay to help you save it as "+fileName(g.name)); },fallback); }catch(e){ fallback(); }
+      }})),box);
+}
+function titleCode(P,g){
+  return "titleScreen = {\n"+
+    '  title: '+qstr(P.title||g.name)+",\n"+
+    (P.sub?'  subtitle: '+qstr(P.sub)+",\n":"")+
+    (P.by?'  by: '+qstr(P.by)+",\n":"")+
+    '  background: '+qstr(P.bg)+",\n"+
+    '  colour: '+qstr(P.col)+",\n"+
+    '  button: '+qstr(P.btn)+",\n"+
+    '  fullScreen: '+(P.fs?"true":"false")+"\n};";
+}
+function publishSheet(){
+  var g=G(); ensureLevels(g);
+  var P=g.publish||cleanPublish({}), f=h("div",{class:"pane"});
+  var dpr=Math.min(2,window.devicePixelRatio||1), pv=h("canvas",{class:"scenepv",width:CW*dpr,height:CH*dpr,"aria-label":"Title screen preview"});
+  var t0=0, live=true, code=pickCode(titleCode(P,g));
+  (function anim(){ if(!live) return; if((!document.body.contains(pv)||$("sheet").hidden)&&t0>2){ live=false; return; } t0++; var c=pv.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); drawTitleScreen(c,g,t0); requestAnimationFrame(anim); })();
+  function changed(){ g.publish=P; saveSoon(); refreshMission(); var nc=pickCode(titleCode(P,g)); code.replaceWith(nc); code=nc; }
+  function field(key,label,max,ph){
+    var i=h("input",{type:"text",value:P[key],maxlength:String(max),placeholder:ph||"",autocomplete:"off",id:"pub_"+key});
+    i.addEventListener("input",function(){ P[key]=msgOk(i.value,max); changed(); });
+    return h("div",{class:"field"},h("label",{for:"pub_"+key,text:label}),i);
+  }
+  function tog(key,label){
+    var b=h("button",{class:"opt","aria-pressed":String(!!P[key]),type:"button"},h("span",{class:"opticon","aria-hidden":"true",text:P[key]?"\u2713":""}),h("span",{text:label}),h("span",{class:"optstate",text:P[key]?"On":"Off"}));
+    b.addEventListener("click",function(){ P[key]=!P[key]; b.setAttribute("aria-pressed",String(P[key])); b.querySelector(".optstate").textContent=P[key]?"On":"Off"; b.querySelector(".opticon").textContent=P[key]?"\u2713":""; changed(); });
+    return b;
+  }
+  var bgs=h("div",{class:"row bgpick",role:"group","aria-label":"Background"});
+  SCENE_BGS.forEach(function(b){ bgs.append(h("button",{class:"bgbtn","aria-pressed":String(P.bg===b[0]),type:"button","data-bg":b[0],onclick:function(){ P.bg=b[0]; Array.prototype.forEach.call(bgs.children,function(x){ x.setAttribute("aria-pressed",String(x.getAttribute("data-bg")===b[0])); }); changed(); }},h("i",{style:"background:"+b[2]}),h("span",{text:b[1]}))); });
+  var cols=h("div",{class:"row",role:"group","aria-label":"Title colour"});
+  Object.keys(TCOLS).forEach(function(k){ cols.append(h("button",{class:"colsw","aria-pressed":String(P.col===k),"aria-label":k,type:"button",style:"background:"+TCOLS[k],onclick:function(){ P.col=k; Array.prototype.forEach.call(cols.children,function(x){ x.setAttribute("aria-pressed",String(x.getAttribute("aria-label")===k)); }); changed(); }})); });
+  var tune=h("input",{type:"text",value:P.tune,maxlength:"80",placeholder:"C E G c",autocomplete:"off",id:"pub_tune"});
+  tune.addEventListener("input",function(){ P.tune=noteList(tune.value).join(" "); changed(); });
+  var presets=h("div",{class:"row"},
+    h("button",{class:"btn small ghost",type:"button",text:"Happy",onclick:function(){ tune.value=P.tune="C E G c G E C -"; changed(); }}),
+    h("button",{class:"btn small ghost",type:"button",text:"Heroic",onclick:function(){ tune.value=P.tune="C C G G A A G - F F E E D D C -"; changed(); }}),
+    h("button",{class:"btn small ghost",type:"button",text:"Spooky",onclick:function(){ tune.value=P.tune="A - C - B - A - E - - -"; changed(); }}),
+    h("button",{class:"btn small",type:"button",text:"\u25b6 Listen",onclick:function(){ if(!prefs.sound||!audio()) return; noteList(P.tune).forEach(function(n,i){ if(n!=="-") try{ tone(NOTEF[n],NOTEF[n],0.22,"triangle",0.05,i*0.26); }catch(e){} }); }}));
+  f.append(
+    h("div",{class:"card"},h("h2",{text:"Title screen"}),pv,
+      tog("on","Show a title screen first"),
+      field("title","Title",40,g.name),field("sub","Subtitle",60,"Find your way home"),field("by","Made by",30,"Your initials"),field("hero","Hero's name",20,"Hero"),
+      h("div",{class:"field"},h("span",{class:"kicker",text:"Background"}),bgs),
+      h("div",{class:"field"},h("span",{class:"kicker",text:"Title colour"}),cols),
+      h("div",{class:"row"},tog("sh","Hero"),tog("sb","Baddie"),tog("sf","Friend")),
+      field("btn","Play button words",16,"Play"),
+      h("div",{class:"field"},h("label",{for:"pub_tune",text:"Title tune"}),tune,presets),
+      h("p",{class:"edhint",text:"Your title screen is saved like this:"}),code),
+    h("div",{class:"card"},h("h2",{text:"Playing"}),
+      tog("fs","Go full screen when Play is pressed"),
+      tog("code","Show the code next to the game"),
+      h("div",{class:"row"},h("button",{class:"btn sun",type:"button",text:"\u25b6 Try it like a player",onclick:function(){ closeSheet(); showTitle(); enterFS(); }}))),
+    h("div",{class:"card"},h("h2",{text:"Share it"}),
+      h("p",{class:"tip",text:"Your game as its own web page, with your title screen and cutscenes."}),
+      pageButtons(g),
+      h("div",{class:"row"},h("button",{class:"btn ghost",type:"button",text:"Make a share code",onclick:function(){ closeSheet(); settingsSheet(); }}))));
+  openSheet("Publish your game",f);
+}
+
 /* ---------- graduate: your game as its own web page ---------- */
 function fileName(n){ return (String(n||"my game").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"my-game")+".html"; }
 function buildExport(g){
   syncLevel(g);
   var L0=g.levels[0];
-  var data={name:g.name,w:L0.w,sky:L0.sky,tiles:L0.tiles,hat:g.hat,rules:g.rules,levels:g.levels,cur:0,art:g.art||{},best:g.best||null,kind:L0.kind,vars:g.vars||[],funcs:g.funcs||[]};
+  var data={name:g.name,w:L0.w,sky:L0.sky,tiles:L0.tiles,hat:g.hat,rules:g.rules,levels:g.levels,cur:0,art:g.art||{},best:g.best||null,kind:L0.kind,vars:g.vars||[],funcs:g.funcs||[],scenes:g.scenes||[],publish:g.publish||null};
   var json=JSON.stringify(data).replace(/</g,"\\u003c");
   var OPEN="<scr"+"ipt", CLOSE="</scr"+"ipt>", EMB=OPEN+' id="jl-embed">', html=PRISTINE;
   var old=html.indexOf(EMB);
@@ -5151,7 +5651,7 @@ var TEMPLATES=[
     [5,6,7].forEach(function(x){ put(t,w,x,10,5); }); [14,15].forEach(function(x){ put(t,w,x,9,5); }); [28,29].forEach(function(x){ put(t,w,x,10,5); });
     put(t,w,37,11,9);
     var g=newGame("Robot friends",w,"day",t,[
-      R("start",[S("lives",3)]),
+      R("start",[{op:"scene",s:"intro"},S("lives",3)]),
       RS("meet","Bolt",[{op:"fsay",s:"Beep! Can you find Pip and Moss?"}]),
       RS("meet","Pip",[{op:"fsay",s:"Hello!"},{op:"ask",s:"Shall I give you a big jump?",a:"Yes",b:"No"}]),
       RS("message","Yes",[{op:"fsay",s:"Boing!"},{op:"bounce",n:18},{op:"call",s:"cheer"}]),
@@ -5159,9 +5659,12 @@ var TEMPLATES=[
       RS("meet","Moss",[{op:"call",s:"cheer"},{op:"fsay",s:"You found me!"},{op:"fleave"}]),
       R("coin",[C("score",1),snd("coin")]),
       R("fall",[C("lives",-1)]),
-      R("flag",[{op:"if",c:{v:"friends",op:">=",n:2},acts:[{op:"win"}]},{op:"say",s:"Find Pip and Moss first!"}])]);
+      R("flag",[{op:"if",c:{v:"friends",op:">=",n:2},acts:[{op:"scene",s:"ending"},{op:"win"}]},{op:"say",s:"Find Pip and Moss first!"}])]);
     g.vars=[{name:"friends",n:0}];
     g.funcs=[{id:uid(),name:"cheer",acts:[{op:"confetti"},snd("win"),C("friends",1)]}];
+    g.scenes=[{id:uid(),name:"intro",slides:[{bg:"level",l:"hero",r:"bolt",sp:"r",text:"Beep! Welcome to Robot Town."},{bg:"level",l:"hero",r:"bolt",sp:"l",text:"Where is everyone?"},{bg:"level",l:"hero",r:"bolt",sp:"r",text:"Pip and Moss are hiding. Can you find them?"}]},
+      {id:uid(),name:"ending",slides:[{bg:"sunset",l:"hero",r:"pip",sp:"r",text:"You found us! Thank you!"},{bg:"sunset",l:"box",r:"moss",sp:"r",text:"Wait... did that box just wink?"}]}];
+    g.publish=cleanPublish({title:"Robot Town",sub:"Find your robot friends",sf:true,sb:false,tune:"C E G c G E C -"});
     return g; }},
   {id:"tour",isNew:true,name:"Grand tour",desc:"Four levels, four kinds of game",make:function(){
     var w1=30,t1=floorLevel(w1); put(t1,w1,2,11,10);
@@ -5319,7 +5822,7 @@ var TEMPLATES=[
       R("coin",[C("score",1),snd("coin")]),R("flag",[snd("win"),{op:"win"}])]); }}
 ];
 var TPL_THUMB={};
-function isPristine(g){ syncLevel(g); if(g.levels.length>1||(g.art&&Object.keys(g.art).length)||g.best||g.vars.length||g.funcs.length||kindOf(g)!=="platform") return false; var gp=genProgram(g.rules); return JSON.stringify(g.tiles)===JSON.stringify(starterTiles())&&(gp===genProgram(defaultRules())||gp===genProgram(defaultRules().filter(function(r){ return ["heart","chest","lava"].indexOf(r.ev)<0; }))); }
+function isPristine(g){ syncLevel(g); if(g.levels.length>1||(g.art&&Object.keys(g.art).length)||g.best||g.vars.length||g.funcs.length||(g.scenes&&g.scenes.length)||g.publish||kindOf(g)!=="platform") return false; var gp=genProgram(g.rules); return JSON.stringify(g.tiles)===JSON.stringify(starterTiles())&&(gp===genProgram(defaultRules())||gp===genProgram(defaultRules().filter(function(r){ return ["heart","chest","lava"].indexOf(r.ev)<0; }))); }
 function useTemplate(tp){
   var saved=!isPristine(free);
   if(saved) saveToGallery(free);
@@ -5336,6 +5839,13 @@ function templateSheet(){
   openSheet("Pick a starting game",f);
 }
 $("newGameBtn").addEventListener("click",templateSheet);
+$("sceneBtn").addEventListener("click",function(){ cutsceneSheet(); });
+$("pubBtn").addEventListener("click",function(){ publishSheet(); });
+$("sceneNext").addEventListener("click",sceneNext);
+$("sceneSkip").addEventListener("click",sceneSkip);
+$("titlePlay").addEventListener("click",startFromTitle);
+$("fsExit").addEventListener("click",exitFS);
+$("fsBtn").addEventListener("click",function(){ if(state.mode!=="play") setMode("play"); enterFS(); });
 $("newFromGames").addEventListener("click",templateSheet);
 $("saveGameBtn").addEventListener("click",function(){ saveToGallery(free); toast("Saved to My games."); });
 
@@ -5388,7 +5898,7 @@ function encodeGame(g){
   var obj={v:1,n:g.name,w:g.w,s:g.sky,h:g.hat||"none",t:rle(g.tiles),
     L:g.levels.length>1?g.levels.map(function(l){ return {w:l.w,s:l.sky,k:l.kind,t:rle(l.tiles)}; }):undefined,c:g.cur,
     A:g.art&&Object.keys(g.art).length?g.art:undefined,B:g.best?{t:g.best.t,lv0:g.best.lv0,f:[]}:undefined,
-    k:kindOf(g)!=="platform"?g.kind:undefined,V:g.vars.length?g.vars:undefined,F:g.funcs.length?g.funcs.map(function(f){ return {n:f.name,a:f.acts}; }):undefined,r:g.rules.map(function(r){ var o={ev:r.ev,acts:r.acts}; if(r.n!=null) o.n=r.n; if(r.s!=null) o.s=r.s; return o; })};
+    k:kindOf(g)!=="platform"?g.kind:undefined,P:g.publish||undefined,S:g.scenes&&g.scenes.length?g.scenes.map(function(s){ return {n:s.name,sl:s.slides}; }):undefined,V:g.vars.length?g.vars:undefined,F:g.funcs.length?g.funcs.map(function(f){ return {n:f.name,a:f.acts}; }):undefined,r:g.rules.map(function(r){ var o={ev:r.ev,acts:r.acts}; if(r.n!=null) o.n=r.n; if(r.s!=null) o.s=r.s; return o; })};
   var bytes=new TextEncoder().encode(JSON.stringify(obj));
   if(window.CompressionStream){
     try{
@@ -5415,7 +5925,7 @@ function decodeGame(code){
     if(!o||o.v!==1) throw new Error("x");
     return cleanGame({name:o.n,w:o.w,sky:o.s,hat:o.h,tiles:unrle(o.t,o.w*H),rules:o.r,
       levels:Array.isArray(o.L)?o.L.map(function(l){ return {w:l.w,sky:l.s,kind:l.k,tiles:unrle(l.t,l.w*H)}; }):undefined,cur:o.c,art:o.A,best:o.B,
-      kind:o.k,vars:o.V,funcs:Array.isArray(o.F)?o.F.map(function(f){ return {name:f&&f.n,acts:f&&f.a}; }):undefined});
+      kind:o.k,publish:o.P,scenes:Array.isArray(o.S)?o.S.map(function(s){ return {name:s&&s.n,slides:s&&s.sl}; }):undefined,vars:o.V,funcs:Array.isArray(o.F)?o.F.map(function(f){ return {name:f&&f.n,acts:f&&f.a}; }):undefined});
   }).catch(function(){ throw new Error("Part of the code is missing or changed. Try copying it again."); });
 }
 
@@ -5472,7 +5982,9 @@ if(PLAYER){
   store=function(){};
   try{ free=cleanGame(window.JL_EMBED); }catch(e){ free=TEMPLATES[0].make(); setTimeout(function(){ toast("This game could not be loaded."); },500); }
   var cr=document.querySelector(".credit span:last-child"); if(cr) cr.textContent="Made with Jump Lab v2 LW edition at Chilton Bridge School";
-  openFree(); view="code"; renderRules(); setMode("play");
+  openFree(); view="code"; renderRules();
+  if(free.publish&&!free.publish.code) document.documentElement.classList.add("nocode");
+  if(publishOf(free).on) showTitle(); else setMode("play");
 } else show("workshop");
 requestAnimationFrame(loop);
 })();
