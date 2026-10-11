@@ -3419,6 +3419,63 @@ changeQuestion=function(pu){const q=_changeQ(pu);if(mathsLevel()!=='gentle')retu
 const _bonusQ=bonusQuestion;
 bonusQuestion=function(){return mathsLevel()==='gentle'?scaleQuestion():_bonusQ()};
 
+// ===== Chill lo-fi for every place =====
+// Made live in the browser (no music files): soft electric piano chords, a round bass, a lazy swung
+// beat, a little bell melody and vinyl crackle. Each water, the town and HK's room has its own key,
+// tempo, chords and mood. It fades out for the dirt bike (Jay's song) and the cutscenes.
+const LOFI_TRACKS={
+ mill:{name:'Mill Pond Mornings',bpm:74,cut:1900,chords:[[65,[0,4,7,11,14]],[64,[0,3,7,10,14]],[62,[0,3,7,10,14]],[60,[0,4,7,11,14]]],drums:'full',bells:.22},
+ levels:{name:'Levels in the Mist',bpm:68,cut:1300,chords:[[57,[0,3,7,10,14]],[53,[0,4,7,11,14]],[60,[0,4,7,11,14]],[55,[0,4,7,9,14]]],drums:'soft',bells:.15},
+ mere:{name:'The Sword in the Mere',bpm:70,cut:1500,chords:[[62,[0,3,7,10,14]],[58,[0,4,7,11,14]],[55,[0,3,7,10,14]],[57,[0,5,7,10]]],drums:'full',bells:.18},
+ wye:{name:'Wye Water',bpm:80,cut:2100,chords:[[55,[0,4,7,11,14]],[59,[0,3,7,10]],[52,[0,3,7,10,14]],[60,[0,4,7,11,14]]],drums:'full',bells:.12,arp:1},
+ severn:{name:'Estuary Drift',bpm:72,cut:1700,chords:[[63,[0,4,7,11,14]],[60,[0,3,7,10,14]],[56,[0,4,7,11,14]],[58,[0,4,7,9]]],drums:'soft',bells:.2},
+ harbour:{name:'Harbour Lights',bpm:84,cut:2200,chords:[[62,[0,3,7,10]],[55,[0,4,7,10,14]],[60,[0,4,7,11,14]],[57,[0,4,7,10,13]]],drums:'bossa',bells:.18},
+ glass:{name:'Glass Lake',bpm:70,cut:2400,chords:[[64,[0,4,7,11,14]],[61,[0,3,7,10,14]],[57,[0,4,7,11,14]],[59,[0,4,7,9]]],drums:'soft',bells:.4},
+ bonnie:{name:'Bonnie Banks',bpm:66,cut:1600,chords:[[62,[0,2,7,14]],[60,[0,2,7,14]],[55,[0,4,7,12]],[52,[0,3,7,10,14]]],drums:'soft',bells:.25,drone:50},
+ town:{name:'High Street Hum',bpm:86,cut:2300,chords:[[60,[0,4,7,11,14]],[57,[0,3,7,10,14]],[62,[0,3,7,10,14]],[55,[0,4,7,10,14,21]]],drums:'full',bells:.16},
+ room:{name:'HK\u2019s Room',bpm:70,cut:1500,chords:[[56,[0,4,7,11,14]],[53,[0,3,7,10,14]],[61,[0,4,7,11,14]],[63,[0,4,7,9]]],drums:'soft',bells:.2}};
+const LOFI_BY_WATER=['mill','levels','mere','wye','severn','harbour','glass','bonnie'];
+const lofi={on:false,track:null,bus:null,filt:null,step:0,next:0,timer:0,crackle:null,melody:{},want:null,fadeT:0};
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function lofiWanted(){if(!AC||save.sound===false||settings().lofi===false)return null;if(mode==='bike'||mode==='cutscene')return null;
+ if(panelName==='bedroom')return 'room';if(mode==='town')return 'town';if(mode==='pond'||mode==='intro')return LOFI_BY_WATER[save.location]||'mill';return null}
+function lofiNight(){const h=(save.clock/60)%24;return h>=20.5||h<5.5}
+function lofiSetup(){if(lofi.bus||!AC)return;lofi.bus=AC.createGain();lofi.bus.gain.value=0;lofi.filt=AC.createBiquadFilter();lofi.filt.type='lowpass';lofi.filt.frequency.value=1900;lofi.filt.Q.value=.4;
+ lofi.filt.connect(lofi.bus);lofi.bus.connect(master);
+ try{const s=AC.createBufferSource(),hp=AC.createBiquadFilter(),gn=AC.createGain();s.buffer=noiseBuf;s.loop=true;hp.type='highpass';hp.frequency.value=3500;gn.gain.value=.006;s.connect(hp);hp.connect(gn);gn.connect(lofi.bus);s.start();lofi.crackle=s}catch(e){}}
+function lofiMelody(id){if(lofi.melody[id])return lofi.melody[id];const r=rng(id.length*131+7),T=LOFI_TRACKS[id],out=[];
+ for(let bar=0;bar<4;bar++)for(let s=0;s<8;s++){const [root,iv]=T.chords[bar];out.push(r()<T.bells*(s%2?.6:1.4)?root+12+iv[Math.floor(r()*iv.length)]:null)}return lofi.melody[id]=out}
+function env(g,t,peak,att,dec,sus,rel,end){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+att);g.gain.exponentialRampToValueAtTime(Math.max(.0001,peak*sus),t+att+dec);g.gain.setValueAtTime(Math.max(.0001,peak*sus),end);g.gain.exponentialRampToValueAtTime(.0001,end+rel)}
+function lfKeys(t,m,v,dur){for(const [type,mul,det,vv] of [['sine',1,-4,1],['triangle',1,5,.35],['sine',2,0,.12]]){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=mtof(m)*mul;o.detune.value=det+R(-3,3);o.connect(g);g.connect(lofi.filt);env(g,t,v*vv,.012,.5,.4,.6,t+dur);o.start(t);o.stop(t+dur+.7)}}
+function lfBass(t,m,v,dur){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=mtof(m-24);o.connect(g);g.connect(lofi.bus);env(g,t,v,.01,.25,.55,.15,t+dur);o.start(t);o.stop(t+dur+.2)}
+function lfBell(t,m,v){for(const [mul,vv,d] of [[1,1,1.4],[2.76,.18,.5]]){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=mtof(m)*mul;o.connect(g);g.connect(lofi.filt);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*vv,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.05)}}
+function lfKick(t,v){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(42,t+.13);o.connect(g);g.connect(lofi.bus);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.3);o.start(t);o.stop(t+.32)}
+function lfNoise(t,v,type,f,dec,q=.7){const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=noiseBuf;fl.type=type;fl.frequency.value=f;fl.Q.value=q;s.connect(fl);fl.connect(g);g.connect(lofi.bus);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+dec);s.start(t,Math.random()*1.5);s.stop(t+dec+.02)}
+function lfSnare(t,v){lfNoise(t,v,'bandpass',1700,.2,.8);const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=185;o.connect(g);g.connect(lofi.bus);g.gain.setValueAtTime(v*.5,t);g.gain.exponentialRampToValueAtTime(.0001,t+.08);o.start(t);o.stop(t+.1)}
+function lfHat(t,v){lfNoise(t,v,'highpass',7500,.045)}
+function lfRim(t,v){lfNoise(t,v,'bandpass',3200,.03,4)}
+function lfDrone(t,m,v,dur){for(const k of [0,7]){const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain();o.type='sawtooth';o.frequency.value=mtof(m+k-12);f.type='lowpass';f.frequency.value=500;o.connect(f);f.connect(g);g.connect(lofi.bus);env(g,t,v,.6,.5,.8,.8,t+dur);o.start(t);o.stop(t+dur+1)}}
+function lofiStep(t){const T=LOFI_TRACKS[lofi.track];if(!T)return;const spb=60/T.bpm,e8=spb/2,s=lofi.step%32,bar=Math.floor(s/8),i=s%8,[root,iv]=T.chords[bar],night=lofiNight(),hum=()=>R(-.008,.008);
+ if(i===0){const voic=iv.map(x=>root+x);voic.forEach((m,k)=>lfKeys(t+k*.012+hum(),m,.05*R(.85,1),spb*3.6));lfBass(t,root,.2,spb*1.8);if(T.drone&&bar%2===0)lfDrone(t,T.drone,.025,spb*8)}
+ if(i===4){lfBass(t+hum(),root+(Math.random()<.5?7:0),.16,spb*1.5);if(Math.random()<.5)iv.slice(1,4).forEach((x,k)=>lfKeys(t+.02+k*.01,root+x,.028,spb*1.2))}
+ if(T.arp&&i%2===1)lfKeys(t+hum(),root+12+iv[(i>>1)%iv.length],.022,spb*.8);
+ const mel=lofiMelody(lofi.track)[s];if(mel)lfBell(t+hum(),mel,.04);
+ const dk=T.drums,quiet=night?.55:1;
+ if(dk==='full'||dk==='soft'){if(i===0||(i===5&&Math.random()<.6)||(i===3&&dk==='full'&&Math.random()<.3))lfKick(t,.32*quiet*(dk==='soft'?.75:1));if((i===2||i===6)&&!(night&&dk==='soft'))lfSnare(t+hum(),dk==='soft'?.05:.09*quiet);lfHat(t+hum(),(i%2?.018:.03)*quiet)}
+ if(dk==='bossa'){if(i===0||i===3||i===4||i===7)lfKick(t,.25*quiet);if([0,3,6].includes(i)||(i===2&&bar%2))lfRim(t+hum(),.07*quiet);lfHat(t+hum(),.02*quiet)}
+ if(Math.random()<.18)lfNoise(t+R(0,e8),.03,'highpass',2500,.006,1);
+ lofi.step++}
+function lofiTick(){if(!AC)return;const want=lofiWanted();
+ if(want!==lofi.want){lofi.want=want;if(lofi.bus){const n=AC.currentTime;lofi.bus.gain.cancelScheduledValues(n);lofi.bus.gain.setValueAtTime(lofi.bus.gain.value,n);lofi.bus.gain.linearRampToValueAtTime(0,n+1.2)}lofi.fadeT=performance.now()+1300}
+ if(!want){if(lofi.on&&performance.now()>lofi.fadeT){lofi.on=false;lofi.track=null}return}
+ lofiSetup();if(!lofi.bus)return;
+ if(lofi.track!==want&&performance.now()>lofi.fadeT){lofi.track=want;lofi.step=0;lofi.next=AC.currentTime+.1;lofi.on=true;const n=AC.currentTime,T=LOFI_TRACKS[want];lofi.filt.frequency.setValueAtTime(T.cut*(lofiNight()?.75:1),n);lofi.bus.gain.cancelScheduledValues(n);lofi.bus.gain.setValueAtTime(0,n);lofi.bus.gain.linearRampToValueAtTime(settings().volume==='quiet'?.35:.5,n+2.5);const sb=$('soundBtn');if(sb)sb.title='Now playing: '+T.name+' (lo-fi)'}
+ if(!lofi.on||lofi.track!==want)return;const T=LOFI_TRACKS[lofi.track],e8=60/T.bpm/2;
+ while(lofi.next<AC.currentTime+.35){const swing=(lofi.step%2)?e8*.16:0;try{lofiStep(lofi.next+swing)}catch(e){}lofi.next+=e8}}
+lofi.timer=setInterval(lofiTick,90);
+SETTINGS_DEFAULT.lofi=true;if(save.settings&&save.settings.lofi===undefined)save.settings.lofi=true;
+{const i=SET_ROWS.findIndex(r=>r[0]==='music');SET_ROWS.splice(i,0,['lofi','Background music',[[true,'On: chill lo-fi for each place'],[false,'Off']]])}
+
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
 $('soundBtn').onclick=()=>{audioInit();setSound(save.sound===false)};setSound(save.sound!==false);
@@ -3450,6 +3507,13 @@ window.__hooked.zone=id=>zoneOf(id);
 window.__hooked.ride=t=>{const a=songEl();if(a){try{a.currentTime=t}catch(e){}}bike.rideT=t};
 window.__hooked.bikeState=()=>({era:bike.era,rideT:bike.rideT,outro:bike.outro&&bike.outro.stage,portal:!!bike.portal,score:bike.score,mode,loc:save.location,phase});
 window.__hooked.mq=(kind,a,b)=>{const q=kind==='photo'?catchValueQuestion({id:'perch',uid:999,weight:a,rate:b,price:clubPhotoValue(a,b),location:0,bonus:0}):kind==='sale'?saleQuestion({saleId:1,before:a,amount:b,count:3}):changeQuestion({id:1,before:a,cost:b,item:'Fibreglass rod'});return q.q+'  =>  '+q.choices.join(' | ')+'  [hint: '+q.hint+']'};
+window.__hooked.lofi=()=>({on:lofi.on,track:lofi.track,want:lofi.want,step:lofi.step});
+window.__hooked.lofiRender=async(id,secs)=>{const keep=[AC,master,noiseBuf,lofi.bus,lofi.filt,lofi.track,lofi.step];const T=LOFI_TRACKS[id],sr=22050,oc=new OfflineAudioContext(1,sr*secs,sr);
+ AC=oc;master=oc.createGain();master.gain.value=.55;master.connect(oc.destination);noiseBuf=oc.createBuffer(1,sr*2,sr);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ lofi.bus=null;lofiSetup();lofi.bus.gain.value=.5;lofi.filt.frequency.value=T.cut;lofi.track=id;lofi.step=0;const e8=60/T.bpm/2;for(let t=.05;t<secs-1;t+=e8){lofiStep(t+((lofi.step%2)?e8*.16:0))}
+ const buf=await oc.startRendering();[AC,master,noiseBuf,lofi.bus,lofi.filt,lofi.track,lofi.step]=keep;const ch=buf.getChannelData(0);let pk=0,ss=0;for(const v of ch){pk=Math.max(pk,Math.abs(v));ss+=v*v}
+ const out=new Int16Array(ch.length);for(let i=0;i<ch.length;i++)out[i]=Math.max(-1,Math.min(1,ch[i]))*32767;let bin='';const u8=new Uint8Array(out.buffer);for(let i=0;i<u8.length;i+=8192)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));
+ return {peak:pk,rms:Math.sqrt(ss/ch.length),pcm:btoa(bin),sr}};
 
 })();
 </script></body></html>
