@@ -479,7 +479,7 @@ const FISH=[
 {id:'arctic-charr',name:'Arctic charr',base:120,min:.28,max:1.55,col:'#8798a7',fin:'#dc8861',bias:.12,size:37,desc:'Cold-water glacial-lake fish: Windermere holds native charr populations; conservation and local restrictions matter.',places:[6]}
 ];
 const RODS=[{name:'Stick & paper worm',cost:0,assist:0},{name:'Second-hand rod',cost:15,assist:.11},{name:'Fibreglass rod',cost:85,assist:.22},{name:'Carbon rod',cost:350,assist:.34},{name:'Competition rod',cost:1200,assist:.47}];
-const BAGS=[{name:'First photo album',cost:0,cap:3},{name:'Pocket photo album',cost:32,cap:6},{name:'Large photo album',cost:145,cap:10},{name:'Fieldwork binder',cost:600,cap:18}];
+const BAGS=[{name:'First photo album',cost:0,cap:6},{name:'Pocket photo album',cost:32,cap:10},{name:'Large photo album',cost:145,cap:14},{name:'Fieldwork binder',cost:600,cap:20}];
 const BOATS=[{name:'No boat',cost:0},{name:'Little rowing boat',cost:900},{name:'Small motorboat',cost:2800}];
 const LOC=[
 {name:'Mill Pond',price:0,boat:0,fish:'Roach \u00b7 Perch \u00b7 Rudd \u00b7 Bream \u00b7 Tench \u00b7 Carp',subtitle:'A quiet pond beside the old Chilton Bridge',lat:50.82,lon:-2.42,habitat:'Sheltered lowland pond with reeds, water lilies and soft silt',region:'Dorset \u00b7 fictional starter',access:'Fictional introductory water'},
@@ -520,7 +520,7 @@ save.bucket=save.bucket.map(photo=>{
  const rate=Number(photo.rate)||clubRate(fish);
  return {...photo,uid,rate,price:Number(photo.rate)?photo.price:clubPhotoValue(photo.weight,rate),bonus:Math.max(0,Number(photo.bonus)||0),mastered:!!photo.mastered,location:photo.location??save.location};
 });
-function photoBonus(p){return Math.min(40,Math.max(2,Math.round(p.price*.3)))}
+function photoBonus(p){return Math.min(60,Math.max(5,Math.round(p.price*.6)))}
 function photoTotal(p){return p.price+(Number(p.bonus)||0)+(Number(p.pick)||0)}
 function photoByUID(uid){return save.bucket.find(p=>p.uid===uid)}
 let saveFlashUntil=0;
@@ -1153,7 +1153,7 @@ function updateFight(dt){
  struggle.visualTug=clamp(struggle.pull+struggle.surge*.8,0,2.5);
  let wantedBend=struggle.pull*(reeling?1.2:.5);struggle.flexVel+=(wantedBend-struggle.flex)*dt*26;struggle.flexVel*=Math.exp(-6.5*dt);struggle.flex+=struggle.flexVel*dt*13;
  struggle.stress=clamp(struggle.stress+(reeling?(struggle.pull*.82+.1-.45*grip)*dt*.63*(settings().calm?.7:1):(-.94-grip*.2)*dt),0,1);
- if(reeling){reelTick-=dt;if(reelTick<=0){reelTick=.075;sfx('tick')}let tensionBlock=clamp((struggle.stress-.55)*1.8,0,.9);let gain=(.17+grip*.19)*(1-tensionBlock)*(1-struggle.pull*.12);reel+=dt*gain*(1+(.6*(1-struggle.energy)));if(struggle.stress>.86)reel-=dt*.055;struggle.energy=clamp(struggle.energy-dt*(.015+hard*.012),.07,1)}
+ if(reeling){reelTick-=dt;if(reelTick<=0){reelTick=.075;sfx('tick')}let tensionBlock=clamp((struggle.stress-.55)*1.8,0,.9);let gain=(.17+grip*.19)*(1-tensionBlock)*(1-struggle.pull*.12)*clamp(.62/hard,1,3);reel+=dt*gain*(1+(.6*(1-struggle.energy)));if(struggle.stress>.86)reel-=dt*.055;struggle.energy=clamp(struggle.energy-dt*(.015+hard*.012),.07,1)}
  else{reel-=dt*Math.max(0,.006+struggle.surge*.035);struggle.energy=clamp(struggle.energy+dt*.008,.07,1)}
  reel=clamp(reel,0,1);
  if(fightRisk(dt,reeling))return;
@@ -1257,7 +1257,7 @@ function render(){
  // line and bait under water
  if(bob&&(phase==='waiting'||phase==='bite')){const bx=bob.x/2,dip=phase==='bite'?3:(nibble?Math.round(nibble.dip*2):0);const hy=bob.hookY/2;g.globalAlpha=.6;pline(bx,SURF+1+dip,bx+(nibble||phase==='bite'?Math.sin(time*20):0),hy,'#e4ece6');g.globalAlpha=1;drawBait(bx,hy)}
  for(const f of fishies){if(landing&&f===landing.fish&&phase!=='reeling'&&phase!=='idle'&&phase!=='waiting'&&phase!=='bite')continue;let facing=f.vx>=0?1:-1,speed=f===hookedFish&&phase==='reeling'?14:(3+Math.abs(f.vx)*6);if(f===hookedFish&&phase==='reeling')facing=1;
-  drawFishSprite(f.f.id,f.x/2,f.y/2,Math.floor(f.wiggle*speed/4),facing);if(f.trophy)drawTrophyGlint(f)}
+  if(fishKnown(f.f))drawFishSprite(f.f.id,f.x/2,f.y/2,Math.floor(f.wiggle*speed/4),facing);else drawTadpole(f.f.id,f.x/2,f.y/2,Math.floor(f.wiggle*speed/4),facing);if(f.trophy)drawTrophyGlint(f)}
  drawParts(true);
  g.drawImage(sc.veil,0,0);
  for(const f of fishies){const gl=fishArt(f.f.id).glow;if(!gl)continue;g.globalAlpha=.35+.25*Math.sin(time*3);const a=fishArt(f.f.id);for(let k=0;k<6;k++){const an=time*1.5+k*1.05;pdot(f.x/2+Math.cos(an)*a.w*.45,f.y/2+Math.sin(an)*a.h*.35,gl)}g.globalAlpha=1}
@@ -1333,7 +1333,7 @@ let ovMemo='';function drawOverlay(){
 // ===== HUD and panels =====
 function toast(txt,ms=2900){if(phase==='reeling')return;if(mode==='cutscene'){if(!toastQ.some(q=>q.t===txt))toastQ.push({t:txt,ms:Math.max(ms,3200)});return}const long=ms>3000;if(toastBusyLong()&&txt!==toastShown){if(long){if(!toastQ.some(q=>q.t===txt)&&toastQ.length<4)toastQ.push({t:txt,ms});return}toastQ.unshift({t:toastShown,ms:4200})}toastLong=long;toastShown=txt;$('toast').textContent=txt;$('toast').classList.toggle('long',ms>3000);$('toast').classList.add('on');toastTimeout=performance.now()+ms}
 const _txtMemo=new Map();function setTxt(id,v){v=String(v);if(_txtMemo.get(id)!==v){_txtMemo.set(id,v);const el=$(id);if(el)el.textContent=v}}function setStyleW(id,v){if(_txtMemo.get(id+'w')!==v){_txtMemo.set(id+'w',v);$(id).style.width=v}}
-function updateHUD(){setTxt('money',fmt(save.money));setTxt('capacity',`\ud83d\udcd6 ${save.bucket.length} / ${BAGS[save.bag].cap}`);setTxt('place',LOC[save.location].name.toUpperCase()+' '+SEASON_ICON[seasonNow()]);let h=Math.floor(save.clock/60)%24,m=Math.floor(save.clock%60);const w=weather();setTxt('clock',`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${save.weather==='clear'&&(h<7||h>=19)?'\u263e':w.icon}`);if($('clock').title!==w.name)$('clock').title=w.name;if(save.season2){setTxt('fundTitle','RESTORATION');setTxt('fundLabel',save.flags.golden?'GOLDEN ROD \u2605':restoreDone()+' / '+RESTORE.length+' projects');setStyleW('fundFill',(restoreDone()/RESTORE.length*100)+'%')}else{setTxt('fundLabel',save.bikeOwned?'OWNED \u2713':fmt(save.money)+' / \u00a310,000');setStyleW('fundFill',clamp((save.bikeOwned?100:save.money/10000*100),0,100)+'%')}{const bp=$('baitPill');if(bp&&bp.dataset.b!==save.bait){bp.dataset.b=save.bait;bp.innerHTML=`<img src="${baitIcon(save.bait)}" alt=""> ${esc(bait().name)}`;bp.title='Bait: '+bait().name+' (B to change)'}}if($('saveStatus')&&saveFlashUntil&&performance.now()>saveFlashUntil){$('saveStatus').textContent='';saveFlashUntil=0}}
+function updateHUD(){setTxt('money',fmt(save.money));setTxt('capacity',`\ud83d\udcd6 ${save.bucket.length} / ${BAGS[save.bag].cap}`);setTxt('place',LOC[save.location].name.toUpperCase()+' '+SEASON_ICON[seasonNow()]);let h=Math.floor(save.clock/60)%24,m=Math.floor(save.clock%60);const w=weather();setTxt('clock',`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${save.weather==='clear'&&(h<7||h>=19)?'\u263e':w.icon}`);if($('clock').title!==w.name)$('clock').title=w.name;if(save.season2){setTxt('fundTitle','RESTORATION');setTxt('fundLabel',save.flags.golden?'GOLDEN ROD \u2605':restoreDone()+' / '+RESTORE.length+' projects');setStyleW('fundFill',(restoreDone()/RESTORE.length*100)+'%')}else{{const nw=nextWaterGoal();if(nw){setTxt('fundTitle','NEXT WATER');if($('fundTitle').title!==nw.name)$('fundTitle').title=nw.name;setTxt('fundLabel',fmt(save.money)+' / '+fmt(nw.price));setStyleW('fundFill',clamp(save.money/nw.price*100,0,100)+'%')}else{setTxt('fundTitle','DIRT BIKE FUND');setTxt('fundLabel',save.bikeOwned?'OWNED \u2713':fmt(save.money)+' / \u00a310,000');setStyleW('fundFill',clamp((save.bikeOwned?100:save.money/10000*100),0,100)+'%')}}}{const bp=$('baitPill');if(bp&&bp.dataset.b!==save.bait){bp.dataset.b=save.bait;bp.innerHTML=`<img src="${baitIcon(save.bait)}" alt=""> ${esc(bait().name)}`;bp.title='Bait: '+bait().name+' (B to change)'}}if($('saveStatus')&&saveFlashUntil&&performance.now()>saveFlashUntil){$('saveStatus').textContent='';saveFlashUntil=0}}
 const btn=(label,act,disabled=false,style='')=>`<button class="action ${style}" data-act="${act}" ${disabled?'disabled':''}>${label}</button>`;
 const BUSY=()=>['casting','reeling','landing','releasing'].includes(phase);
 function open(name){$('npcQuip').classList.remove('on');npcSayUntil=0;lastPanelDrawn='';$('quip').classList.remove('on');quipUntil=0;quipAnim=null;
@@ -1365,8 +1365,8 @@ const HABITAT_ZONES=['A still or slow-moving freshwater habitat with plants','A 
 const ZONE_OF={roach:0,perch:0,rudd:0,bream:0,tench:0,carp:0,gudgeon:1,eel:5,pike:0,chub:1,barbel:1,dace:1,flounder:2,'grey-mullet':2,'sea-bass':2,'sand-goby':2,whiting:3,mackerel:3,pollack:4,'brown-trout':7,'arctic-charr':6};
 function scienceQuestion(id){const f=FISH.find(x=>x.id===id);if(!f)return null;let legend=!!f.legend,zone=ZONE_OF[id]??0,correct=legend?'A fictional fish from local folklore':HABITAT_ZONES[zone],alts=legend?['A verified new animal species','A local fishing licence','A type of boat']:[1,2,3,4,5,0].filter(i=>i!==zone).slice(0,3).map(i=>HABITAT_ZONES[i]),choices=permuteChoices(correct,alts);return {kind:'science',species:id,bonus:8,title:legend?'Folklore or fact?':'Where does this fish live?',eyebrow:'YOUR FISH JOURNAL \u00b7 ECOLOGY',q:legend?`You discovered ${f.name}. What is this encounter based on?`:`Your journal now includes ${f.name}. Which habitat best fits its real-world ecology?`,...choices,context:`${f.name} \u00b7 Fish journal`,skill:legend?'Science and local folklore: fact versus fiction':'Science: fish habitat and ecology',why:legend?`${f.name} is inspired by folklore, not a scientifically verified separate species.`:`${f.name}: ${f.desc}`,hint:legend?'The journal note says whether it is folklore or a documented fish.':`Your catch notes say: ${f.desc}`,visual:`<div class="study-header"><img src="${fishPortrait(f.id)}" alt="${esc(f.name)} illustration"><div><b>${esc(f.name)}</b><p class="small">From your fish journal</p></div></div>`}}
 function saleQuestion(sale){const correct=fmt(sale.before+sale.amount),step=Math.max(1,Math.round(sale.amount*.2)),choices=permuteChoices(correct,[fmt(sale.before+sale.amount+step),fmt(Math.max(0,sale.before+sale.amount-step)),fmt(sale.amount)]);return {kind:'sale',saleId:sale.saleId,bonus:Math.max(3,Math.min(15,3+sale.count)),title:'Count your club rewards',eyebrow:'REAL REWARDS \u00b7 MONEY MATHS',q:`Before collecting your last ${sale.count} photo reward${sale.count===1?'':'s'}, you had ${fmt(sale.before)}. You earned ${fmt(sale.amount)}. How much did you have afterwards?`,...choices,context:`Club claim #${sale.saleId}: ${sale.count} photos`,skill:'Maths: addition and money management',why:`${fmt(sale.before)} + ${fmt(sale.amount)} = ${correct}.`,hint:`Add the reward to what you had before.`,visual:`<div class="coins"><span>${fmt(sale.before)}</span><span>+</span><span>${fmt(sale.amount)}</span><span>= ?</span></div>`,calculation:`${fmt(sale.before)} + ${fmt(sale.amount)} = ${correct}`}}
-function makeQuestion(){const photo=[...save.bucket].reverse().find(p=>!p.mastered);if(photo)return catchValueQuestion(photo);const unm=[...save.bucket].reverse().find(p=>p.mastered&&!p.measured&&FISH.find(f=>f.id===p.id&&!f.legend));if(unm)return rulerQuestion(unm);const id=Object.keys(save.journal).find(id=>!save.scienceClaims[id]&&!id.startsWith('cf-'));if(id)return scienceQuestion(id);const pu=save.lastPurchase;if(pu&&!save.changeClaims[pu.id])return changeQuestion(pu);let sl=save.lastSale;if(sl&&!save.saleClaims[sl.saleId])return saleQuestion(sl);const lq=locQuestion();if(lq)return lq;const dz=FISH.filter(f=>!f.legend&&!f.sighting&&!f.custom&&!save.depthClaims[f.id]&&f.places.some(p=>save.owned.includes(p)));if(dz.length)return depthQuestion(dz[Math.floor(Math.random()*dz.length)].id);let sale=save.lastSale;if(sale&&!save.saleClaims[sale.saleId])return saleQuestion(sale);return null}
-function grantLearningBonus(q){if(q.kind==='photo'){const p=photoByUID(q.uid);if(!p||p.mastered)return {bonus:0,toAlbum:true};p.mastered=true;p.bonus=photoBonus(p);save.learningBonusesEarned+=p.bonus;logAction('learning_bonus',`Worked out the ${FISH.find(f=>f.id===p.id)?.name||'fish'} photo value: +${fmt(p.bonus)}`);return {bonus:p.bonus,toAlbum:true}}
+function makeQuestion(){const photo=!save.flags.albumQ&&[...save.bucket].reverse().find(p=>!p.mastered);if(photo)return catchValueQuestion(photo);const unm=[...save.bucket].reverse().find(p=>p.mastered&&!p.measured&&FISH.find(f=>f.id===p.id&&!f.legend));if(unm)return rulerQuestion(unm);const id=Object.keys(save.journal).find(id=>!save.scienceClaims[id]&&!id.startsWith('cf-'));if(id)return scienceQuestion(id);const pu=save.lastPurchase;if(pu&&!save.changeClaims[pu.id])return changeQuestion(pu);let sl=save.lastSale;if(sl&&!save.saleClaims[sl.saleId])return saleQuestion(sl);const lq=locQuestion();if(lq)return lq;const dz=FISH.filter(f=>!f.legend&&!f.sighting&&!f.custom&&!save.depthClaims[f.id]&&f.places.some(p=>save.owned.includes(p)));if(dz.length)return depthQuestion(dz[Math.floor(Math.random()*dz.length)].id);let sale=save.lastSale;if(sale&&!save.saleClaims[sale.saleId])return saleQuestion(sale);return null}
+function grantLearningBonus(q){if(q.kind==='photo'){save.flags.albumQ=1;const p=photoByUID(q.uid);if(!p||p.mastered)return {bonus:0,toAlbum:true};p.mastered=true;p.bonus=photoBonus(p);save.learningBonusesEarned+=p.bonus;logAction('learning_bonus',`Worked out the ${FISH.find(f=>f.id===p.id)?.name||'fish'} photo value: +${fmt(p.bonus)}`);return {bonus:p.bonus,toAlbum:true}}
 if(q.kind==='science'){if(save.scienceClaims[q.species])return {bonus:0,toAlbum:false};save.scienceClaims[q.species]=true;save.money+=q.bonus;save.learningBonusesEarned+=q.bonus;save.learningBonusPaid+=q.bonus;logAction('learning_bonus',`Fish ecology for ${FISH.find(f=>f.id===q.species)?.name}: +${fmt(q.bonus)}`);updateHUD();return {bonus:q.bonus,toAlbum:false}}
 if(q.kind==='depth'){if(save.depthClaims[q.species])return {bonus:0,toAlbum:false};save.depthClaims[q.species]=true;save.money+=q.bonus;save.learningBonusesEarned+=q.bonus;save.learningBonusPaid+=q.bonus;logAction('learning_bonus',`Feeding depth for ${FISH.find(f=>f.id===q.species)?.name}: +${fmt(q.bonus)}`);updateHUD();return {bonus:q.bonus,toAlbum:false}}
 if(q.kind==='sale'){if(save.saleClaims[q.saleId])return {bonus:0,toAlbum:false};save.saleClaims[q.saleId]=true;save.money+=q.bonus;save.learningBonusesEarned+=q.bonus;save.learningBonusPaid+=q.bonus;logAction('learning_bonus',`Club claim #${q.saleId} mental maths: +${fmt(q.bonus)}`);updateHUD();return {bonus:q.bonus,toAlbum:false}}
@@ -1404,7 +1404,7 @@ if(action==='ride'){if(!save.bikeOwned)return;close();startBike();return}
 if(action==='watch-intro'){close();startCutscene(true);return}
 if(action==='demo-bike'){logAction('bike','Tried the dirt bike demo');close();startBike();bike.demo=true;announce('DIRT BIKE DEMO','A sneak peek: HK still has to earn the real one!','#ffd27a');return}
 if(action.startsWith('visit:')){if(mode==='town')exitTown();let i=Number(action.split(':')[1]),spot=LOC[i];if(!spot||spot.boat>save.boat)return;if(!save.owned.includes(i)){if(save.money<spot.price)return;save.money-=spot.price;save.owned.push(i);logAction('explore',`Unlocked ${spot.name} for ${fmt(spot.price)}`)}save.location=i;resetLine();phase='idle';castAim=0;save.clock=(save.clock+35)%1440;fishInit();stoat.state='hidden';stoat.t=R(4,9);birds=[];persist();updateHUD();close();toast('Now fishing: '+spot.name);maybeQuip('explore');return}
-if(action==='sell'){sfx('coins');magsSays=MAGS_LINES.paid;const amount=save.bucket.reduce((a,p)=>a+photoTotal(p),0);if(!amount)return;const count=save.bucket.length,before=save.money,bonusPaid=save.bucket.reduce((a,p)=>a+(p.bonus||0),0);save.money+=amount;save.total+=amount;save.learningBonusPaid+=bonusPaid;save.bucket=[];save.sales++;lastSale={amount,count,before,saleId:save.sales};save.lastSale=lastSale;logAction('reward',`Claimed ${fmt(amount)} for ${count} catch photos (including ${fmt(bonusPaid)} catch maths bonuses)`);updateHUD();renderPanel();toast('Club rewards! +'+fmt(amount));return}
+if(action==='sell'){sfx('coins');if(save.bucket.length){save.flags.albumQ=0;save.flags.qN=(save.flags.qN||0)+1}magsSays=MAGS_LINES.paid;const amount=save.bucket.reduce((a,p)=>a+photoTotal(p),0);if(!amount)return;const count=save.bucket.length,before=save.money,bonusPaid=save.bucket.reduce((a,p)=>a+(p.bonus||0),0);save.money+=amount;save.total+=amount;save.learningBonusPaid+=bonusPaid;save.bucket=[];save.sales++;lastSale={amount,count,before,saleId:save.sales};save.lastSale=lastSale;logAction('reward',`Claimed ${fmt(amount)} for ${count} catch photos (including ${fmt(bonusPaid)} catch maths bonuses)`);updateHUD();renderPanel();toast('Club rewards! +'+fmt(amount));return}
 if(action.startsWith('rod:')||action.startsWith('bag:')||action.startsWith('boat:')){let [type,n]=action.split(':'),i=Number(n),arr=type==='rod'?RODS:type==='bag'?BAGS:BOATS,key=type;if(i!==save[key]+1||save.money<arr[i].cost)return;notePurchase(arr[i].name,arr[i].cost,save.money);save.money-=arr[i].cost;save[key]=i;logAction('purchase',`Bought ${arr[i].name} for ${fmt(arr[i].cost)}`);updateHUD();renderPanel();maybeQuip('purchase');toast(type==='rod'?'New rod!':type==='boat'?'Your boat is ready!':'Bigger album!');return}
 if(action.startsWith('answer:')){answer(Number(action.split(':')[1]));return}
 if(action.startsWith('selectsite:')){selectedSite=clamp(Number(action.split(':')[1])||0,0,LOC.length-1);renderPanel();return}
@@ -1524,7 +1524,7 @@ const PANELS={
  catch:()=>{const f=FISH.find(x=>x.id===target.id),photo=photoByUID(target.uid),img=photoStore[target.uid];return {theme:'th-photo',html:`<div class="photo-flag">${target.trophy?'TROPHY FISH!':target.newSpecies?'New species!':target.newRecord?'Personal best!':'Snap!'}</div>${target.wanted?'<div class="photo-flag wanted-flag">Wanted today: double rate!</div>':''}${target.rec&&!target.rec.beatSelf?`<div class="photo-flag record-flag">Club record! Beat ${esc(target.rec.prev.who)}\u2019s ${target.rec.prev.kg} kg \u00b7 +\u00a350</div>`:''}${target.trophy?'<div class="photo-flag record-flag">Trophy bonus +\u00a350</div>':''}<figure class="big-polaroid"><span class="washi"></span><div class="pol-img ${img?'real':''}"><img src="${img||fishPortrait(f.id)}" alt="HK holding a ${esc(f.name)}"></div><figcaption>${esc(f.name)}, ${target.weight.toFixed(2)} kg</figcaption></figure>
   <div class="photo-tags"><span class="ptag">${target.weight.toFixed(2)} kg</span><span class="ptag">\u00a3${target.rate} per kg</span><span class="ptag">${photo?.mastered?fmt(target.price):'\u00a3 ? (weight \u00d7 rate)'}</span></div>
   ${renderHollyTip()}<p class="photo-desc">${esc(f.desc)}</p>${f.legend?'<p class="photo-legend">A legend from folklore, not a real species. What a story, though.</p>':`${(TRAVEL_BONUS[save.location]||1)>1?`<p class="photo-bonus">Water bonus: the club pays ${TRAVEL_BONUS[save.location]} times its usual rate at this water.</p>`:''}<p class="photo-depth">${FIGHT_NAME[FIGHT[f.id]]?FIGHT_NAME[FIGHT[f.id]]+' fighter. ':''}Hook set ${target.depth.toLowerCase()}, with ${esc(bait().name.toLowerCase())}. ${esc(f.name)} usually feeds ${HOOK_LEVELS[zoneOf(f.id)].short}.</p>`}
-  <div class="actions">${photo&&!photo.mastered?btn('Work out its value \u00b7 +'+fmt(photoBonus(photo)),`challenge:${photo.uid}`,false,'sticky'):''}${btn('Let it go and keep fishing','close',false,'paper')}</div>`}},
+  <div class="actions">${photo&&!photo.mastered&&save.flags.albumQ?'<p class="small">One money sum per album: you have done this one. Sell at the club and Holly will set a new one.</p>':''}${photo&&!photo.mastered&&!save.flags.albumQ?btn('Work out its value \u00b7 +'+fmt(photoBonus(photo)),`challenge:${photo.uid}`,false,'sticky'):''}${btn('Let it go and keep fishing','close',false,'paper')}</div>`}},
  learn:()=>({theme:'th-ledger',html:renderLearn()}),
  feedback:()=>({theme:'th-ledger',html:renderFeedback()}),
  controls:()=>({theme:'th-permit card',html:`<div class="permit-head">How to fish <span>from Clive\u2019s counter</span></div><div class="keys-grid"><div><kbd>\u2190</kbd><kbd>\u2192</kbd><span>Choose where to cast</span></div><div><kbd>\u2191</kbd><kbd>\u2193</kbd><span>Hook depth: shallow, middle or bottom</span></div><div><kbd class="wide">Space</kbd><span>Cast \u00b7 strike when the float goes under \u00b7 hold to reel</span></div><div><kbd>S</kbd><kbd>U</kbd><kbd>M</kbd><span>Club \u00b7 Clive\u2019s shop \u00b7 map</span></div><div><kbd>J</kbd><kbd>R</kbd><kbd>C</kbd><span>Journal \u00b7 research book \u00b7 backpack</span></div><div><kbd>L</kbd><kbd>N</kbd><kbd>Esc</kbd><span>Puzzles \u00b7 sound \u00b7 permit</span></div><div><kbd>B</kbd><kbd>O</kbd><span>Swap bait \u00b7 settings</span></div></div><p class="permit-tip">A twitchy float means a nibble. When it goes right under, that\u2019s a bite. While reeling, letting go of Space eases a tight line. Hold the tension in the red too long and the line can snap. Calm fishing in Settings turns that off.</p><div class="actions">${btn('Got it',save.hasPlayed?'menu':'intro',false,'paper')}</div>`}),
@@ -2016,7 +2016,8 @@ function challengeEvent(ev){if(!Array.isArray(save.challenges))return;let change
    if(c.type==='dark'&&(ev.hour>=20||ev.hour<5))add=1;
    if(c.type==='heavy'&&ev.weight>c.p.kg)add=1;
    if(c.type==='bait'&&ev.bait===c.p.b)add=1;
-   if(c.type==='release')add=1}
+   if(c.type==='release')add=1;
+   if(c.type==='target'&&ev.id===c.p.id)add=1}
   if(ev.kind==='learn'&&c.type==='puzzles')add=1;
   if(ev.kind==='stoat'&&c.type==='stoat')add=1;
   if(add){c.progress=Math.min(c.goal,c.progress+add);changed=true;if(c.progress>=c.goal){c.done=true;setTimeout(()=>{toast('Challenge done! Mags has '+fmt(c.reward)+' for HK at the club');sfx('right')},panelName?0:1900)}}}
@@ -2107,7 +2108,7 @@ const EVENTS={
  jump:{w:1.4,ok:()=>true,
   start:()=>{const pool=FISH.filter(f=>!f.legend&&!f.sighting&&f.places.includes(save.location));const f=pool[Math.floor(Math.random()*pool.length)]||FISH[0];return {id:f.id,x:R(240,420),d:Math.random()<.5?1:-1,t:0}},
   update(e,dt){const was=e.t;e.t+=dt;if(was===0){splash(e.x,SURF,.5);sfx('plop')}if(e.t>.75&&was<=.75){splash(e.x+e.d*16,SURF,.8);sfx('splash');feedBoost=45;const f=FISH.find(x=>x.id===e.id);evToast((save.journal[e.id]?`A ${f.name.toLowerCase()} jumped!`:'Something jumped!')+' The fish are feeding: bites come quicker for a while.')}return e.t<1.1},
-  draw(e,layer){if(layer!=='water'||e.t>.75)return;const k=e.t/.75;drawFishSprite(e.id,e.x+e.d*16*k,SURF-Math.sin(k*Math.PI)*18,Math.floor(time*16),e.d)}},
+  draw(e,layer){if(layer!=='water'||e.t>.75)return;const k=e.t/.75;drawFishOrShadow(e.id,e.x+e.d*16*k,SURF-Math.sin(k*Math.PI)*18,Math.floor(time*16),e.d)}},
  dragonfly:{w:1,ok:(l,h)=>FRESH_LOCS.includes(l)&&h>9&&h<18.5&&save.weather!=='rain',
   start:()=>({x:-4,y:R(70,110),tx:R(60,240),ty:R(80,130),st:'fly',t:R(12,18),hop:0,sat:0}),
   update(e,dt){e.t-=dt;e.hop-=dt;if(e.st==='sit'){e.x=rodTip.x;e.y=rodTip.y-1;if(e.t<=0||!['idle','waiting'].includes(phase)){e.st='leave';e.tx=LW+10;e.ty=R(60,100)}return true}
@@ -2279,7 +2280,7 @@ function fightPost(dt){const st=fightStyle(),sts=hookedFish&&hookedFish.trophy?[
 
 // ----- Farther waters pay more -----
 const TRAVEL_BONUS=[1,1.2,1.4,1.6,2,2.5,3,3.5];
-function rateAt(f,loc){return Math.max(10,Math.round(clubRate(f)*(TRAVEL_BONUS[loc]||1)/10)*10)}
+function rateAt(f,loc){return Math.max(10,Math.round(clubRate(f)*(TRAVEL_BONUS[loc]||1)/10)*10)*starterK()}
 
 // ----- Seasons, from the real calendar -----
 const SEASON_NAMES=['winter','spring','summer','autumn'];
@@ -3310,6 +3311,74 @@ function drawParkedBike(){if(!save.bikeOwned||save.location!==0||mode!=='pond')r
 // Esc during the quiet ending skips straight to the fishing
 const _exitBike=exitBike;
 exitBike=function(){if(mode==='bike'&&bike&&bike.outro&&bike.outro.stage!=='coast'){finishRide();return}_exitBike.apply(this,arguments)};
+
+// ===== A livelier core loop =====
+// Small fish land quickly (in 04-game), the first water pays a starter rate, every new species earns a
+// bonus, Mags names fish to hunt with a tip, the money sum comes once per album in rotating forms,
+// the HUD shows the next water as the goal, and a few surprises arrive early.
+
+// ----- starter rate: double pay until HK opens a second water -----
+function starterK(){return save.owned&&save.owned.length<2?2:1}
+function nextWaterGoal(){if(save.season2||save.bikeOwned||save.owned.length>=3)return null;let best=null;LOC.forEach((l,i)=>{if(!save.owned.includes(i)&&(!best||l.price<best.price))best={name:l.name,price:l.price,i}});return best}
+
+// ----- new species bonus, early surprises, gentle tips -----
+const _completeCatch=completeCatch;
+completeCatch=function(){const f=hookedFish&&hookedFish.f,had=f&&!!save.journal[f.id];const r=_completeCatch.apply(this,arguments);
+ if(f&&!had&&!f.sighting&&!f.custom){save.money+=20;save.total=(save.total||0)+20;queueLoopToast(`New species! Mags adds a \u00a320 bonus for the ${f.name.toLowerCase()}.`)}
+ const n=save.totalCatches||0,fl=save.flags;
+ if(starterK()>1&&!fl.starterSaid){fl.starterSaid=1;queueLoopToast('Mags: \u201cStarter rate! The club pays double until you open up a new water.\u201d')}
+ if(n>=5&&!fl.depthTip&&save.location===0){const ids=Object.keys(save.journal);if(!ids.some(id=>['bream','tench','carp'].includes(id))){fl.depthTip=1;queueLoopToast('Mags: \u201cBream and tench feed near the bottom, best at dusk. Sweetcorn helps!\u201d')}}
+ if(n>=6&&!fl.legendRumour){fl.legendRumour=1;queueLoopToast('Holly: \u201cHave you heard about the Doctor of the Reeds? A golden fish at Mill Pond, but only at dusk\u2026\u201d')}
+ persist();return r};
+let loopToasts=[];
+function queueLoopToast(t){loopToasts.push(t)}
+setInterval(()=>{if(!loopToasts.length||mode!=='pond'||panelName||phase==='reeling'||toastBusyLong())return;toast(loopToasts.shift(),5200)},1200);
+// a guaranteed trophy fish early on, so everyone meets one in their first few minutes
+const _spawnFish=spawnFish;
+spawnFish=function(x){_spawnFish.apply(this,arguments);const fo=fishies[fishies.length-1],fl=save.flags;
+ if(fo&&!fl.firstTrophy&&(save.totalCatches||0)>=3&&!fo.f.legend&&!fo.f.sighting&&!fo.f.custom&&!fishies.some(o=>o.trophy)){fo.trophy=true;fo.weight=fo.f.max*R(.93,1)}};
+{const _cc2=completeCatch;completeCatch=function(){const tr=hookedFish&&hookedFish.trophy;const r=_cc2.apply(this,arguments);if(tr)save.flags.firstTrophy=1;return r}}
+
+// ----- Mags names a fish to hunt, with a tip -----
+CH_MAKERS.target=()=>{const pool=FISH.filter(f=>!f.legend&&!f.sighting&&!f.custom&&!save.journal[f.id]&&f.places.some(p=>save.owned.includes(p)));if(!pool.length)return null;
+ const f=rnd(pool),L=f.places.find(p=>save.owned.includes(p)),bb=bestBaits(f.id),tip=[HOOK_LEVELS[zoneOf(f.id)].short,(TIME_HINT[f.id]||'any time').toLowerCase(),bb.length?'try '+bb[0].toLowerCase():''].filter(Boolean).join(', ');
+ return {text:`Photograph a ${f.name.toLowerCase()} at ${LOC[L].name} (tip: ${tip})`,goal:1,p:{id:f.id},mult:1.6}};
+const _refill=refillChallenges;
+refillChallenges=function(){if(Array.isArray(save.challenges)&&save.challenges.length<3&&!save.challenges.some(c=>c.type==='target'&&!c.done)){const c=CH_MAKERS.target();if(c)save.challenges.push({id:Date.now()+'-t',type:'target',text:c.text,goal:1,progress:0,reward:challengeReward(c.mult),done:false,p:c.p})}return _refill.apply(this,arguments)};
+
+// ----- one money sum per album, in a different form each time -----
+const _cvqLoop=catchValueQuestion;
+catchValueQuestion=function(photo){const q=_cvqLoop(photo),v=(save.flags.qN||0)%3;if(v===0)return q;
+ const f=FISH.find(x=>x.id===photo.id)||FISH[0],w=photo.weight,rate=photo.rate,exact=clubPhotoValue(w,rate);
+ if(v===2&&w>=1){const kg=Math.round(w),est=kg*rate,step=Math.max(1,rate);
+  return {...q,...permuteChoices(fmt(est),[fmt(est+step),fmt(Math.max(1,est-step)),fmt(est*2)]),title:'Roughly what is it worth?',eyebrow:'ROUND, THEN MULTIPLY',
+   q:`Your ${f.name} weighs ${w.toFixed(2)} kg, which rounds to ${kg} kg. The club pays \u00a3${rate} for each kilogram. Roughly what is the photo worth?`,
+   why:`${kg} kg \u00d7 \u00a3${rate} = ${fmt(est)}. The exact value is ${fmt(exact)}, and that is what the club pays.`,hint:`Round the weight to the nearest whole kilogram first, then multiply by \u00a3${rate}.`,calculation:`${kg} \u00d7 \u00a3${rate} = ${fmt(est)}`}}
+ const n=Math.max(1,Math.round(w*10)),per=rate/10,est=Math.round(n*per),step=Math.max(1,Math.round(per));
+ return {...q,...permuteChoices(fmt(est),[fmt(est+step),fmt(Math.max(1,est-step)),fmt(est+2*step)]),title:'Count it in 100 g',eyebrow:'\u00a3 PER 100 GRAMS',
+  q:`Your ${f.name} weighs ${w.toFixed(2)} kg. That is about ${n} lots of 100 g. The club pays \u00a3${rate} per kilogram, which is \u00a3${per} for every 100 g. Roughly what is the photo worth?`,
+  why:`${n} \u00d7 \u00a3${per} = ${fmt(est)}. The exact value is ${fmt(exact)}, and that is what the club pays.`,hint:`A kilogram is ten lots of 100 g, so 100 g earns \u00a3${rate} \u00f7 10 = \u00a3${per}.`,calculation:`${n} \u00d7 \u00a3${per} = ${fmt(est)}`}};
+
+// ===== Mystery fish =====
+// Until HK has caught a species, it swims as a dark, blurry fish-shaped shadow: you can see something is
+// there and roughly how big it is, but not what it is. The first time one is landed it is revealed,
+// and from then on that species always shows properly.
+function fishKnown(f){return !!(f.custom||save.journal[f.id])}
+const tadCache={};
+function tadpoleArt(id,frame,facing){const key=id+'|'+frame+'|'+facing;if(tadCache[key])return tadCache[key];
+ const a=fishArt(id),L=Math.max(12,a.len),D=Math.max(4,(ART[id]&&ART[id].dep)||Math.round(a.h*.4)),W=L+10,H=D+12,sharp=document.createElement('canvas');sharp.width=W;sharp.height=H;const s=sharp.getContext('2d');s.fillStyle='#08181c';
+ // a plain fish-shaped shadow: chunky oval body that narrows into a short forked tail fin
+ const cy=H/2,dir=facing>=0?1:-1,ph=frame*Math.PI/2,bl=L*.78,tl=L-bl,rh=Math.max(2.5,D*.5),x0=facing>=0?W-4-bl:4+bl;
+ for(let k=0;k<=bl;k++){const t=k/bl,taper=t<.7?1:1-(t-.7)/.3*.55,h=Math.sqrt(Math.max(0,1-Math.pow(t*2-1,2)))*rh*taper+(t>.5?0:0),x=facing>=0?x0+bl-k:x0-bl+k,wob=Math.sin(ph)*t*t*.8;
+  s.fillRect(Math.round(x),Math.round(cy-h+wob),1,Math.max(1,Math.round(h*2)))}
+ const tx0=facing>=0?x0:x0,sw=Math.sin(ph)*1.2;for(let k=0;k<tl;k++){const t=k/tl,spread=rh*(.35+t*.75),x=facing>=0?tx0-k:tx0+k;
+  if(t<.45){s.fillRect(Math.round(x),Math.round(cy-spread*.5+sw*t),1,Math.max(1,Math.round(spread)))}
+  else{const lobe=Math.max(1,Math.round(spread*.38));s.fillRect(Math.round(x),Math.round(cy-spread+sw*t),1,lobe);s.fillRect(Math.round(x),Math.round(cy+spread-lobe+sw*t),1,lobe)}}
+ const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ for(const [dx,dy,al] of [[0,0,.34],[-1,0,.16],[1,0,.16],[0,-1,.16],[0,1,.16],[-2,0,.07],[2,0,.07],[0,-2,.07],[0,2,.07],[-1,-1,.08],[1,1,.08],[-1,1,.08],[1,-1,.08]]){x.globalAlpha=al;x.drawImage(sharp,dx,dy)}
+ return tadCache[key]=c}
+function drawTadpole(id,cx,cy,frame,facing){const c=tadpoleArt(id,((frame%4)+4)%4,facing>=0?1:-1);const keep=g.globalAlpha;g.globalAlpha=keep*.9;g.drawImage(c,Math.round(cx-c.width/2),Math.round(cy-c.height/2));g.globalAlpha=keep}
+function drawFishOrShadow(id,x,y,frame,facing){const f=FISH.find(q=>q.id===id);if(!f||fishKnown(f))drawFishSprite(id,x,y,frame,facing);else drawTadpole(id,x,y,frame,facing)}
 
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
