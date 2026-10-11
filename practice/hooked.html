@@ -575,7 +575,7 @@ function buildFish(id){
   const ph=f*Math.PI/2,grid=new Array(W*H).fill(null);
   const set=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<W&&y<H)grid[y*W+x]=c};
   const cy=Math.floor(H/2),x0=1,eel=a.tail==='eel';
-  const tailLen=eel?0:Math.max(3,Math.round(L*.2)),bodyStart=x0+tailLen,bodyLen=L-tailLen;
+  const tailLen=eel||a.tail==='none'?0:Math.max(3,Math.round(L*.2)),bodyStart=x0+tailLen,bodyLen=L-tailLen;
   const bend=x=>{const t=clamp((x-x0)/L,0,1);return Math.round((eel?2.2:1.6)*Math.sin(ph-t*(eel?6:3.2))*Math.pow(1-t,eel?.6:2.2))};
   const colTop=[],colBot=[],colC=[];
   for(let i=0;i<bodyLen;i++){
@@ -610,7 +610,7 @@ function buildFish(id){
   }
   if(a.pat==='lateral'){for(let x=bodyStart+2;x<snoutX-3;x++){const c=colC[x];if(c===undefined)continue;const t=(x-bodyStart)/bodyLen;set(x,c-Math.round(Math.sin(t*Math.PI)*1.6)-1,shade(a.side,-.35))}}
   // tail fin, which carries most of the swim motion
-  if(!eel){const c0=colC[bodyStart];
+  if(!eel&&tailLen){const c0=colC[bodyStart];
    for(let k=1;k<=tailLen;k++){const x=bodyStart-k,s=1+k/tailLen*(D*.55),off=bend(x)+(colC[bodyStart]-cy)*0;const cc=c0+Math.round((bend(x)-bend(bodyStart))*1.3);
     if(a.tail==='fork'||!a.tail){for(let y=-Math.round(s);y<=Math.round(s);y++){if(k>tailLen*.55&&Math.abs(y)<s*.45)continue;set(x,cc+y,y<0?shade(a.fin,.04):a.fin)}}
     else{const r=a.tail==='round'?s*(1-Math.pow(k/tailLen,3)*.5):s;for(let y=-Math.round(r);y<=Math.round(r);y++)set(x,cc+y,a.fin)}
@@ -629,7 +629,7 @@ function buildFish(id){
   else if(a.dorsal==='fringe'){for(let x=bodyStart+1;x<snoutX-3;x++){set(x,colTop[x]-1,a.fin);set(x,colBot[x]+1,a.fin)}}
   if(a.adipose){const x=Math.round(bodyStart+bodyLen*.16);set(x,colTop[x]-1,a.fin)}
   // pectoral, pelvic and anal fins
-  if(!eel&&!a.flat){const px1=Math.round(bodyStart+bodyLen*.72),c=colC[px1];set(px1,c+1,shade(a.fin,-.1));set(px1-1,c+2,a.fin);set(px1-2,c+2,a.fin);
+  if(!eel&&!a.flat&&!a.nofins){const px1=Math.round(bodyStart+bodyLen*.72),c=colC[px1];set(px1,c+1,shade(a.fin,-.1));set(px1-1,c+2,a.fin);set(px1-2,c+2,a.fin);
    const pv=Math.round(bodyStart+bodyLen*.5);set(pv,colBot[pv]+1,a.fin);set(pv-1,colBot[pv-1]+1,a.fin);set(pv-1,colBot[pv-1]+2,a.fin);
    for(let x=Math.round(bodyStart+bodyLen*.24);x<bodyStart+bodyLen*.36;x++){set(x,colBot[x]+1,a.fin);if(x%2)set(x,colBot[x]+2,a.fin)}}
   // head details: gill line, eye, mouth, barbels, sword
@@ -642,6 +642,7 @@ function buildFish(id){
   if(a.jaw)set(snoutX+1,mc+1,a.side);
   if(a.barbel){set(snoutX,mc+1,a.fin);set(snoutX,mc+2,a.fin);if(a.barbel>1){set(snoutX-2,mc+1,a.fin);set(snoutX-2,mc+2,a.fin);set(snoutX-1,mc+3,a.fin)}}
   if(a.sword){for(let k=1;k<=11;k++)set(snoutX+1+k,mc,k%3?'#dfe5ea':'#ffffff');set(snoutX+1,mc-1,'#c99a3a');set(snoutX+1,mc+1,'#c99a3a');set(snoutX+1,mc,'#8a5a2a');set(snoutX+2,mc-2,'#c99a3a');set(snoutX+2,mc+2,'#c99a3a')}
+  if(a.extra&&typeof legendArt==='function')legendArt(a,set,{f,snoutX,mc,colTop,colBot,colC,bodyStart,bodyLen,cy,L,D});
   // crisp dark outline, the main thing that makes these read as finished sprites
   const outl=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(grid[y*W+x])continue;if((x>0&&grid[y*W+x-1])||(x<W-1&&grid[y*W+x+1])||(y>0&&grid[(y-1)*W+x])||(y<H-1&&grid[(y+1)*W+x]))outl.push(y*W+x)}
   for(const i of outl)grid[i]=outline;
@@ -1032,7 +1033,7 @@ function drawRipples(){for(const r of ripples){const t=r.age/1.6,rx=2+r.age*11*r
 
 // ===== Fish population =====
 function fishInit(){fishies=[];for(let i=0;i<16;i++)spawnFish(R(320,950))}
-function activity(f){let h=(save.clock/60)%24,twilight=h>=17.5&&h<21||h>=4.5&&h<7.5,night=h>=20||h<5.5,day=h>=8&&h<17;let w=1;if(['eel','bream','tench','flounder'].includes(f.id))w*=night?1.65:twilight?1.25:.65;if(['rudd','grey-mullet','sand-goby'].includes(f.id))w*=day?1.5:night?.45:1;if(['mackerel','pike','perch','sea-bass','brown-trout'].includes(f.id))w*=twilight?1.7:night?.65:1;if(f.legend){if(f.id==='sword-fish')w*=save.location===2&&(twilight||night)&&save.rod>=2?16:0;else w*=twilight&&save.rod>=1?28:0;}return w*weatherFeed(f.id)*baitFactor(f.id)*seasonFeed(f.id)*restoreFeed(f.id)*(feedBoost>0?1.4:1)}
+function activity(f){let h=(save.clock/60)%24,twilight=h>=17.5&&h<21||h>=4.5&&h<7.5,night=h>=20||h<5.5,day=h>=8&&h<17;let w=1;if(['eel','bream','tench','flounder'].includes(f.id))w*=night?1.65:twilight?1.25:.65;if(['rudd','grey-mullet','sand-goby'].includes(f.id))w*=day?1.5:night?.45:1;if(['mackerel','pike','perch','sea-bass','brown-trout'].includes(f.id))w*=twilight?1.7:night?.65:1;if(f.legend)w*=legendFeed(f);return w*weatherFeed(f.id)*baitFactor(f.id)*seasonFeed(f.id)*restoreFeed(f.id)*(feedBoost>0?1.4:1)}
 function chooseFish(){let odds=FISH.map(f=>f.places.includes(save.location)?f.bias*activity(f)*(1+save.rod*.07):0),sum=odds.reduce((a,b)=>a+b,0),r=R(0,sum);return FISH[Math.max(0,odds.findIndex(w=>(r-=w)<=0))]||FISH[0]}
 function spawnFish(x){let f=chooseFish(),depth=DEPTHS[f.id]||[350,515];const fo={f,x,y:R(depth[0],depth[1]),vx:R(.12,.45)*(Math.random()<.5?-1:1),wiggle:R(0,7),chosen:false,interest:0,agitation:0,weight:R(f.min,f.max)};makeTrophy(fo);fishies.push(fo)}
 const bankEdgeW=yw=>bankEdge(yw/2)*2+28;
@@ -1131,7 +1132,7 @@ function update(dt){
  if((phase==='idle'||phase==='waiting')&&!panelName&&save.hasPlayed&&!sadT){if(idleAnim){idleAnim.t+=dt;if(idleAnim.type==='whistle'&&Math.random()<dt*2.2)parts.push({x:heroAt.x+8,y:heroAt.y-30,vx:R(4,10),vy:R(-14,-8),life:1.3,age:0,kind:'note'});if(idleAnim.t>=idleAnim.dur)idleAnim=null}else{idleNext-=dt;if(idleNext<=0){idleNext=R(3.5,8);const [type,dur]=pickIdle();idleAnim={type,t:0,dur}}}}else idleAnim=null;
  {const dim=!panelName&&performance.now()-lastInput>4500;if(dim!==hudDim){hudDim=dim;$('hud').classList.toggle('dim',dim)}}
  if(quipUntil&&performance.now()>quipUntil){$('quip').classList.remove('on');quipUntil=0}
- toastTick();checkStickers(dt);updateGuide(dt);
+ toastTick();checkStickers(dt);updateGuide(dt);legendTick(dt);
  updateHUD();updateTip();
 }
 function inDepth(f,y){const d=DEPTHS[f.f.id]||[350,515];return y>=d[0]-45&&y<=d[1]+45}
@@ -1549,7 +1550,7 @@ function renderResearch(){
  const tabs=[['find','Still to find'],['rare','Rare & legendary'],['all','Every species']].map(([k,n])=>`<button class="rb-tab ${researchTab===k?'on':''}" data-act="rtab:${k}">${n}</button>`).join('');
  return `<div class="rb-title">The Research Book<span>Mags\u2019s field notes on British waters</span></div><div class="rb-tabs">${tabs}</div><p class="rb-key">Places in grey italics are still to be explored.</p><div class="rb-design">${btn('\ud83c\udfa8 Design your own fish','designer',false,'paper')}</div><div class="rb-pages">${list.length?list.map(f=>{const found=!!save.journal[f.id],r=rarityOf(f),likes=weatherLikes(f.id);
   return `<article class="rb-entry ${found?'found':''} ${f.legend?'legend':''}"><div class="rb-pic">${swimmer(f.id,found,found?f.name+' swimming':'Ink silhouette of an unknown fish')}</div><div class="rb-text"><h3>${esc(f.name)} <span class="rb-rarity r-${r.toLowerCase()}">${r}</span></h3>
-  <p class="rb-note">${esc(RESEARCH[f.id]||'')}</p>${found?`<p class="rb-fact"><b>Fun fact</b> ${esc(FUN_FACTS[f.id]||'')}</p>`:`<p class="rb-fact locked"><b>Fun fact</b> Photograph one to unlock this page\u2019s fun fact.</p>`}<dl><dt>Where</dt><dd>${f.places.map(p=>save.owned.includes(p)?esc(LOC[p].name):`<span class="unexp">${esc(LOC[p].name)}</span>`).join(', ')}</dd>${f.legend?'':f.sighting?'<dt>Rule</dt><dd>Protected: photographed from a distance, never hooked</dd>':`<dt>Depth</dt><dd>${HOOK_LEVELS[zoneOf(f.id)].name}</dd>`}${isWanted(f.id)?'<dt>Today</dt><dd class="rb-wanted">On Mags\u2019s wanted board: double pay!</dd>':''}${recordOf(f.id)?`<dt>Club record</dt><dd>${recordOf(f.id).kg.toFixed(2)} kg (${esc(recordOf(f.id).who)})</dd>`:''}<dt>Best time</dt><dd>${TIME_HINT[f.id]||'Any time'}</dd>${(()=>{const ss=bestSeason(f.id);return ss.length?`<dt>Season</dt><dd>Busiest in ${ss.join(' and ')}</dd>`:''})()}${!f.legend&&FIGHT[f.id]?`<dt>Fights</dt><dd>${FIGHT_NAME[FIGHT[f.id]]}</dd>`:''}${likes.length?`<dt>Weather</dt><dd>Livelier in ${likes.join(' or ')}</dd>`:''}${(()=>{const bb=bestBaits(f.id);return bb.length&&!f.legend?`<dt>Bait</dt><dd>${esc(bb.join(' or '))}</dd>`:''})()}${f.legend?`<dt>Needs</dt><dd>${f.id==='sword-fish'?'Fibreglass rod or better':'Second-hand rod or better'}</dd>`:''}</dl>${found?'<span class="rb-stamp">Photographed</span>':''}${f.legend?'<span class="seal"></span>':''}</div></article>`}).join(''):'<p class="rb-empty">Every species in this book has been photographed. Mags would be proud.</p>'}</div><div class="actions">${btn('Close the book','close',false,'paper')}</div>`}
+  <p class="rb-note">${esc(RESEARCH[f.id]||'')}</p>${found?`<p class="rb-fact"><b>Fun fact</b> ${esc(FUN_FACTS[f.id]||'')}</p>`:`<p class="rb-fact locked"><b>Fun fact</b> Photograph one to unlock this page\u2019s fun fact.</p>`}<dl><dt>Where</dt><dd>${f.places.map(p=>save.owned.includes(p)?esc(LOC[p].name):`<span class="unexp">${esc(LOC[p].name)}</span>`).join(', ')}</dd>${f.legend?'':f.sighting?'<dt>Rule</dt><dd>Protected: photographed from a distance, never hooked</dd>':`<dt>Depth</dt><dd>${HOOK_LEVELS[zoneOf(f.id)].name}</dd>`}${isWanted(f.id)?'<dt>Today</dt><dd class="rb-wanted">On Mags\u2019s wanted board: double pay!</dd>':''}${recordOf(f.id)?`<dt>Club record</dt><dd>${recordOf(f.id).kg.toFixed(2)} kg (${esc(recordOf(f.id).who)})</dd>`:''}<dt>Best time</dt><dd>${TIME_HINT[f.id]||'Any time'}</dd>${(()=>{const ss=bestSeason(f.id);return ss.length?`<dt>Season</dt><dd>Busiest in ${ss.join(' and ')}</dd>`:''})()}${!f.legend&&FIGHT[f.id]?`<dt>Fights</dt><dd>${FIGHT_NAME[FIGHT[f.id]]}</dd>`:''}${likes.length?`<dt>Weather</dt><dd>Livelier in ${likes.join(' or ')}</dd>`:''}${(()=>{const bb=bestBaits(f.id);return bb.length&&!f.legend?`<dt>Bait</dt><dd>${esc(bb.join(' or '))}</dd>`:''})()}${f.legend?`<dt>Needs</dt><dd>${legendNeeds(f)}</dd>`:''}</dl>${found?'<span class="rb-stamp">Photographed</span>':''}${f.legend?'<span class="seal"></span>':''}</div></article>`}).join(''):'<p class="rb-empty">Every species in this book has been photographed. Mags would be proud.</p>'}</div><div class="actions">${btn('Close the book','close',false,'paper')}</div>`}
 
 function renderLearn(){const q=currentQuestion;
  if(!q)return `<div class="ledger-tab">Fieldwork puzzles</div><h1 class="ledger-h">Nothing to work out right now</h1><p class="ledger-q">Puzzles come from real catches: a photo\u2019s weight and rate, a new species, the research book, or a trip to the club.</p><div class="actions">${btn('Back to fishing','close',false,'paper')}</div>`;
@@ -2682,22 +2683,35 @@ function renderDales(){const owned=save.bikeOwned;return `<div class="sign-board
 
 // ----- HK's bedroom -----
 const POSTERS=['hooked','pike','bike','crumble','song','squad1','map','strawberry','fishchart','stoat','moon','squad2','club','squad3','carp','socks'];
-// Asharby: HK's favourite operator from his favourite game, Breach Squad. An original character (Sakura Night look).
+// Asharby: HK's favourite operator from his favourite game, Breach Squad. An original character:
+// a chibi shadow ninja with a black bob, face mask, dark gear with red ties and two teal tipped blades.
 function drawAsharby(cx,by,s,flip){cx=Math.round(cx);by=Math.round(by);const P=(dx,dy,w,h,c)=>px(flip?cx-(dx+w)*s:cx+dx*s,by+dy*s,w*s,h*s,c);
- P(-3,-8,2,8,'#1a2040');P(1,-8,2,8,'#1a2040');P(-4,-1,3,1,'#f2c0d0');P(1,-1,3,1,'#f2c0d0');
- P(-5,-18,10,10,'#1e2a50');P(-1,-18,1,10,'#ff9ac0');P(-2,-18,1,4,'#ff9ac0');P(1,-18,1,4,'#ff9ac0');P(-5,-11,10,2,'#ff9ac0');
- P(-7,-17,2,7,'#1e2a50');P(5,-17,2,7,'#1e2a50');P(-7,-10,2,2,'#e8b896');P(5,-10,2,2,'#e8b896');
- P(-6,-25,2,12,'#ff9ac0');P(4,-25,2,12,'#ff9ac0');P(-6,-13,1,2,'#ff9ac0');P(5,-13,1,2,'#ff9ac0');
- P(-3,-25,6,7,'#e8b896');P(-4,-27,8,3,'#ff9ac0');P(-4,-26,1,2,'#ffc0d8');P(-2,-22,1,1,'#2a2a2a');P(1,-22,1,1,'#2a2a2a');P(-1,-20,2,1,'#c86a5a');
- for(const [dx,dy] of [[-4,-16],[2,-14],[-1,-12],[3,-17],[-9,-6],[8,-9]])P(dx,dy,1,1,'#ffc0d8')}
+ const HAIR='#16161c',HL='#3a3a48',SUIT='#2c2c34',SUIT2='#3c3c46',DARK='#1e1e24',RED='#b0283a',SKIN='#e8a070',TEAL='#7ae8d0',STEEL='#4a4a56';
+ P(-1,0,2,1,'#00000040');P(-11,0,22,1,'#0000002a');
+ // legs in a wide fighting stance
+ P(-11,-2,5,2,DARK);P(6,-2,5,2,DARK);P(-10,-6,3,4,SUIT);P(7,-6,3,4,SUIT);P(-8,-10,4,4,SUIT2);P(4,-10,4,4,SUIT2);
+ P(-9,-7,2,1,RED);P(7,-5,3,1,RED);P(-11,-1,5,1,'#33333c');P(6,-1,5,1,'#33333c');
+ // hips, sash and body
+ P(-5,-12,10,3,SUIT);P(-5,-12,10,1,RED);P(-1,-11,2,2,RED);
+ P(-4,-18,8,6,SUIT2);P(-3,-17,3,2,'#50505c');P(0,-15,3,1,RED);P(-6,-18,2,2,SKIN);P(4,-18,2,2,SKIN);
+ // arms: one low, one high, a blade in each hand
+ P(-7,-16,2,3,SUIT);P(-9,-14,2,2,DARK);P(5,-19,2,3,SUIT);P(7,-21,2,2,DARK);P(-7,-16,1,1,SKIN);P(6,-19,1,1,SKIN);
+ for(let k=0;k<5;k++){P(-10-k,-15-k,1,1,STEEL);P(9+k,-22-k,1,1,STEEL)}
+ P(-12,-17,1,1,'#e8803a');P(11,-24,1,1,'#e8803a');P(-15,-20,1,1,TEAL);P(14,-27,1,1,TEAL);P(-8,-12,1,1,'#c8c8d0');P(8,-19,1,1,'#c8c8d0');
+ // head: black bob with heavy fringe, mask over nose and mouth, sharp brown eyes
+ P(-7,-31,14,11,HAIR);P(-6,-32,12,1,HAIR);P(-4,-31,4,1,HL);P(3,-30,2,1,HL);
+ P(-5,-27,10,6,SKIN);P(-5,-28,10,2,HAIR);P(-3,-26,1,1,HAIR);P(1,-26,1,1,HAIR);
+ P(-4,-26,2,1,HAIR);P(2,-26,2,1,HAIR);P(-4,-25,1,1,'#5a2a14');P(-3,-25,1,1,'#ffffff');P(3,-25,1,1,'#5a2a14');P(2,-25,1,1,'#ffffff');
+ P(-5,-24,10,3,'#2e2e36');P(-3,-23,1,1,'#3e3e48');P(1,-23,1,1,'#3e3e48');P(-1,-22,1,1,'#3e3e48');P(-1,-21,2,1,'#2e2e36');
+ P(-7,-23,2,4,HAIR);P(5,-23,2,4,HAIR);P(-7,-20,1,1,HAIR);P(6,-20,1,1,HAIR)}
 function drawPoster(kind,x,y,w,h){const T=(t,yy,col,sz=8)=>{g.fillStyle=col;g.font=`${sz}px HKPixel,monospace`;g.textAlign='center';g.textBaseline='top';g.fillText(t,x+w/2,y+yy)};
- px(x-1,y-1,w+2,h+2,'#2a2018');const bg={hooked:'#14324a',pike:'#e8f0e0',bike:'#e06a2a',crumble:'#f4e0b0',song:'#1a1030',squad1:'#141a34',map:'#cfdcb4',strawberry:'#ffe0e8',fishchart:'#fbf6ea',stoat:'#f4e8c8',moon:'#05060f',squad2:'#1e1a3a',club:'#2f4a3a',squad3:'#141a34',carp:'#5a8ab0',socks:'#e8f4e8'}[kind];px(x,y,w,h,bg);
+ px(x-1,y-1,w+2,h+2,'#2a2018');const bg={hooked:'#14324a',pike:'#e8f0e0',bike:'#e06a2a',crumble:'#f4e0b0',song:'#1a1030',squad1:'#a83a3a',map:'#cfdcb4',strawberry:'#ffe0e8',fishchart:'#fbf6ea',stoat:'#f4e8c8',moon:'#05060f',squad2:'#e8dcc4',club:'#2f4a3a',squad3:'#141a34',carp:'#5a8ab0',socks:'#e8f4e8'}[kind];px(x,y,w,h,bg);
  if(kind==='hooked'){T('HOOKED!',4,'#ffd27a');px(x+w/2-6,y+16,4,10,'#c8702e');px(x+w/2-5,y+12,3,4,'#e2b496');drawFishSprite('perch',x+w/2+8,y+h-12,0,1)}
  else if(kind==='pike'){drawFishSprite('pike',x+w/2,y+h/2,0,1);T('PIKE',h-10,'#34452a')}
  else if(kind==='bike'){g.drawImage(bikeSprite(true),x+w/2-21,y+8,42,32);T('SEND IT',h-10,'#1a1a22')}
  else if(kind==='crumble'){px(x+6,y+18,w-12,10,'#c8902a');for(let k=0;k<8;k++)pdot(x+8+k*3,y+18+(k%2),'#e8c070');px(x+4,y+28,w-8,3,'#f2f2ea');T('CRUMBLE',4,'#7a3a1a')}
  else if(kind==='song'){for(let k=0;k<4;k++){px(x+8+k*7,y+16-(k%2)*3,1,8,'#ffd27a');pdisc(x+7+k*7,y+24-(k%2)*3,1,'#ffd27a')}T('BETTER',h-20,'#e8a0ff');T('COMPANY',h-11,'#e8a0ff')}
- else if(kind.startsWith('squad')){const n=kind.slice(-1);if(n==='1'){g.save();g.beginPath();g.rect(x,y,w,h);g.clip();drawAsharby(x+w/2,y+h+14,2);g.restore();px(x,y,w,10,'#141a34');T('ASHARBY',2,'#ff9ac0')}else if(n==='2'){drawAsharby(x+w/2,y+h-11,1);T('SAKURA',h-10,'#ff9ac0')}else{drawAsharby(x+w/2-8,y+h-12,1);drawAsharby(x+w/2+9,y+h-12,1,true);T('SEASON 8',2,'#ff9ac0')}
+ else if(kind.startsWith('squad')){const n=kind.slice(-1);if(n==='1'){g.save();g.beginPath();g.rect(x,y,w,h);g.clip();drawAsharby(x+w/2,y+76,2);g.restore();px(x,y,w,10,'#141a34');T('ASHARBY',2,'#e84a5a')}else if(n==='2'){drawAsharby(x+w/2,y+h-11,1);T('SHADOW',h-10,'#7ae8d0')}else{drawAsharby(x+w/2-8,y+h-12,1);drawAsharby(x+w/2+9,y+h-12,1,true);T('SEASON 8',2,'#e84a5a')}
   if(n!=='3'){g.fillStyle='#ff8ab8';for(const [hx,hy] of [[x+w-8,y+h-20],[x+4,y+h-26]]){px(hx,hy,2,2,'#ff8ab8');px(hx+3,hy,2,2,'#ff8ab8');px(hx,hy+1,5,2,'#ff8ab8');px(hx+1,hy+3,3,1,'#ff8ab8');pdot(hx+2,hy+4,'#ff8ab8')}}}
  else if(kind==='map'){px(x+8,y+6,10,20,'#7aa04a');px(x+14,y+14,8,16,'#7aa04a');px(x+4,y+10,5,8,'#a8b88a');for(const [dx,dy] of [[12,26],[16,20],[11,12],[17,30]])pdot(x+dx,y+dy,'#c8402e');T('UK MAP',h-10,'#3a3a1a')}
  else if(kind==='strawberry'){for(let k=0;k<3;k++)drawStrawberry(x+8+k*8,y+16+(k%2)*6);T('BERRY',h-18,'#c8202a');T('TIME!',h-10,'#c8202a')}
@@ -2735,9 +2749,9 @@ function drawBedroom(){const W=480,H=270,c=document.createElement('canvas');c.wi
  const best=Object.entries(save.journal).filter(([id,j])=>j.best>0&&!id.startsWith('cf-')).sort((a,b)=>b[1].best-a[1].best).slice(0,3);best.forEach(([id],k)=>{const fx=300+k*44;px(fx,112,40,28,'#f2ead8');px(fx+2,114,36,24,'#bfe0ea');drawFishSprite(id,fx+20,126,0,1)});
  if(save.flags.golden){pline(150,196,170,118,'#c8962a',2);pdot(170,118,'#fff2a0')}else{const [c1]=ROD_COL[save.rod];pline(140,196,158,120,c1,2)}
  // HK's Breach Squad corner: the game box, an Asharby figurine, her teal hoodie, the Season 8 countdown, hearts
- px(268,186,16,14,'#1e2a50');px(268,186,16,3,'#ff9ac0');px(274,190,4,6,'#e8b896');px(268,198,16,2,'#1a1a22');
+ px(268,186,16,14,'#26262c');px(268,186,16,3,'#b0283a');px(274,190,4,6,'#e8b896');px(268,198,16,2,'#1a1a22');
  drawAsharby(283,150,1);px(277,150,12,2,'#5a5a62');
- px(380,170,30,10,'#1e2a50');px(380,174,30,2,'#ff9ac0');px(404,166,6,8,'#1e2a50');
+ px(380,170,30,10,'#26262c');px(380,174,30,2,'#b0283a');px(404,166,6,8,'#26262c');
  px(26,180,40,30,'#fbf6ea');px(26,180,40,7,'#c8402e');g.fillStyle='#fff';g.font='8px HKPixel,monospace';g.textAlign='center';g.textBaseline='top';g.fillText('S8',46,180);
  for(let k=0;k<12;k++){const cx0=29+(k%6)*6,cy0=189+Math.floor(k/6)*8;px(cx0,cy0,4,5,'#e8e0d0');if(k<9){pline(cx0,cy0,cx0+3,cy0+4,'#c8402e')}}g.fillStyle='#c8402e';g.fillText('3 DAYS',46,205);
  if(Math.floor(time*2)%2===0){for(const [hx,hy] of [[340,150],[350,142]]){px(hx,hy,2,2,'#ff8ab8');px(hx+3,hy,2,2,'#ff8ab8');px(hx,hy+1,5,2,'#ff8ab8');px(hx+1,hy+3,3,1,'#ff8ab8');pdot(hx+2,hy+4,'#ff8ab8')}}
@@ -2926,11 +2940,11 @@ function drawReelHUD(){const s=struggle,rod=save.rod,T=REEL_THEME[rod],calm=sett
 // ===== HK's room, rebuilt: proper scale, a tidy poster wall, light and depth =====
 // The room is drawn at 320x180 so HK reads at a sensible size. Furniture is scaled to HK, the posters
 // hang as a neat gallery above the bed, and light comes from the window by day and the lamp and TV by night.
-function drawMiniPoster(kind,x,y,w,h){px(x+1,y+1,w,h,'#00000030');const bgs={hooked:'#14324a',asharby:'#141a34',asharby2:'#1e1a3a',song:'#1a1030',carp:'#5a8ab0',space:'#05060f',dino:'#e8d8b0',bike:'#e06a2a',club:'#2f4a3a',crumble:'#f4e0b0'};px(x,y,w,h,bgs[kind]||'#444');
+function drawMiniPoster(kind,x,y,w,h){px(x+1,y+1,w,h,'#00000030');const bgs={hooked:'#14324a',asharby:'#a83a3a',asharby2:'#e8dcc4',song:'#1a1030',carp:'#5a8ab0',space:'#05060f',dino:'#e8d8b0',bike:'#e06a2a',club:'#2f4a3a',crumble:'#f4e0b0'};px(x,y,w,h,bgs[kind]||'#444');
  const cx=x+Math.floor(w/2);g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
  if(kind==='hooked'){px(x+3,y+4,w-6,1,'#ffd27a');for(let i=0;i<3;i++){px(x+4+i*6,y+8,4,6,i===0?'#5ae0e0':'#ffd27a')}px(x+4,y+h-10,w-8,3,'#2f6a7a');drawFishSprite('roach',cx,y+h-6,0,1)}
- else if(kind==='asharby'){drawAsharby(cx,y+h+16,2);px(x,y,w,4,'#ff9ac0')}
- else if(kind==='asharby2'){drawAsharby(cx,y+h-2,1);for(let k=0;k<6;k++)pdot(x+2+((k*7)%(w-4)),y+3+((k*5)%(h-8)),'#ffc0d8')}
+ else if(kind==='asharby'){pdisc(cx,y+22,16,'#d8604a');drawAsharby(cx,y+68,2);px(x,y,w,4,'#1a1a20')}
+ else if(kind==='asharby2'){pdisc(cx,y+14,9,'#d8443a');drawAsharby(cx,y+34,1);for(let k=0;k<6;k++)pdot(x+2+((k*7)%(w-4)),y+3+((k*5)%(h-8)),k%2?'#7ae8d0':'#e84a5a')}
  else if(kind==='song'){for(let k=0;k<3;k++){px(x+4+k*6,y+6-(k%2)*2,1,7,'#ffd27a');px(x+3+k*6,y+12-(k%2)*2,2,2,'#ffd27a')}px(x+3,y+h-7,w-6,2,'#e8a0ff');px(x+5,y+h-4,w-10,1,'#e8a0ff')}
  else if(kind==='carp'){drawFishSprite('carp',cx,y+h/2,0,1)}
  else if(kind==='space'){pdisc(cx,y+h/2-2,6,'#e8e6d8');pdisc(cx-2,y+h/2-4,1,'#c8c6b8');for(let k=0;k<7;k++)pdot(x+2+((k*9)%(w-4)),y+2+((k*7)%(h-4)),'#ffffff')}
@@ -2968,20 +2982,113 @@ drawBedroom=function(){const W=320,H=180,c=document.createElement('canvas');c.wi
  px(296,40,18,22,'#fbf6ea');px(296,40,18,5,'#c8402e');for(let k=0;k<9;k++){const cx0=298+(k%3)*5,cy0=47+Math.floor(k/3)*5;px(cx0,cy0,3,3,'#e8e0d0');if(k<7)pdot(cx0+1,cy0+1,'#c8402e')}
  // bed with the orange duvet and Asharby hoodie, HK on the edge playing
  px(292,104,6,BASE-104,'#6a4a2e');px(292,104,6,2,'#8a6a42');px(226,124,6,BASE-124,'#6a4a2e');px(228,130,66,8,'#f4f4ee');px(278,124,14,7,'#fbfbf8');px(228,136,66,12,HOOD);px(228,136,66,2,HOOD_L);for(let k=0;k<4;k++)px(236+k*14,138,1,10,HOOD_D);
- px(230,134,18,6,'#1e2a50');px(230,136,18,1,'#ff9ac0');
+ px(230,134,18,6,'#26262c');px(230,136,18,1,'#b0283a');
  {const p={hands:[8,-13],hands2:[6,-12],arm2Front:1,mouth:'grin',crouch:2,blink:Math.sin(time*2)>.97};hkDraw(250,BASE,p,1);px(255,BASE-17,7,3,'#e8e8ec');pdot(256,BASE-16,'#3a8ac8');pdot(260,BASE-16,'#c8402e')}
  if(Math.floor(time*1.5)%3===0){for(const [hx,hy] of [[262,BASE-48],[268,BASE-54]]){px(hx,hy,2,2,'#ff8ab8');px(hx+3,hy,2,2,'#ff8ab8');px(hx,hy+1,5,2,'#ff8ab8');px(hx+1,hy+3,3,1,'#ff8ab8')}}
  // wardrobe at the edge with HK's stickers
  px(300,70,22,BASE-70,'#8a6040');px(300,70,22,3,'#a87a50');const got=STICKERS.filter(s=>save.stickers[s[0]]);got.slice(0,12).forEach((s,i)=>{px(303+(i%3)*6,78+Math.floor(i/3)*7,4,4,['#ffd27a','#9aff6a','#5ad0ff','#ff8ae0','#ff8a6a'][i%5])});
  // rug, socks, album, game box on the floor
  for(let y=0;y<10;y++){const w=Math.round(70*Math.sqrt(1-((y-5)/5.2)**2));px(176-w/2+40,BASE+6+y,w,1,y%3?'#2f6a7a':'#e7a95b')}
- px(150,BASE+2,8,3,'#3f5a45');px(156,BASE+3,4,2,'#3f5a45');px(162,BASE+4,8,3,'#4a6a50');px(196,BASE+10,16,9,'#3a5a7a');px(198,BASE+11,12,7,'#f2ead8');px(186,BASE,12,10,'#1e2a50');px(186,BASE,12,2,'#ff9ac0');
+ px(150,BASE+2,8,3,'#3f5a45');px(156,BASE+3,4,2,'#3f5a45');px(162,BASE+4,8,3,'#4a6a50');px(196,BASE+10,16,9,'#3a5a7a');px(198,BASE+11,12,7,'#f2ead8');px(186,BASE,12,10,'#26262c');px(186,BASE,12,2,'#b0283a');
  // shadows under furniture for depth
  g.globalAlpha=.25;px(104,BASE,80,3,'#2a1a0a');px(226,BASE,72,3,'#2a1a0a');px(300,BASE,22,3,'#2a1a0a');g.globalAlpha=1;
  // light: sunshine from the window by day, lamp and TV glow at night
  if(!night){g.globalAlpha=dusk?.08:.12;g.fillStyle='#fff6c8';g.beginPath();g.moveTo(wx,wy+wh+6);g.lineTo(wx+ww,wy+wh+6);g.lineTo(wx+ww+60,H);g.lineTo(wx+10,H);g.closePath();g.fill();g.globalAlpha=1}
  if(night||dusk){g.globalCompositeOperation='multiply';g.fillStyle=night?'#5a5a8a':'#c8a088';g.fillRect(0,0,W,H);g.globalCompositeOperation='lighter';g.globalAlpha=night?.3:.15;pdisc(109,100,22,'#ffc870');g.globalAlpha=night?.22:.1;pdisc(158,98,18,'#3a8ac8');g.globalAlpha=1;g.globalCompositeOperation='source-over'}
  }finally{g=keep}return c.toDataURL('image/png')};
+
+// ===== Legends of every water =====
+// Every water now has its own folklore legend. Each one is a made up fish inspired by a real local tale,
+// and the game always says so. Their rules (where, when, which rod, what weather) live in one table,
+// which drives how often they bite and what the research book tells HK.
+FISH.push(
+ {id:'lantern-eel',name:'The Lantern Eel of the Levels',base:180,min:1.2,max:3.4,col:'#4a6a3a',fin:'#c8ff8a',bias:.0011,size:58,desc:"FOLKLORE: inspired by the marsh lights of the Somerset Levels, which locals called spunkies or Jack o' lanterns. A made up legendary fish, not a real species.",places:[1],legend:true},
+ {id:'mordiford-wyrm',name:'The Mordiford Wyrm',base:240,min:2,max:6.5,col:'#4a8a3a',fin:'#e0b040',bias:.0011,size:64,desc:'FOLKLORE: inspired by the Mordiford Dragon, a Herefordshire tale about a little dragon that grew too big. A made up legendary fish, not a real species.',places:[3],legend:true},
+ {id:'llyn-llyw-salmon',name:'The Salmon of Llyn Llyw',base:360,min:9,max:21,col:'#9aa8ae',fin:'#6a7a84',bias:.001,size:90,desc:'FOLKLORE: in the old Welsh tale Culhwch and Olwen, the Salmon of Llyn Llyw is the oldest animal in the world. A legendary fish from a story, not a real individual.',places:[4],legend:true},
+ {id:'unmentionable',name:'The Unmentionable of Portland',base:320,min:1.5,max:4,col:'#b8a890',fin:'#f4f0ea',bias:.0011,size:56,desc:'FOLKLORE: inspired by the Portland tradition of never saying the name of a certain long eared, bouncy animal. A made up legendary fish, not a real species.',places:[5],legend:true},
+ {id:'tizzie-whizie',name:'The Tizzie Whizie',base:300,min:.8,max:2.2,col:'#c8a040',fin:'#c87a3a',bias:.0011,size:52,desc:'FOLKLORE: Windermere boatmen invented the Tizzie Whizie around 1900 to tease visitors. This fishy version is a made up legend, not a real animal.',places:[6],legend:true},
+ {id:'finless-lomond',name:'The Finless Fish of Lomond',base:420,min:4,max:11,col:'#c8d0dc',fin:'#e0e8ff',bias:.001,size:80,desc:"FOLKLORE: an old rhyme lists Loch Lomond's three wonders: waves without wind, fish without fins, and a floating island. A made up legendary fish, not a real species.",places:[7],legend:true});
+
+Object.assign(ART,{
+ 'lantern-eel':{len:46,dep:5,back:'#22301c',side:'#4a6a3a',belly:'#b8d88a',fin:'#2e4426',eye:'#e8ffb0',dorsal:'eel',tail:'eel',pat:'plain',glow:'#c8ff8a',extra:'lantern'},
+ 'mordiford-wyrm':{len:44,dep:9,back:'#24502a',side:'#4a8a3a',belly:'#d8c870',fin:'#e0b040',eye:'#ff4a2a',dorsal:'spiny',pat:'bigscales',snout:'long',glow:'#ffb070',extra:'wyrm'},
+ 'llyn-llyw-salmon':{len:52,dep:13,back:'#33434c',side:'#9aa8ae',belly:'#e8ece6',fin:'#5a6a72',eye:'#f0e0a0',dorsal:'single',pat:'spots',adipose:1,glow:'#d8f0ff',extra:'ancient'},
+ 'unmentionable':{len:30,dep:11,back:'#8a7a62',side:'#b8a890',belly:'#f0e8dc',fin:'#f4f0ea',eye:'#2a1a1a',dorsal:'none',tail:'round',pat:'plain',glow:'#ffd8f0',extra:'ears'},
+ 'tizzie-whizie':{len:28,dep:10,back:'#5a4030',side:'#e0b040',belly:'#f4e4a8',fin:'#c87a3a',eye:'#1a1a1a',dorsal:'none',tail:'round',pat:'bars',glow:'#fff0a0',extra:'tizzie'},
+ 'finless-lomond':{len:44,dep:10,back:'#5a6a80',side:'#c8d0dc',belly:'#f4f6fa',fin:'#c8d0dc',eye:'#9ad8ff',dorsal:'none',tail:'none',nofins:1,pat:'lines',glow:'#e0e8ff',extra:'finless'}});
+
+// Extra details drawn onto a legend's sprite (called from buildFish before the outline)
+function legendArt(a,set,o){const {f,snoutX:sx,mc,colTop:T,colBot:B,colC:C,bodyStart:bs,bodyLen:bl}=o;
+ if(a.extra==='lantern'){const x=sx-3,t=T[x]??mc-2;for(let k=1;k<=3;k++)set(x,t-k,'#3a5030');set(x+1,t-4,'#3a5030');set(x+2,t-4,'#fff6a0');set(x+3,t-4,'#fff6a0');set(x+2,t-5,f%2?'#c8ff8a':'#fff6a0');set(x+3,t-3,'#c8ff8a');
+  for(let xx=bs+3;xx<sx-4;xx+=5)if(C[xx]!==undefined)set(xx,C[xx],(xx+f)%2?'#d8ff9a':'#a8e070')}
+ else if(a.extra==='wyrm'){for(const hx of [sx-5,sx-7]){const t=T[hx];if(t===undefined)continue;set(hx,t-1,'#e8d8a0');set(hx-1,t-2,'#e8d8a0');set(hx-2,t-3,'#f4ecc8')}
+  if(f%2){set(sx+1,mc,'#d03a3a');set(sx+2,mc-1,'#d03a3a');set(sx+2,mc+1,'#d03a3a')}
+  for(let xx=bs+2;xx<sx-5;xx+=3)if(B[xx]!==undefined)set(xx,B[xx]-1,'#f0e090');
+  const wx=Math.round(bs+bl*.62),wc=C[wx];if(wc!==undefined){const up=f%2?1:0;for(let k=0;k<5;k++){set(wx-k,wc-1-up-Math.floor(k/2),'#e0b040');set(wx-k,wc-up-Math.floor(k/2),'#c89030')}}}
+ else if(a.extra==='ancient'){const r=rng(4242);for(let k=0;k<16;k++){const xx=Math.round(bs+2+r()*(bl-10)),t=T[xx];if(t===undefined)continue;const yy=t+1+Math.floor(r()*3);set(xx,yy,'#e8e4d8');if(k%3===0)set(xx+1,yy,'#a8a090')}
+  set(sx+1,mc+1,'#8a9aa0');set(sx+1,mc,'#8a9aa0');set(sx,mc-1,'#3a1a14');
+  for(let xx=Math.round(bs+bl*.45);xx<bs+bl*.62;xx+=2)if(T[xx]!==undefined)set(xx,T[xx]-4,'#5a8a4a')}
+ else if(a.extra==='ears'){for(const [ex,lean] of [[sx-6,.55],[sx-9,.75]]){const t=T[ex];if(t===undefined)continue;for(let k=1;k<=7;k++){const xx=Math.round(ex-k*lean);set(xx,t-k,'#c8b8a0');set(xx+1,t-k,k>1&&k<7?'#f0b0c0':'#c8b8a0')}set(Math.round(ex-7*lean),t-8,'#c8b8a0')}
+  set(sx,mc-1,'#f08aa0');set(sx+1,mc,'#e8e8e8');set(sx+2,mc-1,'#e8e8e8');set(sx+1,mc+2,'#e8e8e8');set(sx+2,mc+3,'#e8e8e8')}
+ else if(a.extra==='tizzie'){for(let xx=bs+1;xx<sx-3;xx++){const t=T[xx];if(t===undefined)continue;set(xx,t-1,'#5a4030');if(xx%2)set(xx,t-2,'#3a2a1a')}
+  const wx=Math.round(bs+bl*.5),t=T[wx];if(t!==undefined){const hh=[4,5,3,5][f];for(let k=0;k<5;k++)for(let j=0;j<hh-Math.abs(k-2);j++){set(wx-4+k,t-3-j,j===hh-Math.abs(k-2)-1?'#9ac8e8':'#e0f4ff');set(wx+k,t-3-j,j===hh-Math.abs(k-2)-1?'#9ac8e8':'#e0f4ff')}}}
+ else if(a.extra==='finless'){for(let xx=bs+2;xx<sx-3;xx++){if(C[xx]===undefined)continue;if((xx+f*3)%9===0)set(xx,C[xx]-1,'#ffffff')}}}
+
+// The rule table: which water, which times, which rod, and what weather or season helps
+const LEGENDS={
+ 'doctor-tench':{loc:[0,2],time:['twilight'],rod:1,mult:28,stir:'The reeds sway though there is no wind. Something golden is near the bottom.'},
+ 'sword-fish':{loc:[2],time:['twilight','night'],rod:2,mult:16,stir:'A flash of metal deep in the mere. The old story says it carries a sword.'},
+ 'lantern-eel':{loc:[1],time:['night'],rod:1,mult:26,stir:'A small green light is drifting along the bottom of the drain...'},
+ 'mordiford-wyrm':{loc:[3],time:['day'],rod:2,mult:20,season:{summer:1.8},stir:'Something green and spiky just turned in the current. Mordiford is only just upstream...'},
+ 'llyn-llyw-salmon':{loc:[4],time:['dawn'],rod:3,mult:34,stir:'A huge, slow swirl in the estuary, older than anything HK has seen.'},
+ 'unmentionable':{loc:[5],time:['night'],rod:3,mult:22,stir:'Two long shapes poke up out of the harbour water. HK decides not to say the word.'},
+ 'tizzie-whizie':{loc:[6],time:['day'],rod:3,mult:22,stir:'A buzzing, like a bee, skims across Windermere. Bowness boatmen would be delighted.'},
+ 'finless-lomond':{loc:[7],time:['twilight','night'],rod:4,mult:24,wxOnly:['clear','mist'],stir:'Waves without wind... and now a smooth shape with no fins at all.'}};
+Object.assign(WEATHER_FEED.mist,{'lantern-eel':2.2,'finless-lomond':1.5});
+Object.assign(WEATHER_FEED.rain,{'lantern-eel':1.4});
+Object.assign(WEATHER_FEED.clear,{'mordiford-wyrm':1.7,'tizzie-whizie':2});
+Object.assign(WEATHER_FEED.cloudy,{unmentionable:1.6,'llyn-llyw-salmon':1.4});
+const LEGEND_TIME={twilight:'dawn and dusk',night:'after dark',day:'bright daytime',dawn:'dawn only'};
+function legendClock(){const h=(save.clock/60)%24;return {twilight:h>=17.5&&h<21||h>=4.5&&h<7.5,night:h>=20||h<5.5,day:h>=8&&h<17,dawn:h>=4.5&&h<7.5}}
+function legendFeed(f){const L=LEGENDS[f.id];if(!L)return 0;if(!L.loc.includes(save.location)||save.rod<L.rod)return 0;
+ const c=legendClock();if(!L.time.some(t=>c[t]))return 0;if(L.wxOnly&&!L.wxOnly.includes(save.weather))return 0;
+ return L.mult*((L.season&&L.season[seasonNow()])||1)}
+function legendNeeds(f){const L=LEGENDS[f.id];if(!L)return 'A proper rod';let s=`${RODS[L.rod].name} or better`;
+ if(L.wxOnly)s+=` \u00b7 only in ${L.wxOnly.map(w=>WEATHERS[w].name.toLowerCase()).join(' or ')} weather`;
+ if(L.season)s+=` \u00b7 best in ${Object.keys(L.season).join(' or ')}`;return s}
+Object.assign(DEPTHS,{'lantern-eel':[476,546],'mordiford-wyrm':[380,470],'llyn-llyw-salmon':[400,500],unmentionable:[340,430],'tizzie-whizie':[320,372],'finless-lomond':[470,540]});
+Object.assign(RESEARCH,{
+ 'lantern-eel':"Folklore from the Levels: on dark nights a little light drifts along King's Sedgemoor Drain, low over the bottom. Some say it is an eel carrying its own lantern. Mist helps. Any proper rod will do.",
+ 'mordiford-wyrm':'Mordiford folklore says the little dragon loved the river. On bright days, something green and spiky hunts the mid water of the Wye, most of all in summer. Fibreglass rod or better.',
+ 'llyn-llyw-salmon':'If the old Welsh tale is right, this is the oldest fish in Britain. It only rises at dawn on the Severn, and it is huge. Carbon rod or better, and plenty of patience.',
+ 'unmentionable':'Do not say the word. On Portland, after dark, something with very long ears is said to bounce through the shallows of the harbour. Cloudy nights help. Carbon rod or better.',
+ 'tizzie-whizie':'The Bowness boatmen swear it skims Windermere on bright days, buzzing like a bee. Fish near the surface. Carbon rod or better.',
+ 'finless-lomond':"Loch Lomond's second wonder. On calm evenings and nights (clear or misty, never rain or cloud) a smooth shape with no fins glides near the bottom. Only the best rod will hold it."});
+Object.assign(TIME_HINT,{'lantern-eel':'After dark','mordiford-wyrm':'Bright daytime','llyn-llyw-salmon':'Dawn only','unmentionable':'After dark','tizzie-whizie':'Bright daytime','finless-lomond':'Dusk and night, calm weather'});
+Object.assign(FUN_FACTS,{
+ 'lantern-eel':"Flickering lights over marshes were called spunkies or Jack o' lanterns on the Somerset Levels. Scientists think they may be marsh gas from rotting plants catching light.",
+ 'mordiford-wyrm':'In Mordiford, a story tells of a girl called Maud who raised a tiny dragon as a pet until it grew huge. A green dragon was painted on the church wall there until 1811.',
+ 'llyn-llyw-salmon':"In the Welsh tale Culhwch and Olwen, King Arthur's men ask the oldest animals for help. The Salmon of Llyn Llyw is the oldest of all, and carries two of them up the river to Gloucester.",
+ 'unmentionable':"Many people on Portland avoid saying the word rabbit. Quarry workers blamed burrows for rockfalls, so islanders say 'underground mutton' or 'furry things' instead.",
+ 'tizzie-whizie':'The Tizzie Whizie was said to have a hedgehog body, a squirrel tail and bee wings. Boatmen sold postcards of it, and Bowness still celebrates it.',
+ 'finless-lomond':'The finless fish of Loch Lomond were probably adders swimming across the water. The floating island may have been a mat of reeds drifting about.'});
+Object.assign(FIGHT,{'lantern-eel':'diver','mordiford-wyrm':'runner','llyn-llyw-salmon':'heavy',unmentionable:'jumper','tizzie-whizie':'zigzag','finless-lomond':'heavy'});
+Object.assign(COND_K,{'lantern-eel':.2,'mordiford-wyrm':.6,'llyn-llyw-salmon':1.1,unmentionable:1.4,'tizzie-whizie':1.3,'finless-lomond':.9});
+
+// When a legend's conditions are met at HK's water, drop a hint (once per in game day per legend)
+let legendTickT=0;
+function legendTick(dt){legendTickT+=dt;if(legendTickT<1.5)return;legendTickT=0;
+ if(mode==='bike'||mode==='cutscene'||mode==='town'||panelName||phase!=='idle'&&phase!=='waiting'||!save.hasPlayed)return;
+ const day=Math.floor(save.clock/1440);save.flags.stir=save.flags.stir||{};
+ for(const id in LEGENDS){const f=FISH.find(x=>x.id===id);if(!f||!f.places.includes(save.location)||legendFeed(f)<=0)continue;
+  const key=id+'@'+save.location;if(save.flags.stir[key]===day)continue;save.flags.stir[key]=day;
+  toast((save.journal[id]?'':'Legend nearby! ')+LEGENDS[id].stir,5200);return}}
+
+// Stickers for legend hunters
+{const i=STICKERS.findIndex(s=>s[0]==='legend')+1;
+ STICKERS.splice(i,0,
+  ['legend3','\u{1F4DC}','Legend hunter','Photograph 3 different legends',()=>FISH.filter(f=>f.legend&&!f.custom&&save.journal[f.id]).length>=3],
+  ['legendall','\u{1F409}','Keeper of tales','Photograph every legend in the research book',()=>FISH.filter(f=>f.legend&&!f.custom).every(f=>save.journal[f.id])])}
 
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
@@ -3006,6 +3113,11 @@ window.__hooked.locQ=k=>{currentQuestion=({tide:tideQuestion,thermo:thermoQuesti
 window.__hooked.ending=()=>startEnding();window.__hooked.wanted=()=>wantedToday();
 window.__hooked.snap=()=>snap;window.__hooked.slowSnap=()=>{snapFast=false};
 window.__hooked.townX=()=>town&&town.x;
+window.__hooked.legend=id=>{const f=FISH.find(x=>x.id===id);fishies.forEach(o=>{o.f=f;const d=DEPTHS[id]||[400,500];o.y=R(d[0],d[1]);o.weight=R(f.min,f.max);o.trophy=false})};
+window.__hooked.legendFeed=id=>legendFeed(FISH.find(x=>x.id===id));
+window.__hooked.portrait=id=>fishPortrait(id);
+window.__hooked.stickers=()=>STICKERS.map(s=>s[0]);
+window.__hooked.zone=id=>zoneOf(id);
 
 })();
 </script></body></html>
