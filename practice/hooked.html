@@ -497,7 +497,7 @@ const HOOK_LEVELS=[{name:'Shallow',y:360,short:'near the surface'},{name:'Middle
 function zoneOf(id){const d=DEPTHS[id]||[350,515],m=(d[0]+d[1])/2;return m<400?0:m<470?1:2}
 const SURF_W=SURF*2;
 
-const SETTINGS_DEFAULT={text:'normal',font:'default',motion:'full',calm:false,surprises:true,volume:'normal',music:true,hints:'auto'};
+const SETTINGS_DEFAULT={text:'normal',font:'default',motion:'full',calm:false,surprises:true,volume:'normal',music:true,hints:'auto',maths:'gentle'};
 const fresh=()=>({version:3,money:0,total:0,rod:0,bag:0,boat:0,owned:[0],location:0,bucket:[],journal:{},events:[],sales:0,learnIndex:0,learnAt:0,clock:8*60,hasPlayed:false,cinemaSeen:false,bikeOwned:false,bikeHigh:0,totalCatches:0,nextCatchId:0,scienceClaims:{},saleClaims:{},lastSale:null,learningBonusesEarned:0,learningBonusPaid:0,cosmetic:'default',stoatSeen:0,hookDepth:1,depthTipSeen:false,hair:'crop',weather:'clear',weatherLeft:200,sound:true,depthClaims:{},researchSeen:{},settings:null,baits:['paper'],bait:'paper',challenges:[],challengesDone:0,purchaseSeq:0,lastPurchase:null,changeClaims:{},litter:0,stickers:{},flags:{},guideStep:0,guideDone:false,records:{},restored:{},locClaims:{},season2:false,customFish:[]});
 let save;try{save=Object.assign(fresh(),JSON.parse(localStorage.getItem(DB)||'null')||{});if(!LOC[save.location])save.location=0;if(!Array.isArray(save.owned))save.owned=[0];if(!Array.isArray(save.bucket)||!save.journal||!Array.isArray(save.events))throw 1;save.boat=clamp(Number(save.boat)||0,0,2);save.bag=clamp(Number(save.bag)||0,0,BAGS.length-1);save.rod=clamp(Number(save.rod)||0,0,RODS.length-1);if(LOC[save.location].boat>save.boat)save.location=0;}catch{save=fresh()}
 function clubRate(f){let midpoint=(f.min+f.max)/2;return Math.max(10,10*Math.round(f.base/Math.max(.01,midpoint)/10))}
@@ -3380,6 +3380,45 @@ function tadpoleArt(id,frame,facing){const key=id+'|'+frame+'|'+facing;if(tadCac
 function drawTadpole(id,cx,cy,frame,facing){const c=tadpoleArt(id,((frame%4)+4)%4,facing>=0?1:-1);const keep=g.globalAlpha;g.globalAlpha=keep*.9;g.drawImage(c,Math.round(cx-c.width/2),Math.round(cy-c.height/2));g.globalAlpha=keep}
 function drawFishOrShadow(id,x,y,frame,facing){const f=FISH.find(q=>q.id===id);if(!f||fishKnown(f))drawFishSprite(id,x,y,frame,facing);else drawTadpole(id,x,y,frame,facing)}
 
+// ===== Maths level =====
+// Gentle (the default) keeps every sum to times tables, tens and rounding. Standard rotates a mix of
+// forms. Stretch uses exact decimals. Teachers or students can change it in Settings.
+function mathsLevel(){return settings().maths||'gentle'}
+SET_ROWS.splice(4,0,['maths','Maths level',[['gentle','Gentle: times tables and rounding'],['standard','Standard: a mix'],['stretch','Stretch: exact decimals']]]);
+const roundTo=(v,u)=>Math.max(u,Math.round(v/u)*u);
+function unitFor(v){return v>=500?100:10}
+const lots=(n,u)=>`${n} ${u===100?'hundred':'ten'}${n===1?'':'s'}`;
+// four different answers: the right one plus nearby wrong ones, never duplicates
+function gentleChoices(ans,step,extra){const c=[ans];for(const v of [ans+step,ans-step,extra,ans+2*step,ans-2*step,ans+3*step])if(v>0&&!c.includes(v)&&c.length<4)c.push(v);return permuteChoices(fmt(ans),c.slice(1).map(fmt))}
+function timesHint(k,rate){if(rate<100){const lead=rate/10;return Number.isInteger(lead)?`Work out ${k} \u00d7 ${lead} = ${k*lead}, then add a zero.`:`Count up in ${rate}s, ${k} times.`}
+ const h=Math.floor(rate/100)*100,t=rate-h;return t?`Split it: ${k} \u00d7 \u00a3${h} = \u00a3${k*h}, and ${k} \u00d7 \u00a3${t} = \u00a3${k*t}. Add them together.`:`Work out ${k} \u00d7 ${h/100} = ${k*h/100}, then add two zeros.`}
+const _cvqLevel=catchValueQuestion;
+catchValueQuestion=function(photo){const lv=mathsLevel();if(lv==='stretch')return _cvqLoop(photo);if(lv==='standard')return _cvqLevel(photo);
+ const q=_cvqLoop(photo),f=FISH.find(x=>x.id===photo.id)||FISH[0],w=photo.weight,rate=photo.rate,per=rate/10,exact=clubPhotoValue(w,rate);
+ if(w<1.05&&per<=10){const n=Math.max(1,Math.round(w*10)),est=n*per;
+  return {...q,...gentleChoices(est,per,n+per),title:'Count it in 100 g',eyebrow:'TIMES TABLES',
+   q:`Your ${f.name.toLowerCase()} weighs about ${n*100} g. That is ${n} lot${n===1?'':'s'} of 100 g. Each 100 g earns \u00a3${per}. Roughly what is the photo worth?`,
+   why:`${n} \u00d7 \u00a3${per} = ${fmt(est)}. The exact value is ${fmt(exact)}, and that is what the club pays.`,hint:`Count up in ${per}s, ${n} time${n===1?'':'s'}.`,calculation:`${n} \u00d7 \u00a3${per} = ${fmt(est)}`,
+   visual:`<div class="catch-math"><div class="math-tile"><span class="big">${n} \u00d7 100 g</span><span class="small">Weight</span></div><div class="math-tile"><span class="big">\u00a3${per}</span><span class="small">per 100 g</span></div><div class="math-tile wide"><b>${n} \u00d7 \u00a3${per} = ?</b></div></div>`}}
+ const kg=Math.max(1,Math.round(w)),est=kg*rate;
+ return {...q,...gentleChoices(est,rate,est*2),title:'Roughly what is it worth?',eyebrow:'TIMES TABLES WITH TENS',
+  q:`Your ${f.name.toLowerCase()} weighs about ${kg} kg. The club pays \u00a3${rate} for each kilogram. Roughly what is the photo worth?`,
+  why:`${kg} \u00d7 \u00a3${rate} = ${fmt(est)}. The exact value is ${fmt(exact)}, and that is what the club pays.`,
+  hint:timesHint(kg,rate),calculation:`${kg} \u00d7 \u00a3${rate} = ${fmt(est)}`,
+  visual:`<div class="catch-math"><div class="math-tile"><span class="big">${kg} kg</span><span class="small">About</span></div><div class="math-tile"><span class="big">\u00a3${rate}/kg</span><span class="small">Rate</span></div><div class="math-tile wide"><b>${kg} \u00d7 \u00a3${rate} = ?</b></div></div>`}};
+const _saleQ=saleQuestion;
+saleQuestion=function(sale){const q=_saleQ(sale);if(mathsLevel()!=='gentle')return q;const u=unitFor(Math.max(sale.before,sale.amount)),a=roundTo(sale.before,u),b=roundTo(sale.amount,u),ans=a+b;
+ return {...q,...gentleChoices(ans,u,ans+2*u),title:'About how much now?',eyebrow:u===100?'ADDING HUNDREDS':'ADDING TENS',
+  q:`Before the club paid, HK had about ${fmt(a)}. Mags paid about ${fmt(b)}. About how much does HK have now?`,why:`${fmt(a)} + ${fmt(b)} = ${fmt(ans)}. Exactly, it is ${fmt(sale.before)} + ${fmt(sale.amount)} = ${fmt(sale.before+sale.amount)}.`,
+  hint:`Add them up: ${lots(a/u,u)} and ${lots(b/u,u)}.`,calculation:`${fmt(a)} + ${fmt(b)} = ${fmt(ans)}`}};
+const _changeQ=changeQuestion;
+changeQuestion=function(pu){const q=_changeQ(pu);if(mathsLevel()!=='gentle')return q;const u=unitFor(pu.before),c=roundTo(pu.cost,u),a=Math.max(c,roundTo(pu.before,u)),ans=a-c;
+ return {...q,...gentleChoices(ans,u,a+c),title:'About how much is left?',eyebrow:u===100?'TAKING AWAY HUNDREDS':'TAKING AWAY TENS',
+  q:`HK had about ${fmt(a)} and spent about ${fmt(c)} at Clive\u2019s. About how much is left?`,why:`${fmt(a)} \u2212 ${fmt(c)} = ${fmt(ans)}. Exactly, it is ${fmt(pu.before)} \u2212 ${fmt(pu.cost)} = ${fmt(pu.before-pu.cost)}.`,
+  hint:`${lots(a/u,u)} take away ${lots(c/u,u)}.`,calculation:`${fmt(a)} - ${fmt(c)} = ${fmt(ans)}`}};
+const _bonusQ=bonusQuestion;
+bonusQuestion=function(){return mathsLevel()==='gentle'?scaleQuestion():_bonusQ()};
+
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
 $('soundBtn').onclick=()=>{audioInit();setSound(save.sound===false)};setSound(save.sound!==false);
@@ -3410,6 +3449,7 @@ window.__hooked.stickers=()=>STICKERS.map(s=>s[0]);
 window.__hooked.zone=id=>zoneOf(id);
 window.__hooked.ride=t=>{const a=songEl();if(a){try{a.currentTime=t}catch(e){}}bike.rideT=t};
 window.__hooked.bikeState=()=>({era:bike.era,rideT:bike.rideT,outro:bike.outro&&bike.outro.stage,portal:!!bike.portal,score:bike.score,mode,loc:save.location,phase});
+window.__hooked.mq=(kind,a,b)=>{const q=kind==='photo'?catchValueQuestion({id:'perch',uid:999,weight:a,rate:b,price:clubPhotoValue(a,b),location:0,bonus:0}):kind==='sale'?saleQuestion({saleId:1,before:a,amount:b,count:3}):changeQuestion({id:1,before:a,cost:b,item:'Fibreglass rod'});return q.q+'  =>  '+q.choices.join(' | ')+'  [hint: '+q.hint+']'};
 
 })();
 </script></body></html>
