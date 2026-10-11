@@ -1626,15 +1626,16 @@ function jayHello(){const h=(save.clock/60)%24,part=h<12?'Morning':h<17?'Afterno
 function updateCameo(dt){const c=cameo;c.f+=dt*6;if(npcSayUntil&&performance.now()>npcSayUntil){$('npcQuip').classList.remove('on');npcSayUntil=0}
  if(mode==='bike'||panelName)return;c.t-=dt;c.poseT=Math.max(0,c.poseT-dt);
  if(c.state==='away'){if(c.t<=0&&save.hasPlayed&&settings().surprises&&(phase==='idle'||phase==='waiting')){c.state='enter';c.x=-16;c.bx=-30;c.jpose='walk';c.bpose='walk';c.bdir=1;c.ball=null;if(['sit','run','sniff','peek'].includes(stoat.state)){stoatFlee();if(Math.random()<.6)setTimeout(()=>jaySay('Unhand me, goblin!'),900)}stoat.state='hidden';stoat.t=999}return}
- if(c.state==='enter'){c.x+=18*dt;c.bx=Math.min(c.bx+18*dt,c.x-12);if(c.x>=40){c.x=40;c.state='visit';c.t=R(9,13);c.jpose='wave';c.poseT=1.6;c.throwT=2.4;c.bt=1.5;jaySay(jayHello())}}
+ if(c.state==='enter'){c.x+=18*dt;c.bx=Math.min(c.bx+18*dt,c.x-12);if(c.x>=40){c.x=40;c.state='visit';c.t=R(12,14);c.jpose='wave';c.poseT=1.6;c.throwT=2.4;c.bt=1.5;jaySay('Hey. Why are they called dirt bikes anyway?')}}
  else if(c.state==='visit'){if(!c.poseT&&c.jpose!=='stand')c.jpose='stand';
   // a game of fetch with Bonnie
   c.throwT-=dt;if(c.throwT<=0&&!c.ball&&c.t>3){c.throwT=R(3,4.5);c.jpose='throw';c.poseT=.4;c.ball={x:c.x+10,y:144-34,vx:R(-38,-20),vy:-70,on:false}}
   const b=c.ball;if(b){if(!b.on){b.vy+=160*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.y>=143){b.y=143;b.on=true}c.btx=b.x}else if(Math.abs(c.bx-b.x)<3&&!b.got){b.got=true;c.btx=c.x-8}if(b.got){b.x=c.bx+(c.bdir>0?9:-9);b.y=144-9;if(Math.abs(c.bx-c.btx)<2){c.ball=null;c.bpose='sit';c.bt=1.2}}}
   else{c.bt-=dt;if(c.bt<=0){c.bt=R(1.5,3.5);const toHK=!LOC[save.location].boat&&Math.random()<.3;c.btx=toHK?122:R(14,78);c.bpose='walk'}}
   const d=c.btx-c.bx;if(Math.abs(d)>1){c.bdir=Math.sign(d);c.bx+=c.bdir*(c.ball?34:22)*dt;c.bpose='walk'}else if(!c.ball)c.bpose=c.btx>110?'sit':(c.bpose==='walk'?'sniff':c.bpose);
-  if(!c.said&&c.t<6&&Math.random()<dt*.3){c.said=1;jaySay('When I was in China....')}
-  if(c.t<=1.6&&c.jpose!=='wave'&&!c.bye){c.bye=1;c.jpose='wave';c.poseT=1.6;c.ball=null;jaySay('See you later, HK! Have a good one.')}
+  if(!c.said&&c.t>5&&c.t<8&&Math.random()<dt*.6){c.said=1;jaySay('When I was in China....')}
+  if(c.t<=4.4&&!c.bye){c.bye=1;jaySay('They should be called metal bikes.')}
+  if(c.t<=1.6&&c.bye===1){c.bye=2;c.jpose='wave';c.poseT=1.6;c.ball=null;jaySay('OK, bye bye.')}
   if(c.t<=0){c.state='leave';c.jpose='walk';c.bpose='walk';c.bdir=-1;c.bye=0}}
  else if(c.state==='leave'){c.x-=18*dt;c.bx-=22*dt;if(c.x<-20&&c.bx<-20){c.state='away';c.t=R(150,320);c.said=0;stoat.state='hidden';stoat.t=R(4,9)}}
 }
