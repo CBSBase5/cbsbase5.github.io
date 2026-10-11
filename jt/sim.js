@@ -123,14 +123,14 @@ function avg(a){ if(!a.length) return 30; var s = 0; for(var i = 0; i < a.length
 
 /* xi: array of 11 player ids (or "" for an empty slot), in slot order.
    boost: { atk, mid, def, gk } training points. luck: 0 to 1 */
-function buildTeam(formation, xi, boost, luck){
+function buildTeam(formation, xi, boost, luck, dev){
   var F = FORMATIONS[formation] || FORMATIONS["4-4-2"];
   var by = { GK: [], DEF: [], MID: [], FWD: [] }, players = [], i;
   for(i = 0; i < 11; i++){
     var p = xi[i] ? playerById(xi[i]) : null;
-    var eff = p ? p.r * fit(p.pos, F.slots[i]) : 30;
+    var eff = p ? (p.r + ((dev && dev[p.id]) || 0)) * fit(p.pos, F.slots[i]) : 30;
     by[F.slots[i]].push(eff);
-    players.push({ name: p ? p.name : "A gap in the side", pos: F.slots[i], id: p ? p.id : "" });
+    players.push({ name: p ? p.name : "A gap in the side", pos: F.slots[i], id: p ? p.id : "", r: Math.round(eff) });
   }
   boost = boost || {};
   var atk = (2 * avg(by.FWD) + avg(by.MID)) / 3 + F.mod.atk + (boost.atk || 0);
@@ -177,51 +177,169 @@ function fmt(s, o){
 
 /* home and away are teams from clubTeam / buildTeam.
    Returns { hs, as, events:[{m,k,side,text,who}] } */
-function simulate(home, away, seed){
-  var r = rng(seed), hs = 0, as = 0, events = [], m, add = 90 + 1 + Math.floor(r() * 4);
-  events.push({ m: 0, k: "kick", side: "", text: "Kick off. " + home.name + " against " + away.name + "." });
-  for(m = 1; m <= add; m++){
-    if(m === 46) events.push({ m: 45, k: "half", side: "", text: "Half time. " + home.name + " " + hs + ", " + away.name + " " + as + "." });
-    if(m === 91) events.push({ m: 90, k: "added", side: "", text: "A few minutes added on." });
-    var ph = Math.pow(home.mid, K.possExp) / (Math.pow(home.mid, K.possExp) + Math.pow(away.mid, K.possExp));
-    var homeAtt = r() < ph;
-    var X = homeAtt ? home : away, Y = homeAtt ? away : home, side = homeAtt ? "h" : "a";
-    var cp = clamp(K.chanceBase * Math.pow(X.atk / Y.def, K.chanceExp), 0.03, 0.4);
-    if(r() >= cp){
-      if(r() < 0.012) events.push({ m: m, k: "move", side: side, text: fmt(pick(r, T_MOVE), { t: X.name, p: anyOf(r, X, ["MID"]).name }) });
-      continue;
-    }
-    /* a chance */
-    var cancel = Y.luck * K.luckCancel;
-    if(r() < cancel){
-      events.push({ m: m, k: "luck", side: side === "h" ? "a" : "h", text: fmt(pick(r, T_LUCK), { t: Y.name }) });
-      continue;
-    }
-    var gp = clamp(K.goalBase * Math.pow(X.atk / Y.gk, K.goalExp), 0.04, 0.5);
-    var sc = scorer(r, X);
-    var keeper = Y.players[0].name;
-    var lucky = false, goal = r() < gp;
-    if(!goal && X.luck > 0 && r() < X.luck * K.luckRebound){
-      goal = r() < clamp(gp * 1.5, 0.1, 0.7); lucky = goal;
-    }
-    if(goal){
-      if(homeAtt) hs++; else as++;
-      events.push({ m: m, k: "goal", side: side, lucky: lucky, who: sc.name,
-        text: fmt(pick(r, lucky ? T_LUCKGOAL : T_GOAL), { p: sc.name, t: X.name }) + " " + hs + "-" + as });
-    } else {
-      var save = r() < 0.55;
-      events.push({ m: m, k: "chance", side: side, who: sc.name,
-        text: fmt(pick(r, save ? T_SAVE : T_MISS), { p: sc.name, k: keeper }) });
+var T_FK_GOAL = ["{p} bends the free kick into the top corner!", "{p} steps up and curls it past the wall. Goal!"];
+var T_FK_MISS = ["{p} sends it over the wall and just wide.", "{p} hits it well but {k} gets across to save.", "Straight into the wall. A good effort from {p}."];
+var T_FK_LUCK = ["It hits the post, bounces off the keeper and goes in. The luck dial at work."];
+var T_SHORT_GOAL = ["A short one, a quick one two, and {p} finishes it!", "Clever. A neat short pass and {p} hits it in."];
+var T_SHORT_MISS = ["A short pass, but the move breaks down in the box.", "Nice idea, and the defence snuffs it out."];
+
+/* A match you can step through a minute at a time, so a person can make
+   choices part way. opts: { our: "h"|"a", interactive: true, cup: true } */
+function createMatch(home, away, seed, opts){
+  opts = opts || {};
+  var r = rng(seed);
+  var M = { home: home, away: away, r: r, hs: 0, as: 0, events: [], m: 0, add: 91 + Math.floor(r() * 4),
+    done: false, pause: null, our: opts.our || "", interactive: !!opts.interactive, cup: !!opts.cup,
+    halfDone: false, spDone: false, pens: null, winner: "" };
+  M.spMin = M.our ? 12 + Math.floor(r() * 62) : 0;
+  M.events.push({ m: 0, k: "kick", side: "", text: "Kick off. " + home.name + " against " + away.name + "." });
+  return M;
+}
+function ourTeamOf(M){ return M.our === "h" ? M.home : M.away; }
+function theirTeamOf(M){ return M.our === "h" ? M.away : M.home; }
+
+function step(M){
+  if(M.done || M.pause) return M;
+  var home = M.home, away = M.away, r = M.r, ev = M.events;
+  if(M.m >= M.add){ finish(M); return M; }
+  var m = M.m + 1;
+  if(m === 46 && !M.halfDone){
+    M.halfDone = true;
+    ev.push({ m: 45, k: "half", side: "", text: "Half time. " + home.name + " " + M.hs + ", " + away.name + " " + M.as + "." });
+    if(M.our && M.interactive){
+      M.pause = { k: "talk", title: "Half time team talk", def: 2, options: [
+        { label: "Go for it", sub: "More attack, a little less cover", fx: { atk: 3, def: -2 } },
+        { label: "Stay solid", sub: "More cover, a little less attack", fx: { atk: -2, def: 3 } },
+        { label: "Stay calm", sub: "Steady heads. A bit more luck", fx: { luck: 0.1 } }
+      ] };
+      return M;
     }
   }
-  events.push({ m: add, k: "full", side: "", text: "Full time. " + home.name + " " + hs + ", " + away.name + " " + as + "." });
-  return { hs: hs, as: as, events: events };
+  if(M.our && M.interactive && !M.spDone && m >= M.spMin){
+    M.spDone = true;
+    var us = ourTeamOf(M), takers = us.players.filter(function(p){ return p.pos === "MID" || p.pos === "FWD"; });
+    takers.sort(function(a, b){ return b.r - a.r; });
+    var opts = takers.slice(0, 3).map(function(p){ return { label: p.name + " takes it", sub: "Rated " + p.r, taker: p.name, rate: p.r }; });
+    opts.push({ label: "Play it short", sub: "Build a move instead", short: true });
+    M.pause = { k: "setpiece", minute: m, title: "Free kick in a good spot", def: 0, options: opts };
+    return M;
+  }
+  if(m === 91) ev.push({ m: 90, k: "added", side: "", text: "A few minutes added on." });
+  var ph = Math.pow(home.mid, K.possExp) / (Math.pow(home.mid, K.possExp) + Math.pow(away.mid, K.possExp));
+  var homeAtt = r() < ph;
+  var X = homeAtt ? home : away, Y = homeAtt ? away : home, side = homeAtt ? "h" : "a";
+  var cp = clamp(K.chanceBase * Math.pow(X.atk / Y.def, K.chanceExp), 0.03, 0.4);
+  M.m = m;
+  if(r() >= cp){
+    if(r() < 0.012) ev.push({ m: m, k: "move", side: side, text: fmt(pick(r, T_MOVE), { t: X.name, p: anyOf(r, X, ["MID"]).name }) });
+    return M;
+  }
+  if(r() < Y.luck * K.luckCancel){
+    ev.push({ m: m, k: "luck", side: side === "h" ? "a" : "h", text: fmt(pick(r, T_LUCK), { t: Y.name }) });
+    return M;
+  }
+  var gp = clamp(K.goalBase * Math.pow(X.atk / Y.gk, K.goalExp), 0.04, 0.5);
+  var sc = scorer(r, X), keeper = Y.players[0].name, lucky = false, goal = r() < gp;
+  if(!goal && X.luck > 0 && r() < X.luck * K.luckRebound){
+    goal = r() < clamp(gp * 1.5, 0.1, 0.7); lucky = goal;
+  }
+  if(goal){
+    if(homeAtt) M.hs++; else M.as++;
+    ev.push({ m: m, k: "goal", side: side, lucky: lucky, who: sc.name,
+      text: fmt(pick(r, lucky ? T_LUCKGOAL : T_GOAL), { p: sc.name, t: X.name }) + " " + M.hs + "-" + M.as });
+  } else {
+    var save = r() < 0.55;
+    ev.push({ m: m, k: "chance", side: side, who: sc.name, text: fmt(pick(r, save ? T_SAVE : T_MISS), { p: sc.name, k: keeper }) });
+  }
+  return M;
 }
 
+/* apply a choice to a paused match */
+function resolve(M, idx){
+  var P = M.pause; if(!P) return M;
+  var o = P.options[idx] || P.options[P.def || 0], us = ourTeamOf(M), them = theirTeamOf(M), r = M.r, ev = M.events;
+  M.pause = null;
+  if(P.k === "talk"){
+    if(o.fx){
+      if(o.fx.atk) us.atk += o.fx.atk;
+      if(o.fx.def) us.def += o.fx.def;
+      if(o.fx.luck) us.luck = Math.min(1, us.luck + o.fx.luck);
+    }
+    ev.push({ m: 45, k: "talk", side: M.our, text: "Team talk: " + o.label + ". " + o.sub + "." });
+    return M;
+  }
+  /* set piece */
+  var m = P.minute, goal, lucky = false, who, texts;
+  if(o.short){
+    who = scorer(r, us).name;
+    var gp0 = clamp(K.goalBase * 1.15 * Math.pow(us.atk / them.gk, K.goalExp), 0.05, 0.5);
+    goal = r() < gp0; texts = goal ? T_SHORT_GOAL : T_SHORT_MISS;
+  } else {
+    who = o.taker;
+    var gp = clamp(0.03 + (o.rate - 55) * 0.010, 0.04, 0.36);
+    goal = r() < gp;
+    if(!goal && us.luck > 0 && r() < us.luck * K.luckRebound){ goal = r() < 0.55; lucky = goal; }
+    texts = goal ? (lucky ? T_FK_LUCK : T_FK_GOAL) : T_FK_MISS;
+  }
+  if(goal){
+    if(M.our === "h") M.hs++; else M.as++;
+    ev.push({ m: m, k: "goal", side: M.our, lucky: lucky, who: who, setpiece: true,
+      text: fmt(pick(r, texts), { p: who, k: them.players[0].name }) + " " + M.hs + "-" + M.as });
+  } else {
+    ev.push({ m: m, k: "chance", side: M.our, who: who, text: fmt(pick(r, texts), { p: who, k: them.players[0].name }) });
+  }
+  return M;
+}
+function autoResolve(M){ while(M.pause) resolve(M, M.pause.def || 0); return M; }
+
+function finish(M){
+  var home = M.home, away = M.away, ev = M.events;
+  ev.push({ m: M.add, k: "full", side: "", text: "Full time. " + home.name + " " + M.hs + ", " + away.name + " " + M.as + "." });
+  if(M.cup && M.hs === M.as) shootout(M);
+  else M.winner = M.hs > M.as ? "h" : (M.as > M.hs ? "a" : "");
+  M.done = true;
+}
+function shootout(M){
+  var r = M.r, h = 0, a = 0, k, ev = M.events, home = M.home, away = M.away;
+  var ph = clamp(0.74 + (home.atk - away.gk) * 0.004 + home.luck * 0.08, 0.55, 0.92);
+  var pa = clamp(0.74 + (away.atk - home.gk) * 0.004 + away.luck * 0.08, 0.55, 0.92);
+  function taker(t, i){ var f = t.players.filter(function(p){ return p.pos !== "GK"; }); return f[i % f.length].name; }
+  ev.push({ m: M.add, k: "pens", side: "", text: "Level after ninety minutes. It goes to penalties." });
+  for(k = 0; k < 5 || h === a; k++){
+    var sh = r() < ph, sa = r() < pa;
+    if(sh) h++; if(sa) a++;
+    ev.push({ m: M.add, k: "pen", side: "h", text: taker(home, k) + (sh ? " scores." : " misses.") + " " + (sa ? taker(away, k) + " scores." : taker(away, k) + " misses.") + " Penalties " + h + "-" + a });
+    if(k >= 4){ if(h !== a) break; }
+    else {
+      var left = 4 - k;
+      if(h > a + left || a > h + left) break;
+    }
+    if(k > 14) break;
+  }
+  if(h === a){ h++; }
+  M.pens = { h: h, a: a }; M.winner = h > a ? "h" : "a";
+  ev.push({ m: M.add, k: "pens", side: "", text: (M.winner === "h" ? home.name : away.name) + " win " + h + "-" + a + " on penalties." });
+}
+function runAll(M){ while(!M.done){ if(M.pause) autoResolve(M); step(M); } return M; }
+
+/* quiet whole match, used for the other clubs and for tests */
+function simulate(home, away, seed, opts){
+  var M = createMatch(home, away, seed, opts);
+  runAll(M);
+  return { hs: M.hs, as: M.as, events: M.events, pens: M.pens, winner: M.winner };
+}
+
+/* cup: four ties, the draws get harder. returns a 0 based index into CLUBS */
+function cupOpponent(seed, k){
+  var order = CLUBS.map(function(c, i){ return i; }).sort(function(a, b){ return CLUBS[a].base - CLUBS[b].base || a - b; });
+  var tiers = [[0, 6], [6, 10], [10, 13], [13, 15]], t = tiers[k] || tiers[3];
+  var rr = rng((seed * 7 + k * 131) >>> 0);
+  return order[t[0] + Math.floor(rr() * (t[1] - t[0]))];
+}
 
 /* ---- the training ground: fifteen activities, each trains one thing ---- */
 var CAP = 4;            /* beats that count per activity */
-var BOOST_SCALE = 0.55; /* tuned by Monte Carlo */
+var BOOST_SCALE = 0.5; /* tuned by Monte Carlo */
 var PER_LEVEL = { atk: 0.7, mid: 0.55, def: 0.7, gk: 1.2 };
 var STATS = {
   atk: { label: "Finishing", short: "ATK" },
@@ -294,11 +412,11 @@ function otherResults(seed, r){
 /* table after our played matches: played = [{round, hs, as, home}] */
 function table(seed, played){
   var rows = [], i;
-  for(i = 0; i < 16; i++) rows.push({ id: i, name: i === 0 ? HOME_NAME : CLUBS[i - 1].name, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 });
+  for(i = 0; i < 16; i++) rows.push({ id: i, name: i === 0 ? HOME_NAME : CLUBS[i - 1].name, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] });
   function put(a, b, ag, bg){
     var A = rows[a], B = rows[b];
     A.p++; B.p++; A.gf += ag; A.ga += bg; B.gf += bg; B.ga += ag;
-    if(ag > bg){ A.w++; B.l++; A.pts += 3; } else if(ag < bg){ B.w++; A.l++; B.pts += 3; } else { A.d++; B.d++; A.pts++; B.pts++; }
+    if(ag > bg){ A.w++; B.l++; A.pts += 3; A.form.push("W"); B.form.push("L"); } else if(ag < bg){ B.w++; A.l++; B.pts += 3; A.form.push("L"); B.form.push("W"); } else { A.d++; B.d++; A.pts++; B.pts++; A.form.push("D"); B.form.push("D"); }
   }
   for(i = 0; i < played.length; i++){
     var pl = played[i], fx = ourFixture(pl.round);
@@ -314,7 +432,7 @@ function table(seed, played){
 
 function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
 var API = { setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
-  clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, fixtures: fixtures, ourFixture: ourFixture,
+  clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
   otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
 root.B5Sim = API;
