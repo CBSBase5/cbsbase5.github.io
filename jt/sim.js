@@ -312,7 +312,8 @@ function table(seed, played){
   return rows;
 }
 
-var API = { rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
+function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
+var API = { setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
   clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, fixtures: fixtures, ourFixture: ourFixture,
   otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
