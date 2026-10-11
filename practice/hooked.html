@@ -2671,8 +2671,8 @@ function renderTown(){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompos
  const night=clamp((.66-lum(sky.light))/.3,0,1);if(night>.2){g.globalCompositeOperation='lighter';for(const lx of [92,284,486,676,866,1076]){const sx=lx-cam;if(sx<-30||sx>LW+30)continue;for(let r=22;r>2;r-=4){g.globalAlpha=night*.07;pdisc(sx+1,TOWN_GY-56,r,'#ffc870')}}g.globalAlpha=1;g.globalCompositeOperation='source-over'}
  drawRain();
  out.clearRect(0,0,960,600);ovDirty=true;ovMemo='';const d=nearDoor();
- if(d&&!panelName){const x=(d.x-cam)*2,y=(TOWN_GY-112)*2;const w=Math.max(170,d.label.length*9+40);rr(x-w/2,y-26,w,40,10,'#fff3cf');tx(d.label,x,y-1,15,'#3a2a10','center');tx('Space',x,y+30,13,'#fff3cf','center')}
- for(const n of NP){if(!n.line||Math.abs(n.x-t.x)>34||panelName)continue;const x=(n.x-cam)*2,y=(TOWN_GY-44)*2;const w=Math.min(420,n.line.length*7.4+30);rr(x-w/2,y-34,w,30,10,'#fffdf4');tx(n.line,x,y-14,13,'#2a2a2a','center');break}}
+ if(d&&!panelName){townCard((d.x-cam)*2,(TOWN_GY-104)*2,d.label,null,'SPACE to go in')}
+ else for(const n of NP){if(!n.line||Math.abs(n.x-t.x)>34||panelName)continue;townCard((n.x-cam)*2,(TOWN_GY-44)*2,{mags:'Mags',clive:'Clive',holly:'Holly',jay:'Jay'}[n.who]||'',n.line,null);break}}
 
 // ----- The caf\u00e9: small treats, everything nut free -----
 const CAFE=[['tea','Cup of tea',2,'HK feels warm and patient. Bites come a little quicker for a while.'],['choc','Hot chocolate',3,'Marshmallows included. Bites come a little quicker for a while.'],['crumble','Apple crumble and custard',4,'Crumble.']];
@@ -2763,18 +2763,18 @@ function overgrowTown(G){const r=rng(2026),R0=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.
   // weathered, faded paint
   for(let k=0;k<(b-a)*(G-top)*.12;k++){const x=ri(a,b-1),y=ri(top,G-3);g.globalAlpha=.25;pdot(x,y,r()<.5?'#2a2a20':'#d8d0b8');g.globalAlpha=1}
   // collapsed roof: jagged holes that show the sky
-  for(let h=0;h<2;h++){const hx=ri(a+6,b-46),hw=ri(22,42),hd=ri(10,26);for(let x=0;x<hw;x++){const d=Math.max(2,Math.round(hd*(1-Math.abs(x/hw*2-1))**.6+R0(-3,3)));g.clearRect(hx+x,top-12,1,d+10);pdot(hx+x,top-2+d,'#2a2018');if(r()<.4)pdot(hx+x,top-1+d,'#5a4a3a')}
+  for(let h=0;h<2;h++){const hx=ri(a+6,b-46),hw=ri(22,42),hd=a===110?ri(10,26):ri(4,7);for(let x=0;x<hw;x++){const d=Math.max(2,Math.round(hd*(1-Math.abs(x/hw*2-1))**.6+R0(-3,3)));g.clearRect(hx+x,top-12,1,d+10);pdot(hx+x,top-2+d,'#2a2018');if(r()<.4)pdot(hx+x,top-1+d,'#5a4a3a')}
    for(let k=0;k<5;k++)px(hx+ri(0,hw),top-12+ri(0,6),ri(2,5),2,'#5a3a2a')}
   // smashed and boarded windows
-  for(let k=0;k<3;k++){const wx=ri(a+8,b-30),wy=ri(top+14,G-50);if(nearDoor(wx+10))continue;if(r()<.5){px(wx,wy,ri(16,24),ri(12,18),'#1a2420');for(let s=0;s<5;s++)pline(wx+ri(0,16),wy,wx+ri(0,16),wy+ri(3,8),'#8ab0c8')}else{for(let s=0;s<3;s++)px(wx-2,wy+s*5,24,3,'#8a6a42');pdot(wx,wy+1,'#3a2a1a');pdot(wx+20,wy+6,'#3a2a1a')}}
+  for(let k=0;k<3;k++){const wx=ri(a+8,b-30),wy=ri(a===110?top+14:top+32,G-50);if(nearDoor(wx+10))continue;if(r()<.5){px(wx,wy,ri(16,24),ri(12,18),'#1a2420');for(let s=0;s<5;s++)pline(wx+ri(0,16),wy,wx+ri(0,16),wy+ri(3,8),'#8ab0c8')}else{for(let s=0;s<3;s++)px(wx-2,wy+s*5,24,3,'#8a6a42');pdot(wx,wy+1,'#3a2a1a');pdot(wx+20,wy+6,'#3a2a1a')}}
   // deep cracks
   for(let k=0;k<5;k++){let x=ri(a+4,b-4),y=ri(top+4,G-30);for(let st=0;st<ri(10,24);st++){pdot(x,y,'#1a140e');if(r()<.3)pdot(x+1,y,'#3a2a20');x+=ri(-1,1);y+=1}}
   // moss swallowing the walls, thickest near the ground and along the roof
   for(let x=a-6;x<b+6;x+=3)blob(x,top-2+ri(-1,2),ri(2,4),.9);
-  for(let k=0;k<Math.round((b-a)/10);k++){const x=ri(a,b),y=ri(top+8,G-4);if(nearDoor(x))continue;blob(x,y,ri(3,9),.8)}
+  for(let k=0;k<Math.round((b-a)/10);k++){const x=ri(a,b),y=ri(top+8,G-4);if(nearDoor(x)||(a!==110&&y<top+30))continue;blob(x,y,ri(3,9),.8)}
   for(let x=a-4;x<b+4;x+=5){if(nearDoor(x))continue;blob(x,G-ri(2,8),ri(4,10),.95)}
-  // ivy curtains
-  for(let k=0;k<Math.round((b-a)/14);k++){const vx=ri(a,b),len=ri(20,70);if(nearDoor(vx))continue;for(let y=0;y<len;y++){const sx=vx+Math.round(Math.sin(y*.25+k)*1.6);px(sx,top+y,2,1,'#2f5a24');if(y%3===0)px(sx+(y%6?2:-2),top+y,2,2,moss[(y+k)%moss.length])}}}
+  // ivy curtains (stopping short of the shop signs)
+  const signTop=a===110?G:top+3;for(let k=0;k<Math.round((b-a)/14);k++){const vx=ri(a,b);let len=ri(20,70);if(a!==110)len=Math.min(len,signTop-top-1>4?ri(3,5):len);if(nearDoor(vx))continue;for(let y=0;y<len;y++){const sx=vx+Math.round(Math.sin(y*.25+k)*1.6);px(sx,top+y,2,1,'#2f5a24');if(y%3===0)px(sx+(y%6?2:-2),top+y,2,2,moss[(y+k)%moss.length])}}}
  // trees growing through the house and the caf\u00e9, and big ones in the gaps
  g.clearRect(126,G-124,22,20);trunk(140,G-4,120);canopy(140,G-130,30);
  g.clearRect(800,G-108,26,16);trunk(812,G-4,112);canopy(812,G-120,32);
@@ -2804,6 +2804,20 @@ function drawDinosBack(cam,t){const G=TOWN_GY;
  {const x=LW+120-(((t*20-cam*.5)%(LW+300))+LW+300)%(LW+300);drawTheropod(x,G-20,t,-1)}
  for(let k=0;k<3;k++){const fx=((t*(30+k*8)+k*400)%(LW+200))-100,fy=30+k*22+Math.sin(t*1.2+k)*6;drawPterosaur(fx,fy,t+k)}}
 function drawDinosFront(cam,t){const lx=((t*120)%(TOWN_W*3))-200;const sx=lx-cam;if(sx>-20&&sx<LW+20){drawLittleDino(sx,TOWN_GY,t);drawLittleDino(sx-18,TOWN_GY,t+.3);drawLittleDino(sx-34,TOWN_GY,t+.6)}}
+
+// clear, readable pop ups for the street: solid card, dark border, no text shadow, wrapped lines, a pointer
+function townCard(cx,by,title,text,key){const pad=14,lines=[];out.font='700 17px system-ui,sans-serif';
+ if(text){const words=text.split(' ');let cur='';for(const w of words){const t2=cur?cur+' '+w:w;if(out.measureText(t2).width>340&&cur){lines.push(cur);cur=w}else cur=t2}if(cur)lines.push(cur)}
+ out.font=pixelFont(18);const tw=title?out.measureText(title).width:0;out.font='700 17px system-ui,sans-serif';let w=Math.max(tw,...lines.map(l=>out.measureText(l).width),key?150:0)+pad*2;
+ const h=(title?26:0)+lines.length*22+(key?30:0)+pad*1.4;const x=clamp(cx-w/2,10,950-w),y=by-h-14;
+ out.fillStyle='#1a2a30';out.beginPath();out.roundRect?out.roundRect(x-3,y-3,w+6,h+6,14):out.rect(x-3,y-3,w+6,h+6);out.fill();
+ out.fillStyle='#fffdf4';out.beginPath();out.roundRect?out.roundRect(x,y,w,h,12):out.rect(x,y,w,h);out.fill();
+ const tx0=clamp(cx,x+20,x+w-20);out.fillStyle='#1a2a30';out.beginPath();out.moveTo(tx0-12,y+h+2);out.lineTo(tx0+12,y+h+2);out.lineTo(tx0,y+h+16);out.closePath();out.fill();out.fillStyle='#fffdf4';out.beginPath();out.moveTo(tx0-8,y+h-1);out.lineTo(tx0+8,y+h-1);out.lineTo(tx0,y+h+10);out.closePath();out.fill();
+ let yy=y+pad+4;out.textAlign='left';out.textBaseline='top';
+ if(title){out.font=pixelFont(18);out.fillStyle='#2f6a7a';out.fillText(title,x+pad,yy);yy+=26}
+ out.font='700 17px system-ui,sans-serif';out.fillStyle='#1a2228';for(const l of lines){out.fillText(l,x+pad,yy);yy+=22}
+ if(key){const kw=64;out.fillStyle='#1a2a30';out.beginPath();out.roundRect?out.roundRect(x+pad,yy+2,kw,22,6):out.rect(x+pad,yy+2,kw,22);out.fill();out.fillStyle='#fffdf4';out.font='800 12px system-ui,sans-serif';out.fillText('SPACE',x+pad+12,yy+7);out.fillStyle='#1a2228';out.font='700 15px system-ui,sans-serif';out.fillText(key.replace('SPACE ',''),x+pad+kw+8,yy+5)}
+ out.textBaseline='alphabetic'}
 
 // ===== THE SECRET DIRT BIKE, turned up even further =====
 // Ride up a dinosaur's tail and launch off its nose, wheelies, boost pads, HYPER MODE (double points
@@ -2909,6 +2923,66 @@ function drawReelHUD(){const s=struggle,rod=save.rod,T=REEL_THEME[rod],calm=sett
  const hint=s.redT>0?'In the red! Let go of Space before the line snaps':s.slackT>2.2&&!calm?'Keep a little pressure on, or it\u2019ll shake the hook':s.stress>.72?'Line\u2019s tight. Ease off for a moment':s.surge>.35?'Big surge! Let it run':keys.Space?'Reeling in nicely':'Hold Space to reel';
  if(!fishingLearnt()||s.redT>0||s.stress>.72||s.slackT>2.2)tx(hint,480,y+H+30,15,s.redT>0||s.stress>.72?'#ffc2b0':'#f2ecd8','center')}
 
+// ===== HK's room, rebuilt: proper scale, a tidy poster wall, light and depth =====
+// The room is drawn at 320x180 so HK reads at a sensible size. Furniture is scaled to HK, the posters
+// hang as a neat gallery above the bed, and light comes from the window by day and the lamp and TV by night.
+function drawMiniPoster(kind,x,y,w,h){px(x+1,y+1,w,h,'#00000030');const bgs={hooked:'#14324a',asharby:'#141a34',asharby2:'#1e1a3a',song:'#1a1030',carp:'#5a8ab0',space:'#05060f',dino:'#e8d8b0',bike:'#e06a2a',club:'#2f4a3a',crumble:'#f4e0b0'};px(x,y,w,h,bgs[kind]||'#444');
+ const cx=x+Math.floor(w/2);g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
+ if(kind==='hooked'){px(x+3,y+4,w-6,1,'#ffd27a');for(let i=0;i<3;i++){px(x+4+i*6,y+8,4,6,i===0?'#5ae0e0':'#ffd27a')}px(x+4,y+h-10,w-8,3,'#2f6a7a');drawFishSprite('roach',cx,y+h-6,0,1)}
+ else if(kind==='asharby'){drawAsharby(cx,y+h+16,2);px(x,y,w,4,'#ff9ac0')}
+ else if(kind==='asharby2'){drawAsharby(cx,y+h-2,1);for(let k=0;k<6;k++)pdot(x+2+((k*7)%(w-4)),y+3+((k*5)%(h-8)),'#ffc0d8')}
+ else if(kind==='song'){for(let k=0;k<3;k++){px(x+4+k*6,y+6-(k%2)*2,1,7,'#ffd27a');px(x+3+k*6,y+12-(k%2)*2,2,2,'#ffd27a')}px(x+3,y+h-7,w-6,2,'#e8a0ff');px(x+5,y+h-4,w-10,1,'#e8a0ff')}
+ else if(kind==='carp'){drawFishSprite('carp',cx,y+h/2,0,1)}
+ else if(kind==='space'){pdisc(cx,y+h/2-2,6,'#e8e6d8');pdisc(cx-2,y+h/2-4,1,'#c8c6b8');for(let k=0;k<7;k++)pdot(x+2+((k*9)%(w-4)),y+2+((k*7)%(h-4)),'#ffffff')}
+ else if(kind==='dino'){g.save();g.translate(cx-2,y+h-3);g.scale(.32,.32);drawSauropod(0,0,0);g.restore();px(x,y+h-3,w,3,'#7aa04a')}
+ else if(kind==='bike'){g.drawImage(bikeSprite(true),x+1,y+h/2-8,w-2,Math.round((w-2)*.75))}
+ else if(kind==='club'){px(x+3,y+4,w-6,h-8,'#e06a2a');px(x+3,y+4,w-6,2,'#f49a5a')}
+ else if(kind==='crumble'){px(x+3,y+h-12,w-6,6,'#c8902a');for(let k=0;k<5;k++)pdot(x+4+k*3,y+h-12,'#e8c070');px(x+2,y+h-6,w-4,2,'#f2f2ea')}
+ g.restore();px(x-1,y-1,4,2,'#e8e0c0a0');px(x+w-3,y-1,4,2,'#e8e0c0a0')}
+drawBedroom=function(){const W=320,H=180,c=document.createElement('canvas');c.width=W;c.height=H;const keep=g;g=c.getContext('2d');try{
+ const h=(save.clock/60)%24,sky=skyAt(h),night=h>=20.5||h<6,dusk=!night&&(h>=18||h<7.5),FL=128,BASE=152;
+ // walls and floor
+ px(0,0,W,FL,'#d6b089');for(let x=0;x<W;x+=8)px(x,0,3,FL,'#dbb790');px(0,26,W,2,'#c49a70');px(0,FL-4,W,5,'#7a5232');px(0,FL+1,W,H-FL,'#8a6646');
+ for(let y=FL+4;y<H;y+=7){px(0,y,W,1,'#76563a');for(let x=((y/7)%2)*24;x<W;x+=48)px(x,y-6,1,6,'#76563a')}
+ // window with curtains and the view outside
+ const wx=20,wy=34,ww=58,wh=46;px(wx-3,wy-3,ww+6,wh+6,'#f2ead8');const A=hexRGB(sky.top),Bc=hexRGB(sky.bot);for(let y=0;y<wh;y++)px(wx,wy+y,ww,1,rgbHex(A.map((v,i)=>v+(Bc[i]-v)*y/wh)));px(wx,wy+wh-12,ww,12,night?'#24402a':'#7ea24a');
+ if(night)for(let k=0;k<6;k++)pdot(wx+4+k*9,wy+4+(k*5)%14,'#ffffff');if(save.bikeOwned)g.drawImage(bikeSprite(true),wx+12,wy+wh-30,36,27);
+ px(wx+Math.floor(ww/2)-1,wy,2,wh,'#f2ead8');px(wx,wy+Math.floor(wh/2)-1,ww,2,'#f2ead8');px(wx-6,wy+wh+3,ww+12,3,'#e8dcc8');
+ for(const [cx0,dir] of [[wx-9,1],[wx+ww+1,-1]]){px(cx0,wy-6,8,wh+16,HOOD);for(let k=0;k<3;k++)px(cx0+1+k*3,wy-6,1,wh+16,HOOD_D)}px(wx-12,wy-8,ww+24,3,'#6a4a2e');
+ // rod leaning in the corner by the window
+ {const [c1,c2]=save.flags.golden?['#c8962a','#fff2a0']:ROD_COL[save.rod];pline(86,BASE-2,96,52,c1,2);pdot(96,52,c2)}
+ // framed catches above the desk, trophies on the shelf
+ const best=Object.entries(save.journal).filter(([id,j])=>j.best>0&&!id.startsWith('cf-')).sort((a,b)=>b[1].best-a[1].best).slice(0,3);
+ for(let k=0;k<3;k++){const fx=110+k*24,fy=44;px(fx,fy,20,14,'#6a4a2e');px(fx+1,fy+1,18,12,'#bfe0ea');const id=best[k]&&best[k][0];if(id){const a=fishArt(id);g.drawImage(a.frames[0],fx+2,fy+3,16,Math.max(4,Math.round(16*a.h/a.w)))}else{px(fx+8,fy+3,4,1,'#7a9aa8');px(fx+11,fy+4,1,2,'#7a9aa8');px(fx+9,fy+6,2,1,'#7a9aa8');px(fx+9,fy+7,1,2,'#7a9aa8');pdot(fx+9,fy+10,'#7a9aa8')}}
+ px(108,74,74,3,'#6a4a2e');const nT=Math.min(6,(save.flags.trophies||0)+(save.flags.records||0)+(save.bikeHigh>5000?1:0));for(let k=0;k<nT;k++){const tx0=112+k*11;px(tx0,67,7,5,'#e0b040');px(tx0+3,72,1,2,'#c8962a');px(tx0+1,66,5,1,'#f2d070')}
+ // desk, monitor, console, lamp, Asharby figurine, a crumble
+ px(104,112,80,5,'#7a5232');px(104,112,80,1,'#9a7048');px(108,117,4,BASE-117,'#5a3a22');px(176,117,4,BASE-117,'#5a3a22');px(112,117,26,14,'#6a4a2e');px(124,122,2,2,'#d8b878');
+ px(140,86,36,24,'#1a1a1a');px(142,88,32,19,'#3a8ac8');px(142,100,32,7,'#7ea24a');px(156,108,4,4,'#1a1a1a');px(150,111,16,2,'#2a2a2a');{const f=Math.floor(time*2)%2;drawFishSprite('perch',158,96,f,1)}
+ px(118,106,16,6,'#f2f2f2');px(118,106,16,1,'#ffffff');pdot(131,108,'#5aa8ff');
+ g.save();g.translate(130,112);g.scale(.45,.45);drawAsharby(0,0,1);g.restore();px(125,111,10,1,'#3a3a3a');
+ px(108,99,2,13,'#3a3a3a');px(104,95,10,5,'#e0b040');px(105,111,8,1,'#3a3a3a');
+ // the poster wall above the bed: a neat gallery, Asharby in the middle
+ const pool=['hooked','song','carp','space','dino','club','crumble'].concat(save.bikeOwned?['bike']:[]),seed=save.flags.posterSeed||0;const pick=pool.map((p,i)=>[p,hash1(i,seed+3)]).sort((a,b)=>a[1]-b[1]).map(a=>a[0]);
+ drawMiniPoster('asharby',236,22,26,36);drawMiniPoster(pick[0],208,26,22,28);drawMiniPoster(pick[1],266,26,22,28);drawMiniPoster(pick[2],208,62,22,28);drawMiniPoster('asharby2',237,64,24,28);drawMiniPoster(pick[3],266,62,22,28);
+ // a Season 8 calendar by the door frame
+ px(296,40,18,22,'#fbf6ea');px(296,40,18,5,'#c8402e');for(let k=0;k<9;k++){const cx0=298+(k%3)*5,cy0=47+Math.floor(k/3)*5;px(cx0,cy0,3,3,'#e8e0d0');if(k<7)pdot(cx0+1,cy0+1,'#c8402e')}
+ // bed with the orange duvet and Asharby hoodie, HK on the edge playing
+ px(292,104,6,BASE-104,'#6a4a2e');px(292,104,6,2,'#8a6a42');px(226,124,6,BASE-124,'#6a4a2e');px(228,130,66,8,'#f4f4ee');px(278,124,14,7,'#fbfbf8');px(228,136,66,12,HOOD);px(228,136,66,2,HOOD_L);for(let k=0;k<4;k++)px(236+k*14,138,1,10,HOOD_D);
+ px(230,134,18,6,'#1e2a50');px(230,136,18,1,'#ff9ac0');
+ {const p={hands:[8,-13],hands2:[6,-12],arm2Front:1,mouth:'grin',crouch:2,blink:Math.sin(time*2)>.97};hkDraw(250,BASE,p,1);px(255,BASE-17,7,3,'#e8e8ec');pdot(256,BASE-16,'#3a8ac8');pdot(260,BASE-16,'#c8402e')}
+ if(Math.floor(time*1.5)%3===0){for(const [hx,hy] of [[262,BASE-48],[268,BASE-54]]){px(hx,hy,2,2,'#ff8ab8');px(hx+3,hy,2,2,'#ff8ab8');px(hx,hy+1,5,2,'#ff8ab8');px(hx+1,hy+3,3,1,'#ff8ab8')}}
+ // wardrobe at the edge with HK's stickers
+ px(300,70,22,BASE-70,'#8a6040');px(300,70,22,3,'#a87a50');const got=STICKERS.filter(s=>save.stickers[s[0]]);got.slice(0,12).forEach((s,i)=>{px(303+(i%3)*6,78+Math.floor(i/3)*7,4,4,['#ffd27a','#9aff6a','#5ad0ff','#ff8ae0','#ff8a6a'][i%5])});
+ // rug, socks, album, game box on the floor
+ for(let y=0;y<10;y++){const w=Math.round(70*Math.sqrt(1-((y-5)/5.2)**2));px(176-w/2+40,BASE+6+y,w,1,y%3?'#2f6a7a':'#e7a95b')}
+ px(150,BASE+2,8,3,'#3f5a45');px(156,BASE+3,4,2,'#3f5a45');px(162,BASE+4,8,3,'#4a6a50');px(196,BASE+10,16,9,'#3a5a7a');px(198,BASE+11,12,7,'#f2ead8');px(186,BASE,12,10,'#1e2a50');px(186,BASE,12,2,'#ff9ac0');
+ // shadows under furniture for depth
+ g.globalAlpha=.25;px(104,BASE,80,3,'#2a1a0a');px(226,BASE,72,3,'#2a1a0a');px(300,BASE,22,3,'#2a1a0a');g.globalAlpha=1;
+ // light: sunshine from the window by day, lamp and TV glow at night
+ if(!night){g.globalAlpha=dusk?.08:.12;g.fillStyle='#fff6c8';g.beginPath();g.moveTo(wx,wy+wh+6);g.lineTo(wx+ww,wy+wh+6);g.lineTo(wx+ww+60,H);g.lineTo(wx+10,H);g.closePath();g.fill();g.globalAlpha=1}
+ if(night||dusk){g.globalCompositeOperation='multiply';g.fillStyle=night?'#5a5a8a':'#c8a088';g.fillRect(0,0,W,H);g.globalCompositeOperation='lighter';g.globalAlpha=night?.3:.15;pdisc(109,100,22,'#ffc870');g.globalAlpha=night?.22:.1;pdisc(158,98,18,'#3a8ac8');g.globalAlpha=1;g.globalCompositeOperation='source-over'}
+ }finally{g=keep}return c.toDataURL('image/png')};
+
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
 $('soundBtn').onclick=()=>{audioInit();setSound(save.sound===false)};setSound(save.sound!==false);
@@ -2931,6 +3005,7 @@ window.__hooked.forceTrophy=()=>{fishies.forEach(f=>{if(!f.f.legend&&!f.f.sighti
 window.__hooked.locQ=k=>{currentQuestion=({tide:tideQuestion,thermo:thermoQuestion,scale:scaleQuestion,bonus:bonusQuestion})[k]();learningHintVisible=false;workingVisible=false;panelName='learn';$('panel').classList.add('on');renderPanel()};
 window.__hooked.ending=()=>startEnding();window.__hooked.wanted=()=>wantedToday();
 window.__hooked.snap=()=>snap;window.__hooked.slowSnap=()=>{snapFast=false};
+window.__hooked.townX=()=>town&&town.x;
 
 })();
 </script></body></html>
