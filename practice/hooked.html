@@ -1582,27 +1582,34 @@ function renderReport(){let attempted=save.events.filter(e=>e.type==='learning')
  const rows=[`HOOKED! EDUCATIONAL EVIDENCE`,`Generated: ${new Date().toLocaleString('en-GB')}`,`Device-local report: no student name or email stored`,``,`FISHING & PROGRESSION`,`Fish photographed and released: ${save.totalCatches||0}`,`Club claims: ${save.sales}`,`Total club rewards (including learning bonuses): ${fmt(save.total)}`,`Learning bonuses earned (including unclaimed photo bonuses): ${fmt(save.learningBonusesEarned||0)}`,`Learning bonuses deposited to savings: ${fmt(save.learningBonusPaid||0)}`,`Species discovered: ${Object.keys(save.journal).length}/${FISH.length}`,`Species found by feeding depth: shallow ${zones[0]}, middle ${zones[1]}, bottom ${zones[2]}`,`Locations discovered: ${save.owned.map(i=>LOC[i].name).join(', ')}`,`Equipment: ${RODS[save.rod].name}; ${BAGS[save.bag].name}; ${BOATS[save.boat].name}`,`Dirt bike purchased: ${save.bikeOwned?'Yes':'No'}`,`Stoat sightings: ${save.stoatSeen||0}`,`Mags\u2019s challenges completed: ${save.challengesDone||0}`,`Litter cleared from the water: ${save.litter||0}`,``,`CONTEXTUAL LEARNING`,`Answered: ${tried.length}`,`Correct: ${correct}`,`Skipped: ${skipped}`,``,`ANSWER-BY-ANSWER EVIDENCE`,...attempted.map((e,i)=>`${i+1}. ${e.date} | ${e.skill} | ${e.context||'Fishing'}\nQuestion: ${e.q}\nAnswer: ${e.answer}\nOutcome: ${e.skipped?'Skipped':e.correct?'Correct':'Revisit'}\nBonus earned: ${fmt(e.bonusEarned||0)}\n${e.calculation?'Calculation: '+e.calculation:''}\n`),``,`REAL GAMEPLAY DECISIONS`,...actions.slice(-70).map((e,i)=>`${i+1}. ${e.date}: ${e.detail}`)];
  window.reportText=rows.join('\n');return `<div class="cinematic">FOR STAFF \u00b7 CLASSROOM EVIDENCE</div><h1>Learning and gameplay report</h1><p>Questions use real fish weights, species, reward rates and fishing decisions. Export with Print, then Save as PDF.</p><div class="report">${esc(rows.join('\n'))}</div><div class="actions">${btn('Print / Save as PDF','print')}${btn('Back','menu',false,'secondary')}</div>`}
 
-// ===== Cameos: Jay the birdwatcher, Bonnie the poodle, and a kingfisher =====
-// Rare visits to the near bank. Jay: messy brown hair, big eyebrows, binoculars.
+// ===== Cameos: Jay out walking Bonnie the poodle =====
+// Now and then Jay walks Bonnie along the near bank. He says hello straight away, plays fetch with Bonnie
+// for a few moments, says goodbye and carries on with his walk. He never hangs about watching.
 // Bonnie: brown toy poodle, all curls, no tail.
 const outA=document.createElement('canvas'),outB=document.createElement('canvas');outA.width=outB.width=72;outA.height=outB.height=64;
 function drawOutlined(x,y,ox,oy,fn){const a=outA.getContext('2d'),keep=g;a.clearRect(0,0,72,64);g=a;try{fn(ox,oy)}finally{g=keep}
  const t=outB.getContext('2d');t.globalCompositeOperation='source-over';t.clearRect(0,0,72,64);t.drawImage(outA,0,0);t.globalCompositeOperation='source-in';t.fillStyle='#16202a';t.fillRect(0,0,72,64);
  const bx=Math.round(x-ox),by=Math.round(y-oy);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])g.drawImage(outB,bx+dx,by+dy);g.drawImage(outA,bx,by)}
-function drawJay(ox,oy,pose,f){const P=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(ox+x,oy+y,w,h)};const SK='#e2b496',SKD='#c8987a',H='#6a4428',HL='#8a5e38',HD='#4a2c18';
- const step=pose==='walk'?(f%2):0;
- P(-3,-12,2,8,'#3a3e4a');P(1,-12,2,8,'#444a58');P(-4+step,-4,3,3,'#3a3e4a');P(1-step,-4,3,3,'#444a58');P(-4+step,-1,4,1,'#2a2018');P(1-step,-1,4,1,'#2a2018');
- P(-5,-27,10,15,'#2f4a6a');P(-5,-27,2,15,'#243a54');P(3,-26,2,13,'#3a5a7e');P(-5,-13,10,1,'#1e3046');
- P(1,-27,1,8,'#f2f2ea');P(0,-20,3,3,'#3a7ac8');P(1,-19,1,1,'#f2f2ea');
- P(-1,-29,3,2,SKD);P(-4,-39,10,11,SK);P(-4,-39,2,11,SKD);P(6,-34,1,2,SK);P(-2,-34,2,3,SKD);
- // messy brown hair: tufts in every direction
- P(-5,-41,11,3,H);P(-5,-38,3,5,H);for(const [x,y,c] of [[-6,-42,H],[-3,-43,HL],[0,-42,H],[2,-44,H],[4,-42,HL],[6,-41,H],[-7,-40,HD],[7,-39,H],[1,-43,HD],[-2,-41,HL],[5,-40,HD]])P(x,y,1,1,c);P(3,-38,3,1,H);
- // big eyebrows
- P(2,-36,4,2,HD);
- if(pose==='binos'){P(2,-35,5,3,'#1a1a1a');P(3,-34,1,1,'#5a6a7a');P(6,-34,1,1,'#5a6a7a');pline(ox+1,oy-24,ox+3,oy-33,'#2f4a6a',2);pline(ox-3,oy-24,ox+2,oy-32,'#243a54',2);P(5,-31,2,1,'#8a4a3a')}
- else{P(3,-34,1,2,'#f4f4f0');P(4,-34,1,2,'#3a2a20');P(4,-31,3,1,'#8a4a3a');P(6,-32,1,1,'#8a4a3a');
-  if(pose==='wave'){const up=Math.sin(time*12)>0?1:0;pline(ox+3,oy-24,ox+8+up,oy-40,'#2f4a6a',2);P(8+up,-42,2,2,SK)}else{pline(ox+3,oy-24,ox+5,oy-15,'#2f4a6a',2);P(5,-15,2,2,SK)}
-  pline(ox-4,oy-24,ox-5,oy-15,'#243a54',2);P(-6,-15,2,2,SKD)}
+function drawJay(ox,oy,pose,f){const P=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(ox+x,oy+y,w,h)};const SK='#e2b496',SKD='#c8987a',H='#7a4e2c',HL='#9a6a3e',HD='#5a3820';
+ // Jay: bright mustard Base 5 hoodie, jeans, white trainers, a big open smile. Always out walking Bonnie.
+ const Y='#e8a83a',YD='#c8882a',YL='#f6c862',ARM=YD;const step=pose==='walk'?(f%2):0,bob=pose==='cheer'?(Math.sin(time*10)>0?1:0):0;
+ P(-3,-12,2,8,'#3a4a6a');P(1,-12,2,8,'#465a80');P(-4+step,-4,3,3,'#3a4a6a');P(1-step,-4,3,3,'#465a80');
+ P(-4+step,-1,4,1,'#f2f2ea');P(1-step,-1,4,1,'#f2f2ea');P(-4+step,0,4,1,'#9a9a96');P(1-step,0,4,1,'#9a9a96');
+ P(-5,-27-bob,10,15,Y);P(-5,-27-bob,2,15,YD);P(3,-26-bob,2,13,YL);P(-5,-13-bob,10,2,YD);P(-4,-29-bob,8,2,Y);
+ P(1,-25-bob,1,4,'#f2f2ea');P(3,-25-bob,1,3,'#f2f2ea');P(-2,-20-bob,3,3,'#2a8a9a');P(-1,-19-bob,1,1,'#5ae0e0');
+ const hy=-bob;P(-1,-30+hy,3,2,SKD);P(-4,-40+hy,10,11,SK);P(-4,-40+hy,2,11,SKD);P(6,-35+hy,1,2,SK);P(-2,-35+hy,2,3,SKD);
+ // soft, curly brown hair
+ P(-5,-42+hy,11,3,H);P(-5,-39+hy,3,5,H);for(const [x,y,c] of [[-4,-43,HL],[-1,-43,H],[2,-43,HL],[5,-42,H],[-6,-41,HD],[6,-40,H],[0,-42,HL],[3,-42,HD]])P(x,y+hy,1,1,c);P(3,-39+hy,3,1,H);
+ // friendly eyebrows (raised), bright eye, big smile and rosy cheek
+ P(3,-38+hy,3,1,HD);P(6,-37+hy,1,1,HD);
+ P(3,-35+hy,2,2,'#ffffff');P(4,-35+hy,1,2,'#3a2a20');P(4,-35+hy,1,1,'#5a4030');
+ P(3,-31+hy,4,1,'#8a3a2a');P(2,-32+hy,1,1,'#8a3a2a');P(7,-32+hy,1,1,'#8a3a2a');P(3,-32+hy,3,1,'#ffffff');P(1,-33+hy,2,1,'#f0a090');
+ // arms
+ const hand=(x,y,c)=>P(x,y+hy,2,2,c);
+ if(pose==='wave'){const up=Math.sin(time*12)>0?1:0;pline(ox+3,oy-24+hy,ox+8+up,oy-40+hy,ARM,2);hand(8+up,-42,SK);pline(ox-4,oy-24+hy,ox-5,oy-15+hy,ARM,2);hand(-6,-15,SKD)}
+ else if(pose==='cheer'){pline(ox+3,oy-24+hy,ox+7,oy-41+hy,ARM,2);hand(7,-43,SK);pline(ox-4,oy-24+hy,ox-7,oy-41+hy,ARM,2);hand(-8,-43,SKD)}
+ else if(pose==='throw'){pline(ox+3,oy-24+hy,ox+10,oy-34+hy,ARM,2);hand(10,-36,SK);pline(ox-4,oy-24+hy,ox-5,oy-15+hy,ARM,2);hand(-6,-15,SKD)}
+ else{pline(ox+3,oy-24+hy,ox+5,oy-15+hy,ARM,2);hand(5,-15,SK);pline(ox-4,oy-24+hy,ox-5,oy-15+hy,ARM,2);hand(-6,-15,SKD)}
 }
 function drawBonnie(ox,oy,pose,f,dir){const P=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(dir>0?ox+x:ox-x-w+1,oy+y,w,h)};const B='#8a5a36',L='#a8784a',D='#6a4226';
  const s=pose==='walk'?f%2:0;
@@ -1610,27 +1617,33 @@ function drawBonnie(ox,oy,pose,f,dir){const P=(x,y,w,h,c)=>{g.fillStyle=c;g.fill
  P(-4,-7,9,5,B);P(-3,-8,7,2,L);P(-4,-6,1,3,L);P(0,-5,2,2,L);
  P(-3+s,-2,1,2,D);P(-1-s,-2,1,2,D);P(2+s,-2,1,2,D);P(4-s,-2,1,2,D);P(-4+s,0,2,1,L);P(4-s,0,2,1,L);
  const hy=pose==='sniff'?-4:-11;P(4,hy,5,5,B);P(5,hy-1,3,2,L);P(3,hy+1,2,4,D);P(9,hy+2,2,2,B);P(10,hy+2,1,1,'#1a1a1a');P(7,hy+1,1,1,'#1a1a1a')}
-let cameo={state:'away',t:120,x:-20,bx:-34,bpose:'walk',bdir:1,btx:40,bt:0,f:0,jpose:'walk',watchT:0,said:0};
+let cameo={state:'away',t:120,x:-20,bx:-34,bpose:'walk',bdir:1,btx:40,bt:0,f:0,jpose:'walk',said:0,ball:null,throwT:0,poseT:0};
 let npcSayUntil=0;
 function jaySay(line){const el=$('npcQuip');if(!el||cameo.state==='away'||panelName||mode==='bike')return;el.textContent=line;el.classList.add('on');npcSayUntil=performance.now()+3000;placeNpc();sfx('quip')}
 function placeNpc(){const el=$('npcQuip');el.style.left=((cameo.x+2)/LW*100)+'%';el.style.top=((144-48)/LH*100)+'%'}
 function cameoHere(){return cameo.state!=='away'}
+function jayHello(){const h=(save.clock/60)%24,part=h<12?'Morning':h<17?'Afternoon':'Evening';return [`${part} HK! Just taking Bonnie for her walk.`,'Hello! How are you? Good to see!',`${part} HK! Bonnie wanted to say hello.`][Math.floor(Math.random()*3)]}
 function updateCameo(dt){const c=cameo;c.f+=dt*6;if(npcSayUntil&&performance.now()>npcSayUntil){$('npcQuip').classList.remove('on');npcSayUntil=0}
- if(mode==='bike'||panelName)return;c.t-=dt;
- if(c.state==='away'){if(c.t<=0&&save.hasPlayed&&settings().surprises&&(phase==='idle'||phase==='waiting')){c.state='enter';c.x=-16;c.bx=-30;c.jpose='walk';c.bpose='walk';c.bdir=1;if(['sit','run','sniff','peek'].includes(stoat.state)){stoatFlee();if(Math.random()<.6)setTimeout(()=>jaySay('Unhand me, goblin!'),900)}stoat.state='hidden';stoat.t=999}return}
- if(c.state==='enter'){c.x+=18*dt;c.bx=Math.min(c.bx+18*dt,c.x-12);if(c.x>=40){c.x=40;c.state='watch';c.t=R(9,15);c.jpose='binos';c.bt=1.5;birdTimer=Math.min(birdTimer,1.2)}}
- else if(c.state==='watch'){c.watchT+=dt;if(c.t<2.4&&c.t+dt>=2.4)c.jpose='wave';
-  c.bt-=dt;if(c.bt<=0){c.bt=R(1.5,3.5);const toHK=!LOC[save.location].boat&&Math.random()<.3;c.btx=toHK?122:R(14,78);c.bpose='walk'}
-  const d=c.btx-c.bx;if(Math.abs(d)>1){c.bdir=Math.sign(d);c.bx+=c.bdir*22*dt}else c.bpose=c.btx>110?'sit':(Math.random()<.02?'sniff':c.bpose==='walk'?'sniff':c.bpose);
-  if(c.jpose==='binos'&&Math.random()<dt*.04&&!c.said){c.said=1;jaySay('When I was in China....')}
-  if(c.t<=0){c.state='leave';c.jpose='walk';c.bpose='walk';c.bdir=-1}}
+ if(mode==='bike'||panelName)return;c.t-=dt;c.poseT=Math.max(0,c.poseT-dt);
+ if(c.state==='away'){if(c.t<=0&&save.hasPlayed&&settings().surprises&&(phase==='idle'||phase==='waiting')){c.state='enter';c.x=-16;c.bx=-30;c.jpose='walk';c.bpose='walk';c.bdir=1;c.ball=null;if(['sit','run','sniff','peek'].includes(stoat.state)){stoatFlee();if(Math.random()<.6)setTimeout(()=>jaySay('Unhand me, goblin!'),900)}stoat.state='hidden';stoat.t=999}return}
+ if(c.state==='enter'){c.x+=18*dt;c.bx=Math.min(c.bx+18*dt,c.x-12);if(c.x>=40){c.x=40;c.state='visit';c.t=R(9,13);c.jpose='wave';c.poseT=1.6;c.throwT=2.4;c.bt=1.5;jaySay(jayHello())}}
+ else if(c.state==='visit'){if(!c.poseT&&c.jpose!=='stand')c.jpose='stand';
+  // a game of fetch with Bonnie
+  c.throwT-=dt;if(c.throwT<=0&&!c.ball&&c.t>3){c.throwT=R(3,4.5);c.jpose='throw';c.poseT=.4;c.ball={x:c.x+10,y:144-34,vx:R(-38,-20),vy:-70,on:false}}
+  const b=c.ball;if(b){if(!b.on){b.vy+=160*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.y>=143){b.y=143;b.on=true}c.btx=b.x}else if(Math.abs(c.bx-b.x)<3&&!b.got){b.got=true;c.btx=c.x-8}if(b.got){b.x=c.bx+(c.bdir>0?9:-9);b.y=144-9;if(Math.abs(c.bx-c.btx)<2){c.ball=null;c.bpose='sit';c.bt=1.2}}}
+  else{c.bt-=dt;if(c.bt<=0){c.bt=R(1.5,3.5);const toHK=!LOC[save.location].boat&&Math.random()<.3;c.btx=toHK?122:R(14,78);c.bpose='walk'}}
+  const d=c.btx-c.bx;if(Math.abs(d)>1){c.bdir=Math.sign(d);c.bx+=c.bdir*(c.ball?34:22)*dt;c.bpose='walk'}else if(!c.ball)c.bpose=c.btx>110?'sit':(c.bpose==='walk'?'sniff':c.bpose);
+  if(!c.said&&c.t<6&&Math.random()<dt*.3){c.said=1;jaySay('When I was in China....')}
+  if(c.t<=1.6&&c.jpose!=='wave'&&!c.bye){c.bye=1;c.jpose='wave';c.poseT=1.6;c.ball=null;jaySay('See you later, HK! Have a good one.')}
+  if(c.t<=0){c.state='leave';c.jpose='walk';c.bpose='walk';c.bdir=-1;c.bye=0}}
  else if(c.state==='leave'){c.x-=18*dt;c.bx-=22*dt;if(c.x<-20&&c.bx<-20){c.state='away';c.t=R(150,320);c.said=0;stoat.state='hidden';stoat.t=R(4,9)}}
 }
 function renderCameo(){const c=cameo;if(c.state==='away')return;const gy=x=>(!LOC[save.location].boat&&x>78)?149:144;
  const bonnieY=gy(c.bx),jx=Math.round(c.x),bxp=Math.round(c.bx);
- if(c.state!=='watch'||Math.abs(c.bx-c.x)<60){g.globalAlpha=.9;pline(jx+5,130,bxp+(c.bdir>0?7:-7),bonnieY-7,'#c8402e');g.globalAlpha=1}
+ if(c.state!=='visit'||Math.abs(c.bx-c.x)<60){g.globalAlpha=.9;pline(jx+5,130,bxp+(c.bdir>0?7:-7),bonnieY-7,'#c8402e');g.globalAlpha=1}
  drawOutlined(bxp,bonnieY,36,46,(ox,oy)=>drawBonnie(ox,oy,c.bpose,Math.floor(c.f),c.bdir));
  drawOutlined(jx,144,36,52,(ox,oy)=>drawJay(ox,oy,c.jpose,Math.floor(c.f)));
+ if(c.ball){px(Math.round(c.ball.x)-1,Math.round(c.ball.y)-1,3,3,'#d8f04a');pdot(Math.round(c.ball.x),Math.round(c.ball.y)-1,'#f4ffa0')}
  if(npcSayUntil)placeNpc()}
 
 // ===== THE SECRET DIRT BIKE: absolutely over the top =====
@@ -1758,7 +1771,7 @@ function drawCrowd(f,camera,oy){const x0=Math.round((f.x0+100-camera)/2),gy=Math
  for(let r=0;r<4;r++){px(x0+r*4,gy-12-r*8,200-r*8,8,r%2?'#8a8f96':'#9aa0a6');px(x0+r*4,gy-12-r*8,200-r*8,1,'#c8ccd0')}
  const rr=rng(f.n*7);for(let r=0;r<4;r++)for(let k=0;k<22;k++){const xx=x0+8+r*4+k*8+Math.floor(rr()*3),yy=gy-17-r*8-(Math.sin(time*9+k+r)>.3?1:0),col=['#e06a2a','#2f6ab0','#c8402e','#3a9a3a','#ffd23a','#8a4a9a'][Math.floor(rr()*6)];px(xx,yy,3,3,col);px(xx,yy-3,3,3,['#e2b496','#c8906a','#8a5a3a','#f0c8a0'][Math.floor(rr()*4)]);if(Math.sin(time*7+k*2)>.6)pdot(xx+3,yy-5,'#f0c8a0')}
  // familiar faces on the front row
- drawOutlined(x0+30,gy-12,36,52,(ox,oy)=>drawJay(ox,oy,Math.sin(time*2)>0?'wave':'binos',Math.floor(time*6)));
+ drawOutlined(x0+30,gy-12,36,52,(ox,oy)=>drawJay(ox,oy,Math.sin(time*2)>0?'wave':'cheer',Math.floor(time*6)));
  drawOutlined(x0+46,gy-12,36,46,(ox,oy)=>drawBonnie(ox,oy,'sit',0,1));
  const pal=[['#c8c4bc','#4a5a3a','#7a6a4a'],['#4a2e22','#7a4a8a',null],['#b8682a','#6a6a3a','#8a8a5a']];
  pal.forEach(([hair,coat,hat],i)=>{const x=x0+70+i*16,y=gy-12,j=Math.sin(time*8+i)>0?1:0;px(x-3,y-14-j,7,10,coat);px(x-3,y-23-j,7,8,'#e8b896');px(x-3,y-24-j,7,3,hair);if(hat)px(x-4,y-26-j,9,2,hat);if(i===1){px(x-3,y-20-j,3,3,'#1e2a3a');px(x+1,y-20-j,3,3,'#1e2a3a');pdot(x-2,y-19-j,'#dceef6');pdot(x+2,y-19-j,'#dceef6')}if(i===2)px(x-3,y-18-j,7,4,'#b8682a');pline(x+3,y-12-j,x+6,y-24-j*2,coat,2)});
