@@ -1508,7 +1508,7 @@ function polaroid(p,i){const f=FISH.find(x=>x.id===p.id);const img=photoStore[p.
  return `<figure class="polaroid r${i%4}"><span class="pin"></span><div class="pol-img ${photoStore[p.uid]?'real':''}"><img src="${img}" alt="Photo of a ${esc(f?.name||'fish')}"></div><figcaption><b>${esc(f?.name||'Fish')}</b><span>${p.weight.toFixed(2)} kg \u00d7 \u00a3${p.rate}/kg</span></figcaption><span class="holly-stamp ${p.quality==='pick'?'pick':''}">${p.quality==='pick'?'\u2605 Holly\u2019s pick':'\u2713 Holly'}</span><div class="pol-foot">${p.mastered?`<span class="worked">\u2713 ${fmt(photoTotal(p))}</span>`:`<button class="sticky-btn" data-act="challenge:${p.uid}">Work it out? +${fmt(photoBonus(p))}</button>`}</div></figure>`}
 function wareTag(type,i,cost,owned,current,next){if(current)return `<span class="tag in-use">In use</span>`;if(owned)return `<span class="tag owned">Owned</span>`;if(!next)return `<span class="tag later">Later</span>`;return save.money>=cost?`<button class="tag buy" data-act="${type}:${i}">${fmt(cost)}</button>`:`<span class="tag saving">${fmt(cost)}<small>saving up</small></span>`}
 const PANELS={
- intro:()=>({theme:'th-title',html:`<div class="title-logo"><b class="ini">H</b>OO<b class="ini">K</b>ED<span>!</span></div><div class="title-sub">on a dirt bike</div><div class="title-hero"><img src="${heroPreview(save.hair)}" alt="HK with his fishing rod"></div><p class="title-blurb">One boy. One dirt bike. Absolutely no money.<br>His rod is a stick. His bait is a drawing of a worm.</p><p class="title-note">Photograph each fish, let it go, and the angling club pays for the photo. \u00a310,000 buys the dirt bike.</p><div class="actions center">${btn('Let\u2019s go','start',false,'sign')}${btn('How to fish','controls',false,'sign ghost')}${btn('\ud83c\udfcd Demo the dirt bike','demo-bike',false,'sign ghost')}</div><div class="title-foot"><button class="linkish" data-act="watch-intro">\u25b6 Watch the intro</button><span class="credit">${ON_SITE?'<a class="linkish" href="/">Back to Base 5</a> \u00b7 ':''}Made by Jay @ CBS</span></div>`}),
+ intro:()=>({theme:'th-title',html:`<div class="title-logo"><b class="ini">H</b>OO<b class="ini">K</b>ED<span>!</span></div><div class="title-sub">on a dirt bike</div><div class="title-hero"><img src="${heroPreview(save.hair)}" alt="HK with his fishing rod"></div><p class="title-blurb">One boy. One dirt bike. Absolutely no money.<br>His rod is a stick. His bait is a drawing of a worm.</p><p class="title-note">Photograph each fish, let it go, and the angling club pays for the photo. \u00a310,000 buys the dirt bike.</p><div class="actions center">${btn('Let\u2019s go','start',false,'sign')}${btn('How to fish','controls',false,'sign ghost')}</div><div class="title-foot"><button class="linkish" data-act="watch-intro">\u25b6 Watch the intro</button><span class="credit">${ON_SITE?'<a class="linkish" href="/">Back to Base 5</a> \u00b7 ':''}Made by Jay @ CBS</span></div>`}),
  market:()=>{const total=save.bucket.reduce((a,f)=>a+photoTotal(f),0),full=save.bucket.length>=BAGS[save.bag].cap;const line=magsSays||(save.bucket.length?(full?MAGS_LINES.full:MAGS_LINES.some):MAGS_LINES.empty);magsSays='';
   return {theme:'th-club',html:`<div class="sign-board">Chilton Bridge Angling Club</div>${npc('mags','Mags, club secretary',line)}${save.bucket.length?npc('holly','Holly, photo desk',HOLLY_LINES[(save.totalCatches||0)%HOLLY_LINES.length]):''}${renderWanted()}${renderChallenges()}<div class="corkboard">${save.bucket.length?save.bucket.map(polaroid).join(''):'<div class="cork-note">No photos pinned yet.<br>Every fish you catch, photograph and release goes up here.</div>'}</div><div class="chalk"><span>Photos <b>${save.bucket.length} / ${BAGS[save.bag].cap}</b></span><span>Owed to HK <b>${save.bucket.length?fmt(total):'\u00a30'}</b></span><span>Savings <b>${fmt(save.money)}</b></span></div>${renderRecords()}<p class="club-small">No fish are sold here: the club pays for photos, and every fish goes back.</p><div class="actions">${btn('Claim the rewards','sell',!save.bucket.length,'stamp')}${save.season2?btn('Restoration fund','restore',false,'sticky'):''}${btn('Back to the water','close',false,'paper')}</div>`}},
  gear:()=>({theme:'th-shop',html:`<div class="sign-board wood">Clive\u2019s World-Class Tackle Emporium</div>${npc('clive','Clive',save.rod===0?'A stick? A STICK? Right. Let\u2019s sort you out, young man.':'Every rod is a masterpiece. Even the cheap one.')}<div class="till">Your savings <b>${fmt(save.money)}</b></div>
@@ -1531,7 +1531,7 @@ const PANELS={
  menu:()=>{const pct=clamp(save.money/10000*100,0,100);return {theme:'th-permit',html:`<div class="permit-head">Angling permit <span>Chilton Bridge Angling Club</span></div><div class="permit-body"><img class="permit-photo" src="${heroPreview(save.hair)}" alt="HK"><dl><dt>Holder</dt><dd>HK</dd><dt>Rod</dt><dd>${esc(RODS[save.rod].name)}</dd><dt>Boat</dt><dd>${esc(BOATS[save.boat].name)}</dd><dt>Fish photographed</dt><dd>${save.totalCatches||0}</dd><dt>Species found</dt><dd>${Object.keys(save.journal).length} / ${FISH.length}</dd><dt>Stickers</dt><dd>${STICKERS.filter(s=>save.stickers[s[0]]).length} / ${STICKERS.length}</dd><dt>Season</dt><dd>${SEASON_ICON[seasonNow()]} ${seasonNow()[0].toUpperCase()+seasonNow().slice(1)}</dd></dl></div>
   <div class="permit-fund"><span>${save.bikeOwned?'Dirt bike: OWNED':'Dirt bike fund'}</span><div class="fund-bar"><i style="width:${save.bikeOwned?100:pct}%"></i></div><b>${save.bikeOwned?'\u2713':fmt(save.money)+' of \u00a310,000'}</b></div>
   <div class="actions main-row">${btn('Keep fishing','close',false,'paper')}${save.bikeOwned?btn('Ride the dirt bike!','ride',false,'stamp'):btn('Buy the dirt bike \u00b7 \u00a310,000','buy-bike',save.money<10000,'stamp')}</div>
-  <div class="permit-groups"><div class="pg"><h3>Learn</h3>${btn('Puzzles','learn',false,'paper')}${btn('Research book','research',false,'paper')}${btn('Learning report','report',false,'paper')}</div><div class="pg"><h3>Extras</h3>${save.bikeOwned?'':btn('\ud83c\udfcd Demo the dirt bike','demo-bike',false,'paper')}${btn('\ud83c\udfa8 Design a fish','designer',false,'paper')}${btn('Watch the intro','watch-intro',false,'paper')}${save.endingSeen?btn('Watch the ending','watch-ending',false,'paper'):''}${btn('How to fish','controls',false,'paper')}</div><div class="pg"><h3>Options</h3>${btn('Settings','settings',false,'paper')}${btn('Start again','reset',false,'paper small-btn')}${ON_SITE?'<a class="action paper" href="/">Back to Base 5</a>':''}</div></div><p class="permit-credit">Made by Jay @ CBS</p>`}},
+  <div class="permit-groups"><div class="pg"><h3>Learn</h3>${btn('Puzzles','learn',false,'paper')}${btn('Research book','research',false,'paper')}${btn('Learning report','report',false,'paper')}</div><div class="pg"><h3>Extras</h3>${btn('\ud83c\udfa8 Design a fish','designer',false,'paper')}${btn('Watch the intro','watch-intro',false,'paper')}${save.endingSeen?btn('Watch the ending','watch-ending',false,'paper'):''}${btn('How to fish','controls',false,'paper')}</div><div class="pg"><h3>Options</h3>${btn('Settings','settings',false,'paper')}${btn('Start again','reset',false,'paper small-btn')}${ON_SITE?'<a class="action paper" href="/">Back to Base 5</a>':''}</div></div><p class="permit-credit">Made by Jay @ CBS</p>`}},
  bedroom:()=>({theme:'th-pack',html:renderBedroom()}),
  cafe:()=>({theme:'th-club',html:renderCafe()}),
  dales:()=>({theme:'th-club',html:renderDales()}),
@@ -2614,9 +2614,9 @@ function updateTown(dt){if(panelName)return;const t=town,sp=70;let mv=0;if(keys.
  if(mv){t.x=clamp(t.x+mv*sp*dt,16,TOWN_W-16);t.dir=mv;t.walkT+=dt}else t.walkT=0;
  if(save.hasPlayed){save.clock=(save.clock+dt*1.1)%1440}}
 function townNPCs(h){const out=[];const T=time;
- if(h>=7&&h<17)out.push({who:'mags',x:h<8.5?250+(h-7)*90:395,line:'Morning, HK! The wanted board\u2019s up.'});
- if(h>=8&&h<18)out.push({who:'clive',x:600,line:'Every rod a masterpiece. Even the cheap one.'});
- if(h>=10&&h<17)out.push({who:'holly',x:735,line:'Light\u2019s lovely today. Hold the fish low for the photo!'});
+ if(h>=7&&h<17)out.push({who:'mags',x:h<8.5?250+(h-7)*90:395,line:'Morning, HK! Mind the diplodocus on your way in.'});
+ if(h>=8&&h<18)out.push({who:'clive',x:600,line:'Every rod a masterpiece. Even the one a dinosaur sat on.'});
+ if(h>=10&&h<17)out.push({who:'holly',x:735,line:'A pterosaur photobombed my last shot. Again.'});
  if(h>=9&&h<16)out.push({who:'jay',x:520+Math.sin(T*.12)*320,dir:Math.cos(T*.12)>0?1:-1,line:'In the wise words of my late, great grandfather: stop. Then fish.'});
  if(h>=21||h<5)out.push({who:'fox',x:((T*40)%(TOWN_W+200))-100,dir:1,line:''});
  return out}
@@ -2653,12 +2653,14 @@ function buildTown(){const c=document.createElement('canvas');c.width=TOWN_W;c.h
  // lamps and planters
  for(const lx of [92,284,486,676,866,1076]){px(lx,G-58,2,58,'#3a3a42');px(lx-3,G-62,8,4,'#3a3a42');px(lx-2,G-58,6,2,'#fff2c0')}
  for(const tx0 of [250,660,850]){px(tx0,G-10,20,10,'#8a5a3a');for(let k=0;k<6;k++)pdot(tx0+2+k*3,G-11-(k%2),'#d84a8a')}
+ overgrowTown(G);
  }finally{g=keep}return c}
 function renderTown(){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';const t=town,h=(save.clock/60)%24,sky=skyCached(h);
  if(!townC||(!townC.fontOk&&document.fonts&&document.fonts.check&&document.fonts.check('8px HKPixel'))){townC=buildTown();townC.fontOk=!!(document.fonts&&document.fonts.check&&document.fonts.check('8px HKPixel'))}
  const cam=clamp(t.x-LW/2,0,TOWN_W-LW);ensureSky(h,0);g.drawImage(skyC,0,0);
  const L=bikeLayers();[[.1,0,60],[.25,1,70]].forEach(([d,i,yo])=>{const off=-Math.floor((cam*d)%LW);g.drawImage(L[i],off,yo);g.drawImage(L[i],off+LW,yo)});
- g.drawImage(townC,-Math.round(cam),0);
+ {g.globalAlpha=.18;px(0,0,LW,TOWN_GY,'#9ab878');g.globalAlpha=1}drawDinosBack(cam,time);
+ g.drawImage(townC,-Math.round(cam),0);drawDinosFront(cam,time);
  if(save.bikeOwned||true){const s=bikeSprite(true);g.drawImage(s,Math.round(906-cam),TOWN_GY-90)}
  const NP=townNPCs(h);for(const n of NP){const sx=n.x-cam;if(sx<-30||sx>LW+30)continue;
   if(n.who==='jay'){drawOutlined(sx,TOWN_GY,36,52,(ox,oy)=>drawJay(ox,oy,'walk',Math.floor(time*5)));drawOutlined(sx-14*(n.dir||1),TOWN_GY,36,46,(ox,oy)=>drawBonnie(ox,oy,'walk',Math.floor(time*6),n.dir||1));g.globalAlpha=.9;pline(sx+2,TOWN_GY-14,sx-12*(n.dir||1),TOWN_GY-6,'#c8402e');g.globalAlpha=1}
@@ -2677,7 +2679,7 @@ function renderTown(){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompos
 const CAFE=[['tea','Cup of tea',2,'HK feels warm and patient. Bites come a little quicker for a while.'],['choc','Hot chocolate',3,'Marshmallows included. Bites come a little quicker for a while.'],['crumble','Apple crumble and custard',4,'Crumble.']];
 function renderCafe(){return `<div class="sign-board" style="background:linear-gradient(#8a4a6a,#6a3a5a)">The Crumble Caf\u00e9</div>${npc('holly','Pat, caf\u00e9 owner',magsSays||'What can I get you, love? Everything here is nut free, as always.')}<div class="cafe-menu">${CAFE.map(([id,n,c,d])=>`<div class="cafe-item"><b>${esc(n)}</b><span>${fmt(c)}</span>${save.money>=c?`<button class="tag buy" data-act="cafe:${id}">Buy</button>`:'<span class="tag saving">saving up</span>'}</div>`).join('')}</div><div class="actions">${btn('Back outside','close',false,'paper')}</div>`}
 function buyCafe(id){const it=CAFE.find(x=>x[0]===id);if(!it||save.money<it[2])return;save.money-=it[2];feedBoost=Math.max(feedBoost,90);magsSays=id==='crumble'?'One crumble, coming up.':'There you go. Mind, it\u2019s hot.';logAction('purchase',`${it[1]} at the caf\u00e9 (${fmt(it[2])})`);sfx('coins');if(id==='crumble'){pendingQuip='crumble';save.flags.crumble=1}toast(it[3],4200);updateHUD();persist();renderPanel()}
-function renderDales(){const owned=save.bikeOwned;return `<div class="sign-board" style="background:linear-gradient(#e06a2a,#b8481a);color:#1a1a22">Dale\u2019s Dirt Bikes</div>${npc('clive','Dale',owned?`How\u2019s she running? Best stunt score so far: ${(save.bikeHigh||0).toLocaleString('en-GB')}.`:'That orange beauty in the window? \u00a310,000. Fancy a test ride first?')}<div class="actions center">${owned?btn('Ride the dirt bike!','ride',false,'stamp'):btn('Buy it \u00b7 \u00a310,000','buy-bike',save.money<10000,'stamp')+btn('\ud83c\udfcd Test ride (demo)','demo-bike',false,'paper')}${btn('Back outside','close',false,'paper')}</div>`}
+function renderDales(){const owned=save.bikeOwned;return `<div class="sign-board" style="background:linear-gradient(#e06a2a,#b8481a);color:#1a1a22">Dale\u2019s Dirt Bikes</div>${npc('clive','Dale',owned?`How\u2019s she running? Best stunt score so far: ${(save.bikeHigh||0).toLocaleString('en-GB')}.`:'That orange beauty in the window? \u00a310,000. Every penny earned with fish photos, mind.')}<div class="actions center">${owned?btn('Ride the dirt bike!','ride',false,'stamp'):btn('Buy it \u00b7 \u00a310,000','buy-bike',save.money<10000,'stamp')}${btn('Back outside','close',false,'paper')}</div>`}
 
 // ----- HK's bedroom -----
 const POSTERS=['hooked','pike','bike','crumble','song','squad1','map','strawberry','fishchart','stoat','moon','squad2','club','squad3','carp','socks'];
@@ -2747,6 +2749,62 @@ function drawBedroom(){const W=480,H=270,c=document.createElement('canvas');c.wi
 function renderBedroom(){const got=STICKERS.filter(s=>save.stickers[s[0]]).length;return `<div class="pack-title">HK\u2019s room</div><p class="pack-sub">Everything HK earns ends up in here somewhere.</p><div class="room-img"><img src="${drawBedroom()}" alt="HK\u2019s bedroom: posters on every wall, a games console, trophies, framed catches and stickers on the wardrobe"></div>
  <div class="room-facts"><span>\ud83d\uddbc Wall photos: HK\u2019s three heaviest catches</span><span>\ud83c\udfc6 Trophies on the shelf: ${Math.min(9,(save.flags.trophies||0)+(save.flags.records||0)+(save.bikeHigh>5000?1:0))}</span><span>\u2b50 Stickers on the wardrobe: ${got} / ${STICKERS.length}</span><span>\ud83c\udfae Favourite game: Breach Squad. Favourite operator: Asharby (HK will tell you why, at length)</span>${save.bikeOwned?'<span>\ud83c\udfcd The dirt bike, parked outside</span>':''}${save.flags.golden?'<span>\u2728 The Golden Rod</span>':''}</div>
  <div class="actions">${btn('Rearrange the posters','posters',false,'paper')}${btn(mode==='town'?'Back outside':'Close','close',false,'paper')}</div>`}
+
+// ===== HK's model village: Chilton Bridge after the end of the world, with dinosaurs =====
+// Inspired by HK's project ("what if dinosaurs returned?"): crumbling buildings, moss and greenery
+// growing over and through everything, and dinosaurs roaming behind the rooftops.
+function overgrowTown(G){const r=rng(2026),R0=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.round(R0(a,b));
+ const BLD=[[110,230,G-110],[300,470,G-96],[500,650,G-104],[690,840,G-96],[880,1060,G-112]],DOORX=[170,380,575,765,1030];
+ const moss=['#3a6a2a','#4a7a32','#5a8a3a','#6a9a42','#7aaa4a','#2f5a24'];
+ const nearDoor=x=>DOORX.some(d=>Math.abs(x-d)<14);
+ const blob=(cx,cy,rad,dens)=>{for(let y=-rad;y<=rad;y++)for(let x=-rad;x<=rad;x++){const d=(x*x+y*y)/(rad*rad);if(d<=1&&r()<dens*(1-d*.6))pdot(cx+x,cy+y,moss[Math.floor(r()*moss.length)])}};
+ const canopy=(cx,cy,rad)=>{blob(cx,cy,rad,1);blob(cx-rad*.4,cy-rad*.3,Math.round(rad*.7),.9);for(let k=0;k<rad*3;k++){const a=r()*Math.PI*2,d=r()*rad*.8;pdot(cx+Math.cos(a)*d,cy-rad*.2+Math.sin(a)*d*.7,k%2?'#8aba5a':'#9aca6a')}};
+ const trunk=(x,base,h)=>{for(let y=0;y<h;y++){const w=y<12?6:y<30?4:3;px(x-Math.floor(w/2)+Math.round(Math.sin(y*.08)*2),base-y,w,1,y%6?'#5a3e26':'#4a3018')}};
+ for(const [a,b,top] of BLD){
+  // weathered, faded paint
+  for(let k=0;k<(b-a)*(G-top)*.12;k++){const x=ri(a,b-1),y=ri(top,G-3);g.globalAlpha=.25;pdot(x,y,r()<.5?'#2a2a20':'#d8d0b8');g.globalAlpha=1}
+  // collapsed roof: jagged holes that show the sky
+  for(let h=0;h<2;h++){const hx=ri(a+6,b-46),hw=ri(22,42),hd=ri(10,26);for(let x=0;x<hw;x++){const d=Math.max(2,Math.round(hd*(1-Math.abs(x/hw*2-1))**.6+R0(-3,3)));g.clearRect(hx+x,top-12,1,d+10);pdot(hx+x,top-2+d,'#2a2018');if(r()<.4)pdot(hx+x,top-1+d,'#5a4a3a')}
+   for(let k=0;k<5;k++)px(hx+ri(0,hw),top-12+ri(0,6),ri(2,5),2,'#5a3a2a')}
+  // smashed and boarded windows
+  for(let k=0;k<3;k++){const wx=ri(a+8,b-30),wy=ri(top+14,G-50);if(nearDoor(wx+10))continue;if(r()<.5){px(wx,wy,ri(16,24),ri(12,18),'#1a2420');for(let s=0;s<5;s++)pline(wx+ri(0,16),wy,wx+ri(0,16),wy+ri(3,8),'#8ab0c8')}else{for(let s=0;s<3;s++)px(wx-2,wy+s*5,24,3,'#8a6a42');pdot(wx,wy+1,'#3a2a1a');pdot(wx+20,wy+6,'#3a2a1a')}}
+  // deep cracks
+  for(let k=0;k<5;k++){let x=ri(a+4,b-4),y=ri(top+4,G-30);for(let st=0;st<ri(10,24);st++){pdot(x,y,'#1a140e');if(r()<.3)pdot(x+1,y,'#3a2a20');x+=ri(-1,1);y+=1}}
+  // moss swallowing the walls, thickest near the ground and along the roof
+  for(let x=a-6;x<b+6;x+=3)blob(x,top-2+ri(-1,2),ri(2,4),.9);
+  for(let k=0;k<Math.round((b-a)/10);k++){const x=ri(a,b),y=ri(top+8,G-4);if(nearDoor(x))continue;blob(x,y,ri(3,9),.8)}
+  for(let x=a-4;x<b+4;x+=5){if(nearDoor(x))continue;blob(x,G-ri(2,8),ri(4,10),.95)}
+  // ivy curtains
+  for(let k=0;k<Math.round((b-a)/14);k++){const vx=ri(a,b),len=ri(20,70);if(nearDoor(vx))continue;for(let y=0;y<len;y++){const sx=vx+Math.round(Math.sin(y*.25+k)*1.6);px(sx,top+y,2,1,'#2f5a24');if(y%3===0)px(sx+(y%6?2:-2),top+y,2,2,moss[(y+k)%moss.length])}}}
+ // trees growing through the house and the caf\u00e9, and big ones in the gaps
+ g.clearRect(126,G-124,22,20);trunk(140,G-4,120);canopy(140,G-130,30);
+ g.clearRect(800,G-108,26,16);trunk(812,G-4,112);canopy(812,G-120,32);
+ for(const [tx0,h,rad] of [[262,80,22],[480,90,24],[672,70,18],[868,96,26],[1100,84,24],[40,70,20]]){trunk(tx0,G-2,h);canopy(tx0,G-h-6,rad)}
+ // the road and pavement breaking up, plants everywhere
+ for(let x=0;x<TOWN_W;x+=2){if(r()<.7){const hh=ri(1,7);px(x,G-hh,1,hh,moss[x%moss.length])}if(r()<.05){let cx=x,cy=G+1;for(let s=0;s<ri(8,20);s++){pdot(cx,cy,'#2a2622');if(r()<.5)pdot(cx+1,cy,moss[s%moss.length]);cx+=ri(-1,1);cy+=1}}}
+ for(let x=0;x<TOWN_W;x+=ri(18,40))blob(x,G+ri(20,40),ri(3,8),.85);
+ for(let k=0;k<10;k++){const px0=ri(10,TOWN_W-30);g.globalAlpha=.55;px(px0,G+ri(24,44),ri(10,26),2,'#7aa0b8');g.globalAlpha=1}
+ // rubble heaps
+ for(const [a,b] of BLD){for(let k=0;k<3;k++){const rx=ri(a,b-24);if(nearDoor(rx+12))continue;for(let i=0;i<30;i++)px(rx+ri(0,22),G-ri(0,9),ri(2,4),ri(2,3),['#8a8078','#6a6058','#a89a88','#7a5a3a'][i%4]);blob(rx+10,G-6,5,.7)}}
+ // a rusty, overgrown car by the bus stop
+ px(1068,G-12,36,9,'#8a4a2a');px(1074,G-19,22,7,'#7a3a22');px(1076,G-18,8,5,'#1a2420');px(1087,G-18,8,5,'#1a2420');pdisc(1076,G-3,3,'#2a2a2a');pdisc(1098,G-3,3,'#2a2a2a');for(let i=0;i<20;i++)pdot(1068+ri(0,36),G-ri(3,18),'#a8602a');blob(1086,G-18,9,.8);blob(1072,G-6,6,.8);
+ // spray paint, because someone had to
+ g.fillStyle='#e8402e';g.font='8px HKPixel,monospace';g.textAlign='left';g.textBaseline='top';g.fillText('THEY\u2019RE BACK',512,G-48);g.fillStyle='#ffd23a';g.fillText('DINO ZONE',404,G-28)}
+// dinosaurs roaming behind the rooftops (and the odd little one dashing along the street)
+function drawSauropod(x,y,t){x=Math.round(x);y=Math.round(y);const B='#4f7058',D='#3a5642',L='#7a9a78',st=Math.sin(t*2);
+ for(const [lx,ph] of [[-22,0],[-12,1],[14,1],[24,0]]){const o=Math.round(Math.sin(t*2+ph*Math.PI)*2);px(x+lx+o,y-16,6,16,ph?D:B)}
+ pellipse(x,y-26,32,13,B);for(let yy=-13;yy<=13;yy++){const w=Math.round(Math.sqrt(1-(yy/13)**2)*32);px(x-w,y-26+yy,w*2,1,yy>4?L:B)}
+ for(let i=0;i<34;i++){const nx=x+26+i*1.1+Math.sin(t*.8)*i*.12,ny=y-34-i*1.9;px(Math.round(nx),Math.round(ny),5,5,B)}const hx=Math.round(x+26+37+Math.sin(t*.8)*4),hy=y-34-66;px(hx,hy,11,6,B);pdot(hx+7,hy+1,'#1a1a1a');px(hx+8,hy+4,3,1,D);
+ for(let i=0;i<30;i++)px(Math.round(x-30-i*1.4),Math.round(y-24+i*.55+Math.sin(t*1.5+i*.2)*1.5),4,3,B)}
+function drawTheropod(x,y,t,dir){x=Math.round(x);y=Math.round(y);const B='#8a6a3a',D='#6a4a2a',L='#c8a46a',P=(dx,dy,w,h,c)=>px(dir>0?x+dx:x-dx-w,y+dy,w,h,c);const s=Math.sin(t*4);
+ P(-4+Math.round(s*3),-14,5,14,D);P(4-Math.round(s*3),-14,5,14,B);P(-10,-30,26,16,B);P(-6,-20,18,6,L);P(-40,-28,30,6,B);P(-46,-26,8,3,B);P(12,-42,8,14,B);P(12,-48,22,10,B);P(14,-40,20,3,'#f2f2ea');P(28,-46,2,2,'#1a1a1a');P(14,-26,3,4,D);P(22,-30,2,4,D)}
+function drawPterosaur(x,y,t){x=Math.round(x);y=Math.round(y);const f=Math.sin(t*6)>0;px(x-2,y,8,3,'#8a5a4a');px(x+6,y-1,6,2,'#8a5a4a');px(x+11,y-3,2,2,'#c8402e');if(f){pline(x,y,x-14,y-8,'#6a3a2a',2);pline(x+4,y,x+16,y-9,'#6a3a2a',2)}else{pline(x,y+1,x-14,y+5,'#6a3a2a',2);pline(x+4,y+1,x+16,y+5,'#6a3a2a',2)}}
+function drawLittleDino(x,y,t){x=Math.round(x);y=Math.round(y);const s=Math.floor(t*10)%2;px(x-6,y-8,10,5,'#5a8a4a');px(x+3,y-12,5,5,'#5a8a4a');pdot(x+6,y-11,'#1a1a1a');px(x-12,y-7,6,2,'#5a8a4a');px(x-3+s,y-3,1,3,'#3a5a2a');px(x+1-s,y-3,1,3,'#3a5a2a')}
+function drawDinosBack(cam,t){const G=TOWN_GY;
+ for(const [spd,off,sc] of [[12,0,1],[9,340,1]]){const x=((t*spd+off-cam*.35)%(LW+360)+LW+360)%(LW+360)-180;g.save();g.translate(x,G-14);g.scale(sc*1.5,sc*1.5);drawSauropod(0,0,t+off);g.restore()}
+ {const x=LW+120-(((t*20-cam*.5)%(LW+300))+LW+300)%(LW+300);drawTheropod(x,G-20,t,-1)}
+ for(let k=0;k<3;k++){const fx=((t*(30+k*8)+k*400)%(LW+200))-100,fy=30+k*22+Math.sin(t*1.2+k)*6;drawPterosaur(fx,fy,t+k)}}
+function drawDinosFront(cam,t){const lx=((t*120)%(TOWN_W*3))-200;const sx=lx-cam;if(sx>-20&&sx<LW+20){drawLittleDino(sx,TOWN_GY,t);drawLittleDino(sx-18,TOWN_GY,t+.3);drawLittleDino(sx-34,TOWN_GY,t+.6)}}
 
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
