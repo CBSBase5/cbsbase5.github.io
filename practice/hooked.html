@@ -1155,6 +1155,7 @@ function updateFight(dt){
  if(reeling){reelTick-=dt;if(reelTick<=0){reelTick=.075;sfx('tick')}let tensionBlock=clamp((struggle.stress-.55)*1.8,0,.9);let gain=(.17+grip*.19)*(1-tensionBlock)*(1-struggle.pull*.12);reel+=dt*gain*(1+(.6*(1-struggle.energy)));if(struggle.stress>.86)reel-=dt*.055;struggle.energy=clamp(struggle.energy-dt*(.015+hard*.012),.07,1)}
  else{reel-=dt*Math.max(0,.006+struggle.surge*.035);struggle.energy=clamp(struggle.energy+dt*.008,.07,1)}
  reel=clamp(reel,0,1);
+ if(fightRisk(dt,reeling))return;
  let direction=Math.sin(time*(2.8+hard)+struggle.burst),pullBack=struggle.surge*18+hard*10;
  struggle.fishX=clamp(struggle.fishX+dt*(direction*20*hard+pullBack-(reeling?(20+grip*18):8)),372,915);
  struggle.fishY=clamp(struggle.fishY+dt*(Math.sin(time*4.1+struggle.burst)*8+struggle.surge*16),324,548);
@@ -1323,12 +1324,7 @@ let ovMemo='';function drawOverlay(){
  if(!save.hasPlayed){out.fillStyle='#10202a70';out.fillRect(0,0,960,600)}
  if(phase==='bite'&&bob){const x=bob.x,y=SURF_W-40,pulse=1+Math.sin(time*12)*.06;const lbl=fishingLearnt()?'A bite!':'A bite! Space';rr(x-66*pulse,y-23,132*pulse,34,10,'#fff3cf');tx(lbl,x,y,17,'#7a2a14','center')}
  if(phase==='idle'&&!panelName&&save.hasPlayed&&!sadT){const x=clamp(560+castAim,410,890),y=hookTargetY();tx(HOOK_LEVELS[save.hookDepth].name,x+14,y+5,12,'#fff4d0')}
- if(phase==='reeling'){const W=360,x=480-W/2,y=70;rr(x,y,W,74,12,'#10262ce6');
-  tx('Reeling in',x+16,y+22,13,'#ffe9b0');rr(x+16,y+30,W-32,10,5,'#3c4e56');rr(x+16,y+30,(W-32)*reel,10,5,'#8fd0a0');
-  tx('Line tension',x+16,y+56,12,'#cfe3dc');const tw=W-140,tx0=x+124;rr(tx0,y+47,tw*.55,9,4,'#3e6a50');rr(tx0+tw*.55,y+47,tw*.3,9,0,'#7a6a34');rr(tx0+tw*.85,y+47,tw*.15,9,4,'#8a3a32');
-  const mx=tx0+tw*struggle.stress;rr(mx-3,y+43,6,17,3,'#fff4d6');
-  const hint=struggle.stress>.72?"Line's very tight. Letting go of Space eases it":struggle.surge>.35?'Big surge! Let it run for a moment':keys.Space?'Reeling in nicely':'Hold Space to reel when ready';
-  if(!fishingLearnt()||struggle.stress>.72)tx(hint,480,y+98,15,struggle.stress>.72?'#ffc2b0':'#f2ecd8','center')}
+ if(phase==='reeling'&&hookedFish)drawReelHUD();
  drawSnapUI();
 }
 
@@ -1529,7 +1525,7 @@ const PANELS={
   <div class="actions">${photo&&!photo.mastered?btn('Work out its value \u00b7 +'+fmt(photoBonus(photo)),`challenge:${photo.uid}`,false,'sticky'):''}${btn('Let it go and keep fishing','close',false,'paper')}</div>`}},
  learn:()=>({theme:'th-ledger',html:renderLearn()}),
  feedback:()=>({theme:'th-ledger',html:renderFeedback()}),
- controls:()=>({theme:'th-permit card',html:`<div class="permit-head">How to fish <span>from Clive\u2019s counter</span></div><div class="keys-grid"><div><kbd>\u2190</kbd><kbd>\u2192</kbd><span>Choose where to cast</span></div><div><kbd>\u2191</kbd><kbd>\u2193</kbd><span>Hook depth: shallow, middle or bottom</span></div><div><kbd class="wide">Space</kbd><span>Cast \u00b7 strike when the float goes under \u00b7 hold to reel</span></div><div><kbd>S</kbd><kbd>U</kbd><kbd>M</kbd><span>Club \u00b7 Clive\u2019s shop \u00b7 map</span></div><div><kbd>J</kbd><kbd>R</kbd><kbd>C</kbd><span>Journal \u00b7 research book \u00b7 backpack</span></div><div><kbd>L</kbd><kbd>N</kbd><kbd>Esc</kbd><span>Puzzles \u00b7 sound \u00b7 permit</span></div><div><kbd>B</kbd><kbd>O</kbd><span>Swap bait \u00b7 settings</span></div></div><p class="permit-tip">A twitchy float means a nibble. When it goes right under, that\u2019s a bite. While reeling, letting go of Space eases a tight line. Lines never snap.</p><div class="actions">${btn('Got it',save.hasPlayed?'menu':'intro',false,'paper')}</div>`}),
+ controls:()=>({theme:'th-permit card',html:`<div class="permit-head">How to fish <span>from Clive\u2019s counter</span></div><div class="keys-grid"><div><kbd>\u2190</kbd><kbd>\u2192</kbd><span>Choose where to cast</span></div><div><kbd>\u2191</kbd><kbd>\u2193</kbd><span>Hook depth: shallow, middle or bottom</span></div><div><kbd class="wide">Space</kbd><span>Cast \u00b7 strike when the float goes under \u00b7 hold to reel</span></div><div><kbd>S</kbd><kbd>U</kbd><kbd>M</kbd><span>Club \u00b7 Clive\u2019s shop \u00b7 map</span></div><div><kbd>J</kbd><kbd>R</kbd><kbd>C</kbd><span>Journal \u00b7 research book \u00b7 backpack</span></div><div><kbd>L</kbd><kbd>N</kbd><kbd>Esc</kbd><span>Puzzles \u00b7 sound \u00b7 permit</span></div><div><kbd>B</kbd><kbd>O</kbd><span>Swap bait \u00b7 settings</span></div></div><p class="permit-tip">A twitchy float means a nibble. When it goes right under, that\u2019s a bite. While reeling, letting go of Space eases a tight line. Hold the tension in the red too long and the line can snap. Calm fishing in Settings turns that off.</p><div class="actions">${btn('Got it',save.hasPlayed?'menu':'intro',false,'paper')}</div>`}),
  menu:()=>{const pct=clamp(save.money/10000*100,0,100);return {theme:'th-permit',html:`<div class="permit-head">Angling permit <span>Chilton Bridge Angling Club</span></div><div class="permit-body"><img class="permit-photo" src="${heroPreview(save.hair)}" alt="HK"><dl><dt>Holder</dt><dd>HK</dd><dt>Rod</dt><dd>${esc(RODS[save.rod].name)}</dd><dt>Boat</dt><dd>${esc(BOATS[save.boat].name)}</dd><dt>Fish photographed</dt><dd>${save.totalCatches||0}</dd><dt>Species found</dt><dd>${Object.keys(save.journal).length} / ${FISH.length}</dd><dt>Stickers</dt><dd>${STICKERS.filter(s=>save.stickers[s[0]]).length} / ${STICKERS.length}</dd><dt>Season</dt><dd>${SEASON_ICON[seasonNow()]} ${seasonNow()[0].toUpperCase()+seasonNow().slice(1)}</dd></dl></div>
   <div class="permit-fund"><span>${save.bikeOwned?'Dirt bike: OWNED':'Dirt bike fund'}</span><div class="fund-bar"><i style="width:${save.bikeOwned?100:pct}%"></i></div><b>${save.bikeOwned?'\u2713':fmt(save.money)+' of \u00a310,000'}</b></div>
   <div class="actions main-row">${btn('Keep fishing','close',false,'paper')}${save.bikeOwned?btn('Ride the dirt bike!','ride',false,'stamp'):btn('Buy the dirt bike \u00b7 \u00a310,000','buy-bike',save.money<10000,'stamp')}</div>
@@ -2862,6 +2858,56 @@ function maxLaunch(f){endWheelie();if(f.type==='dino'){addScore(1000);announce('
 const TEACHER_HASH='f88f0f6091c359880162ced80ed3772696d50ad3f430e5afb3974990919d9ae7';let teacherOn=false,teacherMsg='';
 async function teacherUnlock(code){try{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode((code||'').trim().toUpperCase()));const hex=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');teacherOn=hex===TEACHER_HASH;teacherMsg=teacherOn?'':'That code didn\u2019t work.'}catch(e){teacherMsg='This browser can\u2019t check codes here.'}renderPanel()}
 function renderTeacherBox(){return `<div class="backup teacher-box"><b>Teacher only</b>${teacherOn?`<p class="small">Unlocked for this session.</p><div class="actions">${btn('\ud83c\udfcd Test ride the dirt bike','demo-bike',false,'stamp')}</div>`:`<p class="small">A teacher code unlocks a test ride on the dirt bike.</p><input id="tCode" type="password" autocomplete="off" placeholder="Teacher code"><div class="actions">${btn('Unlock','tunlock',false,'paper')}</div>`}${teacherMsg?`<p class="import-msg">${esc(teacherMsg)}</p>`:''}</div>`}
+
+// ===== Reeling: tougher, and it looks like the gear HK is actually holding =====
+// Lines can now snap if the tension stays in the red too long, and a fish can shake the hook if it is
+// given slack for too long. Better rods hold the red longer and build tension more slowly.
+// Calm fishing (Settings) keeps the old forgiving behaviour: no snaps, no shaking free.
+const ROD_LINE=[1.3,1.15,1.05,1,1];        // how fast tension builds with each rod
+const ROD_SNAP=[.45,.6,.75,.9,1.0];         // seconds the line survives in the red
+const ROD_LB=['string','6 lb line','8 lb line','10 lb line','12 lb line'];
+const REEL_THEME=[
+ {bg:'#5a3e22',edge:'#8a6038',ink:'#fff2d0',sub:'#e8d0a0',bar:'#c8a060',track:'#3a2814'},
+ {bg:'#3a4044',edge:'#8a9096',ink:'#f0f0ea',sub:'#c8ccc4',bar:'#9ab890',track:'#262a2e'},
+ {bg:'#4a3c14',edge:'#e0b040',ink:'#fff4c8',sub:'#ffe08a',bar:'#ffd23a',track:'#2e260c'},
+ {bg:'#141619',edge:'#c9a640',ink:'#f4f4f8',sub:'#e8c860',bar:'#e8c860',track:'#2a2c30'},
+ {bg:'#0c2850',edge:'#9ad8ff',ink:'#eaf8ff',sub:'#9ad8ff',bar:'#5ad0ff',track:'#06182e'}];
+let reelSpin=0;
+function fightRisk(dt,reeling){const s=struggle,calm=settings().calm;
+ if(reeling&&!calm)s.stress=clamp(s.stress+(s.surge*.85+s.pull*.14)*dt*ROD_LINE[save.rod],0,1);
+ s.redT=s.stress>=.97?(s.redT||0)+dt:Math.max(0,(s.redT||0)-dt*1.5);
+ s.slackT=reeling?0:(s.slackT||0)+dt;
+ if(!reeling&&!calm)reel=Math.max(0,reel-dt*(.012+s.surge*.06));
+ if(calm)return false;
+ if(s.redT>ROD_SNAP[save.rod]){loseFish('SNAP! The line broke. When it glows red, let go of Space for a moment.');return true}
+ if(s.slackT>4&&reel<.97&&(hookedFish.f.size>26||s.surge>.3)){loseFish('The fish shook the hook free. Keep a little pressure on.');return true}
+ return false}
+function loseFish(msg){escapeFish();save.flags.lost=(save.flags.lost||0)+1;setTimeout(()=>toast(msg,4200),60)}
+function drawReelHUD(){const s=struggle,rod=save.rod,T=REEL_THEME[rod],calm=settings().calm,W=430,x=480-W/2,y=92,H=104;
+ rr(x-3,y-3,W+6,H+6,14,T.edge);rr(x,y,W,H,12,T.bg);
+ if(rod===3){out.globalAlpha=.12;for(let i=0;i<W;i+=6)for(let j=0;j<H;j+=6)if(((i+j)/6)%2===0){out.fillStyle='#ffffff';out.fillRect(x+i,y+j,3,3)}out.globalAlpha=1}
+ if(rod===1){out.globalAlpha=.85;out.fillStyle='#d8d0b0';out.save();out.translate(x+W-40,y+6);out.rotate(.3);out.fillRect(0,0,34,10);out.restore();out.globalAlpha=1}
+ // the reel itself (or a stick with string wound round it)
+ const cx=x+50,cy=y+52;reelSpin+=keys.Space?.35:.02;
+ if(rod===0){out.strokeStyle='#8a6038';out.lineWidth=8;out.beginPath();out.moveTo(cx-30,cy+26);out.lineTo(cx+26,cy-30);out.stroke();out.strokeStyle='#f2e8d0';out.lineWidth=2;for(let k=-3;k<=3;k++){const o=k*5+Math.sin(reelSpin+k)*1.5;out.beginPath();out.moveTo(cx+o-6,cy-o-6);out.lineTo(cx+o+6,cy-o+6);out.stroke()}}
+ else{const rim=[null,'#a8acb0','#e0b040','#c9a640','#d8e8f8'][rod],body=[null,'#6a7074','#8a6a20','#26282c','#2a5a9a'][rod];out.fillStyle=rim;out.beginPath();out.arc(cx,cy,30,0,Math.PI*2);out.fill();out.fillStyle=body;out.beginPath();out.arc(cx,cy,24,0,Math.PI*2);out.fill();
+  out.strokeStyle=rim;out.lineWidth=3;for(let k=0;k<3;k++){const a=reelSpin+k*2.09;out.beginPath();out.moveTo(cx,cy);out.lineTo(cx+Math.cos(a)*20,cy+Math.sin(a)*20);out.stroke()}
+  const ha=reelSpin;out.strokeStyle=T.ink;out.lineWidth=4;out.beginPath();out.moveTo(cx,cy);out.lineTo(cx+Math.cos(ha)*36,cy+Math.sin(ha)*36);out.stroke();out.fillStyle=rod===4?'#5ad0ff':'#f2e8d0';out.beginPath();out.arc(cx+Math.cos(ha)*36,cy+Math.sin(ha)*36,5,0,Math.PI*2);out.fill();
+  if(rod===1){out.fillStyle='#d8d0b0';out.fillRect(cx-12,cy-30,24,7)}}
+ // labels and bars
+ const lx=x+100,bw=W-120;out.textAlign='left';out.font=pixelFont(16);out.fillStyle=T.ink;out.fillText(RODS[rod].name.toUpperCase(),lx,y+22);
+ out.font='700 11px system-ui,sans-serif';out.fillStyle=T.sub;out.fillText(`${ROD_LB[rod]} \u00b7 ${bait().name.toLowerCase()}${hookedFish&&hookedFish.trophy?' \u00b7 TROPHY FISH':''}`,lx,y+37);
+ out.fillText('LINE IN',lx,y+54);rr(lx+54,y+46,bw-54,10,5,T.track);rr(lx+54,y+46,(bw-54)*reel,10,5,T.bar);
+ out.fillText('TENSION',lx,y+74);const tx0=lx+54,tw=bw-54;
+ if(rod===0){out.strokeStyle=T.track;out.lineWidth=6;out.beginPath();out.moveTo(tx0,y+70);out.lineTo(tx0+tw,y+70);out.stroke();out.strokeStyle=s.stress>.8?'#ff7a5a':'#f2e8d0';out.lineWidth=2;out.beginPath();for(let i=0;i<=tw;i+=4){const yy=y+70+Math.sin(i*.2+time*(4+s.stress*30))*(4-s.stress*3.5);i?out.lineTo(tx0+i,yy):out.moveTo(tx0+i,yy)}out.stroke()}
+ else{rr(tx0,y+65,tw*.6,10,4,'#3e6a50');rr(tx0+tw*.6,y+65,tw*.27,10,0,'#8a7a34');rr(tx0+tw*.87,y+65,tw*.13,10,4,'#a8402e')}
+ const mx=tx0+tw*s.stress;rr(mx-3,y+61,6,18,3,s.stress>=.97?(Math.sin(time*30)>0?'#ffffff':'#ff5a3a'):'#fff4d6');
+ // line strength: segments that burn down while the tension is in the red
+ out.fillText(calm?'CALM: CAN\u2019T SNAP':'LINE',lx,y+94);if(!calm){const seg=Math.round(ROD_SNAP[rod]/.25),left=seg*(1-(s.redT||0)/ROD_SNAP[rod]);for(let k=0;k<seg;k++)rr(lx+54+k*16,y+86,12,8,2,k<left-.01?(s.redT>0?'#ff8a5a':T.bar):T.track)}
+ if(rod===4){out.font='700 12px ui-monospace,Consolas,monospace';out.fillStyle='#5ad0ff';out.textAlign='right';out.fillText(`DRAG ${(s.pull*(hookedFish?hookedFish.weight:1)*2.2).toFixed(1)} kg`,x+W-12,y+22);out.textAlign='left'}
+ // hint underneath
+ const hint=s.redT>0?'In the red! Let go of Space before the line snaps':s.slackT>2.2&&!calm?'Keep a little pressure on, or it\u2019ll shake the hook':s.stress>.72?'Line\u2019s tight. Ease off for a moment':s.surge>.35?'Big surge! Let it run':keys.Space?'Reeling in nicely':'Hold Space to reel';
+ if(!fishingLearnt()||s.redT>0||s.stress>.72||s.slackT>2.2)tx(hint,480,y+H+30,15,s.redT>0||s.stress>.72?'#ffc2b0':'#f2ecd8','center')}
 
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
