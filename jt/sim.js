@@ -1,0 +1,320 @@
+/* ==========================================================
+   Base 5 - the dugout: match engine
+   Pure functions, no page needed, so it can be tested in node.
+   Everything here is fictional: made up teams, made up players.
+   ========================================================== */
+(function(root){
+"use strict";
+
+/* ---- seeded random numbers, so a match replays the same way ---- */
+function rng(seed){
+  var a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ---- tuning knobs (see calibrate notes in the repo scratch) ---- */
+var K = {
+  chanceBase: 0.17, chanceExp: 2.2,
+  goalBase: 0.165, goalExp: 1.6,
+  possExp: 2.4,
+  luckCancel: 0.30,   /* share of the other side's chances that go astray at full luck */
+  luckRebound: 0.40   /* share of our misses that fall back to us at full luck */
+};
+
+/* ---- the league: fifteen made up clubs, strength out of about 80 ---- */
+var CLUBS = [
+  { name: "Hollowfield Rovers", base: 71, o: [2,-1,0,1] },
+  { name: "Marsh End United", base: 67, o: [-2,2,1,-1] },
+  { name: "Wickham Athletic", base: 65, o: [1,0,-2,2] },
+  { name: "Brightwater Town", base: 69, o: [0,3,-1,-2] },
+  { name: "Stonebridge", base: 62, o: [-1,-2,3,0] },
+  { name: "Fernley City", base: 73, o: [3,1,-2,0] },
+  { name: "Oakhurst Wanderers", base: 60, o: [0,-1,2,-2] },
+  { name: "Riverside Albion", base: 66, o: [-2,0,0,3] },
+  { name: "Copper Hill", base: 64, o: [2,-2,1,0] },
+  { name: "Ashgrove", base: 68, o: [-1,1,2,-1] },
+  { name: "Dunmore Rangers", base: 61, o: [1,2,-3,1] },
+  { name: "Larkfield Town", base: 66, o: [0,-3,1,3] },
+  { name: "Penhallow", base: 63, o: [-2,1,2,-1] },
+  { name: "Saltmarsh United", base: 70, o: [1,-1,-1,2] },
+  { name: "Greywell Park", base: 58, o: [2,-2,0,0] }
+];
+var HOME_NAME = "Base 5 United";
+
+var SURNAMES = ["Archer","Bellamy","Cresswell","Dacre","Everett","Fenwick","Garner","Harlow","Ingram","Jessop",
+  "Kendrick","Lovell","Marlow","Nash","Orton","Pickering","Quayle","Rowntree","Sutton","Thorne",
+  "Upton","Vickers","Wetherby","Yardley","Ashby","Bridger","Corbett","Delaney","Elliott","Faraday",
+  "Gale","Haig","Iliffe","Jarrett","Kemp","Lockyer","Merrick","Norcott","Oakley","Prentice"];
+
+/* team strength from the club's list: atk, mid, def, gk */
+function clubTeam(i){
+  var c = CLUBS[i];
+  var players = [], j;
+  var pos = ["GK","DEF","DEF","DEF","DEF","MID","MID","MID","FWD","FWD","FWD"];
+  for(j = 0; j < 11; j++){
+    players.push({ name: "No. " + (j + 1) + " " + SURNAMES[(i * 7 + j * 3) % SURNAMES.length], pos: pos[j] });
+  }
+  return {
+    name: c.name, atk: c.base + c.o[0], mid: c.base + c.o[1],
+    def: c.base + c.o[2], gk: c.base + c.o[3], luck: 0, players: players
+  };
+}
+
+/* ---- the squad: nineteen to start, four more to unlock ---- */
+var PLAYERS = [
+  { id: "gk1", name: "Archie Pell", pos: "GK", r: 64, note: "A safe pair of hands" },
+  { id: "gk2", name: "Tomasz Weller", pos: "GK", r: 60, note: "Loud, brave, hard to beat" },
+  { id: "d1", name: "Dan Okoro", pos: "DEF", r: 66, note: "Reads the game" },
+  { id: "d2", name: "Ravi Shenoy", pos: "DEF", r: 64, note: "Tackles clean" },
+  { id: "d3", name: "Sol Ridgeway", pos: "DEF", r: 63, note: "Calm on the ball" },
+  { id: "d4", name: "Kofi Brennan", pos: "DEF", r: 62, note: "Quick across the turf" },
+  { id: "d5", name: "Ollie Strand", pos: "DEF", r: 60, note: "Never gives up" },
+  { id: "d6", name: "Jonah Pryce", pos: "DEF", r: 58, note: "Heads everything" },
+  { id: "m1", name: "Mateo Hartley", pos: "MID", r: 66, note: "Spots the pass" },
+  { id: "m2", name: "Idris Calder", pos: "MID", r: 65, note: "The engine room" },
+  { id: "m3", name: "Finn Adeyemi", pos: "MID", r: 64, note: "Tricky feet" },
+  { id: "m4", name: "Luca Marsh", pos: "MID", r: 62, note: "Shoots from anywhere" },
+  { id: "m5", name: "Niko Fairweather", pos: "MID", r: 61, note: "Keeps the ball" },
+  { id: "m6", name: "Remy Castellane", pos: "MID", r: 59, note: "Sets up chances" },
+  { id: "f1", name: "Zane Holloway", pos: "FWD", r: 66, note: "Sharp in the box" },
+  { id: "f2", name: "Theo Blackwood", pos: "FWD", r: 64, note: "Fast and fearless" },
+  { id: "f3", name: "Jaden Moss", pos: "FWD", r: 62, note: "Holds the ball up" },
+  { id: "f4", name: "Wren Alder", pos: "FWD", r: 60, note: "Late runner" },
+  { id: "f5", name: "Sami Quill", pos: "FWD", r: 58, note: "Super sub" },
+  { id: "u1", name: "Kit Calloway", pos: "FWD", r: 75, note: "Scores when it matters", fp: 8 },
+  { id: "u2", name: "Orla Vance", pos: "MID", r: 76, note: "Sees the game a move ahead", fp: 20 },
+  { id: "u3", name: "Bram Tolliver", pos: "DEF", r: 75, note: "A wall with a smile", fp: 34 },
+  { id: "u4", name: "Pia Lindqvist", pos: "GK", r: 77, note: "Saves the unsavable", fp: 50 }
+];
+
+var FORMATIONS = {
+  "4-3-3": { slots: ["GK","DEF","DEF","DEF","DEF","MID","MID","MID","FWD","FWD","FWD"], mod: { atk: 2, mid: 0, def: -1 },
+    xy: [[50,92],[16,72],[39,74],[61,74],[84,72],[26,50],[50,54],[74,50],[22,22],[50,16],[78,22]],
+    note: "Bold. Three forwards." },
+  "4-4-2": { slots: ["GK","DEF","DEF","DEF","DEF","MID","MID","MID","MID","FWD","FWD"], mod: { atk: 0, mid: 0, def: 0 },
+    xy: [[50,92],[16,72],[39,74],[61,74],[84,72],[14,48],[38,52],[62,52],[86,48],[36,20],[64,20]],
+    note: "Balanced. Hard to read." },
+  "3-5-2": { slots: ["GK","DEF","DEF","DEF","MID","MID","MID","MID","MID","FWD","FWD"], mod: { atk: 0, mid: 3, def: -2 },
+    xy: [[50,92],[25,74],[50,76],[75,74],[10,50],[30,54],[50,48],[70,54],[90,50],[36,20],[64,20]],
+    note: "Rule the middle." },
+  "5-3-2": { slots: ["GK","DEF","DEF","DEF","DEF","DEF","MID","MID","MID","FWD","FWD"], mod: { atk: -3, mid: 0, def: 3 },
+    xy: [[50,92],[10,68],[30,74],[50,76],[70,74],[90,68],[26,48],[50,52],[74,48],[36,20],[64,20]],
+    note: "A fortress." }
+};
+
+function fit(playerPos, slotPos){
+  if(playerPos === slotPos) return 1;
+  if(slotPos === "GK") return 0.45;
+  if(playerPos === "GK") return 0.55;
+  if((playerPos === "DEF" && slotPos === "MID") || (playerPos === "MID" && slotPos === "DEF")) return 0.88;
+  if((playerPos === "MID" && slotPos === "FWD") || (playerPos === "FWD" && slotPos === "MID")) return 0.88;
+  return 0.72;
+}
+function playerById(id){
+  for(var i = 0; i < PLAYERS.length; i++) if(PLAYERS[i].id === id) return PLAYERS[i];
+  return null;
+}
+function avg(a){ if(!a.length) return 30; var s = 0; for(var i = 0; i < a.length; i++) s += a[i]; return s / a.length; }
+
+/* xi: array of 11 player ids (or "" for an empty slot), in slot order.
+   boost: { atk, mid, def, gk } training points. luck: 0 to 1 */
+function buildTeam(formation, xi, boost, luck){
+  var F = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+  var by = { GK: [], DEF: [], MID: [], FWD: [] }, players = [], i;
+  for(i = 0; i < 11; i++){
+    var p = xi[i] ? playerById(xi[i]) : null;
+    var eff = p ? p.r * fit(p.pos, F.slots[i]) : 30;
+    by[F.slots[i]].push(eff);
+    players.push({ name: p ? p.name : "A gap in the side", pos: F.slots[i], id: p ? p.id : "" });
+  }
+  boost = boost || {};
+  var atk = (2 * avg(by.FWD) + avg(by.MID)) / 3 + F.mod.atk + (boost.atk || 0);
+  var mid = (2 * avg(by.MID) + avg(by.FWD) + avg(by.DEF)) / 4 + F.mod.mid + (boost.mid || 0);
+  var def = (2 * avg(by.DEF) + avg(by.MID)) / 3 + F.mod.def + (boost.def || 0);
+  var gk = avg(by.GK) + (boost.gk || 0);
+  return { name: HOME_NAME, atk: atk, mid: mid, def: def, gk: gk, luck: luck || 0, players: players };
+}
+
+function clamp(x, a, b){ return x < a ? a : (x > b ? b : x); }
+function pick(r, arr){ return arr[Math.floor(r() * arr.length) % arr.length]; }
+
+function scorer(r, team){
+  var tot = 0, w = [], i, p;
+  for(i = 0; i < team.players.length; i++){
+    p = team.players[i];
+    w.push(p.pos === "FWD" ? 6 : (p.pos === "MID" ? 2.5 : (p.pos === "DEF" ? 0.6 : 0.02)));
+    tot += w[i];
+  }
+  var x = r() * tot;
+  for(i = 0; i < w.length; i++){ x -= w[i]; if(x <= 0) return team.players[i]; }
+  return team.players[team.players.length - 1];
+}
+function anyOf(r, team, poss){
+  var c = [], i;
+  for(i = 0; i < team.players.length; i++) if(poss.indexOf(team.players[i].pos) >= 0) c.push(team.players[i]);
+  return c.length ? pick(r, c) : team.players[0];
+}
+
+var T_GOAL = ["{p} finishes it. {t} score!", "{p} sends it into the corner. Goal!", "A neat move and {p} slots it home.",
+  "{p} buries it. The keeper had no chance.", "Beautiful team goal, {p} puts it away."];
+var T_LUCKGOAL = ["It drops back to {p} and in it goes. Some days the ball just falls your way.",
+  "A deflection, a bounce, and {p} is there to tap in. Lucky? The luck dial says so.",
+  "The first shot is blocked, then it rolls straight back to {p}. Goal!"];
+var T_SAVE = ["{p} shoots, and {k} gets down to save.", "A strong effort from {p}, {k} pushes it away.", "{p} lines it up and the keeper tips it over."];
+var T_MISS = ["{p} fires just wide.", "{p} gets there a moment late and the chance is gone.", "Off the post! {p} cannot believe it."];
+var T_LUCK = ["Lucky escape for {t}. A deflection takes it wide.", "The flag goes up. Offside, and {t} breathe again.",
+  "It hits the post and bounces away from danger. The luck is with {t}.", "A slip at the last moment and the shot never comes."];
+var T_MOVE = ["{t} knock it around nicely.", "A long spell of possession for {t}.", "{p} has a look at what is on."];
+
+function fmt(s, o){
+  return s.replace("{p}", o.p || "").replace("{t}", o.t || "").replace("{k}", o.k || "");
+}
+
+/* home and away are teams from clubTeam / buildTeam.
+   Returns { hs, as, events:[{m,k,side,text,who}] } */
+function simulate(home, away, seed){
+  var r = rng(seed), hs = 0, as = 0, events = [], m, add = 90 + 1 + Math.floor(r() * 4);
+  events.push({ m: 0, k: "kick", side: "", text: "Kick off. " + home.name + " against " + away.name + "." });
+  for(m = 1; m <= add; m++){
+    if(m === 46) events.push({ m: 45, k: "half", side: "", text: "Half time. " + home.name + " " + hs + ", " + away.name + " " + as + "." });
+    if(m === 91) events.push({ m: 90, k: "added", side: "", text: "A few minutes added on." });
+    var ph = Math.pow(home.mid, K.possExp) / (Math.pow(home.mid, K.possExp) + Math.pow(away.mid, K.possExp));
+    var homeAtt = r() < ph;
+    var X = homeAtt ? home : away, Y = homeAtt ? away : home, side = homeAtt ? "h" : "a";
+    var cp = clamp(K.chanceBase * Math.pow(X.atk / Y.def, K.chanceExp), 0.03, 0.4);
+    if(r() >= cp){
+      if(r() < 0.012) events.push({ m: m, k: "move", side: side, text: fmt(pick(r, T_MOVE), { t: X.name, p: anyOf(r, X, ["MID"]).name }) });
+      continue;
+    }
+    /* a chance */
+    var cancel = Y.luck * K.luckCancel;
+    if(r() < cancel){
+      events.push({ m: m, k: "luck", side: side === "h" ? "a" : "h", text: fmt(pick(r, T_LUCK), { t: Y.name }) });
+      continue;
+    }
+    var gp = clamp(K.goalBase * Math.pow(X.atk / Y.gk, K.goalExp), 0.04, 0.5);
+    var sc = scorer(r, X);
+    var keeper = Y.players[0].name;
+    var lucky = false, goal = r() < gp;
+    if(!goal && X.luck > 0 && r() < X.luck * K.luckRebound){
+      goal = r() < clamp(gp * 1.5, 0.1, 0.7); lucky = goal;
+    }
+    if(goal){
+      if(homeAtt) hs++; else as++;
+      events.push({ m: m, k: "goal", side: side, lucky: lucky, who: sc.name,
+        text: fmt(pick(r, lucky ? T_LUCKGOAL : T_GOAL), { p: sc.name, t: X.name }) + " " + hs + "-" + as });
+    } else {
+      var save = r() < 0.55;
+      events.push({ m: m, k: "chance", side: side, who: sc.name,
+        text: fmt(pick(r, save ? T_SAVE : T_MISS), { p: sc.name, k: keeper }) });
+    }
+  }
+  events.push({ m: add, k: "full", side: "", text: "Full time. " + home.name + " " + hs + ", " + away.name + " " + as + "." });
+  return { hs: hs, as: as, events: events };
+}
+
+
+/* ---- the training ground: fifteen activities, each trains one thing ---- */
+var CAP = 4;            /* beats that count per activity */
+var BOOST_SCALE = 0.55; /* tuned by Monte Carlo */
+var PER_LEVEL = { atk: 0.7, mid: 0.55, def: 0.7, gk: 1.2 };
+var STATS = {
+  atk: { label: "Finishing", short: "ATK" },
+  mid: { label: "Vision and passing", short: "MID" },
+  def: { label: "Shape and positioning", short: "DEF" },
+  gk:  { label: "Nerve in goal", short: "GK" }
+};
+var ACTS = [
+  { slug: "tiny-town", title: "Tiny Town", pillar: "Maths", stat: "mid", blurb: "Plan a tiny town with scale and ratio." },
+  { slug: "number-allotment", title: "The Number Allotment", pillar: "Maths", stat: "mid", blurb: "Squares, fractions and sequences in the garden." },
+  { slug: "drone-dash", title: "Drone Dash", pillar: "Maths", stat: "mid", blurb: "Fly a drone round a course with numbers." },
+  { slug: "inside-the-machine", title: "Inside the Machine", pillar: "Digital media", stat: "mid", blurb: "Open up a machine and see how it thinks." },
+  { slug: "party-budget", title: "The Party Budget", pillar: "Preparation for adulthood", stat: "mid", blurb: "Plan a party and keep the money sorted." },
+  { slug: "objection", title: "Objection!", pillar: "English", stat: "atk", blurb: "Read for evidence and make your case." },
+  { slug: "punctuation-escape", title: "The Punctuation Escape Room", pillar: "English", stat: "atk", blurb: "Fix the marks to unlock each door." },
+  { slug: "break-it-up", title: "Break It Up", pillar: "English", stat: "atk", blurb: "Paragraphs that land." },
+  { slug: "gallery-night", title: "Gallery Night", pillar: "Aesthetic and creative", stat: "atk", blurb: "Hang the show and look closely." },
+  { slug: "warning-room", title: "The Warning Room", pillar: "Human and social", stat: "def", blurb: "Read the signs before things happen." },
+  { slug: "rot-lab", title: "Rot Lab", pillar: "Science", stat: "def", blurb: "Microbes, plants and what breaks down." },
+  { slug: "river-road", title: "River Road", pillar: "Physical world", stat: "def", blurb: "Follow the water and the road." },
+  { slug: "training-camp", title: "Training Camp", pillar: "PE", stat: "def", blurb: "Build a training plan that fits you." },
+  { slug: "the-brave-bit", title: "The Brave Bit", pillar: "Preparation for adulthood", stat: "gk", blurb: "Small brave steps, at your pace." },
+  { slug: "late-night-radio", title: "Late Night Radio", pillar: "PHSE", stat: "gk", blurb: "Tune in, talk it through, take what helps." }
+];
+/* beats: { slug: { n } } straight from b5.engage.v1 */
+function training(beats){
+  beats = beats || {};
+  var fp = 0, boost = { atk: 0, mid: 0, def: 0, gk: 0 }, levels = {}, engaged = 0;
+  for(var i = 0; i < ACTS.length; i++){
+    var a = ACTS[i], n = beats[a.slug] && beats[a.slug].n ? beats[a.slug].n : 0;
+    var lv = Math.min(CAP, Math.max(0, Math.floor(n)));
+    levels[a.slug] = lv; fp += lv; if(lv > 0) engaged++;
+    boost[a.stat] += lv * PER_LEVEL[a.stat] * BOOST_SCALE;
+  }
+  return { fp: fp, luck: Math.min(1, fp / (CAP * ACTS.length)), boost: boost, levels: levels, engaged: engaged };
+}
+
+/* ---- the league: sixteen clubs (0 is us), fifteen rounds, circle method ---- */
+function fixtures(){
+  var n = 16, ring = [], rounds = [], r, i;
+  for(i = 1; i < n; i++) ring.push(i);
+  for(r = 0; r < n - 1; r++){
+    var list = [[0, ring[0]]];
+    for(i = 1; i < n / 2; i++) list.push([ring[i], ring[n - 1 - i]]);
+    rounds.push(list);
+    ring.unshift(ring.pop());
+  }
+  return rounds;  /* each pair is [a, b]; a is home */
+}
+/* round r (0 to 14): who do we play, and are we at home */
+function ourFixture(r){
+  var list = fixtures()[r], i;
+  for(i = 0; i < list.length; i++){
+    if(list[i][0] === 0) return { opp: list[i][1], home: (r % 2 === 0) };
+    if(list[i][1] === 0) return { opp: list[i][0], home: (r % 2 === 0) };
+  }
+  return null;
+}
+/* results of everyone else in a round, quietly */
+function otherResults(seed, r){
+  var out = [], list = fixtures()[r], i;
+  for(i = 0; i < list.length; i++){
+    var a = list[i][0], b = list[i][1];
+    if(a === 0 || b === 0) continue;
+    var res = simulate(clubTeam(a - 1), clubTeam(b - 1), (seed * 31 + r * 977 + a * 53 + b * 7) >>> 0);
+    out.push({ a: a, b: b, hs: res.hs, as: res.as });
+  }
+  return out;
+}
+/* table after our played matches: played = [{round, hs, as, home}] */
+function table(seed, played){
+  var rows = [], i;
+  for(i = 0; i < 16; i++) rows.push({ id: i, name: i === 0 ? HOME_NAME : CLUBS[i - 1].name, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 });
+  function put(a, b, ag, bg){
+    var A = rows[a], B = rows[b];
+    A.p++; B.p++; A.gf += ag; A.ga += bg; B.gf += bg; B.ga += ag;
+    if(ag > bg){ A.w++; B.l++; A.pts += 3; } else if(ag < bg){ B.w++; A.l++; B.pts += 3; } else { A.d++; B.d++; A.pts++; B.pts++; }
+  }
+  for(i = 0; i < played.length; i++){
+    var pl = played[i], fx = ourFixture(pl.round);
+    if(pl.home) put(0, fx.opp, pl.hs, pl.as); else put(fx.opp, 0, pl.as, pl.hs);
+    var oth = otherResults(seed, pl.round);
+    for(var j = 0; j < oth.length; j++) put(oth[j].a, oth[j].b, oth[j].hs, oth[j].as);
+  }
+  rows.sort(function(x, y){
+    return (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (x.id - y.id);
+  });
+  return rows;
+}
+
+var API = { rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
+  clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, fixtures: fixtures, ourFixture: ourFixture,
+  otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
+if(typeof module !== "undefined" && module.exports) module.exports = API;
+root.B5Sim = API;
+})(typeof window !== "undefined" ? window : this);
