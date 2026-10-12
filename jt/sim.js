@@ -27,7 +27,7 @@ var K = {
 };
 
 /* ---- the league: fifteen made up clubs, strength out of about 80 ---- */
-var CLUBS = [
+var DIV2 = [
   { name: "Hollowfield Rovers", base: 71, o: [2,-1,0,1] },
   { name: "Marsh End United", base: 67, o: [-2,2,1,-1] },
   { name: "Wickham Athletic", base: 65, o: [1,0,-2,2] },
@@ -44,6 +44,27 @@ var CLUBS = [
   { name: "Saltmarsh United", base: 70, o: [1,-1,-1,2] },
   { name: "Greywell Park", base: 58, o: [2,-2,0,0] }
 ];
+/* ---- divisions: four tiers of fifteen clubs each. 3 is the bottom, 0 is the top ---- */
+var LEAGUES = [
+  { name: "Chilton Premier League", mean: 74, clubs: ["Chilton Royals","Ironbridge Athletic","Castlemere City","Valeview United","Redwell Rovers","Goldcrest Town","Silverdale","Ashworth Wanderers","Blackmoor United","Crownhill","Dalecrest City","Eaglescliffe","Foxhollow Rangers","Grandmere","Heronsgate Albion"] },
+  { name: "Chilton Division One", mean: 69, clubs: ["Chilton Albion","Ravenscar City","Kingsmere United","Eastbrook Rovers","Harrowgate Athletic","Linden Town","Northcote","Bellmoor Wanderers","Sandford Park","Thornbury City","Wexcombe","Aldermoor United","Fairhaven","Stourbridge Hill","Highcliffe Rangers"] },
+  { name: "Chilton Division Two", mean: 65, clubs: null },
+  { name: "Chilton Division Three", mean: 60, clubs: ["Chilton Colts","Netherby Town","Quarry Lane","Elmstead Athletic","Thistledown","Hobbs Green","Ploughley United","Marlpit Rovers","Westmere","Fallowfield Park","Cinder Row","Brambleton","Oldacre","Tansley Wanderers","Pennywell"] }
+];
+var TIER = 2;
+var CLUBS = [];
+function setTier(t){
+  t = Math.max(0, Math.min(3, t | 0)); TIER = t; CLUBS.length = 0;
+  var L = LEAGUES[t], i;
+  for(i = 0; i < 15; i++){
+    var d = DIV2[i];
+    if(t === 2){ CLUBS.push({ name: d.name, base: d.base, o: d.o.slice() }); }
+    else { var o = d.o.map(function(x, k){ return DIV2[(i + t * 3 + k) % 15].o[(k + t) % 4] }); CLUBS.push({ name: L.clubs[i], base: L.mean + (d.base - 65), o: o }); }
+  }
+  return CLUBS;
+}
+function leagueName(t){ return LEAGUES[t == null ? TIER : t].name }
+setTier(2);
 var HOME_NAME = "Base 5 United";
 
 var SURNAMES = ["Archer","Bellamy","Cresswell","Dacre","Everett","Fenwick","Garner","Harlow","Ingram","Jessop",
@@ -431,7 +452,7 @@ function table(seed, played){
 }
 
 function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
-var API = { setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
+var API = { setTier: setTier, leagueName: leagueName, LEAGUES: LEAGUES, setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
   clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
   otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
