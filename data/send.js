@@ -99,11 +99,19 @@ function mount(host, opts){
     }
 
     if(a === 'copy'){
-      if(navigator.clipboard){
-        navigator.clipboard.writeText(body).then(function(){
-          msg.textContent = 'Copied. Paste it wherever you like.';
-        });
-      }
+      var okCopy = function(){ msg.textContent = 'Copied. Paste it wherever you like.'; };
+      var oldCopy = function(){
+        try{
+          var ta = document.createElement('textarea'); ta.value = body; ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+          var done = document.execCommand('copy'); document.body.removeChild(ta);
+          if(done){ okCopy(); return }
+        }catch(er){}
+        msg.textContent = 'Copying did not work here. Try the Save button, or select the text and copy it.';
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(body).then(okCopy, oldCopy);
+      } else { oldCopy() }
     }
 
     if(a === 'save'){
