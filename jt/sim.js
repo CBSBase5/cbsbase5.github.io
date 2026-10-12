@@ -22,8 +22,8 @@ var K = {
   chanceBase: 0.17, chanceExp: 2.2,
   goalBase: 0.165, goalExp: 1.6,
   possExp: 2.4,
-  luckCancel: 0.30,   /* share of the other side's chances that go astray at full luck */
-  luckRebound: 0.40   /* share of our misses that fall back to us at full luck */
+  luckCancel: 0.18,   /* share of the other side's chances that go astray at full luck */
+  luckRebound: 0.24   /* share of our misses that fall back to us at full luck */
 };
 
 /* ---- the league: fifteen made up clubs, strength out of about 80 ---- */
@@ -46,20 +46,22 @@ var DIV2 = [
 ];
 /* ---- divisions: four tiers of fifteen clubs each. 3 is the bottom, 0 is the top ---- */
 var LEAGUES = [
-  { name: "Chilton Premier League", mean: 74, clubs: ["Chilton Royals","Ironbridge Athletic","Castlemere City","Valeview United","Redwell Rovers","Goldcrest Town","Silverdale","Ashworth Wanderers","Blackmoor United","Crownhill","Dalecrest City","Eaglescliffe","Foxhollow Rangers","Grandmere","Heronsgate Albion"] },
-  { name: "Chilton Division One", mean: 69, clubs: ["Chilton Albion","Ravenscar City","Kingsmere United","Eastbrook Rovers","Harrowgate Athletic","Linden Town","Northcote","Bellmoor Wanderers","Sandford Park","Thornbury City","Wexcombe","Aldermoor United","Fairhaven","Stourbridge Hill","Highcliffe Rangers"] },
-  { name: "Chilton Division Two", mean: 65, clubs: null },
-  { name: "Chilton Division Three", mean: 60, clubs: ["Chilton Colts","Netherby Town","Quarry Lane","Elmstead Athletic","Thistledown","Hobbs Green","Ploughley United","Marlpit Rovers","Westmere","Fallowfield Park","Cinder Row","Brambleton","Oldacre","Tansley Wanderers","Pennywell"] }
+  { name: "Chilton Premier League", mean: 75, clubs: ["Chilton Royals","Ironbridge Athletic","Castlemere City","Valeview United","Redwell Rovers","Goldcrest Town","Silverdale","Ashworth Wanderers","Blackmoor United","Crownhill","Dalecrest City","Eaglescliffe","Foxhollow Rangers","Grandmere","Heronsgate Albion"] },
+  { name: "Chilton Division One", mean: 70, clubs: ["Chilton Albion","Ravenscar City","Kingsmere United","Eastbrook Rovers","Harrowgate Athletic","Linden Town","Northcote","Bellmoor Wanderers","Sandford Park","Thornbury City","Wexcombe","Aldermoor United","Fairhaven","Stourbridge Hill","Highcliffe Rangers"] },
+  { name: "Chilton Division Two", mean: 66, clubs: null },
+  { name: "Chilton Division Three", mean: 62, clubs: ["Chilton Colts","Netherby Town","Quarry Lane","Elmstead Athletic","Thistledown","Hobbs Green","Ploughley United","Marlpit Rovers","Westmere","Fallowfield Park","Cinder Row","Brambleton","Oldacre","Tansley Wanderers","Pennywell"] }
 ];
 var TIER = 2;
 var CLUBS = [];
+var HEAT = 0;   /* rivals raise their game after you win things */
+function setHeat(h){ HEAT = Math.max(0, Math.min(6, +h || 0)); setTier(TIER); }
 function setTier(t){
   t = Math.max(0, Math.min(3, t | 0)); TIER = t; CLUBS.length = 0;
   var L = LEAGUES[t], i;
   for(i = 0; i < 15; i++){
     var d = DIV2[i];
-    if(t === 2){ CLUBS.push({ name: d.name, base: d.base, o: d.o.slice() }); }
-    else { var o = d.o.map(function(x, k){ return DIV2[(i + t * 3 + k) % 15].o[(k + t) % 4] }); CLUBS.push({ name: L.clubs[i], base: L.mean + (d.base - 65), o: o }); }
+    if(t === 2){ CLUBS.push({ name: d.name, base: d.base + (L.mean - 65) + HEAT, o: d.o.slice() }); }
+    else { var o = d.o.map(function(x, k){ return DIV2[(i + t * 3 + k) % 15].o[(k + t) % 4] }); CLUBS.push({ name: L.clubs[i], base: L.mean + (d.base - 65) + HEAT, o: o }); }
   }
   return CLUBS;
 }
@@ -130,10 +132,10 @@ var PLAYERS = [
   { id: "f3", name: "Jaden Moss", pos: "FWD", r: 62, note: "Holds the ball up" },
   { id: "f4", name: "Wren Alder", pos: "FWD", r: 60, note: "Late runner" },
   { id: "f5", name: "Sami Quill", pos: "FWD", r: 58, note: "Super sub" },
-  { id: "u1", name: "Kit Calloway", pos: "FWD", r: 75, note: "Scores when it matters", fp: 8 },
-  { id: "u2", name: "Orla Vance", pos: "MID", r: 76, note: "Sees the game a move ahead", fp: 20 },
-  { id: "u3", name: "Bram Tolliver", pos: "DEF", r: 75, note: "A wall with a smile", fp: 34 },
-  { id: "u4", name: "Pia Lindqvist", pos: "GK", r: 77, note: "Saves the unsavable", fp: 50 }
+  { id: "u1", name: "Kit Calloway", pos: "FWD", r: 72, note: "Scores when it matters", fp: 8 },
+  { id: "u2", name: "Orla Vance", pos: "MID", r: 72, note: "Sees the game a move ahead", fp: 20 },
+  { id: "u3", name: "Bram Tolliver", pos: "DEF", r: 71, note: "A wall with a smile", fp: 34 },
+  { id: "u4", name: "Pia Lindqvist", pos: "GK", r: 72, note: "Saves the unsavable", fp: 50 }
 ];
 
 var FORMATIONS = {
@@ -446,10 +448,37 @@ function cupOpponent(seed, k){
   return order[t[0] + Math.floor(rr() * (t[1] - t[0]))];
 }
 
+/* ---- match day variables: weather and the other side's form ---- */
+var WEATHER = [
+  { id: "clear", n: "Clear and mild", w: 34, sq: 1, note: "Nothing to worry about today." },
+  { id: "wet", n: "Heavy rain", w: 18, sq: 0.72, note: "The ball skids about. Rain makes it a lottery and the favourites find it harder." },
+  { id: "wind", n: "Gusty wind", w: 14, sq: 0.82, note: "Crosses drift and goal kicks go astray. It could be anyone's day." },
+  { id: "hot", n: "Hot afternoon", w: 10, sq: 0.85, note: "Heavy legs late on. The gap between sides shrinks." },
+  { id: "frost", n: "Frosty pitch", w: 10, sq: 0.8, note: "Hard ground and careful touches." },
+  { id: "perfect", n: "Perfect pitch", w: 14, sq: 1.12, note: "A lovely surface. It rewards the side with the better passers." }
+];
+function conditions(seed, round){
+  var r = rng((seed * 13 + round * 4999 + 17) >>> 0), x = r() * 100, i, tot = 0;
+  for(i = 0; i < WEATHER.length; i++){ tot += WEATHER[i].w; if(x < tot) return WEATHER[i]; }
+  return WEATHER[0];
+}
+/* the other side's form on the day: -3 to +3, mostly near zero */
+function oppForm(seed, round, id){
+  var r = rng((seed * 29 + round * 1117 + id * 313 + 5) >>> 0), a = r(), b = r();
+  return Math.round((a + b - 1) * 3.6);
+}
+function formLabel(f){ return f >= 2 ? "in great form" : (f <= -2 ? "struggling for form" : (f >= 1 ? "playing well" : (f <= -1 ? "a little rusty" : "in their usual shape"))) }
+/* pull both sides' numbers together (or apart) before kick off */
+function squeeze(us, them, sq){
+  if(sq === 1) return;
+  ["atk", "mid", "def", "gk"].forEach(function(k){ var m = (us[k] + them[k]) / 2; us[k] = m + (us[k] - m) * sq; them[k] = m + (them[k] - m) * sq; });
+}
+function shift(t, d){ ["atk", "mid", "def", "gk"].forEach(function(k){ t[k] += d; }); }
+
 /* ---- the training ground: fifteen activities, each trains one thing ---- */
 var CAP = 4;            /* beats that count per activity */
-var BOOST_SCALE = 0.5; /* tuned by Monte Carlo */
-var PER_LEVEL = { atk: 0.7, mid: 0.55, def: 0.7, gk: 1.2 };
+var TUNE = { boost: 0.34 }; /* tuned by Monte Carlo */
+var PER_LEVEL = { atk: 0.7, mid: 0.55, def: 0.7, gk: 0.75 };
 var STATS = {
   atk: { label: "Finishing", short: "ATK" },
   mid: { label: "Vision and passing", short: "MID" },
@@ -481,7 +510,7 @@ function training(beats){
     var a = ACTS[i], n = beats[a.slug] && beats[a.slug].n ? beats[a.slug].n : 0;
     var lv = Math.min(CAP, Math.max(0, Math.floor(n)));
     levels[a.slug] = lv; fp += lv; if(lv > 0) engaged++;
-    boost[a.stat] += lv * PER_LEVEL[a.stat] * BOOST_SCALE;
+    boost[a.stat] += lv * PER_LEVEL[a.stat] * TUNE.boost;
   }
   return { fp: fp, luck: Math.min(1, fp / (CAP * ACTS.length)), boost: boost, levels: levels, engaged: engaged };
 }
@@ -542,7 +571,7 @@ function table(seed, played){
 function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
 var API = { setTier: setTier, leagueName: leagueName, LEAGUES: LEAGUES, setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
   clubTeam: clubTeam, oppName: oppName, oppTeam: oppTeam, foreignOpponent: foreignOpponent, FOREIGN: FOREIGN, RT: RT, FKSTYLE: FKSTYLE, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
-  otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
+  otherResults: otherResults, conditions: conditions, oppForm: oppForm, formLabel: formLabel, squeeze: squeeze, shift: shift, WEATHER: WEATHER, TUNE: TUNE, setHeat: setHeat, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
 root.B5Sim = API;
 })(typeof window !== "undefined" ? window : this);

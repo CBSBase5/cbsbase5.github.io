@@ -66,14 +66,14 @@ function rawBeats(){
   try{ var o = JSON.parse(localStorage.getItem(ENG) || "{}"); return (o && typeof o === "object") ? o : {} }catch(e){ return {} }
 }
 /* a short activity done in the game is worth 2 levels and is checked by the game.
-   Beats from the practice pages count half, except the ones banked before this version. */
+   The practice pages no longer count. Beats banked before this version are kept. */
 function beats(){
   var r = rawBeats(), o = {}, k;
   for(k in r) o[k] = r[k];
   S.ACTS.forEach(function(a){
     var n = r[a.slug] && r[a.slug].n ? Math.floor(r[a.slug].n) : 0, b0 = (st && st.eb0 && st.eb0[a.slug]) || 0;
     var dn = (st && st.drills && st.drills[a.slug] ? st.drills[a.slug].length : 0);
-    var eng = Math.min(n, b0) + Math.floor(Math.max(0, n - b0) / 2);
+    var eng = Math.min(n, b0);
     var last = Math.max((r[a.slug] && r[a.slug].last) || 0, (st && st.dlast && st.dlast[a.slug]) || 0);
     if(eng + dn * 2 > 0 || o[a.slug]) o[a.slug] = { n: eng + dn * 2, last: last };
   });
@@ -122,7 +122,10 @@ if(!st.season) st.season = 1;
 if(typeof st.tier !== "number" || st.tier < 0 || st.tier > 3) st.tier = firstRun ? 3 : 2;
 if(typeof st.fp0 !== "number") st.fp0 = 0;
 if(!st.sgn) st.sgn = 1;
+if(typeof st.heat !== "number") st.heat = 0;
+["inj", "run"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
 S.setTier(st.tier);
+S.setHeat(st.heat);
 if(!st.dev) st.dev = { xp: {}, bonus: {} };
 if(!st.set) st.set = { motion: "lively", sound: false, pace: "gentle" };
 ["bd", "look", "pn", "num", "focus", "skill", "tby", "tac"].forEach(function(k){ if(!st[k]) st[k] = {} });
@@ -198,16 +201,19 @@ var view = "dugout", sel = null, posFilter = "ALL", folds = {}, newB = [], studi
 
 /* ---------- derived numbers ---------- */
 function bonusOf(id){ return (st.dev.bonus && st.dev.bonus[id]) || 0 }
-function rate(p){ return p.r + bonusOf(p.id) + (st.cap === p.id ? 1 : 0) }
+function tiredOf(id){ var n = (st.run && st.run[id]) || 0; return n >= 11 ? 3 : (n >= 8 ? 2 : (n >= 5 ? 1 : 0)) }
+function rate(p){ return p.r + bonusOf(p.id) - tiredOf(p.id) + (st.cap === p.id ? 1 : 0) }
 function bonusMap(){
   var o = {}, k; for(k in st.dev.bonus) o[k] = st.dev.bonus[k];
+  for(k in st.run){ var tt = tiredOf(k); if(tt) o[k] = (o[k] || 0) - tt }
   if(st.cap) o[st.cap] = (o[st.cap] || 0) + 1;
   return o;
 }
 function ctx(){
   var tr = S.training(beats());
-  var avail = S.PLAYERS.filter(function(p){ return !p.fp || tr.fp >= p.fp });
-  return { tr: tr, avail: avail };
+  var all = S.PLAYERS.filter(function(p){ return !p.fp || tr.fp >= p.fp });
+  var avail = all.filter(function(p){ return !(st.inj && st.inj[p.id]) });
+  return { tr: tr, avail: avail, all: all };
 }
 function autoPick(form, avail, prefer){
   var F = S.FORMATIONS[form], pairs = [], i, j, xi = [], used = {}, slotDone = {};
@@ -225,6 +231,11 @@ function autoPick(form, avail, prefer){
   return xi;
 }
 function drillTotal(){ var n = 0, k; for(k in st.drills) n += st.drills[k].length; return n }
+function nextDrill(slug){
+  var cs = window.JTLearn ? window.JTLearn.forAct(slug) : [], dn = drillsDone(slug), i;
+  for(i = 0; i < cs.length; i++) if(dn.indexOf(cs[i].id) < 0) return cs[i].id;
+  return cs.length ? cs[0].id : "";
+}
 function drillsDone(slug){ return st.drills[slug] || [] }
 function drillFinish(c){
   if(!st.drills[c.slug]) st.drills[c.slug] = [];
@@ -276,14 +287,14 @@ function triedCount(c){ return S.ACTS.filter(function(a){ return (c.tr.levels[a.
 /* ---------- learning link: sessions train a chosen player ---------- */
 function traineeOf(a, c){
   var id = st.focus[a.slug];
-  if(id && c.avail.some(function(p){ return p.id === id })) return id;
+  if(id && c.all.some(function(p){ return p.id === id })) return id;
   var pos = GROUP[a.stat], best = null, bv = -1;
-  c.avail.forEach(function(p){ if(p.pos !== pos) return; var v = (st.xi.indexOf(p.id) >= 0 ? 100 : 0) + rate(p); if(v > bv){ bv = v; best = p } });
-  return best ? best.id : (c.avail[0] ? c.avail[0].id : "");
+  c.all.forEach(function(p){ if(p.pos !== pos) return; var v = (st.xi.indexOf(p.id) >= 0 ? 100 : 0) + rate(p); if(v > bv){ bv = v; best = p } });
+  return best ? best.id : (c.all[0] ? c.all[0].id : "");
 }
 function addXp(id, n){
   st.dev.xp[id] = (st.dev.xp[id] || 0) + n;
-  var nb = Math.min(6, Math.floor(st.dev.xp[id] / 4));
+  var nb = Math.min(5, Math.floor(st.dev.xp[id] / 6));
   if(nb > bonusOf(id)) st.dev.bonus[id] = nb;
 }
 var BIAS = { FWD: { atk: 1.15, mid: 0.8, def: 0.4, gk: 0.1 }, MID: { atk: 0.8, mid: 1.15, def: 0.7, gk: 0.1 }, DEF: { atk: 0.4, mid: 0.7, def: 1.15, gk: 0.1 }, GK: { atk: 0.1, mid: 0.35, def: 0.5, gk: 1.25 } };
@@ -585,6 +596,7 @@ function pcard(p, o){
     '<span class="rt">' + rate(p) + '<small>' + p.pos + '</small></span>' + (at ? '<span class="inx">IN SIDE</span>' : '') +
     '<span class="shn">#' + numOf(p.id) + '</span>' + (st.cap === p.id ? '<span class="cpt" title="Captain">C</span>' : '') +
     '<span class="av">' + avatar(p.id, 74, p.pos) + '</span><span class="nm">' + esc(p.name) + '</span><span class="nt">' + esc(p.note) + '</span>' +
+    (st.inj[p.id] ? '<span class="inj">Out ' + st.inj[p.id] + (st.inj[p.id] === 1 ? ' match' : ' matches') + '</span>' : (tiredOf(p.id) ? '<span class="tir">Tired legs</span>' : '')) +
     '<span class="gr">' + (bn ? "+" + bn + " growth" : "&nbsp;") + (sk ? " &middot; +" + sk + " skill" : "") + (g ? " &middot; " + g + (g === 1 ? " goal" : " goals") : "") + '</span></' + tg + '>';
 }
 function stadium(){
@@ -753,18 +765,18 @@ function learnBtns(a, lv){
     var d = dn.indexOf(ch.id) >= 0;
     h += '<button class="btn ' + (d ? "" : (lv === 0 && k === 0 ? "btn-go" : "")) + ' lact" data-act="drill" data-id="' + ch.id + '"><span>' + esc(ch.title) + '</span><em>' + (d ? "Done" : "2 min or so") + '</em></button>';
   });
-  return h + '<a class="lfull" href="/practice/' + a.slug + '.html?from=jt">Open the full activity</a></div>';
+  return h + '</div>';
 }
 /* ---------- training: choose who trains ---------- */
 function vTrain(c){
-  var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try one of its short activities. They take a couple of minutes, the game checks your work, and a finished one is worth 2 training levels. Hints are free and a wrong try costs nothing. The full activity is still there if you fancy a longer go.</p></section></div>';
+  var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try one of its short activities. They take a couple of minutes, the game checks your work, and a finished one is worth 2 training levels. Hints are free and a wrong try costs nothing.</p></section></div>';
   ["atk", "mid", "def", "gk"].forEach(function(k){
     var list = S.ACTS.filter(function(a){ return a.stat === k });
     h += '<div class="group-h" style="--sc:' + STATCOL[k] + '"><b>' + S.STATS[k].label + '</b><span class="hint">' + (c.tr.boost[k] > 0.04 ? plus(c.tr.boost[k]) + " boost so far" : "no boost yet") + '</span></div><div class="tgrid">';
     list.forEach(function(a){
       var lv = c.tr.levels[a.slug] || 0, pips = "", tid = traineeOf(a, c), pos = GROUP[a.stat];
       for(var i = 0; i < S.CAP; i++) pips += '<i class="' + (i < lv ? "on" : "") + '"></i>';
-      var opts = c.avail.slice().sort(function(x, y){ return ((y.pos === pos) - (x.pos === pos)) || (rate(y) - rate(x)) }).map(function(p){ return [p.id, p.name + " (" + p.pos + ")"] });
+      var opts = c.all.slice().sort(function(x, y){ return ((y.pos === pos) - (x.pos === pos)) || (rate(y) - rate(x)) }).map(function(p){ return [p.id, p.name + " (" + p.pos + ")"] });
       h += '<div class="tcard" style="--sc:' + STATCOL[k] + '"><span class="pil">' + esc(a.pillar) + '</span><h4>' + esc(a.title) + '</h4><span>' + esc(a.blurb) + '</span><div class="pips" aria-label="Training level ' + lv + ' of ' + S.CAP + '">' + pips + '</div>' +
         selHtml("tr:" + a.slug, tid, "Who trains (" + SKILLNAME[a.stat] + ")", opts) +
         learnBtns(a, lv) + '</div>';
@@ -790,8 +802,8 @@ function vSettings(){
 var resetAsk = "";
 function resetHtml(){
   if(false) return '<div class="choice"><p style="margin:0 0 8px"><b>Start a new season?</b> Matches, the table, the cup, badges, player growth and training results go back to the start. Your club design, own players, names and numbers stay. The sessions you have done will earn matches again.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="season">Yes, start a new season</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
-  if(resetAsk === "all") return '<div class="choice"><p style="margin:0 0 8px"><b>Wipe everything?</b> This clears the whole dugout, including your club design and own players, and starts the setup again. It cannot be undone. Your practice activities are not touched.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="all">Yes, wipe it all</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
-  return '<p class="hint" style="margin:0 0 4px">Fancy a fresh go? Nothing happens until you confirm, and your practice activities are never touched. A new season starts by itself after fifteen matches.</p><div class="mbtns" style="margin:0"><button class="btn btn-quiet" data-act="rsask" data-v="all">Reset everything</button></div>';
+  if(resetAsk === "all") return '<div class="choice"><p style="margin:0 0 8px"><b>Wipe everything?</b> This clears the whole dugout, including your club design and own players, and starts the setup again. It cannot be undone. Your finished activities are not touched.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="all">Yes, wipe it all</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
+  return '<p class="hint" style="margin:0 0 4px">Fancy a fresh go? Nothing happens until you confirm, and your finished activities are never touched. A new season starts by itself after fifteen matches.</p><div class="mbtns" style="margin:0"><button class="btn btn-quiet" data-act="rsask" data-v="all">Reset everything</button></div>';
 }
 function resetDo(kind){
   if(kind === "all"){ try{ localStorage.removeItem(KEY) }catch(e){} mem = null; location.reload(); return }
@@ -812,7 +824,7 @@ var MSURN = ["Abbott", "Brook", "Castle", "Dunn", "Easton", "Frost", "Gallow", "
 var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
 function sfp(c){ return c.tr.fp }
 function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
-function priceOf(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.45 / 5) * 5) }
+function priceOf(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.72 / 5) * 5) }
 function sellValue(p){ return Math.max(5, Math.round(priceOf(rate(p)) * 0.6 / 5) * 5) }
 function coShort(c){ return String(c.name || "").split(/\s+/).filter(Boolean).map(function(x){ return x.charAt(0) }).join("").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3) || "CO" }
 function coLogoOf(c, w){ return crestSvg(w, true, { c1: c.c1, c2: c.c2, shape: c.shape, crest: c.sym, cbg: c.cbg || "plain", short: coShort(c) }) }
@@ -880,7 +892,8 @@ function seasonSummary(){
   var up = t > 0 && pos <= 3, down = t < 3 && pos >= 14, nt = up ? t - 1 : (down ? t + 1 : t);
   var prize = Math.round((160 - (pos - 1) * 9) * (1 + (3 - t) * 0.25)), cupWon = false, extra = 0, won = [];
   COMP_ORDER.forEach(function(id){ if(compWon(id)){ extra += COMPS[id].bonus; won.push(COMPS[id].name) } });
-  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + extra, cup: cupText(), t: t, won: won };
+  var hn = clamp(st.heat + (pos === 1 ? 1 : (pos > 3 ? -1 : 0)), 0, 6);
+  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + extra, cup: cupText(), t: t, won: won, heat: hn, heat0: st.heat };
 }
 function openSeason(){
   if(st.played.length < ROUNDS) return;
@@ -890,7 +903,7 @@ function openSeason(){
     (m.down ? '<p>You are moving down to the ' + esc(S.leagueName(m.nt)) + '. A fresh chance to climb back, and your squad keeps everything it has learned.</p>' : '<p>You stay in the ' + esc(S.leagueName(m.t)) + ' next season.</p>');
   $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">Season ' + st.season + ' complete</div><h2>' + (m.pos === 1 ? "Champions of the " : "Finished " + ord(m.pos) + " in the ") + esc(S.leagueName(m.t)) + '</h2>' +
     '<div class="sumgrid" style="margin:12px 0"><div><b>' + r.w + '</b><small>Won</small></div><div><b>' + r.d + '</b><small>Drawn</small></div><div><b>' + r.l + '</b><small>Lost</small></div><div><b>' + r.gf + '</b><small>For</small></div><div><b>' + r.ga + '</b><small>Against</small></div><div><b>' + r.pts + '</b><small>Points</small></div></div>' +
-    '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
+    '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>' + (m.heat > m.heat0 ? 'Champions get noticed. Every rival is raising their game for next season, so expect tougher matches.' : (m.heat < m.heat0 ? 'The other clubs have eased off a little, which gives you room to rebuild.' : '')) + '</p><p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
     '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>';
   $("rv").classList.add("on"); $("rv").classList.add("season");
 }
@@ -905,7 +918,9 @@ function seasonGo(){
   Object.keys(st.career).forEach(function(id){ var cc = st.career[id]; if(cc.sa > 0){ cc.ss++; cc.sa = 0 } });
   pressPush(m.pos === 1 ? "Champions! " + clubName() + " win the " + S.leagueName(m.t) : "Season " + st.season + ": " + clubName() + " finish " + ord(m.pos), (m.up ? "Promoted to the " + S.leagueName(m.nt) + ". " : (m.down ? "Back to the " + S.leagueName(m.nt) + " to rebuild. " : "")) + "Prize money: " + m.prize + " coins.", "");
   st.hist.push({ season: st.season, tier: m.t, league: S.leagueName(m.t), pos: m.pos, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga, pts: r.pts, cup: m.cup, up: m.up, down: m.down, coins: m.prize });
-  st.season++; st.tier = m.nt; S.setTier(st.tier);
+  st.heat = clamp(st.heat + (m.pos === 1 ? 1 : (m.pos > 3 ? -1 : 0)), 0, 6);
+  st.inj = {}; st.run = {}; st.nextMod = null;
+  st.season++; st.tier = m.nt; S.setTier(st.tier); S.setHeat(st.heat);
   st.seed = 1 + Math.floor(Math.random() * 2000000000);
   st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cups = {}; st.cupSeen = 0; st.cseen = {}; st.deals = []; st.mk = {};
   var b = beats(), sb = {}; S.ACTS.forEach(function(a){ sb[a.slug] = (b[a.slug] && b[a.slug].n) || 0 });
@@ -924,7 +939,7 @@ function marketWin(){ return st.season * 100 + Math.floor(st.played.length / 3) 
 function marketList(){
   var w = marketWin();
   if(st.mk.w !== w) st.mk = { w: w, bought: [] };
-  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[65, 80], [61, 76], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc;
+  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[63, 78], [60, 75], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc;
   T[0] += 2 * sc; T[1] += 2 * sc;
   for(i = 0; i < N; i++){
     var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
@@ -938,7 +953,7 @@ function buyPlayer(id){
   var l = marketList().filter(function(x){ return x.id === id })[0]; if(!l) return;
   var price = priceOf(l.r), c = ctx();
   if(st.coins < price){ toast("Not enough coins yet. Matches and sponsors earn more."); return }
-  if(c.avail.length >= 30){ toast("The squad is full (30). Sell someone first."); return }
+  if(c.all.length >= 30){ toast("The squad is full (30). Sell someone first."); return }
   var nid = "sg" + (st.sgn++), nm = l.name; if(nameTaken(nm, "")) nm += " II";
   st.signed.push({ id: nid, name: nm, pos: l.pos, r: l.r, note: l.note, look: lookOf(l.id) });
   st.mk.bought.push(id); addCoins(-price, "Signed " + nm); st.trades = (st.trades || 0) + 1;
@@ -947,8 +962,8 @@ function buyPlayer(id){
 function sellPlayer(id){
   var p = playerOf(id), c = ctx(); sellAsk = "";
   if(!p || isMine(id)) return;
-  if(c.avail.length <= 15){ toast("Keep at least fifteen players in the squad."); render(); return }
-  if(p.pos === "GK" && c.avail.filter(function(q){ return q.pos === "GK" }).length <= 2){ toast("Keep at least two goalkeepers."); render(); return }
+  if(c.all.length <= 15){ toast("Keep at least fifteen players in the squad."); render(); return }
+  if(p.pos === "GK" && c.all.filter(function(q){ return q.pos === "GK" }).length <= 2){ toast("Keep at least two goalkeepers."); render(); return }
   var val = sellValue(p), nm = p.name;
   if(isSg(id)) st.signed = st.signed.filter(function(x){ return x.id !== id }); else st.sold[id] = 1;
   ["cap", "pk", "fk"].forEach(function(k){ if(st[k] === id) st[k] = "" });
@@ -966,7 +981,7 @@ function vMarket(c){
     var price = priceOf(l.r), cls = worst === 99 ? "" : (l.r > worst ? "better" : "");
     return '<div class="mk">' + avatar(l.id, 54, l.pos) + '<div><b>' + esc(l.name) + '</b><small>' + l.pos + ' &middot; rated ' + l.r + '</small><small>' + esc(l.note) + '</small>' + (cls ? '<small class="up">Better than someone in your side</small>' : "") + '</div><button class="btn ' + (st.coins >= price ? "btn-go" : "") + '" data-act="buy" data-id="' + l.id + '"' + (st.coins >= price ? "" : " aria-disabled=\"true\"") + '>' + price + ' coins</button></div>';
   }).join("") : '<p class="hint">Everyone on this list has been signed. A new list comes after the next three matches.</p>') + '</div></div>';
-  var mine = c.avail.filter(function(p){ return !isMine(p.id) }).sort(function(a, b){ return rate(b) - rate(a) });
+  var mine = c.all.filter(function(p){ return !isMine(p.id) }).sort(function(a, b){ return rate(b) - rate(a) });
   h += fold("sell", "Sell a player", '<p class="hint">Players you made yourself are never for sale. Others sell for a bit less than they cost.</p><div class="plist">' + mine.map(function(p){
     var val = sellValue(p);
     return '<div class="prow sell">' + avatar(p.id, 40, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + p.pos + ' &middot; rated ' + rate(p) + '</small></span>' + (sellAsk === p.id ? '<span class="sa"><button class="btn btn-go" data-act="sellyes" data-id="' + p.id + '">Sell for ' + val + '</button><button class="btn btn-quiet" data-act="sellask" data-id="">Keep</button></span>' : '<button class="btn btn-quiet" data-act="sellask" data-id="' + p.id + '">Sell ' + val + '</button>') + '</div>';
@@ -1375,7 +1390,7 @@ function studioBody(){
   } else if(t === "players"){
     var c = ctx();
     h += '<p class="hint" style="margin:0 0 10px">Tap a player to change their name, number, face and more. Names you change show up everywhere, including old match reports.</p><div class="plist">' +
-      c.avail.map(function(p){ return '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 44, p.pos) + '<span><b>' + esc(p.name) + '</b><small>#' + numOf(p.id) + ' &middot; ' + p.pos + ' &middot; rated ' + rate(p) + (st.cap === p.id ? " &middot; captain" : "") + '</small></span></button>' }).join("") + '</div>' +
+      c.all.map(function(p){ return '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 44, p.pos) + '<span><b>' + esc(p.name) + '</b><small>#' + numOf(p.id) + ' &middot; ' + p.pos + ' &middot; rated ' + rate(p) + (st.cap === p.id ? " &middot; captain" : "") + '</small></span></button>' }).join("") + '</div>' +
       '<h3 style="margin-top:16px">Players you made</h3>' + (st.mine.length ? '<div class="plist">' + st.mine.map(function(m){ var p = playerOf(m.id); return p ? '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 44, p.pos) + '<span><b>' + esc(p.name) + '</b><small>#' + numOf(p.id) + ' &middot; ' + p.pos + ' &middot; rated ' + rate(p) + '</small></span></button>' : "" }).join("") + '</div>' : '<p class="hint">None yet.</p>') +
       (st.mine.length < 3 ? '<div class="mbtns"><button class="btn btn-go" data-act="newmine">Make a new player</button></div>' : '<p class="hint">You have made the most you can (three).</p>');
   } else {
@@ -1547,14 +1562,14 @@ function vDugout(c){
     '<div class="tile"><h3>Form</h3><div style="margin:8px 0">' + (last5.length ? formDots(last5) : '<span class="hint">No games yet</span>') + '</div><small>Last five matches</small></div>' +
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
     '<div class="tile"><h3>Cups</h3>' + cupHtml + '</div></div>';
-  h += '<div class="row2"><section class="card"><h3>Scouting report</h3>' + (done < ROUNDS ? compareBars(t, S.clubTeam(S.ourFixture(done).opp - 1)) + '<p class="hint" style="margin:10px 0 0">Our side on the left, theirs on the right. Training sharpens ours.</p>' : '<p class="hint">Season done. The table and trophies are in League and Club.</p>') + '</section>' + managerCard(c) + '</div>';
+  h += '<div class="row2"><section class="card"><h3>Scouting report</h3>' + (done < ROUNDS ? compareBars(t, S.clubTeam(S.ourFixture(done).opp - 1)) + '<div class="cond">' + infoLines(matchInfo("league", null, done, S.ourFixture(done).opp), S.oppName(S.ourFixture(done).opp)).map(function(x){ return '<p>' + x + '</p>' }).join("") + '</div><p class="hint" style="margin:10px 0 0">Our side on the left, theirs on the right. Training sharpens ours, and match day can change the numbers.</p>' : '<p class="hint">Season done. The table and trophies are in League and Club.</p>') + '</section>' + managerCard(c) + '</div>';
   h += pressTeaser();
   h += riseCard(c);
   var ts = trySessions(c, 3);
   if(ts.length){
     h += '<section class="card"><h3>Try one next</h3><div class="try">' + ts.map(function(a){
       var lv = c.tr.levels[a.slug] || 0;
-      return '<div class="tcard" style="--sc:' + STATCOL[a.stat] + '"><span class="pil">' + S.STATS[a.stat].label + '</span><h4>' + esc(a.title) + '</h4><span class="hint">' + esc(a.blurb) + '</span><a class="btn ' + (lv === 0 ? "btn-go" : "") + '" href="/practice/' + a.slug + '.html?from=jt">' + (lv === 0 ? "Have a go" : "Back to training") + '</a></div>';
+      return '<div class="tcard" style="--sc:' + STATCOL[a.stat] + '"><span class="pil">' + S.STATS[a.stat].label + '</span><h4>' + esc(a.title) + '</h4><span class="hint">' + esc(a.blurb) + '</span><button class="btn ' + (lv === 0 ? "btn-go" : "") + '" data-act="drill" data-id="' + nextDrill(a.slug) + '">' + (lv === 0 ? "Have a go" : "Try another") + '</button></div>';
     }).join("") + '</div></section>';
   }
   if(done){
@@ -1570,7 +1585,7 @@ function vDugout(c){
     return '<div class="stat"><span>' + S.STATS[k].label + '</span><div class="track"><i style="width:' + Math.min(100, 100 * b / 10) + '%;background:' + STATCOL[k] + '"></i></div><span>' + (b > 0.04 ? plus(b) : "0") + '</span></div>';
   }).join("") + '<button class="btn" data-act="view" data-v="train" style="margin-top:8px">Go to the training ground</button>');
   h += fold("news", "Latest news", st.inbox.slice(0, 3).map(msgHtml).join(""));
-  h += fold("how", "How it works", '<ol style="margin:0 0 10px;padding-left:1.2em"><li>Pick your best side in <b>Squad</b>.</li><li>Try any <b>training</b> session. It opens in this tab and a button brings you back.</li><li>Each session you try earns a <b>match</b>. Doing more turns up the luck dial and sharpens your players.</li><li>In a match you may be asked to make a choice. Or let the coach decide.</li><li>Fifteen league matches. Reach more focus points to unlock cup ties and new signings.</li></ol><button class="btn" data-act="help">Show me how to play</button>');
+  h += fold("how", "How it works", '<ol style="margin:0 0 10px;padding-left:1.2em"><li>Pick your best side in <b>Squad</b>.</li><li>Try a short activity in <b>Training</b>. It happens right here in the game.</li><li>Each session you try earns a <b>match</b>. Doing more turns up the luck dial and sharpens your players.</li><li>In a match you may be asked to make a choice. Or let the coach decide.</li><li>Fifteen league matches. Reach more focus points to unlock cup ties and new signings.</li></ol><button class="btn" data-act="help">Show me how to play</button>');
   return h + '</div>';
 }
 
@@ -1805,6 +1820,72 @@ function celebrate(e){
 function inForm(){
   return st.xi.filter(Boolean).map(playerOf).filter(function(q){ return q && skillTotal(q.id) > 0 }).sort(function(a, b){ return skillTotal(b.id) - skillTotal(a.id) }).slice(0, 3);
 }
+/* ---------- match day variables: weather, rival form, confidence, mishaps ---------- */
+function confMod(){ return clamp(((st.fans == null ? 50 : st.fans) - 50) / 25, -2, 2) }
+function mkey(kind, comp, round){ return kind === "cup" ? 100 + COMP_ORDER.indexOf(comp || "cup") * 20 + round : round }
+function matchInfo(kind, comp, round, oppId){
+  var key = mkey(kind, comp, round);
+  return { w: S.conditions(st.seed, key), f: S.oppForm(st.seed, key, oppId), conf: confMod(), mod: st.nextMod || null };
+}
+function applyInfo(p, us, opp, info){
+  S.shift(opp, info.f);
+  p.oppPre = { atk: opp.atk, mid: opp.mid, def: opp.def, gk: opp.gk };
+  S.shift(us, info.conf + (info.mod ? info.mod.d : 0));
+  S.squeeze(us, opp, info.w.sq);
+}
+function r1(x){ return Math.round(x * 10) / 10 }
+function infoLines(info, oname){
+  var l = ['<b>' + esc(info.w.n) + '.</b> ' + esc(info.w.note)];
+  l.push('<b>' + esc(oname) + '</b> are ' + S.formLabel(info.f) + (info.f ? ' (' + (info.f > 0 ? "+" : "") + info.f + ' to all their numbers)' : '') + '.');
+  if(Math.abs(info.conf) >= 0.5) l.push(info.conf > 0 ? 'The fans are right behind you (+' + r1(info.conf) + ').' : 'The fans are a bit flat after recent results (' + r1(info.conf) + '). A good win lifts them.');
+  if(info.mod) l.push(esc(info.mod.text));
+  var inj = Object.keys(st.inj).map(playerOf).filter(Boolean);
+  if(inj.length) l.push('Injured: ' + inj.map(function(q){ return esc(q.name) + ' (' + st.inj[q.id] + ')' }).join(", ") + '.');
+  var tr = st.xi.filter(Boolean).map(playerOf).filter(function(q){ return q && tiredOf(q.id) });
+  if(tr.length) l.push('Tired legs: ' + tr.map(function(q){ return esc(q.name) }).join(", ") + '. A rest match clears it.');
+  return l;
+}
+function infoHtml(info, oname){
+  return '<div class="cond" role="note">' + infoLines(info, oname).map(function(x){ return '<p>' + x + '</p>' }).join("") + '</div>';
+}
+function afterMatch(p, M, entry, kind){
+  var c = ctx(), started = {}, id, msgs = [];
+  (p.xiStart || []).forEach(function(x){ started[x] = 1 });
+  c.all.forEach(function(q){ st.run[q.id] = started[q.id] ? (st.run[q.id] || 0) + 1 : Math.max(0, (st.run[q.id] || 0) - 4) });
+  var back = [];
+  Object.keys(st.inj).forEach(function(k){ st.inj[k]--; if(st.inj[k] <= 0){ delete st.inj[k]; var q = playerOf(k); if(q) back.push(q.name) } });
+  if(back.length) post("Fit again: " + back.join(", "), "Physio report", back.join(" and ") + (back.length > 1 ? " are" : " is") + " back to full fitness. Pop into Squad to put them back in the side, or use Pick the best side for me.");
+  var key = mkey(kind, p.comp, p.round), r = S.rng(hash("inj" + st.seed + ":" + key)), ph = staffLvl("physio");
+  if(Object.keys(st.inj).length < 2){
+    (p.xiStart || []).some(function(x){
+      if(r() < 0.05 * (1 - 0.22 * ph) && !st.inj[x]){
+        var q = playerOf(x), n = ph >= 2 ? 1 : 2; st.inj[x] = n;
+        post("Injury news: " + (q ? q.name : "a player"), "Physio report", (q ? q.name : "A player") + " picked up a knock and will miss the next " + (n === 1 ? "match" : n + " matches") + ". " + (ph ? "The physio has them on a recovery plan, which shortens the wait. " : "A physio would speed this up. You can hire one in Stadium. ") + "Someone else steps in, and the squad has the depth.");
+        return true;
+      }
+      return false;
+    });
+  }
+  if(kind === "league"){
+    var up = staffLvl("coach") * 3 + staffLvl("physio") * 3 + staffLvl("scout") * 3 + (upLvl("stands") + upLvl("lights") + upLvl("pitch")) * 2;
+    up = Math.min(up, Math.max(0, st.coins));
+    if(up > 0){ addCoins(-up, "Running costs"); entry.up = up }
+    var rv = S.rng(hash("ev" + st.seed + ":" + entry.round)), roll = rv();
+    if(roll < 0.13){
+      var sub = rv();
+      if(sub < 0.4){
+        var bill = Math.min(Math.max(0, st.coins), 25 + 8 * (upLvl("stands") + upLvl("lights") + upLvl("pitch")));
+        if(bill > 0){ addCoins(-bill, "Repair bill"); post("Repair bill: " + bill + " coins", "The Chairman (Jay)", "A pipe burst under the main stand and the groundsman had to call someone in. It cost " + bill + " coins. These things happen at every club.") }
+      } else if(sub < 0.7){
+        st.nextMod = { d: -1.5, text: "A cold has gone round the squad, so the side starts a little slower today (-1.5)." };
+        post("A cold in the camp", "Physio report", "Half the squad is sniffling. The next match starts a little slower. It clears once that match is played." + (ph ? " Your physio has the vitamins out, so it should be quick." : ""));
+      } else {
+        addCoins(30, "Local donation"); post("A local business donates 30 coins", "The Chairman (Jay)", "The baker down the road is a big fan and has put some money in the tin.");
+      }
+    }
+  }
+  if(p.info && p.info.mod) st.nextMod = null;
+}
 function openMatch(kind, comp0){
   var c = ctx(), us = teamNow(c), round, tok = null, opp, home, away, hm, k;
   if(kind === "cup"){
@@ -1820,6 +1901,8 @@ function openMatch(kind, comp0){
     playing = { kind: "league", round: round, opp: fx.opp, hm: hm, tok: tok };
   }
   if(hm) us.luck = Math.min(1, us.luck + homeLuckBonus());
+  playing.info = matchInfo(playing.kind === "cup" ? "cup" : "league", playing.comp, playing.round, playing.opp);
+  applyInfo(playing, us, opp, playing.info); playing.xiStart = st.xi.filter(Boolean);
   home = hm ? us : opp; away = hm ? opp : us;
   playing.home = home; playing.away = away; playing.c = c; playing.us = us; playing.ourS = hm ? "h" : "a"; playing.min = 0; playing.mom = 0;
   playing.f = st.formation; playing.xiNow = st.xi.slice(); playing.subs = 0; playing.off = []; playing.subLog = [];
@@ -1827,7 +1910,7 @@ function openMatch(kind, comp0){
   var title = kind === "cup" ? COMPS[playing.comp].rounds[round] + (playing.comp !== "cup" ? ": " + COMPS[playing.comp].name : "") : "Matchday " + (round + 1);
   var fm = inForm();
   $("match").innerHTML = '<div class="mhead"><h2>' + title + '</h2><span id="ctlTop"><button class="btn btn-quiet" data-act="closem">Not now</button></span></div>' +
-    sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + sponsorLine(playing.opp) + lpHtml(playing) +
+    sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + sponsorLine(playing.opp) + infoHtml(playing.info, S.oppName(playing.opp)) + lpHtml(playing) +
     '<div id="choice"></div><div id="ctl"><div style="margin-top:14px">' + compareBars(us, opp) + '</div>' +
     (fm.length ? '<div class="inform"><b>In form</b>' + fm.map(function(q){ return '<span>' + avatar(q.id, 30, q.pos) + esc(q.name) + ' <span class="sks">' + skillChips(q.id) + '</span></span>' }).join("") + '</div>' : "") +
     '<p>Luck dial at <b style="color:var(--gold)">' + Math.round(c.tr.luck * 100) + '%</b>. ' + (kind === "cup" ? "A cup tie has a winner on the day, with penalties if it is level, and you take them. " : "") + 'You may get a few choices to make, and you can make up to three changes while you watch. Or let the coach decide.</p>' +
@@ -1890,6 +1973,7 @@ function showChoice(P){
 function teamFrom(p, xi){
   var t = S.buildTeam(p.f, xi, p.c.tr.boost, p.c.tr.luck + (p.hm ? homeLuckBonus() : 0), bonusMap()), m = tacMods();
   t.atk += m.atk; t.mid += m.mid; t.def += m.def;
+  if(p.info){ S.shift(t, p.info.conf + (p.info.mod ? p.info.mod.d : 0)); S.squeeze(t, { atk: p.oppPre.atk, mid: p.oppPre.mid, def: p.oppPre.def, gk: p.oppPre.gk }, p.info.w.sq) }
   return t;
 }
 function subOpen(){
@@ -2222,10 +2306,11 @@ function finalise(){
   M.events.forEach(function(e){ if(e.k === "goal" && e.side === ours && byName[e.who]) gain[byName[e.who]] += 2 });
   Object.keys(gain).forEach(function(id){
     var xp = (st.dev.xp[id] || 0) + gain[id]; st.dev.xp[id] = xp;
-    var nb = Math.min(6, Math.floor(xp / 4)), old = bonusOf(id);
+    var nb = Math.min(5, Math.floor(xp / 6)), old = bonusOf(id);
     if(nb > old){ st.dev.bonus[id] = nb; var pl = S.playerById(id); if(pl) grew.push(pl.name + " (now " + (pl.r + nb) + ")") }
   });
   if(grew.length) post("Players improving", "Coaching staff", "Match time is making players better: " + grew.join(", ") + ".");
+  afterMatch(p, M, entry, p.kind === "cup" ? "cup" : "league");
   p.growth = grew; p.entry = entry; save();
 }
 function replay(kind, i, comp){
@@ -2321,7 +2406,7 @@ function wizDraw(){
   } else {
     var D = demoNumbers(); wiz.demo = D;
     h += '<div class="how"><div><b class="n">1</b><b>Build your side.</b><br>You can change it any time in Squad, along with tactics and set pieces.</div>' +
-      '<div><b class="n">2</b><b>Choose who trains, then try a session.</b><br>Any one, in any order. Each opens in this tab with a button to bring you back. The player you chose gets better.</div>' +
+      '<div><b class="n">2</b><b>Choose who trains, then try a session.</b><br>Any one, in any order. Each is a short activity right here in the game. The player you chose gets better.</div>' +
       '<div><b class="n">3</b><b>Each session earns a match.</b><br>Kick off when you fancy. Watch it live on the pitch, see the highlights, or just the score.</div>' +
       '<div><b class="n">4</b><b>More doing, more luck.</b><br>Every bit of doing turns the luck dial up and sharpens your players.</div>' +
       '<div><b class="n">5</b><b>Make a few choices.</b><br>At half time, for a free kick, and with up to three changes. In the cup you take the penalties. Or let the coach decide.</div>' +
@@ -2382,6 +2467,7 @@ document.addEventListener("change", function(e){
 
 /* ---------- clicks ---------- */
 function place(pid, slot){
+  if(st.inj[pid]){ var ip = playerOf(pid); toast((ip ? ip.name : "That player") + " is injured for " + st.inj[pid] + " more " + (st.inj[pid] === 1 ? "match" : "matches") + ". The physio says rest."); return }
   var j = st.xi.indexOf(pid), old = st.xi[slot];
   if(j >= 0 && j !== slot) st.xi[j] = old || "";
   st.xi[slot] = pid; save();
@@ -2550,7 +2636,7 @@ window.addEventListener("storage", function(e){ if(e.key === ENG) refresh() });
 
 var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
-window.__dugout = {drillFinish: drillFinish, beats: beats,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
+window.__dugout = {drillFinish: drillFinish, beats: beats, matchInfo: matchInfo, tiredOf: tiredOf, afterMatch: afterMatch,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
 if(!st.setup) wizOpen(0, "setup");
 render();
 var seenMenu = false; try{ seenMenu = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
