@@ -62,8 +62,22 @@ var VIEWS = [
 var mem = null;
 function rawLoad(){ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){ return mem } }
 function save(){ mem = st; try{ localStorage.setItem(KEY, JSON.stringify(st)) }catch(e){} }
-function beats(){
+function rawBeats(){
   try{ var o = JSON.parse(localStorage.getItem(ENG) || "{}"); return (o && typeof o === "object") ? o : {} }catch(e){ return {} }
+}
+/* a short activity done in the game is worth 2 levels and is checked by the game.
+   Beats from the practice pages count half, except the ones banked before this version. */
+function beats(){
+  var r = rawBeats(), o = {}, k;
+  for(k in r) o[k] = r[k];
+  S.ACTS.forEach(function(a){
+    var n = r[a.slug] && r[a.slug].n ? Math.floor(r[a.slug].n) : 0, b0 = (st && st.eb0 && st.eb0[a.slug]) || 0;
+    var dn = (st && st.drills && st.drills[a.slug] ? st.drills[a.slug].length : 0);
+    var eng = Math.min(n, b0) + Math.floor(Math.max(0, n - b0) / 2);
+    var last = Math.max((r[a.slug] && r[a.slug].last) || 0, (st && st.dlast && st.dlast[a.slug]) || 0);
+    if(eng + dn * 2 > 0 || o[a.slug]) o[a.slug] = { n: eng + dn * 2, last: last };
+  });
+  return o;
 }
 var CLUBD = { name: "Base 5 United", short: "", nick: "", motto: "", stadium: "", c1: "#0c3b27", c2: "#74c9a0", pat: "plain", gk: "#e8c35a", crest: "bird", shape: "shield", cbg: "plain", grass: "classic", gpat: "stripes" };
 var st = rawLoad(), firstRun = false, upgraded = false, ORIG = {};
@@ -94,6 +108,12 @@ if(typeof st.fans !== "number") st.fans = 50;
 ["press", "trophies"].forEach(function(k){ if(!Array.isArray(st[k])) st[k] = [] });
 ["career", "retired", "cseen"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
 if(!st.pid) st.pid = 1;
+if(!st.drills || typeof st.drills !== "object") st.drills = {};
+if(!st.dlast || typeof st.dlast !== "object") st.dlast = {};
+if(!st.eb0 || typeof st.eb0 !== "object"){
+  st.eb0 = {}; var r0 = rawBeats();
+  S.ACTS.forEach(function(a){ st.eb0[a.slug] = r0[a.slug] && r0[a.slug].n ? Math.floor(r0[a.slug].n) : 0 });
+}
 if(!st.sp || typeof st.sp !== "object") st.sp = {};
 if(!st.sp.corner) st.sp.corner = { routine: "near", taker: "", target: "" };
 if(!st.sp.fk) st.sp.fk = "curl";
@@ -203,6 +223,17 @@ function autoPick(form, avail, prefer){
   }
   for(i = 0; i < 11; i++) if(!xi[i]) xi[i] = "";
   return xi;
+}
+function drillTotal(){ var n = 0, k; for(k in st.drills) n += st.drills[k].length; return n }
+function drillsDone(slug){ return st.drills[slug] || [] }
+function drillFinish(c){
+  if(!st.drills[c.slug]) st.drills[c.slug] = [];
+  var first = st.drills[c.slug].indexOf(c.id) < 0;
+  if(first){ st.drills[c.slug].push(c.id); st.dlast[c.slug] = Date.now() }
+  save();
+  var a = actBy(c.slug);
+  render();
+  toast(first ? "Done. +2 training levels in " + (a ? a.title : "training") + "." : "Done again. Nice, that one was already banked.");
 }
 function pendingList(){
   var b = beats(), out = [];
@@ -336,6 +367,7 @@ function badgeDefs(c){
     { id: "stad", name: "Ground builder", desc: "Upgrade your stadium", ok: upLvl("stands") + upLvl("lights") + upLvl("pitch") > 0 },
     { id: "staffb", name: "Backroom team", desc: "Hire a coach, physio or scout", ok: staffLvl("coach") + staffLvl("physio") + staffLvl("scout") > 0 },
     { id: "corner", name: "Corner master", desc: "Score from a corner routine", ok: Object.keys(st.sp.stats).some(function(k){ return k.indexOf("fk_") !== 0 && st.sp.stats[k].g > 0 }) },
+    { id: "hands", name: "Hands on", desc: "Finish five short activities", ok: drillTotal() >= 5 },
     { id: "div", name: "Division champions", desc: "Win a division", ok: st.hist.some(function(h){ return h.pos === 1 }) || (done && pos === 1) }
   ];
 }
@@ -715,9 +747,17 @@ function vSquad(c){
   return '<div class="grid">' + pitchCard(c, "s7") + listCard(c, "s5") + tacCard(c, "s12") + '<div class="card s12"><h3>Your club</h3><div class="mbtns" style="margin:0"><button class="btn" data-act="view" data-v="studio">Open the Studio</button><button class="btn" data-act="help">How to play</button></div></div></div>';
 }
 
+function learnBtns(a, lv){
+  var cs = window.JTLearn ? window.JTLearn.forAct(a.slug) : [], dn = drillsDone(a.slug), h = '<div class="lbtns">';
+  cs.forEach(function(ch, k){
+    var d = dn.indexOf(ch.id) >= 0;
+    h += '<button class="btn ' + (d ? "" : (lv === 0 && k === 0 ? "btn-go" : "")) + ' lact" data-act="drill" data-id="' + ch.id + '"><span>' + esc(ch.title) + '</span><em>' + (d ? "Done" : "2 min or so") + '</em></button>';
+  });
+  return h + '<a class="lfull" href="/practice/' + a.slug + '.html?from=jt">Open the full activity</a></div>';
+}
 /* ---------- training: choose who trains ---------- */
 function vTrain(c){
-  var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try it. It opens in this tab, and a button at the bottom left brings you back. The player you chose gets better at what the session trains, and you will see it in their card and in matches.</p></section></div>';
+  var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try one of its short activities. They take a couple of minutes, the game checks your work, and a finished one is worth 2 training levels. Hints are free and a wrong try costs nothing. The full activity is still there if you fancy a longer go.</p></section></div>';
   ["atk", "mid", "def", "gk"].forEach(function(k){
     var list = S.ACTS.filter(function(a){ return a.stat === k });
     h += '<div class="group-h" style="--sc:' + STATCOL[k] + '"><b>' + S.STATS[k].label + '</b><span class="hint">' + (c.tr.boost[k] > 0.04 ? plus(c.tr.boost[k]) + " boost so far" : "no boost yet") + '</span></div><div class="tgrid">';
@@ -727,7 +767,7 @@ function vTrain(c){
       var opts = c.avail.slice().sort(function(x, y){ return ((y.pos === pos) - (x.pos === pos)) || (rate(y) - rate(x)) }).map(function(p){ return [p.id, p.name + " (" + p.pos + ")"] });
       h += '<div class="tcard" style="--sc:' + STATCOL[k] + '"><span class="pil">' + esc(a.pillar) + '</span><h4>' + esc(a.title) + '</h4><span>' + esc(a.blurb) + '</span><div class="pips" aria-label="Training level ' + lv + ' of ' + S.CAP + '">' + pips + '</div>' +
         selHtml("tr:" + a.slug, tid, "Who trains (" + SKILLNAME[a.stat] + ")", opts) +
-        '<a class="btn ' + (lv === 0 ? "btn-go" : "") + '" href="/practice/' + a.slug + '.html?from=jt">' + (lv === 0 ? "Have a go" : "Back to training") + '</a></div>';
+        learnBtns(a, lv) + '</div>';
     });
     h += '</div>';
   });
@@ -2355,6 +2395,7 @@ function rvNext(then){
 document.addEventListener("toggle", function(e){
   var d = e.target; if(d && d.getAttribute && d.getAttribute("data-f")) folds[d.getAttribute("data-f")] = d.open;
 }, true);
+if(window.JTLearn) window.JTLearn.actInfo = function(slug){ return actBy(slug) };
 document.addEventListener("click", function(e){
   var b = e.target.closest("[data-act]");
   if(!b) return;
@@ -2388,6 +2429,7 @@ document.addEventListener("click", function(e){
   if(a === "rsask"){ resetAsk = b.getAttribute("data-v"); render(); return }
   if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); return }
   if(a === "menu"){ titleOpen(); return }
+  if(a === "drill"){ if(window.JTLearn) window.JTLearn.open(b.getAttribute("data-id"), drillFinish); return }
   if(a === "upgrade"){ buyUpgrade(b.getAttribute("data-id")); return }
   if(a === "hire"){ hireStaff(b.getAttribute("data-id")); return }
   if(a === "retire"){ var rid = b.getAttribute("data-id"), rn = numOf(rid); st.retired[rn] = rid; var rc = st.career[rid]; post("Shirt retired", "The Chairman (Jay)", "Number " + rn + " is retired in honour of " + (rc ? rc.n : "a legend") + ". Nobody else will wear it."); pressPush("Number " + rn + " retired for " + (rc ? rc.n : "a legend"), "A shirt goes up on the wall at " + stadiumName() + ".", ""); addFans(5); save(); render(); toast("Number " + rn + " retired."); return }
@@ -2508,7 +2550,7 @@ window.addEventListener("storage", function(e){ if(e.key === ENG) refresh() });
 
 var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
-window.__dugout = { st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
+window.__dugout = {drillFinish: drillFinish, beats: beats,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
 if(!st.setup) wizOpen(0, "setup");
 render();
 var seenMenu = false; try{ seenMenu = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
