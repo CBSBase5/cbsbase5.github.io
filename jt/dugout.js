@@ -23,6 +23,7 @@ function ord(n){ var s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 
 function clamp(x, a, b){ return x < a ? a : (x > b ? b : x) }
 function hash(s){ var h = 2166136261, i; s = String(s); for(i = 0; i < s.length; i++){ h = Math.imul(h ^ s.charCodeAt(i), 16777619) } return h >>> 0 }
 function isMine(id){ return /^me[23]?$/.test(String(id)) }
+function isSg(id){ return /^sg\d+$/.test(String(id)) }
 var ICON = {
   home: '<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z" fill="currentColor"/>',
   squad: '<circle cx="8" cy="8" r="3.4" fill="currentColor"/><circle cx="17" cy="9" r="2.8" fill="currentColor"/><path d="M2 20c0-4 3-6 6-6s6 2 6 6zM14 20c0-3 2-5 4-5s4 2 4 5z" fill="currentColor"/>',
@@ -31,13 +32,17 @@ var ICON = {
   club: '<path d="M4 3h16v9c0 5-4 8-8 10-4-2-8-5-8-10z" fill="currentColor"/>',
   studio: '<path d="M3 21l3-1 11-11-2-2L4 18zM16 4l2-2 4 4-2 2z" fill="currentColor"/>',
   inbox: '<path d="M3 5h18v14H3zm2 2v.5l7 5 7-5V7zm14 3l-7 5-7-5V17h14z" fill="currentColor" fill-rule="evenodd"/>',
-  send: '<path d="M2 12L22 3l-5 18-5-6-4 4v-6z" fill="currentColor"/>'
+  send: '<path d="M2 12L22 3l-5 18-5-6-4 4v-6z" fill="currentColor"/>',
+  cart: '<path d="M2 3h3l2.6 11h11l2.4-8H6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="9" cy="19" r="2" fill="currentColor"/><circle cx="17" cy="19" r="2" fill="currentColor"/>',
+  brief: '<path d="M3 8h18v12H3zM9 8V5h6v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="2"/>'
 };
 var VIEWS = [
   { id: "dugout", label: "Dugout", icon: "home", title: "The Dugout" },
   { id: "squad", label: "Squad", icon: "squad", title: "Squad and tactics" },
   { id: "train", label: "Training", icon: "train", title: "Training ground" },
   { id: "league", label: "League", icon: "league", title: "League and cup" },
+  { id: "market", label: "Market", icon: "cart", title: "Transfer market" },
+  { id: "business", label: "Business", icon: "brief", title: "Your company and sponsorships" },
   { id: "studio", label: "Studio", icon: "studio", title: "Design your club" },
   { id: "club", label: "Club", icon: "club", title: "Club, badges and trophies" },
   { id: "inbox", label: "Inbox", icon: "inbox", title: "Inbox", hidden: true },
@@ -69,6 +74,15 @@ if(!st.mine){
 if(!st.formation || !S.FORMATIONS[st.formation]) st.formation = "4-3-3";
 if(!st.nid) st.nid = 1;
 if(!st.cup) st.cup = { ties: [], out: false };
+if(typeof st.coins !== "number") st.coins = 150;
+["signed", "hist", "log", "deals"].forEach(function(k){ if(!Array.isArray(st[k])) st[k] = [] });
+["sold", "mk", "sbase"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
+if(!st.mk.bought) st.mk.bought = [];
+if(!st.season) st.season = 1;
+if(typeof st.tier !== "number" || st.tier < 0 || st.tier > 3) st.tier = firstRun ? 3 : 2;
+if(typeof st.fp0 !== "number") st.fp0 = 0;
+if(!st.sgn) st.sgn = 1;
+S.setTier(st.tier);
 if(!st.dev) st.dev = { xp: {}, bonus: {} };
 if(!st.set) st.set = { motion: "lively", sound: false, pace: "gentle" };
 ["bd", "look", "pn", "num", "focus", "skill", "tby", "tac"].forEach(function(k){ if(!st[k]) st[k] = {} });
@@ -101,14 +115,15 @@ function nickName(){ return (st.club.nick || "").trim() || clubName() }
 function stadiumName(){ return (st.club.stadium || "").trim() || "Base 5 Park" }
 function applyMine(){
   var i;
-  for(i = S.PLAYERS.length - 1; i >= 0; i--) if(isMine(S.PLAYERS[i].id)) S.PLAYERS.splice(i, 1);
+  for(i = S.PLAYERS.length - 1; i >= 0; i--) if(isMine(S.PLAYERS[i].id) || isSg(S.PLAYERS[i].id)) S.PLAYERS.splice(i, 1);
+  st.signed.forEach(function(m){ S.PLAYERS.push({ id: m.id, name: m.name, pos: m.pos, r: m.r, note: m.note }) });
   st.mine.forEach(function(m){
     var nm = String(m.name || "").trim(); if(!nm) return;
     S.PLAYERS.push({ id: m.id, name: nm, pos: m.pos, r: MINER[m.id] || 66, note: m.note + " (your player)" });
   });
 }
 function applyNames(){
-  S.PLAYERS.forEach(function(p){ if(!isMine(p.id)) p.name = String(st.pn[p.id] || "").trim() || ORIG[p.id] });
+  S.PLAYERS.forEach(function(p){ if(!isMine(p.id) && !isSg(p.id)) p.name = String(st.pn[p.id] || "").trim() || ORIG[p.id] });
 }
 function applyClub(){ S.setHomeName(clubName()) }
 function calm(){ return sysReduce || st.set.motion !== "lively" }
@@ -138,7 +153,7 @@ function nameTaken(name, exceptId){
   S.PLAYERS.forEach(function(p){ if(p.id !== exceptId && p.name.toLowerCase() === low) hit = true });
   return hit;
 }
-applyMine(); applyNames(); applyClub(); applyMotion(); applyKit();
+applyMine(); applySold(); applyNames(); applyClub(); applyMotion(); applyKit();
 var view = "dugout", sel = null, posFilter = "ALL", folds = {}, newB = [], studioTab = "club", editing = null, picking = null;
 
 /* ---------- derived numbers ---------- */
@@ -173,14 +188,14 @@ function pendingList(){
   var b = beats(), out = [];
   S.ACTS.forEach(function(a){
     var e = b[a.slug];
-    if(e && e.n >= 1 && st.used.indexOf(a.slug) < 0) out.push({ slug: a.slug, last: e.last || 0, act: a });
+    if(e && (e.n - (st.sbase[a.slug] || 0)) >= 1 && st.used.indexOf(a.slug) < 0) out.push({ slug: a.slug, last: e.last || 0, act: a });
   });
   out.sort(function(x, y){ return x.last - y.last });
   return out;
 }
 function cupReady(c){
   if(st.cup.out || st.cup.ties.length >= 4) return false;
-  var n = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
+  var n = CUP_AT.filter(function(t){ return sfp(c) >= t }).length;
   return n > st.cup.ties.length;
 }
 function actBy(slug){ for(var i = 0; i < S.ACTS.length; i++) if(S.ACTS[i].slug === slug) return S.ACTS[i]; return null }
@@ -294,7 +309,12 @@ function badgeDefs(c){
     { id: "learn", name: "Learning pays off", desc: "Score with a player a session trained", ok: why },
     { id: "design", name: "Club designer", desc: "Make your club your own", ok: !!designed },
     { id: "sub", name: "Super sub", desc: "Make a change in a match", ok: !!st.madeSub },
-    { id: "shoot", name: "Shoot-out hero", desc: "Take part in a penalty shoot-out", ok: ties.some(function(t){ return !!t.pens }) }
+    { id: "shoot", name: "Shoot-out hero", desc: "Take part in a penalty shoot-out", ok: ties.some(function(t){ return !!t.pens }) },
+    { id: "boss", name: "Entrepreneur", desc: "Start your own company", ok: !!st.co },
+    { id: "spon", name: "Sponsor", desc: "Sponsor a club", ok: !!(st.co && ((st.co.signed || 0) >= 1 || st.deals.length)) },
+    { id: "deal", name: "Transfer dealer", desc: "Buy or sell a player", ok: (st.trades || 0) >= 1 },
+    { id: "up", name: "Promoted", desc: "Move up a division", ok: st.hist.some(function(h){ return h.up }) },
+    { id: "div", name: "Division champions", desc: "Win a division", ok: st.hist.some(function(h){ return h.pos === 1 }) || (done && pos === 1) }
   ];
 }
 function checkBadges(c){
@@ -304,6 +324,11 @@ function checkBadges(c){
 }
 
 function migrate(c){
+  if(!st.set.mig5){
+    st.set.mig5 = 1;
+    if(!firstRun) post("New in the dugout: divisions, money and sponsors", "The Chairman (Jay)", "Four divisions now make a pyramid, from the Chilton Premier League down to Division Three. After fifteen matches the top three go up and the bottom three go down, and then a new season begins. Matches and prizes earn coins. Spend them in the Transfer market on new players, or start your own made-up company in Business and sponsor clubs. You are in the Chilton Division Two. All optional, and your squad keeps everything it has learned.");
+    save();
+  }
   if(st.set.mig4) return;
   st.set.mig4 = 1;
   S.ACTS.forEach(function(a){
@@ -350,7 +375,7 @@ function sync(){
       changed = true;
     }
   });
-  var cupN = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
+  var cupN = CUP_AT.filter(function(t){ return sfp(c) >= t }).length;
   if(cupN > (st.cupSeen || 0)){
     st.cupSeen = cupN;
     post("Cup news", "The Chairman (Jay)", cupN === 1 ? "You have earned a place in the cup. The first tie is waiting in the dugout whenever you fancy it." : "Another cup tie is waiting in the dugout (" + CUP_NAMES[cupN - 1] + ").");
@@ -464,9 +489,10 @@ function opCrest(i, w, plain){
 }
 var SKIN = ["#f1c9a5", "#e0ac82", "#c68642", "#8d5524", "#6b3f1f", "#f6d7bd", "#fbe3cf", "#4a2c17"], HAIR = ["#1b1b1b", "#3b2a1a", "#6b4423", "#b5651d", "#d8b45a", "#8c2f1f", "#b9b9b9", "#3a7bd5", "#e56b9c"];
 var HAIRN = ["Short", "Curly", "Swept", "Bunches", "Bald", "Neat", "Mohawk"], ACCN = ["Nothing", "Headband", "Glasses", "Beard"];
+function sgLook(id){ var r = st.signed.filter(function(x){ return x.id === id })[0]; return r && r.look }
 function lookOf(id){
-  var hs = hash(id), o = st.look[id] || {};
-  return { s: o.s != null ? o.s : hs % 6, h: o.h != null ? o.h : (hs >> 6) % 4, c: o.c != null ? o.c : (hs >> 3) % 6, a: o.a || 0 };
+  var hs = hash(id), o = st.look[id] || sgLook(id) || {};
+  return { s: o.s != null ? o.s : hs % 6, h: o.h != null ? o.h : (hs >>> 6) % 4, c: o.c != null ? o.c : (hs >>> 3) % 6, a: o.a || 0 };
 }
 function avatar(id, w, pos){
   var lk = lookOf(id), skin = SKIN[lk.s] || SKIN[0], hair = HAIR[lk.c] || HAIR[0], sty = lk.h, hr = "", acc = "";
@@ -557,6 +583,7 @@ function renderPills(c){
   var tb = S.table(st.seed, st.played), mot = sysReduce ? "Calm (your device setting)" : (calm() ? "Calm" : "Lively"), unread = st.inbox.some(function(m){ return !m.read });
   $("pills").innerHTML = '<span class="pill">Matchday <b>' + Math.min(st.played.length + 1, ROUNDS) + '</b> of ' + ROUNDS + '</span>' +
     '<span class="pill">League <b>' + (st.played.length ? ord(posOf(tb)) : "-") + '</b></span>' +
+    '<button class="pill" data-act="view" data-v="business" title="Your coins">Coins <b style="color:var(--gold)">' + st.coins + '</b></button>' +
     '<span class="pill">Luck <b>' + Math.round(c.tr.luck * 100) + '%</b></span>' +
     '<button class="pill" data-act="motion" aria-pressed="' + (!calm()) + '" ' + (sysReduce ? "disabled" : "") + ' title="Switch movement on or off any time">Motion: <b style="color:inherit">' + mot + '</b></button>' +
     '<button class="pill" data-act="view" data-v="inbox">Inbox' + (unread ? ' <span class="dot" title="New messages" style="position:static;display:inline-block;margin-left:4px"></span>' : "") + '</button>' +
@@ -568,7 +595,7 @@ function render(){
   $("title").textContent = V.title;
   applyMotion(); applyKit();
   renderNav(); renderPills(c); renderClub();
-  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings }[view];
+  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings }[view];
   var vw = $("view"); vw.style.animation = "none"; void vw.offsetWidth; vw.style.animation = "";
   vw.innerHTML = fn(c);
   if(view === "send") mountSend();
@@ -677,9 +704,9 @@ function vSettings(){
 }
 var resetAsk = "";
 function resetHtml(){
-  if(resetAsk === "season") return '<div class="choice"><p style="margin:0 0 8px"><b>Start a new season?</b> Matches, the table, the cup, badges, player growth and training results go back to the start. Your club design, own players, names and numbers stay. The sessions you have done will earn matches again.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="season">Yes, start a new season</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
+  if(false) return '<div class="choice"><p style="margin:0 0 8px"><b>Start a new season?</b> Matches, the table, the cup, badges, player growth and training results go back to the start. Your club design, own players, names and numbers stay. The sessions you have done will earn matches again.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="season">Yes, start a new season</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
   if(resetAsk === "all") return '<div class="choice"><p style="margin:0 0 8px"><b>Wipe everything?</b> This clears the whole dugout, including your club design and own players, and starts the setup again. It cannot be undone. Your practice activities are not touched.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="all">Yes, wipe it all</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
-  return '<p class="hint" style="margin:0 0 4px">Fancy a fresh go? Nothing happens until you confirm, and your practice activities are never touched.</p><div class="mbtns" style="margin:0"><button class="btn" data-act="rsask" data-v="season">Start a new season</button><button class="btn btn-quiet" data-act="rsask" data-v="all">Reset everything</button></div>';
+  return '<p class="hint" style="margin:0 0 4px">Fancy a fresh go? Nothing happens until you confirm, and your practice activities are never touched. A new season starts by itself after fifteen matches.</p><div class="mbtns" style="margin:0"><button class="btn btn-quiet" data-act="rsask" data-v="all">Reset everything</button></div>';
 }
 function resetDo(kind){
   if(kind === "all"){ try{ localStorage.removeItem(KEY) }catch(e){} mem = null; location.reload(); return }
@@ -689,6 +716,205 @@ function resetDo(kind){
   newB = [];
   post("A new season begins", "The Chairman (Jay)", "Fresh start. Your club, players and design are all still yours. Have a go at any training session and a match turns up.");
   save();
+}
+
+
+/* ---------- v5: divisions, seasons, coins, company, market ---------- */
+var coDraft = null, coEditing = false, rvMode = "", sellAsk = "";
+var INDS = ["Sports kit", "Snacks and drinks", "Games", "Music", "Bikes", "Pets", "Tech", "Books"];
+var FIRSTN = ["Ash", "Bailey", "Cal", "Dev", "Eli", "Finn", "Gus", "Hari", "Ivo", "Jory", "Kai", "Leo", "Milo", "Nico", "Omar", "Pip", "Quinn", "Remy", "Sol", "Tobi", "Uma", "Vic", "Wes", "Yusuf", "Zane", "Ada", "Bea", "Cleo", "Dani", "Esme"];
+var MSURN = ["Abbott", "Brook", "Castle", "Dunn", "Easton", "Frost", "Gallow", "Hale", "Irving", "Jolly", "Knight", "Lund", "Mason", "Nolan", "Oduya", "Pryor", "Raine", "Stone", "Tully", "Underhill", "Voss", "Wren", "Yates", "Zaman", "Aldous", "Bright", "Crane", "Drake", "Flint", "Grove"];
+var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
+function sfp(c){ return c.tr.fp - (st.fp0 || 0) }
+function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
+function priceOf(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.45 / 5) * 5) }
+function sellValue(p){ return Math.max(5, Math.round(priceOf(rate(p)) * 0.6 / 5) * 5) }
+function coShort(c){ return String(c.name || "").split(/\s+/).filter(Boolean).map(function(x){ return x.charAt(0) }).join("").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3) || "CO" }
+function coLogoOf(c, w){ return crestSvg(w, true, { c1: c.c1, c2: c.c2, shape: c.shape, crest: c.sym, cbg: c.cbg || "plain", short: coShort(c) }) }
+function coLogo(w){ return coLogoOf(st.co, w) }
+function dealOf(club){ return st.deals.filter(function(d){ return d.club === club })[0] }
+function dealLogo(id){ if(!st.co) return ""; return dealOf(id === 0 ? -1 : id - 1) ? '<span class="dl" title="Sponsored by ' + esc(st.co.name) + '">' + coLogo(16) + '</span>' : "" }
+function sponsorLine(oppId){
+  if(!st.co) return "";
+  var own = dealOf(-1), opp = dealOf(oppId - 1);
+  if(!own && !opp) return "";
+  return '<p class="sponsor">' + coLogo(18) + '<span>' + esc(st.co.name) + ' sponsors ' + (own && opp ? "both clubs" : (own ? esc(clubName()) : esc(S.CLUBS[oppId - 1].name))) + '</span></p>';
+}
+function coLevel(){ return st.co ? 1 + Math.floor((st.co.earned || 0) / 250) : 0 }
+function coSlots(){ return Math.min(6, 1 + coLevel()) }
+function clubStr(i){ var t = S.clubTeam(i); return (t.atk + t.mid + t.def) / 3 }
+function dealFee(club){ return club === -1 ? 12 : Math.max(6, Math.round(6 + (clubStr(club) - 55) * 0.7)) }
+function dealPrice(club){ return dealFee(club) * (club === -1 ? 5 : 8) }
+function zoneNote(){
+  if(st.tier === 0) return "The bottom three go down.";
+  if(st.tier === 3) return "The top three go up.";
+  return "The top three go up and the bottom three go down.";
+}
+function payout(entry, kind){
+  var tot = 0, spon = 0, x = kind === "league" ? resultOf(entry) : (entry.won ? "W" : "L"), lv0 = coLevel();
+  if(kind === "league"){
+    tot += x === "W" ? 40 : (x === "D" ? 20 : 10); tot += ourGoals(entry) * 3;
+    var oth = null, opp = S.ourFixture(entry.round).opp - 1;
+    st.deals.forEach(function(d){
+      var bonus = 0;
+      if(d.club === -1){ if(x === "W") bonus = 8 }
+      else {
+        var res = null;
+        if(opp === d.club) res = x === "W" ? "L" : (x === "L" ? "W" : "D");
+        else {
+          oth = oth || S.otherResults(st.seed, entry.round);
+          oth.forEach(function(o){
+            if(o.a - 1 === d.club) res = o.hs > o.as ? "W" : (o.hs < o.as ? "L" : "D");
+            else if(o.b - 1 === d.club) res = o.as > o.hs ? "W" : (o.as < o.hs ? "L" : "D");
+          });
+        }
+        bonus = res === "W" ? 6 : (res === "D" ? 2 : 0);
+      }
+      d.got = (d.got || 0) + d.fee + bonus; spon += d.fee + bonus;
+    });
+    tot += spon;
+  } else tot += entry.won ? 30 * (entry.k + 1) : 10;
+  if(spon && st.co) st.co.earned = (st.co.earned || 0) + spon;
+  entry.spon = spon;
+  addCoins(tot, kind === "league" ? "Matchday " + (entry.round + 1) : "Cup tie");
+  if(st.co && coLevel() > lv0) post("Your company grew", "Business news", st.co.name + " is now level " + coLevel() + ". You have a new sponsorship slot.");
+  return tot;
+}
+
+/* seasons */
+function cupText(){
+  var n = st.cup.ties.length;
+  if(n >= 4 && st.cup.ties[3].won) return "Winners";
+  if(st.cup.out) return "Out in the " + CUP_NAMES[n - 1].toLowerCase();
+  return n ? "Through " + n + (n === 1 ? " tie" : " ties") : "Not played";
+}
+function seasonSummary(){
+  var tb = S.table(st.seed, st.played), pos = posOf(tb), r = tb.filter(function(x){ return x.id === 0 })[0], t = st.tier;
+  var up = t > 0 && pos <= 3, down = t < 3 && pos >= 14, nt = up ? t - 1 : (down ? t + 1 : t);
+  var prize = Math.round((160 - (pos - 1) * 9) * (1 + (3 - t) * 0.25)), cupWon = st.cup.ties.length >= 4 && st.cup.ties[3].won;
+  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + (cupWon ? 100 : 0), cup: cupText(), t: t };
+}
+function openSeason(){
+  if(st.played.length < ROUNDS) return;
+  var m = seasonSummary(), r = m.r;
+  rvMode = "season";
+  var out = m.up ? '<p><b>Promoted!</b> You are moving up to the ' + esc(S.leagueName(m.nt)) + '. The clubs are stronger there, and so are the prizes.</p>' :
+    (m.down ? '<p>You are moving down to the ' + esc(S.leagueName(m.nt)) + '. A fresh chance to climb back, and your squad keeps everything it has learned.</p>' : '<p>You stay in the ' + esc(S.leagueName(m.t)) + ' next season.</p>');
+  $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">Season ' + st.season + ' complete</div><h2>' + (m.pos === 1 ? "Champions of the " : "Finished " + ord(m.pos) + " in the ") + esc(S.leagueName(m.t)) + '</h2>' +
+    '<div class="sumgrid" style="margin:12px 0"><div><b>' + r.w + '</b><small>Won</small></div><div><b>' + r.d + '</b><small>Drawn</small></div><div><b>' + r.l + '</b><small>Lost</small></div><div><b>' + r.gf + '</b><small>For</small></div><div><b>' + r.ga + '</b><small>Against</small></div><div><b>' + r.pts + '</b><small>Points</small></div></div>' +
+    '<p>The Cup: ' + esc(m.cup) + '.</p>' + out + '<p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
+    '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>';
+  $("rv").classList.add("on"); $("rv").classList.add("season");
+}
+function closeSeason(){ rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season") }
+function seasonGo(){
+  if(st.played.length < ROUNDS){ closeSeason(); return }
+  var m = seasonSummary(), r = m.r, c = ctx();
+  addCoins(m.prize, "Season " + st.season + " prize");
+  st.hist.push({ season: st.season, tier: m.t, league: S.leagueName(m.t), pos: m.pos, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga, pts: r.pts, cup: m.cup, up: m.up, down: m.down, coins: m.prize });
+  st.season++; st.tier = m.nt; S.setTier(st.tier);
+  st.seed = 1 + Math.floor(Math.random() * 2000000000);
+  st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cupSeen = 0; st.deals = []; st.mk = {};
+  var b = beats(), sb = {}; S.ACTS.forEach(function(a){ sb[a.slug] = (b[a.slug] && b[a.slug].n) || 0 });
+  st.sbase = sb; st.fp0 = c.tr.fp;
+  post("Season " + st.season + " begins", "The Chairman (Jay)", "Welcome to the " + S.leagueName() + ". " + (m.up ? "You earned this promotion. " : (m.down ? "Every club has a rough season now and then. " : "")) + "Your squad keeps all its growth. Try some training and matches turn up again, and your sponsorship deals can be renewed in Business.");
+  rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season"); view = "dugout"; save(); render(); window.scrollTo(0, 0);
+  toast("Season " + st.season + " in the " + S.leagueName() + ".");
+}
+
+/* roster changes */
+function applySold(){
+  for(var i = S.PLAYERS.length - 1; i >= 0; i--) if(st.sold[S.PLAYERS[i].id]) S.PLAYERS.splice(i, 1);
+}
+function marketWin(){ return st.season * 100 + Math.floor(st.played.length / 3) }
+function marketList(){
+  var w = marketWin();
+  if(st.mk.w !== w) st.mk = { w: w, bought: [] };
+  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[65, 80], [61, 76], [57, 72], [53, 68]][st.tier], i;
+  for(i = 0; i < 12; i++){
+    var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
+    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 25);
+    used[nm] = 1;
+    out.push({ id: "mk" + w + "_" + i, name: nm, pos: POSL[i], r: rt, note: TRAITS[Math.floor(r() * TRAITS.length)] });
+  }
+  return out.filter(function(x){ return st.mk.bought.indexOf(x.id) < 0 });
+}
+function buyPlayer(id){
+  var l = marketList().filter(function(x){ return x.id === id })[0]; if(!l) return;
+  var price = priceOf(l.r), c = ctx();
+  if(st.coins < price){ toast("Not enough coins yet. Matches and sponsors earn more."); return }
+  if(c.avail.length >= 30){ toast("The squad is full (30). Sell someone first."); return }
+  var nid = "sg" + (st.sgn++), nm = l.name; if(nameTaken(nm, "")) nm += " II";
+  st.signed.push({ id: nid, name: nm, pos: l.pos, r: l.r, note: l.note, look: lookOf(l.id) });
+  st.mk.bought.push(id); addCoins(-price, "Signed " + nm); st.trades = (st.trades || 0) + 1;
+  applyMine(); save(); render(); toast(nm + " has joined " + clubName() + ".");
+}
+function sellPlayer(id){
+  var p = playerOf(id), c = ctx(); sellAsk = "";
+  if(!p || isMine(id)) return;
+  if(c.avail.length <= 15){ toast("Keep at least fifteen players in the squad."); render(); return }
+  if(p.pos === "GK" && c.avail.filter(function(q){ return q.pos === "GK" }).length <= 2){ toast("Keep at least two goalkeepers."); render(); return }
+  var val = sellValue(p), nm = p.name;
+  if(isSg(id)) st.signed = st.signed.filter(function(x){ return x.id !== id }); else st.sold[id] = 1;
+  ["cap", "pk", "fk"].forEach(function(k){ if(st[k] === id) st[k] = "" });
+  st.xi = st.xi.map(function(x){ return x === id ? "" : x });
+  applyMine(); applySold(); addCoins(val, "Sold " + nm); st.trades = (st.trades || 0) + 1;
+  save(); render(); toast(nm + " sold for " + val + " coins.");
+}
+
+/* views */
+function vMarket(c){
+  var list = marketList(), h = '<div class="stack"><div class="card"><h3>Transfer market</h3><p class="hint" style="margin:0">You have <b style="color:var(--gold)">' + st.coins + ' coins</b>. Your squad has ' + c.avail.length + ' players (most is 30). New players are listed every three league matches, and there is no rush.</p></div>';
+  h += '<div class="card"><h3>Players for sale</h3><div class="mkgrid">' + (list.length ? list.map(function(l){
+    var worst = 99, F = S.FORMATIONS[st.formation];
+    st.xi.forEach(function(id, i){ var q = id ? playerOf(id) : null; if(q && F.slots[i] === l.pos) worst = Math.min(worst, rate(q)) });
+    var price = priceOf(l.r), cls = worst === 99 ? "" : (l.r > worst ? "better" : "");
+    return '<div class="mk">' + avatar(l.id, 54, l.pos) + '<div><b>' + esc(l.name) + '</b><small>' + l.pos + ' &middot; rated ' + l.r + '</small><small>' + esc(l.note) + '</small>' + (cls ? '<small class="up">Better than someone in your side</small>' : "") + '</div><button class="btn ' + (st.coins >= price ? "btn-go" : "") + '" data-act="buy" data-id="' + l.id + '"' + (st.coins >= price ? "" : " aria-disabled=\"true\"") + '>' + price + ' coins</button></div>';
+  }).join("") : '<p class="hint">Everyone on this list has been signed. A new list comes after the next three matches.</p>') + '</div></div>';
+  var mine = c.avail.filter(function(p){ return !isMine(p.id) }).sort(function(a, b){ return rate(b) - rate(a) });
+  h += fold("sell", "Sell a player", '<p class="hint">Players you made yourself are never for sale. Others sell for a bit less than they cost.</p><div class="plist">' + mine.map(function(p){
+    var val = sellValue(p);
+    return '<div class="prow sell">' + avatar(p.id, 40, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + p.pos + ' &middot; rated ' + rate(p) + '</small></span>' + (sellAsk === p.id ? '<span class="sa"><button class="btn btn-go" data-act="sellyes" data-id="' + p.id + '">Sell for ' + val + '</button><button class="btn btn-quiet" data-act="sellask" data-id="">Keep</button></span>' : '<button class="btn btn-quiet" data-act="sellask" data-id="' + p.id + '">Sell ' + val + '</button>') + '</div>';
+  }).join("") + '</div>');
+  return h + '</div>';
+}
+function coForm(){
+  var d = coDraft || (coDraft = st.co ? Object.assign({}, st.co) : { name: "", slogan: "", ind: "Sports kit", c1: SWATCH[1][0], c2: SWATCH[1][1], shape: "round", sym: "star", cbg: "plain" });
+  var prev = function(){ return '<div class="stcard">' + coLogoOf(d, 84) + '<div><h2>' + esc(d.name || "Your company") + '</h2><span class="hint">' + esc(d.ind) + (d.slogan ? " &middot; " : "") + (d.slogan ? '<em>' + esc(d.slogan) + '</em>' : "") + '</span></div></div>' };
+  return '<div class="stack"><div class="card"><h3>' + (coEditing ? "Change your company" : "Start your own company") + '</h3><p class="hint">Make up a company and put its name on teams as a sponsor. Sponsors earn coins when their clubs play well. Everything here is made up, so go for it.</p>' +
+    '<div class="pv" id="coprev">' + prev() + '</div>' +
+    '<label class="sendlab" for="conname">Company name</label><br><input class="wzin" id="conname" maxlength="24" value="' + esc(d.name) + '" placeholder="e.g. Rocket Bikes">' +
+    '<label class="sendlab" for="conslogan" style="display:block;margin-top:12px">Slogan</label><input class="wzin" id="conslogan" maxlength="40" value="' + esc(d.slogan) + '" placeholder="e.g. Ride your luck">' +
+    '<h3 style="margin-top:14px">What it makes</h3><div class="opts">' + INDS.map(function(x){ return optBtn("coset", "ind", x, x, d.ind === x) }).join("") + '</div>' +
+    '<h3>Colours</h3><div class="swatches">' + SWATCH.map(function(sw, i){ return '<button class="swatch" data-act="cocol" data-i="' + i + '" aria-pressed="' + (d.c1 === sw[0] && d.c2 === sw[1]) + '" aria-label="Colour set ' + (i + 1) + '" style="background:' + sw[0] + '"><i style="background:' + sw[1] + '"></i></button>' }).join("") + '</div>' +
+    '<h3>Logo shape</h3><div class="crests">' + SHAPELIST.map(function(s){ return '<button data-act="coset" data-k="shape" data-v="' + s[0] + '" aria-pressed="' + (d.shape === s[0]) + '" aria-label="' + s[1] + '">' + coLogoOf(Object.assign({}, d, { shape: s[0] }), 40) + '</button>' }).join("") + '</div>' +
+    '<h3>Logo symbol</h3><div class="crests">' + SYMS.map(function(s){ return '<button data-act="coset" data-k="sym" data-v="' + s[0] + '" aria-pressed="' + (d.sym === s[0]) + '" aria-label="' + s[1] + '">' + coLogoOf(Object.assign({}, d, { sym: s[0] }), 40) + '</button>' }).join("") + '</div>' +
+    '<div class="mbtns"><button class="btn btn-go btn-big" data-act="cosave">' + (coEditing ? "Save changes" : "Start the company") + '</button>' + (coEditing ? '<button class="btn" data-act="cocancel">Cancel</button>' : "") + '</div></div></div>';
+}
+function vBusiness(c){
+  if(!st.co || coDraft) return coForm();
+  var co = st.co, lv = coLevel(), nxt = lv * 250, got = co.earned || 0, tb = S.table(st.seed, st.played), used = st.deals.length, slots = coSlots();
+  var h = '<div class="stack"><div class="card"><div class="stcard">' + coLogo(84) + '<div style="flex:1"><h2>' + esc(co.name) + '</h2><span class="hint">' + esc(co.ind) + (co.slogan ? " &middot; " : "") + (co.slogan ? '<em>' + esc(co.slogan) + '</em>' : "") + '</span><p style="margin:6px 0 0">Level <b>' + lv + '</b> &middot; ' + got + ' coins earned from sponsorship</p><div class="prog" aria-hidden="true"><i style="width:' + Math.round(100 * Math.min(1, (got - (lv - 1) * 250) / 250)) + '%"></i></div><span class="hint">' + Math.max(0, nxt - got) + ' more coins for level ' + (lv + 1) + ' and another sponsorship slot.</span></div><button class="btn" data-act="coedit">Change company</button></div></div>';
+  h += '<div class="card"><h3>Sponsorship deals &middot; ' + used + ' of ' + slots + ' slots</h3><p class="hint">Sign a deal for a club for the season. You earn a fee every league match, plus a bonus when they win. Deals end when the season does. You have <b style="color:var(--gold)">' + st.coins + ' coins</b>.</p><div class="dealist">';
+  var rows = [{ id: 0, name: clubName() }].concat(tb.filter(function(r){ return r.id !== 0 }));
+  rows.forEach(function(r){
+    var club = r.id === 0 ? -1 : r.id - 1, d = dealOf(club), fee = dealFee(club), price = dealPrice(club), pos = tb.map(function(x){ return x.id }).indexOf(r.id) + 1;
+    var cr = r.id === 0 ? crestSvg(30, true) : opCrest(r.id, 30, true), act;
+    if(d) act = '<span class="chip-on">Active &middot; earned ' + (d.got || 0) + '</span>';
+    else if(used >= slots) act = '<button class="btn" disabled>No slot free</button>';
+    else if(st.coins < price) act = '<button class="btn" disabled>Need ' + price + ' coins</button>';
+    else act = '<button class="btn btn-go" data-act="deal" data-c="' + club + '">Sponsor for ' + price + '</button>';
+    h += '<div class="deal">' + cr + '<span><b>' + esc(r.name) + (club === -1 ? " (your club)" : "") + '</b><small>' + (st.played.length || club !== -1 ? ord(pos) + " in the table &middot; " : "") + fee + ' coins a match</small></span>' + act + '</div>';
+  });
+  h += '</div></div>';
+  h += fold("log", "Money in and out", st.log.length ? '<ul class="moments">' + st.log.slice(0, 12).map(function(l){ return '<li><b style="color:' + (l.n >= 0 ? "var(--win)" : "var(--loss)") + '">' + (l.n >= 0 ? "+" : "") + l.n + '</b> ' + esc(l.why) + '</li>' }).join("") + '</ul>' : '<p class="hint">Nothing yet. Matches, cup ties and sponsors all earn coins.</p>');
+  return h + '</div>';
+}
+function histCard(){
+  if(!st.hist.length) return "";
+  return '<div class="card"><h3>Seasons</h3>' + st.hist.slice().reverse().map(function(s){
+    return '<div class="resline"><span><b>Season ' + s.season + '</b> &middot; ' + esc(s.league) + '</span><span>' + ord(s.pos) + ' &middot; W' + s.w + ' D' + s.d + ' L' + s.l + ' &middot; Cup: ' + esc(s.cup) + (s.pos === 1 ? ' &middot; <b style="color:var(--gold)">Champions</b>' : "") + (s.up ? ' &middot; <b style="color:var(--win)">Promoted</b>' : "") + (s.down ? " &middot; Moved down" : "") + '</span></div>';
+  }).join("") + '</div>';
 }
 
 /* ---------- the Studio ---------- */
@@ -766,7 +992,7 @@ function edDraw(){
     return '<div class="skr"><span>' + SKILLNAME[k] + '</span><div class="track"><i style="width:' + A[k].v + '%;background:' + STATCOL[k] + '"></i></div><b>' + A[k].v + '</b>' + (A[k].tr ? '<em>+' + A[k].tr + '</em>' : '') + '</div>';
   }).join("") + '<p class="hint" style="margin:6px 0 0">Every training session this player does adds five points to the skill it trains.</p></div></div></div>';
   h += '<div class="edgrid"><div><label class="sendlab" for="edname">Name</label><input class="wzin" id="edname" maxlength="22" value="' + esc(p.name) + '"></div><div><label class="sendlab" for="ednum">Shirt number</label><input class="wzin" id="ednum" type="number" min="1" max="99" value="' + numOf(id) + '" style="max-width:110px"></div></div>';
-  if(!mine && st.pn[id]) h += '<div class="mbtns" style="margin:4px 0 0"><button class="btn btn-quiet" data-act="edname0">Back to the original name (' + esc(ORIG[id]) + ')</button></div>';
+  if(!mine && !isSg(id) && st.pn[id]) h += '<div class="mbtns" style="margin:4px 0 0"><button class="btn btn-quiet" data-act="edname0">Back to the original name (' + esc(ORIG[id]) + ')</button></div>';
   if(mine){
     var m = st.mine.filter(function(x){ return x.id === id })[0] || {};
     h += '<h3 style="margin-top:14px">Position</h3><div class="opts">' + ["GK", "DEF", "MID", "FWD"].map(function(k){ return optBtn("edmine", "pos", k, POSN[k], m.pos === k) }).join("") + '</div>' +
@@ -783,12 +1009,13 @@ function edDraw(){
   $("edbox").innerHTML = h;
 }
 function renamePlayer(id, raw){
-  var p = playerOf(id), nm = String(raw || "").trim().replace(/\s+/g, " ").slice(0, 22), mine = isMine(id);
+  var p = playerOf(id), nm = String(raw || "").trim().replace(/\s+/g, " ").slice(0, 22), mine = isMine(id), sg = isSg(id);
   if(!p) return;
-  if(!nm){ if(mine) return; nm = ORIG[id] }
+  if(!nm){ if(mine || sg) return; nm = ORIG[id] }
   if(/^no\.\s/i.test(nm) || nameTaken(nm, id)){ toast("That name is already taken. Pick another."); return }
   var old = p.name;
   if(mine){ st.mine.forEach(function(m){ if(m.id === id) m.name = nm }) }
+  else if(sg){ st.signed.forEach(function(m){ if(m.id === id) m.name = nm }) }
   else if(nm === ORIG[id]) delete st.pn[id]; else st.pn[id] = nm;
   applyMine(); applyNames();
   if(old !== nm && !(mine && !old)) renameHistory(old, nm);
@@ -810,7 +1037,7 @@ function newMine(){
   edOpen(free);
 }
 function afterRender(){
-  var open = $("ov").classList.contains("on") || $("ed").classList.contains("on") || wiz.on;
+  var open = $("ov").classList.contains("on") || $("ed").classList.contains("on") || wiz.on || $("rv").classList.contains("on");
   if(open) return;
   if(st.reveal.length){ showReveal(); return }
   if(newB.length && view !== "club"){
@@ -867,15 +1094,15 @@ function heroHtml(c, t, tb){
   var done = st.played.length;
   if(done >= ROUNDS){
     var pos = posOf(tb);
-    return '<section class="hero">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">Base 5 League</span><span class="ch">Season complete</span></div><div class="vs3" style="grid-template-columns:1fr"><div class="tm">' + crestSvg(104) + '<h2>' + (pos === 1 ? "Champions of the Base 5 League" : "Finished " + ord(pos) + " in the Base 5 League") + '</h2><span class="sub">' + esc(clubName()) + '</span></div></div>' +
-      '<div class="cta"><button class="btn btn-go btn-big" data-act="view" data-v="league">See the final table</button><button class="btn" data-act="view" data-v="club">Trophies and badges</button></div></div></section>';
+    return '<section class="hero">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">' + esc(S.leagueName()) + '</span><span class="ch">Season ' + st.season + ' complete</span></div><div class="vs3" style="grid-template-columns:1fr"><div class="tm">' + crestSvg(104) + '<h2>' + (pos === 1 ? "Champions of the " : "Finished " + ord(pos) + " in the ") + esc(S.leagueName()) + '</h2><span class="sub">' + esc(clubName()) + '</span></div></div>' +
+      '<div class="cta"><button class="btn btn-go btn-big" data-act="endseason">Finish the season</button><button class="btn" data-act="view" data-v="league">See the final table</button><button class="btn" data-act="view" data-v="club">Trophies and badges</button></div></div></section>';
   }
   var fx = S.ourFixture(done), opp = S.clubTeam(fx.opp - 1), pend = pendingList(), row = tb.filter(function(r){ return r.id === fx.opp })[0], oi = tb.indexOf(row);
   function duel(label, d){
     var cls = d >= 3 ? "ok" : (d <= -3 ? "hard" : "mid"), w = d >= 3 ? "Our edge" : (d <= -3 ? "Tough" : "Even");
     return '<span class="duel ' + cls + '"><b>' + w + '</b>' + label + '</span>';
   }
-  var h = '<section class="hero' + (pend.length ? " ready" : "") + '">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">Base 5 League</span><span class="ch">Matchday ' + (done + 1) + ' of ' + ROUNDS + '</span><span class="ch">' + (fx.home ? "At home" : "Away") + '</span>' + (pend.length ? '<span class="ribbon">Match ready</span>' : "") + '</div>' +
+  var h = '<section class="hero' + (pend.length ? " ready" : "") + '">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">' + esc(S.leagueName()) + '</span><span class="ch">Season ' + st.season + '</span><span class="ch">Matchday ' + (done + 1) + ' of ' + ROUNDS + '</span><span class="ch">' + (fx.home ? "At home" : "Away") + '</span>' + (pend.length ? '<span class="ribbon">Match ready</span>' : "") + '</div>' +
     '<div class="vs3"><div class="tm">' + crestSvg(104) + '<h2>' + esc(clubName()) + '</h2><span class="sub">' + (done ? ord(posOf(tb)) + " in the league" : "Ready for the season") + '</span></div><div class="vsm">VS</div>' +
     '<div class="tm">' + opCrest(fx.opp) + '<h2>' + esc(opp.name) + '</h2><span class="sub">' + (done ? ord(oi + 1) + " &middot; " + row.pts + " pts" : "Rated " + r1((opp.atk + opp.mid + opp.def) / 3)) + '</span></div></div>' +
     '<div class="duels">' + duel("Our attack v their defence", t.atk - opp.def) + duel("Midfield battle", t.mid - opp.mid) + duel("Their attack v our defence", t.def - opp.atk) + '</div><div class="cta">';
@@ -891,7 +1118,7 @@ function vDugout(c){
   if(st.cup.ties.length >= 4 && st.cup.ties[3].won) cupHtml = '<div class="big">Winners</div><small>Brilliant run.</small>';
   else if(st.cup.out) cupHtml = '<div class="big">Out</div><small>Knocked out in the ' + CUP_NAMES[st.cup.ties.length - 1].toLowerCase() + '. The league carries on.</small>';
   else if(cupReady(c)){ var cn = st.cup.ties.length; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[cn] + '</div><small>v ' + esc(S.CLUBS[S.cupOpponent(st.seed, cn)].name) + '</small><button class="btn btn-go" data-act="kickcup">Play the tie</button>'; }
-  else { var nx = CUP_AT[st.cup.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[st.cup.ties.length] + '</div><small>Arrives at ' + nx + ' focus points. You have ' + c.tr.fp + '.</small>'; }
+  else { var nx = CUP_AT[st.cup.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[st.cup.ties.length] + '</div><small>Arrives at ' + nx + ' focus points this season. You have ' + sfp(c) + '.</small>'; }
   h += '<div class="tiles"><div class="tile"><h3>League</h3><div class="big">' + (done ? ord(pos) : "-") + '</div><small>' + (done ? tb[pos - 1].pts + " points" : "Everyone starts level") + '</small></div>' +
     '<div class="tile"><h3>Form</h3><div style="margin:8px 0">' + (last5.length ? formDots(last5) : '<span class="hint">No games yet</span>') + '</div><small>Last five matches</small></div>' +
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
@@ -928,19 +1155,20 @@ function improved(){
   return best ? S.playerById(best) : null;
 }
 function vLeague(c){
-  var tb = S.table(st.seed, st.played), h = '<div class="stack"><div class="card"><h3>League table</h3><div class="tbl-wrap"><table class="lg"><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th><th class="form">Form</th></tr>';
+  var tb = S.table(st.seed, st.played), h = '<div class="stack"><div class="card"><h3>' + esc(S.leagueName()) + ' &middot; season ' + st.season + '</h3><div class="tbl-wrap"><table class="lg"><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th><th class="form">Form</th></tr>';
   tb.forEach(function(r, i){
     var cr = r.id === 0 ? crestSvg(18, true) : opCrest(r.id, 18, true);
-    h += '<tr class="' + (r.id === 0 ? "us" : "") + '"><td>' + (i + 1) + '</td><td><span style="display:flex;align-items:center;gap:8px">' + cr + esc(r.name) + '</span></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + (r.gf - r.ga) + '</td><td><b>' + r.pts + '</b></td><td class="form">' + formDots(r.form) + '</td></tr>';
+    var zone = (st.tier > 0 && i < 3) ? " up" : ((st.tier < 3 && i >= 13) ? " down" : "");
+    h += '<tr class="' + (r.id === 0 ? "us" : "") + zone + '"><td>' + (i + 1) + '</td><td><span style="display:flex;align-items:center;gap:8px">' + cr + esc(r.name) + dealLogo(r.id) + '</span></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + (r.gf - r.ga) + '</td><td><b>' + r.pts + '</b></td><td class="form">' + formDots(r.form) + '</td></tr>';
   });
-  h += '</table></div><p class="hint" style="margin-top:10px">' + (st.played.length ? esc(tb[0].name) + ' lead the table on ' + tb[0].pts + ' points.' : 'No matches yet. Everyone starts level.') + '</p></div>';
+  h += '</table></div><p class="hint" style="margin-top:10px">' + zoneNote() + ' ' + (st.played.length ? esc(tb[0].name) + ' lead the table on ' + tb[0].pts + ' points.' : 'No matches yet. Everyone starts level.') + '</p></div>';
   h += '<div class="card"><h3>The Cup</h3><div class="bracket">';
   for(var k = 0; k < 4; k++){
     var tie = st.cup.ties[k], oi = tie ? tie.opp : S.cupOpponent(st.seed, k) + 1, nm = S.CLUBS[oi - 1].name, cls = "", line;
     if(tie){ cls = tie.won ? "won" : "lost"; line = '<em>' + (tie.won ? "Won " : "Lost ") + ourGoals(tie) + " to " + theirGoals(tie) + (tie.pens ? " (pens)" : "") + '</em> <button class="btn btn-quiet" style="padding:1px 8px" data-act="replay" data-k="cup" data-i="' + k + '">Report</button>' }
     else if(st.cup.out) line = '<em>Out of the cup</em>';
     else if(k === st.cup.ties.length && cupReady(c)){ cls = "next"; line = '<em style="color:var(--gold)">Ready to play</em>' }
-    else line = '<em>Arrives at ' + CUP_AT[k] + ' focus points</em>';
+    else line = '<em>Arrives at ' + CUP_AT[k] + ' focus points this season</em>';
     h += '<div class="bn ' + cls + '"><b>' + CUP_NAMES[k] + '</b>' + opCrest(oi, 34, true) + '<span>' + esc(nm) + '</span>' + line + '</div>';
   }
   h += '</div></div>';
@@ -962,11 +1190,12 @@ function vClub(c){
   var defs = badgeDefs(c), got = defs.filter(function(d){ return d.ok }).length, w = 0, d = 0, l = 0, gf = 0, ga = 0, tb = S.table(st.seed, st.played);
   st.played.forEach(function(m){ var x = resultOf(m); if(x === "W") w++; else if(x === "D") d++; else l++; gf += ourGoals(m); ga += theirGoals(m) });
   var champ = st.played.length >= ROUNDS && posOf(tb) === 1, cupw = st.cup.ties.length >= 4 && st.cup.ties[3].won;
-  var h = '<div class="stack"><div class="card"><h3>Season so far</h3><div class="sumgrid"><div><b>' + st.played.length + '</b><small>Played</small></div><div><b>' + w + '</b><small>Won</small></div><div><b>' + d + '</b><small>Drawn</small></div><div><b>' + l + '</b><small>Lost</small></div><div><b>' + gf + '</b><small>For</small></div><div><b>' + ga + '</b><small>Against</small></div></div></div>';
+  var h = '<div class="stack"><div class="card"><h3>Season ' + st.season + ' so far</h3><div class="sumgrid"><div><b>' + st.played.length + '</b><small>Played</small></div><div><b>' + w + '</b><small>Won</small></div><div><b>' + d + '</b><small>Drawn</small></div><div><b>' + l + '</b><small>Lost</small></div><div><b>' + gf + '</b><small>For</small></div><div><b>' + ga + '</b><small>Against</small></div></div></div>';
   h += '<div class="card"><h3>Trophy cabinet</h3><div class="cabinet"><div class="cab ' + (champ ? "" : "off") + '">' + cupSvg(champ) + '<h4>League title</h4><span class="hint">' + (champ ? "Champions" : "Finish top after fifteen matches") + '</span></div><div class="cab ' + (cupw ? "" : "off") + '">' + cupSvg(cupw) + '<h4>The Cup</h4><span class="hint">' + (cupw ? "Winners" : "Win all four ties") + '</span></div></div></div>';
   h += '<div class="card"><h3>Badges &middot; ' + got + ' of ' + defs.length + '</h3><div class="badges">' + defs.map(function(b, i){
     return '<div class="bd ' + (b.ok ? "" : "off") + '">' + medal(i, b.ok) + '<span><b>' + b.name + '</b><small>' + b.desc + '</small></span></div>';
   }).join("") + '</div></div>';
+  h += histCard();
   h += '<div class="card"><h3>Your club</h3><div class="mbtns" style="margin:0"><button class="btn" data-act="view" data-v="studio">Open the Studio</button><button class="btn" data-act="view" data-v="send">Send a report to Jay</button></div></div>';
   return h + '</div>';
 }
@@ -977,7 +1206,7 @@ function vSend(){
 function reportText(){
   var c = ctx(), tb = S.table(st.seed, st.played), pos = posOf(tb), w = 0, d = 0, l = 0, gf = 0, ga = 0;
   st.played.forEach(function(m){ var x = resultOf(m); if(x === "W") w++; else if(x === "D") d++; else l++; gf += ourGoals(m); ga += theirGoals(m) });
-  var lines = ["Manager: JT", "Club: " + clubName(), "",
+  var lines = ["Manager: JT", "Club: " + clubName(), "Division: " + S.leagueName() + " (season " + st.season + ")", "Seasons completed: " + st.hist.length, "Coins: " + st.coins, st.co ? "Company: " + st.co.name + " (level " + coLevel() + ", " + (st.co.ind || "") + ")" : "Company: not started", "",
     "League matches played: " + st.played.length + " of " + ROUNDS,
     "Record: won " + w + ", drawn " + d + ", lost " + l + ", goals " + gf + " for and " + ga + " against",
     "League position: " + (st.played.length ? ord(pos) : "not started"),
@@ -1178,7 +1407,7 @@ function openMatch(kind){
   var title = kind === "cup" ? CUP_NAMES[round] : "Matchday " + (round + 1);
   var fm = inForm();
   $("match").innerHTML = '<div class="mhead"><h2>' + title + '</h2><span id="ctlTop"><button class="btn btn-quiet" data-act="closem">Not now</button></span></div>' +
-    sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + lpHtml(playing) +
+    sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + sponsorLine(playing.opp) + lpHtml(playing) +
     '<div id="choice"></div><div id="ctl"><div style="margin-top:14px">' + compareBars(us, opp) + '</div>' +
     (fm.length ? '<div class="inform"><b>In form</b>' + fm.map(function(q){ return '<span>' + avatar(q.id, 30, q.pos) + esc(q.name) + ' <span class="sks">' + skillChips(q.id) + '</span></span>' }).join("") + '</div>' : "") +
     '<p>Luck dial at <b style="color:var(--gold)">' + Math.round(c.tr.luck * 100) + '%</b>. ' + (kind === "cup" ? "A cup tie has a winner on the day, with penalties if it is level, and you take them. " : "") + 'You may get a few choices to make, and you can make up to three changes while you watch. Or let the coach decide.</p>' +
@@ -1476,6 +1705,7 @@ function endPanel(){
   if(p.kind === "cup" && p.rep ? (p.rep.k === 3 && won) : (p.kind === "cup" && p.round === 3 && won)) head = "Cup winners";
   var en = p.entry || {}, rt = en.rt || [];
   var growth = p.growth && p.growth.length ? '<p>Growing: ' + esc(p.growth.join(", ")) + '.</p>' : "";
+  if(!p.rep && en.inc) growth += '<p class="earn">Earned <b>' + en.inc + ' coins</b>' + (en.spon ? ' (' + en.spon + ' from sponsors)' : "") + '.</p>';
   var mv = "";
   if(p.mv && p.kind === "league") mv = '<p>' + (p.round === 0 ? "Now " + ord(p.mv.after) + " in the league." : (p.mv.after < p.mv.before ? "Up to " + ord(p.mv.after) + " in the league." : (p.mv.after > p.mv.before ? "Down to " + ord(p.mv.after) + " in the league." : "Still " + ord(p.mv.after) + " in the league."))) + '</p>';
   var motm = rt.length ? '<div class="motm">' + avatar(rt[0].id || rt[0].n, 54, rt[0].pos) + '<div><span class="eyebrow">Player of the match</span><br><b>' + esc(rt[0].n) + '</b> <span class="mute">' + rt[0].v.toFixed(1) + '</span></div></div>' +
@@ -1534,12 +1764,14 @@ function finalise(){
   if(p.kind === "cup"){
     entry = { k: p.round, opp: p.opp, home: p.hm, hs: M.hs, as: M.as, events: M.events, pens: M.pens, won: wonM, rt: rt, lu: lu, sb: p.subLog };
     st.cup.ties.push(entry); if(!wonM) st.cup.out = true;
+    entry.inc = payout(entry, "cup");
     post((wonM ? "Cup win: " : "Cup exit: ") + CUP_NAMES[p.round], "Match report", (wonM ? "Through after " : "Out after ") + ourGoals(entry) + " to " + theirGoals(entry) + (M.pens ? " and penalties" : "") + " against " + S.CLUBS[p.opp - 1].name + ".");
     if(wonM && p.round === 3) post("Cup winners!", "The Chairman (Jay)", "You have won the cup. A brilliant run, manager.");
   } else {
     var before = posOf(S.table(st.seed, st.played));
     entry = { round: p.round, opp: p.opp, home: p.hm, hs: M.hs, as: M.as, events: M.events, slug: p.tok.slug, luck: Math.round(p.c.tr.luck * 100), rt: rt, lu: lu, sb: p.subLog };
     st.played.push(entry); st.used.push(p.tok.slug);
+    entry.inc = payout(entry, "league");
     p.mv = { before: before, after: posOf(S.table(st.seed, st.played)) };
     var o = S.CLUBS[p.opp - 1].name, g = ourGoals(entry), a = theirGoals(entry), x = resultOf(entry);
     var luckN = M.events.filter(function(e){ return e.k === "luck" || e.lucky }).length, whyN = M.events.filter(function(e){ return e.k === "goal" && e.side === ours && e.why }).length;
@@ -1695,6 +1927,10 @@ document.addEventListener("input", function(e){
       for(var q = 0; q < pbs.length; q++){ var pvv = pbs[q].querySelector(".pv2"); if(pvv) pvv.innerHTML = shirt({ c1: st.club.c1, c2: st.club.c2, pat: pbs[q].getAttribute("data-v") }, "") }
     }
   }
+  else if(id === "conname" || id === "conslogan"){
+    coForm(); coDraft[id === "conname" ? "name" : "slogan"] = v;
+    var cp = $("coprev"); if(cp) cp.innerHTML = '<div class="stcard">' + coLogoOf(coDraft, 84) + '<div><h2>' + esc(coDraft.name || "Your company") + '</h2><span class="hint">' + esc(coDraft.ind) + (coDraft.slogan ? " &middot; " : "") + (coDraft.slogan ? '<em>' + esc(coDraft.slogan) + '</em>' : "") + '</span></div></div>';
+  }
   else if(id === "edname"){
     var ec = $("edcard"); if(ec){ var nm = ec.querySelector(".nm"); if(nm) nm.textContent = v }
   }
@@ -1758,7 +1994,36 @@ document.addEventListener("click", function(e){
     st.set[k] = (k === "sound" || k === "voice") ? (v === "true") : v; save(); if(k === "sound" && st.set.sound) sfx("luck"); if(k === "voice" && st.set.voice) speak("Commentary is on."); render(); return;
   }
   if(a === "rsask"){ resetAsk = b.getAttribute("data-v"); render(); return }
-  if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); if(rk2 === "season"){ view = "dugout"; render(); window.scrollTo(0, 0); toast("New season started.") } return }
+  if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); return }
+  if(a === "endseason"){ openSeason(); return }
+  if(a === "seasongo"){ seasonGo(); return }
+  if(a === "seasonclose"){ closeSeason(); return }
+  if(a === "coset"){ coForm(); coDraft[b.getAttribute("data-k")] = b.getAttribute("data-v"); render(); return }
+  if(a === "cocol"){ coForm(); var sw = SWATCH[+b.getAttribute("data-i")]; if(sw){ coDraft.c1 = sw[0]; coDraft.c2 = sw[1] } render(); return }
+  if(a === "coedit"){ coEditing = true; coDraft = Object.assign({}, st.co); render(); return }
+  if(a === "cocancel"){ coEditing = false; coDraft = null; render(); return }
+  if(a === "cosave"){
+    var cd = coDraft || {}, cn = String(cd.name || "").trim().replace(/\s+/g, " ").slice(0, 24);
+    if(!cn){ toast("Give your company a name first."); var ci = $("conname"); if(ci) ci.focus(); return }
+    var first = !st.co;
+    st.co = Object.assign({ earned: 0, signed: 0 }, st.co || {}, cd, { name: cn, slogan: String(cd.slogan || "").trim().slice(0, 40) });
+    coDraft = null; coEditing = false;
+    if(first) post("Your company is open", "The Chairman (Jay)", cn + " is ready for business. Sign a sponsorship deal in Business and it earns coins whenever your sponsored clubs play well.");
+    save(); render(); toast(first ? cn + " is open for business." : "Company updated."); return;
+  }
+  if(a === "deal"){
+    var dc = +b.getAttribute("data-c"), dd = dealOf(dc);
+    if(!st.co || dd) return;
+    if(st.deals.length >= coSlots()){ toast("No free slot. Your company grows as it earns."); return }
+    var dp = dealPrice(dc);
+    if(st.coins < dp){ toast("Not enough coins yet."); return }
+    st.deals.push({ club: dc, fee: dealFee(dc), price: dp, got: 0 }); st.co.signed = (st.co.signed || 0) + 1;
+    addCoins(-dp, "Sponsorship: " + (dc === -1 ? clubName() : S.CLUBS[dc].name));
+    save(); render(); toast(st.co.name + " now sponsors " + (dc === -1 ? clubName() : S.CLUBS[dc].name) + "."); return;
+  }
+  if(a === "buy"){ buyPlayer(b.getAttribute("data-id")); return }
+  if(a === "sellask"){ sellAsk = b.getAttribute("data-id") || ""; render(); return }
+  if(a === "sellyes"){ sellPlayer(b.getAttribute("data-id")); return }
   if(a === "stab"){ studioTab = b.getAttribute("data-v"); render(); return }
   if(a === "club"){ st.club[b.getAttribute("data-k")] = b.getAttribute("data-v"); save(); applyKit(); renderClub(); render(); return }
   if(a === "edit"){ edOpen(b.getAttribute("data-id")); return }
@@ -1830,7 +2095,7 @@ document.addEventListener("click", function(e){
 });
 document.addEventListener("keydown", function(e){
   if(e.key !== "Escape") return;
-  if($("rv").classList.contains("on")) rvNext();
+  if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else rvNext() }
   else if($("ed").classList.contains("on")) edClose();
   else if(wiz.on) wizClose(); else if($("ov").classList.contains("on")) closeMatch();
 });
@@ -1842,7 +2107,7 @@ window.addEventListener("storage", function(e){ if(e.key === ENG) refresh() });
 
 var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
-window.__dugout = { st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save };
+window.__dugout = { st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
 if(!st.setup) wizOpen(0, "setup");
 render();
 })();
