@@ -3476,6 +3476,81 @@ lofi.timer=setInterval(lofiTick,90);
 SETTINGS_DEFAULT.lofi=true;if(save.settings&&save.settings.lofi===undefined)save.settings.lofi=true;
 {const i=SET_ROWS.findIndex(r=>r[0]==='music');SET_ROWS.splice(i,0,['lofi','Background music',[[true,'On: chill lo-fi for each place'],[false,'Off']]])}
 
+// ===== First steps maths (KS1), now the default =====
+// Counting in 2s, 5s and 10s, tens and ones with notes and coins, change from a note, o'clock times,
+// counting map blocks in 10s and reading a ruler in cm. Three answer choices instead of four.
+// Gentle (KS2 times tables and rounding), Standard and Stretch are still there in Settings.
+SETTINGS_DEFAULT.maths='first';
+if(save.settings&&!save.flags.mathsFirst){save.flags.mathsFirst=1;save.settings.maths='first'}
+{const row=SET_ROWS.find(r=>r[0]==='maths');if(row)row[2]=[['first','First steps: counting, tens and ones'],['gentle','Gentle: times tables and rounding'],['standard','Standard: a mix'],['stretch','Stretch: exact decimals']]}
+function choices3(correct,alts){const c=[correct];for(const a of alts)if(a!==undefined&&a!==null&&!c.includes(a)&&c.length<3)c.push(a);let k=1;while(c.length<3){const extra=typeof correct==='number'?correct+k*7:correct+' ';if(!c.includes(extra))c.push(extra);k++}
+ for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]]}return c}
+function pick3(correct,alts,f=String){const raw=choices3(correct,alts.filter(v=>typeof v!=='number'||v>0));const ch=raw.map(f);return {choices:ch,ok:ch.indexOf(f(correct))}}
+const coin=(label,bg,fg='#2a2a2a')=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:${bg};color:${fg};font-weight:800;font-size:15px;margin:3px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)">${label}</span>`;
+const note=(label,bg)=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:38px;border-radius:6px;background:${bg};color:#fff;font-weight:800;font-size:15px;margin:3px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)">${label}</span>`;
+const coinFor=v=>v>=5?note('\u00a3'+v,v>=50?'#c8402e':v>=20?'#7a4a9a':v>=10?'#a0603a':'#2a8a8a'):coin('\u00a3'+v,v===1?'#e8c050':'#d8d0b0');
+const moneyRow=items=>`<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;padding:6px">${items.join('')}</div>`;
+function tensOnes(v){const t=Math.floor(v/10),o=v%10;return moneyRow([...Array(t)].map(()=>coinFor(10)).concat([...Array(o)].map(()=>coinFor(1))))}
+const isFirst=()=>mathsLevel()==='first';
+
+// ----- photo value -----
+const _cvqFirst=catchValueQuestion;
+catchValueQuestion=function(photo){if(!isFirst())return _cvqFirst(photo);
+ const q={..._cvqLoop(photo),blocks:''},f=FISH.find(x=>x.id===photo.id)||FISH[0],w=photo.weight,per=photo.rate/10,n=Math.max(1,Math.round(w*10)),v=clubPhotoValue(w,photo.rate),nm=f.name.toLowerCase();
+ if([1,2,5,10].includes(per)&&n<=10){const tot=n*per;
+  return {...q,...pick3(tot,[tot+per,tot-per,tot+2*per],fmt),title:`Count in ${per}s`,eyebrow:'COUNTING MONEY',
+   q:`Your ${nm} weighs about ${n*100} g. That is ${n} lot${n===1?'':'s'} of 100 g, and each 100 g earns a \u00a3${per} ${per>=5?'note':'coin'}. Count in ${per}s. How much is it worth?`,
+   why:`${[...Array(n)].map((_,i)=>'\u00a3'+(i+1)*per).join(', ')}. That makes ${fmt(tot)}. The exact value is ${fmt(v)}, and that is what the club pays.`,hint:`Point at each ${per>=5?'note':'coin'} and count in ${per}s.`,calculation:`${n} lots of \u00a3${per} = ${fmt(tot)}`,
+   visual:moneyRow([...Array(n)].map(()=>coinFor(per)))}}
+ if(v>=1&&v<=99){const t=Math.floor(v/10),o=v%10,swap=o*10+t;
+  return {...q,...pick3(v,[swap!==v?swap:v+10,v+10,v-10,v+1],fmt),title:'Count the money',eyebrow:'TENS AND ONES',
+   q:`Holly pays for your ${nm} photo with these notes and coins. How much is it altogether?`,
+   why:`${t} ten${t===1?'':'s'} make \u00a3${t*10}, and ${o} one${o===1?'':'s'} make \u00a3${o}. Together that is ${fmt(v)}.`,hint:'Count the \u00a310 notes in tens first, then count on the \u00a31 coins in ones.',calculation:`\u00a3${t*10} + \u00a3${o} = ${fmt(v)}`,visual:tensOnes(v)}}
+ const r=rulerQuestion(photo),L=parseInt(r.choices[r.ok],10);
+ return {...q,...r,kind:'photo',uid:photo.uid,bonus:q.bonus,...pick3(L,[L+2,L-2,L+5],x=>x+' cm')}};
+
+// ----- after selling -----
+const _saleFirst=saleQuestion;
+saleQuestion=function(sale){const q=_saleFirst(sale);if(!isFirst())return q;const amt=sale.amount,N=sale.count;
+ if(amt>=1&&amt<=99)return {...q,...pick3(amt,[(amt%10)*10+Math.floor(amt/10),amt+10,amt-10,amt+1],fmt),title:'How much did Mags pay?',eyebrow:'TENS AND ONES',
+  q:`Mags paid for your ${N} photo${N===1?'':'s'} with these notes and coins. How much is it altogether?`,why:`Count the tens, then the ones: ${fmt(amt)}.`,hint:'Count the \u00a310 notes in tens first, then count on the \u00a31 coins.',calculation:fmt(amt),visual:tensOnes(amt)};
+ const each=N<=10?2:1,tot=N*each;
+ return {...q,bonus:tot,...pick3(tot,[tot+each,tot-each,tot+2*each],fmt),title:'Holly\u2019s photo bonus',eyebrow:each===2?'COUNTING IN 2s':'COUNTING',
+  q:`Holly gives you a \u00a3${each} coin for each photo you sold. You sold ${N} photo${N===1?'':'s'}. How much does Holly give you?`,why:`${N} coins of \u00a3${each} make ${fmt(tot)}.`,hint:`Count in ${each}s, once for each photo.`,calculation:`${N} \u00d7 \u00a3${each} = ${fmt(tot)}`,
+  visual:moneyRow([...Array(N)].map(()=>coinFor(each)))}};
+
+// ----- change at Clive's -----
+const _changeFirst=changeQuestion;
+changeQuestion=function(pu){const q=_changeFirst(pu);if(!isFirst())return q;const c=pu.cost,item=pu.item.toLowerCase();
+ if(c<=50){const nt=[5,10,20,50].find(x=>x>c)||100,ch=nt-c;
+  return {...q,...pick3(ch,[ch+1,ch-1,ch+5,ch+10],fmt),title:'How much change?',eyebrow:'CHANGE FROM A NOTE',
+   q:`The ${item} costs ${fmt(c)}. HK pays with a \u00a3${nt} note. How much change does Clive give him?`,why:`From ${fmt(c)}, count on to \u00a3${nt}: that is ${fmt(ch)} change.`,hint:`Start at ${c} and count up to ${nt}.`,calculation:`\u00a3${nt} \u2212 ${fmt(c)} = ${fmt(ch)}`,visual:moneyRow([coinFor(nt)])}}
+ if(c<=100){const r=Math.min(90,Math.max(10,Math.round(c/10)*10)),ch=100-r;
+  return {...q,...pick3(ch,[ch+10,ch-10,r],fmt),title:'About how much change?',eyebrow:'NUMBER BONDS TO 100',
+   q:`The ${item} costs about \u00a3${r}. HK pays with \u00a3100. About how much change does he get?`,why:`\u00a3${r} and \u00a3${ch} make \u00a3100, so the change is about ${fmt(ch)}.`,hint:`What goes with ${r} to make 100? Count up in tens.`,calculation:`100 \u2212 ${r} = ${ch}`}}
+ const big=c>1000,unit=big?1000:100,k=Math.max(1,Math.round(c/unit));
+ return {...q,...pick3(k,[k+1,k-1,k+2]),title:big?'Count the bundles':'Count the \u00a3100 notes',eyebrow:'COUNTING',
+  q:`The ${item} costs about \u00a3${(k*unit).toLocaleString('en-GB')}. How many ${big?'\u00a31,000 bundles':'\u00a3100 notes'} is that?`,why:`${k} lot${k===1?'':'s'} of \u00a3${unit.toLocaleString('en-GB')} make \u00a3${(k*unit).toLocaleString('en-GB')}.`,hint:`Count in ${big?'thousands':'hundreds'} until you reach the price.`,calculation:`${k} \u00d7 \u00a3${unit} = \u00a3${k*unit}`,
+  visual:moneyRow([...Array(Math.min(10,k))].map(()=>note(big?'\u00a31,000':'\u00a3100','#2f6a5a')))}};
+
+// ----- map, tide and time -----
+const oclock=h=>`${((h-1)%12)+1} o\u2019clock`;
+function firstTime(place){const H=6+Math.floor(Math.random()*5),add=[2,3,4,6][Math.floor(Math.random()*4)],ans=H+add;
+ return {kind:'loc',key:'time'+dayKey(),bonus:4,title:'What time will it be?',eyebrow:'TELLING THE TIME',q:`${place} At ${oclock(H)}, HK starts fishing. He fishes for ${add} hours. What time does he stop?`,...pick3(oclock(ans),[oclock(ans+1),oclock(ans-1),oclock(H)]),
+  context:'Telling the time',skill:'Maths: o\u2019clock times and counting on hours',why:`Count on ${add} hours from ${oclock(H)}: ${[...Array(add)].map((_,i)=>oclock(H+i+1)).join(', ')}.`,hint:'Count on one hour at a time.',calculation:`${oclock(H)} + ${add} hours = ${oclock(ans)}`}}
+const _tideFirst=tideQuestion;
+tideQuestion=function(){if(!isFirst())return _tideFirst();const loc=save.owned.includes(5)?5:4,H=1+Math.floor(Math.random()*6),ans=H+6;
+ return {kind:'loc',key:'tide'+dayKey(),bonus:4,title:'When is low tide?',eyebrow:'TELLING THE TIME \u00b7 '+LOC[loc].name.toUpperCase(),q:`At ${LOC[loc].name}, high tide is at ${oclock(H)}. Low tide comes 6 hours later. What time is low tide?`,...pick3(oclock(ans),[oclock(ans+1),oclock(ans-1),oclock(H)]),
+  context:LOC[loc].name+' tides',skill:'Maths: o\u2019clock times and counting on hours',why:`Count on 6 hours from ${oclock(H)}: ${[1,2,3,4,5,6].map(i=>oclock(H+i)).join(', ')}.`,hint:'Count on one hour at a time, six times.',calculation:`${oclock(H)} + 6 hours = ${oclock(ans)}`}};
+const _scaleFirst=scaleQuestion;
+scaleQuestion=function(){if(!isFirst())return _scaleFirst();const near=save.owned.filter(i=>i!==0&&kmBetween(LOC[0],LOC[i])<=100);if(!near.length)return firstTime('Mill Pond.');
+ const j=near[Math.floor(Math.random()*near.length)],n=Math.max(1,Math.min(10,Math.round(kmBetween(LOC[0],LOC[j])/10))),ans=n*10;
+ return {kind:'loc',key:'scale'+dayKey(),bonus:4,title:'How far is it?',eyebrow:'COUNTING IN 10s',q:`On HK\u2019s map, each block is 10 km. It is ${n} block${n===1?'':'s'} from Mill Pond to ${LOC[j].name}. About how far is that?`,...pick3(ans+' km',[(ans+10)+' km',Math.max(10,ans-10)+' km',n+' km']),
+  context:'HK\u2019s fishing map',skill:'Maths: counting in 10s',why:`Count in tens, ${n} time${n===1?'':'s'}: ${[...Array(n)].map((_,i)=>(i+1)*10).join(', ')} km.`,hint:'Point at each block and count in 10s.',calculation:`${n} \u00d7 10 = ${ans} km`,
+  visual:`<div class="scale-bar"><div class="sb-line">${Array.from({length:n},()=>'<i></i>').join('')}</div><p class="small">Each block is 10 km</p></div>`}};
+const _bonusFirst=bonusQuestion;
+bonusQuestion=function(){return isFirst()?scaleQuestion():_bonusFirst()};
+
 // ===== Main loop =====
 function loop(ts){let dt=Math.min(.035,(ts-last)/1000||.016);last=ts;try{update(dt);render()}catch(err){console.error(err)}requestAnimationFrame(loop)}
 $('soundBtn').onclick=()=>{audioInit();setSound(save.sound===false)};setSound(save.sound!==false);
@@ -3514,6 +3589,7 @@ window.__hooked.lofiRender=async(id,secs)=>{const keep=[AC,master,noiseBuf,lofi.
  const buf=await oc.startRendering();[AC,master,noiseBuf,lofi.bus,lofi.filt,lofi.track,lofi.step]=keep;const ch=buf.getChannelData(0);let pk=0,ss=0;for(const v of ch){pk=Math.max(pk,Math.abs(v));ss+=v*v}
  const out=new Int16Array(ch.length);for(let i=0;i<ch.length;i++)out[i]=Math.max(-1,Math.min(1,ch[i]))*32767;let bin='';const u8=new Uint8Array(out.buffer);for(let i=0;i<u8.length;i+=8192)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));
  return {peak:pk,rms:Math.sqrt(ss/ch.length),pcm:btoa(bin),sr}};
+window.__hooked.lq=k=>{const q=k==='tide'?tideQuestion():k==='scale'?scaleQuestion():bonusQuestion();return q.q+'  =>  '+q.choices.join(' | ')};
 
 })();
 </script></body></html>
