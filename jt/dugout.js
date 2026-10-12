@@ -1810,9 +1810,10 @@ function lpHtml(p){
     else if(t.i !== 0) sty = "background:" + k[0] + ";border-color:" + k[1] + ";color:" + (lum(k[0]) > 0.55 ? "#10172a" : "#fff");
     h += '<i class="' + cls + '" id="tk' + n + '" style="' + sty + '" title="' + esc(t.name) + '">' + t.num + '</i>';
   });
-  return h + '<b class="ball" id="ball" style="left:50%;top:50%"></b><div class="gb" id="gb" hidden></div></div></div></div>' +
+  return h + '<b class="ball" id="ball" style="left:50%;top:50%"></b><div class="gb" id="gb" hidden></div></div></div><div class="cap" id="cap" aria-hidden="true"></div><div class="pop" id="pop" aria-hidden="true"></div></div>' +
     '<div class="plab"><span>' + esc(p.home.name) + '</span><span>Pressure</span><span>' + esc(p.away.name) + '</span></div>' +
-    '<div class="pres" style="background:' + (p.ourS === "h" ? "#64759a" : st.club.c2) + '"><i id="pl" style="width:50%;background:' + (p.ourS === "h" ? st.club.c2 : "#64759a") + '"></i></div>';
+    '<div class="pres" style="background:' + (p.ourS === "h" ? "#64759a" : st.club.c2) + '"><i id="pl" style="width:50%;background:' + (p.ourS === "h" ? st.club.c2 : "#64759a") + '"></i></div>' +
+    '<div class="tline" id="tline" aria-hidden="true"><i id="tlf"></i></div>';
 }
 function placeAll(){
   var p = playing; if(!p || !p.tk) return;
@@ -1981,8 +1982,9 @@ function openMatch(kind, comp0){
   buildTokens(playing);
   var title = kind === "cup" ? COMPS[playing.comp].rounds[round] + (playing.comp !== "cup" ? ": " + COMPS[playing.comp].name : "") : "Matchday " + (round + 1);
   var fm = inForm();
+  $("match").className = "match"; $("ov").scrollTop = 0;
   $("match").innerHTML = '<div class="mhead"><h2>' + title + '</h2><span id="ctlTop"><button class="btn btn-quiet" data-act="closem">Not now</button></span></div>' +
-    sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + sponsorLine(playing.opp) + infoHtml(playing.info, S.oppName(playing.opp)) + lpHtml(playing) +
+    '<div class="pre">' + sponsorLine(playing.opp) + infoHtml(playing.info, S.oppName(playing.opp)) + '</div><div class="stage" id="stage">' + sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + lpHtml(playing) + '</div>' +
     '<div id="choice"></div><div id="ctl"><div style="margin-top:14px">' + compareBars(us, opp) + '</div>' +
     (fm.length ? '<div class="inform"><b>In form</b>' + fm.map(function(q){ return '<span>' + avatar(q.id, 30, q.pos) + esc(q.name) + ' <span class="sks">' + skillChips(q.id) + '</span></span>' }).join("") + '</div>' : "") +
     '<p>Luck dial at <b style="color:var(--gold)">' + Math.round(c.tr.luck * 100) + '%</b>. ' + (kind === "cup" ? "A cup tie has a winner on the day, with penalties if it is level, and you take them. " : "") + 'You may get a few choices to make, and you can make up to three changes while you watch. Or let the coach decide.</p>' +
@@ -2007,6 +2009,7 @@ function startMatch(mode){
   p.lu = { f: p.f, n: (p.ourS === "h" ? p.home : p.away).players.map(function(q){ return q.name }), nums: (p.ourS === "h" ? p.home : p.away).players.map(function(q){ return q.id ? numOf(q.id) : 0 }) };
   $("ctl").innerHTML = ""; $("ctlTop").innerHTML = (mode === "watch" ? '<button class="btn" data-act="subopen">Make a change</button> ' : "") + '<button class="btn" id="skipb" data-act="skip">Skip to the end</button>';
   $("clk").textContent = "Kick off";
+  $("match").classList.add("live"); try{ $("ov").scrollTo({ top: 0, behavior: calm() ? "auto" : "smooth" }) }catch(er){ $("ov").scrollTop = 0 }
   if(mode !== "watch"){
     var bl = $("ball"); if(bl) bl.style.display = "none";
     settle(p); showAll(p.M.events, mode === "highlights"); return;
@@ -2024,6 +2027,7 @@ function tickLoop(){
     var g = drain(M, true);
     p.min = M.m; placeAll();
     var cl = $("clk"); if(cl) cl.textContent = (M.m > 90 ? "90+" + (M.m - 90) : M.m) + " min";
+    var tf = $("tlf"); if(tf) tf.style.width = Math.min(100, M.m / 95 * 100) + "%";
     if(M.pause){ stopTimer(); showChoice(M.pause); return }
     if(M.done){
       stopTimer();
@@ -2229,10 +2233,36 @@ function evHtml(e, ourS){
   var why = e.k === "goal" && e.side === ourS && e.why ? '<em class="why">Trained in: ' + esc(e.why) + '</em>' : "";
   return '<div class="ev ' + e.k + (e.lucky ? " lucky" : "") + (e.k === "goal" && e.side === ourS ? " us" : "") + '"><b>' + (e.k === "kick" || e.k === "pens" || e.k === "pen" ? "" : e.m + "'") + '</b><span>' + tag + esc(e.text) + why + '</span></div>';
 }
+/* the caption on the pitch, the quick word that pops up near a goal, and the timeline marks */
+function capShow(e, p){
+  var cap = $("cap"); if(!cap || e.k === "talk" || e.k === "kick") return;
+  var tag = e.k === "goal" ? "goal" : (e.k === "chance" ? "chance" : (e.k === "luck" ? "luck" : "plain"));
+  cap.className = "cap on " + tag + (e.k === "goal" && e.side === p.ourS ? " us" : "");
+  cap.innerHTML = (e.k === "half" || e.k === "full" || e.k === "pens" ? "" : '<b>' + e.m + "'" + '</b> ') + esc(e.text);
+  clearTimeout(p.capt); p.capt = setTimeout(function(){ var c2 = $("cap"); if(c2) c2.classList.remove("on") }, calm() ? 6000 : 4600);
+  if(e.k === "chance"){
+    var pop = $("pop"); if(!pop) return;
+    var saved = /save|keeper|gloves|palm|stop|tip|grab|claw|block|beat|denied/i.test(e.text);
+    pop.className = "pop " + (e.side === "h" ? "r" : "l") + (e.side === p.ourS ? " us" : "");
+    pop.textContent = saved ? "SAVED!" : "CLOSE!"; void pop.offsetWidth; pop.classList.add("go");
+  }
+  var st2 = $("stage");
+  if(st2 && e.k === "goal" && !calm()){ st2.classList.remove("flu", "flo"); void st2.offsetWidth; st2.classList.add(e.side === p.ourS ? "flu" : "flo") }
+}
+function tlMark(e, p){
+  var tl = $("tline"); if(!tl || (e.k !== "goal" && e.k !== "chance" && e.k !== "sub")) return;
+  var m = document.createElement("b"); m.className = e.k + (e.side === p.ourS ? " us" : "");
+  m.style.left = Math.min(100, (e.m || 0) / 95 * 100) + "%"; m.title = e.m + "'";
+  tl.appendChild(m);
+}
 function addEvent(e, anim){
   var p = playing, feed = $("feed"); if(!feed) return false;
   tagWhy(e, p);
   feed.insertAdjacentHTML("afterbegin", evHtml(e, p.ourS));
+  if(anim && feed.firstElementChild) feed.firstElementChild.classList.add("new");
+  feed.scrollTop = 0;
+  tlMark(e, p);
+  if(anim) capShow(e, p);
   var goal = false;
   if(e.k === "goal"){
     goal = true;
@@ -2275,6 +2305,9 @@ function endPanel(){
   var cl = $("clk"); if(cl) cl.textContent = "Full time";
   var sh = $("sh"), sa = $("sa"); if(sh) sh.textContent = M.hs; if(sa) sa.textContent = M.as;
   var pl = $("pl"); if(pl) pl.style.width = "50%";
+  var tf = $("tlf"); if(tf) tf.style.width = "100%";
+  var cp = $("cap"); if(cp) cp.classList.remove("on");
+  $("match").classList.add("over");
   var bl = $("ball"); if(bl){ bl.style.display = ""; setBall(50, 50) }
   var ev = M.events, scorers = ev.filter(function(e){ return e.k === "goal" && e.side === ours }).map(function(e){ return e.who + " " + e.m + "'" });
   var luckN = ev.filter(function(e){ return e.k === "luck" || e.lucky }).length;
@@ -2302,7 +2335,7 @@ function endPanel(){
     '<div class="mbtns"><button class="btn btn-go" data-act="closem">Back to the dugout</button><button class="btn" data-act="closeleague">See the table</button></div></div>';
   if(won && !p.replay) confetti($("finbox"));
   var b = $("fin").querySelector("button"); if(b) b.focus();
-  try{ $("fin").scrollIntoView({ block: "center" }) }catch(e){}
+  try{ $("fin").scrollIntoView({ block: "center", behavior: calm() ? "auto" : "smooth" }) }catch(e){}
 }
 function goalReplay(i){
   var p = playing; if(!p) return;
@@ -2393,6 +2426,7 @@ function replay(kind, i, comp){
   playing = { replay: true, comp: comp || "cup", kind: kind === "cup" ? "cup" : "league", round: -1, ourS: ours, rep: rep, entry: m, M: { events: m.events, hs: m.hs, as: m.as, pens: m.pens, winner: win }, shown: 0, sh: 0, sa: 0, finalised: true, growth: [], nameId: {} };
   m.events.forEach(function(e){ if(e.k === "goal" && e.side === ours && e.why === undefined) playing.nameId[e.who] = null });
   $("ov").classList.add("on");
+  $("match").className = "match";
   $("match").innerHTML = '<div class="mhead"><h2>Match report</h2><button class="btn" id="skipb" data-act="skiphl">Skip</button></div>' + sbHtml({ hn: rep.hname, an: rep.aname, ourS: ours, oppId: m.opp, clk: "" }) + '<div id="rpitch"></div><div class="mbtns" style="margin:12px 0 8px"><button class="btn" data-act="rp" data-m="full">Full report</button><button class="btn" data-act="rp" data-m="hl">Highlights</button></div><div class="feed" id="feed"></div><div id="fin"></div>';
   showAllReplay(false);
 }
