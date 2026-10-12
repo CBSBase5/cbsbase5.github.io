@@ -94,6 +94,7 @@ if(!st.mine){
 ["trained", "unlocked"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
 ["used", "played", "inbox", "xi", "reveal"].forEach(function(k){ if(!Array.isArray(st[k])) st[k] = [] });
 if(!st.formation || !S.FORMATIONS[st.formation]) st.formation = "4-3-3";
+if(st.played.length > 15) st.played.length = 15;
 if(!st.nid) st.nid = 1;
 if(!st.cup) st.cup = { ties: [], out: false };
 if(typeof st.coins !== "number") st.coins = 150;
@@ -215,6 +216,10 @@ function ctx(){
   var tr = S.training(beats());
   var all = S.PLAYERS.filter(function(p){ return !p.fp || tr.fp >= p.fp });
   var avail = all.filter(function(p){ return !(st.inj && st.inj[p.id]) });
+  if(avail.length < 11){
+    /* never leave the side short: the least hurt players play through a knock */
+    all.filter(function(p){ return st.inj && st.inj[p.id] }).sort(function(x, y){ return (st.inj[x.id] - st.inj[y.id]) || (y.r - x.r) }).slice(0, 11 - avail.length).forEach(function(p){ avail.push(p) });
+  }
   return { tr: tr, avail: avail, all: all };
 }
 function autoPick(form, avail, prefer){
@@ -1012,7 +1017,7 @@ function marketList(){
     var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
     do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 25);
     used[nm] = 1;
-    out.push({ id: "mk" + w + "_" + i, name: nm, pos: POSL[i], r: rt, note: TRAITS[Math.floor(r() * TRAITS.length)] });
+    out.push({ id: "mk" + w + "_" + i, name: nm, pos: POSL[i % POSL.length], r: rt, note: TRAITS[Math.floor(r() * TRAITS.length)] });
   }
   return out.filter(function(x){ return st.mk.bought.indexOf(x.id) < 0 });
 }
