@@ -420,7 +420,7 @@ function table(seed, played){
   }
   for(i = 0; i < played.length; i++){
     var pl = played[i], fx = ourFixture(pl.round);
-    if(pl.home) put(0, fx.opp, pl.hs, pl.as); else put(fx.opp, 0, pl.as, pl.hs);
+    if(pl.home) put(0, fx.opp, pl.hs, pl.as); else put(fx.opp, 0, pl.hs, pl.as);
     var oth = otherResults(seed, pl.round);
     for(var j = 0; j < oth.length; j++) put(oth[j].a, oth[j].b, oth[j].hs, oth[j].as);
   }
