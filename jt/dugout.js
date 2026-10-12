@@ -586,6 +586,7 @@ function renderPills(c){
     '<button class="pill" data-act="view" data-v="business" title="Your coins">Coins <b style="color:var(--gold)">' + st.coins + '</b></button>' +
     '<span class="pill">Luck <b>' + Math.round(c.tr.luck * 100) + '%</b></span>' +
     '<button class="pill" data-act="motion" aria-pressed="' + (!calm()) + '" ' + (sysReduce ? "disabled" : "") + ' title="Switch movement on or off any time">Motion: <b style="color:inherit">' + mot + '</b></button>' +
+    '<button class="pill" data-act="menu">Menu</button>' +
     '<button class="pill" data-act="view" data-v="inbox">Inbox' + (unread ? ' <span class="dot" title="New messages" style="position:static;display:inline-block;margin-left:4px"></span>' : "") + '</button>' +
     '<button class="pill" data-act="view" data-v="settings">Settings</button>';
 }
@@ -725,7 +726,7 @@ var INDS = ["Sports kit", "Snacks and drinks", "Games", "Music", "Bikes", "Pets"
 var FIRSTN = ["Ash", "Bailey", "Cal", "Dev", "Eli", "Finn", "Gus", "Hari", "Ivo", "Jory", "Kai", "Leo", "Milo", "Nico", "Omar", "Pip", "Quinn", "Remy", "Sol", "Tobi", "Uma", "Vic", "Wes", "Yusuf", "Zane", "Ada", "Bea", "Cleo", "Dani", "Esme"];
 var MSURN = ["Abbott", "Brook", "Castle", "Dunn", "Easton", "Frost", "Gallow", "Hale", "Irving", "Jolly", "Knight", "Lund", "Mason", "Nolan", "Oduya", "Pryor", "Raine", "Stone", "Tully", "Underhill", "Voss", "Wren", "Yates", "Zaman", "Aldous", "Bright", "Crane", "Drake", "Flint", "Grove"];
 var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
-function sfp(c){ return c.tr.fp - (st.fp0 || 0) }
+function sfp(c){ return c.tr.fp }
 function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
 function priceOf(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.45 / 5) * 5) }
 function sellValue(p){ return Math.max(5, Math.round(priceOf(rate(p)) * 0.6 / 5) * 5) }
@@ -816,7 +817,7 @@ function seasonGo(){
   st.seed = 1 + Math.floor(Math.random() * 2000000000);
   st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cupSeen = 0; st.deals = []; st.mk = {};
   var b = beats(), sb = {}; S.ACTS.forEach(function(a){ sb[a.slug] = (b[a.slug] && b[a.slug].n) || 0 });
-  st.sbase = sb; st.fp0 = c.tr.fp;
+  st.sbase = sb; st.fp0 = c.tr.fp; st.cupSeen = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
   post("Season " + st.season + " begins", "The Chairman (Jay)", "Welcome to the " + S.leagueName() + ". " + (m.up ? "You earned this promotion. " : (m.down ? "Every club has a rough season now and then. " : "")) + "Your squad keeps all its growth. Try some training and matches turn up again, and your sponsorship deals can be renewed in Business.");
   rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season"); view = "dugout"; save(); render(); window.scrollTo(0, 0);
   toast("Season " + st.season + " in the " + S.leagueName() + ".");
@@ -916,6 +917,20 @@ function histCard(){
     return '<div class="resline"><span><b>Season ' + s.season + '</b> &middot; ' + esc(s.league) + '</span><span>' + ord(s.pos) + ' &middot; W' + s.w + ' D' + s.d + ' L' + s.l + ' &middot; Cup: ' + esc(s.cup) + (s.pos === 1 ? ' &middot; <b style="color:var(--gold)">Champions</b>' : "") + (s.up ? ' &middot; <b style="color:var(--win)">Promoted</b>' : "") + (s.down ? " &middot; Moved down" : "") + '</span></div>';
   }).join("") + '</div>';
 }
+
+/* ---------- title menu ---------- */
+var tiOn = false;
+function titleOpen(){
+  var el = $("ti");
+  if(!el){ el = document.createElement("div"); el.id = "ti"; el.className = "ov"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "Menu"); document.body.appendChild(el) }
+  var c = ctx(), pend = pendingList().length && st.played.length < ROUNDS;
+  el.innerHTML = '<div class="rvbox timenu">' + crestSvg(96, true) + '<div class="eyebrow" style="color:var(--gold)">JT\'s Dugout</div><h2>' + esc(clubName()) + '</h2><p class="hint">' + esc(S.leagueName()) + ' &middot; season ' + st.season + ' &middot; ' + st.coins + ' coins</p>' +
+    '<div class="timbtns"><button class="btn btn-go btn-big" data-act="tiplay">' + (st.played.length || st.hist.length ? (pend ? "Continue: match ready" : "Continue") : "Play") + '</button>' +
+    '<button class="btn" data-act="tigo" data-v="squad">Squad and tactics</button><button class="btn" data-act="tigo" data-v="train">Training ground</button><button class="btn" data-act="tigo" data-v="league">League and cup</button><button class="btn" data-act="tigo" data-v="market">Transfer market</button><button class="btn" data-act="tigo" data-v="business">Business</button><button class="btn" data-act="tigo" data-v="studio">Studio</button><button class="btn" data-act="tigo" data-v="club">Club and badges</button><button class="btn" data-act="tihelp">How it works</button><button class="btn" data-act="tigo" data-v="settings">Settings</button></div></div>';
+  el.classList.add("on"); tiOn = true;
+  var b = el.querySelector("button"); if(b) b.focus();
+}
+function titleClose(){ var el = $("ti"); if(el) el.classList.remove("on"); tiOn = false; try{ sessionStorage.setItem("b5.jt.menu", "1") }catch(e){} }
 
 /* ---------- the Studio ---------- */
 var STABS = [["club", "Club"], ["kit", "Kit"], ["crest", "Badge"], ["players", "Players"], ["ground", "Ground"]];
@@ -1037,7 +1052,7 @@ function newMine(){
   edOpen(free);
 }
 function afterRender(){
-  var open = $("ov").classList.contains("on") || $("ed").classList.contains("on") || wiz.on || $("rv").classList.contains("on");
+  var open = $("ov").classList.contains("on") || $("ed").classList.contains("on") || wiz.on || tiOn || $("rv").classList.contains("on");
   if(open) return;
   if(st.reveal.length){ showReveal(); return }
   if(newB.length && view !== "club"){
@@ -1118,7 +1133,7 @@ function vDugout(c){
   if(st.cup.ties.length >= 4 && st.cup.ties[3].won) cupHtml = '<div class="big">Winners</div><small>Brilliant run.</small>';
   else if(st.cup.out) cupHtml = '<div class="big">Out</div><small>Knocked out in the ' + CUP_NAMES[st.cup.ties.length - 1].toLowerCase() + '. The league carries on.</small>';
   else if(cupReady(c)){ var cn = st.cup.ties.length; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[cn] + '</div><small>v ' + esc(S.CLUBS[S.cupOpponent(st.seed, cn)].name) + '</small><button class="btn btn-go" data-act="kickcup">Play the tie</button>'; }
-  else { var nx = CUP_AT[st.cup.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[st.cup.ties.length] + '</div><small>Arrives at ' + nx + ' focus points this season. You have ' + sfp(c) + '.</small>'; }
+  else { var nx = CUP_AT[st.cup.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[st.cup.ties.length] + '</div><small>Arrives at ' + nx + ' focus points. You have ' + sfp(c) + '.</small>'; }
   h += '<div class="tiles"><div class="tile"><h3>League</h3><div class="big">' + (done ? ord(pos) : "-") + '</div><small>' + (done ? tb[pos - 1].pts + " points" : "Everyone starts level") + '</small></div>' +
     '<div class="tile"><h3>Form</h3><div style="margin:8px 0">' + (last5.length ? formDots(last5) : '<span class="hint">No games yet</span>') + '</div><small>Last five matches</small></div>' +
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
@@ -1168,7 +1183,7 @@ function vLeague(c){
     if(tie){ cls = tie.won ? "won" : "lost"; line = '<em>' + (tie.won ? "Won " : "Lost ") + ourGoals(tie) + " to " + theirGoals(tie) + (tie.pens ? " (pens)" : "") + '</em> <button class="btn btn-quiet" style="padding:1px 8px" data-act="replay" data-k="cup" data-i="' + k + '">Report</button>' }
     else if(st.cup.out) line = '<em>Out of the cup</em>';
     else if(k === st.cup.ties.length && cupReady(c)){ cls = "next"; line = '<em style="color:var(--gold)">Ready to play</em>' }
-    else line = '<em>Arrives at ' + CUP_AT[k] + ' focus points this season</em>';
+    else line = '<em>Arrives at ' + CUP_AT[k] + ' focus points</em>';
     h += '<div class="bn ' + cls + '"><b>' + CUP_NAMES[k] + '</b>' + opCrest(oi, 34, true) + '<span>' + esc(nm) + '</span>' + line + '</div>';
   }
   h += '</div></div>';
@@ -1995,6 +2010,10 @@ document.addEventListener("click", function(e){
   }
   if(a === "rsask"){ resetAsk = b.getAttribute("data-v"); render(); return }
   if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); return }
+  if(a === "menu"){ titleOpen(); return }
+  if(a === "tiplay"){ titleClose(); view = "dugout"; render(); window.scrollTo(0, 0); return }
+  if(a === "tigo"){ titleClose(); view = b.getAttribute("data-v"); sel = null; render(); window.scrollTo(0, 0); return }
+  if(a === "tihelp"){ titleClose(); wizOpen(3, "help"); return }
   if(a === "endseason"){ openSeason(); return }
   if(a === "seasongo"){ seasonGo(); return }
   if(a === "seasonclose"){ closeSeason(); return }
@@ -2095,11 +2114,12 @@ document.addEventListener("click", function(e){
 });
 document.addEventListener("keydown", function(e){
   if(e.key !== "Escape") return;
-  if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else rvNext() }
+  if(tiOn) titleClose();
+  else if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else rvNext() }
   else if($("ed").classList.contains("on")) edClose();
   else if(wiz.on) wizClose(); else if($("ov").classList.contains("on")) closeMatch();
 });
-function refresh(){ if(!$("ov").classList.contains("on") && !$("ed").classList.contains("on") && !wiz.on && !$("rv").classList.contains("on")) render() }
+function refresh(){ if(tiOn) return; if(!$("ov").classList.contains("on") && !$("ed").classList.contains("on") && !wiz.on && !$("rv").classList.contains("on")) render() }
 window.addEventListener("pageshow", refresh);
 window.addEventListener("focus", refresh);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh() });
@@ -2110,4 +2130,6 @@ VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
 window.__dugout = { st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
 if(!st.setup) wizOpen(0, "setup");
 render();
+var seenMenu = false; try{ seenMenu = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
+if(st.setup && !firstRun && !seenMenu && !location.hash && !$("rv").classList.contains("on")) titleOpen();
 })();
