@@ -200,11 +200,15 @@ var CH = [
   why: "Trusted people and trained helplines can really help. Strangers online do not know you or your situation." }
 ];
 
-var MARKS = [["", "choose"], ["?", "question mark"], [",", "comma"], [".", "full stop"], ["'", "apostrophe"], ["!", "exclamation mark"]];
+var MARKS = [["", "choose"], ["?", "question mark"], [",", "comma"], [".", "full stop"], ["'", "apostrophe"], ["!", "exclamation mark"], [";", "semicolon"], [":", "colon"]];
 var QUOTES = {};
 function byId(id){ for(var i = 0; i < CH.length; i++) if(CH[i].id === id) return CH[i]; return null }
 function forAct(slug){ return CH.filter(function(c){ return c.slug === slug }) }
 
+function pickOf(r, arr){ return arr[Math.floor(r() * arr.length)] }
+function rint(r, a, b){ return a + Math.floor(r() * (b - a + 1)) }
+function rnd(seed){ var s = (seed >>> 0) || 1; return function(){ s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
+function shr(arr, r){ var a = arr.slice(), i, j, t; for(i = a.length - 1; i > 0; i--){ j = Math.floor(r() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t } return a }
 function shuf(n, seed){
   var a = [], i, s = seed || 7;
   for(i = 0; i < n; i++) a.push(i);
@@ -216,7 +220,375 @@ function shuf(n, seed){
 }
 function hashId(id){ var h = 3, i; for(i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff; return h }
 
-var box = null, ov = null, cur = null, X = null, done = null;
+/* ---------- challenge activities: a harder second tier, unlocked after the two warm ups ---------- */
+function gridSvg(v, px, py){
+  var s = '<svg viewBox="-8 -8 226 226" class="lgrid" role="img" aria-label="Grid with a drone' + (px != null ? " and a landing pad" : "") + '">', i;
+  for(i = 0; i <= 10; i++){ s += '<line x1="' + (i * 20) + '" y1="0" x2="' + (i * 20) + '" y2="200"/><line x1="0" y1="' + (i * 20) + '" x2="200" y2="' + (i * 20) + '"/>' }
+  if(px != null) s += '<rect x="' + (px * 20 - 8) + '" y="' + (200 - py * 20 - 8) + '" width="16" height="16" class="pad"/>';
+  return s + '<circle cx="' + (v.x * 20) + '" cy="' + (200 - v.y * 20) + '" r="7" class="drone"/></svg>';
+}
+var CH2 = [
+/* Maths */
+{ id: "tt3", slug: "tiny-town", tier: 2, title: "Plan the playground", type: "dial",
+  intro: "The real playground is 40 m wide and 25 m deep. On the plan, 1 cm stands for 5 m. Set both sides of the playground on your plan.",
+  sliders: [{ k: "w", l: "Width on the plan", min: 1, max: 14, step: 1, v: 3, u: " cm" }, { k: "d", l: "Depth on the plan", min: 1, max: 14, step: 1, v: 3, u: " cm" }],
+  read: function(v){ return '<div class="lrect"><i style="width:' + (v.w * 14) + 'px;height:' + (v.d * 14) + 'px"></i></div><p>The plan shows <b>' + v.w + ' cm by ' + v.d + ' cm</b>. That stands for <b>' + (v.w * 5) + ' m by ' + (v.d * 5) + ' m</b>.</p>' },
+  ok: function(v){ return v.w === 8 && v.d === 5 }, sol: { w: 8, d: 5 },
+  hint: "Divide each real length by 5 m. How many 5s fit into 40, and into 25?",
+  why: "40 divided by 5 is 8 and 25 divided by 5 is 5. A scale applies to every length, not just one." },
+{ id: "tt4", slug: "tiny-town", tier: 2, title: "A long walk on a small map", type: "dial",
+  intro: "The town trail is 3.5 km long. On the plan, 1 cm stands for 500 m. How long is the trail on the plan?",
+  sliders: [{ k: "cm", l: "Trail on the plan", min: 1, max: 20, step: 1, v: 4, u: " cm" }],
+  read: function(v){ return '<div class="lbar"><i style="width:' + (v.cm / 20 * 100) + '%"></i></div><p>On the plan: <b>' + v.cm + ' cm</b>. That stands for <b>' + (v.cm * 0.5) + ' km</b> in real life.</p>' },
+  ok: function(v){ return v.cm === 7 }, sol: { cm: 7 },
+  hint: "500 m is half a kilometre, so every centimetre is 0.5 km. How many halves make 3.5?",
+  why: "3.5 km is 3500 m, and 3500 divided by 500 is 7. Change the units first and the sum is easy." },
+{ id: "na3", slug: "number-allotment", tier: 2, title: "Three crops, one plot", type: "paint", cells: 36, perRow: 6,
+  intro: "The big plot has 36 beds. Plant one third with tomatoes, one quarter with beans and one sixth with herbs.",
+  cols: [{ n: "Tomatoes", c: "#e0533f", k: 12 }, { n: "Beans", c: "#7bc96f", k: 9 }, { n: "Herbs", c: "#8e7be0", k: 6 }],
+  hint: "Divide 36 by 3, by 4 and by 6 to find each share.",
+  why: "36 divided by 3 is 12, by 4 is 9 and by 6 is 6. Together that is 27 beds, so 9 are left free." },
+{ id: "na4", slug: "number-allotment", tier: 2, title: "Triangular numbers", type: "fix",
+  intro: "Triangular numbers build up in rows of dots. Find the pattern and complete it.",
+  parts: ["The triangular numbers go 1, 3, 6, 10, ", { a: "15", o: ["13", "14", "15", "16"] }, ", 21, ", { a: "28", o: ["26", "27", "28", "30"] }, ". Each time you add one more than before, so after 28 you add ", { a: "8", o: ["6", "7", "8", "9"] }, " to reach 36."],
+  hint: "The gaps are 2, 3, 4, 5 and so on. What is the gap after 10?",
+  why: "The gaps grow by one each time: +2, +3, +4, +5, +6, +7, +8. That is how each row of dots adds on." },
+{ id: "dd3", slug: "drone-dash", tier: 2, title: "Two legs, one landing", type: "dial",
+  intro: "The drone starts at (0, 0). It flies 3 across and 5 up, then 2 across and 1 down. Set the drone where it ends up.",
+  sliders: [{ k: "x", l: "Across (x)", min: 0, max: 10, step: 1, v: 0, u: "" }, { k: "y", l: "Up (y)", min: 0, max: 10, step: 1, v: 0, u: "" }],
+  read: function(v){ return gridSvg(v) + '<p>Drone at <b>(' + v.x + ', ' + v.y + ')</b></p>' },
+  ok: function(v){ return v.x === 5 && v.y === 4 }, sol: { x: 5, y: 4 },
+  hint: "Add the across moves together, then work out the up moves. Down takes away.",
+  why: "Across: 3 + 2 is 5. Up: 5 up and 1 down is 4. Each direction can be worked out on its own." },
+{ id: "dd4", slug: "drone-dash", tier: 2, title: "Battery levels", type: "order",
+  intro: "Four drones show their battery as a decimal. Order them from the lowest charge to the highest.",
+  items: ["0.09", "0.405", "0.45", "0.5", "0.6"],
+  hint: "Compare tenths first. Then compare hundredths when the tenths match.",
+  why: "Line the decimals up by place value. 0.405 is less than 0.45 because 0 hundredths is less than 5 hundredths." },
+/* Digital media */
+{ id: "im3", slug: "inside-the-machine", tier: 2, title: "Loading a web page", type: "order",
+  intro: "You type a web address and a page appears. Put the steps in order.",
+  items: ["You type the address into the browser", "The browser asks a server for the page", "The server sends the page files back", "The browser puts the files together and draws the page"],
+  hint: "A request goes out first. The page can only be drawn after the files arrive.",
+  why: "Browsers send a request, servers answer, and the browser builds what you see. That all happens in a blink." },
+{ id: "im4", slug: "inside-the-machine", tier: 2, title: "File types", type: "pairs",
+  intro: "File names end in a short code that says what is inside. Match each ending to its file.",
+  pairs: [[".jpg", "A photo"], [".mp3", "A sound or song"], [".docx", "A text document"], [".mp4", "A video"]],
+  hint: "Think about which one you would play, which you would read and which you would look at.",
+  why: "The ending tells your computer which program should open the file." },
+/* Preparation for adulthood: money */
+{ id: "pb3", slug: "party-budget", tier: 2, title: "Saving for tickets", type: "dial",
+  intro: "Tickets cost " + PD + "90. You can save " + PD + "12 a week. Set how many weeks you need to save, so you have enough but do not wait longer than you must.",
+  sliders: [{ k: "w", l: "Weeks of saving", min: 1, max: 15, step: 1, v: 4, u: " weeks" }],
+  read: function(v){ var t = v.w * 12; return '<div class="lbar ' + (t >= 90 ? "" : "over") + '"><i style="width:' + Math.min(100, t / 90 * 100) + '%"></i></div><p>Saved after ' + v.w + ' weeks: <b>' + PD + t + '</b>. ' + (t >= 90 ? "Enough for the tickets." : "Still " + PD + (90 - t) + " short.") + '</p>' },
+  ok: function(v){ return v.w === 8 }, sol: { w: 8 },
+  hint: "90 divided by 12 is a bit more than 7. You cannot save part of a week.",
+  why: "7 weeks gives " + PD + "84, which is not enough. 8 weeks gives " + PD + "96, so round up to the next whole week." },
+{ id: "pb4", slug: "party-budget", tier: 2, title: "Repeats or one off", type: "sort", buckets: ["Repeats every month", "One off cost"],
+  intro: "Some costs come back again and again and some happen once. Sort these.",
+  items: [["Phone contract", 0], ["A new jacket", 1], ["Bus pass", 0], ["A birthday present", 1], ["A streaming subscription", 0], ["Fixing a bike tyre", 1]],
+  hint: "Would you pay it again next month without choosing to buy something new?",
+  why: "Knowing which costs repeat helps you plan. They come out of your money before the one offs." },
+/* English */
+{ id: "ob3", slug: "objection", tier: 2, title: "Answer the other side", type: "order",
+  intro: "A strong argument deals with the other view. Put this paragraph in order.",
+  items: ["Some people argue homework should be banned.", "They say students need time to rest.", "However, short homework helps memory.", "So a little homework, set sensibly, is still worth doing."],
+  hint: "Start with the other side. Use however to turn it around. Finish with your own point.",
+  why: "Say what the other side thinks, show you understand it, then explain why you still disagree." },
+{ id: "ob4", slug: "objection", tier: 2, title: "Strong or weak evidence", type: "sort", buckets: ["Strong evidence", "Weak evidence"],
+  intro: "Not all evidence is equally convincing. Sort these.",
+  items: [["Official figures from the council", 0], ["My cousin said so", 1], ["A survey of 200 students", 0], ["Everyone knows it", 1], ["A report from a science museum", 0], ["I saw it on a random post", 1]],
+  hint: "Who counted it, and could somebody check it?",
+  why: "Strong evidence comes from careful counting or trusted sources. Weak evidence is just somebody saying so." },
+{ id: "pe3", slug: "punctuation-escape", tier: 2, title: "Whose is it", type: "fix",
+  intro: "An apostrophe can show who something belongs to. Pick the right form for each gap.",
+  parts: ["The ", { a: "dog's", o: ["dogs", "dog's", "dogs'"] }, " bowl is empty (one dog). The ", { a: "players'", o: ["players", "player's", "players'"] }, " changing room is down the hall (lots of players). ", { a: "We're", o: ["Were", "We're", "Where"] }, " late for the match."],
+  hint: "One owner means apostrophe then s. Many owners that end in s means the apostrophe goes after the s.",
+  why: "Dog's is one dog. Players' is more than one player. We're is we are." },
+{ id: "pe4", slug: "punctuation-escape", tier: 2, title: "Colons, semicolons and commas", type: "fix",
+  intro: "Three marks, three jobs. Pick the right mark for each gap.",
+  marks: true,
+  parts: ["I packed three things", { a: ":", o: "m" }, " boots, a bottle and a towel.<br>It was raining", { a: ";", o: "m" }, " we played anyway.<br>Although it was late", { a: ",", o: "m" }, " we kept going."],
+  hint: "A colon introduces a list. A semicolon joins two sentences that belong together. A comma follows an opening phrase.",
+  why: "A colon opens a list, a semicolon links two related sentences and a comma follows a starter phrase." },
+{ id: "bi3", slug: "break-it-up", tier: 2, title: "The bake sale", type: "break",
+  intro: "Tap between sentences to start a new paragraph when the time or topic shifts. There are two changes.",
+  sents: ["Last Friday we held a bake sale for charity.", "We set up tables in the hall before school.", "Everyone brought something to sell.", "At ten o'clock the first customers arrived.", "By lunchtime nearly every cake had gone.", "Afterwards we counted the money.", "We raised 142 pounds in total.", "The head teacher thanked everyone in assembly."],
+  brk: [3, 5],
+  hint: "Getting ready, the sale itself, and the result. Where does each part end?",
+  why: "A new paragraph marks a change of time or topic: setting up, the sale, then the result." },
+{ id: "bi4", slug: "break-it-up", tier: 2, title: "Who is speaking", type: "break",
+  intro: "In a story, every time someone new speaks, a new paragraph starts. Tap where each new speaker begins.",
+  sents: ["\"Are you coming?\" asked Sam.", "\"In a minute,\" said Jo.", "\"We will miss the bus,\" said Sam.", "\"Then we run,\" Jo laughed."],
+  brk: [1, 2, 3],
+  hint: "Each line is a different person talking, so each one starts fresh.",
+  why: "A new speaker means a new line. It helps the reader follow who is talking without extra words." },
+/* Aesthetic and creative */
+{ id: "gn3", slug: "gallery-night", tier: 2, title: "Light to dark", type: "order",
+  intro: "A shaded wall goes from the lightest tone to the darkest. Put the swatches in that order.",
+  items: [pw("#fbfbf4", "White"), pw("#f4e58a", "Pale yellow"), pw("#e58b2c", "Orange"), pw("#7b4a22", "Brown"), pw("#14120e", "Black")],
+  hint: "Which is nearest to white, and which is nearest to black?",
+  why: "Tone is how light or dark a colour is. Artists use tone to make shapes look solid." },
+{ id: "gn4", slug: "gallery-night", tier: 2, title: "Warm and cool", type: "sort", buckets: ["Warm colour", "Cool colour"],
+  intro: "Some colours feel warm and some feel cool. Sort these swatches.",
+  items: [[pw("#d9453d", "Red"), 0], [pw("#3f78d6", "Blue"), 1], [pw("#f08a2c", "Orange"), 0], [pw("#4fae5c", "Green"), 1], [pw("#f1d04a", "Yellow"), 0], [pw("#7d55c7", "Purple"), 1]],
+  hint: "Think of fire and sunshine, then of water and ice.",
+  why: "Warm colours seem to come forward and cool colours seem to sit back. Mixing both makes a picture feel balanced." },
+/* Human and social */
+{ id: "wr3", slug: "warning-room", tier: 2, title: "Be a good friend", type: "sort", buckets: ["Kind and helpful", "Not so helpful"],
+  intro: "A friend seems upset. Sort the things you could do.",
+  items: [["Ask quietly if they want company", 0], ["Tell them to cheer up", 1], ["Give them space and say you are around", 0], ["Laugh it off", 1], ["Offer a drink or a walk", 0], ["Tell other people about it", 1]],
+  hint: "Which ones let them choose, and which ones push or make it worse?",
+  why: "Kind responses give the other person choice and keep things private. Pushing or telling others can hurt." },
+{ id: "wr4", slug: "warning-room", tier: 2, title: "Sign and response", type: "pairs",
+  intro: "Match what you notice with a kind response.",
+  pairs: [["Quiet and looking away", "Check in gently and offer a choice"], ["Snapping at everyone", "Give a little space"], ["Worried about a test", "Break the work into small steps"], ["Excited and very loud", "Share the good news with them"]],
+  hint: "A sign is a clue about a need. What would meet that need?",
+  why: "Noticing the sign and matching the response is how we look after each other." },
+/* Science */
+{ id: "rl3", slug: "rot-lab", tier: 2, title: "Meet the microbes", type: "pairs",
+  intro: "Match each word to its meaning.",
+  pairs: [["Bacteria", "Tiny living things found almost everywhere"], ["Mould", "Fuzzy patches that grow on food"], ["Decomposer", "Something that breaks dead material down"], ["Compost", "Rotted material that feeds new plants"]],
+  hint: "Which word is the most general, and which one describes what is left at the end?",
+  why: "Decomposers break dead matter into nutrients, and compost returns those nutrients to the soil." },
+{ id: "rl4", slug: "rot-lab", tier: 2, title: "A food chain", type: "order",
+  intro: "Energy moves along a food chain. Put the steps in order, starting from the sun.",
+  items: ["The sun's energy is captured by grass", "A rabbit eats the grass", "A fox eats the rabbit", "Microbes break the fox down when it dies"],
+  hint: "Producers come first. Decomposers come at the very end.",
+  why: "Plants capture the energy, animals pass it along and decomposers return the nutrients to the soil." },
+/* Physical world */
+{ id: "rr3", slug: "river-road", tier: 2, title: "Wearing away or dropping off", type: "sort", buckets: ["Erosion, wearing away", "Deposition, dropping off"],
+  intro: "A river both wears things away and drops things off. Sort these.",
+  items: [["Cutting a steep valley in the hills", 0], ["Leaving silt on the flood plain", 1], ["Wearing away the outside of a bend", 0], ["Building up a delta at the sea", 1], ["A waterfall cutting back into the rock", 0], ["A sandbar on the inside of a bend", 1]],
+  hint: "Which ones take material from the land, and which add material to it?",
+  why: "Erosion removes material. Deposition lays material down where the river slows." },
+{ id: "rr4", slug: "river-road", tier: 2, title: "Read the map", type: "pairs",
+  intro: "Maps use symbols and lines. Match each one to what it shows.",
+  pairs: [["A blue line", "A river"], ["Contour lines close together", "A steep slope"], ["Contour lines far apart", "Gentle, flat ground"], ["A green area", "Woodland or a park"]],
+  hint: "Close together means the height changes fast. Far apart means it barely changes.",
+  why: "Contour lines join places at the same height. Squeezed lines mean steep, wide lines mean gentle." },
+/* PE */
+{ id: "tc3", slug: "training-camp", tier: 2, title: "Plan a full hour", type: "dial",
+  intro: "You have 60 minutes. Warm up needs at least 10, cool down at least 5 and the main work at least 30. Use all 60 minutes.",
+  sliders: [{ k: "w", l: "Warm up", min: 0, max: 40, step: 1, v: 5, u: " min" }, { k: "m", l: "Main work", min: 0, max: 60, step: 1, v: 20, u: " min" }, { k: "c", l: "Cool down", min: 0, max: 30, step: 1, v: 5, u: " min" }],
+  read: function(v){ var t = v.w + v.m + v.c; return '<div class="lmix"><i style="flex:' + v.w + ';background:#e8b13c"></i><i style="flex:' + v.m + ';background:#e0533f"></i><i style="flex:' + v.c + ';background:#4a90d9"></i></div><p>Total: <b>' + t + ' minutes</b> of 60. ' + (t === 60 ? "That fills the hour." : (t > 60 ? (t - 60) + " too many." : (60 - t) + " left to plan.")) + '</p>' },
+  ok: function(v){ return v.w + v.m + v.c === 60 && v.w >= 10 && v.c >= 5 && v.m >= 30 },
+  sol: { w: 12, m: 40, c: 8 },
+  hint: "Cover the three minimums first (10 + 30 + 5). Then share out what is left.",
+  why: "Good plans protect the warm up and cool down, then put the rest where it matters." },
+{ id: "tc4", slug: "training-camp", tier: 2, title: "Muscle match", type: "pairs",
+  intro: "Different exercises work different parts of the body. Match them up.",
+  pairs: [["Squats", "Strong legs"], ["Press ups", "Arms and chest"], ["Plank", "Core, the middle of the body"], ["Jogging", "Heart and lungs"]],
+  hint: "Which part of your body feels it most during each one?",
+  why: "A good plan mixes exercises, so legs, arms, core and heart and lungs all get a turn." },
+/* Brave bit */
+{ id: "bb3", slug: "the-brave-bit", tier: 2, title: "Speaking up", type: "order",
+  intro: "Speaking up in a group can feel big. Here is a ladder of small steps. Put them in order, smallest first.",
+  items: ["Think about what you would like to say", "Say it to one person you trust", "Say it to a small group", "Say it to the whole class"],
+  hint: "Start with the step that asks the least of you.",
+  why: "You decide when to climb a step. Small steps build confidence without rushing." },
+{ id: "bb4", slug: "the-brave-bit", tier: 2, title: "Kind self talk", type: "sort", buckets: ["Kind to yourself", "Not so kind"],
+  intro: "The things we say in our heads matter. Sort these.",
+  items: [["I am trying, and that counts", 0], ["I always get it wrong", 1], ["I can do a small bit today", 0], ["Everyone is better than me", 1], ["I did it before, so I can try again", 0], ["I should just give up", 1]],
+  hint: "Which ones would you say to a friend who was having a go?",
+  why: "Kind self talk keeps you moving. It does not mean pretending, only being fair to yourself." },
+/* PHSE */
+{ id: "lr3", slug: "late-night-radio", tier: 2, title: "Winding down", type: "order",
+  intro: "A good wind down helps you sleep. Put the steps in a sensible order.",
+  items: ["Dim the lights", "Put screens away", "Do something calm, like reading or music", "Get into bed", "Slow breathing until sleepy"],
+  hint: "Start with the environment, then your activity, then your body.",
+  why: "Lowering light and screens first tells your body it is nearly time to sleep." },
+{ id: "lr4", slug: "late-night-radio", tier: 2, title: "What your body says", type: "pairs",
+  intro: "Feelings show up in the body. Match each body clue to what it might mean.",
+  pairs: [["Butterflies in your tummy", "You may be nervous or excited"], ["Tight shoulders", "You may be stressed"], ["A heavy, tired body", "You may need rest"], ["A racing heart", "Your body is getting ready to act"]],
+  hint: "Think of times you felt each one. What was going on?",
+  why: "Body clues are messages. Noticing them helps you choose what to do next." }
+];
+CH.push.apply(CH, CH2);
+
+/* ---------- more to see on a second go: bigger pools and changing numbers ---------- */
+function setx(id, k, v){ var c = byId(id); if(c) c[k] = v }
+setx("pb2", "extra", [["A way to tell guests the time", 0], ["Party hats", 1]]);
+setx("ob2", "extra", [["The train takes 12 minutes.", 0], ["That film was rubbish.", 1]]);
+setx("wr1", "extra", [["Jaw clenched, breathing fast", 0], ["Laughing easily", 1]]);
+setx("rl2", "extra", [["Broken, bruised skin", 0], ["Sealed in a clean airtight tub", 1]]);
+setx("tc2", "extra", [["High knees on the spot", 0], ["Gentle shoulder rolls to finish", 1]]);
+setx("bb2", "extra", [["Taking a break when you need one", 0], ["Comparing yourself with others", 1]]);
+setx("lr2", "extra", [["A parent or carer", 0], ["Arguing in an online chat at midnight", 1]]);
+setx("pb4", "extra", [["A gym membership", 0], ["A new pair of boots", 1]]);
+setx("ob4", "extra", [["Results from a school census", 0], ["A rumour from the playground", 1]]);
+setx("wr3", "extra", [["Sit with them without pushing", 0], ["Make a joke at their expense", 1]]);
+setx("rr3", "extra", [["Carving a gorge", 0], ["Spreading mud on a floodplain after floods", 1]]);
+setx("bb4", "extra", [["I can ask for help", 0], ["There is no point trying", 1]]);
+setx("im1", "extra", [["Keyboard", "Lets you type things in"], ["Speaker", "Lets you hear sound out"]]);
+setx("gn2", "extra", [["Perspective", "Making things look near or far"], ["Sketch", "A quick rough drawing"]]);
+setx("rr2", "extra", [["Floodplain", "Flat land beside a river that floods"], ["Waterfall", "Where water drops over a step of rock"]]);
+setx("lr1", "extra", [["Worried about tomorrow", "Write it down and set it aside"], ["Feeling restless", "Stretch or move around for a bit"]]);
+setx("im4", "extra", [[".png", "A picture with clear edges"], [".pdf", "A document that keeps its layout"]]);
+setx("rl3", "extra", [["Nutrient", "Something living things need to grow"], ["Spore", "A tiny seed like cell from a mould"]]);
+setx("rr4", "extra", [["A black dashed line", "A path or boundary"], ["A blue area", "A lake or the sea"]]);
+setx("tc4", "extra", [["Lunges", "Strong legs and balance"], ["Cycling", "Heart, lungs and legs"]]);
+setx("wr4", "extra", [["Pacing up and down", "Offer a walk and a quiet space"], ["Very quiet at lunch", "Ask if they want company"]]);
+setx("lr4", "extra", [["A dry mouth", "You may be nervous"], ["Wide awake at night", "Your mind may be busy"]]);
+
+setx("tt1", "vary", function(r){
+  var L = pickOf(r, [60, 80, 100, 140, 160, 180]), w = L / 20;
+  return { intro: "The real road through Tiny Town is " + L + " m long. On the plan, 1 cm stands for 20 m. Slide until the road on your plan is the right length.",
+    ok: function(v){ return v.cm === w }, sol: { cm: w },
+    hint: "Real length divided by the scale. How many lots of 20 m fit into " + L + " m?",
+    why: L + " divided by 20 is " + w + ", so the road is " + w + " cm on the plan. Dividing by the scale shrinks real lengths." };
+});
+setx("tt2", "vary", function(r){
+  var rt = pickOf(r, [[2, 3], [1, 4], [3, 2], [1, 2], [2, 1], [3, 1]]), a = rt[0], b = rt[1], k = rint(r, 2, 4), T = (a + b) * k;
+  return { intro: "Tiny Town roofs need " + T + " litres of paint. The mix is " + a + " parts red to " + b + " parts white. Set the litres so the mix is right and the total is " + T + ".",
+    sliders: [{ k: "r", l: "Red", min: 0, max: T, step: 1, v: 1, u: " litres" }, { k: "w", l: "White", min: 0, max: T, step: 1, v: 1, u: " litres" }],
+    read: function(v){ var t = v.r + v.w; return '<div class="lmix"><i style="flex:' + v.r + ';background:#d9544d"></i><i style="flex:' + v.w + ';background:#f1ece2"></i></div><p>Total: <b>' + t + ' litres</b>. Red to white is <b>' + v.r + ' : ' + v.w + '</b>.</p>' },
+    ok: function(v){ return v.r + v.w === T && v.r * b === v.w * a }, sol: { r: a * k, w: b * k },
+    hint: a + " + " + b + " is " + (a + b) + " parts. Each part is " + T + " divided by " + (a + b) + " litres.",
+    why: (a + b) + " parts make " + T + " litres, so one part is " + k + " litres. Red is " + a + " parts (" + (a * k) + " litres) and white is " + b + " parts (" + (b * k) + " litres)." };
+});
+setx("tt3", "vary", function(r){
+  var W = 5 * rint(r, 4, 12), D = 5 * rint(r, 3, 8), w = W / 5, d = D / 5;
+  return { intro: "The real playground is " + W + " m wide and " + D + " m deep. On the plan, 1 cm stands for 5 m. Set both sides of the playground on your plan.",
+    ok: function(v){ return v.w === w && v.d === d }, sol: { w: w, d: d },
+    hint: "Divide each real length by 5 m. How many 5s fit into " + W + ", and into " + D + "?",
+    why: W + " divided by 5 is " + w + " and " + D + " divided by 5 is " + d + "." };
+});
+setx("tt4", "vary", function(r){
+  var km = pickOf(r, [2, 2.5, 3, 3.5, 4, 4.5, 5]), cm = km * 2;
+  return { intro: "The town trail is " + km + " km long. On the plan, 1 cm stands for 500 m. How long is the trail on the plan?",
+    ok: function(v){ return v.cm === cm }, sol: { cm: cm },
+    hint: "500 m is half a kilometre, so every centimetre is 0.5 km. How many halves make " + km + "?",
+    why: km + " km is " + (km * 1000) + " m, and " + (km * 1000) + " divided by 500 is " + cm + "." };
+});
+setx("na1", "vary", function(r){
+  var v = pickOf(r, [
+    { cells: 24, perRow: 6, a: ["carrots", "one third", 8], b: ["peas", "one half", 12] },
+    { cells: 30, perRow: 6, a: ["carrots", "one fifth", 6], b: ["peas", "two fifths", 12] },
+    { cells: 36, perRow: 6, a: ["carrots", "one sixth", 6], b: ["peas", "one third", 12] },
+    { cells: 40, perRow: 8, a: ["carrots", "one quarter", 10], b: ["peas", "three eighths", 15] }
+  ]);
+  return { cells: v.cells, perRow: v.perRow,
+    intro: "The allotment has " + v.cells + " beds. Pick a plant, then tap beds to plant it. Plant " + v.a[1] + " with carrots and " + v.b[1] + " with peas.",
+    cols: [{ n: "Carrots", c: "#e8893a", k: v.a[2] }, { n: "Peas", c: "#6fcf7d", k: v.b[2] }],
+    hint: "Divide " + v.cells + " by the bottom number of each fraction. Then multiply by the top number.",
+    why: v.a[1] + " of " + v.cells + " is " + v.a[2] + " and " + v.b[1] + " of " + v.cells + " is " + v.b[2] + "." };
+});
+setx("na2", "vary", function(r){
+  var alt = pickOf(r, [
+    { parts: ["Square numbers go 4, 9, 16, ", { a: "25", o: ["20", "25", "30", "36"] }, ", 36, ", { a: "49", o: ["42", "45", "49", "56"] }, ", 64. The 8th square number is 8 x ", { a: "8", o: ["2", "8", "16", "64"] }, "."] },
+    { parts: ["The square numbers are 1, 4, 9, ", { a: "16", o: ["12", "15", "16", "18"] }, ", 25, ", { a: "36", o: ["30", "35", "36", "49"] }, ". The 9th square number is 9 x ", { a: "9", o: ["3", "9", "18", "81"] }, "."] }
+  ]);
+  return { parts: alt.parts };
+});
+setx("dd1", "vary", function(r){
+  var px = rint(r, 2, 9), py = rint(r, 1, 8);
+  return { intro: "Your drone starts at (0, 0). The landing pad is at (" + px + ", " + py + "). Across first, then up. Set the drone's position and land on the pad.",
+    read: function(v){ return gridSvg(v, px, py) + '<p>Drone at <b>(' + v.x + ', ' + v.y + ')</b></p>' },
+    ok: function(v){ return v.x === px && v.y === py }, sol: { x: px, y: py },
+    hint: "The first number is across, the second is up. The pad is " + px + " across and " + py + " up.",
+    why: "Coordinates are written (across, up). The pad at (" + px + ", " + py + ") is " + px + " along and " + py + " up." };
+});
+setx("dd3", "vary", function(r){
+  var a = rint(r, 1, 5), b = rint(r, 2, 6), c = rint(r, 1, 4), d = rint(r, 1, Math.min(3, b)), ex = a + c, ey = b - d;
+  return { intro: "The drone starts at (0, 0). It flies " + a + " across and " + b + " up, then " + c + " across and " + d + " down. Set the drone where it ends up.",
+    ok: function(v){ return v.x === ex && v.y === ey }, sol: { x: ex, y: ey },
+    why: "Across: " + a + " + " + c + " is " + ex + ". Up: " + b + " up and " + d + " down is " + ey + "." };
+});
+setx("pb1", "vary", function(r){
+  var T = pickOf(r, [[60, 25, 10, 10], [80, 30, 15, 15], [100, 40, 20, 20]]);
+  return { intro: "You have " + PD + T[0] + " for the party. Food needs at least " + PD + T[1] + ", and music and decorations each need at least " + PD + T[2] + ". Spend all of it, and not a penny more.",
+    sliders: [{ k: "f", l: "Food", min: 0, max: Math.round(T[0] * 0.65), step: 1, v: 10, u: "" }, { k: "m", l: "Music", min: 0, max: Math.round(T[0] * 0.65), step: 1, v: 10, u: "" }, { k: "d", l: "Decorations", min: 0, max: Math.round(T[0] * 0.65), step: 1, v: 10, u: "" }],
+    read: function(v){ var t = v.f + v.m + v.d, left = T[0] - t; return '<div class="lbar ' + (left < 0 ? "over" : "") + '"><i style="width:' + Math.min(100, t / T[0] * 100) + '%"></i></div><p>Spent <b>' + PD + t + '</b> of ' + PD + T[0] + '. ' + (left < 0 ? 'That is ' + PD + (-left) + ' over.' : (left === 0 ? 'Nothing left over.' : 'Left: <b>' + PD + left + '</b>.')) + '</p>' },
+    ok: function(v){ return v.f + v.m + v.d === T[0] && v.f >= T[1] && v.m >= T[2] && v.d >= T[2] },
+    sol: { f: T[1] + 5, m: T[0] - T[1] - 5 - T[2], d: T[2] },
+    hint: "Spend the three minimums first (" + T[1] + " + " + T[2] + " + " + T[2] + "). How much is left to share out?" };
+});
+setx("pb3", "vary", function(r){
+  var earn = pickOf(r, [10, 12, 15, 20]), goal = pickOf(r, [60, 75, 90, 110, 125]), w = Math.ceil(goal / earn);
+  return { intro: "Tickets cost " + PD + goal + ". You can save " + PD + earn + " a week. Set how many weeks you need to save, so you have enough but do not wait longer than you must.",
+    sliders: [{ k: "w", l: "Weeks of saving", min: 1, max: 15, step: 1, v: 4, u: " weeks" }],
+    read: function(v){ var t = v.w * earn; return '<div class="lbar ' + (t >= goal ? "" : "over") + '"><i style="width:' + Math.min(100, t / goal * 100) + '%"></i></div><p>Saved after ' + v.w + ' weeks: <b>' + PD + t + '</b>. ' + (t >= goal ? "Enough for the tickets." : "Still " + PD + (goal - t) + " short.") + '</p>' },
+    ok: function(v){ return v.w === w }, sol: { w: w },
+    hint: goal + " divided by " + earn + " might not be a whole number. You cannot save part of a week.",
+    why: "Divide the cost by the weekly saving, then round up to the next whole week: " + w + " weeks." };
+});
+setx("tc3", "vary", function(r){
+  var T = pickOf(r, [[45, 8, 22, 5], [60, 10, 30, 5], [90, 15, 50, 10]]);
+  return { intro: "You have " + T[0] + " minutes. Warm up needs at least " + T[1] + ", cool down at least " + T[3] + " and the main work at least " + T[2] + ". Use all " + T[0] + " minutes.",
+    sliders: [{ k: "w", l: "Warm up", min: 0, max: 40, step: 1, v: 5, u: " min" }, { k: "m", l: "Main work", min: 0, max: 70, step: 1, v: 20, u: " min" }, { k: "c", l: "Cool down", min: 0, max: 30, step: 1, v: 5, u: " min" }],
+    read: function(v){ var t = v.w + v.m + v.c; return '<div class="lmix"><i style="flex:' + v.w + ';background:#e8b13c"></i><i style="flex:' + v.m + ';background:#e0533f"></i><i style="flex:' + v.c + ';background:#4a90d9"></i></div><p>Total: <b>' + t + ' minutes</b> of ' + T[0] + '. ' + (t === T[0] ? "That fills the session." : (t > T[0] ? (t - T[0]) + " too many." : (T[0] - t) + " left to plan.")) + '</p>' },
+    ok: function(v){ return v.w + v.m + v.c === T[0] && v.w >= T[1] && v.c >= T[3] && v.m >= T[2] },
+    sol: { w: T[1] + 2, m: T[0] - T[1] - 2 - T[3], c: T[3] },
+    hint: "Cover the three minimums first (" + T[1] + " + " + T[2] + " + " + T[3] + "). Then share out what is left." };
+});
+setx("pe1", "vary", function(r){
+  var alt = pickOf(r, [
+    ["Is the bus here yet", "?", "<br>We need a ball", ",", " cones", ",", " and bibs", ".", "<br>The coach", "'", "s whistle is lost", ".", "<br>Quick", "!"],
+    ["Who has the keys", "?", "<br>Bring a coat", ",", " gloves", ",", " and a scarf", ".", "<br>The teacher", "'", "s bag is heavy", ".", "<br>Careful", "!"]
+  ]), parts = [], i, ans = ["?", ",", ",", ".", "'", ".", "!"], gi = 0;
+  for(i = 0; i < alt.length; i++){ var p = alt[i]; if(p === "?" || p === "," || p === "." || p === "'" || p === "!"){ parts.push({ a: ans[gi++], o: "m" }) } else parts.push(p) }
+  return { parts: parts };
+});
+setx("pe2", "vary", function(r){
+  var alt = pickOf(r, [
+    { parts: [{ a: "It's", o: ["Its", "It's"] }, " a lovely day. The cat licked ", { a: "its", o: ["its", "it's"] }, " paw. ", { a: "Their", o: ["There", "Their", "They're"] }, " bags are over ", { a: "there", o: ["there", "their", "they're"] }, ", and ", { a: "they're", o: ["there", "their", "they're"] }, " ready."] },
+    { parts: ["I think ", { a: "it's", o: ["its", "it's"] }, " time to go. The team lost ", { a: "its", o: ["its", "it's"] }, " first match. ", { a: "They're", o: ["There", "Their", "They're"] }, " bringing ", { a: "their", o: ["there", "their", "they're"] }, " own boots over ", { a: "there", o: ["there", "their", "they're"] }, "."] }
+  ]);
+  return { parts: alt.parts };
+});
+
+
+/* ---------- a second version for the ordering, paragraph, gap and paint ones ---------- */
+function sw(c, n){ return '<span class="lsw" style="background:' + c + '" title="' + n + '"></span>' + n }
+setx("gn4", "extra", [[sw("#e58b2c", "Gold"), 0], [sw("#2a9d8f", "Teal"), 1]]);
+setx("dd2", "alt", [{ intro: "The drone is mapping a mine shaft. Heights are measured from the ground, so below it counts as negative. Put these heights in order, lowest at the top.", items: ["-20 m", "-7 m", "-1 m", "0 m", "12 m"], hint: "The further below zero, the lower the height. -20 is lower than -7.", why: "The further a number is to the left on a number line, the lower it is. -20 is lower than -7, and both are below 0." }]);
+setx("im2", "alt", [{ intro: "You click the mouse and a menu opens. Put the steps in the order they happen.", items: ["You click the mouse", "The mouse sends a signal", "The processor works out where you clicked", "The screen draws the menu"], hint: "Input first, then the thinking, then output at the end.", why: "Input, process, output again. The mouse is the input and the screen is the output." }]);
+setx("ob1", "alt", [{ intro: "A strong paragraph makes a claim, backs it up, explains it and links back. Put these sentences in order.", items: ["Our class should have a quiet reading time every day.", "In our survey, 20 of 28 students said they read less than they would like.", "That shows many of us want more time with books.", "So a daily reading time would help us enjoy reading more."], hint: "Start with what you think. End by bringing it back to that point.", why: "Claim, evidence, explanation, link. The numbers are what make the claim strong." }]);
+setx("gn1", "alt", [{ intro: "The gallery wants the rainbow the other way round, right to left. Put the colours in order, starting with violet.", items: [sw("#7d55c7", "Violet"), sw("#3f78d6", "Blue"), sw("#4fae5c", "Green"), sw("#f1d04a", "Yellow"), sw("#f08a2c", "Orange"), sw("#d9453d", "Red")], hint: "It is the rainbow backwards. Violet is first, red is last.", why: "The spectrum runs red to violet. Reading it backwards starts at violet and ends at red." }]);
+setx("wr2", "alt", [{ intro: "When a worry builds up, a plan helps. Put these steps in the order that works best.", items: ["Notice your body tensing", "Take three slow breaths", "Say what the worry is", "Pick one small thing you can do about it", "Do it, or ask someone to help"], hint: "Notice and calm down before you decide what to do.", why: "Notice, breathe, name it, choose a small step, act. Asking for help is a good choice." }]);
+setx("rl1", "alt", [{ intro: "Bread left out goes mouldy in stages. Put the stages in order from fresh to finished.", items: ["Soft fresh bread", "The bread dries and hardens", "Fuzzy mould spots appear", "The mould spreads across the slice", "The slice crumbles and rots away"], hint: "Think about the last time you found old bread. What did you see first?", why: "Microbes need food and damp air. Over time they break the bread down." }]);
+setx("rr1", "alt", [{ intro: "Water travels a long way. Put these parts of a river system in order from the rain to the sea.", items: ["Rain falls on high ground", "A small stream runs downhill", "Streams join into a wide river", "The river reaches the sea"], hint: "Water starts high and ends at the sea.", why: "Rain feeds streams, streams join into rivers and rivers carry the water down to the sea." }]);
+setx("tc1", "alt", [{ intro: "Even a short fitness circuit has a shape. Put the parts in order.", items: ["Pulse raiser: gentle jogging on the spot", "Stretch the main muscles you will use", "The circuit: sprints, squats and passes", "Cool down: walk and breathe slowly"], hint: "Start gently, build up, then slow down.", why: "A warm up gets the body ready and a cool down helps it settle. The hardest part sits in the middle." }]);
+setx("bb1", "alt", [{ intro: "Big things feel easier in small steps. Here is a ladder for joining a new club. Put the steps in order, smallest first.", items: ["Read about the club online", "Walk past while it is on", "Go along and watch from the door", "Join in with a friend beside you", "Join in on your own"], hint: "The smallest step asks the least of you.", why: "Small steps make a big thing doable. You choose when to climb." }]);
+setx("dd4", "alt", [{ intro: "Four drones show their battery as a decimal. Order them from the lowest charge to the highest.", items: ["0.08", "0.3", "0.35", "0.5", "0.62"], hint: "Compare tenths first, then hundredths.", why: "Line the decimals up by place value. 0.3 is less than 0.35 because 0 hundredths is less than 5." }]);
+setx("im3", "alt", [{ intro: "You search for a video and it starts playing. Put the steps in order.", items: ["You type a search into the box", "The browser sends your search to a server", "The server sends back a list of videos", "You pick one and the video plays"], hint: "A request goes out first, then an answer comes back.", why: "Your device sends a request, a server answers, and then you choose what to watch." }]);
+setx("ob3", "alt", [{ intro: "A strong argument deals with the other view. Put this paragraph in order.", items: ["Some people say school uniform should go.", "They say it stops pupils showing who they are.", "However, uniform makes everyone look equal.", "So a simple uniform is still a good idea."], hint: "Start with the other side. Use however to turn it around.", why: "State the other view, show you understand it, then explain why you still disagree." }]);
+setx("gn3", "alt", [{ intro: "A shaded wall goes from the darkest tone to the lightest. Put the swatches in that order.", items: [sw("#14120e", "Black"), sw("#5a3a64", "Dark purple"), sw("#9a6fb0", "Purple"), sw("#d9bde6", "Pale purple"), sw("#fbfbf4", "White")], hint: "Start with the one nearest to black.", why: "Tone is how light or dark a colour is. Going from dark to light gives a smooth fade." }]);
+setx("rl4", "alt", [{ intro: "Energy moves along a pond food chain. Put the steps in order, starting from the sun.", items: ["The sun's energy is captured by pond weed", "A snail eats the pond weed", "A frog eats the snail", "Microbes break the frog down when it dies"], hint: "Producers come first. Decomposers come last.", why: "Plants capture the energy, animals pass it along and decomposers return nutrients to the water." }]);
+setx("bb3", "alt", [{ intro: "Asking for help can feel big. Here is a ladder of small steps. Put them in order, smallest first.", items: ["Think about what you need help with", "Write it down", "Ask one person you trust", "Ask in front of the class"], hint: "Start with the step that asks the least of you.", why: "Small steps build confidence. You decide when to climb." }]);
+setx("bi1", "alt", [{ intro: "Tap between sentences to start a new paragraph where the topic changes. There are two changes.", sents: ["We got up early on Saturday and found our swimming bags.", "Mum made toast while we waited for the lift.", "We arrived at the pool just before ten.", "The water was warm and the lanes were quiet.", "I swam my first full length without stopping.", "My coach gave me a high five.", "Afterwards we had hot chocolate.", "Then we went home tired and happy."], brk: [3, 7], hint: "Getting ready, the swimming, and afterwards.", why: "A new paragraph marks a new time or place: getting ready, the swim, then afterwards." }]);
+setx("bi2", "alt", [{ intro: "Tap between sentences to start a new paragraph. Look for a change of place or person. There are two changes.", sents: ["We set off for the museum on Tuesday.", "The coach was full of chatter.", "In the first hall, there was a giant whale skeleton.", "It hung from the ceiling on wires.", "Later, a guide called Ms Patel showed us the fossils.", "She let us hold a real shark tooth."], brk: [2, 4], hint: "The journey, the whale hall, then the guide.", why: "The paragraph changes when we arrive somewhere new and again when a new person takes over." }]);
+setx("bi3", "alt", [{ intro: "Tap between sentences to start a new paragraph when the time or topic shifts. There are two changes.", sents: ["Last month our class ran a school fair.", "We made posters and put them up all over school.", "We chose games and found prizes.", "On the day, the doors opened at noon.", "The hoopla stall had the longest queue.", "By three, nearly every ticket had been sold.", "Afterwards we counted the money.", "We raised 96 pounds for the library."], brk: [3, 6], hint: "Getting ready, the fair, then the result.", why: "A new paragraph marks a change of time or topic: planning, the fair, then the result." }]);
+setx("bi4", "alt", [{ intro: "In a story, every time someone new speaks, a new paragraph starts. Tap where each new speaker begins.", sents: ["\"Can I borrow your pen?\" asked Mia.", "\"Of course,\" said Ben.", "\"It has run out,\" Mia sighed.", "\"Then try this one,\" Ben grinned."], brk: [1, 2, 3], hint: "Each line is a different person talking.", why: "A new speaker means a new line. It helps the reader follow who is talking." }]);
+setx("na3", "alt", [{ cells: 24, perRow: 6, intro: "The plot has 24 beds. Plant one half with carrots, one quarter with peas and one eighth with sunflowers.", cols: [{ n: "Carrots", c: "#f08a2c", k: 12 }, { n: "Peas", c: "#7bc96f", k: 6 }, { n: "Sunflowers", c: "#f1d04a", k: 3 }], hint: "Divide 24 by 2, by 4 and by 8 to find each share.", why: "24 divided by 2 is 12, by 4 is 6 and by 8 is 3. That is 21 beds, so 3 are left free." }]);
+setx("na4", "alt", [{ parts: ["The square numbers go 1, 4, 9, 16, ", { a: "25", o: ["20", "24", "25", "26"] }, ", 36, ", { a: "49", o: ["42", "48", "49", "64"] }, ". Each time you add the next odd number, so after 49 you add ", { a: "15", o: ["13", "14", "15", "16"] }, " to reach 64."], intro: "Square numbers build up as squares of dots. Find the pattern and complete it.", hint: "The gaps are 3, 5, 7, 9 and so on. What comes after 49?", why: "The gaps are the odd numbers: +3, +5, +7, +9, +11, +13, +15. Each new square adds an edge of dots." }]);
+setx("pe3", "alt", [{ parts: ["The ", { a: "cat's", o: ["cats", "cat's", "cats'"] }, " basket is by the door (one cat). The ", { a: "teachers'", o: ["teachers", "teacher's", "teachers'"] }, " room is down the corridor (lots of teachers). ", { a: "They're", o: ["Their", "They're", "There"] }, " on their way."], hint: "One owner means apostrophe then s. Many owners that end in s means the apostrophe goes after the s.", why: "Cat's is one cat. Teachers' is more than one teacher. They're is they are." }]);
+setx("pe4", "alt", [{ parts: ["You will need two things", { a: ":", o: "m" }, " a pencil and a ruler.<br>The bell rang", { a: ";", o: "m" }, " everyone lined up.<br>When the bell rang", { a: ",", o: "m" }, " everyone lined up."], hint: "A colon introduces a list. A semicolon joins two sentences. A comma follows an opening phrase.", why: "A colon opens a list, a semicolon links two related sentences and a comma follows a starter phrase." }]);
+
+setx("lr3", "alt", [{ intro: "A good wake up helps you start the day. Put the steps in a sensible order.", items: ["Open the curtains", "Sit up slowly", "Drink some water", "Get dressed", "Eat breakfast"], hint: "Start with light and your body, then do the getting ready.", why: "Light and water tell your body it is time to start the day." }]);
+var box = null, ov = null, cur = null, X = null, done = null, baseC = null;
+
+/* a new instance of a chunk for replay number gen (0 = the original) */
+function inst(base, gen){
+  if(!gen) return base;
+  var c = {}, k, r = rnd(hashId(base.id) * 7 + gen * 101), i, j;
+  for(k in base) c[k] = base[k];
+  if(base.alt){ var vs = [null].concat(base.alt), v0 = vs[gen % vs.length]; if(v0) for(k in v0) c[k] = v0[k] }
+  if(base.type === "sort" && base.extra){
+    var out = [];
+    base.buckets.forEach(function(b, bi){
+      var have = base.items.filter(function(it){ return it[1] === bi });
+      var pool = have.concat(base.extra.filter(function(it){ return it[1] === bi }));
+      shr(pool, r).slice(0, have.length).forEach(function(it){ out.push(it) });
+    });
+    c.items = shr(out, r);
+  } else if(base.type === "pairs" && base.extra){
+    c.pairs = shr(base.pairs.concat(base.extra), r).slice(0, base.pairs.length);
+  }
+  if(base.vary){ var o = base.vary(r); for(k in o) c[k] = o[k] }
+  return c;
+}
 
 function fresh(c, gen){
   var n, i, o = { tries: 0, res: null, shown: false, hint: "", gen: gen || 0 };
@@ -344,7 +716,13 @@ function draw(){
   h += '<div class="lhead"><div><span class="lpil">' + act.pillar + ' &middot; ' + act.title + '</span><h2>' + c.title + '</h2></div><button class="btn btn-quiet" data-lk="close">Leave it for now</button></div>';
   h += '<p class="lintro">' + c.intro + '</p>';
   if(x.done){
-    h += '<div class="ldone"><h3>Nicely done</h3><p>' + c.why + '</p><p class="lgain">+2 training levels for ' + act.title + '</p><div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button></div></div>';
+    var rw = x.reward || {}, pips = "", q;
+    if(rw.cap){ pips = '<span class="lpips" aria-hidden="true">'; for(q = 0; q < rw.cap; q++) pips += '<i class="' + (q < rw.lvBefore ? "on" : (q < rw.lvAfter ? "on gain" : "")) + '" style="animation-delay:' + (0.25 + (q - rw.lvBefore) * 0.3) + 's"></i>'; pips += '</span>' }
+    var gain;
+    if(rw.already) gain = '<p class="lgain lgrey">Just for fun this time. This one is already banked.</p>';
+    else if(c.tier === 2) gain = '<p class="lgain">+' + (rw.coins || 0) + ' coins and a mastery star for ' + act.title + '</p>';
+    else gain = '<p class="lgain">+' + (rw.lvAfter - rw.lvBefore) + ' training level' + (rw.lvAfter - rw.lvBefore === 1 ? "" : "s") + ' for ' + act.title + '</p>' + pips + (rw.lvAfter >= rw.cap && rw.cap ? '<p class="lmax">' + act.title + ' is maxed out!</p>' : "");
+    h += '<div class="ldone"><h3>' + (c.tier === 2 ? "Challenge complete" : "Nicely done") + '</h3><p>' + c.why + '</p>' + gain + '<div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button><button class="btn btn-quiet" data-lk="replay">Play a new version</button></div></div>';
   } else {
     h += '<div class="lbody">' + bodyHtml(c, x) + '</div>';
     h += '<div class="lmsg" id="lmsg" role="status" aria-live="polite">' + (x.say || "") + (x.hint ? '<p class="lnudge"><b>Nudge:</b> ' + x.hint + '</p>' : "") + '</div>';
@@ -359,9 +737,11 @@ function draw(){
   if(f && draw.focus){ f.focus(); draw.focus = false }
 }
 
-function open(id, cb){
-  var c = byId(id); if(!c) return false;
-  cur = c; done = cb || null; X = fresh(c, 0);
+function open(id, cb, gen){
+  var b0 = byId(id); if(!b0) return false;
+  gen = gen || 0; baseC = b0;
+  var c = inst(b0, gen);
+  cur = c; done = cb || null; X = fresh(c, gen);
   box = document.getElementById("lobox"); ov = document.getElementById("lo");
   ov.classList.add("on"); draw();
   var hd = box.querySelector("h2"); if(hd){ hd.setAttribute("tabindex", "-1"); hd.focus() }
@@ -374,14 +754,16 @@ function onClick(e){
   var b = e.target.closest("[data-lk]"); if(!b) return;
   var k = b.getAttribute("data-lk"), i = +b.getAttribute("data-i"), c = cur, x = X;
   if(k === "close"){ close(); return }
-  if(k === "finish"){ var cb = done, cc = c; close(); if(cb) cb(cc); return }
-  if(k === "finishgo"){ var cb2 = done, cc2 = c; close(); if(cb2) cb2(cc2); if(window.JTLearn.go) window.JTLearn.go(); return }
-  if(k === "again"){ X = fresh(c, x.gen + 1); draw(); return }
+  if(k === "finish"){ close(); return }
+  if(k === "finishgo"){ close(); if(window.JTLearn.go) window.JTLearn.go(); return }
+  if(k === "again" || k === "replay"){ cur = inst(baseC, x.gen + 1); X = fresh(cur, x.gen + 1); draw(); var h2 = box.querySelector("h2"); if(h2){ h2.setAttribute("tabindex", "-1"); h2.focus() } return }
   if(k === "nudge"){ x.hint = c.hint; draw(); return }
   if(k === "show"){ solve(c, x); x.shown = true; x.res = null; x.say = "Here is the answer."; x.hint = ""; draw(); return }
   if(k === "check"){
     x.tries++; var r = check(c, x); x.res = r;
-    if(r.ok){ x.done = true; x.say = "" } else { x.say = r.say; if(x.tries >= 3 && !x.hint) x.say += " A nudge is free whenever you like." }
+    if(r.ok){ x.done = true; x.say = "";
+      if(!x.rewarded){ x.rewarded = true; window.JTLearn.reward = null; if(done) done(baseC, x.gen); x.reward = window.JTLearn.reward }
+    } else { x.say = r.say; if(x.tries >= 3 && !x.hint) x.say += " A nudge is free whenever you like." }
     draw.focus = x.done; draw(); return;
   }
   if(x.shown) return;
@@ -428,6 +810,6 @@ function init(){
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
-window.JTLearn = { chunks: CH, byId: byId, forAct: forAct, open: open, close: close, check: check, solve: solve, fresh: fresh, actInfo: null, go: null,
+window.JTLearn = { chunks: CH, byId: byId, forAct: forAct, open: open, close: close, check: check, solve: solve, fresh: fresh, inst: inst, reward: null, actInfo: null, go: null,
   isOpen: function(){ return !!cur }, state: function(){ return X }, current: function(){ return cur } };
 })();
