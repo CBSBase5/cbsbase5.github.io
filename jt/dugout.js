@@ -672,7 +672,23 @@ function vSettings(){
     '<h4>Sound</h4>' + seg("sound", [["false", "Off"], ["true", "On, soft (crowd and goals)"]]) +
     '<h4>Commentary voice</h4><p class="hint" style="margin:0 0 4px">Reads out the big moments in a match, using your device voice.</p>' + seg("voice", [["false", "Off"], ["true", "On"]]) +
     '<h4>Match speed</h4>' + seg("pace", [["gentle", "Gentle"], ["quick", "Quick"]]) +
+    '<h4>Start again</h4>' + resetHtml() +
     '<div class="mbtns"><button class="btn" data-act="view" data-v="dugout">Back to the dugout</button></div></div>';
+}
+var resetAsk = "";
+function resetHtml(){
+  if(resetAsk === "season") return '<div class="choice"><p style="margin:0 0 8px"><b>Start a new season?</b> Matches, the table, the cup, badges, player growth and training results go back to the start. Your club design, own players, names and numbers stay. The sessions you have done will earn matches again.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="season">Yes, start a new season</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
+  if(resetAsk === "all") return '<div class="choice"><p style="margin:0 0 8px"><b>Wipe everything?</b> This clears the whole dugout, including your club design and own players, and starts the setup again. It cannot be undone. Your practice activities are not touched.</p><div class="mbtns" style="margin:0"><button class="btn btn-go" data-act="rsdo" data-v="all">Yes, wipe it all</button><button class="btn" data-act="rsask" data-v="">Not now</button></div></div>';
+  return '<p class="hint" style="margin:0 0 4px">Fancy a fresh go? Nothing happens until you confirm, and your practice activities are never touched.</p><div class="mbtns" style="margin:0"><button class="btn" data-act="rsask" data-v="season">Start a new season</button><button class="btn btn-quiet" data-act="rsask" data-v="all">Reset everything</button></div>';
+}
+function resetDo(kind){
+  if(kind === "all"){ try{ localStorage.removeItem(KEY) }catch(e){} mem = null; location.reload(); return }
+  st.seed = 1 + Math.floor(Math.random() * 2000000000);
+  st.xi = []; st.used = []; st.played = []; st.inbox = []; st.nid = 1; st.cup = { ties: [], out: false }; st.dev = { xp: {}, bonus: {} };
+  st.trained = {}; st.unlocked = {}; st.reveal = []; st.bd = {}; st.cupSeen = 0; st.skill = {}; st.tby = {}; st.focus = {}; st.lastTrain = null; st.madeSub = 0;
+  newB = [];
+  post("A new season begins", "The Chairman (Jay)", "Fresh start. Your club, players and design are all still yours. Have a go at any training session and a match turns up.");
+  save();
 }
 
 /* ---------- the Studio ---------- */
@@ -1741,6 +1757,8 @@ document.addEventListener("click", function(e){
     var k = b.getAttribute("data-k"), v = b.getAttribute("data-v");
     st.set[k] = (k === "sound" || k === "voice") ? (v === "true") : v; save(); if(k === "sound" && st.set.sound) sfx("luck"); if(k === "voice" && st.set.voice) speak("Commentary is on."); render(); return;
   }
+  if(a === "rsask"){ resetAsk = b.getAttribute("data-v"); render(); return }
+  if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); if(rk2 === "season"){ view = "dugout"; render(); window.scrollTo(0, 0); toast("New season started.") } return }
   if(a === "stab"){ studioTab = b.getAttribute("data-v"); render(); return }
   if(a === "club"){ st.club[b.getAttribute("data-k")] = b.getAttribute("data-v"); save(); applyKit(); renderClub(); render(); return }
   if(a === "edit"){ edOpen(b.getAttribute("data-id")); return }
