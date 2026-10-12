@@ -3,8 +3,10 @@
    A tiny shared script for the practice activities.
 
    Whenever an activity saves its progress, this counts a
-   "beat", at most one every 15 seconds, so a beat means a bit
-   of real doing rather than a lot of clicking. Beats live in
+   "beat". A beat means real doing, not a quick click: the first
+   beat needs a minute of the activity being open on screen and
+   several saves, and each later beat needs twenty seconds and a
+   couple more saves. Beats live in
    one localStorage key (b5.engage.v1) as { slug: { n, last } }
    and hold nothing about who the student is or what they
    wrote. Other pages (like a student's own HQ) can read them.
@@ -16,9 +18,18 @@
 "use strict";
 
 var KEY = "b5.engage.v1";
-var BEAT_MS = 15000;      /* one beat per 15 seconds of doing */
+var BEAT_MS = 20000;      /* later beats: at least 20 seconds apart */
+var FIRST_VIS_MS = 60000; /* the first beat needs a minute on screen */
+var FIRST_SAVES = 4;      /* and this many real saves */
+var LATER_SAVES = 2;      /* later beats need this many saves since the last */
 var QUIET_MS = 1500;      /* ignore saves made while the page is loading */
 var started = Date.now();
+var visMs = 0, visStart = (typeof document !== "undefined" && document.visibilityState === "visible") ? Date.now() : 0, saves = 0;
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ if(visStart){ visMs += Date.now() - visStart; visStart = 0 } }
+  else visStart = Date.now();
+});
+function onScreen(){ return visMs + (visStart ? Date.now() - visStart : 0) }
 
 var m = location.pathname.match(/\/practice\/([a-z0-9-]+)\.html$/i);
 var slug = m ? m[1].toLowerCase() : "";
@@ -46,8 +57,10 @@ if(slug && window.Storage && Storage.prototype && !window.__b5engage){
         var now = Date.now();
         if(now - started > QUIET_MS && String(before) !== String(v)){
           var o = read(), e = o[slug] || { n: 0, last: 0 };
-          if(now - e.last >= BEAT_MS || e.n === 0){
-            e.n += 1; e.last = now; o[slug] = e; write(o);
+          saves += 1;
+          var ok = e.n === 0 ? (onScreen() >= FIRST_VIS_MS && saves >= FIRST_SAVES) : (now - e.last >= BEAT_MS && saves >= LATER_SAVES);
+          if(ok){
+            e.n += 1; e.last = now; o[slug] = e; write(o); saves = 0;
             try{ luckToast(o) }catch(er){}
           }
         }
