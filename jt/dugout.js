@@ -33,18 +33,26 @@ var ICON = {
   studio: '<path d="M3 21l3-1 11-11-2-2L4 18zM16 4l2-2 4 4-2 2z" fill="currentColor"/>',
   inbox: '<path d="M3 5h18v14H3zm2 2v.5l7 5 7-5V7zm14 3l-7 5-7-5V17h14z" fill="currentColor" fill-rule="evenodd"/>',
   send: '<path d="M2 12L22 3l-5 18-5-6-4 4v-6z" fill="currentColor"/>',
+  news: '<path d="M4 4h13v16H6a2 2 0 0 1-2-2zM17 8h3v10a2 2 0 0 1-2 2h-1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M7 8h7M7 12h7M7 16h4" stroke="currentColor" stroke-width="2"/>',
+  arena: '<path d="M2 9c3-4 17-4 20 0v8c-3 4-17 4-20 0z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><ellipse cx="12" cy="13" rx="5" ry="2.6" fill="currentColor"/>',
+  star: '<path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.600 5.700 21.100l1.500-7L2 9.300l7-.8z" fill="currentColor"/>',
+  flag: '<path d="M5 3v18M5 4h12l-3 4 3 4H5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>',
   cart: '<path d="M2 3h3l2.6 11h11l2.4-8H6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="9" cy="19" r="2" fill="currentColor"/><circle cx="17" cy="19" r="2" fill="currentColor"/>',
   brief: '<path d="M3 8h18v12H3zM9 8V5h6v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="2"/>'
 };
 var VIEWS = [
-  { id: "dugout", label: "Dugout", icon: "home", title: "The Dugout" },
-  { id: "squad", label: "Squad", icon: "squad", title: "Squad and tactics" },
-  { id: "train", label: "Training", icon: "train", title: "Training ground" },
-  { id: "league", label: "League", icon: "league", title: "League and cup" },
-  { id: "market", label: "Market", icon: "cart", title: "Transfer market" },
-  { id: "business", label: "Business", icon: "brief", title: "Your company and sponsorships" },
-  { id: "studio", label: "Studio", icon: "studio", title: "Design your club" },
-  { id: "club", label: "Club", icon: "club", title: "Club, badges and trophies" },
+  { id: "dugout", label: "Dugout", icon: "home", title: "The Dugout", g: "Play", main: 1 },
+  { id: "squad", label: "Squad", icon: "squad", title: "Squad and tactics", g: "Play", main: 1 },
+  { id: "sets", label: "Set pieces", icon: "flag", title: "Set piece designer", g: "Play" },
+  { id: "train", label: "Training", icon: "train", title: "Training ground", g: "Play", main: 1 },
+  { id: "league", label: "League", icon: "league", title: "Leagues and cups", g: "Compete", main: 1 },
+  { id: "news", label: "Chronicle", icon: "news", title: "The Chilton Chronicle", g: "Compete" },
+  { id: "stadium", label: "Stadium", icon: "arena", title: "Stadium and staff", g: "Club" },
+  { id: "market", label: "Market", icon: "cart", title: "Transfer market", g: "Club" },
+  { id: "business", label: "Business", icon: "brief", title: "Your company and sponsorships", g: "Club" },
+  { id: "legends", label: "Legends", icon: "star", title: "Club legends", g: "Club" },
+  { id: "studio", label: "Studio", icon: "studio", title: "Design your club", g: "Club" },
+  { id: "club", label: "Club", icon: "club", title: "Club, badges and trophies", g: "Club" },
   { id: "inbox", label: "Inbox", icon: "inbox", title: "Inbox", hidden: true },
   { id: "send", label: "Report", icon: "send", title: "Send a report to Jay", hidden: true },
   { id: "settings", label: "Settings", icon: "send", title: "Settings", hidden: true }
@@ -78,6 +86,18 @@ if(typeof st.coins !== "number") st.coins = 150;
 ["signed", "hist", "log", "deals"].forEach(function(k){ if(!Array.isArray(st[k])) st[k] = [] });
 ["sold", "mk", "sbase"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
 if(!st.mk.bought) st.mk.bought = [];
+if(!st.cups || typeof st.cups !== "object") st.cups = {};
+if(!st.up || typeof st.up !== "object") st.up = { stands: 0, lights: 0, pitch: 0 };
+if(!st.staff || typeof st.staff !== "object") st.staff = {};
+if(!st.staffn || typeof st.staffn !== "object") st.staffn = {};
+if(typeof st.fans !== "number") st.fans = 50;
+["press", "trophies"].forEach(function(k){ if(!Array.isArray(st[k])) st[k] = [] });
+["career", "retired", "cseen"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
+if(!st.pid) st.pid = 1;
+if(!st.sp || typeof st.sp !== "object") st.sp = {};
+if(!st.sp.corner) st.sp.corner = { routine: "near", taker: "", target: "" };
+if(!st.sp.fk) st.sp.fk = "curl";
+if(!st.sp.stats) st.sp.stats = {};
 if(!st.season) st.season = 1;
 if(typeof st.tier !== "number" || st.tier < 0 || st.tier > 3) st.tier = firstRun ? 3 : 2;
 if(typeof st.fp0 !== "number") st.fp0 = 0;
@@ -146,7 +166,7 @@ function renameHistory(oldN, newN){
     (m.rt || []).forEach(function(r){ if(r.n === oldN) r.n = newN });
     if(m.lu && m.lu.n) m.lu.n = m.lu.n.map(function(x){ return x === oldN ? newN : x });
   }
-  st.played.forEach(fix); st.cup.ties.forEach(fix);
+  st.played.forEach(fix); allTies().forEach(fix);
 }
 function nameTaken(name, exceptId){
   var low = String(name).trim().toLowerCase(), hit = false;
@@ -193,11 +213,7 @@ function pendingList(){
   out.sort(function(x, y){ return x.last - y.last });
   return out;
 }
-function cupReady(c){
-  if(st.cup.out || st.cup.ties.length >= 4) return false;
-  var n = CUP_AT.filter(function(t){ return sfp(c) >= t }).length;
-  return n > st.cup.ties.length;
-}
+function cupReady(c){ return compReady(c, "cup") }
 function actBy(slug){ for(var i = 0; i < S.ACTS.length; i++) if(S.ACTS[i].slug === slug) return S.ACTS[i]; return null }
 function ourSide(m){ return m.home ? "h" : "a" }
 function ourGoals(m){ return m.home ? m.hs : m.as }
@@ -205,7 +221,7 @@ function theirGoals(m){ return m.home ? m.as : m.hs }
 function resultOf(m){ var a = ourGoals(m), b = theirGoals(m); return a > b ? "W" : (a < b ? "L" : "D") }
 function goalTally(){
   var t = {};
-  st.played.concat(st.cup.ties).forEach(function(m){
+  st.played.concat(allTies()).forEach(function(m){
     (m.events || []).forEach(function(e){ if(e.k === "goal" && e.side === ourSide(m) && e.who) t[e.who] = (t[e.who] || 0) + 1 });
   });
   return t;
@@ -278,7 +294,7 @@ function radarSvg(p, w){
 
 /* ---------- badges ---------- */
 function badgeDefs(c){
-  var pl = st.played, ties = st.cup.ties, i, streak = 0, best = 0, hat = false, lucky = false, tally = goalTally(), why = false;
+  var pl = st.played, ties = allTies(), i, streak = 0, best = 0, hat = false, lucky = false, tally = goalTally(), why = false;
   pl.forEach(function(m){ if(resultOf(m) === "W"){ streak++; if(streak > best) best = streak } else streak = 0 });
   pl.concat(ties).forEach(function(m){
     var per = {};
@@ -303,7 +319,7 @@ function badgeDefs(c){
     { id: "sign", name: "New signing", desc: "Unlock a new player", ok: Object.keys(st.unlocked).length >= 1 },
     { id: "cup1", name: "Cup run", desc: "Win a cup tie", ok: ties.some(function(t){ return t.won }) },
     { id: "pens", name: "Nerves of steel", desc: "Win on penalties", ok: ties.some(function(t){ return t.pens && t.won }) },
-    { id: "cupw", name: "Cup winners", desc: "Win the cup", ok: ties.length >= 4 && ties[3].won },
+    { id: "cupw", name: "Cup winners", desc: "Win the cup", ok: compWon("cup") || st.trophies.some(function(t){ return t.kind === "cup" }) },
     { id: "all", name: "Full house", desc: "Try all fifteen sessions", ok: tried >= 15 },
     { id: "champ", name: "Champions", desc: "Finish top of the league", ok: done && pos === 1 },
     { id: "learn", name: "Learning pays off", desc: "Score with a player a session trained", ok: why },
@@ -314,6 +330,12 @@ function badgeDefs(c){
     { id: "spon", name: "Sponsor", desc: "Sponsor a club", ok: !!(st.co && ((st.co.signed || 0) >= 1 || st.deals.length)) },
     { id: "deal", name: "Transfer dealer", desc: "Buy or sell a player", ok: (st.trades || 0) >= 1 },
     { id: "up", name: "Promoted", desc: "Move up a division", ok: st.hist.some(function(h){ return h.up }) },
+    { id: "lcw", name: "League Cup winners", desc: "Win the League Cup", ok: compWon("lcup") || st.trophies.some(function(t){ return t.kind === "lcup" }) },
+    { id: "chw", name: "Champions of far away", desc: "Win the Champions Cup", ok: compWon("champ") || st.trophies.some(function(t){ return t.kind === "champ" }) },
+    { id: "leg", name: "Club legend", desc: "Have a player join the Hall of fame", ok: legends().length > 0 },
+    { id: "stad", name: "Ground builder", desc: "Upgrade your stadium", ok: upLvl("stands") + upLvl("lights") + upLvl("pitch") > 0 },
+    { id: "staffb", name: "Backroom team", desc: "Hire a coach, physio or scout", ok: staffLvl("coach") + staffLvl("physio") + staffLvl("scout") > 0 },
+    { id: "corner", name: "Corner master", desc: "Score from a corner routine", ok: Object.keys(st.sp.stats).some(function(k){ return k.indexOf("fk_") !== 0 && st.sp.stats[k].g > 0 }) },
     { id: "div", name: "Division champions", desc: "Win a division", ok: st.hist.some(function(h){ return h.pos === 1 }) || (done && pos === 1) }
   ];
 }
@@ -324,6 +346,11 @@ function checkBadges(c){
 }
 
 function migrate(c){
+  if(!st.set.mig6){
+    st.set.mig6 = 1;
+    if(!firstRun) post("New in the dugout: the sequel", "The Chairman (Jay)", "The Chilton Chronicle now reports on your matches and the fans have moods. Upgrade the stadium and hire staff in Stadium, design corner routines in Set pieces, and find your club legends in Legends. There is a League Cup too, and the Champions Cup for the top two divisions. Everything is optional, and Calm still switches all movement off.");
+    save();
+  }
   if(!st.set.mig5){
     st.set.mig5 = 1;
     if(!firstRun) post("New in the dugout: divisions, money and sponsors", "The Chairman (Jay)", "Four divisions now make a pyramid, from the Chilton Premier League down to Division Three. After fifteen matches the top three go up and the bottom three go down, and then a new season begins. Matches and prizes earn coins. Spend them in the Transfer market on new players, or start your own made-up company in Business and sponsor clubs. You are in the Chilton Division Two. All optional, and your squad keeps everything it has learned.");
@@ -381,6 +408,15 @@ function sync(){
     post("Cup news", "The Chairman (Jay)", cupN === 1 ? "You have earned a place in the cup. The first tie is waiting in the dugout whenever you fancy it." : "Another cup tie is waiting in the dugout (" + CUP_NAMES[cupN - 1] + ").");
     changed = true;
   }
+  ["lcup", "champ"].forEach(function(id){
+    if(!compOn(id)) return;
+    var n = COMPS[id].at.filter(function(t){ return c.tr.fp >= t }).length;
+    if(n > (st.cseen[id] || 0)){
+      st.cseen[id] = n;
+      post(COMPS[id].name + " news", "The Chairman (Jay)", n === 1 ? "You have a place in the " + COMPS[id].name + ". The first tie is waiting in the dugout whenever you fancy it." : "Another " + COMPS[id].name + " tie is waiting (" + COMPS[id].rounds[n - 1] + ").");
+      changed = true;
+    }
+  });
   if(changed) save();
   checkBadges(c);
   return c;
@@ -527,14 +563,19 @@ function stadium(){
     '<rect width="800" height="300" fill="url(#sk)"/>' +
     '<path d="M0 78L800 98V130H0Z" fill="#0b1229"/><path d="M0 78L800 98V130H0Z" fill="url(#crowd)" opacity=".7"/>' +
     '<path d="M0 126H800V192H0Z" fill="#101a3b"/><path d="M0 126H800V192H0Z" fill="url(#crowd)"/>';
-  [90, 270, 530, 710].forEach(function(px){
-    s += '<circle class="fl" cx="' + px + '" cy="26" r="78" fill="url(#gl)"/><rect x="' + (px - 3) + '" y="26" width="6" height="104" fill="#0a1024"/><rect x="' + (px - 24) + '" y="12" width="48" height="24" rx="3" fill="#1f2b55"/>';
+  var stL = upLvl("stands"), liL = upLvl("lights");
+  if(stL >= 1) s += '<path d="M0 96L110 112V192H0Z" fill="#0f1836"/><path d="M0 96L110 112V192H0Z" fill="url(#crowd)"/><path d="M800 96L690 112V192H800Z" fill="#0f1836"/><path d="M800 96L690 112V192H800Z" fill="url(#crowd)"/>';
+  if(stL >= 2) s += '<path d="M0 70L800 90V100L0 80Z" fill="#141d3d"/><path d="M0 80L800 100" stroke="' + c2 + '" stroke-opacity=".5" stroke-width="2"/>';
+  if(stL >= 3) for(x = 0; x < 16; x++) s += '<path d="M' + (25 + x * 50) + ' 110l0 -18l14 5l-14 5z" fill="' + (x % 2 ? c1 : c2) + '" opacity=".9"/><rect x="' + (24 + x * 50) + '" y="92" width="2" height="22" fill="#cfd8f0" opacity=".7"/>';
+  (liL === 0 ? [270, 530] : (liL < 3 ? [90, 270, 530, 710] : [50, 190, 330, 470, 610, 750])).forEach(function(px){
+    s += '<circle class="fl" cx="' + px + '" cy="26" r="' + (liL === 0 ? 46 : 62 + liL * 10) + '" fill="url(#gl)" opacity="' + (liL === 0 ? .55 : 1) + '"/><rect x="' + (px - 3) + '" y="26" width="6" height="104" fill="#0a1024"/><rect x="' + (px - 24) + '" y="12" width="48" height="24" rx="3" fill="#1f2b55"/>';
     for(x = 0; x < 6; x++) s += '<circle cx="' + (px - 18 + (x % 3) * 18) + '" cy="' + (19 + Math.floor(x / 3) * 11) + '" r="4" fill="#fff6cf"/>';
   });
   s += '<path d="M0 192H800V300H0Z" style="fill:var(--g1)"/>';
   if(gp === "stripes") for(x = 0; x < 8; x++) s += '<rect x="' + (x * 100) + '" y="192" width="100" height="108" style="fill:' + (x % 2 ? "var(--g2)" : "var(--g1)") + '"/>';
   else if(gp === "checks") for(x = 0; x < 16; x++) for(var yy = 0; yy < 3; yy++) if((x + yy) % 2) s += '<rect x="' + (x * 50) + '" y="' + (192 + yy * 36) + '" width="50" height="36" style="fill:var(--g2)"/>';
   for(x = 0; x < 16; x++) s += '<rect x="' + (x * 50) + '" y="186" width="50" height="8" fill="' + (x % 2 ? c1 : c2) + '"/>';
+  if(st.co && dealOf(-1)) [110, 330, 550].forEach(function(bx){ s += '<rect x="' + bx + '" y="176" width="140" height="14" rx="2" fill="' + st.co.c1 + '" stroke="' + st.co.c2 + '"/><text x="' + (bx + 70) + '" y="186.500" text-anchor="middle" font-size="9" font-weight="800" fill="' + st.co.c2 + '" textLength="120" lengthAdjust="spacingAndGlyphs">' + esc(String(st.co.name).toUpperCase().slice(0, 22)) + '</text>' });
   s += '<ellipse cx="400" cy="250" rx="90" ry="24" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2"/><path d="M400 200V300" stroke="#fff" stroke-opacity=".4" stroke-width="2"/></svg>';
   return s;
 }
@@ -568,14 +609,17 @@ function renderClub(){
 }
 function icon(n){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[n] + '</svg>' }
 function renderNav(){
-  var unread = st.inbox.some(function(m){ return !m.read });
-  $("nav").innerHTML = VIEWS.filter(function(v){ return !v.hidden }).map(function(v){
+  var unread = st.inbox.some(function(m){ return !m.read }), last = "", out = "", onMain = VIEWS.some(function(v){ return v.main && v.id === view });
+  VIEWS.filter(function(v){ return !v.hidden }).forEach(function(v){
     var d = "";
     if(v.id === "inbox" && unread) d = '<span class="dot" title="New messages"></span>';
     if(v.id === "dugout" && (pendingList().length && st.played.length < ROUNDS)) d = '<span class="dot" title="A match is ready"></span>';
     if(v.id === "club" && newB.length) d = '<span class="dot" title="New badge"></span>';
-    return '<button data-act="view" data-v="' + v.id + '"' + (v.id === view ? ' aria-current="page"' : "") + '>' + icon(v.icon) + '<span>' + v.label + '</span>' + d + '</button>';
-  }).join("");
+    if(v.g !== last){ last = v.g; out += '<div class="ngrp">' + v.g + '</div>' }
+    out += '<button class="' + (v.main ? "" : "m-hide") + '" data-act="view" data-v="' + v.id + '"' + (v.id === view ? ' aria-current="page"' : "") + '>' + icon(v.icon) + '<span>' + v.label + '</span>' + d + '</button>';
+  });
+  out += '<button class="m-only" data-act="menu"' + (!onMain ? ' aria-current="page"' : "") + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>More</span></button>';
+  $("nav").innerHTML = out;
 }
 
 /* ---------- chrome ---------- */
@@ -596,7 +640,7 @@ function render(){
   $("title").textContent = V.title;
   applyMotion(); applyKit();
   renderNav(); renderPills(c); renderClub();
-  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings }[view];
+  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, news: vNews, stadium: vStadium, legends: vLegends, sets: vSets, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings }[view];
   var vw = $("view"); vw.style.animation = "none"; void vw.offsetWidth; vw.style.animation = "";
   vw.innerHTML = fn(c);
   if(view === "send") mountSend();
@@ -774,7 +818,9 @@ function payout(entry, kind){
       d.got = (d.got || 0) + d.fee + bonus; spon += d.fee + bonus;
     });
     tot += spon;
-  } else tot += entry.won ? 30 * (entry.k + 1) : 10;
+  } else tot += Math.round((entry.won ? 30 * (entry.k + 1) : 10) * (COMPS[entry.comp || "cup"].mult));
+  entry.gate = 0;
+  if(entry.home){ entry.gate = gateOf(); tot += entry.gate }
   if(spon && st.co) st.co.earned = (st.co.earned || 0) + spon;
   entry.spon = spon;
   addCoins(tot, kind === "league" ? "Matchday " + (entry.round + 1) : "Cup tie");
@@ -792,8 +838,9 @@ function cupText(){
 function seasonSummary(){
   var tb = S.table(st.seed, st.played), pos = posOf(tb), r = tb.filter(function(x){ return x.id === 0 })[0], t = st.tier;
   var up = t > 0 && pos <= 3, down = t < 3 && pos >= 14, nt = up ? t - 1 : (down ? t + 1 : t);
-  var prize = Math.round((160 - (pos - 1) * 9) * (1 + (3 - t) * 0.25)), cupWon = st.cup.ties.length >= 4 && st.cup.ties[3].won;
-  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + (cupWon ? 100 : 0), cup: cupText(), t: t };
+  var prize = Math.round((160 - (pos - 1) * 9) * (1 + (3 - t) * 0.25)), cupWon = false, extra = 0, won = [];
+  COMP_ORDER.forEach(function(id){ if(compWon(id)){ extra += COMPS[id].bonus; won.push(COMPS[id].name) } });
+  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + extra, cup: cupText(), t: t, won: won };
 }
 function openSeason(){
   if(st.played.length < ROUNDS) return;
@@ -803,7 +850,7 @@ function openSeason(){
     (m.down ? '<p>You are moving down to the ' + esc(S.leagueName(m.nt)) + '. A fresh chance to climb back, and your squad keeps everything it has learned.</p>' : '<p>You stay in the ' + esc(S.leagueName(m.t)) + ' next season.</p>');
   $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">Season ' + st.season + ' complete</div><h2>' + (m.pos === 1 ? "Champions of the " : "Finished " + ord(m.pos) + " in the ") + esc(S.leagueName(m.t)) + '</h2>' +
     '<div class="sumgrid" style="margin:12px 0"><div><b>' + r.w + '</b><small>Won</small></div><div><b>' + r.d + '</b><small>Drawn</small></div><div><b>' + r.l + '</b><small>Lost</small></div><div><b>' + r.gf + '</b><small>For</small></div><div><b>' + r.ga + '</b><small>Against</small></div><div><b>' + r.pts + '</b><small>Points</small></div></div>' +
-    '<p>The Cup: ' + esc(m.cup) + '.</p>' + out + '<p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
+    '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
     '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>';
   $("rv").classList.add("on"); $("rv").classList.add("season");
 }
@@ -812,12 +859,18 @@ function seasonGo(){
   if(st.played.length < ROUNDS){ closeSeason(); return }
   var m = seasonSummary(), r = m.r, c = ctx();
   addCoins(m.prize, "Season " + st.season + " prize");
+  if(m.pos === 1) st.trophies.push({ season: st.season, kind: "league", name: S.leagueName(m.t) });
+  m.won.forEach(function(nme){ COMP_ORDER.forEach(function(id){ if(COMPS[id].name === nme) st.trophies.push({ season: st.season, kind: id, name: nme }) }) });
+  addFans(m.up ? 15 : (m.down ? -12 : (m.pos <= 5 ? 5 : 0)));
+  Object.keys(st.career).forEach(function(id){ var cc = st.career[id]; if(cc.sa > 0){ cc.ss++; cc.sa = 0 } });
+  pressPush(m.pos === 1 ? "Champions! " + clubName() + " win the " + S.leagueName(m.t) : "Season " + st.season + ": " + clubName() + " finish " + ord(m.pos), (m.up ? "Promoted to the " + S.leagueName(m.nt) + ". " : (m.down ? "Back to the " + S.leagueName(m.nt) + " to rebuild. " : "")) + "Prize money: " + m.prize + " coins.", "");
   st.hist.push({ season: st.season, tier: m.t, league: S.leagueName(m.t), pos: m.pos, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga, pts: r.pts, cup: m.cup, up: m.up, down: m.down, coins: m.prize });
   st.season++; st.tier = m.nt; S.setTier(st.tier);
   st.seed = 1 + Math.floor(Math.random() * 2000000000);
-  st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cupSeen = 0; st.deals = []; st.mk = {};
+  st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cups = {}; st.cupSeen = 0; st.cseen = {}; st.deals = []; st.mk = {};
   var b = beats(), sb = {}; S.ACTS.forEach(function(a){ sb[a.slug] = (b[a.slug] && b[a.slug].n) || 0 });
   st.sbase = sb; st.fp0 = c.tr.fp; st.cupSeen = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
+  ["lcup", "champ"].forEach(function(id){ st.cseen[id] = COMPS[id].at.filter(function(t){ return c.tr.fp >= t }).length });
   post("Season " + st.season + " begins", "The Chairman (Jay)", "Welcome to the " + S.leagueName() + ". " + (m.up ? "You earned this promotion. " : (m.down ? "Every club has a rough season now and then. " : "")) + "Your squad keeps all its growth. Try some training and matches turn up again, and your sponsorship deals can be renewed in Business.");
   rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season"); view = "dugout"; save(); render(); window.scrollTo(0, 0);
   toast("Season " + st.season + " in the " + S.leagueName() + ".");
@@ -831,8 +884,9 @@ function marketWin(){ return st.season * 100 + Math.floor(st.played.length / 3) 
 function marketList(){
   var w = marketWin();
   if(st.mk.w !== w) st.mk = { w: w, bought: [] };
-  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[65, 80], [61, 76], [57, 72], [53, 68]][st.tier], i;
-  for(i = 0; i < 12; i++){
+  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[65, 80], [61, 76], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc;
+  T[0] += 2 * sc; T[1] += 2 * sc;
+  for(i = 0; i < N; i++){
     var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
     do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 25);
     used[nm] = 1;
@@ -918,15 +972,329 @@ function histCard(){
   }).join("") + '</div>';
 }
 
+
+/* ---------- v6: cups, press, fans, legends, stadium, staff ---------- */
+var COMPS = {
+  cup: { id: "cup", name: "The Cup", rounds: CUP_NAMES, at: CUP_AT, bonus: 100, mult: 1 },
+  lcup: { id: "lcup", name: "League Cup", rounds: ["Quarter final", "Semi final", "Final"], at: [10, 22, 34], bonus: 80, mult: 0.8 },
+  champ: { id: "champ", name: "Champions Cup", rounds: ["First round", "Quarter final", "Semi final", "Final"], at: [16, 28, 40, 52], bonus: 200, mult: 2 }
+};
+var COMP_ORDER = ["cup", "lcup", "champ"];
+function compOn(id){ return id !== "champ" || st.tier <= 1 }
+function cupSt(id){ id = id || "cup"; if(id === "cup") return st.cup; if(!st.cups[id]) st.cups[id] = { ties: [], out: false }; return st.cups[id] }
+function compDone(id){ var s = cupSt(id), n = COMPS[id].rounds.length; return s.out || s.ties.length >= n }
+function compWon(id){ var s = cupSt(id), n = COMPS[id].rounds.length; return s.ties.length >= n && !!s.ties[n - 1].won }
+function compReady(c, id){
+  if(!compOn(id) || compDone(id)) return false;
+  var n = COMPS[id].at.filter(function(t){ return c.tr.fp >= t }).length;
+  return n > cupSt(id).ties.length;
+}
+function compOpp(id, k){
+  if(id === "cup") return S.cupOpponent(st.seed, k) + 1;
+  if(id === "lcup") return S.cupOpponent(st.seed + 5555, Math.min(3, k + 1)) + 1;
+  return S.foreignOpponent(st.seed, k);
+}
+function compHome(id, k){ return id === "cup" ? ((k % 2 === 0) || k === 3) : (id === "lcup" ? (k % 2 === 0) : (k % 2 === 1)) }
+function compText(id){
+  var s = cupSt(id), C = COMPS[id], n = s.ties.length;
+  if(compWon(id)) return "Winners";
+  if(s.out) return "Out in the " + C.rounds[Math.max(0, n - 1)].toLowerCase();
+  return n ? "Through " + n + (n === 1 ? " tie" : " ties") : "Not played";
+}
+function allTies(){ var o = []; COMP_ORDER.forEach(function(id){ cupSt(id).ties.forEach(function(t){ o.push(t) }) }); return o }
+function nextComp(c){
+  var i, id;
+  for(i = 0; i < COMP_ORDER.length; i++){ id = COMP_ORDER[i]; if(compReady(c, id)) return id }
+  for(i = 0; i < COMP_ORDER.length; i++){ id = COMP_ORDER[i]; if(compOn(id) && !compDone(id)) return id }
+  return "cup";
+}
+
+/* ---------- the stadium and the staff ---------- */
+var UPG = [
+  { id: "stands", name: "Stands", costs: [150, 300, 500],
+    step: ["A terrace behind one goal", "A second stand opposite", "Stands all the way round"], eff: ["Bigger gate on home matches", "Even bigger gate", "The biggest gate"] },
+  { id: "lights", name: "Floodlights", costs: [120, 240, 400],
+    step: ["Four lights on the corners", "Brighter lights on tall masts", "Night match glow and a bigger roar"], eff: ["A little extra luck at home", "More luck at home", "The most luck at home"] },
+  { id: "pitch", name: "Training pitch", costs: [150, 300, 500],
+    step: ["Cones and a patch of grass", "A full practice pitch", "Pitch, goals and a coach's tower"], eff: ["Players grow a little faster", "Players grow faster", "Players grow fastest"] }
+];
+var STAFF = [
+  { id: "coach", role: "Head coach", costs: [120, 240, 400], eff: ["Team talks work a bit better", "Team talks work better", "Team talks work best"] },
+  { id: "physio", role: "Physio", costs: [120, 240, 400], eff: ["Fresher legs in the second half", "Fresher legs, more attack and cover", "The freshest second half"] },
+  { id: "scout", role: "Chief scout", costs: [100, 200, 350], eff: ["Two more players on the market", "Four more, and better ones", "Six more, and the best ones"] }
+];
+var CAPS = [3000, 6000, 10000, 15000];
+function upLvl(id){ return (st.up && st.up[id]) || 0 }
+function staffLvl(id){ return (st.staff && st.staff[id]) || 0 }
+function fanLabel(m){ return m < 20 ? "Fed up" : (m < 38 ? "Restless" : (m < 56 ? "Hopeful" : (m < 74 ? "Happy" : (m < 90 ? "Buzzing" : "Euphoric")))) }
+function addFans(n){ st.fans = clamp(Math.round((st.fans == null ? 50 : st.fans) + n), 0, 100) }
+function gateOf(){ return Math.round((8 + (st.fans == null ? 50 : st.fans) / 5) * (1 + 0.5 * upLvl("stands"))) }
+function homeLuckBonus(){ return 0.02 * upLvl("lights") }
+function staffName(id){
+  if(!st.staffn) st.staffn = {};
+  if(!st.staffn[id]) st.staffn[id] = FIRSTN[hash(id + st.seed) % FIRSTN.length] + " " + MSURN[hash(st.seed + id + "x") % MSURN.length];
+  return st.staffn[id];
+}
+function buyUpgrade(id){
+  var U = UPG.filter(function(u){ return u.id === id })[0], l = upLvl(id); if(!U || l >= 3) return;
+  var cost = U.costs[l];
+  if(st.coins < cost){ toast("Not enough coins yet. Matches, gate money and sponsors earn more."); return }
+  st.up[id] = l + 1; addCoins(-cost, U.name + " level " + (l + 1)); addFans(4);
+  pressPush(U.name + ": " + U.step[l], "Work finished at " + stadiumName() + ". " + U.eff[l] + ".", "Fans were out in force to see it.");
+  save(); render(); toast(U.name + " is now level " + (l + 1) + ".");
+}
+function hireStaff(id){
+  var S0 = STAFF.filter(function(u){ return u.id === id })[0], l = staffLvl(id); if(!S0 || l >= 3) return;
+  var cost = S0.costs[l];
+  if(st.coins < cost){ toast("Not enough coins yet."); return }
+  var nm = staffName(id);
+  st.staff[id] = l + 1; addCoins(-cost, (l ? "Upgraded " : "Hired ") + S0.role.toLowerCase() + " " + nm);
+  pressPush(l ? S0.role + " " + nm + " takes on more" : nm + " joins as " + S0.role.toLowerCase(), S0.eff[l] + ".", "");
+  save(); render(); toast((l ? S0.role + " upgraded." : nm + " has joined as " + S0.role.toLowerCase() + ".") );
+}
+
+/* ---------- the Chilton Chronicle ---------- */
+var HL = {
+  big: ["{u} run riot, {g} to {a} against {o}", "{o} blown away by {u}", "{s} leads the charge as {u} score {g}", "A party at {st}: {u} win {g} to {a}"],
+  win: ["{u} beat {o}, {g} to {a}", "{s} sends the fans home happy", "Three points for {u} against {o}", "{u} do the job against {o}"],
+  narrow: ["{u} edge past {o} in a tight one", "{s} the hero as {u} hold on", "Nervy finish, but {u} take the points"],
+  draw: ["Honours even between {u} and {o}", "{u} and {o} share the points", "A point each at {st}"],
+  nilnil: ["Goalless at {st}: {u} and {o} cancel each other out", "No goals, plenty of effort"],
+  loss: ["{o} take the points, {a} to {g}", "A tough afternoon for {u}", "{u} come up short against {o}"],
+  heavy: ["A day to forget at {o}, but the club will bounce back", "{o} too strong for {u} this time"],
+  cupwin: ["{u} are through in the {c}", "{s} fires {u} into the next round", "{c} dream stays alive for {u}"],
+  cupfinal: ["{u} WIN THE {C}!", "Silverware for {u}: {s} the star"],
+  cuppens: ["{u} survive the shootout against {o}", "Nerves of steel as {u} win on penalties"],
+  cuplose: ["{u} are out of the {c}, but heads are up", "{o} end {u}'s {c} run"]
+};
+var FANQ = {
+  w: ["'I have never heard it so loud,' said one supporter.", "'We believed from the first whistle,' said a fan by the tea hut.", "Fans were singing all the way home.", "'That is why we come every week,' said a regular on the terrace."],
+  d: ["'A point is a point,' said one fan. 'We go again.'", "Supporters stayed to clap the players off.", "'Could have gone either way,' said a fan, smiling."],
+  l: ["'We will bounce back,' said a fan. 'We always do.'", "Supporters stayed to clap the players off.", "'Next week is a new week,' said one regular."]
+};
+function numWord(n){ return n }
+function writeNews(entry, kind, comp, ours){
+  var r = S.rng(hash("hl" + st.season + ":" + (entry.round != null ? entry.round : "c" + entry.k) + ":" + kind + comp)), g = ourGoals(entry), a = theirGoals(entry);
+  var res = entry.pens ? (entry.won ? "W" : "L") : resultOf(entry), diff = g - a, key, C = COMPS[comp || "cup"];
+  var evs = (entry.events || []).filter(function(e){ return e.k === "goal" && e.side === ourSide(entry) });
+  var cnt = {}; evs.forEach(function(e){ cnt[e.who] = (cnt[e.who] || 0) + 1 });
+  var top = Object.keys(cnt).sort(function(x, y){ return cnt[y] - cnt[x] })[0] || ((entry.rt && entry.rt[0]) ? entry.rt[0].n : clubName());
+  var o = S.oppName(entry.opp);
+  if(kind === "cup"){
+    var last = entry.k === C.rounds.length - 1;
+    key = entry.won ? (last ? "cupfinal" : (entry.pens ? "cuppens" : "cupwin")) : "cuplose";
+  } else key = res === "W" ? (diff >= 3 ? "big" : (diff === 1 ? "narrow" : "win")) : (res === "D" ? (g === 0 ? "nilnil" : "draw") : (diff <= -3 ? "heavy" : "loss"));
+  var pool = HL[key], tpl = pool[Math.floor(r() * pool.length)];
+  var h = tpl.replace(/\{u\}/g, clubName()).replace(/\{o\}/g, o).replace(/\{s\}/g, top).replace(/\{st\}/g, stadiumName()).replace(/\{g\}/g, g).replace(/\{a\}/g, a).replace(/\{c\}/g, C.name).replace(/\{C\}/g, C.name.toUpperCase());
+  var bits = [];
+  Object.keys(cnt).sort(function(x, y){ return cnt[y] - cnt[x] }).slice(0, 3).forEach(function(n){ bits.push(n + (cnt[n] > 1 ? " (" + cnt[n] + ")" : "")) });
+  var sub = (bits.length ? "Goals: " + bits.join(", ") + ". " : "No goals for " + clubName() + ". ") + (entry.rt && entry.rt[0] ? "Player of the match: " + entry.rt[0].n + ". " : "") + (kind === "cup" ? C.name + ", " + C.rounds[entry.k].toLowerCase() + "." : "");
+  var q = FANQ[res === "W" ? "w" : (res === "D" ? "d" : "l")], quote = q[Math.floor(r() * q.length)];
+  pressPush(h, sub.trim(), quote, { score: g + " to " + a, opp: o, res: res, star: top });
+}
+function pressPush(h, s, q, extra){
+  st.press.unshift(Object.assign({ id: st.pid++, season: st.season, h: h, s: s || "", q: q || "" }, extra || {}));
+  if(st.press.length > 50) st.press.length = 50;
+}
+function moodAfter(entry, kind){
+  var g = ourGoals(entry), a = theirGoals(entry), d = g - a, res = entry.pens ? (entry.won ? "W" : "L") : resultOf(entry);
+  if(kind === "cup") addFans(res === "W" ? 8 : -5);
+  else addFans(res === "W" ? (d >= 3 ? 8 : 6) : (res === "D" ? 1 : (d <= -3 ? -7 : -5)));
+}
+
+/* ---------- club legends ---------- */
+function isLegend(c){ return c.g >= 10 || c.apps >= 30 || c.mom >= 5 }
+function careerUpdate(entry, our, byName){
+  var seen = {};
+  our.players.forEach(function(q){
+    if(!q.id || seen[q.id]) return; seen[q.id] = 1;
+    var np = playerOf(q.id), c = st.career[q.id] || (st.career[q.id] = { id: q.id, n: q.name, pos: np ? np.pos : q.pos, apps: 0, g: 0, mom: 0, sa: 0, ss: 0 });
+    c.n = q.name; if(np) c.pos = np.pos; c.apps++; c.sa++;
+  });
+  (entry.events || []).forEach(function(e){
+    if(e.k === "goal" && e.side === ourSide(entry) && byName[e.who] && st.career[byName[e.who]]) st.career[byName[e.who]].g++;
+  });
+  if(entry.rt && entry.rt[0] && entry.rt[0].id && st.career[entry.rt[0].id]) st.career[entry.rt[0].id].mom++;
+  Object.keys(st.career).forEach(function(id){
+    var c = st.career[id];
+    if(isLegend(c) && !c.leg){
+      c.leg = 1;
+      post("A new club legend", "The Chairman (Jay)", c.n + " has written a place in the club's history. See the Hall of fame in Legends.");
+      pressPush(c.n + " becomes a club legend", c.g + " goals, " + c.apps + " appearances and " + c.mom + " player of the match awards.", "The fans have their own song for " + c.n + " already.");
+    }
+  });
+}
+function legends(){ return Object.keys(st.career).map(function(id){ return st.career[id] }).filter(function(c){ return c.leg }).sort(function(a, b){ return (b.g * 3 + b.apps + b.mom * 4) - (a.g * 3 + a.apps + a.mom * 4) }) }
+function bestXI(){
+  var F = S.FORMATIONS["4-3-3"], pool = Object.keys(st.career).map(function(id){ return st.career[id] }).filter(function(c){ return c.apps > 0 });
+  function sc(c){ return c.g * 3 + c.apps * 0.5 + c.mom * 4 }
+  var used = {}, out = [];
+  F.slots.forEach(function(pos, i){
+    var cand = pool.filter(function(c){ return !used[c.id] && c.pos === pos }).sort(function(a, b){ return sc(b) - sc(a) })[0];
+    if(cand) used[cand.id] = 1;
+    out.push(cand || null);
+  });
+  return out;
+}
+
+/* ---------- v6 screens ---------- */
+function nameId(n){ var r = ""; S.PLAYERS.forEach(function(p){ if(p.name === n) r = p.id }); return r }
+function cupCard(c, id){
+  var C = COMPS[id], s = cupSt(id), h = '<div class="card"><h3>' + esc(C.name) + '</h3>';
+  if(!compOn(id)) return h + '<p class="hint" style="margin:0">Open to the top two divisions. Finish in the top three of Division One to qualify.</p></div>';
+  h += '<div class="bracket' + (C.rounds.length === 3 ? " b3" : "") + '">';
+  C.rounds.forEach(function(rn, k){
+    var tie = s.ties[k], oi = tie ? tie.opp : compOpp(id, k), nm = S.oppName(oi), cls = "", line;
+    if(tie){ cls = tie.won ? "won" : "lost"; line = '<em>' + (tie.won ? "Won " : "Lost ") + ourGoals(tie) + " to " + theirGoals(tie) + (tie.pens ? " (pens)" : "") + '</em> <button class="btn btn-quiet" style="padding:1px 8px" data-act="replay" data-k="cup" data-comp="' + id + '" data-i="' + k + '">Report</button>' }
+    else if(s.out) line = '<em>Out of the cup</em>';
+    else if(k === s.ties.length && compReady(c, id)){ cls = "next"; line = '<button class="btn btn-go" style="padding:3px 12px" data-act="kickcup" data-comp="' + id + '">Play the tie</button>' }
+    else line = '<em>Arrives at ' + C.at[k] + ' focus points</em>';
+    h += '<div class="bn ' + cls + '"><b>' + rn + '</b>' + opCrest(oi, 34, true) + '<span>' + esc(nm) + '</span>' + line + '</div>';
+  });
+  return h + '</div></div>';
+}
+
+function pressTeaser(){
+  var P = st.press[0], m = st.fans == null ? 50 : st.fans;
+  return '<section class="card"><h3>In the papers</h3>' + (P ? '<button class="lnk teaser" data-act="view" data-v="news"><b>' + esc(P.h) + '</b><span class="hint">' + esc(P.s) + '</span></button>' : '<p class="hint" style="margin:0">The Chronicle is waiting for your first match.</p>') + '<div class="mood small"><span>Fans: <b>' + fanLabel(m) + '</b></span><div class="prog" aria-hidden="true"><i style="width:' + m + '%"></i></div></div></section>';
+}
+function vNews(c){
+  var P = st.press, lead = P[0], m = st.fans == null ? 50 : st.fans, seats = "", i;
+  for(i = 0; i < 10; i++) seats += '<i class="' + (m >= (i + 1) * 10 - 5 ? "on" : "") + '"></i>';
+  var h = '<div class="stack"><div class="paper"><div class="mast"><span class="mn">The Chilton Chronicle</span><div class="mline"><span>' + esc(S.leagueName()) + '</span><span>Season ' + st.season + '</span><span>Price: one coin</span></div></div>';
+  if(!lead) h += '<article class="lead"><h2 class="hl">Waiting for the first big story</h2><p class="deck">Play a match and the Chronicle will be at the ground with a notebook.</p></article>';
+  else {
+    var sid = nameId(lead.star), sp = sid ? playerOf(sid) : null;
+    h += '<article class="lead"><h2 class="hl">' + esc(lead.h) + '</h2>' + (lead.score ? '<div class="sc">' + esc(clubName()) + ' ' + esc(lead.score) + ' against ' + esc(lead.opp) + '</div>' : "") +
+      '<div class="lcols">' + (sp ? '<figure class="ph">' + avatar(sid, 110, sp.pos) + '<figcaption>' + esc(sp.name) + '</figcaption></figure>' : '<figure class="ph">' + crestSvg(90, true) + '<figcaption>' + esc(clubName()) + '</figcaption></figure>') +
+      '<div><p class="deck">' + esc(lead.s) + '</p>' + (lead.q ? '<blockquote>' + esc(lead.q) + '</blockquote>' : "") + '</div></div></article>';
+    if(P.length > 1) h += '<div class="briefs">' + P.slice(1, 9).map(function(x){ return '<div class="brief"><b>' + esc(x.h) + '</b><span>' + esc(x.s) + '</span></div>' }).join("") + '</div>';
+  }
+  h += '</div>';
+  h += '<div class="card"><h3>The terraces</h3><div class="mood"><div class="seats" role="img" aria-label="Fan mood ' + m + ' out of 100">' + seats + '</div><div><b class="moodn">' + fanLabel(m) + '</b><p class="hint" style="margin:2px 0 0">Wins lift the fans, and happy fans fill the ground. Home matches pay <b style="color:var(--gold)">' + gateOf() + ' coins</b> at the gate.</p></div></div></div>';
+  if(P.length > 9) h += fold("old", "Older editions", P.slice(9, 30).map(function(x){ return '<div class="resline"><span>' + esc(x.h) + '</span><span class="mute">Season ' + x.season + '</span></div>' }).join(""));
+  return h + '</div>';
+}
+
+function groundPlan(){
+  var s = upLvl("stands"), l = upLvl("lights"), t = upLvl("pitch"), x, h = '<svg class="gplan" viewBox="0 0 420 250" role="img" aria-label="Plan of your ground: stands level ' + s + ', floodlights level ' + l + ', training pitch level ' + t + '">';
+  h += '<defs><pattern id="gcr" width="8" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" fill="' + st.club.c2 + '" opacity=".85"/><circle cx="6" cy="5" r="1.6" fill="#7d8fc0"/></pattern><radialGradient id="gglow"><stop offset="0" stop-color="#fff3c0" stop-opacity=".9"/><stop offset="1" stop-color="#fff3c0" stop-opacity="0"/></radialGradient></defs>';
+  h += '<rect width="420" height="250" rx="14" fill="#0a1228"/>';
+  function stand(px, py, w, hh){ return '<rect x="' + px + '" y="' + py + '" width="' + w + '" height="' + hh + '" rx="3" fill="#1b2750"/><rect x="' + px + '" y="' + py + '" width="' + w + '" height="' + hh + '" rx="3" fill="url(#gcr)"/><rect x="' + px + '" y="' + py + '" width="' + w + '" height="' + hh + '" rx="3" fill="none" stroke="#3a4a7e"/>' }
+  h += stand(70, 88, 28, 74);
+  if(s >= 1) h += stand(322, 88, 28, 74);
+  if(s >= 2){ h += stand(110, 22, 202, 24); h += stand(110, 204, 202, 24) }
+  if(s >= 3){ h += stand(70, 22, 36, 24) + stand(316, 22, 34, 24) + stand(70, 204, 36, 24) + stand(316, 204, 34, 24); h += '<rect x="66" y="18" width="288" height="214" rx="10" fill="none" stroke="#5a6ca8" stroke-width="2" stroke-dasharray="3 5"/>' }
+  h += '<rect x="106" y="52" width="208" height="146" fill="var(--g1)"/>';
+  for(x = 0; x < 8; x++) h += '<rect x="' + (106 + x * 26) + '" y="52" width="26" height="146" style="fill:' + (x % 2 ? "var(--g2)" : "var(--g1)") + '"/>';
+  h += '<g fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.6"><rect x="110" y="56" width="200" height="138"/><path d="M210 56V194"/><circle cx="210" cy="125" r="18"/><rect x="110" y="95" width="32" height="60"/><rect x="278" y="95" width="32" height="60"/></g>';
+  [[84, 52], [336, 52], [84, 198], [336, 198]].forEach(function(p){
+    if(l >= 1) h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (14 + l * 9) + '" fill="url(#gglow)" class="fl"/>';
+    h += '<rect x="' + (p[0] - 3) + '" y="' + (p[1] - 3) + '" width="6" height="6" rx="1" fill="' + (l >= 1 ? "#fff6cf" : "#44507a") + '"/>';
+  });
+  h += '<g>';
+  if(t === 0) h += '<rect x="350" y="120" width="60" height="64" rx="4" fill="none" stroke="#3a4a7e" stroke-dasharray="4 4"/>';
+  else {
+    h += '<rect x="350" y="' + (t >= 2 ? 96 : 120) + '" width="60" height="' + (t >= 2 ? 90 : 64) + '" rx="4" style="fill:var(--g2)" stroke="#fff" stroke-opacity=".5"/>';
+    h += '<path d="M358 ' + (t >= 2 ? 160 : 150) + 'l4 -8l4 8zM372 ' + (t >= 2 ? 160 : 150) + 'l4 -8l4 8zM386 ' + (t >= 2 ? 160 : 150) + 'l4 -8l4 8z" fill="#ff9d3c"/>';
+    if(t >= 2) h += '<path d="M350 141H410" stroke="#fff" stroke-opacity=".6"/>';
+    if(t >= 3) h += '<rect x="346" y="126" width="4" height="30" fill="#fff" opacity=".8"/><rect x="410" y="126" width="4" height="30" fill="#fff" opacity=".8"/><rect x="396" y="76" width="14" height="16" fill="#2a3768" stroke="#8fa0d0"/>';
+  }
+  h += '</g></svg>';
+  return h;
+}
+function lvlPips(n){ var o = "", i; for(i = 0; i < 3; i++) o += '<i class="' + (i < n ? "on" : "") + '"></i>'; return '<span class="pips" role="img" aria-label="Level ' + n + ' of 3">' + o + '</span>' }
+function vStadium(c){
+  var m = st.fans == null ? 50 : st.fans, h = '<div class="stack"><div class="card feat"><div class="stwrap"><div class="stplan">' + groundPlan() + '</div><div><h2>' + esc(stadiumName()) + '</h2><p class="hint">Capacity ' + CAPS[upLvl("stands")].toLocaleString("en-GB") + ' &middot; fans ' + fanLabel(m).toLowerCase() + ' &middot; you have <b style="color:var(--gold)">' + st.coins + ' coins</b></p><p class="hint" style="margin:0">Upgrades show up on the plan and in the stadium on your dugout screen. Rename the ground in the Studio.</p></div></div></div>';
+  h += '<div class="card"><h3>Ground upgrades</h3><div class="upl">' + UPG.map(function(u){
+    var l = upLvl(u.id), nx = l < 3 ? u.costs[l] : 0, can = st.coins >= nx;
+    return '<div class="up"><div><b>' + u.name + '</b> ' + lvlPips(l) + '<small>' + (l ? "Now: " + u.eff[l - 1] : "Not built yet") + '</small>' + (l < 3 ? '<small>Next: ' + u.step[l] + '</small>' : '<small>Fully built</small>') + '</div>' +
+      (l < 3 ? '<button class="btn ' + (can ? "btn-go" : "") + '" data-act="upgrade" data-id="' + u.id + '"' + (can ? "" : ' aria-disabled="true"') + '>' + nx + ' coins</button>' : '<span class="chip-on">Done</span>') + '</div>';
+  }).join("") + '</div></div>';
+  h += '<div class="card"><h3>Staff</h3><div class="upl">' + STAFF.map(function(u){
+    var l = staffLvl(u.id), nx = l < 3 ? u.costs[l] : 0, can = st.coins >= nx, nm = l ? staffName(u.id) : "";
+    return '<div class="up"><div>' + (l ? avatar("staff:" + u.id, 44, "MID") : "") + '<div><b>' + u.role + (nm ? ': ' + esc(nm) : "") + '</b> ' + lvlPips(l) + '<small>' + (l ? u.eff[l - 1] : "Not hired yet. " + u.eff[0]) + '</small></div></div>' +
+      (l < 3 ? '<button class="btn ' + (can ? "btn-go" : "") + '" data-act="hire" data-id="' + u.id + '"' + (can ? "" : ' aria-disabled="true"') + '>' + (l ? "Upgrade " : "Hire ") + nx + '</button>' : '<span class="chip-on">Done</span>') + '</div>';
+  }).join("") + '</div></div>';
+  return h + '</div>';
+}
+
+function xiPitch(){
+  var F = S.FORMATIONS["4-3-3"], xi = bestXI(), h = '<div class="xipitch">';
+  F.xy.forEach(function(p, i){
+    var c = xi[i];
+    h += '<div class="xip" style="left:' + p[0] + '%;top:' + p[1] + '%">' + (c ? avatar(c.id, 38, c.pos) + '<span>' + esc(c.n.split(" ").slice(-1)[0]) + '</span>' : '<i class="empty"></i><span>Open</span>') + '</div>';
+  });
+  return h + '</div>';
+}
+function vLegends(c){
+  var car = Object.keys(st.career).map(function(id){ return st.career[id] }), L = legends();
+  function top(key){ return car.slice().sort(function(a, b){ return b[key] - a[key] })[0] }
+  function rec(label, key, unit){ var p = top(key); return '<div class="rec"><b>' + (p && p[key] ? esc(p.n) : "Not yet") + '</b><span>' + (p && p[key] ? p[key] + " " + unit : "Play to set one") + '</span><small>' + label + '</small></div>' }
+  var wins = st.trophies.length;
+  var h = '<div class="stack"><div class="card"><h3>Club records</h3><div class="recs">' + rec("Top scorer", "g", "goals") + rec("Most appearances", "apps", "matches") + rec("Most player of the match", "mom", "awards") +
+    '<div class="rec"><b>' + wins + '</b><span>' + (wins === 1 ? "trophy" : "trophies") + '</span><small>Won so far</small></div></div></div>';
+  h += '<div class="card"><h3>Hall of fame</h3>' + (L.length ? '<div class="hof">' + L.map(function(p){
+    var n = numOf(p.id), ret = st.retired[n] === p.id, here = !!playerOf(p.id);
+    return '<div class="leg">' + avatar(p.id, 56, p.pos) + '<div><b>' + esc(p.n) + '</b><small>' + p.g + ' goals &middot; ' + p.apps + ' matches &middot; ' + p.mom + ' player of the match</small><small>' + (here ? "Still at the club" : "Moved on") + ' &middot; shirt ' + n + '</small></div>' +
+      (ret ? '<span class="chip-on">Number retired</span>' : '<button class="btn" data-act="retire" data-id="' + p.id + '">Retire number ' + n + '</button>') + '</div>';
+  }).join("") + '</div>' : '<p class="hint" style="margin:0">Score 10 goals, play 30 matches or win 5 player of the match awards and a player joins the Hall of fame. Then you can retire their shirt number.</p>') + '</div>';
+  var rn = Object.keys(st.retired);
+  if(rn.length) h += '<div class="card"><h3>Retired shirts</h3><div class="shirts">' + rn.sort(function(a, b){ return a - b }).map(function(n){
+    var rec2 = st.career[st.retired[n]];
+    return '<div class="rs">' + shirt({ c1: st.club.c1, c2: st.club.c2, pat: st.club.pat }, n) + '<span>' + esc(rec2 ? rec2.n : "") + '</span></div>';
+  }).join("") + '</div></div>';
+  h += '<div class="card"><h3>Best XI of all time</h3>' + (car.length ? xiPitch() + '<p class="hint" style="margin:8px 0 0">Picked from everyone who has played for the club, by goals, matches and player of the match awards.</p>' : '<p class="hint" style="margin:0">Play a match and the first names go on the board.</p>') + '</div>';
+  return h + '</div>';
+}
+
+/* ---------- set pieces ---------- */
+function routineSvg(k){
+  var P = {
+    near: { path: "M228 12Q190 4 152 24", t: [152, 24], extra: "" },
+    far: { path: "M228 12Q150 -6 88 24", t: [88, 24], extra: "" },
+    short: { path: "M228 12L206 40", t: [206, 40], extra: '<path class="route" d="M206 40Q170 60 126 14" fill="none"/><circle cx="126" cy="14" r="4" fill="#ff9d3c"/>' },
+    edge: { path: "M228 12Q176 40 124 100", t: [124, 100], extra: '<path class="route" d="M124 100Q122 60 120 12" fill="none"/><circle cx="120" cy="12" r="4" fill="#ff9d3c"/>' }
+  }[k];
+  return '<svg class="rsvg" viewBox="0 0 250 150" role="img" aria-label="Diagram of the ' + RTN[k] + ' routine"><rect width="250" height="150" rx="10" style="fill:var(--g1)"/><g fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6"><rect x="40" y="6" width="170" height="86"/><rect x="88" y="6" width="74" height="28"/><path d="M96 92a30 22 0 0 0 58 0"/></g><rect x="108" y="2" width="34" height="6" fill="#fff"/>' +
+    '<path d="M222 6a12 12 0 0 0 12 12" fill="none" stroke="#fff" stroke-opacity=".7"/><path class="route" d="' + P.path + '" fill="none"/>' + P.extra +
+    '<circle cx="' + P.t[0] + '" cy="' + P.t[1] + '" r="6" fill="#ff9d3c" stroke="#fff"/><circle cx="228" cy="12" r="5" fill="#fff"/>' +
+    '<circle cx="70" cy="40" r="4" fill="#8fa0d0"/><circle cx="96" cy="50" r="4" fill="#8fa0d0"/><circle cx="130" cy="44" r="4" fill="#8fa0d0"/><circle cx="170" cy="52" r="4" fill="#8fa0d0"/></svg>';
+}
+var RTN = { near: "near post flick", far: "far post header", short: "short corner", edge: "edge of the box" };
+var RTD = { near: "A fast ball to the near post for a flick on.", far: "A high ball to the back post. Tall players love it.", short: "Play it short, then curl in a shot.", edge: "Pull it back for a first time strike." };
+function spStat(k){ var s = st.sp.stats[k] || { u: 0, g: 0 }; return s }
+function spMast(k){ return Math.min(3, Math.floor(spStat(k).g / 2)) }
+function masteryMap(){ var o = {}; Object.keys(st.sp.stats).forEach(function(k){ o[k] = spMast(k) }); return o }
+function vSets(c){
+  var cr = st.sp.corner, xiP = st.xi.filter(Boolean).map(playerOf).filter(Boolean);
+  function sel(key, cur, list, none){
+    return '<select class="wzin" data-sel="sp:' + key + '" aria-label="' + key + '"><option value="">' + none + '</option>' + list.map(function(p){ return '<option value="' + p.id + '"' + (cur === p.id ? " selected" : "") + '>' + esc(p.name) + ' (' + p.pos + ', ' + rate(p) + ')</option>' }).join("") + '</select>';
+  }
+  var h = '<div class="stack"><div class="card feat"><h3>Corner routine</h3><div class="spwrap"><div>' + routineSvg(cr.routine) + '</div><div><h2>' + RTN[cr.routine].charAt(0).toUpperCase() + RTN[cr.routine].slice(1) + '</h2><p class="hint">' + RTD[cr.routine] + '</p>' +
+    '<div class="opts">' + ["near", "far", "short", "edge"].map(function(k){ return optBtn("spset", "corner", k, RTN[k].charAt(0).toUpperCase() + RTN[k].slice(1), cr.routine === k) }).join("") + '</div></div></div>' +
+    '<div class="edgrid" style="margin-top:12px"><div><label class="sendlab">Who takes it</label>' + sel("taker", cr.taker, xiP.filter(function(p){ return p.pos !== "GK" }), "The coach picks") + '</div><div><label class="sendlab">Who attacks the ball</label>' + sel("target", cr.target, xiP.filter(function(p){ return p.pos !== "GK" }), "The coach picks") + '</div></div>' +
+    '<h4 style="margin-top:14px">Practice makes it better</h4><div class="mast2">' + ["near", "far", "short", "edge"].map(function(k){ var s = spStat(k); return '<div><b>' + RTN[k].charAt(0).toUpperCase() + RTN[k].slice(1) + '</b>' + lvlPips(spMast(k)) + '<small>Used ' + s.u + ', scored ' + s.g + '</small></div>' }).join("") + '</div>' +
+    '<p class="hint" style="margin:8px 0 0">Every two goals from a routine make it a level better. Your pick comes up first when a corner arrives in a match, and you can still change your mind on the day.</p></div>';
+  h += '<div class="card"><h3>Free kick style</h3><div class="opts">' + Object.keys(S.FKSTYLE).map(function(k){ return optBtn("spset", "fk", k, S.FKSTYLE[k].n, st.sp.fk === k) }).join("") + '</div>' +
+    '<div class="edgrid" style="margin-top:12px"><div><label class="sendlab">Who takes free kicks</label>' + sel("fk", st.fk, xiP.filter(function(p){ return p.pos !== "GK" }), "The coach picks") + '</div><div class="mast2">' + Object.keys(S.FKSTYLE).map(function(k){ var s = spStat("fk_" + k); return '<div><b>' + S.FKSTYLE[k].n.split(" ").slice(0, 2).join(" ") + '</b>' + lvlPips(spMast("fk_" + k)) + '<small>Used ' + s.u + ', scored ' + s.g + '</small></div>' }).join("") + '</div></div></div>';
+  return h + '</div>';
+}
+
 /* ---------- title menu ---------- */
 var tiOn = false;
 function titleOpen(){
   var el = $("ti");
   if(!el){ el = document.createElement("div"); el.id = "ti"; el.className = "ov"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "Menu"); document.body.appendChild(el) }
   var c = ctx(), pend = pendingList().length && st.played.length < ROUNDS;
+  var grp = "", btns = "";
+  VIEWS.filter(function(v){ return !v.hidden }).forEach(function(v){
+    if(v.g !== grp){ grp = v.g; btns += '<div class="tig">' + v.g + '</div>' }
+    btns += '<button class="btn" data-act="tigo" data-v="' + v.id + '">' + icon(v.icon) + v.title + '</button>';
+  });
   el.innerHTML = '<div class="rvbox timenu">' + crestSvg(96, true) + '<div class="eyebrow" style="color:var(--gold)">JT\'s Dugout</div><h2>' + esc(clubName()) + '</h2><p class="hint">' + esc(S.leagueName()) + ' &middot; season ' + st.season + ' &middot; ' + st.coins + ' coins</p>' +
-    '<div class="timbtns"><button class="btn btn-go btn-big" data-act="tiplay">' + (st.played.length || st.hist.length ? (pend ? "Continue: match ready" : "Continue") : "Play") + '</button>' +
-    '<button class="btn" data-act="tigo" data-v="squad">Squad and tactics</button><button class="btn" data-act="tigo" data-v="train">Training ground</button><button class="btn" data-act="tigo" data-v="league">League and cup</button><button class="btn" data-act="tigo" data-v="market">Transfer market</button><button class="btn" data-act="tigo" data-v="business">Business</button><button class="btn" data-act="tigo" data-v="studio">Studio</button><button class="btn" data-act="tigo" data-v="club">Club and badges</button><button class="btn" data-act="tihelp">How it works</button><button class="btn" data-act="tigo" data-v="settings">Settings</button></div></div>';
+    '<button class="btn btn-go btn-big" data-act="tiplay">' + (st.played.length || st.hist.length ? (pend ? "Continue: match ready" : "Continue") : "Play") + '</button>' +
+    '<div class="timbtns">' + btns + '<div class="tig">More</div><button class="btn" data-act="tihelp">How it works</button><button class="btn" data-act="tigo" data-v="inbox">Inbox</button><button class="btn" data-act="tigo" data-v="settings">Settings</button></div></div>';
   el.classList.add("on"); tiOn = true;
   var b = el.querySelector("button"); if(b) b.focus();
 }
@@ -1038,6 +1406,7 @@ function renamePlayer(id, raw){
 }
 function setNumber(id, n){
   n = clamp(parseInt(n, 10) || numOf(id), 1, 99);
+  if(st.retired[n] && st.retired[n] !== id){ toast("That shirt number is retired for a club legend. Pick another."); return }
   var old = numOf(id), other = null;
   S.PLAYERS.forEach(function(q){ if(q.id !== id && numOf(q.id) === n) other = q.id });
   if(other) st.num[other] = old;
@@ -1129,16 +1498,17 @@ function vDugout(c){
   var done = st.played.length, t = teamNow(c), tb = S.table(st.seed, st.played), h = '<div class="stack">';
   h += heroHtml(c, t, tb);
   var pos = posOf(tb), last5 = tb.filter(function(r){ return r.id === 0 })[0].form;
-  var cupHtml;
-  if(st.cup.ties.length >= 4 && st.cup.ties[3].won) cupHtml = '<div class="big">Winners</div><small>Brilliant run.</small>';
-  else if(st.cup.out) cupHtml = '<div class="big">Out</div><small>Knocked out in the ' + CUP_NAMES[st.cup.ties.length - 1].toLowerCase() + '. The league carries on.</small>';
-  else if(cupReady(c)){ var cn = st.cup.ties.length; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[cn] + '</div><small>v ' + esc(S.CLUBS[S.cupOpponent(st.seed, cn)].name) + '</small><button class="btn btn-go" data-act="kickcup">Play the tie</button>'; }
-  else { var nx = CUP_AT[st.cup.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CUP_NAMES[st.cup.ties.length] + '</div><small>Arrives at ' + nx + ' focus points. You have ' + sfp(c) + '.</small>'; }
+  var cid = nextComp(c), CC = COMPS[cid], cs = cupSt(cid), cupHtml;
+  if(compWon(cid)) cupHtml = '<div class="big">Winners</div><small>' + esc(CC.name) + '. Brilliant run.</small>';
+  else if(cs.out) cupHtml = '<div class="big">Out</div><small>' + esc(CC.name) + ': knocked out in the ' + CC.rounds[cs.ties.length - 1].toLowerCase() + '.</small>';
+  else if(compReady(c, cid)){ var cn = cs.ties.length; cupHtml = '<div class="big" style="font-size:1.3rem">' + CC.rounds[cn] + '</div><small>' + esc(CC.name) + ' v ' + esc(S.oppName(compOpp(cid, cn))) + '</small><button class="btn btn-go" data-act="kickcup" data-comp="' + cid + '">Play the tie</button>'; }
+  else { var nx = CC.at[cs.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CC.rounds[cs.ties.length] + '</div><small>' + esc(CC.name) + ' arrives at ' + nx + ' focus points. You have ' + c.tr.fp + '.</small>'; }
   h += '<div class="tiles"><div class="tile"><h3>League</h3><div class="big">' + (done ? ord(pos) : "-") + '</div><small>' + (done ? tb[pos - 1].pts + " points" : "Everyone starts level") + '</small></div>' +
     '<div class="tile"><h3>Form</h3><div style="margin:8px 0">' + (last5.length ? formDots(last5) : '<span class="hint">No games yet</span>') + '</div><small>Last five matches</small></div>' +
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
-    '<div class="tile"><h3>Cup</h3>' + cupHtml + '</div></div>';
+    '<div class="tile"><h3>Cups</h3>' + cupHtml + '</div></div>';
   h += '<div class="row2"><section class="card"><h3>Scouting report</h3>' + (done < ROUNDS ? compareBars(t, S.clubTeam(S.ourFixture(done).opp - 1)) + '<p class="hint" style="margin:10px 0 0">Our side on the left, theirs on the right. Training sharpens ours.</p>' : '<p class="hint">Season done. The table and trophies are in League and Club.</p>') + '</section>' + managerCard(c) + '</div>';
+  h += pressTeaser();
   h += riseCard(c);
   var ts = trySessions(c, 3);
   if(ts.length){
@@ -1177,16 +1547,7 @@ function vLeague(c){
     h += '<tr class="' + (r.id === 0 ? "us" : "") + zone + '"><td>' + (i + 1) + '</td><td><span style="display:flex;align-items:center;gap:8px">' + cr + esc(r.name) + dealLogo(r.id) + '</span></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + (r.gf - r.ga) + '</td><td><b>' + r.pts + '</b></td><td class="form">' + formDots(r.form) + '</td></tr>';
   });
   h += '</table></div><p class="hint" style="margin-top:10px">' + zoneNote() + ' ' + (st.played.length ? esc(tb[0].name) + ' lead the table on ' + tb[0].pts + ' points.' : 'No matches yet. Everyone starts level.') + '</p></div>';
-  h += '<div class="card"><h3>The Cup</h3><div class="bracket">';
-  for(var k = 0; k < 4; k++){
-    var tie = st.cup.ties[k], oi = tie ? tie.opp : S.cupOpponent(st.seed, k) + 1, nm = S.CLUBS[oi - 1].name, cls = "", line;
-    if(tie){ cls = tie.won ? "won" : "lost"; line = '<em>' + (tie.won ? "Won " : "Lost ") + ourGoals(tie) + " to " + theirGoals(tie) + (tie.pens ? " (pens)" : "") + '</em> <button class="btn btn-quiet" style="padding:1px 8px" data-act="replay" data-k="cup" data-i="' + k + '">Report</button>' }
-    else if(st.cup.out) line = '<em>Out of the cup</em>';
-    else if(k === st.cup.ties.length && cupReady(c)){ cls = "next"; line = '<em style="color:var(--gold)">Ready to play</em>' }
-    else line = '<em>Arrives at ' + CUP_AT[k] + ' focus points</em>';
-    h += '<div class="bn ' + cls + '"><b>' + CUP_NAMES[k] + '</b>' + opCrest(oi, 34, true) + '<span>' + esc(nm) + '</span>' + line + '</div>';
-  }
-  h += '</div></div>';
+  COMP_ORDER.forEach(function(id){ h += cupCard(c, id) });
   var tally = goalTally(), top = Object.keys(tally).sort(function(a, b){ return tally[b] - tally[a] }), imp = improved();
   function idOf(n){ var r = ""; S.PLAYERS.forEach(function(p){ if(p.name === n) r = p.id }); return r || n }
   h += '<div class="row2"><div class="card"><h3>Golden boot</h3>' + (top.length ? top.slice(0, 4).map(function(n, i){ return '<div class="scorer"><span class="n">' + (i + 1) + '</span><span style="display:flex;align-items:center;gap:8px">' + avatar(idOf(n), 34) + esc(n) + '</span><b>' + tally[n] + '</b></div>' }).join("") : '<p class="hint">No goals yet.</p>') + '</div>' +
@@ -1204,9 +1565,11 @@ function vLeague(c){
 function vClub(c){
   var defs = badgeDefs(c), got = defs.filter(function(d){ return d.ok }).length, w = 0, d = 0, l = 0, gf = 0, ga = 0, tb = S.table(st.seed, st.played);
   st.played.forEach(function(m){ var x = resultOf(m); if(x === "W") w++; else if(x === "D") d++; else l++; gf += ourGoals(m); ga += theirGoals(m) });
-  var champ = st.played.length >= ROUNDS && posOf(tb) === 1, cupw = st.cup.ties.length >= 4 && st.cup.ties[3].won;
+  var champ = st.played.length >= ROUNDS && posOf(tb) === 1;
+  function tcount(kind, now){ return st.trophies.filter(function(t){ return t.kind === kind }).length + (now ? 1 : 0) }
+  var cab = [["league", "League title", tcount("league", champ), "Finish top after fifteen matches"], ["cup", "The Cup", tcount("cup", compWon("cup")), "Win all four ties"], ["lcup", "League Cup", tcount("lcup", compWon("lcup")), "Win all three ties"], ["champ", "Champions Cup", tcount("champ", compWon("champ")), "Win all four ties against far away clubs"]];
   var h = '<div class="stack"><div class="card"><h3>Season ' + st.season + ' so far</h3><div class="sumgrid"><div><b>' + st.played.length + '</b><small>Played</small></div><div><b>' + w + '</b><small>Won</small></div><div><b>' + d + '</b><small>Drawn</small></div><div><b>' + l + '</b><small>Lost</small></div><div><b>' + gf + '</b><small>For</small></div><div><b>' + ga + '</b><small>Against</small></div></div></div>';
-  h += '<div class="card"><h3>Trophy cabinet</h3><div class="cabinet"><div class="cab ' + (champ ? "" : "off") + '">' + cupSvg(champ) + '<h4>League title</h4><span class="hint">' + (champ ? "Champions" : "Finish top after fifteen matches") + '</span></div><div class="cab ' + (cupw ? "" : "off") + '">' + cupSvg(cupw) + '<h4>The Cup</h4><span class="hint">' + (cupw ? "Winners" : "Win all four ties") + '</span></div></div></div>';
+  h += '<div class="card"><h3>Trophy cabinet</h3><div class="cabinet c4">' + cab.map(function(x){ return '<div class="cab ' + (x[2] ? "" : "off") + '">' + cupSvg(!!x[2]) + '<h4>' + x[1] + (x[2] > 1 ? ' x' + x[2] : "") + '</h4><span class="hint">' + (x[2] ? "Won " + x[2] + (x[2] === 1 ? " time" : " times") : x[3]) + '</span></div>' }).join("") + '</div></div>';
   h += '<div class="card"><h3>Badges &middot; ' + got + ' of ' + defs.length + '</h3><div class="badges">' + defs.map(function(b, i){
     return '<div class="bd ' + (b.ok ? "" : "off") + '">' + medal(i, b.ok) + '<span><b>' + b.name + '</b><small>' + b.desc + '</small></span></div>';
   }).join("") + '</div></div>';
@@ -1225,7 +1588,7 @@ function reportText(){
     "League matches played: " + st.played.length + " of " + ROUNDS,
     "Record: won " + w + ", drawn " + d + ", lost " + l + ", goals " + gf + " for and " + ga + " against",
     "League position: " + (st.played.length ? ord(pos) : "not started"),
-    "Cup: " + (st.cup.ties.length ? (st.cup.out ? "out in the " + CUP_NAMES[st.cup.ties.length - 1].toLowerCase() : (st.cup.ties.length >= 4 ? "winners" : "through " + st.cup.ties.length + " ties")) : "not started"),
+    "Cup: " + compText("cup").toLowerCase(), "League Cup: " + compText("lcup").toLowerCase(), compOn("champ") ? "Champions Cup: " + compText("champ").toLowerCase() : "Champions Cup: not open yet", "Fan mood: " + fanLabel(st.fans).toLowerCase(), "Stadium upgrades: " + (upLvl("stands") + upLvl("lights") + upLvl("pitch")) + " of 9", "Staff hired: " + ["coach", "physio", "scout"].filter(function(k){ return staffLvl(k) }).length + " of 3", "Club legends: " + legends().length,
     "Formation: " + st.formation, "Luck dial: " + Math.round(c.tr.luck * 100) + " percent", "Focus points: " + c.tr.fp, "Manager rank: " + rankOf(c.tr.fp),
     "Badges earned: " + badgeDefs(c).filter(function(b){ return b.ok }).length + " of " + badgeDefs(c).length, "", "Training sessions tried:"];
   var any = false;
@@ -1402,24 +1765,26 @@ function celebrate(e){
 function inForm(){
   return st.xi.filter(Boolean).map(playerOf).filter(function(q){ return q && skillTotal(q.id) > 0 }).sort(function(a, b){ return skillTotal(b.id) - skillTotal(a.id) }).slice(0, 3);
 }
-function openMatch(kind){
+function openMatch(kind, comp0){
   var c = ctx(), us = teamNow(c), round, tok = null, opp, home, away, hm, k;
   if(kind === "cup"){
-    if(!cupReady(c)) return;
-    k = st.cup.ties.length; var oi = S.cupOpponent(st.seed, k);
-    opp = S.clubTeam(oi); hm = (k % 2 === 0) || k === 3; round = k;
-    playing = { kind: "cup", round: k, opp: oi + 1, hm: hm };
+    var comp = comp0 || "cup";
+    if(!compReady(c, comp)) return;
+    k = cupSt(comp).ties.length; var oid = compOpp(comp, k);
+    opp = S.oppTeam(oid); hm = compHome(comp, k); round = k;
+    playing = { kind: "cup", comp: comp, round: k, opp: oid, hm: hm };
   } else {
     round = st.played.length; if(round >= ROUNDS) return;
     tok = pendingList()[0]; if(!tok) return;
     var fx = S.ourFixture(round); opp = S.clubTeam(fx.opp - 1); hm = fx.home;
     playing = { kind: "league", round: round, opp: fx.opp, hm: hm, tok: tok };
   }
+  if(hm) us.luck = Math.min(1, us.luck + homeLuckBonus());
   home = hm ? us : opp; away = hm ? opp : us;
   playing.home = home; playing.away = away; playing.c = c; playing.us = us; playing.ourS = hm ? "h" : "a"; playing.min = 0; playing.mom = 0;
   playing.f = st.formation; playing.xiNow = st.xi.slice(); playing.subs = 0; playing.off = []; playing.subLog = [];
   buildTokens(playing);
-  var title = kind === "cup" ? CUP_NAMES[round] : "Matchday " + (round + 1);
+  var title = kind === "cup" ? COMPS[playing.comp].rounds[round] + (playing.comp !== "cup" ? ": " + COMPS[playing.comp].name : "") : "Matchday " + (round + 1);
   var fm = inForm();
   $("match").innerHTML = '<div class="mhead"><h2>' + title + '</h2><span id="ctlTop"><button class="btn btn-quiet" data-act="closem">Not now</button></span></div>' +
     sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + sponsorLine(playing.opp) + lpHtml(playing) +
@@ -1437,8 +1802,11 @@ function openMatch(kind){
 function startMatch(mode){
   if(!playing || playing.M) return;
   var p = playing, fkp = st.fk ? playerOf(st.fk) : null;
-  var seed = (p.kind === "cup" ? st.seed + 100003 + p.round * 6151 : st.seed + p.round * 7919) >>> 0;
-  p.M = S.createMatch(p.home, p.away, seed, { our: p.ourS, interactive: true, cup: false, fk: fkp && st.xi.indexOf(fkp.id) >= 0 ? fkp.name : "" });
+  var seed = (p.kind === "cup" ? st.seed + 100003 + p.round * 6151 + COMP_ORDER.indexOf(p.comp || "cup") * 911 : st.seed + p.round * 7919) >>> 0;
+  function nm(id){ var q = id ? playerOf(id) : null; return q && st.xi.indexOf(q.id) >= 0 ? q.name : "" }
+  p.M = S.createMatch(p.home, p.away, seed, { our: p.ourS, interactive: true, cup: false, fk: fkp && st.xi.indexOf(fkp.id) >= 0 ? fkp.name : "",
+    coach: staffLvl("coach"), physio: staffLvl("physio"), captain: nm(st.cap), fkStyle: st.sp.fk, mast: masteryMap(),
+    corner: { routine: st.sp.corner.routine, taker: nm(st.sp.corner.taker), target: nm(st.sp.corner.target) } });
   p.mode = mode; p.shown = 0; p.sh = 0; p.sa = 0;
   p.nameId = {}; (p.ourS === "h" ? p.home : p.away).players.forEach(function(q){ if(q.id) p.nameId[q.name] = q.id });
   p.lu = { f: p.f, n: (p.ourS === "h" ? p.home : p.away).players.map(function(q){ return q.name }), nums: (p.ourS === "h" ? p.home : p.away).players.map(function(q){ return q.id ? numOf(q.id) : 0 }) };
@@ -1480,7 +1848,7 @@ function showChoice(P){
 
 /* ---------- changes ---------- */
 function teamFrom(p, xi){
-  var t = S.buildTeam(p.f, xi, p.c.tr.boost, p.c.tr.luck, bonusMap()), m = tacMods();
+  var t = S.buildTeam(p.f, xi, p.c.tr.boost, p.c.tr.luck + (p.hm ? homeLuckBonus() : 0), bonusMap()), m = tacMods();
   t.atk += m.atk; t.mid += m.mid; t.def += m.def;
   return t;
 }
@@ -1661,7 +2029,7 @@ function tagWhy(e, p){
   var a = whyFor(id, "atk"); if(a) e.why = a.title;
 }
 function evHtml(e, ourS){
-  var tag = e.k === "luck" ? '<span class="tag">LUCK</span>' : (e.lucky ? '<span class="tag">LUCKY GOAL</span>' : (e.k === "sub" ? '<span class="tag">CHANGE</span>' : ""));
+  var tag = e.k === "luck" ? '<span class="tag">LUCK</span>' : (e.lucky ? '<span class="tag">LUCKY GOAL</span>' : (e.k === "sub" ? '<span class="tag">CHANGE</span>' : (e.setpiece && e.k === "goal" ? '<span class="tag">SET PIECE</span>' : "")));
   var why = e.k === "goal" && e.side === ourS && e.why ? '<em class="why">Trained in: ' + esc(e.why) + '</em>' : "";
   return '<div class="ev ' + e.k + (e.lucky ? " lucky" : "") + (e.k === "goal" && e.side === ourS ? " us" : "") + '"><b>' + (e.k === "kick" || e.k === "pens" || e.k === "pen" ? "" : e.m + "'") + '</b><span>' + tag + esc(e.text) + why + '</span></div>';
 }
@@ -1716,11 +2084,11 @@ function endPanel(){
   var luckN = ev.filter(function(e){ return e.k === "luck" || e.lucky }).length;
   var won = M.winner === ours, drew = M.hs === M.as && !M.pens;
   var cls = won ? "win" : (drew ? "draw" : "loss");
-  var head = p.kind === "cup" ? (won ? "Through to the next round" : "Out of the cup this time") : (won ? "A win" : (drew ? "A draw" : "Beaten this time"));
-  if(p.kind === "cup" && p.rep ? (p.rep.k === 3 && won) : (p.kind === "cup" && p.round === 3 && won)) head = "Cup winners";
+  var CCe = COMPS[p.comp || "cup"], head = p.kind === "cup" ? (won ? "Through to the next round" : "Out of the " + CCe.name.toLowerCase() + " this time") : (won ? "A win" : (drew ? "A draw" : "Beaten this time"));
+  if(p.kind === "cup" && p.rep ? (p.rep.k === CCe.rounds.length - 1 && won) : (p.kind === "cup" && p.round === CCe.rounds.length - 1 && won)) head = CCe.name + " winners";
   var en = p.entry || {}, rt = en.rt || [];
   var growth = p.growth && p.growth.length ? '<p>Growing: ' + esc(p.growth.join(", ")) + '.</p>' : "";
-  if(!p.rep && en.inc) growth += '<p class="earn">Earned <b>' + en.inc + ' coins</b>' + (en.spon ? ' (' + en.spon + ' from sponsors)' : "") + '.</p>';
+  if(!p.rep && en.inc) growth += '<p class="earn">Earned <b>' + en.inc + ' coins</b>' + ((en.spon || en.gate) ? ' (' + [en.gate ? en.gate + " from the gate" : "", en.spon ? en.spon + " from sponsors" : ""].filter(Boolean).join(", ") + ')' : "") + '.</p>';
   var mv = "";
   if(p.mv && p.kind === "league") mv = '<p>' + (p.round === 0 ? "Now " + ord(p.mv.after) + " in the league." : (p.mv.after < p.mv.before ? "Up to " + ord(p.mv.after) + " in the league." : (p.mv.after > p.mv.before ? "Down to " + ord(p.mv.after) + " in the league." : "Still " + ord(p.mv.after) + " in the league."))) + '</p>';
   var motm = rt.length ? '<div class="motm">' + avatar(rt[0].id || rt[0].n, 54, rt[0].pos) + '<div><span class="eyebrow">Player of the match</span><br><b>' + esc(rt[0].n) + '</b> <span class="mute">' + rt[0].v.toFixed(1) + '</span></div></div>' +
@@ -1744,7 +2112,7 @@ function goalReplay(i){
   var p = playing; if(!p) return;
   var e = p.M.events[i], en = p.entry; if(!e || !en || !en.lu) return;
   if(!$("lp")){
-    var m = en.lu, F = S.FORMATIONS[m.f] || S.FORMATIONS["4-3-3"], oppN = S.CLUBS[en.opp - 1].name, oppT = S.clubTeam(en.opp - 1);
+    var m = en.lu, F = S.FORMATIONS[m.f] || S.FORMATIONS["4-3-3"], oppN = S.oppName(en.opp), oppT = S.oppTeam(en.opp);
     var ourPl = m.n.map(function(nm, k){ return { name: nm, pos: F.slots[k] } });
     (en.sb || []).forEach(function(sx){ if(sx.m < e.m && ourPl[sx.slot]) ourPl[sx.slot] = { name: sx.on, pos: ourPl[sx.slot].pos } });
     var our = { name: clubName(), players: ourPl }, opp = { name: oppN, players: oppT.players };
@@ -1777,18 +2145,21 @@ function finalise(){
   var rt = ratingsFor(M.events, ours, our, wonM, gAgainst, p.opp + ":" + p.round);
   var lu = p.lu || { f: p.f, n: ourT.players.map(function(q){ return q.name }), nums: [] };
   if(p.kind === "cup"){
-    entry = { k: p.round, opp: p.opp, home: p.hm, hs: M.hs, as: M.as, events: M.events, pens: M.pens, won: wonM, rt: rt, lu: lu, sb: p.subLog };
-    st.cup.ties.push(entry); if(!wonM) st.cup.out = true;
+    var cmp = p.comp || "cup", CC2 = COMPS[cmp], cst = cupSt(cmp);
+    entry = { k: p.round, comp: cmp, opp: p.opp, home: p.hm, hs: M.hs, as: M.as, events: M.events, pens: M.pens, won: wonM, rt: rt, lu: lu, sb: p.subLog };
+    cst.ties.push(entry); if(!wonM) cst.out = true;
     entry.inc = payout(entry, "cup");
-    post((wonM ? "Cup win: " : "Cup exit: ") + CUP_NAMES[p.round], "Match report", (wonM ? "Through after " : "Out after ") + ourGoals(entry) + " to " + theirGoals(entry) + (M.pens ? " and penalties" : "") + " against " + S.CLUBS[p.opp - 1].name + ".");
-    if(wonM && p.round === 3) post("Cup winners!", "The Chairman (Jay)", "You have won the cup. A brilliant run, manager.");
+    post((wonM ? CC2.name + " win: " : CC2.name + " exit: ") + CC2.rounds[p.round], "Match report", (wonM ? "Through after " : "Out after ") + ourGoals(entry) + " to " + theirGoals(entry) + (M.pens ? " and penalties" : "") + " against " + S.oppName(p.opp) + ".");
+    if(wonM && p.round === CC2.rounds.length - 1){ post(CC2.name + " winners!", "The Chairman (Jay)", "You have won the " + CC2.name + ". A brilliant run, manager."); addFans(15) }
+    moodAfter(entry, "cup"); writeNews(entry, "cup", cmp);
   } else {
     var before = posOf(S.table(st.seed, st.played));
     entry = { round: p.round, opp: p.opp, home: p.hm, hs: M.hs, as: M.as, events: M.events, slug: p.tok.slug, luck: Math.round(p.c.tr.luck * 100), rt: rt, lu: lu, sb: p.subLog };
     st.played.push(entry); st.used.push(p.tok.slug);
     entry.inc = payout(entry, "league");
+    moodAfter(entry, "league"); writeNews(entry, "league", "");
     p.mv = { before: before, after: posOf(S.table(st.seed, st.played)) };
-    var o = S.CLUBS[p.opp - 1].name, g = ourGoals(entry), a = theirGoals(entry), x = resultOf(entry);
+    var o = S.oppName(p.opp), g = ourGoals(entry), a = theirGoals(entry), x = resultOf(entry);
     var luckN = M.events.filter(function(e){ return e.k === "luck" || e.lucky }).length, whyN = M.events.filter(function(e){ return e.k === "goal" && e.side === ours && e.why }).length;
     post((x === "W" ? "Win" : (x === "D" ? "Draw" : "Defeat")) + ": " + g + " to " + a + " against " + o, "Match report",
       (x === "W" ? "A good day. " : (x === "D" ? "A point to take away. " : "Not our day, and that is football. ")) +
@@ -1803,7 +2174,11 @@ function finalise(){
     }
   }
   var grew = [], byName = {}, gain = {};
-  our.players.forEach(function(q){ if(q.id){ byName[q.name] = q.id; gain[q.id] = (gain[q.id] || 0) + 1 } });
+  our.players.forEach(function(q){ if(q.id){ byName[q.name] = q.id; gain[q.id] = (gain[q.id] || 0) + 1 + upLvl("pitch") } });
+  careerUpdate(entry, our, byName);
+  M.events.forEach(function(e){
+    if(e.setpiece && e.side === ours && e.routine){ var ss = st.sp.stats[e.routine] || (st.sp.stats[e.routine] = { u: 0, g: 0 }); ss.u++; if(e.k === "goal") ss.g++ }
+  });
   M.events.forEach(function(e){ if(e.k === "goal" && e.side === ours && byName[e.who]) gain[byName[e.who]] += 2 });
   Object.keys(gain).forEach(function(id){
     var xp = (st.dev.xp[id] || 0) + gain[id]; st.dev.xp[id] = xp;
@@ -1813,12 +2188,12 @@ function finalise(){
   if(grew.length) post("Players improving", "Coaching staff", "Match time is making players better: " + grew.join(", ") + ".");
   p.growth = grew; p.entry = entry; save();
 }
-function replay(kind, i){
-  var m = kind === "cup" ? st.cup.ties[i] : st.played[i]; if(!m) return;
-  var ours = ourSide(m), opp = S.CLUBS[m.opp - 1].name;
+function replay(kind, i, comp){
+  var m = kind === "cup" ? cupSt(comp || "cup").ties[i] : st.played[i]; if(!m) return;
+  var ours = ourSide(m), opp = S.oppName(m.opp);
   var rep = { hname: m.home ? clubName() : opp, aname: m.home ? opp : clubName(), k: m.k };
   var win = m.pens ? (m.won ? ours : (ours === "h" ? "a" : "h")) : (m.hs > m.as ? "h" : (m.as > m.hs ? "a" : ""));
-  playing = { replay: true, kind: kind === "cup" ? "cup" : "league", round: -1, ourS: ours, rep: rep, entry: m, M: { events: m.events, hs: m.hs, as: m.as, pens: m.pens, winner: win }, shown: 0, sh: 0, sa: 0, finalised: true, growth: [], nameId: {} };
+  playing = { replay: true, comp: comp || "cup", kind: kind === "cup" ? "cup" : "league", round: -1, ourS: ours, rep: rep, entry: m, M: { events: m.events, hs: m.hs, as: m.as, pens: m.pens, winner: win }, shown: 0, sh: 0, sa: 0, finalised: true, growth: [], nameId: {} };
   m.events.forEach(function(e){ if(e.k === "goal" && e.side === ours && e.why === undefined) playing.nameId[e.who] = null });
   $("ov").classList.add("on");
   $("match").innerHTML = '<div class="mhead"><h2>Match report</h2><button class="btn" id="skipb" data-act="skiphl">Skip</button></div>' + sbHtml({ hn: rep.hname, an: rep.aname, ourS: ours, oppId: m.opp, clk: "" }) + '<div id="rpitch"></div><div class="mbtns" style="margin:12px 0 8px"><button class="btn" data-act="rp" data-m="full">Full report</button><button class="btn" data-act="rp" data-m="hl">Highlights</button></div><div class="feed" id="feed"></div><div id="fin"></div>';
@@ -1960,6 +2335,8 @@ document.addEventListener("change", function(e){
   }
   var key = t.getAttribute && t.getAttribute("data-sel"); if(!key) return;
   if(key === "cap" || key === "pk" || key === "fk"){ st[key] = t.value; save(); render(); return }
+  if(key === "sp:taker" || key === "sp:target"){ st.sp.corner[key.slice(3)] = t.value; save(); render(); return }
+  if(key === "sp:fk"){ st.fk = t.value; save(); render(); return }
   if(key.indexOf("tr:") === 0){ st.focus[key.slice(3)] = t.value; save(); render() }
 });
 
@@ -2011,6 +2388,10 @@ document.addEventListener("click", function(e){
   if(a === "rsask"){ resetAsk = b.getAttribute("data-v"); render(); return }
   if(a === "rsdo"){ var rk2 = b.getAttribute("data-v"); resetAsk = ""; resetDo(rk2); return }
   if(a === "menu"){ titleOpen(); return }
+  if(a === "upgrade"){ buyUpgrade(b.getAttribute("data-id")); return }
+  if(a === "hire"){ hireStaff(b.getAttribute("data-id")); return }
+  if(a === "retire"){ var rid = b.getAttribute("data-id"), rn = numOf(rid); st.retired[rn] = rid; var rc = st.career[rid]; post("Shirt retired", "The Chairman (Jay)", "Number " + rn + " is retired in honour of " + (rc ? rc.n : "a legend") + ". Nobody else will wear it."); pressPush("Number " + rn + " retired for " + (rc ? rc.n : "a legend"), "A shirt goes up on the wall at " + stadiumName() + ".", ""); addFans(5); save(); render(); toast("Number " + rn + " retired."); return }
+  if(a === "spset"){ var sk = b.getAttribute("data-k"), sv = b.getAttribute("data-v"); if(sk === "corner") st.sp.corner.routine = sv; else st.sp.fk = sv; save(); render(); return }
   if(a === "tiplay"){ titleClose(); view = "dugout"; render(); window.scrollTo(0, 0); return }
   if(a === "tigo"){ titleClose(); view = b.getAttribute("data-v"); sel = null; render(); window.scrollTo(0, 0); return }
   if(a === "tihelp"){ titleClose(); wizOpen(3, "help"); return }
@@ -2069,7 +2450,7 @@ document.addEventListener("click", function(e){
   }
   if(a === "tac"){ st.tac[b.getAttribute("data-k")] = b.getAttribute("data-v"); save(); render(); return }
   if(a === "kick"){ openMatch("league"); return }
-  if(a === "kickcup"){ openMatch("cup"); return }
+  if(a === "kickcup"){ openMatch("cup", b.getAttribute("data-comp") || "cup"); return }
   if(a === "start"){ startMatch(b.getAttribute("data-w")); return }
   if(a === "subopen"){ subOpen(); return }
   if(a === "subout"){ playing.subSel = +b.getAttribute("data-i"); subDraw(); return }
@@ -2093,7 +2474,7 @@ document.addEventListener("click", function(e){
   if(a === "skiphl"){ if(playing && playing.finishNow) playing.finishNow(); return }
   if(a === "closem"){ closeMatch(); return }
   if(a === "closeleague"){ closeMatch(); view = "league"; render(); return }
-  if(a === "replay"){ replay(b.getAttribute("data-k"), +b.getAttribute("data-i")); return }
+  if(a === "replay"){ replay(b.getAttribute("data-k"), +b.getAttribute("data-i"), b.getAttribute("data-comp") || "cup"); return }
   if(a === "rp"){ showAllReplay(b.getAttribute("data-m") === "hl"); return }
   if(a === "pf"){ posFilter = b.getAttribute("data-k"); render(); return }
   if(a === "form"){
