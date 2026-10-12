@@ -344,7 +344,7 @@ function draw(){
   h += '<div class="lhead"><div><span class="lpil">' + act.pillar + ' &middot; ' + act.title + '</span><h2>' + c.title + '</h2></div><button class="btn btn-quiet" data-lk="close">Leave it for now</button></div>';
   h += '<p class="lintro">' + c.intro + '</p>';
   if(x.done){
-    h += '<div class="ldone"><h3>Nicely done</h3><p>' + c.why + '</p><p class="lgain">+2 training levels for ' + act.title + '</p><div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button></div></div>';
+    h += '<div class="ldone"><h3>Nicely done</h3><p>' + c.why + '</p><p class="lgain">+2 training levels for ' + act.title + '</p><div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button></div></div>';
   } else {
     h += '<div class="lbody">' + bodyHtml(c, x) + '</div>';
     h += '<div class="lmsg" id="lmsg" role="status" aria-live="polite">' + (x.say || "") + (x.hint ? '<p class="lnudge"><b>Nudge:</b> ' + x.hint + '</p>' : "") + '</div>';
@@ -375,6 +375,7 @@ function onClick(e){
   var k = b.getAttribute("data-lk"), i = +b.getAttribute("data-i"), c = cur, x = X;
   if(k === "close"){ close(); return }
   if(k === "finish"){ var cb = done, cc = c; close(); if(cb) cb(cc); return }
+  if(k === "finishgo"){ var cb2 = done, cc2 = c; close(); if(cb2) cb2(cc2); if(window.JTLearn.go) window.JTLearn.go(); return }
   if(k === "again"){ X = fresh(c, x.gen + 1); draw(); return }
   if(k === "nudge"){ x.hint = c.hint; draw(); return }
   if(k === "show"){ solve(c, x); x.shown = true; x.res = null; x.say = "Here is the answer."; x.hint = ""; draw(); return }
@@ -427,6 +428,6 @@ function init(){
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
-window.JTLearn = { chunks: CH, byId: byId, forAct: forAct, open: open, close: close, check: check, solve: solve, fresh: fresh, actInfo: null,
+window.JTLearn = { chunks: CH, byId: byId, forAct: forAct, open: open, close: close, check: check, solve: solve, fresh: fresh, actInfo: null, go: null,
   isOpen: function(){ return !!cur }, state: function(){ return X }, current: function(){ return cur } };
 })();

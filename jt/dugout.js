@@ -1220,7 +1220,7 @@ function vNews(c){
   if(!lead) h += '<article class="lead"><h2 class="hl">Waiting for the first big story</h2><p class="deck">Play a match and the Chronicle will be at the ground with a notebook.</p></article>';
   else {
     var sid = nameId(lead.star), sp = sid ? playerOf(sid) : null;
-    h += '<article class="lead"><h2 class="hl">' + esc(lead.h) + '</h2>' + (lead.score ? '<div class="sc">' + esc(clubName()) + ' ' + esc(lead.score) + ' against ' + esc(lead.opp) + '</div>' : "") +
+    h += '<article class="lead"><h2 class="hl">' + esc(lead.h) + '</h2>' + "" +
       '<div class="lcols">' + (sp ? '<figure class="ph">' + avatar(sid, 110, sp.pos) + '<figcaption>' + esc(sp.name) + '</figcaption></figure>' : '<figure class="ph">' + crestSvg(90, true) + '<figcaption>' + esc(clubName()) + '</figcaption></figure>') +
       '<div><p class="deck">' + esc(lead.s) + '</p>' + (lead.q ? '<blockquote>' + esc(lead.q) + '</blockquote>' : "") + '</div></div></article>';
     if(P.length > 1) h += '<div class="briefs">' + P.slice(1, 9).map(function(x){ return '<div class="brief"><b>' + esc(x.h) + '</b><span>' + esc(x.s) + '</span></div>' }).join("") + '</div>';
@@ -1263,12 +1263,12 @@ function vStadium(c){
   var m = st.fans == null ? 50 : st.fans, h = '<div class="stack"><div class="card feat"><div class="stwrap"><div class="stplan">' + groundPlan() + '</div><div><h2>' + esc(stadiumName()) + '</h2><p class="hint">Capacity ' + CAPS[upLvl("stands")].toLocaleString("en-GB") + ' &middot; fans ' + fanLabel(m).toLowerCase() + ' &middot; you have <b style="color:var(--gold)">' + st.coins + ' coins</b></p><p class="hint" style="margin:0">Upgrades show up on the plan and in the stadium on your dugout screen. Rename the ground in the Studio.</p></div></div></div>';
   h += '<div class="card"><h3>Ground upgrades</h3><div class="upl">' + UPG.map(function(u){
     var l = upLvl(u.id), nx = l < 3 ? u.costs[l] : 0, can = st.coins >= nx;
-    return '<div class="up"><div><b>' + u.name + '</b> ' + lvlPips(l) + '<small>' + (l ? "Now: " + u.eff[l - 1] : "Not built yet") + '</small>' + (l < 3 ? '<small>Next: ' + u.step[l] + '</small>' : '<small>Fully built</small>') + '</div>' +
+    return '<div class="urow"><div><b>' + u.name + '</b> ' + lvlPips(l) + '<small>' + (l ? "Now: " + u.eff[l - 1] : "Not built yet") + '</small>' + (l < 3 ? '<small>Next: ' + u.step[l] + '</small>' : '<small>Fully built</small>') + '</div>' +
       (l < 3 ? '<button class="btn ' + (can ? "btn-go" : "") + '" data-act="upgrade" data-id="' + u.id + '"' + (can ? "" : ' aria-disabled="true"') + '>' + nx + ' coins</button>' : '<span class="chip-on">Done</span>') + '</div>';
   }).join("") + '</div></div>';
   h += '<div class="card"><h3>Staff</h3><div class="upl">' + STAFF.map(function(u){
     var l = staffLvl(u.id), nx = l < 3 ? u.costs[l] : 0, can = st.coins >= nx, nm = l ? staffName(u.id) : "";
-    return '<div class="up"><div>' + (l ? avatar("staff:" + u.id, 44, "MID") : "") + '<div><b>' + u.role + (nm ? ': ' + esc(nm) : "") + '</b> ' + lvlPips(l) + '<small>' + (l ? u.eff[l - 1] : "Not hired yet. " + u.eff[0]) + '</small></div></div>' +
+    return '<div class="urow"><div>' + (l ? avatar("staff:" + u.id, 44, "MID") : "") + '<div><b>' + u.role + (nm ? ': ' + esc(nm) : "") + '</b> ' + lvlPips(l) + '<small>' + (l ? u.eff[l - 1] : "Not hired yet. " + u.eff[0]) + '</small></div></div>' +
       (l < 3 ? '<button class="btn ' + (can ? "btn-go" : "") + '" data-act="hire" data-id="' + u.id + '"' + (can ? "" : ' aria-disabled="true"') + '>' + (l ? "Upgrade " : "Hire ") + nx + '</button>' : '<span class="chip-on">Done</span>') + '</div>';
   }).join("") + '</div></div>';
   return h + '</div>';
@@ -1541,7 +1541,7 @@ function heroHtml(c, t, tb){
     var cls = d >= 3 ? "ok" : (d <= -3 ? "hard" : "mid"), w = d >= 3 ? "Our edge" : (d <= -3 ? "Tough" : "Even");
     return '<span class="duel ' + cls + '"><b>' + w + '</b>' + label + '</span>';
   }
-  var h = '<section class="hero' + (pend.length ? " ready" : "") + '">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">' + esc(S.leagueName()) + '</span><span class="ch">Season ' + st.season + '</span><span class="ch">Matchday ' + (done + 1) + ' of ' + ROUNDS + '</span><span class="ch">' + (fx.home ? "At home" : "Away") + '</span>' + (pend.length ? '<span class="ribbon">Match ready</span>' : "") + '</div>' +
+  var h = '<section class="hero' + (pend.length ? " ready" : "") + '">' + stadium() + '<div class="fg"><div class="chips2"><span class="ch">' + esc(S.leagueName()) + '</span><span class="ch">Season ' + st.season + '</span><span class="ch">Matchday ' + (done + 1) + ' of ' + ROUNDS + '</span><span class="ch">' + (fx.home ? "At home" : "Away") + '</span><span class="ch">' + esc(S.conditions(st.seed, done).n) + '</span>' + (pend.length ? '<span class="ribbon">Match ready</span>' : "") + '</div>' +
     '<div class="vs3"><div class="tm">' + crestSvg(104) + '<h2>' + esc(clubName()) + '</h2><span class="sub">' + (done ? ord(posOf(tb)) + " in the league" : "Ready for the season") + '</span></div><div class="vsm">VS</div>' +
     '<div class="tm">' + opCrest(fx.opp) + '<h2>' + esc(opp.name) + '</h2><span class="sub">' + (done ? ord(oi + 1) + " &middot; " + row.pts + " pts" : "Rated " + r1((opp.atk + opp.mid + opp.def) / 3)) + '</span></div></div>' +
     '<div class="duels">' + duel("Our attack v their defence", t.atk - opp.def) + duel("Midfield battle", t.mid - opp.mid) + duel("Their attack v our defence", t.def - opp.atk) + '</div><div class="cta">';
@@ -2212,7 +2212,7 @@ function endPanel(){
   if(p.kind === "cup" && p.rep ? (p.rep.k === CCe.rounds.length - 1 && won) : (p.kind === "cup" && p.round === CCe.rounds.length - 1 && won)) head = CCe.name + " winners";
   var en = p.entry || {}, rt = en.rt || [];
   var growth = p.growth && p.growth.length ? '<p>Growing: ' + esc(p.growth.join(", ")) + '.</p>' : "";
-  if(!p.rep && en.inc) growth += '<p class="earn">Earned <b>' + en.inc + ' coins</b>' + ((en.spon || en.gate) ? ' (' + [en.gate ? en.gate + " from the gate" : "", en.spon ? en.spon + " from sponsors" : ""].filter(Boolean).join(", ") + ')' : "") + '.</p>';
+  if(!p.rep && en.inc) growth += '<p class="earn">Earned <b>' + en.inc + ' coins</b>' + ((en.spon || en.gate) ? ' (' + [en.gate ? en.gate + " from the gate" : "", en.spon ? en.spon + " from sponsors" : ""].filter(Boolean).join(", ") + ')' : "") + '.' + (en.up ? ' Running costs: <b>' + en.up + ' coins</b> for staff and the ground.' : '') + '</p>';
   var mv = "";
   if(p.mv && p.kind === "league") mv = '<p>' + (p.round === 0 ? "Now " + ord(p.mv.after) + " in the league." : (p.mv.after < p.mv.before ? "Up to " + ord(p.mv.after) + " in the league." : (p.mv.after > p.mv.before ? "Down to " + ord(p.mv.after) + " in the league." : "Still " + ord(p.mv.after) + " in the league."))) + '</p>';
   var motm = rt.length ? '<div class="motm">' + avatar(rt[0].id || rt[0].n, 54, rt[0].pos) + '<div><span class="eyebrow">Player of the match</span><br><b>' + esc(rt[0].n) + '</b> <span class="mute">' + rt[0].v.toFixed(1) + '</span></div></div>' +
@@ -2482,6 +2482,7 @@ document.addEventListener("toggle", function(e){
   var d = e.target; if(d && d.getAttribute && d.getAttribute("data-f")) folds[d.getAttribute("data-f")] = d.open;
 }, true);
 if(window.JTLearn) window.JTLearn.actInfo = function(slug){ return actBy(slug) };
+if(window.JTLearn) window.JTLearn.go = function(){ view = "dugout"; sel = null; render(); window.scrollTo(0, 0) };
 document.addEventListener("click", function(e){
   var b = e.target.closest("[data-act]");
   if(!b) return;
