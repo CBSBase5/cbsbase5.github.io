@@ -86,6 +86,29 @@ function clubTeam(i){
   };
 }
 
+/* ---- the Champions Cup: made up clubs from far away. ids 100 and up ---- */
+var FOREIGN = [
+  { name: "Dinamo Karst", base: 79, o: [2, 0, 1, -1] },
+  { name: "Sporting Lerma", base: 81, o: [0, 2, -1, 1] },
+  { name: "Olympique Vaux", base: 82, o: [1, 1, 0, -2] },
+  { name: "Nordhaven FC", base: 83, o: [-1, 2, 2, 0] },
+  { name: "Union Brandt", base: 84, o: [2, -1, 1, 1] },
+  { name: "Club Aurelia", base: 86, o: [1, 1, 1, 1] }
+];
+function foreignTeam(k){
+  var c = FOREIGN[k % FOREIGN.length], players = [], j;
+  var pos = ["GK","DEF","DEF","DEF","DEF","MID","MID","MID","FWD","FWD","FWD"];
+  for(j = 0; j < 11; j++) players.push({ name: "No. " + (j + 1) + " " + SURNAMES[(k * 11 + 5 + j * 3) % SURNAMES.length], pos: pos[j] });
+  return { name: c.name, atk: c.base + c.o[0], mid: c.base + c.o[1], def: c.base + c.o[2], gk: c.base + c.o[3], luck: 0, players: players };
+}
+/* champions cup draw: k is 0 to 3, harder each round. returns an id of 100 or more */
+function foreignOpponent(seed, k){
+  var rr = rng((seed * 13 + k * 977) >>> 0), pairs = [[0, 1], [1, 2], [2, 3], [4, 5]], pr = pairs[Math.min(k, 3)];
+  return 100 + pr[rr() < 0.5 ? 0 : 1];
+}
+function oppName(id){ return id >= 100 ? FOREIGN[(id - 100) % FOREIGN.length].name : CLUBS[id - 1].name }
+function oppTeam(id){ return id >= 100 ? foreignTeam(id - 100) : clubTeam(id - 1) }
+
 /* ---- the squad: nineteen to start, four more to unlock ---- */
 var PLAYERS = [
   { id: "gk1", name: "Archie Pell", pos: "GK", r: 64, note: "A safe pair of hands" },
@@ -204,6 +227,14 @@ var T_FK_LUCK = ["It hits the post, bounces off the keeper and goes in. The luck
 var T_SHORT_GOAL = ["A short one, a quick one two, and {p} finishes it!", "Clever. A neat short pass and {p} hits it in."];
 var T_SHORT_MISS = ["A short pass, but the move breaks down in the box.", "Nice idea, and the defence snuffs it out."];
 
+var RT = {
+  near: { n: "Near post flick", b: 0.0, pos: "FWD", g: ["{t} whips it to the near post and {p} flicks it in!", "Near post, {p} gets a touch and it loops in. Goal!"], m: ["{t} finds the near post but {p} cannot get a proper touch.", "A flick from {p} that goes just wide."] },
+  far: { n: "Far post header", b: 0.008, pos: "DEF", g: ["{t} floats it to the far post and {p} heads it home!", "A towering header from {p} at the back post. Goal!"], m: ["{p} rises at the far post and the header is straight at {k}.", "The cross is cleared before {p} can attack it."] },
+  short: { n: "Short corner", b: 0.004, pos: "MID", g: ["A short corner, a pass back, and {p} curls it in!", "Clever routine. {t} plays it short and {p} finishes the move."], m: ["The short corner is read and the move breaks down.", "{p} tries a shot from the short corner and {k} saves."] },
+  edge: { n: "Edge of the box", b: 0.0, pos: "MID", g: ["{t} pulls it back and {p} strikes it first time. What a goal!", "Pulled back to the edge, {p} hits it on the volley. Goal!"], m: ["{p} volleys from the edge of the box and it flies over.", "{p} strikes it sweetly but {k} gets across."] }
+};
+var FKSTYLE = { curl: { n: "Curl it round the wall", b: 0.01 }, power: { n: "Hit it hard", b: 0.0 }, layoff: { n: "Lay it off for a shot", b: 0.005 } };
+
 /* A match you can step through a minute at a time, so a person can make
    choices part way. opts: { our: "h"|"a", interactive: true, cup: true } */
 function createMatch(home, away, seed, opts){
@@ -211,8 +242,12 @@ function createMatch(home, away, seed, opts){
   var r = rng(seed);
   var M = { home: home, away: away, r: r, hs: 0, as: 0, events: [], m: 0, add: 91 + Math.floor(r() * 4),
     done: false, pause: null, our: opts.our || "", interactive: !!opts.interactive, cup: !!opts.cup, fk: opts.fk || "",
-    halfDone: false, spDone: false, pens: null, winner: "" };
+    halfDone: false, spDone: false, pens: null, winner: "",
+    coach: opts.coach || 0, physio: opts.physio || 0, captain: opts.captain || "", corner: opts.corner || null, fkStyle: opts.fkStyle || "curl", mast: opts.mast || {},
+    preDone: false, lateDone: false, cDone: false };
   M.spMin = M.our ? 12 + Math.floor(r() * 62) : 0;
+  M.cMin = M.our ? 8 + Math.floor(r() * 70) : 0;
+  if(M.our && Math.abs(M.cMin - M.spMin) < 6) M.cMin = M.spMin > 45 ? Math.max(5, M.spMin - 12) : Math.min(80, M.spMin + 12);
   M.events.push({ m: 0, k: "kick", side: "", text: "Kick off. " + home.name + " against " + away.name + "." });
   return M;
 }
@@ -224,17 +259,53 @@ function step(M){
   var home = M.home, away = M.away, r = M.r, ev = M.events;
   if(M.m >= M.add){ finish(M); return M; }
   var m = M.m + 1;
+  if(M.our && M.interactive && !M.preDone){
+    M.preDone = true;
+    var cm = 1 + 0.35 * M.coach;
+    M.pause = { k: "talk", minute: 0, title: "Before kick off" + (M.captain ? ": " + M.captain + " speaks up" : ""), def: 2, options: [
+      { label: "Play with joy", sub: "Enjoy it. A bit more luck", fx: { luck: 0.07 * cm } },
+      { label: "Be brave", sub: "Go at them from the first whistle", fx: { atk: 2.5 * cm, def: -1.5 } },
+      { label: "Stay tight", sub: "Hard to beat, patient", fx: { atk: -1.5, def: 2.5 * cm } }
+    ] };
+    return M;
+  }
   if(m === 46 && !M.halfDone){
     M.halfDone = true;
+    if(M.our && M.physio){
+      var usP = ourTeamOf(M); usP.atk += 0.8 * M.physio; usP.def += 0.8 * M.physio;
+      ev.push({ m: 45, k: "physio", side: M.our, text: "The physio's work shows. Our legs feel fresh for the second half." });
+    }
     ev.push({ m: 45, k: "half", side: "", text: "Half time. " + home.name + " " + M.hs + ", " + away.name + " " + M.as + "." });
     if(M.our && M.interactive){
-      M.pause = { k: "talk", title: "Half time team talk", def: 2, options: [
-        { label: "Go for it", sub: "More attack, a little less cover", fx: { atk: 3, def: -2 } },
-        { label: "Stay solid", sub: "More cover, a little less attack", fx: { atk: -2, def: 3 } },
-        { label: "Stay calm", sub: "Steady heads. A bit more luck", fx: { luck: 0.1 } }
+      var cm2 = 1 + 0.35 * M.coach;
+      M.pause = { k: "talk", minute: 45, title: "Half time team talk", def: 2, options: [
+        { label: "Go for it", sub: "More attack, a little less cover", fx: { atk: 3 * cm2, def: -2 } },
+        { label: "Stay solid", sub: "More cover, a little less attack", fx: { atk: -2, def: 3 * cm2 } },
+        { label: "Stay calm", sub: "Steady heads. A bit more luck", fx: { luck: 0.1 * cm2 } }
       ] };
       return M;
     }
+  }
+  if(M.our && M.interactive && !M.lateDone && m >= 76){
+    M.lateDone = true;
+    var ours = M.our === "h" ? M.hs : M.as, theirs = M.our === "h" ? M.as : M.hs, cm3 = 1 + 0.35 * M.coach, lo;
+    if(ours < theirs) lo = [{ label: "Throw everyone forward", sub: "Big push, leaves gaps", fx: { atk: 4 * cm3, def: -4 } }, { label: "Keep pushing", sub: "A little more attack", fx: { atk: 1.8 * cm3, def: -1 } }, { label: "Take a breath", sub: "Steady, and a bit of luck", fx: { luck: 0.08 * cm3 } }];
+    else if(ours === theirs) lo = [{ label: "Go for the win", sub: "More attack, a risk at the back", fx: { atk: 3 * cm3, def: -3 } }, { label: "Take the point", sub: "Keep it tight", fx: { atk: -1.5, def: 3 * cm3 } }, { label: "Stay calm", sub: "A bit of luck", fx: { luck: 0.08 * cm3 } }];
+    else lo = [{ label: "Close it out", sub: "More cover, keep the ball", fx: { atk: -1, def: 3.5 * cm3 } }, { label: "Keep playing", sub: "A little of both", fx: { atk: 1, def: 1 } }, { label: "Stay calm", sub: "A bit of luck", fx: { luck: 0.08 * cm3 } }];
+    M.pause = { k: "talk", minute: 75, title: "Late on: your call", def: 2, options: lo };
+    return M;
+  }
+  if(M.our && M.interactive && !M.cDone && m >= M.cMin){
+    M.cDone = true;
+    var usC = ourTeamOf(M), ids = usC.players.filter(function(p){ return p.pos !== "GK"; }), d = M.corner || { routine: "near" };
+    var byR = function(list){ return list.slice().sort(function(a, b){ return b.r - a.r; }); };
+    var tk = byR(ids.filter(function(p){ return p.pos === "MID"; }))[0] || ids[0], tg = byR(ids.filter(function(p){ return p.pos === "DEF" || p.pos === "FWD"; }))[0] || ids[0];
+    var okName = function(n){ return n && usC.players.some(function(p){ return p.name === n; }); };
+    var r0 = RT[d.routine] ? d.routine : "near";
+    var copts = [{ label: "Your routine: " + RT[r0].n, sub: (okName(d.taker) ? d.taker : tk.name) + " to " + (okName(d.target) ? d.target : tg.name), routine: r0, taker: okName(d.taker) ? d.taker : tk.name, target: okName(d.target) ? d.target : tg.name }];
+    ["near", "far", "short", "edge"].forEach(function(k){ if(k !== r0) copts.push({ label: RT[k].n, sub: tk.name + " to " + tg.name, routine: k, taker: tk.name, target: tg.name }); });
+    M.pause = { k: "corner", minute: m, title: "Corner kick", def: 0, options: copts };
+    return M;
   }
   if(M.our && M.interactive && !M.spDone && m >= M.spMin){
     M.spDone = true;
@@ -286,7 +357,23 @@ function resolve(M, idx){
       if(o.fx.def) us.def += o.fx.def;
       if(o.fx.luck) us.luck = Math.min(1, us.luck + o.fx.luck);
     }
-    ev.push({ m: 45, k: "talk", side: M.our, text: "Team talk: " + o.label + ". " + o.sub + "." });
+    ev.push({ m: P.minute == null ? 45 : P.minute, k: "talk", side: M.our, text: "Team talk: " + o.label + ". " + o.sub + "." });
+    return M;
+  }
+  if(P.k === "corner"){
+    var rt = RT[o.routine] || RT.near, tkr = us.players.filter(function(p){ return p.name === o.taker; })[0], tgt = us.players.filter(function(p){ return p.name === o.target; })[0];
+    var tR = tkr ? tkr.r : 60, gR = tgt ? tgt.r : 60, mast = Math.min(3, (M.mast && M.mast[o.routine]) || 0);
+    var fitB = (tgt && tgt.pos === rt.pos) ? 0.015 : 0;
+    var gpc = clamp(0.045 + (gR - 55) * 0.0065 + (tR - 55) * 0.0025 + rt.b + fitB + mast * 0.012, 0.03, 0.32);
+    var goalC = r() < gpc, luckyC = false;
+    if(!goalC && us.luck > 0 && r() < us.luck * K.luckRebound){ goalC = r() < 0.5; luckyC = goalC; }
+    var tx = pick(r, goalC ? rt.g : rt.m);
+    if(goalC){
+      if(M.our === "h") M.hs++; else M.as++;
+      ev.push({ m: P.minute, k: "goal", side: M.our, lucky: luckyC, who: o.target, setpiece: true, routine: o.routine, corner: true, text: fmt(tx.replace("{t}", o.taker).replace("{p}", o.target), { k: them.players[0].name }) + " " + M.hs + "-" + M.as });
+    } else {
+      ev.push({ m: P.minute, k: "chance", side: M.our, who: o.target, setpiece: true, routine: o.routine, corner: true, text: fmt(tx.replace("{t}", o.taker).replace("{p}", o.target), { k: them.players[0].name }) });
+    }
     return M;
   }
   /* set piece */
@@ -297,17 +384,18 @@ function resolve(M, idx){
     goal = r() < gp0; texts = goal ? T_SHORT_GOAL : T_SHORT_MISS;
   } else {
     who = o.taker;
-    var gp = clamp(0.03 + (o.rate - 55) * 0.010, 0.04, 0.36);
+    var sty = FKSTYLE[M.fkStyle] || FKSTYLE.curl, fmast = Math.min(3, (M.mast && M.mast["fk_" + M.fkStyle]) || 0);
+    var gp = clamp(0.03 + (o.rate - 55) * 0.010 + sty.b + fmast * 0.012 + (M.fkStyle === "power" && them.gk < 68 ? 0.03 : 0), 0.04, 0.38);
     goal = r() < gp;
     if(!goal && us.luck > 0 && r() < us.luck * K.luckRebound){ goal = r() < 0.55; lucky = goal; }
     texts = goal ? (lucky ? T_FK_LUCK : T_FK_GOAL) : T_FK_MISS;
   }
   if(goal){
     if(M.our === "h") M.hs++; else M.as++;
-    ev.push({ m: m, k: "goal", side: M.our, lucky: lucky, who: who, setpiece: true,
+    ev.push({ m: m, k: "goal", side: M.our, lucky: lucky, who: who, setpiece: true, routine: o.short ? "fk_short" : "fk_" + M.fkStyle,
       text: fmt(pick(r, texts), { p: who, k: them.players[0].name }) + " " + M.hs + "-" + M.as });
   } else {
-    ev.push({ m: m, k: "chance", side: M.our, who: who, text: fmt(pick(r, texts), { p: who, k: them.players[0].name }) });
+    ev.push({ m: m, k: "chance", side: M.our, who: who, setpiece: true, routine: o.short ? "fk_short" : "fk_" + M.fkStyle, text: fmt(pick(r, texts), { p: who, k: them.players[0].name }) });
   }
   return M;
 }
@@ -453,7 +541,7 @@ function table(seed, played){
 
 function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
 var API = { setTier: setTier, leagueName: leagueName, LEAGUES: LEAGUES, setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
-  clubTeam: clubTeam, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
+  clubTeam: clubTeam, oppName: oppName, oppTeam: oppTeam, foreignOpponent: foreignOpponent, FOREIGN: FOREIGN, RT: RT, FKSTYLE: FKSTYLE, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
   otherResults: otherResults, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
 root.B5Sim = API;
