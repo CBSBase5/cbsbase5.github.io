@@ -53,6 +53,9 @@ var LEAGUES = [
 ];
 var TIER = 2;
 var CLUBS = [];
+/* the player's own league settings: names for divisions and clubs, and how hard the clubs are */
+var CUSTOM = null, DIFF = 0, FAR0 = null;
+function cname(v){ return typeof v === "string" ? v.trim() : "" }
 var HEAT = 0;   /* rivals raise their game after you win things */
 function setHeat(h){ HEAT = Math.max(0, Math.min(6, +h || 0)); setTier(TIER); }
 function setTier(t){
@@ -60,12 +63,15 @@ function setTier(t){
   var L = LEAGUES[t], i;
   for(i = 0; i < 15; i++){
     var d = DIV2[i];
-    if(t === 2){ CLUBS.push({ name: d.name, base: d.base + (L.mean - 65) + HEAT, o: d.o.slice() }); }
-    else { var o = d.o.map(function(x, k){ return DIV2[(i + t * 3 + k) % 15].o[(k + t) % 4] }); CLUBS.push({ name: L.clubs[i], base: L.mean + (d.base - 65) + HEAT, o: o }); }
+    var own = CUSTOM && CUSTOM.clubs && CUSTOM.clubs[t] ? cname(CUSTOM.clubs[t][i]) : "";
+    if(t === 2){ CLUBS.push({ name: own || d.name, base: d.base + (L.mean - 65) + HEAT + DIFF, o: d.o.slice() }); }
+    else { var o = d.o.map(function(x, k){ return DIV2[(i + t * 3 + k) % 15].o[(k + t) % 4] }); CLUBS.push({ name: own || L.clubs[i], base: L.mean + (d.base - 65) + HEAT + DIFF, o: o }); }
   }
   return CLUBS;
 }
-function leagueName(t){ return LEAGUES[t == null ? TIER : t].name }
+function defaultLeagueName(t){ return LEAGUES[t].name }
+function defaultClubName(t, i){ return t === 2 ? DIV2[i].name : LEAGUES[t].clubs[i] }
+function leagueName(t){ var k = t == null ? TIER : t, own = CUSTOM && CUSTOM.names ? cname(CUSTOM.names[k]) : ""; return own || LEAGUES[k].name }
 setTier(2);
 var HOME_NAME = "Base 5 United";
 
@@ -568,8 +574,16 @@ function table(seed, played){
   return rows;
 }
 
+function setCustom(c){
+  CUSTOM = c && typeof c === "object" ? c : null;
+  var d = CUSTOM ? Math.max(-1, Math.min(1, +CUSTOM.diff || 0)) : 0; DIFF = d * 4;
+  if(!FAR0) FAR0 = FOREIGN.map(function(f){ return f.name });
+  FOREIGN.forEach(function(f, k){ var own = CUSTOM && CUSTOM.far ? cname(CUSTOM.far[k]) : ""; f.name = own || FAR0[k] });
+  setTier(TIER);
+}
+function defaultFarName(k){ if(!FAR0) FAR0 = FOREIGN.map(function(f){ return f.name }); return FAR0[k] }
 function setHomeName(n){ HOME_NAME = n || "Base 5 United"; API.HOME_NAME = HOME_NAME }
-var API = { setTier: setTier, leagueName: leagueName, LEAGUES: LEAGUES, setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
+var API = { setCustom: setCustom, defaultLeagueName: defaultLeagueName, defaultClubName: defaultClubName, defaultFarName: defaultFarName, setTier: setTier, leagueName: leagueName, LEAGUES: LEAGUES, setHomeName: setHomeName, rng: rng, K: K, CLUBS: CLUBS, HOME_NAME: HOME_NAME, PLAYERS: PLAYERS, FORMATIONS: FORMATIONS,
   clubTeam: clubTeam, oppName: oppName, oppTeam: oppTeam, foreignOpponent: foreignOpponent, FOREIGN: FOREIGN, RT: RT, FKSTYLE: FKSTYLE, buildTeam: buildTeam, simulate: simulate, createMatch: createMatch, step: step, resolve: resolve, autoResolve: autoResolve, runAll: runAll, cupOpponent: cupOpponent, fixtures: fixtures, ourFixture: ourFixture,
   otherResults: otherResults, conditions: conditions, oppForm: oppForm, formLabel: formLabel, squeeze: squeeze, shift: shift, WEATHER: WEATHER, TUNE: TUNE, setHeat: setHeat, ACTS: ACTS, STATS: STATS, CAP: CAP, training: training, table: table, playerById: playerById, fit: fit };
 if(typeof module !== "undefined" && module.exports) module.exports = API;
