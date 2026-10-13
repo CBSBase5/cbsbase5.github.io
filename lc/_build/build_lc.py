@@ -24,7 +24,7 @@ LC = os.path.join(ROOT, "lc")
 
 HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html", "teacher.html"]
 SHARED = r"(engine\.js|skin\.js|progress\.js|egw\.css)"
-LC_CSS = "/lc/lc.css?v=2"
+LC_CSS = "/lc/lc.css?v=3"
 CONF = "/lc/conf.js?v=1"
 CAT_V = "1"
 BANK_V = "1"
@@ -76,7 +76,7 @@ def hub_patches(name, s):
                      '      <a href="/practice/multiplication.html"><b>Multiplication</b><span>Maths drills</span></a>\n'
                      '      <a href="/practice/day-at-school.html"><b>Story builder</b><span>English, make something</span></a>') + s[b:]
         # the jumpscare button
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=1"></script>', 1, name)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=2" data-button="1"></script>', 1, name)
     if name == "papers.html":
         s = must(s, "<title>What's on the papers - ", "<title>Your skills map - ", 1, name)
         s = must(s, "<h1>What's on<br>the <em>papers</em></h1>", "<h1>Your<br><em>skills</em> map</h1>", 1, name)
@@ -88,6 +88,8 @@ def hub_patches(name, s):
         s = must(s, "<h3>Every topic, and where to practise it</h3>", "<h3>Every skill, and where to practise it</h3>", 1, name)
         s = must(s, '<span class="often">Often</span> turns up most years', '<span class="often">Key</span> a key skill to start with', 1, name)
         s = must(s, "' <span class=\"often\">Often</span>'", "' <span class=\"often\">Key</span>'", 1, name)
+    if name not in ("index.html", "teacher.html"):
+        s = must(s, "</body>", '<script src="/lc/jumpscare.js?v=2"></script>\n</body>', 1, name)
     if name == "daily.html":
         for sub in ("bio", "stats"):
             s = re.sub(r'<script src="/lc/daily-bank-%s\.js\?v=\d+"></script>\n' % sub, "", s)
@@ -104,19 +106,19 @@ def hub_patches(name, s):
     if name == "sky.html":
         s = must(s, 'english: "#ff7a7a", maths: "#ffd23f"', 'english: "#39d98a", maths: "#ff5c5c"', 1, name)
     if name == "teacher.html":
-        # Jay's view talks about LC as "they" (no pronoun assumed)
+        # Jay's view talks about LC as "he"
         for a, b in [
-            ("Her progress is saved on her own device. When she taps", "LC's progress is saved on their own device. When they tap"),
-            ("on her HQ page", "on their HQ page"),
-            ("to see where she is.", "to see where they are."),
+            ("Her progress is saved on her own device. When she taps", "LC's progress is saved on his own device. When he taps"),
+            ("on her HQ page", "on his HQ page"),
+            ("to see where she is.", "to see where he is."),
             ("Show her progress", "Show LC's progress"),
-            ("sends her progress", "sends their progress"),
-            ("Where she leaned on Show me most", "Where they leaned on Show me most"),
-            ("Her ratings here were made", "Their ratings here were made"),
-            ("rated by her,", "rated by them,"),
-            ("Her rating", "Their rating"),
-            ("the last time she saw them", "the last time they saw them"),
-            ("Things she noted to remember", "Things they noted to remember"),
+            ("sends her progress", "sends his progress"),
+            ("Where she leaned on Show me most", "Where he leaned on Show me most"),
+            ("Her ratings here were made", "His ratings here were made"),
+            ("rated by her,", "rated by him,"),
+            ("Her rating", "His rating"),
+            ("the last time she saw them", "the last time he saw them"),
+            ("Things she noted to remember", "Things he noted to remember"),
         ]:
             s = must(s, a, b, None, name)
         left = re.findall(r"[^/*\n]{0,30}\b(?:she|her|herself)\b", re.sub(r"/\*.*?\*/", "", s, flags=re.S), flags=re.I)
