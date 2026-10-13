@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<!-- BUILT by hk/_build/build_hk.py from a shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money and time - HK Overgrown HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bungee&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/hk/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/hk/hk.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.mt-menu{border-collapse:collapse;margin:4px auto 12px;font-size:1.02rem;background:#fff}
+.mt-menu caption{font-family:var(--display);font-weight:700;padding:0 0 6px}
+.mt-menu td,.mt-menu th{border:2px solid var(--ink);padding:6px 12px}
+.mt-menu th{background:var(--accent-soft)}
+.mt-menu td:last-child{text-align:right}
+.mt-hours td:last-child{text-align:left}
+.mt-clk{width:112px;height:auto;display:block}
+/* Set the clock widget */
+.sc-fig{margin:6px 0 4px;touch-action:none}
+.sc-fig svg{max-width:290px;cursor:grab}
+.sc-task p{margin:0 0 6px}
+.sc-note{display:inline-block;background:#fffbe0;border:2px solid var(--ink);border-radius:4px;padding:6px 12px;transform:rotate(-1.5deg);font-size:1.08rem}
+.sc-dots{display:flex;gap:6px;margin-bottom:6px}
+.sc-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.sc-dots span.on{background:var(--good)}
+.sc-dots span.now{background:var(--sun)}
+.sc-turn .btn{padding:9px 12px;font-size:.95rem}
+@media (max-width:480px){
+  .sc-turn{gap:8px}
+  .sc-turn .btn{flex:1 1 40%;padding:9px 6px}
+}
+.sc-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/hk/"><span class="hqlogo">HK</span><span class="hqname">Overgrown HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/hk/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Money and time</h2>
+    <span>Coins, prices and change at the Midnight Caf&eacute;. Then clocks, how long things take, opening times and the calendar.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>HK's Overgrown HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/hk/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var MONO = 'font-family="Space Mono,Courier New,monospace"';
+
+function f1(v){ return (+v).toFixed(1).replace(/\.0$/, ""); }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + f1(x) + '" y="' + f1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function arc(x1, x2, y, lift, col){
+  var mx = (x1 + x2) / 2;
+  return '<path d="M' + x1 + ' ' + y + ' Q' + mx + ' ' + (y - lift) + ' ' + x2 + ' ' + y + '" fill="none" stroke="' + col + '" stroke-width="3"/>' +
+    '<path d="M' + (x2 - 9) + ' ' + (y - 9) + ' L' + x2 + ' ' + y + ' L' + (x2 - 12) + ' ' + (y + 1) + '" fill="none" stroke="' + col + '" stroke-width="3"/>';
+}
+
+/* ---------- coins and notes ---------- */
+/* real diameters in mm; drawn at 0.8 units per mm as a radius */
+var COIN = {
+  "1p":  { d: 20.3, col: "#c8753a", lab: "1p" },
+  "2p":  { d: 25.9, col: "#c8753a", lab: "2p" },
+  "5p":  { d: 18.0, col: "#d9dbe0", lab: "5p" },
+  "10p": { d: 24.5, col: "#d9dbe0", lab: "10p" },
+  "20p": { d: 21.4, col: "#d9dbe0", lab: "20p", sides: 7 },
+  "50p": { d: 27.3, col: "#d9dbe0", lab: "50p", sides: 7 },
+  "1":   { d: 23.43, col: "#e3c35a", inner: "#d9dbe0", lab: "&pound;1", sides: 12 },
+  "2":   { d: 28.4, col: "#e3c35a", inner: "#d9dbe0", lab: "&pound;2" }
+};
+function rad(k){ return COIN[k].d * 0.8; }
+function poly(cx, cy, r, n, curved){
+  var p = "", k, a, b;
+  for(k = 0; k < n; k++){
+    a = (k / n) * 2 * Math.PI - Math.PI / 2;
+    var x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    if(k === 0){ p += "M" + f1(x) + " " + f1(y); continue; }
+    if(curved){
+      b = ((k - 0.5) / n) * 2 * Math.PI - Math.PI / 2;
+      p += " Q" + f1(cx + r * 1.12 * Math.cos(b)) + " " + f1(cy + r * 1.12 * Math.sin(b)) + " " + f1(x) + " " + f1(y);
+    }else p += " L" + f1(x) + " " + f1(y);
+  }
+  if(curved){
+    b = ((n - 0.5) / n) * 2 * Math.PI - Math.PI / 2;
+    a = -Math.PI / 2;
+    p += " Q" + f1(cx + r * 1.12 * Math.cos(b)) + " " + f1(cy + r * 1.12 * Math.sin(b)) + " " + f1(cx + r * Math.cos(a)) + " " + f1(cy + r * Math.sin(a));
+  }
+  return p + " Z";
+}
+function coin(cx, cy, k){
+  var c = COIN[k], r = rad(k), s = "";
+  if(c.sides === 7) s += '<path d="' + poly(cx, cy, r * 0.95, 7, true) + '" fill="' + c.col + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  else if(c.sides === 12) s += '<path d="' + poly(cx, cy, r, 12, false) + '" fill="' + c.col + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  else s += '<circle cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="' + f1(r) + '" fill="' + c.col + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  if(c.inner) s += '<circle cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="' + f1(r * 0.68) + '" fill="' + c.inner + '" stroke="' + INK + '" stroke-width="1.5"/>';
+  s += t(cx, cy + 5, c.lab, 14, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s;
+}
+function note(x, y, v, col){
+  return '<rect x="' + x + '" y="' + y + '" width="86" height="48" rx="5" fill="' + col + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+    '<rect x="' + (x + 6) + '" y="' + (y + 6) + '" width="74" height="36" rx="3" fill="none" stroke="' + INK + '" stroke-opacity=".35" stroke-width="1.5"/>' +
+    t(x + 43, y + 31, "&pound;" + v, 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+}
+function coinRow(keys, y, gap){
+  var w = 0, k;
+  for(k = 0; k < keys.length; k++) w += 2 * rad(keys[k]);
+  w += gap * (keys.length - 1);
+  var x = 200 - w / 2, s = "";
+  for(k = 0; k < keys.length; k++){ var r = rad(keys[k]); s += coin(x + r, y, keys[k]); x += 2 * r + gap; }
+  return s;
+}
+var MONEY = '<svg viewBox="0 0 400 168" role="img" aria-label="The coins: 1p, 2p, 5p, 10p, 20p, 50p, 1 pound and 2 pounds. The notes: 5, 10, 20 and 50 pounds.">' +
+  coinRow(["1p", "2p", "5p", "10p", "20p", "50p", "1", "2"], 34, 9) +
+  note(9, 92, 5, "#7cc7b6") + note(105, 92, 10, "#e8a35e") + note(201, 92, 20, "#b49af7") + note(297, 92, 50, "#f08a84") +
+  '</svg>';
+var PURSE = '<svg viewBox="0 0 400 80" role="img" aria-label="Coins: a 2 pound coin, a 1 pound coin, a 50p, a 20p and a 5p.">' +
+  coinRow(["2", "1", "50p", "20p", "5p"], 40, 22) + '</svg>';
+
+/* ---------- the cafe menu ---------- */
+var MENU = '<table class="mt-menu"><caption>Midnight Caf&eacute;</caption>' +
+  '<tr><td>Hot chocolate</td><td>&pound;1.50</td></tr>' +
+  '<tr><td>Toffee pudding</td><td>&pound;2.25</td></tr>' +
+  '<tr><td>Ghost cupcake</td><td>&pound;1.20</td></tr>' +
+  '<tr><td>Jelly pot</td><td>80p</td></tr>' +
+  '<tr><td>Cookie</td><td>65p</td></tr></table>';
+
+/* Counting up for change: 3.70 to 4 to 5 */
+var CHANGE = (function(){
+  var s = '<svg viewBox="0 0 400 180" role="img" aria-label="Counting up from 3 pounds 70 to 4 pounds is 30p. Then 4 pounds to 5 pounds is 1 pound. Change is 1 pound 30.">';
+  s += ln(18, 112, 386, 112, INK, 3);
+  var xs = [50, 140, 350], labs = ["&pound;3.70", "&pound;4", "&pound;5"];
+  for(var k = 0; k < 3; k++){
+    s += ln(xs[k], 102, xs[k], 122, INK, 3);
+    s += t(xs[k], 145, labs[k], 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += arc(50, 140, 102, 56, CORAL) + t(95, 62, "30p", 18, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += arc(140, 350, 102, 96, BLUE) + t(245, 42, "&pound;1", 18, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(200, 174, "Change: &pound;1.30", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- clocks ---------- */
+/* tm = minutes after 12:00 */
+function face(cx, cy, r, tm){
+  var big = r > 80, s = "";
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="' + (big ? 5 : 3.5) + '"/>';
+  for(var m = 0; m < 60; m++){
+    var b = m * 6 * Math.PI / 180, r1 = m % 5 ? r * 0.93 : r * 0.87;
+    s += ln(cx + r1 * Math.sin(b), cy - r1 * Math.cos(b), cx + (r - 2) * Math.sin(b), cy - (r - 2) * Math.cos(b), INK, m % 5 ? 1 : 2.5);
+  }
+  var nr = r * 0.72, ns = Math.max(14, Math.min(24, Math.round(r * 0.2)));
+  for(var k = 1; k <= 12; k++){
+    var a = k * 30 * Math.PI / 180;
+    s += t(cx + nr * Math.sin(a), cy - nr * Math.cos(a) + ns * 0.36, String(k), ns, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  var ha = ((tm % 720) / 60) * 30 * Math.PI / 180, ma = (tm % 60) * 6 * Math.PI / 180;
+  s += ln(cx, cy, cx + r * 0.38 * Math.sin(ha), cy - r * 0.38 * Math.cos(ha), INK, big ? 9 : 6, ' stroke-linecap="round"');
+  s += ln(cx, cy, cx + r * 0.58 * Math.sin(ma), cy - r * 0.58 * Math.cos(ma), BLUE, big ? 6 : 4, ' stroke-linecap="round"');
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (big ? 8 : 5) + '" fill="' + INK + '"/>';
+  return s;
+}
+function tmOf(h, m){ return (h % 12) * 60 + m; }
+function clock(h, m, aria){
+  return '<svg viewBox="0 0 200 200" role="img" aria-label="' + aria + '" style="max-width:220px">' + face(100, 100, 92, tmOf(h, m)) + '</svg>';
+}
+function smallClock(h, m, aria){
+  return '<svg class="mt-clk" viewBox="0 0 130 130" role="img" aria-label="' + aria + '">' + face(65, 65, 61, tmOf(h, m)) + '</svg>';
+}
+function digi(cx, cy, txt){
+  return '<rect x="' + (cx - 66) + '" y="' + (cy - 28) + '" width="132" height="56" rx="8" fill="' + INK + '" stroke="' + INK + '" stroke-width="3"/>' +
+    t(cx, cy + 11, txt, 32, SUN, MONO + ' font-weight="700" text-anchor="middle"');
+}
+function digital(txt, aria){
+  return '<svg viewBox="0 0 160 70" role="img" aria-label="' + aria + '" style="max-width:200px">' + digi(80, 35, txt) + '</svg>';
+}
+
+var FOUR = (function(){
+  var s = '<svg viewBox="0 0 400 420" role="img" aria-label="Four clocks. 3 o&#39;clock. Quarter past 3, with the long hand on 3. Half past 3, with the long hand on 6. Quarter to 4, with the long hand on 9.">';
+  var c = [[100, 92, 3, 0, "3 o&#39;clock"], [300, 92, 3, 15, "Quarter past 3"], [100, 302, 3, 30, "Half past 3"], [300, 302, 3, 45, "Quarter to 4"]];
+  c.forEach(function(k){
+    s += face(k[0], k[1], 76, tmOf(k[2], k[3]));
+    s += t(k[0], k[1] + 104, k[4], 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  });
+  s += '</svg>';
+  return s;
+})();
+
+var PAIRS = (function(){
+  var s = '<svg viewBox="0 0 400 386" role="img" aria-label="Three clocks with their digital times. Quarter past 7 is 7:15. Half past 7 is 7:30. Quarter to 8 is 7:45.">';
+  var c = [[7, 15, "7:15", "Quarter past 7"], [7, 30, "7:30", "Half past 7"], [7, 45, "7:45", "Quarter to 8"]];
+  c.forEach(function(k, i){
+    var y = 64 + i * 128;
+    s += face(78, y, 60, tmOf(k[0], k[1]));
+    s += t(155, y + 7, "=", 26, INK, LAB + ' font-weight="800" text-anchor="middle"');
+    s += digi(250, y, k[2]);
+  });
+  s += '</svg>';
+  return s;
+})();
+
+/* Time line: half past 2 to 3 to 4, drawn to scale (100 units an hour) */
+var HOWLONG = (function(){
+  var s = '<svg viewBox="0 0 400 170" role="img" aria-label="A time line. From half past 2 to 3 o&#39;clock is half an hour. From 3 o&#39;clock to 4 o&#39;clock is 1 hour. Total 1 and a half hours.">';
+  var xs = [60, 160, 360], labs = ["2:30", "3:00", "4:00"];
+  s += ln(30, 110, 385, 110, INK, 3);
+  for(var j = 0; j < 3; j++){
+    s += ln(xs[j], 100, xs[j], 120, INK, 3);
+    s += t(xs[j], 144, labs[j], 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += arc(60, 160, 100, 54, CORAL) + t(110, 60, "half an hour", 16, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += arc(160, 360, 100, 96, BLUE) + t(260, 40, "1 hour", 17, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(200, 168, "Total: 1 and a half hours", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+var HOURS = '<table class="mt-menu mt-hours"><caption>Midnight Caf&eacute; opening times</caption>' +
+  '<tr><th>Day</th><th>Open</th></tr>' +
+  '<tr><td>Monday</td><td>Closed</td></tr>' +
+  '<tr><td>Tuesday to Thursday</td><td>6 pm to 10 pm</td></tr>' +
+  '<tr><td>Friday and Saturday</td><td>6 pm to midnight</td></tr>' +
+  '<tr><td>Sunday</td><td>4 pm to 8 pm</td></tr></table>';
+
+/* ---------- Set the clock widget ---------- */
+function hr(h){ h = h % 12; return String(h === 0 ? 12 : h); }
+function say(tm){
+  tm = ((tm % 720) + 720) % 720;
+  var h = Math.floor(tm / 60), m = tm % 60;
+  if(m === 0) return hr(h) + " o'clock";
+  if(m === 15) return "quarter past " + hr(h);
+  if(m === 30) return "half past " + hr(h);
+  if(m === 45) return "quarter to " + hr(h + 1);
+  return hr(h) + ":" + (m < 10 ? "0" : "") + m;
+}
+function dig(tm){
+  tm = ((tm % 720) + 720) % 720;
+  var m = tm % 60;
+  return hr(Math.floor(tm / 60)) + ":" + (m < 10 ? "0" : "") + m;
+}
+var SC = [
+  { tm: tmOf(7, 30), note: "The night bus comes at <b>half past 7</b>.",
+    how: "Half past: the long hand points to 6. The short hand sits half way between 7 and 8." },
+  { tm: tmOf(2, 15), note: "The lights flicker at <b>quarter past 2</b>.",
+    how: "Quarter past: the long hand points to 3. The short hand is just past 2." },
+  { tm: tmOf(8, 45), note: "Jay says: lock up at <b>quarter to 9</b>.",
+    how: "Quarter to 9 is 15 minutes before 9 o'clock. The long hand points to 9. The short hand is nearly at 9, but not there yet." }
+];
+
+function mountClock(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(typeof d.tm !== "number") d.tm = 0;
+  var view = Math.min(d.c, 2), landed = false, dragging = false;
+
+  el.innerHTML =
+    '<div class="wpanel sc-task" data-r="task"></div>' +
+    '<div class="fig sc-fig" data-r="svg"></div>' +
+    '<div class="wrow sc-turn">' +
+      '<button class="btn btn-quiet" type="button" data-act="mb">Back 15 min</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="mf">On 15 min</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="hb">Back 1 hour</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="hf">On 1 hour</button>' +
+    '</div>' +
+    '<div class="wrow">' +
+      '<button class="btn" type="button" data-act="check">Start the clock</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-act="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb sc-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function act(a){ return el.querySelector('[data-act="' + a + '"]'); }
+
+  function paint(){
+    var s = '<svg viewBox="0 0 300 372" role="img" aria-label="A clock with its hands set. Drag the long blue hand round, or use the buttons.">';
+    s += '<rect x="6" y="6" width="288" height="288" rx="30" fill="#5a4632" stroke="' + INK + '" stroke-width="3"/>';
+    s += face(150, 150, 132, d.tm);
+    s += digi(150, 336, landed || d.c >= 3 ? dig(d.tm) : "?:??");
+    s += '</svg>';
+    q("svg").innerHTML = s;
+  }
+  function draw(){
+    var dots = '<div class="sc-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && d.c < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    q("task").innerHTML = dots + (d.c >= 3 ?
+      '<p><b>Free play.</b> The clock is fixed. Turn the hands and watch the digital time.</p>' :
+      '<p class="tiny" style="margin:0 0 6px">Clock ' + (view + 1) + ' of 3. The big clock in the empty hall has stopped. A note says:</p><p class="sc-note">' + SC[view].note + '</p>');
+    paint();
+    var wait = landed || d.c >= 3;
+    act("check").classList.toggle("hidden", d.c >= 3);
+    act("check").disabled = wait;
+    act("show").classList.toggle("hidden", wait || !d.miss[view]);
+    ["mb", "mf", "hb", "hf"].forEach(function(a){ act(a).disabled = landed; });
+  }
+  function setT(v){ d.tm = ((v % 720) + 720) % 720; api.save(); paint(); }
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb sc-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb sc-fb " + cls; f.innerHTML = html;
+  }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function win(viaShow){
+    var k = view;
+    landed = true;
+    if(viaShow) d.shown[k] = true;
+    d.c = k + 1;
+    if(d.c >= 3) d.result = result();
+    api.save();
+    var head = viaShow ? "<b>Here is how this one works.</b> " : "<b>" + ["Tick tock. The clock is going again.", "The hall clock chimes. Spot on.", "Locked up on time. Nice."][k] + "</b> ";
+    var more = k < 2 ? '<br><button class="btn" type="button" data-act="next">Next clock</button>' :
+      '<p style="margin:8px 0 0">All three clocks set. Long hand for minutes, short hand for hours.</p><button class="btn" type="button" data-act="next">Free play</button>';
+    fb(viaShow ? "show" : "good", head + SC[k].how + " On a digital clock it is " + dig(SC[k].tm) + "." + more);
+    draw();
+    if(k === 2) api.done(d.result);
+  }
+  function check(){
+    if(landed || d.c >= 3) return;
+    var want = SC[view].tm;
+    if(d.tm === want){ win(false); return; }
+    d.miss[view]++; api.save();
+    var mOk = d.tm % 60 === want % 60;
+    var msg = "Your clock says <b>" + say(d.tm) + "</b>. ";
+    if(mOk) msg += "The long hand is right. Now move the hour.";
+    else msg += "Look at the long hand first. Where should it point?";
+    fb("nudge", "<b>Not quite yet.</b> " + msg + (d.miss[view] > 1 ? " Show me is there if you want it." : ""));
+    draw();
+  }
+
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("[data-act]");
+    if(!b || !el.contains(b)) return;
+    var a = b.getAttribute("data-act");
+    if(!landed){
+      if(a === "mf") setT(d.tm + 15);
+      else if(a === "mb") setT(d.tm - 15);
+      else if(a === "hf") setT(d.tm + 60);
+      else if(a === "hb") setT(d.tm - 60);
+    }
+    if(a === "check") check();
+    else if(a === "show"){
+      if(landed || d.c >= 3) return;
+      d.tm = SC[view].tm; win(true);
+    }else if(a === "next"){
+      landed = false; fb(null);
+      view = Math.min(d.c, 2); d.tm = 0; api.save(); draw();
+    }
+  });
+
+  /* drag the long hand: it clicks round in quarters, and the short hand follows */
+  function fromPointer(e){
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var r = sv.getBoundingClientRect();
+    var x = (e.clientX - r.left) * 300 / r.width - 150, y = (e.clientY - r.top) * 372 / r.height - 150;
+    var deg = Math.atan2(x, -y) * 180 / Math.PI;
+    if(deg < 0) deg += 360;
+    var nm = (Math.round(deg / 90) * 15) % 60, cm = d.tm % 60;
+    var diff = nm - cm;
+    if(diff > 30) diff -= 60;
+    if(diff <= -30) diff += 60;
+    if(diff) setT(d.tm + diff);
+  }
+  q("svg").addEventListener("pointerdown", function(e){
+    if(landed) return;
+    dragging = true;
+    try{ q("svg").setPointerCapture(e.pointerId); }catch(err){}
+    fromPointer(e); e.preventDefault();
+  });
+  q("svg").addEventListener("pointermove", function(e){ if(dragging && !landed) fromPointer(e); });
+  function stop(){ dragging = false; }
+  q("svg").addEventListener("pointerup", stop);
+  q("svg").addEventListener("pointercancel", stop);
+
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three clocks set.</b> Free play is open. Turn the hands and watch the digital time.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "money-time",
+  title: "Money and time",
+  subject: "Maths",
+  mins: 40,
+  blurb: "Coins, prices and change at the Midnight Caf&eacute;, then clocks, how long things take, opening times and the calendar. You get to fix the stopped clock in the empty hall.",
+  steps: [
+
+  /* ---------- 1 COINS AND NOTES ---------- */
+  { type: "learn", topic: "Coins and notes",
+    title: "Coins and notes",
+    fig: MONEY,
+    html: '<p>There are 8 coins and 4 notes.</p>' +
+          '<p>100 pence make &pound;1.</p>' +
+          '<p>&pound;3.45 means 3 pounds and 45 pence.</p>' +
+          '<p>After the dot there are always two numbers. 3 pounds and 5 pence is &pound;3.05.</p>' +
+          '<div class="keep"><b>Keep this</b>100p is &pound;1.</div>' },
+
+  { type: "num", topic: "Coins and notes",
+    fig: PURSE,
+    q: "How much money is here?",
+    boxes: [ { label: "Total", a: 3.75, pre: "&pound;", show: "3.75" } ],
+    hint: "Add the pounds first. Then add the pence.",
+    why: "Pounds: &pound;2 and &pound;1 make &pound;3. Pence: 50p, 20p and 5p make 75p. Total <b>&pound;3.75</b>." },
+
+  { type: "match", topic: "Coins and notes",
+    q: "Match the pence to the pounds.",
+    pairs: [ [ "100p", "&pound;1.00" ], [ "250p", "&pound;2.50" ], [ "75p", "&pound;0.75" ], [ "305p", "&pound;3.05" ] ],
+    hint: "Every 100p is &pound;1. What is left over is the pence.",
+    why: "100p is &pound;1.00. 250p is &pound;2 and 50p, so &pound;2.50. 305p is &pound;3 and 5p, so &pound;3.05. 75p is less than &pound;1, so &pound;0.75." },
+
+  { type: "mc", topic: "Coins and notes",
+    q: "How do you write 3 pounds and 5 pence?",
+    options: [ "&pound;3.05", "&pound;3.5", "&pound;3.50", "&pound;35" ],
+    answer: 0,
+    hint: "There are always two numbers after the dot.",
+    why: "5 pence is written 05 after the dot. So it is <b>&pound;3.05</b>. &pound;3.50 would be 3 pounds and 50 pence." },
+
+  { type: "mc", topic: "Coins and notes",
+    q: "Which is worth the most?",
+    options: [ "A &pound;5 note", "Two &pound;2 coins", "Five 50p coins", "Ten 10p coins" ],
+    answer: 0,
+    hint: "Work out each one in pounds.",
+    why: "Two &pound;2 coins make &pound;4. Five 50p coins make &pound;2.50. Ten 10p coins make &pound;1. So <b>a &pound;5 note</b> is worth the most." },
+
+  /* ---------- 2 ADDING UP PRICES ---------- */
+  { type: "learn", topic: "Adding up prices",
+    title: "The Midnight Caf&eacute;",
+    html: MENU +
+          '<p>To add prices, add the pounds. Then add the pence.</p>' +
+          '<p>Hot chocolate and a cupcake: &pound;1 and &pound;1 make &pound;2. 50p and 20p make 70p.</p>' +
+          '<p>Total: &pound;2.70.</p>' +
+          '<div class="keep"><b>Keep this</b>100 pence or more makes another &pound;1.</div>' },
+
+  { type: "num", topic: "Adding up prices",
+    fig: MENU,
+    q: "You buy 2 cookies. How much is that?",
+    boxes: [ { label: "Total", a: 1.3, pre: "&pound;", show: "1.30" } ],
+    hint: "65p and 65p. Is that more than 100p?",
+    why: "65p and 65p make 130p. 100p is &pound;1, so 130p is <b>&pound;1.30</b>." },
+
+  { type: "num", topic: "Adding up prices",
+    fig: MENU,
+    q: "You buy a toffee pudding and a jelly pot. How much is that?",
+    boxes: [ { label: "Total", a: 3.05, pre: "&pound;", show: "3.05" } ],
+    hint: "Pence: 25p and 80p. That is more than 100p.",
+    why: "Pounds: &pound;2. Pence: 25p and 80p make 105p, which is &pound;1.05. So the total is &pound;2 and &pound;1.05, which is <b>&pound;3.05</b>." },
+
+  { type: "num", topic: "Adding up prices",
+    fig: MENU,
+    q: "You buy a hot chocolate, a ghost cupcake and a cookie. How much is that?",
+    boxes: [ { label: "Total", a: 3.35, pre: "&pound;", show: "3.35" } ],
+    hint: "Add the pounds. Then add the pence: 50p, 20p and 65p.",
+    why: "Pounds: &pound;1 and &pound;1 make &pound;2. Pence: 50p, 20p and 65p make 135p, which is &pound;1.35. Total <b>&pound;3.35</b>." },
+
+  { type: "mc", topic: "Adding up prices",
+    fig: MENU,
+    q: "You have &pound;3. Can you buy a toffee pudding and a cookie?",
+    options: [ "Yes, with 10p left", "No, you are 10p short", "Yes, with &pound;1 left" ],
+    answer: 0,
+    hint: "Add &pound;2.25 and 65p. Is it more or less than &pound;3?",
+    why: "&pound;2.25 and 65p make &pound;2.90. That is less than &pound;3. So <b>yes, with 10p left</b>." },
+
+  /* ---------- 3 CHANGE AND BEST VALUE ---------- */
+  { type: "learn", topic: "Change and best value",
+    title: "Counting up for change",
+    fig: CHANGE,
+    html: '<p>Change is the money you get back.</p>' +
+          '<p>Count up from the price to what you paid.</p>' +
+          '<p>A pudding costs &pound;3.70. You pay with &pound;5.</p>' +
+          '<p>&pound;3.70 to &pound;4 is 30p. &pound;4 to &pound;5 is &pound;1. Change: &pound;1.30.</p>' +
+          '<div class="keep"><b>Keep this</b>Count up to the next pound. Then count up in pounds.</div>' },
+
+  { type: "num", topic: "Change and best value",
+    q: "A cupcake costs &pound;1.20. You pay with a &pound;5 note. How much change do you get?",
+    boxes: [ { label: "Change", a: 3.8, pre: "&pound;", show: "3.80" } ],
+    hint: "Count up from &pound;1.20 to &pound;2. Then from &pound;2 to &pound;5.",
+    why: "&pound;1.20 to &pound;2 is 80p. &pound;2 to &pound;5 is &pound;3. Change: <b>&pound;3.80</b>." },
+
+  { type: "num", topic: "Change and best value",
+    q: "Your snacks cost &pound;6.40. You pay with a &pound;10 note. How much change do you get?",
+    boxes: [ { label: "Change", a: 3.6, pre: "&pound;", show: "3.60" } ],
+    hint: "Count up from &pound;6.40 to &pound;7. Then from &pound;7 to &pound;10.",
+    why: "&pound;6.40 to &pound;7 is 60p. &pound;7 to &pound;10 is &pound;3. Change: <b>&pound;3.60</b>." },
+
+  { type: "learn", topic: "Change and best value",
+    title: "Best value",
+    html: '<p>Best value means you get more for your money.</p>' +
+          '<p>Cookies cost 60p each. A pack of 4 costs &pound;2.</p>' +
+          '<p>4 single cookies cost 60p, 60p, 60p and 60p. That is &pound;2.40.</p>' +
+          '<p>The pack is cheaper. It is better value.</p>' +
+          '<div class="keep"><b>Keep this</b>Compare the same number of things.</div>' },
+
+  { type: "mc", topic: "Change and best value",
+    q: "Cupcakes cost &pound;1 each. A box of 6 cupcakes costs &pound;5. You want 6 cupcakes. Which is better value?",
+    options: [ "The box of 6", "6 single cupcakes", "They cost the same" ],
+    answer: 0,
+    hint: "How much would 6 single cupcakes cost?",
+    why: "6 single cupcakes cost &pound;6. The box costs &pound;5. So <b>the box of 6</b> is better value. You save &pound;1." },
+
+  { type: "mc", topic: "Change and best value", stretch: true,
+    q: "A 1 litre bottle of squash costs 95p. A 2 litre bottle costs &pound;1.80. Which is better value?",
+    options: [ "The 2 litre bottle", "The 1 litre bottle", "They are the same value" ],
+    answer: 0,
+    hint: "What would 2 litres cost if you bought two small bottles?",
+    why: "Two 1 litre bottles cost 95p and 95p, which is &pound;1.90. The 2 litre bottle is &pound;1.80. So <b>the 2 litre bottle</b> is better value, by 10p." },
+
+  /* ---------- 4 TELLING THE TIME ---------- */
+  { type: "learn", topic: "Telling the time",
+    title: "Reading a clock",
+    fig: FOUR,
+    html: '<p>The short hand shows the hour. The long hand shows the minutes.</p>' +
+          '<p>Long hand on 12: it is o&#39;clock. Long hand on 6: half past.</p>' +
+          '<p>Long hand on 3: quarter past. Long hand on 9: quarter to.</p>' +
+          '<div class="keep"><b>Keep this</b>Quarter to means 15 minutes before the next hour.</div>' },
+
+  { type: "match", topic: "Telling the time",
+    q: "Match each clock to its time.",
+    pairs: [
+      [ smallClock(8, 0, "Clock A: the long hand is on 12 and the short hand is on 8."), "8 o'clock" ],
+      [ smallClock(2, 30, "Clock B: the long hand is on 6 and the short hand is half way between 2 and 3."), "Half past 2" ],
+      [ smallClock(11, 15, "Clock C: the long hand is on 3 and the short hand is just past 11."), "Quarter past 11" ],
+      [ smallClock(5, 45, "Clock D: the long hand is on 9 and the short hand is nearly at 6."), "Quarter to 6" ]
+    ],
+    hint: "Look at the long hand first. 12 is o&#39;clock, 6 is half past, 3 is quarter past, 9 is quarter to.",
+    why: "Long hand on 12: 8 o&#39;clock. On 6: half past 2. On 3: quarter past 11. On 9: quarter to 6, because the short hand is nearly at 6." },
+
+  { type: "mc", topic: "Telling the time",
+    fig: clock(4, 45, "A clock. The long hand is on 9. The short hand is nearly at 5."),
+    q: "What time does this clock show?",
+    options: [ "Quarter to 5", "Quarter past 5", "Quarter to 4", "Quarter past 9" ],
+    answer: 0,
+    hint: "The long hand is on 9. Which hour is the short hand moving towards?",
+    why: "Long hand on 9 means quarter to. The short hand is nearly at 5. So it is <b>quarter to 5</b>. It is not quarter to 4: 4 o&#39;clock has already gone." },
+
+  { type: "mc", topic: "Telling the time",
+    fig: clock(9, 30, "A clock. The long hand is on 6. The short hand is half way between 9 and 10."),
+    q: "What time does this clock show?",
+    options: [ "Half past 9", "Half past 6", "6 o'clock", "Half past 10" ],
+    answer: 0,
+    hint: "Which hand is the short one?",
+    why: "The long hand is on 6, so it is half past. The short hand is half way between 9 and 10. So it is <b>half past 9</b>. Half past 6 mixes up the two hands." },
+
+  { type: "widget", topic: "Telling the time",
+    title: "Set the clock",
+    html: "Set the stopped clock to the time on each note. Drag the long hand, or use the buttons. Press <b>Start the clock</b> when it looks right.",
+    mount: mountClock,
+    report: function(d){
+      if(!d || !d.result) return "Set the clock: " + (d && d.c ? d.c : 0) + " of 3 set.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Set the clock: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  /* ---------- 5 DIGITAL CLOCKS ---------- */
+  { type: "learn", topic: "Digital clocks",
+    title: "Clocks with numbers",
+    fig: PAIRS,
+    html: '<p>There are 60 minutes in an hour.</p>' +
+          '<p>A digital clock shows the hour, then the minutes.</p>' +
+          '<p>Quarter past is 15 minutes. Half past is 30 minutes.</p>' +
+          '<p>Quarter to 8 is 45 minutes past 7. So it is 7:45.</p>' +
+          '<div class="keep"><b>Keep this</b>O&#39;clock is 00. Quarter past is 15. Half past is 30. Quarter to is 45.</div>' },
+
+  { type: "num", topic: "Digital clocks",
+    q: "How many minutes are in 1 hour?",
+    boxes: [ { label: "1 hour", a: 60, post: "minutes" } ],
+    hint: "The long hand goes all the way round once in an hour.",
+    why: "There are <b>60 minutes</b> in 1 hour." },
+
+  { type: "match", topic: "Digital clocks",
+    q: "Match each time to the digital clock.",
+    pairs: [ [ "6 o'clock", "6:00" ], [ "Quarter past 6", "6:15" ], [ "Half past 6", "6:30" ], [ "Quarter to 6", "5:45" ] ],
+    hint: "Quarter to 6 comes before 6 o&#39;clock.",
+    why: "6 o&#39;clock is 6:00. Quarter past 6 is 6:15. Half past 6 is 6:30. Quarter to 6 is 15 minutes before 6, so it is 5:45." },
+
+  { type: "mc", topic: "Digital clocks",
+    fig: digital("8:45", "A digital clock showing 8:45."),
+    q: "What time is this?",
+    options: [ "Quarter to 9", "Quarter past 8", "Quarter to 8", "Half past 8" ],
+    answer: 0,
+    hint: "45 minutes past 8. How long until 9 o&#39;clock?",
+    why: "8:45 is 45 minutes past 8. That is 15 minutes before 9. So it is <b>quarter to 9</b>." },
+
+  { type: "num", topic: "Digital clocks",
+    q: "How many minutes are in half an hour?",
+    boxes: [ { label: "Half an hour", a: 30, post: "minutes" } ],
+    hint: "What is half of 60?",
+    why: "Half of 60 is <b>30</b>. So half an hour is 30 minutes." },
+
+  { type: "mc", topic: "Digital clocks", stretch: true,
+    fig: clock(4, 20, "A clock. The long hand is on 4. The short hand is a little past 4."),
+    q: "What will a digital clock show at this time?",
+    options: [ "4:20", "4:04", "4:40", "8:20" ],
+    answer: 0,
+    hint: "Each number round the clock is 5 minutes for the long hand. Count in 5s.",
+    why: "The long hand is on 4. Count in 5s: 5, 10, 15, 20. So it is 20 minutes past. The short hand is just past 4. So it is <b>4:20</b>." },
+
+  /* ---------- 6 HOW LONG ---------- */
+  { type: "learn", topic: "How long?",
+    title: "How long does it take?",
+    fig: HOWLONG,
+    html: '<p>To find how long something takes, count on.</p>' +
+          '<p>3 o&#39;clock to 5 o&#39;clock: count 4, 5. That is 2 hours.</p>' +
+          '<p>Half past 2 to 4 o&#39;clock: half an hour gets you to 3. Then 1 hour gets you to 4.</p>' +
+          '<p>That is 1 and a half hours.</p>' +
+          '<div class="keep"><b>Keep this</b>Count on. Half an hour is 30 minutes.</div>' },
+
+  { type: "num", topic: "How long?",
+    q: "A scary film starts at 7 o'clock. It ends at 9 o'clock. How long is it?",
+    boxes: [ { label: "Film", a: 2, post: "hours" } ],
+    hint: "Count on from 7: 8, 9.",
+    why: "Count on from 7: 8, 9. That is <b>2 hours</b>." },
+
+  { type: "mc", topic: "How long?",
+    q: "A pudding bakes from 4 o'clock to half past 5. How long is that?",
+    options: [ "1 and a half hours", "1 hour", "2 hours", "Half an hour" ],
+    answer: 0,
+    hint: "4 o&#39;clock to 5 o&#39;clock first. Then 5 o&#39;clock to half past 5.",
+    why: "4 o&#39;clock to 5 o&#39;clock is 1 hour. 5 o&#39;clock to half past 5 is half an hour. Total: <b>1 and a half hours</b>." },
+
+  { type: "num", topic: "How long?",
+    q: "A cake bakes for 30 minutes. Then it cools for 30 minutes. How many minutes is that in total?",
+    boxes: [ { label: "Total", a: 60, post: "minutes" } ],
+    hint: "Add 30 and 30.",
+    why: "30 and 30 make <b>60 minutes</b>. That is 1 hour." },
+
+  { type: "num", topic: "How long?", stretch: true,
+    q: "The night cleaner starts at 10 o'clock at night. The shift ends at 2 o'clock in the morning. How many hours is that?",
+    boxes: [ { label: "Shift", a: 4, post: "hours" } ],
+    hint: "Count on from 10: 11, 12, then keep going after midnight.",
+    why: "Count on from 10: 11, 12, 1, 2. That is <b>4 hours</b>. After 12 midnight the clock starts again at 1." },
+
+  /* ---------- 7 TIMETABLES AND CALENDARS ---------- */
+  { type: "learn", topic: "Opening times and calendars",
+    title: "When is it open?",
+    html: HOURS +
+          '<p>Find the day. Read across to the times.</p>' +
+          '<p>There are 7 days in a week. There are 12 months in a year.</p>' +
+          '<div class="keep"><b>Keep this</b>Find the row first. Then read across.</div>' },
+
+  { type: "mc", topic: "Opening times and calendars",
+    fig: HOURS,
+    q: "Which day is the caf&eacute; closed?",
+    options: [ "Monday", "Tuesday", "Friday", "Sunday" ],
+    answer: 0,
+    hint: "Look for the word Closed.",
+    why: "The table says <b>Monday</b>: Closed." },
+
+  { type: "mc", topic: "Opening times and calendars",
+    fig: HOURS,
+    q: "What time does the caf&eacute; open on Sunday?",
+    options: [ "4 pm", "6 pm", "8 pm", "10 pm" ],
+    answer: 0, fixed: true,
+    hint: "Find the Sunday row. The first time is when it opens.",
+    why: "Sunday: 4 pm to 8 pm. It opens at <b>4 pm</b>. 8 pm is when it closes." },
+
+  { type: "num", topic: "Opening times and calendars",
+    fig: HOURS,
+    q: "On Friday, how many hours is the caf&eacute; open?",
+    boxes: [ { label: "Friday", a: 6, post: "hours" } ],
+    hint: "6 pm to midnight. Midnight is 12 o&#39;clock. Count on from 6.",
+    why: "Count on from 6: 7, 8, 9, 10, 11, 12. That is <b>6 hours</b>." },
+
+  { type: "order", topic: "Opening times and calendars",
+    q: "Put these months in order, from the start of the year.",
+    items: [ "January", "March", "June", "September", "December" ],
+    hint: "The year starts in January and ends in December.",
+    why: "January is month 1. March is 3. June is 6. September is 9. December is 12." },
+
+  { type: "num", topic: "Opening times and calendars",
+    q: "How many days are in 2 weeks?",
+    boxes: [ { label: "2 weeks", a: 14, post: "days" } ],
+    hint: "There are 7 days in 1 week.",
+    why: "7 days and 7 days make <b>14 days</b>." }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

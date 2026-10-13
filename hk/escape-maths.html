@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<!-- BUILT by hk/_build/build_hk.py from a shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the night bus - HK Overgrown HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bungee&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/hk/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/hk/hk.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* room banners, the ticket machine screen, the place value table and the gate plaque */
+.fig svg.roomban{max-width:560px;border-radius:10px}
+.fig svg.small{max-width:340px}
+.tmach{background:#0f2a1c;color:#7dffb0;border:4px solid #3a4060;border-radius:12px;padding:12px 16px;margin:0 auto 12px;max-width:340px;text-align:left;font-family:"Space Mono","Courier New",monospace}
+.tmach .bh{display:block;text-align:center;font-weight:700;letter-spacing:.12em;margin-bottom:6px;color:#ffd23f}
+.tmach table{width:100%;border-collapse:collapse;font-size:1.05rem}
+.tmach td{padding:6px 4px;border-bottom:1px dashed rgba(125,255,176,.3)}
+.tmach td.p{text-align:right;font-weight:700;white-space:nowrap}
+.tmach tr:last-child td{border-bottom:0}
+.pv{border-collapse:collapse;margin:4px auto 12px;font-size:1.1rem}
+.pv th,.pv td{border:2px solid var(--ink);padding:8px 16px;text-align:center}
+.pv th{background:var(--accent-soft);font-family:var(--display);font-size:.9rem}
+.pv td{font-family:var(--display);font-weight:700;font-size:1.5rem}
+.plaque{background:#f6e7b4;border:3px solid #c9a646;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif;font-size:1.08rem;color:#141a33}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/hk/"><span class="hqlogo">HK</span><span class="hqname">Overgrown HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/hk/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the night bus</h2>
+    <span>Maths. An escape room: you wake up in an empty bus depot. Do the maths in four rooms to find the gate code.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>HK's Overgrown HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/hk/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec",
+    WHITE = "#ffffff", LINE = "#d9d8e6", NIGHT = "#232a4d", DIM = "#2e3352",
+    FUR = "#9a6b4a", FUR2 = "#7a5238";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function svg(w, hgt, label, inner, cls){
+  return '<svg class="' + (cls || "roomban") + '" viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function strip(x, y, w, faint){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="6" rx="3" fill="#fbf8e4" opacity="' + (faint ? 0.3 : 0.95) + '"/>' +
+    (faint ? '' : '<rect x="' + (x - 10) + '" y="' + (y + 6) + '" width="' + (w + 20) + '" height="10" fill="#fbf8e4" opacity="0.08"/>');
+}
+/* a small brown toy poodle with no tail; (x, y) is where its feet touch the shelf */
+function poodle(x, y, s){
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    '<rect x="-16" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="-6" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<rect x="8" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="16" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<ellipse cx="2" cy="-22" rx="22" ry="11" fill="' + FUR + '"/>' +
+    '<circle cx="-14" cy="-26" r="8" fill="' + FUR + '"/><circle cx="16" cy="-26" r="8" fill="' + FUR + '"/>' +
+    '<circle cx="26" cy="-40" r="10" fill="' + FUR + '"/><circle cx="24" cy="-51" r="6" fill="' + FUR + '"/>' +
+    '<ellipse cx="20" cy="-35" rx="5" ry="9" fill="' + FUR2 + '"/>' +
+    '<ellipse cx="36" cy="-37" rx="6" ry="4" fill="' + FUR + '"/>' +
+    '<circle cx="41" cy="-38" r="2" fill="' + INK + '"/><circle cx="30" cy="-43" r="1.8" fill="' + INK + '"/>' +
+  '</g>';
+}
+
+/* ---------- room banners ---------- */
+var BAN_BUS = svg(380, 130, "Inside the top deck of an empty bus at night. Rows of seats, dark windows, and the sign at the front says 347",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(40, 8, 60) + strip(160, 8, 60, true) + strip(280, 8, 60) +
+  '<rect x="10" y="24" width="360" height="44" rx="6" fill="' + NIGHT + '"/>' +
+  '<circle cx="80" cy="40" r="2" fill="' + WHITE + '"/><circle cx="210" cy="34" r="1.5" fill="' + WHITE + '"/><circle cx="330" cy="46" r="2" fill="' + WHITE + '"/>' +
+  '<path d="M300 60 A14 14 0 1 1 318 40 A11 11 0 1 0 300 60 Z" fill="#fbf8e4" opacity="0.8"/>' +
+  [30, 110, 190, 270].map(function(x){
+    return '<rect x="' + x + '" y="74" width="60" height="38" rx="8" fill="' + CORAL + '"/><rect x="' + (x + 4) + '" y="78" width="52" height="16" rx="5" fill="#d94a4a"/>';
+  }).join("") +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>' +
+  '<rect x="150" y="28" width="80" height="24" rx="4" fill="' + INK + '" stroke="' + SUN + '" stroke-width="2"/>' +
+  '<text x="190" y="46" text-anchor="middle" ' + LAB + ' font-size="17" font-weight="700" fill="' + SUN + '">347</text>');
+
+var BAN_TICKET = svg(380, 130, "An old ticket machine by the depot door. Its screen glows green",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(150, 8, 80) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>' +
+  '<rect x="250" y="30" width="100" height="82" fill="' + NIGHT + '" stroke="' + LINE + '" stroke-width="2"/>' +
+  '<text x="300" y="80" text-anchor="middle" ' + LAB + ' font-size="13" font-weight="700" fill="' + LINE + '">EXIT</text>' +
+  '<rect x="90" y="24" width="110" height="88" rx="10" fill="#5a6584"/>' +
+  '<rect x="102" y="34" width="86" height="40" rx="4" fill="#0f2a1c"/>' +
+  '<text x="145" y="52" text-anchor="middle" ' + LAB + ' font-size="12" font-weight="700" fill="#7dffb0">TICKETS</text>' +
+  '<text x="145" y="67" text-anchor="middle" ' + LAB + ' font-size="11" fill="#7dffb0">BEEP</text>' +
+  '<rect x="108" y="82" width="30" height="8" rx="3" fill="' + INK + '"/>' +
+  '<circle cx="160" cy="86" r="5" fill="' + SUN + '"/><circle cx="176" cy="86" r="5" fill="' + MINT + '"/>' +
+  '<rect x="118" y="98" width="54" height="8" rx="2" fill="' + INK + '"/>');
+
+var BAN_LOST = svg(380, 130, "The lost property office: shelves of boxes, umbrellas and hats, a small brown toy dog with no tail, and a clock on the wall",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(40, 8, 70, true) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>' +
+  '<rect x="20" y="62" width="240" height="5" fill="' + LINE + '"/><rect x="20" y="108" width="240" height="4" fill="' + LINE + '"/>' +
+  '<rect x="28" y="38" width="40" height="24" rx="2" fill="#b8925e"/><rect x="74" y="42" width="36" height="20" rx="2" fill="#a07a4a"/>' +
+  '<rect x="116" y="36" width="42" height="26" rx="2" fill="#b8925e"/>' +
+  '<path d="M176 62 L176 30 M170 34 A10 8 0 0 1 190 34 Z" stroke="' + VIOLET + '" stroke-width="3" fill="' + VIOLET + '"/>' +
+  '<path d="M210 62 L210 28 M202 32 A12 9 0 0 1 222 32 Z" stroke="' + CYAN + '" stroke-width="3" fill="' + CYAN + '"/>' +
+  '<path d="M40 108 Q50 88 64 108 Z" fill="' + MINT + '"/><rect x="34" y="104" width="36" height="4" fill="' + MINT + '"/>' +
+  '<rect x="84" y="86" width="44" height="22" rx="2" fill="#a07a4a"/>' +
+  poodle(170, 108, 0.6) +
+  '<path d="M214 108 Q222 92 236 108 Z" fill="' + SUN + '"/>' +
+  '<circle cx="320" cy="56" r="34" fill="' + PAPER + '" stroke="' + LINE + '" stroke-width="4"/>' +
+  '<line x1="320" y1="56" x2="296" y2="56" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
+  '<line x1="320" y1="56" x2="318" y2="36" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
+  '<circle cx="320" cy="56" r="3" fill="' + CORAL + '"/>');
+
+var BAN_GARAGE = svg(380, 130, "The mechanics garage: a bus up on a lift, tools on the wall and a tap dripping",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(60, 8, 80) + strip(240, 8, 80, true) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>' +
+  '<rect x="30" y="34" width="210" height="52" rx="10" fill="' + CORAL + '"/>' +
+  '<rect x="44" y="42" width="34" height="20" rx="3" fill="' + NIGHT + '"/><rect x="86" y="42" width="34" height="20" rx="3" fill="' + NIGHT + '"/>' +
+  '<rect x="128" y="42" width="34" height="20" rx="3" fill="' + NIGHT + '"/><rect x="170" y="42" width="34" height="20" rx="3" fill="' + NIGHT + '"/>' +
+  '<circle cx="70" cy="88" r="10" fill="' + INK + '" stroke="' + LINE + '" stroke-width="3"/><circle cx="200" cy="88" r="10" fill="' + INK + '" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<rect x="60" y="98" width="8" height="14" fill="' + SUN + '"/><rect x="200" y="98" width="8" height="14" fill="' + SUN + '"/>' +
+  '<rect x="270" y="26" width="90" height="50" fill="' + NIGHT + '"/>' +
+  '<path d="M284 34 L284 66 M300 34 L300 60 M316 34 L316 66 M334 34 L346 66" stroke="' + LINE + '" stroke-width="4" stroke-linecap="round"/>' +
+  '<path d="M290 90 L310 90 L310 98" stroke="' + LINE + '" stroke-width="5" fill="none"/>' +
+  '<ellipse cx="310" cy="106" rx="2.5" ry="3.5" fill="' + CYAN + '"/>');
+
+/* ---------- boards and figures ---------- */
+var PV = '<table class="pv"><tr><th>Hundreds</th><th>Tens</th><th>Ones</th></tr><tr><td>3</td><td>4</td><td>7</td></tr></table>';
+
+var PRICES =
+'<div class="tmach"><span class="bh">TICKETS</span><table>' +
+'<tr><td>Single</td><td class="p">&pound;2.00</td></tr>' +
+'<tr><td>Return</td><td class="p">&pound;3.50</td></tr>' +
+'<tr><td>Day ticket</td><td class="p">&pound;5.00</td></tr>' +
+'</table></div>';
+
+/* the lost property clock, drawn by angle */
+function clock(hr, mn){
+  var cx = 120, cy = 120, r = 100, s = '';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="6"/>';
+  for(var k = 0; k < 60; k++){
+    var a = k * 6 * Math.PI / 180, big = k % 5 === 0;
+    var r1 = big ? r - 14 : r - 7;
+    s += '<line x1="' + (cx + r1 * Math.sin(a)).toFixed(1) + '" y1="' + (cy - r1 * Math.cos(a)).toFixed(1) + '" x2="' + (cx + (r - 3) * Math.sin(a)).toFixed(1) + '" y2="' + (cy - (r - 3) * Math.cos(a)).toFixed(1) + '" stroke="' + INK + '" stroke-width="' + (big ? 3 : 1.2) + '"/>';
+  }
+  for(var n = 1; n <= 12; n++){
+    var b = n * 30 * Math.PI / 180;
+    s += '<text x="' + (cx + (r - 30) * Math.sin(b)).toFixed(1) + '" y="' + (cy - (r - 30) * Math.cos(b) + 7).toFixed(1) + '" text-anchor="middle" ' + LAB + ' font-size="20" font-weight="700" fill="' + INK + '">' + n + '</text>';
+  }
+  var ha = ((hr % 12) + mn / 60) * 30 * Math.PI / 180, ma = mn * 6 * Math.PI / 180;
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + 50 * Math.sin(ha)).toFixed(1) + '" y2="' + (cy - 50 * Math.cos(ha)).toFixed(1) + '" stroke="' + INK + '" stroke-width="8" stroke-linecap="round"/>';
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + 80 * Math.sin(ma)).toFixed(1) + '" y2="' + (cy - 80 * Math.cos(ma)).toFixed(1) + '" stroke="' + CORAL + '" stroke-width="5" stroke-linecap="round"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + INK + '"/>';
+  return svg(240, 240, "A clock face. The short hour hand is nearly at 12, three quarters of the way from 11. The long minute hand points at 9.", s, "small");
+}
+var CLOCK = clock(11, 45);
+
+/* measuring jug: 0 to 1000 ml, numbers every 200, a mark every 100, oil up to 700 */
+var JUG = (function(){
+  var x0 = 120, w = 140, yb = 280, px = 0.24, s = '';
+  s += '<rect width="380" height="310" rx="12" fill="' + PAPER + '"/>';
+  var top = yb - 1000 * px;
+  s += '<rect x="' + x0 + '" y="' + (yb - 700 * px) + '" width="' + w + '" height="' + (700 * px) + '" fill="#c8a032" opacity="0.85"/>';
+  s += '<path d="M' + x0 + ' ' + (top - 14) + ' L' + x0 + ' ' + yb + ' L' + (x0 + w) + ' ' + yb + ' L' + (x0 + w) + ' ' + (top - 14) + '" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>';
+  s += '<path d="M' + (x0 + w) + ' ' + (top + 10) + ' Q' + (x0 + w + 50) + ' ' + (top + 20) + ' ' + (x0 + w + 40) + ' ' + (top + 90) + ' Q' + (x0 + w + 34) + ' ' + (top + 130) + ' ' + (x0 + w) + ' ' + (top + 140) + '" fill="none" stroke="' + INK + '" stroke-width="4"/>';
+  for(var v = 0; v <= 1000; v += 100){
+    var y = yb - v * px, lab = v % 200 === 0;
+    s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + (lab ? 34 : 20)) + '" y2="' + y + '" stroke="' + INK + '" stroke-width="' + (lab ? 3 : 2) + '"/>';
+    if(lab) s += '<text x="' + (x0 - 8) + '" y="' + (y + 6) + '" text-anchor="end" ' + LAB + ' font-size="17" font-weight="700" fill="' + INK + '">' + v + '</text>';
+  }
+  s += '<text x="' + (x0 - 8) + '" y="' + (top - 22) + '" text-anchor="end" ' + BODY + ' font-size="15" fill="' + INK + '">ml</text>';
+  return svg(380, 310, "A measuring jug. The scale has numbers 0, 200, 400, 600, 800 and 1000 ml, with one small mark between each pair of numbers. The oil comes up to the small mark between 600 and 800.", s, "small");
+})();
+
+/* bar chart: buses fixed this week */
+var CHART = (function(){
+  var days = [["Mon", 4], ["Tue", 6], ["Wed", 3], ["Thu", 7], ["Fri", 5]];
+  var x0 = 56, yb = 250, py = 26, bw = 40, gap = 22, s = '';
+  s += '<rect width="380" height="320" rx="12" fill="' + PAPER + '"/>';
+  s += '<text x="200" y="26" text-anchor="middle" ' + LAB + ' font-size="17" font-weight="700" fill="' + INK + '">Buses fixed this week</text>';
+  for(var v = 0; v <= 8; v++){
+    var y = yb - v * py;
+    s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + 5 * (bw + gap) + 4) + '" y2="' + y + '" stroke="' + (v ? LINE : INK) + '" stroke-width="' + (v ? 1.5 : 2) + '"/>';
+    s += '<text x="' + (x0 - 8) + '" y="' + (y + 6) + '" text-anchor="end" ' + LAB + ' font-size="15" fill="' + INK + '">' + v + '</text>';
+  }
+  days.forEach(function(d, k){
+    var x = x0 + gap / 2 + k * (bw + gap);
+    s += '<rect x="' + x + '" y="' + (yb - d[1] * py) + '" width="' + bw + '" height="' + (d[1] * py) + '" fill="' + CORAL + '"/>';
+    s += '<text x="' + (x + bw / 2) + '" y="' + (yb + 22) + '" text-anchor="middle" ' + LAB + ' font-size="15" fill="' + INK + '">' + d[0] + '</text>';
+  });
+  s += '<line x1="' + x0 + '" y1="' + (yb - 8 * py) + '" x2="' + x0 + '" y2="' + yb + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<text x="18" y="' + (yb - 4 * py) + '" transform="rotate(-90 18 ' + (yb - 4 * py) + ')" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">Number of buses</text>';
+  s += '<text x="200" y="' + (yb + 50) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">Day</text>';
+  return svg(380, 320, "A bar chart called Buses fixed this week. Monday 4, Tuesday 6, Wednesday 3, Thursday 7, Friday 5.", s, "chart");
+})();
+
+EGW.run({
+  id: "escape-maths",
+  title: "Escape the night bus",
+  subject: "Maths",
+  mins: 25,
+  blurb: "Asleep on the last bus, awake in an empty depot. Four rooms of maths, one digit in each.",
+  escape: {
+    digits: ["8", "1", "5", "3"],
+    intro: "<p>You fall asleep on the last bus. When you wake up, the bus is parked in the depot. The engine is off.</p>" +
+           "<p>A light flickers. Nobody else is here. Somewhere, a tap drips.</p>" +
+           "<p>The depot gate has a padlock with four dials. A note on the driver's seat says:</p>" +
+           "<p><i>One digit in each room. Do the maths. Then you can go home.</i></p>",
+    outro: "<p>The last dial turns. Click! The depot gate swings open.</p>" +
+           "<p>A worker in an orange jacket is drinking tea. He waves. Fell asleep on the bus? It happens all the time, he says. The next bus home leaves in 5 minutes.</p>" +
+           "<p>Place value, money, times tables, the clock, a scale and a chart. Every digit found. Brilliant work.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: THE BUS ---------- */
+  { type: "learn", topic: "The bus",
+    title: "Room 1: the bus",
+    fig: BAN_BUS,
+    html: "<p>You wake up on the top deck. The seats are empty.</p>" +
+          "<p>The sign at the front says 347. Each digit has a job.</p>" +
+          PV +
+          '<div class="keep"><b>Keep this</b>In 347, the 3 is worth 300. The 4 is worth 40. The 7 is worth 7.</div>' },
+
+  { type: "mc", topic: "The bus",
+    q: "The bus is number 347. What is the 4 worth?",
+    fig: PV,
+    options: ["40", "4", "400", "47"],
+    answer: 0,
+    hint: "Which column is the 4 in?",
+    why: "The 4 is in the tens column. So it is worth 4 tens. That is <b>40</b>." },
+
+  { type: "mc", topic: "The bus",
+    q: "Four buses are parked. Which bus number is the biggest?",
+    options: ["490", "409", "449", "94"],
+    answer: 0,
+    hint: "Look at the hundreds first. If they are the same, look at the tens.",
+    why: "94 has no hundreds, so it is the smallest. 409, 449 and 490 all have 4 hundreds. Now look at the tens: 0, 4 and 9. 9 tens is the most. So <b>490</b> is the biggest." },
+
+  { type: "num", topic: "The bus",
+    q: "There are 23 seats downstairs. There are 38 seats upstairs. How many seats are there in all?",
+    boxes: [ { label: "Seats", a: 61 } ],
+    hint: "Add the ones first: 3 and 8. Then add the tens.",
+    why: "Ones: 3 + 8 = 11. Write 1 and carry 1 ten.<br>Tens: 2 + 3 + 1 = 6.<br>So there are <b>61</b> seats. Forgetting the carried ten gives 51." },
+
+  { type: "num", topic: "The bus",
+    q: "There were 52 people on the bus. 18 got off at the hospital. How many were left?",
+    boxes: [ { label: "People left", a: 34 } ],
+    hint: "You could count up from 18 to 52. Go to 20 first.",
+    why: "Count up from 18. To get to 20 is 2. From 20 to 52 is 32. 2 + 32 = <b>34</b>.<br>Or use columns. You cannot take 8 from 2. So swap a ten for 10 ones. 12 take away 8 is 4. 4 tens take away 1 ten is 3 tens. So 34." },
+
+  /* ---------- ROOM 2: TICKET MACHINE ---------- */
+  { type: "learn", topic: "Ticket machine",
+    title: "Room 2: the ticket machine",
+    fig: BAN_TICKET,
+    html: "<p>By the depot door is an old ticket machine. Its screen glows green.</p>" +
+          "<p>It beeps once. Then it shows the prices.</p>" +
+          PRICES +
+          '<div class="keep"><b>Keep this</b>&pound;1 is 100p. To find change, count up from the price to the money you paid.</div>' },
+
+  { type: "num", topic: "Ticket machine",
+    q: "How much do 2 single tickets cost?",
+    fig: PRICES,
+    boxes: [ { label: "Cost", a: 4, pre: "&pound;", show: "4.00" } ],
+    hint: "One single is &pound;2. What is 2 lots of &pound;2?",
+    why: "One single costs &pound;2. 2 lots of &pound;2 is <b>&pound;4</b>." },
+
+  { type: "num", topic: "Ticket machine",
+    q: "How many pence is &pound;1.50?",
+    boxes: [ { label: "Pence", a: 150, post: "p" } ],
+    hint: "&pound;1 is 100p. Then add the 50p.",
+    why: "&pound;1 is 100p. Add the 50p. 100 + 50 = <b>150p</b>." },
+
+  { type: "num", topic: "Ticket machine",
+    q: "You buy a return ticket. You pay with a &pound;5 note. How much change do you get?",
+    fig: PRICES,
+    boxes: [ { label: "Change", a: 1.5, pre: "&pound;", show: "1.50" } ],
+    hint: "Count up from &pound;3.50. How much to get to &pound;4? Then to &pound;5?",
+    why: "Count up from &pound;3.50. Add 50p to get to &pound;4. Add &pound;1 to get to &pound;5. 50p and &pound;1 make <b>&pound;1.50</b>." },
+
+  { type: "mc", topic: "Ticket machine",
+    q: "Which coins make exactly &pound;3.50?",
+    options: ["&pound;2, &pound;1 and 50p", "&pound;2, &pound;1 and 20p", "&pound;1, &pound;1 and 50p", "&pound;2, 50p and 50p"],
+    answer: 0,
+    hint: "Add up each set. Start with the pounds, then the pence.",
+    why: "&pound;2 and &pound;1 make &pound;3. Add 50p to get <b>&pound;3.50</b>. The other sets make &pound;3.20, &pound;2.50 and &pound;3." },
+
+  /* ---------- ROOM 3: LOST PROPERTY ---------- */
+  { type: "learn", topic: "Lost property",
+    title: "Room 3: lost property",
+    fig: BAN_LOST,
+    html: "<p>The lost property office is full of shelves. There are boxes of hats and umbrellas.</p>" +
+          "<p>There is even a little brown toy dog with no tail. It looks just like Bonnie!</p>" +
+          "<p>A clock ticks on the wall. Tick, tick, tick.</p>" +
+          '<div class="keep"><b>Keep this</b>6 boxes of 5 is 6 times 5. That is 30. Sharing is the other way. 30 shared into 6 boxes is 5 each.</div>' },
+
+  { type: "num", topic: "Lost property",
+    q: "There are 6 boxes. Each box has 5 umbrellas. How many umbrellas are there?",
+    boxes: [ { label: "Umbrellas", a: 30 } ],
+    hint: "Count in 5s, six times. Start 5, 10, 15.",
+    why: "6 times 5 = <b>30</b>. Counting in 5s works too: 5, 10, 15, 20, 25, 30." },
+
+  { type: "num", topic: "Lost property",
+    q: "24 hats are shared equally on 3 shelves. How many hats are on each shelf?",
+    boxes: [ { label: "Hats on each shelf", a: 8 } ],
+    hint: "What times 3 makes 24? You could count in 3s.",
+    why: "24 shared by 3 is <b>8</b>, because 3 times 8 = 24. Sharing is the opposite of times." },
+
+  { type: "mc", topic: "Lost property",
+    q: "Look at the clock. What time does it show?",
+    fig: CLOCK,
+    options: ["Quarter to 12", "Quarter past 12", "Half past 11", "9 o'clock"],
+    answer: 0,
+    hint: "The long hand shows the minutes. Where does it point? The short hand shows the hour.",
+    why: "The long hand points at 9. That is 45 minutes, or <b>quarter to</b>. The short hand is nearly at 12. So it is <b>quarter to 12</b>. That is 11:45." },
+
+  { type: "num", topic: "Lost property",
+    q: "The last bus left town at 11:10. The clock says 11:45 now. How many minutes is that?",
+    boxes: [ { label: "Minutes", a: 35, post: "minutes" } ],
+    hint: "The hour is the same. Look at the minutes: 10 and 45.",
+    why: "The hour is 11 both times. 45 take away 10 is <b>35</b>. So it is 35 minutes. You were asleep for a while!" },
+
+  /* ---------- ROOM 4: GARAGE ---------- */
+  { type: "learn", topic: "Garage",
+    title: "Room 4: the garage",
+    fig: BAN_GARAGE,
+    html: "<p>The garage smells of oil. A bus sits up on a lift.</p>" +
+          "<p>Something drips. Plink. Plink. It is only a tap.</p>" +
+          '<div class="keep"><b>Keep this</b>On a scale, find two numbers. Count the steps between them. Then work out what one step is worth.</div>' },
+
+  { type: "num", topic: "Garage",
+    q: "How much oil is in the jug?",
+    fig: JUG,
+    boxes: [ { label: "Oil", a: 700, post: "ml" } ],
+    hint: "From 600 to 800 there are 2 steps. What is one step worth?",
+    why: "From 600 to 800 is 200. There are 2 steps, so each step is 100. The oil is one step above 600. So it is <b>700 ml</b>." },
+
+  { type: "num", topic: "Garage",
+    q: "The jug holds 1000 ml when it is full. How much more oil fits in?",
+    fig: JUG,
+    boxes: [ { label: "More oil", a: 300, post: "ml" } ],
+    hint: "Count up from 700 to 1000.",
+    why: "Count up from 700 to 1000. 700, 800, 900, 1000. That is 3 hundreds, so <b>300 ml</b>." },
+
+  { type: "mc", topic: "Garage",
+    q: "On which day were the most buses fixed?",
+    fig: CHART,
+    options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    answer: 3, fixed: true,
+    hint: "Find the tallest bar.",
+    why: "The tallest bar is Thursday. It goes up to 7. So the most buses were fixed on <b>Thursday</b>." },
+
+  { type: "num", topic: "Garage",
+    q: "How many buses were fixed on Monday and Tuesday together?",
+    fig: CHART,
+    boxes: [ { label: "Buses", a: 10 } ],
+    hint: "Read the Monday bar. Then read the Tuesday bar. Add them.",
+    why: "Monday is 4. Tuesday is 6. 4 + 6 = <b>10</b> buses." },
+
+  /* ---------- THE FINAL DOOR ---------- */
+  { type: "unlock", topic: "The final door",
+    q: "<p>Back at the depot gate, there is a small sign on the padlock.</p>" +
+       '<div class="plaque">Use each digit once. Make the <b>biggest</b> number you can.</div>' +
+       "<p>Here are your rooms and their digits.</p>",
+    code: "8531",
+    hint: "Put the biggest digit first. Then the next biggest, and so on.",
+    why: "The digits are 8, 1, 5 and 3. Biggest first: 8, then 5, then 3, then 1. So the code is <b>8531</b>. That is eight thousand, five hundred and thirty one." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<!-- BUILT by hk/_build/build_hk.py from a shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measuring - HK Overgrown HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bungee&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/hk/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/hk/hk.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.ms-recipe{list-style:none;padding:12px 16px !important;margin:0 0 12px;background:var(--paper);border:2px dashed var(--ink);border-radius:12px}
+.ms-recipe li{margin:0 0 4px}
+.ms-recipe li:first-child{font-family:var(--display);font-weight:700}
+/* Fill the jug widget */
+.jw-fig{margin:6px 0 4px;touch-action:none;cursor:ns-resize}
+.jw-fig svg{max-width:420px}
+.jw-task p{margin:0 0 6px}
+.jw-dots{display:flex;gap:6px;margin-bottom:6px}
+.jw-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.jw-dots span.on{background:var(--good)}
+.jw-dots span.now{background:var(--sun)}
+.jw-pour .btn{padding:9px 14px;font-size:.95rem}
+@media (max-width:480px){
+  .jw-pour{gap:8px}
+  .jw-pour .btn{flex:1 1 40%;padding:9px 6px}
+}
+.jw-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/hk/"><span class="hqlogo">HK</span><span class="hqname">Overgrown HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/hk/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Measuring</h2>
+    <span>Jugs, scales and rulers after hours. Millilitres and litres, grams and kilograms, centimetres and metres.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>HK's Overgrown HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/hk/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function f1(v){ return (+v).toFixed(1).replace(/\.0$/, ""); }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + f1(x) + '" y="' + f1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+
+/* ---------- figures ---------- */
+
+/* A container with a scale up its left side.
+   o: top, lab (labelled every), minor (one small mark), level, unit, kind (jug, cup, bucket), col, aria, stream */
+function vessel(o){
+  var bot = 270, topY = 50, sc = (bot - topY) / o.top;
+  function y(v){ return bot - v * sc; }
+  var L = o.kind === "cup" ? 165 : o.kind === "bucket" ? 130 : 150;
+  var R = o.kind === "cup" ? 285 : o.kind === "bucket" ? 330 : 310;
+  var s = '<svg viewBox="0 0 420 300" role="img" aria-label="' + o.aria + '">';
+  s += '<rect x="' + L + '" y="30" width="' + (R - L) + '" height="' + (bot - 30) + '" fill="' + WHITE + '"/>';
+  if(o.stream) s += '<rect x="' + ((L + R) / 2 - 5) + '" y="0" width="10" height="' + f1(y(o.level)) + '" fill="' + (o.col || CYAN) + '" opacity=".8"/>';
+  if(o.level > 0){
+    s += '<rect x="' + L + '" y="' + f1(y(o.level)) + '" width="' + (R - L) + '" height="' + f1(o.level * sc) + '" fill="' + (o.col || CYAN) + '" opacity=".6"/>';
+    s += ln(L, y(o.level), R, y(o.level), BLUE, 3);
+  }
+  s += '<path d="M' + L + ' 22 V' + bot + ' H' + R + ' V22" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>';
+  if(o.kind === "jug") s += '<path d="M310 70 H350 Q366 70 366 86 V180 Q366 196 350 196 H310" fill="none" stroke="' + INK + '" stroke-width="4"/>';
+  if(o.kind === "bucket") s += '<path d="M' + L + ' 30 Q' + ((L + R) / 2) + ' -40 ' + R + ' 30" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  var n = Math.round(o.top / o.minor), per = Math.round(o.lab / o.minor);
+  for(var k = 0; k <= n; k++){
+    var v = k * o.minor, major = k % per === 0;
+    s += ln(L, y(v), L + (major ? 36 : 20), y(v), INK, major ? 3 : 2);
+    if(major) s += t(L - 10, y(v) + 6, String(v), 17, INK, LAB + ' font-weight="700" text-anchor="end"');
+  }
+  s += t(L - 10, 18, o.unit, 16, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += '</svg>';
+  return s;
+}
+
+/* A straight scale with an arrow. o: min, max, lab, minor, arrow, aria */
+function hscale(o){
+  var x0 = 30, x1 = 370, yL = 66;
+  function x(v){ return x0 + (v - o.min) / (o.max - o.min) * (x1 - x0); }
+  var s = '<svg viewBox="0 0 400 110" role="img" aria-label="' + o.aria + '">';
+  s += ln(x0 - 8, yL, x1 + 8, yL, INK, 3);
+  var n = Math.round((o.max - o.min) / o.minor), per = Math.round(o.lab / o.minor);
+  for(var k = 0; k <= n; k++){
+    var v = o.min + k * o.minor, major = k % per === 0;
+    s += ln(x(v), major ? yL - 14 : yL - 8, x(v), major ? yL + 14 : yL + 8, INK, major ? 3 : 2);
+    if(major) s += t(x(v), yL + 36, String(v), 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  if(o.arrow !== null && o.arrow !== undefined){
+    var ax = x(o.arrow);
+    s += ln(ax, 6, ax, 30, CORAL, 4);
+    s += '<path d="M' + f1(ax - 10) + ' 28 L' + f1(ax + 10) + ' 28 L' + f1(ax) + ' ' + (yL - 16) + ' Z" fill="' + CORAL + '"/>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* Kitchen scales with a dial. o: max, lab, minor, val, unit, item, aria */
+function dial(o){
+  var cx = 200, cy = 172;
+  function ang(v){ return (-135 + 270 * v / o.max) * Math.PI / 180; }
+  function px(v, r){ return [cx + r * Math.sin(ang(v)), cy - r * Math.cos(ang(v))]; }
+  var s = '<svg viewBox="0 0 400 292" role="img" aria-label="' + o.aria + '">';
+  s += '<rect x="80" y="44" width="240" height="12" rx="4" fill="' + LINE + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += ln(200, 56, 200, 64, INK, 6);
+  if(o.item === "flour"){
+    s += '<path d="M150 44 L156 10 L244 10 L250 44 Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
+    s += t(200, 34, "FLOUR", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }else if(o.item === "sweets"){
+    s += '<path d="M160 44 Q150 20 172 14 L228 14 Q250 20 240 44 Z" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += t(200, 36, "SWEETS", 15, WHITE, LAB + ' font-weight="700" text-anchor="middle"');
+  }else if(o.item === "sack"){
+    s += '<path d="M146 44 Q136 20 160 12 L240 12 Q264 20 254 44 Z" fill="#c9a26b" stroke="' + INK + '" stroke-width="3"/>';
+    s += t(200, 36, "POTATOES", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '<rect x="70" y="64" width="260" height="222" rx="26" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="104" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+  var n = Math.round(o.max / o.minor), per = Math.round(o.lab / o.minor);
+  for(var k = 0; k <= n; k++){
+    var v = k * o.minor, major = k % per === 0;
+    var a = px(v, major ? 80 : 88), b = px(v, 100);
+    s += ln(a[0], a[1], b[0], b[1], INK, major ? 3 : 2);
+    if(major){ var p = px(v, 62); s += t(p[0], p[1] + 6, String(v), 16, INK, LAB + ' font-weight="700" text-anchor="middle"'); }
+  }
+  s += t(cx, cy + 70, o.unit, 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  var e = px(o.val, 90);
+  s += ln(cx, cy, e[0], e[1], CORAL, 5, ' stroke-linecap="round"');
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="8" fill="' + INK + '"/>';
+  s += '</svg>';
+  return s;
+}
+
+/* A centimetre ruler with a candle or a key lying on it, from a to b */
+function ruler(a, b, kind, aria){
+  function x(c){ return 28 + 28 * c; }
+  var s = '<svg viewBox="0 40 400 116" role="img" aria-label="' + aria + '">';
+  if(kind === "candle"){
+    s += '<rect x="' + x(a) + '" y="52" width="' + (x(b) - x(a)) + '" height="24" rx="3" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<path d="M' + (x(b) - 1) + ' 64 q8 -3 10 -10" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<path d="M' + (x(a) + 8) + ' 52 q6 10 2 24" fill="none" stroke="' + LINE + '" stroke-width="3"/>';
+  }else{
+    s += '<circle cx="' + (x(a) + 13) + '" cy="64" r="12" fill="' + SUN + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<circle cx="' + (x(a) + 13) + '" cy="64" r="4" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += '<rect x="' + (x(a) + 25) + '" y="60" width="' + (x(b) - x(a) - 25) + '" height="8" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<path d="M' + (x(b) - 18) + ' 68 V80 H' + (x(b) - 12) + ' V74 H' + (x(b) - 6) + ' V82 H' + x(b) + ' V68" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+  }
+  s += ln(x(a), 84, x(a), 96, CORAL, 2.5, ' stroke-dasharray="3 3"') + ln(x(b), 84, x(b), 96, CORAL, 2.5, ' stroke-dasharray="3 3"');
+  s += '<rect x="14" y="96" width="372" height="54" rx="4" fill="#f7e9b0" stroke="' + INK + '" stroke-width="3"/>';
+  for(var c = 0; c <= 12; c++){
+    s += ln(x(c), 96, x(c), 116, INK, 2);
+    if(c < 12) s += ln(x(c) + 14, 96, x(c) + 14, 106, INK, 1.5);
+    s += t(x(c), 138, String(c), 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += t(384, 88, "cm", 16, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += '</svg>';
+  return s;
+}
+
+/* 1 litre bottle = 10 cups of 100 ml */
+var LITRE = (function(){
+  var s = '<svg viewBox="0 0 400 210" role="img" aria-label="A 1 litre bottle is the same as ten cups of 100 millilitres. 1 litre is 1000 millilitres.">';
+  s += '<path d="M40 70 Q40 50 56 44 V22 H74 V44 Q90 50 90 70 V180 Q90 188 82 188 H48 Q40 188 40 180 Z" fill="' + CYAN + '" fill-opacity=".45" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
+  s += '<rect x="54" y="12" width="22" height="12" rx="2" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(65, 120, "1", 22, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(65, 142, "litre", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(122, 112, "=", 34, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  for(var r = 0; r < 2; r++){
+    for(var c = 0; c < 5; c++){
+      var x = 152 + c * 48, y = 34 + r * 74;
+      s += '<path d="M' + x + ' ' + y + ' H' + (x + 40) + ' L' + (x + 36) + ' ' + (y + 54) + ' H' + (x + 4) + ' Z" fill="' + CYAN + '" fill-opacity=".45" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+      s += t(x + 20, y + 34, "100", 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    }
+  }
+  s += t(270, 200, "10 cups of 100 ml = 1000 ml", 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* 1 kg against 900 g as bars */
+var COMPARE = (function(){
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="Two bars. 1 kilogram is 1000 grams and its bar is longer than the bar for 900 grams.">';
+  s += t(16, 34, "1 kg = 1000 g", 17, INK, LAB + ' font-weight="800"');
+  s += '<rect x="16" y="44" width="360" height="30" rx="4" fill="' + MINT + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += t(16, 104, "900 g", 17, INK, LAB + ' font-weight="800"');
+  s += '<rect x="16" y="114" width="324" height="30" rx="4" fill="' + SUN + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- Fill the jug widget ---------- */
+var JR = [
+  { top: 1000, lab: 200, minor: 100, target: 500, unit: "ml", kind: "jug", col: CYAN, stuff: "water",
+    ask: "The midnight jelly needs <b>500 ml</b> of water. Fill the jug to 500 ml." },
+  { top: 100, lab: 50, minor: 10, target: 80, unit: "ml", kind: "cup", col: "#e8c98a", stuff: "cream",
+    ask: "The pudding sauce needs <b>80 ml</b> of cream. Fill the cup to 80 ml." },
+  { top: 10, lab: 2, minor: 1, target: 7, unit: "litres", kind: "bucket", col: MINT, stuff: "soapy water",
+    ask: "The night cleaner needs <b>7 litres</b> in the mop bucket. Fill it to 7 litres." }
+];
+function amt(v, r){ return v + " " + (r.unit === "litres" ? (v === 1 ? "litre" : "litres") : "ml"); }
+
+function mountJug(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(typeof d.v !== "number") d.v = 0;
+  var view = Math.min(d.c, 2), disp = d.v, raf = 0, landed = false, dragging = false;
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  el.innerHTML =
+    '<div class="wpanel jw-task" data-r="task"></div>' +
+    '<div class="fig jw-fig" data-r="svg"></div>' +
+    '<div class="wrow jw-pour">' +
+      '<button class="btn btn-quiet" type="button" data-act="little">Pour a little</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="lot">Pour a lot</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="out">Tip a little out</button>' +
+      '<button class="btn btn-quiet" type="button" data-act="empty">Empty it</button>' +
+    '</div>' +
+    '<div class="wrow">' +
+      '<button class="btn" type="button" data-act="check">This is my line</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-act="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb jw-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function act(a){ return el.querySelector('[data-act="' + a + '"]'); }
+  function rnd(){ return JR[view]; }
+
+  function paint(stream){
+    var r = rnd();
+    q("svg").innerHTML = vessel({ top: r.top, lab: r.lab, minor: r.minor, level: disp, unit: r.unit, kind: r.kind, col: r.col, stream: stream,
+      aria: "A " + r.kind + " with a scale up to " + amt(r.top, r) + ", numbered every " + amt(r.lab, r) + ". Use the buttons, or drag up and down on it, to fill it." });
+  }
+  function draw(){
+    var dots = '<div class="jw-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && d.c < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    q("task").innerHTML = dots + (d.c >= 3 ?
+      '<p><b>Free play.</b> All three are filled. Pour and tip as much as you like.</p>' :
+      '<p class="tiny" style="margin:0 0 4px">Fill ' + (view + 1) + ' of 3</p><p>' + rnd().ask + '</p>');
+    paint(false);
+    var wait = landed || d.c >= 3;
+    act("check").classList.toggle("hidden", d.c >= 3);
+    act("check").disabled = wait;
+    act("show").classList.toggle("hidden", wait || !d.miss[view]);
+    ["little", "lot", "out", "empty"].forEach(function(a){ act(a).disabled = landed; });
+  }
+  function animate(){
+    cancelAnimationFrame(raf);
+    if(reduce){ disp = d.v; paint(false); return; }
+    var from = disp, to = d.v, t0 = null;
+    function step(ts){
+      if(t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 380);
+      disp = from + (to - from) * k;
+      paint(to > from && k < 1);
+      if(k < 1) raf = requestAnimationFrame(step); else { disp = to; paint(false); }
+    }
+    raf = requestAnimationFrame(step);
+  }
+  function setV(v, now){
+    var r = rnd();
+    d.v = Math.max(0, Math.min(r.top, Math.round(v / r.minor) * r.minor));
+    api.save();
+    if(now){ cancelAnimationFrame(raf); disp = d.v; paint(false); } else animate();
+  }
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb jw-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb jw-fb " + cls; f.innerHTML = html;
+  }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  var HOW = [
+    "Numbers go up in 200s. Each small mark is 100 ml. 500 ml is one mark past 400.",
+    "From 0 to 50 there are 5 gaps, so each mark is 10 ml. Count on from 50: 60, 70, 80.",
+    "Numbers go up in 2s. Each small mark is 1 litre. 7 litres is one mark past 6."
+  ];
+  function win(viaShow){
+    var k = view;
+    landed = true;
+    if(viaShow) d.shown[k] = true;
+    d.c = k + 1;
+    if(d.c >= 3) d.result = result();
+    api.save();
+    var head = viaShow ? "<b>Here is how this one works.</b> " : "<b>" + ["Spot on. The jelly will set.", "Perfect pour.", "Bucket filled. The cleaner gives you a thumbs up."][k] + "</b> ";
+    var more = k < 2 ? '<br><button class="btn" type="button" data-act="next">Next one</button>' :
+      '<p style="margin:8px 0 0">All three filled. Find what one mark is worth, then count on.</p><button class="btn" type="button" data-act="next">Free play</button>';
+    fb(viaShow ? "show" : "good", head + HOW[k] + more);
+    draw();
+    if(k === 2) api.done(d.result);
+  }
+  function check(){
+    if(landed || d.c >= 3) return;
+    var r = rnd();
+    if(d.v === r.target){ win(false); return; }
+    d.miss[view]++; api.save();
+    var msg = "You have <b>" + amt(d.v, r) + "</b>. " + (d.v > r.target ? "That is too much. Tip a little out." : "That is not enough yet. Pour some more.");
+    fb("nudge", "<b>Not quite yet.</b> " + msg + (d.miss[view] > 1 ? " Show me is there if you want it." : " Tip: work out what one small mark is worth."));
+    draw();
+  }
+
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("[data-act]");
+    if(!b || !el.contains(b)) return;
+    var a = b.getAttribute("data-act"), r = rnd();
+    if(a === "little" && !landed) setV(d.v + r.minor);
+    else if(a === "lot" && !landed) setV(d.v + r.lab);
+    else if(a === "out" && !landed) setV(d.v - r.minor);
+    else if(a === "empty" && !landed) setV(0);
+    else if(a === "check") check();
+    else if(a === "show"){
+      if(landed || d.c >= 3) return;
+      setV(r.target); win(true);
+    }else if(a === "next"){
+      landed = false; fb(null);
+      view = Math.min(d.c, 2); d.v = 0; disp = 0; api.save(); draw();
+    }
+  });
+
+  /* drag up and down on the container to set the level */
+  function fromPointer(e){
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var b = sv.getBoundingClientRect();
+    var uy = (e.clientY - b.top) * 300 / b.height;
+    setV((270 - uy) * rnd().top / 220, true);
+  }
+  q("svg").addEventListener("pointerdown", function(e){
+    if(landed) return;
+    dragging = true;
+    try{ q("svg").setPointerCapture(e.pointerId); }catch(err){}
+    fromPointer(e); e.preventDefault();
+  });
+  q("svg").addEventListener("pointermove", function(e){ if(dragging && !landed) fromPointer(e); });
+  function stop(){ dragging = false; }
+  q("svg").addEventListener("pointerup", stop);
+  q("svg").addEventListener("pointercancel", stop);
+
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three filled.</b> Free play is open. Find what one mark is worth, then count on.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "measures",
+  title: "Measuring",
+  subject: "Maths",
+  mins: 35,
+  blurb: "Jugs, scales and rulers. Read scales that go up in 2s, 5s, 10s and 100s, fill a jug to the line, and sort out a midnight pudding recipe.",
+  steps: [
+
+  /* ---------- 1 MILLILITRES AND LITRES ---------- */
+  { type: "learn", topic: "Millilitres and litres",
+    title: "How much it holds",
+    fig: LITRE,
+    html: '<p>Capacity is how much something holds.</p>' +
+          '<p>Small amounts are in <b>millilitres</b>. We write ml.</p>' +
+          '<p>Big amounts are in <b>litres</b>. We write l.</p>' +
+          '<p>Ten cups of 100 ml fill a 1 litre bottle.</p>' +
+          '<div class="keep"><b>Keep this</b>1 litre is 1000 ml.</div>' },
+
+  { type: "sort", topic: "Millilitres and litres",
+    q: "Would you measure it in millilitres or litres?",
+    buckets: [ "Millilitres", "Litres" ],
+    cards: [ [ "A spoon of syrup", 0 ], [ "A cup of tea", 0 ], [ "A bath of water", 1 ], [ "A paddling pool", 1 ] ],
+    hint: "Litres are for big amounts. Millilitres are for small amounts.",
+    why: "A spoon and a cup hold a small amount, so we use millilitres. A bath and a paddling pool hold lots, so we use litres." },
+
+  { type: "num", topic: "Millilitres and litres",
+    q: "How many millilitres are in 1 litre?",
+    boxes: [ { label: "1 litre", a: 1000, post: "ml" } ],
+    hint: "Think of ten cups of 100 ml.",
+    why: "Ten lots of 100 ml make <b>1000 ml</b>. So 1 litre is 1000 ml." },
+
+  { type: "match", topic: "Millilitres and litres",
+    q: "Match the litres to the millilitres.",
+    pairs: [ [ "1 litre", "1000 ml" ], [ "2 litres", "2000 ml" ], [ "Half a litre", "500 ml" ], [ "5 litres", "5000 ml" ] ],
+    hint: "Each litre is 1000 ml. Half of 1000 is 500.",
+    why: "1 litre is 1000 ml. 2 litres is 2000 ml. 5 litres is 5000 ml. Half a litre is half of 1000, so 500 ml." },
+
+  { type: "mc", topic: "Millilitres and litres",
+    q: "Which holds more?",
+    options: [ "1 litre", "800 ml", "They hold the same" ],
+    answer: 0, fixed: true,
+    hint: "Change 1 litre into ml first.",
+    why: "1 litre is 1000 ml. 1000 is more than 800. So <b>1 litre</b> holds more." },
+
+  /* ---------- 2 READING SCALES ---------- */
+  { type: "learn", topic: "Reading scales",
+    title: "Not every mark is 1",
+    fig: hscale({ min: 0, max: 20, lab: 10, minor: 2, arrow: 14, aria: "A scale from 0 to 20, numbered 0, 10 and 20. There are 5 gaps between 10 and 20, so each gap is 2. The arrow points to 14." }),
+    html: '<p>Scales have numbers and small marks.</p>' +
+          '<p>The marks can go up in 2s, 5s, 10s or 100s.</p>' +
+          '<p>Look at two numbers next to each other. Count the gaps between them.</p>' +
+          '<p>Here, 10 to 20 has 5 gaps. So each gap is 2. Count on from 10: 12, 14. The arrow is at 14.</p>' +
+          '<div class="keep"><b>Keep this</b>Find what one gap is worth. Then count on.</div>' },
+
+  { type: "mc", topic: "Reading scales",
+    fig: hscale({ min: 0, max: 100, lab: 50, minor: 10, arrow: null, aria: "A scale from 0 to 100, numbered 0, 50 and 100, with 5 gaps between each number." }),
+    q: "What is each gap worth on this scale?",
+    options: [ "1", "5", "10", "50" ],
+    answer: 2, fixed: true,
+    hint: "Count the gaps from 0 to 50.",
+    why: "There are 5 gaps from 0 to 50. Five 10s make 50. So each gap is <b>10</b>." },
+
+  { type: "num", topic: "Reading scales",
+    fig: hscale({ min: 0, max: 100, lab: 50, minor: 10, arrow: 70, aria: "A scale from 0 to 100, numbered 0, 50 and 100, with 5 gaps between each number. The arrow points 2 marks past 50." }),
+    q: "What number is the arrow pointing to?",
+    boxes: [ { label: "Arrow", a: 70 } ],
+    hint: "Each gap is 10. Start at 50 and count on.",
+    why: "Count on in 10s from 50: 60, 70. The arrow is at <b>70</b>." },
+
+  { type: "num", topic: "Reading scales",
+    fig: hscale({ min: 0, max: 60, lab: 20, minor: 5, arrow: 35, aria: "A scale from 0 to 60, numbered every 20, with 4 gaps between each number. The arrow points 3 marks past 20." }),
+    q: "What number is the arrow pointing to?",
+    boxes: [ { label: "Arrow", a: 35 } ],
+    hint: "From 20 to 40 there are 4 gaps. What is each gap worth?",
+    why: "4 gaps make 20, so each gap is 5. Count on from 20: 25, 30, 35. The arrow is at <b>35</b>." },
+
+  { type: "num", topic: "Reading scales",
+    fig: hscale({ min: 0, max: 1000, lab: 500, minor: 100, arrow: 800, aria: "A scale from 0 to 1000, numbered 0, 500 and 1000, with 5 gaps between each number. The arrow points 3 marks past 500." }),
+    q: "What number is the arrow pointing to?",
+    boxes: [ { label: "Arrow", a: 800 } ],
+    hint: "Count the gaps from 0 to 500. What is each one worth?",
+    why: "5 gaps make 500, so each gap is 100. Count on from 500: 600, 700, 800. The arrow is at <b>800</b>." },
+
+  { type: "num", topic: "Reading scales", stretch: true,
+    fig: hscale({ min: 0, max: 100, lab: 100, minor: 25, arrow: 75, aria: "A scale from 0 to 100, numbered only at 0 and 100, with 4 gaps. The arrow points to the third mark." }),
+    q: "What number is the arrow pointing to?",
+    boxes: [ { label: "Arrow", a: 75 } ],
+    hint: "4 gaps make 100. What is each gap worth?",
+    why: "Four 25s make 100, so each gap is 25. Count on: 25, 50, 75. The arrow is at <b>75</b>. Counting in 10s here would give 30, which is the usual slip." },
+
+  /* ---------- 3 READING A JUG ---------- */
+  { type: "learn", topic: "Reading a jug",
+    title: "Reading a jug",
+    fig: vessel({ top: 1000, lab: 200, minor: 100, level: 300, unit: "ml", kind: "jug", aria: "A measuring jug numbered every 200 millilitres with a small mark every 100 millilitres. The water is at 300 millilitres." }),
+    html: '<p>Put the jug on a flat table.</p>' +
+          '<p>Get down low, so your eyes are level with the water.</p>' +
+          '<p>This jug has numbers every 200 ml. Each small mark is 100 ml.</p>' +
+          '<p>The water is one mark past 200. That is 300 ml.</p>' +
+          '<div class="keep"><b>Keep this</b>Eyes level with the water. Then read the scale.</div>' },
+
+  { type: "num", topic: "Reading a jug",
+    fig: vessel({ top: 1000, lab: 200, minor: 100, level: 900, unit: "ml", kind: "jug", aria: "A measuring jug numbered every 200 millilitres with a small mark every 100 millilitres. The water is one mark above 800." }),
+    q: "How much water is in this jug?",
+    boxes: [ { label: "Water", a: 900, post: "ml" } ],
+    hint: "Numbers go up in 200s. Each small mark is 100 ml.",
+    why: "The water is one mark past 800. 800 add 100 is <b>900 ml</b>." },
+
+  { type: "num", topic: "Reading a jug",
+    fig: vessel({ top: 100, lab: 50, minor: 10, level: 40, unit: "ml", kind: "cup", col: "#e8c98a", aria: "A small measuring cup numbered 0, 50 and 100 millilitres, with 5 gaps between each number. The cream is 4 marks above 0." }),
+    q: "This small cup is for cream. How much cream is in it?",
+    boxes: [ { label: "Cream", a: 40, post: "ml" } ],
+    hint: "From 0 to 50 there are 5 gaps. What is each gap worth?",
+    why: "Each gap is 10 ml. Count up in 10s: 10, 20, 30, 40. There is <b>40 ml</b>." },
+
+  { type: "widget", topic: "Reading a jug",
+    title: "Fill it to the line",
+    html: "Fill each one to the amount on the order. Use the buttons, or drag up and down on it. Press <b>This is my line</b> when you think you are there. No rush.",
+    mount: mountJug,
+    report: function(d){
+      if(!d || !d.result) return "Fill it to the line: " + (d && d.c ? d.c : 0) + " of 3 filled.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Fill it to the line: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Reading a jug", stretch: true,
+    fig: vessel({ top: 1000, lab: 200, minor: 100, level: 700, unit: "ml", kind: "jug", aria: "A measuring jug numbered every 200 millilitres with a small mark every 100 millilitres. The water is at 700 millilitres." }),
+    q: "This jug has 700 ml in it. How much more water fills it to 1 litre?",
+    boxes: [ { label: "More water", a: 300, post: "ml" } ],
+    hint: "1 litre is 1000 ml. Count on from 700 in 100s.",
+    why: "1 litre is 1000 ml. Count on from 700: 800, 900, 1000. That is 3 lots of 100, so <b>300 ml</b> more." },
+
+  /* ---------- 4 GRAMS AND KILOGRAMS ---------- */
+  { type: "learn", topic: "Grams and kilograms",
+    title: "How heavy?",
+    fig: dial({ max: 1000, lab: 200, minor: 100, val: 500, unit: "grams", item: "flour", aria: "Kitchen scales with a dial from 0 to 1000 grams, numbered every 200, with a small mark every 100. A bag of flour is on top. The pointer is at 500 grams." }),
+    html: '<p>Mass is how heavy something is.</p>' +
+          '<p>Light things are in <b>grams</b>. We write g.</p>' +
+          '<p>Heavy things are in <b>kilograms</b>. We write kg.</p>' +
+          '<p>On these scales each small mark is 100&nbsp;g. The flour is one mark past 400, so it weighs 500 g.</p>' +
+          '<div class="keep"><b>Keep this</b>1 kg is 1000 g.</div>' },
+
+  { type: "sort", topic: "Grams and kilograms",
+    q: "Would you weigh it in grams or kilograms?",
+    buckets: [ "Grams", "Kilograms" ],
+    cards: [ [ "A grape", 0 ], [ "A pencil", 0 ], [ "A sack of potatoes", 1 ], [ "Bonnie the poodle", 1 ] ],
+    hint: "Grams are for light things. Kilograms are for heavy things.",
+    why: "A grape and a pencil are light, so grams. A sack of potatoes is heavy, so kilograms. Bonnie is a small dog, but still weighs a few kilograms." },
+
+  { type: "num", topic: "Grams and kilograms",
+    fig: dial({ max: 1000, lab: 200, minor: 100, val: 300, unit: "grams", item: "sweets", aria: "Kitchen scales with a dial from 0 to 1000 grams, numbered every 200, with a small mark every 100. A bag of sweets is on top. The pointer is one mark past 200." }),
+    q: "How much does this bag of sweets weigh?",
+    boxes: [ { label: "Sweets", a: 300, post: "g" } ],
+    hint: "Each small mark is 100 g.",
+    why: "The pointer is one mark past 200. 200 add 100 is <b>300 g</b>." },
+
+  { type: "match", topic: "Grams and kilograms",
+    q: "Match the kilograms to the grams.",
+    pairs: [ [ "1 kg", "1000 g" ], [ "2 kg", "2000 g" ], [ "Half a kilogram", "500 g" ], [ "3 kg", "3000 g" ] ],
+    hint: "Each kilogram is 1000 g.",
+    why: "1 kg is 1000 g, 2 kg is 2000 g and 3 kg is 3000 g. Half a kilogram is half of 1000, so 500 g." },
+
+  { type: "num", topic: "Grams and kilograms",
+    fig: dial({ max: 10, lab: 2, minor: 1, val: 7, unit: "kilograms", item: "sack", aria: "Scales with a dial from 0 to 10 kilograms, numbered every 2, with a small mark every 1. A sack of potatoes is on top. The pointer is one mark past 6." }),
+    q: "These scales are in kilograms. How heavy is the sack?",
+    boxes: [ { label: "Sack", a: 7, post: "kg" } ],
+    hint: "The numbers go up in 2s. What is one small mark?",
+    why: "The numbers go up in 2s, so each small mark is 1 kg. The pointer is one mark past 6. That is <b>7 kg</b>." },
+
+  /* ---------- 5 CENTIMETRES AND METRES ---------- */
+  { type: "learn", topic: "Centimetres and metres",
+    title: "How long?",
+    fig: ruler(0, 7, "candle", "A candle on a ruler. The candle starts at 0 and ends at 7 centimetres."),
+    html: '<p>Length is how long something is.</p>' +
+          '<p>Short things are in <b>centimetres</b>. We write cm.</p>' +
+          '<p>Long things are in <b>metres</b>. We write m.</p>' +
+          '<p>Line up one end with 0 on the ruler. This candle is 7 cm long.</p>' +
+          '<div class="keep"><b>Keep this</b>1 metre is 100 cm. Start at 0.</div>' },
+
+  { type: "num", topic: "Centimetres and metres",
+    fig: ruler(0, 9, "key", "An old key on a ruler. The key starts at 0 and ends at 9 centimetres."),
+    q: "You find an old key in the corridor. How long is it?",
+    boxes: [ { label: "Key", a: 9, post: "cm" } ],
+    hint: "The key starts at 0. Where does the other end reach?",
+    why: "The key starts at 0 and ends at 9. It is <b>9 cm</b> long." },
+
+  { type: "mc", topic: "Centimetres and metres",
+    q: "Which would you measure in metres?",
+    options: [ "A long corridor", "A pencil", "A key", "A stamp" ],
+    answer: 0,
+    hint: "Metres are for long things.",
+    why: "<b>A long corridor</b> is many metres long. A pencil, a key and a stamp are short, so we use centimetres." },
+
+  { type: "num", topic: "Centimetres and metres",
+    q: "How many centimetres are in 1 metre?",
+    boxes: [ { label: "1 metre", a: 100, post: "cm" } ],
+    hint: "Look back at the Keep this box.",
+    why: "1 metre is <b>100 cm</b>." },
+
+  { type: "num", topic: "Centimetres and metres", stretch: true,
+    fig: ruler(2, 8, "candle", "A candle on a ruler. It does not start at 0. It starts at 2 and ends at 8 centimetres."),
+    q: "This candle does not start at 0. How long is it?",
+    boxes: [ { label: "Candle", a: 6, post: "cm" } ],
+    hint: "Count the centimetres from one end to the other.",
+    why: "It goes from 2 to 8. Count the jumps: 3, 4, 5, 6, 7, 8. That is <b>6 cm</b>. Saying 8 cm is the usual slip." },
+
+  /* ---------- 6 COMPARING AMOUNTS ---------- */
+  { type: "learn", topic: "Comparing amounts",
+    title: "Which is more?",
+    fig: COMPARE,
+    html: '<p>To compare, make the units the same.</p>' +
+          '<p>Which is heavier, 1 kg or 900 g?</p>' +
+          '<p>1 kg is 1000 g. 1000 g is more than 900 g. So 1 kg is heavier.</p>' +
+          '<div class="keep"><b>Keep this</b>Same units first. Then compare the numbers.</div>' },
+
+  { type: "mc", topic: "Comparing amounts",
+    q: "Which is heavier?",
+    options: [ "2 kg", "1500 g", "They are the same" ],
+    answer: 0, fixed: true,
+    hint: "Change 2 kg into grams first.",
+    why: "2 kg is 2000 g. 2000 is more than 1500. So <b>2 kg</b> is heavier." },
+
+  { type: "order", topic: "Comparing amounts",
+    q: "Put these in order. Start with the smallest.",
+    items: [ "300 ml", "Half a litre", "750 ml", "1 litre", "1500 ml" ],
+    hint: "Change them all to ml. Half a litre is 500 ml.",
+    why: "In ml they are 300, 500, 750, 1000 and 1500. So the order is 300 ml, half a litre, 750 ml, 1 litre, 1500 ml." },
+
+  { type: "mc", topic: "Comparing amounts",
+    q: "Which is the longest?",
+    options: [ "1 m", "90 cm", "50 cm", "99 cm" ],
+    answer: 0,
+    hint: "Change 1 m into centimetres.",
+    why: "1 m is 100 cm. That is longer than 99 cm. So <b>1 m</b> is the longest." },
+
+  { type: "num", topic: "Comparing amounts",
+    q: "How much more is 1 kg than 600 g?",
+    boxes: [ { label: "More by", a: 400, post: "g" } ],
+    hint: "Change 1 kg into grams first. Then count on from 600.",
+    why: "1 kg is 1000 g. Count on from 600: 700, 800, 900, 1000. That is <b>400 g</b> more." },
+
+  /* ---------- 7 PUDDING PROBLEMS ---------- */
+  { type: "learn", topic: "Pudding problems",
+    title: "Maths in the kitchen",
+    html: '<ul class="ms-recipe"><li>Midnight chocolate pudding</li><li>Serves 4 people</li><li>200 g flour</li><li>100 g sugar</li><li>300 ml milk</li><li>2 eggs</li></ul>' +
+          '<p>A recipe tells you how much to use.</p>' +
+          '<p>For 8 people, you need double. Double means two lots.</p>' +
+          '<p>Double 300 ml is 600 ml.</p>' +
+          '<div class="keep"><b>Keep this</b>Find the numbers. Then add, take away or double.</div>' },
+
+  { type: "num", topic: "Pudding problems",
+    q: "You make the pudding for 8 people. How much flour do you need?",
+    boxes: [ { label: "Flour", a: 400, post: "g" } ],
+    hint: "For 4 people it is 200 g. Double it.",
+    why: "8 people is double 4 people. Double 200 g is <b>400 g</b>." },
+
+  { type: "num", topic: "Pudding problems",
+    q: "You have 1 litre of milk. The pudding uses 300 ml. How much milk is left?",
+    boxes: [ { label: "Milk left", a: 700, post: "ml" } ],
+    hint: "1 litre is 1000 ml. Take away 300.",
+    why: "1 litre is 1000 ml. 1000 take away 300 is <b>700 ml</b>." },
+
+  { type: "num", topic: "Pudding problems",
+    q: "The night cleaner fills a 10 litre bucket. A jug holds 2 litres. How many jugs fill the bucket?",
+    boxes: [ { label: "Jugs", a: 5 } ],
+    hint: "Count in 2s up to 10.",
+    why: "Count in 2s: 2, 4, 6, 8, 10. That is <b>5 jugs</b>." },
+
+  { type: "num", topic: "Pudding problems", stretch: true,
+    q: "A bag holds 1 kg of flour. One pudding needs 200 g. How many puddings can you make?",
+    boxes: [ { label: "Puddings", a: 5 } ],
+    hint: "1 kg is 1000 g. Count in 200s up to 1000.",
+    why: "1 kg is 1000 g. Count in 200s: 200, 400, 600, 800, 1000. That is <b>5 puddings</b>." },
+
+  { type: "num", topic: "Pudding problems", stretch: true,
+    q: "Now you make the pudding for 2 people. That is half the recipe.<br>a) How much sugar?<br>b) How much milk?",
+    boxes: [
+      { label: "a) Sugar", a: 50, post: "g" },
+      { label: "b) Milk", a: 150, post: "ml" }
+    ],
+    hint: "2 people is half of 4 people. Halve each amount.",
+    why: "Half of 100 g is <b>50 g</b> of sugar. Half of 300 ml is <b>150 ml</b> of milk." }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>
