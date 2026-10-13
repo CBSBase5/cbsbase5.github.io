@@ -127,6 +127,15 @@ if(typeof st.fp0 !== "number") st.fp0 = 0;
 if(!st.sgn) st.sgn = 1;
 if(typeof st.heat !== "number") st.heat = 0;
 ["inj", "run"].forEach(function(k){ if(!st[k] || typeof st[k] !== "object") st[k] = {} });
+if(!st.lg || typeof st.lg !== "object") st.lg = {};
+if(!Array.isArray(st.lg.names)) st.lg.names = ["", "", "", ""];
+if(!Array.isArray(st.lg.clubs)) st.lg.clubs = [[], [], [], []];
+if(!Array.isArray(st.lg.far)) st.lg.far = [];
+st.lg.names = [0, 1, 2, 3].map(function(k){ return typeof st.lg.names[k] === "string" ? st.lg.names[k].slice(0, 24) : "" });
+st.lg.clubs = [0, 1, 2, 3].map(function(k){ var a = Array.isArray(st.lg.clubs[k]) ? st.lg.clubs[k] : [], o = [], i; for(i = 0; i < 15; i++) o.push(typeof a[i] === "string" ? a[i].slice(0, 24) : ""); return o });
+st.lg.far = [0, 1, 2, 3, 4, 5].map(function(k){ return typeof st.lg.far[k] === "string" ? st.lg.far[k].slice(0, 24) : "" });
+st.lg.diff = Math.max(-1, Math.min(1, Math.round(+st.lg.diff || 0)));
+S.setCustom(st.lg);
 S.setTier(st.tier);
 S.setHeat(st.heat);
 if(!st.dev) st.dev = { xp: {}, bonus: {} };
@@ -1428,7 +1437,42 @@ function titleOpen(){
 function titleClose(){ var el = $("ti"); if(el) el.classList.remove("on"); tiOn = false; try{ sessionStorage.setItem("b5.jt.menu", "1") }catch(e){} }
 
 /* ---------- the Studio ---------- */
-var STABS = [["club", "Club"], ["kit", "Kit"], ["crest", "Badge"], ["players", "Players"], ["ground", "Ground"]];
+var STABS = [["club", "Club"], ["kit", "Kit"], ["crest", "Badge"], ["players", "Players"], ["ground", "Ground"], ["league", "Leagues"]];
+/* ---- your own leagues: rename divisions and clubs, roll surprise names, pick how fierce the clubs are ---- */
+var lgDiv = -1;
+var LG_A = ["Ash", "Brook", "Cinder", "Dale", "Elm", "Fern", "Glen", "Hazel", "Iron", "Juniper", "Kestrel", "Lark", "Maple", "North", "Oak", "Pine", "Quarry", "Raven", "Stone", "Thorn", "Under", "Vale", "Willow", "Yew", "Amber", "Bright", "Crimson", "Dusk", "Ember", "Frost", "Golden", "Harbour", "Ivory", "Jade", "Copper", "Silver"];
+var LG_B = ["Town", "United", "Rovers", "Athletic", "City", "Wanderers", "Park", "Albion", "Rangers", "Villa", "Argyle", "Orient", "County", "Borough", "Harriers", "Stars", "Dynamos", "Falcons", "Tigers", "Comets"];
+function cleanLg(v){ return String(v || "").replace(/[^A-Za-z0-9\u00C0-\u024F '.\-]/g, "").replace(/\s{2,}/g, " ").replace(/^\s+/, "").slice(0, 24) }
+function lgDivNow(){ return lgDiv < 0 ? st.tier : lgDiv }
+function lgSlots(){ return lgDivNow() === 4 ? 6 : 15 }
+function lgDefault(i){ var d = lgDivNow(); return d === 4 ? S.defaultFarName(i) : S.defaultClubName(d, i) }
+function lgGet(i){ var d = lgDivNow(); return d === 4 ? st.lg.far[i] : st.lg.clubs[d][i] }
+function lgPut(i, v){ var d = lgDivNow(); if(d === 4) st.lg.far[i] = v; else st.lg.clubs[d][i] = v }
+function lgShown(i){ return String(lgGet(i) || "").trim() || lgDefault(i) }
+function lgApply(){ S.setCustom(st.lg); S.setHeat(st.heat); save() }
+function lgRandom(){
+  var n = lgSlots(), used = {}, i, tries;
+  for(i = 0; i < n; i++){
+    var nm; tries = 0;
+    do { nm = LG_A[Math.floor(Math.random() * LG_A.length)] + (n === 6 ? "grad" : "") + " " + LG_B[Math.floor(Math.random() * LG_B.length)]; tries++ } while((used[nm.toLowerCase()] || nm.toLowerCase() === clubName().toLowerCase()) && tries < 40);
+    used[nm.toLowerCase()] = 1; lgPut(i, nm);
+  }
+  lgApply();
+}
+function lgTidy(i){
+  /* a name may not match another club in the same group, or your own club */
+  var v = String(lgGet(i) || "").trim(), n = lgSlots(), j;
+  lgPut(i, v);
+  if(!v){ lgApply(); return "" }
+  for(j = 0; j < n; j++) if(j !== i && lgShown(j).toLowerCase() === v.toLowerCase()){ lgPut(i, ""); lgApply(); return "Another club already has that name. Pick a different one." }
+  if(v.toLowerCase() === clubName().toLowerCase()){ lgPut(i, ""); lgApply(); return "That is the name of your own club. Pick a different one." }
+  lgApply(); return "";
+}
+function lgIni(nm){ var w = String(nm).split(/\s+/).filter(Boolean); return (w.length > 1 ? w.map(function(x){ return x.charAt(0) }).join("") : String(nm).slice(0, 3)).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3) || "FC" }
+function lgCrest(i, nm, w){
+  var d = lgDivNow(), l = oppLook(d === 4 ? 100 + i : i + 1);
+  return crestSvg(w, true, { c1: l.c1, c2: l.c2, crest: l.crest, shape: l.shape, cbg: l.cbg, short: lgIni(nm) });
+}
 function optBtn(act, k, v, label, pressed, extra){
   return '<button data-act="' + act + '" data-k="' + k + '" data-v="' + v + '" aria-pressed="' + pressed + '"' + (extra || "") + '>' + label + '</button>';
 }
@@ -1438,6 +1482,11 @@ function studioPreview(){
   if(t === "kit") return '<div class="stcard"><div style="width:120px">' + shirt(kitOf(false), 10) + '<span class="hint">Home</span></div><div style="width:120px">' + shirt(kitOf(true), 1) + '<span class="hint">Goalkeeper</span></div><div class="mini-live"><i class="tk" style="position:static;transform:none;' + tokStyle(kitOf(false)) + '">7</i><i class="tk" style="position:static;transform:none;' + tokStyle(kitOf(true)) + '">1</i><span class="hint">On the match pitch</span></div></div>';
   if(t === "crest") return '<div class="stcard">' + crestSvg(120, true) + '<div>' + crestSvg(44, true) + '<span class="hint" style="display:block">Small size</span></div></div>';
   if(t === "ground") return '<div class="gprev">' + stadium() + '<b class="gname">' + esc(stadiumName()) + '</b></div>';
+  if(t === "league"){
+    var dv = lgDivNow(), ttl = dv === 4 ? "The Champions Cup" : (String(st.lg.names[dv] || "").trim() || S.defaultLeagueName(dv)), cr = "", q;
+    for(q = 0; q < Math.min(6, lgSlots()); q++) cr += '<span class="lgc" title="' + esc(lgShown(q)) + '">' + lgCrest(q, lgShown(q), 44) + '</span>';
+    return '<div class="stcard lgprev"><div><h2>' + esc(ttl) + '</h2><span class="hint">' + (dv === 4 ? "Six clubs from far away" : "Fifteen clubs and yours") + (dv === st.tier ? " &middot; you play here now" : "") + '</span></div><div class="lgcs">' + cr + '</div></div>';
+  }
   return "";
 }
 function colorIn(id, label, val){ return '<label class="colw"><span>' + label + '</span><input type="color" id="' + id + '" value="' + val + '"></label>' }
@@ -1465,6 +1514,21 @@ function studioBody(){
       c.all.map(function(p){ return '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 56, p.pos) + '<span><b>' + esc(p.name) + '</b><small>#' + numOf(p.id) + ' &middot; ' + p.pos + ' &middot; rated ' + rate(p) + (st.cap === p.id ? " &middot; captain" : "") + '</small></span></button>' }).join("") + '</div>' +
       '<h3 style="margin-top:16px">Players you made</h3>' + (st.mine.length ? '<div class="plist">' + st.mine.map(function(m){ var p = playerOf(m.id); return p ? '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 56, p.pos) + '<span><b>' + esc(p.name) + '</b><small>#' + numOf(p.id) + ' &middot; ' + p.pos + ' &middot; rated ' + rate(p) + '</small></span></button>' : "" }).join("") + '</div>' : '<p class="hint">None yet.</p>') +
       (st.mine.length < 3 ? '<div class="mbtns"><button class="btn btn-go" data-act="newmine">Make a new player</button></div>' : '<p class="hint">You have made the most you can (three).</p>');
+  } else if(t === "league"){
+    var dn = lgDivNow(), nSl = lgSlots(), k2;
+    h += '<p class="hint" style="margin:0 0 10px">Make your own leagues. Rename a division, rename any club, or tap Surprise me for a fresh set of names. Matches you have already played keep the names they had.</p>';
+    h += '<h3>Which league?</h3><div class="opts" role="group" aria-label="Choose a league">' + [0, 1, 2, 3].map(function(d){ return '<button data-act="lgdiv" data-v="' + d + '" aria-pressed="' + (dn === d) + '">' + esc(String(st.lg.names[d] || "").trim() || S.defaultLeagueName(d)) + (d === st.tier ? ' (you are here)' : '') + '</button>' }).join("") + '<button data-act="lgdiv" data-v="4" aria-pressed="' + (dn === 4) + '">Champions Cup clubs</button></div>';
+    if(dn < 4) h += '<div class="fields"><label class="sendlab" for="lgname">League name</label><input class="wzin" id="lgname" maxlength="24" value="' + esc(st.lg.names[dn]) + '" placeholder="' + esc(S.defaultLeagueName(dn)) + '"></div>';
+    h += '<h3 style="margin-top:14px">Clubs</h3><div class="lgclubs">';
+    for(k2 = 0; k2 < nSl; k2++){
+      h += '<label class="lgrow" for="lgc' + k2 + '"><span class="lgc">' + lgCrest(k2, lgShown(k2), 34) + '</span><input class="wzin" id="lgc' + k2 + '" maxlength="24" value="' + esc(lgGet(k2)) + '" placeholder="' + esc(lgDefault(k2)) + '" aria-label="Club ' + (k2 + 1) + ' name"></label>';
+    }
+    h += '</div><p class="hint" id="lgmsg" role="status" aria-live="polite"></p><div class="mbtns"><button class="btn btn-go" data-act="lgrand">Surprise me</button><button class="btn" data-act="lgreset">Put the original names back</button></div>';
+    if(dn < 4){
+      var canD = st.played.length === 0;
+      h += '<h3 style="margin-top:16px">How fierce are the clubs?</h3><div class="opts" role="group" aria-label="Difficulty">' + [[-1, "Relaxed", "Clubs a little weaker"], [0, "Standard", "As designed"], [1, "Fierce", "Clubs a little stronger"]].map(function(x){ return '<button data-act="lgdiff" data-v="' + x[0] + '" aria-pressed="' + (st.lg.diff === x[0]) + '"' + (canD ? "" : ' aria-disabled="true"') + '>' + x[1] + '<small>' + x[2] + '</small></button>' }).join("") + '</div>' +
+        '<p class="hint">' + (canD ? "This is for every league. You can change it before the first match of a season." : "You can change this at the start of a season, before your first match.") + '</p>';
+    }
   } else {
     h += '<div class="fields"><label class="sendlab" for="ststad">Stadium name</label><input class="wzin" id="ststad" maxlength="28" value="' + esc(st.club.stadium) + '" placeholder="Base 5 Park"></div>' +
       '<h3 style="margin-top:14px">Grass</h3><div class="opts">' + [["classic", "Classic green"], ["bright", "Bright"], ["night", "Deep night green"]].map(function(g){ return optBtn("club", "grass", g[0], g[1], st.club.grass === g[0]) }).join("") + '</div>' +
@@ -2540,6 +2604,14 @@ function wizDraw(){
 /* ---------- typing ---------- */
 document.addEventListener("input", function(e){
   var id = e.target.id, v = e.target.value, f = { stname: "name", stshort: "short", stnick: "nick", stmotto: "motto", ststad: "stadium", stc1: "c1", stc2: "c2", stgk: "gk" }[id];
+  if(id === "lgname"){ var cv = cleanLg(v); if(cv !== v) e.target.value = cv; st.lg.names[lgDivNow()] = cv; lgApply(); studioRefresh(false); return }
+  if(/^lgc\d+$/.test(id || "")){
+    var ix = +id.slice(3), cv2 = cleanLg(v); if(cv2 !== v) e.target.value = cv2;
+    lgPut(ix, cv2); lgApply();
+    var cs = e.target.parentNode.querySelector(".lgc"); if(cs) cs.innerHTML = lgCrest(ix, lgShown(ix), 34);
+    var pv2 = $("stprev"); if(pv2) pv2.innerHTML = studioPreview();
+    return;
+  }
   if(id === "wzname"){ st.club.name = v; applyClub(); var sh = $("wzshow"); if(sh) sh.textContent = clubName(); save(); renderClub() }
   else if(id === "wzpl"){
     var m = mine0(true); m.name = v; applyMine(); save();
@@ -2563,6 +2635,11 @@ document.addEventListener("input", function(e){
 });
 document.addEventListener("change", function(e){
   var t = e.target;
+  if(/^lgc\d+$/.test(t.id || "")){
+    var m3 = lgTidy(+t.id.slice(3)); studioRefresh(true);
+    var lm = $("lgmsg"); if(lm) lm.textContent = m3; if(m3) toast(m3);
+    return;
+  }
   if(t.id === "edname"){ renamePlayer(editing, t.value); edDraw(); return }
   if(t.id === "ednum"){ setNumber(editing, t.value); edDraw(); return }
   if(t.id === "wzpl"){
@@ -2671,6 +2748,13 @@ document.addEventListener("click", function(e){
   if(a === "sellask"){ sellAsk = b.getAttribute("data-id") || ""; render(); return }
   if(a === "sellyes"){ sellPlayer(b.getAttribute("data-id")); return }
   if(a === "stab"){ studioTab = b.getAttribute("data-v"); render(); return }
+  if(a === "lgdiv"){ lgDiv = +b.getAttribute("data-v"); studioRefresh(true); return }
+  if(a === "lgrand"){ lgRandom(); studioRefresh(true); toast("Fresh names for " + (lgDivNow() === 4 ? "the Champions Cup" : S.leagueName(lgDivNow())) + "."); return }
+  if(a === "lgreset"){ var d0 = lgDivNow(); if(d0 === 4) st.lg.far = ["", "", "", "", "", ""]; else { st.lg.clubs[d0] = st.lg.clubs[d0].map(function(){ return "" }); st.lg.names[d0] = "" } lgApply(); studioRefresh(true); toast("Original names are back."); return }
+  if(a === "lgdiff"){
+    if(b.getAttribute("aria-disabled") === "true"){ toast("You can change this before your first match of a season."); return }
+    st.lg.diff = +b.getAttribute("data-v"); lgApply(); studioRefresh(true); render(); return;
+  }
   if(a === "club"){ st.club[b.getAttribute("data-k")] = b.getAttribute("data-v"); save(); applyKit(); renderClub(); render(); return }
   if(a === "edit"){ edOpen(b.getAttribute("data-id")); return }
   if(a === "edclose"){ edClose(); return }
