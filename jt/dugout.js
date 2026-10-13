@@ -1034,6 +1034,7 @@ function parodyName(r, used){
   if(used[nm] || nameTaken(nm, "")){ tries = 0; do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 40) }
   used[nm] = 1; return nm;
 }
+var MGRN = ["Pep Guardiolaa", "Jurgen Clopp", "Arsene Wingers", "Carlo Ancelotty", "Jose Mourinhoo", "Unai Emery Board", "Mikel Artichoke", "Erik ten Bag", "Thomas Tuckshop", "Antonio Contact", "Roy Hodgepodge", "Sam Allardice", "Harry Redknapsack", "Brendan Rogers Ramsay", "Eddie Howdy", "Graham Pottery", "Ange Postcodeglou", "Sean Ditch", "Marco Silverfoil", "Mauricio Pocketino", "Steve Bruise", "Neil Warlock", "Tony Pulse", "Arne Slotmachine", "Gareth Southgrate", "Fabio Capellini", "Louis van Gaol", "Rafa Benitea"];
 var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
 function sfp(c){ return c.tr.fp }
 function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
@@ -2070,14 +2071,21 @@ function carCheck(){
   return fresh;
 }
 
+/* how far our side stands above the average club, fixed at the start of each season so targets never move mid season */
+function carEdge(){
+  var i, tot = 0, t = teamNow();
+  for(i = 0; i < 15; i++){ var c = S.clubTeam(i); tot += (c.atk + c.mid + c.def + c.gk) / 4 }
+  return Math.round(((t.atk + t.mid + t.def + t.gk) / 4 - tot / 15) * 10) / 10;
+}
 /* what the board would like to see this season */
 function carObjs(){
   var t = st.tier, tb = S.table(st.seed, st.played), pos = st.played.length ? posOf(tb) : 0, fin = st.played.length >= ROUNDS, lv = st.car.oLv || carLevel();
-  var tgt = Math.max(3, ([8, 7, 6, 5][t] || 8) - Math.floor((lv - 1) / 3)), stre = t === 0 ? 1 : 3;
+  var hard = st.car.oHard ? 1 : 0, ed = hard ? (+st.car.oEdge || 0) : 0, eb = ed >= 12 ? 2 : (ed >= 6 ? 1 : 0);
+  var tgt = hard ? Math.max(2, ([6, 5, 5, 4][t] || 6) - Math.floor((lv - 1) / 3) - eb) : Math.max(3, ([8, 7, 6, 5][t] || 8) - Math.floor((lv - 1) / 3)), stre = hard ? (eb >= 1 || t === 0 ? 1 : 2) : (t === 0 ? 1 : 3);
   var wins = st.played.filter(function(m){ return resultOf(m) === "W" }).length;
   var cw = allTies().filter(function(x){ return x.won }).length;
-  var wt = Math.min(10, 5 + Math.floor((lv - 1) / 3)), ws = Math.min(13, 8 + Math.floor((lv - 1) / 3));
-  var ct = 1 + Math.floor(lv / 5), cs = 3 + Math.floor(lv / 4);
+  var wt = hard ? Math.min(12, 6 + Math.floor((lv - 1) / 3) + eb) : Math.min(10, 5 + Math.floor((lv - 1) / 3)), ws = hard ? Math.min(14, 10 + Math.floor((lv - 1) / 3) + eb) : Math.min(13, 8 + Math.floor((lv - 1) / 3));
+  var ct = hard ? 1 + Math.floor(lv / 4) + (eb >= 2 ? 1 : 0) : 1 + Math.floor(lv / 5), cs = hard ? 3 + Math.floor(lv / 3) : 3 + Math.floor(lv / 4);
   var lt = Math.min(15, 5 + lv), ls = Math.min(24, 11 + lv), late = st.played.length >= 8;
   var list = [
     { id: "pos", text: "Finish in the top " + tgt, big: t === 0 ? "Win the league" : "Finish in the top three", val: pos, t: tgt, s: stre, low: true, fin: fin, now: pos ? ord(pos) + " at the moment" : "Not started yet" },
@@ -2095,7 +2103,7 @@ function carObjs(){
 function carObjPay(list){
   var coins = 0, xp = 0, board = 0, n = 0;
   var n2 = 0;
-  list.forEach(function(o){ if(o.ok){ coins += 40; xp += 15; board += 4; n++ } else if(o.cok && o.late){ coins += 20; xp += 7; board += 2; n2++ } if(o.sok){ coins += 30; xp += 10; board += 3 } });
+  list.forEach(function(o){ if(o.ok){ coins += 40; xp += 15; board += 3; n++ } else if(o.cok && o.late){ coins += 20; xp += 7; board += 1; n2++ } if(o.sok){ coins += 30; xp += 10; board += 2 } });
   return { coins: coins, xp: xp, board: board, n: n, n2: n2 };
 }
 
@@ -2112,11 +2120,11 @@ function carMatch(en, kind, p){
   if(kind === "cup" && en.won) r.cupW++;
   xp = x === "W" ? (kind === "cup" ? 12 : 10) : (x === "D" ? 5 : (kind === "cup" ? 4 : 3));
   if(a === 0 && x !== "L") xp += 2;
-  bt = x === "W" ? (kind === "cup" ? 4 : 3) : (x === "D" ? 1 : -2);
+  bt = x === "W" ? (kind === "cup" ? 3 : 2) : (x === "D" ? 0 : -3);
   if(kind === "league" && en.opp === c.rival){
     var d = c.derby;
     d[x === "W" ? "w" : (x === "D" ? "d" : "l")]++; d.gf += g; d.ga += a;
-    if(x === "W"){ xp += 8; bt += 2; addCoins(10, "Derby win"); addFans(3); notes.push("Derby day win over " + on + ", with 10 coins from the fans."); pressPush("Derby day: " + clubName() + " beat " + on, g + " to " + a + " in the big one. The town is buzzing.", "") }
+    if(x === "W"){ xp += 8; bt += 1; addCoins(10, "Derby win"); addFans(3); notes.push("Derby day win over " + on + ", with 10 coins from the fans."); pressPush("Derby day: " + clubName() + " beat " + on, g + " to " + a + " in the big one. The town is buzzing.", "") }
     else if(x === "D") notes.push("A draw in the derby against " + on + ". Honours even.");
     else notes.push("Derby day did not go our way against " + on + ". There is always a return match.");
   }
@@ -2140,20 +2148,21 @@ function carActivity(first){
 function carSettle(m){
   var list = carObjs(), pay = carObjPay(list), xp = 10 + (m.pos === 1 ? 20 : 0) + (m.up ? 10 : 0) + pay.xp;
   if(pay.coins) addCoins(pay.coins, "Board objectives");
-  carBoard(pay.board + (m.pos === 1 ? 6 : (m.up ? 4 : 0)));
+  carBoard(pay.board + (m.pos === 1 ? 4 : (m.up ? 3 : 0)));
   carXp(xp);
   post("Board report, season " + st.season, "The Board", pay.n + pay.n2 ? "The board is delighted with " + pay.n + " of 4 objectives this season" + (pay.n2 ? " and a second chance on " + pay.n2 : "") + ", worth " + pay.coins + " coins. " + (pay.n < 4 ? "The others are ideas to try next time." : "A clean sweep.") : "No targets hit this time, and that is fine. The board still backs you and the squad keeps all it has learned.");
   return list.map(function(o){ return { id: o.id, text: o.text, ok: o.ok ? 1 : 0, sok: o.sok ? 1 : 0, cok: (!o.ok && o.cok && o.late) ? 1 : 0 } });
 }
 function carNewSeason(){
   var a = st.car.acad, gift;
-  st.car.act = 0; st.car.oLv = carLevel();
+  st.car.act = 0; st.car.oLv = carLevel(); st.car.oHard = 1; st.car.oEdge = carEdge();
   if(carUnlocked("rival")) post(st.car.rm.name + " is back", "The Chronicle", st.car.rm.name + " of " + carRival() + " has spent the break studying your side. A " + st.car.rm.style.toLowerCase() + " boss with " + rivalExp() + (rivalExp() === 1 ? " season" : " seasons") + " of experience now. Expect a fiery derby.");
   var grew = [];
   st.signed.forEach(function(s){
     if(s.yg && s.r < s.yg){ var n = Math.min(s.yg - s.r, 3 + (hasPerk("youth") ? 1 : 0)); s.r += n; grew.push(s.name) }
   });
   if(grew.length){ applyMine(); post("The youngsters are growing", "Coaching staff", grew.join(", ") + (grew.length > 1 ? " have" : " has") + " had a growth spurt over the break. Check the Career page to see how far they could go.") }
+  if(st.car.board > 80){ carBoard(-(st.car.board > 92 ? 10 : 6)); post("The board expects more", "The Board", "After such a strong run the board has raised its hopes for the new season, so the targets are a little bolder. Nothing you have won goes away.") }
   gift = Math.round(Math.max(0, st.car.board - 40) / 2);
   if(gift > 0){ addCoins(gift, "Board investment"); post("The board invests " + gift + " coins", "The Board", "The board feels " + carBandOf(st.car.board).toLowerCase() + " about the club and has put " + gift + " coins into the kitty for the new season.") }
   a.season = 0; acadRoll();
@@ -2328,10 +2337,12 @@ function carNorm2(){
     return { era: Math.floor(+x.era || 1), lvl: clamp(Math.floor(+x.lvl || 1), 1, 10), xp: Math.max(0, Math.floor(+x.xp || 0)), w: Math.max(0, Math.floor(+x.w || 0)), d: Math.max(0, Math.floor(+x.d || 0)), l: Math.max(0, Math.floor(+x.l || 0)), seasons: Math.max(0, Math.floor(+x.seasons || 0)), trophies: Math.max(0, Math.floor(+x.trophies || 0)), best: Math.max(0, Math.floor(+x.best || 0)), lp: Math.max(0, Math.floor(+x.lp || 0)), upto: Math.floor(+x.upto || 1) };
   });
   c.oLv = clamp(Math.floor(+c.oLv || carLevel()), 1, 10);
+  c.oHard = c.oHard ? 1 : ((st.played && st.played.length) || (st.hist && st.hist.length) ? 0 : 1);
+  c.oEdge = Math.max(-30, Math.min(40, +c.oEdge || 0));
   var rm = c.rm;
   if(!rm || typeof rm !== "object" || RSTY[rm.style] === undefined || !rm.name){
     var r = S.rng(hash("rm" + c.aseed));
-    c.rm = { name: FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)], style: ["Attacking", "Defensive", "Tricky"][Math.floor(r() * 3)], since: 1 };
+    c.rm = { name: MGRN[Math.floor(r() * MGRN.length)], style: ["Attacking", "Defensive", "Tricky"][Math.floor(r() * 3)], since: 1 };
   } else { rm.name = String(rm.name).slice(0, 24); rm.since = Math.max(1, Math.floor(+rm.since || 1)) }
   if(!c.pl || typeof c.pl !== "object" || Array.isArray(c.pl)) c.pl = {};
   Object.keys(c.pl).forEach(function(id){
@@ -2667,7 +2678,7 @@ function carRetire(){
   var add = Math.floor(Math.max(0, car.xp - CLV[9]) / 15) + 5;
   car.legacy.unshift({ era: car.era, lvl: lvl, xp: car.xp, w: t.w, d: t.d, l: t.l, seasons: st.hist.length, trophies: st.trophies.length, best: st.hist.length ? Math.min.apply(null, st.hist.map(function(s){ return s.pos })) : 0, lp: add, upto: st.season });
   car.lp += add; car.era++;
-  car.xp = 0; car.perks = {}; car.board = 60; car.act = 0; car.oLv = 1;
+  car.xp = 0; car.perks = {}; car.board = 60; car.act = 0; car.oLv = 1; car.oHard = 1; car.oEdge = 0;
   car.rec = { run: 0, bestUnb: 0, wrun: 0, bestWin: 0, cs: 0, cupW: 0, tot: { w: 0, d: 0, l: 0, gf: 0, ga: 0 }, bigW: null, hiS: null };
   car.chap = {}; CHAPS.forEach(function(p){ try{ if(p.when()) car.chap[p.id] = 1 }catch(e){} });
   retAsk = false;
