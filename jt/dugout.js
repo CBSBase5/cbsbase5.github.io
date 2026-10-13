@@ -38,6 +38,7 @@ var ICON = {
   star: '<path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.600 5.700 21.100l1.500-7L2 9.300l7-.8z" fill="currentColor"/>',
   flag: '<path d="M5 3v18M5 4h12l-3 4 3 4H5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>',
   cart: '<path d="M2 3h3l2.6 11h11l2.4-8H6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="9" cy="19" r="2" fill="currentColor"/><circle cx="17" cy="19" r="2" fill="currentColor"/>',
+  career: '<path d="M3 20h18v2H3zM4 12h5v8H4zM9.500 5h5v15h-5zM15 9h5v11h-5z" fill="currentColor"/>',
   brief: '<path d="M3 8h18v12H3zM9 8V5h6v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="2"/>'
 };
 var VIEWS = [
@@ -46,6 +47,7 @@ var VIEWS = [
   { id: "sets", label: "Set pieces", icon: "flag", title: "Set piece designer", g: "Play" },
   { id: "train", label: "Training", icon: "train", title: "Training ground", g: "Play", main: 1 },
   { id: "league", label: "League", icon: "league", title: "Leagues and cups", g: "Compete", main: 1 },
+  { id: "career", label: "Career", icon: "career", title: "Your career", g: "Compete" },
   { id: "news", label: "Chronicle", icon: "news", title: "The Chilton Chronicle", g: "Compete" },
   { id: "stadium", label: "Stadium", icon: "arena", title: "Stadium and staff", g: "Club" },
   { id: "market", label: "Market", icon: "cart", title: "Transfer market", g: "Club" },
@@ -288,6 +290,7 @@ function drillFinish(c, gen){
   }
   info.match = !wasPend && pendingList().some(function(q){ return q.slug === c.slug });
   if(info.match){ msg += " A match is ready in the dugout."; render() }
+  var cxm = carActivity(!info.already); if(cxm){ save(); msg += cxm }
   toast(msg);
   window.JTLearn.reward = info;
 }
@@ -739,6 +742,7 @@ function renderNav(){
     var d = "";
     if(v.id === "inbox" && unread) d = '<span class="dot" title="New messages"></span>';
     if(v.id === "dugout" && (pendingList().length && st.played.length < ROUNDS)) d = '<span class="dot" title="A match is ready"></span>';
+    if(v.id === "career" && (st.car.newc || carPts() > 0)) d = '<span class="dot" title="Something new in Career"></span>';
     if(v.id === "club" && newB.length) d = '<span class="dot" title="New badge"></span>';
     if(v.g !== last){ last = v.g; out += '<div class="ngrp">' + v.g + '</div>' }
     out += '<button class="' + (v.main ? "" : "m-hide") + '" data-act="view" data-v="' + v.id + '"' + (v.id === view ? ' aria-current="page"' : "") + '>' + icon(v.icon) + '<span>' + v.label + '</span>' + d + '</button>';
@@ -765,7 +769,7 @@ function render(){
   $("title").textContent = V.title;
   applyMotion(); applyKit();
   renderNav(); renderPills(c); renderClub();
-  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, news: vNews, stadium: vStadium, legends: vLegends, sets: vSets, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings }[view];
+  var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, news: vNews, stadium: vStadium, legends: vLegends, sets: vSets, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings, career: vCareer }[view];
   var vw = $("view"); vw.style.animation = "none"; void vw.offsetWidth; vw.style.animation = "";
   vw.innerHTML = fn(c);
   if(view === "send") mountSend();
@@ -938,8 +942,9 @@ var MSURN = ["Abbott", "Brook", "Castle", "Dunn", "Easton", "Frost", "Gallow", "
 var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
 function sfp(c){ return c.tr.fp }
 function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
-function priceOf(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.72 / 5) * 5) }
-function sellValue(p){ return Math.max(5, Math.round(priceOf(rate(p)) * 0.6 / 5) * 5) }
+function priceRaw(r){ return Math.max(5, Math.round(Math.pow(Math.max(r - 48, 1), 2) * 0.72 / 5) * 5) }
+function priceOf(r){ var v = priceRaw(r); return hasPerk("deal") ? Math.max(5, Math.round(v * 0.9 / 5) * 5) : v }
+function sellValue(p){ return Math.max(5, Math.round(priceRaw(rate(p)) * 0.6 * (hasPerk("deal") ? 1.1 : 1) / 5) * 5) }
 function coShort(c){ return String(c.name || "").split(/\s+/).filter(Boolean).map(function(x){ return x.charAt(0) }).join("").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3) || "CO" }
 function coLogoOf(c, w){ return crestSvg(w, true, { c1: c.c1, c2: c.c2, shape: c.shape, crest: c.sym, cbg: c.cbg || "plain", short: coShort(c) }) }
 function coLogo(w){ return coLogoOf(st.co, w) }
@@ -1007,7 +1012,7 @@ function seasonSummary(){
   var prize = Math.round((160 - (pos - 1) * 9) * (1 + (3 - t) * 0.25)), cupWon = false, extra = 0, won = [];
   COMP_ORDER.forEach(function(id){ if(compWon(id)){ extra += COMPS[id].bonus; won.push(COMPS[id].name) } });
   var hn = clamp(st.heat + (pos === 1 ? 1 : (pos > 3 ? -1 : 0)), 0, 6);
-  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: prize + extra, cup: cupText(), t: t, won: won, heat: hn, heat0: st.heat };
+  return { pos: pos, r: r, up: up, down: down, nt: nt, prize: Math.round((prize + extra) * (hasPerk("bank") ? 1.15 : 1)), cup: cupText(), t: t, won: won, heat: hn, heat0: st.heat };
 }
 function openSeason(){
   if(st.played.length < ROUNDS) return;
@@ -1017,7 +1022,7 @@ function openSeason(){
     (m.down ? '<p>You are moving down to the ' + esc(S.leagueName(m.nt)) + '. A fresh chance to climb back, and your squad keeps everything it has learned.</p>' : '<p>You stay in the ' + esc(S.leagueName(m.t)) + ' next season.</p>');
   $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">Season ' + st.season + ' complete</div><h2>' + (m.pos === 1 ? "Champions of the " : "Finished " + ord(m.pos) + " in the ") + esc(S.leagueName(m.t)) + '</h2>' +
     '<div class="sumgrid" style="margin:12px 0"><div><b>' + r.w + '</b><small>Won</small></div><div><b>' + r.d + '</b><small>Drawn</small></div><div><b>' + r.l + '</b><small>Lost</small></div><div><b>' + r.gf + '</b><small>For</small></div><div><b>' + r.ga + '</b><small>Against</small></div><div><b>' + r.pts + '</b><small>Points</small></div></div>' +
-    '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>' + (m.heat > m.heat0 ? 'Champions get noticed. Every rival is raising their game for next season, so expect tougher matches.' : (m.heat < m.heat0 ? 'The other clubs have eased off a little, which gives you room to rebuild.' : '')) + '</p><p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' +
+    '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>' + (m.heat > m.heat0 ? 'Champions get noticed. Every rival is raising their game for next season, so expect tougher matches.' : (m.heat < m.heat0 ? 'The other clubs have eased off a little, which gives you room to rebuild.' : '')) + '</p><p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' + carSeasonHtml() +
     '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>';
   $("rv").classList.add("on"); $("rv").classList.add("season");
 }
@@ -1026,12 +1031,13 @@ function seasonGo(){
   if(st.played.length < ROUNDS){ closeSeason(); return }
   var m = seasonSummary(), r = m.r, c = ctx();
   addCoins(m.prize, "Season " + st.season + " prize");
+  var objRes = carSettle(m);
   if(m.pos === 1) st.trophies.push({ season: st.season, kind: "league", name: S.leagueName(m.t) });
   m.won.forEach(function(nme){ COMP_ORDER.forEach(function(id){ if(COMPS[id].name === nme) st.trophies.push({ season: st.season, kind: id, name: nme }) }) });
   addFans(m.up ? 15 : (m.down ? -12 : (m.pos <= 5 ? 5 : 0)));
   Object.keys(st.career).forEach(function(id){ var cc = st.career[id]; if(cc.sa > 0){ cc.ss++; cc.sa = 0 } });
   pressPush(m.pos === 1 ? "Champions! " + clubName() + " win the " + S.leagueName(m.t) : "Season " + st.season + ": " + clubName() + " finish " + ord(m.pos), (m.up ? "Promoted to the " + S.leagueName(m.nt) + ". " : (m.down ? "Back to the " + S.leagueName(m.nt) + " to rebuild. " : "")) + "Prize money: " + m.prize + " coins.", "");
-  st.hist.push({ season: st.season, tier: m.t, league: S.leagueName(m.t), pos: m.pos, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga, pts: r.pts, cup: m.cup, up: m.up, down: m.down, coins: m.prize });
+  st.hist.push({ season: st.season, tier: m.t, league: S.leagueName(m.t), pos: m.pos, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga, pts: r.pts, cup: m.cup, up: m.up, down: m.down, coins: m.prize, obj: objRes });
   st.heat = clamp(st.heat + (m.pos === 1 ? 1 : (m.pos > 3 ? -1 : 0)), 0, 6);
   st.inj = {}; st.run = {}; st.nextMod = null;
   st.season++; st.tier = m.nt; S.setTier(st.tier); S.setHeat(st.heat);
@@ -1042,6 +1048,7 @@ function seasonGo(){
   ["lcup", "champ"].forEach(function(id){ st.cseen[id] = COMPS[id].at.filter(function(t){ return c.tr.fp >= t }).length });
   post("Season " + st.season + " begins", "The Chairman (Jay)", "Welcome to the " + S.leagueName() + ". " + (m.up ? "You earned this promotion. " : (m.down ? "Every club has a rough season now and then. " : "")) + "Your squad keeps all its growth. Try some training and matches turn up again, and your sponsorship deals can be renewed in Business.");
   rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season"); view = "dugout"; save(); render(); window.scrollTo(0, 0);
+  carNewSeason(); save(); render();
   toast("Season " + st.season + " in the " + S.leagueName() + ".");
 }
 
@@ -1053,7 +1060,7 @@ function marketWin(){ return st.season * 100 + Math.floor(st.played.length / 3) 
 function marketList(){
   var w = marketWin();
   if(st.mk.w !== w) st.mk = { w: w, bought: [] };
-  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[63, 78], [60, 75], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc;
+  var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[63, 78], [60, 75], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc + (hasPerk("scout") ? 3 : 0);
   T[0] += 2 * sc; T[1] += 2 * sc;
   for(i = 0; i < N; i++){
     var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
@@ -1137,7 +1144,7 @@ function vBusiness(c){
 function histCard(){
   if(!st.hist.length) return "";
   return '<div class="card"><h3>Seasons</h3>' + st.hist.slice().reverse().map(function(s){
-    return '<div class="resline"><span><b>Season ' + s.season + '</b> &middot; ' + esc(s.league) + '</span><span>' + ord(s.pos) + ' &middot; W' + s.w + ' D' + s.d + ' L' + s.l + ' &middot; Cup: ' + esc(s.cup) + (s.pos === 1 ? ' &middot; <b style="color:var(--gold)">Champions</b>' : "") + (s.up ? ' &middot; <b style="color:var(--win)">Promoted</b>' : "") + (s.down ? " &middot; Moved down" : "") + '</span></div>';
+    return '<div class="resline"><span><b>Season ' + s.season + '</b> &middot; ' + esc(s.league) + '</span><span>' + ord(s.pos) + ' &middot; W' + s.w + ' D' + s.d + ' L' + s.l + ' &middot; Cup: ' + esc(s.cup) + (s.pos === 1 ? ' &middot; <b style="color:var(--gold)">Champions</b>' : "") + (s.up ? ' &middot; <b style="color:var(--win)">Promoted</b>' : "") + (s.down ? " &middot; Moved down" : "") + (s.obj ? ' &middot; Board: ' + s.obj.filter(function(o){ return o.ok }).length + ' of ' + s.obj.length : "") + '</span></div>';
   }).join("") + '</div>';
 }
 
@@ -1196,7 +1203,7 @@ var CAPS = [3000, 6000, 10000, 15000];
 function upLvl(id){ return (st.up && st.up[id]) || 0 }
 function staffLvl(id){ return (st.staff && st.staff[id]) || 0 }
 function fanLabel(m){ return m < 20 ? "Fed up" : (m < 38 ? "Restless" : (m < 56 ? "Hopeful" : (m < 74 ? "Happy" : (m < 90 ? "Buzzing" : "Euphoric")))) }
-function addFans(n){ st.fans = clamp(Math.round((st.fans == null ? 50 : st.fans) + n), 0, 100) }
+function addFans(n){ if(n > 0 && hasPerk("fans")) n = Math.ceil(n * 1.5); st.fans = clamp(Math.round((st.fans == null ? 50 : st.fans) + n), 0, 100) }
 function gateOf(){ return Math.round((8 + (st.fans == null ? 50 : st.fans) / 5) * (1 + 0.5 * upLvl("stands"))) }
 function homeLuckBonus(){ return 0.02 * upLvl("lights") }
 function staffName(id){
@@ -1735,6 +1742,7 @@ function vDugout(c){
     '<div class="tile"><h3>Cups</h3>' + cupHtml + '</div></div>';
   h += '<div class="row2"><section class="card"><h3>Scouting report</h3>' + (done < ROUNDS ? compareBars(t, S.clubTeam(S.ourFixture(done).opp - 1)) + '<div class="cond">' + infoLines(matchInfo("league", null, done, S.ourFixture(done).opp), S.oppName(S.ourFixture(done).opp)).map(function(x){ return '<p>' + x + '</p>' }).join("") + '</div><p class="hint" style="margin:10px 0 0">Our side on the left, theirs on the right. Training sharpens ours, and match day can change the numbers.</p>' : '<p class="hint">Season done. The table and trophies are in League and Club.</p>') + '</section>' + managerCard(c) + '</div>';
   h += pressTeaser();
+  h += carTeaser();
   h += riseCard(c);
   var ts = trySessions(c, 3);
   if(ts.length){
@@ -1821,7 +1829,7 @@ function reportText(){
     "League position: " + (st.played.length ? ord(pos) : "not started"),
     "Cup: " + compText("cup").toLowerCase(), "League Cup: " + compText("lcup").toLowerCase(), compOn("champ") ? "Champions Cup: " + compText("champ").toLowerCase() : "Champions Cup: not open yet", "Fan mood: " + fanLabel(st.fans).toLowerCase(), "Stadium upgrades: " + (upLvl("stands") + upLvl("lights") + upLvl("pitch")) + " of 9", "Staff hired: " + ["coach", "physio", "scout"].filter(function(k){ return staffLvl(k) }).length + " of 3", "Club legends: " + legends().length,
     "Formation: " + st.formation, "Luck dial: " + Math.round(c.tr.luck * 100) + " percent", "Focus points: " + c.tr.fp, "Manager rank: " + rankOf(c.tr.fp),
-    "Badges earned: " + badgeDefs(c).filter(function(b){ return b.ok }).length + " of " + badgeDefs(c).length, "", "Training sessions tried:"];
+    "Career level: " + carLevel() + " (" + CTIT[carLevel() - 1] + ", " + st.car.xp + " XP)", "Board mood: " + carBandOf(st.car.board).toLowerCase(), "Story chapters: " + CHAPS.filter(function(p){ return st.car.chap[p.id] }).length + " of " + CHAPS.length, "Academy graduates: " + st.car.acad.grads, "Derby record: won " + st.car.derby.w + ", drawn " + st.car.derby.d + ", lost " + st.car.derby.l, "Longest winning run: " + st.car.rec.bestWin, "Badges earned: " + badgeDefs(c).filter(function(b){ return b.ok }).length + " of " + badgeDefs(c).length, "", "Training sessions tried:"];
   var any = false;
   S.ACTS.forEach(function(a){ var lv = c.tr.levels[a.slug]; if(lv){ any = true; lines.push("- " + a.title + " (" + a.pillar + "), level " + lv + " of " + S.CAP) } });
   if(!any) lines.push("- none yet");
@@ -1840,6 +1848,329 @@ function mountSend(){
   var host = $("sendhost");
   if(window.Base5Send && host) Base5Send.mount(host, { tool: "The Dugout", filename: "dugout", getText: reportText });
   var pv = $("sendprev"); if(pv) pv.textContent = reportText();
+}
+
+/* ---------- v15: career mode ---------- */
+var CLV = [0, 30, 80, 150, 240, 350, 480, 640, 830, 1050];
+var CTIT = ["Apprentice", "Coach", "Assistant boss", "Manager", "Gaffer", "Tactician", "Mastermind", "Boss", "Club legend", "Football genius"];
+var PERKS = [
+  { id: "scout", name: "Sharp eye", desc: "Three more players on the transfer list each time it refreshes." },
+  { id: "deal", name: "Good dealer", desc: "Players cost 10 percent less to sign and sell for 10 percent more." },
+  { id: "youth", name: "Youth champion", desc: "Two more youngsters in the academy, and they grow a little faster." },
+  { id: "bank", name: "Money minded", desc: "Season prize money is 15 percent bigger." },
+  { id: "fans", name: "Crowd pleaser", desc: "The fans warm to you faster when things go well." },
+  { id: "mentor", name: "Mentor", desc: "Your starters pick up extra growth from every match." }
+];
+var ACAD_N = [2, 3, 4, 5], ACAD_R = [46, 49, 52, 55], ACAD_COST = [120, 240, 400], ACAD_NAME = ["Youth corner", "Youth team", "Academy", "Elite academy"];
+var CHAPS = [
+  { id: "kick", t: "Kick off", hint: "Set up your club.", when: function(){ return !!st.setup }, l: "Welcome to the club, manager. Everything starts here. Take your time and enjoy the first few weeks." },
+  { id: "win", t: "First win", hint: "Win a match.", when: function(){ return st.car.rec.tot.w >= 1 }, l: "That first win is always special. The dressing room is buzzing and the fans are already talking about you." },
+  { id: "clean", t: "Brick wall", hint: "Keep a clean sheet.", when: function(){ return st.car.rec.cs >= 1 }, l: "Nothing got past your defence today. The goalkeeper wants to buy the back four a pie." },
+  { id: "roll", t: "On a roll", hint: "Win three matches in a row.", when: function(){ return st.car.rec.bestWin >= 3 }, l: "Three wins on the spin. People are starting to notice what you are building." },
+  { id: "learn", t: "Quick learner", hint: "Finish ten activities.", when: function(){ return st.car.actTot >= 10 }, l: "Ten activities done. The more you learn, the sharper the squad gets, and it shows on the pitch." },
+  { id: "cup", t: "Cup fever", hint: "Win a cup tie.", when: function(){ return st.car.rec.cupW >= 1 }, l: "Through in the cup. There is something special about a knockout night, and you handled it well." },
+  { id: "derby", t: "Derby delight", hint: "Beat your local rivals.", when: function(){ return st.car.derby.w >= 1 }, l: "You beat the old enemy. The fans will be singing about this one all week." },
+  { id: "acad", t: "Home grown", hint: "Sign a youngster from the academy.", when: function(){ return st.car.acad.grads >= 1 }, l: "A youngster from our own academy has joined the squad. Every great club grows its own." },
+  { id: "s1", t: "Season one in the books", hint: "Finish a season.", when: function(){ return st.hist.length >= 1 }, l: "A whole season done. Look how far the club has come since the first day." },
+  { id: "up", t: "Onwards and upwards", hint: "Get promoted.", when: function(){ return st.hist.some(function(h){ return h.up }) }, l: "Promotion. The club is moving up in the world and you made it happen." },
+  { id: "troph", t: "Silverware", hint: "Win a trophy.", when: function(){ return st.trophies.length >= 1 }, l: "Your first trophy. It is going straight in the cabinet, and the shine is going nowhere." },
+  { id: "fifty", t: "Fifty matches", hint: "Play fifty matches.", when: function(){ var t = st.car.rec.tot; return t.w + t.d + t.l >= 50 }, l: "Fifty matches in charge. That is a proper stint, manager. Thank you for everything." },
+  { id: "lvl5", t: "Gaffer", hint: "Reach career level 5.", when: function(){ return carLevel() >= 5 }, l: "You are a gaffer now. People ask for your opinion, and it is usually right." },
+  { id: "top", t: "The top flight", hint: "Reach Division One.", when: function(){ return st.tier === 0 }, l: "Division One. The best clubs, the biggest crowds and you are right there among them." },
+  { id: "leg", t: "A legend is born", hint: "Have a player join the Hall of fame.", when: function(){ return legends().length >= 1 }, l: "One of your players has written their name into the club's history. That is your doing too." },
+  { id: "champ", t: "Champions of Division One", hint: "Win the top division.", when: function(){ return st.hist.some(function(h){ return h.tier === 0 && h.pos === 1 }) }, l: "Champions of the top division. What a journey, from the first training session to this.", big: 1 },
+  { id: "dbl", t: "The double", hint: "Win the league and the Cup in one season.", when: function(){ return st.hist.some(function(h){ return h.pos === 1 && h.cup === "Winners" }) }, l: "The league and the Cup in the same season. Very few managers ever manage it.", big: 1 },
+  { id: "five", t: "Five seasons", hint: "Finish five seasons.", when: function(){ return st.hist.length >= 5 }, l: "Five seasons. You are building something that lasts, and the whole town knows it.", big: 1 }
+];
+
+function carLevel(){ var x = st.car.xp, i, lv = 1; for(i = 0; i < CLV.length; i++) if(x >= CLV[i]) lv = i + 1; return lv }
+function carPts(){ var n = 0, k; for(k in st.car.perks) if(st.car.perks[k]) n++; return Math.max(0, carLevel() - 1 - n) }
+function hasPerk(id){ return !!(st.car && st.car.perks && st.car.perks[id]) }
+function carBandOf(b){ return b >= 85 ? "Delighted" : (b >= 70 ? "Happy" : (b >= 50 ? "Content" : (b >= 35 ? "Patient" : "Hopeful"))) }
+function carBoard(n){ st.car.board = clamp(Math.round(st.car.board + n), 15, 100) }
+
+function carNorm(){
+  var c = st.car, i, k;
+  if(!c || typeof c !== "object" || Array.isArray(c)) c = st.car = {};
+  ["xp", "act", "actTot"].forEach(function(key){ c[key] = (typeof c[key] === "number" && isFinite(c[key]) && c[key] > 0) ? Math.floor(c[key]) : 0 });
+  c.board = (typeof c.board === "number" && isFinite(c.board)) ? clamp(Math.round(c.board), 15, 100) : 60;
+  if(!c.perks || typeof c.perks !== "object" || Array.isArray(c.perks)) c.perks = {};
+  var pk = {}; PERKS.forEach(function(p){ if(c.perks[p.id]) pk[p.id] = 1 });
+  c.perks = pk;
+  if(!c.chap || typeof c.chap !== "object" || Array.isArray(c.chap)) c.chap = {};
+  var ch = {}; CHAPS.forEach(function(p){ if(c.chap[p.id]) ch[p.id] = 1 }); c.chap = ch;
+  c.newc = c.newc ? 1 : 0;
+  var r = c.rec;
+  if(!r || typeof r !== "object" || Array.isArray(r)) r = c.rec = {};
+  ["run", "bestUnb", "wrun", "bestWin", "cs", "cupW"].forEach(function(key){ r[key] = (typeof r[key] === "number" && isFinite(r[key]) && r[key] > 0) ? Math.floor(r[key]) : 0 });
+  if(!r.tot || typeof r.tot !== "object") r.tot = {};
+  ["w", "d", "l", "gf", "ga"].forEach(function(key){ r.tot[key] = (typeof r.tot[key] === "number" && isFinite(r.tot[key]) && r.tot[key] > 0) ? Math.floor(r.tot[key]) : 0 });
+  ["bigW", "hiS"].forEach(function(key){
+    var o = r[key];
+    if(o && typeof o === "object" && typeof o.gf === "number" && typeof o.ga === "number") r[key] = { gf: Math.floor(o.gf), ga: Math.floor(o.ga), opp: String(o.opp || "").slice(0, 30), season: Math.floor(+o.season || 1) };
+    else r[key] = null;
+  });
+  if(!c.derby || typeof c.derby !== "object") c.derby = {};
+  ["w", "d", "l", "gf", "ga"].forEach(function(key){ c.derby[key] = (typeof c.derby[key] === "number" && isFinite(c.derby[key]) && c.derby[key] > 0) ? Math.floor(c.derby[key]) : 0 });
+  c.rival = (typeof c.rival === "number" && c.rival >= 1 && c.rival <= 15) ? Math.floor(c.rival) : 1 + Math.floor(Math.random() * 15);
+  c.aseed = (typeof c.aseed === "number" && isFinite(c.aseed)) ? Math.floor(c.aseed) : 1 + Math.floor(Math.random() * 2000000000);
+  var a = c.acad;
+  if(!a || typeof a !== "object" || Array.isArray(a)) a = c.acad = {};
+  a.lvl = clamp(Math.floor(+a.lvl || 0), 0, 3); a.season = Math.floor(+a.season || 0); a.grads = Math.max(0, Math.floor(+a.grads || 0));
+  var pool = Array.isArray(a.pool) ? a.pool : [], clean = [];
+  pool.forEach(function(p){
+    if(!p || typeof p !== "object" || clean.length >= 8) return;
+    var pos = ["GK", "DEF", "MID", "FWD"].indexOf(p.pos) >= 0 ? p.pos : "MID";
+    clean.push({ id: String(p.id || ("ac" + a.season + "_" + clean.length)).slice(0, 20), name: String(p.name || "Youngster").slice(0, 24), pos: pos, r: clamp(Math.floor(+p.r || 50), 30, 90), pot: clamp(Math.floor(+p.pot || 70), 30, 95), note: String(p.note || "Never gives up").slice(0, 40), taken: p.taken ? 1 : 0 });
+  });
+  a.pool = clean;
+  if(!c.init){
+    /* an older save joins the career from what it has already done */
+    c.init = 1;
+    st.hist.forEach(function(h){ var t = c.rec.tot; t.w += h.w || 0; t.d += h.d || 0; t.l += h.l || 0; t.gf += h.gf || 0; t.ga += h.ga || 0 });
+    st.played.forEach(function(m){ var t = c.rec.tot, x = resultOf(m); if(x === "W") t.w++; else if(x === "D") t.d++; else t.l++; t.gf += ourGoals(m); t.ga += theirGoals(m) });
+    c.rec.cupW = allTies().filter(function(x){ return x.won }).length + st.trophies.filter(function(t){ return t.kind !== "league" }).length * 2;
+    c.actTot = drillTotal() + Object.keys(st.chal).reduce(function(n, key){ return n + (Array.isArray(st.chal[key]) ? st.chal[key].length : 0) }, 0);
+    c.xp = Math.round(c.rec.tot.w * 8 + c.rec.tot.d * 4 + c.rec.tot.l * 2 + st.hist.length * 30 + c.actTot * 3);
+    CHAPS.forEach(function(p){ try{ if(p.when()) c.chap[p.id] = 1 }catch(e){} });
+  }
+}
+carNorm();
+
+function carXp(n){
+  var a = carLevel(), b, l, out = "";
+  st.car.xp += Math.max(0, Math.round(n));
+  b = carLevel();
+  for(l = a + 1; l <= b; l++){
+    addCoins(25 * l, "Career level " + l);
+    post("Career level " + l + ": " + CTIT[l - 1], "The Chairman (Jay)", "You have reached career level " + l + ", " + CTIT[l - 1] + ". There is a bonus of " + (25 * l) + " coins and a perk point waiting in Career whenever you fancy choosing one.");
+    out = "Career level " + l + ": " + CTIT[l - 1] + ".";
+  }
+  if(b > a) st.car.newc = 1;
+  return out;
+}
+function carCheck(){
+  var fresh = [], again = true, guard = 0;
+  while(again && guard++ < 6){
+    again = false;
+    CHAPS.forEach(function(p){
+      if(st.car.chap[p.id]) return;
+      var ok = false; try{ ok = p.when() }catch(e){}
+      if(!ok) return;
+      st.car.chap[p.id] = 1; st.car.newc = 1; again = true; fresh.push(p.t);
+      var coins = p.big ? 50 : 20;
+      addCoins(coins, "Chapter: " + p.t);
+      post("Chapter: " + p.t, "The Chairman (Jay)", p.l + " A little something for the club: " + coins + " coins.");
+      carXp(p.big ? 30 : 12);
+    });
+  }
+  return fresh;
+}
+
+/* what the board would like to see this season */
+function carObjs(){
+  var t = st.tier, tb = S.table(st.seed, st.played), pos = st.played.length ? posOf(tb) : 0, fin = st.played.length >= ROUNDS;
+  var tgt = [8, 7, 6, 5][t] || 8, stre = t === 0 ? 1 : 3;
+  var wins = st.played.filter(function(m){ return resultOf(m) === "W" }).length;
+  var cw = allTies().filter(function(x){ return x.won }).length;
+  var list = [
+    { id: "pos", text: "Finish in the top " + tgt, big: t === 0 ? "Win the league" : "Finish in the top three", val: pos, t: tgt, s: stre, low: true, fin: fin, now: pos ? ord(pos) + " at the moment" : "Not started yet" },
+    { id: "wins", text: "Win 5 league matches", big: "Win 8 league matches", val: wins, t: 5, s: 8, now: wins + " won so far" },
+    { id: "cup", text: "Win a cup tie", big: "Win 3 cup ties", val: cw, t: 1, s: 3, now: cw + " won so far" },
+    { id: "learn", text: "Finish 6 activities", big: "Finish 12 activities", val: st.car.act, t: 6, s: 12, now: st.car.act + " finished so far" }
+  ];
+  list.forEach(function(o){
+    if(o.low){ o.ok = o.fin && o.val > 0 && o.val <= o.t; o.sok = o.fin && o.val > 0 && o.val <= o.s; o.pct = o.val ? clamp(Math.round(100 * (16 - o.val) / (16 - o.t)), 0, 100) : 0; o.on = o.val > 0 && o.val <= o.t }
+    else { o.ok = o.val >= o.t; o.sok = o.val >= o.s; o.pct = clamp(Math.round(100 * o.val / o.s), 0, 100); o.on = o.ok }
+  });
+  return list;
+}
+function carObjPay(list){
+  var coins = 0, xp = 0, board = 0, n = 0;
+  list.forEach(function(o){ if(o.ok){ coins += 40; xp += 15; board += 4; n++ } if(o.sok){ coins += 30; xp += 10; board += 3 } });
+  return { coins: coins, xp: xp, board: board, n: n };
+}
+
+/* a match has been played */
+function carMatch(en, kind, p){
+  var c = st.car, r = c.rec, g = ourGoals(en), a = theirGoals(en), x, xp, bt, notes = [], lv;
+  x = kind === "cup" ? (en.won ? "W" : "L") : resultOf(en);
+  r.tot[x === "W" ? "w" : (x === "D" ? "d" : "l")]++; r.tot.gf += g; r.tot.ga += a;
+  if(x === "L"){ r.run = 0; r.wrun = 0 } else { r.run++; if(r.run > r.bestUnb) r.bestUnb = r.run; if(x === "W"){ r.wrun++; if(r.wrun > r.bestWin) r.bestWin = r.wrun } else r.wrun = 0 }
+  if(a === 0 && x !== "L") r.cs++;
+  var on = S.oppName(en.opp);
+  if(x === "W" && (!r.bigW || (g - a) > (r.bigW.gf - r.bigW.ga) || ((g - a) === (r.bigW.gf - r.bigW.ga) && g > r.bigW.gf))) r.bigW = { gf: g, ga: a, opp: on, season: st.season };
+  if(!r.hiS || g > r.hiS.gf) r.hiS = { gf: g, ga: a, opp: on, season: st.season };
+  if(kind === "cup" && en.won) r.cupW++;
+  xp = x === "W" ? (kind === "cup" ? 12 : 10) : (x === "D" ? 5 : (kind === "cup" ? 4 : 3));
+  if(a === 0 && x !== "L") xp += 2;
+  bt = x === "W" ? (kind === "cup" ? 4 : 3) : (x === "D" ? 1 : -2);
+  if(kind === "league" && en.opp === c.rival){
+    var d = c.derby;
+    d[x === "W" ? "w" : (x === "D" ? "d" : "l")]++; d.gf += g; d.ga += a;
+    if(x === "W"){ xp += 8; bt += 2; addCoins(10, "Derby win"); addFans(3); notes.push("Derby day win over " + on + ", with 10 coins from the fans."); pressPush("Derby day: " + clubName() + " beat " + on, g + " to " + a + " in the big one. The town is buzzing.", "") }
+    else if(x === "D") notes.push("A draw in the derby against " + on + ". Honours even.");
+    else notes.push("Derby day did not go our way against " + on + ". There is always a return match.");
+  }
+  carBoard(bt);
+  lv = carXp(xp);
+  var fresh = carCheck();
+  var line = "Career: +" + xp + " XP." + (bt > 0 ? " The board is pleased." : (bt < 0 ? " The board says keep going." : "")) + (lv ? " " + lv : "") + (fresh.length ? " New chapter: " + fresh.join(", ") + "." : "");
+  if(p) p.cx = [line].concat(notes);
+}
+
+/* learning counts in the career too */
+function carActivity(first){
+  st.car.act++; st.car.actTot++;
+  var lv = carXp(first ? 3 : 1), fresh = carCheck();
+  return (lv ? " " + lv : "") + (fresh.length ? " New chapter: " + fresh.join(", ") + "." : "");
+}
+
+/* the end of a season */
+function carSettle(m){
+  var list = carObjs(), pay = carObjPay(list), xp = 10 + (m.pos === 1 ? 20 : 0) + (m.up ? 10 : 0) + pay.xp;
+  if(pay.coins) addCoins(pay.coins, "Board objectives");
+  carBoard(pay.board + (m.pos === 1 ? 6 : (m.up ? 4 : 0)));
+  carXp(xp);
+  post("Board report, season " + st.season, "The Board", pay.n ? "The board is delighted with " + pay.n + " of 4 objectives this season, worth " + pay.coins + " coins. " + (pay.n < 4 ? "The others are ideas to try next time." : "A clean sweep.") : "No targets hit this time, and that is fine. The board still backs you and the squad keeps all it has learned.");
+  return list.map(function(o){ return { id: o.id, text: o.text, ok: o.ok ? 1 : 0, sok: o.sok ? 1 : 0 } });
+}
+function carNewSeason(){
+  var a = st.car.acad, gift;
+  st.car.act = 0;
+  var grew = [];
+  st.signed.forEach(function(s){
+    if(s.yg && s.r < s.yg){ var n = Math.min(s.yg - s.r, 3 + (hasPerk("youth") ? 1 : 0)); s.r += n; grew.push(s.name) }
+  });
+  if(grew.length){ applyMine(); post("The youngsters are growing", "Coaching staff", grew.join(", ") + (grew.length > 1 ? " have" : " has") + " had a growth spurt over the break. Check the Career page to see how far they could go.") }
+  gift = Math.round(Math.max(0, st.car.board - 40) / 2);
+  if(gift > 0){ addCoins(gift, "Board investment"); post("The board invests " + gift + " coins", "The Board", "The board feels " + carBandOf(st.car.board).toLowerCase() + " about the club and has put " + gift + " coins into the kitty for the new season.") }
+  a.season = 0; acadRoll();
+  var o = carObjs();
+  post("Board objectives, season " + st.season, "The Board", "Targets for this season, only if you fancy them: " + o.map(function(x){ return x.text.toLowerCase() }).join("; ") + ". Each one you reach is worth coins and career XP, and there is a stretch goal for each too.");
+  carCheck();
+}
+
+/* the academy */
+function acadCount(){ return ACAD_N[st.car.acad.lvl] + (hasPerk("youth") ? 2 : 0) }
+function acadRoll(){
+  var a = st.car.acad, n = acadCount(), r = S.rng(hash("acad" + st.season + ":" + st.car.aseed)), pool = [], used = {}, i;
+  for(i = 0; i < n; i++){
+    var nm, tries = 0;
+    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 30);
+    used[nm] = 1;
+    var pos = i === 0 && st.season % 3 === 1 ? "GK" : POSL[Math.floor(r() * POSL.length)];
+    var r0 = ACAD_R[a.lvl] + Math.floor(r() * 7), pot = Math.min(86, r0 + 16 + Math.floor(r() * 9) + a.lvl * 2);
+    pool.push({ id: "ac" + st.season + "_" + i, name: nm, pos: pos, r: r0, pot: pot, note: TRAITS[Math.floor(r() * TRAITS.length)], taken: 0 });
+  }
+  a.season = st.season; a.pool = pool;
+}
+function acadEnsure(){ if(st.car.acad.season !== st.season || !st.car.acad.pool.length){ acadRoll(); save() } }
+function acadPromote(id){
+  acadEnsure();
+  var e = st.car.acad.pool.filter(function(x){ return x.id === id && !x.taken })[0]; if(!e) return;
+  var c = ctx();
+  if(c.all.length >= 30){ toast("The squad is full (30). Sell someone first."); return }
+  var nid = "sg" + (st.sgn++), nm = e.name; if(nameTaken(nm, "")) nm += " II";
+  st.signed.push({ id: nid, name: nm, pos: e.pos, r: e.r, note: e.note, look: lookOf(e.id), yg: e.pot });
+  e.taken = 1; st.car.acad.grads++;
+  post("Academy graduate: " + nm, "Coaching staff", nm + " has stepped up from the academy. Rated " + e.r + " today and could reach " + e.pot + " with time. Young players grow a little every season.");
+  var lv = carXp(8), fresh = carCheck();
+  applyMine(); save(); render(); toast(nm + " has joined " + clubName() + " from the academy." + (fresh.length ? " New chapter: " + fresh.join(", ") + "." : "") + (lv ? " " + lv : ""));
+}
+function acadUp(){
+  var a = st.car.acad;
+  if(a.lvl >= 3) return;
+  var cost = ACAD_COST[a.lvl];
+  if(st.coins < cost){ toast("Not enough coins yet. Matches and sponsors earn more."); return }
+  addCoins(-cost, ACAD_NAME[a.lvl + 1]); a.lvl++;
+  post("The academy grows", "The Chairman (Jay)", "The club now has a " + ACAD_NAME[a.lvl].toLowerCase() + ". Better youngsters will turn up next season, and you can sign them for free.");
+  save(); render(); toast("Your academy is now a " + ACAD_NAME[a.lvl].toLowerCase() + ".");
+}
+function perkTake(id){
+  if(!PERKS.some(function(p){ return p.id === id })) return;
+  if(hasPerk(id) || carPts() < 1){ toast(hasPerk(id) ? "You already have that one." : "Reach the next career level for another perk point."); return }
+  st.car.perks[id] = 1;
+  var pk = PERKS.filter(function(p){ return p.id === id })[0];
+  post("New perk: " + pk.name, "The Chairman (Jay)", pk.desc);
+  save(); render(); toast("Perk chosen: " + pk.name + ".");
+}
+
+/* views */
+function carBar(pct, cls){ return '<div class="prog ' + (cls || "") + '" aria-hidden="true"><i style="width:' + clamp(pct, 0, 100) + '%"></i></div>' }
+function carRival(){ return S.oppName(st.car.rival) }
+function carNextDerby(){
+  var i; for(i = st.played.length; i < ROUNDS; i++) if(S.ourFixture(i).opp === st.car.rival) return i + 1;
+  return 0;
+}
+function carTeaser(){
+  var lv = carLevel(), x = st.car.xp, lo = CLV[lv - 1], hi = CLV[lv] != null ? CLV[lv] : lo, pts = carPts(), o = carObjs(), on = o.filter(function(q){ return q.ok }).length;
+  return '<section class="card cteaser"><div class="cthead"><div><h3>Career</h3><p style="margin:0"><b>Level ' + lv + '</b> &middot; ' + CTIT[lv - 1] + '</p></div><button class="btn' + (pts ? " btn-go" : "") + '" data-act="view" data-v="career">' + (pts ? "Choose a perk" : "Open Career") + '</button></div>' +
+    carBar(hi > lo ? 100 * (x - lo) / (hi - lo) : 100) + '<p class="hint" style="margin:0">Board objectives reached: <b>' + on + ' of 4</b> &middot; The board feels <b>' + carBandOf(st.car.board).toLowerCase() + '</b>.</p></section>';
+}
+function vCareer(c){
+  acadEnsure();
+  var car = st.car, lv = carLevel(), x = car.xp, lo = CLV[lv - 1], hi = CLV[lv] != null ? CLV[lv] : lo, pts = carPts(), r = car.rec, t = r.tot, objs = carObjs();
+  car.newc = 0;
+  var h = '<div class="stack">';
+  /* the manager */
+  h += '<div class="card"><div class="cmgr"><div class="clvl"><b>' + lv + '</b><small>Level</small></div><div style="flex:1;min-width:0"><h2 style="margin:0">' + CTIT[lv - 1] + '</h2><span class="hint">Manager of ' + esc(clubName()) + ' &middot; ' + esc(rankOf(c.tr.fp)) + ' on the training ground</span>' +
+    carBar(hi > lo ? 100 * (x - lo) / (hi - lo) : 100) + '<span class="hint">' + (hi > lo ? (hi - x) + ' more XP for level ' + (lv + 1) : 'Top level reached. XP keeps counting.') + ' (' + x + ' XP in all)</span></div></div>' +
+    '<div class="cboard"><div><b>The board</b><span class="hint"> feels ' + carBandOf(car.board).toLowerCase() + '</span></div>' + carBar(car.board, "bd") + '<p class="hint" style="margin:0">Win matches and reach objectives and the board puts coins into the club at the start of each season. There is no sack in this game. The board always backs you.</p></div></div>';
+  /* objectives */
+  var pay = carObjPay(objs);
+  h += '<div class="card"><h3>Board objectives, season ' + st.season + '</h3><p class="hint" style="margin:0 0 8px">Four targets from the board, only if you fancy them. Reach one for 40 coins and 15 XP, and its stretch goal for 30 coins and 10 XP more. Paid when the season ends.</p><div class="cobjs">' + objs.map(function(o){
+    var tag = o.sok ? '<span class="chip-on">Stretch reached</span>' : (o.ok ? '<span class="chip-on">Reached</span>' : (o.low && !o.fin ? (o.on ? '<span class="chip-on">On track</span>' : '<span class="chip-off">Not yet</span>') : '<span class="chip-off">In progress</span>'));
+    return '<div class="cobj"><div class="coh"><b>' + o.text + '</b>' + tag + '</div>' + carBar(o.pct, o.ok ? "ok" : "") + '<small>' + o.now + ' &middot; Stretch: ' + o.big.toLowerCase() + '</small></div>';
+  }).join("") + '</div>' + (pay.coins ? '<p class="hint" style="margin:8px 0 0">So far worth <b>' + pay.coins + ' coins</b> at the end of the season.</p>' : '') + '</div>';
+  /* perks */
+  h += '<div class="card"><h3>Manager perks &middot; ' + pts + (pts === 1 ? " point" : " points") + ' to spend</h3><p class="hint" style="margin:0 0 8px">You earn a perk point at every career level. Each perk is yours for good.</p><div class="perks">' + PERKS.map(function(p){
+    var own = hasPerk(p.id);
+    return '<div class="perk' + (own ? " own" : "") + '"><b>' + p.name + '</b><small>' + p.desc + '</small>' + (own ? '<span class="chip-on">Yours</span>' : '<button class="btn' + (pts ? " btn-go" : "") + '" data-act="perk" data-id="' + p.id + '"' + (pts ? "" : ' aria-disabled="true"') + '>' + (pts ? "Choose" : "Needs a point") + '</button>') + '</div>';
+  }).join("") + '</div></div>';
+  /* derby */
+  var nd = carNextDerby(), d = car.derby, dn = d.w + d.d + d.l;
+  h += '<div class="card"><h3>Local derby</h3><div class="cder">' + opCrest(car.rival, 64, true) + '<div style="flex:1;min-width:0"><b>' + esc(carRival()) + '</b><span class="hint" style="display:block">Your local rivals. Beating them earns 10 coins, extra XP and a happy town.</span><span class="hint" style="display:block">' + (nd ? "Next meeting: matchday " + nd + "." : "The derby is done for this season.") + '</span></div></div>' +
+    '<div class="sumgrid" style="margin-top:10px"><div><b>' + dn + '</b><small>Played</small></div><div><b>' + d.w + '</b><small>Won</small></div><div><b>' + d.d + '</b><small>Drawn</small></div><div><b>' + d.l + '</b><small>Lost</small></div><div><b>' + d.gf + '</b><small>For</small></div><div><b>' + d.ga + '</b><small>Against</small></div></div></div>';
+  /* academy */
+  var a = car.acad, youth = st.signed.filter(function(s){ return s.yg }), nextC = a.lvl < 3 ? ACAD_COST[a.lvl] : 0;
+  h += '<div class="card"><h3>' + ACAD_NAME[a.lvl] + '</h3><p class="hint" style="margin:0 0 8px">New youngsters arrive each season and signing them is free. They start modest and grow every season, so they are a long game. ' + (a.grads ? a.grads + " graduated so far." : "") + '</p>';
+  h += '<div class="mkgrid">' + a.pool.map(function(e){
+    return '<div class="mk' + (e.taken ? " gone" : "") + '">' + avatar(e.id, 66, e.pos) + '<div><b>' + esc(e.name) + '</b><small>' + e.pos + ' &middot; rated ' + e.r + ', could reach ' + e.pot + '</small><small>' + esc(e.note) + '</small></div>' + (e.taken ? '<span class="chip-on">Signed</span>' : '<button class="btn btn-go" data-act="acpro" data-id="' + e.id + '">Sign for free</button>') + '</div>';
+  }).join("") + '</div>';
+  if(youth.length) h += '<h4 style="margin:14px 0 6px">Your youngsters</h4><div class="plist">' + youth.map(function(s){
+    return '<div class="prow">' + avatar(s.id, 48, s.pos) + '<span><b>' + esc(s.name) + '</b><small>' + s.pos + ' &middot; rated ' + s.r + (s.r < s.yg ? ', growing towards ' + s.yg : ', fully grown') + '</small></span></div>';
+  }).join("") + '</div>';
+  h += '<div class="mbtns" style="margin-top:12px">' + (a.lvl < 3 ? '<button class="btn' + (st.coins >= nextC ? " btn-go" : "") + '" data-act="acup"' + (st.coins >= nextC ? "" : ' aria-disabled="true"') + '>Grow it into a ' + ACAD_NAME[a.lvl + 1].toLowerCase() + ' for ' + nextC + ' coins</button>' : '<span class="chip-on">Top level</span>') + '</div></div>';
+  /* the story */
+  var done = CHAPS.filter(function(p){ return car.chap[p.id] }).length;
+  h += '<div class="card"><h3>Your story &middot; ' + done + ' of ' + CHAPS.length + ' chapters</h3><ol class="chaps">' + CHAPS.map(function(p){
+    var on = car.chap[p.id];
+    return '<li class="' + (on ? "on" : "") + '"><b>' + p.t + '</b><small>' + (on ? p.l : p.hint) + '</small></li>';
+  }).join("") + '</ol></div>';
+  /* records */
+  var played = t.w + t.d + t.l;
+  h += '<div class="card"><h3>Career records</h3><div class="sumgrid"><div><b>' + played + '</b><small>Played</small></div><div><b>' + t.w + '</b><small>Won</small></div><div><b>' + t.d + '</b><small>Drawn</small></div><div><b>' + t.l + '</b><small>Lost</small></div><div><b>' + t.gf + '</b><small>Goals for</small></div><div><b>' + t.ga + '</b><small>Against</small></div></div>' +
+    '<div class="recs" style="margin-top:12px">' +
+    '<div class="rec"><b>' + r.bestWin + '</b><span>matches</span><small>Longest winning run</small></div>' +
+    '<div class="rec"><b>' + r.bestUnb + '</b><span>matches</span><small>Longest unbeaten run</small></div>' +
+    '<div class="rec"><b>' + r.cs + '</b><span>clean sheets</span><small>Nothing got past us</small></div>' +
+    '<div class="rec"><b>' + (r.bigW ? r.bigW.gf + " to " + r.bigW.ga : "Not yet") + '</b><span>' + (r.bigW ? esc(r.bigW.opp) : "Win to set one") + '</span><small>Biggest win</small></div>' +
+    '<div class="rec"><b>' + (r.hiS ? r.hiS.gf : "Not yet") + '</b><span>' + (r.hiS ? "goals v " + esc(r.hiS.opp) : "Score to set one") + '</span><small>Most goals in a match</small></div>' +
+    '<div class="rec"><b>' + (st.hist.length ? ord(Math.min.apply(null, st.hist.map(function(s){ return s.pos }))) : "Not yet") + '</b><span>' + (st.hist.length ? "best finish" : "Finish a season") + '</span><small>Best league finish</small></div>' +
+    '<div class="rec"><b>' + st.trophies.length + '</b><span>' + (st.trophies.length === 1 ? "trophy" : "trophies") + '</span><small>In the cabinet</small></div>' +
+    '<div class="rec"><b>' + st.hist.length + '</b><span>' + (st.hist.length === 1 ? "season" : "seasons") + '</span><small>Completed</small></div>' +
+    '</div></div>';
+  h += histCard();
+  return h + '</div>';
+}
+function carSeasonHtml(){
+  var o = carObjs(), pay = carObjPay(o);
+  return '<div class="cseas"><b>Board report</b><ul>' + o.map(function(q){ return '<li class="' + (q.ok ? "ok" : "") + '">' + (q.ok ? "Reached: " : "Not this time: ") + q.text + (q.sok ? " (and the stretch goal)" : "") + '</li>' }).join("") + '</ul><p style="margin:6px 0 0">' + (pay.coins ? 'Board bonus: <b>' + pay.coins + ' coins</b> and <b>' + pay.xp + ' career XP</b>.' : 'No targets reached this time, and that is fine. They are only ideas.') + '</p></div>';
+}
+function carDerbyLine(opp){
+  if(!playing || playing.kind !== "league" || opp !== st.car.rival) return "";
+  return '<p class="derbyline"><b>Derby day.</b> ' + esc(S.oppName(opp)) + ' are your local rivals. The fans are loud today.</p>';
 }
 
 /* ---------- ambience and commentary ---------- */
@@ -2088,7 +2419,7 @@ function openMatch(kind, comp0){
   var fm = inForm();
   $("match").className = "match"; $("ov").scrollTop = 0;
   $("match").innerHTML = '<div class="mhead"><h2>' + title + '</h2><span id="ctlTop"><button class="btn btn-quiet" data-act="closem">Not now</button></span></div>' +
-    '<div class="pre">' + sponsorLine(playing.opp) + infoHtml(playing.info, S.oppName(playing.opp)) + '</div><div class="stage" id="stage">' + sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + lpHtml(playing) + '</div>' +
+    '<div class="pre">' + sponsorLine(playing.opp) + carDerbyLine(playing.opp) + infoHtml(playing.info, S.oppName(playing.opp)) + '</div><div class="stage" id="stage">' + sbHtml({ hn: home.name, an: away.name, ourS: playing.ourS, oppId: playing.opp, clk: "Team sheets" }) + lpHtml(playing) + '</div>' +
     '<div id="choice"></div><div id="ctl"><div style="margin-top:14px">' + compareBars(us, opp) + '</div>' +
     (fm.length ? '<div class="inform"><b>In form</b>' + fm.map(function(q){ return '<span>' + avatar(q.id, 30, q.pos) + esc(q.name) + ' <span class="sks">' + skillChips(q.id) + '</span></span>' }).join("") + '</div>' : "") +
     '<p>Luck dial at <b style="color:var(--gold)">' + Math.round(c.tr.luck * 100) + '%</b>. ' + (kind === "cup" ? "A cup tie has a winner on the day, with penalties if it is level, and you take them. " : "") + 'You may get a few choices to make, and you can make up to three changes while you watch. Or let the coach decide.</p>' +
@@ -2435,12 +2766,13 @@ function endPanel(){
     if(gl.length) wr = '<h4 style="margin-top:12px">Watch the goals again</h4><div class="mbtns" style="margin:6px 0 0">' + gl.join("") + '</div>';
   }
   $("fin").innerHTML = '<div class="final ' + cls + '" id="finbox"><span class="fres">' + (won ? "Win" : (drew ? "Draw" : "Defeat")) + '</span><h2>' + head + '</h2><p style="margin-top:6px">' + (M.pens ? "Penalties " + M.pens.h + " to " + M.pens.a + ". " : "") +
-    (scorers.length ? "Our scorers: " + esc(scorers.join(", ")) + ". " : "No goals for us today. ") + (luckN ? "Luck moments: " + luckN + ". " : "") + '</p>' + lh + motm + mv + growth + wr +
+    (scorers.length ? "Our scorers: " + esc(scorers.join(", ")) + ". " : "No goals for us today. ") + (luckN ? "Luck moments: " + luckN + ". " : "") + '</p>' + lh + motm + mv + growth + cxHtml(p) + wr +
     '<div class="mbtns"><button class="btn btn-go" data-act="closem">Back to the dugout</button><button class="btn" data-act="closeleague">See the table</button></div></div>';
   if(won && !p.replay) confetti($("finbox"));
   var b = $("fin").querySelector("button"); if(b) b.focus();
   try{ $("fin").scrollIntoView({ block: "center", behavior: calm() ? "auto" : "smooth" }) }catch(e){}
 }
+function cxHtml(p){ return p.cx && p.cx.length ? '<p class="cx">' + p.cx.map(esc).join(' ') + '</p>' : "" }
 function goalReplay(i){
   var p = playing; if(!p) return;
   var e = p.M.events[i], en = p.entry; if(!e || !en || !en.lu) return;
@@ -2506,9 +2838,11 @@ function finalise(){
       post(pos === 1 ? "League champions!" : "Season finished: " + ord(pos), "The Chairman (Jay)", (pos === 1 ? "Top of the league after fifteen matches. Outrageous. Well played, manager." : "Fifteen matches played and you finished " + ord(pos) + ".") + (imp0 ? " Most improved player: " + imp0.name + "." : ""));
     }
   }
-  var grew = [], byName = {}, gain = {};
-  our.players.forEach(function(q){ if(q.id){ byName[q.name] = q.id; gain[q.id] = (gain[q.id] || 0) + 1 + upLvl("pitch") } });
+  var grew = [], byName = {}, gain = {}, started0 = {};
+  (p.xiStart || []).forEach(function(x){ started0[x] = 1 });
+  our.players.forEach(function(q){ if(q.id){ byName[q.name] = q.id; gain[q.id] = (gain[q.id] || 0) + 1 + upLvl("pitch") + (hasPerk("mentor") && started0[q.id] ? 1 : 0) } });
   careerUpdate(entry, our, byName);
+  carMatch(entry, p.kind === "cup" ? "cup" : "league", p);
   M.events.forEach(function(e){
     if(e.setpiece && e.side === ours && e.routine){ var ss = st.sp.stats[e.routine] || (st.sp.stats[e.routine] = { u: 0, g: 0 }); ss.u++; if(e.k === "goal") ss.g++ }
   });
@@ -2561,7 +2895,7 @@ function wizStop(){ if(wiz.timer){ clearInterval(wiz.timer); wiz.timer = null } 
 function wizClose(){
   wizStop(); wiz.on = false; $("wiz").classList.remove("on");
   var m = mine0(false); if(m && !String(m.name || "").trim()) st.mine = st.mine.filter(function(x){ return x !== m });
-  applyMine(); applyClub(); st.setup = true; save(); render();
+  applyMine(); applyClub(); st.setup = true; carCheck(); save(); render();
 }
 function demoNumbers(){
   var opp = S.clubTeam(0), pool = S.PLAYERS.filter(function(p){ return !p.fp });
@@ -2749,6 +3083,9 @@ document.addEventListener("click", function(e){
   if(a === "upgrade"){ buyUpgrade(b.getAttribute("data-id")); return }
   if(a === "hire"){ hireStaff(b.getAttribute("data-id")); return }
   if(a === "retire"){ var rid = b.getAttribute("data-id"), rn = numOf(rid); st.retired[rn] = rid; var rc = st.career[rid]; post("Shirt retired", "The Chairman (Jay)", "Number " + rn + " is retired in honour of " + (rc ? rc.n : "a legend") + ". Nobody else will wear it."); pressPush("Number " + rn + " retired for " + (rc ? rc.n : "a legend"), "A shirt goes up on the wall at " + stadiumName() + ".", ""); addFans(5); save(); render(); toast("Number " + rn + " retired."); return }
+  if(a === "perk"){ perkTake(b.getAttribute("data-id")); return }
+  if(a === "acpro"){ acadPromote(b.getAttribute("data-id")); return }
+  if(a === "acup"){ if(b.getAttribute("aria-disabled") === "true"){ toast("Not enough coins yet. Matches and sponsors earn more."); return } acadUp(); return }
   if(a === "spset"){ var sk = b.getAttribute("data-k"), sv = b.getAttribute("data-v"); if(sk === "corner") st.sp.corner.routine = sv; else st.sp.fk = sv; save(); render(); return }
   if(a === "tiplay"){ titleClose(); view = "dugout"; render(); window.scrollTo(0, 0); return }
   if(a === "tigo"){ titleClose(); view = b.getAttribute("data-v"); sel = null; render(); window.scrollTo(0, 0); return }
@@ -2873,7 +3210,7 @@ window.addEventListener("storage", function(e){ if(e.key === ENG) refresh() });
 
 var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
-window.__dugout = {drillFinish: drillFinish, beats: beats, matchInfo: matchInfo, tiredOf: tiredOf, afterMatch: afterMatch,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots };
+window.__dugout = {drillFinish: drillFinish, beats: beats, matchInfo: matchInfo, tiredOf: tiredOf, afterMatch: afterMatch,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots, carLevel: carLevel, carObjs: carObjs, carCheck: carCheck, carNewSeason: carNewSeason, acadRoll: acadRoll, acadCount: acadCount };
 if(!st.setup) wizOpen(0, "setup");
 render();
 var seenMenu = false; try{ seenMenu = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
