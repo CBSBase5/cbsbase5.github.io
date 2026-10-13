@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Place value - LC Night Shift HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="/lc/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/lc/lc.css?v=2">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.gap{position:relative;border:2px dashed var(--ink);border-radius:6px;padding:0 .4em;margin:0 3px;color:transparent}
+.gap::after{content:"?";color:var(--ink);position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.sumbig{display:block;font-family:var(--display);font-weight:700;font-size:1.45rem;margin:8px 0 4px}
+.pvchart{border-collapse:collapse;margin:6px auto;font-size:1rem}
+.pvchart th,.pvchart td{border:2px solid var(--ink);padding:6px 10px;text-align:center}
+.pvchart th{background:var(--accent-soft);font-size:.9rem}
+.pvchart td{font-family:var(--display);font-weight:700;font-size:1.5rem}
+/* Lift code widget */
+.pv-task p{margin:0 0 6px}
+.pv-dots{display:flex;gap:6px;margin-bottom:6px}
+.pv-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.pv-dots span.on{background:var(--good)}
+.pv-dots span.now{background:var(--sun)}
+.pv-stage{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:6px;margin:8px 0}
+.pv-stage svg{display:block;width:100%;max-width:460px;margin:0 auto;height:auto}
+.pv-ctrl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.pv-col{text-align:center;background:#fff;border:2px solid var(--ink);border-top-width:7px;border-radius:12px;padding:6px 2px 8px}
+.pv-col.h{border-top-color:#3a5cff}.pv-col.t{border-top-color:#19c39a}.pv-col.o{border-top-color:#ff5d5d}
+.pv-name{display:block;font-weight:700;font-size:.88rem;margin-bottom:4px}
+.pv-step{display:flex;align-items:center;justify-content:center;gap:2px}
+.pv-b{width:34px;height:34px;flex:0 0 34px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);color:var(--ink);font-size:1.3rem;font-weight:800;line-height:1;cursor:pointer;touch-action:manipulation;padding:0}
+.pv-b:disabled{opacity:.35;cursor:default}
+.pv-dig{font-family:var(--display);font-size:1.6rem;min-width:1em;display:inline-block}
+.pv-read{min-height:2.6em;font-size:1rem}
+.pv-num{font-family:var(--display);font-weight:700;font-size:1.3rem}
+.pv-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lc/"><span class="hqlogo">LC</span><span class="hqname">Night Shift HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/lc/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Place value</h2>
+    <span>Hundreds, tens and ones. Making, comparing and rounding numbers, with lockers, lifts and car parks after dark.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LC's Night Shift HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lc/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function gap(){ return '<span class="gap">what</span>'; }
+function plural(n, one, many){ return n + " " + (n === 1 ? one : many); }
+
+/* ---------- base ten blocks: a hundred is a 10 by 10 square ---------- */
+var C = 9, F = 90;
+function flat(x, y){
+  var s = '<rect x="' + x + '" y="' + y + '" width="' + F + '" height="' + F + '" fill="#d6ddff"/>';
+  for(var k = 1; k < 10; k++){
+    s += ln(x + k * C, y, x + k * C, y + F, BLUE, 0.8, ' opacity=".75"');
+    s += ln(x, y + k * C, x + F, y + k * C, BLUE, 0.8, ' opacity=".75"');
+  }
+  return s + '<rect x="' + x + '" y="' + y + '" width="' + F + '" height="' + F + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+}
+function stick(x, y){
+  var s = '<rect x="' + x + '" y="' + y + '" width="' + C + '" height="' + F + '" fill="#c4f0e2"/>';
+  for(var k = 1; k < 10; k++) s += ln(x, y + k * C, x + C, y + k * C, "#0e8a6a", 0.9);
+  return s + '<rect x="' + x + '" y="' + y + '" width="' + C + '" height="' + F + '" fill="none" stroke="' + INK + '" stroke-width="1.6"/>';
+}
+function cube(x, y){
+  return '<rect x="' + x + '" y="' + y + '" width="' + C + '" height="' + C + '" fill="#ffc4c4" stroke="' + INK + '" stroke-width="1.6"/>';
+}
+/* a row of blocks: hundreds, then tens, then ones (in columns of 5) */
+function blocks(h, tn, o, opt){
+  opt = opt || {};
+  var lab = !!opt.labels, top = 10, x = 10, s = "", labs = [], k, gw;
+  var minW = lab ? 64 : 12, gapW = lab ? 22 : 26;
+  gw = Math.max(h * (F + 8) - 8, minW);
+  for(k = 0; k < h; k++) s += flat(x + k * (F + 8), top);
+  labs.push([x + gw / 2, plural(h, "hundred", "hundreds")]); x += gw + gapW;
+  gw = Math.max(tn * (C + 6) - 6, minW);
+  for(k = 0; k < tn; k++) s += stick(x + k * (C + 6), top);
+  labs.push([x + gw / 2, plural(tn, "ten", "tens")]); x += gw + gapW;
+  var cols = Math.ceil(o / 5);
+  gw = Math.max(cols * (C + 6) - 6, minW);
+  var cx0 = x + (gw - (cols * (C + 6) - 6)) / 2;
+  for(k = 0; k < o; k++) s += cube(cx0 + Math.floor(k / 5) * (C + 6), top + F - C - (k % 5) * (C + 6));
+  labs.push([x + gw / 2, plural(o, "one", "ones")]); x += gw;
+  var W = Math.max(x + 10, 300), H = top + F + 10;
+  if(lab){
+    labs.forEach(function(l){ s += t(l[0].toFixed(1), H + 14, l[1], 16, INK, LAB + ' font-weight="700" text-anchor="middle"'); });
+    H += 26;
+  }
+  if(opt.total){ s += t(W / 2, H + 26, opt.total, 26, INK, LAB + ' font-weight="800" text-anchor="middle"'); H += 36; }
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + opt.label + '">' + s + '</svg>';
+}
+
+var B243 = blocks(2, 4, 3, { labels: true, total: "243", label: "Base ten blocks: 2 hundred squares, 4 ten sticks and 3 one cubes. Together they make 243." });
+var B315 = blocks(3, 1, 5, { label: "Base ten blocks: 3 hundred squares, 1 ten stick and 5 one cubes." });
+var B205 = blocks(2, 0, 5, { label: "Base ten blocks: 2 hundred squares, no ten sticks and 5 one cubes." });
+
+/* ---------- part whole model ---------- */
+function pw(whole, parts, label){
+  var W = 400, H = 196, wy = 52, py = 150, s = "";
+  var n = parts.length, sp = n === 2 ? 180 : 120, x0 = 200 - sp * (n - 1) / 2;
+  parts.forEach(function(p, k){ s += ln(200, wy, x0 + k * sp, py, INK, 3); });
+  function circ(x, y, r, v, fill){
+    var q = v === "?";
+    return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3"/>' +
+      t(x, y + 8, String(v), 23, q ? CORAL : INK, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  s += circ(200, wy, 42, whole, "#fff3c2");
+  parts.forEach(function(p, k){ s += circ(x0 + k * sp, py, 38, p, WHITE); });
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + label + '">' + s + '</svg>';
+}
+var PW346 = pw(346, [300, 40, 6], "A part whole model. The whole is 346. The parts are 300, 40 and 6.");
+var PW527 = pw(527, [500, "?", 7], "A part whole model. The whole is 527. The parts are 500, a missing part, and 7.");
+var PW481 = pw("?", [400, 80, 1], "A part whole model. The whole is missing. The parts are 400, 80 and 1.");
+var PW75 = pw(75, [40, "?"], "A part whole model. The whole is 75. One part is 40. The other part is missing.");
+
+/* ---------- digit cards ---------- */
+function cards(ds, label, extra){
+  var w = 62, g = 14, n = ds.length, x0 = 200 - (n * w + (n - 1) * g) / 2, s = "";
+  ds.forEach(function(d, k){
+    var x = x0 + k * (w + g);
+    s += '<rect x="' + x + '" y="10" width="' + w + '" height="78" rx="9" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += t(x + w / 2, 64, d, 40, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  });
+  var H = 100;
+  (extra || []).forEach(function(e){ H += 30; s += t(200, H - 6, e[0], 20, e[1], LAB + ' font-weight="800" text-anchor="middle"'); });
+  return '<svg viewBox="0 0 400 ' + (H + 4) + '" role="img" aria-label="' + label + '">' + s + '</svg>';
+}
+var CARDS472 = cards(["4", "7", "2"], "Three digit cards: 4, 7 and 2. The biggest number is 742. The smallest is 247.",
+  [["Biggest: 742", BLUE], ["Smallest: 247", CORAL]]);
+var CARDS518 = cards(["5", "1", "8"], "Three digit cards: 5, 1 and 8.");
+var CARDS369 = cards(["3", "6", "9"], "Three digit cards: 3, 6 and 9.");
+
+/* ---------- counters on a place value chart ---------- */
+function counters(h, tn, o, label){
+  var s = "", names = ["Hundreds", "Tens", "Ones"], cols = [BLUE, MINT, CORAL], v = [h, tn, o];
+  for(var c = 0; c < 3; c++){
+    var x = 10 + c * 127;
+    s += '<rect x="' + x + '" y="8" width="127" height="118" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += '<rect x="' + x + '" y="8" width="127" height="34" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x + 63.5, 32, names[c], 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    for(var k = 0; k < v[c]; k++){
+      var cx = x + 33 + (k % 3) * 30, cy = 66 + Math.floor(k / 3) * 30;
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="11" fill="' + cols[c] + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+  }
+  return '<svg viewBox="0 0 400 134" role="img" aria-label="' + label + '">' + s + '</svg>';
+}
+var CNT304 = counters(3, 0, 4, "A place value chart. 3 counters in the hundreds. No counters in the tens. 4 counters in the ones.");
+
+/* ---------- comparing ---------- */
+var CMP = '<svg viewBox="0 0 400 150" role="img" aria-label="548 is greater than 524. 524 is less than 548.">' +
+  t(200, 42, "548 &gt; 524", 34, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(200, 68, "548 is greater than 524", 17, BLUE, BODY + ' font-weight="700" text-anchor="middle"') +
+  t(200, 114, "524 &lt; 548", 34, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(200, 140, "524 is less than 548", 17, CORAL, BODY + ' font-weight="700" text-anchor="middle"') +
+  '</svg>';
+
+/* ---------- number lines ---------- */
+function nline(a, b, n, opt){
+  opt = opt || {};
+  var x0 = 34, x1 = 366, y = 84, s = "";
+  function X(v){ return x0 + (v - a) / (b - a) * (x1 - x0); }
+  s += ln(x0 - 14, y, x1 + 14, y, INK, 3);
+  for(var k = 0; k <= n; k++){
+    var v = a + (b - a) * k / n, xx = X(v).toFixed(1), end = k === 0 || k === n;
+    s += ln(xx, y - (end ? 13 : 9), xx, y + (end ? 13 : 9), INK, end ? 3 : 2);
+    if(opt.all || end || (opt.show && opt.show.indexOf(v) >= 0)) s += t(xx, y + 34, String(v), 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  if(opt.arrow !== undefined){
+    var ax = X(opt.arrow);
+    s += '<path d="M' + (ax - 9).toFixed(1) + ' ' + (y - 30) + ' L' + (ax + 9).toFixed(1) + ' ' + (y - 30) + ' L' + ax.toFixed(1) + ' ' + (y - 14) + ' Z" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(ax.toFixed(1), y - 40, opt.atext || "?", 22, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  if(opt.round !== undefined){
+    var rx = X(opt.round), tx = X(opt.to);
+    s += '<circle cx="' + rx.toFixed(1) + '" cy="' + y + '" r="7" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(rx.toFixed(1), y + 36, String(opt.round), 20, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+    var mx = (rx + tx) / 2;
+    s += '<path d="M' + rx.toFixed(1) + ' ' + (y - 9) + ' Q' + mx.toFixed(1) + ' ' + (y - 60) + ' ' + tx.toFixed(1) + ' ' + (y - 16) + '" fill="none" stroke="' + BLUE + '" stroke-width="3"/>';
+    s += '<path d="M' + (tx - 12).toFixed(1) + ' ' + (y - 24) + ' L' + tx.toFixed(1) + ' ' + (y - 16) + ' L' + (tx + 2).toFixed(1) + ' ' + (y - 30) + '" fill="none" stroke="' + BLUE + '" stroke-width="3"/>';
+    s += t(mx.toFixed(1), y - 46, "nearer", 16, BLUE, BODY + ' font-weight="700" text-anchor="middle"');
+  }
+  return '<svg viewBox="0 0 400 ' + (opt.round !== undefined ? 150 : 130) + '" role="img" aria-label="' + opt.label + '">' + s + '</svg>';
+}
+var NL70 = nline(0, 100, 10, { all: true, arrow: 70, atext: "70", label: "A number line from 0 to 100 going up in tens. The arrow points to 70." });
+var NL600 = nline(0, 1000, 10, { arrow: 600, label: "A number line from 0 to 1000 with 10 equal steps. Only 0 and 1000 are labelled. The arrow is 6 steps along." });
+var NL260 = nline(200, 300, 10, { arrow: 260, label: "A number line from 200 to 300 with 10 equal steps. The arrow is 6 steps along." });
+var NL350 = nline(300, 400, 2, { arrow: 350, label: "A number line from 300 to 400. The arrow is exactly halfway." });
+var NL35 = nline(0, 50, 10, { arrow: 35, label: "A number line from 0 to 50 with 10 equal steps. The arrow is 7 steps along." });
+var NL67 = nline(60, 70, 10, { show: [65], round: 67, to: 70, label: "A number line from 60 to 70. 67 is marked. An arrow shows 67 is nearer to 70." });
+
+/* ---------- Lift code widget ---------- */
+var ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+  "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+var TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+function words(n){
+  if(n < 20) return ONES[n];
+  if(n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? " " + ONES[n % 10] : "");
+  var r = n % 100;
+  return ONES[Math.floor(n / 100)] + " hundred" + (r ? " and " + words(r) : "");
+}
+var LIFT = [
+  { n: 243, task: "The lift code is <b>243</b>. Build it with the blocks.",
+    why: "243 is 2 hundreds, 4 tens and 3 ones." },
+  { n: 406, task: "The next code is <b>four hundred and six</b>. Build it.",
+    why: "Four hundred and six is 4 hundreds, 0 tens and 6 ones. We write 406. The 0 keeps the tens place empty." },
+  { n: 318, task: "The last code is <b>1 ten, 8 ones and 3 hundreds</b>. They are mixed up, so take care.",
+    why: "3 hundreds, 1 ten and 8 ones make 318. Hundreds always go first." }
+];
+function liftStage(v){
+  var H = Math.max(34 + Math.max(1, Math.ceil(v[0] / 3)) * 96, 236) + 4;
+  var s = '<svg viewBox="0 0 400 ' + H + '" role="img" aria-label="Your blocks: ' + plural(v[0], "hundred", "hundreds") + ", " + plural(v[1], "ten", "tens") + " and " + plural(v[2], "one", "ones") + '.">';
+  s += t(8, 22, "Hundreds", 16, BLUE, LAB + ' font-weight="800"');
+  s += t(300, 22, "Tens", 16, "#0e8a6a", LAB + ' font-weight="800"');
+  s += t(300, 166, "Ones", 16, CORAL, LAB + ' font-weight="800"');
+  for(var k = 0; k < v[0]; k++) s += flat(8 + (k % 3) * 96, 34 + Math.floor(k / 3) * 96);
+  for(k = 0; k < v[1]; k++) s += stick(300 + k * 11, 34);
+  for(k = 0; k < v[2]; k++) s += cube(304 + (k % 3) * 17, 182 + Math.floor(k / 3) * 17);
+  if(!v[0]) s += t(98, 90, "none yet", 16, "#7a7f99", BODY + ' text-anchor="middle"');
+  if(!v[1]) s += t(300, 84, "none yet", 16, "#7a7f99", BODY);
+  if(!v[2]) s += t(300, 200, "none yet", 16, "#7a7f99", BODY);
+  return s + '</svg>';
+}
+function mountLift(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.v) d.v = [0, 0, 0];
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  var view = d.c;
+  var cls = ["h", "t", "o"], names = ["Hundreds", "Tens", "Ones"], small = ["hundred", "ten", "one"];
+  var ctrl = "";
+  for(var k = 0; k < 3; k++){
+    ctrl += '<div class="pv-col ' + cls[k] + '"><span class="pv-name">' + names[k] + '</span><div class="pv-step">' +
+      '<button class="pv-b" type="button" data-k="' + k + '" data-d="-1" aria-label="One less ' + small[k] + '">&minus;</button>' +
+      '<b class="pv-dig" data-r="d' + k + '">0</b>' +
+      '<button class="pv-b" type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + small[k] + '">+</button></div></div>';
+  }
+  el.innerHTML =
+    '<div class="wpanel pv-task" data-r="task"></div>' +
+    '<div class="pv-stage" data-r="stage"></div>' +
+    '<div class="pv-ctrl">' + ctrl + '</div>' +
+    '<div class="wpanel">' +
+      '<p class="wnote pv-read" data-r="read" aria-live="polite"></p>' +
+      '<div class="wrow">' +
+        '<button class="btn" type="button" data-r="go">Try the code</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb pv-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function val(){ return d.v[0] * 100 + d.v[1] * 10 + d.v[2]; }
+  function digits(n){ return [Math.floor(n / 100), Math.floor(n / 10) % 10, n % 10]; }
+
+  function task(){
+    var dots = '<div class="pv-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= 3) return dots + "<p><b>Free play.</b> All three codes worked. The lift doors open, and out steps the night cleaner. Build any number you like and see it in words.</p>";
+    return dots + '<p class="tiny" style="margin:0 0 4px">Code ' + (view + 1) + ' of 3. Nothing is timed.</p><p>' + LIFT[view].task + "</p>";
+  }
+  function reading(){
+    var n = val();
+    var s = "You have " + plural(d.v[0], "hundred", "hundreds") + ", " + plural(d.v[1], "ten", "tens") + " and " + plural(d.v[2], "one", "ones") + ". ";
+    s += 'That makes <span class="pv-num">' + n + "</span>.";
+    if(d.c >= 3) s += " In words: <b>" + words(n) + "</b>.";
+    return s;
+  }
+  function draw(){
+    q("task").innerHTML = task();
+    q("stage").innerHTML = liftStage(d.v);
+    q("read").innerHTML = reading();
+    for(var k = 0; k < 3; k++){
+      q("d" + k).textContent = d.v[k];
+      el.querySelector('.pv-b[data-k="' + k + '"][data-d="-1"]').disabled = d.v[k] <= 0;
+      el.querySelector('.pv-b[data-k="' + k + '"][data-d="1"]').disabled = d.v[k] >= 9;
+    }
+    var waiting = view !== d.c || d.c >= 3;
+    q("go").classList.toggle("hidden", d.c >= 3);
+    q("go").disabled = waiting;
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+  function fb(c, html){ var f = q("fb"); f.className = "fb pv-fb " + c; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function nudge(){
+    var want = digits(LIFT[view].n), n = val();
+    if(view === 1 && n === 460) return "You made 460. Four hundred and six has no tens. The six is ones.";
+    if(view === 2 && n === 183) return "You made 183. That follows the words in order. Find the hundreds first.";
+    var wrong = [];
+    for(var k = 0; k < 3; k++) if(d.v[k] !== want[k]) wrong.push(names[k].toLowerCase());
+    var list = wrong.length === 1 ? wrong[0] : wrong.slice(0, -1).join(", ") + " and " + wrong[wrong.length - 1];
+    return "You made " + n + ". Have another look at the " + list + ".";
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here it is.</b> " : "<b>Beep. The lift likes that.</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All three codes done. Hundreds, then tens, then ones.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next code</button>';
+    fb(how === "shown" ? "show" : "good", head + LIFT[k].why + more);
+    q("next").onclick = function(){
+      view = d.c; d.v = [0, 0, 0]; api.save();
+      q("fb").className = "fb pv-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+  el.querySelector(".pv-ctrl").addEventListener("click", function(e){
+    var b = e.target.closest(".pv-b");
+    if(!b || b.disabled) return;
+    if(view !== d.c && d.c < 3) return;
+    var k = +b.getAttribute("data-k"), dd = +b.getAttribute("data-d");
+    d.v[k] = Math.max(0, Math.min(9, d.v[k] + dd));
+    api.save(); draw();
+  });
+  q("go").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    if(val() === LIFT[view].n){ solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    fb("nudge", "<b>Not quite yet.</b> " + nudge() + (d.miss[view] > 1 ? " Show me is there if you want it." : ""));
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    d.shown[view] = true;
+    d.v = digits(LIFT[view].n);
+    solved(view, "shown");
+  };
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three codes done.</b> Hundreds, then tens, then ones. Play with the blocks as long as you like.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "place-value",
+  title: "Place value",
+  subject: "Maths",
+  mins: 35,
+  blurb: "Hundreds, tens and ones with blocks, into the thousands, part whole models, making and comparing numbers, number lines and rounding.",
+  steps: [
+
+  /* ---------- 1 HUNDREDS, TENS, ONES ---------- */
+  { type: "learn", topic: "Hundreds, tens, ones",
+    title: "Blocks for numbers",
+    fig: B243,
+    html: "<p>A big square is <b>100</b>. We call it a hundred.</p>" +
+          "<p>A long stick is <b>10</b>. We call it a ten.</p>" +
+          "<p>A small cube is <b>1</b>. We call it a one.</p>" +
+          "<p>2 hundreds, 4 tens and 3 ones make <b>243</b>.</p>" +
+          '<div class="keep"><b>Keep this</b>Hundreds first, then tens, then ones.</div>' },
+
+  { type: "widget", topic: "Hundreds, tens, ones",
+    title: "Lift code",
+    html: "The lift in the empty shopping centre needs a code. Use + and &minus; to build each number with blocks.",
+    mount: mountLift,
+    report: function(d){
+      if(!d || !d.result) return "Lift code: " + (d && d.c ? d.c : 0) + " of 3 codes built.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Lift code: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "mc", topic: "Hundreds, tens, ones",
+    fig: B315,
+    q: "What number do these blocks make?",
+    options: [ "315", "351", "9", "513" ],
+    answer: 0,
+    hint: "Count the big squares first. Then the sticks. Then the small cubes.",
+    why: "3 hundreds, 1 ten and 5 ones make <b>315</b>. The answer 9 just counts the blocks. A big square is worth 100, not 1." },
+
+  { type: "num", topic: "Hundreds, tens, ones",
+    q: "Look at 472. What is the 7 worth?",
+    boxes: [ { label: "The 7 is worth", a: 70 } ],
+    hint: "Is the 7 in the hundreds, the tens or the ones?",
+    why: "472 is 4 hundreds, 7 tens and 2 ones. 7 tens is <b>70</b>." },
+
+  { type: "mc", topic: "Hundreds, tens, ones",
+    fig: B205,
+    q: "What number is this? Look out for the tens.",
+    options: [ "25", "205", "250", "2005" ],
+    answer: 1,
+    hint: "There are no ten sticks. What digit shows nothing in the tens?",
+    why: "2 hundreds, 0 tens and 5 ones is <b>205</b>. The 0 holds the tens place. Without it, you would read 25." },
+
+  /* ---------- 2 INTO THE THOUSANDS ---------- */
+  { type: "learn", topic: "Into the thousands",
+    title: "Ten hundreds make a thousand",
+    html: "<p>Count on in hundreds: 800, 900, 1000.</p>" +
+          "<p>Ten hundreds make <b>one thousand</b>.</p>" +
+          "<p>Thousands go in a new place, on the left.</p>" +
+          '<table class="pvchart"><tr><th>Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr><tr><td>3</td><td>4</td><td>0</td><td>6</td></tr></table>' +
+          "<p>This is 3406. Say it: three thousand, four hundred and six.</p>" +
+          '<div class="keep"><b>Keep this</b>Four digits means thousands.</div>' },
+
+  { type: "match", topic: "Into the thousands",
+    q: "Match the words to the number.",
+    pairs: [
+      ["two thousand and fifty", "2050"],
+      ["two thousand five hundred", "2500"],
+      ["two thousand and five", "2005"],
+      ["two thousand five hundred and fifty", "2550"]
+    ],
+    hint: "Fill a place for each part: thousands, hundreds, tens, ones. Use 0 for a place with nothing.",
+    why: "Two thousand and fifty: 2 thousands, 0 hundreds, 5 tens, 0 ones is 2050. Two thousand and five is 2005. Two thousand five hundred is 2500. Add fifty and you get 2550." },
+
+  { type: "num", topic: "Into the thousands",
+    q: "Look at 6152. What is the 6 worth?",
+    boxes: [ { label: "The 6 is worth", a: 6000 } ],
+    hint: "Four digits. The first digit is in the thousands place.",
+    why: "6152 is 6 thousands, 1 hundred, 5 tens and 2 ones. The 6 is worth <b>6000</b>." },
+
+  { type: "num", topic: "Into the thousands",
+    q: "Write <b>one thousand and forty</b> in digits.",
+    boxes: [ { label: "Number", a: 1040 } ],
+    hint: "1 thousand. How many hundreds? How many tens? How many ones?",
+    why: "1 thousand, 0 hundreds, 4 tens and 0 ones: <b>1040</b>. Writing 140 misses the hundreds place." },
+
+  { type: "mc", topic: "Into the thousands",
+    q: "What is 100 more than 950?",
+    options: [ "1050", "960", "1950", "951" ],
+    answer: 0,
+    hint: "Count on in hundreds from 950. What comes after 950, then?",
+    why: "950 and 100 more is <b>1050</b>. 9 hundreds and 1 more hundred makes 10 hundreds, which is 1 thousand. 960 is only 10 more." },
+
+  /* ---------- 3 PART WHOLE MODELS ---------- */
+  { type: "learn", topic: "Part whole models",
+    title: "Parts and the whole",
+    fig: PW346,
+    html: "<p>The top circle is the <b>whole</b>.</p>" +
+          "<p>The circles below are the <b>parts</b>.</p>" +
+          "<p>The parts add up to the whole. 300 + 40 + 6 = 346.</p>" +
+          "<p>You can split a number in other ways too. 346 is also 200 and 146.</p>" +
+          '<div class="keep"><b>Keep this</b>Parts add up to make the whole.</div>' },
+
+  { type: "num", topic: "Part whole models",
+    fig: PW527,
+    q: "What is the missing part?",
+    boxes: [ { label: "Missing part", a: 20 } ],
+    hint: "527 is some hundreds, some tens and some ones. Which part is missing?",
+    why: "527 is 500 + 20 + 7. The missing part is <b>20</b>, the tens." },
+
+  { type: "num", topic: "Part whole models",
+    fig: PW481,
+    q: "What is the whole?",
+    boxes: [ { label: "Whole", a: 481 } ],
+    hint: "Add the parts: hundreds, tens and ones.",
+    why: "400 + 80 + 1 = <b>481</b>." },
+
+  { type: "num", topic: "Part whole models",
+    fig: PW75,
+    q: "The whole is 75. One part is 40. What is the other part?",
+    boxes: [ { label: "Other part", a: 35 } ],
+    hint: "What do you add to 40 to make 75?",
+    why: "40 + 35 = 75, so the other part is <b>35</b>. You can also take away: 75 &minus; 40 = 35." },
+
+  { type: "mc", topic: "Part whole models",
+    q: "Which is another way to split 254?",
+    options: [ "200 and 54", "200 and 45", "250 and 40", "25 and 4" ],
+    answer: 0,
+    hint: "Add each pair. Which pair makes 254?",
+    why: "200 + 54 = <b>254</b>. The others make 245, 290 and 29." },
+
+  /* ---------- 4 MAKING NUMBERS ---------- */
+  { type: "learn", topic: "Making numbers",
+    title: "Digit cards",
+    fig: CARDS472,
+    html: "<p>You have three cards: 4, 7 and 2.</p>" +
+          "<p>For the <b>biggest</b> number, put the biggest digit first. 742.</p>" +
+          "<p>For the <b>smallest</b> number, put the smallest digit first. 247.</p>" +
+          "<p>A number is <b>even</b> if it ends in 0, 2, 4, 6 or 8. If not, it is <b>odd</b>.</p>" +
+          '<div class="keep"><b>Keep this</b>The last digit tells you odd or even.</div>' },
+
+  { type: "num", topic: "Making numbers",
+    fig: CARDS518,
+    q: "Use all three cards. Make the <b>biggest</b> number you can.",
+    boxes: [ { label: "Biggest", a: 851 } ],
+    hint: "Which card is the biggest? Put it in the hundreds place.",
+    why: "8 is biggest, so it goes first. Then 5, then 1. The biggest number is <b>851</b>." },
+
+  { type: "num", topic: "Making numbers",
+    fig: CARDS518,
+    q: "Now make the <b>smallest</b> number with the same cards.",
+    boxes: [ { label: "Smallest", a: 158 } ],
+    hint: "Smallest digit first this time.",
+    why: "1 is smallest, so it goes first. Then 5, then 8. The smallest number is <b>158</b>." },
+
+  { type: "sort", topic: "Making numbers",
+    q: "Odd or even? Look at the last digit.",
+    buckets: [ "Even", "Odd" ],
+    cards: [ ["36", 0], ["47", 1], ["120", 0], ["305", 1], ["998", 0], ["1001", 1] ],
+    hint: "Even numbers end in 0, 2, 4, 6 or 8.",
+    why: "Even: 36, 120 and 998 end in 6, 0 and 8. Odd: 47, 305 and 1001 end in 7, 5 and 1. Only the last digit matters." },
+
+  { type: "mc", topic: "Making numbers",
+    fig: CNT304,
+    q: "Each counter is worth its column. What number is this?",
+    options: [ "304", "340", "34", "7" ],
+    answer: 0,
+    hint: "3 counters in the hundreds is 300. What is in the tens? What is in the ones?",
+    why: "3 hundreds, 0 tens and 4 ones make <b>304</b>. 7 just counts the counters. 34 forgets the empty tens." },
+
+  { type: "num", topic: "Making numbers", stretch: true,
+    fig: CARDS369,
+    q: "Use all three cards. Make the biggest <b>even</b> number.",
+    boxes: [ { label: "Biggest even", a: 936 } ],
+    hint: "Even numbers always end in an even digit. Which card is even? Put it last.",
+    why: "6 is the only even card, so it goes last. Then make the rest big: 9 first, then 3. The answer is <b>936</b>. 963 is bigger, but it is odd." },
+
+  /* ---------- 5 COMPARING NUMBERS ---------- */
+  { type: "learn", topic: "Comparing numbers",
+    title: "Greater than and less than",
+    fig: CMP,
+    html: "<p>More digits means a bigger number.</p>" +
+          "<p>Same number of digits? Start on the left. If the digits match, look at the next one.</p>" +
+          "<p>548 and 524: the hundreds match. 4 tens beats 2 tens.</p>" +
+          "<p>So 548 is <b>greater than</b> 524. We write 548 &gt; 524.</p>" +
+          "<p>And 524 is <b>less than</b> 548. We write 524 &lt; 548.</p>" +
+          '<div class="keep"><b>Keep this</b>The wide side of the sign faces the bigger number.</div>' },
+
+  { type: "mc", topic: "Comparing numbers",
+    q: "Which number is greater: 609 or 690?",
+    options: [ "609", "690", "They are the same" ],
+    answer: 1,
+    hint: "The hundreds match. Look at the tens.",
+    why: "Both have 6 hundreds. 690 has 9 tens and 609 has 0 tens. So <b>690</b> is greater." },
+
+  { type: "mc", topic: "Comparing numbers", fixed: true,
+    q: 'Which sign goes in the box?<span class="sumbig">1205 ' + gap() + ' 1250</span>',
+    options: [ "&lt; is less than", "&gt; is greater than", "= is equal to" ],
+    answer: 0,
+    hint: "The thousands match. The hundreds match. Look at the tens.",
+    why: "1205 has 0 tens. 1250 has 5 tens. So 1205 <b>is less than</b> 1250: 1205 &lt; 1250." },
+
+  { type: "order", topic: "Comparing numbers",
+    q: "Five lockers in a dark corridor. Put the locker numbers in order, smallest first.",
+    items: [ "189", "198", "819", "891", "918" ],
+    hint: "Sort by the hundreds first. Two start with 1 and two start with 8. Then look at the tens.",
+    why: "189, 198, 819, 891, 918. Same hundreds? Then the tens decide." },
+
+  { type: "sort", topic: "Comparing numbers",
+    q: "True or not true?",
+    buckets: [ "True", "Not true" ],
+    cards: [ ["350 &gt; 305", 0], ["72 &lt; 27", 1], ["1000 &gt; 999", 0], ["406 &lt; 460", 0], ["813 &gt; 831", 1], ["2100 &lt; 2010", 1] ],
+    hint: "Say each one out loud: &gt; is greater than, &lt; is less than. Then check.",
+    why: "True: 350 is greater than 305. 1000 is greater than 999. 406 is less than 460. Not true: 72 is not less than 27. 813 is not greater than 831. 2100 is not less than 2010." },
+
+  /* ---------- 6 NUMBER LINES ---------- */
+  { type: "learn", topic: "Number lines",
+    title: "Finding numbers on a line",
+    fig: NL70,
+    html: "<p>A number line goes up in equal steps.</p>" +
+          "<p>First, work out what one step is worth.</p>" +
+          "<p>This line goes from 0 to 100 in 10 steps. Each step is 10.</p>" +
+          "<p>The arrow is 7 steps along. It points to 70.</p>" +
+          '<div class="keep"><b>Keep this</b>Find the size of one step. Then count the steps.</div>' },
+
+  { type: "mc", topic: "Number lines",
+    fig: NL600,
+    q: "What number is the arrow pointing to?",
+    options: [ "600", "6", "60", "700" ],
+    answer: 0,
+    hint: "1000 split into 10 equal steps. What is each step worth?",
+    why: "Each step is 1000 &divide; 10 = 100. The arrow is 6 steps along, so it points to <b>600</b>." },
+
+  { type: "num", topic: "Number lines",
+    fig: NL260,
+    q: "What number is the arrow pointing to?",
+    boxes: [ { label: "Arrow", a: 260 } ],
+    hint: "The line starts at 200, not 0. Each step is 10.",
+    why: "The steps go 210, 220, 230 and on. The arrow is 6 steps along: <b>260</b>." },
+
+  { type: "num", topic: "Number lines",
+    fig: NL350,
+    q: "What number is halfway between 300 and 400?",
+    boxes: [ { label: "Halfway", a: 350 } ],
+    hint: "Halfway between 0 and 100 is 50.",
+    why: "300 and 400 are 100 apart. Half of 100 is 50. 300 + 50 = <b>350</b>." },
+
+  { type: "mc", topic: "Number lines", stretch: true,
+    fig: NL35,
+    q: "Careful, each step is not 10 here. Where is the arrow?",
+    options: [ "35", "7", "70", "30" ],
+    answer: 0,
+    hint: "The line goes from 0 to 50 in 10 steps. What is each step worth?",
+    why: "50 &divide; 10 = 5, so each step is 5. The arrow is 7 steps along: 5, 10, 15, 20, 25, 30, <b>35</b>." },
+
+  /* ---------- 7 ROUNDING ---------- */
+  { type: "learn", topic: "Rounding",
+    title: "Rounding to 10 and 100",
+    fig: NL67,
+    html: '<p class="tiny"><b>Stretch.</b> A step up, if you fancy it.</p>' +
+          "<p>67 is between 60 and 70. It is nearer to 70.</p>" +
+          "<p>So 67 rounds to <b>70</b>, to the nearest 10.</p>" +
+          "<p>Halfway numbers round up. 65 rounds to 70.</p>" +
+          "<p>For the nearest 100, look at the tens. 340 rounds to 300.</p>" +
+          '<div class="keep"><b>Keep this</b>5 or more, round up. 4 or less, round down.</div>' },
+
+  { type: "num", topic: "Rounding", stretch: true,
+    q: "Round 43 to the nearest 10.",
+    boxes: [ { label: "43 rounds to", a: 40 } ],
+    hint: "43 is between 40 and 50. Which is nearer?",
+    why: "43 is 3 away from 40 and 7 away from 50. It rounds to <b>40</b>." },
+
+  { type: "num", topic: "Rounding", stretch: true,
+    q: "Round 286 to the nearest 10.",
+    boxes: [ { label: "286 rounds to", a: 290 } ],
+    hint: "286 is between 280 and 290. Look at the ones digit.",
+    why: "The ones digit is 6. That is 5 or more, so round up. 286 rounds to <b>290</b>." },
+
+  { type: "mc", topic: "Rounding", stretch: true, fixed: true,
+    q: "Round 650 to the nearest 100.",
+    options: [ "600", "650", "700", "1000" ],
+    answer: 2,
+    hint: "650 is exactly halfway between 600 and 700. What do halfway numbers do?",
+    why: "Halfway numbers round up. 650 rounds to <b>700</b>." },
+
+  { type: "match", topic: "Rounding", stretch: true,
+    q: "Round each number to the nearest 100.",
+    pairs: [
+      ["349", "300"],
+      ["351", "400"],
+      ["1250", "1300"],
+      ["1449", "1400"]
+    ],
+    hint: "Look at the tens digit. 5 or more, round up.",
+    why: "349 has 4 tens, so down to 300. 351 has 5 tens, so up to 400. 1250 has 5 tens, so up to 1300. 1449 has 4 tens, so down to 1400." },
+
+  { type: "num", topic: "Rounding", stretch: true,
+    q: "The night car park counted 1386 cars this month.<br>a) Round 1386 to the nearest 10.<br>b) Round 1386 to the nearest 100.",
+    boxes: [
+      { label: "a) Nearest 10", a: 1390 },
+      { label: "b) Nearest 100", a: 1400 }
+    ],
+    hint: "For the nearest 10, look at the ones digit. For the nearest 100, look at the tens digit.",
+    why: "a) The ones digit is 6, so round up: <b>1390</b>. b) The tens digit is 8, so round up: <b>1400</b>." }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

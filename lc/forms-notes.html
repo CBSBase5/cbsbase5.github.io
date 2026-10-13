@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forms and notes - LC Night Shift HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="/lc/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/lc/lc.css?v=2">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.eg{background:#fbf8e4;border-left:5px solid var(--accent);border-radius:6px;padding:8px 12px;margin:6px 0 12px;font-size:1.08rem}
+.note{clear:both;background:#fffbe2;border-radius:4px;padding:12px 16px;margin:4px auto 6px;max-width:440px;text-align:left;font-size:1.08rem;line-height:1.5;box-shadow:0 3px 10px rgba(0,0,0,.18);transform:rotate(-.5deg);border-top:14px solid rgba(230,216,74,.7)}
+.note p{margin:0 0 8px}
+.note p:last-child{margin:0}
+
+/* Fill in the form: drag details into the right boxes */
+.ff{background:#1b1c16;color:#fbf8e4;border-radius:10px;padding:14px;margin:6px 0}
+.ffbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:var(--display);font-weight:700;margin-bottom:10px}
+.ffbar span{background:rgba(255,255,255,.12);border-radius:99px;padding:4px 12px;font-size:.86rem}
+.fftask{font-size:1rem;line-height:1.45;margin:0 0 10px}
+.fftask b{color:#e6d84a}
+.fftray{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+.ffchip{font-family:inherit;font-size:1rem;line-height:1.2;color:#141a33;background:#fff;border:2px solid transparent;border-radius:6px;padding:8px 11px;min-height:44px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.ffchip:hover{border-color:#e6d84a}
+.ffchip.sel{border-color:#e6d84a;box-shadow:0 0 0 3px #e6d84a;background:#fff8cf}
+.ffchip.binned{opacity:.4;text-decoration:line-through;cursor:default;border-color:transparent;box-shadow:none}
+.ffchip.lift{opacity:.35}
+.ffchip .sig,.ffslot .sig{font-family:"Segoe Script","Brush Script MT","Comic Sans MS",cursive;font-style:italic;font-size:1.1em}
+.ffchip .tk,.ffslot .tk{font-size:1.4em;font-weight:700;color:#1f7a4f;line-height:1}
+.ffghost{position:fixed;z-index:1000;pointer-events:none;transform:translate(-50%,-60%);box-shadow:0 8px 20px rgba(0,0,0,.35);border-color:#e6d84a}
+.ffpaper{background:#fffdf3;color:#141a33;border-radius:6px;padding:12px;margin-top:12px;text-align:left}
+.ffhead{font-family:var(--display);font-weight:700;font-size:1rem;border-bottom:3px solid #141a33;padding-bottom:6px;margin-bottom:8px}
+.ffrow{display:flex;align-items:center;gap:8px;padding:3px 0;flex-wrap:wrap}
+.ffrow > span{font-family:Space Grotesk,Arial,sans-serif;font-weight:700;font-size:.92rem;width:118px;flex:none;line-height:1.2}
+.ffrow > span small{display:block;font-weight:400;font-size:.78rem;color:#5b5872}
+.ffslot{flex:1;min-width:150px;display:flex;align-items:center;font-family:inherit;font-size:1rem;line-height:1.25;text-align:left;border:2px dashed #b9b4cc;border-radius:6px;background:transparent;min-height:44px;padding:6px 10px;margin:2px 0;color:#8a86a0;cursor:pointer}
+.ffslot.hot{border-color:#c9b92c;background:#fff6c8;color:#141a33}
+.ffslot.done{border-style:solid;border-color:#1f9d63;background:#e8f7ef;color:#141a33;cursor:default}
+.ffslot.shake{animation:nudge .35s;border-color:#ff5c5c}
+.ffslot.box{flex:none;min-width:0;width:46px;justify-content:center;padding:0}
+.fftick{display:flex;align-items:center;gap:10px;padding:3px 0}
+.fftick > span{font-size:1rem}
+.ffmsg{min-height:1.4em;margin:10px 0 0;font-size:1rem;line-height:1.45;background:rgba(255,255,255,.08);border-radius:8px;padding:9px 12px}
+.ffmsg b{color:#e6d84a}
+.ffbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ffend{text-align:center;padding:4px 0}
+.ffend .big{font-family:var(--display);font-size:1.6rem;color:#e6d84a;line-height:1.15;margin:6px 0}
+@media (max-width:420px){
+  .ff{padding:10px}
+  .ffpaper{padding:10px}
+  .ffchip{font-size:.95rem;padding:7px 9px}
+  .ffrow > span{width:100%}
+  .ffslot{min-width:100%}
+  .ffslot.box{min-width:0}
+}
+</style>
+</head>
+<body class="subj-eng">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lc/"><span class="hqlogo">LC</span><span class="hqname">Night Shift HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/lc/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Forms and notes</h2>
+    <span>English writing. Filling in a form, writing dates, BLOCK CAPITALS, signing, and writing a short note.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LC's Night Shift HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lc/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- figure: a filled in form ---------- */
+var FORM = (function(){
+  var rows = [["First name", "Alex"], ["Surname", "Moon"], ["Address", "12 Elm Road, Chilton"], ["Postcode", "CB4 2RT"], ["Telephone", "07700 900123"]];
+  var s = '<svg viewBox="0 0 380 258" role="img" aria-label="A filled in form. First name: Alex. Surname: Moon. Address: 12 Elm Road, Chilton. Postcode: CB4 2RT. Telephone: 07700 900123.">' +
+    '<rect x="3" y="3" width="374" height="252" rx="6" fill="#fffdf3" stroke="#141a33" stroke-width="2"/>' +
+    '<text x="16" y="32" font-family="Space Grotesk,Arial" font-size="18" font-weight="700" fill="#141a33">Film club sign up form</text>' +
+    '<line x1="16" y1="42" x2="364" y2="42" stroke="#141a33" stroke-width="3"/>';
+  rows.forEach(function(r, k){
+    var y = 56 + k * 39;
+    s += '<text x="16" y="' + (y + 21) + '" font-family="Space Grotesk,Arial" font-size="15" font-weight="700" fill="#141a33">' + r[0] + '</text>' +
+         '<rect x="128" y="' + y + '" width="236" height="31" rx="4" fill="#ffffff" stroke="#8a86a0" stroke-width="2"/>' +
+         '<text x="138" y="' + (y + 21) + '" font-family="Atkinson Hyperlegible,Verdana" font-size="16" fill="#1f4fa8">' + r[1] + '</text>';
+  });
+  return s + '</svg>';
+})();
+
+/* ---------- figure: months as numbers ---------- */
+var MONTHNUM = (function(){
+  var m = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var s = '<svg viewBox="0 0 380 176" role="img" aria-label="Months as numbers. January is 01, February 02, March 03, April 04, May 05, June 06, July 07, August 08, September 09, October 10, November 11, December 12.">';
+  m.forEach(function(t, k){
+    var col = k % 3, row = Math.floor(k / 3);
+    var x = 4 + col * 125, y = 4 + row * 43;
+    s += '<rect x="' + x + '" y="' + y + '" width="121" height="37" rx="5" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' +
+         '<rect x="' + x + '" y="' + y + '" width="34" height="37" rx="5" fill="#e6d84a" stroke="#141a33" stroke-width="2"/>' +
+         '<text x="' + (x + 17) + '" y="' + (y + 25) + '" text-anchor="middle" font-family="Space Grotesk,Arial" font-size="15" font-weight="700" fill="#141a33">' + (k < 9 ? "0" : "") + (k + 1) + '</text>' +
+         '<text x="' + (x + 78) + '" y="' + (y + 25) + '" text-anchor="middle" font-family="Atkinson Hyperlegible,Verdana" font-size="14" fill="#141a33">' + t + '</text>';
+  });
+  return s + '</svg>';
+})();
+
+/* ---------- figure: tick boxes, signature and date ---------- */
+var TICKS =
+'<svg viewBox="0 0 380 210" role="img" aria-label="Part of a form. Which films do you like? Tick one. Scary has a tick. Funny and cartoon are empty. Signature: A Moon, written in joined up writing. Date: 31/10/2026.">' +
+'<rect x="3" y="3" width="374" height="204" rx="6" fill="#fffdf3" stroke="#141a33" stroke-width="2"/>' +
+'<g font-family="Space Grotesk,Arial" fill="#141a33">' +
+'<text x="16" y="32" font-size="16" font-weight="700">Which films do you like? Tick one.</text>' +
+'<rect x="16" y="46" width="28" height="28" rx="3" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' +
+'<path d="M21 60 L28 68 L41 50" fill="none" stroke="#1f7a4f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+'<text x="52" y="66" font-size="16">Scary</text>' +
+'<rect x="134" y="46" width="28" height="28" rx="3" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' +
+'<text x="170" y="66" font-size="16">Funny</text>' +
+'<rect x="250" y="46" width="28" height="28" rx="3" fill="#ffffff" stroke="#141a33" stroke-width="2"/>' +
+'<text x="286" y="66" font-size="16">Cartoon</text>' +
+'<line x1="16" y1="96" x2="364" y2="96" stroke="#d9d8e6" stroke-width="2"/>' +
+'<text x="16" y="136" font-size="16" font-weight="700">Signature</text>' +
+'<rect x="112" y="112" width="252" height="34" rx="4" fill="#ffffff" stroke="#8a86a0" stroke-width="2"/>' +
+'<text x="124" y="136" font-family="Segoe Script,Brush Script MT,cursive" font-style="italic" font-size="20" fill="#1f4fa8">A Moon</text>' +
+'<text x="16" y="182" font-size="16" font-weight="700">Date</text>' +
+'<rect x="112" y="158" width="252" height="34" rx="4" fill="#ffffff" stroke="#8a86a0" stroke-width="2"/>' +
+'<text x="124" y="181" font-family="Atkinson Hyperlegible,Verdana" font-size="16" fill="#1f4fa8">31/10/2026</text>' +
+'</g></svg>';
+
+/* ---------- notes ---------- */
+var NOTE1 = '<div class="note"><p>Hi Sam,</p><p>Do you want to come to film club? It is on Friday at 7pm in the school hall.</p><p>From Kit</p></div>';
+var NOTE2 = '<div class="note"><p>Hi Ash,</p><p>Do you want to come to the cake shop with me?</p><p>From Kit</p></div>';
+
+/* ---------- Fill in the form widget ---------- */
+var SIG = '<span class="sig">A Moon</span>';
+var TICK = '<span class="tk">&#10003;</span>';
+var FF_ROUNDS = [
+  { head: "Fright Night Film Club",
+    task: "<b>Form 1.</b> Alex Moon wants to join the film club. Alex was born on 14 March 2011. Today is 31 October 2026.",
+    rows: [
+      ["first", "First name", "BLOCK CAPITALS"],
+      ["sur", "Surname", "BLOCK CAPITALS"],
+      ["dob", "Date of birth", ""],
+      ["tel", "Telephone", ""],
+      ["sign", "Signature", ""],
+      ["date", "Date", ""]
+    ],
+    chips: [
+      { id: "date", t: "31/10/2026" },
+      { id: "first", t: "ALEX" },
+      { id: null, t: "alex", why: "<b>Not quite.</b> The form asks for BLOCK CAPITALS. Every letter needs to be a capital." },
+      { id: "tel", t: "07700 900123" },
+      { id: "sign", t: SIG },
+      { id: null, t: "03/14/2011", why: "<b>Month first?</b> That is how they do it in America. In the UK, the day goes first: 14/03/2011." },
+      { id: "dob", t: "14/03/2011" },
+      { id: "sur", t: "MOON" }
+    ] },
+  { head: "Midnight Puddings: delivery form",
+    task: "<b>Form 2.</b> Alex wants a sticky toffee pudding delivered to 12 Elm Road, Chilton, CB4 2RT.",
+    rows: [
+      ["name", "Name", ""],
+      ["addr", "Address", ""],
+      ["post", "Postcode", ""],
+      ["tel", "Telephone", ""]
+    ],
+    ticks: [["stp", "Sticky toffee pudding"], ["tri", "Trifle"]],
+    need: ["name", "addr", "post", "tel", "stp"],
+    chips: [
+      { id: "post", t: "CB4 2RT" },
+      { id: null, t: "CB4", why: "<b>Only half.</b> A postcode has two parts. You need all of it." },
+      { id: "name", t: "Alex Moon" },
+      { id: "stp", t: TICK },
+      { id: "addr", t: "12 Elm Road, Chilton" },
+      { id: null, t: "14/03/2011", why: "<b>Not needed.</b> This form does not ask for a date of birth." },
+      { id: "tel", t: "07700 900123" }
+    ] }
+];
+var FF_WHERE = {
+  first: "That is a first name. Find the First name box.",
+  sur: "That is a family name. It goes in the Surname box.",
+  dob: "Alex was born on 14 March 2011. Which box is for that?",
+  tel: "That is a phone number. Find the Telephone box.",
+  sign: "That is Alex writing their name in their own way. That is a signature.",
+  date: "That is today's date. It goes next to the signature.",
+  name: "That is a full name. Find the Name box.",
+  addr: "That is where Alex lives. Find the Address box.",
+  post: "That is a postcode. It has its own box.",
+  stp: "Alex wants sticky toffee pudding. Tick that box."
+};
+var FF_GOOD = ["Yes.", "Spot on.", "That is the one.", "Sorted.", "Nice."];
+
+function fillForm(el, api){
+  var d = api.data;
+  if(d.r === undefined) d.r = 0;
+  if(!d.placed) d.placed = [[], []];
+  if(!d.binned) d.binned = [[], []];
+  if(d.miss === undefined) d.miss = 0;
+  var sel = null, msg = "", shakeSlot = null, drag = null;
+
+  function R(){ return FF_ROUNDS[d.r]; }
+  function needs(){ return R().need || R().rows.map(function(r){ return r[0]; }); }
+  function chipFor(slot){
+    var r = R();
+    for(var k = 0; k < d.placed[d.r].length; k++){
+      var c = r.chips[d.placed[d.r][k]];
+      if(c.id === slot) return c;
+    }
+    return null;
+  }
+  function roundDone(){ return needs().every(function(s){ return chipFor(s); }); }
+  function result(){ return d.shown ? "shown" : d.miss <= 2 ? "right1" : "right2"; }
+
+  function slotHtml(id, label, box){
+    var c = chipFor(id), cls = "ffslot" + (box ? " box" : "");
+    if(c) return '<div class="' + cls + ' done" data-slot="' + id + '">' + c.t + '</div>';
+    if(roundDone()) return '<div class="' + cls + '" data-slot="' + id + '"></div>';
+    return '<button type="button" class="' + cls + (sel !== null ? ' hot' : '') + '" data-slot="' + id + '" aria-label="Empty box: ' + label + '">' + (box ? '' : '?') + '</button>';
+  }
+
+  function paper(){
+    var r = R(), h = '<div class="ffhead">' + r.head + '</div>';
+    r.rows.forEach(function(row){
+      h += '<div class="ffrow"><span>' + row[1] + (row[2] ? '<small>' + row[2] + '</small>' : '') + '</span>' + slotHtml(row[0], row[1]) + '</div>';
+    });
+    if(r.ticks){
+      h += '<div class="ffrow"><span>Pudding<small>Tick one</small></span></div>';
+      r.ticks.forEach(function(t){
+        h += '<div class="fftick">' + slotHtml(t[0], t[1], true) + '<span>' + t[1] + '</span></div>';
+      });
+    }
+    return '<div class="ffpaper">' + h + '</div>';
+  }
+
+  function draw(){
+    if(d.finished){ drawEnd(); return; }
+    var r = R(), done = roundDone(), tray = "";
+    if(!done) r.chips.forEach(function(c, k){
+      if(d.placed[d.r].indexOf(k) >= 0) return;
+      var binned = d.binned[d.r].indexOf(k) >= 0;
+      tray += '<button type="button" class="ffchip' + (binned ? ' binned' : '') + (sel === k ? ' sel' : '') + '" data-k="' + k + '"' + (binned ? ' disabled' : '') + '>' + c.t + '</button>';
+    });
+    var btns = "";
+    if(done) btns = '<button class="btn" type="button" id="ffNext">' + (d.r === 0 ? "On to form 2" : "See how you did") + '</button>';
+    else if(d.miss > 0) btns = '<button class="btn btn-quiet" type="button" id="ffShow">Show me one</button>';
+    el.innerHTML = '<div class="ff">' +
+      '<div class="ffbar"><span>Form ' + (d.r + 1) + ' of 2</span><span>Misses ' + d.miss + '</span></div>' +
+      '<p class="fftask">' + r.task + '</p>' +
+      (done ? '' : '<p class="fftask">Drag each detail into its box. Or tap a detail, then tap its box. Some details do not belong.</p>') +
+      '<div class="fftray">' + tray + '</div>' +
+      paper() +
+      '<div class="ffmsg" aria-live="polite">' + (msg || (done ? "" : "Pick a detail to start.")) + '</div>' +
+      '<div class="ffbtns">' + btns + '</div></div>';
+    wire();
+    if(shakeSlot){
+      var sl = el.querySelector('.ffslot[data-slot="' + shakeSlot + '"]');
+      if(sl) sl.classList.add("shake");
+      shakeSlot = null;
+    }
+  }
+
+  function wire(){
+    [].forEach.call(el.querySelectorAll(".ffchip"), function(b){
+      if(b.disabled) return;
+      var k = +b.dataset.k;
+      b.addEventListener("pointerdown", function(e){
+        if(e.button !== undefined && e.button > 0) return;
+        drag = { k: k, x: e.clientX, y: e.clientY, ghost: null };
+        try{ b.setPointerCapture(e.pointerId); }catch(err){}
+      });
+      b.addEventListener("pointermove", function(e){
+        if(!drag || drag.k !== k) return;
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if(!drag.ghost && dx * dx + dy * dy > 64){
+          drag.ghost = b.cloneNode(true);
+          drag.ghost.classList.add("ffghost");
+          drag.ghost.classList.remove("sel");
+          drag.ghost.style.width = b.offsetWidth + "px";
+          document.body.appendChild(drag.ghost);
+          b.classList.add("lift");
+          sel = null;
+          [].forEach.call(el.querySelectorAll("button.ffslot"), function(s){ s.classList.add("hot"); });
+        }
+        if(drag.ghost){
+          drag.ghost.style.left = e.clientX + "px";
+          drag.ghost.style.top = e.clientY + "px";
+          e.preventDefault();
+        }
+      });
+      function end(e, cancelled){
+        if(!drag || drag.k !== k) return;
+        var g = drag.ghost;
+        drag = null;
+        if(g){
+          if(g.parentNode) g.parentNode.removeChild(g);
+          var under = cancelled ? null : document.elementFromPoint(e.clientX, e.clientY);
+          var slot = under && under.closest ? under.closest("button.ffslot") : null;
+          if(slot && el.contains(slot)) place(k, slot.dataset.slot);
+          else { msg = "Drop it on a dashed box. Or tap it, then tap a box."; draw(); }
+        }else if(!cancelled){
+          sel = sel === k ? null : k;
+          msg = sel !== null ? "Now tap the box it goes in." : "";
+          draw();
+        }
+      }
+      b.addEventListener("pointerup", function(e){ end(e, false); });
+      b.addEventListener("pointercancel", function(e){ end(e, true); });
+      b.addEventListener("click", function(e){
+        if(e.detail === 0){ sel = sel === k ? null : k; msg = sel !== null ? "Now choose the box it goes in." : ""; draw(); }
+      });
+    });
+    [].forEach.call(el.querySelectorAll("button.ffslot"), function(s){
+      s.onclick = function(){
+        if(sel === null){ msg = "Pick a detail first. Then tap here."; draw(); return; }
+        var k = sel; sel = null;
+        place(k, s.dataset.slot);
+      };
+    });
+    var nx = el.querySelector("#ffNext");
+    if(nx) nx.onclick = function(){
+      msg = "";
+      if(d.r === 0) d.r = 1; else d.finished = true;
+      api.save(); draw();
+    };
+    var sh = el.querySelector("#ffShow");
+    if(sh) sh.onclick = showOne;
+  }
+
+  function place(k, slot){
+    var c = R().chips[k];
+    if(c.id === slot){
+      d.placed[d.r].push(k);
+      msg = "<b>" + FF_GOOD[d.placed[d.r].length % FF_GOOD.length] + "</b>";
+      if(roundDone()) msg = d.r === 0 ?
+        "<b>Form 1 done.</b> BLOCK CAPITALS, the day first in dates, and a signature with today's date." :
+        "<b>Form 2 done.</b> The whole postcode, and one tick in the right box.";
+    }else{
+      d.miss++;
+      if(c.id === null){ d.binned[d.r].push(k); msg = c.why; }
+      else msg = "<b>Not that box.</b> " + FF_WHERE[c.id];
+      shakeSlot = slot;
+    }
+    api.save();
+    draw();
+  }
+
+  function showOne(){
+    var r = R(), n = needs();
+    for(var s = 0; s < n.length; s++){
+      if(chipFor(n[s])) continue;
+      for(var k = 0; k < r.chips.length; k++){
+        if(r.chips[k].id === n[s]){
+          d.placed[d.r].push(k); d.shown = true; sel = null;
+          msg = "<b>Here is one.</b> " + FF_WHERE[n[s]];
+          if(roundDone()) msg += " That finishes this form.";
+          api.save(); draw(); return;
+        }
+      }
+    }
+  }
+
+  function drawEnd(){
+    var rank = d.miss === 0 ? "Form filling pro" : d.miss <= 2 ? "Sharp and tidy" : "Getting the hang of it";
+    el.innerHTML = '<div class="ff"><div class="ffend">' +
+      '<p class="fftask" style="margin:0">Both forms done. Your title:</p>' +
+      '<div class="big">' + rank + '</div>' +
+      '<p>' + d.miss + ' miss' + (d.miss === 1 ? '' : 'es') + (d.shown ? ', with a little help' : '') + '.</p>' +
+      '<p class="fftask">Read each label. Then put the right detail in the right box.</p>' +
+      '<button class="btn btn-quiet" type="button" id="ffAgain">Play again</button></div></div>';
+    el.querySelector("#ffAgain").onclick = function(){
+      d.r = 0; d.placed = [[], []]; d.binned = [[], []]; d.miss = 0; d.shown = false; d.finished = false;
+      sel = null; msg = ""; api.save(); draw();
+    };
+    api.done(result());
+  }
+
+  draw();
+}
+
+EGW.run({
+  id: "forms-notes",
+  title: "Forms and notes",
+  subject: "English",
+  blurb: "What goes in which box on a form, dates and BLOCK CAPITALS, signing, and writing a short note.",
+  mins: 35,
+  steps: [
+
+  /* ---------- 1. READING A FORM ---------- */
+  { type: "learn", topic: "Reading a form",
+    title: "What a form asks for",
+    fig: FORM,
+    html: "<p>A form asks for details about you.</p>" +
+          "<p>Each box has a label. The label tells you what to write.</p>" +
+          "<p><b>First name</b> is your own name. <b>Surname</b> is your family name.</p>" +
+          "<p>Your <b>postcode</b> comes at the end of your address.</p>" +
+          '<div class="keep"><b>Keep this</b>Read the label first. Then fill in the box.</div>' },
+
+  { type: "mc", topic: "Reading a form",
+    q: "What goes in the <b>Surname</b> box?",
+    options: ["Your family name", "Your first name", "Your age"],
+    answer: 0,
+    hint: "Surname is another way to say last name.",
+    why: "Surname means your family name. For Alex Moon, the surname is Moon." },
+
+  { type: "match", topic: "Reading a form",
+    q: "This form is for Alex Moon. Match each label to the right detail.",
+    pairs: [
+      ["First name", "Alex"],
+      ["Surname", "Moon"],
+      ["Postcode", "CB4 2RT"],
+      ["Telephone", "07700 900123"],
+      ["Address", "12 Elm Road"]
+    ],
+    hint: "A postcode mixes letters and numbers. A phone number is all numbers.",
+    why: "Alex is the first name. Moon is the surname. CB4 2RT is the postcode. 07700 900123 is the phone number. 12 Elm Road is the address." },
+
+  { type: "mc", topic: "Reading a form",
+    q: "Which one is a postcode?",
+    options: ["CB4 2RT", "12 Elm Road", "07700 900123", "Chilton"],
+    answer: 0,
+    hint: "A postcode is short. It mixes letters and numbers.",
+    why: "<b>CB4 2RT</b> is the postcode. 12 Elm Road is the street. Chilton is the town. The long number is a phone number." },
+
+  { type: "mc", topic: "Reading a form",
+    q: "Where does <i>12 Elm Road</i> go?",
+    options: ["Address", "Surname", "Telephone"],
+    answer: 0,
+    hint: "It tells you where someone lives.",
+    why: "A house number and street are part of the <b>address</b>." },
+
+  /* ---------- 2. DATES AND CAPITALS ---------- */
+  { type: "learn", topic: "Dates and capitals",
+    title: "Dates and BLOCK CAPITALS",
+    fig: MONTHNUM,
+    html: "<p>In the UK, a date goes day, then month, then year.</p>" +
+          '<p class="eg">14 March 2011 is 14/03/2011</p>' +
+          "<p>March is month 3, so it is written 03.</p>" +
+          "<p><b>BLOCK CAPITALS</b> means every letter is a capital.</p>" +
+          '<p class="eg">ALEX MOON</p>' +
+          '<div class="keep"><b>Keep this</b>Check the form first. Does it ask for BLOCK CAPITALS?</div>' },
+
+  { type: "mc", topic: "Dates and capitals",
+    q: "Which name is in BLOCK CAPITALS?",
+    options: ["SAM REED", "Sam Reed", "sam reed", "Sam REED"],
+    answer: 0,
+    hint: "Every single letter needs to be a capital.",
+    why: "<b>SAM REED.</b> In BLOCK CAPITALS, every letter is a capital." },
+
+  { type: "num", topic: "Dates and capitals",
+    q: "Mo was born on 3 October 2009. Fill in the date of birth.",
+    boxes: [{ label: "Day", a: 3 }, { label: "Month", a: 10 }, { label: "Year", a: 2009 }],
+    hint: "Day first. Then the month as a number. Look at the months picture if you like.",
+    why: "Day 3, month 10, year 2009. October is month 10. So it is 03/10/2009." },
+
+  { type: "mc", topic: "Dates and capitals",
+    q: "Which is the UK way to write 21 May 2010?",
+    options: ["21/05/2010", "05/21/2010", "2010/21/05"],
+    answer: 0,
+    hint: "Day first, then month, then year. May is month 5.",
+    why: "<b>21/05/2010.</b> The day is 21. May is month 5, written 05. The year comes last." },
+
+  { type: "mc", topic: "Dates and capitals",
+    q: "A form says <i>Surname (BLOCK CAPITALS)</i>. What should Kit Lane write?",
+    options: ["LANE", "Lane", "KIT", "lane"],
+    answer: 0,
+    hint: "Which part is the surname? Then make every letter a capital.",
+    why: "The surname is Lane. In BLOCK CAPITALS it is <b>LANE</b>." },
+
+  /* ---------- 3. TICKS AND SIGNING ---------- */
+  { type: "learn", topic: "Ticks and signing",
+    title: "Tick boxes, signing and dating",
+    fig: TICKS,
+    html: "<p>A tick box is a small square. A tick in it means yes.</p>" +
+          "<p>Read the label. Does it say tick one, or tick all that are true?</p>" +
+          "<p>To <b>sign</b>, write your name in your own way.</p>" +
+          "<p>The <b>date</b> next to it is today's date.</p>" +
+          '<div class="keep"><b>Keep this</b>Sign and date at the end. Check the form before you sign.</div>' },
+
+  { type: "mc", topic: "Ticks and signing",
+    q: "A form says <i>Tick one box</i>. How many boxes do you tick?",
+    options: ["1", "2", "All of them"],
+    answer: 0,
+    fixed: true,
+    hint: "Read the label again.",
+    why: "Tick <b>one</b> box means just one." },
+
+  { type: "mc", topic: "Ticks and signing",
+    q: "What goes in the <b>Signature</b> box?",
+    options: ["Your name in your own way", "Your address", "Your age"],
+    answer: 0,
+    hint: "To sign means to write your name.",
+    why: "A signature is your name, written in your own way. You use the same one each time." },
+
+  { type: "mc", topic: "Ticks and signing",
+    q: "Today is 31 October 2026. What goes in the Date box, next to the signature?",
+    options: ["31/10/2026", "Your date of birth", "10/31/2026"],
+    answer: 0,
+    hint: "It is the date you fill the form in. Day first.",
+    why: "The date next to a signature is today's date. Day first: <b>31/10/2026</b>." },
+
+  { type: "widget", topic: "Ticks and signing",
+    title: "Fill in the form",
+    html: "<p>Two forms for Alex. Put each detail in the right box.</p>",
+    mount: fillForm,
+    report: function(d){ return d && d.finished ? "Fill in the form: both forms done, " + (d.miss || 0) + " misses" + (d.shown ? ", used Show me" : "") : "Fill in the form: not finished"; } },
+
+  /* ---------- 4. WRITING A NOTE ---------- */
+  { type: "learn", topic: "Writing a note",
+    title: "What goes in a note",
+    fig: NOTE1,
+    html: "<p>A note is a short message to someone. It says:</p>" +
+          "<ul><li>who it is to</li><li>what you want to say</li><li>when and where</li><li>who it is from</li></ul>" +
+          '<div class="keep"><b>Keep this</b>Who, what, when, where, and your name.</div>' },
+
+  { type: "mc", topic: "Writing a note",
+    q: "Who is this note to?",
+    fig: NOTE1,
+    options: ["Sam", "Kit", "Mo"],
+    answer: 0,
+    hint: "Look at the very first line.",
+    why: "It starts <i>Hi Sam</i>, so it is to <b>Sam</b>. Kit wrote it." },
+
+  { type: "mc", topic: "Writing a note",
+    q: "When is film club?",
+    fig: NOTE1,
+    options: ["Friday at 7pm", "Saturday at 7pm", "Friday at 9pm"],
+    answer: 0,
+    hint: "Find the day and the time in the note.",
+    why: "The note says <i>Friday at 7pm</i>." },
+
+  { type: "match", topic: "Writing a note",
+    q: "Match each part of a note to an example.",
+    pairs: [
+      ["Who it is to", "Hi Mo,"],
+      ["What you want", "Can you walk my dog?"],
+      ["When", "On Saturday at 10am."],
+      ["Where", "Meet me at my house."],
+      ["Who it is from", "Thanks, Kit"]
+    ],
+    hint: "A name at the start says who it is to. A name at the end says who it is from.",
+    why: "Hi Mo says who it is to. The question says what you want. Saturday at 10am is when. My house is where. Thanks, Kit is the sign off." },
+
+  { type: "mc", topic: "Writing a note",
+    q: "Kit forgot something. What is missing?",
+    fig: NOTE2,
+    options: ["When to go", "Who it is to", "Who it is from"],
+    answer: 0,
+    hint: "Ash knows where. Does Ash know what day or time?",
+    why: "It says who it is to, where and who it is from. But there is no day or time. Ash does not know <b>when</b> to go." },
+
+  /* ---------- 5. WRITING IN SENTENCES ---------- */
+  { type: "learn", topic: "Writing in sentences",
+    title: "Write in sentences",
+    html: "<p>A note is easier to read in sentences.</p>" +
+          "<p>Start each sentence with a capital letter.</p>" +
+          "<p>End it with a full stop or a question mark.</p>" +
+          "<p>Each sentence should make sense on its own.</p>" +
+          '<p class="eg">Can you come to film club? It is on Friday at 7pm.</p>' +
+          '<div class="keep"><b>Keep this</b>Read your note out loud. Does each sentence make sense?</div>' },
+
+  { type: "mc", topic: "Writing in sentences",
+    q: "Which message is written in sentences?",
+    options: ["Can you come to my house? It is on Elm Road.", "can you come to my house it is on elm road", "Come house. Elm Road."],
+    answer: 0,
+    hint: "Look for capitals, a full stop or question mark, and sense.",
+    why: "It has capital letters, a question mark and a full stop. Each sentence makes sense on its own." },
+
+  { type: "mc", topic: "Writing in sentences",
+    q: "<i>the cake shop shuts at 9pm</i><br>What does it need?",
+    options: ["A capital T and a full stop", "Just a full stop", "A question mark"],
+    answer: 0,
+    hint: "Check the start and the end.",
+    why: "<i><b>T</b>he cake shop shuts at 9pm<b>.</b></i> It tells you something, so it ends with a full stop. It needs a capital at the start too." },
+
+  { type: "mc", topic: "Writing in sentences",
+    q: "Kit wrote <i>meet me at the car park on friday</i>. Which is the best fix?",
+    options: ["Meet me at the car park on Friday.", "Meet me at the car park on friday.", "meet me at the car park on Friday?"],
+    answer: 0,
+    hint: "Check the start, the day and the end.",
+    why: "Meet starts the sentence, so it needs a capital. Friday is a day, so it needs one too. It tells, so it ends with a full stop." },
+
+  /* ---------- 6. YOUR TURN TO WRITE ---------- */
+  { type: "learn", topic: "Your turn to write",
+    title: "Plan, write, check",
+    html: "<p>Before you write, think.</p>" +
+          "<ul><li>Who is it to?</li><li>What do you want to say?</li><li>When and where?</li></ul>" +
+          "<p>Then sign off with your name.</p>" +
+          "<p>The next two are optional. They go to Jay only if you choose to send them.</p>" +
+          '<div class="keep"><b>Keep this</b>Short is fine. Two or three sentences is a good note.</div>' },
+
+  { type: "write", topic: "Your turn to write",
+    q: "<p><b>A note to a friend.</b> Ask them to come to a late night film with you.</p>" +
+       "<p>Say which film, when and where. Then sign off.</p>",
+    starters: ["Hi", "Do you want to come to", "The film is on", "It starts at", "We can meet at", "From"],
+    checklist: [
+      "I said who it is to",
+      "I asked them to come to the film",
+      "I said when and where",
+      "I signed off with my name",
+      "My sentences start with a capital and end with a full stop or question mark"
+    ],
+    minWords: 20 },
+
+  { type: "write", topic: "Your turn to write",
+    q: "<p><b>Your choice.</b> Write a short message, or make up a short form.</p>" +
+       "<p>Some ideas:</p>" +
+       "<ul><li>a message to order a pudding</li><li>a note to tell Jay something</li><li>a sign up form for a spooky film club</li></ul>",
+    starters: ["Hi", "Please can I have", "Name:", "Address:", "Date:", "Thanks,"],
+    checklist: [
+      "It says who it is to, or what it is for",
+      "My sentences start with a capital letter",
+      "My sentences end with a full stop or question mark",
+      "I read it back to check it makes sense"
+    ],
+    minWords: 15 }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

@@ -21,6 +21,7 @@
      multi  {q, fig, options:[], answers:[i,j], hint, why}
      num    {q, fig, boxes:[{label, a, tol, pre, post, alts}], hint, why}
      text   {q, fig, need:[[any of these],[and any of these]], model, hint, why}
+            add exact:true to need the whole answer to match (spelling)
      sort   {q, buckets:[], cards:[[text, bucketIndex]], hint, why}
      order  {q, items:[in the right order], hint, why}
      match  {q, pairs:[[left, right]], hint, why}
@@ -528,6 +529,7 @@ function drawChips(){
 }
 
 function go(i){
+  speakStop();
   state.pos = i; save();
   showOnly("qCard");
 
@@ -553,6 +555,7 @@ function go(i){
   cur = null;
   var renderer = R[s.type];
   renderer(s, body, i);
+  if(HQ.readAloud) addReader(body, body);
   if(cfg.review && s._remind){
     var rem = h("details", "working remind");
     rem.innerHTML = '<summary>Want a reminder? Tap for the idea behind this one.</summary>' +
@@ -569,6 +572,47 @@ function go(i){
   }else if(a && a.value !== undefined && cur && cur.restore){
     cur.restore(a.value, false);
   }
+}
+
+/* ---------- read it to me (only in an HQ that asks for it) ----------
+   A small button at the top of a card that reads out what is showing:
+   the question and options, or the part of a learn card revealed so far. */
+function speakStop(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
+function addReader(where, what){
+  if(!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+  var b = h("button", "readme", '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Read it to me</span>');
+  b.type = "button";
+  b.onclick = function(){
+    if(speechSynthesis.speaking){ speakStop(); b.classList.remove("on"); return; }
+    var txt = textOf(what).replace(/_{2,}/g, " blank ").replace(/\s+/g, " ").trim();
+    if(!txt) return;
+    var u = new SpeechSynthesisUtterance(txt);
+    u.lang = "en-GB"; u.rate = 0.92;
+    var vs = speechSynthesis.getVoices().filter(function(v){ return /en-GB/i.test(v.lang); });
+    if(vs.length) u.voice = vs[0];
+    u.onend = u.onerror = function(){ b.classList.remove("on"); };
+    speakStop(); b.classList.add("on"); speechSynthesis.speak(u);
+  };
+  where.insertBefore(b, where.firstChild);
+}
+/* visible text only, skipping the reader button and pictures */
+function textOf(el){
+  var out = [];
+  (function walk(n){
+    if(n.nodeType === 3){ out.push(n.nodeValue); return; }
+    if(n.nodeType !== 1) return;
+    if(n.classList && n.classList.contains("readme")) return;
+    var tag = n.tagName.toLowerCase();
+    if(tag === "svg" || tag === "script" || tag === "style") return;
+    var cs = window.getComputedStyle ? getComputedStyle(n) : null;
+    if(cs && (cs.display === "none" || cs.visibility === "hidden")) return;
+    if(tag === "input" || tag === "textarea"){ return; }
+    var block = cs && /block|flex|grid|list-item|table/.test(cs.display);
+    if(block) out.push(". ");
+    for(var c = n.firstChild; c; c = c.nextSibling) walk(c);
+    if(block) out.push(". ");
+  })(el);
+  return out.join("").replace(/(\s*\.\s*){2,}/g, ". ").replace(/^\s*\.\s*/, "");
 }
 
 function setButtons(s, i){
@@ -778,6 +822,11 @@ R.text = function(s, body){
   body.appendChild(ta);
   function hit(){
     var t = " " + norm(ta.value) + " ";
+    /* exact: the whole answer must be one of the words (for spelling) */
+    if(s.exact) return s.need.every(function(group){
+      var x = function(v){ return norm(v).replace(/[.\s]+$/, ""); };
+      return group.some(function(w){ return x(ta.value) === x(w); });
+    });
     return s.need.every(function(group){
       /* match from the start of a word, so "all" does not hit "really" */
       return group.some(function(w){ return t.indexOf(" " + norm(w)) >= 0; });
@@ -1158,6 +1207,7 @@ function showFeedback(s, status, quiet){
   var plus = quiet ? "" : '<span class="plus">+' + (SPARK[status] || 0) + ' sparks</span>';
   var streak = !quiet && status === "right1" && state.streak >= 3 ? ' <span class="tiny">That is ' + state.streak + ' first go in a row.</span>' : "";
   fb.innerHTML = plus + head + streak + (s.why ? '<div class="why">' + s.why + '</div>' : "") + extra;
+  if(HQ.readAloud) addReader(fb, fb);
 }
 
 function flash(msg){

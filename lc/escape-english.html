@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the empty mall - LC Night Shift HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="/lc/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/lc/lc.css?v=2">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* signs and notes found around the mall, the room banners, the alphabet strip */
+.fig svg.roomban{max-width:560px;border-radius:10px}
+.sign{border-radius:8px;padding:12px 16px;margin:0 auto 12px;max-width:420px;text-align:left;font-size:1.08rem;line-height:1.6;color:#141a33;border:3px solid #141a33;box-shadow:0 3px 0 rgba(20,26,51,.15)}
+.sign p{margin:0 0 6px}
+.sign .who{display:block;font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#6b6450;margin-bottom:8px}
+.sign h4{margin:0 0 8px;font-family:var(--display);font-size:1.3rem;line-height:1.15;text-align:center}
+.sign.pud{background:#fff3d6;border-color:#e0a612}
+.sign.pud h4{color:#7a1f3d}
+.sign.pud .spec{margin-top:8px;padding-top:8px;border-top:2px dashed #e0a612}
+.sign.note{background:#fffbe0;font-family:"Courier New",Courier,monospace;transform:rotate(-.6deg);max-width:320px}
+.sign.lift{background:#e9eef7;border-color:#5a6584}
+.sign.lift h4{background:#141a33;color:#ffd23f;border-radius:4px;padding:4px 0}
+.abc{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:6px 0 12px}
+.abc span{display:inline-block;width:26px;height:30px;line-height:30px;text-align:center;border-radius:5px;background:var(--paper);border:2px solid var(--line);font-family:var(--display);font-weight:700;font-size:1rem;color:var(--ink)}
+.plaque{background:#f6e7b4;border:3px solid #c9a646;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif;font-size:1.08rem;color:#141a33}
+</style>
+</head>
+<body class="subj-eng">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lc/"><span class="hqlogo">LC</span><span class="hqname">Night Shift HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/lc/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the empty mall</h2>
+    <span>English. An escape room: you are locked in a shopping centre after closing time. Read the signs to find the code.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LC's Night Shift HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lc/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+/* Every text on this page is original, written for it. */
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec",
+    WHITE = "#ffffff", LINE = "#d9d8e6", NIGHT = "#232a4d", DIM = "#2e3352";
+var LAB = 'font-family="Space Grotesk,Arial"';
+
+function svg(w, hgt, label, inner){
+  return '<svg class="roomban" viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+/* a strip light; the flickering one is drawn faint */
+function strip(x, y, w, faint){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="6" rx="3" fill="#fbf8e4" opacity="' + (faint ? 0.3 : 0.95) + '"/>' +
+    (faint ? '' : '<rect x="' + (x - 10) + '" y="' + (y + 6) + '" width="' + (w + 20) + '" height="10" fill="#fbf8e4" opacity="0.08"/>');
+}
+function note(x, y){
+  return '<text x="' + x + '" y="' + y + '" ' + LAB + ' font-size="20" fill="' + SUN + '" opacity="0.8">&#9835;</text>';
+}
+
+var BAN_FOOD = svg(380, 130, "The food court at night: chairs stacked on tables and one glowing pudding stall sign",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(30, 10, 80) + strip(150, 10, 80, true) + strip(270, 10, 80) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  /* pudding stall */
+  '<rect x="220" y="44" width="140" height="68" fill="' + DIM + '"/>' +
+  '<rect x="228" y="30" width="124" height="26" rx="5" fill="' + SUN + '"/>' +
+  '<text x="290" y="49" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">PUDDINGS</text>' +
+  '<path d="M262 92 L318 92 L312 104 L268 104 Z" fill="' + CORAL + '"/>' +
+  '<ellipse cx="290" cy="88" rx="22" ry="8" fill="#a0612c"/><ellipse cx="290" cy="83" rx="14" ry="5" fill="#ffe7a8"/>' +
+  /* tables with chairs upside down on top */
+  [40, 120].map(function(x){
+    return '<rect x="' + x + '" y="84" width="60" height="6" fill="' + LINE + '"/><rect x="' + (x + 27) + '" y="90" width="6" height="22" fill="' + LINE + '"/>' +
+      '<path d="M' + (x + 6) + ' 84 L' + (x + 6) + ' 70 L' + (x + 24) + ' 70 L' + (x + 24) + ' 84 M' + (x + 6) + ' 70 L' + (x + 6) + ' 54 M' + (x + 24) + ' 70 L' + (x + 24) + ' 54" stroke="' + CYAN + '" stroke-width="3" fill="none"/>' +
+      '<path d="M' + (x + 36) + ' 84 L' + (x + 36) + ' 70 L' + (x + 54) + ' 70 L' + (x + 54) + ' 84 M' + (x + 36) + ' 70 L' + (x + 36) + ' 54 M' + (x + 54) + ' 70 L' + (x + 54) + ' 54" stroke="' + MINT + '" stroke-width="3" fill="none"/>';
+  }).join("") +
+  note(196, 74));
+
+var BAN_TOYS = svg(380, 130, "The toy shop at night: a half open shutter, shelves of toy boxes and a little robot with glowing eyes",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(150, 10, 80) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  /* half open shutter */
+  '<rect x="10" y="20" width="360" height="30" fill="' + DIM + '"/>' +
+  '<path d="M10 28 L370 28 M10 36 L370 36 M10 44 L370 44" stroke="' + INK + '" stroke-width="2"/>' +
+  /* shelves */
+  '<rect x="20" y="78" width="200" height="5" fill="' + LINE + '"/><rect x="20" y="108" width="200" height="4" fill="' + LINE + '"/>' +
+  '<rect x="28" y="56" width="30" height="22" rx="3" fill="' + CORAL + '"/><rect x="64" y="60" width="24" height="18" rx="3" fill="' + SUN + '"/>' +
+  '<rect x="94" y="54" width="34" height="24" rx="3" fill="' + VIOLET + '"/><rect x="134" y="58" width="26" height="20" rx="3" fill="' + MINT + '"/>' +
+  '<rect x="166" y="56" width="40" height="22" rx="3" fill="' + CYAN + '"/>' +
+  '<rect x="30" y="88" width="44" height="20" rx="3" fill="' + MINT + '"/><rect x="80" y="86" width="30" height="22" rx="3" fill="' + CORAL + '"/>' +
+  '<rect x="116" y="90" width="40" height="18" rx="3" fill="' + SUN + '"/><rect x="162" y="86" width="46" height="22" rx="3" fill="' + BLUE + '"/>' +
+  /* robot */
+  '<rect x="276" y="64" width="44" height="40" rx="6" fill="' + LINE + '"/>' +
+  '<rect x="284" y="72" width="28" height="16" rx="3" fill="' + INK + '"/>' +
+  '<circle cx="292" cy="80" r="4" fill="' + SUN + '"/><circle cx="304" cy="80" r="4" fill="' + SUN + '"/>' +
+  '<line x1="298" y1="64" x2="298" y2="54" stroke="' + LINE + '" stroke-width="3"/><circle cx="298" cy="52" r="4" fill="' + CORAL + '"/>' +
+  '<rect x="282" y="104" width="10" height="8" fill="' + LINE + '"/><rect x="304" y="104" width="10" height="8" fill="' + LINE + '"/>' +
+  note(340, 80));
+
+var BAN_SEC = svg(380, 130, "The security office: a desk with six small screens. One screen shows a shadow holding a mop",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  strip(60, 8, 70, true) + strip(250, 8, 70) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  '<rect x="40" y="96" width="300" height="10" fill="' + LINE + '"/>' +
+  [0, 1, 2].map(function(c){
+    return [0, 1].map(function(r){
+      var x = 60 + c * 90, y = 26 + r * 34, on = !(c === 1 && r === 0);
+      return '<rect x="' + x + '" y="' + y + '" width="80" height="30" rx="3" fill="' + (on ? "#3d5a4f" : DIM) + '" stroke="' + LINE + '" stroke-width="2"/>' +
+        (on ? '<path d="M' + (x + 6) + ' ' + (y + 10) + ' L' + (x + 74) + ' ' + (y + 10) + ' M' + (x + 6) + ' ' + (y + 20) + ' L' + (x + 74) + ' ' + (y + 20) + '" stroke="' + MINT + '" stroke-width="1" opacity="0.4"/>' : '');
+    }).join("");
+  }).join("") +
+  /* the shadow with a mop on the bottom right screen */
+  '<circle cx="254" cy="70" r="4" fill="' + INK + '"/><rect x="250" y="74" width="8" height="12" rx="3" fill="' + INK + '"/>' +
+  '<line x1="262" y1="68" x2="268" y2="90" stroke="' + INK + '" stroke-width="2"/><rect x="263" y="88" width="10" height="4" fill="' + INK + '"/>' +
+  '<text x="324" y="122" text-anchor="end" ' + LAB + ' font-size="11" fill="' + CORAL + '">&#9679; REC</text>');
+
+var BAN_LIFT = svg(380, 130, "The lift: the doors are open and a strip light buzzes inside. Music notes float up from below",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  '<rect x="120" y="14" width="140" height="98" fill="' + LINE + '"/>' +
+  '<rect x="134" y="28" width="112" height="84" fill="#3a4060"/>' +
+  strip(160, 32, 60, true) +
+  '<rect x="134" y="28" width="16" height="84" fill="#9aa0b8"/><rect x="230" y="28" width="16" height="84" fill="#9aa0b8"/>' +
+  '<rect x="164" y="2" width="52" height="16" rx="3" fill="' + INK + '"/>' +
+  '<text x="190" y="15" text-anchor="middle" ' + LAB + ' font-size="13" font-weight="700" fill="' + SUN + '">G &#9660;</text>' +
+  '<rect x="270" y="56" width="18" height="34" rx="4" fill="' + DIM + '"/><circle cx="279" cy="66" r="4" fill="' + SUN + '"/><circle cx="279" cy="80" r="4" fill="' + LINE + '"/>' +
+  note(60, 96) + note(80, 70) + note(320, 100));
+
+/* ---------- signs and notes ---------- */
+var PUD =
+'<div class="sign pud">' +
+'<span class="who">Sign on the pudding stall</span>' +
+'<h4>Pip\'s Puddings</h4>' +
+'<p><b>Monday to Friday:</b> 10am to 6pm</p>' +
+'<p><b>Saturday:</b> 9am to 7pm</p>' +
+'<p><b>Sunday:</b> 11am to 4pm</p>' +
+'<p class="spec"><b>Today\'s special:</b> sticky toffee pudding</p>' +
+'</div>';
+
+var PIPNOTE =
+'<div class="sign note">' +
+'<span class="who">Note on the counter</span>' +
+'<p>Back in 5 minutes.</p>' +
+'<p>I have gone to get more custard.</p>' +
+'<p>Pip</p>' +
+'</div>';
+
+var LIFT =
+'<div class="sign lift">' +
+'<span class="who">Sign inside the lift</span>' +
+'<h4>LIFT</h4>' +
+'<p>Press G for the ground floor.</p>' +
+'<p>In an emergency, press the bell.</p>' +
+'<p>Do not lean on the doors.</p>' +
+'<p>No more than 8 people.</p>' +
+'</div>';
+
+var ABC = '<div class="abc">' + "abcdefghijklmnopqrstuvwxyz".split("").map(function(c){ return "<span>" + c + "</span>"; }).join("") + '</div>';
+
+EGW.run({
+  id: "escape-english",
+  title: "Escape the empty mall",
+  subject: "English",
+  mins: 25,
+  blurb: "Locked in a mall after closing time. Four rooms of reading, one digit in each.",
+  escape: {
+    digits: ["6", "2", "9", "3"],
+    intro: "<p>You stop to tie your shoe. When you look up, the shopping centre is empty.</p>" +
+           "<p>The lights flicker. The escalators have stopped. Soft music plays from somewhere.</p>" +
+           "<p>The big glass doors are locked. The padlock has four dials. A note is stuck to it.</p>" +
+           "<p><i>Each room hides one digit. Read carefully. Then you can go home.</i></p>",
+    outro: "<p>The last dial turns. Click! The big doors swing open.</p>" +
+           "<p>By the door is a cleaner with a mop. A little radio sits on the trolley. Soft music is playing.</p>" +
+           "<p>So that was the music! The cleaner smiles and waves. Mystery solved.</p>" +
+           "<p>You found times on a sign. You put words in a to z order. You fixed capital letters and spelt tricky words. That is a lot of reading. Well done.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: FOOD COURT ---------- */
+  { type: "learn", topic: "Food court",
+    title: "Room 1: the food court",
+    fig: BAN_FOOD,
+    html: "<p>The food court is dark. The chairs are up on the tables.</p>" +
+          "<p>One sign still glows. It is the pudding stall.</p>" +
+          '<div class="keep"><b>Keep this</b>Look for a key word, like a day. Then read the words next to it.</div>' },
+
+  { type: "mc", topic: "Food court",
+    q: "What time does Pip's Puddings open on Saturday?",
+    fig: PUD,
+    options: ["9am", "10am", "11am", "7pm"],
+    answer: 0,
+    hint: "Find the word Saturday first. The first time is when it opens.",
+    why: "Find Saturday. It says 9am to 7pm. The first time is when it opens. So it opens at <b>9am</b>. 7pm is when it closes." },
+
+  { type: "mc", topic: "Food court",
+    q: "What time does it close on Sunday?",
+    fig: PUD,
+    options: ["4pm", "6pm", "7pm", "11am"],
+    answer: 0,
+    hint: "Find Sunday. The second time is when it closes.",
+    why: "Sunday says 11am to 4pm. The second time is when it closes. So it closes at <b>4pm</b>." },
+
+  { type: "mc", topic: "Food court",
+    q: "On which day does it open at 10am?",
+    fig: PUD,
+    options: ["Wednesday", "Saturday", "Sunday"],
+    answer: 0,
+    hint: "Find 10am on the sign. Which days does that line cover?",
+    why: "10am is on the line for Monday to Friday. That means every day from Monday to Friday. <b>Wednesday</b> is one of them." },
+
+  { type: "mc", topic: "Food court",
+    q: "Pip left a note. Why did Pip go?",
+    fig: PIPNOTE,
+    options: ["To get more custard", "To go home", "To find the cleaner", "To fix the lights"],
+    answer: 0,
+    hint: "Look for the word gone in the note.",
+    why: "The note says: I have gone to get more custard. So Pip went <b>to get more custard</b>. Words like gone to and because often show a reason." },
+
+  /* ---------- ROOM 2: TOY SHOP ---------- */
+  { type: "learn", topic: "Toy shop",
+    title: "Room 2: the toy shop",
+    fig: BAN_TOYS,
+    html: "<p>The toy shop shutter is half open. You duck under it.</p>" +
+          "<p>A little robot blinks its eyes. Then it stops. Spooky!</p>" +
+          "<p>The toy boxes are all mixed up. A sign says: <i>Put us in a to z order.</i></p>" +
+          ABC +
+          '<div class="keep"><b>Keep this</b>Alphabetical order is a to z order. Look at the first letter of each word. The letter nearer to a comes first.</div>' },
+
+  { type: "order", topic: "Toy shop",
+    q: "Put the toy boxes in alphabetical order.",
+    items: ["Bears", "Cars", "Dolls", "Kites", "Robots"],
+    hint: "Look at the first letter of each word. Find the one nearest to a.",
+    why: "The first letters are B, C, D, K and R. In a to z order that is <b>Bears, Cars, Dolls, Kites, Robots</b>." },
+
+  { type: "mc", topic: "Toy shop",
+    q: "Which letter comes next? m, n, o, ...",
+    options: ["p", "q", "l", "r"],
+    answer: 0,
+    hint: "Say the alphabet from m. You could look at the strip in the learn card.",
+    why: "m, n, o, <b>p</b>. Then q, r, s. Singing the alphabet song quietly is a good trick." },
+
+  { type: "mc", topic: "Toy shop",
+    q: "Which toy comes first in alphabetical order?",
+    options: ["game", "puzzle", "teddy", "slime"],
+    answer: 0,
+    hint: "Look at the first letters: g, p, t and s. Which is nearest to a?",
+    why: "The first letters are g, p, t and s. The letter g comes first in the alphabet. So <b>game</b> comes first." },
+
+  { type: "order", topic: "Toy shop", stretch: true,
+    q: "These all start with b. Put them in alphabetical order.",
+    items: ["bear", "bike", "boat", "bus"],
+    hint: "The first letters are the same. So look at the second letter of each word.",
+    why: "They all start with b. So look at the second letter: e, i, o and u. In a to z order that is <b>bear, bike, boat, bus</b>. A dictionary works like this too." },
+
+  /* ---------- ROOM 3: SECURITY OFFICE ---------- */
+  { type: "learn", topic: "Security office",
+    title: "Room 3: the security office",
+    fig: BAN_SEC,
+    html: "<p>The security office has lots of little screens. They flicker on and off.</p>" +
+          "<p>On one screen, a shadow moves. It is holding a mop! Who is that?</p>" +
+          "<p>The guard left a note. It has no capital letters.</p>" +
+          '<div class="keep"><b>Keep this</b>A sentence starts with a capital letter. It ends with a full stop. Names and days of the week start with a capital letter too. So does the word I.</div>' },
+
+  { type: "mc", topic: "Security office",
+    q: "Which sentence is written correctly?",
+    options: ["The screens are flickering.", "the screens are flickering.", "The screens are flickering", "the Screens are flickering."],
+    answer: 0,
+    hint: "Check the start and the end of each one.",
+    why: "<b>The screens are flickering.</b> It starts with a capital T. It ends with a full stop. Each of the others has a mistake." },
+
+  { type: "multi", topic: "Security office",
+    q: "The note says: <i>on monday i saw sam by the lifts.</i> Which words need a capital letter?",
+    options: ["on", "monday", "i", "sam", "saw", "lifts"],
+    answers: [0, 1, 2, 3],
+    hint: "There are four. Think about the start, a day, a name and the word I.",
+    why: "<b>On</b> starts the sentence. <b>Monday</b> is a day. <b>I</b> always has a capital. <b>Sam</b> is a name. So: On Monday I saw Sam by the lifts. The words saw and lifts stay small." },
+
+  { type: "sort", topic: "Security office",
+    q: "Is each sentence <b>correct</b>, or does it <b>need fixing</b>?",
+    buckets: ["Correct", "Needs fixing"],
+    cards: [
+      ["The mall is closed.", 0],
+      ["My name is Sam.", 0],
+      ["I like the toy shop.", 0],
+      ["the music is soft.", 1],
+      ["I can see a light", 1],
+      ["we go on friday.", 1]
+    ],
+    hint: "For each one, check: a capital at the start? A full stop at the end? Capitals for names and days?",
+    why: "The first three are right. <b>the music is soft.</b> needs a capital T. <b>I can see a light</b> needs a full stop. <b>we go on friday.</b> needs a capital W and a capital F, because Friday is a day." },
+
+  /* ---------- ROOM 4: LIFT ---------- */
+  { type: "learn", topic: "Lift",
+    title: "Room 4: the lift",
+    fig: BAN_LIFT,
+    html: "<p>The lift doors are open. The light inside buzzes.</p>" +
+          "<p>The music is louder here. It is coming from downstairs.</p>" +
+          "<p>There is a sign by the buttons. Some words on it are tricky.</p>" +
+          '<div class="keep"><b>Keep this</b>To spell a long word, say it slowly in parts. To find what a word means, read the words around it. They give you clues.</div>' },
+
+  { type: "mc", topic: "Lift",
+    q: "Fill the gap. Press G for the ground ____.",
+    fig: LIFT,
+    options: ["floor", "flor", "flore", "flaw"],
+    answer: 0,
+    hint: "Look at the sign. The word is there.",
+    why: "It is <b>floor</b>, with two letter o. Flaw sounds a bit the same, but it means a mistake. The sign is a good place to check." },
+
+  { type: "mc", topic: "Lift",
+    q: "Which spelling is right?",
+    options: ["because", "becos", "becuase", "beacuse"],
+    answer: 0,
+    hint: "Say it slowly in parts: be, cause.",
+    why: "<b>because</b>. Say it in parts: be, cause. A trick to remember it: big elephants can always understand small elephants. The first letters spell because." },
+
+  { type: "mc", topic: "Lift",
+    q: "The sign says: In an <b>emergency</b>, press the bell. What does emergency mean?",
+    fig: LIFT,
+    options: ["When something goes wrong and you need help fast", "When you want to go up", "When the music is too loud", "When the lift is clean"],
+    answer: 0,
+    hint: "What does the bell do? Why would you press it?",
+    why: "The bell calls for help. So an <b>emergency</b> is when something goes wrong and you need help fast. The words around it gave the clue." },
+
+  { type: "match", topic: "Lift",
+    q: "Match each word to what it means.",
+    pairs: [
+      ["exit", "the way out"],
+      ["quiet", "not loud"],
+      ["closed", "not open"],
+      ["flicker", "to go on and off fast"]
+    ],
+    hint: "Start with the one you know best. Then do the rest.",
+    why: "<b>Exit</b> is the way out. <b>Quiet</b> means not loud. <b>Closed</b> means not open. Lights <b>flicker</b> when they go on and off fast. You will see these words on signs all over the mall." },
+
+  /* ---------- THE FINAL DOOR ---------- */
+  { type: "unlock", topic: "The final door",
+    q: "<p>Back at the big glass doors, there is a small sign on the padlock.</p>" +
+       '<div class="plaque">Put the room names in a to z order. Then read the digits.</div>' +
+       "<p>Here are your rooms and their digits.</p>",
+    code: "6392",
+    hint: "Look at the first letter of each room: F, T, S and L. Which comes first in the alphabet?",
+    why: "The first letters in a to z order are F, L, S and T. So the rooms go Food court (6), Lift (3), Security office (9), Toy shop (2). The code is <b>6392</b>." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

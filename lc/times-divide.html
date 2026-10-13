@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Times and share - LC Night Shift HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="/lc/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/lc/lc.css?v=2">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.gap{position:relative;border:2px dashed var(--ink);border-radius:6px;padding:0 .4em;margin:0 3px;color:transparent}
+.gap::after{content:"?";color:var(--ink);position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.sumbig{display:block;font-family:var(--display);font-weight:700;font-size:1.45rem;margin:8px 0 4px}
+.tt{border-collapse:collapse;margin:6px auto;font-size:1rem}
+.tt th,.tt td{border:2px solid var(--ink);padding:6px 10px;text-align:left}
+.tt th{background:var(--accent-soft);white-space:nowrap}
+/* Sharing machine widget */
+.sm-task p{margin:0 0 6px}
+.sm-dots{display:flex;gap:6px;margin-bottom:6px}
+.sm-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.sm-dots span.on{background:var(--good)}
+.sm-dots span.now{background:var(--sun)}
+.sm-machine{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px;margin:8px 0}
+.sm-head{font-weight:700;margin:0 0 4px}
+.sm-pile{display:flex;flex-wrap:wrap;gap:3px;min-height:30px;padding:6px;border:2px dashed #b9bccd;border-radius:10px;background:var(--paper)}
+.sm-pile .sm-none{color:#6b7090;font-size:.9rem;align-self:center}
+.sm-cake{width:26px;height:26px;display:block}
+.sm-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:6px;margin-top:10px}
+.sm-box{border:3px solid var(--ink);border-radius:8px;background:#fff5d6;padding:4px 4px 6px;min-height:74px}
+.sm-blab{display:block;font-family:var(--display);font-weight:700;font-size:.78rem;text-align:center;margin-bottom:3px}
+.sm-in{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+.sm-new{animation:smpop .35s ease-out}
+@keyframes smpop{from{transform:translateY(-14px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sm-new{animation:none}}
+.sm-ans{text-align:center}
+.sm-sent{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;font-family:var(--display);font-weight:700;font-size:1.3rem}
+.sm-step{display:inline-flex;align-items:center;gap:3px}
+.sm-b{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:#fff;color:var(--ink);font-size:1.2rem;font-weight:800;line-height:1;cursor:pointer;touch-action:manipulation;padding:0}
+.sm-b:disabled{opacity:.35;cursor:default}
+.sm-v{min-width:1.4em;display:inline-block;text-align:center;font-size:1.6rem}
+.sm-word{font-size:1rem}
+.sm-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lc/"><span class="hqlogo">LC</span><span class="hqname">Night Shift HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/lc/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Times and share</h2>
+    <span>Equal groups, arrays, the 2, 3, 4, 5 and 10 times tables, doubling and halving, sharing and leftovers. Cupcake boxes and lit windows after dark.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LC's Night Shift HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lc/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function gap(){ return '<span class="gap">what</span>'; }
+function big(s){ return '<span class="sumbig">' + s + '</span>'; }
+function f1(n){ return (+n).toFixed(1); }
+
+/* ---------- a cupcake, drawn at (x, y) with size s ---------- */
+function cake(x, y, s){
+  return '<path d="M' + f1(x + .16 * s) + ' ' + f1(y + .5 * s) + ' L' + f1(x + .84 * s) + ' ' + f1(y + .5 * s) + ' L' + f1(x + .74 * s) + ' ' + f1(y + s) + ' L' + f1(x + .26 * s) + ' ' + f1(y + s) + ' Z" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<path d="M' + f1(x + .08 * s) + ' ' + f1(y + .54 * s) + ' Q' + f1(x + .08 * s) + ' ' + f1(y + .14 * s) + ' ' + f1(x + .5 * s) + ' ' + f1(y + .14 * s) + ' Q' + f1(x + .92 * s) + ' ' + f1(y + .14 * s) + ' ' + f1(x + .92 * s) + ' ' + f1(y + .54 * s) + ' Z" fill="#ffd1e3" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<circle cx="' + f1(x + .5 * s) + '" cy="' + f1(y + .12 * s) + '" r="' + f1(.1 * s) + '" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="1.2"/>';
+}
+var CAKE_ICON = '<svg class="sm-cake" viewBox="0 0 24 24" aria-hidden="true">' + cake(1, 1, 22) + '</svg>';
+
+/* 3 plates of 4 cupcakes */
+var GROUPS = (function(){
+  var s = '<svg viewBox="0 0 400 160" role="img" aria-label="3 plates. Each plate has 4 cupcakes. 3 groups of 4 is 12.">';
+  [70, 200, 330].forEach(function(cx){
+    s += '<ellipse cx="' + cx + '" cy="96" rx="60" ry="15" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    for(var k = 0; k < 4; k++) s += cake(cx - 54 + k * 27, 60, 27);
+  });
+  s += t(200, 146, "3 groups of 4 = 12", 22, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+})();
+
+/* 5 pairs of glowing eyes */
+var EYES = (function(){
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="A dark night with 5 pairs of glowing eyes. Each pair is 2 eyes.">';
+  s += '<rect x="4" y="4" width="392" height="142" rx="14" fill="#1b1c16"/>';
+  [[70, 50], [190, 40], [320, 56], [120, 108], [260, 104]].forEach(function(p){
+    [-13, 13].forEach(function(dx){
+      s += '<ellipse cx="' + (p[0] + dx) + '" cy="' + p[1] + '" rx="9" ry="12" fill="' + SUN + '"/>';
+      s += '<ellipse cx="' + (p[0] + dx) + '" cy="' + p[1] + '" rx="2.5" ry="9" fill="#1b1c16"/>';
+    });
+  });
+  return s + '</svg>';
+})();
+
+/* an office block at night with an array of lit windows */
+function windows(r, c, label, caption){
+  var ww = 32, wh = 24, g = 10, bw = c * ww + (c - 1) * g + 40, bh = r * wh + (r - 1) * g + 44;
+  var bx = 200 - bw / 2, by = 30, H = by + bh + (caption ? 44 : 12);
+  var s = '<svg viewBox="0 0 400 ' + H + '" role="img" aria-label="' + label + '">';
+  s += '<circle cx="356" cy="30" r="16" fill="#fbf8e4" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" fill="#2b2f4a" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<rect x="' + (bx - 8) + '" y="' + (by - 10) + '" width="' + (bw + 16) + '" height="12" fill="#2b2f4a" stroke="' + INK + '" stroke-width="3"/>';
+  for(var i = 0; i < r; i++) for(var j = 0; j < c; j++){
+    s += '<rect x="' + (bx + 20 + j * (ww + g)) + '" y="' + (by + 22 + i * (wh + g)) + '" width="' + ww + '" height="' + wh + '" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  if(caption) s += t(200, by + bh + 32, caption, 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+}
+var WIN35 = windows(3, 5, "An office block at night. The lit windows make 3 rows of 5. 3 times 5 is 15.", "3 rows of 5 = 15");
+var WIN46 = windows(4, 6, "An office block at night. The lit windows are in rows and columns: 4 rows with 6 windows in each row.");
+
+/* sharing and grouping */
+function boxOf(x, y, w, h, n, fill){
+  var s = '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" fill="' + fill + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  var cs = 22, gx = (w - n * cs) / (n + 1);
+  for(var k = 0; k < n; k++) s += cake(x + gx + k * (cs + gx), y + (h - cs) / 2, cs);
+  return s;
+}
+var SHAREFIG = (function(){
+  var s = '<svg viewBox="0 0 400 260" role="img" aria-label="Sharing: 12 cupcakes in 3 boxes, 4 in each box. Grouping: 12 cupcakes in bags of 3 make 4 bags.">';
+  s += t(10, 22, "Sharing: 3 boxes", 17, INK, LAB + ' font-weight="800"');
+  for(var k = 0; k < 3; k++) s += boxOf(10 + k * 130, 32, 118, 48, 4, "#fff5d6");
+  s += t(390, 102, "4 in each box", 16, BLUE, BODY + ' font-weight="700" text-anchor="end"');
+  s += t(10, 146, "Grouping: bags of 3", 17, INK, LAB + ' font-weight="800"');
+  for(k = 0; k < 4; k++) s += boxOf(10 + k * 97, 156, 88, 48, 3, "#e9f9f2");
+  s += t(390, 226, "4 bags", 16, BLUE, BODY + ' font-weight="700" text-anchor="end"');
+  s += t(200, 252, "12 &divide; 3 = 4", 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+})();
+var LEFTFIG = (function(){
+  var s = '<svg viewBox="0 0 400 190" role="img" aria-label="14 cupcakes shared into 4 boxes. Each box has 3. 2 cupcakes are left over.">';
+  for(var k = 0; k < 4; k++) s += boxOf(8 + k * 98, 12, 90, 48, 3, "#fff5d6");
+  s += cake(160, 92, 30) + cake(206, 92, 30);
+  s += '<rect x="146" y="84" width="104" height="46" rx="10" fill="none" stroke="' + CORAL + '" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  s += t(200, 152, "2 left over", 17, CORAL, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(200, 182, "14 &divide; 4 = 3 remainder 2", 19, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+})();
+
+/* ---------- Sharing machine widget ---------- */
+var SHARE = [ { n: 12, b: 3 }, { n: 17, b: 5 }, { n: 22, b: 4 } ];
+function mountShare(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(typeof d.r !== "number") d.r = 0;
+  if(typeof d.each !== "number") d.each = 0;
+  if(typeof d.left !== "number") d.left = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(typeof d.fn !== "number") d.fn = 20;
+  if(typeof d.fb !== "number") d.fb = 3;
+  var view = d.c, fresh = 0;
+  el.innerHTML =
+    '<div class="wpanel sm-task" data-r="task"></div>' +
+    '<div class="wpanel hidden" data-r="free"></div>' +
+    '<div class="sm-machine">' +
+      '<p class="sm-head" data-r="head"></p>' +
+      '<div class="sm-pile" data-r="pile"></div>' +
+      '<div class="wrow">' +
+        '<button class="btn" type="button" data-r="deal">Deal a round</button>' +
+        '<button class="btn btn-quiet" type="button" data-r="rest">Deal the rest</button>' +
+        '<button class="btn btn-quiet" type="button" data-r="again">Start again</button>' +
+      '</div>' +
+      '<div class="sm-boxes" data-r="boxes"></div>' +
+    '</div>' +
+    '<div class="wpanel sm-ans" data-r="ans"></div>' +
+    '<div class="fb sm-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function cur(){ return d.c >= 3 && view >= 3 ? { n: d.fn, b: d.fb } : SHARE[view]; }
+  function free(){ return view >= 3; }
+  function pileLeft(){ var p = cur(); return p.n - d.r * p.b; }
+  function finished(){ return pileLeft() < cur().b; }
+  function locked(){ return !free() && view !== d.c; }
+  function stepper(key, v, min, max, lab){
+    return '<span class="sm-step"><button class="sm-b" type="button" data-k="' + key + '" data-d="-1" aria-label="' + lab + ' down"' + (v <= min || locked() ? " disabled" : "") + '>&minus;</button>' +
+      '<b class="sm-v">' + v + '</b><button class="sm-b" type="button" data-k="' + key + '" data-d="1" aria-label="' + lab + ' up"' + (v >= max || locked() ? " disabled" : "") + '>+</button></span>';
+  }
+  function task(){
+    var dots = '<div class="sm-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(free()) return dots + "<p><b>Free play.</b> The night bakery is all yours. Pick how many cakes and how many boxes, then deal.</p>";
+    var p = SHARE[view];
+    return dots + '<p class="tiny" style="margin:0 0 4px">Order ' + (view + 1) + ' of 3. Nothing is timed.</p>' +
+      "<p>Share <b>" + p.n + " cupcakes</b> into <b>" + p.b + " boxes</b>. Deal them out, then fill in the sum.</p>";
+  }
+  function draw(){
+    var p = cur(), left = pileLeft(), done = finished(), k, j;
+    q("task").innerHTML = task();
+    var fr = q("free");
+    fr.classList.toggle("hidden", !free());
+    if(free()) fr.innerHTML = '<div class="sm-sent"><span class="sm-word">Cakes</span>' + stepper("fn", d.fn, 1, 30, "Cakes") +
+      '<span class="sm-word">Boxes</span>' + stepper("fb", d.fb, 2, 6, "Boxes") + "</div>";
+    q("head").textContent = left > 0 ? "Cakes still to share: " + left : "Cakes still to share: none";
+    var pile = "";
+    for(k = 0; k < left; k++) pile += CAKE_ICON;
+    q("pile").innerHTML = pile || '<span class="sm-none">The pile is empty.</span>';
+    var bx = "";
+    for(k = 0; k < p.b; k++){
+      bx += '<div class="sm-box"><span class="sm-blab">Box ' + (k + 1) + '</span><div class="sm-in">';
+      for(j = 0; j < d.r; j++) bx += j >= d.r - fresh ? CAKE_ICON.replace('class="sm-cake"', 'class="sm-cake sm-new"') : CAKE_ICON;
+      bx += "</div></div>";
+    }
+    q("boxes").innerHTML = bx;
+    fresh = 0;
+    var lk = locked();
+    q("deal").disabled = done || lk;
+    q("rest").disabled = done || lk;
+    q("again").disabled = d.r === 0 || lk;
+    q("deal").textContent = done ? "Not enough for every box" : "Deal a round";
+    var a = q("ans");
+    if(!done){
+      a.innerHTML = '<p class="wnote" style="margin:0">Keep dealing until there are not enough cakes for every box.</p>';
+    }else if(free()){
+      var e = Math.floor(p.n / p.b), r = p.n % p.b;
+      a.innerHTML = '<div class="sm-sent">' + p.n + " &divide; " + p.b + " = " + e + (r ? ' <span class="sm-word">remainder</span> ' + r : "") + "</div>" +
+        '<p class="wnote" style="margin:6px 0 0">Each box gets ' + e + ". " + (r ? r + " left over." : "Nothing left over.") + "</p>";
+    }else{
+      a.innerHTML = '<div class="sm-sent">' + p.n + " &divide; " + p.b + " = " + stepper("each", d.each, 0, 20, "Each box") +
+        '<span class="sm-word">remainder</span>' + stepper("left", d.left, 0, 20, "Left over") + "</div>" +
+        '<div class="wrow" style="justify-content:center">' +
+          '<button class="btn" type="button" data-r="go"' + (lk ? " disabled" : "") + ">Check</button>" +
+          '<button class="btn btn-quiet' + (lk || !d.miss[view] ? " hidden" : "") + '" type="button" data-r="show">Show me</button>' +
+        "</div>";
+      q("go").onclick = check;
+      q("show").onclick = showMe;
+    }
+  }
+  function fbk(cls, html){ var f = q("fb"); f.className = "fb sm-fb " + cls; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function why(p){
+    var e = Math.floor(p.n / p.b), r = p.n % p.b;
+    return p.n + " &divide; " + p.b + " = " + e + (r ? " remainder " + r : "") + ". Each box gets " + e + ". " +
+      (r ? r + " " + (r === 1 ? "is" : "are") + " left over, not enough for every box." : "Nothing is left over.");
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here it is.</b> " : "<b>Boxed up. Lovely.</b> ";
+    var more = last ? '<p style="margin:8px 0 0">All three orders packed.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next order</button>';
+    fbk(how === "shown" ? "show" : "good", head + why(SHARE[k]) + more);
+    q("next").onclick = function(){
+      view = d.c; d.r = 0; d.each = 0; d.left = 0; api.save();
+      q("fb").className = "fb sm-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+  function check(){
+    if(locked() || free() || !finished()) return;
+    var p = SHARE[view], e = Math.floor(p.n / p.b), r = p.n % p.b;
+    if(d.each === e && d.left === r){ solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    var msg = d.each !== e ? "Count the cakes in one box. Every box has the same." : "Now count the cakes still in the pile. They are the remainder.";
+    fbk("nudge", "<b>Not quite yet.</b> " + msg + (d.miss[view] > 1 ? " Show me is there if you want it." : ""));
+    draw();
+  }
+  function showMe(){
+    if(locked() || free()) return;
+    var p = SHARE[view];
+    d.shown[view] = true;
+    d.r = Math.floor(p.n / p.b); d.each = d.r; d.left = p.n % p.b;
+    solved(view, "shown");
+  }
+  q("deal").onclick = function(){ if(locked() || finished()) return; d.r++; fresh = 1; api.save(); draw(); };
+  q("rest").onclick = function(){
+    if(locked() || finished()) return;
+    var p = cur(), want = Math.floor(p.n / p.b);
+    fresh = want - d.r; d.r = want; api.save(); draw();
+  };
+  q("again").onclick = function(){ if(locked()) return; d.r = 0; api.save(); draw(); };
+  el.addEventListener("click", function(e){
+    var b = e.target.closest(".sm-b");
+    if(!b || b.disabled || locked()) return;
+    var k = b.getAttribute("data-k"), dd = +b.getAttribute("data-d");
+    if(k === "fn"){ d.fn = Math.max(1, Math.min(30, d.fn + dd)); d.r = 0; }
+    else if(k === "fb"){ d.fb = Math.max(2, Math.min(6, d.fb + dd)); d.r = 0; }
+    else if(k === "each") d.each = Math.max(0, Math.min(20, d.each + dd));
+    else if(k === "left") d.left = Math.max(0, Math.min(20, d.left + dd));
+    api.save(); draw();
+  });
+  draw();
+  if(d.c >= 3 && d.result){
+    fbk("good", "<b>All three orders packed.</b> Share it out, then count one box and the pile.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "times-divide",
+  title: "Times and share",
+  subject: "Maths",
+  mins: 35,
+  blurb: "Equal groups and arrays, the 2, 5, 10, 3 and 4 times tables, multiples, doubling and halving, sharing, grouping, remainders and word problems.",
+  steps: [
+
+  /* ---------- 1 GROUPS AND ARRAYS ---------- */
+  { type: "learn", topic: "Groups and arrays",
+    title: "Equal groups",
+    fig: GROUPS,
+    html: "<p>Here are 3 plates. Each plate has 4 cupcakes.</p>" +
+          "<p>That is 3 groups of 4. 4 + 4 + 4 = 12.</p>" +
+          "<p>We can write it as 3 &times; 4 = 12.</p>" +
+          "<p>The &times; sign means groups of, or lots of.</p>" +
+          '<div class="keep"><b>Keep this</b>Equal groups all have the same number in them.</div>' },
+
+  { type: "mc", topic: "Groups and arrays",
+    fig: EYES,
+    q: "Glowing eyes in the dark! Each pair is 2 eyes. Which sum matches?",
+    options: [ "5 &times; 2 = 10", "5 + 2 = 7", "2 &times; 2 = 4", "5 &times; 5 = 25" ],
+    answer: 0,
+    hint: "How many pairs are there? How many eyes in each pair?",
+    why: "5 pairs, with 2 eyes in each: <b>5 &times; 2 = 10</b>. Do not worry. It is just five cats on a wall." },
+
+  { type: "learn", topic: "Groups and arrays",
+    title: "Arrays",
+    fig: WIN35,
+    html: "<p>An <b>array</b> is things in rows and columns.</p>" +
+          "<p>This office block has 3 rows of windows. Each row has 5.</p>" +
+          "<p>3 &times; 5 = 15. Count the columns too: 5 &times; 3 = 15.</p>" +
+          '<div class="keep"><b>Keep this</b>You can times in any order. 3 &times; 5 is the same as 5 &times; 3.</div>' },
+
+  { type: "num", topic: "Groups and arrays",
+    fig: WIN46,
+    q: "How many windows are lit?",
+    boxes: [ { label: "Lit windows", a: 24 } ],
+    hint: "Count one row. Then count how many rows.",
+    why: "4 rows of 6: 6, 12, 18, 24. So 4 &times; 6 = <b>24</b>." },
+
+  { type: "match", topic: "Groups and arrays",
+    q: "Match each adding sum to a times sum.",
+    pairs: [
+      ["4 + 4 + 4", "3 &times; 4"],
+      ["5 + 5", "2 &times; 5"],
+      ["2 + 2 + 2 + 2", "4 &times; 2"],
+      ["10 + 10 + 10", "3 &times; 10"]
+    ],
+    hint: "Count how many numbers are added. That is how many groups.",
+    why: "4 + 4 + 4 is 3 lots of 4. 5 + 5 is 2 lots of 5. 2 + 2 + 2 + 2 is 4 lots of 2. 10 + 10 + 10 is 3 lots of 10." },
+
+  /* ---------- 2 2, 5 AND 10 TABLES ---------- */
+  { type: "learn", topic: "2, 5 and 10 tables",
+    title: "Counting in 2s, 5s and 10s",
+    html: '<table class="tt"><tr><th>2 times table</th><td>2, 4, 6, 8, 10, 12</td></tr>' +
+          '<tr><th>5 times table</th><td>5, 10, 15, 20, 25, 30</td></tr>' +
+          '<tr><th>10 times table</th><td>10, 20, 30, 40, 50, 60</td></tr></table>' +
+          "<p>Numbers in a times table are called <b>multiples</b>.</p>" +
+          "<p>Multiples of 2 are even. Multiples of 5 end in 5 or 0. Multiples of 10 end in 0.</p>" +
+          '<div class="keep"><b>Keep this</b>Stuck? Count up in steps on your fingers.</div>' },
+
+  { type: "num", topic: "2, 5 and 10 tables",
+    q: "Fill in the times table facts.",
+    boxes: [
+      { label: "7 &times; 5", a: 35 },
+      { label: "6 &times; 2", a: 12 },
+      { label: "9 &times; 10", a: 90 }
+    ],
+    hint: "Count in 5s seven times. Count in 2s six times. Count in 10s nine times.",
+    why: "7 &times; 5 = <b>35</b>. 6 &times; 2 = <b>12</b>. 9 &times; 10 = <b>90</b>." },
+
+  { type: "num", topic: "2, 5 and 10 tables",
+    q: "Count in 5s. What comes next?" + big("25, 30, 35, " + gap()),
+    boxes: [ { label: "Next", a: 40 } ],
+    hint: "Add 5 to the last number.",
+    why: "35 + 5 = <b>40</b>." },
+
+  { type: "sort", topic: "2, 5 and 10 tables",
+    q: "Is it a multiple of 5?",
+    buckets: [ "Multiple of 5", "Not a multiple of 5" ],
+    cards: [ ["15", 0], ["40", 0], ["52", 1], ["85", 0], ["101", 1], ["70", 0] ],
+    hint: "Multiples of 5 end in 5 or 0.",
+    why: "15, 40, 85 and 70 end in 5 or 0. 52 ends in 2 and 101 ends in 1, so they are not multiples of 5." },
+
+  { type: "mc", topic: "2, 5 and 10 tables",
+    q: "Night guards carry torches. Each torch takes 2 batteries. How many batteries for 8 torches?",
+    options: [ "16", "10", "82", "18" ],
+    answer: 0,
+    hint: "8 groups of 2. Count in 2s, eight times.",
+    why: "8 &times; 2 = <b>16</b>. 10 comes from adding 8 and 2." },
+
+  /* ---------- 3 3 AND 4 TABLES ---------- */
+  { type: "learn", topic: "3 and 4 tables",
+    title: "Counting in 3s and 4s",
+    html: '<table class="tt"><tr><th>3 times table</th><td>3, 6, 9, 12, 15, 18</td></tr>' +
+          '<tr><th>4 times table</th><td>4, 8, 12, 16, 20, 24</td></tr></table>' +
+          "<p>Stuck on the 4s? Double the 2s.</p>" +
+          "<p>2 &times; 6 = 12. Double 12 is 24. So 4 &times; 6 = 24.</p>" +
+          '<div class="keep"><b>Keep this</b>12 is in both tables. 4 &times; 3 = 12 and 3 &times; 4 = 12.</div>' },
+
+  { type: "num", topic: "3 and 4 tables",
+    q: "Fill in the times table facts.",
+    boxes: [
+      { label: "4 &times; 3", a: 12 },
+      { label: "5 &times; 4", a: 20 },
+      { label: "6 &times; 3", a: 18 }
+    ],
+    hint: "Use the tables in the learn card. Count in 3s or 4s.",
+    why: "4 &times; 3 = <b>12</b>. 5 &times; 4 = <b>20</b>. 6 &times; 3 = <b>18</b>." },
+
+  { type: "num", topic: "3 and 4 tables",
+    q: "What is 8 &times; 4?",
+    boxes: [ { label: "8 &times; 4", a: 32 } ],
+    hint: "Double 8. Then double again.",
+    why: "Double 8 is 16. Double 16 is <b>32</b>. So 8 &times; 4 = 32." },
+
+  { type: "multi", topic: "3 and 4 tables",
+    q: "Pick the multiples of 3.",
+    options: [ "9", "14", "21", "25", "30", "16" ],
+    answers: [ 0, 2, 4 ],
+    hint: "Count in 3s: 3, 6, 9, 12, 15, 18, 21, 24, 27, 30.",
+    why: "<b>9, 21 and 30</b> are in the 3 times table. 14, 25 and 16 are not." },
+
+  { type: "num", topic: "3 and 4 tables",
+    q: "Ghost tour tickets cost &pound;3 each. How much for 7 tickets?",
+    boxes: [ { label: "Cost", a: 21, pre: "&pound;" } ],
+    hint: "7 lots of &pound;3. Count in 3s seven times.",
+    why: "7 &times; 3 = 21, so 7 tickets cost <b>&pound;21</b>." },
+
+  /* ---------- 4 DOUBLING AND HALVING ---------- */
+  { type: "learn", topic: "Doubling and halving",
+    title: "Double and half",
+    html: "<p><b>Double</b> means two lots of. Double 8 is 16.</p>" +
+          "<p><b>Halve</b> means split into 2 equal parts. Half of 16 is 8.</p>" +
+          "<p>Doubling and halving undo each other.</p>" +
+          "<p>Big number? Split it. Double 34: double 30 is 60. Double 4 is 8. So 68.</p>" +
+          '<div class="keep"><b>Keep this</b>Double is times 2. Half is share by 2.</div>' },
+
+  { type: "num", topic: "Doubling and halving",
+    q: "Double these.",
+    boxes: [
+      { label: "Double 15", a: 30 },
+      { label: "Double 24", a: 48 }
+    ],
+    hint: "Split into tens and ones. Double each part.",
+    why: "Double 15: double 10 is 20, double 5 is 10. 20 + 10 = <b>30</b>. Double 24: double 20 is 40, double 4 is 8. 40 + 8 = <b>48</b>." },
+
+  { type: "num", topic: "Doubling and halving",
+    q: "Halve these.",
+    boxes: [
+      { label: "Half of 40", a: 20 },
+      { label: "Half of 18", a: 9 },
+      { label: "Half of 50", a: 25 }
+    ],
+    hint: "What number doubles to make it?",
+    why: "Half of 40 is <b>20</b>. Half of 18 is <b>9</b>. Half of 50 is <b>25</b>, because 25 + 25 = 50." },
+
+  { type: "match", topic: "Doubling and halving",
+    q: "Match each number to its double.",
+    pairs: [ ["6", "12"], ["25", "50"], ["45", "90"], ["100", "200"] ],
+    hint: "Double means add the number to itself.",
+    why: "6 + 6 = 12. 25 + 25 = 50. 45 + 45 = 90. 100 + 100 = 200." },
+
+  { type: "num", topic: "Doubling and halving",
+    q: "Bonnie, Jay's dog, has 24 treats for the week. Half of them are gone by Wednesday. How many treats has Bonnie eaten?",
+    boxes: [ { label: "Treats eaten", a: 12 } ],
+    hint: "Half of 24. Halve the tens, then halve the ones.",
+    why: "Half of 20 is 10 and half of 4 is 2. So half of 24 is <b>12</b>." },
+
+  /* ---------- 5 SHARING AND GROUPING ---------- */
+  { type: "learn", topic: "Sharing and grouping",
+    title: "Two ways to divide",
+    fig: SHAREFIG,
+    html: "<p><b>Sharing</b>: 12 cupcakes into 3 boxes. Deal them out one at a time. Each box gets 4.</p>" +
+          "<p><b>Grouping</b>: 12 cupcakes, 3 in each bag. That fills 4 bags.</p>" +
+          "<p>Both are 12 &divide; 3 = 4.</p>" +
+          '<div class="keep"><b>Keep this</b>Divide undoes times. 3 &times; 4 = 12, so 12 &divide; 3 = 4.</div>' },
+
+  { type: "num", topic: "Sharing and grouping",
+    q: "Share 20 cupcakes equally into 4 boxes. How many in each box?",
+    boxes: [ { label: "In each box", a: 5 } ],
+    hint: "What times 4 makes 20? Count in 4s.",
+    why: "20 &divide; 4 = <b>5</b>, because 4 &times; 5 = 20." },
+
+  { type: "num", topic: "Sharing and grouping",
+    q: "Use your times tables to divide.",
+    boxes: [
+      { label: "15 &divide; 5", a: 3 },
+      { label: "18 &divide; 2", a: 9 },
+      { label: "40 &divide; 10", a: 4 }
+    ],
+    hint: "How many 5s make 15? How many 2s make 18? How many 10s make 40?",
+    why: "15 &divide; 5 = <b>3</b>. 18 &divide; 2 = <b>9</b>. 40 &divide; 10 = <b>4</b>." },
+
+  { type: "mc", topic: "Sharing and grouping",
+    q: "Torches come in packs of 4. You need 24 torches. How many packs?",
+    options: [ "6", "20", "28", "96" ],
+    answer: 0,
+    hint: "How many 4s make 24? Count in 4s.",
+    why: "4, 8, 12, 16, 20, 24 is 6 fours. So <b>6 packs</b>. 24 &divide; 4 = 6." },
+
+  { type: "match", topic: "Sharing and grouping",
+    q: "Match each times fact to a divide fact.",
+    pairs: [
+      ["4 &times; 5 = 20", "20 &divide; 5 = 4"],
+      ["3 &times; 6 = 18", "18 &divide; 3 = 6"],
+      ["2 &times; 9 = 18", "18 &divide; 9 = 2"],
+      ["10 &times; 4 = 40", "40 &divide; 10 = 4"]
+    ],
+    hint: "The divide fact uses the same three numbers.",
+    why: "Each divide fact starts with the answer of the times fact. Then it goes back the other way." },
+
+  /* ---------- 6 LEFTOVERS ---------- */
+  { type: "learn", topic: "Leftovers",
+    title: "When it does not share out",
+    fig: LEFTFIG,
+    html: "<p>Share 14 cupcakes into 4 boxes.</p>" +
+          "<p>Each box gets 3. There are 2 left over.</p>" +
+          "<p>The part left over is called the <b>remainder</b>.</p>" +
+          "<p>We write 14 &divide; 4 = 3 remainder 2.</p>" +
+          '<div class="keep"><b>Keep this</b>The remainder is always smaller than the number of boxes.</div>' },
+
+  { type: "widget", topic: "Leftovers",
+    title: "Sharing machine",
+    html: "Three orders from the night bakery. Deal the cupcakes into boxes, then fill in the sum.",
+    mount: mountShare,
+    report: function(d){
+      if(!d || !d.result) return "Sharing machine: " + (d && d.c ? d.c : 0) + " of 3 orders packed.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Sharing machine: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Leftovers",
+    q: "Share 19 cupcakes into 5 boxes.",
+    boxes: [
+      { label: "Each box gets", a: 3 },
+      { label: "Left over", a: 4 }
+    ],
+    hint: "Count in 5s: 5, 10, 15, 20. 20 is too many. Stop at 15.",
+    why: "3 &times; 5 = 15. That leaves 19 &minus; 15 = 4. So 19 &divide; 5 = <b>3 remainder 4</b>." },
+
+  { type: "mc", topic: "Leftovers", stretch: true,
+    q: "You have 26 cupcakes. A box holds 4. How many boxes do you need for all of them?",
+    options: [ "6", "7", "8", "6 remainder 2" ],
+    answer: 1,
+    hint: "26 &divide; 4 is 6 remainder 2. Where do the last 2 cupcakes go?",
+    why: "6 boxes hold 24. The last 2 cupcakes need a box too. So you need <b>7 boxes</b>." },
+
+  { type: "mc", topic: "Leftovers", stretch: true,
+    q: "A baker has 23 cupcakes. A box holds 5. How many boxes can she fill right up?",
+    options: [ "4", "5", "3", "18" ],
+    answer: 0,
+    hint: "Count in 5s up to 23. How many full 5s fit?",
+    why: "4 &times; 5 = 20, with 3 left over. 3 cannot fill a box. So she fills <b>4 boxes</b>." },
+
+  /* ---------- 7 WORD PROBLEMS ---------- */
+  { type: "learn", topic: "Word problems",
+    title: "Times or share?",
+    html: "<p>Do you know how many groups, and how many in each? Then times.</p>" +
+          "<p>Do you know the total, and need to split it? Then divide.</p>" +
+          "<p>Words like <b>each</b>, <b>rows of</b> and <b>lots of</b> often mean times.</p>" +
+          "<p>Words like <b>share</b> and <b>split</b> often mean divide.</p>" +
+          '<div class="keep"><b>Keep this</b>Draw it if it helps. Dots and circles are fine.</div>' },
+
+  { type: "sort", topic: "Word problems",
+    q: "Times or divide?",
+    buckets: [ "Times", "Divide" ],
+    cards: [ ["6 boxes. 5 cakes in each. How many cakes?", 0], ["30 cakes shared by 5 people. How many each?", 1],
+             ["4 rows of 10 seats. How many seats?", 0], ["40 seats in rows of 10. How many rows?", 1] ],
+    hint: "Do you know the total already? If yes, you divide.",
+    why: "Times: 6 boxes of 5 is 30 cakes. 4 rows of 10 is 40 seats. Divide: 30 shared by 5 is 6 each. 40 in rows of 10 is 4 rows." },
+
+  { type: "num", topic: "Word problems",
+    q: "The old cinema has 8 rows of seats. Each row has 10 seats. How many seats are there?",
+    boxes: [ { label: "Seats", a: 80 } ],
+    hint: "8 groups of 10.",
+    why: "8 &times; 10 = <b>80</b> seats." },
+
+  { type: "num", topic: "Word problems",
+    q: "3 friends share 18 glow sticks equally. How many does each friend get?",
+    boxes: [ { label: "Each friend", a: 6 } ],
+    hint: "18 shared into 3 groups. Count in 3s to 18.",
+    why: "18 &divide; 3 = <b>6</b>, because 3 &times; 6 = 18." },
+
+  { type: "num", topic: "Word problems", stretch: true,
+    q: "Cupcakes cost &pound;2 each. You buy 4 for the night shift. You pay with a &pound;10 note.<br>a) How much do the cupcakes cost?<br>b) How much change do you get?",
+    boxes: [
+      { label: "a) Cost", a: 8, pre: "&pound;" },
+      { label: "b) Change", a: 2, pre: "&pound;" }
+    ],
+    hint: "a) 4 lots of &pound;2. b) Then take that away from &pound;10.",
+    why: "a) 4 &times; 2 = <b>&pound;8</b>. b) 10 &minus; 8 = <b>&pound;2</b> change." }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

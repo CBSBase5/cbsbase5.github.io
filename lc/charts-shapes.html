@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charts and shapes - LC Night Shift HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="/lc/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/lc/lc.css?v=2">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.cs-tally{border-collapse:collapse;margin:4px auto 12px;font-size:1rem;background:#fff}
+.cs-tally caption{font-family:var(--display);font-weight:700;padding:0 0 6px}
+.cs-tally td,.cs-tally th{border:2px solid var(--ink);padding:6px 10px;text-align:left;vertical-align:middle}
+.cs-tally th{background:var(--accent-soft)}
+.cs-tally svg{display:block;height:30px;width:auto}
+.cs-shape{width:96px;height:auto;display:block}
+.cs-big{font-family:var(--display);font-size:1.8rem;font-weight:700;padding:0 6px;line-height:1.1}
+.cs-ang{display:block;width:96px;height:auto;margin-bottom:2px}
+/* Build the bar chart widget */
+.bc-wrap{max-width:420px;margin:6px auto 0}
+.bc-fig{touch-action:none;cursor:ns-resize}
+.bc-fig svg{width:100%;height:auto;display:block}
+.bc-btns{display:grid;grid-template-columns:repeat(4,1fr);padding-left:15%;padding-right:2.5%;margin:2px 0 6px}
+.bc-btns div{display:flex;justify-content:center;gap:4px}
+.bc-btns button{width:34px;height:34px;border-radius:10px;border:2px solid var(--ink);background:#fff;color:var(--ink);font-size:1.2rem;font-weight:700;cursor:pointer;line-height:1;padding:0}
+.bc-btns button:disabled{opacity:.4;cursor:default}
+@media (max-width:420px){ .bc-btns button{width:29px;height:32px;font-size:1.05rem} .bc-btns div{gap:2px} }
+.bc-task p{margin:0 0 6px}
+.bc-title{font-family:var(--display);font-weight:700;text-align:center;margin:10px 0 6px}
+.bc-dots{display:flex;gap:6px;margin-bottom:6px}
+.bc-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.bc-dots span.on{background:var(--good)}
+.bc-dots span.now{background:var(--sun)}
+.bc-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lc/"><span class="hqlogo">LC</span><span class="hqname">Night Shift HQ<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/lc/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Charts and shapes</h2>
+    <span>Tally charts, pictograms and bar charts from the night shift. Then flat shapes, solid shapes, symmetry and right angles.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LC's Night Shift HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lc/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function f1(v){ return (+v).toFixed(1).replace(/\.0$/, ""); }
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + f1(x) + '" y="' + f1(y) + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + f1(x1) + '" y1="' + f1(y1) + '" x2="' + f1(x2) + '" y2="' + f1(y2) + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function pts(a){ return a.map(function(p){ return f1(p[0]) + "," + f1(p[1]); }).join(" "); }
+function poly(a, fill, extra){ return '<polygon points="' + pts(a) + '" fill="' + (fill || WHITE) + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"' + (extra || "") + '/>'; }
+var DASH = ' stroke-dasharray="6 5"';
+
+/* ---------- tallies ---------- */
+function tally(n){
+  var gates = Math.floor(n / 5), rest = n % 5, w = gates * 38 + rest * 8 + 4, s = "", x = 4, k, j;
+  for(k = 0; k < gates; k++){
+    for(j = 0; j < 4; j++) s += ln(x + j * 8, 4, x + j * 8, 28, INK, 2.5, ' stroke-linecap="round"');
+    s += ln(x - 3, 24, x + 27, 8, CORAL, 2.5, ' stroke-linecap="round"');
+    x += 38;
+  }
+  for(j = 0; j < rest; j++) s += ln(x + j * 8, 4, x + j * 8, 28, INK, 2.5, ' stroke-linecap="round"');
+  return '<svg viewBox="0 0 ' + Math.max(w, 12) + ' 32" role="img" aria-label="tally of ' + n + '">' + s + '</svg>';
+}
+var SOUNDS = [ ["Creaky door", 7], ["Footsteps", 12], ["Flickering light", 9], ["Owl hoot", 4] ];
+var TALLY = '<table class="cs-tally"><caption>Sounds heard on the night shift</caption><tr><th>Sound</th><th>Tally</th></tr>' +
+  SOUNDS.map(function(r){ return '<tr><td>' + r[0] + '</td><td>' + tally(r[1]) + '</td></tr>'; }).join("") + '</table>';
+var TALLY_EG = '<table class="cs-tally"><tr><th>Tally</th><th>Count</th><th>Number</th></tr>' +
+  '<tr><td>' + tally(7) + '</td><td>5, then 6, 7</td><td>7</td></tr>' +
+  '<tr><td>' + tally(12) + '</td><td>5, 10, then 11, 12</td><td>12</td></tr></table>';
+
+/* ---------- pictogram ---------- */
+var clipN = 0;
+function cake(x, y, half){
+  var id = "cscake" + (++clipN), s = "";
+  if(half) s += '<clipPath id="' + id + '"><rect x="' + (x - 2) + '" y="' + (y - 14) + '" width="' + 19 + '" height="44"/></clipPath><g clip-path="url(#' + id + ')">';
+  s += '<rect x="' + x + '" y="' + (y + 8) + '" width="34" height="20" rx="3" fill="#b5763d" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<path d="M' + x + ' ' + (y + 12) + ' Q' + (x + 4) + ' ' + (y + 2) + ' ' + (x + 9) + ' ' + (y + 10) + ' Q' + (x + 13) + ' ' + (y + 2) + ' ' + (x + 17) + ' ' + (y + 10) + ' Q' + (x + 21) + ' ' + (y + 2) + ' ' + (x + 25) + ' ' + (y + 10) + ' Q' + (x + 30) + ' ' + (y + 2) + ' ' + (x + 34) + ' ' + (y + 12) + ' V' + (y + 6) + ' Q' + (x + 17) + ' ' + (y - 4) + ' ' + x + ' ' + (y + 6) + ' Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+  s += '<circle cx="' + (x + 17) + '" cy="' + (y - 2) + '" r="5" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  if(half) s += '</g>';
+  return s;
+}
+var PUDS = [ ["Monday", 4], ["Tuesday", 7], ["Wednesday", 10], ["Thursday", 5] ];
+var PICTO = (function(){
+  var s = '<svg viewBox="0 0 400 270" role="img" aria-label="A pictogram of puddings sold at the Midnight Cafe. One cake means 2 puddings. Monday 2 cakes. Tuesday 3 and a half cakes. Wednesday 5 cakes. Thursday 2 and a half cakes.">';
+  s += t(200, 22, "Puddings sold", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  PUDS.forEach(function(r, i){
+    var y = 52 + i * 46;
+    s += ln(10, y + 34, 390, y + 34, LINE, 1.5);
+    s += t(16, y + 24, r[0], 16, INK, LAB + ' font-weight="700"');
+    var whole = Math.floor(r[1] / 2), half = r[1] % 2;
+    for(var k = 0; k < whole + half; k++) s += cake(128 + k * 48, y, k === whole);
+  });
+  s += '<rect x="74" y="238" width="252" height="28" rx="6" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<g transform="translate(84 240) scale(.62)">' + cake(0, 8, false) + '</g>';
+  s += t(116, 258, "Key: 1 cake = 2 puddings", 15, INK, LAB + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- bar charts ---------- */
+/* o: cats, vals, max, lab, grid, aria, showVals, col */
+function barChart(o){
+  var x0 = 60, x1 = 390, yTop = 24, y0 = 236, cw = (x1 - x0) / o.cats.length;
+  function y(v){ return y0 - v / o.max * (y0 - yTop); }
+  var s = '<svg viewBox="0 0 400 296" role="img" aria-label="' + o.aria + '">';
+  for(var g = 0; g <= o.max; g += o.grid){
+    s += ln(x0, y(g), x1, y(g), g % o.lab === 0 ? "#b9b8cc" : LINE, g % o.lab === 0 ? 1.5 : 1);
+  }
+  for(var v = 0; v <= o.max; v += o.lab) s += t(x0 - 9, y(v) + 5, String(v), 15, INK, LAB + ' font-weight="700" text-anchor="end"');
+  o.cats.forEach(function(c, i){
+    var cx = x0 + cw * (i + 0.5), val = o.vals[i];
+    if(val > 0) s += '<rect x="' + f1(cx - 24) + '" y="' + f1(y(val)) + '" width="48" height="' + f1(y0 - y(val)) + '" fill="' + (o.col || CYAN) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    if(o.showVals && val > 0) s += t(cx, y(val) - 7, String(val), 16, INK, LAB + ' font-weight="800" text-anchor="middle"');
+    var words = c.split(" ");
+    words.forEach(function(w, k){ s += t(cx, y0 + 22 + k * 18, w, 15, INK, LAB + ' font-weight="700" text-anchor="middle"'); });
+  });
+  s += ln(x0, yTop - 8, x0, y0, INK, 3) + ln(x0, y0, x1, y0, INK, 3);
+  if(o.extra) s += o.extra;
+  s += '</svg>';
+  return s;
+}
+var VOTES = { cats: ["Car park", "Hospital", "Shopping centre", "Library"], vals: [5, 9, 12, 4] };
+function votes(aria){
+  return barChart({ cats: VOTES.cats, vals: VOTES.vals, max: 14, lab: 2, grid: 2, col: VIOLET,
+    aria: aria || "A bar chart of votes for the best place for a ghost story. The scale goes up in 2s. Car park 5, hospital 9, shopping centre 12, library 4." });
+}
+
+/* ---------- 2D shapes ---------- */
+function regular(cx, cy, r, n, rot){
+  var a = [];
+  for(var k = 0; k < n; k++){ var th = (rot || 0) + k * 2 * Math.PI / n - Math.PI / 2; a.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]); }
+  return a;
+}
+var SHAPES2D = (function(){
+  var s = '<svg viewBox="0 0 400 324" role="img" aria-label="Six flat shapes. Triangle: 3 sides, 3 corners. Square: 4 sides, 4 corners. Rectangle: 4 sides, 4 corners. Pentagon: 5 sides, 5 corners. Hexagon: 6 sides, 6 corners. Circle: no straight sides and no corners.">';
+  s += poly([[24, 120], [116, 120], [70, 34]], SUN);
+  s += poly([[160, 36], [240, 36], [240, 116], [160, 116]], MINT);
+  s += poly([[282, 50], [386, 50], [386, 112], [282, 112]], CYAN);
+  s += poly(regular(70, 226, 46, 5), "#f7a6a6");
+  s += poly(regular(200, 226, 46, 6, Math.PI / 6), "#c9b8fb");
+  s += '<circle cx="334" cy="226" r="46" fill="#f7e9b0" stroke="' + INK + '" stroke-width="3"/>';
+  var labs = [[70, 144, "Triangle", "3 sides"], [200, 144, "Square", "4 sides"], [334, 144, "Rectangle", "4 sides"],
+              [70, 296, "Pentagon", "5 sides"], [200, 296, "Hexagon", "6 sides"], [334, 296, "Circle", "no corners"]];
+  labs.forEach(function(l){
+    s += t(l[0], l[1], l[2], 16, INK, LAB + ' font-weight="800" text-anchor="middle"');
+    s += t(l[0], l[1] + 19, l[3], 15, INK, BODY + ' text-anchor="middle"');
+  });
+  s += '</svg>';
+  return s;
+})();
+function shapeCard(points, fill, aria){
+  return '<svg class="cs-shape" viewBox="0 0 120 100" role="img" aria-label="' + aria + '">' + poly(points, fill) + '</svg>';
+}
+var LSHAPE = '<svg viewBox="0 0 400 200" role="img" aria-label="An L shape made of straight sides."><polygon points="120,20 190,20 190,120 290,120 290,180 120,180" fill="#c9b8fb" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/></svg>';
+
+/* ---------- 3D shapes (drawn at a slant, hidden edges dashed) ---------- */
+function box3(x, y, w, h, d, fill){
+  var dx = d * 0.7, dy = -d * 0.5;
+  var A = [x, y + h], B = [x + w, y + h], C = [x + w, y], D = [x, y];
+  function k(p){ return [p[0] + dx, p[1] + dy]; }
+  var s = "";
+  s += poly([D, C, k(C), k(D)], fill) + poly([B, C, k(C), k(B)], fill) + poly([A, B, C, D], fill);
+  s += ln(A[0], A[1], k(A)[0], k(A)[1], INK, 2, DASH) + ln(k(A)[0], k(A)[1], k(B)[0], k(B)[1], INK, 2, DASH) + ln(k(A)[0], k(A)[1], k(D)[0], k(D)[1], INK, 2, DASH);
+  return s;
+}
+function pyramid(cx, by, w, d, h, fill){
+  var dx = d * 0.7, dy = -d * 0.5;
+  var A = [cx - w / 2, by], B = [cx + w / 2, by], C = [B[0] + dx, B[1] + dy], D = [A[0] + dx, A[1] + dy];
+  var P = [cx + dx / 2, by + dy / 2 - h];
+  var s = "";
+  s += poly([A, B, P], fill) + poly([B, C, P], fill);
+  s += ln(A[0], A[1], D[0], D[1], INK, 2, DASH) + ln(D[0], D[1], C[0], C[1], INK, 2, DASH) + ln(D[0], D[1], P[0], P[1], INK, 2, DASH);
+  return s;
+}
+function prism(x, by, w, h, d, fill){
+  var dx = d * 0.85, dy = -d * 0.35;
+  var F1 = [x, by], F2 = [x + w, by], F3 = [x + w / 2, by - h];
+  function k(p){ return [p[0] + dx, p[1] + dy]; }
+  var s = "";
+  s += poly([F3, k(F3), k(F2), F2], fill);
+  s += poly([F1, F2, F3], fill);
+  s += ln(F1[0], F1[1], k(F1)[0], k(F1)[1], INK, 2, DASH) + ln(k(F1)[0], k(F1)[1], k(F2)[0], k(F2)[1], INK, 2, DASH) + ln(k(F1)[0], k(F1)[1], k(F3)[0], k(F3)[1], INK, 2, DASH);
+  return s;
+}
+function cylinder(cx, top, rx, ry, h, fill){
+  var s = '<path d="M' + (cx - rx) + ' ' + top + ' V' + (top + h) + ' A' + rx + ' ' + ry + ' 0 0 0 ' + (cx + rx) + ' ' + (top + h) + ' V' + top + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<path d="M' + (cx - rx) + ' ' + (top + h) + ' A' + rx + ' ' + ry + ' 0 0 1 ' + (cx + rx) + ' ' + (top + h) + '" fill="none" stroke="' + INK + '" stroke-width="2"' + DASH + '/>';
+  s += '<ellipse cx="' + cx + '" cy="' + top + '" rx="' + rx + '" ry="' + ry + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3"/>';
+  return s;
+}
+function cone(cx, base, rx, ry, h, fill){
+  var s = '<path d="M' + (cx - rx) + ' ' + base + ' L' + cx + ' ' + (base - h) + ' L' + (cx + rx) + ' ' + base + ' A' + rx + ' ' + ry + ' 0 0 1 ' + (cx - rx) + ' ' + base + ' Z" fill="' + fill + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
+  s += '<path d="M' + (cx - rx) + ' ' + base + ' A' + rx + ' ' + ry + ' 0 0 1 ' + (cx + rx) + ' ' + base + '" fill="none" stroke="' + INK + '" stroke-width="2"' + DASH + '/>';
+  return s;
+}
+function sphere(cx, cy, r, fill){
+  return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3"/>' +
+    '<path d="M' + (cx - r) + ' ' + cy + ' A' + r + ' ' + (r * 0.3) + ' 0 0 0 ' + (cx + r) + ' ' + cy + '" fill="none" stroke="' + INK + '" stroke-width="1.5" opacity=".5"/>' +
+    '<path d="M' + (cx - r) + ' ' + cy + ' A' + r + ' ' + (r * 0.3) + ' 0 0 1 ' + (cx + r) + ' ' + cy + '" fill="none" stroke="' + INK + '" stroke-width="1.5" opacity=".5"' + DASH + '/>';
+}
+var SHAPES3D = (function(){
+  var s = '<svg viewBox="0 0 400 330" role="img" aria-label="Seven solid shapes: cube, cuboid, square based pyramid and triangular prism on the top row; cylinder, cone and sphere on the bottom row. Hidden edges are dashed.">';
+  s += box3(14, 54, 56, 56, 40, SUN) + t(56, 144, "Cube", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += box3(112, 70, 76, 40, 30, MINT) + t(160, 144, "Cuboid", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += pyramid(240, 110, 64, 36, 70, "#f7a6a6") + t(254, 136, "Square based", 15, INK, LAB + ' font-weight="800" text-anchor="middle"') + t(254, 153, "pyramid", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += prism(300, 110, 52, 50, 46, CYAN) + t(355, 136, "Triangular", 15, INK, LAB + ' font-weight="800" text-anchor="middle"') + t(355, 153, "prism", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += cylinder(72, 196, 40, 13, 70, "#c9b8fb") + t(72, 312, "Cylinder", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += cone(200, 270, 42, 13, 90, "#f7e9b0") + t(200, 312, "Cone", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += sphere(328, 230, 48, "#a7e3d2") + t(328, 312, "Sphere", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+}());
+function solid(inner, aria, vb){
+  return '<svg viewBox="' + (vb || "0 0 260 180") + '" role="img" aria-label="' + aria + '" style="max-width:300px">' + inner + '</svg>';
+}
+function solidCard(inner, aria, vb){
+  return '<svg class="cs-shape" viewBox="' + vb + '" role="img" aria-label="' + aria + '">' + inner + '</svg>';
+}
+
+/* ---------- symmetry ---------- */
+var GHOST = (function(){
+  var s = '<svg viewBox="0 0 400 210" role="img" aria-label="A ghost with a dashed line of symmetry down the middle, and a rectangle with its 2 lines of symmetry, one up and one across.">';
+  s += '<path d="M60 186 V86 Q60 26 120 26 Q180 26 180 86 V186 L160 166 L140 186 L120 166 L100 186 L80 166 Z" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
+  s += '<ellipse cx="100" cy="86" rx="9" ry="13" fill="' + INK + '"/><ellipse cx="140" cy="86" rx="9" ry="13" fill="' + INK + '"/>';
+  s += '<ellipse cx="120" cy="124" rx="12" ry="9" fill="' + INK + '"/>';
+  s += ln(120, 8, 120, 200, CORAL, 3, DASH);
+  s += '<rect x="230" y="56" width="150" height="96" fill="' + MINT + '" fill-opacity=".5" stroke="' + INK + '" stroke-width="3"/>';
+  s += ln(305, 40, 305, 168, CORAL, 3, DASH) + ln(214, 104, 396, 104, CORAL, 3, DASH);
+  s += '</svg>';
+  return s;
+})();
+var DIAG = '<svg viewBox="0 0 400 170" role="img" aria-label="A rectangle with a dashed line from one corner to the opposite corner."><rect x="90" y="20" width="220" height="130" fill="' + MINT + '" fill-opacity=".5" stroke="' + INK + '" stroke-width="3"/>' + ln(90, 150, 310, 20, CORAL, 3, DASH) + '</svg>';
+var TRI = '<svg viewBox="0 0 400 190" role="img" aria-label="A triangle with all three sides the same length.">' + poly([[130, 170], [270, 170], [200, 48.8]], SUN) + '</svg>';
+
+/* ---------- angles ---------- */
+function angleSVG(deg, rot, w){
+  var vx = 30, vy = 80, L = 70, s = "";
+  var a1 = rot * Math.PI / 180, a2 = (rot + deg) * Math.PI / 180;
+  var p1 = [vx + L * Math.cos(a1), vy - L * Math.sin(a1)], p2 = [vx + L * Math.cos(a2), vy - L * Math.sin(a2)];
+  if(deg === 90){
+    var q1 = [vx + 14 * Math.cos(a1), vy - 14 * Math.sin(a1)], q2 = [vx + 14 * Math.cos(a2), vy - 14 * Math.sin(a2)];
+    s += '<path d="M' + f1(q1[0]) + ' ' + f1(q1[1]) + ' L' + f1(q1[0] + q2[0] - vx) + ' ' + f1(q1[1] + q2[1] - vy) + ' L' + f1(q2[0]) + ' ' + f1(q2[1]) + '" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>';
+  }else{
+    var r = 18, e1 = [vx + r * Math.cos(a1), vy - r * Math.sin(a1)], e2 = [vx + r * Math.cos(a2), vy - r * Math.sin(a2)];
+    s += '<path d="M' + f1(e1[0]) + ' ' + f1(e1[1]) + ' A' + r + ' ' + r + ' 0 0 0 ' + f1(e2[0]) + ' ' + f1(e2[1]) + '" fill="none" stroke="' + CORAL + '" stroke-width="2.5"/>';
+  }
+  s += ln(vx, vy, p1[0], p1[1], INK, 4, ' stroke-linecap="round"') + ln(vx, vy, p2[0], p2[1], INK, 4, ' stroke-linecap="round"');
+  return s;
+}
+/* each angle drawn in its own box; vb picked so the arms fit */
+function angleCard(deg, rot, name){
+  return '<svg class="cs-ang" viewBox="-50 0 160 100" role="img" aria-label="' + name + '">' + angleSVG(deg, rot) + '</svg>' + name;
+}
+var ANGLES = (function(){
+  var s = '<svg viewBox="0 0 400 150" role="img" aria-label="Three angles. One smaller than a right angle. A right angle marked with a small square. One bigger than a right angle.">';
+  s += '<g transform="translate(10 10)">' + angleSVG(45, 0) + '</g>';
+  s += '<g transform="translate(150 10)">' + angleSVG(90, 0) + '</g>';
+  s += '<g transform="translate(290 10)">' + angleSVG(135, 0) + '</g>';
+  s += t(76, 122, "Smaller", 15, INK, LAB + ' font-weight="800" text-anchor="middle"') + t(76, 140, "(acute)", 14, INK, BODY + ' text-anchor="middle"');
+  s += t(196, 122, "Right angle", 15, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(320, 122, "Bigger", 15, INK, LAB + ' font-weight="800" text-anchor="middle"') + t(320, 140, "(obtuse)", 14, INK, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- Build the bar chart widget ---------- */
+var BR = [
+  { title: "Puddings ordered at the Midnight Caf&eacute;", head: "Pudding", cats: ["Jelly", "Trifle", "Brownie", "Crumble"], vals: [5, 8, 3, 6],
+    max: 10, lab: 2, grid: 1, col: SUN,
+    how: "Count each tally in 5s, then the rest: Jelly 5, Trifle 8, Brownie 3, Crumble 6. Each bar stops on its line." },
+  { title: "Lights that flickered on each floor", head: "Floor", cats: ["Ground", "First", "Second", "Third"], vals: [11, 4, 7, 12],
+    max: 14, lab: 2, grid: 2, col: CORAL,
+    how: "This scale only has lines for even numbers. 11 and 7 are odd, so those bars stop half way between two lines. Ground 11, First 4, Second 7, Third 12." }
+];
+function mountBars(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0];
+  if(!d.shown) d.shown = [false, false];
+  if(!d.v || d.v.length !== 4) d.v = [0, 0, 0, 0];
+  var view = Math.min(d.c, 1), landed = false, dragging = -1;
+
+  el.innerHTML =
+    '<div class="wpanel bc-task" data-r="task"></div>' +
+    '<div data-r="tally"></div>' +
+    '<div class="bc-wrap"><div class="bc-fig" data-r="svg"></div><div class="bc-btns" data-r="btns"></div></div>' +
+    '<div class="wrow">' +
+      '<button class="btn" type="button" data-act="check">Check my chart</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-act="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb bc-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function act(a){ return el.querySelector('[data-act="' + a + '"]'); }
+  function R(){ return BR[view]; }
+
+  function paint(){
+    var r = R();
+    q("svg").innerHTML = barChart({ cats: r.cats, vals: d.v, max: r.max, lab: r.lab, grid: r.grid, col: r.col, showVals: landed || d.c >= 2,
+      aria: "Your bar chart. Tap or drag in a column to set the height of its bar, or use the plus and minus buttons." });
+    var b = "";
+    r.cats.forEach(function(c, i){
+      b += '<div><button type="button" data-bar="' + i + '" data-dir="-1" aria-label="' + c + ' down one"' + (landed || d.v[i] <= 0 ? " disabled" : "") + '>&minus;</button>' +
+        '<button type="button" data-bar="' + i + '" data-dir="1" aria-label="' + c + ' up one"' + (landed || d.v[i] >= r.max ? " disabled" : "") + '>+</button></div>';
+    });
+    q("btns").innerHTML = b;
+  }
+  function draw(){
+    var r = R();
+    var dots = '<div class="bc-dots" aria-hidden="true">';
+    for(var k = 0; k < 2; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && d.c < 2 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    q("task").innerHTML = dots + (d.c >= 2 ?
+      '<p><b>Free play.</b> Both charts built. Change the bars and see how the chart changes.</p>' :
+      '<p class="tiny" style="margin:0 0 4px">Chart ' + (view + 1) + ' of 2</p><p>Make each bar match its tally.</p>');
+    q("tally").innerHTML = '<p class="bc-title">' + r.title + '</p><table class="cs-tally"><tr><th>' + r.head + '</th><th>Tally</th></tr>' +
+      r.cats.map(function(c, i){ return '<tr><td>' + c + '</td><td>' + tally(r.vals[i]) + '</td></tr>'; }).join("") + '</table>';
+    paint();
+    var wait = landed || d.c >= 2;
+    act("check").classList.toggle("hidden", d.c >= 2);
+    act("check").disabled = wait;
+    act("show").classList.toggle("hidden", wait || !d.miss[view]);
+  }
+  function setBar(i, v){
+    if(landed) return;
+    d.v[i] = Math.max(0, Math.min(R().max, Math.round(v)));
+    api.save(); paint();
+  }
+  function fb(cls, html){
+    var f = q("fb");
+    if(!cls){ f.className = "fb bc-fb hidden"; f.innerHTML = ""; return; }
+    f.className = "fb bc-fb " + cls; f.innerHTML = html;
+  }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function win(viaShow){
+    var k = view;
+    landed = true;
+    if(viaShow) d.shown[k] = true;
+    d.c = k + 1;
+    if(d.c >= 2) d.result = result();
+    api.save();
+    var head = viaShow ? "<b>Here is how this one works.</b> " : "<b>" + ["Chart built. Every bar matches.", "Lovely. Even the odd ones are spot on."][k] + "</b> ";
+    var more = k < 1 ? '<br><button class="btn" type="button" data-act="next">Next chart</button>' :
+      '<p style="margin:8px 0 0">Both charts built. Count the tally, then find that number on the scale.</p><button class="btn" type="button" data-act="next">Free play</button>';
+    fb(viaShow ? "show" : "good", head + R().how + more);
+    draw();
+    if(k === 1) api.done(d.result);
+  }
+  function check(){
+    if(landed || d.c >= 2) return;
+    var r = R(), wrong = [];
+    r.cats.forEach(function(c, i){ if(d.v[i] !== r.vals[i]) wrong.push(c); });
+    if(!wrong.length){ win(false); return; }
+    d.miss[view]++; api.save();
+    var list = wrong.length === 1 ? wrong[0] : wrong.slice(0, -1).join(", ") + " and " + wrong[wrong.length - 1];
+    fb("nudge", "<b>Not quite yet.</b> Have another look at " + list + ". Count the tally in 5s, then find that number on the scale." +
+      (view === 1 ? " Odd numbers sit half way between two lines." : "") + (d.miss[view] > 1 ? " Show me is there if you want it." : ""));
+    draw();
+  }
+
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("[data-bar]");
+    if(b && el.contains(b)){ var i = +b.getAttribute("data-bar"); setBar(i, d.v[i] + (+b.getAttribute("data-dir"))); return; }
+    var a = e.target.closest("[data-act]");
+    if(!a || !el.contains(a)) return;
+    var w = a.getAttribute("data-act");
+    if(w === "check") check();
+    else if(w === "show"){
+      if(landed || d.c >= 2) return;
+      d.v = R().vals.slice(); win(true);
+    }else if(w === "next"){
+      landed = false; fb(null);
+      view = Math.min(d.c, 1); d.v = [0, 0, 0, 0]; api.save(); draw();
+    }
+  });
+
+  /* tap or drag in a column to set its bar */
+  function fromPointer(e, start){
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var b = sv.getBoundingClientRect();
+    var ux = (e.clientX - b.left) * 400 / b.width, uy = (e.clientY - b.top) * 296 / b.height;
+    if(start){
+      if(ux < 60 || ux > 390 || uy > 244) return false;
+      dragging = Math.min(3, Math.floor((ux - 60) / 82.5));
+    }
+    if(dragging < 0) return false;
+    setBar(dragging, (236 - uy) / (212 / R().max));
+    return true;
+  }
+  q("svg").addEventListener("pointerdown", function(e){
+    if(landed) return;
+    if(fromPointer(e, true) === false) return;
+    try{ q("svg").setPointerCapture(e.pointerId); }catch(err){}
+    e.preventDefault();
+  });
+  q("svg").addEventListener("pointermove", function(e){ if(dragging >= 0 && !landed) fromPointer(e, false); });
+  function stop(){ dragging = -1; }
+  q("svg").addEventListener("pointerup", stop);
+  q("svg").addEventListener("pointercancel", stop);
+
+  draw();
+  if(d.c >= 2 && d.result){
+    fb("good", "<b>Both charts built.</b> Free play is open. Count the tally, then find that number on the scale.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "charts-shapes",
+  title: "Charts and shapes",
+  subject: "Maths",
+  mins: 40,
+  blurb: "Tally charts, pictograms and bar charts from the night shift, then flat shapes, solid shapes, symmetry and right angles. You get to build your own bar charts.",
+  steps: [
+
+  /* ---------- 1 TALLIES AND TABLES ---------- */
+  { type: "learn", topic: "Tallies and tables",
+    title: "Counting with tallies",
+    html: '<p>A tally chart helps you count things as they happen.</p>' +
+          '<p>Each line is 1. The fifth line goes across the other four. That makes a gate of 5.</p>' +
+          TALLY_EG +
+          '<p>To read a tally, count the gates in 5s. Then add the lines left over.</p>' +
+          '<div class="keep"><b>Keep this</b>A gate is 5. Count in 5s.</div>' },
+
+  { type: "num", topic: "Tallies and tables",
+    fig: TALLY,
+    q: "How many times were footsteps heard?",
+    boxes: [ { label: "Footsteps", a: 12 } ],
+    hint: "Count the gates in 5s. Then add the lines left over.",
+    why: "Two gates: 5, 10. Then 2 more lines: 11, 12. So <b>12</b>. It was only the cleaner." },
+
+  { type: "num", topic: "Tallies and tables",
+    fig: TALLY,
+    q: "Turn the tally into a table. Write the number for each sound.",
+    boxes: [
+      { label: "Creaky door", a: 7 },
+      { label: "Flickering light", a: 9 },
+      { label: "Owl hoot", a: 4 }
+    ],
+    hint: "Count each row in 5s first.",
+    why: "Creaky door: 5, then 6, 7. So <b>7</b>. Flickering light: 5, then 6, 7, 8, 9. So <b>9</b>. Owl hoot: 4 lines, no gate. So <b>4</b>." },
+
+  { type: "mc", topic: "Tallies and tables",
+    fig: TALLY,
+    q: "Which sound was heard the fewest times?",
+    options: [ "Owl hoot", "Creaky door", "Footsteps", "Flickering light" ],
+    answer: 0,
+    hint: "Fewest means the smallest number.",
+    why: "Owl hoot was heard 4 times. That is the smallest number. So <b>owl hoot</b>." },
+
+  { type: "num", topic: "Tallies and tables",
+    fig: TALLY,
+    q: "How many sounds were heard altogether?",
+    boxes: [ { label: "Altogether", a: 32 } ],
+    hint: "Add 7, 12, 9 and 4.",
+    why: "7 and 12 make 19. 19 and 9 make 28. 28 and 4 make <b>32</b>." },
+
+  /* ---------- 2 PICTOGRAMS ---------- */
+  { type: "learn", topic: "Pictograms",
+    title: "Pictures for numbers",
+    fig: PICTO,
+    html: '<p>A pictogram uses pictures to show numbers.</p>' +
+          '<p>Always read the key first. Sometimes one picture means 1. Here one cake means 2 puddings.</p>' +
+          '<p>Half a cake means 1 pudding.</p>' +
+          '<p>Monday has 2 cakes. Count in 2s: 2, 4. So 4 puddings.</p>' +
+          '<div class="keep"><b>Keep this</b>Read the key. Then count in 2s.</div>' },
+
+  { type: "num", topic: "Pictograms",
+    fig: PICTO,
+    q: "How many puddings were sold on Tuesday?",
+    boxes: [ { label: "Tuesday", a: 7 } ],
+    hint: "3 whole cakes and a half. Each whole cake is 2.",
+    why: "3 whole cakes: 2, 4, 6. Half a cake is 1 more. So <b>7</b>." },
+
+  { type: "mc", topic: "Pictograms",
+    fig: PICTO,
+    q: "Which day sold the fewest puddings?",
+    options: [ "Monday", "Tuesday", "Wednesday", "Thursday" ],
+    answer: 0, fixed: true,
+    hint: "Which row has the fewest cakes?",
+    why: "Monday has 2 cakes, which is 4 puddings. Thursday has 2 and a half cakes, which is 5. So <b>Monday</b>." },
+
+  { type: "num", topic: "Pictograms",
+    fig: PICTO,
+    q: "How many more puddings were sold on Wednesday than on Monday?",
+    boxes: [ { label: "More", a: 6 } ],
+    hint: "Wednesday has 5 cakes. Monday has 2 cakes. Each cake is 2.",
+    why: "Wednesday: 5 cakes is 10 puddings. Monday: 2 cakes is 4 puddings. 10 take away 4 is <b>6</b>." },
+
+  { type: "mc", topic: "Pictograms", stretch: true,
+    q: "One cake means 2 puddings. On Friday, 9 puddings were sold. How many cakes should you draw?",
+    options: [ "4 and a half cakes", "9 cakes", "4 cakes", "5 cakes" ],
+    answer: 0,
+    hint: "How many 2s make 8? Then 1 more pudding is half a cake.",
+    why: "8 puddings is 4 cakes. 1 more pudding is half a cake. So <b>4 and a half cakes</b>. Drawing 9 cakes would show 18 puddings." },
+
+  /* ---------- 3 BAR CHARTS ---------- */
+  { type: "learn", topic: "Bar charts",
+    title: "Reading a bar chart",
+    fig: votes(),
+    html: '<p>This bar chart shows votes for the best place for a ghost story.</p>' +
+          '<p>Go to the top of a bar. Then look across to the scale.</p>' +
+          '<p>This scale goes up in 2s. The hospital bar stops half way between 8 and 10. So it is 9.</p>' +
+          '<div class="keep"><b>Keep this</b>Check what the scale goes up in.</div>' },
+
+  { type: "num", topic: "Bar charts",
+    fig: votes(),
+    q: "How many votes did the car park get?",
+    boxes: [ { label: "Car park", a: 5 } ],
+    hint: "The bar stops half way between two lines. What is half way between 4 and 6?",
+    why: "The car park bar stops half way between 4 and 6. That is <b>5</b>." },
+
+  { type: "mc", topic: "Bar charts",
+    fig: votes(),
+    q: "Which place got the most votes?",
+    options: [ "Shopping centre", "Hospital", "Car park", "Library" ],
+    answer: 0,
+    hint: "Look for the tallest bar.",
+    why: "The tallest bar is the <b>shopping centre</b>, with 12 votes." },
+
+  { type: "num", topic: "Bar charts",
+    fig: votes(),
+    q: "How many more votes did the shopping centre get than the car park?",
+    boxes: [ { label: "More", a: 7 } ],
+    hint: "Read both bars. Then take the smaller from the bigger.",
+    why: "Shopping centre 12. Car park 5. 12 take away 5 is <b>7</b>." },
+
+  { type: "widget", topic: "Bar charts",
+    title: "Build the bar chart",
+    html: "Turn each tally into a bar chart. Tap or drag in a column to set a bar, or use the plus and minus buttons. Then press <b>Check my chart</b>.",
+    mount: mountBars,
+    report: function(d){
+      if(!d || !d.result) return "Build the bar chart: " + (d && d.c ? d.c : 0) + " of 2 built.";
+      var lab = { right1: "both first go", right2: "both, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Build the bar chart: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Bar charts", stretch: true,
+    fig: votes(),
+    q: "How many votes were there altogether?",
+    boxes: [ { label: "Altogether", a: 30 } ],
+    hint: "Read all four bars. Then add them up.",
+    why: "Car park 5, hospital 9, shopping centre 12, library 4. 5 and 9 make 14. 14 and 12 make 26. 26 and 4 make <b>30</b>." },
+
+  /* ---------- 4 2D SHAPES ---------- */
+  { type: "learn", topic: "2D shapes",
+    title: "Flat shapes",
+    fig: SHAPES2D,
+    html: '<p>Flat shapes are called 2D shapes.</p>' +
+          '<p>Count the straight sides. Then count the corners.</p>' +
+          '<p>A shape with straight sides has the same number of sides and corners.</p>' +
+          '<p>A circle has no straight sides and no corners.</p>' +
+          '<div class="keep"><b>Keep this</b>Tri is 3. Pent is 5. Hex is 6.</div>' },
+
+  { type: "match", topic: "2D shapes",
+    q: "Match each shape to its name.",
+    pairs: [
+      [ shapeCard([[14, 90], [106, 90], [40, 12]], SUN, "Shape A: 3 straight sides."), "Triangle" ],
+      [ shapeCard([[10, 22], [110, 22], [110, 80], [10, 80]], CYAN, "Shape B: 4 straight sides, 2 long and 2 short."), "Rectangle" ],
+      [ shapeCard([[24, 92], [96, 92], [96, 44], [60, 10], [24, 44]], "#f7a6a6", "Shape C: a house shape with 5 straight sides."), "Pentagon" ],
+      [ shapeCard(regular(60, 50, 44, 6, Math.PI / 6), "#c9b8fb", "Shape D: 6 straight sides."), "Hexagon" ]
+    ],
+    hint: "Count the straight sides on each shape.",
+    why: "A has 3 sides: triangle. B has 4 sides, 2 long and 2 short: rectangle. C has 5 sides: pentagon. A house shape is a pentagon too. D has 6 sides: hexagon." },
+
+  { type: "num", topic: "2D shapes",
+    q: "How many corners does a pentagon have?",
+    boxes: [ { label: "Corners", a: 5 } ],
+    hint: "Pent means 5.",
+    why: "A pentagon has 5 sides and <b>5 corners</b>." },
+
+  { type: "mc", topic: "2D shapes",
+    q: "Which shape has no corners?",
+    options: [ "Circle", "Square", "Triangle", "Hexagon" ],
+    answer: 0,
+    hint: "Which shape is round all the way?",
+    why: "A <b>circle</b> is one curved line. It has no corners." },
+
+  { type: "num", topic: "2D shapes",
+    fig: LSHAPE,
+    q: "How many straight sides does this shape have?",
+    boxes: [ { label: "Sides", a: 6 } ],
+    hint: "Put your finger on one corner. Go round and count each side.",
+    why: "Go round: up, across, down, across, down, back. That is <b>6 sides</b>. Any shape with 6 sides is a hexagon. It does not have to look like the usual one." },
+
+  /* ---------- 5 3D SHAPES ---------- */
+  { type: "learn", topic: "3D shapes",
+    title: "Solid shapes",
+    fig: SHAPES3D,
+    html: '<p>Solid shapes are called 3D shapes.</p>' +
+          '<p>A <b>face</b> is a flat side. An <b>edge</b> is where two faces meet. A <b>vertex</b> is a corner.</p>' +
+          '<p>We say one vertex, two vertices.</p>' +
+          '<p>A cube has 6 faces, 12 edges and 8 vertices.</p>' +
+          '<div class="keep"><b>Keep this</b>Faces are flat. Edges are lines. Vertices are corners.</div>' },
+
+  { type: "match", topic: "3D shapes",
+    q: "Match each solid shape to its name.",
+    pairs: [
+      [ solidCard(cylinder(60, 22, 30, 10, 56, "#c9b8fb"), "Shape A: a tube shape with two round ends.", "0 0 120 100"), "Cylinder" ],
+      [ solidCard(sphere(60, 50, 40, "#a7e3d2"), "Shape B: a ball shape.", "0 0 120 100"), "Sphere" ],
+      [ solidCard(pyramid(46, 88, 54, 30, 64, "#f7a6a6"), "Shape C: a square base with 4 triangles meeting at a point.", "0 0 120 100"), "Square based pyramid" ],
+      [ solidCard(box3(10, 42, 72, 40, 34, MINT), "Shape D: a box shape.", "0 0 120 100"), "Cuboid" ]
+    ],
+    hint: "Think of everyday things: a tin, a ball, a box.",
+    why: "A is a cylinder, like a tin. B is a sphere, like a ball. C is a square based pyramid. D is a cuboid, like a box." },
+
+  { type: "num", topic: "3D shapes",
+    fig: solid(box3(40, 70, 120, 70, 60, MINT), "A cuboid. Hidden edges are dashed."),
+    q: "A cuboid is like a stretched cube. How many faces, edges and vertices does it have?",
+    boxes: [
+      { label: "Faces", a: 6 },
+      { label: "Edges", a: 12 },
+      { label: "Vertices", a: 8 }
+    ],
+    hint: "It has the same number as a cube.",
+    why: "Faces: front, back, top, bottom, left and right make <b>6</b>. Edges: 4 on the front, 4 on the back and 4 joining them make <b>12</b>. Vertices: 4 at the front and 4 at the back make <b>8</b>." },
+
+  { type: "num", topic: "3D shapes",
+    fig: solid(pyramid(110, 160, 110, 60, 120, "#f7a6a6"), "A square based pyramid. Hidden edges are dashed."),
+    q: "How many faces does a square based pyramid have?",
+    boxes: [ { label: "Faces", a: 5 } ],
+    hint: "Count the triangles. Then do not forget the square on the bottom.",
+    why: "4 triangle faces and 1 square face on the bottom. That makes <b>5 faces</b>." },
+
+  { type: "mc", topic: "3D shapes",
+    q: "Which shape has no flat faces and no edges?",
+    options: [ "Sphere", "Cylinder", "Cube", "Cone" ],
+    answer: 0,
+    hint: "Think of a ball.",
+    why: "A <b>sphere</b> is curved all over, like a ball. A cylinder and a cone have flat circles. A cube has 6 flat faces." },
+
+  { type: "num", topic: "3D shapes", stretch: true,
+    fig: solid(prism(40, 150, 110, 100, 100, CYAN), "A triangular prism. Hidden edges are dashed."),
+    q: "Look at the triangular prism. How many edges and vertices does it have?",
+    boxes: [
+      { label: "Edges", a: 9 },
+      { label: "Vertices", a: 6 }
+    ],
+    hint: "Count the edges on each triangle. Then the edges that join the triangles.",
+    why: "Each triangle has 3 edges, so 6. Then 3 long edges join them. That is <b>9 edges</b>. Each triangle has 3 corners, so <b>6 vertices</b>." },
+
+  /* ---------- 6 SYMMETRY ---------- */
+  { type: "learn", topic: "Symmetry",
+    title: "Lines of symmetry",
+    fig: GHOST,
+    html: '<p>A line of symmetry cuts a shape into two halves that match.</p>' +
+          '<p>Fold along the line. One half fits exactly on top of the other.</p>' +
+          '<p>Some shapes have more than one line. A rectangle has 2.</p>' +
+          '<div class="keep"><b>Keep this</b>The fold test: do the two halves match exactly?</div>' },
+
+  { type: "sort", topic: "Symmetry",
+    q: "Does each letter have a line of symmetry?",
+    buckets: [ "Has a line of symmetry", "No line of symmetry" ],
+    cards: [ [ '<span class="cs-big">H</span>', 0 ], [ '<span class="cs-big">T</span>', 0 ], [ '<span class="cs-big">M</span>', 0 ],
+             [ '<span class="cs-big">F</span>', 1 ], [ '<span class="cs-big">J</span>', 1 ], [ '<span class="cs-big">L</span>', 1 ] ],
+    hint: "Imagine a mirror down the middle of each letter. Do both sides match?",
+    why: "H, T and M have a line straight down the middle. F, J and L do not match on any fold." },
+
+  { type: "mc", topic: "Symmetry",
+    fig: DIAG,
+    q: "Is the dashed line a line of symmetry?",
+    options: [ "Yes", "No" ],
+    answer: 1, fixed: true,
+    hint: "Imagine folding along the dashed line. Do the corners meet?",
+    why: "<b>No.</b> The two halves are the same size. But if you fold on that line, they do not fit. The corners stick out. A rectangle has 2 lines: one up the middle and one across." },
+
+  { type: "mc", topic: "Symmetry",
+    q: "How many lines of symmetry does a square have?",
+    options: [ "1", "2", "4", "8" ],
+    answer: 2, fixed: true,
+    hint: "Up, across, and do not forget the corner to corner ones.",
+    why: "A square has <b>4</b>: one up, one across and two from corner to corner. A square is special. Its corner to corner lines work, but a rectangle&#39;s do not." },
+
+  { type: "num", topic: "Symmetry", stretch: true,
+    fig: TRI,
+    q: "This triangle has 3 equal sides. How many lines of symmetry does it have?",
+    boxes: [ { label: "Lines", a: 3 } ],
+    hint: "Try a line from each corner to the middle of the opposite side.",
+    why: "From each corner to the middle of the opposite side is a line of symmetry. There are 3 corners, so <b>3 lines</b>." },
+
+  /* ---------- 7 RIGHT ANGLES ---------- */
+  { type: "learn", topic: "Right angles",
+    title: "Square corners",
+    fig: ANGLES,
+    html: '<p>A right angle is a square corner. It is a quarter turn.</p>' +
+          '<p>We mark it with a small square.</p>' +
+          '<p>The corners of a door, a book and a window are right angles.</p>' +
+          '<p>Stretch: smaller than a right angle is <b>acute</b>. Bigger than a right angle is <b>obtuse</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Right angle: a square corner, a quarter turn.</div>' },
+
+  { type: "num", topic: "Right angles",
+    q: "How many right angles does a rectangle have?",
+    boxes: [ { label: "Right angles", a: 4 } ],
+    hint: "Look at each corner of a door.",
+    why: "Every corner of a rectangle is a square corner. So it has <b>4</b> right angles." },
+
+  { type: "sort", topic: "Right angles",
+    q: "Sort the angles.",
+    buckets: [ "Smaller than a right angle", "A right angle", "Bigger than a right angle" ],
+    cards: [
+      [ angleCard(40, 10, "Angle A"), 0 ], [ angleCard(90, 0, "Angle B"), 1 ], [ angleCard(130, 20, "Angle C"), 2 ],
+      [ angleCard(90, 30, "Angle D"), 1 ], [ angleCard(60, 0, "Angle E"), 0 ], [ angleCard(150, 0, "Angle F"), 2 ]
+    ],
+    hint: "Look for the small square first. Then compare the others with a square corner.",
+    why: "B and D have the small square, so they are right angles. A and E are narrower than a square corner. C and F open wider than a square corner." },
+
+  { type: "mc", topic: "Right angles",
+    fig: '<svg viewBox="0 0 400 140" role="img" aria-label="An angle that opens wider than a square corner."><g transform="translate(150 30)">' + angleSVG(120, 0) + '</g></svg>',
+    q: "Is this angle smaller or bigger than a right angle?",
+    options: [ "Smaller than a right angle", "A right angle", "Bigger than a right angle" ],
+    answer: 2, fixed: true,
+    hint: "Imagine a square corner. Does this angle open wider?",
+    why: "It opens wider than a square corner. So it is <b>bigger than a right angle</b>." },
+
+  { type: "mc", topic: "Right angles", stretch: true,
+    q: "What do we call an angle that is smaller than a right angle?",
+    options: [ "Acute", "Obtuse", "Right" ],
+    answer: 0,
+    hint: "A cute little angle.",
+    why: "Smaller than a right angle is <b>acute</b>. Bigger than a right angle is obtuse." },
+
+  { type: "write", topic: "Right angles",
+    q: "If you like: look around you. Write down 3 things that have a right angle.",
+    starters: [ "The corner of", "The edge of", "I found one on" ],
+    checklist: [ "I wrote 3 things", "Each one has a square corner" ],
+    minWords: 6 }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>
