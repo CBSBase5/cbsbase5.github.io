@@ -112,6 +112,8 @@ if(!st.pid) st.pid = 1;
 if(!st.drills || typeof st.drills !== "object") st.drills = {};
 if(!st.dlast || typeof st.dlast !== "object") st.dlast = {};
 if(!st.dplay || typeof st.dplay !== "object") st.dplay = {};
+if(!st.mcr || typeof st.mcr !== "object") st.mcr = {};
+if(!st.mbase || typeof st.mbase !== "object") st.mbase = {};
 if(!st.chal || typeof st.chal !== "object") st.chal = {};
 if(!st.eb0 || typeof st.eb0 !== "object"){
   st.eb0 = {}; var r0 = rawBeats();
@@ -268,30 +270,59 @@ function drillFinish(c, gen){
   var a = actBy(c.slug), info = { id: c.id, cap: S.CAP, lvBefore: 0, lvAfter: 0, coins: 0, star: false, already: false };
   var lv0 = (ctx().tr.levels[c.slug]) || 0;
   info.lvBefore = lv0; info.lvAfter = lv0;
+  var wasPend = pendingList().some(function(q){ return q.slug === c.slug }), msg = "";
   if(c.tier === 2){
     if(!st.chal[c.slug]) st.chal[c.slug] = [];
     var f2 = st.chal[c.slug].indexOf(c.id) < 0;
     if(f2){ st.chal[c.slug].push(c.id); info.coins = 30; info.star = true; addCoins(30, "Challenge: " + c.title) } else info.already = true;
+    st.mcr[c.slug] = (st.mcr[c.slug] || 0) + 1; st.dlast[c.slug] = Date.now();
     save(); render();
-    toast(f2 ? "Challenge done. +30 coins and a mastery star." : "Done again. Nice, that one was already banked.");
+    msg = f2 ? "Challenge done. +30 coins and a mastery star." : "Done again. No new coins this time, but it counts towards a match.";
   } else {
     if(!st.drills[c.slug]) st.drills[c.slug] = [];
     var first = st.drills[c.slug].indexOf(c.id) < 0;
-    if(first){ st.drills[c.slug].push(c.id); st.dlast[c.slug] = Date.now() } else info.already = true;
+    if(first){ st.drills[c.slug].push(c.id); st.dlast[c.slug] = Date.now() } else { info.already = true; st.mcr[c.slug] = (st.mcr[c.slug] || 0) + 1; st.dlast[c.slug] = Date.now() }
     save(); render();
     info.lvAfter = (ctx().tr.levels[c.slug]) || 0;
-    toast(first ? "Done. +2 training levels in " + (a ? a.title : "training") + "." : "Done again. Nice, that one was already banked.");
+    msg = first ? "Done. +2 training levels in " + (a ? a.title : "training") + "." : "Done again. No new levels this time, but it counts towards a match.";
   }
+  info.match = !wasPend && pendingList().some(function(q){ return q.slug === c.slug });
+  if(info.match){ msg += " A match is ready in the dugout."; render() }
+  toast(msg);
   window.JTLearn.reward = info;
 }
 function pendingList(){
   var b = beats(), out = [];
   S.ACTS.forEach(function(a){
-    var e = b[a.slug];
-    if(e && (e.n - (st.sbase[a.slug] || 0)) >= 1 && st.used.indexOf(a.slug) < 0) out.push({ slug: a.slug, last: e.last || 0, act: a });
+    var e = b[a.slug] || { n: 0, last: 0 }, extra = (st.mcr[a.slug] || 0) - (st.mbase[a.slug] || 0);
+    if(((e.n - (st.sbase[a.slug] || 0)) + extra) >= 1 && st.used.indexOf(a.slug) < 0) out.push({ slug: a.slug, last: e.last || 0, act: a });
   });
   out.sort(function(x, y){ return x.last - y.last });
   return out;
+}
+/* what a player needs to do to get a match, in plain words */
+function openSessions(){ return S.ACTS.filter(function(a){ return st.used.indexOf(a.slug) < 0 }) }
+function needNames(n){
+  var c = ctx(), open = openSessions(), list = open.filter(function(a){ return !(c.tr.levels[a.slug] || 0) });
+  if(list.length < n) list = list.concat(open.filter(function(a){ return list.indexOf(a) < 0 }));
+  return list.slice(0, n).map(function(a){ return "<b>" + esc(a.title) + "</b>" });
+}
+function joinOr(a){ return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " or " + a[a.length - 1] }
+function matchNeed(short){
+  if(st.played.length >= ROUNDS) return "The season is over. Finish it to start the next one.";
+  var open = openSessions();
+  if(!open.length) return "Every session has had its match this season. Finish the season when you are ready.";
+  return "To play, finish one short activity in a session that has not had a match yet this season, such as " + joinOr(needNames(short ? 2 : 3)) + "." + (short ? "" : " Any activity counts, and a new version of one you have done counts too. Challenges count as well.");
+}
+function cupNeed(c, id){
+  var C = COMPS[id], s = cupSt(id);
+  if(!compOn(id)) return "The " + C.name + " is for the top two divisions. Finish in the top three of Division One to qualify.";
+  if(compWon(id)) return "You won the " + C.name + " this season.";
+  if(s.out) return "You are out of the " + C.name + " this season. A new one starts next season.";
+  if(s.ties.length >= C.rounds.length) return "The " + C.name + " is finished for this season.";
+  var nx = C.at[s.ties.length], need = nx - c.tr.fp;
+  if(need <= 0) return "";
+  return "The " + C.rounds[s.ties.length].toLowerCase() + " opens at " + nx + " focus points. You have " + c.tr.fp + ", so you need " + need + " more. Each warm up you finish adds 2.";
 }
 function cupReady(c){ return compReady(c, "cup") }
 function actBy(slug){ for(var i = 0; i < S.ACTS.length; i++) if(S.ACTS[i].slug === slug) return S.ACTS[i]; return null }
@@ -851,6 +882,8 @@ function learnBtns(a, lv){
 /* ---------- training: choose who trains ---------- */
 function vTrain(c){
   var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try one of its short activities. They take a couple of minutes, the game checks your work, and a finished one is worth 2 training levels. Hints are free and a wrong try costs nothing.</p></section></div>';
+  var pn = pendingList().length;
+  h += '<section class="card needcard" role="status"><h3>' + (pn ? "A match is ready" : "Getting your next match") + '</h3><p class="hint" style="margin:0">' + (pn ? "You have " + pn + " match" + (pn > 1 ? "es" : "") + " waiting. Head to the dugout whenever you like, or earn another here." : matchNeed()) + '</p>' + (pn ? '<div class="mbtns" style="margin:10px 0 0"><button class="btn btn-go" data-act="view" data-v="dugout">Go to the dugout</button></div>' : '') + '</section>';
   ["atk", "mid", "def", "gk"].forEach(function(k){
     var list = S.ACTS.filter(function(a){ return a.stat === k });
     h += '<div class="group-h" style="--sc:' + STATCOL[k] + '"><b>' + S.STATS[k].label + '</b><span class="hint">' + (c.tr.boost[k] > 0.04 ? plus(c.tr.boost[k]) + " boost so far" : "no boost yet") + '</span></div><div class="tgrid">';
@@ -858,7 +891,7 @@ function vTrain(c){
       var lv = c.tr.levels[a.slug] || 0, pips = "", tid = traineeOf(a, c), pos = GROUP[a.stat];
       for(var i = 0; i < S.CAP; i++) pips += '<i class="' + (i < lv ? "on" : "") + '"></i>';
       var opts = c.all.slice().sort(function(x, y){ return ((y.pos === pos) - (x.pos === pos)) || (rate(y) - rate(x)) }).map(function(p){ return [p.id, p.name + " (" + p.pos + ")"] });
-      h += '<div class="tcard tr" style="--sc:' + STATCOL[k] + '"><span class="pil">' + esc(a.pillar) + '</span><h4>' + esc(a.title) + '</h4><span>' + esc(a.blurb) + '</span><div class="pips" aria-label="Training level ' + lv + ' of ' + S.CAP + '">' + pips + '</div>' +
+      h += '<div class="tcard tr" style="--sc:' + STATCOL[k] + '"><span class="pil">' + esc(a.pillar) + (st.used.indexOf(a.slug) >= 0 ? ' &middot; match played' : '') + '</span><h4>' + esc(a.title) + '</h4><span>' + esc(a.blurb) + '</span><div class="pips" aria-label="Training level ' + lv + ' of ' + S.CAP + '">' + pips + '</div>' +
         selHtml("tr:" + a.slug, tid, "Who trains (" + SKILLNAME[a.stat] + ")", opts) +
         learnBtns(a, lv) + '</div>';
     });
@@ -1005,7 +1038,7 @@ function seasonGo(){
   st.seed = 1 + Math.floor(Math.random() * 2000000000);
   st.played = []; st.used = []; st.cup = { ties: [], out: false }; st.cups = {}; st.cupSeen = 0; st.cseen = {}; st.deals = []; st.mk = {};
   var b = beats(), sb = {}; S.ACTS.forEach(function(a){ sb[a.slug] = (b[a.slug] && b[a.slug].n) || 0 });
-  st.sbase = sb; st.fp0 = c.tr.fp; st.cupSeen = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
+  st.mbase = Object.assign({}, st.mcr); st.sbase = sb; st.fp0 = c.tr.fp; st.cupSeen = CUP_AT.filter(function(t){ return c.tr.fp >= t }).length;
   ["lcup", "champ"].forEach(function(id){ st.cseen[id] = COMPS[id].at.filter(function(t){ return c.tr.fp >= t }).length });
   post("Season " + st.season + " begins", "The Chairman (Jay)", "Welcome to the " + S.leagueName() + ". " + (m.up ? "You earned this promotion. " : (m.down ? "Every club has a rough season now and then. " : "")) + "Your squad keeps all its growth. Try some training and matches turn up again, and your sponsorship deals can be renewed in Business.");
   rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season"); view = "dugout"; save(); render(); window.scrollTo(0, 0);
@@ -1278,13 +1311,15 @@ function nameId(n){ var r = ""; S.PLAYERS.forEach(function(p){ if(p.name === n) 
 function cupCard(c, id){
   var C = COMPS[id], s = cupSt(id), h = '<div class="card"><h3>' + esc(C.name) + '</h3>';
   if(!compOn(id)) return h + '<p class="hint" style="margin:0">Open to the top two divisions. Finish in the top three of Division One to qualify.</p></div>';
+  var cn2 = cupNeed(c, id);
+  if(cn2 && !s.out && !compWon(id)) h += '<p class="hint need" style="margin:0 0 8px">' + cn2 + '</p>';
   h += '<div class="bracket' + (C.rounds.length === 3 ? " b3" : "") + '">';
   C.rounds.forEach(function(rn, k){
     var tie = s.ties[k], oi = tie ? tie.opp : compOpp(id, k), nm = S.oppName(oi), cls = "", line;
     if(tie){ cls = tie.won ? "won" : "lost"; line = '<em>' + (tie.won ? "Won " : "Lost ") + ourGoals(tie) + " to " + theirGoals(tie) + (tie.pens ? " (pens)" : "") + '</em> <button class="btn btn-quiet" style="padding:1px 8px" data-act="replay" data-k="cup" data-comp="' + id + '" data-i="' + k + '">Report</button>' }
     else if(s.out) line = '<em>Out of the cup</em>';
     else if(k === s.ties.length && compReady(c, id)){ cls = "next"; line = '<button class="btn btn-go" style="padding:3px 12px" data-act="kickcup" data-comp="' + id + '">Play the tie</button>' }
-    else line = '<em>Arrives at ' + C.at[k] + ' focus points</em>';
+    else line = '<em>' + (c.tr.fp >= C.at[k] ? "Next in line" : "Needs " + C.at[k] + " focus points (" + Math.max(0, C.at[k] - c.tr.fp) + " to go)") + '</em>';
     h += '<div class="bn ' + cls + '"><b>' + rn + '</b>' + opCrest(oi, 34, true) + '<span>' + esc(nm) + '</span>' + line + '</div>';
   });
   return h + '</div></div>';
@@ -1682,7 +1717,7 @@ function heroHtml(c, t, tb){
     '<div class="tm">' + opCrest(fx.opp) + '<span class="kitmini">' + shirt(oppKitFull(fx.opp), "") + '</span><h2>' + esc(opp.name) + '</h2><span class="sub">' + (done ? ord(oi + 1) + " &middot; " + row.pts + " pts" : "Rated " + r1((opp.atk + opp.mid + opp.def) / 3)) + '</span></div></div>' +
     '<div class="duels">' + duel("Our attack v their defence", t.atk - opp.def) + duel("Midfield battle", t.mid - opp.mid) + duel("Their attack v our defence", t.def - opp.atk) + '</div><div class="cta">';
   if(pend.length) h += '<button class="btn btn-go btn-big" data-act="kick">Kick off</button><p>Your <b>' + esc(pend[0].act.title) + '</b> session earned this match.</p>';
-  else h += '<button class="btn btn-go btn-big" data-act="view" data-v="train">Earn a match</button><p>Try any training session, in any order, and a match turns up.</p>';
+  else h += '<button class="btn btn-go btn-big" data-act="view" data-v="train">Earn a match</button><p class="need">' + matchNeed(true) + '</p>';
   return h + '</div></div></section>';
 }
 function vDugout(c){
@@ -1693,7 +1728,7 @@ function vDugout(c){
   if(compWon(cid)) cupHtml = '<div class="big">Winners</div><small>' + esc(CC.name) + '. Brilliant run.</small>';
   else if(cs.out) cupHtml = '<div class="big">Out</div><small>' + esc(CC.name) + ': knocked out in the ' + CC.rounds[cs.ties.length - 1].toLowerCase() + '.</small>';
   else if(compReady(c, cid)){ var cn = cs.ties.length; cupHtml = '<div class="big" style="font-size:1.3rem">' + CC.rounds[cn] + '</div><small>' + esc(CC.name) + ' v ' + esc(S.oppName(compOpp(cid, cn))) + '</small><button class="btn btn-go" data-act="kickcup" data-comp="' + cid + '">Play the tie</button>'; }
-  else { var nx = CC.at[cs.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CC.rounds[cs.ties.length] + '</div><small>' + esc(CC.name) + ' arrives at ' + nx + ' focus points. You have ' + c.tr.fp + '.</small>'; }
+  else { var nx = CC.at[cs.ties.length]; cupHtml = '<div class="big" style="font-size:1.3rem">' + CC.rounds[cs.ties.length] + '</div><small>' + esc(CC.name) + ' opens at ' + nx + ' focus points. You have ' + c.tr.fp + '. ' + (nx - c.tr.fp > 0 ? 'Need ' + (nx - c.tr.fp) + ' more: each warm up adds 2.' : '') + '</small>'; }
   h += '<div class="tiles"><div class="tile"><h3>League</h3><div class="big">' + (done ? ord(pos) : "-") + '</div><small>' + (done ? tb[pos - 1].pts + " points" : "Everyone starts level") + '</small></div>' +
     '<div class="tile"><h3>Form</h3><div style="margin:8px 0">' + (last5.length ? formDots(last5) : '<span class="hint">No games yet</span>') + '</div><small>Last five matches</small></div>' +
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
@@ -2779,8 +2814,8 @@ document.addEventListener("click", function(e){
     editing = null; $("ed").classList.remove("on"); save(); render(); return;
   }
   if(a === "tac"){ st.tac[b.getAttribute("data-k")] = b.getAttribute("data-v"); save(); render(); return }
-  if(a === "kick"){ openMatch("league"); return }
-  if(a === "kickcup"){ openMatch("cup", b.getAttribute("data-comp") || "cup"); return }
+  if(a === "kick"){ if(!pendingList().length){ toast(matchNeed().replace(/<[^>]+>/g, "")); return } openMatch("league"); return }
+  if(a === "kickcup"){ var cid0 = b.getAttribute("data-comp") || "cup"; if(!compReady(ctx(), cid0)){ toast(cupNeed(ctx(), cid0).replace(/<[^>]+>/g, "")); return } openMatch("cup", cid0); return }
   if(a === "start"){ startMatch(b.getAttribute("data-w")); return }
   if(a === "subopen"){ subOpen(); return }
   if(a === "subout"){ playing.subSel = +b.getAttribute("data-i"); subDraw(); return }

@@ -722,7 +722,8 @@ function draw(){
     if(rw.already) gain = '<p class="lgain lgrey">Just for fun this time. This one is already banked.</p>';
     else if(c.tier === 2) gain = '<p class="lgain">+' + (rw.coins || 0) + ' coins and a mastery star for ' + act.title + '</p>';
     else gain = '<p class="lgain">+' + (rw.lvAfter - rw.lvBefore) + ' training level' + (rw.lvAfter - rw.lvBefore === 1 ? "" : "s") + ' for ' + act.title + '</p>' + pips + (rw.lvAfter >= rw.cap && rw.cap ? '<p class="lmax">' + act.title + ' is maxed out!</p>' : "");
-    h += '<div class="ldone"><h3>' + (c.tier === 2 ? "Challenge complete" : "Nicely done") + '</h3><p>' + c.why + '</p>' + gain + '<div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button><button class="btn btn-quiet" data-lk="replay">Play a new version</button></div></div>';
+    var mt = rw.match ? '<p class="lgain lmatch">A match is ready. Head to the dugout when you like.</p>' : "";
+    h += '<div class="ldone"><h3>' + (c.tier === 2 ? "Challenge complete" : "Nicely done") + '</h3><p>' + c.why + '</p>' + gain + mt + '<div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button><button class="btn btn-quiet" data-lk="replay">Play a new version</button></div></div>';
   } else {
     h += '<div class="lbody">' + bodyHtml(c, x) + '</div>';
     h += '<div class="lmsg" id="lmsg" role="status" aria-live="polite">' + (x.say || "") + (x.hint ? '<p class="lnudge"><b>Nudge:</b> ' + x.hint + '</p>' : "") + '</div>';
