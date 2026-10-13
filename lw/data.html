@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data and chance - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+/* Bar chart builder widget */
+.bb-task p{margin:0 0 6px}
+.bb-dots{display:flex;gap:6px;margin-bottom:6px}
+.bb-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.bb-dots span.on{background:var(--good)}
+.bb-dots span.now{background:var(--sun)}
+.bb-src svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto}
+.bb-chart svg{width:100%;max-width:440px;height:auto;display:block;margin:0 auto;cursor:pointer;touch-action:manipulation}
+.bb-adj{justify-content:center}
+.bb-adj .btn{padding:10px 16px;min-width:52px}
+.bb-sel{font-weight:700;min-width:7em;text-align:center}
+.bb-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Data and chance</h2>
+    <span>Functional Skills Maths, Level 1. Tables, tallies, pictograms, bar charts and line graphs, grouping data, mean and range, comparing data, and probability.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6", TINT = "#4b5275";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function fmt(v){ return String(Math.round(v * 100) / 100); }
+
+/* ---------- tally marks ---------- */
+function tallyMarks(n, x, y, h){
+  var s = "", gx = x;
+  for(var g = 0; g < Math.floor(n / 5); g++){
+    for(var k = 0; k < 4; k++) s += ln(gx + k * 7, y, gx + k * 7, y + h, INK, 2.5, ' stroke-linecap="round"');
+    s += ln(gx - 4, y + h - 3, gx + 25, y + 3, INK, 2.5, ' stroke-linecap="round"');
+    gx += 38;
+  }
+  for(var j = 0; j < n % 5; j++) s += ln(gx + j * 7, y, gx + j * 7, y + h, INK, 2.5, ' stroke-linecap="round"');
+  return s;
+}
+/* rows: [[name, n]], freq: show the frequency column */
+function tallyTable(title, head, rows, freq, aria, total){
+  var rh = 36, top = 62, W = 400;
+  var H = top + rh * (rows.length + (total ? 1 : 0)) + 10;
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + aria + '">';
+  s += t(W / 2, 20, title, 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  var cols = freq ? [10, 130, 280, 390] : [10, 150, 390];
+  s += '<rect x="10" y="' + (top - 30) + '" width="380" height="30" fill="#d6f6f3"/>';
+  s += t(cols[0] + 8, top - 9, head, 16, INK, LAB + ' font-weight="800"');
+  s += t(cols[1] + 8, top - 9, "Tally", 16, INK, LAB + ' font-weight="800"');
+  if(freq) s += t(cols[2] + 8, top - 9, "Frequency", 16, INK, LAB + ' font-weight="800"');
+  rows.forEach(function(r, i){
+    var y = top + i * rh;
+    s += t(cols[0] + 8, y + 24, r[0], 17, INK, BODY);
+    s += tallyMarks(r[1], cols[1] + 14, y + 7, 22);
+    if(freq) s += t((cols[2] + cols[3]) / 2, y + 24, String(r[1]), 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  var nrows = rows.length + (total ? 1 : 0);
+  if(total){
+    var y2 = top + rows.length * rh, sum = 0;
+    rows.forEach(function(r){ sum += r[1]; });
+    s += t(cols[0] + 8, y2 + 24, "Total", 16, INK, LAB + ' font-weight="800"');
+    s += t((cols[2] + cols[3]) / 2, y2 + 24, String(sum), 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  for(var r2 = 0; r2 <= nrows; r2++) s += ln(10, top + r2 * rh, 390, top + r2 * rh, INK, r2 === 0 ? 2.5 : 1.5);
+  s += ln(10, top - 30, 390, top - 30, INK, 2.5);
+  cols.forEach(function(x){ s += ln(x, top - 30, x, top + nrows * rh, INK, 2); });
+  s += '</svg>';
+  return s;
+}
+
+var TALLY_LEARN = tallyTable("How people got to college", "Way", [["Walk", 7], ["Bus", 12], ["Car", 4], ["Bike", 3]], true,
+  "Tally chart. Walk 7, Bus 12, Car 4, Bike 3. Total 26.", true);
+var TALLY_Q = tallyTable("Favourite takeaway", "Takeaway", [["Pizza", 13], ["Chinese", 9], ["Curry", 11], ["Fish and chips", 6]], false,
+  "Tally chart of favourite takeaways: pizza, Chinese, curry, and fish and chips.", false);
+
+/* ---------- pictograms ---------- */
+function circleSym(x, y, r, frac, col){
+  if(frac >= 1) return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>';
+  if(frac === 0.5) return '<path d="M' + x + ' ' + (y - r) + ' A' + r + ' ' + r + ' 0 0 0 ' + x + ' ' + (y + r) + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>';
+  /* quarter: top left wedge */
+  return '<path d="M' + x + ' ' + y + ' L' + x + ' ' + (y - r) + ' A' + r + ' ' + r + ' 0 0 0 ' + (x - r) + ' ' + y + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>';
+}
+function bookSym(x, y, frac, col){
+  var w = 22, h = 30;
+  return '<rect x="' + x + '" y="' + y + '" width="' + (w * frac) + '" height="' + h + '" rx="2" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>' +
+    (frac >= 1 ? ln(x + 5, y + 2, x + 5, y + h - 2, INK, 1.5) : "");
+}
+function pictogram(title, rows, keyHtml, keyDraw, sym, step, aria){
+  var rh = 42, top = 34, W = 400;
+  var H = top + rh * rows.length + 54;
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + aria + '">';
+  s += t(W / 2, 20, title, 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  rows.forEach(function(r, i){
+    var y = top + i * rh;
+    s += '<rect x="10" y="' + y + '" width="380" height="' + rh + '" fill="' + (i % 2 ? WHITE : PAPER) + '"/>';
+    s += t(20, y + 27, r[0], 16, INK, LAB + ' font-weight="700"');
+    var n = r[1], k = 0;
+    while(n > 0){
+      var f = n >= 1 ? 1 : n;
+      s += sym(110 + k * step, y + rh / 2, f);
+      n = Math.round((n - f) * 100) / 100; k++;
+    }
+  });
+  s += ln(100, top, 100, top + rh * rows.length, INK, 2);
+  s += '<rect x="10" y="' + top + '" width="380" height="' + (rh * rows.length) + '" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+  var ky = top + rh * rows.length + 30;
+  s += t(20, ky + 6, "Key:", 16, INK, LAB + ' font-weight="800"');
+  s += keyDraw(70, ky);
+  s += t(100, ky + 6, keyHtml, 16, INK, BODY + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+}
+var PICTO_LEARN = pictogram("Ice creams sold", [["Mon", 3.5], ["Tue", 2], ["Wed", 4.25]],
+  "stands for 4 ice creams", function(x, y){ return circleSym(x + 8, y, 13, 1, SUN); },
+  function(x, y, f){ return circleSym(x + 14, y, 15, f, SUN); }, 38,
+  "Pictogram of ice creams sold. Key: one circle stands for 4 ice creams. Monday 3 and a half circles, Tuesday 2 circles, Wednesday 4 and a quarter circles.");
+var PICTO_Q = pictogram("Books borrowed from the library", [["Mon", 2.5], ["Tue", 4], ["Wed", 1.5], ["Thu", 3], ["Fri", 5]],
+  "stands for 10 books", function(x, y){ return bookSym(x, y - 15, 1, CYAN); },
+  function(x, y, f){ return bookSym(x, y - 15, f, CYAN); }, 34,
+  "Pictogram of books borrowed. Key: one book stands for 10 books. Monday 2 and a half books, Tuesday 4, Wednesday 1 and a half, Thursday 3, Friday 5.");
+
+/* ---------- bar charts ---------- */
+/* series: [{name, col, vals}] ; one series = simple bar chart */
+function barChart(o){
+  var W = o.W || 400, H = o.H || 290, x0 = 56, y0 = H - (o.series.length > 1 ? 66 : 40), yT = 34, x1 = W - 10;
+  var ph = y0 - yT, n = o.cats.length, cw = (x1 - x0) / n;
+  function Y(v){ return (y0 - v / o.max * ph).toFixed(1); }
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + o.aria + '">';
+  s += t(W / 2, 20, o.title, 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  for(var v = 0; v <= o.max + 1e-9; v += o.grid){
+    var lab = Math.abs(v / o.lab - Math.round(v / o.lab)) < 1e-9;
+    s += ln(x0, Y(v), x1, Y(v), lab ? "#b9b8cc" : LINE, 1.2);
+    if(lab) s += t(x0 - 8, (+Y(v) + 5).toFixed(1), fmt(v), 14, INK, LAB + ' font-weight="700" text-anchor="end"');
+  }
+  var m = o.series.length, bw = m > 1 ? Math.min(30, cw * 0.36) : Math.min(46, cw * 0.6);
+  o.cats.forEach(function(c, i){
+    var cx = x0 + cw * (i + 0.5);
+    o.series.forEach(function(se, j){
+      var bx = m > 1 ? cx - bw + j * bw : cx - bw / 2;
+      var val = se.vals[i];
+      s += '<rect x="' + bx.toFixed(1) + '" y="' + Y(val) + '" width="' + bw.toFixed(1) + '" height="' + (val / o.max * ph).toFixed(1) + '" fill="' + se.col + '" stroke="' + INK + '" stroke-width="2"/>';
+    });
+    s += t(cx.toFixed(1), y0 + 20, c, 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  });
+  s += ln(x0, yT - 6, x0, y0, INK, 2.5) + ln(x0, y0, x1, y0, INK, 2.5);
+  s += t(14, (yT + y0) / 2, o.ylab, 14, INK, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(-90 14 ' + ((yT + y0) / 2) + ')"');
+  if(m > 1){
+    var ky = H - 16, kx = W / 2 - 110;
+    o.series.forEach(function(se, j){
+      var x = kx + j * 120;
+      s += '<rect x="' + x + '" y="' + (ky - 13) + '" width="18" height="16" fill="' + se.col + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += t(x + 26, ky, se.name, 15, INK, BODY + ' font-weight="700"');
+    });
+  }
+  s += '</svg>';
+  return s;
+}
+var DUAL_LEARN = barChart({ title: "Hot drinks sold at a caf&eacute;", cats: ["Mon", "Tue", "Wed", "Thu"], max: 20, grid: 2, lab: 4, ylab: "Cups sold",
+  series: [{ name: "Tea", col: CYAN, vals: [12, 18, 10, 14] }, { name: "Coffee", col: SUN, vals: [16, 14, 8, 20] }],
+  aria: "Dual bar chart of cups sold. Tea: Monday 12, Tuesday 18, Wednesday 10, Thursday 14. Coffee: Monday 16, Tuesday 14, Wednesday 8, Thursday 20." });
+var DUAL_Q = barChart({ title: "Books sold by a bookshop", cats: ["Jan", "Feb", "Mar", "Apr"], max: 50, grid: 5, lab: 10, ylab: "Books sold",
+  series: [{ name: "In the shop", col: VIOLET, vals: [30, 45, 25, 40] }, { name: "Online", col: MINT, vals: [35, 30, 50, 45] }],
+  aria: "Dual bar chart of books sold in the shop and online, January to April. The scale goes up in 10s with a line every 5." });
+
+/* ---------- line graphs ---------- */
+function lineGraph(o){
+  var W = 400, H = 290, x0 = 56, y0 = 240, yT = 34, x1 = 386;
+  var ph = y0 - yT, n = o.xs.length, dx = (x1 - x0 - 20) / (n - 1);
+  function Y(v){ return (y0 - (v - o.min) / (o.max - o.min) * ph).toFixed(1); }
+  function X(i){ return (x0 + 10 + i * dx).toFixed(1); }
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + o.aria + '">';
+  s += t(W / 2, 20, o.title, 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  for(var v = o.min; v <= o.max + 1e-9; v += o.grid){
+    var lab = Math.abs(v / o.lab - Math.round(v / o.lab)) < 1e-9;
+    s += ln(x0, Y(v), x1, Y(v), lab ? "#b9b8cc" : LINE, 1.2);
+    if(lab) s += t(x0 - 8, (+Y(v) + 5).toFixed(1), fmt(v), 14, INK, LAB + ' font-weight="700" text-anchor="end"');
+  }
+  for(var i = 0; i < n; i++){
+    s += ln(X(i), y0, X(i), +y0 + 6, INK, 2);
+    s += t(X(i), y0 + 22, o.xs[i], 13, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += ln(x0, yT - 6, x0, y0, INK, 2.5) + ln(x0, y0, x1, y0, INK, 2.5);
+  var pts = o.ys.map(function(y, i){ return X(i) + "," + Y(y); }).join(" ");
+  s += '<polyline points="' + pts + '" fill="none" stroke="' + o.col + '" stroke-width="3.5" stroke-linejoin="round"/>';
+  o.ys.forEach(function(y, i){ s += '<circle cx="' + X(i) + '" cy="' + Y(y) + '" r="4.5" fill="' + o.col + '" stroke="' + INK + '" stroke-width="1.5"/>'; });
+  s += t(14, (yT + y0) / 2, o.ylab, 14, INK, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(-90 14 ' + ((yT + y0) / 2) + ')"');
+  s += t((x0 + x1) / 2, H - 6, o.xlab, 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+}
+var LINE_LEARN = lineGraph({ title: "Temperature in a greenhouse", xs: ["06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"], ys: [8, 12, 16, 20, 22, 18, 14],
+  min: 0, max: 24, grid: 2, lab: 4, col: CORAL, ylab: "Temperature (&deg;C)", xlab: "Time",
+  aria: "Line graph of greenhouse temperature: 06:00 8 degrees, 08:00 12, 10:00 16, 12:00 20, 14:00 22, 16:00 18, 18:00 14." });
+var LINE_Q = lineGraph({ title: "Monthly gas bill", xs: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], ys: [95, 90, 75, 55, 45, 35],
+  min: 0, max: 100, grid: 5, lab: 10, col: BLUE, ylab: "Bill (&pound;)", xlab: "Month",
+  aria: "Line graph of a monthly gas bill from January to June. The scale goes up in 10s with a line every 5." });
+
+/* ---------- mean levelling ---------- */
+var MEAN_FIG = (function(){
+  var vals = [6, 9, 4, 8, 8], a = 18, y0 = 200, x0 = 60, gap = 64;
+  var s = '<svg viewBox="0 0 400 250" role="img" aria-label="Five towers of squares: 6, 9, 4, 8 and 8. A dashed line at 7 shows the mean: if the squares were shared out evenly every tower would be 7 high. The range is 9 take away 4, which is 5.">';
+  vals.forEach(function(v, i){
+    var x = x0 + i * gap;
+    for(var k = 0; k < v; k++){
+      s += '<rect x="' + x + '" y="' + (y0 - (k + 1) * a) + '" width="' + (a * 2) + '" height="' + a + '" fill="' + (k >= 7 ? SUN : "#9fe5dd") + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    }
+    s += t(x + a, y0 + 22, String(v), 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  });
+  s += ln(x0 - 14, y0 - 7 * a, x0 + 4 * gap + 2 * a + 14, y0 - 7 * a, CORAL, 3, ' stroke-dasharray="8 5"');
+  s += t(x0 - 18, y0 - 7 * a + 5, "7", 17, CORAL, LAB + ' font-weight="800" text-anchor="end"');
+  s += t(200, 22, "Mean: 35 &divide; 5 = 7", 17, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(200, 246, "Range: 9 &minus; 4 = 5", 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- probability scale ---------- */
+var PSCALE = (function(){
+  var x0 = 30, x1 = 370, y = 110;
+  function X(p){ return x0 + p * (x1 - x0); }
+  var s = '<svg viewBox="0 0 400 190" role="img" aria-label="Probability scale from 0, impossible, through unlikely, even chance at one half, likely, to 1, certain. An arrow at 0.3 shows the chance of picking a red counter from 3 red and 7 blue.">';
+  s += '<rect x="' + x0 + '" y="' + (y - 6) + '" width="' + (x1 - x0) + '" height="12" rx="6" fill="#e7f8f6" stroke="' + INK + '" stroke-width="2"/>';
+  [[0, "0"], [0.5, "&frac12;"], [1, "1"]].forEach(function(p){
+    s += ln(X(p[0]), y - 14, X(p[0]), y + 14, INK, 3);
+    s += t(X(p[0]), y + 36, p[1], 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  });
+  s += t(X(0) - 6, y - 22, "impossible", 16, INK, BODY + ' font-weight="700" text-anchor="start"');
+  s += t(X(0.25), y - 52, "unlikely", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(X(0.5), y - 22, "even chance", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(X(0.75), y - 52, "likely", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(X(1) + 6, y - 22, "certain", 16, INK, BODY + ' font-weight="700" text-anchor="end"');
+  s += '<path d="M' + (X(0) + 4) + ' ' + (y - 40) + ' H' + (X(0.5) - 4) + '" stroke="' + TINT + '" stroke-width="1.5" stroke-dasharray="4 4"/>';
+  s += '<path d="M' + (X(0.5) + 4) + ' ' + (y - 40) + ' H' + (X(1) - 4) + '" stroke="' + TINT + '" stroke-width="1.5" stroke-dasharray="4 4"/>';
+  s += '<path d="M' + X(0.3) + ' ' + (y + 52) + ' V' + (y + 12) + '" stroke="' + CORAL + '" stroke-width="3"/><path d="M' + (X(0.3) - 7) + ' ' + (y + 22) + ' L' + X(0.3) + ' ' + (y + 11) + ' L' + (X(0.3) + 7) + ' ' + (y + 22) + '" fill="none" stroke="' + CORAL + '" stroke-width="3"/>';
+  s += t(X(0.3), y + 72, "P(red) = 3/10", 16, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- spinner: 8 equal parts ---------- */
+var SPINNER = (function(){
+  var cx = 200, cy = 112, r = 96;
+  var cols = [["G", MINT], ["Y", SUN], ["G", MINT], ["R", CORAL], ["B", CYAN], ["G", MINT], ["Y", SUN], ["B", CYAN]];
+  var s = '<svg viewBox="0 0 400 226" role="img" aria-label="A spinner with 8 equal sections: 3 green, 2 yellow, 1 red and 2 blue.">';
+  for(var k = 0; k < 8; k++){
+    var a1 = k * 45 * Math.PI / 180, a2 = (k + 1) * 45 * Math.PI / 180, am = (a1 + a2) / 2;
+    var p1 = [cx + r * Math.sin(a1), cy - r * Math.cos(a1)], p2 = [cx + r * Math.sin(a2), cy - r * Math.cos(a2)];
+    s += '<path d="M' + cx + ' ' + cy + ' L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' A' + r + ' ' + r + ' 0 0 1 ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' Z" fill="' + cols[k][1] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t((cx + 64 * Math.sin(am)).toFixed(1), (cy - 64 * Math.cos(am) + 6).toFixed(1), cols[k][0], 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  s += '<path d="M' + cx + ' ' + cy + ' L' + (cx + 10) + ' ' + (cy - 44) + '" stroke="' + INK + '" stroke-width="5" stroke-linecap="round"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + INK + '"/>';
+  s += t(392, 200, "G green", 14, INK, BODY + ' text-anchor="end"') + t(392, 218, "Y yellow  R red  B blue", 14, INK, BODY + ' text-anchor="end" xml:space="preserve"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- tables ---------- */
+var GYM =
+'<table class="datatable"><tr><th>Gym prices</th><th>Monthly</th><th>Yearly</th></tr>' +
+'<tr><td>Adult</td><td>&pound;28.50</td><td>&pound;300</td></tr>' +
+'<tr><td>Student</td><td>&pound;19.00</td><td>&pound;200</td></tr>' +
+'<tr><td>Junior</td><td>&pound;12.00</td><td>&pound;120</td></tr></table>';
+
+/* ---------- bar chart builder widget ---------- */
+var BB = [
+  { title: "Snacks sold at the interval", cats: ["Crisps", "Popcorn", "Ice cream", "Sweets"], vals: [7, 11, 5, 9],
+    max: 12, grid: 1, lab: 2, step: 1, tally: true,
+    task: "The front of house team kept a tally of snacks sold at the interval. Build the bar chart: tap the chart to set each bar, and use &minus; and + to fine tune.",
+    tip: "Count each tally in fives first. On this scale every line is 1.",
+    why: "Crisps 7, popcorn 11, ice cream 5, sweets 9. Each gate is 5, then add the single strokes." },
+  { title: "Pets owned by a class", cats: ["Dog", "Cat", "Fish", "Rabbit"], vals: [12, 8, 5, 3],
+    max: 14, grid: 2, lab: 2, step: 1, tally: true,
+    task: "Same again, but look carefully at the scale on this chart before you start.",
+    tip: "On this scale each line is worth <b>2</b>, so an odd number sits halfway between two lines.",
+    why: "Dog 12, cat 8, fish 5, rabbit 3. Each line is worth 2, so 5 is halfway between 4 and 6, and 3 is halfway between 2 and 4." },
+  { title: "Swimmers at the pool", cats: ["Mon", "Tue", "Wed", "Thu"], vals: [25, 40, 15, 35],
+    max: 50, grid: 10, lab: 10, step: 5, tally: false,
+    task: "This time the numbers are already counted for you. Draw the bars on a scale that goes up in 10s.",
+    tip: "Each line is worth <b>10</b>, so 25 is halfway between 20 and 30.",
+    why: "Monday 25, Tuesday 40, Wednesday 15, Thursday 35. Halfway between two lines is 5 on this scale." }
+];
+
+function mountBuilder(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  if(!d.vals || d.vals.length !== 4) d.vals = [0, 0, 0, 0];
+  if(typeof d.sel !== "number") d.sel = 0;
+  var view = d.c;
+  var G = { W: 360, H: 270, x0: 50, y0: 230, yT: 20, x1: 350 };
+
+  el.innerHTML =
+    '<div class="wpanel bb-task" data-r="task"></div>' +
+    '<div class="bb-src" data-r="src"></div>' +
+    '<div class="bb-chart" data-r="chart"></div>' +
+    '<div class="wrow bb-adj">' +
+      '<button class="btn btn-quiet" type="button" data-r="down" aria-label="Make the chosen bar lower">&minus;</button>' +
+      '<span class="bb-sel" data-r="sel"></span>' +
+      '<button class="btn btn-quiet" type="button" data-r="up" aria-label="Make the chosen bar higher">+</button>' +
+    '</div>' +
+    '<div class="wrow">' +
+      '<button class="btn" type="button" data-r="check">Check my chart</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb bb-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function R(){ return BB[Math.min(view, 2)]; }
+
+  function source(){
+    var c = R();
+    if(c.tally) return tallyTable(c.title, "Item", c.cats.map(function(n, i){ return [n, c.vals[i]]; }), false, "Tally chart: " + c.title + ".", false);
+    var s = '<table class="datatable"><tr><th>Day</th>' + c.cats.map(function(n){ return "<th>" + n + "</th>"; }).join("") + '</tr>' +
+      '<tr><th>Swimmers</th>' + c.vals.map(function(v){ return "<td>" + v + "</td>"; }).join("") + '</tr></table>';
+    return s;
+  }
+  function Y(v, c){ return G.y0 - v / c.max * (G.y0 - G.yT); }
+  function chart(){
+    var c = R(), n = 4, cw = (G.x1 - G.x0) / n, bw = 46;
+    var s = '<svg viewBox="0 0 ' + G.W + ' ' + G.H + '" role="img" aria-label="Your bar chart. Tap in a column to set the height of that bar.">';
+    s += '<rect x="0" y="0" width="' + G.W + '" height="' + G.H + '" fill="' + WHITE + '"/>';
+    for(var v = 0; v <= c.max + 1e-9; v += c.grid){
+      var lab = Math.abs(v / c.lab - Math.round(v / c.lab)) < 1e-9;
+      s += ln(G.x0, Y(v, c).toFixed(1), G.x1, Y(v, c).toFixed(1), lab ? "#b9b8cc" : LINE, 1.2);
+      if(lab) s += t(G.x0 - 8, (Y(v, c) + 5).toFixed(1), String(v), 14, INK, LAB + ' font-weight="700" text-anchor="end"');
+    }
+    for(var i = 0; i < n; i++){
+      var cx = G.x0 + cw * (i + 0.5), val = d.vals[i], sel = i === d.sel;
+      if(sel) s += '<rect x="' + (G.x0 + cw * i + 2).toFixed(1) + '" y="' + G.yT + '" width="' + (cw - 4).toFixed(1) + '" height="' + (G.y0 - G.yT) + '" fill="rgba(255,210,63,.18)"/>';
+      if(val > 0) s += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + Y(val, c).toFixed(1) + '" width="' + bw + '" height="' + (G.y0 - Y(val, c)).toFixed(1) + '" fill="' + (sel ? BLUE : CYAN) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+      s += t(cx.toFixed(1), G.y0 + 22, c.cats[i], 14, INK, LAB + ' font-weight="' + (sel ? 800 : 600) + '" text-anchor="middle"');
+    }
+    s += ln(G.x0, G.yT - 4, G.x0, G.y0, INK, 2.5) + ln(G.x0, G.y0, G.x1, G.y0, INK, 2.5);
+    var my = (G.yT + G.y0) / 2;
+    s += t(12, my, "Frequency", 14, INK, LAB + ' font-weight="700" text-anchor="middle" transform="rotate(-90 12 ' + my + ')"');
+    s += '</svg>';
+    return s;
+  }
+  function task(){
+    var dots = '<div class="bb-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= 3) return dots + '<p><b>Free play.</b> All three charts built. Move the bars around if you like: the last chart stays here.</p>';
+    return dots + '<p class="tiny" style="margin:0 0 4px">Chart ' + (view + 1) + ' of 3</p><p>' + BB[view].task + '</p>';
+  }
+  function draw(){
+    q("task").innerHTML = task();
+    q("src").innerHTML = source();
+    q("chart").innerHTML = chart();
+    q("sel").innerHTML = R().cats[d.sel];
+    var waiting = view !== d.c || d.c >= 3;
+    q("check").classList.toggle("hidden", d.c >= 3);
+    q("check").disabled = waiting;
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+  function fb(cls, html){ var f = q("fb"); f.className = "fb bb-fb " + cls; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function locked(){ return view !== d.c && d.c < 3; }
+  function setVal(i, v){
+    var c = R();
+    d.vals[i] = Math.max(0, Math.min(c.max, Math.round(v / c.step) * c.step));
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is the finished chart.</b> " : "<b>Yes, every bar is right.</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All three charts built. Check the scale before you draw or read any bar: 1s, 2s, 5s or 10s.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next chart</button>';
+    fb(how === "shown" ? "show" : "good", head + BB[k].why + more);
+    q("next").onclick = function(){
+      view = d.c;
+      if(d.c < 3) d.vals = [0, 0, 0, 0];
+      d.sel = 0; api.save();
+      q("fb").className = "fb bb-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+
+  q("chart").addEventListener("click", function(e){
+    if(locked()) return;
+    var svg = q("chart").querySelector("svg");
+    var m = svg.getScreenCTM();
+    if(!m) return;
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(m.inverse());
+    if(p.x < G.x0 || p.x > G.x1) return;
+    var i = Math.min(3, Math.floor((p.x - G.x0) / ((G.x1 - G.x0) / 4)));
+    var c = R();
+    d.sel = i;
+    var v = (G.y0 - Math.min(G.y0, Math.max(G.yT, p.y))) / (G.y0 - G.yT) * c.max;
+    setVal(i, v);
+    api.save(); draw();
+  });
+  q("down").onclick = function(){ if(locked()) return; setVal(d.sel, d.vals[d.sel] - R().step); api.save(); draw(); };
+  q("up").onclick = function(){ if(locked()) return; setVal(d.sel, d.vals[d.sel] + R().step); api.save(); draw(); };
+  q("check").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    var c = BB[view], wrong = [];
+    c.vals.forEach(function(v, i){ if(d.vals[i] !== v) wrong.push(c.cats[i]); });
+    if(!wrong.length){ solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    var names = wrong.length === 1 ? wrong[0] : wrong.slice(0, -1).join(", ") + " and " + wrong[wrong.length - 1];
+    fb("nudge", "<b>Not quite yet.</b> " + (4 - wrong.length) + " of 4 bars are right. Have another look at " + names + ". " + c.tip);
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    d.shown[view] = true;
+    d.vals = BB[view].vals.slice();
+    solved(view, "shown");
+  };
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three charts built.</b> Check the scale before you draw or read any bar.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "data",
+  title: "Data and chance",
+  subject: "Maths",
+  mins: 50,
+  blurb: "Reading and drawing tables, tally charts, pictograms, bar charts and line graphs, grouping data, mean and range, comparing two sets of data to make a decision, and probability from impossible to certain.",
+  steps: [
+
+  /* ---------- 1 TABLES AND TALLIES ---------- */
+  { type: "learn", topic: "Tables and tallies",
+    title: "Tables and tally charts",
+    fig: TALLY_LEARN,
+    html: '<p>A <b>table</b> puts information in rows and columns. Find the right row, find the right column, and read where they meet.</p>' +
+          '<p>A <b>tally chart</b> counts things as they happen. Each stroke is 1. The fifth stroke goes across the first four, making a gate of 5, so you can count in fives.</p>' +
+          '<p>The <b>frequency</b> is how many there are in each row. Bus: two gates and two strokes, 5 + 5 + 2 = 12.</p>' +
+          '<div class="keep"><b>Keep this</b>Count the gates in fives, then add the single strokes. Check your frequencies add up to the total.</div>' },
+
+  { type: "num", topic: "Tables and tallies",
+    fig: TALLY_Q,
+    q: "Some people were asked their favourite takeaway.<br>a) How many people chose pizza?<br>b) How many people were asked altogether?",
+    boxes: [
+      { label: "a) Pizza", a: 13 },
+      { label: "b) Total", a: 39 }
+    ],
+    hint: "Each gate is 5. Find the frequency for every row, then add them up.",
+    why: "Pizza: two gates and three strokes, 5 + 5 + 3 = <b>13</b>. Chinese 9, curry 11, fish and chips 6. Total: 13 + 9 + 11 + 6 = <b>39</b>." },
+
+  { type: "num", topic: "Tables and tallies", stretch: true,
+    fig: GYM,
+    q: "a) Two adults and one student all pay monthly. How much do they pay altogether for one month?<br>b) An adult pays yearly instead of monthly for a whole year. How much do they save?",
+    boxes: [
+      { label: "a) Total for one month", a: 76, pre: "&pound;", show: "76.00" },
+      { label: "b) Saving in a year", a: 42, pre: "&pound;", show: "42.00" }
+    ],
+    hint: "a) Use the Monthly column: two adult prices and one student price. b) Monthly for a year is 12 lots of the monthly price. Compare that with the yearly price.",
+    why: "a) 28.50 + 28.50 + 19.00 = <b>&pound;76.00</b>.<br>b) Monthly for a year: 12 &times; 28.50 = &pound;342. Yearly: &pound;300. Saving: 342 &minus; 300 = <b>&pound;42</b>." },
+
+  /* ---------- 2 PICTOGRAMS ---------- */
+  { type: "learn", topic: "Pictograms",
+    title: "Pictograms: read the key first",
+    fig: PICTO_LEARN,
+    html: '<p>A <b>pictogram</b> uses a picture to stand for a number of things. The <b>key</b> tells you how many.</p>' +
+          '<p>Here one circle stands for 4 ice creams. So half a circle is 2, and a quarter of a circle is 1.</p>' +
+          '<p>Monday: 3 whole circles and a half. 3 &times; 4 + 2 = <b>14</b>. Wednesday: 4 circles and a quarter, 4 &times; 4 + 1 = <b>17</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Read the key first. Then work out what half or a quarter of a symbol is worth.</div>' },
+
+  { type: "num", topic: "Pictograms",
+    fig: PICTO_Q,
+    q: "a) How many books were borrowed on Wednesday?<br>b) How many books were borrowed altogether from Monday to Friday?",
+    boxes: [
+      { label: "a) Wednesday", a: 15 },
+      { label: "b) Whole week", a: 160 }
+    ],
+    hint: "One book symbol is 10 books, so half a symbol is 5. Work out each day, then add.",
+    why: "a) Wednesday is 1 and a half symbols: 10 + 5 = <b>15</b>.<br>b) Mon 25, Tue 40, Wed 15, Thu 30, Fri 50. Total: <b>160</b>. Counting symbols instead (16) forgets the key." },
+
+  { type: "mc", topic: "Pictograms",
+    q: "In a pictogram, one car symbol stands for 6 cars. How many symbols would show 21 cars?",
+    options: [ "3 symbols", "3 and a half symbols", "4 symbols", "21 symbols" ],
+    answer: 1, fixed: true,
+    hint: "How many whole 6s go into 21, and what is left over? What fraction of 6 is that?",
+    why: "21 &divide; 6 = 3.5. Three whole symbols make 18, and the 3 left over is half of 6, so <b>3 and a half symbols</b>." },
+
+  /* ---------- 3 BAR CHARTS ---------- */
+  { type: "learn", topic: "Bar charts",
+    title: "Bar charts and dual bar charts",
+    fig: DUAL_LEARN,
+    html: '<p>The height of each bar shows the frequency. Go across from the top of the bar to the scale.</p>' +
+          '<p><b>Check the scale first.</b> Does each line go up in 1s, 2s, 5s or 10s? Here each line is 2, so Tuesday&#39;s tea bar is 18.</p>' +
+          '<p>A <b>dual bar chart</b> puts two bars side by side for each group, with a key, so you can compare. On Thursday, 20 coffees and 14 teas were sold.</p>' +
+          '<p>Drawing one? Give it a title, label both axes, keep the bars the same width with equal gaps.</p>' +
+          '<div class="keep"><b>Keep this</b>Scale first, then read. Use the key to tell the two bars apart.</div>' },
+
+  { type: "widget", topic: "Bar charts",
+    title: "Build the bar chart",
+    html: "Turn a tally into a bar chart. Tap a column to set the height of its bar, then use &minus; and + to fine tune. Three charts, each a little trickier.",
+    mount: mountBuilder,
+    report: function(d){
+      if(!d || !d.result) return "Bar chart builder: " + (d && d.c ? d.c : 0) + " of 3 charts built.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Bar chart builder: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Bar charts",
+    fig: DUAL_Q,
+    q: "a) How many books were sold online in March?<br>b) In February, how many more books were sold in the shop than online?<br>c) In how many of the four months did online sales beat shop sales?",
+    boxes: [
+      { label: "a) Online in March", a: 50 },
+      { label: "b) Shop minus online, February", a: 15 },
+      { label: "c) Months online won", a: 3 }
+    ],
+    hint: "Each line on this scale is 5. Use the key: which colour is online?",
+    why: "a) The online bar in March reaches the top line: <b>50</b>.<br>b) February: shop 45, online 30, so 45 &minus; 30 = <b>15</b>.<br>c) Online beat the shop in January (35 v 30), March (50 v 25) and April (45 v 40): <b>3</b> months." },
+
+  /* ---------- 4 LINE GRAPHS ---------- */
+  { type: "learn", topic: "Line graphs",
+    title: "Line graphs show change over time",
+    fig: LINE_LEARN,
+    html: '<p>A <b>line graph</b> shows how something changes over time. Time goes along the bottom.</p>' +
+          '<p>To read a value, go <b>up</b> from the time to the line, then <b>across</b> to the scale. At 10:00 it was 16&deg;C.</p>' +
+          '<p>The <b>trend</b> is the overall direction. Here the temperature rose steadily until 14:00, then fell. The steeper the line, the faster the change.</p>' +
+          '<div class="keep"><b>Keep this</b>Up from the bottom, across to the side. Describe a trend in words, with figures: &quot;it rose from 8&deg;C to 22&deg;C, then fell to 14&deg;C&quot;.</div>' },
+
+  { type: "num", topic: "Line graphs",
+    fig: LINE_Q,
+    q: "a) How much was the gas bill in March?<br>b) How much less was the bill in June than in January?",
+    boxes: [
+      { label: "a) March", a: 75, pre: "&pound;" },
+      { label: "b) Difference", a: 60, pre: "&pound;" }
+    ],
+    hint: "Each line on the scale is &pound;5. Read January and June, then subtract.",
+    why: "a) March is halfway between 70 and 80: <b>&pound;75</b>.<br>b) January &pound;95, June &pound;35. 95 &minus; 35 = <b>&pound;60</b>." },
+
+  { type: "mc", topic: "Line graphs",
+    fig: LINE_Q,
+    q: "Between which two months did the gas bill fall the most?",
+    options: [ "January to February", "February to March", "March to April", "April to May", "May to June" ],
+    answer: 2, fixed: true,
+    hint: "Look for the steepest part of the line going down. Or work out each drop.",
+    why: "The drops are 5, 15, 20, 10 and 10. The biggest is <b>March to April</b> (75 to 55, &pound;20), which is the steepest part of the line. The trend overall: the bill went down every month." },
+
+  /* ---------- 5 GROUPING DATA ---------- */
+  { type: "learn", topic: "Grouping data",
+    title: "Grouping data into classes",
+    html: '<p>When there are lots of different values, put them into <b>groups</b> (also called classes), such as 0 to 4, 5 to 9, 10 to 14.</p>' +
+          '<p>Groups must not overlap, must not leave gaps, and are usually the same width.</p>' +
+          '<table class="datatable"><tr><th>Group</th><th>Tally</th><th>Frequency</th></tr><tr><td>0 to 4</td><td>||||</td><td>4</td></tr><tr><td>5 to 9</td><td>|||</td><td>3</td></tr></table>' +
+          '<p>Go through the list once, in order. Put a tally in the right group for each value and cross the value off, so nothing gets counted twice.</p>' +
+          '<div class="keep"><b>Keep this</b>No gaps, no overlaps. Cross off as you go. Check the total matches how many values you started with.</div>' },
+
+  { type: "num", topic: "Grouping data",
+    q: "20 people were asked how many texts they sent yesterday:<br><b>3, 12, 7, 15, 9, 1, 11, 6, 14, 8, 2, 10, 5, 13, 7, 4, 16, 9, 12, 6</b><br>Fill in the frequency for each group.",
+    boxes: [
+      { label: "0 to 4", a: 4 },
+      { label: "5 to 9", a: 8 },
+      { label: "10 to 14", a: 6 },
+      { label: "15 to 19", a: 2 }
+    ],
+    hint: "Go along the list once, putting each number in its group. Your four answers should add up to 20.",
+    why: "0 to 4: 3, 1, 2, 4 = <b>4</b>. 5 to 9: 7, 9, 6, 8, 5, 7, 9, 6 = <b>8</b>. 10 to 14: 12, 11, 14, 10, 13, 12 = <b>6</b>. 15 to 19: 15, 16 = <b>2</b>. Check: 4 + 8 + 6 + 2 = 20." },
+
+  { type: "mc", topic: "Grouping data",
+    q: "Ages of people at a youth club are going to be grouped. Which set of groups is best?",
+    options: [
+      "0 to 10, 10 to 20, 20 to 30",
+      "0 to 9, 10 to 19, 20 to 29",
+      "0 to 9, 11 to 19, 21 to 29",
+      "0 to 5, 6 to 20, 21 to 29"
+    ],
+    answer: 1,
+    hint: "Check each set for three things: does any age fit in two groups? Is any age missing? Are the groups the same size?",
+    why: "<b>0 to 9, 10 to 19, 20 to 29</b>: no gaps, no overlaps, same width. In &quot;0 to 10, 10 to 20&quot; a 10 year old fits two groups. In &quot;0 to 9, 11 to 19&quot; a 10 year old fits none. &quot;0 to 5, 6 to 20&quot; has groups of very different sizes." },
+
+  /* ---------- 6 MEAN AND RANGE ---------- */
+  { type: "learn", topic: "Mean and range",
+    title: "Mean and range",
+    fig: MEAN_FIG,
+    html: '<p>The <b>mean</b> is a fair share average. Add up all the values, then divide by how many values there are.</p>' +
+          '<p>Quiz scores 6, 9, 4, 8, 8: total 35, five values, so the mean is 35 &divide; 5 = <b>7</b>. If the scores were shared out evenly, everyone would get 7.</p>' +
+          '<p>The <b>range</b> shows how spread out the data is: biggest minus smallest. 9 &minus; 4 = <b>5</b>.</p>' +
+          '<p>A smaller range means the values are closer together: more <b>consistent</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Mean: add them all, divide by how many. Range: biggest minus smallest. Small range = consistent.</div>' },
+
+  { type: "num", topic: "Mean and range",
+    q: "Hours of sleep over six nights: <b>7, 8.5, 6, 9, 7.5, 7</b><br>a) Find the mean.<br>b) Find the range.",
+    boxes: [
+      { label: "a) Mean", a: 7.5, post: "hours" },
+      { label: "b) Range", a: 3, post: "hours" }
+    ],
+    hint: "a) Add all six, then divide by 6. b) Find the biggest and the smallest.",
+    why: "a) 7 + 8.5 + 6 + 9 + 7.5 + 7 = 45. Then 45 &divide; 6 = <b>7.5 hours</b>.<br>b) 9 &minus; 6 = <b>3 hours</b>. Dividing by 5 instead of 6 is the classic slip: count the values." },
+
+  { type: "num", topic: "Mean and range", stretch: true,
+    q: "The mean of four numbers is 12. Three of the numbers are 10, 15 and 9. What is the fourth number?",
+    boxes: [ { label: "Fourth number", a: 14 } ],
+    hint: "If the mean of four numbers is 12, what must the four numbers add up to?",
+    why: "Four numbers with a mean of 12 add up to 4 &times; 12 = 48. The three you know add up to 10 + 15 + 9 = 34. So the fourth is 48 &minus; 34 = <b>14</b>. Check: (10 + 15 + 9 + 14) &divide; 4 = 12." },
+
+  /* ---------- 7 COMPARING DATA ---------- */
+  { type: "learn", topic: "Comparing data",
+    title: "Comparing two sets to make a decision",
+    html: '<p>To compare two sets of data, use an <b>average</b> (the mean) and a <b>spread</b> (the range).</p>' +
+          '<p>Say what each one tells you. A higher mean is higher on average. A smaller range is more consistent, so more reliable.</p>' +
+          '<table class="datatable"><tr><th>Minutes late</th><th>Mean</th><th>Range</th></tr><tr><td>Firm A</td><td>12</td><td>30</td></tr><tr><td>Firm B</td><td>15</td><td>8</td></tr></table>' +
+          '<p>Firm A is less late on average, but Firm B is far more consistent. Which is better depends on what matters to you.</p>' +
+          '<div class="keep"><b>Keep this</b>Decision + figures: &quot;I would choose B. Its mean is 15 minutes, a bit more than A&#39;s 12, but its range is only 8, so it is much more reliable.&quot;</div>' },
+
+  { type: "num", topic: "Comparing data",
+    q: "Two people want the last place on a quiz team. Their scores in five practice quizzes:<br><b>Asha: 14, 18, 9, 20, 14</b><br><b>Ben: 15, 13, 16, 14, 17</b><br>Work out the mean and range for each person.",
+    boxes: [
+      { label: "Asha&#39;s mean", a: 15 },
+      { label: "Asha&#39;s range", a: 11 },
+      { label: "Ben&#39;s mean", a: 15 },
+      { label: "Ben&#39;s range", a: 4 }
+    ],
+    hint: "Each person has 5 scores, so divide each total by 5. Range: highest minus lowest.",
+    why: "Asha: total 75, mean 75 &divide; 5 = <b>15</b>, range 20 &minus; 9 = <b>11</b>.<br>Ben: total 75, mean <b>15</b>, range 17 &minus; 13 = <b>4</b>." },
+
+  { type: "mc", topic: "Comparing data",
+    q: "Using those figures, the team wants someone they can rely on to score well every time. Who should get the place, and why?",
+    options: [
+      "Ben: the same mean as Asha, but a smaller range, so his scores are more consistent",
+      "Asha: she got the highest single score, 20",
+      "Asha: her range is bigger, so she is better",
+      "Either: their means are the same, so there is nothing to choose between them"
+    ],
+    answer: 0,
+    hint: "The means are equal, so the mean cannot decide it. What does the range tell you about being reliable?",
+    why: "Both means are 15, so they are equally good on average. Ben&#39;s range is 4 and Asha&#39;s is 11, so <b>Ben is more consistent</b>, which is what the team wants. A bigger range means less reliable, not better, and one high score does not show reliability." },
+
+  /* ---------- 8 PROBABILITY ---------- */
+  { type: "learn", topic: "Probability",
+    title: "Probability: from impossible to certain",
+    fig: PSCALE,
+    html: '<p><b>Probability</b> is how likely something is, on a scale from 0 to 1. 0 means impossible, 1 means certain, and &frac12; means an even chance.</p>' +
+          '<p>Between them: <b>unlikely</b> is nearer 0, <b>likely</b> is nearer 1.</p>' +
+          '<p>When all the outcomes are equally likely:<br><b>probability = number of ways it can happen &divide; total number of outcomes</b>.</p>' +
+          '<p>A bag has 3 red and 7 blue counters. P(red) = 3/10.</p>' +
+          '<div class="keep"><b>Keep this</b>A probability is never less than 0 or more than 1. Write it as a fraction, such as 3/10.</div>' },
+
+  { type: "sort", topic: "Probability",
+    q: "Sort these events using a normal six sided dice, a coin, and a bag of 3 red and 7 blue counters.",
+    buckets: ["Impossible", "Unlikely", "Even chance", "Likely", "Certain"],
+    cards: [
+      ["Rolling a 7 on the dice", 0],
+      ["Rolling a 6 on the dice", 1],
+      ["Picking a red counter from the bag", 1],
+      ["Getting heads when you flip the coin", 2],
+      ["Rolling an even number on the dice", 2],
+      ["Rolling a number bigger than 1 on the dice", 3],
+      ["Picking a blue counter from the bag", 3],
+      ["Rolling a number less than 7 on the dice", 4]
+    ],
+    hint: "Work out the fraction for each one if you can, then place it on the scale from 0 to 1.",
+    why: "Impossible: a 7 (0). Unlikely: a 6 (1/6) and red (3/10). Even chance: heads (1/2) and even (3/6 = 1/2). Likely: bigger than 1 (5/6) and blue (7/10). Certain: less than 7 (6/6 = 1)." },
+
+  { type: "num", topic: "Probability",
+    fig: SPINNER,
+    q: "This spinner has 8 equal sections. Give each answer as a fraction.<br>a) What is the probability of landing on green?<br>b) What is the probability of <b>not</b> landing on blue?",
+    boxes: [
+      { label: "a) P(green)", a: 0.375, tol: 0.001, show: "3/8" },
+      { label: "b) P(not blue)", a: 0.75, tol: 0.001, show: "6/8 = 3/4" }
+    ],
+    hint: "Count the green sections out of 8. For not blue, count every section that is not blue.",
+    why: "a) 3 of the 8 sections are green: <b>3/8</b>.<br>b) 2 are blue, so 8 &minus; 2 = 6 are not blue: <b>6/8</b>, which simplifies to 3/4." },
+
+  { type: "num", topic: "Probability", stretch: true,
+    q: "A bag has 20 sweets: 8 strawberry, 7 lemon and 5 orange. You take one without looking. Give each answer as a fraction.<br>a) What is the probability it is lemon?<br>b) What is the probability it is <b>not</b> strawberry?<br>c) What is the probability it is orange?",
+    boxes: [
+      { label: "a) P(lemon)", a: 0.35, tol: 0.001, show: "7/20" },
+      { label: "b) P(not strawberry)", a: 0.6, tol: 0.001, show: "12/20 = 3/5" },
+      { label: "c) P(orange)", a: 0.25, tol: 0.001, show: "5/20 = 1/4" }
+    ],
+    hint: "There are 20 sweets in total, so every answer is something out of 20. Not strawberry means lemon or orange.",
+    why: "a) 7 lemon out of 20: <b>7/20</b>.<br>b) Not strawberry: 7 + 5 = 12 out of 20: <b>12/20</b>, or 3/5.<br>c) 5 out of 20: <b>5/20</b>, or 1/4. On the word scale that is unlikely: less than an even chance." }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

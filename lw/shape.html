@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shape and space - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.choices button svg{display:block;max-width:150px;height:auto;margin:0 auto}
+/* Room builder widget */
+.rb-svg svg{width:100%;max-width:440px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.rb-svg rect.rb-cell{cursor:pointer}
+.rb-task p{margin:0 0 6px}
+.rb-dots{display:flex;gap:6px;margin-bottom:6px}
+.rb-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.rb-dots span.on{background:var(--good)}
+.rb-dots span.now{background:var(--sun)}
+.rb-read{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+.rb-read div{flex:1 1 130px;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:8px 10px}
+.rb-read small{display:block;font-size:.8rem;color:var(--body-tint)}
+.rb-read .wbig{font-size:1.4rem}
+.rb-per{color:#d63a3a}
+.rb-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Shape and space</h2>
+    <span>Functional Skills Maths, Level 1. Perimeter, area, volume, plans and nets, scale drawings, angles, symmetry, compass directions, and how many tins of paint to buy.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6", TINT = "#4b5275";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function poly(pts, fill, extra){
+  return '<polygon points="' + pts.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ") + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"' + (extra || "") + '/>';
+}
+function rect(x, y, w, h, fill, extra){
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="3"' + (extra || "") + '/>';
+}
+
+/* ---------- figures (drawn to scale unless marked) ---------- */
+
+/* L shape from points in metres; labels: [x, y, text, anchor] in metres */
+function lshape(pts, k, ox, oy, W, H, labs, extra, aria){
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + aria + '">';
+  s += poly(pts.map(function(p){ return [ox + p[0] * k, oy + p[1] * k]; }), "#e7f8f6");
+  s += extra ? extra(function(x){ return ox + x * k; }, function(y){ return oy + y * k; }) : "";
+  labs.forEach(function(l){
+    s += t((ox + l[0] * k).toFixed(1), (oy + l[1] * k).toFixed(1), l[2], 18, l[4] || INK, LAB + ' font-weight="700" text-anchor="' + (l[3] || "middle") + '"');
+  });
+  s += '</svg>';
+  return s;
+}
+/* Learn L: top 5, inner drop 4, step 3, right 2, bottom 8, left 6. 30 units per metre. */
+var L1PTS = [[0, 0], [5, 0], [5, 4], [8, 4], [8, 6], [0, 6]];
+var PERIM_FIG = lshape(L1PTS, 30, 70, 34, 400, 262, [
+  [2.5, -0.35, "5 m"], [-0.3, 3.15, "6 m", "end"], [4, 6.85, "8 m"], [8.3, 5.15, "2 m", "start"],
+  [5.3, 2.15, "?", "start", CORAL], [6.5, 3.75, "?", "middle", CORAL]
+], null, "An L shaped room drawn to scale. Top 5 metres, left side 6 metres, bottom 8 metres, right side 2 metres. Two inside edges are marked with question marks.");
+var AREA_FIG = lshape(L1PTS, 30, 70, 34, 400, 262, [
+  [2.5, -0.35, "5 m"], [-0.3, 3.15, "6 m", "end"], [4, 6.85, "8 m"], [8.3, 5.15, "2 m", "start"],
+  [5.3, 2.15, "4 m", "start"], [6.5, 3.75, "3 m"]
+], function(X, Y){
+  return ln(X(0), Y(4), X(5), Y(4), BLUE, 3, ' stroke-dasharray="8 6"') +
+    t(X(2.5), Y(2.15), "5 &times; 4 = 20", 17, BLUE, LAB + ' font-weight="800" text-anchor="middle"') +
+    t(X(4), Y(5.2), "8 &times; 2 = 16", 17, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+}, "The same L shaped room split by a dashed line into a 5 by 4 rectangle, area 20 square metres, and an 8 by 2 strip, area 16 square metres.");
+
+/* Question room: top 4, left 5, bottom 6, right 2; inside edges 3 down and 2 across. 36 units per metre. */
+var L2PTS = [[0, 0], [4, 0], [4, 3], [6, 3], [6, 5], [0, 5]];
+var ROOM_FIG = lshape(L2PTS, 36, 86, 34, 400, 246, [
+  [2, -0.3, "4 m"], [-0.25, 2.65, "5 m", "end"], [3, 5.75, "6 m"], [6.25, 4.15, "2 m", "start"]
+], null, "An L shaped room drawn to scale. Top 4 metres, left side 5 metres, bottom 6 metres, right side 2 metres. The two inside edges are not labelled.");
+
+/* Cuboid, oblique drawing */
+function cuboid(ox, oy, L, H, D, k, labs, aria, W, Hh){
+  var d = D * k * 0.5 * 0.7071;
+  var x1 = ox + L * k, y1 = oy - H * k;
+  var s = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + aria + '">';
+  s += poly([[ox, y1], [ox + d, y1 - d], [x1 + d, y1 - d], [x1, y1]], "#c9f1ec");
+  s += poly([[x1, y1], [x1 + d, y1 - d], [x1 + d, oy - d], [x1, oy]], "#9fe5dd");
+  s += poly([[ox, oy], [ox, y1], [x1, y1], [x1, oy]], "#e7f8f6");
+  s += t((ox + x1) / 2, oy + 26, labs[0], 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(ox - 8, (oy + y1) / 2 + 6, labs[1], 18, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += t((x1 + d / 2 + 10).toFixed(1), (oy - d / 2 + 14).toFixed(1), labs[2], 18, INK, LAB + ' font-weight="700" text-anchor="start"');
+  return s;
+}
+var CUBOID_FIG = cuboid(70, 170, 30, 10, 20, 7, ["30 cm", "10 cm", "20 cm"],
+  "A cuboid box 30 centimetres long, 20 centimetres wide and 10 centimetres high. Not to scale.", 400, 210) +
+  '</svg>';
+CUBOID_FIG = CUBOID_FIG.replace('</svg>', t(396, 20, "not to scale", 14, TINT, BODY + ' text-anchor="end"') + '</svg>');
+
+/* Net of a 4 by 2 by 1 cuboid, 30 units per cm */
+var NET_FIG = (function(){
+  var u = 32, ox = 10, oy = 14;
+  var faces = [[1, 0, 4, 1, "side"], [1, 1, 4, 2, "top"], [1, 3, 4, 1, "side"], [1, 4, 4, 2, "bottom"], [0, 1, 1, 2, "end"], [5, 1, 1, 2, "end"]];
+  var s = '<svg viewBox="0 0 400 214" role="img" aria-label="A net of a cuboid 4 centimetres by 2 centimetres by 1 centimetre: six rectangles in three matching pairs, beside the folded box.">';
+  faces.forEach(function(f){
+    s += rect(ox + f[0] * u, oy + f[1] * u, f[2] * u, f[3] * u, f[4] === "end" ? "#fff3c4" : f[4] === "side" ? "#e7f8f6" : "#c9f1ec");
+    s += t(ox + (f[0] + f[2] / 2) * u, oy + (f[1] + f[3] / 2) * u + 5, f[4], 15, INK, BODY + ' text-anchor="middle"');
+  });
+  s += t(300, 96, "folds up to make", 16, TINT, BODY + ' text-anchor="middle"');
+  var c = cuboid(240, 166, 4, 1, 2, 24, ["4 cm", "1 cm", "2 cm"], "", 1, 1);
+  s += c.replace(/^<svg[^>]*>/, "");
+  s += '</svg>';
+  return s;
+})();
+
+/* Four cube object, oblique: three in a row, one on top of the left cube */
+function cubeAt(ox, oy, c, r, a){
+  var x = ox + c * a, y = oy - r * a, d = a / 2;
+  return poly([[x, y - a], [x + d, y - a - d], [x + a + d, y - a - d], [x + a, y - a]], "#c9f1ec") +
+    poly([[x + a, y - a], [x + a + d, y - a - d], [x + a + d, y - d], [x + a, y]], "#9fe5dd") +
+    poly([[x, y], [x, y - a], [x + a, y - a], [x + a, y]], "#e7f8f6");
+}
+var BLOCKS_FIG = '<svg viewBox="0 0 400 200" role="img" aria-label="A shape made of four cubes: three cubes in a row from left to right, with a fourth cube on top of the left hand cube. An arrow shows the front.">' +
+  cubeAt(110, 170, 0, 0, 50) + cubeAt(110, 170, 1, 0, 50) + cubeAt(110, 170, 2, 0, 50) + cubeAt(110, 170, 0, 1, 50) +
+  t(185, 196, "front", 15, TINT, BODY + ' text-anchor="middle"') +
+  '</svg>';
+/* small square drawings for answer options: cells [[c, r]] with r = 0 at the top */
+function view(cells, aria){
+  var a = 30, maxc = 0, maxr = 0;
+  cells.forEach(function(p){ maxc = Math.max(maxc, p[0]); maxr = Math.max(maxr, p[1]); });
+  var W = (maxc + 1) * a + 8, H = (maxr + 1) * a + 8;
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="' + aria + '">';
+  cells.forEach(function(p){ s += rect(4 + p[0] * a, 4 + p[1] * a, a, a, "#e7f8f6"); });
+  return s + '</svg>';
+}
+function net(cells, aria){
+  var a = 22, maxc = 0, maxr = 0;
+  cells.forEach(function(p){ maxc = Math.max(maxc, p[0]); maxr = Math.max(maxr, p[1]); });
+  var W = (maxc + 1) * a + 6, H = (maxr + 1) * a + 6;
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="' + aria + '">';
+  cells.forEach(function(p){ s += '<rect x="' + (3 + p[0] * a) + '" y="' + (3 + p[1] * a) + '" width="' + a + '" height="' + a + '" fill="#fff3c4" stroke="' + INK + '" stroke-width="2.5"/>'; });
+  return s + '</svg>';
+}
+
+/* Map scale bar 1 : 50 000, 1 cm drawn as 70 units */
+var SCALEBAR = (function(){
+  var s = '<svg viewBox="0 0 400 122" role="img" aria-label="Scale bar for 1 to 50 000: each centimetre on the map is 500 metres, so 2 centimetres is 1 kilometre.">';
+  s += t(200, 22, "Map scale 1 : 50 000", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  for(var k = 0; k < 4; k++){
+    s += '<rect x="' + (60 + k * 70) + '" y="40" width="70" height="16" fill="' + (k % 2 ? WHITE : INK) + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  var labs = ["0", "500 m", "1 km", "1.5 km", "2 km"];
+  for(var j = 0; j <= 4; j++) s += t(60 + j * 70, 80, labs[j], 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(95, 112, "1 cm on the map", 16, BLUE, BODY + ' text-anchor="middle"');
+  s += ln(62, 94, 128, 94, BLUE, 3);
+  s += t(310, 112, "2 cm = 1 km", 16, BLUE, BODY + ' text-anchor="middle" font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Garden plan on a 1 cm grid: 6 squares by 4 squares */
+var PLAN_FIG = (function(){
+  var a = 36, ox = 56, oy = 14, cols = 8, rows = 6;
+  var s = '<svg viewBox="0 0 400 268" role="img" aria-label="A plan on a grid of 1 centimetre squares. The garden is a rectangle 6 squares long and 4 squares wide. Scale 1 centimetre to 2 metres.">';
+  for(var c = 0; c <= cols; c++) s += ln(ox + c * a, oy, ox + c * a, oy + rows * a, LINE, 1.5);
+  for(var r = 0; r <= rows; r++) s += ln(ox, oy + r * a, ox + cols * a, oy + r * a, LINE, 1.5);
+  s += '<rect x="' + (ox + a) + '" y="' + (oy + a) + '" width="' + (6 * a) + '" height="' + (4 * a) + '" fill="rgba(25,195,154,.25)" stroke="' + INK + '" stroke-width="3"/>';
+  s += t(ox + 4 * a, oy + 3 * a + 6, "garden", 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(200, 258, "Each square is 1 cm.  Scale: 1 cm to 2 m", 16, INK, BODY + ' text-anchor="middle" font-weight="700" xml:space="preserve"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Three angles */
+var ANGLES = (function(){
+  var s = '<svg viewBox="0 0 400 170" role="img" aria-label="Three angles: an acute angle of 40 degrees, a right angle of 90 degrees marked with a small square, and an obtuse angle of 130 degrees.">';
+  function ang(vx, vy, deg, col, name, sub){
+    var r = 80, rad = deg * Math.PI / 180;
+    var ex = vx + r * Math.cos(rad), ey = vy - r * Math.sin(rad);
+    var o = ln(vx, vy, vx + r, vy, INK, 4, ' stroke-linecap="round"') + ln(vx, vy, ex.toFixed(1), ey.toFixed(1), INK, 4, ' stroke-linecap="round"');
+    if(deg === 90){
+      o += '<path d="M' + (vx + 18) + ' ' + vy + ' V' + (vy - 18) + ' H' + vx + '" fill="none" stroke="' + col + '" stroke-width="3"/>';
+    } else {
+      var ar = 26, ax = vx + ar * Math.cos(rad), ay = vy - ar * Math.sin(rad);
+      o += '<path d="M' + (vx + ar) + ' ' + vy + ' A' + ar + ' ' + ar + ' 0 0 0 ' + ax.toFixed(1) + ' ' + ay.toFixed(1) + '" fill="none" stroke="' + col + '" stroke-width="3"/>';
+    }
+    return o;
+  }
+  s += ang(20, 112, 40, BLUE) + ang(155, 112, 90, MINT) + ang(305, 112, 130, CORAL);
+  s += t(60, 140, "acute", 18, BLUE, LAB + ' font-weight="800" text-anchor="middle"') + t(60, 162, "less than 90&deg;", 16, INK, BODY + ' text-anchor="middle"');
+  s += t(195, 140, "right angle", 18, MINT, LAB + ' font-weight="800" text-anchor="middle"') + t(195, 162, "exactly 90&deg;", 16, INK, BODY + ' text-anchor="middle"');
+  s += t(330, 140, "obtuse", 18, CORAL, LAB + ' font-weight="800" text-anchor="middle"') + t(330, 162, "90&deg; to 180&deg;", 16, INK, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Six shapes for the symmetry match */
+var SHAPES = (function(){
+  var s = '<svg viewBox="0 0 420 290" role="img" aria-label="Six shapes: a square, a rectangle, an equilateral triangle, an isosceles triangle, a regular hexagon and a parallelogram.">';
+  var F = "#e7f8f6";
+  function nm(x, y, a, b){ return t(x, y, a, 15, INK, LAB + ' font-weight="700" text-anchor="middle"') + (b ? t(x, y + 18, b, 15, INK, LAB + ' font-weight="700" text-anchor="middle"') : ""); }
+  // row 1 centres x = 70, 210, 350, shapes sit above y = 105
+  s += rect(40, 40, 60, 60, F) + nm(70, 126, "square");
+  s += rect(165, 50, 90, 50, F) + nm(210, 126, "rectangle");
+  var h = 70 * Math.sqrt(3) / 2;
+  s += poly([[315, 100], [385, 100], [350, 100 - h]], F) + nm(350, 126, "equilateral", "triangle");
+  // row 2
+  s += poly([[45, 245], [95, 245], [70, 170]], F) + nm(70, 268, "isosceles", "triangle");
+  var hx = [];
+  for(var k = 0; k < 6; k++){ var a = k * Math.PI / 3; hx.push([210 + 38 * Math.cos(a), 210 + 38 * Math.sin(a)]); }
+  s += poly(hx, F) + nm(210, 268, "regular", "hexagon");
+  s += poly([[305, 245], [375, 245], [400, 200], [330, 200]], F) + nm(350, 268, "parallelogram");
+  s += '</svg>';
+  return s;
+})();
+
+/* Compass rose */
+var ROSE = (function(){
+  var cx = 200, cy = 112, s = '<svg viewBox="0 0 400 226" role="img" aria-label="A compass rose with the eight points: North, North East, East, South East, South, South West, West and North West, going clockwise.">';
+  var names = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  for(var k = 0; k < 8; k++){
+    var a = k * 45 * Math.PI / 180, r = k % 2 ? 62 : 80;
+    var x = cx + r * Math.sin(a), y = cy - r * Math.cos(a);
+    s += ln(cx, cy, x.toFixed(1), y.toFixed(1), k % 2 ? TINT : INK, k % 2 ? 3 : 5, ' stroke-linecap="round"');
+    var lr = k % 2 ? 82 : 100;
+    s += t((cx + lr * Math.sin(a)).toFixed(1), (cy - lr * Math.cos(a) + 6).toFixed(1), names[k], k % 2 ? 16 : 20, k === 0 ? CORAL : INK, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + INK + '"/>';
+  var a1 = 35 * Math.PI / 180, a2 = 75 * Math.PI / 180, R = 112;
+  var sx = cx + R * Math.sin(a1), sy = cy - R * Math.cos(a1), ex = cx + R * Math.sin(a2), ey = cy - R * Math.cos(a2);
+  s += '<path d="M' + sx.toFixed(1) + ' ' + sy.toFixed(1) + ' A' + R + ' ' + R + ' 0 0 1 ' + ex.toFixed(1) + ' ' + ey.toFixed(1) + '" fill="none" stroke="' + BLUE + '" stroke-width="3"/>';
+  var tx = Math.cos(a2), ty = Math.sin(a2);   /* direction of travel at the end of the arc */
+  function hd(sgn){ var bx = ex - 12 * tx + sgn * 7 * ty, by = ey - 12 * ty - sgn * 7 * tx; return bx.toFixed(1) + ' ' + by.toFixed(1); }
+  s += '<path d="M' + hd(1) + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + hd(-1) + '" fill="none" stroke="' + BLUE + '" stroke-width="3"/>';
+  s += t(396, 40, "clockwise", 16, BLUE, BODY + ' text-anchor="end" font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Town map on a grid, North up */
+var TOWN = (function(){
+  var a = 52, ox = 30, oy = 20, cols = 6, rows = 5;
+  var s = '<svg viewBox="0 0 400 300" role="img" aria-label="A map on a grid of squares, 6 across and 5 down, with North at the top. Counting from the top left: Library column 2 row 5, Park column 2 row 3, Cafe column 5 row 3, Station column 5 row 5, School column 3 row 2.">';
+  for(var c = 0; c <= cols; c++) s += ln(ox + c * a, oy, ox + c * a, oy + rows * a, LINE, 1.5);
+  for(var r = 0; r <= rows; r++) s += ln(ox, oy + r * a, ox + cols * a, oy + r * a, LINE, 1.5);
+  function place(c, r, name, col){
+    var x = ox + c * a + a / 2, y = oy + r * a + a / 2;
+    return '<circle cx="' + x + '" cy="' + (y - 8) + '" r="8" fill="' + col + '" stroke="' + INK + '" stroke-width="2"/>' +
+      t(x, y + 18, name, 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += place(1, 4, "Library", BLUE) + place(1, 2, "Park", MINT) + place(4, 2, "Cafe", SUN) + place(4, 4, "Station", CORAL) + place(2, 1, "School", VIOLET);
+  s += '<path d="M370 120 V40" stroke="' + INK + '" stroke-width="4"/><path d="M360 56 L370 38 L380 56 Z" fill="' + INK + '"/>';
+  s += t(370, 34, "N", 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Wall and tins */
+var WALL = (function(){
+  var k = 60, ox = 60, oy = 30;           // wall 4 m by 2.5 m; each tin covers 4 m2, a strip 1.6 m wide
+  var s = '<svg viewBox="0 0 400 250" role="img" aria-label="A wall 4 metres wide and 2.5 metres high, area 10 square metres, split into strips: tin 1 covers 4 square metres, tin 2 covers 4 square metres, and half a tin covers the last 2 square metres.">';
+  var cols = ["#c9f1ec", "#9fe5dd", "#fff3c4"];
+  var xs = [0, 1.6, 3.2, 4], labs = ["tin 1", "tin 2", "&frac12; tin"];
+  for(var j = 0; j < 3; j++){
+    s += '<rect x="' + (ox + xs[j] * k) + '" y="' + oy + '" width="' + ((xs[j + 1] - xs[j]) * k).toFixed(1) + '" height="' + (2.5 * k) + '" fill="' + cols[j] + '" stroke="' + INK + '" stroke-width="2" stroke-dasharray="' + (j ? "6 4" : "0") + '"/>';
+    s += t((ox + (xs[j] + xs[j + 1]) / 2 * k).toFixed(1), oy + 1.25 * k + 6, labs[j], 17, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  }
+  s += '<rect x="' + ox + '" y="' + oy + '" width="' + (4 * k) + '" height="' + (2.5 * k) + '" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += t(ox + 2 * k, oy + 2.5 * k + 26, "4 m", 18, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(ox - 8, oy + 1.25 * k + 6, "2.5 m", 18, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += t(200, 240, "Area 10 m&sup2;. 10 &divide; 4 = 2.5, so buy 3 tins", 17, BLUE, BODY + ' text-anchor="middle" font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- room builder widget ---------- */
+var RC = 8, RR = 6, CELL = 40, PAD = 20;
+var RB = [
+  { area: 12, per: 14, rect: true,
+    task: "Make a <b>rectangular</b> room with an area of <b>12 m&sup2;</b> and a perimeter of <b>14 m</b>.",
+    sol: [[1, 1, 4, 3]],
+    why: "A 4 by 3 rectangle: area 4 &times; 3 = 12 m&sup2;, perimeter 4 + 3 + 4 + 3 = 14 m. A 6 by 2 rectangle also has area 12 but its perimeter is 16 m." },
+  { area: 12, per: 16,
+    task: "Same area, <b>12 m&sup2;</b>, but this time a perimeter of <b>16 m</b>. Any shape you like, as long as the squares join edge to edge.",
+    sol: [[1, 2, 6, 2]],
+    why: "A 6 by 2 rectangle works: 6 + 2 + 6 + 2 = 16 m. Lots of other shapes work too. Same area, different perimeter: a long thin room needs more skirting board than a squarer one." },
+  { area: 15, per: 16, notRect: true,
+    task: "Now an <b>L shaped</b> room (not a rectangle) with an area of <b>15 m&sup2;</b> and a perimeter of <b>16 m</b>.",
+    sol: [[1, 1, 4, 3], [1, 4, 3, 1]],
+    why: "A 4 by 4 square with one corner square taken out: area 16 &minus; 1 = 15 m&sup2;. Taking out a corner does not change the perimeter: it is still 16 m, because the two edges you lose are replaced by two new ones." }
+];
+function rbStats(cells){
+  var area = 0, per = 0, minc = 99, maxc = -1, minr = 99, maxr = -1;
+  function on(c, r){ return c >= 0 && r >= 0 && c < RC && r < RR && cells[r * RC + c] === 1; }
+  for(var r = 0; r < RR; r++) for(var c = 0; c < RC; c++){
+    if(!on(c, r)) continue;
+    area++;
+    minc = Math.min(minc, c); maxc = Math.max(maxc, c); minr = Math.min(minr, r); maxr = Math.max(maxr, r);
+    if(!on(c - 1, r)) per++; if(!on(c + 1, r)) per++; if(!on(c, r - 1)) per++; if(!on(c, r + 1)) per++;
+  }
+  var isRect = area > 0 && area === (maxc - minc + 1) * (maxr - minr + 1);
+  /* joined: flood fill from the first filled square */
+  var seen = {}, stack = [], joined = true, holes = false;
+  for(var i = 0; i < cells.length; i++) if(cells[i] === 1){ stack.push(i); seen[i] = 1; break; }
+  var count = 0;
+  while(stack.length){
+    var p = stack.pop(), pc = p % RC, pr = Math.floor(p / RC); count++;
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function(dv){
+      var nc = pc + dv[0], nr = pr + dv[1], ni = nr * RC + nc;
+      if(on(nc, nr) && !seen[ni]){ seen[ni] = 1; stack.push(ni); }
+    });
+  }
+  if(area && count !== area) joined = false;
+  /* holes: flood the empty squares from outside the grid */
+  var out = {}, st = [];
+  for(var rr = -1; rr <= RR; rr++) for(var cc = -1; cc <= RC; cc++){
+    if(rr === -1 || cc === -1 || rr === RR || cc === RC){ out[rr + "," + cc] = 1; st.push([cc, rr]); }
+  }
+  while(st.length){
+    var q = st.pop();
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function(dv){
+      var nc = q[0] + dv[0], nr = q[1] + dv[1], key = nr + "," + nc;
+      if(nc < -1 || nr < -1 || nc > RC || nr > RR || out[key]) return;
+      if(on(nc, nr)) return;
+      out[key] = 1; st.push([nc, nr]);
+    });
+  }
+  for(var r2 = 0; r2 < RR; r2++) for(var c2 = 0; c2 < RC; c2++) if(!on(c2, r2) && !out[r2 + "," + c2]) holes = true;
+  return { area: area, per: per, isRect: isRect, joined: joined, holes: holes };
+}
+
+function mountRooms(el, api){
+  var d = api.data;
+  if(!d.cells || d.cells.length !== RC * RR){ d.cells = []; for(var i = 0; i < RC * RR; i++) d.cells.push(0); }
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  var view = d.c;
+
+  el.innerHTML =
+    '<div class="wpanel rb-task" data-r="task"></div>' +
+    '<div class="rb-svg" data-r="svg"></div>' +
+    '<div class="rb-read"><div><small>Area</small><span class="wbig" data-r="area"></span></div><div><small>Perimeter (red edges)</small><span class="wbig rb-per" data-r="per"></span></div></div>' +
+    '<div class="wrow">' +
+      '<button class="btn" type="button" data-r="check">Check my room</button>' +
+      '<button class="btn btn-quiet" type="button" data-r="clear">Clear</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb rb-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function svg(){
+    var W = RC * CELL + PAD * 2, H = RR * CELL + PAD * 2;
+    var st = rbStats(d.cells);
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Room builder grid, 8 squares by 6. ' + st.area + ' squares filled, perimeter ' + st.per + ' metres.">';
+    s += '<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="12" fill="' + PAPER + '"/>';
+    for(var r = 0; r < RR; r++) for(var c = 0; c < RC; c++){
+      var i = r * RC + c, f = d.cells[i] === 1;
+      s += '<rect class="rb-cell" data-i="' + i + '" x="' + (PAD + c * CELL) + '" y="' + (PAD + r * CELL) + '" width="' + CELL + '" height="' + CELL + '" fill="' + (f ? "#9fe5dd" : WHITE) + '" stroke="' + LINE + '" stroke-width="1.5"/>';
+    }
+    function on(c, r){ return c >= 0 && r >= 0 && c < RC && r < RR && d.cells[r * RC + c] === 1; }
+    for(var r1 = 0; r1 < RR; r1++) for(var c1 = 0; c1 < RC; c1++){
+      if(!on(c1, r1)) continue;
+      var x = PAD + c1 * CELL, y = PAD + r1 * CELL, e = ' stroke-linecap="round" pointer-events="none"';
+      if(!on(c1, r1 - 1)) s += ln(x, y, x + CELL, y, "#e03a3a", 5, e);
+      if(!on(c1, r1 + 1)) s += ln(x, y + CELL, x + CELL, y + CELL, "#e03a3a", 5, e);
+      if(!on(c1 - 1, r1)) s += ln(x, y, x, y + CELL, "#e03a3a", 5, e);
+      if(!on(c1 + 1, r1)) s += ln(x + CELL, y, x + CELL, y + CELL, "#e03a3a", 5, e);
+    }
+    s += '</svg>';
+    return s;
+  }
+  function task(){
+    var dots = '<div class="rb-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= 3) return dots + '<p><b>Free play.</b> All three rooms built. Build anything you like and watch the area and perimeter change.</p>';
+    return dots + '<p class="tiny" style="margin:0 0 4px">Room ' + (view + 1) + ' of 3. Each square is 1 m by 1 m. Tap squares to fill or empty them.</p><p>' + RB[view].task + '</p>';
+  }
+  function draw(){
+    var st = rbStats(d.cells);
+    q("task").innerHTML = task();
+    q("svg").innerHTML = svg();
+    q("area").innerHTML = st.area + " m&sup2;";
+    q("per").innerHTML = st.per + " m";
+    var waiting = view !== d.c || d.c >= 3;
+    q("check").classList.toggle("hidden", d.c >= 3);
+    q("check").disabled = waiting;
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+  function fb(cls, html){ var f = q("fb"); f.className = "fb rb-fb " + cls; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function setSol(k){
+    for(var i = 0; i < d.cells.length; i++) d.cells[i] = 0;
+    RB[k].sol.forEach(function(b){
+      for(var r = b[1]; r < b[1] + b[3]; r++) for(var c = b[0]; c < b[0] + b[2]; c++) d.cells[r * RC + c] = 1;
+    });
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is one that works.</b> " : "<b>Yes, that room works.</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All three rooms built. Area counts the squares inside; perimeter counts the edges all the way round.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next room</button>';
+    fb(how === "shown" ? "show" : "good", head + RB[k].why + more);
+    q("next").onclick = function(){
+      view = d.c;
+      for(var i = 0; i < d.cells.length; i++) d.cells[i] = 0;
+      api.save();
+      q("fb").className = "fb rb-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+  function problem(){
+    var c = RB[view], st = rbStats(d.cells);
+    if(!st.area) return "There are no squares yet. Tap some to fill them.";
+    if(!st.joined) return "Some squares are not joined edge to edge. A room needs to be one piece.";
+    if(st.holes) return "There is an empty square in the middle. Fill it in or move it to the edge.";
+    if(st.area !== c.area) return "The area is " + st.area + " m&sup2;, and it needs to be " + c.area + " m&sup2;. " + (st.area < c.area ? "Add" : "Take away") + " " + Math.abs(st.area - c.area) + " square" + (Math.abs(st.area - c.area) === 1 ? "" : "s") + ".";
+    if(c.rect && !st.isRect) return "Area 12 m&sup2;, good. This room needs to be a rectangle.";
+    if(c.notRect && st.isRect) return "That is a rectangle. This one needs to be L shaped.";
+    if(st.per !== c.per) return "The area is right. The perimeter is " + st.per + " m and it needs to be " + c.per + " m. " +
+      (st.per > c.per ? "Try a more compact, squarer shape." : "Try a longer, thinner shape.");
+    return "";
+  }
+  q("svg").addEventListener("click", function(e){
+    var cell = e.target.closest("[data-i]");
+    if(!cell || d.c >= 3 && view < 3) return;
+    if(view !== d.c && d.c < 3) return;
+    var i = parseInt(cell.getAttribute("data-i"), 10);
+    d.cells[i] = d.cells[i] ? 0 : 1;
+    api.save(); draw();
+  });
+  q("clear").onclick = function(){
+    if(view !== d.c && d.c < 3) return;
+    for(var i = 0; i < d.cells.length; i++) d.cells[i] = 0;
+    api.save(); draw();
+  };
+  q("check").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    var p = problem();
+    if(!p){ solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    fb("nudge", "<b>Not quite yet.</b> " + p);
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    d.shown[view] = true;
+    setSol(view);
+    solved(view, "shown");
+  };
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three rooms built.</b> Area counts the squares inside; perimeter counts the edges all the way round.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "shape",
+  title: "Shape and space",
+  subject: "Maths",
+  mins: 50,
+  blurb: "Rooms, gardens, boxes and maps: perimeter and area, volume, plans and nets, scale drawings, angles and symmetry, compass directions, and working out how many tins or packs to buy.",
+  steps: [
+
+  /* ---------- 1 PERIMETER ---------- */
+  { type: "learn", topic: "Perimeter",
+    title: "Perimeter: the distance all the way round",
+    fig: PERIM_FIG,
+    html: '<p><b>Perimeter</b> is the total length around the edge of a shape. Add up every side. It is a length, so it is in cm or m.</p>' +
+          '<p>A rectangle 5 m by 3 m: 5 + 3 + 5 + 3 = <b>16 m</b>.</p>' +
+          '<p>In an L shape, some sides have no number. Use the sides you know: the top edges add up to the bottom, and the right edges add up to the left. Here the missing step is 8 &minus; 5 = 3 m, and the missing drop is 6 &minus; 2 = 4 m.</p>' +
+          '<p>So the perimeter is 5 + 4 + 3 + 2 + 8 + 6 = <b>28 m</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Start at one corner and go round, ticking off each side as you add it, so none get missed.</div>' },
+
+  { type: "num", topic: "Perimeter",
+    q: "Jay is putting a fence around a rectangle of garden for Bonnie, his small poodle. The rectangle is 12 m long and 7.5 m wide. How much fencing does he need to go all the way round?",
+    boxes: [ { label: "Fencing", a: 39, post: "m" } ],
+    hint: "A rectangle has two long sides and two short sides. Add all four.",
+    why: "12 + 7.5 + 12 + 7.5 = <b>39 m</b>. Or 2 &times; (12 + 7.5) = 2 &times; 19.5 = 39. Adding just 12 + 7.5 = 19.5 only goes half way round." },
+
+  { type: "num", topic: "Perimeter",
+    fig: ROOM_FIG,
+    q: "Skirting board goes all the way round this room (ignore the door). Work out the two sides with no numbers, then the perimeter.",
+    boxes: [
+      { label: "a) Inside edge going across", a: 2, post: "m" },
+      { label: "b) Inside edge going down", a: 3, post: "m" },
+      { label: "c) Perimeter", a: 22, post: "m" }
+    ],
+    hint: "Across: the bottom is 6 m and the top is 4 m. Down: the left side is 5 m and the right side is 2 m.",
+    why: "Across: 6 &minus; 4 = <b>2 m</b>. Down: 5 &minus; 2 = <b>3 m</b>. Perimeter: 4 + 3 + 2 + 2 + 6 + 5 = <b>22 m</b>. Check: there should be six sides to add for an L shape." },
+
+  /* ---------- 2 AREA ---------- */
+  { type: "learn", topic: "Area",
+    title: "Area: the space inside",
+    fig: AREA_FIG,
+    html: '<p><b>Area</b> is the space inside a shape, measured in squares: cm&sup2; or m&sup2;.</p>' +
+          '<p>Rectangle: <b>area = length &times; width</b>. A room 5 m by 4 m has an area of 20 m&sup2;.</p>' +
+          '<p>Shapes made of rectangles: split them into rectangles, find each area, then add. This L shape: 5 &times; 4 = 20 and 8 &times; 2 = 16, so the area is <b>36 m&sup2;</b>.</p>' +
+          '<p>Check another way: the whole 8 by 6 box is 48 m&sup2;, take away the missing 3 by 4 corner (12 m&sup2;): 48 &minus; 12 = 36.</p>' +
+          '<div class="keep"><b>Keep this</b>Perimeter is a length (m). Area is squares (m&sup2;). Split L shapes into two rectangles.</div>' },
+
+  { type: "widget", topic: "Area",
+    title: "Room builder",
+    html: "Tap squares to build a room. The area and perimeter update as you go: the red edges are the perimeter. Three rooms to build, then free play.",
+    mount: mountRooms,
+    report: function(d){
+      if(!d || !d.result) return "Room builder: " + (d && d.c ? d.c : 0) + " of 3 rooms built.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Room builder: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Area",
+    fig: ROOM_FIG,
+    q: "Here is the same room as before. New carpet is needed for the whole floor. What is the area of the floor?",
+    boxes: [ { label: "Area", a: 24, post: "m&sup2;" } ],
+    hint: "Split it with a line across where the room gets wider. The top part is 4 m by 3 m. The bottom strip is 6 m by 2 m.",
+    why: "Top part: 4 &times; 3 = 12 m&sup2;. Bottom strip: 6 &times; 2 = 12 m&sup2;. Total <b>24 m&sup2;</b>. Check: the 6 by 5 box is 30 m&sup2;, minus the missing 2 by 3 corner (6 m&sup2;) = 24. Multiplying 6 &times; 5 = 30 forgets the missing corner." },
+
+  { type: "sort", topic: "Area",
+    q: "Do you need the <b>area</b> or the <b>perimeter</b> for each job?",
+    buckets: ["Area", "Perimeter"],
+    cards: [
+      ["Carpet for a bedroom floor", 0],
+      ["Turf for a new lawn", 0],
+      ["Paint for a wall", 0],
+      ["A fence around a field", 1],
+      ["Skirting board around a room", 1],
+      ["Ribbon around the edge of a cake board", 1]
+    ],
+    hint: "Does the job cover the whole surface, or go round the edge?",
+    why: "Covering a surface (carpet, turf, paint) needs the <b>area</b>. Going round the edge (fence, skirting board, ribbon) needs the <b>perimeter</b>." },
+
+  /* ---------- 3 VOLUME ---------- */
+  { type: "learn", topic: "Volume",
+    title: "Volume: how much fits inside",
+    fig: CUBOID_FIG,
+    html: '<p><b>Volume</b> is the space inside a 3D shape, measured in cubes: cm&sup3; or m&sup3;.</p>' +
+          '<p>Cuboid: <b>volume = length &times; width &times; height</b>. This box: 30 &times; 20 &times; 10 = <b>6000 cm&sup3;</b>.</p>' +
+          '<p>A cube has every edge the same: a 3 cm cube is 3 &times; 3 &times; 3 = 27 cm&sup3;.</p>' +
+          '<p><b>How many fit?</b> Work out how many fit along each edge, then multiply. Boxes 10 cm each way into a crate 50 by 30 by 20 cm: 5 &times; 3 &times; 2 = 30 boxes.</p>' +
+          '<div class="keep"><b>Keep this</b>Volume = l &times; w &times; h, in cubed units. For how many fit, divide each edge first and round down.</div>' },
+
+  { type: "num", topic: "Volume",
+    q: "A fish tank is a cuboid 60 cm long, 30 cm wide and 40 cm high. What is its volume?",
+    boxes: [ { label: "Volume", a: 72000, post: "cm&sup3;" } ],
+    hint: "Multiply all three measurements together. Two at a time is fine: 60 &times; 30 first.",
+    why: "60 &times; 30 = 1800, then 1800 &times; 40 = <b>72 000 cm&sup3;</b>. Adding the edges (130) or using only two of them (1800) are the common slips." },
+
+  { type: "num", topic: "Volume", stretch: true,
+    q: "Cube shaped boxes have edges of 20 cm. They are packed into a crate 1.2 m long, 80 cm wide and 50 cm high. How many boxes fit in the crate?",
+    boxes: [ { label: "Boxes", a: 48 } ],
+    hint: "Change 1.2 m into cm first. Then how many 20 cm boxes fit along each edge? You cannot have half a box in a layer.",
+    why: "1.2 m = 120 cm. Along the length: 120 &divide; 20 = 6. Across: 80 &divide; 20 = 4. Up: 50 &divide; 20 = 2.5, so only <b>2</b> layers fit. 6 &times; 4 &times; 2 = <b>48 boxes</b>. Dividing the volumes (480 000 &divide; 8000 = 60) gives too many, because boxes cannot be cut to fill the gap at the top." },
+
+  /* ---------- 4 PLANS AND NETS ---------- */
+  { type: "learn", topic: "Plans and nets",
+    title: "Plans, elevations and nets",
+    fig: NET_FIG,
+    html: '<p>A <b>plan</b> is the view from directly above. An <b>elevation</b> is the view from the front or the side.</p>' +
+          '<p>A <b>net</b> is a flat shape that folds up to make a 3D shape. A cube&#39;s net has 6 squares. A cuboid&#39;s net has 6 rectangles in 3 matching pairs: top and bottom, two sides, two ends.</p>' +
+          '<p>Not every set of 6 squares folds into a cube. If two squares would end up on the same face, it fails. A 2 by 3 block of squares does not work.</p>' +
+          '<div class="keep"><b>Keep this</b>Plan = from above. Front elevation = from the front. Side elevation = from the side.</div>' },
+
+  { type: "mc", topic: "Plans and nets",
+    fig: BLOCKS_FIG,
+    q: "This shape is made from 4 cubes. Which drawing is its <b>plan</b>, the view from directly above?",
+    options: [
+      view([[0, 0], [1, 0], [2, 0]], "Three squares in a row"),
+      view([[0, 0], [0, 1], [1, 1], [2, 1]], "Three squares in a row with one more on top of the left one"),
+      view([[0, 0], [0, 1]], "Two squares, one on top of the other"),
+      view([[0, 0], [1, 0], [0, 1], [1, 1]], "A two by two square")
+    ],
+    answer: 0,
+    hint: "Imagine looking straight down from above. The cube on top sits right over another cube, so from above you cannot see that it is stacked.",
+    why: "From above you see the tops of three cubes in a row, so the plan is <b>three squares in a row</b>. The drawing with a square on top of the left end is the <b>front elevation</b>. Two squares stacked is the <b>side elevation</b> from the right." },
+
+  { type: "mc", topic: "Plans and nets",
+    q: "Which of these will <b>not</b> fold up to make a cube?",
+    options: [
+      net([[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]], "A cross: a row of four squares with one square above and one below the second square"),
+      net([[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]], "A 2 by 3 block of six squares"),
+      net([[0, 0], [1, 0], [1, 1], [2, 1], [2, 2], [3, 2]], "A staircase of three pairs of squares"),
+      net([[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [3, 2]], "A row of four squares with one square above the first and one below the last")
+    ],
+    answer: 1,
+    hint: "Picture folding each one. Do the squares cover all six faces, or do two land on top of each other?",
+    why: "The <b>2 by 3 block</b> cannot make a cube: fold it and the squares overlap, leaving two faces open. The cross, the staircase and the row of four with one square at each end on opposite sides all fold into cubes. There are 11 different cube nets in all." },
+
+  /* ---------- 5 SCALE DRAWINGS ---------- */
+  { type: "learn", topic: "Scale drawings",
+    title: "Scale drawings and maps",
+    fig: SCALEBAR,
+    html: '<p>A scale tells you what 1 cm on a drawing stands for in real life. With a scale of <b>1 cm to 2 m</b>, a wall 4.5 cm long on the plan is 4.5 &times; 2 = <b>9 m</b> long in real life.</p>' +
+          '<p>Going the other way, divide: a real wall 7 m long is drawn 7 &divide; 2 = 3.5 cm long.</p>' +
+          '<p>Maps often use a ratio like <b>1 : 50 000</b>. That means 1 cm on the map is 50 000 cm in real life, which is 500 m. So 2 cm on the map is 1 km.</p>' +
+          '<div class="keep"><b>Keep this</b>Drawing to real life: multiply. Real life to drawing: divide. Then check the units make sense.</div>' },
+
+  { type: "num", topic: "Scale drawings",
+    fig: PLAN_FIG,
+    q: "This is a plan of a garden. What are the real length and width of the garden?",
+    boxes: [
+      { label: "a) Real length", a: 12, post: "m" },
+      { label: "b) Real width", a: 8, post: "m" }
+    ],
+    hint: "Count the squares along each side to get the length on the plan in cm. Each cm on the plan is 2 m in real life.",
+    why: "On the plan the garden is 6 cm long and 4 cm wide. Real length: 6 &times; 2 = <b>12 m</b>. Real width: 4 &times; 2 = <b>8 m</b>." },
+
+  { type: "num", topic: "Scale drawings", stretch: true,
+    q: "A walking map has a scale of 1 : 50 000. On the map, the path from the campsite to the village is 7 cm long. How far is that in real life, in kilometres?",
+    boxes: [ { label: "Real distance", a: 3.5, post: "km" } ],
+    hint: "1 cm on this map is 50 000 cm. Change 50 000 cm into metres (divide by 100), then think about km.",
+    why: "1 cm on the map is 500 m, so 7 cm is 7 &times; 500 = 3500 m = <b>3.5 km</b>. Or: 7 &times; 50 000 = 350 000 cm; &divide; 100 = 3500 m; &divide; 1000 = 3.5 km." },
+
+  /* ---------- 6 ANGLES AND SYMMETRY ---------- */
+  { type: "learn", topic: "Angles and symmetry",
+    title: "Types of angle and lines of symmetry",
+    fig: ANGLES,
+    html: '<p>A <b>right angle</b> is a quarter turn, 90&deg;, like the corner of a page. It is marked with a small square.</p>' +
+          '<p><b>Acute</b> angles are smaller than a right angle. <b>Obtuse</b> angles are bigger than a right angle but smaller than a straight line (180&deg;).</p>' +
+          '<p>A <b>line of symmetry</b> splits a shape into two halves that are mirror images: fold along it and the halves match exactly. A rectangle has 2 lines of symmetry (not the diagonals). A square has 4.</p>' +
+          '<div class="keep"><b>Keep this</b>Acute: less than 90&deg;. Right: exactly 90&deg;. Obtuse: between 90&deg; and 180&deg;.</div>' },
+
+  { type: "sort", topic: "Angles and symmetry",
+    q: "Sort these angles.",
+    buckets: ["Acute", "Right angle", "Obtuse"],
+    cards: [
+      ["35&deg;", 0],
+      ["89&deg;", 0],
+      ["The angle between the hands of a clock at 1 o&#39;clock", 0],
+      ["90&deg;", 1],
+      ["The corner of a sheet of paper", 1],
+      ["The angle between the hands of a clock at 3 o&#39;clock", 1],
+      ["120&deg;", 2],
+      ["179&deg;", 2],
+      ["The angle between the hands of a clock at 5 o&#39;clock", 2]
+    ],
+    hint: "Compare each with a right angle (90&deg;). A clock face is a full turn of 360&deg;, so each hour mark is 30&deg; apart.",
+    why: "Acute: 35&deg;, 89&deg; (just under 90), and 1 o&#39;clock (30&deg;). Right angle: 90&deg;, the corner of a page, and 3 o&#39;clock (a quarter turn). Obtuse: 120&deg;, 179&deg; (just under a straight line), and 5 o&#39;clock (150&deg;)." },
+
+  { type: "match", topic: "Angles and symmetry",
+    fig: SHAPES,
+    q: "How many lines of symmetry does each shape have?",
+    pairs: [
+      ["Square", "4"],
+      ["Rectangle", "2"],
+      ["Equilateral triangle", "3"],
+      ["Isosceles triangle", "1"],
+      ["Regular hexagon", "6"],
+      ["Parallelogram", "0"]
+    ],
+    hint: "Imagine folding each shape so the two halves match exactly. Try the diagonals too, but check the corners really meet: they do on a square, not on a rectangle.",
+    why: "Square 4 (two straight, two diagonal). Rectangle 2 (the diagonals do not work: try folding paper). Equilateral triangle 3, one from each corner. Isosceles triangle 1, down the middle. Regular hexagon 6. This parallelogram has none: no fold makes the halves match." },
+
+  /* ---------- 7 COMPASS AND TURNS ---------- */
+  { type: "learn", topic: "Compass and turns",
+    title: "Compass directions and turns",
+    fig: ROSE,
+    html: '<p>The four main compass points, going clockwise: <b>North, East, South, West</b>. In between are North East (NE), South East (SE), South West (SW) and North West (NW).</p>' +
+          '<p>A quarter turn is 90&deg;, a half turn is 180&deg;, a full turn is 360&deg;. Each step between the 8 points is 45&deg;.</p>' +
+          '<p>Facing North, turn 90&deg; clockwise and you face East. Facing East, make a half turn and you face West.</p>' +
+          '<div class="keep"><b>Keep this</b>Clockwise order: N, NE, E, SE, S, SW, W, NW. Two steps round is a right angle.</div>' },
+
+  { type: "mc", topic: "Compass and turns",
+    q: "You are facing South West. You turn 90&deg; clockwise. Which way are you facing now?",
+    options: [ "North West", "South East", "North East", "West" ],
+    answer: 0,
+    hint: "90&deg; is two steps round the compass. Clockwise from SW goes towards W.",
+    why: "Clockwise from SW: one step (45&deg;) is W, two steps (90&deg;) is <b>NW</b>. South East is what you get turning anticlockwise, and West is only a 45&deg; turn." },
+
+  { type: "mc", topic: "Compass and turns",
+    fig: TOWN,
+    q: "You start at the Library. You walk 2 squares North, then 3 squares East. Where are you?",
+    options: [ "The Cafe", "The Station", "The Park", "The School" ],
+    answer: 0,
+    hint: "North is up the map. East is to the right. Move one square at a time.",
+    why: "2 squares North takes you up to the Park. Then 3 squares East (right) takes you to <b>the Cafe</b>. The Station is 3 East with no North; the Park is where you are after the first part." },
+
+  /* ---------- 8 TILES AND PAINT ---------- */
+  { type: "learn", topic: "Tiles and paint",
+    title: "How many packs? Round up",
+    fig: WALL,
+    html: '<p>Find the area first, then divide by how much one tin or pack covers.</p>' +
+          '<p>A wall 4 m by 2.5 m has an area of 10 m&sup2;. One tin covers 4 m&sup2;. 10 &divide; 4 = 2.5 tins. You cannot buy half a tin, so buy <b>3</b>.</p>' +
+          '<p>When you need enough of something, always round <b>up</b>, even if the answer is 2.1. Two coats? Double the area first.</p>' +
+          '<p>When the question is how many will <b>fit</b>, round <b>down</b> instead.</p>' +
+          '<div class="keep"><b>Keep this</b>Need enough? Round up. How many fit? Round down. Then work out the cost for whole packs.</div>' },
+
+  { type: "num", topic: "Tiles and paint",
+    q: "A bathroom floor is 3 m by 2.4 m. Floor tiles come in packs that cover 1.5 m&sup2;. Each pack costs &pound;18.50.<br>a) What is the area of the floor?<br>b) How many packs are needed?<br>c) How much will they cost?",
+    boxes: [
+      { label: "a) Area", a: 7.2, post: "m&sup2;" },
+      { label: "b) Packs", a: 5 },
+      { label: "c) Cost", a: 92.5, pre: "&pound;", show: "92.50" }
+    ],
+    hint: "Area: 3 &times; 2.4. Then divide by 1.5. You can only buy whole packs.",
+    why: "Area: 3 &times; 2.4 = <b>7.2 m&sup2;</b>. Packs: 7.2 &divide; 1.5 = 4.8, so <b>5 packs</b> (4 would not be enough). Cost: 5 &times; 18.50 = <b>&pound;92.50</b>." },
+
+  { type: "sort", topic: "Tiles and paint",
+    q: "Each answer comes out as a decimal. Should you round it up or down?",
+    buckets: ["Round up", "Round down"],
+    cards: [
+      ["Tins of paint for a room: 3.2 tins", 0],
+      ["Packs of tiles for a floor: 5.1 packs", 0],
+      ["Coaches for 130 people, 50 seats each: 2.6 coaches", 0],
+      ["Shelves 45 cm long cut from a 2 m plank: 4.4 shelves", 1],
+      ["Boxes that fit along a 2.5 m shelf: 6.25 boxes", 1],
+      ["Full 300 g bags from 1 kg of rice: 3.3 bags", 1]
+    ],
+    hint: "Ask: do you need enough to cover everything (round up), or are you counting how many complete ones you can make or fit (round down)?",
+    why: "Paint, tiles and coaches: you need enough, so round <b>up</b> (4 tins, 6 packs, 3 coaches). Shelves, boxes and full bags: you can only count complete ones, so round <b>down</b> (4 shelves, 6 boxes, 3 bags)." },
+
+  { type: "num", topic: "Tiles and paint", stretch: true,
+    q: "You are painting a flat backdrop for your musical. It is a rectangle 6 m wide and 2.5 m high, and it needs <b>two coats</b> on one side. A tin of paint covers 12 m&sup2; and costs &pound;14.99. Your budget is &pound;50.<br>Is the budget enough? Work out:",
+    boxes: [
+      { label: "a) Area to paint, both coats", a: 30, post: "m&sup2;" },
+      { label: "b) Tins needed", a: 3 },
+      { label: "c) Cost", a: 44.97, pre: "&pound;", show: "44.97" },
+      { label: "d) Money left from &pound;50", a: 5.03, pre: "&pound;", show: "5.03" }
+    ],
+    hint: "One coat: 6 &times; 2.5. Double it for two coats. Divide by 12 and round up to whole tins.",
+    why: "One coat: 6 &times; 2.5 = 15 m&sup2;, two coats = <b>30 m&sup2;</b>. Tins: 30 &divide; 12 = 2.5, so <b>3 tins</b>. Cost: 3 &times; 14.99 = <b>&pound;44.97</b>. Left: 50 &minus; 44.97 = <b>&pound;5.03</b>.<br>Decision with figures: &quot;3 tins cost &pound;44.97, which is less than &pound;50, so yes, the budget is enough, with &pound;5.03 left.&quot;" }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

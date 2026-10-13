@@ -51,6 +51,7 @@ var EGW = (function(){
 /* Which HQ this is. EGW's pages have no config; another student's
    HQ sets window.HQ in its conf.js before this file loads. */
 var HQ = window.HQ || { who: "EGW", prefix: "b5.egw.", base: "/egw/" };
+var HQNAME = HQ.hq || "GCSE HQ";
 var PREFIX = HQ.prefix;
 var cfg, steps, state, key;
 
@@ -317,7 +318,7 @@ function build(){
         '<div class="qnav" style="margin-top:18px">' +
           '<button class="btn btn-quiet" id="againBtn">Back to the chunks</button>' +
           '<button class="btn btn-quiet" id="freshBtn">Start fresh</button>' +
-          '<a class="btn" href="' + HQ.base + '">Back to GCSE HQ</a>' +
+          '<a class="btn" href="' + HQ.base + '">Back to ' + HQNAME + '</a>' +
         '</div>' +
         '<div id="sendHost"></div>' +
       '</div>' +
@@ -363,7 +364,7 @@ function build(){
 
   if(window.Base5Send){
     Base5Send.mount($("sendHost"), {
-      tool: "GCSE HQ: " + (cfg.review ? "Second look, " : "") + cfg.title,
+      tool: HQNAME + ": " + (cfg.review ? "Second look, " : "") + cfg.title,
       filename: HQ.who.toLowerCase() + "-" + cfg.id,
       getText: reportText
     });
@@ -1334,7 +1335,7 @@ function run(c){
   }
   if(!state.widgets) state.widgets = {};
   try{ localStorage.setItem("base5.who.v1", HQ.who); }catch(e){}
-  document.title = c.title + " - " + HQ.who + " GCSE HQ";
+  document.title = c.title + " - " + HQ.who + " " + HQNAME;
   makeChunks();
   build();
   if(cfg.review) buildReviewStart();

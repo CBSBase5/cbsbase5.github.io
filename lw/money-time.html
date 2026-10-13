@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money, time and units - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.mt-tt{border-collapse:collapse;margin:6px auto;font-size:.95rem}
+.mt-tt th,.mt-tt td{border:2px solid var(--ink);padding:6px 9px;text-align:center}
+.mt-tt th{background:var(--accent-soft)}
+.mt-tt td:first-child,.mt-tt th:first-child{text-align:left}
+/* Journey planner widget */
+.jp-wrap{overflow-x:auto;margin:8px 0}
+.jp-table{border-collapse:collapse;width:100%;font-size:.92rem;background:#fff}
+.jp-table th,.jp-table td{border:2px solid var(--ink);padding:7px 3px;text-align:center}
+.jp-table td.jp-stop,.jp-table th.jp-stop{text-align:left;padding-left:6px;font-weight:700}
+@media (max-width:480px){
+  .jp-table{font-size:.8rem}
+  .jp-table th,.jp-table td{padding:6px 1px}
+  .jp-table td.jp-stop,.jp-table th.jp-stop{padding-left:4px;width:22%;line-height:1.2}
+  .jp-table th.jp-col button{padding:2px 0}
+}
+.jp-table th{background:var(--paper)}
+.jp-table .jp-col{cursor:pointer;font-variant-numeric:tabular-nums}
+.jp-table th.jp-col button{font:inherit;font-weight:800;border:0;background:none;cursor:pointer;color:var(--ink);padding:2px 6px;width:100%}
+.jp-table .jp-on{background:var(--accent);color:var(--ink);font-weight:800}
+.jp-table th.jp-on{background:var(--accent)}
+.jp-table tr.jp-row td{box-shadow:inset 0 0 0 999px rgba(255,197,61,.18)}
+.jp-table tr.jp-row td.jp-on{box-shadow:none}
+.jp-task p{margin:0 0 6px}
+.jp-dots{display:flex;gap:6px;margin-bottom:6px}
+.jp-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.jp-dots span.on{background:var(--good)}
+.jp-dots span.now{background:var(--sun)}
+.jp-read{min-height:3.2em}
+.jp-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Money, time and units</h2>
+    <span>Functional Skills Maths, Level 1. Bills, change, budgets and best buys, the 24 hour clock, timetables and rotas, and metric units and scales.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function arc(x1, x2, y, lift, col){
+  var mx = (x1 + x2) / 2;
+  return '<path d="M' + x1 + ' ' + y + ' Q' + mx + ' ' + (y - lift) + ' ' + x2 + ' ' + y + '" fill="none" stroke="' + col + '" stroke-width="3"/>' +
+    '<path d="M' + (x2 - 9) + ' ' + (y - 9) + ' L' + x2 + ' ' + y + ' L' + (x2 - 12) + ' ' + (y + 1) + '" fill="none" stroke="' + col + '" stroke-width="3"/>';
+}
+
+/* ---------- figures ---------- */
+
+/* Counting up for change: 13.65 to 14 to 20 */
+var CHANGE = (function(){
+  var s = '<svg viewBox="0 0 400 176" role="img" aria-label="Counting up from 13 pounds 65 to 14 pounds is 35p, then from 14 pounds to 20 pounds is 6 pounds. Change is 6 pounds 35.">';
+  s += ln(18, 112, 386, 112, INK, 3);
+  var xs = [42, 112, 356], labs = ["&pound;13.65", "&pound;14.00", "&pound;20.00"];
+  for(var k = 0; k < 3; k++){
+    s += ln(xs[k], 102, xs[k], 122, INK, 3);
+    s += t(xs[k], 145, labs[k], 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += arc(42, 112, 102, 58, CORAL) + t(77, 58, "+35p", 18, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += arc(112, 356, 102, 100, BLUE) + t(234, 36, "+&pound;6", 18, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(392, 16, "not to scale", 14, "#4b5275", BODY + ' text-anchor="end"');
+  s += t(200, 172, "Change: 35p + &pound;6 = &pound;6.35", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Cereal best buy */
+function box(x, w, h, col, name){
+  var y = 150 - h;
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" fill="' + col + '" stroke="' + INK + '" stroke-width="3"/>' +
+    t(x + w / 2, y + h / 2 + 7, name, 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+}
+var CEREAL =
+'<svg viewBox="0 0 400 232" role="img" aria-label="Cereal: 500 grams for 2 pounds 10 is 42p per 100 grams. 750 grams for 2 pounds 85 is 38p per 100 grams, which is better value.">' +
+box(50, 90, 80, SUN, "500 g") + box(240, 100, 120, SUN, "750 g") +
+t(95, 178, "500 g for &pound;2.10", 17, INK, BODY + ' text-anchor="middle" font-weight="700"') +
+t(290, 178, "750 g for &pound;2.85", 17, INK, BODY + ' text-anchor="middle" font-weight="700"') +
+t(95, 204, "2.10 &divide; 5 = 42p", 17, INK, BODY + ' text-anchor="middle"') +
+t(290, 204, "2.85 &divide; 7.5 = 38p", 17, BLUE, BODY + ' text-anchor="middle" font-weight="700"') +
+t(95, 226, "per 100 g", 15, INK, BODY + ' text-anchor="middle"') +
+t(290, 226, "per 100 g: better value", 15, BLUE, BODY + ' text-anchor="middle" font-weight="700"') +
+'</svg>';
+
+/* Clock at 4:30 */
+var CLOCK = (function(){
+  var cx = 100, cy = 100, r = 84;
+  var s = '<svg viewBox="0 0 400 200" role="img" aria-label="A clock showing half past four. In the afternoon that is 4:30 pm, which is 16:30 on the 24 hour clock.">';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="4"/>';
+  for(var k = 1; k <= 12; k++){
+    var a = k * 30 * Math.PI / 180;
+    s += t((cx + 66 * Math.sin(a)).toFixed(1), (cy - 66 * Math.cos(a) + 6).toFixed(1), String(k), 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  for(var m = 0; m < 60; m++){
+    var b = m * 6 * Math.PI / 180, r1 = m % 5 ? 78 : 74;
+    s += ln((cx + r1 * Math.sin(b)).toFixed(1), (cy - r1 * Math.cos(b)).toFixed(1), (cx + 83 * Math.sin(b)).toFixed(1), (cy - 83 * Math.cos(b)).toFixed(1), INK, m % 5 ? 1 : 2.5);
+  }
+  var ha = 135 * Math.PI / 180, ma = 180 * Math.PI / 180;
+  s += ln(cx, cy, (cx + 42 * Math.sin(ha)).toFixed(1), (cy - 42 * Math.cos(ha)).toFixed(1), INK, 7, ' stroke-linecap="round"');
+  s += ln(cx, cy, (cx + 62 * Math.sin(ma)).toFixed(1), (cy - 62 * Math.cos(ma)).toFixed(1), BLUE, 4, ' stroke-linecap="round"');
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="' + INK + '"/>';
+  s += t(205, 62, "In the afternoon:", 17, INK, BODY);
+  s += t(205, 98, "4:30 pm", 30, INK, LAB + ' font-weight="800"');
+  s += t(205, 128, "4 + 12 = 16", 17, CORAL, BODY + ' font-weight="700"');
+  s += t(205, 166, "16:30", 30, BLUE, LAB + ' font-weight="800"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Time line, 09:45 to 11:20, drawn to scale: 3 units per minute */
+var TIMELINE = (function(){
+  var x0 = 50, k = 3;
+  var xs = [x0, x0 + 15 * k, x0 + 75 * k, x0 + 95 * k];
+  var labs = ["09:45", "10:00", "11:00", "11:20"];
+  var anc = ["end", "start", "middle", "middle"], dx = [6, -6, 0, 0];
+  var s = '<svg viewBox="0 0 400 176" role="img" aria-label="A time line from 09:45 to 11:20 drawn to scale. 15 minutes to 10:00, 1 hour to 11:00, 20 minutes to 11:20. Total 1 hour 35 minutes.">';
+  s += ln(20, 110, 385, 110, INK, 3);
+  for(var j = 0; j < 4; j++){
+    s += ln(xs[j], 100, xs[j], 120, INK, 3);
+    s += t(xs[j] + dx[j], 142, labs[j], 17, INK, LAB + ' font-weight="700" text-anchor="' + anc[j] + '"');
+  }
+  s += arc(xs[0], xs[1], 100, 44, CORAL) + t((xs[0] + xs[1]) / 2, 64, "15 min", 16, CORAL, LAB + ' font-weight="800" text-anchor="middle"');
+  s += arc(xs[1], xs[2], 100, 100, BLUE) + t((xs[1] + xs[2]) / 2, 38, "1 hour", 17, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+  s += arc(xs[2], xs[3], 100, 50, VIOLET) + t((xs[2] + xs[3]) / 2, 62, "20 min", 16, VIOLET, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(200, 172, "Total: 1 hour 35 minutes", 18, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Measuring jug: top value, label step, small mark step, liquid level */
+function jug(top, labStep, minor, level, unit, label){
+  var bot = 270, scale = 220 / top;     // top of scale sits at y = 50
+  function y(v){ return (bot - v * scale).toFixed(1); }
+  var s = '<svg viewBox="0 0 420 300" role="img" aria-label="' + label + '">';
+  s += '<path d="M150 ' + (bot) + ' V30 H310 V' + bot + ' Z" fill="' + WHITE + '"/>';
+  s += '<rect x="150" y="' + y(level) + '" width="160" height="' + (level * scale).toFixed(1) + '" fill="' + CYAN + '" opacity=".55"/>';
+  s += ln(150, y(level), 310, y(level), BLUE, 3);
+  s += '<path d="M150 22 V' + bot + ' H310 V22" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>';
+  s += '<path d="M310 70 H350 Q366 70 366 86 V180 Q366 196 350 196 H310" fill="none" stroke="' + INK + '" stroke-width="4"/>';
+  var n = Math.round(top / minor);
+  for(var k = 0; k <= n; k++){
+    var v = k * minor, major = Math.abs(v / labStep - Math.round(v / labStep)) < 1e-9;
+    s += ln(150, y(v), major ? 186 : 170, y(v), INK, major ? 3 : 2);
+    if(major) s += t(140, (+y(v) + 6).toFixed(1), String(v), 17, INK, LAB + ' font-weight="700" text-anchor="end"');
+  }
+  s += t(140, 18, unit, 16, INK, LAB + ' font-weight="700" text-anchor="end"');
+  s += '</svg>';
+  return s;
+}
+var JUG1 = jug(1000, 200, 50, 650, "ml", "A measuring jug labelled every 200 millilitres with small marks every 50 millilitres. The water is at 650 millilitres.");
+var JUG2 = jug(500, 100, 25, 275, "ml", "A measuring jug labelled 0 to 500 millilitres, labelled every 100, with three small marks between each label. The water level is between 200 and 300.");
+
+/* ---------- tables ---------- */
+var BUS7 =
+'<table class="mt-tt"><tr><th>Bus 7</th><th>A</th><th>B</th><th>C</th></tr>' +
+'<tr><td>Bus Station</td><td>08:10</td><td>08:40</td><td>09:10</td></tr>' +
+'<tr><td>Park Lane</td><td>08:22</td><td>08:52</td><td>09:22</td></tr>' +
+'<tr><td>College</td><td>08:35</td><td>09:05</td><td>09:35</td></tr></table>';
+
+var TRAIN =
+'<table class="mt-tt"><tr><th>Station</th><th colspan="3">Train times</th></tr>' +
+'<tr><td>Chilton Bridge</td><td>07:48</td><td>08:18</td><td>08:48</td></tr>' +
+'<tr><td>Halford</td><td>08:05</td><td>08:35</td><td>09:05</td></tr>' +
+'<tr><td>Kingsport</td><td>08:31</td><td>09:01</td><td>09:31</td></tr></table>';
+
+var ROTA =
+'<table class="mt-tt"><tr><th>Day</th><th>Start</th><th>Finish</th></tr>' +
+'<tr><td>Monday</td><td>09:00</td><td>13:00</td></tr>' +
+'<tr><td>Wednesday</td><td>12:30</td><td>17:00</td></tr>' +
+'<tr><td>Saturday</td><td>08:00</td><td>14:30</td></tr></table>';
+
+var UNITS =
+'<table class="datatable"><tr><th>Length</th><td>10 mm = 1 cm<br>100 cm = 1 m<br>1000 m = 1 km</td></tr>' +
+'<tr><th>Weight</th><td>1000 g = 1 kg</td></tr>' +
+'<tr><th>Capacity</th><td>1000 ml = 1 litre (l)</td></tr>' +
+'<tr><th>Money</th><td>100p = &pound;1</td></tr></table>';
+
+/* ---------- journey planner widget ---------- */
+var STOPS = ["Westgate", "Chilton Road", "Market Square", "Leisure Centre", "Hospital"];
+var BUSES = [
+  { id: "A", times: ["16:50", "16:59", "17:11", "17:20", "17:33"] },
+  { id: "B", times: ["17:20", "17:31", "17:47", "17:58", "18:14"] },
+  { id: "C", times: ["17:45", "17:56", "18:08", null, "18:22"] },
+  { id: "D", times: ["18:15", "18:24", "18:36", "18:45", "18:58"] },
+  { id: "E", times: ["18:45", "18:54", "19:06", "19:15", "19:28"] }
+];
+var JP = [
+  { from: 1, to: 3, ans: 1, by: "18:00",
+    task: "You want to be at the <b>Leisure Centre by 18:00</b> for a swim. Which is the <b>latest</b> bus you could catch from Chilton Road and still get there in time?",
+    why: "Bus B reaches the Leisure Centre at 17:58, just before 18:00. Bus C has a dash there: it does not stop. Bus D gets there at 18:45, which is too late. So catch <b>Bus B at 17:31</b>." },
+  { from: 1, to: 2, ans: 3, arrive: "18:00",
+    task: "You get to the <b>Chilton Road</b> stop at <b>18:00</b>. Which is the <b>first</b> bus you can catch to Market Square?",
+    why: "Bus C left Chilton Road at 17:56, four minutes before you got there. The next one is <b>Bus D at 18:24</b>, so you wait 24 minutes and reach Market Square at 18:36." },
+  { from: 1, to: 4, ans: 2, quick: true,
+    task: "You are going from <b>Chilton Road</b> to the <b>Hospital</b>. Which bus has the <b>quickest</b> journey?",
+    why: "Count on for each bus. A: 16:59 to 17:33 is 34 minutes. B: 17:31 to 18:14 is 43 minutes (rush hour). <b>C: 17:56 to 18:22 is 26 minutes</b>, because it skips the Leisure Centre. D and E both take 34 minutes." }
+];
+function mins(s){ var p = s.split(":"); return parseInt(p[0], 10) * 60 + parseInt(p[1], 10); }
+function hhmm(m){ var h = Math.floor(m / 60), mm = m % 60; return (h < 10 ? "0" : "") + h + ":" + (mm < 10 ? "0" : "") + mm; }
+function plural(n, w){ return n + " " + w + (n === 1 ? "" : "s"); }
+function countOn(a, b){
+  var ma = mins(a), mb = mins(b), d = mb - ma;
+  var nextHour = Math.ceil(ma / 60) * 60;
+  if(ma % 60 !== 0 && mb > nextHour){
+    return a + " to " + hhmm(nextHour) + " is " + plural(nextHour - ma, "minute") + ", then " + hhmm(nextHour) + " to " + b + " is " + plural(mb - nextHour, "minute") + ". Journey: <b>" + plural(d, "minute") + "</b>.";
+  }
+  return a + " to " + b + " is <b>" + plural(d, "minute") + "</b>.";
+}
+
+function mountPlanner(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(typeof d.sel !== "number") d.sel = -1;
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  var view = d.c;
+
+  el.innerHTML =
+    '<div class="wpanel jp-task" data-r="task"></div>' +
+    '<div class="jp-wrap"><table class="jp-table" data-r="tt"></table></div>' +
+    '<div class="wpanel">' +
+      '<p class="wnote jp-read" data-r="read" aria-live="polite"></p>' +
+      '<div class="wrow">' +
+        '<button class="btn" type="button" data-r="go">Catch this bus</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb jp-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function table(){
+    var c = view < 3 ? JP[view] : null;
+    var s = '<tr><th class="jp-stop">Bus</th>';
+    BUSES.forEach(function(b, k){
+      s += '<th class="jp-col' + (k === d.sel ? " jp-on" : "") + '"><button type="button" data-bus="' + k + '" aria-label="Choose bus ' + b.id + '" aria-pressed="' + (k === d.sel) + '">' + b.id + '</button></th>';
+    });
+    s += '</tr>';
+    STOPS.forEach(function(st, r){
+      var hi = c && (r === c.from || r === c.to);
+      s += '<tr' + (hi ? ' class="jp-row"' : '') + '><td class="jp-stop">' + st + '</td>';
+      BUSES.forEach(function(b, k){
+        s += '<td class="jp-col' + (k === d.sel ? " jp-on" : "") + '" data-bus="' + k + '">' + (b.times[r] || "&ndash;") + '</td>';
+      });
+      s += '</tr>';
+    });
+    return s;
+  }
+
+  function reading(){
+    if(d.sel < 0) return "Tap a bus letter (or any time in its column) to follow that bus.";
+    var c = view < 3 ? JP[view] : JP[2];
+    var b = BUSES[d.sel], a = b.times[c.from], z = b.times[c.to];
+    var s = "<b>Bus " + b.id + "</b>: " + STOPS[c.from] + " " + a + ", ";
+    if(!z) return "<b>Bus " + b.id + "</b>: " + STOPS[c.from] + " " + a + ". It <b>does not stop</b> at the " + STOPS[c.to] + " (that is what the dash means).";
+    s += STOPS[c.to] + " " + z + ". " + countOn(a, z);
+    if(c.arrive){
+      var w = mins(a) - mins(c.arrive);
+      s += w < 0 ? " You get to the stop at " + c.arrive + ", so this one has already gone." : " You get to the stop at " + c.arrive + ", so you wait " + plural(w, "minute") + ".";
+    }
+    return s;
+  }
+
+  function task(){
+    var dots = '<div class="jp-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= 3) return dots + '<p><b>Free play.</b> All three journeys planned. Tap any bus to see its journey from Chilton Road to the Hospital.</p>';
+    return dots + '<p class="tiny" style="margin:0 0 4px">Journey ' + (view + 1) + ' of 3. The two stops you need are shaded.</p><p>' + JP[view].task + '</p>';
+  }
+
+  function draw(){
+    q("task").innerHTML = task();
+    q("tt").innerHTML = table();
+    q("read").innerHTML = reading();
+    var waiting = view !== d.c || d.c >= 3;
+    q("go").disabled = waiting || d.sel < 0;
+    q("go").classList.toggle("hidden", d.c >= 3);
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+
+  function fb(cls, html){ var f = q("fb"); f.className = "fb jp-fb " + cls; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function nudge(k){
+    var c = JP[view], b = BUSES[k], z = b.times[c.to], a = b.times[c.from];
+    if(view === 0){
+      if(!z) return "Bus " + b.id + " has a dash at the Leisure Centre, so it does not stop there.";
+      if(mins(z) > mins(c.by)) return "Bus " + b.id + " gets there at " + z + ", which is after 18:00.";
+      return "Bus " + b.id + " gets you there in time, but a later bus still makes it. Look along the Leisure Centre row.";
+    }
+    if(view === 1){
+      if(mins(a) < mins(c.arrive)) return "Bus " + b.id + " left Chilton Road at " + a + ", before you got there at 18:00.";
+      return "Bus " + b.id + " works, but there is an earlier one that leaves after 18:00.";
+    }
+    var dd = mins(z) - mins(a);
+    return "Bus " + b.id + " takes " + dd + " minutes. Tap each bus and compare: is any of them quicker?";
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is how this one works.</b> " : "<b>Yes, that is the one.</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All three journeys planned. The trick every time: follow <b>one column</b> down, and count on through the o&#39;clock.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next journey</button>';
+    fb(how === "shown" ? "show" : "good", head + JP[k].why + more);
+    q("next").onclick = function(){
+      view = d.c; d.sel = -1; api.save();
+      q("fb").className = "fb jp-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+
+  q("tt").addEventListener("click", function(e){
+    var cell = e.target.closest("[data-bus]");
+    if(!cell) return;
+    d.sel = parseInt(cell.getAttribute("data-bus"), 10);
+    api.save(); draw();
+  });
+  q("go").onclick = function(){
+    if(view !== d.c || d.c >= 3 || d.sel < 0) return;
+    if(d.sel === JP[view].ans){ solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    fb("nudge", "<b>Not quite yet.</b> " + nudge(d.sel) + (d.miss[view] === 1 ? "" : " Show me is there if you want it."));
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= 3) return;
+    d.shown[view] = true;
+    d.sel = JP[view].ans;
+    solved(view, "shown");
+  };
+
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three journeys planned.</b> Follow one column down, and count on through the o&#39;clock.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "money-time",
+  title: "Money, time and units",
+  subject: "Maths",
+  mins: 50,
+  blurb: "Everyday maths for the Level 1 paper: adding bills, change, budgets with VAT, best buys, the 24 hour clock, how long things take, timetables, rotas and pay, metric units and reading scales.",
+  steps: [
+
+  /* ---------- 1 ADDING UP MONEY ---------- */
+  { type: "learn", topic: "Adding up money",
+    title: "Bills and change",
+    fig: CHANGE,
+    html: '<p>Money has two parts, pounds and pence, and 100p = &pound;1. Always write two digits after the point: &pound;3.5 is <b>&pound;3.50</b>, and 7p is <b>&pound;0.07</b>.</p>' +
+          '<p>To add a bill, line up the decimal points, or add the pounds and the pence separately. A quick estimate first (round each price to the nearest pound) helps you spot slips.</p>' +
+          '<p>For change, count up from the price to what you paid. Paying &pound;20 for &pound;13.65: 35p takes you to &pound;14, then &pound;6 takes you to &pound;20. Change: <b>&pound;6.35</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Pounds or pence in an answer, never both. Write &pound;6.35 or 635p, not &pound;6.35p.</div>' },
+
+  { type: "num", topic: "Adding up money",
+    q: "<b>No calculator.</b> At a caf&eacute; you buy a sandwich for &pound;3.85, a packet of crisps for 95p and a drink for &pound;1.40. What is the total?",
+    boxes: [ { label: "Total", a: 6.2, pre: "&pound;", show: "6.20" } ],
+    hint: "Change 95p into pounds first (&pound;0.95). Then add the pounds and the pence. 85p + 95p is more than &pound;1.",
+    why: "3.85 + 0.95 + 1.40 = <b>&pound;6.20</b>. Pence: 85 + 95 + 40 = 220p, which is &pound;2.20. Pounds: 3 + 1 = 4. Then 4 + 2.20 = 6.20. Estimate check: 4 + 1 + 1 = &pound;6, so &pound;6.20 is sensible. Writing 95p as &pound;9.50 is the classic slip." },
+
+  { type: "num", topic: "Adding up money",
+    q: "<b>No calculator.</b> Your shopping comes to &pound;7.38. You pay with a &pound;10 note. How much change should you get?",
+    boxes: [ { label: "Change", a: 2.62, pre: "&pound;", show: "2.62" } ],
+    hint: "Count up from &pound;7.38. How much to get to &pound;7.40? Then to &pound;8? Then to &pound;10?",
+    why: "Count up: 7.38 + 2p = 7.40, + 60p = 8.00, + &pound;2 = 10.00. Add the jumps: 2p + 60p + &pound;2 = <b>&pound;2.62</b>. Check: 7.38 + 2.62 = 10.00." },
+
+  /* ---------- 2 BUDGETS AND BILLS ---------- */
+  { type: "learn", topic: "Budgets and bills",
+    title: "Budgets, bills and VAT",
+    html: '<p>A <b>budget</b> is the most you can spend. Add up everything you need, then compare the total with the budget.</p>' +
+          '<p><b>VAT</b> is a tax added to many bills. At this level the bill often tells you the VAT as an amount of money, so you just add it on.</p>' +
+          '<table class="datatable"><tr><th>Phone repair</th><th>&pound;</th></tr><tr><td>Parts</td><td>45.00</td></tr><tr><td>Labour</td><td>30.00</td></tr><tr><td>VAT</td><td>15.00</td></tr><tr><th>Total</th><th>90.00</th></tr></table>' +
+          '<p>Many questions end with a decision: "Is the budget enough?" The examiner wants the decision <b>and</b> the figures: "The total is &pound;90, which is less than &pound;100, so yes, with &pound;10 left."</p>' +
+          '<div class="keep"><b>Keep this</b>Decision + figures. A bare "yes" scores very little; the working gets most of the marks.</div>' },
+
+  { type: "num", topic: "Budgets and bills",
+    q: "Your electricity bill shows: energy used &pound;62.40, standing charge &pound;14.60, VAT &pound;3.85. What is the total bill?",
+    boxes: [ { label: "Total bill", a: 80.85, pre: "&pound;", show: "80.85" } ],
+    hint: "Add all three lines. The VAT is already worked out for you as an amount of money.",
+    why: "62.40 + 14.60 = 77.00, then 77.00 + 3.85 = <b>&pound;80.85</b>. The VAT is an amount here, so it is added on like any other line." },
+
+  { type: "num", topic: "Budgets and bills",
+    q: "Sam is moving into a flat. He wants a kettle (&pound;24.99), a toaster (&pound;18.50) and a microwave (&pound;64.00). Delivery is &pound;5.95. His budget is &pound;120.<br>Does he have enough? Work out the figures that show it.",
+    boxes: [
+      { label: "a) Total cost", a: 113.44, pre: "&pound;", show: "113.44" },
+      { label: "b) Money left from &pound;120", a: 6.56, pre: "&pound;", show: "6.56" }
+    ],
+    hint: "Add all four amounts, delivery too. Then take the total away from &pound;120.",
+    why: "24.99 + 18.50 + 64.00 + 5.95 = <b>&pound;113.44</b>. Then 120 &minus; 113.44 = <b>&pound;6.56</b>.<br>A full marks answer: &quot;The total is &pound;113.44, which is less than &pound;120, so yes, he has enough, with &pound;6.56 left.&quot; Forgetting the delivery is the usual slip." },
+
+  /* ---------- 3 BEST BUYS ---------- */
+  { type: "learn", topic: "Best buys",
+    title: "Best buys: compare like with like",
+    fig: CEREAL,
+    html: '<p>Bigger packs are often cheaper for the amount you get, but not always. To find the <b>best value</b>, compare the cost of the <b>same amount</b>.</p>' +
+          '<p>Cereal: 500 g for &pound;2.10 or 750 g for &pound;2.85. Cost of 100 g: 2.10 &divide; 5 = 42p, and 2.85 &divide; 7.5 = 38p. The bigger box is better value.</p>' +
+          '<p>Another way: make both the same amount. 1500 g is 3 small boxes (&pound;6.30) or 2 big ones (&pound;5.70).</p>' +
+          '<p>Offers: <b>3 for 2</b> means you get 3 but pay for 2.</p>' +
+          '<div class="keep"><b>Keep this</b>Same amount, then compare. Say which is better value and show both figures.</div>' },
+
+  { type: "mc", topic: "Best buys",
+    q: "Orange juice comes in a 1 litre carton for &pound;1.20 or a 1.5 litre carton for &pound;1.95. Which is better value?",
+    options: [ "The 1 litre carton", "The 1.5 litre carton", "They are the same value" ],
+    answer: 0,
+    hint: "Find what 1 litre costs in the big carton: 1.95 &divide; 1.5. Or work out what 3 litres would cost each way.",
+    why: "Big carton: 1.95 &divide; 1.5 = &pound;1.30 a litre. Small carton: &pound;1.20 a litre. So the <b>1 litre carton</b> is better value. Check with 3 litres: 3 small = &pound;3.60, 2 big = &pound;3.90. Bigger is not always cheaper." },
+
+  { type: "num", topic: "Best buys", stretch: true,
+    q: "You need 6 cans of drink.<br>Shop A sells cans at 75p each, with an offer of <b>3 for 2</b>.<br>Shop B sells a pack of 6 for &pound;3.30.<br>a) How much would 6 cans cost at Shop A?<br>b) How much cheaper is the cheaper shop?",
+    boxes: [
+      { label: "a) Shop A, 6 cans", a: 3, pre: "&pound;", show: "3.00" },
+      { label: "b) Saving", a: 0.3, pre: "&pound;", alts: [30], show: "0.30" }
+    ],
+    hint: "3 for 2: for every 3 cans you pay for 2. How many lots of 3 are in 6? How many cans do you pay for?",
+    why: "6 cans is two lots of 3, and you pay for 2 in each lot, so you pay for 4 cans: 4 &times; 0.75 = <b>&pound;3.00</b>. Shop B is &pound;3.30. Shop A is cheaper by 3.30 &minus; 3.00 = <b>&pound;0.30</b> (30p). Paying for all 6 cans (&pound;4.50) is the trap." },
+
+  /* ---------- 4 CLOCK AND CALENDAR ---------- */
+  { type: "learn", topic: "Clock and calendar",
+    title: "12 hour, 24 hour and the calendar",
+    fig: CLOCK,
+    html: '<p>The 24 hour clock uses four digits and no am or pm. Morning times keep their hour: 9:15 am is <b>09:15</b>.</p>' +
+          '<p>From 1 pm onwards, add 12 to the hour: 4:30 pm is <b>16:30</b>. Midday is 12:00 and midnight is 00:00, so 12:45 am is 00:45.</p>' +
+          '<p>Calendar: April, June, September and November have 30 days. February has 28 (29 in a leap year). All the others have 31.</p>' +
+          '<div class="keep"><b>Keep this</b>12 hour to 24 hour: pm times from 1 pm add 12. 24 hour to 12 hour: hours above 12 take away 12 and say pm.</div>' },
+
+  { type: "match", topic: "Clock and calendar",
+    q: "Match each 12 hour time to the same time on the 24 hour clock.",
+    pairs: [
+      ["7:20 am", "07:20"],
+      ["7:20 pm", "19:20"],
+      ["12:05 am", "00:05"],
+      ["12:05 pm", "12:05"],
+      ["11:50 pm", "23:50"],
+      ["1:15 pm", "13:15"]
+    ],
+    hint: "pm times from 1 pm onwards: add 12 to the hour. The 12 o&#39;clock hour is the odd one out: 12 am is just after midnight.",
+    why: "7:20 pm: 7 + 12 = 19, so 19:20. 11:50 pm is 23:50, 1:15 pm is 13:15. 12:05 pm is just after midday, so it stays 12:05. 12:05 am is just after midnight, so it is 00:05." },
+
+  { type: "num", topic: "Clock and calendar",
+    q: "A free gym trial starts on <b>18 April</b> and lasts <b>21 days</b>, counting 18 April as day 1. On what date in May is the last day of the trial?",
+    boxes: [ { label: "Last day", a: 8, post: "May" } ],
+    hint: "April has 30 days. Count how many trial days are in April first (18 April to 30 April), then carry on into May.",
+    why: "18 to 30 April is 13 days (30 &minus; 18 + 1). That leaves 21 &minus; 13 = 8 days in May, so the last day is <b>8 May</b>. Forgetting to count the first day gives 9 May." },
+
+  /* ---------- 5 HOW LONG ---------- */
+  { type: "learn", topic: "How long?",
+    title: "Working out how long",
+    fig: TIMELINE,
+    html: '<p>Do not subtract times like ordinary numbers: an hour has 60 minutes, not 100. <b>Count on</b> instead.</p>' +
+          '<p>09:45 to 11:20: 15 minutes takes you to 10:00, 1 hour to 11:00, then 20 minutes more. Total <b>1 hour 35 minutes</b>.</p>' +
+          '<p>Across midnight works the same way: 22:30 to 00:00 is 1 hour 30 minutes, then 00:00 to 06:15 is 6 hours 15 minutes. Total 7 hours 45 minutes.</p>' +
+          '<p>Hours to minutes: &frac12; hour = 30 min, &frac14; hour = 15 min, &frac34; hour = 45 min. So 1.5 hours is 1 hour 30 minutes, and 135 minutes is 2 hours 15 minutes.</p>' +
+          '<div class="keep"><b>Keep this</b>Jump to the next o&#39;clock, jump whole hours, then the rest. Add up the jumps.</div>' },
+
+  { type: "num", topic: "How long?",
+    q: "A film starts at 18:50 and finishes at 21:05. How long is it?",
+    boxes: [
+      { label: "Hours", a: 2 },
+      { label: "Minutes", a: 15 }
+    ],
+    hint: "18:50 to 19:00 first. Then whole hours up to 21:00. Then the last few minutes.",
+    why: "18:50 to 19:00 is 10 minutes, 19:00 to 21:00 is 2 hours, 21:00 to 21:05 is 5 minutes. Total <b>2 hours 15 minutes</b>. Subtracting 21.05 &minus; 18.50 gives 2.55, which is wrong: it treats an hour as 100 minutes." },
+
+  { type: "num", topic: "How long?",
+    q: "A night shift starts at 21:30 and finishes at 06:00 the next morning. How long is the shift?",
+    boxes: [
+      { label: "Hours", a: 8 },
+      { label: "Minutes", a: 30 }
+    ],
+    hint: "Count on to midnight (00:00) first, then from midnight to 06:00.",
+    why: "21:30 to 00:00 is 2 hours 30 minutes. 00:00 to 06:00 is 6 hours. Total <b>8 hours 30 minutes</b>." },
+
+  { type: "mc", topic: "How long?",
+    q: "A coach journey takes 1.75 hours. How long is that in hours and minutes?",
+    options: [ "1 hour 75 minutes", "1 hour 45 minutes", "1 hour 7.5 minutes", "2 hours 15 minutes" ],
+    answer: 1,
+    hint: "0.75 of an hour is &frac34; of 60 minutes.",
+    why: "0.75 &times; 60 = 45, so 1.75 hours is <b>1 hour 45 minutes</b>. &quot;1 hour 75 minutes&quot; treats the decimal as minutes, a very common slip (and 75 minutes is more than an hour anyway)." },
+
+  /* ---------- 6 TIMETABLES ---------- */
+  { type: "learn", topic: "Timetables",
+    title: "Reading a timetable",
+    html: '<p>Each <b>column</b> is one bus or train. Read <b>down</b> a column to follow it from stop to stop. Each <b>row</b> is a stop.</p>' +
+          BUS7 +
+          '<p>To arrive by a certain time, find your stop&#39;s row and look for the latest time that is not after your deadline. Then go up that column to see when to leave.</p>' +
+          '<p>To be at College by 09:00: bus B gets there at 09:05, too late. Bus A gets there at 08:35, so catch the <b>08:10</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Columns are journeys, rows are stops. Follow one column all the way. A dash means that bus does not stop there.</div>' },
+
+  { type: "widget", topic: "Timetables",
+    title: "Journey planner",
+    html: "Here is an evening bus timetable. Tap a bus to follow it, read off its times, then plan three journeys. Nothing is timed: take as long as you like.",
+    mount: mountPlanner,
+    report: function(d){
+      if(!d || !d.result) return "Journey planner: " + (d && d.c ? d.c : 0) + " of 3 journeys done.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Journey planner: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Timetables",
+    fig: TRAIN,
+    q: "You have an interview in Kingsport at <b>09:15</b>. The office is a 10 minute walk from Kingsport station.<br>a) Which train from Chilton Bridge should you catch? Give the time it leaves.<br>b) How long is that train journey?",
+    boxes: [
+      { label: "a) Leaves Chilton Bridge at (hours)", a: 8, show: "08" },
+      { label: "a) and minutes", a: 18, pre: ":" },
+      { label: "b) Train journey", a: 43, post: "minutes" }
+    ],
+    hint: "With a 10 minute walk you need to reach Kingsport station by 09:05. Which train gets there by then? Then count on from when it leaves to when it arrives.",
+    why: "You need to be at the station by 09:15 &minus; 10 minutes = 09:05. The train arriving at 09:01 works (the next one, 09:31, is too late). It leaves Chilton Bridge at <b>08:18</b>. Journey: 08:18 to 09:00 is 42 minutes, plus 1 minute to 09:01, so <b>43 minutes</b>." },
+
+  /* ---------- 7 ROTAS AND PAY ---------- */
+  { type: "learn", topic: "Rotas and pay",
+    title: "Rotas and pay by the hour",
+    html: '<p>A <b>rota</b> shows who works when. Work out the length of each shift, then add them up.</p>' +
+          '<p>Half hours count as 0.5. A shift from 09:00 to 13:30 is 4 hours 30 minutes, which is <b>4.5 hours</b>.</p>' +
+          '<p>Pay = hours &times; rate per hour. 4.5 hours at &pound;10.40 an hour: 4 &times; 10.40 = 41.60, plus half of 10.40 = 5.20. Total <b>&pound;46.80</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Change minutes into parts of an hour before you multiply: 15 min = 0.25, 30 min = 0.5, 45 min = 0.75. Four and a half hours is 4.5, never 4.30.</div>' },
+
+  { type: "num", topic: "Rotas and pay",
+    fig: ROTA,
+    q: "This is your rota for one week at a part time job. You are paid &pound;9.60 an hour.<br>a) How many hours do you work in the week?<br>b) How much are you paid for the week?",
+    boxes: [
+      { label: "a) Hours", a: 15, post: "hours" },
+      { label: "b) Pay", a: 144, pre: "&pound;", show: "144.00" }
+    ],
+    hint: "Monday 4 hours. Wednesday: 12:30 to 17:00. Saturday: 08:00 to 14:30. Each of those has a half hour in it.",
+    why: "Monday 4 hours, Wednesday 4.5 hours, Saturday 6.5 hours. Total 4 + 4.5 + 6.5 = <b>15 hours</b>. Pay: 15 &times; 9.60 = <b>&pound;144.00</b>." },
+
+  { type: "num", topic: "Rotas and pay", stretch: true,
+    q: "Your normal rate is &pound;11.20 an hour. On Sundays you are paid <b>time and a half</b>, which means 1.5 times the normal rate. On Sunday you work from 09:30 to 15:30.<br>a) What is the Sunday rate per hour?<br>b) How much do you earn on Sunday?",
+    boxes: [
+      { label: "a) Sunday rate", a: 16.8, pre: "&pound;", post: "an hour", show: "16.80" },
+      { label: "b) Sunday pay", a: 100.8, pre: "&pound;", show: "100.80" }
+    ],
+    hint: "Time and a half: the normal rate plus half of it again. Then count the hours from 09:30 to 15:30.",
+    why: "Half of 11.20 is 5.60, so the Sunday rate is 11.20 + 5.60 = <b>&pound;16.80</b> an hour. 09:30 to 15:30 is 6 hours. Pay: 6 &times; 16.80 = <b>&pound;100.80</b>." },
+
+  /* ---------- 8 UNITS AND SCALES ---------- */
+  { type: "learn", topic: "Units and scales",
+    title: "Metric units and reading scales",
+    fig: JUG1,
+    html: UNITS +
+          '<p>Big unit to small unit: <b>multiply</b> (there are more of them). 2.5 kg = 2500 g. Small unit to big unit: <b>divide</b>. 750 ml = 0.75 litres.</p>' +
+          '<p>Reading a scale: first work out what one small mark is worth. On this jug there are 4 gaps between 200 and 400, so each gap is 200 &divide; 4 = <b>50 ml</b>. The water is 1 mark above 600: <b>650 ml</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Value of one small mark first, then read. Check the units on the scale.</div>' },
+
+  { type: "match", topic: "Units and scales",
+    q: "Match each measurement to the same amount in a different unit.",
+    pairs: [
+      ["3 kg", "3000 g"],
+      ["0.5 litres", "500 ml"],
+      ["250 cm", "2.5 m"],
+      ["4 km", "4000 m"],
+      ["35 mm", "3.5 cm"],
+      ["1500 g", "1.5 kg"]
+    ],
+    hint: "kg, l and km are all 1000 of the smaller unit. 100 cm in a metre, 10 mm in a centimetre.",
+    why: "3 &times; 1000 = 3000 g. 0.5 &times; 1000 = 500 ml. 250 &divide; 100 = 2.5 m. 4 &times; 1000 = 4000 m. 35 &divide; 10 = 3.5 cm. 1500 &divide; 1000 = 1.5 kg." },
+
+  { type: "num", topic: "Units and scales",
+    fig: JUG2,
+    q: "How much water is in this jug?",
+    boxes: [ { label: "Water", a: 275, post: "ml" } ],
+    hint: "Between 200 and 300 there are 4 gaps. What is each one worth?",
+    why: "100 &divide; 4 = 25, so each small mark is 25 ml. The water is 3 marks above 200: 200 + 75 = <b>275 ml</b>. Counting each mark as 10 gives 230 ml, the usual slip." },
+
+  { type: "num", topic: "Units and scales", stretch: true,
+    q: "You are sorting drinks for the cast party after your musical. You want 30 cups of squash, and each cup holds 250 ml. Squash comes in 1.5 litre bottles costing &pound;1.10 each. You have &pound;6.<br>Do you have enough money? Work out:",
+    boxes: [
+      { label: "a) Squash needed", a: 7.5, post: "litres" },
+      { label: "b) Bottles to buy", a: 5 },
+      { label: "c) Cost", a: 5.5, pre: "&pound;", show: "5.50" },
+      { label: "d) Money left from &pound;6", a: 0.5, pre: "&pound;", alts: [50], show: "0.50" }
+    ],
+    hint: "30 &times; 250 ml first, then change ml into litres (divide by 1000). How many 1.5 litre bottles make that?",
+    why: "30 &times; 250 = 7500 ml = <b>7.5 litres</b>. 7.5 &divide; 1.5 = <b>5 bottles</b>. Cost: 5 &times; 1.10 = <b>&pound;5.50</b>. Left: 6 &minus; 5.50 = <b>&pound;0.50</b>.<br>Decision with figures: &quot;5 bottles cost &pound;5.50, which is less than &pound;6, so yes, I have enough, with 50p left.&quot;" }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>

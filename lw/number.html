@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Number confidence - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here: Frost watch widget */
+.fw-svg{cursor:pointer}
+.fw-svg svg{width:100%;max-width:290px;height:auto;display:block;margin:0 auto}
+.fw-grid{display:grid;gap:4px}
+@media (min-width:640px){.fw-grid{grid-template-columns:300px 1fr;gap:16px;align-items:start}.fw-grid .wpanel{margin-top:0}}
+.fw-read{justify-content:space-between;margin-top:0}
+.fw-read span:first-child{font-weight:700}
+.fw-dots{display:flex;gap:6px;margin-bottom:6px}
+.fw-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.fw-dots span.on{background:var(--accent)}
+.fw-dots span.now{background:var(--sun)}
+.fw-task p{margin:0 0 6px}
+.fw-btns .btn{padding:10px 14px}
+.fw-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Number confidence</h2>
+    <span>Big numbers, below zero, written methods, squares, formulae in words, rounding and estimating. The Section A toolkit.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function M(v){ return v < 0 ? "&minus;" + Math.abs(v) : String(v); }
+
+/* ---------- figures ---------- */
+
+/* Place value columns for 305,040 */
+var PV = (function(){
+  var heads = ["100,000", "10,000", "1000", "100", "10", "1"];
+  var digs = ["3", "0", "5", "0", "4", "0"];
+  var s = '<svg viewBox="0 0 380 170" role="img" aria-label="Place value columns: 3 hundred thousands, 0 ten thousands, 5 thousands, 0 hundreds, 4 tens, 0 ones. 305,040 is three hundred and five thousand and forty.">';
+  s += '<path d="M14 20 V14 H186 V20" fill="none" stroke="' + BLUE + '" stroke-width="2.5"/>';
+  s += t(100, 10, "the thousands", 14, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<path d="M194 20 V14 H366 V20" fill="none" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+  s += t(280, 10, "the rest", 14, VIOLET, LAB + ' font-weight="700" text-anchor="middle"');
+  for(var k = 0; k < 6; k++){
+    var x = 10 + k * 60;
+    s += '<rect x="' + x + '" y="26" width="60" height="28" fill="' + (k < 3 ? "#e6eaff" : "#efe8ff") + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(x + 30, 46, heads[k], 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += '<rect x="' + x + '" y="54" width="60" height="50" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(x + 30, 90, digs[k], 30, digs[k] === "0" ? "#8a8fa8" : INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += t(190, 134, "305,040", 22, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(190, 160, "three hundred and five thousand and forty", 15, INK, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Number line: 4 falls 7 to -3 */
+var NLINE = (function(){
+  function X(v){ return 190 + v * 27; }
+  var s = '<svg viewBox="0 0 380 140" role="img" aria-label="Number line from minus 6 to 6. A jump of 4 from 4 down to 0, then 3 more from 0 down to minus 3. 4 falls by 7 to minus 3.">';
+  s += '<line x1="18" y1="96" x2="362" y2="96" stroke="' + INK + '" stroke-width="2.5"/>';
+  for(var v = -6; v <= 6; v++){
+    s += '<line x1="' + X(v) + '" y1="89" x2="' + X(v) + '" y2="103" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(X(v), 124, M(v), 15, v === 0 ? BLUE : INK, LAB + ' text-anchor="middle"' + (v === 0 || v === 4 || v === -3 ? ' font-weight="700"' : ""));
+  }
+  s += '<path d="M' + X(4) + ' 86 Q' + ((X(4) + X(0)) / 2) + ' 40 ' + X(0) + ' 86" fill="none" stroke="' + VIOLET + '" stroke-width="3"/>';
+  s += '<path d="M' + (X(0) + 3) + ' 74 L' + X(0) + ' 86 L' + (X(0) + 12) + ' 80" fill="none" stroke="' + VIOLET + '" stroke-width="3"/>';
+  s += t((X(4) + X(0)) / 2, 54, "down 4", 15, VIOLET, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<path d="M' + X(0) + ' 86 Q' + ((X(0) + X(-3)) / 2) + ' 50 ' + X(-3) + ' 86" fill="none" stroke="' + CORAL + '" stroke-width="3"/>';
+  s += '<path d="M' + (X(-3) + 3) + ' 74 L' + X(-3) + ' 86 L' + (X(-3) + 12) + ' 80" fill="none" stroke="' + CORAL + '" stroke-width="3"/>';
+  s += t((X(0) + X(-3)) / 2, 62, "down 3", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(190, 22, "4&deg;C falls 7 degrees: 4 then 3 more", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Digits shift two places for x 100 */
+var SHIFT = (function(){
+  var heads = ["H", "T", "O", "t", "h"];
+  var s = '<svg viewBox="0 0 380 214" role="img" aria-label="3.75 times 100. Each digit moves two places to the left: 3 ones becomes 3 hundreds, 7 tenths becomes 7 tens, 5 hundredths becomes 5 ones. The answer is 375.">';
+  function cx(k){ return 70 + k * 60 + (k > 2 ? 20 : 0); }
+  for(var k = 0; k < 5; k++) s += t(cx(k), 22, heads[k], 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(2, 68, "3.75", 15, INK, LAB + ' font-weight="700"');
+  s += t(4, 158, "375", 15, BLUE, LAB + ' font-weight="700"');
+  var top = { 2: "3", 3: "7", 4: "5" }, bot = { 0: "3", 1: "7", 2: "5" };
+  for(k = 0; k < 5; k++){
+    s += '<rect x="' + (cx(k) - 22) + '" y="40" width="44" height="44" rx="8" fill="' + (top[k] ? WHITE : PAPER) + '" stroke="' + INK + '" stroke-width="2"/>';
+    if(top[k]) s += t(cx(k), 71, top[k], 24, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += '<rect x="' + (cx(k) - 22) + '" y="130" width="44" height="44" rx="8" fill="' + (bot[k] ? "#e6eaff" : PAPER) + '" stroke="' + INK + '" stroke-width="2"/>';
+    if(bot[k]) s += t(cx(k), 161, bot[k], 24, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '<circle cx="' + (cx(2) + 40) + '" cy="78" r="4" fill="' + INK + '"/>';
+  for(k = 2; k < 5; k++){
+    s += '<path d="M' + cx(k) + ' 88 L' + (cx(k - 2) + 6) + ' 124" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+    s += '<path d="M' + (cx(k - 2) + 4) + ' 112 L' + (cx(k - 2) + 6) + ' 124 L' + (cx(k - 2) + 17) + ' 119" fill="none" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+  }
+  s += t(190, 204, "&times; 100: every digit moves 2 places left", 16, VIOLET, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Column addition and subtraction */
+var COLS = (function(){
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="Column addition: 2475 plus 1386 equals 3861, with carries of 1 into the tens and the hundreds. Column subtraction: 724 minus 358 equals 366: the 4 becomes 14, the 2 tens become 11, the 7 hundreds become 6.">';
+  function col(x0, digs, y, fill){
+    for(var k = 0; k < digs.length; k++) if(digs[k] !== " ") s += t(x0 + k * 26, y, digs[k], 24, fill || INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  /* addition */
+  s += t(80, 16, "Add", 16, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  col(50, "2475", 60);
+  s += t(16, 96, "+", 24, INK, LAB + ' font-weight="700"');
+  col(50, "1386", 96);
+  s += '<line x1="30" y1="108" x2="140" y2="108" stroke="' + INK + '" stroke-width="2.5"/>';
+  col(50, "3861", 142);
+  s += '<line x1="30" y1="152" x2="140" y2="152" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(76, 172, "1", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(102, 172, "1", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(80, 194, "carries", 14, CORAL, BODY + ' text-anchor="middle"');
+  /* subtraction */
+  s += t(290, 16, "Subtract", 16, VIOLET, LAB + ' font-weight="700" text-anchor="middle"');
+  col(264, "724", 62);
+  s += '<line x1="256" y1="58" x2="272" y2="40" stroke="' + CORAL + '" stroke-width="2.5"/>';
+  s += t(264, 36, "6", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<line x1="282" y1="58" x2="298" y2="40" stroke="' + CORAL + '" stroke-width="2.5"/>';
+  s += t(290, 36, "11", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(307, 46, "1", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(230, 96, "&minus;", 24, INK, LAB + ' font-weight="700"');
+  col(264, "358", 96);
+  s += '<line x1="244" y1="108" x2="340" y2="108" stroke="' + INK + '" stroke-width="2.5"/>';
+  col(264, "366", 142);
+  s += '<line x1="244" y1="152" x2="340" y2="152" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(290, 178, "exchanges", 14, CORAL, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Bus stop division 852 / 6 */
+var BUS = (function(){
+  var s = '<svg viewBox="0 0 380 130" role="img" aria-label="Short division: 852 divided by 6. 8 divided by 6 is 1 remainder 2. 25 divided by 6 is 4 remainder 1. 12 divided by 6 is 2. The answer is 142.">';
+  s += t(84, 52, "1", 26, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(124, 52, "4", 26, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(164, 52, "2", 26, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<path d="M60 64 H190 M60 64 V112" fill="none" stroke="' + INK + '" stroke-width="3"/>';
+  s += t(40, 98, "6", 26, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(84, 98, "8", 26, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(124, 98, "5", 26, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(164, 98, "2", 26, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(112, 86, "2", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(152, 86, "1", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(214, 44, "8 &divide; 6 = 1 r 2", 16, INK, BODY);
+  s += t(214, 70, "25 &divide; 6 = 4 r 1", 16, INK, BODY);
+  s += t(214, 96, "12 &divide; 6 = 2", 16, INK, BODY);
+  s += t(214, 122, "so 852 &divide; 6 = 142", 16, BLUE, BODY + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Squares as grids */
+var SQ = (function(){
+  var s = '<svg viewBox="0 0 380 130" role="img" aria-label="Square numbers drawn as grids: 3 by 3 makes 9, 4 by 4 makes 16, 5 by 5 makes 25.">';
+  var sizes = [3, 4, 5], x0 = [20, 130, 250], cell = 18;
+  for(var n = 0; n < 3; n++){
+    var k = sizes[n];
+    for(var r = 0; r < k; r++) for(var c = 0; c < k; c++){
+      s += '<rect x="' + (x0[n] + c * cell) + '" y="' + (8 + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="' + [CYAN, MINT, SUN][n] + '" stroke="' + INK + '" stroke-width="1.5"/>';
+    }
+    s += t(x0[n] + k * cell / 2, 122, k + "&sup2; = " + (k * k), 17, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '</svg>';
+  return s;
+})();
+
+/* Formula machine */
+var FLOW =
+'<svg viewBox="0 0 380 130" role="img" aria-label="Formula as a flow: hours, times 28, plus 35, gives the cost. 3 hours: times 28 is 84, plus 35 is 119 pounds.">' +
+'<rect x="4" y="22" width="70" height="44" rx="10" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(39, 50, "hours", 15, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+'<path d="M76 44 H98" stroke="' + INK + '" stroke-width="2.5"/><path d="M92 38 L99 44 L92 50" fill="none" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="102" y="18" width="84" height="52" rx="12" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(144, 51, "&times; 28", 20, WHITE, LAB + ' font-weight="700" text-anchor="middle"') +
+'<path d="M188 44 H210" stroke="' + INK + '" stroke-width="2.5"/><path d="M204 38 L211 44 L204 50" fill="none" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="214" y="18" width="84" height="52" rx="12" fill="' + VIOLET + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(256, 51, "+ 35", 20, WHITE, LAB + ' font-weight="700" text-anchor="middle"') +
+'<path d="M300 44 H322" stroke="' + INK + '" stroke-width="2.5"/><path d="M316 38 L323 44 L316 50" fill="none" stroke="' + INK + '" stroke-width="2.5"/>' +
+'<rect x="326" y="22" width="50" height="44" rx="10" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(351, 50, "cost", 15, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(39, 100, "3", 18, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(144, 100, "84", 18, BLUE, LAB + ' font-weight="700" text-anchor="middle"') +
+t(256, 100, "119", 18, VIOLET, LAB + ' font-weight="700" text-anchor="middle"') +
+t(351, 100, "&pound;119", 18, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(190, 124, "3 hours: 3 &times; 28 = 84, then 84 + 35 = 119", 15, INK, BODY + ' text-anchor="middle"') +
+'</svg>';
+
+/* Rounding number line */
+var ROUND = (function(){
+  function X(v){ return 30 + (v - 3400) * 3.2; }
+  var s = '<svg viewBox="0 0 380 120" role="img" aria-label="Number line from 3400 to 3500. 3478 is past the halfway mark of 3450, so it rounds up to 3500.">';
+  s += '<line x1="' + X(3400) + '" y1="70" x2="' + X(3500) + '" y2="70" stroke="' + INK + '" stroke-width="2.5"/>';
+  for(var v = 3400; v <= 3500; v += 10){
+    var big = v === 3400 || v === 3500;
+    s += '<line x1="' + X(v) + '" y1="' + (big ? 58 : 64) + '" x2="' + X(v) + '" y2="' + (big ? 82 : 76) + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += t(X(3400), 104, "3400", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(X(3500), 104, "3500", 16, BLUE, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<line x1="' + X(3450) + '" y1="40" x2="' + X(3450) + '" y2="88" stroke="' + VIOLET + '" stroke-width="2" stroke-dasharray="5 4"/>';
+  s += t(X(3450), 104, "3450 halfway", 14, VIOLET, BODY + ' text-anchor="middle"');
+  s += '<circle cx="' + X(3478) + '" cy="70" r="7" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += t(X(3478), 40, "3478", 17, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '<path d="M' + (X(3478) + 10) + ' 60 Q' + ((X(3478) + X(3500)) / 2) + ' 40 ' + (X(3500) - 2) + ' 60" fill="none" stroke="' + BLUE + '" stroke-width="2.5"/>';
+  s += t(190, 20, "3478 is nearer 3500 than 3400", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* ---------- Frost watch widget ---------- */
+var FW = [
+  { start: 4, target: -3, sl: "6pm",
+    ctx: "At 6pm the thermometer at the garden centre reads <b>4&deg;C</b>. Overnight the temperature <b>falls by 7 degrees</b>.",
+    ask: "Set the thermometer to the overnight low.",
+    hint: "Count down 4 degrees to reach 0, then keep going for the rest of the 7.",
+    why: "From 4 down to 0 is 4 degrees. That leaves 3 more to fall, so it lands on <b>&minus;3&deg;C</b>. As a sum: 4 &minus; 7 = &minus;3." },
+  { start: -3, target: 6, sl: "dawn",
+    ctx: "From that low of <b>&minus;3&deg;C</b>, the sun comes out and it <b>warms up by 9 degrees</b> by midday.",
+    ask: "Set the midday temperature.",
+    hint: "Count up 3 degrees to reach 0 first. How many of the 9 are left after that?",
+    why: "From &minus;3 up to 0 is 3 degrees. 9 &minus; 3 = 6 more, so it reaches <b>6&deg;C</b>. As a sum: &minus;3 + 9 = 6." },
+  { start: -5, target: -8, sl: "Tue",
+    ctx: "On Tuesday night it was <b>&minus;5&deg;C</b>. Wednesday night was <b>3 degrees colder</b>.",
+    ask: "Set Wednesday night's temperature.",
+    hint: "Colder means further down the thermometer, further below zero.",
+    why: "Colder means down. 3 down from &minus;5 is <b>&minus;8&deg;C</b>. It can feel odd because 8 is bigger than 5, but &minus;8 is further below zero, so it is colder." },
+  { start: -4, target: 7, sl: "outside",
+    ctx: "Outside it is <b>&minus;4&deg;C</b>. The heated greenhouse is <b>11 degrees warmer</b> than outside.",
+    ask: "Set the greenhouse temperature.",
+    hint: "Warmer means up. 4 of the 11 degrees get you to 0. Where do the rest take you?",
+    why: "From &minus;4 up to 0 uses 4 degrees, leaving 11 &minus; 4 = 7, so the greenhouse is <b>7&deg;C</b>. Going the other way, the difference between 7 and &minus;4 is 7 + 4 = 11 degrees." }
+];
+var FWN = FW.length, FWMIN = -10, FWMAX = 10;
+function fwY(v){ return 175 - v * 15; }
+
+function mountFrost(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false, false];
+  if(typeof d.v !== "number") d.v = d.c < FWN ? FW[d.c].start : 0;
+  var view = d.c;
+
+  el.innerHTML =
+    '<div class="wpanel fw-task" data-r="task"></div>' +
+    '<div class="fw-grid"><div class="fw-svg" data-r="svg" title="Tap the scale to set the temperature"></div><div>' +
+    '<div class="wpanel">' +
+      '<div class="wrow fw-read"><span>Thermometer reads</span><span class="wbig" data-r="read"></span></div>' +
+      '<p class="wnote" data-r="note"></p>' +
+      '<div class="wrow fw-btns">' +
+        '<button class="btn btn-quiet" type="button" data-r="down">&#9660; Colder</button>' +
+        '<button class="btn btn-quiet" type="button" data-r="up">&#9650; Warmer</button>' +
+        '<button class="btn" type="button" data-r="lock">Lock it in</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb fw-fb hidden" data-r="fb" aria-live="polite"></div></div></div>';
+
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+
+  function start(){ return view < FWN ? FW[view].start : 0; }
+
+  function svg(){
+    var v = d.v, st = start(), y = fwY(v), ys = fwY(st);
+    var s = '<svg viewBox="0 0 280 380" role="img" aria-label="Thermometer from minus 10 to 10 degrees, reading ' + v + ' degrees' + (view < FWN ? ", start mark at " + st : "") + '">';
+    s += '<rect x="50" y="175" width="226" height="' + (fwY(FWMIN) + 8 - 175) + '" fill="' + CYAN + '" opacity=".12"/>';
+    s += '<line x1="50" y1="175" x2="80" y2="175" stroke="' + CYAN + '" stroke-width="2.5" stroke-dasharray="7 5"/>';
+    s += '<line x1="158" y1="175" x2="276" y2="175" stroke="' + CYAN + '" stroke-width="2.5" stroke-dasharray="7 5"/>';
+    s += '<rect x="80" y="8" width="36" height="340" rx="18" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<circle cx="98" cy="352" r="20" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="3"/>';
+    s += '<rect x="89" y="' + y + '" width="18" height="' + (342 - y) + '" fill="' + CORAL + '"/>';
+    for(var k = FWMIN; k <= FWMAX; k++){
+      var yy = fwY(k), even = k % 2 === 0;
+      s += '<line x1="116" y1="' + yy + '" x2="' + (even ? 130 : 124) + '" y2="' + yy + '" stroke="' + INK + '" stroke-width="' + (even ? 2 : 1.5) + '"/>';
+      if(even) s += t(134, yy + 5, M(k), 15, k === 0 ? BLUE : INK, LAB + (k === 0 ? ' font-weight="700"' : ""));
+    }
+    s += t(128, 374, "shaded: below 0&deg;C", 14, BLUE, LAB + ' font-weight="700"');
+    if(view < FWN){
+      s += '<path d="M60 ' + (ys - 8) + ' L76 ' + ys + ' L60 ' + (ys + 8) + ' Z" fill="' + VIOLET + '"/>';
+      s += t(56, ys + 5, FW[view].sl, 14, VIOLET, LAB + ' font-weight="700" text-anchor="end"');
+    }
+    /* current level pointer */
+    s += '<path d="M158 ' + y + ' L168 ' + (y - 6) + ' L168 ' + (y + 6) + ' Z" fill="' + INK + '"/>';
+    s += '<line x1="166" y1="' + y + '" x2="196" y2="' + y + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(202, y + 6, M(v) + "&deg;C", 18, INK, LAB + ' font-weight="700"');
+    /* jump arrow from start to now */
+    if(view < FWN && Math.abs(v - st) > 1){
+      var down = v < st, col = down ? VIOLET : CORAL;
+      s += '<line x1="182" y1="' + ys + '" x2="182" y2="' + (down ? y - 8 : y + 8) + '" stroke="' + col + '" stroke-width="3"/>';
+      s += down ? '<path d="M175 ' + (y - 12) + ' L182 ' + (y - 2) + ' L189 ' + (y - 12) + '" fill="none" stroke="' + col + '" stroke-width="3"/>' :
+                  '<path d="M175 ' + (y + 12) + ' L182 ' + (y + 2) + ' L189 ' + (y + 12) + '" fill="none" stroke="' + col + '" stroke-width="3"/>';
+      s += '<line x1="146" y1="' + ys + '" x2="182" y2="' + ys + '" stroke="' + VIOLET + '" stroke-width="2" stroke-dasharray="4 3"/>';
+    }
+    s += '</svg>';
+    return s;
+  }
+
+  function task(){
+    var dots = '<div class="fw-dots" aria-hidden="true">';
+    for(var k = 0; k < FWN; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < FWN ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= FWN) return dots + '<p><b>Free play.</b> All four done. Move the temperature around if you like and watch it cross zero.</p>';
+    var c = FW[view];
+    return dots + '<p class="tiny" style="margin:0 0 4px">Night ' + (view + 1) + ' of ' + FWN + '</p><p>' + c.ctx + '</p><p><b>' + c.ask + '</b> Use the buttons or tap the scale, then Lock it in.</p>';
+  }
+
+  function draw(){
+    q("task").innerHTML = task();
+    q("svg").innerHTML = svg();
+    q("read").innerHTML = M(d.v) + "&deg;C";
+    var st = start(), diff = d.v - st;
+    q("note").innerHTML = view >= FWN ? "Free play: no right or wrong here." :
+      (d.miss[view] || d.shown[view] ? "From " + M(st) + "&deg;C that is <b>" + (diff === 0 ? "no change" : (diff < 0 ? "down " : "up ") + Math.abs(diff) + (Math.abs(diff) === 1 ? " degree" : " degrees")) + "</b>." :
+       "The purple arrow marks where you start. Count the steps as you go.");
+    var waiting = view !== d.c || d.c >= FWN;
+    q("lock").disabled = waiting;
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+
+  function set(v){
+    d.v = Math.max(FWMIN, Math.min(FWMAX, v));
+    draw(); api.save();
+  }
+
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+
+  function fb(cls, html){ var f = q("fb"); f.className = "fb fw-fb " + cls; f.innerHTML = html; }
+
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= FWN;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is how this one goes.</b> " : "<b>" + ["Spot on.", "Yes, that is it.", "Nailed it.", "Exactly right."][k % 4] + "</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All four nights done. The trick every time: <b>stop at zero, then count on</b>.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next night</button>';
+    fb(how === "shown" ? "show" : "good", head + FW[k].why + more);
+    q("next").onclick = function(){
+      view = d.c;
+      d.v = view < FWN ? FW[view].start : d.v;
+      api.save();
+      q("fb").className = "fb fw-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+
+  q("svg").addEventListener("click", function(e){
+    var sv = q("svg").querySelector("svg");
+    if(!sv) return;
+    var r = sv.getBoundingClientRect();
+    var yy = (e.clientY - r.top) * 380 / r.height;
+    set(Math.round((175 - yy) / 15));
+  });
+  q("down").onclick = function(){ set(d.v - 1); };
+  q("up").onclick = function(){ set(d.v + 1); };
+  q("lock").onclick = function(){
+    if(view !== d.c || d.c >= FWN) return;
+    var c = FW[view];
+    if(d.v === c.target){ solved(view, "right"); return; }
+    d.miss[view]++;
+    api.save();
+    var diff = d.v - c.start;
+    fb("nudge", "<b>Not quite yet.</b> That reads " + M(d.v) + "&deg;C, which is " +
+      (diff === 0 ? "no change" : (diff < 0 ? "down " : "up ") + Math.abs(diff) + (Math.abs(diff) === 1 ? " degree" : " degrees")) + " from " + M(c.start) + "&deg;C. " + c.hint +
+      '<br><span class="tiny">The size of your jump now shows under the reading.</span>');
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= FWN) return;
+    d.shown[view] = true;
+    d.v = FW[view].target;
+    solved(view, "shown");
+  };
+
+  draw();
+  if(d.c >= FWN && d.result){
+    fb("good", "<b>All four nights done.</b> Stop at zero, then count on.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "number",
+  title: "Number confidence",
+  subject: "Maths",
+  mins: 50,
+  blurb: "The number skills behind every Functional Skills question: big numbers, below zero, written methods for Section A, squares, formulae in words, rounding and estimating. Dip into any chunk you like.",
+  steps: [
+
+  /* ---------- PLACE VALUE ---------- */
+  { type: "learn", topic: "Place value",
+    title: "Big numbers, up to a million",
+    fig: PV,
+    html: '<p>Every digit is worth something different depending on its column. In 305,040 the 3 is worth 300,000, the 5 is worth 5000 and the 4 is worth 40.</p>' +
+          '<p>Read big numbers in two parts: the thousands, then the rest. So 305,040 is <b>three hundred and five thousand and forty</b>. The comma marks where the thousands end.</p>' +
+          '<p>To order whole numbers, more digits means bigger. Same number of digits? Compare from the left until two digits are different.</p>' +
+          '<div class="keep"><b>Keep this</b>Zeros hold a place. "Two hundred and six thousand and fifty" is 206 thousand, then 050: <b>206,050</b>. One million is 1,000,000.</div>' },
+
+  { type: "mc", topic: "Place value",
+    q: "A new garden centre had <b>140,607</b> visitors in its first year. Which is that number in words?",
+    options: [
+      "One hundred and forty thousand, six hundred and seven",
+      "One hundred and forty thousand, sixty seven",
+      "Fourteen thousand, six hundred and seven",
+      "One million, four hundred and six thousand and seven"
+    ],
+    answer: 0,
+    hint: "Split it at the comma. Say the part before the comma, then the word thousand, then the rest.",
+    why: "Before the comma: 140, so <b>one hundred and forty thousand</b>. After the comma: 607, <b>six hundred and seven</b>.<br>Fourteen thousand would be 14,607 (only five digits), and a million needs seven digits." },
+
+  { type: "num", topic: "Place value",
+    q: "A house is advertised for <b>two hundred and six thousand and fifty pounds</b>. Write the price in figures.",
+    boxes: [ { label: "Price", a: 206050, pre: "&pound;", show: "206,050" } ],
+    hint: "Write the thousands first: 206. Then you need three more digits for fifty: hundreds, tens, ones.",
+    why: "Two hundred and six thousand is 206 thousand. Fifty needs three places after that: 0 hundreds, 5 tens, 0 ones, so 050. Together: <b>&pound;206,050</b>.<br>A common slip is 20,650 or 206,50: the zero in the hundreds column has to stay." },
+
+  { type: "order", topic: "Place value",
+    q: "Five flats are for sale. Put the prices in order, <b>cheapest first</b>.",
+    items: ["&pound;98,750", "&pound;187,500", "&pound;189,950", "&pound;198,500", "&pound;1,050,000"],
+    hint: "Count the digits first: fewer digits means smaller. Then compare the ones with the same number of digits from the left.",
+    why: "&pound;98,750 has only five digits, so it is cheapest, and &pound;1,050,000 has seven, so it is most expensive. The three in the middle all start 1, so look at the next digit: 187 and 189 come before 198, and 187 is less than 189." },
+
+  /* ---------- NEGATIVE NUMBERS ---------- */
+  { type: "learn", topic: "Negative numbers",
+    title: "Below zero: temperatures and bank balances",
+    fig: NLINE,
+    html: '<p>Negative numbers are below zero. You meet them on thermometers (&minus;3&deg;C is 3 degrees below freezing) and in bank accounts (a balance of &minus;&pound;20 means you are overdrawn: you owe the bank &pound;20).</p>' +
+          '<p>Going <b>up</b> means warmer, or more money. Going <b>down</b> means colder, or less. From 4&deg;C, a fall of 7 degrees takes you to &minus;3&deg;C: 4 down to zero, then 3 more.</p>' +
+          '<p>For a <b>difference</b> across zero, count to zero and then on. From &minus;5&deg;C to 8&deg;C is 5 + 8 = 13 degrees.</p>' +
+          '<div class="keep"><b>Keep this</b>Across zero, split the jump at zero. And &minus;8 is colder than &minus;3: the bigger the number after the minus, the further below zero.</div>' },
+
+  { type: "widget", topic: "Negative numbers",
+    title: "Frost watch",
+    html: "The garden centre keeps an eye on the temperature so the plants do not freeze. Four nights, four readings to set. Take your time.",
+    mount: mountFrost,
+    report: function(d){
+      if(!d || !d.result) return "Frost watch: " + (d && d.c ? d.c : 0) + " of 4 nights done.";
+      var lab = { right1: "all four first go", right2: "all four, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Frost watch: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Negative numbers",
+    q: "Your bank balance is <b>&pound;35</b>. Your phone bill of <b>&pound;52</b> is paid out of it.<br>a) What is your balance now?<br>b) Then &pound;40 birthday money goes in. What is the balance after that?",
+    boxes: [
+      { label: "a) Balance after the bill", a: -17, pre: "&pound;", show: "&minus;17" },
+      { label: "b) Balance after the &pound;40", a: 23, pre: "&pound;" }
+    ],
+    hint: "a) The &pound;35 covers part of the bill and takes you to zero. How much of the bill is still left to pay? b) Count up from there: first to zero, then on.",
+    why: "a) &pound;35 pays off 35 of the 52, leaving 52 &minus; 35 = 17 still owed, so the balance is <b>&minus;&pound;17</b> (overdrawn).<br>b) &pound;17 of the &pound;40 gets you back to zero, and 40 &minus; 17 = 23 is left: <b>&pound;23</b>." },
+
+  { type: "num", topic: "Negative numbers", stretch: true,
+    q: "Mo's account is overdrawn: the balance is <b>&minus;&pound;45</b>. His wages go in, and now the balance is <b>&pound;130</b>. How much were his wages?",
+    boxes: [ { label: "Wages", a: 175, pre: "&pound;" } ],
+    hint: "This is a difference across zero. How far is it from &minus;45 up to 0? And from 0 up to 130?",
+    why: "From &minus;&pound;45 up to zero is &pound;45. From zero up to &pound;130 is &pound;130. The wages were 45 + 130 = <b>&pound;175</b>.<br>130 &minus; 45 = 85 is the trap: that ignores that he started below zero." },
+
+  /* ---------- 10, 100, 1000 ---------- */
+  { type: "learn", topic: "10, 100 and 1000",
+    title: "Times and divide by 10, 100 and 1000",
+    fig: SHIFT,
+    html: '<p>Times by 10 moves every digit <b>one place left</b>, so the number is 10 times bigger. Times by 100: two places. Times by 1000: three places.</p>' +
+          '<p>Divide and the digits move <b>right</b>. Fill any empty places with zeros, as in 0.008.</p>' +
+          '<ul><li>3.75 &times; 100 = 375</li><li>4.2 &times; 1000 = 4200</li><li>65 &divide; 100 = 0.65</li><li>8 &divide; 1000 = 0.008</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Count the zeros: that is how many places the digits move. Times makes it bigger, divide makes it smaller. Then ask: does the size make sense?</div>' },
+
+  { type: "match", topic: "10, 100 and 1000",
+    q: "Match each calculation to its answer.",
+    pairs: [
+      ["5.6 &times; 10", "56"],
+      ["5.6 &times; 1000", "5600"],
+      ["56 &divide; 100", "0.56"],
+      ["56 &divide; 1000", "0.056"],
+      ["0.056 &times; 100", "5.6"]
+    ],
+    hint: "Count the zeros in 10, 100 or 1000 to see how many places the digits move. Times: bigger. Divide: smaller.",
+    why: "5.6 &times; 10 = 56 (one place). 5.6 &times; 1000 = 5600 (three places, filling with zeros). 56 &divide; 100 = 0.56. 56 &divide; 1000 = 0.056. 0.056 &times; 100 = 5.6.<br>A quick sense check: 56 shared between 1000 people is a tiny amount each, so 0.056 makes sense." },
+
+  { type: "num", topic: "10, 100 and 1000",
+    q: "No calculator. The garden centre is stocking up.<br>a) It buys <b>100</b> bags of compost at <b>&pound;4.85</b> each. What is the total cost?<br>b) It pays <b>&pound;370</b> for <b>1000</b> plant pots. How much is that for one pot, in pounds?",
+    boxes: [
+      { label: "a) Total for the compost", a: 485, pre: "&pound;" },
+      { label: "b) Cost of one pot", a: 0.37, pre: "&pound;", show: "0.37" }
+    ],
+    hint: "a) Times by 100: the digits move two places left. b) Divide by 1000: the digits move three places right.",
+    why: "a) 4.85 &times; 100 = <b>&pound;485</b>.<br>b) 370 &divide; 1000 = <b>&pound;0.37</b>, which is 37p a pot. Sense check: 1000 pots at 37p is &pound;370." },
+
+  /* ---------- ADD AND SUBTRACT ---------- */
+  { type: "learn", topic: "Add and subtract",
+    title: "Column methods: add and subtract",
+    fig: COLS,
+    html: '<p>Section A has no calculator, so it helps to have a written method you trust.</p>' +
+          '<p><b>Line up the digits</b> by place value, with the decimal points under each other for money. Start from the right.</p>' +
+          '<p><b>Adding:</b> if a column makes 10 or more, write the ones digit and carry the 1 to the next column.</p>' +
+          '<p><b>Subtracting:</b> if the top digit is smaller, exchange: take 1 from the next column on the left. It is worth 10 in this column.</p>' +
+          '<div class="keep"><b>Keep this</b>Line up, start on the right, carry or exchange. Check a subtraction by adding: 366 + 358 should give back 724.</div>' },
+
+  { type: "num", topic: "Add and subtract",
+    q: "No calculator. At the shop you buy three things: <b>&pound;12.85</b>, <b>&pound;4.60</b> and <b>&pound;27.95</b>.<br>a) What is the total?<br>b) You pay with a &pound;50 note. How much change do you get?",
+    boxes: [
+      { label: "a) Total", a: 45.4, pre: "&pound;", show: "45.40" },
+      { label: "b) Change", a: 4.6, pre: "&pound;", show: "4.60" }
+    ],
+    hint: "Write all three prices in a column with the points lined up. For the change, 50 is 50.00.",
+    why: "a) 12.85 + 4.60 + 27.95: the pence make 85 + 60 + 95 = 240p, which is &pound;2.40; the pounds make 12 + 4 + 27 = 43. Total <b>&pound;45.40</b>.<br>b) 50.00 &minus; 45.40 = <b>&pound;4.60</b>. Check: 45.40 + 4.60 = 50." },
+
+  { type: "mc", topic: "Add and subtract",
+    q: "Ellie works out <b>503 &minus; 278</b> in columns and gets <b>375</b>. What went wrong?",
+    options: [
+      "In each column she took the smaller digit from the bigger one, instead of exchanging",
+      "She added the numbers instead of taking them away",
+      "She started from the left instead of the right",
+      "Nothing: 375 is right"
+    ],
+    answer: 0,
+    hint: "Try the ones column: 3 take away 8. What did Ellie do there to get a 5?",
+    why: "3 &minus; 8 cannot be done without exchanging, so Ellie did 8 &minus; 3 = 5 instead. Same in the tens: 7 &minus; 0. That gives 375, but the real answer is <b>225</b>.<br>Check with adding: 225 + 278 = 503. And 375 + 278 = 653, so 375 cannot be right." },
+
+  /* ---------- MULTIPLY AND DIVIDE ---------- */
+  { type: "learn", topic: "Multiply and divide",
+    title: "Written methods: times and share",
+    fig: BUS,
+    html: '<p><b>Short multiplication.</b> 236 &times; 4: work from the right. 6 &times; 4 = 24, write 4 and carry 2. 3 &times; 4 = 12, plus 2 makes 14, write 4 and carry 1. 2 &times; 4 = 8, plus 1 makes 9. Answer: <b>944</b>.</p>' +
+          '<p>For a two digit number, split it: 236 &times; 14 = 236 &times; 10 + 236 &times; 4 = 2360 + 944 = <b>3304</b>.</p>' +
+          '<p><b>Short division</b> (the bus stop): 852 &divide; 6. Carry each remainder to the next digit, as in the picture. Answer: <b>142</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Times tables up to 12 &times; 12 do the heavy lifting. Split big multiplications into easy pieces, then add the pieces.</div>' },
+
+  { type: "num", topic: "Multiply and divide",
+    q: "No calculator. A caf&eacute; pays <b>&pound;13 an hour</b>. Sam's rota this week adds up to <b>24 hours</b>. How much does Sam earn?",
+    boxes: [ { label: "Pay", a: 312, pre: "&pound;" } ],
+    hint: "Split 24 into 20 and 4. Work out 13 &times; 20 and 13 &times; 4, then add.",
+    why: "13 &times; 20 = 260 and 13 &times; 4 = 52. Then 260 + 52 = <b>&pound;312</b>.<br>Estimate check: about 10 &times; 25 = 250 and 15 &times; 25 = 375, so 312 sits sensibly in between." },
+
+  { type: "num", topic: "Multiply and divide",
+    q: "The garden centre has <b>150</b> pansies to put out. A tray holds <b>12</b> plants. How many trays are needed to hold all of them?",
+    boxes: [ { label: "Trays", a: 13 } ],
+    hint: "Divide 150 by 12. If there is a remainder, what happens to the plants that are left over?",
+    why: "150 &divide; 12 = 12 remainder 6 (12 &times; 12 = 144, and 6 are left). Those 6 plants still need a tray, so the answer is <b>13 trays</b>.<br>In real life questions, think about what the remainder means. Here you round <b>up</b>." },
+
+  { type: "num", topic: "Multiply and divide", stretch: true,
+    q: "No calculator. The garden centre sells <b>125</b> hanging baskets at <b>&pound;14</b> each. How much money is that?",
+    boxes: [ { label: "Total", a: 1750, pre: "&pound;" } ],
+    hint: "Split 14 into 10 and 4. 125 &times; 10 is easy. For 125 &times; 4, double and double again.",
+    why: "125 &times; 10 = 1250. 125 &times; 4 = 500 (double 125 is 250, double again is 500). Total: 1250 + 500 = <b>&pound;1750</b>." },
+
+  /* ---------- SQUARES AND ORDER ---------- */
+  { type: "learn", topic: "Squares and order",
+    title: "Squares and the order of operations",
+    fig: SQ,
+    html: '<p>A <b>square number</b> is a number times itself. 7 squared, written 7&sup2;, is 7 &times; 7 = 49. Also 12&sup2; = 144 and 20&sup2; = 400.</p>' +
+          '<p>When a calculation has more than one step, there is an agreed order, often called <b>BIDMAS</b>:</p>' +
+          '<ul><li><b>B</b>rackets first</li><li><b>I</b>ndices: powers, like squares</li><li><b>D</b>ivide and <b>M</b>ultiply</li><li><b>A</b>dd and <b>S</b>ubtract last</li></ul>' +
+          '<p>5 + 3 &times; 4 = 5 + 12 = 17, not 32. But (5 + 3) &times; 4 = 8 &times; 4 = 32.</p>' +
+          '<div class="keep"><b>Keep this</b>Squared means times by itself, not times by 2: 6&sup2; is 36, not 12.</div>' },
+
+  { type: "num", topic: "Squares and order",
+    q: "Work these out without a calculator.",
+    boxes: [
+      { label: "a) 9&sup2;", a: 81 },
+      { label: "b) 15&sup2;", a: 225 },
+      { label: "c) 20 &minus; 3 &times; 4", a: 8 },
+      { label: "d) (20 &minus; 3) &times; 4", a: 68 },
+      { label: "e) 2 + 3&sup2;", a: 11 }
+    ],
+    hint: "Squared means the number times itself. Then BIDMAS: brackets, then squares, then times, then add and take away.",
+    why: "a) 9 &times; 9 = <b>81</b>. b) 15 &times; 15 = 150 + 75 = <b>225</b>.<br>c) Times first: 3 &times; 4 = 12, then 20 &minus; 12 = <b>8</b>. d) Brackets first: 17 &times; 4 = <b>68</b>. e) Square first: 3&sup2; = 9, then 2 + 9 = <b>11</b> (not 5&sup2; = 25)." },
+
+  { type: "mc", topic: "Squares and order",
+    q: "At the garden centre you buy <b>3 bags of compost at &pound;8</b> each and <b>2 trays of plants at &pound;5</b> each. Which calculation gives the total cost?",
+    options: [
+      "3 &times; 8 + 2 &times; 5",
+      "(3 + 2) &times; (8 + 5)",
+      "3 + 8 &times; 2 + 5",
+      "3 &times; 8 + 2 + 5"
+    ],
+    answer: 0,
+    hint: "Work out the compost on its own and the plants on its own. Then add. Which calculation does that, with BIDMAS?",
+    why: "BIDMAS does the times before the add, so 3 &times; 8 + 2 &times; 5 = 24 + 10 = <b>&pound;34</b>. The bracket version gives 5 &times; 13 = 65, which mixes everything up. 3 + 8 &times; 2 + 5 is 24, and 3 &times; 8 + 2 + 5 forgets that there are 2 trays at &pound;5." },
+
+  /* ---------- FORMULAE IN WORDS ---------- */
+  { type: "learn", topic: "Formulae in words",
+    title: "Formulae in words",
+    fig: FLOW,
+    html: '<p>A formula in words is a rule for working something out. They are everywhere: call out charges, phone bills, taxi fares, wages.</p>' +
+          '<p>A plumber charges: <b>cost = &pound;35 call out + &pound;28 for each hour</b>. A 3 hour job: 28 &times; 3 = 84, then 84 + 35 = <b>&pound;119</b>.</p>' +
+          '<p>A one step formula does one thing (pay = hours &times; rate). A two step formula does two things, often a times and then an add.</p>' +
+          '<div class="keep"><b>Keep this</b>Write the formula, put the numbers in, then do one step per line. Each line you write can earn a mark.</div>' },
+
+  { type: "num", topic: "Formulae in words",
+    q: "A phone contract uses this formula:<br><b>monthly cost = &pound;15 + &pound;3 for every extra GB of data</b>.<br>This month you use 4 extra GB. What is your bill?",
+    boxes: [ { label: "Bill", a: 27, pre: "&pound;" } ],
+    hint: "Do the extra data first: 4 lots of &pound;3. Then add the &pound;15.",
+    why: "Extra data: 4 &times; 3 = &pound;12. Bill: 15 + 12 = <b>&pound;27</b>.<br>Adding first, (15 + 3) &times; 4 = 72, is the classic slip: the &pound;15 is only paid once." },
+
+  { type: "num", topic: "Formulae in words",
+    q: "When Jay goes away, his small poodle Bonnie stays with a dog sitter. The sitter uses this formula:<br><b>cost = &pound;10 booking fee + &pound;18 for each day</b>.<br>Bonnie stays for 5 days. How much does it cost?",
+    boxes: [ { label: "Cost", a: 100, pre: "&pound;" } ],
+    hint: "Days first: 5 lots of &pound;18. Then add the booking fee once.",
+    why: "5 &times; 18 = 90, then 90 + 10 = <b>&pound;100</b>. Bonnie, for the record, thinks this is a bargain." },
+
+  { type: "num", topic: "Formulae in words", stretch: true,
+    q: "The plumber's formula is <b>cost = &pound;35 call out + &pound;28 for each hour</b>. A bill comes to <b>&pound;175</b>. How many hours did the job take?",
+    boxes: [ { label: "Hours", a: 5 } ],
+    hint: "Work backwards. Take off the call out charge first. Then how many lots of &pound;28 make what is left?",
+    why: "Undo the steps in reverse order. Take off the call out: 175 &minus; 35 = 140. Then divide by the hourly rate: 140 &divide; 28 = <b>5 hours</b>.<br>Check forwards: 5 &times; 28 = 140, plus 35 = 175." },
+
+  /* ---------- ROUND AND ESTIMATE ---------- */
+  { type: "learn", topic: "Round and estimate",
+    title: "Rounding and estimating",
+    fig: ROUND,
+    html: '<p><b>Rounding:</b> find the place you are rounding to, then look at the very next digit. 5 or more, round up. 4 or less, it stays.</p>' +
+          '<ul><li>3478 to the nearest 100: next digit is 7, so 3500</li><li>3478 to the nearest 1000: next digit is 4, so 3000</li><li>6.847 to 1 decimal place: next digit is 4, so 6.8</li><li>6.847 to 2 decimal places: next digit is 7, so 6.85</li></ul>' +
+          '<p><b>Estimating:</b> round to easy numbers, then work it out. 49 &times; &pound;3.95 is about 50 &times; 4 = &pound;200, so &pound;193.55 looks right and &pound;19.36 cannot be.</p>' +
+          '<div class="keep"><b>Keep this</b>Round, work it out, compare. If your answer is miles from your estimate, something has slipped.</div>' },
+
+  { type: "num", topic: "Round and estimate",
+    q: "Last year <b>34,652</b> people visited the garden centre. Round this number:",
+    boxes: [
+      { label: "a) to the nearest 10", a: 34650 },
+      { label: "b) to the nearest 100", a: 34700 },
+      { label: "c) to the nearest 1000", a: 35000 }
+    ],
+    hint: "For each one, find the digit in that column and look at the digit just to its right.",
+    why: "a) Tens digit 5, next digit 2: stays, <b>34,650</b>.<br>b) Hundreds digit 6, next digit 5: round up, <b>34,700</b>.<br>c) Thousands digit 4, next digit 6: round up, <b>35,000</b>." },
+
+  { type: "mc", topic: "Round and estimate",
+    q: "A bag of compost weighs <b>12.96 kg</b>. What is this to <b>one decimal place</b>?",
+    options: ["12.0 kg", "12.9 kg", "12.10 kg", "13.0 kg"],
+    answer: 3, fixed: true,
+    hint: "Look at the digit after the first decimal place. It is 6, so the 9 rounds up. What happens when a 9 rounds up?",
+    why: "The next digit is 6, so the 9 tenths round up to 10 tenths, which is one whole. 12.9 becomes <b>13.0 kg</b>. Keep the .0: it shows the answer is to one decimal place." },
+
+  { type: "mc", topic: "Round and estimate",
+    q: "Estimate the cost of <b>19 garden chairs at &pound;21.50</b> each.",
+    options: ["About &pound;40", "About &pound;200", "About &pound;400", "About &pound;4000"],
+    answer: 2, fixed: true,
+    hint: "Round both numbers to something easy: 19 is nearly 20, and &pound;21.50 is nearly &pound;20.",
+    why: "20 &times; 20 = <b>about &pound;400</b>. The exact cost is &pound;408.50, so the estimate is close. An estimate is a quick check, not the exact answer." },
+
+  { type: "num", topic: "Round and estimate",
+    q: "<p><b>Section A style, no calculator.</b> A youth theatre sells tickets for its summer show.</p>" +
+       "<p>Adult tickets cost <b>&pound;12</b>. Under 16 tickets cost <b>&pound;7</b>.<br>Over the run they sell <b>134</b> adult tickets and <b>87</b> under 16 tickets.<br>Hiring the hall costs <b>&pound;1500</b>.</p>" +
+       "<p>Work through it in parts.</p>",
+    boxes: [
+      { label: "a) Money from adult tickets", a: 1608, pre: "&pound;" },
+      { label: "b) Money from under 16 tickets", a: 609, pre: "&pound;" },
+      { label: "c) Total ticket money", a: 2217, pre: "&pound;" },
+      { label: "d) Money left after paying for the hall", a: 717, pre: "&pound;" }
+    ],
+    hint: "a) 134 &times; 12: try 134 &times; 10 plus 134 &times; 2. b) 87 &times; 7: try 80 &times; 7 plus 7 &times; 7. Then add, then take away the hall.",
+    why: "a) 134 &times; 10 = 1340 and 134 &times; 2 = 268, so <b>&pound;1608</b>.<br>b) 80 &times; 7 = 560 and 7 &times; 7 = 49, so <b>&pound;609</b>.<br>c) 1608 + 609 = <b>&pound;2217</b>.<br>d) 2217 &minus; 1500 = <b>&pound;717</b>.<br>Estimate check: about 130 &times; 12 = 1560 plus 90 &times; 7 = 630, roughly &pound;2200 in total. Close, so the answers look sensible." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

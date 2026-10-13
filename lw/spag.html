@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spelling, punctuation and grammar - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+.pairtable{width:100%}
+.pairtable td,.pairtable th{text-align:left;font-size:.95rem}
+.sa td:first-child{width:84px}
+.eg{background:#fff8e6;border-left:5px solid var(--accent);border-radius:8px;padding:8px 12px;margin:6px 0 10px}
+
+/* Red pen proofreading game */
+.rp{background:var(--ink);color:#fff;border-radius:16px;padding:14px;margin:6px 0}
+.rpbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:var(--display);font-weight:700;margin-bottom:10px}
+.rpbar span{background:rgba(255,255,255,.12);border-radius:99px;padding:4px 12px;font-size:.88rem}
+.rptip{font-size:.95rem;line-height:1.45;margin:0 0 10px;color:#efe6f0}
+.rptip b{color:var(--sun)}
+.rppaper{background:#fffdf7;color:var(--ink);border-radius:12px;padding:12px 14px;font-size:1.02rem;line-height:2.1;text-align:left;word-spacing:0}
+.rppaper .ln{display:block}
+.pw{font-family:inherit;font-size:inherit;line-height:1.3;color:var(--ink);background:transparent;border:0;border-bottom:2px dotted #d9d8e6;border-radius:4px;padding:2px 1px;margin:0;cursor:pointer}
+.pw:hover{background:#fff1c9}
+.pw.shake{animation:nudge .35s;background:#ffe1de}
+.pw.ok{cursor:default;background:#e8f7ef;padding:3px 4px}
+.pw.ok s{color:#d23b30;text-decoration-thickness:2px;margin-right:4px}
+.pw.ok b{color:#1f7a4f}
+.rpmsg{min-height:1.4em;margin:10px 0 0;font-size:.96rem;line-height:1.45;background:rgba(255,255,255,.08);border-radius:12px;padding:9px 12px}
+.rpmsg b{color:var(--sun)}
+.rprow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rpend{text-align:center;padding:4px 0}
+.rpend .big{font-family:var(--marquee,var(--display));font-size:2rem;color:var(--sun);line-height:1.1;margin:6px 0;letter-spacing:.03em}
+@media (max-width:420px){ .rp{padding:10px} .rppaper{padding:10px;font-size:.98rem} }
+</style>
+</head>
+<body class="subj-eng">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Spelling, punctuation and grammar</h2>
+    <span>English writing. The accuracy part of the mark: capitals, commas, apostrophes, sound alikes, spelling patterns and verbs.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- Red pen: a proofreading game ----------
+   In each text, {wrong|right} marks a mistake. A "/" starts a new line. */
+var RP_ROUNDS = [
+  { name: "a message about rehearsals",
+    text: "Hi everyone, / Rehearsals for the summer show start on {monday.|Monday.} Please bring {you're|your} script and a pencil. If {your|you're} late, wait in the hall until there is a break. Last year we {was|were} really proud of the show, and {its|it's} going to be even better this time. Bring a water bottle and some {snack's|snacks} too. See you {their!|there!}",
+    why: [
+      "Days of the week always take a capital letter: Monday.",
+      "You're means you are. The script belongs to you, so it is your.",
+      "\"If you are late\" makes sense, so it needs you're.",
+      "We were, not we was.",
+      "It is going to be better, so it's, with an apostrophe.",
+      "A plain plural never needs an apostrophe: snacks.",
+      "A place, so there. Their means belonging to them."
+    ] },
+  { name: "a complaint email",
+    text: "Dear Sir or Madam, / I am writing to complain about a kettle I ordered from {you're|your} website. When it arrived, the box was {definately|definitely} damaged and the lid {were|was} cracked. I should {of|have} sent it back straight away, but I was away for a week. I would like a refund {becuase|because} it is still under guarantee. / {i|I} look forward to hearing from you.",
+    why: [
+      "The website belongs to them, so your, not you're (you are).",
+      "Definitely: think of the word finite hiding inside it.",
+      "One lid, so the lid was. Were goes with we, you and they.",
+      "Should have, never should of.",
+      "Because: big elephants can always understand small elephants.",
+      "I on its own is always a capital letter."
+    ] }
+];
+var RP_FINE = ["That one is fine as it is.", "No problem there. Keep looking.", "That word is right. Try another."];
+
+function parseRound(r){
+  var lines = r.text.split(" / "), out = [], err = 0;
+  lines.forEach(function(line){
+    var toks = [];
+    line.split(" ").forEach(function(t){
+      var m = t.match(/\{([^|}]*)\|([^}]*)\}/);
+      if(m) toks.push({ w: t.replace(m[0], m[1]), fix: t.replace(m[0], m[2]), e: err++ });
+      else toks.push({ w: t, e: -1 });
+    });
+    out.push(toks);
+  });
+  return { lines: out, n: err };
+}
+var RP_PARSED = RP_ROUNDS.map(parseRound);
+
+function redPen(el, api){
+  var d = api.data;
+  if(d.r === undefined) d.r = 0;
+  if(!d.found) d.found = [[], []];
+  if(d.miss === undefined) d.miss = 0;
+  var msg = "", shake = null;
+
+  function P(){ return RP_PARSED[d.r]; }
+  function done(){ return d.found[d.r].length >= P().n; }
+  function result(){ return d.shown ? "shown" : d.miss <= 2 ? "right1" : "right2"; }
+
+  function draw(){
+    if(d.finished){ drawEnd(); return; }
+    var p = P(), r = RP_ROUNDS[d.r], fin = done();
+    var paper = p.lines.map(function(toks, li){
+      return '<span class="ln">' + toks.map(function(t, ti){
+        var id = li + "_" + ti;
+        if(t.e >= 0 && d.found[d.r].indexOf(t.e) >= 0)
+          return '<span class="pw ok"><s>' + t.w + '</s><b>' + t.fix + '</b></span>';
+        return '<button type="button" class="pw" data-id="' + id + '">' + t.w + '</button>';
+      }).join(" ") + '</span>';
+    }).join("");
+    var btns = fin ? '<button class="btn" type="button" id="rpNext">' + (d.r === 0 ? "On to round 2" : "See how you did") + '</button>' :
+      (d.miss > 0 ? '<button class="btn btn-quiet" type="button" id="rpShow">Show me one</button>' : '');
+    el.innerHTML = '<div class="rp">' +
+      '<div class="rpbar"><span>Round ' + (d.r + 1) + ' of 2</span><span>Found ' + d.found[d.r].length + ' of ' + p.n + '</span><span>Misses ' + d.miss + '</span></div>' +
+      '<p class="rptip"><b>Round ' + (d.r + 1) + ': ' + r.name + '.</b> ' + (fin ? "All found." : "There are " + p.n + " wrong words in here. Tap each one you spot.") + '</p>' +
+      '<div class="rppaper">' + paper + '</div>' +
+      '<div class="rpmsg" aria-live="polite">' + (msg || "Read it slowly. Your brain will try to read what was meant, not what is there.") + '</div>' +
+      '<div class="rprow">' + btns + '</div></div>';
+    [].forEach.call(el.querySelectorAll("button.pw"), function(b){
+      b.onclick = function(){ tap(b.dataset.id); };
+    });
+    var nx = el.querySelector("#rpNext");
+    if(nx) nx.onclick = function(){
+      msg = "";
+      if(d.r === 0) d.r = 1; else d.finished = true;
+      api.save(); draw();
+    };
+    var sh = el.querySelector("#rpShow");
+    if(sh) sh.onclick = showOne;
+    if(shake){
+      var s = el.querySelector('button.pw[data-id="' + shake + '"]');
+      if(s) s.classList.add("shake");
+      shake = null;
+    }
+  }
+
+  function tap(id){
+    var ix = id.split("_"), t = P().lines[+ix[0]][+ix[1]];
+    if(t.e >= 0){
+      d.found[d.r].push(t.e);
+      msg = "<b>Got it: " + t.fix.replace(/[.,!?]$/, "") + ".</b> " + RP_ROUNDS[d.r].why[t.e];
+      if(done()) msg += d.r === 0 ? " That is all seven." : " That is all six.";
+    }else{
+      d.miss++;
+      msg = "<b>Hmm.</b> " + RP_FINE[d.miss % RP_FINE.length];
+      shake = id;
+    }
+    api.save(); draw();
+  }
+
+  function showOne(){
+    var p = P();
+    for(var e = 0; e < p.n; e++){
+      if(d.found[d.r].indexOf(e) < 0){
+        var fix = "";
+        p.lines.forEach(function(toks){ toks.forEach(function(t){ if(t.e === e) fix = t.fix; }); });
+        d.found[d.r].push(e); d.shown = true;
+        msg = "<b>Here is one: " + fix.replace(/[.,!?]$/, "") + ".</b> " + RP_ROUNDS[d.r].why[e];
+        api.save(); draw(); return;
+      }
+    }
+  }
+
+  function drawEnd(){
+    var rank = d.miss === 0 ? "Eagle eyed editor" : d.miss <= 2 ? "Sharp proofreader" : "Red pen in training";
+    el.innerHTML = '<div class="rp"><div class="rpend">' +
+      '<p class="rptip" style="margin:0">Both texts fixed. Your title:</p>' +
+      '<div class="big">' + rank + '</div>' +
+      '<p>13 mistakes found, ' + d.miss + ' miss' + (d.miss === 1 ? '' : 'es') + (d.shown ? ', with a little help from Show me' : '') + '.</p>' +
+      '<p class="rptip">The usual suspects turned up: your and you\'re, its and it\'s, there and their, we was, should of. Look for them first in your own writing.</p>' +
+      '<button class="btn btn-quiet" type="button" id="rpAgain">Play again</button></div></div>';
+    el.querySelector("#rpAgain").onclick = function(){
+      d.r = 0; d.found = [[], []]; d.miss = 0; d.shown = false; d.finished = false; msg = "";
+      api.save(); draw();
+    };
+    api.done(result());
+  }
+
+  draw();
+}
+
+EGW.run({
+  id: "spag",
+  title: "Spelling, punctuation and grammar",
+  subject: "English",
+  mins: 50,
+  blurb: "About 12 of the 27 marks in each writing task are for SPaG. Here are the slips that cost the most, with a proofreading game at the end.",
+  steps: [
+
+  /* ---------- 1. CAPITALS AND STOPS ---------- */
+  { type: "learn", topic: "Capitals and stops",
+    title: "Start strong, stop clearly",
+    html: "<p>A <b>capital letter</b> starts every sentence. You also need one for:</p>" +
+          "<ul><li>the word <b>I</b> on its own</li>" +
+          "<li>names of people and places: <i>Priya, Leeds, Wales</i></li>" +
+          "<li>days and months: <i>Monday, June</i></li>" +
+          "<li>names of shops, companies and events: <i>Brightway Buses</i></li></ul>" +
+          "<p>A <b>full stop</b> ends a statement. A <b>question mark</b> ends a question: <i>When will my refund arrive?</i></p>" +
+          "<p><b>Speech marks</b> go around the exact words someone says, with the punctuation inside: <i>\"Can I help you?\" asked the assistant.</i></p>" +
+          '<div class="keep"><b>Keep this</b>Days and months take a capital. Seasons do not: summer, winter.</div>' },
+
+  { type: "multi", topic: "Capitals and stops",
+    q: "<i>last june, i went to cardiff with my cousin on a saturday.</i><br>Which words need a capital letter?",
+    options: ["last", "june", "i", "went", "cardiff", "cousin", "saturday"],
+    answers: [0, 1, 2, 4, 6],
+    fixed: true,
+    hint: "Check the start of the sentence, the word I, a month, a place and a day.",
+    why: "<i>Last June, I went to Cardiff with my cousin on a Saturday.</i> Last starts the sentence, June is a month, I is always a capital, Cardiff is a place and Saturday is a day. Cousin is an ordinary word, so it stays small." },
+
+  { type: "mc", topic: "Capitals and stops",
+    q: "<i>When will my refund arrive</i><br>What should go at the end?",
+    options: ["A question mark", "A full stop", "A comma", "Speech marks"],
+    answer: 0,
+    hint: "Is it telling you something, or asking something?",
+    why: "It asks a question, so it ends with a question mark. A handy check: questions often start with when, where, what, why, how, who, can, could or will." },
+
+  { type: "mc", topic: "Capitals and stops",
+    q: "Which sentence is punctuated correctly?",
+    options: [
+      "\"Where is the bus station?\" asked Maya.",
+      "\"Where is the bus station\"? asked Maya.",
+      "Where is the \"bus station?\" asked Maya.",
+      "\"Where is the bus station? asked Maya.\""
+    ],
+    answer: 0,
+    hint: "The speech marks go round exactly the words Maya says, and the question mark belongs to her words.",
+    why: "Maya says <i>Where is the bus station?</i>, so those words and their question mark go inside the speech marks. <i>asked Maya</i> is not part of what she says, so it sits outside." },
+
+  /* ---------- 2. COMMAS AND RUN ONS ---------- */
+  { type: "learn", topic: "Commas and run ons",
+    title: "Commas, and where sentences end",
+    html: "<p>Use <b>commas</b> between the items in a list, with <b>and</b> or <b>or</b> before the last one:</p>" +
+          '<p class="eg">Bring a coat, a packed lunch, a water bottle and some money.</p>' +
+          "<p>A comma cannot join two full sentences. <i>The bus was late, I missed my lesson.</i> is a <b>run on</b>. Fix it with a full stop, or with a joining word such as <i>so</i> or <i>because</i>:</p>" +
+          '<p class="eg">The bus was late. I missed my lesson.<br>The bus was late, so I missed my lesson.</p>' +
+          "<p>A <b>fragment</b> is part of a sentence that cannot stand on its own: <i>Because the bus was late.</i> Join it to a full sentence: <i>I missed my lesson because the bus was late.</i></p>" +
+          '<div class="keep"><b>Keep this</b>A very long sentence? Read it aloud. Where you would stop for breath and start a new idea, try a full stop.</div>' },
+
+  { type: "mc", topic: "Commas and run ons",
+    q: "Which list is punctuated correctly?",
+    options: [
+      "You will need a pen, a ruler, a calculator and a pencil.",
+      "You will need a pen a ruler a calculator and a pencil.",
+      "You will need, a pen, a ruler, a calculator, and, a pencil.",
+      "You will need a pen, a ruler a calculator, and a pencil."
+    ],
+    answer: 0,
+    hint: "A comma between each item, then and before the last one. No commas anywhere else.",
+    why: "Commas separate the items: pen, ruler, calculator, then <i>and</i> joins the last one. No commas at all runs it together, and extra commas after <i>need</i> and <i>and</i> break it up in odd places." },
+
+  { type: "sort", topic: "Commas and run ons",
+    q: "Full sentence, run on, or fragment?",
+    buckets: ["Full sentence", "Run on", "Fragment"],
+    cards: [
+      ["I bought the kettle on Monday.", 0],
+      ["The staff were friendly and helpful.", 0],
+      ["The shop was closed, nobody answered the phone.", 1],
+      ["The lid is cracked, the light does not work.", 1],
+      ["Which was really annoying.", 2],
+      ["Although the queue was long.", 2]
+    ],
+    hint: "A run on is two sentences glued with a comma. A fragment leaves you waiting for the rest.",
+    why: "Each run on is two complete sentences joined by just a comma, so each needs a full stop or a joining word. The fragments make no sense alone: <i>Although the queue was long</i> ... what? Join them to a full sentence." },
+
+  { type: "mc", topic: "Commas and run ons",
+    q: "<i>I waited for an hour, the bus never came.</i><br>Which is the best fix?",
+    options: [
+      "I waited for an hour. The bus never came.",
+      "I waited for an hour, and, the bus never came.",
+      "I waited for an hour, the bus, never came.",
+      "I waited for an hour the bus never came."
+    ],
+    answer: 0,
+    hint: "There are two complete ideas here. How do you separate two sentences?",
+    why: "Two complete sentences, so a full stop between them. Taking the comma out just makes it run on with no break at all. <i>I waited for an hour, but the bus never came.</i> would also work." },
+
+  /* ---------- 3. APOSTROPHES ---------- */
+  { type: "learn", topic: "Apostrophes",
+    title: "Apostrophes have two jobs",
+    html: "<p><b>Job 1: missing letters.</b> The apostrophe sits where letters were taken out: <i>do not &rarr; don't, I am &rarr; I'm, they are &rarr; they're, will not &rarr; won't</i>.</p>" +
+          "<p><b>Job 2: belonging.</b> Add <b>'s</b> to show something belongs to someone: <i>the manager's office, Sam's phone</i>. If the owners are a plural ending in s, add just the apostrophe: <i>the players' changing room</i>.</p>" +
+          "<p><b>it's</b> always means <i>it is</i> or <i>it has</i>. <b>its</b> means belonging to it: <i>The shop changed its opening hours.</i></p>" +
+          '<div class="keep"><b>Keep this</b>Never add an apostrophe just to make a plural: three apples, not three apple\'s. Stuck on it\'s? Try saying \"it is\".</div>' },
+
+  { type: "match", topic: "Apostrophes",
+    q: "Match each pair of words to its short form.",
+    pairs: [
+      ["do not", "don't"],
+      ["I am", "I'm"],
+      ["they are", "they're"],
+      ["will not", "won't"],
+      ["it is", "it's"],
+      ["could not", "couldn't"]
+    ],
+    hint: "The apostrophe goes where the missing letters were. Will not is the odd one: it changes shape.",
+    why: "<i>do not</i> loses the o, <i>could not</i> loses the o, <i>they are</i> loses the a. <i>won't</i> is a strange old one but it follows the same idea. In formal writing you can dodge all of these by writing the words out in full." },
+
+  { type: "mc", topic: "Apostrophes",
+    q: "<i>The caf&eacute; has changed ___ menu, and ___ much cheaper now.</i><br>Which pair fills the gaps?",
+    options: ["its / it's", "it's / its", "it's / it's", "its / its"],
+    answer: 0,
+    hint: "Try saying \"it is\" in each gap. Where it works, you need the apostrophe.",
+    why: "\"The caf&eacute; has changed it is menu\" makes no sense, so the first gap is <i>its</i> (belonging to it). \"It is much cheaper now\" works, so the second is <i>it's</i>." },
+
+  { type: "mc", topic: "Apostrophes", stretch: true,
+    q: "The changing room belongs to <b>all</b> the players in the team. Which is correct?",
+    options: ["the players' changing room", "the player's changing room", "the players changing room", "the players's changing room"],
+    answer: 0,
+    hint: "Write the owners first: players. It already ends in s. Now show belonging.",
+    why: "The owners are <i>players</i>, a plural that ends in s, so you add just an apostrophe: <i>players'</i>. <i>The player's</i> would mean one player owns it." },
+
+  /* ---------- 4. SOUND ALIKES ---------- */
+  { type: "learn", topic: "Sound alikes",
+    title: "Words that sound the same",
+    html: '<table class="datatable pairtable sa">' +
+          "<tr><td><b>there</b></td><td>a place, or <i>there is</i>: over there</td></tr>" +
+          "<tr><td><b>their</b></td><td>belongs to them: their coats</td></tr>" +
+          "<tr><td><b>they're</b></td><td>they are</td></tr></table>" +
+          '<table class="datatable pairtable sa">' +
+          "<tr><td><b>your</b></td><td>belongs to you: your bag</td></tr>" +
+          "<tr><td><b>you're</b></td><td>you are</td></tr></table>" +
+          '<table class="datatable pairtable sa">' +
+          "<tr><td><b>to</b></td><td>towards, or before a doing word: go to town, to eat</td></tr>" +
+          "<tr><td><b>too</b></td><td>also, or too much: too hot</td></tr>" +
+          "<tr><td><b>two</b></td><td>the number 2</td></tr></table>" +
+          '<div class="keep"><b>Keep this</b>Not sure? Say the long version. If \"they are\" fits, write they\'re. If \"you are\" fits, write you\'re. There has <b>here</b> inside it, for places.</div>' },
+
+  { type: "mc", topic: "Sound alikes",
+    q: "<i>___ coats are hanging over ___ by the door.</i>",
+    options: ["Their / there", "There / their", "They're / there", "Their / they're"],
+    answer: 0,
+    hint: "Who do the coats belong to? And which word is about a place?",
+    why: "The coats belong to them, so <i>Their</i>. By the door is a place, so <i>there</i>." },
+
+  { type: "mc", topic: "Sound alikes",
+    q: "<i>___ going to love this. Is this ___ jacket?</i>",
+    options: ["You're / your", "Your / you're", "Your / your", "You're / you're"],
+    answer: 0,
+    hint: "Try \"you are\" in each gap.",
+    why: "\"You are going to love this\" works, so <i>You're</i>. \"Is this you are jacket\" does not, so <i>your</i>." },
+
+  { type: "mc", topic: "Sound alikes",
+    q: "<i>I bought ___ tickets, but it was ___ late ___ use them.</i>",
+    options: ["two / too / to", "to / two / too", "too / to / two", "two / to / too"],
+    answer: 0,
+    hint: "A number, then \"too much\", then the one that goes before a doing word.",
+    why: "<i>two</i> tickets (the number), <i>too</i> late (more than it should be), <i>to</i> use (before a doing word)." },
+
+  /* ---------- 5. MORE SOUND ALIKES ---------- */
+  { type: "learn", topic: "More sound alikes",
+    title: "Where, were, wear, and could have",
+    html: '<table class="datatable pairtable sa">' +
+          "<tr><td><b>where</b></td><td>a place or a question: where is it?</td></tr>" +
+          "<tr><td><b>were</b></td><td>the past of are: we were, they were</td></tr>" +
+          "<tr><td><b>wear</b></td><td>clothes: wear a coat</td></tr></table>" +
+          "<p>After <b>could, would, should</b> and <b>might</b>, write <b>have</b>, not <i>of</i>. When we talk, <i>could've</i> sounds like \"could of\", which is how the mistake creeps in.</p>" +
+          '<p class="eg">I could have phoned. You should have said. We might have won.</p>' +
+          '<div class="keep"><b>Keep this</b><i>Where</i> has <b>here</b> inside it, like <i>there</i>: both are about places. And <i>of</i> never comes straight after could, would, should or might.</div>' },
+
+  { type: "mc", topic: "More sound alikes",
+    q: "Which sentence is correct?",
+    options: [
+      "I would have come if I had known.",
+      "I would of come if I had known.",
+      "I would off come if I had known.",
+      "I wood have come if I had known."
+    ],
+    answer: 0,
+    hint: "Say would've slowly. What two words is it short for?",
+    why: "<i>would've</i> is short for <i>would have</i>. It only sounds like \"would of\". (And <i>wood</i> is what trees are made of.)" },
+
+  { type: "multi", topic: "More sound alikes",
+    q: "Choose <b>all</b> the sentences with a sound alike mistake.",
+    options: [
+      "Were did you put the tickets?",
+      "We were there on time.",
+      "You should of asked first.",
+      "What will you wear tonight?",
+      "Their going to be late.",
+      "I bought two pairs."
+    ],
+    answers: [0, 2, 4],
+    hint: "Check each tricky word against its meaning: a place, the past of are, clothes, have, they are.",
+    why: "<i>Were</i> should be <i>Where</i> (a question about a place), <i>should of</i> should be <i>should have</i>, and <i>Their</i> should be <i>They're</i> (they are). The other three are all correct." },
+
+  /* ---------- 6. SPELLING PATTERNS ---------- */
+  { type: "learn", topic: "Spelling patterns",
+    title: "Patterns that help",
+    html: "<p><b>Plurals</b> (more than one):</p>" +
+          "<ul><li>Most words add <b>s</b>: <i>ticket, tickets</i>.</li>" +
+          "<li>Words ending in s, x, ch or sh add <b>es</b>: <i>bus, buses; box, boxes; church, churches</i>.</li>" +
+          "<li>Consonant then y: change the y to <b>ies</b>: <i>party, parties; city, cities</i>. Vowel then y just adds s: <i>day, days; key, keys</i>.</li>" +
+          "<li>Many words ending in f or fe change to <b>ves</b>: <i>half, halves; knife, knives</i>. A few just add s: <i>roof, roofs</i>.</li></ul>" +
+          '<div class="keep"><b>Keep this</b>Tricky words worth learning, since there is no spell checker: because, definitely, separate, necessary, beginning, believe, Wednesday, February.</div>' },
+
+  { type: "match", topic: "Spelling patterns",
+    q: "Match each word to its plural.",
+    pairs: [
+      ["party", "parties"],
+      ["day", "days"],
+      ["half", "halves"],
+      ["box", "boxes"],
+      ["knife", "knives"],
+      ["church", "churches"]
+    ],
+    hint: "Look at the last letter or two of each word, then use the patterns from the card.",
+    why: "<i>party</i> has a consonant before the y, so ies; <i>day</i> has a vowel before the y, so just s. <i>half</i> and <i>knife</i> change to ves. <i>box</i> and <i>church</i> end in x and ch, so they add es." },
+
+  { type: "sort", topic: "Spelling patterns",
+    q: "These words all end in y. Which pattern does each one follow for its plural?",
+    buckets: ["Just add s", "Change y to ies"],
+    cards: [
+      ["toy", 0],
+      ["holiday", 0],
+      ["key", 0],
+      ["lorry", 1],
+      ["family", 1],
+      ["city", 1]
+    ],
+    hint: "Look at the letter just before the y. Is it a vowel (a, e, i, o, u) or not?",
+    why: "toy, holiday and key have a vowel before the y, so they just add s: toys, holidays, keys. lorry, family and city have a consonant before the y, so they become lorries, families, cities." },
+
+  { type: "mc", topic: "Spelling patterns",
+    q: "Which spelling is correct?",
+    options: ["definitely", "definately", "definitly", "defanitely"],
+    answer: 0,
+    hint: "It is built from the word finite.",
+    why: "<i>definitely</i>: de, finite, ly. Spotting a smaller word inside a long one is a great way to remember spellings. It is one of the most often misspelt words in English." },
+
+  /* ---------- 7. VERBS THAT AGREE ---------- */
+  { type: "learn", topic: "Verbs that agree",
+    title: "Make the verb agree, and keep the tense",
+    html: "<p>The verb has to match who is doing it. These slip most often:</p>" +
+          '<table class="datatable pairtable"><tr><th>Right</th><th>Not</th></tr>' +
+          "<tr><td>we were, they were</td><td>we was, they was</td></tr>" +
+          "<tr><td>you were</td><td>you was</td></tr>" +
+          "<tr><td>he doesn't, she doesn't</td><td>he don't, she don't</td></tr>" +
+          "<tr><td>I did it</td><td>I done it</td></tr></table>" +
+          "<p><b>Keep your tense steady.</b> If you start in the past, stay in the past: <i>I went to the shop and bought some milk</i>, not <i>and buy some milk</i>.</p>" +
+          '<div class="keep"><b>Keep this</b>Read it in your head in a newsreader voice. If it would sound odd on the news, check the verb.</div>' },
+
+  { type: "sort", topic: "Verbs that agree",
+    q: "Right, or needs fixing?",
+    buckets: ["Right", "Needs fixing"],
+    cards: [
+      ["They were very helpful.", 0],
+      ["She doesn't work here any more.", 0],
+      ["You were right about the bus.", 0],
+      ["He don't answer the phone.", 1],
+      ["I done my best.", 1],
+      ["The lights was off.", 1]
+    ],
+    hint: "Swap in the patterns from the card: we were, he doesn't, I did.",
+    why: "<i>He doesn't answer</i>, <i>I did my best</i> (or <i>I have done my best</i>), and <i>the lights were off</i>: lights is plural, so were. These are common in speech, which is why they sneak into writing." },
+
+  { type: "mc", topic: "Verbs that agree",
+    q: "Which sentence keeps the tense steady?",
+    options: [
+      "I ordered the kettle on Monday and it arrived on Friday.",
+      "I order the kettle on Monday and it arrived on Friday.",
+      "I ordered the kettle on Monday and it arrive on Friday.",
+      "I ordering the kettle on Monday and it arrived on Friday."
+    ],
+    answer: 0,
+    hint: "Both things already happened. Both verbs should be in the past.",
+    why: "<i>ordered</i> and <i>arrived</i> are both past tense, so the sentence holds together. The others jump between past and present, or use a verb form that does not fit." },
+
+  { type: "mc", topic: "Verbs that agree",
+    q: "<i>Last Saturday we went to the match. It was freezing, and the queue for food is huge. We waited for twenty minutes.</i><br>Which word slips out of the past tense?",
+    options: ["is", "went", "was", "waited"],
+    answer: 0,
+    hint: "Everything happened last Saturday. Which verb sounds like it is happening now?",
+    why: "The queue <i>was</i> huge last Saturday. <i>went</i>, <i>was</i> and <i>waited</i> are all past tense; <i>is</i> is present, so it is the slip." },
+
+  /* ---------- 8. PROOFREAD IT ---------- */
+  { type: "learn", topic: "Proofread it",
+    title: "Proofreading: slow down and point",
+    html: "<p>In the exam there is no spell checker, so <b>you</b> are the spell checker. Keep a few minutes at the end of each task.</p>" +
+          "<ul><li>Read slowly, pointing at each word. Your brain likes to read what you <i>meant</i> to write.</li>" +
+          "<li>Check one thing at a time: capitals and full stops, then apostrophes, then sound alikes, then verbs.</li>" +
+          "<li>Fix it neatly: one line through the mistake and the correction just above.</li></ul>" +
+          '<div class="keep"><b>Keep this</b>Your top suspects: there, their, they\'re; your, you\'re; its, it\'s; could of; we was; a small i on its own.</div>' },
+
+  { type: "widget", topic: "Proofread it",
+    title: "Red pen",
+    html: "Two short texts, each with some wrong words. Tap the words that are wrong to fix them. Two misses or fewer earns full sparks, and there is no clock.",
+    mount: redPen,
+    report: function(d){
+      var f = d.found || [[], []];
+      if(d.finished) return "Red pen: both texts done, " + (d.miss || 0) + " misses" + (d.shown ? " (used Show me)" : "");
+      return "Red pen: round " + ((d.r || 0) + 1) + ", found " + (f[0].length + f[1].length) + " of 13, " + (d.miss || 0) + " misses so far";
+    } },
+
+  { type: "mc", topic: "Proofread it",
+    q: "<i>their going too the shop on saturday</i><br>Which is the fully corrected version?",
+    options: [
+      "They're going to the shop on Saturday.",
+      "Their going to the shop on Saturday.",
+      "They're going too the shop on Saturday.",
+      "They're going to the shop on saturday."
+    ],
+    answer: 0,
+    hint: "Four things to fix: a sound alike at the start, another in the middle, a missing capital, and the end of the sentence.",
+    why: "<i>They're</i> (they are), <i>to</i> the shop (towards), a capital for <i>Saturday</i>, and a full stop at the end. The other versions each fix some but not all: exactly what a careful one word at a time read back catches." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

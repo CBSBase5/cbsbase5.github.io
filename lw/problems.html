@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Show your working - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.probq{background:var(--paper);border:2px solid var(--ink);border-radius:12px;padding:10px 14px;margin:6px 0 10px}
+.probq p{margin:0 0 6px}
+.probq p:last-child{margin:0}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Show your working</h2>
+    <span>The skill that wins Functional Skills marks: read the problem, pick the numbers, lay it out, make the decision, check it.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function tick(x, y){ return '<path d="M' + x + ' ' + y + ' l5 6 l10 -13" fill="none" stroke="' + MINT + '" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'; }
+function cross(x, y){ return '<path d="M' + x + ' ' + (y - 6) + ' l11 11 M' + (x + 11) + ' ' + (y - 6) + ' l-11 11" stroke="' + CORAL + '" stroke-width="3.5" stroke-linecap="round"/>'; }
+
+/* ---------- figures ---------- */
+
+/* Sorting a problem: asks, need, ignore */
+var NOTES = (function(){
+  var s = '<svg viewBox="0 0 380 190" role="img" aria-label="Three notes for the phone bill problem. It asks: the June bill. Need: 14 pounds a month, 3 extra GB, 2 pounds 50 per GB. Ignore: since March, 140 free texts.">';
+  var cards = [
+    [6, "IT ASKS", SUN, ["the bill", "for June"]],
+    [130, "I NEED", MINT, ["&pound;14 a month", "3 extra GB", "&pound;2.50 per GB"]],
+    [254, "IGNORE", PAPER, ["since March", "140 texts", "(texts are free)"]]
+  ];
+  cards.forEach(function(c){
+    s += '<rect x="' + c[0] + '" y="8" width="120" height="150" rx="12" fill="' + c[2] + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(c[0] + 60, 34, c[1], 15, INK, LAB + ' font-weight="700" text-anchor="middle" letter-spacing="1"');
+    c[3].forEach(function(line, k){
+      s += t(c[0] + 60, 64 + k * 24, line, 15, INK, BODY + ' text-anchor="middle"' + (c[1] === "IGNORE" ? ' text-decoration="line-through"' : ""));
+    });
+  });
+  s += t(190, 182, "Bill = 14 + 3 &times; 2.50 = &pound;21.50", 16, BLUE, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Answer only versus working */
+var SAFETY = (function(){
+  var s = '<svg viewBox="0 0 380 200" role="img" aria-label="Two answers to the same question with the same slip at the end. Answer only, 126 pounds 70, scores 0 marks. With working, the right hours and the right method each score, so 2 marks out of 3.">';
+  s += '<rect x="4" y="8" width="138" height="150" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(73, 32, "Answer only", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(73, 90, "&pound;126.70", 20, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += cross(64, 116);
+  s += '<rect x="152" y="8" width="224" height="150" rx="12" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(264, 32, "With working", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(164, 66, "hours = 6 + 5 = 11", 15, INK, BODY);
+  s += tick(340, 62);
+  s += t(164, 96, "pay = 11 &times; 11.60", 15, INK, BODY);
+  s += tick(340, 92);
+  s += t(164, 126, "= &pound;126.70", 15, INK, BODY);
+  s += cross(342, 122);
+  s += t(73, 186, "0 marks", 18, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(264, 186, "2 marks out of 3", 18, MINT, LAB + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Decision: yes AND the figures */
+var DECIDE =
+'<svg viewBox="0 0 380 140" role="img" aria-label="A decision needs both parts: the decision, such as yes, and the figures, such as needs 84 pounds and has 90 pounds. Together they earn the mark.">' +
+'<rect x="6" y="12" width="120" height="58" rx="12" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(66, 38, "decision", 15, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(66, 60, "Yes", 18, INK, BODY + ' font-weight="700" text-anchor="middle"') +
+t(140, 50, "+", 26, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+'<rect x="156" y="12" width="218" height="58" rx="12" fill="' + MINT + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(265, 38, "accurate figures", 15, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(265, 60, "needs &pound;84, has &pound;90", 16, INK, BODY + ' font-weight="700" text-anchor="middle"') +
+'<path d="M190 78 V96" stroke="' + INK + '" stroke-width="3"/><path d="M183 89 L190 98 L197 89" fill="none" stroke="' + INK + '" stroke-width="3"/>' +
+'<rect x="70" y="102" width="240" height="34" rx="17" fill="' + BLUE + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(190, 125, "the decision mark", 16, WHITE, LAB + ' font-weight="700" text-anchor="middle"') +
+'</svg>';
+
+/* Three checks */
+var CHECKS =
+'<svg viewBox="0 0 380 130" role="img" aria-label="Three ways to check: does it make sense, estimate, and inverse. Example: 252 divided by 7 is 36, and 36 times 7 is 252.">' +
+'<rect x="4" y="10" width="118" height="112" rx="12" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(63, 36, "Sense?", 16, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(63, 66, "&pound;3 a week", 14, INK, BODY + ' text-anchor="middle"') +
+t(63, 86, "wages?", 14, INK, BODY + ' text-anchor="middle"') +
+t(63, 108, "No way.", 14, CORAL, BODY + ' font-weight="700" text-anchor="middle"') +
+'<rect x="131" y="10" width="118" height="112" rx="12" fill="' + MINT + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(190, 36, "Estimate", 16, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(190, 66, "19 &times; 4.95", 14, INK, BODY + ' text-anchor="middle"') +
+t(190, 86, "is about", 14, INK, BODY + ' text-anchor="middle"') +
+t(190, 108, "20 &times; 5 = 100", 14, INK, BODY + ' font-weight="700" text-anchor="middle"') +
+'<rect x="258" y="10" width="118" height="112" rx="12" fill="' + CYAN + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+t(317, 36, "Inverse", 16, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(317, 66, "252 &divide; 7 = 36", 14, INK, BODY + ' text-anchor="middle"') +
+t(317, 86, "so check", 14, INK, BODY + ' text-anchor="middle"') +
+t(317, 108, "36 &times; 7 = 252", 14, INK, BODY + ' font-weight="700" text-anchor="middle"') +
+'</svg>';
+
+/* Decimal hours clock */
+var CLOCK = (function(){
+  var s = '<svg viewBox="0 0 380 150" role="img" aria-label="A clock face with the half hour shaded. 0.5 of an hour is 30 minutes, so 2.5 hours is 2 hours 30 minutes, not 2 hours 50.">';
+  s += '<circle cx="70" cy="75" r="60" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="3"/>';
+  s += '<path d="M70 75 L70 15 A60 60 0 0 1 70 135 Z" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+  for(var k = 0; k < 12; k++){
+    var a = k * Math.PI / 6, x1 = 70 + 52 * Math.sin(a), y1 = 75 - 52 * Math.cos(a), x2 = 70 + 60 * Math.sin(a), y2 = 75 - 60 * Math.cos(a);
+    s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += t(96, 80, "30 min", 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(150, 40, "0.5 hour = 30 minutes", 16, INK, BODY + ' font-weight="700"');
+  s += t(150, 68, "2.5 hours = 2 h 30 min", 16, MINT, BODY + ' font-weight="700"');
+  s += t(150, 96, "not 2 h 50 min", 16, CORAL, BODY + ' font-weight="700"');
+  s += t(150, 126, "minutes = decimal &times; 60", 16, BLUE, BODY + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+EGW.run({
+  id: "problems",
+  title: "Show your working",
+  subject: "Maths",
+  mins: 45,
+  blurb: "How to turn a wordy problem into marks: find what it asks, pick the numbers, lay out your working, make the decision, and check it. Plus some of Jay's working to mark.",
+  steps: [
+
+  /* ---------- READ THE PROBLEM ---------- */
+  { type: "learn", topic: "Read the problem",
+    title: "Pull out what matters",
+    fig: NOTES,
+    html: '<p>Functional Skills questions are wordy on purpose, because real life is too. Before any maths, read with three questions in mind:</p>' +
+          '<ul><li><b>What is it asking?</b> Look at the last sentence first: how much, how many, is there enough, which one?</li>' +
+          '<li><b>Which numbers do I need?</b> Circle them, and keep their units.</li>' +
+          '<li><b>What can I ignore?</b> Dates, names and extra facts are often just scenery.</li></ul>' +
+          '<p>The picture sorts this one: "Priya has had her phone contract since March. It costs &pound;14 a month, plus &pound;2.50 for each extra GB. In June she used 3 extra GB and sent 140 texts (texts are free). What was her June bill?"</p>' +
+          '<div class="keep"><b>Keep this</b>Last sentence first. Then circle what you need and cross out what you do not.</div>' },
+
+  { type: "mc", topic: "Read the problem",
+    q: "<div class='probq'><p>The Riverside Youth Theatre hall has <b>240</b> seats. Tickets cost <b>&pound;8.50</b>. By Friday, <b>176</b> tickets have been sold. The show starts at <b>7:30pm</b>.</p><p>How many seats are still unsold?</p></div>Which calculation answers the question?",
+    options: ["240 &minus; 176", "176 &times; 8.50", "240 &times; 8.50", "240 + 176"],
+    answer: 0,
+    hint: "Read the last sentence again. It asks about seats, not money. So which numbers are about seats?",
+    why: "It asks how many seats are <b>unsold</b>: all the seats take away the sold ones. 240 &minus; 176 = <b>64 seats</b>.<br>The &pound;8.50 and the 7:30pm are scenery for this question. 176 &times; 8.50 would answer a different question: how much money has come in." },
+
+  { type: "multi", topic: "Read the problem",
+    q: "<div class='probq'><p>Mo works at a garden centre. He started there in <b>2023</b>. He works <b>6 hours</b> on Saturday and <b>5 hours</b> on Sunday. He is paid <b>&pound;11.60</b> an hour. His bus fare is <b>&pound;3.20</b> each day.</p><p>How much does Mo earn at the weekend, before bus fares?</p></div>Which numbers do you need? Pick all of them.",
+    options: ["2023", "6 hours", "5 hours", "&pound;11.60", "&pound;3.20"],
+    answers: [1, 2, 3],
+    hint: "The last sentence says <b>before</b> bus fares. So do the fares matter here?",
+    why: "You need the hours (6 and 5) and the hourly pay (&pound;11.60). The year he started tells you nothing about pay, and <b>before bus fares</b> means leave the &pound;3.20 out." },
+
+  { type: "num", topic: "Read the problem",
+    q: "Now work out Mo's weekend pay: <b>6 hours</b> on Saturday and <b>5 hours</b> on Sunday at <b>&pound;11.60</b> an hour. Use a calculator if you like.",
+    boxes: [
+      { label: "Total hours", a: 11 },
+      { label: "Weekend pay", a: 127.6, pre: "&pound;", show: "127.60" }
+    ],
+    hint: "Add the hours first, then times by the hourly pay.",
+    why: "Hours: 6 + 5 = <b>11</b>. Pay: 11 &times; 11.60 = <b>&pound;127.60</b>.<br>You could also do each day: 6 &times; 11.60 = 69.60 and 5 &times; 11.60 = 58.00, then 69.60 + 58.00 = 127.60. Either way is fine." },
+
+  /* ---------- CHOOSE THE OPERATION ---------- */
+  { type: "learn", topic: "Choose the operation",
+    title: "Which calculation?",
+    html: '<p>Key words can trick you. "Altogether" might mean add, or it might mean times. Picture what is really happening instead:</p>' +
+          '<ul><li><b>Putting different amounts together:</b> add.</li><li><b>A difference</b>, a change, how much more, how much is left: subtract.</li><li><b>Lots of the same amount:</b> multiply.</li><li><b>Sharing equally</b>, or how many fit into: divide.</li></ul>' +
+          '<p>Most questions need two or three of these in a row. Ask yourself: what do I need to know first, and what can I find on the way?</p>' +
+          '<div class="keep"><b>Keep this</b>Ask what is happening to the numbers. Groups of the same: times. Shared out: divide. And when you divide people into minibuses, think about the remainder.</div>' },
+
+  { type: "match", topic: "Choose the operation",
+    q: "Match each situation to the operation it needs.",
+    pairs: [
+      ["The cost of 6 cinema tickets at &pound;8 each", "Multiply"],
+      ["How many 12 seat minibuses carry 50 people", "Divide"],
+      ["The change from &pound;20 after spending &pound;13.45", "Subtract"],
+      ["The cost of a &pound;4.20 sandwich and a &pound;1.80 drink", "Add"]
+    ],
+    hint: "Picture each one. Is it lots of the same, sharing out, finding what is left, or putting together?",
+    why: "6 tickets at &pound;8: lots of the same, so multiply. 50 people into 12 seat buses: how many fit, so divide (and round up). Change: what is left, so subtract. A sandwich and a drink: two different amounts together, so add." },
+
+  { type: "num", topic: "Choose the operation",
+    q: "A train ticket costs <b>&pound;14.50 each way</b>. You travel there and back <b>3 days</b> a week. How much do you spend on train tickets each week?",
+    boxes: [ { label: "Weekly cost", a: 87, pre: "&pound;" } ],
+    hint: "Each way means one direction. How many tickets is there and back? Then how many days?",
+    why: "There and back is 2 tickets a day: 2 &times; 14.50 = &pound;29 a day. Three days: 3 &times; 29 = <b>&pound;87</b>.<br>Forgetting the return journey gives &pound;43.50, the most common slip here." },
+
+  { type: "num", topic: "Choose the operation",
+    q: "A youth club is taking <b>45 people</b> on a trip. Each minibus has <b>16 seats</b> and costs <b>&pound;85</b> to hire.<br>a) How many minibuses are needed?<br>b) What is the total cost of hiring them?",
+    boxes: [
+      { label: "a) Minibuses", a: 3 },
+      { label: "b) Total cost", a: 255, pre: "&pound;" }
+    ],
+    hint: "a) 45 &divide; 16 is not a whole number. Can part of a minibus go? b) Then times by the cost of one minibus.",
+    why: "a) 45 &divide; 16 = 2.8..., so 2 minibuses carry only 32 people. You need <b>3</b>.<br>b) 3 &times; 85 = <b>&pound;255</b>.<br>A calculator answer of 2.8125 is never the final answer here: think about what it means." },
+
+  /* ---------- LAY IT OUT ---------- */
+  { type: "learn", topic: "Lay it out",
+    title: "Working that earns marks",
+    fig: SAFETY,
+    html: '<p>In Functional Skills, many marks are for the <b>process</b>: the steps you took. If the last number slips, clear working can still earn most of the marks.</p>' +
+          '<ul><li>One step per line.</li><li>Say what each number is: "Saturday pay = 6 &times; 11.60 = 69.60".</li><li>Keep units and &pound; signs in your answer.</li><li>Do not cross out working unless you have replaced it.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>A right answer on its own can score full marks. A wrong answer on its own scores nothing. Working is your safety net.</div>' },
+
+  { type: "order", topic: "Lay it out",
+    q: "<div class='probq'><p>Jade works 4, 6 and 5 hours this week at &pound;11.20 an hour. She saves half of her pay. Can she buy boots costing &pound;79 with this week's savings?</p></div>Put her working in order.",
+    items: [
+      "Total hours: 4 + 6 + 5 = 15",
+      "Pay: 15 &times; &pound;11.20 = &pound;168",
+      "Savings: &pound;168 &divide; 2 = &pound;84",
+      "Yes: she saves &pound;84 and the boots cost &pound;79"
+    ],
+    hint: "Each line uses the answer from the line before. What has to be found first?",
+    why: "Hours, then pay (it needs the hours), then savings (it needs the pay), then the decision (it needs the savings). Laid out like this, an examiner can follow every step and give a mark for each one." },
+
+  { type: "mark", topic: "Lay it out",
+    q: "<p>Priya works 7 hours on Saturday and 4 hours on Sunday. She is paid &pound;12.40 an hour. How much does she earn at the weekend?</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    note: "Jay did this one on the bus, which is his excuse.",
+    jay: ["Hours = 7 + 4 = 11", "Pay = 11 &times; &pound;12.40", "= &pound;134.40"],
+    wrong: 2, max: 3, award: 2,
+    hint: "Check the method on each line first. Then type 11 &times; 12.40 into a calculator.",
+    why: "Lines 1 and 2 are right. The slip is the last line: 11 &times; 12.40 = <b>&pound;136.40</b>, not &pound;134.40.<br>A typical scheme: 1 mark for the process to find the total hours, 1 mark for the full process (hours &times; &pound;12.40), 1 mark for the accurate answer &pound;136.40. Jay keeps the two process marks: <b>2 out of 3</b>. With just &pound;134.40 written down, he would have had 0." },
+
+  { type: "mark", topic: "Lay it out",
+    q: "<p>A garden centre works out delivery costs like this: <b>cost = &pound;6 + &pound;1.50 for each bag</b>. How much does it cost to deliver 14 bags of compost?</p><p class='tiny'>(2 marks)</p>",
+    note: "Jay's handwriting is at its neatest here.",
+    jay: ["Bags: 14 &times; &pound;1.50 = &pound;21", "Cost: &pound;21 + &pound;6 = &pound;27"],
+    wrong: -1, max: 2, award: 2,
+    hint: "Work it out yourself first: the bags, then the &pound;6. Does it match?",
+    why: "All correct. 14 &times; 1.50 = 21, then 21 + 6 = <b>&pound;27</b>.<br>1 mark for the process (14 &times; 1.50 plus 6), 1 mark for &pound;27: <b>2 out of 2</b>. Each line says what it is, so it is easy to mark. Sometimes the answer in front of you is simply right, and saying so is part of the job too." },
+
+  /* ---------- MAKE THE DECISION ---------- */
+  { type: "learn", topic: "Make the decision",
+    title: "Decision questions",
+    fig: DECIDE,
+    html: '<p>Lots of questions end with a decision: "Does she have enough money?", "Which deal is cheaper?", "Will it fit?" They usually add: <i>You must show your working.</i></p>' +
+          '<p>To get the decision mark you need <b>both</b>: the decision (yes, no, Deal B) <b>and</b> accurate figures that back it up.</p>' +
+          '<ul><li>"Yes" on its own: no decision mark.</li><li>Figures with no decision: no decision mark.</li><li>The right decision with wrong figures: no decision mark either.</li></ul>' +
+          '<div class="keep"><b>Keep this</b>Finish with a sentence: the decision, then the numbers that prove it. "Yes, because it costs &pound;84 and he has &pound;90."</div>' },
+
+  { type: "mc", topic: "Make the decision",
+    q: "<div class='probq'><p>Four gig tickets cost <b>&pound;84</b> altogether. Sam has saved <b>&pound;90</b>. Does Sam have enough money? You must show your working.</p></div>Which final sentence would earn the decision mark?",
+    options: [
+      "Yes. The tickets cost &pound;84 and Sam has &pound;90, so he has &pound;6 to spare.",
+      "Yes, he has enough.",
+      "84 and 90",
+      "No, because 84 is less than 90."
+    ],
+    answer: 0,
+    hint: "The mark needs two things together: a decision, and the figures that back it up.",
+    why: "Only one gives the decision <b>and</b> the figures: &pound;84 against &pound;90. \"Yes, he has enough\" has no figures. \"84 and 90\" has no decision. And \"No\" is the wrong decision: 84 is less than 90, so he does have enough." },
+
+  { type: "mark", topic: "Make the decision",
+    q: "<p>Two phone contracts, both for 12 months.</p><p><b>Deal A:</b> &pound;24 a month.<br><b>Deal B:</b> &pound;50 up front, then &pound;19 a month.</p><p>Which deal is cheaper over 12 months? You must show your working.</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    note: "Jay was very pleased with how quick this was.",
+    jay: ["Deal A = 24 &times; 12 = &pound;288", "Deal B = 19 &times; 12 = &pound;228", "Deal B is cheaper."],
+    wrong: 1, max: 3, award: 1,
+    hint: "Read Deal B again. Is there anything Jay has left out?",
+    why: "Line 1 is right. Line 2 forgets the &pound;50 up front: Deal B is 50 + 228 = <b>&pound;278</b>.<br>A typical scheme: 1 mark for finding the total of one deal, 1 mark for the full process for both, 1 mark for a valid decision with accurate figures. Deal A earns the first mark. Deal B is incomplete, so no second mark. Deal B <i>is</i> cheaper, but the figures behind it are wrong, so no decision mark either: <b>1 out of 3</b>.<br>The full answer: Deal B is cheaper, &pound;278 against &pound;288, a saving of &pound;10." },
+
+  { type: "mark", topic: "Make the decision",
+    q: "<p>At the youth theatre box office, Ana has <b>&pound;50</b>. She wants 3 adult tickets at <b>&pound;12.50</b> and 1 child ticket at <b>&pound;8.75</b>. There is a booking fee of <b>&pound;1.50</b>. Does she have enough money? You must show your working.</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    note: "Jay says he loves a booking fee. Nobody believes him.",
+    jay: ["Adult tickets: 3 &times; 12.50 = &pound;37.50", "Total: 37.50 + 8.75 + 1.50 = &pound;47.75", "Yes, she has enough. It costs &pound;47.75 and she has &pound;50."],
+    wrong: -1, max: 3, award: 3,
+    hint: "Check each line with a calculator. Does the last line have a decision and the figures?",
+    why: "All correct. 3 &times; 12.50 = 37.50, and 37.50 + 8.75 + 1.50 = 47.75.<br>1 mark for the adult tickets, 1 mark for the full total, 1 mark for the decision with accurate figures (&pound;47.75 and &pound;50): <b>3 out of 3</b>. This is what a full marks decision answer looks like." },
+
+  /* ---------- CHECK IT ---------- */
+  { type: "learn", topic: "Check your answer",
+    title: "Checking: three quick ways",
+    fig: CHECKS,
+    html: '<p><b>Does it make sense?</b> A weekly wage of &pound;3, or a bus ride lasting 40 hours, means something has slipped.</p>' +
+          '<p><b>Estimate.</b> Round to easy numbers. 19 &times; &pound;4.95 is about 20 &times; 5 = &pound;100, so the exact &pound;94.05 looks right.</p>' +
+          '<p><b>Inverse.</b> Undo it. If 252 &divide; 7 = 36, then 36 &times; 7 should give 252.</p>' +
+          '<p>Some questions give a mark just for showing a check. Doing the same sum again does not count: it has to be a different calculation, like the inverse or an estimate.</p>' +
+          '<div class="keep"><b>Keep this</b>Sense, estimate, inverse. Write your check down: it can earn its own mark.</div>' },
+
+  { type: "mc", topic: "Check your answer",
+    q: "Ana's working says <b>&pound;50 &minus; &pound;47.75 = &pound;2.25</b> change. Which of these is a valid check?",
+    options: ["47.75 + 2.25 = 50", "50 &minus; 47.75 = 2.25", "50 + 2.25 = 52.25", "47.75 &times; 2.25"],
+    answer: 0,
+    hint: "A check should undo the calculation, not repeat it.",
+    why: "Adding the change back on, 47.75 + 2.25 = 50, undoes the subtraction: that is the inverse, a valid check. Writing 50 &minus; 47.75 = 2.25 again just repeats the same sum, so it does not count as a check. The other two do not test anything." },
+
+  { type: "sort", topic: "Check your answer",
+    q: "Sense check. Sort each answer: does it look sensible, or suspicious?",
+    buckets: ["Sensible", "Suspicious"],
+    cards: [
+      ["A monthly phone bill of &pound;23.50", 0],
+      ["A mug that holds 300 ml", 0],
+      ["A 2 hour 15 minute train journey from Leeds to London", 0],
+      ["A weekly food shop for one person costing &pound;8,450", 1],
+      ["A 10 km bike ride taking 4 minutes", 1],
+      ["Bonnie, Jay's small poodle, weighing 650 kg", 1]
+    ],
+    hint: "Picture each one in real life. Would anyone blink?",
+    why: "Sensible: a phone bill around &pound;20 to &pound;30, a mug of about 300 ml, a 2 hour 15 minute train ride.<br>Suspicious: &pound;8,450 is a car, not a food shop (a slip with the decimal point?). 10 km in 4 minutes is 150 km per hour, on a bike. And Bonnie at 650 kg would be the size of a horse. Outrageous. She is more like 3 or 4 kg." },
+
+  { type: "num", topic: "Check your answer",
+    q: "A garden centre orders <b>31 trays</b> of plants at <b>&pound;9.85</b> a tray.",
+    boxes: [
+      { label: "a) Estimate: round both numbers and work it out", a: 300, pre: "&pound;" },
+      { label: "b) The exact cost (calculator)", a: 305.35, pre: "&pound;", show: "305.35" }
+    ],
+    hint: "a) 31 is about 30, and &pound;9.85 is about &pound;10. b) Now type the real numbers in.",
+    why: "a) 30 &times; 10 = <b>&pound;300</b>.<br>b) 31 &times; 9.85 = <b>&pound;305.35</b>. Close to the estimate, so it looks right. If the calculator had said 3053.5, the estimate would catch it straight away." },
+
+  /* ---------- CALCULATOR SKILLS ---------- */
+  { type: "learn", topic: "Calculator skills",
+    title: "Using a calculator well",
+    fig: CLOCK,
+    html: '<p>In Section B (1 hour 30 minutes, 42 marks) you can use a calculator. Three traps to dodge:</p>' +
+          '<p><b>Brackets.</b> The calculator follows BIDMAS. The mean of 12, 15 and 18: type (12 + 15 + 18) &divide; 3 = 15. Without brackets you get 12 + 15 + 6 = 33.</p>' +
+          '<p><b>Money.</b> 4.5 on the screen means &pound;4.50. Write money with 2 decimal places, and round long answers to the nearest penny: 13.456 is &pound;13.46.</p>' +
+          '<p><b>Time.</b> 2.5 hours is 2 hours 30 minutes, not 2 hours 50. Times the decimal part by 60 to get minutes.</p>' +
+          '<div class="keep"><b>Keep this</b>Brackets for "add, then divide". Money: 2 decimal places. Time: decimal part &times; 60 = minutes.</div>' },
+
+  { type: "match", topic: "Calculator skills",
+    q: "Your calculator gives these times in hours. Match each one to hours and minutes.",
+    pairs: [
+      ["1.5 hours", "1 h 30 min"],
+      ["2.25 hours", "2 h 15 min"],
+      ["0.75 hours", "45 min"],
+      ["3.2 hours", "3 h 12 min"],
+      ["1.1 hours", "1 h 6 min"]
+    ],
+    hint: "Keep the whole number of hours. Times the decimal part by 60 to get the minutes.",
+    why: "0.5 &times; 60 = 30, 0.25 &times; 60 = 15, 0.75 &times; 60 = 45, 0.2 &times; 60 = 12, 0.1 &times; 60 = 6.<br>The trap: 3.2 hours is not 3 hours 20 minutes, and 1.1 hours is not 1 hour 10. Minutes go up to 60, not 100." },
+
+  { type: "mc", topic: "Calculator skills",
+    q: "You work out a shopping bill and your calculator shows <b>7.2</b>. How should you write the answer?",
+    options: ["&pound;7.20", "&pound;7.02", "&pound;0.72", "&pound;72"],
+    answer: 0,
+    hint: "The 2 is in the tenths place. In money, tenths of a pound are 10p coins.",
+    why: "7.2 is 7 pounds and 2 tenths of a pound, which is 20p. Written properly: <b>&pound;7.20</b>. Money always gets two decimal places." },
+
+  { type: "num", topic: "Calculator skills",
+    q: "A coach travels <b>153 miles</b> at an average speed of <b>45 miles per hour</b>. The formula is <b>time = distance &divide; speed</b>. How long does the journey take, in hours and minutes?",
+    boxes: [
+      { label: "Hours", a: 3 },
+      { label: "Minutes", a: 24 }
+    ],
+    hint: "153 &divide; 45 on a calculator gives a decimal. Keep the whole hours, then times the decimal part by 60.",
+    why: "153 &divide; 45 = 3.4 hours. The 0.4 is a fraction of an hour: 0.4 &times; 60 = 24 minutes. So <b>3 hours 24 minutes</b>, not 3 hours 40." },
+
+  { type: "mark", topic: "Calculator skills",
+    q: "<p>Kai works a shift of <b>2 hours 45 minutes</b>. He is paid <b>&pound;11.20</b> an hour. How much does he earn for the shift?</p><p class='tiny'>(2 marks, calculator allowed)</p>",
+    note: "Jay typed this one in very fast.",
+    jay: ["2 hours 45 minutes = 2.45 hours", "2.45 &times; 11.20 = &pound;27.44"],
+    wrong: 0, max: 2, award: 0,
+    hint: "Is 45 minutes really 0.45 of an hour? How many minutes are in an hour?",
+    why: "The very first line is the slip. 45 minutes is 45 out of 60, which is <b>0.75</b> of an hour, so the shift is 2.75 hours. Pay: 2.75 &times; 11.20 = <b>&pound;30.80</b>.<br>A typical scheme: 1 mark for a correct process, such as 2.75 &times; 11.20 (or 2 &times; 11.20 plus 45 minutes' pay), 1 mark for &pound;30.80. Jay's process uses the wrong time, so neither: <b>0 out of 2</b>. Changing the time correctly is the heart of this question." },
+
+  /* ---------- EXAM PRACTICE ---------- */
+  { type: "learn", topic: "Exam practice",
+    title: "Your routine for any problem",
+    html: '<p>Here is a routine for any multi step question, in the exam or in real life:</p>' +
+          '<ol><li><b>Read</b> the last sentence first. What does it ask?</li><li><b>Pick out</b> the numbers you need, with units.</li><li><b>Plan:</b> what do you need to find first?</li></ol>' +
+          '<ol start="4"><li><b>Work</b> one step per line, saying what each number is.</li><li><b>Answer</b> with units, money to 2 decimal places, and a decision sentence if it asks for one.</li><li><b>Check</b> it: sense, estimate or inverse.</li></ol>' +
+          '<div class="keep"><b>Keep this</b>Read, pick, plan, work, answer, check. Six small steps beat one big leap.</div>' },
+
+  { type: "mark", topic: "Exam practice",
+    q: "<p>Sophie works at a garden centre for <b>&pound;11.80</b> an hour. This week she works 4 hours on Monday, 6.5 hours on Wednesday and 7.5 hours on Saturday. She wants a bike that costs <b>&pound;230</b>. Will one week's pay be enough? You must show your working.</p><p class='tiny'>(3 marks, calculator allowed)</p>",
+    note: "Jay added the hours in his head. Bold.",
+    jay: ["Hours = 4 + 6.5 + 7.5 = 17", "Pay = 17 &times; &pound;11.80 = &pound;200.60", "No, it is not enough. &pound;200.60 is less than &pound;230."],
+    wrong: 0, max: 3, award: 2,
+    hint: "Add the three hours yourself. Then think: the method on each line, and is the decision backed by accurate figures?",
+    why: "The slip is on line 1: 4 + 6.5 + 7.5 = <b>18</b>, not 17. So the pay is 18 &times; 11.80 = <b>&pound;212.40</b>.<br>A typical scheme: 1 mark for the process of adding the hours, 1 mark for hours &times; &pound;11.80 (Jay's own 17 still counts for this, because the method is right), 1 mark for a valid decision with accurate figures. Jay's decision, No, happens to be right, but &pound;200.60 is not accurate, so no third mark: <b>2 out of 3</b>.<br>Full answer: No, she earns &pound;212.40 and the bike costs &pound;230." },
+
+  { type: "num", topic: "Exam practice",
+    q: "<p><b>Section B style.</b> Two friends are going to a gig and want the cheaper way to travel.</p>" +
+       "<p><b>Train:</b> &pound;21 return each, and they both have a railcard that takes " + '<span style="white-space:nowrap"><sup>1</sup>&frasl;<sub>3</sub></span>' + " off.<br><b>Car:</b> the round trip is 136 miles, petrol costs about 15p a mile, and parking is &pound;12.</p>" +
+       "<p>Which is cheaper for the two of them, and by how much?</p>",
+    boxes: [
+      { label: "a) Train cost for both of them", a: 28, pre: "&pound;", show: "28.00" },
+      { label: "b) Car cost", a: 32.4, pre: "&pound;", show: "32.40" },
+      { label: "c) How much cheaper is the cheaper way?", a: 4.4, pre: "&pound;", show: "4.40" }
+    ],
+    hint: "Train: a third of &pound;21 is &pound;7, so each pays &pound;14. Car: 136 &times; 0.15 for petrol, then add the parking once. Then find the difference.",
+    why: "a) A third off &pound;21: 21 &divide; 3 = 7, so each ticket is &pound;14. Two people: <b>&pound;28.00</b>.<br>b) Petrol: 136 &times; 0.15 = 20.40. Plus parking: 20.40 + 12 = <b>&pound;32.40</b>.<br>c) 32.40 &minus; 28.00 = <b>&pound;4.40</b>.<br>Your decision sentence: <i>The train is cheaper. It costs &pound;28.00 for both, against &pound;32.40 by car, a saving of &pound;4.40.</i>" }
+  ]
+});
+})();
+</script>
+</body>
+</html>

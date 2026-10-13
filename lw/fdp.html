@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fractions, decimals and percentages - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.fr{white-space:nowrap}
+.fr sup,.fr sub{font-size:.78em}
+/* Percentage builder widget */
+.pb-svg svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.pb-read{justify-content:space-between;margin-top:0}
+.pb-read span:first-child{font-weight:700}
+.pb-work{font-size:1rem;margin:4px 0;line-height:1.5}
+.pb-dots{display:flex;gap:6px;margin-bottom:6px}
+.pb-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.pb-dots span.on{background:var(--accent)}
+.pb-dots span.now{background:var(--sun)}
+.pb-task p{margin:0 0 6px}
+.pb-btns{gap:8px}
+.pb-btns .btn{padding:10px 11px}
+.pb-fb .btn{margin-top:10px}
+.pb-warn{color:#b3261e;font-weight:700}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Fractions, decimals and percentages</h2>
+    <span>Parts of amounts, money off, interest, recipes and best buys. Three ways of saying the same thing.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+/* a fraction for HTML text */
+function F(a, b, w){ return '<span class="fr">' + (w ? w + " " : "") + '<sup>' + a + '</sup>&frasl;<sub>' + b + '</sub></span>'; }
+function gbp(v){
+  v = Math.round(v * 100) / 100;
+  return "&pound;" + (Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2));
+}
+
+/* ---------- figures ---------- */
+
+/* Fraction wall: 1/2 = 2/4 = 4/8 */
+var WALL = (function(){
+  var s = '<svg viewBox="0 0 380 170" role="img" aria-label="Fraction wall. One half is the same length as two quarters and four eighths.">';
+  var rows = [[1, "whole"], [2, "halves"], [4, "quarters"], [8, "eighths"]];
+  var cols = [PAPER, CORAL, SUN, CYAN];
+  for(var r = 0; r < 4; r++){
+    var n = rows[r][0], w = 300 / n, y = 8 + r * 38;
+    for(var k = 0; k < n; k++){
+      var on = r > 0 && k < n / 2;
+      s += '<rect x="' + (10 + k * w) + '" y="' + y + '" width="' + w + '" height="32" fill="' + (on ? cols[r] : WHITE) + '" stroke="' + INK + '" stroke-width="2"/>';
+      if(r > 0 && k === 0) s += t(10 + w / 2, y + 22, "<tspan>1/" + n + "</tspan>", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    }
+    if(r === 0) s += t(235, y + 22, "1 whole", 15, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += t(316, y + 22, rows[r][1], 14, INK, BODY);
+  }
+  s += '<line x1="160" y1="4" x2="160" y2="160" stroke="' + VIOLET + '" stroke-width="2.5" stroke-dasharray="6 4"/>';
+  s += t(166, 166, "1/2 = 2/4 = 4/8", 15, VIOLET, LAB + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Bar model: 3/5 of 40 */
+var FIFTHS = (function(){
+  var s = '<svg viewBox="0 0 380 130" role="img" aria-label="Bar model: 40 pounds split into 5 equal parts of 8 pounds. Three parts are shaded, making 24 pounds.">';
+  s += t(190, 20, "&pound;40 split into 5 equal parts", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  for(var k = 0; k < 5; k++){
+    var x = 15 + k * 70;
+    s += '<rect x="' + x + '" y="32" width="70" height="46" fill="' + (k < 3 ? BLUE : WHITE) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x + 35, 62, "&pound;8", 18, k < 3 ? WHITE : INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '<path d="M17 88 V96 H223 V88" fill="none" stroke="' + BLUE + '" stroke-width="2.5"/>';
+  s += t(120, 120, "3/5 = 3 &times; &pound;8 = &pound;24", 17, BLUE, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Decimal place value */
+var DEC = (function(){
+  var heads = ["ones", "tenths", "hundredths", "thousandths"], digs = ["2", "0", "7", "5"];
+  var s = '<svg viewBox="0 0 380 130" role="img" aria-label="Place value columns: 2 ones, 0 tenths, 7 hundredths, 5 thousandths. 2.075 kilograms.">';
+  var xs = [10, 100, 190, 285], ws = [80, 80, 90, 90];
+  for(var k = 0; k < 4; k++){
+    s += '<rect x="' + xs[k] + '" y="10" width="' + ws[k] + '" height="28" fill="' + (k ? "#e6eaff" : PAPER) + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(xs[k] + ws[k] / 2, 29, heads[k], 14, INK, LAB + ' font-weight="700" text-anchor="middle"');
+    s += '<rect x="' + xs[k] + '" y="38" width="' + ws[k] + '" height="48" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2"/>';
+    s += t(xs[k] + ws[k] / 2, 72, digs[k], 28, digs[k] === "0" ? "#8a8fa8" : INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '<circle cx="95" cy="80" r="5" fill="' + CORAL + '"/>';
+  s += t(190, 116, "2.075 kg: 2 ones, 0 tenths, 7 hundredths, 5 thousandths", 14, INK, BODY + ' text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Percentage blocks for 60 */
+var BLOCKS = (function(){
+  var s = '<svg viewBox="0 0 380 140" role="img" aria-label="60 pounds split into ten blocks of 6 pounds. Three blocks and a half block are shaded: 35 percent is 21 pounds.">';
+  s += t(10, 20, "&pound;60 = 100%, so each block (10%) is &pound;6", 16, INK, LAB + ' font-weight="700"');
+  for(var k = 0; k < 10; k++){
+    var x = 10 + k * 36;
+    s += '<rect x="' + x + '" y="32" width="36" height="44" fill="' + (k < 3 ? BLUE : WHITE) + '" stroke="' + INK + '" stroke-width="2"/>';
+    if(k === 3) s += '<rect x="' + x + '" y="32" width="18" height="44" fill="' + SUN + '" stroke="' + INK + '" stroke-width="2"/>';
+    if(k !== 3) s += t(x + 18, 60, "&pound;6", 14, k < 3 ? WHITE : INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += t(10, 104, "10% + 10% + 10% + 5% = 35%", 16, BLUE, BODY + ' font-weight="700"');
+  s += t(10, 128, "&pound;6 + &pound;6 + &pound;6 + &pound;3 = &pound;21", 16, INK, BODY + ' font-weight="700"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Discount bar: 15% off 60 */
+var OFF = (function(){
+  var s = '<svg viewBox="0 0 380 120" role="img" aria-label="A 60 pound coat with 15 percent off. The bar splits into 51 pounds to pay and 9 pounds off.">';
+  s += t(10, 20, "&pound;60 coat, 15% off", 16, INK, LAB + ' font-weight="700"');
+  s += '<rect x="10" y="32" width="306" height="44" fill="' + MINT + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="316" y="32" width="54" height="44" fill="' + WHITE + '" stroke="' + CORAL + '" stroke-width="2.5" stroke-dasharray="6 4"/>';
+  s += t(163, 60, "you pay 85%: &pound;51", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(343, 60, "&pound;9", 15, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(343, 98, "15% off", 14, CORAL, BODY + ' text-anchor="middle"');
+  s += t(10, 112, "60 &minus; 9 = 51", 15, INK, BODY);
+  s += '</svg>';
+  return s;
+})();
+
+/* Ratio bar 2 : 3 of 45 */
+var RATIO = (function(){
+  var s = '<svg viewBox="0 0 380 130" role="img" aria-label="Bar model: 45 pounds shared in the ratio 2 to 3. Five parts of 9 pounds: two parts make 18 pounds and three parts make 27 pounds.">';
+  s += t(190, 20, "&pound;45 shared in the ratio 2 : 3", 16, INK, LAB + ' font-weight="700" text-anchor="middle"');
+  for(var k = 0; k < 5; k++){
+    var x = 15 + k * 70;
+    s += '<rect x="' + x + '" y="32" width="70" height="44" fill="' + (k < 2 ? VIOLET : CYAN) + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    s += t(x + 35, 61, "&pound;9", 18, k < 2 ? WHITE : INK, LAB + ' font-weight="700" text-anchor="middle"');
+  }
+  s += '<path d="M17 86 V94 H153 V86" fill="none" stroke="' + VIOLET + '" stroke-width="2.5"/>';
+  s += '<path d="M157 86 V94 H363 V86" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(85, 118, "2 parts = &pound;18", 16, VIOLET, BODY + ' font-weight="700" text-anchor="middle"');
+  s += t(260, 118, "3 parts = &pound;27", 16, INK, BODY + ' font-weight="700" text-anchor="middle"');
+  s += '</svg>';
+  return s;
+})();
+
+/* Best buy: bird seed bags */
+function bag(x, w, h, col){
+  var top = 120 - h;
+  return '<path d="M' + x + ' ' + (top + 10) + ' Q' + (x + w / 2) + ' ' + (top - 4) + ' ' + (x + w) + ' ' + (top + 10) + ' L' + (x + w + 4) + ' 120 H' + (x - 4) + ' Z" fill="' + col + '" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+}
+var SEED =
+'<svg viewBox="0 0 380 190" role="img" aria-label="Bird seed: 500 grams for 2 pounds 40 is 48p per 100 grams. 2 kilograms for 8 pounds 80 is 44p per 100 grams, the better value.">' +
+bag(60, 50, 50, SUN) + bag(200, 84, 95, SUN) +
+t(85, 104, "500 g", 14, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(242, 80, "2 kg", 16, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(85, 144, "&pound;2.40", 17, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(242, 144, "&pound;8.80", 17, INK, LAB + ' font-weight="700" text-anchor="middle"') +
+t(85, 168, "2.40 &divide; 5 = 48p", 15, INK, BODY + ' text-anchor="middle"') +
+t(242, 168, "8.80 &divide; 20 = 44p", 15, BLUE, BODY + ' text-anchor="middle" font-weight="700"') +
+t(190, 186, "price per 100 g: lower is better value", 14, INK, BODY + ' text-anchor="middle"') +
+t(374, 70, "better", 15, BLUE, LAB + ' font-weight="700" text-anchor="end"') +
+t(374, 88, "value", 15, BLUE, LAB + ' font-weight="700" text-anchor="end"') +
+'</svg>';
+
+/* ---------- Percentage builder widget ---------- */
+var PB = [
+  { amt: 40, target: 30,
+    ctx: "A bird table at the garden centre costs <b>&pound;40</b>. In the sale it has <b>30% off</b>.",
+    ask: "Build 30% of &pound;40 to find the discount.",
+    hint: "30% is three 10% blocks.",
+    why: "10% of &pound;40 is &pound;4, so 30% is three blocks: 4 + 4 + 4 = <b>&pound;12</b> off. The bird table costs &pound;28 in the sale.",
+    show: [10, 10, 10] },
+  { amt: 60, target: 15,
+    ctx: "Your phone contract costs <b>&pound;60</b> a month. Next year it goes up by <b>15%</b>.",
+    ask: "Build 15% of &pound;60 to find the rise.",
+    hint: "15% is a 10% block and a 5% block. 5% is half of 10%.",
+    why: "10% = &pound;6 and 5% = &pound;3, so 15% = 6 + 3 = <b>&pound;9</b>. The new price is 60 + 9 = &pound;69 a month.",
+    show: [10, 5] },
+  { amt: 24, target: 75,
+    ctx: "A garden hose costs <b>&pound;24</b>. With a staff card you pay <b>75%</b> of the price.",
+    ask: "Build 75% of &pound;24.",
+    hint: "75% is three quarters. Which two of the big blocks make 75%?",
+    why: "50% is half: &pound;12. 25% is a quarter: &pound;6. So 75% = 12 + 6 = <b>&pound;18</b>. You could also do 100% minus 25%: 24 &minus; 6 = 18.",
+    show: [50, 25] },
+  { amt: 120, target: 35, money: 42,
+    ctx: "At a youth theatre box office, a group booking costs <b>&pound;120</b>. The deposit is <b>&pound;42</b>.",
+    ask: "What percentage of &pound;120 is the deposit? Build blocks until the money matches &pound;42.",
+    hint: "10% of &pound;120 is &pound;12. How many 12s get you close to 42 without going over? A 5% block (&pound;6) could finish it.",
+    why: "10% = &pound;12, so 30% = &pound;36. Then 5% = &pound;6, and 36 + 6 = 42. The deposit is <b>35%</b>.",
+    show: [10, 10, 10, 5] }
+];
+var PBN = PB.length, PBFREE = 80;
+var PCOL = { 50: VIOLET, 25: CYAN, 10: BLUE, 5: SUN };
+
+function mountBuilder(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.miss) d.miss = [0, 0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false, false];
+  if(!d.pieces) d.pieces = [];
+  var view = d.c, warn = "";
+
+  el.innerHTML =
+    '<div class="wpanel pb-task" data-r="task"></div>' +
+    '<div class="pb-svg" data-r="svg"></div>' +
+    '<div class="wpanel">' +
+      '<div class="wrow pb-read"><span>You have built</span><span class="wbig" data-r="read"></span></div>' +
+      '<p class="pb-work" data-r="work"></p>' +
+      '<div class="wrow pb-btns">' +
+        '<button class="btn btn-quiet" type="button" data-p="50">+50%</button>' +
+        '<button class="btn btn-quiet" type="button" data-p="25">+25%</button>' +
+        '<button class="btn btn-quiet" type="button" data-p="10">+10%</button>' +
+        '<button class="btn btn-quiet" type="button" data-p="5">+5%</button>' +
+      '</div>' +
+      '<div class="wrow pb-btns">' +
+        '<button class="btn btn-quiet" type="button" data-r="undo">Undo</button>' +
+        '<button class="btn btn-quiet" type="button" data-r="clear">Clear</button>' +
+        '<button class="btn" type="button" data-r="lock">Lock it in</button>' +
+        '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fb pb-fb hidden" data-r="fb" aria-live="polite"></div>';
+
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  function amt(){ return view < PBN ? PB[view].amt : PBFREE; }
+  function total(){ return d.pieces.reduce(function(a, b){ return a + b; }, 0); }
+
+  function svg(){
+    var A = amt(), x0 = 10, W = 340, s = '<svg viewBox="0 0 360 112" role="img" aria-label="Percentage bar for ' + A + ' pounds, ' + total() + ' percent built">';
+    s += t(10, 18, gbp(A) + " = 100%", 15, INK, LAB + ' font-weight="700"');
+    s += t(350, 18, "each block: 10% = " + gbp(A / 10), 15, INK, BODY + ' text-anchor="end"');
+    for(var k = 0; k < 10; k++) s += '<rect x="' + (x0 + k * 34) + '" y="28" width="34" height="46" fill="' + WHITE + '" stroke="' + LINE + '" stroke-width="2"/>';
+    var at = 0;
+    d.pieces.forEach(function(p){
+      var x = x0 + at * W / 100, w = p * W / 100;
+      s += '<rect x="' + x + '" y="28" width="' + w + '" height="46" fill="' + PCOL[p] + '" stroke="' + INK + '" stroke-width="2"/>';
+      if(w >= 30) s += t(x + w / 2, 57, p + "%", 14, p === 5 || p === 25 ? INK : WHITE, LAB + ' font-weight="700" text-anchor="middle"');
+      at += p;
+    });
+    s += '<rect x="' + x0 + '" y="28" width="' + W + '" height="46" fill="none" stroke="' + INK + '" stroke-width="2.5"/>';
+    if(view < PBN && (d.miss[view] > 0 || d.shown[view])){
+      var tx = x0 + PB[view].target * W / 100;
+      s += '<line x1="' + tx + '" y1="22" x2="' + tx + '" y2="82" stroke="' + CORAL + '" stroke-width="3" stroke-dasharray="5 3"/>';
+      s += t(tx, 100, "target", 14, CORAL, LAB + ' font-weight="700" text-anchor="middle"');
+    }
+    s += t(x0, 96, "0%", 14, INK, LAB);
+    s += t(x0 + W, 96, "100%", 14, INK, LAB + ' text-anchor="end"');
+    s += '</svg>';
+    return s;
+  }
+
+  function task(){
+    var dots = '<div class="pb-dots" aria-hidden="true">';
+    for(var k = 0; k < PBN; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && view < PBN ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(view >= PBN) return dots + '<p><b>Free play.</b> All four done. Here is &pound;80 to play with: try building 45%, 65% or 95% and watch the money.</p>';
+    var c = PB[view];
+    return dots + '<p class="tiny" style="margin:0 0 4px">Job ' + (view + 1) + ' of ' + PBN + '</p><p>' + c.ctx + '</p><p><b>' + c.ask + '</b> Use the + buttons to build it, then Lock it in.</p>';
+  }
+
+  function draw(){
+    var A = amt(), T = total();
+    q("task").innerHTML = task();
+    q("svg").innerHTML = svg();
+    q("read").innerHTML = T + "% = " + gbp(A * T / 100);
+    q("work").innerHTML = (d.pieces.length ?
+      d.pieces.map(function(p){ return p + "%"; }).join(" + ") + " = <b>" + T + "%</b><br>" +
+      d.pieces.map(function(p){ return gbp(A * p / 100); }).join(" + ") + " = <b>" + gbp(A * T / 100) + "</b>" :
+      "Nothing built yet. Each block shows its money value as you add it.") +
+      (warn ? '<br><span class="pb-warn">' + warn + '</span>' : "");
+    var waiting = view !== d.c || d.c >= PBN;
+    q("lock").disabled = waiting;
+    q("show").classList.toggle("hidden", waiting || !d.miss[view]);
+  }
+
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+
+  function fb(cls, html){ var f = q("fb"); f.className = "fb pb-fb " + cls; f.innerHTML = html; }
+
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= PBN;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is one way to build it.</b> " : "<b>" + ["Spot on.", "Yes, that is it.", "Nailed it.", "Exactly right."][k % 4] + "</b> ";
+    var more = last ?
+      '<p style="margin:8px 0 0">All four jobs done. Every one came from the same few blocks: <b>50%, 25%, 10% and 5%</b>.</p><button class="btn" type="button" data-r="next">Free play</button>' :
+      '<button class="btn" type="button" data-r="next">Next job</button>';
+    fb(how === "shown" ? "show" : "good", head + PB[k].why + more);
+    q("next").onclick = function(){
+      view = d.c; d.pieces = []; warn = ""; api.save();
+      q("fb").className = "fb pb-fb hidden";
+      draw();
+    };
+    draw();
+    if(last) api.done(d.result);
+  }
+
+  [].forEach.call(el.querySelectorAll("[data-p]"), function(b){
+    b.onclick = function(){
+      var p = parseInt(b.getAttribute("data-p"), 10);
+      if(view !== d.c && view < PBN) return;
+      if(total() + p > 100){ warn = "That would go past 100%, the whole amount."; draw(); return; }
+      warn = ""; d.pieces.push(p); draw(); api.save();
+    };
+  });
+  q("undo").onclick = function(){ if(view !== d.c && view < PBN) return; warn = ""; d.pieces.pop(); draw(); api.save(); };
+  q("clear").onclick = function(){ if(view !== d.c && view < PBN) return; warn = ""; d.pieces = []; draw(); api.save(); };
+  q("lock").onclick = function(){
+    if(view !== d.c || d.c >= PBN) return;
+    var c = PB[view], T = total();
+    if(T === c.target){ solved(view, "right"); return; }
+    d.miss[view]++;
+    api.save();
+    var got = gbp(c.amt * T / 100);
+    var dir = c.money ?
+      (c.amt * T / 100 > c.money ? "That is more than the &pound;" + c.money + " deposit." : "That is less than the &pound;" + c.money + " deposit.") :
+      (T > c.target ? "That is a bit too much." : "That is not enough yet.");
+    fb("nudge", "<b>Not quite yet.</b> You have built " + T + "%, which is " + got + ". " + dir + " " + c.hint +
+      '<br><span class="tiny">The dashed line on the bar now shows where to aim.</span>');
+    draw();
+  };
+  q("show").onclick = function(){
+    if(view !== d.c || d.c >= PBN) return;
+    d.shown[view] = true;
+    d.pieces = PB[view].show.slice();
+    solved(view, "shown");
+  };
+
+  draw();
+  if(d.c >= PBN && d.result){
+    fb("good", "<b>All four jobs done.</b> 50%, 25%, 10% and 5% build almost anything.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "fdp",
+  title: "Fractions, decimals and percentages",
+  subject: "Maths",
+  mins: 50,
+  blurb: "Fractions, decimals and percentages in real life: parts of amounts, money off, pay rises, interest, recipes and best buys. Start anywhere you like.",
+  steps: [
+
+  /* ---------- FRACTIONS ---------- */
+  { type: "learn", topic: "Fractions",
+    title: "Reading and comparing fractions",
+    fig: WALL,
+    html: '<p>A fraction is part of a whole. The bottom number says how many <b>equal parts</b> the whole is split into. The top number says how many of them you have. ' + F(3, 8) + ' of a pizza is 3 slices out of 8.</p>' +
+          '<p><b>Equivalent fractions</b> are worth the same. Times or divide the top and bottom by the same number: ' + F(1, 2) + ' = ' + F(2, 4) + ' = ' + F(4, 8) + '. To simplify, divide: ' + F(12, 16) + ' &divide; 4 gives ' + F(3, 4) + '.</p>' +
+          '<p><b>Mixed numbers</b> have a whole part and a fraction: ' + F(1, 2, "2") + ' bags is 2 whole bags and half a bag.</p>' +
+          '<div class="keep"><b>Keep this</b>To compare, make the bottoms the same. ' + F(2, 3) + ' or ' + F(3, 4) + '? That is ' + F(8, 12) + ' against ' + F(9, 12) + ', so ' + F(3, 4) + ' is bigger.</div>' },
+
+  { type: "match", topic: "Fractions",
+    q: "Match each fraction to an equivalent fraction.",
+    pairs: [
+      [F(1, 2), "5/10"],
+      [F(3, 4), "9/12"],
+      [F(2, 3), "8/12"],
+      [F(1, 5), "3/15"],
+      [F(2, 5), "6/15"]
+    ],
+    hint: "Look for the number that the bottom was multiplied by. The top has to be multiplied by the same number.",
+    why: F(1, 2) + ": times 5 gives 5/10. " + F(3, 4) + ": times 3 gives 9/12. " + F(2, 3) + ": times 4 gives 8/12. " + F(1, 5) + ": times 3 gives 3/15. " + F(2, 5) + ": times 3 gives 6/15.<br>Whatever you do to the bottom, do to the top." },
+
+  { type: "num", topic: "Fractions",
+    q: "On the garden centre rota, <b>18</b> of the <b>24</b> weekend shifts are covered. Write " + F(18, 24) + " in its simplest form.",
+    boxes: [
+      { label: "Top number", a: 3 },
+      { label: "Bottom number", a: 4 }
+    ],
+    hint: "Find a number that divides into both 18 and 24. The biggest one gets you there in one go; smaller ones just take a few goes.",
+    why: "6 goes into both: 18 &divide; 6 = 3 and 24 &divide; 6 = 4, so " + F(3, 4) + ". If you halved first you get " + F(9, 12) + ", which still simplifies (divide by 3)." },
+
+  { type: "order", topic: "Fractions",
+    q: "Five lengths of wood, in metres. Put them in order, <b>shortest first</b>.",
+    items: [F(1, 2, "1"), F(2, 3, "1"), F(3, 4, "1"), "2", F(1, 4, "2")],
+    hint: "Compare the whole numbers first. For the ones that start with 1, compare the fractions: which is bigger, a half, two thirds or three quarters?",
+    why: "The three that start with 1 come first. Of those, " + F(1, 2) + " &lt; " + F(2, 3) + " &lt; " + F(3, 4) + " (as twelfths: 6, 8 and 9). Then 2, then " + F(1, 4, "2") + ", which is a bit more than 2." },
+
+  /* ---------- FRACTION OF AN AMOUNT ---------- */
+  { type: "learn", topic: "Fraction of an amount",
+    title: "Finding a fraction of an amount",
+    fig: FIFTHS,
+    html: '<p>To find a fraction of an amount: <b>divide by the bottom, times by the top</b>.</p>' +
+          '<p>' + F(3, 5) + ' of &pound;40: 40 &divide; 5 = 8 (that is one fifth), then 8 &times; 3 = <b>&pound;24</b>.</p>' +
+          '<p>When the top is 1, you only need the divide: ' + F(1, 4) + ' of 60 minutes is 15 minutes.</p>' +
+          '<p>To write one amount <b>as a fraction</b> of another, put the part over the whole and simplify: 15 minutes out of an hour is ' + F(15, 60) + ' = ' + F(1, 4) + '.</p>' +
+          '<div class="keep"><b>Keep this</b>Divide by the bottom, times by the top. Sense check: ' + F(3, 5) + ' is a bit more than half, and &pound;24 is a bit more than half of &pound;40.</div>' },
+
+  { type: "num", topic: "Fraction of an amount",
+    q: "The garden centre is open <b>60 hours</b> a week. Ali works " + F(2, 5) + " of those hours. How many hours does Ali work?",
+    boxes: [ { label: "Hours", a: 24 } ],
+    hint: "Divide by the bottom number first to find one fifth. Then times by the top.",
+    why: "One fifth: 60 &divide; 5 = 12. Two fifths: 12 &times; 2 = <b>24 hours</b>." },
+
+  { type: "num", topic: "Fraction of an amount",
+    q: "A jacket costs <b>&pound;72</b>. The sign says <b>" + F(1, 3) + " off</b>.<br>a) How much is taken off?<br>b) What is the sale price?",
+    boxes: [
+      { label: "a) Money off", a: 24, pre: "&pound;" },
+      { label: "b) Sale price", a: 48, pre: "&pound;" }
+    ],
+    hint: "A third means divide by 3. Then the sale price is what is left after taking that off.",
+    why: "a) 72 &divide; 3 = <b>&pound;24</b> off.<br>b) 72 &minus; 24 = <b>&pound;48</b>. Or: one third off leaves two thirds, and 24 &times; 2 = 48." },
+
+  { type: "num", topic: "Fraction of an amount",
+    q: "Your phone plan has <b>20 GB</b> of data a month. So far you have used <b>12 GB</b>. What fraction of your data have you used? Give it in its simplest form.",
+    boxes: [
+      { label: "Top number", a: 3 },
+      { label: "Bottom number", a: 5 }
+    ],
+    hint: "Part over whole: 12 over 20. Then find a number that divides into both.",
+    why: F(12, 20) + ": both divide by 4, giving " + F(3, 5) + ". So you have used three fifths, a bit more than half." },
+
+  /* ---------- DECIMALS ---------- */
+  { type: "learn", topic: "Decimals",
+    title: "Decimals to three places",
+    fig: DEC,
+    html: '<p>After the decimal point come <b>tenths</b>, then <b>hundredths</b>, then <b>thousandths</b>. A parcel weighing 2.075 kg has 0 tenths, 7 hundredths and 5 thousandths.</p>' +
+          '<p>To <b>order</b> decimals, give them all the same number of places: 0.5, 0.45 and 0.405 become 0.500, 0.450 and 0.405. Now it is easy: 0.405 is smallest, then 0.45, then 0.5.</p>' +
+          '<p>To <b>add or subtract</b>, line up the decimal points. To <b>times or divide by a whole number</b>, work as normal and keep the point in line: &pound;7.50 &divide; 3 = &pound;2.50.</p>' +
+          '<div class="keep"><b>Keep this</b>Longer is not bigger: 0.405 is less than 0.5. Fill with zeros, then compare.</div>' },
+
+  { type: "order", topic: "Decimals",
+    q: "Five parcels at the post office, in kg. Put them in order, <b>lightest first</b>.",
+    items: ["1.05 kg", "1.055 kg", "1.45 kg", "1.5 kg", "1.505 kg"],
+    hint: "Write them all with three decimal places: 1.050, 1.055, 1.450, 1.500, 1.505. Then compare.",
+    why: "With three places: 1.050, 1.055, 1.450, 1.500, 1.505. So <b>1.05, 1.055, 1.45, 1.5, 1.505</b>.<br>The trap is to think 1.505 or 1.055 must be big because they are long." },
+
+  { type: "num", topic: "Decimals",
+    q: "At the garden centre you buy <b>3 bags of bark at &pound;4.65</b> each and <b>a trowel for &pound;6.89</b>.<br>a) What is the total?<br>b) How much change do you get from &pound;25?",
+    boxes: [
+      { label: "a) Total", a: 20.84, pre: "&pound;", show: "20.84" },
+      { label: "b) Change", a: 4.16, pre: "&pound;", show: "4.16" }
+    ],
+    hint: "Bark first: 3 &times; 4.65. Then add the trowel. For the change, 25 is 25.00.",
+    why: "a) 3 &times; 4.65 = 13.95. Then 13.95 + 6.89 = <b>&pound;20.84</b>.<br>b) 25.00 &minus; 20.84 = <b>&pound;4.16</b>. Check: 20.84 + 4.16 = 25.00." },
+
+  { type: "num", topic: "Decimals",
+    q: "Four friends share a caf&eacute; bill of <b>&pound;38.60</b> equally. How much does each pay?",
+    boxes: [ { label: "Each pays", a: 9.65, pre: "&pound;", show: "9.65" } ],
+    hint: "Bus stop method: 38.60 &divide; 4, keeping the decimal point in line.",
+    why: "38 &divide; 4 = 9 remainder 2. Carry the 2: 26 &divide; 4 = 6 remainder 2. Carry again: 20 &divide; 4 = 5. So <b>&pound;9.65</b> each. Check: 9.65 &times; 4 = 38.60." },
+
+  { type: "num", topic: "Decimals", stretch: true,
+    q: "Loose bird seed costs <b>&pound;2.40 per kg</b>. You buy <b>2.5 kg</b>. How much does it cost?",
+    boxes: [ { label: "Cost", a: 6, pre: "&pound;", show: "6.00" } ],
+    hint: "2.5 kg is 2 kg and half a kg. Work out each and add.",
+    why: "2 kg: 2 &times; 2.40 = 4.80. Half a kg: 2.40 &divide; 2 = 1.20. Total 4.80 + 1.20 = <b>&pound;6.00</b>. With a calculator: 2.5 &times; 2.40 = 6. Write money with two decimal places: &pound;6.00." },
+
+  /* ---------- PERCENTAGES ---------- */
+  { type: "learn", topic: "Percentages",
+    title: "Percentages of amounts",
+    fig: BLOCKS,
+    html: '<p>Per cent means "out of 100". 100% is the whole amount. Four blocks build almost everything:</p>' +
+          '<ul><li><b>50%</b> is a half: divide by 2.</li><li><b>25%</b> is a quarter: divide by 4.</li><li><b>10%</b>: divide by 10.</li><li><b>5%</b>: half of 10%.</li></ul>' +
+          '<p>35% of &pound;60: 10% = &pound;6, so 30% = &pound;18. 5% = &pound;3. So 35% = 18 + 3 = <b>&pound;21</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Find 10% first. Write each block down: that working earns marks even if the last step slips.</div>' },
+
+  { type: "widget", topic: "Percentages",
+    title: "Percentage builder",
+    html: "Four jobs. Build each percentage from blocks and watch the money add up as you go.",
+    mount: mountBuilder,
+    report: function(d){
+      if(!d || !d.result) return "Percentage builder: " + (d && d.c ? d.c : 0) + " of 4 jobs done.";
+      var lab = { right1: "all four first go", right2: "all four, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Percentage builder: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Percentages",
+    q: "No calculator. Find <b>15% of &pound;80</b>. Fill in each block.",
+    boxes: [
+      { label: "10% of &pound;80", a: 8, pre: "&pound;" },
+      { label: "5% of &pound;80", a: 4, pre: "&pound;" },
+      { label: "15% of &pound;80", a: 12, pre: "&pound;" }
+    ],
+    hint: "10% means divide by 10. 5% is half of the 10% answer. Then add.",
+    why: "10% = 80 &divide; 10 = &pound;8. 5% = half of 8 = &pound;4. 15% = 8 + 4 = <b>&pound;12</b>." },
+
+  { type: "sort", topic: "Percentages",
+    q: "Each of these works out to &pound;3, &pound;6 or &pound;12. Sort them by their answer.",
+    buckets: ["&pound;3", "&pound;6", "&pound;12"],
+    cards: [
+      ["5% of &pound;60", 0],
+      ["25% of &pound;12", 0],
+      ["10% of &pound;30", 0],
+      ["50% of &pound;12", 1],
+      ["25% of &pound;24", 1],
+      ["10% of &pound;60", 1],
+      ["50% of &pound;24", 2],
+      ["20% of &pound;60", 2],
+      ["75% of &pound;16", 2]
+    ],
+    hint: "Find 10% first, or use half for 50% and a quarter for 25%. For 20%, double the 10%. For 75%, find a quarter and times by 3.",
+    why: "&pound;3: 5% of 60 is half of 6; a quarter of 12; 10% of 30.<br>&pound;6: half of 12; a quarter of 24; 10% of 60.<br>&pound;12: half of 24; 20% of 60 is 2 &times; 6; 75% of 16 is 3 &times; 4." },
+
+  /* ---------- INCREASE AND DECREASE ---------- */
+  { type: "learn", topic: "Increase and decrease",
+    title: "Increases, discounts and interest",
+    fig: OFF,
+    html: '<p><b>Increase</b> by a percentage: find the percentage, then add it on. A &pound;240 phone goes up by 5%: 5% = &pound;12, so the new price is <b>&pound;252</b>.</p>' +
+          '<p><b>Decrease</b> or <b>discount</b>: find it, then take it away. 15% off a &pound;60 coat: 15% = &pound;9, so you pay <b>&pound;51</b>.</p>' +
+          '<p><b>Simple interest</b> is the same amount every year. &pound;400 saved at 5% a year earns &pound;20 a year. After 3 years: 400 + 3 &times; 20 = <b>&pound;460</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Find the percentage, then add it on or take it off. Read the question again: does it want the discount, or the new price?</div>' },
+
+  { type: "num", topic: "Increase and decrease",
+    q: "A bird table costs <b>&pound;35</b>. In the garden centre sale it has <b>20% off</b>.",
+    boxes: [
+      { label: "a) The discount", a: 7, pre: "&pound;" },
+      { label: "b) The sale price", a: 28, pre: "&pound;" }
+    ],
+    hint: "Find 10% of &pound;35 first, then double it for 20%. The sale price is what is left.",
+    why: "10% of 35 = 3.50, so 20% = <b>&pound;7</b>.<br>Sale price: 35 &minus; 7 = <b>&pound;28</b>. Jay would like to point out that the birds do not mind which price you paid." },
+
+  { type: "num", topic: "Increase and decrease",
+    q: "You earn <b>&pound;11.40 an hour</b>. Your pay goes up by <b>5%</b>. What is your new hourly pay? Use a calculator if you like.",
+    boxes: [ { label: "New hourly pay", a: 11.97, pre: "&pound;", show: "11.97" } ],
+    hint: "Find 5% of &pound;11.40 (half of 10%), then add it on.",
+    why: "10% of 11.40 = 1.14, so 5% = 0.57. New pay: 11.40 + 0.57 = <b>&pound;11.97</b>.<br>On a calculator: 11.40 &divide; 100 &times; 5 = 0.57." },
+
+  { type: "num", topic: "Increase and decrease",
+    q: "You save <b>&pound;650</b> in an account paying <b>5% simple interest</b> a year. You leave it for <b>2 years</b>.",
+    boxes: [
+      { label: "a) Interest for one year", a: 32.5, pre: "&pound;", show: "32.50" },
+      { label: "b) Total in the account after 2 years", a: 715, pre: "&pound;" }
+    ],
+    hint: "Simple interest is the same every year. Find 5% of &pound;650 once, then think about 2 years.",
+    why: "a) 10% of 650 = 65, so 5% = <b>&pound;32.50</b>.<br>b) Two years: 2 &times; 32.50 = 65 interest. Total: 650 + 65 = <b>&pound;715</b>." },
+
+  { type: "mc", topic: "Increase and decrease", stretch: true,
+    q: "A shirt costs <b>&pound;40</b>. The price goes <b>up 10%</b>. A month later, the new price is cut by <b>10%</b>. What is the final price?",
+    options: ["&pound;36", "&pound;39.60", "&pound;40", "&pound;44"],
+    answer: 1, fixed: true,
+    hint: "Do it in two steps. Up 10% first. Then find 10% of the <b>new</b> price, not of &pound;40.",
+    why: "Up 10%: 40 + 4 = &pound;44. Down 10% of 44: 44 &minus; 4.40 = <b>&pound;39.60</b>.<br>It does not get back to &pound;40, because the second 10% is of a bigger amount." },
+
+  /* ---------- CONVERTING ---------- */
+  { type: "learn", topic: "Converting",
+    title: "Same value, new look",
+    html: '<p>A fraction, a decimal and a percentage can all say the same thing. These are worth knowing by heart:</p>' +
+          '<table class="datatable"><tr><th>Fraction</th><th>Decimal</th><th>Percentage</th></tr>' +
+          '<tr><td>' + F(1, 2) + '</td><td>0.5</td><td>50%</td></tr>' +
+          '<tr><td>' + F(1, 4) + '</td><td>0.25</td><td>25%</td></tr>' +
+          '<tr><td>' + F(3, 4) + '</td><td>0.75</td><td>75%</td></tr>' +
+          '<tr><td>' + F(1, 5) + '</td><td>0.2</td><td>20%</td></tr>' +
+          '<tr><td>' + F(1, 10) + '</td><td>0.1</td><td>10%</td></tr>' +
+          '<tr><td>' + F(1, 100) + '</td><td>0.01</td><td>1%</td></tr></table>' +
+          '<p><b>Percentage to decimal:</b> divide by 100, so 35% = 0.35. <b>Decimal to percentage:</b> times by 100, so 0.6 = 60%. <b>Fraction to decimal:</b> top divided by bottom, so ' + F(3, 8) + ' = 3 &divide; 8 = 0.375.</p>' +
+          '<div class="keep"><b>Keep this</b>To compare things written in different ways, change them all to percentages first.</div>' },
+
+  { type: "match", topic: "Converting",
+    q: "Match each fraction to the same value as a percentage.",
+    pairs: [
+      [F(1, 4), "25%"],
+      [F(3, 5), "60%"],
+      [F(7, 10), "70%"],
+      [F(1, 20), "5%"],
+      [F(3, 4), "75%"]
+    ],
+    hint: "Make the bottom 100 if you can: " + F(3, 5) + " is " + F(60, 100) + ". Or do top divided by bottom and times by 100.",
+    why: F(1, 4) + " = 25%. " + F(3, 5) + " = " + F(60, 100) + " = 60%. " + F(7, 10) + " = " + F(70, 100) + " = 70%. " + F(1, 20) + " = " + F(5, 100) + " = 5%. " + F(3, 4) + " = 75%." },
+
+  { type: "mc", topic: "Converting",
+    q: "Three friends have each used some of their phone data this month. Ana has used <b>0.4</b> of hers, Ben has used <b>" + F(3, 8) + "</b> of his, and Cal has used <b>35%</b> of his. Who has used the biggest share?",
+    options: ["Ana", "Ben", "Cal", "They have all used the same share"],
+    answer: 0, fixed: true,
+    hint: "Turn each one into a percentage. 0.4 times 100. " + F(3, 8) + " is 3 &divide; 8, then times 100.",
+    why: "Ana: 0.4 = 40%. Ben: 3 &divide; 8 = 0.375 = 37.5%. Cal: 35%. So <b>Ana</b> has used the biggest share. Once they are all percentages, it is an easy comparison." },
+
+  { type: "num", topic: "Converting",
+    q: "Fill in the gaps.",
+    boxes: [
+      { label: "a) 0.65 as a percentage", a: 65, post: "%" },
+      { label: "b) 8% as a decimal", a: 0.08 },
+      { label: "c) " + F(3, 8) + " as a decimal", a: 0.375 }
+    ],
+    hint: "Decimal to percentage: times 100. Percentage to decimal: divide by 100. Fraction to decimal: top divided by bottom.",
+    why: "a) 0.65 &times; 100 = <b>65%</b>.<br>b) 8 &divide; 100 = <b>0.08</b> (not 0.8, which is 80%).<br>c) 3 &divide; 8 = <b>0.375</b>." },
+
+  /* ---------- RATIO ---------- */
+  { type: "learn", topic: "Ratio",
+    title: "Ratio: sharing and recipes",
+    fig: RATIO,
+    html: '<p>A ratio compares amounts. Squash and water in the ratio 1 : 4 means 1 part squash for every 4 parts water.</p>' +
+          '<p><b>Sharing</b> in a ratio: add the parts, find one part, multiply. Share &pound;45 in the ratio 2 : 3. There are 5 parts, so one part is &pound;9. The shares are <b>&pound;18</b> and <b>&pound;27</b>.</p>' +
+          '<p><b>Recipes</b> scale in proportion. A recipe for 4 people uses 200 g of flour. For 6 people: 200 &divide; 4 = 50 g for one person, then 50 &times; 6 = <b>300 g</b>.</p>' +
+          '<div class="keep"><b>Keep this</b>Add the parts, find one part, multiply. Check the shares add back up to the total.</div>' },
+
+  { type: "num", topic: "Ratio",
+    q: "Two friends run a plant stall and share the profit of <b>&pound;84</b> in the ratio <b>3 : 4</b>.",
+    boxes: [
+      { label: "One part is worth", a: 12, pre: "&pound;" },
+      { label: "Smaller share", a: 36, pre: "&pound;" },
+      { label: "Larger share", a: 48, pre: "&pound;" }
+    ],
+    hint: "How many parts altogether? Share the &pound;84 between that many parts first.",
+    why: "3 + 4 = 7 parts. One part: 84 &divide; 7 = <b>&pound;12</b>. Shares: 3 &times; 12 = <b>&pound;36</b> and 4 &times; 12 = <b>&pound;48</b>. Check: 36 + 48 = 84." },
+
+  { type: "num", topic: "Ratio",
+    q: "The garden centre caf&eacute; makes scones. This recipe makes <b>12 scones</b>:<br>300 g flour, 75 g butter, 150 ml milk.<br>How much flour and butter are needed for <b>30 scones</b>?",
+    boxes: [
+      { label: "Flour", a: 750, post: "g" },
+      { label: "Butter", a: 187.5, post: "g" }
+    ],
+    hint: "Find the amount for one scone first (divide by 12), then times by 30. Or: 30 is 12 + 12 + 6, which is two and a half batches.",
+    why: "30 &divide; 12 = 2.5 batches. Flour: 300 &times; 2.5 = <b>750 g</b>. Butter: 75 &times; 2.5 = <b>187.5 g</b>.<br>Or per scone: 300 &divide; 12 = 25 g flour, and 25 &times; 30 = 750 g." },
+
+  { type: "mc", topic: "Ratio", stretch: true,
+    q: "Plant feed is mixed with water in the ratio <b>1 : 9</b>. You want <b>2 litres</b> (2000 ml) of mixture altogether. How much plant feed do you need?",
+    options: ["20 ml", "200 ml", "222 ml", "1800 ml"],
+    answer: 1, fixed: true,
+    hint: "1 : 9 means 1 part feed and 9 parts water. How many parts is that altogether?",
+    why: "1 + 9 = 10 parts. One part: 2000 &divide; 10 = <b>200 ml</b> of feed (and 1800 ml water).<br>222 ml comes from dividing by 9, which forgets that the feed is one of the parts too." },
+
+  /* ---------- BEST BUY ---------- */
+  { type: "learn", topic: "Best buy",
+    title: "Proportion and best buys",
+    fig: SEED,
+    html: '<p><b>Direct proportion:</b> if one thing doubles, so does the other. If 3 bags of compost cost &pound;12, one bag costs &pound;4, so 7 bags cost &pound;28. Find the cost of one first.</p>' +
+          '<p><b>Best buy:</b> compare like with like. Work out the price for the same amount of each, such as per 100 g or per litre.</p>' +
+          '<p>500 g of bird seed for &pound;2.40 is 48p per 100 g. 2 kg (2000 g) for &pound;8.80 is 44p per 100 g. So the 2 kg bag is the better value.</p>' +
+          '<div class="keep"><b>Keep this</b>Same units first, then the price for one unit. Lowest price per unit wins. Say which one AND show the figures.</div>' },
+
+  { type: "num", topic: "Best buy",
+    q: "Sam earns <b>&pound;92 for 8 hours</b> of work. At the same rate, how much would Sam earn for <b>13 hours</b>?",
+    boxes: [
+      { label: "Pay for 1 hour", a: 11.5, pre: "&pound;", show: "11.50" },
+      { label: "Pay for 13 hours", a: 149.5, pre: "&pound;", show: "149.50" }
+    ],
+    hint: "Find the pay for one hour first: divide by 8. Then times by 13.",
+    why: "One hour: 92 &divide; 8 = <b>&pound;11.50</b>. Thirteen hours: 11.50 &times; 13 = <b>&pound;149.50</b>." },
+
+  { type: "mc", topic: "Best buy",
+    q: "Three SIM only deals for a month: <b>10 GB for &pound;8</b>, <b>25 GB for &pound;15</b> and <b>40 GB for &pound;26</b>. Which is the best value per GB?",
+    options: ["10 GB for &pound;8", "25 GB for &pound;15", "40 GB for &pound;26", "They are all the same value"],
+    answer: 1, fixed: true,
+    hint: "Find the price of 1 GB in each deal: price divided by the number of GB.",
+    why: "Per GB: 8 &divide; 10 = 80p, 15 &divide; 25 = 60p, 26 &divide; 40 = 65p. The <b>25 GB</b> deal is cheapest per GB, even though the 40 GB deal is bigger.<br>Of course, the best value is only a bargain if you actually use the data." },
+
+  { type: "num", topic: "Best buy",
+    q: "<p><b>Section B style, calculator allowed.</b> You need <b>2 kg</b> of grass seed. The garden centre sells:</p>" +
+       "<p><b>Small box:</b> 250 g for &pound;3.75<br><b>Large box:</b> 1 kg for &pound;12.60</p>" +
+       "<p>Work through it in parts.</p>",
+    boxes: [
+      { label: "a) Small box: price per 100 g", a: 1.5, pre: "&pound;", show: "1.50" },
+      { label: "b) Large box: price per 100 g", a: 1.26, pre: "&pound;", show: "1.26" },
+      { label: "c) Cost of 2 kg in large boxes", a: 25.2, pre: "&pound;", show: "25.20" },
+      { label: "d) The large box gets 15% off. Cost of 2 large boxes now", a: 21.42, pre: "&pound;", show: "21.42" }
+    ],
+    hint: "a) 250 g is 2.5 lots of 100 g. b) 1 kg is 1000 g, which is 10 lots of 100 g. d) Find 15% of &pound;12.60, take it off, then times by 2.",
+    why: "a) 3.75 &divide; 2.5 = <b>&pound;1.50</b> per 100 g.<br>b) 12.60 &divide; 10 = <b>&pound;1.26</b> per 100 g, so the large box is better value.<br>c) 2 &times; 12.60 = <b>&pound;25.20</b> (eight small boxes would be &pound;30.00).<br>d) 15% of 12.60 = 1.89, so one box is 12.60 &minus; 1.89 = 10.71. Two boxes: <b>&pound;21.42</b>.<br>In the exam, finish with a sentence: buy two large boxes, they cost &pound;21.42." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

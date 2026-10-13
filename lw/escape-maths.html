@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the theme park - LW Skills HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/lw/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=6">
+<link rel="stylesheet" href="/lw/lw.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* room banners, boards and the gate plaque on this page only */
+.fig svg.roomban{max-width:560px;border-radius:14px}
+.pboard{background:#141a33;color:#ffffff;border-radius:14px;padding:12px 14px;margin:0 auto 12px;max-width:420px;text-align:left}
+.pboard .bh{display:block;font-family:var(--marquee);font-size:1.5rem;letter-spacing:.06em;color:#ffd23f;text-align:center;margin-bottom:6px}
+.pboard table{width:100%;border-collapse:collapse;font-size:1rem}
+.pboard td{padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,.25)}
+.pboard td.p{text-align:right;font-weight:700;white-space:nowrap}
+.pboard tr:last-child td{border-bottom:0}
+.rcard{background:#fff8e6;border:2px solid #e0a612;border-radius:12px;padding:10px 14px;margin:0 auto 12px;max-width:420px;text-align:left;color:#141a33}
+.rcard b.t{display:block;font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;margin-bottom:4px}
+.rcard ul{margin:4px 0 0;padding-left:20px}
+.plaque{background:#f6e7b4;border:3px solid #c9a646;border-radius:12px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif;color:#141a33}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/lw/"><span class="hqlogo">LW</span><span class="hqname">Skills HQ<small>Functional Skills, Level 1</small></span></a>
+    <nav class="hqnav"><a href="/lw/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the theme park</h2>
+    <span>Maths. An escape room: tickets, chips, queues and a gift shop, with one digit of the gate code hiding in each.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>LW's Skills HQ &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/lw/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=10"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", CORAL = "#ff5d5d",
+    SUN = "#ffd23f", MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec",
+    WHITE = "#ffffff", LINE = "#d9d8e6", NIGHT = "#232a4d", FUR = "#9a6b4a", FUR2 = "#7a5238";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function svg(w, hgt, label, inner, cls){
+  return '<svg ' + (cls ? 'class="' + cls + '" ' : '') + 'viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function stars(list){
+  return list.map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (p[2] || 1.6) + '" fill="' + WHITE + '"/>'; }).join("");
+}
+/* a string of fairground bulbs from x1 to x2 at height y */
+function bulbs(x1, x2, y, gap){
+  var s = '<path d="M' + x1 + ' ' + y + ' L' + x2 + ' ' + y + '" stroke="' + LINE + '" stroke-width="1" opacity="0.5"/>';
+  var cols = [SUN, CORAL, CYAN, MINT];
+  for(var x = x1, k = 0; x <= x2; x += gap, k++) s += '<circle cx="' + x + '" cy="' + (y + 3) + '" r="3.2" fill="' + cols[k % 4] + '"/>';
+  return s;
+}
+/* a cuddly toy poodle, small and brown, no tail. (x, y) is where its feet touch the shelf. */
+function poodle(x, y, s){
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    '<rect x="-16" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="-6" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<rect x="8" y="-16" width="6" height="14" rx="3" fill="' + FUR2 + '"/>' +
+    '<rect x="16" y="-16" width="6" height="14" rx="3" fill="' + FUR + '"/>' +
+    '<circle cx="-13" cy="-2" r="4" fill="' + FUR + '"/><circle cx="-3" cy="-2" r="4" fill="' + FUR + '"/>' +
+    '<circle cx="11" cy="-2" r="4" fill="' + FUR + '"/><circle cx="19" cy="-2" r="4" fill="' + FUR + '"/>' +
+    '<ellipse cx="2" cy="-22" rx="22" ry="11" fill="' + FUR + '"/>' +
+    '<circle cx="-14" cy="-26" r="8" fill="' + FUR + '"/><circle cx="16" cy="-26" r="8" fill="' + FUR + '"/>' +
+    '<circle cx="26" cy="-40" r="10" fill="' + FUR + '"/>' +
+    '<circle cx="24" cy="-51" r="6" fill="' + FUR + '"/>' +
+    '<ellipse cx="20" cy="-35" rx="5" ry="9" fill="' + FUR2 + '"/>' +
+    '<ellipse cx="36" cy="-37" rx="6" ry="4" fill="' + FUR + '"/>' +
+    '<circle cx="41" cy="-38" r="2" fill="' + INK + '"/>' +
+    '<circle cx="30" cy="-43" r="1.8" fill="' + INK + '"/>' +
+  '</g>';
+}
+
+/* ---------- room banners ---------- */
+function wheel(cx, cy, r){
+  var s = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + LINE + '" stroke-width="3" opacity="0.8"/>';
+  for(var k = 0; k < 8; k++){
+    var a = k * Math.PI / 4, x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="' + LINE + '" stroke-width="1.5" opacity="0.6"/>';
+    s += '<rect x="' + (x - 6).toFixed(1) + '" y="' + (y - 2).toFixed(1) + '" width="12" height="10" rx="3" fill="' + [SUN, CORAL, CYAN, MINT][k % 4] + '"/>';
+  }
+  return s + '<path d="M' + cx + ' ' + cy + ' L' + (cx - 26) + ' 112 M' + cx + ' ' + cy + ' L' + (cx + 26) + ' 112" stroke="' + LINE + '" stroke-width="3"/>';
+}
+
+var BAN_TICKET = svg(380, 130, "The ticket office at night: a booth with a striped awning and a TICKETS sign, with a big wheel behind it",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  stars([[30,18],[90,30,1.2],[200,12],[350,22],[330,60,1.2]]) +
+  wheel(270, 58, 46) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  /* booth */
+  '<rect x="50" y="52" width="130" height="60" fill="' + PAPER + '"/>' +
+  '<rect x="70" y="64" width="90" height="30" rx="4" fill="' + NIGHT + '"/>' +
+  '<rect x="70" y="86" width="90" height="8" fill="' + LINE + '"/>' +
+  /* striped awning */
+  '<path d="M40 52 L190 52 L180 34 L50 34 Z" fill="' + CORAL + '"/>' +
+  '<path d="M66 52 L72 34 L88 34 L86 52 Z M106 52 L108 34 L124 34 L126 52 Z M146 52 L144 34 L160 34 L166 52 Z" fill="' + WHITE + '"/>' +
+  '<rect x="64" y="10" width="102" height="24" rx="6" fill="' + SUN + '"/>' +
+  '<text x="115" y="28" text-anchor="middle" ' + LAB + ' font-size="17" font-weight="700" fill="' + INK + '">TICKETS</text>' +
+  bulbs(10, 370, 120, 20));
+
+var BAN_FOOD = svg(380, 130, "The food court at night: a chip stall, a candyfloss stall and strings of coloured bulbs",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  bulbs(10, 370, 10, 18) +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  /* chip stall */
+  '<rect x="30" y="56" width="140" height="56" fill="' + PAPER + '"/>' +
+  '<path d="M22 56 L178 56 L168 38 L32 38 Z" fill="' + SUN + '"/>' +
+  '<text x="100" y="52" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + INK + '">CHIPS</text>' +
+  '<rect x="44" y="66" width="112" height="22" rx="4" fill="' + NIGHT + '"/>' +
+  '<path d="M60 86 L64 70 M66 86 L68 68 M72 86 L74 71 M78 86 L77 69" stroke="' + SUN + '" stroke-width="4" stroke-linecap="round"/>' +
+  '<path d="M56 88 L86 88 L82 100 L60 100 Z" fill="' + CORAL + '"/>' +
+  /* candyfloss stall */
+  '<rect x="220" y="62" width="120" height="50" fill="' + PAPER + '"/>' +
+  '<path d="M212 62 L348 62 L338 44 L222 44 Z" fill="' + VIOLET + '"/>' +
+  '<path d="M240 62 L246 44 L260 44 L258 62 Z M280 62 L282 44 L296 44 L298 62 Z M318 62 L316 44 L330 44 L336 62 Z" fill="' + WHITE + '" opacity="0.6"/>' +
+  '<line x1="260" y1="112" x2="260" y2="84" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<circle cx="260" cy="76" r="12" fill="#ff9ec4"/><circle cx="252" cy="70" r="8" fill="#ff9ec4"/><circle cx="268" cy="70" r="8" fill="#ff9ec4"/>' +
+  '<line x1="300" y1="112" x2="300" y2="86" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<circle cx="300" cy="78" r="12" fill="' + CYAN + '"/><circle cx="292" cy="72" r="8" fill="' + CYAN + '"/><circle cx="308" cy="72" r="8" fill="' + CYAN + '"/>');
+
+var BAN_QUEUE = svg(380, 130, "The ride queue at night: a winding queue barrier in front of a roller coaster with a loop",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  stars([[24,16],[120,10,1.2],[360,14],[300,40,1.2]]) +
+  /* coaster track with a loop */
+  '<path d="M0 70 C40 20 80 20 120 60 C150 90 170 92 200 70 C230 46 210 18 240 18 C270 18 270 60 240 60 C220 60 226 34 260 40 C300 48 330 90 380 50" fill="none" stroke="' + CORAL + '" stroke-width="5"/>' +
+  '<path d="M40 112 L40 40 M120 112 L120 62 M200 112 L200 72 M300 112 L300 56 M350 112 L350 62" stroke="' + LINE + '" stroke-width="2" opacity="0.5"/>' +
+  /* a little coaster car */
+  '<rect x="60" y="22" width="26" height="12" rx="4" fill="' + SUN + '" transform="rotate(-12 73 28)"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  /* zigzag queue barrier */
+  '<path d="M30 104 L330 104 M30 92 L330 92 M30 80 L330 80" stroke="' + SUN + '" stroke-width="2.5"/>' +
+  '<path d="M30 80 L30 112 M330 80 L330 112 M110 80 L110 112 M190 80 L190 112 M270 80 L270 112" stroke="' + LINE + '" stroke-width="4" stroke-linecap="round"/>' +
+  '<rect x="300" y="56" width="70" height="20" rx="4" fill="' + CYAN + '"/>' +
+  '<text x="335" y="71" text-anchor="middle" ' + LAB + ' font-size="13" font-weight="700" fill="' + INK + '">QUEUE</text>');
+
+var BAN_SHOP = svg(380, 130, "The gift shop at night: shelves of toys, a bunch of balloons and a cuddly brown toy poodle",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + NIGHT + '"/>' +
+  '<rect x="20" y="40" width="200" height="6" fill="' + LINE + '"/><rect x="20" y="78" width="200" height="6" fill="' + LINE + '"/><rect x="20" y="110" width="200" height="4" fill="' + LINE + '"/>' +
+  '<rect x="30" y="20" width="22" height="20" rx="4" fill="' + CORAL + '"/><rect x="60" y="14" width="18" height="26" rx="4" fill="' + MINT + '"/>' +
+  '<rect x="88" y="22" width="30" height="18" rx="4" fill="' + CYAN + '"/><circle cx="134" cy="30" r="10" fill="' + VIOLET + '"/>' +
+  '<rect x="152" y="16" width="26" height="24" rx="4" fill="' + SUN + '"/><rect x="186" y="24" width="24" height="16" rx="4" fill="' + CORAL + '"/>' +
+  '<rect x="30" y="56" width="40" height="22" rx="4" fill="' + SUN + '"/><rect x="78" y="60" width="30" height="18" rx="4" fill="' + BLUE + '"/>' +
+  poodle(150, 78, 0.6) +
+  '<rect x="186" y="58" width="26" height="20" rx="4" fill="' + MINT + '"/>' +
+  '<rect x="40" y="94" width="60" height="16" rx="3" fill="' + VIOLET + '"/><rect x="110" y="92" width="44" height="18" rx="3" fill="' + CYAN + '"/><rect x="162" y="96" width="50" height="14" rx="3" fill="' + CORAL + '"/>' +
+  /* balloons */
+  '<path d="M290 112 L276 60 M290 112 L300 50 M290 112 L320 64" stroke="' + LINE + '" stroke-width="1.2"/>' +
+  '<ellipse cx="276" cy="48" rx="14" ry="17" fill="' + CORAL + '"/><ellipse cx="300" cy="36" rx="14" ry="17" fill="' + SUN + '"/><ellipse cx="322" cy="52" rx="14" ry="17" fill="' + MINT + '"/>' +
+  '<rect x="250" y="104" width="100" height="8" rx="3" fill="' + PAPER + '"/>');
+
+function ban(s){ return s.replace("<svg ", '<svg class="roomban" '); }
+
+/* ---------- boards and figures ---------- */
+var PRICES =
+'<div class="pboard"><span class="bh">Ticket prices</span><table>' +
+'<tr><td>Adult (16 and over)</td><td class="p">&pound;32</td></tr>' +
+'<tr><td>Child (4 to 15)</td><td class="p">&pound;24</td></tr>' +
+'<tr><td>Under 4</td><td class="p">Free</td></tr>' +
+'<tr><td>Family ticket (2 adults and 2 children)</td><td class="p">&pound;95</td></tr>' +
+'<tr><td>Park map</td><td class="p">&pound;2.75</td></tr>' +
+'</table></div>';
+
+var MENU =
+'<div class="pboard"><span class="bh">Food court menu</span><table>' +
+'<tr><td>Burger</td><td class="p">&pound;6.40</td></tr>' +
+'<tr><td>Hot dog</td><td class="p">&pound;4.95</td></tr>' +
+'<tr><td>Chips</td><td class="p">&pound;2.85</td></tr>' +
+'<tr><td>Ice cream</td><td class="p">&pound;2.60</td></tr>' +
+'<tr><td>Drink</td><td class="p">&pound;1.90</td></tr>' +
+'</table></div>';
+
+var RECIPE =
+'<div class="rcard"><b class="t">Strawberry smoothie (makes 4 cups)</b><ul>' +
+'<li>200 g strawberries</li><li>2 bananas</li><li>300 ml apple juice</li></ul></div>';
+
+/* the doughnut stall spinner: 8 equal sections, FREE on sections 0, 3 and 5 */
+var SPINNER = (function(){
+  var cx = 190, cy = 126, r = 100, s = '', free = [0, 3, 5];
+  for(var k = 0; k < 8; k++){
+    var a1 = (k * 45 - 90) * Math.PI / 180, a2 = ((k + 1) * 45 - 90) * Math.PI / 180;
+    var x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1), x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+    var isFree = free.indexOf(k) >= 0;
+    s += '<path d="M' + cx + ' ' + cy + ' L' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + r + ' ' + r + ' 0 0 1 ' + x2.toFixed(1) + ' ' + y2.toFixed(1) + ' Z" fill="' + (isFree ? SUN : CYAN) + '" stroke="' + INK + '" stroke-width="2"/>';
+    var mid = k * 45 + 22.5 - 90, mx = cx + 62 * Math.cos(mid * Math.PI / 180), my = cy + 62 * Math.sin(mid * Math.PI / 180);
+    var rot = mid > 90 && mid < 270 ? mid + 180 : mid;
+    s += '<text x="' + mx.toFixed(1) + '" y="' + my.toFixed(1) + '" transform="rotate(' + rot.toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1) + ')" text-anchor="middle" dominant-baseline="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">' + (isFree ? 'FREE' : 'AGAIN') + '</text>';
+  }
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="8" fill="' + INK + '"/>';
+  s += '<polygon points="' + cx + ',' + (cy - r - 4) + ' ' + (cx - 9) + ',' + (cy - r - 18) + ' ' + (cx + 9) + ',' + (cy - r - 18) + '" fill="' + CORAL + '"/>';
+  return svg(380, 240, "A spinner with 8 equal sections. 3 sections say FREE and 5 sections say AGAIN.",
+    '<rect width="380" height="240" rx="12" fill="' + PAPER + '"/>' + s);
+})();
+
+/* queue times bar chart: horizontal bars, scale 0 to 50 minutes */
+var QUEUE = (function(){
+  var rides = [["Thunder Loop", 45], ["Log Splash", 20], ["Pirate Ship", 35], ["Teacups", 10], ["Dodgems", 15]];
+  var x0 = 118, px = 4.8, top = 14, rowH = 36, s = '';
+  s += '<rect width="380" height="262" rx="12" fill="' + PAPER + '"/>';
+  for(var m = 0; m <= 50; m += 5){
+    var x = x0 + m * px;
+    s += '<line x1="' + x + '" y1="' + top + '" x2="' + x + '" y2="' + (top + rowH * 5 + 4) + '" stroke="' + (m % 10 ? LINE : "#b9b8c9") + '" stroke-width="' + (m % 10 ? 1 : 1.5) + '"/>';
+    if(m % 10 === 0) s += '<text x="' + x + '" y="' + (top + rowH * 5 + 22) + '" text-anchor="middle" ' + LAB + ' font-size="14" fill="' + INK + '">' + m + '</text>';
+  }
+  rides.forEach(function(r, k){
+    var y = top + k * rowH + 7;
+    s += '<text x="' + (x0 - 8) + '" y="' + (y + 16) + '" text-anchor="end" ' + LAB + ' font-size="14" fill="' + INK + '">' + r[0] + '</text>';
+    s += '<rect x="' + x0 + '" y="' + y + '" width="' + (r[1] * px) + '" height="22" rx="3" fill="' + BLUE + '"/>';
+  });
+  s += '<line x1="' + x0 + '" y1="' + top + '" x2="' + x0 + '" y2="' + (top + rowH * 5 + 4) + '" stroke="' + INK + '" stroke-width="2"/>';
+  s += '<text x="' + (x0 + 120) + '" y="' + (top + rowH * 5 + 44) + '" text-anchor="middle" ' + BODY + ' font-size="14" fill="' + INK + '">Waiting time (minutes)</text>';
+  return svg(380, 262, "A bar chart of waiting times. Thunder Loop 45 minutes, Log Splash 20 minutes, Pirate Ship 35 minutes, Teacups 10 minutes, Dodgems 15 minutes.", s);
+})();
+
+/* the soft play corner: an L shape, 30 px per metre */
+var SOFTPLAY = svg(380, 260, "An L shaped floor. Bottom side 8 m, left side 6 m, top side 5 m, then a step down of 2 m, across 3 m, and the right side is 4 m.",
+  '<rect width="380" height="260" rx="12" fill="' + PAPER + '"/>' +
+  '<path d="M70 210 L310 210 L310 90 L220 90 L220 30 L70 30 Z" fill="' + MINT + '" fill-opacity="0.35" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+  '<text x="190" y="234" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">8 m</text>' +
+  '<text x="60" y="126" text-anchor="end" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">6 m</text>' +
+  '<text x="145" y="22" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">5 m</text>' +
+  '<text x="228" y="58" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">2 m</text>' +
+  '<text x="282" y="82" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">3 m</text>' +
+  '<text x="318" y="156" ' + LAB + ' font-size="16" font-weight="700" fill="' + INK + '">4 m</text>' +
+  '<text x="366" y="252" text-anchor="end" ' + BODY + ' font-size="14" fill="' + INK + '" opacity="0.7">Not drawn accurately</text>');
+
+EGW.run({
+  id: "escape-maths",
+  title: "Escape the theme park",
+  subject: "Maths",
+  mins: 40,
+  blurb: "A maths escape room in a theme park after closing: four rooms of Level 1 problems, one digit in each, and a gate to open.",
+  escape: {
+    digits: ["5", "2", "3", "1"],
+    intro: "<p>One last go on the Teacups. When you step off, still a bit dizzy, the music has stopped and the park is empty. Everyone else has gone home.</p>" +
+           "<p>The exit gate has a padlock with four dials, and a note from the park manager: <i>Sorry! Locked up early. The code is hidden in four places around the park: one digit in each. Good luck, and help yourself to a free ice cream.</i></p>",
+    outro: "<p>The last dial clicks round, the gate creaks open, and the big wheel lights flicker on one by one, as if the park is waving you off.</p>" +
+           "<p>Ticket prices, a menu, a smoothie recipe, queue times, a sale and a soft play floor: real life maths, which is exactly what Functional Skills is about. Nicely done.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: TICKET OFFICE ---------- */
+  { type: "learn", topic: "Ticket office",
+    title: "Room 1: the ticket office",
+    fig: ban(BAN_TICKET),
+    html: "<p>The ticket office shutter is half down, but the price board is still lit up. A small lock hangs off the counter.</p>" +
+          "<p>This room is like Section A of the real paper, where there is no calculator. Have a go in your head or on paper if you fancy. Your call.</p>" +
+          '<div class="keep"><b>Keep this</b>Line up the decimal points when you add or take away money. <b>Change</b> = money handed over &minus; the total cost.</div>' },
+
+  { type: "num", topic: "Ticket office",
+    q: "Ana buys tickets for <b>2 adults and 1 child</b>. They are all aged 4 or over. How much does she pay?",
+    fig: PRICES,
+    boxes: [
+      { label: "Cost of the 2 adult tickets", a: 64, pre: "&pound;" },
+      { label: "Total cost", a: 88, pre: "&pound;" }
+    ],
+    hint: "Adults first: 2 lots of &pound;32. Then add the child price.",
+    why: "Adults: 2 &times; 32 = <b>&pound;64</b>. Child: &pound;24.<br>Total: 64 + 24 = <b>&pound;88</b>.<br>The family ticket is no help here: it costs &pound;95, which is more than &pound;88." },
+
+  { type: "num", topic: "Ticket office",
+    q: "The Lee family is <b>2 adults and 2 children</b>. Is the family ticket cheaper than 4 separate tickets? Work out how much they would save.",
+    fig: PRICES,
+    boxes: [
+      { label: "Cost of 4 separate tickets", a: 112, pre: "&pound;" },
+      { label: "Saving with the family ticket", a: 17, pre: "&pound;" }
+    ],
+    hint: "Separate tickets: 2 adults and 2 children. Then compare with &pound;95.",
+    why: "Separate: 2 &times; 32 + 2 &times; 24 = 64 + 48 = <b>&pound;112</b>.<br>Family ticket: &pound;95. Saving: 112 &minus; 95 = <b>&pound;17</b>.<br>So yes, the family ticket is cheaper. In the exam, a decision like this needs the answer <i>and</i> both figures: &pound;112 and &pound;95." },
+
+  { type: "num", topic: "Ticket office",
+    q: "Grandad buys one adult ticket and a park map. He pays with a <b>&pound;50 note</b>. How much change should he get?",
+    fig: PRICES,
+    boxes: [
+      { label: "Change", a: 15.25, pre: "&pound;", show: "15.25" }
+    ],
+    hint: "Add the ticket and the map first. Then count up from that total to &pound;50.",
+    why: "Total: 32 + 2.75 = &pound;34.75.<br>Change: 50 &minus; 34.75 = <b>&pound;15.25</b>.<br>Counting up works well without a calculator: &pound;34.75 + 25p = &pound;35, then &pound;35 + &pound;15 = &pound;50, so &pound;15.25. Counting up is often easier than taking away from a round number like &pound;50." },
+
+  /* ---------- ROOM 2: FOOD COURT ---------- */
+  { type: "learn", topic: "Food court",
+    title: "Room 2: the food court",
+    fig: ban(BAN_FOOD),
+    html: "<p>The food court still smells of chips and candyfloss. The freezer hums. The manager did say a free ice cream, so that seems fair.</p>" +
+          "<p>From here on, a calculator is fine whenever you want one, like Section B of the real paper.</p>" +
+          '<div class="keep"><b>Keep this</b>A <b>decision</b> question (\"Does she have enough?\") needs three things: the working, a clear yes or no, and the figures that prove it. Marks go to the working as well as the answer.</div>' },
+
+  { type: "mark", topic: "Food court",
+    q: "<p>Jo has <b>&pound;20</b>. She wants to buy 2 burgers, 2 portions of chips and 2 drinks.</p><p>Does Jo have enough money? You must show your working. <b>(3 marks)</b></p>",
+    fig: MENU,
+    note: "Jay did this one on a paper napkin.",
+    jay: ["6.40 + 2.85 + 1.90 = 11.15", "11.15 &times; 2 = 22.30", "22.30 &minus; 20 = 2.30", "Yes, she has enough. She gets &pound;2.30 change."],
+    wrong: 3, max: 3, award: 2,
+    hint: "Check the sums line by line. Then ask: is &pound;22.30 more or less than &pound;20?",
+    why: "A typical mark scheme: <b>M1</b> for adding one burger, chips and drink (11.15), <b>M1</b> for doubling to 22.30, <b>C1</b> for \"No\" with 22.30 (or &pound;2.30 short) to back it up.<br>Jay's first three lines are all correct, so both M1 marks. The last line is where it goes wrong: &pound;22.30 is <i>more</i> than &pound;20, so the &pound;2.30 is how much Jo is <b>short</b>, not her change. The decision mark is lost.<br>So <b>2 marks out of 3</b>. Jay says he should have asked himself \"is the cost bigger than the money?\" before writing the answer." },
+
+  { type: "num", topic: "Food court",
+    q: "The smoothie stall has a recipe card. How much of each thing do you need to make <b>10 cups</b>?",
+    fig: RECIPE,
+    boxes: [
+      { label: "Strawberries", a: 500, post: "g" },
+      { label: "Bananas", a: 5 },
+      { label: "Apple juice", a: 750, post: "ml" }
+    ],
+    hint: "Find how much for 2 cups first (halve everything), then multiply by 5. Or work out 10 &divide; 4.",
+    why: "10 cups is 10 &divide; 4 = 2.5 times the recipe.<br>Strawberries: 200 &times; 2.5 = <b>500 g</b>. Bananas: 2 &times; 2.5 = <b>5</b>. Apple juice: 300 &times; 2.5 = <b>750 ml</b>.<br>Another way: halve for 2 cups (100 g, 1 banana, 150 ml), then times by 5. Adding 6 to each amount (because 10 is 6 more than 4) is the classic mistake: recipes scale by multiplying." },
+
+  { type: "num", topic: "Food court",
+    q: "The doughnut stall has a spinner with <b>8 equal sections</b>. Spin it once. Write each probability as a fraction.",
+    fig: SPINNER,
+    boxes: [
+      { label: "P(FREE doughnut)", a: 0.375, tol: 0.001, show: "3/8" },
+      { label: "P(spin AGAIN)", a: 0.625, tol: 0.001, show: "5/8" }
+    ],
+    hint: "Count the FREE sections. Probability = number of ways it can happen &divide; total number of equal sections.",
+    why: "3 of the 8 equal sections say FREE, so P(FREE) = <b>3/8</b>. The other 5 say AGAIN, so P(AGAIN) = <b>5/8</b>.<br>The two add up to 8/8 = 1, because one of them is certain to happen. On a 0 to 1 probability scale, 3/8 sits a bit below the middle: less likely than not." },
+
+  /* ---------- ROOM 3: RIDE QUEUE ---------- */
+  { type: "learn", topic: "Ride queue",
+    title: "Room 3: the ride queue",
+    fig: ban(BAN_QUEUE),
+    html: "<p>The queue for Thunder Loop zigzags back and forth between yellow ropes. Nobody is in it now, which feels very strange. The board still shows the last waiting times of the day.</p>" +
+          '<div class="keep"><b>Keep this</b>Adding time: count on to the next hour first, then add the rest. There are 60 minutes in an hour, not 100.</div>' +
+          '<div class="keep"><b>Keep this</b><b>Mean</b>: add them all up, then divide by how many there are. <b>Range</b>: biggest &minus; smallest.</div>' },
+
+  { type: "num", topic: "Ride queue",
+    q: "How much longer was the wait for Thunder Loop than for the Dodgems?",
+    fig: QUEUE,
+    boxes: [
+      { label: "Difference", a: 30, post: "minutes" }
+    ],
+    hint: "Read each bar carefully: the lighter lines are every 5 minutes. Then take the smaller wait away from the bigger one.",
+    why: "Thunder Loop: 45 minutes. Dodgems: 15 minutes. 45 &minus; 15 = <b>30 minutes</b>.<br>Both bars end halfway between the labelled lines, on a 5 minute line, so it is worth slowing down when reading them." },
+
+  { type: "mc", topic: "Ride queue",
+    q: "Before closing, Kai joined the Thunder Loop queue at <b>14:35</b> and waited the time shown on the chart. What time did he reach the front?",
+    fig: QUEUE,
+    options: ["15:20", "14:80", "15:10", "16:20"],
+    answer: 0,
+    hint: "From 14:35, how many minutes to get to 15:00? Then add on whatever is left of the wait.",
+    why: "The wait was 45 minutes. 14:35 + 25 minutes = 15:00, and 45 &minus; 25 = 20 minutes more, so <b>15:20</b>.<br>14:80 comes from adding 35 + 45 as if an hour had 100 minutes. There is no 80th minute: 80 minutes is 1 hour and 20 minutes." },
+
+  { type: "num", topic: "Ride queue",
+    q: "Work out the <b>mean</b> and the <b>range</b> of the five waiting times on the chart.",
+    fig: QUEUE,
+    boxes: [
+      { label: "Mean", a: 25, post: "minutes" },
+      { label: "Range", a: 35, post: "minutes" }
+    ],
+    hint: "Write down all five waits first. For the mean, add them and divide by 5.",
+    why: "The waits are 45, 20, 35, 10 and 15 minutes.<br>Total: 45 + 20 + 35 + 10 + 15 = 125. Mean: 125 &divide; 5 = <b>25 minutes</b>.<br>Range: 45 &minus; 10 = <b>35 minutes</b>. The range tells you how spread out the waits were, not how long they were." },
+
+  { type: "mc", topic: "Ride queue",
+    q: "A sign says: <b>You must be at least 1.2 m tall to ride Thunder Loop.</b> Mia is 118 cm tall. Can she ride?",
+    options: [
+      "No: 1.2 m is 120 cm, so she is 2 cm too short",
+      "Yes: 118 is much bigger than 1.2",
+      "Yes: she is 2 cm taller than she needs to be",
+      "No: she is 18 cm too short"
+    ],
+    answer: 0,
+    hint: "Change 1.2 m into centimetres first, so both heights are in the same unit. There are 100 cm in a metre.",
+    why: "1.2 m = 1.2 &times; 100 = 120 cm. Mia is 118 cm, which is <b>2 cm short</b>, so she cannot ride yet.<br>Comparing 118 with 1.2 directly is the trap: always get the units the same before you compare. A decision like this needs the answer and the figures (120 cm and 118 cm)." },
+
+  /* ---------- ROOM 4: GIFT SHOP ---------- */
+  { type: "learn", topic: "Gift shop",
+    title: "Room 4: the gift shop",
+    fig: ban(BAN_SHOP),
+    html: "<p>Balloons bob against the ceiling. On a shelf sits a cuddly brown toy poodle with no tail, which looks a lot like Jay's dog Bonnie. The last lock is under the till.</p>" +
+          '<div class="keep"><b>Keep this</b>Percentages: 10% is divide by 10, 5% is half of that, and 25% is a quarter. Take the discount away to get the sale price.</div>' +
+          '<div class="keep"><b>Keep this</b><b>Perimeter</b> is the distance all the way round. <b>Area</b> is the space inside, in square units like m&sup2;.</div>' },
+
+  { type: "num", topic: "Gift shop",
+    q: "A park hoodie costs <b>&pound;36</b>. The sale sign says <b>25% off</b>. Work out the sale price.",
+    boxes: [
+      { label: "25% of &pound;36", a: 9, pre: "&pound;" },
+      { label: "Sale price", a: 27, pre: "&pound;" }
+    ],
+    hint: "25% is one quarter. What is a quarter of &pound;36?",
+    why: "25% = 1/4, and 36 &divide; 4 = <b>&pound;9</b> off.<br>Sale price: 36 &minus; 9 = <b>&pound;27</b>.<br>Or build it up: 10% = 3.60, 20% = 7.20, 5% = 1.80, so 25% = 7.20 + 1.80 = 9. Stopping at &pound;9 is the common slip: that is the discount, not the price." },
+
+  { type: "num", topic: "Gift shop",
+    q: "Next to the shop is a soft play corner. Soft mats cover the whole floor, and a safety rail goes all the way round the edge. Work out the <b>area</b> of the floor and the <b>length of the rail</b>.",
+    fig: SOFTPLAY,
+    boxes: [
+      { label: "Area of the floor", a: 42, post: "m&sup2;" },
+      { label: "Length of the rail (the perimeter)", a: 28, post: "m" }
+    ],
+    hint: "Split the L shape into two rectangles with one straight line. For the rail, add up all six sides.",
+    why: "Area: split it into a 5 by 6 rectangle (30 m&sup2;) and a 3 by 4 rectangle (12 m&sup2;). 30 + 12 = <b>42 m&sup2;</b>. Or take the missing corner away from a big rectangle: 8 &times; 6 &minus; 3 &times; 2 = 48 &minus; 6 = 42.<br>Perimeter: 8 + 4 + 3 + 2 + 5 + 6 = <b>28 m</b>.<br>Mixing these up is very common: area multiplies and is in m&sup2;; perimeter adds and is in m." },
+
+  { type: "mc", topic: "Gift shop", stretch: true,
+    q: "<p>Fudge comes in two bags:</p><ul><li>250 g for &pound;3.50</li><li>400 g for &pound;5.20</li></ul><p>Which bag is better value for money?</p>",
+    options: [
+      "The 400 g bag: it costs &pound;1.30 per 100 g",
+      "The 250 g bag: it costs &pound;1.40 per 100 g",
+      "The 250 g bag, because it is cheaper",
+      "They are the same value"
+    ],
+    answer: 0,
+    hint: "Compare like with like. Work out the price of 100 g in each bag.",
+    why: "250 g is 2.5 lots of 100 g: 3.50 &divide; 2.5 = &pound;1.40 per 100 g.<br>400 g is 4 lots of 100 g: 5.20 &divide; 4 = &pound;1.30 per 100 g.<br>The <b>400 g bag</b> is cheaper per 100 g, so it is better value. The 250 g bag costs less in total, but you get less fudge. In the exam, show the price per 100 g (or per gram) for both, then say which wins." },
+
+  /* ---------- THE FINAL DOOR ---------- */
+  { type: "unlock", topic: "The final door",
+    q: "<p>Back at the exit gate, there is a small plaque under the padlock:</p>" +
+       '<div class="plaque">The code is a time. Use each room&rsquo;s digit once to make the <b>latest time</b> you can on the <b>24 hour clock</b>. Type it without the colon.</div>',
+    code: "2351",
+    hint: "On the 24 hour clock, hours go from 00 up to 23 and minutes from 00 up to 59. Make the hours as late as you can first.",
+    why: "The digits are 5, 2, 3 and 1. The latest hour you can make is <b>23</b>: 25, 31, 32, 51 and so on are not real hours. That leaves 5 and 1 for the minutes, and 51 is later than 15. So the time is 23:51 and the code is <b>2351</b>.<br>5321 is the biggest number you can make, but 53:21 is not a time. Nine minutes to midnight: no wonder the park was closed." }
+  ]
+});
+})();
+</script>
+</body>
+</html>
