@@ -148,12 +148,89 @@ if(!st.set) st.set = { motion: "lively", sound: false, pace: "gentle" };
 if(!st.tac.ment) st.tac.ment = "bal";
 if(!st.tac.press) st.tac.press = "mid";
 if(!st.reveal) st.reveal = [];
+if(!st.ui || typeof st.ui !== "object" || Array.isArray(st.ui)) st.ui = {};
+st.ui.all = st.ui.all ? 1 : 0; st.ui.hints = st.ui.hints === 0 || st.ui.hints === false ? 0 : 1; st.ui.init = st.ui.init ? 1 : 0;
+["seen", "un", "fresh"].forEach(function(k){ if(!st.ui[k] || typeof st.ui[k] !== "object" || Array.isArray(st.ui[k])) st.ui[k] = {} });
 ["cap", "pk", "fk"].forEach(function(k){ if(typeof st[k] !== "string") st[k] = "" });
 if(st.set.ui !== 4){
   var fromOld = st.set.ui === 3;
   if(!fromOld){ st.set.motion = "lively" }
   st.set.ui = 4;
   if(!firstRun) upgraded = true;
+}
+
+/* ---------- v18: opening up gently ---------- */
+var GATE = { news: 1, club: 1, studio: 1, sets: 1, career: 2, stadium: 3, market: 3, legends: 3, business: 4 };
+var VBLURB = { news: "The Chronicle: the local paper writes about your club.", club: "Club: your badges, trophies and records.", studio: "Studio: design your kit, badge, ground and players.", sets: "Set pieces: choose how your team takes corners and free kicks.", career: "Career: your manager level, perks and goals.", stadium: "Stadium: upgrade the ground and hire staff.", market: "Market: sign and sell players, and make transfer deals.", legends: "Legends: your club's heroes and the hall of fame.", business: "Business: your own company and sponsorship deals." };
+var HINTS = {
+  dugout: "This is home. The big button in the middle is the next thing you can do, and it changes as you go. Everything else can wait.",
+  squad: "Pick who plays here. Tap a spot on the pitch, then tap a player. Or press Pick the best side for me and change what you like.",
+  train: "Try a short activity to earn a match. Any one counts, in any order, and you can come back to it whenever you fancy.",
+  league: "The table and the cups live here. Nothing to do, just have a look when you are curious.",
+  news: "The local paper writes about your club. Just for reading.",
+  club: "Your badges and trophies collect here. They turn up by themselves as you play.",
+  studio: "Make your club look the way you want. Nothing here changes how well you play, so go wild.",
+  sets: "Choose how your team takes corners and free kicks. The coach does a good job if you leave it alone.",
+  career: "Your manager level, perks and goals. Dip in when you fancy it. More things open up here as you level up.",
+  stadium: "Upgrade the ground and hire helpers with your coins. There is no rush.",
+  market: "Sign and sell players with coins. The squad can hold 30. You do not need to buy anything.",
+  legends: "Your club's heroes and records. It fills up by itself as you play.",
+  business: "Start a company and sponsor clubs to earn coins. Totally optional."
+};
+function viewOpen(id){
+  if(!GATE[id] || st.ui.all || st.ui.un[id]) return true;
+  return false;
+}
+function gateOk(id){
+  var m = st.played.length + st.hist.length * ROUNDS + allTies().length, g = GATE[id];
+  if(g === 4) return st.hist.length >= 1 || m >= 8;
+  return m >= g;
+}
+function uiSync(){
+  var silent = !st.ui.init && (st.played.length || st.hist.length || allTies().length), fresh = [];
+  st.ui.init = 1;
+  Object.keys(GATE).forEach(function(id){
+    if(st.ui.un[id] || !gateOk(id)) return;
+    st.ui.un[id] = 1;
+    if(!silent){ st.ui.fresh[id] = 1; fresh.push(id) }
+  });
+  if(fresh.length){
+    post("New screens are open", "The Chairman (Jay)", "Something new is ready: " + fresh.map(function(id){ return VBLURB[id] }).join(" ") + " Find them in the menu, or under More on a phone. They are there whenever you fancy a look.");
+    toast("New screens are open: " + fresh.map(function(id){ return VIEWS.filter(function(v){ return v.id === id })[0].label }).join(", ") + ".");
+  }
+  if(fresh.length || silent) save();
+}
+function homeSimple(){ return !st.ui.all && st.played.length < 3 && !st.hist.length }
+function hintBar(id){
+  if(!st.ui.hints || st.ui.seen[id] || !HINTS[id]) return "";
+  return '<div class="hintbar" role="note"><span>' + HINTS[id] + '</span><span class="hb">' + (id === "dugout" ? '<button class="btn btn-quiet" data-act="tour">Quick tour</button>' : "") + '<button class="btn" data-act="hintok" data-v="' + id + '">Got it</button></span></div>';
+}
+var TOUR = [
+  ["This is your dugout", "The big button in the middle is the next thing you can do. It changes as you go. Everything else can wait."],
+  ["Training earns matches", "Try a short activity in Training. Each one earns a match, in any order and at your own pace."],
+  ["Pick your side", "In Squad, tap a spot on the pitch, then a player. Or press Pick the best side for me. You can change it any time."],
+  ["Play and grow", "Kick off and watch, see the highlights, or just the score. Wins, goals and training help your players and your club grow."],
+  ["More arrives as you go", "New screens open after your first match, and again after a few more. A note in your inbox tells you about each one. If you want everything now, there is a switch in Settings."]
+];
+var tourAt = 0;
+function tourOpen(){ tourAt = 0; rvMode = "tour"; tourDraw() }
+function tourDraw(){
+  var t = TOUR[tourAt], last = tourAt === TOUR.length - 1;
+  $("rvbox").innerHTML = '<div class="wzdots" aria-label="Step ' + (tourAt + 1) + ' of ' + TOUR.length + '">' + TOUR.map(function(x, i){ return '<i class="' + (i <= tourAt ? "on" : "") + '"></i>' }).join("") + '</div><div class="eyebrow" style="color:var(--gold)">Quick tour</div><h2>' + t[0] + '</h2><p>' + t[1] + '</p>' +
+    '<div class="mbtns" style="justify-content:center">' + (tourAt ? '<button class="btn" data-act="tourback">Back</button>' : "") + '<button class="btn btn-go btn-big" data-act="' + (last ? "tourclose" : "tournext") + '">' + (last ? "Done" : "Next") + '</button><button class="btn btn-quiet" data-act="tourclose">Skip</button></div>';
+  $("rv").classList.add("on");
+  var f = $("rvbox").querySelector(".btn-go"); if(f) try{ f.focus() }catch(e){}
+}
+function uiAct(a, b){
+  if(a === "hintok"){ st.ui.seen[b.getAttribute("data-v")] = 1; save(); render(); return true }
+  if(a === "hintsagain"){ st.ui.seen = {}; st.ui.hints = 1; save(); render(); toast("The hints will show again, one per screen."); return true }
+  if(a === "uiset"){ st.ui[b.getAttribute("data-k")] = b.getAttribute("data-v") === "true" ? 1 : 0; save(); render(); return true }
+  if(a === "tour"){ tourOpen(); return true }
+  if(a === "titour"){ titleClose(); tourOpen(); return true }
+  if(a === "tournext"){ tourAt = Math.min(TOUR.length - 1, tourAt + 1); tourDraw(); return true }
+  if(a === "tourback"){ tourAt = Math.max(0, tourAt - 1); tourDraw(); return true }
+  if(a === "tourclose"){ closeSeason(); return true }
+  return false;
 }
 function post(title, from, body){
   st.inbox.unshift({ id: st.nid++, title: title, from: from, body: body, read: false });
@@ -739,8 +816,9 @@ function renderClub(){
 function icon(n){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[n] + '</svg>' }
 function renderNav(){
   var unread = st.inbox.some(function(m){ return !m.read }), last = "", out = "", onMain = VIEWS.some(function(v){ return v.main && v.id === view });
-  VIEWS.filter(function(v){ return !v.hidden }).forEach(function(v){
+  VIEWS.filter(function(v){ return !v.hidden && viewOpen(v.id) }).forEach(function(v){
     var d = "";
+    if(st.ui.fresh[v.id] && v.id !== view) d = '<span class="dot" title="New screen"></span>';
     if(v.id === "inbox" && unread) d = '<span class="dot" title="New messages"></span>';
     if(v.id === "dugout" && (pendingList().length && st.played.length < ROUNDS)) d = '<span class="dot" title="A match is ready"></span>';
     if(v.id === "career" && (st.car.newc || carPts() > 0)) d = '<span class="dot" title="Something new in Career"></span>';
@@ -756,8 +834,8 @@ function renderNav(){
 function renderPills(c){
   var tb = S.table(st.seed, st.played), mot = sysReduce ? "Calm (your device setting)" : (calm() ? "Calm" : "Lively"), unread = st.inbox.some(function(m){ return !m.read });
   $("pills").innerHTML = '<span class="pill">Matchday <b>' + Math.min(st.played.length + 1, ROUNDS) + '</b> of ' + ROUNDS + '</span>' +
-    '<span class="pill">League <b>' + (st.played.length ? ord(posOf(tb)) : "-") + '</b></span>' +
-    '<button class="pill" data-act="view" data-v="business" title="Your coins">Coins <b style="color:var(--gold)">' + st.coins + '</b></button>' +
+    (st.played.length ? '<span class="pill">League <b>' + ord(posOf(tb)) + '</b></span>' : "") +
+    (viewOpen("business") ? '<button class="pill" data-act="view" data-v="business" title="Your coins">Coins <b style="color:var(--gold)">' + st.coins + '</b></button>' : '<span class="pill">Coins <b style="color:var(--gold)">' + st.coins + '</b></span>') +
     '<span class="pill">Luck <b>' + Math.round(c.tr.luck * 100) + '%</b></span>' +
     '<button class="pill" data-act="motion" aria-pressed="' + (!calm()) + '" ' + (sysReduce ? "disabled" : "") + ' title="Switch movement on or off any time">Motion: <b style="color:inherit">' + mot + '</b></button>' +
     '<button class="pill" data-act="menu">Menu</button>' +
@@ -766,13 +844,16 @@ function renderPills(c){
 }
 function render(){
   var c = sync();
+  uiSync();
+  if(!viewOpen(view)) view = "dugout";
   var V = VIEWS.filter(function(v){ return v.id === view })[0];
   $("title").textContent = V.title;
   applyMotion(); applyKit();
   renderNav(); renderPills(c); renderClub();
   var fn = { dugout: vDugout, squad: vSquad, train: vTrain, league: vLeague, market: vMarket, business: vBusiness, news: vNews, stadium: vStadium, legends: vLegends, sets: vSets, studio: vStudio, club: vClub, inbox: vInbox, send: vSend, settings: vSettings, career: vCareer }[view];
   var vw = $("view"); vw.style.animation = "none"; void vw.offsetWidth; vw.style.animation = "";
-  vw.innerHTML = fn(c);
+  vw.innerHTML = hintBar(view) + fn(c);
+  if(st.ui.fresh[view]){ delete st.ui.fresh[view]; save() }
   if(view === "send") mountSend();
   if(view === "inbox"){ var any = false; st.inbox.forEach(function(m){ if(!m.read){ m.read = true; any = true } }); if(any){ save(); renderNav(); renderPills(c) } }
   if(view === "club" && newB.length){ newB.forEach(function(b){ b.seen = 1 }) }
@@ -860,7 +941,7 @@ function listCard(c, cls){
   return h + '</div></div>';
 }
 function vSquad(c){
-  return '<div class="grid">' + pitchCard(c, "s7") + listCard(c, "s5") + tacCard(c, "s12") + '<div class="card s12"><h3>Your club</h3><div class="mbtns" style="margin:0"><button class="btn" data-act="view" data-v="studio">Open the Studio</button><button class="btn" data-act="help">How to play</button></div></div></div>';
+  return '<div class="grid">' + pitchCard(c, "s7") + listCard(c, "s5") + tacCard(c, "s12") + '<div class="card s12"><h3>Your club</h3><div class="mbtns" style="margin:0">' + (viewOpen("studio") ? '<button class="btn" data-act="view" data-v="studio">Open the Studio</button>' : "") + '<button class="btn" data-act="tour">Quick tour</button><button class="btn" data-act="help">How to play</button></div></div></div>';
 }
 
 function learnBtns(a, lv){
@@ -916,8 +997,13 @@ function vSettings(){
     '<h4>Sound</h4>' + seg("sound", [["false", "Off"], ["true", "On, soft (crowd and goals)"]]) +
     '<h4>Commentary voice</h4><p class="hint" style="margin:0 0 4px">Reads out the big moments in a match, using your device voice.</p>' + seg("voice", [["false", "Off"], ["true", "On"]]) +
     '<h4>Match speed</h4>' + seg("pace", [["gentle", "Gentle"], ["quick", "Quick"]]) +
+    '<h4>Screens</h4><p class="hint" style="margin:0 0 4px">New screens open up as you play. You can have them all straight away if you prefer.</p>' + uiSeg("all", [["false", "Open up as I play"], ["true", "Show everything now"]]) +
+    '<h4>Hints</h4>' + uiSeg("hints", [["true", "On (one short note per screen)"], ["false", "Off"]]) + '<div class="mbtns"><button class="btn" data-act="tour">Take the quick tour</button><button class="btn" data-act="hintsagain">Show the hints again</button></div>' +
     '<h4>Start again</h4>' + resetHtml() +
     '<div class="mbtns"><button class="btn" data-act="view" data-v="dugout">Back to the dugout</button></div></div>';
+}
+function uiSeg(key, items){
+  return '<div class="opts">' + items.map(function(it){ return '<button data-act="uiset" data-k="' + key + '" data-v="' + it[0] + '" aria-pressed="' + ((st.ui[key] ? "true" : "false") === it[0]) + '">' + it[1] + '</button>' }).join("") + '</div>';
 }
 var resetAsk = "";
 function resetHtml(){
@@ -1473,13 +1559,13 @@ function titleOpen(){
   if(!el){ el = document.createElement("div"); el.id = "ti"; el.className = "ov"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "Menu"); document.body.appendChild(el) }
   var c = ctx(), pend = pendingList().length && st.played.length < ROUNDS;
   var grp = "", btns = "";
-  VIEWS.filter(function(v){ return !v.hidden }).forEach(function(v){
+  VIEWS.filter(function(v){ return !v.hidden && viewOpen(v.id) }).forEach(function(v){
     if(v.g !== grp){ grp = v.g; btns += '<div class="tig">' + v.g + '</div>' }
     btns += '<button class="btn" data-act="tigo" data-v="' + v.id + '">' + icon(v.icon) + v.title + '</button>';
   });
   el.innerHTML = '<div class="rvbox timenu">' + crestSvg(96, true) + '<div class="eyebrow" style="color:var(--gold)">JT\'s Dugout</div><h2>' + esc(clubName()) + '</h2><p class="hint">' + esc(S.leagueName()) + ' &middot; season ' + st.season + ' &middot; ' + st.coins + ' coins</p>' +
     '<button class="btn btn-go btn-big" data-act="tiplay">' + (st.played.length || st.hist.length ? (pend ? "Continue: match ready" : "Continue") : "Play") + '</button>' +
-    '<div class="timbtns">' + btns + '<div class="tig">More</div><button class="btn" data-act="tihelp">How it works</button><button class="btn" data-act="tigo" data-v="inbox">Inbox</button><button class="btn" data-act="tigo" data-v="settings">Settings</button></div></div>';
+    '<div class="timbtns">' + btns + '<div class="tig">More</div><button class="btn" data-act="titour">Quick tour</button><button class="btn" data-act="tihelp">How it works</button><button class="btn" data-act="tigo" data-v="inbox">Inbox</button><button class="btn" data-act="tigo" data-v="settings">Settings</button></div></div>';
   el.classList.add("on"); tiOn = true;
   var b = el.querySelector("button"); if(b) b.focus();
 }
@@ -1738,6 +1824,7 @@ function heroHtml(c, t, tb){
 function vDugout(c){
   var done = st.played.length, t = teamNow(c), tb = S.table(st.seed, st.played), h = '<div class="stack">';
   h += heroHtml(c, t, tb);
+  var base = h; h = "";
   var pos = posOf(tb), last5 = tb.filter(function(r){ return r.id === 0 })[0].form;
   var cid = nextComp(c), CC = COMPS[cid], cs = cupSt(cid), cupHtml;
   if(compWon(cid)) cupHtml = '<div class="big">Winners</div><small>' + esc(CC.name) + '. Brilliant run.</small>';
@@ -1749,9 +1836,11 @@ function vDugout(c){
     '<div class="tile"><h3>Luck</h3><div class="dial" style="width:100%;max-width:120px;margin:0 auto">' + dialSvg(c.tr.luck) + '<div class="num">' + Math.round(c.tr.luck * 100) + '%</div></div></div>' +
     '<div class="tile"><h3>Cups</h3>' + cupHtml + '</div></div>';
   h += '<div class="row2"><section class="card"><h3>Scouting report</h3>' + (done < ROUNDS ? compareBars(t, S.clubTeam(S.ourFixture(done).opp - 1)) + '<div class="cond">' + infoLines(matchInfo("league", null, done, S.ourFixture(done).opp), S.oppName(S.ourFixture(done).opp)).map(function(x){ return '<p>' + x + '</p>' }).join("") + '</div><p class="hint" style="margin:10px 0 0">Our side on the left, theirs on the right. Training sharpens ours, and match day can change the numbers.</p>' : '<p class="hint">Season done. The table and trophies are in League and Club.</p>') + '</section>' + managerCard(c) + '</div>';
-  h += pressTeaser();
-  h += carTeaser();
+  var blockMain = h; h = "";
+  if(viewOpen("news")) h += pressTeaser();
+  if(viewOpen("career")) h += carTeaser();
   h += riseCard(c);
+  var blockExtras = h; h = "";
   var ts = trySessions(c, 3);
   if(ts.length){
     h += '<section class="card"><h3>Try one next</h3><div class="try">' + ts.map(function(a){
@@ -1763,6 +1852,9 @@ function vDugout(c){
     var m = st.played[done - 1], o = S.CLUBS[S.ourFixture(m.round).opp - 1];
     h += '<section class="card"><h3>Last result</h3><div class="resline"><span><span class="res ' + resultOf(m) + '">' + resultOf(m) + '</span> ' + (m.home ? esc(clubName()) + " " + m.hs + ", " + esc(o.name) + " " + m.as : esc(o.name) + " " + m.hs + ", " + esc(clubName()) + " " + m.as) + '</span><button class="btn btn-quiet" data-act="replay" data-k="league" data-i="' + (done - 1) + '">Read the report</button></div></section>';
   }
+  var tl = h; h = base;
+  if(homeSimple()) h += tl + fold("more", "More about your club", blockMain + blockExtras);
+  else h += blockMain + tl + fold("extras", "Club news and extras", blockExtras);
   var rows = tb.slice(0, 5), usIdx = pos - 1;
   if(usIdx > 4) rows.push(tb[usIdx]);
   h += fold("table", "League table", '<div class="tbl-wrap"><table><tr><th>#</th><th>Club</th><th>P</th><th>GD</th><th>Pts</th></tr>' +
@@ -3407,6 +3499,8 @@ function wizDraw(){
   } else if(step === 2){
     var c = ctx();
     h += '<p class="hint">Choose a formation, then tap a spot and a player card to build your side. Or let the computer pick, then change what you like. There is no wrong answer.</p><div class="grid" style="gap:14px">' + pitchCard(c, "s12") + listCard(c, "s12") + '</div>';
+  } else if(full){
+    h += '<div class="how"><div><b class="n">1</b><b>Try a short activity in Training.</b><br>Any one, in any order. Each one earns a match.</div><div><b class="n">2</b><b>Kick off when you fancy.</b><br>Watch it live, see the highlights, or just the score.</div><div><b class="n">3</b><b>Pick your side in Squad.</b><br>Or let the computer pick. You can change it any time.</div></div><p class="hint">New screens open up as you play, and a note in your inbox tells you about each one. The full guide is in the menu under How it works, and the quick tour is there too.</p>';
   } else {
     var D = demoNumbers(); wiz.demo = D;
     h += '<div class="how"><div><b class="n">1</b><b>Build your side.</b><br>You can change it any time in Squad, along with tactics and set pieces.</div>' +
@@ -3531,6 +3625,7 @@ document.addEventListener("click", function(e){
   if(a === "rvclose"){ rvNext(); return }
   if(a === "rvsquad"){ rvNext("squad"); return }
   if(a === "motion"){ if(sysReduce) return; st.set.motion = calm() ? "lively" : "calm"; save(); render(); return }
+  if(a === "view" && !viewOpen(b.getAttribute("data-v"))){ toast("That screen opens up after a few more matches. Settings can show everything now."); return }
   if(a === "view"){ view = b.getAttribute("data-v"); sel = null; try{ history.replaceState(null, "", "#" + view) }catch(er){} render(); window.scrollTo(0, 0); return }
   if(a === "set"){
     var k = b.getAttribute("data-k"), v = b.getAttribute("data-v");
@@ -3543,6 +3638,7 @@ document.addEventListener("click", function(e){
   if(a === "upgrade"){ buyUpgrade(b.getAttribute("data-id")); return }
   if(a === "hire"){ hireStaff(b.getAttribute("data-id")); return }
   if(a === "retire"){ var rid = b.getAttribute("data-id"), rn = numOf(rid); st.retired[rn] = rid; var rc = st.career[rid]; post("Shirt retired", "The Chairman (Jay)", "Number " + rn + " is retired in honour of " + (rc ? rc.n : "a legend") + ". Nobody else will wear it."); pressPush("Number " + rn + " retired for " + (rc ? rc.n : "a legend"), "A shirt goes up on the wall at " + stadiumName() + ".", ""); addFans(5); save(); render(); toast("Number " + rn + " retired."); return }
+  if(uiAct(a, b)) return;
   if(carAct(a, b)) return;
   if(a === "perk"){ perkTake(b.getAttribute("data-id")); return }
   if(a === "acpro"){ acadPromote(b.getAttribute("data-id")); return }
@@ -3659,7 +3755,7 @@ document.addEventListener("click", function(e){
 document.addEventListener("keydown", function(e){
   if(e.key !== "Escape") return;
   if(tiOn) titleClose();
-  else if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else if(rvMode === "newgame" || rvMode === "haggle") rvDismiss(); else rvNext() }
+  else if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else if(rvMode === "newgame" || rvMode === "haggle" || rvMode === "tour") rvDismiss(); else rvNext() }
   else if($("ed").classList.contains("on")) edClose();
   else if(wiz.on) wizClose(); else if($("ov").classList.contains("on")) closeMatch();
 });
