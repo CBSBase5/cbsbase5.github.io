@@ -218,11 +218,12 @@ var view = "dugout", sel = null, posFilter = "ALL", folds = {}, newB = [], studi
 /* ---------- derived numbers ---------- */
 function bonusOf(id){ return (st.dev.bonus && st.dev.bonus[id]) || 0 }
 function tiredOf(id){ var n = (st.run && st.run[id]) || 0; return n >= 11 ? 3 : (n >= 8 ? 2 : (n >= 5 ? 1 : 0)) }
-function rate(p){ return p.r + bonusOf(p.id) - tiredOf(p.id) + (st.cap === p.id ? 1 : 0) }
+function rate(p){ return p.r + bonusOf(p.id) - tiredOf(p.id) + (st.cap === p.id ? 1 : 0) + carFx(p.id) }
 function bonusMap(){
   var o = {}, k; for(k in st.dev.bonus) o[k] = st.dev.bonus[k];
   for(k in st.run){ var tt = tiredOf(k); if(tt) o[k] = (o[k] || 0) - tt }
   if(st.cap) o[st.cap] = (o[st.cap] || 0) + 1;
+  st.xi.forEach(function(id){ if(id){ var f = carFx(id); if(f) o[id] = (o[id] || 0) + f } });
   return o;
 }
 function ctx(){
@@ -813,6 +814,7 @@ function restTired(){
   }
   return out;
 }
+function frIn(p){ return !!(p && carUnlocked("stories") && st.car.fr[p.id] && st.xi.indexOf(st.car.fr[p.id]) >= 0) }
 function pitchCard(c, cls){
   var F = S.FORMATIONS[st.formation], t = teamNow(c), i;
   var h = '<div class="card ' + cls + '"><h3>Formation</h3><div class="formrow">' +
@@ -824,7 +826,7 @@ function pitchCard(c, cls){
   for(i = 0; i < 11; i++){
     var pid = st.xi[i], p = pid ? S.playerById(pid) : null, slotPos = F.slots[i];
     var eff = p ? Math.round(rate(p) * S.fit(p.pos, slotPos)) : "";
-    h += '<button class="slot ' + slotPos + (sel && sel.slot === i ? " sel" : "") + (p && p.pos !== slotPos ? " off" : "") + '" data-act="slot" data-i="' + i + '" style="left:' + F.xy[i][0] + '%;top:' + F.xy[i][1] + '%" aria-label="' + slotPos + ' slot ' + (p ? esc(p.name) + ", number " + numOf(p.id) + ", rated " + eff : "empty") + '">' + shirt(kitOf(slotPos === "GK"), p ? numOf(p.id) : "+") + '<span>' + (p ? esc(surname(p.name)) + (st.cap === p.id ? " (C)" : "") + ' <i>' + eff + '</i>' : slotPos) + '</span></button>';
+    h += '<button class="slot ' + slotPos + (sel && sel.slot === i ? " sel" : "") + (p && p.pos !== slotPos ? " off" : "") + '" data-act="slot" data-i="' + i + '" style="left:' + F.xy[i][0] + '%;top:' + F.xy[i][1] + '%" aria-label="' + slotPos + ' slot ' + (p ? esc(p.name) + ", number " + numOf(p.id) + ", rated " + eff + (frIn(p) ? ", playing with a best mate" : "") : "empty") + '">' + shirt(kitOf(slotPos === "GK"), p ? numOf(p.id) : "+") + '<span>' + (p ? esc(surname(p.name)) + (st.cap === p.id ? " (C)" : "") + ' <i>' + eff + '</i>' : slotPos) + '</span>' + (frIn(p) ? '<em class="frb" aria-hidden="true">&hearts;</em>' : "") + '</button>';
   }
   return h + '</div><p class="hint" style="margin-top:12px">Tap a spot on the pitch, then tap a player card to put them there. A faded shirt means a player is out of position and plays a bit below their rating. The small number is their rating in that spot.</p><div class="mbtns"><button class="btn" data-act="auto">Pick the best side for me</button></div></div>';
 }
@@ -1095,7 +1097,7 @@ function sellPlayer(id){
 
 /* views */
 function vMarket(c){
-  var list = marketList(), h = '<div class="stack"><div class="card"><h3>Transfer market</h3><p class="hint" style="margin:0">You have <b style="color:var(--gold)">' + st.coins + ' coins</b>. Your squad has ' + c.avail.length + ' players (most is 30). New players are listed every three league matches, and there is no rush.</p></div>';
+  var list = marketList(), h = '<div class="stack">' + vTx(c) + '<div class="card"><h3>Transfer market</h3><p class="hint" style="margin:0">You have <b style="color:var(--gold)">' + st.coins + ' coins</b>. Your squad has ' + c.avail.length + ' players (most is 30). New players are listed every three league matches, and there is no rush.</p></div>';
   h += '<div class="card"><h3>Players for sale</h3><div class="mkgrid">' + (list.length ? list.map(function(l){
     var worst = 99, F = S.FORMATIONS[st.formation];
     st.xi.forEach(function(id, i){ var q = id ? playerOf(id) : null; if(q && F.slots[i] === l.pos) worst = Math.min(worst, rate(q)) });
@@ -1607,6 +1609,7 @@ function edDraw(){
   h += '<div class="edtop"><div id="edcard">' + pcard(p, { tag: "div", mini: 1 }) + '</div><div class="edrad">' + radarSvg(p, 150) + '<div class="skl">' + ["atk", "mid", "def", "gk"].map(function(k){
     return '<div class="skr"><span>' + SKILLNAME[k] + '</span><div class="track"><i style="width:' + A[k].v + '%;background:' + STATCOL[k] + '"></i></div><b>' + A[k].v + '</b>' + (A[k].tr ? '<em>+' + A[k].tr + '</em>' : '') + '</div>';
   }).join("") + '<p class="hint" style="margin:6px 0 0">Every training session this player does adds five points to the skill it trains.</p></div></div></div>';
+  h += plCardHtml(p.id);
   h += '<div class="edgrid"><div><label class="sendlab" for="edname">Name</label><input class="wzin" id="edname" maxlength="22" value="' + esc(p.name) + '"></div><div><label class="sendlab" for="ednum">Shirt number</label><input class="wzin" id="ednum" type="number" min="1" max="99" value="' + numOf(id) + '" style="max-width:110px"></div></div>';
   if(!mine && !isSg(id) && st.pn[id]) h += '<div class="mbtns" style="margin:4px 0 0"><button class="btn btn-quiet" data-act="edname0">Back to the original name (' + esc(ORIG[id]) + ')</button></div>';
   if(mine){
@@ -1880,6 +1883,9 @@ var CHAPS = [
   { id: "leg", t: "A legend is born", hint: "Have a player join the Hall of fame.", when: function(){ return legends().length >= 1 }, l: "One of your players has written their name into the club's history. That is your doing too." },
   { id: "champ", t: "Champions of Division One", hint: "Win the top division.", when: function(){ return st.hist.some(function(h){ return h.tier === 0 && h.pos === 1 }) }, l: "Champions of the top division. What a journey, from the first training session to this.", big: 1 },
   { id: "dbl", t: "The double", hint: "Win the league and the Cup in one season.", when: function(){ return st.hist.some(function(h){ return h.pos === 1 && h.cup === "Winners" }) }, l: "The league and the Cup in the same season. Very few managers ever manage it.", big: 1 },
+  { id: "deal", t: "Dealmaker", hint: "Complete a transfer deal.", when: function(){ return st.car.txn >= 1 }, l: "Your first transfer deal is done. The agents already have your number." },
+  { id: "goal", t: "Goal reached", hint: "Help a player reach a personal goal.", when: function(){ return st.car.plg >= 1 }, l: "A player has hit a personal goal. Little wins like this make a squad believe in itself." },
+  { id: "era", t: "Passing the torch", hint: "Retire and pass on the club.", when: function(){ return st.car.era >= 2 }, l: "You passed the club on in great shape. Your name stays on the wall for good.", big: 1 },
   { id: "five", t: "Five seasons", hint: "Finish five seasons.", when: function(){ return st.hist.length >= 5 }, l: "Five seasons. You are building something that lasts, and the whole town knows it.", big: 1 }
 ];
 
@@ -1946,7 +1952,7 @@ function carXp(n){
     post("Career level " + l + ": " + CTIT[l - 1], "The Chairman (Jay)", "You have reached career level " + l + ", " + CTIT[l - 1] + ". There is a bonus of " + (25 * l) + " coins and a perk point waiting in Career whenever you fancy choosing one.");
     out = "Career level " + l + ": " + CTIT[l - 1] + ".";
   }
-  if(b > a) st.car.newc = 1;
+  if(b > a){ st.car.newc = 1; carUnlocks() }
   return out;
 }
 function carCheck(){
@@ -1969,26 +1975,31 @@ function carCheck(){
 
 /* what the board would like to see this season */
 function carObjs(){
-  var t = st.tier, tb = S.table(st.seed, st.played), pos = st.played.length ? posOf(tb) : 0, fin = st.played.length >= ROUNDS;
-  var tgt = [8, 7, 6, 5][t] || 8, stre = t === 0 ? 1 : 3;
+  var t = st.tier, tb = S.table(st.seed, st.played), pos = st.played.length ? posOf(tb) : 0, fin = st.played.length >= ROUNDS, lv = st.car.oLv || carLevel();
+  var tgt = Math.max(3, ([8, 7, 6, 5][t] || 8) - Math.floor((lv - 1) / 3)), stre = t === 0 ? 1 : 3;
   var wins = st.played.filter(function(m){ return resultOf(m) === "W" }).length;
   var cw = allTies().filter(function(x){ return x.won }).length;
+  var wt = Math.min(10, 5 + Math.floor((lv - 1) / 3)), ws = Math.min(13, 8 + Math.floor((lv - 1) / 3));
+  var ct = 1 + Math.floor(lv / 5), cs = 3 + Math.floor(lv / 4);
+  var lt = Math.min(15, 5 + lv), ls = Math.min(24, 11 + lv), late = st.played.length >= 8;
   var list = [
     { id: "pos", text: "Finish in the top " + tgt, big: t === 0 ? "Win the league" : "Finish in the top three", val: pos, t: tgt, s: stre, low: true, fin: fin, now: pos ? ord(pos) + " at the moment" : "Not started yet" },
-    { id: "wins", text: "Win 5 league matches", big: "Win 8 league matches", val: wins, t: 5, s: 8, now: wins + " won so far" },
-    { id: "cup", text: "Win a cup tie", big: "Win 3 cup ties", val: cw, t: 1, s: 3, now: cw + " won so far" },
-    { id: "learn", text: "Finish 6 activities", big: "Finish 12 activities", val: st.car.act, t: 6, s: 12, now: st.car.act + " finished so far" }
+    { id: "wins", text: "Win " + wt + " league matches", big: "Win " + ws + " league matches", val: wins, t: wt, s: ws, now: wins + " won so far" },
+    { id: "cup", text: ct === 1 ? "Win a cup tie" : "Win " + ct + " cup ties", big: "Win " + cs + " cup ties", val: cw, t: ct, s: cs, now: cw + " won so far" },
+    { id: "learn", text: "Finish " + lt + " activities", big: "Finish " + ls + " activities", val: st.car.act, t: lt, s: ls, now: st.car.act + " finished so far" }
   ];
   list.forEach(function(o){
-    if(o.low){ o.ok = o.fin && o.val > 0 && o.val <= o.t; o.sok = o.fin && o.val > 0 && o.val <= o.s; o.pct = o.val ? clamp(Math.round(100 * (16 - o.val) / (16 - o.t)), 0, 100) : 0; o.on = o.val > 0 && o.val <= o.t }
-    else { o.ok = o.val >= o.t; o.sok = o.val >= o.s; o.pct = clamp(Math.round(100 * o.val / o.s), 0, 100); o.on = o.ok }
+    if(o.low){ o.ok = o.fin && o.val > 0 && o.val <= o.t; o.sok = o.fin && o.val > 0 && o.val <= o.s; o.pct = o.val ? clamp(Math.round(100 * (16 - o.val) / (16 - o.t)), 0, 100) : 0; o.on = o.val > 0 && o.val <= o.t; o.t2 = o.t + 2; o.cok = o.fin && o.val > 0 && o.val <= o.t2 }
+    else { o.ok = o.val >= o.t; o.sok = o.val >= o.s; o.pct = clamp(Math.round(100 * o.val / o.s), 0, 100); o.on = o.ok; o.t2 = Math.max(1, Math.ceil(o.t * 0.7)); o.cok = o.val >= o.t2 }
+    o.late = late;
   });
   return list;
 }
 function carObjPay(list){
   var coins = 0, xp = 0, board = 0, n = 0;
-  list.forEach(function(o){ if(o.ok){ coins += 40; xp += 15; board += 4; n++ } if(o.sok){ coins += 30; xp += 10; board += 3 } });
-  return { coins: coins, xp: xp, board: board, n: n };
+  var n2 = 0;
+  list.forEach(function(o){ if(o.ok){ coins += 40; xp += 15; board += 4; n++ } else if(o.cok && o.late){ coins += 20; xp += 7; board += 2; n2++ } if(o.sok){ coins += 30; xp += 10; board += 3 } });
+  return { coins: coins, xp: xp, board: board, n: n, n2: n2 };
 }
 
 /* a match has been played */
@@ -2012,6 +2023,8 @@ function carMatch(en, kind, p){
     else if(x === "D") notes.push("A draw in the derby against " + on + ". Honours even.");
     else notes.push("Derby day did not go our way against " + on + ". There is always a return match.");
   }
+  notes = notes.concat(plTick(en, kind, p || { xiStart: [] }));
+  carBanter(en, kind);
   carBoard(bt);
   lv = carXp(xp);
   var fresh = carCheck();
@@ -2032,12 +2045,13 @@ function carSettle(m){
   if(pay.coins) addCoins(pay.coins, "Board objectives");
   carBoard(pay.board + (m.pos === 1 ? 6 : (m.up ? 4 : 0)));
   carXp(xp);
-  post("Board report, season " + st.season, "The Board", pay.n ? "The board is delighted with " + pay.n + " of 4 objectives this season, worth " + pay.coins + " coins. " + (pay.n < 4 ? "The others are ideas to try next time." : "A clean sweep.") : "No targets hit this time, and that is fine. The board still backs you and the squad keeps all it has learned.");
-  return list.map(function(o){ return { id: o.id, text: o.text, ok: o.ok ? 1 : 0, sok: o.sok ? 1 : 0 } });
+  post("Board report, season " + st.season, "The Board", pay.n + pay.n2 ? "The board is delighted with " + pay.n + " of 4 objectives this season" + (pay.n2 ? " and a second chance on " + pay.n2 : "") + ", worth " + pay.coins + " coins. " + (pay.n < 4 ? "The others are ideas to try next time." : "A clean sweep.") : "No targets hit this time, and that is fine. The board still backs you and the squad keeps all it has learned.");
+  return list.map(function(o){ return { id: o.id, text: o.text, ok: o.ok ? 1 : 0, sok: o.sok ? 1 : 0, cok: (!o.ok && o.cok && o.late) ? 1 : 0 } });
 }
 function carNewSeason(){
   var a = st.car.acad, gift;
-  st.car.act = 0;
+  st.car.act = 0; st.car.oLv = carLevel();
+  if(carUnlocked("rival")) post(st.car.rm.name + " is back", "The Chronicle", st.car.rm.name + " of " + carRival() + " has spent the break studying your side. A " + st.car.rm.style.toLowerCase() + " boss with " + rivalExp() + (rivalExp() === 1 ? " season" : " seasons") + " of experience now. Expect a fiery derby.");
   var grew = [];
   st.signed.forEach(function(s){
     if(s.yg && s.r < s.yg){ var n = Math.min(s.yg - s.r, 3 + (hasPerk("youth") ? 1 : 0)); s.r += n; grew.push(s.name) }
@@ -2119,10 +2133,12 @@ function vCareer(c){
     '<div class="cboard"><div><b>The board</b><span class="hint"> feels ' + carBandOf(car.board).toLowerCase() + '</span></div>' + carBar(car.board, "bd") + '<p class="hint" style="margin:0">Win matches and reach objectives and the board puts coins into the club at the start of each season. There is no sack in this game. The board always backs you.</p></div></div>';
   /* objectives */
   var pay = carObjPay(objs);
-  h += '<div class="card"><h3>Board objectives, season ' + st.season + '</h3><p class="hint" style="margin:0 0 8px">Four targets from the board, only if you fancy them. Reach one for 40 coins and 15 XP, and its stretch goal for 30 coins and 10 XP more. Paid when the season ends.</p><div class="cobjs">' + objs.map(function(o){
+  h += '<div class="card"><h3>Board objectives, season ' + st.season + '</h3><p class="hint" style="margin:0 0 8px">Four targets from the board, only if you fancy them. They grow a little as your career level rises. Reach one for 40 coins and 15 XP, and its stretch goal for 30 coins and 10 XP more. If one slips away, the board offers a second chance from matchday 8 for half the reward. Paid when the season ends.</p><div class="cobjs">' + objs.map(function(o){
     var tag = o.sok ? '<span class="chip-on">Stretch reached</span>' : (o.ok ? '<span class="chip-on">Reached</span>' : (o.low && !o.fin ? (o.on ? '<span class="chip-on">On track</span>' : '<span class="chip-off">Not yet</span>') : '<span class="chip-off">In progress</span>'));
-    return '<div class="cobj"><div class="coh"><b>' + o.text + '</b>' + tag + '</div>' + carBar(o.pct, o.ok ? "ok" : "") + '<small>' + o.now + ' &middot; Stretch: ' + o.big.toLowerCase() + '</small></div>';
+    return '<div class="cobj"><div class="coh"><b>' + o.text + '</b>' + tag + '</div>' + carBar(o.pct, o.ok ? "ok" : "") + '<small>' + o.now + ' &middot; Stretch: ' + o.big.toLowerCase() + '</small>' + (o.late && !o.ok ? '<small class="sc">Second chance: ' + (o.low ? 'finish in the top ' + o.t2 : 'reach ' + o.t2) + ', worth half the reward.' + (o.cok ? ' You are there.' : '') + '</small>' : "") + '</div>';
   }).join("") + '</div>' + (pay.coins ? '<p class="hint" style="margin:8px 0 0">So far worth <b>' + pay.coins + ' coins</b> at the end of the season.</p>' : '') + '</div>';
+  /* unlocks */
+  h += '<div class="card"><h3>New things to unlock</h3><div class="unls">' + UNL.map(function(u){ var on = car.unl[u.id]; return '<div class="unl' + (on ? " on" : "") + '"><b>' + u.name + '</b><small>' + (on ? u.what : 'Unlocks at career level ' + u.lvl + '.') + '</small></div>' }).join("") + '</div></div>';
   /* perks */
   h += '<div class="card"><h3>Manager perks &middot; ' + pts + (pts === 1 ? " point" : " points") + ' to spend</h3><p class="hint" style="margin:0 0 8px">You earn a perk point at every career level. Each perk is yours for good.</p><div class="perks">' + PERKS.map(function(p){
     var own = hasPerk(p.id);
@@ -2130,8 +2146,9 @@ function vCareer(c){
   }).join("") + '</div></div>';
   /* derby */
   var nd = carNextDerby(), d = car.derby, dn = d.w + d.d + d.l;
-  h += '<div class="card"><h3>Local derby</h3><div class="cder">' + opCrest(car.rival, 64, true) + '<div style="flex:1;min-width:0"><b>' + esc(carRival()) + '</b><span class="hint" style="display:block">Your local rivals. Beating them earns 10 coins, extra XP and a happy town.</span><span class="hint" style="display:block">' + (nd ? "Next meeting: matchday " + nd + "." : "The derby is done for this season.") + '</span></div></div>' +
+  h += '<div class="card"><h3>Local derby</h3><div class="cder">' + opCrest(car.rival, 64, true) + '<div style="flex:1;min-width:0"><b>' + esc(carRival()) + '</b><span class="hint" style="display:block">Your local rivals. Beating them earns 10 coins, extra XP and a happy town.</span>' + (carUnlocked("rival") ? '<span class="hint" style="display:block">Manager <b>' + esc(car.rm.name) + '</b>, ' + car.rm.style.toLowerCase() + ' style, ' + rivalExp() + (rivalExp() === 1 ? ' season' : ' seasons') + ' of experience. ' + esc(RSTY[car.rm.style].note.charAt(0).toUpperCase() + RSTY[car.rm.style].note.slice(1)) + '.</span>' : '<span class="hint" style="display:block">A rival manager takes charge from career level 3.</span>') + '<span class="hint" style="display:block">' + (nd ? "Next meeting: matchday " + nd + "." : "The derby is done for this season.") + '</span></div></div>' +
     '<div class="sumgrid" style="margin-top:10px"><div><b>' + dn + '</b><small>Played</small></div><div><b>' + d.w + '</b><small>Won</small></div><div><b>' + d.d + '</b><small>Drawn</small></div><div><b>' + d.l + '</b><small>Lost</small></div><div><b>' + d.gf + '</b><small>For</small></div><div><b>' + d.ga + '</b><small>Against</small></div></div></div>';
+  h += plCareerHtml(c);
   /* academy */
   var a = car.acad, youth = st.signed.filter(function(s){ return s.yg }), nextC = a.lvl < 3 ? ACAD_COST[a.lvl] : 0;
   h += '<div class="card"><h3>' + ACAD_NAME[a.lvl] + '</h3><p class="hint" style="margin:0 0 8px">New youngsters arrive each season and signing them is free. They start modest and grow every season, so they are a long game. ' + (a.grads ? a.grads + " graduated so far." : "") + '</p>';
@@ -2148,6 +2165,7 @@ function vCareer(c){
     var on = car.chap[p.id];
     return '<li class="' + (on ? "on" : "") + '"><b>' + p.t + '</b><small>' + (on ? p.l : p.hint) + '</small></li>';
   }).join("") + '</ol></div>';
+  h += legacyHtml();
   /* records */
   var played = t.w + t.d + t.l;
   h += '<div class="card"><h3>Career records</h3><div class="sumgrid"><div><b>' + played + '</b><small>Played</small></div><div><b>' + t.w + '</b><small>Won</small></div><div><b>' + t.d + '</b><small>Drawn</small></div><div><b>' + t.l + '</b><small>Lost</small></div><div><b>' + t.gf + '</b><small>Goals for</small></div><div><b>' + t.ga + '</b><small>Against</small></div></div>' +
@@ -2166,11 +2184,448 @@ function vCareer(c){
 }
 function carSeasonHtml(){
   var o = carObjs(), pay = carObjPay(o);
-  return '<div class="cseas"><b>Board report</b><ul>' + o.map(function(q){ return '<li class="' + (q.ok ? "ok" : "") + '">' + (q.ok ? "Reached: " : "Not this time: ") + q.text + (q.sok ? " (and the stretch goal)" : "") + '</li>' }).join("") + '</ul><p style="margin:6px 0 0">' + (pay.coins ? 'Board bonus: <b>' + pay.coins + ' coins</b> and <b>' + pay.xp + ' career XP</b>.' : 'No targets reached this time, and that is fine. They are only ideas.') + '</p></div>';
+  return '<div class="cseas"><b>Board report</b><ul>' + o.map(function(q){ return '<li class="' + (q.ok || (q.cok && q.late) ? "ok" : "") + '">' + (q.ok ? "Reached: " : (q.cok && q.late ? "Second chance reached: " : "Not this time: ")) + q.text + (q.sok ? " (and the stretch goal)" : "") + '</li>' }).join("") + '</ul><p style="margin:6px 0 0">' + (pay.coins ? 'Board bonus: <b>' + pay.coins + ' coins</b> and <b>' + pay.xp + ' career XP</b>.' : 'No targets reached this time, and that is fine. They are only ideas.') + '</p></div>';
 }
 function carDerbyLine(opp){
   if(!playing || playing.kind !== "league" || opp !== st.car.rival) return "";
-  return '<p class="derbyline"><b>Derby day.</b> ' + esc(S.oppName(opp)) + ' are your local rivals. The fans are loud today.</p>';
+  return '<p class="derbyline"><b>Derby day.</b> ' + esc(S.oppName(opp)) + ' are your local rivals.' + (carUnlocked("rival") ? ' Their boss ' + esc(st.car.rm.name) + ' ' + RSTY[st.car.rm.style].note + '.' : ' The fans are loud today.') + '</p>';
+}
+
+/* ---------- v16: player stories, rival manager, transfer deals, legacy ---------- */
+var UNL = [
+  { id: "stories", lvl: 2, name: "Player stories", what: "Every player gets a mood, a personal goal, a backstory and a best mate." },
+  { id: "rival", lvl: 3, name: "Rival manager", what: "Your derby rivals get a manager with a style, a growing reputation and plenty to say." },
+  { id: "tx", lvl: 4, name: "Transfer deals", what: "Offers for your players, bids for theirs and swap deals, in Market." },
+  { id: "legacy", lvl: 10, name: "Legacy", what: "Retire and pass the club on, and build a hall of fame with your legacy points." }
+];
+var HOMES = ["Marlow Bridge", "Ashby Vale", "Little Corton", "Hollin Green", "Wexcombe", "Dunmere", "Foxley Cross", "Thornby", "Pelham Quay", "Kettlewick", "Brayfield", "Oakhaven", "Redmoor", "Saltmarsh End", "Cobbleton", "Eastwick", "Larkhill Rise", "Norbury Dale", "Quillford", "Tanner's Mill"];
+var YOUTHL = ["kicked a ball against the garage door every evening", "played in the park until the lights came on", "won a medal at the school sports day", "was the smallest kid in the team and the loudest", "learned to juggle a ball before learning to ride a bike", "watched every match with a gran who knew all the rules", "practised free kicks in the back garden for hours", "made the first team by never missing training"];
+var TRAIT2 = ["Big game player", "Cool finisher", "Never tires", "Team spirit", "Calm on the ball", "Fearless tackler", "Safe hands", "Crowd favourite"];
+var DISP = [
+  { id: "banner", name: "Season banner", cost: 4, d: '<path d="M6 4h12v16l-6-4-6 4z" fill="currentColor"/>' },
+  { id: "plaque", name: "Golden plaque", cost: 6, d: '<rect x="4" y="6" width="16" height="12" rx="2" fill="currentColor"/><path d="M8 10h8M8 14h5" stroke="#10172a" stroke-width="2"/>' },
+  { id: "statue", name: "Bronze statue", cost: 12, d: '<circle cx="12" cy="6" r="3.4" fill="currentColor"/><path d="M8 20l1-9h6l1 9zM5 22h14v-2H5z" fill="currentColor"/>' },
+  { id: "gates", name: "Memorial gates", cost: 18, d: '<path d="M3 21V8l4-3 4 3v13zM13 21V8l4-3 4 3v13z" fill="currentColor"/>' },
+  { id: "stand", name: "Named stand", cost: 25, d: '<path d="M2 20h20v2H2zM4 8h16v10H4z" fill="currentColor"/><path d="M4 12h16M4 15h16" stroke="#10172a" stroke-width="1.4"/>' },
+  { id: "mural", name: "Town mural", cost: 30, d: '<rect x="3" y="4" width="18" height="16" rx="2" fill="currentColor"/><circle cx="9" cy="10" r="2.4" fill="#10172a"/><path d="M4 19l6-6 4 4 3-3 3 3v2z" fill="#10172a"/>' }
+];
+var RSTY = {
+  Attacking: { atk: 1.5, mid: 0, def: -1, note: "likes to attack with everything" },
+  Defensive: { atk: -1, mid: 0, def: 1.5, note: "builds a wall and hits on the break" },
+  Tricky: { atk: 0, mid: 1.5, def: 0, note: "plays clever passing games to unsettle you" }
+};
+var RPRE = ["Mark my words, {c} will not leave our ground with a thing. This is OUR town!", "I have waited all season for this one. {c} are about to learn what derby day means.", "Tell the fans to bring their loudest voices. {c} will not know what hit them."];
+var RWIN = ["A freak result! The scoreboard lies and the whole town knows it. We will be back, and louder!", "I will remember this day forever, and so will they. The return match cannot come soon enough."];
+var RLOSS = ["{c} talk big, but I have been shown up today. Give us the next one and watch the thunder roll in.", "A bruised ego, a bruised town, but we shall rise again. Derby day belongs to {c} for now."];
+var RDRAW = ["Honours even, but history will remember who blinked first. Next time, {c}, next time!"];
+
+/* ---- state ---- */
+function carNorm2(){
+  var c = st.car, k;
+  if(!c.unl || typeof c.unl !== "object" || Array.isArray(c.unl)) c.unl = {};
+  var u = {}; UNL.forEach(function(x){ if(c.unl[x.id]) u[x.id] = 1 }); c.unl = u;
+  c.era = Math.max(1, Math.floor(+c.era || 1)); c.lp = Math.max(0, Math.floor(+c.lp || 0));
+  c.txn = Math.max(0, Math.floor(+c.txn || 0)); c.plg = Math.max(0, Math.floor(+c.plg || 0));
+  if(!c.hof || typeof c.hof !== "object" || Array.isArray(c.hof)) c.hof = {};
+  var dd = {}; DISP.forEach(function(x){ if(c.hof[x.id]) dd[x.id] = 1 }); c.hof = dd;
+  if(!Array.isArray(c.legacy)) c.legacy = [];
+  c.legacy = c.legacy.slice(0, 12).filter(function(x){ return x && typeof x === "object" }).map(function(x){
+    return { era: Math.floor(+x.era || 1), lvl: clamp(Math.floor(+x.lvl || 1), 1, 10), xp: Math.max(0, Math.floor(+x.xp || 0)), w: Math.max(0, Math.floor(+x.w || 0)), d: Math.max(0, Math.floor(+x.d || 0)), l: Math.max(0, Math.floor(+x.l || 0)), seasons: Math.max(0, Math.floor(+x.seasons || 0)), trophies: Math.max(0, Math.floor(+x.trophies || 0)), best: Math.max(0, Math.floor(+x.best || 0)), lp: Math.max(0, Math.floor(+x.lp || 0)), upto: Math.floor(+x.upto || 1) };
+  });
+  c.oLv = clamp(Math.floor(+c.oLv || carLevel()), 1, 10);
+  var rm = c.rm;
+  if(!rm || typeof rm !== "object" || RSTY[rm.style] === undefined || !rm.name){
+    var r = S.rng(hash("rm" + c.aseed));
+    c.rm = { name: FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)], style: ["Attacking", "Defensive", "Tricky"][Math.floor(r() * 3)], since: 1 };
+  } else { rm.name = String(rm.name).slice(0, 24); rm.since = Math.max(1, Math.floor(+rm.since || 1)) }
+  if(!c.pl || typeof c.pl !== "object" || Array.isArray(c.pl)) c.pl = {};
+  Object.keys(c.pl).forEach(function(id){
+    var p = c.pl[id];
+    if(!p || typeof p !== "object"){ delete c.pl[id]; return }
+    p.mood = clamp(Math.round(+p.mood || 60), 0, 100); p.gl = Math.max(0, Math.floor(+p.gl || 0)); p.tr = TRAIT2.indexOf(p.tr) >= 0 ? p.tr : "";
+    var g = p.goal;
+    if(g && typeof g === "object" && ["score", "start", "mom", "clean", "grow", "trophy", "promo"].indexOf(g.k) >= 0) p.goal = { k: g.k, n: clamp(Math.floor(+g.n || 1), 1, 20), base: Math.max(0, Math.floor(+g.base || 0)), prog: Math.max(0, Math.floor(+g.prog || 0)), promise: g.promise ? 1 : 0 };
+    else p.goal = null;
+  });
+  if(!c.fr || typeof c.fr !== "object" || Array.isArray(c.fr)) c.fr = {};
+  Object.keys(c.fr).forEach(function(id){ if(typeof c.fr[id] !== "string") delete c.fr[id] });
+  var tx = c.tx;
+  if(!tx || typeof tx !== "object" || Array.isArray(tx)) tx = c.tx = {};
+  tx.w = Math.floor(+tx.w || 0);
+  function okT(t){ return t && typeof t === "object" && typeof t.id === "string" && typeof t.name === "string" && ["GK", "DEF", "MID", "FWD"].indexOf(t.pos) >= 0 && isFinite(+t.r) && isFinite(+t.ask) }
+  tx.targets = (Array.isArray(tx.targets) ? tx.targets : []).filter(okT).slice(0, 8).map(function(t){ return { id: t.id.slice(0, 20), name: t.name.slice(0, 24), pos: t.pos, r: clamp(Math.floor(+t.r), 30, 99), ask: Math.max(20, Math.floor(+t.ask)), club: clamp(Math.floor(+t.club || 1), 1, 15), note: String(t.note || "").slice(0, 40), rv: t.rv ? 1 : 0 } });
+  tx.offers = (Array.isArray(tx.offers) ? tx.offers : []).filter(function(o){ return o && typeof o === "object" && typeof o.id === "string" && isFinite(+o.price) }).slice(0, 4).map(function(o){ return { id: o.id.slice(0, 20), price: Math.max(5, Math.floor(+o.price)), club: clamp(Math.floor(+o.club || 1), 1, 15), asked: o.asked ? 1 : 0 } });
+  if(firstRun) c.nv = 1; else c.nv = c.nv ? 1 : 0;
+}
+carNorm2();
+
+/* ---- unlocks ---- */
+function carUnlocked(id){ return !!(st.car && st.car.unl && st.car.unl[id]) }
+function carUnlocks(){
+  UNL.forEach(function(u){
+    if(st.car.unl[u.id] || carLevel() < u.lvl) return;
+    st.car.unl[u.id] = 1; st.car.newc = 1;
+    post("New: " + u.name, "The Chairman (Jay)", "You have unlocked " + u.name + ". " + u.what + " It is all there whenever you fancy a look.");
+  });
+}
+carUnlocks();
+
+/* ---- player stories ---- */
+function plOf(id){
+  var p = st.car.pl[id];
+  if(!p) p = st.car.pl[id] = { mood: 60, goal: null, tr: "", gl: 0 };
+  return p;
+}
+function plMoodLabel(m){ return m >= 80 ? "Delighted" : (m >= 60 ? "Happy" : (m >= 40 ? "Settled" : (m >= 26 ? "Restless" : "Wants a chat"))) }
+function carFx(id){
+  if(!st.car || !st.car.unl || !st.car.unl.stories) return 0;
+  var p = st.car.pl[id], fx = 0;
+  if(p){ if(p.mood >= 80) fx += 1; else if(p.mood <= 25) fx -= 1 }
+  var f = st.car.fr[id];
+  if(f && st.xi.indexOf(id) >= 0 && st.xi.indexOf(f) >= 0) fx += 1;
+  return fx;
+}
+function plStory(id){
+  var p = playerOf(id), h = hash("story" + id + st.car.aseed);
+  if(!p) return "";
+  return p.name + " grew up in " + HOMES[h % HOMES.length] + ", where they " + YOUTHL[(h >>> 5) % YOUTHL.length] + ".";
+}
+function plFriends(){
+  var all = S.PLAYERS.map(function(p){ return p.id }), fr = st.car.fr, ok = {};
+  all.forEach(function(id){ ok[id] = 1 });
+  Object.keys(fr).forEach(function(id){ if(!ok[id] || !ok[fr[id]] || fr[fr[id]] !== id){ delete fr[id] } });
+  var free = all.filter(function(id){ return !fr[id] }).sort(function(a, b){ return hash(a + "fr" + st.car.aseed) - hash(b + "fr" + st.car.aseed) });
+  for(var i = 0; i + 1 < free.length; i += 2){ fr[free[i]] = free[i + 1]; fr[free[i + 1]] = free[i] }
+}
+function plGoalText(g, id){
+  var t = { score: "Score " + g.n + (g.n === 1 ? " goal" : " goals"), start: "Start " + g.n + (g.n === 1 ? " match" : " matches"), mom: "Win player of the match", clean: "Help keep " + g.n + " clean sheets", grow: "Grow by " + g.n + " through training and matches", trophy: "Win a trophy with the club", promo: "Help the club win promotion" }[g.k];
+  return t || "A goal to aim for";
+}
+function plGoalProg(id, g){
+  if(g.k === "grow") return Math.max(0, bonusOf(id) - g.base);
+  if(g.k === "trophy") return Math.max(0, st.trophies.length - g.base);
+  if(g.k === "promo") return Math.max(0, st.hist.filter(function(h){ return h.up }).length - g.base);
+  return g.prog;
+}
+function plGoalNew(id){
+  var p = plOf(id), pl = playerOf(id), pos = pl ? pl.pos : "MID", h = hash("goal" + id + p.gl + st.season + st.car.aseed);
+  var kinds = pos === "FWD" ? ["score", "start", "mom", "grow", "trophy"] : (pos === "MID" ? ["score", "start", "mom", "grow", "trophy"] : ["clean", "start", "grow", "trophy", "promo"]);
+  if(st.tier === 0) kinds = kinds.filter(function(k){ return k !== "promo" });
+  var k = kinds[h % kinds.length], n = { score: 2 + (h >>> 4) % 3, start: 3 + (h >>> 4) % 3, mom: 1, clean: 2 + (h >>> 4) % 2, grow: 1, trophy: 1, promo: 1 }[k];
+  var base = k === "grow" ? bonusOf(id) : (k === "trophy" ? st.trophies.length : (k === "promo" ? st.hist.filter(function(x){ return x.up }).length : 0));
+  p.goal = { k: k, n: n, base: base, prog: 0, promise: 0 };
+}
+function plReward(id, notes){
+  var p = plOf(id), pl = playerOf(id); if(!pl) return;
+  p.gl++; st.car.plg++;
+  st.dev.bonus[id] = Math.min(7, (st.dev.bonus[id] || 0) + 1);
+  var tr = "";
+  if(!p.tr){ p.tr = TRAIT2[hash(id + "tr" + p.gl) % TRAIT2.length]; tr = " and the trait " + p.tr }
+  p.mood = clamp(p.mood + 25, 0, 100); p.goal = null;
+  post("Goal reached: " + pl.name, "Coaching staff", pl.name + " has reached a personal goal. +1 rating" + tr + ". " + pl.name + " is buzzing and the dressing room can feel it.");
+  pressPush(pl.name + " hits a personal milestone", "A proud day for the club. " + pl.name + " has worked for this and it shows on the pitch.", "I just wanted to do it for the fans and the lads.");
+  notes.push("Goal reached for " + pl.name + ": +1 rating" + tr + ".");
+}
+function plTick(en, kind, p){
+  var notes = [];
+  if(!carUnlocked("stories")) return notes;
+  var c = ctx(), x = kind === "cup" ? (en.won ? "W" : "L") : resultOf(en), started = {}, scored = {}, ga = theirGoals(en), mom = en.rt && en.rt[0] && en.rt[0].id;
+  (p.xiStart || []).forEach(function(id){ started[id] = 1 });
+  (en.events || []).forEach(function(e){ if(e.k === "goal" && e.side === ourSide(en) && p.nameId && p.nameId[e.who]) scored[p.nameId[e.who]] = (scored[p.nameId[e.who]] || 0) + 1 });
+  plFriends();
+  c.all.forEach(function(q){
+    var s = plOf(q.id);
+    if(!s.goal) plGoalNew(q.id);
+    var g = s.goal;
+    if(started[q.id]){
+      s.mood = clamp(s.mood + (x === "W" ? 3 : (x === "D" ? 2 : 1)), 0, 100);
+      if(g.k === "start") g.prog++;
+      if(g.k === "clean" && ga === 0 && (q.pos === "DEF" || q.pos === "GK")) g.prog++;
+      if(g.promise) { /* a promise is kept by starting */ }
+    } else if(!(st.inj && st.inj[q.id])) s.mood = clamp(s.mood - 1, 0, 100);
+    if(scored[q.id] && g.k === "score") g.prog += scored[q.id];
+    if(mom === q.id && g.k === "mom") g.prog++;
+    if(plGoalProg(q.id, g) >= g.n){ var wasP = g.promise; plReward(q.id, notes); if(wasP) plOf(q.id).mood = clamp(plOf(q.id).mood + 10, 0, 100) }
+    if(s.mood <= 25 && !s.req){ s.req = 1; post("A word with " + q.name, "Coaching staff", q.name + " would like a chat about playing time. You can talk it through on the Career page, or leave it for now. Nobody leaves without you saying so.") }
+    if(s.mood > 25) s.req = 0;
+  });
+  return notes;
+}
+function plTalk(id){
+  var s = plOf(id), pl = playerOf(id); if(!pl) return;
+  s.goal = { k: "start", n: 2, base: 0, prog: 0, promise: 1 }; s.mood = 45; s.req = 0;
+  post("You spoke to " + pl.name, "Coaching staff", "You and " + pl.name + " agreed a goal: start the next two matches. " + pl.name + " feels listened to. Pick them in Squad when you are ready.");
+  save(); render(); toast("You and " + pl.name + " agreed a goal.");
+}
+function plCardHtml(id){
+  if(!carUnlocked("stories")) return "";
+  plFriends();
+  var s = plOf(id), g = s.goal, fr = st.car.fr[id] ? playerOf(st.car.fr[id]) : null;
+  var h = '<h3 style="margin-top:14px">Their story</h3><p class="hint" style="margin:0 0 6px">' + esc(plStory(id)) + '</p>' +
+    '<div class="plcard"><span><b>Mood</b> ' + plMoodLabel(s.mood) + carBar(s.mood, "bd") + '</span>' +
+    '<span><b>Personal goal</b> ' + (g ? esc(plGoalText(g, id)) + ' (' + Math.min(g.n, plGoalProg(id, g)) + ' of ' + g.n + ')' : "Being chosen") + '</span>' +
+    '<span><b>Best mate</b> ' + (fr ? esc(fr.name) + ', plus one rating when they start together' : "No best mate yet") + '</span>' +
+    (s.tr ? '<span><b>Trait</b> ' + esc(s.tr) + '</span>' : "") + '</div>';
+  return h;
+}
+function plCareerHtml(c){
+  if(!carUnlocked("stories")) return '<div class="card"><h3>Player stories</h3><p class="hint" style="margin:0">Unlocks at career level 2. Every player gets a mood, a goal, a backstory and a best mate.</p></div>';
+  plFriends();
+  var all = c.all.slice().sort(function(a, b){ return plOf(a.id).mood - plOf(b.id).mood });
+  var talk = all.filter(function(p){ return plOf(p.id).mood <= 25 });
+  var h = '<div class="card"><h3>Player stories</h3><p class="hint" style="margin:0 0 8px">Happy players play a little better and unhappy ones a little worse. Starting matches lifts the mood, and reaching a goal gives a rating boost, a trait and a news story. Best mates playing together get plus one each. Open a player in Squad to read their story.</p>';
+  if(talk.length) h += '<h4 style="margin:6px 0">Would like a chat</h4><div class="plist">' + talk.map(function(p){
+    return '<div class="prow sell">' + avatar(p.id, 48, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + p.pos + ' &middot; ' + plMoodLabel(plOf(p.id).mood) + '</small></span><button class="btn btn-go" data-act="pltalk" data-id="' + p.id + '">Agree a goal together</button></div>';
+  }).join("") + '</div>';
+  h += '<h4 style="margin:12px 0 6px">The squad</h4><div class="plist">' + all.slice().reverse().slice(0, 12).map(function(p){
+    var s = plOf(p.id), g = s.goal, fr = st.car.fr[p.id] ? playerOf(st.car.fr[p.id]) : null;
+    return '<button class="prow" data-act="edit" data-id="' + p.id + '">' + avatar(p.id, 44, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + plMoodLabel(s.mood) + (g ? ' &middot; ' + esc(plGoalText(g, p.id)) : "") + (fr ? ' &middot; mate: ' + esc(surname(fr.name)) : "") + '</small></span></button>';
+  }).join("") + '</div></div>';
+  return h;
+}
+
+/* ---- the rival manager ---- */
+function rivalExp(){ return Math.max(0, st.season - st.car.rm.since) }
+function carRivalMod(opp, pl){
+  if(!carUnlocked("rival") || !pl || pl.kind !== "league" || pl.opp !== st.car.rival) return;
+  var sty = RSTY[st.car.rm.style], e = Math.min(2.5, 0.5 * rivalExp());
+  opp.atk += sty.atk + e / 2; opp.mid += sty.mid + e / 2; opp.def += sty.def + e / 2;
+}
+function rivalLine(arr, key){ return arr[hash(key + st.car.aseed) % arr.length].split("{c}").join(clubName()) }
+function carBanter(en, kind){
+  if(kind !== "league" || !carUnlocked("rival")) return;
+  var rm = st.car.rm, rn = carRival();
+  if(en.opp === st.car.rival){
+    var x = resultOf(en);
+    var q = x === "W" ? rivalLine(RWIN, "w" + st.season + en.round) : (x === "L" ? rivalLine(RLOSS, "l" + st.season + en.round) : rivalLine(RDRAW, "d" + st.season + en.round));
+    pressPush(rn + " boss " + rm.name + " reacts to the derby", x === "W" ? "A fiery press conference after the derby." : (x === "L" ? "Calm, for about a second, then the drama starts." : "Both bosses claim a moral victory."), q);
+    post("Derby reaction: " + rm.name, "The Chronicle", rm.name + " of " + rn + " said: " + q);
+  } else if(en.round + 1 < ROUNDS && S.ourFixture(en.round + 1).opp === st.car.rival){
+    var pq = rivalLine(RPRE, "p" + st.season + en.round);
+    pressPush("Derby week: " + rm.name + " fires a warning", "The " + rm.style.toLowerCase() + " boss of " + rn + " is talking loudly again.", pq);
+    post("Derby next: " + rm.name + " is talking", "The Chronicle", rm.name + " of " + rn + " said: " + pq + " Your move, manager.");
+  }
+}
+
+/* ---- transfer deals ---- */
+function txEnsure(){
+  var tx = st.car.tx, w = marketWin();
+  if(tx.w === w && tx.targets.length) return;
+  if(carUnlocked("rival") && tx.targets[0] && tx.targets[0].rv && tx.w){
+    var t0 = tx.targets[0];
+    post("Rival snaps up " + t0.name, "The Chronicle", st.car.rm.name + " of " + carRival() + " got in first and signed " + t0.name + ". There are fresh targets on the list.");
+  }
+  var r = S.rng(hash("tx" + w + ":" + st.seed)), T = [[66, 80], [63, 77], [60, 74], [56, 70]][st.tier], i, used = {};
+  var targets = [], offers = [];
+  for(i = 0; i < 6; i++){
+    var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
+    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 30);
+    used[nm] = 1;
+    var rv = i === 0 && carUnlocked("rival") ? 1 : 0, ask = Math.max(20, Math.round(priceRaw(rt) * 1.25 * (rv ? 1.1 : 1) / 20) * 20);
+    targets.push({ id: "tx" + w + "_" + i, name: nm, pos: POSL[Math.floor(r() * POSL.length)], r: rt, ask: ask, club: 1 + Math.floor(r() * 15), note: TRAITS[Math.floor(r() * TRAITS.length)], rv: rv });
+  }
+  var cand = ctx().all.filter(function(p){ return !isMine(p.id) && rate(p) >= 55 });
+  var no = Math.min(cand.length, r() < 0.5 ? 1 : 2);
+  for(i = 0; i < no; i++){
+    var pi = Math.floor(r() * cand.length), pp = cand.splice(pi, 1)[0];
+    offers.push({ id: pp.id, price: Math.max(5, Math.round(sellValue(pp) * (1.1 + 0.4 * r()) / 5) * 5), club: 1 + Math.floor(r() * 15), asked: 0 });
+  }
+  tx.w = w; tx.targets = targets; tx.offers = offers;
+  save();
+}
+function sellFor(id, val, why){
+  var p = playerOf(id), c = ctx();
+  if(!p || isMine(id)) return false;
+  if(c.all.length <= 15){ toast("Keep at least fifteen players in the squad."); return false }
+  if(p.pos === "GK" && c.all.filter(function(q){ return q.pos === "GK" }).length <= 2){ toast("Keep at least two goalkeepers."); return false }
+  if(isSg(id)) st.signed = st.signed.filter(function(x){ return x.id !== id }); else st.sold[id] = 1;
+  ["cap", "pk", "fk"].forEach(function(k){ if(st[k] === id) st[k] = "" });
+  st.xi = st.xi.map(function(x){ return x === id ? "" : x });
+  delete st.car.pl[id];
+  applyMine(); applySold(); if(val) addCoins(val, why); st.trades = (st.trades || 0) + 1;
+  return true;
+}
+function txOffer(i, what){
+  txEnsure();
+  var o = st.car.tx.offers[i], p = o ? playerOf(o.id) : null;
+  if(!o || !p){ st.car.tx.offers.splice(i, 1); save(); render(); return }
+  var cn = S.oppName(o.club);
+  if(what === "no"){ st.car.tx.offers.splice(i, 1); save(); render(); toast("You told " + cn + " no thanks."); return }
+  if(what === "more"){
+    if(o.asked){ toast("You have already asked once."); return }
+    if(hash("ask" + st.car.tx.w + o.id) % 100 < 60){ o.price = Math.round(o.price * 1.2 / 5) * 5; o.asked = 1; save(); render(); toast(cn + " came back with " + o.price + " coins.") }
+    else { st.car.tx.offers.splice(i, 1); save(); render(); toast(cn + " went elsewhere this time. That happens.") }
+    return;
+  }
+  var nm = p.name;
+  if(!sellFor(o.id, o.price, "Sold " + nm + " to " + cn)) return;
+  st.car.tx.offers.splice(i, 1); st.car.txn++;
+  post("Deal done: " + nm + " to " + cn, "Transfers", nm + " has joined " + cn + " for " + o.price + " coins. Good luck to them.");
+  var fresh = carCheck(); save(); render(); toast(nm + " sold to " + cn + " for " + o.price + " coins." + (fresh.length ? " New chapter: " + fresh.join(", ") + "." : ""));
+}
+function txSign(i, price, give){
+  txEnsure();
+  var t = st.car.tx.targets[i]; if(!t) return;
+  var c = ctx();
+  if(st.coins < price){ toast("Not enough coins yet. Matches and sponsors earn more."); return }
+  if(!give && c.all.length >= 30){ toast("The squad is full (30). Sell someone first."); return }
+  var gp = give ? playerOf(give) : null;
+  if(give && gp && !sellFor(give, 0, "")) return;
+  var nid = "sg" + (st.sgn++), nm = t.name; if(nameTaken(nm, "")) nm += " II";
+  st.signed.push({ id: nid, name: nm, pos: t.pos, r: t.r, note: t.note, look: lookOf(t.id) });
+  if(price) addCoins(-price, "Signed " + nm);
+  st.car.tx.targets.splice(i, 1); st.car.txn++;
+  post("Deal done: " + nm + " signs", "Transfers", nm + " has joined from " + S.oppName(t.club) + (give && gp ? " in a swap for " + gp.name : "") + " for " + price + " coins.");
+  carXp(5); var fresh = carCheck(); applyMine(); closeSeason(); save(); render();
+  toast(nm + " has joined " + clubName() + "." + (fresh.length ? " New chapter: " + fresh.join(", ") + "." : ""));
+}
+var hg = null;
+function hgBuild(i, give){
+  var t = st.car.tx.targets[i], h = hash("hg" + st.car.tx.w + t.id), kind = h % 3, g = give ? playerOf(give) : null;
+  var base = Math.max(0, t.ask - (g ? sellValue(g) : 0)), q, opts, ok, why;
+  function shuffle(a, k){ return a.slice().sort(function(x, y){ return hash(String(x) + k) - hash(String(y) + k) }) }
+  if(kind === 0 && base >= 20){
+    var pc = [10, 20, 25, 50][(h >>> 3) % 4], base2 = Math.max(20, Math.round(base / 20) * 20), sv = base2 * pc / 100;
+    base = base2;
+    q = "The price is " + base + " coins. You would like " + pc + " percent off. How many coins does that save?"; ok = String(sv);
+    var cd = [sv, base - sv, sv * 2, sv + 10, sv + 20, sv + 5].filter(function(v, ix, ar){ return ar.indexOf(v) === ix }).slice(0, 4);
+    opts = shuffle(cd, "m" + h); why = pc + " percent of " + base + " is " + sv + ". So you save " + sv + " coins.";
+    kind = 0;
+  } else if(kind === 1){
+    var facts = [["position", POSN[t.pos]], ["rating", String(t.r)], ["trait", t.note]], f = facts[(h >>> 5) % 3];
+    q = "The agent's letter says: \"" + t.name + " is a " + POSN[t.pos].toLowerCase() + " rated " + t.r + ". Style: " + t.note.toLowerCase() + ". The club wants " + t.ask + " coins.\" What is the player's " + f[0] + "?"; ok = f[1];
+    var wrong = f[0] === "position" ? ["Goalkeeper", "Defender", "Midfielder", "Forward"].filter(function(x){ return x !== ok }) : (f[0] === "rating" ? [String(t.r + 5), String(t.r - 4), String(t.r + 9)] : TRAITS.filter(function(x){ return x !== ok }));
+    opts = shuffle([ok].concat(wrong.slice(0, 3)), "r" + h); why = "It is in the letter: " + f[1] + "."; kind = 1;
+  } else {
+    q = "What is the best thing to say to " + S.oppName(t.club) + " about " + t.name + "?"; ok = "We can offer " + t.name + " a place in the side and a fair price.";
+    opts = shuffle([ok, "Just give him to me.", "I will take him for free.", "Hurry up, I am busy."], "p" + h); why = "Being friendly, fair and clear about the plan is what clubs like to hear."; kind = 2;
+  }
+  hg = { i: i, give: give || "", base: base, kind: kind, q: q, opts: opts.map(String), ok: String(ok), why: why, ans: "", price: base };
+}
+function hgDraw(){
+  if(!hg) return;
+  var t = st.car.tx.targets[hg.i]; if(!t){ closeSeason(); hg = null; return }
+  var g = hg.give ? playerOf(hg.give) : null;
+  var h = '<div class="eyebrow" style="color:var(--gold)">Transfer bid</div><h2>' + esc(t.name) + '</h2><p class="hint" style="margin:0 0 8px">' + t.pos + ' &middot; rated ' + t.r + ' &middot; ' + esc(S.oppName(t.club)) + (g ? ' &middot; swap for ' + esc(g.name) : "") + '</p>';
+  if(hg.base <= 0){
+    h += '<p>The swap covers the whole price. Nothing more to pay.</p><div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="hgsign" data-p="0">Sign ' + esc(t.name) + '</button><button class="btn" data-act="hgclose">Not now</button></div>';
+  } else if(!hg.ans){
+    h += '<p>Asking price: <b>' + hg.base + ' coins</b>. Answer a quick question and the club may knock some off. Or skip it and pay the asking price.</p><div class="hgq"><b>' + esc(hg.q) + '</b><div class="hgo">' + hg.opts.map(function(o, k){ return '<button class="btn" data-act="hgans" data-k="' + k + '">' + esc(o) + '</button>' }).join("") + '</div></div>' +
+      '<div class="mbtns" style="justify-content:center"><button class="btn btn-quiet" data-act="hgsign" data-p="' + hg.base + '">Pay the asking price (' + hg.base + ')</button><button class="btn" data-act="hgclose">Not now</button></div>';
+  } else {
+    var good = hg.ans === hg.ok, pct = good ? 15 : 5, np = Math.round(hg.base * (100 - pct) / 100 / 5) * 5;
+    h += '<p>' + (good ? '<b>Spot on.</b> ' : '<b>Nearly.</b> ') + esc(hg.why) + ' The club takes ' + pct + ' percent off.</p><p>New price: <b>' + np + ' coins</b>. You have ' + st.coins + '.</p><div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="hgsign" data-p="' + np + '">Sign for ' + np + ' coins</button><button class="btn" data-act="hgclose">Not now</button></div>';
+  }
+  $("rvbox").innerHTML = h;
+  $("rv").classList.add("on");
+  var f = $("rvbox").querySelector("button"); if(f) try{ f.focus() }catch(e){}
+}
+function hgOpen(i, give){
+  txEnsure(); if(!st.car.tx.targets[i]) return;
+  rvMode = "haggle"; hgBuild(i, give); hgDraw();
+}
+function txSwapList(i){
+  var t = st.car.tx.targets[i]; if(!t) return "";
+  var c = ctx(), list = c.all.filter(function(p){ return !isMine(p.id) && rate(p) >= t.r - 10 });
+  return list.length ? '<div class="plist">' + list.sort(function(a, b){ return rate(b) - rate(a) }).slice(0, 8).map(function(p){
+    var cash = Math.max(0, t.ask - sellValue(p));
+    return '<div class="prow sell">' + avatar(p.id, 44, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + p.pos + ' &middot; rated ' + rate(p) + ' &middot; you add ' + cash + ' coins</small></span><button class="btn" data-act="txswap" data-i="' + i + '" data-id="' + p.id + '">Offer a swap</button></div>';
+  }).join("") + '</div>' : '<p class="hint">Nobody in the squad is close enough in quality for a swap with this player yet.</p>';
+}
+var swapOpen = -1;
+function vTx(c){
+  if(!carUnlocked("tx")) return '<div class="card"><h3>Transfer deals</h3><p class="hint" style="margin:0">Unlocks at career level 4. Offers for your players, bids for theirs and swap deals all live here.</p></div>';
+  txEnsure();
+  var tx = st.car.tx, h = '<div class="card"><h3>Offers for your players</h3>';
+  if(tx.offers.length) h += '<div class="plist">' + tx.offers.map(function(o, i){
+    var p = playerOf(o.id); if(!p) return "";
+    return '<div class="prow sell">' + avatar(p.id, 52, p.pos) + '<span><b>' + esc(p.name) + '</b><small>' + esc(S.oppName(o.club)) + ' offer <b style="color:var(--gold)">' + o.price + ' coins</b>' + (plOf(p.id).mood <= 25 && carUnlocked("stories") ? ' &middot; wants a move' : "") + '</small></span><span class="sa"><button class="btn btn-go" data-act="txoff" data-w="yes" data-i="' + i + '">Accept</button>' + (o.asked ? "" : '<button class="btn" data-act="txoff" data-w="more" data-i="' + i + '">Ask for more</button>') + '<button class="btn btn-quiet" data-act="txoff" data-w="no" data-i="' + i + '">No thanks</button></span></div>';
+  }).join("") + '</div><p class="hint" style="margin:8px 0 0">Asking for more can work, or the club may walk away. Either is fine.</p>';
+  else h += '<p class="hint" style="margin:0">No offers right now. New ones can turn up every three league matches.</p>';
+  h += '</div><div class="card"><h3>Players at other clubs</h3><p class="hint" style="margin:0 0 8px">Make a bid. Answer a quick question and the club may knock some off the price, or skip it and pay the asking price. Or offer a swap. You have <b style="color:var(--gold)">' + st.coins + ' coins</b>.</p><div class="mkgrid">' + tx.targets.map(function(t, i){
+    return '<div class="mk">' + avatar(t.id, 66, t.pos) + '<div><b>' + esc(t.name) + '</b><small>' + t.pos + ' &middot; rated ' + t.r + ' &middot; ' + esc(S.oppName(t.club)) + '</small><small>' + esc(t.note) + '</small>' + (t.rv ? '<small class="up">' + esc(st.car.rm.name) + ' of ' + esc(carRival()) + ' is interested too</small>' : "") + '</div><span class="sa"><button class="btn btn-go" data-act="txbid" data-i="' + i + '">Bid ' + t.ask + '</button><button class="btn" data-act="txsw" data-i="' + i + '">Swap</button></span></div>' + (swapOpen === i ? '<div class="swapbox" style="grid-column:1/-1">' + txSwapList(i) + '</div>' : "");
+  }).join("") + '</div></div>';
+  return h;
+}
+
+/* ---- legacy ---- */
+function lpTotal(){ return st.car.lp + Math.floor(Math.max(0, st.car.xp - CLV[9]) / 15) }
+function lpFree(){
+  var spent = 0; DISP.forEach(function(d){ if(st.car.hof[d.id]) spent += d.cost });
+  return Math.max(0, lpTotal() - spent);
+}
+function legacyHtml(){
+  var car = st.car, owned = DISP.filter(function(d){ return car.hof[d.id] });
+  var h = '<div class="card"><h3>Hall of fame and legacy</h3>';
+  if(!carUnlocked("legacy")) h += '<p class="hint" style="margin:0">Unlocks at career level 10. Then you can pass the club on to a new manager and spend legacy points on statues, banners and more.</p></div>';
+  else {
+    h += '<p class="hint" style="margin:0 0 8px">Legacy points: <b style="color:var(--gold)">' + lpFree() + '</b> to spend. XP beyond level 10 turns into legacy points, and so does retiring.</p><div class="hofg">' + DISP.map(function(d){
+      var own = car.hof[d.id];
+      return '<div class="hofd' + (own ? " own" : "") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + d.d + '</svg><b>' + d.name + '</b>' + (own ? '<span class="chip-on">On display</span>' : '<button class="btn' + (lpFree() >= d.cost ? " btn-go" : "") + '" data-act="hofbuy" data-id="' + d.id + '"' + (lpFree() >= d.cost ? "" : ' aria-disabled="true"') + '>' + d.cost + ' points</button>') + '</div>';
+    }).join("") + '</div>';
+    if(car.legacy.length) h += '<h4 style="margin:14px 0 6px">Past managers</h4>' + car.legacy.map(function(x){ return '<div class="resline"><span><b>Era ' + x.era + '</b> &middot; level ' + x.lvl + ', ' + CTIT[x.lvl - 1] + '</span><span>' + x.seasons + ' seasons &middot; W' + x.w + ' D' + x.d + ' L' + x.l + ' &middot; ' + x.trophies + ' trophies</span></div>' }).join("");
+    h += '<div class="mbtns" style="margin-top:12px">' + (retAsk ? '<span class="hint">The club, squad and trophies all stay. Your career level, perks and chapters start again, and your record goes on the wall.</span><button class="btn btn-go" data-act="redo">Yes, pass on the club</button><button class="btn" data-act="retask">Keep going</button>' : '<button class="btn" data-act="retask">Retire and pass on the club</button>') + '</div></div>';
+  }
+  return h;
+}
+var retAsk = false;
+function carRetire(){
+  var car = st.car, lvl = carLevel(), t = car.rec.tot;
+  var add = Math.floor(Math.max(0, car.xp - CLV[9]) / 15) + 5;
+  car.legacy.unshift({ era: car.era, lvl: lvl, xp: car.xp, w: t.w, d: t.d, l: t.l, seasons: st.hist.length, trophies: st.trophies.length, best: st.hist.length ? Math.min.apply(null, st.hist.map(function(s){ return s.pos })) : 0, lp: add, upto: st.season });
+  car.lp += add; car.era++;
+  car.xp = 0; car.perks = {}; car.board = 60; car.act = 0; car.oLv = 1;
+  car.rec = { run: 0, bestUnb: 0, wrun: 0, bestWin: 0, cs: 0, cupW: 0, tot: { w: 0, d: 0, l: 0, gf: 0, ga: 0 }, bigW: null, hiS: null };
+  car.chap = {}; CHAPS.forEach(function(p){ try{ if(p.when()) car.chap[p.id] = 1 }catch(e){} });
+  retAsk = false;
+  post("A new manager takes charge", "The Chairman (Jay)", "Era " + car.era + " begins. The club, the squad and the trophies are all still here. Your record is on the wall in the hall of fame, worth " + add + " legacy points.");
+  carCheck(); save(); render(); toast("A new era begins. Your legacy is on the wall.");
+}
+
+/* ---- a fresh game, offered once after this update ---- */
+function ngOpen(){
+  rvMode = "newgame"; $("rv").classList.add("on");
+  $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">New in the dugout</div><h2>There is lots of new stuff</h2><p>Player stories, a rival manager with a temper, transfer deals, harder board targets and a legacy to leave behind. All of it is waiting in <b>Career</b> and <b>Market</b>.</p><p>It is at its best in a <b>brand new game</b>, because you meet everything from the very first match. You can also keep your current game and still find it all as your career level climbs. Your finished activities are never touched.</p>' +
+    '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="ngyes">Start a new game</button><button class="btn btn-big" data-act="ngkeep">Keep my game</button></div><p class="hint" style="text-align:center">You can start a new game any time in Settings.</p>';
+  var f = $("rvbox").querySelector("button"); if(f) try{ f.focus() }catch(e){}
+}
+function ngClose(){
+  st.car.nv = 1; save(); closeSeason(); render();
+  var seen = false; try{ seen = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
+  if(!seen && !location.hash) titleOpen();
+}
+function rvDismiss(){
+  if(rvMode === "newgame") ngClose(); else if(rvMode === "haggle"){ hg = null; closeSeason() } else closeSeason();
+}
+
+/* ---- clicks ---- */
+function carAct(a, b){
+  var i = +b.getAttribute("data-i"), id = b.getAttribute("data-id");
+  if(a === "pltalk"){ plTalk(id); return true }
+  if(a === "txoff"){ txOffer(i, b.getAttribute("data-w")); return true }
+  if(a === "txbid"){ hgOpen(i, ""); return true }
+  if(a === "txsw"){ swapOpen = swapOpen === i ? -1 : i; render(); return true }
+  if(a === "txswap"){ swapOpen = -1; hgOpen(i, id); return true }
+  if(a === "hgans"){ if(hg && !hg.ans){ hg.ans = hg.opts[+b.getAttribute("data-k")]; carXp(3); save(); hgDraw() } return true }
+  if(a === "hgsign"){ if(hg){ var gv = hg.give, ix = hg.i; txSign(ix, +b.getAttribute("data-p"), gv); hg = null } return true }
+  if(a === "hgclose"){ hg = null; closeSeason(); return true }
+  if(a === "hofbuy"){
+    var d = DISP.filter(function(x){ return x.id === id })[0];
+    if(!d || st.car.hof[id]) return true;
+    if(lpFree() < d.cost){ toast("Not enough legacy points yet."); return true }
+    st.car.hof[id] = 1; post("On display: " + d.name, "The Chairman (Jay)", "A " + d.name.toLowerCase() + " now stands in honour of your career. Visitors will ask about it for years.");
+    save(); render(); toast(d.name + " is on display."); return true;
+  }
+  if(a === "retask"){ retAsk = !retAsk; render(); return true }
+  if(a === "redo"){ carRetire(); return true }
+  if(a === "ngyes"){
+    $("rvbox").innerHTML = '<h2>Start a new game?</h2><p>This clears the current game, including your club design, players and trophies, and starts the setup again. Your finished activities are not touched, and it cannot be undone.</p><div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="ngdo">Yes, start fresh</button><button class="btn btn-big" data-act="ngkeep">No, keep my game</button></div>';
+    var f = $("rvbox").querySelector("button"); if(f) try{ f.focus() }catch(e){}
+    return true;
+  }
+  if(a === "ngdo"){ resetDo("all"); return true }
+  if(a === "ngkeep"){ ngClose(); return true }
+  return false;
 }
 
 /* ---------- ambience and commentary ---------- */
@@ -2410,7 +2865,7 @@ function openMatch(kind, comp0){
   }
   if(hm) us.luck = Math.min(1, us.luck + homeLuckBonus());
   playing.info = matchInfo(playing.kind === "cup" ? "cup" : "league", playing.comp, playing.round, playing.opp);
-  applyInfo(playing, us, opp, playing.info); playing.xiStart = st.xi.filter(Boolean);
+  applyInfo(playing, us, opp, playing.info); carRivalMod(opp, playing); playing.xiStart = st.xi.filter(Boolean);
   home = hm ? us : opp; away = hm ? opp : us;
   playing.home = home; playing.away = away; playing.c = c; playing.us = us; playing.ourS = hm ? "h" : "a"; playing.min = 0; playing.mom = 0;
   playing.f = st.formation; playing.xiNow = st.xi.slice(); playing.subs = 0; playing.off = []; playing.subLog = [];
@@ -2693,6 +3148,10 @@ function tlMark(e, p){
 function addEvent(e, anim){
   var p = playing, feed = $("feed"); if(!feed) return false;
   tagWhy(e, p);
+  if(e.k === "goal" && e.side === p.ourS && !e.fr && carUnlocked("stories") && p.nameId && p.nameId[e.who]){
+    e.fr = 1; var fid = st.car.fr[p.nameId[e.who]], fq = fid ? playerOf(fid) : null;
+    if(fq && p.lu && p.lu.n.indexOf(fq.name) >= 0) e.text += " Best mates " + e.who + " and " + fq.name + " are playing together today.";
+  }
   feed.insertAdjacentHTML("afterbegin", evHtml(e, p.ourS));
   if(anim && feed.firstElementChild) feed.firstElementChild.classList.add("new");
   feed.scrollTop = 0;
@@ -3083,6 +3542,7 @@ document.addEventListener("click", function(e){
   if(a === "upgrade"){ buyUpgrade(b.getAttribute("data-id")); return }
   if(a === "hire"){ hireStaff(b.getAttribute("data-id")); return }
   if(a === "retire"){ var rid = b.getAttribute("data-id"), rn = numOf(rid); st.retired[rn] = rid; var rc = st.career[rid]; post("Shirt retired", "The Chairman (Jay)", "Number " + rn + " is retired in honour of " + (rc ? rc.n : "a legend") + ". Nobody else will wear it."); pressPush("Number " + rn + " retired for " + (rc ? rc.n : "a legend"), "A shirt goes up on the wall at " + stadiumName() + ".", ""); addFans(5); save(); render(); toast("Number " + rn + " retired."); return }
+  if(carAct(a, b)) return;
   if(a === "perk"){ perkTake(b.getAttribute("data-id")); return }
   if(a === "acpro"){ acadPromote(b.getAttribute("data-id")); return }
   if(a === "acup"){ if(b.getAttribute("aria-disabled") === "true"){ toast("Not enough coins yet. Matches and sponsors earn more."); return } acadUp(); return }
@@ -3198,7 +3658,7 @@ document.addEventListener("click", function(e){
 document.addEventListener("keydown", function(e){
   if(e.key !== "Escape") return;
   if(tiOn) titleClose();
-  else if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else rvNext() }
+  else if($("rv").classList.contains("on")){ if(rvMode === "season") closeSeason(); else if(rvMode === "newgame" || rvMode === "haggle") rvDismiss(); else rvNext() }
   else if($("ed").classList.contains("on")) edClose();
   else if(wiz.on) wizClose(); else if($("ov").classList.contains("on")) closeMatch();
 });
@@ -3210,8 +3670,9 @@ window.addEventListener("storage", function(e){ if(e.key === ENG) refresh() });
 
 var h0 = (location.hash || "").replace("#", "");
 VIEWS.forEach(function(v){ if(v.id === h0) view = h0 });
-window.__dugout = {drillFinish: drillFinish, beats: beats, matchInfo: matchInfo, tiredOf: tiredOf, afterMatch: afterMatch,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots, carLevel: carLevel, carObjs: carObjs, carCheck: carCheck, carNewSeason: carNewSeason, acadRoll: acadRoll, acadCount: acadCount };
+window.__dugout = {drillFinish: drillFinish, beats: beats, matchInfo: matchInfo, tiredOf: tiredOf, afterMatch: afterMatch,  st: function(){ return st }, ctx: ctx, render: render, teamNow: teamNow, save: save, seasonSummary: seasonSummary, marketList: marketList, priceOf: priceOf, coSlots: coSlots, carLevel: carLevel, carObjs: carObjs, carCheck: carCheck, carNewSeason: carNewSeason, acadRoll: acadRoll, acadCount: acadCount, carUnlocks: carUnlocks, txEnsure: txEnsure, plTick: plTick, plOf: plOf, carRetire: carRetire, lpFree: lpFree };
 if(!st.setup) wizOpen(0, "setup");
+if(st.setup && !firstRun && !st.car.nv) ngOpen();
 render();
 var seenMenu = false; try{ seenMenu = !!sessionStorage.getItem("b5.jt.menu") }catch(e){}
 if(st.setup && !firstRun && !seenMenu && !location.hash && !$("rv").classList.contains("on")) titleOpen();
