@@ -941,6 +941,13 @@ var coDraft = null, coEditing = false, rvMode = "", sellAsk = "";
 var INDS = ["Sports kit", "Snacks and drinks", "Games", "Music", "Bikes", "Pets", "Tech", "Books"];
 var FIRSTN = ["Ash", "Bailey", "Cal", "Dev", "Eli", "Finn", "Gus", "Hari", "Ivo", "Jory", "Kai", "Leo", "Milo", "Nico", "Omar", "Pip", "Quinn", "Remy", "Sol", "Tobi", "Uma", "Vic", "Wes", "Yusuf", "Zane", "Ada", "Bea", "Cleo", "Dani", "Esme"];
 var MSURN = ["Abbott", "Brook", "Castle", "Dunn", "Easton", "Frost", "Gallow", "Hale", "Irving", "Jolly", "Knight", "Lund", "Mason", "Nolan", "Oduya", "Pryor", "Raine", "Stone", "Tully", "Underhill", "Voss", "Wren", "Yates", "Zaman", "Aldous", "Bright", "Crane", "Drake", "Flint", "Grove"];
+var PARODY = ["Kevin De Brownie", "Mo Salad", "Harry Cake", "Erling Haulage", "Bukayo Sake", "Phil Fodder", "Jude Bellringer", "Declan Rice Pudding", "Marcus Rushford", "Bruno Burnandes", "Virgil van Dike", "Trent Alexander Arnie", "Alison Baker", "Bernard Silverware", "Ruben Dice", "John Stonewall", "Kyle Talker", "Jack Grealfish", "Raheem Sterling Silver", "Cole Parmesan", "Ollie Wetkins", "Ivan Toenail", "Gabriel Jelly", "Martin Odegarden", "Gareth Baleful", "Wayne Roomy", "Steven Gerbil", "Frank Lamppost", "David Bakeham", "Gary Linoleum", "Alan Sheeper", "Michael Owl", "Paul Schools", "Ryan Giggles", "Crispy Ronaldo", "Lionel Messy", "Kylian Mbappie", "Luka Moderate", "Manuel Newer", "Gianluigi Buffoon", "Jordan Pickfork", "David Seaweed", "Luke Shawl", "Conor Garlicher", "Kobbie Mainoodle", "Alejandro Garnachoo", "Cody Gakpot", "Darwin Nunny", "Luis Dice", "Dominik Sausagelai", "Wilfried Zahaha", "Eberechi Easy", "Jamie Vardee", "Golo Cantaloupe", "Thierry Henhouse", "Didier Drogbag", "Zinedine Zesty", "Paul Pogostick", "Raphael Varnish", "Sergio Rams", "Vinicius Juniper", "Harry Blinks", "Peter Smitchell"];
+function parodyName(r, used){
+  var nm, tries = 0;
+  do { nm = PARODY[Math.floor(r() * PARODY.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 40);
+  if(used[nm] || nameTaken(nm, "")){ tries = 0; do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 40) }
+  used[nm] = 1; return nm;
+}
 var POSL = ["GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD", "MID", "DEF"];
 function sfp(c){ return c.tr.fp }
 function addCoins(n, why){ n = Math.round(n); st.coins += n; st.log.unshift({ n: n, why: why }); if(st.log.length > 30) st.log.length = 30 }
@@ -1065,9 +1072,7 @@ function marketList(){
   var r = S.rng(hash("mk" + w + ":" + st.seed)), out = [], used = {}, T = [[63, 78], [60, 75], [57, 72], [53, 68]][st.tier].slice(), i, sc = staffLvl("scout"), N = 12 + 2 * sc + (hasPerk("scout") ? 3 : 0);
   T[0] += 2 * sc; T[1] += 2 * sc;
   for(i = 0; i < N; i++){
-    var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
-    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 25);
-    used[nm] = 1;
+    var rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1)), nm = parodyName(r, used);
     out.push({ id: "mk" + w + "_" + i, name: nm, pos: POSL[i % POSL.length], r: rt, note: TRAITS[Math.floor(r() * TRAITS.length)] });
   }
   return out.filter(function(x){ return st.mk.bought.indexOf(x.id) < 0 });
@@ -2070,9 +2075,7 @@ function acadCount(){ return ACAD_N[st.car.acad.lvl] + (hasPerk("youth") ? 2 : 0
 function acadRoll(){
   var a = st.car.acad, n = acadCount(), r = S.rng(hash("acad" + st.season + ":" + st.car.aseed)), pool = [], used = {}, i;
   for(i = 0; i < n; i++){
-    var nm, tries = 0;
-    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 30);
-    used[nm] = 1;
+    var nm = parodyName(r, used);
     var pos = i === 0 && st.season % 3 === 1 ? "GK" : POSL[Math.floor(r() * POSL.length)];
     var r0 = ACAD_R[a.lvl] + Math.floor(r() * 7), pot = Math.min(86, r0 + 16 + Math.floor(r() * 9) + a.lvl * 2);
     pool.push({ id: "ac" + st.season + "_" + i, name: nm, pos: pos, r: r0, pot: pot, note: TRAITS[Math.floor(r() * TRAITS.length)], taken: 0 });
@@ -2418,9 +2421,7 @@ function txEnsure(){
   var r = S.rng(hash("tx" + w + ":" + st.seed)), T = [[66, 80], [63, 77], [60, 74], [56, 70]][st.tier], i, used = {};
   var targets = [], offers = [];
   for(i = 0; i < 6; i++){
-    var nm, tries = 0, rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1));
-    do { nm = FIRSTN[Math.floor(r() * FIRSTN.length)] + " " + MSURN[Math.floor(r() * MSURN.length)]; tries++ } while((used[nm] || nameTaken(nm, "")) && tries < 30);
-    used[nm] = 1;
+    var rt = T[0] + Math.floor(r() * (T[1] - T[0] + 1)), nm = parodyName(r, used);
     var rv = i === 0 && carUnlocked("rival") ? 1 : 0, ask = Math.max(20, Math.round(priceRaw(rt) * 1.25 * (rv ? 1.1 : 1) / 20) * 20);
     targets.push({ id: "tx" + w + "_" + i, name: nm, pos: POSL[Math.floor(r() * POSL.length)], r: rt, ask: ask, club: 1 + Math.floor(r() * 15), note: TRAITS[Math.floor(r() * TRAITS.length)], rv: rv });
   }
