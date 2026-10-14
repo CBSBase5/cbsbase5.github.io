@@ -166,7 +166,7 @@ var HINTS = {
   dugout: "This is home. The big button in the middle is the next thing you can do, and it changes as you go. Everything else can wait.",
   squad: "Pick who plays here. Tap a spot on the pitch, then tap a player. Or press Pick the best side for me and change what you like.",
   train: "Try a short activity to earn a match. Any one counts, in any order, and you can come back to it whenever you fancy.",
-  league: "The table and the cups live here. Nothing to do, just have a look when you are curious.",
+  league: "The table and the cups live here. Fancy your own league? There is a button to make one with your own names.",
   news: "The local paper writes about your club. Just for reading.",
   club: "Your badges and trophies collect here. They turn up by themselves as you play.",
   studio: "Make your club look the way you want. Nothing here changes how well you play, so go wild.",
@@ -225,6 +225,7 @@ function uiAct(a, b){
   if(a === "hintok"){ st.ui.seen[b.getAttribute("data-v")] = 1; save(); render(); return true }
   if(a === "hintsagain"){ st.ui.seen = {}; st.ui.hints = 1; save(); render(); toast("The hints will show again, one per screen."); return true }
   if(a === "uiset"){ st.ui[b.getAttribute("data-k")] = b.getAttribute("data-v") === "true" ? 1 : 0; save(); render(); return true }
+  if(a === "mkleague"){ st.ui.un.studio = 1; view = "studio"; studioTab = "league"; lgDiv = -1; sel = null; try{ history.replaceState(null, "", "#studio") }catch(er){} save(); render(); window.scrollTo(0, 0); return true }
   if(a === "tour"){ tourOpen(); return true }
   if(a === "titour"){ titleClose(); tourOpen(); return true }
   if(a === "tournext"){ tourAt = Math.min(TOUR.length - 1, tourAt + 1); tourDraw(); return true }
@@ -1841,6 +1842,7 @@ function vDugout(c){
   if(viewOpen("news")) h += pressTeaser();
   if(viewOpen("career")) h += carTeaser();
   h += riseCard(c);
+  h += '<div class="card mkl"><h3>Make your own league</h3><p class="hint" style="margin:0 0 10px">Give the divisions and clubs your own names. Optional.</p><div class="mbtns"><button class="btn" data-act="mkleague">Make my own league</button></div></div>';
   var blockExtras = h; h = "";
   var ts = trySessions(c, 3);
   if(ts.length){
@@ -1882,6 +1884,7 @@ function vLeague(c){
     h += '<tr class="' + (r.id === 0 ? "us" : "") + zone + '"><td>' + (i + 1) + '</td><td><span style="display:flex;align-items:center;gap:8px">' + cr + esc(r.name) + dealLogo(r.id) + '</span></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + (r.gf - r.ga) + '</td><td><b>' + r.pts + '</b></td><td class="form">' + formDots(r.form) + '</td></tr>';
   });
   h += '</table></div><p class="hint" style="margin-top:10px">' + zoneNote() + ' ' + (st.played.length ? esc(tb[0].name) + ' lead the table on ' + tb[0].pts + ' points.' : 'No matches yet. Everyone starts level.') + '</p></div>';
+  h += '<div class="card mkl"><h3>Make your own league</h3><p class="hint" style="margin:0 0 10px">Rename the divisions and every club, or tap Surprise me for a fresh set. Totally optional, and you can change it back any time.</p><div class="mbtns"><button class="btn btn-go" data-act="mkleague">Make my own league</button></div></div>';
   COMP_ORDER.forEach(function(id){ h += cupCard(c, id) });
   var tally = goalTally(), top = Object.keys(tally).sort(function(a, b){ return tally[b] - tally[a] }), imp = improved();
   function idOf(n){ var r = ""; S.PLAYERS.forEach(function(p){ if(p.name === n) r = p.id }); return r || n }
