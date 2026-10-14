@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="/lp/conf.js?v=1"></script>
-<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/egw/egw.css?v=8">
 <link rel="stylesheet" href="/lp/lp.css?v=1">
 <script src="/egw/skin.js?v=2"></script>
 <style>
@@ -150,6 +150,14 @@ a.fold .chev{margin-left:auto;font-family:var(--display);font-weight:700;font-si
 /* how are you arriving? */
 .checkin{margin:18px 0 0;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(201,205,240,.18)}
 .checkin p{margin:0 0 10px;color:var(--moon);font-family:var(--display);font-weight:600}
+.nudge{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(201,205,240,.22);color:var(--moon)}
+.nudge p{margin:0 0 10px;font-size:.95rem;color:var(--mist)}
+.nudge p b{display:block;color:var(--moon);font-family:var(--display);margin-bottom:2px}
+.nudgebtns{display:flex;flex-wrap:wrap;gap:8px}
+.nudgebtns .btn{padding:8px 14px;font-size:.92rem}
+.feelchips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.feelchip{font-family:var(--display);font-weight:600;font-size:.9rem;padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.feelchip[aria-pressed="true"]{background:var(--accent);border-color:var(--ink)}
 .weathers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .weathers button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;border:2px solid rgba(201,205,240,.25);background:rgba(255,255,255,.04);color:var(--moon);cursor:pointer;font-family:var(--display);font-weight:600;font-size:.85rem}
 .weathers button:hover,.weathers button:focus-visible{border-color:var(--sun)}
@@ -209,6 +217,7 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
 
   <div id="secTop">
   <a class="dropbar" id="dropBar" href="/lp/daily.html"></a>
+  <div id="sendNudge"></div>
 
   <div id="secondLook"></div>
   </div>
@@ -329,9 +338,15 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
     </div>
   </details>
 
-  <details class="fold" style="--accent:var(--violet)">
+  <details class="fold" id="sendFold" style="--accent:var(--violet)">
     <summary><span><b>Send to Jay</b><small>Only if you want to: a quick note to Jay on how things are going.</small></span><span class="chev">&rsaquo;</span></summary>
-    <div class="inner"><div id="sendHost"></div></div>
+    <div class="inner">
+      <p class="chiplabel">How is it all feeling at the moment? <span class="tiny">(optional)</span></p>
+      <div class="feelchips" id="feelChips" role="group" aria-label="How it is feeling"></div>
+      <textarea class="logbox" id="feelNote" rows="2" maxlength="400" placeholder="Anything you want Jay to know? (optional)" aria-label="A note for Jay"></textarea>
+      <p class="tiny" id="lastSent"></p>
+      <div id="sendHost"></div>
+    </div>
   </details>
 
 </div>
@@ -347,7 +362,7 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
 
 <script src="/data/send.js"></script>
 <script src="/lp/catalogue.js?v=1"></script>
-<script src="/egw/progress.js?v=8"></script>
+<script src="/egw/progress.js?v=9"></script>
 <script>
 (function(){
 "use strict";
@@ -846,6 +861,9 @@ function refreshJayCode(){
 }
 function reportText(){
   var lines = ["LP's GCSE HQ", ""];
+  if(hq.feel && FEELS[hq.feel]) lines.push("How it is feeling: " + FEELS[hq.feel]);
+  if(hq.feelNote && hq.feelNote.trim()) lines.push("A note for Jay: " + hq.feelNote.trim());
+  if(hq.feel || (hq.feelNote && hq.feelNote.trim())) lines.push("");
   lines.push("== Activities ==");
   SUBJECTS.forEach(function(s){
     var acts = s.acts.map(function(a){ return actState(a); });
@@ -884,12 +902,52 @@ function drawLooksRow(){
   $("looksRow").textContent = f.length ? "New look ready: " + f.map(function(x){ return x.name; }).join(" and ") + ". Tap to try it, if you like." :
     "Wearing: " + cur.name + ". New colours for your whole HQ; sparks open more of them.";
 }
-function drawAll(){ drawLooksRow(); drawMood(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
+/* ---------- sending Jay an update: a gentle nudge, never a demand ---------- */
+var FEELS = { easy: "Mostly easy", ok: "About right", tricky: "A bit tricky", lots: "A lot right now" };
+function sentInfo(){ return loadJSON("b5.lp.sent.v1") || {}; }
+function ago(iso){
+  var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago";
+}
+function workedSince(last){
+  var n = 0;
+  allActs().concat((EGWCAT.extras || []).map(function(a){ return { a: a }; })).forEach(function(x){
+    var st = loadJSON("b5.lp." + x.a.id + ".v1");
+    var sm = st && st.summary;
+    if(sm && st.updated && (sm.done || sm.chunksDone || sm.skipped || sm.got1 || sm.got2 || sm.shown) && (!last || st.updated > last)) n++;
+  });
+  return n;
+}
+function drawNudge(){
+  var box = $("sendNudge"), si = sentInfo(), n = workedSince(si.last);
+  if(!n || hq.nudgeOff === EGWPROG.today()){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="nudge"><p><b>' + (si.last ? "Since your last update" : "Jay would love to hear how it is going") + '</b>' +
+    "You have worked on " + n + " activit" + (n === 1 ? "y" : "ies") + (si.last ? " since you last sent Jay an update (" + ago(si.last) + ")." : ". You could send Jay an update, whenever you fancy.") + '</p>' +
+    '<div class="nudgebtns"><button class="btn" type="button" id="nudgeGo">Send an update</button><button class="btn btn-quiet" type="button" id="nudgeOff">Not now</button></div></div>';
+  $("nudgeGo").onclick = function(){ var f = $("sendFold"); f.open = true; f.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  $("nudgeOff").onclick = function(){ hq.nudgeOff = EGWPROG.today(); saveHQ(); drawNudge(); };
+}
+function drawFeel(){
+  var box = $("feelChips");
+  box.innerHTML = Object.keys(FEELS).map(function(k){
+    return '<button type="button" class="feelchip" data-k="' + k + '" aria-pressed="' + (hq.feel === k ? "true" : "false") + '">' + FEELS[k] + '</button>';
+  }).join("");
+  [].forEach.call(box.querySelectorAll("button"), function(b){
+    b.onclick = function(){ hq.feel = hq.feel === b.dataset.k ? "" : b.dataset.k; saveHQ(); drawFeel(); };
+  });
+  var note = $("feelNote");
+  if(document.activeElement !== note) note.value = hq.feelNote || "";
+  note.oninput = function(){ hq.feelNote = note.value; saveHQ(); };
+  var si = sentInfo();
+  $("lastSent").textContent = si.last ? "Last update sent " + ago(si.last) + ". Thank you." : "No updates sent yet. There is no rush.";
+}
+document.addEventListener("base5sent", function(){ setTimeout(function(){ drawNudge(); drawFeel(); }, 50); });
+function drawAll(){ drawNudge(); drawFeel(); drawLooksRow(); drawMood(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
 
 $("dice").onclick = deal;
 drawAll();
 refreshJayCode();
-window.addEventListener("pageshow", function(){ drawLooksRow(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
+window.addEventListener("pageshow", function(){ drawNudge(); drawFeel(); drawLooksRow(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
 $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>

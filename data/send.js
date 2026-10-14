@@ -27,6 +27,25 @@ function setName(v){
   try{ localStorage.setItem(NAME_KEY, v) }catch(e){}
 }
 
+/* In a student's HQ space, remember when something was last sent, so the
+   home page can say how long it has been. Nothing else is stored, and
+   nothing happens outside those spaces. */
+function hqPrefix(){
+  if(window.HQ && window.HQ.prefix) return window.HQ.prefix;
+  if(location.pathname.indexOf("/egw/") === 0) return "b5.egw.";
+  return null;
+}
+function noteSent(tool){
+  var pre = hqPrefix(); if(!pre) return;
+  try{
+    var k = pre + "sent.v1", d = JSON.parse(localStorage.getItem(k) || "null") || {};
+    d.last = new Date().toISOString(); d.n = (d.n || 0) + 1;
+    d.log = (d.log || []).concat([{ t: d.last, tool: String(tool || "").slice(0, 60) }]).slice(-30);
+    localStorage.setItem(k, JSON.stringify(d));
+  }catch(e){}
+  try{ document.dispatchEvent(new CustomEvent("base5sent", { detail: { tool: tool } })); }catch(e){}
+}
+
 function stamp(){
   return new Date().toLocaleString("en-GB",{
     weekday:"long", day:"numeric", month:"long", year:"numeric",
@@ -81,6 +100,7 @@ function mount(host, opts){
   host.addEventListener('click', function(e){
     var b = e.target.closest('button[data-a]');
     if(!b) return;
+    noteSent(opts.tool);
     var body = wrap(opts);
     var a = b.dataset.a;
 
@@ -163,6 +183,7 @@ function mountImage(host, opts){
   host.addEventListener('click', function(e){
     var b = e.target.closest('button[data-a]');
     if(!b) return;
+    noteSent(opts.tool);
     var name = download();
 
     if(b.dataset.a === 'dl'){

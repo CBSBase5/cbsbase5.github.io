@@ -308,6 +308,7 @@ function build(){
           '<button class="btn btn-quiet" id="breakBtn">Stop here for now</button>' +
         '</div>' +
         '<p class="tiny" style="text-align:center;margin-top:12px">Stopping is completely fine. Everything is saved on this device.</p>' +
+        '<details class="chunksend" id="chunkSend"><summary>Want Jay to see how this chunk went? Only if you like.</summary><div id="chunkSendHost"></div></details>' +
       '</div>' +
       '<div class="card w12 hidden" id="resultCard">' +
         '<span class="kicker">How it went</span>' +
@@ -367,7 +368,12 @@ function build(){
     Base5Send.mount($("sendHost"), {
       tool: HQNAME + ": " + (cfg.review ? "Second look, " : "") + cfg.title,
       filename: HQ.who.toLowerCase() + "-" + cfg.id,
-      getText: reportText
+      getText: function(){ return reportText() + jayCodeText(); }
+    });
+    Base5Send.mount($("chunkSendHost"), {
+      tool: HQNAME + ": " + cfg.title + ", chunk " + (lastChunk + 1),
+      filename: HQ.who.toLowerCase() + "-" + cfg.id + "-chunk",
+      getText: function(){ return chunkText(lastChunk) + jayCodeText(); }
     });
   }
 }
@@ -450,8 +456,54 @@ function drawLock(){
 
 /* ---------- the little celebration between chunks ---------- */
 var CHEERS = ["Chunk done.", "That is one more in the bag.", "Done and dusted.", "Look at that.", "Another one sorted."];
+/* ---------- sending progress to Jay ----------
+   Every send (a finished chunk or a whole activity) can end with the
+   progress code for Jay's view, so Jay's view stays up to date however
+   the student chooses to send. Off in an HQ with no Jay's view. */
+var lastChunk = 0, codeCache = "";
+function wantCode(){ return HQ.jayView !== false; }
+function refreshCode(){
+  if(!wantCode() || !window.EGWPROG) return;
+  try{ EGWPROG.encode("JAY", EGWPROG.report()).then(function(c){ codeCache = c; }, function(){}); }catch(e){}
+}
+function jayCodeText(){
+  if(!wantCode() || !window.EGWPROG) return "";
+  var code = codeCache;
+  if(!code){ try{ code = EGWPROG.encodeSync("JAY", EGWPROG.report()); }catch(e){ return ""; } }
+  return "\n\n== For Jay's view ==\nPaste this whole email into Jay's view to update it.\n" + code;
+}
+function loadProgress(){
+  if(!wantCode() || window.EGWPROG) { refreshCode(); return; }
+  var sc = document.createElement("script");
+  sc.src = "/egw/progress.js?v=9";
+  sc.onload = refreshCode;
+  document.head.appendChild(sc);
+}
+function chunkText(k){
+  var c = chunks[k], lines = [];
+  lines.push(cfg.subject + ": " + cfg.title + ", chunk " + (k + 1) + " of " + chunks.length + ": " + stripTags(c.topic));
+  var n = 0;
+  for(var i = c.from; i <= c.to; i++){
+    var s = steps[i];
+    if(s.type === "learn") continue;
+    n++;
+    var a = state.answers[i], st = a ? a.status : "not tried";
+    var lab = { right1: "first go", right2: "second go", shown: "Show me", done: "done", skipped: "skipped", trying: "started" }[st] || "not tried";
+    lines.push("Q" + n + (s.stretch ? " (stretch)" : "") + ": " + lab + "  |  " + stripTags(s.q || s.title || "").slice(0, 90));
+    if(s.type === "write" && a && a.value && a.value.text){ lines.push(""); lines.push(a.value.text); lines.push(""); }
+    if(s.type === "text" && a && a.value) lines.push("   answer: " + String(a.value).replace(/\s+/g, " "));
+  }
+  var sm = summary();
+  lines.push("");
+  lines.push("Whole activity so far: " + sm.chunksDone + " of " + sm.chunks + " chunks done, " + sm.sparks + " sparks.");
+  return lines.join("\n");
+}
+
 function chunkDone(k){
   var c = chunks[k];
+  lastChunk = k;
+  if($("chunkSend")) $("chunkSend").open = false;
+  refreshCode();
   var g1 = 0, g2 = 0, sh = 0, sk = 0, sp = 0;
   for(var i = c.from; i <= c.to; i++){
     var a = state.answers[i];
@@ -1219,6 +1271,7 @@ function flash(msg){
 /* ---------- results ---------- */
 function finish(){
   state.finished = true; save();
+  refreshCode();
   showOnly("resultCard");
   if(cfg.review){ finishReview(); return; }
   var sm = summary();
@@ -1388,6 +1441,7 @@ function run(c){
   document.title = c.title + " - " + HQ.who + " " + HQNAME;
   makeChunks();
   build();
+  loadProgress();
   if(cfg.review) buildReviewStart();
   showStart();
   save();

@@ -4,5 +4,6 @@ window.HQ = {
   who: "LP",
   prefix: "b5.lp.",
   base: "/lp/",
+  jayView: false,
   look: { name: "Blueprint", line: "The original. Plans pinned to a drawing board." }
 };

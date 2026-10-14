@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/egw/egw.css?v=8">
 <script src="/egw/skin.js?v=2"></script>
 <style>
 .bwrap{max-width:760px;margin:0 auto}
@@ -195,6 +195,7 @@ body.justb .clockside .btn:not(#pauseBtn){display:none}
   </div>
 </footer>
 
+<script src="/data/send.js"></script>
 <script>
 (function(){
 "use strict";
@@ -436,7 +437,16 @@ function drawPanel(){
       '<ul class="breaks">' + breaks().map(function(b){ return "<li>" + b + "</li>"; }).join("") + "</ul>" +
       '<button class="btn" type="button" id="againBtn">Another one</button> ' +
       '<button class="btn btn-quiet" type="button" id="changeBtn">Change things</button> ' +
-      '<a class="btn btn-quiet" href="/egw/">Back to HQ</a>';
+      '<a class="btn btn-quiet" href="/egw/">Back to HQ</a>' +
+      (r.m && window.Base5Send ? '<details class="chunksend" id="bnSend"><summary>Want to tell Jay you did a session? Only if you like.</summary><div id="bnSendHost"></div></details>' : "");
+    if(r.m && window.Base5Send){
+      Base5Send.mount($("bnSendHost"), { tool: "Study with Bonnie", filename: "bonnie-session", getText: function(){
+        var n = st.log.length, m = 0; st.log.forEach(function(x){ m += x.m || 0; });
+        return "Study with Bonnie: " + (r.full ? "a full session" : "a session") + " of " + r.m + " minute" + (r.m === 1 ? "" : "s") + "." +
+          ((st.note || "").trim() ? "\nOn the desk: " + st.note.trim() : "") +
+          "\nSessions so far: " + n + ", " + m + " minutes in all.";
+      } });
+    }
     $("againBtn").onclick = function(){ start(); };
     $("changeBtn").onclick = function(){ phase = "setup"; $("room").classList.remove("awake"); drawAll(); };
   }
