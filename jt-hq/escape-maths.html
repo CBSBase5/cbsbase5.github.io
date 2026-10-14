@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the training ground - JT Training Ground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/jt-hq/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/jt-hq/jt.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles: room banners, the place value table, the club shop price board, the league table, the gate plaque */
+.fig svg.roomban{max-width:560px;border-radius:10px}
+.fig svg.small{max-width:300px}
+.pv{border-collapse:collapse;margin:4px auto 12px;font-size:1.05rem}
+.pv th,.pv td{border:2px solid var(--ink);padding:8px 6px;text-align:center}
+.pv th{background:var(--accent-soft);font-family:var(--display);font-weight:600;font-size:.8rem}
+.pv td{font-family:var(--display);font-weight:700;font-size:1.5rem}
+.priceb{background:#fff;border:3px solid #e4002b;border-radius:10px;margin:0 auto 12px;max-width:340px;overflow:hidden;color:#141a33}
+.priceb .bh{display:block;background:#e4002b;color:#fff;text-align:center;font-family:var(--display);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 0}
+.priceb table{width:100%;border-collapse:collapse;font-size:1.08rem}
+.priceb td{padding:8px 14px;border-bottom:1px solid #f0d9d9;text-align:left}
+.priceb td.p{text-align:right;font-weight:700;white-space:nowrap}
+.priceb tr:last-child td{border-bottom:0}
+.priceb th{padding:6px 14px;text-align:left;font-size:.9rem;color:#6b6450;border-bottom:2px solid #f0d9d9}
+.priceb th.p{text-align:right}
+.priceb tr.us td{background:#ffe5ea;font-weight:700}
+.plaque{background:#fff;border:3px solid #e4002b;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif;font-size:1.08rem;color:#141a33}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/jt-hq/"><span class="hqlogo">JT</span><span class="hqname">Training Ground<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/jt-hq/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the training ground</h2>
+    <span>Maths. An escape room: you are the last one at training and the gates lock. Do the maths in four rooms to find the code.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>JT's Training Ground &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/jt-hq/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+/* Bridgeford Town and every other club and player here are made up. */
+
+var INK = "#141a33", BLUE = "#3a5cff", CYAN = "#22b8e6", SUN = "#ffc72c", MINT = "#19c39a",
+    PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6", RED = "#e4002b",
+    DARKRED = "#a8001f", PITCH = "#2fbf71", DIM = "#2a2f45", CONE = "#ff7a1a";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+
+function svg(w, hgt, label, inner, cls){
+  return '<svg class="' + (cls || "roomban") + '" viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+function flood(x, y){
+  var s = '<rect x="' + (x - 2) + '" y="' + (y + 18) + '" width="4" height="' + (112 - y - 18) + '" fill="' + LINE + '"/>';
+  s += '<rect x="' + (x - 18) + '" y="' + y + '" width="36" height="20" rx="3" fill="' + DIM + '"/>';
+  for(var r = 0; r < 2; r++) for(var c = 0; c < 4; c++)
+    s += '<circle cx="' + (x - 12 + c * 8) + '" cy="' + (y + 6 + r * 8) + '" r="3" fill="#fffbe0"/>';
+  return s + '<circle cx="' + x + '" cy="' + (y + 10) + '" r="30" fill="#fffbe0" opacity="0.12"/>';
+}
+function ball(x, y, r){
+  return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1.5"/>' +
+    '<circle cx="' + x + '" cy="' + y + '" r="' + (r * 0.38) + '" fill="' + INK + '"/>';
+}
+function cone(x, y){
+  return '<path d="M' + (x - 9) + ' ' + y + ' L' + x + ' ' + (y - 18) + ' L' + (x + 9) + ' ' + y + ' Z" fill="' + CONE + '"/>' +
+    '<rect x="' + (x - 11) + '" y="' + y + '" width="22" height="3" fill="' + CONE + '"/>';
+}
+
+/* ---------- room banners ---------- */
+var BAN_KIT = svg(380, 130, "The kit room. Shelves of folded red and white shirts, a net bag full of footballs and a row of boots",
+  '<rect width="380" height="130" fill="' + DIM + '"/>' +
+  '<rect x="0" y="0" width="380" height="14" fill="' + INK + '"/>' +
+  '<rect x="160" y="4" width="70" height="6" rx="3" fill="#fffbe0" opacity="0.9"/>' +
+  '<rect x="16" y="56" width="220" height="5" fill="' + LINE + '"/><rect x="16" y="104" width="220" height="5" fill="' + LINE + '"/>' +
+  [0, 1, 2, 3, 4].map(function(k){
+    var x = 22 + k * 43, s = '';
+    for(var j = 0; j < 3; j++) s += '<rect x="' + x + '" y="' + (44 - j * 10) + '" width="36" height="10" rx="2" fill="' + ((k + j) % 2 ? WHITE : RED) + '" stroke="' + INK + '" stroke-width="1"/>';
+    return s;
+  }).join("") +
+  [0, 1, 2, 3].map(function(k){
+    var x = 30 + k * 52;
+    return '<path d="M' + x + ' 104 L' + x + ' 90 L' + (x + 10) + ' 90 L' + (x + 12) + ' 96 L' + (x + 26) + ' 98 L' + (x + 26) + ' 104 Z" fill="' + INK + '" stroke="' + LINE + '" stroke-width="1.5"/>';
+  }).join("") +
+  /* net bag of balls */
+  '<path d="M300 22 L272 60 Q270 108 306 110 Q344 108 340 60 Z" fill="none" stroke="' + LINE + '" stroke-width="2"/>' +
+  ball(292, 70, 13) + ball(320, 70, 13) + ball(306, 94, 13) + ball(306, 48, 11) +
+  '<path d="M276 64 L336 64 M274 84 L338 84 M290 30 L282 104 M312 30 L326 104" stroke="' + LINE + '" stroke-width="1" opacity="0.6"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + INK + '"/>');
+
+var BAN_GYM = svg(380, 130, "The gym. Orange cones stand in rows on the floor. Coloured bibs hang on hooks and water bottles sit on a bench",
+  '<rect width="380" height="130" fill="' + DIM + '"/>' +
+  '<rect x="0" y="0" width="380" height="14" fill="' + INK + '"/>' +
+  '<rect x="60" y="4" width="70" height="6" rx="3" fill="#fffbe0" opacity="0.9"/><rect x="250" y="4" width="70" height="6" rx="3" fill="#fffbe0" opacity="0.9"/>' +
+  /* bibs on hooks */
+  [MINT, SUN, BLUE, MINT, SUN].map(function(c, k){
+    var x = 20 + k * 34;
+    return '<circle cx="' + (x + 12) + '" cy="22" r="3" fill="' + LINE + '"/><path d="M' + x + ' 26 L' + (x + 8) + ' 26 L' + (x + 12) + ' 32 L' + (x + 16) + ' 26 L' + (x + 24) + ' 26 L' + (x + 24) + ' 58 L' + x + ' 58 Z" fill="' + c + '"/>';
+  }).join("") +
+  /* bench with bottles */
+  '<rect x="210" y="56" width="150" height="8" fill="#b8925e"/><rect x="220" y="64" width="6" height="14" fill="#8a6a40"/><rect x="344" y="64" width="6" height="14" fill="#8a6a40"/>' +
+  [230, 262, 294, 326].map(function(x){
+    return '<rect x="' + x + '" y="30" width="16" height="26" rx="4" fill="' + CYAN + '" opacity="0.8"/><rect x="' + (x + 4) + '" y="24" width="8" height="6" fill="' + RED + '"/>';
+  }).join("") +
+  /* rows of cones */
+  '<rect x="0" y="84" width="380" height="46" fill="#1d6b42"/>' +
+  [0, 1].map(function(r){
+    var s = '';
+    for(var c = 0; c < 9; c++) s += cone(30 + c * 40, 104 + r * 22);
+    return s;
+  }).join(""));
+
+var BAN_BUS = svg(380, 130, "The team bus in the car park at night. It is red with Bridgeford Town on the side. A floodlight glows above",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  flood(348, 6) +
+  '<rect x="16" y="30" width="300" height="72" rx="12" fill="' + RED + '"/>' +
+  '<rect x="16" y="78" width="300" height="10" fill="' + WHITE + '"/>' +
+  [0, 1, 2, 3, 4].map(function(k){
+    return '<rect x="' + (30 + k * 52) + '" y="40" width="44" height="24" rx="3" fill="' + DIM + '"/>';
+  }).join("") +
+  '<rect x="290" y="40" width="20" height="36" rx="3" fill="#3a4060"/>' +
+  '<text x="150" y="98" text-anchor="middle" ' + LAB + ' font-size="12" font-weight="700" fill="' + WHITE + '">BRIDGEFORD TOWN</text>' +
+  '<circle cx="70" cy="104" r="12" fill="' + INK + '" stroke="' + LINE + '" stroke-width="3"/><circle cx="256" cy="104" r="12" fill="' + INK + '" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<circle cx="312" cy="86" r="4" fill="' + SUN + '"/>' +
+  '<rect x="0" y="116" width="380" height="14" fill="' + DIM + '"/>');
+
+var BAN_SHOP = svg(380, 130, "The club shop window. A red and white scarf, a red shirt, a mug and a pile of match programmes, all with price tags",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="10" y="10" width="360" height="22" fill="' + RED + '"/>' +
+  '<text x="190" y="26" text-anchor="middle" ' + LAB + ' font-size="13" font-weight="700" fill="' + WHITE + '">CLUB SHOP</text>' +
+  '<rect x="10" y="32" width="360" height="80" fill="#2e3352" stroke="' + LINE + '" stroke-width="3"/>' +
+  /* scarf */
+  (function(){
+    var s = '';
+    for(var k = 0; k < 8; k++) s += '<rect x="' + (30 + k * 10) + '" y="46" width="10" height="16" fill="' + (k % 2 ? WHITE : RED) + '"/>';
+    return s + '<path d="M30 62 L30 70 M40 62 L40 70 M100 62 L100 70 M110 62 L110 70" stroke="' + WHITE + '" stroke-width="2"/>';
+  })() +
+  /* shirt */
+  '<path d="M150 44 L170 44 L182 54 L176 64 L172 60 L172 94 L148 94 L148 60 L144 64 L138 54 Z" fill="' + RED + '" stroke="' + WHITE + '" stroke-width="2"/>' +
+  /* mug */
+  '<rect x="216" y="70" width="26" height="28" rx="3" fill="' + WHITE + '"/><path d="M242 76 Q252 84 242 92" stroke="' + WHITE + '" stroke-width="4" fill="none"/>' +
+  '<rect x="216" y="78" width="26" height="6" fill="' + RED + '"/>' +
+  /* programmes */
+  '<rect x="282" y="56" width="50" height="40" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1"/><rect x="286" y="60" width="42" height="12" fill="' + RED + '"/>' +
+  '<rect x="276" y="62" width="50" height="40" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="1"/><rect x="280" y="66" width="42" height="12" fill="' + RED + '"/>' +
+  /* price tags */
+  [[60, 84], [160, 100], [229, 104], [300, 108]].map(function(p){
+    return '<rect x="' + (p[0] - 10) + '" y="' + (p[1] - 8) + '" width="20" height="10" rx="2" fill="' + SUN + '"/>';
+  }).join("") +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>');
+
+/* ---------- tables, boards and figures ---------- */
+var PV = '<table class="pv"><tr><th>Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr><tr><td>4</td><td>3</td><td>6</td><td>2</td></tr></table>';
+
+var PRICES =
+'<div class="priceb"><span class="bh">Club shop prices</span><table>' +
+'<tr><td>Home shirt</td><td class="p">&pound;35</td></tr>' +
+'<tr><td>Scarf</td><td class="p">&pound;8</td></tr>' +
+'<tr><td>Mug</td><td class="p">&pound;6</td></tr>' +
+'<tr><td>Programme</td><td class="p">&pound;2.50</td></tr>' +
+'</table></div>';
+
+var TABLE =
+'<div class="priceb"><span class="bh">League table</span><table>' +
+'<tr><th>Team</th><th class="p">Points</th></tr>' +
+'<tr><td>Kestrel Athletic</td><td class="p">24</td></tr>' +
+'<tr class="us"><td>Bridgeford Town</td><td class="p">19</td></tr>' +
+'<tr><td>Copperhill United</td><td class="p">17</td></tr>' +
+'<tr><td>Stonemere Rovers</td><td class="p">12</td></tr>' +
+'</table></div>';
+
+/* the clock on the team bus, drawn by angle */
+function clock(hr, mn){
+  var cx = 120, cy = 120, r = 100, s = '';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + WHITE + '" stroke="' + RED + '" stroke-width="6"/>';
+  for(var k = 0; k < 60; k++){
+    var a = k * 6 * Math.PI / 180, big = k % 5 === 0;
+    var r1 = big ? r - 14 : r - 7;
+    s += '<line x1="' + (cx + r1 * Math.sin(a)).toFixed(1) + '" y1="' + (cy - r1 * Math.cos(a)).toFixed(1) + '" x2="' + (cx + (r - 3) * Math.sin(a)).toFixed(1) + '" y2="' + (cy - (r - 3) * Math.cos(a)).toFixed(1) + '" stroke="' + INK + '" stroke-width="' + (big ? 3 : 1.2) + '"/>';
+  }
+  for(var n = 1; n <= 12; n++){
+    var b = n * 30 * Math.PI / 180;
+    s += '<text x="' + (cx + (r - 30) * Math.sin(b)).toFixed(1) + '" y="' + (cy - (r - 30) * Math.cos(b) + 7).toFixed(1) + '" text-anchor="middle" ' + LAB + ' font-size="20" font-weight="700" fill="' + INK + '">' + n + '</text>';
+  }
+  var ha = ((hr % 12) + mn / 60) * 30 * Math.PI / 180, ma = mn * 6 * Math.PI / 180;
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + 50 * Math.sin(ha)).toFixed(1) + '" y2="' + (cy - 50 * Math.cos(ha)).toFixed(1) + '" stroke="' + INK + '" stroke-width="8" stroke-linecap="round"/>';
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + 80 * Math.sin(ma)).toFixed(1) + '" y2="' + (cy - 80 * Math.cos(ma)).toFixed(1) + '" stroke="' + RED + '" stroke-width="5" stroke-linecap="round"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + INK + '"/>';
+  return svg(240, 240, "A clock face. The long minute hand points at 6. The short hour hand is half way between 1 and 2.", s, "small");
+}
+var CLOCK = clock(1, 30);
+
+/* water bottle: 0 to 500 ml, numbers every 100, a small mark every 50, water up to 350 */
+var BOTTLE = (function(){
+  var x0 = 150, w = 110, yb = 300, px = 0.46, s = '';
+  var top = yb - 500 * px;
+  s += '<rect width="380" height="330" rx="12" fill="' + PAPER + '"/>';
+  s += '<rect x="' + x0 + '" y="' + (yb - 350 * px) + '" width="' + w + '" height="' + (350 * px) + '" fill="' + CYAN + '" opacity="0.55"/>';
+  s += '<path d="M' + x0 + ' ' + (top - 10) + ' L' + x0 + ' ' + (yb - 8) + ' Q' + x0 + ' ' + yb + ' ' + (x0 + 8) + ' ' + yb + ' L' + (x0 + w - 8) + ' ' + yb + ' Q' + (x0 + w) + ' ' + yb + ' ' + (x0 + w) + ' ' + (yb - 8) + ' L' + (x0 + w) + ' ' + (top - 10) + ' Q' + (x0 + w) + ' ' + (top - 30) + ' ' + (x0 + w - 30) + ' ' + (top - 36) + ' L' + (x0 + 30) + ' ' + (top - 36) + ' Q' + x0 + ' ' + (top - 30) + ' ' + x0 + ' ' + (top - 10) + ' Z" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>';
+  s += '<rect x="' + (x0 + 30) + '" y="' + (top - 58) + '" width="' + (w - 60) + '" height="22" rx="4" fill="' + RED + '"/>';
+  for(var v = 0; v <= 500; v += 50){
+    var y = yb - v * px, lab = v % 100 === 0;
+    s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + (lab ? 34 : 20)) + '" y2="' + y + '" stroke="' + INK + '" stroke-width="' + (lab ? 3 : 2) + '"/>';
+    if(lab) s += '<text x="' + (x0 - 10) + '" y="' + (y + 6) + '" text-anchor="end" ' + LAB + ' font-size="18" font-weight="700" fill="' + INK + '">' + v + '</text>';
+  }
+  s += '<text x="' + (x0 - 10) + '" y="' + (top - 30) + '" text-anchor="end" ' + BODY + ' font-size="16" fill="' + INK + '">ml</text>';
+  return svg(380, 330, "A water bottle with a scale. The numbers go 0, 100, 200, 300, 400 and 500 ml, with one small mark between each pair of numbers. The water comes up to the small mark between 300 and 400.", s, "small");
+})();
+
+EGW.run({
+  id: "escape-maths",
+  title: "Escape the training ground",
+  subject: "Maths",
+  mins: 25,
+  blurb: "Last one at training, and the gates lock. Four rooms of maths, one digit in each.",
+  escape: {
+    digits: ["2", "9", "6", "5"],
+    intro: "<p>Training is over. You stay out to practise one more free kick. Then one more.</p>" +
+           "<p>When you look round, everyone has gone. The floodlights click off, one by one.</p>" +
+           "<p>The main gate has a padlock with four dials. A note from Coach is taped to it:</p>" +
+           "<p><i>One digit in each room. Do the maths. Then you can go home.</i></p>",
+    outro: "<p>The last dial turns. Click! The main gate swings open.</p>" +
+           "<p>Coach is in the car park, holding a cup of tea. Still here? That is what I call dedication, Coach grins.</p>" +
+           "<p>Place value, adding, times tables, a scale, the clock, money and a league table. Every digit found. That is a clean sheet.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: KIT ROOM ---------- */
+  { type: "learn", topic: "Kit room",
+    title: "Room 1: the kit room",
+    fig: BAN_KIT,
+    html: "<p>The kit room is full of shirts, boots and balls.</p>" +
+          "<p>A poster on the wall says: Last home crowd, 4362. Each digit has a job.</p>" +
+          PV +
+          '<div class="keep"><b>Keep this</b>In 4362, the 4 is worth 4000. The 3 is worth 300. The 6 is worth 60. The 2 is worth 2.</div>' },
+
+  { type: "mc", topic: "Kit room",
+    q: "The crowd was 4362. What is the 3 worth?",
+    fig: PV,
+    options: ["300", "3", "30", "3000"],
+    answer: 0,
+    hint: "Which column is the 3 in?",
+    why: "The 3 is in the hundreds column. So it is worth 3 hundreds. That is <b>300</b>." },
+
+  { type: "mc", topic: "Kit room",
+    q: "Here are four crowds. Which is the biggest?",
+    options: ["2850", "2580", "2508", "2085"],
+    answer: 0,
+    hint: "They all have 2 thousands. So look at the hundreds next.",
+    why: "They all have 2 thousands. Now look at the hundreds: 8, 5, 5 and 0. 8 hundreds is the most. So <b>2850</b> is the biggest crowd." },
+
+  { type: "num", topic: "Kit room",
+    q: "There are 36 red shirts and 27 white shirts. How many shirts in all?",
+    boxes: [ { label: "Shirts", a: 63 } ],
+    hint: "Add the ones first: 6 and 7. Then add the tens.",
+    why: "Ones: 6 + 7 = 13. Write 3 and carry 1 ten.<br>Tens: 3 + 2 + 1 = 6.<br>So there are <b>63</b> shirts. Forgetting the carried ten gives 53." },
+
+  { type: "num", topic: "Kit room",
+    q: "There were 45 balls. 18 got kicked over the fence. How many are left?",
+    boxes: [ { label: "Balls left", a: 27 } ],
+    hint: "You could count up from 18 to 45. Go to 20 first.",
+    why: "Count up from 18. To get to 20 is 2. From 20 to 45 is 25. 2 + 25 = <b>27</b>.<br>Or use columns. You cannot take 8 from 5. So swap a ten for 10 ones. 15 take away 8 is 7. 3 tens take away 1 ten is 2 tens. So 27." },
+
+  /* ---------- ROOM 2: GYM ---------- */
+  { type: "learn", topic: "Gym",
+    title: "Room 2: the gym",
+    fig: BAN_GYM,
+    html: "<p>The gym lights are still on. Cones and bibs are everywhere.</p>" +
+          "<p>Coach always sets the cones out in rows.</p>" +
+          '<div class="keep"><b>Keep this</b>4 rows of 5 cones is 4 times 5. That is 20. Sharing is the other way. 20 cones shared into 4 rows is 5 in each row.</div>' +
+          "<p>On a scale, find two numbers. Count the steps between them. Then work out what one step is worth.</p>" },
+
+  { type: "num", topic: "Gym",
+    q: "Coach puts out 4 rows of 6 cones. How many cones is that?",
+    boxes: [ { label: "Cones", a: 24 } ],
+    hint: "Count in 6s, four times. Start 6, 12.",
+    why: "4 times 6 = <b>24</b>. Counting in 6s works too: 6, 12, 18, 24." },
+
+  { type: "num", topic: "Gym",
+    q: "30 bibs are shared equally into 5 teams. How many bibs does each team get?",
+    boxes: [ { label: "Bibs for each team", a: 6 } ],
+    hint: "What times 5 makes 30? You could count in 5s.",
+    why: "30 shared by 5 is <b>6</b>, because 5 times 6 = 30. Sharing is the opposite of times." },
+
+  { type: "num", topic: "Gym",
+    q: "How much water is in the bottle?",
+    fig: BOTTLE,
+    boxes: [ { label: "Water", a: 350, post: "ml" } ],
+    hint: "From 300 to 400 there are 2 steps. What is one step worth?",
+    why: "From 300 to 400 is 100. There are 2 steps, so each step is 50. The water is one step above 300. So it is <b>350 ml</b>." },
+
+  { type: "num", topic: "Gym",
+    q: "You drink 150 ml of it. How much water is left?",
+    fig: BOTTLE,
+    boxes: [ { label: "Water left", a: 200, post: "ml" } ],
+    hint: "Start at 350. Take away 100, then take away 50.",
+    why: "350 take away 100 is 250. Then take away 50 more. That leaves <b>200 ml</b>." },
+
+  /* ---------- ROOM 3: TEAM BUS ---------- */
+  { type: "learn", topic: "Team bus",
+    title: "Room 3: the team bus",
+    fig: BAN_BUS,
+    html: "<p>The team bus is parked by the gate. The door is open.</p>" +
+          "<p>A clock ticks by the driver's seat. Coach's matchday plan is on the dashboard.</p>" +
+          '<div class="keep"><b>Keep this</b>A match has two halves. Each half is 45 minutes. Half time is a 15 minute break.</div>' },
+
+  { type: "mc", topic: "Team bus",
+    q: "Look at the clock on the bus. What time does it show?",
+    fig: CLOCK,
+    options: ["Half past 1", "Half past 6", "1 o'clock", "Quarter past 1"],
+    answer: 0,
+    hint: "The long hand shows the minutes. Where does it point? The short hand shows the hour.",
+    why: "The long hand points at 6. That is 30 minutes, or <b>half past</b>. The short hand is just past 1. So it is <b>half past 1</b>. That is 1:30." },
+
+  { type: "num", topic: "Team bus",
+    q: "Each half is 45 minutes. How many minutes of football is that in all?",
+    boxes: [ { label: "Minutes", a: 90, post: "minutes" } ],
+    hint: "There are two halves. Add 45 and 45.",
+    why: "45 + 45 = <b>90</b>. So a match is 90 minutes of football. Half time is not part of the 90." },
+
+  { type: "mc", topic: "Team bus",
+    q: "Kick off is at 3pm. The first half is 45 minutes. Then half time is 15 minutes. When does the second half start?",
+    options: ["4pm", "3:45pm", "4:15pm", "3:15pm"],
+    answer: 0,
+    hint: "Add the 45 minutes first. Then add the 15 minutes.",
+    why: "3pm and 45 minutes is 3:45pm. That is half time. Then add 15 minutes. That makes <b>4pm</b>. 3:45pm is when half time starts, not the second half." },
+
+  { type: "mc", topic: "Team bus",
+    q: "The bus leaves at 1:30. The trip takes 45 minutes. When does it get there?",
+    options: ["2:15", "2:45", "1:75", "2:30"],
+    answer: 0,
+    hint: "Go to 2 o'clock first. That is 30 minutes. How many more minutes are left?",
+    why: "From 1:30 to 2:00 is 30 minutes. You need 15 more. So it gets there at <b>2:15</b>. There is no such time as 1:75, because an hour only has 60 minutes." },
+
+  /* ---------- ROOM 4: CLUB SHOP ---------- */
+  { type: "learn", topic: "Club shop",
+    title: "Room 4: the club shop",
+    fig: BAN_SHOP,
+    html: "<p>The club shop is shut. But the till is still on, and the prices are on the wall.</p>" +
+          PRICES +
+          '<div class="keep"><b>Keep this</b>To find change, count up from the price to the money you paid.</div>' },
+
+  { type: "num", topic: "Club shop",
+    q: "You buy a scarf and a mug. How much is that?",
+    fig: PRICES,
+    boxes: [ { label: "Cost", a: 14, pre: "&pound;", show: "14" } ],
+    hint: "Find the scarf and the mug on the board. Add them.",
+    why: "The scarf is &pound;8. The mug is &pound;6. 8 + 6 = 14. So it costs <b>&pound;14</b>." },
+
+  { type: "num", topic: "Club shop",
+    q: "You buy a programme. You pay with a &pound;5 note. How much change do you get?",
+    fig: PRICES,
+    boxes: [ { label: "Change", a: 2.5, pre: "&pound;", show: "2.50" } ],
+    hint: "Count up from &pound;2.50. How much to get to &pound;3? Then to &pound;5?",
+    why: "Count up from &pound;2.50. Add 50p to get to &pound;3. Add &pound;2 to get to &pound;5. 50p and &pound;2 make <b>&pound;2.50</b>." },
+
+  { type: "num", topic: "Club shop",
+    q: "Look at the league table. How many more points does Kestrel Athletic have than Bridgeford Town?",
+    fig: TABLE,
+    boxes: [ { label: "More points", a: 5 } ],
+    hint: "Find both teams. Then take away the smaller number from the bigger one.",
+    why: "Kestrel Athletic have 24. Bridgeford Town have 19. 24 take away 19 is <b>5</b>. Or count up. 19 to 20 is 1. Then 20 to 24 is 4. 1 + 4 = 5." },
+
+  { type: "num", topic: "Club shop", stretch: true,
+    q: "A win is worth 3 points. Bridgeford Town win the next 2 games. How many points will they have then?",
+    fig: TABLE,
+    boxes: [ { label: "Points", a: 25 } ],
+    hint: "2 wins is 2 lots of 3 points. Add that to 19.",
+    why: "2 wins is 2 times 3 = 6 points. 19 + 6 = <b>25</b>. That is more than Kestrel Athletic's 24. Bridgeford would go top, if Kestrel do not win too." },
+
+  /* ---------- THE MAIN GATE ---------- */
+  { type: "unlock", topic: "The main gate",
+    q: "<p>Back at the main gate, there is a small sign on the padlock.</p>" +
+       '<div class="plaque">Use each digit once. Make the <b>smallest</b> number you can.</div>' +
+       "<p>Here are your rooms and their digits.</p>",
+    code: "2569",
+    hint: "Put the smallest digit first. Then the next smallest, and so on.",
+    why: "The digits are 2, 9, 6 and 5. Smallest first: 2, then 5, then 6, then 9. So the code is <b>2569</b>. That is two thousand, five hundred and sixty nine." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

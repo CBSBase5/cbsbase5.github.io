@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the stadium - JT Training Ground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/jt-hq/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/jt-hq/jt.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles: room banners, the signs and lists found around the stadium, the alphabet strip */
+.fig svg.roomban{max-width:560px;border-radius:10px}
+.sign{border-radius:8px;padding:12px 16px;margin:0 auto 12px;max-width:420px;text-align:left;font-size:1.08rem;line-height:1.6;color:#141a33;border:3px solid #141a33;box-shadow:0 3px 0 rgba(20,26,51,.15);background:#fff}
+.sign p{margin:0 0 6px}
+.sign .who{display:block;font-family:var(--display);font-weight:600;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#6b6450;margin-bottom:8px}
+.sign h4{margin:0 0 8px;font-family:var(--display);font-size:1.3rem;line-height:1.15;text-align:center;text-transform:uppercase;letter-spacing:.03em}
+.sign.tix{border-color:#e4002b}
+.sign.tix h4{background:#e4002b;color:#fff;border-radius:4px;padding:4px 0}
+.sign.tix .spec{margin-top:8px;padding-top:8px;border-top:2px dashed #e4002b}
+.sign.fix{background:#fff8ea;border-color:#e4002b}
+.sign.fix h4{color:#e4002b}
+.sign.fix .game{border-top:2px solid #f0d9d9;padding-top:6px;margin-top:6px}
+.sign.fix .game b{display:block}
+.sign.note{background:#fffbe0;font-family:"Courier New",Courier,monospace;transform:rotate(-.6deg);max-width:330px}
+.sign.tun{background:#2a2f45;border-color:#e4002b;color:#fff}
+.sign.tun .who{color:#ffc72c}
+.sign.tun h4{background:#e4002b;color:#fff;border-radius:4px;padding:4px 0}
+.abc{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:6px 0 12px}
+.abc span{display:inline-block;width:26px;height:30px;line-height:30px;text-align:center;border-radius:5px;background:var(--paper);border:2px solid var(--line);font-family:var(--display);font-weight:600;font-size:1rem;color:var(--ink)}
+.plaque{background:#fff;border:3px solid #e4002b;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Space Grotesk",Arial,sans-serif;font-size:1.08rem;color:#141a33}
+</style>
+</head>
+<body class="subj-eng">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/jt-hq/"><span class="hqlogo">JT</span><span class="hqname">Training Ground<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/jt-hq/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Escape the stadium</h2>
+    <span>English. An escape room: you are locked in the stadium after the final whistle. Read the signs to find the code.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>JT's Training Ground &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/jt-hq/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+/* Every text on this page is original, written for it.
+   Bridgeford Town and every other club and player here are made up. */
+
+var INK = "#141a33", CYAN = "#22b8e6", SUN = "#ffc72c", MINT = "#19c39a",
+    PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6", RED = "#e4002b",
+    DARKRED = "#a8001f", PITCH = "#2fbf71", NIGHT = "#0c2416", DIM = "#2a2f45";
+var LAB = 'font-family="Space Grotesk,Arial"';
+
+function svg(w, hgt, label, inner){
+  return '<svg class="roomban" viewBox="0 0 ' + w + ' ' + hgt + '" role="img" aria-label="' + label + '">' + inner + '</svg>';
+}
+/* a floodlight: a pole with a bank of lamps and a soft glow */
+function flood(x, y, on){
+  var s = '<rect x="' + (x - 2) + '" y="' + (y + 18) + '" width="4" height="' + (112 - y - 18) + '" fill="' + LINE + '"/>';
+  s += '<rect x="' + (x - 18) + '" y="' + y + '" width="36" height="20" rx="3" fill="' + DIM + '"/>';
+  for(var r = 0; r < 2; r++) for(var c = 0; c < 4; c++)
+    s += '<circle cx="' + (x - 12 + c * 8) + '" cy="' + (y + 6 + r * 8) + '" r="3" fill="' + (on ? "#fffbe0" : "#5a6080") + '"/>';
+  if(on) s += '<circle cx="' + x + '" cy="' + (y + 10) + '" r="30" fill="#fffbe0" opacity="0.12"/>';
+  return s;
+}
+/* a football shirt, top left at (x, y), about 44 wide */
+function shirt(x, y, n){
+  return '<path d="M' + (x + 12) + ' ' + y + ' L' + (x + 32) + ' ' + y + ' L' + (x + 44) + ' ' + (y + 10) + ' L' + (x + 38) + ' ' + (y + 20) + ' L' + (x + 34) + ' ' + (y + 16) + ' L' + (x + 34) + ' ' + (y + 50) + ' L' + (x + 10) + ' ' + (y + 50) + ' L' + (x + 10) + ' ' + (y + 16) + ' L' + (x + 6) + ' ' + (y + 20) + ' L' + x + ' ' + (y + 10) + ' Z" fill="' + RED + '" stroke="' + WHITE + '" stroke-width="2"/>' +
+    '<text x="' + (x + 22) + '" y="' + (y + 40) + '" text-anchor="middle" ' + LAB + ' font-size="16" font-weight="700" fill="' + WHITE + '">' + n + '</text>';
+}
+
+var BAN_TICKET = svg(380, 130, "Outside the stadium at night. A red wall says Bridgeford Town. Two ticket windows have their shutters down. A floodlight glows above",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  flood(32, 8, true) +
+  '<rect x="70" y="34" width="300" height="78" fill="' + RED + '"/>' +
+  '<rect x="70" y="34" width="300" height="22" fill="' + WHITE + '"/>' +
+  '<text x="220" y="51" text-anchor="middle" ' + LAB + ' font-size="15" font-weight="700" fill="' + RED + '">BRIDGEFORD TOWN</text>' +
+  [100, 250].map(function(x){
+    return '<rect x="' + x + '" y="66" width="90" height="46" fill="' + DARKRED + '"/>' +
+      '<rect x="' + (x + 6) + '" y="72" width="78" height="34" fill="' + LINE + '"/>' +
+      '<path d="M' + (x + 6) + ' 79 L' + (x + 84) + ' 79 M' + (x + 6) + ' 86 L' + (x + 84) + ' 86 M' + (x + 6) + ' 93 L' + (x + 84) + ' 93 M' + (x + 6) + ' 100 L' + (x + 84) + ' 100" stroke="#9aa0b8" stroke-width="2"/>';
+  }).join("") +
+  '<rect x="196" y="70" width="48" height="18" rx="3" fill="' + SUN + '"/>' +
+  '<text x="220" y="83" text-anchor="middle" ' + LAB + ' font-size="11" font-weight="700" fill="' + INK + '">TICKETS</text>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>');
+
+var BAN_DRESS = svg(380, 130, "The dressing room. Red shirts with numbers hang on pegs over a long bench. A whiteboard shows a team plan",
+  '<rect width="380" height="130" fill="' + DIM + '"/>' +
+  '<rect x="0" y="0" width="380" height="16" fill="' + INK + '"/>' +
+  '<rect x="150" y="4" width="80" height="6" rx="3" fill="#fffbe0" opacity="0.9"/>' +
+  [2, 5, 7, 9].map(function(n, k){
+    var x = 14 + k * 54;
+    return '<circle cx="' + (x + 22) + '" cy="26" r="3" fill="' + LINE + '"/>' + shirt(x, 28, n);
+  }).join("") +
+  '<rect x="6" y="90" width="226" height="8" fill="#b8925e"/>' +
+  '<rect x="20" y="98" width="6" height="14" fill="#8a6a40"/><rect x="210" y="98" width="6" height="14" fill="#8a6a40"/>' +
+  /* whiteboard plan */
+  '<rect x="248" y="24" width="120" height="76" rx="4" fill="' + WHITE + '" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<rect x="256" y="32" width="104" height="60" fill="none" stroke="' + PITCH + '" stroke-width="2"/>' +
+  '<line x1="308" y1="32" x2="308" y2="92" stroke="' + PITCH + '" stroke-width="2"/>' +
+  '<circle cx="308" cy="62" r="10" fill="none" stroke="' + PITCH + '" stroke-width="2"/>' +
+  '<text x="280" y="52" text-anchor="middle" ' + LAB + ' font-size="14" font-weight="700" fill="' + RED + '">X</text>' +
+  '<text x="282" y="80" text-anchor="middle" ' + LAB + ' font-size="14" font-weight="700" fill="' + RED + '">X</text>' +
+  '<text x="336" y="66" text-anchor="middle" ' + LAB + ' font-size="14" font-weight="700" fill="' + INK + '">O</text>' +
+  '<path d="M286 76 Q310 70 328 64" stroke="' + INK + '" stroke-width="2" fill="none" stroke-dasharray="4 3"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + INK + '"/>');
+
+var BAN_PRESS = svg(380, 130, "The press room. A long table with three microphones stands in front of a board covered in red and white club badges. A camera waits on legs",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<rect x="30" y="10" width="250" height="80" fill="' + WHITE + '"/>' +
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function(k){
+    var c = k % 5, r = Math.floor(k / 5), x = 54 + c * 50, y = 32 + r * 38;
+    var f = (c + r) % 2 ? RED : WHITE, g = (c + r) % 2 ? WHITE : RED;
+    return '<path d="M' + (x - 11) + ' ' + (y - 13) + ' L' + (x + 11) + ' ' + (y - 13) + ' L' + (x + 11) + ' ' + (y + 1) + ' Q' + (x + 11) + ' ' + (y + 10) + ' ' + x + ' ' + (y + 15) + ' Q' + (x - 11) + ' ' + (y + 10) + ' ' + (x - 11) + ' ' + (y + 1) + ' Z" fill="' + f + '" stroke="' + RED + '" stroke-width="2"/>' +
+      '<path d="M' + (x - 4) + ' ' + (y - 7) + ' L' + (x + 4) + ' ' + (y - 7) + ' L' + (x + 4) + ' ' + (y + 6) + ' L' + (x - 4) + ' ' + (y + 6) + ' Z" fill="' + g + '"/>';
+  }).join("") +
+  '<rect x="20" y="82" width="270" height="30" fill="' + RED + '"/>' +
+  [80, 155, 230].map(function(x){
+    return '<line x1="' + x + '" y1="82" x2="' + (x + 4) + '" y2="66" stroke="' + LINE + '" stroke-width="3"/><ellipse cx="' + (x + 5) + '" cy="62" rx="5" ry="7" fill="' + INK + '" stroke="' + LINE + '" stroke-width="2"/>';
+  }).join("") +
+  /* camera on legs */
+  '<rect x="318" y="40" width="44" height="26" rx="4" fill="' + LINE + '"/><circle cx="318" cy="53" r="9" fill="' + DIM + '" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<path d="M340 66 L326 112 M340 66 L340 112 M340 66 L354 112" stroke="' + LINE + '" stroke-width="3"/>' +
+  '<circle cx="356" cy="46" r="3" fill="' + RED + '"/>' +
+  '<rect x="0" y="112" width="380" height="18" fill="' + DIM + '"/>');
+
+var BAN_TUNNEL = svg(380, 130, "The players tunnel. It is dark inside. At the far end the green pitch glows under the floodlights",
+  '<rect width="380" height="130" fill="' + INK + '"/>' +
+  '<path d="M90 130 L90 50 Q190 -10 290 50 L290 130 Z" fill="' + DIM + '"/>' +
+  '<path d="M150 112 L150 70 Q190 44 230 70 L230 112 Z" fill="' + PITCH + '"/>' +
+  '<path d="M150 70 Q190 44 230 70 L230 80 Q190 56 150 80 Z" fill="#fffbe0" opacity="0.5"/>' +
+  '<line x1="190" y1="80" x2="190" y2="112" stroke="' + WHITE + '" stroke-width="2" opacity="0.7"/>' +
+  '<path d="M90 130 L150 112 L230 112 L290 130 Z" fill="#3a4060"/>' +
+  '<rect x="104" y="64" width="34" height="18" rx="3" fill="' + RED + '"/>' +
+  '<text x="121" y="77" text-anchor="middle" ' + LAB + ' font-size="9" font-weight="700" fill="' + WHITE + '">WALK</text>' +
+  flood(40, 14, true) + flood(340, 14, true));
+
+/* ---------- signs, lists and notes ---------- */
+var TIX =
+'<div class="sign tix">' +
+'<span class="who">Sign on the ticket office</span>' +
+'<h4>Ticket office</h4>' +
+'<p><b>Monday to Friday:</b> 10am to 4pm</p>' +
+'<p><b>Saturday:</b> 9am to 3pm</p>' +
+'<p><b>Sunday:</b> closed</p>' +
+'<p class="spec">Under 16s pay half price.</p>' +
+'</div>';
+
+var FIX =
+'<div class="sign fix">' +
+'<span class="who">Fixture list in the window</span>' +
+'<h4>Next home games</h4>' +
+'<p class="game"><b>Saturday 24 October</b>Stonemere Rovers<br>Kick off 3pm</p>' +
+'<p class="game"><b>Tuesday 27 October</b>Copperhill United<br>Kick off 7:45pm</p>' +
+'<p class="game"><b>Saturday 31 October</b>Kestrel Athletic<br>Kick off 3pm</p>' +
+'</div>';
+
+var PRESSNOTE =
+'<div class="sign note">' +
+'<span class="who">The reporter\'s notebook</span>' +
+'<p>on saturday kai scored at bridgeford.</p>' +
+'</div>';
+
+var TUN =
+'<div class="sign tun">' +
+'<span class="who">Sign on the tunnel wall</span>' +
+'<h4>Tunnel</h4>' +
+'<p>Players and officials only.</p>' +
+'<p>Please walk. The floor can be slippery.</p>' +
+'<p>Good luck, Bridgeford!</p>' +
+'</div>';
+
+var ABC = '<div class="abc">' + "abcdefghijklmnopqrstuvwxyz".split("").map(function(c){ return "<span>" + c + "</span>"; }).join("") + '</div>';
+
+EGW.run({
+  id: "escape-english",
+  title: "Escape the stadium",
+  subject: "English",
+  mins: 25,
+  blurb: "Locked in the stadium after the final whistle. Four rooms of reading, one digit in each.",
+  escape: {
+    digits: ["4", "7", "1", "8"],
+    intro: "<p>The final whistle blows. Bridgeford Town win 2 to 1!</p>" +
+           "<p>You stay to clap the players. When you look up, the stands are empty.</p>" +
+           "<p>The floodlights hum. The exit gate is locked. The padlock has four dials. A note is tied to it.</p>" +
+           "<p><i>Each room hides one digit. Read carefully. Then you can go home.</i></p>",
+    outro: "<p>The last dial turns. Click! The exit gate swings open.</p>" +
+           "<p>The groundsman is there with a rake. Locked in again? It happens every season, he laughs.</p>" +
+           "<p>Then a small brown dog with no tail runs onto the pitch. A pitch invader! It looks just like Bonnie.</p>" +
+           "<p>You read a sign and a fixture list. You put names in a to z order. You fixed capital letters and spelt tricky words. Man of the match stuff. Well done.</p>"
+  },
+  steps: [
+
+  /* ---------- ROOM 1: TICKET OFFICE ---------- */
+  { type: "learn", topic: "Ticket office",
+    title: "Room 1: the ticket office",
+    fig: BAN_TICKET,
+    html: "<p>The ticket office is dark. The shutters are down.</p>" +
+          "<p>But the signs in the window are still lit up.</p>" +
+          '<div class="keep"><b>Keep this</b>Look for a key word, like a day. Then read the words next to it.</div>' },
+
+  { type: "mc", topic: "Ticket office",
+    q: "What time does the ticket office open on Saturday?",
+    fig: TIX,
+    options: ["9am", "10am", "3pm", "4pm"],
+    answer: 0,
+    hint: "Find the word Saturday first. The first time is when it opens.",
+    why: "Find Saturday. It says 9am to 3pm. The first time is when it opens. So it opens at <b>9am</b>. 3pm is when it closes." },
+
+  { type: "mc", topic: "Ticket office",
+    q: "On which day is the ticket office closed?",
+    fig: TIX,
+    options: ["Sunday", "Monday", "Friday", "Saturday"],
+    answer: 0,
+    hint: "Look for the word closed on the sign.",
+    why: "The sign says <b>Sunday</b>: closed. On all the other days it opens." },
+
+  { type: "mc", topic: "Ticket office",
+    q: "What time is kick off on Tuesday 27 October?",
+    fig: FIX,
+    options: ["7:45pm", "3pm", "7pm", "5:45pm"],
+    answer: 0,
+    hint: "Find Tuesday 27 October. Then read the kick off time under it.",
+    why: "Find Tuesday 27 October. Under it, it says Kick off 7:45pm. So kick off is at <b>7:45pm</b>. That is a night game, under the floodlights." },
+
+  { type: "mc", topic: "Ticket office",
+    q: "Who does Bridgeford Town play on Saturday 31 October?",
+    fig: FIX,
+    options: ["Kestrel Athletic", "Stonemere Rovers", "Copperhill United"],
+    answer: 0,
+    hint: "There are two Saturdays. Find the one that says 31 October.",
+    why: "Find Saturday 31 October. The team under it is <b>Kestrel Athletic</b>. Stonemere Rovers is on Saturday 24 October. Look at the date as well as the day." },
+
+  /* ---------- ROOM 2: DRESSING ROOM ---------- */
+  { type: "learn", topic: "Dressing room",
+    title: "Room 2: the dressing room",
+    fig: BAN_DRESS,
+    html: "<p>The dressing room smells of mud and sweaty socks. The shirts are all mixed up.</p>" +
+          "<p>A note on the whiteboard says: <i>Hang the shirts in a to z order.</i></p>" +
+          ABC +
+          '<div class="keep"><b>Keep this</b>Alphabetical order is a to z order. Look at the first letter of each word. The letter nearer to a comes first.</div>' },
+
+  { type: "order", topic: "Dressing room",
+    q: "Hang the shirts in alphabetical order.",
+    items: ["Ali", "Dev", "Femi", "Kai", "Sam"],
+    hint: "Look at the first letter of each name. Find the one nearest to a.",
+    why: "The first letters are A, D, F, K and S. In a to z order that is <b>Ali, Dev, Femi, Kai, Sam</b>." },
+
+  { type: "mc", topic: "Dressing room",
+    q: "Which letter comes next? r, s, t, ...",
+    options: ["u", "v", "q", "w"],
+    answer: 0,
+    hint: "Say the alphabet from r. You could look at the strip in the learn card.",
+    why: "r, s, t, <b>u</b>. Then v, w. Singing the alphabet song quietly is a good trick." },
+
+  { type: "mc", topic: "Dressing room",
+    q: "Which player comes first in alphabetical order?",
+    options: ["Leo", "Tom", "Max", "Zak"],
+    answer: 0,
+    hint: "Look at the first letters: L, T, M and Z. Which is nearest to a?",
+    why: "The first letters are L, T, M and Z. L comes first in the alphabet. So <b>Leo</b> comes first." },
+
+  { type: "order", topic: "Dressing room", stretch: true,
+    q: "These all start with J. Put them in alphabetical order.",
+    items: ["Jack", "Jed", "Jon", "Jude"],
+    hint: "The first letters are the same. So look at the second letter of each name.",
+    why: "They all start with J. So look at the second letter: a, e, o and u. In a to z order that is <b>Jack, Jed, Jon, Jude</b>. A squad list works like this too." },
+
+  /* ---------- ROOM 3: PRESS ROOM ---------- */
+  { type: "learn", topic: "Press room",
+    title: "Room 3: the press room",
+    fig: BAN_PRESS,
+    html: "<p>The press room is where the manager talks after the game. The cameras are off now.</p>" +
+          "<p>A reporter left a notebook. It has no capital letters!</p>" +
+          '<div class="keep"><b>Keep this</b>A sentence starts with a capital letter. It ends with a full stop. A question ends with a question mark. Names, places and days start with a capital letter too.</div>' },
+
+  { type: "mc", topic: "Press room",
+    q: "Which sentence is written correctly?",
+    options: ["We won the match.", "we won the match.", "We won the match", "we Won the match."],
+    answer: 0,
+    hint: "Check the start and the end of each one.",
+    why: "<b>We won the match.</b> It starts with a capital W. It ends with a full stop. Each of the others has a mistake." },
+
+  { type: "multi", topic: "Press room",
+    q: "Which words need a capital letter?",
+    fig: PRESSNOTE,
+    options: ["on", "saturday", "kai", "scored", "at", "bridgeford"],
+    answers: [0, 1, 2, 5],
+    hint: "There are four. Think about the start, a day, a name and a place.",
+    why: "<b>On</b> starts the sentence. <b>Saturday</b> is a day. <b>Kai</b> is a name. <b>Bridgeford</b> is a place. So: On Saturday Kai scored at Bridgeford. The words scored and at stay small." },
+
+  { type: "sort", topic: "Press room",
+    q: "Does each one need a <b>full stop</b> or a <b>question mark</b>?",
+    buckets: ["Full stop", "Question mark"],
+    cards: [
+      ["The ref blew the whistle", 0],
+      ["We train on Monday", 0],
+      ["I love this club", 0],
+      ["What time is kick off", 1],
+      ["Did you see the goal", 1],
+      ["Where is the team bus", 1]
+    ],
+    hint: "Is it asking something? Words like what, did and where often start a question.",
+    why: "<b>What time is kick off?</b> <b>Did you see the goal?</b> <b>Where is the team bus?</b> They all ask something, so they need a question mark. The other three tell you something, so they end with a full stop." },
+
+  /* ---------- ROOM 4: TUNNEL ---------- */
+  { type: "learn", topic: "Tunnel",
+    title: "Room 4: the tunnel",
+    fig: BAN_TUNNEL,
+    html: "<p>The tunnel is dark and quiet. At the end, the pitch glows under the lights.</p>" +
+          "<p>There is a sign on the wall. Some words on it are long.</p>" +
+          '<div class="keep"><b>Keep this</b>To spell a long word, say it slowly in parts. To find what a word means, read the words around it. They give you clues.</div>' },
+
+  { type: "mc", topic: "Tunnel",
+    q: "Fill the gap. The floor can be ____.",
+    fig: TUN,
+    options: ["slippery", "slipery", "slippry", "slipperry"],
+    answer: 0,
+    hint: "Look at the sign. The word is there.",
+    why: "It is <b>slippery</b>. Say it in parts: slip, per, y. It has a double p, but only one r. The sign is a good place to check." },
+
+  { type: "mc", topic: "Tunnel",
+    q: "The ref blows it at the end of the game. Which spelling is right?",
+    options: ["whistle", "wistle", "whisle", "wissel"],
+    answer: 0,
+    hint: "It starts like when and white.",
+    why: "<b>whistle</b>. It starts with wh, like when and white. The t is silent, so you cannot hear it. Say it in your head as whis, tle." },
+
+  { type: "mc", topic: "Tunnel",
+    q: "The sign says: Players and <b>officials</b> only. Who are the officials?",
+    fig: TUN,
+    options: ["The ref and the people who help run the game", "The fans in the stands", "The people who sell the pies", "The players on the bench"],
+    answer: 0,
+    hint: "Who walks out of the tunnel with the players?",
+    why: "The ref and the assistant refs walk out with the players. They run the game. They are the <b>officials</b>. The words around it gave the clue. Only players and officials go in the tunnel." },
+
+  { type: "match", topic: "Tunnel",
+    q: "Match each football word to what it means.",
+    pairs: [
+      ["kick off", "the start of the game"],
+      ["half time", "the break in the middle"],
+      ["squad", "all the players in a team"],
+      ["fixture", "a game on a set date"]
+    ],
+    hint: "Start with the one you know best. Then do the rest.",
+    why: "<b>Kick off</b> is the start. <b>Half time</b> is the break in the middle. The <b>squad</b> is all the players. A <b>fixture</b> is a game on a set date. The fixture list shows them." },
+
+  /* ---------- THE EXIT GATE ---------- */
+  { type: "unlock", topic: "The exit gate",
+    q: "<p>Back at the exit gate, there is a small sign on the padlock.</p>" +
+       '<div class="plaque">Put the room names in a to z order. Then read the digits.</div>' +
+       "<p>Here are your rooms and their digits.</p>",
+    code: "7148",
+    hint: "The first letters are T, D, P and T. Two rooms start with T. For those two, look at the second letter.",
+    why: "D comes first, then P, then T. Two rooms start with T. So look at the second letter. The i comes before u. So it goes Dressing room 7, Press room 1, Ticket office 4, Tunnel 8. The code is <b>7148</b>." }
+  ]
+});
+})();
+</script>
+</body>
+</html>

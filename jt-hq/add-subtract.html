@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<!-- BUILT by jt-hq/_build/build_jt.py from a shared HQ page. Edit the source and rebuild. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adding and taking away - JT Training Ground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="/jt-hq/conf.js?v=1"></script>
+<link rel="stylesheet" href="/egw/egw.css?v=7">
+<link rel="stylesheet" href="/jt-hq/jt.css?v=1">
+<script src="/egw/skin.js?v=2"></script>
+<style>
+/* page only styles here */
+.gap{position:relative;border:2px dashed var(--ink);border-radius:6px;padding:0 .4em;margin:0 3px;color:transparent}
+.gap::after{content:"?";color:var(--ink);position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.sumbig{display:block;font-family:var(--display);font-weight:700;font-size:1.45rem;margin:8px 0 4px}
+/* Column machine widget */
+.cm-task p{margin:0 0 6px}
+.cm-dots{display:flex;gap:6px;margin-bottom:6px}
+.cm-dots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
+.cm-dots span.on{background:var(--good)}
+.cm-dots span.now{background:var(--sun)}
+.cm-board{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 6px 12px;margin:8px 0}
+.cm-grid{display:grid;grid-template-columns:40px repeat(3,58px);justify-content:center;align-items:center;row-gap:4px;column-gap:6px}
+.cm-hd{text-align:center;font-family:var(--display);font-weight:700;font-size:1rem;color:#4b5275}
+.cm-d,.cm-op{text-align:center;font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.2}
+.cm-line{grid-column:2 / 5;height:0;border-top:4px solid var(--ink);margin:2px 0}
+.cm-cell{height:58px;border:3px dashed #8a8fa8;border-radius:10px;background:var(--paper);font-family:var(--display);font-weight:700;font-size:2rem;color:var(--ink);cursor:pointer;padding:0;touch-action:manipulation}
+.cm-cell.small{height:38px;width:38px;justify-self:center;font-size:1.2rem;color:#d6383b;border-width:2px}
+.cm-cell.sel{border-style:solid;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:#fff}
+.cm-cell.ok{border-style:solid;border-color:var(--good);background:rgba(31,157,99,.12)}
+.cm-cell.no{border-style:solid;border-color:#d6383b;background:rgba(255,92,92,.12)}
+.cm-cell.given{border-style:solid;border-color:var(--violet);background:rgba(138,92,246,.1)}
+.cm-clab{font-size:.78rem;font-weight:700;color:#d6383b;text-align:right;line-height:1.1}
+.cm-pad{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px auto;max-width:360px}
+.cm-pad button{height:46px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-family:var(--display);font-weight:700;font-size:1.3rem;color:var(--ink);cursor:pointer;touch-action:manipulation;padding:0}
+.cm-pad button.wide{grid-column:span 5;font-size:1rem}
+.cm-pad button:disabled{opacity:.4;cursor:default}
+.cm-fb .btn{margin-top:10px}
+</style>
+</head>
+<body class="subj-maths">
+<div class="grain"></div>
+
+<header class="hq">
+  <div class="hqwrap">
+    <a class="hqmark" href="/jt-hq/"><span class="hqlogo">JT</span><span class="hqname">Training Ground<small>English and Maths</small></span></a>
+    <nav class="hqnav"><a href="/jt-hq/">HQ home</a><a href="/">Base 5</a></nav>
+  </div>
+</header>
+
+<div class="wrap qwrap">
+  <div class="weektheme">
+    <h2>Adding and taking away</h2>
+    <span>Number bonds, sums in your head, column adding and taking away, missing numbers and checking. Set in a night bakery, a late cinema and a very long corridor.</span>
+  </div>
+  <div id="egwApp"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>JT's Training Ground &middot; part of Base 5, Chilton Bridge School</span>
+    <a href="/jt-hq/">Back to HQ</a>
+  </div>
+</footer>
+
+<script src="/data/send.js"></script>
+<script src="/egw/engine.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+
+var INK = "#141a33", BLUE = "#3a5cff", CORAL = "#ff5d5d", SUN = "#ffd23f",
+    MINT = "#19c39a", VIOLET = "#8a5cf6", PAPER = "#f2f1ec", WHITE = "#ffffff", LINE = "#d9d8e6";
+var LAB = 'font-family="Space Grotesk,Arial"', BODY = 'font-family="Atkinson Hyperlegible,Verdana"';
+var RED = "#d6383b";
+
+function t(x, y, s, size, fill, extra){
+  return '<text x="' + x + '" y="' + y + '" ' + (extra || "") + ' font-size="' + size + '" fill="' + (fill || INK) + '">' + s + '</text>';
+}
+function ln(x1, y1, x2, y2, col, w, extra){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (col || INK) + '" stroke-width="' + (w || 2) + '"' + (extra || "") + '/>';
+}
+function gap(){ return '<span class="gap">what</span>'; }
+function big(s){ return '<span class="sumbig">' + s + '</span>'; }
+
+/* ---------- ten frame and a bar to 100 ---------- */
+var BONDS = (function(){
+  var s = '<svg viewBox="0 0 400 210" role="img" aria-label="A ten frame with 7 counters and 3 empty spaces: 7 and 3 make 10. Below, a bar of 100 split into 70 and 30.">';
+  for(var k = 0; k < 10; k++){
+    var x = 60 + (k % 5) * 44, y = 12 + Math.floor(k / 5) * 44;
+    s += '<rect x="' + x + '" y="' + y + '" width="44" height="44" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+    if(k < 7) s += '<circle cx="' + (x + 22) + '" cy="' + (y + 22) + '" r="15" fill="' + CORAL + '" stroke="' + INK + '" stroke-width="2"/>';
+  }
+  s += t(300, 52, "7 + 3", 22, INK, LAB + ' font-weight="800"');
+  s += t(300, 80, "= 10", 22, INK, LAB + ' font-weight="800"');
+  s += '<rect x="20" y="128" width="252" height="44" fill="#ffc4c4" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="272" y="128" width="108" height="44" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(146, 157, "70", 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(326, 157, "30", 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(200, 200, "70 + 30 = 100", 20, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+})();
+
+/* ---------- splitting into tens and ones ---------- */
+var SPLIT = '<svg viewBox="0 0 400 160" role="img" aria-label="34 plus 25. Tens: 30 plus 20 is 50. Ones: 4 plus 5 is 9. 50 plus 9 is 59.">' +
+  t(200, 32, "34 + 25", 28, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(110, 76, "Tens", 16, BLUE, LAB + ' font-weight="700" text-anchor="middle"') +
+  t(110, 102, "30 + 20 = 50", 20, BLUE, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(290, 76, "Ones", 16, CORAL, LAB + ' font-weight="700" text-anchor="middle"') +
+  t(290, 102, "4 + 5 = 9", 20, CORAL, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(200, 146, "50 + 9 = 59", 26, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+  '</svg>';
+
+/* ---------- column sums drawn ----------
+   a, b numbers; op "+" or "-"; carry: {col: digit} drawn small under the answer (col 1 tens, 2 hundreds);
+   ex: exchanges for take away, list of {col, from, to} (top digit crossed out, new digit above),
+   and ones: true puts a small 1 in front of the top digit in that column. */
+function colsum(a, b, op, opt){
+  opt = opt || {};
+  var xs = [300, 245, 190], s = "", ans = op === "+" ? a + b : a - b;
+  var hasEx = opt.ex && opt.ex.length, y0 = hasEx ? 40 : 18;
+  var H = y0 + 196 + (opt.carry ? 30 : 0);
+  var hy = hasEx ? 18 : y0 + 16;
+  s += t(xs[2], hy, "H", 16, "#4b5275", LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(xs[1], hy, "T", 16, "#4b5275", LAB + ' font-weight="700" text-anchor="middle"');
+  s += t(xs[0], hy, "O", 16, "#4b5275", LAB + ' font-weight="700" text-anchor="middle"');
+  function row(n, y, cross){
+    var ds = String(n).split("").reverse();
+    ds.forEach(function(d, c){
+      s += t(xs[c], y, d, 36, INK, LAB + ' font-weight="800" text-anchor="middle"');
+    });
+  }
+  row(a, y0 + 62);
+  row(b, y0 + 112);
+  s += t(130, y0 + 112, op === "+" ? "+" : "&minus;", 36, INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += ln(150, y0 + 130, 330, y0 + 130, INK, 4);
+  if(opt.answer !== false){
+    String(ans).split("").reverse().forEach(function(d, c){
+      s += t(xs[c], y0 + 176, d, 36, BLUE, LAB + ' font-weight="800" text-anchor="middle"');
+    });
+    s += ln(150, y0 + 192, 330, y0 + 192, INK, 4);
+  }
+  if(opt.carry){
+    Object.keys(opt.carry).forEach(function(c){
+      s += t(xs[c], y0 + 220, String(opt.carry[c]), 20, RED, LAB + ' font-weight="800" text-anchor="middle"');
+    });
+  }
+  (opt.ex || []).forEach(function(e){
+    var x = xs[e.col];
+    if(e.ones){
+      s += t(x - 17, y0 + 56, "1", 20, RED, LAB + ' font-weight="800" text-anchor="middle"');
+    }else{
+      s += ln(x - 12, y0 + 64, x + 12, y0 + 34, RED, 3);
+      s += t(x, y0 + 22, String(e.to), 20, RED, LAB + ' font-weight="800" text-anchor="middle"');
+    }
+  });
+  return '<svg viewBox="0 0 400 ' + H + '" role="img" aria-label="' + opt.label + '">' + s + '</svg>';
+}
+var COL243 = colsum(243, 125, "+", { label: "Column adding: 243 plus 125. The answer is 368." });
+var COL352 = colsum(352, 416, "+", { answer: false, label: "Column adding: 352 plus 416." });
+var COL367 = colsum(367, 218, "+", { carry: { 1: 1 }, label: "Column adding: 367 plus 218. 7 plus 8 is 15: write 5, carry 1 under the tens. The answer is 585." });
+var COL457 = colsum(457, 238, "+", { answer: false, label: "Column adding: 457 plus 238." });
+var COL586 = colsum(586, 243, "-", { label: "Column taking away: 586 take away 243. The answer is 343." });
+var COL768 = colsum(768, 325, "-", { answer: false, label: "Column taking away: 768 take away 325." });
+var COL452 = colsum(452, 127, "-", { ex: [ { col: 1, to: 4 }, { col: 0, ones: true } ],
+  label: "Column taking away: 452 take away 127. The 5 tens is crossed out and becomes 4 tens. The 2 ones becomes 12 ones. The answer is 325." });
+var COL643 = colsum(643, 218, "-", { answer: false, label: "Column taking away: 643 take away 218." });
+var COL403 = colsum(403, 158, "-", { answer: false, label: "Column taking away: 403 take away 158." });
+
+/* ---------- bar model ---------- */
+function bar(whole, a, b, label){
+  var s = '<svg viewBox="0 0 400 140" role="img" aria-label="' + label + '">';
+  var wn = typeof whole === "number" ? whole : (a + b);
+  var an = typeof a === "number" ? a : wn - b;
+  var w1 = Math.round(360 * an / wn);
+  s += '<rect x="20" y="14" width="360" height="46" fill="#fff3c2" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(200, 45, String(whole), 22, whole === "?" ? CORAL : INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += '<rect x="20" y="74" width="' + w1 + '" height="46" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += '<rect x="' + (20 + w1) + '" y="74" width="' + (360 - w1) + '" height="46" fill="' + WHITE + '" stroke="' + INK + '" stroke-width="2.5"/>';
+  s += t(20 + w1 / 2, 105, String(a), 22, a === "?" ? CORAL : INK, LAB + ' font-weight="800" text-anchor="middle"');
+  s += t(20 + w1 + (360 - w1) / 2, 105, String(b), 22, b === "?" ? CORAL : INK, LAB + ' font-weight="800" text-anchor="middle"');
+  return s + '</svg>';
+}
+var BAR60 = bar(60, 25, "?", "A bar model. The whole is 60. One part is 25. The other part is missing.");
+var BAR150 = bar(150, 90, "?", "A bar model. The whole is 150. One part is 90. The other part is missing.");
+
+/* ---------- inverse ---------- */
+var INV = '<svg viewBox="0 0 400 150" role="img" aria-label="368 plus 254 is 622. Going back, 622 take away 254 is 368.">' +
+  t(200, 36, "368 + 254 = 622", 26, INK, LAB + ' font-weight="800" text-anchor="middle"') +
+  '<path d="M330 50 Q370 84 330 112" fill="none" stroke="' + BLUE + '" stroke-width="3"/>' +
+  '<path d="M342 104 L330 112 L344 118" fill="none" stroke="' + BLUE + '" stroke-width="3"/>' +
+  t(200, 130, "622 &minus; 254 = 368", 26, BLUE, LAB + ' font-weight="800" text-anchor="middle"') +
+  t(200, 82, "undo it to check", 16, BLUE, BODY + ' font-weight="700" text-anchor="middle"') +
+  '</svg>';
+
+/* ---------- Column machine widget ---------- */
+var CM = [ { a: 243, b: 135 }, { a: 367, b: 218 }, { a: 458, b: 276 } ];
+function cmWork(a, b){
+  var ao = a % 10, at = Math.floor(a / 10) % 10, ah = Math.floor(a / 100);
+  var bo = b % 10, bt = Math.floor(b / 10) % 10, bh = Math.floor(b / 100);
+  var so = ao + bo, c1 = so >= 10 ? 1 : 0;
+  var st = at + bt + c1, c2 = st >= 10 ? 1 : 0;
+  var sh = ah + bh + c2;
+  return { ao: ao, bo: bo, at: at, bt: bt, ah: ah, bh: bh, so: so, st: st, sh: sh, c1: c1, c2: c2,
+    o: String(so % 10), t: String(st % 10), h: String(sh), ct: c1 ? "1" : "", ch: c2 ? "1" : "", ans: a + b };
+}
+function cmWhy(a, b){
+  var w = cmWork(a, b), s = [];
+  s.push("Ones: " + w.ao + " + " + w.bo + " = " + w.so + (w.c1 ? ". Write " + w.o + ", carry 1." : "."));
+  s.push("Tens: " + w.at + " + " + w.bt + (w.c1 ? " + 1" : "") + " = " + w.st + (w.c2 ? ". Write " + w.t + ", carry 1." : "."));
+  s.push("Hundreds: " + w.ah + " + " + w.bh + (w.c2 ? " + 1" : "") + " = " + w.sh + ".");
+  return s.join(" ") + " Answer: <b>" + w.ans + "</b>.";
+}
+var CM_ORDER = ["o", "ct", "t", "ch", "h"];
+function mountColumns(el, api){
+  var d = api.data;
+  if(typeof d.c !== "number") d.c = 0;
+  if(!d.cell) d.cell = { o: "", t: "", h: "", ct: "", ch: "" };
+  if(!d.sel) d.sel = "o";
+  if(!d.miss) d.miss = [0, 0, 0];
+  if(!d.shown) d.shown = [false, false, false];
+  var view = Math.min(d.c, 2), marks = null;
+  el.innerHTML =
+    '<div class="wpanel cm-task" data-r="task"></div>' +
+    '<div class="cm-board"><div class="cm-grid" data-r="grid"></div></div>' +
+    '<div class="cm-pad" data-r="pad"></div>' +
+    '<div class="wrow" style="justify-content:center">' +
+      '<button class="btn" type="button" data-r="go">Check my sum</button>' +
+      '<button class="btn btn-quiet hidden" type="button" data-r="show">Show me</button>' +
+    '</div>' +
+    '<div class="fb cm-fb hidden" data-r="fb" aria-live="polite"></div>';
+  function q(r){ return el.querySelector('[data-r="' + r + '"]'); }
+  var pad = "";
+  for(var k = 1; k <= 10; k++) pad += '<button type="button" data-n="' + (k % 10) + '">' + (k % 10) + '</button>';
+  pad += '<button type="button" class="wide" data-n="x">Rub out this box</button>';
+  q("pad").innerHTML = pad;
+
+  function locked(){ return view !== d.c || d.c >= 3; }
+  function task(){
+    var dots = '<div class="cm-dots" aria-hidden="true">';
+    for(var k = 0; k < 3; k++) dots += '<span class="' + (k < d.c ? "on" : (k === view && d.c < 3 ? "now" : "")) + '"></span>';
+    dots += '</div>';
+    if(d.c >= 3) return dots + "<p><b>All three sums done.</b> The machine is happy. You can look back at the last one.</p>";
+    var w = cmWork(CM[view].a, CM[view].b);
+    var tip = view === 0 ? "No carrying in this one." : (w.c2 ? "Two carries in this one. Take it slowly." : "There is one carry in this one.");
+    return dots + '<p class="tiny" style="margin:0 0 4px">Sum ' + (view + 1) + " of 3. " + tip + "</p>" +
+      "<p>Tap a box, then tap a number. Start with the ones on the right. Small boxes are for carries.</p>";
+  }
+  function cell(c, small){
+    var cls = "cm-cell" + (small ? " small" : "") + (d.sel === c && !locked() ? " sel" : "") + (marks && marks[c] ? " " + marks[c] : "");
+    var lab = { o: "Answer, ones", t: "Answer, tens", h: "Answer, hundreds", ct: "Carry into the tens", ch: "Carry into the hundreds" }[c];
+    return '<button type="button" class="' + cls + '" data-c="' + c + '" aria-label="' + lab + '">' + d.cell[c] + "</button>";
+  }
+  function grid(){
+    var p = CM[view], A = String(p.a), B = String(p.b), s = "";
+    s += '<span></span><span class="cm-hd">H</span><span class="cm-hd">T</span><span class="cm-hd">O</span>';
+    s += '<span></span><span class="cm-d">' + A[0] + '</span><span class="cm-d">' + A[1] + '</span><span class="cm-d">' + A[2] + "</span>";
+    s += '<span class="cm-op">+</span><span class="cm-d">' + B[0] + '</span><span class="cm-d">' + B[1] + '</span><span class="cm-d">' + B[2] + "</span>";
+    s += '<span></span><span class="cm-line"></span>';
+    s += "<span></span>" + cell("h") + cell("t") + cell("o");
+    s += '<span class="cm-clab">carry</span>' + cell("ch", true) + cell("ct", true) + "<span></span>";
+    return s;
+  }
+  function draw(){
+    q("task").innerHTML = task();
+    q("grid").innerHTML = grid();
+    var lk = locked();
+    [].forEach.call(q("pad").querySelectorAll("button"), function(b){ b.disabled = lk; });
+    q("go").classList.toggle("hidden", d.c >= 3);
+    q("go").disabled = lk;
+    q("show").classList.toggle("hidden", lk || !d.miss[view]);
+  }
+  function fb(cls, html){ var f = q("fb"); f.className = "fb cm-fb " + cls; f.innerHTML = html; }
+  function result(){
+    if(d.shown.some(Boolean)) return "shown";
+    if(d.miss.some(function(n){ return n > 0; })) return "right2";
+    return "right1";
+  }
+  function nudge(w){
+    if(d.cell.o !== w.o) return "Start with the ones. What is " + w.ao + " + " + w.bo + "?" + (w.c1 ? " It is more than 9, so carry the ten." : "");
+    if(d.cell.t !== w.t) return w.c1 ? "The ones look good. In the tens, did you add the carried 1?" : "The ones look good. Now add the tens: " + w.at + " + " + w.bt + ".";
+    return w.c2 ? "Nearly there. In the hundreds, did you add the carried 1?" : "Nearly there. Add the hundreds: " + w.ah + " + " + w.bh + ".";
+  }
+  function solved(k, how){
+    d.c = k + 1;
+    var last = d.c >= 3;
+    if(last) d.result = result();
+    api.save();
+    var head = how === "shown" ? "<b>Here is how it goes.</b> " : "<b>Ding! The machine likes that.</b> ";
+    var more = last ? '<p style="margin:8px 0 0">All three sums done. Ones first, and never forget the carry.</p>' :
+      '<button class="btn" type="button" data-r="next">Next sum</button>';
+    fb(how === "shown" ? "show" : "good", head + cmWhy(CM[k].a, CM[k].b) + more);
+    if(!last){
+      q("next").onclick = function(){
+        view = d.c; marks = null; d.cell = { o: "", t: "", h: "", ct: "", ch: "" }; d.sel = "o"; api.save();
+        q("fb").className = "fb cm-fb hidden";
+        draw();
+      };
+    }
+    draw();
+    if(last) api.done(d.result);
+  }
+  q("grid").addEventListener("click", function(e){
+    var b = e.target.closest(".cm-cell");
+    if(!b || locked()) return;
+    d.sel = b.getAttribute("data-c"); marks = null; api.save(); draw();
+  });
+  q("pad").addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if(!b || locked()) return;
+    var n = b.getAttribute("data-n");
+    marks = null;
+    if(n === "x"){ d.cell[d.sel] = ""; }
+    else{
+      d.cell[d.sel] = n;
+      var i = CM_ORDER.indexOf(d.sel);
+      if(i < CM_ORDER.length - 1) d.sel = CM_ORDER[i + 1];
+    }
+    api.save(); draw();
+  });
+  q("go").onclick = function(){
+    if(locked()) return;
+    if(!d.cell.o || !d.cell.t || !d.cell.h){ fb("nudge", "Fill in all three big answer boxes first. Carry boxes are there if you need them."); return; }
+    var w = cmWork(CM[view].a, CM[view].b);
+    if(d.cell.o === w.o && d.cell.t === w.t && d.cell.h === w.h){ marks = { o: "ok", t: "ok", h: "ok" }; solved(view, "right"); return; }
+    d.miss[view]++; api.save();
+    marks = {};
+    ["o", "t", "h"].forEach(function(c){ marks[c] = d.cell[c] === w[c] ? "ok" : "no"; });
+    fb("nudge", "<b>Not quite yet.</b> " + nudge(w) + (d.miss[view] > 1 ? " Show me is there if you want it." : ""));
+    draw();
+  };
+  q("show").onclick = function(){
+    if(locked()) return;
+    d.shown[view] = true;
+    var w = cmWork(CM[view].a, CM[view].b);
+    ["o", "t", "h", "ct", "ch"].forEach(function(c){ d.cell[c] = w[c]; });
+    marks = { o: "given", t: "given", h: "given", ct: w.ct ? "given" : "", ch: w.ch ? "given" : "" };
+    solved(view, "shown");
+  };
+  draw();
+  if(d.c >= 3 && d.result){
+    fb("good", "<b>All three sums done.</b> Ones first, and never forget the carry.");
+    api.done(d.result);
+  }
+}
+
+EGW.run({
+  id: "add-subtract",
+  title: "Adding and taking away",
+  subject: "Maths",
+  mins: 35,
+  blurb: "Number bonds, adding and taking away in your head, column sums with carrying and exchanging, missing numbers, checking, and word problems.",
+  steps: [
+
+  /* ---------- 1 NUMBER BONDS ---------- */
+  { type: "learn", topic: "Number bonds",
+    title: "Pairs that make 10 and 100",
+    fig: BONDS,
+    html: "<p>A number bond is a pair that makes a number.</p>" +
+          "<p>7 and 3 make 10.</p>" +
+          "<p>Bonds to 10 help with bonds to 100. 70 and 30 make 100.</p>" +
+          "<p>For 45, count on 5 to get to 50. Then 50 more. So 45 and 55 make 100.</p>" +
+          '<div class="keep"><b>Keep this</b>Bonds to 10: 1 and 9, 2 and 8, 3 and 7, 4 and 6, 5 and 5.</div>' },
+
+  { type: "match", topic: "Number bonds",
+    q: "Match each number to its partner. Each pair makes 10.",
+    pairs: [ ["1", "9"], ["2", "8"], ["3", "7"], ["4", "6"] ],
+    hint: "Count on from the number to 10 on your fingers.",
+    why: "1 + 9, 2 + 8, 3 + 7 and 4 + 6 all make 10." },
+
+  { type: "num", topic: "Number bonds",
+    q: "What goes with 60 to make 100?",
+    boxes: [ { label: "60 and", a: 40 } ],
+    hint: "6 and what make 10?",
+    why: "6 and 4 make 10, so 60 and <b>40</b> make 100." },
+
+  { type: "num", topic: "Number bonds",
+    q: "What goes with 35 to make 100?",
+    boxes: [ { label: "35 and", a: 65 } ],
+    hint: "Count on to 40 first. Then count on to 100.",
+    why: "35 to 40 is 5. 40 to 100 is 60. 5 + 60 = <b>65</b>. Check: 35 + 65 = 100." },
+
+  { type: "mc", topic: "Number bonds",
+    q: "Which pair makes 100?",
+    options: [ "45 and 55", "45 and 65", "40 and 50", "55 and 55" ],
+    answer: 0,
+    hint: "Add each pair. Only one makes exactly 100.",
+    why: "45 + 55 = <b>100</b>. The others make 110, 90 and 110." },
+
+  /* ---------- 2 IN YOUR HEAD ---------- */
+  { type: "learn", topic: "In your head",
+    title: "Tens first, then ones",
+    fig: SPLIT,
+    html: "<p>To add 34 and 25, split them up.</p>" +
+          "<p>Add the tens: 30 + 20 = 50.</p>" +
+          "<p>Add the ones: 4 + 5 = 9.</p>" +
+          "<p>Put them back together: 59.</p>" +
+          "<p>Taking away works the same way. 58 &minus; 23 is 30 and 5. So 35.</p>" +
+          '<div class="keep"><b>Keep this</b>Adding 9? Add 10, then take away 1.</div>' },
+
+  { type: "num", topic: "In your head",
+    q: 'Work it out in your head.' + big("43 + 26"),
+    boxes: [ { label: "Answer", a: 69 } ],
+    hint: "Tens: 40 + 20. Ones: 3 + 6.",
+    why: "40 + 20 = 60 and 3 + 6 = 9. So 43 + 26 = <b>69</b>." },
+
+  { type: "num", topic: "In your head",
+    q: 'Work it out in your head.' + big("76 &minus; 34"),
+    boxes: [ { label: "Answer", a: 42 } ],
+    hint: "Tens: 70 take away 30. Ones: 6 take away 4.",
+    why: "70 &minus; 30 = 40 and 6 &minus; 4 = 2. So 76 &minus; 34 = <b>42</b>." },
+
+  { type: "mc", topic: "In your head",
+    q: "What is a quick way to do 56 + 9?",
+    options: [ "Add 10, then take away 1", "Add 10, then add 1", "Take away 9", "Add 9 tens" ],
+    answer: 0,
+    hint: "9 is very close to 10.",
+    why: "9 is 1 less than 10. So <b>add 10, then take away 1</b>: 56 + 10 = 66, then 65." },
+
+  { type: "num", topic: "In your head",
+    q: 'Use the trick.' + big("67 + 9"),
+    boxes: [ { label: "Answer", a: 76 } ],
+    hint: "67 + 10 first. Then take away 1.",
+    why: "67 + 10 = 77. Take away 1: <b>76</b>." },
+
+  /* ---------- 3 COLUMN ADDING ---------- */
+  { type: "learn", topic: "Column adding",
+    title: "Line up the columns",
+    fig: COL243,
+    html: "<p>Write one number under the other.</p>" +
+          "<p>Ones go under ones. Tens go under tens.</p>" +
+          "<p>Start with the <b>ones</b> on the right. 3 + 5 = 8.</p>" +
+          "<p>Then the tens: 4 + 2 = 6. Then the hundreds: 2 + 1 = 3.</p>" +
+          '<div class="keep"><b>Keep this</b>Always start on the right, with the ones.</div>' },
+
+  { type: "num", topic: "Column adding",
+    fig: COL352,
+    q: "Add these in columns.",
+    boxes: [ { label: "352 + 416", a: 768 } ],
+    hint: "Ones first: 2 + 6. Then the tens, then the hundreds.",
+    why: "Ones: 2 + 6 = 8. Tens: 5 + 1 = 6. Hundreds: 3 + 4 = 7. Answer: <b>768</b>." },
+
+  { type: "learn", topic: "Column adding",
+    title: "Carrying",
+    fig: COL367,
+    html: "<p>Sometimes a column makes 10 or more.</p>" +
+          "<p>7 + 8 = 15. That is 1 ten and 5 ones.</p>" +
+          "<p>Write the 5 in the ones. Carry the 1 into the tens.</p>" +
+          "<p>Now add the tens and the carry: 6 + 1 + 1 = 8.</p>" +
+          "<p>Hundreds: 3 + 2 = 5. The answer is 585.</p>" +
+          '<div class="keep"><b>Keep this</b>Write the carry small, under the next column. Add it in.</div>' },
+
+  { type: "widget", topic: "Column adding",
+    title: "Column machine",
+    html: "Fill in the answer one digit at a time. Nothing is timed.",
+    mount: mountColumns,
+    report: function(d){
+      if(!d || !d.result) return "Column machine: " + (d && d.c ? d.c : 0) + " of 3 sums done.";
+      var lab = { right1: "all three first go", right2: "all three, with some second goes", shown: "finished, used Show me on at least one" }[d.result];
+      return "Column machine: " + lab + " (misses " + (d.miss || []).join("/") + ").";
+    } },
+
+  { type: "num", topic: "Column adding",
+    fig: COL457,
+    q: "Add these in columns. Look out for a carry.",
+    boxes: [ { label: "457 + 238", a: 695 } ],
+    hint: "Ones: 7 + 8 is more than 9. Write the ones and carry the ten.",
+    why: "Ones: 7 + 8 = 15. Write 5, carry 1. Tens: 5 + 3 + 1 = 9. Hundreds: 4 + 2 = 6. Answer: <b>695</b>. Forgetting the carry gives 685." },
+
+  /* ---------- 4 COLUMN TAKING AWAY ---------- */
+  { type: "learn", topic: "Column taking away",
+    title: "Take away in columns",
+    fig: COL586,
+    html: "<p>Line up the columns. The bigger number goes on top.</p>" +
+          "<p>Start with the ones: 6 &minus; 3 = 3.</p>" +
+          "<p>Then the tens: 8 &minus; 4 = 4.</p>" +
+          "<p>Then the hundreds: 5 &minus; 2 = 3.</p>" +
+          "<p>The answer is 343.</p>" },
+
+  { type: "num", topic: "Column taking away",
+    fig: COL768,
+    q: "Take away in columns.",
+    boxes: [ { label: "768 &minus; 325", a: 443 } ],
+    hint: "Ones first: 8 take away 5.",
+    why: "Ones: 8 &minus; 5 = 3. Tens: 6 &minus; 2 = 4. Hundreds: 7 &minus; 3 = 4. Answer: <b>443</b>." },
+
+  { type: "learn", topic: "Column taking away",
+    title: "Exchanging",
+    fig: COL452,
+    html: "<p>Look at 452 &minus; 127. In the ones, 2 take away 7 does not work.</p>" +
+          "<p>So swap one ten for ten ones.</p>" +
+          "<p>Now there are 4 tens and 12 ones.</p>" +
+          "<p>12 &minus; 7 = 5. Then 4 &minus; 2 = 2. Then 4 &minus; 1 = 3.</p>" +
+          "<p>The answer is 325.</p>" +
+          '<div class="keep"><b>Keep this</b>Never swap the digits round. Exchange a ten.</div>' },
+
+  { type: "num", topic: "Column taking away",
+    fig: COL643,
+    q: "Take away in columns. You will need to exchange.",
+    boxes: [ { label: "643 &minus; 218", a: 425 } ],
+    hint: "3 take away 8 does not work. Swap one of the 4 tens for ten ones.",
+    why: "Exchange a ten: 3 tens and 13 ones. Ones: 13 &minus; 8 = 5. Tens: 3 &minus; 1 = 2. Hundreds: 6 &minus; 2 = 4. Answer: <b>425</b>." },
+
+  { type: "mc", topic: "Column taking away",
+    q: "Sam worked out 52 &minus; 17. Sam got 45. What went wrong?",
+    options: [ "Sam did 7 &minus; 2 instead of exchanging", "Sam added instead", "Nothing, 45 is right", "Sam forgot the tens" ],
+    answer: 0,
+    hint: "Look at the ones. 2 take away 7 needs an exchange.",
+    why: "Sam turned it round and did 7 &minus; 2 = 5. Exchange instead: 4 tens and 12 ones. 12 &minus; 7 = 5 and 4 &minus; 1 = 3. The right answer is 35." },
+
+  { type: "num", topic: "Column taking away", stretch: true,
+    fig: COL403,
+    q: "A tricky one. There are no tens to swap.",
+    boxes: [ { label: "403 &minus; 158", a: 245 } ],
+    hint: "Swap 1 hundred for 10 tens first. Then swap 1 of those tens for 10 ones.",
+    why: "403 becomes 3 hundreds, 9 tens and 13 ones. Ones: 13 &minus; 8 = 5. Tens: 9 &minus; 5 = 4. Hundreds: 3 &minus; 1 = 2. Answer: <b>245</b>. Check: 245 + 158 = 403." },
+
+  /* ---------- 5 MISSING NUMBERS ---------- */
+  { type: "learn", topic: "Missing numbers",
+    title: "Find the missing number",
+    fig: BAR60,
+    html: "<p>Look at 25 + " + gap() + " = 60.</p>" +
+          "<p>The whole is 60. One part is 25.</p>" +
+          "<p>To find the other part, take away. 60 &minus; 25 = 35.</p>" +
+          "<p>Taking away works too. For 80 &minus; " + gap() + " = 50, do 80 &minus; 50 = 30.</p>" +
+          '<div class="keep"><b>Keep this</b>Whole take away a part gives the missing part.</div>' },
+
+  { type: "num", topic: "Missing numbers",
+    q: "What is the missing number?" + big(gap() + " + 40 = 95"),
+    boxes: [ { label: "Missing number", a: 55 } ],
+    hint: "The whole is 95. One part is 40. Take away.",
+    why: "95 &minus; 40 = <b>55</b>. Check: 55 + 40 = 95." },
+
+  { type: "num", topic: "Missing numbers",
+    q: "What is the missing number?" + big("70 &minus; " + gap() + " = 28"),
+    boxes: [ { label: "Missing number", a: 42 } ],
+    hint: "70 is the whole. 28 is one part. What is the other part?",
+    why: "70 &minus; 28 = <b>42</b>. Check: 70 &minus; 42 = 28." },
+
+  { type: "num", topic: "Missing numbers",
+    fig: BAR150,
+    q: "What is the missing part?",
+    boxes: [ { label: "Missing part", a: 60 } ],
+    hint: "Whole take away the part you know.",
+    why: "150 &minus; 90 = <b>60</b>. Check: 90 + 60 = 150." },
+
+  { type: "mc", topic: "Missing numbers", stretch: true,
+    q: "What is the missing number?" + big("125 + " + gap() + " = 200"),
+    options: [ "75", "85", "325", "175" ],
+    answer: 0,
+    hint: "Count on from 125 to 130. Then to 200.",
+    why: "125 to 130 is 5. 130 to 200 is 70. 5 + 70 = <b>75</b>. 325 comes from adding instead of taking away." },
+
+  /* ---------- 6 CHECKING ---------- */
+  { type: "learn", topic: "Checking",
+    title: "Undo it to check",
+    fig: INV,
+    html: "<p>Adding and taking away undo each other.</p>" +
+          "<p>We call the undo the <b>inverse</b>.</p>" +
+          "<p>Say you worked out 368 + 254 = 622.</p>" +
+          "<p>Check it: 622 &minus; 254. You get 368, so you were right.</p>" +
+          '<div class="keep"><b>Keep this</b>Check a take away by adding. Check an add by taking away.</div>' },
+
+  { type: "mc", topic: "Checking",
+    q: "Which sum checks this one?" + big("435 &minus; 182 = 253"),
+    options: [ "253 + 182", "435 + 182", "253 &minus; 182", "435 + 253" ],
+    answer: 0,
+    hint: "Add the answer to the number you took away. You should get back to the start.",
+    why: "<b>253 + 182</b> = 435, the number you started with. So 253 is right." },
+
+  { type: "mc", topic: "Checking",
+    q: "Ali says 503 &minus; 247 = 266. Check it by adding. Is Ali right?",
+    options: [ "No. 266 + 247 = 513", "Yes. 266 + 247 = 503", "No. 266 + 247 = 493", "Yes. 503 + 247 = 750" ],
+    answer: 0,
+    hint: "Work out 266 + 247 carefully. Do you get 503?",
+    why: "266 + 247 = 513, not 503. So Ali is <b>not right</b>. The answer is 10 too big." },
+
+  { type: "num", topic: "Checking", stretch: true,
+    q: "So what is the right answer?" + big("503 &minus; 247"),
+    boxes: [ { label: "503 &minus; 247", a: 256 } ],
+    hint: "Ali was 10 too big. Or use columns: 503 has no tens to swap.",
+    why: "503 &minus; 247 = <b>256</b>. Check: 256 + 247 = 503." },
+
+  { type: "match", topic: "Checking",
+    q: "Match each sum to the one that checks it.",
+    pairs: [
+      ["40 + 25 = 65", "65 &minus; 25 = 40"],
+      ["90 &minus; 30 = 60", "60 + 30 = 90"],
+      ["120 + 80 = 200", "200 &minus; 80 = 120"],
+      ["75 &minus; 15 = 60", "60 + 15 = 75"]
+    ],
+    hint: "The check uses the same three numbers. It goes back the other way.",
+    why: "Each check undoes the sum. Adds are checked by taking away. Take aways are checked by adding." },
+
+  /* ---------- 7 WORD PROBLEMS ---------- */
+  { type: "learn", topic: "Word problems",
+    title: "Add or take away?",
+    html: "<p>Read the story. Do you need more, or less?</p>" +
+          "<p>Words like <b>altogether</b> and <b>total</b> mean add.</p>" +
+          "<p>Words like <b>left</b>, <b>difference</b> and <b>how many more</b> mean take away.</p>" +
+          "<p>Pick out the numbers. Then work it out.</p>" +
+          '<div class="keep"><b>Keep this</b>Stuck? Draw a bar. Put the whole on top and the parts below.</div>' },
+
+  { type: "sort", topic: "Word problems",
+    q: "Add or take away?",
+    buckets: [ "Add", "Take away" ],
+    cards: [ ["How many altogether?", 0], ["How many are left?", 1], ["What is the total?", 0],
+             ["What is the difference?", 1], ["How many more?", 1], ["How many in all?", 0] ],
+    hint: "Putting things together means add. Finding a gap or what is left means take away.",
+    why: "Add: altogether, total, in all. Take away: left, difference, how many more." },
+
+  { type: "num", topic: "Word problems",
+    q: "The late horror film has 312 seats. 178 people are watching. How many seats are empty?",
+    boxes: [ { label: "Empty seats", a: 134 } ],
+    hint: "Empty seats are the seats left. 312 take away 178.",
+    why: "312 &minus; 178 = <b>134</b>. Check: 134 + 178 = 312." },
+
+  { type: "num", topic: "Word problems",
+    q: "You walk down a dark hospital corridor. You count 236 steps. Footsteps behind you! It is only the cleaner. She says the exit is 300 steps from the start. How many more steps to go?",
+    boxes: [ { label: "More steps", a: 64 } ],
+    hint: "How many more means take away. 300 take away 236. Or count on from 236.",
+    why: "Count on: 236 to 240 is 4. 240 to 300 is 60. 4 + 60 = <b>64</b> steps." },
+
+  { type: "num", topic: "Word problems",
+    q: "The night bakery made 250 cupcakes. It sold 145 in the evening. It sold 87 more after midnight.<br>a) How many did it sell altogether?<br>b) How many cupcakes are left?",
+    boxes: [
+      { label: "a) Sold altogether", a: 232 },
+      { label: "b) Left", a: 18 }
+    ],
+    hint: "a) Altogether means add: 145 + 87. b) Then take that away from 250.",
+    why: "a) 145 + 87: ones 5 + 7 = 12, write 2 carry 1. Tens 4 + 8 + 1 = 13, write 3 carry 1. Hundreds 1 + 1 = 2. Sold: <b>232</b>.<br>b) 250 &minus; 232 = <b>18</b> cupcakes left." },
+
+  { type: "write", topic: "Word problems",
+    q: "If you like, make up your own spooky add or take away story for Jay. Give the answer too.",
+    starters: [ "In the empty shopping centre,", "At midnight,", "How many", "The answer is" ],
+    checklist: [ "My story has two numbers", "It asks a question", "I gave the answer" ],
+    minWords: 15 }
+
+  ]
+});
+})();
+</script>
+</body>
+</html>
