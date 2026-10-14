@@ -723,7 +723,7 @@ function draw(){
     else if(c.tier === 2) gain = '<p class="lgain">+' + (rw.coins || 0) + ' coins and a mastery star for ' + act.title + '</p>';
     else gain = '<p class="lgain">+' + (rw.lvAfter - rw.lvBefore) + ' training level' + (rw.lvAfter - rw.lvBefore === 1 ? "" : "s") + ' for ' + act.title + '</p>' + pips + (rw.lvAfter >= rw.cap && rw.cap ? '<p class="lmax">' + act.title + ' is maxed out!</p>' : "");
     var mt = rw.match ? '<p class="lgain lmatch">A match is ready. Head to the dugout when you like.</p>' : "";
-    h += '<div class="ldone"><h3>' + (c.tier === 2 ? "Challenge complete" : "Nicely done") + '</h3><p>' + c.why + '</p>' + gain + mt + '<div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button><button class="btn btn-quiet" data-lk="replay">Play a new version</button></div></div>';
+    h += '<div class="ldone"><h3>' + (c.tier === 2 ? "Challenge complete" : "Nicely done") + '</h3><p>' + c.why + '</p>' + gain + mt + '<div class="mbtns"><button class="btn btn-go" data-lk="finish">Back to training</button><button class="btn" data-lk="finishgo">Go to the dugout</button><button class="btn btn-quiet" data-lk="replay">Play a new version</button><button class="btn btn-quiet" data-lk="sendrep">Send Jay a report</button></div></div>';
   } else {
     h += '<div class="lbody">' + bodyHtml(c, x) + '</div>';
     h += '<div class="lmsg" id="lmsg" role="status" aria-live="polite">' + (x.say || "") + (x.hint ? '<p class="lnudge"><b>Nudge:</b> ' + x.hint + '</p>' : "") + '</div>';
@@ -756,6 +756,7 @@ function onClick(e){
   var k = b.getAttribute("data-lk"), i = +b.getAttribute("data-i"), c = cur, x = X;
   if(k === "close"){ close(); return }
   if(k === "finish"){ close(); return }
+  if(k === "sendrep"){ close(); if(window.JTLearn.report) window.JTLearn.report(); return }
   if(k === "finishgo"){ close(); if(window.JTLearn.go) window.JTLearn.go(); return }
   if(k === "again" || k === "replay"){ cur = inst(baseC, x.gen + 1); X = fresh(cur, x.gen + 1); draw(); var h2 = box.querySelector("h2"); if(h2){ h2.setAttribute("tabindex", "-1"); h2.focus() } return }
   if(k === "nudge"){ x.hint = c.hint; draw(); return }
@@ -763,7 +764,7 @@ function onClick(e){
   if(k === "check"){
     x.tries++; var r = check(c, x); x.res = r;
     if(r.ok){ x.done = true; x.say = "";
-      if(!x.rewarded){ x.rewarded = true; window.JTLearn.reward = null; if(done) done(baseC, x.gen); x.reward = window.JTLearn.reward }
+      if(!x.rewarded){ x.rewarded = true; window.JTLearn.reward = null; if(done) done(baseC, x.gen, { tries: x.tries, nudge: !!x.hint, shown: !!x.shown }); x.reward = window.JTLearn.reward }
     } else { x.say = r.say; if(x.tries >= 3 && !x.hint) x.say += " A nudge is free whenever you like." }
     draw.focus = x.done; draw(); return;
   }
