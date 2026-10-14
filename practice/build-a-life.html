@@ -131,6 +131,22 @@ textarea{min-height:80px}
 .cscene{display:block;width:100%;image-rendering:pixelated;border:3px solid #000;border-radius:4px;margin-bottom:8px;background:#bfe8ff}
 .card h2{font-family:"Silkscreen",monospace;font-size:20px;text-align:center;margin:4px 0 8px}
 .card .fx{margin-top:8px}
+.card.swapin{animation:swapin .22s ease-out}
+@keyframes swapin{0%{opacity:.2;transform:translateY(6px)}100%{opacity:1;transform:none}}
+.ysub{font:700 15px "Silkscreen",monospace;margin:14px 0 6px}
+.whylist{display:grid;gap:8px}
+.whylist .why{background:#fff;border:2px solid #000;border-radius:6px;padding:6px 8px}
+.whylist .why img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-2px;margin-right:6px}
+.whylist .rs{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:14px}
+.whylist .rs .up{color:#2a7a4a}.whylist .rs .dn{color:#9b2c24}
+.tk{display:inline-block;width:16px;height:16px;border:3px solid #000;background:#fff;border-radius:3px;margin-right:8px;vertical-align:-3px;flex:none;position:relative}
+.tk.on{background:#3fa66b}
+.tk.on::after{content:"";position:absolute;left:3px;top:-1px;width:4px;height:8px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.newtag{display:inline-block;background:#ffd34d;border:2px solid #000;border-radius:4px;font:700 11px "Silkscreen",monospace;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.afford{border:3px solid #000;border-radius:6px;padding:6px 10px;margin:8px 0;background:#e8f6ec}
+.afford.short{background:#fde8e4}
+.readbtn{position:absolute;top:8px;right:8px;z-index:2;font:700 12px "Silkscreen",monospace;background:#fff;border:3px solid #000;border-radius:4px;box-shadow:0 2px 0 #000;padding:3px 8px;cursor:pointer}
 /* wheel */
 .wheelbox{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 #wheel{width:190px;height:190px}
@@ -235,6 +251,11 @@ textarea{min-height:80px}
 .rep .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .rep ul{margin:4px 0;padding-left:20px}
 .rep canvas{width:100%;border:2px solid #000}
+.rephead{display:flex;align-items:center;gap:16px}
+.rep canvas#repMe{width:84px;height:132px;border:3px solid #000;border-radius:6px;background:#bfe3ff;image-rendering:pixelated;flex:none}
+.timeline{list-style:none;padding-left:0}
+.timeline li{display:flex;align-items:center;gap:8px;margin:3px 0}
+.timeline img{width:16px;height:16px;image-rendering:pixelated;flex:none}
 @media print{
   body{background:#fff}
   .top,.console,#cardwrap,.noprint,.toast,#fx,#banner{display:none !important}
@@ -252,7 +273,13 @@ textarea{min-height:80px}
   .pbezel{padding:8px}
   .round{width:44px;height:44px}
   .dpad{transform:scale(.8)}
+  #banner{top:8px}
   #banner .bt{font-size:24px;padding:8px 14px}
+  .pad{display:none}
+  .hidephone{display:none}
+  .hubtabs{position:sticky;top:0;z-index:5;background:var(--paper);margin:-6px -14px 10px;padding:8px 14px;border-bottom:3px solid #000}
+  .hubtabs{flex-wrap:nowrap;overflow-x:auto}
+  .hubtabs button{padding:6px 9px;font-size:12px;flex:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
@@ -775,7 +802,7 @@ function renderHud() {
     var v = Math.round(S.meters[k]);
     return '<div class="meter' + (v < 25 ? " low" : "") + '" data-k="' + k + '"><img src="' + iconSrc(MICON[k]) + '" alt=""><div class="mw"><div class="lab"><span>' + MLAB[k] + "</span><b>" + v + '</b></div><div class="bar"><div class="fill" style="width:' + v + "%;background:" + MCOL[k] + '"></div></div></div></div>';
   }).join("");
-  var bits = ['<span class="chip">Age ' + S.age + "</span>", '<span class="chip" data-k="cash"><img src="' + iconSrc("coin") + '" alt=""> ' + money(S.cash, 0) + "</span>"];
+  var bits = ['<span class="chip">Age ' + S.age + "</span>", '<span class="chip" data-k="cash"><img src="' + iconSrc("coin") + '" alt=""> Savings ' + money(S.cash, 0) + "</span>"];
   if (S.debt > 0) bits.push('<span class="chip">Owed ' + money(S.debt, 0) + "</span>");
   if (S.job) bits.push('<span class="chip">' + esc(S.job.title) + "</span>");
   if (S.home && S.phase !== "board") bits.push('<span class="chip">' + esc(HOME_TYPES[S.home.type].name) + "</span>");
@@ -790,7 +817,8 @@ var cardOpen = false;
 function showCard(o) {
   /* o: {title, icon, text, html, choices:[{label, sub, cls, fn}], after, bg, cameo, act} */
   var c = $("card");
-  var h = '<div class="cback" aria-hidden="true"><span>?</span></div>';
+  var quick = now() - (window.LASTCLOSE || 0) < 160;
+  var h = quick ? "" : '<div class="cback" aria-hidden="true"><span>?</span></div>';
   if (o.icon) { h += '<canvas class="cscene" width="320" height="124" id="cardScene"></canvas>'; CARDSCENE = { icon: o.icon, bg: o.bg, cameo: o.cameo, act: o.act, jayAct: o.jayAct }; }
   else CARDSCENE = null;
   if (o.kicker) h += '<div class="kicker" style="text-align:center">' + esc(o.kicker) + "</div>";
@@ -802,10 +830,19 @@ function showCard(o) {
     h += '<button class="btn wide ' + (ch.cls || (i ? "alt" : "")) + '" data-i="' + i + '"' + (ch.disabled ? " disabled" : "") + ">" + "<span>" + esc(ch.label) + (ch.sub ? '<span class="sub">' + esc(ch.sub) + "</span>" : "") + "</span></button>";
   });
   h += "</div>";
+  h = '<button class="readbtn" id="cardRead" type="button">Read it to me</button>' + h;
   c.innerHTML = h;
-  c.classList.remove("flipin"); void c.offsetWidth; c.classList.add("flipin");
+  on("cardRead", function () {
+    var parts = [o.title], body = c.cloneNode(true);
+    [].forEach.call(body.querySelectorAll(".choices,.readbtn,.cback,canvas,h2"), function (e) { e.remove(); });
+    parts.push(body.textContent.replace(/\s+/g, " ").trim());
+    var labs = (o.choices || [{ label: "Carry on" }]).map(function (x) { return x.label; });
+    if (labs.length > 1) parts.push("You can pick: " + labs.join(", or ") + ".");
+    if (window.speak) speak(parts.join(". "));
+  });
+  c.classList.remove("flipin"); c.classList.remove("swapin"); void c.offsetWidth; c.classList.add(quick ? "swapin" : "flipin");
   $("cardwrap").classList.add("on");
-  cardOpen = true; sfx("flip");
+  cardOpen = true; if (!quick) sfx("flip");
   if (o.icon) drawCardScene(TICK);
   if (o.onShow) o.onShow(c);
   var btns = c.querySelectorAll(".choices .btn");
@@ -821,7 +858,7 @@ function showCard(o) {
   }
   setTimeout(function () { var b = c.querySelector(".choices .btn"); if (b) b.focus({ preventScroll: true }); }, 60);
 }
-function closeCard() { $("cardwrap").classList.remove("on"); cardOpen = false; CARDSCENE = null; }
+function closeCard() { if (cardOpen) window.LASTCLOSE = now(); try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {} $("cardwrap").classList.remove("on"); cardOpen = false; CARDSCENE = null; }
 function result(title, text, tags, next, icon, extra) {
   var o = { title: title, icon: icon, text: text, html: tags && tags.length ? '<div class="fx">' + tags.join(" ") + "</div>" : "", choices: [{ label: "Carry on", fn: next }] };
   var good = tags && tags.some(function (t) { return t.indexOf("minus") < 0; }), bad = tags && tags.some(function (t) { return t.indexOf("minus") >= 0; });
@@ -829,6 +866,7 @@ function result(title, text, tags, next, icon, extra) {
   if (extra) for (var k in extra) o[k] = extra[k];
   showCard(o);
 }
+function tick(on) { return '<span class="tk' + (on ? " on" : "") + '" aria-hidden="true"></span>' + (on ? '<span class="sr">Chosen: </span>' : ""); }
 
 /* =========================================================
    WORLD: time of day, seasons, weather
@@ -1003,8 +1041,8 @@ function ageAt(i) {
 function spaceType(i) {
   if (i === 0) return "start";
   if (STOPS[i]) return "stop";
-  if (i < 28) return ["choice", "event", "pay", "learn", "choice", "event"][i % 6];
-  return ["learn", "choice", "learn", "event", "pay", "learn", "choice", "learn"][i % 8];
+  if (i < 28) return ["choice", "event", "pay", "choice", "learn", "event"][i % 6];
+  return ["learn", "choice", "event", "pay", "choice", "learn", "event", "choice"][i % 8];
 }
 function spacePos(i) { var row = Math.floor(i / 7), col = i % 7; if (row % 2) col = 6 - col; return { x: 40 + col * 40, y: 40 + row * 64 }; }
 function boardSeason(pos) {
@@ -1088,7 +1126,7 @@ function drawBoard(t) {
   if (A.path.length) {
     var target = spacePos(A.path[0]);
     if (!A.from) { A.from = { x: A.x, y: A.y }; A.t0 = t; }
-    var k = clamp((t - A.t0) / 260, 0, 1);
+    var k = clamp((t - A.t0) / 190, 0, 1);
     A.x = A.from.x + (target.x - A.from.x) * k;
     A.y = A.from.y + (target.y - A.from.y) * k - Math.sin(k * Math.PI) * 8;
     if (k >= 1) { A.path.shift(); A.from = null; if (window.sfx) sfx("hop"); if (!A.path.length && A.done) { var d = A.done; A.done = null; setTimeout(d, 140); } }
@@ -1119,7 +1157,10 @@ function drawBoard(t) {
   CX.restore();
   drawPrecip(0, 0, 320, 180, t);
   nightOverlay(false, [[100, gapY(5) - 30 - cy, 30], [210, gapY(5) - 30 - cy, 30]]);
-  rect(0, 0, 320, 12, "rgba(27,20,36,.55)"); txt(SEASONS[WORLD.season].name.toUpperCase() + "  AGE " + (S ? S.age : 5), 160, 9, "#ffd98a", 8);
+  var hd = SEASONS[WORLD.season].name.toUpperCase() + " AGE " + (S ? S.age : 5);
+  CX.font = "8px Silkscreen, monospace"; var hw = Math.ceil(CX.measureText(hd).width) + 10;
+  rect(4, 3, hw, 11, "rgba(27,20,36,.7)"); rect(5, 2, hw - 2, 1, "rgba(27,20,36,.7)"); rect(5, 14, hw - 2, 1, "rgba(27,20,36,.7)");
+  txt(hd, 4 + hw / 2, 11, "#ffd98a", 8);
 }
 function showMap() {
   var html = '<canvas id="mapCv" width="320" height="' + BH + '" style="width:100%;image-rendering:pixelated;border:3px solid #000"></canvas>';
@@ -1216,8 +1257,8 @@ function drawRoom(t, sc) {
   winOut(28, 28, 76, 66, t, sc.view || "houses");
   if (issues.indexOf("mould") >= 0) { for (var m = 0; m < 16; m++) rect(24 + ((m * 13) % 84), 92 + (m % 3), 2, 2, "#2a2f2a"); rect(22, 22, 3, 76, "#55605a"); }
   rect(34, 104, 62, 20, "#f4f4f4"); for (var r = 0; r < 9; r++) rect(37 + r * 6.6, 106, 2, 16, "#d0d0d0"); rect(34, 124, 4, 6, "#bbbbbb"); rect(92, 124, 4, 6, "#bbbbbb");
-  rect(148, 110, 10, 8, "#ffffff"); rect(150, 113, 2, 2, "#555"); rect(154, 113, 2, 2, "#555");
-  if (issues.indexOf("sockets") >= 0) { rect(146, 106, 4, 4, "#2b2b2b"); rect(156, 107, 5, 3, "#3b3b3b"); rect(149, 109, 8, 2, "#4a3a2a"); }
+  rect(162, 110, 10, 8, "#ffffff"); rect(164, 113, 2, 2, "#555"); rect(168, 113, 2, 2, "#555");
+  if (issues.indexOf("sockets") >= 0) { rect(160, 106, 4, 4, "#2b2b2b"); rect(170, 107, 5, 3, "#3b3b3b"); rect(163, 109, 8, 2, "#4a3a2a"); }
   if (issues.indexOf("smoke") < 0) { rect(154, 0, 14, 4, "#ffffff"); rect(160, 4, 2, 1, Math.floor(t / 800) % 2 ? "#e0473f" : "#7a1f1a"); }
   if (issues.indexOf("damp") >= 0) { CX.fillStyle = "rgba(70,90,60,.45)"; CX.fillRect(292, 0, 28, 42); CX.fillRect(300, 42, 20, 16); CX.fillRect(286, 8, 10, 14); for (var dm = 0; dm < 10; dm++) rect(294 + (dm * 7) % 24, 6 + dm * 5, 2, 2, "#2f3a2a"); }
   rect(280, 62, 30, 70, "#8a5a3b"); rect(282, 64, 26, 66, "#9c6b45"); rect(284, 68, 22, 26, "#8a5a3b"); rect(284, 98, 22, 28, "#8a5a3b"); rect(302, 96, 3, 3, "#ffd34d");
@@ -1599,9 +1640,9 @@ function spinWheel(n, done) {
   WSEG.forEach(function (v, i) { if (v === n) idx.push(i); });
   var i = pick(idx), jitter = (Math.random() - 0.5) * th * 0.6;
   var target = -Math.PI / 2 - (i + 0.5) * th + jitter;
-  var a0 = WHEEL.a, turns = Math.PI * 2 * (4 + Math.floor(Math.random() * 2));
+  var a0 = WHEEL.a, turns = Math.PI * 2 * (3 + Math.floor(Math.random() * 2));
   var a1 = target; while (a1 < a0 + turns) a1 += Math.PI * 2;
-  var t0 = performance.now(), dur = 2600, lastSeg = Math.floor(a0 / th);
+  var t0 = performance.now(), dur = 1700, lastSeg = Math.floor(a0 / th);
   WHEEL.spinning = true;
   function frame(tt) {
     var k = Math.min(1, (tt - t0) / dur), e = 1 - Math.pow(1 - k, 3);
@@ -1794,7 +1835,7 @@ function openDecor(back) {
       row("wall", DECOR.wall, "Walls") + "<b class='small'>Wallpaper</b><div class='row'>" + DECOR.pattern.map(function (p, i) { return '<button class="btn sm ' + (D.pattern === i ? "green" : "alt") + '" data-dp="' + i + '">' + p + "</button>"; }).join("") + "</div>" +
       row("floor", DECOR.floor, "Floor") + row("sofa", DECOR.sofa, (HOME_TYPES[S.home.type].furn === "bed" || HOME_TYPES[S.home.type].furn === "desk" ? "Bed covers" : "Sofa")) + row("rug", DECOR.rug, "Rug") +
       "<b class='small'>On the wall</b><div class='row'>" + ["Nothing", "Poster", "Painting", "Fairy lights"].map(function (p, i) { return '<button class="btn sm ' + (D.art === i ? "green" : "alt") + '" data-da="' + i + '">' + p + "</button>"; }).join("") + "</div>" +
-      "<b class='small'>Extras</b><div class='row'><button class='btn sm " + (D.lamp ? "green" : "alt") + "' id='dLamp'>" + (D.lamp ? "[x] " : "[ ] ") + "Floor lamp</button><button class='btn sm alt' id='dPlant'>Plants: " + D.plants + " (tap to change)</button></div>" +
+      "<b class='small'>Extras</b><div class='row'><button class='btn sm " + (D.lamp ? "green" : "alt") + "' id='dLamp'>" + tick(D.lamp) + "Floor lamp</button><button class='btn sm alt' id='dPlant'>Plants: " + D.plants + " (tap to change)</button></div>" +
       '<div style="margin-top:14px"><button class="btn big" id="dDone">Done</button></div>';
     setPanel(h);
     onAll("[data-dk]", function () { D[this.getAttribute("data-dk")] = +this.getAttribute("data-v"); draw(); });
@@ -1886,11 +1927,11 @@ var CHILD_CARDS = [
     C("Not yet, maybe next time", { happy: 1 }, "Totally fine. There will be more.")] }
 ];
 var TEEN_CARDS = [
-  { id: "jayvol", icon: "star", bg: "lesson", cameo: "jay", title: "Jay needs a volunteer", text: "Jay asks if anyone fancies reading the next bit out loud. No pressure, he says.", ch: [
+  { id: "jayvol", school: true, icon: "star", bg: "lesson", cameo: "jay", title: "Jay needs a volunteer", text: "Jay asks if anyone fancies reading the next bit out loud. No pressure, he says.", ch: [
     C("Put your hand up", { trait: "Confident", eng: 1 }, "Jay says your reading was outrageous. In a good way."),
     C("Offer to draw the diagram instead", { trait: "Creative" }, "Your diagram goes up on the wall."),
     C("Pass this time", { happy: 1 }, "Jay nods. That is completely fine.")] },
-  { id: "mocks", icon: "book", title: "Mocks are coming up", text: "Practice exams are in three weeks.", ch: [
+  { id: "mocks", school: true, icon: "book", title: "Mocks are coming up", text: "Practice exams are in three weeks.", ch: [
     C("Make a revision plan", { study: 2, hidden: "Organised" }, "Little and often. It adds up."),
     C("Revise with a friend", { study: 1, rel: 3 }, "You test each other with flashcards."),
     C("Wing it", { happy: 3 }, "Less stress now. We will see how it goes.")] },
@@ -1927,11 +1968,11 @@ var TEEN_CARDS = [
     C("A primary school", { interest: "Children", exp: "Work experience: primary school" }, "The Year 2s think you are a celebrity."),
     C("An office", { skill: "Computers", exp: "Work experience: office" }, "Spreadsheets. Surprisingly satisfying."),
     C("A vets", { interest: "Animals", exp: "Work experience: vets" }, "You hold a very nervous rabbit.")] },
-  { id: "makegame", icon: "phone", title: "Make a game in computing", text: "The project is to make a simple game.", ch: [
+  { id: "makegame", school: true, icon: "phone", title: "Make a game in computing", text: "The project is to make a simple game.", ch: [
     C("Go all in on the code", { skill: "Coding", trait: "Curious", interest: "Computers" }, "It has a high score table."),
     C("Make it look amazing", { trait: "Creative" }, "It is the best looking game in the class."),
     C("Do the basics", { happy: 1 }, "Done is better than perfect.")] },
-  { id: "trials", icon: "ball", title: "Trials for the school team", text: "The coach is holding trials on Thursday.", ch: [
+  { id: "trials", school: true, icon: "ball", title: "Trials for the school team", text: "The coach is holding trials on Thursday.", ch: [
     C("Go to trials", { trait: "Sporty", skill: "Teamwork", health: 5 }, "You make the squad."),
     C("Be the team photographer", { trait: "Creative" }, "Your photos end up on the school website."),
     C("Watch with friends", { rel: 3 }, "Loudest supporters there.")] },
@@ -1970,6 +2011,22 @@ var TEEN_CARDS = [
     C("Book a few lessons", function () { if (S.cash >= 300) { S.drivingStarted = true; return { cash: -300, happy: 3 }; } return { happy: 0 }; }, "If you had the savings, you are on your way. If not, it can wait until later."),
     C("Wait until later", { happy: 1 }, "No rush.")] }
 ];
+var CALLBACKS = [
+  { id: "cb_football", need: ["club", 0], stage: "adult", icon: "ball", bg: "park", title: "Five a side with old friends", text: "Some of your old football club mates have started a Thursday five a side. They want you in.", fx: { rel: 6, health: 4 } },
+  { id: "cb_coding", need: ["club", 1], stage: "teen", icon: "phone", bg: "lesson", title: "Coding club pays off", text: "Remember coding club? You build a website for your form group in one afternoon.", fx: { skill: "Coding", happy: 3 } },
+  { id: "cb_fence", need: ["fence", 0], stage: "adult", icon: "tool", bg: "street", ref: true, title: "Your old neighbour remembers", text: "The neighbour whose fence you helped fix years ago spots you in town. They offer to be a reference for any job you go for. That will help at interviews.", fx: { rel: 4, happy: 3 } },
+  { id: "cb_play", need: ["play", 0], stage: "teen", icon: "star", bg: "party", title: "Back on stage", text: "You were brilliant in the school play when you were little. You get asked to host the talent show.", fx: { trait: "Confident", happy: 4 } },
+  { id: "cb_paint", need: ["play", 1], stage: "adult", icon: "brush", bg: "home", title: "Still making things", text: "Remember painting that cardboard castle? A friend asks you to paint a mural in their cafe.", fx: { cash: 150, happy: 4 } },
+  { id: "cb_sunflower", need: ["sunflower", 0], stage: "adult", icon: "plant", bg: "park", title: "Still growing things", text: "You remember that giant sunflower. You plant some seeds on your windowsill and they come up beautifully.", fx: { happy: 4, health: 2 } },
+  { id: "cb_stall", need: ["stall", 0], stage: "adult", icon: "coin", bg: "street", title: "Car boot sale", text: "Running that squash stall as a kid taught you a thing or two. You sell your old stuff at a car boot sale.", fx: { cash: 120, happy: 3 } },
+  { id: "cb_newkid", need: ["newkid", 0], stage: "adult", icon: "people", bg: "park", title: "An old friend", text: "The new kid you showed around in primary school messages you out of the blue. You meet up and it is like no time has passed.", fx: { rel: 8 } },
+  { id: "cb_newkid2", need: ["newkid", 1], stage: "teen", icon: "people", bg: "park", title: "Still friends", text: "That new kid you played with at lunch? They are still one of your best mates.", fx: { rel: 6 } },
+  { id: "cb_upset", need: ["upset", 0], stage: "teen", icon: "heart", bg: "park", title: "Someone returns the favour", text: "The friend you sat with at break when they were upset is there for you now, on a bad day of your own.", fx: { rel: 5, happy: 3 } },
+  { id: "cb_library", need: ["library", 0], stage: "teen", icon: "book", bg: "lesson", title: "All that reading", text: "All those summer reading books pay off. Your writing has really grown.", fx: { eng: 2, happy: 2 } },
+  { id: "cb_hamster", need: ["hamster", 0], stage: "adult", icon: "pet", bg: "park", title: "A natural with animals", text: "Remember looking after Nibbles? A friend asks you to pet sit for a week and pays you for it.", fx: { cash: 80, happy: 3 } },
+  { id: "cb_tables", need: ["tables", 0], stage: "teen", icon: "book", bg: "lesson", title: "Times tables, sorted", text: "All that practice when you were little means maths feels easier now.", fx: { maths: 2, happy: 2 } },
+  { id: "cb_captain", need: ["captain", 0], stage: "adult", icon: "ball", bg: "park", title: "Captain again", text: "Your local team needs a captain. People remember you are good at picking fair teams.", fx: { rel: 5, happy: 3 } }
+];
 var CHILD_EVENTS = [
   { icon: "pet", bg: "park", cameo: "bonnie", title: "A tiny poodle in the park", text: "A brown toy poodle with no tail trots up and sniffs your shoes. Her tag says Bonnie.", fx: { happy: 4 } },
   { icon: "coin", title: "Found " + P + "5 on the pavement", text: "Nobody is around. You hand it in at the shop, and the owner says to keep it.", fx: { cash: 5, happy: 2 } },
@@ -1987,19 +2044,19 @@ var CHILD_EVENTS = [
   { icon: "cloud", title: "Money is tight at home this month", text: "Pocket money pauses for a bit. You find free things to do together.", fx: { happy: -2, rel: 2, hidden: "Thrifty" } }
 ];
 var TEEN_EVENTS = [
-  { icon: "book", bg: "lesson", cameo: "jay", title: "A story from Jay", text: "Jay starts a story in class: \"When I was in China...\" The bell goes before he finishes. Nobody will ever know how it ends.", fx: { happy: 3 } },
+  { icon: "book", bg: "lesson", cameo: "jay", school: true, title: "A story from Jay", text: "Jay starts a story in class: \"When I was in China...\" The bell goes before he finishes. Nobody will ever know how it ends.", fx: { happy: 3 } },
   { icon: "bird", bg: "park", cameo: "jay", title: "Bird spotting", text: "Jay spends the whole of break pointing at a bird. \"Is that a red kite?\" It is a pigeon.", fx: { happy: 2, rel: 1 } },
   { icon: "heart", title: "Glandular fever", text: "Two weeks off school. Your friends send messages every day.", fx: { health: -8, rel: 2 } },
-  { icon: "star", title: "Your art gets picked", text: "Your work is chosen for the school exhibition.", fx: { happy: 5 } },
+  { icon: "star", school: true, title: "Your art gets picked", text: "Your work is chosen for the end of year exhibition.", fx: { happy: 5 } },
   { icon: "phone", title: "Cracked phone screen", text: "Dropped it on the bus.", fx: function () { return S.cash >= 60 ? { cash: -60 } : { happy: -3 }; } },
   { icon: "people", title: "A new friend group", text: "You click with some people in your form.", fx: { rel: 6 } },
   { icon: "smile", title: "Brilliant birthday", text: "Pizza, films and far too much cake.", fx: { happy: 5, rel: 2 } },
   { icon: "people", title: "A falling out", text: "You and a friend fall out. A week later, you make up.", fx: { rel: -3, happy: -2 } },
-  { icon: "book", title: "A teacher notices", text: "Your teacher says your work has really improved.", fx: { happy: 4, study: 1 } },
-  { icon: "bus", title: "Bus strike", text: "You walk to school all week.", fx: { health: 3 } },
-  { icon: "book", title: "Mock results", text: "Better than you expected.", fx: { happy: 3, study: 1 } },
+  { icon: "book", school: true, title: "A teacher notices", text: "Your teacher says your work has really improved.", fx: { happy: 4, study: 1 } },
+  { icon: "bus", school: true, title: "Bus strike", text: "You walk to school all week.", fx: { health: 3 } },
+  { icon: "book", school: true, title: "Mock results", text: "Better than you expected.", fx: { happy: 3, study: 1 } },
   { icon: "coin", title: "Lost your bus pass", text: "A replacement costs " + P + "20.", fx: function () { return S.cash >= 20 ? { cash: -20 } : { happy: -2 }; } },
-  { icon: "smile", title: "School trip", text: "Three days at an outdoor centre. Canoes, climbing and campfire songs.", fx: { happy: 6, rel: 4 } },
+  { icon: "smile", school: true, title: "School trip", text: "Three days at an outdoor centre. Canoes, climbing and campfire songs.", fx: { happy: 6, rel: 4 } },
   { icon: "cloud", title: "A rough week", text: "Nothing goes right. It passes.", fx: { happy: -4 } },
   { icon: "coin", title: "Gift from a relative", text: "A card with " + P + "30 in it.", fx: { cash: 30, rel: 2 } }
 ];
@@ -2267,7 +2324,13 @@ function startTitle() {
 }
 function resumeLife() {
   S.look = fixLook(S.look); renderHud();
-  if (S.phase === "board") { SCENE = { kind: "board" }; BOARD_ANIM.camY = clamp(spacePos(S.pos).y - 96, 0, BH - 180); boardPanel(); }
+  if (S.phase === "board") {
+    SCENE = { kind: "board" }; BOARD_ANIM.camY = clamp(spacePos(S.pos).y - 96, 0, BH - 180); boardPanel();
+    var pd = S.pending;
+    if (pd === "route" || (pd === "results" && S.quals.gcse)) chooseRoute();
+    else if (pd === "options" && S.quals.options && S.quals.options.length) after();
+    else if (pd) stopSpace(pd);
+  }
   else if (S.phase === "transition") { leavingBoard(); }
   else if (S.phase === "goals") { pickGoals(); }
   else if (S.phase === "adult") { yearHub(); }
@@ -2336,7 +2399,7 @@ function rollBackground(again) {
       [res.income.fx, res.support.fx].forEach(function (f) { if (f) applyFx(f); });
       logIt("Started life in a " + res.area.name.toLowerCase() + ". Money at home: " + res.income.name.toLowerCase() + ". " + res.support.name + ".", "start");
       pushHistory(); save();
-      SCENE = { kind: "board" }; BOARD_ANIM.camY = 0;
+      SCENE = { kind: "board" }; BOARD_ANIM.camY = 0; boardPanel();
       showCard({ title: "Welcome to the board", icon: "star", text: "Spin to move. Orange spaces are choices, purple spaces are life happening, gold spaces are money and blue spaces are learning moments. <b>Red spaces are big moments</b>: everyone stops there.", choices: [{ label: "Let me spin", fn: boardPanel }] });
     });
   }
@@ -2355,7 +2418,7 @@ function routeStageName() { if (!S.route) return "Age 16 to 18"; return { sixth:
 function boardPanel() {
   renderHud();
   var h = '<div class="kicker">' + esc(stageName(S.pos)) + ", age " + S.age + "</div><h2>Your turn, " + esc(S.name) + "</h2>" +
-    '<div class="wheelbox"><canvas id="wheel" width="200" height="200"></canvas><div><button class="btn big" id="spin">Spin</button><p class="small muted">Move 1 to 4 spaces. Press A to spin.</p><div class="row"><button class="btn sm alt" id="mapBtn">Map</button><button class="btn sm alt" id="wardBtn">Wardrobe</button></div></div></div>' +
+    '<div class="wheelbox"><canvas id="wheel" width="200" height="200"></canvas><div><button class="btn big" id="spin">Spin</button><p class="small muted">Move 1 to 4 spaces.<span class="hidephone"> Press A to spin.</span></p><div class="row"><button class="btn sm alt" id="mapBtn">Map</button><button class="btn sm alt" id="wardBtn">Wardrobe</button></div></div></div>' +
     '<div class="row small">' + ["choice", "event", "pay", "learn", "stop"].map(function (k) { return '<span class="tag" style="background:' + SPACE_STYLE[k].col + (k === "event" || k === "stop" ? ";color:#fff" : "") + '">' + SPACE_STYLE[k].name + "</span>"; }).join("") + "</div>" +
     charCard();
   setPanel(h);
@@ -2390,6 +2453,7 @@ function doSpin() {
         save(); renderHud(); land();
       };
       toast("You spun a " + n + "!");
+      if (window.innerWidth <= 900) { var stg = document.querySelector(".stage"); if (stg && stg.getBoundingClientRect().top < -40 && stg.scrollIntoView) stg.scrollIntoView({ block: "start", behavior: "smooth" }); }
       if (to < S.pos + n && STOPS[to]) setTimeout(function () { toast("Big moment ahead: everyone stops here"); }, 900);
     }
   });
@@ -2400,26 +2464,30 @@ function land() {
   if (t === "event") return eventSpace();
   if (t === "pay") return paySpace();
   if (t === "learn") return learnSpace();
-  if (t === "stop") return stopSpace(STOPS[S.pos]);
+  if (t === "stop") { S.pending = STOPS[S.pos]; save(); return stopSpace(STOPS[S.pos]); }
   boardPanel();
 }
-function after() { save(); boardPanel(); }
+function after() { S.pending = null; save(); boardPanel(); }
 function runCard(card) {
   showCard({
     kicker: SPACE_STYLE.choice.name, title: card.title, icon: card.icon, bg: card.bg, cameo: card.cameo, text: card.text,
     choices: card.ch.map(function (c) {
-      return { label: c.t, fn: function () { var fx = typeof c.fx === "function" ? c.fx() : c.fx; var tags = applyFx(fx); result(card.title, esc(c.r), tags, after, card.icon, { bg: card.bg, cameo: card.cameo }); } };
+      return { label: c.t, fn: function () { S.picks = S.picks || {}; S.picks[card.id] = card.ch.indexOf(c); var fx = typeof c.fx === "function" ? c.fx() : c.fx; var tags = applyFx(fx); result(card.title, esc(c.r), tags, after, card.icon, { bg: card.bg, cameo: card.cameo }); } };
     })
   });
 }
 function choiceSpace() {
   var bank = S.pos < 28 ? CHILD_CARDS : TEEN_CARDS;
+  var inSchool = !S.route || S.route.type === "sixth";
+  bank = bank.filter(function (c) { return inSchool || !c.school; });
   var ok = bank.filter(function (c) { return !S.seen[c.id] && (c.min == null || S.age >= c.min) && (c.max == null || S.age <= c.max); });
   if (!ok.length) { bank.forEach(function (c) { delete S.seen[c.id]; }); ok = bank.filter(function (c) { return (c.min == null || S.age >= c.min) && (c.max == null || S.age <= c.max); }); }
   var card = pick(ok); S.seen[card.id] = 1; runCard(card);
 }
 function eventSpace() {
-  var bank = S.pos < 28 ? CHILD_EVENTS : TEEN_EVENTS;
+  if (S.pos >= 28 && Math.random() < 0.45 && callbackCard("teen", after)) return;
+  var inSchool = !S.route || S.route.type === "sixth";
+  var bank = (S.pos < 28 ? CHILD_EVENTS : TEEN_EVENTS).filter(function (x) { return inSchool || !x.school; });
   var e = pick(bank);
   if (e.title.indexOf("tight") >= 0 && S.bg.income === "comfortable") e = bank[0];
   var fx = typeof e.fx === "function" ? e.fx() : e.fx;
@@ -2456,18 +2524,19 @@ function needsResit(subj) {
   return subj === "maths" ? (S.quals.gcse.maths < 4 && !S.quals.fsMaths) : (S.quals.gcse.eng < 4 && !S.quals.fsEng);
 }
 function learnTarget(subj) {
-  if (S.phase === "board" && S.pos < 28) return subj === "maths" ? "your maths at school" : "your English at school";
-  if (!S.quals.gcse) return subj === "maths" ? "GCSE Maths" : "GCSE English";
-  if (subj === "course") return S.route ? S.route.title : "your course";
-  if (needsResit(subj)) return "Functional Skills " + (subj === "maths" ? "Maths" : "English") + " Level 2";
-  return S.route ? S.route.title : "your course";
+  var M = subj === "maths" ? "Maths" : "English";
+  if (S.phase === "board" && S.pos < 28) return "Helps your character get better at " + M.toLowerCase().replace("english", "English") + " at school";
+  if (!S.quals.gcse) return "Helps your character's GCSE " + M + " grade";
+  if (subj === "course") return "Helps your character with " + (S.route ? S.route.title : "their course");
+  if (needsResit(subj)) return "Helps your character pass Functional Skills " + M + " Level 2";
+  return "Helps your character with " + (S.route ? S.route.title : "their course");
 }
 function learnSpace() {
   var ch = [
-    { label: "A maths one", sub: "Counts towards " + learnTarget("maths"), fn: function () { startActivity("maths", false); } },
-    { label: "An English one", sub: "Counts towards " + learnTarget("eng"), fn: function () { startActivity("eng", false); } }
+    { label: "A maths one", sub: learnTarget("maths"), fn: function () { startActivity("maths", false); } },
+    { label: "An English one", sub: learnTarget("eng"), fn: function () { startActivity("eng", false); } }
   ];
-  if (S.route) ch.push({ label: "Surprise me", sub: "Counts towards " + learnTarget("course"), fn: function () { startActivity(pick(["maths", "eng"]), true); } });
+  if (S.route) ch.push({ label: "Surprise me", sub: learnTarget("course"), fn: function () { startActivity(pick(["maths", "eng"]), true); } });
   ch.push({ label: "Not right now", cls: "alt", fn: function () { var tg = applyFx({ happy: 1 }); result("Maybe later", "That is okay. There will be more learning moments.", tg, after, "smile"); } });
   showCard({ kicker: "Learning moment", title: "Want to learn something?", icon: "book", text: "Pick the kind of thing you fancy. It is real life stuff, the kind that turns up in Functional Skills.", choices: ch });
 }
@@ -2489,8 +2558,8 @@ function startActivity(subj, course, onDone) {
 function renderActivity() {
   var a = ACT;
   var h = '<div class="act"><div class="kicker">' + esc(a.kicker || ("Learning moment: " + (a.subj === "maths" ? "Maths" : "English"))) + "</div><h2>" + esc(a.title) + "</h2>" +
-    (a.target ? '<div class="small muted">Counts towards ' + esc(a.target) + "</div>" : "") +
-    (a.jay ? jayLine(pick(["Have a go. No rush.", "This one is real life stuff.", "When I was in China... sorry, wrong story. Have a go!", "Try it your way. There is a hint if you want one."])) : "") +
+    (a.target ? '<div class="small muted">' + esc(a.target) + "</div>" : "") +
+    (a.jay ? jayLine(pick(["Have a go. No rush.", "This one is real life stuff.", "When I was in China... sorry, wrong story. Have a go!", "Try it your way. There is help if you want it."])) : "") +
     '<div class="scenario">' + a.scene + (a.visual || "") + '</div><p class="qline"><b>' + a.q + '</b></p><div id="ans"></div>' +
     '<div id="help"></div><div id="fb"></div><div class="row" id="actBtns"></div>' +
     '<div class="row helprow"><button class="btn sm alt" id="readB">Read it to me</button>' + (a.subj === "maths" ? '<button class="btn sm alt" id="toolB" aria-expanded="false">Maths tools</button>' : "") + '</div><div id="tools" hidden></div></div>';
@@ -2562,7 +2631,7 @@ function gradeAttempt(ok, el) {
     endActivity(pts, "Spot on. " + a.explain);
   } else if (a.tries < 2) {
     if (el) { el.classList.add("wrong"); el.disabled = true; }
-    $("fb").innerHTML = '<div class="note warm">Not quite. Have another go' + (a.usedHint ? "." : ", or tap <b>Show me a hint</b>.") + "</div>";
+    $("fb").innerHTML = '<div class="note warm">Not quite. Have another go' + ($("hintB") ? ", or tap <b>Get some help</b>." : ".") + "</div>";
   } else {
     if (el) el.classList.add("wrong");
     endActivity(1, "Here is how it works: " + a.explain + " You still picked something up.");
@@ -2639,7 +2708,7 @@ function stopOptions() {
       (sug.length ? '<p class="small muted">Starred ones link to things you are interested in.</p>' : "") +
       '<div class="choices">' + OPTION_SUBJECTS.map(function (o, i) {
         var on = chosen.indexOf(i) >= 0, star = sug.indexOf(o[1]) >= 0;
-        return '<button class="btn wide ' + (on ? "green" : "alt") + '" data-op="' + i + '">' + (on ? "[x] " : "[ ] ") + esc(o[0]) + (star ? " *" : "") + "</button>";
+        return '<button class="btn wide ' + (on ? "green" : "alt") + '" data-op="' + i + '">' + tick(on) + esc(o[0]) + (star ? " *" : "") + "</button>";
       }).join("") + "</div>" +
       '<button class="btn big" id="lockOpt" ' + (chosen.length === 2 ? "" : "disabled") + ">Lock in my options</button>";
     setPanel(h);
@@ -2667,11 +2736,11 @@ function stopResults() {
     sci: gcseGrade(2 + S.pts.study * 0.8 + (hasTrait("Curious") ? 2 : 0) + (S.pts.maths > 4 ? 1 : 0)),
     opts: S.quals.options.map(function (o) { return { name: o.name, area: o.area, grade: gcseGrade(2 + S.pts.opt + st) }; })
   };
-  S.quals.gcse = g;
+  S.quals.gcse = g; S.pending = "route";
   var all = [g.maths, g.eng, g.sci].concat(g.opts.map(function (o) { return o.grade; }));
   var fours = all.filter(function (x) { return x >= 4; }).length;
   g.fours = fours;
-  logIt("GCSE results: Maths " + g.maths + ", English " + g.eng + ", Science " + g.sci + ", " + g.opts.map(function (o) { return o.name + " " + o.grade; }).join(", "), "qual");
+  logIt("GCSE results: " + ["Maths " + g.maths, "English " + g.eng, "Science " + g.sci].concat(g.opts.map(function (o) { return o.name + " " + o.grade; })).join(", "), "qual");
   pushHistory(); save();
   var rows = [["Maths", g.maths], ["English Language", g.eng], ["Combined Science", g.sci]].concat(g.opts.map(function (o) { return [o.name, o.grade]; }));
   var html = '<table class="t">' + rows.map(function (r) { return "<tr><td>GCSE " + esc(r[0]) + '</td><td class="n"><b>' + r[1] + "</b></td></tr>"; }).join("") + "</table>" +
@@ -2716,10 +2785,12 @@ function apprenticeOpenings(em) {
   on("backR", chooseRoute);
   onAll("[data-ap]", function () {
     var a = this.getAttribute("data-ap");
-    var chance = 0.7 + (hasTrait("Confident") ? 0.1 : 0) + Math.min(0.15, S.exp.length * 0.05) + (sug.indexOf(a) >= 0 ? 0.1 : 0);
+    var chance = 0.75 + (hasTrait("Confident") ? 0.1 : 0) + Math.min(0.15, S.exp.length * 0.05) + (sug.indexOf(a) >= 0 ? 0.1 : 0) + (S.reference ? 0.1 : 0) + (S.appTries || 0) * 0.15;
     if (Math.random() < chance) {
+      S.appTries = 0;
       setRoute({ type: "apprentice", area: a, level: em ? 3 : 2, title: "Level " + (em ? 3 : 2) + " " + WORK_AREAS[a].app.replace(" apprentice", "") + " apprenticeship" });
     } else {
+      S.appTries = (S.appTries || 0) + 1;
       var fb = S.exp.length ? "They liked you, but someone else had more experience in " + a.toLowerCase() + "." : "They liked you. Some work experience or a part time job would make you stand out next time.";
       showCard({ title: "Not this time", icon: "letter", text: "The employer went with someone else. <b>Their feedback:</b> " + esc(fb), choices: [{ label: "Try a different one", fn: function () { apprenticeOpenings(em); } }, { label: "Look at college instead", cls: "alt", fn: chooseRoute }] });
     }
@@ -2763,7 +2834,8 @@ function hasL3(area) {
   return list.some(function (x) { return x.area === area; });
 }
 function leavingBoard() {
-  S.phase = "transition"; S.age = 18; save();
+  S.phase = "transition"; S.age = 18; S.pending = null; save();
+  SCENE = { kind: "place", place: "street" };
   var q = post16Result();
   pushHistory(); save();
   var em = emOK();
@@ -2776,7 +2848,7 @@ function leavingBoard() {
 function emOK() { var g = S.quals.gcse || { maths: 0, eng: 0 }; return (g.maths >= 4 || S.quals.fsMaths) && (g.eng >= 4 || S.quals.fsEng); }
 var DEGREES = ["Nursing", "Primary education", "Computer science", "Engineering", "Business", "Sport science", "Art and design", "Psychology"];
 function nextStepAt18() {
-  var l3 = hasL3();
+  var l3 = hasL3(); SCENE = { kind: "room", home: "family", view: AREAS[S.bg.area].view };
   var h = '<div class="kicker">Age 18</div><h2>What next?</h2><div class="choices">' +
     '<button class="btn wide" id="n18job"><span>Find a job or an apprenticeship<span class="sub">Build your CV, look at the job board and apply.</span></span></button>' +
     '<button class="btn wide teal" id="n18uni" ' + (l3 ? "" : "disabled") + "><span>Go to university<span class='sub'>" + (l3 ? "Three years. Tuition " + money(FIG.tuition, 0) + " a year, paid by a student loan." : "Needs a Level 3 qualification first. You could get one later.") + "</span></span></button>";
@@ -2803,7 +2875,7 @@ var GOALS = [
   ["debt", "Stay out of debt", "Owe nothing apart from any student loan."]
 ];
 function pickGoals() {
-  S.phase = "goals"; save();
+  S.phase = "goals"; save(); SCENE = { kind: "room", home: "family", view: AREAS[S.bg.area].view };
   var sel = S.goals.map(function (g) { return g.id; });
   var h = '<div class="kicker">Your life, your goals</div><h2>What matters to you?</h2><p>Pick <b>up to three</b> goals for your adult life. You can also write your own. Your life report will look back at them.</p><div class="goals">' +
     GOALS.map(function (g) { return '<label><input type="checkbox" value="' + g[0] + '"' + (sel.indexOf(g[0]) >= 0 ? " checked" : "") + "><span><b>" + esc(g[1]) + "</b>" + (g[2] ? '<br><span class="small muted">' + esc(g[2]) + "</span>" : "") + "</span></label>"; }).join("") +
@@ -2828,6 +2900,16 @@ function pickGoals() {
   });
 }
 function goalName(id) { for (var i = 0; i < GOALS.length; i++) if (GOALS[i][0] === id) return GOALS[i][1]; return id; }
+
+function callbackCard(stage, next) {
+  S.cbDone = S.cbDone || []; var picks = S.picks || {};
+  var ok = CALLBACKS.filter(function (c) { return c.stage === stage && S.cbDone.indexOf(c.id) < 0 && picks[c.need[0]] === c.need[1]; });
+  if (!ok.length) return false;
+  var c = pick(ok); S.cbDone.push(c.id); if (c.ref) S.reference = true;
+  var tg = applyFx(c.fx);
+  showCard({ kicker: "Remember when...", title: c.title, icon: c.icon, bg: c.bg, act: "jump", text: esc(c.text), html: '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Nice", fn: next }] });
+  return true;
+}
 
 /* =========================================================
    JOBS
@@ -3011,7 +3093,7 @@ var ISSUE_TEXT = {
   sockets: ["Plug socket", "Scorch marks round the socket. The wiring needs checking by an electrician.", "Sockets look safe."],
   landlord: ["Chat to the landlord", "The landlord wants the deposit in cash with no paperwork. By law your deposit must go into a government approved protection scheme.", "Friendly landlord. Your deposit goes into a protection scheme and you get a written tenancy agreement."]
 };
-var HOTSPOTS = { damp: [284, 0, 36, 58], mould: [20, 20, 92, 66], smoke: [144, 0, 34, 18], boiler: [30, 100, 70, 30], sockets: [138, 102, 30, 22], landlord: [212, 104, 56, 64] };
+var HOTSPOTS = { damp: [284, 0, 36, 58], mould: [20, 20, 92, 66], smoke: [144, 0, 34, 18], boiler: [30, 100, 70, 30], sockets: [156, 102, 28, 22], landlord: [212, 104, 56, 64] };
 var HOME_NAMES = {
   share: ["Room in a friendly 4 bed house share", "Double room in a house share near the park", "Room in a quiet 3 bed share"],
   flat: ["1 bed flat above a bakery", "1 bed flat with a balcony", "Studio flat near the station", "1 bed ground floor flat"],
@@ -3125,7 +3207,7 @@ function startMoneyMoment(back) {
   ACT.onDone = function (pts) {
     S.mm = (S.mm || 0) + 1; S.mmDoneAge = S.age;
     var msg = "Knowing your own numbers is a real life skill.", tg = [];
-    if (resit && pts) { S.pts.fsM = (S.pts.fsM || 0) + pts; if (S.pts.fsM >= 4) { S.quals.fsMaths = true; S.adultQual++; logIt("Passed Functional Skills Maths Level 2 through money moments", "qual"); celebrate("QUALIFIED!", "Functional Skills Maths Level 2"); msg = "That takes you to Functional Skills Maths Level 2!"; } }
+    if (resit && pts) { S.pts.fsM = (S.pts.fsM || 0) + pts; if (S.pts.fsM >= 8) { S.quals.fsMaths = true; S.adultQual++; logIt("Passed Functional Skills Maths Level 2 through money moments", "qual"); celebrate("QUALIFIED!", "Functional Skills Maths Level 2"); msg = "That takes you to Functional Skills Maths Level 2!"; } }
     if (pts >= 2) { S.mmGood = (S.mmGood || 0) + 1; tg = applyFx({ happy: 2 }); if (S.mmGood === 2 && S.skills.indexOf("Managing money") < 0) { addSkill("Managing money"); tg.push('<span class="tag">Skill: Managing money</span>'); msg += " You can put Managing money on your CV now."; } }
     save();
     result("Money moment done", esc(msg), tg, back, "coin", { bg: "bank" });
@@ -3174,7 +3256,7 @@ function yearHub(tab) {
   updateMoneyMeter(); renderHud();
   var sub = inStudy() ? "University, year " + S.uni.year + " of 3" : S.job ? S.job.title : "Not working right now";
   var tabs = [["year", "This year"], ["money", "Money"], ["work", "Work"], ["home", "Home"], ["goals", "Goals"]];
-  var h = '<div class="kicker">Age ' + S.age + " &middot; " + esc(sub) + '</div><div class="tabs" role="tablist">' +
+  var h = '<div class="kicker">Age ' + S.age + " &middot; " + esc(sub) + '</div><div class="tabs hubtabs" role="tablist">' +
     tabs.map(function (t) { return '<button role="tab" aria-selected="' + (HUB_TAB === t[0]) + '" data-tab="' + t[0] + '">' + t[1] + (t[0] === "year" && S.deadlines.length ? " (" + S.deadlines.length + ")" : "") + "</button>"; }).join("") + '</div><div id="tabBody"></div>';
   setPanel(h);
   onAll("[data-tab]", function () { yearHub(this.getAttribute("data-tab")); });
@@ -3194,11 +3276,13 @@ function tabYear() {
       '<button class="btn wide teal" data-focus="balance"><span>A bit of everything<span class="sub">Study, friends and sleep</span></span></button>' +
       '<button class="btn wide teal" data-focus="social"><span>Big social life<span class="sub">Lots of friends, less studying</span></span></button></div>';
   }
+  var nNew = S.deadlines.filter(function (d) { return d.fresh; }).length;
   h += "<h3>Coming up</h3>";
+  if (nNew) h += '<div class="note"><b>' + (nNew === 1 ? "Something new is" : nNew + " new things are") + " waiting for you</b> just below.</div>";
   if (!S.deadlines.length) h += '<p class="small muted">Nothing waiting for a decision.</p>';
   S.deadlines.forEach(function (d, i) {
     var info = DL[d.kind].info(d);
-    h += '<div class="dl"><div><b>' + esc(info.title) + '</b><br><span class="small">' + info.text + '</span><div class="row" style="margin-top:6px">' +
+    h += '<div class="dl"><div><b>' + esc(info.title) + "</b>" + (d.fresh ? '<span class="newtag">NEW</span>' : "") + '<br><span class="small">' + info.text + '</span><div class="row" style="margin-top:6px">' +
       info.btns.map(function (b, k) { return '<button class="btn ' + (k ? "alt" : "green") + '" data-dl="' + i + '" data-b="' + k + '">' + esc(b.label) + "</button>"; }).join("") +
       '</div></div><span class="turns">' + (d.turns <= 1 ? "THIS YEAR" : d.turns + " YEARS") + "</span></div>";
   });
@@ -3220,7 +3304,11 @@ function tabYear() {
   });
   onAll("[data-dl]", function () { var d = S.deadlines[+this.getAttribute("data-dl")]; DL[d.kind].info(d).btns[+this.getAttribute("data-b")].fn(); });
   onAll("[data-act]", function () { ACTIONS[+this.getAttribute("data-act")].run(); });
-  on("endYear", finishYear);
+  on("endYear", function () {
+    var n = S.deadlines.filter(function (d) { return d.turns <= 1; }).length;
+    if (!n) return finishYear();
+    showCard({ title: "Before the year ends", icon: "clock", text: (n === 1 ? "One thing is" : n + " things are") + " still waiting for a decision this year. If you leave " + (n === 1 ? "it" : "them") + ", the game will decide for you.", choices: [{ label: "Have a look first", fn: function () { toHub("year"); setTimeout(function () { var e = document.querySelector(".dl"); if (e && e.scrollIntoView) e.scrollIntoView({ block: "center", behavior: "smooth" }); }, 80); } }, { label: "Finish the year anyway", cls: "alt", fn: finishYear }] });
+  });
   on("mmBtn", function () { startMoneyMoment(function () { toHub("year"); }); });
   on("wardB", function () { openWardrobe(function () { toHub("year"); }); });
   on("decB", function () { openDecor(function () { toHub("year"); }); });
@@ -3278,7 +3366,7 @@ function courseMenu() {
     startActivity(subj, false, function (pts) { S.pts[subj === "maths" ? "fsM" : "fsE"] = (S.pts[subj === "maths" ? "fsM" : "fsE"] || 0) + pts + 1; var k = subj === "maths" ? "fsM" : "fsE"; if (S.pts[k] >= 4) { if (subj === "maths") S.quals.fsMaths = true; else S.quals.fsEng = true; S.adultQual++; logIt("Passed Functional Skills " + (subj === "maths" ? "Maths" : "English") + " Level 2 as an adult", "qual"); celebrate("QUALIFIED!"); result("You passed!", "Functional Skills Level 2. More jobs are open to you now.", applyFx({ happy: 6 }), toHub, "grad"); } else result("Good session", "Keep going. One more session should do it.", applyFx({ happy: 2 }), toHub, "book"); });
   } });
   ch.push({ label: "Evening course: Level 3", sub: "One year, paid with an Advanced Learner Loan of about " + money(3000, 0), fn: function () {
-    showCard({ title: "Which Level 3?", icon: "book", text: "You study alongside work. It finishes when you finish next year.", choices: Object.keys(WORK_AREAS).slice(0, 8).map(function (a) { return { label: WORK_AREAS[a].course, fn: function () { useAction(); S.course = { area: a, name: "Level 3 " + WORK_AREAS[a].course, ends: S.age + 1 }; S.studentLoan += 3000; var tg = applyFx({ health: -2, happy: 2 }); result("Enrolled", "Tuesday and Thursday evenings. Tiring but exciting.", tg, toHub, "book"); } }; }).concat([{ label: "Back", cls: "alt", fn: toHub }]) });
+    showCard({ title: "Which Level 3?", icon: "book", text: "You study alongside work. It finishes when you finish next year.", choices: Object.keys(WORK_AREAS).filter(function (a) { var nm = "Level 3 " + WORK_AREAS[a].course; return !S.quals.extra.some(function (x) { return x.name === nm; }) && !(S.quals.post16 && S.quals.post16.name.indexOf(nm) === 0); }).slice(0, 8).map(function (a) { return { label: WORK_AREAS[a].course, fn: function () { useAction(); S.course = { area: a, name: "Level 3 " + WORK_AREAS[a].course, ends: S.age + 1 }; S.studentLoan += 3000; var tg = applyFx({ health: -2, happy: 2 }); result("Enrolled", "Tuesday and Thursday evenings. Tiring but exciting.", tg, toHub, "book"); } }; }).concat([{ label: "Back", cls: "alt", fn: toHub }]) });
   } });
   ch.push({ label: "First aid at work", sub: "A three day course, " + money(240, 0), disabled: S.cash < 240 || S.skills.indexOf("First aid") >= 0, fn: function () { useAction(); var tg = applyFx({ cash: -240, skill: "First aid" }); result("Certified", "First aiders are wanted in almost every workplace.", tg, toHub, "heart"); } });
   if (inStudy()) ch.unshift({ label: "Extra study session", sub: "A learning moment that counts towards your degree", fn: function () { useAction(); startActivity(pick(["maths", "eng"]), true, function (pts) { S.uni.study += pts / 2; result("Good session", "Every bit counts.", applyFx({ happy: 1 }), toHub, "book"); }); } });
@@ -3292,7 +3380,7 @@ function removeDeadline(d) { S.deadlines = S.deadlines.filter(function (x) { ret
 var DL = {
   offer: { info: function (d) { var j = JOBS[d.jobId]; return { title: "Job offer: " + j.title, text: (d.why ? esc(d.why) + ". " : "") + hourlyText(d.jobId) + ", " + j.hrs + " hours a week.", btns: [{ label: "Accept the job", fn: function () { removeDeadline(d); startJob(d.jobId); } }, { label: "Turn it down", fn: function () { removeDeadline(d); toHub("year"); } }] }; },
     expire: function (d) { return "The offer for " + JOBS[d.jobId].title.toLowerCase() + " ran out. You can always apply for other jobs."; } },
-  renew: { info: function (d) { return { title: "Tenancy renewal", text: "Your landlord wants to put the rent up to " + money(d.newRent, 0) + " a month.", btns: [{ label: "Renew at " + money(d.newRent, 0), fn: function () { S.home.rent = d.newRent; removeDeadline(d); toast("Tenancy renewed"); toHub("year"); } }, { label: "Look for somewhere else", fn: function () { toHub("home"); } }] }; },
+  renew: { info: function (d) { return { title: "Tenancy renewal", text: "Your landlord wants to put the rent up to " + money(d.newRent, 0) + " a month.", btns: [{ label: "Renew at " + money(d.newRent, 0), fn: function () { S.home.rent = d.newRent; S.renewedAge = S.age; removeDeadline(d); toast("Tenancy renewed"); toHub("year"); } }, { label: "Look for somewhere else", fn: function () { toHub("home"); } }] }; },
     expire: function (d) { S.home.rent = d.newRent; return "Your tenancy rolled on at the new rent of " + money(d.newRent, 0) + "."; } },
   social: { info: function (d) { return { title: "Housing offer", text: "The council has a 1 bed flat for you. Rent " + money(d.listing.rent, 0) + " a month.", btns: [{ label: "Go and view it", fn: function () { removeDeadline(d); viewing(d.listing); } }, { label: "Stay where you are", fn: function () { removeDeadline(d); toHub("year"); } }] }; },
     expire: function () { S.socialWait = 1; return "The flat went to the next person on the list. You are still on the register."; } },
@@ -3363,18 +3451,18 @@ function tabMoney() {
   if (S.ucClaim && ucAmount() === 0) h += '<p class="small muted">You are claiming Universal Credit, but your pay is now too high to get any.</p>';
   h += "<h3>Your budget</h3><p class='small muted'>Change these any time. The figures above update straight away.</p>";
   function opt(key, val, label) { return '<button class="btn ' + (S.budget[key] === val ? "green" : "alt") + '" data-bk="' + key + '" data-bv="' + val + '">' + esc(label) + "</button>"; }
-  h += "<b>Food</b><div class='row'>" + Object.keys(FOOD).map(function (k) { return opt("food", k, FOOD[k].name + " (" + money(px(FOOD[k].cost), 0) + ")"); }).join("") + "</div>";
+  h += "<b>Food</b><div class='row'>" + Object.keys(FOOD).map(function (k) { return opt("food", k, FOOD[k].name + " (" + money(px(S.home.type === "family" ? Math.round(FOOD[k].cost * 0.5) : FOOD[k].cost), 0) + ")"); }).join("") + "</div>";
   h += "<b>Going out and fun</b><div class='row'>" + Object.keys(FUN).map(function (k) { return opt("fun", k, FUN[k].name + " (" + money(px(FUN[k].cost), 0) + ")"); }).join("") + "</div>";
   h += "<b>Getting around</b><div class='row'>" + opt("transport", "walk", "Walk or cycle (free)") + opt("transport", "bus", "Bus pass (" + money(px(AREAS[S.bg.area].busPass), 0) + ")") + (S.car ? opt("transport", "car", "Drive") : "") + "</div>";
   h += "<b>Phone</b><div class='row'>" + opt("phone", "sim", "SIM only (" + money(px(BILLS.phoneSim), 0) + ")") + opt("phone", "contract", "New phone contract (" + money(px(BILLS.phoneContract), 0) + ")") + "</div>";
-  h += "<b>Extras</b><div class='row'>" + tog("tv", "TV licence") + tog("gym", "Gym") + (S.home.type !== "family" ? tog("contents", "Contents insurance") : "") + (S.pet ? tog("petIns", "Pet insurance") : "") +
+  h += (S.home.type === "family" ? "<p class='small muted'>Living with family: food costs are shared, and the TV licence is covered by the household.</p>" : "") + "<b>Extras</b><div class='row'>" + (S.home.type !== "family" ? tog("tv", "TV licence") : "") + tog("gym", "Gym") + (S.home.type !== "family" ? tog("contents", "Contents insurance") : "") + (S.pet ? tog("petIns", "Pet insurance") : "") +
     '<button class="btn alt" id="strm">Streaming: ' + S.budget.streaming + " (tap to change)</button></div>";
   h += '<h3>Savings and what you owe</h3><table class="t"><tr><td>Savings</td><td class="n">' + money(S.cash, 0) + "</td></tr>" +
     (S.debt > 0 ? '<tr class="minus"><td>Overdraft or card debt</td><td class="n">' + money(S.debt, 0) + "</td></tr>" : "") +
     (S.studentLoan > 0 ? '<tr><td>Student loan <span class="small muted">(paid back through your payslip, wiped after 40 years)</span></td><td class="n">' + money(S.studentLoan, 0) + "</td></tr>" : "") + "</table>";
   if (S.debt > 0 && !S.deadlines.some(function (d) { return d.kind === "debt"; }) && !S.debtAdvice) h += '<div class="note warm">Owing money is really common. Free advice is available.<br><button class="btn teal" id="adv">Get free debt advice</button></div>';
   $("tabBody").innerHTML = h;
-  function tog(k, l) { return '<button class="btn ' + (S.budget[k] ? "green" : "alt") + '" data-tg="' + k + '">' + (S.budget[k] ? "[x] " : "[ ] ") + esc(l) + "</button>"; }
+  function tog(k, l) { return '<button class="btn ' + (S.budget[k] ? "green" : "alt") + '" data-tg="' + k + '">' + tick(S.budget[k]) + esc(l) + "</button>"; }
   onAll("[data-bk]", function () { S.budget[this.getAttribute("data-bk")] = this.getAttribute("data-bv"); yearHub("money"); });
   onAll("[data-tg]", function () {
     var k = this.getAttribute("data-tg"); S.budget[k] = !S.budget[k];
@@ -3495,7 +3583,7 @@ function cvBuilder(jobId, done) {
       '<p class="small">Drag things from <b>Your stuff</b> onto your CV, or just tap them. Tap something on your CV to take it off.' + (j ? " <b>Orange outlines</b> match what this job is looking for." : "") + "</p>" +
       '<h3>Your stuff</h3><div class="dz" data-zone="pool" id="poolZone">' + (pool.filter(function (p) { return sel.indexOf(p.id) < 0; }).map(function (p) { return chip(p, false); }).join("") || '<span class="small muted">Everything is on your CV.</span>') + "</div>" +
       '<h3>Your CV</h3><div class="cvpaper"><div class="px" style="font-size:18px">' + esc(S.name) + "</div>" +
-      "<h4>About me (pick up to 2)</h4><div>" + STATEMENTS.map(function (x) { var on = st.indexOf(x.id) >= 0; return '<button class="btn ' + (on ? "green" : "alt") + '" style="min-height:36px;padding:4px 10px;font-size:14px" data-st="' + x.id + '">' + (on ? "[x] " : "") + esc(x.t) + "</button>"; }).join("") + "</div>" +
+      "<h4>About me (pick up to 2)</h4><div>" + STATEMENTS.map(function (x) { var on = st.indexOf(x.id) >= 0; return '<button class="btn ' + (on ? "green" : "alt") + '" style="min-height:36px;padding:4px 10px;font-size:14px" data-st="' + x.id + '">' + tick(on) + esc(x.t) + "</button>"; }).join("") + "</div>" +
       SECT.map(function (sc) { return "<h4>" + sc[1] + '</h4><div class="dz" data-zone="' + sc[0] + '">' + pool.filter(function (p) { return p.k === sc[0] && sel.indexOf(p.id) >= 0; }).map(function (p) { return chip(p, true); }).join("") + "</div>"; }).join("") +
       '</div><p class="small muted">' + plural(sel.length, "thing") + " on your CV. Good CVs fit on one page: about 6 to 9 things.</p>" +
       '<button class="btn big" id="cvDone">' + (j ? "Send it" : "Save my CV") + '</button><button class="btn alt" id="cvBack">Back</button>';
@@ -3588,17 +3676,21 @@ function sendApp(id) {
   interview(id, cv);
 }
 function IA(t, s, fb, trait) { return { t: t, s: s, fb: fb, trait: trait }; }
-function expPhrase(t) {
-  var sp = { "Paper round": "did a paper round", "Cafe Saturday job": "had a Saturday job at a cafe", "Food bank volunteer": "volunteered at a food bank", "Duke of Edinburgh Bronze award": "did my Duke of Edinburgh Bronze award", "Volunteer": "volunteered in my community" };
-  if (sp[t]) return sp[t];
-  if (t.indexOf("Work experience: ") === 0) return "did work experience at a " + t.slice(17);
-  var l = t.toLowerCase();
-  if (/apprenticeship/.test(l)) return "did " + (/^[aeiou]/.test(l) ? "an " : "a ") + l; return "worked as " + (/^[aeiou]/.test(l) ? "an " : "a ") + l;
+function expPhrase(t, perf) {
+  /* perf true gives the "I have ..." form */
+  var sp = { "Paper round": ["did a paper round", "done a paper round"], "Cafe Saturday job": ["had a Saturday job at a cafe", "had a Saturday job at a cafe"], "Food bank volunteer": ["volunteered at a food bank", "volunteered at a food bank"], "Duke of Edinburgh Bronze award": ["did my Duke of Edinburgh Bronze award", "done my Duke of Edinburgh Bronze award"], "Volunteer": ["volunteered in my community", "volunteered in my community"] };
+  var k = perf ? 1 : 0;
+  if (sp[t]) return sp[t][k];
+  if (t.indexOf("Work experience: ") === 0) return (perf ? "done" : "did") + " work experience at a " + t.slice(17).toLowerCase();
+  var l = t.toLowerCase(), an = /^[aeiou]/.test(l) ? "an " : "a ";
+  if (/apprenticeship/.test(l)) return (perf ? "done " : "did ") + an + l;
+  return (perf ? "worked as " : "worked as ") + an + l;
 }
+var TAGTEXT = { "Calm": "staying calm when things get busy", "Cars": "working on cars", "Children": "working with children", "Coding": "coding", "Computers": "working with computers", "Confident": "talking to lots of people", "Cooking": "cooking", "Creative": "being creative", "Curious": "finding things out", "Customer service": "helping customers", "First aid": "looking after people", "Green fingers": "working outdoors with plants", "Handy": "fixing and making things", "Kind": "caring for people", "Leader": "leading a team", "Managing money": "working with money", "Organised": "keeping things organised", "Patient": "helping people step by step", "Reliable": "being someone people can count on", "Sporty": "sport and keeping active", "Teamwork": "working as part of a team", "Using tools": "using tools" };
 function bestExp() { var e = S.exp.slice().sort(function (a, b) { return b.years - a.years; }); return e.length ? e[0].title : null; }
 var IQS = {
-  about: function () { var b = bestExp(); return { q: "Tell us a bit about yourself.", a: [IA("I am " + (S.traits[0] ? S.traits[0].toLowerCase() : "keen") + " and I like getting things done. " + (b ? "I have " + expPhrase(b) + "." : "I am ready to learn on the job."), 3), IA("Um. I do not really know what to say.", 0, "Have a short answer ready about who you are. Two or three sentences is plenty."), IA("I like gaming and sleeping in.", 1, "Hobbies are fine, but link what you say to the job.")] }; },
-  why: function (j) { return { q: "Why do you want to work here?", a: [IA("I like that this job involves " + j.tags[0].toLowerCase() + ", and I want to learn and grow here.", 3), IA("I need the money.", 1, "Everyone needs money! Also say what you like about the job itself."), IA("Someone told me to apply.", 0, "Show them you want it for yourself.")] }; },
+  about: function () { var b = bestExp(); return { q: "Tell us a bit about yourself.", a: [IA("I am " + (S.traits[0] ? S.traits[0].toLowerCase() : "keen") + " and I like getting things done. " + (b ? "I have " + expPhrase(b, true) + "." : "I am ready to learn on the job."), 3), IA("Um. I do not really know what to say.", 0, "Have a short answer ready about who you are. Two or three sentences is plenty."), IA("I like gaming and sleeping in.", 1, "Hobbies are fine, but link what you say to the job.")] }; },
+  why: function (j) { return { q: "Why do you want to work here?", a: [IA("I like that this job involves " + (TAGTEXT[j.tags[0]] || j.tags[0].toLowerCase()) + ", and I want to learn and grow here.", 3), IA("I need the money.", 1, "Everyone needs money! Also say what you like about the job itself."), IA("Someone told me to apply.", 0, "Show them you want it for yourself.")] }; },
   team: function () { var b = bestExp(); var a = [IA(b ? "When I " + expPhrase(b) + ", I helped out whenever someone was stuck." : "In a group project at school, I made sure everyone knew their part.", 2), IA("I prefer working on my own, to be honest.", 1, "Most jobs involve working with others. Have one team example ready."), IA("I cannot think of one.", 0, "Think of a time from school, a club or a job. Any team counts.")]; if (S.revealed.indexOf("Leader") >= 0 || hasTrait("Confident")) a.push(IA("I like to take the lead: I share out the jobs and check everyone is okay.", 3, null, S.revealed.indexOf("Leader") >= 0 ? "Leader" : "Confident")); return { q: "Tell us about a time you worked in a team.", a: a }; },
   customer: function () { var a = [IA("Stay calm, listen, say sorry it happened, and get help if I cannot sort it.", 3), IA("Tell them to calm down.", 0, "Telling someone to calm down rarely works. Listening first does."), IA("Go and get my manager straight away.", 1, "Getting help is good, but listen to the customer first.")]; if (S.revealed.indexOf("Calm") >= 0 || hasTrait("Kind")) a.push(IA("I would listen properly, repeat back what they said so they know I understood, then fix what I can.", 3, null, S.revealed.indexOf("Calm") >= 0 ? "Calm" : "Kind")); return { q: "What would you do if a customer got angry with you?", a: a }; },
   busy: function () { var a = [IA("Do the most important things first and ask for help if I need it.", 3), IA("Panic a bit, then get on with it.", 1, "Honest! Try to show them you would have a plan."), IA("Work slowly so I do not make mistakes.", 1, "Careful is good. Say how you would keep up too.")]; if (S.revealed.indexOf("Organised") >= 0) a.push(IA("I make a quick list, sort it by what matters most and tick things off as I go.", 3, null, "Organised")); return { q: "How would you handle a really busy day?", a: a }; },
@@ -3626,15 +3718,17 @@ function interview(id, cv) {
       SCENE.ivMood = a.s >= 3 ? "happy" : a.s >= 2 ? "neutral" : "sad"; react(a.s >= 2 ? "good" : "bad");
       this.classList.add(a.s >= 3 ? "right" : a.s >= 2 ? "right" : "wrong");
       $("panel").querySelectorAll(".opt").forEach(function (b) { b.disabled = true; });
-      $("panel").insertAdjacentHTML("beforeend", '<div class="note">' + rtxt + '</div><button class="btn" id="nextQ">Next</button>');
+      var best = ans.filter(function (x) { return x.s >= 3; })[0];
+      var tip = a.s < 3 && best ? '<div class="note good"><b>A stronger answer could be:</b> "' + esc(best.t) + '"' + (a.fb ? "<br><span class='small'>" + esc(a.fb) + "</span>" : "") + "</div>" : "";
+      $("panel").insertAdjacentHTML("beforeend", '<div class="note">' + rtxt + "</div>" + tip + '<button class="btn" id="nextQ">Next</button>');
       on("nextQ", function () { i++; ask(); });
     });
   }
   function decide() {
-    var luck = R(0, 3), total = cv.s + score + luck + (hasTrait("Confident") ? 1 : 0) + (arrive ? 0 : -2);
-    var need = j.req.length ? 10 : 8; if ((j.a || 0) >= 30000) need = 11;
+    var luck = R(0, 3), total = cv.s + score + luck + (hasTrait("Confident") ? 1 : 0) + (arrive ? 0 : -2) + (S.reference ? 1 : 0) + Math.min(2, S.rejects || 0);
+    var need = j.req.length ? 10 : 8; if ((j.a || 0) >= 30000) need = 11; if (j.app) need = 7;
     if (total >= need) {
-      logIt("Was offered a job as " + j.title, "work"); celebrate("JOB OFFER!", j.title);
+      S.rejects = 0; logIt("Was offered a job as " + j.title, "work"); celebrate("JOB OFFER!", j.title);
       showCard({ title: "You got an offer!", icon: "star", html: "<p>They would love you to be their new " + esc(j.title.toLowerCase()) + ".</p><div class='note good'><b>What went well:</b> " + esc(good.length ? "your answer to \"" + good[0] + "\"" : "your enthusiasm") + ".</div>", choices: [
         { label: "Accept now", fn: function () { startJob(id); } },
         { label: "Think about it (decide by the end of the year)", fn: function () { addDeadline({ kind: "offer", jobId: id, turns: 1 }); toHub("year"); } },
@@ -3642,8 +3736,9 @@ function interview(id, cv) {
     } else {
       var all = cv.fb.concat(fb).slice(0, 3);
       if (!arrive) all.unshift("You arrived a bit late. Leaving extra time helps.");
-      var tg = applyFx({ happy: -2 });
-      showCard({ title: "Not this time", icon: "letter", html: "<p>They went with someone else. That happens to everyone, often lots of times.</p><div class='note'><b>Their feedback:</b><ul>" + (all.length ? all : ["It was close. Another candidate had a bit more experience."]).map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul></div>" + (good.length ? "<p class='small'><b>What went well:</b> your answer to \"" + esc(good[0]) + "\".</p>" : "") + '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Look at other jobs", fn: function () { toHub("work"); } }, { label: "Back to my year", cls: "alt", fn: function () { toHub("year"); } }] });
+      S.rejects = (S.rejects || 0) + 1;
+      var tg = applyFx({ happy: -1 });
+      showCard({ title: "Not this time", icon: "letter", html: "<p>They went with someone else. That happens to everyone, often lots of times. Every interview is practice, so the next one gets a bit easier.</p><div class='note'><b>Their feedback:</b><ul>" + (all.length ? all : ["It was close. Another candidate had a bit more experience."]).map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul></div>" + (good.length ? "<p class='small'><b>What went well:</b> your answer to \"" + esc(good[0]) + "\".</p>" : "") + '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Look at other jobs", fn: function () { toHub("work"); } }, { label: "Back to my year", cls: "alt", fn: function () { toHub("year"); } }] });
     }
   }
   if (!arrive) { showCard({ title: "Running late", icon: "bus", text: "The bus is ten minutes late. You text them to say sorry and that you are on your way.", choices: [{ label: "Head in", fn: ask }] }); }
@@ -3653,6 +3748,17 @@ function interview(id, cv) {
 /* =========================================================
    HOME TAB AND VIEWINGS
    ========================================================= */
+function leftIfMoved(L) {
+  var keep = S.home;
+  try {
+    S.home = { type: L.type, rent: L.rent, mortgage: L.type === "owned" ? mortgagePayment(L.price - L.deposit) : 0, issues: [], found: [] };
+    return Math.round(monthlyNet().net - monthlyOut().total);
+  } finally { S.home = keep; }
+}
+function affordHtml(L) {
+  var left = leftIfMoved(L);
+  return '<div class="afford' + (left < 0 ? " short" : "") + '">' + (left >= 0 ? "After rent and bills you would have about <b>" + money(left, 0) + "</b> a month left." : "After rent and bills you would be about <b>" + money(-left, 0) + " short</b> each month.") + "</div>";
+}
 function tabHome() {
   var hm = S.home, ht = HOME_TYPES[hm.type];
   var h = "<h2>Home</h2><div class='row'><button class='btn sm alt' id='decB2'>Decorate your space</button></div><div class='box'><b>" + esc(hm.title || ht.name) + "</b><br>";
@@ -3680,7 +3786,7 @@ function tabHome() {
   S.listings.forEach(function (L, i) {
     h += '<div class="listing"><div><b>' + esc(L.title) + '</b><br><span class="small">' +
       (L.type === "owned" ? "Price " + money(L.price, 0) + ". Deposit (5%) " + money(L.deposit, 0) + " plus about " + money(2500, 0) + " fees." : "Deposit " + money(L.deposit, 0) + (L.type === "share" ? ". Bills included." : ". Bills not included.")) +
-      "<br>" + L.commute + " minutes to town. " + (L.pets ? "Pets allowed." : "No pets.") + '</span></div><div><div class="price">' + (L.type === "owned" ? money(mortgagePayment(L.price - L.deposit), 0) : money(L.rent, 0)) + '</div><div class="small" style="text-align:right">' + (L.type === "owned" ? "mortgage a month" : "a month") + '</div><button class="btn" data-view="' + i + '">Book a viewing</button></div></div>';
+      "<br>" + L.commute + " minutes to town. " + (L.pets ? "Pets allowed." : "No pets.") + "</span>" + affordHtml(L) + '</div><div><div class="price">' + (L.type === "owned" ? money(mortgagePayment(L.price - L.deposit), 0) : money(L.rent, 0)) + '</div><div class="small" style="text-align:right">' + (L.type === "owned" ? "mortgage a month" : "a month") + '</div><button class="btn" data-view="' + i + '">Book a viewing</button></div></div>';
   });
   $("tabBody").innerHTML = h;
   bindHome();
@@ -3721,9 +3827,10 @@ function viewing(L) {
   });
   function drawFound() { var f = $("foundList"); if (f) f.innerHTML = L.found.length ? "<b>Problems you spotted:</b> " + L.found.map(function (x) { return ISSUE_TEXT[x][0].toLowerCase(); }).join(", ") : '<span class="small muted">No problems spotted yet.</span>'; }
   var cost = L.type === "owned" ? L.deposit + 2500 : L.deposit + L.rent;
-  var h = '<div class="kicker">Viewing</div><h2>' + esc(L.title) + "</h2><p>" + (L.type === "owned" ? "Price " + money(L.price, 0) + ". Mortgage about " + money(mortgagePayment(L.price - L.deposit), 0) + " a month." : "Rent " + money(L.rent, 0) + " a month.") + " To move in you need about <b>" + money(cost, 0) + "</b>" + (L.type === "owned" ? " (deposit and fees)." : " (deposit and first month's rent).") + "</p>" +
-    '<div class="note"><b>Have a good look round.</b> Tap the dashed boxes on the picture to check things. Problems are easier to sort before you move in.</div><div id="viewMsg"></div><div id="foundList" class="box tint"></div><div class="choices" id="viewBtns"></div>';
+  var h = '<div class="kicker">Viewing</div><h2>' + esc(L.title) + "</h2><p>" + (L.type === "owned" ? "Price " + money(L.price, 0) + ". Mortgage about " + money(mortgagePayment(L.price - L.deposit), 0) + " a month." : "Rent " + money(L.rent, 0) + " a month.") + " To move in you need about <b>" + money(cost, 0) + "</b>" + (L.type === "owned" ? " (deposit and fees)." : " (deposit and first month's rent).") + "</p>" + affordHtml(L) +
+    '<div class="note"><b>Have a good look round.</b> Tap the dashed boxes on the picture above to check things. Problems are easier to sort before you move in.</div><div id="viewMsg"></div><div id="foundList" class="box tint"></div><div class="choices" id="viewBtns"></div>';
   setPanel(h); drawFound();
+  if (window.innerWidth <= 900) setTimeout(function () { var st = document.querySelector(".stage") || $("hotspots"); if (st && st.scrollIntoView) st.scrollIntoView({ block: "start", behavior: "smooth" }); }, 120);
   var bh = '<button class="btn" id="takeIt">' + (L.type === "owned" ? "Make an offer and buy it" : "Take it") + "</button>" +
     '<button class="btn teal" id="askFix">Ask about the problems I found</button><button class="btn alt" id="walk">Walk away</button>';
   $("viewBtns").innerHTML = bh;
@@ -3745,6 +3852,7 @@ function viewing(L) {
     drawFound();
     var nc = L.type === "owned" ? L.deposit + 2500 : L.deposit + L.rent;
     $("panel").querySelector("p").innerHTML = (L.type === "owned" ? "Price " + money(L.price, 0) + "." : "Rent " + money(L.rent, 0) + " a month.") + " To move in you need about <b>" + money(nc, 0) + "</b>.";
+    var af = $("panel").querySelector(".afford"); if (af) af.outerHTML = affordHtml(L);
   });
   on("takeIt", function () {
     if (S.pet && !L.pets) { toast("This place does not allow pets"); return; }
@@ -3756,6 +3864,12 @@ function viewing(L) {
     if (S.cash < need) {
       var helper = S.bg.support === "big" || S.bg.income === "comfortable";
       showCard({ title: "Not enough saved yet", icon: "coin", text: "You need about " + money(need, 0) + " and you have " + money(S.cash, 0) + ".", choices: (helper && !S.familyHelped ? [{ label: "Ask family if they can help", fn: function () { S.familyHelped = true; var gift = Math.round((need - S.cash) * 0.7); applyFx({ cash: gift, rel: 2 }); result("Family to the rescue", "They lend you " + money(gift, 0) + " towards it. You agree to pay it back when you can.", [], function () { viewing(L); }, "people"); } }] : []).concat([{ label: "Keep saving", cls: "alt", fn: function () { $("hotspots").innerHTML = ""; toHub("home"); } }]) });
+      return;
+    }
+    var left = leftIfMoved(L);
+    if (left < 0 && !L.warned) {
+      L.warned = true;
+      showCard({ title: "Can you afford it?", icon: "coin", text: "With this rent and the bills, you would be about <b>" + money(-left, 0) + " short</b> every month. Your savings would slowly go down. A cheaper place, more hours or cutting back on the Money tab could help.", choices: [{ label: "Have another think", fn: function () { viewing(L); } }, { label: "Take it anyway", cls: "alt", fn: function () { moveTo(L); } }] });
       return;
     }
     moveTo(L);
@@ -3785,11 +3899,11 @@ function finishYear() {
   closeCard();
   var b = S.budget, mn = monthlyNet(), mo = monthlyOut(), left = round2(mn.net - mo.total), yearly = round2(left * 12);
   var before = { money: S.meters.money, health: S.meters.health, happy: S.meters.happy, rel: S.meters.rel };
-  var notes = [], age = S.age;
+  var notes = [], age = S.age, led = { start: S.cash, left: yearly, oneoff: 0, cover: 0, paid: 0, interest: 0, debt0: S.debt };
   S.cash = round2(S.cash + yearly);
-  if (!inStudy()) { var oneoff = Math.round(450 * (S.priceIdx || 1) + (S.job ? S.job.annual * 0.05 : 0)); S.cash = round2(S.cash - oneoff); notes.push("One off costs this year (Christmas, birthdays, clothes, replacing worn out things): " + money(oneoff, 0) + ". These tend to grow as you earn more."); }
+  if (!inStudy()) { var oneoff = Math.round(450 * (S.priceIdx || 1) + (S.job ? S.job.annual * 0.05 : 0)); led.oneoff = oneoff; S.cash = round2(S.cash - oneoff); }
   if (S.home.type === "family" && S.job) { var ob = S.home.rent; S.home.rent = familyBoard(); if (S.home.rent > ob) notes.push("Your board at home is now " + money(S.home.rent, 0) + " a month: about a quarter of your take home pay, which is typical."); }
-  if (renting() && S.home.type !== "social" && S.home.since != null && S.home.since < age) { var oldR = S.home.rent; S.home.rent = Math.round(S.home.rent * 1.04); notes.push("Your rent went up from " + money(oldR, 0) + " to " + money(S.home.rent, 0) + " a month. Rents often rise faster than pay."); }
+  if (renting() && S.home.type !== "social" && S.home.since != null && S.home.since < age && S.renewedAge !== age && !S.deadlines.some(function (d) { return d.kind === "renew"; })) { var oldR = S.home.rent; S.home.rent = Math.round(S.home.rent * 1.04); notes.push("Your rent went up from " + money(oldR, 0) + " to " + money(S.home.rent, 0) + " a month. Rents often rise faster than pay."); }
   else if (S.home.type === "social") S.home.rent = Math.round(S.home.rent * 1.03);
   var debtPay = mo.lines.filter(function (l) { return l.name === "Paying off what you owe"; }).reduce(function (a, l) { return a + l.amt; }, 0) * 12;
   if (S.debt > 0) {
@@ -3802,25 +3916,47 @@ function finishYear() {
   (S.plans || []).forEach(function (p) { p.months -= 12; });
   S.plans = (S.plans || []).filter(function (p) { if (p.months <= 0) { notes.push(p.name + " is paid off."); return false; } return true; });
   if (S.cash < 0) {
-    S.debt = round2(S.debt + -S.cash); S.cash = 0;
+    led.cover = -S.cash; S.debt = round2(S.debt + -S.cash); S.cash = 0;
     notes.push("Your savings ran out and you went into your overdraft.");
     logIt("Went into an overdraft", "setback");
     if (!S.deadlines.some(function (d) { return d.kind === "debt"; }) && !S.debtAdvice) addDeadline({ kind: "debt", turns: 2 });
   }
-  if (S.debt > 0 && S.cash > 0) { var p = Math.min(S.debt, S.cash); S.debt = round2(S.debt - p); S.cash = round2(S.cash - p); notes.push("You used " + money(p, 0) + " of savings to pay off debt. Paying debt first saves on interest."); }
-  if (S.cash > 0) { var si = round2(S.cash * FIG.savingsRate); S.cash = round2(S.cash + si); if (si >= 1) notes.push("Interest on your savings: " + money(si, 0) + "."); }
+  if (S.debt > 5000 && !S.debtAdvice && S.debt > led.debt0 && !inStudy()) {
+    S.debtAdvice = true; S.deadlines = S.deadlines.filter(function (x) { return x.kind !== "debt"; });
+    notes.push("Your bank noticed you were struggling. They froze the interest and put you in touch with free debt advice, who helped you make a plan. Have a look at the Money tab to find some savings.");
+    logIt("Got help from free debt advice", "money");
+  }
+  if (S.debt > 12000 && left < 0 && ["share", "flat", "house"].indexOf(S.home.type) >= 0 && !inStudy()) {
+    var back = leaveHome(); if (back) { var pb = Math.min(S.debt, back); S.debt = round2(S.debt - pb); S.cash = round2(S.cash - pb); }
+    S.home = { type: "family", rent: 0, title: "Family home" }; S.home.rent = familyBoard();
+    S.homes.push({ age: age, type: "family", title: "Back to the family home" }); S.listings = null;
+    notes.push("The rent was more than you could keep up with, so you moved back in with family to get back on your feet. Lots of people do this. It gives you time to pay things off.");
+    logIt("Moved back in with family to get back on track", "setback");
+  }
+  if (S.debt > 0 && S.cash > 0) { var p = Math.min(S.debt, S.cash); led.paid = p; S.debt = round2(S.debt - p); S.cash = round2(S.cash - p); notes.push("Your savings paid off " + money(p, 0) + " of what you owed. Paying debt first saves on interest."); }
+  if (S.cash > 0) { var si = round2(S.cash * FIG.savingsRate); led.interest = si; S.cash = round2(S.cash + si); }
   if (S.studentLoan > 0 && !inStudy()) S.studentLoan = Math.max(0, round2(S.studentLoan * (1 + FIG.loanInterest) - mn.ps.loan * 12));
   /* meters */
-  var d = { health: 0, happy: 0, rel: 0 };
-  d.health += FOOD[b.food].health + (b.transport === "walk" ? 3 : 0) + (b.gym ? 4 : 0) + (S.job && S.job.hrs > 40 ? -3 : 0) + (age >= 30 ? -1 : 0);
+  var d = { health: 0, happy: 0, rel: 0 }, why = { health: [], happy: [], rel: [] };
+  function rs(k, v, t) { if (!v) return; d[k] += v; why[k].push([v, t]); }
+  rs("health", FOOD[b.food].health, FOOD[b.food].health > 0 ? "cooking proper meals" : "a lot of " + (b.food === "cheap" ? "cheap and quick food" : "takeaways"));
+  rs("health", b.transport === "walk" ? 3 : 0, "walking or cycling everywhere"); rs("health", b.gym ? 4 : 0, "going to the gym");
+  rs("health", S.job && S.job.hrs > 40 ? -3 : 0, "long working hours"); rs("health", age >= 30 ? -1 : 0, "getting a bit older");
   var iss = S.home.issues || [];
-  if (iss.indexOf("damp") >= 0 || iss.indexOf("mould") >= 0) { d.health -= 5; notes.push("Damp at home is getting to you. Report it to your landlord, or think about moving."); }
-  d.happy += FUN[b.fun].happy + FOOD[b.food].happy + (S.pet ? 3 : 0) + (left < 0 ? -3 : 0) + (livingAlone() ? 1 : 0);
-  if (S.job) d.happy += Math.round((S.job.sat - 50) / 5); else if (!inStudy()) d.happy -= 4;
-  if (S.home.type === "family" && age >= 24) { d.happy -= 4; d.rel -= 2; notes.push("Living at home is saving you money, but you would like a bit more space of your own."); }
-  d.rel += FUN[b.fun].rel + (["family", "share", "halls"].indexOf(S.home.type) >= 0 ? 2 : -2) + (S.pet ? 1 : 0) + (S.bg.support === "big" ? 1 : 0);
-  d.happy -= 3; d.rel -= 3; d.health -= 1;
-  ["health", "happy", "rel"].forEach(function (k) { var v = S.meters[k] + d[k] + R(-2, 2); v += (50 - v) * 0.12; if (v > 70) v -= (v - 70) * 0.45; S.meters[k] = clamp(Math.round(v), 0, 100); });
+  if (iss.indexOf("damp") >= 0 || iss.indexOf("mould") >= 0) rs("health", -5, "damp at home (you could report it or move)");
+  rs("happy", FUN[b.fun].happy, FUN[b.fun].happy > 0 ? "time out having fun" : "hardly any fun this year");
+  rs("happy", FOOD[b.food].happy, b.food === "takeaway" ? "tasty treats" : b.food === "cheap" ? "boring food" : "");
+  rs("happy", S.pet ? 3 : 0, "your pet"); rs("happy", left < 0 ? -3 : 0, "being short of money"); rs("happy", livingAlone() ? 1 : 0, "having your own space");
+  if (S.job) rs("happy", Math.round((S.job.sat - 50) / 5), S.job.sat >= 50 ? "liking your job" : "not enjoying your job much"); else if (!inStudy()) rs("happy", -4, "not working");
+  if (S.home.type === "family" && age >= 24) { rs("happy", -4, "wanting more space of your own"); rs("rel", -2, "living on top of each other at home"); }
+  rs("rel", FUN[b.fun].rel, FUN[b.fun].rel > 0 ? "seeing people" : "not seeing many people");
+  rs("rel", ["family", "share", "halls"].indexOf(S.home.type) >= 0 ? 2 : -2, ["family", "share", "halls"].indexOf(S.home.type) >= 0 ? "living with other people" : "living on your own");
+  rs("rel", S.pet ? 1 : 0, "your pet"); rs("rel", S.bg.support === "big" ? 1 : 0, "family nearby");
+  ["health", "happy", "rel"].forEach(function (k) {
+    var v = S.meters[k] + d[k], settle = (55 - v) * 0.06 - (v > 85 ? (v - 85) * 0.5 : 0);
+    if (Math.round(settle)) why[k].push([Math.round(settle), settle > 0 ? "bouncing back a little" : "things settling down over the year"]);
+    S.meters[k] = clamp(Math.round(v + settle), 0, 100);
+  });
   /* work */
   if (S.job) {
     S.job.years++; addExp(S.job.title, 1);
@@ -3863,11 +3999,21 @@ function finishYear() {
     S.lastRise = Math.round((S.job.annual / oldPay - 1) * 1000) / 10;
   } else S.lastRise = null;
   save();
-  var tags = ["money", "health", "happy", "rel"].map(function (k) { var dd = after[k] - before[k]; return dd ? '<span class="tag ' + k + (dd < 0 ? " minus" : "") + '">' + (dd > 0 ? "+" : "") + dd + " " + MLAB[k] + "</span>" : ""; }).join(" ");
-  var html = '<table class="t"><tr><td>Money in over the year</td><td class="n">' + money(mn.net * 12, 0) + '</td></tr><tr class="minus"><td>Money out over the year</td><td class="n">-' + money(mo.total * 12, 0) + '</td></tr><tr class="tot"><td>' + (yearly >= 0 ? "Saved" : "Short") + '</td><td class="n">' + money(yearly, 0) + "</td></tr>" +
-    "<tr><td>Savings now</td><td class='n'>" + money(S.cash, 0) + "</td></tr>" + (S.debt > 0 ? "<tr class='minus'><td>Owed now</td><td class='n'>" + money(S.debt, 0) + "</td></tr>" : "") + "</table>" +
-    '<div class="fx">' + tags + "</div>" + (notes.length ? "<ul>" + notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "");
-  notes.push("Prices went up about 3% this year (inflation)." + (S.lastRise != null ? " Your pay went up " + S.lastRise + "%." : ""));
+  notes.push("Prices went up about 3% this year." + (S.lastRise != null ? " Your pay went up " + S.lastRise + "%." : ""));
+  function row(lab, v, cls) { return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + lab + '</td><td class="n">' + (v > 0 && cls !== "tot" && lab !== "Savings at the start" ? "+" : "") + money(v, 0) + "</td></tr>"; }
+  var html = '<h3 class="ysub">Your savings</h3><table class="t">' + row("Savings at the start", led.start) +
+    row(led.left >= 0 ? "Left over each month, added up" : "Short each month, added up", led.left, led.left < 0 ? "minus" : "") +
+    (led.oneoff ? row("One off costs: presents, clothes, things wearing out", -led.oneoff, "minus") : "") +
+    (led.cover ? row("Borrowed on your overdraft to cover it", led.cover) : "") +
+    (led.paid ? row("Used to pay off what you owe", -led.paid, "minus") : "") +
+    (led.interest >= 1 ? row("Interest from the bank", led.interest) : "") +
+    row("Savings now", S.cash, "tot") + (S.debt > 0 ? "<tr class='minus'><td>Still owed</td><td class='n'>" + money(S.debt, 0) + "</td></tr>" : "") + "</table>";
+  html += '<h3 class="ysub">How you are doing</h3><div class="whylist">' + ["health", "happy", "rel", "money"].map(function (k) {
+    var dd = after[k] - before[k], list = why[k] || [];
+    var reasons = k === "money" ? (dd ? "<span>Based on your savings, what you owe, and whether money runs short each month.</span>" : "") : list.filter(function (r) { return r[1]; }).sort(function (a, b2) { return Math.abs(b2[0]) - Math.abs(a[0]); }).slice(0, 4).map(function (r) { return '<span class="' + (r[0] > 0 ? "up" : "dn") + '">' + (r[0] > 0 ? "+" : "") + r[0] + " " + esc(r[1]) + "</span>"; }).join("");
+    return '<div class="why"><img src="' + iconSrc(MICON[k]) + '" alt=""><b>' + MLAB[k] + " " + (dd > 0 ? "+" : "") + (dd || "no change") + "</b>" + (reasons ? '<div class="rs">' + reasons + "</div>" : "") + "</div>";
+  }).join("") + '</div><p class="small muted">Things you do in the year, like seeing friends or resting, show up straight away and mostly stick.</p>' +
+    (notes.length ? '<h3 class="ysub">Also this year</h3><ul>' + notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "");
   setSeason(3);
   if (notes.some(function (x) { return x.indexOf("Goal reached") === 0; })) setTimeout(function () { celebrate("GOAL REACHED!"); }, 500);
   showCard({ kicker: "Year done", title: "Your year at " + age, bg: "home", icon: "clock", html: html, choices: [{ label: S.age >= END_AGE ? "See how your life turned out" : "Start age " + S.age, fn: function () {
@@ -3891,22 +4037,22 @@ function afterGrad() { showCard({ title: "Time to update your CV", icon: "letter
 
 function newYear(tab) {
   var q = [];
+  S.deadlines.forEach(function (d) { d.fresh = false; });
   if (renting() && S.home.since != null && S.home.since < S.age - 0 && Math.random() < 0.35 && !S.deadlines.some(function (x) { return x.kind === "renew"; })) {
-    q.push(function (next) { var nr = S.home.rent + R(2, 6) * 10; addDeadline({ kind: "renew", newRent: nr, turns: 1 }); showCard({ title: "Letter from your landlord", icon: "letter", text: "Your tenancy is up for renewal. They want to raise the rent to " + money(nr, 0) + " a month. You can decide on the This year tab.", choices: [{ label: "Okay", fn: next }] }); });
+    var nr = S.home.rent + R(2, 6) * 10; addDeadline({ kind: "renew", newRent: nr, turns: 1, fresh: true });
   }
   if (S.onRegister && S.socialWait >= 2 && S.home.type !== "social" && !S.deadlines.some(function (x) { return x.kind === "social"; })) {
-    q.push(function (next) { var L = makeListing("social"); addDeadline({ kind: "social", listing: L, turns: 1 }); showCard({ title: "A housing offer", icon: "key", text: "The council has a 1 bed flat available for you at " + money(L.rent, 0) + " a month. Have a look on the This year tab.", choices: [{ label: "Okay", fn: next }] }); });
+    addDeadline({ kind: "social", listing: makeListing("social"), turns: 1, fresh: true });
   }
   if (S.job && JOBS[S.job.id].next && S.job.years >= JOBS[S.job.id].next[1] && !S.deadlines.some(function (x) { return x.kind === "promo"; }) && Math.random() < 0.55 + (S.revealed.indexOf("Leader") >= 0 ? 0.25 : 0) + (S.revealed.indexOf("Calm") >= 0 ? 0.1 : 0)) {
-    q.push(function (next) { var nid = JOBS[S.job.id].next[0]; addDeadline({ kind: "promo", jobId: nid, turns: 1 }); showCard({ title: "A chat with your manager", icon: "case", text: "They want to offer you a promotion to " + esc(JOBS[nid].title.toLowerCase()) + ". It is on the This year tab.", choices: [{ label: "Brilliant", fn: next }] }); });
+    addDeadline({ kind: "promo", jobId: JOBS[S.job.id].next[0], turns: 1, fresh: true });
   }
   var iss = S.home.issues || [];
   if (iss.indexOf("boiler") >= 0) q.push(function (next) { S.home.issues = iss.filter(function (x) { return x !== "boiler"; }); var own = S.home.type === "owned"; var tg = applyFx(own ? { cash: -2800, health: -3 } : { health: -3, happy: -2 }); showCard({ title: "The boiler breaks", icon: "warn", text: own ? "No heating in January. As the owner, a new boiler is your cost: " + money(2800, 0) + ". It has to be fitted by a Gas Safe registered engineer." : "No heating in January. You report it, and your landlord has to fix it: repairs like this are their job, not yours. It takes a cold week.", html: '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Carry on", fn: next }] }); });
   else if (iss.indexOf("sockets") >= 0) q.push(function (next) { S.home.issues = iss.filter(function (x) { return x !== "sockets"; }); var own = S.home.type === "owned"; var tg = applyFx(own ? { cash: -400 } : { happy: -2 }); showCard({ title: "Sparks from a socket", icon: "bolt", text: own ? "An electrician rewires it for " + money(400, 0) + "." : "You report it straight away. Your landlord sends an electrician the next day.", html: '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Carry on", fn: next }] }); });
   if (!S.job && !inStudy() && !S.ucClaim && (S.debt > 0 || S.cash < 500)) q.push(function (next) { showCard({ title: "Money check", icon: "coin", text: "You are not working and your savings are low. Universal Credit is there for times like this, and it keeps paying as you start earning again, just less.", choices: [{ label: "Apply for Universal Credit", fn: function () { S.ucClaim = true; logIt("Applied for Universal Credit", "money"); next(); } }, { label: "Not now", cls: "alt", fn: next }] }); });
   if (S.hidden.length && Math.random() < 0.35) q.push(revealEvent);
-  if (Math.random() < 0.75) q.push(randomAdultEvent);
-  if (!inStudy() && S.age >= 19 && Math.random() < 0.45) q.push(function (next) { showCard({ title: "Fancy a money moment?", icon: "coin", bg: "bank", text: "A quick bit of maths using your own real numbers this year. Completely up to you.", choices: [{ label: "Have a go", fn: function () { startMoneyMoment(function () { toHub("year"); }); } }, { label: "Not now", cls: "alt", fn: next }] }); });
+  if (Math.random() < 0.75) q.push(function (next) { if (Math.random() < 0.4 && callbackCard("adult", next)) return; randomAdultEvent(next); });
   runQueue(q, function () { toHub(tab || "year"); });
 }
 function runQueue(q, done) { if (!q.length) return done(); var f = q.shift(); f(function () { runQueue(q, done); }); }
@@ -3962,11 +4108,15 @@ function endLife() {
   closeCard(); S.phase = "report"; pushHistory(); save(); showReport(); setTimeout(function () { celebrate("LIFE COMPLETE!", S.name + ", age " + S.age); }, 300);
 }
 function balanceVerdict() {
-  var ok = ["money", "health", "happy", "rel"].filter(function (k) { return S.meters[k] >= 40; }).length;
-  if (ok === 4) return "A balanced, sustainable life: all four parts of life ended up in a good place.";
-  if (ok === 3) return "A mostly balanced life. One part could do with some attention.";
-  return "A life with some hard parts. That is real too, and every choice taught you something.";
+  var ks = ["money", "health", "happy", "rel"];
+  var low = ks.filter(function (k) { return S.meters[k] < 40; }).map(function (k) { return MLAB[k]; });
+  var high = ks.filter(function (k) { return S.meters[k] >= 60; }).map(function (k) { return MLAB[k]; });
+  function and(l) { return l.length > 1 ? l.slice(0, -1).join(", ") + " and " + l[l.length - 1] : l[0]; }
+  if (!low.length) return "A balanced, sustainable life: all four parts of life ended up in a good place" + (high.length ? ", with " + and(high) + " doing really well." : ".");
+  if (low.length === 1) return "A mostly balanced life. " + low[0] + " could do with some attention" + (high.length ? ", but " + and(high) + " went really well." : ".");
+  return "A life with some hard parts: " + and(low) + " ended up low." + (high.length ? " " + and(high) + " went well." : "") + " That is real too, and every choice taught you something.";
 }
+var LOGICON = { qual: "grad", grad: "grad", school: "book", book: "book", maths: "book", work: "case", home: "house", house: "house", owned: "key", landlord: "house", money: "coin", coin: "coin", car: "car", family: "people", life: "smile", goal: "star", star: "star", trait: "star", setback: "warn", letter: "letter", start: "star" };
 function reportText() {
   var t = "BUILD A LIFE: life report\n" + S.name + (S.initials ? " (" + S.initials + ")" : "") + ", lived to " + S.age + "\n\n";
   t += balanceVerdict() + "\nMoney " + S.meters.money + ", Health " + S.meters.health + ", Happiness " + S.meters.happy + ", Relationships " + S.meters.rel + "\n\n";
@@ -3994,7 +4144,7 @@ function showReport() {
   var r = $("report"); r.style.display = "block"; setMusic("report");
   var picks = S.log.filter(function (l) { return ["start", "setback", "money"].indexOf(l.kind) < 0 && l.text.indexOf("Was offered") !== 0 && l.text.indexOf("Set goals") !== 0 && l.text.indexOf("Started adult life") !== 0; });
   var h = '<div class="rep"><div class="noprint row" style="justify-content:space-between;margin-bottom:10px"><button class="btn" id="rpPrint">Print</button><button class="btn teal" id="rpSend">Send to Jay</button><button class="btn alt" id="rpMail">Email app</button><button class="btn alt" id="rpCopy">Copy</button><button class="btn alt" id="rpNew">Start a new life</button></div>' +
-    "<h1>Life report</h1><p><b>" + esc(S.name) + "</b>" + (S.initials ? " (" + esc(S.initials) + ")" : "") + ", lived to " + S.age + ". Grew up in a " + esc(AREAS[S.bg.area].name.toLowerCase()) + ".</p>" +
+    '<div class="rephead"><canvas id="repMe" width="28" height="44" aria-hidden="true"></canvas><div><h1>Life report</h1><p><b>' + esc(S.name) + "</b>" + (S.initials ? " (" + esc(S.initials) + ")" : "") + ", lived to " + S.age + ". Grew up in a " + esc(AREAS[S.bg.area].name.toLowerCase()) + ".</p></div></div>" +
     '<p style="font-size:18px"><b>' + esc(balanceVerdict()) + "</b></p>" +
     '<div class="row">' + ["money", "health", "happy", "rel"].map(function (k) { return '<span class="tag ' + k + '" style="font-size:14px">' + MLAB[k] + " " + S.meters[k] + "</span>"; }).join("") + "</div>" +
     "<h2>Your life in four lines</h2><canvas id=\"repChart\" width=\"760\" height=\"260\"></canvas>" +
@@ -4003,16 +4153,22 @@ function showReport() {
     "<h2>Qualifications</h2><ul>" + qualList().map(function (q) { return "<li>" + esc(q) + "</li>"; }).join("") + "</ul></div>" +
     "<div><h2>Work</h2><ul>" + workList().map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul><h2>Homes</h2><ul>" + S.homes.map(function (x) { return "<li>" + esc(x.title) + " (from age " + x.age + ")</li>"; }).join("") + "</ul>" +
     "<h2>Money at the end</h2><ul><li>Savings: " + money(S.cash, 0) + "</li>" + (S.mm ? "<li>Money moments done: " + S.mm + "</li>" : "") + (S.debt ? "<li>Owed: " + money(S.debt, 0) + "</li>" : "") + (S.studentLoan ? "<li>Student loan: " + money(S.studentLoan, 0) + "</li>" : "") + "</ul></div></div>" +
-    "<h2>Three choices I am proud of</h2><p class='small noprint'>Tap up to three moments from your life.</p><div id=\"proudList\"></div>" +
+    "<h2>Three choices I am proud of</h2><p class='small noprint'>Tap up to three moments from your life. The ones marked with a star might be a good place to start.</p><div id=\"proudList\"></div>" +
     "<h2>Something I would do differently next time</h2><textarea id=\"refl\" class=\"noprint\" placeholder=\"Totally optional\">" + esc(S.reflection) + '</textarea><p id="reflPrint">' + esc(S.reflection) + "</p>" +
-    '<h2>Key moments</h2><ul class="small">' + S.log.filter(function (l) { return l.text.indexOf("Was offered") !== 0; }).slice(-30).map(function (l) { return "<li>Age " + l.age + ": " + esc(l.text) + "</li>"; }).join("") + "</ul></div>";
+    '<h2>Key moments</h2><ul class="small timeline">' + S.log.filter(function (l) { return l.text.indexOf("Was offered") !== 0; }).slice(-30).map(function (l) { return '<li><img src="' + iconSrc(LOGICON[l.kind] || "smile") + '" alt="">Age ' + l.age + ": " + esc(l.text) + "</li>"; }).join("") + "</ul></div>";
   r.innerHTML = h;
+  var sugW = { qual: 5, grad: 5, goal: 5, owned: 4, home: 3, work: 3, trait: 2, life: 2, family: 2 };
+  var sug = picks.map(function (l, i) { return [sugW[l.kind] || 0, i]; }).filter(function (x) { return x[0]; }).sort(function (a2, b2) { return b2[0] - a2[0] || b2[1] - a2[1]; });
+  var sugKinds = [], sugIx = [];
+  sug.forEach(function (x) { var k = picks[x[1]].kind; if (sugIx.length < 3 && sugKinds.indexOf(k) < 0) { sugKinds.push(k); sugIx.push(x[1]); } });
+  sug.forEach(function (x) { if (sugIx.length < 3 && sugIx.indexOf(x[1]) < 0) sugIx.push(x[1]); });
   function drawProud() {
-    $("proudList").innerHTML = picks.map(function (l, i) { var on = S.proud.indexOf(l.text) >= 0; return '<button class="btn ' + (on ? "green" : "alt") + (on ? "" : " noprint") + '" style="font-size:14px;min-height:34px;padding:4px 10px" data-pr="' + i + '">' + (on ? "[x] " : "") + "Age " + l.age + ": " + esc(l.text) + "</button>"; }).join("");
+    $("proudList").innerHTML = picks.map(function (l, i) { var on = S.proud.indexOf(l.text) >= 0; return '<button class="btn ' + (on ? "green" : "alt") + (on ? "" : " noprint") + '" style="font-size:14px;min-height:34px;padding:4px 10px" data-pr="' + i + '">' + tick(on) + (sugIx.indexOf(i) >= 0 && !on ? '<span class="sr">Suggested: </span><span aria-hidden="true" style="color:#d9a21b">&#9733; </span>' : "") + "Age " + l.age + ": " + esc(l.text) + "</button>"; }).join("");
     onAll("[data-pr]", function () { var t = picks[+this.getAttribute("data-pr")].text, at = S.proud.indexOf(t); if (at >= 0) S.proud.splice(at, 1); else { if (S.proud.length >= 3) S.proud.shift(); S.proud.push(t); } save(); drawProud(); });
   }
   S.proud = (S.proud || []).filter(function (p) { return typeof p === "string"; });
   drawProud(); drawChart();
+  (function () { var c = $("repMe"); if (!c) return; var x = c.getContext("2d"); x.imageSmoothingEnabled = false; var ok = ["money", "health", "happy", "rel"].filter(function (k) { return S.meters[k] >= 40; }).length; x.drawImage(heroSprite(myLook(), "adult", ok >= 3 ? "happy" : "neutral", "stand", 0), 0, 0); })();
   $("refl").oninput = function () { S.reflection = this.value; $("reflPrint").textContent = this.value; save(); };
   onAll("[data-cga]", function () { S.customAnswer = this.getAttribute("data-cga"); save(); showReport(); });
   on("rpPrint", function () { window.print(); });
