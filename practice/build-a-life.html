@@ -1975,91 +1975,98 @@ var TEEN_EVENTS = [
 
 /* ---------- learning activities (Functional Skills style) ---------- */
 function A(o) { return o; }
+/* ---------- KS2 maths learning activities: whole numbers, friendly sums, pictures to help ---------- */
+function clockSVG(h, m) {
+  var ma = m / 60 * Math.PI * 2 - Math.PI / 2, ha = ((h % 12) + m / 60) / 12 * Math.PI * 2 - Math.PI / 2, ticks = "";
+  for (var i = 1; i <= 12; i++) { var a = i / 12 * Math.PI * 2 - Math.PI / 2; ticks += '<text x="' + (50 + Math.cos(a) * 37).toFixed(1) + '" y="' + (54 + Math.sin(a) * 37).toFixed(1) + '" font-size="11" font-weight="700" text-anchor="middle" fill="#1b1424">' + i + "</text>"; }
+  return '<svg viewBox="0 0 100 100" width="130" height="130" style="display:block;margin:8px auto" role="img" aria-label="A clock showing ' + h + ":" + (m < 10 ? "0" : "") + m + '"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#1b1424" stroke-width="4"/>' + ticks +
+    '<line x1="50" y1="50" x2="' + (50 + Math.cos(ha) * 22).toFixed(1) + '" y2="' + (50 + Math.sin(ha) * 22).toFixed(1) + '" stroke="#1b1424" stroke-width="5" stroke-linecap="round"/>' +
+    '<line x1="50" y1="50" x2="' + (50 + Math.cos(ma) * 33).toFixed(1) + '" y2="' + (50 + Math.sin(ma) * 33).toFixed(1) + '" stroke="#ef7724" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="50" r="4" fill="#1b1424"/></svg>';
+}
+function coinsHTML(list) {
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">' + list.map(function (c) {
+    var note = c >= 5, lab = c >= 1 ? P + c : (c * 100) + "p";
+    return '<span style="display:inline-flex;align-items:center;justify-content:center;font-weight:700;border:3px solid #1b1424;' + (note ? 'border-radius:4px;width:64px;height:38px;background:' + (c >= 20 ? "#d65a9a" : c >= 10 ? "#ef9a4a" : "#7fd0a0") : 'border-radius:50%;width:46px;height:46px;background:' + (c >= 1 ? "#ffd34d" : "#d9d9d9")) + '">' + lab + "</span>";
+  }).join("") + "</div>";
+}
+function gridHTML(w, h, col) {
+  var cells = ""; for (var i = 0; i < w * h; i++) cells += '<span style="width:26px;height:26px;background:' + (col || "#4fc1d6") + ';border:2px solid #1b1424;box-sizing:border-box"></span>';
+  return '<div style="display:grid;grid-template-columns:repeat(' + w + ',26px);gap:2px;margin:8px 0">' + cells + "</div>";
+}
+function barsHTML(rows) {
+  var mx = Math.max.apply(null, rows.map(function (r) { return r[1]; }));
+  return '<div style="margin:8px 0">' + rows.map(function (r) { return '<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><b style="width:76px">' + esc(r[0]) + '</b><span style="height:22px;width:' + (r[1] / mx * 200) + 'px;background:#ef7724;border:2px solid #1b1424;display:inline-block"></span><span>' + r[1] + "</span></div>"; }).join("") + "</div>";
+}
+function splitCoins(p) { var out = []; [50, 20, 10].forEach(function (c) { while (p >= c) { out.push(c / 100); p -= c; } }); return out; }
+function tm(h, m) { return h + ":" + (m < 10 ? "0" : "") + m; }
+function words(h, m) { var n = ["twelve", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]; return m === 0 ? n[h] + " o'clock" : m === 30 ? "half past " + n[h] : m === 15 ? "quarter past " + n[h] : "quarter to " + n[(h % 12) + 1]; }
 var MATHS_ACTS = [
   function () {
-    var n = R(3, 5), p = pick([6.5, 7, 7.5, 8, 8.25]), each = pick([1, 1.5, 2]), s = n * each;
-    var ans = round2(p + each);
-    return A({ title: "Cinema trip", scene: "You and " + (n - 1) + " friends are off to the cinema. Tickets are " + money(p, 2) + " each. You share a big popcorn that costs " + money(s, 2) + ", split equally between all " + n + " of you.", q: "How much does each person pay altogether?", type: "num", prefix: P, ans: ans, hint: "Split the popcorn first: " + money(s, 2) + " divided by " + n + ". Then add one ticket.", explain: "Popcorn each: " + money(each, 2) + ". Ticket plus popcorn: " + money(p, 2) + " + " + money(each, 2) + " = " + money(ans, 2) + "." });
+    var n = R(2, 5), p = pick([4, 5, 6]), ans = n * p;
+    return A({ title: "Cinema trip", scene: "You and your friends are going to the cinema. Tickets are " + money(p, 0) + " each. You need " + n + " tickets.", q: "How much do the tickets cost altogether?", type: "num", prefix: P, ans: ans, hint: "Count up in " + p + "s, " + n + " times: " + p + ", " + (p * 2) + "...", explain: n + " lots of " + money(p, 0) + " is " + money(ans, 0) + ". That is the " + p + " times table: " + n + " x " + p + " = " + ans + "." });
   },
   function () {
-    var start = 13 * 60 + 30 + R(0, 3) * 5, j = R(3, 5) * 5, w = pick([5, 10]), k = R(1, 2);
-    var deps = [0, 1, 2, 3].map(function (i) { return start + i * 15; });
-    var ko = deps[k] + j + w + R(1, 9);
-    function hm(m) { var h = Math.floor(m / 60), mm = m % 60; return h + ":" + (mm < 10 ? "0" : "") + mm; }
-    var table = '<table class="tt"><tr><th>Bus leaves</th>' + deps.map(function (d) { return "<td>" + hm(d) + "</td>"; }).join("") + "</tr></table>";
-    return A({ title: "Getting to the match", scene: "Kick off is at <b>" + hm(ko) + "</b>. The bus takes " + j + " minutes, then it is a " + w + " minute walk from the stop to the ground." + table, q: "Which is the latest bus you can catch and still be there for kick off?", type: "mc", opts: deps.map(hm), ans: k, hint: "Take each bus time, add " + j + " minutes for the bus and " + w + " for the walk.", explain: "The " + hm(deps[k]) + " bus gets you to the ground at " + hm(deps[k] + j + w) + ". The next one would get you there at " + hm(deps[k + 1] + j + w) + ", which is too late." });
+    var h = R(2, 5), m = pick([0, 30]), j = 30, eh = m === 30 ? h + 1 : h, em = m === 30 ? 0 : 30, right = tm(eh, em);
+    var opts = shuffle([right, tm(h, m === 0 ? 15 : 45), tm(h + 1, m)]);
+    return A({ title: "Catching the bus", scene: "The bus leaves at " + words(h, m) + ":" + clockSVG(h, m) + "The ride takes half an hour (30 minutes).", q: "What time will you get there?", type: "mc", opts: opts, ans: opts.indexOf(right), hint: "Half an hour moves the long hand halfway round the clock.", explain: "Half an hour after " + words(h, m) + " is " + words(eh, em) + ", which is " + right + "." });
   },
   function () {
-    var g = pick([200, 250, 300, 400]), m = pick([2, 6, 8, 10]), item = pick(["flour", "pasta", "rice", "oats"]);
-    var ans = g * m / 4;
-    return A({ title: "Cooking for friends", scene: "A recipe for 4 people needs " + g + " g of " + item + ". You are cooking for " + m + " people.", q: "How much " + item + " do you need?", type: "num", unit: "g", ans: ans, hint: "Work out how much one person needs first: " + g + " divided by 4.", explain: "One person: " + (g / 4) + " g. For " + m + " people: " + (g / 4) + " x " + m + " = " + ans + " g." });
+    var e = R(2, 6), item = pick(["eggs", "potatoes", "tomatoes", "carrots"]), ans = e * 2;
+    return A({ title: "Cooking for friends", scene: "A recipe for 2 people needs " + e + " " + item + ". You want to cook for 4 people, so you need to double it.", q: "How many " + item + " do you need?", type: "num", ans: ans, hint: "Double means add it to itself: " + e + " + " + e + ".", explain: "Double " + e + " is " + ans + ". 4 people is twice as many as 2." });
   },
   function () {
-    var price = pick([40, 45, 60, 80, 25, 70]), pct = pick([10, 20, 25, 50]), thing = pick(["trainers", "a jacket", "headphones", "a hoodie"]);
-    var ans = round2(price * (1 - pct / 100));
-    return A({ title: "Sale time", scene: "You spot " + thing + " for " + money(price, 0) + ". There is " + pct + "% off everything today.", q: "How much do they cost in the sale?", type: "num", prefix: P, ans: ans, hint: pct === 10 ? "10% is the price divided by 10." : pct === 50 ? "50% is half." : pct === 25 ? "25% is a quarter: divide by 4." : "Find 10% first (divide by 10), then double it for 20%.", explain: pct + "% of " + money(price, 0) + " is " + money(price * pct / 100, 2) + ". Take that away: " + money(ans, 2) + "." });
+    var price = pick([10, 20, 30, 40, 50, 60]), thing = pick(["trainers", "a jacket", "headphones", "a hoodie"]), ans = price / 2;
+    return A({ title: "Half price sale", scene: "You spot " + thing + " for " + money(price, 0) + ". Everything is half price today!", q: "How much do they cost now?", type: "num", prefix: P, ans: ans, hint: "Half means split into 2 equal parts. What is half of " + price + "?", explain: "Half of " + money(price, 0) + " is " + money(ans, 0) + "." });
   },
   function () {
-    var items = shuffle([["a sandwich", 2.40], ["a drink", 1.25], ["crisps", 0.85], ["a fruit pot", 1.99], ["a wrap", 3.15], ["a cookie", 1.10]]).slice(0, 3);
-    var sum = round2(items[0][1] + items[1][1] + items[2][1]); var paid = sum < 10 ? 10 : 20;
-    var ans = round2(paid - sum);
-    return A({ title: "Lunch on the go", scene: "You buy " + items.map(function (x) { return x[0] + " (" + money(x[1], 2) + ")"; }).join(", ") + ". You pay with a " + money(paid, 0) + " note.", q: "How much change should you get?", type: "num", prefix: P, ans: ans, hint: "Add up the three prices first, then take that away from " + money(paid, 0) + ".", explain: "Total: " + money(sum, 2) + ". Change: " + money(paid, 0) + " - " + money(sum, 2) + " = " + money(ans, 2) + "." });
+    var a = R(1, 4), b = R(1, 4), tot = a + b, ans = 10 - tot;
+    return A({ title: "Change from " + P + "10", scene: "You buy a sandwich for " + money(a, 0) + " and a drink for " + money(b, 0) + ". You pay with this note:" + coinsHTML([10]), q: "How much change should you get?", type: "num", prefix: P, ans: ans, hint: "Add the two prices first. Then count on from that number up to 10.", explain: money(a, 0) + " + " + money(b, 0) + " = " + money(tot, 0) + ". From " + tot + " up to 10 is " + ans + ", so your change is " + money(ans, 0) + "." });
   },
   function () {
-    var s = pick([9 * 60, 9 * 60 + 30, 10 * 60]), e = s + R(8, 14) * 30, brk = 30, worked = e - s - brk;
-    function hm(m) { var h = Math.floor(m / 60), mm = m % 60; return h + ":" + (mm < 10 ? "0" : "") + mm; }
-    function dur(m) { var h = Math.floor(m / 60), mm = m % 60; return h + " hours" + (mm ? " " + mm + " minutes" : ""); }
-    var opts = shuffle([worked, worked + 30, worked - 30, worked + 60]);
-    return A({ title: "Your shift", scene: "Your shift starts at " + hm(s) + " and finishes at " + hm(e) + ". You get a 30 minute unpaid break.", q: "How long are you paid for?", type: "mc", opts: opts.map(dur), ans: opts.indexOf(worked), hint: "Count from start to finish, then take off the 30 minute break.", explain: "From " + hm(s) + " to " + hm(e) + " is " + dur(e - s) + ". Take off the break: " + dur(worked) + "." });
+    var s = pick([8, 9, 10]), len = R(3, 6), e = s + len, eh = e > 12 ? e - 12 : e;
+    return A({ title: "Your shift", scene: "Your shift starts at " + s + " o'clock in the morning and finishes at " + eh + " o'clock.", q: "How many hours is your shift?", type: "num", unit: "hours", ans: len, hint: "Count the hours on your fingers: " + s + " to " + (s + 1) + " is one hour...", explain: "From " + s + " o'clock to " + eh + " o'clock is " + len + " hours." });
   },
   function () {
-    var a = pick([[4, 2.40], [6, 3.30], [5, 2.75]]), b = pick([[10, 5.20], [12, 6.00], [8, 4.80]]);
-    var ua = a[1] / a[0], ub = b[1] / b[0];
-    if (Math.abs(ua - ub) < 0.005) b = [10, 4.90], ub = 0.49;
-    var ans = ua < ub ? 0 : 1;
-    return A({ title: "Snack shop", scene: "Pack A: " + a[0] + " cereal bars for " + money(a[1], 2) + ".<br>Pack B: " + b[0] + " cereal bars for " + money(b[1], 2) + ".", q: "Which pack is better value?", type: "mc", opts: ["Pack A", "Pack B"], ans: ans, hint: "Work out the price of one bar in each pack: divide the price by the number of bars.", explain: "Pack A: " + money(ua, 2) + " a bar. Pack B: " + money(ub, 2) + " a bar. Pack " + (ans ? "B" : "A") + " is cheaper per bar." });
+    var each = pick([1, 2]), n = 3, dear = Math.random() < 0.35, pack = each * n + (dear ? 1 : -1), ans = dear ? 0 : 1;
+    var opts = ["Buy " + n + " single bars", "Buy the pack of " + n];
+    return A({ title: "Snack shop", scene: "Cereal bars cost " + money(each, 0) + " each.<br>A pack of " + n + " cereal bars costs " + money(pack, 0) + ".", q: "You want " + n + " bars. Which is cheaper?", type: "mc", opts: opts, ans: ans, hint: "Work out " + n + " single bars: " + each + " + " + each + " + " + each + ".", explain: n + " single bars cost " + money(each * n, 0) + ". The pack costs " + money(pack, 0) + (dear ? ", so the single bars are cheaper. Packs are not always a bargain!" : ", so the pack is cheaper.") });
   },
   function () {
-    var w = pick([5, 10, 15, 20]), n = R(4, 12), T = w * n, thing = pick(["a new game", "festival tickets", "a skateboard", "a gig ticket"]);
-    return A({ title: "Saving up", scene: "You want " + thing + " that costs " + money(T, 0) + ". You can save " + money(w, 0) + " a week.", q: "How many weeks until you can buy it?", type: "num", unit: "weeks", ans: n, hint: "How many lots of " + money(w, 0) + " make " + money(T, 0) + "? Divide.", explain: money(T, 0) + " divided by " + money(w, 0) + " = " + n + " weeks." });
+    var w = pick([2, 5, 10]), n = R(2, 6), T = w * n, thing = pick(["a new game", "a football", "a gig ticket", "a phone case"]);
+    return A({ title: "Saving up", scene: "You want " + thing + " that costs " + money(T, 0) + ". You save " + money(w, 0) + " every week.", q: "How many weeks until you have enough?", type: "num", unit: "weeks", ans: n, hint: "Count up in " + w + "s until you get to " + T + ". Count how many jumps.", explain: "Counting in " + w + "s: " + Array.from({ length: n }, function (_, i) { return w * (i + 1); }).join(", ") + ". That is " + n + " weeks." });
   },
   function () {
-    var f = pick([[1, 4], [3, 4], [2, 3], [1, 3], [2, 5]]); var a = f[1] * R(4, 12);
-    var ans = a / f[1] * f[0];
-    return A({ title: "Birthday money", scene: "You get " + money(a, 0) + " for your birthday. You decide to save " + f[0] + "/" + f[1] + " of it.", q: "How much do you save?", type: "num", prefix: P, ans: ans, hint: "Divide by the bottom number (" + f[1] + "), then multiply by the top number (" + f[0] + ").", explain: money(a, 0) + " divided by " + f[1] + " = " + money(a / f[1], 0) + ". Times " + f[0] + " = " + money(ans, 0) + "." });
+    var f = pick([2, 4]), sl = pick([8, 12]), ans = sl / f;
+    return A({ title: "Sharing a pizza", scene: "A pizza is cut into " + sl + " slices. You share it equally between " + f + " friends.", q: "How many slices does each friend get?", type: "num", unit: "slices", ans: ans, hint: "Share them out one by one, like dealing cards, until they are all gone.", explain: sl + " shared between " + f + " is " + ans + " each. " + f + " x " + ans + " = " + sl + "." });
   },
   function () {
-    var l = pick([3, 3.5, 4, 4.5]), w = pick([2, 2.5, 3]), p = pick([10, 12, 15]);
-    var area = l * w, ans = round2(area * p);
-    return A({ title: "New bedroom carpet", scene: "Your bedroom floor is " + l + " m long and " + w + " m wide. Carpet costs " + money(p, 0) + " per square metre.", q: "How much will the carpet cost?", type: "num", prefix: P, ans: ans, hint: "Area first: length x width. Then multiply by the price per square metre.", explain: "Area: " + l + " x " + w + " = " + area + " square metres. Cost: " + area + " x " + money(p, 0) + " = " + money(ans, 2) + "." });
+    var w = R(2, 5), h = R(2, 4), ans = w * h;
+    return A({ title: "New bedroom carpet", scene: "Carpet comes in squares. Your floor needs " + w + " squares across and " + h + " squares down:" + gridHTML(w, h), q: "How many carpet squares do you need?", type: "num", unit: "squares", ans: ans, hint: "Count the squares, or count " + h + " rows of " + w + ".", explain: h + " rows of " + w + " is " + ans + " squares. " + h + " x " + w + " = " + ans + "." });
   },
   function () {
-    var sc = [R(3, 12), R(3, 12), R(3, 12), R(3, 12)]; var s4 = sc.reduce(function (a, b) { return a + b; }, 0);
-    var fifth = R(3, 12); while ((s4 + fifth) % 5) fifth++;
-    sc.push(fifth); var ans = (s4 + fifth) / 5;
-    return A({ title: "Bowling night", scene: "Your scores on the arcade game were: " + sc.join(", ") + ".", q: "What was your mean (average) score?", type: "num", ans: ans, hint: "Add all five scores, then divide by 5.", explain: "Total: " + (s4 + fifth) + ". Divided by 5 = " + ans + "." });
+    var sc = [R(2, 9), R(2, 9), R(2, 9)], ans = sc[0] + sc[1] + sc[2];
+    return A({ title: "Bowling night", scene: "Your scores in three games were " + sc.join(", ") + ".", q: "What is your total score?", type: "num", ans: ans, hint: "Add two of them first, then add the last one.", explain: sc[0] + " + " + sc[1] + " = " + (sc[0] + sc[1]) + ". Then + " + sc[2] + " = " + ans + "." });
   },
   function () {
-    var t = pick([10, 15, 20]), u = R(35, 95) / 10; var ans = round2(t - u);
-    return A({ title: "Phone data", scene: "Your phone plan has " + t + " GB of data a month. So far you have used " + u + " GB.", q: "How much data is left?", type: "num", unit: "GB", ans: ans, hint: "Take " + u + " away from " + t + ". Line up the decimal points.", explain: t + " - " + u + " = " + ans + " GB." });
+    var have = pick([20, 30, 40, 50, 60, 70, 80]), ans = 100 - have;
+    return A({ title: "Bus fare", scene: "The bus costs " + P + "1. That is 100p. In your pocket you have:" + coinsHTML(splitCoins(have)), q: "How much more do you need, in pence?", type: "num", unit: "p", ans: ans, hint: "Count on in 10s from " + have + "p up to 100p.", explain: "From " + have + "p to 100p is " + ans + "p. " + have + " + " + ans + " = 100." });
   },
   function () {
-    var n = pick([4, 5, 6, 9]), k = pick([50, 100]), total = (n + 1) * k;
-    return A({ title: "Making squash", scene: "The bottle says: mix 1 part squash to " + n + " parts water. Your jug holds " + total + " ml.", q: "How much squash do you need?", type: "num", unit: "ml", ans: k, hint: "There are " + (n + 1) + " parts altogether. Divide the jug by " + (n + 1) + " to find one part.", explain: total + " divided by " + (n + 1) + " = " + k + " ml of squash, and the rest is water." });
+    var s = pick([2, 3]), c = R(3, 6), ans = s * c;
+    return A({ title: "Making squash", scene: "Each cup of squash needs " + s + " scoops of ice. You are making " + c + " cups.", q: "How many scoops of ice do you need?", type: "num", unit: "scoops", ans: ans, hint: "Count up in " + s + "s, " + c + " times.", explain: c + " cups x " + s + " scoops = " + ans + " scoops." });
   },
   function () {
-    var h = R(1, 11), m = pick([0, 15, 30, 45]); var mm = (m < 10 ? "0" : "") + m;
-    var right = (h + 12) + ":" + mm, opts = shuffle([right, (h < 10 ? "0" : "") + h + ":" + mm, (h + 10) + ":" + mm, (h + 12) + ":" + (m === 30 ? "15" : "30")]);
-    return A({ title: "Party invite", scene: "The invite says the party starts at " + h + ":" + mm + " pm. You want to set a reminder on your phone, which uses the 24 hour clock.", q: "What time should you set?", type: "mc", opts: opts, ans: opts.indexOf(right), hint: "For pm times, add 12 to the hour.", explain: h + " + 12 = " + (h + 12) + ", so " + right + "." });
+    var h = pick([1, 2, 3, 4, 5, 6]), right = (h + 12) + ":00", opts = shuffle([right, "0" + h + ":00", (h + 10) + ":00"]);
+    return A({ title: "Party reminder", scene: "The party starts at " + h + " o'clock in the afternoon." + clockSVG(h, 0) + "Your phone uses the 24 hour clock.", q: "What time should you set your reminder for?", type: "mc", opts: opts, ans: opts.indexOf(right), hint: "In the afternoon, add 12 to the hour.", explain: h + " + 12 = " + (h + 12) + ", so " + h + " o'clock in the afternoon is " + right + "." });
   },
   function () {
-    var s = -R(2, 6), up = R(5, 10); var ans = s + up;
-    return A({ title: "Frosty morning", scene: "At 7am it is " + s + " degrees. By lunchtime it has gone up by " + up + " degrees.", q: "What is the temperature at lunchtime?", type: "num", unit: "degrees", ans: ans, hint: "Start at " + s + " on a number line and count up " + up + ".", explain: s + " + " + up + " = " + ans + " degrees." });
+    var p = pick([12, 18, 23, 27, 31, 38, 42, 46, 53, 57, 64, 69, 72, 78, 84, 89]), r = Math.round(p / 10) * 10, opts = shuffle([r, r === 10 ? 20 : r - 10, r + 10]);
+    return A({ title: "Roughly how much?", scene: "A jacket costs " + money(p, 0) + ".", q: "What is that to the nearest " + P + "10?", type: "mc", opts: opts.map(function (x) { return money(x, 0); }), ans: opts.indexOf(r), hint: "Is " + p + " closer to " + (Math.floor(p / 10) * 10) + " or to " + (Math.ceil(p / 10) * 10) + "? 5 or more rounds up.", explain: p + " is closer to " + r + ", so it is about " + money(r, 0) + "." });
   },
   function () {
-    var r = R(2, 5), g = R(2, 6), y = R(1, 4), tot = r + g + y; var right = r + " out of " + tot;
-    var opts = shuffle([right, r + " out of " + (g + y), "1 out of " + tot, g + " out of " + tot]);
-    return A({ title: "Bag of sweets", scene: "A bag has " + r + " red, " + g + " green and " + y + " yellow sweets. You pick one without looking.", q: "What is the chance it is red?", type: "mc", opts: opts, ans: opts.indexOf(right), hint: "How many red sweets are there, out of how many sweets altogether?", explain: "There are " + r + " red sweets out of " + tot + " in total, so " + right + "." });
+    var v = shuffle([["Crisps", R(2, 9)], ["Fruit", R(2, 9)], ["Cookies", R(2, 9)]]); while (v[0][1] === v[1][1] || v[1][1] === v[2][1] || v[0][1] === v[2][1]) v[R(0, 2)][1] = R(2, 9);
+    var best = v.slice().sort(function (a, b) { return b[1] - a[1]; })[0][0], names = v.map(function (x) { return x[0]; });
+    return A({ title: "Snack vote", scene: "Your friends voted for the party snack:" + barsHTML(v), q: "Which snack got the most votes?", type: "mc", opts: names, ans: names.indexOf(best), hint: "Look for the longest bar.", explain: best + " has the longest bar, so it got the most votes." });
   }
 ];
 var ENG_ACTS = [
@@ -2909,50 +2916,50 @@ function mortgagePayment(loan) { var r = FIG.mortgageRate / 12, n = FIG.mortgage
    MONEY MOMENTS: real maths with the player's own numbers
    ========================================================= */
 function px(n) { return round2(n * ((S && S.priceIdx) || 1)); }
+function r10(n) { return Math.max(10, Math.round(n / 10) * 10); }
+function r100(n) { return Math.max(100, Math.round(n / 100) * 100); }
 function mmGens() {
-  var g = [], ps = payslip(), mn = monthlyNet(), mo = monthlyOut(), left = round2(mn.net - mo.total);
-  if (ps.gross > 0) g.push(function () {
-    var d = round2(ps.tax + ps.ni + ps.pension + ps.loan), take = round2(ps.gross - d);
-    var tbl = '<table class="tt"><tr><th>Gross pay</th><td>' + money(ps.gross, 2) + "</td></tr><tr><th>Income Tax</th><td>" + money(ps.tax, 2) + "</td></tr><tr><th>National Insurance</th><td>" + money(ps.ni, 2) + "</td></tr><tr><th>Pension</th><td>" + money(ps.pension, 2) + "</td></tr>" + (ps.loan ? "<tr><th>Student loan</th><td>" + money(ps.loan, 2) + "</td></tr>" : "") + "</table>";
-    return { title: "Check your payslip", scene: "This is your real payslip for this month." + tbl, q: "What is your take home pay?", type: "num", prefix: P, ans: take, tol: 0.02, hint: "Add up everything taken off, then take that away from the gross pay.", explain: "Taken off: " + money(d, 2) + ". " + money(ps.gross, 2) + " - " + money(d, 2) + " = " + money(take, 2) + ". Always worth checking: payslips can be wrong." };
-  });
+  var g = [], ps = payslip(), mn = monthlyNet(), mo = monthlyOut();
+  var pay = mn.net > 0 ? r100(mn.net) : 0;
   var rent = S.home && S.home.type !== "family" && S.home.type !== "halls" ? (S.home.type === "owned" ? S.home.mortgage : S.home.rent) : 0;
-  if (rent && mn.net > 0) g.push(function () {
-    var pc = Math.round(rent / mn.net * 100);
-    return { title: "How much goes on your home?", scene: "Your " + (S.home.type === "owned" ? "mortgage" : "rent") + " is " + money(rent, 0) + " a month. Your money coming in is " + money(mn.net, 0) + " a month.", q: "What percentage of your money goes on your home? (To the nearest whole number.)", type: "num", unit: "%", ans: pc, tol: 1.01, hint: "Divide the " + (S.home.type === "owned" ? "mortgage" : "rent") + " by your money in, then multiply by 100.", explain: money(rent, 0) + " divided by " + money(mn.net, 0) + " = " + (rent / mn.net).toFixed(3) + ". Times 100 is about " + pc + "%. Many people aim to keep it to about a third (33%)." };
+  var rentR = rent ? r100(rent) : 0, home = S.home && S.home.type === "owned" ? "mortgage" : "rent";
+  if (pay && rentR && pay > rentR) g.push(function () {
+    var ans = pay - rentR;
+    return { title: "After your " + home, scene: "Your money coming in is about <b>" + money(pay, 0) + "</b> a month.<br>Your " + home + " is about <b>" + money(rentR, 0) + "</b> a month.", q: "About how much is left after you pay your " + home + "?", type: "num", prefix: P, ans: ans, hint: "Take away the hundreds: " + (pay / 100) + " hundreds take away " + (rentR / 100) + " hundreds.", explain: money(pay, 0) + " - " + money(rentR, 0) + " = " + money(ans, 0) + ". That has to cover food, bills and fun." };
   });
-  var bills = mo.lines.filter(function (l) { return ["Bills", "Fun", "Health", "Insurance"].indexOf(l.cat) >= 0 && l.amt > 5; });
+  if (ps.gross > 0) g.push(function () {
+    var gr = r100(ps.gross), off = r100(ps.tax + ps.ni + ps.pension + ps.loan), take = gr - off;
+    return { title: "Your payslip", scene: "Your pay before anything comes off is about <b>" + money(gr, 0) + "</b>.<br>Tax, National Insurance and pension take about <b>" + money(off, 0) + "</b>.", q: "About how much do you take home?", type: "num", prefix: P, ans: take, hint: "Take " + money(off, 0) + " away from " + money(gr, 0) + ". Think in hundreds.", explain: money(gr, 0) + " - " + money(off, 0) + " = " + money(take, 0) + ". That is your take home pay." };
+  });
+  var bills = mo.lines.filter(function (l) { return ["Bills", "Fun", "Health", "Insurance"].indexOf(l.cat) >= 0 && l.amt >= 5; });
   if (bills.length) g.push(function () {
-    var b = pick(bills), yr = round2(b.amt * 12);
-    return { title: "The yearly cost", scene: "Your " + b.name.toLowerCase() + " costs " + money(b.amt, 2) + " a month.", q: "How much is that over a whole year?", type: "num", prefix: P, ans: yr, tol: 0.02, hint: "There are 12 months in a year.", explain: money(b.amt, 2) + " x 12 = " + money(yr, 2) + ". Small monthly costs add up." };
+    var b = pick(bills), each = Math.max(5, Math.round(b.amt / 5) * 5), n = pick([2, 3, 4]), ans = each * n;
+    return { title: "Adding up a bill", scene: "Your " + b.name.toLowerCase() + " costs about <b>" + money(each, 0) + "</b> a month.", q: "How much is that for " + n + " months?", type: "num", prefix: P, ans: ans, hint: "Count up in " + each + "s, " + n + " times.", explain: n + " x " + money(each, 0) + " = " + money(ans, 0) + ". Small bills add up." };
+  });
+  var food = mo.lines.filter(function (l) { return l.name === "Food shopping"; })[0];
+  if (food) g.push(function () {
+    var wk = r10(food.amt / 4), ans = wk * 2;
+    return { title: "The weekly shop", scene: "Your food shop costs about <b>" + money(wk, 0) + "</b> a week.", q: "How much is that for 2 weeks?", type: "num", prefix: P, ans: ans, hint: "Double " + wk + ".", explain: "Double " + money(wk, 0) + " is " + money(ans, 0) + "." };
   });
   g.push(function () {
-    return { title: "Your monthly budget", scene: "Money coming in each month: <b>" + money(mn.net, 2) + "</b><br>Money going out each month: <b>" + money(mo.total, 2) + "</b>", q: "How much is left over each month? If it is less than nothing, put a minus sign in front.", type: "num", prefix: P, ans: left, tol: 0.02, hint: "Take the money out away from the money in.", explain: money(mn.net, 2) + " - " + money(mo.total, 2) + " = " + money(left, 2) + (left < 0 ? ". That is a shortfall: the Money tab can help you find savings." : ".") };
-  });
-  if (left >= 20) g.push(function () {
-    var m = Math.ceil(3000 / left);
-    return { title: "Rainy day fund", scene: "You want to save " + money(3000, 0) + " for emergencies. You have about " + money(left, 2) + " left over each month.", q: "How many months will it take? (Round up to a whole month.)", type: "num", unit: "months", ans: m, tol: 0.01, hint: "Divide " + money(3000, 0) + " by what you save each month, then round up.", explain: money(3000, 0) + " divided by " + money(left, 2) + " = " + (3000 / left).toFixed(1) + ", so " + m + " months." };
-  });
-  if (S.job && !JOBS[S.job.id].a && !S.job.app) g.push(function () {
-    var rate = round2(S.job.annual / 52 / S.job.hrs), wk = round2(rate * S.job.hrs);
-    return { title: "A week's pay", scene: "You earn " + money(rate, 2) + " an hour and work " + S.job.hrs + " hours a week.", q: "How much do you earn in a week, before tax?", type: "num", prefix: P, ans: wk, tol: 0.02, hint: "Multiply the hourly rate by the number of hours.", explain: money(rate, 2) + " x " + S.job.hrs + " = " + money(wk, 2) + "." };
-  });
-  if (rent) g.push(function () {
-    var nr = round2(rent * 1.04);
-    return { title: "Prices go up", scene: "Prices rise most years. Your " + (S.home.type === "owned" ? "mortgage" : "rent") + " of " + money(rent, 0) + " a month might go up by 4%.", q: "What would it be after the rise?", type: "num", prefix: P, ans: nr, tol: 0.02, hint: "Find 1% by dividing by 100, times by 4, then add it on.", explain: "4% of " + money(rent, 0) + " is " + money(rent * 0.04, 2) + ". New amount: " + money(nr, 2) + "." };
+    var a = pick([20, 25, 30]), b = a - 5, fee = pick([20, 30]), ta = a * 2, tb = b * 2 + fee, ans = ta <= tb ? 0 : 1;
+    return { title: "Which broadband deal?", scene: "Deal A: <b>" + money(a, 0) + "</b> a month.<br>Deal B: <b>" + money(b, 0) + "</b> a month, plus " + money(fee, 0) + " to set it up.", q: "Which costs less for the first 2 months?", type: "mc", opts: ["Deal A", "Deal B"], ans: ans, hint: "Deal A: double " + a + ". Deal B: double " + b + ", then add " + fee + ".", explain: "Deal A: " + money(ta, 0) + ". Deal B: " + money(b * 2, 0) + " + " + money(fee, 0) + " = " + money(tb, 0) + ". A cheap monthly price is not always the cheapest deal." };
   });
   g.push(function () {
-    var a = R(22, 30), fee = pick([0, 20, 30, 50]), b = a - R(2, 5), feeB = fee + pick([40, 60, 80]);
-    var ta = a * 12 + fee, tb = b * 12 + feeB, ans = ta <= tb ? 0 : 1;
-    return { title: "Which broadband deal?", scene: "Deal A: " + money(a, 0) + " a month, set up fee " + money(fee, 0) + ".<br>Deal B: " + money(b, 0) + " a month, set up fee " + money(feeB, 0) + ".<br>Both last 12 months.", q: "Which is cheaper over the year?", type: "mc", opts: ["Deal A", "Deal B"], ans: ans, hint: "Work out 12 months plus the set up fee for each one.", explain: "Deal A: " + money(ta, 0) + ". Deal B: " + money(tb, 0) + ". The cheapest monthly price is not always the cheapest deal." };
+    var w = pick([5, 10]), n = pick([4, 5, 10]), ans = w * n;
+    return { title: "Saving a bit each week", scene: "You decide to put <b>" + money(w, 0) + "</b> in your savings every week.", q: "How much will you have saved after " + n + " weeks?", type: "num", prefix: P, ans: ans, hint: "Count up in " + w + "s, " + n + " times.", explain: n + " x " + money(w, 0) + " = " + money(ans, 0) + "." };
+  });
+  if (S.job && !S.job.app) g.push(function () {
+    var exact = S.job.annual / 52 / S.job.hrs, rate = exact < 15 ? Math.min(12, Math.max(10, Math.floor(exact))) : Math.floor(exact / 5) * 5, h = pick([2, 3, 5, 10]), ans = rate * h;
+    return { title: "Extra hours", scene: "You earn about <b>" + money(rate, 0) + "</b> an hour. Your manager offers you " + h + " extra hours this week.", q: "How much extra will you earn, before tax?", type: "num", prefix: P, ans: ans, hint: "Count up in " + rate + "s, " + h + " times. Or do " + h + " x " + rate + ".", explain: h + " x " + money(rate, 0) + " = " + money(ans, 0) + "." };
+  });
+  if (rentR) g.push(function () {
+    var up = pick([20, 30, 40, 50]), ans = rentR + up;
+    return { title: "The " + home + " goes up", scene: "Your " + home + " is about <b>" + money(rentR, 0) + "</b> a month. Next year it goes up by <b>" + money(up, 0) + "</b>.", q: "What will it be next year?", type: "num", prefix: P, ans: ans, hint: "Add " + up + " to " + rentR + ". Only the tens change.", explain: money(rentR, 0) + " + " + money(up, 0) + " = " + money(ans, 0) + "." };
   });
   if (livingAlone() && !inStudy()) g.push(function () {
-    var full = px(S.home.type === "house" || S.home.type === "owned" ? BILLS.councilTaxHouse : BILLS.councilTax), pay = round2(full * 0.75);
-    return { title: "Council tax discount", scene: "Council tax for your home is " + money(full, 2) + " a month. Because you live on your own, you get 25% off.", q: "How much do you pay each month?", type: "num", prefix: P, ans: pay, tol: 0.02, hint: "25% is a quarter. Find a quarter and take it off.", explain: "A quarter of " + money(full, 2) + " is " + money(full / 4, 2) + ". You pay " + money(pay, 2) + ". You have to ask the council for the discount." };
-  });
-  if (S.cash >= 200) g.push(function () {
-    var i = Math.round(S.cash * FIG.savingsRate);
-    return { title: "Interest on savings", scene: "You have " + money(S.cash, 0) + " in a savings account paying 3.5% a year.", q: "About how much interest will you get in a year? (To the nearest pound.)", type: "num", prefix: P, ans: i, tol: 1.01, hint: "1% is the amount divided by 100. Then times by 3.5.", explain: "1% is " + money(S.cash / 100, 2) + ". Times 3.5 is about " + money(i, 0) + "." };
+    var full = pick([120, 160, 200]), off = full / 4, opts = shuffle([off, full / 2, 25]);
+    return { title: "Council tax discount", scene: "Council tax for your home is <b>" + money(full, 0) + "</b> a month. People who live on their own get <b>a quarter</b> off.", q: "How much is a quarter of " + money(full, 0) + "?", type: "mc", opts: opts.map(function (x) { return money(x, 0); }), ans: opts.indexOf(off), hint: "A quarter means split into 4 equal parts. Halve it, then halve it again.", explain: "Half of " + full + " is " + (full / 2) + ", and half of that is " + off + ". So you save " + money(off, 0) + " a month. You have to ask the council for it." };
   });
   return g;
 }
@@ -2961,7 +2968,7 @@ function startMoneyMoment(back) {
   var pool = gens.map(function (f, i) { return i; }), fresh = pool.filter(function (i) { return S.mmSeen.indexOf(i) < 0; });
   if (!fresh.length) { S.mmSeen = []; fresh = pool; }
   var gi = pick(fresh); S.mmSeen.push(gi);
-  ACT = gens[gi](); ACT.subj = "maths"; ACT.tries = 0; ACT.usedHint = false; ACT.order = []; ACT.mistakes = 0; ACT.jay = false; ACT.kicker = "Money moment: your own numbers";
+  ACT = gens[gi](); ACT.subj = "maths"; ACT.tries = 0; ACT.usedHint = false; ACT.order = []; ACT.mistakes = 0; ACT.jay = false; ACT.kicker = "Money moment: your own numbers, rounded";
   var resit = needsResit("maths");
   ACT.target = resit ? "Functional Skills Maths Level 2" : "";
   ACT.onDone = function (pts) {
