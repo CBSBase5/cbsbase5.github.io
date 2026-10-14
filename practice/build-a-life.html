@@ -143,6 +143,7 @@ textarea{min-height:80px}
 .tk.on{background:#3fa66b}
 .tk.on::after{content:"";position:absolute;left:3px;top:-1px;width:4px;height:8px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.lenopts{display:grid;gap:8px;margin-top:8px}
 .newtag{display:inline-block;background:#ffd34d;border:2px solid #000;border-radius:4px;font:700 11px "Silkscreen",monospace;padding:1px 6px;margin-left:6px;vertical-align:2px}
 .afford{border:3px solid #000;border-radius:6px;padding:6px 10px;margin:8px 0;background:#e8f6ec}
 .afford.short{background:#fde8e4}
@@ -328,6 +329,18 @@ var KEY = "b5.practice.buildalife.v1";
 var EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
 var INITIALS = ["JT", "LW", "EGW", "LP", "LC", "HK"];
 var END_AGE = 35;
+/* Game length: every length is a whole life from 5 to 35.
+   Shorter games move further on each spin and cover more years in each adult turn,
+   so big moments, goals and outcomes stay the same. */
+var LENGTHS = {
+  full: { name: "Full", time: "about an hour and a half", spinAdd: 0, span: 1, actions: 2, ptsMul: 1, ev: 0.75, blurb: "Every year of your life, one at a time." },
+  normal: { name: "Normal", time: "about an hour", spinAdd: 1, span: 2, actions: 3, ptsMul: 1.35, ev: 0.85, blurb: "Bigger moves on the board. Each adult turn is 2 years." },
+  short: { name: "Short", time: "about 45 minutes", spinAdd: 2, span: 3, actions: 3, ptsMul: 1.7, ev: 0.9, blurb: "The biggest moves. Each adult turn is 3 years." }
+};
+function lenKey() { return S && LENGTHS[S.len] ? S.len : "full"; }
+function lenInfo() { return LENGTHS[lenKey()]; }
+function turnSpan() { return Math.max(1, Math.min(lenInfo().span, END_AGE - S.age)); }
+function turnLabel(a, n) { return n > 1 ? "ages " + a + " to " + (a + n - 1) : "age " + a; }
 
 /* ---------------------------------------------------------
    FIGURES: approximate UK figures for the 2026/27 tax year.
@@ -750,15 +763,17 @@ function applyFx(fx) {
   var tags = [];
   if (!fx) return tags;
   var net = 0;
+  var bk = S.phase === "board" ? 1 + (lenInfo().ptsMul - 1) * 0.5 : 1;
   ["money", "health", "happy", "rel"].forEach(function (k) {
     if (fx[k]) {
-      var before = S.meters[k];
-      S.meters[k] = clamp(S.meters[k] + fx[k], 0, 100);
-      net += fx[k];
-      tags.push('<span class="tag ' + k + (fx[k] < 0 ? " minus" : "") + '">' + (fx[k] > 0 ? "+" : "") + fx[k] + " " + MLAB[k] + "</span>");
-      (function (k, d) { setTimeout(function () { floatOver(document.querySelector('.meter[data-k="' + k + '"]'), (d > 0 ? "+" : "") + d, MCOL[k]); }, 120); })(k, fx[k]);
+      var dv = bk === 1 ? fx[k] : Math.round(fx[k] * bk);
+      S.meters[k] = clamp(S.meters[k] + dv, 0, 100);
+      net += dv;
+      tags.push('<span class="tag ' + k + (dv < 0 ? " minus" : "") + '">' + (dv > 0 ? "+" : "") + dv + " " + MLAB[k] + "</span>");
+      (function (k, d) { setTimeout(function () { floatOver(document.querySelector('.meter[data-k="' + k + '"]'), (d > 0 ? "+" : "") + d, MCOL[k]); }, 120); })(k, dv);
     }
   });
+  if (fx.cash && bk !== 1) fx = Object.assign({}, fx, { cash: Math.round(fx.cash * bk) });
   if (fx.cash) {
     S.cash = round2(S.cash + fx.cash); net += fx.cash > 0 ? 2 : -2;
     tags.push('<span class="tag money' + (fx.cash < 0 ? " minus" : "") + '">' + (fx.cash > 0 ? "+" : "") + money(fx.cash) + "</span>");
@@ -770,10 +785,11 @@ function applyFx(fx) {
   if (fx.skill) { addSkill(fx.skill); tags.push('<span class="tag">Skill: ' + esc(fx.skill) + "</span>"); net += 1; }
   if (fx.exp) { addExp(fx.exp, 1); tags.push('<span class="tag">Experience: ' + esc(fx.exp) + "</span>"); net += 1; }
   if (fx.interest && S.interests.indexOf(fx.interest) < 0) { S.interests.push(fx.interest); tags.push('<span class="tag">Interest: ' + esc(fx.interest) + "</span>"); net += 1; }
-  if (fx.maths) S.pts.maths += fx.maths;
-  if (fx.eng) S.pts.eng += fx.eng;
-  if (fx.study) { S.pts.study += fx.study; tags.push('<span class="tag">Learning boost</span>'); net += 1; }
-  if (fx.opt) S.pts.opt += fx.opt;
+  var pm = S.phase === "board" ? lenInfo().ptsMul : 1;
+  if (fx.maths) S.pts.maths += fx.maths * pm;
+  if (fx.eng) S.pts.eng += fx.eng * pm;
+  if (fx.study) { S.pts.study += fx.study * pm; tags.push('<span class="tag">Learning boost</span>'); net += 1; }
+  if (fx.opt) S.pts.opt += fx.opt * pm;
   if (fx.log) logIt(fx.log, fx.logKind);
   if (net > 0) { react(net >= 8 ? "great" : "good"); if (!fx.cash || fx.cash < 0) sfx("good"); }
   else if (net < 0) { react("bad"); sfx("bad"); if (net <= -4) setWeather("rain", 9000); }
@@ -1628,7 +1644,7 @@ function drawWheel() {
     c.fillStyle = WCOL[i]; c.beginPath(); c.moveTo(cx, cy); c.arc(cx, cy, R0, WHEEL.a + i * th, WHEEL.a + (i + 1) * th); c.closePath(); c.fill();
     c.strokeStyle = "#1b1424"; c.lineWidth = 3; c.stroke();
     var m = WHEEL.a + (i + 0.5) * th; c.save(); c.translate(cx + Math.cos(m) * R0 * 0.66, cy + Math.sin(m) * R0 * 0.66); c.rotate(m + Math.PI / 2);
-    c.font = "bold 26px Silkscreen, monospace"; c.textAlign = "center"; c.fillStyle = "#1b1424"; c.fillText(WSEG[i], 2, 11); c.fillStyle = "#ffffff"; c.fillText(WSEG[i], 0, 9); c.restore();
+    c.font = "bold 26px Silkscreen, monospace"; c.textAlign = "center"; c.fillStyle = "#1b1424"; var sv = WSEG[i] + (S ? lenInfo().spinAdd : 0); c.fillText(sv, 2, 11); c.fillStyle = "#ffffff"; c.fillText(sv, 0, 9); c.restore();
   }
   for (var p = 0; p < 16; p++) { var pa = p / 16 * Math.PI * 2; c.fillStyle = "#ffe08a"; c.fillRect(Math.round(cx + Math.cos(pa) * (R0 + 2)) - 2, Math.round(cy + Math.sin(pa) * (R0 + 2)) - 2, 4, 4); }
   c.fillStyle = "#1b1424"; c.beginPath(); c.arc(cx, cy, 16, 0, Math.PI * 2); c.fill(); c.fillStyle = "#ffd34d"; c.beginPath(); c.arc(cx, cy, 12, 0, Math.PI * 2); c.fill();
@@ -1637,7 +1653,7 @@ function drawWheel() {
 }
 function spinWheel(n, done) {
   var th = Math.PI * 2 / 8, idx = [];
-  WSEG.forEach(function (v, i) { if (v === n) idx.push(i); });
+  WSEG.forEach(function (v, i) { if (v + lenInfo().spinAdd === n) idx.push(i); });
   var i = pick(idx), jitter = (Math.random() - 0.5) * th * 0.6;
   var target = -Math.PI / 2 - (i + 0.5) * th + jitter;
   var a0 = WHEEL.a, turns = Math.PI * 2 * (3 + Math.floor(Math.random() * 2));
@@ -2300,7 +2316,7 @@ function startTitle() {
     h += '<button class="btn big wide green" id="rep"><span>See your life report<span class="sub">' + esc(sv.name) + ", lived to " + sv.age + "</span></span></button>";
     h += '<button class="btn wide alt" id="newl2"><span>Start a brand new life</span></button>';
   } else if (sv && sv.phase !== "create" && !sv.ended) {
-    h += '<button class="btn big wide green" id="cont"><span>Carry on your life<span class="sub">' + esc(sv.name) + ", age " + sv.age + "</span></span></button>";
+    h += '<button class="btn big wide green" id="cont"><span>Carry on your life<span class="sub">' + esc(sv.name) + ", age " + sv.age + ", " + (LENGTHS[sv.len] || LENGTHS.full).name.toLowerCase() + " game</span></span></button>";
     h += '<button class="btn wide alt" id="newl"><span>Start a brand new life</span></button>';
   } else {
     h += '<button class="btn big wide" id="newl"><span>Start a new life</span></button>';
@@ -2310,7 +2326,7 @@ function startTitle() {
     '<div class="box"><b>2. Teenage years</b><br><span class="small">Learning moments earn real qualifications. At 16 you pick your route.</span></div>' +
     '<div class="box"><b>3. Starting out</b><br><span class="small">Build a CV, apply for jobs and find your first home.</span></div>' +
     '<div class="box"><b>4. Your own life</b><br><span class="small">Payslips, bills, surprises and goals, one year at a time.</span></div></div>' +
-    '<p class="small muted">Your life saves on this device as you go, so you can stop and come back whenever you like. A full life takes about an hour and a half.</p>';
+    '<p class="small muted">Your life saves on this device as you go, so you can stop and come back whenever you like. Pick a Full, Normal or Short game: about an hour and a half, an hour, or 45 minutes.</p>';
   setPanel(h);
   on("cont", function () { S = sv; resumeLife(); });
   on("rep", function () { S = sv; showReport(); });
@@ -2343,7 +2359,17 @@ function startCreate() {
   S.name = pick(NAMES);
   S.look = fixLook({ skin: R(0, 4), hair: R(0, 5), hairStyle: pick(["short", "long", "curly", "bun", "spiky", "afro", "ponytail"]), top: R(0, 11), top2: 9, legs: R(0, 3), outfit: pick(["tshirt", "hoodie", "jumper", "dress"]) });
   SCENE = { kind: "room", home: "family", view: "houses" };
-  renderCreate();
+  chooseLength();
+}
+function lengthButtons(cur) {
+  return Object.keys(LENGTHS).map(function (k) { var L = LENGTHS[k]; return '<button class="btn wide ' + (k === cur ? "green" : "alt") + '" data-len="' + k + '"><span>' + L.name + " (" + L.time + ')<span class="sub">' + L.blurb + "</span></span></button>"; }).join("");
+}
+function chooseLength() {
+  var last = "full"; try { last = localStorage.getItem("b5.practice.buildalife.len") || "full"; } catch (e) {}
+  if (!LENGTHS[last]) last = "full";
+  var h = '<div class="kicker">New life</div><h2>How much time have you got?</h2><p>Every length is a whole life, from age 5 to 35, with the same big moments and goals. Shorter games just move faster.</p><div class="choices">' + lengthButtons(last) + '</div><p class="small muted">Your life saves as you go, and you can change this later from the Menu.</p>';
+  setPanel(h);
+  onAll("[data-len]", function () { S.len = this.getAttribute("data-len"); try { localStorage.setItem("b5.practice.buildalife.len", S.len); } catch (e) {} renderCreate(); });
 }
 function swatchRow(key, list) {
   return '<div class="swatches">' + list.map(function (c, i) { return '<button class="sw" type="button" data-k="' + key + '" data-v="' + i + '" style="background:' + c + '" aria-label="' + key + " " + (i + 1) + '" aria-pressed="' + (S.look[key] === i) + '"></button>'; }).join("") + "</div>";
@@ -2418,7 +2444,7 @@ function routeStageName() { if (!S.route) return "Age 16 to 18"; return { sixth:
 function boardPanel() {
   renderHud();
   var h = '<div class="kicker">' + esc(stageName(S.pos)) + ", age " + S.age + "</div><h2>Your turn, " + esc(S.name) + "</h2>" +
-    '<div class="wheelbox"><canvas id="wheel" width="200" height="200"></canvas><div><button class="btn big" id="spin">Spin</button><p class="small muted">Move 1 to 4 spaces.<span class="hidephone"> Press A to spin.</span></p><div class="row"><button class="btn sm alt" id="mapBtn">Map</button><button class="btn sm alt" id="wardBtn">Wardrobe</button></div></div></div>' +
+    '<div class="wheelbox"><canvas id="wheel" width="200" height="200"></canvas><div><button class="btn big" id="spin">Spin</button><p class="small muted">Move ' + (1 + lenInfo().spinAdd) + ' to ' + (4 + lenInfo().spinAdd) + ' spaces.<span class="hidephone"> Press A to spin.</span></p><div class="row"><button class="btn sm alt" id="mapBtn">Map</button><button class="btn sm alt" id="wardBtn">Wardrobe</button></div></div></div>' +
     '<div class="row small">' + ["choice", "event", "pay", "learn", "stop"].map(function (k) { return '<span class="tag" style="background:' + SPACE_STYLE[k].col + (k === "event" || k === "stop" ? ";color:#fff" : "") + '">' + SPACE_STYLE[k].name + "</span>"; }).join("") + "</div>" +
     charCard();
   setPanel(h);
@@ -2440,7 +2466,7 @@ function charCard() {
 function nextStopFrom(p) { for (var i = p + 1; i < BOARD_N; i++) if (STOPS[i]) return i; return BOARD_N - 1; }
 function doSpin() {
   var btn = $("spin"); if (!btn || btn.disabled) return; btn.disabled = true;
-  var n = R(1, 4);
+  var n = R(1, 4) + lenInfo().spinAdd;
   spinWheel(n, function () {
     {
       var stop = nextStopFrom(S.pos), to = Math.min(S.pos + n, stop), path = [];
@@ -2482,7 +2508,19 @@ function choiceSpace() {
   bank = bank.filter(function (c) { return inSchool || !c.school; });
   var ok = bank.filter(function (c) { return !S.seen[c.id] && (c.min == null || S.age >= c.min) && (c.max == null || S.age <= c.max); });
   if (!ok.length) { bank.forEach(function (c) { delete S.seen[c.id]; }); ok = bank.filter(function (c) { return (c.min == null || S.age >= c.min) && (c.max == null || S.age <= c.max); }); }
-  var card = pick(ok); S.seen[card.id] = 1; runCard(card);
+  var card = lenKey() === "full" ? pick(ok) : pickMeaningful(ok); S.seen[card.id] = 1; runCard(card);
+}
+/* shorter games favour the choices that shape your traits or come back later */
+function cardWeight(c) {
+  var w = 1;
+  if (CALLBACKS.some(function (k) { return k.need[0] === c.id; })) w += 2;
+  if (c.ch.some(function (x) { return x.fx && typeof x.fx === "object" && (x.fx.trait || x.fx.hidden || x.fx.interest); })) w += 1;
+  return w;
+}
+function pickMeaningful(list) {
+  var tot = 0, ws = list.map(function (c) { var w = cardWeight(c); tot += w; return w; }), r = Math.random() * tot;
+  for (var i = 0; i < list.length; i++) { r -= ws[i]; if (r <= 0) return list[i]; }
+  return list[list.length - 1];
 }
 function eventSpace() {
   if (S.pos >= 28 && Math.random() < 0.45 && callbackCard("teen", after)) return;
@@ -2649,7 +2687,7 @@ function endActivity(pts, msg) {
   on("actDone", function () { a.onDone(pts, a); });
 }
 function finishLearning(pts, a) {
-  if (!S.quals.gcse) { S.pts[a.subj] += pts; if (S.pos >= 41) S.pts.opt += pts * 0.25; }
+  if (!S.quals.gcse) { var pm = lenInfo().ptsMul; S.pts[a.subj] += pts * pm; if (S.pos >= 41) S.pts.opt += pts * 0.25 * pm; }
   else if (!a.course && needsResit(a.subj)) {
     var k = a.subj === "maths" ? "fsM" : "fsE"; S.pts[k] = (S.pts[k] || 0) + pts;
     if (S.pts[k] >= 4) {
@@ -3222,7 +3260,7 @@ function startMoneyMoment(back) {
 var HUB_TAB = "year";
 function toHub(tab) { closeCard(); yearHub(tab || HUB_TAB); }
 function beginAdult() {
-  S.phase = "adult"; S.age = 18; S.actionsLeft = 2; S.board = null;
+  S.phase = "adult"; S.age = 18; S.actionsLeft = lenInfo().actions; S.board = null;
   if (S.next18 === "uni") {
     S.uni.year = 1; S.uni.maint = FIG.maintenance[S.bg.income];
     S.home = { type: "halls", rent: 0 }; S.homes.push({ age: 18, type: "halls", title: "Student halls" });
@@ -3267,7 +3305,8 @@ function yearHub(tab) {
 /* ---------- This year ---------- */
 function tabYear() {
   var mn = monthlyNet(), mo = monthlyOut(), left = round2(mn.net - mo.total);
-  var h = '<h2>Your year at ' + S.age + '</h2><p class="small muted">' + SEASONS[WORLD.season].name + ': time moves on through the seasons as you do things.</p><div class="row"><button class="btn sm alt" id="wardB">Wardrobe</button><button class="btn sm alt" id="decB">Decorate your space</button></div>';
+  var span = turnSpan();
+  var h = '<h2>' + (span > 1 ? "Your turn: ages " + S.age + " to " + (S.age + span - 1) : "Your year at " + S.age) + '</h2><p class="small muted">' + SEASONS[WORLD.season].name + ': time moves on through the seasons as you do things.</p><div class="row"><button class="btn sm alt" id="wardB">Wardrobe</button><button class="btn sm alt" id="decB">Decorate your space</button></div>';
   h += '<div class="note ' + (left >= 0 ? "good" : "warm") + '">' + (left >= 0 ? "Each month you have about <b>" + money(left, 0) + "</b> left over. It goes into your savings." : "Each month you are about <b>" + money(-left, 0) + " short</b>. Have a look at the Money tab: small changes add up.") + "</div>";
   if (!S.job && !inStudy()) h += '<div class="note">You are not working at the moment. The <b>Work</b> tab has this year\'s jobs' + (!S.ucClaim ? ", and you could claim Universal Credit on the <b>Money</b> tab" : "") + ".</div>";
   if (inStudy() && !S.uni.focusSet) {
@@ -3284,16 +3323,16 @@ function tabYear() {
     var info = DL[d.kind].info(d);
     h += '<div class="dl"><div><b>' + esc(info.title) + "</b>" + (d.fresh ? '<span class="newtag">NEW</span>' : "") + '<br><span class="small">' + info.text + '</span><div class="row" style="margin-top:6px">' +
       info.btns.map(function (b, k) { return '<button class="btn ' + (k ? "alt" : "green") + '" data-dl="' + i + '" data-b="' + k + '">' + esc(b.label) + "</button>"; }).join("") +
-      '</div></div><span class="turns">' + (d.turns <= 1 ? "THIS YEAR" : d.turns + " YEARS") + "</span></div>";
+      '</div></div><span class="turns">' + (span > 1 ? (d.turns <= 1 ? "THIS TURN" : d.turns + " TURNS") : (d.turns <= 1 ? "THIS YEAR" : d.turns + " YEARS")) + "</span></div>";
   });
   h += S.mmDoneAge === S.age ? '<p class="small muted">Money moment done this year.</p>' : '<button class="btn wide teal" id="mmBtn"><span>Money moment<span class="sub">A quick bit of maths with your own real numbers. Free: it does not use up one of your things this year.</span></span></button>';
-  h += "<h3>Things you could do (" + S.actionsLeft + " left this year)</h3><div class=\"choices\">";
+  h += "<h3>Things you could do (" + S.actionsLeft + (span > 1 ? " left this turn" : " left this year") + ")</h3><div class=\"choices\">";
   ACTIONS.forEach(function (a, i) {
     if (a.show && !a.show()) return;
     var c = a.can(); var ok = c === true && S.actionsLeft > 0;
     h += '<button class="btn wide ' + (ok ? "alt" : "alt") + '" data-act="' + i + '" ' + (ok ? "" : "disabled") + "><span>" + esc(a.name) + '<span class="sub">' + esc(c === true ? a.sub() : c) + "</span></span></button>";
   });
-  h += '</div><button class="btn big wide" id="endYear" style="margin-top:12px"><span>Finish the year<span class="sub">See how it went and turn ' + (S.age + 1) + "</span></span></button>";
+  h += '</div><button class="btn big wide" id="endYear" style="margin-top:12px"><span>' + (span > 1 ? "Finish these " + span + " years" : "Finish the year") + '<span class="sub">See how it went and turn ' + (S.age + span) + "</span></span></button>";
   if (S.age >= 25) h += '<button class="btn alt" id="endLife">Finish this life and see my life report</button>';
   $("tabBody").innerHTML = h;
   onAll("[data-focus]", function () {
@@ -3307,7 +3346,7 @@ function tabYear() {
   on("endYear", function () {
     var n = S.deadlines.filter(function (d) { return d.turns <= 1; }).length;
     if (!n) return finishYear();
-    showCard({ title: "Before the year ends", icon: "clock", text: (n === 1 ? "One thing is" : n + " things are") + " still waiting for a decision this year. If you leave " + (n === 1 ? "it" : "them") + ", the game will decide for you.", choices: [{ label: "Have a look first", fn: function () { toHub("year"); setTimeout(function () { var e = document.querySelector(".dl"); if (e && e.scrollIntoView) e.scrollIntoView({ block: "center", behavior: "smooth" }); }, 80); } }, { label: "Finish the year anyway", cls: "alt", fn: finishYear }] });
+    showCard({ title: "Before you move on", icon: "clock", text: (n === 1 ? "One thing is" : n + " things are") + " still waiting for a decision " + (turnSpan() > 1 ? "this turn." : "this year.") + " If you leave " + (n === 1 ? "it" : "them") + ", the game will decide for you.", choices: [{ label: "Have a look first", fn: function () { toHub("year"); setTimeout(function () { var e = document.querySelector(".dl"); if (e && e.scrollIntoView) e.scrollIntoView({ block: "center", behavior: "smooth" }); }, 80); } }, { label: "Finish the year anyway", cls: "alt", fn: finishYear }] });
   });
   on("mmBtn", function () { startMoneyMoment(function () { toHub("year"); }); });
   on("wardB", function () { openWardrobe(function () { toHub("year"); }); });
@@ -3895,10 +3934,8 @@ function moveTo(L) {
    YEAR END AND NEW YEAR EVENTS
    ========================================================= */
 function renting() { return S.home && ["share", "flat", "house", "social"].indexOf(S.home.type) >= 0; }
-function finishYear() {
-  closeCard();
+function simYear() {
   var b = S.budget, mn = monthlyNet(), mo = monthlyOut(), left = round2(mn.net - mo.total), yearly = round2(left * 12);
-  var before = { money: S.meters.money, health: S.meters.health, happy: S.meters.happy, rel: S.meters.rel };
   var notes = [], age = S.age, led = { start: S.cash, left: yearly, oneoff: 0, cover: 0, paid: 0, interest: 0, debt0: S.debt };
   S.cash = round2(S.cash + yearly);
   if (!inStudy()) { var oneoff = Math.round(450 * (S.priceIdx || 1) + (S.job ? S.job.annual * 0.05 : 0)); led.oneoff = oneoff; S.cash = round2(S.cash - oneoff); }
@@ -3983,14 +4020,9 @@ function finishYear() {
     else if (S.uni.year === 2) { S.home = { type: "share", rent: 520, title: "Student house share", issues: [], found: [], pets: false }; S.homes.push({ age: age + 1, type: "share", title: "Student house share" }); notes.push("You move into a student house with friends from halls."); }
   }
   if (S.onRegister) S.socialWait++;
-  S.deadlines.forEach(function (x) { x.turns--; });
-  S.deadlines.filter(function (x) { return x.turns <= 0; }).forEach(function (x) { notes.push(DL[x.kind].expire(x)); });
-  S.deadlines = S.deadlines.filter(function (x) { return x.turns > 0; });
   S.goals.forEach(function (g) { if (!g.done && goalDone(g.id)) { g.done = true; g.age = age; notes.push("Goal reached: " + goalName(g.id) + "!"); logIt("Reached a goal: " + goalName(g.id), "goal"); } });
   updateMoneyMeter(); pushHistory();
-  var after = { money: S.meters.money, health: S.meters.health, happy: S.meters.happy, rel: S.meters.rel };
   S.age = age + 1;
-  S.actionsLeft = 2; S.appliedThisYear = []; S.movedThisYear = false; S.askedRise = false; S.jobBoard = null; S.listings = null;
   S.priceIdx = Math.round(((S.priceIdx || 1) * 1.03) * 10000) / 10000;
   if (S.job) {
     var oldPay = S.job.annual;
@@ -3998,8 +4030,45 @@ function finishYear() {
     else S.job.annual = Math.max(round2(S.job.annual * 1.03), jobAnnual(S.job.id, S.job.years));
     S.lastRise = Math.round((S.job.annual / oldPay - 1) * 1000) / 10;
   } else S.lastRise = null;
+  return { led: led, why: why, notes: notes, graduating: graduating };
+}
+function finishYear() {
+  closeCard();
+  var span = turnSpan(), age = S.age, focus = S.uni && S.uni.focusSet;
+  var before = { money: S.meters.money, health: S.meters.health, happy: S.meters.happy, rel: S.meters.rel };
+  var led = { start: S.cash, left: 0, oneoff: 0, cover: 0, paid: 0, interest: 0 }, why = { health: {}, happy: {}, rel: {} }, notes = [], graduating = false, done = 0;
+  for (var yi = 0; yi < span; yi++) {
+    if (yi > 0 && !S.job && !inStudy()) {
+      /* in a long turn, someone out of work keeps looking and finds something */
+      S.jobBoard = null;
+      var fit = jobBoard().filter(function (id) { return !JOBS[id].app && !missingReqs(id).length; });
+      if (fit.length) {
+        var jid = pick(fit), jb = JOBS[jid];
+        S.job = { id: jid, title: jb.title, annual: jobAnnual(jid, 0), hrs: jb.hrs, years: 0, sat: jobSat(jid), app: false };
+        if (S.home.type === "family") S.home.rent = familyBoard();
+        if (S.ucClaim && S.job.annual > 20000) S.ucClaim = false;
+        logIt("Started work as " + jb.title, "work");
+        notes.push("After a while looking, you found work as " + (/^[AEIOU]/.test(jb.title) ? "an " : "a ") + jb.title.toLowerCase() + ".");
+      }
+    }
+    if (yi > 0 && focus && inStudy()) { S.uni.focusSet = focus; S.uni.study += focus === "study" ? 3 : focus === "balance" ? 2 : 1; }
+    var r = simYear(); done++;
+    ["left", "oneoff", "cover", "paid", "interest"].forEach(function (k) { led[k] += r.led[k] || 0; });
+    ["health", "happy", "rel"].forEach(function (k) { r.why[k].forEach(function (x) { why[k][x[1]] = (why[k][x[1]] || 0) + x[0]; }); });
+    r.notes.forEach(function (n) { if (notes.indexOf(n) < 0) notes.push(n); });
+    if (r.graduating) { graduating = true; break; }
+    if (S.age >= END_AGE) break;
+  }
+  ["health", "happy", "rel"].forEach(function (k) { why[k] = Object.keys(why[k]).map(function (t) { return [why[k][t], t]; }); });
+  S.deadlines.forEach(function (x) { x.turns--; });
+  S.deadlines.filter(function (x) { return x.turns <= 0; }).forEach(function (x) { notes.push(DL[x.kind].expire(x)); });
+  S.deadlines = S.deadlines.filter(function (x) { return x.turns > 0; });
+  updateMoneyMeter();
+  var after = { money: S.meters.money, health: S.meters.health, happy: S.meters.happy, rel: S.meters.rel };
+  S.actionsLeft = lenInfo().actions; S.appliedThisYear = []; S.movedThisYear = false; S.askedRise = false; S.jobBoard = null; S.listings = null;
   save();
-  notes.push("Prices went up about 3% this year." + (S.lastRise != null ? " Your pay went up " + S.lastRise + "%." : ""));
+  var multi = done > 1;
+  notes.push("Prices went up about 3% " + (multi ? "a year." : "this year.") + (S.lastRise != null ? " Your pay went up " + S.lastRise + "%" + (multi ? " last year." : ".") : ""));
   function row(lab, v, cls) { return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + lab + '</td><td class="n">' + (v > 0 && cls !== "tot" && lab !== "Savings at the start" ? "+" : "") + money(v, 0) + "</td></tr>"; }
   var html = '<h3 class="ysub">Your savings</h3><table class="t">' + row("Savings at the start", led.start) +
     row(led.left >= 0 ? "Left over each month, added up" : "Short each month, added up", led.left, led.left < 0 ? "minus" : "") +
@@ -4012,11 +4081,11 @@ function finishYear() {
     var dd = after[k] - before[k], list = why[k] || [];
     var reasons = k === "money" ? (dd ? "<span>Based on your savings, what you owe, and whether money runs short each month.</span>" : "") : list.filter(function (r) { return r[1]; }).sort(function (a, b2) { return Math.abs(b2[0]) - Math.abs(a[0]); }).slice(0, 4).map(function (r) { return '<span class="' + (r[0] > 0 ? "up" : "dn") + '">' + (r[0] > 0 ? "+" : "") + r[0] + " " + esc(r[1]) + "</span>"; }).join("");
     return '<div class="why"><img src="' + iconSrc(MICON[k]) + '" alt=""><b>' + MLAB[k] + " " + (dd > 0 ? "+" : "") + (dd || "no change") + "</b>" + (reasons ? '<div class="rs">' + reasons + "</div>" : "") + "</div>";
-  }).join("") + '</div><p class="small muted">Things you do in the year, like seeing friends or resting, show up straight away and mostly stick.</p>' +
-    (notes.length ? '<h3 class="ysub">Also this year</h3><ul>' + notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "");
+  }).join("") + '</div><p class="small muted">Things you do ' + (multi ? "in a turn" : "in the year") + ', like seeing friends or resting, show up straight away and mostly stick.</p>' +
+    (notes.length ? '<h3 class="ysub">' + (multi ? "Also in these years" : "Also this year") + '</h3><ul>' + notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "");
   setSeason(3);
   if (notes.some(function (x) { return x.indexOf("Goal reached") === 0; })) setTimeout(function () { celebrate("GOAL REACHED!"); }, 500);
-  showCard({ kicker: "Year done", title: "Your year at " + age, bg: "home", icon: "clock", html: html, choices: [{ label: S.age >= END_AGE ? "See how your life turned out" : "Start age " + S.age, fn: function () {
+  showCard({ kicker: multi ? done + " years done" : "Year done", title: multi ? "Your years from " + age + " to " + (age + done - 1) : "Your year at " + age, bg: "home", icon: "clock", html: html, choices: [{ label: S.age >= END_AGE ? "See how your life turned out" : "Start age " + S.age, fn: function () {
     if (graduating) return graduation();
     if (S.age >= END_AGE) return endLife();
     newYear();
@@ -4044,7 +4113,7 @@ function newYear(tab) {
   if (S.onRegister && S.socialWait >= 2 && S.home.type !== "social" && !S.deadlines.some(function (x) { return x.kind === "social"; })) {
     addDeadline({ kind: "social", listing: makeListing("social"), turns: 1, fresh: true });
   }
-  if (S.job && JOBS[S.job.id].next && S.job.years >= JOBS[S.job.id].next[1] && !S.deadlines.some(function (x) { return x.kind === "promo"; }) && Math.random() < 0.55 + (S.revealed.indexOf("Leader") >= 0 ? 0.25 : 0) + (S.revealed.indexOf("Calm") >= 0 ? 0.1 : 0)) {
+  if (S.job && JOBS[S.job.id].next && S.job.years >= JOBS[S.job.id].next[1] && !S.deadlines.some(function (x) { return x.kind === "promo"; }) && Math.random() < 1 - Math.pow(1 - Math.min(0.95, 0.55 + (S.revealed.indexOf("Leader") >= 0 ? 0.25 : 0) + (S.revealed.indexOf("Calm") >= 0 ? 0.1 : 0)), lenInfo().span)) {
     addDeadline({ kind: "promo", jobId: JOBS[S.job.id].next[0], turns: 1, fresh: true });
   }
   var iss = S.home.issues || [];
@@ -4052,7 +4121,7 @@ function newYear(tab) {
   else if (iss.indexOf("sockets") >= 0) q.push(function (next) { S.home.issues = iss.filter(function (x) { return x !== "sockets"; }); var own = S.home.type === "owned"; var tg = applyFx(own ? { cash: -400 } : { happy: -2 }); showCard({ title: "Sparks from a socket", icon: "bolt", text: own ? "An electrician rewires it for " + money(400, 0) + "." : "You report it straight away. Your landlord sends an electrician the next day.", html: '<div class="fx">' + tg.join(" ") + "</div>", choices: [{ label: "Carry on", fn: next }] }); });
   if (!S.job && !inStudy() && !S.ucClaim && (S.debt > 0 || S.cash < 500)) q.push(function (next) { showCard({ title: "Money check", icon: "coin", text: "You are not working and your savings are low. Universal Credit is there for times like this, and it keeps paying as you start earning again, just less.", choices: [{ label: "Apply for Universal Credit", fn: function () { S.ucClaim = true; logIt("Applied for Universal Credit", "money"); next(); } }, { label: "Not now", cls: "alt", fn: next }] }); });
   if (S.hidden.length && Math.random() < 0.35) q.push(revealEvent);
-  if (Math.random() < 0.75) q.push(function (next) { if (Math.random() < 0.4 && callbackCard("adult", next)) return; randomAdultEvent(next); });
+  if (Math.random() < lenInfo().ev) q.push(function (next) { if (Math.random() < 0.4 && callbackCard("adult", next)) return; randomAdultEvent(next); });
   runQueue(q, function () { toHub(tab || "year"); });
 }
 function runQueue(q, done) { if (!q.length) return done(); var f = q.shift(); f(function () { runQueue(q, done); }); }
@@ -4118,7 +4187,7 @@ function balanceVerdict() {
 }
 var LOGICON = { qual: "grad", grad: "grad", school: "book", book: "book", maths: "book", work: "case", home: "house", house: "house", owned: "key", landlord: "house", money: "coin", coin: "coin", car: "car", family: "people", life: "smile", goal: "star", star: "star", trait: "star", setback: "warn", letter: "letter", start: "star" };
 function reportText() {
-  var t = "BUILD A LIFE: life report\n" + S.name + (S.initials ? " (" + S.initials + ")" : "") + ", lived to " + S.age + "\n\n";
+  var t = "BUILD A LIFE: life report\n" + S.name + (S.initials ? " (" + S.initials + ")" : "") + ", lived to " + S.age + " (" + lenInfo().name.toLowerCase() + " game)\n\n";
   t += balanceVerdict() + "\nMoney " + S.meters.money + ", Health " + S.meters.health + ", Happiness " + S.meters.happy + ", Relationships " + S.meters.rel + "\n\n";
   t += "Goals:\n" + S.goals.map(function (g) { return "- " + goalName(g.id) + ": " + (g.done ? "reached" : "not yet"); }).join("\n") + (S.customGoal ? "\n- " + S.customGoal + ": " + (S.customAnswer || "not answered") : "") + "\n\n";
   t += "Qualifications:\n" + qualList().map(function (q) { return "- " + q; }).join("\n") + "\n\n";
@@ -4144,7 +4213,7 @@ function showReport() {
   var r = $("report"); r.style.display = "block"; setMusic("report");
   var picks = S.log.filter(function (l) { return ["start", "setback", "money"].indexOf(l.kind) < 0 && l.text.indexOf("Was offered") !== 0 && l.text.indexOf("Set goals") !== 0 && l.text.indexOf("Started adult life") !== 0; });
   var h = '<div class="rep"><div class="noprint row" style="justify-content:space-between;margin-bottom:10px"><button class="btn" id="rpPrint">Print</button><button class="btn teal" id="rpSend">Send to Jay</button><button class="btn alt" id="rpMail">Email app</button><button class="btn alt" id="rpCopy">Copy</button><button class="btn alt" id="rpNew">Start a new life</button></div>' +
-    '<div class="rephead"><canvas id="repMe" width="28" height="44" aria-hidden="true"></canvas><div><h1>Life report</h1><p><b>' + esc(S.name) + "</b>" + (S.initials ? " (" + esc(S.initials) + ")" : "") + ", lived to " + S.age + ". Grew up in a " + esc(AREAS[S.bg.area].name.toLowerCase()) + ".</p></div></div>" +
+    '<div class="rephead"><canvas id="repMe" width="28" height="44" aria-hidden="true"></canvas><div><h1>Life report</h1><p><b>' + esc(S.name) + "</b>" + (S.initials ? " (" + esc(S.initials) + ")" : "") + ", lived to " + S.age + ". Grew up in a " + esc(AREAS[S.bg.area].name.toLowerCase()) + ".</p><p class=\"small muted\">" + lenInfo().name + " game</p></div></div>" +
     '<p style="font-size:18px"><b>' + esc(balanceVerdict()) + "</b></p>" +
     '<div class="row">' + ["money", "health", "happy", "rel"].map(function (k) { return '<span class="tag ' + k + '" style="font-size:14px">' + MLAB[k] + " " + S.meters[k] + "</span>"; }).join("") + "</div>" +
     "<h2>Your life in four lines</h2><canvas id=\"repChart\" width=\"760\" height=\"260\"></canvas>" +
@@ -4203,8 +4272,13 @@ function drawChart() {
 $("menuBtn").onclick = function () {
   var ch = [{ label: "Carry on", fn: function () {} }];
   if (S && S.phase === "adult") ch.push({ label: "Finish this life and see my life report", fn: function () { showCard({ title: "Finish this life?", icon: "star", text: "You will see your life report.", choices: [{ label: "Yes", fn: endLife }, { label: "Keep living", cls: "alt", fn: function () {} }] }); } });
+  if (S && (S.phase === "adult" || S.phase === "board")) ch.push({ label: "Game length: " + lenInfo().name, sub: "Change how fast the game moves", fn: function () {
+    showCard({ title: "Game length", icon: "clock", text: "You will still live to 35 with the same big moments. This changes how far you move on the board and how many years each adult turn covers.", html: '<div class="lenopts">' + lengthButtons(lenKey()) + "</div>", choices: [{ label: "Keep it as it is", cls: "alt" }], onShow: function (c) {
+      [].forEach.call(c.querySelectorAll("[data-len]"), function (b) { b.onclick = function () { S.len = b.getAttribute("data-len"); try { localStorage.setItem("b5.practice.buildalife.len", S.len); } catch (e) {} save(); closeCard(); toast("Game length: " + lenInfo().name); if (S.phase === "board") boardPanel(); else toHub("year"); }; });
+    } });
+  } });
   if (S && (S.phase === "adult" || S.phase === "board")) ch.push({ label: "Wardrobe", fn: function () { openWardrobe(function () { if (S.phase === "board") boardPanel(); else toHub(); }); } });
-  ch.push({ label: "How to play", fn: function () { showCard({ title: "How to play", icon: "book", html: "<p><b>On the board</b>, spin to move. Choices shape your traits; learning moments earn qualifications.</p><p><b>As an adult</b>, each year you can do up to two things, check your money, apply for jobs and look for homes. Then finish the year.</p><p>Try to keep all four meters out of the red. Nothing ends the game: setbacks always come with a way forward.</p><p class='small'>Your life saves on this device automatically.</p>", choices: [{ label: "Got it" }] }); } });
+  ch.push({ label: "How to play", fn: function () { showCard({ title: "How to play", icon: "book", html: "<p><b>On the board</b>, spin to move. Choices shape your traits; learning moments earn qualifications.</p><p><b>As an adult</b>, each turn you can do up to " + lenInfo().actions + " things, check your money, apply for jobs and look for homes. In a " + lenInfo().name.toLowerCase() + " game each turn is " + (lenInfo().span > 1 ? lenInfo().span + " years" : "one year") + ".</p><p>Try to keep all four meters out of the red. Nothing ends the game: setbacks always come with a way forward.</p><p class='small'>Your life saves on this device automatically.</p>", choices: [{ label: "Got it" }] }); } });
   ch.push({ label: "Back to the title screen", cls: "alt", fn: function () { save(); $("report").style.display = "none"; document.querySelector(".console").style.display = ""; startTitle(); } });
   showCard({ title: "Menu", icon: "star", choices: ch });
 };
