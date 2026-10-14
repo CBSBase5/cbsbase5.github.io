@@ -150,6 +150,7 @@ if(!st.tac.press) st.tac.press = "mid";
 if(!st.reveal) st.reveal = [];
 if(!st.ui || typeof st.ui !== "object" || Array.isArray(st.ui)) st.ui = {};
 st.ui.all = st.ui.all ? 1 : 0; st.ui.hints = st.ui.hints === 0 || st.ui.hints === false ? 0 : 1; st.ui.init = st.ui.init ? 1 : 0;
+if(!st.ui.la || typeof st.ui.la !== "object" || typeof st.ui.la.t !== "string") st.ui.la = null; else st.ui.la = { t: st.ui.la.t.slice(0, 80), x: String(st.ui.la.x || "").slice(0, 200) };
 ["seen", "un", "fresh"].forEach(function(k){ if(!st.ui[k] || typeof st.ui[k] !== "object" || Array.isArray(st.ui[k])) st.ui[k] = {} });
 ["cap", "pk", "fk"].forEach(function(k){ if(typeof st[k] !== "string") st[k] = "" });
 if(st.set.ui !== 4){
@@ -226,6 +227,9 @@ function uiAct(a, b){
   if(a === "hintsagain"){ st.ui.seen = {}; st.ui.hints = 1; save(); render(); toast("The hints will show again, one per screen."); return true }
   if(a === "uiset"){ st.ui[b.getAttribute("data-k")] = b.getAttribute("data-v") === "true" ? 1 : 0; save(); render(); return true }
   if(a === "mkleague"){ st.ui.un.studio = 1; view = "studio"; studioTab = "league"; lgDiv = -1; sel = null; try{ history.replaceState(null, "", "#studio") }catch(er){} save(); render(); window.scrollTo(0, 0); return true }
+  if(a === "tosend"){ repNote = { t: String(b.getAttribute("data-t") || "").slice(0, 80), x: String(b.getAttribute("data-x") || "").slice(0, 240) }; if(rvMode === "season" || $("rv").classList.contains("on")) closeSeason(); if(playing){ closeMatch() } view = "send"; sel = null; try{ history.replaceState(null, "", "#send") }catch(er){} render(); window.scrollTo(0, 0); return true }
+  if(a === "lahide"){ st.ui.la = null; save(); render(); return true }
+  if(a === "repclear"){ repNote = null; render(); return true }
   if(a === "tour"){ tourOpen(); return true }
   if(a === "titour"){ titleClose(); tourOpen(); return true }
   if(a === "tournext"){ tourAt = Math.min(TOUR.length - 1, tourAt + 1); tourDraw(); return true }
@@ -369,6 +373,7 @@ function drillFinish(c, gen){
   }
   info.match = !wasPend && pendingList().some(function(q){ return q.slug === c.slug });
   if(info.match){ msg += " A match is ready in the dugout."; render() }
+  st.ui.la = { t: "I finished " + (a ? a.title : "an activity"), x: (info.already ? "I did it again for practice." : "It was new for me and gave +2 training levels.") + " " + (a ? a.title : "Training") + " is now level " + (info.lvAfter || 0) + " of " + S.CAP + "." };
   var cxm = carActivity(!info.already); if(cxm){ save(); msg += cxm }
   toast(msg);
   window.JTLearn.reward = info;
@@ -971,6 +976,7 @@ function learnBtns(a, lv){
 function vTrain(c){
   var h = '<div class="row2" style="margin-bottom:6px">' + managerCard(c) + '<section class="card"><h3>How training works</h3><p class="hint" style="margin:0">Every session trains one part of the team. Choose who trains under each session, then try one of its short activities. They take a couple of minutes, the game checks your work, and a finished one is worth 2 training levels. Hints are free and a wrong try costs nothing.</p></section></div>';
   var pn = pendingList().length;
+  if(st.ui.la) h += '<section class="card sndc"><h3>' + esc(st.ui.la.t) + '</h3><p class="hint" style="margin:0 0 10px">Want Jay to see what you just did? Only if you want to.</p><div class="mbtns" style="margin:0">' + sendBtn(st.ui.la.t, st.ui.la.x, "btn") + '<button class="btn btn-quiet" data-act="lahide">Not now</button></div></section>';
   h += '<section class="card needcard" role="status"><h3>' + (pn ? "A match is ready" : "Getting your next match") + '</h3><p class="hint" style="margin:0">' + (pn ? "You have " + pn + " match" + (pn > 1 ? "es" : "") + " waiting. Head to the dugout whenever you like, or earn another here." : matchNeed()) + '</p>' + (pn ? '<div class="mbtns" style="margin:10px 0 0"><button class="btn btn-go" data-act="view" data-v="dugout">Go to the dugout</button></div>' : '') + '</section>';
   ["atk", "mid", "def", "gk"].forEach(function(k){
     var list = S.ACTS.filter(function(a){ return a.stat === k });
@@ -1120,7 +1126,8 @@ function openSeason(){
   $("rvbox").innerHTML = '<div class="eyebrow" style="color:var(--gold)">Season ' + st.season + ' complete</div><h2>' + (m.pos === 1 ? "Champions of the " : "Finished " + ord(m.pos) + " in the ") + esc(S.leagueName(m.t)) + '</h2>' +
     '<div class="sumgrid" style="margin:12px 0"><div><b>' + r.w + '</b><small>Won</small></div><div><b>' + r.d + '</b><small>Drawn</small></div><div><b>' + r.l + '</b><small>Lost</small></div><div><b>' + r.gf + '</b><small>For</small></div><div><b>' + r.ga + '</b><small>Against</small></div><div><b>' + r.pts + '</b><small>Points</small></div></div>' +
     '<p>The Cup: ' + esc(m.cup) + '.' + (m.won.length ? ' Trophies this season: ' + esc(m.won.join(', ')) + '.' : '') + '</p>' + out + '<p>' + (m.heat > m.heat0 ? 'Champions get noticed. Every rival is raising their game for next season, so expect tougher matches.' : (m.heat < m.heat0 ? 'The other clubs have eased off a little, which gives you room to rebuild.' : '')) + '</p><p>Season prize money: <b>' + m.prize + ' coins</b>. Sponsorship deals end with the season, and you can sign new ones in Business.</p>' + carSeasonHtml() +
-    '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>';
+    '<div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="seasongo">Begin season ' + (st.season + 1) + '</button><button class="btn" data-act="seasonclose">Not yet</button></div>' +
+    '<div class="mbtns" style="justify-content:center;margin-top:0">' + sendBtn("Season " + st.season + " complete", (m.pos === 1 ? "We won the " : "We finished " + ord(m.pos) + " in the ") + S.leagueName(m.t) + " with " + r.w + " wins, " + r.d + " draws and " + r.l + " defeats.") + '</div>';
   $("rv").classList.add("on"); $("rv").classList.add("season");
 }
 function closeSeason(){ rvMode = ""; $("rv").classList.remove("on"); $("rv").classList.remove("season") }
@@ -1842,6 +1849,7 @@ function vDugout(c){
   if(viewOpen("news")) h += pressTeaser();
   if(viewOpen("career")) h += carTeaser();
   h += riseCard(c);
+  if(st.played.length >= 2 || st.hist.length) h += sendCard("Update from my club", clubName() + " have " + st.coins + " coins, with " + st.played.length + " league matches played this season.", "Want Jay to see how the club is doing?");
   h += '<div class="card mkl"><h3>Make your own league</h3><p class="hint" style="margin:0 0 10px">Give the divisions and clubs your own names. Optional.</p><div class="mbtns"><button class="btn" data-act="mkleague">Make my own league</button></div></div>';
   var blockExtras = h; h = "";
   var ts = trySessions(c, 3);
@@ -1921,19 +1929,27 @@ function vClub(c){
   return h + '</div>';
 }
 function vInbox(){ return '<div class="card">' + (st.inbox.length ? st.inbox.map(msgHtml).join("") : "<p>No news yet.</p>") + '</div>' }
+var repNote = null;
+function sendBtn(title, text, cls, label){
+  return '<button class="btn ' + (cls || "btn-quiet") + '" data-act="tosend" data-t="' + esc(title) + '" data-x="' + esc(text) + '">' + (label || "Send Jay a report") + '</button>';
+}
+function sendCard(title, text, intro){
+  return '<div class="card sndc"><h3>Send Jay a report</h3><p class="hint" style="margin:0 0 10px">' + intro + ' Only if you want to.</p><div class="mbtns" style="margin:0">' + sendBtn(title, text, "btn", "Make a report") + '</div></div>';
+}
 function vSend(){
-  return '<div class="card"><h3>Send a report to Jay</h3><p class="hint">Only if you want to. It makes a short report of your season so far, ready to send.</p><div id="sendhost"></div><pre id="sendprev" style="white-space:pre-wrap;background:#0a1226;border-radius:12px;padding:12px;margin:12px 0 0;font-family:var(--body);font-size:.92rem"></pre></div>';
+  var note = repNote ? '<div class="sndnote" role="note"><span><b>' + esc(repNote.t) + '.</b> ' + esc(repNote.x) + ' This is added to the top of your report.</span><button class="btn btn-quiet" data-act="repclear">Take the note off</button></div>' : "";
+  return '<div class="card"><h3>Send a report to Jay</h3><p class="hint">Only if you want to. It makes a short report of your season so far, ready to send.</p>' + note + '<div id="sendhost"></div><pre id="sendprev" style="white-space:pre-wrap;background:#0a1226;border-radius:12px;padding:12px;margin:12px 0 0;font-family:var(--body);font-size:.92rem"></pre></div>';
 }
 function reportText(){
   var c = ctx(), tb = S.table(st.seed, st.played), pos = posOf(tb), w = 0, d = 0, l = 0, gf = 0, ga = 0;
   st.played.forEach(function(m){ var x = resultOf(m); if(x === "W") w++; else if(x === "D") d++; else l++; gf += ourGoals(m); ga += theirGoals(m) });
-  var lines = ["Manager: JT", "Club: " + clubName(), "Division: " + S.leagueName() + " (season " + st.season + ")", "Seasons completed: " + st.hist.length, "Coins: " + st.coins, st.co ? "Company: " + st.co.name + " (level " + coLevel() + ", " + (st.co.ind || "") + ")" : "Company: not started", "",
+  var lines = [].concat(repNote ? ["Why I am sending this: " + repNote.t + ". " + repNote.x, ""] : [], ["Manager: JT", "Club: " + clubName(), "Division: " + S.leagueName() + " (season " + st.season + ")", "Seasons completed: " + st.hist.length, "Coins: " + st.coins, st.co ? "Company: " + st.co.name + " (level " + coLevel() + ", " + (st.co.ind || "") + ")" : "Company: not started", "",
     "League matches played: " + st.played.length + " of " + ROUNDS,
     "Record: won " + w + ", drawn " + d + ", lost " + l + ", goals " + gf + " for and " + ga + " against",
     "League position: " + (st.played.length ? ord(pos) : "not started"),
     "Cup: " + compText("cup").toLowerCase(), "League Cup: " + compText("lcup").toLowerCase(), compOn("champ") ? "Champions Cup: " + compText("champ").toLowerCase() : "Champions Cup: not open yet", "Fan mood: " + fanLabel(st.fans).toLowerCase(), "Stadium upgrades: " + (upLvl("stands") + upLvl("lights") + upLvl("pitch")) + " of 9", "Staff hired: " + ["coach", "physio", "scout"].filter(function(k){ return staffLvl(k) }).length + " of 3", "Club legends: " + legends().length,
     "Formation: " + st.formation, "Luck dial: " + Math.round(c.tr.luck * 100) + " percent", "Focus points: " + c.tr.fp, "Manager rank: " + rankOf(c.tr.fp),
-    "Career level: " + carLevel() + " (" + CTIT[carLevel() - 1] + ", " + st.car.xp + " XP)", "Board mood: " + carBandOf(st.car.board).toLowerCase(), "Story chapters: " + CHAPS.filter(function(p){ return st.car.chap[p.id] }).length + " of " + CHAPS.length, "Academy graduates: " + st.car.acad.grads, "Derby record: won " + st.car.derby.w + ", drawn " + st.car.derby.d + ", lost " + st.car.derby.l, "Longest winning run: " + st.car.rec.bestWin, "Badges earned: " + badgeDefs(c).filter(function(b){ return b.ok }).length + " of " + badgeDefs(c).length, "", "Training sessions tried:"];
+    "Career level: " + carLevel() + " (" + CTIT[carLevel() - 1] + ", " + st.car.xp + " XP)", "Board mood: " + carBandOf(st.car.board).toLowerCase(), "Story chapters: " + CHAPS.filter(function(p){ return st.car.chap[p.id] }).length + " of " + CHAPS.length, "Academy graduates: " + st.car.acad.grads, "Derby record: won " + st.car.derby.w + ", drawn " + st.car.derby.d + ", lost " + st.car.derby.l, "Longest winning run: " + st.car.rec.bestWin, "Badges earned: " + badgeDefs(c).filter(function(b){ return b.ok }).length + " of " + badgeDefs(c).length, "", "Training sessions tried:"]);
   var any = false;
   S.ACTS.forEach(function(a){ var lv = c.tr.levels[a.slug]; if(lv){ any = true; lines.push("- " + a.title + " (" + a.pillar + "), level " + lv + " of " + S.CAP) } });
   if(!any) lines.push("- none yet");
@@ -2287,6 +2303,7 @@ function vCareer(c){
     '<div class="rec"><b>' + st.hist.length + '</b><span>' + (st.hist.length === 1 ? "season" : "seasons") + '</span><small>Completed</small></div>' +
     '</div></div>';
   h += histCard();
+  h += sendCard("Career report", "I am level " + lv + " (" + CTIT[lv - 1] + ") with " + x + " XP, and the board feels " + carBandOf(car.board).toLowerCase() + ".", "Want Jay to see how your manager career is going?");
   return h + '</div>';
 }
 function carSeasonHtml(){
@@ -2621,7 +2638,7 @@ function hgDraw(){
       '<div class="mbtns" style="justify-content:center"><button class="btn btn-quiet" data-act="hgsign" data-p="' + hg.base + '">Pay the asking price (' + hg.base + ')</button><button class="btn" data-act="hgclose">Not now</button></div>';
   } else {
     var good = hg.ans === hg.ok, pct = good ? 15 : 5, np = Math.round(hg.base * (100 - pct) / 100 / 5) * 5;
-    h += '<p>' + (good ? '<b>Spot on.</b> ' : '<b>Nearly.</b> ') + esc(hg.why) + ' The club takes ' + pct + ' percent off.</p><p>New price: <b>' + np + ' coins</b>. You have ' + st.coins + '.</p><div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="hgsign" data-p="' + np + '">Sign for ' + np + ' coins</button><button class="btn" data-act="hgclose">Not now</button></div>';
+    h += '<p>' + (good ? '<b>Spot on.</b> ' : '<b>Nearly.</b> ') + esc(hg.why) + ' The club takes ' + pct + ' percent off.</p><p>New price: <b>' + np + ' coins</b>. You have ' + st.coins + '.</p><div class="mbtns" style="justify-content:center"><button class="btn btn-go btn-big" data-act="hgsign" data-p="' + np + '">Sign for ' + np + ' coins</button><button class="btn" data-act="hgclose">Not now</button></div><div class="mbtns" style="justify-content:center;margin-top:0">' + sendBtn("Transfer question", "I answered a question to haggle for " + t.name + ". " + (good ? "I got it right." : "I was close.") + " " + hg.q + " " + hg.why) + '</div>';
   }
   $("rvbox").innerHTML = h;
   $("rv").classList.add("on");
@@ -3333,7 +3350,7 @@ function endPanel(){
   }
   $("fin").innerHTML = '<div class="final ' + cls + '" id="finbox"><span class="fres">' + (won ? "Win" : (drew ? "Draw" : "Defeat")) + '</span><h2>' + head + '</h2><p style="margin-top:6px">' + (M.pens ? "Penalties " + M.pens.h + " to " + M.pens.a + ". " : "") +
     (scorers.length ? "Our scorers: " + esc(scorers.join(", ")) + ". " : "No goals for us today. ") + (luckN ? "Luck moments: " + luckN + ". " : "") + '</p>' + lh + motm + mv + growth + cxHtml(p) + wr +
-    '<div class="mbtns"><button class="btn btn-go" data-act="closem">Back to the dugout</button><button class="btn" data-act="closeleague">See the table</button></div></div>';
+    '<div class="mbtns"><button class="btn btn-go" data-act="closem">Back to the dugout</button><button class="btn" data-act="closeleague">See the table</button>' + sendBtn("Full time", (won ? "A win" : (drew ? "A draw" : "A defeat")) + " against " + S.oppName(p.opp) + ", " + M.hs + " to " + M.as + (M.pens ? " (penalties " + M.pens.h + " to " + M.pens.a + ")" : "") + ".") + '</div></div>';
   if(won && !p.replay) confetti($("finbox"));
   var b = $("fin").querySelector("button"); if(b) b.focus();
   try{ $("fin").scrollIntoView({ block: "center", behavior: calm() ? "auto" : "smooth" }) }catch(e){}
