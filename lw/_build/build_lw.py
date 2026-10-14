@@ -38,6 +38,8 @@ def must(s, a, b, count=None, where=""):
 
 
 def common(s, name):
+    # EGW's floating biscuits stay in EGW's space
+    s = re.sub(r'<script src="/egw/biscuits\.js[^"]*"></script>\n?', "", s)
     s = must(s, '<link rel="stylesheet" href="/egw/egw.css', '<script src="%s"></script>\n<link rel="stylesheet" href="/egw/egw.css' % CONF, 1, name)
     s = re.sub(r'(<link rel="stylesheet" href="/egw/egw\.css\?v=\d+">)', r'\1\n<link rel="stylesheet" href="%s">' % LW_CSS, s, count=1)
     s = must(s, "&display=swap", "&family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap", None, name)

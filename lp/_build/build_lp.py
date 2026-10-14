@@ -40,6 +40,8 @@ def must(s, a, b, count=None, where=""):
 
 
 def common(s, name):
+    # EGW's floating biscuits stay in EGW's space
+    s = re.sub(r'<script src="/egw/biscuits\.js[^"]*"></script>\n?', "", s)
     # config first, then LP's stylesheet straight after the shared one
     s = must(s, '<link rel="stylesheet" href="/egw/egw.css', '<script src="%s"></script>\n<link rel="stylesheet" href="/egw/egw.css' % CONF, 1, name)
     s = re.sub(r'(<link rel="stylesheet" href="/egw/egw\.css\?v=\d+">)', r'\1\n<link rel="stylesheet" href="%s">' % LP_CSS, s, count=1)
