@@ -28,7 +28,7 @@ var WITH_BUTTON = !!(me && me.getAttribute('data-button') && me.getAttribute('da
 var TEST = /[?&]hktest(=|&|$)/.test(location.search);
 
 /* ---------- storage ---------- */
-var store = { best: 0, games: 0, sound: true };
+var store = { best: 0, games: 0, sound: true, runs: 0, credited: 0 };
 function loadStore() {
   try {
     var o = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -36,13 +36,57 @@ function loadStore() {
       if (isFinite(o.best)) store.best = Math.max(0, Math.floor(o.best));
       if (isFinite(o.games)) store.games = Math.max(0, Math.floor(o.games));
       if (typeof o.sound === 'boolean') store.sound = o.sound;
+      if (isFinite(o.runs)) store.runs = Math.max(0, Math.floor(o.runs));
+      if (isFinite(o.credited)) store.credited = Math.max(0, Math.floor(o.credited));
     }
   } catch (e) {}
 }
 function saveStore() {
-  try { localStorage.setItem(KEY, JSON.stringify({ best: store.best, games: store.games, sound: store.sound })); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify({ best: store.best, games: store.games, sound: store.sound, runs: store.runs, credited: store.credited })); } catch (e) {}
 }
 loadStore();
+
+/* ---------- runs are earned with questions ----------
+   Jay asked for this: HK answers questions before he can play.
+   GATE_N right answers at the gate earn GATE_RUNS runs.
+   Every PER_RIGHT right answers in his activities or the daily drop earn one more run.
+   Show me never counts. Change the numbers here. */
+var GATE_N = 3, GATE_RUNS = 2, PER_RIGHT = 5;
+var SKIPKEYS = /^b5\.hk\.(hq|crossy|review|daily|swipe|bonnie|sent|skin|scare)/;
+function rightAnswers() {
+  var n = 0, i, k, o, a;
+  try {
+    for (i = 0; i < localStorage.length; i++) {
+      k = localStorage.key(i);
+      if (!k || k.indexOf('b5.hk.') !== 0 || SKIPKEYS.test(k)) continue;
+      try { o = JSON.parse(localStorage.getItem(k)); } catch (e) { continue; }
+      if (!o || typeof o !== 'object' || !o.answers || typeof o.answers !== 'object') continue;
+      for (a in o.answers) {
+        var st = o.answers[a] && o.answers[a].status;
+        if (st === 'right1' || st === 'right2') n++;
+      }
+    }
+    o = JSON.parse(localStorage.getItem('b5.hk.daily.v1') || 'null');
+    if (o && o.days) for (a in o.days) { var r = o.days[a] && o.days[a].r; if (r === 'right1' || r === 'right2') n++; }
+  } catch (e) {}
+  return n;
+}
+function syncCredit() {
+  loadStore();
+  var total = rightAnswers();
+  if (total < store.credited) store.credited = total;   /* an activity was started again */
+  var earn = Math.floor((total - store.credited) / PER_RIGHT);
+  if (earn > 0) { store.runs += earn; store.credited += earn * PER_RIGHT; }
+  saveStore();
+  return total;
+}
+function takeRun() {
+  syncCredit();
+  if (store.runs < 1) return false;
+  store.runs--; saveStore();
+  return true;
+}
+function runsWord(n) { return n === 1 ? '1 run' : n + ' runs'; }
 
 /* ---------- small helpers ---------- */
 function rnd(a, b) { return a + Math.random() * (b - a); }
@@ -151,6 +195,22 @@ css.textContent =
 '.hkg-go:hover{background:#7ee070}.hkg-go:active{transform:translateY(3px);box-shadow:0 2px 0 #15281c}' +
 '.hkg-c2{display:block;width:100%;margin-top:10px;min-height:44px;border-radius:14px;border:2px solid #9bb59a;background:transparent;color:#15281c;font-weight:800;font-size:1rem}' +
 '.hkg-c2:hover{background:#eef6e4}' +
+'.hkg-card.hkg-wide{width:min(94%,460px);max-height:calc(100% - 24px);overflow:auto;text-align:left}' +
+'.hkg-card.hkg-wide h2{font-size:1.6rem;text-align:center}' +
+'.hkg-qn{display:flex;justify-content:center;gap:8px;margin:2px 0 10px}' +
+'.hkg-qn i{width:26px;height:10px;border-radius:99px;background:#d9e6cf;border:2px solid #15281c}' +
+'.hkg-qn i.on{background:#5ccf52}' +
+'.hkg-q{font-size:1.05rem;line-height:1.45;margin:0 0 10px}' +
+'.hkg-q .extract{margin:8px 0;padding:8px 12px;border-radius:12px;background:#eef6e4;border-left:5px solid #5ccf52}' +
+'.hkg-opts{display:grid;gap:8px}' +
+'.hkg-opt{display:block;width:100%;min-height:48px;padding:8px 12px;border-radius:14px;border:3px solid #15281c;background:#fff;color:#15281c;font-weight:800;font-size:1.02rem;text-align:left;box-shadow:0 3px 0 #15281c}' +
+'.hkg-opt:hover{background:#f3f9ec}.hkg-opt.ok{background:#5ccf52}.hkg-opt.no{background:#ffd0c4;text-decoration:line-through}' +
+'.hkg-box{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;font-weight:800}' +
+'.hkg-box input{width:9em;min-height:48px;padding:6px 10px;border-radius:12px;border:3px solid #15281c;font:inherit;font-size:1.2rem}' +
+'.hkg-box input.no{background:#ffe3dc}.hkg-box input.ok{background:#dff6d6}' +
+'.hkg-fb{margin:10px 0 0 !important;padding:8px 12px;border-radius:12px;background:#fff3c4;font-size:.98rem !important}' +
+'.hkg-fb:empty{display:none}' +
+'.hkg-card.hkg-wide .hkg-go{margin-top:12px}' +
 '.hkg-tip{font-size:.82rem !important;color:#5a7062;margin-top:8px !important}' +
 '.hkg-pad{display:flex;gap:10px;margin-top:10px;flex:none}' +
 '.hkg-pad button{width:66px;height:56px;border-radius:16px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:1.35rem;line-height:1;touch-action:manipulation;box-shadow:0 4px 0 rgba(0,0,0,.35)}' +
@@ -945,6 +1005,11 @@ function build() {
     if (act === 'again') restart();
     else if (act === 'close') close();
     else if (act === 'resume') resume();
+    else if (act === 'quiz') startQuiz();
+    else if (act === 'qcheck') quizCheck();
+    else if (act === 'qnext') quizNext();
+    else if (act === 'qopt') quizPick(+b.getAttribute('data-i'));
+    else if (act === 'acts') { close(); var t = document.getElementById('subjects') || document.getElementById('secSubjects'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth' }); }
   });
   /* tap and swipe on the canvas */
   var sx = 0, sy = 0, down = false;
@@ -1021,9 +1086,14 @@ function showOver() {
     '<h2 style="color:' + m.col + '">' + m.t + '</h2>' +
     '<p>' + pick(m.m) + '</p>' +
     '<div class="hkg-nums"><div><span>Score</span><b>' + s + '</b></div><div><span>Best</span><b>' + store.best + '</b></div></div>' +
-    '<button type="button" class="hkg-go" data-act="again">Again</button>' +
-    '<button type="button" class="hkg-c2" data-act="close">Close</button>' +
-    '<p class="hkg-tip">Enter or Space also starts again.</p>';
+    (store.runs > 0 ?
+      '<button type="button" class="hkg-go" data-act="again">Again</button>' +
+      '<button type="button" class="hkg-c2" data-act="close">Close</button>' +
+      '<p class="hkg-tip">' + runsWord(store.runs) + ' left. Enter or Space also starts again.</p>' :
+      '<button type="button" class="hkg-go" data-act="again">Earn more runs</button>' +
+      '<button type="button" class="hkg-c2" data-act="close">Close</button>' +
+      '<p class="hkg-tip">That was your last run for now. A few questions earn more.</p>');
+  ui.card.className = 'hkg-card';
   ui.card.innerHTML = html;
   ui.card.insertBefore(cardIcon(), ui.card.firstChild);
   ui.card.hidden = false;
@@ -1059,22 +1129,169 @@ function resume() {
 }
 function restart() {
   newGame();
+  if (!takeRun()) { showGate(); return; }
   state = 'play';
-  ui.card.hidden = true; ui.card.innerHTML = '';
+  ui.card.hidden = true; ui.card.innerHTML = ''; ui.card.className = 'hkg-card';
   ui.pause.disabled = false; ui.pause.textContent = 'Pause';
   ui.hint.className = 'hkg-hint' + (store.games >= 3 ? ' gone' : '');
   if (ui.hint.className.indexOf('gone') < 0) G.hopped = false;
   ui.toast.className = 'hkg-toast';
   updateHud();
   focusStage();
+  runToast();
 }
 function focusStage() { try { ui.canvas.setAttribute('tabindex', '-1'); ui.canvas.focus({ preventScroll: true }); } catch (e) {} }
+
+/* ---------- the gate: answer questions to earn runs ---------- */
+function cardIn(html, wide) {
+  ui.card.className = 'hkg-card' + (wide ? ' hkg-wide' : '');
+  ui.card.innerHTML = html;
+  ui.card.hidden = false;
+  ui.pause.disabled = true;
+  var f = ui.card.querySelector('input, .hkg-go, .hkg-opt');
+  if (f) { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }
+}
+function showGate() {
+  state = 'gate';
+  if (ui.hint) ui.hint.className = 'hkg-hint gone';
+  cardIn('<h2 style="color:#2c8f43">Fuel up first</h2>' +
+    '<p>The dino needs fuel. Get ' + GATE_N + ' questions right and you earn ' + runsWord(GATE_RUNS) + '.</p>' +
+    '<p class="hkg-tip">Every ' + PER_RIGHT + ' right answers in your activities or the daily drop earn another run too.</p>' +
+    '<button type="button" class="hkg-go" data-act="quiz">Answer questions</button>' +
+    '<button type="button" class="hkg-c2" data-act="acts">Go to my activities</button>' +
+    '<button type="button" class="hkg-c2" data-act="close">Close</button>');
+  ui.card.insertBefore(cardIcon(), ui.card.firstChild);
+}
+var Q = null;
+function loadBank(cb) {
+  if (window.EGWDAILY && window.EGWDAILY.length) { cb(); return; }
+  var srcs = ['/lc/daily-bank-maths.js?v=1', '/lc/daily-bank-english.js?v=1'], left = srcs.length;
+  srcs.forEach(function (u) {
+    var sc = document.createElement('script'); sc.src = u;
+    sc.onload = sc.onerror = function () { if (--left === 0) cb(); };
+    document.head.appendChild(sc);
+  });
+}
+function startQuiz() {
+  ui.card.innerHTML = '<p>Getting questions...</p>';
+  loadBank(function () {
+    if (state !== 'gate') return;
+    var bank = (window.EGWDAILY || []).filter(function (q) { return q && (q.type === 'mc' || q.type === 'num'); });
+    if (!bank.length) {   /* no questions could load: do not lock him out */
+      store.runs += 1; saveStore(); quizDone(true); return;
+    }
+    var order = bank.slice();
+    for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
+    Q = { order: order, at: -1, right: 0, cur: null, tries: 0, opts: null, settled: false };
+    quizNext();
+  });
+}
+function dots() {
+  var h = '<div class="hkg-qn" aria-label="' + Q.right + ' of ' + GATE_N + ' right">';
+  for (var i = 0; i < GATE_N; i++) h += '<i' + (i < Q.right ? ' class="on"' : '') + '></i>';
+  return h + '</div>';
+}
+function quizNext() {
+  if (!Q) return;
+  if (Q.right >= GATE_N) { quizDone(false); return; }
+  Q.at = (Q.at + 1) % Q.order.length;
+  var q = Q.cur = Q.order[Q.at];
+  Q.tries = 0; Q.settled = false;
+  var h = dots() + '<div class="hkg-q">' + q.q + '</div>';
+  if (q.type === 'mc') {
+    var idx = q.options.map(function (o, i) { return i; });
+    for (var i = idx.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    Q.opts = idx;
+    h += '<div class="hkg-opts">' + idx.map(function (oi, n) {
+      return '<button type="button" class="hkg-opt" data-act="qopt" data-i="' + n + '">' + q.options[oi] + '</button>';
+    }).join('') + '</div>';
+  } else {
+    h += q.boxes.map(function (b, n) {
+      return '<label class="hkg-box">' + (b.label || 'Answer') + ' ' + (b.pre || '') +
+        '<input type="text" inputmode="decimal" autocomplete="off" data-n="' + n + '">' + (b.post || '') + '</label>';
+    }).join('') + '<button type="button" class="hkg-go" data-act="qcheck">Check</button>';
+  }
+  h += '<p class="hkg-fb" aria-live="polite"></p>' +
+    '<button type="button" class="hkg-c2" data-act="close">Close</button>';
+  cardIn(h, true);
+}
+function numOf(v) {
+  v = String(v || '').replace(new RegExp(String.fromCharCode(163), 'g'), '').replace(/,/g, '').replace(/\s+/g, '').replace(/[a-z%]+$/i, '');
+  var m = /^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(v);
+  if (m) return +m[2] ? +m[1] / +m[2] : NaN;
+  return v === '' ? NaN : Number(v);
+}
+function quizPick(n) {
+  if (!Q || Q.settled || !Q.cur) return;
+  var q = Q.cur, btns = ui.card.querySelectorAll('.hkg-opt'), b = btns[n];
+  if (!b || b.disabled) return;
+  if (Q.opts[n] === q.answer) { b.className = 'hkg-opt ok'; quizResult(true); return; }
+  b.className = 'hkg-opt no'; b.disabled = true;
+  Q.tries++;
+  if (Q.tries >= 2) {
+    for (var i = 0; i < btns.length; i++) if (Q.opts[i] === q.answer) btns[i].className = 'hkg-opt ok';
+    quizResult(false);
+  } else feedback('Not that one. ' + (q.hint || 'Have another go.'));
+}
+function quizCheck() {
+  if (!Q || Q.settled || !Q.cur || Q.cur.type !== 'num') return;
+  var q = Q.cur, ins = ui.card.querySelectorAll('.hkg-box input'), ok = true, empty = false;
+  for (var i = 0; i < ins.length; i++) {
+    var b = q.boxes[i], v = numOf(ins[i].value);
+    if (ins[i].value.trim() === '') { empty = true; continue; }
+    var good = isFinite(v) && Math.abs(v - b.a) <= (b.tol || 0.001);
+    ins[i].className = good ? 'ok' : 'no';
+    if (!good) ok = false;
+  }
+  if (empty) { feedback('Pop a number in the box first.'); return; }
+  if (ok) { quizResult(true); return; }
+  Q.tries++;
+  if (Q.tries >= 2) {
+    for (i = 0; i < ins.length; i++) { ins[i].value = String(q.boxes[i].a); ins[i].className = 'ok'; ins[i].disabled = true; }
+    quizResult(false);
+  } else feedback('Not quite. ' + (q.hint || 'Have another go.'));
+}
+function feedback(t) { var f = ui.card.querySelector('.hkg-fb'); if (f) f.innerHTML = t; }
+function quizResult(ok) {
+  Q.settled = true;
+  if (ok) { Q.right++; sfx('bone'); }
+  var q = Q.cur;
+  var opts = ui.card.querySelectorAll('.hkg-opt, .hkg-box input');
+  for (var i = 0; i < opts.length; i++) opts[i].disabled = true;
+  var chk = ui.card.querySelector('[data-act="qcheck"]'); if (chk) chk.parentNode.removeChild(chk);
+  var dd = ui.card.querySelector('.hkg-qn'); if (dd) dd.outerHTML = dots();
+  feedback((ok ? '<b>Yes!</b> ' : 'This one does not count. ') + (q.why || ''));
+  var nx = document.createElement('button');
+  nx.type = 'button'; nx.className = 'hkg-go'; nx.setAttribute('data-act', 'qnext');
+  nx.textContent = Q.right >= GATE_N ? 'Get my runs' : 'Next question';
+  var fb = ui.card.querySelector('.hkg-fb');
+  fb.parentNode.insertBefore(nx, fb.nextSibling);
+  try { nx.focus({ preventScroll: true }); } catch (e) { nx.focus(); }
+}
+function quizDone(fallback) {
+  if (!fallback) { store.runs += GATE_RUNS; saveStore(); sfx('best'); }
+  Q = null;
+  cardIn('<div class="hkg-badge hkg-pop">Fuelled up!</div>' +
+    '<h2 style="color:#2c8f43">' + runsWord(store.runs) + ' ready</h2>' +
+    '<p>Nice work. Off you hop.</p><div style="height:12px"></div>' +
+    '<button type="button" class="hkg-go" data-act="again">Play</button>' +
+    '<button type="button" class="hkg-c2" data-act="close">Save them for later</button>');
+  ui.card.insertBefore(cardIcon(), ui.card.firstChild);
+}
+function runToast() {
+  if (!ui.toast) return;
+  toast(store.runs > 0 ? runsWord(store.runs) + ' left after this' : 'Last run for now');
+}
 
 function onKey(e) {
   if (state === 'closed') return;
   var k = e.key, tgt = e.target, onBtn = tgt && tgt.tagName === 'BUTTON';
   if (k === 'Escape' || k === 'Esc') { e.preventDefault(); close(); return; }
   if (k === 'Tab') { trapTab(e); return; }
+  if (state === 'gate') {
+    if (k === 'Enter' && tgt && tgt.tagName === 'INPUT') { e.preventDefault(); quizCheck(); }
+    return;
+  }
   unlockAudio();
   var mv = null;
   if (k === 'ArrowUp' || k === 'w' || k === 'W') mv = [0, 1];
@@ -1098,7 +1315,7 @@ function onKey(e) {
   if ((k === ' ' || k === 'Spacebar') && !onBtn) { e.preventDefault(); tryMove(0, 1); }
 }
 function trapTab(e) {
-  var list = Array.prototype.filter.call(ui.o.querySelectorAll('button'), function (b) { return !b.disabled && b.offsetParent !== null; });
+  var list = Array.prototype.filter.call(ui.o.querySelectorAll('button, input'), function (b) { return !b.disabled && b.offsetParent !== null; });
   if (!list.length) return;
   var i = list.indexOf(document.activeElement);
   e.preventDefault();
@@ -1137,7 +1354,8 @@ function open() {
   document.addEventListener('visibilitychange', onVis);
   lastTs = 0;
   raf = requestAnimationFrame(frame);
-  focusStage();
+  if (!takeRun()) showGate();
+  else { focusStage(); runToast(); }
 }
 function close() {
   if (state === 'closed') return;
@@ -1159,7 +1377,8 @@ function close() {
 var note = null;
 function updateNote() {
   loadStore();
-  if (note) note.textContent = 'Hop the dino across the ruined town. ' + (store.best > 0 ? 'Best: ' + store.best : 'No best yet, whenever you fancy it.');
+  syncCredit();
+  if (note) note.textContent = (store.runs > 0 ? runsWord(store.runs) + ' ready. ' : 'Answer a few questions to earn runs. ') + (store.best > 0 ? 'Best: ' + store.best : 'No best yet.');
 }
 function addButton() {
   var hero = document.querySelector('.hero');
@@ -1185,9 +1404,9 @@ window.HKCrossy = { open: open, close: close };
 if (TEST) {
   window.__hkCrossy = {
     info: function () {
-      if (!G) return { state: state, best: store.best, games: store.games };
+      if (!G) return { state: state, best: store.best, games: store.games, runs: store.runs, credited: store.credited };
       return { state: state, row: P.row, x: P.x, hopping: !!P.hop, onLog: !!P.log, score: score(), maxRow: G.maxRow,
-        bones: G.bones, best: store.best, games: store.games, dead: G.dead, LH: LH, rowType: G.rows[P.row] && G.rows[P.row].type };
+        bones: G.bones, best: store.best, games: store.games, runs: store.runs, credited: store.credited, rights: rightAnswers(), dead: G.dead, LH: LH, rowType: G.rows[P.row] && G.rows[P.row].type };
     },
     /* replace the row just ahead of the player with a known lane */
     lane: function (kind) {
