@@ -2,7 +2,7 @@
    Written by /teacher/folders.html (or by hand: keep the same shape). ASCII only. */
 window.B5FOLDER = {
  "who": "LW",
- "updated": "2026-10-18T19:42:01Z",
+ "updated": "2026-10-18T19:53:34Z",
  "data": {
   "v": 2,
   "messages": [
@@ -13,6 +13,12 @@ window.B5FOLDER = {
    }
   ],
   "activities": [
+   {
+    "id": "a-boxman",
+    "title": "Box-man: Unboxed!",
+    "href": "https://claude.ai/artifact/CnzWLpypZcXenHKLFzZyNm",
+    "note": "Your game, made from your film. You are the creative director, so play it, break it, and if anything should be different, say the word. There is an intro comic, Box-man mode once you finish a run, and a room designer in Extras."
+   },
    {
     "id": "a-idealab",
     "title": "Idea Lab",
