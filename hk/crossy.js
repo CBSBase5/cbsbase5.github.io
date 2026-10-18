@@ -80,7 +80,11 @@ function syncCredit() {
   saveStore();
   return total;
 }
+/* When the HQ break gate is on (/hk/break.js), goes are earned with
+   sparks there instead, so runs are free during a break. */
+function gated() { return !!window.HKGate; }
 function takeRun() {
+  if (gated()) return true;
   syncCredit();
   if (store.runs < 1) return false;
   store.runs--; saveStore();
@@ -1086,10 +1090,10 @@ function showOver() {
     '<h2 style="color:' + m.col + '">' + m.t + '</h2>' +
     '<p>' + pick(m.m) + '</p>' +
     '<div class="hkg-nums"><div><span>Score</span><b>' + s + '</b></div><div><span>Best</span><b>' + store.best + '</b></div></div>' +
-    (store.runs > 0 ?
+    (gated() || store.runs > 0 ?
       '<button type="button" class="hkg-go" data-act="again">Again</button>' +
       '<button type="button" class="hkg-c2" data-act="close">Close</button>' +
-      '<p class="hkg-tip">' + runsWord(store.runs) + ' left. Enter or Space also starts again.</p>' :
+      '<p class="hkg-tip">' + (gated() ? '' : runsWord(store.runs) + ' left. ') + 'Enter or Space also starts again.</p>' :
       '<button type="button" class="hkg-go" data-act="again">Earn more runs</button>' +
       '<button type="button" class="hkg-c2" data-act="close">Close</button>' +
       '<p class="hkg-tip">That was your last run for now. A few questions earn more.</p>');
@@ -1279,7 +1283,7 @@ function quizDone(fallback) {
   ui.card.insertBefore(cardIcon(), ui.card.firstChild);
 }
 function runToast() {
-  if (!ui.toast) return;
+  if (!ui.toast || gated()) return;
   toast(store.runs > 0 ? runsWord(store.runs) + ' left after this' : 'Last run for now');
 }
 

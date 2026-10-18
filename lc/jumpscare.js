@@ -293,12 +293,14 @@ var GHOST = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 28V14a10 10
 var LINES = ["Survived. Your heart rate will be back soon.", "Still here. Brave.", "That one was rude, to be fair.",
   "Did you jump? You jumped.", "Back to normal. Probably.", "The night shift salutes you."];
 var btn, hide, meta;
+/* scares are earned with sparks when /lc/break.js is on the page */
+function gated(fn){ if(window.LCGate) window.LCGate.request(fn); else fn(); }
 function drawMeta(msg){
   if(!meta) return;
   fresh();
   var armed = st.armed && st.armed > Date.now();
   if(hide) hide.disabled = !!armed;
-  meta.innerHTML = (msg ? msg + " " : "") +
+  meta.innerHTML = (window.LCGate ? "<b>" + window.LCGate.note() + "</b> " : "") + (msg ? msg + " " : "") +
     (armed ? "One is hidden somewhere in the HQ. It could be any minute. " : "") +
     (st.n ? "Scares survived: <b>" + st.n + "</b>. " : "") +
     "Sound is " + (st.sound ? "on" : "off") + ' <button type="button" id="jsSound">' + (st.sound ? "turn it off" : "turn it on") + "</button>" +
@@ -323,14 +325,19 @@ function mount(){
   btn.onclick = function(){
     if(busy) return;
     unlock();
-    btn.disabled = true;
-    buildUp(rnd(2600, 6500), function(){ drawMeta(LINES[Math.floor(Math.random() * LINES.length)]); btn.focus(); });
+    gated(function(){
+      btn.disabled = true;
+      buildUp(rnd(2600, 6500), function(){ drawMeta(LINES[Math.floor(Math.random() * LINES.length)]); btn.focus(); });
+    });
   };
   hide.onclick = function(){
     unlock(); fresh();
-    st.armed = Date.now() + Math.round(rnd(60, 300)) * 1000; save();
-    drawMeta("Hidden. Carry on as normal...");
+    gated(function(){
+      st.armed = Date.now() + Math.round(rnd(60, 300)) * 1000; save();
+      drawMeta("Hidden. Carry on as normal...");
+    });
   };
+  window.LCScareRedraw = function(){ if(!busy) drawMeta(); };
   setInterval(function(){ if(!busy) drawMeta(); }, 15000);
 }
 if(WITH_BUTTON){ if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount(); }

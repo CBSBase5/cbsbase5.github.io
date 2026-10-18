@@ -24,7 +24,7 @@ HK = os.path.join(ROOT, "hk")
 OWN = {"conf.js", "hk.css", "crossy.js"}
 HK_CSS = "/hk/hk.css?v=1"
 FONTS = "&family=Bungee&family=Rubik:wght@400;500;600;700"
-CROSSY = '<script src="/hk/crossy.js?v=2" data-button="1"></script>'
+CROSSY = '<script src="/hk/crossy.js?v=3"></script>\n<script src="/data/hqbreak.js?v=2"></script>\n<script src="/hk/break.js?v=1"></script>'
 
 
 def must(s, a, b, count=None, where=""):
@@ -40,6 +40,9 @@ def convert(s, name):
     s = s.replace("&family=Space+Mono:wght@400;700", FONTS)
     # no jumpscares for HK
     s = re.sub(r'<script src="/lc/jumpscare\.js[^"]*"[^>]*></script>\n?', "", s)
+    # and LC's earned-scares gate; this HQ adds its own game and gate
+    s = re.sub(r'<script src="/data/hqbreak\.js[^"]*"></script>\n?', "", s)
+    s = re.sub(r'<script src="/lc/break\.js[^"]*"></script>\n?', "", s)
     # links: everything in /lc/ becomes /hk/, except the shared question banks
     s = re.sub(r"/lc/(?!(daily|swipe)-bank-)", "/hk/", s)
     s = s.replace("b5.lc.", "b5.hk.").replace("b5.lcteacher.", "b5.hkteacher.")

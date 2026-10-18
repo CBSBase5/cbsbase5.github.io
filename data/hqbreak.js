@@ -18,6 +18,15 @@
    Testing: add ?hqtest to the page address and every go is
    free, with no cooldown.
 
+   Two ways to use it:
+   1. A game built for this (Dunk, Neon Stack) calls HQBreak({...})
+      and this file draws the whole overlay around it.
+   2. A game that already has its own screen (HK's Overgrown Hop,
+      JT's Penalty Shootout, LW's Showstopper, LC's jumpscares)
+      is wrapped with HQBreak.wrap({...}): this file only adds the
+      launcher, the earning, a break clock pinned on top of the
+      game, and a card that ends the break. See wrap() below.
+
    A game file calls:
      HQBreak({
        id: "dunk", title: "Dunk", prefix: "b5.egw.",
@@ -39,7 +48,7 @@ var SPARKS_PER_GO = 30;
 var BREAK_SECONDS = 180;
 var COOLDOWN_MINUTES = 15;
 
-var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack)\b/;
+var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|scare)\b/;
 var TEST = /[?&]hqtest(=|&|$)/.test(location.search);
 var RM = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 
@@ -322,5 +331,185 @@ window.HQBreak = function(cfg){
   else addLauncher();
 
   return { open: open };
+};
+
+/* ==========================================================
+   HQBreak.wrap: the same earning, break and cooldown for a game
+   that already draws its own screen.
+     HQBreak.wrap({
+       prefix: "b5.hk.", title: "Overgrown Hop", icon: "<svg>",
+       theme: { card, cardInk, accent, accent2, font },
+       words: { earn, coolingTitle, cooling, coolingShort, done },
+       open: fn, close: fn,          the game's own open and close
+       openSel: ".hkgame",           how to tell the game is open
+       launcher: true                false: no button is added (the
+                                     page asks gate.request itself)
+     })
+   Returns a gate: gate.request(fn) runs fn if a break is on or can
+   start, otherwise it shows why not. gate.note() is a one line
+   status. Saves { credited, goes, breakEnd } in <prefix>break.v1.
+   ========================================================== */
+window.HQBreak.wrap = function(cfg){
+  var KEY = cfg.prefix + "break.v1";
+  var T = cfg.theme, W = cfg.words;
+  var store = { credited: 0, goes: 0, breakEnd: 0 };
+  function load(){ try{ var o = JSON.parse(localStorage.getItem(KEY) || "null"); if(o && typeof o === "object") for(var k in store) if(o[k] !== undefined) store[k] = o[k]; }catch(e){} }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+  load();
+  if(!localStorage.getItem(KEY)){ store.credited = Math.floor(sparksTotal(cfg.prefix) / SPARKS_PER_GO) * SPARKS_PER_GO; save(); }
+
+  function state(){
+    load();
+    var total = sparksTotal(cfg.prefix);
+    if(total < store.credited) store.credited = total;
+    var earn = Math.floor((total - store.credited) / SPARKS_PER_GO);
+    if(earn > 0){ store.goes += earn; store.credited += earn * SPARKS_PER_GO; }
+    save();
+    var now = Date.now(), onBreak = now < store.breakEnd;
+    return {
+      onBreak: onBreak || TEST,
+      breakLeft: TEST ? 999 : Math.max(0, store.breakEnd - now) / 1000,
+      cool: TEST || onBreak ? 0 : Math.max(0, store.breakEnd + COOLDOWN_MINUTES * 60000 - now) / 1000,
+      goes: TEST ? 9 : store.goes,
+      toNext: SPARKS_PER_GO - (total - store.credited)
+    };
+  }
+
+  var css = el("style");
+  css.textContent =
+    "html body>.hqw-back{position:fixed !important;z-index:2147483600 !important;inset:0}" +
+    "html body>.hqw-pill{position:fixed !important;z-index:2147483500 !important}" +
+    ".hqw-back{background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}" +
+    ".hqw-card{width:min(92%,360px);padding:20px 18px 16px;border-radius:22px;background:" + T.card + ";color:" + T.cardInk + ";text-align:center;border:4px solid " + T.cardInk + ";box-shadow:0 8px 0 rgba(0,0,0,.35);font-family:var(--body,'Atkinson Hyperlegible',Verdana,sans-serif)}" +
+    ".hqw-card h2{margin:0 0 6px;font-family:" + T.font + ";font-weight:900;font-size:1.7rem;line-height:1.05}" +
+    ".hqw-card p{margin:6px 0 0;font-size:1rem;line-height:1.4}" +
+    ".hqw-card button{display:block;width:100%;margin-top:14px;min-height:52px;border-radius:16px;border:3px solid " + T.cardInk + ";background:" + T.accent + ";color:" + T.cardInk + ";font-family:" + T.font + ";font-weight:900;font-size:1.2rem;cursor:pointer;box-shadow:0 5px 0 " + T.cardInk + "}" +
+    ".hqw-ring{width:110px;height:110px;margin:4px auto 8px;display:block}" +
+    ".hqw-pill{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483500;padding:6px 14px;border-radius:999px;background:" + T.card + ";color:" + T.cardInk + ";border:3px solid " + T.cardInk + ";font-family:" + T.font + ";font-weight:900;font-size:.95rem;pointer-events:none;box-shadow:0 4px 0 rgba(0,0,0,.3)}" +
+    ".hqw-pill.low{background:" + T.accent + "}" +
+    ".hqw-pill[hidden]{display:none}" +
+    ".hqw-launch{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 0}" +
+    ".hqw-open{display:inline-flex;align-items:center;gap:11px;padding:9px 18px 9px 10px;border-radius:16px;border:3px solid " + T.cardInk + ";background:" + T.accent + ";color:" + T.cardInk + ";font-family:" + T.font + ";font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 5px 0 " + T.cardInk + ";transition:transform .12s}" +
+    ".hqw-open:hover{transform:translateY(-2px)}" +
+    ".hqw-open.wait{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.35);box-shadow:none}" +
+    ".hqw-open svg{width:34px;height:34px;flex:none;border-radius:9px;background:" + T.card + ";padding:3px}" +
+    ".hqw-note{margin:0;font-size:.94rem;opacity:.88}" +
+    "@media (prefers-reduced-motion:reduce){.hqw-open{transition:none}}";
+  document.head.appendChild(css);
+
+  function ring(frac, label){
+    var r = 46, c = 2 * Math.PI * r;
+    return '<svg class="hqw-ring" viewBox="0 0 110 110" aria-hidden="true">' +
+      '<circle cx="55" cy="55" r="' + r + '" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="10"/>' +
+      '<circle cx="55" cy="55" r="' + r + '" fill="none" stroke="' + T.accent2 + '" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + (c * (1 - frac)) + '" transform="rotate(-90 55 55)"/>' +
+      '<text x="55" y="61" text-anchor="middle" font-size="19" font-weight="800" fill="' + T.cardInk + '" font-family="Arial,sans-serif">' + label + '</text></svg>';
+  }
+  var back = null, focusBack = null;
+  function modal(html, btnText, then){
+    shut();
+    focusBack = document.activeElement;
+    back = el("div", "hqw-back");
+    var c = el("div", "hqw-card"); c.setAttribute("role", "dialog"); c.setAttribute("aria-modal", "true");
+    c.innerHTML = html;
+    var b = el("button", "", btnText); b.type = "button";
+    b.addEventListener("click", function(){ shut(); if(then) then(); });
+    c.appendChild(b); back.appendChild(c); document.body.appendChild(back);
+    back.addEventListener("keydown", function(e){ if(e.key === "Escape"){ shut(); if(then) then(); } });
+    b.focus();
+  }
+  function shut(){ if(back){ back.remove(); back = null; if(focusBack && focusBack.focus) try{ focusBack.focus(); }catch(e){} } }
+
+  function locked(s){
+    if(s.goes < 1){
+      var got = SPARKS_PER_GO - s.toNext;
+      modal(ring(got / SPARKS_PER_GO, got + "/" + SPARKS_PER_GO) +
+        "<h2>" + (W.earnedTitle || cfg.title + " is earned") + "</h2>" +
+        "<p>Every " + SPARKS_PER_GO + " sparks earns a " + Math.round(BREAK_SECONDS / 60) + " minute go. You are " + s.toNext + " sparks away. " + W.earn + "</p>", "OK");
+    } else {
+      modal(ring(1 - s.cool / (COOLDOWN_MINUTES * 60), mmss(s.cool)) +
+        "<h2>" + W.coolingTitle + "</h2>" +
+        "<p>" + W.cooling + " Your next go is ready in " + mmss(s.cool) + ". You have " + words(s.goes) + " saved up.</p>", "OK");
+    }
+  }
+
+  /* the break clock, pinned over whatever the game draws */
+  var pill = el("div", "hqw-pill"); pill.hidden = true; pill.setAttribute("aria-live", "off");
+  var watching = null, warned = false;
+  function isOpen(){ return cfg.openSel ? !!document.querySelector(cfg.openSel) : false; }
+  function watch(){
+    if(watching) return;
+    if(!pill.parentNode) document.body.appendChild(pill);
+    warned = false;
+    watching = setInterval(function(){
+      var s = state();
+      if(TEST){ pill.hidden = !isOpen(); pill.textContent = "Test mode"; return; }
+      if(s.onBreak){
+        pill.hidden = !isOpen();
+        pill.textContent = "Break " + mmss(s.breakLeft);
+        pill.classList.toggle("low", s.breakLeft <= 30);
+        if(s.breakLeft <= 30 && !warned){ warned = true; }
+        return;
+      }
+      clearInterval(watching); watching = null; pill.hidden = true;
+      if(isOpen()){
+        modal("<h2>That is the break</h2><p>" + W.done + " Next go in " + mmss(COOLDOWN_MINUTES * 60) +
+          (s.goes ? ", and you have " + words(s.goes) + " saved up." : ". Sparks earn more goes.") + "</p>",
+          "Back to my HQ", function(){ if(cfg.close) cfg.close(); refresh(); });
+      }
+      refresh();
+    }, 500);
+  }
+
+  function request(fn){
+    var s = state();
+    if(!s.onBreak){
+      if(s.goes < 1 || s.cool > 0){ locked(s); return false; }
+      load(); store.goes--; store.breakEnd = Date.now() + BREAK_SECONDS * 1000; save();
+    }
+    watch();
+    if(fn) fn();
+    refresh();
+    return true;
+  }
+
+  function note(){
+    var s = state();
+    if(TEST) return "Test mode: every go is free.";
+    if(s.onBreak) return "Break on: " + mmss(s.breakLeft) + " left.";
+    if(s.goes > 0 && s.cool > 0) return W.coolingShort + " Ready in " + mmss(s.cool) + ".";
+    if(s.goes > 0) return words(s.goes) + " ready. Each one is a " + Math.round(BREAK_SECONDS / 60) + " minute break.";
+    return s.toNext + " more sparks for your next go.";
+  }
+
+  var openBtn = null, noteEl = null;
+  function refresh(){
+    if(cfg.onChange) cfg.onChange();
+    if(!openBtn) return;
+    var s = state(), ready = s.onBreak || (s.goes > 0 && s.cool <= 0);
+    openBtn.classList.toggle("wait", !ready);
+    openBtn.querySelector("span").textContent = (ready ? "Play " : "") + cfg.title;
+    noteEl.textContent = note();
+  }
+  function addLauncher(){
+    if(cfg.launcher === false) return;
+    var hero = document.querySelector(".hero");
+    if(!hero || hero.querySelector(".hqw-launch")) return;
+    var box = el("div", "hqw-launch");
+    openBtn = el("button", "hqw-open"); openBtn.type = "button";
+    openBtn.innerHTML = cfg.icon + "<span></span>";
+    openBtn.addEventListener("click", function(){ request(cfg.open); });
+    noteEl = el("p", "hqw-note");
+    box.appendChild(openBtn); box.appendChild(noteEl);
+    hero.appendChild(box);
+    refresh();
+  }
+  function boot(){
+    addLauncher();
+    if(state().onBreak && !TEST) watch();
+    setInterval(function(){ if(!isOpen()) refresh(); }, 1000);
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+
+  return { request: request, note: note, state: state, active: function(){ return state().onBreak; } };
 };
 })();

@@ -40,6 +40,9 @@ def must(s, a, b, count=None, where=""):
 def common(s, name):
     # EGW's floating biscuits stay in EGW's space
     s = re.sub(r'<script src="/egw/biscuits\.js[^"]*"></script>\n?', "", s)
+    # EGW's break game (Dunk) and its shared engine stay out; this HQ adds its own below
+    s = re.sub(r'<script src="/data/hqbreak\.js[^"]*"></script>\n?', "", s)
+    s = re.sub(r'<script src="/egw/dunk\.js[^"]*"></script>\n?', "", s)
     s = must(s, '<link rel="stylesheet" href="/egw/egw.css', '<script src="%s"></script>\n<link rel="stylesheet" href="/egw/egw.css' % CONF, 1, name)
     s = re.sub(r'(<link rel="stylesheet" href="/egw/egw\.css\?v=\d+">)', r'\1\n<link rel="stylesheet" href="%s">' % LC_CSS, s, count=1)
     s = must(s, "&display=swap", "&family=Space+Mono:wght@400;700&display=swap", None, name)
@@ -78,7 +81,7 @@ def hub_patches(name, s):
                      '      <a href="/practice/multiplication.html"><b>Multiplication</b><span>Maths drills</span></a>\n'
                      '      <a href="/practice/day-at-school.html"><b>Story builder</b><span>English, make something</span></a>') + s[b:]
         # the jumpscare button
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=2" data-button="1"></script>', 1, name)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=3" data-button="1"></script>\n<script src="/data/hqbreak.js?v=2"></script>\n<script src="/lc/break.js?v=1"></script>', 1, name)
     if name == "papers.html":
         s = must(s, "<title>What's on the papers - ", "<title>Your skills map - ", 1, name)
         s = must(s, "<h1>What's on<br>the <em>papers</em></h1>", "<h1>Your<br><em>skills</em> map</h1>", 1, name)
