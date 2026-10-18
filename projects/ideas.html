@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea Lab - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=8">
+<style>
+/* Idea Lab only. Everything else lives in style.css */
+.hero .toprow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hero .ttq{margin-top:14px}
+
+/* station picker */
+.stations{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 8px}
+.station{
+  text-align:left;cursor:pointer;font:inherit;color:var(--ink);
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:18px 18px 16px;box-shadow:var(--lift);
+  transform:rotate(var(--rot,0deg));
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.station.fill-teal,.station.fill-bright,.station.fill-plum,.station.fill-ink{color:var(--paper)}
+.station:nth-child(odd){--rot:-.5deg}
+.station:nth-child(even){--rot:.5deg}
+.station:hover{transform:rotate(0) translateY(-4px);box-shadow:var(--lift-hi)}
+.station[aria-pressed="true"]{outline:4px dashed var(--ink);outline-offset:5px;transform:rotate(0)}
+.station h3{font-variation-settings:"wdth" 118,"wght" 800;font-size:1.3rem;line-height:1.05;margin:0 0 4px}
+.station p{margin:0;font-size:.9rem}
+.station .kicker{margin-bottom:6px}
+@media (max-width:820px){.stations{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.stations{grid-template-columns:1fr}.station p{display:none}}
+
+.pane{
+  background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:22px;margin:18px 0 10px;box-shadow:var(--lift-hi);
+}
+.pane[hidden]{display:none}
+.pane h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.7rem;margin:0 0 4px}
+.pane .lead{margin:0 0 18px;color:var(--body-tint);max-width:62ch}
+.row{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:12px 0 0}
+.small{font-size:.86rem;color:var(--body-tint)}
+.flash{min-height:1.3em;font-size:.88rem;color:var(--teal);margin:10px 0 0}
+
+/* spin the time machine */
+.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.reel{
+  border:var(--border) solid var(--ink);border-radius:16px;padding:14px 14px 12px;
+  background:var(--paper);min-height:140px;display:flex;flex-direction:column;
+}
+.reel .kicker{margin-bottom:6px}
+.reel .val{
+  font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:1.25rem;line-height:1.12;flex:1;
+}
+.reel.locked{background:var(--yellow)}
+.lockbtn{
+  align-self:flex-start;margin-top:10px;font:inherit;font-size:.78rem;cursor:pointer;
+  border:2px solid var(--ink);border-radius:999px;background:var(--white);padding:4px 11px;
+}
+.reel.locked .lockbtn{background:var(--ink);color:var(--paper)}
+.spinning .reel:not(.locked) .val{animation:jitter .25s linear infinite}
+.sentence{
+  margin:16px 0 0;padding:14px 16px;border-radius:14px;background:var(--ink);color:var(--paper);
+  font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 700;font-size:1.1rem;line-height:1.3;
+}
+@media (max-width:700px){.reels{grid-template-columns:1fr}.reel{min-height:0}}
+
+/* should we */
+.sw-card{
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  padding:22px;background:linear-gradient(150deg,var(--bright),var(--teal));color:var(--paper);
+  font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:clamp(1.3rem,3.2vw,1.9rem);line-height:1.15;
+  min-height:130px;display:flex;align-items:center;
+}
+.sw-count{font-size:.82rem;color:var(--body-tint);margin:8px 0 0}
+.piles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.pile{border:var(--border) dashed var(--ink);border-radius:16px;padding:12px 14px;min-height:80px}
+.pile h4{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px}
+.pile ul{margin:0;padding-left:18px;font-size:.88rem}
+.pile li{margin-bottom:5px}
+.pile.dep{background:var(--yellow);border-style:solid}
+@media (max-width:700px){.piles{grid-template-columns:1fr}}
+
+/* chips you can pick */
+.pick{
+  font:inherit;font-size:.92rem;cursor:pointer;
+  border:2px solid var(--ink);border-radius:999px;background:var(--white);padding:7px 14px;
+  transition:transform .12s ease;
+}
+.pick:hover{transform:translateY(-2px) rotate(-1deg)}
+.pick[aria-pressed="true"]{background:var(--orange);font-weight:700}
+.sparks{display:grid;gap:10px;margin-top:16px}
+.spark{
+  display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  border:var(--border) solid var(--ink);border-radius:14px;padding:12px 14px;background:var(--paper);
+}
+.spark span{flex:1 1 260px;font-size:1rem}
+
+/* formats */
+.forms{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.form{
+  text-align:left;font:inherit;cursor:pointer;color:inherit;
+  border:var(--border) solid var(--ink);border-radius:16px;padding:14px;background:var(--paper);
+  transition:transform .14s ease;
+}
+.form:hover{transform:translateY(-3px)}
+.form b{display:block;font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.1rem;margin-bottom:4px}
+.form span{display:block;font-size:.84rem}
+.form .size{margin-top:8px;font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.form[aria-pressed="true"]{background:var(--yellow)}
+@media (max-width:900px){.forms{grid-template-columns:repeat(2,1fr)}}
+
+/* writing boxes */
+textarea.box{
+  width:100%;min-height:96px;resize:vertical;font:inherit;font-size:1rem;
+  border:var(--border) solid var(--ink);border-radius:14px;padding:12px 14px;background:var(--paper);color:var(--ink);
+}
+.starters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+
+/* the shelf */
+.shelf{
+  margin:34px 0 0;padding:20px 22px;border:var(--border) solid var(--ink);border-radius:var(--r-alt);
+  background:linear-gradient(150deg,#123c47,var(--ink));color:var(--paper);box-shadow:var(--lift);
+}
+.shelf h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.6rem;color:var(--yellow);margin:0 0 4px}
+.shelf .lead{margin:0 0 14px;opacity:.85;font-size:.94rem}
+.ideas{display:grid;gap:8px}
+.idea{
+  display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.08);
+  border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:9px 12px;
+}
+.idea .t{flex:1;font-size:.96rem}
+.idea .from{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.idea button{font:inherit;font-size:.8rem;cursor:pointer;border-radius:999px;padding:4px 10px;border:2px solid var(--paper);background:transparent;color:var(--paper)}
+.idea.fav{border-color:var(--yellow);background:rgba(255,194,71,.16)}
+.idea.fav .star{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.emptyshelf{opacity:.75;font-size:.94rem;margin:0}
+
+/* shape it up */
+.shape{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+.shape label.f{display:block;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+.shape select,.shape input{
+  width:100%;font:inherit;border:var(--border) solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);
+}
+.card-out{
+  border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:var(--yellow);padding:18px 20px;
+  box-shadow:5px 6px 0 var(--ink);transform:rotate(-.6deg);
+}
+.card-out .kicker{opacity:.75}
+.card-out h3{font-variation-settings:"wdth" 118,"wght" 800;font-size:1.35rem;line-height:1.1;margin:0 0 10px}
+.card-out dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.92rem}
+.card-out dt{font-weight:700}
+.card-out dd{margin:0}
+@media (max-width:760px){.shape{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/projects/">Projects</a>
+      <a href="/practice/">Practice</a>
+      <a href="/games/">Games</a>
+      <a href="/tools/">Tools</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero hero-sm">
+  <div class="wrap">
+    <div class="toprow">
+      <h1 class="echo" data-echo="IDEA LAB">IDEA <span class="accent">LAB</span></h1>
+    </div>
+    <div class="line">
+      <span class="chip">New project</span>
+      <p>Somewhere to find an idea for your project. Try any of these, in any order, or none of them. Nothing you pick here is final, and half an idea counts.</p>
+    </div>
+    <div class="ttq">If we could time travel, should we?</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="stations" role="group" aria-label="Ways to find an idea">
+    <button class="station fill-orange" data-pane="spin" aria-pressed="false">
+      <span class="kicker">Quick</span><h3>Spin the time machine</h3><p>Three wheels: when, what you do there, and what you make. Keep the bits you like.</p>
+    </button>
+    <button class="station fill-teal" data-pane="should" aria-pressed="false">
+      <span class="kicker">Quick</span><h3>Should we?</h3><p>Twelve time travel ideas. Yes, no, or it depends. The &ldquo;it depends&rdquo; pile is where projects hide.</p>
+    </button>
+    <button class="station fill-plum" data-pane="mash" aria-pressed="false">
+      <span class="kicker">About you</span><h3>Mash it up</h3><p>Pick things you are into. It mixes them with time travel.</p>
+    </button>
+    <button class="station fill-yellow" data-pane="forms" aria-pressed="false">
+      <span class="kicker">Look around</span><h3>What could it be?</h3><p>A film, a song, a model, a game? Sixteen ways a project can turn out.</p>
+    </button>
+    <button class="station fill-bright" data-pane="whatif" aria-pressed="false">
+      <span class="kicker">Think it</span><h3>What if...?</h3><p>Pick a sentence start and finish it however you like.</p>
+    </button>
+    <button class="station fill-ink" data-pane="ask" aria-pressed="false">
+      <span class="kicker">Away from the screen</span><h3>Ask someone</h3><p>Questions to ask Jay, HB or someone at home. Their answers might spark something.</p>
+    </button>
+  </div>
+  <p class="small" style="margin:0 0 6px">Tap one to open it. Anything you keep goes on your idea shelf at the bottom, and it stays on this device.</p>
+
+  <!-- ============ SPIN ============ -->
+  <section class="pane" id="pane-spin" hidden>
+    <h2>Spin the time machine</h2>
+    <p class="lead">Spin all three, or lock the ones you like and spin the rest. Some of what comes out will be daft. That is fine. Daft ideas are where good ones start.</p>
+    <div class="reels" id="reels">
+      <div class="reel" data-r="0"><span class="kicker">Go to</span><div class="val">?</div><button class="lockbtn" type="button">Lock</button></div>
+      <div class="reel" data-r="1"><span class="kicker">And</span><div class="val">?</div><button class="lockbtn" type="button">Lock</button></div>
+      <div class="reel" data-r="2"><span class="kicker">Make it as</span><div class="val">?</div><button class="lockbtn" type="button">Lock</button></div>
+    </div>
+    <div class="sentence" id="spinOut" hidden></div>
+    <div class="row">
+      <button class="btn btn-orange" id="spinBtn" type="button">Spin</button>
+      <button class="btn btn-quiet" id="spinKeep" type="button" disabled>Keep this one</button>
+    </div>
+    <p class="flash" id="spinFlash"></p>
+  </section>
+
+  <!-- ============ SHOULD WE ============ -->
+  <section class="pane" id="pane-should" hidden>
+    <h2>Should we?</h2>
+    <p class="lead">One at a time. No right answers, and you can skip any of them.</p>
+    <div class="sw-card" id="swCard"></div>
+    <p class="sw-count" id="swCount"></p>
+    <div class="row">
+      <button class="btn" data-sw="yes" type="button">Yes</button>
+      <button class="btn btn-quiet" data-sw="no" type="button">No</button>
+      <button class="btn btn-orange" data-sw="dep" type="button">It depends</button>
+      <button class="btn btn-quiet" data-sw="skip" type="button">Skip</button>
+    </div>
+    <div class="piles">
+      <div class="pile"><h4>Yes</h4><ul id="pile-yes"></ul></div>
+      <div class="pile"><h4>No</h4><ul id="pile-no"></ul></div>
+      <div class="pile dep"><h4>It depends</h4><ul id="pile-dep"></ul></div>
+    </div>
+    <p class="small" style="margin-top:12px">Anything in the &ldquo;it depends&rdquo; pile goes on your idea shelf by itself. Those are the ones people argue about, which makes them good projects.</p>
+    <div class="row"><button class="btn btn-quiet" id="swAgain" type="button">Start again</button></div>
+  </section>
+
+  <!-- ============ MASH IT UP ============ -->
+  <section class="pane" id="pane-mash" hidden>
+    <h2>Mash it up</h2>
+    <p class="lead">Pick anything you are into. One is enough, more gives it more to play with.</p>
+    <div class="row" id="likes" style="margin-top:0"></div>
+    <div class="row">
+      <input class="box" id="likeOwn" placeholder="Something else you are into" style="font:inherit;border:3px solid var(--ink);border-radius:999px;padding:8px 14px;background:var(--paper);min-width:220px">
+      <button class="btn btn-quiet" id="likeAdd" type="button">Add it</button>
+    </div>
+    <div class="row"><button class="btn btn-orange" id="mashBtn" type="button">Mash it up</button></div>
+    <div class="sparks" id="sparks"></div>
+    <p class="flash" id="mashFlash"></p>
+  </section>
+
+  <!-- ============ FORMS ============ -->
+  <section class="pane" id="pane-forms" hidden>
+    <h2>What could it be?</h2>
+    <p class="lead">Your project can be pretty much anything you can make or do. Tap any that you would not mind trying. You can pick more than one.</p>
+    <div class="forms" id="forms"></div>
+    <p class="flash" id="formsFlash"></p>
+  </section>
+
+  <!-- ============ WHAT IF ============ -->
+  <section class="pane" id="pane-whatif" hidden>
+    <h2>What if...?</h2>
+    <p class="lead">Tap a start, then finish it in the box. Or ignore the starts and write your own.</p>
+    <div class="starters" id="starters"></div>
+    <textarea class="box" id="whatifBox" placeholder="What if..."></textarea>
+    <div class="row"><button class="btn btn-orange" id="whatifKeep" type="button">Keep this one</button></div>
+    <p class="flash" id="whatifFlash"></p>
+  </section>
+
+  <!-- ============ ASK SOMEONE ============ -->
+  <section class="pane" id="pane-ask" hidden>
+    <h2>Ask someone</h2>
+    <p class="lead">Pick a question and ask it out loud to Jay, HB, Willow, or someone at home. Jot down anything they say that is interesting, or do not and just remember it.</p>
+    <div class="starters" id="askQs"></div>
+    <textarea class="box" id="askBox" placeholder="What did they say?"></textarea>
+    <div class="row"><button class="btn btn-orange" id="askKeep" type="button">Keep this one</button></div>
+    <p class="flash" id="askFlash"></p>
+  </section>
+
+  <!-- ============ THE SHELF ============ -->
+  <section class="shelf" aria-labelledby="shelf-h">
+    <h2 id="shelf-h">Your idea shelf</h2>
+    <p class="lead">Everything you have kept. Star the ones that grab you, bin the rest.</p>
+    <div class="ideas" id="ideas"></div>
+  </section>
+
+  <!-- ============ SHAPE IT UP ============ -->
+  <section class="pane" id="pane-shape" style="margin-top:22px">
+    <h2>Shape one up</h2>
+    <p class="lead">When one idea feels like it might be the one, give it a little shape. It does not have to be the final idea, and you can do this as many times as you like.</p>
+    <div class="shape">
+      <div>
+        <label class="f" for="shIdea">The idea</label>
+        <select id="shIdea"></select>
+        <div style="height:12px"></div>
+        <label class="f" for="shForm">What it might turn into</label>
+        <select id="shForm"></select>
+        <div style="height:12px"></div>
+        <label class="f">A tiny first step</label>
+        <div class="row" id="shSteps" style="margin-top:0"></div>
+        <div style="height:12px"></div>
+        <label class="f">Who could help</label>
+        <div class="row" id="shHelp" style="margin-top:0"></div>
+      </div>
+      <div>
+        <div class="card-out" id="cardOut"></div>
+      </div>
+    </div>
+    <div id="sendHost"></div>
+  </section>
+
+  <a class="backlink" href="/projects/" style="margin-top:26px">Back to projects</a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/milestones.html">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- saved on this device ---------- */
+var KEY = "b5.projects.ideas.v1";
+var st = { shelf:[], likes:[], forms:[], sw:{}, shape:{} };
+try{ var d = JSON.parse(localStorage.getItem(KEY) || "null"); if(d && typeof d === "object"){ for(var k in d) st[k] = d[k]; } }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function flash(id, msg){ var f = el(id); f.textContent = msg; clearTimeout(f._t); f._t = setTimeout(function(){ f.textContent = ""; }, 3200); }
+
+/* ---------- stations ---------- */
+var stations = Array.prototype.slice.call(document.querySelectorAll('.station'));
+stations.forEach(function(b){
+  b.addEventListener('click', function(){
+    var open = b.getAttribute('aria-pressed') !== 'true';
+    stations.forEach(function(x){
+      x.setAttribute('aria-pressed', 'false');
+      el('pane-'+x.dataset.pane).hidden = true;
+    });
+    if(open){
+      b.setAttribute('aria-pressed', 'true');
+      var p = el('pane-'+b.dataset.pane);
+      p.hidden = false;
+      p.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start' });
+    }
+  });
+});
+
+/* ---------- the shelf ---------- */
+function addIdea(text, from){
+  text = String(text || "").trim();
+  if(!text) return false;
+  if(st.shelf.some(function(i){ return i.text === text; })) return false;
+  st.shelf.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), text: text, from: from, star: false });
+  save(); drawShelf(); return true;
+}
+function drawShelf(){
+  var box = el('ideas');
+  if(!st.shelf.length){
+    box.innerHTML = '<p class="emptyshelf">Nothing here yet. Open any of the ways above and keep whatever you like the sound of.</p>';
+  } else {
+    var list = st.shelf.slice().sort(function(a,b){ return (b.star?1:0) - (a.star?1:0); });
+    box.innerHTML = list.map(function(i){
+      return '<div class="idea'+(i.star?' fav':'')+'" data-id="'+i.id+'">'+
+        '<div class="t"><span class="from">'+esc(i.from)+'</span>'+esc(i.text)+'</div>'+
+        '<button class="star" type="button" aria-pressed="'+(i.star?'true':'false')+'">'+(i.star?'Starred':'Star')+'</button>'+
+        '<button class="bin" type="button" aria-label="Bin this idea">Bin</button>'+
+      '</div>';
+    }).join('');
+  }
+  drawShape();
+}
+el('ideas').addEventListener('click', function(e){
+  var row = e.target.closest('.idea'); if(!row) return;
+  var i = st.shelf.filter(function(x){ return x.id === row.dataset.id; })[0]; if(!i) return;
+  if(e.target.classList.contains('star')){ i.star = !i.star; }
+  if(e.target.classList.contains('bin')){ st.shelf = st.shelf.filter(function(x){ return x !== i; }); if(st.shape.idea === i.id) st.shape.idea = ''; }
+  save(); drawShelf();
+});
+
+/* ---------- spin the time machine ---------- */
+var R = [
+  [ "the dinosaurs, 66 million years ago", "Ancient Egypt, while the pyramids go up", "Roman Britain", "a Viking longship", "1066, the year of the castles",
+    "the Great Fire of London, 1666", "a Victorian street in 1851", "the first ever football match", "the Titanic, the night before",
+    "the first moon landing, 1969", "a 1980s arcade", "the day you were born", "Chilton Bridge in 1950", "ten years from now",
+    "the year 2100", "a thousand years from now", "the last day on Earth" ],
+  [ "meet someone famous", "stop something happening", "bring one thing back with you", "warn someone", "just watch, and touch nothing",
+    "fix a mistake", "live there for a week", "open a shop", "start a band", "take one photo", "bring a friend",
+    "leave something for the future to find", "get a job", "teach them something from now", "find out the truth about something" ],
+  [ "a short film", "a song", "a comic", "a model", "a game", "a podcast", "a poster", "a museum display", "a debate", "a diary",
+    "a cafe menu", "a travel guide", "an invention", "a painting", "a map", "a news report" ]
+];
+var reels = Array.prototype.slice.call(document.querySelectorAll('.reel'));
+var cur = ["", "", ""];
+reels.forEach(function(r, i){
+  r.querySelector('.lockbtn').addEventListener('click', function(){
+    if(!cur[i]) return;
+    r.classList.toggle('locked');
+    this.textContent = r.classList.contains('locked') ? 'Locked' : 'Lock';
+  });
+});
+function spinText(){ return "Go to " + cur[0] + " and " + cur[1] + ". Make it as " + cur[2] + "."; }
+el('spinBtn').addEventListener('click', function(){
+  var box = el('reels'); box.classList.add('spinning');
+  var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var n = 0, t = setInterval(function(){
+    reels.forEach(function(r, i){ if(!r.classList.contains('locked')) r.querySelector('.val').textContent = pick(R[i]); });
+    if(++n > (calm ? 0 : 8)){
+      clearInterval(t); box.classList.remove('spinning');
+      reels.forEach(function(r, i){
+        if(!r.classList.contains('locked')){ cur[i] = pick(R[i]); r.querySelector('.val').textContent = cur[i]; }
+      });
+      var out = el('spinOut'); out.hidden = false; out.textContent = spinText() + " Should you?";
+      el('spinKeep').disabled = false;
+      el('spinBtn').textContent = 'Spin again';
+    }
+  }, 70);
+});
+el('spinKeep').addEventListener('click', function(){
+  flash('spinFlash', addIdea(spinText(), 'Time machine') ? 'On your shelf.' : 'That one is already on your shelf.');
+});
+
+/* ---------- should we ---------- */
+var SW = [
+  "Go back and watch the dinosaurs, from a safe distance.",
+  "Stop the Titanic from ever leaving port.",
+  "Meet yourself at seven years old and give one piece of advice.",
+  "Bring a woolly mammoth back to 2026.",
+  "Find out who wins the next World Cup before it happens.",
+  "Go back and have one rubbish day again, but better.",
+  "Buy a lottery ticket you already know will win.",
+  "Visit the year 3026 and come back with what you saw.",
+  "Bring a Victorian kid to 2026 for a day out.",
+  "Stop the mobile phone from ever being invented.",
+  "Ask someone from history what they really meant.",
+  "Go back and sort out climate change before it got bad."
+];
+var swIdx = 0;
+function swNext(){
+  while(swIdx < SW.length && st.sw[swIdx]) swIdx++;
+  var c = el('swCard');
+  if(swIdx >= SW.length){
+    c.textContent = "That is all twelve. Have a look at your piles.";
+    el('swCount').textContent = "";
+  } else {
+    c.textContent = SW[swIdx];
+    el('swCount').textContent = (swIdx + 1) + " of " + SW.length;
+  }
+  ['yes','no','dep'].forEach(function(k){
+    el('pile-'+k).innerHTML = SW.map(function(s, i){ return st.sw[i] === k ? '<li>'+esc(s)+'</li>' : ''; }).join('');
+  });
+}
+document.querySelectorAll('[data-sw]').forEach(function(b){
+  b.addEventListener('click', function(){
+    if(swIdx >= SW.length) return;
+    var v = b.dataset.sw;
+    if(v === 'skip'){ st.sw[swIdx] = 'skip'; }
+    else {
+      st.sw[swIdx] = v;
+      if(v === 'dep') addIdea(SW[swIdx].replace(/\.$/, '') + ". It depends...", 'Should we?');
+    }
+    save(); swIdx++; swNext();
+  });
+});
+el('swAgain').addEventListener('click', function(){ st.sw = {}; swIdx = 0; save(); swNext(); });
+swNext();
+
+/* ---------- mash it up ---------- */
+var LIKES = [ "football", "music", "horror", "video games", "animals", "cooking", "drawing", "building things", "cars and bikes",
+  "fashion", "films", "space", "fishing", "dinosaurs", "science", "history", "nature", "YouTube", "dancing", "comedy",
+  "money", "sport", "phones and tech", "sleep" ];
+function drawLikes(){
+  var all = LIKES.concat(st.likes.filter(function(l){ return LIKES.indexOf(l) < 0; }));
+  el('likes').innerHTML = all.map(function(l){
+    var on = st.likes.indexOf(l) > -1;
+    return '<button class="pick" type="button" aria-pressed="'+on+'" data-l="'+esc(l)+'">'+esc(l)+'</button>';
+  }).join('');
+}
+el('likes').addEventListener('click', function(e){
+  var b = e.target.closest('.pick'); if(!b) return;
+  var l = b.dataset.l, i = st.likes.indexOf(l);
+  if(i > -1) st.likes.splice(i, 1); else st.likes.push(l);
+  save(); drawLikes();
+});
+el('likeAdd').addEventListener('click', function(){
+  var v = el('likeOwn').value.trim().toLowerCase(); if(!v) return;
+  if(st.likes.indexOf(v) < 0) st.likes.push(v);
+  el('likeOwn').value = ''; save(); drawLikes();
+});
+var ONE = [
+  "{a} in the past: what was it like a hundred years ago, and would you go back for it?",
+  "{a} a thousand years from now. Show what it has turned into.",
+  "A time traveller who only cares about {a}.",
+  "Go back and teach someone from history about {a}. How does it go?",
+  "The whole history of {a}, told in five stops.",
+  "If you could change one moment in the history of {a}, should you?",
+  "Someone from 1850 finds out about {a} today. What do they make of it?"
+];
+var TWO = [
+  "{a} meets {b}, across time.",
+  "A {a} fan and a {b} fan get stuck in the same year. Which year, and what happens?",
+  "Travel back to the day {a} and {b} first crossed paths.",
+  "{a} in the future, {b} in the past. Swap them."
+];
+function drawSparks(list){
+  el('sparks').innerHTML = list.map(function(s){
+    return '<div class="spark"><span>'+esc(s)+'</span><button class="btn btn-quiet" type="button" data-keep="'+esc(s)+'">Keep this one</button></div>';
+  }).join('');
+}
+el('mashBtn').addEventListener('click', function(){
+  if(!st.likes.length){ flash('mashFlash', 'Pick at least one thing first. Anything at all.'); return; }
+  var out = [], tries = 0;
+  while(out.length < 3 && tries++ < 40){
+    var s;
+    if(st.likes.length > 1 && Math.random() < .45){
+      var a = pick(st.likes), b = pick(st.likes); if(a === b) continue;
+      s = pick(TWO).replace('{a}', a).replace('{b}', b);
+    } else {
+      s = pick(ONE).replace('{a}', pick(st.likes));
+    }
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    if(out.indexOf(s) < 0) out.push(s);
+  }
+  drawSparks(out);
+});
+el('sparks').addEventListener('click', function(e){
+  var b = e.target.closest('[data-keep]'); if(!b) return;
+  flash('mashFlash', addIdea(b.dataset.keep, 'Mash it up') ? 'On your shelf.' : 'That one is already on your shelf.');
+});
+
+/* ---------- forms ---------- */
+var FORMS = [
+  ["A short film", "Film it on a phone or tablet. Acting, animation or just footage.", "Medium"],
+  ["A song", "Lyrics, a beat, or both. Recorded or just written.", "Small to medium"],
+  ["A comic", "Panels and speech bubbles, on paper or on screen.", "Medium"],
+  ["A model", "Card, clay, Lego, whatever is about. Something you can hold.", "Medium to big"],
+  ["A game", "Board game, card game, or one made in Jump Lab.", "Medium to big"],
+  ["A podcast", "Talk about it, interview someone, record it.", "Small"],
+  ["A poster or campaign", "Make people think one thing. Bold and short.", "Small"],
+  ["A museum display", "Objects with labels, like the real thing.", "Medium"],
+  ["A debate", "Pick a side and argue it. Or argue both.", "Small"],
+  ["A diary", "Pages from someone living in another time.", "Small to medium"],
+  ["A menu", "Food from another time, or a cafe in the future.", "Small"],
+  ["A travel guide", "Where to go, what to avoid, in another year.", "Medium"],
+  ["An invention", "Design a thing that would help a time traveller.", "Medium"],
+  ["Art", "Painting, drawing, photos, anything visual.", "Any size"],
+  ["A map", "A place across time, or a route through it.", "Small to medium"],
+  ["A news report", "Breaking news from another century.", "Small"]
+];
+function drawForms(){
+  el('forms').innerHTML = FORMS.map(function(f){
+    var on = st.forms.indexOf(f[0]) > -1;
+    return '<button class="form" type="button" aria-pressed="'+on+'" data-f="'+esc(f[0])+'"><b>'+f[0]+'</b><span>'+f[1]+'</span><span class="size">'+f[2]+'</span></button>';
+  }).join('');
+}
+el('forms').addEventListener('click', function(e){
+  var b = e.target.closest('.form'); if(!b) return;
+  var f = b.dataset.f, i = st.forms.indexOf(f);
+  if(i > -1) st.forms.splice(i, 1); else st.forms.push(f);
+  save(); drawForms(); drawShape();
+  flash('formsFlash', st.forms.length ? 'Your picks show up when you shape an idea at the bottom.' : '');
+});
+
+/* ---------- what if ---------- */
+var STARTS = [
+  "What if you could only go back, never forward...",
+  "What if you met yourself and...",
+  "What if one thing from the past came back today...",
+  "What if time travel cost something you really care about...",
+  "What if everyone could do it...",
+  "What if the past did not want you there...",
+  "What if you changed one tiny thing and...",
+  "What if you got stuck..."
+];
+el('starters').innerHTML = STARTS.map(function(s){ return '<button class="pick" type="button" data-s="'+esc(s)+'">'+esc(s)+'</button>'; }).join('');
+el('starters').addEventListener('click', function(e){
+  var b = e.target.closest('.pick'); if(!b) return;
+  var box = el('whatifBox'); box.value = b.dataset.s.replace(/\.\.\.$/, ' '); box.focus();
+});
+el('whatifKeep').addEventListener('click', function(){
+  var v = el('whatifBox').value.trim();
+  if(!v){ flash('whatifFlash', 'Nothing in the box yet. Even three words is fine.'); return; }
+  flash('whatifFlash', addIdea(v, 'What if') ? 'On your shelf.' : 'That one is already on your shelf.');
+  el('whatifBox').value = '';
+});
+
+/* ---------- ask someone ---------- */
+var ASK = [
+  "If you could go back to one day of your life, which would it be?",
+  "What do you wish you had known at my age?",
+  "What from when you were young should come back?",
+  "Would you want to know your own future?",
+  "If you could meet anyone from history, who?",
+  "What do you think school will be like in a hundred years?"
+];
+el('askQs').innerHTML = ASK.map(function(s){ return '<button class="pick" type="button" data-q="'+esc(s)+'">'+esc(s)+'</button>'; }).join('');
+var askQ = '';
+el('askQs').addEventListener('click', function(e){
+  var b = e.target.closest('.pick'); if(!b) return;
+  askQ = b.dataset.q;
+  el('askQs').querySelectorAll('.pick').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  el('askBox').placeholder = 'What did they say to: ' + askQ;
+});
+el('askKeep').addEventListener('click', function(){
+  var v = el('askBox').value.trim();
+  if(!v){ flash('askFlash', 'Nothing in the box yet. You can keep it in your head instead.'); return; }
+  flash('askFlash', addIdea((askQ ? askQ + ' They said: ' : '') + v, 'Asked someone') ? 'On your shelf.' : 'That one is already on your shelf.');
+  el('askBox').value = '';
+});
+
+/* ---------- shape one up ---------- */
+var STEPS = [ "Tell Jay the idea", "Sketch it on paper", "Find three pictures", "Look up one fact", "Write one sentence about it", "Make a really rough version", "Decide later" ];
+var HELP = [ "Jay", "HB", "Willow", "Andy", "Kara", "Vernon", "Someone at home", "Going solo for now" ];
+function chips(id, list, key){
+  el(id).innerHTML = list.map(function(s){
+    var on = (st.shape[key] || []).indexOf(s) > -1;
+    return '<button class="pick" type="button" aria-pressed="'+on+'" data-v="'+esc(s)+'">'+esc(s)+'</button>';
+  }).join('');
+}
+['shSteps','shHelp'].forEach(function(id){
+  el(id).addEventListener('click', function(e){
+    var b = e.target.closest('.pick'); if(!b) return;
+    var key = id === 'shSteps' ? 'steps' : 'help';
+    var a = st.shape[key] = st.shape[key] || [];
+    var i = a.indexOf(b.dataset.v); if(i > -1) a.splice(i, 1); else a.push(b.dataset.v);
+    save(); drawShape();
+  });
+});
+el('shIdea').addEventListener('change', function(){ st.shape.idea = this.value; save(); drawShape(); });
+el('shForm').addEventListener('change', function(){ st.shape.form = this.value; save(); drawShape(); });
+
+function ideaById(id){ return st.shelf.filter(function(x){ return x.id === id; })[0]; }
+function drawShape(){
+  var ideas = st.shelf.slice().sort(function(a,b){ return (b.star?1:0) - (a.star?1:0); });
+  el('shIdea').innerHTML = '<option value="">' + (ideas.length ? 'Pick one from your shelf' : 'Your shelf is empty so far') + '</option>' +
+    ideas.map(function(i){ return '<option value="'+i.id+'"'+(st.shape.idea === i.id ? ' selected' : '')+'>'+esc(i.text.length > 80 ? i.text.slice(0,78)+'...' : i.text)+'</option>'; }).join('');
+  var forms = st.forms.length ? st.forms.concat(FORMS.map(function(f){return f[0]}).filter(function(f){ return st.forms.indexOf(f) < 0; })) : FORMS.map(function(f){return f[0]});
+  el('shForm').innerHTML = '<option value="">Not sure yet</option>' + forms.map(function(f){ return '<option'+(st.shape.form === f ? ' selected' : '')+'>'+esc(f)+'</option>'; }).join('');
+  chips('shSteps', STEPS, 'steps');
+  chips('shHelp', HELP, 'help');
+  var i = ideaById(st.shape.idea);
+  el('cardOut').innerHTML =
+    '<span class="kicker">My project idea, for now</span>'+
+    '<h3>'+(i ? esc(i.text) : 'Pick an idea from your shelf and it lands here.')+'</h3>'+
+    '<dl>'+
+      '<dt>Might be</dt><dd>'+esc(st.shape.form || 'Not sure yet')+'</dd>'+
+      '<dt>First step</dt><dd>'+esc((st.shape.steps||[]).join(', ') || 'Not decided')+'</dd>'+
+      '<dt>Help from</dt><dd>'+esc((st.shape.help||[]).join(', ') || 'Not decided')+'</dd>'+
+    '</dl>';
+}
+function cardText(){
+  var i = ideaById(st.shape.idea);
+  var lines = [
+    "The big question: If we could time travel, should we?",
+    "",
+    "MY PROJECT IDEA, FOR NOW",
+    "Idea: " + (i ? i.text : "not picked yet"),
+    "Might be: " + (st.shape.form || "not sure yet"),
+    "First step: " + ((st.shape.steps||[]).join(", ") || "not decided"),
+    "Help from: " + ((st.shape.help||[]).join(", ") || "not decided"),
+    "",
+    "EVERYTHING ON MY IDEA SHELF"
+  ];
+  st.shelf.forEach(function(x){ lines.push((x.star ? "* " : "- ") + x.text); });
+  if(!st.shelf.length) lines.push("(empty)");
+  return lines.join("\n");
+}
+if(window.Base5Send){
+  Base5Send.mount(el('sendHost'), { tool: "Project ideas", getText: cardText, filename: "project-ideas" });
+}
+
+drawLikes(); drawForms(); drawShelf();
+})();
+</script>
+</body>
+</html>

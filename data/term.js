@@ -154,7 +154,7 @@ window.B5TERM = {
       sub:"Whichever one you are on.",
       body:"Two different things sharing a slot. This half term the project question is: if we could time travel, should we? Your answer can be anything you can make. If you are on GCSE work, Jay will have said which shelf, or go to your own HQ.",
       hq:true,
-      links:[["My project","/projects/"],["Play It's Time","/projects/its-time.html"],["GCSE maths","/practice/#maths-gcse"],["GCSE english","/practice/#english-gcse"]],
+      links:[["Idea Lab","/projects/ideas.html"],["My project","/projects/"],["Play It's Time","/projects/its-time.html"],["GCSE maths","/practice/#maths-gcse"],["GCSE english","/practice/#english-gcse"]],
       ways:["Think it through out loud with Jay","Look at someone else's for a bit","Make a mess and tidy it later","Start again"]
     },
 
@@ -240,7 +240,7 @@ window.B5TERM = {
         }
       },
       feature:[
-        { kicker:"This half term", title:"If we could time travel, should we?", text:"That is the question for the next seven weeks. Your project is your answer, made in whatever way you like: a film, a song, a model, a game, an argument. You do not have to know yet.", href:"/projects/", fill:"ink", w:12, sticker:"The big question" }
+        { kicker:"This half term", title:"If we could time travel, should we?", text:"That is the question for the next seven weeks. Your project is your answer, made in whatever way you like: a film, a song, a model, a game, an argument. You do not have to know yet. The Idea Lab can help you find one.", href:"/projects/ideas.html", fill:"ink", w:12, sticker:"The big question" }
       ]
     },
     {
