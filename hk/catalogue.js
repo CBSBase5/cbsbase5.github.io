@@ -1,5 +1,5 @@
 /* ==========================================================
-   HK's Overgrown HQ - catalogue
+   HK's Tackle Ops HQ - catalogue
    Every activity, step and topic, so the HQ home, the skills map
    and Jay's view always agree. Chunk names come from the pages;
    if a page's chunks change, update the list here too.

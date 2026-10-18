@@ -21,7 +21,7 @@
    Two ways to use it:
    1. A game built for this (Dunk, Neon Stack) calls HQBreak({...})
       and this file draws the whole overlay around it.
-   2. A game that already has its own screen (HK's Overgrown Hop,
+   2. A game that already has its own screen (HK's Lakeside Breach,
       JT's Penalty Shootout, LW's Showstopper, LC's jumpscares)
       is wrapped with HQBreak.wrap({...}): this file only adds the
       launcher, the earning, a break clock pinned on top of the
@@ -366,7 +366,7 @@ window.HQBreak = function(cfg){
    HQBreak.wrap: the same earning, break and cooldown for a game
    that already draws its own screen.
      HQBreak.wrap({
-       prefix: "b5.hk.", title: "Overgrown Hop", icon: "<svg>",
+       prefix: "b5.hk.", title: "Lakeside Breach", icon: "<svg>",
        theme: { card, cardInk, accent, accent2, font },
        words: { earn, coolingTitle, cooling, coolingShort, done },
        open: fn, close: fn,          the game's own open and close

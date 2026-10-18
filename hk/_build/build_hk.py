@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Builds HK's Overgrown HQ (/hk/) from LC's Night Shift HQ (/lc/).
+Builds HK's Tackle Ops HQ (/hk/) from LC's Night Shift HQ (/lc/).
 
 HK works on the same English and Maths targets as LC (English Foundation 1
 to 2, Maths Foundation 2 to 3, from Jay's baselines, no exam), so every
 page is shared: activities, escape rooms, hub pages, Jay's view and the
 catalogue are copied from /lc/ and given HK's name, links, storage keys
 and look. The daily drop and swipe card banks are loaded from /lc/ as they
-are. HK has no jumpscare; instead the home page gets Overgrown Hop, a pop
+are. HK has no jumpscare; instead the home page gets Lakeside Breach, a pop
 up crossing game (/hk/crossy.js, HK's own file, not built).
 
 Run from the repo root after LC's pages change (and after
@@ -22,9 +22,9 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LC = os.path.join(ROOT, "lc")
 HK = os.path.join(ROOT, "hk")
 OWN = {"conf.js", "hk.css", "crossy.js"}
-HK_CSS = "/hk/hk.css?v=1"
-FONTS = "&family=Bungee&family=Rubik:wght@400;500;600;700"
-CROSSY = '<script src="/hk/crossy.js?v=3"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/hk/break.js?v=1"></script>'
+HK_CSS = "/hk/hk.css?v=2"
+FONTS = "&family=Black+Ops+One&family=Rubik:wght@400;500;600;700"
+CROSSY = '<script src="/hk/crossy.js?v=4"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/hk/break.js?v=2"></script>'
 
 
 def must(s, a, b, count=None, where=""):
@@ -35,7 +35,7 @@ def must(s, a, b, count=None, where=""):
 
 
 def convert(s, name):
-    s = re.sub(r'/lc/conf\.js\?v=\d+', "/hk/conf.js?v=1", s)
+    s = re.sub(r'/lc/conf\.js\?v=\d+', "/hk/conf.js?v=2", s)
     s = re.sub(r'/lc/lc\.css\?v=\d+', HK_CSS, s)
     s = s.replace("&family=Space+Mono:wght@400;700", FONTS)
     # no jumpscares for HK
@@ -48,8 +48,8 @@ def convert(s, name):
     s = s.replace("b5.lc.", "b5.hk.").replace("b5.lcteacher.", "b5.hkteacher.")
     s = s.replace("LCJAY1", "HKJAY1").replace("LCSAVE1", "HKSAVE1")
     s = s.replace('filename: "lc-', 'filename: "hk-').replace('seeded("lc-daily-"', 'seeded("hk-daily-"')
-    s = s.replace("LC's Night Shift HQ", "HK's Overgrown HQ").replace("LC Night Shift HQ", "HK Overgrown HQ")
-    s = s.replace("Night Shift HQ", "Overgrown HQ")
+    s = s.replace("LC's Night Shift HQ", "HK's Tackle Ops HQ").replace("LC Night Shift HQ", "HK Tackle Ops HQ")
+    s = s.replace("Night Shift HQ", "Tackle Ops HQ")
     s = re.sub(r"\bLC\b(?![.\w])", "HK", s)
     s = re.sub(r"<!-- BUILT by lc/_build/build_lc\.py[^>]*-->\n", "", s)
     s = must(s, "<!DOCTYPE html>\n", "<!DOCTYPE html>\n<!-- BUILT by hk/_build/build_hk.py from a shared HQ page. Edit the source and rebuild. -->\n", 1, name) if name.endswith(".html") else s
@@ -94,7 +94,7 @@ def main():
         s = open(path).read()
         s = convert(s, name)
         if name == "catalogue.js":
-            s = s.replace("LC's Night Shift HQ - catalogue", "HK's Overgrown HQ - catalogue")
+            s = s.replace("LC's Night Shift HQ - catalogue", "HK's Tackle Ops HQ - catalogue")
             s = s.replace("   Written by hand, not built.", "   BUILT by hk/_build/build_hk.py from a shared catalogue. Do not edit by hand.")
         if re.search(r"[^\x00-\x7f]", s):
             sys.exit("build_hk: non ASCII in " + name)

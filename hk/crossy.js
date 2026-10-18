@@ -1,9 +1,11 @@
 /* ==========================================================
-   HK's Overgrown HQ - Overgrown Hop
-   A pop up hopping game. A small pixel dinosaur hops forward
-   through a town that nature has taken back: grass and rubble,
-   old roads that still have traffic, rivers with drifting logs
-   and rafts, and dino trails where a big herd thunders past.
+   HK's Tackle Ops HQ - Lakeside Breach
+   A pop up hopping game. A small pixel operator with a fishing
+   rod pushes forward to the water: lakeside banks with sandbags,
+   crates and floodlights, patrol tracks with trucks rolling past,
+   rivers with drifting logs and rafts, and drone sweep zones where
+   a line of drones zips across. Fish along the way are bonus
+   points. Original art: no real game's characters or logos.
 
    No timers, no nagging, standing still is always fine.
    Instant restart, calm messages, sound can be turned off.
@@ -19,7 +21,7 @@
 if (window.HKCrossy) return;
 
 var KEY = 'b5.hk.crossy.v1';
-var GAME = 'Overgrown Hop';
+var GAME = 'Lakeside Breach';
 var COLS = 9, TS = 16, LW = COLS * TS;   /* art pixels */
 var SPAN = 18, XMIN = -4.5;              /* lanes wrap over this many tiles */
 var HOP = 0.12;                          /* seconds per hop */
@@ -108,22 +110,22 @@ var RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').
 
 /* ---------- sprites ---------- */
 var DINO = [
-  '.......OGGGGG.',
-  '......OGLLGGGG',
-  '......GGLGGWKG',
-  '......GGGGGGGG',
-  '......GGGGgggg',
-  '.....OGGGGGGW.',
-  '....OGGGGBBB..',
-  '...OGGGGGBBGG.',
-  'O.OGGGGGGBB.g.',
-  'GGGGGGGGGBB...',
-  '.ggGGGGGGBB...',
-  '...gGGGGGgg...',
-  '....GG..GG....',
-  '....gK..gK....'
+  '..hHHHHh.....R',
+  '.hHHHHHHh...R.',
+  '.HHVWKVVH...R.',
+  '.hSSSSSSh..R..',
+  '..SSggSS...R..',
+  '.OTTTTTTO.R...',
+  'OTTtTTtTTSS...',
+  'OTTTTTTTT.....',
+  '.TTtTTtTT.....',
+  '.TTTTTTTT.....',
+  '..tt..tt......',
+  '..tt..tt......',
+  '..BB..BB......',
+  '.BBB..BBB.....'
 ];
-var DPAL = { G: '#5ccf52', g: '#2c8f43', L: '#b4f582', B: '#ffd76e', O: '#ff8a3a', W: '#ffffff', K: '#15281c' };
+var DPAL = { H: '#5b6b3a', h: '#3f4a28', V: '#5cf2ff', S: '#e2b48f', g: '#c08d69', T: '#c8b27a', t: '#9a8656', O: '#ff7a1a', B: '#1d1f24', R: '#8b5a2b', W: '#ffffff', K: '#15281c' };
 function sprite(rows, pal, flip, blink) {
   var h = rows.length, w = rows[0].length;
   var c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -156,7 +158,7 @@ css.textContent =
 'html body>.hkgame{position:fixed !important;z-index:2147483000 !important;inset:0 !important}' +
 '.hkgame{display:flex;flex-direction:column;align-items:center;margin:0;padding:0 0 10px;overflow:hidden;' +
 'color:var(--moon,#f3f8ee);font-family:var(--body,"Atkinson Hyperlegible",Verdana,system-ui,sans-serif);' +
-'background:radial-gradient(120% 70% at 50% 0%,rgba(92,207,82,.20),transparent 60%),radial-gradient(90% 60% at 50% 110%,rgba(255,138,58,.16),transparent 60%),var(--night,#0c1a13);' +
+'background:radial-gradient(120% 70% at 50% 0%,rgba(88,242,165,.16),transparent 60%),radial-gradient(90% 60% at 50% 110%,rgba(255,122,26,.16),transparent 60%),var(--night,#0b1622);' +
 'background-color:var(--night,#0c1a13);overscroll-behavior:contain;-webkit-tap-highlight-color:transparent}' +
 '.hkgame *{box-sizing:border-box}' +
 '.hkgame button{font-family:var(--display,"Arial Black",system-ui,sans-serif);cursor:pointer;-webkit-user-select:none;user-select:none}' +
@@ -192,10 +194,10 @@ css.textContent =
 '.hkg-pop{animation:hkgpop .55s cubic-bezier(.2,1.6,.4,1) both}' +
 '@keyframes hkgpop{0%{transform:scale(.4) rotate(-8deg)}100%{transform:scale(1) rotate(-3deg)}}' +
 '.hkg-nums{display:flex;justify-content:center;gap:12px;margin:12px 0 14px}' +
-'.hkg-nums div{min-width:92px;padding:6px 10px;border-radius:14px;background:#eef6e4;border:2px solid #cfe3bd}' +
+'.hkg-nums div{min-width:92px;padding:6px 10px;border-radius:14px;background:#eef2f6;border:2px solid #c9d3dd}' +
 '.hkg-nums span{display:block;font-size:.8rem;font-weight:700;color:#3d5b47}' +
 '.hkg-nums b{display:block;font-family:var(--display,"Arial Black",system-ui,sans-serif);font-size:1.7rem;line-height:1.1}' +
-'.hkg-go{display:block;width:100%;min-height:58px;border-radius:16px;border:3px solid #15281c;background:#5ccf52;color:#0f2414;font-weight:900;font-size:1.45rem;box-shadow:0 5px 0 #15281c}' +
+'.hkg-go{display:block;width:100%;min-height:58px;border-radius:16px;border:3px solid #15281c;background:#ff7a1a;color:#1b1206;font-weight:900;font-size:1.45rem;box-shadow:0 5px 0 #15281c}' +
 '.hkg-go:hover{background:#7ee070}.hkg-go:active{transform:translateY(3px);box-shadow:0 2px 0 #15281c}' +
 '.hkg-c2{display:block;width:100%;margin-top:10px;min-height:44px;border-radius:14px;border:2px solid #9bb59a;background:transparent;color:#15281c;font-weight:800;font-size:1rem}' +
 '.hkg-c2:hover{background:#eef6e4}' +
@@ -219,7 +221,7 @@ css.textContent =
 '.hkg-pad{display:flex;gap:10px;margin-top:10px;flex:none}' +
 '.hkg-pad button{width:66px;height:56px;border-radius:16px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:1.35rem;line-height:1;touch-action:manipulation;box-shadow:0 4px 0 rgba(0,0,0,.35)}' +
 '.hkg-pad button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35);background:rgba(255,255,255,.22)}' +
-'.hkg-pad .hkg-up{background:#5ccf52;color:#0f2414;border-color:#2c8f43;width:84px}' +
+'.hkg-pad .hkg-up{background:#ff7a1a;color:#1b1206;border-color:#b3500c;width:84px}' +
 '@media (max-height:560px){.hkg-pad button{height:44px}.hkg-bar{padding:6px 12px}.hkg-tb,.hkg-x{min-height:40px}}' +
 '@media (max-width:440px){.hkg-tb{padding:8px 10px;font-size:.85rem}.hkg-title span{display:none}}' +
 '@media (prefers-reduced-motion:reduce){.hkg-pop{animation:none;transform:rotate(-3deg)}.hkg-hint,.hkg-toast{transition:none}}' +
@@ -395,7 +397,7 @@ var CARS = [
   ['#e94f37', '#ff9a80', '#a8311f'], ['#ffb627', '#ffe08a', '#c4830b'], ['#22b8ab', '#8ff0e6', '#147f76'],
   ['#5867d6', '#a6b0ff', '#38449c'], ['#f27fae', '#ffc6dc', '#b84f7d'], ['#8a5bd0', '#c9a8ff', '#5d3a96']
 ];
-var VANS = [['#f1ede0', '#ffffff', '#b9b29c', '#ef7724'], ['#2f6fb8', '#79aef0', '#1f4c80', '#ffd76e'], ['#e0c13a', '#fff08a', '#a88c16', '#15281c']];
+var VANS = [['#5b6b3a', '#7a8c52', '#3f4a28', '#ffd23f'], ['#c8b27a', '#e0cd96', '#9a8656', '#ff7a1a'], ['#4a525a', '#6b737c', '#2b3036', '#5cf2ff']];
 function roadRow(r) {
   var d = diff(r);
   var row = { r: r, type: 'road', dir: Math.random() < 0.5 ? 1 : -1, items: [], bone: -1 };
@@ -619,10 +621,10 @@ function addPart(x, y, vx, vy, g, life, c, s) {
 }
 
 var MSG = {
-  squash: { t: 'Squashed!', col: '#e2541f', m: ['That car was in a real hurry.', 'Who knew a ruined town still had traffic?', 'Flat as a pancake, but still smiling.', 'Beep beep. The van won that one.'] },
-  splash: { t: 'Splash!', col: '#1f86d1', m: ['Turns out this dino is not a swimmer.', 'Into the river. Quite refreshing, really.', 'Missed the log by a claw.'] },
+  squash: { t: 'Flattened!', col: '#e2541f', m: ['That patrol truck was not stopping.', 'Wrong lane, operator.', 'Flat as a pancake, still holding the rod.', 'Beep beep. The truck won that one.'] },
+  splash: { t: 'Splash!', col: '#1f86d1', m: ['Wrong way to get to the fish.', 'In the lake. Kit is soaked.', 'Missed the log by a boot.'] },
   drift: { t: 'Splash!', col: '#1f86d1', m: ['The log drifted right off the edge.', 'Nice ride, shame about the ending.'] },
-  stamp: { t: 'Stampeded!', col: '#8a4fb5', m: ['The herd had somewhere to be.', 'That was a lot of very big feet.', 'Big dinos, small dino. Big dinos win.'] }
+  stamp: { t: 'Spotted!', col: '#8a4fb5', m: ['The drones picked you up.', 'Should have waited for the sweep to pass.', 'Buzz buzz. Busted.'] }
 };
 
 function die(kind, vr, px) {
@@ -754,18 +756,10 @@ function drawGround(row, r, y) {
     if (up.type !== 'river') { R(0, y, LW, 2, '#2a7fb8'); }
     if (dn.type !== 'river') { R(0, y + TS - 1, LW, 1, '#a9defa'); }
   } else if (row.type === 'stamp') {
-    R(0, y, LW, TS, '#cda96d');
-    R(0, y + 4, LW, 1, '#b8945a'); R(0, y + 11, LW, 1, '#b8945a');
-    for (c = 0; c < COLS; c++) {
-      h = hash(r, c + 200); x = c * TS + (h % 6);
-      if (h % 2 === 0) { R(x + 2, y + 6, 3, 2, '#a98450'); R(x + 1, y + 5, 1, 1, '#a98450'); R(x + 3, y + 4, 1, 1, '#a98450'); R(x + 5, y + 5, 1, 1, '#a98450'); }
-      if (h % 5 === 1) R(x + 9, y + 13, 2, 1, '#e6cb98');
-    }
-    for (x = 1; x < LW; x += 7) { R(x, y, 2, 1, '#9c7d4b'); R(x + 3, y + TS - 1, 2, 1, '#9c7d4b'); }
-    if (row.phase !== 'idle') {
-      var on = RM ? true : (Math.floor(G.t * 8) % 2 === 0);
-      if (on) { g2.fillStyle = row.phase === 'warn' ? 'rgba(255,70,40,0.30)' : 'rgba(255,70,40,0.16)'; g2.fillRect(0, y, LW, TS); }
-    }
+    R(0, y, LW, TS, '#8d939a');
+    R(0, y + 1, LW, 1, '#a3a9b0'); R(0, y + TS - 2, LW, 1, '#6f757c');
+    for (x = 0; x < LW; x += 8) { R(x, y + 1, 4, 2, '#ffd23f'); R(x + 4, y + 1, 4, 2, '#2b3036'); R(x, y + TS - 3, 4, 2, '#2b3036'); R(x + 4, y + TS - 3, 4, 2, '#ffd23f'); }
+    for (x = 3; x < LW; x += 16) { R(x, y + 7, 6, 1, '#7a8087'); R(x + 2, y + 6, 1, 3, '#7a8087'); }
   }
 }
 function pick2(h, a) { return a[(h >>> 4) % a.length]; }
@@ -817,43 +811,40 @@ function drawObstacle(kind, x, y, h) {
     if (h % 4 === 0) { R(x + 10, y - 4, 1, 1, '#ff8fb1'); R(x + 4, y + 1, 1, 1, '#ff8fb1'); R(x + 12, y + 2, 1, 1, '#ffd84a'); }
     if (h % 3 === 1) { R(x + 1, y + 6, 1, 4, t[1]); R(x + 14, y + 5, 1, 3, t[1]); }
   } else if (kind === 'rubble') {
+    /* sandbags */
     shadow(x + 1, y + 13, 14);
-    R(x + 7, y + 3, 7, 10, '#b4b7ad'); R(x + 7, y + 3, 7, 2, '#d3d5cb'); R(x + 13, y + 5, 1, 8, '#8e9188');
-    R(x + 2, y + 7, 7, 7, '#a1a49a'); R(x + 2, y + 7, 7, 2, '#c5c8bd'); R(x + 8, y + 9, 1, 5, '#7f8279');
-    R(x + 5, y + 11, 8, 3, '#8f9289'); R(x + 5, y + 11, 8, 1, '#b2b5aa');
-    R(x + 11, y - 1, 1, 5, '#9a4f2a'); R(x + 12, y - 2, 1, 2, '#9a4f2a');
-    R(x + 3, y + 7, 3, 1, '#5aa845'); R(x + 9, y + 3, 2, 1, '#5aa845'); R(x + 2, y + 8, 1, 2, '#5aa845');
-    if (h % 2) { R(x + 4, y + 5, 1, 2, '#4f9e3c'); R(x + 3, y + 4, 1, 1, '#6cc24c'); }
+    R(x + 1, y + 9, 7, 4, '#b8a06a'); R(x + 8, y + 9, 7, 4, '#a8915c');
+    R(x + 4, y + 5, 8, 4, '#c8b27a'); R(x + 1, y + 9, 7, 1, '#d8c48e'); R(x + 8, y + 9, 7, 1, '#c9b27c'); R(x + 4, y + 5, 8, 1, '#e0cd96');
+    R(x + 7, y + 10, 1, 3, '#8a7548'); R(x + 7, y + 6, 1, 3, '#8a7548');
+    R(x + 2, y + 12, 13, 1, '#7d6a42');
   } else if (kind === 'wreck') {
+    /* reinforced supply crate */
     shadow(x, y + 13, 16);
-    R(x + 1, y + 5, 14, 8, '#b4562a'); R(x + 1, y + 5, 14, 1, '#d0743f');
-    R(x + 4, y + 1, 8, 5, '#c4652f'); R(x + 4, y + 1, 8, 1, '#dc8547');
-    R(x + 5, y + 2, 6, 3, '#2b3a40'); R(x + 6, y + 2, 2, 1, '#8fb8c6'); R(x + 9, y + 3, 1, 1, '#8fb8c6');
-    R(x + 3, y + 8, 2, 2, '#7a3518'); R(x + 10, y + 9, 3, 1, '#7a3518'); R(x + 7, y + 7, 1, 1, '#7a3518');
-    R(x + 2, y + 12, 4, 2, '#22242a'); R(x + 10, y + 12, 4, 2, '#22242a');
-    R(x + 1, y + 6, 1, 6, '#3f9a3a'); R(x + 2, y + 9, 1, 3, '#3f9a3a'); R(x + 6, y + 3, 1, 4, '#3f9a3a');
-    R(x + 5, y + 4, 1, 1, '#6cc24c'); R(x + 12, y + 1, 1, 6, '#3f9a3a'); R(x + 13, y + 3, 1, 1, '#6cc24c');
-    R(x + 14, y + 7, 1, 1, '#fff2a8');
+    R(x + 1, y + 2, 14, 12, '#5b6b3a'); R(x + 1, y + 2, 14, 1, '#7a8c52'); R(x + 1, y + 13, 14, 1, '#3f4a28');
+    R(x + 1, y + 2, 1, 12, '#3f4a28'); R(x + 14, y + 2, 1, 12, '#3f4a28');
+    R(x + 3, y + 5, 10, 1, '#3f4a28'); R(x + 3, y + 10, 10, 1, '#3f4a28');
+    R(x + 6, y + 6, 4, 3, '#c8b27a'); R(x + 7, y + 7, 2, 1, '#ff7a1a');
+    for (var k = 0; k < 14; k += 4) R(x + 1 + k, y + 13, 2, 1, '#ffd23f');
   } else if (kind === 'lamp') {
+    /* tactical floodlight on a stand */
     shadow(x + 4, y + 13, 8);
-    R(x + 5, y + 12, 6, 2, '#4a525a');
-    R(x + 7, y - 7, 2, 19, '#5d6670'); R(x + 7, y - 7, 1, 19, '#77818b');
-    R(x + 4, y - 9, 8, 3, '#5d6670'); R(x + 5, y - 7, 6, 1, '#ffe08a');
-    R(x + 6, y - 2, 1, 2, '#46a43c'); R(x + 9, y + 1, 1, 2, '#46a43c'); R(x + 6, y + 4, 1, 2, '#46a43c'); R(x + 9, y + 7, 1, 2, '#46a43c');
-    R(x + 5, y - 1, 1, 1, '#6cc24c'); R(x + 10, y + 2, 1, 1, '#6cc24c'); R(x + 5, y + 5, 1, 1, '#6cc24c'); R(x + 10, y + 8, 1, 1, '#ff8fb1');
-    R(x + 8, y - 6, 1, 1, '#ffd84a');
+    R(x + 5, y + 12, 6, 2, '#2b3036');
+    R(x + 7, y - 4, 2, 16, '#4a525a'); R(x + 7, y - 4, 1, 16, '#6b737c');
+    R(x + 3, y - 8, 10, 5, '#2b3036'); R(x + 4, y - 7, 8, 3, '#fff2a8');
+    if (!RM && Math.floor(G.t * 2 + h) % 3 === 0) { g2.fillStyle = 'rgba(255,242,168,0.25)'; g2.fillRect(x + 1, y - 10, 14, 9); }
   }
 }
 
 function drawBone(x, y, r) {
+  /* a fish, flapping a little */
   var oy = RM ? 0 : Math.round(Math.sin(G.t * 4 + r) * 1.2);
-  shadow(x + 4, y + 12, 8);
-  var Y = y + 6 + oy;
-  R(x + 5, Y + 1, 6, 2, '#fff6dc');
-  R(x + 3, Y, 3, 2, '#fff6dc'); R(x + 3, Y + 2, 3, 2, '#fff6dc');
-  R(x + 10, Y, 3, 2, '#fff6dc'); R(x + 10, Y + 2, 3, 2, '#fff6dc');
-  R(x + 5, Y + 3, 6, 1, '#d9c79a'); R(x + 3, Y + 3, 3, 1, '#d9c79a'); R(x + 10, Y + 3, 3, 1, '#d9c79a');
-  if (!RM && Math.floor(G.t * 3 + r) % 4 === 0) { R(x + 13, Y - 2, 1, 1, '#ffffff'); R(x + 12, Y - 1, 3, 1, 'rgba(255,255,255,0.7)'); }
+  shadow(x + 3, y + 12, 10);
+  var Y = y + 5 + oy, flap = RM ? 0 : (Math.floor(G.t * 6 + r) % 2);
+  R(x + 4, Y + 1, 7, 5, '#9fd3f0'); R(x + 3, Y + 2, 1, 3, '#9fd3f0'); R(x + 5, Y, 5, 1, '#9fd3f0');
+  R(x + 5, Y + 5, 5, 1, '#5aa7d6'); R(x + 4, Y + 4, 7, 1, '#7cc0e8');
+  R(x + 11, Y + 1 - flap, 1, 2 + flap, '#5aa7d6'); R(x + 12, Y + flap, 1, 5 - flap, '#5aa7d6'); R(x + 13, Y - 1 + flap, 1, 7 - 2 * flap, '#5aa7d6');
+  R(x + 5, Y + 2, 1, 1, '#15281c'); R(x + 7, Y + 2, 3, 1, '#ff7a1a');
+  if (!RM && Math.floor(G.t * 3 + r) % 4 === 0) { R(x + 9, Y - 2, 1, 1, '#ffffff'); R(x + 8, Y - 1, 3, 1, 'rgba(255,255,255,0.7)'); }
 }
 
 function drawCar(m, X, y, dir) {
@@ -906,28 +897,20 @@ function drawSign(x, y, row) {
   if (on && !RM) { g2.fillStyle = 'rgba(255,80,50,0.35)'; g2.fillRect(x + 1, Y - 4, 7, 6); }
 }
 
-var HERD = [['#8a5bd0', '#b996ee', '#5d3a96', '#f2d4ff'], ['#2fa38f', '#79dcc8', '#1b6c5e', '#e0fff6'], ['#d9772f', '#f7a865', '#9c4f19', '#ffe7cc']];
+var HERD = [['#2b3036', '#4a525a', '#ff3b2f'], ['#3f4a28', '#5b6b3a', '#ffd23f'], ['#1d2a3a', '#3a5068', '#5cf2ff']];
 function drawHerdDino(X, Y, dir, d) {
-  var W = 30, p = HERD[d.pal];
-  function M(px, py, w, h, c) { R(dir > 0 ? X + px : X + W - px - w, Y + py, w, h, c); }
-  var f = RM ? 0 : Math.floor(G.t * 14 + d.ph) % 2;
-  g2.fillStyle = 'rgba(40,20,0,0.25)'; g2.fillRect(X + 3, Y + 19, 24, 2);
-  /* legs (back pair first) */
-  M(7, 14, 3, 5 - f, p[2]); M(17, 14, 3, 4 + f, p[2]);
-  /* tail */
-  M(0, 9, 3, 2, p[2]); M(2, 8, 4, 4, p[0]);
-  /* body */
-  M(5, 5, 15, 10, p[0]); M(6, 4, 13, 1, p[0]); M(6, 5, 12, 2, p[1]);
-  M(7, 13, 11, 2, p[3]);
-  M(9, 7, 2, 2, p[2]); M(13, 6, 2, 2, p[2]); M(16, 8, 2, 2, p[2]);
-  /* frill and head */
-  M(18, 1, 5, 11, p[1]); M(19, 0, 3, 1, p[1]); M(18, 1, 1, 11, p[2]);
-  M(21, 5, 7, 7, p[0]); M(21, 5, 7, 1, p[1]); M(27, 8, 3, 3, p[2]);
-  M(24, 2, 1, 3, '#fff3d6'); M(25, 1, 1, 2, '#fff3d6'); M(28, 6, 1, 2, '#fff3d6');
-  M(23, 6, 2, 2, '#ffffff'); M(24, 7, 1, 1, '#15141c');
-  /* front legs */
-  M(9, 15, 3, 4 + f, p[2]); M(19, 14, 3, 5 - f, p[2]);
-  M(9, 18 + f, 3, 1, '#2a1f1a'); M(19, 18 - f, 3, 1, '#2a1f1a');
+  /* a quadcopter drone, rotors blurring */
+  var p = HERD[d.pal], f = RM ? 0 : Math.floor(G.t * 20 + d.ph) % 2;
+  var cx = X + 15, cy = Y + 12;
+  g2.fillStyle = 'rgba(0,0,0,0.25)'; g2.fillRect(cx - 9, Y + 19, 18, 2);
+  R(cx - 9, cy - 1, 18, 2, p[1]);
+  R(cx - 4, cy - 3, 8, 6, p[0]); R(cx - 3, cy - 3, 6, 1, p[1]);
+  R(cx - 1, cy + 2, 2, 2, '#15141c'); R(cx, cy + 2, 1, 1, '#5cf2ff');
+  R(cx - 1, cy - 2, 2, 1, (f ? p[2] : '#ffffff'));
+  [-9, 7].forEach(function (ox) {
+    R(cx + ox, cy - 3, 2, 3, p[0]);
+    R(cx + ox - (f ? 4 : 2), cy - 4, f ? 10 : 6, 1, 'rgba(220,230,240,0.85)');
+  });
 }
 
 function drawPlayer(cam) {
@@ -980,7 +963,7 @@ function build() {
   cv.setAttribute('aria-label', 'Game area. Tap to hop forward, swipe to hop sideways or back.');
   cv.setAttribute('role', 'img');
   var hud = el('div', 'hkg-hud', '<div class="hkg-score"><b>0</b><span></span></div><div class="hkg-best">Best <b>0</b></div>');
-  var hint = el('div', 'hkg-hint', 'Tap or swipe to hop. Arrow keys work too.<br>Bones are bonus points.');
+  var hint = el('div', 'hkg-hint', 'Tap or swipe to move. Arrow keys work too.<br>Fish are bonus points.');
   var tst = el('div', 'hkg-toast');
   var card = el('div', 'hkg-card'); card.hidden = true;
   stage.appendChild(cv); stage.appendChild(hud); stage.appendChild(hint); stage.appendChild(tst); stage.appendChild(card);
@@ -1067,7 +1050,7 @@ function updateHud() {
   if (!ui.score || !G) return;
   var s = score();
   ui.score.textContent = String(s);
-  ui.bones.textContent = G.bones ? (G.bones === 1 ? '1 bone' : G.bones + ' bones') : '';
+  ui.bones.textContent = G.bones ? (G.bones === 1 ? '1 fish' : G.bones + ' fish') : '';
   var b = Math.max(store.best, s);
   ui.bestN.textContent = String(b);
   ui.best.className = 'hkg-best' + (s > G.startBest && G.startBest > 0 ? ' hot' : '');
@@ -1115,7 +1098,7 @@ function doPause() {
   if (state !== 'play') return;
   state = 'paused';
   P.queued = null;
-  ui.card.innerHTML = '<h2 style="color:#2c8f43">Paused</h2><p>Take your time. Carry on whenever you like.</p>' +
+  ui.card.innerHTML = '<h2 style="color:#1f6f99">Paused</h2><p>Take your time. Carry on whenever you like.</p>' +
     '<div style="height:14px"></div><button type="button" class="hkg-go" data-act="resume">Carry on</button>' +
     '<button type="button" class="hkg-c2" data-act="close">Close</button>';
   ui.card.insertBefore(cardIcon(), ui.card.firstChild);
@@ -1158,8 +1141,8 @@ function cardIn(html, wide) {
 function showGate() {
   state = 'gate';
   if (ui.hint) ui.hint.className = 'hkg-hint gone';
-  cardIn('<h2 style="color:#2c8f43">Fuel up first</h2>' +
-    '<p>The dino needs fuel. Get ' + GATE_N + ' questions right and you earn ' + runsWord(GATE_RUNS) + '.</p>' +
+  cardIn('<h2 style="color:#1f6f99">Gear up first</h2>' +
+    '<p>The squad needs bait. Get ' + GATE_N + ' questions right and you earn ' + runsWord(GATE_RUNS) + '.</p>' +
     '<p class="hkg-tip">Every ' + PER_RIGHT + ' right answers in your activities or the daily drop earn another run too.</p>' +
     '<button type="button" class="hkg-go" data-act="quiz">Answer questions</button>' +
     '<button type="button" class="hkg-c2" data-act="acts">Go to my activities</button>' +
@@ -1276,8 +1259,8 @@ function quizDone(fallback) {
   if (!fallback) { store.runs += GATE_RUNS; saveStore(); sfx('best'); }
   Q = null;
   cardIn('<div class="hkg-badge hkg-pop">Fuelled up!</div>' +
-    '<h2 style="color:#2c8f43">' + runsWord(store.runs) + ' ready</h2>' +
-    '<p>Nice work. Off you hop.</p><div style="height:12px"></div>' +
+    '<h2 style="color:#1f6f99">' + runsWord(store.runs) + ' ready</h2>' +
+    '<p>Nice work. Off you go.</p><div style="height:12px"></div>' +
     '<button type="button" class="hkg-go" data-act="again">Play</button>' +
     '<button type="button" class="hkg-c2" data-act="close">Save them for later</button>');
   ui.card.insertBefore(cardIcon(), ui.card.firstChild);
