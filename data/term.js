@@ -242,9 +242,7 @@ window.B5TERM = {
           }
         }
       },
-      feature:[
-        { kicker:"This half term", title:"If we could time travel, should we?", text:"That is the question for the next seven weeks. Your project is your answer, made in whatever way you like: a film, a song, a model, a game, an argument. You do not have to know yet. The Idea Lab can help you find one.", href:"/projects/ideas.html", fill:"ink", w:12, sticker:"The big question" }
-      ]
+      feature:[]
     },
     {
       n:2, start:"2026-11-09", end:"2026-11-13",
