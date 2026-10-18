@@ -11,6 +11,25 @@
 <style>
 /* Index only. Everything else lives in style.css */
 
+/* on this day: a thin strip across the very top */
+.otd{background:var(--ink);color:var(--paper);font-size:.9rem;line-height:1.35}
+.otd .wrap{display:flex;align-items:center;gap:12px;padding-top:9px;padding-bottom:9px;flex-wrap:wrap}
+.otd b{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;background:var(--yellow);color:var(--ink);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.otd .yr{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;color:var(--yellow);margin-right:4px}
+.otd .ago{opacity:.7;white-space:nowrap}
+
+/* now and next, and the button to today's page */
+.nownext{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:18px 0 0}
+.nn{display:flex;flex-direction:column;justify-content:center;gap:2px;text-decoration:none;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:18px 14px 16px 12px;padding:9px 16px;box-shadow:3px 4px 0 rgba(10,47,56,.18);min-width:0}
+a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
+.nn small{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+.nn span{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:1.05rem;line-height:1.15}
+.nn.now{background:linear-gradient(150deg,var(--orange),var(--orange-deep))}
+.nn.today{background:var(--ink);color:var(--paper);justify-content:center}
+.nn.today span{color:var(--yellow)}
+.nn.quiet{background:transparent;border-style:dashed;box-shadow:none}
+@media (max-width:600px){.nn{flex:1 1 100%}}
+
 /* hero */
 .hero .toprow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .hero .ttq{margin-top:16px}
@@ -136,6 +155,8 @@
 <body>
 <div class="grain"></div>
 
+<div class="otd" id="otd" hidden></div>
+
 <div class="top">
   <div class="wrap">
     <div class="mark">
@@ -181,6 +202,7 @@
       <p>Seven weeks of time travel. Poke about, follow whatever looks good, leave the rest.</p>
     </div>
     <div class="ttq">If we could time travel, should we?</div>
+    <div class="nownext" id="nownext"></div>
   </div>
 </header>
 
@@ -376,9 +398,10 @@
   </div>
 </footer>
 
-<script src="/data/term.js?v=2"></script>
+<script src="/data/term.js?v=3"></script>
 <script src="/data/games.js?v=1"></script>
 <script src="/data/clockhelp.js?v=1"></script>
+<script src="/data/onthisday.js?v=1"></script>
 <script>
 /* ---------- the weeks ---------- */
 (function(){
@@ -464,6 +487,7 @@
     sec.setAttribute('aria-labelledby','tab-'+w.n);
 
     var cards = '';
+    if(w.cc) cards += '<a class="card w12 fill-yellow cccard" href="/practice/#cc"><span class="kicker">CC every morning this week, 10:00</span><h3>' + w.cc + '</h3></a>';
     (w.feature||[]).forEach(function(f){ cards += feature(f); });
 
     var keys = T.dayKeys.filter(function(k){
@@ -555,6 +579,69 @@
   }).join('');
 
   document.getElementById('vaultCount').textContent = all.length + ' games in there, newest first.';
+})();
+
+/* ---------- on this day ---------- */
+(function(){
+  var O = window.B5OTD; if(!O) return;
+  var d = new Date(), key = ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+  var e = O[key]; if(!e) return;
+  var ago = d.getFullYear() - e[0];
+  var box = document.getElementById('otd');
+  box.innerHTML = '<div class="wrap"><b>On this day</b><span><span class="yr">' + e[0] + '</span>' + e[1] + '</span>' +
+    '<span class="ago">' + (ago === 1 ? 'A year back.' : 'Travel back ' + ago + ' years.') + '</span></div>';
+  box.hidden = false;
+})();
+
+/* ---------- now, next, and today's page ---------- */
+(function(){
+  var T = window.B5TERM, box = document.getElementById('nownext');
+  if(!T || !box) return;
+  var now = new Date(), iso = T.iso(now), mins = now.getHours()*60 + now.getMinutes();
+  var openTo = T.currentWeek().n;
+  function dayLink(w, k, hash){ return '/day/?w=' + w.n + '&amp;d=' + k + (hash ? '#' + hash : ''); }
+  function canOpen(w){ return w.n <= openTo; }
+
+  /* every school day this term, in order */
+  var all = [];
+  T.weeks.forEach(function(w){ T.schoolDays(w).forEach(function(k){ all.push({ w: w, k: k, iso: T.iso(T.dateOf(w, k)) }); }); });
+  var today = all.filter(function(x){ return x.iso === iso; })[0];
+  var html = '';
+
+  function nextDay(after){ return all.filter(function(x){ return x.iso > after; })[0]; }
+  function dayCard(x, label){
+    var date = T.niceDate(T.dateOf(x.w, x.k));
+    var title = ((x.w.days || {})[x.k] || {}).title || date;
+    if(canOpen(x.w)) return '<a class="nn today" href="' + dayLink(x.w, x.k) + '"><small>' + label + '</small><span>' + title + (title !== date ? ', ' + date : '') + '</span></a>';
+    return '<div class="nn quiet"><small>' + label + '</small><span>' + date + '</span></div>';
+  }
+
+  if(today){
+    var slots = T.timetable[today.k];
+    var cur = slots.filter(function(s){ return mins >= T.mins(s[0]) && mins < T.mins(s[1]); })[0];
+    var nxt = slots.filter(function(s){ return T.mins(s[0]) > mins; })[0];
+    if(cur){
+      var cs = T.session(cur[2], today.w);
+      html += '<a class="nn now" href="' + dayLink(today.w, today.k, cs.plain ? '' : cur[2]) + '"><small>Now, until ' + cur[1] + '</small><span>' + cs.title + '</span></a>';
+    }
+    if(nxt){
+      var ns = T.session(nxt[2], today.w);
+      html += '<a class="nn" href="' + dayLink(today.w, today.k, ns.plain ? '' : nxt[2]) + '"><small>Next, at ' + nxt[0] + '</small><span>' + ns.title + '</span></a>';
+    }
+    if(!cur && !nxt){
+      var nd = nextDay(iso);
+      html += '<div class="nn quiet"><small>Today</small><span>That is today done.</span></div>';
+      if(nd) html += dayCard(nd, 'Next school day');
+    }
+    html += '<a class="nn today" href="' + dayLink(today.w, today.k) + '"><small>Open</small><span>Today&rsquo;s page</span></a>';
+  } else {
+    var n2 = nextDay(iso);
+    if(n2){
+      html += '<div class="nn quiet"><small>Today</small><span>No school today.</span></div>';
+      html += dayCard(n2, 'Next school day');
+    }
+  }
+  box.innerHTML = html;
 })();
 </script>
 

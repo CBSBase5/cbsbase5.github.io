@@ -56,6 +56,34 @@ function el(tag, cls, text){ var e = document.createElement(tag); if(cls) e.clas
 function mmss(s){ s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
 function words(n){ return n === 1 ? "1 go" : n + " goes"; }
 
+/* the ring round the launcher icon: how close the next go is, or how
+   much of the break or the cooldown is left */
+var RING_C = 2 * Math.PI * 21;
+function ringHTML(icon, col){
+  return '<span class="hq-ringwrap"><svg class="hq-prog" viewBox="0 0 48 48" aria-hidden="true">' +
+    '<circle cx="24" cy="24" r="21" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="4"/>' +
+    '<circle class="hq-prog-p" cx="24" cy="24" r="21" fill="none" stroke="' + col + '" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + RING_C + '" stroke-dashoffset="' + RING_C + '"/>' +
+    '</svg><span class="hq-ic">' + icon + '</span></span>';
+}
+function ringFrac(s){
+  if(s.onBreak) return Math.min(1, s.breakLeft / BREAK_SECONDS);
+  if(s.goes > 0 && s.cool > 0) return 1 - s.cool / (COOLDOWN_MINUTES * 60);
+  if(s.goes > 0) return 1;
+  return Math.max(0, Math.min(1, (SPARKS_PER_GO - s.toNext) / SPARKS_PER_GO));
+}
+function setRing(btn, s){
+  var p = btn.querySelector(".hq-prog-p");
+  if(p) p.setAttribute("stroke-dashoffset", String(RING_C * (1 - ringFrac(s))));
+}
+var ringCss = document.createElement("style");
+ringCss.textContent =
+  ".hq-ringwrap{position:relative;width:48px;height:48px;flex:none;display:inline-flex;align-items:center;justify-content:center}" +
+  ".hq-prog{position:absolute;inset:0;width:48px !important;height:48px !important;transform:rotate(-90deg);background:none !important;padding:0 !important}" +
+  ".hq-prog-p{transition:stroke-dashoffset .6s ease}" +
+  ".hq-ic{display:inline-flex}" +
+  "@media (prefers-reduced-motion:reduce){.hq-prog-p{transition:none}}";
+document.head.appendChild(ringCss);
+
 /* every spark this student has earned on this device */
 function sparksTotal(prefix){
   var n = 0, i, k, o;
@@ -152,7 +180,7 @@ window.HQBreak = function(cfg){
     ".hqb-open{display:inline-flex;align-items:center;gap:11px;padding:9px 18px 9px 10px;border-radius:16px;border:3px solid " + T.cardInk + ";background:" + T.accent + ";color:" + T.cardInk + ";font-family:" + T.font + ";font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 5px 0 " + T.cardInk + ";transition:transform .12s}" +
     ".hqb-open:hover{transform:translateY(-2px)}" +
     ".hqb-open.wait{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.35);box-shadow:none}" +
-    ".hqb-open svg{width:34px;height:34px;flex:none;border-radius:9px;background:" + T.card + ";padding:3px}" +
+    ".hqb-open .hq-ic svg{width:34px;height:34px;flex:none;border-radius:9px;background:" + T.card + ";padding:3px}" +
     ".hqb-note{margin:0;font-size:.94rem;opacity:.88}" +
     "@media (prefers-reduced-motion:reduce){.hqb-open{transition:none}}";
   document.head.appendChild(css);
@@ -306,7 +334,8 @@ window.HQBreak = function(cfg){
     if(!openBtn) return;
     var s = state(), ready = s.onBreak || (s.goes > 0 && s.cool <= 0);
     openBtn.classList.toggle("wait", !ready);
-    openBtn.querySelector("span").textContent = s.onBreak ? "Back to " + cfg.title : ready ? "Play " + cfg.title : cfg.title;
+    openBtn.querySelector(".hq-lab").textContent = s.onBreak ? "Back to " + cfg.title : ready ? "Play " + cfg.title : cfg.title;
+    setRing(openBtn, s);
     if(TEST) note.textContent = "Test mode: every go is free.";
     else if(s.onBreak) note.textContent = "Break on: " + mmss(s.breakLeft) + " left.";
     else if(s.goes > 0 && s.cool > 0) note.textContent = cfg.words.coolingShort + " Ready in " + mmss(s.cool) + ".";
@@ -318,7 +347,7 @@ window.HQBreak = function(cfg){
     if(!hero || hero.querySelector(".hqb-launch")) return;
     var box = el("div", "hqb-launch");
     openBtn = el("button", "hqb-open"); openBtn.type = "button";
-    openBtn.innerHTML = cfg.icon + "<span></span>";
+    openBtn.innerHTML = ringHTML(cfg.icon, T.accent2) + '<span class="hq-lab"></span>';
     openBtn.addEventListener("click", open);
     note = el("p", "hqb-note");
     box.appendChild(openBtn); box.appendChild(note);
@@ -392,7 +421,7 @@ window.HQBreak.wrap = function(cfg){
     ".hqw-open{display:inline-flex;align-items:center;gap:11px;padding:9px 18px 9px 10px;border-radius:16px;border:3px solid " + T.cardInk + ";background:" + T.accent + ";color:" + T.cardInk + ";font-family:" + T.font + ";font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 5px 0 " + T.cardInk + ";transition:transform .12s}" +
     ".hqw-open:hover{transform:translateY(-2px)}" +
     ".hqw-open.wait{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.35);box-shadow:none}" +
-    ".hqw-open svg{width:34px;height:34px;flex:none;border-radius:9px;background:" + T.card + ";padding:3px}" +
+    ".hqw-open .hq-ic svg{width:34px;height:34px;flex:none;border-radius:9px;background:" + T.card + ";padding:3px}" +
     ".hqw-note{margin:0;font-size:.94rem;opacity:.88}" +
     "@media (prefers-reduced-motion:reduce){.hqw-open{transition:none}}";
   document.head.appendChild(css);
@@ -487,7 +516,8 @@ window.HQBreak.wrap = function(cfg){
     if(!openBtn) return;
     var s = state(), ready = s.onBreak || (s.goes > 0 && s.cool <= 0);
     openBtn.classList.toggle("wait", !ready);
-    openBtn.querySelector("span").textContent = (ready ? "Play " : "") + cfg.title;
+    openBtn.querySelector(".hq-lab").textContent = (ready ? "Play " : "") + cfg.title;
+    setRing(openBtn, s);
     noteEl.textContent = note();
   }
   function addLauncher(){
@@ -496,7 +526,7 @@ window.HQBreak.wrap = function(cfg){
     if(!hero || hero.querySelector(".hqw-launch")) return;
     var box = el("div", "hqw-launch");
     openBtn = el("button", "hqw-open"); openBtn.type = "button";
-    openBtn.innerHTML = cfg.icon + "<span></span>";
+    openBtn.innerHTML = ringHTML(cfg.icon, T.accent2) + '<span class="hq-lab"></span>';
     openBtn.addEventListener("click", function(){ request(cfg.open); });
     noteEl = el("p", "hqw-note");
     box.appendChild(openBtn); box.appendChild(noteEl);

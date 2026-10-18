@@ -81,7 +81,7 @@ def hub_patches(name, s):
                      '      <a href="/practice/multiplication.html"><b>Multiplication</b><span>Maths drills</span></a>\n'
                      '      <a href="/practice/day-at-school.html"><b>Story builder</b><span>English, make something</span></a>') + s[b:]
         # the jumpscare button
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=3" data-button="1"></script>\n<script src="/data/hqbreak.js?v=2"></script>\n<script src="/lc/break.js?v=1"></script>', 1, name)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=4" data-button="1"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/lc/break.js?v=1"></script>', 1, name)
     if name == "papers.html":
         s = must(s, "<title>What's on the papers - ", "<title>Your skills map - ", 1, name)
         s = must(s, "<h1>What's on<br>the <em>papers</em></h1>", "<h1>Your<br><em>skills</em> map</h1>", 1, name)
@@ -94,7 +94,7 @@ def hub_patches(name, s):
         s = must(s, '<span class="often">Often</span> turns up most years', '<span class="often">Key</span> a key skill to start with', 1, name)
         s = must(s, "' <span class=\"often\">Often</span>'", "' <span class=\"often\">Key</span>'", 1, name)
     if name not in ("index.html", "teacher.html"):
-        s = must(s, "</body>", '<script src="/lc/jumpscare.js?v=2"></script>\n</body>', 1, name)
+        s = must(s, "</body>", '<script src="/lc/jumpscare.js?v=4"></script>\n</body>', 1, name)
     if name == "daily.html":
         for sub in ("bio", "stats"):
             s = re.sub(r'<script src="/lc/daily-bank-%s\.js\?v=\d+"></script>\n' % sub, "", s)

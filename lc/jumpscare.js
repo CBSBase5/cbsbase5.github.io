@@ -341,4 +341,11 @@ function mount(){
   setInterval(function(){ if(!busy) drawMeta(); }, 15000);
 }
 if(WITH_BUTTON){ if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount(); }
+
+/* LC asked for read it to me: this file is on every LC page, so it brings it along */
+(function(){
+  if(window.LCRead || document.querySelector('script[src^="/lc/readaloud.js"]')) return;
+  var r = document.createElement("script"); r.src = "/lc/readaloud.js?v=1"; r.async = true;
+  (document.head || document.documentElement).appendChild(r);
+})();
 })();

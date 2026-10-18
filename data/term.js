@@ -214,12 +214,15 @@ window.B5TERM = {
      sessions: add to a session for the whole week, e.g.
                 cc: { line:"Remembrance.", body:"...", links:[["text","/href"]] }
               body replaces the default; links are added first.
+     cc:      this week's cultural calendar focus, one line, e.g.
+              "Remembrance". Shows on the index and on every CC block.
      feature: extra cards on the index for that week:
                 { kicker, title, text, href, fill, w, sticker }
      -------------------------------------------------------- */
   weeks: [
     {
       n:1, start:"2026-11-03", end:"2026-11-06",
+      cc:"",
       era:{ year:"2026", label:"Now" },
       theme:"Through the door",
       sub:"Four days. The first one starts at a museum.",
@@ -245,31 +248,37 @@ window.B5TERM = {
     },
     {
       n:2, start:"2026-11-09", end:"2026-11-13",
+      cc:"",
       era:{ year:"1999", label:"Dial up and floppy disks" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:3, start:"2026-11-16", end:"2026-11-20",
+      cc:"",
       era:{ year:"1969", label:"One small step" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:4, start:"2026-11-23", end:"2026-11-27",
+      cc:"",
       era:{ year:"1851", label:"Steam and soot" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:5, start:"2026-11-30", end:"2026-12-04",
+      cc:"",
       era:{ year:"1066", label:"Arrows and castles" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:6, start:"2026-12-07", end:"2026-12-11",
+      cc:"",
       era:{ year:"65,000,000 BC", label:"The dinosaurs again" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:7, start:"2026-12-14", end:"2026-12-18",
+      cc:"",
       era:{ year:"3026", label:"A thousand years from now" },
       theme:"The last jump before Christmas",
       sub:"Five days, a trip on Tuesday, and home for Christmas on Friday.",
@@ -338,6 +347,10 @@ window.B5TERM = {
       if(add.body) s.body = add.body;
       if(add.options) s.options = add.options;
       if(add.links) s.links = add.links.concat(base.links || []);
+    }
+    if(key === "cc" && week && week.cc){
+      s.line = "Cultural calendar: " + week.cc + ".";
+      s.sub = "This week: " + week.cc + ".";
     }
     return s;
   };
