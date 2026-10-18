@@ -1,10 +1,25 @@
-/* Base 5 - LW's folder. Locked with LW's code.
-   Written by /teacher/folders.html. Do not edit by hand. */
+/* Base 5 - LW's folder.
+   Written by /teacher/folders.html (or by hand: keep the same shape). ASCII only. */
 window.B5FOLDER = {
  "who": "LW",
- "iter": 250000,
- "updated": "2026-10-18T19:32:09.264Z",
- "salt": "gdSKldzQ9dlox4hk/6Zvdw==",
- "iv": "0FuXYXKk6EhU05+A",
- "ct": "nALhRd67DrnFPPc8iGSplEEDNUGIUeZhrO+ug7ECswTW3JqnEQaNAo3X7S6VQCzJEOdVKBvBv5CsZBvIwtinf0lZOS19wvMaQQ8cEp+eemDkx2FnNz7+rTSIUBMfdMQnElA9KEeRPn++0o87wO1Gwbt0NSLzB5JSXGALW+yJplmWMhoeEMPX7dOkmL9iANfWeB6hX/lTNeEwOCoJnQ2MDACwjZRI05qNVZmF3laNxQXYz3G+DWhPKB/68ZWzCNzGnqrcDo0bhoWkNYkZSHP3ZjJAqBa9eOD2/Zetblry7cozo5TSuthGXQyM+/SPr8Vl9VNqCf233sQFlo5FiYaKOT9LoSnBfjcgd+JhEnw9fLpIJemBFRMqD9YY21bX87NRmCncP4+Kg9V3HFeMQY+dBN4QiQrtNSI9TX6r1QBmSwBzui5M3af70FY6nHUeBh8gpIjkoniB6aXQ63lwPY1C84G9L6mtKVOp1baAq6uGyu2CnJibAdIjEpdl46zX4KTW33XmHYd76ornvjKXo0pEA+Uf5fnsFFyuDd7YTP2kMnWlO+4Hs5W8kcPHIsZSSycTfkdPnY6qQnu7192O21H9Hi5r0IN0DYcOy7whRNAfYn+1zqAg1yUsBw8i+DpEJe7qlV9BUHC2f4M+nDPIGnkQLeUCYTBDdSl4YoSB5kySCL9zD+toNWV2Ktlz8O9G3D8xavw9/WnQ3dC9a+fy24jcwJYeir81E/PhCCWmYiRJR2C/vMWE7Gfe2L+Mtkj3q5YdsXw1+7wh2Gi2lYSpfrWy"
+ "updated": "2026-10-18T19:42:01Z",
+ "data": {
+  "v": 2,
+  "messages": [
+   {
+    "id": "m-welcome",
+    "date": "2026-10-18",
+    "text": "Hello LW. This is your folder. Anything I put in here is just for you: things to try, files, and the odd message like this one.\n\nThere is no rush, and nothing in here is marked. If you ever want to say something back, there is a box just under this."
+   }
+  ],
+  "activities": [
+   {
+    "id": "a-idealab",
+    "title": "Idea Lab",
+    "href": "/projects/ideas.html",
+    "note": "For the new project, if you fancy it. Spin a time machine, sort some should we? dilemmas and keep anything that sounds good. Nothing you pick is final."
+   }
+  ],
+  "files": []
+ }
 };

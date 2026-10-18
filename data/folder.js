@@ -6,21 +6,18 @@
    the school's own sharing).
 
    Each folder is one file, /data/folders/<who>.js, setting
-     window.B5FOLDER = { who, iter, updated, salt, iv, ct }
-   The contents are locked (AES-GCM, key from PBKDF2) with the
-   student's four digit code, the same one as their project page.
-   Only "updated" is readable without the code. Jay writes these
-   files with /teacher/folders.html.
+     window.B5FOLDER = { who, updated, data: {...} }
+   It opens straight away: no code. Jay writes these files with
+   /teacher/folders.html (or asks for things to be added).
 
-   Unlocked contents:
-     { v: 1,
+   Contents:
+     { v: 2,
        messages:   [ { id, date: "YYYY-MM-DD", text } ],
        activities: [ { id, title, href, note } ],
        files:      [ { id, title, href, note } ] }
 
    On this device, <prefix>folder.v1 keeps
-     { code (only if "keep it open" is ticked), seen: {id: 1},
-       tried: {id: 1}, look: ISO time of the last look }
+     { seen: {id: 1}, tried: {id: 1}, look: ISO time of the last look }
 
    Used by:
      <HQ>/folder.html   B5Folder.page(element)
@@ -39,7 +36,7 @@ var WHO = String(HQ.who || "EGW");
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html != null) e.innerHTML = html; return e; }
 function load(){ try{ var d = JSON.parse(localStorage.getItem(KEY) || "null"); if(d && typeof d === "object") return fill(d); }catch(e){} return fill({}); }
-function fill(d){ d.seen = d.seen || {}; d.tried = d.tried || {}; return d; }
+function fill(d){ delete d.code; d.seen = d.seen || {}; d.tried = d.tried || {}; return d; }
 function save(d){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
 function safeHref(h){
   h = String(h || "").trim();
@@ -64,20 +61,11 @@ function words(t){
   }).join("");
 }
 
-/* ---------- the lock ---------- */
-function b64(s){ var raw = atob(s), a = new Uint8Array(raw.length); for(var i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i); return a; }
-function unlock(blob, code){
-  if(!window.crypto || !crypto.subtle) return Promise.reject(new Error("no crypto"));
-  return crypto.subtle.importKey("raw", new TextEncoder().encode(code), "PBKDF2", false, ["deriveKey"]).then(function(base){
-    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(blob.salt), iterations: blob.iter || 250000, hash: "SHA-256" },
-      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-  }).then(function(key){
-    return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(blob.iv) }, key, b64(blob.ct));
-  }).then(function(buf){
-    var o = JSON.parse(new TextDecoder().decode(buf));
-    o.messages = o.messages || []; o.activities = o.activities || []; o.files = o.files || [];
-    return o;
-  });
+/* ---------- what is in the folder ---------- */
+function contents(blob){
+  var o = blob.data || {};
+  o.messages = o.messages || []; o.activities = o.activities || []; o.files = o.files || [];
+  return o;
 }
 
 /* fetch this student's folder file, fresh each time so new things show up */
@@ -86,8 +74,8 @@ function fetchFolder(){
   if(got) return got;
   got = new Promise(function(res){
     var s = document.createElement("script");
-    s.src = "/data/folders/" + WHO.toLowerCase() + ".js?t=" + Math.floor(Date.now() / 60000);
-    s.onload = function(){ var b = window.B5FOLDER; res(b && b.ct && String(b.who).toUpperCase() === WHO.toUpperCase() ? b : null); };
+    s.src = "/data/folders/" + WHO.toLowerCase() + ".js?t=" + Date.now();
+    s.onload = function(){ var b = window.B5FOLDER; res(b && b.data && String(b.who).toUpperCase() === WHO.toUpperCase() ? b : null); };
     s.onerror = function(){ res(null); };
     document.head.appendChild(s);
   });
@@ -102,14 +90,6 @@ css.textContent =
   ".fo-hero svg{width:84px;height:68px;flex:none}" +
   ".fo-hero h1{font-size:clamp(2.2rem,8vw,3.4rem);color:var(--moon);line-height:1;margin:0}" +
   ".fo-hero p{color:var(--mist);margin:8px 0 0;max-width:56ch}" +
-  ".fo-lock{max-width:440px;margin:22px 0;padding:22px;border-radius:18px;background:#fffdf8;color:#141a33;border:3px solid #141a33;box-shadow:0 8px 0 rgba(0,0,0,.25)}" +
-  ".fo-lock h2{font-size:1.35rem;margin:0 0 6px;color:#141a33}" +
-  ".fo-lock p{margin:0 0 12px;color:#3d4363}" +
-  ".fo-pin{font-family:var(--display,Arial,sans-serif);font-size:2rem;letter-spacing:.5em;text-align:center;width:9.5ch;padding:10px 0 10px .5em;border:3px solid #141a33;border-radius:14px;background:#fff;color:#141a33}" +
-  ".fo-pin:focus{outline:3px solid var(--sun,#ffd23f);outline-offset:3px}" +
-  ".fo-keep{display:flex;gap:8px;align-items:center;margin:12px 0;font-size:.95rem}" +
-  ".fo-keep input{width:20px;height:20px}" +
-  ".fo-msg{min-height:1.4em;margin:10px 0 0;font-size:.95rem}" +
   ".fo-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0 4px;color:var(--mist);font-size:.9rem}" +
   ".fo-bar button{font:inherit;color:var(--mist);background:none;border:0;text-decoration:underline;cursor:pointer;padding:6px 2px}" +
   ".fo-sec{margin:26px 0 0}" +
@@ -187,42 +167,10 @@ function page(host){
       main.innerHTML = '<div class="fo-sec"><div class="fo-body"><p class="fo-empty">Your folder is still being set up. Nothing in here yet, so nothing to miss.</p></div></div>';
       return;
     }
-    if(st.code){
-      unlock(blob, st.code).then(function(o){ show(o, blob); }, function(){ delete st.code; save(st); lockScreen(blob); });
-    } else lockScreen(blob);
+    show(contents(blob));
   });
 
-  function lockScreen(blob){
-    main.innerHTML =
-      '<div class="fo-lock">' +
-        '<h2>It is locked with your code</h2>' +
-        '<p>Your four numbers, the same ones that open your project page. If they have gone out of your head, Jay can tell you.</p>' +
-        '<label for="foPin" class="fo-kind" style="display:block;margin:0 0 6px;font-weight:700">Your code</label>' +
-        '<input id="foPin" class="fo-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">' +
-        '<label class="fo-keep"><input type="checkbox" id="foKeep" checked> Keep it open on this device</label>' +
-        '<button type="button" class="fo-go" id="foOpen">Open my folder</button>' +
-        '<p class="fo-msg" id="foMsg"></p>' +
-      '</div>';
-    var pin = main.querySelector("#foPin"), msg = main.querySelector("#foMsg"), busy = false;
-    function go(){
-      var code = pin.value.replace(/\D/g, "");
-      if(code.length !== 4 || busy){ if(code.length !== 4) msg.textContent = "It is four numbers."; return; }
-      busy = true; msg.textContent = "Opening...";
-      unlock(blob, code).then(function(o){
-        if(main.querySelector("#foKeep").checked){ st.code = code; save(st); }
-        show(o, blob);
-      }, function(){
-        busy = false; pin.value = ""; pin.focus();
-        msg.textContent = "Not that one. Have another go whenever you like.";
-      });
-    }
-    pin.addEventListener("input", function(){ pin.value = pin.value.replace(/\D/g, "").slice(0, 4); if(pin.value.length === 4) go(); });
-    pin.addEventListener("keydown", function(e){ if(e.key === "Enter") go(); });
-    main.querySelector("#foOpen").addEventListener("click", go);
-    pin.focus();
-  }
-
-  function show(o, blob){
+  function show(o){
     var msgs = o.messages.map(function(x, i){ return { x: x, i: i }; }).sort(function(a, b){ return a.x.date < b.x.date ? 1 : a.x.date > b.x.date ? -1 : b.i - a.i; }).map(function(m){ return m.x; });
     var fresh = msgs.filter(function(m){ return !st.seen[m.id]; }).length +
                 o.activities.filter(function(a){ return !st.seen[a.id]; }).length +
@@ -231,7 +179,7 @@ function page(host){
     function tab(icon, name, n){ return '<div class="fo-tab">' + ICON[icon] + name + (n ? ' <span class="fo-n">' + n + '</span>' : "") + '</div>'; }
 
     var h = '<div class="fo-bar"><span>' + (fresh ? fresh + " new since you last looked." : "All caught up. Everything is still here to look back on.") + '</span>' +
-      (st.code ? '<button type="button" id="foLock">Lock it again on this device</button>' : "") + '</div>';
+      '</div>';
 
     /* messages */
     h += '<section class="fo-sec" aria-label="Messages from Jay">' + tab("msg", "From Jay", msgs.length) + '<div class="fo-body">';
@@ -280,8 +228,6 @@ function page(host){
         b.closest(".fo-item").classList.toggle("tried", on);
       });
     });
-    var lk = main.querySelector("#foLock");
-    if(lk) lk.addEventListener("click", function(){ delete st.code; save(st); lockScreen(blob); });
     if(window.Base5Send){
       var reply = main.querySelector("#foReply");
       window.Base5Send.mount(main.querySelector("#foSend"), {
@@ -311,19 +257,12 @@ function card(){
   var t = c.querySelector(".hqx-t"), s = c.querySelector(".hqx-s");
   fetchFolder().then(function(blob){
     if(!blob) return;
-    var newer = !st.look || (blob.updated && blob.updated > st.look);
-    if(st.code){
-      unlock(blob, st.code).then(function(o){
-        var n = o.messages.concat(o.activities, o.files).filter(function(x){ return !st.seen[x.id]; }).length;
-        if(n){ t.innerHTML = n + " new thing" + (n === 1 ? "" : "s") + ' in here<span class="fo-dot" aria-hidden="true"></span>'; s.textContent = "From Jay, just for you. Have a look when you are ready."; }
-      }, function(){});
-    } else if(newer){
-      t.innerHTML = 'Something new is in here<span class="fo-dot" aria-hidden="true"></span>';
-      s.textContent = "From Jay, just for you. Your code opens it.";
-    }
+    var o = contents(blob);
+    var n = o.messages.concat(o.activities, o.files).filter(function(x){ return !st.seen[x.id]; }).length;
+    if(n){ t.innerHTML = n + " new thing" + (n === 1 ? "" : "s") + ' in here<span class="fo-dot" aria-hidden="true"></span>'; s.textContent = "From Jay, just for you. Have a look when you are ready."; }
   });
   return c;
 }
 
-window.B5Folder = { page: page, card: card, unlock: unlock };
+window.B5Folder = { page: page, card: card };
 })();

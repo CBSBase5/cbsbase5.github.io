@@ -20,7 +20,6 @@
 .who{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .who button{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 800;font-size:1.05rem;padding:9px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
 .who button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
-.code{font-family:var(--display);font-size:1.3rem;letter-spacing:.3em;text-align:center;width:9ch;padding-left:.6em !important}
 .inline{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .msg{margin:10px 0 0;min-height:1.2em;font-size:.93rem;color:var(--teal)}
 .msg.bad{color:var(--orange-deep)}
@@ -63,7 +62,7 @@
     <h1>STUDENT <span class="accent">FOLDERS</span></h1>
     <div class="line">
       <span class="chip">Staff only</span>
-      <p>Put messages, things to try and files in one student's folder. It is locked with their code, so only they (and you) can open it.</p>
+      <p>Put messages, things to try and files in one student's folder. It opens straight away for them on their HQ, no code needed.</p>
     </div>
   </div>
 </header>
@@ -72,16 +71,8 @@
   <div class="box">
     <h2>1. Whose folder?</h2>
     <div class="who" id="who" role="group" aria-label="Student"></div>
-    <div class="inline">
-      <label for="code"><b>Their code</b></label>
-      <input id="code" class="code" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000">
-      <button class="btn" id="openBtn" type="button">Open</button>
-    </div>
-    <p class="msg" id="msg1" aria-live="polite"></p>
-    <div id="freshWrap" hidden>
-      <p class="help" style="margin-top:8px">If the code has been lost or changed, you can start this student's folder again from empty. Whatever was in it before goes when you upload the new file.</p>
-      <button class="small" id="freshBtn" type="button">Start an empty folder instead</button>
-    </div>
+    <p class="msg" id="msg1" aria-live="polite">Pick a student to open their folder.</p>
+    <p class="help" style="margin:10px 0 0">Folders open without a code, and the site is public, so anyone with the link could read one. Messages and links are fine. Keep anything personal in Google Drive, shared with the student's school account only, and link to it.</p>
   </div>
 
   <div id="desk" hidden>
@@ -123,11 +114,6 @@
 
     <div class="box">
       <h2>5. Save it <span id="dirty"></span></h2>
-      <div class="inline" style="margin:0 0 10px">
-        <label for="lockCode"><b>Lock it with code</b></label>
-        <input id="lockCode" class="code" type="text" inputmode="numeric" maxlength="4" autocomplete="off">
-      </div>
-      <p class="help" id="codeNote">This is the code they use to open it. Leave it as it is unless you are changing it.</p>
       <button class="btn btn-orange" type="button" id="buildBtn">Download the folder file</button>
       <button class="btn btn-quiet" type="button" id="copyBtn">Copy the file text</button>
       <p class="msg" id="msg5" aria-live="polite"></p>
@@ -151,7 +137,6 @@
 <script>
 (function(){
 "use strict";
-var ITER = 250000;
 var STUDENTS = [
   { who: "EGW", base: "/egw/" }, { who: "LP", base: "/lp/" }, { who: "LW", base: "/lw/" },
   { who: "LC", base: "/lc/" }, { who: "HK", base: "/hk/" }, { who: "JT", base: "/jt-hq/" }
@@ -169,27 +154,8 @@ function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c
 function today(){ var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 function uid(k){ return k + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-/* ---------- the lock (same as /data/folder.js) ---------- */
-function b64(s){ var raw = atob(s), a = new Uint8Array(raw.length); for(var i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i); return a; }
-function toB64(buf){ var a = new Uint8Array(buf), s = ""; for(var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
-async function keyFor(code, salt, use){
-  var base = await crypto.subtle.importKey("raw", new TextEncoder().encode(code), "PBKDF2", false, ["deriveKey"]);
-  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: ITER, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, [use]);
-}
-async function unlock(blob, code){
-  var key = await keyFor(code, b64(blob.salt), "decrypt");
-  var buf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(blob.iv) }, key, b64(blob.ct));
-  return JSON.parse(new TextDecoder().decode(buf));
-}
-async function lock(obj, code){
-  var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
-  var key = await keyFor(code, salt, "encrypt");
-  var ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
-  return { salt: toB64(salt), iv: toB64(iv), ct: toB64(ct) };
-}
-
 /* ---------- state ---------- */
-var cur = STUDENTS[0], data = null, openCode = "", dirty = false;
+var cur = null, data = null, dirty = false;
 function setDirty(v){ dirty = v; $("dirty").innerHTML = v ? '<span class="dirty">Not saved yet</span>' : ""; }
 window.addEventListener("beforeunload", function(e){ if(dirty){ e.preventDefault(); e.returnValue = ""; } });
 
@@ -200,10 +166,10 @@ function drawWho(){
   }).join("");
   [].forEach.call($("who").querySelectorAll("button"), function(b){
     b.onclick = function(){
-      if(dirty && !confirm("You have changes to " + cur.who + "'s folder that are not saved. Switch anyway?")) return;
+      if(cur && dirty && !confirm("You have changes to " + cur.who + "'s folder that are not saved. Switch anyway?")) return;
       cur = STUDENTS.filter(function(s){ return s.who === b.dataset.w; })[0];
-      data = null; setDirty(false); $("desk").hidden = true; $("freshWrap").hidden = true;
-      $("msg1").textContent = ""; $("code").value = ""; drawWho(); $("code").focus();
+      data = null; setDirty(false); $("desk").hidden = true;
+      drawWho(); openIt();
     };
   });
 }
@@ -215,39 +181,27 @@ async function fetchBlob(){
   return JSON.parse(t.slice(a, z + 1));
 }
 
-$("openBtn").onclick = async function(){
-  var m = $("msg1"), code = $("code").value.trim();
-  m.className = "msg";
-  if(!/^\d{4}$/.test(code)){ m.className = "msg bad"; m.textContent = "Their code is four numbers."; return; }
-  m.textContent = "Opening...";
+async function openIt(){
+  var m = $("msg1");
+  m.className = "msg"; m.textContent = "Opening " + cur.who + "'s folder...";
   try{
     var blob = await fetchBlob();
-    if(!blob){ m.textContent = "There is no folder for " + cur.who + " yet. Starting an empty one."; begin({ v: 1, messages: [], activities: [], files: [] }, code); return; }
-    var o = await unlock(blob, code);
+    if(!blob || !blob.data){ m.textContent = "There is no folder for " + cur.who + " yet. Starting an empty one."; begin({ v: 2, messages: [], activities: [], files: [] }); return; }
     m.textContent = "Open. Last changed " + new Date(blob.updated).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + ".";
-    begin(o, code);
+    begin(blob.data);
   }catch(e){
-    m.className = "msg bad"; m.textContent = "That code did not open " + cur.who + "'s folder.";
-    $("freshWrap").hidden = false;
+    m.className = "msg bad"; m.textContent = "Could not open " + cur.who + "'s folder. Try again in a moment.";
   }
-};
-$("code").addEventListener("keydown", function(e){ if(e.key === "Enter") $("openBtn").click(); });
-$("freshBtn").onclick = function(){
-  if(!confirm("Start " + cur.who + "'s folder again from empty? The old one is replaced when you upload the new file.")) return;
-  $("msg1").className = "msg"; $("msg1").textContent = "Empty folder ready. Set the code in step 5.";
-  begin({ v: 1, messages: [], activities: [], files: [] }, $("code").value.trim());
-  setDirty(true);
-};
+}
 
-function begin(o, code){
+function begin(o){
   o.messages = o.messages || []; o.activities = o.activities || []; o.files = o.files || [];
-  data = o; openCode = code;
-  $("freshWrap").hidden = true; $("desk").hidden = false;
+  data = o;
+  $("desk").hidden = false;
   $("whoName").textContent = "for " + cur.who;
-  $("lockCode").value = /^\d{4}$/.test(code) ? code : "";
   $("fileName").textContent = cur.who.toLowerCase() + ".js";
   $("seeLink").href = cur.base + "folder.html";
-  codeNote(); loadPicks(); draw(); setDirty(false);
+  loadPicks(); draw(); setDirty(false);
 }
 
 /* ---------- lists ---------- */
@@ -324,30 +278,19 @@ $("pick").onchange = function(){
 };
 
 /* ---------- save ---------- */
-function codeNote(){
-  var c = $("lockCode").value.trim();
-  $("codeNote").textContent = c && openCode && c !== openCode
-    ? "This is a new code. Tell " + cur.who + " before you upload it, and change it on their project page too so it stays the same code for both."
-    : "This is the code they use to open it. Leave it as it is unless you are changing it.";
-}
-$("lockCode").addEventListener("input", function(){ this.value = this.value.replace(/\D/g, "").slice(0, 4); codeNote(); });
-
 async function build(){
-  var m = $("msg5"), c = $("lockCode").value.trim();
-  m.className = "msg";
-  if(!/^\d{4}$/.test(c)){ m.className = "msg bad"; m.textContent = "The code needs to be four numbers."; return null; }
-  m.textContent = "Locking...";
   var clean = {
-    v: 1,
+    v: 2,
     messages: data.messages.filter(function(x){ return String(x.text || "").trim(); }),
     activities: data.activities.filter(function(x){ return String(x.title || "").trim(); }),
     files: data.files.filter(function(x){ return String(x.title || "").trim(); })
   };
-  var blob = await lock(clean, c);
-  var out = { who: cur.who, iter: ITER, updated: new Date().toISOString(), salt: blob.salt, iv: blob.iv, ct: blob.ct };
-  openCode = c; codeNote();
-  return "/* Base 5 - " + cur.who + "'s folder. Locked with " + cur.who + "'s code.\n   Written by /teacher/folders.html. Do not edit by hand. */\n" +
-         "window.B5FOLDER = " + JSON.stringify(out, null, 1) + ";\n";
+  var out = { who: cur.who, updated: new Date().toISOString(), data: clean };
+  /* keep the file ASCII: curly quotes and the like become escapes */
+  var json = JSON.stringify(out, null, 1).replace(/[^\x00-\x7f]/g, function(c){ return "\\u" + ("000" + c.charCodeAt(0).toString(16)).slice(-4); });
+  $("msg5").className = "msg";
+  return "/* Base 5 - " + cur.who + "'s folder.\n   Written by /teacher/folders.html (or by hand: keep the same shape). ASCII only. */\n" +
+         "window.B5FOLDER = " + json + ";\n";
 }
 $("buildBtn").onclick = async function(){
   var js = await build(); if(!js) return;
