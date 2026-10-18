@@ -3,6 +3,19 @@
    Every game on the site, in one list. The game library page
    and the strip on the index both read this file.
 
+   WHAT GOES IN HERE
+   A game earns a place in the vault when all three are true:
+     1. Someone would pick it to play for its own sake, not
+        because a session or a target sent them there.
+     2. It works on its own: no Jay, no group, no setting up.
+     3. It is worth playing more than once: endless, replayable,
+        or big enough to come back to.
+   Activities for this half term's targets that happen to look
+   like games (Tiny Town, Case File, Storm Lab and the rest) stay
+   on the Practice shelves, where the hub's Games filter finds
+   them. Group sessions (the PHSE card games) stay with the
+   session. Games inside a student's own HQ stay in that HQ.
+
    To add a game, copy one entry and change it:
      id      short name, no spaces
      title   what it is called
@@ -113,54 +126,6 @@ window.B5GAMES = {
       blurb:"A real engine with four strengths, up to one that is not trying to be fair. Strategy notes turn up when the position calls for them.",
       meta:"Thinking and calculation &middot; four strengths",
       tags:["fun"], added:"2026-09-21", fill:"ink", motif:"chess", year:"About 600 AD"
-    },
-    {
-      id:"pixel-moves", title:"Pixel Moves", href:"/practice/pixel-moves.html",
-      blurb:"Move Bonnie and friends round a grid: slide them with vectors, flip them in mirror lines, turn them and grow them, then get Bonnie to bed.",
-      meta:"Vectors and transformations &middot; 14 puzzles",
-      tags:["learning"], added:"2026-09-28", fill:"plum", motif:"grid", year:"8 bit, 1985"
-    },
-    {
-      id:"tiny-town", title:"Tiny Town", href:"/practice/tiny-town.html",
-      blurb:"Build a model village: shrink things to scale, plan a bus route on a map, and run the cafe and toy shop with maths in your head.",
-      meta:"Scale and mental maths &middot; 7 stages",
-      tags:["learning"], added:"2026-10-12", fill:"yellow", motif:"house", year:"Model year 1:50"
-    },
-    {
-      id:"number-allotment", title:"The Number Allotment", href:"/practice/number-allotment.html",
-      blurb:"An empty allotment that fills up as you go: square patios, seedlings that grow in sequences, and beds split into fractions.",
-      meta:"Squares, sequences and fractions &middot; 7 jobs",
-      tags:["learning"], added:"2026-10-12", fill:"teal", motif:"leaf", year:"Next spring"
-    },
-    {
-      id:"drone-dash", title:"Drone Dash", href:"/practice/drone-dash.html",
-      blurb:"Run a drone delivery company: fly by column vectors round no fly zones, price the parcel shop sale, and tile the landing pads.",
-      meta:"Vectors, discounts and transformations &middot; 7 stages",
-      tags:["learning"], added:"2026-10-12", fill:"bright", motif:"bolt", year:"2040"
-    },
-    {
-      id:"base-camp", title:"Base Camp", href:"/practice/expedition-maths.html",
-      blurb:"Plan an expedition in seven stops: mental sums up a hill, a formula machine, a map with a ruler and a tent on a scale plan.",
-      meta:"Mental maths, formulas and scale &middot; 7 stops",
-      tags:["learning"], added:"2026-10-05", fill:"orange", motif:"stars", year:"1953"
-    },
-    {
-      id:"pattern-factory", title:"The Pattern Factory", href:"/practice/pattern-factory.html",
-      blurb:"Seven factory machines that press squares, squash fractions and grow tile patterns until you can dial in the nth term.",
-      meta:"Squares, fractions and sequences &middot; 7 machines",
-      tags:["learning"], added:"2026-10-05", fill:"plum", motif:"blocks", year:"1851"
-    },
-    {
-      id:"tile-shop", title:"The Tile Shop", href:"/practice/tile-shop.html",
-      blurb:"See which shapes tessellate, flip and turn tiles on a grid, drive a robot with vectors, then serve customers at a sale till.",
-      meta:"Tessellation, transformations and discounts &middot; 7 stages",
-      tags:["learning"], added:"2026-10-05", fill:"bright", motif:"grid", year:"Ancient Rome"
-    },
-    {
-      id:"curveballs", title:"Control or Chaos", href:"/shuffle/phse-week-4.html",
-      blurb:"Five group games from PHSE: a card sort, curveballs against the clock, a dice run, the slowest line wins, and the Curveball Awards.",
-      meta:"Safety and predictability &middot; best with a few people",
-      tags:["learning","fun"], added:"2026-09-21", fill:"yellow", motif:"heart", year:"Any old Tuesday"
     }
   ]
 };
