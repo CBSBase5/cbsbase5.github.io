@@ -75,12 +75,13 @@
 }
 
 /* the span, with a year on every cable */
-.span-svg .yr{font-family:var(--display);font-size:15px;font-weight:800;letter-spacing:.06em;fill:var(--body-tint);text-anchor:middle}
-.span-svg .yr.on{fill:var(--orange-deep);font-size:18px}
+.span-svg .here{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:.08em;fill:var(--orange-deep);text-anchor:middle}
 .span-svg .cbl.on{stroke:var(--orange);stroke-width:4;opacity:1}
 
 /* week panels */
-.weektheme .stamp{margin-left:4px}
+/* weeks that have not happened yet: visible, not openable */
+.wtab:disabled{cursor:not-allowed;background:var(--paper);border-style:dashed;color:var(--body-tint);box-shadow:none;transform:none}
+.wtab:disabled .dates{opacity:1}
 .ticket.today{outline:4px dashed var(--orange);outline-offset:5px}
 
 /* game vault on the index */
@@ -139,7 +140,7 @@
     </div>
     <div class="line">
       <span class="chip">Autumn 2</span>
-      <p>Seven weeks, seven jumps through time. Poke about, follow whatever looks good, leave the rest.</p>
+      <p>Seven weeks of time travel. Poke about, follow whatever looks good, leave the rest.</p>
     </div>
     <div class="ttq">If we could time travel, should we?</div>
   </div>
@@ -239,7 +240,7 @@
     </div>
   </section>
 
-  <svg class="span-svg" viewBox="0 0 1100 150" role="img" aria-label="A bridge with a year on each cable, one for each week of the half term">
+  <svg class="span-svg" viewBox="0 0 1100 150" role="img" aria-label="A bridge with one cable for each week of the half term, this week marked">
     <g class="spangroup">
       <path class="arc" d="M 0 100 Q 550 0 1100 100"/>
       <line class="cbl" data-w="1" x1="110" y1="82" x2="110" y2="114"/>
@@ -250,12 +251,12 @@
       <line class="cbl" data-w="6" x1="825" y1="58" x2="825" y2="114"/>
       <line class="cbl" data-w="7" x1="990" y1="82" x2="990" y2="114"/>
       <line class="dck" x1="0" y1="114" x2="1100" y2="114"/>
-      <g id="spanYears"></g>
+      <text id="spanHere" class="here" x="110" y="140"></text>
     </g>
   </svg>
 
   <!-- ============ THE WEEKS (built from /data/term.js) ============ -->
-  <div class="weekbar tt" role="tablist" aria-label="Weeks this half term" id="weekbar"></div>
+  <div class="weekbar" role="tablist" aria-label="Weeks this half term" id="weekbar"></div>
   <div id="weekpanels"></div>
 
   <hr class="rule">
@@ -338,6 +339,9 @@
   var holder = document.getElementById('weekpanels');
   var today = T.todayIso();
   var current = T.currentWeek();
+  /* ?preview=1 opens every week, for planning ahead */
+  var preview = /[?&]preview=1/.test(location.search);
+  function isOpen(w){ return preview || w.n <= current.n; }
 
   function esc(s){ return String(s); }
 
@@ -395,7 +399,14 @@
     tab.setAttribute('role','tab');
     tab.id = 'tab-'+w.n;
     tab.setAttribute('aria-controls','wk-'+w.n);
-    tab.innerHTML = 'Week '+w.n+'<span class="yr">'+w.era.year+'</span><span class="dates">'+T.shortRange(w)+'</span>';
+    var open = isOpen(w);
+    tab.innerHTML = 'Week '+w.n+'<span class="dates">'+(open ? T.shortRange(w) : 'Opens '+T.dateOf(w,'mon').getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][T.dateOf(w,'mon').getMonth()])+'</span>';
+    if(!open){
+      tab.disabled = true;
+      tab.title = 'Week '+w.n+' opens on '+T.niceDate(T.dateOf(w,'mon'));
+      bar.appendChild(tab);
+      return;
+    }
     bar.appendChild(tab);
 
     var sec = document.createElement('section');
@@ -422,29 +433,22 @@
     sec.innerHTML =
       '<div class="weektheme">'+
         '<h2>'+(w.theme || ('Week '+w.n))+'</h2>'+
-        '<span class="stamp">Destination '+w.era.year+'<small>'+w.era.label+'</small></span>'+
         '<span>'+(w.sub || autoSub(w))+'</span>'+
       '</div>'+
       '<div class="board">'+cards+'</div>';
     holder.appendChild(sec);
   });
 
-  /* the bridge: one year under each cable */
-  var yrs = document.getElementById('spanYears');
+  /* the bridge: this week's cable lit up */
   var xs = [110,275,440,550,660,825,990];
-  var svgNS = 'http://www.w3.org/2000/svg';
-  T.weeks.forEach(function(w,i){
-    var t = document.createElementNS(svgNS,'text');
-    t.setAttribute('x', xs[i]); t.setAttribute('y', 138);
-    t.setAttribute('class','yr' + (w===current?' on':''));
-    t.textContent = w.era.year.replace(',000,000',' mil');
-    yrs.appendChild(t);
-  });
+  var here = document.getElementById('spanHere');
+  here.setAttribute('x', xs[current.n-1]);
+  here.textContent = 'Week '+current.n;
   var cb = document.querySelector('.cbl[data-w="'+current.n+'"]');
   if(cb) cb.setAttribute('class','cbl on');
 
   /* tabs */
-  var tabs = Array.prototype.slice.call(bar.querySelectorAll('.wtab'));
+  var tabs = Array.prototype.slice.call(bar.querySelectorAll('.wtab:not(:disabled)'));
   function show(tab){
     tabs.forEach(function(t){
       var panel = document.getElementById(t.getAttribute('aria-controls'));

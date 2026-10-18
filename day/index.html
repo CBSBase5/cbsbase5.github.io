@@ -21,7 +21,7 @@
 }
 .pass .f{font-family:var(--display);font-variation-settings:"wdth" 104,"wght" 800;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65;display:block}
 .pass .v{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.2rem;line-height:1.1}
-.pass .stamp{position:absolute;right:16px;top:-14px;background:var(--paper)}
+
 @media (max-width:600px){.pass{grid-template-columns:repeat(2,auto)}}
 
 .daynav{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 10px}
@@ -129,12 +129,23 @@
     '<div class="line"><span class="chip">Week '+week.n+'</span><p>'+T.niceDate(date)+'. '+(dd.line || T.dayLines[key])+'</p></div>'+
     (dd.off ? '' :
     '<div class="pass" aria-label="Your ticket for today">'+
-      '<span class="stamp">'+week.era.year+'<small>'+week.era.label+'</small></span>'+
-      '<div><span class="f">From</span><span class="v">Base 5</span></div>'+
-      '<div><span class="f">To</span><span class="v">'+(dd.trip && dd.trip.where ? dd.trip.where : 'Destination '+week.era.year)+'</span></div>'+
+      '<div><span class="f">Ticket for</span><span class="v">'+dayName+' '+date.getDate()+'</span></div>'+
+      (dd.trip && dd.trip.where ? '<div><span class="f">Going to</span><span class="v">'+dd.trip.where+'</span></div>' : '')+
       '<div><span class="f">Departs</span><span class="v">9:30</span></div>'+
       '<div><span class="f">Back</span><span class="v">2:30</span></div>'+
     '</div>');
+
+  /* weeks that have not started yet stay shut, unless ?preview=1 */
+  var current = T.currentWeek();
+  var preview = /[?&]preview=1/.test(location.search);
+  var shut = !preview && week.n > current.n;
+  if(shut){
+    head.querySelector('.pass') && head.querySelector('.pass').remove();
+    head.querySelector('.line p').textContent = T.niceDate(date)+'.';
+    main.innerHTML = '<div class="panel panel-orange nothing"><p>This day has not happened yet. It opens when Week '+week.n+' starts, on '+T.niceDate(T.dateOf(week,'mon'))+'.</p></div>'+
+      '<div class="daynav"><a class="backlink" href="/">Back to now</a></div>';
+    return;
+  }
 
   if(dd.off){
     main.innerHTML = '<div class="panel panel-orange nothing"><p>No school on this day. '+(dd.line||'')+'</p></div>'+navHTML();
@@ -226,6 +237,7 @@
     all.forEach(function(x,n){ if(x.w===week && x.k===key) i=n; });
     var prev = i>0 ? all[i-1] : null;
     var next = (i>-1 && i<all.length-1) ? all[i+1] : (i<0 ? all.filter(function(x){return x.iso>isoDate})[0] : null);
+    if(next && !preview && next.w.n > current.n) next = null;
     function link(x, label){
       return '<a class="backlink" href="/day/?w='+x.w.n+'&amp;d='+x.k+'">'+label+': '+T.dayNames[x.k]+' '+T.dateOf(x.w,x.k).getDate()+'</a>';
     }
