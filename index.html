@@ -11,6 +11,19 @@
 <style>
 /* Index only. Everything else lives in style.css */
 
+/* today's two */
+.fun .said{font-size:1.08rem;line-height:1.45;margin:4px 0 12px}
+.fun .said mark{background:transparent;color:inherit}
+.fun.shown .said mark{background:var(--yellow);color:var(--ink);border-radius:4px;padding:0 3px;text-decoration:line-through;text-decoration-thickness:3px}
+.fun .fix{display:none;margin:10px 0 0;font-weight:700}
+.fun.shown .fix{display:block}
+.fun .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fun .opts .btn{text-transform:none;letter-spacing:.02em;font-size:.9rem}
+.fun .opts .btn[aria-pressed="true"]{background:var(--orange)}
+.fun .then{margin:12px 0 0;font-weight:700;min-height:1.4em}
+.askcard textarea{width:100%;margin:12px 0 0;font:inherit;border:3px solid var(--ink);border-radius:14px;padding:10px 12px;background:var(--paper);color:var(--ink);resize:vertical}
+.askcard .sendbox{max-width:none;margin:12px 0 0;box-shadow:none}
+
 /* on this day: a thin strip across the very top */
 .otd{background:var(--ink);color:var(--paper);font-size:.9rem;line-height:1.35}
 .otd .wrap{display:flex;align-items:center;gap:12px;padding-top:9px;padding-bottom:9px;flex-wrap:wrap}
@@ -347,6 +360,14 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
   <hr class="rule">
 
   <div class="weektheme">
+    <h2>Today&rsquo;s two</h2>
+    <span>A new pair every day.</span>
+  </div>
+  <div class="board" id="todaystwo"></div>
+
+  <hr class="rule">
+
+  <div class="weektheme">
     <h2>Here whenever you want them</h2>
     <span>Not tied to any year</span>
   </div>
@@ -387,6 +408,13 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
       <h3>Last half term</h3>
       <p>All seven weeks of Autumn 1, exactly as they were. Every day page and activity still works.</p>
     </a>
+    <div class="card w12 askcard">
+      <span class="kicker">Ask the site</span>
+      <h3>What should we add?</h3>
+      <p>A game, a topic, something that is broken, something that would make this better. Your idea goes straight to Jay.</p>
+      <textarea id="askIdea" rows="3" placeholder="My idea is..."></textarea>
+      <div id="askSend"></div>
+    </div>
   </div>
 
 </div>
@@ -402,6 +430,8 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
 <script src="/data/games.js?v=1"></script>
 <script src="/data/clockhelp.js?v=1"></script>
 <script src="/data/onthisday.js?v=1"></script>
+<script src="/data/dailyfun.js?v=1"></script>
+<script src="/data/send.js?v=1"></script>
 <script>
 /* ---------- the weeks ---------- */
 (function(){
@@ -642,6 +672,52 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
     }
   }
   box.innerHTML = html;
+})();
+
+/* ---------- today's two ---------- */
+(function(){
+  var F = window.B5FUN, box = document.getElementById('todaystwo');
+  if(!F || !box) return;
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var m = F.today(F.mistakes), w = F.today(F.wyr);
+  var said = esc(m[0]).replace(esc(m[1]), '<mark>' + esc(m[1]) + '</mark>');
+  box.innerHTML =
+    '<div class="card w6 fill-teal fun" id="funMistake">' +
+      '<span class="kicker">Jay&rsquo;s mistake of the day</span>' +
+      '<h3>Jay says:</h3>' +
+      '<p class="said">' + said + '</p>' +
+      '<button class="btn" type="button" id="funReveal">Show me where he slipped</button>' +
+      '<p class="fix">' + esc(m[2]) + '</p>' +
+    '</div>' +
+    '<div class="card w6 fill-plum fun">' +
+      '<span class="kicker">Would you rather</span>' +
+      '<h3>' + esc(w[0]) + '</h3>' +
+      '<div class="opts"><button class="btn btn-quiet" type="button" data-i="0">' + esc(w[1]) + '</button>' +
+      '<button class="btn btn-quiet" type="button" data-i="1">' + esc(w[3]) + '</button></div>' +
+      '<p class="then" id="funThen" aria-live="polite"></p>' +
+    '</div>';
+  document.getElementById('funReveal').addEventListener('click', function(){
+    var c = document.getElementById('funMistake');
+    var on = !c.classList.contains('shown');
+    c.classList.toggle('shown', on);
+    this.textContent = on ? 'Hide it again' : 'Show me where he slipped';
+  });
+  box.querySelectorAll('.opts .btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      box.querySelectorAll('.opts .btn').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.getElementById('funThen').textContent = b.dataset.i === '0' ? w[2] : w[4];
+    });
+  });
+})();
+
+/* ---------- ask the site ---------- */
+(function(){
+  var host = document.getElementById('askSend');
+  if(!host || !window.Base5Send) return;
+  Base5Send.mount(host, { tool: "Idea for the site", filename: "site-idea", getText: function(){
+    var v = document.getElementById('askIdea').value.trim();
+    return "An idea for the Base 5 site:\n\n" + (v || "(nothing typed yet)");
+  }});
 })();
 </script>
 

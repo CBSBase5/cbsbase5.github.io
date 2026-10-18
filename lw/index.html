@@ -11,7 +11,7 @@
 <script src="/lw/conf.js?v=1"></script>
 <link rel="stylesheet" href="/egw/egw.css?v=8">
 <link rel="stylesheet" href="/lw/lw.css?v=1">
-<script src="/egw/skin.js?v=2"></script>
+<script src="/egw/skin.js?v=3"></script>
 <style>
 /* HQ home only. Everything shared lives in egw.css */
 .acc-eng{--accent:var(--coral);--accent-soft:rgba(255,93,93,.14)}
@@ -49,6 +49,24 @@
 .filt{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
 .filt button{font-family:var(--display);font-weight:600;font-size:.85rem;border-radius:99px;border:2px solid var(--line);background:#fff;padding:5px 12px;cursor:pointer;color:var(--ink)}
 .filt button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* three face down cards */
+.flip3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fcard{position:relative;min-height:150px;perspective:900px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.fcard .in{position:absolute;inset:0;transition:transform .5s ease;transform-style:preserve-3d}
+.fcard.up .in{transform:rotateY(180deg)}
+.fcard .face{position:absolute;inset:0;border-radius:16px;border:3px solid var(--ink);backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.fcard .back{background:repeating-linear-gradient(45deg,var(--sun) 0 12px,#ffdf6e 12px 24px);align-items:center;font-family:var(--display);font-weight:700;font-size:2.6rem;color:var(--ink)}
+.fcard .front{background:#fff;color:var(--ink);transform:rotateY(180deg)}
+.fcard .front .kicker{font-size:.7rem}
+.fcard .front b{font-family:var(--display);font-size:1.05rem;line-height:1.15;display:block;margin:2px 0 8px}
+.fcard .front .btn{align-self:flex-start;font-size:.85rem;padding:6px 12px}
+.fcard:nth-child(1){transform:rotate(-2deg)}.fcard:nth-child(3){transform:rotate(2deg)}
+.dealrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0}
+.reshuffle{font-family:var(--display);font-weight:700;font-size:.9rem;border-radius:12px;border:2px solid var(--ink);background:var(--sun);color:var(--ink);padding:7px 14px;cursor:pointer}
+.dealrow .filt{margin:0}
+@media (max-width:640px){.flip3{grid-template-columns:1fr}.fcard{min-height:110px}}
+@media (prefers-reduced-motion:reduce){.fcard .in{transition:none}}
 
 /* subjects */
 .subj h3{display:flex;align-items:center;gap:10px}
@@ -223,18 +241,12 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
   </div>
 
   <div id="secDice">
-  <p class="lead2">Not sure where to start? The dice can choose.</p>
+  <p class="lead2" id="leadDice">Not sure where to start? Flip a card.</p>
   <div class="board" style="margin-bottom:0">
     <div class="card w12 acc-stats" id="dealCard">
-      <div class="deal">
-        <button class="dice" id="dice" type="button" aria-label="Pick a chunk for me">&#9861;</button>
-        <div class="dealout" id="dealOut">
-          <span class="kicker">Pick for me</span>
-          <b>Tap the dice, if you like.</b>
-          <p class="tiny">It picks one chunk you have not finished yet. A chunk is about five to ten minutes.</p>
-        </div>
-      </div>
-      <div class="filt" id="dealFilt"></div>
+      <div class="flip3" id="flip3"></div>
+      <p class="tiny" id="flipNote" style="margin:10px 0 0">Three chunks you have not finished, face down. Flip one, or shuffle for three more. A chunk is about five to ten minutes.</p>
+      <div class="dealrow"><button class="reshuffle" id="reshuffle" type="button">Shuffle again</button><div class="filt" id="dealFilt"></div></div>
     </div>
   </div>
 
@@ -248,7 +260,7 @@ body.mood-grey #secTop, body.mood-grey #secDice, body.mood-grey #secSubjects, bo
   </div>
 
   <div id="secMore">
-  <p class="lead2">More, whenever you want it.</p>
+  <p class="lead2" id="leadMore">More, whenever you want it.</p>
 
   <a class="fold" href="/lw/sky.html" style="--accent:#2a3570">
     <span><b>Your sky</b><small id="skyRow">One star for every chunk. Each one you finish lights up.</small></span><span class="chev">&rsaquo;</span>
@@ -492,7 +504,7 @@ function drawDealFilter(){
     var b = document.createElement("button");
     b.type = "button"; b.textContent = p[1];
     b.className = dealSubj === p[0] ? "on" : "";
-    b.onclick = function(){ dealSubj = p[0]; drawDealFilter(); };
+    b.onclick = function(){ dealSubj = p[0]; drawDealFilter(); deal(); };
     f.appendChild(b);
   });
 }
@@ -505,21 +517,30 @@ function deal(){
       pool.push({ x: x, k: k });
     }
   });
-  var out = $("dealOut");
-  var dice = $("dice");
-  dice.classList.remove("roll"); void dice.offsetWidth; dice.classList.add("roll");
+  var box = $("flip3");
   if(!pool.length){
-    out.innerHTML = '<span class="kicker">Pick for me</span><b>Everything here is done.</b><p class="tiny">Genuinely impressive. Any chunk is worth a second go for the stretch questions.</p>';
+    box.innerHTML = '<p style="grid-column:1/-1;margin:0"><b>Everything here is done.</b> Genuinely impressive. Any chunk is worth a second go for the stretch questions.</p>';
     return;
   }
-  var p = pool[Math.floor(Math.random() * pool.length)];
-  var name = p.x.st.names[p.k] ? ": " + p.x.st.names[p.k] : "";
-  var faces = ["&#9856;", "&#9857;", "&#9858;", "&#9859;", "&#9860;", "&#9861;"];
-  dice.innerHTML = faces[Math.floor(Math.random() * 6)];
-  out.innerHTML = '<span class="kicker">' + p.x.s.name + '</span>' +
-    '<b>' + p.x.a.title + '<br>Chunk ' + (p.k + 1) + name + '</b>' +
-    '<p class="tiny">About five to ten minutes. Not feeling it? Roll again, or leave it.</p>' +
-    '<a class="btn" href="/lw/' + p.x.a.id + '.html#chunk-' + (p.k + 1) + '">Open this chunk</a>';
+  /* three different chunks, at random */
+  var picks = [];
+  while(picks.length < 3 && pool.length){ picks.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); }
+  box.innerHTML = picks.map(function(p, i){
+    var name = p.x.st.names[p.k] ? ": " + p.x.st.names[p.k] : "";
+    return '<button class="fcard" type="button" aria-label="Face down card ' + (i + 1) + '. Tap to flip.">' +
+      '<span class="in"><span class="face back" aria-hidden="true">?</span>' +
+      '<span class="face front"><span class="kicker">' + p.x.s.name + '</span>' +
+      '<b>' + p.x.a.title + '<br>Chunk ' + (p.k + 1) + name + '</b>' +
+      '<a class="btn" href="/lw/' + p.x.a.id + '.html#chunk-' + (p.k + 1) + '" tabindex="-1">Open this chunk</a></span></span></button>';
+  }).join("");
+  [].forEach.call(box.querySelectorAll(".fcard"), function(c){
+    c.onclick = function(e){
+      if(c.classList.contains("up")){ if(e.target.closest("a")) return; var a = c.querySelector("a"); if(a) location.href = a.href; return; }
+      c.classList.add("up");
+      c.setAttribute("aria-label", c.querySelector(".front").textContent.replace("Open this chunk", "") + ". Tap again to open it.");
+      var a2 = c.querySelector("a"); if(a2) a2.tabIndex = 0;
+    };
+  });
 }
 
 /* ---------- revision map ---------- */
@@ -729,7 +750,7 @@ function drawMood(){
   }
   ci.innerHTML = '<span class="moodchip">' + WEATHER[w].svg + 'Today: ' + WEATHER[w].name.toLowerCase() + '. <button type="button" id="chgW">Change</button></span>';
   $("chgW").onclick = function(){ hq.mood = null; saveHQ(); drawMood(); };
-  if(showAll){ mc.innerHTML = ""; return; }
+  if(showAll){ mc.innerHTML = ""; softWords(w); return; }
   var rv = EGWPROG.reviewInfo(), dd = loadJSON("b5.lw.daily.v1") || { days: {} }, dropDone = !!(dd.days || {})[EGWPROG.today()];
   if(w === "storm"){
     document.body.classList.add("mood-storm");
@@ -737,9 +758,13 @@ function drawMood(){
       '<div><h3>Nothing needs doing today.</h3><p>Bonnie has the right idea. Everything here will still be here tomorrow.</p>' +
       '<p class="tiny">If you would like to, breathe with the circle: tap it to start.</p></div></div>' +
       '<div style="display:flex;justify-content:center;margin:8px 0"><button class="breath" type="button" id="breath" aria-label="Breathing circle. Tap to start or stop."><i></i><span id="breathTxt">Tap me</span></button></div>' +
-      '<div class="smalls"><a href="/lw/swipe.html?n=5"><span><b>One tiny thing, only if you fancy it</b><small>Five swipe cards. Flick, flip, done.</small></span><span>&rsaquo;</span></a></div>' +
+      '<div class="smalls"><a href="/lw/swipe.html?n=5"><span><b>One tiny thing, only if you fancy it</b><small>Five swipe cards. Flick, flip, done.</small></span><span>&rsaquo;</span></a>' +
+      '<a href="/lw/bonnie.html"><span><b>Sit with Bonnie</b><small>She snoozes. You do nothing, or a little bit of something.</small></span><span>&rsaquo;</span></a>' +
+      '<a href="#" id="fidgetGo"><span><b>Fidget shelf</b><small>Bubble wrap, a spinner and a squishy blob. Nothing to do with work.</small></span><span>&rsaquo;</span></a></div>' +
       '<button class="everything" type="button" id="allBtn">Show me everything anyway</button></div>';
     wireBreath();
+    var fg = $("fidgetGo");
+    if(fg) fg.onclick = function(e){ e.preventDefault(); if(window.HQFidget) window.HQFidget.open(); };
   }else if(w === "grey"){
     document.body.classList.add("mood-grey");
     var items = [];
@@ -767,6 +792,14 @@ function drawMood(){
   }
   var ab = $("allBtn");
   if(ab) ab.onclick = function(){ showAll = true; drawMood(); };
+  softWords(w);
+}
+/* on stormy and grey days the page's own words get gentler too */
+function softWords(w){
+  var soft = w === "storm" || w === "grey";
+  $("leadDice").textContent = soft ? "If you would like something, a card can choose for you." : "Not sure where to start? Flip a card.";
+  $("subjects").textContent = soft ? "Or just have a look round. Nothing needs starting." : "Or choose a subject.";
+  $("leadMore").textContent = soft ? "Bits and pieces, for whenever." : "More, whenever you want it.";
 }
 var breathTimer = null;
 function wireBreath(){
@@ -950,13 +983,15 @@ function drawFeel(){
 document.addEventListener("base5sent", function(){ setTimeout(function(){ drawNudge(); drawFeel(); }, 50); });
 function drawAll(){ drawNudge(); drawFeel(); drawLooksRow(); drawMood(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); drawDealFilter(); drawMap(); drawPlan(); drawLog(); drawExams(); }
 
-$("dice").onclick = deal;
+$("reshuffle").onclick = deal;
+deal();
 drawAll();
 refreshJayCode();
 window.addEventListener("pageshow", function(){ drawNudge(); drawFeel(); drawLooksRow(); drawSkyRow(); drawDropBar(); drawSecondLook(); drawStrip(); drawSubjects(); refreshJayCode(); });
 $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>
-<script src="/data/hqextras.js?v=1"></script>
+<script src="/data/catchjay.js?v=1"></script>
+<script src="/data/hqextras.js?v=3"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
 <script src="/hk/conf.js?v=1"></script>
 <link rel="stylesheet" href="/egw/egw.css?v=8">
 <link rel="stylesheet" href="/hk/hk.css?v=1">
-<script src="/egw/skin.js?v=2"></script>
+<script src="/egw/skin.js?v=3"></script>
 <style>
 .bwrap{max-width:760px;margin:0 auto}
 body.subj-home .bwrap .btn:not(.btn-quiet){background:var(--sun);color:var(--ink)}
@@ -20,6 +20,18 @@ body.subj-home .bwrap .btn:not(.btn-quiet){background:var(--sun);color:var(--ink
 .bhero p{color:var(--mist);margin:8px 0 0;max-width:56ch}
 
 /* the room */
+.room[data-who="jay"] #bonnieHit{display:none}
+.room[data-who="bonnie"] #jayDesk{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .jayarms{animation:typing .5s steps(2) infinite}
+  .jaybody{animation:jaybob 6s ease-in-out infinite}
+  .jaysteam{animation:steam 3s ease-in-out infinite}
+  .jayscreen{animation:screen 4s ease-in-out infinite}
+}
+@keyframes typing{0%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@keyframes jaybob{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}
+@keyframes steam{0%,100%{opacity:.2}50%{opacity:.8}}
+@keyframes screen{0%,100%{fill:#bfe9ff}50%{fill:#d9f2ff}}
 .room{position:relative;margin:14px 0 12px;border-radius:22px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.3);background:#262c52}
 .room svg{display:block;width:100%;height:auto}
 .room .sticky{position:absolute;left:31%;top:8%;max-width:27%;background:#ffe98a;color:#3b3214;font-family:var(--display);font-weight:600;font-size:clamp(.72rem,2.6vw,.95rem);line-height:1.25;padding:8px 10px 10px;border-radius:3px;transform:rotate(-3deg);box-shadow:0 4px 10px rgba(0,0,0,.25);word-wrap:break-word}
@@ -153,6 +165,25 @@ body.justb .clockside .btn:not(#pauseBtn){display:none}
       <ellipse cx="190" cy="222" rx="150" ry="20" fill="#4f4682"/>
       <ellipse cx="185" cy="210" rx="84" ry="22" fill="#b84a4a"/>
       <ellipse cx="185" cy="203" rx="78" ry="16" fill="#d65f5f"/>
+      <!-- Jay, working at a desk under the window -->
+      <g id="jayDesk" aria-label="Jay, working at a desk">
+        <rect x="292" y="156" width="10" height="30" fill="#5b4a3a"/>
+        <rect x="290" y="146" width="16" height="12" rx="3" fill="#7b5b45"/>
+        <g class="jaybody">
+          <path d="M318 186 V150 q0 -12 14 -12 h8 q14 0 14 12 V186 Z" fill="#007291"/>
+          <circle cx="336" cy="126" r="12" fill="#e2b48f"/>
+          <path d="M324 124 q2 -14 12 -14 q11 0 12 13 q-5 -6 -12 -6 q-7 0 -12 7 Z" fill="#3a2a20"/>
+          <circle cx="332" cy="127" r="1.4" fill="#2b1a10"/><circle cx="340" cy="127" r="1.4" fill="#2b1a10"/>
+          <path d="M333 132 q3 2 6 0" stroke="#2b1a10" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        </g>
+        <rect x="300" y="166" width="88" height="6" rx="2" fill="#a07850"/>
+        <rect x="306" y="172" width="5" height="14" fill="#7b5b45"/><rect x="377" y="172" width="5" height="14" fill="#7b5b45"/>
+        <rect class="jayscreen" x="322" y="150" width="30" height="16" rx="2" fill="#bfe9ff"/>
+        <rect x="320" y="164" width="34" height="3" rx="1" fill="#1b1f3a"/>
+        <g class="jayarms"><rect x="322" y="158" width="10" height="5" rx="2" fill="#007291"/><rect x="342" y="158" width="10" height="5" rx="2" fill="#007291"/></g>
+        <rect x="364" y="158" width="9" height="8" rx="2" fill="#ff5d5d"/>
+        <path class="jaysteam" d="M367 154 q-2 -4 1 -7 M371 154 q-2 -4 1 -7" stroke="#c9cdf0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      </g>
       <!-- Bonnie -->
       <g id="bonnieHit" tabindex="0" role="button" aria-label="Bonnie. Tap to see what she does.">
         <g transform="translate(118 112) scale(1.05)">
@@ -210,6 +241,17 @@ function load(){ try{ var d = JSON.parse(localStorage.getItem(KEY) || "null"); i
 var st = load();
 st.log = st.log || [];
 st.pref = st.pref || { mins: 15, sound: "off", vol: 40, chime: false, hide: false };
+if(!st.pref.who) st.pref.who = "bonnie";
+var WHO = { bonnie: "Bonnie", jay: "Jay", both: "Bonnie and Jay" };
+function drawWho(){
+  var w = st.pref.who in WHO ? st.pref.who : "bonnie";
+  var room = document.getElementById("room"); if(room) room.setAttribute("data-who", w);
+  var h = document.querySelector(".bhero h1"); if(h) h.textContent = "Study with " + WHO[w];
+  var p = document.querySelector(".bhero p");
+  if(p) p.textContent = w === "jay" ? "Jay works at his desk. You do a bit of work, on paper or anywhere else. Nothing here checks up on you; he is just company." :
+    w === "both" ? "Jay works, Bonnie snoozes. You do a bit of work, on paper or anywhere else. Nothing here checks up on you; they are just company." :
+    "Bonnie snoozes. You do a bit of work, on paper or anywhere else. Nothing here checks up on you; she is just company.";
+}
 function save(){ st.updated = new Date().toISOString(); try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
 function dayStr(d){ var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd; }
 function today(){ var d = new Date(); d.setHours(12, 0, 0, 0); return dayStr(d); }
@@ -407,6 +449,7 @@ function wireSound(root){
   wireChips(root, function(n, v){
     if(n === "sound"){ soundNow = v; st.pref.sound = v; save(); soundOn(v); }
     if(n === "mins"){ st.pref.mins = +v; save(); drawClock(); }
+    if(n === "who"){ st.pref.who = v; save(); drawWho(); }
   });
   var vr = root.querySelector("#vol");
   if(vr) vr.oninput = function(){ st.pref.vol = +vr.value; setVol(); save(); };
@@ -415,6 +458,8 @@ function drawPanel(){
   var p = $("panel");
   if(phase === "setup"){
     p.innerHTML = '<h3>Get comfy</h3>' +
+      '<span class="lab">Who would you like with you?</span>' +
+      chips("who", [["bonnie", "Bonnie"], ["jay", "Jay"], ["both", "Both"]], st.pref.who) +
       '<span class="lab">How long? <small>(or no timer at all)</small></span>' +
       chips("mins", [[10, "10"], [15, "15"], [20, "20"], [25, "25"], [30, "30"], [0, "No timer"]], st.pref.mins) +
       '<label class="lab" for="note">What is on your desk? <small>(optional, goes on a sticky note)</small></label>' +
@@ -436,7 +481,7 @@ function drawPanel(){
   }else{
     var r = lastDone;
     p.innerHTML = '<h3>' + (r.full ? pick(["That is a session.", "Time is up. Nicely done.", "There it is."]) : "Stopping there is fine.") + '</h3>' +
-      '<p>' + (r.m ? "You sat with Bonnie for " + r.m + " minute" + (r.m === 1 ? "" : "s") + ". " : "") + "Bonnie is stretching. Maybe something small for you too:</p>" +
+      '<p>' + (r.m ? "You sat with " + WHO[st.pref.who in WHO ? st.pref.who : "bonnie"] + " for " + r.m + " minute" + (r.m === 1 ? "" : "s") + ". " : "") + "Bonnie is stretching. Maybe something small for you too:</p>" +
       '<ul class="breaks">' + breaks().map(function(b){ return "<li>" + b + "</li>"; }).join("") + "</ul>" +
       '<button class="btn" type="button" id="againBtn">Another one</button> ' +
       '<button class="btn btn-quiet" type="button" id="changeBtn">Change things</button> ' +
@@ -508,6 +553,7 @@ function finish(full){
 }
 
 /* ---------- start up: carry on a session after a reload ---------- */
+drawWho();
 if(st.run){
   var e0 = elapsed();
   if(st.run.mins && e0 >= st.run.mins * 60000){ phase = "run"; finish(true); }

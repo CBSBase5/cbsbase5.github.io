@@ -51,7 +51,13 @@ css.textContent =
   ".hqx-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}" +
   ".hqx-row button{font-family:var(--display,Arial,sans-serif);font-weight:700;font-size:.95rem;padding:9px 14px;border-radius:12px;border:2px solid #141a33;background:#fff;color:#141a33;cursor:pointer}" +
   ".hqx-row button.main{background:var(--sun,#ffd23f)}" +
-  ".hqx-modal .sendbox{margin:14px 0 0;max-width:none}";
+  ".hqx-modal .sendbox{margin:14px 0 0;max-width:none}" +
+  ".cj-lines{display:flex;flex-direction:column;gap:8px}" +
+  ".cj-line{text-align:left;font:inherit;font-size:1.05rem;padding:10px 14px;border-radius:12px;border:2px solid #141a33;background:#fff;color:#141a33;cursor:pointer;font-family:'Comic Sans MS','Chalkboard SE',var(--body,Verdana),sans-serif}" +
+  ".cj-line:hover{background:#fff6cf}" +
+  ".cj-line.cj-ok{border-style:dashed;opacity:.6}" +
+  ".cj-line.cj-hit{background:#ffe1e1;border-color:#ff5d5d;text-decoration:line-through;text-decoration-color:#ff5d5d;text-decoration-thickness:2px}" +
+  ".cj-say{min-height:1.4em;margin:12px 0 0;font-size:1rem;line-height:1.45}";
 document.head.appendChild(css);
 
 /* ---------- 1. pick up where you left off ---------- */
@@ -202,9 +208,86 @@ function openPostcard(w){
     return ["My week, starting " + w.start, "", "Sparks: " + w.sparks, "Chunks finished: " + w.chunks, "Daily drops: " + w.daily, "Sent to Jay: " + w.sends, "", "What I had a go at:"].concat(w.touched.length ? w.touched.map(function(t){ return "- " + t; }) : ["- a quiet week"]).join("\n");
   }});
   back.appendChild(m); document.body.appendChild(back);
-  back.addEventListener("click", function(e){ if(e.target === back) back.remove(); });
-  back.addEventListener("keydown", function(e){ if(e.key === "Escape") back.remove(); });
+  function onKey(e){ if(e.key === "Escape") shut(); }
+  function shut(){ document.removeEventListener("keydown", onKey); back.remove(); }
+  close.onclick = shut;
+  back.addEventListener("click", function(e){ if(e.target === back) shut(); });
+  document.addEventListener("keydown", onKey);
   save.focus();
+}
+
+/* ---------- 3. catch Jay out ---------- */
+var CJ_KEY = P + "catchjay.v1";
+var CJ_SPARK = { right1: 10, right2: 6, shown: 3 };
+function cjLoad(){ var d = read(CJ_KEY); return d && d.done ? d : { done: {} }; }
+function cjSave(d){
+  var sp = 0; for(var k in d.done) sp += CJ_SPARK[d.done[k]] || 0;
+  d.summary = { sparks: sp, title: "Catch Jay out" };
+  d.updated = new Date().toISOString();
+  try{ localStorage.setItem(CJ_KEY, JSON.stringify(d)); }catch(e){}
+}
+function catchCard(){
+  if(!window.B5Catch) return null;
+  var bank = window.B5Catch.bank(HQ.who), d = cjLoad();
+  var caught = bank.filter(function(it){ return d.done[it.id]; }).length;
+  var c = el("div", "hqx-card");
+  c.innerHTML =
+    '<span class="hqx-k">Catch Jay out</span>' +
+    '<span class="hqx-t">Jay had a go. Somewhere he slipped.</span>' +
+    '<p class="hqx-s">' + (caught ? 'Caught ' + caught + ' of ' + bank.length + ' so far.' : 'Tap the line where he first goes wrong.') + '</p>';
+  var b = el("button", "hqx-go", caught >= bank.length ? "Go round again" : "Mark Jay&rsquo;s work"); b.type = "button";
+  b.addEventListener("click", function(){ openCatch(); });
+  c.appendChild(b);
+  return c;
+}
+function openCatch(){
+  var bank = window.B5Catch.bank(HQ.who), d = cjLoad();
+  var left = bank.filter(function(it){ return !d.done[it.id]; });
+  if(!left.length){ d.done = {}; cjSave(d); left = bank.slice(); }
+  var back = el("div", "hqx-back"), m = el("div", "hqx-modal");
+  m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", "Catch Jay out");
+  back.appendChild(m); document.body.appendChild(back);
+  function onKey(e){ if(e.key === "Escape") close(); }
+  function close(){ document.removeEventListener("keydown", onKey); back.remove(); var old = document.querySelector(".hqx"); if(old){ old.remove(); mount(); } }
+  back.addEventListener("click", function(e){ if(e.target === back) close(); });
+  document.addEventListener("keydown", onKey);
+  function next(){
+    if(!left.length){
+      m.innerHTML = '<h3 style="margin:0 0 6px;font-family:var(--display,Arial,sans-serif)">That is all of Jay&rsquo;s work.</h3><p>He is going to need a word with himself.</p>';
+      var row = el("div", "hqx-row"), x = el("button", "main", "Back to my HQ"); x.type = "button"; x.onclick = close; row.appendChild(x); m.appendChild(row); x.focus(); return;
+    }
+    var it = left.splice(Math.floor(Math.random() * left.length), 1)[0], tries = 0;
+    m.innerHTML =
+      '<p style="margin:0 0 4px;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#4b5275">Catch Jay out &middot; ' + (it.s === "maths" ? "Maths" : "English") + '</p>' +
+      '<h3 style="margin:0 0 8px;font-family:var(--display,Arial,sans-serif);font-size:1.25rem">' + it.q + '</h3>' +
+      '<p style="margin:0 0 10px;color:#4b5275">Jay&rsquo;s working. Tap the line where he first goes wrong.</p>' +
+      '<div class="cj-lines">' + it.lines.map(function(l, i){ return '<button type="button" class="cj-line" data-i="' + i + '">' + l + '</button>'; }).join("") + '</div>' +
+      '<p class="cj-say" aria-live="polite"></p><div class="hqx-row cj-after"></div>';
+    var say = m.querySelector(".cj-say"), after = m.querySelector(".cj-after");
+    function finish(status){
+      d.done[it.id] = status; cjSave(d);
+      [].forEach.call(m.querySelectorAll(".cj-line"), function(b){ b.disabled = true; if(+b.dataset.i === it.wrong) b.classList.add("cj-hit"); });
+      var n = el("button", "main", "Another one"); n.type = "button"; n.onclick = next;
+      var x = el("button", "", "That will do"); x.type = "button"; x.onclick = close;
+      after.appendChild(n); after.appendChild(x); n.focus();
+    }
+    [].forEach.call(m.querySelectorAll(".cj-line"), function(b){
+      b.onclick = function(){
+        var i = +b.dataset.i;
+        if(i === it.wrong){
+          say.innerHTML = '<b>' + (tries ? "Got him." : "Caught him first go.") + '</b> ' + it.why;
+          finish(tries ? "right2" : "right1");
+        } else {
+          tries++;
+          b.classList.add("cj-ok"); b.disabled = true;
+          if(tries >= 2){ say.innerHTML = '<b>That line is fine too. Here is where he went wrong:</b> ' + it.why; finish("shown"); }
+          else say.innerHTML = 'That line is actually right. Jay goes wrong somewhere else.';
+        }
+      };
+    });
+    var first = m.querySelector(".cj-line"); if(first) first.focus();
+  }
+  next();
 }
 
 /* ---------- put them on the page ---------- */
@@ -214,6 +297,7 @@ function mount(){
   var box = el("div", "hqx");
   var r = resumeCard(); if(r) box.appendChild(r);
   box.appendChild(weekCard());
+  var cj = catchCard(); if(cj) box.appendChild(cj);
   hero.parentNode.insertBefore(box, hero.nextSibling);
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
