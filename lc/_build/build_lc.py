@@ -22,7 +22,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 EGW = os.path.join(ROOT, "egw")
 LC = os.path.join(ROOT, "lc")
 
-HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html", "teacher.html"]
+HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html", "folder.html", "teacher.html"]
 SHARED = r"(engine\.js|skin\.js|progress\.js|egw\.css)"
 LC_CSS = "/lc/lc.css?v=3"
 CONF = "/lc/conf.js?v=1"

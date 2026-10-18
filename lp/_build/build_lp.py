@@ -25,7 +25,7 @@ LP = os.path.join(ROOT, "lp")
 
 SUBJECTS = ["english", "maths"]
 EXTRAS = ["escape-maths", "escape-english"]
-HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html"]
+HUBS = ["index.html", "papers.html", "sky.html", "daily.html", "swipe.html", "bonnie.html", "looks.html", "folder.html"]
 SHARED = r"(engine\.js|skin\.js|progress\.js|egw\.css|daily-bank-|swipe-bank-)"
 LP_CSS = "/lp/lp.css?v=1"
 CONF = "/lp/conf.js?v=1"

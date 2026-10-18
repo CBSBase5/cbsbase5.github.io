@@ -1,6 +1,7 @@
 /* ==========================================================
    Base 5 - HQ home page extras
-   Two cards that sit under the hello on every student HQ home:
+   Cards that sit under the hello on every student HQ home (the
+   folder card comes first, from /data/folder.js when it is loaded):
      1. Pick up where you left off: the last activity touched
         that is not finished, with one tap back into the right
         chunk.
@@ -295,6 +296,7 @@ function mount(){
   var hero = document.querySelector(".hero");
   if(!hero || document.querySelector(".hqx")) return;
   var box = el("div", "hqx");
+  if(window.B5Folder) box.appendChild(window.B5Folder.card());
   var r = resumeCard(); if(r) box.appendChild(r);
   box.appendChild(weekCard());
   var cj = catchCard(); if(cj) box.appendChild(cj);
