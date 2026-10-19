@@ -68,7 +68,14 @@ var PROJECTS = {
   "/projects/lw.html":  { who: "LW",  prefix: "b5.project.lw." },
   "/projects/lc.html":  { who: "LC",  prefix: "b5.project.lc." },
   "/projects/hk.html":  { who: "HK",  prefix: "b5-project-hk" },
-  "/projects/jt.html":  { who: "JT",  prefix: "b5.project.jt." }
+  "/projects/jt.html":  { who: "JT",  prefix: "b5.project.jt." },
+  /* Autumn 1 projects, kept safe: same students, same saved work */
+  "/autumn-1/projects/egw.html": { who: "EGW", prefix: "b5.project.egw." },
+  "/autumn-1/projects/lp.html":  { who: "LP",  prefix: "b5.project.lp." },
+  "/autumn-1/projects/lw.html":  { who: "LW",  prefix: "b5.project.lw." },
+  "/autumn-1/projects/lc.html":  { who: "LC",  prefix: "b5.project.lc." },
+  "/autumn-1/projects/hk.html":  { who: "HK",  prefix: "b5-project-hk" },
+  "/autumn-1/projects/jt.html":  { who: "JT",  prefix: "b5.project.jt." }
 };
 var base = null, hq = null;
 Object.keys(HQS).forEach(function(b){ if(path.indexOf(b) === 0){ base = b; hq = HQS[b]; } });

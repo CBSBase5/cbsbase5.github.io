@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""
+Writes the six Autumn 2 project pages (projects/<initials>.html) from one
+shell. The workspace itself is drawn by /data/project.js; the look is in
+/projects/project.css. Per-student touches live in PEOPLE in project.js.
+
+    python3 projects/_build/build_projects.py      (from the repo root)
+
+Last half term's pages are kept safe in /autumn-1/projects/. ASCII only.
+"""
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+WHO = ["JT", "LW", "LC", "EGW", "LP", "HK"]
+
+SHELL = """<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{w}'s project - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=11">
+<link rel="stylesheet" href="/projects/project.css?v=1">
+<script src="/data/b5site.js?v=7"></script>
+<script src="/data/b5keys.js?v=1"></script>
+<script src="/data/b5lock.js?v=1"></script>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true">
+        <path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="10" y1="13.6" x2="10" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="18" y1="10" x2="18" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="26" y1="13.6" x2="26" y2="24" stroke="#cfe2e7" stroke-width="1.6"/>
+        <line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="2.4"/>
+      </svg>
+      <b>Base 5</b>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/practice/">Practice</a>
+      <a href="/projects/" aria-current="page">Projects</a>
+      <a href="/games/">Games</a>
+      <a href="/tools/">Tools</a>
+      <a href="/my-targets.html">My targets</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap pwrap pj">
+
+  <header class="hero hero-sm hero-page">
+    <div class="toprow">
+      <h1 class="echo" data-echo="{w}&#x27;s project">{w}'s <span class="accent">project</span></h1>
+      <span class="badge" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fffdf8" stroke="#0a2f38" stroke-width="6"/><path d="M50 24a18 18 0 0 0-10 33v8h20v-8a18 18 0 0 0-10-33z" fill="#ffc247" stroke="#0a2f38" stroke-width="4" stroke-linejoin="round"/><path d="M42 72h16M45 78h10" stroke="#0a2f38" stroke-width="4" stroke-linecap="round"/><path d="M50 40v12" stroke="#ef7724" stroke-width="4" stroke-linecap="round"/></svg></span>
+    </div>
+    <div class="line"><span class="chip">Autumn 2</span><p>If we could time travel, should we? Answer it your way: a song, a film, a model, a game, anything you can make. Nothing here is fixed.</p></div>
+  </header>
+
+  <div class="board">
+    <div class="card w12" id="gateCard">
+      <span class="kicker">Your workspace</span>
+      <h3>Pop your code in</h3>
+      <p style="font-size:1.05rem;line-height:1.5;margin:6px 0 0">Signed in to your school account, this opens by itself. Otherwise it is the same four numbers as your targets.</p>
+      <div class="pinpad">
+        <input id="pin" type="text" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="Your four digit code">
+        <button class="btn" id="unlockBtn" type="button">Open</button>
+      </div>
+      <p class="pinmsg" id="pinMsg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="board hidden" id="work"></div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Teacher view</a>
+  </div>
+</footer>
+
+<script src="/data/send.js?v=1"></script>
+<script>window.PROJECT = {{ who: "{w}" }};</script>
+<script src="/data/project.js?v=1"></script>
+</body>
+</html>
+"""
+
+for w in WHO:
+    s = SHELL.format(w=w)
+    assert all(ord(c) < 128 for c in s)
+    p = os.path.join(ROOT, "projects", w.lower() + ".html")
+    open(p, "w", encoding="utf-8").write(s)
+    print("wrote", os.path.relpath(p, ROOT))

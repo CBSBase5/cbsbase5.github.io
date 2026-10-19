@@ -131,7 +131,7 @@
 .nextup h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
 .nextup p{margin:0;font-size:.95rem}
 </style>
-<script src="/data/b5site.js?v=6"></script>
+<script src="/data/b5site.js?v=7"></script>
 </head>
 <body>
 <div class="grain"></div>
@@ -204,6 +204,7 @@
       <p id="wheresaved"><strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.</p>
     </div>
     <p id="termswitch" hidden><button class="btn btn-quiet" type="button" id="termBtn">Look back at Autumn 1</button></p>
+    <div class="panel panel-yellow" id="a2wait" hidden><p><strong>These are last half term's targets.</strong> Your Autumn 2 ones come from Jay's sheet, and it did not answer just now. You can look back at these, or try again.</p><p><button class="btn btn-quiet" type="button" id="a2retry">Try again</button></p></div>
 
     <div id="sendHost"></div>
 
@@ -403,10 +404,16 @@ function setMode(m){
     ? "<strong>Where this is saved.</strong> In Jay's sheet, so it is the same on any school device. Jay can see it, and can tick things too."
     : "<strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.";
   document.getElementById('termswitch').hidden=!a2;
+  document.getElementById('a2wait').hidden=!!a2||STAFF!=="";
   document.getElementById('termBtn').textContent=m==="a2"?"Look back at Autumn 1":"Back to Autumn 2";
   renderTargets();
 }
 document.getElementById('termBtn').addEventListener('click',function(){ setMode(mode==="a2"?"a1":"a2") });
+document.getElementById('a2retry').addEventListener('click',function(){
+  var b=this; b.disabled=true; b.textContent="Asking the sheet...";
+  try{ sessionStorage.removeItem("b5.bridge.down"); }catch(e){}
+  fetchA2().then(function(){ b.disabled=false; b.textContent="Try again"; if(a2) setMode("a2"); else b.textContent="Still no answer. Try again"; });
+});
 var noteTimers={};
 function pushTick(id,what){
   var S=window.B5Site; if(mode!=="a2"||!S) return;
