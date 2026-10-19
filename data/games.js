@@ -25,10 +25,14 @@
      tags    any of: cc, learning, project, make, fun
      added   the date it went up (yyyy-mm-dd). Anything added in
              the last three weeks gets a NEW sticker.
-     art     path to a box art image, if it has one
-     fill    cover colour if there is no art:
+     art     path to the box art image (640x822 webp, plus a
+             box@2x.webp next to it). Every game in the vault has
+             one, all drawn at the same size and angle so the
+             shelves match. New games get theirs from the box art
+             maker in /games/art/_maker/
+     fill    back up cover colour, drawn if the art will not load:
              teal, bright, orange, yellow, plum, ink
-     motif   cover picture if there is no art:
+     motif   back up cover picture if the art will not load:
              portal, stars, wave, ball, chess, grid, blocks,
              bolt, house, heart, pitch, leaf, clock
      year    the year it "comes from" on its vault label.
@@ -53,7 +57,7 @@ window.B5GAMES = {
       id:"its-time", title:"It's Time", href:"/projects/its-time.html",
       blurb:"Catapult yourself through nine eras of invention and smash every gate on the way. A warm up for this half term's question: if we could time travel, should we?",
       meta:"Nine eras &middot; play a round or play all afternoon",
-      tags:["project","fun"], added:"2026-10-14", fill:"orange", motif:"portal", year:"Every year at once", featured:true
+      tags:["project","fun"], added:"2026-10-14", art:"/games/art/its-time/box.webp", fill:"orange", motif:"portal", year:"Every year at once", featured:true
     },
     {
       id:"build-a-life", title:"Build a Life", href:"/practice/build-a-life.html",
@@ -89,43 +93,43 @@ window.B5GAMES = {
       id:"last-stand", title:"Tiny Legends: Last Stand", href:"/practice/last-stand.html",
       blurb:"Hold the community hall on bingo night, or the old Chilton Bridge Manor in a storm, and keep the neighbours safe until morning. One player, or two on one keyboard.",
       meta:"For Elderly Appreciation Day &middot; four bosses",
-      tags:["cc","fun"], added:"2026-09-28", fill:"ink", motif:"house", year:"1950s onwards"
+      tags:["cc","fun"], added:"2026-09-28", art:"/games/art/last-stand/box.webp", fill:"ink", motif:"house", year:"1950s onwards"
     },
     {
       id:"tiny-legends", title:"Tiny Legends", href:"/practice/tiny-legends.html",
       blurb:"Pick an older legend and fight your way through five floors of the Memory House, stopping to hear the stories of the people you meet.",
       meta:"For Elderly Appreciation Day &middot; five floors",
-      tags:["cc","fun"], added:"2026-09-28", fill:"plum", motif:"stars", year:"A long life ago"
+      tags:["cc","fun"], added:"2026-09-28", art:"/games/art/tiny-legends/box.webp", fill:"plum", motif:"stars", year:"A long life ago"
     },
     {
       id:"jts-dugout", title:"JT's Dugout", href:"/jt/",
       blurb:"Pick your best side and run a club. Every training session you try earns a match, and the more you do, the luckier your team gets.",
       meta:"Football manager &middot; saves on this computer",
-      tags:["fun"], added:"2026-10-14", fill:"teal", motif:"pitch", year:"This season"
+      tags:["fun"], added:"2026-10-14", art:"/games/art/jts-dugout/box.webp", fill:"teal", motif:"pitch", year:"This season"
     },
     {
       id:"cue-the-sequence", title:"Cue the Sequence", href:"/practice/cue-the-sequence.html",
       blurb:"A pool potting race against Chalky, with a quick sequences warm up before each of your turns. The levels never run out.",
       meta:"Sequences and the nth term &middot; endless levels",
-      tags:["learning"], added:"2026-09-24", fill:"teal", motif:"ball", year:"Down the pub, 1987"
+      tags:["learning"], added:"2026-09-24", art:"/games/art/cue-the-sequence/box.webp", fill:"teal", motif:"ball", year:"Down the pub, 1987"
     },
     {
       id:"paragraph-dash", title:"Paragraph Dash", href:"/practice/paragraphs.html",
       blurb:"Jay's face, in a Geometry Dash style run, with paragraph structure to sort out on the way.",
       meta:"English paragraphs &middot; jump and sort",
-      tags:["learning","fun"], added:"2026-09-24", fill:"yellow", motif:"bolt", year:"Somewhere in 2013"
+      tags:["learning","fun"], added:"2026-09-24", art:"/games/art/paragraph-dash/box.webp", fill:"yellow", motif:"bolt", year:"Somewhere in 2013"
     },
     {
       id:"chip-run", title:"Chip Run", href:"/practice/chip-run.html",
       blurb:"You are a chip on a pier and the seagulls want you. Run into the right answer before they catch you.",
       meta:"Times tables &middot; 20 levels",
-      tags:["learning","fun"], added:"2026-09-21", fill:"orange", motif:"wave", year:"Seaside, 1962"
+      tags:["learning","fun"], added:"2026-09-21", art:"/games/art/chip-run/box.webp", fill:"orange", motif:"wave", year:"Seaside, 1962"
     },
     {
       id:"chess", title:"Chess, properly", href:"/practice/chess.html",
       blurb:"A real engine with four strengths, up to one that is not trying to be fair. Strategy notes turn up when the position calls for them.",
       meta:"Thinking and calculation &middot; four strengths",
-      tags:["fun"], added:"2026-09-21", fill:"ink", motif:"chess", year:"About 600 AD"
+      tags:["fun"], added:"2026-09-21", art:"/games/art/chess/box.webp", fill:"ink", motif:"chess", year:"About 600 AD"
     }
   ]
 };
