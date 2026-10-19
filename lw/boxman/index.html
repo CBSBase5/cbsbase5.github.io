@@ -1303,6 +1303,19 @@ var SPR = (function () {
     }
     return this;
   };
+  /* a scale transform, so a whole part (a head, say) can be drawn bigger around an anchor point */
+  ['rect', 'rrect', 'ell', 'limb', 'poly', 'dec', 'tint'].forEach(function (n) {
+    var raw = PP[n];
+    PP[n] = function () {
+      var T = this.T; if (!T) return raw.apply(this, arguments);
+      var a = Array.prototype.slice.call(arguments), s = T.s, tx = function (x) { return T.ox + (x - T.ox) * s; }, ty = function (y) { return T.oy + (y - T.oy) * s; }, sz = function (v) { return Math.max(1, Math.round(v * s)); };
+      if (n === 'poly') a[0] = a[0].map(function (p) { return [tx(p[0]), ty(p[1])]; });
+      else if (n === 'ell') { a[0] = tx(a[0]); a[1] = ty(a[1]); a[2] *= s; a[3] *= s; }
+      else if (n === 'limb') { a[0] = tx(a[0]); a[1] = ty(a[1]); a[2] = tx(a[2]); a[3] = ty(a[3]); a[4] *= s; }
+      else { a[0] = tx(a[0]); a[1] = ty(a[1]); a[2] = sz(a[2]); a[3] = sz(a[3]); if (n === 'rrect') a[4] = a[4] * s; }
+      this.T = null; try { return raw.apply(this, a); } finally { this.T = T; }
+    };
+  });
   PP.finish = function (outlineHex) {
     var w = this.w, h = this.h, d = this.d, o = new Uint8ClampedArray(d), gold = outlineHex ? hexRGB(outlineHex) : null;
     // a soft rim light on the top and left edges and a little shade on the bottom and right, the same on every sprite
@@ -1327,29 +1340,29 @@ var SPR = (function () {
 
   /* ---------- character looks (taken from LW's film) ---------- */
   var SPECS = {
-    gingerbeard: { skin: '#f0c4a0', style: 'bald', beard: '#c9612b', glasses: 'sun', top: '#24304f', shortSleeve: 1, legs: '#e8a0a2', shorts: 1, socks: '#3cb371', sandals: 1, shoes: '#5a4632', weapon: 'gun' },
+    gingerbeard: { build: 'big', skin: '#f0c4a0', style: 'bald', beard: '#c9612b', glasses: 'sun', top: '#24304f', shortSleeve: 1, legs: '#e8a0a2', shorts: 1, socks: '#3cb371', sandals: 1, shoes: '#5a4632', weapon: 'gun', offhand: 'magnifier' },
     sweettooth: { skin: '#f3cdb2', hair: '#dcb46c', style: 'tied', top: '#a52a5e', legs: '#2c2f3e', shoes: '#f2f0ea', sole: '#d9b9a0', weapon: 'sweets' },
-    trainer: { skin: '#f0c8a8', head: 'hood', top: '#1c1c20', print: 'frog', shortSleeve: 1, legs: '#2a2a30', shoes: '#26262c', sole: '#d8d8d8', weapon: 'pole' },
+    trainer: { build: 'slim', skin: '#f0c8a8', head: 'hood', top: '#1c1c20', print: 'frog', shortSleeve: 1, legs: '#2a2a30', shoes: '#26262c', sole: '#d8d8d8', weapon: 'pole' },
     friend: { skin: '#eebf9b', hair: '#3b2418', style: 'curly', glasses: 'sun', top: '#f6f4ee', shortSleeve: 1, legs: '#70402e', wide: 1, shoes: '#ebe3d0', weapon: null },
     jay: { skin: '#f0c8a8', hair: '#5a3a22', style: 'messy', brows: 1, top: '#2d4170', legs: '#30343f', shoes: '#232327', cape: '#c23a2b', weapon: null },
     boxman: { skin: '#f0c8a8', head: 'bag', jacket: '#5c6444', top: '#18181c', print: 'dog', legs: '#3b3b33', shorts: 1, shoes: '#17171a', weapon: 'hammer' },
     boxmanboss: { skin: '#f0c8a8', head: 'bag', jacket: '#5c6444', top: '#18181c', legs: '#3b3b33', shorts: 1, shoes: '#17171a', weapon: 'hammer', armour: 1 },
-    fan1: { skin: '#f0c8a8', head: 'cheapbag', bagv: 0, top: '#c4392d', print: 'diy', shortSleeve: 1, legs: '#2b3a58', shoes: '#f0f0f0', weapon: null },
-    fan2: { skin: '#c99a76', head: 'cheapbag', bagv: 1, top: '#2f86c3', print: 'diy', legs: '#34343a', shoes: '#26262a', weapon: 'finger' },
+    fan1: { build: 'big', skin: '#f0c8a8', head: 'cheapbag', bagv: 0, top: '#c4392d', print: 'diy', shortSleeve: 1, legs: '#2b3a58', shoes: '#f0f0f0', weapon: null },
+    fan2: { build: 'slim', skin: '#c99a76', head: 'cheapbag', bagv: 1, top: '#2f86c3', print: 'diy', legs: '#34343a', shoes: '#26262a', weapon: 'finger' },
     fan3: { skin: '#8d5a3b', head: 'cheapbag', bagv: 2, top: '#2aa65e', print: 'diy', shortSleeve: 1, legs: '#3b3b40', shoes: '#ececec', weapon: 'pad' },
-    robber: { skin: '#f0c8a8', hair: '#222222', style: 'beanie', hat: '#25252b', glasses: 'mask', top: '#25252b', stripes: '#e8e8e8', legs: '#2b2b30', shoes: '#18181b', weapon: 'crowbar', bag: 1 },
-    thief: { skin: '#e2b48f', hair: '#3b2a20', style: 'hoodup', hat: '#4b505c', top: '#4b505c', legs: '#2f3442', shoes: '#cfcfcf', weapon: 'parcel' },
+    robber: { build: 'big', skin: '#f0c8a8', hair: '#222222', style: 'beanie', hat: '#25252b', glasses: 'mask', top: '#25252b', stripes: '#e8e8e8', legs: '#2b2b30', shoes: '#18181b', weapon: 'crowbar', bag: 1 },
+    thief: { build: 'slim', skin: '#e2b48f', hair: '#3b2a20', style: 'hoodup', hat: '#4b505c', top: '#4b505c', legs: '#2f3442', shoes: '#cfcfcf', weapon: 'parcel' },
     cboy: { skin: '#f0c8a8', head: 'box', top: '#6a8caf', shortSleeve: 1, legs: '#33363d', shorts: 1, shoes: '#222226', weapon: null },
     cboyheadless: { skin: '#f0c8a8', head: 'none', top: '#6a8caf', shortSleeve: 1, legs: '#33363d', shorts: 1, shoes: '#222226', weapon: null },
-    soup: { skin: '#f0c8a8', hair: '#3a2a1e', style: 'short', glasses: 'mask', jacket: '#4e5b3b', collar: '#f4f4f0', top: '#18181c', print: 'frog', legs: '#3b3b33', shorts: 1, shoes: '#222226', weapon: 'crowbar' },
-    dreamman: { skin: '#f0d6c6', hair: '#2a1f1a', style: 'short', mask: 1, top: '#18181c', print: 'wolf', shortSleeve: 1, legs: '#2a2a33', shoes: '#222226', weapon: 'orb' },
+    soup: { build: 'big', skin: '#f0c8a8', hair: '#3a2a1e', style: 'short', glasses: 'mask', jacket: '#4e5b3b', collar: '#f4f4f0', top: '#18181c', print: 'frog', legs: '#3b3b33', shorts: 1, shoes: '#222226', weapon: 'crowbar' },
+    dreamman: { build: 'slim', skin: '#f0d6c6', hair: '#2a1f1a', style: 'short', mask: 1, top: '#18181c', print: 'wolf', shortSleeve: 1, legs: '#2a2a33', shoes: '#222226', weapon: 'orb' },
     frank: { skin: '#f3cdb2', hair: '#7c5434', style: 'long', top: '#18181c', shortSleeve: 1, legs: '#2b2b30', shoes: '#232327', weapon: null },
-    assistant: { skin: '#e9c2a0', hair: '#2a1c14', style: 'short', cushion: 1, jacket: '#5c6444', collar: '#6b4a2b', top: '#18181c', legs: '#2f2f34', shoes: '#232327', weapon: null },
-    surfer: { skin: '#f0c8a8', hair: '#a0a0a0', style: 'greycurly', beard: '#929292', shortBeard: 1, glasses: 'specs', top: '#a8a97c', legs: '#3b6090', shoes: '#2b2b2b', weapon: null },
+    assistant: { build: 'slim', skin: '#e9c2a0', hair: '#2a1c14', style: 'short', cushion: 1, jacket: '#5c6444', collar: '#6b4a2b', top: '#18181c', legs: '#2f2f34', shoes: '#232327', weapon: null },
+    surfer: { build: 'big', skin: '#f0c8a8', hair: '#a0a0a0', style: 'greycurly', beard: '#929292', shortBeard: 1, glasses: 'specs', top: '#a8a97c', legs: '#3b6090', shoes: '#2b2b2b', weapon: null },
     cardboy: { skin: '#f0c8a8', head: 'tallbox', top: '#d98c84', legs: '#2f3552', shoes: '#232327', weapon: 'blaster' },
     cardboyfists: { skin: '#f0c8a8', head: 'tallbox', top: '#d98c84', legs: '#2f3552', shoes: '#232327', weapon: null },
-    todd: { skin: '#e8b48e', hair: '#6b5440', style: 'short', top: '#5e2438', legs: '#3a3a44', shoes: '#232327', weapon: null },
-    deadguy: { skin: '#cfd8dc', hair: '#5a4632', style: 'short', top: '#18181c', shortSleeve: 1, legs: '#7c7a4a', shorts: 1, shoes: '#e2e2e2', weapon: null }
+    todd: { skin: '#e8b48e', hair: '#6b5440', style: 'short', top: '#5e2438', legs: '#3a3a44', shoes: '#232327', weapon: null, binoculars: 1 },
+    deadguy: { skin: '#cfd8dc', hair: '#5a4632', style: 'short', top: '#18181c', shortSleeve: 1, legs: '#7c7a4a', shorts: 1, shoes: '#e2e2e2', weapon: null, halo: 1 }
   };
 
   /* ---------- skeleton for a view and frame ---------- */
@@ -1359,23 +1372,24 @@ var SPR = (function () {
     var bob = (f === 1) ? 1 : (walk ? (Math.abs(sw) > 0.6 ? 0 : 1) : 0);
     if (f === 10) bob = 1;
     var S = { v: v, f: f, cx: 32, bob: bob, walk: walk, sw: sw, cw: cw, atk: f === 8 ? 'up' : (f === 9 ? 'out' : null), hurt: f === 10 };
-    var cx = 32, hipY = 41 + bob, footY = 60;
-    S.headY = 7 + bob; S.torsoY = 24 + bob; S.hipY = hipY;
+    // chunkier proportions: a bigger head (drawn scaled), a shorter body and a wider stance
+    var cx = 32, hipY = 43 + bob, footY = 60;
+    S.headY = 11 + bob; S.torsoY = 28 + bob; S.hipY = hipY; S.headScale = 1.25;
     if (v === 0 || v === 4) {
       S.tw = 18; S.tx = cx - 9;
       var la = Math.max(0, sw) * 3, ra = Math.max(0, -sw) * 3;
-      S.legs = [{ hx: cx - 4, hy: hipY, fx: cx - 5, fy: footY - la, near: v === 4 }, { hx: cx + 4, hy: hipY, fx: cx + 5, fy: footY - ra, near: v === 0 }];
+      S.legs = [{ hx: cx - 4, hy: hipY, fx: cx - 6, fy: footY - la, near: v === 4 }, { hx: cx + 4, hy: hipY, fx: cx + 6, fy: footY - ra, near: v === 0 }];
       var s1 = Math.round(sw * 1.5);
-      S.arms = [{ sx: cx - 10, sy: S.torsoY + 2, hx: cx - 12, hy: S.torsoY + 16 + s1, side: 'l' }, { sx: cx + 10, sy: S.torsoY + 2, hx: cx + 12, hy: S.torsoY + 16 - s1, side: 'r' }];
+      S.arms = [{ sx: cx - 10, sy: S.torsoY + 2, hx: cx - 13, hy: S.torsoY + 14 + s1, side: 'l' }, { sx: cx + 10, sy: S.torsoY + 2, hx: cx + 13, hy: S.torsoY + 14 - s1, side: 'r' }];
     } else if (v === 1 || v === 3) {
       S.tw = 15; S.tx = cx - 7;
       var l2 = Math.max(0, sw) * 2.5, r2 = Math.max(0, -sw) * 2.5;
       S.legs = [{ hx: cx - 3, hy: hipY, fx: cx - 3 - sw * 3, fy: footY - l2, near: false }, { hx: cx + 3, hy: hipY, fx: cx + 3 + sw * 3, fy: footY - r2, near: true }];
-      S.arms = [{ sx: cx - 8, sy: S.torsoY + 2, hx: cx - 9 + sw * 2, hy: S.torsoY + 16, side: 'l', far: true }, { sx: cx + 8, sy: S.torsoY + 2, hx: cx + 9 - sw * 2, hy: S.torsoY + 16, side: 'r' }];
+      S.arms = [{ sx: cx - 8, sy: S.torsoY + 2, hx: cx - 10 + sw * 2, hy: S.torsoY + 14, side: 'l', far: true }, { sx: cx + 8, sy: S.torsoY + 2, hx: cx + 10 - sw * 2, hy: S.torsoY + 14, side: 'r' }];
     } else {
       S.tw = 11; S.tx = cx - 5;
       S.legs = [{ hx: cx - 1, hy: hipY, fx: cx - sw * 7, fy: footY - Math.max(0, -cw) * 2.5 * (walk ? 1 : 0), near: false, kf: 2 }, { hx: cx + 1, hy: hipY, fx: cx + sw * 7, fy: footY - Math.max(0, cw) * 2.5 * (walk ? 1 : 0), near: true, kf: 2 }];
-      S.arms = [{ sx: cx, sy: S.torsoY + 2, hx: cx + sw * 5, hy: S.torsoY + 15, side: 'l', far: true }, { sx: cx, sy: S.torsoY + 2, hx: cx - sw * 5, hy: S.torsoY + 15, side: 'r' }];
+      S.arms = [{ sx: cx, sy: S.torsoY + 2, hx: cx + sw * 5, hy: S.torsoY + 13, side: 'l', far: true }, { sx: cx, sy: S.torsoY + 2, hx: cx - sw * 5, hy: S.torsoY + 13, side: 'r' }];
     }
     // attack poses move the right (weapon) arm
     var A = S.arms[1];
@@ -1396,7 +1410,8 @@ var SPR = (function () {
       else if (pose === 'up') { P.rrect(x - 2, y - 9, 4, 9, 1).part(card); }
       else { P.rrect(x - 2, y, 4, 9, 1).part(card); P.rect(x - 1, y + 2, 4, 3).part('#8e6a40'); }
     } else if (type === 'sweets') {
-      P.ell(x, y + 1, 3, 3).part('#ff5fa2'); P.dec(x - 1, y, 2, 2, '#ffe14d');
+      var ly = pose === 'up' ? y - 12 : y - 9; P.rect(x, ly, 1, y - ly + 2).part('#f4f0ea', { flat: true });
+      P.ell(x, ly - 1, 4.4, 4.4).part('#ff5fa2'); P.dec(x - 2, ly - 3, 2, 1, '#ffe14d'); P.dec(x + 1, ly - 2, 2, 2, '#ffe14d'); P.dec(x - 3, ly, 2, 2, '#ffffff'); P.dot(x, ly - 1, '#ffffff'); P.dec(x + 2, ly + 1, 1, 2, '#ffe14d');
     } else if (type === 'pole') {
       if (pose === 'out') P.rect(x - 8, y - 1, 26, 2).part('#a7b0bb', { soft: false });
       else if (pose === 'up') P.limb(x - 6, y + 10, x + 6, y - 16, 2).part('#a7b0bb', { soft: false });
@@ -1550,7 +1565,7 @@ var SPR = (function () {
       var ey = hy + 7, eye = '#2a1b14', R = ramp(skin);
       if (front) {
         P.dec(cx - 5, ey, 2, 3, eye); P.dec(cx + 3, ey, 2, 3, eye); P.dot(cx - 5, ey, '#ffffff'); P.dot(cx + 3, ey, '#ffffff');
-        P.dot(cx, ey + 3, R[1]); P.dec(cx - 1, ey + 5, 3, 1, '#8c3c3c');
+        P.dot(cx, ey + 3, R[1]); P.dec(cx - 1, ey + 5, 3, 1, '#8c3c3c'); P.dot(cx - 2, ey + 4, '#8c3c3c'); P.dot(cx + 2, ey + 4, '#8c3c3c');
         P.tint(cx - 7, ey + 3, 2, 2, '#ff8f8f', 0.35); P.tint(cx + 5, ey + 3, 2, 2, '#ff8f8f', 0.35);
         if (s.brows) { P.dec(cx - 6, ey - 3, 4, 2, ramp(hair)[0]); P.dec(cx + 2, ey - 3, 4, 2, ramp(hair)[0]); }
         else if (hair) { P.dec(cx - 6, ey - 2, 3, 1, ramp(hair)[0]); P.dec(cx + 3, ey - 2, 3, 1, ramp(hair)[0]); }
@@ -1623,6 +1638,9 @@ var SPR = (function () {
   /* ---------- humanoid ---------- */
   function human(P, s, v, f) {
     var S = skel(v, f), cx = S.cx, front = v === 0, back = v === 4, side = v === 2, diag = v === 1 || v === 3;
+    // body builds, so a crowd is not a row of clones
+    var bw = s.build === 'big' ? (side ? 2 : 4) : (s.build === 'slim' ? (side ? -1 : -2) : 0), lr = s.build === 'big' ? 1 : (s.build === 'slim' ? -0.5 : 0);
+    if (bw) { S.tw += bw; S.tx -= Math.round(bw / 2); if (!side) S.arms.forEach(function (A) { var o = A.side === 'l' ? -1 : 1; A.sx += o * Math.round(bw / 2); A.hx += o * Math.round(bw / 2); }); if (front || back) S.legs.forEach(function (L, i) { var o = L.hx < cx ? -1 : 1; L.hx += o * Math.round(bw / 4); L.fx += o * Math.round(bw / 4); }); }
     var sleeve = s.jacket || s.top, skin = s.skin;
     if (S.hurt) { S.headY += 1; }
     // cape behind
@@ -1634,12 +1652,13 @@ var SPR = (function () {
     }
     function legDraw(L, dark) {
       var kx = (L.hx + L.fx) / 2 + (L.kf || 0), ky = (L.hy + L.fy) / 2 - 1;
-      var thighC = s.legs, shinC = s.shorts ? skin : s.legs, r = s.wide ? 6 : 5;
+      var thighC = s.legs, shinC = s.shorts ? skin : s.legs, r = (s.wide ? 6 : 5) + lr;
       P.limb(L.hx, L.hy, kx, ky, r).part(thighC, { dark: dark });
-      P.limb(kx, ky, L.fx, L.fy - 3, s.wide && !s.shorts ? 6 : 4).part(shinC, { dark: dark });
+      P.limb(kx, ky, L.fx, L.fy - 3, (s.wide && !s.shorts ? 6 : 4) + lr).part(shinC, { dark: dark });
       if (s.socks) P.limb(L.fx, L.fy - 6, L.fx, L.fy - 3, 4).part(s.socks, { dark: dark });
-      if (side) { P.rrect(L.fx - 3, L.fy - 3, 9, 4, 1).part(s.socks && s.sandals ? s.socks : s.shoes, { dark: dark }); }
-      else { P.rrect(L.fx - 3, L.fy - 3, 7, 4, 1).part(s.socks && s.sandals ? s.socks : s.shoes, { dark: dark }); }
+      if (side) { P.rrect(L.fx - 3, L.fy - 4, 10, 5, 2).part(s.socks && s.sandals ? s.socks : s.shoes, { dark: dark }); }
+      else { P.rrect(L.fx - 4, L.fy - 4, 8, 5, 2).part(s.socks && s.sandals ? s.socks : s.shoes, { dark: dark }); }
+      if (!dark) P.dec(side ? L.fx + 3 : L.fx - 2, L.fy - 3, 2, 1, ramp(s.socks && s.sandals ? s.socks : s.shoes)[3], true);
       var sx = side ? L.fx - 3 : L.fx - 3, sw2 = side ? 9 : 7;
       if (s.sandals) { P.dec(sx, L.fy, sw2, 1, '#4a3626'); P.dec(sx + 1, L.fy - 2, sw2 - 2, 1, '#6b4e34'); }
       else if (s.sole) P.dec(sx, L.fy, sw2, 1, s.sole);
@@ -1647,9 +1666,9 @@ var SPR = (function () {
     function armDraw(A, dark) {
       var ex = (A.sx + A.hx) / 2 + (A.pose === 'down' ? (A.side === 'l' ? -1 : 1) : 0), ey = (A.sy + A.hy) / 2;
       var upC = sleeve, loC = (s.shortSleeve && !s.jacket) ? skin : sleeve;
-      P.limb(A.sx, A.sy, ex, ey, 5).part(upC, { dark: dark });
-      P.limb(ex, ey, A.hx, A.hy - 1, 4).part(loC, { dark: dark });
-      P.ell(A.hx, A.hy, 2.2, 2.2).part(skin, { dark: dark });
+      P.limb(A.sx, A.sy, ex, ey, 5 + lr).part(upC, { dark: dark });
+      P.limb(ex, ey, A.hx, A.hy - 1, 4 + lr).part(loC, { dark: dark });
+      P.ell(A.hx, A.hy, 2.6, 2.6).part(skin, { dark: dark });
     }
     if (s.head === 'tallbox' && !side) S.arms.forEach(function (A) { var o = A.side === 'l' ? -1 : 1, k = diag ? 3 : 4; A.sx += o * k; if (A.pose === 'down') A.hx += o * (k - 1); });
     var legs = S.legs.slice().sort(function (a, b) { return (a.near ? 1 : 0) - (b.near ? 1 : 0); });
@@ -1666,6 +1685,7 @@ var SPR = (function () {
     var tc = s.jacket || s.top;
     P.rrect(S.tx, S.torsoY, S.tw, S.hipY - S.torsoY + 1, 3).part(tc, { noise: s.jacket ? 0.08 : 0 });
     if (s.stripes) for (var sy = 2; sy < 16; sy += 3) P.dec(S.tx, S.torsoY + sy, S.tw, 1, s.stripes, true);
+    if (!s.armour) { P.dec(S.tx + 1, S.hipY - 4, S.tw - 2, 1, ramp(tc)[1], true); if (front && !s.jacket && !s.collar) P.dec(cx - 2, S.torsoY, 4, 1, ramp(tc)[0], true); }
     if (s.jacket && !back) {
       var ix = front ? cx - 2 : (diag ? cx + 1 : cx + 2), iw = side ? 2 : 4;
       P.dec(ix, S.torsoY + 2, iw, S.hipY - S.torsoY - 3, s.top, true);
@@ -1694,11 +1714,32 @@ var SPR = (function () {
     }
     if (s.cape && back) { var wv2 = S.walk ? Math.round(S.sw * 2) : 0; P.poly([[S.tx - 1, S.torsoY], [S.tx + S.tw + 1, S.torsoY], [S.tx + S.tw + 3 + wv2, S.torsoY + 26], [S.tx - 3 - wv2, S.torsoY + 26]]).part(s.cape); P.dec(cx, S.torsoY + 2, 1, 22, ramp(s.cape)[1], true); }
     if (s.cape && !back && !side) { P.rect(S.tx, S.torsoY - 1, S.tw, 2).part(s.cape); }
-    // head before near arms so arms overlap the body
-    head(P, s, S);
+    // head before near arms so arms overlap the body; heads are drawn a size up, anchored at the neck
+    if (s.head !== 'tallbox') P.T = { ox: cx, oy: S.headY + 17, s: S.headScale || 1 };
+    head(P, s, S); P.T = null;
     S.arms.forEach(function (A) { if (!A.far) armDraw(A, 0); });
     if (!back && s.weapon) { var A1 = S.arms[1]; weapon(P, s.weapon, A1.hx, A1.hy, A1.pose); }
-    if (S.hurt && !back) { P.dec(cx - 6, S.headY + 7, 3, 1, '#2a1b14'); P.dec(cx + 3, S.headY + 7, 3, 1, '#2a1b14'); }
+    props(P, s, S);
+    if (S.hurt && !back) { if (s.head !== 'tallbox') P.T = { ox: cx, oy: S.headY + 17, s: S.headScale || 1 }; P.dec(cx - 6, S.headY + 7, 3, 1, '#2a1b14'); P.dec(cx + 3, S.headY + 7, 3, 1, '#2a1b14'); P.T = null; }
+  }
+  /* signature props: the things that make a hero readable from across a room */
+  function props(P, s, S) {
+    var v = S.v, cx = S.cx, back = v === 4, side = v === 2, A0 = S.arms[0];
+    if (s.offhand === 'magnifier' && !back && !side) {
+      var mx = A0.hx - 1, my = A0.hy - 2;
+      P.limb(mx, my + 1, mx - 2, my - 4, 2).part('#5a4632');
+      P.ell(mx - 3, my - 8, 3.6, 3.6).part('#c9a24a'); P.dec(mx - 5, my - 10, 4, 4, '#bfe8ff'); P.dot(mx - 5, my - 10, '#ffffff'); P.dot(mx - 4, my - 9, '#ffffff');
+    }
+    if (s.binoculars && !back) {
+      var by = S.torsoY + 3, bx = side ? cx + 2 : cx - 4;
+      P.dec(cx - 4, S.torsoY, 1, 3, '#1b1520', true); P.dec(cx + 3, S.torsoY, 1, 3, '#1b1520', true);
+      P.rrect(bx, by, 4, 5, 1).part('#2a2a30'); if (!side) P.rrect(bx + 5, by, 4, 5, 1).part('#2a2a30');
+      P.dot(bx + 1, by + 3, '#9fd6ff'); if (!side) P.dot(bx + 6, by + 3, '#9fd6ff');
+    }
+    if (s.halo) {
+      var hy = Math.max(1, S.headY - 10), hx = side ? cx - 1 : cx;
+      P.dec(hx - 5, hy, 10, 1, '#f5d34a'); P.dec(hx - 5, hy + 2, 10, 1, '#c9a24a'); P.dot(hx - 6, hy + 1, '#f5d34a'); P.dot(hx + 5, hy + 1, '#c9a24a');
+    }
   }
   function printOn(P, kind, x, y, clip) {
     if (kind === 'frog') {
