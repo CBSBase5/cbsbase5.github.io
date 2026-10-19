@@ -62,7 +62,7 @@
     <h1>AUTUMN 2 <span class="accent">TARGETS</span></h1>
     <div class="line">
       <span class="chip">Staff only</span>
-      <p>The targets in the Targets tab, ticked by students on My targets and by you here.</p>
+      <p>The targets in the Targets tab, step by step, ticked by students on My targets and by you here.</p>
     </div>
   </div>
 </header>
@@ -79,6 +79,12 @@
     <div class="weektheme"><h2>One at a time</h2><span>Tick, add a note, and see what has been linked as evidence from the live view.</span></div>
     <div class="chipsrow" id="whos"></div>
     <div id="list"></div>
+  </div>
+  <div class="box" id="replaceBox">
+    <h2>Replace the Autumn 2 targets</h2>
+    <p class="help">Pick the targets file (a .tsv, one row per step, from BridgeLink Buddy or from Claude) and this replaces every row of the Targets tab with it. A copy of the old rows is kept in a new tab first, so nothing is lost. The wording never goes into the site: it goes straight from your file to your sheet. Needs the October 2026 version of the script or later.</p>
+    <div class="inline"><input type="file" id="tfile" accept=".tsv,.txt,text/tab-separated-values,text/plain"><button class="btn" type="button" id="tgo" disabled>Replace the Targets tab</button></div>
+    <p class="msg" id="tmsg" aria-live="polite"></p>
   </div>
   <div class="box" id="empty" hidden>
     <h2>No Autumn 2 targets yet</h2>
@@ -100,6 +106,9 @@ function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c
 function msg(t, bad){ $("msg").textContent = t; $("msg").className = "msg" + (bad ? " bad" : ""); }
 var D = null, me = "EGW";
 try{ $("key").value = localStorage.getItem(KEY) || ""; }catch(e){}
+function stepOf(t){ var m = /\.(\d+)$/.exec(t.id); return m ? +m[1] : 0; }
+function label(t){ var n = stepOf(t); return esc(t.title) + (n ? ", step " + n : ""); }
+function has(t, w){ return !stepOf(t) || !!((t.ms || {})[w]); }
 function tick(w, id){ return ((D.ticks || {})[w] || {})[id] || { state: 0, snote: "", jnote: "", at: 0 }; }
 function load(){
   var k = $("key").value.trim();
@@ -119,13 +128,13 @@ $("key").addEventListener("keydown", function(e){ if(e.key === "Enter") load(); 
 function draw(){
   $("grid").innerHTML = '<thead><tr><th>Target</th>' + WHO.map(function(w){ return '<th class="w">' + w + '</th>'; }).join("") + '</tr></thead><tbody>' +
     D.targets.map(function(t){
-      return '<tr><td>' + esc(t.title) + (t.pillar ? '<small>' + esc(t.pillar) + '</small>' : '') + '</td>' + WHO.map(function(w){ var s = tick(w, t.id).state; return '<td class="w"><span class="dot s' + s + '" title="' + w + ': ' + LABELS[s] + '"></span></td>'; }).join("") + '</tr>';
+      return '<tr><td>' + label(t) + (t.pillar ? '<small>' + esc(t.pillar) + '</small>' : '') + '</td>' + WHO.map(function(w){ if(!has(t, w)) return '<td class="w"></td>'; var s = tick(w, t.id).state; return '<td class="w"><span class="dot s' + s + '" title="' + w + ': ' + LABELS[s] + '"></span></td>'; }).join("") + '</tr>';
     }).join("") + '</tbody>';
   $("whos").innerHTML = WHO.map(function(w){ return '<button type="button" data-w="' + w + '" aria-pressed="' + (w === me) + '">' + w + '</button>'; }).join("");
   [].forEach.call($("whos").querySelectorAll("button"), function(b){ b.onclick = function(){ me = b.dataset.w; draw(); }; });
-  $("list").innerHTML = D.targets.map(function(t){
+  $("list").innerHTML = D.targets.filter(function(t){ return has(t, me); }).map(function(t){
     var k = tick(me, t.id), ev = (D.evidence || []).filter(function(e){ return e.who === me && e.target === t.id; });
-    return '<div class="t s' + k.state + '" data-id="' + esc(t.id) + '"><span class="k">' + esc(t.pillar) + '</span><h3>' + esc(t.title) + '</h3>' +
+    return '<div class="t s' + k.state + '" data-id="' + esc(t.id) + '"><span class="k">' + esc(t.pillar) + '</span><h3>' + label(t) + '</h3>' +
       '<p class="ms">' + esc((t.ms || {})[me] || "No milestone wording for " + me + " yet (their column in the Targets tab).") + '</p>' +
       '<div class="states">' + [0, 1, 2].map(function(n){ return '<button type="button" data-s="' + n + '" aria-pressed="' + (k.state === n) + '">' + LABELS[n] + '</button>'; }).join("") +
       (k.at ? '<span class="none">&nbsp;changed ' + esc(new Date(k.at).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })) + '</span>' : '') + '</div>' +
@@ -155,6 +164,40 @@ function draw(){
     };
   });
 }
+/* ---------- replace the Targets tab from a file ---------- */
+var TROWS = null;
+$("tfile").onchange = function(){
+  var f = this.files && this.files[0]; TROWS = null; $("tgo").disabled = true;
+  if(!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    var lines = String(rd.result).replace(/\r/g, "").split("\n").filter(function(l){ return l.trim(); });
+    var rows = lines.map(function(l){ return l.split("\t"); });
+    if(rows.length && /^pillar$/i.test(String(rows[0][0]).trim())) rows.shift();
+    rows = rows.filter(function(r){ return r.length >= 5 && r[1] && r[2]; });
+    if(!rows.length){ $("tmsg").textContent = "That file does not look like a targets file (tab separated: Pillar, Id, Title, Statement, then EGW, LP, LW, LC, HK, JT)."; $("tmsg").className = "msg bad"; return; }
+    TROWS = rows;
+    var per = WHO.map(function(w, j){ return w + " " + rows.filter(function(r){ return String(r[4 + j] || "").trim(); }).length; });
+    var titles = {}; rows.forEach(function(r){ titles[r[2]] = 1; });
+    $("tmsg").className = "msg"; $("tmsg").textContent = rows.length + " steps across " + Object.keys(titles).length + " targets (" + per.join(", ") + "). Ready when you are.";
+    $("tgo").disabled = false;
+  };
+  rd.readAsText(f);
+};
+$("tgo").onclick = function(){
+  var k = $("key").value.trim(), b = this;
+  if(!TROWS) return;
+  if(!k){ $("tmsg").className = "msg bad"; $("tmsg").textContent = "The staff passphrase goes in the box at the top first."; return; }
+  if(!confirm("Replace every row of the Targets tab with these " + TROWS.length + " steps? A copy of the old rows is kept in a new tab.")) return;
+  b.disabled = true; $("tmsg").className = "msg"; $("tmsg").textContent = "Replacing...";
+  B5Site.call("targetsreplace", { key: k, rows: TROWS }).then(function(o){
+    b.disabled = false;
+    if(!o.ok){ $("tmsg").className = "msg bad"; $("tmsg").textContent = /unknown/i.test(o.error || "") ? "The sheet does not know this yet: paste in the new script and deploy a new version first." : "The sheet said: " + o.error; return; }
+    $("tmsg").textContent = "Done. " + o.rows + " steps are now in the Targets tab. Students see theirs on My targets straight away.";
+    load();
+  }).catch(function(){ b.disabled = false; $("tmsg").className = "msg bad"; $("tmsg").textContent = "Could not reach the sheet."; });
+};
+
 if(window.B5Site && B5Site.syncUrl){
   if($("key").value) load();
   else B5Lock.whoami().then(function(m){ if(m && m.staff && m.pass){ $("key").value = m.pass; load(); } });

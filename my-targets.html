@@ -68,6 +68,14 @@
   transition:width .45s cubic-bezier(.2,1.1,.4,1)}
 .scoreboard .said{font-size:.95rem;color:var(--body-tint);flex-basis:100%;margin:0}
 
+.tgroup{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.25rem;margin:26px 0 10px;line-height:1.15}
+.tgroup span{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
+.tgroup small{font-family:var(--body);font-variation-settings:normal;font-weight:400;font-size:.85rem;color:var(--body-tint)}
+.helps{margin:4px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.helps .fl{width:100%;margin:0}
+.helps a,.helps span{display:inline-block;padding:7px 13px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);text-decoration:none;font-weight:700;font-size:.9rem}
+.helps a{background:var(--yellow)}
+.helps small{font-weight:400;color:var(--body-tint)}
 .tgt{border:var(--border) solid var(--ink);border-radius:var(--r-alt);
   background:var(--white);margin:0 0 14px;overflow:hidden;box-shadow:var(--lift)}
 .tgt>summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;gap:14px;align-items:center}
@@ -202,6 +210,7 @@
 </footer>
 
 <script src="/data/targets-enc.js?v=2"></script>
+<script src="/data/a2/drops.js"></script>
 <script src="/data/b5keys.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <script src="/data/send.js?v=1"></script>
@@ -349,7 +358,8 @@ function fetchA2(){
   var t=new Promise(function(r){ setTimeout(r,10000) });
   return Promise.race([t, S.call("targets",{who:me,code:entry}).then(function(o){
     if(!o||!o.ok||!o.targets||!o.targets.length) return;
-    a2=o.targets.map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title} });
+    a2=o.targets.filter(function(x){ return !(/\.\d+$/.test(x.id) && (!x.me || x.me==="Jay will add this one.")) })
+      .map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title} });
     a2ticks={};
     Object.keys(o.ticks||{}).forEach(function(id){ var k=o.ticks[id]; a2ticks[id]={state:k.state||0,at:k.at?new Date(k.at).toISOString():"",snote:k.snote||"",tnote:k.jnote||""} });
   }).catch(function(){})]);
@@ -403,8 +413,18 @@ function renderTargets(){
   var box=document.getElementById('targets');
   box.innerHTML="";
 
+  var lastGroup="";
   mine.forEach(function(x,i){
     var r=rec(me,x.id);
+    var step=mode==="a2"?(/\.(\d+)$/.exec(x.id)||[])[1]:null;
+    /* Autumn 2 targets come in steps: one heading per target, its steps underneath */
+    if(step&&x.title!==lastGroup){
+      lastGroup=x.title;
+      var n=mine.filter(function(y){ return y.title===x.title }).length;
+      var gh=document.createElement('h3'); gh.className='tgroup';
+      gh.innerHTML='<span>'+escH(x.pillar)+'</span>'+escH(x.title)+' <small>'+n+' step'+(n===1?'':'s')+'</small>';
+      box.appendChild(gh);
+    }
     var det=document.createElement('details');
     det.className='tgt';
 
@@ -414,7 +434,7 @@ function renderTargets(){
     var txt=document.createElement('div');
     txt.className='txt';
     var pill=document.createElement('p');
-    pill.className='pill'; pill.textContent=x.pillar;
+    pill.className='pill'; pill.textContent=step?'Step '+step:x.pillar;
     var h=document.createElement('h2');
     h.textContent=x.me;
     txt.appendChild(pill); txt.appendChild(h);
@@ -460,6 +480,7 @@ function renderTargets(){
 
     body.appendChild(states);
     body.appendChild(when);
+    if(step) helps(body,x.id);
 
     var lab=document.createElement('label');
     lab.className='fl';
@@ -490,6 +511,22 @@ function renderTargets(){
   });
 
   renderScore();
+}
+
+function escH(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] }) }
+/* the activities that help with this step: in their folder from the day each one lands */
+function helps(body,id){
+  var D=window.B5DROPS; if(!D||!D.items) return;
+  var m=/^(.*)\.(\d+)$/.exec(id); if(!m) return;
+  var t=new Date(), today=t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2)+"-"+("0"+t.getDate()).slice(-2);
+  var list=D.items.filter(function(it){ return it.who===me && it.ready!==false && (it.covers||[]).some(function(c){ return c[0]===m[1] && String(c[1])===m[2] }) });
+  if(!list.length) return;
+  var w=document.createElement('div'); w.className='helps';
+  w.innerHTML='<p class="fl">Activities that help with this</p>'+list.map(function(it){
+    var day=new Date(it.date+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+    return it.date<=today ? '<a href="'+escH(it.href)+'">'+escH(it.title)+'</a>' : '<span>'+escH(it.title)+' <small>arrives '+escH(day)+'</small></span>';
+  }).join("");
+  body.appendChild(w);
 }
 
 document.getElementById('lockBtn').addEventListener('click',function(){

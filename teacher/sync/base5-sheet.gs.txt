@@ -706,7 +706,9 @@ function targets_(r){
   }
   var who = who_(r.who);
   if(!studentOk_(who, r.code)) throw new Error("not yours");
-  var mine = targetRows_().map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one." }; });
+  /* step rows (ids like eng-infer.2) only go to the students who have that step */
+  var mine = targetRows_().filter(function(t){ return t.ms[who] || t.id.indexOf(".") < 0; })
+    .map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one." }; });
   return { ok: true, who: who, targets: mine, ticks: ticksOf_(who)[who] || {} };
 }
 function tick_(r){
@@ -724,6 +726,25 @@ function tick_(r){
   if(row) sh.getRange(row, 1, 1, 7).setValues(vals); else sh.getRange(sh.getLastRow() + 1, 1, 1, 7).setValues(vals);
   if(r.state != null && state !== (+cur[2] || 0)) logEvents_(who, [["Target", id + ": " + ["Not yet", "Having a go", "Got it"][state] + (staff ? " (Jay)" : "")]]);
   return { ok: true };
+}
+
+/* Staff only: replace every row of the Targets tab (keeps a copy of the old
+   rows in a tab called "Targets before <date>" first). rows: arrays of
+   Pillar, Id, Title, Statement, then one milestone per student in WHO order. */
+function targetsReplace_(r){
+  staff_(r.key);
+  var rows = Array.isArray(r.rows) ? r.rows : [];
+  rows = rows.filter(function(x){ return Array.isArray(x) && String(x[1] || "").trim() && String(x[2] || "").trim(); })
+    .map(function(x){ var o = []; for(var i = 0; i < 4 + WHO.length; i++) o.push(clean_(x[i] == null ? "" : x[i], 600)); return o; });
+  if(!rows.length) throw new Error("no rows");
+  var ss = SpreadsheetApp.getActive(), sh = sheet_("Targets"), old = sh.getDataRange().getValues();
+  if(old.length > 1){
+    var name = "Targets before " + day_(), copy = ss.getSheetByName(name) || ss.insertSheet(name);
+    copy.clear(); copy.getRange(1, 1, old.length, old[0].length).setValues(old);
+  }
+  if(sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(sh.getLastColumn(), 4 + WHO.length)).clearContent();
+  sh.getRange(2, 1, rows.length, 4 + WHO.length).setValues(rows);
+  return { ok: true, rows: rows.length };
 }
 
 /* ---------- questions made by students ---------- */
@@ -807,5 +828,5 @@ var READ3 = {
 var WRITE3 = {
   reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
   post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
-  a2plan: a2plan_
+  a2plan: a2plan_, targetsreplace: targetsReplace_
 };
