@@ -359,7 +359,7 @@ function fetchA2(){
   return Promise.race([t, S.call("targets",{who:me,code:entry}).then(function(o){
     if(!o||!o.ok||!o.targets||!o.targets.length) return;
     a2=o.targets.filter(function(x){ return !(/\.\d+$/.test(x.id) && (!x.me || x.me==="Jay will add this one.")) })
-      .map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title} });
+      .map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title,jay:x.jay||""} });
     a2ticks={};
     Object.keys(o.ticks||{}).forEach(function(id){ var k=o.ticks[id]; a2ticks[id]={state:k.state||0,at:k.at?new Date(k.at).toISOString():"",snote:k.snote||"",tnote:k.jnote||""} });
   }).catch(function(){})]);
@@ -480,6 +480,11 @@ function renderTargets(){
 
     body.appendChild(states);
     body.appendChild(when);
+    if(step&&x.jay&&!/^not yet$/i.test(x.jay)){
+      var js=document.createElement('p'); js.className='whenline';
+      js.textContent=/achieved/i.test(x.jay)?'Jay has marked this one as achieved.':'Jay says: '+x.jay.toLowerCase()+'.';
+      body.appendChild(js);
+    }
     if(step) helps(body,x.id);
 
     var lab=document.createElement('label');

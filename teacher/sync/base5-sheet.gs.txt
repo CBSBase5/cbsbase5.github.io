@@ -406,7 +406,9 @@ function setup3_(ss){
   var st = ss.getSheetByName("Settings");
   [["Fuel target", 300, "Sparks the whole of Base 5 needs in a week to fill the time machine."],
    ["Fuel reward", "", "What the group gets when it is full (shown on the home page)."],
-   ["Daily email", "TRUE", "TRUE sends you a short summary of the day at 3pm, Monday to Friday."]].forEach(function(r){
+   ["Daily email", "TRUE", "TRUE sends you a short summary of the day at 3pm, Monday to Friday."],
+   ["BridgeLink Buddy sheet", "", "Paste the link to your BridgeLink Buddy Google Sheet. My targets then shows each student's steps straight from Buddy."],
+   ["Targets term", "Autumn 2", "Which BridgeLink Buddy term My targets shows."]].forEach(function(r){
     if(String(setting_(r[0])) === "") st.appendRow(r);
   });
   var has = ScriptApp.getProjectTriggers().some(function(t){ return t.getHandlerFunction() === "dailyDigest"; });
@@ -678,7 +680,62 @@ function fame_(r){
 }
 
 /* ---------- Autumn 2 targets, ticked both ways ---------- */
+/* ---------- targets straight from BridgeLink Buddy ----------
+   With "BridgeLink Buddy sheet" in Settings (its link), My targets and the
+   staff Targets page read the steps for the "Targets term" (Autumn 2 unless
+   set) from Buddy's Targets and Milestones tabs, so the wording lives in one
+   place. Buddy's own status for each step comes along as "Jay says". Without
+   the setting, or if Buddy cannot be opened, the Targets tab is used. */
+var BUDDY_KEYS = {
+  "deduce, infer or interpret information": "eng-infer", "recognising fact and opinion": "eng-factop",
+  "sentence and text cohesion": "eng-cohesion", "text organisation and cohesion": "eng-organise",
+  "use punctuation accurately and effectively": "eng-punct", "number and calculation": "maths-number",
+  "shape, space and measure": "maths-shape", "architecture and construction": "ac-arch", "myths and legends": "hs-myths",
+  "adventure activities (including climbing)": "pw-adventure", "balance and control (including climbing)": "pw-balance",
+  "careers for the future": "pfa-careers", "transport and travel": "pfa-transport", "earth and atmosphere": "se-earth"
+};
+function buddyRows_(){
+  var link = String(setting_("BridgeLink Buddy sheet") || "").trim();
+  var m = link.match(/\/d\/([-\w]{20,})/) || link.match(/^([-\w]{20,})$/);
+  if(!m) return null;
+  var term = String(setting_("Targets term") || "Autumn 2").trim().toLowerCase();
+  var bs = SpreadsheetApp.openById(m[1]);
+  function table(name){
+    var sh = bs.getSheetByName(name); if(!sh) return [];
+    var v = sh.getDataRange().getValues(), h = (v[0] || []).map(function(x){ return String(x).trim().toLowerCase(); });
+    return v.slice(1).map(function(r){ var o = {}; h.forEach(function(k, i){ o[k] = r[i]; }); return o; });
+  }
+  function col(o, names){
+    for(var i = 0; i < names.length; i++) if(o[names[i]] != null && String(o[names[i]]).trim() !== "") return String(o[names[i]]).trim();
+    return "";
+  }
+  var titles = {};
+  table("Targets").forEach(function(t){ titles[col(t, ["id", "target id"])] = { title: col(t, ["target", "title"]), pillar: col(t, ["pillar"]) }; });
+  var rows = {}, order = [], firstSeen = {};
+  table("Milestones").forEach(function(r, n){
+    if(col(r, ["term"]).toLowerCase() !== term) return;
+    var who = col(r, ["student", "who"]).toUpperCase(); if(WHO.indexOf(who) < 0) return;
+    var tid = col(r, ["target id"]), tt = titles[tid] || {};
+    var title = tt.title || col(r, ["target", "title"]), pillar = tt.pillar || col(r, ["pillar"]);
+    var step = parseInt(col(r, ["step"]), 10) || 0;
+    var text = col(r, ["milestone", "step text", "wording", "text"]);
+    if(!title || !step || !text) return;
+    var key = BUDDY_KEYS[title.toLowerCase()] || ("t" + (tid || title).replace(/[^\w]+/g, "-").toLowerCase());
+    var id = key + "." + step;
+    if(firstSeen[key] == null) firstSeen[key] = n;
+    if(!rows[id]){ rows[id] = { pillar: pillar, id: id, title: title, statement: "", ms: {}, jay: {}, _k: key, _s: step }; order.push(id); }
+    rows[id].ms[who] = text;
+    rows[id].jay[who] = col(r, ["status"]);
+  });
+  var out = order.map(function(id){ return rows[id]; });
+  out.sort(function(a, b){ return firstSeen[a._k] - firstSeen[b._k] || a._s - b._s; });
+  return out;
+}
+
 function targetRows_(){
+  var fromBuddy = null;
+  try{ fromBuddy = buddyRows_(); }catch(eb){ fromBuddy = null; }
+  if(fromBuddy && fromBuddy.length) return fromBuddy;
   var v = rows_("Targets"), out = [];
   for(var i = 1; i < v.length; i++){
     if(!String(v[i][1]).trim() || !String(v[i][2]).trim()) continue;
@@ -708,7 +765,7 @@ function targets_(r){
   if(!studentOk_(who, r.code)) throw new Error("not yours");
   /* step rows (ids like eng-infer.2) only go to the students who have that step */
   var mine = targetRows_().filter(function(t){ return t.ms[who] || t.id.indexOf(".") < 0; })
-    .map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one." }; });
+    .map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one.", jay: (t.jay || {})[who] || "" }; });
   return { ok: true, who: who, targets: mine, ticks: ticksOf_(who)[who] || {} };
 }
 function tick_(r){
