@@ -52,14 +52,14 @@ window.B5DROPS = {
    "title": "The big idea",
    "subject": "English",
    "href": "/hk/a2-main-idea.html?lv=mild",
-   "note": "",
+   "note": "Finding the big idea in a text. Four five minute chunks, and a front page to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -68,14 +68,14 @@ window.B5DROPS = {
    "title": "The big idea",
    "subject": "English",
    "href": "/jt-hq/a2-main-idea.html?lv=mild",
-   "note": "",
+   "note": "Finding the big idea in a text. Four five minute chunks, and a front page to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -84,14 +84,14 @@ window.B5DROPS = {
    "title": "The big idea",
    "subject": "English",
    "href": "/lc/a2-main-idea.html?lv=mild",
-   "note": "",
+   "note": "Finding the big idea in a text. Four five minute chunks, and a front page to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -100,14 +100,14 @@ window.B5DROPS = {
    "title": "The big idea",
    "subject": "English",
    "href": "/lp/a2-main-idea.html?lv=mild",
-   "note": "",
+   "note": "Finding the big idea in a text. Four five minute chunks, and a front page to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -116,14 +116,14 @@ window.B5DROPS = {
    "title": "The big idea",
    "subject": "English",
    "href": "/lw/a2-main-idea.html?lv=medium",
-   "note": "",
+   "note": "Finding the big idea in a text. Four five minute chunks, and a front page to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -148,14 +148,14 @@ window.B5DROPS = {
    "title": "Fact factory",
    "subject": "Maths",
    "href": "/hk/a2-times-facts.html?lv=mild",
-   "note": "",
+   "note": "Times facts, and how they help you divide. Four five minute chunks with a fact card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -164,14 +164,14 @@ window.B5DROPS = {
    "title": "Fact factory",
    "subject": "Maths",
    "href": "/jt-hq/a2-times-facts.html?lv=mild",
-   "note": "",
+   "note": "Times facts, and how they help you divide. Four five minute chunks with a fact card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -180,14 +180,14 @@ window.B5DROPS = {
    "title": "Fact factory",
    "subject": "Maths",
    "href": "/lc/a2-times-facts.html?lv=mild",
-   "note": "",
+   "note": "Times facts, and how they help you divide. Four five minute chunks with a fact card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -196,14 +196,14 @@ window.B5DROPS = {
    "title": "Fact factory",
    "subject": "Maths",
    "href": "/lp/a2-times-facts.html?lv=medium",
-   "note": "",
+   "note": "Times facts, and how they help you divide. Four five minute chunks with a fact card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -212,14 +212,14 @@ window.B5DROPS = {
    "title": "Fact factory",
    "subject": "Maths",
    "href": "/lw/a2-times-facts.html?lv=mild",
-   "note": "",
+   "note": "Times facts, and how they help you divide. Four five minute chunks with a fact card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -228,14 +228,14 @@ window.B5DROPS = {
    "title": "Fact or opinion?",
    "subject": "English",
    "href": "/egw/a2-fact-or-opinion.html?lv=spicy",
-   "note": "",
+   "note": "Sorting facts from opinions and explaining why, then finding both in a review. Four five minute chunks and a review card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -400,14 +400,14 @@ window.B5DROPS = {
    "title": "Fact or opinion?",
    "subject": "English",
    "href": "/lw/a2-fact-or-opinion.html?lv=medium",
-   "note": "",
+   "note": "Sorting facts from opinions and explaining why, then finding both in a review. Four five minute chunks and a review card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -448,14 +448,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/egw/a2-what-makes-it-stand.html?lv=spicy",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -464,14 +464,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/hk/a2-what-makes-it-stand.html?lv=mild",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -480,14 +480,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/jt-hq/a2-what-makes-it-stand.html?lv=mild",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -496,14 +496,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/lc/a2-what-makes-it-stand.html?lv=mild",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -528,14 +528,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/lp/a2-what-makes-it-stand.html?lv=medium",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -564,14 +564,14 @@ window.B5DROPS = {
    "title": "What makes it stand?",
    "subject": "Aesthetic and Creative",
    "href": "/lw/a2-what-makes-it-stand.html?lv=medium",
-   "note": "",
+   "note": "What makes a structure stand up, ready for a build challenge away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -580,14 +580,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/egw/a2-design-an-expedition.html?lv=spicy",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -632,14 +632,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/hk/a2-design-an-expedition.html?lv=mild",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -664,14 +664,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/jt-hq/a2-design-an-expedition.html?lv=mild",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -696,14 +696,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/lc/a2-design-an-expedition.html?lv=mild",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -712,14 +712,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/lp/a2-design-an-expedition.html?lv=medium",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -728,14 +728,14 @@ window.B5DROPS = {
    "title": "Design an expedition",
    "subject": "Physical World",
    "href": "/lw/a2-design-an-expedition.html?lv=medium",
-   "note": "",
+   "note": "Planning a local expedition: route, timings, kit, weather and who to tell. Four five minute chunks, a route card to make, and a real walk if you fancy it.",
    "covers": [
     [
      "pw-adventure",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -760,14 +760,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/egw/a2-pick-format.html?lv=spicy",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1032,14 +1032,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/lp/a2-pick-format.html?lv=mild",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1064,14 +1064,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/lw/a2-pick-format.html?lv=medium",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1096,14 +1096,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/hk/a2-pick-format.html?lv=mild",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1112,14 +1112,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/jt-hq/a2-pick-format.html?lv=mild",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1128,14 +1128,14 @@ window.B5DROPS = {
    "title": "Pick the format",
    "subject": "English",
    "href": "/lc/a2-pick-format.html?lv=mild",
-   "note": "",
+   "note": "Letters, diaries, instructions and travelogues: spotting them, and picking the right one for the job. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1192,14 +1192,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/egw/a2-move-balance-control.html?lv=spicy",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1224,14 +1224,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/hk/a2-move-balance-control.html?lv=mild",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1256,14 +1256,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/jt-hq/a2-move-balance-control.html?lv=mild",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1288,14 +1288,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/lc/a2-move-balance-control.html?lv=mild",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1320,14 +1320,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/lp/a2-move-balance-control.html?lv=medium",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1352,14 +1352,14 @@ window.B5DROPS = {
    "title": "Move, balance, control",
    "subject": "Physical World",
    "href": "/lw/a2-move-balance-control.html?lv=medium",
-   "note": "",
+   "note": "Big moves and small moves: balance, jumping, throwing, laces, zips and pens. Four five minute chunks and a try it challenge, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1384,14 +1384,14 @@ window.B5DROPS = {
    "title": "Divisibility detective",
    "subject": "Maths",
    "href": "/hk/a2-divisibility.html?lv=mild",
-   "note": "",
+   "note": "Spotting whether a number splits evenly by 2, 5 or 10 just from its digits. Four five minute chunks, with a case card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1400,14 +1400,14 @@ window.B5DROPS = {
    "title": "Divisibility detective",
    "subject": "Maths",
    "href": "/jt-hq/a2-divisibility.html?lv=mild",
-   "note": "",
+   "note": "Spotting whether a number splits evenly by 2, 5 or 10 just from its digits. Four five minute chunks, with a case card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1416,14 +1416,14 @@ window.B5DROPS = {
    "title": "Divisibility detective",
    "subject": "Maths",
    "href": "/lc/a2-divisibility.html?lv=mild",
-   "note": "",
+   "note": "Spotting whether a number splits evenly by 2, 5 or 10 just from its digits. Four five minute chunks, with a case card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1448,14 +1448,14 @@ window.B5DROPS = {
    "title": "Divisibility detective",
    "subject": "Maths",
    "href": "/lw/a2-divisibility.html?lv=mild",
-   "note": "",
+   "note": "Spotting whether a number splits evenly by 2, 5 or 10 just from its digits. Four five minute chunks, with a case card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1480,14 +1480,14 @@ window.B5DROPS = {
    "title": "Whose side?",
    "subject": "English",
    "href": "/egw/a2-whose-side.html?lv=spicy",
-   "note": "",
+   "note": "Points of view: whose view it is, the two sides of an argument, and which side the writer is on. Four five minute chunks and a two sides card to make. Have a go if you fancy it.",
    "covers": [
     [
      "eng-factop",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1676,14 +1676,14 @@ window.B5DROPS = {
    "title": "Says who?",
    "subject": "English",
    "href": "/hk/a2-says-who.html?lv=mild",
-   "note": "",
+   "note": "Saying how you know a fact is a fact, and spotting opinion clue words. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1708,14 +1708,14 @@ window.B5DROPS = {
    "title": "Says who?",
    "subject": "English",
    "href": "/jt-hq/a2-says-who.html?lv=mild",
-   "note": "",
+   "note": "Saying how you know a fact is a fact, and spotting opinion clue words. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1740,14 +1740,14 @@ window.B5DROPS = {
    "title": "Says who?",
    "subject": "English",
    "href": "/lc/a2-says-who.html?lv=mild",
-   "note": "",
+   "note": "Saying how you know a fact is a fact, and spotting opinion clue words. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1804,14 +1804,14 @@ window.B5DROPS = {
    "title": "Whose side?",
    "subject": "English",
    "href": "/lw/a2-whose-side.html?lv=medium",
-   "note": "",
+   "note": "Points of view: whose view it is, the two sides of an argument, and which side the writer is on. Four five minute chunks and a two sides card to make. Have a go if you fancy it.",
    "covers": [
     [
      "eng-factop",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1820,14 +1820,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/egw/a2-adventure-day.html?lv=spicy",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1852,14 +1852,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/hk/a2-adventure-day.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1868,14 +1868,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/jt-hq/a2-adventure-day.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1884,14 +1884,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/lc/a2-adventure-day.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1900,14 +1900,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/lp/a2-adventure-day.html?lv=medium",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1916,14 +1916,14 @@ window.B5DROPS = {
    "title": "Says who?",
    "subject": "English",
    "href": "/lp/a2-says-who.html?lv=mild",
-   "note": "",
+   "note": "Saying how you know a fact is a fact, and spotting opinion clue words. Four five minute chunks and a card to make. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1932,14 +1932,14 @@ window.B5DROPS = {
    "title": "Adventure day",
    "subject": "Physical World",
    "href": "/lw/a2-adventure-day.html?lv=medium",
-   "note": "",
+   "note": "Getting ready for an adventure activity, and looking back on it after. Four five minute chunks and an adventure badge to make, whenever you fancy it.",
    "covers": [
     [
      "pw-adventure",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2208,7 +2208,7 @@ window.B5DROPS = {
    "title": "What is it about?",
    "subject": "English",
    "href": "/lp/a2-paragraph-focus.html?lv=mild",
-   "note": "",
+   "note": "Finding what a paragraph is about, and how its sentences link together. Four five minute chunks and a focus card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
@@ -2219,7 +2219,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2292,14 +2292,14 @@ window.B5DROPS = {
    "title": "Signposts",
    "subject": "English",
    "href": "/hk/a2-signposts.html?lv=mild",
-   "note": "",
+   "note": "Headings and sections: grouping things so a reader can find them. Four five minute chunks and a mini guide page to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2308,14 +2308,14 @@ window.B5DROPS = {
    "title": "Signposts",
    "subject": "English",
    "href": "/jt-hq/a2-signposts.html?lv=mild",
-   "note": "",
+   "note": "Headings and sections: grouping things so a reader can find them. Four five minute chunks and a mini guide page to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2324,14 +2324,14 @@ window.B5DROPS = {
    "title": "Signposts",
    "subject": "English",
    "href": "/lc/a2-signposts.html?lv=mild",
-   "note": "",
+   "note": "Headings and sections: grouping things so a reader can find them. Four five minute chunks and a mini guide page to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2340,14 +2340,14 @@ window.B5DROPS = {
    "title": "Signposts",
    "subject": "English",
    "href": "/lp/a2-signposts.html?lv=mild",
-   "note": "",
+   "note": "Headings and sections: grouping things so a reader can find them. Four five minute chunks and a mini guide page to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2700,14 +2700,14 @@ window.B5DROPS = {
    "title": "Factors and multiples",
    "subject": "Maths",
    "href": "/hk/a2-factors-multiples.html?lv=mild",
-   "note": "",
+   "note": "The words multiple and factor, with pictures. Four five minute chunks and a number profile at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2716,14 +2716,14 @@ window.B5DROPS = {
    "title": "Factors and multiples",
    "subject": "Maths",
    "href": "/jt-hq/a2-factors-multiples.html?lv=mild",
-   "note": "",
+   "note": "The words multiple and factor, with pictures. Four five minute chunks and a number profile at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2732,14 +2732,14 @@ window.B5DROPS = {
    "title": "Factors and multiples",
    "subject": "Maths",
    "href": "/lc/a2-factors-multiples.html?lv=mild",
-   "note": "",
+   "note": "The words multiple and factor, with pictures. Four five minute chunks and a number profile at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2768,14 +2768,14 @@ window.B5DROPS = {
    "title": "Factors and multiples",
    "subject": "Maths",
    "href": "/lw/a2-factors-multiples.html?lv=mild",
-   "note": "",
+   "note": "The words multiple and factor, with pictures. Four five minute chunks and a number profile at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2896,14 +2896,14 @@ window.B5DROPS = {
    "title": "What is it about?",
    "subject": "English",
    "href": "/hk/a2-paragraph-focus.html?lv=mild",
-   "note": "",
+   "note": "Finding what a paragraph is about, and how its sentences link together. Four five minute chunks and a focus card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2912,14 +2912,14 @@ window.B5DROPS = {
    "title": "What is it about?",
    "subject": "English",
    "href": "/jt-hq/a2-paragraph-focus.html?lv=mild",
-   "note": "",
+   "note": "Finding what a paragraph is about, and how its sentences link together. Four five minute chunks and a focus card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2928,14 +2928,14 @@ window.B5DROPS = {
    "title": "What is it about?",
    "subject": "English",
    "href": "/lc/a2-paragraph-focus.html?lv=mild",
-   "note": "",
+   "note": "Finding what a paragraph is about, and how its sentences link together. Four five minute chunks and a focus card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -3104,14 +3104,14 @@ window.B5DROPS = {
    "title": "Fact or opinion?",
    "subject": "English",
    "href": "/lp/a2-fact-or-opinion.html?lv=mild",
-   "note": "",
+   "note": "Sorting facts from opinions and explaining why, then finding both in a review. Four five minute chunks and a review card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
