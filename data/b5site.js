@@ -48,7 +48,7 @@ if(GUEST){
 
 /* The shared memory: the Google Sheet web app address. Empty means off.
    A device can try another address with localStorage b5.sync.url. */
-var SYNC_URL = "";
+var SYNC_URL = "https://script.google.com/macros/s/AKfycbxW2fhiuNntbardG07n5CCk08pxLzLxzESjA5k67l5aUODzlUTjKpYHX2cDQDaYokyB6A/exec";
 try{ SYNC_URL = localStorage.getItem("b5.sync.url") || SYNC_URL; }catch(e){}
 if(GUEST) SYNC_URL = "";
 
