@@ -11,6 +11,12 @@
        an HQ; Base 5 home on an HQ's own home page)
      - remembers which HQ this device last opened, so the home
        page can put it first (b5.myhq.v1)
+   Guest mode, for parents and visitors (started from /guest/):
+     - a slim banner on every page saying what guest mode is
+     - everything the page saves goes into this tab only
+       (sessionStorage), so a guest never sees a student's work,
+       never changes it, and nothing syncs or sends
+     ?guest=1 turns it on, ?guest=0 turns it off; b5.guest.v1
    In an HQ, when the shared memory is switched on (SYNC_URL below,
    see /teacher/sync.html), progress follows the student between
    devices: the second half of this file.
@@ -20,10 +26,31 @@
 "use strict";
 if(window.B5Site) return;
 
+/* ---------- guest mode ---------- */
+var GKEY = "b5.guest.v1", GUEST = false;
+try{
+  var gq = (location.search.match(/[?&]guest=([01])/) || [])[1];
+  if(gq === "1") localStorage.setItem(GKEY, "1");
+  if(gq === "0") localStorage.removeItem(GKEY);
+  GUEST = localStorage.getItem(GKEY) === "1";
+}catch(e){}
+if(GUEST){
+  /* every save on this page goes to a scratch copy for this tab only */
+  try{
+    var LSG = window.localStorage, SSG = window.sessionStorage, pg = Object.getPrototypeOf(LSG);
+    var gGet = pg.getItem, gSet = pg.setItem, gRem = pg.removeItem;
+    var real = function(k){ return k === GKEY; };
+    pg.getItem = function(k){ if(this === LSG && !real(k)) return gGet.call(SSG, "guest:" + k); return gGet.apply(this, arguments); };
+    pg.setItem = function(k, v){ if(this === LSG && !real(k)) return gSet.call(SSG, "guest:" + k, v); return gSet.apply(this, arguments); };
+    pg.removeItem = function(k){ if(this === LSG && !real(k)) return gRem.call(SSG, "guest:" + k); return gRem.apply(this, arguments); };
+  }catch(e){}
+}
+
 /* The shared memory: the Google Sheet web app address. Empty means off.
    A device can try another address with localStorage b5.sync.url. */
 var SYNC_URL = "";
 try{ SYNC_URL = localStorage.getItem("b5.sync.url") || SYNC_URL; }catch(e){}
+if(GUEST) SYNC_URL = "";
 
 var path = location.pathname;
 var HQS = {
@@ -80,7 +107,7 @@ fade.textContent =
 document.head.appendChild(fade);
 
 /* ---------- remember this device's HQ ---------- */
-if(hq && !/teacher\.html$/.test(path)){
+if(hq && !GUEST && !/teacher\.html$/.test(path)){
   try{ localStorage.setItem("b5.myhq.v1", hq.who); }catch(e){}
 }
 
@@ -106,7 +133,26 @@ function homeButton(){
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", homeButton); else homeButton();
 
-window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL };
+/* ---------- the guest banner ---------- */
+function guestBanner(){
+  if(!GUEST || document.querySelector(".b5guest") || path.indexOf("/board") === 0) return;
+  var st = document.createElement("style");
+  st.textContent =
+    ".b5guest{position:relative;z-index:2147482300;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:9px 16px;background:#ffc247;color:#0a2f38;border-bottom:3px solid #0a2f38;font:600 .92rem/1.35 'Atkinson Hyperlegible',Arial,sans-serif}" +
+    ".b5guest b{font-family:Archivo,Arial,sans-serif;font-weight:900;letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;background:#0a2f38;color:#ffc247;border-radius:999px;padding:4px 10px}" +
+    ".b5guest a{color:#0a2f38;font-weight:700}" +
+    ".b5guest .gx{margin-left:auto;display:flex;gap:12px}" +
+    "@media print{.b5guest{display:none}}";
+  document.head.appendChild(st);
+  var b = document.createElement("div");
+  b.className = "b5guest"; b.setAttribute("role", "note");
+  b.innerHTML = "<b>Guest mode</b><span>Look around as much as you like. Nothing you do is saved or sent, and no student's own work is shown.</span>" +
+    "<span class='gx'><a href='/guest/'>About Base 5</a><a href='/guest/?guest=0' data-leave>Leave guest mode</a></span>";
+  document.body.insertBefore(b, document.body.firstChild);
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", guestBanner); else guestBanner();
+
+window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST };
 })();
 
 

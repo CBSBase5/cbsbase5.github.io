@@ -175,6 +175,10 @@ function page(host){
       '<div class="fo-main" aria-live="polite"></div>' +
     '</div>';
   var main = host.querySelector(".fo-main");
+  if(window.B5Site && window.B5Site.guest){
+    main.innerHTML = '<div class="fo-sec"><div class="fo-body"><p class="fo-empty" style="color:var(--moon)">Each student\'s folder holds messages, things to try and files that Jay has put there just for them, so it stays closed in guest mode. Students see their own folder here.</p></div></div>';
+    return;
+  }
   main.innerHTML = '<p class="fo-empty">Opening your folder...</p>';
 
   fetchFolder().then(function(blob){
@@ -270,6 +274,7 @@ function card(){
     '<p class="hqx-s">Messages, things to try and files. Just for you.</p>' +
     '<span class="hqx-go">Open my folder</span>';
   var t = c.querySelector(".hqx-t"), s = c.querySelector(".hqx-s");
+  if(window.B5Site && window.B5Site.guest){ s.textContent = "Private to each student, so it stays closed in guest mode."; return c; }
   fetchFolder().then(function(blob){
     if(!blob) return;
     var o = contents(blob);

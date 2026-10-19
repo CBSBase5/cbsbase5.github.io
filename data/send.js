@@ -73,7 +73,14 @@ function wrap(opts){
 function syncUrl(){ return (window.B5Site && window.B5Site.syncUrl) || ""; }
 function hqWho(){ return (window.B5Site && window.B5Site.hq) || ""; }
 
+function guestNote(host){
+  host.innerHTML = '<div class="sendbox"><p class="sendtitle">Send this to Jay</p>' +
+    '<p class="sendwhy">Sending is switched off in guest mode, so nothing here can reach Jay. Students see a Send to Jay button in this spot.</p></div>';
+}
+function isGuest(){ return !!(window.B5Site && window.B5Site.guest); }
+
 function mount(host, opts){
+  if(isGuest()){ guestNote(host); return; }
   var direct = !!syncUrl();
   host.innerHTML =
     '<div class="sendbox">' +
@@ -178,6 +185,7 @@ function mount(host, opts){
 /* For pictures rather than text. Downloads the image first, then
    opens a message the student can attach it to. */
 function mountImage(host, opts){
+  if(isGuest()){ guestNote(host); return; }
   host.innerHTML =
     '<div class="sendbox">' +
       '<p class="sendtitle">Send this to Jay</p>' +
