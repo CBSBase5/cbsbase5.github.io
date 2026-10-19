@@ -69,9 +69,16 @@
 .scoreboard .said{font-size:.95rem;color:var(--body-tint);flex-basis:100%;margin:0}
 
 #signin a{color:var(--teal);font-weight:700}
-.tgroup{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.25rem;margin:26px 0 10px;line-height:1.15}
-.tgroup span{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
-.tgroup small{font-family:var(--body);font-variation-settings:normal;font-weight:400;font-size:.85rem;color:var(--body-tint)}
+.tgroup{margin:30px 0 12px;padding:16px 18px;border-radius:var(--r-alt);background:var(--white);border:2px dashed var(--line)}
+.tgroup .k{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
+.tgroup h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.45rem;line-height:1.1;margin:0 0 6px}
+.tgroup h3 small{font-family:var(--body);font-variation-settings:normal;font-weight:400;font-size:.85rem;color:var(--body-tint)}
+.tgroup p{margin:0 0 4px;font-size:.98rem}
+.tgroup .twhy{color:var(--body-tint)}
+.tgroup .treal{font-size:.8rem;color:var(--body-tint);margin-top:6px}
+.tgt .plain{margin:6px 0 0;font-size:.95rem;font-weight:400;opacity:.95;line-height:1.4}
+.eg{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--white);border:2px solid var(--ink);box-shadow:3px 4px 0 rgba(10,47,56,.15);font-size:.98rem;line-height:1.5}
+.eg span{display:block;font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
 .helps{margin:4px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .helps .fl{width:100%;margin:0}
 .helps a,.helps span{display:inline-block;padding:7px 13px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);text-decoration:none;font-weight:700;font-size:.9rem}
@@ -212,6 +219,7 @@
 
 <script src="/data/targets-enc.js?v=2"></script>
 <script src="/data/a2/drops.js"></script>
+<script src="/data/targets-explain.js?v=1"></script>
 <script src="/data/b5keys.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <script src="/data/send.js?v=1"></script>
@@ -443,8 +451,11 @@ function renderTargets(){
     if(step&&x.title!==lastGroup){
       lastGroup=x.title;
       var n=mine.filter(function(y){ return y.title===x.title }).length;
-      var gh=document.createElement('h3'); gh.className='tgroup';
-      gh.innerHTML='<span>'+escH(x.pillar)+'</span>'+escH(x.title)+' <small>'+n+' step'+(n===1?'':'s')+'</small>';
+      var tx=explainTarget(x);
+      var gh=document.createElement('div'); gh.className='tgroup';
+      gh.innerHTML='<span class="k">'+escH(x.pillar)+'</span>'+
+        '<h3>'+escH(tx?tx.name:x.title)+' <small>'+n+' step'+(n===1?'':'s')+'</small></h3>'+
+        (tx?'<p class="tabout">'+escH(tx.about)+'</p><p class="twhy">'+escH(tx.why)+'</p><p class="treal">On your school record: '+escH(x.title)+'</p>':'');
       box.appendChild(gh);
     }
     var det=document.createElement('details');
@@ -460,6 +471,8 @@ function renderTargets(){
     var h=document.createElement('h2');
     h.textContent=x.me;
     txt.appendChild(pill); txt.appendChild(h);
+    var ex=step?explainStep(x.me):null;
+    if(ex){ var pw=document.createElement('p'); pw.className='plain'; pw.textContent='In other words: '+(/^I /.test(ex.say)?ex.say:ex.say.charAt(0).toLowerCase()+ex.say.slice(1)); txt.appendChild(pw); }
 
     var flag=document.createElement('span');
     flag.className='flag'+(r.state===1?' go':'')+(r.state===2?' got':'');
@@ -500,6 +513,11 @@ function renderTargets(){
       states.appendChild(b);
     });
 
+    if(ex){
+      var eg=document.createElement('div'); eg.className='eg';
+      eg.innerHTML='<span>For example</span>'+escH(ex.eg);
+      body.appendChild(eg);
+    }
     body.appendChild(states);
     body.appendChild(when);
     if(step&&x.jay&&!/^not yet$/i.test(x.jay)){
@@ -544,6 +562,19 @@ function renderTargets(){
   renderScore();
 }
 
+/* plain words and examples (data/targets-explain.js), found by the step's wording */
+function exKey(t){
+  t=String(t||"").trim().toLowerCase().replace(/\s+/g," ").replace(/\.+$/,"");
+  var h=2166136261, b=unescape(encodeURIComponent(t));
+  for(var i=0;i<b.length;i++){ h^=b.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+  return h.toString(16);
+}
+function explainStep(t){ var E=window.B5EXPLAIN; return E&&E.steps?E.steps[exKey(t)]||null:null; }
+function explainTarget(x){
+  var E=window.B5EXPLAIN; if(!E) return null;
+  var k=(x.id.split(".")[0]);
+  return E.targets[k]||E.targets[(E.titles||{})[String(x.title).toLowerCase()]]||null;
+}
 function escH(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] }) }
 /* the activities that help with this step: in their folder from the day each one lands */
 function helps(body,id){
