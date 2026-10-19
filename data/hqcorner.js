@@ -31,6 +31,10 @@ css.textContent =
   ".hqc-dock{display:flex;gap:8px}" +
   ".hqc-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--display,Arial,sans-serif);font-weight:700;font-size:.86rem;padding:8px 12px;border-radius:999px;border:2px solid rgba(201,205,240,.45);background:var(--night-2,#1b2240);color:var(--moon,#eef0ff);cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35)}" +
   ".hqc-btn:hover{filter:brightness(1.15)}" +
+  ".hqc-aa{gap:1px;padding:8px 11px}" +
+  ".hqc-aa i{display:inline-flex;flex-direction:column-reverse;gap:2px;margin-left:5px}" +
+  ".hqc-aa u{display:block;width:4px;height:4px;border-radius:1px;background:currentColor;opacity:.3;text-decoration:none}" +
+  ".hqc-aa u.on{opacity:1}" +
   ".hqc-btn svg{width:18px;height:18px}" +
   ".hqc-btn b{display:inline-block;min-width:18px;padding:0 5px;border-radius:99px;background:var(--sun,#ffd23f);color:var(--ink,#141a33);font-size:.75rem;text-align:center}" +
   "html body>.hqc-park{position:fixed !important;z-index:2147482450 !important;right:12px;bottom:62px}" +
@@ -241,6 +245,25 @@ function mount(){
   parkBtn.onclick = openPark;
   var done = el("button", "hqc-btn", MOON + "Done for now"); done.type = "button";
   done.onclick = openCalm;
+  /* text size: normal, bigger, biggest, for every HQ on this device (applied early by /egw/skin.js) */
+  var SIZES = ["Normal text", "Bigger text", "Biggest text"];
+  var size = 0;
+  try{ size = Math.max(0, Math.min(2, +localStorage.getItem("b5.hqtext.v1") || 0)); }catch(e){}
+  var aa = el("button", "hqc-btn hqc-aa", ""); aa.type = "button";
+  function drawAa(){
+    aa.innerHTML = '<span aria-hidden="true" style="font-size:.8em">A</span><span aria-hidden="true" style="font-size:1.15em;margin-left:-2px">A</span>' +
+      '<i aria-hidden="true">' + [0, 1, 2].map(function(i){ return '<u class="' + (i <= size ? "on" : "") + '"></u>'; }).join("") + '</i>';
+    aa.setAttribute("aria-label", SIZES[size] + ". Tap to change the text size.");
+    aa.title = SIZES[size];
+  }
+  aa.onclick = function(){
+    size = (size + 1) % 3;
+    try{ localStorage.setItem("b5.hqtext.v1", String(size)); }catch(e){}
+    if(size) document.documentElement.setAttribute("data-b5text", String(size)); else document.documentElement.removeAttribute("data-b5text");
+    drawAa();
+  };
+  drawAa();
+  dock.appendChild(aa);
   dock.appendChild(parkBtn); dock.appendChild(done);
   document.body.appendChild(dock);
   count();

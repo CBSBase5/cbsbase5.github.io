@@ -353,6 +353,11 @@ window.B5TERM = {
     return s;
   };
 
+  /* The subject a session belongs to, for its colour (s-<subject> in style.css) */
+  var SUBJ = { maths:"maths", english:"english", core:"core", forest:"science", hort:"science", digital:"dm",
+    project:"project", aesthetic:"ac", physical:"pw", pe:"pe", pfa:"pfa", phse:"phse", cc:"cc", brain:"brain", trip:"trip" };
+  T.subjectOf = function(key){ return SUBJ[key] || ""; };
+
   /* Turns "1:15" into minutes past midnight, school day style */
   T.mins = function(t){
     var p=t.split(":"), h=+p[0], m=+p[1];

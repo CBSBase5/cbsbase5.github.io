@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=8">
+<link rel="stylesheet" href="/style.css?v=9">
 <style>
 /* Index only. Everything else lives in style.css */
 
@@ -85,6 +85,36 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
 .nn.today span{color:var(--yellow)}
 .nn.quiet{background:transparent;border-style:dashed;box-shadow:none}
 @media (max-width:600px){.nn{flex:1 1 100%}}
+
+/* the time of day: a greeting and a gentle change of light */
+.todhi{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 800;font-size:clamp(1.05rem,2.4vw,1.3rem);margin:2px 0 0;color:var(--orange-deep)}
+html[data-tod="morning"] body{background:
+  radial-gradient(1100px 700px at 6% -12%, rgba(255,194,71,.55), transparent 62%),
+  radial-gradient(800px 560px at 92% 0%, rgba(255,143,177,.28), transparent 64%),
+  radial-gradient(900px 760px at 46% 112%, rgba(0,166,201,.16), transparent 62%), var(--paper)}
+html[data-tod="midday"] body{background:
+  radial-gradient(1000px 640px at 50% -18%, rgba(255,214,102,.42), transparent 62%),
+  radial-gradient(900px 620px at 98% 4%, rgba(0,166,201,.32), transparent 64%),
+  radial-gradient(900px 760px at 6% 108%, rgba(239,119,36,.18), transparent 62%), var(--paper)}
+html[data-tod="late"] body{background:
+  radial-gradient(1100px 700px at 96% -6%, rgba(239,119,36,.40), transparent 62%),
+  radial-gradient(900px 620px at 4% 4%, rgba(255,194,71,.30), transparent 64%),
+  radial-gradient(900px 760px at 50% 112%, rgba(127,72,140,.22), transparent 62%), var(--paper)}
+html[data-tod="evening"] body{background:
+  radial-gradient(1100px 700px at 90% -10%, rgba(127,72,140,.36), transparent 62%),
+  radial-gradient(900px 620px at 6% 0%, rgba(30,70,140,.26), transparent 64%),
+  radial-gradient(900px 760px at 46% 112%, rgba(239,119,36,.20), transparent 62%), var(--paper)}
+
+/* this device's HQ: a glow, a tag, and first in the grid */
+.hq.mine{box-shadow:0 0 0 4px var(--yellow),0 0 30px 8px rgba(255,194,71,.55),6px 7px 0 var(--ink)}
+.hq .mytag{position:absolute;top:16px;left:16px;z-index:2;font-family:var(--display);font-variation-settings:"wdth" 106,"wght" 900;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 10px;transform:rotate(-4deg)}
+@media (prefers-reduced-motion:no-preference){.hq.mine{animation:mineglow 2.8s ease-in-out infinite alternate}}
+@keyframes mineglow{from{box-shadow:0 0 0 4px var(--yellow),0 0 18px 4px rgba(255,194,71,.35),6px 7px 0 var(--ink)}to{box-shadow:0 0 0 4px var(--yellow),0 0 36px 10px rgba(255,194,71,.6),6px 7px 0 var(--ink)}}
+@media (max-width:520px){.hq .mytag{top:10px;left:10px;font-size:.56rem;padding:3px 7px}}
+
+/* the portal: an HQ tile opens out into its HQ */
+.portal{position:fixed;inset:0;z-index:2147483000;pointer-events:none;clip-path:circle(0 at var(--px) var(--py));transition:clip-path .5s cubic-bezier(.6,0,.3,1)}
+.portal.go{clip-path:circle(150% at var(--px) var(--py))}
 
 /* hero */
 .hero .toprow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
@@ -216,6 +246,7 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
 /* the big question, with a way in */
 .ttq a{display:block;margin-top:4px;font-family:var(--body);font-variation-settings:normal;font-weight:700;font-size:.82rem;color:var(--teal)}
 </style>
+<script src="/data/b5site.js?v=1"></script>
 </head>
 <body>
 <div class="grain"></div>
@@ -239,6 +270,7 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
       </svg>
       </button>
     </div>
+    <p class="todhi" id="todHi" aria-live="off"></p>
     <div class="line">
       <span class="chip">Autumn 2</span>
       <p>Seven weeks of time travel. Poke about, follow whatever looks good, leave the rest.</p>
@@ -421,11 +453,11 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
 <footer>
   <div class="wrap">
     <span>Base 5 &middot; Chilton Bridge School</span>
-    <a href="/teacher/milestones.html">Teacher view</a>
+    <span><a href="/board/">Board mode</a> &middot; <a href="/teacher/milestones.html">Teacher view</a></span>
   </div>
 </footer>
 
-<script src="/data/term.js?v=4"></script>
+<script src="/data/term.js?v=5"></script>
 <script src="/data/games.js?v=1"></script>
 <script src="/data/clockhelp.js?v=1"></script>
 <script src="/data/onthisday.js?v=1"></script>
@@ -650,11 +682,13 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
     var nxt = slots.filter(function(s){ return T.mins(s[0]) > mins; })[0];
     if(cur){
       var cs = T.session(cur[2], today.w);
-      html += '<a class="nn now" href="' + dayLink(today.w, today.k, cs.plain ? '' : cur[2]) + '"><small>Now, until ' + cur[1] + '</small><span>' + cs.title + '</span></a>';
+      var csub = T.subjectOf(cur[2]);
+      html += '<a class="nn now' + (csub ? ' subjfill s-' + csub : '') + '" href="' + dayLink(today.w, today.k, cs.plain ? '' : cur[2]) + '"><small>Now, until ' + cur[1] + '</small><span>' + cs.title + '</span></a>';
     }
     if(nxt){
       var ns = T.session(nxt[2], today.w);
-      html += '<a class="nn" href="' + dayLink(today.w, today.k, ns.plain ? '' : nxt[2]) + '"><small>Next, at ' + nxt[0] + '</small><span>' + ns.title + '</span></a>';
+      var nsub = T.subjectOf(nxt[2]);
+      html += '<a class="nn" href="' + dayLink(today.w, today.k, ns.plain ? '' : nxt[2]) + '"><small>Next, at ' + nxt[0] + '</small><span>' + (nsub ? '<i class="subjdot s-' + nsub + '"></i>' : '') + ns.title + '</span></a>';
     }
     if(!cur && !nxt){
       var nd = nextDay(iso);
@@ -706,6 +740,64 @@ a.nn:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
       document.getElementById('funThen').textContent = b.dataset.i === '0' ? w[2] : w[4];
     });
   });
+})();
+
+/* ---------- the time of day ---------- */
+(function(){
+  var hi = document.getElementById('todHi');
+  function set(){
+    var d = new Date(), m = d.getHours() * 60 + d.getMinutes(), wk = d.getDay() === 0 || d.getDay() === 6;
+    var tod = m < 360 ? 'evening' : m < 720 ? 'morning' : m < 870 ? 'midday' : m < 1080 ? 'late' : 'evening';
+    var words = m < 360 ? 'Up early. The bridge is quiet.' :
+                m < 720 ? 'Morning.' :
+                m < 870 ? 'Afternoon.' :
+                m < 1080 ? 'Late afternoon. Nearly done for the day.' : 'Evening. Base 5 is closed, but everything here is open.';
+    if(wk) words = m < 720 ? 'Weekend morning. Nothing is on, so anything goes.' : 'Weekend. Nothing is on, so anything goes.';
+    document.documentElement.setAttribute('data-tod', tod);
+    if(hi) hi.textContent = words;
+  }
+  set(); setInterval(set, 60000);
+})();
+
+/* ---------- this device's HQ, first and glowing ---------- */
+(function(){
+  var who = null;
+  try{ who = localStorage.getItem('b5.myhq.v1'); }catch(e){}
+  if(!who) return;
+  var tile = document.querySelector('.hq.hq-' + String(who).toLowerCase());
+  var grid = document.querySelector('.hqgrid');
+  if(!tile || !grid) return;
+  tile.classList.add('mine');
+  var tag = document.createElement('span'); tag.className = 'mytag'; tag.textContent = 'Yours';
+  tile.appendChild(tag);
+  grid.insertBefore(tile, grid.firstChild);
+  tile.setAttribute('aria-label', (tile.querySelector('h3') ? tile.querySelector('h3').textContent : who) + ', your HQ on this device');
+})();
+
+/* ---------- the portal: tap an HQ and it opens out ---------- */
+(function(){
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(still) return;
+  document.querySelectorAll('.hq').forEach(function(tile){
+    tile.addEventListener('click', function(e){
+      if(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      var r = tile.getBoundingClientRect();
+      var x = (e.clientX || r.left + r.width / 2), y = (e.clientY || r.top + r.height / 2);
+      var p = document.createElement('div');
+      p.className = 'portal';
+      p.style.setProperty('--px', x + 'px'); p.style.setProperty('--py', y + 'px');
+      p.style.background = getComputedStyle(tile).backgroundImage + ', ' + getComputedStyle(tile).backgroundColor;
+      document.body.appendChild(p);
+      void p.offsetWidth; p.classList.add('go');
+      var href = tile.getAttribute('href'), gone = false;
+      function leave(){ if(!gone){ gone = true; location.href = href; } }
+      p.addEventListener('transitionend', leave);
+      setTimeout(leave, 650);
+    });
+  });
+  /* coming back with the back button: clear the portal away */
+  window.addEventListener('pageshow', function(){ document.querySelectorAll('.portal').forEach(function(p){ p.remove(); }); });
 })();
 
 /* ---------- ask the site ---------- */

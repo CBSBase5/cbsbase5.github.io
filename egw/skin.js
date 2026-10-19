@@ -73,11 +73,24 @@ apply(current());
 return { list: LIST, current: current, set: set, sparks: sparks, fresh: fresh, markSeen: markSeen };
 })();
 
+/* Text size for every HQ on this device: 0 normal, 1 bigger, 2 biggest.
+   Set from the Aa button in the corner (/data/hqcorner.js). */
+(function(){
+  var n = 0;
+  try{ n = +localStorage.getItem("b5.hqtext.v1") || 0; }catch(e){}
+  if(n === 1 || n === 2) document.documentElement.setAttribute("data-b5text", String(n));
+  var st = document.createElement("style");
+  st.textContent =
+    "html[data-b5text='1']{font-size:112.5%}html[data-b5text='1'] body{font-size:19px}" +
+    "html[data-b5text='2']{font-size:125%}html[data-b5text='2'] body{font-size:21px}";
+  (document.head || document.documentElement).appendChild(st);
+})();
+
 /* Every HQ page (not Jay's view) also gets the corner: Park it and
    Done for now, plus the fidget shelf. See /data/hqcorner.js */
 (function(){
   if(/teacher\.html$/.test(location.pathname)) return;
   var s = document.createElement("script");
-  s.src = "/data/hqcorner.js?v=2"; s.async = true;
+  s.src = "/data/hqcorner.js?v=3"; s.async = true;
   (document.head || document.documentElement).appendChild(s);
 })();
