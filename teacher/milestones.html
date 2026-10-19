@@ -146,7 +146,7 @@
 
   <div class="gate" id="gate">
     <h2>Staff passphrase</h2>
-    <p>The records are encrypted. Enter the staff passphrase to open them.</p>
+    <p>The records are encrypted. Staff signed in to a school Google account listed in the People tab go straight in; otherwise, the staff passphrase.</p>
     <input type="password" id="gpass" placeholder="Passphrase" autocomplete="current-password">
     <button class="btn" id="gbtn">Open</button>
     <p class="gmsg" id="gmsg"></p>
@@ -184,7 +184,8 @@
   </div>
 </footer>
 
-<script src="/data/targets-enc.js?v=1"></script>
+<script src="/data/targets-enc.js?v=2"></script>
+<script src="/data/b5lock.js?v=1"></script>
 <script>
 (function(){
 "use strict";
@@ -468,6 +469,13 @@ async function openStaff(){
 }
 document.getElementById('gbtn').addEventListener('click',openStaff);
 gpass.addEventListener('keydown',function(e){ if(e.key==='Enter') openStaff() });
+
+/* staff signed in to a school account in the People tab: no passphrase needed */
+gmsg.textContent='Checking whether you are signed in...';
+B5Lock.whoami().then(function(m){
+  if(m && m.staff && m.pass && !gate.hidden){ gpass.value = m.pass; openStaff(); }
+  else if(gmsg.textContent.indexOf('Checking') === 0) gmsg.textContent = '';
+});
 
 })();
 </script>

@@ -11,7 +11,9 @@
    works when access is set to Anyone.
 
    Tabs it makes:
-     Settings  the staff key, and whether sends are emailed to you
+     People    each student's and staff member's school email, and
+               each student's code; signed in, pages open by themselves
+     Settings  the staff passphrase, and whether sends are emailed to you
      Folders   type a row here and it shows in that student's folder
                (tick Hide to take something out without deleting it)
      Sends     everything students send to Jay, newest at the bottom
@@ -33,12 +35,21 @@ function setup(){
   var st = tab_(ss, "Settings", ["Setting", "Value", "What it does"]);
   if(st.getLastRow() < 2){
     st.getRange(2, 1, 3, 3).setValues([
-      ["Staff key", randomKey_(), "Type this into the live view (cbsbase5.github.io/teacher/live.html) to see everything. Change it to anything long if you like."],
+      ["Staff passphrase", "", "The one staff passphrase for the whole site: Milestones, Rebuild targets and the live view. Staff listed in People never need to type it."],
       ["Email me sends", "TRUE", "TRUE sends you an email each time a student sends something. FALSE turns that off."],
       ["Email address", me, "Where those emails go."]
     ]);
   }
   st.setColumnWidth(1, 160); st.setColumnWidth(2, 260); st.setColumnWidth(3, 520);
+
+  var pe = tab_(ss, "People", ["Who", "School email", "Code"]);
+  if(pe.getLastRow() < 2){
+    pe.getRange(2, 1, 8, 3).setValues(WHO.map(function(w){ return [w, "", ""]; }).concat([["Staff", me, ""], ["Staff", "", ""]]));
+  }
+  pe.getRange("B:C").setNumberFormat("@");
+  pe.getRange(2, 1, 200, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(WHO.concat(["Staff"]), true).build());
+  pe.setColumnWidth(2, 300);
+  pe.getRange(1, 5).setValue("Students: their school email and their four number code. Staff: just their school email (add a row for anyone else who should get in).");
 
   var fo = tab_(ss, "Folders", ["Who", "Type", "Date", "Title", "Text or link", "Note", "Hide"]);
   if(fo.getLastRow() < 2) seedFolders_(fo);
@@ -111,6 +122,8 @@ function api(r){
     if(a === "load") return load_(who_(r.who), +r.since || 0);
     if(a === "folder") return folder_(who_(r.who));
     if(a === "overview") return overview_(r.key);
+    if(a === "whoami") return whoami_();
+    if(a === "codes") return codes_(r.key);
     if(a === "save" || a === "send" || a === "seen"){
       var lock = LockService.getScriptLock();
       lock.waitLock(15000);
@@ -244,9 +257,43 @@ function digest_(s){
 }
 
 /* ---------- Jay's live view ---------- */
+function staffPass_(){ return String(setting_("Staff passphrase") || setting_("Staff key")).trim(); }
 function staff_(key){
-  var real = String(setting_("Staff key")).trim();
+  if(signedIn_().staff) return;
+  var real = staffPass_();
   if(!real || String(key || "").trim() !== real) throw new Error("staff key");
+}
+
+/* ---------- who is signed in ---------- */
+function signedIn_(){
+  var email = "";
+  try{ email = String(Session.getActiveUser().getEmail() || "").trim().toLowerCase(); }catch(e){}
+  if(!email) return {};
+  var sh = sheet_("People"); if(!sh) return {};
+  var v = sh.getDataRange().getValues();
+  for(var i = 1; i < v.length; i++){
+    if(String(v[i][1]).trim().toLowerCase() !== email) continue;
+    var w = String(v[i][0]).trim().toUpperCase();
+    if(w === "STAFF") return { staff: true };
+    if(WHO.indexOf(w) >= 0) return { who: w, code: String(v[i][2]).trim() };
+  }
+  return {};
+}
+/* every student's code, for Rebuild targets (staff only) */
+function codes_(key){
+  staff_(key);
+  var v = sheet_("People").getDataRange().getValues(), out = {};
+  for(var i = 1; i < v.length; i++){
+    var w = String(v[i][0]).trim().toUpperCase();
+    if(WHO.indexOf(w) >= 0 && String(v[i][2]).trim()) out[w] = String(v[i][2]).trim();
+  }
+  return { ok: true, codes: out };
+}
+function whoami_(){
+  var me = signedIn_();
+  if(me.staff) return { ok: true, staff: true, who: "Staff", pass: staffPass_() };
+  if(me.who) return { ok: true, who: me.who, code: me.code };
+  return { ok: true, who: null };
 }
 
 function overview_(key){

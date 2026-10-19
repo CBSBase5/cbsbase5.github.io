@@ -36,6 +36,8 @@
 @media (max-width:480px){.sendgrid{grid-template-columns:1fr}}
 </style>
 <script src="/data/b5site.js?v=5"></script>
+<script src="/data/b5keys.js?v=1"></script>
+<script src="/data/b5lock.js?v=1"></script>
 </head>
 <body>
 <div class="grain"></div>
@@ -122,9 +124,10 @@
 <script>
 (function () {
   "use strict";
-  // Light gate: the code matches this student's target PIN. This reveals the
-  // workspace; it is not encryption, so it keeps others out but is not a vault.
-  var CODE = "6520";           // LC
+  // The same lock as the rest of the site (/data/b5lock.js): signed in to
+  // this student's school account it opens by itself, otherwise their code.
+  // No code is written in this page.
+  var WHO = "LC";
   var STORE = "b5.project.lc.v1";
   var TEACHER_EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
   var NUDGES = [
@@ -157,12 +160,16 @@
 
   function tryUnlock() {
     var v = el("pin").value.trim();
-    if (v === CODE) {
-      try { sessionStorage.setItem(unlockedKey(), "1"); } catch (e) {}
-      openWorkspace();
-    } else {
-      el("pinMsg").textContent = "That code did not match. Same four numbers as your targets.";
-    }
+    el("pinMsg").textContent = "Checking...";
+    B5Lock.checkCode(WHO, v).then(function (ok) {
+      if (ok) {
+        el("pinMsg").textContent = "";
+        try { sessionStorage.setItem(unlockedKey(), "1"); } catch (e) {}
+        openWorkspace();
+      } else {
+        el("pinMsg").textContent = "That code did not match. Same four numbers as your targets.";
+      }
+    });
   }
 
   el("unlockBtn").onclick = tryUnlock;
@@ -213,7 +220,16 @@
   load();
   var stillOpen = false;
   try { stillOpen = sessionStorage.getItem(unlockedKey()) === "1"; } catch (e) {}
-  if (stillOpen) { openWorkspace(); } else { el("pin").focus(); }
+  if (stillOpen) { openWorkspace(); } else {
+    el("pin").focus();
+    /* signed in as this student (or as staff): open straight away */
+    B5Lock.whoami().then(function (m) {
+      if (m && (m.staff || m.who === WHO) && !el("gateCard").classList.contains("hidden")) {
+        try { sessionStorage.setItem(unlockedKey(), "1"); } catch (e) {}
+        openWorkspace();
+      }
+    });
+  }
 })();
 </script>
 

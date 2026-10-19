@@ -71,6 +71,8 @@ label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
 .hidden{display:none}
 </style>
 <script src="/data/b5site.js?v=5"></script>
+<script src="/data/b5keys.js?v=1"></script>
+<script src="/data/b5lock.js?v=1"></script>
 </head>
 <body>
 <div class="grain"></div>
@@ -322,8 +324,10 @@ label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
 (function(){
   "use strict";
 
-  /* ---- Jay: set HK's four digit code here, same one as his targets PIN ---- */
-  var CODE = "0000";
+  /* The same lock as the rest of the site (/data/b5lock.js): signed in to
+     HK's school account it opens by itself, otherwise HK's code.
+     No code is written in this page. */
+  var WHO = "HK";
 
   var KEY = "b5-project-hk";
   var EMAIL = "jay.raine@chiltonbridgeschool.co.uk";
@@ -358,21 +362,28 @@ label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
   }
 
   /* ---------- gate ---------- */
+  var opened = false;
+  function openUp(){
+    if(opened) return; opened = true;
+    $("gateWrap").classList.add("hidden");
+    $("proj").classList.remove("hidden");
+    start();
+  }
   function wireGate(){
     var inputs = $("pinPad").querySelectorAll("input");
     function attempt(){
       var got="";
       for(var i=0;i<inputs.length;i++){ got += inputs[i].value; }
       if(got.length < 4) return;
-      if(got === CODE){
-        $("gateWrap").classList.add("hidden");
-        $("proj").classList.remove("hidden");
-        start();
-      } else {
-        $("gateMsg").textContent = "Not that one. Have another go.";
-        for(var j=0;j<inputs.length;j++){ inputs[j].value=""; }
-        inputs[0].focus();
-      }
+      $("gateMsg").textContent = "Checking...";
+      B5Lock.checkCode(WHO, got).then(function(ok){
+        if(ok){ $("gateMsg").textContent = ""; openUp(); }
+        else {
+          $("gateMsg").textContent = "Not that one. Have another go.";
+          for(var j=0;j<inputs.length;j++){ inputs[j].value=""; }
+          inputs[0].focus();
+        }
+      });
     }
     for(var i=0;i<inputs.length;i++){
       (function(inp,idx){
@@ -639,6 +650,8 @@ label.fld{display:block;font-weight:700;font-size:.92rem;margin:12px 0 4px}
   }
 
   wireGate();
+  /* signed in as HK (or as staff): open straight away */
+  B5Lock.whoami().then(function(m){ if(m && (m.staff || m.who === WHO)) openUp(); });
 })();
 </script>
 </body>

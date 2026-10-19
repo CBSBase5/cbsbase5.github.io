@@ -156,7 +156,7 @@
 
   <div class="lock" id="lock" hidden>
     <h2 id="lockwho">PIN</h2>
-    <p class="sub">Four numbers. Ask Jay if you have forgotten it.</p>
+    <p class="sub">Four numbers. Ask Jay if you have forgotten it. Signed in to your school Google account, it opens by itself.</p>
     <div class="dots" id="dots"></div>
     <div class="pad" id="pad"></div>
     <p class="lockmsg" id="lockmsg"></p>
@@ -197,7 +197,9 @@
   </div>
 </footer>
 
-<script src="/data/targets-enc.js?v=1"></script>
+<script src="/data/targets-enc.js?v=2"></script>
+<script src="/data/b5keys.js?v=1"></script>
+<script src="/data/b5lock.js?v=1"></script>
 <script src="/data/send.js?v=1"></script>
 <script>
 (function(){
@@ -455,6 +457,20 @@ load();
 renderWho();
 buildPad();
 renderDots();
+
+/* signed in to a school account in the People tab: open straight away */
+var who0 = document.createElement('p');
+who0.className = 'sub'; who0.id = 'signin'; who0.textContent = 'Checking whether you are signed in...';
+document.getElementById('who').insertAdjacentElement('afterend', who0);
+B5Lock.whoami().then(function(m){
+  who0.remove();
+  if(!m || !m.who || !m.code || me || BASE5_STUDENTS.indexOf(m.who) < 0) return;
+  me = m.who; entry = m.code;
+  renderWho(); renderDots();
+  document.getElementById('lock').hidden = false;
+  document.getElementById('lockwho').textContent = me + " - opening for you";
+  tryUnlock();
+});
 })();
 </script>
 

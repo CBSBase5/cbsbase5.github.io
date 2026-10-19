@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=9">
 <script src="/data/b5site.js?v=5"></script>
+<script src="/data/b5lock.js?v=1"></script>
 <style>
 /* Jay's live view: every HQ's progress and every send, from the shared sheet. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -71,9 +72,9 @@
 <div class="wrap">
   <div class="box" id="setupBox">
     <h2>This device</h2>
-    <p class="help">The staff key is in the Settings tab of your Base 5 sheet. This device remembers it.</p>
+    <p class="help">Signed in to a staff school account listed in the People tab, this opens by itself. Otherwise, the staff passphrase (this device remembers it).</p>
     <div class="inline">
-      <input type="password" id="key" placeholder="Staff key" autocomplete="off">
+      <input type="password" id="key" placeholder="Staff passphrase" autocomplete="off">
       <button class="btn" type="button" id="go">Open</button>
       <button class="btn btn-quiet" type="button" id="refresh" hidden>Refresh</button>
     </div>
@@ -143,11 +144,11 @@ function nice(id){ return id.replace(/-/g, " ").replace(/^./, function(c){ retur
 var last = null, filter = "unseen";
 function load(){
   var k = $("key").value.trim();
-  if(!k){ msg("The staff key goes in the box.", true); return; }
+  if(!k){ msg("The staff passphrase goes in the box.", true); return; }
   msg("Opening...");
   B5Site.call("overview", { key: k })
     .then(function(o){
-      if(!o.ok){ msg(o.error === "staff key" ? "That staff key did not work. It is in the Settings tab of the sheet." : "The sheet said: " + o.error, true); return; }
+      if(!o.ok){ msg(o.error === "staff key" ? "That staff passphrase did not work." : "The sheet said: " + o.error, true); return; }
       try{ localStorage.setItem(KEY, k); }catch(e){}
       msg(""); $("view").hidden = false; $("refresh").hidden = false;
       last = o; draw(o);
@@ -205,6 +206,7 @@ function draw(o){
 }
 
 if(URL && $("key").value) load();
+else if(URL) B5Lock.whoami().then(function(m){ if(m && m.staff && m.pass){ $("key").value = m.pass; load(); } });
 setInterval(function(){ if(last && document.visibilityState === "visible") load(); }, 60000);
 })();
 </script>
