@@ -323,6 +323,12 @@ function build(){
           '<a class="btn" href="' + HQ.base + '">Back to ' + HQNAME + '</a>' +
         '</div>' +
         '<div id="sendHost"></div>' +
+        '<details class="chunksend hidden" id="makeQ"><summary>Make a question for Base 5? Only if you like.</summary>' +
+          '<p class="tiny">Something from this activity that someone else could have a go at. Jay reads it first, then it turns up in other people\'s daily drops, with no name on it.</p>' +
+          '<label class="tiny" for="makeQq">Your question</label><textarea id="makeQq" maxlength="400" rows="2" style="width:100%;box-sizing:border-box;font:inherit;padding:8px;border-radius:10px"></textarea>' +
+          '<label class="tiny" for="makeQa">The answer (or leave it empty)</label><input id="makeQa" maxlength="300" type="text" style="width:100%;box-sizing:border-box;font:inherit;padding:8px;border-radius:10px">' +
+          '<div class="qnav" style="margin-top:10px"><button class="btn" type="button" id="makeQgo">Send it to Jay</button></div><p class="tiny" id="makeQmsg" aria-live="polite"></p>' +
+        '</details>' +
       '</div>' +
     '</div>';
 
@@ -1269,10 +1275,26 @@ function flash(msg){
 }
 
 /* ---------- results ---------- */
+function makeQuestion(){
+  var S = window.B5Site, box = $("makeQ");
+  if(!box || !S || !S.call || !S.syncUrl || S.guest || !S.hq || S.bridgeDown()) return;
+  box.classList.remove("hidden");
+  $("makeQgo").onclick = function(){
+    var q = $("makeQq").value.trim(), a = $("makeQa").value.trim(), m = $("makeQmsg"), b = this;
+    if(!q){ m.textContent = "The question goes in the first box."; return; }
+    b.disabled = true; m.textContent = "Sending...";
+    S.call("question", { who: S.hq, subject: cfg.subject || "", from: cfg.title || "", q: q, a: a }).then(function(o){
+      b.disabled = false;
+      if(o && o.ok){ $("makeQq").value = ""; $("makeQa").value = ""; m.textContent = "Sent. Thank you. Jay will have a look."; }
+      else m.textContent = "That did not send. You can try again later.";
+    }).catch(function(){ b.disabled = false; m.textContent = "That did not send. You can try again later."; });
+  };
+}
 function finish(){
   state.finished = true; save();
   refreshCode();
   showOnly("resultCard");
+  makeQuestion();
   if(cfg.review){ finishReview(); return; }
   var sm = summary();
   var marked = sm.got1 + sm.got2 + sm.shown;

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ideas - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=9">
+<script src="/data/b5site.js?v=6"></script>
+<style>
+.ideas{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:0 0 30px}
+@media (max-width:700px){.ideas{grid-template-columns:1fr}}
+.idea{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:var(--white);box-shadow:var(--lift);border-top:10px solid var(--edge,var(--plum))}
+.idea p{margin:0;font-size:1.05rem;line-height:1.45}
+.idea .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto}
+.status{font-size:.82rem;padding:3px 10px;border-radius:999px;border:2px solid var(--ink);background:var(--paper)}
+.status.building{background:#ffe680}.status.done{background:#d8f0c6}
+.plus{margin-left:auto;font:inherit;font-weight:700;padding:6px 14px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.plus[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.idea a{font-weight:700;color:var(--teal)}
+.note{font-size:.95rem;color:var(--body-tint);margin:0 0 16px;max-width:68ch}
+.chipsrow{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chipsrow button{font:inherit;font-size:.9rem;padding:6px 13px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.chipsrow button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <b>Base 5</b>
+    </div>
+    <nav><a href="/">Home</a><a href="/projects/">Projects</a><a href="/games/">Games</a></nav>
+  </div>
+</div>
+<div class="wrap">
+  <div class="weektheme">
+    <h2>Ideas for the site</h2>
+    <span>Everything Base 5 has asked for, and what Jay is doing about it.</span>
+  </div>
+  <p class="note">Like one? Give it a +1, so Jay knows which ones people want most. Got one of your own? Type it into <a href="/#askCard">Ask the site</a> on the home page. Ideas show here without a name.</p>
+  <div class="chipsrow" id="filters"></div>
+  <div class="ideas" id="ideas"><p class="note">Fetching the ideas...</p></div>
+</div>
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+<script>
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function voter(){
+  var v = null;
+  try{ v = localStorage.getItem("b5.voter.v1"); }catch(e){}
+  if(!v || !/^dev-[a-z0-9]{10}$/.test(v)){
+    v = "dev-"; for(var i = 0; i < 10; i++) v += "abcdefghijkmnpqrstuvwxyz23456789".charAt(Math.floor(Math.random() * 32));
+    try{ localStorage.setItem("b5.voter.v1", v); }catch(e){}
+  }
+  return v;
+}
+var S = window.B5Site, off = !S || !S.call || !S.syncUrl;
+var EDGE = { "Thinking about it": "var(--plum)", "Building it": "var(--yellow-deep)", "Done": "var(--teal)" };
+var list = [], filter = "all", mine = {};
+try{ mine = JSON.parse(localStorage.getItem("b5.ideas.plus.v1") || "{}") || {}; }catch(e){}
+function draw(){
+  var opts = [["all", "Everything"], ["Thinking about it", "Thinking about it"], ["Building it", "Being built"], ["Done", "Done"]];
+  document.getElementById("filters").innerHTML = opts.map(function(f){ return '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + f[1] + '</button>'; }).join("");
+  [].forEach.call(document.querySelectorAll("#filters button"), function(b){ b.onclick = function(){ filter = b.dataset.f; draw(); }; });
+  var show = list.filter(function(i){ return i.status !== "Not this time" && (filter === "all" || i.status === filter); });
+  document.getElementById("ideas").innerHTML = show.length ? show.map(function(i){
+    var cls = i.status === "Building it" ? " building" : i.status === "Done" ? " done" : "", on = !!mine[i.row];
+    var link = i.status === "Done" && /^\/[^\/]|^https:\/\//.test(i.link) ? ' <a href="' + esc(i.link) + '">Have a look</a>' : "";
+    return '<div class="idea" style="--edge:' + (EDGE[i.status] || "var(--plum)") + '"><p>' + esc(i.idea) + '</p><div class="row"><span class="status' + cls + '">' + esc(i.status === "Building it" ? "Being built" : i.status) + '</span>' + link +
+      '<button type="button" class="plus" data-row="' + i.row + '" aria-pressed="' + on + '" aria-label="Plus one this idea">+1 &middot; ' + i.plus + '</button></div></div>';
+  }).join("") : '<p class="note">' + (list.length ? "Nothing in this pile right now." : "No ideas yet. Be the first, on the home page.") + '</p>';
+  [].forEach.call(document.querySelectorAll(".plus"), function(b){
+    if(mine[b.dataset.row] || (S && S.guest)) b.disabled = !!(S && S.guest);
+    b.onclick = function(){
+      var row = +b.dataset.row; if(mine[row]) return;
+      mine[row] = 1; try{ localStorage.setItem("b5.ideas.plus.v1", JSON.stringify(mine)); }catch(e){}
+      list.forEach(function(i){ if(i.row === row) i.plus++; }); draw();
+      S.call("plus", { row: row, voter: voter() }).then(function(o){ if(o && o.ok){ list.forEach(function(i){ if(i.row === row) i.plus = o.plus; }); draw(); } }).catch(function(){});
+    };
+  });
+}
+if(off) document.getElementById("ideas").innerHTML = '<p class="note">The ideas board lives in the shared memory, which is not on for this page. Ideas still reach Jay from the home page.</p>';
+else S.call("ideas").then(function(o){ if(o && o.ok){ list = o.items; draw(); } else throw 0; })
+  .catch(function(){ document.getElementById("ideas").innerHTML = '<p class="note">The ideas board could not load just now. It needs this device signed in to a school Google account. Ideas still reach Jay from the home page.</p>'; });
+</script>
+</body>
+</html>

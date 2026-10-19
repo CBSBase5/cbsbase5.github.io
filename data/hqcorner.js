@@ -269,6 +269,41 @@ function mount(){
   count();
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
+
+/* Shout-outs from Jay (sent from the live view). Private: they show
+   only on this student's own HQ, once, until "Thanks" is tapped. */
+var STICK = { star: "\u2B50", rocket: "\uD83D\uDE80", fire: "\uD83D\uDD25", trophy: "\uD83C\uDFC6", heart: "\uD83D\uDC9A", fish: "\uD83C\uDFA3", ball: "\u26BD", music: "\uD83C\uDFB5" };
+function shoutouts(){
+  var S = window.B5Site;
+  if(!S || !S.call || S.guest || !S.syncUrl || !S.hq || S.bridgeDown()) return;
+  try{ if(sessionStorage.getItem("b5.shout.asked")) return; sessionStorage.setItem("b5.shout.asked", "1"); }catch(e){}
+  S.call("shoutouts", { who: S.hq }).then(function(o){
+    if(!o || !o.ok || !o.items || !o.items.length) return;
+    var items = o.items.slice(), st = el("style");
+    st.textContent = "html body>.hqc-shout{position:fixed !important;z-index:2147482500 !important;left:50%;top:18px;transform:translateX(-50%)}" +
+      ".hqc-shout{width:min(420px,calc(100vw - 32px));box-sizing:border-box;padding:18px 20px;border-radius:20px;background:var(--night-2,#1b2240);color:var(--moon,#eef0ff);border:2px solid rgba(201,205,240,.45);box-shadow:0 10px 0 rgba(0,0,0,.3);font-family:var(--body,Arial,sans-serif);text-align:center}" +
+      ".hqc-shout .st{font-size:2.6rem;line-height:1;display:block;margin:0 0 6px}" +
+      ".hqc-shout small{display:block;opacity:.8;font-size:.82rem;margin:0 0 6px}" +
+      ".hqc-shout p{margin:0 0 14px;font-size:1.08rem;line-height:1.4}" +
+      ".hqc-shout button{font:inherit;font-weight:700;padding:8px 20px;border-radius:999px;border:2px solid currentColor;background:transparent;color:inherit;cursor:pointer}" +
+      "@media (prefers-reduced-motion:no-preference){.hqc-shout{animation:hqcShout .35s ease-out}@keyframes hqcShout{from{opacity:0;transform:translate(-50%,-14px)}}}";
+    document.head.appendChild(st);
+    function next(){
+      var x = items.shift(); if(!x) return;
+      var card = el("div", "hqc-shout");
+      card.setAttribute("role", "status");
+      card.innerHTML = '<span class="st" aria-hidden="true">' + (STICK[x.sticker] || STICK.star) + '</span><small>A shout-out from Jay</small><p>' + esc(x.text) + '</p><button type="button">Thanks</button>';
+      card.querySelector("button").onclick = function(){
+        card.remove();
+        S.call("shoutseen", { who: S.hq, row: x.row }).catch(function(){});
+        setTimeout(next, 300);
+      };
+      document.body.appendChild(card);
+    }
+    next();
+  }).catch(function(){});
+}
+setTimeout(shoutouts, 1800);
 window.HQCorner = { park: openPark, calm: openCalm };
 window.HQFidget = { open: openFidget };
 })();

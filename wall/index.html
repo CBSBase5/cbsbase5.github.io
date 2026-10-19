@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Wall - Base 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=9">
+<script src="/data/b5site.js?v=6"></script>
+<style>
+.post{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:18px 20px;border:var(--border) solid var(--ink);border-radius:var(--r-alt);background:var(--white);box-shadow:var(--lift);margin:0 0 24px}
+@media (max-width:620px){.post{grid-template-columns:1fr}}
+.post textarea{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);min-height:70px;resize:vertical}
+.post p{margin:6px 0 0;font-size:.9rem;color:var(--body-tint)}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:0 0 30px}
+.sticky{padding:18px 18px 22px;min-height:120px;font-size:1.05rem;line-height:1.45;color:#0a2f38;border-radius:4px 4px 18px 4px;box-shadow:4px 6px 0 rgba(10,47,56,.18);transform:rotate(var(--r,0deg))}
+.sticky:nth-child(4n+1){background:#ffe680;--r:-1.2deg}.sticky:nth-child(4n+2){background:#c9f0f7;--r:.8deg}.sticky:nth-child(4n+3){background:#ffd3b8;--r:-.5deg}.sticky:nth-child(4n){background:#d8f0c6;--r:1.1deg}
+@media (prefers-reduced-motion:reduce){.sticky{transform:none}}
+.note{font-size:.95rem;color:var(--body-tint);margin:0 0 16px;max-width:68ch}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <b>Base 5</b>
+    </div>
+    <nav><a href="/">Home</a><a href="/projects/">Projects</a><a href="/games/">Games</a></nav>
+  </div>
+</div>
+<div class="wrap">
+  <div class="weektheme">
+    <h2>The Question Wall</h2>
+    <span>Big questions, small questions, odd questions. About time travel, or anything at all.</span>
+  </div>
+  <p class="note">Any question is welcome here, and none of them need answering. Jay reads each one before it goes up, and the wall never shows who asked.</p>
+  <div class="post" id="post">
+    <div>
+      <label for="q" class="kicker">A question for the wall</label>
+      <textarea id="q" maxlength="280" placeholder="If you went back in time and met yourself, who would talk first?"></textarea>
+      <p id="qmsg" aria-live="polite">Goes to Jay first. No name on it.</p>
+    </div>
+    <button class="btn" type="button" id="qgo">Send it</button>
+  </div>
+  <div class="notes" id="notes"><p class="note">Fetching the wall...</p></div>
+</div>
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">Home</a>
+  </div>
+</footer>
+<script>
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function voter(){
+  var v = null;
+  try{ v = localStorage.getItem("b5.voter.v1"); }catch(e){}
+  if(!v || !/^dev-[a-z0-9]{10}$/.test(v)){
+    v = "dev-"; for(var i = 0; i < 10; i++) v += "abcdefghijkmnpqrstuvwxyz23456789".charAt(Math.floor(Math.random() * 32));
+    try{ localStorage.setItem("b5.voter.v1", v); }catch(e){}
+  }
+  return v;
+}
+var S = window.B5Site, off = !S || !S.call || !S.syncUrl;
+var notes = document.getElementById("notes");
+function draw(posts){
+  notes.innerHTML = posts.length ? posts.map(function(p){ return '<div class="sticky">' + esc(p.text) + '</div>'; }).join("") : '<p class="note">The wall is empty so far. The first question could be yours.</p>';
+}
+if(off || (S && S.guest)){
+  document.getElementById("post").hidden = true;
+  notes.innerHTML = '<p class="note">The wall lives in the shared memory, which is not on for this page.</p>';
+} else {
+  S.call("wall").then(function(o){ if(o && o.ok) draw(o.posts); else throw 0; })
+    .catch(function(){ notes.innerHTML = '<p class="note">The wall could not load just now. It needs this device signed in to a school Google account.</p>'; });
+  document.getElementById("qgo").onclick = function(){
+    var b = this, t = document.getElementById("q").value.trim(), m = document.getElementById("qmsg"), who = "";
+    if(!t){ m.textContent = "The question goes in the box first."; return; }
+    try{ who = localStorage.getItem("b5.myhq.v1") || ""; }catch(e){}
+    b.disabled = true; m.textContent = "Sending...";
+    S.call("post", { text: t, who: who }).then(function(o){
+      b.disabled = false;
+      if(o && o.ok){ document.getElementById("q").value = ""; m.textContent = "Sent. Jay will put it up soon."; }
+      else m.textContent = "That did not send. Try again in a bit.";
+    }).catch(function(){ b.disabled = false; m.textContent = "That did not send. This device may not be signed in to a school Google account."; });
+  };
+}
+</script>
+</body>
+</html>

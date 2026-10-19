@@ -91,6 +91,6 @@ return { list: LIST, current: current, set: set, sparks: sparks, fresh: fresh, m
 (function(){
   if(/teacher\.html$/.test(location.pathname)) return;
   var s = document.createElement("script");
-  s.src = "/data/hqcorner.js?v=3"; s.async = true;
+  s.src = "/data/hqcorner.js?v=4"; s.async = true;
   (document.head || document.documentElement).appendChild(s);
 })();

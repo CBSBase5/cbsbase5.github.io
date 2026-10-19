@@ -144,7 +144,7 @@
   <div class="wrap">
     <h1>MY <span class="accent">TARGETS</span></h1>
     <div class="line">
-      <span class="chip">Autumn 1</span>
+      <span class="chip" id="termchip">Autumn 1</span>
       <p>These are yours, and <span class="hl">only you can open them</span>. You decide when one is done.</p>
     </div>
   </div>
@@ -179,8 +179,9 @@
     <div id="targets"></div>
 
     <div class="panel panel-teal">
-      <p><strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.</p>
+      <p id="wheresaved"><strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.</p>
     </div>
+    <p id="termswitch" hidden><button class="btn btn-quiet" type="button" id="termBtn">Look back at Autumn 1</button></p>
 
     <div id="sendHost"></div>
 
@@ -221,9 +222,13 @@ var LABELS=["Not yet","Having a go","Got it"];
 var FILLS=["fill-teal","fill-orange","fill-plum","fill-bright","fill-yellow","fill-ink"];
 
 var data={};
+/* Autumn 2 lives in Jay's sheet (Targets and Ticks tabs) when it is there;
+   Autumn 1 stays on this device, as it always was. */
+var mode="a1", a1=null, a2=null, a2ticks={}, TERM={a1:"Autumn 1",a2:"Autumn 2"};
 function load(){try{data=JSON.parse(localStorage.getItem(BASE5_KEY))||{}}catch(e){data={}}}
 function save(){try{localStorage.setItem(BASE5_KEY,JSON.stringify(data))}catch(e){}}
 function rec(s,t){
+  if(mode==="a2"){ a2ticks[t]=a2ticks[t]||{state:0,at:"",snote:"",tnote:""}; return a2ticks[t]; }
   data[s]=data[s]||{};
   data[s][t]=data[s][t]||{state:0,at:"",snote:"",tnote:"",link:""};
   return data[s][t];
@@ -298,13 +303,16 @@ async function tryUnlock(){
   if(entry.length<4){ msg.textContent="Four numbers needed."; return }
   msg.textContent="Opening...";
   try{
-    mine=await unlock(BASE5_ENC.students[me], entry, BASE5_ENC.iter);
+    a1=await unlock(BASE5_ENC.students[me], entry, BASE5_ENC.iter);
+    mine=a1; mode="a1"; a2=null;
+    msg.textContent="Opening...";
+    await fetchA2();
     msg.textContent="";
     Base5Send.mount(document.getElementById('sendHost'),{
       tool:"My targets",
       filename:"targets",
       getText:function(){
-        var L=[me+" - Autumn 1 targets",""];
+        var L=[me+" - "+TERM[mode]+" targets",""];
         var order=["Got it","Having a go","Not yet"];
         [2,1,0].forEach(function(st){
           var rows=mine.filter(function(x){ return rec(me,x.id).state===st });
@@ -323,13 +331,43 @@ async function tryUnlock(){
     });
     document.getElementById('lock').hidden=true;
     document.getElementById('main').hidden=false;
-    renderTargets();
+    setMode(a2?"a2":"a1");
   }catch(e){
     entry=""; renderDots();
     msg.textContent="That is not the right PIN. Have another go.";
     var l=document.getElementById('lock');
     l.classList.remove('shake'); void l.offsetWidth; l.classList.add('shake');
   }
+}
+
+function fetchA2(){
+  var S=window.B5Site;
+  if(!S||!S.call||!S.syncUrl||S.guest||S.bridgeDown()) return Promise.resolve();
+  var t=new Promise(function(r){ setTimeout(r,10000) });
+  return Promise.race([t, S.call("targets",{who:me,code:entry}).then(function(o){
+    if(!o||!o.ok||!o.targets||!o.targets.length) return;
+    a2=o.targets.map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title} });
+    a2ticks={};
+    Object.keys(o.ticks||{}).forEach(function(id){ var k=o.ticks[id]; a2ticks[id]={state:k.state||0,at:k.at?new Date(k.at).toISOString():"",snote:k.snote||"",tnote:k.jnote||""} });
+  }).catch(function(){})]);
+}
+function setMode(m){
+  mode=m; mine=m==="a2"?a2:a1;
+  document.getElementById('termchip').textContent=TERM[m];
+  document.getElementById('wheresaved').innerHTML=m==="a2"
+    ? "<strong>Where this is saved.</strong> In Jay's sheet, so it is the same on any school device. Jay can see it, and can tick things too."
+    : "<strong>Where this is saved.</strong> On this device, in this browser. On a different computer it will look empty. Jay keeps the proper copy.";
+  document.getElementById('termswitch').hidden=!a2;
+  document.getElementById('termBtn').textContent=m==="a2"?"Look back at Autumn 1":"Back to Autumn 2";
+  renderTargets();
+}
+document.getElementById('termBtn').addEventListener('click',function(){ setMode(mode==="a2"?"a1":"a2") });
+var noteTimers={};
+function pushTick(id,what){
+  var S=window.B5Site; if(mode!=="a2"||!S) return;
+  var r=rec(me,id), d={who:me,code:entry,id:id};
+  if(what==="state") d.state=r.state; else d.snote=r.snote;
+  S.call("tick",d).catch(function(){});
 }
 
 function counts(){
@@ -342,12 +380,13 @@ function renderScore(){
   var got=counts(), total=mine.length;
   document.getElementById('bigcount').textContent=got;
   document.getElementById('ofcount').textContent='of '+total;
-  document.getElementById('trackfill').style.width=(got/total*100)+'%';
+  document.getElementById('trackfill').style.width=(total?got/total*100:0)+'%';
 
   var said="Nothing here has to be done in order, and nothing has to be done today.";
-  if(got>0&&got<5) said="That is "+got+" down. No rush on the rest.";
-  if(got>=5&&got<10) said="Over a third. Whenever you fancy the next one.";
-  if(got>=10&&got<total) said="Getting close now.";
+  var f=total?got/total:0;
+  if(got>0&&f<1/3) said="That is "+got+" down. No rush on the rest.";
+  if(f>=1/3&&f<2/3) said="Over a third. Whenever you fancy the next one.";
+  if(f>=2/3&&got<total) said="Getting close now.";
   if(got===total) said="That is the lot. Every single one.";
   document.getElementById('said').textContent=said;
 
@@ -404,7 +443,7 @@ function renderTargets(){
       b.addEventListener('click',function(){
         r.state=n;
         r.at=n?new Date().toISOString():"";
-        save();
+        save(); pushTick(x.id,"state");
         Array.prototype.forEach.call(states.children,function(o){
           o.setAttribute('aria-pressed', Number(o.dataset.s)===n?'true':'false');
         });
@@ -432,11 +471,16 @@ function renderTargets(){
     var tmr;
     ta.addEventListener('input',function(){
       r.snote=ta.value; save();
+      clearTimeout(noteTimers[x.id]); noteTimers[x.id]=setTimeout(function(){ pushTick(x.id,"snote") },1500);
       savedP.textContent='Saved';
       clearTimeout(tmr);
       tmr=setTimeout(function(){ savedP.textContent='' },1200);
     });
     body.appendChild(ta); body.appendChild(savedP);
+    if(mode==="a2"&&r.tnote){
+      var jn=document.createElement('p'); jn.className='whenline'; jn.textContent='Jay: '+r.tnote;
+      body.appendChild(jn);
+    }
 
     det.appendChild(body);
     box.appendChild(det);
@@ -446,7 +490,8 @@ function renderTargets(){
 }
 
 document.getElementById('lockBtn').addEventListener('click',function(){
-  me=null; mine=null; entry="";
+  me=null; mine=null; entry=""; a1=null; a2=null; a2ticks={}; mode="a1";
+  document.getElementById('termchip').textContent="Autumn 1";
   document.getElementById('main').hidden=true;
   document.getElementById('lock').hidden=true;
   renderWho();

@@ -68,8 +68,9 @@ function setup(){
   pr.getRange("A:C").setNumberFormat("@");
   pr.getRange(1, 6).setValue("The site writes this tab. Leave it alone.");
 
+  setup3_(ss);
   ss.setActiveSheet(fo);
-  return "Done. Now deploy it as a web app.";
+  return "Done. Now deploy it as a web app (or a new version of it).";
 }
 
 function tab_(ss, name, head){
@@ -124,6 +125,13 @@ function api(r){
     if(a === "overview") return overview_(r.key);
     if(a === "whoami") return whoami_();
     if(a === "codes") return codes_(r.key);
+    var read3 = READ3[a];
+    if(read3) return read3(r);
+    if(WRITE3[a]){
+      var lock3 = LockService.getScriptLock();
+      lock3.waitLock(15000);
+      try{ return WRITE3[a](r); }finally{ try{ lock3.releaseLock(); }catch(e3){} }
+    }
     if(a === "save" || a === "send" || a === "seen"){
       var lock = LockService.getScriptLock();
       lock.waitLock(15000);
@@ -193,6 +201,8 @@ function load_(who, since){
 function save_(who, items){
   var sh = sheet_("Progress"), v = sh.getDataRange().getValues(), at = {};
   for(var i = 1; i < v.length; i++) if(v[i][0] === who) at[v[i][1]] = i + 1;
+  try{ fuelBaseline_(who, v); }catch(e0){}
+  var events = [];
   var add = [], changed = 0;
   Object.keys(items).forEach(function(k){
     var it = items[k] || {}, val = it.v == null ? "" : String(it.v), t = +it.t || Date.now();
@@ -200,11 +210,16 @@ function save_(who, items){
     var r = at[k];
     if(r){
       if(t < (+v[r - 1][3] || 0)) return;            /* something newer is already here */
+      try{ events = events.concat(events_(who, k, String(v[r - 1][2]), val)); }catch(e1){}
       sh.getRange(r, 3, 1, 2).setValues([[val, t]]);
-    } else add.push([who, k, val, t]);
+    } else {
+      try{ events = events.concat(events_(who, k, "", val)); }catch(e2){}
+      add.push([who, k, val, t]);
+    }
     changed++;
   });
   if(add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, 4).setValues(add);
+  if(events.length) logEvents_(who, events);
   return { ok: true, saved: changed, now: Date.now() };
 }
 
@@ -216,6 +231,11 @@ function send_(b){
   var text = String(b.text || "").slice(0, MAX_CELL);
   var sh = sheet_("Sends");
   sh.appendRow([new Date(), plain_(who), plain_(page), plain_(what), plain_(text), ""]);
+  if(WHO.indexOf(who) >= 0) logEvents_(who, [["Sent to Jay", what]]);
+  if(what === "Idea for the site"){
+    var idea = text.replace(/^An idea for the Base 5 site:\s*/, "").trim();
+    if(idea && idea !== "(nothing typed yet)") sheet_("Ideas").appendRow([new Date(), plain_(idea.slice(0, 500)), "Thinking about it", "", 0, "", false]);
+  }
   try{
     var on = String(setting_("Email me sends")).toUpperCase() === "TRUE", to = String(setting_("Email address")).trim();
     if(on && to) MailApp.sendEmail(to, "Base 5: " + who + " sent " + what, text + "\n\n(From " + page + ". Everything is in the Sends tab of your Base 5 sheet.)");
@@ -311,5 +331,452 @@ function overview_(key){
     var r = sv[j];
     sends.push({ row: j + 1, time: r[0] instanceof Date ? r[0].getTime() : String(r[0]), who: String(r[1]), page: String(r[2]), what: String(r[3]), text: String(r[4]), seen: String(r[5]) === "yes" });
   }
-  return { ok: true, students: students, sends: sends, now: Date.now() };
+  for(var k2 = 0; k2 < sends.length; k2++){
+    var row = sv[sends[k2].row - 1] || [];
+    sends[k2].reply = String(row[6] || ""); sends[k2].target = String(row[8] || "");
+  }
+  var folders = {};
+  WHO.forEach(function(w){ try{ folders[w] = folder_(w).data; }catch(e4){} });
+  return { ok: true, students: students, sends: sends, folders: folders, targets: targetsAll_(),
+    wall: pending_("Wall", 2, 1), questions: pending_("Questions", 4, 1), ideas: ideasList_(true),
+    parents: parentsSet_(), now: Date.now() };
 }
+
+
+/* ==========================================================
+   Version 3: everything else the shared data makes possible.
+   Tabs: Events, Shoutouts, Votes, Fuel, Ideas, Wall, Scores,
+   Targets, Ticks, Questions, Postcards. Setup adds any that
+   are missing and leaves existing ones alone.
+   ========================================================== */
+var PREFIX = { EGW: "b5.egw.", LP: "b5.lp.", LW: "b5.lw.", LC: "b5.lc.", HK: "b5.hk.", JT: "b5.jthq." };
+var MOODS = { storm: "Stormy", grey: "Grey", bright: "Bright spells", sun: "Sunny", skip: "Skipped the check-in" };
+var GAMENAMES = { "its-time": "It's time", "cue-the-sequence": "Cue the sequence", "chip-run": "Chip run" };
+function game_(g){ return GAMENAMES[g] || nice_(g); }
+var HQGAMES = { "b5.egw.dunk.v1": "Dunk", "b5.lp.stack.v1": "Neon Stack", "b5.hk.crossy.v1": "Lakeside Breach", "b5.jthq.penalty.v1": "Penalty shootout", "b5.lw.showstopper.v1": "Showstopper" };
+
+function setup3_(ss){
+  tab_(ss, "Events", ["Time", "Who", "Kind", "Detail"]);
+  tab_(ss, "Shoutouts", ["Time", "Who", "Sticker", "Text", "Shown"]);
+  tab_(ss, "Votes", ["Updated", "Kind", "Voter", "Choice", "Reason", "Hide"]);
+  tab_(ss, "Fuel", ["Week", "Who", "Baseline"]);
+  var id = tab_(ss, "Ideas", ["Time", "Idea", "Status", "Link", "Plus", "Voters", "Hide"]);
+  id.getRange(2, 3, 300, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(["Thinking about it", "Building it", "Done", "Not this time"], true).build());
+  var wa = tab_(ss, "Wall", ["Time", "Who", "Text", "Approved", "Hide"]);
+  wa.getRange(1, 7).setValue("Tick Approved to put a post on the wall. Who is never shown.");
+  tab_(ss, "Scores", ["Who", "Game", "Best", "Public", "Updated"]);
+  var ta = tab_(ss, "Targets", ["Pillar", "Id", "Title", "Statement"].concat(WHO));
+  ta.getRange(1, 12).setValue("One row per target. Id is short and never changes (e.g. eng1). Each student's column is their own milestone wording.");
+  tab_(ss, "Ticks", ["Who", "Id", "State", "At", "Student note", "Jay note", "Updated"]);
+  var qu = tab_(ss, "Questions", ["Time", "Who", "Subject", "From", "Question", "Answer", "Approved"]);
+  qu.getRange(1, 9).setValue("Tick Approved and the question joins other students' daily drops (never shown with a name).");
+  tab_(ss, "Postcards", ["Time", "Who", "Sent to", "Text"]);
+  var se = ss.getSheetByName("Sends");
+  if(se && !String(se.getRange(1, 7).getValue())) se.getRange(1, 7, 1, 3).setValues([["Reply", "Replied", "Target"]]).setFontWeight("bold");
+  var pe = ss.getSheetByName("People");
+  if(pe && !String(pe.getRange(1, 4).getValue())) pe.getRange(1, 4).setValue("Parent email").setFontWeight("bold");
+  var st = ss.getSheetByName("Settings");
+  [["Fuel target", 300, "Sparks the whole of Base 5 needs in a week to fill the time machine."],
+   ["Fuel reward", "", "What the group gets when it is full (shown on the home page)."],
+   ["Daily email", "TRUE", "TRUE sends you a short summary of the day at 3pm, Monday to Friday."]].forEach(function(r){
+    if(String(setting_(r[0])) === "") st.appendRow(r);
+  });
+  var has = ScriptApp.getProjectTriggers().some(function(t){ return t.getHandlerFunction() === "dailyDigest"; });
+  if(!has) ScriptApp.newTrigger("dailyDigest").timeBased().atHour(15).everyDays(1).create();
+}
+
+/* ---------- small helpers ---------- */
+function rows_(name){ var sh = sheet_(name); return sh ? sh.getDataRange().getValues() : [[]]; }
+function parse_(s){ try{ var o = JSON.parse(s); return o && typeof o === "object" ? o : null; }catch(e){ return null; } }
+function nice_(id){ id = String(id).replace(/-/g, " "); return id.charAt(0).toUpperCase() + id.slice(1); }
+function tz_(){ return Session.getScriptTimeZone(); }
+function day_(d){ return Utilities.formatDate(d || new Date(), tz_(), "yyyy-MM-dd"); }
+function monday_(d){
+  d = new Date(d || new Date()); var n = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - n); return day_(d);
+}
+function ticked_(x){ return x === true || String(x).toUpperCase() === "TRUE"; }
+function clean_(s, n){ return plain_(String(s == null ? "" : s).replace(/[\u0000-\u0008]/g, "").slice(0, n || 500)); }
+function voterOk_(v){ return /^[A-Za-z0-9-]{2,40}$/.test(String(v || "")); }
+function studentOk_(who, code){
+  var me = signedIn_();
+  if(me.staff || me.who === who) return true;
+  var v = rows_("People");
+  for(var i = 1; i < v.length; i++){
+    if(String(v[i][0]).trim().toUpperCase() === who && String(v[i][2]).trim() && String(v[i][2]).trim() === String(code || "").trim()) return true;
+  }
+  return false;
+}
+
+/* ---------- events (the timeline) ---------- */
+function events_(who, key, oldV, newV){
+  var P = PREFIX[who], out = [];
+  if(!P || key.indexOf(P) !== 0) return out;
+  var id = key.slice(P.length), o = parse_(oldV), n = parse_(newV);
+  if(!n) return out;
+  if(id === "hq.v1" && n.mood && n.mood.w){
+    if(!o || !o.mood || o.mood.w !== n.mood.w || o.mood.d !== n.mood.d) out.push(["Check-in", MOODS[n.mood.w] || n.mood.w]);
+  }
+  if(/^[a-z0-9\-]+\.v1$/.test(id) && n.summary && n.summary.chunks){
+    var act = nice_(id.replace(/\.v1$/, "")), os = (o && o.summary) || null, nd = n.summary.chunksDone || 0;
+    if(!os) out.push(["Started", act]);
+    if(nd > ((os && os.chunksDone) || 0)) out.push(["Chunk done", act + ": " + nd + " of " + n.summary.chunks]);
+    if(n.summary.finished && !(os && os.finished)) out.push(["Finished", act]);
+  }
+  if(HQGAMES[key]){
+    var nb = typeof n.best === "number" ? n.best : maxOf_(n.best), ob = o ? (typeof o.best === "number" ? o.best : maxOf_(o.best)) : 0;
+    if(nb > ob && nb > 0) out.push(["New best", HQGAMES[key] + ": " + nb]);
+  }
+  return out;
+}
+function maxOf_(x){ var m = 0; if(x && typeof x === "object") Object.keys(x).forEach(function(k){ if(+x[k] > m) m = +x[k]; }); return m; }
+function logEvents_(who, list){
+  var sh = sheet_("Events"); if(!sh || !list.length) return;
+  var now = new Date();
+  sh.getRange(sh.getLastRow() + 1, 1, list.length, 4).setValues(list.map(function(e){ return [now, who, e[0], clean_(e[1], 300)]; }));
+}
+function timeline_(r){
+  staff_(r.key);
+  var who = who_(r.who), from = r.from ? new Date(r.from) : new Date(0), to = r.to ? new Date(r.to) : new Date(8.64e15);
+  var v = rows_("Events"), out = [];
+  for(var i = 1; i < v.length; i++){
+    if(v[i][1] !== who || !(v[i][0] instanceof Date)) continue;
+    if(v[i][0] < from || v[i][0] > to) continue;
+    out.push({ t: v[i][0].getTime(), kind: String(v[i][2]), detail: String(v[i][3]) });
+  }
+  return { ok: true, who: who, events: out };
+}
+
+/* ---------- the 3pm email ---------- */
+function dailyDigest(){
+  var d = new Date(), wd = d.getDay();
+  if(wd === 0 || wd === 6) return;
+  if(String(setting_("Daily email")).toUpperCase() !== "TRUE") return;
+  var to = String(setting_("Email address")).trim(); if(!to) return;
+  var today = day_(d), v = rows_("Events"), by = {};
+  for(var i = 1; i < v.length; i++){
+    if(!(v[i][0] instanceof Date) || day_(v[i][0]) !== today) continue;
+    (by[v[i][1]] = by[v[i][1]] || []).push(Utilities.formatDate(v[i][0], tz_(), "HH:mm") + "  " + v[i][2] + ": " + v[i][3]);
+  }
+  var lines = ["Base 5 today, " + Utilities.formatDate(d, tz_(), "EEEE d MMMM") + ".", ""];
+  WHO.forEach(function(w){
+    lines.push(w);
+    lines.push(by[w] ? by[w].join("\n") : "  Nothing on the site today.");
+    lines.push("");
+  });
+  lines.push("Everything is in the live view: https://cbsbase5.github.io/teacher/live.html");
+  MailApp.sendEmail(to, "Base 5 today", lines.join("\n"));
+}
+
+/* ---------- replies, shout-outs, tags (staff) ---------- */
+function reply_(r){
+  staff_(r.key);
+  var sh = sheet_("Sends"), row = +r.row, text = String(r.text || "").trim();
+  if(row < 2 || row > sh.getLastRow() || !text) throw new Error("nothing to reply to");
+  var v = sh.getRange(row, 1, 1, 9).getValues()[0], who = String(v[1]).toUpperCase();
+  sh.getRange(row, 7, 1, 2).setValues([[clean_(text, 2000), new Date()]]);
+  sh.getRange(row, 6).setValue("yes");
+  if(WHO.indexOf(who) >= 0){
+    var quote = String(v[4] || "").replace(/\s+/g, " ").slice(0, 90);
+    sheet_("Folders").appendRow([who, "Message", new Date(), "", clean_("About what you sent (" + v[3] + (quote ? ': "' + quote + (String(v[4]).length > 90 ? '..."' : '"') : "") + "):\n\n" + text, 3000), "", false]);
+  }
+  return { ok: true };
+}
+function shout_(r){
+  staff_(r.key);
+  var who = who_(r.who), text = String(r.text || "").trim();
+  if(!text) throw new Error("empty");
+  sheet_("Shoutouts").appendRow([new Date(), who, clean_(r.sticker || "star", 20), clean_(text, 300), ""]);
+  return { ok: true };
+}
+function shoutouts_(r){
+  var who = who_(r.who), v = rows_("Shoutouts"), out = [];
+  for(var i = 1; i < v.length; i++) if(v[i][1] === who && !v[i][4]) out.push({ row: i + 1, sticker: String(v[i][2]), text: String(v[i][3]) });
+  return { ok: true, items: out };
+}
+function shoutSeen_(r){
+  var who = who_(r.who), sh = sheet_("Shoutouts"), row = +r.row;
+  if(row < 2 || row > sh.getLastRow() || sh.getRange(row, 2).getValue() !== who) throw new Error("no such shout-out");
+  sh.getRange(row, 5).setValue(new Date());
+  return { ok: true };
+}
+function tag_(r){
+  staff_(r.key);
+  var sh = sheet_("Sends"), row = +r.row;
+  if(row < 2 || row > sh.getLastRow()) throw new Error("no such row");
+  sh.getRange(row, 9).setValue(clean_(r.target || "", 40));
+  return { ok: true };
+}
+
+/* ---------- votes: the big question and Would you rather ---------- */
+function vote_(r){
+  var kind = String(r.kind || ""), voter = String(r.voter || ""), choice = String(r.choice || "");
+  if(!/^(bigq|wyr:\d{4}-\d{2}-\d{2})$/.test(kind) || !voterOk_(voter) || !/^[a-z0-9]{1,12}$/.test(choice)) throw new Error("bad vote");
+  var sh = sheet_("Votes"), v = sh.getDataRange().getValues(), reason = clean_(String(r.reason || "").trim(), 140);
+  for(var i = 1; i < v.length; i++){
+    if(v[i][1] === kind && v[i][2] === voter){ sh.getRange(i + 1, 1, 1, 5).setValues([[new Date(), kind, voter, choice, reason || v[i][4]]]); return votes_({ kind: kind }); }
+  }
+  sh.appendRow([new Date(), kind, voter, choice, reason, false]);
+  return votes_({ kind: kind });
+}
+function votes_(r){
+  var kind = String(r.kind || ""), v = rows_("Votes"), counts = {}, reasons = [];
+  for(var i = 1; i < v.length; i++){
+    if(v[i][1] !== kind) continue;
+    counts[v[i][3]] = (counts[v[i][3]] || 0) + 1;
+    if(v[i][4] && !ticked_(v[i][5])) reasons.push({ choice: String(v[i][3]), text: String(v[i][4]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
+  }
+  reasons.sort(function(a, b){ return b.t - a.t; });
+  return { ok: true, kind: kind, counts: counts, reasons: reasons.slice(0, 12) };
+}
+
+/* ---------- the weekly time machine fuel ---------- */
+function sparksOf_(who, v){
+  var P = PREFIX[who], n = 0;
+  for(var i = 1; i < v.length; i++){
+    if(v[i][0] !== who) continue;
+    var k = String(v[i][1]);
+    if(k.indexOf(P) !== 0 || !/^[a-z0-9\-]+\.v1$/.test(k.slice(P.length))) continue;
+    var o = parse_(String(v[i][2]));
+    if(o && o.summary && o.summary.sparks) n += +o.summary.sparks || 0;
+  }
+  return n;
+}
+function fuelBaseline_(who, progressRows){
+  var wk = monday_(), sh = sheet_("Fuel"), v = sh.getDataRange().getValues();
+  for(var i = 1; i < v.length; i++) if(String(v[i][0]) === wk && v[i][1] === who) return;
+  sh.appendRow([wk, who, sparksOf_(who, progressRows || rows_("Progress"))]);
+}
+function fuel_(){
+  var wk = monday_(), pv = rows_("Progress"), fv = rows_("Fuel"), base = {}, total = 0;
+  for(var i = 1; i < fv.length; i++) if(String(fv[i][0]) === wk) base[fv[i][1]] = +fv[i][2] || 0;
+  WHO.forEach(function(w){ if(w in base) total += Math.max(0, sparksOf_(w, pv) - base[w]); });
+  var target = +setting_("Fuel target") || 300;
+  return { ok: true, week: wk, sparks: total, target: target, reward: String(setting_("Fuel reward") || "") };
+}
+
+/* ---------- ideas board ---------- */
+function ideasList_(all){
+  var v = rows_("Ideas"), out = [];
+  for(var i = 1; i < v.length; i++){
+    if(!v[i][1] || (!all && ticked_(v[i][6]))) continue;
+    out.push({ row: i + 1, idea: String(v[i][1]), status: String(v[i][2] || "Thinking about it"), link: String(v[i][3] || ""), plus: +v[i][4] || 0, hidden: ticked_(v[i][6]) });
+  }
+  return out.reverse();
+}
+function plus_(r){
+  var sh = sheet_("Ideas"), row = +r.row, voter = String(r.voter || "");
+  if(row < 2 || row > sh.getLastRow() || !voterOk_(voter)) throw new Error("bad");
+  var cur = sh.getRange(row, 5, 1, 2).getValues()[0], list = String(cur[1] || "").split(",").filter(String);
+  if(list.indexOf(voter) < 0){ list.push(voter); sh.getRange(row, 5, 1, 2).setValues([[list.length, list.join(",")]]); }
+  return { ok: true, plus: list.length };
+}
+function ideaStatus_(r){
+  staff_(r.key);
+  var sh = sheet_("Ideas"), row = +r.row;
+  if(row < 2 || row > sh.getLastRow()) throw new Error("no such idea");
+  if(r.status) sh.getRange(row, 3).setValue(clean_(r.status, 40));
+  if(r.link != null) sh.getRange(row, 4).setValue(clean_(r.link, 300));
+  if(r.hide != null) sh.getRange(row, 7).setValue(!!r.hide);
+  return { ok: true };
+}
+
+/* ---------- the Question Wall (Jay approves first) ---------- */
+function post_(r){
+  var text = String(r.text || "").trim();
+  if(!text) throw new Error("empty");
+  var who = WHO.indexOf(String(r.who || "").toUpperCase()) >= 0 ? String(r.who).toUpperCase() : "";
+  sheet_("Wall").appendRow([new Date(), who, clean_(text, 280), false, false]);
+  return { ok: true };
+}
+function wall_(){
+  var v = rows_("Wall"), out = [];
+  for(var i = 1; i < v.length; i++) if(v[i][2] && ticked_(v[i][3]) && !ticked_(v[i][4])) out.push({ text: String(v[i][2]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
+  return { ok: true, posts: out.reverse() };
+}
+function pending_(name, textCol, whoCol){
+  var v = rows_(name), out = [], ac = name === "Wall" ? 3 : 6;
+  for(var i = 1; i < v.length; i++){
+    if(!v[i][textCol] || ticked_(v[i][ac]) || (name === "Wall" && ticked_(v[i][4]))) continue;
+    out.push({ row: i + 1, who: String(v[i][whoCol] || ""), text: String(v[i][textCol]), answer: name === "Questions" ? String(v[i][5]) : "", subject: name === "Questions" ? String(v[i][2]) : "" });
+  }
+  return out;
+}
+function approve_(r){
+  staff_(r.key);
+  var name = r.tab === "Questions" ? "Questions" : "Wall", sh = sheet_(name), row = +r.row;
+  if(row < 2 || row > sh.getLastRow()) throw new Error("no such row");
+  if(r.on === false){ sh.getRange(row, name === "Wall" ? 5 : 7).setValue(name === "Wall"); if(name === "Questions") sh.deleteRow(row); return { ok: true }; }
+  sh.getRange(row, name === "Wall" ? 4 : 7).setValue(true);
+  return { ok: true };
+}
+
+/* ---------- game bests and the hall of fame ---------- */
+function score_(r){
+  var who = who_(r.who), game = String(r.game || ""), best = +r.best || 0;
+  if(!/^[a-z0-9\-]{2,30}$/.test(game)) throw new Error("bad game");
+  var sh = sheet_("Scores"), v = sh.getDataRange().getValues(), pub = null;
+  for(var i = 1; i < v.length; i++) if(v[i][0] === who && v[i][1] === "*") pub = ticked_(v[i][3]);
+  for(var j = 1; j < v.length; j++){
+    if(v[j][0] === who && v[j][1] === game){
+      if(best > (+v[j][2] || 0)){ sh.getRange(j + 1, 3).setValue(best); sh.getRange(j + 1, 5).setValue(new Date()); logEvents_(who, [["New best", game_(game) + ": " + best]]); }
+      return { ok: true, best: Math.max(best, +v[j][2] || 0) };
+    }
+  }
+  sh.appendRow([who, game, best, !!pub, new Date()]);
+  if(best > 0) logEvents_(who, [["New best", game_(game) + ": " + best]]);
+  return { ok: true, best: best };
+}
+function optin_(r){
+  var who = who_(r.who), on = !!r.on, sh = sheet_("Scores"), v = sh.getDataRange().getValues(), found = false;
+  for(var i = 1; i < v.length; i++){
+    if(v[i][0] !== who) continue;
+    sh.getRange(i + 1, 4).setValue(on);
+    if(v[i][1] === "*") found = true;
+  }
+  if(!found) sh.appendRow([who, "*", "", on, new Date()]);
+  return { ok: true, on: on };
+}
+function fame_(r){
+  var v = rows_("Scores"), games = {}, mine = {}, me = String(r.who || "").toUpperCase(), on = false;
+  for(var i = 1; i < v.length; i++){
+    var w = v[i][0], g = v[i][1], b = +v[i][2] || 0;
+    if(g === "*"){ if(w === me) on = ticked_(v[i][3]); continue; }
+    if(w === me) mine[g] = b;
+    if(ticked_(v[i][3]) && b > 0) (games[g] = games[g] || []).push({ who: w, best: b });
+  }
+  Object.keys(games).forEach(function(g){ games[g].sort(function(a, b){ return b.best - a.best; }); games[g] = games[g].slice(0, 3); });
+  return { ok: true, games: games, mine: mine, on: on };
+}
+
+/* ---------- Autumn 2 targets, ticked both ways ---------- */
+function targetRows_(){
+  var v = rows_("Targets"), out = [];
+  for(var i = 1; i < v.length; i++){
+    if(!String(v[i][1]).trim() || !String(v[i][2]).trim()) continue;
+    var ms = {}; WHO.forEach(function(w, j){ ms[w] = String(v[i][4 + j] || "").trim(); });
+    out.push({ pillar: String(v[i][0]).trim(), id: String(v[i][1]).trim(), title: String(v[i][2]).trim(), statement: String(v[i][3]).trim(), ms: ms });
+  }
+  return out;
+}
+function targetsAll_(){ try{ return targetRows_().map(function(t){ return { id: t.id, title: t.title, pillar: t.pillar }; }); }catch(e){ return []; } }
+function ticksOf_(who){
+  var v = rows_("Ticks"), out = {};
+  for(var i = 1; i < v.length; i++){
+    if(who && v[i][0] !== who) continue;
+    (out[v[i][0]] = out[v[i][0]] || {})[String(v[i][1])] = { state: +v[i][2] || 0, at: v[i][3] instanceof Date ? v[i][3].getTime() : 0, snote: String(v[i][4] || ""), jnote: String(v[i][5] || "") };
+  }
+  return out;
+}
+function targets_(r){
+  var me = signedIn_();
+  if(r.key || me.staff){
+    staff_(r.key);
+    var sv = rows_("Sends"), ev = [];
+    for(var i = 1; i < sv.length; i++) if(sv[i][8]) ev.push({ row: i + 1, who: String(sv[i][1]), target: String(sv[i][8]), what: String(sv[i][3]), text: String(sv[i][4]).slice(0, 400), time: sv[i][0] instanceof Date ? sv[i][0].getTime() : 0 });
+    return { ok: true, staff: true, targets: targetRows_(), ticks: ticksOf_(null), evidence: ev };
+  }
+  var who = who_(r.who);
+  if(!studentOk_(who, r.code)) throw new Error("not yours");
+  var mine = targetRows_().map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one." }; });
+  return { ok: true, who: who, targets: mine, ticks: ticksOf_(who)[who] || {} };
+}
+function tick_(r){
+  var who = who_(r.who), id = String(r.id || "").trim(), me = signedIn_(), staff = false;
+  if(r.key || me.staff){ staff_(r.key); staff = true; }
+  else if(!studentOk_(who, r.code)) throw new Error("not yours");
+  var sh = sheet_("Ticks"), v = sh.getDataRange().getValues(), row = 0;
+  for(var i = 1; i < v.length; i++) if(v[i][0] === who && String(v[i][1]) === id){ row = i + 1; break; }
+  var cur = row ? v[row - 1] : [who, id, 0, "", "", "", ""];
+  var state = r.state != null ? Math.max(0, Math.min(2, +r.state || 0)) : +cur[2] || 0;
+  var at = r.state != null && state !== (+cur[2] || 0) ? new Date() : cur[3];
+  var snote = !staff && r.snote != null ? clean_(r.snote, 500) : cur[4];
+  var jnote = staff && r.jnote != null ? clean_(r.jnote, 1000) : cur[5];
+  var vals = [[who, id, state, at, snote, jnote, new Date()]];
+  if(row) sh.getRange(row, 1, 1, 7).setValues(vals); else sh.getRange(sh.getLastRow() + 1, 1, 1, 7).setValues(vals);
+  if(r.state != null && state !== (+cur[2] || 0)) logEvents_(who, [["Target", id + ": " + ["Not yet", "Having a go", "Got it"][state] + (staff ? " (Jay)" : "")]]);
+  return { ok: true };
+}
+
+/* ---------- questions made by students ---------- */
+function question_(r){
+  var who = who_(r.who), q = String(r.q || "").trim(), a = String(r.a || "").trim();
+  if(!q) throw new Error("empty");
+  sheet_("Questions").appendRow([new Date(), who, clean_(r.subject || "", 20), clean_(r.from || "", 80), clean_(q, 400), clean_(a, 300), false]);
+  logEvents_(who, [["Made a question", String(r.from || r.subject || "")]]);
+  return { ok: true };
+}
+function questions_(r){
+  var me = String(r.who || "").toUpperCase(), v = rows_("Questions"), out = [];
+  for(var i = 1; i < v.length; i++) if(ticked_(v[i][6]) && v[i][1] !== me && v[i][4]) out.push({ id: "q" + (i + 1), subject: String(v[i][2]), q: String(v[i][4]), a: String(v[i][5]) });
+  return { ok: true, items: out };
+}
+
+/* ---------- the Friday postcard home ---------- */
+function parentsSet_(){
+  var v = rows_("People"), out = {};
+  for(var i = 1; i < v.length; i++){ var w = String(v[i][0]).trim().toUpperCase(); if(WHO.indexOf(w) >= 0) out[w] = !!String(v[i][3] || "").trim(); }
+  return out;
+}
+function postcard_(r){
+  staff_(r.key);
+  var who = who_(r.who), wk = monday_(), v = rows_("Events"), started = {}, chunks = 0, finished = {}, bests = [], sent = 0, last = {};
+  for(var i = 1; i < v.length; i++){
+    if(v[i][1] !== who || !(v[i][0] instanceof Date)) continue;
+    var k = v[i][2], d = String(v[i][3]), m = k === "Chunk done" ? d.match(/^(.*): (\d+) of \d+$/) : null;
+    if(monday_(v[i][0]) !== wk){ if(m) last[m[1]] = +m[2]; continue; }
+    if(k === "Started") started[d] = 1;
+    if(m){ chunks += Math.max(0, +m[2] - (last[m[1]] || 0)); last[m[1]] = +m[2]; started[m[1]] = 1; }
+    if(k === "Finished") finished[d] = 1;
+    if(k === "New best") bests.push(d);
+    if(k === "Sent to Jay") sent++;
+  }
+  var acts = Object.keys(started), lines = [];
+  lines.push("Hello,");
+  lines.push("");
+  lines.push("A quick postcard from Base 5 about " + who + "'s week on the Base 5 site.");
+  lines.push("");
+  if(acts.length) lines.push("Worked on: " + acts.join(", ") + ".");
+  if(chunks) lines.push("Short chunks finished: " + chunks + ".");
+  if(Object.keys(finished).length) lines.push("Finished: " + Object.keys(finished).join(", ") + ".");
+  if(sent) lines.push("Shared " + sent + " piece" + (sent === 1 ? "" : "s") + " of work with Jay.");
+  if(bests.length) lines.push("New personal best" + (bests.length === 1 ? "" : "s") + ": " + bests.join("; ") + ".");
+  if(!acts.length && !chunks && !sent) lines.push("A quieter week on the site, which is completely fine.");
+  lines.push("");
+  lines.push("Have a lovely weekend,");
+  lines.push("Jay");
+  return { ok: true, who: who, text: lines.join("\n"), hasParent: !!parentsSet_()[who] };
+}
+function sendPostcard_(r){
+  staff_(r.key);
+  var who = who_(r.who), text = String(r.text || "").trim(), v = rows_("People"), to = "";
+  for(var i = 1; i < v.length; i++) if(String(v[i][0]).trim().toUpperCase() === who && String(v[i][3] || "").trim()){ to = String(v[i][3]).trim(); break; }
+  if(!to) throw new Error("No parent email for " + who + " in the People tab.");
+  if(!text) throw new Error("empty");
+  MailApp.sendEmail(to, "A postcard from Base 5", text);
+  sheet_("Postcards").appendRow([new Date(), who, plain_(to), clean_(text, 5000)]);
+  return { ok: true };
+}
+
+/* ---------- board mode ---------- */
+function board_(){
+  var today = day_(), pv = rows_("Progress"), n = 0;
+  WHO.forEach(function(w){
+    for(var i = 1; i < pv.length; i++){
+      if(pv[i][0] !== w || pv[i][1] !== PREFIX[w] + "hq.v1") continue;
+      var o = parse_(String(pv[i][2]));
+      if(o && o.mood && o.mood.d === today && o.mood.w && o.mood.w !== "skip") n++;
+    }
+  });
+  return { ok: true, fuel: fuel_(), bigq: votes_({ kind: "bigq" }), checkedIn: n, of: WHO.length };
+}
+
+var READ3 = {
+  timeline: timeline_, shoutouts: shoutouts_, votes: votes_, fuel: function(){ return fuel_(); },
+  ideas: function(){ return { ok: true, items: ideasList_(false) }; }, wall: function(){ return wall_(); },
+  fame: fame_, targets: targets_, questions: questions_, postcard: postcard_, board: function(){ return board_(); }
+};
+var WRITE3 = {
+  reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
+  post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_
+};

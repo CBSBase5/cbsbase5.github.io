@@ -245,6 +245,28 @@ html[data-tod="evening"] body{background:
 
 /* the big question, with a way in */
 .ttq a{display:block;margin-top:4px;font-family:var(--body);font-variation-settings:normal;font-weight:700;font-size:.82rem;color:var(--teal)}
+
+/* shared data: the big question vote, group answers, the fuel gauge */
+.bq{margin-top:10px;font-family:var(--body);font-variation-settings:normal}
+.bq-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bq-row small{font-size:.82rem;color:var(--body-tint)}
+.bq button{font:inherit;font-weight:700;font-size:.88rem;padding:6px 14px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.bq button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.bq-bars{display:flex;gap:4px;height:12px;border-radius:999px;overflow:hidden;border:2px solid var(--ink);margin:8px 0 4px;max-width:420px;background:var(--paper)}
+.bq-bars i{display:block;height:100%}
+.bq-key{display:flex;gap:12px;flex-wrap:wrap;font-size:.84rem}
+.bq-key span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--c);border:1px solid var(--ink)}
+.bq-why{display:flex;gap:8px;margin-top:8px;max-width:520px}
+.bq-why input{flex:1;font:inherit;font-size:.9rem;border:2px solid var(--ink);border-radius:999px;padding:6px 12px;background:var(--white);color:var(--ink);min-width:0}
+.bq-said{margin:8px 0 0;padding:0;list-style:none;font-size:.86rem;color:var(--body-tint);max-width:520px}
+.bq-said li{margin:2px 0}
+.groupsaid{margin:8px 0 0;font-size:.9rem;color:var(--body-tint)}
+.fuel{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 18px}
+.fuel h3{margin:0;font-size:1.05rem}
+.fuel-bar{flex:1 1 220px;height:20px;border-radius:999px;border:3px solid var(--ink);background:var(--paper);overflow:hidden}
+.fuel-bar i{display:block;height:100%;background:linear-gradient(90deg,#00a6c9,#9fd356,#ffd23f);border-radius:999px;transition:width .8s ease}
+.fuel small{font-size:.86rem;color:var(--body-tint)}
+.fuel.full .fuel-bar{box-shadow:0 0 0 4px #ffd23f}
 </style>
 <script src="/data/b5site.js?v=6"></script>
 </head>
@@ -275,7 +297,7 @@ html[data-tod="evening"] body{background:
       <span class="chip">Autumn 2</span>
       <p>Seven weeks of time travel. Poke about, follow whatever looks good, leave the rest.</p>
     </div>
-    <div class="ttq">If we could time travel, should we?<a href="/projects/ideas.html">Not sure yet? The Idea Lab helps you find your answer</a></div>
+    <div class="ttq">If we could time travel, should we?<a href="/projects/ideas.html">Not sure yet? The Idea Lab helps you find your answer</a><div class="bq" id="bigq" hidden></div></div>
     <div class="nownext" id="nownext"></div>
   </div>
 </header>
@@ -413,6 +435,8 @@ html[data-tod="evening"] body{background:
 
   <hr class="rule">
 
+  <div class="board" id="fuelWrap" hidden><div class="card w12 edge edge-teal fuel" id="fuel"></div></div>
+
   <div class="weektheme">
     <h2>Today&rsquo;s two</h2>
     <span>A new pair every day.</span>
@@ -443,7 +467,7 @@ html[data-tod="evening"] body{background:
         <h3><label for="askIdea">What should we add?</label></h3>
         <textarea id="askIdea" rows="1" placeholder="A game, a topic, something broken..."></textarea>
       </div>
-      <p class="askwhy">Your idea goes straight to Jay.</p>
+      <p class="askwhy">Your idea goes straight to Jay. <a href="/ideas/">See everyone's ideas</a></p>
       <div id="askSend" hidden></div>
     </div>
   </div>
@@ -706,6 +730,21 @@ html[data-tod="evening"] body{background:
   box.innerHTML = html;
 })();
 
+/* ---------- small shared helpers ---------- */
+window.B5Shared = {
+  /* a random id for this device, so a vote can be changed but not doubled */
+  voter: function(){
+    var v = null;
+    try{ v = localStorage.getItem('b5.voter.v1'); }catch(e){}
+    if(!v || !/^dev-[a-z0-9]{10}$/.test(v)){
+      v = 'dev-'; for(var i = 0; i < 10; i++) v += 'abcdefghijkmnpqrstuvwxyz23456789'.charAt(Math.floor(Math.random() * 32));
+      try{ localStorage.setItem('b5.voter.v1', v); }catch(e){}
+    }
+    return v;
+  },
+  day: function(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+};
+
 /* ---------- today's two ---------- */
 (function(){
   var F = window.B5FUN, box = document.getElementById('todaystwo');
@@ -738,8 +777,67 @@ html[data-tod="evening"] body{background:
     b.addEventListener('click', function(){
       box.querySelectorAll('.opts .btn').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
       document.getElementById('funThen').textContent = b.dataset.i === '0' ? w[2] : w[4];
+      groupVote(b.dataset.i === '0' ? 'a' : 'b');
     });
   });
+  /* what the rest of Base 5 picked today (from the shared sheet) */
+  function groupVote(c){
+    var S = window.B5Site;
+    if(!S || !S.call || !S.syncUrl || S.bridgeDown()) return;
+    var kind = 'wyr:' + B5Shared.day(), p = S.guest ? S.call('votes', { kind: kind }) : S.call('vote', { kind: kind, voter: B5Shared.voter(), choice: c });
+    p.then(function(o){
+      if(!o || !o.ok) return;
+      var a = o.counts.a || 0, b2 = o.counts.b || 0, el = document.getElementById('funGroup');
+      if(!el){ el = document.createElement('p'); el.className = 'groupsaid'; el.id = 'funGroup'; document.getElementById('funThen').after(el); }
+      el.textContent = 'Base 5 today: ' + a + ' picked ' + w[1].replace(/[.?!]$/, '') + ', ' + b2 + ' picked ' + w[3].replace(/[.?!]$/, '') + '.';
+    }).catch(function(){});
+  }
+})();
+
+/* ---------- the shared bits: big question vote and the fuel gauge ---------- */
+(function(){
+  var S = window.B5Site, box = document.getElementById('bigq');
+  if(!S || !S.call || !S.syncUrl) return;
+  var CH = [['yes', 'Yes', '#9fd356'], ['no', 'No', '#ef7724'], ['depends', 'It depends', '#00a6c9']];
+  var KEY = 'b5.bigq.v1', mine = null;
+  try{ mine = (JSON.parse(localStorage.getItem(KEY) || 'null') || {}).c || null; }catch(e){}
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function draw(o){
+    var n = 0; CH.forEach(function(c){ n += o && o.counts[c[0]] || 0; });
+    var h = '<div class="bq-row">';
+    if(!S.guest) h += CH.map(function(c){ return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (mine === c[0]) + '">' + c[1] + '</button>'; }).join('');
+    h += '<small>' + (mine || S.guest ? (n === 1 ? '1 answer so far' : n + ' answers so far') : 'Your answer, if you have one. You can change it any time.') + '</small></div>';
+    if((mine || S.guest) && n){
+      h += '<div class="bq-bars" aria-hidden="true">' + CH.map(function(c){ var k = o.counts[c[0]] || 0; return k ? '<i style="flex:' + k + ';background:' + c[2] + '"></i>' : ''; }).join('') + '</div>' +
+        '<div class="bq-key">' + CH.map(function(c){ return '<span style="--c:' + c[2] + '">' + c[1] + ' ' + (o.counts[c[0]] || 0) + '</span>'; }).join('') + '</div>';
+    }
+    if(mine) h += '<div class="bq-why"><input type="text" id="bqWhy" maxlength="140" placeholder="Why? Only if you want to say." aria-label="Why, if you want to say"><button type="button" id="bqWhyGo">Add</button></div>';
+    var rs = (o && o.reasons || []).slice(0, 4);
+    if((mine || S.guest) && rs.length){
+      var name = {}; CH.forEach(function(c){ name[c[0]] = c[1]; });
+      h += '<ul class="bq-said">' + rs.map(function(r){ return '<li>' + esc(name[r.choice] || '') + ': "' + esc(r.text) + '"</li>'; }).join('') + '</ul>';
+    }
+    box.innerHTML = h; box.hidden = false;
+    [].forEach.call(box.querySelectorAll('button[data-c]'), function(b){ b.onclick = function(){ vote(b.dataset.c); }; });
+    var go = document.getElementById('bqWhyGo');
+    if(go) go.onclick = function(){ var v = document.getElementById('bqWhy').value.trim(); if(v){ go.disabled = true; vote(mine, v); } };
+  }
+  function vote(c, why){
+    mine = c;
+    try{ localStorage.setItem(KEY, JSON.stringify({ c: c })); }catch(e){}
+    S.call('vote', { kind: 'bigq', voter: B5Shared.voter(), choice: c, reason: why || '' }).then(draw).catch(function(){ draw(null); });
+  }
+  /* one call brings the fuel, the votes and the check-ins */
+  if(S.bridgeDown()) return;
+  S.call('board').then(function(o){
+    if(!o || !o.ok) return;
+    draw(o.bigq);
+    var f = o.fuel, pct = Math.min(100, Math.round(100 * f.sparks / Math.max(1, f.target))), el = document.getElementById('fuel');
+    el.classList.toggle('full', pct >= 100);
+    el.innerHTML = '<h3>Time machine fuel</h3><div class="fuel-bar" role="img" aria-label="' + f.sparks + ' of ' + f.target + ' sparks this week"><i style="width:' + pct + '%"></i></div>' +
+      '<small>' + (pct >= 100 ? 'Full! ' + (f.reward ? esc(f.reward) : 'Well done, everyone.') : f.sparks + ' of ' + f.target + ' sparks this week, from everyone in Base 5' + (f.reward ? '. When it is full: ' + esc(f.reward) : '') + '.') + ' It starts again on Monday.</small>';
+    document.getElementById('fuelWrap').hidden = false;
+  }).catch(function(){});
 })();
 
 /* ---------- the time of day ---------- */

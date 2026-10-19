@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="/style.css?v=9">
 <script src="/data/b5site.js?v=6"></script>
 <script src="/data/b5lock.js?v=1"></script>
+<script src="/data/minidocx.js?v=1"></script>
 <style>
 /* Jay's live view: every HQ's progress and every send, from the shared sheet. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -46,6 +47,31 @@
 .send .head button{margin-left:auto;font:inherit;font-size:.82rem;padding:4px 10px;border-radius:10px;border:2px solid var(--ink);background:var(--white);cursor:pointer}
 .send pre{white-space:pre-wrap;font-family:var(--body);font-size:.93rem;margin:8px 0 0;max-height:260px;overflow:auto;background:var(--paper);border-radius:10px;padding:10px}
 .off{background:var(--paper);border:2px dashed var(--ink);border-radius:14px;padding:16px}
+.today{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px 0}
+.pill{display:inline-block;font-size:.8rem;padding:3px 10px;border-radius:999px;border:2px solid var(--ink);background:var(--paper)}
+.pill.sun{background:#ffe680}.pill.bright{background:#d8f0c6}.pill.grey{background:#dde3e6}.pill.storm{background:#c9c6e8}.pill.no{border-style:dashed;color:var(--body-tint)}
+.kid h4{margin:10px 14px 0;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--body-tint)}
+.kid .acts{display:flex;gap:6px;flex-wrap:wrap;padding:6px 14px 14px}
+.kid .acts button,.mini{font:inherit;font-size:.82rem;padding:5px 11px;border-radius:10px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.mini.go{background:var(--ink);color:var(--paper)}
+.panel{margin:0 14px 14px;padding:10px;border-radius:12px;background:var(--paper);border:2px solid var(--ink)}
+.panel textarea,.reply textarea,.big textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.93rem;border:2px solid var(--ink);border-radius:10px;padding:8px 10px;background:var(--white);color:var(--ink);min-height:64px}
+.stick{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.stick button{font-size:1.25rem;width:42px;height:42px;border-radius:12px;border:2px solid var(--ink);background:var(--white);cursor:pointer}
+.stick button[aria-pressed=true]{background:#ffe680;box-shadow:inset 0 0 0 2px var(--ink)}
+.row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.reply{margin-top:10px}
+.replied{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#e3f3f6;font-size:.9rem}
+.send select,.box select{font:inherit;font-size:.85rem;padding:5px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--white);color:var(--ink)}
+.tl-day{margin:14px 0 4px;font-family:var(--display);font-variation-settings:"wght" 800}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:flex;gap:12px;padding:5px 0;border-top:1px dashed rgba(10,47,56,.18);font-size:.92rem}
+.tl li em{font-style:normal;color:var(--body-tint);min-width:3.2em}
+.tl li b{font-weight:700;min-width:8em}
+.wait{border:2px solid var(--ink);border-radius:12px;padding:10px 12px;margin:0 0 8px;background:var(--white)}
+.wait p{margin:0 0 6px}
+.wait small{color:var(--body-tint)}
+.big textarea{min-height:220px;font-family:var(--body)}
 </style>
 </head>
 <body>
@@ -56,7 +82,7 @@
       <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg>
       <b>Base 5</b>
     </div>
-    <nav><a href="/teacher/milestones.html">Milestones</a><a href="/teacher/sync.html">Setup</a><a href="/">Site</a></nav>
+    <nav><a href="/teacher/">Staff room</a><a href="/teacher/targets.html">Targets</a><a href="/teacher/sync.html">Setup</a><a href="/">Site</a></nav>
   </div>
 </div>
 <header class="hero hero-sm">
@@ -64,7 +90,7 @@
     <h1>LIVE <span class="accent">VIEW</span></h1>
     <div class="line">
       <span class="chip">Staff only</span>
-      <p>Every HQ's progress and everything sent to you, straight from the shared sheet.</p>
+      <p>Every HQ's progress, today's check-ins and everything sent to you, straight from the shared sheet.</p>
     </div>
   </div>
 </header>
@@ -85,6 +111,30 @@
   <div id="view" hidden>
     <div class="weektheme"><h2>The HQs</h2><span id="stamp"></span></div>
     <div class="kids" id="kids"></div>
+    <div class="box" id="waitBox" hidden><h2>Waiting for you</h2><p class="help">Wall posts and student-made questions only go out once you approve them. Ideas show on the ideas board with the status you pick.</p><div id="wait"></div></div>
+    <div class="box" id="tlBox">
+      <h2>Timeline</h2>
+      <p class="help">Everything one student did on the site, from the sheet: check-ins, chunks, finishes, new bests, sends and target ticks. Copy it into a note, or download it as a Word document.</p>
+      <div class="inline">
+        <select id="tlWho"></select>
+        <select id="tlWeek"><option value="0">This week</option><option value="1">Last week</option><option value="2">Two weeks ago</option><option value="3">Three weeks ago</option><option value="all">Everything</option></select>
+        <button class="btn" type="button" id="tlGo">Show</button>
+        <button class="btn btn-quiet" type="button" id="tlCopy" hidden>Copy</button>
+        <button class="btn btn-quiet" type="button" id="tlDoc" hidden>Download as Word</button>
+      </div>
+      <p class="msg" id="tlMsg" aria-live="polite"></p>
+      <div id="tl"></div>
+    </div>
+    <div class="box big" id="pcBox">
+      <h2>Friday postcard home</h2>
+      <p class="help">A short, warm note about the week, made from the timeline. Read it, change anything you like, then send it to the parent email in the People tab (or copy it).</p>
+      <div class="inline"><select id="pcWho"></select><button class="btn" type="button" id="pcMake">Make the postcard</button></div>
+      <div id="pcOut" hidden>
+        <textarea id="pcText" style="margin-top:12px"></textarea>
+        <div class="row2"><button class="btn" type="button" id="pcSend">Send to parent</button><button class="btn btn-quiet" type="button" id="pcCopy">Copy</button><span id="pcNote" class="help" style="margin:0"></span></div>
+      </div>
+      <p class="msg" id="pcMsg" aria-live="polite"></p>
+    </div>
     <div class="weektheme"><h2>Sent to you</h2><span>Newest first. Mark things seen as you go; it is saved in the sheet.</span></div>
     <div class="chipsrow" id="filters"></div>
     <div id="sends"></div>
@@ -159,55 +209,271 @@ $("go").addEventListener("click", load);
 $("refresh").addEventListener("click", load);
 $("key").addEventListener("keydown", function(e){ if(e.key === "Enter") load(); });
 
+var STICK = { star: "\u2B50", rocket: "\uD83D\uDE80", fire: "\uD83D\uDD25", trophy: "\uD83C\uDFC6", heart: "\uD83D\uDC9A", fish: "\uD83C\uDFA3", ball: "\u26BD", music: "\uD83C\uDFB5" };
+var MOOD = { sun: "Sunny", bright: "Bright spells", grey: "Grey", storm: "Stormy", skip: "Skipped" };
+var open = {};   /* which card panels are open, so a refresh keeps them */
+function key(){ return $("key").value.trim(); }
+function dayStr(d){ d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+function when(t){ return new Date(t).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
+function seenWhen(v){
+  if(!v) return null;
+  if(v === 1 || v === "1" || v === true) return "Seen";
+  var d = new Date(v); if(isNaN(d)) return "Seen";
+  return "Seen " + d.toLocaleString("en-GB", { weekday: "long", hour: "2-digit", minute: "2-digit" });
+}
+function parse(x){ try{ return JSON.parse(x); }catch(e){ return null; } }
+function copy(text, btn){
+  var done = function(){ var t = btn.textContent; btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = t; }, 1600); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function(){ prompt("Copy this:", text); });
+  else prompt("Copy this:", text);
+}
+function call(action, data){ data = data || {}; data.key = key(); return B5Site.call(action, data); }
+
+function card(w, o){
+  var s = o.students[w] || { items: {}, last: 0 }, h = HQ[w], sparks = 0, acts = [];
+  Object.keys(s.items).forEach(function(k){
+    if(k.indexOf(h.prefix) !== 0) return;
+    var id = k.slice(h.prefix.length);
+    if(!/^[a-z0-9\-]+\.v1$/.test(id)) return;
+    var d = parse(s.items[k].v);
+    if(!d || !d.summary) return;
+    sparks += d.summary.sparks || 0;
+    id = id.replace(/\.v1$/, "");
+    if(d.summary.chunks) acts.push({ id: id, t: s.items[k].t, done: d.summary.chunksDone || 0, of: d.summary.chunks, fin: d.summary.finished });
+  });
+  acts.sort(function(a, b){ return b.t - a.t; });
+  /* today's check-in */
+  var hq = parse((s.items[h.prefix + "hq.v1"] || {}).v), mood = hq && hq.mood && hq.mood.d === dayStr() ? hq.mood.w : "";
+  var today = mood ? '<span class="pill ' + esc(mood) + '">Checked in: ' + esc(MOOD[mood] || mood) + '</span>' : '<span class="pill no">Not checked in today</span>';
+  /* folder: newest few things and whether they have been opened */
+  var fo = (o.folders || {})[w] || { messages: [], activities: [], files: [] }, st = parse((s.items[h.prefix + "folder.v1"] || {}).v) || {};
+  var seen = st.seen || {}, tried = st.tried || {};
+  var things = fo.messages.map(function(m){ return { id: m.id, label: "Message: " + m.text.replace(/\s+/g, " ").slice(0, 46) + (m.text.length > 46 ? "..." : ""), date: m.date || "" }; })
+    .concat(fo.activities.map(function(a){ return { id: a.id, label: "Activity: " + a.title, date: a.date || "" }; }))
+    .concat(fo.files.map(function(f){ return { id: f.id, label: "File: " + f.title, date: "" }; }));
+  things.sort(function(a, b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  var folder = things.length ? '<h4>Folder</h4><ul>' + things.slice(0, 4).map(function(x){
+    var sw = seenWhen(seen[x.id]), tw = tried[x.id] ? " &middot; had a go" : "";
+    return '<li><span>' + esc(x.label) + '</span><em>' + (sw ? esc(sw) + tw : "Not opened yet") + '</em></li>';
+  }).join("") + '</ul>' : "";
+  var panel = "";
+  if(open[w] === "shout"){
+    panel = '<div class="panel" data-w="' + w + '"><div class="stick">' + Object.keys(STICK).map(function(k, i){ return '<button type="button" data-st="' + k + '" aria-pressed="' + (i === 0) + '" aria-label="' + k + '">' + STICK[k] + '</button>'; }).join("") + '</div>' +
+      '<textarea data-shout placeholder="Something you noticed, kept short. Only ' + w + ' sees it, on their HQ."></textarea><div class="row2"><button class="mini go" type="button" data-do="sendshout">Send the shout-out</button><button class="mini" type="button" data-do="close">Not now</button><span class="help" data-out style="margin:0"></span></div></div>';
+  }
+  return '<div class="kid"><div class="kid-top" style="background:' + h.bg + '"><b>' + w + '</b><span>Last active ' + ago(s.last) + '</span><a href="' + h.base + '">Open HQ</a></div>' +
+    '<div class="today">' + today + '</div>' +
+    '<div class="kid-nums"><div><b>' + sparks + '</b><small>sparks (about)</small></div><div><b>' + acts.length + '</b><small>activities started</small></div><div><b>' + acts.filter(function(a){ return a.fin || a.done >= a.of; }).length + '</b><small>finished</small></div></div>' +
+    (acts.length ? '<ul>' + acts.slice(0, 5).map(function(a){
+      return '<li><span>' + esc(names[w + ":" + a.id] || nice(a.id)) + '</span><em>' + a.done + ' of ' + a.of + ' chunks, ' + ago(a.t) + '</em></li>';
+    }).join("") + '</ul>' : '<p class="none">Nothing saved to the sheet yet.</p>') +
+    folder +
+    '<div class="acts"><button type="button" data-w="' + w + '" data-do="shout">Shout-out</button><button type="button" data-w="' + w + '" data-do="timeline">Timeline</button><button type="button" data-w="' + w + '" data-do="postcard">Postcard</button></div>' +
+    panel + '</div>';
+}
+
 function draw(o){
   $("stamp").textContent = "Updated " + new Date(o.now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  $("kids").innerHTML = Object.keys(HQ).map(function(w){
-    var s = o.students[w] || { items: {}, last: 0 }, h = HQ[w], sparks = 0, acts = [];
-    Object.keys(s.items).forEach(function(k){
-      if(k.indexOf(h.prefix) !== 0) return;
-      var id = k.slice(h.prefix.length);
-      if(!/^[a-z0-9\-]+\.v1$/.test(id)) return;
-      var d = null; try{ d = JSON.parse(s.items[k].v); }catch(e){}
-      if(!d || !d.summary) return;
-      sparks += d.summary.sparks || 0;
-      id = id.replace(/\.v1$/, "");
-      if(d.summary.chunks) acts.push({ id: id, t: s.items[k].t, done: d.summary.chunksDone || 0, of: d.summary.chunks, fin: d.summary.finished });
-    });
-    acts.sort(function(a, b){ return b.t - a.t; });
-    return '<div class="kid"><div class="kid-top" style="background:' + h.bg + '"><b>' + w + '</b><span>Last active ' + ago(s.last) + '</span><a href="' + h.base + '">Open HQ</a></div>' +
-      '<div class="kid-nums"><div><b>' + sparks + '</b><small>sparks (about)</small></div><div><b>' + acts.length + '</b><small>activities started</small></div><div><b>' + acts.filter(function(a){ return a.fin || a.done >= a.of; }).length + '</b><small>finished</small></div></div>' +
-      (acts.length ? '<ul>' + acts.slice(0, 6).map(function(a){
-        return '<li><span>' + esc(names[w + ":" + a.id] || nice(a.id)) + '</span><em>' + a.done + ' of ' + a.of + ' chunks, ' + ago(a.t) + '</em></li>';
-      }).join("") + '</ul>' : '<p class="none">Nothing saved to the sheet yet.</p>') +
-    '</div>';
-  }).join("");
+  $("kids").innerHTML = Object.keys(HQ).map(function(w){ return card(w, o); }).join("");
+  [].forEach.call($("kids").querySelectorAll("[data-do]"), function(b){
+    b.onclick = function(){
+      var w = b.dataset.w || b.closest("[data-w]").dataset.w, d = b.dataset.do;
+      if(d === "shout"){ open[w] = open[w] === "shout" ? null : "shout"; draw(last); var t = $("kids").querySelector('.panel[data-w="' + w + '"] textarea'); if(t) t.focus(); }
+      if(d === "close"){ open[w] = null; draw(last); }
+      if(d === "timeline"){ $("tlWho").value = w; showTimeline(); $("tlBox").scrollIntoView({ behavior: "smooth" }); }
+      if(d === "postcard"){ $("pcWho").value = w; makePostcard(); $("pcBox").scrollIntoView({ behavior: "smooth" }); }
+      if(d === "sendshout"){
+        var p = b.closest(".panel"), text = p.querySelector("textarea").value.trim(), on = p.querySelector('.stick [aria-pressed="true"]'), out = p.querySelector("[data-out]");
+        if(!text){ out.textContent = "A few words go in the box first."; return; }
+        b.disabled = true; out.textContent = "Sending...";
+        call("shout", { who: w, sticker: on ? on.dataset.st : "star", text: text }).then(function(r){
+          if(r.ok){ open[w] = null; draw(last); msg("Shout-out sent to " + w + ". It pops up next time they open their HQ."); }
+          else { out.textContent = "That did not send: " + r.error; b.disabled = false; }
+        }).catch(function(){ out.textContent = "Could not reach the sheet."; b.disabled = false; });
+      }
+    };
+  });
+  [].forEach.call($("kids").querySelectorAll(".stick button"), function(b){
+    b.onclick = function(){ [].forEach.call(b.parentNode.children, function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); };
+  });
+
+  drawWait(o);
 
   var whos = {}; o.sends.forEach(function(x){ whos[x.who] = 1; });
   var opts = [["unseen", "Not seen yet"], ["all", "Everything"]].concat(Object.keys(whos).sort().map(function(w){ return [w, w]; }));
   $("filters").innerHTML = opts.map(function(f){ return '<button type="button" data-f="' + esc(f[0]) + '" aria-pressed="' + (filter === f[0]) + '">' + esc(f[1]) + '</button>'; }).join("");
   [].forEach.call($("filters").querySelectorAll("button"), function(b){ b.onclick = function(){ filter = b.dataset.f; draw(last); }; });
 
+  var targets = o.targets || [], tname = {};
+  targets.forEach(function(t){ tname[t.id] = t.title; });
   var list = o.sends.slice().reverse().filter(function(x){ return filter === "all" ? true : filter === "unseen" ? !x.seen : x.who === filter; });
   $("sends").innerHTML = list.length ? list.map(function(x){
-    var when = typeof x.time === "number" ? new Date(x.time).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : x.time;
-    return '<div class="send' + (x.seen ? "" : " unseen") + '"><div class="head"><b>' + esc(x.who) + '</b><span>' + esc(x.what) + '</span><em>' + esc(when) + (x.page ? ' &middot; ' + esc(x.page) : '') + '</em>' +
+    var tw = typeof x.time === "number" ? when(x.time) : x.time, kid = HQ[x.who];
+    var tag = targets.length ? '<select data-tag="' + x.row + '" aria-label="Link to a target"><option value="">Link to a target...</option>' + targets.map(function(t){ return '<option value="' + esc(t.id) + '"' + (x.target === t.id ? " selected" : "") + '>' + esc((t.pillar ? t.pillar + ": " : "") + t.title) + '</option>'; }).join("") + '</select>' : "";
+    return '<div class="send' + (x.seen ? "" : " unseen") + '"><div class="head"><b>' + esc(x.who) + '</b><span>' + esc(x.what) + '</span><em>' + esc(tw) + (x.page ? ' &middot; ' + esc(x.page) : '') + '</em>' +
       '<button type="button" data-row="' + x.row + '" data-seen="' + (x.seen ? 0 : 1) + '">' + (x.seen ? "Mark not seen" : "Mark seen") + '</button></div>' +
-      '<pre>' + esc(x.text) + '</pre></div>';
+      '<pre>' + esc(x.text) + '</pre>' +
+      (x.reply ? '<p class="replied"><b>You replied:</b> ' + esc(x.reply) + '</p>' : "") +
+      '<div class="row2">' + tag + '<button type="button" class="mini" data-bl="' + x.row + '">Copy for BridgeLink</button>' +
+      (kid && !x.reply ? '<button type="button" class="mini" data-rp="' + x.row + '">Reply</button>' : "") + '</div>' +
+      (kid && !x.reply ? '<div class="reply" data-rbox="' + x.row + '" hidden><textarea placeholder="Your reply. It lands in ' + esc(x.who) + '\'s folder, with a line saying what it is about."></textarea><div class="row2"><button type="button" class="mini go" data-rsend="' + x.row + '">Send the reply</button><span class="help" data-rout style="margin:0"></span></div></div>' : "") +
+      '</div>';
   }).join("") : '<p class="help">' + (filter === "unseen" ? "All caught up." : "Nothing here.") + '</p>';
+  function row(r){ for(var i = 0; i < last.sends.length; i++) if(last.sends[i].row === r) return last.sends[i]; return null; }
   [].forEach.call($("sends").querySelectorAll("button[data-row]"), function(b){
     b.onclick = function(){
-      var row = +b.dataset.row, seen = b.dataset.seen === "1";
+      var r = +b.dataset.row, seen = b.dataset.seen === "1";
       b.disabled = true;
-      B5Site.call("seen", { key: $("key").value.trim(), row: row, seen: seen })
-        .then(function(r){ if(r.ok){ last.sends.forEach(function(x){ if(x.row === row) x.seen = seen; }); draw(last); } else b.disabled = false; })
+      call("seen", { row: r, seen: seen })
+        .then(function(x){ if(x.ok){ row(r).seen = seen; draw(last); } else b.disabled = false; })
         .catch(function(){ b.disabled = false; });
+    };
+  });
+  [].forEach.call($("sends").querySelectorAll("select[data-tag]"), function(sel){
+    sel.onchange = function(){
+      var r = +sel.dataset.tag; sel.disabled = true;
+      call("tag", { row: r, target: sel.value }).then(function(x){ sel.disabled = false; if(x.ok) row(r).target = sel.value; }).catch(function(){ sel.disabled = false; });
+    };
+  });
+  [].forEach.call($("sends").querySelectorAll("button[data-bl]"), function(b){
+    b.onclick = function(){
+      var x = row(+b.dataset.bl), d = typeof x.time === "number" ? new Date(x.time).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : x.time;
+      var t = x.who + ", " + d + ". " + x.what + " (from the Base 5 site).\n\n" + x.text + (x.target && tname[x.target] ? "\n\nTarget: " + tname[x.target] : "") + (x.reply ? "\n\nJay's reply: " + x.reply : "");
+      copy(t, b);
+    };
+  });
+  [].forEach.call($("sends").querySelectorAll("button[data-rp]"), function(b){
+    b.onclick = function(){ var box = $("sends").querySelector('[data-rbox="' + b.dataset.rp + '"]'); box.hidden = !box.hidden; if(!box.hidden) box.querySelector("textarea").focus(); };
+  });
+  [].forEach.call($("sends").querySelectorAll("button[data-rsend]"), function(b){
+    b.onclick = function(){
+      var r = +b.dataset.rsend, box = b.closest(".reply"), text = box.querySelector("textarea").value.trim(), out = box.querySelector("[data-rout]");
+      if(!text){ out.textContent = "Your reply goes in the box first."; return; }
+      b.disabled = true; out.textContent = "Sending...";
+      call("reply", { row: r, text: text }).then(function(x){
+        if(x.ok){ var s = row(r); s.reply = text; s.seen = true; draw(last); }
+        else { out.textContent = "That did not send: " + x.error; b.disabled = false; }
+      }).catch(function(){ out.textContent = "Could not reach the sheet."; b.disabled = false; });
     };
   });
 }
 
+/* ---------- waiting for you: wall posts, questions, ideas ---------- */
+var IDEA = ["Thinking about it", "Building it", "Done", "Not this time"];
+function drawWait(o){
+  var w = o.wall || [], q = o.questions || [], ideas = (o.ideas || []).filter(function(i){ return !i.hidden; }), h = "";
+  w.forEach(function(x){
+    h += '<div class="wait"><p><b>Question Wall post</b> <small>from ' + esc(x.who || "someone") + ' (never shown with a name)</small></p><p>' + esc(x.text) + '</p>' +
+      '<div class="row2"><button class="mini go" data-ap="Wall" data-r="' + x.row + '">Put it on the wall</button><button class="mini" data-no="Wall" data-r="' + x.row + '">Leave it off</button></div></div>';
+  });
+  q.forEach(function(x){
+    h += '<div class="wait"><p><b>A question ' + esc(x.who) + ' made</b> <small>' + esc(x.subject) + '</small></p><p>' + esc(x.text) + (x.answer ? '<br><small>Their answer: ' + esc(x.answer) + '</small>' : "") + '</p>' +
+      '<div class="row2"><button class="mini go" data-ap="Questions" data-r="' + x.row + '">Add it to the daily drops</button><button class="mini" data-no="Questions" data-r="' + x.row + '">Not this one</button></div></div>';
+  });
+  ideas.forEach(function(x){
+    h += '<div class="wait"><p><b>Idea for the site</b> <small>+' + x.plus + '</small></p><p>' + esc(x.idea) + '</p><div class="row2"><select data-idea="' + x.row + '">' +
+      IDEA.map(function(s){ return '<option' + (s === x.status ? " selected" : "") + '>' + s + '</option>'; }).join("") + '</select><button class="mini" data-hide="' + x.row + '">Hide from the board</button></div></div>';
+  });
+  $("waitBox").hidden = !h;
+  $("wait").innerHTML = h;
+  function after(b){ return function(x){ if(x.ok) load(); else { b.disabled = false; msg("The sheet said: " + x.error, true); } }; }
+  [].forEach.call($("wait").querySelectorAll("[data-ap],[data-no]"), function(b){
+    b.onclick = function(){ b.disabled = true; call("approve", { tab: b.dataset.ap || b.dataset.no, row: +b.dataset.r, on: !!b.dataset.ap }).then(after(b), function(){ b.disabled = false; }); };
+  });
+  [].forEach.call($("wait").querySelectorAll("select[data-idea]"), function(sel){
+    sel.onchange = function(){ sel.disabled = true; call("ideastatus", { row: +sel.dataset.idea, status: sel.value }).then(function(){ sel.disabled = false; }, function(){ sel.disabled = false; }); };
+  });
+  [].forEach.call($("wait").querySelectorAll("[data-hide]"), function(b){
+    b.onclick = function(){ b.disabled = true; call("ideastatus", { row: +b.dataset.hide, hide: true }).then(after(b), function(){ b.disabled = false; }); };
+  });
+}
+
+/* ---------- timeline ---------- */
+var whoOpts = Object.keys(HQ).map(function(w){ return '<option>' + w + '</option>'; }).join("");
+$("tlWho").innerHTML = whoOpts; $("pcWho").innerHTML = whoOpts;
+function weekRange(n){
+  var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) - 7 * n);
+  var e = new Date(d); e.setDate(e.getDate() + 7);
+  return { from: d, to: e };
+}
+var tlData = null;
+function showTimeline(){
+  var w = $("tlWho").value, wk = $("tlWeek").value, q = { who: w };
+  if(wk !== "all"){ var r = weekRange(+wk); q.from = r.from.toISOString(); q.to = r.to.toISOString(); }
+  $("tlMsg").textContent = "Fetching..."; $("tlMsg").className = "msg";
+  call("timeline", q).then(function(o){
+    if(!o.ok){ $("tlMsg").textContent = "The sheet said: " + o.error; $("tlMsg").className = "msg bad"; return; }
+    var label = $("tlWeek").options[$("tlWeek").selectedIndex].text;
+    if(wk !== "all") label += " (from " + weekRange(+wk).from.toLocaleDateString("en-GB", { day: "numeric", month: "long" }) + ")";
+    tlData = { who: w, label: label, events: o.events };
+    $("tlMsg").textContent = o.events.length ? "" : "Nothing logged for " + w + " in that time. (The timeline starts from the day the new sheet script went in.)";
+    $("tlCopy").hidden = $("tlDoc").hidden = !o.events.length;
+    var days = group(o.events);
+    $("tl").innerHTML = days.map(function(d){
+      return '<div class="tl-day">' + esc(d.day) + '</div><ul class="tl">' + d.items.map(function(e){ return '<li><em>' + esc(e.time) + '</em><b>' + esc(e.kind) + '</b><span>' + esc(e.detail) + '</span></li>'; }).join("") + '</ul>';
+    }).join("");
+  }).catch(function(){ $("tlMsg").textContent = "Could not reach the sheet."; $("tlMsg").className = "msg bad"; });
+}
+function group(events){
+  var out = [], at = {};
+  events.slice().sort(function(a, b){ return a.t - b.t; }).forEach(function(e){
+    var d = new Date(e.t), day = d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    if(!(day in at)){ at[day] = out.length; out.push({ day: day, items: [] }); }
+    out[at[day]].items.push({ time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }), kind: e.kind, detail: e.detail });
+  });
+  return out;
+}
+$("tlGo").onclick = showTimeline;
+$("tlCopy").onclick = function(){
+  if(!tlData) return;
+  var t = tlData.who + " on the Base 5 site: " + tlData.label + "\n";
+  group(tlData.events).forEach(function(d){ t += "\n" + d.day + "\n" + d.items.map(function(e){ return e.time + "  " + e.kind + ": " + e.detail; }).join("\n") + "\n"; });
+  copy(t, this);
+};
+$("tlDoc").onclick = function(){
+  if(!tlData || !window.B5Docx) return;
+  var p = [{ text: tlData.who + " on the Base 5 site", size: 18, bold: true, gap: 2 }, { text: tlData.label, size: 11, gap: 14 }];
+  group(tlData.events).forEach(function(d){
+    p.push({ text: d.day, size: 13, bold: true, gap: 4 });
+    d.items.forEach(function(e){ p.push({ text: e.time + "   " + e.kind + ": " + e.detail, gap: 2 }); });
+    p.push({ text: "", gap: 6 });
+  });
+  p.push({ text: "Made from the Base 5 shared memory on " + new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) + ".", size: 9 });
+  B5Docx.download(tlData.who + " timeline " + dayStr() + ".docx", p);
+};
+
+/* ---------- Friday postcard ---------- */
+function makePostcard(){
+  var w = $("pcWho").value;
+  $("pcMsg").textContent = "Making it..."; $("pcMsg").className = "msg";
+  call("postcard", { who: w }).then(function(o){
+    if(!o.ok){ $("pcMsg").textContent = "The sheet said: " + o.error; $("pcMsg").className = "msg bad"; return; }
+    $("pcMsg").textContent = "";
+    $("pcOut").hidden = false; $("pcText").value = o.text;
+    $("pcSend").disabled = !o.hasParent;
+    $("pcNote").textContent = o.hasParent ? "Goes to the parent email in the People tab." : "No parent email for " + w + " in the People tab yet (column D). Copy works.";
+  }).catch(function(){ $("pcMsg").textContent = "Could not reach the sheet."; $("pcMsg").className = "msg bad"; });
+}
+$("pcMake").onclick = makePostcard;
+$("pcCopy").onclick = function(){ copy($("pcText").value, this); };
+$("pcSend").onclick = function(){
+  var b = this, w = $("pcWho").value, t = $("pcText").value.trim();
+  if(!t) return;
+  if(!confirm("Send this postcard to " + w + "'s parent now?")) return;
+  b.disabled = true; $("pcMsg").textContent = "Sending...";
+  call("sendpostcard", { who: w, text: t }).then(function(o){
+    b.disabled = false;
+    $("pcMsg").textContent = o.ok ? "Sent. It is logged in the Postcards tab." : "That did not send: " + o.error;
+    $("pcMsg").className = "msg" + (o.ok ? "" : " bad");
+  }).catch(function(){ b.disabled = false; $("pcMsg").textContent = "Could not reach the sheet."; $("pcMsg").className = "msg bad"; });
+};
+
 if(URL && $("key").value) load();
 else if(URL) B5Lock.whoami().then(function(m){ if(m && m.staff && m.pass){ $("key").value = m.pass; load(); } });
-setInterval(function(){ if(last && document.visibilityState === "visible") load(); }, 60000);
+setInterval(function(){
+  var a = document.activeElement, typing = a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT" || a.tagName === "SELECT");
+  if(last && document.visibilityState === "visible" && !typing && !document.querySelector(".panel, .reply:not([hidden])")) load();
+}, 60000);
 })();
 </script>
 </body>

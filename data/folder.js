@@ -17,7 +17,8 @@
        files:      [ { id, title, href, note } ] }
 
    On this device, <prefix>folder.v1 keeps
-     { seen: {id: 1}, tried: {id: 1}, look: ISO time of the last look }
+     { seen: {id: ISO time first seen}, tried: {id: ISO time},
+       look: ISO time of the last look } (older saves used 1)
 
    Used by:
      <HQ>/folder.html   B5Folder.page(element)
@@ -239,7 +240,7 @@ function page(host){
     [].forEach.call(main.querySelectorAll(".fo-tick"), function(b){
       b.addEventListener("click", function(){
         var id = b.dataset.id, on = !st.tried[id];
-        if(on) st.tried[id] = 1; else delete st.tried[id];
+        if(on) st.tried[id] = new Date().toISOString(); else delete st.tried[id];
         save(st);
         b.setAttribute("aria-pressed", on ? "true" : "false");
         b.textContent = on ? "Had a go" : "Mark as had a go";
@@ -256,8 +257,9 @@ function page(host){
     }
 
     /* everything on show now counts as seen, ready for next time */
-    msgs.concat(o.activities, o.files).forEach(function(x){ st.seen[x.id] = 1; });
-    st.look = new Date().toISOString();
+    var nowIso = new Date().toISOString();
+    msgs.concat(o.activities, o.files).forEach(function(x){ if(!st.seen[x.id]) st.seen[x.id] = nowIso; });
+    st.look = nowIso;
     save(st);
   }
 }
