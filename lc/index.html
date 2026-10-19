@@ -774,7 +774,7 @@ function drawMood(){
     items.push('<a href="/lc/bonnie.html"><span><b>Sit with Bonnie</b><small>She snoozes, you do a little bit of anything. Ten minutes is plenty.</small></span><span>&rsaquo;</span></a>');
     if(rv.due.length){
       var it = rv.due[0], a = EGWCAT.act(it.id);
-      items.push('<a href="/lc/' + it.id + '.html#review"><span><b>A second look</b><small>' + (a ? a.title : "") + ', with a reminder under each one.</small></span><span>&rsaquo;</span></a>');
+      items.push('<a href="/lc/' + it.id + '.html#review"><span><b>A second look</b><small>' + (a ? a.title : (it.title || "")) + ', with a reminder under each one.</small></span><span>&rsaquo;</span></a>');
     }
     mc.innerHTML = '<div class="moodcard" style="--mc:#c9cdf0"><h3>Small things only.</h3><p>Low battery days count too. Pick one of these, or none.</p>' +
       '<div class="smalls">' + items.join("") + '</div><button class="everything" type="button" id="allBtn">Show me everything anyway</button></div>';
@@ -821,7 +821,7 @@ function drawSecondLook(){
   if(!rv.due.length){ host.innerHTML = ""; return; }
   var byAct = {}, order = [];
   rv.due.forEach(function(it){
-    if(!byAct[it.id]){ byAct[it.id] = { n: 0, topics: [] }; order.push(it.id); }
+    if(!byAct[it.id]){ byAct[it.id] = { n: 0, topics: [], title: it.title || "" }; order.push(it.id); }
     byAct[it.id].n++;
     if(byAct[it.id].topics.indexOf(it.topic) < 0) byAct[it.id].topics.push(it.topic);
   });
@@ -829,7 +829,7 @@ function drawSecondLook(){
     '<span class="kicker">Second look</span><h3>A few questions are back for another go</h3>' +
     '<p class="tiny" style="margin:0">They needed Show me or a second go last time. Trying them again a few days later is how they stick.</p>';
   order.forEach(function(id){
-    var a = EGWCAT.act(id), o = byAct[id];
+    var o = byAct[id], a = EGWCAT.act(id) || (o.title ? { title: o.title } : null);   /* folder activities are not in the catalogue */
     if(!a) return;
     html += '<a class="act" href="/lc/' + id + '.html#review"><span class="t"><b>' + a.title + '</b><span class="st">' + o.n + ' question' + (o.n === 1 ? "" : "s") + '</span></span>' +
       '<p style="margin-bottom:0">' + o.topics.slice(0, 3).join(", ") + '</p></a>';
@@ -993,7 +993,7 @@ $("map").addEventListener("toggle", function(){ if($("map").open) drawMap(); });
 })();
 </script>
 <script src="/data/catchjay.js?v=1"></script>
-<script src="/data/folder.js?v=4"></script>
+<script src="/data/folder.js?v=5"></script>
 <script src="/data/hqextras.js?v=4"></script>
 </body>
 </html>

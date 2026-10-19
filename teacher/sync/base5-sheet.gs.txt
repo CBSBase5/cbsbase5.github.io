@@ -15,7 +15,8 @@
                each student's code; signed in, pages open by themselves
      Settings  the staff passphrase, and whether sends are emailed to you
      Folders   type a row here and it shows in that student's folder
-               (tick Hide to take something out without deleting it)
+               (tick Hide to take something out without deleting it;
+               a Date still to come keeps it back until that day)
      Sends     everything students send to Jay, newest at the bottom
      Progress  the site writes this one; leave it alone
 
@@ -254,20 +255,47 @@ function seen_(key, row, seen){
 /* ---------- folders ---------- */
 function folder_(who){
   var v = sheet_("Folders").getDataRange().getValues(), tz = Session.getScriptTimeZone();
-  var out = { messages: [], activities: [], files: [] };
+  var out = { messages: [], activities: [], files: [], a2: false };
+  var today = Utilities.formatDate(new Date(), tz, "yyyy-MM-dd");
   for(var i = 1; i < v.length; i++){
     var r = v[i], w = String(r[0]).trim();
     if(w !== who && w !== "Everyone") continue;
-    if(r[6] === true || String(r[6]).toUpperCase() === "TRUE") continue;   /* ticked Hide */
     var type = String(r[1]).trim(), title = String(r[3]).trim(), text = String(r[4]).trim(), note = String(r[5]).trim();
+    if(/\/a2-[a-z0-9-]+\.html/.test(text)) out.a2 = true;      /* the Autumn 2 plan is in the sheet */
+    if(r[6] === true || String(r[6]).toUpperCase() === "TRUE") continue;   /* ticked Hide */
     if(!type || (!title && !text)) continue;
     var date = r[2] instanceof Date ? Utilities.formatDate(r[2], tz, "yyyy-MM-dd") : String(r[2] || "").trim();
+    if(date && date > today) continue;                            /* a date still to come: it waits until then */
     var id = "r" + digest_(w + "|" + type + "|" + title + "|" + text);
     if(type === "Message") out.messages.push({ id: id, date: date, text: text || title });
-    else if(type === "File") out.files.push({ id: id, title: title || "A file", href: text, note: note });
-    else out.activities.push({ id: id, title: title || "Something to try", href: text, note: note });
+    else if(type === "File") out.files.push({ id: id, title: title || "A file", href: text, note: note, date: date });
+    else out.activities.push({ id: id, title: title || "Something to try", href: text, note: note, date: date });
   }
   return { ok: true, who: who, data: out, now: Date.now() };
+}
+
+/* ---------- Autumn 2: put the term's drops into the Folders tab ----------
+   Staff only. rows: [{who, date, title, href, note}]. Adds each row that
+   is not there already (same student and same page), dated, so it shows
+   in the folder from that day. Safe to run again. */
+function a2plan_(r){
+  staff_(r.key);
+  var rows = Array.isArray(r.rows) ? r.rows : [];
+  var sh = sheet_("Folders"), v = sh.getDataRange().getValues(), have = {};
+  function base(t){ return String(t || "").trim().split("?")[0]; }
+  for(var i = 1; i < v.length; i++) have[String(v[i][0]).trim() + "|" + base(v[i][4])] = 1;
+  var add = [];
+  rows.forEach(function(x){
+    var who = String(x.who || "").toUpperCase(), href = String(x.href || "").trim();
+    if(WHO.indexOf(who) < 0 || !/^\/[a-z0-9\-\/]+\/a2-[a-z0-9-]+\.html(\?lv=[a-z]+)?$/.test(href)) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x.date || ""))) return;
+    if(have[who + "|" + base(href)]) return;
+    have[who + "|" + base(href)] = 1;
+    var p = String(x.date).split("-");
+    add.push([who, "Something to try", new Date(+p[0], +p[1] - 1, +p[2]), clean_(x.title, 120), href, clean_(x.note || "", 600), false]);
+  });
+  if(add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, 7).setValues(add);
+  return { ok: true, added: add.length, skipped: rows.length - add.length };
 }
 
 function digest_(s){
@@ -418,7 +446,7 @@ function events_(who, key, oldV, newV){
     if(!o || !o.mood || o.mood.w !== n.mood.w || o.mood.d !== n.mood.d) out.push(["Check-in", MOODS[n.mood.w] || n.mood.w]);
   }
   if(/^[a-z0-9\-]+\.v1$/.test(id) && n.summary && n.summary.chunks){
-    var act = nice_(id.replace(/\.v1$/, "")), os = (o && o.summary) || null, nd = n.summary.chunksDone || 0;
+    var act = n.summary.title ? String(n.summary.title) : nice_(id.replace(/\.v1$/, "")), os = (o && o.summary) || null, nd = n.summary.chunksDone || 0;
     if(!os) out.push(["Started", act]);
     if(nd > ((os && os.chunksDone) || 0)) out.push(["Chunk done", act + ": " + nd + " of " + n.summary.chunks]);
     if(n.summary.finished && !(os && os.finished)) out.push(["Finished", act]);
@@ -778,5 +806,6 @@ var READ3 = {
 };
 var WRITE3 = {
   reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
-  post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_
+  post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
+  a2plan: a2plan_
 };

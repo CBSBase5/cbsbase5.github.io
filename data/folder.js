@@ -74,8 +74,41 @@ var got = null;
 function fetchFolder(){
   if(got) return got;
   var url = window.B5Site && window.B5Site.syncUrl;
-  got = (url ? fromSheet(url) : Promise.resolve(null)).then(function(b){ return b || fromFile(); });
+  got = (url ? fromSheet(url) : Promise.resolve(null)).then(function(b){ return b || fromFile(); }).then(withDrops);
   return got;
+}
+/* ---------- Autumn 2: activities that arrive on their own day ----------
+   /data/a2/drops.js lists each student's activities with the day each one
+   lands. Once Jay has added them to the Folders tab, the sheet holds them
+   (and only shows each from its date); until then they come from the
+   file. Either way nothing shows before its day. */
+function todayStr(){
+  var d = new Date(), m = d.getMonth() + 1, dd = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd;
+}
+function loadDrops(){
+  if(window.B5DROPS) return Promise.resolve(window.B5DROPS);
+  return new Promise(function(res){
+    var s = document.createElement("script");
+    s.src = "/data/a2/drops.js?t=" + todayStr();
+    s.onload = function(){ res(window.B5DROPS || null); };
+    s.onerror = function(){ res(null); };
+    document.head.appendChild(s);
+  });
+}
+function withDrops(blob){
+  var o = blob ? contents(blob) : { messages: [], activities: [], files: [] };
+  var today = todayStr();
+  o.activities = o.activities.filter(function(a){ return !a.date || a.date <= today; });
+  var inSheet = o.a2 === true || o.activities.some(function(a){ return /\/a2-[a-z0-9-]+\.html/.test(String(a.href || "")); });
+  if(inSheet) return Promise.resolve(blob || { who: WHO, updated: "", data: o });
+  return loadDrops().then(function(d){
+    if(d && d.items) d.items.forEach(function(it){
+      if(String(it.who).toUpperCase() !== WHO.toUpperCase() || it.date > today || it.ready === false) return;
+      o.activities.push({ id: "a2:" + it.slug, title: it.title, href: it.href, note: it.note, date: it.date });
+    });
+    return { who: WHO, updated: blob ? blob.updated : "", data: o };
+  });
 }
 /* with the shared memory on, the folder comes from the Folders tab of Jay's sheet */
 function fromSheet(url){
@@ -126,6 +159,8 @@ css.textContent =
   ".fo-tick{font-family:var(--display,Arial,sans-serif);font-weight:700;font-size:.9rem;padding:8px 13px;border-radius:12px;border:2px dashed #8a8fa8;background:#fff;color:#3d4363;cursor:pointer}" +
   ".fo-tick[aria-pressed=true]{border-style:solid;border-color:#1f9d62;background:#e3f7ec;color:#11603a}" +
   ".fo-item.tried{opacity:.86}" +
+  ".fo-older summary{cursor:pointer;color:var(--moon);font-family:var(--display,Arial,sans-serif);font-weight:700;padding:6px 2px}" +
+  ".fo-olderlist{display:flex;flex-direction:column;gap:12px;margin-top:10px}" +
   ".fo-file{display:flex;gap:14px;align-items:center}" +
   ".fo-file svg{width:42px;height:48px;flex:none}" +
   ".fo-file .fo-kind{font-size:.8rem;color:#5b6180;margin:0 0 2px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}" +
@@ -213,15 +248,22 @@ function page(host){
     /* things to try */
     h += '<section class="fo-sec" aria-label="Things to try">' + tab("act", "Things to try", o.activities.length) + '<div class="fo-body">';
     if(!o.activities.length) h += '<p class="fo-empty">Nothing here yet.</p>';
-    o.activities.forEach(function(a){
+    var acts = o.activities.map(function(x, i){ return { x: x, i: i }; }).sort(function(a, b){
+      var da = a.x.date || "", db = b.x.date || "";
+      return da === db ? a.i - b.i : da < db ? 1 : -1;
+    }).map(function(m){ return m.x; });
+    var SHOW = 6, tucked = false;
+    acts.forEach(function(a, k){
       var href = safeHref(a.href), tried = !!st.tried[a.id];
-      h += '<article class="fo-item' + (tried ? " tried" : "") + '"><h3>' + esc(a.title) + isNew(a.id) + '</h3>' +
+      if(k === SHOW){ tucked = true; h += '<details class="fo-older"><summary>Earlier things to try (' + (acts.length - SHOW) + ')</summary><div class="fo-olderlist">'; }
+      h += '<article class="fo-item' + (tried ? " tried" : "") + '">' + (a.date ? '<span class="fo-when">Arrived ' + esc(nice(a.date)) + '</span>' : "") + '<h3>' + esc(a.title) + isNew(a.id) + '</h3>' +
         (a.note ? words(a.note) : "") +
         '<div class="fo-row">' +
           (href ? '<a class="fo-go" href="' + esc(href) + '"' + (isOut(href) ? ' target="_blank" rel="noopener"' : "") + '>Have a look</a>' : "") +
           '<button type="button" class="fo-tick" data-id="' + esc(a.id) + '" aria-pressed="' + tried + '">' + (tried ? "Had a go" : "Mark as had a go") + '</button>' +
         '</div></article>';
     });
+    if(tucked) h += '</div></details>';
     h += '</div></section>';
 
     /* files */

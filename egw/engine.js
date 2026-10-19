@@ -56,6 +56,147 @@ var HQNAME = HQ.hq || "GCSE HQ";
 var PREFIX = HQ.prefix;
 var cfg, steps, state, key;
 
+/* ---------- Autumn 2 activities (opt-in: a2:true in the config) ----------
+   The October 2026 design rules, switched on per activity:
+     levels:   [{id, name, line}] x3, student-chosen, switchable any time.
+               Any step can carry lv:{mild:{...}, spicy:{...}} overrides.
+               First open takes ?lv= from the folder link, then the last
+               level picked in this HQ, then the middle one.
+     themes:   {id:{name, w:{word: "..."}}} and themeFor:{LC:"id"}; every
+               [[word]] in a step is swapped for the theme's word.
+     sure:     an optional "how sure are you?" tap before Check; a
+               confident slip is flagged for a second look and for Jay.
+     slips:    on a step, names the likely slip for a wrong answer:
+               mc {optionIndex: "..."}, num [[value, "..."]] or
+               [[box, value, "..."]], text [[["words"], "..."]], any: "..."
+     explain:  true on a step offers "How did you get that?" after it lands.
+     routes:   on a learn step, [{name, html, fig}] tabs (read it, see it).
+     realWorld:{title, html, fig} on the finish card.
+     make:     {title, intro, fields:[{id,label,ph,max}], svg:fn(vals, who)}
+               something the student makes at the end to save or send.
+     .egg      any element with class "egg" and data-egg="..." in a
+               picture is a hidden surprise: tap it, never scored.
+   Read it to me stays LC only on these activities. */
+var A2LV = null, A2TH = null, A2RAW = null, sureNow = null;
+var A2LEVELS = [{ id: "mild", name: "Mild" }, { id: "medium", name: "Medium" }, { id: "spicy", name: "Spicy" }];
+function a2(){ return !!(cfg && cfg.a2); }
+function reads(){ return !!HQ.readAloud && (!a2() || HQ.who === "LC"); }
+function lvList(){ return (cfg.levels && cfg.levels.length) ? cfg.levels : A2LEVELS; }
+function lvName(id){ var l = lvList().filter(function(x){ return x.id === id; })[0]; return l ? l.name : id; }
+function tok(v){
+  if(typeof v === "string"){
+    var th = cfg.themes && A2TH && cfg.themes[A2TH];
+    return v.indexOf("[[") < 0 ? v : v.replace(/\[\[([a-zA-Z0-9_]+)\]\]/g, function(m, k){
+      if(th && th.w && th.w[k] != null) return th.w[k];
+      /* [[Place]] is [[place]] with a capital letter, for the start of a sentence */
+      var lo = k.charAt(0).toLowerCase() + k.slice(1);
+      if(th && th.w && th.w[lo] != null){ var t = String(th.w[lo]); return t.charAt(0).toUpperCase() + t.slice(1); }
+      return k;
+    });
+  }
+  if(Array.isArray(v)) return v.map(tok);
+  if(v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype){
+    var o = {}; Object.keys(v).forEach(function(k){ o[k] = tok(v[k]); }); return o;
+  }
+  return v;
+}
+function resolveStep(s){
+  var o = {};
+  Object.keys(s).forEach(function(k){ if(k !== "lv") o[k] = s[k]; });
+  if(s.lv && s.lv[A2LV]) Object.keys(s.lv[A2LV]).forEach(function(k){ if(k !== "topic") o[k] = s.lv[A2LV][k]; });
+  var out = {};
+  Object.keys(o).forEach(function(k){ out[k] = typeof o[k] === "function" ? o[k] : tok(o[k]); });
+  return out;
+}
+function a2Pick(){
+  var ids = lvList().map(function(x){ return x.id; });
+  var q = (location.search.match(/[?&]lv=([a-z]+)/) || [])[1];
+  var hqLast = null; try{ hqLast = localStorage.getItem(PREFIX + "a2level.v1"); }catch(e){}
+  A2LV = [state.level, q, hqLast, ids[1], ids[0]].filter(function(x){ return x && ids.indexOf(x) >= 0; })[0];
+  var tids = cfg.themes ? Object.keys(cfg.themes) : [];
+  A2TH = [state.theme, (cfg.themeFor || {})[HQ.who], tids[0]].filter(function(x){ return x && tids.indexOf(x) >= 0; })[0] || null;
+  state.level = A2LV; if(A2TH) state.theme = A2TH;
+}
+function a2Resolve(){ steps = A2RAW.map(resolveStep); }
+function a2Set(level, theme){
+  if(level){ A2LV = level; state.level = level; try{ localStorage.setItem(PREFIX + "a2level.v1", level); }catch(e){} }
+  if(theme){ A2TH = theme; state.theme = theme; }
+  a2Resolve(); makeChunks(); save();
+  a2DrawBars();
+  if(!$("qCard").classList.contains("hidden")) go(state.pos);
+  else if(!$("startCard").classList.contains("hidden")) showStart();
+}
+function a2BarHtml(where){
+  var h1 = '<div class="a2bar a2bar-' + where + '" role="group" aria-label="Level"><span class="a2lab">' + (where === "start" ? "Pick your level" : "Level") + '</span>';
+  lvList().forEach(function(l){ h1 += '<button type="button" class="a2chip" data-lv="' + l.id + '" aria-pressed="false">' + l.name + '</button>'; });
+  h1 += '</div>';
+  if(cfg.themes && Object.keys(cfg.themes).length > 1){
+    h1 += '<div class="a2bar a2bar-' + where + '" role="group" aria-label="Theme"><span class="a2lab">' + (where === "start" ? "Dress it up as" : "Theme") + '</span>';
+    Object.keys(cfg.themes).forEach(function(t){ h1 += '<button type="button" class="a2chip a2th" data-th="' + t + '" aria-pressed="false">' + cfg.themes[t].name + '</button>'; });
+    h1 += '</div>';
+  }
+  return h1;
+}
+function a2DrawBars(){
+  [].forEach.call(document.querySelectorAll(".a2chip[data-lv]"), function(b){ b.setAttribute("aria-pressed", b.dataset.lv === A2LV ? "true" : "false"); });
+  [].forEach.call(document.querySelectorAll(".a2chip[data-th]"), function(b){ b.setAttribute("aria-pressed", b.dataset.th === A2TH ? "true" : "false"); });
+  var ln = $("a2LvLine"), l = lvList().filter(function(x){ return x.id === A2LV; })[0];
+  if(ln) ln.textContent = l && l.line ? l.line : "Switch whenever you like. Nothing is lost.";
+}
+function a2Wire(){
+  document.addEventListener("click", function(e){
+    var b = e.target.closest && e.target.closest(".a2chip");
+    if(b){ if(b.dataset.lv) a2Set(b.dataset.lv, null); else if(b.dataset.th) a2Set(null, b.dataset.th); return; }
+    var egg = e.target.closest && e.target.closest("#egwApp .egg");
+    if(egg) a2Egg(egg);
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var egg = e.target.closest && e.target.closest("#egwApp .egg");
+    if(egg){ e.preventDefault(); a2Egg(egg); }
+  });
+}
+function a2Egg(el){
+  var msg = el.getAttribute("data-egg") || "You found something.";
+  state.eggs = state.eggs || {};
+  var k = msg.slice(0, 40);
+  var first = !state.eggs[k];
+  state.eggs[k] = new Date().toISOString(); save();
+  var t = $("a2Toast");
+  if(!t){ t = h("div", "a2toast"); t.id = "a2Toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.innerHTML = '<b>' + (first ? "Found one." : "Still here.") + '</b> ' + msg;
+  t.classList.add("on");
+  clearTimeout(a2Egg.tm); a2Egg.tm = setTimeout(function(){ t.classList.remove("on"); }, 4200);
+  confetti(el, 12);
+}
+/* the likely slip behind a wrong answer, if the step names one */
+function slipFor(s, v){
+  var sl = s.slips;
+  if(!sl) return "";
+  try{
+    if(s.type === "mc" && sl[v] != null && !Array.isArray(sl)) return sl[v];
+    if(s.type === "num" && Array.isArray(sl) && v && v.v){
+      for(var j = 0; j < sl.length; j++){
+        var r = sl[j], box = r.length === 3 ? r[0] : -1, val = r.length === 3 ? r[1] : r[0], say = r[r.length - 1];
+        var vals = [].concat(val);
+        var check = box >= 0 ? [v.v[box]] : v.v;
+        for(var c = 0; c < check.length; c++){
+          var got = parseNum(check[c]);
+          for(var q = 0; q < vals.length; q++) if(!isNaN(got) && Math.abs(got - vals[q]) < 1e-9 + Math.abs(vals[q]) * 1e-9) return say;
+        }
+      }
+    }
+    if(s.type === "text" && Array.isArray(sl)){
+      var t = " " + norm(v) + " ";
+      for(var i = 0; i < sl.length; i++){
+        var ws = [].concat(sl[i][0]);
+        for(var w = 0; w < ws.length; w++) if(t.indexOf(norm(ws[w])) >= 0) return sl[i][1];
+      }
+    }
+  }catch(e){}
+  return (!Array.isArray(sl) && sl.any) || "";
+}
+
 /* ---------- small helpers ---------- */
 function $(id){ return document.getElementById(id); }
 function h(tag, cls, html){
@@ -205,7 +346,17 @@ function summary(){
            sparks: sparks, best: state.best || 0,
            chunkStates: ch, chunkNames: chunks.map(function(c){ return stripTags(c.topic); }),
            chunks: ch.length, chunksDone: ch.filter(function(x){ return x === "done"; }).length,
-           finished: !!state.finished, title: cfg.title };
+           finished: !!state.finished, title: cfg.title,
+           level: a2() ? A2LV : undefined, flagged: a2() ? flaggedList() : undefined };
+}
+/* questions answered with "certain" that slipped on the first go */
+function flaggedList(){
+  var out = [];
+  steps.forEach(function(s, i){
+    var a = state.answers[i];
+    if(a && a.flag) out.push(stripTags(s.q || s.title || "").slice(0, 80));
+  });
+  return out;
 }
 
 /* ---------- chunks ----------
@@ -265,11 +416,14 @@ function build(){
         :
           '<h3>Learn a bit, try a bit</h3>' +
           '<p class="lead">' + cfg.blurb + '</p>' +
+          (cfg.startFig ? '<div class="fig a2startfig">' + tok(cfg.startFig) + '</div>' : '') +
           '<ul class="howlist">' +
-            '<li><b>' + chunks.length + ' short chunks.</b> Any order, any day. It saves itself.</li>' +
+            '<li><b>' + chunks.length + ' short chunks' + (a2() ? ', about five minutes each' : '') + '.</b> Any order, any day. It saves itself.</li>' +
             '<li><b>Two goes</b> at each question, and <b>Show me</b> whenever you want it.</li>' +
-            '<li><span class="stretch">Stretch</span> questions are optional extras.</li>' +
+            (a2() ? '<li>Every activity ends with something you make, and there may be a surprise or two hidden on the way.</li>' :
+            '<li><span class="stretch">Stretch</span> questions are optional extras.</li>') +
           '</ul>') +
+        (a2() ? '<div class="a2set">' + a2BarHtml("start") + '<p class="tiny" id="a2LvLine"></p></div>' : '') +
         '<div class="qnav" style="margin-top:4px">' +
           '<button class="btn" id="beginBtn">Begin with chunk 1</button>' +
           '<button class="btn btn-quiet hidden" id="resumeBtn">Carry on where I left off</button>' +
@@ -283,6 +437,7 @@ function build(){
           '<span class="chunklabel" id="chunkLabel"></span>' +
           '<span class="chips"><span class="chipstat hidden" id="lockChip"></span><span class="chipstat hidden" id="clockChip"></span><span class="chipstat" id="streakChip"></span><span class="chipstat" id="sparkChip"></span></span>' +
         '</div>' +
+        (a2() ? '<details class="a2qset"><summary>Level and theme</summary>' + a2BarHtml("q") + '</details>' : '') +
         '<div class="dots" id="dots"></div>' +
         '<div class="qprogress"><span id="progFill"></span></div>' +
         '<div class="qtop" style="margin-bottom:6px"><span class="kicker" id="qTopic" style="margin:0"></span><span class="qcount" id="qCount"></span></div>' +
@@ -316,6 +471,8 @@ function build(){
         '<p class="lead" id="scoreNote"></p>' +
         '<div class="tally" id="tally"></div>' +
         '<div class="topicbar" id="topicBars"></div>' +
+        '<div id="a2Real"></div>' +
+        '<div id="a2Make"></div>' +
         '<details class="review"><summary>See each question</summary><div id="reviewList"></div></details>' +
         '<div class="qnav" style="margin-top:18px">' +
           '<button class="btn btn-quiet" id="againBtn">Back to the chunks</button>' +
@@ -611,9 +768,21 @@ function go(i){
   fb.className = "fb hidden"; fb.innerHTML = "";
 
   cur = null;
+  sureNow = null;
   var renderer = R[s.type];
   renderer(s, body, i);
-  if(HQ.readAloud) addReader(body, body);
+  if(reads()) addReader(body, body);
+  if(a2() && cfg.sure && scored(s) && s.type !== "widget" && !resolved(i) && !(state.answers[i] && state.answers[i].tries)){
+    var sr = h("div", "a2sure");
+    sr.innerHTML = '<span class="a2lab">How sure are you? <small>(only if you like)</small></span>' +
+      '<button type="button" data-s="guess">Guessing</button><button type="button" data-s="think">Think so</button><button type="button" data-s="certain">Certain</button>';
+    sr.onclick = function(e){
+      var b = e.target.closest("button"); if(!b) return;
+      sureNow = sureNow === b.dataset.s ? null : b.dataset.s;
+      [].forEach.call(sr.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x.dataset.s === sureNow ? "true" : "false"); });
+    };
+    body.appendChild(sr);
+  }
   if(cfg.review && s._remind){
     var rem = h("details", "working remind");
     rem.innerHTML = '<summary>Want a reminder? Tap for the idea behind this one.</summary>' +
@@ -624,12 +793,30 @@ function go(i){
 
   var a = state.answers[i];
   setButtons(s, i);
+  /* an answer given at another level belongs to that level's version */
+  var otherLv = a2() && a && a.lv && a.lv !== A2LV && A2RAW[i] && A2RAW[i].lv && (A2RAW[i].lv[a.lv] || A2RAW[i].lv[A2LV]);
   if(a && resolved(i) && s.type !== "learn" && s.type !== "write" && s.type !== "widget"){
     showFeedback(s, a.status, true);
-    if(cur && cur.restore) cur.restore(a.value, true);
-  }else if(a && a.value !== undefined && cur && cur.restore){
+    if(cur && cur.restore && !otherLv) cur.restore(a.value, true);
+    if(otherLv) $("qFb").insertAdjacentHTML("afterbegin", '<p class="tiny a2was">You answered this one on ' + lvName(a.lv) + '. This is the ' + lvName(A2LV) + ' version.</p>');
+  }else if(a && a.value !== undefined && cur && cur.restore && !otherLv){
     cur.restore(a.value, false);
   }
+  if(a2() && a && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
+}
+/* "How did you get that?" now and then, never required */
+function a2Explain(s, i){
+  if($("a2Why")) return;
+  var a = state.answers[i];
+  var d = h("details", "a2why");
+  d.id = "a2Why";
+  if(a.why) d.open = true;
+  d.innerHTML = '<summary>How did you get that? <small>Only if you like. Jay sees it if you send.</small></summary>' +
+    '<textarea rows="2" maxlength="400" placeholder="I knew because..."></textarea>';
+  var ta = d.querySelector("textarea");
+  ta.value = a.why || "";
+  ta.oninput = function(){ a.why = ta.value.slice(0, 400); save(); };
+  $("qFb").appendChild(d);
 }
 
 /* ---------- read it to me (only in an HQ that asks for it) ----------
@@ -714,6 +901,23 @@ var R = {};
 var revealPending = false;
 var BIT_WORDS = 60;
 R.learn = function(s, body, i){
+  if(s.routes && s.routes.length){
+    /* two or more ways into the same idea: read it, see it, try it */
+    body.innerHTML = '<h3 class="learnh">' + s.title + '</h3>' +
+      '<div class="a2routes" role="tablist">' + s.routes.map(function(r, k){ return '<button type="button" role="tab" data-k="' + k + '" aria-selected="' + (k === 0) + '">' + r.name + '</button>'; }).join("") + '</div>' +
+      '<div class="a2route"></div>';
+    var host = body.querySelector(".a2route");
+    var show = function(k){
+      var r = s.routes[k];
+      host.innerHTML = (r.fig ? '<div class="fig">' + r.fig + '</div>' : "") + '<div class="learnbody">' + (r.html || "") + '</div>';
+      [].forEach.call(body.querySelectorAll(".a2routes button"), function(b){ b.setAttribute("aria-selected", +b.dataset.k === k ? "true" : "false"); });
+    };
+    body.querySelector(".a2routes").onclick = function(e){ var b = e.target.closest("button"); if(b) show(+b.dataset.k); };
+    show(0);
+    state.answers[i] = { status: "done" }; save();
+    revealPending = false;
+    return;
+  }
   body.innerHTML = '<h3 class="learnh">' + s.title + '</h3>' +
     (s.fig ? '<div class="fig">' + s.fig + '</div>' : "") +
     '<div class="learnbody">' + s.html + '</div>';
@@ -1186,6 +1390,8 @@ R.widget = function(s, body, i){
   var api = {
     data: state.widgets[i],
     save: save,
+    level: A2LV, theme: A2TH, who: HQ.who,
+    tok: tok,
     done: function(result){
       var prev = state.answers[i];
       var first = !(prev && resolved(i));
@@ -1211,11 +1417,17 @@ function check(giveUp){
     flash(cur.emptyMsg || "Pop an answer in first, or tap Skip for now.");
     return;
   }
+  var firstGo = !a.tries && a.status !== "trying";
+  if(a2() && firstGo && sureNow && !giveUp){ a.sure = sureNow; delete a.flag; }
+  if(a2()) a.lv = A2LV;
+  var slip = "";
   if(giveUp){
     a.status = "shown";
   }else if(cur.right()){
     a.status = a.tries ? "right2" : "right1";
   }else{
+    slip = a2() ? slipFor(s, cur.get()) : "";
+    if(a2() && firstGo && a.sure === "certain") a.flag = true;
     a.tries = (a.tries || 0) + 1;
     if(a.tries >= 2) a.status = "shown";
     else a.status = "trying";
@@ -1228,7 +1440,10 @@ function check(giveUp){
     cur.mark(false);
     var fb = $("qFb");
     fb.className = "fb nudge";
-    fb.innerHTML = '<b>' + pick(NUDGE) + '</b> ' + (s.hint || "Have another look at the question, then try again.") +
+    fb.innerHTML = '<b>' + pick(NUDGE) + '</b> ' +
+      (slip ? '<span class="a2slip">' + slip + '</span> ' + (s.hint ? '<span class="tiny">' + s.hint + '</span>' : '') :
+        (s.hint || "Have another look at the question, then try again.")) +
+      (a.flag ? '<br><span class="tiny">You were sure about that one, so it will come back for a second look. Being sure and slipping is how brains learn fastest.</span>' : '') +
       '<br><span class="tiny">Change your answer and press Check again, or tap Show me.</span>';
     setButtons(s, i);
     return;
@@ -1237,6 +1452,8 @@ function check(giveUp){
   if(cfg.review) reviewResult(s._orig, a.status); else noteForReview(i, a.status);
   bump(a.status, $("checkBtn"));
   showFeedback(s, a.status, false);
+  if(slip && a.status === "shown") $("qFb").insertAdjacentHTML("beforeend", '<p class="tiny a2slip">The likely slip: ' + slip + '</p>');
+  if(a2() && (a.status === "right1" || a.status === "right2") && s.explain) a2Explain(s, i);
   setButtons(s, i);
   drawChips();
 }
@@ -1265,7 +1482,7 @@ function showFeedback(s, status, quiet){
   var plus = quiet ? "" : '<span class="plus">+' + (SPARK[status] || 0) + ' sparks</span>';
   var streak = !quiet && status === "right1" && state.streak >= 3 ? ' <span class="tiny">That is ' + state.streak + ' first go in a row.</span>' : "";
   fb.innerHTML = plus + head + streak + (s.why ? '<div class="why">' + s.why + '</div>' : "") + extra;
-  if(HQ.readAloud) addReader(fb, fb);
+  if(reads()) addReader(fb, fb);
 }
 
 function flash(msg){
@@ -1310,7 +1527,9 @@ function finish(){
   else if(pct >= 0.85) note = "That is strong. The stretch questions are where the higher grades live, so those are worth another look if any slipped.";
   else if(pct >= 0.6) note = "Solid. The sections below with shorter bars are the ones worth a second visit on another day.";
   else note = "Every Show me you used is something you now know more about than before. Coming back to this in a few days is exactly how revision sticks.";
+  if(a2() && marked && pct >= 0.85) note = "That is strong. If that felt comfortable, the next level up is there whenever you fancy it.";
   $("scoreNote").textContent = note;
+  if(a2()) a2Finish();
 
   $("tally").innerHTML =
     '<div class="tbox big"><b>' + sm.sparks + '</b><span>sparks</span></div>' +
@@ -1357,6 +1576,92 @@ function finish(){
   confetti($("scoreLine"), 30);
 }
 
+/* ---------- Autumn 2 finish: where you'd use this, and something to make ---------- */
+function a2Finish(){
+  var mq = document.querySelector("#makeQ summary");
+  if(mq) mq.textContent = "Teach it back? Write your own question for someone else. Only if you like.";
+  var rw = cfg.realWorld, rh = $("a2Real");
+  rh.innerHTML = rw ? '<div class="a2real"><span class="kicker">Where you would use this</span><h4>' + tok(rw.title || "") + '</h4>' +
+    (rw.fig ? '<div class="fig">' + tok(rw.fig) + '</div>' : "") + '<div class="learnbody">' + tok(rw.html || "") + '</div></div>' : "";
+  var mk = cfg.make, host = $("a2Make");
+  if(!mk){ host.innerHTML = ""; return; }
+  state.make = state.make || {};
+  var who = { who: HQ.who, level: A2LV, theme: A2TH, themeName: cfg.themes && A2TH ? cfg.themes[A2TH].name : "" };
+  var fields = (mk.fields || []).map(tok);
+  host.innerHTML = '<div class="a2make"><span class="kicker">Make something</span><h4>' + tok(mk.title || "Make a card") + '</h4>' +
+    (mk.intro ? '<p>' + tok(mk.intro) + '</p>' : "") +
+    '<div class="a2fields">' + fields.map(function(f){
+      var big = (f.max || 60) > 80;
+      return '<label><span>' + f.label + '</span>' + (big ? '<textarea rows="2" data-f="' + f.id + '" maxlength="' + (f.max || 200) + '" placeholder="' + (f.ph || "") + '"></textarea>' :
+        '<input type="text" data-f="' + f.id + '" maxlength="' + (f.max || 60) + '" placeholder="' + (f.ph || "") + '">') + '</label>';
+    }).join("") + '</div>' +
+    '<div class="a2preview" aria-live="polite"></div>' +
+    '<div class="qnav"><button type="button" class="btn" id="a2Save">Save it as a picture</button>' +
+    '<button type="button" class="btn btn-quiet" id="a2Fill">Fill the gaps for me</button></div>' +
+    '<p class="tiny">Put it on the wall, keep it, or send it to Jay. Pictures go to Jay by email: save it, then attach it.</p>' +
+    '<div id="a2MakeSend"></div></div>';
+  var prev = host.querySelector(".a2preview");
+  var ins = [].slice.call(host.querySelectorAll("[data-f]"));
+  function vals(){ var o = {}; fields.forEach(function(f){ o[f.id] = (state.make[f.id] || "").trim(); }); return o; }
+  function draw(){
+    var v = vals(), shown = {};
+    fields.forEach(function(f){ shown[f.id] = v[f.id] || f.ph || ""; });
+    try{ prev.innerHTML = mk.svg(shown, who); }catch(e){ prev.innerHTML = ""; }
+  }
+  ins.forEach(function(el){
+    el.value = state.make[el.dataset.f] || "";
+    el.oninput = function(){ state.make[el.dataset.f] = el.value; save(); draw(); };
+  });
+  $("a2Fill").onclick = function(){
+    fields.forEach(function(f){ if(!(state.make[f.id] || "").trim() && f.ph) state.make[f.id] = f.ph; });
+    ins.forEach(function(el){ el.value = state.make[el.dataset.f] || ""; });
+    save(); draw();
+  };
+  $("a2Save").onclick = function(){
+    var svg = prev.querySelector("svg");
+    if(svg) svgToPng(svg.outerHTML, HQ.who.toLowerCase() + "-" + cfg.id + ".png");
+  };
+  draw();
+  if(window.Base5Send){
+    Base5Send.mount($("a2MakeSend"), {
+      tool: HQNAME + ": " + cfg.title + ", what I made",
+      filename: HQ.who.toLowerCase() + "-" + cfg.id + "-made",
+      getText: function(){
+        var v = vals();
+        return cfg.title + ": " + (mk.title ? stripTags(tok(mk.title)) : "what I made") + "\n\n" +
+          fields.map(function(f){ return stripTags(f.label) + ": " + (v[f.id] || "(left empty)"); }).join("\n");
+      }
+    });
+  }
+}
+function svgToPng(svg, name){
+  try{
+    var m = svg.match(/viewBox="\s*([-\d.]+)[\s,]+([-\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+    var W = m ? +m[3] : 800, H = m ? +m[4] : 600, k = 2;
+    if(!/xmlns=/.test(svg)) svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+    svg = svg.replace(/<svg([^>]*)>/, function(t, at){
+      at = at.replace(/\s(width|height)="[^"]*"/g, "");
+      return "<svg" + at + ' width="' + W * k + '" height="' + H * k + '">';
+    });
+    var img = new Image();
+    img.onload = function(){
+      var c = document.createElement("canvas");
+      c.width = W * k; c.height = H * k;
+      var x = c.getContext("2d");
+      x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function(b){
+        if(!b) return;
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(b); a.download = name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      }, "image/png");
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }catch(e){}
+}
+
 function finishReview(){
   var g1 = 0, g2 = 0, sh = 0, sk = 0;
   steps.forEach(function(s, i){
@@ -1389,6 +1694,10 @@ function reportText(){
   lines.push(cfg.subject + ": " + (cfg.review ? "Second look, " : "") + cfg.title);
   lines.push("First go: " + sm.got1 + ", second go: " + sm.got2 + ", learnt from Show me: " + sm.shown + ", skipped: " + sm.skipped + " (of " + sm.marked + " marked questions)");
   lines.push("Sparks: " + sm.sparks + ", best streak: " + sm.best + ", chunks done: " + sm.chunksDone + " of " + sm.chunks);
+  if(a2()){
+    lines.push("Level: " + lvName(A2LV) + (A2TH && cfg.themes ? ", theme: " + cfg.themes[A2TH].name : ""));
+    if(sm.flagged && sm.flagged.length) lines.push("Sure, but slipped (worth a chat): " + sm.flagged.length);
+  }
   lines.push("");
   var n = 0, lastTopic = "";
   steps.forEach(function(s, i){
@@ -1398,7 +1707,8 @@ function reportText(){
     var a = state.answers[i];
     var st = a ? a.status : "not tried";
     var lab = { right1: "first go", right2: "second go", shown: "Show me", done: "done", skipped: "skipped", trying: "started" }[st] || "not tried";
-    lines.push("Q" + n + (s.stretch ? " (stretch)" : "") + ": " + lab + "  |  " + stripTags(s.q || s.title || "").slice(0, 90));
+    lines.push("Q" + n + (s.stretch ? " (stretch)" : "") + ": " + lab + (a && a.flag ? " (was certain)" : "") + "  |  " + stripTags(s.q || s.title || "").slice(0, 90));
+    if(a && a.why) lines.push("   how I got it: " + String(a.why).replace(/\s+/g, " "));
     if(s.type === "write" && a && a.value && a.value.text){
       lines.push("");
       lines.push(a.value.text);
@@ -1436,6 +1746,16 @@ function buildReviewStart(){
 /* ---------- start ---------- */
 function run(c){
   var reviewMode = (location.hash || "") === "#review";
+  if(c.a2){
+    /* level and theme come from the activity's own save, even in a second look */
+    cfg = c;
+    var mainSave = null;
+    try{ mainSave = JSON.parse(localStorage.getItem(PREFIX + c.id + ".v1") || "null"); }catch(e){}
+    state = mainSave && mainSave.answers ? mainSave : fresh();
+    a2Pick();
+    A2RAW = c.steps;
+    document.documentElement.classList.add("a2");
+  }
   if(reviewMode){
     var d = loadReview(), today = addDays(0), list = [];
     Object.keys(d.items).forEach(function(k){
@@ -1445,24 +1765,29 @@ function run(c){
     list.sort(function(a, b){ return a.i - b.i; });
     cfg = {}; Object.keys(c).forEach(function(k){ cfg[k] = c[k]; });
     cfg.review = true;
+    var lvSave = A2LV, thSave = A2TH;
+    var srcSteps = c.a2 ? c.steps.map(resolveStep) : c.steps;
     steps = list.map(function(it){
-      var copy = {}, src = c.steps[it.i];
+      var copy = {}, src = srcSteps[it.i];
       Object.keys(src).forEach(function(k){ copy[k] = src[k]; });
       copy._orig = it.i;
-      copy._remind = findLearn(c.steps, it.i);
+      copy._remind = findLearn(srcSteps, it.i);
       return copy;
     });
     key = PREFIX + c.id + ".review.v1";
     state = fresh();
+    if(c.a2){ A2RAW = steps.map(function(s){ return s; }); state.level = lvSave; state.theme = thSave; }
   }else{
     cfg = c; steps = c.steps; key = PREFIX + c.id + ".v1";
     state = load() || fresh();
+    if(c.a2){ a2Pick(); a2Resolve(); }
   }
   if(!state.widgets) state.widgets = {};
   try{ localStorage.setItem("base5.who.v1", HQ.who); }catch(e){}
   document.title = c.title + " - " + HQ.who + " " + HQNAME;
   makeChunks();
   build();
+  if(c.a2){ a2Wire(); a2DrawBars(); }
   loadProgress();
   if(cfg.review) buildReviewStart();
   showStart();

@@ -105,6 +105,8 @@ def main():
         path = os.path.join(LC, name)
         if not os.path.isfile(path) or name in OWN:
             continue
+        if name.startswith("a2-"):
+            continue   # Autumn 2 activities are built per student by data/a2/_build/build_a2.py
         if not (name.endswith(".html") or name == "catalogue.js"):
             continue
         s = open(path).read()
