@@ -42,6 +42,8 @@
 .dr b{font-weight:700}
 .dr.eng{border-left-color:#ff5d5d}.dr.mat{border-left-color:#f2b705}.dr.oth{border-left-color:#19c39a}
 .dr.notyet{opacity:.55;border-left-style:dashed}
+.dr i{font-style:normal;float:right;font-size:.72rem;font-weight:700;padding:0 6px;border-radius:99px;background:var(--white);border:1px solid var(--line)}
+.dr i.fin{background:#dff3e6;border-color:#1e7a46;color:#14532f}
 .acts{width:100%;border-collapse:collapse;font-size:.9rem}
 .actswrap{overflow-x:auto}
 .acts th,.acts td{border-bottom:1px dashed rgba(10,47,56,.2);padding:8px;text-align:left;vertical-align:top}
@@ -86,7 +88,7 @@
     <p class="msg" id="msg" aria-live="polite"></p>
   </div>
 
-  <div class="weektheme"><h2>Day by day</h2><span>Tap a student to see just theirs. Faded ones are still being written.</span></div>
+  <div class="weektheme"><h2>Day by day</h2><span>Tap a student to see just theirs. Once the page has your passphrase, each drop shows started (chunks done) or done. Faded ones are still being written. <a href="/practice/?all=1" target="_blank" rel="noopener">Preview the library with everything in it</a>.</span></div>
   <div class="chipsrow" id="whos"></div>
   <div class="key"><span><i style="background:#ff5d5d"></i>English</span><span><i style="background:#f2b705"></i>Maths</span><span><i style="background:#19c39a"></i>Shared pillars</span></div>
   <div class="calwrap"><div class="cal" id="cal"></div></div>
@@ -111,7 +113,25 @@ function ds(d){ var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear
 function cls(sub){ return sub === "English" ? "eng" : sub === "Maths" ? "mat" : "oth"; }
 if(!D){ document.querySelector(".wrap").insertAdjacentHTML("afterbegin", '<p class="msg bad">The drops file did not load.</p>'); return; }
 try{ $("key").value = localStorage.getItem(KEY) || ""; }catch(e){}
-if(window.B5Lock && !$("key").value) B5Lock.whoami().then(function(m){ if(m && m.staff && m.pass) $("key").value = m.pass; }).catch(function(){});
+/* how each student is getting on, from the shared memory: started or done */
+var PFX = { EGW: "b5.egw.", LP: "b5.lp.", LW: "b5.lw.", LC: "b5.lc.", HK: "b5.hk.", JT: "b5.jthq." }, PROG = {};
+function loadProgress(){
+  var k = $("key").value.trim();
+  if(!k || !window.B5Site || !B5Site.syncUrl) return;
+  B5Site.call("overview", { key: k }).then(function(o){
+    if(!o || !o.ok) return;
+    WHO.forEach(function(w){
+      var st = (o.students || {})[w]; if(!st) return;
+      Object.keys(st.items || {}).forEach(function(key){
+        var m = key.indexOf(PFX[w] + "a2-") === 0 && /a2-([a-z0-9-]+)\.v1$/.exec(key); if(!m) return;
+        try{ var v = JSON.parse(st.items[key].v), sm = v.summary || {}; PROG[w + "|" + m[1]] = sm.finished ? "done" : (sm.chunksDone ? sm.chunksDone + "/" + sm.chunks : "started"); }catch(e){}
+      });
+    });
+    drawCal();
+  }).catch(function(){});
+}
+if($("key").value) loadProgress();
+else if(window.B5Lock) B5Lock.whoami().then(function(m){ if(m && m.staff && m.pass){ $("key").value = m.pass; loadProgress(); } }).catch(function(){});
 
 var items = D.items, slugs = {};
 items.forEach(function(it){ (slugs[it.slug] = slugs[it.slug] || []).push(it); });
@@ -135,7 +155,7 @@ function drawCal(){
     var off = key < D.first || key > D.last;
     h += '<div class="day' + (wd === 2 ? " trip" : "") + (key === today ? " today" : "") + (off && !list.length ? " off" : "") + '"><p class="d"><span>' +
       d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + '</span>' + (wd === 2 ? "<span>trip</span>" : "") + '</p>' +
-      list.map(function(i){ return '<a class="dr ' + cls(i.subject) + (i.ready ? "" : " notyet") + '" href="' + esc(i.href) + '" target="_blank" rel="noopener"><b>' + i.who + '</b> ' + esc(i.title) + '</a>'; }).join("") + '</div>';
+      list.map(function(i){ var pr = PROG[i.who + "|" + i.slug]; return '<a class="dr ' + cls(i.subject) + (i.ready ? "" : " notyet") + '" href="' + esc(i.href) + '" target="_blank" rel="noopener">' + (pr ? '<i class="' + (pr === "done" ? "fin" : "") + '">' + (pr === "done" ? "done" : pr) + '</i>' : "") + '<b>' + i.who + '</b> ' + esc(i.title) + '</a>'; }).join("") + '</div>';
   }
   $("cal").innerHTML = h;
 }

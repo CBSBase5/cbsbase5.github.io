@@ -39,6 +39,25 @@ HQS = {
 }
 
 
+# shelf, group, main site subject colour class, by target
+GROUPS = {
+    "eng-infer": ("english", "Reading", "s-english"),
+    "eng-factop": ("english", "Reading", "s-english"),
+    "eng-cohesion": ("english", "Reading", "s-english"),
+    "eng-organise": ("english", "Writing", "s-english"),
+    "eng-punct": ("english", "Punctuation", "s-english"),
+    "maths-number": ("maths", "Number", "s-maths"),
+    "maths-shape": ("maths", "Shape and measure", "s-maths"),
+    "ac-arch": ("about", "Making and building", "s-ac"),
+    "hs-myths": ("about", "Myths and legends", "s-hs"),
+    "pw-adventure": ("about", "Out and active", "s-pw"),
+    "pw-balance": ("about", "Out and active", "s-pw"),
+    "pfa-careers": ("about", "Careers", "s-pfa"),
+    "pfa-transport": ("about", "Getting about", "s-pfa"),
+    "se-earth": ("about", "Science", "s-science"),
+}
+
+
 def die(msg):
     sys.exit("build_a2: " + msg)
 
@@ -233,7 +252,9 @@ def main():
     for slug, title, subject, covers in plan.ACTS:
         if slug not in ready or (only and slug not in only):
             continue
-        for w in sorted(set(c[0] for c in covers)):
+        # every HQ gets every activity, so anyone can open it from the
+        # library in their own HQ; folders only bring the assigned ones
+        for w in plan.ALL:
             path = os.path.join(ROOT, HQS[w]["base"], "a2-" + slug + ".html")
             html = page(w, slug, info[slug])
             ascii_only(path, html)
@@ -272,6 +293,26 @@ def main():
                                              "targets": plan.TARGETS, "items": items}, indent=1) + ";\n")
     ascii_only("drops.js", js)
     open(os.path.join(ROOT, "data", "a2", "drops.js"), "w", encoding="ascii").write(js)
+
+    # the library on /practice/: one entry per activity, from the day it first lands for anyone
+    first = {}
+    for it in items:
+        if it["slug"] not in first or it["date"] < first[it["slug"]]:
+            first[it["slug"]] = it["date"]
+    lib = []
+    for slug, title, subject, covers in plan.ACTS:
+        t = covers[0][1]
+        shelf, group, subj = GROUPS[t]
+        inf = info.get(slug) or {}
+        lib.append({"slug": slug, "title": inf.get("title") or title, "shelf": shelf, "group": group, "subj": subj,
+                    "line": inf.get("line") or "", "mins": inf.get("mins") or 0, "chunks": len(inf.get("chunks") or []),
+                    "first": first.get(slug, plan.LAST_DROP), "ready": slug in ready})
+    js2 = ("/* Base 5 - Autumn 2 activity library (the Practice tab). Built by\n"
+           "   data/a2/_build/build_a2.py. Do not edit. Each activity shows from\n"
+           "   the day it first lands in anyone's folder. ASCII only. */\n"
+           "window.B5LIB = " + json.dumps({"v": 1, "first": plan.FIRST_DROP, "items": lib}, indent=1) + ";\n")
+    ascii_only("library.js", js2)
+    open(os.path.join(ROOT, "data", "a2", "library.js"), "w", encoding="ascii").write(js2)
 
     missing = [s for s in slugs if s not in ready]
     per = {w: len(sched[w]) for w in plan.ALL}

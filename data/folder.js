@@ -62,6 +62,31 @@ function words(t){
   }).join("");
 }
 
+/* ---------- Autumn 2 activities: progress reads itself ---------- */
+function slugOf(href){ var m = /\/a2-([a-z0-9-]+)\.html/.exec(String(href || "")); return m ? m[1] : ""; }
+function progressOf(slug){
+  try{
+    var o = JSON.parse(localStorage.getItem(HQ.prefix + "a2-" + slug + ".v1") || "null");
+    if(!o) return null;
+    var s = o.summary || {}, made = "";
+    if(o.make) Object.keys(o.make).some(function(k){ var v = String(o.make[k] || "").trim(); if(v){ made = v.slice(0, 70); return true; } return false; });
+    if(s.finished) return { done: true, t: "Done", made: made };
+    if(s.chunksDone) return { t: s.chunksDone + " of " + s.chunks + " chunks", made: made };
+    if(o.answers && Object.keys(o.answers).length) return { t: "Started" };
+  }catch(e){}
+  return null;
+}
+function shelfOf(a){
+  var slug = slugOf(a.href), lib = window.B5LIB;
+  if(slug && lib && lib.items) for(var i = 0; i < lib.items.length; i++) if(lib.items[i].slug === slug) return lib.items[i].shelf;
+  return slug ? "about" : "other";
+}
+function mondayStr(){
+  var d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  var m = d.getMonth() + 1, dd = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd;
+}
+
 /* ---------- what is in the folder ---------- */
 function contents(blob){
   var o = blob.data || {};
@@ -96,7 +121,20 @@ function loadDrops(){
     document.head.appendChild(s);
   });
 }
+function loadLib(){
+  if(window.B5LIB) return Promise.resolve(window.B5LIB);
+  return new Promise(function(res){
+    var s = document.createElement("script");
+    s.src = "/data/a2/library.js?t=" + todayStr();
+    s.onload = function(){ res(window.B5LIB || null); };
+    s.onerror = function(){ res(null); };
+    document.head.appendChild(s);
+  });
+}
 function withDrops(blob){
+  return loadLib().then(function(){ return withDrops2(blob); });
+}
+function withDrops2(blob){
   var o = blob ? contents(blob) : { messages: [], activities: [], files: [] };
   var today = todayStr();
   o.activities = o.activities.filter(function(a){ return !a.date || a.date <= today; });
@@ -159,6 +197,13 @@ css.textContent =
   ".fo-tick{font-family:var(--display,Arial,sans-serif);font-weight:700;font-size:.9rem;padding:8px 13px;border-radius:12px;border:2px dashed #8a8fa8;background:#fff;color:#3d4363;cursor:pointer}" +
   ".fo-tick[aria-pressed=true]{border-style:solid;border-color:#1f9d62;background:#e3f7ec;color:#11603a}" +
   ".fo-item.tried{opacity:.86}" +
+  ".fo-lab{margin:6px 2px 0;font-family:var(--display,Arial,sans-serif);font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mist)}" +
+  ".fo-today{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}" +
+  ".fo-item.fo-big{border:3px solid var(--sun,#ffd23f);box-shadow:0 6px 0 rgba(0,0,0,.18)}" +
+  ".fo-item.fo-big h3{font-size:1.35rem}" +
+  ".fo-pr{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:99px;border:2px solid #8a8fa8;color:#3d4363;font-size:.72rem;vertical-align:middle;font-weight:700}" +
+  ".fo-pr.done{border-color:#1f9d62;background:#e3f7ec;color:#11603a}" +
+  ".fo-made{font-size:.9rem;color:#3d4363;font-style:italic}" +
   ".fo-older summary{cursor:pointer;color:var(--moon);font-family:var(--display,Arial,sans-serif);font-weight:700;padding:6px 2px}" +
   ".fo-olderlist{display:flex;flex-direction:column;gap:12px;margin-top:10px}" +
   ".fo-file{display:flex;gap:14px;align-items:center}" +
@@ -230,6 +275,19 @@ function page(host){
                 o.activities.filter(function(a){ return !st.seen[a.id]; }).length +
                 o.files.filter(function(f){ return !st.seen[f.id]; }).length;
     function isNew(id){ return !st.seen[id] ? '<span class="fo-new">New</span>' : ""; }
+    function actHtml(a, big){
+      var href = safeHref(a.href), slug = slugOf(href), pr = slug ? progressOf(slug) : null, tried = !!st.tried[a.id];
+      var done = pr && pr.done;
+      return '<article class="fo-item' + (big ? " fo-big" : "") + (done || tried ? " tried" : "") + '">' +
+        (a.date && !big ? '<span class="fo-when">Arrived ' + esc(nice(a.date)) + '</span>' : "") +
+        '<h3>' + esc(a.title) + isNew(a.id) + (pr ? ' <span class="fo-pr' + (done ? " done" : "") + '">' + esc(pr.t) + '</span>' : "") + '</h3>' +
+        (a.note && (big || !pr) ? words(a.note) : "") +
+        (pr && pr.made ? '<p class="fo-made">You made: ' + esc(pr.made) + '</p>' : "") +
+        '<div class="fo-row">' +
+          (href ? '<a class="fo-go" href="' + esc(href) + '"' + (isOut(href) ? ' target="_blank" rel="noopener"' : "") + '>' + (done ? "Have another look" : pr ? "Carry on" : "Have a look") + '</a>' : "") +
+          (slug ? "" : '<button type="button" class="fo-tick" data-id="' + esc(a.id) + '" aria-pressed="' + tried + '">' + (tried ? "Had a go" : "Mark as had a go") + '</button>') +
+        '</div></article>';
+    }
     function tab(icon, name, n){ return '<div class="fo-tab">' + ICON[icon] + name + (n ? ' <span class="fo-n">' + n + '</span>' : "") + '</div>'; }
 
     var h = '<div class="fo-bar"><span>' + (fresh ? fresh + " new since you last looked." : "All caught up. Everything is still here to look back on.") + '</span>' +
@@ -245,25 +303,31 @@ function page(host){
          '<textarea id="foReply" placeholder="Anything you like. A reply, a question, or just hello."></textarea><div id="foSend"></div></details>';
     h += '</div></section>';
 
-    /* things to try */
-    h += '<section class="fo-sec" aria-label="Things to try">' + tab("act", "Things to try", o.activities.length) + '<div class="fo-body">';
+    /* things to try: today first, then this week, then anything from Jay;
+       older drops wait in a closed drawer, by shelf, so it never reads as a pile */
+    h += '<section class="fo-sec" aria-label="Things to try">' + tab("act", "Things to try", 0) + '<div class="fo-body">';
     if(!o.activities.length) h += '<p class="fo-empty">Nothing here yet.</p>';
+    var today = todayStr(), mon = mondayStr();
     var acts = o.activities.map(function(x, i){ return { x: x, i: i }; }).sort(function(a, b){
       var da = a.x.date || "", db = b.x.date || "";
       return da === db ? a.i - b.i : da < db ? 1 : -1;
     }).map(function(m){ return m.x; });
-    var SHOW = 6, tucked = false;
-    acts.forEach(function(a, k){
-      var href = safeHref(a.href), tried = !!st.tried[a.id];
-      if(k === SHOW){ tucked = true; h += '<details class="fo-older"><summary>Earlier things to try (' + (acts.length - SHOW) + ')</summary><div class="fo-olderlist">'; }
-      h += '<article class="fo-item' + (tried ? " tried" : "") + '">' + (a.date ? '<span class="fo-when">Arrived ' + esc(nice(a.date)) + '</span>' : "") + '<h3>' + esc(a.title) + isNew(a.id) + '</h3>' +
-        (a.note ? words(a.note) : "") +
-        '<div class="fo-row">' +
-          (href ? '<a class="fo-go" href="' + esc(href) + '"' + (isOut(href) ? ' target="_blank" rel="noopener"' : "") + '>Have a look</a>' : "") +
-          '<button type="button" class="fo-tick" data-id="' + esc(a.id) + '" aria-pressed="' + tried + '">' + (tried ? "Had a go" : "Mark as had a go") + '</button>' +
-        '</div></article>';
-    });
-    if(tucked) h += '</div></details>';
+    var tod = acts.filter(function(a){ return a.date === today; });
+    var week = acts.filter(function(a){ return a.date && a.date < today && a.date >= mon; });
+    var jay = acts.filter(function(a){ return !a.date; });
+    var older = acts.filter(function(a){ return a.date && a.date < mon; });
+    if(tod.length){ h += '<p class="fo-lab">New today, if you fancy it</p><div class="fo-today">' + tod.map(function(a){ return actHtml(a, true); }).join("") + '</div>'; }
+    else if(acts.length) h += '<p class="fo-empty">Nothing new today. Everything else is still here, whenever you like.</p>';
+    if(week.length) h += '<p class="fo-lab">Earlier this week</p>' + week.map(function(a){ return actHtml(a); }).join("");
+    if(jay.length) h += '<p class="fo-lab">Also from Jay</p>' + jay.map(function(a){ return actHtml(a); }).join("");
+    if(older.length){
+      var by = {}, names = { english: "English", maths: "Maths", about: "Out and about", other: "Other things" };
+      older.forEach(function(a){ var sh = shelfOf(a); (by[sh] = by[sh] || []).push(a); });
+      h += '<details class="fo-older"><summary>Earlier things to try</summary><div class="fo-olderlist">' +
+        ["english", "maths", "about", "other"].filter(function(k){ return by[k]; }).map(function(k){
+          return '<p class="fo-lab">' + names[k] + '</p>' + by[k].map(function(a){ return actHtml(a); }).join("");
+        }).join("") + '</div></details>';
+    }
     h += '</div></section>';
 
     /* files */
