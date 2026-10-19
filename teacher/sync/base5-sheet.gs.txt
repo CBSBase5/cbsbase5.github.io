@@ -409,7 +409,9 @@ function setup3_(ss){
    ["Daily email", "TRUE", "TRUE sends you a short summary of the day at 3pm, Monday to Friday."],
    ["BridgeLink Buddy sheet", "", "Paste the link to your BridgeLink Buddy Google Sheet. My targets then shows each student's steps straight from Buddy."],
    ["Targets term", "Autumn 2", "Which BridgeLink Buddy term My targets shows."]].forEach(function(r){
-    if(String(setting_(r[0])) === "") st.appendRow(r);
+    /* add a row only when there is no row with that name yet (an empty value is a choice, not a gap) */
+    var have = st.getDataRange().getValues().some(function(x){ return String(x[0]).trim() === r[0]; });
+    if(!have) st.appendRow(r);
   });
   var has = ScriptApp.getProjectTriggers().some(function(t){ return t.getHandlerFunction() === "dailyDigest"; });
   if(!has) ScriptApp.newTrigger("dailyDigest").timeBased().atHour(15).everyDays(1).create();

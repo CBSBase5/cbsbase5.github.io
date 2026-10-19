@@ -68,6 +68,7 @@
   transition:width .45s cubic-bezier(.2,1.1,.4,1)}
 .scoreboard .said{font-size:.95rem;color:var(--body-tint);flex-basis:100%;margin:0}
 
+#signin a{color:var(--teal);font-weight:700}
 .tgroup{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.25rem;margin:26px 0 10px;line-height:1.15}
 .tgroup span{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
 .tgroup small{font-family:var(--body);font-variation-settings:normal;font-weight:400;font-size:.85rem;color:var(--body-tint)}
@@ -155,7 +156,7 @@
   <div class="wrap">
     <h1>MY <span class="accent">TARGETS</span></h1>
     <div class="line">
-      <span class="chip" id="termchip">Autumn 1</span>
+      <span class="chip" id="termchip">Autumn 2</span>
       <p>These are yours, and <span class="hl">only you can open them</span>. You decide when one is done.</p>
     </div>
   </div>
@@ -254,7 +255,26 @@ function stamp(iso){
   return day+" "+d.getDate()+" "+mon+", "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
 }
 
-var me=null, mine=null, entry="";
+var me=null, mine=null, entry="", STAFF="";
+/* staff signed in: open a student's Autumn 2 steps straight from the sheet */
+function staffOpen(s){
+  var msg=document.getElementById('signin');
+  document.getElementById('lock').hidden=true;
+  if(msg) msg.textContent='Opening '+s+'...';
+  window.B5Site.call("targets",{key:STAFF}).then(function(o){
+    if(!o||!o.ok||!o.targets){ if(msg) msg.textContent='The sheet said: '+((o&&o.error)||'no answer'); return; }
+    a1=null;
+    a2=o.targets.filter(function(t){ return !/\.\d+$/.test(t.id) || (t.ms&&t.ms[s]) })
+      .map(function(t){ return {id:t.id,pillar:t.pillar||"",title:t.title,me:(t.ms&&t.ms[s])||t.title,jay:(t.jay&&t.jay[s])||""} });
+    a2ticks={};
+    var tk=(o.ticks||{})[s]||{};
+    Object.keys(tk).forEach(function(id){ var k=tk[id]; a2ticks[id]={state:k.state||0,at:k.at?new Date(k.at).toISOString():"",snote:k.snote||"",tnote:k.jnote||""} });
+    if(msg) msg.innerHTML='Staff view of <b>'+s+'</b>. Ticks you make here are saved as yours. <a href="/teacher/targets.html">Everyone at once</a>';
+    document.getElementById('main').hidden=false;
+    setMode("a2");
+    document.getElementById('termswitch').hidden=true;
+  }).catch(function(){ if(msg) msg.textContent='Could not reach the sheet.'; });
+}
 
 function renderWho(){
   var box=document.getElementById('who');
@@ -264,6 +284,7 @@ function renderWho(){
     b.textContent=s;
     b.setAttribute('aria-pressed', s===me?'true':'false');
     b.addEventListener('click',function(){
+      if(STAFF){ me=s; renderWho(); staffOpen(s); return; }
       me=s; mine=null; entry="";
       document.getElementById('main').hidden=true;
       document.getElementById('lock').hidden=false;
@@ -378,7 +399,8 @@ document.getElementById('termBtn').addEventListener('click',function(){ setMode(
 var noteTimers={};
 function pushTick(id,what){
   var S=window.B5Site; if(mode!=="a2"||!S) return;
-  var r=rec(me,id), d={who:me,code:entry,id:id};
+  var r=rec(me,id), d=STAFF?{who:me,key:STAFF,id:id}:{who:me,code:entry,id:id};
+  if(STAFF&&what!=="state") return;
   if(what==="state") d.state=r.state; else d.snote=r.snote;
   S.call("tick",d).catch(function(){});
 }
@@ -506,6 +528,10 @@ function renderTargets(){
       tmr=setTimeout(function(){ savedP.textContent='' },1200);
     });
     body.appendChild(ta); body.appendChild(savedP);
+    if(STAFF){
+      lab.hidden=true; ta.hidden=true;
+      if(r.snote){ var sn=document.createElement('p'); sn.className='whenline'; sn.textContent=me+' said: '+r.snote; body.appendChild(sn); }
+    }
     if(mode==="a2"&&r.tnote){
       var jn=document.createElement('p'); jn.className='whenline'; jn.textContent='Jay: '+r.tnote;
       body.appendChild(jn);
@@ -536,7 +562,7 @@ function helps(body,id){
 
 document.getElementById('lockBtn').addEventListener('click',function(){
   me=null; mine=null; entry=""; a1=null; a2=null; a2ticks={}; mode="a1";
-  document.getElementById('termchip').textContent="Autumn 1";
+  document.getElementById('termchip').textContent="Autumn 2";
   document.getElementById('main').hidden=true;
   document.getElementById('lock').hidden=true;
   renderWho();
@@ -553,8 +579,19 @@ var who0 = document.createElement('p');
 who0.className = 'sub'; who0.id = 'signin'; who0.textContent = 'Checking whether you are signed in...';
 document.getElementById('who').insertAdjacentElement('afterend', who0);
 B5Lock.whoami().then(function(m){
+  if(m && m.staff && m.pass){
+    STAFF = m.pass;
+    who0.innerHTML = 'Signed in as staff. Tap anyone to see their Autumn 2 steps, no PIN needed. Ticks you make here are saved as yours. <a href="/teacher/targets.html">Everyone at once</a>';
+    return;
+  }
+  if(!m || !m.who || !m.code){
+    var S = window.B5Site;
+    who0.textContent = (!S || !S.syncUrl || S.guest) ? '' : (S.bridgeDown() ? 'Could not reach the Base 5 sheet just now, so it asks for the PIN.' : 'Not signed in to a school Google account in this browser, so it asks for the PIN.');
+    if(!who0.textContent) who0.remove();
+    return;
+  }
   who0.remove();
-  if(!m || !m.who || !m.code || me || BASE5_STUDENTS.indexOf(m.who) < 0) return;
+  if(me || BASE5_STUDENTS.indexOf(m.who) < 0) return;
   me = m.who; entry = m.code;
   renderWho(); renderDots();
   document.getElementById('lock').hidden = false;
