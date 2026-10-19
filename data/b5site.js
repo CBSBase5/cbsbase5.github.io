@@ -48,7 +48,7 @@ if(GUEST){
 
 /* The shared memory: the Google Sheet web app address. Empty means off.
    A device can try another address with localStorage b5.sync.url. */
-var SYNC_URL = "https://script.google.com/macros/s/AKfycbxW2fhiuNntbardG07n5CCk08pxLzLxzESjA5k67l5aUODzlUTjKpYHX2cDQDaYokyB6A/exec";
+var SYNC_URL = "https://script.google.com/a/macros/chiltonbridgeschool.co.uk/s/AKfycbxW2fhiuNntbardG07n5CCk08pxLzLxzESjA5k67l5aUODzlUTjKpYHX2cDQDaYokyB6A/exec";
 try{ SYNC_URL = localStorage.getItem("b5.sync.url") || SYNC_URL; }catch(e){}
 if(GUEST) SYNC_URL = "";
 
@@ -152,7 +152,70 @@ function guestBanner(){
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", guestBanner); else guestBanner();
 
-window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST };
+/* ---------- talking to the sheet ----------
+   The web app is school-only, so the site cannot call it directly.
+   Instead a small page from the web app (?bridge=1) opens in a
+   hidden frame, signed in as whoever is using the device, and
+   passes requests through. B5Site.call(action, data) returns a
+   promise of the sheet's answer. If the bridge does not open
+   (signed out, or the device blocks it) every call fails quietly
+   and the site carries on as before. */
+var bridges = {}, DOWN = "b5.bridge.down";
+/* if the bridge would not open in the last ten minutes, do not keep waiting for it */
+function bridgeDown(){
+  try{ var t = +sessionStorage.getItem(DOWN) || 0; return Date.now() - t < 600000; }catch(e){ return false; }
+}
+function bridgeFor(url){
+  if(bridges[url]) return bridges[url];
+  var waiting = {}, seq = 0, target = null, origin = null;
+  var ready = new Promise(function(res, rej){
+    var t = setTimeout(function(){
+      try{ sessionStorage.setItem(DOWN, String(Date.now())); }catch(e){}
+      rej(new Error("no bridge"));
+    }, 10000);
+    window.addEventListener("message", function(e){
+      var d = e.data;
+      if(!d || (d.b5 !== "ready" && d.b5 !== "res")) return;
+      if(!/\.googleusercontent\.com$/.test(e.origin) && e.origin !== new URL(url, location.href).origin) return;
+      if(d.b5 === "ready"){ target = e.source; origin = e.origin; clearTimeout(t); try{ sessionStorage.removeItem(DOWN); }catch(x){} res(); return; }
+      if(e.source !== target) return;
+      var w = waiting[d.id]; if(!w) return;
+      delete waiting[d.id];
+      try{ w.res(JSON.parse(d.body)); }catch(err){ w.rej(err); }
+    });
+    function make(){
+      var f = document.createElement("iframe");
+      f.src = url + (url.indexOf("?") < 0 ? "?" : "&") + "bridge=1";
+      f.title = "Base 5 shared memory"; f.setAttribute("aria-hidden", "true"); f.tabIndex = -1;
+      f.style.cssText = "position:absolute;width:1px;height:1px;left:-9999px;top:0;border:0;opacity:0;pointer-events:none";
+      document.body.appendChild(f);
+    }
+    if(document.body) make(); else document.addEventListener("DOMContentLoaded", make);
+  });
+  bridges[url] = {
+    send: function(req){
+      return ready.then(function(){
+        return new Promise(function(res, rej){
+          var id = ++seq;
+          waiting[id] = { res: res, rej: rej };
+          setTimeout(function(){ if(waiting[id]){ delete waiting[id]; rej(new Error("no answer")); } }, 30000);
+          target.postMessage({ b5: "req", id: id, req: req }, origin);
+        });
+      });
+    }
+  };
+  return bridges[url];
+}
+function call(action, data, url){
+  url = url || SYNC_URL;
+  if(!url) return Promise.reject(new Error("off"));
+  if(url === SYNC_URL && bridgeDown() && !bridges[url]) return Promise.reject(new Error("bridge down"));
+  var req = { action: action }, k;
+  for(k in (data || {})) req[k] = data[k];
+  return bridgeFor(url).send(req);
+}
+
+window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown };
 })();
 
 
@@ -235,8 +298,7 @@ function push(){
   var items = batch(); if(!items) return;
   var sent = Object.keys(items);
   busy = true;
-  fetch(URL, { method: "POST", body: JSON.stringify({ action: "save", who: WHO, items: items }) })
-    .then(function(r){ return r.json(); })
+  S.call("save", { who: WHO, items: items })
     .then(function(o){
       if(o && o.ok){
         sent.forEach(function(k){ if(items[k].t === (meta[k] || 0)) delete dirty[k]; });
@@ -250,7 +312,7 @@ function push(){
 function flush(){
   var items = batch(); if(!items) return;
   try{
-    navigator.sendBeacon(URL, new Blob([JSON.stringify({ action: "save", who: WHO, items: items })], { type: "text/plain" }));
+    S.call("save", { who: WHO, items: items }).catch(function(){});   /* best effort; anything missed goes next time */
   }catch(e){}
 }
 document.addEventListener("visibilitychange", function(){ if(document.visibilityState === "hidden") flush(); });
@@ -262,8 +324,7 @@ var interacted = false;
 
 function pull(){
   var since = +rawGet.call(LS, SINCE) || 0;
-  return fetch(URL + "?action=load&who=" + encodeURIComponent(WHO) + "&since=" + since)
-    .then(function(r){ return r.json(); })
+  return S.call("load", { who: WHO, since: since })
     .then(function(o){
       if(!o || !o.ok) return;
       var changed = 0, newest = since;

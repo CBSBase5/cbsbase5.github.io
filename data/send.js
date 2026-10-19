@@ -70,7 +70,7 @@ function wrap(opts){
   ].join("\n");
 }
 
-function syncUrl(){ return (window.B5Site && window.B5Site.syncUrl) || ""; }
+function syncUrl(){ var S = window.B5Site; return (S && S.syncUrl && !(S.bridgeDown && S.bridgeDown())) ? S.syncUrl : ""; }
 function hqWho(){ return (window.B5Site && window.B5Site.hq) || ""; }
 
 function guestNote(host){
@@ -122,11 +122,10 @@ function mount(host, opts){
 
     if(a === 'sheet'){
       b.disabled = true; msg.textContent = 'Sending...';
-      fetch(syncUrl(), { method: 'POST', body: JSON.stringify({
-        action: 'send', who: whoIn.value.trim() || hqWho(), tool: opts.tool,
+      window.B5Site.call('send', {
+        who: whoIn.value.trim() || hqWho(), tool: opts.tool,
         text: opts.getText(), page: location.pathname
-      }) })
-        .then(function(r){ return r.json(); })
+      })
         .then(function(o){
           if(!o || !o.ok) throw new Error('no');
           msg.textContent = 'Sent. It is in Jay\'s list now.';

@@ -2,8 +2,13 @@
    Base 5 - the shared memory
    Paste all of this into Extensions > Apps Script in a Google
    Sheet in the school Drive. Run setup once, then deploy it as a
-   web app (Execute as: Me, Who has access: Anyone). The site at
-   cbsbase5.github.io talks to the web app address.
+   web app (Execute as: Me; Who has access: anyone in the school).
+
+   The site at cbsbase5.github.io talks to it through a small
+   hidden page (the bridge, ?bridge=1) that opens inside the site
+   with the student's own school Google sign-in, so the web app can
+   stay school-only. It can also be called directly, which only
+   works when access is set to Anyone.
 
    Tabs it makes:
      Settings  the staff key, and whether sends are emailed to you
@@ -16,6 +21,7 @@
    ========================================================== */
 
 var WHO = ["EGW", "LP", "LW", "LC", "HK", "JT"];
+var SITE = "https://cbsbase5.github.io";      /* the only site the bridge talks to */
 var MAX_CELL = 45000;
 
 /* ---------- run this once ---------- */
@@ -84,30 +90,60 @@ function seedFolders_(fo){
 /* ---------- the web app ---------- */
 function doGet(e){
   var p = (e && e.parameter) || {};
-  try{
-    if(p.action === "ping") return out_({ ok: true });
-    if(p.action === "load") return out_(load_(who_(p.who), +p.since || 0));
-    if(p.action === "folder") return out_(folder_(who_(p.who)));
-    if(p.action === "overview") return out_(overview_(p.key));
-    return out_({ ok: false, error: "unknown action" });
-  }catch(err){ return out_({ ok: false, error: String(err.message || err) }); }
+  if(p.bridge) return HtmlService.createHtmlOutput(bridgeHtml_())
+    .setTitle("Base 5")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return out_(api(p));
 }
 
 function doPost(e){
   var b = {};
   try{ b = JSON.parse((e && e.postData && e.postData.contents) || "{}"); }catch(err){ return out_({ ok: false, error: "bad body" }); }
-  var lock = LockService.getScriptLock();
+  return out_(api(b));
+}
+
+/* every request, from the bridge or called directly */
+function api(r){
+  r = r || {};
   try{
-    lock.waitLock(15000);
-    if(b.action === "save") return out_(save_(who_(b.who), b.items || {}));
-    if(b.action === "send") return out_(send_(b));
-    if(b.action === "seen") return out_(seen_(b.key, +b.row, b.seen !== false));
-    return out_({ ok: false, error: "unknown action" });
-  }catch(err){
-    return out_({ ok: false, error: String(err.message || err) });
-  }finally{
-    try{ lock.releaseLock(); }catch(e2){}
-  }
+    var a = r.action;
+    if(a === "ping") return { ok: true };
+    if(a === "load") return load_(who_(r.who), +r.since || 0);
+    if(a === "folder") return folder_(who_(r.who));
+    if(a === "overview") return overview_(r.key);
+    if(a === "save" || a === "send" || a === "seen"){
+      var lock = LockService.getScriptLock();
+      lock.waitLock(15000);
+      try{
+        if(a === "save") return save_(who_(r.who), r.items || {});
+        if(a === "send") return send_(r);
+        return seen_(r.key, +r.row, r.seen !== false);
+      }finally{ try{ lock.releaseLock(); }catch(e2){} }
+    }
+    return { ok: false, error: "unknown action" };
+  }catch(err){ return { ok: false, error: String(err.message || err) }; }
+}
+/* the bridge page calls this with google.script.run; text in, text out */
+function apiJson(req){
+  var r = {};
+  try{ r = typeof req === "string" ? JSON.parse(req) : (req || {}); }catch(e){}
+  return JSON.stringify(api(r));
+}
+
+function bridgeHtml_(){
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><script>' +
+    'var SITE = ' + JSON.stringify(SITE) + ';' +
+    'window.addEventListener("message", function(e){' +
+    '  if(e.origin !== SITE) return;' +
+    '  var m = e.data; if(!m || m.b5 !== "req") return;' +
+    '  var reply = function(body){ e.source.postMessage({ b5: "res", id: m.id, body: body }, e.origin); };' +
+    '  google.script.run' +
+    '    .withSuccessHandler(reply)' +
+    '    .withFailureHandler(function(err){ reply(JSON.stringify({ ok: false, error: String((err && err.message) || err) })); })' +
+    '    .apiJson(JSON.stringify(m.req || {}));' +
+    '});' +
+    'try{ window.top.postMessage({ b5: "ready" }, SITE); }catch(x){}' +
+    '<\/script></body></html>';
 }
 
 function out_(o){

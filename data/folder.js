@@ -79,9 +79,8 @@ function fetchFolder(){
 /* with the shared memory on, the folder comes from the Folders tab of Jay's sheet */
 function fromSheet(url){
   return new Promise(function(res){
-    var done = false, t = setTimeout(function(){ if(!done){ done = true; res(null); } }, 8000);
-    fetch(url + "?action=folder&who=" + encodeURIComponent(WHO))
-      .then(function(r){ return r.json(); })
+    var done = false, t = setTimeout(function(){ if(!done){ done = true; res(null); } }, 12000);
+    window.B5Site.call("folder", { who: WHO })
       .then(function(o){ if(!done){ done = true; clearTimeout(t); res(o && o.ok && o.data ? { who: WHO, updated: "", data: o.data } : null); } })
       .catch(function(){ if(!done){ done = true; clearTimeout(t); res(null); } });
   });

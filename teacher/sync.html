@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=9">
-<script src="/data/b5site.js?v=4"></script>
+<script src="/data/b5site.js?v=5"></script>
 <style>
 /* Setup steps for the shared memory (a Google Sheet web app). Staff only. */
 .step{display:grid;grid-template-columns:56px 1fr;gap:16px;background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 18px;box-shadow:var(--lift)}
@@ -127,13 +127,13 @@ kbd,code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86em;backg
     <div class="mock" aria-hidden="true">
       <div class="row"><span>Description</span><span class="btnm">Base 5</span></div>
       <div class="row"><span>Execute as</span><span class="dd hl">Me (your school email)</span></div>
-      <div class="row"><span>Who has access</span><span class="dd hl">Anyone</span></div>
+      <div class="row"><span>Who has access</span><span class="dd hl">Anyone within your school</span></div>
       <div class="row"><span></span><span><span class="btnm blue">Deploy</span></span></div>
       <div class="cap">Drawn to look like the New deployment box.</div>
     </div>
     <ul>
-      <li><b>Execute as: Me</b>, so the script uses your sheet and the students never sign in to anything.</li>
-      <li><b>Who has access: Anyone</b>, so the students' devices can reach it. If <b>Anyone</b> is not on the list, the school has switched it off: pick <b>Anyone within Chilton Bridge</b> instead, which works as long as the students are signed in to their school Google accounts on their devices.</li>
+      <li><b>Execute as: Me</b>, so the script uses your sheet.</li>
+      <li><b>Who has access: Anyone within</b> the school (it may show the trust's name). Only people signed in to a school Google account can reach it. The site talks to it through a small hidden page that uses the student's own sign-in, so students need to be signed in to their school Google account in the browser they use.</li>
     </ul>
     <p>Press <b>Deploy</b>, allow again if asked, and copy the <b>Web app URL</b>. It ends in <code>/exec</code>.</p>
   </div></div>
@@ -163,6 +163,7 @@ kbd,code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86em;backg
     <ul>
       <li><b>Putting something in a folder:</b> add a row to the Folders tab. It shows the next time the student opens their folder. No downloading or uploading.</li>
       <li><b>Changing the script</b> (if Claude sends a new version): paste it over the old one, Save, then <b>Deploy</b>, <b>Manage deployments</b>, the pencil, <b>Version: New version</b>, <b>Deploy</b>. The URL stays the same.</li>
+      <li><b>If a device cannot reach the sheet</b> (the staff room says so at the top): check that browser is signed in to a school Google account. Some managed devices block signed-in Google pages inside other sites; on those, the site simply carries on saving on the device.</li>
       <li><b>If the sheet is ever unreachable</b>, nothing breaks: progress still saves on the device and catches up later, folders fall back to the files on the site, and sends offer Gmail as before.</li>
       <li><b>Pictures</b> (doodle pad and the like) still go by email, because a sheet cannot hold them well.</li>
     </ul>
@@ -198,12 +199,12 @@ $("check").addEventListener("click", function(){
   m.className = "msg";
   if(!good(u)){ m.className = "msg bad"; m.textContent = "That does not look like a web app URL. It starts with https://script.google.com and ends in /exec."; return; }
   m.textContent = "Checking...";
-  fetch(u + "?action=ping").then(function(r){ return r.json(); }).then(function(o){
+  B5Site.call("ping", {}, u).then(function(o){
     if(o && o.ok){ m.textContent = "It works. The sheet answered."; $("after").hidden = false; }
     else { m.className = "msg bad"; m.textContent = "Something answered, but not the Base 5 script. Check step 3 was saved before deploying."; }
   }).catch(function(){
     m.className = "msg bad";
-    m.textContent = "No answer. Check Who has access is Anyone (or Anyone within Chilton Bridge and you are signed in), and that you copied the whole URL.";
+    m.textContent = "No answer. Check this browser is signed in to your school Google account, that the latest script is deployed (step 5), and that you copied the whole URL.";
   });
 });
 $("useHere").addEventListener("click", function(){

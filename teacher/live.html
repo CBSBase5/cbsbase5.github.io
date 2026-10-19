@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=9">
-<script src="/data/b5site.js?v=4"></script>
+<script src="/data/b5site.js?v=5"></script>
 <style>
 /* Jay's live view: every HQ's progress and every send, from the shared sheet. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -145,15 +145,14 @@ function load(){
   var k = $("key").value.trim();
   if(!k){ msg("The staff key goes in the box.", true); return; }
   msg("Opening...");
-  fetch(URL + "?action=overview&key=" + encodeURIComponent(k))
-    .then(function(r){ return r.json(); })
+  B5Site.call("overview", { key: k })
     .then(function(o){
       if(!o.ok){ msg(o.error === "staff key" ? "That staff key did not work. It is in the Settings tab of the sheet." : "The sheet said: " + o.error, true); return; }
       try{ localStorage.setItem(KEY, k); }catch(e){}
       msg(""); $("view").hidden = false; $("refresh").hidden = false;
       last = o; draw(o);
     })
-    .catch(function(){ msg("Could not reach the sheet just now. Try again in a minute.", true); });
+    .catch(function(){ msg("Could not reach the sheet. Check you are signed in to your school Google account in this browser, then try again.", true); });
 }
 $("go").addEventListener("click", load);
 $("refresh").addEventListener("click", load);
@@ -198,8 +197,7 @@ function draw(o){
     b.onclick = function(){
       var row = +b.dataset.row, seen = b.dataset.seen === "1";
       b.disabled = true;
-      fetch(URL, { method: "POST", body: JSON.stringify({ action: "seen", key: $("key").value.trim(), row: row, seen: seen }) })
-        .then(function(r){ return r.json(); })
+      B5Site.call("seen", { key: $("key").value.trim(), row: row, seen: seen })
         .then(function(r){ if(r.ok){ last.sends.forEach(function(x){ if(x.row === row) x.seen = seen; }); draw(last); } else b.disabled = false; })
         .catch(function(){ b.disabled = false; });
     };
