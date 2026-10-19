@@ -61,6 +61,15 @@ var HQS = {
   "/hk/":    { who: "HK", prefix: "b5.hk.",  bg: "#0b1622", ink: "#ff7a1a" },
   "/jt-hq/": { who: "JT", prefix: "b5.jthq.",  bg: "#1f8a3c", ink: "#ffffff" }
 };
+/* project pages follow their student between devices too (sync only) */
+var PROJECTS = {
+  "/projects/egw.html": { who: "EGW", prefix: "b5.project.egw." },
+  "/projects/lp.html":  { who: "LP",  prefix: "b5.project.lp." },
+  "/projects/lw.html":  { who: "LW",  prefix: "b5.project.lw." },
+  "/projects/lc.html":  { who: "LC",  prefix: "b5.project.lc." },
+  "/projects/hk.html":  { who: "HK",  prefix: "b5-project-hk" },
+  "/projects/jt.html":  { who: "JT",  prefix: "b5.project.jt." }
+};
 var base = null, hq = null;
 Object.keys(HQS).forEach(function(b){ if(path.indexOf(b) === 0){ base = b; hq = HQS[b]; } });
 
@@ -215,7 +224,9 @@ function call(action, data, url){
   return bridgeFor(url).send(req);
 }
 
-window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown };
+window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown,
+  syncWho: hq ? hq.who : (PROJECTS[path] || {}).who || null,
+  syncPrefix: hq ? hq.prefix : (PROJECTS[path] || {}).prefix || null };
 })();
 
 
@@ -236,7 +247,7 @@ window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl
 "use strict";
 if(window.B5Sync) return;
 var S = window.B5Site || {};
-var URL = S.syncUrl, WHO = S.hq, P = S.prefix;
+var URL = S.syncUrl, WHO = S.syncWho, P = S.syncPrefix;
 if(!URL || !WHO || !P) return;
 if(/teacher\.html$/.test(location.pathname)) return;
 try{ if(localStorage.getItem("b5.sync.off") === "1") return; }catch(e){ return; }
