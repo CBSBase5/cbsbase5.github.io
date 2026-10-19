@@ -91,7 +91,7 @@ window.B5TERM = {
       sub:"Half an hour on a day worth marking.",
       body:"Half an hour each morning on whatever the calendar is marking this week, and why people bother to mark it at all.",
       options:[["Find","One thing about it you did not know yesterday."],["Talk","Tell someone else the bit that stuck."],["Then","What would someone a hundred years ago have made of it?"]],
-      links:[["Cultural calendar shelf","/practice/#cc"]],
+      links:[["Cultural calendar shelf","/practice/shelves.html#cc"]],
       ways:["Listen and say nothing","Draw it instead","Work with Jay or HB","Sit this one out"]
     },
 
@@ -100,25 +100,25 @@ window.B5TERM = {
       sub:"A quarter of an hour, after CC.",
       body:"Talking rather than writing, and there is nothing to hand in at the end of it. Willow leads it.",
       options:[["Join in","Say what you think when you have something to say."],["Listen","Take it in and say nothing. That still counts."],["Step out","Leave the room and come back when you want to."]],
-      links:[["PHSE shelf","/practice/#phse"]],
+      links:[["PHSE shelf","/practice/shelves.html#phse"]],
       ways:["Write it down instead of saying it","Answer only the bits you want to","Sit at the edge of the room","Skip it"]
     },
 
     maths: {
       title:"Maths", line:"Half an hour of maths.", type:"work",
       sub:"Half an hour, before going outside.",
-      body:"Half an hour of maths. Jay will have said which shelf you are on, or you can pick. Your own HQ counts too.",
+      body:"Half an hour of maths. Your HQ folder has the newest activity for you, or pick anything from the library. Exam papers are still on the shelves.",
       hq:true,
-      links:[["GCSE maths","/practice/#maths-gcse"],["Everyday maths","/practice/#maths-standard"]]
+      links:[["Maths in the library","/practice/#maths"],["Exam papers and older maths","/practice/shelves.html#maths"]]
     },
 
     core: {
       title:"Maths / English", line:"Whichever one you are set.", type:"work",
       heading:"Maths or English",
       sub:"One slot covering both subjects.",
-      body:"Jay will have said which one you are on today, and which shelf it is on. Your own HQ counts too.",
+      body:"Maths or English, whichever you fancy or Jay suggests. Your HQ folder has the newest activity for you, or pick anything from the library.",
       hq:true,
-      links:[["GCSE maths","/practice/#maths-gcse"],["Everyday maths","/practice/#maths-standard"],["GCSE english","/practice/#english-gcse"],["Everyday english","/practice/#english-standard"]]
+      links:[["English in the library","/practice/#english"],["Maths in the library","/practice/#maths"],["Exam papers and older work","/practice/shelves.html"]]
     },
 
     forest: {
@@ -126,7 +126,7 @@ window.B5TERM = {
       heading:"Forest School with Vernon",
       sub:"Outside for three quarters of an hour.",
       body:"Vernon runs this one. Outside whatever the weather is doing, so coats on if it is that sort of morning. People have been doing most of what happens out there for thousands of years.",
-      links:[["Physical world shelf","/practice/#pw"]],
+      links:[["Physical world shelf","/practice/shelves.html#pw"]],
       ways:["Just be outside","Work alongside Vernon","Take photos instead of notes","Stay near the fire"]
     },
 
@@ -135,7 +135,7 @@ window.B5TERM = {
       heading:"Horticulture with Kara",
       sub:"Outside, in the beds.",
       body:"Kara runs this one. Outside for three quarters of an hour, gloves on if you want them. Whatever goes in the ground now is a message to the you of next spring.",
-      links:[["Science shelf","/practice/#science"]],
+      links:[["Out and about in the library","/practice/#about"],["Science shelf","/practice/shelves.html#science"]],
       ways:["Stay outside the whole time","Work alongside Kara","Just dig","Watch for a bit first"]
     },
 
@@ -144,7 +144,7 @@ window.B5TERM = {
       heading:"Digital media with Andy",
       sub:"Three quarters of an hour with Andy.",
       body:"Andy runs this one. Hands on with the kit rather than reading about it.",
-      links:[["Digital media shelf","/practice/#dm"]],
+      links:[["Digital media shelf","/practice/shelves.html#dm"]],
       ways:["Watch first, try after","Work with a partner","Take something apart","Sit this one out"]
     },
 
@@ -152,9 +152,9 @@ window.B5TERM = {
       title:"Project / GCSE", line:"Whichever one you are on.", type:"work",
       heading:"Project or GCSE",
       sub:"Whichever one you are on.",
-      body:"Two different things sharing a slot. This half term the project question is: if we could time travel, should we? Your answer can be anything you can make. If you are on GCSE work, Jay will have said which shelf, or go to your own HQ.",
+      body:"Two different things sharing a slot. This half term the project question is: if we could time travel, should we? Your answer can be anything you can make. If you are on GCSE work, your own HQ is the place to go.",
       hq:true,
-      links:[["Idea Lab","/projects/ideas.html"],["My project","/projects/"],["Play It's Time","/projects/its-time.html"],["GCSE maths","/practice/#maths-gcse"],["GCSE english","/practice/#english-gcse"]],
+      links:[["Idea Lab","/projects/ideas.html"],["My project","/projects/"],["Play It's Time","/projects/its-time.html"],["Exam papers","/practice/shelves.html#maths-gcse"]],
       ways:["Think it through out loud with Jay","Look at someone else's for a bit","Make a mess and tidy it later","Start again"]
     },
 
@@ -163,7 +163,7 @@ window.B5TERM = {
       heading:"Aesthetic and creative",
       sub:"The last proper slot of the day.",
       body:"A making slot rather than a writing one. Jay will have the materials out.",
-      links:[["Aesthetic and creative shelf","/practice/#ac"]],
+      links:[["Out and about in the library","/practice/#about"],["Aesthetic and creative shelf","/practice/shelves.html#ac"]],
       ways:["Make it and skip the screen","Help someone else with theirs","Make something tiny","Just watch"]
     },
 
@@ -172,7 +172,7 @@ window.B5TERM = {
       heading:"Physical world and exploration",
       sub:"The last slot of the day.",
       body:"Out and about, or looking at how places change over time.",
-      links:[["Physical world shelf","/practice/#pw"]],
+      links:[["Out and about in the library","/practice/#about"],["Physical world shelf","/practice/shelves.html#pw"]],
       ways:["Do it from a window","Work with Jay or HB","Go for a walk and talk about it","Sit this one out"]
     },
 
@@ -180,7 +180,7 @@ window.B5TERM = {
       title:"PE", line:"Three quarters of an hour off the chairs.", type:"key",
       sub:"Three quarters of an hour off the chairs.",
       body:"Moving about for three quarters of an hour. Taking part at whatever level suits you today counts as taking part.",
-      links:[["Build your own training plan","/practice/training-plan.html"],["PE shelf","/practice/#pe"]],
+      links:[["Build your own training plan","/practice/training-plan.html"],["PE shelf","/practice/shelves.html#pe"]],
       ways:["Do your own thing","Work it out with Jay or HB","Keep score instead","Just move"]
     },
 
@@ -188,7 +188,7 @@ window.B5TERM = {
       title:"PFA", line:"Preparation for adulthood, last thing.", type:"plain",
       sub:"The practical side of being an adult.",
       body:"Half an hour on the practical side of being an adult: the future you, sorted out a bit early. It closes the week, so if there is something you want covering, saying so is how it gets in.",
-      links:[["Life skills","/practice/life-skills.html"],["PFA shelf","/practice/#pfa"]],
+      links:[["Out and about in the library","/practice/#about"],["Life skills","/practice/life-skills.html"],["PFA shelf","/practice/shelves.html#pfa"]],
       ways:["Do it with Jay or HB","Watch someone else first","Pick one from another day","Not today"]
     },
 
