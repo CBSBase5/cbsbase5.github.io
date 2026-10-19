@@ -9,9 +9,11 @@
        filename: "writing"               // for the download
      });
 
-   There is no server behind this, so nothing sends on its own.
-   Every route opens a message with the work already written in
-   it, and the student presses send.
+   When the shared memory is on (B5Site.syncUrl, see
+   /teacher/sync.html) the first button sends it straight into the
+   Sends tab of Jay's sheet. Otherwise, and as a backup, every route
+   opens a message with the work already written in it, and the
+   student presses send. Nothing ever goes on its own.
    ========================================================== */
 
 var Base5Send = (function(){
@@ -68,18 +70,25 @@ function wrap(opts){
   ].join("\n");
 }
 
+function syncUrl(){ return (window.B5Site && window.B5Site.syncUrl) || ""; }
+function hqWho(){ return (window.B5Site && window.B5Site.hq) || ""; }
+
 function mount(host, opts){
+  var direct = !!syncUrl();
   host.innerHTML =
     '<div class="sendbox">' +
       '<p class="sendtitle">Send this to Jay</p>' +
-      '<p class="sendwhy">Only if you want to. It opens a message with your work already in it, ' +
-        'and you press send. Nothing goes anywhere on its own.</p>' +
+      (direct
+        ? '<p class="sendwhy">Only if you want to. One tap and it lands in Jay\'s list. Nothing goes anywhere until you press it.</p>'
+        : '<p class="sendwhy">Only if you want to. It opens a message with your work already in it, ' +
+          'and you press send. Nothing goes anywhere on its own.</p>') +
       '<div class="sendwho">' +
         '<label class="sendlab" for="b5who">Your initials</label>' +
         '<input type="text" id="b5who" maxlength="6" placeholder="e.g. LW">' +
       '</div>' +
       '<div class="sendrow">' +
-        '<button class="btn btn-orange" data-a="gmail">Open in Gmail</button>' +
+        (direct ? '<button class="btn btn-orange" data-a="sheet">Send to Jay</button>' : '') +
+        '<button class="btn ' + (direct ? 'btn-quiet' : 'btn-orange') + '" data-a="gmail">Open in Gmail</button>' +
         '<button class="btn btn-quiet" data-a="mail">Email app</button>' +
         '<button class="btn btn-quiet" data-a="copy">Copy it</button>' +
         '<button class="btn btn-quiet" data-a="save">Save a copy</button>' +
@@ -89,7 +98,7 @@ function mount(host, opts){
 
   var whoIn = host.querySelector('#b5who');
   var msg   = host.querySelector('.sendmsg');
-  whoIn.value = getName();
+  whoIn.value = getName() || hqWho();
   whoIn.addEventListener('input', function(){ setName(whoIn.value.trim()) });
 
   function subject(){
@@ -103,6 +112,26 @@ function mount(host, opts){
     noteSent(opts.tool);
     var body = wrap(opts);
     var a = b.dataset.a;
+
+    if(a === 'sheet'){
+      b.disabled = true; msg.textContent = 'Sending...';
+      fetch(syncUrl(), { method: 'POST', body: JSON.stringify({
+        action: 'send', who: whoIn.value.trim() || hqWho(), tool: opts.tool,
+        text: opts.getText(), page: location.pathname
+      }) })
+        .then(function(r){ return r.json(); })
+        .then(function(o){
+          if(!o || !o.ok) throw new Error('no');
+          msg.textContent = 'Sent. It is in Jay\'s list now.';
+          b.textContent = 'Sent';
+          setTimeout(function(){ b.disabled = false; b.textContent = 'Send to Jay'; }, 4000);
+        })
+        .catch(function(){
+          b.disabled = false;
+          msg.textContent = 'That did not go through just now. Open in Gmail does the same job.';
+        });
+      return;
+    }
 
     if(a === 'gmail'){
       window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' +

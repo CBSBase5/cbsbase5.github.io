@@ -72,14 +72,29 @@ function contents(blob){
 var got = null;
 function fetchFolder(){
   if(got) return got;
-  got = new Promise(function(res){
+  var url = window.B5Site && window.B5Site.syncUrl;
+  got = (url ? fromSheet(url) : Promise.resolve(null)).then(function(b){ return b || fromFile(); });
+  return got;
+}
+/* with the shared memory on, the folder comes from the Folders tab of Jay's sheet */
+function fromSheet(url){
+  return new Promise(function(res){
+    var done = false, t = setTimeout(function(){ if(!done){ done = true; res(null); } }, 8000);
+    fetch(url + "?action=folder&who=" + encodeURIComponent(WHO))
+      .then(function(r){ return r.json(); })
+      .then(function(o){ if(!done){ done = true; clearTimeout(t); res(o && o.ok && o.data ? { who: WHO, updated: "", data: o.data } : null); } })
+      .catch(function(){ if(!done){ done = true; clearTimeout(t); res(null); } });
+  });
+}
+/* otherwise (or if the sheet cannot be reached) from /data/folders/<who>.js */
+function fromFile(){
+  return new Promise(function(res){
     var s = document.createElement("script");
     s.src = "/data/folders/" + WHO.toLowerCase() + ".js?t=" + Date.now();
     s.onload = function(){ var b = window.B5FOLDER; res(b && b.data && String(b.who).toUpperCase() === WHO.toUpperCase() ? b : null); };
     s.onerror = function(){ res(null); };
     document.head.appendChild(s);
   });
-  return got;
 }
 
 /* ---------- looks: the HQ's own colours via its CSS variables ---------- */
