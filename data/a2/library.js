@@ -171,7 +171,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-25",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "scene-change",
@@ -315,7 +315,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-12-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "punctuation-purpose",
@@ -519,7 +519,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-03",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "convert-it",
@@ -591,7 +591,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-12",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "hidden-messages",
@@ -695,9 +695,9 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Getting about",
    "subj": "s-pfa",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Symbols on signs and maps, and how to read a bus timetable, so you can find your way.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-20",
    "ready": false
   },

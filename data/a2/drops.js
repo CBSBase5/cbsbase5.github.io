@@ -751,7 +751,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -799,7 +799,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -831,7 +831,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -863,7 +863,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -895,7 +895,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -927,7 +927,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1464,7 +1464,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-read-the-signs.html?lv=spicy",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1512,7 +1512,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1544,7 +1544,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1576,7 +1576,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1592,7 +1592,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-read-the-signs.html?lv=medium",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1608,7 +1608,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-read-the-signs.html?lv=medium",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
@@ -1843,7 +1843,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1955,7 +1955,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1987,7 +1987,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2003,7 +2003,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2019,7 +2019,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2539,7 +2539,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -3255,7 +3255,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -3287,7 +3287,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -3303,7 +3303,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -3319,7 +3319,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
