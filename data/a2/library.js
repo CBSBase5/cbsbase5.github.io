@@ -63,7 +63,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-19",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "case-file",
@@ -183,7 +183,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "text-skeleton",
@@ -239,9 +239,9 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Writing",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A travelogue tells the story of a journey: written as I, in the order it happened.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-11",
    "ready": false
   },
@@ -291,7 +291,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-30",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "semicolons",
@@ -299,9 +299,9 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A colon says \"here it comes\". A semicolon joins two sentences that belong together.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-10",
    "ready": false
   },
@@ -543,7 +543,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "plan-the-trip",

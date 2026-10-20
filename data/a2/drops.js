@@ -555,7 +555,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1375,7 +1375,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2267,7 +2267,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2363,7 +2363,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2887,7 +2887,7 @@ window.B5DROPS = {
      5
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2976,7 +2976,7 @@ window.B5DROPS = {
    "title": "Semicolons and colons",
    "subject": "English",
    "href": "/egw/a2-semicolons.html?lv=spicy",
-   "note": "",
+   "note": "Colons and semicolons: what each one does and when to pick it. Four five minute chunks and a punctuation card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
@@ -3184,7 +3184,7 @@ window.B5DROPS = {
    "title": "My travelogue",
    "subject": "English",
    "href": "/hk/a2-my-travelogue.html?lv=mild",
-   "note": "",
+   "note": "Planning and writing a travelogue: a real trip or a journey through time. Four five minute chunks, ending with your own short travelogue, whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
@@ -3200,7 +3200,7 @@ window.B5DROPS = {
    "title": "My travelogue",
    "subject": "English",
    "href": "/jt-hq/a2-my-travelogue.html?lv=mild",
-   "note": "",
+   "note": "Planning and writing a travelogue: a real trip or a journey through time. Four five minute chunks, ending with your own short travelogue, whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
@@ -3216,7 +3216,7 @@ window.B5DROPS = {
    "title": "My travelogue",
    "subject": "English",
    "href": "/lc/a2-my-travelogue.html?lv=mild",
-   "note": "",
+   "note": "Planning and writing a travelogue: a real trip or a journey through time. Four five minute chunks, ending with your own short travelogue, whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
@@ -3328,7 +3328,7 @@ window.B5DROPS = {
    "title": "My travelogue",
    "subject": "English",
    "href": "/lp/a2-my-travelogue.html?lv=mild",
-   "note": "",
+   "note": "Planning and writing a travelogue: a real trip or a journey through time. Four five minute chunks, ending with your own short travelogue, whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
