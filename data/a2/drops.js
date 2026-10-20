@@ -251,7 +251,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -287,7 +287,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -323,7 +323,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -359,7 +359,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -391,7 +391,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -423,7 +423,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1183,7 +1183,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1439,7 +1439,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2071,7 +2071,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2103,7 +2103,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2135,7 +2135,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2167,7 +2167,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2199,7 +2199,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2235,7 +2235,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2855,7 +2855,7 @@ window.B5DROPS = {
      5
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -3168,7 +3168,7 @@ window.B5DROPS = {
    "title": "Plan the trip",
    "subject": "Maths",
    "href": "/egw/a2-plan-the-trip.html?lv=spicy",
-   "note": "",
+   "note": "Planning a journey: times, timetables and costs. Four five minute chunks with a planner to try, and a trip card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3232,7 +3232,7 @@ window.B5DROPS = {
    "title": "Plan the trip",
    "subject": "Maths",
    "href": "/lp/a2-plan-the-trip.html?lv=medium",
-   "note": "",
+   "note": "Planning a journey: times, timetables and costs. Four five minute chunks with a planner to try, and a trip card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3248,7 +3248,7 @@ window.B5DROPS = {
    "title": "Proofreading patrol",
    "subject": "English",
    "href": "/lw/a2-proofread.html?lv=medium",
-   "note": "",
+   "note": "Proofreading patrol: catching punctuation slips in a whole piece of writing. Four five minute chunks and a before and after card. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
@@ -3280,7 +3280,7 @@ window.B5DROPS = {
    "title": "Proofreading patrol",
    "subject": "English",
    "href": "/hk/a2-proofread.html?lv=mild",
-   "note": "",
+   "note": "Proofreading patrol: catching punctuation slips in a whole piece of writing. Four five minute chunks and a before and after card. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
@@ -3296,7 +3296,7 @@ window.B5DROPS = {
    "title": "Proofreading patrol",
    "subject": "English",
    "href": "/jt-hq/a2-proofread.html?lv=mild",
-   "note": "",
+   "note": "Proofreading patrol: catching punctuation slips in a whole piece of writing. Four five minute chunks and a before and after card. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
@@ -3312,7 +3312,7 @@ window.B5DROPS = {
    "title": "Proofreading patrol",
    "subject": "English",
    "href": "/lc/a2-proofread.html?lv=mild",
-   "note": "",
+   "note": "Proofreading patrol: catching punctuation slips in a whole piece of writing. Four five minute chunks and a before and after card. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-punct",

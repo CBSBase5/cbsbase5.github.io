@@ -311,9 +311,9 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Read it slowly, one sweep at a time, and catch the slips before anyone else does.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-12-11",
    "ready": false
   },
@@ -483,7 +483,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-18",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "kit-it-out",
@@ -531,7 +531,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-07",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "speed-distance-time",
@@ -551,9 +551,9 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Hours and minutes, timetables and a budget: everything you need to get there on time.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-11",
    "ready": false
   },
@@ -675,7 +675,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-27",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "getting-around",
@@ -687,7 +687,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-06",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "read-the-signs",
