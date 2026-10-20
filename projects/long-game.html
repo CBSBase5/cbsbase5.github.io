@@ -454,6 +454,8 @@ body.golden .topbar { box-shadow: inset 0 -2px 0 #f6c04a, 0 0 20px #f6c04a55 !im
   .card { max-height: 50%; bottom: 150px; }
 }
 @media (max-width: 900px) { .stat.rank small { display: none; } }
+@media (max-width: 1150px) { .when .turn { display: none; } }
+@media (max-width: 440px) { .when { padding: 0 4px; gap: 4px; } .year { font-size: 14px !important; } .stat { padding: 0 4px !important; } .res .stat small { display: none; } }
 @media (max-width: 600px) { .res .stat:nth-child(3), .res .stat:nth-child(4), .res .stat.rank, .res .stat small { display: none; } .when .era { display: none; } .stat { padding: 0 7px; } .year { font-size: 17px; } .tbtns .btn { padding: 0 7px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
 </style>
@@ -1888,10 +1890,10 @@ function lunge(u, k) {
 }
 function tick(dt, now) {
   if ((ambTick(dt, now) | terrainTick(dt, now)) && Math.floor(now / 33) % 2 === 0) GL.dirty = true;
-  if (ANIMS.length) { GL.dirty = true; var adt = dt / animMul(); ANIMS = ANIMS.filter(function (a) { if (a.step) return a.step(a, a === GLIDE ? dt : adt); a.t += adt; var p = Math.min(1, a.t / a.dur), e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  if (ANIMS.length) { GL.dirty = true; var adt = dt / animMul() * (GL.slowUntil > now ? 0.3 : 1), old = ANIMS, n0 = old.length; ANIMS = old.slice(0, n0).filter(function (a) { try { if (a.step) return a.step(a, a === GLIDE ? dt : adt); } catch (err) { if (window.console) console.error(err); return false; } a.t += adt; var p = Math.min(1, a.t / a.dur), e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     a.obj.position.lerpVectors(a.from, a.to, e); a.obj.position.y += Math.sin(p * Math.PI) * a.hop;
-    if (p >= 1 && a.back) { ANIMS.push({ obj: a.obj, from: a.to.clone(), to: a.from.clone(), t: 0, dur: 0.25, hop: 0 }); }
-    return p < 1; }); }
+    if (p >= 1 && a.back) { old.push({ obj: a.obj, from: a.to.clone(), to: a.from.clone(), t: 0, dur: 0.25, hop: 0 }); }
+    return p < 1; }); if (old.length > n0) ANIMS = ANIMS.concat(old.slice(n0)); } // keep anything an animation started while it ran
   if (GL.shake > 0) { GL.shake = Math.max(0, GL.shake - dt); GL.cam.position.x += (Math.random() - 0.5) * GL.shake * 0.4; GL.cam.position.y += (Math.random() - 0.5) * GL.shake * 0.4; GL.dirty = true; }
   if (GL.cities && GL.cities.children.length && !$("hud").hidden && SET.qual !== "low") { var bob = false; GL.cities.traverse(function (o) { var u = o.userData; if (u.bob) { o.position.y = 0.42 + Math.sin(now / 400) * 0.05; o.rotation.y = now / 700; bob = true; }
       else if (u.spin) { o.rotation[u.spin] = now / 600; bob = true; } else if (u.smoke) { var ph = (now / 1800 + o.id * 0.37) % 1; o.position.y = u.smoke + ph * 0.18; o.scale.setScalar(0.7 + ph * 0.8); bob = true; }
@@ -2751,7 +2753,9 @@ function cloudDrift(mode) {
   fresh.slice(0, 80).forEach(function (k) { var m = new THREE.Mesh(geo, mat); m.position.set(wx(k), 0.5 + hash(k, 13) * 0.1, wz(k)); var a = hash(k, 21) * Math.PI * 2; m.userData.v = new THREE.Vector3(Math.cos(a) * 0.7, 0.35 + hash(k, 22) * 0.3, Math.sin(a) * 0.7); m.rotation.y = hash(k, 15) * 6; GL.scene.add(m); parts.push(m); });
   var t = 0; ANIMS.push({ step: function (a, dt) { t += dt; var p = Math.min(1, t / 1.3);
     parts.forEach(function (m) { m.position.addScaledVector(m.userData.v, dt); var s = 1 + p * 0.7; m.scale.set(s, 1 + p * 0.3, s); });
-    mat.opacity = 1 - p * p; if (p >= 1) { parts.forEach(function (m) { GL.scene.remove(m); }); geo.dispose(); mat.dispose(); } return p < 1; } });
+    mat.opacity = 1 - p * p; if (p >= 1) clear(); return p < 1; } });
+  var gone = false, clear = function () { if (gone) return; gone = true; parts.forEach(function (m) { GL.scene.remove(m); }); geo.dispose(); mat.dispose(); GL.dirty = true; };
+  setTimeout(clear, 4000 * Math.max(1, animMul()));
 }
 
 /* ---------- ripples: borders spreading, rivals acting ---------- */
