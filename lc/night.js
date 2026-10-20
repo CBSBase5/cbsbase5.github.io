@@ -36,6 +36,8 @@ css.textContent =
 document.head.appendChild(css);
 
 function scene(){
+  /* the same corridor as the Night Corridor game, so the two always match */
+  if(window.LCCorridor && LCCorridor.scene) return LCCorridor.scene(0, null, false, "lcn");
   return '<svg viewBox="0 0 800 500" aria-hidden="true">' +
     '<defs><pattern id="lcnP" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="#8c7e44"/><path d="M11 3l3 8-3 8-3-8z" fill="#7b6e3a"/></pattern>' +
     '<radialGradient id="lcnG" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#fff9c4" stop-opacity=".5"/><stop offset="1" stop-color="#fff9c4" stop-opacity="0"/></radialGradient></defs>' +
@@ -67,7 +69,7 @@ function boot(){
   var hero = document.querySelector(".hero");
   if(!hero || hero.querySelector(".lcn-scene")) return;
   hero.classList.add("lcn-hero");
-  var sc = document.createElement("div"); sc.className = "lcn-scene"; sc.innerHTML = scene();
+  var sc = document.createElement("div"); sc.className = "lcn-scene"; sc.setAttribute("aria-hidden", "true"); sc.innerHTML = scene();
   hero.insertBefore(sc, hero.firstChild);
   var h1 = hero.querySelector("h1");
   if(h1){

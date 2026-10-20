@@ -49,95 +49,272 @@ var ODD = [
   { id: "bird",    say: "There was a bird on the light. Jay would have liked that one." }
 ];
 
-/* ---------- drawing ---------- */
-var W = 800, H = 500;
-function scene(floor, odd, reveal){
+/* ---------- drawing ----------
+   A real one point perspective corridor. World units: the walls are
+   at x = -1 and x = 1, the floor is y = 0, the ceiling y = CEIL and
+   the eye is at EYE, looking down +z. P() turns a world point into
+   a point on the 800 x 500 picture. Every wall slice, floor tile and
+   ceiling tile is shaded by how near it is to a working strip light,
+   and things get darker the further away they are. Doors, signs and
+   posters are drawn flat and then laid onto the wall, so they line
+   up with the corridor instead of floating on it.
+   LCCorridor.scene(floor, odd, reveal, idp) also draws the corridor
+   behind LC's home page greeting (/lc/night.js). */
+var W = 800, H = 500, CX = 400, CY = 226, F = 380;
+var EYE = 1.42, CEIL = 2.3, NZ = 0.5, FZ = 5.6, DH = 1.95;
+var LIGHTZ = [1.25, 2.45, 3.65, 4.85];
+
+function P(x, y, z){ return [CX + F * x / z, CY - F * (y - EYE) / z]; }
+function pt(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }
+function poly(pts, fill, extra){ return '<polygon points="' + pts.map(pt).join(" ") + '" fill="' + fill + '"' + (extra || "") + '/>'; }
+/* a rectangle on a side wall (s = -1 left, 1 right) between depths za..zb and heights ya..yb */
+function wallQ(s, za, zb, ya, yb){ return [P(s, ya, za), P(s, yb, za), P(s, yb, zb), P(s, ya, zb)]; }
+function floorQ(xa, xb, za, zb, y){ y = y || 0; return [P(xa, y, za), P(xb, y, za), P(xb, y, zb), P(xa, y, zb)]; }
+
+/* colour helpers */
+function rgb(h){ return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
+function hex(c){ return "#" + c.map(function(v){ v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); }
+function shade(h, k){
+  /* k below 1 darkens; above 1 warms towards the colour of the strip lights */
+  var c = rgb(h), warm = [255, 240, 190];
+  if(k <= 1) return hex(c.map(function(v){ return v * k; }));
+  var t = Math.min(1, (k - 1) * 1.6);
+  return hex(c.map(function(v, i){ return v + (warm[i] - v) * t * 0.5; }));
+}
+/* how lit a point at depth z is: a little ambient, a pool under each working light, darker further away */
+function lit(z, lights){
+  var k = 0.26;
+  for(var i = 0; i < LIGHTZ.length; i++) if(lights[i]){ var d = z - LIGHTZ[i]; k += 0.78 * Math.exp(-(d * d) / 0.62); }
+  return Math.min(1.12, k) * (1 - 0.42 * Math.min(1, z / FZ));
+}
+
+/* lay a flat drawing onto a side wall. Local units are centimetres, centred on (zc, yc);
+   +x reads left to right as you look at that wall, +y goes down */
+function onWall(s, zc, yc, svg){
+  var a = F / (zc * zc) * 0.01, b = F * (yc - EYE) / (zc * zc) * -s * 0.01, d = F / zc * 0.01, p = P(s, yc, zc);
+  return '<g transform="matrix(' + [a, b, 0, d, p[0], p[1]].map(function(v){ return +v.toFixed(4); }).join(" ") + ')">' + svg + '</g>';
+}
+/* stand a flat drawing up in the corridor, facing you, feet at (x, y, z). cm units, origin at its feet */
+function standUp(x, y, z, svg, unit){
+  var p = P(x, y, z), k = F / z * (unit || 0.01);
+  return '<g transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ') scale(' + k.toFixed(4) + ')">' + svg + '</g>';
+}
+function txt(x, y, size, fill, s, extra, weight){
+  return '<text x="' + x + '" y="' + y + '" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="' + (weight || 700) + '" font-size="' + size + '" fill="' + fill + '"' + (extra || "") + '>' + s + '</text>';
+}
+
+function scene(floor, odd, reveal, idp){
+  idp = idp || "lcc";
   var o = function(id){ return odd === id; };
   var hi = function(id, svg){ return reveal && o(id) ? '<g class="lcc-hi">' + svg + '</g>' : svg; };
-  var paper = o("paper") ? "#7c2f2a" : "#b9a65a";
-  var paper2 = o("paper") ? "#6a2522" : "#a8964c";
-  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="lcc-svg" role="img" aria-label="A long corridor at night, Floor ' + floor + '">' +
+  var lights = LIGHTZ.map(function(z, i){ return !(i === 1 && o("light")); });
+  var red = o("paper");
+  var PAPER_A = red ? "#8a2c26" : "#b8a45c", PAPER_B = red ? "#782420" : "#ab9752";
+  var LOW = red ? "#4e1a17" : "#6f6440", RAIL = "#4a3f28", SKIRT = "#2c271b";
+  var TILE_A = "#77725f", TILE_B = "#6a6553", CEIL_A = "#d9d4b8", CEIL_B = "#cfc9ad";
+  var s = "", z, i, j, k;
+
+  s += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="lcc-svg" role="img" aria-label="A long corridor at night, Floor ' + floor + '">' +
     '<defs>' +
-      '<pattern id="lccP" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="' + paper + '"/><path d="M11 3l3 8-3 8-3-8z" fill="' + paper2 + '"/><rect x="0" y="0" width="2" height="22" fill="' + paper2 + '" opacity=".6"/></pattern>' +
-      '<pattern id="lccF" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#5e5a4a"/><rect width="20" height="20" fill="#686452"/><rect x="20" y="20" width="20" height="20" fill="#686452"/></pattern>' +
-      '<radialGradient id="lccG" cx="50%" cy="0%" r="90%"><stop offset="0" stop-color="#fff9c4" stop-opacity=".55"/><stop offset="1" stop-color="#fff9c4" stop-opacity="0"/></radialGradient>' +
-      '<linearGradient id="lccD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></linearGradient>' +
+      '<radialGradient id="' + idp + 'Pool"><stop offset="0" stop-color="#fff6c8" stop-opacity=".5"/><stop offset=".55" stop-color="#fff2b0" stop-opacity=".16"/><stop offset="1" stop-color="#fff2b0" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="' + idp + 'Glow"><stop offset="0" stop-color="#fffbe0" stop-opacity=".75"/><stop offset="1" stop-color="#fff6c0" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="' + idp + 'Exit"><stop offset="0" stop-color="#5dff9b" stop-opacity=".55"/><stop offset="1" stop-color="#5dff9b" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="' + idp + 'Vig" cx="50%" cy="46%" r="72%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient>' +
+      '<linearGradient id="' + idp + 'Spill" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffe98a" stop-opacity="0"/></linearGradient>' +
+      '<clipPath id="' + idp + 'Floor"><polygon points="' + floorQ(-1, 1, NZ, FZ).map(pt).join(" ") + '"/></clipPath>' +
+      '<linearGradient id="' + idp + 'Wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4c4" stop-opacity=".14"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>' +
     '</defs>' +
-    /* ceiling, floor, walls in one point perspective; vanishing box 330..470 x 170..300 */
-    '<polygon points="0,0 800,0 470,170 330,170" fill="#d8d4b4"/>' +
-    '<polygon points="0,500 800,500 470,300 330,300" fill="url(#lccF)"/>' +
-    '<polygon points="0,500 800,500 470,300 330,300" fill="url(#lccD)" opacity=".7"/>' +
-    '<polygon points="0,0 330,170 330,300 0,500" fill="url(#lccP)"/>' +
-    '<polygon points="800,0 470,170 470,300 800,500" fill="url(#lccP)"/>' +
-    '<polygon points="0,0 330,170 330,300 0,500" fill="#000" opacity=".18"/>' +
-    '<polygon points="800,0 470,170 470,300 800,500" fill="#000" opacity=".1"/>' +
-    /* skirting */
-    '<polygon points="0,470 330,290 330,300 0,500" fill="#3b3a30"/><polygon points="800,470 470,290 470,300 800,500" fill="#3b3a30"/>' +
-    /* far wall, exit door and sign */
-    '<rect x="330" y="170" width="140" height="130" fill="' + (o("paper") ? "#5e2420" : "#9c8c4a") + '"/>' +
-    '<rect x="372" y="208" width="56" height="92" fill="#5b4a33" stroke="#2e2619" stroke-width="3"/><circle cx="420" cy="256" r="2.5" fill="#d8c27a"/>' +
-    hi("exit", '<rect x="370" y="186" width="60" height="18" rx="2" fill="#123c22"/><text x="400" y="200" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#5dff9b" class="lcc-glow">' + (o("exit") ? "TIXE" : "EXIT") + '</text>') +
-    (o("figure") ? hi("figure", '<g class="lcc-fig"><ellipse cx="400" cy="236" rx="7" ry="8" fill="#111"/><path d="M391 246q9-6 18 0l2 54h-22z" fill="#111"/></g>') : "") +
-    /* ceiling strip lights */
-    light(0, o("light") ? false : true) + light(1, true) + light(2, true) +
-    (o("bird") ? hi("bird", '<g transform="translate(470 92) scale(.9)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#3a8fd6"/><circle cx="11" cy="-7" r="8" fill="#3a8fd6"/><path d="M18 -8l8 3-8 3z" fill="#f2a516"/><circle cx="13" cy="-9" r="1.8" fill="#111"/><path d="M-12 2l-11-4 4 8z" fill="#3a8fd6"/></g>') : "") +
-    /* left wall: near door, poster, extinguisher */
-    hi("door", door("L", o("door"))) +
-    hi("poster", '<g transform="translate(206 168) skewY(28)"><rect x="0" y="0" width="58" height="76" fill="#efe6c8" stroke="#3b3a30" stroke-width="3"/>' +
-      '<g' + (o("poster") ? ' transform="rotate(180 29 38)"' : '') + '><circle cx="29" cy="26" r="13" fill="#e0b84a"/><path d="M22 28q7 7 14 0" stroke="#3b3a30" stroke-width="2.5" fill="none"/><circle cx="24" cy="22" r="2" fill="#3b3a30"/><circle cx="34" cy="22" r="2" fill="#3b3a30"/>' +
-      '<text x="29" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#3b3a30">SMILE</text><text x="29" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#3b3a30">IT IS LATE</text></g></g>') +
-    (o("ext") ? hi("ext", '<g transform="translate(276 300) skewY(28)"><rect x="0" y="-4" width="20" height="4" fill="#3b3a30"/><rect x="2" y="0" width="16" height="3" fill="#2a2920" opacity=".5"/></g>') :
-      '<g transform="translate(276 284) skewY(28)"><rect x="0" y="12" width="20" height="44" rx="6" fill="#c8262a"/><rect x="5" y="0" width="10" height="14" fill="#2a2920"/><path d="M15 6h10v8" stroke="#2a2920" stroke-width="3" fill="none"/><rect x="3" y="26" width="14" height="10" fill="#f3f0e2"/></g>') +
-    /* right wall: clock, notice board, door, extra door */
-    hi("clock", clock(o("clock"))) +
-    hi("notice", '<g transform="translate(560 140) skewY(-28)"><rect x="0" y="0" width="74" height="54" fill="#8a6a3e" stroke="#4a3820" stroke-width="3"/><rect x="8" y="8" width="34" height="24" fill="#fffbe8"/><rect x="46" y="12" width="20" height="30" fill="#ffe08a"/>' +
-      '<text x="25" y="20" text-anchor="middle" font-family="Arial,sans-serif" font-size="' + (o("notice") ? 8 : 7) + '" font-weight="700" fill="' + (o("notice") ? "#b3261e" : "#3b3a30") + '">' + (o("notice") ? "TURN" : "FIRE") + '</text>' +
-      '<text x="25" y="29" text-anchor="middle" font-family="Arial,sans-serif" font-size="' + (o("notice") ? 8 : 7) + '" font-weight="700" fill="' + (o("notice") ? "#b3261e" : "#3b3a30") + '">' + (o("notice") ? "BACK" : "DRILL") + '</text></g>') +
-    door("R", false) +
-    (o("extra") ? hi("extra", '<g transform="translate(486 204) skewY(-28)"><rect x="0" y="0" width="34" height="78" fill="#5b4a33" stroke="#2e2619" stroke-width="3"/><circle cx="6" cy="42" r="2" fill="#d8c27a"/></g>') : "") +
-    /* floor: plaque, wet floor sign, footprints, Bonnie */
-    hi("plaque", '<g transform="translate(36 250) skewY(28)"><rect x="0" y="0" width="70" height="40" rx="4" fill="#1f2a22" stroke="#cfc9a6" stroke-width="3"/><text x="35" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#cfc9a6">FLOOR</text>' +
-      '<text x="35" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#fbf8e4">' + (o("plaque") ? (floor + 3) % 9 : floor) + '</text></g>') +
-    hi("wet", '<g transform="translate(560 360)"><path d="M0 70l22-70h16l22 70z" fill="#f2c916" stroke="#2a2920" stroke-width="3" stroke-linejoin="round"/><text x="30" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#2a2920">' + (o("wet") ? "DRY" : "WET") + '</text><text x="30" y="51" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#2a2920">FLOOR</text></g>') +
-    (o("steps") ? hi("steps", steps()) : "") +
-    (o("bonnie") ? hi("bonnie", '<g transform="translate(330 352)">' + (window.A2ART ? A2ART.bonnie(0, 0, 0.9, "sit") : '<ellipse cx="0" cy="10" rx="22" ry="24" fill="#9c6b45"/><circle cx="0" cy="-22" r="16" fill="#a87650"/>') + '</g>') : "") +
-    /* the hum: a soft glow from the lights */
-    '<polygon points="0,0 800,0 470,170 330,170" fill="url(#lccG)"/>' +
-    '</svg>';
-  return s;
-}
-function light(i, on){
-  /* three lights receding along the ceiling */
-  var y = [40, 98, 138][i], w = [300, 150, 80][i], h = [14, 8, 5][i];
-  var x = 400 - w / 2;
-  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="' + (on ? "#fffbe0" : "#55554a") + '"' + (on && i === 1 ? ' class="lcc-flick"' : '') + '/>' +
-    (on ? '<rect x="' + (x - 6) + '" y="' + (y - 4) + '" width="' + (w + 12) + '" height="' + (h + 8) + '" rx="6" fill="#fff8b0" opacity=".18"/>' : "");
-}
-function door(side, ajar){
-  if(side === "L"){
-    return '<g transform="translate(60 120) skewY(28)">' +
-      '<rect x="0" y="0" width="92" height="210" fill="#4a3a26" stroke="#241b10" stroke-width="5"/>' +
-      (ajar ? '<rect x="0" y="0" width="16" height="210" fill="#fff4a8" opacity=".9"/><rect x="16" y="0" width="76" height="210" fill="#5b4a33" stroke="#241b10" stroke-width="4"/>' : '<rect x="10" y="12" width="72" height="80" fill="#57452e"/><rect x="10" y="108" width="72" height="88" fill="#57452e"/>') +
-      '<circle cx="80" cy="112" r="5" fill="#d8c27a"/><rect x="26" y="-26" width="40" height="18" fill="#1f2a22"/><text x="46" y="-12" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#cfc9a6">B12</text></g>';
+    '<rect width="800" height="500" fill="#14130e"/>';
+
+  /* ceiling tiles */
+  var cz = [NZ, 0.9, 1.5, 2.1, 2.7, 3.3, 3.9, 4.5, 5.1, FZ];
+  for(i = 0; i < cz.length - 1; i++){
+    k = lit((cz[i] + cz[i + 1]) / 2, lights) * 0.95;
+    for(j = 0; j < 4; j++){
+      var xa = -1 + j * 0.5;
+      s += poly(floorQ(xa, xa + 0.5, cz[i], cz[i + 1], CEIL), shade((i + j) % 2 ? CEIL_A : CEIL_B, k), ' stroke="' + shade("#8f8a72", k) + '" stroke-width="1"');
+    }
   }
-  return '<g transform="translate(626 196) skewY(-28)"><rect x="0" y="0" width="60" height="140" fill="#4a3a26" stroke="#241b10" stroke-width="4"/><rect x="8" y="10" width="44" height="52" fill="#57452e"/><circle cx="8" cy="76" r="4" fill="#d8c27a"/></g>';
+
+  /* floor tiles, checked, with dark grout */
+  var fz = [NZ];
+  for(z = 0.75; z < FZ; z += 0.42) fz.push(z);
+  fz.push(FZ);
+  for(i = 0; i < fz.length - 1; i++){
+    k = lit((fz[i] + fz[i + 1]) / 2, lights) * 0.92;
+    for(j = 0; j < 4; j++){
+      var fx = -1 + j * 0.5;
+      s += poly(floorQ(fx, fx + 0.5, fz[i], fz[i + 1]), shade((i + j) % 2 ? TILE_A : TILE_B, k), ' stroke="' + shade("#3a372c", k) + '" stroke-width="1.2"');
+    }
+  }
+
+  /* the two side walls in thin slices, so the light can fall along them */
+  [-1, 1].forEach(function(sd){
+    var side = sd < 0 ? 0.9 : 1, n = 0;
+    for(z = NZ; z < FZ - 0.001; z += 0.2){
+      var z2 = Math.min(FZ, z + 0.2), kk = lit((z + z2) / 2, lights) * side;
+      s += poly(wallQ(sd, z, z2, 0.98, CEIL), shade(n % 2 ? PAPER_A : PAPER_B, kk));
+      s += poly(wallQ(sd, z, z2, 0.14, 0.92), shade(LOW, kk));
+      s += poly(wallQ(sd, z, z2, 0.92, 0.98), shade(RAIL, kk));
+      s += poly(wallQ(sd, z, z2, 0, 0.14), shade(SKIRT, kk));
+      n++;
+    }
+    /* soft light from above, shadow near the floor */
+    s += poly(wallQ(sd, NZ, FZ, 0, CEIL), "url(#" + idp + "Wall)");
+    /* coving where the wall meets the ceiling */
+    s += poly(wallQ(sd, NZ, FZ, CEIL - 0.05, CEIL), "#000", ' opacity=".18"');
+  });
+
+  /* far wall: fire doors under the far light */
+  var kf = lit(FZ, lights);
+  s += poly([P(-1, 0, FZ), P(-1, CEIL, FZ), P(1, CEIL, FZ), P(1, 0, FZ)], shade(PAPER_B, kf * 0.85));
+  s += poly([P(-1, 0, FZ), P(-1, 0.92, FZ), P(1, 0.92, FZ), P(1, 0, FZ)], shade(LOW, kf * 0.85));
+  s += poly([P(-0.62, 0, FZ), P(-0.62, 1.95, FZ), P(0.62, 1.95, FZ), P(0.62, 0, FZ)], shade("#2a241a", 1));
+  s += poly([P(-0.56, 0, FZ), P(-0.56, 1.89, FZ), P(-0.01, 1.89, FZ), P(-0.01, 0, FZ)], shade("#6a5233", kf));
+  s += poly([P(0.01, 0, FZ), P(0.01, 1.89, FZ), P(0.56, 1.89, FZ), P(0.56, 0, FZ)], shade("#6a5233", kf));
+  s += poly([P(-0.4, 1.15, FZ), P(-0.4, 1.6, FZ), P(-0.16, 1.6, FZ), P(-0.16, 1.15, FZ)], "#1c2a2c");
+  s += poly([P(0.16, 1.15, FZ), P(0.16, 1.6, FZ), P(0.4, 1.6, FZ), P(0.4, 1.15, FZ)], "#1c2a2c");
+  s += poly([P(-0.5, 0.95, FZ), P(-0.5, 1.0, FZ), P(0.5, 1.0, FZ), P(0.5, 0.95, FZ)], "#b9b4a0");
+
+  /* someone standing at the far end */
+  if(o("figure")) s += hi("figure", '<g class="lcc-fig">' + standUp(0.32, 0, FZ - 0.25,
+    '<ellipse cx="0" cy="-4" rx="30" ry="6" fill="#000" opacity=".4"/>' +
+    '<path d="M-22 0 L-19 -84 Q-24 -128 -15 -138 L15 -138 Q24 -128 19 -84 L22 0 Z" fill="#0b0b09"/>' +
+    '<ellipse cx="0" cy="-154" rx="13" ry="16" fill="#0b0b09"/><rect x="-6" y="-142" width="12" height="8" fill="#0b0b09"/>') + '</g>');
+
+  /* light pools on the floor and their shine */
+  s += '<g clip-path="url(#' + idp + 'Floor)">';
+  LIGHTZ.forEach(function(lz, li){
+    if(!lights[li]) return;
+    var c = P(0, 0, lz), rx = F * 1.15 / lz, ry = F * EYE * 0.9 / (lz * lz);
+    s += '<ellipse cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="url(#' + idp + 'Pool)"/>';
+    var r = P(0, 0, lz + 0.9);
+    s += '<ellipse cx="' + r[0].toFixed(1) + '" cy="' + r[1].toFixed(1) + '" rx="' + (F * 0.3 / lz).toFixed(1) + '" ry="' + (F * EYE * 0.3 / ((lz + 0.9) * (lz + 0.9))).toFixed(1) + '" fill="#fffbe0" opacity=".1"/>';
+  });
+
+  s += '</g>';
+
+  /* wet footprints walking away from you */
+  if(o("steps")){
+    var st = "";
+    for(i = 0; i < 9; i++){
+      var sz = 1.0 + i * 0.45, sx = i % 2 ? 0.12 : -0.12, c2 = P(sx, 0, sz);
+      st += '<ellipse cx="' + c2[0].toFixed(1) + '" cy="' + c2[1].toFixed(1) + '" rx="' + (F * 0.055 / sz).toFixed(1) + '" ry="' + (F * EYE * 0.13 / (sz * sz)).toFixed(1) + '" fill="#18242a" opacity=".62"/>';
+    }
+    s += hi("steps", st);
+  }
+
+  /* LEFT WALL: floor sign, door B12 (sometimes open), poster, fire extinguisher, a far door */
+  s += hi("plaque", onWall(-1, 1.36, 1.6,
+    '<rect x="-24" y="-15" width="48" height="30" rx="3" fill="#1f2a22" stroke="#cfc9a6" stroke-width="2.5"/>' +
+    txt(0, -4, 7.5, "#cfc9a6", "FLOOR") + txt(0, 11.5, 14, "#fbf8e4", (o("plaque") ? (floor + 3) % 9 : floor))));
+  s += hi("door", door(-1, 1.62, 2.32, o("door"), "B12", idp, lights));
+  s += hi("poster", onWall(-1, 2.78, 1.38,
+    '<rect x="-24" y="-32" width="48" height="64" fill="#efe6c8" stroke="#3b3a30" stroke-width="2.5"/>' +
+    '<g' + (o("poster") ? ' transform="rotate(180)"' : '') + '><circle cx="0" cy="-12" r="11" fill="#e0b84a"/><path d="M-6 -10q6 6 12 0" stroke="#3b3a30" stroke-width="2.2" fill="none"/>' +
+    '<circle cx="-4" cy="-15" r="1.8" fill="#3b3a30"/><circle cx="4" cy="-15" r="1.8" fill="#3b3a30"/>' +
+    txt(0, 14, 10, "#3b3a30", "SMILE") + txt(0, 25, 6.5, "#3b3a30", "IT IS LATE") + '</g>'));
+  s += o("ext") ? hi("ext", onWall(-1, 3.3, 0.8, '<rect x="-9" y="-4" width="18" height="5" fill="#2a2920"/><rect x="-9" y="1" width="18" height="40" fill="#000" opacity=".12"/>')) :
+    onWall(-1, 3.3, 0.8, '<rect x="-9" y="-4" width="18" height="5" fill="#2a2920"/>' +
+      '<rect x="-8" y="6" width="16" height="44" rx="6" fill="#c8262a"/><rect x="-4" y="-4" width="8" height="12" fill="#2a2920"/>' +
+      '<path d="M4 2h9v10" stroke="#2a2920" stroke-width="2.5" fill="none"/><rect x="-6" y="20" width="12" height="9" fill="#f3f0e2"/><rect x="-6" y="8" width="3" height="40" fill="#fff" opacity=".22"/>');
+  s += door(-1, 3.85, 4.45, false, "B14", idp, lights);
+
+  /* RIGHT WALL: clock, notice board, a door, sometimes an extra door */
+  s += hi("clock", onWall(1, 1.5, 1.86, clock(o("clock"))));
+  s += hi("notice", onWall(1, 2.6, 1.42,
+    '<rect x="-36" y="-26" width="72" height="52" fill="#8a6a3e" stroke="#4a3820" stroke-width="3"/>' +
+    '<rect x="-28" y="-18" width="34" height="24" fill="#fffbe8"/><rect x="10" y="-14" width="18" height="30" fill="#ffe08a"/><rect x="-24" y="10" width="26" height="10" fill="#cfe6f2"/>' +
+    txt(-11, -8, o("notice") ? 8.5 : 7, o("notice") ? "#b3261e" : "#3b3a30", o("notice") ? "TURN" : "FIRE") +
+    txt(-11, 2, o("notice") ? 8.5 : 7, o("notice") ? "#b3261e" : "#3b3a30", o("notice") ? "BACK" : "DRILL")));
+  if(o("extra")) s += hi("extra", door(1, 3.05, 3.55, false, "", idp, lights));
+  s += door(1, 3.95, 4.55, false, "B15", idp, lights);
+
+  /* ceiling strip lights, hanging a little below the ceiling */
+  LIGHTZ.forEach(function(lz, li){ s += lamp(lz, lights[li], li === 2, idp); });
+  if(o("bird")) s += hi("bird", standUp(0.18, CEIL - 0.1, LIGHTZ[1] - 0.2,
+    '<g transform="translate(0 -12)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#3a8fd6"/><circle cx="11" cy="-7" r="8" fill="#3a8fd6"/><path d="M18 -8l8 3-8 3z" fill="#f2a516"/>' +
+    '<circle cx="13" cy="-9" r="1.8" fill="#111"/><path d="M-12 2l-11-4 4 8z" fill="#2f78b8"/><path d="M-2 9v4M4 9v4" stroke="#f2a516" stroke-width="2"/></g>'));
+
+  /* the exit sign hangs from the ceiling near the far end */
+  var ez = 4.3, e1 = P(-0.3, CEIL, ez), e2 = P(0.3, CEIL, ez);
+  s += '<line x1="' + e1[0].toFixed(1) + '" y1="' + e1[1].toFixed(1) + '" x2="' + e1[0].toFixed(1) + '" y2="' + P(-0.3, 2.13, ez)[1].toFixed(1) + '" stroke="#2a2920" stroke-width="1.5"/>' +
+       '<line x1="' + e2[0].toFixed(1) + '" y1="' + e2[1].toFixed(1) + '" x2="' + e2[0].toFixed(1) + '" y2="' + P(0.3, 2.13, ez)[1].toFixed(1) + '" stroke="#2a2920" stroke-width="1.5"/>';
+  var ec = P(0, 2.03, ez);
+  s += '<ellipse cx="' + ec[0].toFixed(1) + '" cy="' + ec[1].toFixed(1) + '" rx="' + (F * 0.75 / ez).toFixed(1) + '" ry="' + (F * 0.38 / ez).toFixed(1) + '" fill="url(#' + idp + 'Exit)" class="lcc-glow"/>';
+  s += hi("exit", standUp(0, 1.93, ez,
+    '<rect x="-34" y="-22" width="68" height="22" rx="2" fill="#123c22" stroke="#0a1a10" stroke-width="2"/>' +
+    txt(0, -6, 15, "#5dff9b", o("exit") ? "TIXE" : "EXIT", ' class="lcc-glow"')));
+
+  /* the wet floor sign */
+  s += hi("wet", standUp(0.56, 0, 2.25,
+    '<ellipse cx="0" cy="0" rx="30" ry="5" fill="#000" opacity=".35"/>' +
+    '<path d="M-26 0 L-12 -64 L12 -64 L26 0 L19 0 L9 -54 L-9 -54 L-19 0 Z" fill="#f2c916" stroke="#2a2920" stroke-width="2.5" stroke-linejoin="round"/>' +
+    '<path d="M-21 -2 L-10 -56 L10 -56 L21 -2 Z" fill="#f7d42a"/>' +
+    '<path d="M-6 -46 l6 -8 l6 8 z" fill="none" stroke="#2a2920" stroke-width="2"/>' +
+    txt(0, -30, 9, "#2a2920", o("wet") ? "DRY" : "WET") + txt(0, -19, 8, "#2a2920", "FLOOR") +
+    '<path d="M-9 -8 q4 -6 9 -3 q5 -5 9 1" stroke="#2a2920" stroke-width="2" fill="none"/>'));
+
+  /* Bonnie, sitting in the corridor where she should not be */
+  if(o("bonnie")) s += hi("bonnie", standUp(-0.32, 0, 2.6,
+    '<g transform="translate(0 -51)">' + (window.A2ART ? A2ART.bonnie(0, 0, 1, "sit") : '<ellipse cx="0" cy="16" rx="24" ry="26" fill="#9c6b45"/><circle cx="0" cy="-26" r="18" fill="#a87650"/>') + '</g>', 0.005));
+
+  /* everything fades into the dark at the edges */
+  s += '<rect width="800" height="500" fill="url(#' + idp + 'Vig)" pointer-events="none"/>';
+  return s + '</svg>';
 }
+
+/* a door in a side wall: frame, leaf with two panels, handle, number plate. open = lit room behind */
+function door(sd, za, zb, open, label, idp, lights){
+  var k = lit((za + zb) / 2, lights), out = "";
+  /* frame */
+  out += poly(wallQ(sd, za - 0.07, zb + 0.07, 0, DH + 0.08), shade("#3a2c1b", k));
+  /* the opening's side, so the door sits back in the wall */
+  var inner = sd * 1.06;
+  out += poly([P(sd, 0, zb), P(sd, DH, zb), P(inner, DH, zb), P(inner, 0, zb)], shade("#2b2015", k));
+  /* open a crack: a bright gap at the near side, the leaf pushed in a little, light on the floor */
+  var lz0 = open ? za + (zb - za) * 0.4 : za, lin = inner;
+  if(open){
+    out += poly([P(inner, 0, za), P(inner, DH, za), P(inner, DH, zb), P(inner, 0, zb)], "#ffe98a");
+    out += poly([P(sd, 0, za - 0.05), P(sd, 0, lz0), P(sd * 0.3, 0, lz0 + 0.5), P(sd * 0.5, 0, za)], "#ffe98a", ' opacity=".28"');
+  }
+  out += poly([P(lin, 0, lz0), P(lin, DH, lz0), P(lin, DH, zb), P(lin, 0, zb)], shade("#5e4730", k * (open ? 0.85 : 1)));
+  var u = function(f){ return lz0 + (zb - lz0) * f; };
+  out += poly([P(lin, 1.05, u(0.15)), P(lin, 1.78, u(0.15)), P(lin, 1.78, u(0.85)), P(lin, 1.05, u(0.85))], shade("#523e29", k), ' stroke="' + shade("#3a2c1b", k) + '" stroke-width="1.2"');
+  out += poly([P(lin, 0.16, u(0.15)), P(lin, 0.9, u(0.15)), P(lin, 0.9, u(0.85)), P(lin, 0.16, u(0.85))], shade("#523e29", k), ' stroke="' + shade("#3a2c1b", k) + '" stroke-width="1.2"');
+  out += poly([P(lin, 0.02, u(0.04)), P(lin, 0.12, u(0.04)), P(lin, 0.12, u(0.96)), P(lin, 0.02, u(0.96))], shade("#8d8a7c", k));
+  var hz = u(open ? 0.12 : 0.88), hp = P(lin, 1.0, hz), hr = F * 0.035 / hz;
+  out += '<ellipse cx="' + hp[0].toFixed(1) + '" cy="' + hp[1].toFixed(1) + '" rx="' + (hr * 0.75).toFixed(1) + '" ry="' + hr.toFixed(1) + '" fill="' + shade("#d8c27a", k) + '" stroke="#2a2010" stroke-width=".8"/>';
+  /* the near side of the frame and its head sit in front of the leaf */
+  out += poly(wallQ(sd, za - 0.07, za + 0.01, 0, DH + 0.08), shade("#3a2c1b", k));
+  out += poly(wallQ(sd, za - 0.07, zb + 0.07, DH, DH + 0.08), shade("#3a2c1b", k));
+  if(label) out += onWall(sd, (za + zb) / 2, DH + 0.2, '<rect x="-18" y="-8" width="36" height="16" rx="2" fill="#1f2a22" stroke="#9e987a" stroke-width="1.5"/>' + txt(0, 4.5, 11, "#cfc9a6", label));
+  return out;
+}
+
+/* a hanging strip light: diffuser underneath, metal edge, and a glow when it is on */
+function lamp(lz, on, flick, idp){
+  var y = CEIL - 0.1, za = lz - 0.24, zb = lz + 0.24, xa = -0.36, xb = 0.36, out = "";
+  var rod1 = P(-0.25, CEIL, lz), rod1b = P(-0.25, y, lz), rod2 = P(0.25, CEIL, lz), rod2b = P(0.25, y, lz);
+  out += '<path d="M' + pt(rod1) + 'L' + pt(rod1b) + 'M' + pt(rod2) + 'L' + pt(rod2b) + '" stroke="#55534a" stroke-width="1.2"/>';
+  if(on){
+    var c = P(0, y, lz);
+    out += '<ellipse cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="' + (F * 0.95 / lz).toFixed(1) + '" ry="' + (F * 0.42 / lz).toFixed(1) + '" fill="url(#' + idp + 'Glow)"' + (flick ? ' class="lcc-flick"' : '') + '/>';
+  }
+  out += poly([P(xa, y, za), P(xb, y, za), P(xb, y, zb), P(xa, y, zb)], on ? "#fffbe6" : "#4e4d44", flick && on ? ' class="lcc-flick"' : '');
+  /* the metal front edge you can see from below */
+  out += poly([P(xa, y, za), P(xb, y, za), P(xb, y + 0.05, za), P(xa, y + 0.05, za)], on ? "#9c9a8a" : "#3e3d36");
+  return out;
+}
+
 function clock(odd){
   var nums = "";
   for(var n = 1; n <= 12; n++){
     var a = (n / 12) * Math.PI * 2, lab = odd && n === 12 ? 13 : n;
-    nums += '<text x="' + (Math.sin(a) * 19).toFixed(1) + '" y="' + (-Math.cos(a) * 19 + 3).toFixed(1) + '" text-anchor="middle" font-family="Arial,sans-serif" font-size="' + (lab > 9 ? 6 : 7) + '" fill="#2a2920">' + lab + '</text>';
+    nums += txt((Math.sin(a) * 15.5).toFixed(1), (-Math.cos(a) * 15.5 + 2.6).toFixed(1), lab > 9 ? 6 : 7, "#2a2920", lab, "", 700);
   }
-  return '<g transform="translate(700 104) skewY(-28)"><circle r="27" fill="#fffbe8" stroke="#2a2920" stroke-width="4"/>' + nums +
-    '<line x1="0" y1="0" x2="0" y2="-14" stroke="#2a2920" stroke-width="3" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="4" stroke="#2a2920" stroke-width="2.5" stroke-linecap="round"/><circle r="2.5" fill="#c8262a"/></g>';
-}
-function steps(){
-  var out = "", i;
-  for(i = 0; i < 6; i++){
-    var t = i / 6, x = 400 + (i % 2 ? 14 : -14) * (1 - t * 0.7), y = 470 - t * 160, s = 1 - t * 0.7;
-    out += '<ellipse cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" rx="' + (9 * s).toFixed(1) + '" ry="' + (16 * s).toFixed(1) + '" fill="#2b3a44" opacity=".55"/>';
-  }
-  return out;
+  return '<circle r="22" fill="#fffbe8" stroke="#2a2920" stroke-width="3.5"/>' + nums +
+    '<line x1="0" y1="0" x2="0" y2="-11" stroke="#2a2920" stroke-width="2.5" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="3" stroke="#2a2920" stroke-width="2" stroke-linecap="round"/><circle r="2" fill="#c8262a"/>';
 }
 
 /* ---------- sound: a soft electrical hum and a footstep, never loud ---------- */
@@ -185,7 +362,7 @@ function chime(up){
 /* ---------- the overlay ---------- */
 var css = document.createElement("style");
 css.textContent =
-  "html body>.lccorr{position:fixed !important;inset:0;z-index:2147482000 !important}" +
+  "html body>.lccorr{position:fixed !important;inset:0;z-index:2147482900 !important}" /* above the corner buttons, below the break timer and calm screen */ +
   ".lccorr{background:#0b0c09;color:#fbf8e4;display:flex;flex-direction:column;font-family:var(--body,'Atkinson Hyperlegible',Verdana,sans-serif)}" +
   ".lcc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;flex-wrap:wrap}" +
   ".lcc-top h2{margin:0;font-family:var(--display,'Space Mono',monospace);font-size:1.15rem;letter-spacing:.02em}" +
