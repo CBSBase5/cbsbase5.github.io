@@ -135,7 +135,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-04",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "belong-together",
@@ -327,7 +327,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-14",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "times-facts",
@@ -447,7 +447,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "read-the-scale",
@@ -663,7 +663,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-13",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "career-explorer",

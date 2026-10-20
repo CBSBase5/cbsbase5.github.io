@@ -240,15 +240,26 @@ def main():
     # ready for folders and the library; a writer's work in progress builds pages but stays hidden
     pub = set(l.strip() for l in open(os.path.join(HERE, "published.txt")) if l.strip())
     shown = [s for s in ready if s in pub]
+    broken = [x for x in ready if info[x].get("error")]
+    for x in broken:
+        if not only or x in only:
+            die("%s did not load: %s" % (x, info[x]["error"][:600]))
+        print("note: %s does not load yet, skipped" % x)
+    ready = [x for x in ready if x not in broken]
+    keep = []
     for s in ready:
-        if info[s].get("error"):
-            die("%s did not load: %s" % (s, info[s]["error"][:600]))
         p = os.path.join(ROOT, "data", "a2", s + ".js")
         txt = open(p, encoding="utf-8").read()
+        bad = any(ord(c) > 127 for c in txt) or info[s]["id"] != "a2-" + s
+        if bad and only and s not in only:
+            print("note: %s is not ready yet (non-ASCII or wrong id), skipped" % s)
+            continue
         ascii_only(p, txt)
         if info[s]["id"] != "a2-" + s:
             die("%s: id should be a2-%s" % (s, s))
         info[s]["_v"] = str(abs(hash_text(txt)) % 100000)
+        keep.append(s)
+    ready = keep
     sched, who_acts = schedule()
 
     # pages
