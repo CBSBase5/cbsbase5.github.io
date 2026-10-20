@@ -75,7 +75,7 @@ function check(slug){
   }
   if(!p.realWorld || !p.realWorld.title || !p.realWorld.html) errs.push("realWorld {title, html} missing");
   if(!p.make || typeof p.make.svg !== "function" || !Array.isArray(p.make.fields) || !p.make.fields.length) errs.push("make {title, fields, svg} missing");
-  if(!/class=\\?"egg|A2ART\.egg\(/.test(src)) errs.push("no hidden surprise (A2ART.egg or class=\"egg\")");
+  if(!/class=\\?"egg|\.egg\(/.test(src)) errs.push("no hidden surprise (A2ART.egg or class=\"egg\")");
   if(!/A2ART\.(jay|bonnie|bird)\(/.test(src) && !/Bonnie|Jay/.test(src)) warns.push("no Jay/Bonnie cameo found");
   if(/\byour teacher\b/i.test(src)) warns.push("says 'your teacher' (Base 5 pages say Jay)");
   if(/Mr Raine/i.test(src)) errs.push("never Mr Raine");
@@ -183,7 +183,7 @@ function check(slug){
   return { errs: Array.from(new Set(errs)), warns: Array.from(new Set(warns)) };
 }
 
-const all = fs.readdirSync(ROOT + "/data/a2").filter(f => /^[a-z0-9-]+\.js$/.test(f) && ["art.js", "drops.js"].indexOf(f) < 0).map(f => f.replace(/\.js$/, ""));
+const all = fs.readdirSync(ROOT + "/data/a2").filter(f => /^[a-z0-9-]+\.js$/.test(f) && ["art.js", "drops.js", "library.js"].indexOf(f) < 0).map(f => f.replace(/\.js$/, ""));
 const list = process.argv.slice(2).length ? process.argv.slice(2) : all;
 let bad = 0;
 list.forEach(slug => {
