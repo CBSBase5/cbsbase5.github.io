@@ -78,6 +78,22 @@ var cfg, steps, state, key;
                picture is a hidden surprise: tap it, never scored.
    Read it to me stays LC only on these activities. */
 var A2LV = null, A2TH = null, A2RAW = null, sureNow = null;
+var PATH = /[?&]path=1(&|$)/.test(location.search);
+/* on the path, the end of an activity offers the next step and nothing else to choose */
+function pathNext(){
+  var host = $("pathNext"); if(!host) return;
+  host.innerHTML = '<p class="tiny">Finding your next step...</p>';
+  function show(){
+    window.HQPath.next(cfg.id).then(function(r){
+      var it = r.item;
+      host.innerHTML = it ?
+        '<a class="btn pathgo" href="' + it.go + '">Next step: ' + stripTags(it.title) + '</a><p class="tiny">Step ' + Math.min(r.done + 1, r.all.length) + ' of ' + r.all.length + ' on your path. Stopping here is completely fine too.</p>' :
+        '<p class="lead"><b>That is your whole path done.</b> Everything is still in your HQ to come back to.</p>';
+    }).catch(function(){ host.innerHTML = ""; });
+  }
+  if(window.HQPath) show();
+  else { var sc = document.createElement("script"); sc.src = "/data/hqpath.js?v=1"; sc.onload = show; document.head.appendChild(sc); }
+}
 var A2LEVELS = [{ id: "mild", name: "Mild" }, { id: "medium", name: "Medium" }, { id: "spicy", name: "Spicy" }];
 function a2(){ return !!(cfg && cfg.a2); }
 function reads(){ return !!HQ.readAloud && (!a2() || HQ.who === "LC"); }
@@ -466,6 +482,7 @@ function build(){
         '<details class="chunksend" id="chunkSend"><summary>Want Jay to see how this chunk went? Only if you like.</summary><div id="chunkSendHost"></div></details>' +
       '</div>' +
       '<div class="card w12 hidden" id="resultCard">' +
+        '<div id="pathNext" class="pathnext"></div>' +
         '<span class="kicker">How it went</span>' +
         '<h3 id="scoreLine"></h3>' +
         '<p class="lead" id="scoreNote"></p>' +
@@ -1512,6 +1529,7 @@ function finish(){
   refreshCode();
   showOnly("resultCard");
   makeQuestion();
+  if(PATH && !cfg.review) pathNext();
   if(cfg.review){ finishReview(); return; }
   var sm = summary();
   var marked = sm.got1 + sm.got2 + sm.shown;
@@ -1799,6 +1817,12 @@ function run(c){
   /* /egw/page.html#chunk-3 opens straight onto chunk 3 */
   var m = (location.hash || "").match(/^#chunk-(\d+)$/);
   if(m && chunks[+m[1] - 1]) go(chunks[+m[1] - 1].from);
+  /* opened from the Start button (?path=1): no menu, straight into the first chunk not done */
+  else if(PATH){
+    var first = 0;
+    for(var ck = 0; ck < chunks.length; ck++){ if(chunkState(chunks[ck]) !== "done"){ first = ck; break; } }
+    go(chunks[first] ? chunks[first].from : 0);
+  }
   window.addEventListener("hashchange", function(){
     var h = (location.hash || "").match(/^#chunk-(\d+)$/);
     if(h && chunks[+h[1] - 1]) go(chunks[+h[1] - 1].from);
