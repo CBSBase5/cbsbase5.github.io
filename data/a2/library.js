@@ -27,7 +27,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-04",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "between-lines",
@@ -39,7 +39,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-20",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "prove-it",
@@ -51,7 +51,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-07",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "join-dots",
@@ -63,7 +63,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-19",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "case-file",
@@ -75,7 +75,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-02",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "fact-check",
@@ -135,7 +135,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-04",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "belong-together",
@@ -147,7 +147,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-11",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "paragraph-focus",
@@ -171,7 +171,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-25",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "scene-change",
@@ -183,7 +183,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-09",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "text-skeleton",
@@ -231,7 +231,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-27",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "my-travelogue",
@@ -251,9 +251,9 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Writing",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "The little words that stick a travelogue together, so the reader never gets lost.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-07",
    "ready": false
   },
@@ -267,7 +267,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-16",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "end-marks",
@@ -291,7 +291,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-30",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "semicolons",
@@ -327,7 +327,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-14",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "times-facts",
@@ -375,7 +375,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-16",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "round-it",
@@ -387,7 +387,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "written-methods",
@@ -399,7 +399,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-05",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "head-or-paper",
@@ -411,7 +411,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-13",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "estimate-first",
@@ -435,7 +435,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 5,
    "first": "2026-11-12",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "hot-or-not",
@@ -447,7 +447,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "read-the-scale",
@@ -455,9 +455,9 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Rulers, jugs, dials and thermometers: find the labels, work out the gaps, read the mark.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-10",
    "ready": false
   },
@@ -471,7 +471,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-09",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "l-shaped-floors",
@@ -483,7 +483,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-18",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "kit-it-out",
@@ -495,7 +495,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "map-scales",
@@ -507,7 +507,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-30",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "draw-to-scale",
@@ -519,7 +519,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-03",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "convert-it",
@@ -531,7 +531,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-07",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "speed-distance-time",
@@ -543,7 +543,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-09",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "plan-the-trip",
@@ -579,7 +579,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-23",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "myths-then-and-now",
@@ -591,7 +591,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-12",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "hidden-messages",
@@ -603,7 +603,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-03",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "design-an-expedition",
@@ -651,7 +651,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-12-02",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "careers-fair-scout",
@@ -663,7 +663,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-13",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "career-explorer",
@@ -675,7 +675,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-27",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "getting-around",
@@ -687,7 +687,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-06",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "read-the-signs",
@@ -699,7 +699,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-20",
-   "ready": true
+   "ready": false
   },
   {
    "slug": "what-is-it-made-of",

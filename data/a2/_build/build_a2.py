@@ -236,6 +236,10 @@ def main():
     only = sys.argv[1:]
     info = pack_info(slugs)
     ready = [s for s in slugs if not info[s].get("missing")]
+    # only activities Jay has been given (checked and listed in published.txt) count as
+    # ready for folders and the library; a writer's work in progress builds pages but stays hidden
+    pub = set(l.strip() for l in open(os.path.join(HERE, "published.txt")) if l.strip())
+    shown = [s for s in ready if s in pub]
     for s in ready:
         if info[s].get("error"):
             die("%s did not load: %s" % (s, info[s]["error"][:600]))
@@ -276,7 +280,7 @@ def main():
                 "href": "/" + HQS[w]["base"] + "/a2-" + slug + ".html?lv=" + lv,
                 "note": (info.get(slug) or {}).get("note") or "",
                 "covers": [[t, st] for t, st in sorted(who_acts[w][slug], key=lambda x: (x[0], x[1]))],
-                "ready": slug in ready,
+                "ready": slug in shown,
             })
     items.sort(key=lambda x: (x["date"], x["who"], x["slug"]))
     js = ("/* ==========================================================\n"
@@ -306,7 +310,7 @@ def main():
         inf = info.get(slug) or {}
         lib.append({"slug": slug, "title": inf.get("title") or title, "shelf": shelf, "group": group, "subj": subj,
                     "line": inf.get("line") or "", "mins": inf.get("mins") or 0, "chunks": len(inf.get("chunks") or []),
-                    "first": first.get(slug, plan.LAST_DROP), "ready": slug in ready})
+                    "first": first.get(slug, plan.LAST_DROP), "ready": slug in shown})
     js2 = ("/* Base 5 - Autumn 2 activity library (the Practice tab). Built by\n"
            "   data/a2/_build/build_a2.py. Do not edit. Each activity shows from\n"
            "   the day it first lands in anyone's folder. ASCII only. */\n"
@@ -316,7 +320,7 @@ def main():
 
     missing = [s for s in slugs if s not in ready]
     per = {w: len(sched[w]) for w in plan.ALL}
-    print("pages: %d  activities ready: %d of %d  drops: %d  per student: %s" % (made, len(ready), len(slugs), len(items), per))
+    print("published: %d  pages: %d  activities ready: %d of %d  drops: %d  per student: %s" % (len(shown), made, len(ready), len(slugs), len(items), per))
     if missing:
         print("not written yet: " + ", ".join(missing))
 

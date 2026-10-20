@@ -43,7 +43,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -139,7 +139,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -251,7 +251,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -287,7 +287,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -323,7 +323,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -359,7 +359,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -391,7 +391,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -423,7 +423,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -439,7 +439,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -519,7 +519,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -555,7 +555,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -623,7 +623,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -655,7 +655,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -687,7 +687,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -751,7 +751,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -783,7 +783,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -799,7 +799,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -815,7 +815,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -831,7 +831,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -847,7 +847,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -863,7 +863,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -879,7 +879,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -895,7 +895,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -911,7 +911,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -927,7 +927,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -943,7 +943,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -959,7 +959,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -975,7 +975,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -991,7 +991,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -1007,7 +1007,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -1023,7 +1023,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -1055,7 +1055,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1087,7 +1087,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1151,7 +1151,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1167,7 +1167,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1183,7 +1183,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1215,7 +1215,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1247,7 +1247,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -1279,7 +1279,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -1311,7 +1311,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -1343,7 +1343,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1375,7 +1375,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1439,7 +1439,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1471,7 +1471,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1503,7 +1503,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1519,7 +1519,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -1535,7 +1535,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -1551,7 +1551,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -1567,7 +1567,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -1583,7 +1583,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -1599,7 +1599,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1615,7 +1615,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1631,7 +1631,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1667,7 +1667,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1699,7 +1699,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -1731,7 +1731,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -1763,7 +1763,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -1779,7 +1779,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1795,7 +1795,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -1843,7 +1843,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1955,7 +1955,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -1971,7 +1971,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -1987,7 +1987,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2003,7 +2003,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2019,7 +2019,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2039,7 +2039,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2055,7 +2055,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2071,7 +2071,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2087,7 +2087,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2103,7 +2103,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2119,7 +2119,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2135,7 +2135,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2151,7 +2151,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2167,7 +2167,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2183,7 +2183,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2199,7 +2199,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2235,7 +2235,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2251,7 +2251,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2267,7 +2267,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2283,7 +2283,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2363,7 +2363,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2379,7 +2379,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2395,7 +2395,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2427,7 +2427,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2459,7 +2459,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2491,7 +2491,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2507,7 +2507,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2523,7 +2523,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2539,7 +2539,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2555,7 +2555,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2571,7 +2571,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2587,7 +2587,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2603,7 +2603,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2619,7 +2619,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2639,7 +2639,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2655,7 +2655,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2671,7 +2671,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2691,7 +2691,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2784,7 +2784,7 @@ window.B5DROPS = {
    "title": "Glue words",
    "subject": "English",
    "href": "/egw/a2-glue-words.html?lv=spicy",
-   "note": "",
+   "note": "Glue words: the little words that hold a travelogue together. Four five minute chunks and a card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
@@ -2807,7 +2807,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "JT",
@@ -2823,7 +2823,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LC",
@@ -2839,7 +2839,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LP",
@@ -2855,7 +2855,7 @@ window.B5DROPS = {
      5
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2871,7 +2871,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "EGW",
@@ -2887,7 +2887,7 @@ window.B5DROPS = {
      5
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -2951,7 +2951,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "LW",
@@ -2960,7 +2960,7 @@ window.B5DROPS = {
    "title": "Glue words",
    "subject": "English",
    "href": "/lw/a2-glue-words.html?lv=medium",
-   "note": "",
+   "note": "Glue words: the little words that hold a travelogue together. Four five minute chunks and a card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
@@ -3008,7 +3008,7 @@ window.B5DROPS = {
    "title": "Read the scale",
    "subject": "Maths",
    "href": "/hk/a2-read-the-scale.html?lv=mild",
-   "note": "",
+   "note": "Reading scales on rulers, jugs, dials and thermometers. Four five minute chunks, a jug to fill, and your own scale to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3040,7 +3040,7 @@ window.B5DROPS = {
    "title": "Read the scale",
    "subject": "Maths",
    "href": "/jt-hq/a2-read-the-scale.html?lv=mild",
-   "note": "",
+   "note": "Reading scales on rulers, jugs, dials and thermometers. Four five minute chunks, a jug to fill, and your own scale to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3072,7 +3072,7 @@ window.B5DROPS = {
    "title": "Read the scale",
    "subject": "Maths",
    "href": "/lc/a2-read-the-scale.html?lv=mild",
-   "note": "",
+   "note": "Reading scales on rulers, jugs, dials and thermometers. Four five minute chunks, a jug to fill, and your own scale to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3136,7 +3136,7 @@ window.B5DROPS = {
    "title": "Read the scale",
    "subject": "Maths",
    "href": "/lw/a2-read-the-scale.html?lv=mild",
-   "note": "",
+   "note": "Reading scales on rulers, jugs, dials and thermometers. Four five minute chunks, a jug to fill, and your own scale to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -3271,7 +3271,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   },
   {
    "who": "HK",
@@ -3351,7 +3351,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": true
+   "ready": false
   }
  ]
 };
