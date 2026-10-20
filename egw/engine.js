@@ -1609,9 +1609,10 @@ function a2Finish(){
   host.innerHTML = '<div class="a2make"><span class="kicker">Make something</span><h4>' + tok(mk.title || "Make a card") + '</h4>' +
     (mk.intro ? '<p>' + tok(mk.intro) + '</p>' : "") +
     '<div class="a2fields">' + fields.map(function(f){
+      var ph = String(f.ph || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
       var big = (f.max || 60) > 80;
-      return '<label><span>' + f.label + '</span>' + (big ? '<textarea rows="2" data-f="' + f.id + '" maxlength="' + (f.max || 200) + '" placeholder="' + (f.ph || "") + '"></textarea>' :
-        '<input type="text" data-f="' + f.id + '" maxlength="' + (f.max || 60) + '" placeholder="' + (f.ph || "") + '">') + '</label>';
+      return '<label><span>' + f.label + '</span>' + (big ? '<textarea rows="2" data-f="' + f.id + '" maxlength="' + (f.max || 200) + '" placeholder="' + ph + '"></textarea>' :
+        '<input type="text" data-f="' + f.id + '" maxlength="' + (f.max || 60) + '" placeholder="' + ph + '">') + '</label>';
     }).join("") + '</div>' +
     '<div class="a2preview" aria-live="polite"></div>' +
     '<div class="qnav"><button type="button" class="btn" id="a2Save">Save it as a picture</button>' +
