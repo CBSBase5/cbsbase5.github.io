@@ -300,7 +300,7 @@ function drawMeta(msg){
   fresh();
   var armed = st.armed && st.armed > Date.now();
   if(hide) hide.disabled = !!armed;
-  meta.innerHTML = (window.LCGate ? "<b>" + window.LCGate.note() + "</b> " : "") + (msg ? msg + " " : "") +
+  meta.innerHTML = (window.LCGate && !window.LCCorridor ? "<b>" + window.LCGate.note() + "</b> " : "") + (msg ? msg + " " : "") +
     (armed ? "One is hidden somewhere in the HQ. It could be any minute. " : "") +
     (st.n ? "Scares survived: <b>" + st.n + "</b>. " : "") +
     "Sound is " + (st.sound ? "on" : "off") + ' <button type="button" id="jsSound">' + (st.sound ? "turn it off" : "turn it on") + "</button>" +

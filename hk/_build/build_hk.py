@@ -40,6 +40,9 @@ def convert(s, name):
     s = s.replace("&family=Space+Mono:wght@400;700", FONTS)
     # no jumpscares for HK
     s = re.sub(r'<script src="/lc/jumpscare\.js[^"]*"[^>]*></script>\n?', "", s)
+    # nor LC's night shift scene, corridor game or the drawings it borrows
+    s = re.sub(r'<script src="/lc/(night|corridor)\.js[^"]*"></script>\n?', "", s)
+    s = re.sub(r'<script src="/data/a2/art\.js[^"]*"></script>\n?', "", s)
     # and LC's earned-scares gate; this HQ adds its own game and gate
     s = re.sub(r'<script src="/data/hqbreak\.js[^"]*"></script>\n?', "", s)
     s = re.sub(r'<script src="/lc/break\.js[^"]*"></script>\n?', "", s)

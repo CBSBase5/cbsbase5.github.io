@@ -80,8 +80,18 @@ def hub_patches(name, s):
                      '      <a href="/practice/fractions.html"><b>Fractions</b><span>Maths drills</span></a>\n'
                      '      <a href="/practice/multiplication.html"><b>Multiplication</b><span>Maths drills</span></a>\n'
                      '      <a href="/practice/day-at-school.html"><b>Story builder</b><span>English, make something</span></a>') + s[b:]
-        # the jumpscare button
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/jumpscare.js?v=4" data-button="1"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/lc/break.js?v=1"></script>', 1, name)
+        # LC's own home: the building after hours, Night Corridor, and the jumpscare button,
+        # all behind one earned break (HK and JT builds take these out again)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/night.js?v=1"></script>\n<script src="/data/a2/art.js?v=1"></script>\n<script src="/lc/corridor.js?v=2"></script>\n<script src="/lc/jumpscare.js?v=5" data-button="1"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/lc/break.js?v=2"></script>', 1, name)
+        # no exam for LC, HK or JT: no exam dates, no revision talk
+        s = must(s, '<p>Your revision corner. Small chunks, any order, your pace. Nothing here is timed, and it all saves on this device.</p>',
+                 '<p>Your own space. Small chunks, any order, your pace. Nothing here is timed, and it all saves and follows you.</p>', 1, name)
+        s = must(s, '<details class="fold acc-eng" id="exams">', '<details class="fold acc-eng" id="exams" hidden>', 1, name)
+        s = must(s, '<b>Revision map</b><small>How each topic feels right now. It can change any time.</small>',
+                 '<b>How it feels</b><small>How each skill feels right now. It can change any time.</small>', 1, name)
+        s = must(s, 'Reading these back is revision too.', 'Reading these back helps it stick.', 1, name)
+        s = must(s, '"If you like, open your revision map for "', '"If you like, open How it feels for "', 1, name)
+        s = must(s, 'lines.push("== Revision map ==");', 'lines.push("== How it feels ==");', 1, name)
     if name == "papers.html":
         s = must(s, "<title>What's on the papers - ", "<title>Your skills map - ", 1, name)
         s = must(s, "<h1>What's on<br>the <em>papers</em></h1>", "<h1>Your<br><em>skills</em> map</h1>", 1, name)
@@ -94,7 +104,7 @@ def hub_patches(name, s):
         s = must(s, '<span class="often">Often</span> turns up most years', '<span class="often">Key</span> a key skill to start with', 1, name)
         s = must(s, "' <span class=\"often\">Often</span>'", "' <span class=\"often\">Key</span>'", 1, name)
     if name not in ("index.html", "teacher.html"):
-        s = must(s, "</body>", '<script src="/lc/jumpscare.js?v=4"></script>\n</body>', 1, name)
+        s = must(s, "</body>", '<script src="/lc/jumpscare.js?v=5"></script>\n</body>', 1, name)
     if name == "daily.html":
         for sub in ("bio", "stats"):
             s = re.sub(r'<script src="/lc/daily-bank-%s\.js\?v=\d+"></script>\n' % sub, "", s)
