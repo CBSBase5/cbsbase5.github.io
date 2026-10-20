@@ -17,6 +17,11 @@ window.B5FOLDER = {
     "text": "I have put the empire through time game in your folder so you can review it. I would really like your thoughts. Tell me anything, big or small, whenever you are ready."
    },
    {
+    "id": "m-epoch-wow",
+    "date": "2026-10-20",
+    "text": "EPOCH has had a big update with lots of funny, creative and wow moments. There is a studio for your flag, leader and anthem, a sticker album, a trip to the Moon and plenty of surprises to find. Have a look whenever you like."
+   },
+   {
     "id": "m-epoch",
     "date": "2026-10-20",
     "text": "You said the game felt like a 0.3, so I kept going. EPOCH is in your folder now, with the title you picked. I would love to know what number you would give it this time, whenever you feel like it."
