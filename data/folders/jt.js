@@ -15,14 +15,19 @@ window.B5FOLDER = {
     "id": "m-longgame",
     "date": "2026-10-20",
     "text": "I have put the empire through time game in your folder so you can review it. I would really like your thoughts. Tell me anything, big or small, whenever you are ready."
+   },
+   {
+    "id": "m-epoch",
+    "date": "2026-10-20",
+    "text": "You said the game felt like a 0.3, so I kept going. EPOCH is in your folder now, with the title you picked. I would love to know what number you would give it this time, whenever you feel like it."
    }
   ],
   "activities": [
    {
     "id": "a-longgame",
-    "title": "The Long Game (working title)",
+    "title": "EPOCH",
     "href": "/projects/long-game.html",
-    "note": "The empire through time game, ready for you to have a look whenever you like. Play a few turns, poke around, and see what you think. What would you keep, change or add? A title idea is welcome too. Nothing here is final."
+    "note": "Your game, now called EPOCH. Version 1.0 has richer land, workers who build farms, mines and roads, cities that make things, 22 kinds of army and ship, new ways to rule and great people from history. Have a play whenever you like."
    },
    {
     "id": "a-idealab",
