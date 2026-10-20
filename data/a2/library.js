@@ -39,7 +39,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-20",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "prove-it",
@@ -303,7 +303,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-10",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "proofread",
@@ -471,7 +471,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "l-shaped-floors",
@@ -507,7 +507,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-30",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "draw-to-scale",
