@@ -231,7 +231,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-27",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "my-travelogue",
@@ -255,7 +255,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-07",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "capitals-stops",
@@ -375,7 +375,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-16",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "round-it",
@@ -399,7 +399,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-05",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "head-or-paper",
