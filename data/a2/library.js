@@ -27,7 +27,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-04",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "between-lines",
@@ -51,7 +51,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-07",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "join-dots",
@@ -267,7 +267,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-16",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "end-marks",
@@ -495,7 +495,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "map-scales",
