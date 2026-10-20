@@ -243,7 +243,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "glue-words",
@@ -435,7 +435,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 5,
    "first": "2026-11-12",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "hot-or-not",
@@ -579,7 +579,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-23",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "myths-then-and-now",
@@ -651,7 +651,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-12-02",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "careers-fair-scout",
