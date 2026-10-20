@@ -481,6 +481,23 @@ h1,h2,h3{text-wrap:balance}
 @keyframes bd-fly{0%{opacity:0;transform:translate(104px,24px)}12%{opacity:1;transform:translate(92px,34px)}30%{transform:translate(85px,43px)}45%{transform:translate(91px,36px)}60%{transform:translate(83px,32px)}80%{opacity:1;transform:translate(96px,22px)}100%{opacity:0;transform:translate(110px,12px)}}
 @keyframes bd-wings{from{transform:scaleX(1)}to{transform:scaleX(.35)}}
 @media (prefers-reduced-motion: reduce){ .bd *{animation:none!important;transition:none!important}  }
+
+/* ---- the demonstration tape: the real app, start to finish */
+.dm-set{background:var(--set);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:12px}
+.dm-screen{position:relative;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 0 0 3px var(--studio),6px 6px 0 var(--buddy)}
+.dm-screen video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+.dm-bug{position:absolute;left:12px;top:10px;font-family:var(--crt);font-size:22px;line-height:1.2;color:var(--gold);background:rgba(11,26,48,.78);padding:1px 9px;border-radius:4px;pointer-events:none;transition:opacity .3s}
+.dm-bug::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--red);margin-right:7px;vertical-align:1px}
+.dm.playing .dm-bug{opacity:0}
+.dm-ch{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.dm-ch button{width:100%;min-height:44px;text-align:left;display:flex;gap:10px;align-items:baseline;background:var(--set2);border:1px solid var(--line);color:var(--white);border-radius:10px;padding:9px 12px;font:inherit;font-size:.97rem;cursor:pointer}
+.dm-ch button span{font-family:var(--crt);font-size:21px;color:var(--gold);flex:none}
+.dm-ch button:hover{border-color:var(--gold)}
+.dm-ch button[aria-current="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.dm-ch button[aria-current="true"] span{color:var(--ink)}
+.dm-ch button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.dm .fine{margin-top:10px}
+@media (max-width:760px){ .dm-ch{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px} .dm-set{padding:10px} .dm-ch button{flex-direction:column;gap:0;padding:7px 10px;font-size:.92rem} .dm-ch button span{font-size:18px} .dm-bug{font-size:15px;left:8px;top:6px;padding:0 6px} .dm-bug::before{width:7px;height:7px;margin-right:5px} }
 </style>
 </head>
 <body>
@@ -644,7 +661,7 @@ h1,h2,h3{text-wrap:balance}
       <p>Notes, photos, steps, targets and EHCP outcomes all link together, and the evidence slides build themselves. BridgeLink gets exactly what it asks for, and you get your evening back.</p>
     </div>
     <aside class="buy" aria-label="Get it">
-      <div class="no">ITEM B5-1204 &middot; VERSION 1.20.4</div>
+      <div class="no">ITEM B5-1204 &middot; VERSION 1.21.0</div>
       <div class="pr"><b>&pound;0.00</b><s>Was: your Thursday evening</s></div>
       <div class="pay">Easy payments: 0 of &pound;0. No catches, no add ons, no "Max 5 already selected".</div>
       <a class="go" href="/buddy/" target="_blank" rel="noopener">Get it from the Buddy page</a>
@@ -663,6 +680,26 @@ h1,h2,h3{text-wrap:balance}
       <li><b>Paste one link into BridgeLink</b><p>Buddy copies a link that opens the deck at that exact slide. Add or take off a photo later and the slide updates; the link you pasted stays the same. "Make the missing slides" does a whole class at once.</p></li>
     </ol>
     <p class="fine">Confidential and safeguarding notes never go on a slide, a report or a review pack.</p>
+  </section>
+
+  <section class="sec dm" id="demo" aria-labelledby="h-demo">
+    <h2 id="h-demo">Watch it go, start to finish</h2>
+    <p class="sub">One step for one student, recorded in the real app with made up notes. A note, the notes behind it, the tick, two photos, the slide and the link for BridgeLink, in 80 seconds.</p>
+    <div class="dm-set">
+      <div class="dm-screen">
+        <video id="demoVid" src="buddy-demo.mp4" poster="buddy-demo.jpg" controls playsinline preload="metadata" aria-label="Demonstration: from a note to BridgeLink evidence"></video>
+        <span class="dm-bug" aria-hidden="true">DEMONSTRATION</span>
+      </div>
+      <ol class="dm-ch" id="demoCh" aria-label="Jump to a part">
+        <li><button type="button" data-t="6"><span>0:06</span>Write a note</button></li>
+        <li><button type="button" data-t="18.9"><span>0:19</span>Link earlier notes</button></li>
+        <li><button type="button" data-t="28.2"><span>0:28</span>Tick the step</button></li>
+        <li><button type="button" data-t="40.7"><span>0:41</span>Add photos</button></li>
+        <li><button type="button" data-t="49.4"><span>0:49</span>Make the slide</button></li>
+        <li><button type="button" data-t="60.9"><span>1:01</span>Paste into BridgeLink</button></li>
+      </ol>
+    </div>
+    <p class="fine">No sound on this one. The student is LC, the notes are made up, and the photos are of a worksheet and a fraction wall.</p>
   </section>
 
   <section class="sec" aria-labelledby="h-box">
@@ -854,5 +891,28 @@ h1,h2,h3{text-wrap:balance}
 })();
 </script>
 
+
+<script>
+/* the demonstration tape: chapters follow the video, and only one thing plays at once */
+(function(){
+  var v = document.getElementById('demoVid'), ch = document.getElementById('demoCh');
+  if (!v || !ch) return;
+  var sec = v.closest('.dm'), bs = [].slice.call(ch.querySelectorAll('button')), pb = document.getElementById('playBtn'), ours = false;
+  function mark(){
+    var t = v.currentTime, k = -1;
+    bs.forEach(function(b, i){ if (t >= +b.getAttribute('data-t') - 0.05) k = i; });
+    bs.forEach(function(b, i){ b.setAttribute('aria-current', i === k && t > 0 ? 'true' : 'false'); });
+  }
+  bs.forEach(function(b){ b.onclick = function(){ v.currentTime = +b.getAttribute('data-t'); var p = v.play(); if (p && p.catch) p.catch(function(){}); mark(); }; });
+  v.addEventListener('timeupdate', mark);
+  v.addEventListener('play', function(){
+    sec.classList.add('playing');
+    if (pb && /pause/i.test(pb.textContent)) { ours = true; pb.click(); ours = false; }
+  });
+  v.addEventListener('pause', function(){ sec.classList.remove('playing'); });
+  v.addEventListener('ended', function(){ sec.classList.remove('playing'); });
+  if (pb) pb.addEventListener('click', function(){ if (!ours && !v.paused) v.pause(); });
+})();
+</script>
 </body>
 </html>
