@@ -36,14 +36,14 @@ window.B5DROPS = {
    "title": "Detail detectives",
    "subject": "English",
    "href": "/egw/a2-detail-hunt.html?lv=spicy",
-   "note": "",
+   "note": "Detail detectives: finding the details that hold a text up, and spotting the padding. Four five minute chunks and some case notes to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -132,14 +132,14 @@ window.B5DROPS = {
    "title": "Written methods",
    "subject": "Maths",
    "href": "/egw/a2-written-methods.html?lv=spicy",
-   "note": "",
+   "note": "Written methods for multiplying and dividing, whole numbers and decimals. Four five minute chunks with a method card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -244,14 +244,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-getting-around.html?lv=spicy",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -280,14 +280,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-getting-around.html?lv=mild",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -316,14 +316,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-getting-around.html?lv=mild",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -352,14 +352,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-getting-around.html?lv=mild",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -384,14 +384,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-getting-around.html?lv=medium",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -416,14 +416,14 @@ window.B5DROPS = {
    "title": "Getting around",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-getting-around.html?lv=medium",
-   "note": "",
+   "note": "Buses, trains and tickets, plus a little trip challenge for away from the screen. Four five minute chunks and a journey ticket to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -432,14 +432,14 @@ window.B5DROPS = {
    "title": "Room plans",
    "subject": "Maths",
    "href": "/egw/a2-room-plans.html?lv=spicy",
-   "note": "",
+   "note": "Working out the edge and the floor space of rooms on a plan. Four five minute chunks, a room builder to play with, and a plan card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -512,14 +512,14 @@ window.B5DROPS = {
    "title": "Room plans",
    "subject": "Maths",
    "href": "/lp/a2-room-plans.html?lv=medium",
-   "note": "",
+   "note": "Working out the edge and the floor space of rooms on a plan. Four five minute chunks, a room builder to play with, and a plan card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -544,7 +544,7 @@ window.B5DROPS = {
    "title": "Scene change",
    "subject": "English",
    "href": "/lw/a2-scene-change.html?lv=medium",
-   "note": "",
+   "note": "Scene changes: why a new paragraph starts and the little words that signal it. Four five minute chunks and a scene card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
@@ -555,7 +555,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -596,7 +596,7 @@ window.B5DROPS = {
    "title": "Text skeleton",
    "subject": "English",
    "href": "/egw/a2-text-skeleton.html?lv=spicy",
-   "note": "",
+   "note": "The bones of a text: headings, topic sentences, openings and endings, and what they do to the reader. Four five minute chunks and a skeleton to plan at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
@@ -607,7 +607,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -616,14 +616,14 @@ window.B5DROPS = {
    "title": "Belong together",
    "subject": "English",
    "href": "/hk/a2-belong-together.html?lv=mild",
-   "note": "",
+   "note": "Matching sentences like socks, and finding the odd one out. Four five minute chunks and a paragraph card to make at the end, whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -648,14 +648,14 @@ window.B5DROPS = {
    "title": "Belong together",
    "subject": "English",
    "href": "/jt-hq/a2-belong-together.html?lv=mild",
-   "note": "",
+   "note": "Matching sentences like socks, and finding the odd one out. Four five minute chunks and a paragraph card to make at the end, whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -680,14 +680,14 @@ window.B5DROPS = {
    "title": "Belong together",
    "subject": "English",
    "href": "/lc/a2-belong-together.html?lv=mild",
-   "note": "",
+   "note": "Matching sentences like socks, and finding the odd one out. Four five minute chunks and a paragraph card to make at the end, whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -744,14 +744,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/egw/a2-myths-then-and-now.html?lv=spicy",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -776,14 +776,14 @@ window.B5DROPS = {
    "title": "Measure it",
    "subject": "Maths",
    "href": "/hk/a2-measure-it.html?lv=mild",
-   "note": "",
+   "note": "Measuring things for real: rulers, jugs, scales and clocks. Five five minute chunks and a measure hunt, whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -792,14 +792,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/hk/a2-myths-then-and-now.html?lv=mild",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -808,14 +808,14 @@ window.B5DROPS = {
    "title": "Measure it",
    "subject": "Maths",
    "href": "/jt-hq/a2-measure-it.html?lv=mild",
-   "note": "",
+   "note": "Measuring things for real: rulers, jugs, scales and clocks. Five five minute chunks and a measure hunt, whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -824,14 +824,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/jt-hq/a2-myths-then-and-now.html?lv=mild",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -840,14 +840,14 @@ window.B5DROPS = {
    "title": "Measure it",
    "subject": "Maths",
    "href": "/lc/a2-measure-it.html?lv=mild",
-   "note": "",
+   "note": "Measuring things for real: rulers, jugs, scales and clocks. Five five minute chunks and a measure hunt, whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -856,14 +856,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/lc/a2-myths-then-and-now.html?lv=mild",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -872,14 +872,14 @@ window.B5DROPS = {
    "title": "Belong together",
    "subject": "English",
    "href": "/lp/a2-belong-together.html?lv=mild",
-   "note": "",
+   "note": "Matching sentences like socks, and finding the odd one out. Four five minute chunks and a paragraph card to make at the end, whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -888,14 +888,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/lp/a2-myths-then-and-now.html?lv=medium",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -904,14 +904,14 @@ window.B5DROPS = {
    "title": "Measure it",
    "subject": "Maths",
    "href": "/lw/a2-measure-it.html?lv=mild",
-   "note": "",
+   "note": "Measuring things for real: rulers, jugs, scales and clocks. Five five minute chunks and a measure hunt, whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -920,14 +920,14 @@ window.B5DROPS = {
    "title": "Myths then and now",
    "subject": "Human and Social",
    "href": "/lw/a2-myths-then-and-now.html?lv=medium",
-   "note": "",
+   "note": "Old myths and legends next to today's urban myths, ready for our Human and Social session. Four five minute chunks, a card to make, and a myth hunt to try if you fancy it.",
    "covers": [
     [
      "hs-myths",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -936,14 +936,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-careers-fair-scout.html?lv=spicy",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -952,14 +952,14 @@ window.B5DROPS = {
    "title": "Head or paper, then check",
    "subject": "Maths",
    "href": "/egw/a2-head-or-paper.html?lv=spicy",
-   "note": "",
+   "note": "Times and divide in your head or on paper, then checking it by undoing it. Four five minute chunks and a trick card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -968,14 +968,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-careers-fair-scout.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -984,14 +984,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-careers-fair-scout.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1000,14 +1000,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-careers-fair-scout.html?lv=mild",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1016,14 +1016,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-careers-fair-scout.html?lv=medium",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1048,14 +1048,14 @@ window.B5DROPS = {
    "title": "Careers fair scout",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-careers-fair-scout.html?lv=medium",
-   "note": "",
+   "note": "Getting ready for the careers fair, scout style. Four five minute chunks, a bingo card to take with you, and a scout report at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1080,14 +1080,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/egw/a2-capitals-stops.html?lv=spicy",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1144,14 +1144,14 @@ window.B5DROPS = {
    "title": "Multiply or divide?",
    "subject": "Maths",
    "href": "/lp/a2-multiply-or-divide.html?lv=medium",
-   "note": "",
+   "note": "Working out whether a real problem needs multiplying or dividing. Four five minute chunks and a problem card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1160,14 +1160,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/lw/a2-capitals-stops.html?lv=medium",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1176,14 +1176,14 @@ window.B5DROPS = {
    "title": "L shaped floors",
    "subject": "Maths",
    "href": "/egw/a2-l-shaped-floors.html?lv=spicy",
-   "note": "",
+   "note": "Area of L shaped rooms: split them into rectangles and add up. Four five minute chunks and a floor plan card to make, if you fancy it.",
    "covers": [
     [
      "maths-shape",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1208,14 +1208,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/hk/a2-capitals-stops.html?lv=mild",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1240,14 +1240,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/jt-hq/a2-capitals-stops.html?lv=mild",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1272,14 +1272,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/lc/a2-capitals-stops.html?lv=mild",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1304,14 +1304,14 @@ window.B5DROPS = {
    "title": "Capitals and full stops",
    "subject": "English",
    "href": "/lp/a2-capitals-stops.html?lv=mild",
-   "note": "",
+   "note": "Capitals and full stops: where sentences start and stop, plus names and I. Four five minute chunks and a postcard to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1336,14 +1336,14 @@ window.B5DROPS = {
    "title": "Detail detectives",
    "subject": "English",
    "href": "/lw/a2-detail-hunt.html?lv=medium",
-   "note": "",
+   "note": "Detail detectives: finding the details that hold a text up, and spotting the padding. Four five minute chunks and some case notes to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1368,14 +1368,14 @@ window.B5DROPS = {
    "title": "Join the dots",
    "subject": "English",
    "href": "/egw/a2-join-dots.html?lv=spicy",
-   "note": "",
+   "note": "Joining the dots: putting together details from different parts of a text to work out something it never says. Four five minute chunks and a dot map at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1432,14 +1432,14 @@ window.B5DROPS = {
    "title": "L shaped floors",
    "subject": "Maths",
    "href": "/lp/a2-l-shaped-floors.html?lv=medium",
-   "note": "",
+   "note": "Area of L shaped rooms: split them into rectangles and add up. Four five minute chunks and a floor plan card to make, if you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1464,14 +1464,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-read-the-signs.html?lv=spicy",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1496,14 +1496,14 @@ window.B5DROPS = {
    "title": "Between the lines",
    "subject": "English",
    "href": "/hk/a2-between-lines.html?lv=mild",
-   "note": "",
+   "note": "Reading between the lines: working out what a text hints at but never says. Four five minute chunks and a clue card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1512,14 +1512,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1528,14 +1528,14 @@ window.B5DROPS = {
    "title": "Between the lines",
    "subject": "English",
    "href": "/jt-hq/a2-between-lines.html?lv=mild",
-   "note": "",
+   "note": "Reading between the lines: working out what a text hints at but never says. Four five minute chunks and a clue card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1544,14 +1544,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1560,14 +1560,14 @@ window.B5DROPS = {
    "title": "Between the lines",
    "subject": "English",
    "href": "/lc/a2-between-lines.html?lv=mild",
-   "note": "",
+   "note": "Reading between the lines: working out what a text hints at but never says. Four five minute chunks and a clue card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1576,14 +1576,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-read-the-signs.html?lv=mild",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1592,14 +1592,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-read-the-signs.html?lv=medium",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1608,14 +1608,14 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-read-the-signs.html?lv=medium",
-   "note": "",
+   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
    "covers": [
     [
      "pfa-transport",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1624,14 +1624,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/egw/a2-draw-like-an-architect.html?lv=spicy",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1640,7 +1640,7 @@ window.B5DROPS = {
    "title": "Estimate first",
    "subject": "Maths",
    "href": "/egw/a2-estimate-first.html?lv=spicy",
-   "note": "",
+   "note": "Estimating before you calculate, so you can tell when an answer looks off. Four five minute chunks and a little card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
@@ -1651,7 +1651,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1660,14 +1660,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/hk/a2-draw-like-an-architect.html?lv=mild",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1692,14 +1692,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/jt-hq/a2-draw-like-an-architect.html?lv=mild",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1724,14 +1724,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/lc/a2-draw-like-an-architect.html?lv=mild",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1756,14 +1756,14 @@ window.B5DROPS = {
    "title": "Detail detectives",
    "subject": "English",
    "href": "/lp/a2-detail-hunt.html?lv=mild",
-   "note": "",
+   "note": "Detail detectives: finding the details that hold a text up, and spotting the padding. Four five minute chunks and some case notes to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1772,14 +1772,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/lp/a2-draw-like-an-architect.html?lv=medium",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1788,14 +1788,14 @@ window.B5DROPS = {
    "title": "Draw like an architect",
    "subject": "Aesthetic and Creative",
    "href": "/lw/a2-draw-like-an-architect.html?lv=medium",
-   "note": "",
+   "note": "Drawing like an architect: plans, symbols, labels and scale, with a drawing board and a real plan challenge. Four five minute chunks, whenever you fancy it.",
    "covers": [
     [
      "ac-arch",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1836,14 +1836,14 @@ window.B5DROPS = {
    "title": "Link words",
    "subject": "English",
    "href": "/egw/a2-link-words.html?lv=spicy",
-   "note": "",
+   "note": "Link words: the little words that hold writing together. Four five minute chunks and a bridge to build at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1948,14 +1948,14 @@ window.B5DROPS = {
    "title": "Link words",
    "subject": "English",
    "href": "/lw/a2-link-words.html?lv=medium",
-   "note": "",
+   "note": "Link words: the little words that hold writing together. Four five minute chunks and a bridge to build at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1964,14 +1964,14 @@ window.B5DROPS = {
    "title": "Kit it out",
    "subject": "Maths",
    "href": "/egw/a2-kit-it-out.html?lv=spicy",
-   "note": "",
+   "note": "Kit it out: working out what to buy for a design and what it costs, then keeping it on budget. Four five minute chunks and a kit list to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -1980,14 +1980,14 @@ window.B5DROPS = {
    "title": "Link words",
    "subject": "English",
    "href": "/hk/a2-link-words.html?lv=mild",
-   "note": "",
+   "note": "Link words: the little words that hold writing together. Four five minute chunks and a bridge to build at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1996,14 +1996,14 @@ window.B5DROPS = {
    "title": "Link words",
    "subject": "English",
    "href": "/jt-hq/a2-link-words.html?lv=mild",
-   "note": "",
+   "note": "Link words: the little words that hold writing together. Four five minute chunks and a bridge to build at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2012,14 +2012,14 @@ window.B5DROPS = {
    "title": "Link words",
    "subject": "English",
    "href": "/lc/a2-link-words.html?lv=mild",
-   "note": "",
+   "note": "Link words: the little words that hold writing together. Four five minute chunks and a bridge to build at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-cohesion",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2028,7 +2028,7 @@ window.B5DROPS = {
    "title": "Round it",
    "subject": "Maths",
    "href": "/lp/a2-round-it.html?lv=medium",
-   "note": "",
+   "note": "Rounding: whole numbers, money and measurements. Four five minute chunks, and a rule card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-number",
@@ -2039,7 +2039,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2048,14 +2048,14 @@ window.B5DROPS = {
    "title": "Hot or not",
    "subject": "Maths",
    "href": "/lw/a2-hot-or-not.html?lv=mild",
-   "note": "",
+   "note": "Reading thermometers and comparing temperatures. Four five minute chunks and a hot or not card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2064,14 +2064,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-career-explorer.html?lv=spicy",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2080,14 +2080,14 @@ window.B5DROPS = {
    "title": "One stop, one paragraph",
    "subject": "English",
    "href": "/egw/a2-journey-paragraphs.html?lv=spicy",
-   "note": "",
+   "note": "Paragraphs for a travelogue: one stop, one paragraph. Four five minute chunks and a postcard at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2096,14 +2096,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-career-explorer.html?lv=mild",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2112,14 +2112,14 @@ window.B5DROPS = {
    "title": "Hot or not",
    "subject": "Maths",
    "href": "/hk/a2-hot-or-not.html?lv=mild",
-   "note": "",
+   "note": "Reading thermometers and comparing temperatures. Four five minute chunks and a hot or not card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2128,14 +2128,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-career-explorer.html?lv=mild",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2144,14 +2144,14 @@ window.B5DROPS = {
    "title": "Hot or not",
    "subject": "Maths",
    "href": "/jt-hq/a2-hot-or-not.html?lv=mild",
-   "note": "",
+   "note": "Reading thermometers and comparing temperatures. Four five minute chunks and a hot or not card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2160,14 +2160,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-career-explorer.html?lv=mild",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2176,14 +2176,14 @@ window.B5DROPS = {
    "title": "Hot or not",
    "subject": "Maths",
    "href": "/lc/a2-hot-or-not.html?lv=mild",
-   "note": "",
+   "note": "Reading thermometers and comparing temperatures. Four five minute chunks and a hot or not card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2192,14 +2192,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-career-explorer.html?lv=medium",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2228,14 +2228,14 @@ window.B5DROPS = {
    "title": "Career explorer",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-career-explorer.html?lv=medium",
-   "note": "",
+   "note": "Exploring jobs on a careers website and picking out three facts worth knowing. Four five minute chunks and a career fact file to make, whenever you fancy it.",
    "covers": [
     [
      "pfa-careers",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2244,14 +2244,14 @@ window.B5DROPS = {
    "title": "One stop, one paragraph",
    "subject": "English",
    "href": "/lw/a2-journey-paragraphs.html?lv=medium",
-   "note": "",
+   "note": "Paragraphs for a travelogue: one stop, one paragraph. Four five minute chunks and a postcard at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-organise",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2260,14 +2260,14 @@ window.B5DROPS = {
    "title": "Commas and apostrophes",
    "subject": "English",
    "href": "/egw/a2-commas-apostrophes.html?lv=spicy",
-   "note": "",
+   "note": "Commas and apostrophes: lists, openers, missing letters and who owns what. Four five minute chunks and a sign to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2276,14 +2276,14 @@ window.B5DROPS = {
    "title": "Map scales",
    "subject": "Maths",
    "href": "/egw/a2-map-scales.html?lv=spicy",
-   "note": "",
+   "note": "Using the scale on a map or plan to work out real distances. Four five minute chunks, a route planner, and a journey card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2356,14 +2356,14 @@ window.B5DROPS = {
    "title": "Commas and apostrophes",
    "subject": "English",
    "href": "/lw/a2-commas-apostrophes.html?lv=medium",
-   "note": "",
+   "note": "Commas and apostrophes: lists, openers, missing letters and who owns what. Four five minute chunks and a sign to design at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2372,14 +2372,14 @@ window.B5DROPS = {
    "title": "Case file",
    "subject": "English",
    "href": "/egw/a2-case-file.html?lv=spicy",
-   "note": "",
+   "note": "Detective work with texts: clues, cases and a mystery at the end. Four five minute chunks and a case file card to make, whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2388,14 +2388,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/egw/a2-what-helps-me-move.html?lv=spicy",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2404,14 +2404,14 @@ window.B5DROPS = {
    "title": "Question or exclamation?",
    "subject": "English",
    "href": "/hk/a2-end-marks.html?lv=mild",
-   "note": "",
+   "note": "Question marks and exclamation marks, and picking the right end mark. Four five minute chunks and a speech bubble poster at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2420,14 +2420,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/hk/a2-what-helps-me-move.html?lv=mild",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2436,14 +2436,14 @@ window.B5DROPS = {
    "title": "Question or exclamation?",
    "subject": "English",
    "href": "/jt-hq/a2-end-marks.html?lv=mild",
-   "note": "",
+   "note": "Question marks and exclamation marks, and picking the right end mark. Four five minute chunks and a speech bubble poster at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2452,14 +2452,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/jt-hq/a2-what-helps-me-move.html?lv=mild",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2468,14 +2468,14 @@ window.B5DROPS = {
    "title": "Question or exclamation?",
    "subject": "English",
    "href": "/lc/a2-end-marks.html?lv=mild",
-   "note": "",
+   "note": "Question marks and exclamation marks, and picking the right end mark. Four five minute chunks and a speech bubble poster at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2484,14 +2484,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/lc/a2-what-helps-me-move.html?lv=mild",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2500,14 +2500,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/lp/a2-what-helps-me-move.html?lv=medium",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2516,14 +2516,14 @@ window.B5DROPS = {
    "title": "What helps me move",
    "subject": "Physical World",
    "href": "/lw/a2-what-helps-me-move.html?lv=medium",
-   "note": "",
+   "note": "Finding what helps you move: warm ups, tools, small steps and practice. Four five minute chunks and a try it card, whenever you fancy it.",
    "covers": [
     [
      "pw-balance",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2532,14 +2532,14 @@ window.B5DROPS = {
    "title": "Draw it to scale",
    "subject": "Maths",
    "href": "/egw/a2-draw-to-scale.html?lv=spicy",
-   "note": "",
+   "note": "Drawing a building plan to scale, with a grid to draw on. Four five minute chunks and a plan to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      4
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2548,14 +2548,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/egw/a2-hidden-messages.html?lv=spicy",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2564,14 +2564,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/hk/a2-hidden-messages.html?lv=mild",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2580,14 +2580,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/jt-hq/a2-hidden-messages.html?lv=mild",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2596,14 +2596,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/lc/a2-hidden-messages.html?lv=mild",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2612,14 +2612,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/lp/a2-hidden-messages.html?lv=medium",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2628,7 +2628,7 @@ window.B5DROPS = {
    "title": "Map scales",
    "subject": "Maths",
    "href": "/lp/a2-map-scales.html?lv=medium",
-   "note": "",
+   "note": "Using the scale on a map or plan to work out real distances. Four five minute chunks, a route planner, and a journey card at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
@@ -2639,7 +2639,7 @@ window.B5DROPS = {
      4
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2648,14 +2648,14 @@ window.B5DROPS = {
    "title": "Between the lines",
    "subject": "English",
    "href": "/lw/a2-between-lines.html?lv=medium",
-   "note": "",
+   "note": "Reading between the lines: working out what a text hints at but never says. Four five minute chunks and a clue card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2664,14 +2664,14 @@ window.B5DROPS = {
    "title": "Hidden messages",
    "subject": "Human and Social",
    "href": "/lw/a2-hidden-messages.html?lv=medium",
-   "note": "",
+   "note": "The hidden messages inside myths and legends, then a legend hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "hs-myths",
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2680,7 +2680,7 @@ window.B5DROPS = {
    "title": "Argument tricks",
    "subject": "English",
    "href": "/egw/a2-argument-tricks.html?lv=spicy",
-   "note": "",
+   "note": "How arguments use facts, opinions and a few sneaky tricks. Four five minute chunks and a campaign poster to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
@@ -2691,7 +2691,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2748,7 +2748,7 @@ window.B5DROPS = {
    "title": "Question or exclamation?",
    "subject": "English",
    "href": "/lp/a2-end-marks.html?lv=mild",
-   "note": "",
+   "note": "Question marks and exclamation marks, and picking the right end mark. Four five minute chunks and a speech bubble poster at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
@@ -2759,7 +2759,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2800,14 +2800,14 @@ window.B5DROPS = {
    "title": "Prove it",
    "subject": "English",
    "href": "/hk/a2-prove-it.html?lv=mild",
-   "note": "",
+   "note": "Prove it: backing up what you have worked out with a detail from the text. Four five minute chunks and a proof card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -2816,14 +2816,14 @@ window.B5DROPS = {
    "title": "Prove it",
    "subject": "English",
    "href": "/jt-hq/a2-prove-it.html?lv=mild",
-   "note": "",
+   "note": "Prove it: backing up what you have worked out with a detail from the text. Four five minute chunks and a proof card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -2832,14 +2832,14 @@ window.B5DROPS = {
    "title": "Prove it",
    "subject": "English",
    "href": "/lc/a2-prove-it.html?lv=mild",
-   "note": "",
+   "note": "Prove it: backing up what you have worked out with a detail from the text. Four five minute chunks and a proof card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -2848,14 +2848,14 @@ window.B5DROPS = {
    "title": "Convert it",
    "subject": "Maths",
    "href": "/lp/a2-convert-it.html?lv=medium",
-   "note": "",
+   "note": "Switching between units like cm and m, or minutes and hours. Four five minute chunks and a conversion card to make, whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      5
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2864,14 +2864,14 @@ window.B5DROPS = {
    "title": "Argument tricks",
    "subject": "English",
    "href": "/lw/a2-argument-tricks.html?lv=medium",
-   "note": "",
+   "note": "How arguments use facts, opinions and a few sneaky tricks. Four five minute chunks and a campaign poster to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-factop",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2880,14 +2880,14 @@ window.B5DROPS = {
    "title": "Speed, distance, time",
    "subject": "Maths",
    "href": "/egw/a2-speed-distance-time.html?lv=spicy",
-   "note": "",
+   "note": "Speed, distance and time, with worked examples to follow and a journey card at the end. Four five minute chunks. Have a go whenever you fancy it.",
    "covers": [
     [
      "maths-shape",
      5
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -2944,14 +2944,14 @@ window.B5DROPS = {
    "title": "Between the lines",
    "subject": "English",
    "href": "/lp/a2-between-lines.html?lv=mild",
-   "note": "",
+   "note": "Reading between the lines: working out what a text hints at but never says. Four five minute chunks and a clue card at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -2992,14 +2992,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/egw/a2-what-is-it-made-of.html?lv=spicy",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -3024,14 +3024,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/hk/a2-what-is-it-made-of.html?lv=mild",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -3056,14 +3056,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/jt-hq/a2-what-is-it-made-of.html?lv=mild",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -3088,14 +3088,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/lc/a2-what-is-it-made-of.html?lv=mild",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -3120,14 +3120,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/lp/a2-what-is-it-made-of.html?lv=medium",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -3152,14 +3152,14 @@ window.B5DROPS = {
    "title": "What is it made of?",
    "subject": "Science",
    "href": "/lw/a2-what-is-it-made-of.html?lv=medium",
-   "note": "",
+   "note": "Materials: what things are made of, what they are like, and where they come from, ready for a material hunt away from the screen. Four five minute chunks. Have a look whenever you fancy it.",
    "covers": [
     [
      "se-earth",
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -3264,14 +3264,14 @@ window.B5DROPS = {
    "title": "Punctuation with purpose",
    "subject": "English",
    "href": "/egw/a2-punctuation-purpose.html?lv=spicy",
-   "note": "",
+   "note": "Choosing punctuation on purpose: suspense, drumrolls and asides. Four five minute chunks and a postcard to make at the end. Have a look whenever you fancy it.",
    "covers": [
     [
      "eng-punct",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -3344,14 +3344,14 @@ window.B5DROPS = {
    "title": "Prove it",
    "subject": "English",
    "href": "/lw/a2-prove-it.html?lv=medium",
-   "note": "",
+   "note": "Prove it: backing up what you have worked out with a detail from the text. Four five minute chunks and a proof card to make at the end. Have a go whenever you fancy it.",
    "covers": [
     [
      "eng-infer",
      3
     ]
    ],
-   "ready": false
+   "ready": true
   }
  ]
 };

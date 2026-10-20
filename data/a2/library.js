@@ -23,11 +23,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Main points need details to hold them up. Find the ones that matter.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-04",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "between-lines",
@@ -35,11 +35,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Writers and pictures do not tell you everything. Clue + what you know = idea.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-20",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "prove-it",
@@ -47,11 +47,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "You have worked something out from a text. Now show the proof.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-07",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "join-dots",
@@ -59,11 +59,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Two details from different places in a text can add up to an idea that neither one says.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-19",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "case-file",
@@ -71,11 +71,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "One clue can mean anything. Several clues together build a case. Then you weigh up which reading wins.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-02",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "fact-check",
@@ -131,11 +131,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Writers mix facts and opinions to win you over. Learn their tricks, spot them, and say how they work.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-04",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "belong-together",
@@ -143,11 +143,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Sentences about the same idea belong together, like a pair of socks. A group of them is a paragraph.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "paragraph-focus",
@@ -167,11 +167,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "The little words that hold ideas together: and, but, because, then, however, and more.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-25",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "scene-change",
@@ -179,11 +179,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A new paragraph is a scene change: new time, new place, new topic or new person.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "text-skeleton",
@@ -191,11 +191,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Reading",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Headings, topic sentences, openings and endings: the bones that hold a text up, and what they do to the reader.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "pick-format",
@@ -227,11 +227,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Writing",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A travelogue is a journey on paper. Every new stop gets a new paragraph.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-27",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "my-travelogue",
@@ -263,11 +263,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Every sentence is a little train: a capital letter at the front, a full stop at the back.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-16",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "end-marks",
@@ -275,11 +275,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Asking gets a question mark. A strong feeling gets an exclamation mark. Calm telling gets a full stop.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-12-02",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "commas-apostrophes",
@@ -287,11 +287,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Commas give the reader a breath. Apostrophes show missing letters, or who owns what.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-30",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "semicolons",
@@ -323,11 +323,11 @@ window.B5LIB = {
    "shelf": "english",
    "group": "Punctuation",
    "subj": "s-english",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Punctuation is not just rules. Pick the right mark and you control the pace, the drama and the meaning.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-14",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "times-facts",
@@ -371,11 +371,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Number",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "One question sorts it: do I know the total, or the parts?",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-16",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "round-it",
@@ -383,11 +383,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Number",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Is it nearer this one or that one? Rounding whole numbers, money and measurements.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "written-methods",
@@ -395,11 +395,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Number",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Big sums on paper: one column at a time, carry what is left, and check it backwards.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-05",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "head-or-paper",
@@ -407,11 +407,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Number",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Some sums are quicker in your head, some are safer on paper. Either way, you can check them.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-13",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "estimate-first",
@@ -419,11 +419,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Number",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Round it, guess it, then check it. An estimate tells you when an answer has gone badly wrong.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-23",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "measure-it",
@@ -431,11 +431,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "How long, how heavy, how much it holds, how long it takes. Read it, then write the number and the unit.",
+   "mins": 25,
+   "chunks": 5,
    "first": "2026-11-12",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "hot-or-not",
@@ -443,11 +443,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Read a thermometer, then work out what is hotter, what is colder, and by how much.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "read-the-scale",
@@ -467,11 +467,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Round the edge is the perimeter. The floor inside is the area.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "l-shaped-floors",
@@ -479,11 +479,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Split it into rectangles, find any missing lengths, then add up the areas.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-18",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "kit-it-out",
@@ -491,11 +491,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "How many to buy, what it costs, and whether it fits the budget.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "map-scales",
@@ -503,11 +503,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A map is a small drawing of a big place. The scale tells you how big.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-30",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "draw-to-scale",
@@ -515,11 +515,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Shrink a real building onto paper so every length shrinks by the same amount.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-03",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "convert-it",
@@ -527,11 +527,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Switch between units: cm and m, g and kg, ml and l, minutes and hours, pence and pounds.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-07",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "speed-distance-time",
@@ -539,11 +539,11 @@ window.B5LIB = {
    "shelf": "maths",
    "group": "Shape and measure",
    "subj": "s-maths",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Speed is how far you go in each hour. Know two of speed, distance and time, and you can find the third.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-09",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "plan-the-trip",
@@ -575,11 +575,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Making and building",
    "subj": "s-ac",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Plans from above, elevations from the front, symbols, labels and a scale. Then draw your own.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-23",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "myths-then-and-now",
@@ -587,11 +587,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Myths and legends",
    "subj": "s-hs",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Old myths and legends, the urban myths people pass on today, and what they have in common.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-12",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "hidden-messages",
@@ -599,11 +599,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Myths and legends",
    "subj": "s-hs",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Old stories have a secret job. Find the moral, the warning or the value hiding inside.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-03",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "design-an-expedition",
@@ -647,11 +647,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Out and active",
    "subj": "s-pw",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Warm ups, tools, small steps and practice: finding the helpers that work for you.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-12-02",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "careers-fair-scout",
@@ -659,11 +659,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Careers",
    "subj": "s-pfa",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Go in as a scout: look around, ask a question if you like, and come away with three jobs that caught your eye.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-13",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "career-explorer",
@@ -671,11 +671,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Careers",
    "subj": "s-pfa",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "How to read a job profile on a careers website, and pick out the facts worth keeping.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-27",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "getting-around",
@@ -683,11 +683,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Getting about",
    "subj": "s-pfa",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Buses, trains, trams and more: what each one is for, and what it costs.",
+   "mins": 20,
+   "chunks": 4,
    "first": "2026-11-06",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "read-the-signs",
@@ -695,11 +695,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Getting about",
    "subj": "s-pfa",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Symbols on signs and maps, and how to read a bus timetable, so you can find your way.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-11-20",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "what-is-it-made-of",
@@ -707,11 +707,11 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Science",
    "subj": "s-science",
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Everything around you is made of materials. What they are like decides what they are good for.",
+   "mins": 25,
+   "chunks": 4,
    "first": "2026-12-10",
-   "ready": false
+   "ready": true
   }
  ]
 };
