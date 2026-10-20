@@ -99,7 +99,7 @@ var got = null;
 function fetchFolder(){
   if(got) return got;
   var url = window.B5Site && window.B5Site.syncUrl;
-  got = (url ? fromSheet(url) : Promise.resolve(null)).then(function(b){ return b || fromFile(); }).then(withDrops);
+  got = (url ? fromSheet(url) : Promise.resolve(null)).then(function(b){ return b ? withFile(b) : fromFile(); }).then(withDrops);
   return got;
 }
 /* ---------- Autumn 2: activities that arrive on their own day ----------
@@ -155,6 +155,20 @@ function fromSheet(url){
     window.B5Site.call("folder", { who: WHO })
       .then(function(o){ if(!done){ done = true; clearTimeout(t); res(o && o.ok && o.data ? { who: WHO, updated: "", data: o.data } : null); } })
       .catch(function(){ if(!done){ done = true; clearTimeout(t); res(null); } });
+  });
+}
+/* anything put straight into /data/folders/<who>.js is added to what the
+   sheet holds, so a game or file can land in a folder without a sheet row.
+   Matching things (same link, same title or same message) only show once. */
+function withFile(b){
+  return fromFile().then(function(f){
+    if(!f) return b;
+    var o = contents(b), x = contents(f), norm = function(v){ return String(v || "").trim().toLowerCase(); };
+    var has = function(list, it, keys){ return list.some(function(a){ return keys.some(function(k){ return it[k] && norm(a[k]) === norm(it[k]); }); }); };
+    x.messages.forEach(function(m){ if(!has(o.messages, m, ["id", "text"])) o.messages.push(m); });
+    x.activities.forEach(function(a){ if(!has(o.activities, a, ["id", "href", "title"])) o.activities.push(a); });
+    x.files.forEach(function(a){ if(!has(o.files, a, ["id", "href", "title"])) o.files.push(a); });
+    b.data = o; return b;
   });
 }
 /* otherwise (or if the sheet cannot be reached) from /data/folders/<who>.js */
