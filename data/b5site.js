@@ -53,12 +53,14 @@ try{ SYNC_URL = localStorage.getItem("b5.sync.url") || SYNC_URL; }catch(e){}
 if(GUEST) SYNC_URL = "";
 
 var path = location.pathname;
+/* HQ tab icon colours: the same values as section 18 (HQ COLOURS)
+   of /style.css. Change the two together. */
 var HQS = {
   "/egw/":   { who: "EGW", prefix: "b5.egw.", bg: "#2d2466", ink: "#ffe28a" },
   "/lp/":    { who: "LP", prefix: "b5.lp.",  bg: "#e2557a", ink: "#ffffff" },
-  "/lw/":    { who: "LW", prefix: "b5.lw.",  bg: "#7d1424", ink: "#ffc247" },
-  "/lc/":    { who: "LC", prefix: "b5.lc.",  bg: "#0b1416", ink: "#c9f7d8" },
-  "/hk/":    { who: "HK", prefix: "b5.hk.",  bg: "#0b1622", ink: "#ff7a1a" },
+  "/lw/":    { who: "LW", prefix: "b5.lw.",  bg: "#9a1d2e", ink: "#ffc247" },
+  "/lc/":    { who: "LC", prefix: "b5.lc.",  bg: "#16262a", ink: "#c9f7d8" },
+  "/hk/":    { who: "HK", prefix: "b5.hk.",  bg: "#1d3a52", ink: "#ff7a1a" },
   "/jt-hq/": { who: "JT", prefix: "b5.jthq.",  bg: "#1f8a3c", ink: "#ffffff" }
 };
 /* project pages follow their student between devices too (sync only) */
@@ -148,6 +150,31 @@ function homeButton(){
   nudge(); setTimeout(nudge, 800); setTimeout(nudge, 2500);
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", homeButton); else homeButton();
+
+/* ---------- title rows: the badge sits right after the title ----------
+   A title that wraps onto two lines keeps its full width, which would
+   push the round badge to the far edge. Shrink it to its widest line so
+   the badge follows the words, like the clock on the home page. */
+function snugTitles(){
+  [].forEach.call(document.querySelectorAll(".hero .toprow > h1"), function(h){
+    h.style.width = "";
+    var r = document.createRange(); r.selectNodeContents(h);
+    var rs = r.getClientRects(), tops = {}, lines = 0, right = 0, i;
+    for(i = 0; i < rs.length; i++){
+      var t = Math.round(rs[i].top / 8);
+      if(!tops[t]){ tops[t] = 1; lines++; }
+      if(rs[i].right > right) right = rs[i].right;
+    }
+    if(lines < 2) return;
+    h.style.width = Math.ceil(right - h.getBoundingClientRect().left + 2) + "px";
+  });
+}
+var snugT = 0;
+function snugSoon(){ clearTimeout(snugT); snugT = setTimeout(snugTitles, 60); }
+document.addEventListener("DOMContentLoaded", snugSoon);
+window.addEventListener("load", snugSoon);
+window.addEventListener("resize", snugSoon);
+try{ document.fonts.ready.then(snugSoon); }catch(e){}
 
 /* ---------- the guest banner ---------- */
 function guestBanner(){

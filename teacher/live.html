@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=11">
+<link rel="stylesheet" href="/style.css?v=12">
 <script src="/data/b5site.js?v=7"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <script src="/data/minidocx.js?v=1"></script>
@@ -24,10 +24,11 @@
 .kids{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 20px}
 @media (max-width:900px){.kids{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.kids{grid-template-columns:1fr}}
-.kid{border:3px solid var(--ink);border-radius:18px 14px 16px 12px;background:var(--white);overflow:hidden;box-shadow:4px 5px 0 rgba(10,47,56,.18)}
-.kid-top{display:flex;align-items:center;gap:12px;padding:12px 14px;color:#fff}
+.kid{border:3px solid var(--ink);border-left:12px solid var(--hq,var(--teal));border-radius:18px 14px 16px 12px;background:var(--white);overflow:hidden;box-shadow:4px 5px 0 rgba(10,47,56,.18)}
+/* initials stay ink on white: the HQ colour is only the side stripe */
+.kid-top{display:flex;align-items:center;gap:12px;padding:12px 14px;color:var(--ink);background:var(--white);border-bottom:2px dashed rgba(10,47,56,.18)}
 .kid-top b{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;font-size:2rem;line-height:.9}
-.kid-top span{font-size:.85rem;opacity:.9}
+.kid-top span{font-size:.85rem;color:var(--body-tint)}
 .kid-top a{margin-left:auto;color:inherit;font-size:.82rem}
 .kid-nums{display:flex;gap:18px;padding:10px 14px 4px}
 .kid-nums div b{display:block;font-family:var(--display);font-variation-settings:"wght" 900;font-size:1.5rem;line-height:1}
@@ -82,7 +83,7 @@
       <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg>
       <b>Base 5</b>
     </div>
-    <nav><a href="/teacher/">Staff room</a><a href="/teacher/targets.html">Targets</a><a href="/teacher/sync.html">Setup</a><a href="/">Site</a></nav>
+    <nav aria-label="Staff pages"><a href="/teacher/">Staff room</a><a href="/teacher/live.html" aria-current="page">Live view</a><a href="/teacher/targets.html">Targets</a><a href="/teacher/a2-drops.html">Drops</a><a href="/teacher/folders.html">Folders</a><a href="/teacher/milestones.html">Milestones</a><a href="/teacher/build-targets.html">Codes</a><a href="/teacher/sync.html">Setup</a><a href="/">Site</a></nav>
   </div>
 </div>
 <header class="hero hero-sm">
@@ -157,12 +158,12 @@
 var URL = (window.B5Site && B5Site.syncUrl) || "";
 var KEY = "b5.staffkey.v1";
 var HQ = {
-  EGW: { base: "/egw/", prefix: "b5.egw.", bg: "linear-gradient(170deg,#141a46,#4c2d7a)" },
-  LP:  { base: "/lp/", prefix: "b5.lp.", bg: "linear-gradient(165deg,#ff8a5c,#8b3d8f)" },
-  LW:  { base: "/lw/", prefix: "b5.lw.", bg: "linear-gradient(170deg,#9a1d2e,#6b0f1e)" },
-  LC:  { base: "/lc/", prefix: "b5.lc.", bg: "linear-gradient(175deg,#0b1416,#16262a)" },
-  HK:  { base: "/hk/", prefix: "b5.hk.", bg: "linear-gradient(165deg,#1d3a52,#0b1622)" },
-  JT:  { base: "/jt-hq/", prefix: "b5.jthq.", bg: "linear-gradient(180deg,#1f8a3c,#13652b)" }
+  EGW: { base: "/egw/", prefix: "b5.egw.", c: "hqc-egw" },
+  LP:  { base: "/lp/", prefix: "b5.lp.", c: "hqc-lp" },
+  LW:  { base: "/lw/", prefix: "b5.lw.", c: "hqc-lw" },
+  LC:  { base: "/lc/", prefix: "b5.lc.", c: "hqc-lc" },
+  HK:  { base: "/hk/", prefix: "b5.hk.", c: "hqc-hk" },
+  JT:  { base: "/jt-hq/", prefix: "b5.jthq.", c: "hqc-jt" }
 };
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -264,7 +265,7 @@ function card(w, o){
     panel = '<div class="panel" data-w="' + w + '"><div class="stick">' + Object.keys(STICK).map(function(k, i){ return '<button type="button" data-st="' + k + '" aria-pressed="' + (i === 0) + '" aria-label="' + k + '">' + STICK[k] + '</button>'; }).join("") + '</div>' +
       '<textarea data-shout placeholder="Something you noticed, kept short. Only ' + w + ' sees it, on their HQ."></textarea><div class="row2"><button class="mini go" type="button" data-do="sendshout">Send the shout-out</button><button class="mini" type="button" data-do="close">Not now</button><span class="help" data-out style="margin:0"></span></div></div>';
   }
-  return '<div class="kid"><div class="kid-top" style="background:' + h.bg + '"><b>' + w + '</b><span>Last active ' + ago(s.last) + '</span><a href="' + h.base + '">Open HQ</a></div>' +
+  return '<div class="kid ' + h.c + '"><div class="kid-top"><b>' + w + '</b><span>Last active ' + ago(s.last) + '</span><a href="' + h.base + '">Open HQ</a></div>' +
     '<div class="today">' + today + '</div>' +
     '<div class="kid-nums"><div><b>' + sparks + '</b><small>sparks (about)</small></div><div><b>' + acts.length + '</b><small>activities started</small></div><div><b>' + acts.filter(function(a){ return a.fin || a.done >= a.of; }).length + '</b><small>finished</small></div></div>' +
     (acts.length ? '<ul>' + acts.slice(0, 5).map(function(a){
