@@ -1464,7 +1464,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/egw/a2-read-the-signs.html?lv=spicy",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",
@@ -1512,7 +1512,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/hk/a2-read-the-signs.html?lv=mild",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",
@@ -1544,7 +1544,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/jt-hq/a2-read-the-signs.html?lv=mild",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",
@@ -1576,7 +1576,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lc/a2-read-the-signs.html?lv=mild",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",
@@ -1592,7 +1592,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lp/a2-read-the-signs.html?lv=medium",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",
@@ -1608,7 +1608,7 @@ window.B5DROPS = {
    "title": "Read the signs",
    "subject": "Preparation for Adulthood",
    "href": "/lw/a2-read-the-signs.html?lv=medium",
-   "note": "Signs, map symbols and bus timetables, ready for our travel sessions. Four five minute chunks, a sign spotter challenge for when you are out, and a journey card to make. Have a look whenever you fancy it.",
+   "note": "",
    "covers": [
     [
      "pfa-transport",

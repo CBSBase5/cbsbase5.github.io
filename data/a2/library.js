@@ -695,9 +695,9 @@ window.B5LIB = {
    "shelf": "about",
    "group": "Getting about",
    "subj": "s-pfa",
-   "line": "Symbols on signs and maps, and how to read a bus timetable, so you can find your way.",
-   "mins": 25,
-   "chunks": 4,
+   "line": "",
+   "mins": 0,
+   "chunks": 0,
    "first": "2026-11-20",
    "ready": false
   },
