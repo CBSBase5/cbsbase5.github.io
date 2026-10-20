@@ -387,7 +387,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-26",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "written-methods",
@@ -411,7 +411,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-13",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "estimate-first",
@@ -555,7 +555,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "what-makes-it-stand",
@@ -603,7 +603,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-03",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "design-an-expedition",
