@@ -3,7 +3,7 @@
 (function(){
 var A = window.A2ART;
 var F = 'font-family="Verdana,Arial,sans-serif"';
-function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '" fill="#141a33" ' + (extra || "") + '>' + s + '</text>'; }
+function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '"' + (/fill=/.test(extra || "") ? "" : ' fill="#141a33"') + ' ' + (extra || "") + '>' + s + '</text>'; }
 
 /* r rows of c dots, each row sitting in its own tray */
 function arr(r, c, col, label){

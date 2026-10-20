@@ -3,7 +3,7 @@
 (function(){
 var A = window.A2ART;
 var F = 'font-family="Verdana,Arial,sans-serif"';
-function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '" fill="#141a33" ' + (extra || "") + '>' + s + '</text>'; }
+function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '"' + (/fill=/.test(extra || "") ? "" : ' fill="#141a33"') + ' ' + (extra || "") + '>' + s + '</text>'; }
 var SQ = "m&#178;";
 
 /* a room drawn on a grid of 1 m squares.

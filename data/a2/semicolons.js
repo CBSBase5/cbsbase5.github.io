@@ -3,7 +3,7 @@
 (function(){
 var A = window.A2ART;
 var F = 'font-family="Verdana,Arial,sans-serif"';
-function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '" fill="#141a33" ' + (extra || "") + '>' + s + '</text>'; }
+function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '"' + (/fill=/.test(extra || "") ? "" : ' fill="#141a33"') + ' ' + (extra || "") + '>' + s + '</text>'; }
 function colonMark(x, y, s, col){ return '<circle cx="' + x + '" cy="' + (y - 12 * s) + '" r="' + 8 * s + '" fill="' + col + '"/><circle cx="' + x + '" cy="' + (y + 12 * s) + '" r="' + 8 * s + '" fill="' + col + '"/>'; }
 function semiMark(x, y, s, col){ return '<circle cx="' + x + '" cy="' + (y - 12 * s) + '" r="' + 8 * s + '" fill="' + col + '"/><path d="M' + (x - 7 * s) + ' ' + (y + 6 * s) + 'h' + 14 * s + 'q2 ' + 16 * s + ' ' + (-12 * s) + ' ' + 26 * s + 'q' + 6 * s + ' ' + (-10 * s) + ' ' + (-2 * s) + ' ' + (-16 * s) + 'z" fill="' + col + '"/>'; }
 

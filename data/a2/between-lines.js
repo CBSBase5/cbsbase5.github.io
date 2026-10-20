@@ -3,7 +3,7 @@
 (function(){
 var A = window.A2ART;
 var F = 'font-family="Verdana,Arial,sans-serif"';
-function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '" fill="#141a33" ' + (extra || "") + '>' + s + '</text>'; }
+function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 14) + '"' + (/fill=/.test(extra || "") ? "" : ' fill="#141a33"') + ' ' + (extra || "") + '>' + s + '</text>'; }
 
 /* clue + what I know = idea, with a dripping umbrella by a door */
 var RAIN = '<svg viewBox="0 0 520 240" role="img" aria-label="A dripping umbrella and a puddle by a door. Clue plus what I know makes an idea.">' +

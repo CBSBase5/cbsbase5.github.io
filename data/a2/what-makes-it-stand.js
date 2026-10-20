@@ -4,7 +4,7 @@
 (function(){
 var A = window.A2ART;
 var F = 'font-family="Verdana,Arial,sans-serif"';
-function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 15) + '" fill="#141a33"' + (extra || "") + '>' + s + '</text>'; }
+function T(x, y, s, size, extra){ return '<text x="' + x + '" y="' + y + '" ' + F + ' font-size="' + (size || 15) + '"' + (/fill=/.test(extra || "") ? "" : ' fill="#141a33"') + ' ' + (extra || "") + '>' + s + '</text>'; }
 function line(x1, y1, x2, y2, col, w){ return '<path d="M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2 + '" stroke="' + (col || "#8a5a2b") + '" stroke-width="' + (w || 7) + '" stroke-linecap="round"/>'; }
 function dot(x, y, col){ return '<circle cx="' + x + '" cy="' + y + '" r="7" fill="' + (col || "#ff5d8f") + '" stroke="#141a33" stroke-width="2"/>'; }
 function arrow(x1, y, x2, col){ var d = x2 > x1 ? -10 : 10; return '<path d="M' + x1 + ' ' + y + 'H' + x2 + 'M' + (x2 + d) + ' ' + (y - 8) + 'L' + x2 + ' ' + y + 'L' + (x2 + d) + ' ' + (y + 8) + '" stroke="' + (col || "#e04848") + '" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'; }
