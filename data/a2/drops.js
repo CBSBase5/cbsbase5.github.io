@@ -623,7 +623,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -655,7 +655,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -687,7 +687,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -879,7 +879,7 @@ window.B5DROPS = {
      1
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1471,7 +1471,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -1519,7 +1519,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -1551,7 +1551,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -1583,7 +1583,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LP",
@@ -1599,7 +1599,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",
@@ -1615,7 +1615,7 @@ window.B5DROPS = {
      2
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -2379,7 +2379,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "EGW",
@@ -3015,7 +3015,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "HK",
@@ -3047,7 +3047,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "JT",
@@ -3079,7 +3079,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LC",
@@ -3143,7 +3143,7 @@ window.B5DROPS = {
      3
     ]
    ],
-   "ready": false
+   "ready": true
   },
   {
    "who": "LW",

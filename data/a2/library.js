@@ -75,7 +75,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-02",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "fact-check",
@@ -147,7 +147,7 @@ window.B5LIB = {
    "mins": 20,
    "chunks": 4,
    "first": "2026-11-11",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "paragraph-focus",
@@ -459,7 +459,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-12-10",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "room-plans",
@@ -699,7 +699,7 @@ window.B5LIB = {
    "mins": 25,
    "chunks": 4,
    "first": "2026-11-20",
-   "ready": false
+   "ready": true
   },
   {
    "slug": "what-is-it-made-of",
