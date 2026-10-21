@@ -712,6 +712,18 @@ window.B5LIB = {
    "chunks": 4,
    "first": "2026-12-10",
    "ready": true
+  },
+  {
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "shelf": "about",
+   "group": "Relationships",
+   "subj": "s-phse",
+   "line": "Noticing your body's no, saying no in a way that feels OK, and hearing it when someone else says no.",
+   "mins": 20,
+   "chunks": 4,
+   "first": "2026-11-12",
+   "ready": true
   }
  ]
 };

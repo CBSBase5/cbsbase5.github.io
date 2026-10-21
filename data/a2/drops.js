@@ -26,7 +26,8 @@ window.B5DROPS = {
   "pw-balance": "Physical World and Exploration: Balance and control",
   "pfa-careers": "Preparation for Adulthood: Careers for the future",
   "pfa-transport": "Preparation for Adulthood: Transport and travel",
-  "se-earth": "Scientific and Environmental: Earth and atmosphere"
+  "se-earth": "Scientific and Environmental: Earth and atmosphere",
+  "rel-assert": "Relational (PSHE and RSE): Assertiveness in relationships"
  },
  "items": [
   {
@@ -740,6 +741,30 @@ window.B5DROPS = {
   {
    "who": "EGW",
    "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/egw/a2-my-yes-my-no.html?lv=spicy",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "EGW",
+   "date": "2026-11-12",
    "slug": "myths-then-and-now",
    "title": "Myths then and now",
    "subject": "Human and Social",
@@ -788,6 +813,30 @@ window.B5DROPS = {
   {
    "who": "HK",
    "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/hk/a2-my-yes-my-no.html?lv=mild",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "HK",
+   "date": "2026-11-12",
    "slug": "myths-then-and-now",
    "title": "Myths then and now",
    "subject": "Human and Social",
@@ -813,6 +862,30 @@ window.B5DROPS = {
     [
      "maths-shape",
      1
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "JT",
+   "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/jt-hq/a2-my-yes-my-no.html?lv=mild",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
     ]
    ],
    "ready": true
@@ -852,6 +925,30 @@ window.B5DROPS = {
   {
    "who": "LC",
    "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/lc/a2-my-yes-my-no.html?lv=mild",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "LC",
+   "date": "2026-11-12",
    "slug": "myths-then-and-now",
    "title": "Myths then and now",
    "subject": "Human and Social",
@@ -884,6 +981,30 @@ window.B5DROPS = {
   {
    "who": "LP",
    "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/lp/a2-my-yes-my-no.html?lv=medium",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "LP",
+   "date": "2026-11-12",
    "slug": "myths-then-and-now",
    "title": "Myths then and now",
    "subject": "Human and Social",
@@ -909,6 +1030,30 @@ window.B5DROPS = {
     [
      "maths-shape",
      1
+    ]
+   ],
+   "ready": true
+  },
+  {
+   "who": "LW",
+   "date": "2026-11-12",
+   "slug": "my-yes-my-no",
+   "title": "My yes, my no",
+   "subject": "Relational",
+   "href": "/lw/a2-my-yes-my-no.html?lv=medium",
+   "note": "My yes, my no: noticing when you do not want to do something, ways of saying so, and hearing someone else's no. Four five minute chunks and a card to make, whenever you fancy it.",
+   "covers": [
+    [
+     "rel-assert",
+     1
+    ],
+    [
+     "rel-assert",
+     2
+    ],
+    [
+     "rel-assert",
+     3
     ]
    ],
    "ready": true
