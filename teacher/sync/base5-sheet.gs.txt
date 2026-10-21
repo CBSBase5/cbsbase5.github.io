@@ -21,6 +21,8 @@
      Progress  the site writes this one; leave it alone
      BridgeLink  Done ticks from the BridgeLink copy list
                (/teacher/bridgelink.html); made the first time one is ticked
+     BridgeLink names  BridgeLink's name for each target, learned by the
+               copy list from a pasted BridgeLink page
 
    Nothing here asks for names: students are their initials.
    ========================================================== */
@@ -953,7 +955,32 @@ function blink_(r){
     students[w].sort(function(a, b){ return a.n - b.n; });
     students[w].forEach(function(x){ delete x.n; });
   });
-  return { ok: true, term: term, students: students, done: blinkDoneMap_() };
+  return { ok: true, term: term, students: students, done: blinkDoneMap_(), names: blinkNames_() };
+}
+/* BridgeLink's own name for each target (the bold line above its wording,
+   like "Writing - SPaG"), learned from a paste of a BridgeLink page.
+   Kept by the target's wording, so every student on that level shares it. */
+function blinkKey_(s){ return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().slice(0, 80); }
+function blinkNames_(){
+  var v = rows_("BridgeLink names"), out = {};
+  for(var i = 1; i < v.length; i++) if(v[i][0] && v[i][1]) out[blinkKey_(v[i][0])] = String(v[i][1]);
+  return out;
+}
+function blinkNamesSave_(r){
+  staff_(r.key);
+  var pairs = Array.isArray(r.pairs) ? r.pairs.slice(0, 600) : [];
+  var sh = sheet_("BridgeLink names") || tab_(SpreadsheetApp.getActive(), "BridgeLink names", ["Target wording", "BridgeLink name", "Learned"]);
+  var v = sh.getDataRange().getValues(), at = {}, added = 0, changed = 0;
+  for(var i = 1; i < v.length; i++) if(v[i][0]) at[blinkKey_(v[i][0])] = i + 1;
+  pairs.forEach(function(p){
+    if(!Array.isArray(p)) return;
+    var text = clean_(oneLine_(p[0]), 600), name = clean_(oneLine_(p[1]), 120), k = blinkKey_(text);
+    if(k.length < 12 || !name) return;
+    if(at[k]){
+      if(String(sh.getRange(at[k], 2).getValue()) !== name){ sh.getRange(at[k], 2, 1, 2).setValues([[name, new Date()]]); changed++; }
+    } else { sh.appendRow([text, name, new Date()]); at[k] = sh.getLastRow(); added++; }
+  });
+  return { ok: true, added: added, changed: changed, names: blinkNames_() };
 }
 function blinkDone_(r){
   staff_(r.key);
@@ -976,5 +1003,5 @@ var READ3 = {
 var WRITE3 = {
   reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
   post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
-  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_
+  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_
 };
