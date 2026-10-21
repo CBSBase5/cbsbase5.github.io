@@ -29,7 +29,7 @@ window.B5CORE = {
    "fp": [
     "8625f9d4"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-spin-detector",
@@ -42,9 +42,9 @@ window.B5CORE = {
    "href": {
     "EGW": "/egw/a2-core-spin-detector.html?lv=spicy"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Follow an argument, see whose side everyone is on, and catch the facts and opinions being used to win you over.",
+   "mins": 25,
+   "chunks": 4,
    "kw": [
     "argument",
     "fact",
@@ -53,7 +53,7 @@ window.B5CORE = {
    "fp": [
     "cb0f892c"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-what-is-not-said",
@@ -66,9 +66,9 @@ window.B5CORE = {
    "href": {
     "EGW": "/egw/a2-core-what-is-not-said.html?lv=spicy"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Pictures, adverts and writers say more than their words. Find the clue, work out the idea, then back it up.",
+   "mins": 25,
+   "chunks": 4,
    "kw": [
     "implicit",
     "inferred"
@@ -76,7 +76,7 @@ window.B5CORE = {
    "fp": [
     "d17bb483"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-method-mastery",
@@ -89,9 +89,9 @@ window.B5CORE = {
    "href": {
     "EGW": "/egw/a2-core-method-mastery.html?lv=spicy"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Times and divide, your way: in your head, on a grid, or at the bus stop.",
+   "mins": 25,
+   "chunks": 4,
    "kw": [
     "multiplication",
     "division",
@@ -100,7 +100,7 @@ window.B5CORE = {
    "fp": [
     "adc9cb47"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-room-makeover",
@@ -113,9 +113,9 @@ window.B5CORE = {
    "href": {
     "EGW": "/egw/a2-core-room-makeover.html?lv=spicy"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Flooring, skirting, paint, tiles and fences: what to buy, and what it costs.",
+   "mins": 25,
+   "chunks": 4,
    "kw": [
     "area",
     "perimeter",
@@ -124,7 +124,7 @@ window.B5CORE = {
    "fp": [
     "9bf78d87"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-get-the-gist",
@@ -137,9 +137,9 @@ window.B5CORE = {
    "href": {
     "LP": "/lp/a2-core-get-the-gist.html?lv=medium"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "What a short text is mostly about, its main points, and what it hints without saying.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "main",
     "points",
@@ -148,7 +148,7 @@ window.B5CORE = {
    "fp": [
     "9c06d083"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-make-it-scannable",
@@ -161,9 +161,9 @@ window.B5CORE = {
    "href": {
     "LP": "/lp/a2-core-make-it-scannable.html?lv=medium"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Titles, headings, bullet points and numbered lists: so a reader can find what they need in seconds.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "headings",
     "bullet"
@@ -171,7 +171,7 @@ window.B5CORE = {
    "fp": [
     "d3a8b2fa"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-near-enough",
@@ -184,16 +184,16 @@ window.B5CORE = {
    "href": {
     "LP": "/lp/a2-core-near-enough.html?lv=medium"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Rounding: to a whole number, to one decimal place, and to the nearest penny.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "rounding"
    ],
    "fp": [
     "6edb1ef7"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-rectangle-rooms",
@@ -206,9 +206,9 @@ window.B5CORE = {
    "href": {
     "LP": "/lp/a2-core-rectangle-rooms.html?lv=medium"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Area and perimeter of rectangles, and of rooms built from rectangles.",
+   "mins": 25,
+   "chunks": 4,
    "kw": [
     "area",
     "perimeter",
@@ -217,7 +217,7 @@ window.B5CORE = {
    "fp": [
     "99cdb4e2"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-fact-families",
@@ -230,9 +230,9 @@ window.B5CORE = {
    "href": {
     "LP": "/lp/a2-core-fact-families.html?lv=medium"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "One times fact, a whole family of facts: times, divide, and the bigger ones too.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "multiplication",
     "connections",
@@ -241,7 +241,7 @@ window.B5CORE = {
    "fp": [
     "f0316f56"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-marker-hunt",
@@ -254,9 +254,9 @@ window.B5CORE = {
    "href": {
     "LC": "/lc/a2-core-marker-hunt.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Titles, subheadings, bullets, numbers, bold, captions and order words: spotting them, and what each one tells you.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "organisational",
     "markers"
@@ -264,7 +264,7 @@ window.B5CORE = {
    "fp": [
     "b1b20d"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-format-match",
@@ -281,9 +281,9 @@ window.B5CORE = {
     "HK": "/hk/a2-core-format-match.html?lv=mild",
     "JT": "/jt-hq/a2-core-format-match.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Letters, diaries and instructions each have their own shape. Spot the clues, and match the format to the job.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "formats",
     "structures"
@@ -291,7 +291,7 @@ window.B5CORE = {
    "fp": [
     "6e9313a8"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-group-it",
@@ -304,9 +304,9 @@ window.B5CORE = {
    "href": {
     "LC": "/lc/a2-core-group-it.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "A paragraph is a box for sentences that belong together. One topic per box.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "paragraphs",
     "group"
@@ -314,7 +314,7 @@ window.B5CORE = {
    "fp": [
     "23a4d47a"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-times-table-gym",
@@ -327,9 +327,9 @@ window.B5CORE = {
    "href": {
     "LC": "/lc/a2-core-times-table-gym.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Times facts are like reps at the gym: come back often and they get stronger. No clock, no rush.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "multiplication",
     "division",
@@ -338,7 +338,7 @@ window.B5CORE = {
    "fp": [
     "7ae24776"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-scale-spotter",
@@ -353,9 +353,9 @@ window.B5CORE = {
     "LC": "/lc/a2-core-scale-spotter.html?lv=mild",
     "LW": "/lw/a2-core-scale-spotter.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Rulers, jugs, dials and gauges: find the labels, work out the gaps, read the pointer.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "scales",
     "division"
@@ -363,7 +363,7 @@ window.B5CORE = {
    "fp": [
     "2904a4b0"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-same-story",
@@ -376,9 +376,9 @@ window.B5CORE = {
    "href": {
     "LW": "/lw/a2-core-same-story.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "The big idea a story is about, and the clues that tell you what kind of text you are reading.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "themes",
     "conventions"
@@ -386,7 +386,7 @@ window.B5CORE = {
    "fp": [
     "403e96f2"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-link-it-up",
@@ -403,9 +403,9 @@ window.B5CORE = {
     "HK": "/hk/a2-core-link-it-up.html?lv=mild",
     "JT": "/jt-hq/a2-core-link-it-up.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Pointing words, linking words and sticking to one idea: the things that turn separate sentences into a paragraph.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "sentences",
     "linked",
@@ -414,7 +414,7 @@ window.B5CORE = {
    "fp": [
     "d146b480"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-who-is-it-for",
@@ -427,9 +427,9 @@ window.B5CORE = {
    "href": {
     "LW": "/lw/a2-core-who-is-it-for.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "The same message can be dressed up or dressed down. Pick the words that fit the reader.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "audience",
     "purpose"
@@ -437,7 +437,7 @@ window.B5CORE = {
    "fp": [
     "8d836bea"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-pounds-and-pence",
@@ -450,9 +450,9 @@ window.B5CORE = {
    "href": {
     "LW": "/lw/a2-core-pounds-and-pence.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Writing money the right way, adding up prices and working out your change.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "money",
     "pounds",
@@ -461,7 +461,7 @@ window.B5CORE = {
    "fp": [
     "4c5d1482"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-fact-finder",
@@ -476,9 +476,9 @@ window.B5CORE = {
     "HK": "/hk/a2-core-fact-finder.html?lv=mild",
     "JT": "/jt-hq/a2-core-fact-finder.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Hunting for facts in short texts: who, where, when, how many, how much.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "simple",
     "facts"
@@ -486,7 +486,7 @@ window.B5CORE = {
    "fp": [
     "dac1155c"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-sum-it-up",
@@ -501,9 +501,9 @@ window.B5CORE = {
     "HK": "/hk/a2-core-sum-it-up.html?lv=mild",
     "JT": "/jt-hq/a2-core-sum-it-up.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Three short paragraphs: a label for each, the details that back them up, then one short summary.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "summarise",
     "main",
@@ -512,7 +512,7 @@ window.B5CORE = {
    "fp": [
     "22ab0fc"
    ],
-   "ready": false
+   "ready": true
   },
   {
    "slug": "core-full-stop",
@@ -527,9 +527,9 @@ window.B5CORE = {
     "HK": "/hk/a2-core-full-stop.html?lv=mild",
     "JT": "/jt-hq/a2-core-full-stop.html?lv=mild"
    },
-   "line": "",
-   "mins": 0,
-   "chunks": 0,
+   "line": "Capital at the front, stop at the end. And when to ask with a question mark, or shout with an exclamation mark.",
+   "mins": 20,
+   "chunks": 4,
    "kw": [
     "punctuation",
     "full",
@@ -538,7 +538,7 @@ window.B5CORE = {
    "fp": [
     "66c32555"
    ],
-   "ready": false
+   "ready": true
   }
  ]
 };
