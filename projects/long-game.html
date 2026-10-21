@@ -2067,7 +2067,7 @@ function lunge(u, k) {
 }
 function tick(dt, now) {
   if ((ambTick(dt, now) | terrainTick(dt, now) | funTick(dt, now)) && Math.floor(now / 33) % 2 === 0) GL.dirty = true;
-  if (ANIMS.length) { GL.dirty = true; var adt = dt / animMul() * (GL.slowUntil > now ? 0.3 : 1), old = ANIMS, n0 = old.length; ANIMS = old.slice(0, n0).filter(function (a) { try { if (a.step) return a.step(a, a === GLIDE ? dt : adt); } catch (err) { if (window.console) console.error(err); return false; } a.t += adt; var p = Math.min(1, a.t / a.dur), e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  if (ANIMS.length) { GL.dirty = true; var adt = dt / animMul() * (GL.slowUntil > now ? 0.3 : 1), old = ANIMS, n0 = old.length; ANIMS = old.slice(0, n0).filter(function (a) { try { if (a.step) return a.step(a, a === GLIDE ? dt : adt); } catch (err) { noteErr(err); return false; } a.t += adt; var p = Math.min(1, a.t / a.dur), e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     a.obj.position.lerpVectors(a.from, a.to, e); a.obj.position.y += Math.sin(p * Math.PI) * a.hop;
     if (p >= 1 && a.back) { old.push({ obj: a.obj, from: a.to.clone(), to: a.from.clone(), t: 0, dur: 0.25, hop: 0 }); }
     return p < 1; }); if (old.length > n0) ANIMS = ANIMS.concat(old.slice(n0)); } // keep anything an animation started while it ran
@@ -3734,7 +3734,7 @@ function productionTurn(msgs) {
     var pr = cityProd(c); c.stock = (c.stock || 0) + pr;
     if (c.proj && c.proj.left != null && c.proj.b) { delete c.proj.left; } // older saves
     if (c.proj && c.proj.u && !unitOk(S, c.proj.u, c)) c.proj = null;
-    if (!c.proj && !c.held) c.proj = autoPick(c);
+    if (!c.proj && !c.stopped) c.proj = autoPick(c);
     if (!c.proj) { var cap = 40 + eraOf(S.year) * 40; if (c.stock > cap) c.stock = cap; if (!c.idleSaid) { c.idleSaid = true; msgs.push(c.name + " is ready to make something. Open the city to choose."); } return; }
     var cost = projCost(c); if (c.stock < cost) return;
     var p = c.proj, done = true;
@@ -3908,10 +3908,10 @@ function workerCardHtml(u) {
 document.addEventListener("click", function (e) {
   var b = e.target.closest && e.target.closest("[data-make],[data-hurry],[data-stop],[data-autopick],[data-imp],[data-upgrade],[data-gov]"); if (!b || !S) return;
   if (b.dataset.make) { var c = S.cities[+b.dataset.city], m = b.dataset.make.split(":"), np = m[0] === "b" ? { b: m[1] } : m[0] === "u" ? { u: m[1] } : { wk: 1 }; sfx("tap");
-    if (c.proj && !c.proj.w) { c.proj = np; toast(c.name + " switches to " + projName(np).toLowerCase() + ". Nothing made so far is lost."); } else c.proj = np; c.idleSaid = false; if (typeof tutDone === "function") tutDone(1); saveGame(); card(); redraw(); hud(); }
+    if (c.proj && !c.proj.w) { c.proj = np; toast(c.name + " switches to " + projName(np).toLowerCase() + ". Nothing made so far is lost."); } else c.proj = np; c.idleSaid = false; c.stopped = false; if (typeof tutDone === "function") tutDone(1); saveGame(); card(); redraw(); hud(); }
   if (b.dataset.hurry != null) { var c2 = S.cities[+b.dataset.hurry], hc = hurryCost(c2); if ((c2.stock || 0) < projCost(c2) && S.gold >= hc) { S.gold -= hc; c2.stock = projCost(c2); sfx("coin"); toast(projName(c2.proj) + " will be ready in " + c2.name + " next turn."); saveGame(); card(); hud(); } }
-  if (b.dataset.stop != null) { var c3 = S.cities[+b.dataset.stop]; c3.proj = null; c3.held = true; sfx("tap"); card(); }
-  if (b.dataset.autopick != null) { var c4 = S.cities[+b.dataset.autopick]; c4.held = false; c4.proj = autoPick(c4) || (bestUnits(S, c4).melee ? { u: bestUnits(S, c4).melee } : { wk: 1 }); sfx("tap"); toast(c4.name + " will make " + projName(c4.proj).toLowerCase() + "."); saveGame(); card(); redraw(); }
+  if (b.dataset.stop != null) { var c3 = S.cities[+b.dataset.stop]; c3.proj = null; c3.stopped = true; sfx("tap"); card(); }
+  if (b.dataset.autopick != null) { var c4 = S.cities[+b.dataset.autopick]; c4.stopped = false; c4.proj = autoPick(c4) || (bestUnits(S, c4).melee ? { u: bestUnits(S, c4).melee } : { wk: 1 }); sfx("tap"); toast(c4.name + " will make " + projName(c4.proj).toLowerCase() + "."); saveGame(); card(); redraw(); }
   if (b.dataset.imp) { var u = S.units.filter(function (x) { return x.id === +b.dataset.uid; })[0]; if (!u) return; var t = b.dataset.imp; u.job = { t: t, k: +b.dataset.k, left: t === "road" ? 1 : IMPROVE[t].turns }; u.auto = false; u.mv = 0; sfx("tap"); toast("Your worker starts on a " + (t === "road" ? "road" : IMPROVE[t].n.toLowerCase()) + "."); saveGame(); card(); redraw(); }
   if (b.dataset.upgrade) { var uu = S.units.filter(function (x) { return x.id === +b.dataset.upgrade; })[0], ca = uu && cityAt(uu.k), up = uu && bestUnits(S, ca ? ca.c : null)[unitCls(uu)], cost = up ? Math.round((unitCost(up) - unitCost(uu.kind)) * 1.5 + 10) : 0; if (up && S.gold >= cost) { S.gold -= cost; uu.kind = up; uu.hp = 10; markFresh("u" + uu.id); sfx("coin"); toast("Upgraded to " + UNITS[up].n + "."); saveGame(); redraw(); card(); hud(); } }
   if (b.dataset.gov) { S.gov = b.dataset.gov; sfx("tap"); [].forEach.call(document.querySelectorAll("[data-gov]"), function (x) { x.classList.toggle("on", x.dataset.gov === S.gov); }); hud(); toast("Your people are now ruled as a " + GOVS[S.gov].n + "."); }
@@ -4149,6 +4149,7 @@ function gpModel(id) {
 /* ---------- older saves and new games get the new fields ---------- */
 function migrateDepth() {
   if (!S) return;
+  S.cities.forEach(function (c) { if (c.held === true || c.held === false) { c.stopped = c.held; delete c.held; } if (c.proj === true || (c.proj && typeof c.proj !== "object")) c.proj = null; });
   S.imp = S.imp || {}; S.road = S.road || {}; S.gov = S.gov || "chiefdom"; S.gpp = S.gpp || {}; S.gpGot = S.gpGot || {}; S.gpUsed = S.gpUsed || {};
   S.units.forEach(function (u) { if (!u.type && !u.kind) u.kind = bestRivalKind(S); });
   (S.rivals || []).forEach(function (R) { (R.units || []).forEach(function (u) { if (!u.type && !u.kind) u.kind = bestRivalKind(R); }); });
@@ -5604,6 +5605,24 @@ function peopleCards(met) {
 }
 setTimeout(function () { try { applyDys(); } catch (e) {} }, 0);
 
+/* ---------- safety net: the game should never freeze ---------- */
+function noteErr(err) {
+  try { console.error(err); var m = String(err && err.message || err) + " @ " + String(err && err.stack || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ").replace(/file:[^ )]*\//g, "").slice(0, 220); store("lastErr", (S ? fmtY(S.year) + ": " : "") + m); } catch (e) {}
+}
+window.addEventListener("error", function (e) { noteErr(e.error || e.message); });
+var WATCH = { since: 0 };
+setInterval(function () {
+  var stuck = S && !$("hud").hidden && (busy || SUMMARY.collect) && $("veil").hidden && !GL.paused;
+  if (!stuck) { WATCH.since = 0; return; }
+  var now = performance.now(); if (!WATCH.since) { WATCH.since = now; return; }
+  var mom = document.querySelector(".moment"), limit = mom ? 90000 : 20000;
+  if (now - WATCH.since < limit) return;
+  WATCH.since = 0; noteErr("watchdog: busy with nothing showing, queue " + queue.length);
+  document.querySelectorAll(".moment").forEach(function (m) { m.remove(); }); GL.slowUntil = 0;
+  SUMMARY.collect = false;
+  if (queue.length) runQueue(); else { busy = false; hud(); card(); }
+}, 1000);
+
 function selectTile(k) { if (k < 0) { GL.selMesh.visible = false; } else { GL.selMesh.visible = true; GL.selMesh.position.set(wx(k), topOf(k) + 0.03, wz(k)); } GL.dirty = true; }
 
 /* labels drawn as HTML over the board */
@@ -6200,6 +6219,7 @@ function settingsView(inGame) {
   h += "<div class='setrow'><span>Music</span>" + seg("music", [[true, "On"], [false, "Off"]], musicOn) + "</div>";
   h += "<div class='setrow'><span>Sound effects</span>" + seg("sfx", [[true, "On"], [false, "Off"]], sfxOn) + "</div>";
   h += "<div class='setrow'><span>Easier reading<br><span class='muted'>A clearer font with more space between letters.</span></span>" + seg("dys", [[true, "On"], [false, "Off"]], !!load("dys", false)) + "</div>";
+  var le = load("lastErr", null); if (le) h += "<p class='muted' style='margin:8px 0 0;font-size:11px;word-break:break-all'>Last problem: " + esc(le) + "</p>";
   h += "<div class='opts'><button class='btn go' id='setDone'>" + (inGame ? "Back" : "Done") + "</button></div></div>";
   openVeil(h);
   $("veilBody").onclick = function (e) { var b = e.target.closest("button"); if (!b) return;
@@ -6427,7 +6447,17 @@ function timeline() {
 
 /* ---------- turns ---------- */
 function nextTurn() {
+  if (mode === "found" && $("foundBar").hidden) mode = null;
+  if (mode === "found") { toast("Pick a glowing tile for the new city first, or press Cancel."); return; }
   if (busy || mode) return;
+  try { nextTurnInner(); } catch (err) { turnRescue(err); }
+}
+// if anything goes wrong during a turn, never leave the game frozen
+function turnRescue(err) {
+  noteErr(err); SUMMARY.collect = false; queue = []; busy = false; mode = null; GOTO = null;
+  try { migrateDepth(); saveGame(); hud(); card(); redraw(); toast("Something got stuck, so the game carried on.", false, "ui:home"); } catch (e) {}
+}
+function nextTurnInner() {
   if (S.turn >= LAST) { if (!S.lapsed) { S.lapsed = true; busy = true; timeLapse(function () { CSIZE = {}; finale(function () { busy = false; endScreen(); }); }); } else endScreen(); return; }
   busy = true; tutDone(2); summaryStart(); sunSweep(); TURNB = []; AMB.turnAt = performance.now();
   var prev = S.year; S.turn++; S.year = YEARS[S.turn];
@@ -6476,7 +6506,8 @@ function nextTurn() {
   summaryShow({ grown: grown, built: TURNB.length, imp: TURNI.length, food: e.net, gold: e.gold });
   tour(pts, runQueue);
 }
-function runQueue() {
+function runQueue() { try { runQueueInner(); } catch (err) { turnRescue(err); } }
+function runQueueInner() {
   if (!S.cities.length) { busy = false; queue = []; if (S.diff === "settler") { var R0 = S.rivals.filter(function (r) { return r.alive && r.cities.length; })[0]; if (R0) { var back = R0.cities[R0.cities.length - 1]; transferCity(back, R0, S); makePeace(R0); toast("Your people take back " + back.name + " and start again."); redraw(); hud(); return; } } var L = S.lastLoss; queue = []; S.pending = []; collapse(L ? "Your last city, " + L.name + ", was captured by an army from " + L.by + " in " + fmtY(L.y) + "." : null); return; }
   if (!queue.length) {
     busy = false; funAfterTurn(); wowAfterTurn(); tutStart();
