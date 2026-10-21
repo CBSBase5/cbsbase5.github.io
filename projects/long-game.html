@@ -2113,7 +2113,7 @@ function bindControls() {
   el.addEventListener("pointerdown", function (e) {
     if (e.button === 1) { e.preventDefault(); spin = { x: e.clientX, y: e.clientY, yaw: GL.view.yaw, pitch: GL.view.pitch }; el.setPointerCapture(e.pointerId); return; }
     if (e.button === 2) { rdown = { x: e.clientX, y: e.clientY }; return; }
-    el.setPointerCapture(e.pointerId); ptrs[e.pointerId] = [e.clientX, e.clientY]; GL.auto = false; hideTip(); var ids = Object.keys(ptrs);
+    el.setPointerCapture(e.pointerId); if (e.pointerType === "mouse" || e.isPrimary) { Object.keys(ptrs).forEach(function (id) { delete ptrs[id]; }); pinch = null; } ptrs[e.pointerId] = [e.clientX, e.clientY]; GL.auto = false; hideTip(); var ids = Object.keys(ptrs);
     if (ids.length === 1) drag = { g: ground(e.clientX, e.clientY), sx: e.clientX, sy: e.clientY, moved: 0 };
     else if (ids.length === 2) { var a = ptrs[ids[0]], b = ptrs[ids[1]]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) }; drag = null; } el.style.cursor = "grabbing"; });
   el.addEventListener("pointermove", function (e) {
@@ -5610,15 +5610,18 @@ function noteErr(err) {
   try { console.error(err); var m = String(err && err.message || err) + " @ " + String(err && err.stack || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ").replace(/file:[^ )]*\//g, "").slice(0, 220); store("lastErr", (S ? fmtY(S.year) + ": " : "") + m); } catch (e) {}
 }
 window.addEventListener("error", function (e) { noteErr(e.error || e.message); });
-var WATCH = { since: 0 };
+var WATCH = { since: 0, f0: 0 }, FRAMES = 0;
+(function frameCount() { FRAMES++; requestAnimationFrame(frameCount); })();
 setInterval(function () {
-  var stuck = S && !$("hud").hidden && (busy || SUMMARY.collect) && $("veil").hidden && !GL.paused;
+  if (window.WATCHOFF) return;
+  var stuck = S && !$("hud").hidden && (busy || SUMMARY.collect) && $("veil").hidden && !GL.paused && !document.hidden;
   if (!stuck) { WATCH.since = 0; return; }
-  var now = performance.now(); if (!WATCH.since) { WATCH.since = now; return; }
-  var mom = document.querySelector(".moment"), limit = mom ? 90000 : 20000;
-  if (now - WATCH.since < limit) return;
+  var now = performance.now(); if (!WATCH.since) { WATCH.since = now; WATCH.f0 = FRAMES; return; }
+  // wait for both real time and enough drawn frames, so slow computers are never cut short mid animation
+  var mom = document.querySelector(".moment"), limit = mom ? 90000 : 20000, frames = mom ? 5000 : 1200;
+  if (now - WATCH.since < limit || FRAMES - WATCH.f0 < frames) return;
   WATCH.since = 0; noteErr("watchdog: busy with nothing showing, queue " + queue.length);
-  document.querySelectorAll(".moment").forEach(function (m) { m.remove(); }); GL.slowUntil = 0;
+  document.querySelectorAll(".moment").forEach(function (m) { m.remove(); }); GL.slowUntil = 0; $("hud").classList.remove("cinehide");
   SUMMARY.collect = false;
   if (queue.length) runQueue(); else { busy = false; hud(); card(); }
 }, 1000);
@@ -5793,7 +5796,8 @@ function hud() {
   drawMini();
 }
 function cityIndexAt(k) { for (var i = 0; i < S.cities.length; i++) if (S.cities[i].k === k) return i; return -1; }
-function card() {
+function card() { try { cardInner(); } catch (err) { noteErr(err); try { $("card").hidden = true; } catch (e) {} } }
+function cardInner() {
   var P = $("card"), e = econ(), h = "", ci = cityIndexAt(sel);
   if (sel < 0) { P.hidden = true; goals(); return; }
   $("goals").hidden = true;
@@ -6156,7 +6160,8 @@ var TIP_ILLO = { food: "ui:food", gold: "ui:gold", people: "ui:people", score: "
   "#rotL": "ui:rotl", "#rotR": "ui:rotr", "#zOut": "ui:zoomout", "#zIn": "ui:zoomin", "#zHome": "ui:home", "#goalsMin": "ui:goals", "#nextBtn": "ui:invention" };
 function showTip(html, x, y) { var t = $("tip"); t.innerHTML = html; t.hidden = false; var w = t.offsetWidth, h = t.offsetHeight; t.style.left = Math.min(innerWidth - w - 8, x + 16) + "px"; t.style.top = Math.min(innerHeight - h - 8, Math.max(8, y + 16)) + "px"; }
 function hideTip() { clearTimeout(tipTimer); var t = $("tip"); if (t) t.hidden = true; }
-function tileTip(k) {
+function tileTip(k) { try { return tileTipInner(k); } catch (err) { noteErr(err); return ""; } }
+function tileTipInner(k) {
   if (k < 0) return "";
   if (S && GL.mode.fog && !REV[k]) return illo("ui:fog", "tipimg") + "<b>Unexplored</b><span class='t2'>Clouds hide land your people have not seen.</span>";
   var t = TERR[k], y = yieldOf(k, S ? S.flags : { farming: true }), h = "<b>" + (t ? TNAME[t] : COAST[k] ? "Shallow sea" : "Open sea") + "</b>", pic = "terr:" + t + (!t && COAST[k] ? ":c" : ""), head = null;
@@ -6479,7 +6484,7 @@ function nextTurnInner() {
   S.cities.forEach(function (c) { if (c.unrest > 0) c.unrest--; if (c.siege > 0) c.siege--; });
   var done = [];
   S.cities.forEach(function (c) { if (!c.proj || !c.proj.w) return; c.proj.left--; if (c.proj.left > 0) return;
-    if (S.wonders[c.proj.w]) { var back = Math.round(c.proj.paid / 2); S.gold += back; msgs.push("Someone else finished " + wName(c.proj.w) + " first. Your builders get " + back + " gold back."); c.proj = c.held || null; c.held = null; }
+    if (S.wonders[c.proj.w]) { var back = Math.round(c.proj.paid / 2); S.gold += back; msgs.push("Someone else finished " + wName(c.proj.w) + " first. Your builders get " + back + " gold back."); c.proj = c.held && typeof c.held === "object" ? c.held : null; c.held = null; }
     else done.push(c); });
   productionTurn(msgs); WMOVE = []; TURNI = []; workerTurn(msgs); var gpNew = gpTurn();
   if (S.gold < 0) { S.gold = 0; var ar = armies(S); if (ar.length) { removeUnit(S, ar[ar.length - 1]); msgs.push("You could not pay your armies, so one went home."); } }
@@ -6516,7 +6521,7 @@ function runQueueInner() {
     if (S.playMs - S.lastBreak >= 5 * 60 * 1000) stopPoint();
     return;
   }
-  var nx = queue.shift(); if (nx.type === "wonder") { var cw = nx.c, idw = cw.proj.w; if (S.wonders[idw]) { cw.proj = null; runQueue(); } else { finishWonder(idw, cw); cw.proj = cw.held || null; cw.held = null; redraw(); hud(); } }
+  var nx = queue.shift(); if (nx.type === "wonder") { var cw = nx.c, idw = cw.proj.w; if (S.wonders[idw]) { cw.proj = null; runQueue(); } else { finishWonder(idw, cw); cw.proj = cw.held && typeof cw.held === "object" ? cw.held : null; cw.held = null; redraw(); hud(); } }
   else if (nx.type === "find") collectFind(nx.k, runQueue); else if (nx.type === "note") { toast(nx.t, false, nx.pic); runQueue(); } else if (nx.type === "new") newCard(nx.id, runQueue); else if (nx.type === "gp") { if (nx.hero) toast("A hero arrives to help your people!", false, "gp:" + nx.id); gpCard(nx.id); } else if (nx.type === "era") eraMorph(Math.max(0, nx.i - 1), function () { eraCard(nx.i); }); else if (nx.type) diploCard(nx); else newspaper(nx);
 }
 function openVeil(html) { $("veilBody").innerHTML = html; $("veil").hidden = false; var f = $("veilBody").querySelector("button:not(:disabled)"); if (f) f.focus(); }
