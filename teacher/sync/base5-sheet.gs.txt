@@ -19,6 +19,8 @@
                a Date still to come keeps it back until that day)
      Sends     everything students send to Jay, newest at the bottom
      Progress  the site writes this one; leave it alone
+     BridgeLink  Done ticks from the BridgeLink copy list
+               (/teacher/bridgelink.html); made the first time one is ticked
 
    Nothing here asks for names: students are their initials.
    ========================================================== */
@@ -879,13 +881,100 @@ function board_(){
   return { ok: true, fuel: fuel_(), bigq: votes_({ kind: "bigq" }), checkedIn: n, of: WHO.length };
 }
 
+/* ---------- BridgeLink copy list (staff only) ----------
+   /teacher/bridgelink.html uses this to put each student's milestones
+   into BridgeLink quickly. For every Buddy target in the "Targets term"
+   it hands back the BridgeLink wording (Buddy's Goals tab), the
+   BridgeLink level Buddy has for it (Levels tab), and the steps, each
+   cleaned onto one line. Done ticks live in a tab called BridgeLink,
+   made the first time one is ticked; nothing in Buddy is changed. */
+function buddyBook_(){
+  var link = String(setting_("BridgeLink Buddy sheet") || "").trim();
+  var m = link.match(/\/d\/([-\w]{20,})/) || link.match(/^([-\w]{20,})$/);
+  if(!m) return null;
+  var bs = SpreadsheetApp.openById(m[1]);
+  return function(name){
+    var sh = bs.getSheetByName(name); if(!sh) return [];
+    var v = sh.getDataRange().getValues(), h = (v[0] || []).map(function(x){ return String(x).trim().toLowerCase(); });
+    return v.slice(1).map(function(r){ var o = {}; h.forEach(function(k, i){ if(k && o[k] == null) o[k] = r[i]; }); return o; });
+  };
+}
+function bcol_(o, names){
+  for(var i = 0; i < names.length; i++) if(o[names[i]] != null && String(o[names[i]]).trim() !== "") return String(o[names[i]]).trim();
+  return "";
+}
+function oneLine_(s){ return String(s == null ? "" : s).replace(/\s+/g, " ").trim(); }
+function blinkDoneMap_(){
+  var v = rows_("BridgeLink"), out = {};
+  for(var i = 1; i < v.length; i++){
+    if(!v[i][0] || !v[i][1]) continue;
+    out[String(v[i][0]) + "|" + String(v[i][1]) + "|" + (+v[i][2] || 0)] = v[i][3] instanceof Date ? v[i][3].getTime() : 1;
+  }
+  return out;
+}
+function blink_(r){
+  staff_(r.key);
+  var term = String(r.term || setting_("Targets term") || "Autumn 2").trim(), tl = term.toLowerCase();
+  var table = buddyBook_();
+  if(!table) return { ok: false, error: "no buddy" };
+  var T = {};
+  table("Targets").forEach(function(t, n){
+    var id = bcol_(t, ["id", "target id"]); if(!id) return;
+    var tt = bcol_(t, ["term"]); if(tt && tt.toLowerCase() !== tl) return;
+    T[id] = { pillar: bcol_(t, ["pillar"]), title: bcol_(t, ["target", "title"]), detail: oneLine_(bcol_(t, ["detail"])), n: n };
+  });
+  var goals = {}, levels = {};
+  table("Goals").forEach(function(g){
+    var w = bcol_(g, ["student", "who"]).toUpperCase(), id = bcol_(g, ["target id"]);
+    if(w && id) goals[w + "|" + id] = { tier: bcol_(g, ["tier"]), goal: oneLine_(bcol_(g, ["goal", "bridgelink target", "wording"])) };
+  });
+  table("Levels").forEach(function(l){
+    var w = bcol_(l, ["student", "who"]).toUpperCase(), id = bcol_(l, ["target id"]);
+    if(w && id) levels[w + "|" + id] = bcol_(l, ["level"]);
+  });
+  var per = {}, keys = [];
+  table("Milestones").forEach(function(m){
+    var mt = bcol_(m, ["term"]); if(mt && mt.toLowerCase() !== tl) return;
+    var w = bcol_(m, ["student", "who"]).toUpperCase(); if(WHO.indexOf(w) < 0) return;
+    var id = bcol_(m, ["target id"]); if(!id || !T[id]) return;
+    var text = oneLine_(bcol_(m, ["milestone", "step text", "wording", "text"])); if(!text) return;
+    var k = w + "|" + id;
+    if(!per[k]){ per[k] = []; keys.push(k); }
+    per[k].push({ step: parseInt(bcol_(m, ["step"]), 10) || per[k].length + 1, text: text, status: bcol_(m, ["status"]) });
+  });
+  var students = {};
+  WHO.forEach(function(w){ students[w] = []; });
+  keys.forEach(function(k){
+    var w = k.split("|")[0], id = k.slice(w.length + 1), t = T[id], g = goals[k] || {};
+    per[k].sort(function(a, b){ return a.step - b.step; });
+    students[w].push({ id: id, pillar: t.pillar, title: t.title, detail: t.detail, tier: g.tier || "", goal: g.goal || "", level: levels[k] || "", n: t.n, steps: per[k] });
+  });
+  WHO.forEach(function(w){
+    students[w].sort(function(a, b){ return a.n - b.n; });
+    students[w].forEach(function(x){ delete x.n; });
+  });
+  return { ok: true, term: term, students: students, done: blinkDoneMap_() };
+}
+function blinkDone_(r){
+  staff_(r.key);
+  var who = who_(r.who), id = clean_(r.id, 80), part = Math.max(0, Math.min(9, +r.part || 0));
+  if(!id) throw new Error("no target");
+  var sh = sheet_("BridgeLink") || tab_(SpreadsheetApp.getActive(), "BridgeLink", ["Who", "Target ID", "Part", "Done"]);
+  var v = sh.getDataRange().getValues();
+  for(var i = v.length - 1; i >= 1; i--){
+    if(String(v[i][0]) === who && String(v[i][1]) === id && (+v[i][2] || 0) === part) sh.deleteRow(i + 1);
+  }
+  if(r.done) sh.appendRow([who, id, part, new Date()]);
+  return { ok: true, done: blinkDoneMap_() };
+}
+
 var READ3 = {
   timeline: timeline_, shoutouts: shoutouts_, votes: votes_, fuel: function(){ return fuel_(); },
   ideas: function(){ return { ok: true, items: ideasList_(false) }; }, wall: function(){ return wall_(); },
-  fame: fame_, targets: targets_, questions: questions_, postcard: postcard_, board: function(){ return board_(); }
+  fame: fame_, targets: targets_, blink: blink_, questions: questions_, postcard: postcard_, board: function(){ return board_(); }
 };
 var WRITE3 = {
   reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
   post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
-  a2plan: a2plan_, targetsreplace: targetsReplace_
+  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_
 };
