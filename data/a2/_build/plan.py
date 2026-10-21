@@ -30,6 +30,7 @@ TARGETS = {
     "pfa-careers":   "Preparation for Adulthood: Careers for the future",
     "pfa-transport": "Preparation for Adulthood: Transport and travel",
     "se-earth":      "Scientific and Environmental: Earth and atmosphere",
+    "rel-assert":    "Relational (PSHE and RSE): Assertiveness in relationships",
 }
 
 F2 = ["HK", "JT", "LC"]          # same English targets
@@ -169,6 +170,8 @@ ACTS = [
     ("getting-around", "Getting around", "Preparation for Adulthood", each(ALL, "pfa-transport", 1)),
     ("read-the-signs", "Read the signs", "Preparation for Adulthood", each(ALL, "pfa-transport", 2)),
     ("what-is-it-made-of", "What is it made of?", "Science", each(ALL, "se-earth", 1)),
+    ("my-yes-my-no", "My yes, my no", "Relational",
+        each(ALL, "rel-assert", 1) + each(ALL, "rel-assert", 2) + each(ALL, "rel-assert", 3)),
 ]
 
 # Shared pillar activities land on the same day for everyone, on the
@@ -188,6 +191,7 @@ PILLAR_DAYS = {
     "what-helps-me-move":     "2026-12-02",
     "hidden-messages":        "2026-12-03",
     "what-is-it-made-of":     "2026-12-10",
+    "my-yes-my-no":           "2026-11-12",   # on a day that already has a shared activity, so no other drop moves
 }
 
 FIRST_DROP = "2026-11-04"

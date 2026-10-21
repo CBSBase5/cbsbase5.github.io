@@ -55,6 +55,7 @@ GROUPS = {
     "pfa-careers": ("about", "Careers", "s-pfa"),
     "pfa-transport": ("about", "Getting about", "s-pfa"),
     "se-earth": ("about", "Science", "s-science"),
+    "rel-assert": ("about", "Relationships", "s-phse"),
 }
 
 

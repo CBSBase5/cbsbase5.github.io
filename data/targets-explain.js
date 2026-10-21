@@ -78,6 +78,11 @@ window.B5EXPLAIN = {
    "name": "What things are made of",
    "about": "Everything around you is made from materials, and they each behave differently.",
    "why": "Useful for choosing the right stuff for a job: a waterproof coat, a strong shelf."
+  },
+  "rel-assert": {
+   "name": "Your yes and your no",
+   "about": "Noticing when you do not want to do something, saying so in a way that works for you, and hearing it when someone else says no.",
+   "why": "Useful with friends, family, online and out and about, so you feel OK about your choices, and so do the people around you."
   }
  },
  "titles": {
@@ -94,9 +99,22 @@ window.B5EXPLAIN = {
   "balance and control (including climbing)": "pw-balance",
   "careers for the future": "pfa-careers",
   "transport and travel": "pfa-transport",
-  "earth and atmosphere": "se-earth"
+  "earth and atmosphere": "se-earth",
+  "assertiveness in relationships": "rel-assert"
  },
  "steps": {
+  "b41f4bc1": {
+   "say": "Notice the signals your body gives you when something does not feel right for you.",
+   "eg": "A friend asks to borrow your phone and you get a tight tummy, a hot face, or want to step back. That feeling is useful information: it is your body saying no."
+  },
+  "ee700a9c": {
+   "say": "Know a few ways of saying no that feel OK for you: words, a shake of the head, or a calm \"not right now\".",
+   "eg": "\"No thanks, I'm alright.\" You do not have to give a reason, and you can say it calmly and kindly."
+  },
+  "d6635dd6": {
+   "say": "When someone says no, or looks like they mean no, stop and let that be OK.",
+   "eg": "You ask to borrow a mate's controller and they say \"nah\". You say \"no worries\" and leave it, without asking again and again."
+  },
   "b7369b7d": {
    "say": "Find the exact facts, names or numbers that back up each main point.",
    "eg": "A review says a phone is great. The details are why: the battery lasts two days and the camera works in the dark."
