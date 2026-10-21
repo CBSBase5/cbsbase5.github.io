@@ -169,6 +169,16 @@ function wrap(t, n, max){ var w = String(t == null ? "" : t).split(/\s+/), out =
       hint: "Metal things are often grey or shiny. Check both shelves.",
       why: "The fork, the pan, the key and the tin can: <b>4</b> metal things." },
 
+    { type: "text", topic: "Objects and materials",
+      q: "In your own words: what is everything around [[place]] made of?",
+      need: [["material", "materials", "made of", "made from", "stuff"]],
+      slips: [[["wood", "metal", "plastic", "glass"], "Good examples. Now say what they all are: materials."]],
+      model: "Everything is made of materials, like wood, metal or plastic.",
+      hint: "The word starts with m.",
+      why: "Everything is made of materials. Saying it in your own words, with an example or two, is exactly the idea.",
+      lv: { spicy: { q: "In your own words: what is everything around [[place]] made of? Give two examples of objects and their materials.",
+        model: "Everything is made of materials: a chair is made of wood, and a window is made of glass." } } },
+
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "What is it like?", title: "Properties: what a material is like",
       fig: PROPS,
