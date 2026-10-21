@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="/style.css?v=12">
 <script src="/data/b5site.js?v=7"></script>
 <script src="/data/b5lock.js?v=1"></script>
+<script src="/data/bank-relational.js?v=1"></script>
 <style>
 /* Jay's Autumn 2 targets, from the Targets and Ticks tabs. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -44,6 +45,15 @@
 .ev li{padding:6px 0;border-top:1px dashed rgba(10,47,56,.18)}
 .ev li em{font-style:normal;color:var(--body-tint)}
 .none{color:var(--body-tint);font-size:.92rem}
+.rel{margin:4px 0 12px}
+.rel details{border-top:1px dashed rgba(10,47,56,.2);padding:8px 0}
+.rel summary{cursor:pointer;font-weight:700}
+.rel summary small{font-weight:400;color:var(--body-tint);margin-left:6px}
+.rel .tg{margin:8px 0 0 14px;padding:8px 12px;border-left:6px solid #6a5acd;background:var(--paper);border-radius:0 10px 10px 0}
+.rel .tg b{display:block}
+.rel .tg p{margin:2px 0 4px;font-size:.9rem}
+.rel .tg ol{margin:4px 0 0;padding-left:20px;font-size:.88rem}
+.rel .fl{font-size:.78rem;background:var(--yellow);border-radius:999px;padding:1px 8px;margin-left:6px;font-weight:700}
 </style>
 </head>
 <body>
@@ -89,6 +99,13 @@
     <p class="help"><b>Or</b>, without Buddy: pick the targets file (a .tsv, one row per step, from BridgeLink Buddy or from Claude) and this replaces every row of the Targets tab with it. A copy of the old rows is kept in a new tab first, so nothing is lost. The wording never goes into the site: it goes straight from your file to your sheet. Needs the October 2026 version of the script or later.</p>
     <div class="inline"><input type="file" id="tfile" accept=".tsv,.txt,text/tab-separated-values,text/plain"><button class="btn" type="button" id="tgo" disabled>Replace the Targets tab</button></div>
     <p class="msg" id="tmsg" aria-live="polite"></p>
+  </div>
+  <div class="box" id="relBox">
+    <h2>Relational (PSHE &amp; RSE) for Autumn 2</h2>
+    <p class="help">From the trust's 26/27 Relational plan: "Building connections", three targets at each tier to choose one from, each with its milestones. This adds them to the Bank tab of BridgeLink Buddy, so Buddy's <b>Plan a term</b> offers them for Autumn 2 under each student's Wider tier. Then pick one for each student there and create the term as usual; My targets, this page and the BridgeLink copy list follow from Buddy.</p>
+    <div class="rel" id="relList"></div>
+    <div class="inline"><button class="btn" type="button" id="relGo">Add them to Buddy's planner</button></div>
+    <p class="msg" id="relMsg" aria-live="polite"></p>
   </div>
   <div class="box" id="empty" hidden>
     <h2>No Autumn 2 targets yet</h2>
@@ -202,6 +219,38 @@ $("tgo").onclick = function(){
     load();
   }).catch(function(){ b.disabled = false; $("tmsg").className = "msg bad"; $("tmsg").textContent = "Could not reach the sheet."; });
 };
+
+/* ---------- Relational targets into Buddy's planner ---------- */
+(function(){
+  var R = window.B5RELATIONAL; if(!R){ $("relBox").hidden = true; return; }
+  $("relList").innerHTML = ["Tier 1", "Tier 2", "Tier 3"].map(function(t){
+    var list = R.targets.filter(function(x){ return x.tier === t; });
+    return '<details><summary>' + t + '<small>choose one of ' + list.length + '</small></summary>' + list.map(function(x){
+      return '<div class="tg"><b>' + esc(x.title) + (x.flag ? '<span class="fl">** in the trust plan</span>' : '') + '</b><p>' + esc(x.goal) + '</p><ol>' +
+        x.steps.map(function(st){ return '<li>' + esc(st) + '</li>'; }).join("") + '</ol></div>';
+    }).join("") + '</details>';
+  }).join("");
+  $("relGo").onclick = function(){
+    var k = $("key").value.trim(), b = this, m = $("relMsg");
+    if(!k){ m.className = "msg bad"; m.textContent = "The staff passphrase goes in the box at the top first."; return; }
+    b.disabled = true; m.className = "msg"; m.textContent = "Adding...";
+    B5Site.call("buddybank", { key: k, term: R.term, rows: R.rows() }).then(function(o){
+      b.disabled = false;
+      if(o && o.ok){
+        m.textContent = o.added ? "Done. " + o.added + " rows are in Buddy's Bank tab" + (o.skipped ? " (" + o.skipped + " were there already)" : "") + ". Open Buddy, Plan a term, Autumn 2, and the Relational targets are under Targets." :
+          "They are all in Buddy's Bank tab already, so nothing changed.";
+        return;
+      }
+      m.className = "msg bad";
+      var e = (o && o.error) || "";
+      m.textContent = /unknown/i.test(e) ? "The sheet does not know this yet: paste in the new script and deploy a new version first." :
+        e === "no buddy" ? 'Put the link to your BridgeLink Buddy sheet next to "BridgeLink Buddy sheet" in the Settings tab first.' :
+        e === "no bank" ? "Buddy has no Bank tab yet. Open Plan a term in Buddy once, then try again." :
+        e === "bank headings" ? "Buddy's Bank tab has headings this does not recognise (" + (o.headings || []).join(", ") + "), so nothing was added. Tell Claude what they are." :
+        e === "staff key" ? "That staff passphrase did not work." : "The sheet said: " + e;
+    }).catch(function(){ b.disabled = false; m.className = "msg bad"; m.textContent = "Could not reach the sheet."; });
+  };
+})();
 
 if(window.B5Site && B5Site.syncUrl){
   if($("key").value) load();

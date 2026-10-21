@@ -890,11 +890,14 @@ function board_(){
    BridgeLink level Buddy has for it (Levels tab), and the steps, each
    cleaned onto one line. Done ticks live in a tab called BridgeLink,
    made the first time one is ticked; nothing in Buddy is changed. */
-function buddyBook_(){
+function buddySS_(){
   var link = String(setting_("BridgeLink Buddy sheet") || "").trim();
   var m = link.match(/\/d\/([-\w]{20,})/) || link.match(/^([-\w]{20,})$/);
-  if(!m) return null;
-  var bs = SpreadsheetApp.openById(m[1]);
+  return m ? SpreadsheetApp.openById(m[1]) : null;
+}
+function buddyBook_(){
+  var bs = buddySS_();
+  if(!bs) return null;
   return function(name){
     var sh = bs.getSheetByName(name); if(!sh) return [];
     var v = sh.getDataRange().getValues(), h = (v[0] || []).map(function(x){ return String(x).trim().toLowerCase(); });
@@ -982,6 +985,54 @@ function blinkNamesSave_(r){
   });
   return { ok: true, added: added, changed: changed, names: blinkNames_() };
 }
+/* Staff only: add target bank rows (the Relational targets from the
+   trust's plan, /data/bank-relational.js) to the Bank tab of BridgeLink
+   Buddy, so its "Plan a term" offers them. Columns are found by their
+   headings; a row already there (same term, pillar, topic, tier, kind
+   and wording) is never added twice. Nothing else in Buddy is touched. */
+function buddyBank_(r){
+  staff_(r.key);
+  var term = clean_(r.term, 40), rows = Array.isArray(r.rows) ? r.rows.slice(0, 400) : [];
+  if(!term || !rows.length) throw new Error("nothing to add");
+  var bs = buddySS_();
+  if(!bs) return { ok: false, error: "no buddy" };
+  var sh = bs.getSheetByName("Bank");
+  if(!sh) return { ok: false, error: "no bank" };
+  var v = sh.getDataRange().getValues(), head = (v[0] || []).map(function(x){ return String(x).trim().toLowerCase(); });
+  var C = {};
+  ["id", "term", "pillar", "subject", "topic", "scheme", "tier", "kind", "text", "order"].forEach(function(k){ C[k] = head.indexOf(k); });
+  if(["term", "pillar", "topic", "tier", "kind", "text"].some(function(k){ return C[k] < 0; }))
+    return { ok: false, error: "bank headings", headings: v[0] || [] };
+  function key(o){ return [o.term, o.pillar, o.topic, o.tier, o.kind, o.text].map(function(x){ return String(x == null ? "" : x).replace(/\s+/g, " ").trim().toLowerCase(); }).join("|"); }
+  var have = {}, order = 0, num = 0;
+  var code = term.replace(/[^A-Za-z0-9]/g, ""); code = code.charAt(0).toUpperCase() + code.replace(/\D/g, "");
+  var pre = "B" + code + "-";
+  for(var i = 1; i < v.length; i++){
+    var o = {}; Object.keys(C).forEach(function(k){ if(C[k] >= 0) o[k] = v[i][C[k]]; });
+    have[key(o)] = 1;
+    if(String(o.term).trim().toLowerCase() === term.toLowerCase() && +o.order > order) order = +o.order;
+    var m = C.id >= 0 ? new RegExp("^" + pre + "(\\d+)$").exec(String(o.id)) : null;
+    if(m && +m[1] > num) num = +m[1];
+  }
+  var width = Math.max(head.length, 1), add = [], skipped = 0;
+  rows.forEach(function(x){
+    var o = { term: term, pillar: clean_(x.pillar, 80), subject: clean_(x.subject, 120), topic: clean_(x.topic, 160), scheme: clean_(x.scheme, 20),
+              tier: clean_(x.tier, 30), kind: x.kind === "goal" ? "goal" : "step", text: clean_(oneLine_(x.text), 600) };
+    if(!o.pillar || !o.topic || !o.tier || !o.text){ skipped++; return; }
+    var k = key(o); if(have[k]){ skipped++; return; }
+    have[k] = 1; num++; order++;
+    o.id = pre + ("00" + num).slice(-3); o.order = String(order);
+    var row = []; for(var c = 0; c < width; c++) row.push("");
+    Object.keys(C).forEach(function(f){ if(C[f] >= 0 && o[f] != null) row[C[f]] = o[f]; });
+    add.push(row);
+  });
+  if(add.length){
+    var rg = sh.getRange(v.length + 1, 1, add.length, width);
+    try{ rg.setNumberFormat("@"); }catch(e){}
+    rg.setValues(add);
+  }
+  return { ok: true, added: add.length, skipped: skipped };
+}
 function blinkDone_(r){
   staff_(r.key);
   var who = who_(r.who), id = clean_(r.id, 80), part = Math.max(0, Math.min(9, +r.part || 0));
@@ -1003,5 +1054,5 @@ var READ3 = {
 var WRITE3 = {
   reply: reply_, shout: shout_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
   post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
-  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_
+  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_, buddybank: buddyBank_
 };
