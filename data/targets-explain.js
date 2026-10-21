@@ -103,6 +103,14 @@ window.B5EXPLAIN = {
   "assertiveness in relationships": "rel-assert"
  },
  "steps": {
+  "8bd9182c": {
+   "say": "Explain it your way: every object around you is made from one or more materials.",
+   "eg": "\"My phone is made of glass, metal and plastic. Everything is made of some kind of stuff like that.\""
+  },
+  "9362d36e": {
+   "say": "Find a real thing near you and name the materials it is made from.",
+   "eg": "Point at a chair: \"The legs are metal and the seat is fabric.\""
+  },
   "b41f4bc1": {
    "say": "Notice the signals your body gives you when something does not feel right for you.",
    "eg": "A friend asks to borrow your phone and you get a tight tummy, a hot face, or want to step back. That feeling is useful information: it is your body saying no."

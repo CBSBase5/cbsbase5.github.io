@@ -169,7 +169,8 @@ ACTS = [
     ("career-explorer", "Career explorer", "Preparation for Adulthood", each(ALL, "pfa-careers", 2)),
     ("getting-around", "Getting around", "Preparation for Adulthood", each(ALL, "pfa-transport", 1)),
     ("read-the-signs", "Read the signs", "Preparation for Adulthood", each(ALL, "pfa-transport", 2)),
-    ("what-is-it-made-of", "What is it made of?", "Science", each(ALL, "se-earth", 1)),
+    ("what-is-it-made-of", "What is it made of?", "Science",
+        each(ALL, "se-earth", 1) + each(ALL, "se-earth", 2) + each(ALL, "se-earth", 3)),
     ("my-yes-my-no", "My yes, my no", "Relational",
         each(ALL, "rel-assert", 1) + each(ALL, "rel-assert", 2) + each(ALL, "rel-assert", 3)),
 ]
