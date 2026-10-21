@@ -261,6 +261,11 @@ function call(action, data, url){
 window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown,
   syncWho: hq ? hq.who : (PROJECTS[path] || {}).who || null,
   syncPrefix: hq ? hq.prefix : (PROJECTS[path] || {}).prefix || null };
+/* a student's own pages (their HQ and project page) open for their school account, staff, or their code */
+if((hq || PROJECTS[path]) && !GUEST){
+  if(document.readyState === "loading") document.write('<script src="/data/b5gate.js?v=1"><\/script>');
+  else { var gs = document.createElement("script"); gs.src = "/data/b5gate.js?v=1"; document.head.appendChild(gs); }
+}
 })();
 
 
