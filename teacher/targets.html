@@ -13,6 +13,8 @@
 <script src="/data/b5staff.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <script src="/data/bank-relational.js?v=1"></script>
+<script src="/data/a2/core.js"></script>
+<script src="/data/b5core.js?v=1"></script>
 <style>
 /* Jay's Autumn 2 targets, from the Targets and Ticks tabs. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -55,6 +57,12 @@
 .rel .tg p{margin:2px 0 4px;font-size:.9rem}
 .rel .tg ol{margin:4px 0 0;padding-left:20px;font-size:.88rem}
 .rel .fl{font-size:.78rem;background:var(--yellow);border-radius:999px;padding:1px 8px;margin-left:6px;font-weight:700}
+.corebox{border:2px solid var(--ink);border-left:10px solid #e7b416;border-radius:14px;padding:14px 16px;margin:0 0 16px;background:#fff7d6}
+.corebox h3{margin:0 0 8px;font-size:1.05rem}
+.corerow{padding:8px 0;border-top:1px dashed rgba(10,47,56,.2)}
+.corerow .k{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7a5600}
+.corerow p{margin:2px 0 4px}
+.corerow a{font-weight:700}
 </style>
 </head>
 <body>
@@ -92,6 +100,7 @@
     <div class="gridwrap"><table class="grid" id="grid"></table></div>
     <div class="weektheme"><h2>One at a time</h2><span>Tick, add a note, and see what has been linked as evidence from the live view.</span></div>
     <div class="chipsrow" id="whos"></div>
+    <div id="coreFor"></div>
     <div id="list"></div>
   </div>
   <div class="box" id="replaceBox">
@@ -154,6 +163,13 @@ function draw(){
     }).join("") + '</tbody>';
   $("whos").innerHTML = WHO.map(function(w){ return '<button type="button" data-w="' + w + '" aria-pressed="' + (w === me) + '">' + w + '</button>'; }).join("");
   [].forEach.call($("whos").querySelectorAll("button"), function(b){ b.onclick = function(){ me = b.dataset.w; draw(); }; });
+  /* core targets first: the ones that need the most focus, and their always-open activity */
+  var cp = window.B5Core ? B5Core.pair(me, (D.core || []).filter(function(c){ return c.who === me; })) : [];
+  $("coreFor").innerHTML = cp.length ? '<div class="corebox"><h3>&#9733; ' + me + '\'s core targets</h3>' + cp.map(function(p){
+    return '<div class="corerow"><span class="k">' + esc(p.core ? (p.core.level || "Core target") : "Core practice") + '</span><p>' + esc(p.core ? p.core.target : "Practice with no core target in Buddy yet") + '</p>' +
+      (p.act ? '<a href="' + esc((p.act.href || {})[me] || "#") + '">' + esc(p.act.title) + '</a>' : '<span class="none">No activity made for this one yet.</span>') + '</div>';
+  }).join("") + '<p class="none">From the Core tab in BridgeLink Buddy. The activities are always open in ' + me + '\'s HQ, and come first on their Start button.</p></div>' :
+    '<p class="none">No core targets for ' + me + ' in BridgeLink Buddy yet: add them on ' + me + '\'s page in Buddy (Paste from BridgeLink).</p>';
   $("list").innerHTML = D.targets.filter(function(t){ return has(t, me); }).map(function(t){
     var k = tick(me, t.id), ev = (D.evidence || []).filter(function(e){ return e.who === me && e.target === t.id; });
     return '<div class="t s' + k.state + '" data-id="' + esc(t.id) + '"><span class="k">' + esc(t.pillar) + '</span><h3>' + label(t) + '</h3>' +

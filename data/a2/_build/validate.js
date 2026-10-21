@@ -41,10 +41,13 @@ function resolver(p, lv, th){
     if(v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype){ const o = {}; Object.keys(v).forEach(k => o[k] = tok(v[k])); return o; }
     return v;
   }
-  return function(s){
+  return function(s, vi){
     const o = {};
-    Object.keys(s).forEach(k => { if(k !== "lv") o[k] = s[k]; });
+    Object.keys(s).forEach(k => { if(k !== "lv" && k !== "vary") o[k] = s[k]; });
     if(s.lv && s.lv[lv]) Object.keys(s.lv[lv]).forEach(k => { if(k !== "topic") o[k] = s.lv[lv][k]; });
+    const vv = vi && Array.isArray(s.vary) ? s.vary[vi - 1] : null;
+    if(vv){ Object.keys(vv).forEach(k => { if(k !== "topic" && k !== "type" && k !== "lv") o[k] = vv[k]; });
+      if(vv.lv && vv.lv[lv]) Object.keys(vv.lv[lv]).forEach(k => { if(k !== "topic" && k !== "type") o[k] = vv.lv[lv][k]; }); }
     const out = {};
     Object.keys(o).forEach(k => out[k] = typeof o[k] === "function" ? o[k] : tok(o[k]));
     return out;
@@ -114,8 +117,8 @@ function check(slug){
 
   ["mild", "medium", "spicy"].forEach(lv => themes.forEach(th => {
     const R = resolver(p, lv, th), tag = "[" + lv + (th ? "/" + th : "") + "] ";
-    p.steps.forEach((raw, i) => {
-      const s = R(raw), at = tag + "step " + i + " (" + s.type + "): ";
+    p.steps.forEach((raw, i) => { [0].concat((raw.vary || []).map((x, n) => n + 1)).forEach(vi => {
+      const s = R(raw, vi), at = tag + "step " + i + (vi ? " version " + (vi + 1) : "") + " (" + s.type + "): ";
       const blob = JSON.stringify(s, (k, v) => typeof v === "function" ? undefined : v);
       const miss = blob.match(/@@MISSING:([a-zA-Z0-9_]+)@@/);
       if(miss) errs.push(at + "theme word [[" + miss[1] + "]] missing");
@@ -170,7 +173,7 @@ function check(slug){
           if(typeof s.mount !== "function") errs.push(at + "widget needs mount()");
           break;
       }
-    });
+    }); });
     try{
       const fields = (p.make.fields || []);
       const vals = {}; fields.forEach(f => vals[f.id] = f.ph || "x");

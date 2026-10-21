@@ -372,7 +372,8 @@ function overview_(key){
   }
   var folders = {};
   WHO.forEach(function(w){ try{ folders[w] = folder_(w).data; }catch(e4){} });
-  return { ok: true, students: students, sends: sends, folders: folders, targets: targetsAll_(),
+  var coreAll = []; try{ coreAll = coreRows_(); }catch(ec){ coreAll = []; }
+  return { ok: true, students: students, sends: sends, folders: folders, targets: targetsAll_(), core: coreAll,
     wall: pending_("Wall", 2, 1), questions: pending_("Questions", 4, 1), ideas: ideasList_(true),
     parents: parentsSet_(), now: Date.now() };
 }
@@ -401,6 +402,7 @@ function setup3_(ss){
   wa.getRange(1, 7).setValue("Tick Approved to put a post on the wall. Who is never shown.");
   tab_(ss, "Scores", ["Who", "Game", "Best", "Public", "Updated"]);
   var ta = tab_(ss, "Targets", ["Pillar", "Id", "Title", "Statement"].concat(WHO));
+  tab_(ss, "Core", ["Who", "Level", "Target"]);
   ta.getRange(1, 12).setValue("One row per target. Id is short and never changes (e.g. eng1). Each student's column is their own milestone wording.");
   tab_(ss, "Ticks", ["Who", "Id", "State", "At", "Student note", "Jay note", "Updated"]);
   var qu = tab_(ss, "Questions", ["Time", "Who", "Subject", "From", "Question", "Answer", "Approved"]);
@@ -760,6 +762,29 @@ function targetRows_(){
   }
   return out;
 }
+/* ---------- core targets ----------
+   The few BridgeLink targets each student most needs to focus on, all year. From the Core
+   tab of BridgeLink Buddy when "BridgeLink Buddy sheet" is set, otherwise from this sheet's
+   Core tab (Who, Level, Target). Retired ones (Active no) are left out. */
+function coreRows_(){
+  var out = [];
+  try{
+    var B = buddyBook_();
+    if(B) B("Core").forEach(function(r){
+      var who = bcol_(r, ["student", "who"]).toUpperCase(), t = bcol_(r, ["target"]);
+      if(WHO.indexOf(who) < 0 || !t || /^no$/i.test(bcol_(r, ["active"]))) return;
+      out.push({ who: who, level: bcol_(r, ["level"]), target: t, order: +bcol_(r, ["order"]) || 0 });
+    });
+  }catch(e){ out = []; }
+  if(!out.length){
+    var v = rows_("Core");
+    for(var i = 1; i < v.length; i++){
+      var w = String(v[i][0] || "").trim().toUpperCase(), tt = String(v[i][2] || "").trim();
+      if(WHO.indexOf(w) >= 0 && tt) out.push({ who: w, level: String(v[i][1] || "").trim(), target: tt, order: i });
+    }
+  }
+  return out.sort(function(a, b){ return WHO.indexOf(a.who) - WHO.indexOf(b.who) || a.order - b.order; });
+}
 function targetsAll_(){ try{ return targetRows_().map(function(t){ return { id: t.id, title: t.title, pillar: t.pillar }; }); }catch(e){ return []; } }
 function ticksOf_(who){
   var v = rows_("Ticks"), out = {};
@@ -775,14 +800,14 @@ function targets_(r){
     staff_(r.key);
     var sv = rows_("Sends"), ev = [];
     for(var i = 1; i < sv.length; i++) if(sv[i][8]) ev.push({ row: i + 1, who: String(sv[i][1]), target: String(sv[i][8]), what: String(sv[i][3]), text: String(sv[i][4]).slice(0, 400), time: sv[i][0] instanceof Date ? sv[i][0].getTime() : 0 });
-    return { ok: true, staff: true, targets: targetRows_(), ticks: ticksOf_(null), evidence: ev };
+    return { ok: true, staff: true, targets: targetRows_(), ticks: ticksOf_(null), evidence: ev, core: coreRows_() };
   }
   var who = who_(r.who);
   if(!studentOk_(who, r.code)) throw new Error("not yours");
   /* step rows (ids like eng-infer.2) only go to the students who have that step */
   var mine = targetRows_().filter(function(t){ return t.ms[who] || t.id.indexOf(".") < 0; })
     .map(function(t){ return { pillar: t.pillar, id: t.id, title: t.title, statement: t.statement, me: t.ms[who] || "Jay will add this one.", jay: (t.jay || {})[who] || "" }; });
-  return { ok: true, who: who, targets: mine, ticks: ticksOf_(who)[who] || {} };
+  return { ok: true, who: who, targets: mine, ticks: ticksOf_(who)[who] || {}, core: coreRows_().filter(function(c){ return c.who === who; }) };
 }
 function tick_(r){
   var who = who_(r.who), id = String(r.id || "").trim(), me = signedIn_(), staff = false;

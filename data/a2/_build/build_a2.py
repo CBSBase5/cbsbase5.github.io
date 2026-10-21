@@ -25,7 +25,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 sys.path.insert(0, HERE)
 import plan
 
-ENGINE_V = "17"
+ENGINE_V = "18"
 A2CSS_V = "1"
 ART_V = "1"
 
@@ -233,7 +233,7 @@ def schedule():
 
 
 def main():
-    slugs = [a[0] for a in plan.ACTS]
+    slugs = [a[0] for a in plan.ACTS] + [c[0] for c in getattr(plan, "CORE", [])]
     only = sys.argv[1:]
     info = pack_info(slugs)
     ready = [s for s in slugs if not info[s].get("missing")]
@@ -270,6 +270,18 @@ def main():
             continue
         # every HQ gets every activity, so anyone can open it from the
         # library in their own HQ; folders only bring the assigned ones
+        for w in plan.ALL:
+            path = os.path.join(ROOT, HQS[w]["base"], "a2-" + slug + ".html")
+            html = page(w, slug, info[slug])
+            ascii_only(path, html)
+            open(path, "w", encoding="ascii").write(html)
+            made += 1
+
+    # core target activities: every HQ gets them too, always open (no drops)
+    for c in getattr(plan, "CORE", []):
+        slug = c[0]
+        if slug not in ready or (only and slug not in only):
+            continue
         for w in plan.ALL:
             path = os.path.join(ROOT, HQS[w]["base"], "a2-" + slug + ".html")
             html = page(w, slug, info[slug])
@@ -323,6 +335,28 @@ def main():
         lib.append({"slug": slug, "title": inf.get("title") or title, "shelf": shelf, "group": group, "subj": subj,
                     "line": inf.get("line") or "", "mins": inf.get("mins") or 0, "chunks": len(inf.get("chunks") or []),
                     "first": first.get(slug, plan.LAST_DROP), "ready": slug in shown})
+    # core target activities are on the shelves from the start, marked core
+    core = []
+    for slug, title, subject, group, who, start, kw, fp in getattr(plan, "CORE", []):
+        inf = info.get(slug) or {}
+        shelf = "maths" if subject == "Maths" else "english"
+        lib.append({"slug": slug, "title": inf.get("title") or title, "shelf": shelf, "group": group,
+                    "subj": "s-maths" if shelf == "maths" else "s-english", "line": inf.get("line") or "", "mins": inf.get("mins") or 0,
+                    "chunks": len(inf.get("chunks") or []), "first": plan.CORE_FROM, "ready": slug in shown, "core": True})
+        core.append({"slug": slug, "title": inf.get("title") or title, "subject": subject, "group": group, "who": who,
+                     "href": dict((w, "/" + HQS[w]["base"] + "/a2-" + slug + ".html?lv=" + start) for w in who),
+                     "line": inf.get("line") or "", "mins": inf.get("mins") or 0, "chunks": len(inf.get("chunks") or []),
+                     "kw": kw, "fp": fp, "ready": slug in shown})
+    js3 = ("/* ==========================================================\n"
+           "   Base 5 - core target activities. Built by data/a2/_build/build_a2.py\n"
+           "   from plan.py (CORE). Do not edit. Always open, replayable. Matched to\n"
+           "   a student's core targets (from BridgeLink Buddy) by fp, a fingerprint\n"
+           "   of the target's wording, or by kw if it was reworded. No wording here.\n"
+           "   ASCII only.\n"
+           "   ========================================================== */\n"
+           "window.B5CORE = " + json.dumps({"v": 1, "items": core}, indent=1) + ";\n")
+    ascii_only("core.js", js3)
+    open(os.path.join(ROOT, "data", "a2", "core.js"), "w", encoding="ascii").write(js3)
     js2 = ("/* Base 5 - Autumn 2 activity library (the Practice tab). Built by\n"
            "   data/a2/_build/build_a2.py. Do not edit. Each activity shows from\n"
            "   the day it first lands in anyone's folder. ASCII only. */\n"

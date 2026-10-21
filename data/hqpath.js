@@ -7,8 +7,10 @@
    get going.
 
    The order:
-     1. The Autumn 2 activities that have landed in their folder
-        (their targets this term), oldest first.
+     1. Their core target activities (/data/a2/core.js: the targets
+        that need the most focus, always open), taking turns with the
+        Autumn 2 activities that have landed in their folder (their
+        targets this term), oldest first.
      2. Then their HQ's own activities, taking turns between
         subjects (English, then Maths, then the next English...)
         in the order the HQ lists them, which builds skill by skill.
@@ -46,13 +48,16 @@ function withParam(href, k, v){
 function list(){
   return Promise.all([
     script(HQ.base + "catalogue.js?v=path", function(){ return !!window.EGWCAT; }),
-    script("/data/a2/drops.js?t=" + today(), function(){ return !!window.B5DROPS; })
+    script("/data/a2/drops.js?t=" + today(), function(){ return !!window.B5DROPS; }),
+    script("/data/a2/core.js?t=" + today(), function(){ return !!window.B5CORE; })
   ]).then(function(){
-    var out = [], t = today();
+    var out = [], t = today(), drops = [], core = coreItems();
     var D = window.B5DROPS;
     if(D && D.items) D.items.filter(function(it){ return String(it.who).toUpperCase() === String(HQ.who).toUpperCase() && it.date <= t && it.ready !== false; })
       .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
-      .forEach(function(it){ out.push({ id: "a2-" + it.slug, title: it.title, subject: it.subject, href: it.href, chunks: 0, kind: "a2" }); });
+      .forEach(function(it){ drops.push({ id: "a2-" + it.slug, title: it.title, subject: it.subject, href: it.href, chunks: 0, kind: "a2" }); });
+    /* core first, taking turns with this term's activities, so the focus stays on core without holding the rest back */
+    while(core.length || drops.length){ if(core.length) out.push(core.shift()); if(drops.length) out.push(drops.shift()); }
     var C = window.EGWCAT;
     if(C && C.acts){
       var by = {}, order = [];
@@ -77,6 +82,12 @@ function list(){
     });
     return out;
   });
+}
+/* this HQ's core target activities, always open */
+function coreItems(){
+  var C = window.B5CORE, w = String(HQ.who || "").toUpperCase();
+  return C && C.items ? C.items.filter(function(it){ return it.ready !== false && (it.who || []).indexOf(w) >= 0; })
+    .map(function(it){ return { id: "a2-" + it.slug, title: it.title, subject: it.subject, group: it.group, href: (it.href || {})[w] || HQ.base + "a2-" + it.slug + ".html", chunks: it.chunks || 0, kind: "core" }; }) : [];
 }
 /* started ones first (in path order), then the first not yet finished */
 function next(skip){
@@ -108,12 +119,36 @@ css.textContent =
   ".hp-list ol{margin:0;padding-left:22px;font-size:.92rem;line-height:1.7}" +
   ".hp-list li.fin{opacity:.55;text-decoration:line-through}" +
   ".hp-list li.now{font-weight:700;color:var(--sun,#ffd23f)}" +
+  ".hp-core{margin:18px 0 0;max-width:620px;padding:14px 16px 12px;border-radius:var(--r,18px);background:rgba(255,210,63,.12);border:2px solid var(--sun,#ffd23f);color:var(--moon,#fff)}" +
+  ".hp-core h2{margin:0 0 2px;font-family:var(--display,Arial,sans-serif);font-size:1.25rem;display:flex;align-items:center;gap:8px}" +
+  ".hp-core h2 svg{width:20px;height:20px;flex:none}" +
+  ".hp-core p{margin:0 0 10px;font-size:.92rem;opacity:.9}" +
+  ".hp-core .hc-list{display:flex;flex-wrap:wrap;gap:8px}" +
+  ".hp-core a{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1 1 150px;padding:9px 12px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);color:inherit;text-decoration:none}" +
+  ".hp-core a:hover{border-color:var(--sun,#ffd23f)}" +
+  ".hp-core a b{font-size:1rem}" +
+  ".hp-core a small{font-size:.8rem;opacity:.85}" +
   "@media (prefers-reduced-motion:reduce){.hp-go{transition:none}}";
 document.head.appendChild(css);
 
 var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l16 9-16 9z" fill="#ffd23f"/></svg>';
+var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#ffd23f" stroke="#141a33" stroke-width="1.2"/></svg>';
+function coreCard(host){
+  list().then(function(all){
+    var mine = all.filter(function(x){ return x.kind === "core"; });
+    if(!mine.length) return;
+    var box = document.createElement("div"); box.className = "hp-core";
+    box.innerHTML = '<h2>' + STAR + 'Core practice</h2><p>The things that matter most for you right now. Open any of them, any time, as often as you like: each go has new questions.</p>' +
+      '<div class="hc-list">' + mine.map(function(x){
+        var st = x.finished ? "Done. Fancy another go?" : x.done ? x.done + " of " + x.chunks + " chunks" : x.started ? "Started" : (x.group || x.subject);
+        return '<a href="' + esc(x.href) + '"><b>' + esc(x.title) + '</b><small>' + esc(st) + '</small></a>';
+      }).join("") + '</div>';
+    host.parentNode.insertBefore(box, host);
+  });
+}
 function button(host){
   if(!host) return;
+  coreCard(host);
   var wrap = document.createElement("div"); wrap.className = "hp-wrap";
   wrap.innerHTML = '<a class="hp-go" href="#" aria-live="polite"><span class="hp-play">' + PLAY + '</span><span><b>Start</b><small>Finding your next step...</small></span></a>' +
     '<div class="hp-meta"></div>';

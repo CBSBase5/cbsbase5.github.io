@@ -69,6 +69,16 @@
 .scoreboard .said{font-size:.95rem;color:var(--body-tint);flex-basis:100%;margin:0}
 
 #signin a{color:var(--teal);font-weight:700}
+.coreblock{margin:22px 0 8px;padding:16px 18px;border-radius:var(--r-alt);background:#fff7d6;border:var(--border) solid var(--ink);box-shadow:4px 5px 0 var(--ink)}
+.coreblock h2{margin:0 0 4px;font-family:var(--display);display:flex;align-items:center;gap:8px}
+.coreblock h2 svg{width:24px;height:24px;flex:none}
+.coreblock > p{margin:0 0 12px}
+.corec{padding:12px 14px;border-radius:14px;background:var(--white);border:2px solid var(--ink)}
+.corec + .corec{margin-top:10px}
+.corec .k{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
+.corec .ct{margin:0 0 8px;font-weight:700}
+.corec a{display:inline-flex;align-items:center;gap:8px;font-weight:700;padding:7px 12px;border-radius:999px;border:2px solid var(--ink);background:#ffd23f;color:var(--ink);text-decoration:none}
+.corec small{display:inline-block;margin-left:8px;color:var(--body-tint)}
 .tgroup{margin:30px 0 12px;padding:16px 18px;border-radius:var(--r-alt);background:var(--white);border:2px dashed var(--line)}
 .tgroup .k{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--body-tint);margin-bottom:3px}
 .tgroup h3{font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 850;font-size:1.45rem;line-height:1.1;margin:0 0 6px}
@@ -223,6 +233,8 @@
 
 <script src="/data/targets-enc.js?v=2"></script>
 <script src="/data/a2/drops.js"></script>
+<script src="/data/a2/core.js"></script>
+<script src="/data/b5core.js?v=1"></script>
 <script src="/data/targets-explain.js?v=3"></script>
 <script src="/data/b5keys.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
@@ -267,7 +279,7 @@ function stamp(iso){
   return day+" "+d.getDate()+" "+mon+", "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
 }
 
-var me=null, mine=null, entry="", STAFF="";
+var me=null, mine=null, entry="", STAFF="", core=[];
 /* staff signed in: open a student's Autumn 2 steps straight from the sheet */
 function staffOpen(s){
   var msg=document.getElementById('signin');
@@ -275,7 +287,7 @@ function staffOpen(s){
   if(msg) msg.textContent='Opening '+s+'...';
   window.B5Site.call("targets",{key:STAFF}).then(function(o){
     if(!o||!o.ok||!o.targets){ if(msg) msg.textContent='The sheet said: '+((o&&o.error)||'no answer'); return; }
-    a1=null;
+    a1=null; core=(o.core||[]).filter(function(c){ return c.who===s });
     a2=o.targets.filter(function(t){ return !/\.\d+$/.test(t.id) || (t.ms&&t.ms[s]) })
       .map(function(t){ return {id:t.id,pillar:t.pillar||"",title:t.title,me:(t.ms&&t.ms[s])||t.title,jay:(t.jay&&t.jay[s])||""} });
     a2ticks={};
@@ -391,6 +403,7 @@ function fetchA2(){
   var t=new Promise(function(r){ setTimeout(r,10000) });
   return Promise.race([t, S.call("targets",{who:me,code:entry}).then(function(o){
     if(!o||!o.ok||!o.targets||!o.targets.length) return;
+    core=o.core||[];
     a2=o.targets.filter(function(x){ return !(/\.\d+$/.test(x.id) && (!x.me || x.me==="Jay will add this one.")) })
       .map(function(x){ return {id:x.id,pillar:x.pillar||"",title:x.title,me:x.me||x.title,jay:x.jay||""} });
     a2ticks={};
@@ -449,9 +462,26 @@ function renderScore(){
     : "Nothing on the go. Open any target and set it to having a go.";
 }
 
+/* core targets first: the ones that matter most, with practice that is always open */
+var STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#ffd23f" stroke="#141a33" stroke-width="1.4"/></svg>';
+function renderCore(box){
+  if(mode!=="a2"||!window.B5Core) return;
+  var pairs=B5Core.pair(me,core); if(!pairs.length) return;
+  var d=document.createElement('div'); d.className='coreblock';
+  d.innerHTML='<h2>'+STAR+'Core targets</h2><p>The ones that matter most for you right now. Their practice is always open: have a go whenever you fancy, as often as you like, and each go has new questions.</p>'+
+    pairs.map(function(p){
+      var a=p.act, st=a?B5Core.status(me,a.slug):null, href=a?((a.href||{})[me]||""):"";
+      var stt=!st?"":st.finished?"Done. Another go any time.":st.done?st.done+" of "+st.chunks+" chunks done":"Started";
+      return '<div class="corec"><span class="k">'+escH(p.core?(p.core.level||"Core target"):(a.group||a.subject))+'</span>'+
+        '<p class="ct">'+escH(p.core?p.core.target:"Core practice")+'</p>'+
+        (a?'<a href="'+escH(href)+'">Have a go: '+escH(a.title)+'</a>'+(stt?'<small>'+escH(stt)+'</small>':''):'<small>Jay is sorting the practice for this one.</small>')+'</div>';
+    }).join("");
+  box.appendChild(d);
+}
 function renderTargets(){
   var box=document.getElementById('targets');
   box.innerHTML="";
+  renderCore(box);
 
   var lastGroup="";
   mine.forEach(function(x,i){
@@ -602,7 +632,7 @@ function helps(body,id){
 }
 
 document.getElementById('lockBtn').addEventListener('click',function(){
-  me=null; mine=null; entry=""; a1=null; a2=null; a2ticks={}; mode="a1";
+  me=null; mine=null; entry=""; a1=null; a2=null; a2ticks={}; mode="a1"; core=[];
   document.getElementById('termchip').textContent="Autumn 2";
   document.getElementById('main').hidden=true;
   document.getElementById('lock').hidden=true;

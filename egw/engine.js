@@ -120,6 +120,14 @@ function resolveStep(s){
   var o = {};
   Object.keys(s).forEach(function(k){ if(k !== "lv") o[k] = s[k]; });
   if(s.lv && s.lv[A2LV]) Object.keys(s.lv[A2LV]).forEach(function(k){ if(k !== "topic") o[k] = s.lv[A2LV][k]; });
+  /* vary: other versions of the same question; each fresh go takes the next one, so a replay gets new questions.
+     A version can carry its own lv overrides too. */
+  if(Array.isArray(s.vary) && s.vary.length){
+    var vv = s.vary[((state && state.round) || 0) % (s.vary.length + 1) - 1];
+    if(vv){ Object.keys(vv).forEach(function(k){ if(k !== "topic" && k !== "type" && k !== "lv") o[k] = vv[k]; });
+      if(vv.lv && vv.lv[A2LV]) Object.keys(vv.lv[A2LV]).forEach(function(k){ if(k !== "topic" && k !== "type") o[k] = vv.lv[A2LV][k]; }); }
+  }
+  delete o.vary;
   var out = {};
   Object.keys(o).forEach(function(k){ out[k] = typeof o[k] === "function" ? o[k] : tok(o[k]); });
   return out;
@@ -509,7 +517,8 @@ function build(){
   $("beginBtn").onclick = function(){
     if(state.answers && Object.keys(state.answers).length){
       if(!confirm("Start again from the beginning? Your answers and sparks on this activity will be cleared.")) return;
-      state = fresh(); save();
+      var rnd = (state.round || 0) + 1, kLv = state.level, kTh = state.theme; state = fresh(); state.round = rnd; state.level = kLv; if(kTh) state.theme = kTh;
+      if(a2()){ a2Pick(); a2Resolve(); makeChunks(); } save();
     }
     go(0);
   };
@@ -531,7 +540,8 @@ function build(){
   $("breakBtn").onclick = showStart;
   $("freshBtn").onclick = function(){
     if(!confirm("Clear everything on this activity and start fresh?")) return;
-    state = fresh(); save(); showStart();
+    var rnd = (state.round || 0) + 1, kLv = state.level, kTh = state.theme; state = fresh(); state.round = rnd; state.level = kLv; if(kTh) state.theme = kTh;
+    if(a2()){ a2Pick(); a2Resolve(); makeChunks(); } save(); showStart();
   };
 
   if(cfg.escape){

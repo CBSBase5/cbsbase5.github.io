@@ -166,7 +166,8 @@ def main():
     pages = 0
     with sync_playwright() as p:
         b = p.chromium.launch()
-        for slug, title, subject, covers in plan.ACTS:
+        acts = list(plan.ACTS) + [(c[0], c[1], c[2], [(w, "core", 1) for w in c[4]]) for c in getattr(plan, "CORE", [])]
+        for slug, title, subject, covers in acts:
             if only and slug not in only:
                 continue
             if not os.path.exists(os.path.join(ROOT, "data", "a2", slug + ".js")):

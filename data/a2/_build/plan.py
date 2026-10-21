@@ -197,3 +197,38 @@ PILLAR_DAYS = {
 
 FIRST_DROP = "2026-11-04"
 LAST_DROP = "2026-12-14"
+
+
+# ---------------------------------------------------------------- CORE TARGETS
+# Each student's core targets (the Core Targets box on their BridgeLink profile) get
+# extra focus: one always available, replayable activity per core target, shared where
+# students share a target. No wording here (that stays in BridgeLink Buddy's Core tab):
+# fp is a fingerprint of the target's wording (FNV-1a of its normalised text, as
+# coreKey() in /data/b5core.js makes it), and kw are curriculum words, all of which a
+# target's wording must contain if the fingerprint does not match (it was reworded).
+# slug, title, subject, group, who, start level, kw, fp
+CORE_FROM = "2026-10-21"
+CORE = [
+    ("core-built-for-effect", "Built for effect", "English", "Reading", ["EGW"], "spicy", ["structural", "effect"], ["8625f9d4"]),
+    ("core-spin-detector", "Spin detector", "English", "Reading", ["EGW"], "spicy", ["argument", "fact", "opinion"], ["cb0f892c"]),
+    ("core-what-is-not-said", "What is not said", "English", "Reading", ["EGW"], "spicy", ["implicit", "inferred"], ["d17bb483"]),
+    ("core-method-mastery", "Method mastery", "Maths", "Number", ["EGW"], "spicy", ["multiplication", "division", "methods"], ["adc9cb47"]),
+    ("core-room-makeover", "Room makeover", "Maths", "Shape and measure", ["EGW"], "spicy", ["area", "perimeter", "cost"], ["9bf78d87"]),
+    ("core-get-the-gist", "Get the gist", "English", "Reading", ["LP"], "medium", ["main", "points", "implied"], ["9c06d083"]),
+    ("core-make-it-scannable", "Make it scannable", "English", "Writing", ["LP"], "medium", ["headings", "bullet"], ["d3a8b2fa"]),
+    ("core-near-enough", "Near enough", "Maths", "Number", ["LP"], "medium", ["rounding"], ["6edb1ef7"]),
+    ("core-rectangle-rooms", "Rectangle rooms", "Maths", "Shape and measure", ["LP"], "medium", ["area", "perimeter", "rectangles"], ["99cdb4e2"]),
+    ("core-fact-families", "Fact families", "Maths", "Number", ["LP"], "medium", ["multiplication", "connections", "division"], ["f0316f56"]),
+    ("core-marker-hunt", "Marker hunt", "English", "Reading", ["LC"], "mild", ["organisational", "markers"], ["b1b20d"]),
+    ("core-format-match", "Format match", "English", "Writing", ["LC", "HK", "JT"], "mild", ["formats", "structures"], ["6e9313a8"]),
+    ("core-group-it", "Group it", "English", "Writing", ["LC"], "mild", ["paragraphs", "group"], ["23a4d47a"]),
+    ("core-times-table-gym", "Times table gym", "Maths", "Number", ["LC"], "mild", ["multiplication", "division", "12"], ["7ae24776"]),
+    ("core-scale-spotter", "Scale spotter", "Maths", "Shape and measure", ["LC", "LW"], "mild", ["scales", "division"], ["2904a4b0"]),
+    ("core-same-story", "Same story, new look", "English", "Reading", ["LW"], "mild", ["themes", "conventions"], ["403e96f2"]),
+    ("core-link-it-up", "Link it up", "English", "Writing", ["LW", "HK", "JT"], "mild", ["sentences", "linked", "paragraphs"], ["d146b480"]),
+    ("core-who-is-it-for", "Who is it for?", "English", "Writing", ["LW"], "mild", ["audience", "purpose"], ["8d836bea"]),
+    ("core-pounds-and-pence", "Pounds and pence", "Maths", "Number", ["LW"], "mild", ["money", "pounds", "pence"], ["4c5d1482"]),
+    ("core-fact-finder", "Fact finder", "English", "Reading", ["HK", "JT"], "mild", ["simple", "facts"], ["dac1155c"]),
+    ("core-sum-it-up", "Sum it up", "English", "Reading", ["HK", "JT"], "mild", ["summarise", "main", "ideas"], ["22ab0fc"]),
+    ("core-full-stop", "Full stop!", "English", "Punctuation", ["HK", "JT"], "mild", ["punctuation", "full", "stops"], ["66c32555"]),
+]

@@ -13,6 +13,8 @@
 <script src="/data/b5staff.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <script src="/data/minidocx.js?v=1"></script>
+<script src="/data/a2/core.js"></script>
+<script src="/data/b5core.js?v=1"></script>
 <style>
 /* Jay's live view: every HQ's progress and every send, from the shared sheet. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -54,6 +56,9 @@
 .pill.sun{background:#ffe680}.pill.bright{background:#d8f0c6}.pill.grey{background:#dde3e6}.pill.storm{background:#c9c6e8}.pill.no{border-style:dashed;color:var(--body-tint)}
 .kid h4{margin:10px 14px 0;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--body-tint)}
 .kid .acts{display:flex;gap:6px;flex-wrap:wrap;padding:6px 14px 14px}
+.kid .corebox{margin:10px 10px 0;border-radius:12px;background:#fff7d6;border:2px solid #e7b416}
+.kid .corebox h4{color:#7a5600;margin-top:8px}
+.kid .corebox ul{padding-bottom:6px}
 .kid .acts button,.mini{font:inherit;font-size:.82rem;padding:5px 11px;border-radius:10px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
 .mini.go{background:var(--ink);color:var(--paper)}
 .panel{margin:0 14px 14px;padding:10px;border-radius:12px;background:var(--paper);border:2px solid var(--ink)}
@@ -261,6 +266,13 @@ function card(w, o){
     var sw = seenWhen(seen[x.id]), tw = tried[x.id] ? " &middot; had a go" : "";
     return '<li><span>' + esc(x.label) + '</span><em>' + (sw ? esc(sw) + tw : "Not opened yet") + '</em></li>';
   }).join("") + '</ul>' : "";
+  /* core practice: the always-open activities for this student's core targets, and how far they have got */
+  var corePairs = window.B5Core ? B5Core.pair(w, (o.core || []).filter(function(c){ return c.who === w; })) : [];
+  var core = corePairs.length ? '<div class="corebox"><h4>&#9733; Core practice</h4><ul>' + corePairs.map(function(p){
+    if(!p.act) return '<li><span>' + esc(p.core.target.slice(0, 60)) + (p.core.target.length > 60 ? "..." : "") + '</span><em>No activity yet</em></li>';
+    var a = acts.filter(function(x){ return x.id === "a2-" + p.act.slug; })[0];
+    return '<li title="' + esc(p.core ? p.core.target : "") + '"><span>' + esc(p.act.title) + '</span><em>' + (a ? (a.fin ? "Finished" : a.done + " of " + a.of + " chunks") + ", " + ago(a.t) : "Not started yet") + '</em></li>';
+  }).join("") + '</ul></div>' : "";
   var panel = "";
   if(open[w] === "shout"){
     panel = '<div class="panel" data-w="' + w + '"><div class="stick">' + Object.keys(STICK).map(function(k, i){ return '<button type="button" data-st="' + k + '" aria-pressed="' + (i === 0) + '" aria-label="' + k + '">' + STICK[k] + '</button>'; }).join("") + '</div>' +
@@ -272,7 +284,7 @@ function card(w, o){
     (acts.length ? '<ul>' + acts.slice(0, 5).map(function(a){
       return '<li><span>' + esc(names[w + ":" + a.id] || nice(a.id)) + '</span><em>' + a.done + ' of ' + a.of + ' chunks, ' + ago(a.t) + '</em></li>';
     }).join("") + '</ul>' : '<p class="none">Nothing saved to the sheet yet.</p>') +
-    folder +
+    core + folder +
     '<div class="acts"><button type="button" data-w="' + w + '" data-do="shout">Shout-out</button><button type="button" data-w="' + w + '" data-do="timeline">Timeline</button><button type="button" data-w="' + w + '" data-do="postcard">Postcard</button></div>' +
     panel + '</div>';
 }
