@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School lunch menu</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%23fdf0e7'/%3E%3Cpath d='M8 26 Q32 2 56 26' fill='none' stroke='%23df6f2a' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M21 18 q-3 4 0 8 M32 15 q-3 5 0 11 M43 18 q-3 4 0 8' fill='none' stroke='%23df6f2a' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M8 30 h48 a24 24 0 0 1 -48 0 z' fill='%2300697f'/%3E%3Cpath d='M22 57 h20' stroke='%2300697f' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/*
+  School lunch menu for families.
+
+  It reads the "Lunch menu for families (public)" spreadsheet, which the lunch
+  orders system keeps up to date every hour with only the menu: dish names,
+  themed days and days with no lunches. No names, orders or allergy details.
+
+  To connect it: open that spreadsheet, then File, Share, Publish to web.
+  Choose the "Menu" sheet and "Comma separated values (.csv)", then Publish,
+  and paste the link between the quotes on the MENU_CSV line near the bottom
+  of this file. Until then the page shows a sample menu.
+*/
+:root {
+  --bg: #f6f4ef; --card: #ffffff; --ink: #1d2327; --muted: #5b6670; --line: #e3ded4;
+  --teal: #00697f; --spark: #1f5fbf; --fuel: #b85f05; --glow: #3d7d2c;
+  --spark-t: #e8f0fb; --fuel-t: #fdf0e3; --glow-t: #eaf4e6;
+  --shadow: 0 1px 2px rgba(29, 35, 39, .06), 0 4px 14px rgba(29, 35, 39, .06);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 48px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 24px; margin-bottom: 22px; }
+.kicker { margin: 0 0 4px; color: var(--teal); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
+h1 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; letter-spacing: -.01em; }
+.sub { margin: 8px 0 0; color: var(--muted); }
+.weeks { display: inline-flex; background: #ebe7de; border-radius: 12px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.weeks button { font: inherit; font-size: 15px; border: 0; background: transparent; color: var(--ink); padding: 8px 14px; border-radius: 9px; cursor: pointer; min-height: 44px; }
+.weeks button[aria-pressed="true"] { background: var(--card); box-shadow: var(--shadow); font-weight: 700; }
+.weeks button:focus-visible, a:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.weekhead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 14px; }
+.weekhead h2 { margin: 0; font-size: 22px; font-family: Fraunces, Georgia, serif; font-weight: 600; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chip.Spark { background: var(--spark-t); color: var(--spark); } .chip.Spark i { background: var(--spark); }
+.chip.Fuel { background: var(--fuel-t); color: var(--fuel); } .chip.Fuel i { background: var(--fuel); }
+.chip.Glow { background: var(--glow-t); color: var(--glow); } .chip.Glow i { background: var(--glow); }
+.days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.day { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.day.today { border: 2px solid var(--teal); }
+.dname { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dname h3 { margin: 0; font-size: 19px; }
+.dname span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.dname .todaytag, .todaytag { display: inline-block; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: 2px; }
+.fest { border-radius: 10px; padding: 8px 10px; color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.fest .e { font-size: 20px; line-height: 1; }
+.item { margin: 0; }
+.item dt { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.item dd { margin: 1px 0 0; font-size: 16px; overflow-wrap: anywhere; }
+.closed { color: var(--muted); font-style: italic; margin: 6px 0 0; }
+.every { margin-top: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); }
+.every h2 { margin: 0 0 8px; font-size: 20px; font-family: Fraunces, Georgia, serif; font-weight: 600; }
+.every ul { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+.every li { margin: 3px 0; break-inside: avoid; }
+.notes { margin: 18px 2px 0; color: var(--muted); font-size: 15px; }
+.notes p { margin: 4px 0; }
+.sample { background: #fff4d6; border: 1px solid #ecc96a; color: #6b4b00; border-radius: 10px; padding: 10px 14px; margin: 0 0 18px; font-size: 15px; }
+.msg { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; color: var(--muted); }
+@media (max-width: 900px) { .days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .days { grid-template-columns: 1fr; } .every ul { columns: 1; } body { font-size: 16px; } }
+@media print {
+  body { background: #fff; font-size: 12pt; }
+  .weeks, .sample { display: none; }
+  .day, .every { box-shadow: none; break-inside: avoid; }
+  .days { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .fest { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="kicker">Chilton Bridge School</p>
+      <h1>School lunch menu</h1>
+      <p class="sub">What the kitchen is cooking, with themed days and days with no lunches.</p>
+    </div>
+    <div class="weeks" id="weeks" role="group" aria-label="Which week"></div>
+  </header>
+  <div id="sample" class="sample" hidden>This is a sample menu. Once the menu link is added (see the note at the top of this file), the real menu shows here and keeps itself up to date.</div>
+  <main id="menu" aria-live="polite"><div class="msg">Loading the menu...</div></main>
+  <section class="every" aria-labelledby="everyH">
+    <h2 id="everyH">Also every day</h2>
+    <ul>
+      <li>Jacket potato, plain or with cheese, tuna mayo or beans</li>
+      <li>Chicken goujon wrap</li>
+      <li>Cheese panini, plain or with ham, pepperoni, tuna or tomato</li>
+      <li>Salad pot</li>
+      <li>Sandwich, roll, baguette or wrap with a choice of fillings, on white bread or brown</li>
+      <li>Packed lunch: a sandwich or roll, crisps, a biscuit and a piece of fruit</li>
+      <li>A yogurt or fruit pot instead of pudding</li>
+      <li>Gluten free bread, wraps and pizza</li>
+    </ul>
+  </section>
+  <div class="notes">
+    <p>Chilton Bridge is a nut free school. For allergen information about any dish, please ask the kitchen team or your child's base.</p>
+    <p>Dishes can occasionally change on the day. <span id="updated"></span></p>
+  </div>
+</div>
+<script>
+(function () {
+  // Paste the published CSV link between the quotes (see the note at the top).
+  var MENU_CSV = '';
+
+  var THEMES = {
+    'Halloween': ['#24132f', [0x1F383, 0x1F47B]], 'Bonfire Night': ['#0d1b2a', [0x1F386, 0x1F387]],
+    'Christmas': ['#0f3d2e', [0x1F384, 0x1F385]], 'Lunar New Year': ['#7a0d0d', [0x1F9E7, 0x1F3EE]],
+    'Valentine\'s Day': ['#5a0f2e', [0x1F496, 0x1F339]], 'Pancake Day': ['#4a3214', [0x1F95E, 0x1F34B]],
+    'World Book Day': ['#1d3557', [0x1F4DA, 0x1F989]], 'Easter': ['#2d6a4f', [0x1F423, 0x1F337]],
+    'Diwali': ['#2b124c', [0x1FA94, 0x2728]], 'Eid': ['#0b3c49', [0x1F319, 0x2B50]],
+    'Summer': ['#023e8a', [0x2600, 0x1F366]], 'Celebration': ['#3a0ca3', [0x1F389, 0x1F388]]
+  };
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function nice(key) { var p = key.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1]; }
+  function todayKey() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+  // A small CSV reader (quoted fields, commas and new lines inside quotes).
+  function parseCsv(text) {
+    var rows = [], row = [], f = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+        else f += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+      else f += c;
+    }
+    if (f !== '' || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  function toDays(rows) {
+    var head = rows[0] || [];
+    var col = function (n) { return head.indexOf(n); };
+    return rows.slice(1).filter(function (r) { return /^\d{4}-\d{2}-\d{2}$/.test(r[col('Date')] || ''); }).map(function (r) {
+      var g = function (n) { var i = col(n); return i >= 0 ? String(r[i] || '').replace(/^'/, '') : ''; };
+      return { date: g('Date'), day: g('Day'), week: g('Week'), main: g('Main'), veg: g('Vegetarian'), grab: g('Grab and go'),
+        pud: g('Pudding'), theme: g('Theme'), title: g('Theme title'), closed: g('No lunches'), updated: g('Updated') };
+    });
+  }
+  function sample() {
+    var d = new Date(), day = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - day);
+    var dishes = [
+      ['Beef Lasagna, Garlic Bread', 'Vegetable Lasagna, Garlic Bread', 'Sausage Roll', 'Apple Crumble & Custard'],
+      ['Chicken Korma, Rice', 'Vegetable & Chickpea Korma, Rice', 'Chicken Burger', 'Chocolate Sponge & Custard'],
+      ['Roast Chicken, Roast Potatoes & Veg', 'Vegetable Parcels, Roast Potatoes & Veg', 'BBQ Chicken Flatbread', 'Pineapple Upside Down Pudding & Custard'],
+      ['Chilli Beef, Nachos, Rice', 'Quorn Chilli, Nachos, Rice', 'Beef Burger', 'Pancakes & Sauces'],
+      ['Fish & Chips', 'Cauliflower & Broccoli Cheese', 'Pizza', 'Cookie']
+    ];
+    var out = [], names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], weeks = ['Spark', 'Fuel', 'Glow'];
+    for (var w = 0; w < 3; w++) for (var i = 0; i < 5; i++) {
+      var x = new Date(d); x.setDate(d.getDate() + w * 7 + i);
+      var key = x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2);
+      out.push({ date: key, day: names[i], week: weeks[w], main: dishes[i][0], veg: dishes[i][1], grab: dishes[i][2], pud: dishes[i][3],
+        theme: w === 0 && i === 4 ? 'Celebration' : '', title: w === 0 && i === 4 ? 'Celebration lunch' : '', closed: w === 1 && i === 0 ? 'INSET day' : '', updated: '' });
+    }
+    return out;
+  }
+
+  var DAYS = [], WEEK = 0;
+  function weeksOf(days) {
+    var out = [];
+    for (var i = 0; i < days.length; i += 5) out.push(days.slice(i, i + 5));
+    return out;
+  }
+  function render() {
+    var weeks = weeksOf(DAYS);
+    if (!weeks.length) { $('menu').innerHTML = '<div class="msg">The menu is not available right now. Please try again later.</div>'; return; }
+    if (WEEK >= weeks.length) WEEK = 0;
+    var labels = ['This week', 'Next week', 'Week after'];
+    $('weeks').innerHTML = weeks.map(function (w, i) {
+      return '<button type="button" data-w="' + i + '" aria-pressed="' + (i === WEEK) + '">' + (labels[i] || 'Week of ' + nice(w[0].date)) + '</button>';
+    }).join('');
+    var wk = weeks[WEEK], name = (wk.filter(function (d) { return d.week; })[0] || {}).week || '';
+    var allClosed = wk.every(function (d) { return d.closed; });
+    var today = todayKey();
+    var h = '<div class="weekhead"><h2>Week of ' + esc(nice(wk[0].date)) + '</h2>' +
+      (name ? '<span class="chip ' + esc(name) + '"><i aria-hidden="true"></i>' + esc(name) + ' week</span>' : '') + '</div>';
+    if (allClosed) {
+      h += '<div class="msg">No school lunches this week' + (wk[0].closed && wk[0].closed !== 'Holiday' ? ': ' + esc(wk[0].closed) : '') + '.</div>';
+    } else {
+      h += '<div class="days">' + wk.map(function (d) {
+        var t = THEMES[d.theme];
+        var item = function (label, v) { return v ? '<dl class="item"><dt>' + label + '</dt><dd>' + esc(v) + '</dd></dl>' : ''; };
+        return '<article class="day' + (d.date === today ? ' today' : '') + '" aria-label="' + esc(d.day + ' ' + nice(d.date)) + '">' +
+          '<div class="dname"><h3>' + esc(d.day) + (d.date === today ? '<span class="todaytag">Today</span>' : '') + '</h3><span>' + esc(nice(d.date)) + '</span></div>' +
+          (t && !d.closed ? '<div class="fest" style="background:' + t[0] + '"><span class="e" aria-hidden="true">' + String.fromCodePoint(t[1][0]) + '</span>' +
+            esc(d.title || d.theme) + '<span class="e" aria-hidden="true">' + String.fromCodePoint(t[1][1]) + '</span></div>' : '') +
+          (d.closed ? '<p class="closed">No school lunches' + (d.closed !== 'Holiday' ? ': ' + esc(d.closed) : '') + '</p>' :
+            item('Main', d.main) + item('Vegetarian', d.veg) + item('Grab and go', d.grab) + item('Pudding', d.pud)) + '</article>';
+      }).join('') + '</div>';
+    }
+    $('menu').innerHTML = h;
+    var up = DAYS.filter(function (d) { return d.updated; })[0];
+    $('updated').textContent = up && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(up.updated) ? 'Menu updated ' + nice(up.updated.slice(0, 10)) + ' at ' + up.updated.slice(11, 16) + '.' : '';
+  }
+  $('weeks').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-w]');
+    if (!b) return;
+    WEEK = Number(b.getAttribute('data-w'));
+    render();
+    var f = $('weeks').querySelector('[data-w="' + WEEK + '"]');
+    if (f) f.focus();
+  });
+
+  if (!MENU_CSV) { $('sample').hidden = false; DAYS = sample(); render(); return; }
+  fetch(MENU_CSV, { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(function (text) {
+    DAYS = toDays(parseCsv(text));
+    render();
+  }).catch(function () {
+    $('menu').innerHTML = '<div class="msg">The menu could not be loaded just now. Please try again later.</div>';
+  });
+})();
+</script>
+</body>
+</html>
