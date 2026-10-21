@@ -15,6 +15,11 @@ window.B5FOLDER = {
     "id": "m-epoch-wow",
     "date": "2026-10-20",
     "text": "EPOCH has had a big update with lots of funny, creative and wow moments. There is a studio for your flag, leader and anthem, a sticker album, a trip to the Moon and plenty of surprises to find. Have a look whenever you like."
+   },
+   {
+    "id": "m-epoch-calm",
+    "date": "2026-10-21",
+    "text": "Another EPOCH update. Your armies and scouts can now take orders like Explore, Guard and Defend home, so they can get on with things by themselves. The screens are calmer too, with more pictures and less to read. Have a go whenever you like."
    }
   ],
   "activities": [
