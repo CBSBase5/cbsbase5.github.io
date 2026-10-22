@@ -43,7 +43,7 @@ def common(s, name):
     # EGW's floating biscuits stay in EGW's space
     s = re.sub(r'<script src="/egw/biscuits\.js[^"]*"></script>\n?', "", s)
     # EGW's break game is Dunk; LP's is Neon Stack (the shared part, /data/hqbreak.js, stays)
-    s = re.sub(r'<script src="/egw/dunk\.js[^"]*"></script>', '<script src="/lp/stack.js?v=1"></script>', s)
+    s = re.sub(r'<script src="/egw/dunk\.js[^"]*"></script>', '<script src="/lp/stack.js?v=2"></script>', s)
     # LP has no Mark Jay's work page; Catch Jay out on the home page does the same job
     s = re.sub(r"\n\s*ideas\.push\('<a href=\"/egw/mark-jay\.html\">.*?\);", "", s, count=1)
     # config first, then LP's stylesheet straight after the shared one
