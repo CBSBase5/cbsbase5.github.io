@@ -15,9 +15,8 @@
   Jay hosts on the board: watch an advert, guess when it was made, spot the
   persuasion tricks, then rate it and put it in the tier list.
 
-  The adverts are NOT on the website. They load from Jay's own copies:
-    - on the live site, Host > Load the adverts, once per device (kept on that device)
-    - or, opened from a folder, from assets/adverts/ad01.mp4 ... ad12.mp4 next to this page
+  The adverts live in /projects/ttv/ad01.mp4 ... ad12.mp4 (shrunk to 720p, sound left as it was).
+  The Host desk can load local copies instead, kept on that device (useful with no internet).
   Each advert has its own volume setting (measured), so none of them jumps out louder.
 
   Saves on this device under b5.ttv.v1. Leaderboard: showscore / showboard in the
@@ -662,7 +661,7 @@ function haveAll(){
     HAVE = {}; keys.forEach(function(r){ var m = /\/__ttv\/ad(\d\d)\.mp4$/.exec(r.url); if(m) HAVE[+m[1]] = 1; }); return HAVE;
   }).catch(function(){ return HAVE; });
 }
-function loaded(id){ return !!(VID[id] || HAVE[id]); }
+function loaded(id){ return true; }
 function loadedCount(){ var n = 0; ADS.forEach(function(a){ if(loaded(a.id)) n++; }); return n; }
 function idFromName(n){ var m = /ad\s*_?0?(\d{1,2})\b[^\/]*\.(mp4|m4v|webm|mov)$/i.exec(n); var id = m ? +m[1] : 0; return id >= 1 && id <= 12 ? id : 0; }
 function loadFiles(list, done){
@@ -1156,7 +1155,7 @@ function post(){
 function mountVideo(a){
   var box = $("#screen"); if(!box) return;
   fromCache(a.id).then(function(url){
-    var src = url || ("assets/adverts/ad" + pad(a.id) + ".mp4");
+    var src = url || ("/projects/ttv/ad" + pad(a.id) + ".mp4");
     if(!$("#screen")) return;
     box.innerHTML = '<video id="advert" playsinline preload="auto" controls controlslist="nodownload noplaybackrate" disablepictureinpicture aria-label="Mystery advert, round ' + roundNo() + '"></video>' +
       '<button type="button" class="playbtn" id="playbig" aria-label="Play the advert"><span>' + PLAY + '</span></button>';
@@ -1176,7 +1175,7 @@ function mountVideo(a){
   });
 }
 function loaderHtml(){
-  return '<div class="loader"><p><b>The adverts are not loaded on this device yet.</b> They never go on the website, so the host loads them once: pick the adverts folder, or select ad01.mp4 to ad12.mp4.</p>' +
+  return '<div class="loader"><p><b>This advert would not load.</b> Check the internet connection, or load your own copies of the adverts on this device.</p>' +
     '<div class="row" style="justify-content:flex-start"><label class="press">Pick the folder<input type="file" data-load webkitdirectory multiple></label><label class="ghost" style="color:var(--ink);border-color:#cfc6e8">Pick the files<input type="file" data-load accept="video/*" multiple></label></div></div>';
 }
 function bindLoaders(){
@@ -1185,12 +1184,12 @@ function bindLoaders(){
 
 /* ---------- backstage: host desk and advert maker ---------- */
 function vHost(){
-  return '<h1>Host desk</h1><div class="cols"><div class="panel"><h2>Tonight\'s running order</h2><p class="note" style="margin-bottom:10px">Switch off anything you would rather not show. Green dot: loaded on this device.</p>' +
+  return '<h1>Host desk</h1><div class="cols"><div class="panel"><h2>Tonight\'s running order</h2><p class="note" style="margin-bottom:10px">Switch off anything you would rather not show. </p>' +
     '<div class="lineup">' + ORDER.map(function(id){ var a = adBy(id);
       return '<div class="lrow"><button type="button" class="switch" role="switch" data-off="' + id + '" aria-checked="' + !st.off[id] + '" aria-label="Show ' + esc(a.title) + '"></button><span class="ok' + (loaded(id) ? " yes" : "") + '"></span>' +
         '<div><b>' + esc(a.title) + '</b> (' + yearText(a) + ')<small>' + esc(a.host) + '</small></div><button type="button" class="ghost" data-prev="' + id + '" style="padding:6px 12px">Preview</button></div>'; }).join("") + '</div></div>' +
     '<div><div class="panel preview hidden" id="prevcard"><h2 id="prevlabel">Preview</h2><div id="prevbox"></div></div>' +
-    '<div class="panel"><h2>The adverts</h2><p id="loadcount">' + loadedCount() + ' of 12 loaded on this device.</p><p class="note" style="margin:6px 0 12px">They stay on this device and never go online.</p>' +
+    '<div class="panel"><h2>The adverts</h2><p id="loadcount">All 12 play from the Base 5 site.</p><p class="note" style="margin:6px 0 12px">To use your own copies on this device instead (for example with no internet), pick them here.</p>' +
       '<div class="row" style="justify-content:flex-start"><label class="press" style="cursor:pointer">Pick the folder<input type="file" data-load webkitdirectory multiple></label><label class="ghost" style="cursor:pointer">Pick the files<input type="file" data-load accept="video/*" multiple></label></div>' +
       '<button type="button" class="link" id="forget" style="margin-top:8px">Forget them on this device</button></div>' +
     '<div class="panel"><h2>Sound and screen</h2><label style="display:flex;gap:10px;align-items:center">Advert volume <input type="range" id="hvol" min="0" max="1" step="0.05" value="' + st.vol + '"></label>' +
@@ -1306,16 +1305,16 @@ function wire(){
   on("post", post);
   /* host */
   $$("[data-off]").forEach(function(b){ b.addEventListener("click", function(){ var id = +b.dataset.off; if(st.off[id]) delete st.off[id]; else { if(lineup().length <= 1){ toast("The show needs at least one advert."); return; } st.off[id] = 1; } save(); render(); }); });
-  if(display === "host"){ bindLoaders(); haveAll().then(function(){ say("loadcount", loadedCount() + " of 12 loaded on this device."); $$(".lrow").forEach(function(r){ var id = +r.querySelector("[data-off]").dataset.off; r.querySelector(".ok").classList.toggle("yes", loaded(id)); }); }); }
+  if(display === "host"){ bindLoaders(); haveAll().then(function(){ $$(".lrow").forEach(function(r){ var id = +r.querySelector("[data-off]").dataset.off; r.querySelector(".ok").classList.toggle("yes", loaded(id)); }); }); }
   $$("[data-prev]").forEach(function(b){ b.addEventListener("click", function(){
     var a2 = adBy(+b.dataset.prev), card = $("#prevcard"); card.classList.remove("hidden"); say("prevlabel", "Preview: " + a2.title);
     fromCache(a2.id).then(function(url){
       var box = $("#prevbox"); if(!box) return;
       box.innerHTML = '<video controls playsinline preload="auto"></video>';
       var v = box.querySelector("video");
-      v.addEventListener("error", function(){ box.innerHTML = '<p class="note">Not loaded on this device yet.</p>'; });
+      v.addEventListener("error", function(){ box.innerHTML = '<p class="note">That advert would not load. Check the internet connection.</p>'; });
       v.addEventListener("loadedmetadata", function(){ if(a2.start) v.currentTime = a2.start; });
-      v.volume = Math.max(0, Math.min(1, a2.gain * st.vol)); v.src = url || ("assets/adverts/ad" + pad(a2.id) + ".mp4");
+      v.volume = Math.max(0, Math.min(1, a2.gain * st.vol)); v.src = url || ("/projects/ttv/ad" + pad(a2.id) + ".mp4");
       card.scrollIntoView({ behavior:"smooth", block:"center" });
     });
   }); });
