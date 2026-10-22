@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff picks - Base 5</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=12">
+<script src="/data/b5site.js?v=7"></script>
+<script src="/data/b5staff.js?v=1"></script>
+<script src="/data/dailyfun.js?v=2"></script>
+<style>
+/* Staff picks for the home page's Would you rather. Staff only. */
+.box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
+.box h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.help{margin:0 0 12px;font-size:.93rem;color:var(--body-tint);max-width:70ch}
+.chipsrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chipsrow button{font:inherit;font-size:.92rem;padding:7px 15px;border-radius:999px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer}
+.chipsrow button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.chipsrow input{font:inherit;font-size:.92rem;border:2px solid var(--ink);border-radius:999px;padding:6px 12px;background:var(--white);color:var(--ink);width:12em}
+.msg{margin:10px 0 0;min-height:1.2em;font-size:.93rem;color:var(--teal)}
+.msg.bad{color:var(--orange-deep)}
+.d{border:2px solid var(--ink);border-left:10px solid var(--plum);border-radius:14px;padding:14px 16px;margin:0 0 12px;background:var(--white)}
+.d.today{border-left-color:var(--orange)}
+.d .k{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--body-tint)}
+.d .k .ev{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--plum);color:var(--paper);letter-spacing:.04em}
+.d h3{margin:2px 0 8px;font-size:1.02rem}
+.d .ab{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.d .ab button{font:inherit;font-size:.92rem;padding:7px 14px;border-radius:12px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;text-align:left}
+.d .ab button[aria-pressed=true]{background:var(--orange);color:var(--ink)}
+.d .rs{display:flex;gap:8px;flex-wrap:wrap}
+.d .rs input{flex:1 1 260px;font:inherit;font-size:.92rem;border:2px solid var(--ink);border-radius:10px;padding:7px 10px;background:var(--white);color:var(--ink);min-width:0}
+.d .others{margin:8px 0 0;padding:0;list-style:none;font-size:.88rem;color:var(--body-tint)}
+.d .st{font-size:.84rem;color:var(--teal);min-height:1.1em;margin:6px 0 0}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="top">
+  <div class="wrap">
+    <div class="mark">
+      <svg width="36" height="27" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="2.8" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#0a2f38" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <b>Base 5</b>
+    </div>
+    <nav aria-label="Staff pages"><a href="/teacher/">Staff room</a><a href="/teacher/live.html">Live view</a><a href="/teacher/targets.html">Targets</a><a href="/teacher/bridgelink.html">BridgeLink</a><a href="/teacher/a2-drops.html">Drops</a><a href="/teacher/picks.html" aria-current="page">Picks</a><a href="/teacher/folders.html">Folders</a><a href="/teacher/milestones.html">Milestones</a><a href="/teacher/build-targets.html">Codes</a><a href="/teacher/sync.html">Setup</a><a href="/">Site</a></nav>
+  </div>
+</div>
+<header class="hero hero-sm">
+  <div class="wrap">
+    <div class="toprow">
+      <h1 class="echo" data-echo="STAFF PICKS">STAFF <span class="accent">PICKS</span></h1>
+    </div>
+    <div class="line">
+      <span class="chip">Staff only</span>
+      <p>Your answer to each day's Would you rather on the home page. Students see it, with your reason, only after they have picked.</p>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="box">
+    <h2>Who is picking?</h2>
+    <p class="help">This browser remembers the name. Picks save as you go. Tap your pick again to take it away.</p>
+    <div class="chipsrow" id="names">
+      <button type="button" data-n="Jay">Jay</button><button type="button" data-n="HB">HB</button>
+      <input type="text" id="other" maxlength="24" placeholder="Someone else" aria-label="Another name">
+    </div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </div>
+  <div id="days"></div>
+</div>
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/">See Today&rsquo;s two on the home page</a>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+var F = window.B5FUN, NAME = "b5.picks.name.v1", KEY = "b5.staffkey.v1", DAYS = 14, got = {}, me = "";
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function msg(t, bad){ $("msg").textContent = t; $("msg").className = "msg" + (bad ? " bad" : ""); }
+function key(){ try{ return localStorage.getItem(KEY) || ""; }catch(e){ return ""; } }
+try{ me = localStorage.getItem(NAME) || ""; }catch(e){}
+var list = [];
+for(var i = 0; i < DAYS; i++){ var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i); list.push(F.forDay(d)); }
+var WD = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function nice(k, i){ var p = k.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return (i === 0 ? "Today, " : i === 1 ? "Tomorrow, " : "") + WD[d.getDay()] + " " + d.getDate() + " " + MO[d.getMonth()]; }
+function mine(k){ var a = got[k] || []; for(var j = 0; j < a.length; j++) if(me && a[j].name.toLowerCase() === me.toLowerCase()) return a[j]; return null; }
+function syncNames(){
+  [].forEach.call($("names").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.n === me ? "true" : "false"); });
+  if(me !== "Jay" && me !== "HB") $("other").value = me;
+}
+function draw(){
+  $("days").innerHTML = list.map(function(D, i){
+    var w = D.wyr, p = mine(D.key), others = (got[D.key] || []).filter(function(x){ return !me || x.name.toLowerCase() !== me.toLowerCase(); });
+    return '<div class="d' + (i === 0 ? " today" : "") + '" data-k="' + D.key + '"><div class="k">' + nice(D.key, i) + (D.event ? '<span class="ev">' + esc(D.event.name) + '</span>' : "") + '</div>' +
+      '<h3>' + esc(w[0]) + '</h3><div class="ab">' +
+      '<button type="button" data-c="a" aria-pressed="' + (p && p.choice === "a") + '">' + esc(w[1]) + '</button>' +
+      '<button type="button" data-c="b" aria-pressed="' + (p && p.choice === "b") + '">' + esc(w[3]) + '</button></div>' +
+      '<div class="rs"><input type="text" maxlength="140" placeholder="Why? One line, if you like. Students see this." aria-label="Your reason" value="' + esc(p ? p.reason : "") + '"></div>' +
+      (others.length ? '<ul class="others">' + others.map(function(x){ return '<li>' + esc(x.name) + ' picked ' + esc(x.choice === "a" ? w[1] : w[3]) + (x.reason ? ': "' + esc(x.reason) + '"' : "") + '</li>'; }).join("") + '</ul>' : "") +
+      '<p class="st" aria-live="polite"></p></div>';
+  }).join("");
+  [].forEach.call($("days").querySelectorAll(".d"), function(c){
+    var k = c.dataset.k, st = c.querySelector(".st"), inp = c.querySelector("input");
+    function save(choice){
+      if(!me){ msg("Pick a name first, just above.", true); return; }
+      st.textContent = "Saving...";
+      B5Site.call("pick", { key: key(), day: k, name: me, choice: choice, reason: inp.value.trim() }).then(function(o){
+        if(!o || !o.ok){ st.textContent = o && /unknown action/.test(o.error) ? "The sheet needs the latest script first (see Setup)." : "That did not save: " + ((o && o.error) || "no answer"); return; }
+        got[k] = o.picks; st.textContent = choice ? "Saved." : "Taken away.";
+        var keepSt = st.textContent; draw(); var again = $("days").querySelector('.d[data-k="' + k + '"] .st'); if(again) again.textContent = keepSt;
+      }, function(){ st.textContent = "Could not reach the sheet just now."; });
+    }
+    [].forEach.call(c.querySelectorAll(".ab button"), function(b){
+      b.onclick = function(){ var p = mine(k); save(p && p.choice === b.dataset.c ? "" : b.dataset.c); };
+    });
+    inp.addEventListener("change", function(){ var p = mine(k); if(p) save(p.choice); });
+  });
+}
+function setMe(n){
+  me = String(n || "").replace(/\s+/g, " ").trim().slice(0, 24);
+  try{ localStorage.setItem(NAME, me); }catch(e){}
+  syncNames(); draw();
+}
+[].forEach.call($("names").querySelectorAll("button"), function(b){ b.onclick = function(){ $("other").value = ""; setMe(b.dataset.n); }; });
+$("other").addEventListener("change", function(){ if(this.value.trim()) setMe(this.value); });
+syncNames(); draw();
+function load(){
+  if(!window.B5Site || !B5Site.syncUrl){ msg("The shared memory is not switched on.", true); return; }
+  msg("Getting picks...");
+  B5Site.call("picks", { from: list[0].key, to: list[list.length - 1].key }).then(function(o){
+    if(!o || !o.ok){ msg(o && /unknown action/.test(o.error) ? "The sheet needs the latest script: paste it in, run setup once (it adds a Picks tab), then deploy a new version." : "The sheet said: " + ((o && o.error) || "no answer"), true); return; }
+    got = o.days || {}; msg(me ? "" : "Pick a name to start."); draw();
+  }, function(){ msg("Could not reach the sheet. Check you are signed in to your school Google account in this browser.", true); });
+}
+(window.B5Staff ? B5Staff.ready : Promise.resolve()).then(load);
+})();
+</script>
+</body>
+</html>
