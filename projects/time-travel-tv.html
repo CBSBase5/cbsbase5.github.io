@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#13235b">
+<title>Time Travel TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<script src="/data/b5site.js?v=7"></script>
+<!--
+  Time Travel TV: Base vs Base
+  A game show hook for the Autumn 2 question "If we could time travel, should we?".
+  Jay hosts on the board: watch an advert, guess when it was made, spot the
+  persuasion tricks, then rate it and put it in the tier list.
+
+  The adverts are NOT on the website. They load from Jay's own copies:
+    - on the live site, Host > Load the adverts, once per device (kept on that device)
+    - or, opened from a folder, from assets/adverts/ad01.mp4 ... ad12.mp4 next to this page
+  Each advert has its own volume setting (measured), so none of them jumps out louder.
+
+  Saves on this device under b5.ttv.v1. Leaderboard: showscore / showboard in the
+  Base 5 shared memory (teacher/sync/base5-sheet.gs.txt). Everything works without it.
+  ASCII only.
+-->
+<style>
+:root{
+  --paper:#fef8f4;--sand:#f3e6d6;--ink:#1f2a37;--soft:#5b6472;--teal:#007291;--teal2:#00586f;
+  --orange:#ef7724;--yellow:#ffc93c;--plum:#7b3f8c;--leaf:#4f9a6a;--navy:#13235b;--navy2:#1d3580;
+  --gold:#ffd97a;--shadow:0 6px 0 rgba(31,42,55,.14);--r:22px 12px 24px 14px;
+  font-family:'Atkinson Hyperlegible',Verdana,Arial,sans-serif;color:var(--ink)
+}
+*{box-sizing:border-box}
+html{font-size:clamp(15px,1.05vw + 6px,24px)}
+body{margin:0;min-height:100vh;background:#efe4d6;background-image:radial-gradient(circle at 8% 4%,#fff6e6 0,transparent 40%),radial-gradient(circle at 96% 92%,#cfe6e3 0,transparent 42%),radial-gradient(circle at 70% 10%,#fde2cc 0,transparent 30%);overflow-x:hidden}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--teal);outline-offset:3px}
+h1,h2,h3{font-family:Archivo,'Arial Black',Arial,sans-serif;font-weight:900;letter-spacing:-.02em;margin:0 0 .4em;line-height:1.05}
+p{margin:0 0 .8em;line-height:1.5}
+.hidden{display:none!important}
+.app{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:12px 18px 90px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;padding:4px 2px 14px}
+.homes{display:flex;gap:8px;align-items:center}
+.homes a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);font-weight:700;font-size:.8rem;background:#fffdf8;border:2px solid #0a2f38;border-radius:999px;padding:6px 12px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.brand{display:flex;align-items:center;gap:12px;cursor:default}
+.brand .tv{width:3.2rem;height:3.2rem;transform:rotate(-6deg);cursor:pointer;flex:0 0 auto}
+.brand b{display:block;font-family:Archivo,sans-serif;font-weight:900;font-size:1.7rem;line-height:.95;letter-spacing:-.03em}
+.brand small{display:block;font-size:.62rem;letter-spacing:.22em;font-weight:700;color:#7a5a3c;text-transform:uppercase}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav button{background:#fffdf8;border:2px solid #c9b293;border-radius:14px 10px 14px 10px;padding:8px 12px;font-weight:700;font-size:.78rem}
+.nav button[aria-current=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* the set */
+.set{position:relative;background:var(--paper);border:6px solid var(--ink);border-radius:30px 18px 34px 20px;box-shadow:0 10px 0 rgba(31,42,55,.18),0 26px 50px rgba(31,42,55,.12);overflow:hidden;min-height:70vh;transition:background .4s,color .4s}
+.set.studio{background:var(--navy);color:#fff;border-color:#0b1640}
+.set.studio:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% -10%,rgba(120,170,255,.45),transparent 60%),repeating-linear-gradient(100deg,transparent 0 120px,rgba(255,231,155,.06) 120px 170px)}
+.sethead{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 22px 8px}
+.onair{display:flex;align-items:center;gap:10px;font-family:Archivo,sans-serif;font-weight:900;letter-spacing:.18em;font-size:.72rem;cursor:pointer;user-select:none}
+.onair i{width:.8rem;height:.8rem;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px rgba(239,119,36,.25);animation:blink 2.4s infinite}
+@keyframes blink{50%{opacity:.35}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-weight:700;font-size:.72rem;letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:var(--sand);border:2px solid #d8c3a5}
+.studio .chip{background:var(--navy2);border-color:#5b78c7;color:#fff}
+.view{position:relative;padding:8px 26px 28px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:24px;align-items:start}
+.kick{font-family:Archivo,sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange)}
+.studio .kick{color:var(--gold)}
+.big{font-size:clamp(2rem,3.4vw,3.6rem);margin:.15em 0 .3em}
+.studio .big{text-shadow:4px 5px 0 #071245}
+.lead{font-size:1.08rem;max-width:44em}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:18px 20px;border:2px solid #eadbc6}
+.card + .card{margin-top:14px}
+.studio .card{background:var(--navy2);border-color:#4d6bc0;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.tilt-l{transform:rotate(-.6deg)}.tilt-r{transform:rotate(.7deg)}
+.label{font-family:Archivo,sans-serif;font-weight:800;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;color:var(--soft)}
+.studio .label{color:#c9d7ff}
+.note{font-size:.85rem;color:var(--soft)}
+.studio .note{color:#d6e1ff}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+
+/* buttons */
+.go{background:var(--teal);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 22px;border-radius:16px 12px 18px 10px;border-bottom:5px solid var(--teal2);min-height:3.1rem}
+.go:hover{filter:brightness(1.08)}
+.studio .go{background:var(--gold);color:var(--navy);border-bottom-color:#c9982b}
+.alt{background:#fff;border:2px solid #c9b293;border-bottom-width:4px;padding:11px 18px;border-radius:14px 10px 14px 10px;font-weight:700;min-height:2.9rem}
+.studio .alt{background:var(--navy2);border-color:#7f9be6;color:#fff}
+.quiet{border:2px dashed #c9b293;padding:10px 16px;border-radius:14px;font-weight:700;min-height:2.8rem;color:var(--soft)}
+.studio .quiet{border-color:#7f9be6;color:#dfe8ff}
+button:disabled{opacity:.5;cursor:default}
+
+/* video */
+.tvset{background:#3b2a22;border-radius:28px 20px 30px 22px;padding:12px;box-shadow:8px 9px 0 rgba(59,42,34,.25);position:relative}
+.screen{position:relative;border-radius:18px;overflow:hidden;background:#0d1422;aspect-ratio:16/9;display:grid;place-items:center}
+.screen video{width:100%;height:100%;object-fit:contain;background:#0d1422;display:block}
+.screen .tag{position:absolute;left:12px;top:12px;background:rgba(254,248,244,.92);color:var(--ink);font-family:Archivo,sans-serif;font-weight:800;font-size:.62rem;letter-spacing:.16em;padding:6px 9px;border-radius:6px;pointer-events:none}
+.playbig{position:absolute;inset:0;display:grid;place-items:center;background:rgba(13,20,34,.35)}
+.playbig span{display:flex;align-items:center;gap:12px;background:var(--gold);color:var(--navy);font-family:Archivo,sans-serif;font-weight:900;font-size:1.3rem;padding:16px 26px;border-radius:999px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+.knobs{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 6px 2px;color:#f7e3c8;font-size:.78rem;font-weight:700;flex-wrap:wrap}
+.knobs label{display:flex;gap:8px;align-items:center}
+.knobs input[type=range]{accent-color:var(--yellow);width:9rem}
+.static{width:100%;height:100%;background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,transparent 2px 4px),radial-gradient(circle,#2c3d63,#0d1422);display:grid;place-items:center;text-align:center;color:#fff;padding:20px}
+.loadbox{background:#fffaf0;border:3px dashed var(--orange);border-radius:var(--r);padding:16px 18px;margin-top:14px;color:var(--ink)}
+.loadbox input[type=file]{display:none}
+
+/* guess */
+.levels{display:flex;gap:8px;flex-wrap:wrap}
+.levels button{background:#fff;border:2px solid #d8c3a5;border-radius:16px 10px 16px 10px;padding:10px 14px;text-align:left;font-weight:700;line-height:1.2}
+.levels button small{display:block;font-weight:400;font-size:.75rem;color:var(--soft)}
+.levels button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.levels button[aria-pressed=true] small{color:#dfe6ee}
+.yearbox{background:#fff;border-radius:var(--r);border:2px solid #eadbc6;box-shadow:var(--shadow);padding:20px;margin-top:14px;text-align:center}
+.yearnum{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(3.4rem,8vw,7rem);line-height:1;color:var(--teal);letter-spacing:-.04em}
+.yearbox input[type=range]{width:100%;accent-color:var(--teal);height:2rem;margin-top:12px}
+.ticks{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--soft)}
+.nudge{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.nudge button{min-width:3.6rem;min-height:3rem;border:2px solid #c9b293;border-radius:12px;background:#fffaf2;font-weight:700}
+.decades{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.decades button{min-height:4.4rem;border-radius:16px 10px 16px 12px;font-family:Archivo,sans-serif;font-weight:900;font-size:1.4rem;border:3px solid transparent;color:var(--ink)}
+.decades button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 4px rgba(31,42,55,.18);transform:translateY(-2px)}
+.spicy{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(3rem,7vw,6rem);width:5.2em;max-width:100%;text-align:center;border:3px solid var(--ink);border-radius:18px;padding:4px 10px;color:var(--teal);background:#fffdf8}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pills button{border:2px solid #c9b293;background:#fff;border-radius:999px;padding:9px 15px;font-weight:700;font-size:.85rem}
+.pills button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+.clue{margin-top:12px;padding:12px 14px;border-radius:14px;background:#fff6dd;border:2px dashed #e0b45a}
+
+/* reveal */
+.reveal{text-align:center;background:linear-gradient(140deg,#1b3a96,#24459f);border:4px solid var(--gold);border-radius:26px 16px 28px 18px;padding:22px;box-shadow:0 8px 0 #091649}
+.reveal .yr{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(5rem,13vw,10rem);line-height:.95;color:var(--gold);letter-spacing:-.05em;text-shadow:6px 8px 0 #0b1a52}
+.reveal .pts{display:inline-block;background:var(--gold);color:var(--navy);font-family:Archivo,sans-serif;font-weight:900;font-size:1.3rem;border-radius:999px;padding:9px 20px;margin-top:10px}
+.reveal .fact{max-width:40em;margin:14px auto 0;font-size:1.02rem}
+.cameo{display:inline-block;margin-top:12px;background:#fff;color:var(--ink);border-radius:14px 14px 14px 4px;padding:8px 14px;font-weight:700;font-size:.9rem}
+
+/* techniques */
+.techs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tech{background:#fff;border:3px solid #eadbc6;border-radius:18px 12px 18px 12px;padding:12px 10px;text-align:center;box-shadow:0 4px 0 rgba(31,42,55,.08);display:flex;flex-direction:column;align-items:center;gap:4px}
+.tech svg{width:2.8rem;height:2.8rem}
+.tech b{font-size:.95rem}
+.tech small{font-size:.74rem;color:var(--soft);line-height:1.3}
+.tech[aria-pressed=true]{border-color:var(--teal);background:#e3f3f1;transform:translateY(-2px)}
+.verdicts{display:grid;gap:10px}
+.vrow{display:flex;gap:12px;align-items:center;background:var(--navy2);border-radius:16px;padding:10px 14px;border:2px solid #4d6bc0}
+.vrow svg{width:2.4rem;height:2.4rem;flex:0 0 auto;background:#fff;border-radius:12px;padding:4px}
+.vrow .badge{margin-left:auto;font-weight:700;font-size:.78rem;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.b-spot{background:var(--gold);color:var(--navy)}
+.b-fair{background:#bfe6da;color:#0b3d33}
+.b-not{background:#d7dcea;color:#2a3350}
+
+/* verdict */
+.stars{display:flex;gap:8px;flex-wrap:wrap}
+.stars button{width:3.6rem;height:3.6rem;border-radius:14px;border:2px solid #d8c3a5;background:#fff;font-size:2rem;line-height:1;color:#b9a184}
+.stars button.on{background:#ffe7a6;border-color:#d39a1c;color:#b8660d}
+.tiers{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.tiers button{min-height:3.8rem;border-radius:14px 10px 14px 10px;font-family:Archivo,sans-serif;font-weight:900;font-size:1.6rem;border:3px solid transparent;color:var(--ink)}
+.tiers button[aria-pressed=true]{border-color:var(--ink);transform:translateY(-3px);box-shadow:0 4px 0 rgba(31,42,55,.25)}
+.t-S{background:#ffc93c}.t-A{background:#ffdf8f}.t-B{background:#bfe6da}.t-C{background:#c9e2f2}.t-D{background:#ddd5ef}.t-F{background:#e2ddd6}
+.mystery{background:#fff1d6;border:2px solid #e8c27a;border-radius:18px 12px 18px 12px;padding:14px 16px;font-size:1.02rem;margin-top:14px}
+.mystery b{font-family:Archivo,sans-serif;letter-spacing:.12em;font-size:.72rem;display:block;color:#a35a12;margin-bottom:4px}
+textarea.why{width:100%;min-height:4.5rem;border:2px solid #d8c3a5;border-radius:12px;padding:10px;background:#fffdf8;resize:vertical}
+
+/* tier board */
+.tierboard{display:grid;gap:6px}
+.trow{display:grid;grid-template-columns:3.2rem 1fr;gap:6px;align-items:stretch}
+.side .trow{grid-template-columns:2.2rem 1fr}.side .trow>b{font-size:1rem}.side .trow>div{min-height:2rem;padding:4px}.side .tierboard{gap:4px}
+.trow>b{display:grid;place-items:center;border-radius:12px 8px 12px 8px;font-family:Archivo,sans-serif;font-weight:900;font-size:1.4rem;color:var(--ink)}
+.trow>div{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:rgba(255,255,255,.75);border-radius:12px;padding:6px;min-height:2.8rem}
+.studio .trow>div{background:rgba(255,255,255,.1)}
+.mini{background:#fff;color:var(--ink);border:2px solid #eadbc6;border-radius:10px;padding:4px 9px;font-size:.78rem;font-weight:700}
+
+/* progress */
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.dots i{width:1.1rem;height:.8rem;border-radius:4px;border:2px solid #c9b293}
+.dots i.done{background:var(--teal);border-color:var(--teal)}
+.dots i.now{background:var(--yellow);border-color:#b98a12}
+.dots i.off{opacity:.25}
+.score{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(2.4rem,5vw,4.4rem);line-height:1;letter-spacing:-.03em}
+
+/* archive */
+.archive{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.acard{background:#fff;border:2px solid #eadbc6;border-radius:18px 12px 18px 12px;padding:10px;box-shadow:var(--shadow);min-width:0}
+.acard .thumb{aspect-ratio:16/9;border-radius:10px;display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:900;color:#fff;font-size:1.6rem;overflow:hidden;position:relative}
+.acard b{display:block;margin-top:8px;font-size:.9rem}
+.acard small{color:var(--soft);font-size:.75rem}
+
+/* board */
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;margin-top:18px}
+.pod{border-radius:18px 18px 4px 4px;text-align:center;padding:16px 10px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;min-height:9rem}
+.pod .n{font-family:Archivo,sans-serif;font-weight:900;font-size:2.6rem;color:var(--gold);line-height:1}
+.pod b{font-size:1.05rem;display:block;margin-top:6px}
+.pod small{opacity:.85}
+.p1{min-height:13rem;background:linear-gradient(#c9952c,#a87418)}.p2{min-height:10rem;background:#3051ad}.p3{min-height:8rem;background:#284494}
+.pod.empty{background:rgba(255,255,255,.08);border:2px dashed #5b78c7}
+
+/* host */
+.lineup{display:grid;gap:8px}
+.lrow{display:grid;grid-template-columns:auto 2rem 1fr auto;gap:10px;align-items:center;background:#fff;border:2px solid #eadbc6;border-radius:14px;padding:8px 12px}
+.lrow .ok{width:1rem;height:1rem;border-radius:50%;background:#d7dcea}
+.lrow .ok.yes{background:var(--leaf)}
+.lrow small{display:block;color:var(--soft);font-size:.75rem}
+.switch{position:relative;width:3.2rem;height:1.8rem;border-radius:999px;background:#cfd5e2;border:2px solid #9aa4b8}
+.switch:after{content:"";position:absolute;top:2px;left:2px;width:1.3rem;height:1.3rem;border-radius:50%;background:#fff;transition:left .2s}
+.switch[aria-checked=true]{background:var(--teal);border-color:var(--teal2)}
+.switch[aria-checked=true]:after{left:1.5rem}
+
+/* maker */
+.maker{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.maker canvas{width:100%;height:auto;border-radius:16px;box-shadow:var(--shadow);background:#fff;display:block}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opts button{border:2px solid #d8c3a5;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:.82rem}
+.opts button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.field{width:100%;border:2px solid #c9b293;border-radius:12px;padding:10px 12px;background:#fffdf8;font-size:1rem;color:var(--ink)}
+input[type=range]{accent-color:var(--teal)}
+.preview video{width:100%;aspect-ratio:16/9;background:#0d1422;border-radius:12px;display:block}
+
+/* send box from /data/send.js */
+.sendbox{background:#fffaf0;border:2px solid #eadbc6;border-radius:var(--r);padding:14px 16px;margin-top:14px;color:var(--ink)}
+.sendtitle{font-family:Archivo,sans-serif;font-weight:900;margin:0 0 4px}
+.sendwhy{font-size:.85rem;color:var(--soft)}
+.sendwho{display:flex;gap:8px;align-items:center;margin:8px 0}
+.sendwho input{border:2px solid #c9b293;border-radius:10px;padding:6px 10px;width:7rem}
+.sendrow{display:flex;gap:8px;flex-wrap:wrap}
+.sendbox .btn{border-radius:12px;padding:9px 14px;font-weight:700;border:2px solid #c9b293;background:#fff}
+.sendbox .btn-orange{background:var(--orange);border-color:#c45d14;color:#fff}
+.sendmsg{font-size:.85rem;margin:8px 0 0}
+
+/* toast, critters, confetti */
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:50;background:var(--ink);color:#fff;border-radius:16px 16px 16px 4px;padding:12px 18px;font-weight:700;max-width:min(560px,calc(100vw - 32px));box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.critter{position:fixed;z-index:40;pointer-events:none;width:7rem}
+.walk{bottom:8px;left:-8rem;animation:walk 7s linear forwards}
+.fly{top:22%;left:-8rem;animation:fly 5s ease-in-out forwards}
+@keyframes walk{to{left:calc(100vw + 8rem)}}
+@keyframes fly{30%{top:12%}60%{top:28%}to{left:calc(100vw + 8rem);top:10%}}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-24px;width:12px;height:20px;border-radius:3px;opacity:.85;animation:fall 2.6s ease-out forwards}
+@keyframes fall{to{transform:translateY(90vh) rotate(400deg);opacity:0}}
+.reduced *{animation:none!important;transition:none!important}
+.reduced .confetti,.reduced .critter{display:none}
+.under{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 6px 0;font-size:.8rem;color:var(--soft)}
+
+@media (max-width:980px){
+  .grid,.maker{grid-template-columns:1fr}
+  .archive{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .techs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .app{padding:8px 8px 30px}
+  .view{padding:6px 14px 20px}
+  .sethead{padding:12px 14px 6px}
+  .set{border-width:4px}
+  .decades{grid-template-columns:repeat(2,1fr)}
+  .tiers{grid-template-columns:repeat(3,1fr)}
+  .trow{grid-template-columns:2.4rem 1fr}
+  .stars button{width:3rem;height:3rem;font-size:1.6rem}
+  .brand b{font-size:1.3rem}
+}
+.print{display:none}
+@media print{
+  body{background:#fff}.app,.grain,.toast,.critter{display:none!important}
+  .print{display:block;font:11pt/1.4 Arial,sans-serif;color:#111;padding:10mm}
+  .print h1{font-size:24pt}.print h2{font-size:14pt;border-bottom:2px solid #007291;margin-top:14pt}
+  .print table{border-collapse:collapse;width:100%;font-size:9pt}.print td,.print th{border:1px solid #999;padding:4px;text-align:left}
+  .print .keep{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="app" id="app">
+  <div class="top">
+    <div class="homes">
+      <a href="/projects/"><svg width="26" height="20" viewBox="0 0 36 27" aria-hidden="true"><path d="M2 21 Q18 3 34 21" fill="none" stroke="#007291" stroke-width="3" stroke-linecap="round"/><line x1="1" y1="24" x2="35" y2="24" stroke="#052f3a" stroke-width="3"/></svg>Projects</a>
+    </div>
+    <div class="brand">
+      <svg class="tv" id="tvlogo" viewBox="0 0 64 64" role="img" aria-label="Time Travel TV">
+        <path d="M22 10 L32 20 L44 6" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/>
+        <rect x="5" y="19" width="54" height="40" rx="10" fill="#ef7724" stroke="#1f2a37" stroke-width="3.5"/>
+        <rect x="11" y="25" width="34" height="28" rx="6" fill="#fef8f4" stroke="#1f2a37" stroke-width="3"/>
+        <circle cx="28" cy="39" r="9" fill="none" stroke="#007291" stroke-width="2.6"/>
+        <path d="M28 39 L28 33 M28 39 L32 41" stroke="#1f2a37" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="52" cy="31" r="3" fill="#1f2a37"/><circle cx="52" cy="42" r="3" fill="#1f2a37"/>
+      </svg>
+      <div><small>Base vs Base</small><b>Time Travel TV</b></div>
+    </div>
+    <nav class="nav" aria-label="Show sections">
+      <button type="button" data-go="game">The show</button>
+      <button type="button" data-go="archive">Archive</button>
+      <button type="button" data-go="board">Leaderboard</button>
+      <button type="button" data-go="make">Make an advert</button>
+      <button type="button" data-go="host">Host</button>
+    </nav>
+  </div>
+
+  <main class="set" id="set">
+    <div class="sethead">
+      <div class="onair" id="onair" title="On air"><i aria-hidden="true"></i><span>ON AIR</span></div>
+      <div class="chips"><span class="chip" id="chip-base">BASE 5</span><span class="chip" id="chip-stage">WELCOME</span><span class="chip" id="chip-score">0 POINTS</span></div>
+    </div>
+    <div class="view" id="view"></div>
+  </main>
+  <div class="under"><span id="savemsg" aria-live="polite"></span><span>Saves on this device as you go. Nothing is scored on anyone's name.</span></div>
+</div>
+<section class="print" id="print"></section>
+<div id="live" class="hidden" aria-live="polite"></div>
+
+<script src="/data/send.js?v=3"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- the adverts ----------
+   year: the year scored against. prec "decade": only the decade is known.
+   focus: the two tricks the show scores. fair: also a fair shout.
+   gain: volume match (measured, so no advert is louder than the rest).
+   start/end: seconds, to skip a channel ident at either end.
+   tell: what gives the era away, shown when a guess is a long way off.
+   host: what to preview before showing it. */
+var ADS = [
+  {id:1, year:1989, title:"Toys 'R' Us: Magical Place", short:"The toy shop song",
+   fact:"Toys 'R' Us opened its first UK shops in 1985, and this Magical Place campaign started in November 1989. Lots of people can still sing the jingle.",
+   clue:"Hand drawn cartoon, and a shop that had only been in the UK for a few years.",
+   tell:"The fuzzy cartoon and the giant shop give it away: the late 1980s, when toy superstores were brand new here.",
+   focus:["Catchy music","Childhood fantasy"], fair:["Animation","Storytelling"],
+   question:"Is it selling toys, or selling the feeling of walking into the shop?",
+   host:"Bright cartoon, upbeat song. Christmas shopping pressure.", gain:0.82},
+  {id:2, year:1955, title:"Gibbs SR: Toothpaste in Ice", short:"The icy toothpaste",
+   fact:"This was the very first advert ever shown on British TV, on 22 September 1955, the night ITV started.",
+   clue:"Black and white, and it is very, very early. There was no TV advert before this one.",
+   tell:"Black and white film is the giveaway. Colour TV did not reach the UK until 1967.",
+   focus:["Expert voice","Big promises"], fair:["Comparison"],
+   question:"Toothpaste frozen in a block of ice: genius demonstration or total nonsense?",
+   host:"Black and white, a little crackly. Mentions gum infection.", gain:0.83},
+  {id:3, year:1965, prec:"decade", title:"The Milkybar Kid", short:"The tiny cowboy",
+   fact:"The Milkybar Kid first appeared in 1961. Nobody knows the exact year of this clip, only that it is from the 1960s, so this round is scored by decade.",
+   clue:"Black and white again. The Milkybar Kid first rode into town in the early 1960s.",
+   tell:"Black and white plus a cowboy craze points to the 1960s. Westerns were everywhere on TV then.",
+   focus:["Catchy music","Memorable mascot"], fair:["Childhood fantasy","Storytelling"],
+   question:"Would a tiny cowboy convince you to buy chocolate today?",
+   host:"Toy guns and a Western saloon. Quiet audio (the show boosts it).", gain:3.2},
+  {id:4, year:1974, title:"Smash: The Martians", short:"Aliens versus potatoes",
+   fact:"The Smash Martians first landed on British TV in 1974. They laugh at humans for peeling real potatoes, and they were later voted one of the best adverts ever made.",
+   clue:"Space age robots and instant food. Think flares and the early to middle 1970s.",
+   tell:"Colour, but a bit faded and grainy, with space age robots: the 1970s loved anything that looked like the future.",
+   focus:["Humour","Comparison"], fair:["Memorable mascot","Animation"],
+   question:"Would you trust a robot that laughs at how you cook potatoes?",
+   host:"Lots of robotic laughing. Can be loud for some; the show evens the volume.", gain:1.06},
+  {id:5, year:1973, title:"R. White's: Secret Lemonade Drinker", short:"Lemonade at midnight",
+   fact:"The Secret Lemonade Drinker first aired in 1973. The singer, Ross MacManus, was the dad of the musician Elvis Costello.",
+   clue:"Big glasses, big collars, and a song that sounds like a 70s pop single.",
+   tell:"The clothes, the hair and the kitchen tiles are pure 1970s.",
+   focus:["Catchy music","Humour"], fair:["Storytelling"],
+   question:"How suspicious is a man who needs a secret identity for lemonade?",
+   host:"Loud in the original file; the show turns it down. Skips the channel ident at each end.", gain:0.33, start:3.8, end:33.3},
+  {id:6, year:1985, title:"Um Bongo: The Jungle Jingle", short:"The impossible earworm",
+   fact:"Um Bongo's animated jingle arrived in 1985. Its cartoon version of the Congo is made up and stereotyped: it is nothing like the real country.",
+   clue:"Very bright cartoon and a chant designed to get stuck in your head. Mid 1980s.",
+   tell:"Flat, bright animation and a chanting jingle are classic mid 1980s.",
+   focus:["Catchy music","Animation"], fair:["Memorable mascot","Childhood fantasy"],
+   question:"Could you remember this tune after one listen? And is the place in it real?",
+   host:"Outdated, stereotyped picture of the Congo: worth a word afterwards. Very energetic.", gain:0.42},
+  {id:7, year:1989, title:"Milky Way: Red Car, Blue Car", short:"The great car race",
+   fact:"Red Car and Blue Car first raced in 1989. Its slogan called Milky Way the sweet you can eat between meals. There are now strict rules about advertising sweets to children.",
+   clue:"Hand drawn cartoon from the very end of the 1980s.",
+   tell:"Painted cartoon cars and a jingle with a moral: late 1980s.",
+   focus:["Catchy music","Comparison"], fair:["Animation","Big promises"],
+   question:"Which car would you trust to make sensible snack choices?",
+   host:"Cartoon cars eating food. Loud in the original; the show turns it down.", gain:0.36},
+  {id:8, year:1996, title:"Sugar Puffs: Honey Monster and Boyzone", short:"An unexpected band member",
+   fact:"In 1996 the Honey Monster joined Boyzone, one of the biggest boybands of the time. The makers said it was aimed mainly at 6 to 10 year olds.",
+   clue:"A boyband at the top of the charts, the middle of the 1990s.",
+   tell:"Boybands, stage smoke and Smash Hits magazine: the mid 1990s.",
+   focus:["Celebrities","Memorable mascot"], fair:["Catchy music","Humour"],
+   question:"How many band members is too many, when one is a giant cereal monster?",
+   host:"Concert lights and crowd noise.", gain:0.51},
+  {id:9, year:1999, title:"PlayStation: Double Life", short:"An advert with a secret",
+   fact:"PlayStation's Double Life came out in 1999. It never shows a game: it sells the feeling of being a hero, not the console.",
+   clue:"The first PlayStation, right at the very end of the 1990s.",
+   tell:"Moody film style and the first PlayStation: the very end of the 1990s.",
+   focus:["Belonging","Storytelling"], fair:["Surprise"],
+   question:"Could you tell what it was selling before the very end?",
+   host:"Aimed at older teens and adults. Dark scenes, a shirtless man, someone in pants on a sofa. Preview first, or switch it off in the line-up.", gain:0.72},
+  {id:10, year:2007, title:"Cadbury: Gorilla", short:"The most serious drum solo",
+   fact:"Cadbury's Gorilla came out in 2007, in the early days of YouTube, and people shared it everywhere. It hardly mentions chocolate at all.",
+   clue:"Sharp picture, but before smartphones took over. Think early YouTube.",
+   tell:"Clean, sharp picture but a slow, arty style: the middle of the 2000s.",
+   focus:["Surprise","Catchy music"], fair:["Humour"],
+   question:"Why would a drumming gorilla make anyone buy chocolate?",
+   host:"Drums get loud near the end. The show evens it out and softens the peaks.", gain:0.53},
+  {id:11, year:2025, title:"Smyths Toys: Christmas", short:"An unusual trip to the toy shop",
+   fact:"This is from 2025. It fills the screen with toys from films and shows you know, and sells the feeling of Christmas more than any one toy.",
+   clue:"The newest advert in the show. Filmed for phones as much as TV.",
+   tell:"Filmed tall, for phones: that only really started in the late 2010s.",
+   focus:["Storytelling","Familiar characters"], fair:["Childhood fantasy","Heartstrings"],
+   question:"Is it selling one toy, or the feeling of Christmas morning?",
+   host:"Tall phone video, so it shows narrow on the board. Dog sounds, quick cuts.", gain:0.61},
+  {id:12, year:2014, title:"John Lewis: Monty the Penguin", short:"An unlikely friendship",
+   fact:"By 2014, big Christmas adverts were events in their own right, shared and talked about online. This one is about a boy and his penguin, and it does not sell penguins.",
+   clue:"Big emotional Christmas adverts, about the middle of the 2010s.",
+   tell:"Glossy film look and a slow piano cover: the 2010s Christmas advert style.",
+   focus:["Heartstrings","Storytelling"], fair:["Surprise","Childhood fantasy"],
+   question:"Can a penguin star in an advert that does not sell penguins?",
+   host:"Loneliness and friendship. Two minutes long.", gain:1.03}
+];
+var ORDER = [4, 11, 3, 12, 2, 8, 6, 10, 5, 9, 1, 7];
+var TIERS = ["S", "A", "B", "C", "D", "F"];
+var TIERNOTE = { S:"Legendary", A:"Brilliant", B:"Good", C:"Fine", D:"Meh", F:"Straight to the basement" };
+var LEVELS = {
+  mild:   { name:"Mild",   how:"Pick the decade", max:60 },
+  medium: { name:"Medium", how:"Slide to the year", max:100 },
+  spicy:  { name:"Spicy",  how:"Type the exact year", max:150 }
+};
+var DECADES = [1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
+var DECCOL = ["#e2ddd6", "#c9e2f2", "#ffd9a8", "#f7c6e0", "#d8cff3", "#bfe6da", "#ffe39a", "#cfe9c3"];
+var SURE = ["Just a hunch", "Fairly sure", "Very sure"];
+
+/* ---------- persuasion tricks, each with a little picture drawn in code ---------- */
+var I = {
+  music:'<path d="M18 34V12l20-5v22" fill="none" stroke="#1f2a37" stroke-width="3.5" stroke-linejoin="round"/><circle cx="13" cy="34" r="5.5" fill="#ef7724" stroke="#1f2a37" stroke-width="3"/><circle cx="33" cy="29" r="5.5" fill="#ef7724" stroke="#1f2a37" stroke-width="3"/>',
+  laugh:'<circle cx="24" cy="24" r="17" fill="#ffc93c" stroke="#1f2a37" stroke-width="3"/><path d="M15 27q9 10 18 0z" fill="#1f2a37"/><path d="M16 19l4 2-4 2M32 19l-4 2 4 2" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/>',
+  vs:'<path d="M24 8v32M10 16h28" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/><path d="M10 16l-6 12h12zM38 16l-6 8h12z" fill="#bfe6da" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/><path d="M16 42h16" stroke="#1f2a37" stroke-width="3.5" stroke-linecap="round"/>',
+  mascot:'<circle cx="24" cy="26" r="15" fill="#f7c6e0" stroke="#1f2a37" stroke-width="3"/><circle cx="12" cy="12" r="5" fill="#f7c6e0" stroke="#1f2a37" stroke-width="3"/><circle cx="36" cy="12" r="5" fill="#f7c6e0" stroke="#1f2a37" stroke-width="3"/><circle cx="19" cy="24" r="2.5" fill="#1f2a37"/><circle cx="29" cy="24" r="2.5" fill="#1f2a37"/><path d="M19 31q5 4 10 0" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/>',
+  star:'<path d="M24 5l5.6 12.2 13.2 1.4-9.9 8.9 2.8 13L24 33.8 12.3 40.5l2.8-13-9.9-8.9 13.2-1.4z" fill="#ffc93c" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/>',
+  pencil:'<rect x="6" y="10" width="36" height="26" rx="4" fill="#c9e2f2" stroke="#1f2a37" stroke-width="3"/><path d="M14 30l6-9 5 6 4-4 6 7z" fill="#4f9a6a" stroke="#1f2a37" stroke-width="2.5" stroke-linejoin="round"/><circle cx="33" cy="17" r="3" fill="#ffc93c"/><path d="M14 42h20" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/>',
+  expert:'<rect x="11" y="7" width="26" height="34" rx="4" fill="#fff" stroke="#1f2a37" stroke-width="3"/><path d="M18 7h12v5H18z" fill="#007291" stroke="#1f2a37" stroke-width="2.5"/><path d="M16 20h16M16 26h16M16 32h10" stroke="#1f2a37" stroke-width="2.5" stroke-linecap="round"/>',
+  promise:'<path d="M8 20v10l6 1 4 9h5l-2-8 16 7V10L14 19z" fill="#ef7724" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/><path d="M42 18q3 6 0 12" fill="none" stroke="#1f2a37" stroke-width="3" stroke-linecap="round"/>',
+  castle:'<path d="M8 42V18h6v5h5v-9l5-6 5 6v9h5v-5h6v24z" fill="#d8cff3" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/><path d="M21 42v-8a3 3 0 0 1 6 0v8" fill="#1f2a37"/>',
+  team:'<circle cx="15" cy="17" r="5" fill="#bfe6da" stroke="#1f2a37" stroke-width="3"/><circle cx="33" cy="17" r="5" fill="#bfe6da" stroke="#1f2a37" stroke-width="3"/><circle cx="24" cy="14" r="6" fill="#ffc93c" stroke="#1f2a37" stroke-width="3"/><path d="M6 38q2-12 10-12M42 38q-2-12-10-12M13 40q2-14 11-14t11 14z" fill="#fff" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/>',
+  book:'<path d="M24 12q-8-5-18-3v28q10-2 18 3 8-5 18-3V9q-10-2-18 3z" fill="#fff" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/><path d="M24 12v28" stroke="#1f2a37" stroke-width="3"/><path d="M10 17h9M10 23h9M29 17h9M29 23h9" stroke="#007291" stroke-width="2.5" stroke-linecap="round"/>',
+  wow:'<path d="M24 3l4 10 10-5-3 11 11 3-10 6 6 9-11-1-1 11-6-9-8 7 1-11-11-1 9-6-6-9 11 2z" fill="#ffc93c" stroke="#1f2a37" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 16v10" stroke="#1f2a37" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="31.5" r="2.3" fill="#1f2a37"/>',
+  film:'<rect x="6" y="11" width="36" height="26" rx="3" fill="#1f2a37"/><rect x="11" y="16" width="12" height="16" rx="2" fill="#ffd9a8"/><rect x="25" y="16" width="12" height="16" rx="2" fill="#c9e2f2"/><path d="M9 13h2M15 13h2M21 13h2M27 13h2M33 13h2M39 13h1M9 35h2M15 35h2M21 35h2M27 35h2M33 35h2M39 35h1" stroke="#fff" stroke-width="2"/>',
+  heart:'<path d="M24 41S6 30 6 18a9 9 0 0 1 18-3 9 9 0 0 1 18 3c0 12-18 23-18 23z" fill="#f2a4b8" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/>'
+};
+var TECH = {
+  "Catchy music":       { i:"music",  d:"A tune that sticks, so the name sticks too." },
+  "Humour":             { i:"laugh",  d:"Makes you laugh, so you like the brand." },
+  "Comparison":         { i:"vs",     d:"Shows theirs beating the other way of doing it." },
+  "Memorable mascot":   { i:"mascot", d:"A character you remember and trust." },
+  "Celebrities":        { i:"star",   d:"Famous faces you already like." },
+  "Animation":          { i:"pencil", d:"Cartoons that grab younger eyes." },
+  "Expert voice":       { i:"expert", d:"Sounds official or scientific, so you believe it." },
+  "Big promises":       { i:"promise",d:"Claims that sound amazing but are hard to check." },
+  "Childhood fantasy":  { i:"castle", d:"A dream world you would love to be in." },
+  "Belonging":          { i:"team",   d:"Buy this and you are part of the group." },
+  "Storytelling":       { i:"book",   d:"A mini film you want to see the end of." },
+  "Surprise":           { i:"wow",    d:"So odd you cannot look away." },
+  "Familiar characters":{ i:"film",   d:"Characters from films or shows you know." },
+  "Heartstrings":       { i:"heart",  d:"Makes you feel something big, like warmth." }
+};
+function icon(name){ return '<svg viewBox="0 0 48 48" aria-hidden="true">' + I[(TECH[name] || {}).i || "wow"] + '</svg>'; }
+
+/* ---------- storage (b5site.js swaps this to a tab-only store in guest mode) ---------- */
+var KEY = "b5.ttv.v1", mem = null;
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ return mem; } }
+function fresh(){
+  return { v:1, base:"Base 5", started:false, step:"start", results:{}, off:{}, cur:blankCur("medium"),
+    effects:(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ? "reduced" : "full",
+    vol:0.8, visit:null, skip:null, posted:null, poster:null };
+}
+function blankCur(level){ return { level:level || "medium", year:1985, decade:null, typed:"", sure:"", clue:false, tech:[], stars:0, tier:"", why:"" }; }
+var st = fresh(), saved = load();
+if(saved && saved.v === 1){ for(var k in saved) st[k] = saved[k]; if(!st.results || typeof st.results !== "object") st.results = {}; if(!st.off) st.off = {}; if(!st.cur) st.cur = blankCur(); }
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(st)); say("savemsg", "Saved on this device."); }
+  catch(e){ mem = JSON.parse(JSON.stringify(st)); say("savemsg", "Saving is not working in this browser, so keep this tab open."); }
+}
+function say(id, t){ var e = document.getElementById(id); if(e) e.textContent = t; }
+
+/* ---------- small helpers ---------- */
+function $(s, r){ return (r || document).querySelector(s); }
+function $$(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+function esc(x){ return String(x == null ? "" : x).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+function pad(n){ return (n < 10 ? "0" : "") + n; }
+function adBy(id){ for(var i = 0; i < ADS.length; i++) if(ADS[i].id === id) return ADS[i]; return null; }
+function lineup(){ return ORDER.filter(function(id){ return !st.off[id]; }); }
+function doneIds(){ return lineup().filter(function(id){ return st.results[id]; }); }
+function judged(){ return doneIds().filter(function(id){ return !st.results[id].skipped; }); }
+function current(){ var l = lineup(); for(var i = 0; i < l.length; i++) if(!st.results[l[i]]) return adBy(l[i]); return null; }
+function roundNo(){ return doneIds().length + 1; }
+function total(){ var t = 0; doneIds().forEach(function(id){ t += st.results[id].points || 0; }); return t; }
+function isB5(){ return /^base\s*5$/i.test(String(st.base).trim()); }
+function yearText(a){ return a.prec === "decade" ? Math.floor(a.year / 10) * 10 + "s" : String(a.year); }
+function fmt(n){ return Number(n).toLocaleString("en-GB"); }
+function guest(){ return !!(window.B5Site && window.B5Site.guest); }
+function canCall(){ return !!(window.B5Site && B5Site.call && B5Site.syncUrl) && !guest(); }
+
+var toastT = null;
+function toast(t){
+  var e = $(".toast"); if(!e){ e = document.createElement("div"); e.className = "toast"; e.setAttribute("role", "status"); document.body.appendChild(e); }
+  e.textContent = t; e.classList.remove("hidden"); clearTimeout(toastT);
+  toastT = setTimeout(function(){ e.classList.add("hidden"); }, 4200);
+}
+function confetti(){
+  if(st.effects === "reduced") return "";
+  var c = ["#ffc93c", "#fef8f4", "#7cc9dd", "#ef7724", "#bfe6da"], s = '<div class="confetti" aria-hidden="true">';
+  for(var i = 0; i < 22; i++) s += '<i style="left:' + (2 + i * 4.4) + '%;background:' + c[i % 5] + ';animation-delay:' + ((i % 7) * .08) + 's"></i>';
+  return s + '</div>';
+}
+
+/* ---------- scoring ---------- */
+function guessValue(c){ return c.level === "mild" ? c.decade : c.year; }
+function yearPoints(a, c){
+  var L = c.level, g = guessValue(c);
+  if(g == null || g === "") return 0;
+  if(L === "mild"){ var d = Math.abs(Math.floor(a.year / 10) - Math.floor(g / 10)); return d === 0 ? 60 : d === 1 ? 25 : 0; }
+  if(a.prec === "decade"){ var dd = Math.abs(Math.floor(a.year / 10) - Math.floor(g / 10)); return dd === 0 ? LEVELS[L].max : dd === 1 ? (L === "spicy" ? 40 : 35) : 0; }
+  var x = Math.abs(a.year - g);
+  if(L === "spicy") return x === 0 ? 150 : x <= 1 ? 110 : x <= 3 ? 70 : x <= 6 ? 30 : 0;
+  return x === 0 ? 100 : x <= 2 ? 80 : x <= 5 ? 60 : x <= 10 ? 40 : x <= 20 ? 20 : 0;
+}
+function techPoints(a, picked){
+  var p = 0; picked.forEach(function(t){ if(a.focus.indexOf(t) >= 0) p += 30; else if(a.fair.indexOf(t) >= 0) p += 10; });
+  return Math.min(60, p);
+}
+function guessLabel(c){ var g = guessValue(c); return g == null || g === "" ? "No guess" : c.level === "mild" ? g + "s" : String(g); }
+
+/* ---------- the adverts themselves (never on the website) ---------- */
+var VID = {}, CACHE = "b5-ttv-adverts-v1";
+function cacheKey(id){ return "/__ttv/ad" + pad(id) + ".mp4"; }
+function fromCache(id){
+  if(VID[id]) return Promise.resolve(VID[id]);
+  if(!("caches" in window)) return Promise.resolve(null);
+  return caches.open(CACHE).then(function(c){ return c.match(cacheKey(id)); })
+    .then(function(r){ return r ? r.blob() : null; })
+    .then(function(b){ if(b && b.size){ VID[id] = URL.createObjectURL(b); return VID[id]; } return null; })
+    .catch(function(){ return null; });
+}
+var HAVE = {};
+function haveAll(){
+  if(!("caches" in window)) return Promise.resolve(HAVE);
+  return caches.open(CACHE).then(function(c){ return c.keys(); }).then(function(keys){
+    HAVE = {}; keys.forEach(function(r){ var m = /\/__ttv\/ad(\d\d)\.mp4$/.exec(r.url); if(m) HAVE[+m[1]] = 1; }); return HAVE;
+  }).catch(function(){ return HAVE; });
+}
+function loaded(id){ return !!(VID[id] || HAVE[id]); }
+function loadedCount(){ var n = 0; ADS.forEach(function(a){ if(loaded(a.id)) n++; }); return n; }
+function idFromName(n){ var m = /ad\s*_?0?(\d{1,2})\b[^\/]*\.(mp4|m4v|webm|mov)$/i.exec(n); var id = m ? +m[1] : 0; return id >= 1 && id <= 12 ? id : 0; }
+function loadFiles(list, done){
+  var files = Array.prototype.slice.call(list || []), got = 0, chain = Promise.resolve(), box = null;
+  files.forEach(function(f){
+    var id = idFromName(f.name); if(!id) return;
+    got++;
+    if(VID[id]) try{ URL.revokeObjectURL(VID[id]); }catch(e){}
+    VID[id] = URL.createObjectURL(f);
+    if("caches" in window) chain = chain.then(function(){
+      return caches.open(CACHE).then(function(c){ return c.put(cacheKey(id), new Response(f, { headers:{ "Content-Type": f.type || "video/mp4" } })); }).then(function(){ HAVE[id] = 1; }).catch(function(){ box = "nocache"; });
+    });
+  });
+  if(!got){ toast("Those files did not look like the adverts. They are called ad01.mp4 to ad12.mp4."); return; }
+  toast(got + " advert" + (got === 1 ? "" : "s") + " loaded. Saving them on this device...");
+  if(done) done(got);
+  chain.then(function(){ toast(box ? "Loaded for now. This browser will not keep them, so load them again next time." : "Saved. This device will remember the adverts."); });
+}
+function forget(){
+  HAVE = {};
+  if("caches" in window) caches.delete(CACHE).catch(function(){});
+  Object.keys(VID).forEach(function(k){ try{ URL.revokeObjectURL(VID[k]); }catch(e){} });
+  VID = {};
+}
+function loaderHtml(why){
+  return '<div class="loadbox"><div class="label">The adverts live on the host device</div>' +
+    '<p>' + (why || "The adverts are not on the website, so they need loading once on this device. Pick the adverts folder, or select all twelve files (ad01.mp4 to ad12.mp4).") + '</p>' +
+    '<div class="row" style="margin-top:6px"><label class="go" style="display:inline-flex;align-items:center;cursor:pointer">Pick the folder<input type="file" data-load webkitdirectory multiple></label>' +
+    '<label class="alt" style="display:inline-flex;align-items:center;cursor:pointer">Pick the files<input type="file" data-load accept="video/*" multiple></label></div></div>';
+}
+function bindLoaders(after){
+  $$("input[data-load]").forEach(function(inp){ inp.addEventListener("change", function(){ loadFiles(inp.files, function(){ render(); if(after) after(); }); }); });
+}
+
+/* gentle sound: each advert matched in volume, peaks softened, a short fade in */
+var AC = null;
+function wireSound(v, a){
+  var plain = function(){ v.volume = Math.max(0, Math.min(1, a.gain * st.vol)); };
+  var Ctx = window.AudioContext || window.webkitAudioContext;
+  var isBlob = v.currentSrc ? v.currentSrc.indexOf("blob:") === 0 : String(v.src).indexOf("blob:") === 0;
+  if(!Ctx || (location.protocol === "file:" && !isBlob)){ plain(); return; }
+  try{
+    AC = AC || new Ctx();
+    var src = AC.createMediaElementSource(v), g = AC.createGain(), comp = AC.createDynamicsCompressor(), fade = AC.createGain();
+    g.gain.value = a.gain; comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 4; fade.gain.value = 0.0001;
+    src.connect(g); g.connect(comp); comp.connect(fade); fade.connect(AC.destination);
+    v._fade = fade;
+    v.addEventListener("play", function(){
+      if(AC.state === "suspended") AC.resume();
+      var t = AC.currentTime; fade.gain.cancelScheduledValues(t); fade.gain.setValueAtTime(0.0001, t); fade.gain.linearRampToValueAtTime(Math.max(0.0001, st.vol), t + 0.8);
+    });
+  }catch(e){ plain(); }
+}
+function setVol(v){
+  st.vol = v; save();
+  var el = $("#advert"); if(!el) return;
+  if(el._fade && AC) el._fade.gain.setTargetAtTime(Math.max(0.0001, v), AC.currentTime, 0.1);
+  else { var a = current(); if(a) el.volume = Math.max(0, Math.min(1, a.gain * v)); }
+}
+function mountVideo(a){
+  var box = $("#screen"); if(!box) return;
+  fromCache(a.id).then(function(url){
+    var src = url || ("assets/adverts/ad" + pad(a.id) + ".mp4");
+    if(!$("#screen")) return;
+    box.innerHTML = '<video id="advert" playsinline preload="auto" controls controlslist="nodownload noplaybackrate" disablepictureinpicture aria-label="Mystery advert ' + roundNo() + '"></video>' +
+      '<span class="tag">TRANSMISSION ' + pad(roundNo()) + '</span><button type="button" class="playbig" id="playbig" aria-label="Play the advert"><span>&#9654; Play</span></button>';
+    var v = $("#advert"), big = $("#playbig");
+    v.addEventListener("error", function(){
+      var mine = src.indexOf("blob:") === 0;
+      box.innerHTML = '<div class="static"><div><b style="font-family:Archivo,sans-serif;font-size:1.4rem">No signal</b><br>' +
+        (mine ? "This browser will not play that video file. Chrome or Edge will." : "This advert is not loaded on this device yet.") + '</div></div>';
+      var hold = $("#loadspot"); if(hold && !mine){ hold.innerHTML = loaderHtml(); bindLoaders(); }
+    });
+    v.addEventListener("loadedmetadata", function(){ if(a.start) v.currentTime = a.start; });
+    v.addEventListener("timeupdate", function(){ if(a.end && v.currentTime >= a.end){ v.pause(); v.currentTime = a.start || 0; ended(); } });
+    v.addEventListener("ended", ended);
+    v.addEventListener("play", function(){ big.classList.add("hidden"); });
+    big.addEventListener("click", function(){ v.play().catch(function(){}); });
+    v.src = src;
+    wireSound(v, a);
+    function ended(){ big.querySelector("span").innerHTML = "&#8635; Watch again"; big.classList.remove("hidden"); }
+  });
+}
+
+/* ---------- header and navigation ---------- */
+var display = "game";
+function header(){
+  say("chip-base", String(st.base).toUpperCase());
+  var stage = display === "game" ? (st.step === "start" ? "WELCOME" : st.step === "finale" ? "GRAND FINALE" : "ROUND " + Math.min(roundNo(), lineup().length) + " OF " + lineup().length)
+    : { archive:"THE ARCHIVE", board:"LEADERBOARD", make:"ADVERT MAKER", host:"HOST DESK" }[display];
+  say("chip-stage", stage);
+  say("chip-score", fmt(total()) + " POINTS");
+  document.body.classList.toggle("reduced", st.effects === "reduced");
+  $$(".nav button").forEach(function(b){ b.setAttribute("aria-current", b.dataset.go === display ? "true" : "false"); });
+}
+function studio(on){ $("#set").classList.toggle("studio", !!on); }
+function go(where){ display = where; render(); window.scrollTo(0, 0); }
+function step(s){ st.step = s; save(); render(); window.scrollTo(0, 0); }
+
+/* ---------- side panel ---------- */
+function side(){
+  var l = lineup(), cur = current();
+  return '<div class="side"><div class="card tilt-r"><div class="label">' + esc(st.base) + ' so far</div><div class="score">' + fmt(total()) + '</div>' +
+    '<div class="note">points, as one team</div><div class="dots" aria-label="' + doneIds().length + ' of ' + l.length + ' adverts done">' +
+    ORDER.map(function(id){ return '<i class="' + (st.off[id] ? "off" : st.results[id] ? "done" : cur && cur.id === id ? "now" : "") + '"></i>'; }).join("") + '</div>' +
+    '<p class="note" style="margin:10px 0 0">' + doneIds().length + ' of ' + l.length + ' tried. Stop after any round: it all saves.</p></div>' +
+    '<div class="card tilt-l"><div class="label">Tonight\'s tier list</div>' + tierBoard() + '</div></div>';
+}
+function tierBoard(){
+  return '<div class="tierboard">' + TIERS.map(function(t){
+    var items = doneIds().filter(function(id){ return st.results[id].tier === t; });
+    return '<div class="trow"><b class="t-' + t + '">' + t + '</b><div>' + items.map(function(id){ return '<span class="mini">' + esc(adBy(id).short) + '</span>'; }).join("") + '</div></div>';
+  }).join("") + '</div>';
+}
+
+/* ---------- views ---------- */
+function vStart(){
+  studio(false);
+  var any = doneIds().length;
+  return '<div class="grid"><div><div class="kick">The great British advert challenge</div><h1 class="big">Broadcasting live from seventy years at once.</h1>' +
+    '<p class="lead">Real adverts from British TV, most of them made to sell things to children and teenagers. Watch one, guess when it was made, spot the tricks, then decide where it goes in the tier list.</p>' +
+    '<div class="card" style="margin-top:16px"><label class="label" for="basename">Which Base is on air?</label>' +
+    '<input id="basename" class="field" maxlength="26" autocomplete="off" value="' + esc(st.base) + '" style="max-width:22rem;font-size:1.2rem">' +
+    '<p class="note" style="margin-top:8px">A Base or team name only, never anyone\'s name.</p>' +
+    '<div class="row"><button type="button" class="go" id="start">' + (any ? "Carry on the show" : "Start the show") + '</button>' +
+    '<button type="button" class="alt" data-go="archive">Peek at the archive</button></div></div></div>' +
+    '<div><div class="tvset"><div class="screen"><div class="static"><div><svg viewBox="0 0 64 64" width="90" aria-hidden="true">' + $("#tvlogo").innerHTML + '</svg><div style="font-family:Archivo,sans-serif;font-weight:900;font-size:1.6rem">TIME TRAVEL TV</div><div style="letter-spacing:.3em;font-size:.7rem">CHANNEL 5 &middot; EST. WHENEVER</div></div></div></div></div>' +
+    '<div class="card" style="margin-top:16px"><div class="label">Each round, about five minutes</div>' +
+    '<ol style="margin:0;padding-left:1.3em;line-height:1.8"><li>Watch the advert (as often as you like)</li><li>Guess when it was made: Mild, Medium or Spicy</li><li>Spot the persuasion tricks</li><li>How convincing was it? Put it in the tier list</li></ol>' +
+    '<p class="note" style="margin:10px 0 0">Nobody has to answer out loud. Point, tap, shout, or just watch.</p></div></div></div>';
+}
+function vWatch(a){
+  studio(false);
+  return '<div class="grid"><div><div class="kick">Transmission ' + pad(roundNo()) + '</div><h1 class="big">An advert has escaped from the past.</h1>' +
+    '<div class="tvset"><div class="screen" id="screen"><div class="static">Tuning in...</div></div>' +
+    '<div class="knobs"><span>REPLAY AS OFTEN AS YOU LIKE</span><label>Volume <input type="range" id="vol" min="0" max="1" step="0.05" value="' + st.vol + '" aria-label="Volume"></label></div></div>' +
+    '<div id="loadspot"></div>' +
+    '<div class="row"><button type="button" class="go" id="toguess">When was it made?</button><button type="button" class="quiet" id="skip">Skip this one</button></div></div>' +
+    '<div>' + side() + '</div></div>';
+}
+function vGuess(a){
+  studio(false);
+  var c = st.cur, L = c.level, body;
+  if(L === "mild"){
+    body = '<div class="decades" role="group" aria-label="Pick a decade">' + DECADES.map(function(d, i){ return '<button type="button" data-dec="' + d + '" aria-pressed="' + (c.decade === d) + '" style="background:' + DECCOL[i] + '">' + d + 's</button>'; }).join("") + '</div>';
+  } else if(L === "medium"){
+    body = '<div class="yearbox"><div class="label">Our best guess</div><div class="yearnum" id="yearnum">' + c.year + '</div>' +
+      '<input type="range" id="yr" min="1950" max="2026" step="1" value="' + c.year + '" aria-label="Year">' +
+      '<div class="ticks"><span>1950</span><span>1970</span><span>1990</span><span>2010</span><span>2026</span></div>' +
+      '<div class="nudge"><button type="button" data-n="-10">-10</button><button type="button" data-n="-1">-1</button><button type="button" data-n="1">+1</button><button type="button" data-n="10">+10</button></div></div>';
+  } else {
+    body = '<div class="yearbox"><label class="label" for="typed">Type the exact year</label><br><input id="typed" class="spicy" inputmode="numeric" maxlength="4" autocomplete="off" value="' + esc(c.typed) + '" placeholder="19??">' +
+      '<div class="nudge"><button type="button" data-t="-1">-1</button><button type="button" data-t="1">+1</button></div></div>';
+  }
+  return '<div class="grid"><div><div class="kick">Transmission ' + pad(roundNo()) + ': the time machine</div><h1 class="big">When was it made?</h1>' +
+    '<div class="label">How spicy?</div><div class="levels" role="group" aria-label="How spicy">' + Object.keys(LEVELS).map(function(k){
+      return '<button type="button" data-level="' + k + '" aria-pressed="' + (L === k) + '">' + LEVELS[k].name + '<small>' + LEVELS[k].how + ', up to ' + LEVELS[k].max + '</small></button>'; }).join("") + '</div>' +
+    '<div style="margin-top:14px">' + body + '</div>' +
+    '<div class="card" style="margin-top:14px"><div class="label">How sure are we? (if you like)</div><div class="pills">' +
+      SURE.map(function(s){ return '<button type="button" data-sure="' + s + '" aria-pressed="' + (c.sure === s) + '">' + s + '</button>'; }).join("") + '</div>' +
+      '<div class="row" style="margin-top:12px"><button type="button" class="alt" id="clue">' + (c.clue ? "Hide the clue" : "Fancy a clue?") + '</button><span class="note">Clues never cost points.</span></div>' +
+      (c.clue ? '<div class="clue">' + esc(a.clue) + '</div>' : '') + '</div>' +
+    '<div class="row"><button type="button" class="go" id="lock">Lock it in</button><button type="button" class="quiet" id="rewatch">Watch it again</button></div></div>' +
+    '<div>' + side() + '</div></div>';
+}
+function vReveal(a){
+  studio(true);
+  var c = st.cur, p = yearPoints(a, c), max = LEVELS[c.level].max, g = guessValue(c);
+  var exact = c.level !== "mild" && a.prec !== "decade" && g === a.year;
+  var line = g == null || g === "" ? "No guess this time, and that is fine." :
+    p >= max ? "Spot on. The time machine works." : p >= max * 0.55 ? "So close. Nearly bang on." : p > 0 ? "In the right neighbourhood." : "A big time jump this time.";
+  var tell = p < max * 0.55 ? '<p class="note" style="margin-top:10px"><b>The giveaway:</b> ' + esc(a.tell) + '</p>' : '';
+  var fooled = c.sure === "Very sure" && p < max * 0.4 ? '<p class="note">That one fooled us, so it goes on the "fooled us" list for later.</p>' : '';
+  var cameo = isB5() && exact ? '<div class="cameo">Jay says: "Outrageous."</div>' : '';
+  return (p ? confetti() : '') + '<div class="grid"><div><div class="kick">The extremely official reveal</div>' +
+    '<div class="reveal"><div class="label">It was made in</div><div class="yr">' + yearText(a) + '</div><div style="font-weight:700;letter-spacing:.08em">' + esc(a.title.toUpperCase()) + '</div>' +
+    '<div class="pts">+' + p + ' time points</div><p class="fact">' + esc(a.fact) + '</p>' + cameo + '</div>' +
+    '<div class="row"><button type="button" class="go" id="todetect">Spot the tricks</button></div></div>' +
+    '<div><div class="card"><div class="label">We guessed</div><div class="score">' + esc(guessLabel(c)) + '</div><p style="margin-top:8px">' + line + '</p>' + tell + fooled +
+    '<p class="note" style="margin:0">' + LEVELS[c.level].name + ' round: up to ' + max + ' points.</p></div>' +
+    '<div class="card"><div class="label">Coming up</div><p style="margin:0">Persuasion detectives: which tricks did it use?</p></div></div></div>';
+}
+function choices(a){
+  var others = Object.keys(TECH).filter(function(t){ return a.focus.indexOf(t) < 0 && a.fair.indexOf(t) < 0; });
+  var pool = a.focus.concat(a.fair.slice(0, 1));
+  for(var i = 0; pool.length < 6; i++) pool.push(others[(a.id * 5 + i * 3) % others.length]);
+  pool = pool.filter(function(t, i){ return pool.indexOf(t) === i; });
+  while(pool.length < 6){ var t = others[(a.id + pool.length * 7) % others.length]; if(pool.indexOf(t) < 0) pool.push(t); else others.push(others.shift()); }
+  return pool.sort(function(x, y){ return ((x.length * a.id) % 11) - ((y.length * a.id) % 11) || (x < y ? -1 : 1); });
+}
+function vDetect(a){
+  studio(false);
+  var c = st.cur;
+  return '<div class="grid"><div><div class="kick">Transmission ' + pad(roundNo()) + ': persuasion detectives</div><h1 class="big">Which tricks did it use?</h1>' +
+    '<p class="lead">Pick up to two. Adverts often use more than one.</p>' +
+    '<div class="techs">' + choices(a).map(function(t){ return '<button type="button" class="tech" data-tech="' + esc(t) + '" aria-pressed="' + (c.tech.indexOf(t) >= 0) + '">' + icon(t) + '<b>' + esc(t) + '</b><small>' + esc(TECH[t].d) + '</small></button>'; }).join("") + '</div>' +
+    '<div class="row"><button type="button" class="go" id="check">' + (c.tech.length ? "Check our cards" : "Check") + '</button><button type="button" class="quiet" id="nocheck">Skip this bit</button></div></div>' +
+    '<div>' + side() + '</div></div>';
+}
+function vChecked(a){
+  studio(true);
+  var c = st.cur, p = techPoints(a, c.tech);
+  var rows = c.tech.map(function(t){
+    var k = a.focus.indexOf(t) >= 0 ? ["b-spot", "Spot on"] : a.fair.indexOf(t) >= 0 ? ["b-fair", "Fair shout"] : ["b-not", "Not this one"];
+    return '<div class="vrow">' + icon(t) + '<div><b>' + esc(t) + '</b><div class="note">' + esc(TECH[t].d) + '</div></div><span class="badge ' + k[0] + '">' + k[1] + '</span></div>';
+  }).join("");
+  var missed = a.focus.filter(function(t){ return c.tech.indexOf(t) < 0; });
+  var msg = p >= 60 ? "Both main tricks spotted. The advertising industry is worried." : p >= 30 ? "Nice detecting." : c.tech.length ? "Those are real tricks, just not the main ones here. Easy to mix up." : "Here are the tricks to look out for.";
+  return (p ? confetti() : '') + '<div class="grid"><div><div class="kick">The detective report</div><h1 class="big">+' + p + ' detective points</h1><p class="lead">' + msg + '</p>' +
+    '<div class="verdicts">' + rows + '</div>' +
+    (missed.length ? '<div class="label" style="margin-top:16px">' + (c.tech.length ? "Also hiding in there" : "The main tricks") + '</div><div class="verdicts">' +
+      missed.map(function(t){ return '<div class="vrow">' + icon(t) + '<div><b>' + esc(t) + '</b><div class="note">' + esc(TECH[t].d) + '</div></div></div>'; }).join("") + '</div>' : '') +
+    '<div class="row"><button type="button" class="go" id="toverdict">Give our verdict</button></div></div>' +
+    '<div><div class="card"><div class="label">Your turn to judge</div><p style="margin:0">Next: how convincing was it, and where does it go in the tier list? No right answers there, just your opinion.</p></div></div></div>';
+}
+function vVerdict(a){
+  studio(false);
+  var c = st.cur, ask = roundNo() === 2 || roundNo() === 7;
+  return '<div class="grid"><div><div class="kick">' + esc(a.title) + ': the verdict</div><h1 class="big">How convincing was it?</h1>' +
+    '<div class="card"><div class="label">Convincing stars</div><div class="stars">' + [1, 2, 3, 4, 5].map(function(n){
+      return '<button type="button" data-star="' + n + '" class="' + (c.stars >= n ? "on" : "") + '" aria-label="' + n + ' star' + (n > 1 ? "s" : "") + '" aria-pressed="' + (c.stars === n) + '">' + (c.stars >= n ? "&#9733;" : "&#9734;") + '</button>'; }).join("") + '</div>' +
+      '<p class="note" style="margin:8px 0 0">' + (c.stars ? c.stars + " out of 5. Would it make us buy it?" : "1 = not a chance. 5 = take my pocket money.") + '</p></div>' +
+    '<div class="card"><div class="label">Tier list: where does it go?</div><div class="tiers">' + TIERS.map(function(t){
+      return '<button type="button" class="t-' + t + '" data-tier="' + t + '" aria-pressed="' + (c.tier === t) + '" title="' + TIERNOTE[t] + '">' + t + '</button>'; }).join("") + '</div>' +
+      '<p class="note" style="margin:8px 0 0">' + (c.tier ? c.tier + ": " + TIERNOTE[c.tier] : "S is legendary. F goes straight to the archive basement.") + '</p></div>' +
+    '<div class="mystery"><b>MYSTERY QUESTION</b>' + esc(a.question) + '</div>' +
+    (ask ? '<div class="card" style="margin-top:14px"><label class="label" for="why">How did you decide? (if you fancy)</label><textarea id="why" class="why" maxlength="300" placeholder="We put it in ' + (c.tier || "...") + ' because...">' + esc(c.why) + '</textarea></div>' : '') +
+    '<div class="row"><button type="button" class="go" id="file">File it in the archive</button></div></div>' +
+    '<div>' + side() + '</div></div>';
+}
+function vFiled(){
+  studio(false);
+  var last = st.lastId ? adBy(st.lastId) : null, left = lineup().length - doneIds().length;
+  return '<div class="grid"><div><div class="kick">Round ' + doneIds().length + ' saved</div><h1 class="big">' + (last ? esc(last.short) + " is in the archive." : "Saved.") + '</h1>' +
+    '<p class="lead">' + (left ? left + " advert" + (left === 1 ? "" : "s") + " still in the vault. A good place to stop, or keep going." : "That was the last one. Time for the grand finale.") + '</p>' +
+    '<div class="row">' + (left ? '<button type="button" class="go" id="next">Next advert</button><button type="button" class="alt" id="pause">Done for now</button>' : '<button type="button" class="go" id="next">To the grand finale</button>') + '</div></div>' +
+    '<div>' + side() + '</div></div>';
+}
+function timelineSvg(){
+  var ids = judged().slice().sort(function(x, y){ return adBy(x).year - adBy(y).year; });
+  var W = 1000, M = 150, x = function(y){ return 40 + (y - 1950) / (2030 - 1950) * (W - 80); }, s = '';
+  var LV = [{ y:M - 42, up:1 }, { y:M + 58, up:0 }, { y:M - 84, up:1 }, { y:M + 100, up:0 }, { y:M - 126, up:1 }, { y:M + 142, up:0 }];
+  s += '<line x1="40" y1="' + M + '" x2="' + (W - 40) + '" y2="' + M + '" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>';
+  for(var d = 1950; d <= 2030; d += 10) s += '<line x1="' + x(d) + '" y1="' + (M - 8) + '" x2="' + x(d) + '" y2="' + (M + 8) + '" stroke="currentColor" stroke-width="3"/><text x="' + x(d) + '" y="' + (M + 28) + '" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" opacity=".8">' + d + '</text>';
+  ids.forEach(function(id, i){
+    var a = adBy(id), L = LV[i % LV.length], X = x(a.year), anchor = X < 150 ? "start" : X > W - 150 ? "end" : "middle", tx = anchor === "start" ? X - 8 : anchor === "end" ? X + 8 : X;
+    s += '<line x1="' + X + '" y1="' + M + '" x2="' + X + '" y2="' + (L.up ? L.y + 6 : L.y - 18) + '" stroke="#ef7724" stroke-width="2"/>' +
+      '<circle cx="' + X + '" cy="' + M + '" r="8" fill="#ffc93c" stroke="#1f2a37" stroke-width="3"/>' +
+      '<text x="' + tx + '" y="' + L.y + '" text-anchor="' + anchor + '" font-size="15" font-weight="700" fill="currentColor">' + esc(a.short) + ' <tspan opacity=".7">' + yearText(a) + '</tspan></text>';
+  });
+  return '<svg viewBox="0 0 ' + W + ' ' + (2 * M) + '" style="width:100%;height:auto" role="img" aria-label="Our adverts on a timeline">' + s + '</svg>';
+}
+function vFinale(){
+  studio(true);
+  var ids = judged(), fooled = ids.filter(function(id){ return st.results[id].fooled; });
+  var opts = function(sel){ return '<option value="">Choose one...</option>' + ids.map(function(id){ return '<option value="' + id + '"' + (+sel === id ? " selected" : "") + '>' + esc(adBy(id).short) + ' (' + yearText(adBy(id)) + ')</option>'; }).join(""); };
+  var bye = isB5() ? '<div class="cameo">Jay: "In the wise words of my late, great grandfather: stop." That is the show.</div>' : '';
+  return confetti() + '<div class="kick">Live from the unnecessarily large studio</div><h1 class="big">The grand finale</h1>' +
+    '<div class="grid"><div><div class="reveal"><div class="label">Our team score</div><div class="yr" style="font-size:clamp(4rem,10vw,8rem)">' + fmt(total()) + '</div><div>' + ids.length + ' advert' + (ids.length === 1 ? "" : "s") + ' judged by ' + esc(st.base) + '</div>' + bye + '</div>' +
+    '<div class="card" style="margin-top:16px;color:#fff"><div class="label">Seventy years of adverts</div>' + timelineSvg() + '</div>' +
+    '<div class="card"><div class="label">The big question: if we could time travel, should we?</div>' +
+      '<p>Which advert\'s world would we visit for a day, and which one should stay in the past?</p>' +
+      '<div class="row" style="margin-top:4px"><label>Visit <select id="visit" class="field" style="width:auto">' + opts(st.visit) + '</select></label>' +
+      '<label>Leave it in the past <select id="skipto" class="field" style="width:auto">' + opts(st.skip) + '</select></label></div></div>' +
+    '<div class="card"><div class="label">Where you will use this</div><p style="margin:0">The same tricks are in YouTube ads, TikTok, game shops and influencer posts today. Next time something makes you want to buy it, ask: which trick is that?</p></div>' +
+    '</div><div><div class="card"><div class="label">Our tier list</div>' + tierBoard() + '</div>' +
+    (fooled.length ? '<div class="card"><div class="label">The ones that fooled us</div><p style="margin:0">' + fooled.map(function(id){ return esc(adBy(id).short) + " (" + yearText(adBy(id)) + ")"; }).join(", ") + '. Worth a second look.</p></div>' : '') +
+    '<div class="card"><div class="label">Make something to keep</div><div class="row" style="margin-top:4px">' +
+      '<button type="button" class="go" id="poster">Save our tier list picture</button><button type="button" class="alt" data-go="make">Make our own advert</button><button type="button" class="alt" id="printit">Print the report</button></div></div>' +
+    '<div class="card"><div class="label">The leaderboard (only if you want)</div>' + postBox() + '</div>' +
+    '<div class="card"><div class="label">Teach it back</div><p>Write a question for another Base about one of these adverts.</p><textarea id="tb" class="why" maxlength="300" placeholder="Which advert used a cartoon cowboy?">' + esc(st.teach || "") + '</textarea><div id="tbsend"></div></div>' +
+    '<div class="row"><button type="button" class="quiet" id="again">Run the show again</button></div></div></div>';
+}
+function postBox(){
+  if(guest()) return '<p class="note" style="margin:0">The leaderboard is switched off in guest mode.</p>';
+  if(st.posted) return '<p style="margin:0">On the board with ' + fmt(st.posted.score) + ' points.</p><div class="row"><button type="button" class="alt" data-go="board">See the leaderboard</button>' + (st.posted.score < total() ? '<button type="button" class="alt" id="post">Update our score</button>' : '') + '</div>';
+  return '<p>Put ' + esc(st.base) + '\'s team score on the Base vs Base board? Only the Base name and score go up, and only if you press this.</p><div class="row"><button type="button" class="alt" id="post">Put us on the board</button><button type="button" class="quiet" data-go="board">Just look</button></div><p class="note" id="postmsg" style="margin:8px 0 0"></p>';
+}
+function vArchive(){
+  studio(false);
+  return '<div class="kick">The archive</div><h1 class="big">' + lineup().length + ' adverts, very much on file</h1><p class="lead">Each one appears here once it has been judged. The rest stay a mystery.</p>' +
+    '<div class="archive">' + ORDER.map(function(id, i){
+      var a = adBy(id), r = st.results[id], col = DECCOL[Math.max(0, DECADES.indexOf(Math.floor(a.year / 10) * 10))];
+      if(st.off[id]) return '<div class="acard" style="opacity:.45"><div class="thumb" style="background:#9aa4b8">OFF</div><b>Not in tonight\'s show</b></div>';
+      var skip = r && r.skipped; if(skip) r = null;
+      return '<div class="acard"><div class="thumb" style="background:' + (r ? col : "radial-gradient(circle,#2c3d63,#0d1422)") + ';color:' + (r ? "#1f2a37" : "#fff") + '">' + (r ? yearText(a) : "?") + '</div>' +
+        '<b>' + (r ? esc(a.title) : "Advert " + pad(i + 1)) + '</b><small>' + (r ? (r.tier ? r.tier + " tier &middot; " : "") + (r.stars ? r.stars + "&#9733; &middot; " : "") + r.points + " points" : skip ? "Skipped, still a mystery" : "Still in the vault") + '</small></div>';
+    }).join("") + '</div><div class="row"><button type="button" class="alt" data-go="game">Back to the show</button></div>';
+}
+var boardData = null, boardMsg = "";
+function vBoard(){
+  studio(true);
+  var top = boardData && boardData.top || [];
+  var pods = [1, 0, 2].map(function(i){
+    var x = top[i], cls = ["p1", "p2", "p3"][i];
+    return x ? '<div class="pod ' + cls + '"><span class="n">' + (i + 1) + '</span><b>' + esc(x.base) + '</b><small>' + fmt(x.score) + ' points &middot; ' + x.rounds + ' adverts</small></div>'
+      : '<div class="pod empty ' + cls + '"><span class="n">' + (i + 1) + '</span><b>Up for grabs</b><small>Any Base can play</small></div>';
+  }).join("");
+  var also = boardData && boardData.also && boardData.also.length ? '<p style="margin:0">' + boardData.also.map(esc).join(" &middot; ") + '</p>' : '<p class="note" style="margin:0">Nobody else yet.</p>';
+  return '<div class="kick">Base vs Base</div><h1 class="big">The leaderboard</h1>' +
+    '<p class="lead">Team scores only, and only from Bases that chose to put theirs up. The top three get the podium; everyone else who played gets a wave.</p>' +
+    '<div class="podium">' + pods + '</div>' +
+    '<div class="grid" style="margin-top:18px"><div class="card"><div class="label">Also on air</div>' + also + '</div>' +
+    '<div class="card"><div class="label">' + esc(st.base) + '</div><p style="margin:0">' + (boardData && boardData.mine ? "On the board with " + fmt(boardData.mine.score) + " points." : "This device's score: " + fmt(total()) + " points. Not on the board.") + '</p>' +
+    '<p class="note" style="margin:8px 0 0">' + esc(boardMsg) + '</p></div></div>' +
+    '<div class="row"><button type="button" class="alt" data-go="game">Back to the show</button><button type="button" class="quiet" id="refresh">Refresh</button></div>';
+}
+function fetchBoard(){
+  if(!canCall()){ boardMsg = guest() ? "The leaderboard is off in guest mode." : "The leaderboard needs a school sign in. Scores are safe on this device."; if(display === "board") render(); return; }
+  boardMsg = "Checking the board...";
+  B5Site.call("showboard", { base: st.base }).then(function(o){
+    if(o && o.ok){ boardData = o; boardMsg = o.count ? o.count + " Base" + (o.count === 1 ? "" : "s") + " on the board." : "Nobody on the board yet. Could be you."; }
+    else boardMsg = "The leaderboard is not switched on yet (Jay needs to update the sheet).";
+  }).catch(function(){ boardMsg = "Could not reach the board just now. Scores are safe on this device."; })
+    .then(function(){ if(display === "board") render(); });
+}
+function post(){
+  var m = $("#postmsg"); if(m) m.textContent = "Sending...";
+  if(!canCall()){ if(m) m.textContent = "That needs a school sign in on this device. The score is safe here."; return; }
+  B5Site.call("showscore", { base: st.base, score: total(), rounds: doneIds().length }).then(function(o){
+    if(!o || !o.ok) throw new Error("no");
+    st.posted = { score: total(), at: Date.now() }; boardData = o; save(); toast("You are on the board."); render();
+  }).catch(function(){ if(m) m.textContent = "That did not go through. The leaderboard may not be switched on yet; the score is safe here."; });
+}
+
+/* ---------- host desk ---------- */
+function vHost(){
+  studio(false);
+  return '<div class="kick">For the host</div><h1 class="big">The host desk</h1>' +
+    '<div class="grid"><div><div class="card"><div class="label">Tonight\'s line-up</div><p class="note">Preview anything you are not sure about, and switch off any advert you would rather not show. Green dot: loaded on this device.</p>' +
+    '<div class="lineup">' + ORDER.map(function(id){ var a = adBy(id);
+      return '<div class="lrow"><button type="button" class="switch" role="switch" data-off="' + id + '" aria-checked="' + !st.off[id] + '" aria-label="Show ' + esc(a.title) + '"></button><span class="ok' + (loaded(id) ? " yes" : "") + '" title="' + (loaded(id) ? "Loaded" : "Not loaded") + '"></span>' +
+        '<div><b>' + esc(a.title) + '</b> <span class="note">(' + yearText(a) + ')</span><small>' + esc(a.host) + '</small></div><button type="button" class="alt" data-prev="' + id + '" style="min-height:2.4rem;padding:6px 12px">Preview</button></div>'; }).join("") + '</div></div></div>' +
+    '<div><div class="card preview hidden" id="prevcard"><div class="label" id="prevlabel">Preview</div><div id="prevbox"></div><p class="note" style="margin:8px 0 0">Only you see this bit if the board is off. Volume is matched like in the show.</p></div>' +
+    '<div class="card"><div class="label">The adverts</div><p style="margin:0" id="loadcount">' + loadedCount() + ' of 12 loaded on this device.</p>' + loaderHtml("Load them once per device and it remembers them. They stay on this device and never go online.") +
+      '<div class="row"><button type="button" class="quiet" id="forget">Forget the adverts on this device</button></div></div>' +
+    '<div class="card"><div class="label">Sound and screen</div><label style="display:flex;gap:10px;align-items:center">Volume <input type="range" id="hvol" min="0" max="1" step="0.05" value="' + st.vol + '"></label>' +
+      '<p class="note">Every advert is already matched in volume and the loud peaks are softened.</p>' +
+      '<div class="row"><button type="button" class="alt" id="fx">Calmer effects: ' + (st.effects === "reduced" ? "on" : "off") + '</button></div></div>' +
+    (doneIds().length > judged().length ? '<div class="card"><div class="label">Skipped adverts</div><p class="note">' + (doneIds().length - judged().length) + ' skipped so far. Bring them back into the show if you change your mind.</p><div class="row"><button type="button" class="alt" id="unskip">Bring them back</button></div></div>' : '') +
+    '<div class="card"><div class="label">Start again</div><p class="note">Clears scores, guesses and the tier list on this device. The line-up and loaded adverts stay.</p><div class="row" id="resetrow"><button type="button" class="quiet" id="reset">Start a fresh show</button></div></div></div></div>';
+}
+
+/* ---------- the advert maker ---------- */
+var ERAS = {
+  "1950s": { bg:"#d9d4ca", ink:"#1b1b1b", acc:"#7a7468", font:"Georgia, serif", grain:true },
+  "1970s": { bg:"#f3c46b", ink:"#4a2512", acc:"#c8571c", font:"'Arial Black', Archivo, sans-serif", stripes:["#c8571c", "#e38a2c", "#7a3b16"] },
+  "1980s": { bg:"#1a0f3d", ink:"#ffffff", acc:"#ff4fb3", font:"Archivo, 'Arial Black', sans-serif", neon:true },
+  "1990s": { bg:"#6b2fbf", ink:"#fff35c", acc:"#2ce6d1", font:"'Comic Sans MS', Archivo, sans-serif", zig:true },
+  "2020s": { bg:"#fef8f4", ink:"#1f2a37", acc:"#007291", font:"'Atkinson Hyperlegible', Arial, sans-serif", clean:true }
+};
+var PRODUCTS = [
+  { n:"Fizzy lemonade", k:"bottle" }, { n:"Chocolate bar", k:"bar" }, { n:"Breakfast cereal", k:"box" }, { n:"Toy robot", k:"robot" },
+  { n:"Games console", k:"console" }, { n:"Pocket time machine", k:"watch" }, { n:"Dinosaur repellent", k:"can" }, { n:"Self tidying bedroom", k:"box" }
+];
+var SLOGANS = ["Once you try it, there's no going back... in time.", "Ten out of ten scientists from the future agree.", "So good, the future wants it back.", "Ask for it by name. Loudly.", "Your nan had one. Your grandchildren will too.", "Warning: may cause extreme happiness.", "It's not just a {p}. It's a lifestyle."];
+function mk(){ st.poster = st.poster || { era:"1980s", prod:0, tricks:["Catchy music"], name:"", slogan:"" }; return st.poster; }
+function vMake(){
+  studio(false);
+  var p = mk();
+  return '<div class="kick">Your turn</div><h1 class="big">Make your own advert poster</h1><p class="lead">Pick an era, pick a product, pick your tricks. Everything is optional, and nothing is marked.</p>' +
+    '<div class="maker"><div>' +
+    '<div class="card"><div class="label">1. Which era?</div><div class="opts">' + Object.keys(ERAS).map(function(e){ return '<button type="button" data-era="' + e + '" aria-pressed="' + (p.era === e) + '">' + e + '</button>'; }).join("") + '</div></div>' +
+    '<div class="card"><div class="label">2. What are you selling?</div><div class="opts">' + PRODUCTS.map(function(x, i){ return '<button type="button" data-prod="' + i + '" aria-pressed="' + (p.prod === i) + '">' + esc(x.n) + '</button>'; }).join("") + '</div>' +
+      '<label class="label" for="pname" style="display:block;margin-top:12px">Brand name (optional)</label><input id="pname" class="field" maxlength="22" value="' + esc(p.name) + '" placeholder="e.g. Zoomo"></div>' +
+    '<div class="card"><div class="label">3. Up to two tricks</div><div class="opts">' + Object.keys(TECH).map(function(t){ return '<button type="button" data-ptrick="' + esc(t) + '" aria-pressed="' + (p.tricks.indexOf(t) >= 0) + '">' + esc(t) + '</button>'; }).join("") + '</div></div>' +
+    '<div class="card"><label class="label" for="pslogan">4. Slogan</label><input id="pslogan" class="field" maxlength="70" value="' + esc(p.slogan) + '" placeholder="Leave it blank, or...">' +
+      '<div class="row" style="margin-top:8px"><button type="button" class="alt" id="slogan">Give me one</button></div></div>' +
+    '</div><div><canvas id="pc" width="1080" height="1350" aria-label="Your advert poster"></canvas>' +
+    '<div class="row"><button type="button" class="go" id="dlposter">Save the poster</button><button type="button" class="alt" data-go="game">Back to the show</button></div><div id="psend"></div></div></div>';
+}
+function wrapText(ctx, text, x, y, maxW, lh){
+  var words = String(text).split(" "), line = "", lines = [];
+  words.forEach(function(w){ var t = line ? line + " " + w : w; if(ctx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; });
+  if(line) lines.push(line);
+  lines.forEach(function(l, i){ ctx.fillText(l, x, y + i * lh); });
+  return lines.length;
+}
+function drawProduct(ctx, k, cx, cy, E){
+  ctx.save(); ctx.translate(cx, cy); ctx.lineWidth = 10; ctx.strokeStyle = E.ink === "#ffffff" ? "#ffffff" : "#1f2a37"; ctx.lineJoin = "round";
+  var fill = E.acc;
+  function rr(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.stroke(); }
+  if(k === "bottle"){ rr(-70, -140, 140, 300, 50); rr(-30, -220, 60, 90, 14); }
+  else if(k === "bar"){ ctx.rotate(-0.25); rr(-200, -70, 400, 140, 22); ctx.fillStyle = E.ink === "#ffffff" ? "#1a0f3d" : "#fff"; ctx.fillRect(-90, -40, 180, 80); }
+  else if(k === "box"){ rr(-130, -180, 260, 340, 12); ctx.beginPath(); ctx.arc(0, -10, 70, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke(); }
+  else if(k === "robot"){ rr(-110, -60, 220, 200, 30); rr(-80, -200, 160, 120, 24); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-35, -140, 18, 0, 7); ctx.arc(35, -140, 18, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, -200); ctx.lineTo(0, -250); ctx.stroke(); }
+  else if(k === "console"){ rr(-220, -70, 440, 150, 70); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-120, 5, 30, 0, 7); ctx.arc(130, -15, 16, 0, 7); ctx.arc(160, 25, 16, 0, 7); ctx.fill(); }
+  else if(k === "watch"){ rr(-60, -230, 120, 460, 30); ctx.beginPath(); ctx.arc(0, 0, 130, 0, 7); ctx.fillStyle = fill; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, 95, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -65); ctx.moveTo(0, 0); ctx.lineTo(45, 25); ctx.stroke(); }
+  else { rr(-100, -160, 200, 320, 40); ctx.fillStyle = "#fff"; ctx.fillRect(-70, -40, 140, 80); }
+  ctx.restore();
+}
+function drawPoster(){
+  var c = $("#pc"); if(!c) return;
+  var ctx = c.getContext("2d"), p = mk(), E = ERAS[p.era], W = c.width, H = c.height, prod = PRODUCTS[p.prod] || PRODUCTS[0];
+  ctx.fillStyle = E.bg; ctx.fillRect(0, 0, W, H);
+  if(E.stripes) E.stripes.forEach(function(col, i){ ctx.fillStyle = col; ctx.fillRect(0, 980 + i * 60, W, 60); });
+  if(E.neon){ ctx.strokeStyle = "rgba(44,230,209,.5)"; ctx.lineWidth = 3; for(var gx = -600; gx < W + 600; gx += 90){ ctx.beginPath(); ctx.moveTo(W / 2, 760); ctx.lineTo(gx, H); ctx.stroke(); } for(var gy = 820; gy < H; gy += 60){ ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke(); } var sun = ctx.createLinearGradient(0, 380, 0, 760); sun.addColorStop(0, "#ffd34f"); sun.addColorStop(1, "#ff4fb3"); ctx.fillStyle = sun; ctx.beginPath(); ctx.arc(W / 2, 760, 300, Math.PI, 0); ctx.fill(); }
+  if(E.zig){ ctx.fillStyle = E.acc; for(var zx = 0; zx < W; zx += 80){ ctx.beginPath(); ctx.moveTo(zx, H); ctx.lineTo(zx + 40, H - 90); ctx.lineTo(zx + 80, H); ctx.fill(); } ctx.fillStyle = "#ff4fb3"; for(var s = 0; s < 14; s++){ ctx.beginPath(); ctx.arc((s * 263) % W, 220 + (s * 137) % 900, 14, 0, 7); ctx.fill(); } }
+  if(E.clean){ var gr = ctx.createLinearGradient(0, 0, W, H); gr.addColorStop(0, "#fef8f4"); gr.addColorStop(1, "#cfe6e3"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H); }
+  drawProduct(ctx, prod.k, W / 2, 640, E);
+  ctx.textAlign = "center"; ctx.fillStyle = E.ink;
+  ctx.font = "900 " + (p.name.length > 12 ? 92 : 120) + "px " + E.font;
+  ctx.fillText((p.name || "BRAND X").toUpperCase(), W / 2, 200);
+  ctx.font = "700 46px " + E.font; ctx.fillText(prod.n, W / 2, 270);
+  ctx.font = "700 50px " + E.font;
+  var slog = p.slogan || "Your slogan goes here";
+  wrapText(ctx, '"' + slog + '"', W / 2, 1010, W - 140, 62);
+  if(p.tricks.length){
+    ctx.font = "700 34px Arial, sans-serif";
+    p.tricks.forEach(function(t, i){
+      var tw = ctx.measureText(t).width + 50, bx = W / 2 - (p.tricks.length === 2 ? (i === 0 ? tw + 10 : -10) : tw / 2);
+      ctx.fillStyle = E.clean ? "#007291" : "rgba(0,0,0,.55)"; ctx.fillRect(bx, 1200, tw, 64); ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(t, bx + 25, 1243); ctx.textAlign = "center";
+    });
+  }
+  ctx.save(); ctx.translate(890, 420); ctx.rotate(0.3); ctx.fillStyle = "#ffc93c"; ctx.beginPath();
+  for(var j = 0; j < 24; j++){ var r = j % 2 ? 80 : 110, an = j / 24 * Math.PI * 2; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); }
+  ctx.closePath(); ctx.fill(); ctx.fillStyle = "#1f2a37"; ctx.font = "900 52px Archivo, Arial, sans-serif"; ctx.fillText("NEW!", 0, 18); ctx.restore();
+  ctx.fillStyle = E.ink; ctx.globalAlpha = .7; ctx.font = "700 24px Arial, sans-serif"; ctx.fillText("Made on Time Travel TV, " + p.era + " edition", W / 2, H - 28); ctx.globalAlpha = 1;
+  if(E.grain){ for(var g = 0; g < 2500; g++){ ctx.fillStyle = Math.random() < .5 ? "rgba(0,0,0,.12)" : "rgba(255,255,255,.18)"; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); } }
+}
+function savePng(canvas, name){
+  try{ canvas.toBlob(function(b){ var u = URL.createObjectURL(b), l = document.createElement("a"); l.href = u; l.download = name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1500); toast("Saved to your downloads as " + name); }); }
+  catch(e){ toast("Saving pictures is not working in this browser."); }
+}
+function tierPicture(){
+  var c = document.createElement("canvas"); c.width = 1600; c.height = 1000;
+  var x = c.getContext("2d"), cols = { S:"#ffc93c", A:"#ffdf8f", B:"#bfe6da", C:"#c9e2f2", D:"#ddd5ef", F:"#e2ddd6" };
+  x.fillStyle = "#fef8f4"; x.fillRect(0, 0, 1600, 1000);
+  x.fillStyle = "#13235b"; x.fillRect(0, 0, 1600, 150);
+  x.fillStyle = "#ffd97a"; x.font = "900 64px Archivo, Arial, sans-serif"; x.fillText("TIME TRAVEL TV: OUR TIER LIST", 50, 95);
+  x.fillStyle = "#fff"; x.font = "700 30px Arial, sans-serif"; x.fillText(st.base + "  |  " + fmt(total()) + " points  |  " + new Date().toLocaleDateString("en-GB"), 50, 135);
+  TIERS.forEach(function(t, i){
+    var y = 180 + i * 130;
+    x.fillStyle = cols[t]; x.fillRect(50, y, 120, 110);
+    x.fillStyle = "#1f2a37"; x.font = "900 70px Archivo, Arial, sans-serif"; x.textAlign = "center"; x.fillText(t, 110, y + 80); x.textAlign = "left";
+    x.fillStyle = "#f3e6d6"; x.fillRect(180, y, 1370, 110);
+    var cx = 200; x.font = "700 28px Arial, sans-serif";
+    doneIds().filter(function(id){ return st.results[id].tier === t; }).forEach(function(id){
+      var a = adBy(id), label = a.short + " (" + yearText(a) + ")", w = x.measureText(label).width + 36;
+      if(cx + w > 1530) return;
+      x.fillStyle = "#fff"; x.fillRect(cx, y + 30, w, 52); x.strokeStyle = "#1f2a37"; x.lineWidth = 3; x.strokeRect(cx, y + 30, w, 52);
+      x.fillStyle = "#1f2a37"; x.fillText(label, cx + 18, y + 66); cx += w + 14;
+    });
+  });
+  savePng(c, "time-travel-tv-tier-list.png");
+}
+function report(){
+  var ids = judged(), s = '<h1>Time Travel TV</h1><p><b>' + esc(st.base) + '</b> &middot; ' + fmt(total()) + ' team points &middot; ' + new Date().toLocaleDateString("en-GB") + '</p>' +
+    '<h2>Adverts, guesses and verdicts</h2><table><tr><th>Advert</th><th>Made</th><th>Level</th><th>Our guess</th><th>Tricks we picked</th><th>Points</th><th>Stars</th><th>Tier</th></tr>' +
+    ids.map(function(id){ var a = adBy(id), r = st.results[id]; return '<tr><td>' + esc(a.title) + '</td><td>' + yearText(a) + '</td><td>' + (r.skipped ? "-" : LEVELS[r.level].name) + '</td><td>' + esc(r.guess) + '</td><td>' + esc(r.tech.join(", ") || "-") + '</td><td>' + r.points + '</td><td>' + (r.stars || "-") + '</td><td>' + (r.tier || "-") + '</td></tr>'; }).join("") + '</table>' +
+    '<h2>Our tier list</h2>' + TIERS.map(function(t){ var n = ids.filter(function(id){ return st.results[id].tier === t; }).map(function(id){ return esc(adBy(id).short); }); return '<p><b>' + t + ':</b> ' + (n.join(", ") || "-") + '</p>'; }).join("") +
+    '<h2>Why we decided</h2>' + (ids.filter(function(id){ return st.results[id].why; }).map(function(id){ return '<p class="keep"><b>' + esc(adBy(id).short) + ':</b> ' + esc(st.results[id].why) + '</p>'; }).join("") || "<p>-</p>") +
+    '<h2>If we could time travel, should we?</h2><p>Visit: ' + (st.visit ? esc(adBy(+st.visit).title) : "-") + '. Leave in the past: ' + (st.skip ? esc(adBy(+st.skip).title) : "-") + '.</p>' +
+    '<h2>Where we will use this</h2><p>The same tricks turn up in YouTube ads, TikTok, game shops and influencer posts. Catchy music, mascots, famous faces, big promises and feel good stories are all ways of making us want things.</p>';
+  $("#print").innerHTML = s;
+}
+function textSummary(){
+  return "Time Travel TV - " + st.base + " - " + total() + " team points\n\n" + judged().map(function(id){ var a = adBy(id), r = st.results[id]; return a.title + " (" + yearText(a) + "): guessed " + r.guess + ", " + r.points + " pts, " + (r.stars || "-") + " stars, tier " + (r.tier || "-"); }).join("\n") +
+    "\n\nQuestion for another Base: " + (st.teach || "-");
+}
+
+/* ---------- render and wiring ---------- */
+function render(){
+  header();
+  var v = $("#view"), a = current();
+  if(display === "archive") v.innerHTML = vArchive();
+  else if(display === "board") v.innerHTML = vBoard();
+  else if(display === "host") v.innerHTML = vHost();
+  else if(display === "make") v.innerHTML = vMake();
+  else {
+    if(st.step !== "start" && st.step !== "filed" && !a) st.step = "finale";
+    var s = st.step;
+    v.innerHTML = s === "start" ? vStart() : s === "watch" ? vWatch(a) : s === "guess" ? vGuess(a) : s === "reveal" ? vReveal(a) :
+      s === "detect" ? vDetect(a) : s === "checked" ? vChecked(a) : s === "verdict" ? vVerdict(a) : s === "filed" ? vFiled() : vFinale();
+  }
+  wire();
+}
+function wire(){
+  $$("[data-go]", $("#view")).forEach(function(b){ b.addEventListener("click", function(){ go(b.dataset.go); }); });
+  var a = current(), c = st.cur;
+  on("start", function(){ var n = ($("#basename").value || "").replace(/[^A-Za-z0-9 '&\-]/g, "").replace(/\s+/g, " ").trim().slice(0, 26); st.base = n || "Base 5"; st.started = true; step(current() ? "watch" : "finale"); });
+  if(display === "game" && st.step === "watch" && a){ mountVideo(a); }
+  on("toguess", function(){ step("guess"); });
+  on("skip", function(){ finish(true); toast("Skipped. It stays in the archive as a mystery."); });
+  var vol = $("#vol"); if(vol) vol.addEventListener("input", function(){ setVol(+vol.value); });
+  $$("[data-level]").forEach(function(b){ b.addEventListener("click", function(){ c.level = b.dataset.level; save(); render(); }); });
+  $$("[data-dec]").forEach(function(b){ b.addEventListener("click", function(){ c.decade = +b.dataset.dec; save(); $$("[data-dec]").forEach(function(x){ x.setAttribute("aria-pressed", String(+x.dataset.dec === c.decade)); }); }); });
+  var yr = $("#yr");
+  function setYear(n){ c.year = Math.max(1950, Math.min(2026, n)); if(yr) yr.value = c.year; say("yearnum", c.year); save(); }
+  if(yr){ yr.addEventListener("input", function(){ setYear(+yr.value); }); $$("[data-n]").forEach(function(b){ b.addEventListener("click", function(){ setYear(c.year + +b.dataset.n); }); }); }
+  var ty = $("#typed");
+  if(ty){
+    ty.addEventListener("input", function(){ ty.value = ty.value.replace(/\D/g, "").slice(0, 4); c.typed = ty.value; if(c.typed === "1066") toast("Adverts in 1066 were mostly tapestries."); if(c.typed === "1987") toast("Static on the line... the year 1987 says hello."); save(); });
+    $$("[data-t]").forEach(function(b){ b.addEventListener("click", function(){ var n = +c.typed || 1985; n = Math.max(1950, Math.min(2026, n + +b.dataset.t)); c.typed = String(n); ty.value = c.typed; save(); }); });
+  }
+  $$("[data-sure]").forEach(function(b){ b.addEventListener("click", function(){ c.sure = c.sure === b.dataset.sure ? "" : b.dataset.sure; save(); $$("[data-sure]").forEach(function(x){ x.setAttribute("aria-pressed", String(x.dataset.sure === c.sure)); }); }); });
+  on("clue", function(){ c.clue = !c.clue; save(); render(); });
+  on("rewatch", function(){ step("watch"); });
+  on("lock", function(){
+    if(c.level === "spicy"){ var n = +c.typed; c.year = n >= 1950 && n <= 2026 ? n : null; }
+    if(c.level === "mild" && c.decade == null){ toast("Tap a decade first, or switch to Medium and slide."); return; }
+    if(c.level === "spicy" && c.year == null){ toast("Type a year between 1950 and 2026, or switch to Mild or Medium."); return; }
+    step("reveal");
+  });
+  on("todetect", function(){ step("detect"); });
+  $$("[data-tech]").forEach(function(b){ b.addEventListener("click", function(){
+    var t = b.dataset.tech, i = c.tech.indexOf(t);
+    if(i >= 0) c.tech.splice(i, 1); else if(c.tech.length < 2) c.tech.push(t); else { toast("Two at most. Tap one again to swap it."); return; }
+    save(); $$("[data-tech]").forEach(function(x){ x.setAttribute("aria-pressed", String(c.tech.indexOf(x.dataset.tech) >= 0)); }); say("check", c.tech.length ? "Check our cards" : "Check");
+  }); });
+  on("check", function(){ step("checked"); });
+  on("nocheck", function(){ c.tech = []; step("checked"); });
+  on("toverdict", function(){ step("verdict"); });
+  $$("[data-star]").forEach(function(b){ b.addEventListener("click", function(){ var n = +b.dataset.star; c.stars = c.stars === n ? 0 : n; save(); render(); }); });
+  $$("[data-tier]").forEach(function(b){ b.addEventListener("click", function(){ c.tier = c.tier === b.dataset.tier ? "" : b.dataset.tier; save(); render(); }); });
+  var why = $("#why"); if(why) why.addEventListener("input", function(){ c.why = why.value; save(); });
+  on("file", function(){ finish(false); });
+  on("next", function(){ step(current() ? "watch" : "finale"); });
+  on("pause", function(){ st.step = "start"; save(); go("game"); toast("Saved. Carry on whenever you like."); });
+  /* finale */
+  var vs = $("#visit"); if(vs) vs.addEventListener("change", function(){ st.visit = vs.value || null; save(); });
+  var sk = $("#skipto"); if(sk) sk.addEventListener("change", function(){ st.skip = sk.value || null; save(); });
+  on("poster", tierPicture);
+  on("printit", function(){ report(); window.print(); });
+  on("post", post);
+  on("again", function(){ var r = $("#again").parentNode; r.innerHTML = '<span>Start again from round one? This clears this device\'s scores.</span><button type="button" class="alt" id="again2">Yes, fresh show</button><button type="button" class="quiet" id="again3">Keep it</button>'; on("again2", resetShow); on("again3", function(){ render(); }); });
+  var tb = $("#tb"); if(tb){ tb.addEventListener("input", function(){ st.teach = tb.value; save(); }); if(window.Base5Send) Base5Send.mount($("#tbsend"), { tool:"Time Travel TV", getText:textSummary, filename:"time-travel-tv" }); }
+  /* board */
+  if(display === "board" && !boardData && boardMsg === "") fetchBoard();
+  on("refresh", fetchBoard);
+  /* host */
+  $$("[data-off]").forEach(function(b){ b.addEventListener("click", function(){ var id = +b.dataset.off; if(st.off[id]) delete st.off[id]; else { if(lineup().length <= 1){ toast("The show needs at least one advert."); return; } st.off[id] = 1; } save(); render(); }); });
+  if(display === "host"){ bindLoaders(); haveAll().then(function(){ say("loadcount", loadedCount() + " of 12 loaded on this device."); $$(".lrow").forEach(function(r){ var id = +r.querySelector("[data-off]").dataset.off; r.querySelector(".ok").classList.toggle("yes", loaded(id)); }); }); }
+  $$("[data-prev]").forEach(function(b){ b.addEventListener("click", function(){
+    var a = adBy(+b.dataset.prev), card = $("#prevcard"); card.classList.remove("hidden"); say("prevlabel", "Preview: " + a.title);
+    fromCache(a.id).then(function(url){
+      var box = $("#prevbox"); if(!box) return;
+      box.innerHTML = '<video controls playsinline preload="auto"></video>';
+      var v = box.querySelector("video");
+      v.addEventListener("error", function(){ box.innerHTML = '<p class="note">Not loaded on this device yet.</p>'; });
+      v.addEventListener("loadedmetadata", function(){ if(a.start) v.currentTime = a.start; });
+      v.volume = Math.max(0, Math.min(1, a.gain * st.vol));
+      v.src = url || ("assets/adverts/ad" + pad(a.id) + ".mp4");
+      card.scrollIntoView({ behavior:"smooth", block:"center" });
+    });
+  }); });
+  on("unskip", function(){ doneIds().forEach(function(id){ if(st.results[id].skipped) delete st.results[id]; }); if(st.step === "finale") st.step = "start"; save(); render(); toast("Skipped adverts are back in the show."); });
+  on("forget", function(){ forget(); render(); toast("The adverts are gone from this device."); });
+  var hv = $("#hvol"); if(hv) hv.addEventListener("input", function(){ setVol(+hv.value); });
+  on("fx", function(){ st.effects = st.effects === "reduced" ? "full" : "reduced"; save(); render(); });
+  on("reset", function(){ $("#resetrow").innerHTML = '<span>Sure? Scores and the tier list on this device go.</span><button type="button" class="alt" id="reset2">Yes, start fresh</button><button type="button" class="quiet" id="reset3">Keep it</button>'; on("reset2", function(){ resetShow(); toast("Fresh show ready."); }); on("reset3", render); });
+  /* maker */
+  if(display === "make"){
+    var p = mk();
+    $$("[data-era]").forEach(function(b){ b.addEventListener("click", function(){ p.era = b.dataset.era; save(); render(); }); });
+    $$("[data-prod]").forEach(function(b){ b.addEventListener("click", function(){ p.prod = +b.dataset.prod; save(); render(); }); });
+    $$("[data-ptrick]").forEach(function(b){ b.addEventListener("click", function(){ var t = b.dataset.ptrick, i = p.tricks.indexOf(t); if(i >= 0) p.tricks.splice(i, 1); else if(p.tricks.length < 2) p.tricks.push(t); else { toast("Two tricks at most. Tap one to swap it."); return; } save(); render(); }); });
+    var pn = $("#pname"); pn.addEventListener("input", function(){ p.name = pn.value; save(); drawPoster(); });
+    var ps = $("#pslogan"); ps.addEventListener("input", function(){ p.slogan = ps.value; save(); drawPoster(); });
+    on("slogan", function(){ var s = SLOGANS[Math.floor(Math.random() * SLOGANS.length)].replace("{p}", PRODUCTS[p.prod].n.toLowerCase()); p.slogan = s; ps.value = s; save(); drawPoster(); });
+    on("dlposter", function(){ savePng($("#pc"), "my-advert-" + p.era + ".png"); });
+    drawPoster();
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(drawPoster);
+    if(window.Base5Send && Base5Send.mountImage) Base5Send.mountImage($("#psend"), { tool:"Time Travel TV advert poster", filename:"advert-poster", getImage:function(){ return $("#pc").toDataURL("image/png"); } });
+  }
+}
+function on(id, fn){ var e = document.getElementById(id); if(e) e.addEventListener("click", fn); }
+function finish(skipped){
+  var a = current(); if(!a) return;
+  var c = st.cur, yp = skipped ? 0 : yearPoints(a, c), tp = skipped ? 0 : techPoints(a, c.tech), max = LEVELS[c.level].max;
+  st.results[a.id] = { id:a.id, level:c.level, guess:skipped ? "-" : guessLabel(c), sure:c.sure, tech:skipped ? [] : c.tech.slice(),
+    yearPoints:yp, techPoints:tp, points:yp + tp, stars:skipped ? 0 : c.stars, tier:skipped ? "" : c.tier, why:skipped ? "" : c.why,
+    skipped:!!skipped, fooled:!skipped && c.sure === "Very sure" && yp < max * 0.4, at:new Date().toISOString() };
+  st.lastId = a.id; st.cur = blankCur(c.level);
+  step(skipped ? (current() ? "watch" : "finale") : "filed");
+}
+function resetShow(){ var keep = { off:st.off, vol:st.vol, effects:st.effects, base:st.base, poster:st.poster }; st = fresh(); for(var k in keep) st[k] = keep[k]; save(); display = "game"; render(); }
+
+/* nav */
+$$(".nav button").forEach(function(b){ b.addEventListener("click", function(){ if(b.dataset.go === "board") boardMsg = ""; boardData = b.dataset.go === "board" ? null : boardData; go(b.dataset.go); }); });
+
+/* ---------- hidden surprises (never scored) ---------- */
+var tvTaps = 0, airTaps = 0;
+$("#tvlogo").addEventListener("click", function(){ if(++tvTaps === 4){ tvTaps = 0; critter("bird"); toast(isB5() ? "A bird has got into the studio. Jay is delighted." : "A bird has got into the studio. Nobody knows how."); } });
+$("#onair").addEventListener("click", function(){ if(++airTaps === 3){ airTaps = 0; critter("dog"); toast(isB5() ? "Executive producer Bonnie has approved this broadcast." : "The studio dog has approved this broadcast."); } });
+function critter(kind){
+  if(st.effects === "reduced") return;
+  var d = document.createElement("div"); d.className = "critter " + (kind === "dog" ? "walk" : "fly"); d.setAttribute("aria-hidden", "true");
+  d.innerHTML = kind === "dog"
+    ? '<svg viewBox="0 0 120 80"><path d="M20 50q-6-22 14-24h40l10-14q8-4 14 2l6 10q4 8-4 10l-6 2v20h-8l-2-14H44l-4 14h-8l-2-16q-8 0-10 10z" fill="#8a5a3b" stroke="#1f2a37" stroke-width="3" stroke-linejoin="round"/><circle cx="98" cy="18" r="2.5" fill="#1f2a37"/><path d="M20 50q-10-4-12-14" fill="none" stroke="#1f2a37" stroke-width="4" stroke-linecap="round"/><rect x="40" y="2" width="44" height="18" rx="4" fill="#ffc93c" stroke="#1f2a37" stroke-width="2"/><text x="62" y="15" font-size="10" text-anchor="middle" font-weight="700" fill="#1f2a37">EXEC</text></svg>'
+    : '<svg viewBox="0 0 120 80"><path d="M20 44q20-30 40 0 20-30 40 0" fill="none" stroke="#1f2a37" stroke-width="6" stroke-linecap="round"/><ellipse cx="60" cy="46" rx="10" ry="6" fill="#007291"/></svg>';
+  document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 7500);
+}
+
+render();
+haveAll();
+})();
+</script>
+</body>
+</html>

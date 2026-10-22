@@ -411,6 +411,9 @@ function setup3_(ss){
   var qu = tab_(ss, "Questions", ["Time", "Who", "Subject", "From", "Question", "Answer", "Approved"]);
   qu.getRange(1, 9).setValue("Tick Approved and the question joins other students' daily drops (never shown with a name).");
   tab_(ss, "Postcards", ["Time", "Who", "Sent to", "Text"]);
+  var sc = tab_(ss, "Show scores", ["Time", "Base", "Score", "Adverts", "Hide"]);
+  try{ sc.getRange(2, 5, 500, 1).insertCheckboxes(); }catch(e){}
+  sc.getRange(1, 7).setValue("Time Travel TV team scores, sent only when a Base chooses. Tick Hide on any row to take that Base off the board.");
   var se = ss.getSheetByName("Sends");
   if(se && !String(se.getRange(1, 7).getValue())) se.getRange(1, 7, 1, 3).setValues([["Reply", "Replied", "Target"]]).setFontWeight("bold");
   var pe = ss.getSheetByName("People");
@@ -765,6 +768,35 @@ function fame_(r){
   }
   Object.keys(games).forEach(function(g){ games[g].sort(function(a, b){ return b.best - a.best; }); games[g] = games[g].slice(0, 3); });
   return { ok: true, games: games, mine: mine, on: on };
+}
+
+/* ---------- Time Travel TV: Base vs Base ----------
+   /projects/time-travel-tv.html. A Base puts its team score up only when it
+   presses "Put us on the board": just a Base name and a number, never a
+   student. Any school account can send one. Tick Hide on any row in the
+   "Show scores" tab and that Base disappears from the board. */
+function showName_(s){ return String(s == null ? "" : s).replace(/^'/, "").replace(/[^A-Za-z0-9 '&\-]/g, "").replace(/\s+/g, " ").trim().slice(0, 26); }
+function showScore_(r){
+  var base = showName_(r.base);
+  if(base.length < 2) throw new Error("bad base");
+  var score = Math.max(0, Math.min(2520, Math.round(+r.score || 0))), rounds = Math.max(0, Math.min(12, Math.round(+r.rounds || 0)));
+  var sh = sheet_("Show scores") || tab_(SpreadsheetApp.getActive(), "Show scores", ["Time", "Base", "Score", "Adverts", "Hide"]);
+  sh.appendRow([new Date(), plain_(base), score, rounds, false]);
+  return showBoard_({ base: base });
+}
+function showBoard_(r){
+  var v = rows_("Show scores"), best = {}, hidden = {}, me = showName_(r.base).toLowerCase();
+  for(var i = 1; i < v.length; i++){
+    var name = showName_(v[i][1]), k = name.toLowerCase();
+    if(!k) continue;
+    if(ticked_(v[i][4])){ hidden[k] = 1; continue; }
+    var s = +v[i][2] || 0;
+    if(!best[k] || s > best[k].score) best[k] = { base: name, score: s, rounds: +v[i][3] || 0 };
+  }
+  var all = Object.keys(best).filter(function(k){ return !hidden[k]; }).map(function(k){ return best[k]; })
+    .sort(function(a, b){ return b.score - a.score || (a.base < b.base ? -1 : 1); });
+  return { ok: true, top: all.slice(0, 3), also: all.slice(3).map(function(x){ return x.base; }).sort(),
+    mine: hidden[me] ? null : (best[me] || null), count: all.length };
 }
 
 /* ---------- Autumn 2 targets, ticked both ways ---------- */
@@ -1160,10 +1192,12 @@ function blinkDone_(r){
 var READ3 = {
   timeline: timeline_, shoutouts: shoutouts_, votes: votes_, fuel: function(){ return fuel_(); },
   ideas: function(){ return { ok: true, items: ideasList_(false) }; }, wall: function(){ return wall_(); },
-  fame: fame_, targets: targets_, picks: picks_, blink: blink_, questions: questions_, postcard: postcard_, board: function(){ return board_(); }
+  fame: fame_, targets: targets_, picks: picks_, blink: blink_, questions: questions_, postcard: postcard_, board: function(){ return board_(); },
+  showboard: showBoard_
 };
 var WRITE3 = {
   reply: reply_, shout: shout_, pick: pick_, shoutseen: shoutSeen_, tag: tag_, vote: vote_, plus: plus_, ideastatus: ideaStatus_,
   post: post_, approve: approve_, score: score_, optin: optin_, tick: tick_, question: question_, sendpostcard: sendPostcard_,
-  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_, buddybank: buddyBank_
+  a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_, buddybank: buddyBank_,
+  showscore: showScore_
 };
