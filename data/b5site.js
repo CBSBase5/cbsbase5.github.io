@@ -190,7 +190,7 @@ function guestBanner(){
   var b = document.createElement("div");
   b.className = "b5guest"; b.setAttribute("role", "note");
   b.innerHTML = "<b>Guest mode</b><span>Look around as much as you like. Nothing you do is saved or sent, and no student's own work is shown.</span>" +
-    "<span class='gx'><a href='/guest/'>About Base 5</a><a href='/guest/?guest=0' data-leave>Leave guest mode</a></span>";
+    "<span class='gx'><a href='/parents/'>About Base 5</a><a href='/parents/?guest=0' data-leave>Leave guest mode</a></span>";
   document.body.insertBefore(b, document.body.firstChild);
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", guestBanner); else guestBanner();

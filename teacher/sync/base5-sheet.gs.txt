@@ -239,7 +239,7 @@ function send_(b){
   if(WHO.indexOf(who) >= 0) logEvents_(who, [["Sent to Jay", what]]);
   if(what === "Idea for the site"){
     var idea = text.replace(/^An idea for the Base 5 site:\s*/, "").trim();
-    if(idea && idea !== "(nothing typed yet)") sheet_("Ideas").appendRow([new Date(), plain_(idea.slice(0, 500)), "Thinking about it", "", 0, "", false]);
+    if(idea && idea !== "(nothing typed yet)") sheet_("Ideas").appendRow([new Date(), plain_(idea.slice(0, 500)), "Thinking about it", "", 0, "", false, false]);
   }
   try{
     var on = String(setting_("Email me sends")).toUpperCase() === "TRUE", to = String(setting_("Email address")).trim();
@@ -399,7 +399,8 @@ function setup3_(ss){
   tab_(ss, "Fuel weeks", ["Week", "Sparks", "Target", "Helpers", "Updated"]);
   var pk = tab_(ss, "Picks", ["Day", "Name", "Choice", "Reason", "Updated"]);
   pk.getRange(1, 7).setValue("Filled in from /teacher/picks.html: staff picks for each day's Would you rather (a or b), shown to students after they choose.");
-  var id = tab_(ss, "Ideas", ["Time", "Idea", "Status", "Link", "Plus", "Voters", "Hide"]);
+  var id = tab_(ss, "Ideas", ["Time", "Idea", "Status", "Link", "Plus", "Voters", "Hide", "Approved"]);
+  if(!String(id.getRange(1, 8).getValue())) id.getRange(1, 8).setValue("Approved").setFontWeight("bold");
   id.getRange(2, 3, 300, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(["Thinking about it", "Building it", "Done", "Not this time"], true).build());
   var wa = tab_(ss, "Wall", ["Time", "Who", "Text", "Approved", "Hide"]);
   wa.getRange(1, 7).setValue("Tick Approved to put a post on the wall. Who is never shown.");
@@ -677,11 +678,15 @@ function pick_(r){
 }
 
 /* ---------- ideas board ---------- */
+/* New ideas wait for Jay (Approved is FALSE) before they show on the board. Rows from
+   before the Approved column (blank) were already on the board, so they stay. */
+function ideaWaiting_(x){ return x === false || String(x).toUpperCase() === "FALSE"; }
 function ideasList_(all){
   var v = rows_("Ideas"), out = [];
   for(var i = 1; i < v.length; i++){
-    if(!v[i][1] || (!all && ticked_(v[i][6]))) continue;
-    out.push({ row: i + 1, idea: String(v[i][1]), status: String(v[i][2] || "Thinking about it"), link: String(v[i][3] || ""), plus: +v[i][4] || 0, hidden: ticked_(v[i][6]) });
+    var waiting = ideaWaiting_(v[i][7]);
+    if(!v[i][1] || (!all && (ticked_(v[i][6]) || waiting))) continue;
+    out.push({ row: i + 1, idea: String(v[i][1]), status: String(v[i][2] || "Thinking about it"), link: String(v[i][3] || ""), plus: +v[i][4] || 0, hidden: ticked_(v[i][6]), waiting: waiting });
   }
   return out.reverse();
 }
@@ -699,6 +704,7 @@ function ideaStatus_(r){
   if(r.status) sh.getRange(row, 3).setValue(clean_(r.status, 40));
   if(r.link != null) sh.getRange(row, 4).setValue(clean_(r.link, 300));
   if(r.hide != null) sh.getRange(row, 7).setValue(!!r.hide);
+  if(r.approve != null) sh.getRange(row, 8).setValue(!!r.approve);
   return { ok: true };
 }
 

@@ -225,12 +225,12 @@ window.B5TERM = {
       cc:"",
       era:{ year:"2026", label:"Now" },
       theme:"Through the door",
-      sub:"Four days. The first one starts at a museum.",
+      sub:"Four days. The first one starts with a trip.",
       days:{
         mon:{ off:true, line:"INSET day. No school, see you Tuesday." },
         tue:{
           title:"First day back",
-          line:"Straight out to a local museum. The first trip back in time.",
+          line:"Straight out on the first trip back in time.",
           trip:{
             where:"A local museum",
             body:"First day back, and the whole of it is a trip back in time. A museum is a building full of things that survived. Nobody needs to write anything down, and nothing gets handed in.",
@@ -357,6 +357,34 @@ window.B5TERM = {
   var SUBJ = { maths:"maths", english:"english", core:"core", forest:"science", hort:"science", digital:"dm",
     project:"project", aesthetic:"ac", physical:"pw", pe:"pe", pfa:"pfa", phse:"phse", cc:"cc", brain:"brain", trip:"trip" };
   T.subjectOf = function(key){ return SUBJ[key] || ""; };
+
+  /* Where a trip goes shows only on a school account (students and staff).
+     The public, parents and guests see no place name: trip details go to
+     families directly from school. Once this tab is confirmed as a school
+     account, the page reloads once to show the place. */
+  var SCHOOL = "b5.school.v1";
+  T.onSchool = function(){
+    if(window.B5Site && B5Site.guest) return false;
+    try{ return sessionStorage.getItem(SCHOOL) === "1"; }catch(e){ return false; }
+  };
+  T.tripPlace = function(dd){
+    if(!dd || !dd.trip || !dd.trip.where) return "";
+    if(T.onSchool()) return dd.trip.where;
+    T.hidPlace = true;
+    return "";
+  };
+  function checkSchool(){
+    var S = window.B5Site;
+    if(!T.hidPlace || !S || S.guest || !S.call || !S.syncUrl || T.onSchool()) return;
+    S.call("whoami").then(function(o){
+      if(o && o.ok && (o.who || o.staff)){
+        try{ sessionStorage.setItem(SCHOOL, "1"); }catch(e){ return; }
+        location.reload();
+      }
+    }).catch(function(){});
+  }
+  if(document.readyState === "complete") setTimeout(checkSchool, 0);
+  else window.addEventListener("load", checkSchool);
 
   /* Turns "1:15" into minutes past midnight, school day style */
   T.mins = function(t){

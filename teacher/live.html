@@ -122,7 +122,7 @@
   <div id="view" hidden>
     <div class="weektheme"><h2>The HQs</h2><span id="stamp"></span></div>
     <div class="kids" id="kids"></div>
-    <div class="box" id="waitBox" hidden><h2>Waiting for you</h2><p class="help">Wall posts and student-made questions only go out once you approve them. Ideas show on the ideas board with the status you pick.</p><div id="wait"></div></div>
+    <div class="box" id="waitBox" hidden><h2>Waiting for you</h2><p class="help">Wall posts, student-made questions and new ideas only go out once you approve them. Ideas on the board show the status you pick.</p><div id="wait"></div></div>
     <div class="box" id="tlBox">
       <h2>Timeline</h2>
       <p class="help">Everything one student did on the site, from the sheet: check-ins, chunks, finishes, new bests, sends and target ticks. Copy it into a note, or download it as a Word document.</p>
@@ -392,6 +392,11 @@ function drawWait(o){
       '<div class="row2"><button class="mini go" data-ap="Questions" data-r="' + x.row + '">Add it to the daily drops</button><button class="mini" data-no="Questions" data-r="' + x.row + '">Not this one</button></div></div>';
   });
   ideas.forEach(function(x){
+    if(x.waiting){
+      h += '<div class="wait"><p><b>A new idea for the site</b> <small>(never shown with a name)</small></p><p>' + esc(x.idea) + '</p>' +
+        '<div class="row2"><button class="mini go" data-ideaok="' + x.row + '">Put it on the ideas board</button><button class="mini" data-hide="' + x.row + '">Leave it off</button></div></div>';
+      return;
+    }
     h += '<div class="wait"><p><b>Idea for the site</b> <small>+' + x.plus + '</small></p><p>' + esc(x.idea) + '</p><div class="row2"><select data-idea="' + x.row + '">' +
       IDEA.map(function(s){ return '<option' + (s === x.status ? " selected" : "") + '>' + s + '</option>'; }).join("") + '</select><button class="mini" data-hide="' + x.row + '">Hide from the board</button></div></div>';
   });
@@ -403,6 +408,9 @@ function drawWait(o){
   });
   [].forEach.call($("wait").querySelectorAll("select[data-idea]"), function(sel){
     sel.onchange = function(){ sel.disabled = true; call("ideastatus", { row: +sel.dataset.idea, status: sel.value }).then(function(){ sel.disabled = false; }, function(){ sel.disabled = false; }); };
+  });
+  [].forEach.call($("wait").querySelectorAll("[data-ideaok]"), function(b){
+    b.onclick = function(){ b.disabled = true; call("ideastatus", { row: +b.dataset.ideaok, approve: true }).then(after(b), function(){ b.disabled = false; }); };
   });
   [].forEach.call($("wait").querySelectorAll("[data-hide]"), function(b){
     b.onclick = function(){ b.disabled = true; call("ideastatus", { row: +b.dataset.hide, hide: true }).then(after(b), function(){ b.disabled = false; }); };
