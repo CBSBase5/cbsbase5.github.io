@@ -181,9 +181,16 @@ h1 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 700; font-si
     var weeks = weeksOf(DAYS);
     if (!weeks.length) { $('menu').innerHTML = '<div class="msg">The menu is not available right now. Please try again later.</div>'; return; }
     if (WEEK >= weeks.length) WEEK = 0;
-    var labels = ['This week', 'Next week', 'Week after'];
+    // Labels from the real dates, so at the weekend the coming week is "Next week".
+    var tk = todayKey(), td = new Date(tk + 'T12:00:00Z'), mon = new Date(td);
+    mon.setUTCDate(td.getUTCDate() - (td.getUTCDay() + 6) % 7);
+    var monKey = mon.toISOString().slice(0, 10);
+    var wkLabel = function (w) {
+      var diff = Math.round((new Date(w[0].date + 'T12:00:00Z') - new Date(monKey + 'T12:00:00Z')) / 604800000);
+      return diff === 0 ? 'This week' : diff === 1 ? 'Next week' : 'Week of ' + nice(w[0].date);
+    };
     $('weeks').innerHTML = weeks.map(function (w, i) {
-      return '<button type="button" data-w="' + i + '" aria-pressed="' + (i === WEEK) + '">' + (labels[i] || 'Week of ' + nice(w[0].date)) + '</button>';
+      return '<button type="button" data-w="' + i + '" aria-pressed="' + (i === WEEK) + '">' + wkLabel(w) + '</button>';
     }).join('');
     var wk = weeks[WEEK], name = (wk.filter(function (d) { return d.week; })[0] || {}).week || '';
     var allClosed = wk.every(function (d) { return d.closed; });
