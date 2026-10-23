@@ -30,7 +30,7 @@ window.B5PARENTS = {
 
   /* Lunch: the school menu as a PDF (upload it to the parents folder on GitHub as
      lunch-menu.pdf, or link one the school publishes). Leave "" for none. */
-  lunchPdf: "",
+  lunchPdf: "/parents/lunch-menu.pdf",
   lunchPdfLabel: "The school lunch menu (PDF)",
 
   /* How lunch works for Base 5. [title, text] */
