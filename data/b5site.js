@@ -210,12 +210,17 @@ function bridgeDown(){
 }
 function bridgeFor(url){
   if(bridges[url]) return bridges[url];
-  var waiting = {}, seq = 0, target = null, origin = null;
+  var waiting = {}, seq = 0, target = null, origin = null, frame = null;
+  /* The web app can take a while to wake up. Pages that need it (staff pages, the
+     student gate) set B5Site.bridgeWait to wait longer. A bridge that never opened is
+     thrown away, so the next call (or Try again) starts a fresh one. */
   var ready = new Promise(function(res, rej){
     var t = setTimeout(function(){
       try{ sessionStorage.setItem(DOWN, String(Date.now())); }catch(e){}
+      if(bridges[url] === me) delete bridges[url];
+      if(frame && frame.parentNode) frame.parentNode.removeChild(frame);
       rej(new Error("no bridge"));
-    }, 10000);
+    }, (window.B5Site && +window.B5Site.bridgeWait) || 10000);
     window.addEventListener("message", function(e){
       var d = e.data;
       if(!d || (d.b5 !== "ready" && d.b5 !== "res")) return;
@@ -227,7 +232,7 @@ function bridgeFor(url){
       try{ w.res(JSON.parse(d.body)); }catch(err){ w.rej(err); }
     });
     function make(){
-      var f = document.createElement("iframe");
+      var f = frame = document.createElement("iframe");
       f.src = url + (url.indexOf("?") < 0 ? "?" : "&") + "bridge=1";
       f.title = "Base 5 shared memory"; f.setAttribute("aria-hidden", "true"); f.tabIndex = -1;
       f.style.cssText = "position:absolute;width:1px;height:1px;left:-9999px;top:0;border:0;opacity:0;pointer-events:none";
@@ -235,7 +240,7 @@ function bridgeFor(url){
     }
     if(document.body) make(); else document.addEventListener("DOMContentLoaded", make);
   });
-  bridges[url] = {
+  var me = bridges[url] = {
     send: function(req){
       return ready.then(function(){
         return new Promise(function(res, rej){
@@ -247,8 +252,10 @@ function bridgeFor(url){
       });
     }
   };
-  return bridges[url];
+  return me;
 }
+/* forget a bridge that would not open, so the next call tries again straight away */
+function retryBridge(){ try{ sessionStorage.removeItem(DOWN); }catch(e){} }
 function call(action, data, url){
   url = url || SYNC_URL;
   if(!url) return Promise.reject(new Error("off"));
@@ -258,7 +265,7 @@ function call(action, data, url){
   return bridgeFor(url).send(req);
 }
 
-window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown,
+window.B5Site = { hq: hq ? hq.who : null, prefix: hq ? hq.prefix : null, syncUrl: SYNC_URL, guest: GUEST, call: call, bridgeDown: bridgeDown, retryBridge: retryBridge, bridgeWait: 0,
   syncWho: hq ? hq.who : (PROJECTS[path] || {}).who || null,
   syncPrefix: hq ? hq.prefix : (PROJECTS[path] || {}).prefix || null };
 /* a student's own pages (their HQ and project page) open for their school account, staff, or their code */

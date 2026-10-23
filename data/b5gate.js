@@ -18,6 +18,7 @@
 if(window.B5Gate) return;
 var S = window.B5Site, who = S && (S.hq || S.syncWho);
 if(!who || S.guest || /^\/autumn-1\//.test(location.pathname) || /\/teacher\.html$/.test(location.pathname)){ window.B5Gate = { ready: Promise.resolve(true) }; return; }
+S.bridgeWait = Math.max(+S.bridgeWait || 0, 20000);
 var d = document, html = d.documentElement, OK = "b5.gate.ok." + who, MEM = "b5.gate.code." + who, DAYS = 30;
 var BASES = { EGW: "/egw/", LP: "/lp/", LW: "/lw/", LC: "/lc/", HK: "/hk/", JT: "/jt-hq/" };
 function sget(st, k){ try{ return st.getItem(k); }catch(e){ return null; } }
@@ -89,7 +90,10 @@ function show(kind, other){
 function check(){
   if(!S.call || !S.syncUrl){ show("down"); return; }
   show("wait");
-  var settled = false, timer = setTimeout(function(){ if(!settled){ settled = true; show("down"); } }, 12000);
+  /* wait a little longer than background features: the sheet can be slow to wake up */
+  if(S.retryBridge) S.retryBridge();
+  S.bridgeWait = 20000;
+  var settled = false, timer = setTimeout(function(){ if(!settled){ settled = true; show("down"); } }, 22000);
   S.call("whoami").then(function(o){
     if(settled) return; settled = true; clearTimeout(timer);
     if(o && o.ok && (o.staff || String(o.who || "").toUpperCase() === who)){ open(); return; }
