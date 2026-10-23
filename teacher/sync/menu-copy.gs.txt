@@ -1,0 +1,73 @@
+/* ==========================================================
+   Base 5 - lunch menu copy for the website
+   The school's Google settings only let people in the trust see
+   the published lunch menu, so the parent portal and the school
+   lunch menu page (both public) cannot read it. This small script
+   runs in your own Google account, reads the Menu sheet of the
+   "Lunch menu for families (public)" spreadsheet once an hour, and,
+   when the dishes change, saves a copy to the website as
+   /data/menu.csv. Dish names only, exactly as on that sheet.
+   It does not touch the lunch orders system.
+
+   Setting it up (once):
+   1. On GitHub, signed in as CBSBase5: Settings, Developer settings,
+      Personal access tokens, Fine-grained tokens, Generate new token.
+      Name it "Base 5 lunch menu". Expiration: up to a year.
+      Repository access: Only select repositories, cbsbase5.github.io.
+      Permissions: Repository permissions, Contents: Read and write.
+      Generate it and copy it (it starts github_pat_).
+   2. Go to script.new, signed in to your school account. Name the
+      project "Base 5 lunch menu copy". Paste all of this file over
+      what is there, and save.
+   3. Project Settings (the cog), Script Properties, Add script property:
+        GITHUB_TOKEN    the token from step 1
+        MENU_SHEET_ID   the long id in the menu spreadsheet's address:
+                        docs.google.com/spreadsheets/d/THIS_PART/edit
+      Save.
+   4. Back in the editor, choose "setup" at the top and press Run.
+      Allow it when Google asks. It copies the menu straight away
+      and then every hour.
+   When the token expires, make a new one and replace GITHUB_TOKEN.
+   ========================================================== */
+var REPO = "CBSBase5/cbsbase5.github.io", PATH = "data/menu.csv", BRANCH = "main", SHEET = "Menu";
+
+function setup(){
+  ScriptApp.getProjectTriggers().forEach(function(t){ if(t.getHandlerFunction() === "copyMenu") ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger("copyMenu").timeBased().everyHours(1).create();
+  PropertiesService.getScriptProperties().deleteProperty("LAST");
+  var r = copyMenu();
+  Logger.log(r);
+  return r;
+}
+
+function copyMenu(){
+  var p = PropertiesService.getScriptProperties();
+  var token = String(p.getProperty("GITHUB_TOKEN") || "").trim(), id = String(p.getProperty("MENU_SHEET_ID") || "").trim();
+  if(!token || !id) throw new Error("Add GITHUB_TOKEN and MENU_SHEET_ID in Project Settings, Script Properties (see the top of this file).");
+  var sh = SpreadsheetApp.openById(id).getSheetByName(SHEET);
+  if(!sh) throw new Error("No sheet called " + SHEET + " in that spreadsheet.");
+  var v = sh.getDataRange().getDisplayValues().filter(function(r){ return r.some(function(c){ return String(c).trim() !== ""; }); });
+  if(!v.length || String(v[0][0]).trim() !== "Date") throw new Error("That does not look like the menu: the first column should be Date.");
+  var csv = v.map(function(r){ return r.map(cell_).join(","); }).join("\n") + "\n";
+  /* only save when the dishes change, not just the Updated time */
+  var u = v[0].indexOf("Updated");
+  var key = JSON.stringify(v.map(function(r){ return r.filter(function(c, i){ return i !== u; }); }));
+  var hash = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, key, Utilities.Charset.UTF_8));
+  if(p.getProperty("LAST") === hash) return "No change to the dishes.";
+  var api = "https://api.github.com/repos/" + REPO + "/contents/" + PATH;
+  var headers = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+  var sha = null, got = UrlFetchApp.fetch(api + "?ref=" + BRANCH, { headers: headers, muteHttpExceptions: true });
+  if(got.getResponseCode() === 200) sha = JSON.parse(got.getContentText()).sha;
+  else if(got.getResponseCode() !== 404) throw new Error("GitHub said " + got.getResponseCode() + ": " + got.getContentText().slice(0, 300));
+  var body = { message: "Lunch menu copy updated from the menu sheet", content: Utilities.base64Encode(csv, Utilities.Charset.UTF_8), branch: BRANCH };
+  if(sha) body.sha = sha;
+  var put = UrlFetchApp.fetch(api, { method: "put", headers: headers, contentType: "application/json", payload: JSON.stringify(body), muteHttpExceptions: true });
+  if(put.getResponseCode() >= 300) throw new Error("GitHub said " + put.getResponseCode() + ": " + put.getContentText().slice(0, 300));
+  p.setProperty("LAST", hash);
+  return "Copied the menu to the website (" + (v.length - 1) + " days).";
+}
+
+function cell_(c){
+  c = String(c == null ? "" : c);
+  return /[",\n\r]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c;
+}
