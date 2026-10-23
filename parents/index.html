@@ -410,7 +410,22 @@ function loadMenu(){
     return rows;
   }
   function none(t){ $("menu").innerHTML = '<p class="muted" style="margin:0">' + t + ' The <a href="/lunch/">school lunch menu page</a> has the full menu.</p>'; }
-  fetch(CSV, { cache: "no-store" }).then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(text){
+  /* two tries (the second skips any cache), then a calm message; the reason goes to the console */
+  function get(n){
+    return fetch(CSV + (n ? (CSV.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now() : ""), n ? {} : { cache: "no-store" }).then(function(r){
+      if(!r.ok) throw new Error("the menu answered HTTP " + r.status);
+      return r.text();
+    }).catch(function(e){ if(!n) return get(1); throw e; });
+  }
+  get(0).then(function(text){
+    if(!/(^|,)Date(,|$)/m.test(text.slice(0, 400))) throw new Error("the menu link did not give the menu (is the Menu sheet still published to the web, as CSV, open to everyone?)");
+    try{ draw(text); }catch(e){ e.drawing = true; throw e; }
+  }).catch(function(e){
+    try{ console.warn("Base 5 parent portal, lunch menu: " + (e && e.message || e)); }catch(x){}
+    $("menu").setAttribute("data-why", String(e && e.message || e));
+    none(e && e.drawing ? "The menu could not be shown just now." : "The menu could not be loaded just now.");
+  });
+  function draw(text){
     var rows = csv(text), head = rows[0] || [];
     function col(n){ return head.indexOf(n); }
     var days = rows.slice(1).map(function(r){
@@ -444,7 +459,7 @@ function loadMenu(){
         (trip ? '<p class="packed">Trip day: Base 5 takes packed lunches.</p>' :
           '<dl>' + item("Main", d.main) + item("Vegetarian", d.veg) + item("Grab and go", d.grab) + item("Pudding", d.pud) + '</dl>') + '</div>';
     }).join("");
-  }).catch(function(){ none("The menu could not be loaded just now."); });
+  }
 }
 })();
 </script>
