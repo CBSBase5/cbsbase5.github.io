@@ -1,0 +1,51 @@
+# Keeps a copy of the school's published lunch menu on the site, at /data/menu.csv.
+# Some browsers and school networks stop web pages reading the menu straight from
+# Google, so the parent portal and the school lunch menu page read this copy first.
+# Dish names only, exactly as published in "Lunch menu for families (public)".
+# Runs every hour in the day, and can be run by hand from the Actions tab.
+name: Lunch menu copy
+on:
+  schedule:
+    - cron: "23 5-18 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: lunch-menu
+  cancel-in-progress: false
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the published menu
+        env:
+          MENU_CSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQNrSf5QLjvs1ZRrYJLTy4J531Rr2zp5Z5jnaNz-PYBJ8v4IhqDk6RwS_B1itxJ5rDkV0WcVvtuyFzx/pub?gid=0&single=true&output=csv"
+        run: |
+          curl -fsSL --retry 3 "$MENU_CSV" -o /tmp/menu.csv
+          head -c 200 /tmp/menu.csv
+          head -1 /tmp/menu.csv | grep -q '^Date,' || { echo "That did not look like the menu, so the copy is left as it was."; exit 0; }
+          python3 - <<'PY'
+          import csv, os, shutil
+          def rows(p):
+              with open(p, newline="", encoding="utf-8") as f:
+                  r = list(csv.reader(f))
+              if not r: return []
+              u = r[0].index("Updated") if "Updated" in r[0] else -1
+              return [[c for i, c in enumerate(x) if i != u] for x in r]
+          new, old = "/tmp/menu.csv", "data/menu.csv"
+          if not os.path.exists(old) or rows(new) != rows(old):
+              shutil.copyfile(new, old)
+              print("The menu changed, so the copy is updated.")
+          else:
+              print("No change to the dishes.")
+          PY
+      - name: Save the copy
+        run: |
+          if [ -n "$(git status --porcelain data/menu.csv)" ]; then
+            git config user.name "Base 5 lunch menu"
+            git config user.email "actions@users.noreply.github.com"
+            git add data/menu.csv
+            git commit -m "Lunch menu copy updated from the published menu"
+            git push
+          fi

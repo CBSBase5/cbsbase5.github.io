@@ -424,7 +424,16 @@ function loadMenu(){
       return r.text();
     }).catch(function(e){ if(!n) return get(1); throw e; });
   }
-  get(0).then(function(text){
+  /* first the copy on this site (/data/menu.csv, refreshed every hour by the "Lunch menu
+     copy" workflow) while it still reaches today, then the published menu itself */
+  function local(){
+    return fetch("/data/menu.csv", { cache: "no-store" }).then(function(r){ if(!r.ok) throw new Error("no copy on the site"); return r.text(); }).then(function(t){
+      var ds = (t.match(/^\d{4}-\d{2}-\d{2}/mg) || []).sort();
+      if(!ds.length || ds[ds.length - 1] < T.todayIso()) throw new Error("the copy on the site is out of date");
+      return t;
+    });
+  }
+  local().catch(function(){ return get(0); }).then(function(text){
     if(!/(^|,)Date(,|$)/m.test(text.slice(0, 400))) throw new Error("the menu link did not give the menu (is the Menu sheet still published to the web, as CSV, open to everyone?)");
     try{ draw(text); }catch(e){ e.drawing = true; throw e; }
   }).catch(function(e){

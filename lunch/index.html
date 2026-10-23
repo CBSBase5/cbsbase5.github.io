@@ -225,11 +225,25 @@ h1 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 700; font-si
   });
 
   if (!MENU_CSV) { $('sample').hidden = false; DAYS = sample(); render(); return; }
-  fetch(MENU_CSV, { cache: 'no-store' }).then(function (r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.text();
-  }).then(function (text) {
-    DAYS = toDays(parseCsv(text));
+  // First the copy on this site (/data/menu.csv, refreshed from the published menu every
+  // hour by the "Lunch menu copy" workflow), as long as it still reaches today; then the
+  // published menu itself; then the published sheet shown as it is.
+  function get(url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function (text) {
+      var days = toDays(parseCsv(text));
+      if (!days.length) throw new Error('not the menu');
+      return days;
+    });
+  }
+  get('/data/menu.csv').then(function (days) {
+    var last = days.map(function (d) { return d.date; }).sort().pop();
+    if (last < todayKey()) throw new Error('old copy');
+    return days;
+  }).catch(function () { return get(MENU_CSV); }).then(function (days) {
+    DAYS = days;
     render();
   }).catch(function () {
     // Some browsers and school networks block reading the menu file from another site.
