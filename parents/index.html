@@ -69,6 +69,23 @@
 .helps b{display:block}
 .helps p{margin:2px 0 0;font-size:.9rem}
 
+/* lunch */
+.menu{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media (max-width:900px){.menu{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:540px){.menu{grid-template-columns:1fr}}
+.md{background:var(--white);border:2px solid var(--ink);border-radius:14px 10px 12px 9px;padding:10px 12px;box-shadow:3px 4px 0 rgba(10,47,56,.12)}
+.md.today{border-width:3px;border-color:var(--teal)}
+.md h3{margin:0;font-size:1rem}
+.md .when{display:block;font-size:.8rem;color:var(--body-tint);margin:0 0 6px}
+.md dl{margin:0}
+.md dt{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--body-tint);margin:6px 0 0}
+.md dd{margin:0;font-size:.9rem;line-height:1.35}
+.md .theme{display:inline-block;margin:0 0 4px;padding:2px 9px;border-radius:999px;background:var(--plum);color:var(--paper);font-size:.78rem;font-weight:700}
+.md .packed{margin:6px 0 0;padding:6px 8px;border-radius:8px;background:#fff1e4;border:2px solid var(--orange);font-size:.86rem;font-weight:700}
+.md.off{border-style:dashed;box-shadow:none;background:transparent;color:var(--body-tint)}
+.menuhead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:700}
+.menuhead .wk{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.84rem;background:var(--paper);border:2px solid rgba(10,47,56,.2)}
+
 /* how it works */
 .why{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media (max-width:820px){.why{grid-template-columns:1fr}}
@@ -124,7 +141,7 @@
   .weektheme{break-after:avoid}
   .urgent{padding:6px 10px}
   .sec{margin:0 0 12px}
-  #thisweek,#how,#look{display:none}
+  #thisweek,#lunch,#how,#look{display:none}
   .tt,.wk{grid-template-columns:repeat(5,1fr) !important;gap:6px}
   .safe{grid-template-columns:repeat(3,1fr) !important;gap:6px}
   .helps{grid-template-columns:repeat(2,1fr) !important;gap:6px}
@@ -160,7 +177,7 @@
       <p>The week, the timetable and the rhythm of each day, how the website keeps students safe, and who to talk to. Nothing on this page is about any one child.</p>
     </div>
     <nav class="jump" aria-label="On this page">
-      <a href="#thisweek">This week</a><a href="#timetable">Timetable</a><a href="#rhythms">Daily rhythms</a><a href="#how">How it works</a><a href="#safe">Keeping safe</a><a href="#worried">Worried about something?</a><a href="#contact">Questions</a><a href="#look">Look around</a>
+      <a href="#thisweek">This week</a><a href="#timetable">Timetable</a><a href="#rhythms">Daily rhythms</a><a href="#lunch">Lunch</a><a href="#how">How it works</a><a href="#safe">Keeping safe</a><a href="#worried">Worried about something?</a><a href="#contact">Questions</a><a href="#look">Look around</a>
     </nav>
   </div>
 </header>
@@ -189,6 +206,13 @@
     </div>
     <div class="wk" id="weekShape"></div>
     <div class="helps" id="helps"></div>
+  </section>
+
+  <section class="sec" id="lunch" aria-labelledby="l-h">
+    <div class="weektheme"><h2 id="l-h">Lunch</h2><span id="lunchLine">What the kitchen is cooking this week.</span></div>
+    <div class="menu" id="menu" aria-live="polite"><p class="muted" style="margin:0">Getting the menu...</p></div>
+    <div class="helps" id="lunchNotes"></div>
+    <p class="muted" style="margin:10px 0 0"><a href="/lunch/">See the full school lunch menu</a>, three weeks at a time.</p>
   </section>
 
   <section class="sec" id="how" aria-labelledby="how-h">
@@ -274,7 +298,7 @@
 </footer>
 
 <script src="/data/term.js?v=6"></script>
-<script src="/data/parents.js?v=2"></script>
+<script src="/data/parents.js?v=3"></script>
 <script>
 /* ?draft=1: preview the staff room's unsaved changes, on that device only */
 (function(){
@@ -303,7 +327,7 @@ var CT = P.contact || {};
 if(CT.name) [].forEach.call(document.querySelectorAll(".cname"), function(e){ e.textContent = CT.name; });
 if(CT.email){ $("cmail").textContent = CT.email; $("cmail").href = "mailto:" + CT.email; }
 var SH = P.show || {};
-["thisweek", "timetable", "rhythms", "how", "safe", "contact", "look"].forEach(function(id){
+["thisweek", "timetable", "rhythms", "lunch", "how", "safe", "contact", "look"].forEach(function(id){
   if(SH[id] === false){
     var sec = $(id); if(sec) sec.hidden = true;
     var a = document.querySelector('.jump a[href="#' + id + '"]'); if(a) a.hidden = true;
@@ -365,6 +389,63 @@ if(routes.length) h += '<ul class="lines" style="margin-bottom:10px">' + routes.
 $("sgTeam").innerHTML = h;
 $("sgChecked").textContent = G.checked ? "These details were last checked in " + G.checked + "." : "";
 if(G.office) $("officeLine").textContent = " on " + G.office;
+
+/* ---------- lunch: this week's school menu, with Base 5's own lunch times and trip days ---------- */
+$("lunchNotes").innerHTML = (P.lunch || []).map(function(h){ return '<div><b>' + esc(h[0]) + '</b><p>' + esc(h[1]) + '</p></div>'; }).join("");
+if(SH.lunch !== false) loadMenu();
+function loadMenu(){
+  /* the same published menu the school lunch menu page (/lunch/) reads: dish names only */
+  var CSV = P.menuCsv || "https://docs.google.com/spreadsheets/d/e/2PACX-1vQNrSf5QLjvs1ZRrYJLTy4J531Rr2zp5Z5jnaNz-PYBJ8v4IhqDk6RwS_B1itxJ5rDkV0WcVvtuyFzx/pub?gid=0&single=true&output=csv";
+  function csv(text){
+    var rows = [], row = [], f = "", q = false;
+    for(var i = 0; i < text.length; i++){
+      var c = text[i];
+      if(q){ if(c === '"'){ if(text[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+      else if(c === '"') q = true;
+      else if(c === ","){ row.push(f); f = ""; }
+      else if(c === "\n" || c === "\r"){ if(c === "\r" && text[i + 1] === "\n") i++; row.push(f); rows.push(row); row = []; f = ""; }
+      else f += c;
+    }
+    if(f !== "" || row.length){ row.push(f); rows.push(row); }
+    return rows;
+  }
+  function none(t){ $("menu").innerHTML = '<p class="muted" style="margin:0">' + t + ' The <a href="/lunch/">school lunch menu page</a> has the full menu.</p>'; }
+  fetch(CSV, { cache: "no-store" }).then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(text){
+    var rows = csv(text), head = rows[0] || [];
+    function col(n){ return head.indexOf(n); }
+    var days = rows.slice(1).map(function(r){
+      function g(n){ var i = col(n); return i >= 0 ? String(r[i] || "").replace(/^'/, "").trim() : ""; }
+      return { date: g("Date"), week: g("Week"), main: g("Main"), veg: g("Vegetarian"), grab: g("Grab and go"), pud: g("Pudding"), theme: g("Theme title") || g("Theme"), closed: g("No lunches") };
+    }).filter(function(d){ return /^\d{4}-\d{2}-\d{2}$/.test(d.date); });
+    /* this week, or next week from Saturday, or the first week the menu has */
+    var now = new Date(), wd = now.getDay(), mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((wd + 6) % 7) + (wd === 6 || wd === 0 ? 7 : 0));
+    var weekKeys = T.dayKeys.map(function(k, i){ return T.iso(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i)); });
+    var have = days.filter(function(d){ return weekKeys.indexOf(d.date) >= 0; });
+    if(!have.length){
+      var next = days.filter(function(d){ return d.date >= weekKeys[0]; })[0];
+      if(!next){ none("The menu for this week is not out yet."); return; }
+      var p = next.date.split("-"), nd = new Date(+p[0], +p[1] - 1, +p[2]);
+      mon = new Date(nd.getFullYear(), nd.getMonth(), nd.getDate() - ((nd.getDay() + 6) % 7));
+      weekKeys = T.dayKeys.map(function(k, i){ return T.iso(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i)); });
+      have = days.filter(function(d){ return weekKeys.indexOf(d.date) >= 0; });
+    }
+    var byDate = {}; have.forEach(function(d){ byDate[d.date] = d; });
+    var wname = (have.filter(function(d){ return d.week; })[0] || {}).week || "";
+    var today = T.todayIso(), MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    $("lunchLine").textContent = "The school menu for the week of " + mon.getDate() + " " + MONTHS[mon.getMonth()] + ", with Base 5's lunch times.";
+    $("menu").innerHTML = (wname ? '<div class="menuhead"><span class="wk">' + esc(wname) + ' week</span></div>' : "") + T.dayKeys.map(function(k, i){
+      var key = weekKeys[i], d = byDate[key], date = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
+      var slot = T.timetable[k].filter(function(s){ return s[2] === "lunch"; })[0], trip = isTripDay(k);
+      var head = '<h3>' + T.dayNames[k] + '</h3><span class="when">' + date.getDate() + " " + MON3[date.getMonth()] + (slot ? " &middot; lunch at " + slot[0] : trip ? " &middot; lunch while out" : "") + '</span>';
+      if(!d) return '<div class="md off">' + head + '<p style="margin:0;font-size:.88rem">Not on the menu yet.</p></div>';
+      if(d.closed) return '<div class="md off">' + head + '<p style="margin:0;font-size:.88rem">No school lunches' + (d.closed !== "Holiday" ? ": " + esc(d.closed) : "") + '.</p></div>';
+      function item(l, v){ return v ? '<dt>' + l + '</dt><dd>' + esc(v) + '</dd>' : ""; }
+      return '<div class="md' + (key === today ? " today" : "") + '">' + head + (d.theme ? '<span class="theme">' + esc(d.theme) + '</span>' : "") +
+        (trip ? '<p class="packed">Trip day: Base 5 takes packed lunches.</p>' :
+          '<dl>' + item("Main", d.main) + item("Vegetarian", d.veg) + item("Grab and go", d.grab) + item("Pudding", d.pud) + '</dl>') + '</div>';
+    }).join("");
+  }).catch(function(){ none("The menu could not be loaded just now."); });
+}
 })();
 </script>
 </body>

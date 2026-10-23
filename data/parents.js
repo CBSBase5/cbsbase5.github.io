@@ -26,7 +26,17 @@ window.B5PARENTS = {
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
 
   /* Sections that can be switched off. "Worried about something?" is always shown. */
-  show: { thisweek: true, timetable: true, rhythms: true, how: true, safe: true, contact: true, look: true },
+  show: { thisweek: true, timetable: true, rhythms: true, lunch: true, how: true, safe: true, contact: true, look: true },
+
+  /* Lunch: the school menu comes from the same published menu as /lunch/ (dish names
+     only, kept up to date by the lunch orders system). These notes explain how lunch
+     works for Base 5. [title, text] */
+  lunch: [
+    ["Ordered for them", "Base 5 staff order each student's lunch from the school kitchen ahead of time, so there is nothing to order from home."],
+    ["Trip days", "On trip days the kitchen makes packed lunches, and lunch happens while the group is out."],
+    ["Allergies and diets", "Chilton Bridge is a nut free school. Base 5 keeps a note of each student's allergies and diet for ordering. If anything changes, please tell Jay or the school office."],
+    ["The full menu", "The school's three week menu, with themed days and days with no lunches, is on the school lunch menu page."]
+  ],
 
   safeguarding: {
     /* [name, role], e.g. ["A Name", "Designated Safeguarding Lead"] */

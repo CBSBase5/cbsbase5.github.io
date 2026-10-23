@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/style.css?v=12">
 <script src="/data/b5site.js?v=7"></script>
 <script src="/data/b5staff.js?v=1"></script>
-<script src="/data/parents.js?v=2"></script>
+<script src="/data/parents.js?v=3"></script>
 <style>
 /* Settings for /parents/. Staff only. Builds a new /data/parents.js to upload. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -120,6 +120,13 @@ ol.steps li{margin:4px 0}
   </div>
 
   <div class="box">
+    <h2>Lunch</h2>
+    <p class="help">The menu itself comes from the lunch orders system, through the same published menu as the school lunch menu page, so it is not changed here. These notes explain how lunch works for Base 5. Base 5's lunch times and trip days come from the term file.</p>
+    <div class="rows" id="lunch"></div>
+    <button class="add" type="button" data-add="lunch">Add a note</button>
+  </div>
+
+  <div class="box">
     <h2>Keeping everyone safe</h2>
     <p class="help">How the website protects students. Keep each one true to how the site works: if a feature changes, change the words here too.</p>
     <div class="rows" id="safety"></div>
@@ -154,12 +161,13 @@ ol.steps li{margin:4px 0}
 "use strict";
 var DRAFT = "b5.parents.draft";
 var DAYS = [["mon", "Monday"], ["tue", "Tuesday"], ["wed", "Wednesday"], ["thu", "Thursday"], ["fri", "Friday"]];
-var SECTIONS = [["thisweek", "This week"], ["timetable", "Timetable"], ["rhythms", "Daily rhythms"], ["how", "How it works"], ["safe", "Keeping everyone safe"], ["contact", "Questions"], ["look", "Look around as a guest"]];
+var SECTIONS = [["thisweek", "This week"], ["timetable", "Timetable"], ["rhythms", "Daily rhythms"], ["lunch", "Lunch"], ["how", "How it works"], ["safe", "Keeping everyone safe"], ["contact", "Questions"], ["look", "Look around as a guest"]];
 var LISTS = {
   team: { cls: "ct", cols: [["Name", 60], ["Role, e.g. Designated Safeguarding Lead", 80]] },
   day: { cls: "c3", cols: [["Title", 40], ["When", 30], ["What it is like", 400, 1]] },
   helps: { cls: "c2", cols: [["Title", 40], ["What helps", 300, 1]] },
-  safety: { cls: "c2", cols: [["Title", 60], ["How it works", 400, 1]] }
+  safety: { cls: "c2", cols: [["Title", 60], ["How it works", 400, 1]] },
+  lunch: { cls: "c2", cols: [["Title", 40], ["What to know", 400, 1]] }
 };
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -171,7 +179,7 @@ function live(){
   L.show = L.show || {};
   L.safeguarding = L.safeguarding || { team: [], office: "", email: "", policy: "", checked: "" };
   L.safeguarding.team = L.safeguarding.team || [];
-  L.day = L.day || []; L.week = L.week || {}; L.helps = L.helps || []; L.safety = L.safety || [];
+  L.day = L.day || []; L.week = L.week || {}; L.helps = L.helps || []; L.safety = L.safety || []; L.lunch = L.lunch || [];
   return L;
 }
 var D = null;
@@ -238,7 +246,7 @@ function tidy(){
   function clean(x){ return typeof x === "string" ? plain(x).trim() : Array.isArray(x) ? x.map(clean) : x && typeof x === "object" ? (function(){ var r = {}; for(var k in x) r[k] = clean(x[k]); return r; })() : x; }
   o = clean(o);
   o.safeguarding.team = o.safeguarding.team.filter(function(r){ return r[0] || r[1]; });
-  ["day", "helps", "safety"].forEach(function(n){ o[n] = o[n].filter(function(r){ return r.some(function(c){ return c; }); }); });
+  ["day", "helps", "safety", "lunch"].forEach(function(n){ o[n] = o[n].filter(function(r){ return r.some(function(c){ return c; }); }); });
   return o;
 }
 function check(){
