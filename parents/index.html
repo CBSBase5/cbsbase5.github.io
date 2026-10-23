@@ -107,6 +107,8 @@
 .way2 small{display:block;color:var(--body-tint);font-size:.84rem;margin-top:3px}
 .way2:hover{transform:translateY(-2px)}
 [hidden]{display:none !important}
+.notice{margin:0 0 24px;padding:14px 18px;border:var(--border) solid var(--ink);border-left:12px solid var(--orange);border-radius:var(--r-alt);background:#fff1e4;font-weight:700;box-shadow:var(--lift)}
+.notice.draft{border-left-color:var(--plum);background:#f3ebf7}
 .state{font-size:.95rem;color:var(--body-tint);margin:6px 0 0}
 
 @media print{
@@ -164,6 +166,8 @@
 </header>
 
 <div class="wrap">
+
+  <div class="notice" id="notice" hidden></div>
 
   <section class="sec" id="thisweek" aria-labelledby="tw-h">
     <div class="weektheme"><h2 id="tw-h">This week</h2><span id="twRange"></span></div>
@@ -235,7 +239,7 @@
 
   <section class="sec" id="contact" aria-labelledby="c-h">
     <div class="weektheme"><h2 id="c-h">Questions</h2><span>Always welcome.</span></div>
-    <div class="pp"><p>Get in touch with Jay at <a href="mailto:jay.raine@chiltonbridgeschool.co.uk">jay.raine@chiltonbridgeschool.co.uk</a>, or through the school office<span id="officeLine"></span>. To see your child's own progress, ask them to show you on their device, or ask Jay.</p></div>
+    <div class="pp"><p>Get in touch with <span class="cname">Jay</span> at <a id="cmail" href="mailto:jay.raine@chiltonbridgeschool.co.uk">jay.raine@chiltonbridgeschool.co.uk</a>, or through the school office<span id="officeLine"></span>. To see your child's own progress, ask them to show you on their device, or ask <span class="cname">Jay</span>.</p></div>
   </section>
 
   <section class="sec" id="look" aria-labelledby="g-h">
@@ -270,7 +274,14 @@
 </footer>
 
 <script src="/data/term.js?v=6"></script>
-<script src="/data/parents.js?v=1"></script>
+<script src="/data/parents.js?v=2"></script>
+<script>
+/* ?draft=1: preview the staff room's unsaved changes, on that device only */
+(function(){
+  if(!/[?&]draft=1/.test(location.search)) return;
+  try{ var d = JSON.parse(localStorage.getItem("b5.parents.draft") || "null"); if(d && typeof d === "object"){ window.B5PARENTS = d; window.B5PARENTS_DRAFT = true; } }catch(e){}
+})();
+</script>
 <script>
 (function(){
 "use strict";
@@ -282,6 +293,22 @@ $("state").textContent = guest ? "You are in guest mode now. Look around, then l
 $("leave").hidden = !guest;
 $("enter").textContent = guest ? "Carry on looking around" : "Look around as a guest";
 $("printIt").onclick = function(){ window.print(); };
+/* notice, contact and which sections show */
+var N = P.notice || {}, nb = $("notice");
+if(window.B5PARENTS_DRAFT){ nb.className = "notice draft"; nb.textContent = "Preview of your changes. Parents see the live version until the new file is uploaded."; nb.hidden = false; }
+if(N.text && (!N.until || N.until >= new Date().toISOString().slice(0, 10))){
+  var nt = document.createElement("div"); nt.className = "notice"; nt.textContent = N.text; nb.parentNode.insertBefore(nt, nb.nextSibling);
+}
+var CT = P.contact || {};
+if(CT.name) [].forEach.call(document.querySelectorAll(".cname"), function(e){ e.textContent = CT.name; });
+if(CT.email){ $("cmail").textContent = CT.email; $("cmail").href = "mailto:" + CT.email; }
+var SH = P.show || {};
+["thisweek", "timetable", "rhythms", "how", "safe", "contact", "look"].forEach(function(id){
+  if(SH[id] === false){
+    var sec = $(id); if(sec) sec.hidden = true;
+    var a = document.querySelector('.jump a[href="#' + id + '"]'); if(a) a.hidden = true;
+  }
+});
 if(!T) return;
 if(T.question) $("bigq").textContent = T.question;
 var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

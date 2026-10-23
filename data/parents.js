@@ -10,10 +10,23 @@
    that are always true: 999, the school office and Jay, and
    the NSPCC helpline. Nothing is made up.
 
+   Edit it from the staff room: /teacher/parents.html builds a new
+   copy of this file to upload.
+
    Plain ASCII only. Use ' for apostrophes. Text goes into the
    page as plain text, so no HTML is needed (or works) here.
    ========================================================== */
 window.B5PARENTS = {
+
+  /* A short notice at the top of the portal, e.g. a change to the week.
+     Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
+  notice: { text: "", until: "" },
+
+  /* Who parents get in touch with about Base 5 */
+  contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
+
+  /* Sections that can be switched off. "Worried about something?" is always shown. */
+  show: { thisweek: true, timetable: true, rhythms: true, how: true, safe: true, contact: true, look: true },
 
   safeguarding: {
     /* [name, role], e.g. ["A Name", "Designated Safeguarding Lead"] */
