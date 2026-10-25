@@ -442,6 +442,122 @@
     px(ctx, X - 5, Y + 1, 2, 1, '#3b2616'); px(ctx, X + 3, Y + 1, 2, 1, '#3b2616');
   };
 
+  /* ---------- UI glyphs: one small pixel icon set for menus, HUD and buttons ---------- */
+  var GPAL = { k: '#151230', w: '#fef8f4', m: '#c3bce8', c: '#5fe0f0', C: '#1f7f8f', o: '#ef7724', y: '#ffc24a', v: '#7b5cff',
+    g: '#7ec850', G: '#3f7a2e', b: '#9a6442', d: '#3e2416', r: '#ff8fb0', s: '#9aa3ad', S: '#59606a' };
+  var GLYPH = {
+    wind: ['', ' s', ' swwwccwwcc', ' s wwccwwcc c', ' s wwccwwcc', ' swwwccwwcc', ' s', ' s', ' s', ' s', ' s', 'sss'],
+    angle: ['           c', '          c', '         c', '  www   c', ' w     c', 'w     c', 'w    c', 'w   c  y', 'w  c    y', 'w c      y', 'wc       y', 'wwwwwwwwwwww'],
+    power: ['', '          oo', '          oo', '       yy oo', '       yy oo', '    cc yy oo', '    cc yy oo', ' cc cc yy oo', ' cc cc yy oo', ' cc cc yy oo'],
+    music: ['', '    wwwwwww', '    wwwwwww', '    w     w', '    w     w', '    w     w', '    w     w', '  www   www', ' wwww  wwww', ' wwww  wwww', '  ww    ww'],
+    sound: ['', '     w   c', '    ww    c', '   www  c  c', 'wwwwww   c c', 'wwwwww c c c', 'wwwwww c c c', 'wwwwww   c c', '   www  c  c', '    ww    c', '     w   c'],
+    touch: ['   ww', '  wmmw', '  wmmw', '  wmmwww', '  wmmwmmwww', ' wwmmwmmwmmw', 'wmwmmmmmmmmw', 'wmmmmmmmmmmw', ' wmmmmmmmmmw', '  wmmmmmmmw', '   wmmmmmw', '   wwwwwww'],
+    museum: ['     yy', '   yyyyyy', ' yyyyyyyyyy', 'yyyyyyyyyyyy', ' w  w  w  w', ' w  w  w  w', ' w  w  w  w', ' w  w  w  w', ' w  w  w  w', 'wwwwwwwwwwww', 'wwwwwwwwwwww'],
+    help: ['   wwwwww', '  ww    ww', '  ww    ww', '        ww', '      www', '     ww', '     ww', '', '     ww', '     ww'],
+    vault: [' vvvvvvvvvv', ' vwwwwwwwwv', ' vwccccccwv', ' vwccccccwv', ' vwccccccwv', ' vwwwwwwwwv', ' vvvvvvvvvv', ' vv oo  vvv', ' vvoooo vvv', ' vv oo  vvv', ' vvvvvvvvvv'],
+    home: ['     oo', '    oooo', '   oooooo', '  oooooooo', ' oooooooooo', 'oooooooooooo', ' wwwwwwwwww', ' ww  wwccww', ' ww  wwccww', ' ww  wwwwww', ' ww  wwwwww', ' wwwwwwwwww'],
+    again: ['   wwwww', '  ww   ww w', ' ww     www', ' w     wwww', ' w', ' w         w', '           w', 'wwww     w', 'www     ww', 'w ww   ww', '   wwwww'],
+    gear: ['    w  w', ' w wwwwww w', '  wwwwwwww', ' www    www', 'www      www', ' ww      ww', ' ww      ww', 'www      www', ' www    www', '  wwwwwwww', ' w wwwwww w', '    w  w'],
+    pencil: ['         rr', '        rrrr', '       yyrr', '      yyy', '     yyy', '    yyy', '   yyy', '  www', ' wwm', ' mm'],
+    hourglass: [' wwwwwwwwww', '  wyyyyyyw', '   wyyyyw', '    wyyw', '     ww', '     ww', '    w  w', '   w yy w', '  w yyyy w', ' wwwwwwwwww'],
+    meteor: ['', '  o', '   o   y', '    o y', '     yoo', '     oooo', '    oowwoo', '    oowwoo', '     oooo', '      oo'],
+    off: ['    mmmm', '  mm    mm', ' m     mm m', ' m    mm  m', 'm    mm    m', 'm   mm     m', 'm  mm      m', ' mmm      m', ' m       m', '  mm    mm', '    mmmm'],
+    sleepy: ['        www', '          w', ' cccccc  w', 'cccccccc www', 'cccccccc', 'ckkcckkc', 'cccccccc', 'cccccccc', 'cc kkkcc', 'cccccccc', ' cccccc'],
+    grumpy: ['', ' yyyyyyyy', 'yyyyyyyyyy', 'ykkyyyykky', 'yykyyyykyy', 'yykkyykkyy', 'yyyyyyyyyy', 'yyyyyyyyyy', 'yyykkkkyyy', 'yykyyyykyy', ' yyyyyyyy'],
+    legendary: [' o  o  o', ' oo oo oo', 'oyyoyyoyyo', 'oyyyyyyyyo', 'yyyyyyyyyy', 'ywwyyyywwy', 'ywkyyyywky', 'yyyyyyyyyy', 'yykyyyykyy', 'yyykkkkyyy', ' yyyyyyyy'],
+    cpu: ['cccccccccccc', 'ckkkkkkkkkkc', 'ckkwkkkkwkkc', 'ckkwkkkkwkkc', 'ckkkkkkkkkkc', 'ckkkwwwwkkkc', 'ckkkkkkkkkkc', 'cccccccccccc', '     cc', '   cccccc'],
+    friend: ['  ww    cc', ' wwww  cccc', ' wwww  cccc', '  ww    cc', '', ' wwww  cccc', 'wwwwwwcccccc', 'wwwwwwcccccc', 'wwwwwwcccccc'],
+    tour: ['', ' g   y   c', 'ggg yyy ccc', ' g   y   c', '', '         w', 'wwwwwwwwwww', 'wwwwwwwwwwww', 'wwwwwwwwwww', '         w'],
+    lock: ['   wwwwww', '  ww    ww', '  w      w', '  w      w', ' yyyyyyyyyy', ' yyyyyyyyyy', ' yyyykkyyyy', ' yyyykkyyyy', ' yyyyykyyyy', ' yyyyyyyyyy', ' yyyyyyyyyy'],
+    bounce: ['', '       c c', '     c     c', '    c       c', '   c', '  c', ' c', ' ww', 'wwww', 'wwww', ' ww', 'mmmmmmmmmmmm'],
+    fuse: ['        y', '       yoy', '      d y', '     d', '   wwww', '  wmmmmw', ' wmmmmmmw', ' wmmmmmmw', ' wmmmmmmw', ' wmmmmmmw', '  wmmmmw', '   wwww'],
+    target: ['    oooo', '  oo    oo', ' o  wwww  o', ' o w    w o', 'o  w oo w  o', 'o  w oo w  o', ' o w    w o', ' o  wwww  o', '  oo    oo', '    oooo'],
+    free: ['', '  gg', ' gggg', ' gggg', '  gg     gg', '        gggg', '  g     gggg', '         gg', '', '         g'],
+    play: [' ww', ' wwww', ' wwwwww', ' wwwwwwww', ' wwwwwwwwww', ' wwwwwwwwww', ' wwwwwwww', ' wwwwww', ' wwww', ' ww'],
+    leave: [' wwwwwww', ' wvvvvvw', ' wvvvvvw  w', ' wvvvvvw ww', ' wvvvyvwwwww', ' wvvvvvw ww', ' wvvvvvw  w', ' wvvvvvw', ' wvvvvvw', ' wwwwwww'],
+    phone: ['  wwwwww', '  wkkkkw', '  wkkkkw', '  wkkkkw', '  wkkkkw', '  wkkkkw', '  wkkkkw', '  wwwwww', '  wwyyww', '  wwwwww'],
+    camera: ['', '   www', ' wwwwwwwwww', ' wwwmmmmwww', ' wwmkkkkmww', ' wwmkcckmww', ' wwmkcckmww', ' wwmkkkkmww', ' wwwmmmmwww', ' wwwwwwwwww'],
+    check: ['', '          g', '         gg', '        gg', '       gg', ' g    gg', ' gg  gg', '  gggg', '   gg'],
+    dice: [' wwwwwwwwww', ' wkkwwwwkkw', ' wkkwwwwkkw', ' wwwwwwwwww', ' wwwwkkwwww', ' wwwwkkwwww', ' wwwwwwwwww', ' wkkwwwwkkw', ' wkkwwwwkkw', ' wwwwwwwwww'],
+    postcard: ['', 'wwwwwwwwwwww', 'wwmwwwwwwmww', 'wwwmwwwwmwww', 'wwwwmwwmwwww', 'wwwwwmmwwwww', 'wwwwwwwwwwww', 'wwwwwwwwwwww', 'wwwwwwwwwwww', 'wwwwwwwwwwww'],
+    next: ['      w', '      ww', '      www', 'wwwwwwwwww', 'wwwwwwwwwww', 'wwwwwwwwww', '      www', '      ww', '      w'],
+    trophy: [' yyyyyyyyyy', 'yy yyyyyy yy', 'y  yyyyyy  y', 'yy yyyyyy yy', ' yyyyyyyyyy', '   yyyyyy', '    yyyy', '     yy', '     yy', '   yyyyyy', '   yyyyyy'],
+    fuel: ['     o', '    ooo', '   ooooo', '  ooyoooo', '  oyooooo', '  ooooooo', '   ooooo', '    ooo'],
+    arrows: ['', '  w      w', ' ww      ww', 'wwwwwwwwwwww', ' ww      ww', '  w      w'],
+    glitch: [' vvvv  c', 'vv  vv c', '    vv c', '   vv  c', '  vv   c', '  vv', '', '  vv   c'],
+    pin: ['   oooo', '  oooooo', ' ooowwooo', ' ooowwooo', '  oooooo', '   oooo', '    oo', '    oo'],
+    cup: ['    m  m', '   m  m', '    m  m', '', ' wwwwwwww', ' wbbbbbbwww', ' wwwwwwww w', ' wwwwwwww w', ' wwwwwwwwww', '  wwwwww'],
+    jump: ['     w', '    www', '   wwwww', '  ww w ww', '     w', '     w', '     w', '', ' mmmmmmmmm'],
+    kit: ['    wwww', '   w    w', ' oooooooooo', ' oooooooooo', ' oowwwwwwoo', ' oowoooowoo', ' oowwwwwwoo', ' oooooooooo', ' oooooooooo', ' oooooooooo'],
+    tag: ['', '   yyyyyyy', '  yyyyyyyyy', ' yyyyyyyyyy', 'yykyyyyyyyy', ' yyyyyyyyyy', '  yyyyyyyyy', '   yyyyyyy'],
+    plus: ['', '', '     ww', '     ww', '     ww', '  wwwwwwww', '  wwwwwwww', '     ww', '     ww', '     ww'],
+    minus: ['', '', '', '', '', '  wwwwwwww', '  wwwwwwww'],
+    snag: ['  g      g', '  gg    gg', '   gggggg', '  gggggggg', '  gyykyykg', '  gggggggg', '  ggkkkkgg', '   gggggg', '    gggg', '   gg  gg']
+  };
+  var glyphCache = {};
+  S.glyph = function (name) {
+    if (glyphCache[name]) return glyphCache[name];
+    var rows = GLYPH[name] || GLYPH.help, c = document.createElement('canvas');
+    c.width = 12; c.height = 12;
+    var x2 = c.getContext('2d'), top = Math.floor((12 - rows.length) / 2);
+    for (var y = 0; y < rows.length; y++) for (var x = 0; x < 12; x++) {
+      var col = GPAL[rows[y].charAt(x)];
+      if (col) { x2.fillStyle = col; x2.fillRect(x, y + top, 1, 1); }
+    }
+    glyphCache[name] = c;
+    return c;
+  };
+  /* fill every <canvas data-g="name"> under root with its glyph */
+  S.paintGlyphs = function (root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll('canvas[data-g]'), function (cv) {
+      cv.width = 12; cv.height = 12;
+      var x2 = cv.getContext('2d'); x2.clearRect(0, 0, 12, 12); x2.drawImage(S.glyph(cv.getAttribute('data-g')), 0, 0);
+    });
+  };
+
+  /* ---------- a tiny painted picture of a battlefield, for menus and time jumps ---------- */
+  S.mapThumb = function (cv, map, look) {
+    var W = cv.width, H = cv.height, x2 = cv.getContext('2d'), i, x;
+    var sky = (look === 'overgrown' && map.skyGreen) || (look === 'sandy' && map.skySandy) || (look === 'neon' && map.skyNeon) || map.sky;
+    for (i = 0; i < sky.length; i++) { x2.fillStyle = sky[i]; x2.fillRect(0, Math.floor(i * H / sky.length), W, Math.ceil(H / sky.length) + 1); }
+    var night = map.style === 'city' || look === 'neon';
+    x2.fillStyle = map.sun || '#fff3c8';
+    x2.beginPath(); x2.arc(W * 0.78, H * (look === 'neon' ? 0.42 : 0.24), H * 0.11, 0, 7); x2.fill();
+    if (night) for (i = 0; i < 14; i++) { x2.fillStyle = '#e9e4ff'; x2.fillRect(Math.floor((i * 37) % W), Math.floor((i * 17) % (H * 0.4)), 1, 1); }
+    var gy = Math.round(H * 0.72);
+    if (map.style === 'hills') {
+      x2.fillStyle = map.far; x2.beginPath(); x2.moveTo(W * 0.1, gy); x2.lineTo(W * 0.42, H * 0.22); x2.lineTo(W * 0.74, gy); x2.fill();
+      x2.fillStyle = map.lava; x2.fillRect(Math.round(W * 0.4), Math.round(H * 0.22), 3, 2);
+      x2.fillStyle = '#7ec850'; x2.fillRect(0, gy, W, 2);
+      x2.fillStyle = 'rgb(138,90,50)'; x2.fillRect(0, gy + 2, W, H - gy);
+      x2.fillStyle = '#7ec850'; x2.fillRect(Math.round(W * 0.55), Math.round(H * 0.42), Math.round(W * 0.22), 2);
+      x2.fillStyle = 'rgb(120,76,42)'; x2.fillRect(Math.round(W * 0.57), Math.round(H * 0.42) + 2, Math.round(W * 0.18), 3);
+    } else if (map.style === 'desert') {
+      var pc = look === 'golden' ? '#f2eadb' : (look === 'neon' ? '#3a3e6e' : '#d6c69e');
+      x2.fillStyle = pc; x2.beginPath(); x2.moveTo(W * 0.2, gy); x2.lineTo(W * 0.45, H * 0.2); x2.lineTo(W * 0.7, gy); x2.fill();
+      x2.fillStyle = look === 'golden' ? '#f0c446' : (look === 'neon' ? '#ff78be' : pc);
+      x2.fillRect(Math.round(W * 0.45) - 2, Math.round(H * 0.2), 4, 3);
+      if (look === 'neon') { x2.strokeStyle = '#5fe0f0'; x2.lineWidth = 1; x2.beginPath(); x2.moveTo(W * 0.2, gy); x2.lineTo(W * 0.45, H * 0.2); x2.lineTo(W * 0.7, gy); x2.stroke(); }
+      if (look === 'rough') { x2.fillStyle = '#8c857b'; x2.beginPath(); x2.arc(W * 0.82, gy - 2, 3, 0, 7); x2.fill(); x2.beginPath(); x2.arc(W * 0.12, gy - 1, 2.5, 0, 7); x2.fill(); }
+      x2.fillStyle = '#aa5848'; x2.fillRect(Math.round(W * 0.82), Math.round(H * 0.3), 2, gy - Math.round(H * 0.3));
+      x2.fillStyle = 'rgb(240,206,136)'; x2.fillRect(0, gy, W, H - gy);
+      x2.fillStyle = 'rgb(224,186,114)'; x2.fillRect(0, gy + 3, W, H - gy);
+    } else {
+      var sandy = look === 'sandy', wild = look === 'overgrown';
+      var tw = [[0.06, 0.4], [0.2, 0.25], [0.36, 0.48], [0.52, 0.18], [0.7, 0.36], [0.86, 0.3]];
+      tw.forEach(function (t, k) {
+        var bx = Math.round(W * t[0]), top = Math.round(H * t[1]), bw = Math.round(W * 0.12);
+        x2.fillStyle = sandy ? '#8a5a62' : (wild ? '#2f4a44' : '#3a3e6e'); x2.fillRect(bx, top, bw, gy - top);
+        if (sandy) { x2.beginPath(); x2.moveTo(bx, top); x2.lineTo(bx + bw / 2, top - 4); x2.lineTo(bx + bw, top); x2.fill(); }
+        x2.fillStyle = sandy ? '#e0b060' : (wild ? '#7ec850' : (look === 'gleaming' ? '#fff3c8' : '#ffd27a'));
+        for (var yy = top + 2; yy < gy - 1; yy += 3) for (var xx = bx + 1; xx < bx + bw - 1; xx += 2) if (((xx * 7 + yy * 3 + k) % 5) < (look === 'gleaming' ? 4 : 2)) x2.fillRect(xx, yy, 1, 1);
+      });
+      x2.fillStyle = sandy ? '#d4a668' : (wild ? '#4e6a3a' : '#4e5870'); x2.fillRect(0, gy, W, H - gy);
+      x2.fillStyle = sandy ? '#f0c446' : (wild ? '#7ec850' : '#5fe0f0'); x2.fillRect(0, gy, W, 1);
+    }
+    x2.fillStyle = map.water || '#3f8fb5'; x2.fillRect(0, H - 3, W, 3);
+  };
+
   /* ---------- kit icons: 12 by 12, drawn for the console and the kit ---------- */
   S.icon = function (ctx, wid, era) {
     ctx.clearRect(0, 0, 12, 12);

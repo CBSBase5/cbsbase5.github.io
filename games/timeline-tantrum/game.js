@@ -703,7 +703,7 @@
     if (c.walking > 0) c.walking--;
     if (c.landT > 0) c.landT--;
     if (c.cheerT > 0) c.cheerT--;
-    if (!c.alive) return;
+    if (!c.alive || c.arrive) return;
     if (c.sled && c.knock) c.sled = false;
     if (c.st === 'ground' && !onGround(c.x, c.y)) { c.st = 'air'; c.vx = c.sled ? c.sv : 0; c.vy = 0; }
     if (c.swing) { c.st = 'air'; swingStep(c); c.airT++; }
@@ -1016,7 +1016,7 @@
     if (cr.kind === 'bark') {
       s.team.bark = (s.team.bark || 0) + 1;
       addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, s: 'BARK!', col: '#ffd27a' });
-      banner(s.team.name + " found Bonnie's Bark!", s.team.ctrl === 'human' ? 'A rare surprise. It is in your kit now.' : 'A rare surprise...');
+      banner("Bonnie's Bark!", null, '#e0b040', 'kit');
       sfx('find');
     } else {
       var heal = Math.min(25, 100 - s.hp);
@@ -1130,15 +1130,15 @@
       game.sudden = true;
       var sty = MAP.style;
       setTimeout(function () {
-        if (sty === 'city') banner('Reactor meltdown!', 'Energy blasts fall and the goo rises after every go. Hang in there.');
-        else if (sty === 'desert') banner('Sandstorm!', 'Rocks fly in the wind and the Nile floods after every go. Hang in there.');
-        else banner('Sudden Death!', 'Meteors fall and the water rises after every go. Hang in there.');
+        if (sty === 'city') banner('Meltdown!', null, '#ef7724', 'meteor');
+        else if (sty === 'desert') banner('Sandstorm!', null, '#ef7724', 'meteor');
+        else banner('Sudden Death!', null, '#ef7724', 'meteor');
       }, 2600);
       say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
     }
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
-    banner(c.name + "'s go", team.name + (team.ctrl === 'ai' ? ', the computer' : (game.opts && game.opts.mode === 'friend' ? ', ' + team.label : '')), ER[team.era].tag);
+    banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
     voice(team.era, 'turn');
     musicEra(team.era);
     game.ai = team.ctrl === 'ai' ? { phase: 'wait', t: 0, walked: false } : null;
@@ -1194,7 +1194,7 @@
 
   function passTurn() {
     if (game.state !== 'play' || game.fired) return;
-    banner(game.active.name + ' has a breather', 'No worries, on to the next squad');
+    banner('Breather', null, '#c3bce8', 'cup');
     say('breather', true);
     endTurn();
   }
@@ -1212,10 +1212,11 @@
     var av = avail(c.team, wid);
     if (!av.ok) {
       game.charging = false; game.power = 0;
-      banner(av.locked ? weaponName(c.team.era, wid) + ' unlocks in ' + av.locked + (av.locked === 1 ? ' turn' : ' turns') : 'None of those left', 'Pick something else from the kit');
+      banner(av.locked ? String(av.locked) : 'x0', null, '#ffc24a', av.locked ? 'lock' : 'kit');
       return;
     }
     game.fired = true; game.charging = false; game.stats.shots++;
+    if (c.team.ctrl === 'human') learnDone('fire');
     c.team.lastWeapon = wid;
     useAmmo(c.team, wid);
     var p;
@@ -1278,7 +1279,7 @@
   }
   function useJet(c) {
     if (c.jet) { c.jet = false; return; }
-    if (game.fuel <= 0) { banner('Out of fuel', 'It fills up again on your next go'); return; }
+    if (game.fuel <= 0) { banner('0%', null, '#ffc24a', 'fuel'); return; }
     c.jet = true; c.swing = null; c.knock = false; c.flip = false;
     if (c.st === 'ground' && bodyClear(c.x, c.y - 2)) c.y -= 2;
     c.st = 'air'; c.vy = -1.2;
@@ -1287,7 +1288,7 @@
 
   function useSled(c) {
     if (c.sled) { c.sled = false; c.sv = 0; return; }
-    if (game.sledFuel <= 0) { banner('The sled needs a rest', 'It is ready again on your next go'); return; }
+    if (game.sledFuel <= 0) { banner('0%', null, '#ffc24a', 'fuel'); return; }
     if (c.st !== 'ground') return;
     c.sled = true; c.sv = c.face * 1.1; c.swing = null; c.jet = false;
     sfx('whoosh'); say('sled');
@@ -1746,7 +1747,7 @@
     if (game.fired && !w.tool) return;
     if (!w.tool && !avail(c.team, wid).ok) {
       var av = avail(c.team, wid);
-      banner(av.locked ? weaponName(c.team.era, wid) + ' unlocks in ' + av.locked + (av.locked === 1 ? ' turn' : ' turns') : 'None of those left', 'Pick something else from the kit');
+      banner(av.locked ? String(av.locked) : 'x0', null, '#ffc24a', av.locked ? 'lock' : 'kit');
       return;
     }
     game.weapon = wid; sfx('click');
@@ -1767,12 +1768,12 @@
       if (inp.right) game.tx = Math.min(WW - 10, game.tx + 3);
       if (inp.left || inp.right) { game.look = { x: game.tx, y: c.y - 30 }; game.lookT = 40; }
     } else if (!busy && c.st === 'ground' && !game.charging && !c.sled) {
-      if (inp.left && !inp.right) { if (tryWalk(c, -1)) c.walking = 6; }
-      else if (inp.right && !inp.left) { if (tryWalk(c, 1)) c.walking = 6; }
+      if (inp.left && !inp.right) { if (tryWalk(c, -1)) { c.walking = 6; learnDone('walk'); } }
+      else if (inp.right && !inp.left) { if (tryWalk(c, 1)) { c.walking = 6; learnDone('walk'); } }
     }
     if (game.state === 'play' && !busy && !c.jet && !c.swing && !c.sled) {
-      if (inp.up) c.aim = Math.min(85, c.aim + 1.2);
-      if (inp.down) c.aim = Math.max(-80, c.aim - 1.2);
+      if (inp.up) { c.aim = Math.min(85, c.aim + 1.2); learnDone('aim'); }
+      if (inp.down) { c.aim = Math.max(-80, c.aim - 1.2); learnDone('aim'); }
       if (game.charging) { game.power = Math.min(100, game.power + 100 / 72); if (game.power >= 100) fire(); }
     }
   }
@@ -1824,6 +1825,7 @@
     var dx = wx - c.x, dy = (c.y - 9) - wy;
     if (Math.abs(dx) > 2) c.face = dx > 0 ? 1 : -1;
     c.aim = clamp(Math.round(Math.atan2(dy, Math.abs(dx)) * 180 / Math.PI), -80, 85);
+    learnDone('aim');
   }
   cv.addEventListener('pointerdown', function (e) {
     audioInit();
@@ -1840,8 +1842,14 @@
   function passPress() {
     if (!humanTurn() || game.state !== 'play' || game.fired) return;
     var b = document.querySelector('#touch [data-k="pass"]');
-    if (passArmed > 0) { passArmed = 0; b.textContent = 'Breather'; passTurn(); return; }
-    passArmed = 120; b.textContent = 'Sure?';
+    if (passArmed > 0) { passArmed = 0; setPassArm(false); passTurn(); return; }
+    passArmed = 120; setPassArm(true);
+  }
+  /* tap Breather once to arm it (it shows a tick), tap again to pass */
+  function setPassArm(on) {
+    var b = document.querySelector('#touch [data-k="pass"]'), gl = $('passG');
+    if (!b || !gl) return;
+    b.classList.toggle('arm', on); gl.setAttribute('data-g', on ? 'check' : 'cup'); SP.paintGlyphs(b);
   }
   function press(k) {
     game.lookT = 0;
@@ -2004,8 +2012,8 @@
     store('music', aud.music ? '1' : '0'); store('sfx', aud.sfx ? '1' : '0');
     if (musG) musG.gain.value = aud.music ? 0.3 : 0;
     if (sfxG) sfxG.gain.value = aud.sfx ? 1 : 0;
-    $('tMusic').textContent = aud.music ? 'On' : 'Off'; $('tMusic').classList.toggle('on', aud.music);
-    $('tSfx').textContent = aud.sfx ? 'On' : 'Off'; $('tSfx').classList.toggle('on', aud.sfx);
+    $('tMusic').classList.toggle('on', aud.music); $('tMusic').setAttribute('aria-pressed', aud.music);
+    $('tSfx').classList.toggle('on', aud.sfx); $('tSfx').setAttribute('aria-pressed', aud.sfx);
   }
 
   /* ---------------- saving ---------------- */
@@ -2162,12 +2170,30 @@
       return { era: e, name: ER[e].team, ctrl: 'none', idx: -1, members: [], label: '' };
     });
     spawnAll(3);
+    game.snags.forEach(function (c, i) { c.arrive = 50 + i * 38; });
   }
 
   function demoTick() {
+    game.snags.forEach(function (c) {
+      if (!c.arrive) return;
+      c.arrive--;
+      if (c.arrive === 24) { game.portals.push({ x: c.x, y: c.y - 26, t: 0, inn: true }); sfx('portal'); }
+      if (c.arrive === 0) { c.y -= 14; c.st = 'air'; c.vy = 0.5; c.knock = false; }
+    });
+    /* now and then something that should not be here tumbles out of a portal */
+    if (game.t % 700 === 350 && game.arts.length < 4) {
+      var gx = 120 + Math.random() * (WW - 240), gy = surfaceY(gx);
+      if (gy > 60) {
+        var pool = glitchOf(MAP.id), gi = pool[Math.floor(Math.random() * pool.length)];
+        game.portals.push({ x: gx, y: gy - 60, t: 0, inn: true });
+        game.arts.push({ id: gi.id, glitch: true, x: gx, y: gy - 60, st: 'loose', vx: rand(-0.6, 0.6), vy: -1, rest: false, glint: 0 });
+        game.look = { x: gx, y: gy - 40 }; game.lookT = 160;
+      }
+    }
+    if (game.t % 1100 === 800) maybeDeliver(true);
     if (game.t % 150 !== 0 || !game.snags.length) return;
     var c = game.snags[Math.floor(Math.random() * game.snags.length)];
-    if (!c.alive || c.st !== 'ground') return;
+    if (!c.alive || c.arrive || c.st !== 'ground') return;
     var r = Math.random();
     if (r < 0.4) jump(c, Math.random() < 0.35);
     else if (r < 0.7) c.cheerT = 50;
@@ -2180,7 +2206,7 @@
     game.t++;
     var i;
     if (game.bannerT > 0 && --game.bannerT === 0) $('banner').classList.remove('show');
-    if (passArmed > 0 && --passArmed === 0) { var pb = document.querySelector('#touch [data-k="pass"]'); if (pb) pb.textContent = 'Breather'; }
+    if (passArmed > 0 && --passArmed === 0) setPassArm(false);
     for (i = 0; i < game.snags.length; i++) updSnag(game.snags[i]);
     if (game.state === 'play' || game.state === 'retreat') control();
     for (i = game.projs.length - 1; i >= 0; i--) {
@@ -2199,7 +2225,7 @@
     updParts();
     for (i = game.portals.length - 1; i >= 0; i--) if (++game.portals[i].t > 70) game.portals.splice(i, 1);
     if (game.state === 'play') {
-      if (--game.timer <= 0) { banner("Time's up, no worries", 'On to the next squad'); endTurn(); }
+      if (--game.timer <= 0) { banner("Time's up", null, '#ffc24a', 'hourglass'); endTurn(); }
     } else if (game.state === 'retreat') {
       if (game.swingT <= 0 && game.digT <= 0 && !game.barker && !game.strikes.length && --game.retreat <= 0) endTurn();
     } else if (game.state === 'settle') settle();
@@ -2688,7 +2714,7 @@
 
   function drawTags(t) {
     game.snags.forEach(function (c) {
-      if (!c.alive) return;
+      if (!c.alive || c.arrive) return;
       var col = ER[c.team.era].tag, y = Math.round(c.y - 40);
       SP.text(ctx, c.name, c.x, y, col, '#1f2a30', true);
       if (game.state !== 'demo') SP.text(ctx, String(c.hp), c.x, y + 7, '#ffffff', '#1f2a30', true);
@@ -2721,12 +2747,13 @@
     ctx.drawImage(terr, 0, 0);
     drawArtsAndCrates(t);
     drawVines();
-    for (i = 0; i < game.snags.length; i++) if (game.snags[i].alive) drawSnag(game.snags[i], t);
+    for (i = 0; i < game.snags.length; i++) if (game.snags[i].alive && !game.snags[i].arrive) drawSnag(game.snags[i], t);
     drawShields(t);
     drawDogs(t);
     drawStrikes(t);
     game.portals.forEach(function (p) {
       var k = p.t / 60;
+      if (p.inn) { SP.portal(ctx, p.x, p.y, Math.min(1, k), t); return; }
       if (k < 1) SP.draw(ctx, p.x, p.y + 12, p.c.face, p.c.team.era, 'panic', (t >> 3) % 2, false, 0, 1 - k);
       SP.portal(ctx, p.x, p.y, Math.min(1, k), t);
     });
@@ -2735,6 +2762,7 @@
     drawParts();
     drawWater(cx, t);
     drawTags(t);
+    if (game.state !== 'demo') drawLearn(t);
     ctx.restore();
     if (game.sudden && MAP.style === 'desert') drawSandstorm(t);
     if (t % 3 === 0 && game.state !== 'demo') drawMini();
@@ -2797,9 +2825,10 @@
   });
 
   /* ---------------- HUD ---------------- */
-  function banner(a, b, col) {
+  function banner(a, b, col, glyph) {
     var el = $('banner');
-    el.innerHTML = esc(a) + (b ? '<small>' + esc(b) + '</small>' : '');
+    el.innerHTML = (glyph ? '<canvas data-g="' + glyph + '" class="g big"></canvas> ' : '') + esc(a) + (b ? '<small>' + esc(b) + '</small>' : '');
+    if (glyph) SP.paintGlyphs(el);
     el.style.setProperty('--c', col || '#7b5cff');
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
     game.bannerT = 150;
@@ -2847,7 +2876,8 @@
     else {
       var wid = game.weapon, kind = WEAP[wid].kind, av = avail(c.team, wid), era = c.team.era;
       setText('wname', weaponName(era, wid));
-      setText('wammo', av.locked ? 'Unlocks in ' + av.locked : ((WEAP[wid].ammo || wid === 'bark') ? 'x' + (av.left || 0) + ' left' : (WEAP[wid].tool ? 'Free move' : '')));
+      setText('wammo', av.locked ? String(av.locked) : ((WEAP[wid].ammo || wid === 'bark') ? 'x' + (av.left || 0) : ''));
+      setHide('wlock', !av.locked); setHide('wfree', !WEAP[wid].tool);
       if (iconKey !== era + wid) { iconKey = era + wid; SP.icon($('wicon').getContext('2d'), wid, era); }
       var showAngle = !c.swing && !c.jet && !c.sled && (kind === 'proj' || kind === 'beam' || kind === 'vine' || kind === 'dig');
       setHide('cAngle', !showAngle);
@@ -2860,13 +2890,18 @@
         $('pseg').classList.toggle('dim', !game.charging);
         setText('wpow', game.charging ? String(Math.round(pw)) : (game.lastPower ? String(game.lastPower) : '--'));
       }
-      var hint = '';
-      if (c.swing) hint = 'Swinging. Fire or jump to let go.';
-      else if (c.jet || kind === 'jet') hint = (c.jet ? 'Flying! ' : 'Fire to take off. ') + 'Fuel ' + Math.max(0, Math.round(game.fuel / WEAP.jet.fuel * 100)) + '%';
-      else if (c.sled || kind === 'sled') hint = (c.sled ? 'Riding! ' : 'Fire to ride. ') + 'Fuel ' + Math.max(0, Math.round(game.sledFuel / WEAP.sled.fuel * 100)) + '%';
-      else if (kind === 'strike') hint = av.locked ? 'Unlocks in ' + av.locked + (av.locked === 1 ? ' turn' : ' turns') : 'Drag or use the arrows to pick the spot.';
+      /* fuel gauge for the jetpack and sled, arrows for picking a strike spot */
+      var hint = '', fuel = -1;
+      if (c.jet || kind === 'jet') { hint = 'fuel'; fuel = game.fuel / WEAP.jet.fuel; }
+      else if (c.sled || kind === 'sled') { hint = 'fuel'; fuel = game.sledFuel / WEAP.sled.fuel; }
+      else if (kind === 'strike' && !av.locked) hint = 'arrows';
       setHide('cHint', !hint);
-      if (hint) setText('cHint', hint);
+      if (hint) {
+        if (hudCache.hintG !== hint) { hudCache.hintG = hint; $('hintG').setAttribute('data-g', hint); SP.paintGlyphs($('cHint')); }
+        setHide('fseg', fuel < 0);
+        if (fuel >= 0) { var fs = $('fseg').children, fn = Math.ceil(Math.max(0, fuel) * 10); for (k = 0; k < fs.length; k++) fs[k].classList.toggle('on', k < fn); }
+        setText('hintT', '');
+      }
     }
     var ring = $('tring');
     if (game.state === 'play') {
@@ -2904,11 +2939,13 @@
   }
   function showFind(info, isNew) {
     paintArt($('findArt'), info.id, false);
-    $('findKick').textContent = info.glitch ? 'A glitch in time!' : (isNew ? 'New for the Time Museum' : 'Already in your museum');
+    $('findKick').innerHTML = info.glitch ? gl('glitch', 'big') : gl('museum', 'big') + (isNew ? 'New!' : gl('check'));
+    SP.paintGlyphs($('findKick'));
     $('findName').textContent = info.name;
-    $('findMeta').textContent = info.glitch ? 'This should not exist yet' : info.when + ' \u00b7 ' + info.where;
+    $('findMeta').textContent = info.glitch ? '?!' : info.when + ', ' + info.where;
     $('findFact').textContent = info.fact;
-    $('findNow').textContent = info.now || '';
+    $('findNow').innerHTML = info.now ? gl('pin') + '<span>' + esc(info.now) + '</span>' : '';
+    if (info.now) SP.paintGlyphs($('findNow'));
     $('findNow').hidden = !info.now;
     $('find').classList.toggle('glitch', !!info.glitch);
     showOv('find');
@@ -2920,32 +2957,31 @@
   function caseHtml(a) {
     var got = !!museum.found[a.id];
     return '<button class="case' + (got ? ' got' : '') + (musPick === a.id ? ' on' : '') + '" data-id="' + a.id + '" aria-label="' + esc(got ? a.name : 'Not found yet') + '">' +
-      '<canvas width="12" height="12" data-art="' + a.id + '" data-dark="' + (got ? 0 : 1) + '"></canvas><span>' + esc(got ? a.name : '???') + '</span></button>';
+      '<canvas width="12" height="12" data-art="' + a.id + '" data-dark="' + (got ? 0 : 1) + '"></canvas>' + (got ? '<span>' + esc(a.name) + '</span>' : '') + '</button>';
   }
   function renderMuseum() {
-    var real = [], gl = [];
-    MAP_IDS.forEach(function (m) { real = real.concat(realOf(m)); gl = gl.concat(glitchOf(m)); });
-    $('musSub').textContent = 'Real finds: ' + museumCount(real) + ' of ' + real.length + ' \u00b7 Glitches: ' + museumCount(gl) + ' of ' + gl.length +
-      (museumCount(real) + museumCount(gl) === 0 ? '. Blast the ground near a glint to dig something up.' : '');
+    var real = [], glx = [];
+    MAP_IDS.forEach(function (m) { real = real.concat(realOf(m)); glx = glx.concat(glitchOf(m)); });
+    $('musSub').innerHTML = '<span title="Real finds">' + gl('museum') + museumCount(real) + '/' + real.length + '</span><span title="Glitches in time">' + gl('glitch') + museumCount(glx) + '/' + glx.length + '</span>';
     $('musShelves').innerHTML = MAP_IDS.slice().sort(function (a, b) { return MAPS[a].year - MAPS[b].year; }).map(function (m) {
-      return '<h3 class="shelf">' + esc(MAPS[m].name) + ' <span class="shelfn">' + museumCount(realOf(m)) + ' of ' + realOf(m).length + '</span></h3>' +
+      return '<h3 class="shelf">' + esc(MAPS[m].name) + ' <span class="shelfn">' + museumCount(realOf(m)) + '/' + realOf(m).length + '</span></h3>' +
         '<div class="cases">' + realOf(m).map(caseHtml).join('') + '</div>' +
-        '<p class="glitchlab">Glitches in time</p><div class="cases">' + glitchOf(m).map(caseHtml).join('') + '</div>';
+        '<p class="glitchlab" title="Glitches in time">' + gl('glitch') + '</p><div class="cases glitchy">' + glitchOf(m).map(caseHtml).join('') + '</div>';
     }).join('');
+    SP.paintGlyphs($('museum'));
     Array.prototype.forEach.call(document.querySelectorAll('#museum canvas[data-art]'), function (c2) { paintArt(c2, c2.getAttribute('data-art'), c2.getAttribute('data-dark') === '1'); });
     var d = $('musDetail');
     if (musPick) {
       var info = artInfo(musPick), got = museum.found[musPick];
       if (got) {
         var lab = museum.labels[musPick];
-        d.innerHTML = '<b>' + esc(info.name) + '</b><span class="meta">' + esc(info.glitch ? 'Out of time' : info.when + ' \u00b7 ' + info.where) + '</span>' +
-          '<p>' + esc(info.fact) + '</p>' + (info.now ? '<p class="now">' + esc(info.now) + '</p>' : '') +
-          (lab ? '<p class="mylabel">Your label: ' + esc(lab) + '</p>' : '') +
-          '<p class="meta">Found by ' + esc(got.by || 'a Snag') + '</p>';
-      } else {
-        d.innerHTML = '<b>Still buried somewhere</b><p>' + (info.glitch ? 'Something strange is hidden somewhere in history. Keep an eye out for glints.' : 'Keep blasting near the glints in the ground. It will turn up.') + '</p>';
-      }
-      d.hidden = false;
+        d.innerHTML = '<b>' + esc(info.name) + '</b><span class="meta">' + esc(info.glitch ? '?!' : info.when + ', ' + info.where) + '</span>' +
+          '<p>' + esc(info.fact) + '</p>' + (info.now ? '<p class="now">' + gl('pin') + esc(info.now) + '</p>' : '') +
+          (lab ? '<p class="mylabel">' + gl('tag') + ' ' + esc(lab) + '</p>' : '') +
+          '<p class="meta">' + gl('snag', 'sm') + ' ' + esc(got.by || 'a Snag') + '</p>';
+        SP.paintGlyphs(d);
+        d.hidden = false;
+      } else d.hidden = true;
     } else d.hidden = true;
   }
   function openMuseum(from) { ovBack = from; musPick = null; renderMuseum(); showOv('museum'); }
@@ -3102,6 +3138,7 @@
     var me = sel, a = TL.filter(function (e2) { return e2.id === me; })[0], b = TL.filter(function (e2) { return e2.id === foe; })[0];
     var later = TL.filter(function (e2) { return !e2.ready; }).map(function (e2) { return e2.name; });
     var you = (opts.mode === 'friend' ? 'Player 1: ' : 'You: ') + ER[me].team + ', ' + a.label + '. ';
+    $('gapYrs').textContent = yearsApart(a.year, b.year).toLocaleString('en-GB');
     if (tour) $('tlText').textContent = you + 'On the tour you face whichever squad lives at each stop. Still to come: ' + later.join(', ') + '.';
     else $('tlText').textContent = you + (opts.mode === 'friend' ? 'Player 2: ' : 'Them: ') + ER[foe].team + ', ' + b.label + '. That is about ' +
       yearsApart(a.year, b.year).toLocaleString('en-GB') + ' years apart. Still to come: ' + later.join(', ') + '.';
@@ -3123,27 +3160,34 @@
   }
   function applyTouch() {
     store('touch', touchOn ? '1' : '0');
-    $('tTouch').textContent = touchOn ? 'On' : 'Off'; $('tTouch').classList.toggle('on', touchOn);
+    $('tTouch').classList.toggle('on', touchOn); $('tTouch').setAttribute('aria-pressed', touchOn);
     inMatch(matchOn);
   }
 
+  function gl(n, extra) { return '<canvas data-g="' + n + '" class="g' + (extra ? ' ' + extra : '') + '"></canvas>'; }
   function openKit() {
     if (!humanTurn() || game.state !== 'play' || game.charging || game.fired) return;
+    learnDone('kit');
     var team = game.active.team, era = ER[team.era], html = '';
     kitFor(team).forEach(function (wid, i) {
       var w = wid === 'bark' ? { name: BARK_NAME, blurb: BARK_BLURB } : era.weapons[wid];
-      var av = avail(team, wid), W2 = WEAP[wid], note;
-      if (W2.tool) note = 'Free move: does not use up your go';
-      else if (av.locked) note = 'Unlocks in ' + av.locked + (av.locked === 1 ? ' turn' : ' turns');
-      else if (av.left !== undefined) note = av.left + ' left';
-      else note = 'As many as you like';
+      var av = avail(team, wid), W2 = WEAP[wid], props = '';
+      if (W2.wind) props += gl('wind');
+      if (W2.fuse) props += gl('fuse') + '<b>' + Math.round(W2.fuse / 60) + 's</b>';
+      if (W2.bounces || (W2.bounce && W2.bounce >= 0.5)) props += gl('bounce');
+      if (W2.direct || W2.kind === 'beam') props += gl('target');
+      if (W2.tool) props += gl('free');
+      if (av.locked) props += gl('lock') + '<b>' + av.locked + '</b>';
+      else if (W2.ammo || wid === 'bark') { var max = wid === 'bark' ? (av.left || 0) : Math.max(W2.ammo, av.left || 0); for (var k = 0; k < max; k++) props += '<i class="pip' + (k < (av.left || 0) ? '' : ' off') + '"></i>'; }
+      if (!touchOn) props += '<kbd>' + ((i + 1) % 10) + '</kbd>';
       var cls = (wid === game.weapon ? 'on' : '') + (wid === 'bark' || W2.kind === 'strike' ? ' gold' : '') + (!W2.tool && !av.ok ? ' off' : '');
-      html += '<button data-w="' + wid + '" class="' + cls + '"><canvas width="12" height="12" data-icon="' + wid + '"></canvas><span class="kn"><b>' + esc(w.name) + '</b><span>' + esc(w.blurb) + '</span></span>' +
-        '<em>' + (touchOn ? '' : '<kbd>' + ((i + 1) % 10) + '</kbd>') + esc(note) + '</em></button>';
+      html += '<button data-w="' + wid + '" class="' + cls + '" title="' + esc(w.blurb) + '" aria-label="' + esc(w.name + '. ' + w.blurb) + '"><canvas width="12" height="12" data-icon="' + wid + '"></canvas>' +
+        '<span class="kn"><b>' + esc(w.name) + '</b></span><span class="props">' + props + '</span></button>';
     });
-    html += '<button data-w="pass"><canvas width="12" height="12" data-icon="pass"></canvas><span class="kn"><b>Have a breather</b><span>Pass this turn. No penalty at all.</span></span></button>';
+    html += '<button data-w="pass" title="Pass this turn. No penalty at all." aria-label="Have a breather. Pass this turn."><canvas width="12" height="12" data-icon="pass"></canvas><span class="kn"><b>Breather</b></span></button>';
     $('kitList').innerHTML = html;
     Array.prototype.forEach.call(document.querySelectorAll('#kitList canvas[data-icon]'), function (c2) { SP.icon(c2.getContext('2d'), c2.getAttribute('data-icon'), team.era); });
+    SP.paintGlyphs($('kitList'));
     showOv('kit');
   }
   $('kitList').addEventListener('click', function (e) {
@@ -3192,56 +3236,52 @@
   function showOver() {
     if (game.state !== 'over') return;
     var w = game.winner, o = game.opts || {}, title, text;
-    if (!w) { title = "It's a draw!"; text = 'Everyone got zapped home at once. Fancy another go?'; }
+    if (!w) { title = 'Draw!'; text = 'Everyone got zapped home at once.'; }
     else if (o.mode === 'cpu' && w.ctrl === 'ai' && TEST !== 'aivai') {
-      title = 'The ' + MOODS[w.mood] + ' computer took this one';
+      title = 'The computer wins';
       text = 'Close one. Fancy a rematch, or a different mood?';
     } else {
-      title = 'The ' + w.name + ' win!';
+      title = w.name + ' win!';
       text = (o.mode === 'friend' ? w.label + ' takes it. ' : 'Nice work. ') + 'Fancy another?';
     }
     $('overTitle').textContent = title;
     $('overText').textContent = text;
     drawPodium();
-    var st = [];
-    if (game.stats.best > 0) st.push('Biggest hit: ' + game.stats.best + ' by ' + game.stats.bestBy);
-    st.push('Turns played: ' + game.turnNo);
-    st.push('Shots fired: ' + game.stats.shots);
-    $('overStats').innerHTML = st.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
+    var st = '';
+    if (game.stats.best > 0) st += '<li title="Biggest hit, by ' + esc(game.stats.bestBy) + '">' + gl('trophy') + game.stats.best + '</li>';
+    st += '<li title="Turns played">' + gl('hourglass') + game.turnNo + '</li>';
+    if (game.finds.length) st += '<li title="Things dug up">' + gl('museum') + game.finds.length + '</li>';
+    $('overStats').innerHTML = st;
+    SP.paintGlyphs($('overStats'));
     var fl = game.finds.map(artInfo).filter(Boolean);
     if (fl.length) {
-      $('overFinds').innerHTML = '<b>Dug up this match</b><div class="finds">' + fl.map(function (a) {
+      $('overFinds').innerHTML = '<div class="finds">' + fl.map(function (a) {
         return '<span class="fd"><canvas width="12" height="12" data-art="' + a.id + '"></canvas>' + esc(a.name) + '</span>';
       }).join('') + '</div>';
       Array.prototype.forEach.call(document.querySelectorAll('#overFinds canvas'), function (c2) { paintArt(c2, c2.getAttribute('data-art'), false); });
       var withNow = fl.filter(function (a) { return a.now; })[0];
-      $('overReal').textContent = withNow ? withNow.now : (fl.some(function (a) { return !a.glitch; }) ?
-        ({ city: 'Museums collect everyday things like these right now, so people in the future can see how we lived.',
-           desert: 'Archaeologists are still making new finds in Egypt today. The oldest papyrus ever found only turned up in 2013.' }[MAP.id] || 'Archaeologists still dig up Stone Age finds like these in Britain today.') :
-        'Something from the future turned up in the past. If time travellers leave a mess like that, should we time travel at all?');
+      $('overReal').innerHTML = withNow ? gl('pin') + '<span>' + esc(withNow.now) + '</span>' : '';
+      $('overReal').hidden = !withNow;
+      SP.paintGlyphs($('overReal'));
     } else {
       $('overFinds').innerHTML = '';
-      $('overReal').textContent = 'No finds this time. Big booms uncover buried treasure, and a glint on the ground is the clue.';
+      $('overReal').hidden = true;
     }
     $('bLabel').hidden = foundList().length === 0;
     var tourOn = !!(game.opts && game.opts.tour && game.tour);
     $('overTour').hidden = !tourOn;
     $('bNext').hidden = true; $('bPostcard').hidden = true;
     $('bRematch').hidden = tourOn;
-    $('bSettings').textContent = tourOn ? 'Have a break' : 'Change settings';
+    $('setLab').textContent = tourOn ? 'Break' : 'Menu';
     if (tourOn) {
       var T = game.tour;
       T.results[T.stop] = { map: TOUR_STOPS[T.stop], winner: game.winner ? game.winner.era : null };
       saveTour();
       snapShot();
       if (T.stop + 1 < TOUR_STOPS.length) {
-        var nm = MAPS[TOUR_STOPS[T.stop + 1]];
-        $('overTour').textContent = 'Time Tour stop ' + (T.stop + 1) + ' of ' + TOUR_STOPS.length + ' done. Whoever won here changes the ' + nm.name + '. Next stop: ' + yearLabel(nm.year) + '.';
         $('bNext').hidden = false;
-      } else {
-        $('overTour').textContent = 'That was the last stop. Time to send a postcard home about what changed.';
-        $('bPostcard').hidden = false;
-      }
+      } else $('bPostcard').hidden = false;
+      tourDots($('overTour'), T.stop);
     }
     showOv('over');
   }
@@ -3251,9 +3291,10 @@
   $('tJay').addEventListener('click', function () {
     jayOn = !jayOn; store('jay', jayOn ? '1' : '0');
     if (!jayOn) $('jay').hidden = true;
-    $('tJay').textContent = jayOn ? 'On' : 'Off'; $('tJay').classList.toggle('on', jayOn);
+    $('tJay').classList.toggle('on', jayOn); $('tJay').setAttribute('aria-pressed', jayOn);
   });
-  $('tJay').textContent = jayOn ? 'On' : 'Off'; $('tJay').classList.toggle('on', jayOn);
+  $('tJay').classList.toggle('on', jayOn); $('tJay').setAttribute('aria-pressed', jayOn);
+  SP.jay($('jayTog'), false, 'grin');
   SP.jay(jayCv, false);
   $('bRematch').addEventListener('click', function () { audioInit(); newMatch(game.opts); });
   $('bSettings').addEventListener('click', function () { inMatch(false); startDemo(); refreshMenu(); showOv('menu'); });
@@ -3283,7 +3324,7 @@
     var T = game.tour, rip = rippleFor(T.stop);
     newMatch({ mode: 'cpu', mood: T.mood, era: T.era, foe: tourFoe(T.stop, T.era), size: T.size, turn: T.turn, sd: T.sd, map: TOUR_STOPS[T.stop], names: T.names,
       look: rip ? rip.look : 'normal', ammoMods: rip ? rip.ammo : null, tour: true });
-    if (rip) setTimeout(function () { banner('History changed!', rip.title); }, 2700);
+    if (rip) setTimeout(function () { banner('History changed!', null, '#ffc24a', 'tour'); }, 2700);
   }
   function drawJump() {
     var c2 = $('jumpTl'), x2 = c2.getContext('2d'), W = c2.width, T = game.tour;
@@ -3300,7 +3341,8 @@
   }
   function showJump() {
     var T = game.tour, from = MAPS[TOUR_STOPS[T.stop - 1]], to = MAPS[TOUR_STOPS[T.stop]], rip = rippleFor(T.stop);
-    $('jumpTitle').textContent = 'Next stop: ' + to.name;
+    $('jumpTitle').textContent = to.name;
+    ripplePicture($('ripVis'), T, rip, to);
     $('jumpYears').textContent = 'You are jumping about ' + yearsApart(from.year, to.year).toLocaleString('en-GB') + ' years forward, from ' + yearLabel(from.year) + ' to ' + yearLabel(to.year) + '. Waiting for you: the ' + ER[tourFoe(T.stop, T.era)].team + '.';
     $('jumpRipTitle').textContent = 'History changed: ' + rip.title;
     $('jumpRipText').textContent = rip.text;
@@ -3436,10 +3478,11 @@
       var rows = '';
       for (var i = 0; i < opts.size; i++) {
         rows += '<div class="nrow"><input id="nm-' + era + '-' + i + '" data-era="' + era + '" data-i="' + i + '" maxlength="10" value="' + esc(list[i]) + '" aria-label="Snag ' + (i + 1) + ' name">' +
-          '<button data-roll="' + era + '" data-i="' + i + '">Roll</button></div>';
+          '<button data-roll="' + era + '" data-i="' + i + '" aria-label="Roll a name" title="Roll a name">' + gl('dice') + '</button></div>';
       }
       return '<div><h3>' + esc(ER[era].team) + '</h3>' + rows + '</div>';
     }).join('');
+    SP.paintGlyphs($('nameCols'));
   }
   function saveNames() { store('opts', JSON.stringify(opts)); }
   $('bNames').addEventListener('click', function () { renderNames(); showOv('names'); });
@@ -3465,6 +3508,138 @@
   });
   $('bNamesDone').addEventListener('click', function () { saveNames(); showOv('menu'); refreshMenu(); });
 
+  /* ---------- pictures that replace sentences ---------- */
+  function thumb(mapId, look, cls) {
+    var c2 = document.createElement('canvas'); c2.width = 64; c2.height = 36; if (cls) c2.className = cls;
+    SP.mapThumb(c2, MAPS[mapId], look || 'normal'); return c2;
+  }
+  function headCanvas(era, pose) {
+    var c2 = document.createElement('canvas'); c2.width = 30; c2.height = 26; c2.className = 'head';
+    SP.draw(c2.getContext('2d'), 15, 27, 1, era, pose || 'cheer', 0, false, 0); return c2;
+  }
+  /* the tour so far: the stops as little pictures, done ones lit, the next one ringed */
+  function tourDots(el, stop) {
+    el.innerHTML = '';
+    TOUR_STOPS.forEach(function (m, i) {
+      var r = game.tour && game.tour.results[i], prev = i > 0 ? rippleFor(i) : null;
+      var c2 = thumb(m, i <= stop ? (prev ? prev.look : 'normal') : 'normal', i <= stop ? 'done' : (i === stop + 1 ? 'next' : ''));
+      c2.title = MAPS[m].name + (r && r.winner ? ': ' + ER[r.winner].team + ' won' : '');
+      el.appendChild(c2);
+    });
+  }
+  /* who won, an arrow, then the next stop as it looks now, plus what each squad gained or lost */
+  function ripplePicture(el, T, rip, to) {
+    el.innerHTML = '';
+    var prev = T.results[T.stop - 1];
+    if (prev && prev.winner) el.appendChild(headCanvas(prev.winner, 'cheer'));
+    else { var off = document.createElement('canvas'); off.setAttribute('data-g', 'off'); off.className = 'g big'; el.appendChild(off); }
+    var ar = document.createElement('canvas'); ar.setAttribute('data-g', 'next'); ar.className = 'g arrow'; el.appendChild(ar);
+    var mt = thumb(TOUR_STOPS[T.stop], rip.look, 'map'); mt.title = to.name; el.appendChild(mt);
+    var foe = tourFoe(T.stop, T.era), box = document.createElement('div'); box.className = 'ammo';
+    if (rip.ammo) [T.era, foe].forEach(function (era) {
+      var mods = rip.ammo[era] || {};
+      for (var wid in mods) {
+        var sp = document.createElement('span'); sp.className = mods[wid] > 0 ? 'up' : 'down';
+        var ic = document.createElement('canvas'); ic.width = 12; ic.height = 12; SP.icon(ic.getContext('2d'), wid, era);
+        sp.appendChild(ic); sp.appendChild(document.createTextNode((mods[wid] > 0 ? '+' : '') + mods[wid]));
+        sp.title = weaponName(era, wid); box.appendChild(sp);
+      }
+    });
+    if (box.children.length) el.appendChild(box);
+    SP.paintGlyphs(el);
+  }
+  /* ---------- How to play as a wordless comic strip ---------- */
+  function keycap(x2, x, y, w, label) {
+    x2.fillStyle = '#0e0b22'; x2.fillRect(x, y + 1, w, 9);
+    x2.fillStyle = '#3a3278'; x2.fillRect(x, y, w, 9);
+    x2.fillStyle = '#4a4290'; x2.fillRect(x, y, w, 1);
+    if (label === '<' || label === '>' || label === '^' || label === 'v') {
+      x2.fillStyle = '#fef8f4'; var cx = x + (w >> 1), cy = y + 4;
+      for (var i = 0; i < 3; i++) {
+        if (label === '<') x2.fillRect(cx - 1 + i, cy - i, 1, 2 * i + 1);
+        if (label === '>') x2.fillRect(cx + 1 - i, cy - i, 1, 2 * i + 1);
+        if (label === '^') x2.fillRect(cx - i, cy - 1 + i, 2 * i + 1, 1);
+        if (label === 'v') x2.fillRect(cx - i, cy + 1 - i, 2 * i + 1, 1);
+      }
+    } else SP.text(x2, label, x + (w >> 1), y + 2, '#fef8f4', null, true);
+  }
+  function scene(x2, map) {
+    var M = MAPS[map], W = 96, H = 60;
+    for (var i = 0; i < M.sky.length; i++) { x2.fillStyle = M.sky[i]; x2.fillRect(0, Math.floor(i * H / M.sky.length), W, Math.ceil(H / M.sky.length) + 1); }
+    x2.fillStyle = map === 'desert' ? 'rgb(240,206,136)' : '#7ec850'; x2.fillRect(0, 44, W, 2);
+    x2.fillStyle = map === 'desert' ? 'rgb(224,186,114)' : 'rgb(138,90,50)'; x2.fillRect(0, 46, W, H - 46);
+  }
+  var COMIC = [
+    ['Move', function (x2, t) { scene(x2, 'jungle'); var wx = 40 + ((t >> 2) % 16); SP.draw(x2, wx, 45, 1, 'pre', 'walk', (t >> 1) % 4, false, 0);
+      if (touchOn) { keycap(x2, 26, 6, 13, '<'); keycap(x2, 57, 6, 13, '>'); } else { keycap(x2, 30, 6, 11, '<'); keycap(x2, 55, 6, 11, '>'); } }],
+    ['Aim', function (x2, t) { scene(x2, 'jungle'); var aim = 10 + ((t % 8) < 4 ? (t % 4) * 12 : (4 - t % 4) * 12);
+      SP.draw(x2, 30, 45, 1, 'pre', 'aim', 0, false, 0, 1, { look: aim > 30 ? -1 : 0 }); SP.weapon(x2, 30, 45, 1, aim, 'lob', 'pre', t);
+      var a = aim * Math.PI / 180; x2.fillStyle = '#ffd27a'; for (var i = 1; i < 6; i++) x2.fillRect(Math.round(36 + Math.cos(a) * i * 6), Math.round(37 - Math.sin(a) * i * 6), 1, 1);
+      if (touchOn) { x2.drawImage(SP.glyph('touch'), 70, 14 - (t % 4) * 2); } else { keycap(x2, 72, 6, 11, '^'); keycap(x2, 72, 18, 11, 'v'); } }],
+    ['Hold, then let go', function (x2, t) { scene(x2, 'jungle'); SP.draw(x2, 24, 45, 1, 'pre', 'charge', 0, false, 0); SP.weapon(x2, 24, 45, 1, 40, 'lob', 'pre', t);
+      var n = t % 6; for (var i = 0; i < 10; i++) { x2.fillStyle = i < n * 2 ? (i < 6 ? '#5fe0f0' : (i < 9 ? '#ffc24a' : '#ef7724')) : '#2a2452'; x2.fillRect(44 + i * 4, 30, 3, 8); }
+      if (touchOn) { x2.fillStyle = '#ef7724'; x2.fillRect(56, 8, 30, 12); SP.text(x2, 'FIRE', 71, 12, '#ffffff', null, true); } else keycap(x2, 46, 8, 40, 'SPACE'); }],
+    ['Splash!', function (x2, t) { scene(x2, 'jungle'); x2.fillStyle = '#3f8fb5'; x2.fillRect(50, 46, 46, 14); x2.fillStyle = '#9fd8ef'; x2.fillRect(50, 46, 46, 1);
+      var k = (t % 6) / 6; SP.draw(x2, 70, 30 + k * 18, -1, 'fut', 'panic', t % 2, false, 0, 1 - k * 0.6); SP.portal(x2, 70, 40, 0.5, t * 3);
+      SP.draw(x2, 22, 45, 1, 'pre', 'cheer', t % 2, false, 0); }],
+    ['Dig up history', function (x2, t) { scene(x2, 'desert'); x2.fillStyle = 'rgba(0,0,0,0)';
+      var ph = t % 6; if (ph < 3) { x2.fillStyle = '#fff3c8'; x2.fillRect(48, 47 - ph, 1, 2 * ph + 1); x2.fillRect(48 - ph, 47, 2 * ph + 1, 1); }
+      else { x2.fillStyle = '#ef7724'; x2.beginPath(); x2.arc(48, 46, 10 - ph, 0, 7); x2.fill(); SP.art(x2, 'papyrus', 48, 42 - (ph - 3) * 4); }
+      x2.drawImage(SP.glyph('museum'), 80, 6); SP.draw(x2, 20, 45, 1, 'egypt', 'idle', 0, false, 0); }],
+    ['Kit', function (x2, t) { scene(x2, 'city'); var ids = ['lob', 'bomb', 'disc', 'laser', 'jet'], ic = document.createElement('canvas'); ic.width = 12; ic.height = 12;
+      ids.forEach(function (w, i) { SP.icon(ic.getContext('2d'), w, 'fut'); x2.fillStyle = (t % 5) === i ? '#5fe0f0' : '#2e2860'; x2.fillRect(8 + i * 17, 10, 14, 14); x2.drawImage(ic, 9 + i * 17, 11); });
+      if (touchOn) x2.drawImage(SP.glyph('kit'), 42, 30); else keycap(x2, 36, 32, 22, 'TAB'); }],
+    ['Breather', function (x2, t) { scene(x2, 'jungle'); SP.draw(x2, 40, 45, 1, 'pre', 'yawn', t % 2, false, 0); x2.drawImage(SP.glyph('cup'), 62, 22); }]
+  ];
+  var comicT = null, comicF = 0;
+  function drawComic() {
+    var box = $('comic');
+    if (!box.children.length) COMIC.forEach(function (c) {
+      var d = document.createElement('div'); d.className = 'panel';
+      var cv2 = document.createElement('canvas'); cv2.width = 96; cv2.height = 60;
+      var sp = document.createElement('span'); sp.textContent = c[0];
+      d.appendChild(cv2); d.appendChild(sp); box.appendChild(d);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('canvas'), function (cv2, i) { var x2 = cv2.getContext('2d'); x2.clearRect(0, 0, 96, 60); COMIC[i][1](x2, comicF); });
+    comicF++;
+    if (comicT) clearTimeout(comicT);
+    comicT = setTimeout(function () { comicT = null; if (game.overlay === 'help' && !reduceMotion) drawComic(); }, 260);
+  }
+  $('bHelp').addEventListener('click', drawComic);
+  $('bHelp2').addEventListener('click', drawComic);
+
+  /* ---------- teach by doing: show the next key or button beside your Snag until you have used it ---------- */
+  var learn = {};
+  try { learn = JSON.parse(store('learn') || '{}') || {}; } catch (e) { learn = {}; }
+  function learnDone(k) { if (!learn[k] && game.active && game.active.team.ctrl === 'human') { learn[k] = 1; store('learn', JSON.stringify(learn)); } }
+  function lesson() {
+    var c = game.active;
+    if (!c || !humanTurn() || game.state !== 'play' || game.overlay || c.st !== 'ground' || game.fired) return null;
+    if (!learn.walk) return 'walk';
+    if (!learn.aim) return 'aim';
+    if (!learn.fire) return 'fire';
+    if (!learn.kit && game.turnNo >= 3) return 'kit';
+    return null;
+  }
+  var teachOn = '';
+  function teachTouch(l) {
+    var want = touchOn ? (l || '') : '';
+    if (want === teachOn) return;
+    teachOn = want;
+    var map = { walk: ['left', 'right'], aim: ['up', 'down'], fire: ['fire'], kit: ['weapons'] };
+    Array.prototype.forEach.call(document.querySelectorAll('#touch button'), function (b) { b.classList.toggle('teach', !!(map[want] && map[want].indexOf(b.getAttribute('data-k')) >= 0)); });
+  }
+  function drawLearn(t) {
+    var l = lesson();
+    teachTouch(l);
+    if (!l || touchOn) return;
+    var c = game.active, bob = Math.round(Math.sin(t * 0.08) * 1.5), x = Math.round(c.x), y = Math.round(c.y) - 62 + bob;
+    if (l === 'walk') { keycap(ctx, x - 14, y, 11, '<'); keycap(ctx, x + 3, y, 11, '>'); }
+    else if (l === 'aim') { var tip = SP.tip(c.x, c.y, c.face, c.aim, game.weapon), a = c.aim * Math.PI / 180; var hx = Math.round(tip.x + Math.cos(a) * c.face * 34) + c.face * 10, hy = Math.round(tip.y - Math.sin(a) * 34) - 10 + bob; keycap(ctx, hx - 5, hy, 11, '^'); keycap(ctx, hx - 5, hy + 12, 11, 'v'); }
+    else if (l === 'fire') { keycap(ctx, x - 20, y, 40, 'SPACE'); }
+    else if (l === 'kit') { keycap(ctx, x - 11, y, 22, 'TAB'); }
+  }
+
   /* menu options */
   var opts = { mode: 'cpu', mood: 'sleepy', era: 'pre', foe: null, size: 3, turn: 60, sd: 'on', map: 'jungle', names: null };
   try { var so = JSON.parse(store('opts') || 'null'); if (so) for (var k in opts) if (so[k] !== undefined) opts[k] = so[k]; } catch (e) { /* defaults */ }
@@ -3473,8 +3648,11 @@
     if (MAP_IDS.indexOf(opts.map) < 0) opts.map = 'jungle';
     opts.foe = foeOf(opts);
     $('foeChips').innerHTML = READY.filter(function (e) { return e !== opts.era; }).map(function (e) {
-      return '<button data-v="' + e + '">' + esc(ER[e].team) + '</button>';
+      return '<button data-v="' + e + '" aria-label="' + esc(ER[e].team) + '" title="' + esc(ER[e].team) + '"><canvas data-head="' + e + '" width="30" height="26"></canvas></button>';
     }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#foeChips canvas[data-head]'), function (c2) {
+      var x2 = c2.getContext('2d'); x2.clearRect(0, 0, 30, 26); SP.draw(x2, 15, 27, -1, c2.getAttribute('data-head'), 'idle', 0, false, 0);
+    });
     $('foeLab').textContent = opts.mode === 'friend' ? "Player 2's squad" : 'Up against';
     $('oFoe').hidden = opts.mode === 'tour';
     Array.prototype.forEach.call(document.querySelectorAll('#menu .chips'), function (ch) {
@@ -3487,13 +3665,9 @@
     $('tourNote').hidden = opts.mode !== 'tour';
     var T0 = loadTourState();
     $('bResumeTour').hidden = !(T0 && !store('save'));
-    if (T0) $('bResumeTour').textContent = 'Carry on your Time Tour (stop ' + Math.min(TOUR_STOPS.length, T0.stop + 1) + ' of ' + TOUR_STOPS.length + ')';
+    if (T0) $('resTour').textContent = Math.min(TOUR_STOPS.length, T0.stop + 1) + '/' + TOUR_STOPS.length;
     $('bResume').hidden = !store('save');
-    var nf = museumCount(allArts());
-    $('bMuseum').textContent = 'Time Museum (' + nf + ' found)';
-    var sum = opts.size + ' Snags each, ' + (opts.mode === 'friend' ? '' : 'a ' + MOODS[opts.mood].toLowerCase() + ' computer, ') +
-      (opts.turn === 90 ? 'an extra relaxed 90 second timer' : 'a relaxed 60 second timer') + ' and ' + (opts.sd === 'off' ? 'no Sudden Death.' : 'Sudden Death after 24 turns.');
-    $('sumLine').textContent = sum.charAt(0).toUpperCase() + sum.slice(1) + ' Change any of it under More settings.';
+    $('musN').textContent = museumCount(allArts());
     drawTimeline();
     $('turnhint').hidden = !(window.innerHeight > window.innerWidth && window.innerWidth < 700);
   }
@@ -3557,6 +3731,16 @@
     requestAnimationFrame(frame);
   }
 
+  SP.paintGlyphs(document);
+  Array.prototype.forEach.call(document.querySelectorAll('canvas[data-map]'), function (c2) { SP.mapThumb(c2, MAPS[c2.getAttribute('data-map')], 'normal'); });
+  (function () {
+    var ts = $('tourNote');
+    TOUR_STOPS.forEach(function (m, i) {
+      if (i) { var ar = document.createElement('canvas'); ar.setAttribute('data-g', 'next'); ar.className = 'g'; ts.appendChild(ar); }
+      var c2 = thumb(m, 'normal', 't'); c2.title = MAPS[m].name; ts.appendChild(c2);
+    });
+    SP.paintGlyphs(ts);
+  })();
   resize();
   if (!TEST) { $('menu').classList.add('intro'); setTimeout(function () { $('menu').classList.remove('intro'); }, 1600); }
   applyAudio();
