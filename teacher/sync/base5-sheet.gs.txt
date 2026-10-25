@@ -1498,7 +1498,8 @@ function buddyNote_(e, prev){
     conf: col(["confidential", "conf"]), incident: col(["accident or near miss", "incident"]), safeguard: col(["safeguarding concern", "safeguarding", "safeguard"]),
     milestones: col(["milestones", "milestone", "steps"]), ehcp: col(["ehcp"]),
     by: col(["logged by", "by", "author"]), at: col(["logged at", "at", "saved"]), editBy: col(["edited by"]), editAt: col(["edited at"]),
-    revision: col(["revision"]), versions: col(["versions"]), changed: col(["changed"]) };
+    revision: col(["revision"]), versions: col(["versions"]), changed: col(["changed"]),
+    photos: col(["photos", "photo"]), file: col(["linked file"]), linkSkip: col(["no target"]) };
   if(ci.id < 0 || ci.date < 0 || ci.student < 0 || ci.entry < 0) return "Buddy notes headings not recognised (" + head.slice(0, 8).join(", ") + ")";
   var id = "b5-" + e.who.toLowerCase() + "-" + e.slug.replace(/^a2-/, "").replace(/\.v1$/, "") + "-" + e.day, row = 0;
   for(var i = 1; i < v.length; i++) if(String(v[i][ci.id]) === id){ row = i + 1; break; }
@@ -1517,7 +1518,7 @@ function buddyNote_(e, prev){
   put("id", id); put("date", e.day); put("student", e.who); put("entry", e.note);
   put("staffIn", withT.join(", ")); put("others", withS.join(", "));
   if(!row){
-    put("type", "Learning"); put("time", Utilities.formatDate(now, tz_(), "HH:mm")); put("tone", "Positive"); put("lesson", e.subject);
+    put("type", "Learning"); put("time", Utilities.formatDate(now, tz_(), "HH:mm")); put("tone", "Neutral"); put("lesson", e.subject);
     put("conf", ""); put("incident", "None"); put("safeguard", ""); put("ehcp", "");
     put("by", by); put("at", stamp); put("revision", 1); put("versions", 1);
   } else {
@@ -1525,11 +1526,19 @@ function buddyNote_(e, prev){
     if(ci.revision >= 0) put("revision", (+line[ci.revision] || 0) + 1);
   }
   if(e.msId && ci.milestones >= 0 && String(line[ci.milestones] || "").split(/\s*,\s*/).indexOf(e.msId) < 0) put("milestones", String(line[ci.milestones] || "") ? String(line[ci.milestones]) + "," + e.msId : e.msId);
-  /* Changed: Buddy's running count of changes, so its quick refresh picks this note up */
-  if(ci.changed >= 0){
-    var top = 0; for(var j = 1; j < v.length; j++){ var c = +v[j][ci.changed]; if(c > top) top = c; }
-    put("changed", top + 1);
+  /* the picture they made: on the note like a photo, so Buddy offers it when the step's slide is made */
+  if(e.picture && ci.photos >= 0){
+    var ph = String(line[ci.photos] || "").split(",").map(function(x){ return x.trim(); }).filter(String);
+    var pid = (e.picture.match(/[-\w]{25,}/) || [""])[0];
+    if(pid && !ph.some(function(u){ return u.indexOf(pid) >= 0; })) ph.push(e.picture);
+    put("photos", ph.join(","));
+    if(ci.file >= 0 && !String(line[ci.file] || "")) put("file", e.picture);
   }
+  /* games and practice are not built for one step, so Wrap up does not ask you to link them */
+  if(!row && e.kind !== "activity" && !e.msId) put("linkSkip", "yes");
+  /* Changed: left empty, so Buddy (1.22.1 and later) gives the note the next number in its own running count and
+     its quick refresh picks it up. Older Buddys show it on their next full refresh. */
+  put("changed", "");
   if(row) sh.getRange(row, 1, 1, line.length).setValues([line]);
   else sh.appendRow(line);
   return (row ? "updated " : "sent ") + Utilities.formatDate(now, tz_(), "HH:mm") + (e.msId ? " (linked to step)" : "");
