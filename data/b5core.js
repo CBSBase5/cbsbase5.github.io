@@ -20,7 +20,7 @@
 if(window.B5Core) return;
 var PREFIX = { EGW: "b5.egw.", LP: "b5.lp.", LW: "b5.lw.", LC: "b5.lc.", HK: "b5.hk.", JT: "b5.jthq." };
 function norm(t){
-  return String(t || "").toLowerCase().replace(/×/g, "x").replace(/labeled/g, "labelled").replace(/[‘’']/g, "")
+  return String(t || "").toLowerCase().replace(/\u00d7/g, "x").replace(/labeled/g, "labelled").replace(/[\u2018\u2019']/g, "")
     .replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 }
 function key(t){

@@ -74,6 +74,7 @@ function setup(){
   pr.getRange(1, 6).setValue("The site writes this tab. Leave it alone.");
 
   setup3_(ss);
+  setup4_(ss);
   ss.setActiveSheet(fo);
   return "Done. Now deploy it as a web app (or a new version of it).";
 }
@@ -216,9 +217,11 @@ function save_(who, items){
     if(r){
       if(t < (+v[r - 1][3] || 0)) return;            /* something newer is already here */
       try{ events = events.concat(events_(who, k, String(v[r - 1][2]), val)); }catch(e1){}
+      try{ evidenceFor_(who, k, val); }catch(ev1){}
       sh.getRange(r, 3, 1, 2).setValues([[val, t]]);
     } else {
       try{ events = events.concat(events_(who, k, "", val)); }catch(e2){}
+      try{ evidenceFor_(who, k, val); }catch(ev2){}
       add.push([who, k, val, t]);
     }
     changed++;
@@ -1207,3 +1210,264 @@ var WRITE3 = {
   a2plan: a2plan_, targetsreplace: targetsReplace_, blinkdone: blinkDone_, blinknames: blinkNamesSave_, buddybank: buddyBank_,
   showscore: showScore_
 };
+
+/* ==========================================================
+   Version 4: learning evidence for BridgeLink Buddy.
+   Every Autumn 2 activity (the a2- pages in each HQ) already saves
+   its progress through sync. This turns each day's work on an
+   activity into one evidence row (the Evidence tab) and, when
+   "Evidence to Buddy" is TRUE and Buddy's sheet is linked, one
+   Learning note in Buddy's Logs tab linked to the milestone step
+   the activity was built for. The note is updated as the day goes
+   on, so there is one per student per activity per day, never a
+   stream. Pictures of what students make at the end land in a
+   Drive folder and are linked from the row and the note.
+   Nothing here is shown to students.
+   ========================================================== */
+var EVH = ["Day", "Who", "Activity", "Slug", "Subject", "Target", "Step", "Buddy milestone", "Level", "Theme", "Minutes",
+  "Chunks done", "Chunks", "Tried", "First go", "Second go", "Shown", "Skipped", "Sure but slipped", "Explained",
+  "Made", "Picture", "Finished", "Note", "Buddy note", "Updated"];
+function setup4_(ss){
+  var ev = tab_(ss, "Evidence", EVH);
+  ev.getRange(1, EVH.length + 2).setValue("Written by the site from Autumn 2 activities: one row per student per activity per day. Note is ready to paste into BridgeLink; Buddy note shows whether it went into BridgeLink Buddy as a Learning note.");
+  var st = ss.getSheetByName("Settings");
+  [["Evidence to Buddy", "TRUE", "TRUE writes each day's activity evidence into BridgeLink Buddy's Logs tab as a Learning note (needs the Buddy sheet link above)."],
+   ["Made things folder", "", "Drive folder for the pictures students make at the end of activities. Left empty, one is made for you the first time."],
+   ["Evidence by", "Base 5 site", "Who the Buddy notes say they are by."]].forEach(function(r){
+    var have = st.getDataRange().getValues().some(function(x){ return String(x[0]).trim() === r[0]; });
+    if(!have) st.appendRow(r);
+  });
+}
+
+/* ---------- which target an activity was built for ----------
+   From the site's own files (/data/a2/drops.js and /data/a2/core.js),
+   fetched once every six hours. drops: who|slug -> [[target key, step]].
+   core: slug -> fingerprints of the core target wording. */
+function siteJson_(path){
+  var txt = UrlFetchApp.fetch(SITE + path, { muteHttpExceptions: true }).getContentText();
+  var a = txt.indexOf("{"), b = txt.lastIndexOf("}");
+  return JSON.parse(txt.slice(a, b + 1));
+}
+function a2map_(){
+  var cache = CacheService.getScriptCache(), hit = cache.get("a2map.v1");
+  if(hit){ try{ return JSON.parse(hit); }catch(e0){} }
+  var map = { drops: {}, names: {}, core: {}, titles: {} };
+  try{
+    var d = siteJson_("/data/a2/drops.js");
+    map.names = d.targets || {};
+    (d.items || []).forEach(function(it){
+      map.drops[it.who + "|a2-" + it.slug] = it.covers || [];
+      map.titles["a2-" + it.slug] = it.title || "";
+    });
+  }catch(e1){}
+  try{
+    var c = siteJson_("/data/a2/core.js");
+    (c.items || []).forEach(function(it){ map.core["a2-" + it.slug] = { fp: it.fp || [], kw: it.kw || [], title: it.title || "" }; });
+  }catch(e2){}
+  try{ cache.put("a2map.v1", JSON.stringify(map), 21600); }catch(e3){}
+  return map;
+}
+/* the same fingerprint as /data/b5core.js */
+function fpNorm_(t){
+  return String(t || "").toLowerCase().replace(/\u00d7/g, "x").replace(/labeled/g, "labelled").replace(/[\u2018\u2019']/g, "")
+    .replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+}
+function fpKey_(t){
+  var s = fpNorm_(t), h = 2166136261, b = Utilities.newBlob(s).getBytes();
+  for(var i = 0; i < b.length; i++){ h ^= (b[i] + 256) % 256; h = Math.imul(h, 16777619) >>> 0; }
+  return h.toString(16);
+}
+/* Buddy's milestone for a student, target key and step: { id, text, tid } or null */
+function buddyStep_(who, key, step){
+  var title = "";
+  Object.keys(BUDDY_KEYS).forEach(function(t){ if(BUDDY_KEYS[t] === key) title = t; });
+  if(!title) return null;
+  var B = buddyBook_(); if(!B) return null;
+  var tids = {};
+  B("Targets").forEach(function(t){ if(bcol_(t, ["target", "title"]).toLowerCase() === title) tids[bcol_(t, ["id", "target id"])] = 1; });
+  var term = String(setting_("Targets term") || "Autumn 2").trim().toLowerCase(), hit = null;
+  B("Milestones").forEach(function(m){
+    if(hit) return;
+    var mt = bcol_(m, ["term"]); if(mt && mt.toLowerCase() !== term) return;
+    if(bcol_(m, ["student", "who"]).toUpperCase() !== who) return;
+    if(!tids[bcol_(m, ["target id"])]) return;
+    if((parseInt(bcol_(m, ["step"]), 10) || 0) !== step) return;
+    hit = { id: bcol_(m, ["id", "milestone id"]), text: oneLine_(bcol_(m, ["milestone", "step text", "wording", "text"])), tid: bcol_(m, ["target id"]) };
+  });
+  return hit;
+}
+/* what the activity was built for: { target, step, ms } */
+function a2target_(who, id){
+  var map = a2map_(), out = { target: "", step: 0, ms: null };
+  var cov = map.drops[who + "|" + id];
+  if(cov && cov.length){
+    out.target = map.names[cov[0][0]] || cov[0][0]; out.step = +cov[0][1] || 0;
+    try{ out.ms = buddyStep_(who, cov[0][0], out.step); }catch(e1){}
+    return out;
+  }
+  var core = map.core[id];
+  if(core){
+    var rows = coreRows_().filter(function(r){ return r.who === who; }), best = null;
+    rows.forEach(function(r){ if(!best && core.fp.indexOf(fpKey_(r.target)) >= 0) best = r; });
+    if(!best) rows.forEach(function(r){
+      var words = " " + fpNorm_(r.target) + " ";
+      if(!best && core.kw.length && core.kw.every(function(k){ return words.indexOf(" " + k) >= 0; })) best = r;
+    });
+    if(best) out.target = (best.level ? best.level + ": " : "Core target: ") + best.target;
+  }
+  return out;
+}
+
+/* ---------- the evidence row ---------- */
+function evidenceNote_(e){
+  var bits = [];
+  bits.push(e.activity + (e.subject ? " (" + e.subject + (e.level ? ", " + e.level + " level" : "") + (e.theme ? ", " + e.theme + " theme" : "") + ")" : "") + ".");
+  var did = [];
+  if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + " on task");
+  if(e.chunks) did.push((e.finished ? "finished all " : e.chunksDone + " of ") + e.chunks + " chunks");
+  if(e.tried) did.push(e.tried + " question" + (e.tried === 1 ? "" : "s") + " tried");
+  if(e.got1) did.push(e.got1 + " right first go");
+  if(e.got2) did.push(e.got2 + " right on a second go");
+  if(e.shown) did.push(e.shown + " with the answer shown");
+  if(e.skipped) did.push(e.skipped + " skipped");
+  if(did.length){ var dl = did.join(", "); bits.push(dl.charAt(0).toUpperCase() + dl.slice(1) + "."); }
+  if(e.flagged) bits.push("Was sure but slipped on " + e.flagged + ", so " + (e.flagged === 1 ? "it comes" : "they come") + " back for a second look.");
+  if(e.explained) bits.push("Explained how they got it " + (e.explained === 1 ? "once" : e.explained === 2 ? "twice" : e.explained + " times") + ".");
+  if(e.made) bits.push("Made at the end: " + e.made + (e.picture ? " (picture: " + e.picture + ")" : "") + ".");
+  if(e.target) bits.push("Built for: " + e.target + (e.step ? ", step " + e.step : "") + ".");
+  return "Base 5 site: " + bits.join(" ");
+}
+/* called from save_ for every key: only Autumn 2 activity saves count */
+function evidenceFor_(who, key, val){
+  var P = PREFIX[who]; if(!P || key.indexOf(P) !== 0) return;
+  var id = key.slice(P.length), m = id.match(/^(a2-[a-z0-9\-]+)\.v1$/); if(!m) return;
+  var n = parse_(val); if(!n || !n.summary) return;
+  evidence_(who, m[1], n);
+}
+function evidence_(who, id, n){
+  var s = n.summary; if(!s || !s.chunks) return;
+  var started = !!(s.chunksDone || s.done || s.secs >= 120 || s.made);
+  if(!started) return;
+  var sh = sheet_("Evidence"); if(!sh) return;
+  var today = day_(), v = sh.getDataRange().getValues(), row = 0;
+  for(var i = 1; i < v.length; i++){
+    if(String(v[i][1]) === who && String(v[i][3]) === id && (v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0])) === today){ row = i + 1; break; }
+  }
+  var t = { target: "", step: 0, ms: null };
+  if(!row){ try{ t = a2target_(who, id); }catch(e1){} }
+  else { t.target = String(v[row - 1][5] || ""); t.step = +v[row - 1][6] || 0; t.ms = v[row - 1][7] ? { id: String(v[row - 1][7]) } : null; }
+  var flagged = Array.isArray(s.flagged) ? s.flagged.length : 0;
+  var e = {
+    day: today, who: who, activity: String(s.title || nice_(id.replace(/^a2-/, "").replace(/\.v1$/, ""))), slug: id, subject: String(s.subject || ""),
+    target: t.target, step: t.step, msId: t.ms && t.ms.id ? String(t.ms.id) : "",
+    level: s.level ? s.level.charAt(0).toUpperCase() + s.level.slice(1) : "", theme: String(s.theme || ""),
+    minutes: Math.round((+s.secs || 0) / 60), chunksDone: +s.chunksDone || 0, chunks: +s.chunks || 0,
+    tried: +s.done || 0, got1: +s.got1 || 0, got2: +s.got2 || 0, shown: +s.shown || 0, skipped: +s.skipped || 0,
+    flagged: flagged, explained: +s.explained || 0, made: String(s.made || "").slice(0, 600), picture: "", finished: !!s.finished
+  };
+  if(s.madeId) e.picture = "https://drive.google.com/file/d/" + String(s.madeId) + "/view";
+  else if(row && v[row - 1][21]) e.picture = String(v[row - 1][21]);
+  e.note = evidenceNote_(e);
+  var buddy = row ? String(v[row - 1][24] || "") : "";
+  var moved = !row || !buddy || /^not sent|^no /.test(buddy) || (+v[row - 1][11] || 0) !== e.chunksDone || (String(v[row - 1][22]) === "yes") !== e.finished ||
+    String(v[row - 1][20] || "") !== e.made || String(v[row - 1][21] || "") !== e.picture;
+  if(moved && ticked_(setting_("Evidence to Buddy")) && (e.chunksDone || e.finished || e.made)){
+    try{ buddy = buddyNote_(e, buddy); }catch(e2){ buddy = "not sent: " + String(e2.message || e2).slice(0, 80); }
+  }
+  var line = [new Date(today + "T12:00:00"), who, plain_(e.activity), e.slug, e.subject, plain_(e.target), e.step || "", e.msId, e.level, e.theme, e.minutes,
+    e.chunksDone, e.chunks, e.tried, e.got1, e.got2, e.shown, e.skipped, e.flagged, e.explained, plain_(e.made), e.picture, e.finished ? "yes" : "", plain_(e.note), buddy, new Date()];
+  if(row) sh.getRange(row, 1, 1, line.length).setValues([line]);
+  else sh.appendRow(line);
+}
+
+/* ---------- one Learning note in Buddy, kept up to date through the day ----------
+   Buddy's Logs tab is found by its headings, so a column Buddy does not have is
+   simply left out. Needs at least id, date, student and entry. The note id is
+   b5-<who>-<slug>-<day>, so a second save on the same day updates the same row.
+   Returns what goes in the Evidence row's "Buddy note" column. */
+function buddyNote_(e, prev){
+  var bs = buddySS_(); if(!bs) return "no Buddy link";
+  var sh = bs.getSheetByName("Logs") || bs.getSheetByName("Notes"); if(!sh) return "no Logs tab in Buddy";
+  var v = sh.getDataRange().getValues(), head = (v[0] || []).map(function(h){ return String(h).trim(); }), lo = head.map(function(h){ return h.toLowerCase(); });
+  function col(names){ for(var i = 0; i < names.length; i++){ var k = lo.indexOf(names[i]); if(k >= 0) return k; } return -1; }
+  var ci = { id: col(["id"]), date: col(["date", "day"]), student: col(["student", "who", "initials"]), entry: col(["entry", "note", "text"]),
+    type: col(["type", "kind"]), time: col(["time"]), tone: col(["tone"]), lesson: col(["lesson"]), staffIn: col(["staffin", "staff in", "staff"]),
+    others: col(["others"]), conf: col(["conf", "confidential"]), incident: col(["incident"]), safeguard: col(["safeguard", "safeguarding"]),
+    milestones: col(["milestones", "milestone", "steps"]), ehcp: col(["ehcp"]), by: col(["by", "author"]), at: col(["at", "updated", "saved"]), photos: col(["photos", "photo"]) };
+  if(ci.id < 0 || ci.date < 0 || ci.student < 0 || ci.entry < 0) return "Buddy Logs headings not recognised (" + head.slice(0, 8).join(", ") + ")";
+  var id = "b5-" + e.who.toLowerCase() + "-" + e.slug.replace(/^a2-/, "").replace(/\.v1$/, "") + "-" + e.day, row = 0;
+  for(var i = 1; i < v.length; i++) if(String(v[i][ci.id]) === id){ row = i + 1; break; }
+  var line = row ? v[row - 1].slice() : head.map(function(){ return ""; });
+  var now = new Date(), by = String(setting_("Evidence by") || "Base 5 site").trim();
+  function put(k, val){ if(ci[k] >= 0) line[ci[k]] = val; }
+  put("id", id); put("date", e.day); put("student", e.who); put("entry", e.note);
+  if(!row){ put("type", "Learning"); put("time", Utilities.formatDate(now, tz_(), "HH:mm")); put("tone", "Positive"); put("lesson", e.subject); put("staffIn", by);
+    put("others", ""); put("conf", false); put("incident", "None"); put("safeguard", false); put("ehcp", ""); }
+  if(e.msId && ci.milestones >= 0 && String(line[ci.milestones] || "").indexOf(e.msId) < 0) put("milestones", String(line[ci.milestones] || "") ? String(line[ci.milestones]) + "," + e.msId : e.msId);
+  put("by", by); put("at", Utilities.formatDate(now, tz_(), "yyyy-MM-dd HH:mm"));
+  if(row) sh.getRange(row, 1, 1, line.length).setValues([line]);
+  else sh.appendRow(line);
+  return (row ? "updated " : "sent ") + Utilities.formatDate(now, tz_(), "HH:mm") + (e.msId ? " (linked to step)" : "");
+}
+
+/* ---------- pictures of what students make ---------- */
+function madeFolder_(){
+  var link = String(setting_("Made things folder") || "").trim(), m = link.match(/folders\/([-\w]{20,})/) || link.match(/^([-\w]{20,})$/);
+  if(m){ try{ return DriveApp.getFolderById(m[1]); }catch(e1){} }
+  var f = DriveApp.createFolder("Base 5 made things");
+  var st = sheet_("Settings"), v = st.getDataRange().getValues();
+  for(var i = 1; i < v.length; i++) if(String(v[i][0]).trim() === "Made things folder"){ st.getRange(i + 1, 2).setValue(f.getUrl()); break; }
+  return f;
+}
+function made_(r){
+  var who = who_(r.who), me = signedIn_();
+  if(!(me.staff || me.who === who)) return { ok: false, error: "sign in" };
+  var png = String(r.png || ""), m = png.match(/^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+\/=]+)$/);
+  if(!m || m[2].length > 2600000) return { ok: false, error: "no picture" };
+  var slug = String(r.slug || "").replace(/[^a-z0-9-]/gi, "").slice(0, 60) || "activity";
+  var ext = m[1] === "image/png" ? ".png" : ".jpg";
+  var name = who + " " + day_() + " " + slug + ext;
+  var folder = madeFolder_();
+  var sub, it = folder.getFoldersByName(who);
+  sub = it.hasNext() ? it.next() : folder.createFolder(who);
+  var old = sub.getFilesByName(name);
+  while(old.hasNext()) old.next().setTrashed(true);
+  var file = sub.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name));
+  file.setDescription(clean_(String(r.title || "") + (r.text ? ": " + r.text : ""), 900));
+  logEvents_(who, [["Made", clean_(r.title || nice_(slug), 120)]]);
+  return { ok: true, id: file.getId(), url: "https://drive.google.com/file/d/" + file.getId() + "/view" };
+}
+
+/* ---------- staff: the evidence list ---------- */
+function evidence_list_(r){
+  staff_(r.key);
+  var from = r.from ? String(r.from) : "0000-00-00", to = r.to ? String(r.to) : "9999-99-99", who = r.who ? who_(r.who) : "";
+  var v = rows_("Evidence"), out = [];
+  for(var i = 1; i < v.length; i++){
+    var d = v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0]);
+    if(d < from || d > to) continue;
+    if(who && String(v[i][1]) !== who) continue;
+    var o = { row: i + 1 };
+    EVH.forEach(function(h, k){ var x = v[i][k]; o[h] = x instanceof Date ? x.getTime() : x; });
+    o.Day = d;
+    out.push(o);
+  }
+  return { ok: true, items: out, buddy: !!buddySS_(), toBuddy: ticked_(setting_("Evidence to Buddy")) };
+}
+/* staff: send (or resend) one evidence row to Buddy now */
+function evidence_send_(r){
+  staff_(r.key);
+  var sh = sheet_("Evidence"), row = +r.row;
+  if(row < 2 || row > sh.getLastRow()) throw new Error("no such row");
+  var v = sh.getRange(row, 1, 1, EVH.length).getValues()[0];
+  var e = { day: v[0] instanceof Date ? day_(v[0]) : String(v[0]), who: String(v[1]), activity: String(v[2]), slug: String(v[3]), subject: String(v[4]), target: String(v[5]), step: +v[6] || 0, msId: String(v[7] || ""),
+    level: String(v[8]), theme: String(v[9]), minutes: +v[10] || 0, chunksDone: +v[11] || 0, chunks: +v[12] || 0, tried: +v[13] || 0, got1: +v[14] || 0, got2: +v[15] || 0, shown: +v[16] || 0, skipped: +v[17] || 0,
+    flagged: +v[18] || 0, explained: +v[19] || 0, made: String(v[20] || ""), picture: String(v[21] || ""), finished: String(v[22]) === "yes", note: String(v[23] || "") };
+  if(!e.msId && e.target){ try{ var map = a2map_(), cov = map.drops[e.who + "|" + e.slug]; if(cov && cov.length){ var ms = buddyStep_(e.who, cov[0][0], +cov[0][1]); if(ms && ms.id){ e.msId = ms.id; sh.getRange(row, 8).setValue(ms.id); } } }catch(e0){} }
+  var out = buddyNote_(e, String(v[24] || ""));
+  sh.getRange(row, 25, 1, 2).setValues([[out, new Date()]]);
+  return { ok: true, buddy: out };
+}
+READ3.evidence = evidence_list_;
+WRITE3.made = made_;
+WRITE3.evidencesend = evidence_send_;

@@ -281,6 +281,19 @@ function save(){
   try{ localStorage.setItem(key, JSON.stringify(state)); }catch(e){}
 }
 
+/* ---------- time on task ----------
+   Counts seconds while the page is on screen and the student has tapped,
+   typed or scrolled in the last two minutes. Saved once a minute while
+   active, so the sheet can say "about 18 minutes" without a score. */
+var lastInput = Date.now(), activeAcc = 0, lastSaveSecs = 0;
+function noteInput(){ lastInput = Date.now(); }
+["pointerdown", "keydown", "scroll", "touchstart"].forEach(function(ev){ document.addEventListener(ev, noteInput, { passive: true, capture: true }); });
+setInterval(function(){
+  if(!state || document.hidden || Date.now() - lastInput > 120000) return;
+  state.secs = (state.secs || 0) + 5;
+  if(state.secs - lastSaveSecs >= 60 && (state.pos > 0 || Object.keys(state.answers || {}).length)){ lastSaveSecs = state.secs; save(); }
+}, 5000);
+
 function scored(s){ return ["learn", "write"].indexOf(s.type) < 0 && !(s.type === "widget" && s.unscored); }
 
 /* ---------- second look ----------
@@ -366,12 +379,28 @@ function summary(){
     }
     return t;
   });
+  /* evidence for Jay (read by the shared memory sheet, never shown to the student as a score):
+     secs on screen and active, how sure the student was, how many times they explained their thinking,
+     and what they made at the end */
+  var sure = { certain: 0, think: 0, guess: 0 }, explained = 0;
+  Object.keys(state.answers).forEach(function(i){
+    var a = state.answers[i]; if(!a) return;
+    if(a.sure && sure[a.sure] != null) sure[a.sure]++;
+    if(a.why && String(a.why).trim()) explained++;
+  });
+  var madeText = "";
+  if(a2() && cfg.make && state.make){
+    madeText = (cfg.make.fields || []).map(function(fl){ var v = String(state.make[fl.id] || "").trim(); return v ? stripTags(tok(fl.label || fl.id)) + ": " + v : ""; }).filter(Boolean).join(" | ").slice(0, 600);
+  }
   return { id: cfg.id, subject: cfg.subject, chunkTally: ct, escaped: !!state.escaped, bestTime: state.bestTime || 0, total: total, marked: marked, done: done, got1: got1, got2: got2, shown: shown, skipped: skipped,
            sparks: sparks, best: state.best || 0,
            chunkStates: ch, chunkNames: chunks.map(function(c){ return stripTags(c.topic); }),
            chunks: ch.length, chunksDone: ch.filter(function(x){ return x === "done"; }).length,
            finished: !!state.finished, title: cfg.title,
-           level: a2() ? A2LV : undefined, flagged: a2() ? flaggedList() : undefined };
+           level: a2() ? A2LV : undefined, flagged: a2() ? flaggedList() : undefined,
+           theme: a2() && A2TH && cfg.themes && cfg.themes[A2TH] ? cfg.themes[A2TH].name : undefined,
+           secs: state.secs || 0, round: state.round || 0, sure: sure, explained: explained,
+           made: madeText || undefined, madeId: state.madeId || undefined, mins: cfg.mins || undefined };
 }
 /* questions answered with "certain" that slipped on the first go */
 function flaggedList(){
@@ -1637,15 +1666,34 @@ function a2Finish(){
     fields.forEach(function(f){ shown[f.id] = v[f.id] || f.ph || ""; });
     try{ prev.innerHTML = mk.svg(shown, who); }catch(e){ prev.innerHTML = ""; }
   }
+  /* Once every gap is filled, the finished card quietly goes to Jay's Drive as a picture
+     (through the shared memory, so it works only when the student is signed in; nothing is
+     lost if it cannot). One copy per version of the card; a changed card replaces it. */
+  var madeTimer = null;
+  function madeKey(){ var v = vals(); return fields.map(function(f){ return v[f.id]; }).join("|"); }
+  function keepMade(){
+    if(!window.B5Site || !B5Site.call || !HQ.who) return;
+    var v = vals(); if(fields.some(function(f){ return !v[f.id]; })) return;
+    var k = madeKey(); if(state.madeKey === k) return;
+    var svg = prev.querySelector("svg"); if(!svg) return;
+    svgToPngData(svg.outerHTML, function(data){
+      if(!data) return;
+      B5Site.call("made", { who: HQ.who, slug: cfg.id, title: cfg.title, name: HQ.who.toLowerCase() + "-" + cfg.id + ".png", png: data, text: summary().made || "" }).then(function(r){
+        if(r && r.ok && r.id){ state.madeId = r.id; state.madeKey = k; save(); }
+      }).catch(function(){});
+    });
+  }
+  function madeSoon(){ clearTimeout(madeTimer); madeTimer = setTimeout(keepMade, 15000); }
   ins.forEach(function(el){
     el.value = state.make[el.dataset.f] || "";
-    el.oninput = function(){ state.make[el.dataset.f] = el.value; save(); draw(); };
+    el.oninput = function(){ state.make[el.dataset.f] = el.value; save(); draw(); madeSoon(); };
   });
   $("a2Fill").onclick = function(){
     fields.forEach(function(f){ if(!(state.make[f.id] || "").trim() && f.ph) state.make[f.id] = f.ph; });
     ins.forEach(function(el){ el.value = state.make[el.dataset.f] || ""; });
-    save(); draw();
+    save(); draw(); madeSoon();
   };
+  madeSoon();
   $("a2Save").onclick = function(){
     var svg = prev.querySelector("svg");
     if(svg) svgToPng(svg.outerHTML, HQ.who.toLowerCase() + "-" + cfg.id + ".png");
@@ -1662,6 +1710,32 @@ function a2Finish(){
       }
     });
   }
+}
+/* the same picture as a data URL, for sending rather than saving */
+function svgToPngData(svg, cb){
+  try{
+    var m = svg.match(/viewBox="\s*([-\d.]+)[\s,]+([-\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+    var W = m ? +m[3] : 800, H = m ? +m[4] : 600, k = W > 900 ? 1 : 1.5;
+    if(!/xmlns=/.test(svg)) svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+    svg = svg.replace(/<svg([^>]*)>/, function(t, at){
+      at = at.replace(/\s(width|height)="[^"]*"/g, "");
+      return "<svg" + at + ' width="' + W * k + '" height="' + H * k + '">';
+    });
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var c = document.createElement("canvas");
+        c.width = W * k; c.height = H * k;
+        var x = c.getContext("2d");
+        x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
+        x.drawImage(img, 0, 0, c.width, c.height);
+        var d = c.toDataURL("image/png");
+        cb(d.length < 900000 ? d : c.toDataURL("image/jpeg", 0.8));
+      }catch(e){ cb(null); }
+    };
+    img.onerror = function(){ cb(null); };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }catch(e){ cb(null); }
 }
 function svgToPng(svg, name){
   try{
