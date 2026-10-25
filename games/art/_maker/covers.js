@@ -110,5 +110,19 @@ var COVERS = {
     small:"Strategy notes turn up when the game calls for them.",
     players:"1<br>PLAYER",
     spine:T("CHESS, properly","font:900 50px/1 Archivo;color:#f2efe6;"+ext("#8a5a2b",4,"#000"))
+  },
+  "timeline-tantrum": {
+    vars:{base:"#24204a",base2:"#151230",accent:"#ef7724",sub:"#7fe8ff",ribbon:"#ef7724",ribbonInk:"#151230",s1:"#7ec850",s2:"#ef7724",s3:"#5fe0f0"},
+    chip:"ARTILLERY",
+    title:'<span style="display:inline-flex;align-items:baseline;gap:22px">'+
+      T("TIMELINE","font:900 italic 112px/1 Archivo;color:#7ec850;-webkit-text-stroke:4px #151230;paint-order:stroke fill;"+ext("#2f6a24",8,"#000"))+
+      T("TANTRUM","font:900 italic 112px/1 Archivo;color:#5fe0f0;-webkit-text-stroke:4px #151230;paint-order:stroke fill;"+ext("#ef7724",8,"#000"))+'</span>',
+    sub:"STONE AGE VS FAR FUTURE",
+    ribbon:"AIM &middot; BOOM &middot; DIG UP HISTORY",
+    burst:["17","REAL FINDS!"],
+    tag:"10,000 BC TO AD 3000",
+    small:"Two squads, two eras and one very bad day for history.",
+    players:"1 OR 2<br>PLAYERS",
+    spine:T("TIMELINE TANTRUM","font:900 italic 50px/1 Archivo;color:#5fe0f0;"+ext("#ef7724",4,"#000"))
   }
 };

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timeline Tantrum</title>
+<script src="/data/b5site.js?v=8"></script>
+<script src="/data/send.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fef8f4;--ink:#1f2a30;--teal:#007291;--orange:#ef7724;--soft:#eadfd5;--amber:#e0a030}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#8fcbe2;touch-action:none;-webkit-user-select:none;user-select:none;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:var(--ink)}
+#game{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+button{font-family:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+
+#hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:8px;pointer-events:none}
+#teams{display:flex;flex-direction:column;gap:6px}
+.tc{display:grid;grid-template-columns:auto 90px auto;align-items:center;gap:8px;background:rgba(254,248,244,.92);border:2px solid var(--c,var(--teal));border-radius:12px 6px 12px 8px;padding:4px 10px;font-size:14px;font-weight:700}
+.tc.now{box-shadow:0 0 0 3px rgba(254,248,244,.6)}
+.tb{height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
+.tb i{display:block;height:100%;width:100%;background:var(--c,var(--teal));transition:width .4s}
+.th{font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
+#mini{pointer-events:auto;background:#bfe0e6;border:2px solid var(--cream);border-radius:8px 12px 6px 12px;image-rendering:pixelated;width:176px;height:74px}
+#topbtns{pointer-events:auto;display:flex;gap:6px}
+.round{width:44px;height:44px;border-radius:14px 10px 14px 12px;border:2px solid var(--ink);background:var(--cream);font-weight:700;font-size:16px}
+
+#info{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;display:flex;align-items:center;gap:14px;background:rgba(254,248,244,.94);border:2px solid var(--ink);border-radius:14px 8px 14px 10px;padding:6px 12px;font-size:14px;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 16px)}
+@media (max-width:1000px){body.touch #info{bottom:auto;top:84px} body.touch #banner{top:132px}}
+@media (max-width:620px){#info,body.touch #info{top:144px;bottom:auto;flex-wrap:wrap;justify-content:center;white-space:normal;width:calc(100vw - 16px)} #banner,body.touch #banner{top:206px}}
+@media (max-height:450px){#touch .cl{grid-template-columns:repeat(2,50px)} #touch .cr{grid-template-columns:repeat(2,64px)} #touch button{height:46px;font-size:14px} #touch button.fire{height:58px}}
+#wind{display:flex;align-items:center;gap:6px}
+.lab{font-weight:700}
+.wbar{position:relative;width:70px;height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
+.wbar::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink)}
+.wbar i{position:absolute;top:0;bottom:0;background:var(--teal)}
+#wpn{font-weight:700}
+#timer{display:flex;align-items:center;gap:6px}
+.tbar{width:60px;height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--teal)}
+.tbar i.low{background:var(--amber)}
+#ttxt{font-variant-numeric:tabular-nums;min-width:28px}
+
+#banner{position:fixed;left:50%;top:96px;transform:translateX(-50%) rotate(-1deg);background:var(--cream);border:3px solid var(--ink);border-radius:16px 10px 18px 12px;padding:8px 18px;font-family:Archivo,sans-serif;font-weight:800;font-size:20px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;white-space:nowrap}
+#banner small{display:block;font-family:'Atkinson Hyperlegible',sans-serif;font-weight:400;font-size:14px}
+#banner.show{opacity:1}
+
+#touch{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;padding:10px;pointer-events:none}
+#touch .cl,#touch .cr{display:grid;gap:8px;pointer-events:auto}
+#touch .cl{grid-template-columns:repeat(2,58px)}
+#touch .cr{grid-template-columns:repeat(2,74px)}
+#touch button{height:58px;border-radius:16px 12px 16px 14px;border:2px solid var(--ink);background:rgba(254,248,244,.88);font-weight:700;font-size:15px;touch-action:none}
+#touch button.fire{grid-column:span 2;height:74px;background:var(--orange);color:#fff;font-size:20px;font-family:Archivo,sans-serif}
+#touch button.on{background:var(--teal);color:#fff}
+
+#hud,#info,#touch,#jay{z-index:20}
+#banner{z-index:30}
+.ov{z-index:60}
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(31,42,48,.35);padding:16px;overflow:auto}
+.card{background:var(--cream);border:3px solid var(--ink);border-radius:22px 14px 24px 16px;padding:22px 24px;max-width:520px;width:100%;transform:rotate(-.6deg);box-shadow:6px 8px 0 rgba(31,42,48,.25);max-height:calc(100vh - 32px);overflow:auto;background-image:radial-gradient(circle at 90% 0%,rgba(239,119,36,.12),transparent 50%),radial-gradient(circle at 0% 100%,rgba(0,114,145,.10),transparent 55%)}
+.card h1,.card h2{font-family:Archivo,sans-serif;font-weight:800;margin:0 0 6px;line-height:1.05}
+.card h1{font-size:40px;color:var(--teal)}
+.card h2{font-size:26px}
+.kicker{margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange)}
+.sub{margin:0 0 16px;font-size:15px}
+.opt{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px dashed #d9cbbf}
+.opt>span{font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:2px solid #cbbcae;background:#fff;border-radius:12px 8px 12px 10px;padding:8px 12px;font-size:15px}
+.chips button.on{border-color:var(--teal);background:var(--teal);color:#fff}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:40px;height:40px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:20px;font-weight:700}
+.step b{font-size:20px;min-width:20px;text-align:center}
+.big{display:block;width:100%;margin-top:16px;padding:14px;font-size:22px;font-family:Archivo,sans-serif;font-weight:800;background:var(--teal);color:#fff;border:3px solid var(--ink);border-radius:18px 12px 18px 14px}
+.big.alt{background:var(--orange);margin-top:4px;margin-bottom:12px;font-size:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .big{flex:1;min-width:160px}
+.foot{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:14px;font-size:15px}
+.foot a,.link{color:var(--teal);font-weight:700;background:none;border:0;padding:0;text-decoration:underline;font-size:15px}
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.kit button{text-align:left;border:2px solid #cbbcae;background:#fff;border-radius:14px 10px 14px 12px;padding:10px 12px}
+.kit button.on{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange)}
+.kit b{display:block;font-size:17px;font-family:Archivo,sans-serif}
+.kit span{font-size:14px}
+.kit em{font-style:normal;font-size:12px;color:#6a5a4c}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px dashed #d9cbbf;font-weight:700}
+.tog button{min-width:74px;padding:8px 10px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-weight:700}
+.tog button.on{background:var(--teal);color:#fff}
+.help dt{font-weight:700;margin-top:8px}
+.help dd{margin:2px 0 0}
+kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;border-radius:6px;padding:0 5px;background:#fff;font-size:14px}
+.stats{margin:10px 0 0;padding:0;list-style:none;font-size:16px}
+.stats li{padding:4px 0}
+#turnhint{margin:0 0 10px;font-size:14px;background:#fff3e2;border-radius:10px;padding:8px 10px}
+.tlopt{flex-direction:column;align-items:stretch}
+#tl{width:100%;max-width:460px;aspect-ratio:230/64;image-rendering:pixelated;cursor:pointer;align-self:center;background:#f6ece1;border-radius:12px 8px 12px 10px}
+#tlText{margin:2px 0 0;font-size:14px;color:#4a3d32}
+.card.wide{max-width:640px}
+.findcard.glitch,.ov.glitch .card{background-color:#eef9fb}
+.findrow{display:flex;gap:16px;align-items:center;margin:4px 0 6px}
+#findArt{width:96px;height:96px;flex:none;image-rendering:pixelated;background:#efe4d6;border:3px solid var(--ink);border-radius:16px 10px 16px 12px;padding:6px}
+.meta{margin:0;font-size:14px;color:#6a5a4c}
+.now,.real{margin:8px 0 0;font-size:15px;background:#e6f3f6;border-radius:10px;padding:8px 10px;color:#0c4a5c}
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0}
+.case{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px dashed #cbbcae;background:#fbf4ec;border-radius:12px 8px 12px 10px;padding:8px 4px;font-size:13px;font-weight:700;line-height:1.15;text-align:center;min-height:96px}
+.case.got{border-style:solid;border-color:#a8977f;background:#fff}
+.case.on{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange)}
+.case canvas{width:48px;height:48px;image-rendering:pixelated}
+.shelf{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;margin:16px 0 2px}
+.shelfn{font-family:'Atkinson Hyperlegible',sans-serif;font-weight:400;font-size:14px;color:#6a5a4c}
+.glitchlab{margin:6px 0 0;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#007291}
+.small{font-size:14px;margin:0;color:#4a3d32}
+.detail{background:#fff;border:2px solid #cbbcae;border-radius:14px 10px 14px 12px;padding:10px 12px;font-size:15px}
+.detail b{display:block;font-family:Archivo,sans-serif;font-size:18px}
+.detail p{margin:6px 0 0}
+.mylabel{font-style:italic;color:#0c4a5c}
+#overFinds{margin-top:10px;font-size:15px}
+.finds{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fd{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #cbbcae;border-radius:10px;padding:4px 8px;font-size:14px}
+.fd canvas{width:24px;height:24px;image-rendering:pixelated}
+#bLabel{margin-top:12px}
+.starters{margin-top:8px}
+.starters button{font-size:13px;padding:6px 10px;background:#fff8ef}
+#pcText,#lblText{display:block;width:100%;margin-top:8px;font:inherit;font-size:16px;padding:10px;border:2px solid #cbbcae;border-radius:12px;background:#fff;resize:vertical}
+.namebtn{border:2px solid var(--teal);background:#fff;color:var(--teal);border-radius:12px 8px 12px 10px;padding:8px 12px;font-size:15px;font-weight:700}
+#nameCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:6px}
+#nameCols h3{font-family:Archivo,sans-serif;font-weight:800;font-size:17px;margin:0 0 6px}
+.nrow{display:flex;gap:6px;margin-bottom:6px}
+.nrow input{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border:2px solid #cbbcae;border-radius:10px;background:#fff;text-transform:uppercase}
+.nrow button{border:2px solid var(--ink);background:#fff8ef;border-radius:10px;padding:0 10px;font-weight:700;font-size:14px}
+.tournote{margin:0;padding:8px 10px;font-size:14px;background:#fff3e2;border-radius:10px}
+#jumpTl{display:block;width:100%;max-width:460px;margin:8px auto;image-rendering:pixelated;background:#f6ece1;border-radius:12px 8px 12px 10px}
+.ripple{background:#e6f3f6;border-radius:12px 8px 12px 10px;padding:10px 12px;color:#0c4a5c}
+.ripple b{display:block;font-family:Archivo,sans-serif;font-size:17px}
+.ripple p{margin:4px 0 0;font-size:15px}
+#pcCard{display:block;width:100%;max-width:480px;margin:10px auto 0;border-radius:10px}
+#bNext,#bPostcard{margin-top:12px}
+#lblCard{display:block;width:100%;max-width:480px;margin:10px auto 0;border-radius:10px}
+.saved{min-height:20px;margin:6px 0 0;font-size:14px;color:#0c4a5c;text-align:center}
+.kit button.gold{border-color:#e0b040;background:#fff7dc}
+.kit button.off{opacity:.55}
+.sendbox{margin-top:12px;border-top:1px dashed #d9cbbf;padding-top:10px}
+.sendtitle{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;margin:0 0 4px}
+.sendwhy{font-size:14px;margin:0 0 8px;color:#4a3d32}
+.sendwho{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-weight:700;font-size:14px}
+.sendwho input{width:90px;font:inherit;font-size:16px;padding:6px 8px;border:2px solid #cbbcae;border-radius:10px;text-transform:uppercase}
+.sendrow{display:flex;flex-wrap:wrap;gap:6px}
+.sendrow .btn{border:2px solid var(--ink);border-radius:12px 8px 12px 10px;padding:8px 12px;font-weight:700;font-size:14px;background:#fff}
+.sendrow .btn-orange{background:var(--orange);color:#fff}
+.sendmsg{font-size:14px;color:#0c4a5c;min-height:18px;margin:6px 0 0}
+.kit{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+#jay{position:fixed;right:8px;top:62px;display:flex;align-items:center;gap:8px;max-width:280px;background:var(--cream);border:2px solid var(--ink);border-radius:14px 8px 14px 10px;padding:6px 10px 6px 6px;font-size:14px;pointer-events:none;transform:rotate(.6deg)}
+#jayFace{width:40px;height:40px;flex:none;image-rendering:pixelated;background:#cfe8ee;border-radius:10px}
+#jay b{display:block;font-family:Archivo,sans-serif;font-size:13px;color:var(--teal)}
+@media (max-width:620px){#jay{top:auto;bottom:206px;left:8px;right:8px;max-width:none}}
+@media (max-width:620px){
+  #hud{flex-wrap:wrap}
+  .tc{grid-template-columns:auto 60px auto;font-size:13px;padding:3px 8px}
+  #mini{width:132px;height:56px}
+  #info{gap:8px;font-size:13px}
+  .wbar{width:44px}.tbar{width:40px}
+  .card h1{font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){#banner{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Timeline Tantrum battlefield"></canvas>
+
+<div id="hud" hidden>
+  <div id="teams">
+    <div class="tc" id="tc0"><span class="tn"></span><span class="tb"><i></i></span><span class="th"></span></div>
+    <div class="tc" id="tc1"><span class="tn"></span><span class="tb"><i></i></span><span class="th"></span></div>
+  </div>
+  <canvas id="mini" width="176" height="74" aria-label="Map overview, tap to look somewhere"></canvas>
+  <div id="topbtns"><button class="round" id="bPause" aria-label="Pause">II</button></div>
+</div>
+
+<div id="info" hidden>
+  <div id="wind"><span class="lab">Wind</span><span class="wbar"><i></i></span><span id="wtxt">calm</span></div>
+  <div id="wpn"></div>
+  <div id="timer"><span class="tbar"><i></i></span><span id="ttxt"></span></div>
+</div>
+
+<div id="banner"></div>
+
+<div id="touch" hidden>
+  <div class="cl">
+    <button data-k="up" aria-label="Aim up">&#9650;</button>
+    <button data-k="jump">Jump</button>
+    <button data-k="down" aria-label="Aim down">&#9660;</button>
+    <button data-k="flip">Flip</button>
+    <button data-k="left" aria-label="Walk left">&#9664;</button>
+    <button data-k="right" aria-label="Walk right">&#9654;</button>
+  </div>
+  <div class="cr">
+    <button data-k="weapons">Kit</button>
+    <button data-k="pass">Breather</button>
+    <button data-k="fire" class="fire">Fire</button>
+  </div>
+</div>
+
+<div class="ov" id="menu">
+  <div class="card">
+    <p class="kicker">Base 5 game vault &middot; Stage 4 test build</p>
+    <h1>Timeline Tantrum</h1>
+    <p class="sub">Stone Snags vs Neon Snags, from the Prehistoric Jungle to the Future City. History is about to have a meltdown.</p>
+    <p id="turnhint" hidden>Tip: turn your phone sideways for a bigger battlefield.</p>
+    <button id="bResume" class="big alt" hidden>Carry on your last match</button>
+    <button id="bResumeTour" class="big alt" hidden>Carry on your Time Tour</button>
+    <div class="opt"><span>Who's playing?</span>
+      <div class="chips" data-o="mode"><button data-v="cpu" class="on">Me vs the computer</button><button data-v="friend">Me vs a friend</button><button data-v="tour">Time Tour</button></div></div>
+    <p class="tournote" id="tourNote" hidden>Time Tour: battle through history in order, from 10,000 BC to AD 3000, against the computer. Whoever wins each stop changes what the next one looks like. Win or lose, the tour carries on.</p>
+    <div class="opt" id="oMood"><span>Computer's mood</span>
+      <div class="chips" data-o="mood"><button data-v="sleepy" class="on">Sleepy</button><button data-v="grumpy">Grumpy</button><button data-v="legendary">Legendary</button></div></div>
+    <div class="opt" id="oMap"><span>Battlefield</span>
+      <div class="chips" data-o="map"><button data-v="jungle" class="on">Prehistoric Jungle</button><button data-v="city">Future City</button></div></div>
+    <div class="opt tlopt" id="oEra"><span>Pick your squad on the timeline</span>
+      <canvas id="tl" width="230" height="64" aria-label="Timeline of the eras, drawn to scale. Tap a squad to pick it."></canvas>
+      <p id="tlText"></p></div>
+    <div class="opt"><span>Snags in each squad</span>
+      <div class="step"><button id="sMinus" aria-label="Fewer">-</button><b id="sVal">3</b><button id="sPlus" aria-label="More">+</button></div></div>
+    <div class="opt"><span>Snag names</span>
+      <button class="namebtn" id="bNames">Name your squad</button></div>
+    <div class="opt"><span>Turn timer</span>
+      <div class="chips" data-o="turn"><button data-v="60" class="on">Relaxed (60s)</button><button data-v="90">Extra relaxed (90s)</button></div></div>
+    <div class="opt"><span>Sudden Death</span>
+      <div class="chips" data-o="sd"><button data-v="on" class="on">After 24 turns</button><button data-v="off">Off</button></div></div>
+    <button id="bStart" class="big">Let's go</button>
+    <div class="foot"><button id="bMuseum" class="link">Time Museum</button><button id="bHelp" class="link">How to play</button><a href="/games/">Game vault</a><a href="/">Back to Base 5</a></div>
+  </div>
+</div>
+
+<div class="ov" id="kit" hidden>
+  <div class="card wide">
+    <h2>Pick your kit</h2>
+    <p class="sub" style="margin:0">The timer waits while you choose.</p>
+    <div class="kit" id="kitList"></div>
+    <button class="big" id="bKitClose">Back to the battle</button>
+  </div>
+</div>
+
+<div class="ov" id="pause" hidden>
+  <div class="card">
+    <h2>Paused</h2>
+    <p class="sub">Take as long as you like. Your match is saved.</p>
+    <div class="tog">Music <button id="tMusic">On</button></div>
+    <div class="tog">Sound effects <button id="tSfx">On</button></div>
+    <div class="tog">On screen buttons <button id="tTouch">Off</button></div>
+    <div class="tog">Jay's commentary <button id="tJay">On</button></div>
+    <div class="tog">Your finds so far <button id="bMuseum2">Museum</button></div>
+    <div class="row">
+      <button class="big" id="bUnpause">Back to it</button>
+      <button class="big alt" id="bLeave" style="margin-top:16px">Leave for now</button>
+    </div>
+    <div class="foot"><button class="link" id="bHelp2">How to play</button></div>
+  </div>
+</div>
+
+<div class="ov" id="help" hidden>
+  <div class="card help">
+    <h2>How to play</h2>
+    <p class="sub" style="margin:0">Squads take turns. On your go, move one Snag, aim, then fire once. After firing you get 3 seconds to scarper. Knock the other squad into the water or down to 0 to send them home through a time portal.</p>
+    <dl>
+      <dt>Keyboard</dt>
+      <dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd> walk &middot; <kbd>&uarr;</kbd> <kbd>&darr;</kbd> aim &middot; hold <kbd>Space</kbd> to power up, let go to fire</dd>
+      <dd><kbd>Enter</kbd> jump &middot; <kbd>Backspace</kbd> backflip &middot; <kbd>Tab</kbd> kit &middot; number keys quick pick &middot; <kbd>Esc</kbd> pause</dd>
+      <dt>Touch or mouse</dt>
+      <dd>Drag on the battlefield to aim. Hold Fire to power up, let go to fire. Tap the little map to look around.</dd>
+      <dt>Numbers worth watching</dt>
+      <dd>Angle is how far above flat you are aiming. Power is how hard you throw. Wind pushes Sling Stones and Plasma Bolts, but not the bouncy ones.</dd>
+      <dt>Each squad's own kit</dt>
+      <dd>Open the kit to see your era's special weapons. Some have limited ammo, and the superweapon unlocks at turn 10. The Vine Swing and Jetpack are free moves: they do not use up your go.</dd>
+      <dt>Buried treasure</dt>
+      <dd>Watch for little glints in the ground. Blast near one to dig up a real artefact, then walk over it to add it to your Time Museum. Some finds should not be there at all.</dd>
+      <dt>Crates</dt>
+      <dd>Bonnie sometimes pops out of a time portal with a crate. Walk over it for a snack, or, very rarely, something special.</dd>
+      <dt>Need a pause?</dt>
+      <dd>Breather passes your turn with no penalty. Pause any time; the match saves itself.</dd>
+    </dl>
+    <button class="big" id="bHelpClose">Got it</button>
+  </div>
+</div>
+
+<div class="ov" id="over" hidden>
+  <div class="card">
+    <p class="kicker">Match over</p>
+    <h2 id="overTitle"></h2>
+    <p class="sub" id="overText"></p>
+    <ul class="stats" id="overStats"></ul>
+    <div id="overFinds"></div>
+    <p class="real" id="overReal"></p>
+    <p class="real" id="overTour" hidden></p>
+    <button class="big alt" id="bLabel" hidden>Make a museum label</button>
+    <button class="big" id="bNext" hidden>Time jump to the next stop</button>
+    <button class="big" id="bPostcard" hidden>Make your history changed postcard</button>
+    <div class="row">
+      <button class="big" id="bRematch">Rematch</button>
+      <button class="big alt" id="bSettings" style="margin-top:16px">Change settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="find" hidden>
+  <div class="card findcard">
+    <p class="kicker" id="findKick">New for the Time Museum</p>
+    <div class="findrow">
+      <canvas id="findArt" width="12" height="12"></canvas>
+      <div><h2 id="findName"></h2><p class="meta" id="findMeta"></p></div>
+    </div>
+    <p class="sub" id="findFact"></p>
+    <p class="now" id="findNow" hidden></p>
+    <button class="big" id="bFindClose">Back to the battle</button>
+  </div>
+</div>
+
+<div class="ov" id="museum" hidden>
+  <div class="card wide">
+    <p class="kicker">Time Museum</p>
+    <h2>Your finds through time</h2>
+    <p class="sub" id="musSub"></p>
+    <p class="small">The glitches are things that should not be there at all. If time travellers leave stuff like this lying around, should we time travel at all?</p>
+    <div class="detail" id="musDetail" hidden></div>
+    <div id="musShelves"></div>
+    <button class="big" id="bMusClose">Close the museum</button>
+  </div>
+</div>
+
+<div class="ov" id="label" hidden>
+  <div class="card wide">
+    <p class="kicker">Make a museum label</p>
+    <h2>Your find, your words</h2>
+    <p class="sub">Pick a find, then say something about it. One line is plenty, and you can leave it blank.</p>
+    <div class="chips" id="lblFinds"></div>
+    <div class="chips starters" id="lblStarters"></div>
+    <textarea id="lblText" maxlength="160" rows="2" placeholder="Write as much or as little as you like"></textarea>
+    <canvas id="lblCard" width="480" height="270" aria-label="Your museum label"></canvas>
+    <div class="row">
+      <button class="big" id="bLblSave">Put it in the museum</button>
+      <button class="big alt" id="bLblPic" style="margin-top:16px">Save as a picture</button>
+    </div>
+    <p class="saved" id="lblSaved" aria-live="polite"></p>
+    <div id="lblSend"></div>
+    <div class="foot"><button class="link" id="bLblBack">Back</button></div>
+  </div>
+</div>
+
+<div class="ov" id="jump" hidden>
+  <div class="card wide jumpcard">
+    <p class="kicker">Time jump</p>
+    <h2 id="jumpTitle"></h2>
+    <canvas id="jumpTl" width="230" height="40" aria-hidden="true"></canvas>
+    <p class="sub" id="jumpYears"></p>
+    <div class="ripple"><b id="jumpRipTitle"></b><p id="jumpRipText"></p></div>
+    <button class="big" id="bJumpGo">Let's go</button>
+  </div>
+</div>
+
+<div class="ov" id="postcard" hidden>
+  <div class="card wide">
+    <p class="kicker">Time Tour complete</p>
+    <h2>Send a postcard from the future</h2>
+    <p class="sub">History changed while you were away. Say what you think: if we could time travel, should we? One line is plenty.</p>
+    <div class="chips starters" id="pcStarters"></div>
+    <textarea id="pcText" maxlength="200" rows="2" placeholder="Write as much or as little as you like"></textarea>
+    <canvas id="pcCard" width="480" height="300" aria-label="Your postcard"></canvas>
+    <div class="row">
+      <button class="big alt" id="bPcPic" style="margin-top:16px">Save as a picture</button>
+      <button class="big" id="bPcDone">Finish the tour</button>
+    </div>
+    <p class="saved" id="pcSaved" aria-live="polite"></p>
+    <div id="pcSend"></div>
+  </div>
+</div>
+
+<div class="ov" id="names" hidden>
+  <div class="card wide">
+    <p class="kicker">Your squad</p>
+    <h2>Name your Snags</h2>
+    <p class="sub">Type your own names, or roll for a silly one. Up to 10 letters each.</p>
+    <div id="nameCols"></div>
+    <div class="row">
+      <button class="big alt" id="bRollAll" style="margin-top:16px">Roll them all</button>
+      <button class="big" id="bNamesDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="jay" hidden><canvas id="jayFace" width="20" height="20"></canvas><div><b>Jay</b><span id="jayLine"></span></div></div>
+
+<script src="eras.js"></script>
+<script src="sprites.js"></script>
+<script src="game.js"></script>
+<script src="/data/b5evidence.js?v=1"></script>
+<script>
+/* evidence for Jay and BridgeLink Buddy: time on task and one line about what they did */
+if(window.B5Evidence) B5Evidence.start({ slug: "game-timeline-tantrum", title: "Timeline Tantrum", subject: "Project", kind: "game",
+  line: function(){ return window.B5TantrumLine ? window.B5TantrumLine() : ""; } });
+</script>
+</body>
+</html>

@@ -60,6 +60,12 @@ window.B5GAMES = {
       tags:["project","fun"], added:"2026-10-14", art:"/games/art/its-time/box.webp", fill:"orange", motif:"portal", year:"Every year at once", featured:true
     },
     {
+      id:"timeline-tantrum", title:"Timeline Tantrum", href:"/games/timeline-tantrum/",
+      blurb:"Lead a squad of Snags across exploding battlefields from the Stone Age to the Future City. Dig up real artefacts for your Time Museum, and find out what happens to history when the other side wins.",
+      meta:"Two eras &middot; Time Tour &middot; 1 or 2 players &middot; saves on this computer",
+      tags:["project","learning","fun"], added:"2026-10-25", art:"/games/art/timeline-tantrum/box.webp", fill:"plum", motif:"portal", year:"10,000 BC to AD 3000"
+    },
+    {
       id:"build-a-life", title:"Build a Life", href:"/practice/build-a-life.html",
       blurb:"Start at 5 and spin your way round a pixel town, earn qualifications, land a job and find a home, one year at a time. Aim for a life that feels good, not just a rich one.",
       meta:"Age 5 to 35 &middot; saves as you go &middot; nothing ends your game",
