@@ -1372,7 +1372,7 @@ function evToRow_(e){
 function evidenceNote_(e){
   var bits = [];
   var kindWord = e.kind === "game" ? "project game" : e.kind === "practice" ? "practice" : "";
-  var bracket = [e.subject || kindWord, e.level ? e.level + " level" : "", e.theme ? e.theme + " theme" : ""].filter(String);
+  var bracket = [e.subject || kindWord, e.level ? e.level.replace(/^(.+?)(?: \((.*)\))?$/, function(m, a, b){ return a + " level" + (b ? ", " + b : ""); }) : "", e.theme ? e.theme + " theme" : ""].filter(String);
   bits.push(e.activity + (bracket.length ? " (" + bracket.join(", ") + ")" : "") + ".");
   var did = [];
   if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + (e.kind === "game" ? " of play" : " on task"));
@@ -1388,7 +1388,7 @@ function evidenceNote_(e){
   if(e.flagged) bits.push("Was sure but slipped on " + e.flagged + ", so " + (e.flagged === 1 ? "it comes" : "they come") + " back for a second look.");
   if(e.second) bits.push("Came back for a second look and got " + e.second + " right.");
   if(e.explained) bits.push("Explained how they got it " + (e.explained === 1 ? "once" : e.explained === 2 ? "twice" : e.explained + " times") + ".");
-  if(e.quote) bits.push('In their words: "' + e.quote + '"');
+  if(e.quote) bits.push('In their words: "' + e.quote.replace(/[.!?]+$/, "") + '".');
   if(e.made) bits.push("Made at the end: " + e.made + (e.picture ? " (picture: " + e.picture + ")" : "") + ".");
   if(e.target) bits.push("Built for: " + e.target + (e.step ? ", step " + e.step : "") + ".");
   return "Base 5 site: " + bits.join(" ");
@@ -1481,24 +1481,55 @@ function activity_(r){
    Returns what goes in the Evidence row's "Buddy note" column. */
 function buddyNote_(e, prev){
   var bs = buddySS_(); if(!bs) return "no Buddy link";
-  var sh = bs.getSheetByName("Logs") || bs.getSheetByName("Notes"); if(!sh) return "no Logs tab in Buddy";
+  /* Buddy's notes tab: by name, or else the tab whose top row has Student, Entry and Logged by */
+  var sh = bs.getSheetByName("Logs") || bs.getSheetByName("Notes") || bs.getSheetByName("Log");
+  if(!sh) bs.getSheets().forEach(function(t){
+    if(sh) return;
+    var h = t.getRange(1, 1, 1, Math.max(1, t.getLastColumn())).getValues()[0].map(function(x){ return String(x).trim().toLowerCase(); });
+    if(h.indexOf("student") >= 0 && h.indexOf("entry") >= 0 && h.indexOf("logged by") >= 0) sh = t;
+  });
+  if(!sh) return "no notes tab in Buddy";
   var v = sh.getDataRange().getValues(), head = (v[0] || []).map(function(h){ return String(h).trim(); }), lo = head.map(function(h){ return h.toLowerCase(); });
   function col(names){ for(var i = 0; i < names.length; i++){ var k = lo.indexOf(names[i]); if(k >= 0) return k; } return -1; }
+  /* Buddy's own headings first (from its Logs tab, October 2026), then older or plainer names */
   var ci = { id: col(["id"]), date: col(["date", "day"]), student: col(["student", "who", "initials"]), entry: col(["entry", "note", "text"]),
-    type: col(["type", "kind"]), time: col(["time"]), tone: col(["tone"]), lesson: col(["lesson"]), staffIn: col(["staffin", "staff in", "staff"]),
-    others: col(["others"]), conf: col(["conf", "confidential"]), incident: col(["incident"]), safeguard: col(["safeguard", "safeguarding"]),
-    milestones: col(["milestones", "milestone", "steps"]), ehcp: col(["ehcp"]), by: col(["by", "author"]), at: col(["at", "updated", "saved"]), photos: col(["photos", "photo"]) };
-  if(ci.id < 0 || ci.date < 0 || ci.student < 0 || ci.entry < 0) return "Buddy Logs headings not recognised (" + head.slice(0, 8).join(", ") + ")";
+    type: col(["type", "kind"]), time: col(["time"]), tone: col(["tone"]), lesson: col(["lesson"]),
+    staffIn: col(["staff involved", "staffin", "staff in"]), others: col(["students involved", "others"]),
+    conf: col(["confidential", "conf"]), incident: col(["accident or near miss", "incident"]), safeguard: col(["safeguarding concern", "safeguarding", "safeguard"]),
+    milestones: col(["milestones", "milestone", "steps"]), ehcp: col(["ehcp"]),
+    by: col(["logged by", "by", "author"]), at: col(["logged at", "at", "saved"]), editBy: col(["edited by"]), editAt: col(["edited at"]),
+    revision: col(["revision"]), versions: col(["versions"]), changed: col(["changed"]) };
+  if(ci.id < 0 || ci.date < 0 || ci.student < 0 || ci.entry < 0) return "Buddy notes headings not recognised (" + head.slice(0, 8).join(", ") + ")";
   var id = "b5-" + e.who.toLowerCase() + "-" + e.slug.replace(/^a2-/, "").replace(/\.v1$/, "") + "-" + e.day, row = 0;
   for(var i = 1; i < v.length; i++) if(String(v[i][ci.id]) === id){ row = i + 1; break; }
   var line = row ? v[row - 1].slice() : head.map(function(){ return ""; });
-  var now = new Date(), by = String(setting_("Evidence by") || "Base 5 site").trim();
+  while(line.length < head.length) line.push("");
+  var now = new Date(), stamp = Utilities.formatDate(now, tz_(), "yyyy-MM-dd HH:mm"), by = String(setting_("Evidence by") || "Base 5 site").trim();
   function put(k, val){ if(ci[k] >= 0) line[ci[k]] = val; }
+  /* who worked on it with them: students to Students involved, Jay and HB to Staff involved */
+  var withS = [], withT = [];
+  String(e.with || "").split(/,\s*/).forEach(function(w){
+    w = w.trim(); if(!w) return;
+    if(WHO.indexOf(w.toUpperCase()) >= 0) withS.push(w.toUpperCase());
+    else if(/^jay$/i.test(w)) withT.push("JR");
+    else if(/^hb$/i.test(w)) withT.push("HB");
+  });
   put("id", id); put("date", e.day); put("student", e.who); put("entry", e.note);
-  if(!row){ put("type", "Learning"); put("time", Utilities.formatDate(now, tz_(), "HH:mm")); put("tone", "Positive"); put("lesson", e.subject); put("staffIn", by);
-    put("others", ""); put("conf", false); put("incident", "None"); put("safeguard", false); put("ehcp", ""); }
-  if(e.msId && ci.milestones >= 0 && String(line[ci.milestones] || "").indexOf(e.msId) < 0) put("milestones", String(line[ci.milestones] || "") ? String(line[ci.milestones]) + "," + e.msId : e.msId);
-  put("by", by); put("at", Utilities.formatDate(now, tz_(), "yyyy-MM-dd HH:mm"));
+  put("staffIn", withT.join(", ")); put("others", withS.join(", "));
+  if(!row){
+    put("type", "Learning"); put("time", Utilities.formatDate(now, tz_(), "HH:mm")); put("tone", "Positive"); put("lesson", e.subject);
+    put("conf", ""); put("incident", "None"); put("safeguard", ""); put("ehcp", "");
+    put("by", by); put("at", stamp); put("revision", 1); put("versions", 1);
+  } else {
+    put("editBy", by); put("editAt", stamp);
+    if(ci.revision >= 0) put("revision", (+line[ci.revision] || 0) + 1);
+  }
+  if(e.msId && ci.milestones >= 0 && String(line[ci.milestones] || "").split(/\s*,\s*/).indexOf(e.msId) < 0) put("milestones", String(line[ci.milestones] || "") ? String(line[ci.milestones]) + "," + e.msId : e.msId);
+  /* Changed: Buddy's running count of changes, so its quick refresh picks this note up */
+  if(ci.changed >= 0){
+    var top = 0; for(var j = 1; j < v.length; j++){ var c = +v[j][ci.changed]; if(c > top) top = c; }
+    put("changed", top + 1);
+  }
   if(row) sh.getRange(row, 1, 1, line.length).setValues([line]);
   else sh.appendRow(line);
   return (row ? "updated " : "sent ") + Utilities.formatDate(now, tz_(), "HH:mm") + (e.msId ? " (linked to step)" : "");
