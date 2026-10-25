@@ -511,11 +511,19 @@ function dailyDigest(){
     (by[v[i][1]] = by[v[i][1]] || []).push(Utilities.formatDate(v[i][0], tz_(), "HH:mm") + "  " + v[i][2] + ": " + v[i][3]);
   }
   var lines = ["Base 5 today, " + Utilities.formatDate(d, tz_(), "EEEE d MMMM") + ".", ""];
+  var evi = {}, ev = rows_("Evidence");
+  for(var k = 1; k < ev.length; k++){
+    var ed = ev[k][0] instanceof Date ? day_(ev[k][0]) : String(ev[k][0]); if(ed !== today) continue;
+    var bn = String(ev[k][EVC["Buddy note"]] || "");
+    (evi[ev[k][1]] = evi[ev[k][1]] || []).push("  " + String(ev[k][EVC.Note]) + (/^(sent|updated)/.test(bn) ? "" : "  (not in Buddy yet)"));
+  }
   WHO.forEach(function(w){
     lines.push(w);
     lines.push(by[w] ? by[w].join("\n") : "  Nothing on the site today.");
+    if(evi[w]){ lines.push(""); lines.push("  Evidence, ready to paste:"); lines.push(evi[w].join("\n\n")); }
     lines.push("");
   });
+  lines.push("All of today's evidence: https://cbsbase5.github.io/teacher/evidence.html");
   lines.push("Everything is in the live view: https://cbsbase5.github.io/teacher/live.html");
   MailApp.sendEmail(to, "Base 5 today", lines.join("\n"));
 }
@@ -1005,6 +1013,17 @@ function postcard_(r){
   if(Object.keys(finished).length) lines.push("Finished: " + Object.keys(finished).join(", ") + ".");
   if(sent) lines.push("Shared " + sent + " piece" + (sent === 1 ? "" : "s") + " of work with Jay.");
   if(bests.length) lines.push("New personal best" + (bests.length === 1 ? "" : "s") + ": " + bests.join("; ") + ".");
+  try{
+    var ev = rows_("Evidence"), madeIn = "", doneIn = "";
+    for(var q = ev.length - 1; q >= 1; q--){
+      if(String(ev[q][1]) !== who || !(ev[q][0] instanceof Date) || monday_(ev[q][0]) !== wk) continue;
+      if(!madeIn && String(ev[q][EVC.Made] || "")) madeIn = String(ev[q][EVC.Activity]);
+      if(!doneIn && String(ev[q][EVC.Finished]) === "yes") doneIn = String(ev[q][EVC.Activity]);
+    }
+    if(madeIn) lines.push("One thing they made: their own card at the end of " + madeIn + ".");
+    if(doneIn && doneIn !== madeIn) lines.push("One activity they finished: " + doneIn + ".");
+    else if(doneIn) lines.push("They finished " + doneIn + " too.");
+  }catch(epc){}
   if(!acts.length && !chunks && !sent) lines.push("A quieter week on the site, which is completely fine.");
   lines.push("");
   lines.push("Have a lovely weekend,");
@@ -1226,9 +1245,10 @@ var WRITE3 = {
    ========================================================== */
 var EVH = ["Day", "Who", "Activity", "Slug", "Subject", "Target", "Step", "Buddy milestone", "Level", "Theme", "Minutes",
   "Chunks done", "Chunks", "Tried", "First go", "Second go", "Shown", "Skipped", "Sure but slipped", "Explained",
-  "Made", "Picture", "Finished", "Note", "Buddy note", "Updated"];
+  "Made", "Picture", "Finished", "Note", "Buddy note", "Updated", "Second look", "With", "Quote", "Kind"];
 function setup4_(ss){
   var ev = tab_(ss, "Evidence", EVH);
+  ev.getRange(1, 1, 1, EVH.length).setValues([EVH]).setFontWeight("bold");
   ev.getRange(1, EVH.length + 2).setValue("Written by the site from Autumn 2 activities: one row per student per activity per day. Note is ready to paste into BridgeLink; Buddy note shows whether it went into BridgeLink Buddy as a Learning note.");
   var st = ss.getSheetByName("Settings");
   [["Evidence to Buddy", "TRUE", "TRUE writes each day's activity evidence into BridgeLink Buddy's Logs tab as a Learning note (needs the Buddy sheet link above)."],
@@ -1319,11 +1339,43 @@ function a2target_(who, id){
 }
 
 /* ---------- the evidence row ---------- */
+/* the three levels every Autumn 2 activity is written to (data/a2/_build/SPEC.md) */
+var LEVELS = { mild: "about Entry 2 to 3", medium: "about Level 1", spicy: "about Level 2 or GCSE foundation" };
+var EVC = {}; EVH.forEach(function(h, i){ EVC[h] = i; });
+function evBlank_(who, slug, day){
+  return { day: day, who: who, activity: "", slug: slug, subject: "", target: "", step: 0, msId: "", level: "", theme: "", minutes: 0,
+    chunksDone: 0, chunks: 0, tried: 0, got1: 0, got2: 0, shown: 0, skipped: 0, flagged: 0, explained: 0, made: "", picture: "",
+    finished: false, note: "", buddy: "", second: "", with: "", quote: "", kind: "activity", line: "" };
+}
+function evFromRow_(v){
+  var g = function(h){ return v[EVC[h]]; };
+  var e = evBlank_(String(g("Who")), String(g("Slug")), g("Day") instanceof Date ? day_(g("Day")) : String(g("Day")));
+  e.activity = String(g("Activity") || ""); e.subject = String(g("Subject") || ""); e.target = String(g("Target") || ""); e.step = +g("Step") || 0;
+  e.msId = String(g("Buddy milestone") || ""); e.level = String(g("Level") || ""); e.theme = String(g("Theme") || ""); e.minutes = +g("Minutes") || 0;
+  e.chunksDone = +g("Chunks done") || 0; e.chunks = +g("Chunks") || 0; e.tried = +g("Tried") || 0; e.got1 = +g("First go") || 0; e.got2 = +g("Second go") || 0;
+  e.shown = +g("Shown") || 0; e.skipped = +g("Skipped") || 0; e.flagged = +g("Sure but slipped") || 0; e.explained = +g("Explained") || 0;
+  e.made = String(g("Made") || ""); e.picture = String(g("Picture") || ""); e.finished = String(g("Finished")) === "yes"; e.note = String(g("Note") || "");
+  e.buddy = String(g("Buddy note") || ""); e.second = String(g("Second look") || ""); e.with = String(g("With") || ""); e.quote = String(g("Quote") || "");
+  e.kind = String(g("Kind") || "activity");
+  return e;
+}
+function evToRow_(e){
+  var out = EVH.map(function(){ return ""; }), put = function(h, x){ out[EVC[h]] = x; };
+  put("Day", new Date(e.day + "T12:00:00")); put("Who", e.who); put("Activity", plain_(e.activity)); put("Slug", e.slug); put("Subject", e.subject);
+  put("Target", plain_(e.target)); put("Step", e.step || ""); put("Buddy milestone", e.msId); put("Level", e.level); put("Theme", e.theme); put("Minutes", e.minutes);
+  put("Chunks done", e.chunksDone); put("Chunks", e.chunks); put("Tried", e.tried); put("First go", e.got1); put("Second go", e.got2); put("Shown", e.shown);
+  put("Skipped", e.skipped); put("Sure but slipped", e.flagged); put("Explained", e.explained); put("Made", plain_(e.made)); put("Picture", e.picture);
+  put("Finished", e.finished ? "yes" : ""); put("Note", plain_(e.note)); put("Buddy note", e.buddy); put("Updated", new Date());
+  put("Second look", e.second); put("With", plain_(e.with)); put("Quote", plain_(e.quote)); put("Kind", e.kind);
+  return out;
+}
 function evidenceNote_(e){
   var bits = [];
-  bits.push(e.activity + (e.subject ? " (" + e.subject + (e.level ? ", " + e.level + " level" : "") + (e.theme ? ", " + e.theme + " theme" : "") + ")" : "") + ".");
+  var kindWord = e.kind === "game" ? "project game" : e.kind === "practice" ? "practice" : "";
+  var bracket = [e.subject || kindWord, e.level ? e.level + " level" : "", e.theme ? e.theme + " theme" : ""].filter(String);
+  bits.push(e.activity + (bracket.length ? " (" + bracket.join(", ") + ")" : "") + ".");
   var did = [];
-  if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + " on task");
+  if(e.minutes) did.push("about " + e.minutes + " minute" + (e.minutes === 1 ? "" : "s") + (e.kind === "game" ? " of play" : " on task"));
   if(e.chunks) did.push((e.finished ? "finished all " : e.chunksDone + " of ") + e.chunks + " chunks");
   if(e.tried) did.push(e.tried + " question" + (e.tried === 1 ? "" : "s") + " tried");
   if(e.got1) did.push(e.got1 + " right first go");
@@ -1331,53 +1383,95 @@ function evidenceNote_(e){
   if(e.shown) did.push(e.shown + " with the answer shown");
   if(e.skipped) did.push(e.skipped + " skipped");
   if(did.length){ var dl = did.join(", "); bits.push(dl.charAt(0).toUpperCase() + dl.slice(1) + "."); }
+  if(e.line) bits.push(e.line.replace(/\.?\s*$/, "."));
+  if(e.with) bits.push("Worked on it with " + e.with + ".");
   if(e.flagged) bits.push("Was sure but slipped on " + e.flagged + ", so " + (e.flagged === 1 ? "it comes" : "they come") + " back for a second look.");
+  if(e.second) bits.push("Came back for a second look and got " + e.second + " right.");
   if(e.explained) bits.push("Explained how they got it " + (e.explained === 1 ? "once" : e.explained === 2 ? "twice" : e.explained + " times") + ".");
+  if(e.quote) bits.push('In their words: "' + e.quote + '"');
   if(e.made) bits.push("Made at the end: " + e.made + (e.picture ? " (picture: " + e.picture + ")" : "") + ".");
   if(e.target) bits.push("Built for: " + e.target + (e.step ? ", step " + e.step : "") + ".");
   return "Base 5 site: " + bits.join(" ");
 }
-/* called from save_ for every key: only Autumn 2 activity saves count */
+/* called from save_ for every key: only Autumn 2 activity saves count, and their second looks */
 function evidenceFor_(who, key, val){
   var P = PREFIX[who]; if(!P || key.indexOf(P) !== 0) return;
-  var id = key.slice(P.length), m = id.match(/^(a2-[a-z0-9\-]+)\.v1$/); if(!m) return;
+  var id = key.slice(P.length), m = id.match(/^(a2-[a-z0-9\-]+?)(\.review)?\.v1$/); if(!m) return;
   var n = parse_(val); if(!n || !n.summary) return;
-  evidence_(who, m[1], n);
+  evidence_(who, m[1], n, !!m[2]);
 }
-function evidence_(who, id, n){
-  var s = n.summary; if(!s || !s.chunks) return;
-  var started = !!(s.chunksDone || s.done || s.secs >= 120 || s.made);
-  if(!started) return;
-  var sh = sheet_("Evidence"); if(!sh) return;
-  var today = day_(), v = sh.getDataRange().getValues(), row = 0;
+/* today's row for who and slug: { sh, row (0 if none), e } */
+function evRow_(who, slug, today){
+  var sh = sheet_("Evidence"); if(!sh) return null;
+  var v = sh.getDataRange().getValues();
   for(var i = 1; i < v.length; i++){
-    if(String(v[i][1]) === who && String(v[i][3]) === id && (v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0])) === today){ row = i + 1; break; }
+    if(String(v[i][EVC.Who]) === who && String(v[i][EVC.Slug]) === slug && (v[i][0] instanceof Date ? day_(v[i][0]) : String(v[i][0])) === today) return { sh: sh, row: i + 1, e: evFromRow_(v[i]) };
   }
-  var t = { target: "", step: 0, ms: null };
-  if(!row){ try{ t = a2target_(who, id); }catch(e1){} }
-  else { t.target = String(v[row - 1][5] || ""); t.step = +v[row - 1][6] || 0; t.ms = v[row - 1][7] ? { id: String(v[row - 1][7]) } : null; }
-  var flagged = Array.isArray(s.flagged) ? s.flagged.length : 0;
-  var e = {
-    day: today, who: who, activity: String(s.title || nice_(id.replace(/^a2-/, "").replace(/\.v1$/, ""))), slug: id, subject: String(s.subject || ""),
-    target: t.target, step: t.step, msId: t.ms && t.ms.id ? String(t.ms.id) : "",
-    level: s.level ? s.level.charAt(0).toUpperCase() + s.level.slice(1) : "", theme: String(s.theme || ""),
-    minutes: Math.round((+s.secs || 0) / 60), chunksDone: +s.chunksDone || 0, chunks: +s.chunks || 0,
-    tried: +s.done || 0, got1: +s.got1 || 0, got2: +s.got2 || 0, shown: +s.shown || 0, skipped: +s.skipped || 0,
-    flagged: flagged, explained: +s.explained || 0, made: String(s.made || "").slice(0, 600), picture: "", finished: !!s.finished
-  };
-  if(s.madeId) e.picture = "https://drive.google.com/file/d/" + String(s.madeId) + "/view";
-  else if(row && v[row - 1][21]) e.picture = String(v[row - 1][21]);
+  return { sh: sh, row: 0, e: evBlank_(who, slug, today) };
+}
+/* write the row, and the Buddy note when something real changed */
+function evWrite_(R, e, old){
   e.note = evidenceNote_(e);
-  var buddy = row ? String(v[row - 1][24] || "") : "";
-  var moved = !row || !buddy || /^not sent|^no /.test(buddy) || (+v[row - 1][11] || 0) !== e.chunksDone || (String(v[row - 1][22]) === "yes") !== e.finished ||
-    String(v[row - 1][20] || "") !== e.made || String(v[row - 1][21] || "") !== e.picture;
-  if(moved && ticked_(setting_("Evidence to Buddy")) && (e.chunksDone || e.finished || e.made)){
-    try{ buddy = buddyNote_(e, buddy); }catch(e2){ buddy = "not sent: " + String(e2.message || e2).slice(0, 80); }
+  var moved = !R.row || !old.buddy || /^not sent|^no /.test(old.buddy) || old.chunksDone !== e.chunksDone || old.finished !== e.finished ||
+    old.made !== e.made || old.picture !== e.picture || old.second !== e.second || old.with !== e.with || old.quote !== e.quote ||
+    (e.kind !== "activity" && (Math.floor(old.minutes / 5) !== Math.floor(e.minutes / 5) || old.line !== e.line));
+  var real = e.chunksDone || e.finished || e.made || e.second || (e.kind !== "activity" && e.minutes >= 3);
+  if(moved && real && ticked_(setting_("Evidence to Buddy"))){
+    try{ e.buddy = buddyNote_(e, old.buddy); }catch(e2){ e.buddy = "not sent: " + String(e2.message || e2).slice(0, 80); }
   }
-  var line = [new Date(today + "T12:00:00"), who, plain_(e.activity), e.slug, e.subject, plain_(e.target), e.step || "", e.msId, e.level, e.theme, e.minutes,
-    e.chunksDone, e.chunks, e.tried, e.got1, e.got2, e.shown, e.skipped, e.flagged, e.explained, plain_(e.made), e.picture, e.finished ? "yes" : "", plain_(e.note), buddy, new Date()];
-  if(row) sh.getRange(row, 1, 1, line.length).setValues([line]);
-  else sh.appendRow(line);
+  var line = evToRow_(e);
+  if(R.row) R.sh.getRange(R.row, 1, 1, line.length).setValues([line]);
+  else R.sh.appendRow(line);
+}
+function evidence_(who, id, n, review){
+  var s = n.summary; if(!s) return;
+  var today = day_(), R = evRow_(who, id, today); if(!R) return;
+  var e = R.e, old = JSON.parse(JSON.stringify(e));
+  if(review){
+    /* a second look: only counts when at least one question was tried */
+    if(!(+s.done)) return;
+    e.second = (+s.got1 || 0) + " of " + (+s.done || 0);
+    if(!e.activity) e.activity = String(s.title || nice_(id.replace(/^a2-/, "")));
+    if(!e.subject) e.subject = String(s.subject || "");
+  } else {
+    if(!s.chunks) return;
+    var started = !!(s.chunksDone || s.done || s.made);
+    if(!started && !R.row) return;
+    if(!R.row){
+      var t = { target: "", step: 0, ms: null };
+      try{ t = a2target_(who, id); }catch(e1){}
+      e.target = t.target; e.step = t.step; e.msId = t.ms && t.ms.id ? String(t.ms.id) : "";
+    }
+    var lv = String(s.level || ""), ln = String(s.levelName || "");
+    e.activity = String(s.title || nice_(id.replace(/^a2-/, ""))); e.subject = String(s.subject || "");
+    e.level = lv ? (ln && ln.toLowerCase() !== lv ? ln : lv.charAt(0).toUpperCase() + lv.slice(1)) + (LEVELS[lv] ? " (" + LEVELS[lv] + ")" : "") : "";
+    e.theme = String(s.theme || ""); e.minutes = Math.round((+s.secs || 0) / 60);
+    e.chunksDone = +s.chunksDone || 0; e.chunks = +s.chunks || 0; e.tried = +s.done || 0; e.got1 = +s.got1 || 0; e.got2 = +s.got2 || 0;
+    e.shown = +s.shown || 0; e.skipped = +s.skipped || 0; e.flagged = Array.isArray(s.flagged) ? s.flagged.length : 0; e.explained = +s.explained || 0;
+    e.made = String(s.made || "").slice(0, 600); e.finished = !!s.finished;
+    e.with = Array.isArray(s.helped) ? s.helped.map(function(x){ return String(x).replace(/[^A-Za-z ]/g, "").slice(0, 20); }).filter(String).join(", ") : "";
+    e.quote = String(s.quote || "").replace(/["\u201c\u201d]/g, "'").replace(/\s+/g, " ").trim().slice(0, 200);
+    if(s.madeId) e.picture = "https://drive.google.com/file/d/" + String(s.madeId).replace(/[^\w-]/g, "") + "/view";
+  }
+  evWrite_(R, e, old);
+}
+/* ---------- project games and practice pages (/data/b5evidence.js) ----------
+   Who it is comes from the school sign in only. */
+function activity_(r){
+  var me = signedIn_(); if(!me.who || WHO.indexOf(me.who) < 0) return { ok: false, error: "not a student" };
+  var slug = String(r.slug || "").toLowerCase();
+  if(!/^(game|practice)-[a-z0-9\-]{1,60}$/.test(slug)) return { ok: false, error: "bad slug" };
+  var kind = slug.indexOf("game-") === 0 ? "game" : "practice";
+  var R = evRow_(me.who, slug, day_()); if(!R) return { ok: false, error: "no Evidence tab" };
+  var e = R.e, old = JSON.parse(JSON.stringify(e));
+  e.kind = kind; e.activity = clean_(r.title || nice_(slug.replace(/^(game|practice)-/, "")), 120);
+  e.subject = clean_(r.subject || (kind === "game" ? "Project" : "Practice"), 60);
+  e.minutes = Math.max(e.minutes, Math.round((+r.secs || 0) / 60));
+  e.line = clean_(r.line || "", 300);
+  if(kind === "game" && !e.target) e.target = "Project: " + String(setting_("Project question") || "If we could time travel, should we?");
+  old.line = R.row ? (old.note.indexOf(e.line) >= 0 ? e.line : "~") : "";
+  evWrite_(R, e, old);
+  return { ok: true, minutes: e.minutes };
 }
 
 /* ---------- one Learning note in Buddy, kept up to date through the day ----------
@@ -1452,22 +1546,57 @@ function evidence_list_(r){
     o.Day = d;
     out.push(o);
   }
-  return { ok: true, items: out, buddy: !!buddySS_(), toBuddy: ticked_(setting_("Evidence to Buddy")) };
+  return { ok: true, items: out, buddy: !!buddySS_(), toBuddy: ticked_(setting_("Evidence to Buddy")), quiet: quiet_(3) };
 }
 /* staff: send (or resend) one evidence row to Buddy now */
 function evidence_send_(r){
   staff_(r.key);
   var sh = sheet_("Evidence"), row = +r.row;
   if(row < 2 || row > sh.getLastRow()) throw new Error("no such row");
-  var v = sh.getRange(row, 1, 1, EVH.length).getValues()[0];
-  var e = { day: v[0] instanceof Date ? day_(v[0]) : String(v[0]), who: String(v[1]), activity: String(v[2]), slug: String(v[3]), subject: String(v[4]), target: String(v[5]), step: +v[6] || 0, msId: String(v[7] || ""),
-    level: String(v[8]), theme: String(v[9]), minutes: +v[10] || 0, chunksDone: +v[11] || 0, chunks: +v[12] || 0, tried: +v[13] || 0, got1: +v[14] || 0, got2: +v[15] || 0, shown: +v[16] || 0, skipped: +v[17] || 0,
-    flagged: +v[18] || 0, explained: +v[19] || 0, made: String(v[20] || ""), picture: String(v[21] || ""), finished: String(v[22]) === "yes", note: String(v[23] || "") };
-  if(!e.msId && e.target){ try{ var map = a2map_(), cov = map.drops[e.who + "|" + e.slug]; if(cov && cov.length){ var ms = buddyStep_(e.who, cov[0][0], +cov[0][1]); if(ms && ms.id){ e.msId = ms.id; sh.getRange(row, 8).setValue(ms.id); } } }catch(e0){} }
-  var out = buddyNote_(e, String(v[24] || ""));
-  sh.getRange(row, 25, 1, 2).setValues([[out, new Date()]]);
-  return { ok: true, buddy: out };
+  var e = evFromRow_(sh.getRange(row, 1, 1, EVH.length).getValues()[0]);
+  if(!e.msId && e.kind === "activity"){
+    try{ var map = a2map_(), cov = map.drops[e.who + "|" + e.slug]; if(cov && cov.length){ var ms = buddyStep_(e.who, cov[0][0], +cov[0][1]); if(ms && ms.id) e.msId = String(ms.id); } }catch(e0){}
+  }
+  e.buddy = buddyNote_(e, e.buddy);
+  var line = evToRow_(e);
+  sh.getRange(row, 1, 1, line.length).setValues([line]);
+  return { ok: true, buddy: e.buddy };
 }
 READ3.evidence = evidence_list_;
+/* ---------- who has been quiet on the site ----------
+   School days (Monday to Friday) since each student last saved anything,
+   from the Progress tab. Only for staff pages; students never see it. */
+function schoolDaysSince_(t){
+  if(!t) return 99;
+  var d = new Date(t), now = new Date(), n = 0;
+  d.setHours(12, 0, 0, 0); now.setHours(12, 0, 0, 0);
+  while(d < now && n < 99){ d.setDate(d.getDate() + 1); var wd = d.getDay(); if(wd !== 0 && wd !== 6) n++; }
+  return n;
+}
+function quiet_(min){
+  var v = rows_("Progress"), last = {};
+  for(var i = 1; i < v.length; i++){ var w = String(v[i][0]), t = +v[i][3] || 0; if(WHO.indexOf(w) >= 0 && t > (last[w] || 0)) last[w] = t; }
+  var out = [];
+  WHO.forEach(function(w){ var n = schoolDaysSince_(last[w]); if(n >= (min || 3)) out.push({ who: w, days: n >= 99 ? 0 : n }); });
+  return out;
+}
+/* ---------- the staff room Today strip ---------- */
+function today_(r){
+  staff_(r.key);
+  var today = day_(), ev = rows_("Evidence"), worked = {}, notes = 0, notBuddy = 0;
+  for(var i = 1; i < ev.length; i++){
+    var d = ev[i][0] instanceof Date ? day_(ev[i][0]) : String(ev[i][0]); if(d !== today) continue;
+    notes++; worked[String(ev[i][EVC.Who])] = 1;
+    if(!/^(sent|updated)/.test(String(ev[i][EVC["Buddy note"]] || ""))) notBuddy++;
+  }
+  var sv = rows_("Sends"), unseen = 0;
+  for(var j = 1; j < sv.length; j++) if(sv[j][0] && String(sv[j][5]) !== "yes") unseen++;
+  var waiting = 0;
+  try{ waiting = pending_("Wall", 2, 1).length + pending_("Questions", 4, 1).length; }catch(e1){}
+  return { ok: true, students: Object.keys(worked).length, notes: notes, notBuddy: notBuddy, unseen: unseen, waiting: waiting, quiet: quiet_(3).length, toBuddy: ticked_(setting_("Evidence to Buddy")) };
+}
+READ3.today = today_;
+
 WRITE3.made = made_;
 WRITE3.evidencesend = evidence_send_;
+WRITE3.activity = activity_;

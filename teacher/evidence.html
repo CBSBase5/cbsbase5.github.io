@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=12">
-<script src="/data/b5site.js?v=7"></script>
+<script src="/data/b5site.js?v=8"></script>
 <script src="/data/b5staff.js?v=1"></script>
 <script src="/data/b5lock.js?v=1"></script>
 <style>
@@ -48,6 +48,9 @@
 .dots i{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
 .dots i.on{background:var(--teal);border-color:var(--teal)}
 .empty{font-size:.95rem;color:var(--body-tint)}
+.quiet{margin:0 0 14px;font-size:.93rem;background:var(--white);border:2px dashed var(--ink);border-radius:14px;padding:10px 14px;max-width:72ch}
+.tgt{margin:24px 0 8px;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 800;font-size:1rem}
+.tgt small{display:block;font-family:inherit;font-weight:400;font-size:.85rem;color:var(--body-tint)}
 @media (max-width:640px){.ev{grid-template-columns:1fr}.ev .acts{justify-content:flex-start}}
 </style>
 </head>
@@ -94,10 +97,12 @@
 
   <div id="view" hidden>
     <div class="state" id="state"></div>
+    <p class="quiet" id="quiet" hidden></p>
     <div class="bar">
       <div class="whos" id="whos" role="group" aria-label="Whose evidence"></div>
       <label>From <input type="date" id="from"></label>
       <label>To <input type="date" id="to"></label>
+      <div class="whos" role="group" aria-label="Show by"><button type="button" id="byDay" aria-pressed="true"><b>By day</b></button><button type="button" id="byTarget" aria-pressed="false"><b>By target</b></button></div>
       <button class="btn btn-quiet" type="button" id="copyAll">Copy all shown</button>
     </div>
     <div id="list"></div>
@@ -115,7 +120,7 @@
 var KEY = "b5.staff.key.v1";
 var WHO = ["EGW", "LP", "LW", "LC", "HK", "JT"];
 var $ = function(id){ return document.getElementById(id); };
-var D = null, me = "All";
+var D = null, me = "All", by = "day";
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function msg(t, bad){ var m = $("msg"); m.textContent = t || ""; m.className = "msg" + (bad ? " bad" : ""); }
 function day(d){ var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd; }
@@ -133,15 +138,29 @@ function draw(){
   $("whos").innerHTML = ["All"].concat(WHO).map(function(w){ return '<button type="button" data-w="' + w + '" aria-pressed="' + (w === me) + '"><b>' + w + '</b></button>'; }).join("");
   $("state").innerHTML = '<span class="' + (D.buddy ? "on" : "") + '">' + (D.buddy ? "Buddy linked" : "Buddy not linked yet") + '</span>' +
     '<span class="' + (D.toBuddy ? "on" : "") + '">' + (D.toBuddy ? "Notes go to Buddy by themselves" : "Notes stay here until you send them") + '</span>';
+  var q = (D.quiet || []).filter(function(x){ return me === "All" || x.who === me; });
+  $("quiet").hidden = !q.length;
+  $("quiet").innerHTML = q.length ? "Not on the site for three school days or more: " + q.map(function(x){ return "<b>" + esc(x.who) + "</b>" + (x.days ? " (" + x.days + " days)" : " (not yet this term)"); }).join(", ") + ". Worth a quiet check in, in person." : "";
+  $("byDay").setAttribute("aria-pressed", by === "day"); $("byTarget").setAttribute("aria-pressed", by === "target");
   var list = shown().slice().sort(function(a, b){ return a.Day < b.Day ? 1 : a.Day > b.Day ? -1 : (b.Updated || 0) - (a.Updated || 0); });
-  if(!list.length){ $("list").innerHTML = '<p class="empty">Nothing yet for these dates. Rows appear here as soon as a student finishes a chunk of an Autumn 2 activity.</p>'; return; }
+  if(by === "target") list.sort(function(a, b){
+    var ka = a.Who + "|" + (a.Target || "~") + "|" + (a.Step || 0), kb = b.Who + "|" + (b.Target || "~") + "|" + (b.Step || 0);
+    return ka < kb ? -1 : ka > kb ? 1 : (a.Day < b.Day ? 1 : a.Day > b.Day ? -1 : 0);
+  });
+  if(!list.length){ $("list").innerHTML = '<p class="empty">Nothing yet for these dates. Rows appear here as soon as a student finishes a chunk of an Autumn 2 activity, or plays a project game for a few minutes.</p>'; return; }
   var html = "", last = "";
   list.forEach(function(x){
-    if(x.Day !== last){ html += '<h2 class="day">' + esc(nice(x.Day)) + '</h2>'; last = x.Day; }
+    var head = by === "target" ? x.Who + "|" + (x.Target || "") + "|" + (x.Step || "") : x.Day;
+    if(head !== last){
+      html += by === "target" ?
+        '<h2 class="tgt">' + esc(x.Who) + ': ' + esc(x.Target || "Not linked to a target") + (x.Step ? ", step " + esc(x.Step) : "") + '</h2>' :
+        '<h2 class="day">' + esc(nice(x.Day)) + '</h2>';
+      last = head;
+    }
     var dots = ""; for(var i = 0; i < (+x.Chunks || 0); i++) dots += '<i class="' + (i < (+x["Chunks done"] || 0) ? "on" : "") + '"></i>';
     html += '<div class="ev"><div><h3><span class="who">' + esc(x.Who) + '</span>' + esc(x.Activity) + '<span class="dots" aria-label="' + (+x["Chunks done"] || 0) + ' of ' + (+x.Chunks || 0) + ' chunks">' + dots + '</span></h3>' +
-      '<p class="meta">' + [x.Subject, x.Level && x.Level + " level", x.Minutes ? "about " + x.Minutes + " min" : "", x.Finished === "yes" ? "finished" : ""].filter(Boolean).map(esc).join(" &middot; ") +
-      (x.Target ? '<br>Built for: ' + esc(x.Target) + (x.Step ? ", step " + esc(x.Step) : "") : "") + '</p></div>' +
+      '<p class="meta">' + [by === "target" ? nice(x.Day) : "", x.Subject, x.Level && x.Level, x.Minutes ? "about " + x.Minutes + " min" : "", x.Finished === "yes" ? "finished" : "", x["Second look"] ? "second look " + x["Second look"] : "", x.With ? "with " + x.With : ""].filter(Boolean).map(esc).join(" &middot; ") +
+      (x.Target && by !== "target" ? '<br>Built for: ' + esc(x.Target) + (x.Step ? ", step " + esc(x.Step) : "") : "") + '</p></div>' +
       '<div class="acts"><button class="btn" type="button" data-copy="' + x.row + '">Copy note</button>' +
       (x.Picture ? '<a class="btn btn-quiet" href="' + esc(x.Picture) + '" target="_blank" rel="noopener">What they made</a>' : "") +
       (D.buddy ? '<button class="btn btn-quiet" type="button" data-send="' + x.row + '">' + (x["Buddy note"] && /^(sent|updated)/.test(x["Buddy note"]) ? "Send to Buddy again" : "Send to Buddy") + '</button>' : "") + '</div>' +
@@ -151,6 +170,8 @@ function draw(){
   $("list").innerHTML = html;
 }
 $("whos").addEventListener("click", function(e){ var b = e.target.closest("button"); if(!b) return; me = b.dataset.w; draw(); });
+$("byDay").addEventListener("click", function(){ by = "day"; draw(); });
+$("byTarget").addEventListener("click", function(){ by = "target"; draw(); });
 $("list").addEventListener("click", function(e){
   var c = e.target.closest("[data-copy]"), s = e.target.closest("[data-send]");
   if(c){ var x = D.items.filter(function(i){ return String(i.row) === c.dataset.copy; })[0]; if(x) copy(x.Note, c); }

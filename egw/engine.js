@@ -388,6 +388,13 @@ function summary(){
     if(a.sure && sure[a.sure] != null) sure[a.sure]++;
     if(a.why && String(a.why).trim()) explained++;
   });
+  /* their best "how did you get that?" in their own words: the longest one, kept short */
+  var quote = "";
+  Object.keys(state.answers).forEach(function(i){
+    var a = state.answers[i], w = a && a.why ? String(a.why).replace(/\s+/g, " ").trim() : "";
+    if(w.length > quote.length) quote = w;
+  });
+  if(quote.length > 200) quote = quote.slice(0, 197).replace(/\s+\S*$/, "") + "...";
   var madeText = "";
   if(a2() && cfg.make && state.make){
     madeText = (cfg.make.fields || []).map(function(fl){ var v = String(state.make[fl.id] || "").trim(); return v ? stripTags(tok(fl.label || fl.id)) + ": " + v : ""; }).filter(Boolean).join(" | ").slice(0, 600);
@@ -400,7 +407,9 @@ function summary(){
            level: a2() ? A2LV : undefined, flagged: a2() ? flaggedList() : undefined,
            theme: a2() && A2TH && cfg.themes && cfg.themes[A2TH] ? cfg.themes[A2TH].name : undefined,
            secs: state.secs || 0, round: state.round || 0, sure: sure, explained: explained,
-           made: madeText || undefined, madeId: state.madeId || undefined, mins: cfg.mins || undefined };
+           made: madeText || undefined, madeId: state.madeId || undefined, mins: cfg.mins || undefined,
+           levelName: a2() && A2LV ? lvName(A2LV) : undefined, quote: quote || undefined,
+           helped: Array.isArray(state.helped) && state.helped.length ? state.helped.slice(0, 8) : undefined };
 }
 /* questions answered with "certain" that slipped on the first go */
 function flaggedList(){
@@ -1633,11 +1642,37 @@ function finish(){
   confetti($("scoreLine"), 30);
 }
 
+/* ---------- Autumn 2 finish: who helped (only if you like), and a line about Jay's note ---------- */
+var HELPERS = ["EGW", "LP", "LW", "LC", "HK", "JT"];
+function a2Helped(){
+  var host = $("a2With");
+  if(!host){
+    host = h("div", "a2with"); host.id = "a2With";
+    var real = $("a2Real"); real.parentNode.insertBefore(host, real);
+  }
+  state.helped = Array.isArray(state.helped) ? state.helped : [];
+  var who = HELPERS.filter(function(x){ return x !== HQ.who; }).concat(["Jay", "HB", "Another adult"]);
+  host.innerHTML = '<p class="a2note">Jay gets a short note about what you did here, so he can see your work. No scores.</p>' +
+    '<details class="a2helped"' + (state.helped.length ? " open" : "") + '><summary>Did anyone work on this with you? <small>Only if you like.</small></summary>' +
+    '<div class="a2chips" role="group" aria-label="Who worked on this with you">' + who.map(function(w){
+      return '<button type="button" data-w="' + w + '" aria-pressed="' + (state.helped.indexOf(w) >= 0) + '">' + w + '</button>';
+    }).join("") + '</div></details>';
+  [].forEach.call(host.querySelectorAll("[data-w]"), function(b){
+    b.onclick = function(){
+      var w = b.dataset.w, k = state.helped.indexOf(w);
+      if(k >= 0) state.helped.splice(k, 1); else state.helped.push(w);
+      b.setAttribute("aria-pressed", k < 0 ? "true" : "false");
+      save();
+    };
+  });
+}
+
 /* ---------- Autumn 2 finish: where you'd use this, and something to make ---------- */
 function a2Finish(){
   var mq = document.querySelector("#makeQ summary");
   if(mq) mq.textContent = "Teach it back? Write your own question for someone else. Only if you like.";
   var rw = cfg.realWorld, rh = $("a2Real");
+  a2Helped();
   rh.innerHTML = rw ? '<div class="a2real"><span class="kicker">Where you would use this</span><h4>' + tok(rw.title || "") + '</h4>' +
     (rw.fig ? '<div class="fig">' + tok(rw.fig) + '</div>' : "") + '<div class="learnbody">' + tok(rw.html || "") + '</div></div>' : "";
   var mk = cfg.make, host = $("a2Make");

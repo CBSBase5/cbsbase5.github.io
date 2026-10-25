@@ -273,6 +273,25 @@ if((hq || PROJECTS[path]) && !GUEST){
   if(document.readyState === "loading") document.write('<script src="/data/b5gate.js?v=1"><\/script>');
   else { var gs = document.createElement("script"); gs.src = "/data/b5gate.js?v=1"; document.head.appendChild(gs); }
 }
+/* a practice page opened from a student's HQ (or their folder) counts as evidence, like an
+   Autumn 2 activity: time on task, no step link. The sheet checks who it is by sign in. */
+var pm = path.match(/^\/practice\/([a-z0-9-]+)\.html$/);
+if(pm && !GUEST){
+  var fromHq = null;
+  try{
+    var ref = document.referrer ? new URL(document.referrer) : null;
+    if(ref && ref.origin === location.origin) Object.keys(HQS).forEach(function(b){ if(ref.pathname.indexOf(b) === 0) fromHq = HQS[b].who; });
+    if(fromHq) sessionStorage.setItem("b5.fromhq", fromHq); else fromHq = sessionStorage.getItem("b5.fromhq");
+  }catch(e){}
+  if(fromHq){
+    var es = document.createElement("script"); es.src = "/data/b5evidence.js?v=1";
+    es.onload = function(){
+      window.B5Evidence.start({ slug: "practice-" + pm[1], title: String(document.title || pm[1]).replace(/\s+-\s+Base 5.*$/, ""), kind: "practice", from: fromHq,
+        line: function(){ try{ var b = JSON.parse(localStorage.getItem("b5.engage.v1") || "{}")[pm[1]]; return b && b.n ? b.n + " burst" + (b.n === 1 ? "" : "s") + " of real work so far" : ""; }catch(e){ return ""; } } });
+    };
+    (document.head || document.documentElement).appendChild(es);
+  }
+}
 })();
 
 
