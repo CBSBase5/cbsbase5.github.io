@@ -442,6 +442,62 @@
     px(ctx, X - 5, Y + 1, 2, 1, '#3b2616'); px(ctx, X + 3, Y + 1, 2, 1, '#3b2616');
   };
 
+  /* ---------- kit icons: 12 by 12, drawn for the console and the kit ---------- */
+  S.icon = function (ctx, wid, era) {
+    ctx.clearRect(0, 0, 12, 12);
+    function P(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+    function dot(cx, cy, rad, c) { for (var y = 0; y < 12; y++) for (var x = 0; x < 12; x++) { var dx = x + 0.5 - cx, dy = y + 0.5 - cy; if (dx * dx + dy * dy <= rad * rad) P(x, y, 1, 1, c); } }
+    var i;
+    if ({ lob: 1, bomb: 1, boulder: 1, gourd: 1, disc: 1, scarab: 1 }[wid]) {
+      S.proj(ctx, { type: wid, x: 6, y: 7, vx: 1, vy: 0, trail: [], rest: false, era: era, face: 1 }, era, 8);
+      return;
+    }
+    switch (wid) {
+      case 'spear': S.proj(ctx, { type: 'spear', x: 9, y: 3, vx: 1, vy: -1, trail: [] }, era, 0); break;
+      case 'shove':
+        if (era === 'pre') { P(7, 1, 4, 4, WK); P(7, 1, 1, 1, '#8c6034'); P(6, 5, 2, 2, WD); P(4, 7, 2, 2, WD); P(2, 9, 2, 2, WD); }
+        else if (era === 'egypt') { P(2, 9, 2, 2, WK); P(4, 7, 2, 2, BZ); P(5, 5, 2, 2, BZ); P(6, 3, 2, 2, BZ); P(8, 2, 2, 2, BZ); P(10, 3, 1, 2, BZ); P(5, 8, 2, 1, AD); }
+        else { P(3, 3, 6, 6, CY); P(3, 3, 6, 1, CYL); P(9, 4, 2, 4, '#1f7f8f'); P(4, 6, 4, 1, '#1f7f8f'); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
+        break;
+      case 'dig':
+        if (era === 'pre') { P(6, 0, 1, 6, BN); P(4, 6, 5, 4, BN); P(5, 7, 3, 2, '#d8ceb4'); P(5, 10, 3, 1, BN); }
+        else if (era === 'egypt') { P(1, 8, 6, 2, WD); P(7, 8, 3, 2, CU); P(10, 8, 1, 2, '#f0b07a'); P(2, 2, 4, 3, WK); P(3, 5, 1, 3, WD); }
+        else { P(1, 4, 6, 5, MT); P(1, 4, 6, 1, '#9aa3ad'); P(7, 5, 2, 3, '#9aa3ad'); P(9, 6, 2, 1, CY); P(11, 6, 1, 1, CYL); }
+        break;
+      case 'vine':
+        P(1, 1, 3, 1, '#7ec850'); for (i = 0; i < 9; i++) P(2 + i, 2 + i, 1, 1, '#3f7a2e');
+        P(4, 5, 2, 1, '#7ec850'); P(7, 7, 1, 2, '#7ec850'); P(9, 10, 2, 1, '#5fa24a'); break;
+      case 'jet':
+        P(3, 1, 6, 7, MT); P(3, 1, 6, 1, '#9aa3ad'); P(5, 3, 2, 2, CY); P(4, 8, 1, 2, OR); P(7, 8, 1, 2, OR); P(4, 10, 1, 1, '#ffd27a'); P(7, 10, 1, 2, '#ffd27a'); break;
+      case 'wall':
+        P(1, 2, 10, 9, '#4a4640'); P(2, 3, 4, 2, '#a8a197'); P(7, 3, 3, 2, '#8c857b'); P(2, 6, 2, 2, '#8c857b'); P(5, 6, 5, 2, '#a8a197'); P(2, 9, 5, 1, '#a8a197'); P(8, 9, 2, 1, '#8c857b'); break;
+      case 'shield':
+        for (i = 0; i < 28; i++) { var a = i / 28 * Math.PI * 2; P(Math.round(5.5 + Math.cos(a) * 4.6), Math.round(5.5 + Math.sin(a) * 4.6), 1, 1, i % 3 ? CY : CYL); }
+        P(5, 5, 2, 2, CYL); break;
+      case 'mega':
+        dot(6, 6.5, 4.5, '#3d3832'); dot(6, 6.5, 3.6, '#8c857b'); P(4, 4, 2, 2, '#b5ada2'); P(1, 0, 1, 2, '#ffffff'); P(10, 0, 1, 2, '#ffffff'); break;
+      case 'orbital':
+        P(4, 0, 4, 9, '#37c8dc'); P(5, 0, 2, 9, '#e9fdff'); P(1, 9, 10, 2, '#37c8dc'); P(0, 11, 12, 1, '#1f7f8f'); break;
+      case 'laser':
+        P(1, 5, 7, 3, MT); P(1, 5, 2, 4, GL); P(2, 8, 2, 2, GL); P(8, 6, 4, 1, '#ff8fb0'); P(8, 5, 1, 1, '#ffffff'); break;
+      case 'sled':
+        P(0, 11, 12, 1, '#e8c27a'); P(1, 8, 9, 2, '#b07a46'); P(1, 8, 9, 1, '#d9a46a'); P(10, 6, 1, 3, '#6e4622'); P(9, 5, 2, 1, '#6e4622'); P(3, 10, 1, 1, '#3b2616'); P(7, 10, 1, 1, '#3b2616'); break;
+      case 'sandwall':
+        for (i = 0; i < 12; i++) { var u = (i + 0.5 - 6) / 6, h = Math.round(6 * Math.sqrt(Math.max(0, 1 - u * u))); P(i, 11 - h, 1, h + 1, '#e0b46a'); P(i, 11 - h, 1, 1, '#f6d896'); }
+        break;
+      case 'sun':
+        P(6, 0, 1, 2, '#f0c446'); P(6, 10, 1, 2, '#f0c446'); P(0, 6, 2, 1, '#f0c446'); P(10, 6, 2, 1, '#f0c446');
+        P(2, 2, 1, 1, '#f0c446'); P(9, 2, 1, 1, '#f0c446'); P(2, 9, 1, 1, '#f0c446'); P(9, 9, 1, 1, '#f0c446');
+        dot(6.5, 6.5, 3.3, '#ffd23f'); dot(6, 6, 1.6, '#fff3c8'); break;
+      case 'bark':
+        dot(6, 6.5, 4.6, '#3e2416'); dot(6, 6.5, 3.7, '#9a6442'); P(2, 4, 2, 5, '#74472c'); P(9, 6, 2, 2, '#c08a5c'); P(10, 6, 1, 1, '#1d1d24'); P(7, 4, 1, 1, '#1d1d24'); P(5, 1, 3, 2, '#9a6442'); break;
+      case 'pass':
+        P(3, 5, 6, 6, '#e8e2d2'); P(9, 6, 2, 3, '#e8e2d2'); P(10, 7, 1, 1, '#2e2860'); P(4, 5, 4, 1, '#8a5a32'); P(3, 10, 6, 1, '#c3bcae');
+        P(5, 1, 1, 3, '#c3bce8'); P(7, 2, 1, 2, '#c3bce8'); break;
+      default: P(4, 4, 4, 4, '#c3bce8');
+    }
+  };
+
   /* Time portal: ring of light that zaps a Snag home. k goes 0 to 1. */
   S.portal = function (ctx, x, y, k, t) {
     var open = Math.sin(Math.min(1, k * 1.4) * Math.PI), rad = 5 + open * 10, i, a;

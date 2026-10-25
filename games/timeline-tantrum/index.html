@@ -8,164 +8,294 @@
 <script src="/data/send.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,800;0,900;1,800;1,900&family=Atkinson+Hyperlegible:wght@400;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--cream:#fef8f4;--ink:#1f2a30;--teal:#007291;--orange:#ef7724;--soft:#eadfd5;--amber:#e0a030}
+/* Theme: the Snags' stolen time machine. Machine parts (HUD, console, menus) are dark plum metal
+   with pixel stepped edges and glowing readouts. Things from history (finds, labels, postcards)
+   are warm Base 5 paper. Colours match the vault box art. */
+:root{
+  --night:#221d45;--night2:#1b1739;--deep:#151230;--edge:#0e0b22;--screen:#110e29;
+  --plate:#2e2860;--plate2:#3a3278;--line:#433a85;
+  --violet:#7b5cff;--cyan:#5fe0f0;--cyanD:#1f7f8f;--orange:#ef7724;--green:#7ec850;
+  --paper:#fef8f4;--muted:#c3bce8;--amber:#ffc24a;--gold:#e0b040;
+  --ink:#1f2a30;--teal:#007291;
+  --bd:var(--edge)
+}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:#8fcbe2;touch-action:none;-webkit-user-select:none;user-select:none;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:var(--ink)}
+html,body{margin:0;height:100%;overflow:hidden;background:#1b1739;touch-action:none;-webkit-user-select:none;user-select:none;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:var(--paper)}
 #game{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 button{font-family:inherit;color:inherit;cursor:pointer}
 [hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:5px}
+input,textarea{-webkit-user-select:text;user-select:text}
 
-#hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:8px;pointer-events:none}
-#teams{display:flex;flex-direction:column;gap:6px}
-.tc{display:grid;grid-template-columns:auto 90px auto;align-items:center;gap:8px;background:rgba(254,248,244,.92);border:2px solid var(--c,var(--teal));border-radius:12px 6px 12px 8px;padding:4px 10px;font-size:14px;font-weight:700}
-.tc.now{box-shadow:0 0 0 3px rgba(254,248,244,.6)}
-.tb{height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
-.tb i{display:block;height:100%;width:100%;background:var(--c,var(--teal));transition:width .4s}
-.th{font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
-#mini{pointer-events:auto;background:#bfe0e6;border:2px solid var(--cream);border-radius:8px 12px 6px 12px;image-rendering:pixelated;width:176px;height:74px}
-#topbtns{pointer-events:auto;display:flex;gap:6px}
-.round{width:44px;height:44px;border-radius:14px 10px 14px 12px;border:2px solid var(--ink);background:var(--cream);font-weight:700;font-size:16px}
+/* pixel stepped edge: four hard shadows leave the corners notched */
+.rig,.squad,#mini,.iconbtn,#info,#banner,#jay,.card,.btn,#touch button{
+  box-shadow:0 -3px 0 0 var(--bd),0 3px 0 0 var(--bd),-3px 0 0 0 var(--bd),3px 0 0 0 var(--bd),
+    inset 0 3px 0 0 rgba(255,255,255,.07),inset 0 -3px 0 0 rgba(0,0,0,.24),0 10px 0 0 rgba(8,6,24,.38)}
 
-#info{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;display:flex;align-items:center;gap:14px;background:rgba(254,248,244,.94);border:2px solid var(--ink);border-radius:14px 8px 14px 10px;padding:6px 12px;font-size:14px;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 16px)}
-@media (max-width:1000px){body.touch #info{bottom:auto;top:84px} body.touch #banner{top:132px}}
-@media (max-width:620px){#info,body.touch #info{top:144px;bottom:auto;flex-wrap:wrap;justify-content:center;white-space:normal;width:calc(100vw - 16px)} #banner,body.touch #banner{top:206px}}
-@media (max-height:450px){#touch .cl{grid-template-columns:repeat(2,50px)} #touch .cr{grid-template-columns:repeat(2,64px)} #touch button{height:46px;font-size:14px} #touch button.fire{height:58px}}
-#wind{display:flex;align-items:center;gap:6px}
-.lab{font-weight:700}
-.wbar{position:relative;width:70px;height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
-.wbar::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink)}
-.wbar i{position:absolute;top:0;bottom:0;background:var(--teal)}
-#wpn{font-weight:700}
-#timer{display:flex;align-items:center;gap:6px}
-.tbar{width:60px;height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
-.tbar i{display:block;height:100%;background:var(--teal)}
-.tbar i.low{background:var(--amber)}
-#ttxt{font-variant-numeric:tabular-nums;min-width:28px}
+/* ---------------- HUD ---------------- */
+#hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 14px;pointer-events:none}
+#teams{display:flex;flex-direction:column;gap:12px}
+.squad{--c:var(--cyan);position:relative;display:block;min-width:230px;max-width:290px;padding:7px 12px 9px 20px;background:rgba(27,23,57,.93)}
+.squad.now{--bd:var(--c)}
+.squad .lamp{position:absolute;left:5px;top:6px;bottom:6px;width:6px;background:var(--c);opacity:.35}
+.squad.now .lamp{opacity:1;box-shadow:0 0 10px var(--c)}
+.sqtop{display:flex;align-items:baseline;gap:8px}
+.tn{font:900 italic 16px/1.1 Archivo,sans-serif;color:var(--c);white-space:nowrap}
+.who{font-size:13px;color:var(--muted);white-space:nowrap}
+.th{margin-left:auto;font:400 15px/1 Silkscreen,monospace;color:var(--paper)}
+.pips{display:flex;gap:4px;margin-top:6px}
+.pips i{position:relative;flex:1;min-width:16px;max-width:40px;height:8px;background:var(--screen)}
+.pips i u{position:absolute;left:0;top:0;bottom:0;background:var(--c);transition:width .4s}
+.pips i.dead{background:repeating-linear-gradient(135deg,#2e2860 0 2px,var(--screen) 2px 4px)}
+.pips i.cur{outline:2px solid var(--paper);outline-offset:2px}
+#scope{display:flex;flex-direction:column;align-items:center;gap:4px}
+#mini{--bd:var(--edge);pointer-events:auto;background:var(--screen);image-rendering:pixelated;width:192px;height:80px;display:block}
+#topbtns{pointer-events:auto;display:flex;gap:10px}
+.iconbtn{--bd:var(--edge);width:48px;height:48px;border:0;background:var(--plate2);display:grid;place-items:center}
+.iconbtn .bars{display:flex;gap:6px}.iconbtn .bars i{width:6px;height:18px;background:var(--paper)}
+.iconbtn:active{transform:translateY(2px)}
 
-#banner{position:fixed;left:50%;top:96px;transform:translateX(-50%) rotate(-1deg);background:var(--cream);border:3px solid var(--ink);border-radius:16px 10px 18px 12px;padding:8px 18px;font-family:Archivo,sans-serif;font-weight:800;font-size:20px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;white-space:nowrap}
-#banner small{display:block;font-family:'Atkinson Hyperlegible',sans-serif;font-weight:400;font-size:14px}
-#banner.show{opacity:1}
+/* the console: one instrument strip with screens for each reading */
+#info{--bd:var(--edge);position:fixed;left:50%;transform:translateX(-50%);bottom:14px;display:flex;align-items:stretch;background:rgba(27,23,57,.95);padding:6px;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 24px)}
+.cell{display:flex;align-items:center;gap:8px;padding:2px 12px;border-left:2px solid var(--line);min-height:40px}
+.cell:first-child{border-left:0}
+.k{font:700 13px/1 'Atkinson Hyperlegible',sans-serif;color:var(--muted)}
+.read{font:400 18px/1 Silkscreen,monospace;color:var(--cyan);min-width:2ch}
+.chev{display:flex;gap:2px}
+.chev.left{transform:scaleX(-1)}
+.chev i{width:8px;height:14px;background:var(--line);clip-path:polygon(0 0,45% 0,100% 50%,45% 100%,0 100%,55% 50%)}
+.chev i.on{background:var(--cyan)}
+#wicon{width:36px;height:36px;image-rendering:pixelated;background:var(--screen);flex:none}
+.wn{display:flex;flex-direction:column;gap:3px}
+#wname{font:800 16px/1 Archivo,sans-serif;color:var(--paper)}
+#wammo{font:400 12px/1 Silkscreen,monospace;color:var(--amber)}
+.seg{display:flex;gap:2px;padding:3px;background:var(--screen)}
+.seg i{width:6px;height:16px;background:#2a2452}
+.seg i.on{background:var(--cyan)}.seg i.on.hot{background:var(--amber)}.seg i.on.max{background:var(--orange)}
+.seg.dim i.on{opacity:.45}
+#cHint{font-size:14px;color:var(--muted);white-space:normal;max-width:260px}
+.ring{--p:100;--rc:var(--cyan);position:relative;width:40px;height:40px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p)*1%),#2a2452 0);display:grid;place-items:center}
+.ring::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--night2)}
+.ring b{position:relative;font:400 13px/1 Silkscreen,monospace;color:var(--paper)}
+.ring.low{--rc:var(--amber)}
 
-#touch{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;padding:10px;pointer-events:none}
-#touch .cl,#touch .cr{display:grid;gap:8px;pointer-events:auto}
+/* turn banner: a plate that slides in with the squad's lamp colour */
+#banner{--c:var(--violet);--bd:var(--edge);position:fixed;left:50%;top:104px;transform:translate(-50%,-8px);background:var(--night);padding:11px 26px 12px 30px;font:900 italic 27px/1.05 Archivo,sans-serif;color:var(--paper);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;text-align:left;white-space:nowrap;max-width:calc(100vw - 24px)}
+#banner::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;width:8px;background:var(--c);box-shadow:0 0 12px var(--c)}
+#banner small{display:block;margin-top:4px;font:400 15px/1.2 'Atkinson Hyperlegible',sans-serif;color:var(--muted);white-space:normal}
+#banner.show{opacity:1;transform:translate(-50%,0)}
+
+/* Jay on the comms screen */
+#jay{--bd:var(--edge);position:fixed;right:14px;top:84px;display:flex;align-items:center;gap:10px;max-width:300px;background:var(--night);padding:7px 12px 7px 7px;font-size:15px;line-height:1.25;pointer-events:none}
+#jayFace{width:46px;height:46px;flex:none;image-rendering:pixelated;background:linear-gradient(180deg,#24506a,#163348);box-shadow:inset 0 0 0 2px var(--cyanD)}
+#jay b{display:block;font:400 12px/1 Silkscreen,monospace;color:var(--cyan);margin-bottom:3px}
+
+/* touch controls: chunky console keys */
+#touch{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;padding:12px 14px;pointer-events:none}
+#touch .cl,#touch .cr{display:grid;gap:10px;pointer-events:auto}
 #touch .cl{grid-template-columns:repeat(2,58px)}
-#touch .cr{grid-template-columns:repeat(2,74px)}
-#touch button{height:58px;border-radius:16px 12px 16px 14px;border:2px solid var(--ink);background:rgba(254,248,244,.88);font-weight:700;font-size:15px;touch-action:none}
-#touch button.fire{grid-column:span 2;height:74px;background:var(--orange);color:#fff;font-size:20px;font-family:Archivo,sans-serif}
-#touch button.on{background:var(--teal);color:#fff}
+#touch .cr{grid-template-columns:repeat(2,76px)}
+#touch button{--bd:var(--edge);height:58px;border:0;background:rgba(46,40,96,.92);color:var(--paper);font-weight:700;font-size:15px;touch-action:none}
+#touch button.fire{grid-column:span 2;height:74px;background:var(--orange);font:900 italic 24px Archivo,sans-serif}
+#touch button.on{background:var(--cyan);color:var(--deep)}
 
 #hud,#info,#touch,#jay{z-index:20}
 #banner{z-index:30}
-.ov{z-index:60}
-.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(31,42,48,.35);padding:16px;overflow:auto}
-.card{background:var(--cream);border:3px solid var(--ink);border-radius:22px 14px 24px 16px;padding:22px 24px;max-width:520px;width:100%;transform:rotate(-.6deg);box-shadow:6px 8px 0 rgba(31,42,48,.25);max-height:calc(100vh - 32px);overflow:auto;background-image:radial-gradient(circle at 90% 0%,rgba(239,119,36,.12),transparent 50%),radial-gradient(circle at 0% 100%,rgba(0,114,145,.10),transparent 55%)}
-.card h1,.card h2{font-family:Archivo,sans-serif;font-weight:800;margin:0 0 6px;line-height:1.05}
-.card h1{font-size:40px;color:var(--teal)}
-.card h2{font-size:26px}
-.kicker{margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange)}
-.sub{margin:0 0 16px;font-size:15px}
-.opt{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px dashed #d9cbbf}
-.opt>span{font-weight:700}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips button{border:2px solid #cbbcae;background:#fff;border-radius:12px 8px 12px 10px;padding:8px 12px;font-size:15px}
-.chips button.on{border-color:var(--teal);background:var(--teal);color:#fff}
-.step{display:flex;align-items:center;gap:10px}
-.step button{width:40px;height:40px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:20px;font-weight:700}
-.step b{font-size:20px;min-width:20px;text-align:center}
-.big{display:block;width:100%;margin-top:16px;padding:14px;font-size:22px;font-family:Archivo,sans-serif;font-weight:800;background:var(--teal);color:#fff;border:3px solid var(--ink);border-radius:18px 12px 18px 14px}
-.big.alt{background:var(--orange);margin-top:4px;margin-bottom:12px;font-size:18px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row .big{flex:1;min-width:160px}
-.foot{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:14px;font-size:15px}
-.foot a,.link{color:var(--teal);font-weight:700;background:none;border:0;padding:0;text-decoration:underline;font-size:15px}
-.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-.kit button{text-align:left;border:2px solid #cbbcae;background:#fff;border-radius:14px 10px 14px 12px;padding:10px 12px}
-.kit button.on{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange)}
-.kit b{display:block;font-size:17px;font-family:Archivo,sans-serif}
-.kit span{font-size:14px}
-.kit em{font-style:normal;font-size:12px;color:#6a5a4c}
-.tog{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px dashed #d9cbbf;font-weight:700}
-.tog button{min-width:74px;padding:8px 10px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-weight:700}
-.tog button.on{background:var(--teal);color:#fff}
-.help dt{font-weight:700;margin-top:8px}
-.help dd{margin:2px 0 0}
-kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;border-radius:6px;padding:0 5px;background:#fff;font-size:14px}
-.stats{margin:10px 0 0;padding:0;list-style:none;font-size:16px}
-.stats li{padding:4px 0}
-#turnhint{margin:0 0 10px;font-size:14px;background:#fff3e2;border-radius:10px;padding:8px 10px}
-.tlopt{flex-direction:column;align-items:stretch}
-#tl{width:100%;max-width:460px;aspect-ratio:230/64;image-rendering:pixelated;cursor:pointer;align-self:center;background:#f6ece1;border-radius:12px 8px 12px 10px}
-#tlText{margin:2px 0 0;font-size:14px;color:#4a3d32}
-.card.wide{max-width:640px}
-.findcard.glitch,.ov.glitch .card{background-color:#eef9fb}
-.findrow{display:flex;gap:16px;align-items:center;margin:4px 0 6px}
-#findArt{width:96px;height:96px;flex:none;image-rendering:pixelated;background:#efe4d6;border:3px solid var(--ink);border-radius:16px 10px 16px 12px;padding:6px}
-.meta{margin:0;font-size:14px;color:#6a5a4c}
-.now,.real{margin:8px 0 0;font-size:15px;background:#e6f3f6;border-radius:10px;padding:8px 10px;color:#0c4a5c}
-.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0}
-.case{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px dashed #cbbcae;background:#fbf4ec;border-radius:12px 8px 12px 10px;padding:8px 4px;font-size:13px;font-weight:700;line-height:1.15;text-align:center;min-height:96px}
-.case.got{border-style:solid;border-color:#a8977f;background:#fff}
-.case.on{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange)}
-.case canvas{width:48px;height:48px;image-rendering:pixelated}
-.shelf{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;margin:16px 0 2px}
-.shelfn{font-family:'Atkinson Hyperlegible',sans-serif;font-weight:400;font-size:14px;color:#6a5a4c}
-.glitchlab{margin:6px 0 0;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#007291}
-.small{font-size:14px;margin:0;color:#4a3d32}
-.detail{background:#fff;border:2px solid #cbbcae;border-radius:14px 10px 14px 12px;padding:10px 12px;font-size:15px}
-.detail b{display:block;font-family:Archivo,sans-serif;font-size:18px}
+
+/* ---------------- overlays ---------------- */
+.ov{z-index:60;position:fixed;inset:0;display:flex;padding:20px;overflow:auto;background:rgba(10,8,28,.55)}
+.ov>*{margin:auto}
+.card{--bd:var(--edge);--fg:var(--paper);--mut:var(--muted);--pl:var(--plate);--plb:var(--line);--sel:var(--cyan);--selfg:var(--deep);--lnk:var(--cyan);
+  position:relative;background:linear-gradient(180deg,#2a2457,#1e1a42);color:var(--fg);padding:24px 26px;max-width:540px;width:100%;scrollbar-color:var(--line) transparent}
+.card.wide{max-width:680px}
+.card h2{font:900 italic 30px/1.05 Archivo,sans-serif;margin:0 0 6px;color:var(--paper)}
+.lead{margin:0 0 14px;font-size:16px;line-height:1.4;color:var(--mut)}
+.stamp{margin:0 0 6px;font:800 italic 15px/1 Archivo,sans-serif;color:var(--orange)}
+/* paper cards: things from history */
+.card.paper{--bd:var(--ink);--fg:var(--ink);--mut:#5d4f43;--pl:#fff;--plb:#cbbcae;--sel:var(--teal);--selfg:#fff;--lnk:var(--teal);
+  background:#fef8f4;background-image:radial-gradient(circle at 90% 0%,rgba(239,119,36,.14),transparent 50%),radial-gradient(circle at 0% 100%,rgba(0,114,145,.12),transparent 55%);transform:rotate(-.6deg)}
+.card.paper h2{color:var(--ink)}
+.card.paper.glitch{background-color:#eaf8fb}
+
+.opt{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:2px solid var(--plb)}
+.opt:first-of-type{border-top:0}
+.opt>span,.optlab{font:800 15px/1 Archivo,sans-serif;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips button{--b:var(--plb);border:0;background:var(--pl);color:var(--fg);padding:9px 13px;font-size:15px;font-weight:700;
+  box-shadow:0 -2px 0 0 var(--b),0 2px 0 0 var(--b),-2px 0 0 0 var(--b),2px 0 0 0 var(--b)}
+.chips button.on{--b:var(--fg);background:var(--sel);color:var(--selfg)}
+.chips button.on::before{content:'';display:inline-block;width:7px;height:7px;margin-right:7px;background:currentColor;vertical-align:1px}
+.step{display:flex;align-items:center;gap:14px}
+.step button{width:44px;height:44px;border:0;background:var(--pl);color:var(--fg);font:900 22px/1 Archivo,sans-serif;box-shadow:0 -2px 0 0 var(--plb),0 2px 0 0 var(--plb),-2px 0 0 0 var(--plb),2px 0 0 0 var(--plb)}
+.step b{font:400 22px/1 Silkscreen,monospace;min-width:24px;text-align:center;color:var(--sel)}
+
+.btn{--bd:var(--edge);display:block;width:100%;margin-top:18px;padding:15px 18px;border:0;background:var(--plate2);color:var(--paper);font:900 italic 21px/1 Archivo,sans-serif;text-align:center}
+.btn:active{transform:translateY(2px)}
+.btn.go{background:var(--orange);color:#fff}
+.btn.alt{background:var(--violet)}
+.card.paper .btn{--bd:var(--ink)}
+.card.paper .btn:not(.go):not(.alt){background:var(--teal)}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.row .btn{flex:1;min-width:170px}
+.foot{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:18px;font-size:15px}
+.foot a,.link{color:var(--lnk);font-weight:700;background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:3px;font-size:15px}
+
+/* the menu: the logo is the loud thing, the setup panel is calm */
+#menu{background:linear-gradient(100deg,rgba(14,11,34,.9) 0%,rgba(14,11,34,.72) 42%,rgba(14,11,34,.35) 100%)}
+.menu{display:grid;grid-template-columns:minmax(0,460px) minmax(0,520px);gap:40px 56px;align-items:center;width:100%;max-width:1060px}
+.hero{position:relative}
+.build{margin:0 0 18px;font-size:14px;color:var(--muted)}
+.logo{position:relative;margin:0 0 24px;font:900 italic clamp(46px,6.3vw,84px)/.86 Archivo,sans-serif;text-transform:uppercase;letter-spacing:-.01em;transform:rotate(-4deg);transform-origin:left bottom}
+.logo span{display:block;-webkit-text-stroke:5px var(--deep);paint-order:stroke fill}
+.logo .l1{color:#7ec850;text-shadow:1px 1px 0 #2f6a24,2px 2px 0 #2f6a24,3px 3px 0 #2f6a24,4px 4px 0 #2f6a24,5px 5px 0 #2f6a24,6px 6px 0 #2f6a24,7px 7px 0 #2f6a24,10px 11px 0 rgba(0,0,0,.4)}
+.logo .l2{color:#5fe0f0;margin-left:.28em;text-shadow:1px 1px 0 #ef7724,2px 2px 0 #ef7724,3px 3px 0 #ef7724,4px 4px 0 #ef7724,5px 5px 0 #ef7724,6px 6px 0 #ef7724,7px 7px 0 #ef7724,10px 11px 0 rgba(0,0,0,.4)}
+.portal{position:absolute;left:46%;top:46%;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(123,92,255,.0) 38%,rgba(123,92,255,.55) 41%,rgba(95,224,240,.5) 45%,rgba(123,92,255,0) 52%);opacity:0}
+.tagline{margin:0 0 6px;font-size:19px;line-height:1.35;max-width:30ch}
+.hero .btn{max-width:400px}
+.hero .btn.go{font-size:30px;padding:20px}
+.sum{margin:14px 0 0;font-size:15px;line-height:1.4;color:var(--muted);max-width:44ch}
+#turnhint{margin:0 0 12px;font-size:15px;color:var(--amber)}
+.setup{max-width:520px}
+.setup h2{font-size:24px}
+.tournote{margin:0 0 4px;padding:10px 12px;font-size:15px;line-height:1.4;background:var(--screen);color:var(--muted);box-shadow:inset 3px 0 0 var(--violet)}
+#tl{width:100%;max-width:470px;aspect-ratio:230/64;image-rendering:pixelated;cursor:pointer;background:var(--screen);box-shadow:inset 0 0 0 2px var(--line)}
+#tlText{margin:0;font-size:15px;line-height:1.4;color:var(--muted)}
+.more{border-top:2px solid var(--plb);margin-top:4px}
+.more summary{list-style:none;cursor:pointer;padding:14px 0 6px;font:800 16px/1 Archivo,sans-serif;color:var(--lnk);display:flex;align-items:center;gap:10px}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:'+';display:grid;place-items:center;width:24px;height:24px;background:var(--pl);color:var(--fg);font:900 18px/1 Archivo,sans-serif;box-shadow:0 0 0 2px var(--plb)}
+.more[open] summary::before{content:'-'}
+.namebtn{align-self:flex-start;border:0;background:var(--pl);color:var(--fg);padding:9px 13px;font-size:15px;font-weight:700;box-shadow:0 -2px 0 0 var(--plb),0 2px 0 0 var(--plb),-2px 0 0 0 var(--plb),2px 0 0 0 var(--plb)}
+
+/* kit: one cartridge per item */
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px;margin-top:12px}
+.kit button{--b:var(--line);display:grid;grid-template-columns:42px 1fr;gap:6px 11px;align-content:start;text-align:left;border:0;background:var(--plate);color:var(--paper);padding:11px;
+  box-shadow:0 -2px 0 0 var(--b),0 2px 0 0 var(--b),-2px 0 0 0 var(--b),2px 0 0 0 var(--b)}
+.kit button canvas{width:42px;height:42px;image-rendering:pixelated;background:var(--screen)}
+.kit .kn b{display:block;font:800 16px/1.15 Archivo,sans-serif;margin-bottom:3px}
+.kit .kn span{font-size:14px;line-height:1.3;color:var(--muted)}
+.kit em{grid-column:1/-1;font-style:normal;font-size:13px;color:var(--cyan);display:flex;align-items:center;gap:8px}
+.kit em kbd{font:400 11px/1 Silkscreen,monospace;padding:3px 5px;background:var(--screen);color:var(--paper);border:0}
+.kit button.on{--b:var(--cyan);background:var(--plate2)}
+.kit button.gold{--b:var(--gold)}
+.kit button.gold em{color:var(--amber)}
+.kit button.off{opacity:.5}
+
+.tog{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:2px solid var(--line);font-weight:700;font-size:16px}
+.tog:first-of-type{border-top:0}
+.tog button{min-width:84px;padding:9px 12px;border:0;background:var(--screen);color:var(--muted);font:400 13px/1 Silkscreen,monospace;box-shadow:0 0 0 2px var(--line)}
+.tog button.on{background:var(--cyan);color:var(--deep);box-shadow:0 0 0 2px var(--paper)}
+.help dl{margin:0}
+.help dt{font:800 16px/1.2 Archivo,sans-serif;margin-top:14px;color:var(--cyan)}
+.help dd{margin:4px 0 0;font-size:16px;line-height:1.45}
+kbd{font:700 14px/1 'Atkinson Hyperlegible',sans-serif;display:inline-block;padding:4px 7px 5px;background:var(--plate2);color:var(--paper);box-shadow:0 3px 0 0 var(--edge)}
+.stats{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.stats li{padding:8px 12px;background:var(--screen);font-size:16px;box-shadow:inset 4px 0 0 var(--cyan)}
+#overArt{display:block;width:100%;max-width:420px;height:auto;aspect-ratio:210/58;margin:4px auto 6px;image-rendering:pixelated;background:linear-gradient(180deg,var(--screen),#1f1a48)}
+.real,.now{margin:12px 0 0;font-size:15px;line-height:1.4;padding:10px 12px;background:var(--screen);color:var(--muted);box-shadow:inset 4px 0 0 var(--violet)}
+.card.paper .now,.detail .now{background:#e3f1f5;color:#0c4a5c;box-shadow:inset 4px 0 0 var(--teal)}
+.findrow{display:flex;gap:18px;align-items:center;margin:6px 0 10px}
+#findArt{width:104px;height:104px;flex:none;image-rendering:pixelated;background:#efe4d6;padding:8px;box-shadow:0 -3px 0 0 var(--ink),0 3px 0 0 var(--ink),-3px 0 0 0 var(--ink),3px 0 0 0 var(--ink)}
+.meta{margin:4px 0 0;font-size:15px;color:var(--mut);line-height:1.35}
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;margin:12px 0}
+.case{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:#1a1640;color:var(--muted);padding:10px 6px;font-size:13px;font-weight:700;line-height:1.15;text-align:center;min-height:104px;box-shadow:inset 0 0 0 2px #2c2660}
+.case.got{background:radial-gradient(circle at 50% 30%,rgba(255,236,190,.22),rgba(255,236,190,0) 62%),var(--plate);color:var(--paper);box-shadow:inset 0 0 0 2px var(--line),inset 0 3px 0 0 rgba(255,255,255,.08)}
+.case.on{box-shadow:inset 0 0 0 3px var(--cyan)}
+.case canvas{width:52px;height:52px;image-rendering:pixelated}
+.shelf{display:flex;align-items:baseline;gap:10px;font:900 italic 20px/1.1 Archivo,sans-serif;margin:20px 0 2px;color:var(--paper)}
+.shelfn{font:400 13px/1 Silkscreen,monospace;color:var(--cyan)}
+.glitchlab{margin:4px 0 0;font:800 14px/1 Archivo,sans-serif;color:var(--violet)}
+.small{font-size:15px;line-height:1.4;margin:0;color:var(--muted)}
+.detail{--fg:var(--ink);margin-top:14px;background:#fef8f4;color:var(--ink);padding:12px 14px;font-size:15px;line-height:1.4;transform:rotate(-.4deg);box-shadow:0 -3px 0 0 var(--ink),0 3px 0 0 var(--ink),-3px 0 0 0 var(--ink),3px 0 0 0 var(--ink)}
+.detail b{display:block;font:900 italic 19px/1.1 Archivo,sans-serif}
 .detail p{margin:6px 0 0}
+.detail .meta{color:#5d4f43}
 .mylabel{font-style:italic;color:#0c4a5c}
-#overFinds{margin-top:10px;font-size:15px}
-.finds{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.fd{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #cbbcae;border-radius:10px;padding:4px 8px;font-size:14px}
+#overFinds{margin-top:12px;font-size:15px}
+#overFinds b{font:800 15px/1 Archivo,sans-serif;color:var(--muted)}
+.finds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.fd{display:inline-flex;align-items:center;gap:6px;background:var(--plate);padding:5px 9px;font-size:14px;box-shadow:inset 0 0 0 2px var(--line)}
 .fd canvas{width:24px;height:24px;image-rendering:pixelated}
-#bLabel{margin-top:12px}
-.starters{margin-top:8px}
-.starters button{font-size:13px;padding:6px 10px;background:#fff8ef}
-#pcText,#lblText{display:block;width:100%;margin-top:8px;font:inherit;font-size:16px;padding:10px;border:2px solid #cbbcae;border-radius:12px;background:#fff;resize:vertical}
-.namebtn{border:2px solid var(--teal);background:#fff;color:var(--teal);border-radius:12px 8px 12px 10px;padding:8px 12px;font-size:15px;font-weight:700}
-#nameCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:6px}
-#nameCols h3{font-family:Archivo,sans-serif;font-weight:800;font-size:17px;margin:0 0 6px}
-.nrow{display:flex;gap:6px;margin-bottom:6px}
-.nrow input{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border:2px solid #cbbcae;border-radius:10px;background:#fff;text-transform:uppercase}
-.nrow button{border:2px solid var(--ink);background:#fff8ef;border-radius:10px;padding:0 10px;font-weight:700;font-size:14px}
-.tournote{margin:0;padding:8px 10px;font-size:14px;background:#fff3e2;border-radius:10px}
-#jumpTl{display:block;width:100%;max-width:460px;margin:8px auto;image-rendering:pixelated;background:#f6ece1;border-radius:12px 8px 12px 10px}
-.ripple{background:#e6f3f6;border-radius:12px 8px 12px 10px;padding:10px 12px;color:#0c4a5c}
-.ripple b{display:block;font-family:Archivo,sans-serif;font-size:17px}
-.ripple p{margin:4px 0 0;font-size:15px}
-#pcCard{display:block;width:100%;max-width:480px;margin:10px auto 0;border-radius:10px}
-#bNext,#bPostcard{margin-top:12px}
-#lblCard{display:block;width:100%;max-width:480px;margin:10px auto 0;border-radius:10px}
-.saved{min-height:20px;margin:6px 0 0;font-size:14px;color:#0c4a5c;text-align:center}
-.kit button.gold{border-color:#e0b040;background:#fff7dc}
-.kit button.off{opacity:.55}
-.sendbox{margin-top:12px;border-top:1px dashed #d9cbbf;padding-top:10px}
-.sendtitle{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;margin:0 0 4px}
-.sendwhy{font-size:14px;margin:0 0 8px;color:#4a3d32}
-.sendwho{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-weight:700;font-size:14px}
-.sendwho input{width:90px;font:inherit;font-size:16px;padding:6px 8px;border:2px solid #cbbcae;border-radius:10px;text-transform:uppercase}
-.sendrow{display:flex;flex-wrap:wrap;gap:6px}
-.sendrow .btn{border:2px solid var(--ink);border-radius:12px 8px 12px 10px;padding:8px 12px;font-weight:700;font-size:14px;background:#fff}
+.starters{margin-top:10px}
+.starters button{font-size:14px;padding:7px 10px}
+#pcText,#lblText{display:block;width:100%;margin-top:12px;font:inherit;font-size:17px;padding:10px 12px;border:0;background:#fff;color:var(--ink);resize:vertical;box-shadow:0 0 0 2px #cbbcae}
+#nameCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:8px}
+#nameCols h3{font:900 italic 18px/1 Archivo,sans-serif;margin:0 0 10px;color:var(--cyan)}
+.nrow{display:flex;gap:8px;margin-bottom:8px}
+.nrow input{flex:1;min-width:0;font:400 15px/1 Silkscreen,monospace;padding:10px;border:0;background:var(--screen);color:var(--paper);text-transform:uppercase;box-shadow:inset 0 0 0 2px var(--line)}
+.nrow button{border:0;background:var(--plate2);color:var(--paper);padding:0 12px;font-weight:700;font-size:14px}
+#jumpTl{display:block;width:100%;max-width:470px;margin:10px auto;image-rendering:pixelated;background:var(--screen);box-shadow:inset 0 0 0 2px var(--line)}
+.ripple{padding:12px 14px;background:var(--screen);box-shadow:inset 4px 0 0 var(--amber)}
+.ripple b{display:block;font:900 italic 18px/1.15 Archivo,sans-serif;color:var(--amber)}
+.ripple p{margin:6px 0 0;font-size:16px;line-height:1.4}
+#pcCard,#lblCard{display:block;width:100%;max-width:480px;margin:14px auto 0}
+.saved{min-height:20px;margin:8px 0 0;font-size:15px;color:#0c4a5c;text-align:center}
+/* shared send component, on paper cards */
+.sendbox{margin-top:14px;border-top:2px dashed #d9cbbf;padding-top:12px}
+.sendtitle{font:900 italic 19px/1.1 Archivo,sans-serif;margin:0 0 4px}
+.sendwhy{font-size:15px;margin:0 0 10px;color:#4a3d32}
+.sendwho{display:flex;gap:8px;align-items:center;margin-bottom:10px;font-weight:700;font-size:15px}
+.sendwho input{width:96px;font:inherit;font-size:16px;padding:7px 9px;border:0;background:#fff;text-transform:uppercase;box-shadow:0 0 0 2px #cbbcae}
+.sendrow{display:flex;flex-wrap:wrap;gap:10px}
+.sendrow .btn{display:inline-block;width:auto;margin:0;padding:10px 13px;font:700 15px/1 'Atkinson Hyperlegible',sans-serif;background:#fff;color:var(--ink);box-shadow:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink)}
 .sendrow .btn-orange{background:var(--orange);color:#fff}
-.sendmsg{font-size:14px;color:#0c4a5c;min-height:18px;margin:6px 0 0}
-.kit{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
-#jay{position:fixed;right:8px;top:62px;display:flex;align-items:center;gap:8px;max-width:280px;background:var(--cream);border:2px solid var(--ink);border-radius:14px 8px 14px 10px;padding:6px 10px 6px 6px;font-size:14px;pointer-events:none;transform:rotate(.6deg)}
-#jayFace{width:40px;height:40px;flex:none;image-rendering:pixelated;background:#cfe8ee;border-radius:10px}
-#jay b{display:block;font-family:Archivo,sans-serif;font-size:13px;color:var(--teal)}
-@media (max-width:1000px) and (min-width:621px){body.touch #jay{top:auto;bottom:10px;left:50%;right:auto;transform:translateX(-50%) rotate(.6deg);max-width:min(360px,calc(100vw - 340px))}}
-@media (max-width:620px){#jay{top:auto;bottom:206px;left:8px;right:8px;max-width:none}}
-@media (max-width:620px){
-  #hud{flex-wrap:wrap}
-  .tc{grid-template-columns:auto 60px auto;font-size:13px;padding:3px 8px}
-  #mini{width:132px;height:56px}
-  #info{gap:8px;font-size:13px}
-  .wbar{width:44px}.tbar{width:40px}
-  .card h1{font-size:32px}
+.card.paper .sendrow .btn:not(.go):not(.alt){background:#fff;color:var(--ink)}
+.card.paper .sendrow .btn.btn-orange:not(.go):not(.alt){background:var(--orange);color:#fff}
+.sendmsg{font-size:15px;color:#0c4a5c;min-height:18px;margin:8px 0 0}
+
+/* ---------------- one entrance, when the game opens ---------------- */
+@keyframes drop{0%{opacity:0;transform:translateY(-40px) rotate(-4deg)}70%{opacity:1;transform:translateY(4px)}100%{transform:none}}
+@keyframes zap{0%{opacity:0;transform:scale(.3)}40%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
+.intro .logo .l1{animation:drop .55s cubic-bezier(.2,.9,.3,1.2) both}
+.intro .logo .l2{animation:drop .55s .12s cubic-bezier(.2,.9,.3,1.2) both}
+.intro .portal{animation:zap .9s .05s ease-out both}
+
+/* ---------------- smaller screens ---------------- */
+@media (max-width:980px){
+  .menu{grid-template-columns:minmax(0,560px);justify-content:center;gap:28px}
+  .hero .btn{max-width:none}
 }
-@media (prefers-reduced-motion:reduce){#banner{transition:none}}
+@media (max-width:1000px){body.touch #info{bottom:auto;top:100px} body.touch #banner{top:158px}}
+@media (max-width:1000px) and (min-width:621px){body.touch #jay{top:auto;bottom:12px;left:50%;right:auto;transform:translateX(-50%);max-width:min(360px,calc(100vw - 360px))}}
+@media (max-height:450px){
+  #touch .cl{grid-template-columns:repeat(2,50px)} #touch .cr{grid-template-columns:repeat(2,66px)}
+  #touch button{height:46px;font-size:14px} #touch button.fire{height:58px;font-size:20px}
+  #hud{padding:10px 12px}
+  #teams{gap:10px;flex-direction:row}
+  .squad{min-width:200px;padding:5px 10px 7px 18px}
+  .tn{font-size:14px}.pips{margin-top:4px}.pips i{height:6px}
+  #mini{width:150px;height:62px}
+  .iconbtn{width:42px;height:42px}
+  body.touch #info{top:70px} body.touch #banner{top:128px}
+  .cell{padding:2px 9px;min-height:34px}
+  #wicon{width:30px;height:30px}
+  .read{font-size:15px}
+  #banner{font-size:22px;padding:9px 20px 10px 26px}
+}
+@media (max-width:620px){
+  #hud{flex-wrap:wrap;gap:10px}
+  #teams{flex-direction:row;width:100%;gap:10px}
+  .squad{min-width:0;flex:1}
+  .tn{font-size:14px}.who{display:none}
+  #scope{order:3}
+  #mini{width:140px;height:58px}
+  #info,body.touch #info{top:158px;bottom:auto;flex-wrap:wrap;justify-content:center;white-space:normal;width:calc(100vw - 24px);row-gap:6px}
+  .cell{padding:2px 8px;border-left:0}
+  #cHint{max-width:none}
+  #banner,body.touch #banner{top:262px}
+  #jay{top:auto;bottom:220px;left:12px;right:12px;max-width:none}
+  .card{padding:20px 18px}
+  .card h2{font-size:26px}
+  .kit{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  #banner{transition:none}
+  .intro .logo .l1,.intro .logo .l2,.intro .portal{animation:none}
+  .pips i u{transition:none}
+}
 </style>
 </head>
 <body>
@@ -173,17 +303,20 @@ kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;borde
 
 <div id="hud" hidden>
   <div id="teams">
-    <div class="tc" id="tc0"><span class="tn"></span><span class="tb"><i></i></span><span class="th"></span></div>
-    <div class="tc" id="tc1"><span class="tn"></span><span class="tb"><i></i></span><span class="th"></span></div>
+    <div class="squad" id="tc0"></div>
+    <div class="squad" id="tc1"></div>
   </div>
-  <canvas id="mini" width="176" height="74" aria-label="Map overview, tap to look somewhere"></canvas>
-  <div id="topbtns"><button class="round" id="bPause" aria-label="Pause">II</button></div>
+  <div id="scope"><canvas id="mini" width="192" height="80" aria-label="Map of the whole battlefield. Tap it to look somewhere."></canvas></div>
+  <div id="topbtns"><button class="iconbtn" id="bPause" aria-label="Pause"><span class="bars"><i></i><i></i></span></button></div>
 </div>
 
 <div id="info" hidden>
-  <div id="wind"><span class="lab">Wind</span><span class="wbar"><i></i></span><span id="wtxt">calm</span></div>
-  <div id="wpn"></div>
-  <div id="timer"><span class="tbar"><i></i></span><span id="ttxt"></span></div>
+  <div class="cell" id="cWind"><span class="k">Wind</span><span class="chev" id="wchev"><i></i><i></i><i></i><i></i><i></i></span><b class="read" id="wtxt">0</b></div>
+  <div class="cell" id="cWpn"><canvas id="wicon" width="12" height="12"></canvas><span class="wn"><b id="wname"></b><span id="wammo"></span></span></div>
+  <div class="cell" id="cAngle"><span class="k">Angle</span><b class="read" id="wangle">35</b></div>
+  <div class="cell" id="cPower"><span class="k">Power</span><span class="seg" id="pseg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b class="read" id="wpow">--</b></div>
+  <div class="cell" id="cHint" hidden></div>
+  <div class="cell" id="cTime"><span class="ring" id="tring"><b id="ttxt"></b></span></div>
 </div>
 
 <div id="banner"></div>
@@ -205,76 +338,86 @@ kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;borde
 </div>
 
 <div class="ov" id="menu">
-  <div class="card">
-    <p class="kicker">Base 5 game vault &middot; Stage 5 test build</p>
-    <h1>Timeline Tantrum</h1>
-    <p class="sub">Stone Snags, Sun Snags and Neon Snags, from the Prehistoric Jungle to the Pyramid Desert to the Future City. History is about to have a meltdown.</p>
-    <p id="turnhint" hidden>Tip: turn your phone sideways for a bigger battlefield.</p>
-    <button id="bResume" class="big alt" hidden>Carry on your last match</button>
-    <button id="bResumeTour" class="big alt" hidden>Carry on your Time Tour</button>
-    <div class="opt"><span>Who's playing?</span>
-      <div class="chips" data-o="mode"><button data-v="cpu" class="on">Me vs the computer</button><button data-v="friend">Me vs a friend</button><button data-v="tour">Time Tour</button></div></div>
-    <p class="tournote" id="tourNote" hidden>Time Tour: battle through history in order against the computer: the Stone Age, Ancient Egypt, then the Future City. At each stop you face the squad who lives there. Whoever wins changes what the next stop looks like. Win or lose, the tour carries on.</p>
-    <div class="opt" id="oMood"><span>Computer's mood</span>
-      <div class="chips" data-o="mood"><button data-v="sleepy" class="on">Sleepy</button><button data-v="grumpy">Grumpy</button><button data-v="legendary">Legendary</button></div></div>
-    <div class="opt" id="oMap"><span>Battlefield</span>
-      <div class="chips" data-o="map"><button data-v="jungle" class="on">Prehistoric Jungle</button><button data-v="desert">Pyramid Desert</button><button data-v="city">Future City</button></div></div>
-    <div class="opt tlopt" id="oEra"><span>Pick your squad on the timeline</span>
-      <canvas id="tl" width="230" height="64" aria-label="Timeline of the eras, drawn to scale. Tap a squad to pick it."></canvas>
-      <p id="tlText"></p></div>
-    <div class="opt" id="oFoe"><span id="foeLab">Up against</span>
-      <div class="chips" data-o="foe" id="foeChips"></div></div>
-    <div class="opt"><span>Snags in each squad</span>
-      <div class="step"><button id="sMinus" aria-label="Fewer">-</button><b id="sVal">3</b><button id="sPlus" aria-label="More">+</button></div></div>
-    <div class="opt"><span>Snag names</span>
-      <button class="namebtn" id="bNames">Name your squad</button></div>
-    <div class="opt"><span>Turn timer</span>
-      <div class="chips" data-o="turn"><button data-v="60" class="on">Relaxed (60s)</button><button data-v="90">Extra relaxed (90s)</button></div></div>
-    <div class="opt"><span>Sudden Death</span>
-      <div class="chips" data-o="sd"><button data-v="on" class="on">After 24 turns</button><button data-v="off">Off</button></div></div>
-    <button id="bStart" class="big">Let's go</button>
-    <div class="foot"><button id="bMuseum" class="link">Time Museum</button><button id="bHelp" class="link">How to play</button><a href="/games/">Game vault</a><a href="/">Back to Base 5</a></div>
+  <div class="menu">
+    <div class="hero">
+      <span class="portal" aria-hidden="true"></span>
+      <p class="build">Base 5 game vault, stage 7 test build</p>
+      <h1 class="logo"><span class="l1">Timeline</span><span class="l2">Tantrum</span></h1>
+      <p class="tagline">Three squads of Snags. Three eras. One very bad day for history.</p>
+      <p id="turnhint" hidden>Tip: turn your phone sideways for a bigger battlefield.</p>
+      <button id="bResume" class="btn alt" hidden>Carry on your last match</button>
+      <button id="bResumeTour" class="btn alt" hidden>Carry on your Time Tour</button>
+      <button id="bStart" class="btn go">Let's go</button>
+      <p class="sum" id="sumLine"></p>
+      <div class="foot"><button id="bMuseum" class="link">Time Museum</button><button id="bHelp" class="link">How to play</button><a href="/games/">Game vault</a><a href="/">Back to Base 5</a></div>
+    </div>
+    <div class="card setup">
+      <h2>Set up your match</h2>
+      <div class="opt"><span>Who's playing?</span>
+        <div class="chips" data-o="mode"><button data-v="cpu" class="on">Me vs the computer</button><button data-v="friend">Me vs a friend</button><button data-v="tour">Time Tour</button></div></div>
+      <p class="tournote" id="tourNote" hidden>Battle through history in order against the computer: the Stone Age, Ancient Egypt, then the Future City. At each stop you face the squad who lives there. Whoever wins changes what the next stop looks like. Win or lose, the tour carries on.</p>
+      <div class="opt" id="oEra"><span>Pick your squad on the timeline</span>
+        <canvas id="tl" width="230" height="64" aria-label="Timeline of the eras, drawn to scale. Tap a squad to pick it."></canvas>
+        <p id="tlText"></p></div>
+      <div class="opt" id="oFoe"><span id="foeLab">Up against</span>
+        <div class="chips" data-o="foe" id="foeChips"></div></div>
+      <div class="opt" id="oMap"><span>Battlefield</span>
+        <div class="chips" data-o="map"><button data-v="jungle" class="on">Prehistoric Jungle</button><button data-v="desert">Pyramid Desert</button><button data-v="city">Future City</button></div></div>
+      <details class="more" id="moreSet">
+        <summary>More settings</summary>
+        <div class="opt" id="oMood"><span>Computer's mood</span>
+          <div class="chips" data-o="mood"><button data-v="sleepy" class="on">Sleepy</button><button data-v="grumpy">Grumpy</button><button data-v="legendary">Legendary</button></div></div>
+        <div class="opt"><span>Snags in each squad</span>
+          <div class="step"><button id="sMinus" aria-label="Fewer Snags">-</button><b id="sVal">3</b><button id="sPlus" aria-label="More Snags">+</button></div></div>
+        <div class="opt"><span>Snag names</span>
+          <button class="namebtn" id="bNames">Name your squad</button></div>
+        <div class="opt"><span>Turn timer</span>
+          <div class="chips" data-o="turn"><button data-v="60" class="on">Relaxed (60s)</button><button data-v="90">Extra relaxed (90s)</button></div></div>
+        <div class="opt"><span>Sudden Death</span>
+          <div class="chips" data-o="sd"><button data-v="on" class="on">After 24 turns</button><button data-v="off">Off</button></div></div>
+      </details>
+    </div>
   </div>
 </div>
 
 <div class="ov" id="kit" hidden>
   <div class="card wide">
     <h2>Pick your kit</h2>
-    <p class="sub" style="margin:0">The timer waits while you choose.</p>
+    <p class="lead">The timer waits while you choose.</p>
     <div class="kit" id="kitList"></div>
-    <button class="big" id="bKitClose">Back to the battle</button>
+    <button class="btn" id="bKitClose">Back to the battle</button>
   </div>
 </div>
 
 <div class="ov" id="pause" hidden>
   <div class="card">
     <h2>Paused</h2>
-    <p class="sub">Take as long as you like. Your match is saved.</p>
+    <p class="lead">Take as long as you like. Your match is saved.</p>
     <div class="tog">Music <button id="tMusic">On</button></div>
     <div class="tog">Sound effects <button id="tSfx">On</button></div>
     <div class="tog">On screen buttons <button id="tTouch">Off</button></div>
     <div class="tog">Jay's commentary <button id="tJay">On</button></div>
     <div class="tog">Your finds so far <button id="bMuseum2">Museum</button></div>
     <div class="row">
-      <button class="big" id="bUnpause">Back to it</button>
-      <button class="big alt" id="bLeave" style="margin-top:16px">Leave for now</button>
+      <button class="btn go" id="bUnpause">Back to it</button>
+      <button class="btn" id="bLeave">Leave for now</button>
     </div>
     <div class="foot"><button class="link" id="bHelp2">How to play</button></div>
   </div>
 </div>
 
 <div class="ov" id="help" hidden>
-  <div class="card help">
+  <div class="card wide help">
     <h2>How to play</h2>
-    <p class="sub" style="margin:0">Squads take turns. On your go, move one Snag, aim, then fire once. After firing you get 3 seconds to scarper. Knock the other squad into the water or down to 0 to send them home through a time portal.</p>
+    <p class="lead">Squads take turns. On your go, move one Snag, aim, then fire once. After firing you get 3 seconds to scarper. Knock the other squad into the water or down to 0 to send them home through a time portal.</p>
     <dl>
       <dt>Keyboard</dt>
-      <dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd> walk &middot; <kbd>&uarr;</kbd> <kbd>&darr;</kbd> aim &middot; hold <kbd>Space</kbd> to power up, let go to fire</dd>
-      <dd><kbd>Enter</kbd> jump &middot; <kbd>Backspace</kbd> backflip &middot; <kbd>Tab</kbd> kit &middot; number keys quick pick &middot; <kbd>Esc</kbd> pause</dd>
+      <dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd> walk, <kbd>&uarr;</kbd> <kbd>&darr;</kbd> aim, hold <kbd>Space</kbd> to power up and let go to fire.</dd>
+      <dd><kbd>Enter</kbd> jump, <kbd>Backspace</kbd> backflip, <kbd>Tab</kbd> kit, number keys to pick quickly, <kbd>Esc</kbd> pause.</dd>
       <dt>Touch or mouse</dt>
       <dd>Drag on the battlefield to aim. Hold Fire to power up, let go to fire. Tap the little map to look around.</dd>
       <dt>Numbers worth watching</dt>
-      <dd>Angle is how far above flat you are aiming. Power is how hard you throw. Wind pushes Sling Stones, Fire Pots, Spears and Plasma Bolts, but not the bouncy ones.</dd>
+      <dd>Angle is how far above flat you are aiming. Power is how hard you throw. Wind pushes Sling Stones, Fire Pots, Spears and Plasma Bolts, but not the bouncy ones. More chevrons means a stronger wind.</dd>
       <dt>Each squad's own kit</dt>
       <dd>Open the kit to see your era's special weapons. Some have limited ammo, and the superweapon unlocks at turn 10. The Vine Swing, Sand Sled and Jetpack are free moves: they do not use up your go.</dd>
       <dt>Buried treasure</dt>
@@ -284,66 +427,65 @@ kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;borde
       <dt>Need a pause?</dt>
       <dd>Breather passes your turn with no penalty. Pause any time; the match saves itself.</dd>
     </dl>
-    <button class="big" id="bHelpClose">Got it</button>
+    <button class="btn" id="bHelpClose">Got it</button>
   </div>
 </div>
 
 <div class="ov" id="over" hidden>
   <div class="card">
-    <p class="kicker">Match over</p>
+    <canvas id="overArt" width="210" height="58" aria-hidden="true"></canvas>
     <h2 id="overTitle"></h2>
-    <p class="sub" id="overText"></p>
+    <p class="lead" id="overText"></p>
     <ul class="stats" id="overStats"></ul>
     <div id="overFinds"></div>
     <p class="real" id="overReal"></p>
     <p class="real" id="overTour" hidden></p>
-    <button class="big alt" id="bLabel" hidden>Make a museum label</button>
-    <button class="big" id="bNext" hidden>Time jump to the next stop</button>
-    <button class="big" id="bPostcard" hidden>Make your history changed postcard</button>
+    <button class="btn alt" id="bLabel" hidden>Make a museum label</button>
+    <button class="btn go" id="bNext" hidden>Time jump to the next stop</button>
+    <button class="btn go" id="bPostcard" hidden>Make your history changed postcard</button>
     <div class="row">
-      <button class="big" id="bRematch">Rematch</button>
-      <button class="big alt" id="bSettings" style="margin-top:16px">Change settings</button>
+      <button class="btn go" id="bRematch">Rematch</button>
+      <button class="btn" id="bSettings">Change settings</button>
     </div>
   </div>
 </div>
 
 <div class="ov" id="find" hidden>
-  <div class="card findcard">
-    <p class="kicker" id="findKick">New for the Time Museum</p>
+  <div class="card paper findcard">
+    <p class="stamp" id="findKick">New for the Time Museum</p>
     <div class="findrow">
       <canvas id="findArt" width="12" height="12"></canvas>
       <div><h2 id="findName"></h2><p class="meta" id="findMeta"></p></div>
     </div>
-    <p class="sub" id="findFact"></p>
+    <p class="lead" id="findFact" style="color:var(--ink)"></p>
     <p class="now" id="findNow" hidden></p>
-    <button class="big" id="bFindClose">Back to the battle</button>
+    <button class="btn" id="bFindClose">Back to the battle</button>
   </div>
 </div>
 
 <div class="ov" id="museum" hidden>
   <div class="card wide">
-    <p class="kicker">Time Museum</p>
-    <h2>Your finds through time</h2>
-    <p class="sub" id="musSub"></p>
+    <h2>The Time Museum</h2>
+    <p class="lead" id="musSub"></p>
     <p class="small">The glitches are things that should not be there at all. If time travellers leave stuff like this lying around, should we time travel at all?</p>
     <div class="detail" id="musDetail" hidden></div>
     <div id="musShelves"></div>
-    <button class="big" id="bMusClose">Close the museum</button>
+    <button class="btn" id="bMusClose">Close the museum</button>
   </div>
 </div>
 
 <div class="ov" id="label" hidden>
-  <div class="card wide">
-    <p class="kicker">Make a museum label</p>
+  <div class="card paper wide">
+    <p class="stamp">Make a museum label</p>
     <h2>Your find, your words</h2>
-    <p class="sub">Pick a find, then say something about it. One line is plenty, and you can leave it blank.</p>
+    <p class="lead">Pick a find, then say something about it. One line is plenty, and you can leave it blank.</p>
     <div class="chips" id="lblFinds"></div>
     <div class="chips starters" id="lblStarters"></div>
     <textarea id="lblText" maxlength="160" rows="2" placeholder="Write as much or as little as you like"></textarea>
     <canvas id="lblCard" width="480" height="270" aria-label="Your museum label"></canvas>
     <div class="row">
-      <button class="big" id="bLblSave">Put it in the museum</button>
-      <button class="big alt" id="bLblPic" style="margin-top:16px">Save as a picture</button>
+      <button class="btn" id="bLblSave">Put it in the museum</button>
+      <button class="btn go" id="bLblPic">Save as a picture</button>
     </div>
     <p class="saved" id="lblSaved" aria-live="polite"></p>
     <div id="lblSend"></div>
@@ -353,26 +495,26 @@ kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;borde
 
 <div class="ov" id="jump" hidden>
   <div class="card wide jumpcard">
-    <p class="kicker">Time jump</p>
+    <p class="stamp">Time jump</p>
     <h2 id="jumpTitle"></h2>
     <canvas id="jumpTl" width="230" height="40" aria-hidden="true"></canvas>
-    <p class="sub" id="jumpYears"></p>
+    <p class="lead" id="jumpYears"></p>
     <div class="ripple"><b id="jumpRipTitle"></b><p id="jumpRipText"></p></div>
-    <button class="big" id="bJumpGo">Let's go</button>
+    <button class="btn go" id="bJumpGo">Let's go</button>
   </div>
 </div>
 
 <div class="ov" id="postcard" hidden>
-  <div class="card wide">
-    <p class="kicker">Time Tour complete</p>
+  <div class="card paper wide">
+    <p class="stamp">Time Tour complete</p>
     <h2>Send a postcard from the future</h2>
-    <p class="sub">History changed while you were away. Say what you think: if we could time travel, should we? One line is plenty.</p>
+    <p class="lead">History changed while you were away. Say what you think: if we could time travel, should we? One line is plenty.</p>
     <div class="chips starters" id="pcStarters"></div>
     <textarea id="pcText" maxlength="200" rows="2" placeholder="Write as much or as little as you like"></textarea>
     <canvas id="pcCard" width="480" height="300" aria-label="Your postcard"></canvas>
     <div class="row">
-      <button class="big alt" id="bPcPic" style="margin-top:16px">Save as a picture</button>
-      <button class="big" id="bPcDone">Finish the tour</button>
+      <button class="btn go" id="bPcPic">Save as a picture</button>
+      <button class="btn" id="bPcDone">Finish the tour</button>
     </div>
     <p class="saved" id="pcSaved" aria-live="polite"></p>
     <div id="pcSend"></div>
@@ -381,13 +523,12 @@ kbd{font-family:inherit;border:1.5px solid #9b8c7e;border-bottom-width:3px;borde
 
 <div class="ov" id="names" hidden>
   <div class="card wide">
-    <p class="kicker">Your squad</p>
     <h2>Name your Snags</h2>
-    <p class="sub">Type your own names, or roll for a silly one. Up to 10 letters each.</p>
+    <p class="lead">Type your own names, or roll for a silly one. Up to 10 letters each.</p>
     <div id="nameCols"></div>
     <div class="row">
-      <button class="big alt" id="bRollAll" style="margin-top:16px">Roll them all</button>
-      <button class="big" id="bNamesDone">Done</button>
+      <button class="btn alt" id="bRollAll">Roll them all</button>
+      <button class="btn go" id="bNamesDone">Done</button>
     </div>
   </div>
 </div>

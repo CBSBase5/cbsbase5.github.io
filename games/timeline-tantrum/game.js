@@ -1138,7 +1138,7 @@
     }
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
-    banner(c.name + "'s go", team.name + (team.ctrl === 'ai' ? ' (computer)' : (game.opts && game.opts.mode === 'friend' ? ' (' + team.label + ')' : '')));
+    banner(c.name + "'s go", team.name + (team.ctrl === 'ai' ? ', the computer' : (game.opts && game.opts.mode === 'friend' ? ', ' + team.label : '')), ER[team.era].tag);
     voice(team.era, 'turn');
     musicEra(team.era);
     game.ai = team.ctrl === 'ai' ? { phase: 'wait', t: 0, walked: false } : null;
@@ -2797,60 +2797,84 @@
   });
 
   /* ---------------- HUD ---------------- */
-  function banner(a, b) {
+  function banner(a, b, col) {
     var el = $('banner');
     el.innerHTML = esc(a) + (b ? '<small>' + esc(b) + '</small>' : '');
-    el.classList.add('show');
+    el.style.setProperty('--c', col || '#7b5cff');
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
     game.bannerT = 150;
   }
+  /* squad plates: a lamp, the squad name, a total, and one health bar per Snag */
   function hudStatic() {
     game.teams.forEach(function (tm, i) {
       var el = $('tc' + i);
       if (!el) return;
-      el.style.setProperty('--c', ER[tm.era].ui);
-      el.querySelector('.tn').textContent = tm.name + (tm.label ? ' (' + tm.label + ')' : '');
+      el.style.setProperty('--c', ER[tm.era].tag);
+      el.innerHTML = '<span class="lamp"></span><span class="sqtop"><b class="tn">' + esc(tm.name) + '</b><span class="who">' + esc(tm.label || '') + '</span><span class="th"></span></span>' +
+        '<span class="pips">' + tm.members.map(function (m) { return '<i title="' + esc(m.name) + '"><u></u></i>'; }).join('') + '</span>';
     });
+    hudCache = {};
   }
-  var hudCache = {};
+  var hudCache = {}, iconKey = '';
   function setText(id, s) { if (hudCache[id] !== s) { hudCache[id] = s; $(id).textContent = s; } }
+  function setHide(id, h) { var k = id + '#h'; if (hudCache[k] !== h) { hudCache[k] = h; $(id).hidden = h; } }
   function hudTick() {
     if (game.state === 'demo') return;
     game.teams.forEach(function (tm, i) {
       var el = $('tc' + i);
       if (!el) return;
-      var tot = 0;
-      tm.members.forEach(function (m) { if (m.alive) tot += m.hp; });
-      el.querySelector('.th').textContent = tot;
-      el.querySelector('.tb i').style.width = Math.round(tot / Math.max(1, tm.members.length * 100) * 100) + '%';
+      var tot = 0, pips = el.querySelectorAll('.pips i');
+      tm.members.forEach(function (m, k) {
+        if (m.alive) tot += m.hp;
+        var pp = pips[k];
+        if (!pp) return;
+        var wd = (m.alive ? Math.min(100, m.hp) : 0) + '%';
+        if (pp.firstChild.style.width !== wd) pp.firstChild.style.width = wd;
+        pp.classList.toggle('dead', !m.alive);
+        pp.classList.toggle('cur', m === game.active);
+      });
+      var th = el.querySelector('.th');
+      if (th && th.textContent !== String(tot)) th.textContent = tot;
       el.classList.toggle('now', !!(game.active && game.active.team === tm));
     });
-    var w = game.wind, bar = document.querySelector('.wbar i');
-    var pct = Math.abs(w) / 10 * 50;
-    bar.style.width = pct + '%';
-    bar.style.left = w < 0 ? (50 - pct) + '%' : '50%';
-    setText('wtxt', w === 0 ? 'calm' : Math.abs(w) + (w > 0 ? ' right' : ' left'));
-    var c = game.active, wtxt = '';
-    if (c) {
-      var name = weaponName(c.team.era, game.weapon), kind = WEAP[game.weapon].kind, av = avail(c.team, game.weapon);
-      if (WEAP[game.weapon].ammo || game.weapon === 'bark') name += av.locked ? ' (locked)' : ' (x' + (av.left || 0) + ')';
-      if (c.swing) wtxt = 'Swinging \u00b7 fire or jump to let go';
-      else if (c.jet) wtxt = 'Jetpack \u00b7 Fuel ' + Math.max(0, Math.round(game.fuel / WEAP.jet.fuel * 100)) + '%';
-      else if (kind === 'proj') wtxt = name + ' \u00b7 Angle ' + Math.round(c.aim) + '\u00b0 \u00b7 Power ' + (game.charging ? Math.round(game.power) : (game.lastPower || '--'));
-      else if (kind === 'dig') wtxt = name + ' \u00b7 Angle ' + Math.round(Math.min(c.aim, 35)) + '\u00b0';
-      else if (kind === 'beam' || kind === 'vine') wtxt = name + ' \u00b7 Angle ' + Math.round(c.aim) + '\u00b0';
-      else if (kind === 'strike') wtxt = name + ' \u00b7 drag or use arrows to pick the spot';
-      else if (kind === 'sled') wtxt = name + ' \u00b7 ' + (c.sled ? 'Riding! ' : 'Fire to ride \u00b7 ') + 'Fuel ' + Math.max(0, Math.round(game.sledFuel / WEAP.sled.fuel * 100)) + '%';
-      else if (kind === 'jet') wtxt = name + ' \u00b7 Fuel ' + Math.max(0, Math.round(game.fuel / WEAP.jet.fuel * 100)) + '%';
-      else wtxt = name;
+    /* wind: chevrons for strength, the number for the maths */
+    var w = game.wind, lit = Math.ceil(Math.abs(w) / 2), ch = $('wchev').children;
+    for (var k = 0; k < ch.length; k++) ch[k].classList.toggle('on', k < lit);
+    $('wchev').classList.toggle('left', w < 0);
+    setText('wtxt', w === 0 ? 'Calm' : Math.abs(w) + (w > 0 ? ' right' : ' left'));
+    var c = game.active;
+    if (!c) { setText('wname', ''); setText('wammo', ''); setHide('cAngle', true); setHide('cPower', true); setHide('cHint', true); }
+    else {
+      var wid = game.weapon, kind = WEAP[wid].kind, av = avail(c.team, wid), era = c.team.era;
+      setText('wname', weaponName(era, wid));
+      setText('wammo', av.locked ? 'Unlocks in ' + av.locked : ((WEAP[wid].ammo || wid === 'bark') ? 'x' + (av.left || 0) + ' left' : (WEAP[wid].tool ? 'Free move' : '')));
+      if (iconKey !== era + wid) { iconKey = era + wid; SP.icon($('wicon').getContext('2d'), wid, era); }
+      var showAngle = !c.swing && !c.jet && !c.sled && (kind === 'proj' || kind === 'beam' || kind === 'vine' || kind === 'dig');
+      setHide('cAngle', !showAngle);
+      if (showAngle) setText('wangle', Math.round(kind === 'dig' ? Math.min(c.aim, 35) : c.aim) + '\u00b0');
+      var showPow = showAngle && kind === 'proj';
+      setHide('cPower', !showPow);
+      if (showPow) {
+        var pw = game.charging ? game.power : (game.lastPower || 0), segs = $('pseg').children, n = Math.round(pw / 10);
+        for (k = 0; k < segs.length; k++) { segs[k].classList.toggle('on', k < n); segs[k].classList.toggle('hot', k >= 6); segs[k].classList.toggle('max', k >= 9); }
+        $('pseg').classList.toggle('dim', !game.charging);
+        setText('wpow', game.charging ? String(Math.round(pw)) : (game.lastPower ? String(game.lastPower) : '--'));
+      }
+      var hint = '';
+      if (c.swing) hint = 'Swinging. Fire or jump to let go.';
+      else if (c.jet || kind === 'jet') hint = (c.jet ? 'Flying! ' : 'Fire to take off. ') + 'Fuel ' + Math.max(0, Math.round(game.fuel / WEAP.jet.fuel * 100)) + '%';
+      else if (c.sled || kind === 'sled') hint = (c.sled ? 'Riding! ' : 'Fire to ride. ') + 'Fuel ' + Math.max(0, Math.round(game.sledFuel / WEAP.sled.fuel * 100)) + '%';
+      else if (kind === 'strike') hint = av.locked ? 'Unlocks in ' + av.locked + (av.locked === 1 ? ' turn' : ' turns') : 'Drag or use the arrows to pick the spot.';
+      setHide('cHint', !hint);
+      if (hint) setText('cHint', hint);
     }
-    setText('wpn', wtxt);
-    var tb = document.querySelector('.tbar i');
+    var ring = $('tring');
     if (game.state === 'play') {
       var secs = Math.ceil(game.timer / 60);
-      setText('ttxt', secs + 's');
-      tb.style.width = Math.round(game.timer / (game.turnLen * 60) * 100) + '%';
-      tb.classList.toggle('low', secs <= 10);
-    } else { setText('ttxt', '--'); tb.style.width = '0%'; }
+      setText('ttxt', String(secs));
+      ring.style.setProperty('--p', Math.round(game.timer / (game.turnLen * 60) * 100));
+      ring.classList.toggle('low', secs <= 10);
+    } else { setText('ttxt', '--'); ring.style.setProperty('--p', 0); ring.classList.remove('low'); }
   }
 
   /* ---------------- overlays and menus ---------------- */
@@ -2876,7 +2900,7 @@
     cv2.width = 12; cv2.height = 12;
     x2.clearRect(0, 0, 12, 12);
     x2.drawImage(SP.artCanvas(id), 0, 0);
-    if (dark) { x2.globalCompositeOperation = 'source-in'; x2.fillStyle = '#b9a999'; x2.fillRect(0, 0, 12, 12); x2.globalCompositeOperation = 'source-over'; }
+    if (dark) { x2.globalCompositeOperation = 'source-in'; x2.fillStyle = '#3d3577'; x2.fillRect(0, 0, 12, 12); x2.globalCompositeOperation = 'source-over'; }
   }
   function showFind(info, isNew) {
     paintArt($('findArt'), info.id, false);
@@ -3053,17 +3077,17 @@
   function drawTimeline() {
     var x2 = tlCv.getContext('2d'), W = tlCv.width, base = 46, i;
     x2.clearRect(0, 0, W, tlCv.height);
-    x2.fillStyle = '#1f2a30'; x2.fillRect(6, base, W - 12, 2);
+    x2.fillStyle = '#6a60b0'; x2.fillRect(6, base, W - 12, 2);
     [[-10000, '10000 BC'], [-5000, '5000 BC'], [1, 'AD 1']].forEach(function (tk) {
-      var x = tlX(tk[0]); x2.fillStyle = '#1f2a30'; x2.fillRect(x, base - 2, 1, 6);
-      SP.text(x2, tk[1], x, base + 7, '#5a4a3c', null, true);
+      var x = tlX(tk[0]); x2.fillStyle = '#6a60b0'; x2.fillRect(x, base - 2, 1, 6);
+      SP.text(x2, tk[1], x, base + 7, '#a79fd8', null, true);
     });
     var nx = tlX(2026);
     x2.fillStyle = '#ef7724'; x2.fillRect(nx, base - 4, 1, 8);
     SP.text(x2, 'NOW', nx - 9, base + 7, '#ef7724', null, true);
     TL.forEach(function (e2) {
       if (e2.ready) return;
-      x2.fillStyle = '#b9a999'; x2.fillRect(tlX(e2.year) - 1, base - 1, 3, 4);
+      x2.fillStyle = '#433a85'; x2.fillRect(tlX(e2.year) - 1, base - 1, 3, 4);
     });
     var sel = opts.era, foe = foeOf(opts), tour = opts.mode === 'tour';
     TL.forEach(function (e2) {
@@ -3071,9 +3095,9 @@
       var x = tlX(e2.year), on = e2.id === sel, vs = !tour && e2.id === foe;
       SP.draw(x2, x, base, x < W / 2 ? 1 : -1, e2.id, on ? 'cheer' : 'idle', on ? (Math.floor(Date.now() / 300) % 2) : 0, false, 0);
       var tw = SP.textWidth(ER[e2.id].team), tx = clamp(x, tw / 2 + 2, W - tw / 2 - 2);
-      SP.text(x2, ER[e2.id].team, tx, 2, on || vs ? ER[e2.id].tag : '#9a8a7c', on || vs ? '#1f2a30' : null, true);
-      if (on) { x2.fillStyle = '#1f2a30'; x2.fillRect(x - 4, base + 14, 9, 1); }
-      if (vs) { x2.fillStyle = '#1f2a30'; for (var d = -4; d <= 4; d += 2) x2.fillRect(x + d, base + 14, 1, 1); }
+      SP.text(x2, ER[e2.id].team, tx, 2, on || vs ? ER[e2.id].tag : '#6a60b0', on || vs ? '#0e0b22' : null, true);
+      if (on) { x2.fillStyle = '#fef8f4'; x2.fillRect(x - 4, base + 14, 9, 1); }
+      if (vs) { x2.fillStyle = '#fef8f4'; for (var d = -4; d <= 4; d += 2) x2.fillRect(x + d, base + 14, 1, 1); }
     });
     var me = sel, a = TL.filter(function (e2) { return e2.id === me; })[0], b = TL.filter(function (e2) { return e2.id === foe; })[0];
     var later = TL.filter(function (e2) { return !e2.ready; }).map(function (e2) { return e2.name; });
@@ -3114,10 +3138,12 @@
       else if (av.left !== undefined) note = av.left + ' left';
       else note = 'As many as you like';
       var cls = (wid === game.weapon ? 'on' : '') + (wid === 'bark' || W2.kind === 'strike' ? ' gold' : '') + (!W2.tool && !av.ok ? ' off' : '');
-      html += '<button data-w="' + wid + '" class="' + cls + '"><b>' + esc(w.name) + '</b><span>' + esc(w.blurb) + '</span><br><em>' + (touchOn ? '' : 'Key ' + ((i + 1) % 10) + ' \u00b7 ') + esc(note) + '</em></button>';
+      html += '<button data-w="' + wid + '" class="' + cls + '"><canvas width="12" height="12" data-icon="' + wid + '"></canvas><span class="kn"><b>' + esc(w.name) + '</b><span>' + esc(w.blurb) + '</span></span>' +
+        '<em>' + (touchOn ? '' : '<kbd>' + ((i + 1) % 10) + '</kbd>') + esc(note) + '</em></button>';
     });
-    html += '<button data-w="pass"><b>Have a breather</b><span>Pass this turn. No penalty at all.</span></button>';
+    html += '<button data-w="pass"><canvas width="12" height="12" data-icon="pass"></canvas><span class="kn"><b>Have a breather</b><span>Pass this turn. No penalty at all.</span></span></button>';
     $('kitList').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('#kitList canvas[data-icon]'), function (c2) { SP.icon(c2.getContext('2d'), c2.getAttribute('data-icon'), team.era); });
     showOv('kit');
   }
   $('kitList').addEventListener('click', function (e) {
@@ -3146,6 +3172,23 @@
   $('bHelp2').addEventListener('click', function () { openHelp('pause'); });
   $('bHelpClose').addEventListener('click', closeHelp);
 
+  /* the winners, cheering on their era coloured blocks */
+  var podiumT = null;
+  function drawPodium() {
+    var cv2 = $('overArt'), x2 = cv2.getContext('2d'), W = cv2.width, H = cv2.height, w = game.winner;
+    x2.clearRect(0, 0, W, H);
+    var squad = w ? w.members.slice(0, 6) : game.teams.map(function (t) { return t.members[0]; }).filter(Boolean);
+    var n = squad.length, gap = Math.min(30, (W - 30) / Math.max(1, n)), f = (Date.now() / 260 | 0) % 2;
+    squad.forEach(function (m, i) {
+      var x = Math.round(W / 2 + (i - (n - 1) / 2) * gap), era = m.team.era, h = w ? (m.alive ? 10 : 5) : 6;
+      x2.fillStyle = '#0e0b22'; x2.fillRect(x - 11, H - h - 1, 23, h + 1);
+      x2.fillStyle = ER[era].tag; x2.fillRect(x - 10, H - h, 21, h);
+      x2.fillStyle = 'rgba(0,0,0,.25)'; x2.fillRect(x - 10, H - 2, 21, 2);
+      SP.draw(x2, x, H - h, i < n / 2 ? 1 : -1, era, w ? (m.alive ? 'cheer' : 'idle') : 'yawn', (f + i) % 2, false, 0);
+    });
+    if (podiumT) clearTimeout(podiumT);
+    podiumT = setTimeout(function () { podiumT = null; if (game.overlay === 'over' && !reduceMotion) drawPodium(); }, 260);
+  }
   function showOver() {
     if (game.state !== 'over') return;
     var w = game.winner, o = game.opts || {}, title, text;
@@ -3159,6 +3202,7 @@
     }
     $('overTitle').textContent = title;
     $('overText').textContent = text;
+    drawPodium();
     var st = [];
     if (game.stats.best > 0) st.push('Biggest hit: ' + game.stats.best + ' by ' + game.stats.bestBy);
     st.push('Turns played: ' + game.turnNo);
@@ -3246,12 +3290,12 @@
     var from = MAPS[TOUR_STOPS[T.stop - 1]].year, to = MAPS[TOUR_STOPS[T.stop]].year;
     var X = function (y) { return Math.round(8 + (y - TL0) / (TL1 - TL0) * (W - 16)); };
     x2.clearRect(0, 0, W, c2.height);
-    x2.fillStyle = '#1f2a30'; x2.fillRect(6, 24, W - 12, 2);
+    x2.fillStyle = '#6a60b0'; x2.fillRect(6, 24, W - 12, 2);
     var a = X(from), b = X(to);
     for (var x = a; x < b; x += 3) { x2.fillStyle = '#ef7724'; x2.fillRect(x, 20, 2, 1); }
     x2.fillStyle = '#ef7724'; x2.fillRect(b - 3, 18, 1, 5); x2.fillRect(b - 2, 19, 1, 3); x2.fillRect(b - 1, 20, 1, 1);
-    SP.text(x2, yearLabel(from).replace(',', ''), a, 30, '#5a4a3c', null, true);
-    SP.text(x2, yearLabel(to), Math.min(b, W - 22), 30, '#5a4a3c', null, true);
+    SP.text(x2, yearLabel(from).replace(',', ''), a, 30, '#a79fd8', null, true);
+    SP.text(x2, yearLabel(to), Math.min(b, W - 22), 30, '#a79fd8', null, true);
     SP.draw(x2, a, 23, 1, T.era, 'idle', 0, false, 0);
   }
   function showJump() {
@@ -3447,6 +3491,9 @@
     $('bResume').hidden = !store('save');
     var nf = museumCount(allArts());
     $('bMuseum').textContent = 'Time Museum (' + nf + ' found)';
+    var sum = opts.size + ' Snags each, ' + (opts.mode === 'friend' ? '' : 'a ' + MOODS[opts.mood].toLowerCase() + ' computer, ') +
+      (opts.turn === 90 ? 'an extra relaxed 90 second timer' : 'a relaxed 60 second timer') + ' and ' + (opts.sd === 'off' ? 'no Sudden Death.' : 'Sudden Death after 24 turns.');
+    $('sumLine').textContent = sum.charAt(0).toUpperCase() + sum.slice(1) + ' Change any of it under More settings.';
     drawTimeline();
     $('turnhint').hidden = !(window.innerHeight > window.innerWidth && window.innerWidth < 700);
   }
@@ -3511,6 +3558,7 @@
   }
 
   resize();
+  if (!TEST) { $('menu').classList.add('intro'); setTimeout(function () { $('menu').classList.remove('intro'); }, 1600); }
   applyAudio();
   applyTouch();
   startDemo();
