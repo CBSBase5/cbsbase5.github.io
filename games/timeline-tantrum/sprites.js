@@ -9,7 +9,8 @@
   var D = '#2e3a17', K = '#8aa64a', BL = '#b5c96f', M = '#3a1414', W = '#ffffff',
       P = '#1d1d24', PL = '#f2d1a8', Y = '#f5e04a', WD = '#9b6a3a', WK = '#6e4622',
       BN = '#f3ecd8', MT = '#59606a', CY = '#37c8dc', CYL = '#bff3fa', OR = '#ef7724',
-      FU = '#8b5a2b', FD = '#5e3a17', PT = '#6b7480', GL = '#2b3038';
+      FU = '#8b5a2b', FD = '#5e3a17', PT = '#6b7480', GL = '#2b3038',
+      LB = '#2c5ca8', AU = '#f0c446', AD = '#b8861e', LN = '#f4efe4', LN2 = '#d8cfbd', CU = '#c8874a', BZ = '#d9a441', TQ = '#3fb8a8';
 
   function r(a, b, w, h, c) { g.fillStyle = c; g.fillRect(OX + a, OY + b, w, h); }
   function e(cx, cy, rx, ry, c) {
@@ -47,6 +48,11 @@
       r(10, 20, 1, 1, FD); r(14, 22, 1, 1, FD); r(12, 19, 1, 1, FD); r(9, 23, 1, 1, FD); r(15, 20, 1, 1, FD);
     }
     if (era === 'fut') { e(12, 21, 4, 3.2, PT); r(9, 21, 7, 1, CY); r(12, 19, 1, 1, OR); }
+    if (era === 'egypt') {
+      /* linen kilt with a gold belt, and a broad collar of gold and lapis */
+      e(12, 22.4, 4.7, 2.3, LN); r(12, 22, 1, 3, LN2); r(8, 21, 9, 1, AU);
+      r(8, 17, 9, 1, AU); r(7, 18, 11, 1, LB); r(8, 19, 9, 1, AU); r(9, 18, 1, 1, TQ); r(15, 18, 1, 1, TQ);
+    }
 
     /* brows */
     if (wild) { r(7, 8, 3, 1, D); r(14, 8, 3, 1, D); }
@@ -67,6 +73,8 @@
       r(14, 10, 3, 3, Y); r(15, 11, 2, 2, P); r(15, 11, 1, 1, W);
     }
 
+    if (era === 'egypt' && !wild && !bl && pose !== 'cheer') { r(7, 9, 3, 1, P); r(6, 9, 1, 1, P); r(14, 9, 3, 1, P); r(17, 9, 1, 1, P); }
+
     /* mouth */
     if (wild) { r(10, 15, 3, 2, M); r(10, 15, 1, 1, W); }
     else if (pose === 'cheer') { r(8, 14, 8, 2, M); r(8, 14, 8, 1, W); r(10, 14, 1, 1, M); r(13, 14, 1, 1, M); }
@@ -76,8 +84,16 @@
 
     /* head gear */
     if (era === 'fut') { r(6, 6, 12, 1, GL); r(8, 5, 3, 2, CY); r(13, 5, 3, 2, CY); r(8, 5, 1, 1, CYL); }
-    else { r(13, 7, 3, 1, PL); r(14, 6, 1, 3, PL); }
+    else if (era === 'pre') { r(13, 7, 3, 1, PL); r(14, 6, 1, 3, PL); }
     if (era === 'pre') { r(9, 5, 6, 1, BN); r(8, 4, 1, 1, BN); r(8, 6, 1, 1, BN); r(15, 4, 1, 1, BN); r(15, 6, 1, 1, BN); }
+    if (era === 'egypt') {
+      /* striped headcloth with a gold band and side flaps */
+      r(8, 4, 9, 1, LB); r(7, 5, 11, 2, LB);
+      r(8, 4, 1, 3, AU); r(11, 4, 1, 3, AU); r(14, 4, 1, 3, AU); r(17, 5, 1, 2, AU);
+      r(6, 7, 13, 1, AU); r(12, 6, 1, 1, '#d84a3a');
+      r(5, 8, 1, 7, LB); r(5, 10, 1, 1, AU); r(5, 13, 1, 1, AU);
+      r(19, 8, 1, 7, LB); r(19, 10, 1, 1, AU); r(19, 13, 1, 1, AU);
+    }
 
     /* feet */
     if (air) { r(9, 23, 3, 1, D); r(12, 23, 3, 1, D); }
@@ -90,6 +106,7 @@
       r(4, 14 - u, 2, 5, D); r(18, 14 - u, 2, 5, D);
       if (era === 'pre') { r(18, 9 - u, 1, 5, WD); r(17, 6 - u, 3, 3, WK); }
       if (era === 'fut') { r(17, 11 - u, 4, 2, MT); r(21, 11 - u, 1, 2, CY); }
+      if (era === 'egypt') { r(18, 8 - u, 1, 7, AU); r(16, 9 - u, 5, 1, AU); r(17, 4 - u, 1, 4, AU); r(19, 4 - u, 1, 4, AU); r(18, 3 - u, 1, 1, AU); r(18, 7 - u, 1, 1, AD); }
     } else if (wild) {
       if (f % 2) { r(4, 14, 2, 4, D); r(18, 19, 2, 3, D); }
       else { r(4, 19, 2, 3, D); r(18, 14, 2, 4, D); }
@@ -102,20 +119,24 @@
       if (f === 0) {
         r(17, 13, 2, 6, D);
         if (era === 'pre') { r(17, 5, 2, 8, WD); r(16, 2, 4, 4, WK); }
+        else if (era === 'egypt') { r(17, 10, 2, 3, WK); r(18, 4, 2, 6, BZ); r(19, 2, 2, 3, BZ); r(21, 1, 2, 2, BZ); r(17, 5, 1, 4, AD); }
         else { r(16, 10, 4, 4, CY); r(17, 11, 2, 2, CYL); }
       } else {
         r(17, 18, 5, 2, D);
         if (era === 'pre') { r(21, 17, 7, 2, WD); r(27, 15, 3, 5, WK); }
+        else if (era === 'egypt') { r(21, 18, 2, 2, WK); r(23, 17, 5, 2, BZ); r(27, 15, 2, 3, BZ); r(28, 13, 2, 2, BZ); r(24, 19, 3, 1, AD); }
         else { r(22, 16, 4, 4, CY); r(23, 17, 2, 2, CYL); r(26, 17, 2, 1, CYL); r(26, 19, 2, 1, CYL); }
       }
     } else if (pose === 'dig') {
       var dd = f % 2;
       r(5, 19, 2, 3, D); r(17, 20 + dd, 4, 2, D);
       if (era === 'pre') { r(21, 21 + dd, 4, 1, BN); r(24, 19 + dd, 2, 4, BN); }
+      else if (era === 'egypt') { r(21, 21 + dd, 5, 1, CU); r(26, 21 + dd, 1, 1, '#f0b07a'); r(18, 16 - dd, 3, 3, WD); }
       else { r(21, 20 + dd, 4, 2, MT); r(25, 20 + dd, 2, 2, CY); r(27, 20 + dd * 2, 1, 1, CYL); }
     } else {
       r(5, 19, 2, 3, D); r(17, 19, 2, 3, D);
       if (era === 'pre') { r(18, 14, 1, 6, WD); r(17, 11, 3, 3, WK); }
+      if (era === 'egypt') { r(18, 9, 1, 12, WD); r(18, 6, 1, 3, CU); r(17, 8, 3, 1, CU); }
     }
   }
 
@@ -156,7 +177,7 @@
   /* Where a shot leaves the weapon, so projectiles start at the business end. */
   S.tip = function (x, y, face, deg, wid) {
     var a = deg * Math.PI / 180;
-    var L = wid === 'bomb' ? 6 : 11;
+    var L = wid === 'bomb' || wid === 'scarab' ? 6 : (wid === 'spear' ? 15 : 11);
     return { x: x + face * 6 + Math.cos(a) * face * L, y: y - 8 - Math.sin(a) * L };
   };
 
@@ -164,6 +185,27 @@
   S.weapon = function (ctx, x, y, face, deg, wid, era, t) {
     var a = deg * Math.PI / 180, dx = Math.cos(a) * face, dy = -Math.sin(a);
     var hx = x + face * 6, hy = y - 8, i;
+    if (wid === 'spear') {
+      for (i = -3; i < 13; i++) px(ctx, hx + dx * i, hy + dy * i, 1, 1, i < 0 ? '#e0d6c0' : WD);
+      px(ctx, hx + dx * 13, hy + dy * 13, 2, 2, CU); px(ctx, hx + dx * 15, hy + dy * 15, 1, 1, '#f0b07a');
+      return;
+    }
+    if (wid === 'scarab') {
+      var sx2 = hx + dx * 4, sy2 = hy + dy * 4;
+      px(ctx, sx2 - 2, sy2 - 2, 5, 4, '#1f4f6a'); px(ctx, sx2 - 1, sy2 - 2, 3, 3, '#2f8fae'); px(ctx, sx2, sy2 - 2, 1, 3, AU);
+      return;
+    }
+    if (era === 'egypt' && (wid === 'lob' || wid === 'bomb')) {
+      var ex = hx + dx * 4, ey = hy + dy * 4;
+      if (wid === 'lob') {
+        px(ctx, ex - 2, ey - 1, 5, 4, '#9a4a26'); px(ctx, ex - 1, ey - 1, 3, 1, '#c8703a');
+        px(ctx, ex - 1, ey - 3, 2, 2, ((t >> 3) % 2) ? OR : '#ffd27a'); px(ctx, ex, ey - 4, 1, 1, '#ffd27a');
+      } else {
+        px(ctx, ex - 2, ey - 2, 4, 5, '#e8e2d2'); px(ctx, ex - 2, ey, 4, 1, LB); px(ctx, ex - 1, ey - 3, 2, 1, '#9b8c7e');
+        if ((t >> 3) % 3 === 0) px(ctx, ex + 1, ey - 5, 1, 1, '#ffffff');
+      }
+      return;
+    }
     if (wid === 'lob') {
       if (era === 'pre') {
         for (i = 0; i < 7; i++) px(ctx, hx + dx * i, hy + dy * i, 2, 2, WD);
@@ -219,6 +261,30 @@
       else { ctx.fillRect(X - 1, Y - 3, 3, 7); ctx.fillStyle = '#e9fdff'; ctx.fillRect(X, Y - 1, 1, 3); }
       return;
     }
+    if (p.type === 'spear') {
+      var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1, ux = p.vx / sp, uy = p.vy / sp;
+      for (i = -8; i < 0; i++) { ctx.fillStyle = i < -6 ? '#e0d6c0' : WD; ctx.fillRect(Math.round(p.x + ux * i), Math.round(p.y + uy * i), 1, 1); }
+      ctx.fillStyle = CU; ctx.fillRect(X - 1, Y - 1, 2, 2);
+      ctx.fillStyle = '#f0b07a'; ctx.fillRect(Math.round(p.x + ux * 2), Math.round(p.y + uy * 2), 1, 1);
+      return;
+    }
+    if (p.type === 'scarab') {
+      var fc = p.face || (p.vx < 0 ? -1 : 1), leg = p.rest ? ((t >> 2) % 2) : 0;
+      ctx.fillStyle = '#123044'; ctx.fillRect(X - 3, Y - 3, 7, 5); ctx.fillRect(X + fc * 3, Y - 2, 2, 3);
+      ctx.fillStyle = '#2f8fae'; ctx.fillRect(X - 2, Y - 3, 5, 3);
+      ctx.fillStyle = '#7fe0f0'; ctx.fillRect(X - 1 - fc, Y - 3, 2, 1);
+      ctx.fillStyle = AU; ctx.fillRect(X, Y - 3, 1, 3); ctx.fillRect(X + fc * 4, Y - 2, 1, 1);
+      ctx.fillStyle = '#123044';
+      ctx.fillRect(X - 3 + leg, Y + 2, 1, 1); ctx.fillRect(X + 3 - leg, Y + 2, 1, 1); ctx.fillRect(X + leg, Y + 2, 1, 1);
+      return;
+    }
+    if (p.type === 'meteor' && p.era === 'egypt') {
+      for (i = 0; i < p.trail.length; i++) { ctx.fillStyle = i < p.trail.length / 2 ? '#c99d62' : '#f0d49a'; ctx.fillRect(Math.round(p.trail[i][0]) + (i % 2), Math.round(p.trail[i][1]), 2, 1); }
+      ctx.fillStyle = '#7a5434'; ctx.fillRect(X - 3, Y - 3, 7, 6);
+      ctx.fillStyle = '#d0a064'; ctx.fillRect(X - 2, Y - 2, 5, 4);
+      ctx.fillStyle = '#f0d49a'; ctx.fillRect(X - 2, Y - 2, 2, 1);
+      return;
+    }
     if (p.type === 'meteor' && p.era === 'fut') {
       for (i = 0; i < p.trail.length; i++) { ctx.fillStyle = i < p.trail.length / 2 ? '#2f8a3a' : '#9be36b'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 2, 2); }
       ctx.fillStyle = '#1f5a2a'; ctx.fillRect(X - 3, Y - 3, 7, 7);
@@ -231,6 +297,20 @@
       ctx.fillStyle = '#3d2a20'; ctx.fillRect(X - 3, Y - 3, 7, 7);
       ctx.fillStyle = '#7a4a30'; ctx.fillRect(X - 2, Y - 2, 5, 5);
       ctx.fillStyle = OR; ctx.fillRect(X - 2, Y + 1, 5, 1); ctx.fillRect(X + 1, Y - 2, 1, 2);
+      return;
+    }
+    if (era === 'egypt' && (p.type === 'lob' || p.type === 'bomb')) {
+      if (p.type === 'lob') {
+        for (i = 0; i < p.trail.length; i += 2) { ctx.fillStyle = i < p.trail.length / 2 ? '#c4572e' : '#ffd27a'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 1, 1); }
+        ctx.fillStyle = '#6a3018'; ctx.fillRect(X - 2, Y - 2, 5, 5);
+        ctx.fillStyle = '#b5653a'; ctx.fillRect(X - 1, Y - 1, 3, 3);
+        ctx.fillStyle = ((t >> 2) % 2) ? OR : '#ffd27a'; ctx.fillRect(X - 1, Y - 3, 2, 1);
+      } else {
+        ctx.fillStyle = '#7a6a5c'; ctx.fillRect(X - 2, Y - 3, 5, 6);
+        ctx.fillStyle = '#efe9da'; ctx.fillRect(X - 1, Y - 2, 3, 4);
+        ctx.fillStyle = LB; ctx.fillRect(X - 1, Y, 3, 1);
+        if ((t >> 3) % 2) { ctx.fillStyle = '#ffffff'; ctx.fillRect(X + ((t >> 4) % 3) - 1, Y - 5, 1, 1); }
+      }
       return;
     }
     if (p.type === 'lob') {
@@ -257,6 +337,14 @@
         ctx.fillStyle = GL; ctx.fillRect(X - 1, Y - 3, 3, 1);
       }
     }
+  };
+
+  /* Sand Sled: a wooden board with a curled front, under the Snag's feet */
+  S.sled = function (ctx, x, y, face) {
+    var X = Math.round(x), Y = Math.round(y);
+    px(ctx, X - 8, Y - 1, 16, 2, '#6e4622'); px(ctx, X - 7, Y - 1, 14, 1, '#b07a46');
+    px(ctx, X + face * 8, Y - 3, 1, 2, '#6e4622'); px(ctx, X + face * 9, Y - 4, 1, 1, '#6e4622');
+    px(ctx, X - 5, Y + 1, 2, 1, '#3b2616'); px(ctx, X + 3, Y + 1, 2, 1, '#3b2616');
   };
 
   /* Time portal: ring of light that zaps a Snag home. k goes 0 to 1. */
@@ -391,6 +479,42 @@
     quill: { pal: { W: '#f4efe4', w: '#c9c3b5', K: '#1d1d24', b: '#2f4f8a' }, rows: [
       '         WW ', '        WWw ', '       WWw  ', '      WWw   ', '     WWw    ', '    WWw     ',
       '   WWw      ', '  Ww        ', '  K         ', ' K          ', ' b          ', 'bb          '] },
+    papyrus: { pal: { o: '#7a5a2a', P: '#efd9a0', p: '#d9bd7a', k: '#3a2a1a', r: '#b04030' }, rows: [
+      '            ', ' oo      oo ', 'oppooooooppo', 'opPPPPPPPPpo', 'opPkkPkPrPpo', 'opPPPPPPPPpo',
+      'opPkPkkPkPpo', 'opPPPPPPPPpo', 'opPkkPrkPPpo', 'oppooooooppo', ' oo      oo ', '            '] },
+    breadmould: { pal: { o: '#4a2a18', C: '#c87a4a', c: '#9a5430', B: '#e8c070' }, rows: [
+      '            ', '   BBBBBB   ', '  oBBBBBBo  ', '  oCCCCCCo  ', '  oCcCCCCo  ', '   oCCCCo   ',
+      '   oCcCCo   ', '    oCCo    ', '    oCco    ', '    oCCo    ', '     oo     ', '            '] },
+    canopic: { pal: { o: '#4a3a28', A: '#e6d6b0', a: '#c4b088', K: '#2b2620', G: '#f0c446', k: '#3a2a1a' }, rows: [
+      '   o    o   ', '   oKooKo   ', '   oKKKKo   ', '   oKGKKo   ', '    oKKo    ', '  oooooooo  ',
+      '  oAAAAAAo  ', '  oAaAAAAo  ', '  oAkkkkAo  ', '  oAAAAAAo  ', '   oAAAAo   ', '    oooo    '] },
+    scarabcharm: { pal: { o: '#1f3a3a', T: '#3fb8a8', t: '#2a8478', G: '#f0c446' }, rows: [
+      '            ', '     oo     ', '    oTTo    ', '  oooooooo  ', ' oTTTGGTTTo ', ' oTtTGGTtTo ',
+      ' oTTTGGTTTo ', ' oTtTGGTtTo ', '  oTTGGTTo  ', '   oTGGTo   ', '    oooo    ', '            '] },
+    shabti: { pal: { o: '#1f3a3a', F: '#5fc8c0', f: '#3a9a90', k: '#1d2a2a' }, rows: [
+      '    oooo    ', '   okkkko   ', '  okFFFFko  ', '  okkFFkko  ', '   oFFFFo   ', '   ofkkfo   ',
+      '   oFFFFo   ', '   oFkFko   ', '   oFFFFo   ', '   oFkkFo   ', '   oFFFFo   ', '    oooo    '] },
+    kohl: { pal: { o: '#2a2a2a', S: '#d8d0c0', s: '#b0a690', k: '#1d1d24', W: '#8a6a3a' }, rows: [
+      '        WW  ', '       WW   ', '    ooWWo   ', '    okWko   ', '   oSSSSSo  ', '  oSSsSSSSo ',
+      '  oSsSSSSSo ', '  oSSSSSSSo ', '  osSSSSSso ', '   oSSSSSo  ', '    ooooo   ', '            '] },
+    senet: { pal: { o: '#3b2616', B: '#c8964a', b: '#e8c37a', P: '#2b2620', W: '#f4efe4' }, rows: [
+      '            ', '            ', 'oooooooooooo', 'obBbBbBbBbBo', 'oBPBbBbWbBbo', 'obBbBbPbBWBo',
+      'oBbBbBbBbBbo', 'oooooooooooo', 'oBBBBBBBBBBo', 'oBBBBooBBBBo', 'oooooooooooo', '            '] },
+    rosetta: { pal: { o: '#1d1d24', G: '#4a4e56', L: '#9aa3ad' }, rows: [
+      '   oooo     ', '  oGGGGoo   ', ' oGLLGLGGo  ', ' oGGGGGGGGo ', ' oGLGLLGLGo ', ' oGGGGGGGGo ',
+      ' oGLLGLLGGo ', ' oGGGGGGGGo ', ' oGLGLGLLGo ', ' oGGGGGGGGo ', ' oGLLGLGLGo ', ' oooooooooo '] },
+    shades: { pal: { k: '#1d1d24', L: '#2f4f8a', l: '#7fb0e0' }, rows: [
+      '            ', '            ', '            ', 'kkkkkkkkkkkk', 'kLlLLkkLlLLk', 'kLLlLkkLLlLk',
+      ' kLLk  kLLk ', '  kk    kk  ', '            ', '            ', '            ', '            '] },
+    lolly: { pal: { o: '#6e1a32', R: '#ff6b9a', r: '#d84a7a', Y: '#ffd27a', W: '#c9a26a' }, rows: [
+      '   oooooo   ', '  oRRRRRRo  ', '  oRrRRRRo  ', '  oYYYYYYo  ', '  oYYYYYYo  ', '  oRRRRrRo  ',
+      '  oRRRRRRo  ', '  oRRRRRRo  ', '   oooooo   ', '     WW     ', '     WW     ', '     WW     '] },
+    trainer: { pal: { o: '#1d1d24', W: '#f4efe4', B: '#2f6fd8', L: '#ff6b9a', w: '#c9c3b5' }, rows: [
+      '            ', '            ', '            ', '   ooo      ', '  oWWWo     ', '  oWBWWoo   ',
+      '  oWWBWWWoo ', ' oWWWWBWWWWo', ' oWWWWWWWWWo', ' oLwwwwwwwwo', '  oooooooooo', '            '] },
+    selfie: { pal: { k: '#1d1d24', M: '#9aa3ad', S: '#5fe0f0' }, rows: [
+      ' kkkk       ', ' kSSk       ', ' kSSk       ', ' kkkk       ', '    M       ', '     M      ',
+      '      M     ', '       M    ', '        M   ', '         kk ', '         kk ', '            '] },
     pad: { pal: { o: '#2b3038', G: '#a7adb5', d: '#3b4048', c: '#37c8dc', r: '#ef7724' }, rows: [
       '            ', '            ', '  oooooooo  ', ' oGGGGGGGGo ', 'oGGdGGGGcGGo', 'oGdddGGcGrGo',
       'oGGdGGGGcGGo', 'oGGGGooGGGGo', 'oGGGo  oGGGo', ' ooo    ooo ', '            ', '            '] }
