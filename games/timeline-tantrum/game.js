@@ -76,12 +76,15 @@
     evarrow: { kind: 'proj', wind: true, impact: true, R: 8, dmg: 9 },
     /* Sudden Death */
     meteor:  { kind: 'proj', wind: false, impact: true, R: 18, dmg: 22 },
+    hail:    { kind: 'proj', wind: true, windK: 0.5, impact: true, R: 8, dmg: 7 },
     /* map events */
     dronebomb: { kind: 'proj', wind: false, impact: true, R: 16, dmg: 18 }
   };
   var SD_TURN = 24;
   /* the bigger battlefields need a longer throw: full power reaches about 1.4 times as far as it used to */
   var REACH = 1.2;
+  /* every blast is a little wider than it was, so near misses still land */
+  var BLAST = 1.15;
   var WORDER = ['lob', 'bomb', 'shove', 'dig'];
   var MAP = MAPS.jungle, LOOK = 'normal';
   var ARTS = window.B5ARTEFACTS, JAY = window.B5JAY, TL = window.B5TIMELINE, RIPPLE = window.B5RIPPLE;
@@ -1426,6 +1429,8 @@
     sfx('hit', Math.min(1.4, dm / 35));
     if (before > 0 && c.hp <= 0 && game.state !== 'demo') koMoment(c);
     if (src && src.by && src.by.team !== c.team) {
+      game.turnHit = (game.turnHit || 0) + dm;
+      if (game.active && src.by.team === game.active.team) recHit(dm, src.by);
       if (dm > game.stats.best) { game.stats.best = dm; game.stats.bestBy = src.by.name; }
       src.by.dealt = (src.by.dealt || 0) + dm; if (dm > (src.by.best || 0)) src.by.best = dm;
     }
@@ -1439,15 +1444,52 @@
   /* the satisfying bit: a knock out slows time for a moment and gets its own word */
   function koMoment(c) {
     if (!reduceMotion) game.slow = 32;
-    word(c.x, c.y - 70, 'K.O.!', '#ff8a5c', 3); game.koFlag = true;
+    game.turnKO = (game.turnKO || 0) + 1;
+    if (game.active && c.team !== game.active.team) recHit(30, game.active, 'K.O.!');
+    var dko = game.turnKO >= 2 && game.active && c.team !== game.active.team;
+    word(c.x, c.y - 70, dko ? (game.turnKO >= 3 ? 'TRIPLE K.O.!' : 'DOUBLE K.O.!') : 'K.O.!', dko ? '#ff78be' : '#ff8a5c', 3); game.koFlag = true;
+    if (dko) { say('trick', true); later(24, function () { if (game.active) cheerSquad(game.active.team); }); }
     for (var i = 0; i < 12; i++) { var a = i / 12 * 6.283; addPart({ k: 'spark', x: c.x, y: c.y - 12, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8 - 0.6, life: 34 }); }
     sfx('ko');
+  }
+  /* ---------- misses are part of the fun: a word, birds or a fish, a kind heckle, and sometimes time junk ---------- */
+  var JUNK = [['duck', 'Rubber duck?!'], ['welly', 'A welly?!'], ['cone', 'Traffic cone?!'], ['teapot', 'A teapot?!'], ['gnome', 'Garden gnome?!'], ['sock', 'One sock?!'], ['toaster', 'A toaster?!']];
+  function queueMiss(x, y, water) {
+    if (game.state === 'demo' || game.missQ || !game.fired || (game.opts && game.opts.training)) return;
+    game.missQ = true;
+    var who = game.active;
+    later(50, function () { if (!game.turnHit && game.active === who && game.state !== 'over') missJoke(x, y, water); });
+  }
+  function missJoke(x, y, water) {
+    var i, w = water ? ['Plop!', 'Sploosh!', 'Glug!'] : ['Whiff!', 'Oops!', 'Nearly!', 'Boing?', 'Nice crater!'];
+    word(x, y - 24, w[Math.floor(Math.random() * w.length)], '#c3bce8', 2);
+    if (water) {
+      /* a fish leaps out to see what all the fuss was about */
+      var fd = Math.random() < 0.5 ? -1 : 1;
+      addPart({ k: 'fish', x: x + fd * 8, y: WATER, vx: -fd * rand(0.6, 1), vy: -rand(3, 3.8), life: 120, max: 120 });
+      say('misswater', Math.random() < 0.6);
+      return;
+    }
+    for (i = 0; i < 3 + Math.floor(Math.random() * 3); i++) addPart({ k: 'flyb', x: x + rand(-14, 14), y: y - rand(4, 14), vx: rand(-1.4, 1.4), vy: -rand(0.9, 1.6), life: 150, max: 150, ph: i * 3 });
+    say('miss', Math.random() < 0.6);
+    if (Math.random() < 0.35) {
+      var j = JUNK[Math.floor(Math.random() * JUNK.length)];
+      addPart({ k: 'junk', id: j[0], x: x, y: y - 2, vx: rand(-1, 1), vy: -rand(2.8, 3.6), life: 480, max: 480, rot: 0, spin: rand(-0.25, 0.25) });
+      later(36, function () { word(x, y - 44, j[1], '#ffd27a', 1); });
+      sfx('pop');
+    }
   }
   function word(x, y, s, col, sc) { addPart({ k: 'txt', x: x, y: y, vy: -0.25, life: 80, max: 80, s: s, sc: sc || 2, col: col || '#ffd27a', w: 1 }); }
   function drown(c) {
     var wasIn = c.hp > 0;
+    if (game.active && c.team !== game.active.team) game.turnHit = (game.turnHit || 0) + 1;
     c.alive = false; c.hp = 0;
-    if (wasIn && game.state !== 'demo') { if (!reduceMotion) game.slow = 28; word(c.x, WATER - 30, 'SPLASH!', '#9fe3f5', 2); }
+    if (wasIn && game.state !== 'demo') {
+      if (!reduceMotion) game.slow = 28;
+      var pushed = game.fired && game.active && c.team !== game.active.team;
+      word(c.x, WATER - 30, pushed ? 'SPLASHDOWN!' : 'SPLASH!', '#9fe3f5', pushed ? 3 : 2);
+      if (pushed) { later(24, function () { if (game.active) cheerSquad(game.active.team); }); recHit(40, game.active, 'SPLASHDOWN!'); }
+    }
     for (var i = 0; i < 26; i++) addPart({ k: 'drop', x: c.x + rand(-4, 4), y: WATER, vx: rand(-1.2, 1.2), vy: rand(-3.2, -1.2), life: 50 });
     game.portals.push({ x: c.x, y: WATER - 12, t: 0, c: c });
     sfx('splash'); sfx('portal'); voice(c.team.era, 'panic');
@@ -1501,7 +1543,7 @@
         if (d < 0) {
           p.vx -= 2 * d * nrm.x; p.vy -= 2 * d * nrm.y;
           p.vx *= w.bounce; p.vy *= w.bounce;
-          if (!sim && d < -1) sfx('bounce');
+          if (!sim && d < -1) { sfx('bounce'); p.bc = (p.bc || 0) + 1; }
           if (w.bounces) { p.bn = (p.bn || 0) + 1; if (p.bn > w.bounces) return 'explode'; }
         }
         var k = 0;
@@ -1529,6 +1571,9 @@
   function addPart(p) { if (game.parts.length < 700) game.parts.push(p); }
 
   function explode(x, y, R, dmg, src) {
+    R = R * BLAST;
+    if (src && src.by && src.by === game.active) queueMiss(x, y, false);
+    scareVisitor(x, y, R);
     var deb = [], i;
     for (i = 0; i < 46; i++) {
       var a = Math.random() * 6.283, rr = Math.random() * R;
@@ -1606,12 +1651,31 @@
     if (src && src.type) weaponSound(src.type, src.era, 'impact', dmg / 50);
     if (dmg >= 30) duck(0.35, 0.9);
     if (game.state !== 'demo') { game.look = { x: x, y: y - 6 }; game.lookT = Math.max(game.lookT, 26 + Math.min(20, Math.round(dmg / 3))); }
-    if (game.koFlag) { /* the knock out gets the spotlight */ }
+    /* trick shots get shouted about */
+    var trick = null, mine = src && src.by && src.by === game.active && game.state !== 'demo';
+    if (mine && hits >= 1) {
+      var wk = WEAP[src.type] || {}, far = game.fireX !== undefined && Math.sqrt((x - game.fireX) * (x - game.fireX) + (y - game.fireY) * (y - game.fireY)) > 480;
+      if (hits >= 3) trick = ['TRIPLE!', '#ff78be'];
+      else if (wk.kind === 'proj' && far) trick = ['LONG SHOT!', '#5fe0f0'];
+      else if ((src.bn || 0) >= 1 || (src.sk || 0) >= 1 || (src.bc || 0) >= 3) trick = ['TRICK SHOT!', '#9be36b'];
+    }
+    if (trick) {
+      word(x, y - 30, trick[0], trick[1], 3);
+      later(20, function () { cheerSquad(src.by.team); });
+      say('trick', true);
+    }
+    if (game.koFlag || trick) { /* the knock out or the trick shot gets the spotlight */ }
     else if (hits >= 2) word(x, y - 2, 'DOUBLE!', '#b39cff', 2);
     else if (maxDm >= 45) word(x, y - 2, 'KABOOM!', '#ffd27a', 2);
     else if (maxDm >= 30) word(x, y - 2, 'WHAM!', '#ffd27a', 2);
-    if (hits >= 2) say('double');
+    if (trick) { /* already said */ }
+    else if (hits >= 2) say('double');
     else if (maxDm >= 40) say('big');
+  }
+  function cheerSquad(team) {
+    if (!team) return;
+    team.members.forEach(function (m) { if (m.alive && m.st === 'ground') { m.cheerT = 50; } });
+    voice(team.era, 'cheer'); sfx('find');
   }
 
   /* little dust puffs, coloured like the ground they come off */
@@ -1885,7 +1949,7 @@
     jayHide = 260; jayTalk = 50;
     jayMood = { big: 'wow', double: 'wow', glitch: 'wow', strike: 'wow', sudden: 'wow', reactor: 'wow', sandstorm: 'wow', sun: 'wow', scarab: 'wow',
       birds: 'grin', find: 'grin', crate: 'grin', win: 'grin', swing: 'grin', jet: 'grin', sled: 'grin', spear: 'grin', dune: 'grin', bark: 'grin',
-      bull: 'wow', canal: 'wow', river: 'wow', cart: 'grin', tablet: 'grin', steps: 'grin',
+      trick: 'wow', miss: 'grin', bull: 'wow', canal: 'wow', river: 'wow', cart: 'grin', tablet: 'grin', steps: 'grin',
       lance: 'wow', cannon: 'wow', broadside: 'wow', treb: 'wow', arrows: 'wow', tide: 'wow', banner: 'grin', launch: 'grin', volley: 'grin', keg: 'grin' }[kind] || null;
     voice('jay', 'turn');
   }
@@ -1900,6 +1964,47 @@
   }
 
   /* ---------------- birds (Jay likes birds) ---------------- */
+  /* ---------- time glitches: now and then a visitor from another time wanders across the battlefield ---------- */
+  var VISITORS = [['mammoth', 'pre', 0.7], ['robot', 'fut', 0.9], ['knight', 'med', 1.3], ['camel', 'egypt', 0.8], ['parrot', 'pirate', 1.5]];
+  function maybeVisitor() {
+    if (game.visitor || game.sudden || !game.opts || game.opts.ev === 'off' || game.opts.training || (TEST === 'aivai' && Q.get('ev') !== 'on')) return;
+    if ((game.visits || 0) >= 2 || game.turnNo < 4 || Math.random() > 0.14) return;
+    var pool = VISITORS.filter(function (v) { return v[1] !== MAP.era; }), v = pool[Math.floor(Math.random() * pool.length)];
+    var dir = Math.random() < 0.5 ? 1 : -1, x = dir > 0 ? 50 : WW - 50, sy = surfaceY(x);
+    var y = sy > 0 && sy < WATER ? sy : WATER - 2;
+    game.visitor = { id: v[0], sp: v[2], x: x, y: v[0] === 'parrot' ? y - 70 : y, dir: dir, t: 0, scared: 0 };
+    game.visits = (game.visits || 0) + 1;
+    game.portals.push({ x: x, y: (v[0] === 'parrot' ? y - 70 : y) - 20, t: 0, inn: true });
+    sfx('portal');
+    if (game.state !== 'demo') { game.look = { x: clamp(x, VW / 2, WW - VW / 2), y: game.visitor.y - 20 }; game.lookT = 90; }
+    later(34, function () { if (game.visitor) word(game.visitor.x, game.visitor.y - 50, 'Time glitch!', '#b39cff', 2); say('v_' + v[0], true); });
+  }
+  function updVisitor() {
+    var v = game.visitor;
+    if (!v) return;
+    v.t++;
+    if (v.t < 40) return;
+    var sp = v.sp * (v.scared > 0 ? 3 : 1) * SPEED;
+    if (v.scared > 0) v.scared--;
+    v.x += v.dir * sp;
+    var sy = surfaceY(Math.round(clamp(v.x, 0, WW - 1))), gy = sy > 0 && sy < WATER ? sy : WATER - 2;
+    if (v.id === 'parrot') { var top = gy - 70; v.y += (Math.min(top, v.y + 0.4) - v.y) * 0.08 + Math.sin(v.t * 0.08) * 0.3; }
+    else v.y += (gy - v.y) * 0.35;
+    if (v.id !== 'parrot' && v.t % 24 === 0 && sy > 0 && sy < WATER) dust(v.x - v.dir * 8, v.y, 2, 3);
+    if (v.id !== 'parrot' && v.t % 30 === 0 && !(sy > 0 && sy < WATER)) splash(v.x);
+    if ((v.dir > 0 && v.x > WW - 40) || (v.dir < 0 && v.x < 40)) {
+      game.portals.push({ x: v.x, y: v.y - 20, t: 0, inn: true }); sfx('portal');
+      game.visitor = null;
+    }
+  }
+  function scareVisitor(x, y, R) {
+    var v = game.visitor;
+    if (!v || v.t < 40) return;
+    if (Math.abs(v.x - x) < R + 26 && Math.abs(v.y - 12 - y) < R + 30) {
+      if (v.scared <= 0) word(v.x, v.y - 44, 'Eep!', '#b39cff', 2);
+      v.scared = 150; v.dir = x < v.x ? 1 : -1;
+    }
+  }
   function updBirds() {
     if (game.t % 1500 === 600) {
       var dir = Math.random() < 0.5 ? 1 : -1, n = 3 + Math.floor(Math.random() * 3), y = 18 + Math.random() * 40;
@@ -1942,18 +2047,18 @@
     if (game.opts && game.opts.sd !== 'off' && !game.sudden && game.turnNo >= SD_TURN) {
       game.sudden = true;
       var sty = MAP.style;
-      later(156, function () {
-        if (sty === 'city') banner('Meltdown!', null, '#ef7724', 'meteor');
-        else if (sty === 'desert') banner('Sandstorm!', null, '#ef7724', 'meteor');
-        else banner('Meteor Shower!', null, '#ef7724', 'meteor');
-      });
-      say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
+      /* every place has its own big finish */
+      var fin = FINALE[sty] || FINALE.hills;
+      game.flood = null;
+      later(156, function () { banner(fin[0], null, fin[1], 'meteor'); });
+      say(fin[2], true);
     }
     if (game.gale > 0) { game.gale--; game.wind = (Math.random() < 0.5 ? -1 : 1) * (7 + Math.floor(Math.random() * 4)); }
     if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner(MAP.style === 'harbour' ? 'High tide!' : (MAP.style === 'uruk' ? 'The river floods!' : 'The Nile floods!'), null, MAP.style === 'harbour' ? '#2a8ab0' : '#3a8a9a', 'pin'); }
     else if (game.flood && game.flood.phase === 'rise' && game.turnNo >= game.flood.until) game.flood.phase = 'fall';
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
-    maybeDeliver();
+    if (game.sudden && MAP.style === 'harbour') game.wind = (Math.random() < 0.5 ? -1 : 1) * (8 + Math.floor(Math.random() * 3));
+    maybeDeliver(); maybeVisitor();
     if (!(game.opts && game.opts.training)) banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
     sfx('turn', { pre: 1, egypt: 2, fut: 3, med: 4, pirate: 5, sumer: 6 }[team.era] || 0);
     voice(team.era, 'turn');
@@ -1982,9 +2087,12 @@
     game.snags.forEach(function (c) { c.swing = null; c.jet = false; c.sled = false; c.sv = 0; });
     /* a charge that is still running carries on into the settle, and is waited for there */
     if (game.sudden) {
-      WATER = Math.max(WATER0 - 210, WATER - 8); miniDirty = true;
-      var n = 3 + Math.floor(Math.random() * 2);
-      for (var i = 0; i < n; i++) game.warn.push({ x: 60 + Math.random() * (WW - 120), t: -i * 12 });
+      var fst = MAP.style, rise = fst === 'uruk' ? 22 : (fst === 'harbour' ? 14 : 8), cap = fst === 'uruk' ? 290 : 210, i;
+      WATER = Math.max(WATER0 - cap, WATER - rise); miniDirty = true;
+      if (fst === 'uruk' || fst === 'harbour') { /* the water is the finale */ }
+      else if (fst === 'wall') { for (i = 0; i < 12; i++) game.warn.push({ x: 40 + Math.random() * (WW - 80), t: -i * 6, kind: 'hail' }); }
+      else if (fst === 'castle') { for (i = 0; i < 2; i++) game.warn.push({ x: 80 + Math.random() * (WW - 160), t: -i * 30, kind: 'siege' }); }
+      else { var n = 3 + Math.floor(Math.random() * 2); for (i = 0; i < n; i++) game.warn.push({ x: 60 + Math.random() * (WW - 120), t: -i * 12, kind: fst === 'hills' ? 'lava' : null }); }
     }
   }
 
@@ -2233,6 +2341,7 @@
       return;
     }
     game.fired = true; game.charging = false; game.stats.shots++;
+    game.turnHit = 0; game.missQ = false; game.turnKO = 0; game.fireX = c.x; game.fireY = c.y - 10;
     if (c.team.ctrl === 'human') learnDone('fire');
     c.team.lastWeapon = wid;
     useAmmo(c.team, wid);
@@ -2936,10 +3045,29 @@
   }
 
   /* ---------- Sudden Death: telegraphed meteors ---------- */
+  /* the big finishes: banner, colour, what Jay says */
+  var FINALE = {
+    hills: ['Volcano!', '#ef7724', 'volcano'], uruk: ['The Great Flood!', '#3f8a9a', 'greatflood'], desert: ['Sandstorm!', '#ef7724', 'sandstorm'],
+    wall: ['Hailstorm!', '#7fd0f0', 'hail'], castle: ['Siege!', '#ef7724', 'siege'], harbour: ['Hurricane!', '#2a8ab0', 'hurricane'], city: ['Meltdown!', '#9be36b', 'reactor']
+  };
   function updWarn() {
     for (var i = game.warn.length - 1; i >= 0; i--) {
       var w = game.warn[i];
-      if (++w.t >= 80) {
+      ++w.t;
+      if (w.kind === 'hail' && w.t >= 50) {
+        game.projs.push({ type: 'hail', era: 'rome', x: w.x + rand(-3, 3) - game.wind * 3, y: -30, vx: game.wind * 0.05, vy: 3.4, age: 0, by: null, trail: [], rest: false });
+        game.warn.splice(i, 1);
+      } else if (w.kind === 'siege' && w.t >= 40) {
+        var tsx = w.x > WW / 2 ? -60 : WW + 60, sty2 = surfaceY(Math.round(w.x));
+        farShot('trebstone', 'med', null, tsx, 90, w.x, sty2 < 0 ? WATER : sty2, Math.round(80 + Math.abs(w.x - tsx) * 0.06));
+        sfx('clunk'); sfx('whoosh');
+        game.warn.splice(i, 1);
+      } else if (w.kind === 'lava' && w.t >= 80) {
+        /* lava bombs come in at an angle, flung from a volcano off the edge of the map */
+        var dir = w.dir || (w.dir = Math.random() < 0.5 ? -1 : 1), lvx = dir * 1.8;
+        game.projs.push({ type: 'meteor', era: 'pre', x: w.x - lvx * 64, y: -40, vx: lvx, vy: 2.5, age: 0, by: null, trail: [], rest: false });
+        game.warn.splice(i, 1);
+      } else if (!w.kind && w.t >= 80) {
         game.projs.push({ type: 'meteor', era: MAP.era || 'pre', x: w.x + rand(-4, 4), y: -40, vx: rand(-0.5, 0.5), vy: 2.5, age: 0, by: null, trail: [], rest: false });
         game.warn.splice(i, 1);
       }
@@ -2995,6 +3123,7 @@
   }
 
   function scoreAt(x, y, R, dmg, team, fw, me) {
+    R = R * BLAST;
     var s = 0, reach = R + 10, nearest = 1e9, A = AIP[team.era] || AIP.fut;
     game.snags.forEach(function (o) {
       if (!o.alive) return;
@@ -3704,7 +3833,7 @@
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
     game.arts = []; game.crates = []; game.courier = null; game.barker = null; game.finds = [];
-    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = WATER0;
+    game.strikes = []; game.warn = []; game.sudden = false; game.visitor = null; game.visits = 0; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = WATER0;
   }
 
   function surfaceAt(x) {
@@ -3746,7 +3875,7 @@
   }
 
   function newMatch(o) {
-    resetWorld();
+    resetWorld(); recReset();
     game.opts = o; game.turnLen = o.turn;
     o.map = o.map || 'jungle';
     setMap(o.map, o.look);
@@ -3840,10 +3969,10 @@
       if (ev) {
         game.projs.splice(i, 1);
         if (ev === 'explode') { explode(p.x, p.y, WEAP[p.type].R, WEAP[p.type].dmg, p); if (WEAP[p.type].direct && p.hitSnag) spearHit(p); }
-        else if (ev === 'water') { splash(p.x); say('miss'); }
+        else if (ev === 'water') { splash(p.x); if (p.by === game.active) queueMiss(p.x, WATER, true); }
       } else if (WEAP[p.type].crawl) crawlScarab(p);
     }
-    updArts(); updCrates(); updBarrels(); updFlows(); updFlags(); updCarts(); updCourier(); updBarker(); updBirds(); updStrikes(); updWarn(); jayTick();
+    updArts(); updCrates(); updBarrels(); updFlows(); updFlags(); updCarts(); updCourier(); updBarker(); updBirds(); updVisitor(); updStrikes(); updWarn(); jayTick();
     updParts();
     for (i = game.portals.length - 1; i >= 0; i--) {
       var pt = game.portals[i];
@@ -3890,6 +4019,18 @@
       else if (p.k === 'dust' || p.k === 'puff') { p.x += (p.vx || 0) + game.wind * 0.01; p.y += (p.vy || -0.15); p.r += 0.04; }
       else if (p.k === 'smoke') { p.x += p.vx + game.wind * 0.03; p.y += p.vy; p.vy *= 0.995; p.r += 0.06; }
       else if (p.k === 'txt') { p.y += p.vy; p.x += p.vx || 0; p.vy *= 0.97; }
+      else if (p.k === 'flyb') { p.x += p.vx; p.y += p.vy; p.vy = Math.max(-2.2, p.vy - 0.01); p.vx *= 1.004; }
+      else if (p.k === 'fish') { p.vy += G * 1.2; p.x += p.vx; p.y += p.vy; if (p.y > WATER + 2 && p.vy > 0) { splash(p.x); p.life = 0; } }
+      else if (p.k === 'junk' && !p.stuck) {
+        p.vy += G * 1.4; p.x += p.vx; p.y += p.vy; p.rot += p.spin;
+        if (p.y > WATER + 4) p.life = 0;
+        else if (solid(p.x, p.y)) {
+          p.y -= p.vy;
+          if (p.vy > 1.2) { p.vy *= -0.4; p.vx *= 0.6; p.spin *= -0.6; dust(p.x, p.y, 2, 2); sfx('bonk'); }
+          else { p.stuck = true; p.rot = Math.random() < 0.3 ? 1.5708 : 0; }
+        }
+      }
+      if (p.k === 'junk' && p.stuck && !solid(p.x, p.y + 1) && p.y < WATER) { p.stuck = false; p.vy = 0; }
       if (p.life <= 0) game.parts.splice(i, 1);
     }
   }
@@ -4685,7 +4826,7 @@
     var k2 = WEAP[game.weapon].kind;
     if (act && game.state === 'play' && (k2 === 'proj' || k2 === 'beam' || k2 === 'vine' || k2 === 'blunder' || k2 === 'launch')) {
       o.look = c.aim > 30 ? -1 : (c.aim < -20 ? 1 : 0);
-      return [game.charging ? 'charge' : 'aim', 0, 0, o];
+      return ['saim', game.charging ? 1 : 0, 0, o];
     }
     if (!act) { var ph = (t + c.blinkAt * 13) % 1500; if (ph < 80) return ['yawn', ph < 60 ? 0 : 1, 0, o]; }
     return ['idle', ((t + c.blinkAt) >> 5) % 4, 0, o];
@@ -4696,21 +4837,21 @@
     var bl = ps[0] !== 'cheer' && (t + c.blinkAt) % 200 < 7;
     ps[3].skin = c.team.skin;
     if (c.sled) { SP.draw(ctx, c.x, c.y - 2, c.face, era, ps[0], ps[1], bl, 0, 1, ps[3]); SP.sled(ctx, c.x, c.y, c.face); return; }
-    var jx = ps[0] === 'charge' && game.power > 55 && !reduceMotion && (game.power > 85 || t % 4 < 2) ? ((t >> 1) % 2 ? 1 : -1) : 0;
+    var jx = (ps[0] === 'charge' || (ps[0] === 'saim' && ps[1] === 1)) && game.power > 55 && !reduceMotion && (game.power > 85 || t % 4 < 2) ? ((t >> 1) % 2 ? 1 : -1) : 0;
     /* wind up: lean back as power builds; follow through: a kick back after the throw; a jolt when hit */
-    if (ps[0] === 'charge') jx -= c.face * Math.round(game.power / 50);
+    if (ps[0] === 'charge' || (ps[0] === 'saim' && ps[1] === 1)) jx -= c.face * Math.round(game.power / 50);
     if (c.fireT > 0) jx -= c.face * (c.fireT > 6 ? 2 : 1);
     if (c.hurtT > 37 && !reduceMotion) jx += (t % 4 < 2 ? 1 : -1);
     var q = reduceMotion ? 0 : clamp(c.sq || 0, -0.35, 0.35), X = Math.round(c.x + jx), Y = Math.round(c.y);
     if (Math.abs(q) > 0.02) {
       ctx.save(); ctx.translate(X, Y); ctx.scale(1 - q * 0.6, 1 + q);
       SP.draw(ctx, 0, 0, c.face, era, ps[0], ps[1], bl, ps[2], 1, ps[3]);
-      if (ps[0] === 'aim' || ps[0] === 'charge') SP.weapon(ctx, 0, 0, c.face, c.aim, game.weapon, era, t);
+      if (ps[0] === 'aim' || ps[0] === 'charge' || ps[0] === 'saim') SP.weapon(ctx, 0, 0, c.face, c.aim, game.weapon, era, t);
       ctx.restore();
       return;
     }
     SP.draw(ctx, X, Y, c.face, era, ps[0], ps[1], bl, ps[2], 1, ps[3]);
-    if (ps[0] === 'aim' || ps[0] === 'charge') SP.weapon(ctx, X, Y, c.face, c.aim, game.weapon, era, t);
+    if (ps[0] === 'aim' || ps[0] === 'charge' || ps[0] === 'saim') SP.weapon(ctx, X, Y, c.face, c.aim, game.weapon, era, t);
     if (c.lance) SP.weapon(ctx, X, Y, c.face, -4, 'lance', era, t);
   }
   function kick(c, v) { c.sqv = (c.sqv || 0) + v; }
@@ -4813,6 +4954,7 @@
       var X = Math.round(w.x), sy = surfaceY(X);
       if (sy < 0) sy = WATER;
       var bob = Math.round(Math.sin((w.t + X) * 0.15) * 2);
+      if (w.kind === 'hail') { ctx.fillStyle = 'rgba(191,233,248,0.8)'; ctx.fillRect(X - 1, sy - 6 + bob, 3, 3); ctx.fillStyle = '#ffffff'; ctx.fillRect(X - 1, sy - 6 + bob, 1, 1); return; }
       ctx.fillStyle = '#1f2a30'; ctx.fillRect(X - 4, sy - 16 + bob, 9, 7); ctx.fillRect(X - 2, sy - 9 + bob, 5, 2);
       ctx.fillStyle = '#ef7724'; ctx.fillRect(X - 3, sy - 15 + bob, 7, 5); ctx.fillRect(X - 1, sy - 10 + bob, 3, 1);
       ctx.fillStyle = '#fff3c8'; ctx.fillRect(X, sy - 14 + bob, 1, 2);
@@ -4885,6 +5027,9 @@
       if (p.delay > 0) continue;
       if (p.k === 'deb') { var s = p.big === 3 ? 3 : (p.big ? 2 : 1); if (s === 3) { ctx.fillStyle = '#1f2a30'; ctx.fillRect(Math.round(p.x), Math.round(p.y) + 1, 3, 3); } ctx.fillStyle = p.col; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
       else if (p.k === 'drop') { ctx.fillStyle = '#cfeefa'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
+      else if (p.k === 'flyb') { if (p.life < 30) ctx.globalAlpha = p.life / 30; SP.bird(ctx, p.x, p.y, ((p.life + p.ph) >> 2) % 2); ctx.globalAlpha = 1; }
+      else if (p.k === 'fish') SP.fish(ctx, p.x, p.y, p.vx, p.vy);
+      else if (p.k === 'junk') { if (p.life < 40) ctx.globalAlpha = p.life / 40; SP.junk(ctx, p.id, p.x, p.y, p.rot); ctx.globalAlpha = 1; }
       else if (p.k === 'spark') { ctx.fillStyle = (p.life >> 2) % 2 ? '#fff3c8' : '#ffd27a'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
       else if (p.k === 'beam') { pixLine(p.x, p.y + 1, p.x2, p.y2 + 1, '#37c8dc'); if (p.life > 6) pixLine(p.x, p.y, p.x2, p.y2, '#e9fdff'); }
       else if (p.k === 'vinemiss') pixLine(p.x, p.y, p.x2, p.y2, '#3f7a2e', 2);
@@ -5048,6 +5193,7 @@
       var sw = 7 - hgt * 0.06;
       ctx.beginPath(); ctx.ellipse(sn.x, gy3 + 0.5, Math.max(2, sw), 1.6, 0, 0, 6.283); ctx.fill();
     }
+    if (game.visitor && game.visitor.t >= 30) SP.visitor(ctx, game.visitor.id, game.visitor.x, game.visitor.y, game.visitor.dir, t, game.visitor.scared > 0);
     for (i = 0; i < game.snags.length; i++) if (game.snags[i].alive && !game.snags[i].arrive) drawSnag(game.snags[i], t);
     drawShields(t);
     drawDogs(t);
@@ -5087,10 +5233,23 @@
     if (game.state !== 'demo') drawLearn(t);
     ctx.restore();
     if (game.sudden && MAP.style === 'desert') drawSandstorm(t);
+    if (game.sudden && (MAP.style === 'uruk' || MAP.style === 'harbour')) drawRain(t, MAP.style === 'harbour' ? 2.2 : 0.8);
+    if (game.sudden && MAP.style === 'hills') { ctx.fillStyle = 'rgba(255,110,40,0.08)'; ctx.fillRect(0, 0, VW, VH); }
     drawGale(t);
     if (t % 3 === 0 && game.state !== 'demo') drawMini();
   }
 
+  /* steady rain, slanted by the wind; no flashes */
+  function drawRain(t, slant) {
+    ctx.fillStyle = 'rgba(40,60,90,0.12)'; ctx.fillRect(0, 0, VW, VH);
+    var dir = game.wind < 0 ? -1 : 1;
+    ctx.fillStyle = 'rgba(200,225,245,0.5)';
+    for (var k = 0; k < 140; k++) {
+      var sp = 5 + hash(k, 2) * 3, y = ((hash(k, 3) * (VH + 40) + t * sp) % (VH + 40)) - 20;
+      var x = ((hash(k, 1) * (VW + 60) + dir * slant * (y + t * sp * 0.2)) % (VW + 60) + VW + 60) % (VW + 60) - 30;
+      for (var q = 0; q < 5; q++) ctx.fillRect(Math.round(x - dir * slant * q * 0.6), Math.round(y - q), 1, 1);
+    }
+  }
   function drawSandstorm(t) {
     ctx.fillStyle = 'rgba(214,170,100,0.13)'; ctx.fillRect(0, 0, VW, VH);
     var dir = game.wind < 0 ? -1 : 1;
@@ -5308,7 +5467,7 @@
   }
 
   /* ---------------- screens ---------------- */
-  var SCREENS = ['title', 'main', 'squad', 'mapsel', 'ready', 'options', 'help', 'pause', 'victory', 'results', 'tour', 'museum', 'find', 'label', 'postcard'];
+  var SCREENS = ['title', 'main', 'squad', 'mapsel', 'ready', 'options', 'help', 'pause', 'replay', 'victory', 'results', 'tour', 'museum', 'find', 'label', 'postcard'];
   var scr = null, CTL = {}, wiping = false, retOf = {};
   /* the time portal wipe: a portal swells to fill the screen, the screen swaps behind it, then it shrinks away */
   function wipe(fn) {
@@ -5330,7 +5489,7 @@
       inp.left = inp.right = inp.up = inp.down = false;
       if (game.charging) { game.charging = false; game.power = 0; }
       panning = null; leftDown = false;
-      $('hud').hidden = !matchOn || ['victory', 'results', 'tour', 'postcard', 'label'].indexOf(scr) >= 0;
+      $('hud').hidden = !matchOn || ['replay', 'victory', 'results', 'tour', 'postcard', 'label'].indexOf(scr) >= 0;
       var c = scr && CTL[scr];
       if (c && c.enter) c.enter();
       if (c && c.items) setSel(c.sel || 0, true);
@@ -5437,6 +5596,7 @@
     enter: function () {
       var T = loadTourState(), n = allArts().length;
       $('miContinue').hidden = !(store('save') || T);
+      $('miAgain').hidden = !lastSetup();
       $('miTrain').innerHTML = 'Training with Jay' + (store('trained') ? '' : '<b>New</b>');
       $('musN').textContent = museumCount(allArts()) + '/' + n;
       $('miTour').innerHTML = 'Time Tour' + (T ? '<b>' + Math.min(TOUR_STOPS.length, T.results.length) + '/' + TOUR_STOPS.length + '</b>' : '');
@@ -5462,6 +5622,8 @@
     }
     if (a === 'continue') doContinue();
     else if (a === 'quick') startSetup('cpu');
+    else if (a === 'again') playAgain();
+    else if (a === 'surprise') surpriseMe();
     else if (a === 'train') startTraining();
     else if (a === 'two') startSetup('friend');
     else if (a === 'tour') { if (loadTourState()) openTour(); else startSetup('tour'); }
@@ -5475,6 +5637,18 @@
     else if (loadTourState()) openTour();
   }
   function startSetup(mode) { opts.mode = mode; pick.keep = 0; show('squad'); }
+  /* straight back in: the last squads, place and rules you played with */
+  function lastSetup() { try { var o = JSON.parse(store('last') || 'null'); return o && ER[o.era] && ER[o.foe] ? o : null; } catch (e) { return null; } }
+  function playAgain() {
+    var o = lastSetup(); if (!o) { startSetup('cpu'); return; }
+    startBattle(o);
+  }
+  /* one press: random squads on a random battlefield, your usual rules */
+  function surpriseMe() {
+    var a = READY[Math.floor(Math.random() * READY.length)], others = READY.filter(function (e) { return e !== a; });
+    sfx('twinkle');
+    startBattle({ mode: 'cpu', era: a, foe: others[Math.floor(Math.random() * others.length)], map: 'random', names: null, skinA: 'classic', skinB: 'classic' });
+  }
   function toMenu() {
     wipe(function () {
       inMatch(false); startDemo(); musicEra('title');
@@ -5870,8 +6044,14 @@
       sfx('twinkle'); saveOpts();
     });
   });
-  function startBattle() {
-    saveOpts(); store('save', null);
+  function startBattle(ov) {
+    if (ov && ov.type) ov = null;
+    if (ov) { var O = {}; for (var k0 in opts) O[k0] = opts[k0]; for (k0 in ov) O[k0] = ov[k0]; return launchBattle(O); }
+    saveOpts();
+    launchBattle(opts);
+  }
+  function launchBattle(opts) {
+    store('save', null);
     if (opts.mode === 'tour') {
       game.tour = { era: opts.era, mood: opts.mood, size: opts.size, turn: opts.turn, sd: opts.sd, names: opts.names, skin: skinOf(opts.skinA), ev: opts.ev, stop: 0, results: [], n: TOUR_STOPS.length };
       saveTour();
@@ -5879,6 +6059,7 @@
       return;
     }
     var map = opts.map === 'random' || !MAPS[opts.map] ? MAP_IDS[Math.floor(Math.random() * MAP_IDS.length)] : opts.map;
+    if (opts.foe) store('last', JSON.stringify(opts));
     wipe(function () { newMatch({ mode: opts.mode, mood: opts.mood, era: opts.era, foe: opts.foe, size: opts.size, turn: opts.turn, sd: opts.sd, map: map, names: opts.names, skinA: skinOf(opts.skinA), skinB: skinOf(opts.skinB), ev: opts.ev }); });
   }
 
@@ -6213,9 +6394,14 @@
       saveTour();
       snapShot();
     }
-    drawPodium();
-    sfx(!w || (o.mode === 'cpu' && w.ctrl === 'ai' && TEST !== 'aivai') ? 'lose' : 'win'); duck(0.2, 2.5);
-    show('victory', true);
+    if (RC.pend) recCommit();
+    function toPodium() {
+      drawPodium();
+      sfx(!w || (o.mode === 'cpu' && w.ctrl === 'ai' && TEST !== 'aivai') ? 'lose' : 'win'); duck(0.2, 2.5);
+      show('victory', true);
+    }
+    if (RC.best && RC.best.n >= 6 && TEST !== 'aivai') openReplay(toPodium);
+    else toPodium();
   }
   CTL.victory = { key: function (e) { if (/^(F\d+|Shift|Control|Alt|Meta|Tab)/.test(e.code)) return false; if (!e.repeat) show('results'); return true; } };
   $('victory').addEventListener('click', function () { show('results'); });
@@ -7075,6 +7261,63 @@
     }
   }
 
+  /* ---------------- best hit replay: keep the last few seconds of every shot, save the biggest hit ---------------- */
+  var RC = { N: 40, W: 427, H: 240, ring: [], bestCv: [], count: 0, tick: 0, pend: null, best: null };
+  function recReset() { RC.count = 0; RC.pend = null; RC.best = null; }
+  function recFrame() {
+    if (!matchOn || TEST === 'aivai' || game.opts && game.opts.training) return;
+    var st = game.state;
+    if (!((st === 'play' && game.fired) || st === 'retreat' || st === 'settle' || st === 'portals')) { if (RC.pend) recCommit(); return; }
+    if (++RC.tick % 4) return;
+    var k = RC.count % RC.N, c = RC.ring[k];
+    if (!c) { c = RC.ring[k] = document.createElement('canvas'); c.width = RC.W; c.height = RC.H; }
+    var x2 = c.getContext('2d'); x2.imageSmoothingEnabled = false;
+    x2.drawImage(cv, 0, 0, cv.width, cv.height, 0, 0, RC.W, RC.H);
+    RC.count++;
+    if (RC.pend && RC.count >= RC.pend.at + 16) recCommit();
+  }
+  function recHit(score, who, extra) {
+    if (!matchOn || game.state === 'demo' || TEST === 'aivai' || !who) return;
+    if (RC.pend && RC.count - RC.pend.at < 12) { RC.pend.score += score; if (extra) RC.pend.ko = RC.pend.ko || extra; if (score > RC.pend.dm) RC.pend.dm = score; return; }
+    if (RC.pend) recCommit();
+    RC.pend = { score: score, dm: extra ? 0 : score, at: RC.count, who: who.name, era: who.team.era, ko: extra || null };
+  }
+  function recCommit() {
+    var P = RC.pend; RC.pend = null;
+    if (!P || (RC.best && P.score <= RC.best.score)) return;
+    var start = Math.max(RC.count - RC.N, P.at - 22, 0), end = RC.count, n = end - start;
+    if (n < 6) return;
+    for (var i = 0; i < n; i++) {
+      var d = RC.bestCv[i];
+      if (!d) { d = RC.bestCv[i] = document.createElement('canvas'); d.width = RC.W; d.height = RC.H; }
+      var x2 = d.getContext('2d'); x2.clearRect(0, 0, RC.W, RC.H); x2.drawImage(RC.ring[(start + i) % RC.N], 0, 0);
+    }
+    RC.best = { score: P.score, dm: P.dm, who: P.who, era: P.era, ko: P.ko, n: n, hit: P.at - start };
+  }
+
+  /* the replay screen: the best hit in slow motion, slower still around the moment it lands */
+  var rpT = null, rpNext = null;
+  function openReplay(next) {
+    var B = RC.best, cv2 = $('rpCv'), x2 = cv2.getContext('2d'), i = 0;
+    rpNext = next;
+    $('rpCap').innerHTML = '<b style="color:' + ER[B.era].tag + '">' + esc(B.who) + '</b>' + (B.dm ? ' <span>-' + B.dm + '</span>' : '') + (B.ko ? ' <i>' + esc(B.ko) + '</i>' : '');
+    show('replay', true);
+    sfx('whoosh');
+    function step() {
+      if (scr !== 'replay') return;
+      if (i >= B.n) { rpT = setTimeout(endReplay, 900); return; }
+      x2.imageSmoothingEnabled = false; x2.drawImage(RC.bestCv[i], 0, 0);
+      if (i === B.hit) sfx('boom', 0.6);
+      var near = Math.abs(i - B.hit) <= 5;
+      i++;
+      rpT = setTimeout(step, reduceMotion ? 70 : (near ? 260 : 130));
+    }
+    step();
+  }
+  function endReplay() { if (rpT) clearTimeout(rpT); rpT = null; var n = rpNext; rpNext = null; if (n) n(); }
+  CTL.replay = { key: function (e) { if (/^(F\d+|Shift|Control|Alt|Meta|Tab)/.test(e.code)) return false; if (!e.repeat) endReplay(); return true; } };
+  $('replay').addEventListener('click', endReplay);
+
   /* ---------------- the loop ---------------- */
   var acc = 0, last = 0, hudN = 0;
   function frame(ts) {
@@ -7088,6 +7331,7 @@
       if (guard >= 40) acc = 0;
     }
     render();
+    recFrame();
     uiTick();
     if (++hudN % 4 === 0 && matchOn) hudTick();
     requestAnimationFrame(frame);
