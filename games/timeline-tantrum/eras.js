@@ -24,6 +24,7 @@
         mega:    { name: 'Mega Boulder',     blurb: 'Superweapon. A gigantic boulder drops from the sky wherever you point.' }
       },
       kit: ['boulder', 'gourd', 'vine', 'wall', 'mega'],
+      stats: { power: 5, precision: 2, tricks: 3 },
       bits: [['Ug', 'Gr', 'Bon', 'Thu', 'Mos', 'Fli', 'Peb', 'Og', 'Bram', 'Stu', 'Clu', 'Nub', 'Dus', 'Grub'],
              ['k', 'nt', 'sy', 'bble', 'dge', 'g', 'rk', 'mble', 'mp', 'bo', 'sty', 'gs', 'ug', 'o']],
       titles: ['Big', 'Lil', 'Old', 'Sir', 'Mad'],
@@ -51,6 +52,7 @@
         sun:      { name: 'Sun Mirror',     blurb: 'Superweapon. Polished mirrors catch the sunlight and burn one spot. Sand turns to glass.' }
       },
       kit: ['spear', 'scarab', 'sled', 'sandwall', 'sun'],
+      stats: { power: 3, precision: 4, tricks: 5 },
       bits: [['Sa', 'Ne', 'Kha', 'Ra', 'Pa', 'Sca', 'Lo', 'Ib', 'Mi', 'Du', 'Ob', 'Su', 'An', 'Ta'],
              ['nd', 'ile', 'fu', 'py', 'rab', 'tus', 'is', 'ra', 'ne', 'khet', 'mun', 'ny', 'sh', 'bo']],
       titles: ['Lord', 'Lady', 'Scribe', 'Little', 'Great'],
@@ -78,6 +80,7 @@
         orbital: { name: 'Orbital Strike',  blurb: 'Superweapon. A beam from space hits wherever you point.' }
       },
       kit: ['disc', 'laser', 'jet', 'shield', 'orbital'],
+      stats: { power: 3, precision: 5, tricks: 4 },
       bits: [['Vol', 'Pix', 'By', 'No', 'Gli', 'Zap', 'Chro', 'Or', 'Ne', 'Spro', 'Wid', 'Ec', 'Bli', 'Sta'],
              ['t', 'el', 'te', 'va', 'tch', 'po', 'me', 'bit', 'on', 'ket', 'get', 'ho', 'x', 'tron']],
       titles: ['Dr', 'Unit', 'Mega', 'Mk2', 'Agent'],

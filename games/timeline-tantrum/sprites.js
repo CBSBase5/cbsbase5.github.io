@@ -815,14 +815,34 @@
   /* ---------- crates ---------- */
   S.crate = function (ctx, x, y, kind, t) {
     var X = Math.round(x) - 5, Y = Math.round(y) - 9;
-    var gold = kind === 'bark';
+    var gold = kind === 'bark', C = { bark: ['#e0b040', '#b8861e', '#5c3a10'], skip: ['#8f74ff', '#5a44c0', '#ffffff'], fest: ['#7ec850', '#4f8a3a', '#ffffff'] }[kind] || ['#b07a46', '#8a5a32', '#ffffff'];
     ctx.fillStyle = '#3b2616'; ctx.fillRect(X, Y, 11, 9);
-    ctx.fillStyle = gold ? '#e0b040' : '#b07a46'; ctx.fillRect(X + 1, Y + 1, 9, 7);
-    ctx.fillStyle = gold ? '#b8861e' : '#8a5a32'; ctx.fillRect(X + 1, Y + 4, 9, 1);
-    ctx.fillStyle = gold ? '#5c3a10' : '#ffffff';
+    ctx.fillStyle = C[0]; ctx.fillRect(X + 1, Y + 1, 9, 7);
+    ctx.fillStyle = C[1]; ctx.fillRect(X + 1, Y + 4, 9, 1);
+    ctx.fillStyle = C[2];
     ctx.fillRect(X + 4, Y + 2, 3, 2); ctx.fillRect(X + 3, Y + 1, 1, 1); ctx.fillRect(X + 7, Y + 1, 1, 1); ctx.fillRect(X + 5, Y + 1, 1, 1);
     ctx.fillRect(X + 4, Y + 5, 3, 2);
     if (gold && (t >> 4) % 2) { ctx.fillStyle = '#fff3c8'; ctx.fillRect(X - 1, Y - 2, 1, 1); ctx.fillRect(X + 11, Y + 1, 1, 1); }
+  };
+
+  /* ---------- era barrels: a tar pot, an oil jar or a fuel cell, with hazard stripes ---------- */
+  S.barrel = function (ctx, x, y, kind, t, lit) {
+    var X = Math.round(x), Y = Math.round(y);
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(X + a, Y + b, w, h); }
+    if (kind === 'tar') {
+      P(-4, -9, 9, 9, '#2a1a10'); P(-3, -8, 7, 7, '#7a4a2a'); P(-3, -8, 2, 6, '#9c6438');
+      P(-4, -10, 9, 2, '#1a1a1a'); P(-2 + ((t >> 4) % 3), -11, 2, 1, '#3a3a3a');
+      P(-3, -5, 7, 1, '#ffc24a'); P(-3, -4, 7, 1, '#1a1a1a'); P(-3, -3, 7, 1, '#ffc24a');
+    } else if (kind === 'oil') {
+      P(-3, -11, 7, 2, '#5a2a14'); P(-4, -9, 9, 8, '#5a2a14'); P(-3, -8, 7, 6, '#c8703a'); P(-3, -8, 2, 5, '#e09060');
+      P(-2, -1, 5, 1, '#5a2a14'); P(-5, -8, 1, 3, '#5a2a14'); P(5, -8, 1, 3, '#5a2a14');
+      P(0, -7, 1, 1, '#ffd27a'); P(-1, -6, 3, 2, '#ef7724'); P(0, -5, 1, 1, '#ffd27a');
+    } else {
+      P(-4, -11, 9, 11, '#2b3038'); P(-3, -10, 7, 9, '#59606a'); P(-3, -10, 2, 9, '#7d8592');
+      P(-3, -8, 7, 1, '#ffc24a'); P(-3, -7, 7, 1, '#1a1a1a'); P(-3, -6, 7, 1, '#ffc24a');
+      P(-2, -4, 5, 2, lit || (t >> 5) % 2 ? '#bff3fa' : '#37c8dc'); P(-1, -12, 3, 1, '#2b3038');
+    }
+    if (lit) { P(-1, -14 - ((t >> 1) % 2), 2, 2, (t >> 1) % 2 ? '#ffd27a' : '#ef7724'); }
   };
 
   /* ---------- Bonnie: a brown toy poodle with no tail ---------- */
