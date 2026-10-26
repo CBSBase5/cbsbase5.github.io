@@ -80,6 +80,8 @@
     dronebomb: { kind: 'proj', wind: false, impact: true, R: 16, dmg: 18 }
   };
   var SD_TURN = 24;
+  /* the bigger battlefields need a longer throw: full power reaches about 1.4 times as far as it used to */
+  var REACH = 1.2;
   var WORDER = ['lob', 'bomb', 'shove', 'dig'];
   var MAP = MAPS.jungle, LOOK = 'normal';
   var ARTS = window.B5ARTEFACTS, JAY = window.B5JAY, TL = window.B5TIMELINE, RIPPLE = window.B5RIPPLE;
@@ -492,9 +494,9 @@
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = K * (292 - 24 * Math.sin(t * 6.283 * 1.1 + p1) - 12 * Math.sin(t * 6.283 * 2.7 + p2) - 4 * Math.sin(t * 6.283 * 7.9 + p3));
+      var h = K * (292 - 36 * Math.sin(t * 6.283 * 1.1 + p1) - 18 * Math.sin(t * 6.283 * 2.7 + p2) - 6 * Math.sin(t * 6.283 * 7.9 + p3));
       /* a crag: the ground steps up sharply where hard rock breaks through, as it does along the real Wall */
-      h -= 80 / (1 + Math.exp(-(t - cr) * 30 * flip));
+      h -= 110 / (1 + Math.exp(-(t - cr) * 30 * flip));
       var edge = Math.min(x, WW - 1 - x);
       if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
@@ -1384,7 +1386,7 @@
       sfx('hit', 0.4); dust(c.x, c.y, 10, 9); game.shake = Math.max(game.shake, 1 + v * 0.4);
       if (!game.hitstop) game.hitstop = 2;
     }
-    c.landT = 6;
+    c.landT = 9;
     kick(c, -Math.min(0.32, 0.08 + v * 0.05));
   }
 
@@ -1943,7 +1945,7 @@
       later(156, function () {
         if (sty === 'city') banner('Meltdown!', null, '#ef7724', 'meteor');
         else if (sty === 'desert') banner('Sandstorm!', null, '#ef7724', 'meteor');
-        else banner('Sudden Death!', null, '#ef7724', 'meteor');
+        else banner('Meteor Shower!', null, '#ef7724', 'meteor');
       });
       say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
     }
@@ -2234,9 +2236,10 @@
     if (c.team.ctrl === 'human') learnDone('fire');
     c.team.lastWeapon = wid;
     useAmmo(c.team, wid);
+    if (ER[c.team.era].kit && ER[c.team.era].kit.indexOf(wid) >= 0) say(wid);
     var p;
     if (w.kind === 'proj') {
-      var pw = Math.max(8, game.power), sp = w.vmax * pw / 100;
+      var pw = Math.max(8, game.power), sp = w.vmax * REACH * pw / 100;
       var a = c.aim * Math.PI / 180, tip = SP.tip(c.x, c.y, c.face, c.aim, wid), nShot = w.spread || 1;
       for (var si = 0; si < nShot; si++) {
         /* a volley fans out a little, each arrow at its own angle and strength */
@@ -2980,7 +2983,7 @@
   function simShot(c, wid, face, aim, pw) {
     var w = WEAP[wid], tip = SP.tip(c.x, c.y, face, aim, wid);
     if (solid(tip.x, tip.y)) return { x: tip.x, y: tip.y };
-    var a = aim * Math.PI / 180, sp = w.vmax * pw / 100;
+    var a = aim * Math.PI / 180, sp = w.vmax * REACH * pw / 100;
     var p = { type: wid, x: tip.x, y: tip.y, vx: Math.cos(a) * face * sp, vy: -Math.sin(a) * sp, age: 0, by: c, rest: false };
     if (w.fuse) p.fuse = w.fuse;
     for (var i = 0; i < 700; i++) {
@@ -3783,6 +3786,9 @@
     spawnAll(3);
     placeBarrels();
     game.snags.forEach(function (c, i) { c.arrive = 50 + i * 38; });
+    /* start the preview looking at the ground, not wherever the last map left the camera */
+    var c0 = game.snags[0];
+    if (c0) { cam.x = clamp(c0.x - VW / 2, 0, Math.max(0, WW - VW)); cam.y = clamp(c0.y - VH * 0.6, -140, WH - VH); }
   }
 
   function demoTick() {
@@ -3850,7 +3856,7 @@
         if (sl <= 5 && sl !== game.lastSec) sfx('count');
         game.lastSec = sl;
       }
-      if (game.turnLen > 0 && --game.timer <= 0) { banner("Time's up", null, '#ffc24a', 'hourglass'); endTurn(); }
+      if (game.turnLen > 0 && --game.timer <= 0) { banner('Next go!', null, '#ffc24a', 'hourglass'); endTurn(); }
     } else if (game.state === 'retreat') {
       if (game.swingT <= 0 && game.digT <= 0 && !game.barker && !game.strikes.length && !(game.active && game.active.lance) && --game.retreat <= 0) endTurn();
     } else if (game.state === 'settle') settle();
@@ -3915,7 +3921,7 @@
       else if (game.state === 'over' && game.winner) {
         var w = game.winner.members.filter(function (m) { return m.alive; })[0];
         tx = w ? w.x : WW / 2; ty = w ? w.y - 20 : WH - 140;
-      } else { tx = WW / 2 + Math.sin(game.t / 600) * 300; ty = 230; }
+      } else { tx = WW / 2 + Math.sin(game.t / 600) * WW * 0.3; var dsy = surfaceY(tx); ty = (dsy > 0 ? Math.min(dsy, WATER) : WATER) - VH * 0.15; }
     }
     var gx = tx - VW / 2, gy = ty - VH / 2;
     gx = VW >= WW ? (WW - VW) / 2 : clamp(gx, 0, WW - VW);
@@ -4657,22 +4663,25 @@
     if (c.hurtT > 41 && !reduceMotion) o.flash = true;
     if ((game.state === 'over' && game.winner === c.team) || c.cheerT > 0) return ['cheer', (t >> 4) % 2, 0, o];
     if (c.sled) return [c.st === 'air' ? 'jump' : 'charge', 0, 0, o];
-    if (c.lance) return ['walk', Math.floor(c.walkd / 2) % 6, 0, o];
-    if (c.ball && c.st === 'air') return ['jump', 0, reduceMotion ? 0 : (c.spin || 0), o];
+    if (c.lance) return ['swalk', Math.floor(c.walkd / 1.6) % 8, 0, o];
+    if (c.ball && c.st === 'air') return ['sjump', 2, reduceMotion ? 0 : (c.spin || 0), o];
     if (act && game.swingT > 0) return ['swing', game.swingT > 12 ? 0 : 1, 0, o];
     if (act && game.digT > 0) return ['dig', (t >> 3) % 2, 0, o];
-    if (c.swing) return ['jump', 0, 0, o];
-    if (c.jet) return ['jump', (t >> 2) % 2, 0, o];
+    if (c.swing) return ['sjump', 3 + ((t >> 4) % 2), 0, o];
+    if (c.jet) return ['sjump', 1 + ((t >> 2) % 2), 0, o];
     if (c.st === 'air') {
       if (c.knock) return ['panic', (t >> 3) % 2, reduceMotion ? 0 : (c.spin || 0), o];
-      if (c.flip) return ['jump', 0, -c.face * (Math.floor(c.airT / 5) % 4), o];
-      if (c.vy < 0) { if (c.vy < -1.5) o.sq = 1; return ['jump', 0, 0, o]; }
-      return ['fall', (t >> 3) % 2, 0, o];
+      /* the side on jump cycle: launch, rise, tuck at the top, then a flailing fall */
+      if (c.flip) return ['sjump', 2, -c.face * (Math.floor(c.airT / 5) % 4), o];
+      if (c.vy < 0) return ['sjump', (c.airT || 0) < 7 ? 0 : (c.vy < -0.9 ? 1 : 2), 0, o];
+      if (c.vy < 0.9) return ['sjump', 2, 0, o];
+      return ['sjump', 3 + ((t >> 3) % 2), 0, o];
     }
+    if (c.landT > 2 && !c.walking) return ['sjump', 5, 0, o];
     if (c.landT > 3) o.sq = -1;
     if (c.hurtT > 25) return ['hurt', 0, 0, o];
     if (c.hurtT > 0) return ['panic', (t >> 3) % 2, 0, o];
-    if (c.walking > 0) return ['walk', Math.floor(c.walkd / 3) % 4, 0, o];
+    if (c.walking > 0) return ['swalk', Math.floor(c.walkd / 2.6) % 8, 0, o];
     var k2 = WEAP[game.weapon].kind;
     if (act && game.state === 'play' && (k2 === 'proj' || k2 === 'beam' || k2 === 'vine' || k2 === 'blunder' || k2 === 'launch')) {
       o.look = c.aim > 30 ? -1 : (c.aim < -20 ? 1 : 0);
@@ -5604,7 +5613,7 @@
   }
   function drawSquad() {
     var tour = opts.mode === 'tour', friend = opts.mode === 'friend';
-    if (pick.st < 2) $('sqTitle').textContent = pick.st === 0 ? (friend ? 'Player 1, choose' : 'Choose your squad') : (friend ? 'Player 2, choose' : 'Choose your rivals');
+    if (pick.st < 2) $('sqTitle').textContent = pick.st === 0 ? (friend ? 'Player 1, pick' : 'Pick your squad') : (friend ? 'Player 2, pick' : 'Pick your rivals');
     var ports = CTL.squad.items(), ia = pick.st === 0 ? CTL.squad.sel : ROSTER.indexOf(pick.a), ib = tour ? -1 : (pick.st === 1 ? CTL.squad.sel : (pick.st === 2 ? ROSTER.indexOf(pick.b) : -1));
     ports.forEach(function (p, i) {
       p.classList.toggle('hov', i === CTL.squad.sel && pick.st < 2);
@@ -5643,11 +5652,20 @@
   $('squad').appendChild(gapLab);
   var gap = { key: '', from: 0, to: 0, t0: 0, shown: -1, lastTick: 0 };
   function tlX(yr) { return Math.round(12 + (yr - TL0) / (TL1 - TL0) * (tlCv.width - 24)); }
+  function tlSpread() {
+    var list = ROSTER.map(function (e) { return { e: e, x: tlX(yearOf(e)) }; }).concat(TL.filter(function (e) { return !e.ready || !ER[e.id]; }).map(function (e) { return { e: '_' + e.id, x: tlX(e.year) }; })).sort(function (p, q) { return p.x - q.x; }), MIN = 30, k, out = {};
+    for (var pass = 0; pass < 6; pass++) for (k = 1; k < list.length; k++) {
+      var d = list[k].x - list[k - 1].x;
+      if (d < MIN) { list[k - 1].x -= (MIN - d) / 2; list[k].x += (MIN - d) / 2; }
+    }
+    list.forEach(function (p) { out[p.e] = Math.round(clamp(p.x, 16, tlCv.width - 16)); });
+    return out;
+  }
   function drawTL() {
     var x2 = tlCv.getContext('2d'), W = tlCv.width, base = 34, now = Date.now();
     x2.clearRect(0, 0, W, tlCv.height);
     x2.fillStyle = '#433a85'; x2.fillRect(4, base, W - 8, 2);
-    [[-10000, '10000 BC'], [-5000, '5000 BC'], [1, 'AD 1']].forEach(function (tk) {
+    [[-10000, '10,000 BC'], [-5000, '5000 BC'], [1, 'AD 1']].forEach(function (tk) {
       var x = tlX(tk[0]); x2.fillStyle = '#5a50a0'; x2.fillRect(x, base, 1, 5);
       SP.text(x2, tk[1], x, base + 8, '#8a80c8', null, true);
     });
@@ -5657,15 +5675,23 @@
     /* eras still to come: dim silhouettes and a padlock */
     var locked = TL.filter(function (e) { return !e.ready || !ER[e.id]; }), lx = 0;
     x2.globalAlpha = 0.55;
-    locked.forEach(function (e) { var x = tlX(e.year); x2.drawImage(silhouette('#2e2860'), x - 16, base - 29); lx += x; });
+    var sx0 = tlSpread();
+    locked.forEach(function (e) { var x = sx0['_' + e.id]; x2.drawImage(silhouette('#2e2860'), x - 16, base - 32); lx += x; });
     x2.globalAlpha = 1;
-    var a = eraA(), b = eraB();
+    var a = eraA(), b = eraB(), sx = tlSpread(), labs = [];
     ROSTER.forEach(function (e) {
-      var x = tlX(yearOf(e)), on = e === a || e === b, f = on ? (Math.floor(now / 260) % 2) : 0;
-      SP.draw(x2, x, base, x < W / 2 ? 1 : -1, e, on ? 'cheer' : 'idle', f, false, 0, on ? 1 : 0.55);
-      var tw = SP.textWidth(ER[e].team), tx = clamp(x, tw / 2 + 2, W - tw / 2 - 2);
-      if (on) SP.text(x2, ER[e].team, tx, 0, e === a ? '#5fe0f0' : '#ef7724', '#0e0b22', true);
+      var x = sx[e], tx0 = tlX(yearOf(e)), on = e === a || e === b, f = on ? (Math.floor(now / 260) % 2) : 0;
+      /* squads close together in time step aside, with a little stalk down to their real year */
+      if (Math.abs(x - tx0) > 2) { x2.fillStyle = on ? '#ffc24a' : '#5a50a0'; x2.fillRect(tx0, base - 2, 1, 4); x2.fillRect(Math.min(x, tx0), base - 3, Math.abs(x - tx0) + 1, 1); }
+      SP.draw(x2, x, base - 3, x < W / 2 ? 1 : -1, e, on ? 'cheer' : 'idle', f, false, 0, on ? 1 : 0.55);
+      if (on) labs.push({ e: e, x: x, w: SP.textWidth(ER[e].team) });
     });
+    if (labs.length === 2) {
+      labs.sort(function (p, q) { return p.x - q.x; });
+      var over = (labs[0].x + labs[0].w / 2 + 6) - (labs[1].x - labs[1].w / 2);
+      if (over > 0) { labs[0].x -= over / 2; labs[1].x += over / 2; }
+    }
+    labs.forEach(function (l) { SP.text(x2, ER[l.e].team, clamp(l.x, l.w / 2 + 2, W - l.w / 2 - 2), 0, l.e === a ? '#5fe0f0' : '#ef7724', '#0e0b22', true); });
     /* the gap: a marching line between the two picks, or between your pick and now */
     var ya = a ? yearOf(a) : null, yb = b ? yearOf(b) : (a ? NOW_Y : null);
     if (ya === null) { gapLab.hidden = true; return; }
@@ -5688,7 +5714,8 @@
   tlCv.addEventListener('click', function (e) {
     if (pick.st >= 2) return;
     var rc = tlCv.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * tlCv.width, best = -1, bd = 1e9;
-    ROSTER.forEach(function (er, i) { var d = Math.abs(tlX(yearOf(er)) - x); if (d < bd) { bd = d; best = i; } });
+    var sx = tlSpread();
+    ROSTER.forEach(function (er, i) { var d = Math.abs(sx[er] - x); if (d < bd) { bd = d; best = i; } });
     if (best >= 0 && bd < 30) setSel(best);
   });
 
@@ -5740,7 +5767,7 @@
     { k: 'mood', label: 'Computer', vals: ['sleepy', 'grumpy', 'legendary'], wrap: true, show: function () { return opts.mode !== 'friend'; }, fmt: function (v) { return gl(v, 'sm') + ' ' + MOODS[v]; } },
     { k: 'size', label: 'Snags each', vals: [2, 3, 4, 5, 6, 7, 8], fmt: String },
     { k: 'turn', label: 'Turn timer', vals: [30, 45, 60, 90, 0], fmt: function (v) { return v ? v + 's' : 'No timer'; } },
-    { k: 'sd', label: 'Sudden Death', vals: ['on', 'off'], wrap: true, fmt: function (v) { return v === 'on' ? 'On' : 'Off'; } },
+    { k: 'sd', label: 'Big Finish', vals: ['on', 'off'], wrap: true, fmt: function (v) { return v === 'on' ? 'On' : 'Off'; } },
     { k: 'ev', label: 'Map events', vals: ['on', 'off'], wrap: true, fmt: function (v) { return v === 'off' ? 'Off' : 'On'; } },
     { k: 'skinA', label: 'Look', vals: lookVals, wrap: true, look: true, fmt: function (v) { var n = unlocked().length; return lookName(v) + (n < LOOKS.length ? ' <i class="more">' + (LOOKS.length - n) + gl('lock', 'sm') + '</i>' : ''); } },
     { k: 'skinB', label: 'P2 look', vals: lookVals, wrap: true, look: true, show: function () { return opts.mode === 'friend'; }, fmt: function (v) { return lookName(v); } }
@@ -6172,7 +6199,7 @@
     if (game.state !== 'over') return;
     var w = game.winner, o = game.opts || {}, title;
     if (!w) title = 'Draw!';
-    else if (o.mode === 'cpu' && w.ctrl === 'ai' && TEST !== 'aivai') title = 'Computer wins';
+    else if (o.mode === 'cpu' && w.ctrl === 'ai' && TEST !== 'aivai') title = 'So close!';
     else if (o.mode === 'friend') title = w.label + ' wins!';
     else title = w.name + ' win!';
     $('overTitle').textContent = title;
@@ -6570,7 +6597,7 @@
     x2.fillStyle = map === 'desert' ? 'rgb(224,186,114)' : 'rgb(138,90,50)'; x2.fillRect(0, 46, W, H - 46);
   }
   var COMIC = [
-    ['Move', function (x2, t) { scene(x2, 'jungle'); var wx = 40 + ((t >> 2) % 16); SP.draw(x2, wx, 45, 1, 'pre', 'walk', (t >> 1) % 4, false, 0);
+    ['Move', function (x2, t) { scene(x2, 'jungle'); var fr = t >> 2, wx = 40 + Math.round((fr % 16) * 1.3); SP.draw(x2, wx, 45, 1, 'pre', 'swalk', fr % 8, false, 0);
       if (touchOn) { keycap(x2, 26, 6, 13, '<'); keycap(x2, 57, 6, 13, '>'); } else { keycap(x2, 30, 6, 11, '<'); keycap(x2, 55, 6, 11, '>'); } }],
     ['Aim', function (x2, t) { scene(x2, 'jungle'); var aim = 10 + ((t % 8) < 4 ? (t % 4) * 12 : (4 - t % 4) * 12);
       SP.draw(x2, 30, 45, 1, 'pre', 'aim', 0, false, 0, 1, { look: aim > 30 ? -1 : 0 }); SP.weapon(x2, 30, 45, 1, aim, 'lob', 'pre', t);
@@ -6616,13 +6643,13 @@
   function learnDone(k) { if (!learn[k] && game.active && game.active.team.ctrl === 'human') { learn[k] = 1; store('learn', JSON.stringify(learn)); } }
   /* ---------- Training with Jay: learn by doing, one short step at a time ---------- */
   var TRAIN = [
-    { id: 'walk', say: 'Walk over to the flag.' },
-    { id: 'aim', say: 'Now aim up at the dummy.' },
+    { id: 'walk', say: 'Fancy a stroll to the flag?' },
+    { id: 'aim', say: 'Want to aim up at the dummy?' },
     { id: 'fire', say: 'Hold to power up, then let go.' },
-    { id: 'kit', say: 'Open your kit and pick the bouncy pot.' },
-    { id: 'pot', say: 'Throw it near a dummy.' },
-    { id: 'jump', say: 'Jump! Have a go at a backflip too.' },
-    { id: 'crate', say: 'Bonnie has a snack for you. Go and get it.' },
+    { id: 'kit', say: 'Have a look in your kit for the %BOMB%.' },
+    { id: 'pot', say: 'Lob it near a dummy?' },
+    { id: 'jump', say: 'Jump! Fancy a backflip too?' },
+    { id: 'crate', say: 'Bonnie left you a snack. Want it?' },
     { id: 'done', say: 'You are ready. Outrageous work.' }
   ];
   function startTraining() {
@@ -6649,7 +6676,8 @@
   }
   function trainSay() {
     var st = TRAIN[game.train.step];
-    $('jayLine').textContent = st.say; $('jay').hidden = false;
+    var bn = game.active ? weaponName(game.active.team.era, 'bomb') : 'pot';
+    $('jayLine').textContent = st.say.replace('%BOMB%', bn); $('jay').hidden = false;
     jayHide = 1e9; jayTalk = 40; jayMood = st.id === 'done' ? 'grin' : null;
     voice('jay', 'turn');
   }

@@ -352,6 +352,173 @@
     OY -= bob; OX -= lean;
   }
 
+  /* ---------- side on Snags: the walk cycle and the jump cycle ----------
+     Same 24 unit space as body(), seen from the side and facing right. Walk has 8 frames:
+     contact, down, passing, up, then the same with the other foot. Jump has 6:
+     launch, rise, tuck at the top, two falling flails, and a squashy landing. */
+  function limb(x0, y0, x1, y1, rad, c) {
+    var n = Math.max(2, Math.ceil(Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) * 2));
+    for (var i = 0; i <= n; i++) e(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, rad, rad, c);
+  }
+  function sideEar(lift, hy, far) {
+    var p;
+    if (far) {
+      p = lift === 'up' ? [12, 6 + hy, 15.5, 5.6 + hy, 14.5, 0.5 + hy] : [11.5, 6 + hy, 15.5, 6 + hy, 12.5, 3.2 + hy];
+      if (lift === 'down') return;
+      tri(p[0], p[1], p[2], p[3], p[4], p[5], D); var f2 = shrink(p, 0.5); tri(f2[0], f2[1], f2[2], f2[3], f2[4], f2[5], KS); return;
+    }
+    if (lift === 'up') p = [7, 7.5 + hy, 11, 5 + hy, 5, -1.5 + hy];
+    else if (lift === 'back') p = [8.5, 6 + hy, 9.5, 11.5 + hy, -1, 8 + hy];
+    else if (lift === 'down') p = [8, 7 + hy, 9.5, 12 + hy, 1, 14 + hy];
+    else p = [8.5, 6 + hy, 9.5, 11.5 + hy, 0, 4 + hy];
+    tri(p[0], p[1], p[2], p[3], p[4], p[5], D);
+    var q = shrink(p, 0.62); tri(q[0], q[1], q[2], q[3], q[4], q[5], K);
+    var s = shrink(p, 0.32); tri(s[0], s[1], s[2], s[3], s[4], s[5], EI);
+  }
+  function sideFoot(fx, fy, tilt, back) {
+    /* a chunky foot pointing forward; tilt lifts the toe (1) or the heel (-1) */
+    r(fx - 2.5, fy - 2, 6, 2, D);
+    if (tilt > 0) r(fx + 2, fy - 3, 1.5, 1.5, D);
+    if (tilt < 0) r(fx - 2.5, fy - 3, 1.5, 1.5, D);
+    r(fx - 1.5, fy - 1.8, 4, 1, back ? KS : FT);
+    r(fx - 1.5, fy - 1.8, 1.5, 0.6, back ? FT : KS);
+  }
+  function sideHeld(era, hx, hy) {
+    if (era === 'pre') { r(hx + 0.5, hy - 6, 1, 6, WD); r(hx - 0.5, hy - 9, 3, 3.5, WK); r(hx - 0.5, hy - 9, 1, 1, '#8c6034'); }
+    else if (era === 'egypt') { r(hx + 0.5, hy - 11, 1, 13, WD); r(hx - 0.5, hy - 12, 3, 1, CU); r(hx + 1.5, hy - 13, 1, 1.5, CU); r(hx + 0.5, hy + 2, 1, 1, CU); }
+    else if (era === 'rome') { r(hx + 0.5, hy - 9, 1, 11, IRL); r(hx + 0.5, hy - 10, 1, 1, '#ffffff'); r(hx, hy, 2, 1, BRS); }
+    else if (era === 'sumer') { r(hx - 0.5, hy - 3.5, 4, 5, CLD); r(hx, hy - 3, 3, 4, CL); r(hx + 0.5, hy - 2, 2, 0.6, CLD); r(hx + 0.5, hy - 0.5, 1.5, 0.6, CLD); r(hx, hy - 3, 1, 1, CLL); }
+    else if (era === 'med') { r(hx + 1.5, hy - 7, 1, 2, WK); r(hx + 2.3, hy - 5, 1, 10, WK); r(hx + 1.5, hy + 5, 1, 2, WK); r(hx + 1.6, hy - 5, 0.5, 10, '#e8e2d2'); }
+    else if (era === 'pirate') { r(hx + 1, hy - 7, 1, 7, IRL); r(hx + 2, hy - 8.5, 1, 2, IRL); r(hx + 2.5, hy - 9.5, 1, 1.2, IRL); r(hx - 0.5, hy, 3.5, 1, AU); r(hx + 0.5, hy + 1, 1, 1, WK); }
+    else if (era === 'fut') { r(hx - 0.5, hy - 1.5, 5, 2.5, MT); r(hx - 0.5, hy - 1.5, 5, 0.7, '#8a94a0'); r(hx + 4.5, hy - 1.5, 1, 2, CY); r(hx + 5.5, hy - 1, 0.7, 0.7, CYL); }
+  }
+  function sideBody(pose, f, bl, era, look) {
+    var walk = pose === 'swalk', p = 0, bob = 0, hy = 0, lean = 0, ears = 'mid', mouth = 'grin', eye = 'open';
+    var ff, bf, fh, bh, fTilt = 0, bTilt = 0, brx = 5.3, bry = 4.3, by = 18.3;
+    if (walk) {
+      p = (f % 8) / 8 * 6.2832;
+      var cs = Math.cos(p), sn = Math.sin(p);
+      ff = [11.5 + 5.2 * cs, 24 - Math.max(0, -sn) * 3];
+      bf = [11.5 - 5.2 * cs, 24 - Math.max(0, sn) * 3];
+      fTilt = -sn > 0.3 ? 1 : (cs < -0.7 ? -1 : 0);
+      bTilt = sn > 0.3 ? 1 : (cs > 0.7 ? -1 : 0);
+      bob = Math.abs(cs) > 0.75 ? 1 : (Math.abs(cs) < 0.4 ? -1 : 0);
+      lean = 0.5;
+      fh = [13 - 5 * cs, 20.5 - Math.abs(cs) * 1.2];
+      bh = [11 + 5 * cs, 20.5 - Math.abs(cs) * 1.2];
+      ears = Math.abs(cs) > 0.75 ? 'back' : 'mid';
+      hy = bob > 0 ? 0.5 : 0;
+    } else {
+      var k = f % 6;
+      if (k === 0) { ff = [10.5, 25]; bf = [8, 24.5]; fTilt = -1; bTilt = -1; fh = [20.5, 17.5]; bh = [4, 13]; ears = 'back'; mouth = 'whoop'; bry = 5.1; brx = 4.8; by = 18.2; hy = -0.8; }
+      else if (k === 1) { ff = [13.5, 22.5]; bf = [10.5, 23]; fh = [21, 15.5]; bh = [3.5, 15]; ears = 'up'; mouth = 'whoop'; }
+      else if (k === 2) { ff = [14, 22]; bf = [11.5, 22.5]; fTilt = 1; fh = [20, 19]; bh = [4, 18]; ears = 'up'; mouth = 'grin'; eye = 'wide'; by = 18.5; }
+      else if (k === 3) { ff = [15, 25.5]; bf = [11.5, 25]; fTilt = 1; bTilt = 1; fh = [21.5, 17]; bh = [3, 11]; ears = 'up'; mouth = 'oh'; eye = 'wide'; }
+      else if (k === 4) { ff = [14.5, 25]; bf = [12, 25.5]; fTilt = 1; fh = [20.5, 19.5]; bh = [4, 9]; ears = 'up'; mouth = 'oh'; eye = 'wide'; }
+      else { ff = [16, 24]; bf = [7.5, 24]; fh = [18.5, 20]; bh = [5, 20]; ears = 'down'; mouth = 'grin'; brx = 6.1; bry = 3.9; by = 20.4; hy = 1.5; eye = 'squint'; }
+    }
+    OX += lean; OY += bob;
+    var air = !walk;
+
+    /* things carried on the back sit behind everything */
+    if (era === 'fut') { r(2.5, 13.5 + (by - 19), 3.5, 7, MT); r(2.5, 13.5 + (by - 19), 1, 7, '#7d8592'); r(2.5, 20.5 + (by - 19), 3.5, 1, OR); if (air) { r(3, 21.5 + (by - 19), 2.5, 1 + (f % 2), '#ffd27a'); r(3.5, 22.5 + (by - 19) + (f % 2), 1.5, 1, OR); } }
+    if (era === 'rome') { r(2, 12 + (by - 19), 5, 11, IRD); r(2.7, 12.8 + (by - 19), 3.6, 9.4, RD); r(2.7, 12.8 + (by - 19), 1, 9.4, RDL); r(3.5, 16.3 + (by - 19), 2, 2, BRS); }
+    if (era === 'med') { r(3, 11.5 + (by - 19), 3, 10, WK); r(3.5, 12.5 + (by - 19), 2, 8, WD); r(3, 9 + (by - 19), 1, 3, ST); r(4.3, 8.3 + (by - 19), 1, 4, '#d84a3a'); r(5.4, 9.8 + (by - 19), 0.8, 2.5, ST); }
+
+    /* far ear, far arm and far leg, in shadow */
+    sideEar(ears, hy, true);
+    limb(10.5, by + 2.5, bf[0], bf[1] - 2, 1.4, D); limb(10.5, by + 2.5, bf[0], bf[1] - 2, 0.7, KS);
+    sideFoot(bf[0], bf[1], bTilt, true);
+    limb(11, by - 1.5, bh[0], bh[1], 1.3, D); limb(11, by - 1.5, bh[0], bh[1], 0.6, KS);
+    r(bh[0] - 1, bh[1] - 1, 2, 2, D); r(bh[0] - 0.5, bh[1] - 0.5, 1, 1, KS);
+
+    /* body */
+    e(11.5, by, brx, bry, D); e(11.5, by, brx - 1, bry - 1, KS); e(11, by - 0.6, brx - 1.6, bry - 1.6, K);
+    e(14.2, by + 1.2, 1.9, 2.3, BL);
+    var oy = by - 19;
+    if (era === 'pre') { e(11.5, 20.2 + oy, 4.8, 3.2, FU); e(10.8, 19.6 + oy, 3.6, 2.2, '#9c6a38'); r(9, 19 + oy, 1, 1, FD); r(13, 21 + oy, 1, 1, FD); r(11, 18 + oy, 1, 1, FD); r(15, 19.5 + oy, 1, 1, FD); }
+    if (era === 'fut') { e(11.5, 20 + oy, 4, 3, PT); r(8, 20 + oy, 7, 1, CY); r(14, 18 + oy, 1, 1, OR); r(9, 18 + oy, 3, 0.6, '#8a94a0'); }
+    if (era === 'rome') { e(11.5, 20 + oy, 4.7, 3.4, IRD); e(11.5, 19.6 + oy, 4, 2.8, IR); r(7.5, 18 + oy, 8.5, 0.8, IRL); r(7.5, 20 + oy, 8.5, 0.8, IRD); r(7.5, 22.2 + oy, 8.5, 1.2, RD); r(9, 22.2 + oy, 1, 1.2, RDL); r(12.5, 22.2 + oy, 1, 1.2, RDL); }
+    if (era === 'sumer') { e(11.5, 20.6 + oy, 4.8, 3, KND); e(11.5, 20.4 + oy, 4.2, 2.4, KN); for (var tq = 0; tq < 4; tq++) { r(8 + tq * 2 + (tq % 2), 19.5 + oy, 1, 1, KND); r(9 + tq * 2, 21.5 + oy, 1, 1, KND); } r(7.5, 18 + oy, 8.5, 1, BRS); }
+    if (era === 'med') { e(11.5, 20 + oy, 4.7, 3.4, GND); e(11.5, 19.6 + oy, 4, 2.8, GN); r(9, 17.5 + oy, 1.5, 5, GNL); r(12.5, 17.5 + oy, 1, 5.5, AU); r(10.5, 19.5 + oy, 5, 1, AU); r(7.5, 22.3 + oy, 8.5, 1, WK); }
+    if (era === 'pirate') { e(11.5, 20 + oy, 4.7, 3.4, NV); e(11.5, 19.6 + oy, 4, 2.8, ST); r(7.5, 18.5 + oy, 8.5, 0.9, NV); r(7.5, 20.4 + oy, 8.5, 0.9, NV); r(7.5, 22.3 + oy, 8.5, 1, WK); r(12, 22.3 + oy, 2, 1, AU); }
+    if (era === 'egypt') { e(11.5, 21.4 + oy, 4.7, 2.3, LN); r(12.5, 21 + oy, 1, 3, LN2); r(7.5, 20 + oy, 8.5, 1, AU); r(9, 16.5 + oy, 7.5, 1, AU); r(8.5, 17.5 + oy, 8, 1, LB); r(9.5, 18.5 + oy, 6.5, 0.8, AU); r(11, 17.5 + oy, 1, 1, TQ); r(14, 17.5 + oy, 1, 1, TQ); }
+
+    /* near leg and foot */
+    limb(12, by + 2.5, ff[0], ff[1] - 2, 1.4, D); limb(12, by + 2.5, ff[0], ff[1] - 2, 0.7, K);
+    sideFoot(ff[0], ff[1], fTilt, false);
+
+    /* head, with a snout poking forward */
+    e(12.5, 11.5 + hy, 7.2, 6.2, D); e(18.6, 12.9 + hy, 2.9, 2.5, D);
+    e(12.5, 11.5 + hy, 6.2, 5.2, KS); e(18.6, 12.9 + hy, 2, 1.6, KS);
+    e(11.9, 10.8 + hy, 5.6, 4.6, K); e(18.3, 12.5 + hy, 1.7, 1.3, K);
+    e(9.2, 7.9 + hy, 2.4, 1.1, KL); r(7.5, 9 + hy, 1, 1, KL); r(18, 11.5 + hy, 1, 0.6, KL);
+    r(6.5, 10 + hy, 1, 1, SP2); r(7.5, 12.5 + hy, 1, 1, SP2); r(9, 13.5 + hy, 1, 1, SP2);
+    r(20.3, 12.2 + hy, 0.8, 0.8, SP2);
+    sideEar(ears, hy, false);
+
+    /* the eye: one big one, looking where we are going */
+    var ex = 14, ey = 8.5 + hy;
+    if (bl && walk) r(ex, ey + 2, 3, 1, D);
+    else if (eye === 'squint') { r(ex, ey + 2, 1, 1, D); r(ex + 1, ey + 1.5, 1, 1, D); r(ex + 2, ey + 2, 1, 1, D); }
+    else {
+      var eh = eye === 'wide' ? 4.5 : 4;
+      r(ex - 0.5, ey - 0.5, 4, eh + 1, D);
+      r(ex, ey, 3, eh, Y); r(ex, ey + eh - 0.6, 3, 0.6, KS);
+      var pyy = ey + 1 + (look < 0 ? -1 : (look > 0 ? 1 : 0)) + (eye === 'wide' ? 0.5 : 0);
+      r(ex + 1.5, pyy, 1.5, 2, P); r(ex + 1.5, pyy, 0.6, 0.6, W);
+      if (era === 'egypt') { r(ex - 0.5, ey - 0.5, 4, 1, P); r(ex + 3.5, ey, 1.5, 0.6, P); }
+    }
+    if (eye === 'wide') r(ex - 0.5, ey - 2.2, 4, 1, D);
+    else if (walk) { r(ex - 0.5, ey - 1.6, 3, 1, D); r(ex + 2.5, ey - 1, 1, 1, D); }
+    else r(ex - 0.5, ey - 1.6, 4, 1, D);
+
+    /* mouth along the bottom of the snout */
+    if (mouth === 'grin') { r(15, 14.8 + hy, 5, 0.8, M); r(19.6, 14.2 + hy, 0.8, 1, M); r(16.5, 15.6 + hy, 1, 1, W); }
+    else if (mouth === 'whoop') { e(17.6, 15.4 + hy, 2.1, 1.4, M); e(17.4, 16 + hy, 1.1, 0.6, TG); r(18.6, 14.3 + hy, 0.8, 0.8, W); }
+    else { e(17.4, 15.5 + hy, 1.1, 1.3, M); }
+    if (era === 'sumer' && mouth !== 'whoop') { r(14.5, 15.8 + hy, 5.5, 2, BRD); r(15, 17.8 + hy, 4.5, 1, BRD); r(16, 18.8 + hy, 2.5, 1, BRD); r(15.5, 16.2 + hy, 1, 1, '#4a3a52'); r(17.5, 17.2 + hy, 1, 1, '#4a3a52'); }
+
+    /* head gear from the side */
+    if (era === 'pre') { r(8, 4.5 + hy, 6, 1, BN); r(7.4, 3.8 + hy, 1, 2.4, BN); r(13.6, 3.8 + hy, 1, 2.4, BN); r(9, 4.5 + hy, 4, 0.5, '#d8ceb4'); r(15.5, 7 + hy, 3, 0.8, PL); }
+    if (era === 'fut') { r(6, 6.5 + hy, 8, 1, GL); r(13, 5.5 + hy, 5.5, 2.5, GL); r(13.8, 6 + hy, 4, 1.5, CY); r(13.8, 6 + hy, 1.4, 0.7, CYL); }
+    if (era === 'rome') {
+      e(11.3, 3.4 + hy, 5, 2.4, RD); e(10.6, 2.6 + hy, 3.4, 1.1, RDL);
+      e(11.8, 5.6 + hy, 6, 2.8, IRD); e(11.8, 5.4 + hy, 5.1, 2.1, IR); e(10.4, 4.6 + hy, 2.2, 0.7, IRL);
+      r(4.8, 6 + hy, 4, 2.2, IRD); r(5.2, 6 + hy, 3.4, 1.5, IR); r(11, 7.4 + hy, 2.4, 4.4, IRD); r(11.4, 7.4 + hy, 1.6, 3.8, IR);
+      r(5.8, 7.2 + hy, 12, 0.8, BRS);
+      r(11.5, 3.3 + hy, 1, 0.8, BRS);
+    }
+    if (era === 'sumer') {
+      e(11.8, 6.6 + hy, 6.3, 3.4, AD); e(11.8, 6.3 + hy, 5.6, 2.7, AU); e(10.5, 5.3 + hy, 2.4, 0.9, '#fff0b0');
+      r(6, 8.4 + hy, 11.6, 1, AD); r(9, 5.5 + hy, 1, 1, AD); r(12, 5 + hy, 1, 1, AD); r(15, 6 + hy, 1, 1, AD);
+      e(4.6, 8 + hy, 2.4, 2.2, AD); e(4.6, 7.8 + hy, 1.5, 1.3, AU);
+    }
+    if (era === 'med') {
+      e(12, 4.4 + hy, 4.6, 2.8, IRD); e(12, 4.2 + hy, 3.8, 2.1, IR); e(10.8, 3.4 + hy, 1.8, 0.7, IRL);
+      r(4.5, 5.6 + hy, 16, 1.8, IRD); r(5.5, 5.6 + hy, 14, 0.8, IR); r(5.5, 5.6 + hy, 4, 0.8, IRL);
+    }
+    if (era === 'pirate') {
+      e(11.8, 6.6 + hy, 6.2, 3.1, BD); r(5.8, 6.8 + hy, 12.2, 1.4, BD); e(10.4, 5 + hy, 2.4, 0.8, BDL);
+      r(9, 5 + hy, 1, 1, ST); r(13, 4.6 + hy, 1, 1, ST); r(15.5, 6 + hy, 1, 1, ST); r(11, 7 + hy, 1, 1, ST);
+      var flap = walk ? Math.round(Math.sin(p * 2)) : (air ? -1 : 0);
+      r(3.5, 7 + hy, 3, 1.5, BD); r(2, 8.3 + hy + flap, 2.2, 1.5, BD); r(3.5, 9 + hy, 1.2, 2, BD);
+      r(8, 7.8 + hy, 6, 0.7, P); r(13.5, 7.8 + hy, 0.7, 0.7, P);
+      r(9.5, 12.6 + hy, 0.9, 1.6, AU);
+    }
+    if (era === 'egypt') {
+      e(11.8, 6.4 + hy, 6.4, 3.3, LB); r(5.4, 6.6 + hy, 12.5, 1.2, LB);
+      for (var st2 = 0; st2 < 4; st2++) r(7 + st2 * 3, 3.6 + hy + (st2 === 0 || st2 === 3 ? 1 : 0), 1, 3, AU);
+      r(5.4, 7.6 + hy, 12.5, 1, AU); r(17, 5.4 + hy, 1, 1.5, '#d84a3a');
+      r(4.5, 8.5 + hy, 3.5, 8, LB); r(4.5, 10 + hy, 3.5, 0.8, AU); r(4.5, 12.6 + hy, 3.5, 0.8, AU); r(4.5, 15.2 + hy, 3.5, 0.8, AU);
+    }
+
+    /* near arm in front of everything, holding the squad's kit while walking */
+    limb(12.5, by - 1.5, fh[0], fh[1], 1.3, D); limb(12.5, by - 1.5, fh[0], fh[1], 0.6, K);
+    r(fh[0] - 1, fh[1] - 1, 2, 2, D); r(fh[0] - 0.5, fh[1] - 0.5, 1, 1, K);
+    OX -= lean; OY -= bob;
+  }
+
   /* The 32 bit pass: light from the top left. Outlines take the colour of what they wrap (lighter on the lit
      side), an inner bevel adds volume, and a soft top to bottom falloff rounds things off. */
   function shade(c) {
@@ -400,7 +567,8 @@
     g = c.getContext('2d');
     if (face < 0) { g.translate(36 * SS, 0); g.scale(-1, 1); }
     OX = 6; OY = 4;
-    body(pose, f, bl, era, look, sq);
+    if (pose === 'swalk' || pose === 'sjump') sideBody(pose, f, bl, era, look || 0);
+    else body(pose, f, bl, era, look, sq);
     shade(c);
     SS = 1;
     useSkin('pre');
@@ -1090,7 +1258,7 @@
     '4': '101101111001001', '5': '111100110001110', '6': '011100111101111', '7': '111001010010010',
     '8': '111101111101111', '9': '111101111001110',
     '-': '000000111000000', '+': '000010111010000', '!': '010010010000010', '.': '000000000000010',
-    "'": '010010000000000', ' ': '000000000000000', '?': '110001010000010'
+    "'": '010010000000000', ',': '000000000010100', ' ': '000000000000000', '?': '110001010000010'
   };
   function glyph(ctx, ch, x, y, c) {
     var gl = GLY[ch] || GLY['?'];
