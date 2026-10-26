@@ -8,7 +8,7 @@
       name: 'Prehistoric',
       team: 'Stone Snags',
       when: 'about 10,000 BC',
-      tag: '#ffa04d',
+      tag: '#ff7f5a',
       ui: '#ef7724',
       names: ['Ug', 'Bonk', 'Grub', 'Flint', 'Mossy', 'Pebbles', 'Thud', 'Ogg', 'Nubs',
               'Stomp', 'Twig', 'Bramble', 'Clunk', 'Grunt', 'Boulder', 'Dusty'],

@@ -28,6 +28,19 @@
   /* Local sprite space: 24 wide, feet on row 24, body centre line at x = 12, facing right.
      Light comes from the top left, so shadows sit low and to the right. */
   var KS = '#668236', KL = '#a9c45e', SP2 = '#6f8a3a', EI = '#d98a80', TG = '#e0707a', FT = '#334818';
+  /* skin palettes: each squad has its own, and extra looks can be unlocked.
+     order: outline, skin, highlight, shade, light, spots, feet */
+  var SKINS = {
+    pre:   ['#2e3a17', '#8aa64a', '#b5c96f', '#668236', '#a9c45e', '#6f8a3a', '#334818'],
+    egypt: ['#3d3314', '#b9a64c', '#ddcf80', '#8e7d34', '#cfc068', '#9a873a', '#4c4018'],
+    fut:   ['#153a38', '#4fae9c', '#93dfcc', '#37857a', '#78cdb8', '#3f9584', '#1a4440'],
+    gold:  ['#4a3510', '#e0b040', '#ffe08a', '#b8861e', '#f0cc5e', '#c99a2a', '#5a4010'],
+    night: ['#1a1636', '#5f54a8', '#958adc', '#463c8a', '#7a6ec4', '#4e4496', '#211a44'],
+    ember: ['#3a1610', '#c95a30', '#f09c6c', '#9c4020', '#e27c4c', '#ac4c2a', '#4a1a10'],
+    ghost: ['#3a4048', '#c9d3da', '#f2f7fa', '#a3afb8', '#dfe8ec', '#b4bfc6', '#4a525a']
+  };
+  S.SKINS = SKINS;
+  function useSkin(name) { var k = SKINS[name] || SKINS.pre; D = k[0]; K = k[1]; BL = k[2]; KS = k[3]; KL = k[4]; SP2 = k[5]; FT = k[6]; }
 
   /* filled triangle, pixel centres inside the three edges */
   function tri(ax, ay, bx, by, cx, cy, c) {
@@ -233,17 +246,20 @@
     x2.globalCompositeOperation = 'source-in'; x2.fillStyle = '#ffffff'; x2.fillRect(0, 0, w.width, w.height);
     return w;
   }
-  S.get = function (era, pose, f, bl, face, look, sq, flash) {
-    var k = era + '|' + pose + '|' + f + '|' + (bl ? 1 : 0) + '|' + face + '|' + (look || 0) + '|' + (sq || 0) + (flash ? '|F' : '');
+  S.get = function (era, pose, f, bl, face, look, sq, flash, skin) {
+    skin = skin && SKINS[skin] ? skin : era;
+    var k = era + '|' + pose + '|' + f + '|' + (bl ? 1 : 0) + '|' + face + '|' + (look || 0) + '|' + (sq || 0) + (flash ? '|F' : '') + '|' + skin;
     var c = cache[k];
     if (c) return c;
-    if (flash) { c = flashOf(S.get(era, pose, f, bl, face, look, sq, false)); cache[k] = c; return c; }
+    if (flash) { c = flashOf(S.get(era, pose, f, bl, face, look, sq, false, skin)); cache[k] = c; return c; }
+    useSkin(skin);
     c = document.createElement('canvas');
     c.width = 36; c.height = 32;
     g = c.getContext('2d');
     if (face < 0) { g.translate(36, 0); g.scale(-1, 1); }
     OX = 6; OY = 4;
     body(pose, f, bl, era, look, sq);
+    useSkin('pre');
     cache[k] = c;
     return c;
   };
@@ -252,7 +268,7 @@
      o (optional): { look: -1 up / 1 down, sq: -1 squash / 1 stretch, flash: true for a white hit flash } */
   S.draw = function (ctx, x, y, face, era, pose, f, bl, rot, alpha, o) {
     o = o || {};
-    var c = S.get(era, pose, f, bl, face, o.look, o.sq, o.flash);
+    var c = S.get(era, pose, f, bl, face, o.look, o.sq, o.flash, o.skin);
     var X = Math.round(x), Y = Math.round(y);
     if (alpha !== undefined && alpha < 1) ctx.globalAlpha = Math.max(0, alpha);
     if (rot) {
