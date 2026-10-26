@@ -44,14 +44,22 @@
     sled:     { kind: 'sled', fuel: 300, tool: true },
     sandwall: { kind: 'dune', ammo: 2 },
     sun:      { kind: 'strike', style: 'sun', R: 32, dmg: 52, ammo: 1, unlock: 10, knock: 1.1 },
+    /* Eagle Snags: Roman engineering. Javelins, bolts, roads and teamwork */
+    pilum:    { kind: 'proj', wind: true, impact: true, R: 10, dmg: 14, direct: 32, pierce: true, vmax: 10.5, grav: 0.7, ammo: 3 },
+    ballista: { kind: 'proj', wind: false, impact: true, R: 23, dmg: 42, vmax: 12, grav: 0.22, ammo: 3 },
+    road:     { kind: 'road', tool: true, ammo: 2 },
+    testudo:  { kind: 'testudo', ammo: 2 },
+    onager:   { kind: 'strike', style: 'onager', R: 24, dmg: 34, ammo: 1, unlock: 10, knock: 1.1 },
     /* Sudden Death */
-    meteor:  { kind: 'proj', wind: false, impact: true, R: 18, dmg: 22 }
+    meteor:  { kind: 'proj', wind: false, impact: true, R: 18, dmg: 22 },
+    /* map events */
+    dronebomb: { kind: 'proj', wind: false, impact: true, R: 16, dmg: 18 }
   };
   var SD_TURN = 24;
   var WORDER = ['lob', 'bomb', 'shove', 'dig'];
   var MAP = MAPS.jungle, LOOK = 'normal';
   var ARTS = window.B5ARTEFACTS, JAY = window.B5JAY, TL = window.B5TIMELINE, RIPPLE = window.B5RIPPLE;
-  var MAP_IDS = ['jungle', 'desert', 'city'];
+  var MAP_IDS = ['jungle', 'desert', 'wall', 'city'];
   var READY = TL.filter(function (e) { return e.ready && ER[e.id]; }).map(function (e) { return e.id; });
   function realOf(mid) { return ARTS[mid] || ARTS.jungle; }
   function glitchOf(mid) { return ARTS[mid === 'jungle' ? 'glitches' : mid + 'Glitches'] || ARTS.glitches; }
@@ -67,7 +75,8 @@
   var AIP = {
     pre:   { fw: 1.0, lob: 1,    bomb: 1.15, shove: 1.4, kill: 25, water: 6 },
     fut:   { fw: 2.0, lob: 1.1,  bomb: 1,    shove: 1,   kill: 25, water: 6 },
-    egypt: { fw: 2.5, lob: 1.05, bomb: 1.05, shove: 1.1, kill: 40, water: 16, weak: 0.6 }
+    egypt: { fw: 2.5, lob: 1.05, bomb: 1.05, shove: 1.1, kill: 40, water: 16, weak: 0.6 },
+    rome:  { fw: 1.6, lob: 1, bomb: 1.05, shove: 1.25, kill: 36, water: 12 }
   };
   function allArts() { var a = []; MAP_IDS.forEach(function (m) { a = a.concat(realOf(m), glitchOf(m)); }); return a; }
   function setMap(id, look) { MAP = MAPS[id] || MAPS.jungle; LOOK = look || 'normal'; game.cars = []; buildSky(); buildCityBg(); }
@@ -377,6 +386,110 @@
     miniDirty = true;
   }
   function blend(a, b, t) { return [a[0] + (b[0] - a[0]) * t | 0, a[1] + (b[1] - a[1]) * t | 0, a[2] + (b[2] - a[2]) * t | 0]; }
+  /* ---------- Hadrian's Wall: rolling crags, the Wall along the ridge with gaps, a milecastle you can walk
+     through, turrets with rooms, a ditch in front. zones: 0 grass and earth, 1 wall stone, 3 roof tiles ---------- */
+  function genWall(seed) {
+    var R = rng(seed), x, y, i, k;
+    mask.fill(0); burnt.fill(0); zone.fill(0);
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283, cr = 0.3 + R() * 0.4, flip = R() < 0.5 ? 1 : -1;
+    var tops = new Float32Array(WW);
+    for (x = 0; x < WW; x++) {
+      var t = x / WW;
+      var h = 292 - 24 * Math.sin(t * 6.283 * 1.1 + p1) - 12 * Math.sin(t * 6.283 * 2.7 + p2) - 4 * Math.sin(t * 6.283 * 7.9 + p3);
+      /* a crag: the ground steps up sharply where hard rock breaks through, as it does along the real Wall */
+      h -= 36 / (1 + Math.exp(-(t - cr) * 30 * flip));
+      var edge = Math.min(x, WW - 1 - x);
+      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      tops[x] = h;
+    }
+    for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
+    function put(xx, yy, z) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; mask[ii] = 1; zone[ii] = z; }
+    function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
+    var wx0 = Math.round(150 + R() * 60), wx1 = Math.round(WW - 150 - R() * 60);
+    /* gaps where the Wall has tumbled down */
+    var gaps = [], ng = 1 + (R() < 0.6 ? 1 : 0);
+    for (k = 0; k < ng; k++) { var gx = Math.round(wx0 + 80 + R() * (wx1 - wx0 - 160)); gaps.push([gx, gx + 26 + Math.floor(R() * 16)]); }
+    function inGap(xx) { for (var q = 0; q < gaps.length; q++) if (xx >= gaps[q][0] && xx < gaps[q][1]) return true; return false; }
+    for (x = wx0; x <= wx1; x++) {
+      if (inGap(x)) { if (hash(x, 3) < 0.35) for (y = gAt(x) - 4; y < gAt(x) + 2; y++) put(x, y, 1); continue; }
+      var top = gAt(x) - 18 - (((x - wx0) % 10) < 4 ? 4 : 0);
+      for (y = top; y < gAt(x) + 3; y++) put(x, y, 1);
+    }
+    /* a milecastle with a gate arch you can walk through */
+    var mc = Math.round(wx0 + (wx1 - wx0) * (0.35 + R() * 0.3)), mw = 56, mg = 0;
+    for (x = mc - mw / 2; x < mc + mw / 2; x++) mg = Math.max(mg, gAt(x));
+    for (x = mc - mw / 2; x < mc + mw / 2; x++) {
+      var mtop = mg - 40 - ((((x - (mc - mw / 2)) % 10) < 4) ? 4 : 0);
+      for (y = mtop; y < gAt(x) + 3; y++) put(x, y, 1);
+    }
+    for (x = mc - 9; x <= mc + 9; x++) for (y = mg - 22; y < mg + 1; y++) {
+      var ax = (x - mc) / 9.5, ay = (mg - 13 - y) / 9;
+      if (y > mg - 13 || ax * ax + ay * ay <= 1) { var ii2 = y * WW + x; if (zone[ii2] === 1) mask[ii2] = 0; }
+    }
+    /* two turrets with a room inside and a tiled roof */
+    var tx = [wx0 + Math.round((mc - wx0) * 0.5), mc + Math.round((wx1 - mc) * 0.5)];
+    tx.forEach(function (cx) {
+      if (inGap(cx) || inGap(cx - 12) || inGap(cx + 12)) return;
+      var tg = Math.max(gAt(cx - 11), gAt(cx + 11)), ttop = tg - 42;
+      for (x = cx - 11; x <= cx + 11; x++) for (y = ttop; y < gAt(x) + 3; y++) put(x, y, 1);
+      for (x = cx - 7; x <= cx + 7; x++) for (y = ttop + 8; y < ttop + 30; y++) { var ri = y * WW + x; mask[ri] = 0; }
+      for (y = ttop + 12; y < ttop + 30; y++) for (x = cx + 7; x <= cx + 11; x++) mask[y * WW + x] = 0;
+      for (k = 0; k < 9; k++) for (x = cx - 13 + k; x <= cx + 13 - k; x++) put(x, ttop - 1 - k, 3);
+    });
+    /* the ditch dug in front of the Wall */
+    var dx = R() < 0.5 ? wx0 + 30 + R() * 80 : wx1 - 30 - R() * 80;
+    blob(dx, gAt(dx) + 2, 22, 9, 0);
+    /* hollows underground */
+    for (i = 0; i < 2; i++) { var hx = 220 + R() * (WW - 440); blob(hx, gAt(hx) + 52 + R() * 26, 22 + R() * 12, 8 + R() * 4, 0); }
+    paintWall();
+  }
+  function paintWall() {
+    var P = MAP.pal, x, y, i, look = LOOK;
+    img = tctx.createImageData(WW, WH); data = img.data;
+    for (x = 0; x < WW; x++) {
+      var d = 0, pz = -1;
+      for (y = 0; y < WH; y++) {
+        i = y * WW + x;
+        if (!mask[i]) { d = 0; pz = -1; continue; }
+        var z = zone[i], nz = hash(x, y), col;
+        if (z === 0 && pz > 0) d = 5;
+        pz = z;
+        if (z === 1) {
+          var row = (y / 5) | 0, bx = (x + (row % 2) * 5) % 10, mort = bx === 0 || y % 5 === 0;
+          if (look === 'turf') col = d < 2 ? P.turf1 : ((y % 4) === 0 ? P.deep : (nz < 0.5 ? P.turf2 : P.earth1));
+          else if (look === 'golden') col = d < 1 ? P.gold : (mort ? [214, 206, 188] : P.white);
+          else if (look === 'neon') col = d < 1 || !mask[i - 1] || !mask[i + 1] ? (hash(x >> 3, 1) < 0.5 ? P.neon : P.neon2) : (mort ? P.nstone2 : P.nstone);
+          else col = d < 1 ? P.ston1 : (mort ? P.mortar : (hash(((x + (row % 2) * 5) / 10) | 0, row) < 0.25 ? P.stonD : (nz < 0.5 ? P.ston1 : P.ston2)));
+        } else if (z === 3) {
+          col = look === 'neon' ? P.neon2 : ((y % 3) === 0 ? [130, 58, 42] : P.tile);
+        } else {
+          if (d < 2) col = look === 'neon' ? [70, 96, 120] : P.grass1;
+          else if (d < 4) col = look === 'neon' ? [52, 70, 92] : P.grass2;
+          else {
+            col = ((((y + (x >> 5) * 3) >> 2) % 7) === 0) ? P.earth2 : P.earth1;
+            if (look === 'neon') col = blend(col, [44, 40, 80], 0.5);
+            if (d > 60 + hash(y, x) * 12) col = P.deep;
+            if (nz < 0.04) col = P.speck;
+          }
+        }
+        setPx(i, col);
+        d++;
+      }
+    }
+    /* grass tufts and a few flowers on the turf: decoration only */
+    for (x = 1; x < WW - 1; x++) {
+      for (y = 3; y < WH; y++) {
+        i = y * WW + x;
+        if (mask[i] && !mask[i - WW] && zone[i] === 0 && look !== 'neon') {
+          var hv = hash(x * 3, y);
+          if (hv < 0.3) { setPx(i - WW, P.tuft); if (hv < 0.1) setPx(i - 2 * WW, P.tuft); }
+          else if (hv > 0.985) { setPx(i - WW, P.tuft); setPx(i - 2 * WW, hv > 0.993 ? P.flower2 : P.flower); }
+        }
+      }
+    }
+    tctx.putImageData(img, 0, 0);
+    miniDirty = true;
+  }
   function paintCity() {
     var P = MAP.pal, x, y, i, wild = LOOK === 'overgrown', bright = LOOK === 'gleaming', sandy = LOOK === 'sandy', k2;
     if (sandy && MAP.sandy) { P = {}; for (k2 in MAP.pal) P[k2] = MAP.pal[k2]; for (k2 in MAP.sandy) P[k2] = MAP.sandy[k2]; }
@@ -430,6 +543,7 @@
   function genTerrain(seed) {
     if (MAP.style === 'city') { genCity(seed); return; }
     if (MAP.style === 'desert') { genDesert(seed); return; }
+    if (MAP.style === 'wall') { genWall(seed); return; }
     var R = rng(seed), x, y, i;
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
     var a1 = 28 + R() * 22, a2 = 14 + R() * 12, a3 = 5 + R() * 5;
@@ -730,7 +844,7 @@
 
   function hurt(c, dm, src) {
     if (!c.alive || dm <= 0) return;
-    if (c.shield) dm = Math.max(1, Math.round(dm / 2));
+    if (c.shield && !(src && src.type && WEAP[src.type] && WEAP[src.type].pierce)) dm = Math.max(1, Math.round(dm / 2));
     var before = c.hp;
     c.hp = Math.max(0, c.hp - dm); c.hurtT = 45;
     c.ghost = Math.max(c.ghost || 0, before); c.ghostT = 40;
@@ -1011,7 +1125,7 @@
   }
 
   /* ---------------- era barrels: tar pots, oil jars and fuel cells that set each other off ---------------- */
-  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel' };
+  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil' };
   function placeBarrels() {
     game.barrels = [];
     var n = 2 + Math.floor(Math.random() * 3), kind = BARREL[MAP.era] || 'tar';
@@ -1186,6 +1300,7 @@
       if (bt === 10) SP.jay(jayCv, false, 'blink'); else if (bt === 4) SP.jay(jayCv, false, jayMood === 'wow' ? null : jayMood);
     }
     if (jayHide > 0 && --jayHide === 0) $('jay').hidden = true;
+    if (game.train && $('jay').hidden) trainSay();
   }
 
   /* ---------------- birds (Jay likes birds) ---------------- */
@@ -1225,7 +1340,7 @@
     game.swingT = 0; game.digT = 0; game.timer = game.turnLen * 60; game.lookT = 0;
     game.weapon = team.lastWeapon || 'lob';
     if (!avail(team, game.weapon).ok && !WEAP[game.weapon].tool) game.weapon = 'lob';
-    team.members.forEach(function (m) { m.shield = false; });
+    team.members.forEach(function (m) { m.shield = false; m.testudo = false; });
     game.fuel = WEAP.jet.fuel; game.sledFuel = WEAP.sled.fuel; game.tx = null;
     game.wind = rollWind();
     if (game.opts && game.opts.sd !== 'off' && !game.sudden && game.turnNo >= SD_TURN) {
@@ -1238,9 +1353,12 @@
       });
       say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
     }
+    if (game.gale > 0) { game.gale--; game.wind = (Math.random() < 0.5 ? -1 : 1) * (7 + Math.floor(Math.random() * 4)); }
+    if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner('The Nile floods!', null, '#3a8a9a', 'pin'); }
+    else if (game.flood && game.flood.phase === 'rise' && game.turnNo >= game.flood.until) game.flood.phase = 'fall';
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
-    banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
+    if (!(game.opts && game.opts.training)) banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
     sfx('turn', { pre: 1, egypt: 2, fut: 3 }[team.era] || 0);
     voice(team.era, 'turn');
     musicEra(team.era);
@@ -1251,6 +1369,7 @@
 
   function nextTurn() {
     var cur = game.teams[game.tIdx];
+    if (game.opts && game.opts.training) { game.tIdx = 0; startTurn(); return; }
     if (cur && cur.bonus && teamAlive(cur)) { cur.bonus = false; startTurn(); return; }
     var n = game.teams.length;
     for (var k = 0; k < n; k++) {
@@ -1278,14 +1397,164 @@
     game.settleAll = (game.settleAll || 0) + 1;
     if (busy && game.settleAll < 900) { game.settleT = 0; return; }
     if (++game.settleT < 16) return;
+    if (game.opts && game.opts.training) game.snags.forEach(function (s) { if (s.alive && s.hp <= 0) { s.hp = 100; s.ghost = 100; } });
     var dying = game.snags.filter(function (s) { return s.alive && s.hp <= 0; });
     if (dying.length) { dying.forEach(zapHome); game.state = 'portals'; game.portT = 80; return; }
     afterSettle();
   }
 
-  function afterSettle() { if (checkOver()) return; nextTurn(); }
+  function afterSettle() { if (checkOver()) return; if (eventDue() && startEvent()) return; nextTurn(); }
+
+  /* ---------------- map events: every place has its own surprise, always announced before it happens ---------------- */
+  function eventDue() {
+    if (!game.opts || game.opts.ev === 'off' || game.opts.training || game.sudden || TEST === 'aivai' && Q.get('ev') !== 'on') return false;
+    return game.turnNo >= (game.evNext || 6);
+  }
+  /* returns true when the event takes over the screen for a moment */
+  function startEvent() {
+    game.evNext = game.turnNo + 7;
+    var st = MAP.style;
+    if (st === 'desert') {
+      if (game.flood) return false;
+      game.flood = { phase: 'warn', base: WATER, level: WATER - 26, at: game.turnNo + 2 };
+      banner('The Nile will flood!', null, '#3a8a9a', 'pin'); say('flood', true); sfx('splash');
+      game.look = { x: cam.x + VW / 2, y: WATER - 30 }; game.lookT = 120;
+      return false;
+    }
+    if (st === 'wall') {
+      game.gale = 4;
+      banner('Gale!', null, '#8fa6a8', 'wind'); say('gale', true); sfx('whoosh');
+      return false;
+    }
+    var ev = { kind: st === 'city' ? 'drones' : 'stampede', t: 0, dir: Math.random() < 0.5 ? 1 : -1, fx: WW / 2, fy: 200 };
+    if (ev.kind === 'stampede') {
+      ev.herd = [0, 1, 2].map(function (k) { return { x: (ev.dir > 0 ? -40 : WW + 40) - ev.dir * k * 46, y: 0, hit: [] }; });
+      ev.fx = ev.dir > 0 ? VW / 2 : WW - VW / 2; ev.fy = surfaceY(clamp(ev.fx, 10, WW - 10)) - 30;
+      banner('Stampede!', null, '#9c6a38', 'next'); say('stampede', true);
+    } else {
+      var alive = game.snags.filter(function (c) { return c.alive; });
+      ev.list = [0, 1, 2].map(function (k) {
+        var tg = alive.length ? alive[Math.floor(Math.random() * alive.length)] : null, tx = clamp((tg ? tg.x : 200 + Math.random() * (WW - 400)) + rand(-40, 40), 30, WW - 30);
+        return { tx: tx, x: ev.dir > 0 ? -30 - k * 70 : WW + 30 + k * 70, y: 40, dropped: false };
+      });
+      banner('Drones!', null, '#ff6b9a', 'target'); say('drones', true);
+    }
+    game.event = ev; game.state = 'event';
+    return true;
+  }
+  function updEvent() {
+    var ev = game.event;
+    if (!ev) { game.state = 'settle'; game.settleT = 0; game.settleAll = 0; return; }
+    ev.t++;
+    if (ev.kind === 'stampede') {
+      if (ev.t < 100) {
+        /* the warning: a rumble and dust at the edge the herd is coming from */
+        if (!reduceMotion) game.shake = Math.max(game.shake, 0.8);
+        if (ev.t % 18 === 0) sfx('land', 1);
+        if (ev.t % 6 === 0) { var ex = ev.dir > 0 ? 8 : WW - 8; dust(ex + rand(-6, 6), surfaceY(ex), 2, 4); }
+        return;
+      }
+      var done = true;
+      ev.herd.forEach(function (m) {
+        m.x += ev.dir * 2.3;
+        var sy = surfaceY(clamp(m.x, 0, WW - 1));
+        if (sy > 0) m.y = m.y ? m.y + clamp(sy - m.y, -4, 4) : sy;
+        if (m.x > -60 && m.x < WW + 60) done = false;
+        if (game.t % 5 === 0 && m.x > 0 && m.x < WW) dust(m.x - ev.dir * 10, m.y, 2, 4);
+        game.snags.forEach(function (c, ci) {
+          if (!c.alive || m.hit.indexOf(ci) >= 0) return;
+          if (Math.abs(c.x - m.x) < 14 && Math.abs(c.y - m.y) < 24) {
+            m.hit.push(ci); hurt(c, 12, null);
+            c.vx = ev.dir * 3.2; c.vy = -3.4; c.st = 'air'; c.knock = true; c.swing = null; c.jet = false; c.sled = false;
+            if (bodyClear(c.x, c.y - 1)) c.y -= 1;
+            sfx('bonk');
+          }
+        });
+      });
+      var lead = ev.herd[0];
+      ev.fx = clamp(lead.x, VW / 2, WW - VW / 2); ev.fy = (lead.y || 260) - 30;
+      if (game.t % 22 === 0) sfx('land', 1);
+      if (done) { game.event = null; game.state = 'settle'; game.settleT = 0; game.settleAll = 0; }
+    } else {
+      var gone = true;
+      ev.list.forEach(function (d, k) {
+        if (ev.t < 40 + k * 26) { gone = false; return; }
+        d.x += ev.dir * 2.6;
+        if (!d.dropped && Math.abs(d.x - d.tx) < 2) {
+          d.dropped = true;
+          game.projs.push({ type: 'dronebomb', era: 'fut', x: d.x, y: d.y + 6, vx: 0, vy: 0.5, age: 0, by: null, trail: [], rest: false });
+          sfx('click');
+        }
+        if (d.x > -40 && d.x < WW + 40) gone = false;
+        if (game.t % 9 === 0) sfx('jet');
+      });
+      var act = ev.list.filter(function (d) { return !d.dropped; })[0] || ev.list[ev.list.length - 1];
+      ev.fx = clamp(act.tx, VW / 2, WW - VW / 2); ev.fy = Math.max(120, surfaceY(clamp(act.tx, 1, WW - 1)) - 60);
+      if (gone && !game.projs.length) { game.event = null; game.state = 'settle'; game.settleT = 0; game.settleAll = 0; }
+    }
+  }
+  /* the flood rises a round after its warning and drains away a few goes later */
+  function updFlood() {
+    var f = game.flood;
+    if (!f) return;
+    if (f.phase === 'rise') { if (WATER > f.level) { WATER = Math.max(f.level, WATER - 0.2); if (game.t % 20 === 0) miniDirty = true; } }
+    else if (f.phase === 'fall') { WATER = Math.min(f.base, WATER + 0.2); if (game.t % 20 === 0) miniDirty = true; if (WATER >= f.base) { game.flood = null; miniDirty = true; } }
+  }
+  function drawEvent(t) {
+    var ev = game.event;
+    if (game.flood && game.flood.phase === 'warn') {
+      /* where the water will reach */
+      var L = Math.round(game.flood.level), x0 = Math.round(cam.x);
+      for (var x = x0 - (x0 % 6); x < x0 + VW; x += 6) { ctx.fillStyle = (x / 6) % 2 ? '#9fe3f5' : '#3a8a9a'; ctx.fillRect(x, L, 4, 1); }
+    }
+    if (!ev) return;
+    if (ev.kind === 'stampede') {
+      ev.herd.forEach(function (m, k) {
+        if (ev.t < 100 || !m.y) return;
+        var X = Math.round(m.x), Y = Math.round(m.y), d = ev.dir, step = ((t >> 2) + k) % 2;
+        /* a woolly mammoth facing the way it runs: a hump, a shaggy fringe, curled tusks and a trunk */
+        var R = function (ax, ay, w, h, col) { ctx.fillStyle = col; ctx.fillRect(d > 0 ? X + ax : X - ax - w, Y + ay, w, h); };
+        R(-15, -20, 28, 14, '#2a1a10'); R(-12, -24, 20, 5, '#2a1a10'); R(6, -27, 12, 13, '#2a1a10');
+        R(-14, -19, 26, 12, '#6e4a2c'); R(-11, -23, 18, 4, '#6e4a2c'); R(7, -26, 10, 11, '#6e4a2c');
+        R(-10, -23, 12, 2, '#8a5e3a'); R(8, -26, 5, 2, '#8a5e3a'); R(-14, -15, 3, 4, '#4a2e1a');
+        for (var fr = 0; fr < 13; fr++) R(-14 + fr * 2, -8, 1, 2 + (fr % 2), '#4a2e1a');
+        [-11, -6, 3, 8].forEach(function (lx, li) { R(lx, -8, 3, 8 - ((li + step) % 2) * 2, '#3a2416'); });
+        R(16, -18, 2, 10, '#4a2e1a'); R(17, -9, 2, 2, '#4a2e1a'); R(18, -11, 1, 2, '#4a2e1a');
+        R(14, -15, 2, 1, '#f2ead8'); R(15, -14, 2, 1, '#f2ead8'); R(17, -13, 2, 1, '#f2ead8'); R(19, -15, 1, 2, '#f2ead8');
+        R(12, -22, 1, 1, '#1d1d24'); R(-16, -18, 1, 4, '#3a2416');
+      });
+    } else {
+      ev.list.forEach(function (d, k) {
+        if (!d.dropped) {
+          var gx = Math.round(d.tx), gy = surfaceY(gx); if (gy < 0) gy = Math.round(WATER);
+          ctx.fillStyle = '#ff6b9a';
+          for (var yy = gy - 8; yy > gy - 60; yy -= 6) ctx.fillRect(gx, yy, 1, 3);
+          ctx.fillRect(gx - 4, gy - 2, 9, 1); ctx.fillRect(gx, gy - 6, 1, 9);
+        }
+        if (ev.t < 40 + k * 26) return;
+        var X = Math.round(d.x), Y = Math.round(d.y), sp = (t >> 1) % 2;
+        ctx.fillStyle = '#1f2a30'; ctx.fillRect(X - 5, Y - 1, 11, 4);
+        ctx.fillStyle = '#5a6478'; ctx.fillRect(X - 4, Y, 9, 2);
+        ctx.fillStyle = '#c3c9d4'; ctx.fillRect(X - 7 + sp * 2, Y - 3, 4, 1); ctx.fillRect(X + 4 - sp * 2, Y - 3, 4, 1);
+        ctx.fillStyle = (t >> 3) % 2 ? '#ff6b9a' : '#ffd27a'; ctx.fillRect(X, Y + 2, 1, 1);
+        if (!d.dropped) { ctx.fillStyle = '#4e5870'; ctx.fillRect(X - 2, Y + 3, 5, 4); ctx.fillStyle = '#5fe0f0'; ctx.fillRect(X - 2, Y + 5, 5, 1); }
+      });
+    }
+  }
+  /* a gale on the Wall: rain driving sideways */
+  function drawGale(t) {
+    if (!(game.gale > 0)) return;
+    var dir = game.wind < 0 ? -1 : 1, n = reduceMotion ? 40 : 90;
+    ctx.fillStyle = 'rgba(60,70,90,0.12)'; ctx.fillRect(0, 0, VW, VH);
+    for (var k = 0; k < n; k++) {
+      var x = ((hash(k, 1) * (VW + 60) + dir * t * 4) % (VW + 60) + VW + 60) % (VW + 60) - 30, y = ((hash(k, 2) * (VH + 40) + t * 6) % (VH + 40)) - 20;
+      ctx.fillStyle = k % 3 ? 'rgba(200,214,226,0.55)' : 'rgba(240,246,250,0.6)';
+      for (var q = 0; q < 5; q++) ctx.fillRect(Math.round(x + dir * q), Math.round(y + q * 2), 1, 2);
+    }
+  }
 
   function checkOver() {
+    if (game.opts && game.opts.training) return false;
     var left = game.teams.filter(teamAlive);
     if (left.length > 1) return false;
     game.winner = left[0] || null; game.state = 'over'; game.active = null;
@@ -1316,6 +1585,7 @@
     if (w.kind === 'vine') { useVine(c); return; }
     if (w.kind === 'jet') { useJet(c); return; }
     if (w.kind === 'sled') { useSled(c); return; }
+    if (w.kind === 'road') { buildRoad(c); return; }
     if (game.fired) return;
     if (c.st !== 'ground') { game.charging = false; game.power = 0; return; }
     var av = avail(c.team, wid);
@@ -1355,6 +1625,14 @@
     else if (w.kind === 'shield') {
       c.shield = true; c.cheerT = 30; sfx('twinkle');
       for (var k = 0; k < 12; k++) addPart({ k: 'spark', x: c.x + rand(-8, 8), y: c.y - rand(2, 22), vx: rand(-0.4, 0.4), vy: rand(-0.8, -0.2), life: 30 });
+    } else if (w.kind === 'testudo') {
+      /* tortoise formation: every Snag of yours nearby raises a shield until your next go */
+      c.team.members.forEach(function (m) {
+        if (!m.alive || Math.abs(m.x - c.x) > 80 || Math.abs(m.y - c.y) > 60) return;
+        m.shield = true; m.testudo = true; m.cheerT = 24;
+        for (var q = 0; q < 8; q++) addPart({ k: 'spark', x: m.x + rand(-7, 7), y: m.y - rand(4, 24), vx: rand(-0.4, 0.4), vy: rand(-0.8, -0.2), life: 26 });
+      });
+      sfx('lock'); say('testudo', true);
     } else if (w.kind === 'strike') startStrike(c, game.tx === null ? c.x + c.face * 150 : game.tx, wid);
     else if (w.kind === 'bark') {
       var bx = c.x + c.face * 14, by = groundY(bx, c.y - 12);
@@ -1415,7 +1693,7 @@
     var dir = p.vx >= 0 ? 1 : -1, k = h.shield ? 0.5 : 1;
     h.vx = dir * 2.4 * k; h.vy = -2.2 * k; h.st = 'air'; h.knock = true; h.swing = null; h.jet = false; h.sled = false;
     if (bodyClear(h.x, h.y - 1)) h.y -= 1;
-    say('spear', true);
+    say(p.type === 'pilum' ? 'pilum' : 'spear', true);
   }
 
   /* ---------- Scarab Beetle: once it lands it scuttles after the nearest enemy ---------- */
@@ -1503,6 +1781,30 @@
     for (var k = 0; k < 10; k++) addPart({ k: 'deb', x: cx + rand(-4, 4), y: gy - 2, vx: rand(-1, 1), vy: rand(-1.8, -0.4), life: 30, col: 'rgb(160,152,140)' });
   }
 
+  /* ---------- Roman Road: a straight stone road laid ahead, even across gaps ---------- */
+  function buildRoad(c) {
+    var av = avail(c.team, 'road');
+    if (!av.ok) { banner('x0', null, '#ffc24a', 'kit'); return; }
+    if (c.st !== 'ground') return;
+    useAmmo(c.team, 'road');
+    var y0 = Math.round(c.y), x0 = Math.round(c.x + c.face * 5), n = 0;
+    for (var k = 0; k < 52; k++) {
+      var x = x0 + c.face * k;
+      if (x < 2 || x >= WW - 2) break;
+      for (var y = y0; y < y0 + 4; y++) {
+        var i = y * WW + x;
+        if (y >= WH || mask[i]) continue;
+        mask[i] = 1; burnt[i] = 0; zone[i] = 1; n++;
+        setPx(i, y === y0 ? [207, 198, 180] : (((x + (y === y0 + 1 ? 0 : 3)) % 7) === 0 ? [96, 90, 82] : (hash(x, y) < 0.5 ? [168, 161, 151] : [140, 133, 123])));
+      }
+    }
+    var lo = c.face > 0 ? x0 : x0 - 52;
+    tctx.putImageData(img, 0, 0, Math.max(0, lo - 1), y0, 55, 5);
+    miniDirty = true;
+    sfx('bonk'); game.shake = Math.max(game.shake, 1.2); say('road');
+    for (var q = 0; q < 12; q++) addPart({ k: 'dust', x: x0 + c.face * rand(0, 50), y: y0 - 1, vx: rand(-0.3, 0.3), vy: rand(-0.4, -0.1), life: 24, max: 24, r: rand(1, 2.2), col: '#d8cfc0' });
+  }
+
   /* ---------- Sand Barrier: piles up a dune of new solid sand ---------- */
   function buildDune(c) {
     var cx = Math.round(c.x + c.face * 17), gy = groundY(cx, c.y - 24), rw = 15, rh = 17, x, y, x0 = WW, x1 = 0, y0 = WH;
@@ -1550,6 +1852,11 @@
   /* ---------- superweapon strikes ---------- */
   function startStrike(c, tx, wid) {
     var w = WEAP[wid];
+    if (w.style === 'onager') {
+      for (var k = 0; k < 3; k++) game.strikes.push({ style: 'boulder', small: true, x: clamp(tx + (k - 1) * 26 + rand(-4, 4), 10, WW - 10), y: -60, vy: 1, t: -k * 16, by: c, R: w.R, dmg: w.dmg, kmul: w.knock || 1 });
+      sfx('whoosh'); say('onager', true);
+      return;
+    }
     game.strikes.push({ style: w.style, x: clamp(tx, 10, WW - 10), y: -60, vy: 1, t: 0, by: c, R: w.R, dmg: w.dmg, kmul: w.knock || 1 });
     sfx(w.style === 'beam' ? 'zap' : (w.style === 'sun' ? 'twinkle' : 'whoosh')); say(w.style === 'sun' ? 'sun' : 'strike', true);
   }
@@ -1704,7 +2011,7 @@
             if (!res) continue;
             if (extra === 'nowater' && res.water) continue;
             var sc = res.water ? -1 : scoreAt(res.x, res.y, WEAP[wid].R, WEAP[wid].dmg, team, fw, c);
-            if (extra === 'spear' && res.hit && res.hit !== c) sc += res.hit.team !== team ? WEAP.spear.direct + (res.hit.hp <= WEAP.spear.direct + 8 ? A.kill : 0) + (res.hit.y > WATER - 60 ? A.water : 0) : -WEAP.spear.direct * fw;
+            if (extra === 'spear' && res.hit && res.hit !== c) { var dr = WEAP[wid].direct; sc += res.hit.team !== team ? dr + (res.hit.hp <= dr + 8 ? A.kill : 0) + (res.hit.y > WATER - 60 ? A.water : 0) : -dr * fw; }
             if (extra === 'nowater') { var tg = nearestFrom(res.x, res.y); if (tg && Math.abs(c.x - res.x) > 30) sc = Math.max(sc, scoreAt(tg.x, tg.y - 6, WEAP[wid].R, WEAP[wid].dmg, team, fw, c) * 0.75); }
             cands.push({ weapon: wid, face: face, aim: a, power: pw, score: sc * mult });
           }
@@ -1718,6 +2025,8 @@
       if (kitHas(team, 'boulder') && avail(team, 'boulder').ok) sweep('boulder', face, -10, 70, 10, 30, 100, 10, 1.25);
       if (kitHas(team, 'disc') && avail(team, 'disc').ok) sweep('disc', face, -40, 60, 4, 80, 80, 10, 1.2);
       if (kitHas(team, 'spear') && avail(team, 'spear').ok) sweep('spear', face, -30, 60, 3, 50, 100, 10, 1.1, 'spear');
+      if (kitHas(team, 'pilum') && avail(team, 'pilum').ok) sweep('pilum', face, -30, 60, 3, 50, 100, 10, 1.1, 'spear');
+      if (kitHas(team, 'ballista') && avail(team, 'ballista').ok) sweep('ballista', face, -30, 40, 3, 60, 100, 10, 1.2);
       if (kitHas(team, 'scarab') && avail(team, 'scarab').ok) sweep('scarab', face, -10, 70, 10, 30, 100, 10, 1.05, 'nowater');
       if (kitHas(team, 'laser') && avail(team, 'laser').ok) (function (face) {
         jobs.push(function () {
@@ -1860,6 +2169,7 @@
     }
     if (!canAct() || c.st !== 'ground' || game.charging) return;
     jump(c, back);
+    if (game.train) game.train.jumped = true;
   }
   function firePress() {
     if (!humanTurn() || game.state !== 'play') return;
@@ -1891,6 +2201,7 @@
     if (game.swingT > 0) { game.swingT--; if (game.swingT === 12) doShove(c); }
     if (game.digT > 0) { game.digT--; doDig(c); }
     if (c.team.ctrl === 'ai') { aiTick(c); return; }
+    if (c.team.ctrl === 'dummy') return;
     if (game.overlay) return;
     var busy = game.swingT > 0 || game.digT > 0, kind = WEAP[game.weapon].kind;
     if (kind === 'strike' && game.state === 'play' && !game.fired) {
@@ -2124,6 +2435,10 @@
           if (s % 8 === 4) tone('sine', 150, 68, 0.16, 0.26, musG, t);
           if (s % 8 === 3 || s % 8 === 6) noise(0.04, 0.06, 'bandpass', 3200, null, musG, t);
           if (s % 2 === 1) noise(0.02, 0.03, 'highpass', 6000, null, musG, t);
+        } else if (M.drum === 'march') {
+          if (s % 8 === 0) tone('sine', 110, 50, 0.2, 0.32, musG, t);
+          if (s % 4 === 2) noise(0.06, 0.09, 'bandpass', 2600, null, musG, t);
+          if (s % 8 === 7) { noise(0.03, 0.05, 'bandpass', 3000, null, musG, t); noise(0.03, 0.06, 'bandpass', 3000, null, musG, t + spb * 0.5); }
         } else if (M.drum === 'doumbek') {
           var b8 = s % 8;
           if (b8 === 0 || b8 === 5) tone('sine', 150, 68, 0.2, 0.32, musG, t);
@@ -2159,11 +2474,14 @@
       else if (wid === 'gourd') { tone('triangle', 200, 140, 0.12, 0.12); noise(0.08, 0.1, 'lowpass', 800); }
       else if (wid === 'disc') { tone('sine', 1200, 2400, 0.18, 0.06); tone('triangle', 600, 1200, 0.18, 0.05); }
       else if (wid === 'spear') { noise(0.22, 0.28, 'bandpass', 2400, 700); tone('triangle', 900, 300, 0.2, 0.05); }
+      else if (wid === 'pilum') { noise(0.24, 0.3, 'bandpass', 1800, 500); tone('sine', 160, 80, 0.16, 0.2); }
+      else if (wid === 'ballista') { tone('triangle', 220, 70, 0.22, 0.25); noise(0.05, 0.3, 'highpass', 2000); noise(0.2, 0.12, 'bandpass', 2600, 900, null, now + 0.04); }
       else if (wid === 'scarab') { for (var i = 0; i < 4; i++) noise(0.02, 0.08, 'bandpass', 3000 + i * 300, null, null, now + i * 0.04); tone('sine', 300, 200, 0.12, 0.1); }
       else { noise(0.18, 0.22, 'bandpass', 700, 2600); tone('sine', 140, 60, 0.12, 0.25); }
     } else {
       if (wid === 'boulder') { tone('sine', 70, 30, 0.6, 0.6); noise(0.5, 0.3, 'lowpass', 600, 100, crunch); }
-      else if (wid === 'spear') { tone('square', 160, 90, 0.1, 0.18); noise(0.06, 0.3, 'bandpass', 900, 300); }
+      else if (wid === 'spear' || wid === 'pilum') { tone('square', 160, 90, 0.1, 0.18); noise(0.06, 0.3, 'bandpass', 900, 300); }
+      else if (wid === 'ballista') { noise(0.12, 0.35, 'highpass', 1500); tone('sine', 120, 50, 0.3, 0.3); }
       else if (wid === 'disc') { tone('sine', 2400, 1900, 0.35, 0.07); tone('triangle', 3600, null, 0.25, 0.03, null, now + 0.05); }
       else if (wid === 'scarab') { for (var j = 0; j < 6; j++) noise(0.02, 0.07, 'bandpass', 2500 + Math.random() * 2000, null, null, now + 0.05 + j * 0.035); }
       else if (wid === 'gourd' || wid === 'mega') { tone('sine', 60, 22, 1.0, 0.7); noise(0.9, 0.3, 'lowpass', 800, 80, crunch); }
@@ -2261,7 +2579,8 @@
     for (var i = game.later.length - 1; i >= 0; i--) if (game.t >= game.later[i].t) { var f = game.later[i].fn; game.later.splice(i, 1); f(); }
   }
   function resetWorld() {
-    game.later = [];
+    game.train = null;
+    game.later = []; game.event = null; game.flood = null; game.gale = 0; game.evNext = 0;
     game.projs = []; game.parts = []; game.portals = []; game.snags = []; game.teams = [];
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
@@ -2383,6 +2702,7 @@
     game.t++;
     if (game.slow > 0) game.slow--;
     if (game.later.length) runLater();
+    if (game.train && (game.state === 'play' || game.state === 'retreat')) trainTick();
     if (game.charging && game.t % 4 === 0) sfx('charge', game.power / 100);
     var i;
     if (game.bannerT > 0 && --game.bannerT === 0) $('banner').classList.remove('show');
@@ -2416,6 +2736,10 @@
     } else if (game.state === 'settle') settle();
     else if (game.state === 'portals') { if (--game.portT <= 0) afterSettle(); }
     else if (game.state === 'demo') demoTick();
+    else if (game.state === 'event') updEvent();
+    updFlood();
+    /* gusts: the wind shifts during a go in a gale */
+    if (game.gale > 0 && game.state === 'play' && game.t % 170 === 0) { game.wind = clamp(game.wind + (Math.random() < 0.5 ? -3 : 3), -10, 10); if (game.wind === 0) game.wind = 3; sfx('whoosh'); }
     if (game.shake > 0) game.shake *= 0.88;
     camUpdate();
   }
@@ -2448,6 +2772,7 @@
     /* looking around with the mouse, until something happens */
     if (freeCam && (game.projs.length || game.barker || game.strikes.length || game.warn.length || game.state === 'over')) freeCam = null;
     if (freeCam) { clampFree(); tx = freeCam.x; ty = freeCam.y; }
+    else if (game.event) { tx = game.event.fx; ty = game.event.fy; }
     else if (game.lookT > 0 && game.look) { tx = game.look.x; ty = game.look.y; game.lookT--; }
     else if (game.projs.length) { var pj = game.projs[0]; tx = pj.x + clamp(pj.vx * 14, -90, 90); ty = pj.y + clamp(pj.vy * 8, -40, 50); }
     else if (game.barker) { tx = game.barker.x; ty = game.barker.y - 20; }
@@ -2620,6 +2945,41 @@
           }
         })
       ];
+    } else if (MAP.style === 'wall') {
+      bakedBg = [
+        bake(0.12, function (g2, W) {
+          var base = VH * 0.6;
+          for (var u = 0; u < W; u++) {
+            var top = Math.round(base - (30 + 14 * Math.sin(u * 0.006) + 8 * Math.sin(u * 0.017 + 1)));
+            g2.fillStyle = neon ? '#3a3e6e' : MAP.far; g2.fillRect(u, top, 1, VH - top);
+            if (LOOK !== 'turf') { g2.fillStyle = neon ? '#ff78be' : (LOOK === 'golden' ? '#f2eadb' : '#c2bcae'); g2.fillRect(u, top - 2, 1, 2); if (u % 160 < 5) g2.fillRect(u, top - 5, 1, 3); }
+          }
+        }),
+        bake(0.32, function (g2, W) {
+          var base = VH * 0.76;
+          for (var u = 0; u < W; u++) {
+            var hh = 18 + 9 * Math.sin(u * 0.011) + 6 * Math.sin(u * 0.029 + 1.3), slope = Math.cos(u * 0.011) * 0.1 + Math.cos(u * 0.029 + 1.3) * 0.17, top = Math.round(base - hh);
+            g2.fillStyle = neon ? '#2c2f57' : (slope < 0 ? MAP.midShade : MAP.mid); g2.fillRect(u, top, 1, VH - top);
+          }
+        }),
+        bake(0.55, function (g2, W) {
+          var base = VH * 0.92, u;
+          g2.fillStyle = neon ? '#1f2142' : MAP.near;
+          for (u = 0; u < W; u++) { var top = Math.round(base - 8 - 3 * Math.sin(u * 0.04)); g2.fillRect(u, top, 1, VH - top); }
+          for (var c = -1; c <= Math.ceil(W / 46) + 1; c++) {
+            var h1 = hash(c, 3), pu = c * 46 + 23 + Math.round((hash(c, 6) - 0.5) * 16), gr = Math.round(base - 8 - 3 * Math.sin(pu * 0.04));
+            if (h1 < 0.45) {
+              var rr = 7 + Math.round(hash(c, 4) * 5);
+              g2.fillStyle = neon ? '#14162e' : MAP.nearTrunk; g2.fillRect(pu, gr - rr - 4, 2, rr + 4);
+              g2.fillStyle = neon ? '#14162e' : '#3f5e3a';
+              for (var yy = -rr; yy <= rr; yy++) { var ww2 = Math.round(Math.sqrt(rr * rr - yy * yy)); g2.fillRect(pu + 1 - ww2, gr - rr - 8 + yy, ww2 * 2, 1); }
+            } else if (h1 > 0.8 && !neon) {
+              /* sheep, naturally */
+              g2.fillStyle = '#f2efe6'; g2.fillRect(pu, gr - 4, 5, 3); g2.fillStyle = '#3a3a3a'; g2.fillRect(pu + 5, gr - 4, 1, 2); g2.fillRect(pu + 1, gr - 1, 1, 1); g2.fillRect(pu + 3, gr - 1, 1, 1);
+            }
+          }
+        })
+      ];
     } else if (MAP.style !== 'city') {
       bakedBg = [
         bake(0.15, function (g2, W) {
@@ -2644,6 +3004,22 @@
     }
   }
   function blit(L, cx, cy) { var rest = WH - VH; ctx.drawImage(L.c, -Math.round(cx * L.f), -Math.round((cy - rest) * L.f)); }
+  function drawWallBackdrop(cx, cy, t) {
+    var rest = WH - VH, i, neon = LOOK === 'neon';
+    if (neon) for (i = 0; i < 40; i++) { if ((i + (t >> 6)) % 9 === 0) continue; ctx.fillStyle = '#e9e4ff'; ctx.fillRect(Math.floor(hash(i, 3) * VW), Math.floor(hash(i, 5) * VH * 0.35), 1, 1); }
+    var sunX = Math.round(VW * 0.7 - cx * 0.03), sunY = Math.round(VH * 0.2 - (cy - rest) * 0.05);
+    disc(sunX, sunY, 14, neon ? '#ffd9a8' : MAP.sun);
+    /* low grey clouds drifting over the moors */
+    for (i = 0; i < 6; i++) {
+      var span = VW + 240, wx = (((i * 211 + t * 0.05 - cx * 0.07) % span) + span) % span - 120, wy = 16 + (i % 3) * 16 - (cy - rest) * 0.08;
+      var cc = neon ? '#3a3468' : (i % 2 ? '#dfe3e6' : '#cfd5da');
+      disc(wx, wy, 9, cc); disc(wx + 11, wy + 2, 8, cc); disc(wx - 11, wy + 3, 7, cc);
+      ctx.fillStyle = cc; ctx.fillRect(Math.round(wx - 18), Math.round(wy + 4), 38, 5);
+    }
+    game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
+    if (!bakedBg) buildBaked();
+    if (bakedBg) bakedBg.forEach(function (L) { blit(L, cx, cy); });
+  }
   function drawDesertBackdrop(cx, cy, t) {
     var rest = WH - VH, i, neon = LOOK === 'neon';
     if (neon) for (i = 0; i < 40; i++) {
@@ -2664,6 +3040,7 @@
   function drawBackdrop(cx, cy, t) {
     if (MAP.style === 'city') { drawCityBackdrop(cx, cy, t); return; }
     if (MAP.style === 'desert') { drawDesertBackdrop(cx, cy, t); return; }
+    if (MAP.style === 'wall') { drawWallBackdrop(cx, cy, t); return; }
     var rest = WH - VH, i;
     var sunX = Math.round(VW * 0.78 - cx * 0.03), sunY = Math.round(VH * 0.18 - (cy - rest) * 0.05);
     disc(sunX, sunY, 15, '#fff9e6'); disc(sunX, sunY, 12, MAP.sun);
@@ -2825,6 +3202,13 @@
   function drawShields(t) {
     game.snags.forEach(function (c) {
       if (!c.alive || !c.shield) return;
+      if (c.testudo) {
+        var sx = Math.round(c.x) - 4, sy = Math.round(c.y) - 34;
+        ctx.fillStyle = '#4f565e'; ctx.fillRect(sx, sy, 9, 8);
+        ctx.fillStyle = '#b8322a'; ctx.fillRect(sx + 1, sy + 1, 7, 6);
+        ctx.fillStyle = '#c99a3a'; ctx.fillRect(sx + 3, sy + 3, 3, 2);
+        return;
+      }
       for (var k = 0; k < 28; k++) {
         if (k % 2) continue;
         var a = k / 28 * Math.PI * 2 + t * 0.015;
@@ -2852,7 +3236,8 @@
           ctx.fillStyle = 'rgba(31,42,48,0.35)'; ctx.fillRect(X - 10, sy - 2, 21, 2);
           return;
         }
-        disc(s.x, s.y, 12, '#3d3832'); disc(s.x, s.y, 11, '#8c857b'); disc(s.x - 3, s.y - 3, 5, '#b5ada2');
+        var br = s.small ? 7 : 12;
+        disc(s.x, s.y, br, '#3d3832'); disc(s.x, s.y, br - 1, '#8c857b'); disc(s.x - br / 4, s.y - br / 4, br * 0.42, '#b5ada2');
         ctx.fillStyle = '#5f5a52'; ctx.fillRect(X + 2, Math.round(s.y), 5, 1); ctx.fillRect(X - 6, Math.round(s.y) + 4, 4, 1);
         for (var k = 1; k < 4; k++) disc(s.x + rand(-3, 3), s.y - 14 * k, 3 - k * 0.6, '#d8dee2');
       } else if (s.style === 'sun') {
@@ -3010,6 +3395,7 @@
     drawShields(t);
     drawDogs(t);
     drawStrikes(t);
+    drawEvent(t);
     game.portals.forEach(function (p) {
       var k = p.t / 60;
       if (p.inn) { SP.portal(ctx, p.x, p.y, Math.min(1, k), t); return; }
@@ -3043,6 +3429,7 @@
     if (game.state !== 'demo') drawLearn(t);
     ctx.restore();
     if (game.sudden && MAP.style === 'desert') drawSandstorm(t);
+    drawGale(t);
     if (t % 3 === 0 && game.state !== 'demo') drawMini();
   }
 
@@ -3070,10 +3457,10 @@
       mcv.width = MW; mcv.height = MH;
       var m = mcv.getContext('2d'), id = m.createImageData(MW, MH), dd = id.data, st = MAP.style;
       var MC = {
-        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : [112, 84, 52]),
+        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : (st === 'wall' ? [128, 118, 96] : [112, 84, 52])),
         water: [63, 143, 181],
         sd: st === 'city' ? [95, 211, 95] : (st === 'desert' ? [154, 106, 58] : [63, 143, 181]),
-        sky: st === 'city' || LOOK === 'neon' ? [58, 56, 104] : (st === 'desert' ? [238, 222, 188] : [191, 224, 230])
+        sky: st === 'city' || LOOK === 'neon' ? [58, 56, 104] : (st === 'desert' ? [238, 222, 188] : (st === 'wall' ? [196, 206, 214] : [191, 224, 230]))
       };
       for (y = 0; y < MH; y++) for (x = 0; x < MW; x++) {
         var wx = Math.floor((x + 0.5) * WW / MW), wy = Math.floor((y + 0.5) * WH / MH), k = (y * MW + x) * 4;
@@ -3380,7 +3767,7 @@
   function goMain() { audioInit(); musicEra('title'); show('main'); }
 
   /* ---------- main menu ---------- */
-  var opts = { mode: 'cpu', mood: 'sleepy', era: 'pre', foe: null, size: 3, turn: 60, sd: 'on', map: 'jungle', names: null, skinA: 'classic', skinB: 'classic' };
+  var opts = { mode: 'cpu', mood: 'sleepy', era: 'pre', foe: null, size: 3, turn: 60, sd: 'on', map: 'jungle', names: null, skinA: 'classic', skinB: 'classic', ev: 'on' };
   try { var so = JSON.parse(store('opts') || 'null'); if (so) for (var ok in opts) if (so[ok] !== undefined) opts[ok] = so[ok]; } catch (e) { /* defaults */ }
   if (READY.indexOf(opts.era) < 0) opts.era = READY[0];
   if (opts.map !== 'random' && MAP_IDS.indexOf(opts.map) < 0) opts.map = 'jungle';
@@ -3392,6 +3779,7 @@
     enter: function () {
       var T = loadTourState(), n = allArts().length;
       $('miContinue').hidden = !(store('save') || T);
+      $('miTrain').innerHTML = 'Training with Jay' + (store('trained') ? '' : '<b>New</b>');
       $('musN').textContent = museumCount(allArts()) + '/' + n;
       $('miTour').innerHTML = 'Time Tour' + (T ? '<b>' + Math.min(TOUR_STOPS.length, T.results.length) + '/' + TOUR_STOPS.length + '</b>' : '');
       /* keep the highlight on the same item, even when Continue appears or goes */
@@ -3416,6 +3804,7 @@
     }
     if (a === 'continue') doContinue();
     else if (a === 'quick') startSetup('cpu');
+    else if (a === 'train') startTraining();
     else if (a === 'two') startSetup('friend');
     else if (a === 'tour') { if (loadTourState()) openTour(); else startSetup('tour'); }
     else if (a === 'museum') openMuseum('main');
@@ -3701,6 +4090,7 @@
     { k: 'size', label: 'Snags each', vals: [2, 3, 4, 5, 6, 7, 8], fmt: String },
     { k: 'turn', label: 'Turn timer', vals: [30, 45, 60, 90, 0], fmt: function (v) { return v ? v + 's' : 'No timer'; } },
     { k: 'sd', label: 'Sudden Death', vals: ['on', 'off'], wrap: true, fmt: function (v) { return v === 'on' ? 'On' : 'Off'; } },
+    { k: 'ev', label: 'Map events', vals: ['on', 'off'], wrap: true, fmt: function (v) { return v === 'off' ? 'Off' : 'On'; } },
     { k: 'skinA', label: 'Look', vals: lookVals, wrap: true, look: true, fmt: function (v) { var n = unlocked().length; return lookName(v) + (n < LOOKS.length ? ' <i class="more">' + (LOOKS.length - n) + gl('lock', 'sm') + '</i>' : ''); } },
     { k: 'skinB', label: 'P2 look', vals: lookVals, wrap: true, look: true, show: function () { return opts.mode === 'friend'; }, fmt: function (v) { return lookName(v); } }
   ];
@@ -3805,13 +4195,13 @@
   function startBattle() {
     saveOpts(); store('save', null);
     if (opts.mode === 'tour') {
-      game.tour = { era: opts.era, mood: opts.mood, size: opts.size, turn: opts.turn, sd: opts.sd, names: opts.names, skin: skinOf(opts.skinA), stop: 0, results: [] };
+      game.tour = { era: opts.era, mood: opts.mood, size: opts.size, turn: opts.turn, sd: opts.sd, names: opts.names, skin: skinOf(opts.skinA), ev: opts.ev, stop: 0, results: [] };
       saveTour();
       openTour();
       return;
     }
     var map = opts.map === 'random' || !MAPS[opts.map] ? MAP_IDS[Math.floor(Math.random() * MAP_IDS.length)] : opts.map;
-    wipe(function () { newMatch({ mode: opts.mode, mood: opts.mood, era: opts.era, foe: opts.foe, size: opts.size, turn: opts.turn, sd: opts.sd, map: map, names: opts.names, skinA: skinOf(opts.skinA), skinB: skinOf(opts.skinB) }); });
+    wipe(function () { newMatch({ mode: opts.mode, mood: opts.mood, era: opts.era, foe: opts.foe, size: opts.size, turn: opts.turn, sd: opts.sd, map: map, names: opts.names, skinA: skinOf(opts.skinA), skinB: skinOf(opts.skinB), ev: opts.ev }); });
   }
 
   /* ---------- options ---------- */
@@ -4222,7 +4612,7 @@
   }
   function playStop() {
     var T = game.tour, rip = rippleFor(T.stop);
-    newMatch({ mode: 'cpu', mood: T.mood, era: T.era, foe: tourFoe(T.stop, T.era), size: T.size, turn: T.turn, sd: T.sd, map: TOUR_STOPS[T.stop], names: T.names, skinA: T.skin || null,
+    newMatch({ mode: 'cpu', mood: T.mood, era: T.era, foe: tourFoe(T.stop, T.era), size: T.size, turn: T.turn, sd: T.sd, map: TOUR_STOPS[T.stop], names: T.names, skinA: T.skin || null, ev: T.ev || 'on',
       look: rip ? rip.look : 'normal', ammoMods: rip ? rip.ammo : null, tour: true });
     if (rip) later(160, function () { banner('History changed!', null, '#ffc24a', 'tour'); });
   }
@@ -4559,6 +4949,107 @@
   var learn = {};
   try { learn = JSON.parse(store('learn') || '{}') || {}; } catch (e) { learn = {}; }
   function learnDone(k) { if (!learn[k] && game.active && game.active.team.ctrl === 'human') { learn[k] = 1; store('learn', JSON.stringify(learn)); } }
+  /* ---------- Training with Jay: learn by doing, one short step at a time ---------- */
+  var TRAIN = [
+    { id: 'walk', say: 'Walk over to the flag.' },
+    { id: 'aim', say: 'Now aim up at the dummy.' },
+    { id: 'fire', say: 'Hold to power up, then let go.' },
+    { id: 'kit', say: 'Open your kit and pick the bouncy pot.' },
+    { id: 'pot', say: 'Throw it near a dummy.' },
+    { id: 'jump', say: 'Jump! Have a go at a backflip too.' },
+    { id: 'crate', say: 'Bonnie has a snack for you. Go and get it.' },
+    { id: 'done', say: 'You are ready. Outrageous work.' }
+  ];
+  function startTraining() {
+    var era = opts.era || 'pre', foe = defaultFoe(era);
+    wipe(function () {
+      newMatch({ mode: 'cpu', training: true, mood: 'sleepy', era: era, foe: foe, size: 3, turn: 0, sd: 'off', ev: 'off', map: 'jungle', names: opts.names });
+      var me = game.teams[0], dum = game.teams[1];
+      dum.ctrl = 'dummy'; dum.label = 'Dummies';
+      me.members.slice(1).forEach(function (m) { m.alive = false; });
+      me.members = me.members.slice(0, 1);
+      game.snags = game.snags.filter(function (m) { return m.alive; });
+      /* stand the practice dummies a short throw away, on the same ground */
+      var c = me.members[0], dir = c.x < WW / 2 ? 1 : -1;
+      dum.members.forEach(function (m, k) {
+        for (var dx = 130 + k * 70; dx < 420; dx += 6) {
+          var x = clamp(c.x + dir * dx, 30, WW - 30), y = groundY(x, c.y - 70);
+          if (y > 0 && y < WATER - 20 && bodyClear(x, y - 1)) { m.x = x; m.y = y - 1; m.face = -dir; break; }
+        }
+      });
+      hudStatic();
+      game.train = { step: 0, t: 0, shots: 0 };
+      trainSay();
+    });
+  }
+  function trainSay() {
+    var st = TRAIN[game.train.step];
+    $('jayLine').textContent = st.say; $('jay').hidden = false;
+    jayHide = 1e9; jayTalk = 40; jayMood = st.id === 'done' ? 'grin' : null;
+    voice('jay', 'turn');
+  }
+  function trainNext() {
+    game.train.step++; game.train.t = 0;
+    sfx('find'); say('teach', true);
+    var c = game.active;
+    if (c) for (var i = 0; i < 10; i++) addPart({ k: 'spark', x: c.x + rand(-8, 8), y: c.y - rand(6, 24), vx: rand(-0.6, 0.6), vy: rand(-1.4, -0.4), life: 30 });
+    if (TRAIN[game.train.step].id === 'crate' && c) {
+      maybeDeliver(true);
+      if (game.courier) { game.courier.dropX = clamp(c.x + c.face * 34, 20, WW - 20); game.courier.kind = 'snack'; }
+    }
+    if (TRAIN[game.train.step].id === 'done') {
+      store('trained', '1');
+      later(150, function () { if (game.train) { game.train = null; toMenu(); } });
+    }
+    later(30, function () { if (game.train) trainSay(); });
+  }
+  function nearestDummy(c) {
+    var best = null;
+    game.snags.forEach(function (o) { if (o.alive && o.team !== c.team && (!best || Math.abs(o.x - c.x) < Math.abs(best.x - c.x))) best = o; });
+    return best;
+  }
+  function trainTick() {
+    var T = game.train, c = game.active;
+    if (!T || !c || !c.alive) return;
+    T.t++;
+    var id = TRAIN[T.step].id, dm = nearestDummy(c);
+    if (id === 'walk') {
+      if (T.fx === undefined) { T.fx = clamp(c.x + (dm && dm.x > c.x ? 56 : -56), 40, WW - 40); var gy0 = groundY(T.fx, c.y - 40); if (gy0 < 0 || gy0 > WATER - 10) T.fx = clamp(c.x - (dm && dm.x > c.x ? 56 : -56), 40, WW - 40); }
+      if (Math.abs(c.x - T.fx) < 7 && c.st === 'ground') trainNext();
+    } else if (id === 'aim') {
+      if (dm && c.face === (dm.x > c.x ? 1 : -1) && c.aim >= 20 && c.aim <= 75) { T.ok = (T.ok || 0) + 1; if (T.ok > 25) trainNext(); } else T.ok = 0;
+    } else if (id === 'fire' || id === 'pot') {
+      if (game.fired && !T.counted) { T.counted = true; T.shots++; }
+      if (T.counted && game.state === 'play' && !game.fired) { T.counted = false; trainNext(); }
+    } else if (id === 'kit') {
+      if (game.weapon === 'bomb') trainNext();
+    } else if (id === 'jump') {
+      if (T.jumped && c.st === 'ground') trainNext();
+    } else if (id === 'crate') {
+      if (T.t > 60 && !game.courier && !game.crates.length) trainNext();
+    }
+  }
+  /* cues drawn in the world: the flag, a ring round the dummy, and the keys or buttons to press */
+  function drawTrain(t) {
+    var T = game.train, c = game.active;
+    if (!T || !c || !c.alive) return;
+    var id = TRAIN[T.step].id, bob = Math.round(Math.sin(t * 0.08) * 1.5), x = Math.round(c.x), y = Math.round(c.y) - 62 + bob, dm = nearestDummy(c);
+    if (id === 'walk' && T.fx !== undefined) {
+      var fx = Math.round(T.fx), fy = groundY(fx, c.y - 40); if (fy < 0) fy = Math.round(c.y);
+      ctx.fillStyle = '#1f2a30'; ctx.fillRect(fx, fy - 22, 2, 22);
+      ctx.fillStyle = '#ef7724'; ctx.fillRect(fx + 2, fy - 22 + ((t >> 4) % 2), 9, 3); ctx.fillRect(fx + 2, fy - 19 + ((t >> 4) % 2), 6, 2);
+      if (!touchOn) { keycap(ctx, x - 14, y, 11, '<'); keycap(ctx, x + 3, y, 11, '>'); }
+    }
+    if ((id === 'aim' || id === 'fire' || id === 'pot') && dm) {
+      var rr = 14 + ((t >> 3) % 3);
+      for (var q = 0; q < 20; q++) { if (q % 2) continue; var a = q / 20 * 6.283 + t * 0.03; ctx.fillStyle = '#ef7724'; ctx.fillRect(Math.round(dm.x + Math.cos(a) * rr), Math.round(dm.y - 11 + Math.sin(a) * rr), 2, 2); }
+    }
+    if (touchOn) return;
+    if (id === 'aim') { keycap(ctx, x - 5, y - 12, 11, '^'); keycap(ctx, x - 5, y, 11, 'v'); mouseIcon(ctx, x + 10, y - 6, ''); }
+    else if (id === 'fire' || id === 'pot') { keycap(ctx, x - 24, y, 34, 'SPACE'); mouseIcon(ctx, x + 13, y - 2, 'l'); }
+    else if (id === 'kit') { keycap(ctx, x - 16, y, 22, 'TAB'); mouseIcon(ctx, x + 9, y - 2, 'r'); }
+    else if (id === 'jump') { keycap(ctx, x - 28, y, 30, 'ENTER'); keycap(ctx, x + 6, y, 22, 'BACK'); }
+  }
   function lesson() {
     var c = game.active;
     if (!c || !humanTurn() || game.state !== 'play' || game.overlay || c.st !== 'ground' || game.fired) return null;
@@ -4577,6 +5068,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#touch button'), function (b) { b.classList.toggle('teach', !!(map[want] && map[want].indexOf(b.getAttribute('data-k')) >= 0)); });
   }
   function drawLearn(t) {
+    if (game.train) { drawTrain(t); teachTouch(null); return; }
     /* instant weapons wait for a second click */
     if (armClick && game.t - armClick < 150 && humanTurn() && game.state === 'play' && !game.fired) {
       var ac = game.active, ax = Math.round(ac.x), ay = Math.round(ac.y) - 64 + Math.round(Math.sin(t * 0.2) * 1.5);
@@ -4603,10 +5095,12 @@
       else if (w.direct) out.push('Direct hit bonus');
       else if (w.impact) out.push('Booms on landing');
       if (w.fuse && !w.crawl) out.push('Pops after ' + Math.round(w.fuse / 60) + 's');
+      if (w.pierce) out.push('Goes through shields');
+      if (w.grav !== undefined && w.grav < 0.5 && w.grav > 0) out.push('Flies almost straight');
       if (w.bounces) out.push('Bounces off walls');
       else if (w.bounce >= 0.5) out.push('Bouncy');
       out.push(w.wind ? 'Wind pushes it' : 'Wind cannot push it');
-    } else out.push({ place: 'Drop it and run', melee: 'Up close', dig: 'Digs a tunnel', beam: 'Straight beam', wall: 'Builds cover', dune: 'Builds a dune', shield: 'Halves damage', strike: 'Pick any spot', bark: 'Rare surprise', vine: 'Swing about', jet: 'Fly about', sled: 'Ride the sand' }[w.kind] || '');
+    } else out.push({ place: 'Drop it and run', melee: 'Up close', dig: 'Digs a tunnel', beam: 'Straight beam', wall: 'Builds cover', dune: 'Builds a dune', shield: 'Halves damage', strike: 'Pick any spot', bark: 'Rare surprise', vine: 'Swing about', jet: 'Fly about', sled: 'Ride the sand', road: 'Lays a stone road', testudo: 'Shields your squad' }[w.kind] || '');
     if (w.tool) out.push('Free move');
     return out.filter(Boolean).join(' \u00b7 ');
   }

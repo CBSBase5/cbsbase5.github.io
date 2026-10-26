@@ -61,8 +61,8 @@ window.B5GAMES = {
     },
     {
       id:"timeline-tantrum", title:"Timeline Tantrum", href:"/games/timeline-tantrum/",
-      blurb:"Lead a squad of Snags across exploding battlefields from the Stone Age to the pyramids to the Future City. Dig up real artefacts for your Time Museum, and find out what happens to history when the other side wins.",
-      meta:"Three eras &middot; Time Tour &middot; 1 or 2 players &middot; saves on this computer",
+      blurb:"Lead a squad of Snags across exploding battlefields from the Stone Age to the pyramids, Hadrian's Wall and the Future City. Dig up real artefacts for your Time Museum, and find out what happens to history when the other side wins.",
+      meta:"Four eras &middot; Time Tour &middot; 1 or 2 players &middot; saves on this computer",
       tags:["project","learning","fun"], added:"2026-10-25", art:"/games/art/timeline-tantrum/box.webp", fill:"plum", motif:"portal", year:"10,000 BC to AD 3000"
     },
     {

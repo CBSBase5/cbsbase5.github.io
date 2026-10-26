@@ -86,10 +86,58 @@
       titles: ['Dr', 'Unit', 'Mega', 'Mk2', 'Agent'],
       voice: { base: 260, wave: 'square', wobble: 18 },
       music: { tempo: 118, root: 220, scale: [0, 2, 4, 7, 9], lead: 'square', drum: 'kick', seed: 11 }
+    },
+    rome: {
+      id: 'rome',
+      name: 'Roman Britain',
+      team: 'Eagle Snags',
+      when: 'about AD 122',
+      tag: '#c58cff',
+      ui: '#7b3fbf',
+      names: ['Maximus', 'Brutus', 'Toga', 'Sandal', 'Aquila', 'Forum', 'Rufus', 'Felix',
+              'Pax', 'Vesta', 'Marcus', 'Julia', 'Nova', 'Crassus', 'Gravel', 'Sulis'],
+      weapons: {
+        lob:   { name: 'Lead Sling Bullet', blurb: 'Booms where it lands. The wind pushes it about.' },
+        bomb:  { name: 'Pitch Pot',         blurb: 'A pot of burning pitch. Pops after 3 seconds. Wind leaves it alone.' },
+        shove: { name: 'Shield Bash',       blurb: 'Up close only. A shove with a big red shield.' },
+        dig:   { name: 'Legion Pickaxe',    blurb: 'Dig a tunnel in the direction you aim, like soldiers digging a ditch.' },
+        pilum:    { name: 'Pilum',           blurb: 'A heavy javelin. A direct hit goes straight through shields.' },
+        ballista: { name: 'Ballista Bolt',   blurb: 'Flies fast and almost straight. Wind leaves it alone.' },
+        road:     { name: 'Roman Road',      blurb: 'Lays a straight stone road ahead of you, even over gaps. Free move.' },
+        testudo:  { name: 'Testudo',         blurb: 'Tortoise formation. Every Snag of yours nearby gets a shield until your next go.' },
+        onager:   { name: 'Onager Barrage',  blurb: 'Superweapon. A catapult far away throws three boulders at the spot you pick.' }
+      },
+      kit: ['pilum', 'ballista', 'road', 'testudo', 'onager'],
+      stats: { power: 4, precision: 4, tricks: 3 },
+      bits: [['Max', 'Bru', 'Tog', 'San', 'Aqu', 'For'], ['us', 'a', 'ix', 'um', 'o', 'ia']],
+      titles: ['Big', 'Old', 'Lil', 'Sir', 'Mega'],
+      voice: { base: 165, wave: 'triangle', wobble: 4 },
+      music: { tempo: 112, root: 196, scale: [0, 2, 4, 5, 7, 9], lead: 'square', drum: 'march', seed: 23 }
     }
   };
 
   window.B5MAPS = {
+    wall: {
+      id: 'wall',
+      name: "Hadrian's Wall",
+      style: 'wall',
+      era: 'rome',
+      year: 122,
+      pal: {
+        grass1: [118, 172, 84], grass2: [86, 138, 62], earth1: [124, 96, 66], earth2: [108, 82, 56], deep: [84, 64, 46], speck: [70, 52, 38],
+        ston1: [196, 188, 170], ston2: [172, 164, 146], mortar: [128, 120, 106], stonD: [150, 142, 126],
+        turf1: [104, 132, 70], turf2: [122, 98, 64], gold: [240, 196, 70], white: [242, 236, 222],
+        neon: [95, 224, 240], neon2: [255, 120, 190], nstone: [70, 62, 112], nstone2: [58, 52, 96],
+        wood: [132, 92, 54], tile: [176, 82, 58],
+        rock: [150, 144, 130], rockL: [184, 178, 164],
+        tuft: [100, 160, 70], flower: [236, 226, 120], flower2: [214, 140, 200]
+      },
+      sky: ['#7d9bb8', '#93aec6', '#a9bfcf', '#c0cfd6', '#d6dcd6', '#e6e2d2'],
+      skyNeon: ['#1d2147', '#2b2c5e', '#46356f', '#71407a', '#a8507a', '#e88a6a'],
+      sun: '#f6f0d8',
+      far: '#8fa6a8', mid: '#7e9c76', midShade: '#6c8a64', near: '#55744e', nearTrunk: '#4a3c2a',
+      water: '#4a7a9a', waterTop: '#a8d0e0'
+    },
     city: {
       id: 'city',
       name: 'Future City',
@@ -158,7 +206,7 @@
   window.B5TIMELINE = [
     { id: 'pre',   name: 'Stone Age',   year: -10000, label: 'about 10,000 BC', ready: true },
     { id: 'egypt', name: 'Ancient Egypt', year: -2560, label: 'about 2560 BC, when the Great Pyramid was built', ready: true },
-    { id: 'rome',  name: 'Ancient Rome', year: 100,   label: 'about AD 100', ready: false },
+    { id: 'rome',  name: 'Roman Britain', year: 122,  label: 'about AD 122, when Hadrian\'s Wall was begun', ready: true },
     { id: 'viking', name: 'Vikings',     year: 900,   label: 'about AD 900', ready: false },
     { id: 'med',   name: 'Medieval',     year: 1300,  label: 'about AD 1300', ready: false },
     { id: 'pirate', name: 'Pirates',     year: 1700,  label: 'about AD 1700', ready: false },
@@ -210,6 +258,42 @@
       { id: 'rosetta', name: 'Rosetta Stone', when: '196 BC', where: 'Rosetta (Rashid), Egypt',
         fact: 'The same message is carved three times: in hieroglyphs, in Demotic and in ancient Greek. Comparing them helped Jean-Francois Champollion crack hieroglyphs in 1822.',
         now: 'The Rosetta Stone is in the British Museum in London. It is one of the most visited objects there.' }
+    ],
+    wall: [
+      { id: 'invite', name: 'Birthday invitation', when: 'about AD 100', where: 'Vindolanda, Northumberland',
+        fact: 'A thin wooden writing tablet. Claudia Severa invited her friend Sulpicia Lepidina to her birthday party, and wrote the last lines herself. It is one of the oldest pieces of Latin known to be written by a woman.',
+        now: 'It is in the British Museum in London, in the Roman Britain gallery.' },
+      { id: 'ribhelm', name: 'Ribchester Helmet', when: 'about AD 100', where: 'Ribchester, Lancashire',
+        fact: 'A bronze helmet with a face mask, made for showing off at cavalry sports, not for battle. A clogmaker\'s son found it in 1796.',
+        now: 'It is in the British Museum in London.' },
+      { id: 'wallpan', name: 'Hadrian\'s Wall souvenir pan', when: 'the 2nd century AD', where: 'found in Staffordshire',
+        fact: 'A bronze pan with bright enamel. Around the rim are the names of four forts on Hadrian\'s Wall, a bit like a holiday souvenir. Metal detectorists found it in 2003.',
+        now: 'It takes turns at the British Museum, Tullie House in Carlisle and the Potteries Museum in Stoke.' },
+      { id: 'curse', name: 'Curse tablet', when: 'the 2nd to 4th century AD', where: 'Bath, Somerset',
+        fact: 'A thin sheet of lead with a message scratched on it for the goddess Sulis Minerva. About 130 were found in the sacred spring. Nearly all ask her to deal with someone who stole from the baths, like a cloak or a tunic.',
+        now: 'You can see them at the Roman Baths in Bath.' },
+      { id: 'pepperpot', name: 'Empress pepper pot', when: 'buried after AD 408', where: 'Hoxne, Suffolk',
+        fact: 'A silver pepper pot shaped like a rich Roman lady. It was part of a hoard of nearly 15,000 coins, found in 1992 by a man helping a farmer look for a lost hammer.',
+        now: 'It is in the British Museum in London. The hammer was given to the museum too.' },
+      { id: 'shoe', name: 'Roman leather shoe', when: 'about AD 100', where: 'Vindolanda, Northumberland',
+        fact: 'Leather usually rots away, but thousands of Roman shoes have survived at Vindolanda because the soil there has hardly any air in it. Some are huge.',
+        now: 'You can see them at the Vindolanda museum near Hadrian\'s Wall.' },
+      { id: 'coin', name: 'Coin of Hadrian', when: 'about AD 119 onwards', where: 'across Roman Britain',
+        fact: 'Hadrian\'s coins were the first to show Britannia, sitting with a spear and shield. She came back on British coins in 1672 and is still on some today.',
+        now: 'Museums all over Britain have Roman coins. Check the coins in your pocket for Britannia too.' },
+      { id: 'dolphin', name: 'Cupid on a dolphin mosaic', when: 'about AD 100 to 280', where: 'Fishbourne, West Sussex',
+        fact: 'A floor picture made of tiny stones, in the biggest Roman house ever found this side of the Alps. Workmen digging a trench for a water pipe found it in 1960.',
+        now: 'You can visit Fishbourne Roman Palace, near Chichester.' }
+    ],
+    wallGlitches: [
+      { id: 'pizza', name: 'Slice of pizza', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'No Roman ever had a margherita. Tomatoes only reached Europe from the Americas in the 1500s.' },
+      { id: 'footy', name: 'Football shirt', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'The rules of modern football were written down in England in 1863. This shirt is about 1,700 years early.' },
+      { id: 'calc', name: 'Pocket calculator', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Romans did sums with an abacus. Roman numerals do not even have a zero.' },
+      { id: 'watch', name: 'Wristwatch', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Romans told the time with sundials and water clocks. Nobody wore one on their wrist.' }
     ],
     desertGlitches: [
       { id: 'shades', name: 'Sunglasses', glitch: true, when: 'out of time', where: 'should not be here',
@@ -287,32 +371,82 @@
         postcard: 'Because the Sun Snags won back in 10,000 BC, the pyramids shine with gold tips.',
         short: 'golden pyramids',
         ammo: { egypt: { spear: 1 } }
+      },
+      rome: {
+        look: 'normal',
+        title: 'The Eagle Snags won the Stone Age',
+        text: 'So Rome got a head start of thousands of years. Eagle Snags march in with an extra pilum. Sun Snags have one less spear.',
+        postcard: 'Because the Eagle Snags won back in 10,000 BC, Rome rose thousands of years early.',
+        short: 'Rome rising early',
+        ammo: { rome: { pilum: 1 }, egypt: { spear: -1 } }
+      }
+    },
+    wall: {
+      pre: {
+        look: 'turf',
+        title: 'The Stone Snags won in Ancient Egypt',
+        text: 'So nobody learned to build in stone. Hadrian\'s Wall is just a bank of earth and turf, like the first western stretch of the real wall. Stone Snags carry an extra boulder. Eagle Snags have one less ballista bolt.',
+        postcard: 'Because the Stone Snags won in 2560 BC, Hadrian\'s Wall is only made of earth and turf.',
+        short: 'a wall of earth and turf',
+        ammo: { pre: { boulder: 1 }, rome: { ballista: -1 } }
+      },
+      egypt: {
+        look: 'golden',
+        title: 'The Sun Snags won in Ancient Egypt',
+        text: 'So Egyptian builders taught the world. Hadrian\'s Wall is smooth white stone with gold on top. Sun Snags carry an extra Scarab Beetle.',
+        postcard: 'Because the Sun Snags won in 2560 BC, Hadrian\'s Wall shines white and gold.',
+        short: 'a white and gold Hadrian\'s Wall',
+        ammo: { egypt: { scarab: 1 } }
+      },
+      fut: {
+        look: 'neon',
+        title: 'The Neon Snags won in Ancient Egypt',
+        text: 'So the future came early. Hadrian\'s Wall glows with neon lights under a purple night sky. Neon Snags bring an extra disc. Eagle Snags have one less pilum.',
+        postcard: 'Because the Neon Snags won in 2560 BC, Hadrian\'s Wall glows with neon lights.',
+        short: 'a neon Hadrian\'s Wall',
+        ammo: { fut: { disc: 1 }, rome: { pilum: -1 } }
+      },
+      rome: {
+        look: 'normal',
+        title: 'The Eagle Snags won in Ancient Egypt',
+        text: 'So Rome grew stronger than ever. Eagle Snags arrive at the Wall with an extra pilum.',
+        postcard: 'Because the Eagle Snags won in 2560 BC, Rome grew stronger than ever.',
+        short: 'a stronger Rome',
+        ammo: { rome: { pilum: 1 } }
       }
     },
     city: {
       pre: {
         look: 'overgrown',
-        title: 'The Stone Snags won in Ancient Egypt',
+        title: 'The Stone Snags won at Hadrian\'s Wall',
         text: 'So history went wild. Vines cover the towers, the sky has gone green, and the factories never quite worked. Neon Snags start with one less disc and laser. Stone Snags carry an extra boulder.',
-        postcard: 'Because the Stone Snags won in 2560 BC, the Future City is covered in vines.',
+        postcard: 'Because the Stone Snags won in AD 122, the Future City is covered in vines.',
         short: 'a Future City covered in vines',
         ammo: { fut: { disc: -1, laser: -1 }, pre: { boulder: 1 } }
       },
       fut: {
         look: 'gleaming',
-        title: 'The Neon Snags won in Ancient Egypt',
+        title: 'The Neon Snags won at Hadrian\'s Wall',
         text: 'So the future arrived early. The Future City gleams brighter than ever. Neon Snags bring an extra Ricochet Disc, and everyone else has one less of their best kit.',
-        postcard: 'Because the Neon Snags won in 2560 BC, the Future City gleams brighter than ever.',
+        postcard: 'Because the Neon Snags won in AD 122, the Future City gleams brighter than ever.',
         short: 'a gleaming Future City',
         ammo: { fut: { disc: 1 }, pre: { boulder: -1 }, egypt: { spear: -1 } }
       },
       egypt: {
         look: 'sandy',
-        title: 'The Sun Snags won in Ancient Egypt',
+        title: 'The Sun Snags won at Hadrian\'s Wall',
         text: 'So Ancient Egypt never ended. The Future City is built like a giant temple, with sandstone towers, gold edges and pyramids on the skyline. Sun Snags carry an extra Scarab Beetle. Neon Snags have one less disc.',
-        postcard: 'Because the Sun Snags won in 2560 BC, the Future City is built like a giant temple.',
+        postcard: 'Because the Sun Snags won in AD 122, the Future City is built like a giant temple.',
         short: 'a Future City built like a temple',
         ammo: { egypt: { scarab: 1 }, fut: { disc: -1 } }
+      },
+      rome: {
+        look: 'gleaming',
+        title: 'The Eagle Snags won at Hadrian\'s Wall',
+        text: 'So the Roman Empire never fell. The Future City gleams like polished marble. Eagle Snags carry an extra ballista bolt. Neon Snags have one less laser.',
+        postcard: 'Because the Eagle Snags won in AD 122, the Roman Empire never fell.',
+        short: 'an empire that never fell',
+        ammo: { rome: { ballista: 1 }, fut: { laser: -1 } }
       }
     }
   };
@@ -343,6 +477,16 @@
     scarab: ['Is that beetle following someone?', 'Run! The beetle has your scent.'],
     spear: ['Bullseye!', 'Straight through the middle. Outrageous.'],
     sun: ['Everybody put your sun cream on.', 'Mirrors at the ready...'],
-    dune: ['Nice dune. Very sandy.', 'Hiding behind a sandcastle. Classic.']
+    dune: ['Nice dune. Very sandy.', 'Hiding behind a sandcastle. Classic.'],
+    pilum: ['Straight through the shield!', 'Pilum! Very Roman. Very rude.'],
+    ballista: ['That bolt was not messing about.', 'Ballista! Duck!'],
+    testudo: ['Tortoise formation! Lovely teamwork.', 'Shields up, everyone.'],
+    road: ['All roads lead to Rome. This one leads over there.', 'A nice straight road. Very Roman.'],
+    onager: ['Incoming boulders! Three of them!', 'Here come the catapult rocks...'],
+    stampede: ['MAMMOTHS! Everybody hold on!', 'Woolly stampede! Mind your toes.'],
+    flood: ['The Nile is flooding! Get to high ground!', 'Water levels rising. Totally normal for the Nile.'],
+    gale: ['It is blowing a gale up here.', 'Northumberland weather. Bring a coat.'],
+    drones: ['Delivery drones! Those are not my parcels.', 'Drones overhead! Watch the red markers.'],
+    teach: ['Lovely. You are a natural.', 'Nailed it.', 'Outrageous. Do that again in a real match.']
   };
 })();
