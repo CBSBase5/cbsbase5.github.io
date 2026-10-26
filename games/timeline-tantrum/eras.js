@@ -114,6 +114,34 @@
       voice: { base: 165, wave: 'triangle', wobble: 4 },
       music: { tempo: 112, root: 196, scale: [0, 2, 4, 5, 7, 9], lead: 'square', drum: 'march', seed: 23 }
     },
+    sumer: {
+      id: 'sumer',
+      name: 'Sumerians',
+      team: 'Wedge Snags',
+      when: 'about 3500 BC',
+      tag: '#ff8fc0',
+      ui: '#c0306a',
+      names: ['Ziggy', 'Lugal', 'Ninni', 'Dumu', 'Kish', 'Reedy', 'Date', 'Stylus',
+              'Uri', 'Lagash', 'Eridu', 'Brickle', 'Tamar', 'Mudge', 'Tiggy', 'Euphy'],
+      weapons: {
+        lob:    { name: 'Bitumen Pot',      blurb: 'A pot of burning bitumen, the sticky black tar Sumerians used as glue. Booms where it lands. The wind pushes it about.' },
+        bomb:   { name: 'Date Jar',         blurb: 'A clay jar of sticky dates. Bounces, then pops after 3 seconds. Wind leaves it alone.' },
+        shove:  { name: 'Copper Axe Bonk',  blurb: 'Up close only. Sends them flying.' },
+        dig:    { name: 'Copper Hoe',       blurb: 'Dig a tunnel in the direction you aim, like farmers digging canals.' },
+        cart:   { name: 'War Cart',         blurb: 'Push off a cart on solid wooden wheels. It speeds up downhill and crashes into the first Snag it meets.' },
+        tablet: { name: 'Clay Tablet',      blurb: 'A heavy clay slab, thrown flat. It skims across water up to 3 times.' },
+        steps:  { name: 'Mud Brick Steps',  blurb: 'Build a little staircase of mud bricks. Walk up it, or hide behind it.' },
+        canal:  { name: 'Open the Canal',   blurb: 'Open the river banks. The water rises for 3 goes, so get your Snags up high.' },
+        bull:   { name: 'Bull of Heaven',   blurb: 'Superweapon. From the Epic of Gilgamesh, one of the oldest stories ever written. A giant bull charges across the spot you pick.' }
+      },
+      kit: ['cart', 'tablet', 'steps', 'canal', 'bull'],
+      stats: { power: 4, precision: 4, tricks: 4 },
+      bits: [['Zig', 'Lu', 'Nin', 'Du', 'Ki', 'Ree', 'Sty', 'U', 'La', 'E', 'Bri', 'Ta', 'Mu', 'Ti'],
+             ['gy', 'gal', 'ni', 'mu', 'sh', 'dy', 'lus', 'ri', 'gash', 'du', 'ckle', 'mar', 'dge', 'ggy']],
+      titles: ['Lugal', 'Big', 'Lil', 'Old', 'Scribe'],
+      voice: { base: 140, wave: 'triangle', wobble: 9 },
+      music: { tempo: 92, root: 207.65, scale: [0, 2, 3, 7, 8], lead: 'triangle', drum: 'frame', seed: 53 }
+    },
     med: {
       id: 'med',
       name: 'Medieval',
@@ -173,6 +201,27 @@
   };
 
   window.B5MAPS = {
+    uruk: {
+      id: 'uruk',
+      name: 'City of Uruk',
+      style: 'uruk',
+      era: 'sumer',
+      year: -3500,
+      pal: {
+        grass1: [132, 176, 78], grass2: [104, 148, 60], silt1: [156, 124, 88], silt2: [140, 110, 78], deep: [100, 78, 56], speck: [88, 68, 48],
+        brick1: [204, 166, 112], brick2: [186, 148, 98], mortar: [146, 112, 74], brickD: [166, 130, 86],
+        white: [238, 230, 212], white2: [214, 204, 184], gold: [240, 196, 70], blue: [52, 92, 170],
+        reed: [196, 176, 104], reed2: [160, 140, 76], reedD: [112, 96, 50],
+        neon: [95, 224, 240], neon2: [255, 120, 190], nstone: [70, 62, 112], nstone2: [58, 52, 96],
+        rock: [160, 140, 110], rockL: [196, 176, 140],
+        tuft: [118, 168, 70], flower: [236, 200, 90], flower2: [220, 120, 160]
+      },
+      sky: ['#8cc4e6', '#a4d0e8', '#c0dce4', '#dce4d4', '#f0dcb4', '#f4c890'],
+      skyNeon: ['#1d2147', '#2b2c5e', '#46356f', '#71407a', '#a8507a', '#e88a6a'],
+      sun: '#fff6d8',
+      far: '#c8b48c', farShade: '#b8a07a', mid: '#9cae68', midShade: '#8a9c5a', near: '#5f7f3e', nearTrunk: '#7a5a34',
+      water: '#3f8a9a', waterTop: '#a6e0dc', flood: '#7a6a4a', floodTop: '#b8a476'
+    },
     castle: {
       id: 'castle',
       name: 'Castle Siege',
@@ -304,6 +353,7 @@
   /* The squad picker timeline, drawn to scale. year: negative numbers are BC. */
   window.B5TIMELINE = [
     { id: 'pre',   name: 'Stone Age',   year: -10000, label: 'about 10,000 BC', ready: true },
+    { id: 'sumer', name: 'Sumer',       year: -3500, label: 'about 3500 BC, when the first cities and writing began', ready: true },
     { id: 'egypt', name: 'Ancient Egypt', year: -2560, label: 'about 2560 BC, when the Great Pyramid was built', ready: true },
     { id: 'rome',  name: 'Roman Britain', year: 122,  label: 'about AD 122, when Hadrian\'s Wall was begun', ready: true },
     { id: 'viking', name: 'Vikings',     year: 900,   label: 'about AD 900', ready: false },
@@ -383,6 +433,39 @@
       { id: 'dolphin', name: 'Cupid on a dolphin mosaic', when: 'about AD 100 to 280', where: 'Fishbourne, West Sussex',
         fact: 'A floor picture made of tiny stones, in the biggest Roman house ever found this side of the Alps. Workmen digging a trench for a water pipe found it in 1960.',
         now: 'You can visit Fishbourne Roman Palace, near Chichester.' }
+    ],
+    uruk: [
+      { id: 'cuneiform', name: 'Early clay tablet', when: 'about 3300 to 3000 BC', where: 'Uruk, Iraq',
+        fact: 'The oldest writing we know of was pressed into wet clay here at Uruk. It was not stories or letters. It was lists, keeping track of things like barley and cloth.' },
+      { id: 'seal', name: 'Cylinder seal', when: 'from about 3500 BC', where: 'Uruk, Iraq',
+        fact: 'A little carved stone tube. Rolled across wet clay, it left a picture like a signature. Seals were invented around Uruk and helped people keep track of goods, even before writing.' },
+      { id: 'counting', name: 'Counting tablet', when: 'about 3000 BC onwards', where: 'Sumer, Iraq',
+        fact: 'Sumerians counted in 60s. Later astronomers kept using 60s, which is why an hour has 60 minutes and a circle has 360 degrees, the same degrees you aim with in this game.' },
+      { id: 'warka', name: 'Warka Vase', when: 'about 3000 BC', where: 'Uruk, Iraq',
+        fact: 'A tall stone vase carved with rows of reeds, sheep and people carrying food to a temple. It is one of the oldest carvings that tells a story. It was stolen in 2003, handed back in pieces, and carefully mended.',
+        now: 'It is in the Iraq Museum in Baghdad.' },
+      { id: 'standard', name: 'Standard of Ur', when: 'about 2550 BC', where: 'Ur, Iraq',
+        fact: 'A wooden box covered in pictures made of shell, red stone and blue lapis lazuli. One side shows a battle with four wheeled carts pulled by donkey like animals, the other a feast. Nobody knows what the box was for.',
+        now: 'It is in the British Museum in London.' },
+      { id: 'gameur', name: 'Royal Game of Ur', when: 'about 2600 to 2400 BC', where: 'Ur, Iraq',
+        fact: 'One of the oldest board games in the world. A British Museum expert worked out the rules in the 1980s, from a clay tablet written much later, in 177 BC.',
+        now: 'One of the boards is in the British Museum in London.' },
+      { id: 'ram', name: 'Ram in a Thicket', when: 'about 2600 BC', where: 'Ur, Iraq',
+        fact: 'A goat standing on its back legs to reach a tree, made of gold, silver, shell and blue lapis lazuli. Two were found together in the royal graves at Ur.',
+        now: 'One is in the British Museum in London, the other in the Penn Museum in Philadelphia.' },
+      { id: 'floodtab', name: 'Flood tablet', when: 'written in the 600s BC', where: 'Nineveh, Iraq',
+        fact: 'Part of the Epic of Gilgamesh, one of the oldest stories in the world, which began with the Sumerians. When George Smith read it in 1872, he got so excited he ran round the room and started taking his clothes off.',
+        now: 'It is in the British Museum in London.' }
+    ],
+    urukGlitches: [
+      { id: 'bike', name: 'Bicycle', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Sumerians were among the first people to use wheels, but nobody built a bicycle until the 1800s.' },
+      { id: 'biro', name: 'Ballpoint pen', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Sumerians wrote by pressing a cut reed into wet clay. Ballpoint pens came along in the 1930s.' },
+      { id: 'dclock', name: 'Digital clock', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Counting in 60s started here, but clocks with glowing numbers are about 5,000 years away.' },
+      { id: 'watercan', name: 'Plastic watering can', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Farmers here watered their fields with canals dug from the rivers. Plastic was not invented until 1907.' }
     ],
     castle: [
       { id: 'chessman', name: 'Lewis chessman', when: 'about 1150 to 1200', where: 'Isle of Lewis, Scotland',
@@ -509,54 +592,120 @@
 
   /* Time Tour: winners change history. Keyed by the map being changed, then the squad that won the stop before. */
   window.B5RIPPLE = {
-    desert: {
+    uruk: {
       pre: {
         look: 'rough',
         title: 'The Stone Snags won the Stone Age',
+        text: 'So people kept hunting instead of farming, and never quite settled down. Uruk is only half built: a low mound of mud bricks and reed huts. Stone Snags carry an extra boulder. Wedge Snags have one less war cart.',
+        postcard: 'Because the Stone Snags won back in 10,000 BC, Uruk is only half built.',
+        short: 'a half built Uruk',
+        ammo: { pre: { boulder: 1 }, sumer: { cart: -1 } }
+      },
+      egypt: {
+        look: 'golden',
+        title: 'The Sun Snags won the Stone Age',
+        text: 'So Egypt got going thousands of years early, and its builders came to Uruk. The temple is white and gold. Sun Snags carry an extra spear.',
+        postcard: 'Because the Sun Snags won back in 10,000 BC, the temple at Uruk shines white and gold.',
+        short: 'a golden Uruk',
+        ammo: { egypt: { spear: 1 } }
+      },
+      fut: {
+        look: 'neon',
+        title: 'The Neon Snags won the Stone Age',
+        text: 'So the future arrived thousands of years early. Uruk glows with neon lights. Neon Snags bring an extra disc. Wedge Snags have one less clay tablet.',
+        postcard: 'Because the Neon Snags won back in 10,000 BC, Uruk glows with neon lights.',
+        short: 'a neon Uruk',
+        ammo: { fut: { disc: 1 }, sumer: { tablet: -1 } }
+      },
+      rome: {
+        look: 'normal',
+        title: 'The Eagle Snags won the Stone Age',
+        text: 'So Rome rose thousands of years early. Eagle Snags march in with an extra pilum. Wedge Snags have one less war cart.',
+        postcard: 'Because the Eagle Snags won back in 10,000 BC, Rome rose thousands of years early.',
+        short: 'Rome rising early',
+        ammo: { rome: { pilum: 1 }, sumer: { cart: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won the Stone Age',
+        text: 'So knights turned up thousands of years early. Crown Snags carry an extra volley. Wedge Snags have one less clay tablet.',
+        postcard: 'Because the Crown Snags won back in 10,000 BC, knights turned up thousands of years early.',
+        short: 'knights by the river',
+        ammo: { med: { volley: 1 }, sumer: { tablet: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won the Stone Age',
+        text: 'So pirates sailed up the river Euphrates thousands of years early. Anchor Snags carry an extra cannonball. Wedge Snags have one less war cart.',
+        postcard: 'Because the Anchor Snags won back in 10,000 BC, pirates sailed up the Euphrates.',
+        short: 'pirates on the Euphrates',
+        ammo: { pirate: { cannon: 1 }, sumer: { cart: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won the Stone Age',
+        text: 'So the first cities started even earlier. Wedge Snags carry an extra war cart.',
+        postcard: 'Because the Wedge Snags won back in 10,000 BC, the first cities started even earlier.',
+        short: 'cities starting early',
+        ammo: { sumer: { cart: 1 } }
+      }
+    },
+    desert: {
+      pre: {
+        look: 'rough',
+        title: 'The Stone Snags won at Uruk',
         text: 'So Stone Age ways won out. The pyramids are rough and half finished, and giant boulders lie all over the desert. Stone Snags carry an extra boulder. Sun Snags have one less spear.',
-        postcard: 'Because the Stone Snags won back in 10,000 BC, the pyramids are rough and covered in boulders.',
+        postcard: 'Because the Stone Snags won in 3500 BC, the pyramids are rough and covered in boulders.',
         short: 'rough pyramids with boulders everywhere',
         ammo: { pre: { boulder: 1 }, egypt: { spear: -1 } }
       },
       fut: {
         look: 'neon',
-        title: 'The Neon Snags won the Stone Age',
+        title: 'The Neon Snags won at Uruk',
         text: 'So the future arrived thousands of years early. The pyramids glow with neon lights under a purple sky. Neon Snags bring an extra Ricochet Disc. Stone Snags have one less boulder.',
-        postcard: 'Because the Neon Snags won back in 10,000 BC, the pyramids glow with neon lights.',
+        postcard: 'Because the Neon Snags won in 3500 BC, the pyramids glow with neon lights.',
         short: 'neon pyramids',
         ammo: { fut: { disc: 1 }, pre: { boulder: -1 } }
       },
       egypt: {
         look: 'golden',
-        title: 'The Sun Snags won the Stone Age',
+        title: 'The Sun Snags won at Uruk',
         text: 'So Egypt got a head start. The pyramids were finished early, with smooth white sides and shining gold tips. Sun Snags carry an extra spear.',
-        postcard: 'Because the Sun Snags won back in 10,000 BC, the pyramids shine with gold tips.',
+        postcard: 'Because the Sun Snags won in 3500 BC, the pyramids shine with gold tips.',
         short: 'golden pyramids',
         ammo: { egypt: { spear: 1 } }
       },
       rome: {
         look: 'normal',
-        title: 'The Eagle Snags won the Stone Age',
+        title: 'The Eagle Snags won at Uruk',
         text: 'So Rome got a head start of thousands of years. Eagle Snags march in with an extra pilum. Sun Snags have one less spear.',
-        postcard: 'Because the Eagle Snags won back in 10,000 BC, Rome rose thousands of years early.',
+        postcard: 'Because the Eagle Snags won in 3500 BC, Rome rose thousands of years early.',
         short: 'Rome rising early',
         ammo: { rome: { pilum: 1 }, egypt: { spear: -1 } }
       },
       med: {
         look: 'normal',
-        title: 'The Crown Snags won the Stone Age',
+        title: 'The Crown Snags won at Uruk',
         text: 'So knights turned up thousands of years early. Crown Snags carry an extra Longbow Volley. Sun Snags have one less spear.',
-        postcard: 'Because the Crown Snags won back in 10,000 BC, knights turned up thousands of years early.',
+        postcard: 'Because the Crown Snags won in 3500 BC, knights turned up thousands of years early.',
         short: 'knights in the desert',
         ammo: { med: { volley: 1 }, egypt: { spear: -1 } }
       },
       pirate: {
         look: 'normal',
-        title: 'The Anchor Snags won the Stone Age',
+        title: 'The Anchor Snags won at Uruk',
         text: 'So pirates sailed the Nile thousands of years early. Anchor Snags carry an extra cannonball. Sun Snags have one less spear.',
-        postcard: 'Because the Anchor Snags won back in 10,000 BC, pirates sailed the Nile.',
+        postcard: 'Because the Anchor Snags won in 3500 BC, pirates sailed the Nile.',
         short: 'pirates on the Nile',
         ammo: { pirate: { cannon: 1 }, egypt: { spear: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won at Uruk',
+        text: 'So Sumer grew into an empire before the pyramids were even finished. Wedge Snags carry an extra clay tablet. Sun Snags have one less spear.',
+        postcard: 'Because the Wedge Snags won in 3500 BC, Sumer grew into an empire before the pyramids.',
+        short: 'an early Sumerian empire',
+        ammo: { sumer: { tablet: 1 }, egypt: { spear: -1 } }
       }
     },
     wall: {
@@ -607,6 +756,14 @@
         postcard: 'Because the Anchor Snags won in 2560 BC, pirates ruled the seas around Britain.',
         short: 'pirate seas around Britain',
         ammo: { pirate: { keg: 1 }, rome: { ballista: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won in Ancient Egypt',
+        text: 'So the Sumerians taught the world to build in mud brick. Wedge Snags carry an extra war cart. Eagle Snags have one less pilum.',
+        postcard: 'Because the Wedge Snags won in 2560 BC, the world learned to build in mud brick.',
+        short: 'a world of mud brick',
+        ammo: { sumer: { cart: 1 }, rome: { pilum: -1 } }
       }
     },
     castle: {
@@ -657,6 +814,14 @@
         postcard: 'Because the Anchor Snags won in AD 122, pirates sailed up every river.',
         short: 'pirates up every river',
         ammo: { pirate: { keg: 1 }, med: { volley: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won at Hadrian\'s Wall',
+        text: 'So mud brick builders spread all the way to Britain. Wedge Snags carry extra Mud Brick Steps. Crown Snags have one less volley.',
+        postcard: 'Because the Wedge Snags won in AD 122, mud brick builders reached Britain.',
+        short: 'mud brick in Britain',
+        ammo: { sumer: { steps: 1 }, med: { volley: -1 } }
       }
     },
     harbour: {
@@ -707,6 +872,14 @@
         postcard: 'Because the Anchor Snags won in AD 1300, the pirates got going early.',
         short: 'pirates starting early',
         ammo: { pirate: { keg: 1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won at the castle',
+        text: 'So the Sumerians sailed reed boats across the oceans. Wedge Snags carry an extra clay tablet. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Wedge Snags won in AD 1300, reed boats crossed the oceans.',
+        short: 'reed boats on every ocean',
+        ammo: { sumer: { tablet: 1 }, pirate: { cannon: -1 } }
       }
     },
     city: {
@@ -757,6 +930,14 @@
         postcard: 'Because the Anchor Snags won in 1718, pirates run the Future City.',
         short: 'a pirate Future City',
         ammo: { pirate: { cannon: 1 }, fut: { laser: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won at the Pirate Harbour',
+        text: 'So writing on clay never went away. Wedge Snags carry an extra war cart. Neon Snags have one less disc.',
+        postcard: 'Because the Wedge Snags won in 1718, the Future City still writes on clay.',
+        short: 'a Future City that writes on clay',
+        ammo: { sumer: { cart: 1 }, fut: { disc: -1 } }
       }
     }
   };
@@ -809,6 +990,12 @@
     keg: ['Who left a keg there?', 'Careful where you step.'],
     broadside: ['Broadside! Everybody duck!', 'Ship ahoy! Five cannonballs incoming.'],
     arrows: ['Arrow storm! Find some cover!', 'The castle archers are awake.'],
-    tide: ['High tide coming! Head for high ground.', 'The sea is coming in. Totally normal for a harbour.']
+    tide: ['High tide coming! Head for high ground.', 'The sea is coming in. Totally normal for a harbour.'],
+    cart: ['War cart! Mind the wheels.', 'Look at it go downhill!'],
+    tablet: ['Skimming a clay tablet. Outrageous.', 'One, two, three skips!'],
+    steps: ['A lovely little staircase.', 'Very Sumerian. Very sturdy.'],
+    canal: ['The river is rising! Everybody up!', 'Who opened the canal?'],
+    bull: ['THE BULL OF HEAVEN!', 'Mind the horns! Mind the horns!'],
+    river: ['The river is flooding! Get to high ground!', 'The Euphrates is coming over the banks.']
   };
 })();

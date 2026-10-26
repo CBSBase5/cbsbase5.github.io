@@ -12,6 +12,7 @@
       FU = '#8b5a2b', FD = '#5e3a17', PT = '#6b7480', GL = '#2b3038',
       LB = '#2c5ca8', AU = '#f0c446', AD = '#b8861e', LN = '#f4efe4', LN2 = '#d8cfbd', CU = '#c8874a', BZ = '#d9a441', TQ = '#3fb8a8',
       RD = '#b8322a', RDL = '#e0574a', IR = '#8a929c', IRL = '#cfd5da', IRD = '#4f565e', BRS = '#c99a3a',
+      CL = '#c89a6a', CLL = '#e6c08e', CLD = '#8a6440', BRD = '#2a1e2e', KN = '#efe6cc', KND = '#c8bc9a',
       GN = '#3f7a3a', GNL = '#5fa04a', GND = '#2a5426', NV = '#2a3f6a', BD = '#c8322a', BDL = '#e8574a', ST = '#f4efe4';
 
   function r(a, b, w, h, c) { g.fillStyle = c; g.fillRect(OX + a, OY + b, w, h); }
@@ -37,6 +38,7 @@
     egypt: ['#3d3314', '#b9a64c', '#ddcf80', '#8e7d34', '#cfc068', '#9a873a', '#4c4018'],
     fut:   ['#153a38', '#4fae9c', '#93dfcc', '#37857a', '#78cdb8', '#3f9584', '#1a4440'],
     rome:  ['#2b2a3a', '#9a8fb0', '#c6bdd6', '#766c8e', '#b2a8c8', '#857aa0', '#2f2a40'],
+    sumer: ['#3a1e24', '#b8707a', '#e0a0a8', '#8c4e5a', '#d08890', '#a05e6a', '#40202a'],
     med:   ['#3a2a18', '#c4925e', '#e6bc8a', '#986c42', '#d8a876', '#aa7c4e', '#3e2c18'],
     pirate: ['#1e2c3a', '#6f93ae', '#a8c8dc', '#4f6f8a', '#8fb0c8', '#5d7f9a', '#223040'],
     gold:  ['#4a3510', '#e0b040', '#ffe08a', '#b8861e', '#f0cc5e', '#c99a2a', '#5a4010'],
@@ -146,6 +148,11 @@
       r(8, 19, 9, 1, IRL); r(8, 21, 9, 1, IRD); r(8, 23, 9, 1, RD); r(9, 23, 1, 1, RDL); r(13, 23, 1, 1, RDL);
       r(7, 17, 3, 2, IRL); r(15, 17, 3, 2, IR);
     }
+    if (era === 'sumer') {
+      e(12, 21.4, 4.8, 3.2, KND); e(12, 21.2, 4.2, 2.6, KN);
+      for (var tq = 0; tq < 4; tq++) { r(8 + tq * 2 + (tq % 2), 20, 1, 1, KND); r(9 + tq * 2, 22, 1, 1, KND); }
+      r(8, 19, 9, 1, BRS); r(12, 19, 1, 1, LB);
+    }
     if (era === 'med') {
       e(12, 21, 4.7, 3.5, GND); e(12, 20.6, 4, 2.9, GN); r(9, 18, 2, 5, GNL);
       r(12, 18, 1, 6, AU); r(9, 20, 7, 1, AU); r(8, 23, 9, 1, WK); r(12, 23, 1, 1, BRS);
@@ -213,6 +220,10 @@
     else if (pose === 'aim') { r(10, 15 + my, 3, 1, M); r(13, 15 + my, 1, 2, TG); }
     else { r(9, 15 + my, 6, 1, M); r(15, 14 + my, 1, 1, M); r(8, 14 + my, 1, 1, M); r(10, 16 + my, 1, 1, W); }
 
+    if (era === 'sumer' && !wild && pose !== 'yawn' && pose !== 'cheer') {
+      r(9, 16 + hy, 7, 2, BRD); r(10, 18 + hy, 5, 1, BRD); r(11, 19 + hy, 3, 1, BRD);
+      r(10, 16 + hy, 1, 1, '#4a3a52'); r(13, 17 + hy, 1, 1, '#4a3a52'); r(11, 18 + hy, 1, 1, '#4a3a52');
+    }
     /* head gear */
     if (era === 'fut') { r(6, 6 + hy, 12, 1, GL); r(8, 5 + hy, 3, 2, CY); r(13, 5 + hy, 3, 2, CY); r(8, 5 + hy, 1, 1, CYL); r(13, 5 + hy, 1, 1, CYL); }
     else if (era === 'pre') { r(13, 7 + hy, 3, 1, PL); r(14, 6 + hy, 1, 3, PL); }
@@ -221,6 +232,12 @@
       r(7, 3 + hy, 11, 3, IRD); r(8, 3 + hy, 9, 2, IR); r(8, 3 + hy, 3, 1, IRL);
       r(6, 6 + hy, 13, 1, BRS); r(5, 6 + hy, 2, 3, IR); r(18, 6 + hy, 2, 3, IR);
       r(12, 2 + hy, 1, 1, BRS); r(9, 0 + hy, 7, 2, RD); r(10, 0 + hy, 4, 1, RDL); r(8, 1 + hy, 1, 1, RD); r(16, 1 + hy, 1, 1, RD);
+    }
+    if (era === 'sumer') {
+      /* a gold helmet shaped like hair with a bun, like the one found at Ur */
+      r(8, 3 + hy, 9, 1, AD); r(7, 4 + hy, 11, 3, AD); r(8, 4 + hy, 9, 2, AU); r(8, 4 + hy, 3, 1, '#fff0b0');
+      r(7, 7 + hy, 11, 1, AD); r(9, 5 + hy, 1, 1, AD); r(12, 5 + hy, 1, 1, AD); r(15, 5 + hy, 1, 1, AD);
+      r(3, 4 + hy, 4, 4, AD); r(4, 5 + hy, 2, 2, AU); r(6, 6 + hy, 2, 1, AD);
     }
     if (era === 'med') {
       /* a steel kettle hat with a wide brim */
@@ -260,6 +277,7 @@
       if (era === 'fut') { r(18, 9 + u, 4, 2, MT); r(22, 9 + u, 1, 2, CY); }
       if (era === 'egypt') { r(19, 6 + u, 1, 7, AU); r(17, 7 + u, 5, 1, AU); r(18, 2 + u, 1, 4, AU); r(20, 2 + u, 1, 4, AU); r(19, 1 + u, 1, 1, AU); r(19, 5 + u, 1, 1, AD); }
       if (era === 'rome') { r(19, 3 + u, 1, 8, IRL); r(19, 2 + u, 1, 1, '#ffffff'); r(18, 11 + u, 3, 1, BRS); }
+      if (era === 'sumer') { r(18, 3 + u, 6, 7, CLD); r(19, 4 + u, 4, 5, CL); r(19, 5 + u, 3, 1, CLD); r(20, 7 + u, 2, 1, CLD); r(19, 4 + u, 1, 1, CLL); }
       if (era === 'med') { r(19, 1 + u, 1, 11, WD); r(20, 1 + u, 5, 4, GND); r(20, 2 + u, 4, 2, GN); r(21, 2 + u, 2, 1, AU); r(19, 0 + u, 1, 1, AU); }
       if (era === 'pirate') { r(19, 4 + u, 1, 6, IRL); r(20, 2 + u, 1, 3, IRL); r(21, 1 + u, 1, 2, IRL); r(18, 10 + u, 3, 1, AU); r(19, 11 + u, 1, 1, WK); }
     } else if (pose === 'yawn') {
@@ -294,6 +312,7 @@
         if (era === 'pre') { r(17, 5, 2, 8, WD); r(16, 2, 4, 4, WK); r(16, 2, 1, 1, '#8c6034'); }
         else if (era === 'egypt') { r(17, 10, 2, 3, WK); r(18, 4, 2, 6, BZ); r(19, 2, 2, 3, BZ); r(21, 1, 2, 2, BZ); r(17, 5, 1, 4, AD); }
         else if (era === 'rome') { r(15, 12, 5, 11, IRD); r(16, 13, 3, 9, RD); r(16, 16, 3, 2, BRS); }
+        else if (era === 'sumer') { r(17, 6, 2, 8, WD); r(15, 3, 5, 3, CU); r(15, 3, 2, 1, '#f0b07a'); r(19, 4, 1, 1, CU); }
         else if (era === 'med') { r(17, 6, 2, 8, WD); r(16, 2, 4, 4, IRD); r(17, 3, 2, 2, IR); r(15, 3, 1, 1, IRD); r(20, 3, 1, 1, IRD); r(17, 1, 1, 1, IRD); }
         else if (era === 'pirate') { r(18, 4, 1, 8, IRL); r(19, 2, 1, 3, IRL); r(16, 12, 4, 1, AU); r(17, 13, 2, 1, WK); }
         else { r(16, 10, 4, 4, CY); r(17, 11, 2, 2, CYL); }
@@ -302,6 +321,7 @@
         if (era === 'pre') { r(21, 17, 7, 2, WD); r(27, 15, 3, 5, WK); }
         else if (era === 'egypt') { r(21, 18, 2, 2, WK); r(23, 17, 5, 2, BZ); r(27, 15, 2, 3, BZ); r(28, 13, 2, 2, BZ); r(24, 19, 3, 1, AD); }
         else if (era === 'rome') { r(21, 12, 5, 12, IRD); r(22, 13, 3, 10, RD); r(22, 13, 1, 10, RDL); r(22, 17, 3, 2, BRS); }
+        else if (era === 'sumer') { r(21, 18, 6, 2, WD); r(26, 15, 3, 6, CU); r(26, 15, 1, 6, '#f0b07a'); }
         else if (era === 'med') { r(21, 18, 6, 2, WD); r(27, 16, 4, 5, IRD); r(28, 17, 2, 3, IR); r(31, 18, 1, 1, IRD); r(28, 15, 1, 1, IRD); }
         else if (era === 'pirate') { r(21, 18, 2, 2, AU); r(23, 18, 7, 1, IRL); r(29, 17, 2, 1, IRL); r(24, 19, 4, 1, IR); }
         else { r(22, 16, 4, 4, CY); r(23, 17, 2, 2, CYL); r(26, 17, 2, 1, CYL); r(26, 19, 2, 1, CYL); }
@@ -314,6 +334,7 @@
       else if (era === 'egypt') { r(21, 21 + dd, 5, 1, CU); r(26, 21 + dd, 1, 1, '#f0b07a'); r(18, 16 - dd, 3, 3, WD); }
       else if (era === 'rome' || era === 'med') { r(21, 21 + dd, 4, 1, WD); r(24, 18 + dd, 2, 5, IRD); r(25, 19 + dd, 1, 3, IRL); }
       else if (era === 'pirate') { r(20, 21 + dd, 5, 1, WD); r(25, 19 + dd, 3, 4, IR); r(25, 19 + dd, 3, 1, IRL); }
+      else if (era === 'sumer') { r(20, 20 + dd, 5, 1, WD); r(25, 20 + dd, 1, 4, CU); r(26, 23 + dd, 2, 1, CU); }
       else { r(21, 20 + dd, 4, 2, MT); r(25, 20 + dd, 2, 2, CY); r(27, 20 + dd * 2, 1, 1, CYL); }
     } else {
       var sw = walk ? [1, 1, 0, -1, -1, 0][w6] : 0;
@@ -321,6 +342,7 @@
       if (era === 'pre') { r(18 + sw, 14, 1, 6, WD); r(17 + sw, 11, 3, 3, WK); r(17 + sw, 11, 1, 1, '#8c6034'); }
       if (era === 'egypt') { r(18 + sw, 9, 1, 12, WD); r(18 + sw, 6, 1, 3, CU); r(17 + sw, 8, 3, 1, CU); r(18 + sw, 6, 1, 1, '#f0b07a'); }
       if (era === 'rome') { r(18 + sw, 13, 1, 6, IRL); r(18 + sw, 12, 1, 1, '#ffffff'); r(17 + sw, 19, 3, 1, BRS); r(18 + sw, 20, 1, 1, WK); }
+      if (era === 'sumer') { r(17 + sw, 15, 5, 6, CLD); r(18 + sw, 16, 3, 4, CL); r(18 + sw, 17, 2, 1, CLD); r(19 + sw, 19, 2, 1, CLD); r(18 + sw, 16, 1, 1, CLL); }
       if (era === 'med') { r(19 + sw, 8, 1, 2, WK); r(20 + sw, 10, 1, 9, WK); r(19 + sw, 19, 1, 2, WK); r(19 + sw, 10, 1, 9, '#e8e2d2'); r(20 + sw, 14, 1, 2, WD); }
       if (era === 'pirate') { r(18 + sw, 13, 1, 6, IRL); r(19 + sw, 11, 1, 2, IRL); r(17 + sw, 19, 3, 1, AU); r(18 + sw, 20, 1, 1, WK); }
     }
@@ -401,6 +423,17 @@
       var bx2 = hx + dx * 7, by2 = hy + dy * 7;
       for (i = -4; i <= 4; i++) px(ctx, bx2 - dy * i - dx * Math.abs(i) * 0.4, by2 + dx * i - dy * Math.abs(i) * 0.4, 1, 1, IRD);
       px(ctx, hx + dx * 11, hy + dy * 11, 2, 1, IRL);
+      return;
+    }
+    if (wid === 'tablet') {
+      var tx2 = hx + dx * 5, ty2 = hy + dy * 5;
+      px(ctx, tx2 - 3, ty2 - 2, 6, 5, CLD); px(ctx, tx2 - 2, ty2 - 1, 4, 3, CL); px(ctx, tx2 - 2, ty2, 3, 1, CLD); px(ctx, tx2 - 2, ty2 - 1, 1, 1, CLL);
+      return;
+    }
+    if (era === 'sumer' && (wid === 'lob' || wid === 'bomb')) {
+      var sx3 = hx + dx * 4, sy3 = hy + dy * 4;
+      if (wid === 'lob') { px(ctx, sx3 - 2, sy3 - 2, 5, 4, '#1d1a1a'); px(ctx, sx3 - 1, sy3 - 2, 3, 1, '#4a4440'); px(ctx, sx3 - 1, sy3 - 4, 2, 2, ((t >> 3) % 2) ? OR : '#ffd27a'); }
+      else { px(ctx, sx3 - 2, sy3 - 2, 5, 5, CLD); px(ctx, sx3 - 1, sy3 - 1, 3, 3, CL); px(ctx, sx3 - 1, sy3 - 3, 3, 1, '#6a3a1a'); px(ctx, sx3, sy3 - 4, 1, 1, '#7a3a20'); }
       return;
     }
     if (wid === 'lance') {
@@ -561,6 +594,24 @@
       for (i = 0; i < p.trail.length; i += 2) { ctx.fillStyle = i < p.trail.length / 2 ? '#8a8a8a' : '#c8c8c8'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 1, 1); }
       ctx.fillStyle = '#1d1d24'; ctx.fillRect(X - 2, Y - 1, 5, 3); ctx.fillRect(X - 1, Y - 2, 3, 5);
       ctx.fillStyle = '#5a5e64'; ctx.fillRect(X - 1, Y - 1, 1, 1);
+      return;
+    }
+    if (p.type === 'tablet') {
+      var spin = (t >> 2) % 4;
+      ctx.fillStyle = CLD;
+      if (spin === 0 || spin === 2) { ctx.fillRect(X - 3, Y - 2, 7, 4); ctx.fillStyle = CL; ctx.fillRect(X - 2, Y - 1, 5, 2); ctx.fillStyle = CLD; ctx.fillRect(X - 1, Y - 1, 1, 1); ctx.fillRect(X + 1, Y, 1, 1); }
+      else { ctx.fillRect(X - 1, Y - 3, 3, 7); ctx.fillStyle = CL; ctx.fillRect(X, Y - 2, 1, 5); }
+      return;
+    }
+    if (era === 'sumer' && (p.type === 'lob' || p.type === 'bomb')) {
+      if (p.type === 'lob') {
+        for (i = 0; i < p.trail.length; i += 2) { ctx.fillStyle = i < p.trail.length / 2 ? '#3a3030' : '#ef7724'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 1, 1); }
+        ctx.fillStyle = '#1d1a1a'; ctx.fillRect(X - 2, Y - 2, 5, 5); ctx.fillStyle = '#4a4440'; ctx.fillRect(X - 1, Y - 1, 2, 1);
+        ctx.fillStyle = ((t >> 1) % 2) ? OR : '#ffd27a'; ctx.fillRect(X - 1, Y - 4, 3, 2);
+      } else {
+        ctx.fillStyle = CLD; ctx.fillRect(X - 2, Y - 2, 5, 5); ctx.fillStyle = CL; ctx.fillRect(X - 1, Y - 1, 3, 3);
+        ctx.fillStyle = '#6a3a1a'; ctx.fillRect(X - 1, Y - 3, 3, 1);
+      }
       return;
     }
     if (p.type === 'trebstone') {
@@ -773,6 +824,18 @@
       if (look === 'neon') { x2.fillStyle = '#5fe0f0'; x2.fillRect(Math.round(W * 0.08), gy - 7, Math.round(W * 0.84), 1); }
       x2.fillStyle = look === 'neon' ? '#2f3a4a' : '#6f9a4a'; x2.fillRect(0, gy, W, 2);
       x2.fillStyle = look === 'neon' ? '#22263e' : 'rgb(110,84,56)'; x2.fillRect(0, gy + 2, W, H - gy);
+    } else if (map.style === 'uruk') {
+      var gU = look === 'golden', nU = look === 'neon', rU = look === 'rough';
+      x2.fillStyle = nU ? '#2c2f57' : '#c8b48c'; x2.fillRect(0, gy - 3, W, 3);
+      var bc = nU ? '#46356f' : '#c8a06a', tiers = rU ? 1 : 3;
+      for (i = 0; i < tiers; i++) { var tw = Math.round(W * (0.46 - i * 0.12)); x2.fillStyle = bc; x2.fillRect(Math.round(W / 2 - tw / 2), gy - 7 - i * 6, tw, 7); x2.fillStyle = nU ? '#5fe0f0' : '#e6c08e'; x2.fillRect(Math.round(W / 2 - tw / 2), gy - 7 - i * 6, tw, 1); }
+      if (!rU) { x2.fillStyle = gU ? '#f0c446' : (nU ? '#ff78be' : '#efe6d4'); x2.fillRect(Math.round(W / 2 - 5), gy - 25, 10, 6); }
+      if (rU) { x2.fillStyle = '#c4b06a'; for (i = 0; i < 3; i++) { x2.beginPath(); x2.arc(W * (0.2 + i * 0.3), gy, 4, Math.PI, 0); x2.fill(); } }
+      x2.fillStyle = nU ? '#14162e' : '#7a5a34'; x2.fillRect(Math.round(W * 0.1), gy - 14, 1, 14); x2.fillRect(Math.round(W * 0.88), gy - 12, 1, 12);
+      x2.fillStyle = nU ? '#ff78be' : '#4f8a3a'; x2.fillRect(Math.round(W * 0.1) - 3, gy - 15, 7, 2); x2.fillRect(Math.round(W * 0.88) - 3, gy - 13, 7, 2);
+      x2.fillStyle = nU ? '#2f3a4a' : '#84b04e'; x2.fillRect(0, gy, W, 2);
+      x2.fillStyle = nU ? '#22263e' : 'rgb(150,118,84)'; x2.fillRect(0, gy + 2, W, H - gy);
+      x2.fillStyle = map.water; x2.fillRect(Math.round(W * 0.7), gy, Math.round(W * 0.1), H - gy);
     } else if (map.style === 'castle') {
       var gold = look === 'golden', wood = look === 'rough', neo = look === 'neon';
       x2.fillStyle = neo ? '#2c2f57' : '#86a874'; x2.beginPath(); x2.moveTo(0, gy); x2.quadraticCurveTo(W * 0.5, H * 0.42, W, gy); x2.fill();
@@ -852,6 +915,20 @@
       case 'onager':
         P(1, 9, 10, 2, WK); P(2, 8, 8, 1, WD); P(3, 4, 1, 5, WD); P(4, 3, 1, 1, WD); P(5, 2, 1, 1, WD); P(6, 1, 1, 1, WD);
         dot(8.5, 2.5, 2, '#8c857b'); P(8, 1, 1, 1, '#b5ada2'); P(2, 11, 2, 1, '#3b2616'); P(8, 11, 2, 1, '#3b2616'); break;
+      case 'cart':
+        P(1, 4, 10, 4, WK); P(2, 5, 8, 2, WD); P(1, 3, 2, 1, WK); P(9, 2, 2, 2, WK);
+        dot(3.5, 9, 2.3, '#3a2410'); dot(3.5, 9, 1.4, WD); dot(8.5, 9, 2.3, '#3a2410'); dot(8.5, 9, 1.4, WD); break;
+      case 'tablet':
+        P(2, 2, 8, 9, CLD); P(3, 3, 6, 7, CL); P(4, 4, 1, 1, CLD); P(6, 4, 2, 1, CLD); P(4, 6, 3, 1, CLD); P(5, 8, 1, 1, CLD); P(7, 8, 1, 1, CLD); P(3, 3, 1, 1, CLL); break;
+      case 'steps':
+        P(0, 9, 12, 3, '#a8824e'); P(3, 6, 9, 3, '#c8a06a'); P(6, 3, 6, 3, '#d8b47a'); P(9, 0, 3, 3, '#e6c08e');
+        P(0, 9, 12, 1, '#e6c08e'); P(3, 6, 9, 1, '#efd09e'); P(6, 3, 6, 1, '#f4dca8'); break;
+      case 'canal':
+        P(0, 2, 3, 10, '#8a6440'); P(9, 2, 3, 10, '#8a6440'); P(3, 6, 6, 6, '#3f8a9a'); P(3, 6, 6, 1, '#a6e0dc');
+        P(5, 0, 2, 4, '#a6e0dc'); P(4, 3, 4, 1, '#a6e0dc'); break;
+      case 'bull':
+        P(2, 4, 8, 5, '#3a2418'); P(1, 5, 1, 3, '#3a2418'); P(8, 2, 3, 4, '#3a2418'); P(10, 1, 1, 2, AU); P(7, 0, 1, 2, AU); P(8, 1, 1, 1, AU);
+        P(9, 6, 2, 3, LB); P(3, 9, 1, 3, '#2a1a10'); P(7, 9, 1, 3, '#2a1a10'); P(9, 3, 1, 1, '#ffffff'); break;
       case 'volley':
         [0, 3, 6].forEach(function (o4) {
           for (var q4 = 0; q4 < 7; q4++) P(o4 - 2 + q4, 9 - q4 + (o4 >> 1), 1, 1, WD);
@@ -883,7 +960,8 @@
         P(0, 7, 12, 2, '#5a3a1a'); P(1, 9, 10, 1, '#3a2410'); P(3, 0, 1, 7, WD); P(8, 1, 1, 6, WD); P(4, 1, 3, 4, ST); P(9, 2, 2, 3, ST);
         P(2, 8, 1, 1, '#1d1d24'); P(5, 8, 1, 1, '#1d1d24'); P(8, 8, 1, 1, '#1d1d24'); P(11, 6, 1, 1, '#c8c8c8'); break;
       case 'shove':
-        if (era === 'med') { P(7, 0, 4, 4, IRD); P(8, 1, 2, 2, IR); P(6, 1, 1, 1, IRD); P(11, 2, 1, 1, IRD); P(6, 4, 2, 2, WD); P(4, 6, 2, 2, WD); P(2, 8, 2, 2, WD); }
+        if (era === 'sumer') { P(6, 1, 5, 4, CU); P(6, 1, 2, 1, '#f0b07a'); P(5, 5, 2, 2, WD); P(3, 7, 2, 2, WD); P(1, 9, 2, 2, WD); }
+        else if (era === 'med') { P(7, 0, 4, 4, IRD); P(8, 1, 2, 2, IR); P(6, 1, 1, 1, IRD); P(11, 2, 1, 1, IRD); P(6, 4, 2, 2, WD); P(4, 6, 2, 2, WD); P(2, 8, 2, 2, WD); }
         else if (era === 'pirate') { P(9, 1, 1, 2, IRL); P(8, 3, 1, 2, IRL); P(7, 5, 1, 2, IRL); P(6, 7, 1, 1, IRL); P(4, 7, 4, 1, AU); P(4, 8, 2, 2, WK); P(0, 4, 2, 1, '#ffffff'); }
         else if (era === 'rome') { P(3, 1, 7, 10, '#4f565e'); P(4, 2, 5, 8, RD); P(4, 2, 1, 8, RDL); P(5, 5, 3, 2, BRS); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         else if (era === 'pre') { P(7, 1, 4, 4, WK); P(7, 1, 1, 1, '#8c6034'); P(6, 5, 2, 2, WD); P(4, 7, 2, 2, WD); P(2, 9, 2, 2, WD); }
@@ -891,7 +969,8 @@
         else { P(3, 3, 6, 6, CY); P(3, 3, 6, 1, CYL); P(9, 4, 2, 4, '#1f7f8f'); P(4, 6, 4, 1, '#1f7f8f'); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         break;
       case 'dig':
-        if (era === 'pirate') { P(1, 2, 2, 2, '#d84a3a'); P(2, 1, 1, 1, '#d84a3a'); P(1, 1, 1, 1, '#d84a3a'); P(3, 4, 1, 4, WD); P(4, 7, 1, 1, WD); P(5, 8, 4, 3, IR); P(5, 8, 4, 1, IRL); }
+        if (era === 'sumer') { P(1, 2, 2, 2, WD); P(3, 4, 2, 2, WD); P(5, 6, 2, 2, WD); P(7, 8, 1, 3, CU); P(8, 10, 3, 1, CU); }
+        else if (era === 'pirate') { P(1, 2, 2, 2, '#d84a3a'); P(2, 1, 1, 1, '#d84a3a'); P(1, 1, 1, 1, '#d84a3a'); P(3, 4, 1, 4, WD); P(4, 7, 1, 1, WD); P(5, 8, 4, 3, IR); P(5, 8, 4, 1, IRL); }
         else if (era === 'rome' || era === 'med') { P(1, 9, 7, 1, WD); P(1, 10, 6, 1, WK); P(7, 4, 2, 7, '#4f565e'); P(8, 5, 1, 4, '#cfd5da'); P(9, 4, 2, 1, '#4f565e'); }
         else if (era === 'pre') { P(6, 0, 1, 6, BN); P(4, 6, 5, 4, BN); P(5, 7, 3, 2, '#d8ceb4'); P(5, 10, 3, 1, BN); }
         else if (era === 'egypt') { P(1, 8, 6, 2, WD); P(7, 8, 3, 2, CU); P(10, 8, 1, 2, '#f0b07a'); P(2, 2, 4, 3, WK); P(3, 5, 1, 3, WD); }
@@ -1010,6 +1089,30 @@
     return c;
   }
   var ART = {
+    cuneiform: { pal: { o: '#5a3a20', C: '#c89a6a', c: '#a87a4a', k: '#6a4426' }, rows: [
+      '            ', '  oooooooo  ', ' oCCCCCCCCo ', ' oCkCkkCkCo ', ' oCCCCCCCCo ', ' oCkkCkCkCo ', ' oCCCCCCCCo ', ' oCkCCkkCCo ', ' oCCCCCCCCo ', ' occcccccco ', '  oooooooo  ', '            '] },
+    seal: { pal: { o: '#2a2a3a', S: '#6a7a9a', s: '#8aa0c0', C: '#c89a6a', k: '#5a3a20' }, rows: [
+      '            ', '   oooo     ', '  oSsSSo    ', '  oSsSSo    ', '  oSsSSo    ', '  oSsSSo    ', '   oooo     ', ' CCCCCCCCCC ', ' CkCCkCkCkC ', ' CCkCCkCCCC ', ' CCCCCCCCCC ', '            '] },
+    counting: { pal: { o: '#5a3a20', C: '#d8aa76', k: '#5a3a20' }, rows: [
+      '            ', ' oooooooooo ', ' oCCCCCCCCo ', ' oCkCkCkCCo ', ' oCkCkCkCCo ', ' oCCCCCCCCo ', ' oCCkkkCCCo ', ' oCCCkCCCCo ', ' oCCCCCCCCo ', ' oCkkkkkCCo ', ' oooooooooo ', '            '] },
+    warka: { pal: { o: '#5a5040', A: '#e8e0cc', a: '#c8bea6', k: '#8a7a5a', G: '#6a8a4a' }, rows: [
+      '  oooooooo  ', '  oAAAAAAo  ', '   oAkkAo   ', '   oAAAAo   ', '  oAkAkAAo  ', '  oAAAAAAo  ', '  oAkAkAko  ', '  oaaaaaao  ', '  oAGAGAGo  ', '   oAAAAo   ', '    oaao    ', '   oooooo   '] },
+    standard: { pal: { o: '#2a2010', B: '#2c5ca8', W: '#f4efe4', R: '#b84a3a' }, rows: [
+      '            ', 'oooooooooooo', 'oBBBBBBBBBBo', 'oBWBBWBBWBBo', 'oBWWBWWBWWBo', 'oRRRRRRRRRRo', 'oBBWBBBWBBBo', 'oBWWWBWWWBBo', 'oBBBBBBBBBBo', 'oRRRRRRRRRRo', 'oooooooooooo', '            '] },
+    gameur: { pal: { o: '#2a2010', W: '#f4efe4', B: '#2c5ca8', R: '#b84a3a', k: '#1d1d24' }, rows: [
+      '            ', '            ', 'oooooooooooo', 'oWBWBooWBWBo', 'oBRBWooBWRBo', 'oWBWBWBWBWBo', 'oBWRBWBWRBWo', 'oWBWBooWBWBo', 'oooooooooooo', '            ', '  kk    WW  ', '  kk    WW  '] },
+    ram: { pal: { o: '#3a2a10', G: '#f0c446', g: '#b8861e', B: '#2c5ca8', W: '#f4efe4', k: '#1d1d24' }, rows: [
+      '  G  G   G  ', '  GG G  GG  ', '   GGG GG   ', '    oGGo    ', '   oBBko    ', '   oBBBo    ', '   oWWWWo   ', '   oWWWWWo  ', '   oWWWWWo  ', '    oo  oo  ', '  ggggggggg ', '  oooooooo  '] },
+    floodtab: { pal: { o: '#4a3a28', C: '#b89a76', c: '#9a7c58', k: '#5a4430' }, rows: [
+      '            ', '  ooooooo   ', ' oCCCCCCCo  ', ' oCkkCkkCCo ', ' oCCCCCCCCo ', ' oCkCkkCkCo ', ' oCCCCCCCCo ', ' oCkkCkCCo  ', ' oCCCCCco   ', '  occcco    ', '   oooo     ', '            '] },
+    bike: { pal: { k: '#1d1d24', R: '#d83a3a', G: '#8a8a8a' }, rows: [
+      '            ', '       kk   ', '  kk   k    ', '  kRRRRRk   ', '   R  RR    ', '  kkk R kkk ', ' k   kRk   k', ' k  k k  k k', ' k   k  k  k', '  kkk   kkk ', '            ', '            '] },
+    biro: { pal: { k: '#1d1d24', B: '#2f6fd8', W: '#e8e8f0', G: '#8a8a8a' }, rows: [
+      '         kk ', '        kBk ', '       kWk  ', '      kWk   ', '     kWk    ', '    kWk     ', '   kWk      ', '  kWk       ', '  kGk       ', ' kGk        ', ' kk         ', '            '] },
+    dclock: { pal: { o: '#1d1d24', K: '#2b3038', R: '#ff4a4a' }, rows: [
+      '            ', '            ', 'oooooooooooo', 'oKKKKKKKKKKo', 'oKRRKRKRRKKo', 'oKKRKKKKRKKo', 'oKRRKRKRRKKo', 'oKRKKKKRKKKo', 'oKRRKRKRRKKo', 'oKKKKKKKKKKo', 'oooooooooooo', ' oo      oo '] },
+    watercan: { pal: { o: '#1d4a2a', G: '#4ac86a', g: '#2a9a4a' }, rows: [
+      '            ', '   oooo     ', '  o    o    ', '  o oooooo o', '  ooGGGGGGoo', '   oGGGGGGo ', '   oGGgGGGo ', '   oGGGGGGo ', '   oGGGGGGo ', '   oggggggo ', '   oooooooo ', '            '] },
     chessman: { pal: { o: '#5a4a38', I: '#efe4c8', i: '#cdbf9e', k: '#3a2a1a' }, rows: [
       '    oooo    ', '   oIIIIo   ', '   oIkIko   ', '   oIIIIo   ', '    oiio    ', '  ooIIIIoo  ', ' oIIiIIiIIo ', ' oIIIkkIIIo ', ' oIiIIIIiIo ', ' oIIIIIIIIo ', '  oiiiiiio  ', '  oooooooo  '] },
     tapestry: { pal: { o: '#4a3a28', L: '#e8dcc0', G: '#4a7a3a', g: '#c8a040', B: '#3a5a9a', R: '#a83a2a', K: '#6a4a2a' }, rows: [
@@ -1259,6 +1362,32 @@
     ctx.fillStyle = GN; ctx.fillRect(X + 1, Y - 25, 8, 8 - wv);
     ctx.fillStyle = AU; ctx.fillRect(X + 3, Y - 23, 4, 3); ctx.fillStyle = GN; ctx.fillRect(X + 4, Y - 22, 2, 1);
     ctx.fillStyle = GND; ctx.fillRect(X + 1, Y - 17 - wv, 2, 1); ctx.fillRect(X + 6, Y - 17 - wv, 2, 1);
+  };
+  /* a Sumerian war cart on solid wooden wheels */
+  S.cart = function (ctx, x, y, face, roll) {
+    var X = Math.round(x), Y = Math.round(y);
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b, w, h); }
+    P(-8, -13, 16, 6, '#3a2410'); P(-7, -12, 14, 4, '#9a6a3a'); P(-7, -12, 14, 1, '#c89a5a'); P(4, -18, 4, 6, '#3a2410'); P(5, -17, 2, 4, '#9a6a3a');
+    P(8, -10, 6, 1, '#3a2410'); P(-9, -9, 2, 2, '#3a2410');
+    [-5, 5].forEach(function (wx) {
+      ctx.fillStyle = '#2a1a10';
+      for (var yy = -3; yy <= 3; yy++) { var hw = Math.round(Math.sqrt(9.5 - yy * yy)); ctx.fillRect(X + wx - hw, Y - 4 + yy, hw * 2 + 1, 1); }
+      ctx.fillStyle = '#8a5a2a'; ctx.fillRect(X + wx - 2, Y - 6, 5, 5);
+      ctx.fillStyle = '#c89a5a'; var ra = roll + wx; ctx.fillRect(X + wx + Math.round(Math.cos(ra) * 2), Y - 4 + Math.round(Math.sin(ra) * 2), 1, 1);
+      ctx.fillStyle = '#1d1d24'; ctx.fillRect(X + wx, Y - 4, 1, 1);
+    });
+  };
+  /* the Bull of Heaven: dark, huge, golden horns and a lapis beard like the bull lyre from Ur */
+  S.bull = function (ctx, x, y, face, t) {
+    var X = Math.round(x), Y = Math.round(y), st = (t >> 2) % 2;
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b, w, h); }
+    P(-18, -24, 30, 16, '#1d1410'); P(-17, -23, 28, 14, '#4a3020'); P(-15, -23, 22, 3, '#6a4630');
+    P(10, -28, 12, 14, '#1d1410'); P(11, -27, 10, 12, '#4a3020'); P(19, -22, 4, 5, '#3a2418');
+    P(13, -34, 2, 7, '#f0c446'); P(12, -36, 2, 3, '#f0c446'); P(18, -33, 2, 6, '#f0c446'); P(19, -35, 2, 3, '#f0c446');
+    P(14, -24, 2, 2, '#ffffff'); P(15, -24, 1, 1, '#1d1d24');
+    P(14, -15, 8, 6, '#2c5ca8'); P(15, -14, 1, 4, '#4a7ad0'); P(18, -14, 1, 4, '#4a7ad0');
+    P(-19, -22, 2, 8, '#1d1410'); P(-21, -16, 2, 4, '#1d1410');
+    [[-14, 0], [-8, 1], [3, 0], [8, 1]].forEach(function (lg) { P(lg[0], -9, 4, 9 - ((lg[1] + st) % 2) * 2, '#1d1410'); });
   };
   /* the ship that fires a Broadside, sailing past the edge of the map */
   S.ship = function (ctx, x, y, face, t) {

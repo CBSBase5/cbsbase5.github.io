@@ -52,6 +52,12 @@
     road:     { kind: 'road', tool: true, ammo: 2 },
     testudo:  { kind: 'testudo', ammo: 2 },
     onager:   { kind: 'strike', style: 'onager', R: 24, dmg: 34, ammo: 1, unlock: 10, knock: 1.1 },
+    /* Wedge Snags: the first cities. Wheels, clay, mud brick and rivers */
+    cart:    { kind: 'cart', ammo: 2 },
+    tablet:  { kind: 'proj', wind: true, windK: 0.6, impact: true, R: 18, dmg: 30, vmax: 11, grav: 0.55, ammo: 3, skim: 3 },
+    steps:   { kind: 'steps', ammo: 2 },
+    canal:   { kind: 'canal', ammo: 1 },
+    bull:    { kind: 'strike', style: 'bull', R: 30, dmg: 40, ammo: 1, unlock: 10 },
     /* Crown Snags: medieval siege craft. Arrows, a charge, hot oil and a banner */
     volley:  { kind: 'proj', wind: true, windK: 1.6, impact: true, R: 11, dmg: 13, vmax: 10.5, grav: 0.8, ammo: 3, spread: 5, aiR: 24, aiDmg: 34 },
     lance:   { kind: 'lance', dmg: 30, range: 120, ammo: 2 },
@@ -76,7 +82,7 @@
   var WORDER = ['lob', 'bomb', 'shove', 'dig'];
   var MAP = MAPS.jungle, LOOK = 'normal';
   var ARTS = window.B5ARTEFACTS, JAY = window.B5JAY, TL = window.B5TIMELINE, RIPPLE = window.B5RIPPLE;
-  var MAP_IDS = ['jungle', 'desert', 'wall', 'castle', 'harbour', 'city'];
+  var MAP_IDS = ['jungle', 'uruk', 'desert', 'wall', 'castle', 'harbour', 'city'];
   var READY = TL.filter(function (e) { return e.ready && ER[e.id]; }).map(function (e) { return e.id; });
   function realOf(mid) { return ARTS[mid] || ARTS.jungle; }
   function glitchOf(mid) { return ARTS[mid === 'jungle' ? 'glitches' : mid + 'Glitches'] || ARTS.glitches; }
@@ -94,6 +100,7 @@
     fut:   { fw: 2.0, lob: 1.1,  bomb: 1,    shove: 1,   kill: 25, water: 6 },
     egypt: { fw: 2.5, lob: 1.05, bomb: 1.05, shove: 1.1, kill: 40, water: 16, weak: 0.6 },
     rome:  { fw: 1.6, lob: 1, bomb: 1.05, shove: 1.25, kill: 36, water: 12 },
+    sumer: { fw: 1.5, lob: 1.05, bomb: 1.1, shove: 1.25, kill: 30, water: 12 },
     med:   { fw: 1.5, lob: 1.05, bomb: 1.1, shove: 1.3, kill: 32, water: 10 },
     pirate: { fw: 1.2, lob: 1.05, bomb: 1.05, shove: 1.3, kill: 30, water: 16 }
   };
@@ -782,6 +789,151 @@
     tctx.putImageData(img, 0, 0);
     miniDirty = true;
   }
+  /* ---------- City of Uruk: a flat river plain, a stepped ziggurat with a white temple on top and staircases
+     up its face, mud brick houses with rooms, reed huts by the river, date palms and irrigation ditches.
+     zones: 0 silt and fields, 1 mud brick, 2 white plaster, 4 reeds ---------- */
+  function genUruk(seed) {
+    var R = rng(seed), x, y, k, j;
+    mask.fill(0); burnt.fill(0); zone.fill(0); castleFlags = []; palmAt = [];
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283, rough = LOOK === 'rough';
+    var zx = Math.round(WW * (0.42 + R() * 0.16)), rs = R() < 0.5 ? -1 : 1, rv = clamp(zx + rs * (260 + Math.round(R() * 60)), 150, WW - 150), rw = 62;
+    var tops = new Float32Array(WW);
+    for (x = 0; x < WW; x++) {
+      var t = x / WW;
+      var h = 314 - 9 * Math.sin(t * 6.283 * 1.1 + p1) - 4 * Math.sin(t * 6.283 * 3.3 + p2) - 2 * Math.sin(t * 6.283 * 8.7 + p3);
+      var dr = Math.abs(x - rv);
+      if (dr < rw) { var cb = Math.cos(dr / rw * Math.PI / 2); h += 150 * cb * cb; }
+      var edge = Math.min(x, WW - 1 - x);
+      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      tops[x] = h;
+    }
+    for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
+    function put(xx, yy, z) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; mask[ii] = 1; zone[ii] = z; }
+    function hole(xx, yy) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; if (zone[ii]) mask[ii] = 0; }
+    function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
+    /* the ziggurat: tiers of mud brick, staircases up one face, a storeroom inside */
+    var widths = [228, 158, 98], th = [24, 22, 20], tiers = rough ? 1 : 3, base = 0, sd = R() < 0.5 ? -1 : 1;
+    for (x = zx - 114; x <= zx + 114; x++) base = Math.max(base, gAt(x));
+    base += 2;
+    var top = base, tierTop = [];
+    for (k = 0; k < tiers; k++) {
+      var hw = widths[k] / 2;
+      for (x = zx - hw; x <= zx + hw; x++) for (y = top - th[k]; y < (k === 0 ? gAt(x) + 3 : top); y++) put(x, y, 1);
+      top -= th[k]; tierTop.push(top);
+      /* steps up the face of this tier, five pixels at a time so a Snag can walk them */
+      var edgeX = zx + sd * hw, n = Math.ceil(th[k] / 5);
+      for (j = 0; j < n; j++) {
+        var sy = top + j * 5, floor = k === 0 ? null : tierTop[k - 1] + th[k];
+        for (x = edgeX + sd * j * 6; sd > 0 ? x < edgeX + sd * (j + 1) * 6 : x > edgeX + sd * (j + 1) * 6; x += sd) {
+          for (y = sy; y < (k === 0 ? gAt(x) + 3 : top + th[k]); y++) put(x, y, 1);
+        }
+      }
+    }
+    for (x = zx - 26; x <= zx + 26; x++) for (y = base - 18; y < base - 6; y++) hole(x, y);
+    if (!rough) {
+      /* the White Temple on top, with a room and a doorway */
+      var tw = 30, tTop = top - 22;
+      for (x = zx - tw; x <= zx + tw; x++) for (y = tTop; y < top; y++) put(x, y, 2);
+      for (x = zx - tw + 1; x <= zx + tw - 1; x += 6) for (y = tTop - 2; y < tTop; y++) { put(x, y, 2); put(x + 1, y, 2); put(x + 2, y, 2); }
+      for (x = zx - tw + 8; x <= zx + tw - 8; x++) for (y = tTop + 6; y < top - 1; y++) hole(x, y);
+      for (x = zx - sd * (tw - 8); Math.abs(x - zx) <= tw; x -= sd) for (y = top - 13; y < top - 1; y++) hole(x, y);
+      castleFlags.push([zx, tTop - 3]);
+    }
+    /* houses: mud brick boxes with a room and a door, or reed huts if history went wild */
+    var spots = [];
+    for (k = 0; k < 14 && spots.length < 4; k++) {
+      var hx = Math.round(130 + R() * (WW - 260));
+      if (Math.abs(hx - zx) < 150 || Math.abs(hx - rv) < rw + 30) continue;
+      var clash = false;
+      for (j = 0; j < spots.length; j++) if (Math.abs(spots[j] - hx) < 70) clash = true;
+      if (clash) continue;
+      spots.push(hx);
+      var hwid = 15 + Math.round(R() * 6), hh = 20 + Math.round(R() * 5), hg = Math.max(gAt(hx - hwid), gAt(hx + hwid)) + 2, door = R() < 0.5 ? -1 : 1;
+      if (rough) {
+        for (x = hx - hwid; x <= hx + hwid; x++) { var u = (x - hx) / hwid, ht = Math.round(hh * Math.sqrt(Math.max(0, 1 - u * u))); for (y = hg - ht; y < gAt(x) + 3; y++) put(x, y, 4); }
+        for (x = hx - 4; x <= hx + 4; x++) for (y = hg - 13; y < hg; y++) hole(x, y);
+        continue;
+      }
+      for (x = hx - hwid; x <= hx + hwid; x++) for (y = hg - hh; y < gAt(x) + 3; y++) put(x, y, 1);
+      for (x = hx - hwid + 6; x <= hx + hwid - 6; x++) for (y = hg - 14; y < hg - 1; y++) hole(x, y);
+      for (x = hx + door * (hwid - 6); Math.abs(x - hx) <= hwid; x += door) for (y = hg - 13; y < hg - 1; y++) hole(x, y);
+      for (x = hx - hwid; x <= hx + hwid; x += 6) for (y = hg - hh - 2; y < hg - hh; y++) { put(x, y, 1); put(x + 1, y, 1); put(x + 2, y, 1); }
+    }
+    /* reed huts by the river */
+    for (k = -1; k <= 1; k += 2) {
+      var rx = clamp(rv + k * (rw + 30 + Math.round(R() * 20)), 40, WW - 40), rg = gAt(rx) + 2;
+      if (Math.abs(rx - zx) < 130 || rg > WATER - 20) continue;
+      for (x = rx - 12; x <= rx + 12; x++) { var u2 = (x - rx) / 12, ht2 = Math.round(18 * Math.sqrt(Math.max(0, 1 - u2 * u2))); for (y = rg - ht2; y < gAt(x) + 3; y++) put(x, y, 4); }
+      for (x = rx - 4; x <= rx + 4; x++) for (y = rg - 12; y < rg; y++) hole(x, y);
+    }
+    /* irrigation ditches and a couple of buried hollows */
+    for (k = 0; k < 3; k++) { var ix = 120 + R() * (WW - 240); if (Math.abs(ix - zx) < 130 || Math.abs(ix - rv) < 100) continue; blob(ix, gAt(ix) + 2, 9, 4, 0); }
+    for (k = 0; k < 2; k++) { var bx = 200 + R() * (WW - 400); if (Math.abs(bx - zx) < 130) continue; blob(bx, gAt(bx) + 50 + R() * 22, 20 + R() * 10, 7 + R() * 3, 0); }
+    for (x = 70; x < WW - 70; x += 40 + Math.round(R() * 50)) if (Math.abs(x - zx) > 125 && Math.abs(x - rv) > rw && gAt(x) < WATER - 26) palmAt.push(x);
+    paintUruk();
+  }
+  function paintUruk() {
+    var P = MAP.pal, x, y, i, look = LOOK, neon = look === 'neon', gold = look === 'golden';
+    img = tctx.createImageData(WW, WH); data = img.data;
+    for (x = 0; x < WW; x++) {
+      var d = 0, pz = -1, gap = 0, dPrev = 0;
+      for (y = 0; y < WH; y++) {
+        i = y * WW + x;
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; pz = -1; gap++; continue; }
+        if (gap > 0 && gap < 34 && dPrev > 12 && zone[i] === 0) d = dPrev + gap;
+        gap = 0;
+        var z = zone[i], nz = hash(x, y), col;
+        if (z === 0 && pz > 0) d = 5;
+        pz = z;
+        if (z === 1) {
+          var row = y >> 2, bx = (x + (row % 2) * 4) % 8, mort = bx === 0 || (y & 3) === 0;
+          if (neon) col = d < 1 || !mask[i - 1] || !mask[i + 1] ? (hash(x >> 3, 1) < 0.5 ? P.neon : P.neon2) : (mort ? P.nstone2 : P.nstone);
+          else if (gold) col = d < 1 ? P.gold : (mort ? P.white2 : P.white);
+          else col = d < 1 ? [226, 192, 140] : (mort ? P.mortar : (hash(((x + (row % 2) * 4) >> 3), row) < 0.22 ? P.brickD : (nz < 0.5 ? P.brick1 : P.brick2)));
+        } else if (z === 2) {
+          col = neon ? P.neon2 : (gold ? (d < 2 ? [255, 236, 150] : P.gold) : (d < 1 ? [252, 248, 238] : (nz < 0.06 ? P.white2 : P.white)));
+          if (!neon && !gold && (y % 9) === 4 && (x % 3) !== 0) col = P.blue;
+        } else if (z === 4) {
+          col = neon ? ((x % 3) === 0 ? P.nstone2 : P.nstone) : ((y % 6) === 0 ? P.reedD : ((x % 3) === 0 ? P.reed2 : P.reed));
+        } else {
+          if (d < 2) col = neon ? [70, 96, 120] : P.grass1;
+          else if (d < 4) col = neon ? [52, 70, 92] : P.grass2;
+          else {
+            col = ((((y + (x >> 5) * 3) >> 2) % 7) === 0) ? P.silt2 : P.silt1;
+            if (neon) col = blend(col, [44, 40, 80], 0.5);
+            if (d > 60 + hash(y, x) * 12) col = P.deep;
+            if (nz < 0.04) col = P.speck;
+          }
+        }
+        setPx(i, col);
+        d++;
+      }
+    }
+    for (x = 1; x < WW - 1; x++) {
+      for (y = 3; y < WH; y++) {
+        i = y * WW + x;
+        if (mask[i] && !mask[i - WW] && zone[i] === 0 && !neon) {
+          var hv = hash(x * 3, y);
+          if (hv < 0.28) { setPx(i - WW, P.tuft); if (hv < 0.1) setPx(i - 2 * WW, P.tuft); }
+          else if (hv > 0.986) { setPx(i - WW, P.tuft); setPx(i - 2 * WW, hv > 0.993 ? P.flower2 : P.flower); }
+        }
+      }
+    }
+    palmAt.forEach(function (px0) {
+      var gy = surfaceY(px0); if (gy < 0) return;
+      var lean = hash(px0, 3) < 0.5 ? -1 : 1, top = [px0, gy];
+      for (var k = 0; k < 22; k++) { var tx = px0 + lean * Math.round(k * k / 90); deco(tx, gy - k, neon ? [20, 22, 46] : [122, 90, 52]); deco(tx + 1, gy - k, neon ? [20, 22, 46] : (k % 3 ? [150, 112, 66] : [98, 70, 40])); top = [tx, gy - 22]; }
+      var fc = neon ? [255, 120, 190] : [76, 140, 60];
+      [-2.8, -2.3, -1.6, -0.9, -0.4].forEach(function (an) { for (var j = 0; j < 10; j++) deco(top[0] + Math.cos(an) * j, top[1] + Math.sin(an) * j * 0.6 + j * j * 0.05, fc); });
+      if (!neon) { deco(top[0] - 1, top[1] + 2, [150, 70, 30]); deco(top[0] + 1, top[1] + 2, [150, 70, 30]); deco(top[0], top[1] + 3, [150, 70, 30]); }
+    });
+    castleFlags.forEach(function (f) {
+      for (var k = 0; k < 6; k++) deco(f[0], f[1] - k, [74, 60, 44]);
+      for (var a = -2; a <= 2; a++) deco(f[0] + a, f[1] - 6, neon ? P.neon : (gold ? P.gold : [240, 196, 70]));
+    });
+    tctx.putImageData(img, 0, 0);
+    miniDirty = true;
+  }
   function paintCity() {
     var P = MAP.pal, x, y, i, wild = LOOK === 'overgrown', bright = LOOK === 'gleaming', sandy = LOOK === 'sandy', k2;
     if (sandy && MAP.sandy) { P = {}; for (k2 in MAP.pal) P[k2] = MAP.pal[k2]; for (k2 in MAP.sandy) P[k2] = MAP.sandy[k2]; }
@@ -837,6 +989,7 @@
     if (MAP.style === 'desert') { genDesert(seed); return; }
     if (MAP.style === 'wall') { genWall(seed); return; }
     if (MAP.style === 'castle') { genCastle(seed); return; }
+    if (MAP.style === 'uruk') { genUruk(seed); return; }
     if (MAP.style === 'harbour') { genHarbour(seed); return; }
     var R = rng(seed), x, y, i;
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
@@ -947,7 +1100,7 @@
     ai: null, winner: null, overlay: 'menu', look: null, lookT: 0, shake: 0, turnNo: 0,
     bannerT: 0, lastPower: 0, stats: { best: 0, bestBy: '', shots: 0 }, opts: null,
     arts: [], crates: [], courier: null, barker: null, finds: [], birds: [],
-    strikes: [], warn: [], fuel: 0, tx: null, sudden: false, cars: [], tour: null, barrels: [], later: [], flows: [], flags: []
+    strikes: [], warn: [], fuel: 0, tx: null, sudden: false, cars: [], tour: null, barrels: [], later: [], flows: [], flags: [], carts: []
   };
   window.B5GAME = game;
   var cam = { x: 0, y: 0 };
@@ -1216,6 +1369,11 @@
       /* shots from far away (a trebuchet, a ship) sail over everything until they near their target */
       if (p.passX !== undefined && Math.abs(nx - p.passX) > 46) { p.x = nx; p.y = ny; if (nx < -120 || nx > WW + 120) return 'gone'; continue; }
       if (nx < -60 || nx > WW + 60) return 'gone';
+      if (ny > WATER && w.skim && (p.sk || 0) < w.skim && p.vy > 0 && Math.abs(p.vx) > 2.2 && p.vy < Math.abs(p.vx) * 1.3) {
+        p.sk = (p.sk || 0) + 1; p.vy = -Math.abs(p.vy) * 0.5 - 0.7; p.vx *= 0.82; p.y = WATER - 1; p.x = nx;
+        if (!sim) { addPart({ k: 'ripple', x: p.x, y: WATER, life: 30, max: 30 }); for (var dq = 0; dq < 5; dq++) addPart({ k: 'drop', x: p.x + rand(-2, 2), y: WATER, vx: rand(-0.6, 0.6), vy: rand(-1.8, -0.6), life: 30 }); sfx('bounce'); if (p.sk === 3) say('tablet', true); }
+        break;
+      }
       if (ny > WATER + 2) { p.x = nx; p.y = ny; return 'water'; }
       if (solid(nx, ny)) {
         if (w.impact) { p.x = nx; p.y = ny; return 'explode'; }
@@ -1437,7 +1595,7 @@
   }
 
   /* ---------------- era barrels: tar pots, oil jars and fuel cells that set each other off ---------------- */
-  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil', med: 'tar', pirate: 'keg' };
+  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil', med: 'tar', pirate: 'keg', sumer: 'tar' };
   function placeBarrels() {
     game.barrels = [];
     var n = 2 + Math.floor(Math.random() * 3), kind = BARREL[MAP.era] || 'tar';
@@ -1607,6 +1765,7 @@
     jayHide = 260; jayTalk = 50;
     jayMood = { big: 'wow', double: 'wow', glitch: 'wow', strike: 'wow', sudden: 'wow', reactor: 'wow', sandstorm: 'wow', sun: 'wow', scarab: 'wow',
       birds: 'grin', find: 'grin', crate: 'grin', win: 'grin', swing: 'grin', jet: 'grin', sled: 'grin', spear: 'grin', dune: 'grin', bark: 'grin',
+      bull: 'wow', canal: 'wow', river: 'wow', cart: 'grin', tablet: 'grin', steps: 'grin',
       lance: 'wow', cannon: 'wow', broadside: 'wow', treb: 'wow', arrows: 'wow', tide: 'wow', banner: 'grin', launch: 'grin', volley: 'grin', keg: 'grin' }[kind] || null;
     voice('jay', 'turn');
   }
@@ -1671,12 +1830,12 @@
       say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
     }
     if (game.gale > 0) { game.gale--; game.wind = (Math.random() < 0.5 ? -1 : 1) * (7 + Math.floor(Math.random() * 4)); }
-    if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner(MAP.style === 'harbour' ? 'High tide!' : 'The Nile floods!', null, MAP.style === 'harbour' ? '#2a8ab0' : '#3a8a9a', 'pin'); }
+    if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner(MAP.style === 'harbour' ? 'High tide!' : (MAP.style === 'uruk' ? 'The river floods!' : 'The Nile floods!'), null, MAP.style === 'harbour' ? '#2a8ab0' : '#3a8a9a', 'pin'); }
     else if (game.flood && game.flood.phase === 'rise' && game.turnNo >= game.flood.until) game.flood.phase = 'fall';
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
     if (!(game.opts && game.opts.training)) banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
-    sfx('turn', { pre: 1, egypt: 2, fut: 3, med: 4, pirate: 5 }[team.era] || 0);
+    sfx('turn', { pre: 1, egypt: 2, fut: 3, med: 4, pirate: 5, sumer: 6 }[team.era] || 0);
     voice(team.era, 'turn');
     musicEra(team.era);
     game.ai = team.ctrl === 'ai' ? { phase: 'wait', t: 0, walked: false } : null;
@@ -1710,7 +1869,7 @@
   }
 
   function settle() {
-    var busy = game.projs.length > 0 || !!game.barker || game.strikes.length > 0 || game.warn.length > 0 || game.flows.length > 0 || game.barrels.some(function (b) { return b.fuse > 0; }), i;
+    var busy = game.projs.length > 0 || !!game.barker || game.strikes.length > 0 || game.warn.length > 0 || game.flows.length > 0 || game.carts.length > 0 || game.barrels.some(function (b) { return b.fuse > 0; }), i;
     for (i = 0; i < game.snags.length && !busy; i++) { var c = game.snags[i]; if (c.alive && (c.st === 'air' || c.lance)) busy = true; }
     game.settleAll = (game.settleAll || 0) + 1;
     if (busy && game.settleAll < 900) { game.settleT = 0; return; }
@@ -1732,10 +1891,11 @@
   function startEvent() {
     game.evNext = game.turnNo + 7;
     var st = MAP.style;
-    if (st === 'desert' || st === 'harbour') {
+    if (st === 'desert' || st === 'harbour' || st === 'uruk') {
       if (game.flood) return false;
       game.flood = { phase: 'warn', base: WATER, level: WATER - (st === 'harbour' ? 22 : 26), at: game.turnNo + 2 };
       if (st === 'harbour') { banner('High tide coming!', null, '#2a8ab0', 'pin'); say('tide', true); }
+      else if (st === 'uruk') { banner('The river will flood!', null, '#3f8a9a', 'pin'); say('river', true); }
       else { banner('The Nile will flood!', null, '#3a8a9a', 'pin'); say('flood', true); }
       sfx('splash');
       game.look = { x: cam.x + VW / 2, y: WATER - 30 }; game.lookT = 120;
@@ -1994,6 +2154,9 @@
     else if (w.kind === 'wall') buildWall(c);
     else if (w.kind === 'dune') buildDune(c);
     else if (w.kind === 'lance') startLance(c);
+    else if (w.kind === 'cart') launchCart(c);
+    else if (w.kind === 'steps') buildSteps(c);
+    else if (w.kind === 'canal') openCanal(c);
     else if (w.kind === 'oil') pourOil(c);
     else if (w.kind === 'banner') plantBanner(c);
     else if (w.kind === 'blunder') fireBlunder(c);
@@ -2334,6 +2497,107 @@
     sfx('clunk'); say('keg', true);
   }
 
+  /* ---------- War Cart: rolls along the ground, faster downhill, and crashes into the first Snag ---------- */
+  function launchCart(c) {
+    var x0 = Math.round(c.x + c.face * 11), y0 = groundY(x0, c.y - 10);
+    if (y0 < 0 || Math.abs(y0 - c.y) > 12) { x0 = Math.round(c.x); y0 = Math.round(c.y); }
+    game.carts.push({ x: x0, y: y0, dir: c.face, v: 1.5, by: c, t: 0, dist: 0, roll: 0, air: false, vy: 0 });
+    c.fireT = 10; kick(c, -0.25); sfx('clunk'); sfx('whoosh'); say('cart', true);
+  }
+  /* one pixel of rolling: returns null, 'crash', 'fall' or the Snag it hits */
+  function cartStep(k, live) {
+    var nx = k.x + k.dir, ny = groundY(nx, k.y - 6);
+    if (ny < 0 || ny >= WATER) return 'fall';
+    if (ny < k.y - (k.dist < 20 ? 8 : 5)) return 'crash';
+    var dy = ny - k.y;
+    k.v = clamp(k.v + dy * 0.09, 0.5, 4.2); k.x = nx; k.y = ny; k.dist++; k.roll += k.dir * 0.45;
+    for (var j = 0; j < game.snags.length; j++) {
+      var o = game.snags[j];
+      if (!o.alive || o === k.by) continue;
+      if (Math.abs(o.x - k.x) < 9 && o.y > k.y - 16 && o.y < k.y + 8) return o;
+    }
+    return null;
+  }
+  function simCart(c, face) {
+    var x0 = Math.round(c.x + face * 11), y0 = groundY(x0, c.y - 10);
+    if (y0 < 0 || Math.abs(y0 - c.y) > 12) return null;
+    var k = { x: x0, y: y0, dir: face, v: 1.5, by: c, dist: 0, roll: 0 };
+    for (var n = 0; n < 420; n++) { var r = cartStep(k); if (r && r.team) return { snag: r, v: k.v }; if (r) return null; k.v *= 0.996; }
+    return null;
+  }
+  function updCarts() {
+    for (var i = game.carts.length - 1; i >= 0; i--) {
+      var k = game.carts[i], end = null;
+      k.t++;
+      if (k.air) {
+        k.vy = Math.min(7, k.vy + G); k.y += k.vy; k.x += k.dir * k.v * 0.8;
+        if (k.y > WATER + 4) { splash(k.x); game.carts.splice(i, 1); continue; }
+        if (solid(k.x, k.y)) { var q = 0; while (solid(k.x, k.y) && q < 10) { k.y--; q++; } k.air = false; k.vy = 0; dust(k.x, k.y, 6, 5); sfx('land', 1); }
+        continue;
+      }
+      var n = Math.max(1, Math.round(k.v));
+      for (var st = 0; st < n && !end; st++) end = cartStep(k, true);
+      k.v *= 0.996;
+      if (end === 'fall') { k.air = true; k.vy = 0; k.x += k.dir; continue; }
+      if (!end && (k.t > 420 || k.dist > 460 || k.v < 0.55)) end = 'crash';
+      if (k.t % 4 === 0) dust(k.x - k.dir * 6, k.y, 2, 2);
+      if (k.t % 7 === 0) sfx('step');
+      if (end) {
+        game.carts.splice(i, 1);
+        if (end.team) {
+          var hit = end, dm = Math.round(18 + k.v * 6);
+          hurt(hit, dm, { by: k.by, type: 'cart' });
+          var kk = hit.shield ? 0.5 : 1;
+          hit.vx = k.dir * (2 + k.v * 0.7) * kk; hit.vy = -3 * kk; hit.st = 'air'; hit.knock = true; hit.swing = null; hit.jet = false; hit.sled = false; hit.lance = null;
+          if (bodyClear(hit.x, hit.y - 1)) hit.y -= 1;
+          game.hitstop = Math.max(game.hitstop || 0, 5);
+          explode(k.x, k.y - 6, 14, 10, { by: k.by, type: 'cart' });
+        } else if (k.dist < 24) { sfx('bonk'); dust(k.x, k.y - 4, 8, 6); }
+        else explode(k.x + k.dir * 3, k.y - 6, 16, 18, { by: k.by, type: 'cart' });
+        for (var dq = 0; dq < 8; dq++) addPart({ k: 'deb', x: k.x, y: k.y - 6, vx: rand(-2, 2), vy: rand(-3, -1), life: 60, col: 'rgb(154,106,58)', big: 2 });
+      }
+    }
+  }
+
+  /* ---------- Mud Brick Steps: a staircase you can walk up ---------- */
+  function buildSteps(c) {
+    var x0 = Math.round(c.x + c.face * 8), gy = groundY(x0, c.y - 20), x, y, j, lo = WW, hi = 0, topY = WH;
+    if (gy < 0 || Math.abs(gy - c.y) > 16) gy = Math.round(c.y);
+    for (j = 0; j < 6; j++) {
+      var sy = gy - (j + 1) * 5;
+      for (var q = 0; q < 6; q++) {
+        x = x0 + c.face * (j * 6 + q);
+        if (x < 0 || x >= WW) continue;
+        for (y = Math.max(0, sy); y < Math.min(WH, sy + 70); y++) {
+          var i = y * WW + x;
+          if (mask[i] && y > sy) break;
+          if (mask[i]) continue;
+          var blocked = false;
+          for (var b = 0; b < game.snags.length; b++) { var s2 = game.snags[b]; if (s2.alive && Math.abs(x - s2.x) <= 5 && y > s2.y - 21 && y <= s2.y) { blocked = true; break; } }
+          if (blocked) continue;
+          mask[i] = 1; burnt[i] = 0; zone[i] = 1;
+          var row = y >> 2, mort = ((x + (row % 2) * 4) % 8) === 0 || (y & 3) === 0;
+          setPx(i, y === sy ? [226, 192, 140] : (mort ? [146, 112, 74] : (hash(x, y) < 0.5 ? [204, 166, 112] : [186, 148, 98])));
+          lo = Math.min(lo, x); hi = Math.max(hi, x); topY = Math.min(topY, y);
+        }
+      }
+    }
+    if (hi >= lo) tctx.putImageData(img, 0, 0, lo, topY, hi - lo + 1, Math.min(WH - topY, 80));
+    miniDirty = true;
+    sfx('bonk'); sfx('dig'); game.shake = Math.max(game.shake, 1.2); say('steps', true);
+    for (var k = 0; k < 12; k++) addPart({ k: 'dust', x: x0 + c.face * rand(0, 36), y: gy - rand(2, 20), vx: rand(-0.3, 0.3), vy: rand(-0.4, -0.1), life: 26, max: 26, r: rand(1, 2.2), col: '#e6c08e' });
+  }
+
+  /* ---------- Open the Canal: the river rises for a few goes ---------- */
+  function openCanal(c) {
+    for (var k = 0; k < 4; k++) { var cx = c.x + c.face * (14 + k * 8), cy = groundY(Math.round(cx), c.y - 16); if (cy > 0) carve(cx, cy + 2, 5, false); }
+    var f = game.flood;
+    if (f && f.phase !== 'fall') { f.phase = 'rise'; f.level = Math.min(f.level, f.base - 20); f.until = Math.max(f.until || 0, game.turnNo + 3); }
+    else game.flood = { phase: 'rise', base: f ? f.base : WATER, level: (f ? f.base : WATER) - 20, until: game.turnNo + 3 };
+    splash(c.x + c.face * 30); sfx('splash');
+    banner('The river rises!', null, '#3f8a9a', 'pin'); say('canal', true);
+  }
+
   /* ---------- Stone Barricade: builds new solid ground ---------- */
   function buildWall(c) {
     var cx = Math.round(c.x + c.face * 12), gy = groundY(cx, c.y - 24), P = MAP.pal;
@@ -2442,6 +2706,13 @@
       sfx('clunk'); sfx('whoosh'); say('treb', true);
       return;
     }
+    if (w.style === 'bull') {
+      /* it charges from beyond the target back towards you, and stops a little past it */
+      var bd = c.x <= tx ? -1 : 1, bx0 = clamp(tx - bd * 150, 4, WW - 4);
+      game.strikes.push({ style: 'bull', tx: clamp(tx, 10, WW - 10), dir: bd, x: bx0, y: surfaceY(Math.round(bx0)), t: 0, hit: [], by: c, dmg: w.dmg });
+      sfx('land', 1); say('bull', true);
+      return;
+    }
     if (w.style === 'broadside') {
       var side = tx > WW / 2 ? 1 : -1;
       game.strikes.push({ style: 'broadside', x: clamp(tx, 10, WW - 10), side: side, t: 0, by: c, n: 0, R: w.R, dmg: w.dmg });
@@ -2460,6 +2731,29 @@
     for (var i = game.strikes.length - 1; i >= 0; i--) {
       var s = game.strikes[i], j, c;
       s.t++;
+      if (s.style === 'bull') {
+        /* the Bull of Heaven: a rumble, then a charge straight through the target */
+        if (s.t < 50) { if (!reduceMotion) game.shake = Math.max(game.shake, 0.8); if (s.t % 6 === 0) dust(s.x, s.y, 3, 6); if (s.t % 15 === 0) sfx('land', 1); continue; }
+        for (var bs = 0; bs < 3; bs++) {
+          s.x += s.dir;
+          var gy2 = groundY(clamp(Math.round(s.x), 0, WW - 1), s.y - 12);
+          s.y = gy2 < 0 ? WATER : (gy2 < s.y - 12 ? s.y : gy2);
+        }
+        if (s.t % 5 === 0) dust(s.x - s.dir * 14, s.y, 3, 4);
+        if (s.t % 12 === 0) { sfx('land', 1); if (!reduceMotion) game.shake = Math.max(game.shake, 1.6); }
+        game.snags.forEach(function (cc) {
+          if (!cc.alive || s.hit.indexOf(cc) >= 0) return;
+          if (Math.abs(cc.x - (s.x + s.dir * 8)) < 18 && cc.y > s.y - 34 && cc.y < s.y + 8) {
+            s.hit.push(cc); hurt(cc, s.dmg, { by: s.by, type: 'bull' });
+            var kb = cc.shield ? 0.5 : 1;
+            cc.vx = s.dir * 3.9 * kb; cc.vy = -3.9 * kb; cc.st = 'air'; cc.knock = true; cc.swing = null; cc.jet = false; cc.sled = false; cc.lance = null;
+            if (bodyClear(cc.x, cc.y - 1)) cc.y -= 1;
+            game.hitstop = Math.max(game.hitstop || 0, 6); sfx('bonk'); sfx('hit', 1.3);
+          }
+        });
+        if (s.y >= WATER || s.dir * (s.x - s.tx) > 50 || s.x < 2 || s.x > WW - 2) { if (s.y >= WATER) splash(s.x); game.strikes.splice(i, 1); }
+        continue;
+      }
       if (s.style === 'broadside') {
         /* the ship sails in at the edge, fires five times, and sails off */
         var shipX = s.side > 0 ? WW + 10 + Math.max(0, 60 - s.t) * 2 + Math.max(0, s.t - 120) * 2 : -10 - Math.max(0, 60 - s.t) * 2 - Math.max(0, s.t - 120) * 2;
@@ -2639,6 +2933,13 @@
       if (kitHas(team, 'ballista') && avail(team, 'ballista').ok) sweep('ballista', face, -30, 40, 3, 60, 100, 10, 1.2);
       if (kitHas(team, 'scarab') && avail(team, 'scarab').ok) sweep('scarab', face, -10, 70, 10, 30, 100, 10, 1.05, 'nowater');
       if (kitHas(team, 'volley') && avail(team, 'volley').ok) sweep('volley', face, -10, 80, 5, 30, 100, 10, 1.0);
+      if (kitHas(team, 'tablet') && avail(team, 'tablet').ok) sweep('tablet', face, -20, 70, 5, 30, 100, 10, 1.1);
+      if (kitHas(team, 'cart') && avail(team, 'cart').ok) (function (face) {
+        jobs.push(function () {
+          var r = simCart(c, face);
+          if (r && r.snag.team !== team) { var dm = 28 + r.v * 6; cands.push({ weapon: 'cart', face: face, aim: c.aim, power: 0, score: (dm + (r.snag.hp <= dm ? A.kill : 0) + (r.snag.y > WATER - 60 ? A.water : 0)) * 1.1 }); }
+        });
+      })(face);
       if (kitHas(team, 'cannon') && avail(team, 'cannon').ok) (function (face) {
         /* the kick would shove it backwards: only fire if there is solid ground behind */
         var bx = c.x - face * 34, bg = groundY(clamp(bx, 1, WW - 2), c.y - 24);
@@ -2703,6 +3004,11 @@
           var heal = 0, low = false;
           team.members.forEach(function (m) { if (m.alive && Math.abs(m.x - c.x) < WEAP.banner.range && Math.abs(m.y - c.y) < 70) { heal += Math.min(WEAP.banner.heal, 100 - m.hp); if (m.hp < 45) low = true; } });
           if (heal >= 25) cands.push({ weapon: 'banner', face: c.face, aim: c.aim, power: 0, score: heal * 0.6 + (low ? 10 : 0) });
+        }
+        if (kitHas(team, 'canal') && avail(team, 'canal').ok && !game.flood) {
+          var lowE = 0, lowO = 0;
+          game.snags.forEach(function (o) { if (o.alive && o.y > WATER - 28) { if (o.team === team) lowO++; else lowE++; } });
+          if (lowE > lowO) cands.push({ weapon: 'canal', face: c.face, aim: c.aim, power: 0, score: (lowE - lowO) * 16 });
         }
         if (kitHas(team, 'keg') && avail(team, 'keg').ok && enemies.some(function (en) { return Math.abs(en.x - c.x) < 90 && Math.abs(en.y - c.y) < 30; })) cands.push({ weapon: 'keg', face: c.face, aim: c.aim, power: 0, score: 9 });
         var kit = ER[team.era].kit || [], sup = kit[4], defW = kit[3];
@@ -3001,6 +3307,7 @@
         else if (k === 2) { [0, 4, 7, 12].forEach(function (st, i) { tone('triangle', 523 * Math.pow(2, st / 12), null, 0.2, 0.06, null, AC.currentTime + i * 0.05); }); }
         else if (k === 3) { tone('square', 660, 1320, 0.1, 0.05); tone('square', 990, 1980, 0.1, 0.04, null, AC.currentTime + 0.1); }
         else if (k === 4) { [0, 0, 7, 12].forEach(function (st, i) { tone('square', 330 * Math.pow(2, st / 12), null, i === 3 ? 0.3 : 0.08, 0.05, null, AC.currentTime + i * 0.09); }); }
+        else if (k === 6) { [0, 3, 7, 12, 15].forEach(function (st, i) { tone('triangle', 415 * Math.pow(2, st / 12), null, 0.35, 0.06, null, AC.currentTime + i * 0.06); }); }
         else if (k === 5) { tone('triangle', 1175, 1175, 0.6, 0.08); tone('sine', 2350, 2350, 0.4, 0.03); tone('triangle', 1175, 1175, 0.5, 0.06, null, AC.currentTime + 0.32); }
         else { tone('sine', 392, 784, 0.18, 0.08); tone('triangle', 988, null, 0.22, 0.05, null, AC.currentTime + 0.12); }
         noise(0.25, 0.05, 'bandpass', 600, 3000);
@@ -3110,6 +3417,11 @@
           if (s % 8 === 0) tone('sine', 110, 50, 0.2, 0.32, musG, t);
           if (s % 4 === 2) noise(0.06, 0.09, 'bandpass', 2600, null, musG, t);
           if (s % 8 === 7) { noise(0.03, 0.05, 'bandpass', 3000, null, musG, t); noise(0.03, 0.06, 'bandpass', 3000, null, musG, t + spb * 0.5); }
+        } else if (M.drum === 'frame') {
+          var f8 = s % 8;
+          if (f8 === 0 || f8 === 5) tone('sine', 100, 48, 0.22, 0.32, musG, t);
+          if (f8 === 2 || f8 === 3 || f8 === 6) noise(0.04, 0.05, 'bandpass', 1800, null, musG, t);
+          if (f8 === 7) noise(0.03, 0.04, 'bandpass', 2600, null, musG, t);
         } else if (M.drum === 'tabor') {
           if (s % 8 === 0) tone('sine', 130, 60, 0.2, 0.3, musG, t);
           if (s % 8 === 6) tone('sine', 170, 80, 0.12, 0.2, musG, t);
@@ -3158,6 +3470,7 @@
       else if (wid === 'ballista') { tone('triangle', 220, 70, 0.22, 0.25); noise(0.05, 0.3, 'highpass', 2000); noise(0.2, 0.12, 'bandpass', 2600, 900, null, now + 0.04); }
       else if (wid === 'scarab') { for (var i = 0; i < 4; i++) noise(0.02, 0.08, 'bandpass', 3000 + i * 300, null, null, now + i * 0.04); tone('sine', 300, 200, 0.12, 0.1); }
       else if (wid === 'volley' || (wid === 'lob' && era === 'med')) { tone('triangle', 320, 140, 0.16, 0.18); noise(0.18, 0.18, 'bandpass', 2600, 900); for (var vq = 1; vq < 4; vq++) noise(0.08, 0.08, 'bandpass', 2400, 1000, null, now + vq * 0.05); }
+      else if (wid === 'tablet') { noise(0.2, 0.22, 'bandpass', 700, 2000); tone('sine', 180, 90, 0.12, 0.18); }
       else if (wid === 'cannon') { tone('sine', 90, 30, 0.6, 0.7); noise(0.5, 0.45, 'lowpass', 1800, 100, crunch); noise(0.06, 0.4, 'highpass', 2500); }
       else if (wid === 'bomb' && era === 'med') { for (var bz = 0; bz < 6; bz++) tone('sawtooth', 220 + Math.random() * 40, null, 0.06, 0.02, null, now + bz * 0.05); }
       else { noise(0.18, 0.22, 'bandpass', 700, 2600); tone('sine', 140, 60, 0.12, 0.25); }
@@ -3269,7 +3582,7 @@
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
     game.arts = []; game.crates = []; game.courier = null; game.barker = null; game.finds = [];
-    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; WATER = 432;
+    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = 432;
   }
 
   function surfaceAt(x) {
@@ -3405,7 +3718,7 @@
         else if (ev === 'water') { splash(p.x); say('miss'); }
       } else if (WEAP[p.type].crawl) crawlScarab(p);
     }
-    updArts(); updCrates(); updBarrels(); updFlows(); updFlags(); updCourier(); updBarker(); updBirds(); updStrikes(); updWarn(); jayTick();
+    updArts(); updCrates(); updBarrels(); updFlows(); updFlags(); updCarts(); updCourier(); updBarker(); updBirds(); updStrikes(); updWarn(); jayTick();
     updParts();
     for (i = game.portals.length - 1; i >= 0; i--) {
       var pt = game.portals[i];
@@ -3465,6 +3778,7 @@
     else if (game.lookT > 0 && game.look) { tx = game.look.x; ty = game.look.y; game.lookT--; }
     else if (game.projs.length) { var pj = game.projs[0]; tx = pj.x + clamp(pj.vx * 14, -90, 90); ty = pj.y + clamp(pj.vy * 8, -40, 50); }
     else if (game.flows.length) { tx = game.flows[0].x; ty = game.flows[0].y - 20; }
+    else if (game.carts.length) { tx = game.carts[0].x + game.carts[0].dir * 30; ty = game.carts[0].y - 20; }
     else if (game.barker) { tx = game.barker.x; ty = game.barker.y - 20; }
     else if (game.strikes.length) {
       var sk = game.strikes[0], sfy = surfaceY(sk.x);
@@ -3670,6 +3984,42 @@
           }
         })
       ];
+    } else if (MAP.style === 'uruk') {
+      bakedBg = [
+        bake(0.12, function (g2, W) {
+          var base = Math.round(VH * 0.64);
+          for (var u = 0; u < W; u++) {
+            var top = base - 3 - Math.round(2 * Math.sin(u * 0.01));
+            var cc = Math.floor(u / 340), lx = u - cc * 340 - 170;
+            if (hash(cc, 13) < 0.5 && Math.abs(lx) < 40) { var tier = Math.abs(lx) < 12 ? 3 : (Math.abs(lx) < 26 ? 2 : 1); top = base - 3 - tier * 7; }
+            g2.fillStyle = neon ? '#3a3e6e' : MAP.far; g2.fillRect(u, top, 1, VH - top);
+            if (!neon && hash(Math.floor(u / 9), 21) < 0.3 && (u % 9) === 4) { g2.fillStyle = MAP.farShade; g2.fillRect(u, top - 9, 1, 9); g2.fillRect(u - 3, top - 10, 7, 2); }
+          }
+        }),
+        bake(0.32, function (g2, W) {
+          var base = Math.round(VH * 0.78);
+          for (var u = 0; u < W; u++) {
+            var top = base - 6 - Math.round(3 * Math.sin(u * 0.02)), strip = Math.floor(u / 44) % 2;
+            g2.fillStyle = neon ? '#2c2f57' : (strip ? MAP.mid : MAP.midShade); g2.fillRect(u, top, 1, VH - top);
+            if (!neon && u % 44 === 0) { g2.fillStyle = '#5f8ab0'; g2.fillRect(u, top, 2, VH - top); }
+          }
+        }),
+        bake(0.55, function (g2, W) {
+          var base = VH * 0.92, u;
+          g2.fillStyle = neon ? '#1f2142' : MAP.near;
+          for (u = 0; u < W; u++) { var top = Math.round(base - 8 - 2 * Math.sin(u * 0.05)); g2.fillRect(u, top, 1, VH - top); }
+          for (var c = -1; c <= Math.ceil(W / 50) + 1; c++) {
+            if (hash(c, 3) > 0.6) continue;
+            var pu = c * 50 + 25 + Math.round((hash(c, 6) - 0.5) * 18), gr = Math.round(base - 8 - 2 * Math.sin(pu * 0.05)), ph = 26 + Math.round(hash(c, 4) * 14), lean = (hash(c, 8) - 0.5) * 0.4;
+            g2.fillStyle = neon ? '#14162e' : MAP.nearTrunk;
+            for (var k = 0; k < ph; k++) g2.fillRect(Math.round(pu + lean * k), gr - k, 2, 1);
+            var tx2 = Math.round(pu + lean * ph), ty2 = gr - ph;
+            g2.fillStyle = neon ? '#14162e' : '#3f6a34';
+            [-2.7, -2.2, -1.75, -1.3, -0.8, -0.35].forEach(function (an) { for (var j = 0; j < 12; j++) g2.fillRect(Math.round(tx2 + Math.cos(an) * j), Math.round(ty2 + Math.sin(an) * j * 0.7 + j * j * 0.045), 2, 1); });
+            if (!neon) { g2.fillStyle = '#9a4a20'; g2.fillRect(tx2 - 1, ty2 + 1, 3, 2); }
+          }
+        })
+      ];
     } else if (MAP.style === 'castle') {
       bakedBg = [
         bake(0.12, function (g2, W) {
@@ -3822,7 +4172,7 @@
 
   function drawBackdrop(cx, cy, t) {
     if (MAP.style === 'city') { drawCityBackdrop(cx, cy, t); return; }
-    if (MAP.style === 'desert') { drawDesertBackdrop(cx, cy, t); return; }
+    if (MAP.style === 'desert' || MAP.style === 'uruk') { drawDesertBackdrop(cx, cy, t); return; }
     if (MAP.style === 'wall' || MAP.style === 'castle') { drawWallBackdrop(cx, cy, t); return; }
     if (MAP.style === 'harbour') { drawHarbourBackdrop(cx, cy, t); return; }
     var rest = WH - VH, i;
@@ -3971,6 +4321,7 @@
     game.crates.forEach(function (cr) { SP.crate(ctx, cr.x, cr.y + 1, cr.kind, t); });
     game.barrels.forEach(function (b) { SP.barrel(ctx, b.x, b.y + 1, b.kind, t, b.fuse > 0); });
     game.flags.forEach(function (f) { SP.flag(ctx, f.x, f.y + 1, t); });
+    game.carts.forEach(function (k) { SP.cart(ctx, k.x, k.y + 1, k.dir, k.roll); });
     game.flows.forEach(function (f) {
       var X = Math.round(f.x), Y = Math.round(f.y);
       ctx.fillStyle = '#c4572e'; ctx.fillRect(X - 2, Y - 2, 5, 3);
@@ -4025,6 +4376,15 @@
     game.strikes.forEach(function (s) {
       var X = Math.round(s.x), sy = surfaceY(X);
       if (sy < 0) sy = WATER;
+      if (s.style === 'bull') {
+        if (s.t < 50) {
+          var mY = surfaceY(Math.round(s.tx)); if (mY < 0) mY = WATER;
+          ctx.fillStyle = '#ff6a5a'; for (var bq2 = 0; bq2 < 5; bq2++) ctx.fillRect(Math.round(s.tx) + s.dir * (bq2 * 6 - 12), mY - 3, 4, 1);
+          ctx.fillRect(Math.round(s.tx) + s.dir * 16, mY - 5, 1, 5);
+        }
+        SP.bull(ctx, s.x, s.y + 1, s.dir, s.t < 50 ? 0 : t);
+        return;
+      }
       if (s.style === 'broadside') {
         SP.ship(ctx, s.shipX === undefined ? (s.side > 0 ? WW + 130 : -130) : s.shipX, WATER + 3, -s.side, t);
         if (s.n < 5) { ctx.fillStyle = '#ff6a5a'; for (var bq = -34; bq <= 34; bq += 17) { ctx.fillRect(X + bq - 2, sy - 2, 5, 1); ctx.fillRect(X + bq, sy - 4, 1, 5); } }
@@ -4261,7 +4621,7 @@
       mcv.width = MW; mcv.height = MH;
       var m = mcv.getContext('2d'), id = m.createImageData(MW, MH), dd = id.data, st = MAP.style;
       var MC = {
-        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : (st === 'wall' ? [128, 118, 96] : (st === 'harbour' ? [222, 198, 140] : (st === 'castle' ? [120, 92, 60] : [112, 84, 52])))),
+        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : (st === 'wall' ? [128, 118, 96] : (st === 'harbour' ? [222, 198, 140] : (st === 'castle' ? [120, 92, 60] : (st === 'uruk' ? [176, 140, 100] : [112, 84, 52]))))),
         water: [63, 143, 181],
         sd: st === 'city' ? [95, 211, 95] : (st === 'desert' ? [154, 106, 58] : [63, 143, 181]),
         sky: st === 'city' || LOOK === 'neon' ? [58, 56, 104] : (st === 'desert' ? [238, 222, 188] : (st === 'wall' ? [196, 206, 214] : [191, 224, 230]))
@@ -5584,12 +5944,12 @@
     }
     x2.strokeStyle = '#1f2a30'; x2.lineWidth = 2; x2.strokeRect(16, 16, pw, ph);
     x2.fillStyle = '#ef7724'; x2.font = '800 22px Archivo, sans-serif';
-    x2.fillText('Greetings from ' + yearLabel(last.year) + '!', 16, 222);
-    x2.fillStyle = '#4a5a62'; x2.font = '400 11px "Atkinson Hyperlegible", sans-serif';
+    x2.fillText('Greetings from ' + yearLabel(last.year) + '!', 16, 218);
+    x2.fillStyle = '#4a5a62'; x2.font = '400 10px "Atkinson Hyperlegible", sans-serif';
     var T2 = game.tour || { results: [] };
     TOUR_STOPS.forEach(function (m, i) {
       var r = T2.results[i];
-      x2.fillText(MAPS[m].name + ': ' + (!r ? 'not played' : (r.winner ? ER[r.winner].team + ' won' : 'a draw')), 16, 236 + i * 11);
+      x2.fillText(MAPS[m].name + ': ' + (!r ? 'not played' : (r.winner ? ER[r.winner].team + ' won' : 'a draw')), 16, 232 + i * 10);
     });
     x2.fillStyle = '#cbbcae'; x2.fillRect(298, 20, 2, H - 40);
     x2.fillStyle = '#fff'; x2.fillRect(W - 82, 16, 66, 74);
