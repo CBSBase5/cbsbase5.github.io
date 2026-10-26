@@ -20,6 +20,8 @@
   var FAST = Math.max(1, Math.min(8, parseInt(Q.get('fast') || '1', 10) || 1));
 
   var WW = 1100, WH = 460, WATER = 432, G = 0.16, STEP = 1000 / 60;
+  /* Game speed: Steady runs the whole world a quarter slower so arcs hang and hits land; Brisk is full speed */
+  var SPEED = (function () { try { return localStorage.getItem('b5.tantrum.v1.speed') === 'brisk' ? 1 : 0.75; } catch (e) { return 0.75; } })();
   var WEAP = {
     lob:   { kind: 'proj', wind: true,  impact: true,  R: 26, dmg: 46, vmax: 10 },
     bomb:  { kind: 'proj', wind: false, impact: false, R: 30, dmg: 50, vmax: 8.5, fuse: 180, bounce: 0.45 },
@@ -814,6 +816,10 @@
     c.st = 'ground'; c.vx = 0; c.vy = 0; c.knock = false;
     if (v > 4.6) hurt(c, Math.round((v - 4.6) * 10) + 3, null);
     if (v > 2) { sfx('land', 0.6); dust(c.x, c.y, Math.min(8, Math.round(v * 1.5)), 5); }
+    if (v > 3 && game.state !== 'demo') {
+      sfx('hit', 0.4); dust(c.x, c.y, 10, 9); game.shake = Math.max(game.shake, 1 + v * 0.4);
+      if (!game.hitstop) game.hitstop = 2;
+    }
     c.landT = 6;
     kick(c, -Math.min(0.32, 0.08 + v * 0.05));
   }
@@ -865,7 +871,7 @@
 
   /* the satisfying bit: a knock out slows time for a moment and gets its own word */
   function koMoment(c) {
-    if (!reduceMotion) game.slow = 42;
+    if (!reduceMotion) game.slow = 32;
     word(c.x, c.y - 70, 'K.O.!', '#ff8a5c', 3); game.koFlag = true;
     for (var i = 0; i < 12; i++) { var a = i / 12 * 6.283; addPart({ k: 'spark', x: c.x, y: c.y - 12, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8 - 0.6, life: 34 }); }
     sfx('ko');
@@ -874,7 +880,7 @@
   function drown(c) {
     var wasIn = c.hp > 0;
     c.alive = false; c.hp = 0;
-    if (wasIn && game.state !== 'demo') { if (!reduceMotion) game.slow = 36; word(c.x, WATER - 30, 'SPLASH!', '#9fe3f5', 2); }
+    if (wasIn && game.state !== 'demo') { if (!reduceMotion) game.slow = 28; word(c.x, WATER - 30, 'SPLASH!', '#9fe3f5', 2); }
     for (var i = 0; i < 26; i++) addPart({ k: 'drop', x: c.x + rand(-4, 4), y: WATER, vx: rand(-1.2, 1.2), vy: rand(-3.2, -1.2), life: 50 });
     game.portals.push({ x: c.x, y: WATER - 12, t: 0, c: c });
     sfx('splash'); sfx('portal'); voice(c.team.era, 'panic');
@@ -903,7 +909,7 @@
   function stepProj(p, sim) {
     var w = WEAP[p.type];
     p.age++;
-    if (p.fuse !== undefined) { p.fuse--; if (p.fuse <= 0) return 'explode'; }
+    if (p.fuse !== undefined) { p.fuse--; if (!sim && p.fuse > 0 && (p.fuse % 60 === 0 || (p.fuse < 60 && p.fuse % 15 === 0))) sfx('tick'); if (p.fuse <= 0) return 'explode'; }
     if (p.rest) {
       if (solid(p.x, p.y + 2)) return null;
       p.rest = false;
@@ -969,10 +975,13 @@
       var gy = surfaceY(Math.round(x + gx));
       if (gy > 0 && Math.abs(gy - y) < R + 10) addPart({ k: 'dust', x: x + gx, y: gy - 1, vx: (gx < 0 ? -1 : 1) * rand(0.5, 1.4), vy: rand(-0.5, -0.1), life: 30 + Math.random() * 20, max: 50, r: rand(2, 3.6), delay: Math.round(Math.abs(gx) / 6) });
     }
-    addPart({ k: 'flash', x: x, y: y, life: 4, max: 4, r: R * 1.15 });
-    addPart({ k: 'fire', x: x, y: y, life: 18, max: 18, r: R });
-    addPart({ k: 'ring', x: x, y: y, life: 14, max: 14, r: R });
-    for (i = 0; i < 7; i++) { var sl = 60 + Math.random() * 40; addPart({ k: 'smoke', x: x + rand(-R / 2, R / 2), y: y + rand(-R / 2, R / 3), vx: rand(-0.25, 0.25), vy: rand(-0.7, -0.25), life: sl, max: sl, r: rand(3, 7), delay: 7 + i * 2 }); }
+    addPart({ k: 'flash', x: x, y: y, life: 6, max: 6, r: R * 0.95 });
+    addPart({ k: 'fire', x: x, y: y, life: 30, max: 30, r: R * 1.25 });
+    addPart({ k: 'ring', x: x, y: y, life: 22, max: 22, r: R * 1.05 });
+    addPart({ k: 'ring', x: x, y: y, life: 18, max: 18, r: R * 1.6, delay: 3, pale: 1 });
+    for (i = 0; i < 12; i++) { var sl = 110 + Math.random() * 60; addPart({ k: 'smoke', x: x + rand(-R / 2, R / 2), y: y + rand(-R / 2, R / 3), vx: rand(-0.2, 0.2), vy: rand(-0.45, -0.15), life: sl, max: sl, r: rand(4, 9), delay: 8 + i * 2 }); }
+    /* the crater rim keeps glowing for a moment */
+    for (i = 0; i < 16; i++) { var ga = Math.random() * 6.283; var gx = x + Math.cos(ga) * (R + 1), gy = y + Math.sin(ga) * (R + 1); if (solid(gx, gy + 1) || solid(gx, gy)) addPart({ k: 'glow', x: gx, y: gy, life: 70 + Math.random() * 50, max: 120 }); }
     for (i = 0; i < 10 + Math.round(R / 3); i++) { var ea = Math.random() * 6.283, es = rand(1, 3.4); addPart({ k: 'ember', x: x, y: y, vx: Math.cos(ea) * es, vy: Math.sin(ea) * es - 1.2, life: 26 + Math.random() * 24, max: 50 }); }
     var reach = R + 10, hits = 0, maxDm = 0;
     game.koFlag = false;
@@ -1010,8 +1019,15 @@
       var bd = Math.sqrt((bb.x - x) * (bb.x - x) + (bb.y - 5 - y) * (bb.y - 5 - y));
       if (bd < R + 6 && !bb.fuse) { bb.fuse = 8; bb.by = src && src.by ? src.by : null; }
     });
-    game.shake = Math.max(game.shake, Math.min(8, dmg / 7 + hits));
-    if (maxDm >= 10) game.hitstop = Math.min(9, 2 + Math.round(maxDm / 10));
+    game.shake = Math.max(game.shake, Math.min(9, dmg / 6 + hits));
+    if (maxDm >= 10) game.hitstop = Math.min(12, 3 + Math.round(maxDm / 8));
+    /* the camera is shoved away from the blast, then springs back */
+    if (game.state !== 'demo') {
+      var vx0 = cam.x + VW / 2 - x, vy0 = cam.y + VH / 2 - y, vl = Math.sqrt(vx0 * vx0 + vy0 * vy0) || 1, km = Math.min(8, dmg / 6);
+      game.kx = (game.kx || 0) + vx0 / vl * km; game.ky = (game.ky || 0) + vy0 / vl * km;
+    }
+    /* a big hit slows the world down for a heartbeat */
+    if (maxDm >= 38 && !reduceMotion && game.state !== 'demo') game.slow = Math.max(game.slow || 0, 14);
     sfx('boom', dmg / 50);
     if (src && src.type) weaponSound(src.type, src.era, 'impact', dmg / 50);
     if (dmg >= 30) duck(0.35, 0.9);
@@ -1337,7 +1353,7 @@
     if (!c) { if (!checkOver()) nextTurn(); return; }
     game.active = c; game.turnNo++; freeCam = null;
     game.state = 'play'; game.fired = false; game.charging = false; game.power = 0;
-    game.swingT = 0; game.digT = 0; game.timer = game.turnLen * 60; game.lookT = 0;
+    game.swingT = 0; game.digT = 0; game.timer = Math.round(game.turnLen * 60 * SPEED); game.lookT = 0;
     game.weapon = team.lastWeapon || 'lob';
     if (!avail(team, game.weapon).ok && !WEAP[game.weapon].tool) game.weapon = 'lob';
     team.members.forEach(function (m) { m.shield = false; m.testudo = false; });
@@ -2729,7 +2745,11 @@
       if (pt.t > (pt.ko ? 84 : 70)) game.portals.splice(i, 1);
     }
     if (game.state === 'play') {
-      if (game.turnLen > 0 && game.active && game.active.team.ctrl === 'human' && game.timer <= 300 && game.timer % 60 === 0 && game.timer > 0) sfx('count');
+      if (game.turnLen > 0 && game.active && game.active.team.ctrl === 'human' && game.timer > 0) {
+        var sl = Math.ceil(game.timer / (60 * SPEED));
+        if (sl <= 5 && sl !== game.lastSec) sfx('count');
+        game.lastSec = sl;
+      }
       if (game.turnLen > 0 && --game.timer <= 0) { banner("Time's up", null, '#ffc24a', 'hourglass'); endTurn(); }
     } else if (game.state === 'retreat') {
       if (game.swingT <= 0 && game.digT <= 0 && !game.barker && !game.strikes.length && --game.retreat <= 0) endTurn();
@@ -2740,7 +2760,8 @@
     updFlood();
     /* gusts: the wind shifts during a go in a gale */
     if (game.gale > 0 && game.state === 'play' && game.t % 170 === 0) { game.wind = clamp(game.wind + (Math.random() < 0.5 ? -3 : 3), -10, 10); if (game.wind === 0) game.wind = 3; sfx('whoosh'); }
-    if (game.shake > 0) game.shake *= 0.88;
+    if (game.shake > 0) game.shake *= 0.9;
+    if (game.kx || game.ky) { game.kx = (game.kx || 0) * 0.8; game.ky = (game.ky || 0) * 0.8; if (Math.abs(game.kx) + Math.abs(game.ky) < 0.1) { game.kx = 0; game.ky = 0; } }
     camUpdate();
   }
 
@@ -3297,10 +3318,11 @@
         ctx.globalAlpha = 1;
       }
       else if (p.k === 'ember') { var el = p.life / p.max; ctx.fillStyle = el > 0.6 ? '#fff3c8' : (el > 0.35 ? '#ffd27a' : (el > 0.18 ? '#ef7724' : '#c4572e')); ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
-      else if (p.k === 'flash') { ctx.globalAlpha = p.life / p.max; disc(p.x, p.y, p.r, '#ffffff'); ctx.globalAlpha = 1; }
+      else if (p.k === 'glow') { var gl = p.life / p.max; ctx.fillStyle = gl > 0.6 ? '#ffd27a' : (gl > 0.3 ? '#ef7724' : '#8a3a22'); ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
+      else if (p.k === 'flash') { ctx.globalAlpha = 0.75 * p.life / p.max; disc(p.x, p.y, p.r, '#fff3c8'); ctx.globalAlpha = 1; }
       else if (p.k === 'ring') {
         var rk = 1 - p.life / p.max, rr = p.r * (0.5 + 1.3 * rk), nn = Math.max(16, Math.round(rr * 4));
-        ctx.fillStyle = rk < 0.5 ? '#fff3c8' : '#ffd27a';
+        ctx.fillStyle = p.pale ? (rk < 0.5 ? '#ffffff' : '#e6e2da') : (rk < 0.5 ? '#fff3c8' : '#ffd27a');
         for (var q = 0; q < nn; q++) { if (rk > 0.6 && q % 2) continue; var qa = q / nn * 6.283; ctx.fillRect(Math.round(p.x + Math.cos(qa) * rr), Math.round(p.y + Math.sin(qa) * rr * 0.8), 1, 1); }
       }
       else if (p.k === 'ripple') {
@@ -3376,13 +3398,14 @@
       }
     }
     game.projs.forEach(function (p) {
-      if (p.fuse !== undefined) SP.text(ctx, String(Math.ceil(p.fuse / 60)), p.x, p.y - 12, '#ffffff', '#1f2a30', true);
+      if (p.fuse !== undefined) SP.text(ctx, String(Math.ceil(p.fuse / 60)), p.x, p.y - 12, p.fuse < 60 ? '#ff8a6a' : '#ffffff', '#1f2a30', true);
     });
   }
 
   function render() {
     var t = game.t, sx = 0, sy = 0;
     if (game.shake > 0.3 && !reduceMotion && shakeOn) { sx = rand(-game.shake, game.shake); sy = rand(-game.shake, game.shake); }
+    if (shakeOn && !reduceMotion) { sx += game.kx || 0; sy += game.ky || 0; }
     var cx = Math.round(cam.x + sx), cy = Math.round(cam.y + sy), i;
     ctx.drawImage(skyCv, 0, 0);
     drawBackdrop(cx, cy, t);
@@ -3570,9 +3593,9 @@
     var ring = $('tring');
     if (game.state === 'play' && game.turnLen === 0) { setText('ttxt', '\u221e'); ring.style.setProperty('--p', 100); ring.classList.remove('low'); }
     else if (game.state === 'play') {
-      var secs = Math.ceil(game.timer / 60);
+      var secs = Math.ceil(game.timer / (60 * SPEED));
       setText('ttxt', String(secs));
-      ring.style.setProperty('--p', Math.round(game.timer / (game.turnLen * 60) * 100));
+      ring.style.setProperty('--p', Math.round(game.timer / (game.turnLen * 60 * SPEED) * 100));
       ring.classList.toggle('low', secs <= 10);
     } else { setText('ttxt', '--'); ring.style.setProperty('--p', 0); ring.classList.remove('low'); }
   }
@@ -4209,12 +4232,13 @@
   var OPTROWS = {
     sound: [{ k: 'mv', label: 'Music', type: 'vol' }, { k: 'sv', label: 'Effects', type: 'vol' }, { k: 'jv', label: "Jay's voice", type: 'vol' }],
     display: [{ k: 'fs', label: 'Fullscreen', type: 'tog' }, { k: 'shake', label: 'Screen shake', type: 'tog' }, { k: 'zoom', label: 'Zoom', type: 'pick' }],
-    game: [{ k: 'jay', label: 'Jay on commentary', type: 'tog' }, { k: 'touch', label: 'On screen buttons', type: 'tog' }]
+    game: [{ k: 'speed', label: 'Game speed', type: 'pick' }, { k: 'jay', label: 'Jay on commentary', type: 'tog' }, { k: 'touch', label: 'On screen buttons', type: 'tog' }]
   };
   function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
   function optVal(r) {
     if (r.type === 'vol') { var n = aud[r.k], s = ''; for (var i = 0; i < 10; i++) s += '<i class="' + (i < n ? 'on' : '') + '"></i>'; return '<span class="slider">' + s + '</span>'; }
     if (r.k === 'zoom') return ZOOM_NAMES[zoom];
+    if (r.k === 'speed') return SPEED === 1 ? 'Brisk' : 'Steady';
     var on = r.k === 'fs' ? isFull() : r.k === 'shake' ? shakeOn : r.k === 'jay' ? jayOn : touchOn;
     return on ? 'On' : 'Off';
   }
@@ -4238,6 +4262,11 @@
       aud[k] = v; applyAudio();
       if (k === 'jv') voice('jay', 'turn'); else sfx('blip');
     } else if (k === 'zoom') setZoom(zoom + d);
+    else if (k === 'speed') {
+      var old = SPEED; SPEED = SPEED === 1 ? 0.75 : 1; store('speed', SPEED === 1 ? 'brisk' : 'steady');
+      if (game.timer) game.timer = Math.round(game.timer * SPEED / old);
+      sfx('blip');
+    }
     else {
       if (k === 'fs') {
         var el = document.documentElement;
@@ -5389,7 +5418,7 @@
     var dt = Math.min(250, ts - last);
     last = ts;
     if (!paused()) {
-      acc += dt * FAST * (game.slow > 0 ? 0.35 : 1);
+      acc += dt * FAST * SPEED * (game.slow > 0 && !game.hitstop ? 0.35 : 1);
       var guard = 0;
       while (acc >= STEP && guard < 40) { update(); acc -= STEP; guard++; }
       if (guard >= 40) acc = 0;
