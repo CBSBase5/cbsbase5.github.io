@@ -573,7 +573,7 @@
         while (!onGround(c.x, c.y) && down < 6 && bodyClear(c.x, c.y + 1)) { c.y++; down++; }
         if (!onGround(c.x, c.y)) { c.st = 'air'; c.vx = dir * 0.5; c.vy = 0; }
         c.walkd += 0.55;
-        if (Math.floor(c.walkd / 6.6) !== Math.floor((c.walkd - 0.55) / 6.6)) dust(c.x - dir * 3, c.y, 1, 1);
+        if (Math.floor(c.walkd / 6.6) !== Math.floor((c.walkd - 0.55) / 6.6)) { dust(c.x - dir * 3, c.y, 2, 1); if (game.state !== 'demo') sfx('step'); }
         return true;
       }
     }
@@ -700,6 +700,9 @@
 
   function updSnag(c) {
     if (c.hurtT > 0) c.hurtT--;
+    if (c.ghostT > 0) c.ghostT--; else if (c.ghost > c.hp) c.ghost = Math.max(c.hp, c.ghost - 0.8);
+    /* knocked Snags leave a dust trail */
+    if (c.alive && c.knock && c.st === 'air' && game.t % 3 === 0 && Math.abs(c.vx) + Math.abs(c.vy) > 2) addPart({ k: 'puff', x: c.x, y: c.y - 9, life: 20, max: 20, r: 2 });
     if (c.walking > 0) c.walking--;
     if (c.landT > 0) c.landT--;
     if (c.cheerT > 0) c.cheerT--;
@@ -715,8 +718,12 @@
   function hurt(c, dm, src) {
     if (!c.alive || dm <= 0) return;
     if (c.shield) dm = Math.max(1, Math.round(dm / 2));
+    var before = c.hp;
     c.hp = Math.max(0, c.hp - dm); c.hurtT = 45;
-    addPart({ k: 'txt', x: c.x, y: c.y - 44, vy: -0.35, life: 80, max: 80, s: '-' + dm });
+    c.ghost = Math.max(c.ghost || 0, before); c.ghostT = 40;
+    addPart({ k: 'txt', x: c.x, y: c.y - 46, vx: rand(-0.25, 0.25), vy: -0.45, life: 90, max: 90, s: '-' + dm, sc: dm >= 40 ? 3 : (dm >= 16 ? 2 : 1), col: dm >= 40 ? '#ff8a5c' : '#ffd27a' });
+    sfx('hit', Math.min(1.4, dm / 35));
+    if (before > 0 && c.hp <= 0 && game.state !== 'demo') koMoment(c);
     if (src && src.by && src.by.team !== c.team) {
       if (dm > game.stats.best) { game.stats.best = dm; game.stats.bestBy = src.by.name; }
       src.by.dealt = (src.by.dealt || 0) + dm; if (dm > (src.by.best || 0)) src.by.best = dm;
@@ -728,9 +735,19 @@
     }
   }
 
+  /* the satisfying bit: a knock out slows time for a moment and gets its own word */
+  function koMoment(c) {
+    if (!reduceMotion) game.slow = 42;
+    word(c.x, c.y - 30, 'K.O.!', '#ff8a5c', 3);
+    for (var i = 0; i < 12; i++) { var a = i / 12 * 6.283; addPart({ k: 'spark', x: c.x, y: c.y - 12, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8 - 0.6, life: 34 }); }
+    sfx('ko');
+  }
+  function word(x, y, s, col, sc) { addPart({ k: 'txt', x: x, y: y, vy: -0.25, life: 80, max: 80, s: s, sc: sc || 2, col: col || '#ffd27a', w: 1 }); }
   function drown(c) {
+    var wasIn = c.hp > 0;
     c.alive = false; c.hp = 0;
-    for (var i = 0; i < 14; i++) addPart({ k: 'drop', x: c.x + rand(-4, 4), y: WATER, vx: rand(-1.2, 1.2), vy: rand(-3.2, -1.2), life: 50 });
+    if (wasIn && game.state !== 'demo') { if (!reduceMotion) game.slow = 36; word(c.x, WATER - 30, 'SPLASH!', '#9fe3f5', 2); }
+    for (var i = 0; i < 26; i++) addPart({ k: 'drop', x: c.x + rand(-4, 4), y: WATER, vx: rand(-1.2, 1.2), vy: rand(-3.2, -1.2), life: 50 });
     game.portals.push({ x: c.x, y: WATER - 12, t: 0, c: c });
     sfx('splash'); sfx('portal'); voice(c.team.era, 'panic');
     say('water');
@@ -795,7 +812,7 @@
 
   function explode(x, y, R, dmg, src) {
     var deb = [], i;
-    for (i = 0; i < 28; i++) {
+    for (i = 0; i < 46; i++) {
       var a = Math.random() * 6.283, rr = Math.random() * R;
       var sx = Math.floor(x + Math.cos(a) * rr), sy = Math.floor(y + Math.sin(a) * rr);
       if (sx >= 0 && sx < WW && sy >= 0 && sy < WH && mask[sy * WW + sx]) {
@@ -806,8 +823,14 @@
     carve(x, y, R, true);
     deb.forEach(function (d) {
       var a2 = Math.atan2(d[2] - y, d[1] - x) + rand(-0.4, 0.4), sp = rand(1.5, 4.2);
-      addPart({ k: 'deb', x: d[1], y: d[2], vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp - 1.5, life: 70, col: d[0], big: Math.random() < 0.3 });
+      var rb = Math.random();
+      addPart({ k: 'deb', x: d[1], y: d[2], vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp - 1.5, life: 90, col: d[0], big: rb < 0.12 ? 3 : (rb < 0.5 ? 2 : 1) });
     });
+    /* a ring of dust rolls out along the ground */
+    for (var gx = -R - 6; gx <= R + 6; gx += 3) {
+      var gy = surfaceY(Math.round(x + gx));
+      if (gy > 0 && Math.abs(gy - y) < R + 10) addPart({ k: 'dust', x: x + gx, y: gy - 1, vx: (gx < 0 ? -1 : 1) * rand(0.5, 1.4), vy: rand(-0.5, -0.1), life: 30 + Math.random() * 20, max: 50, r: rand(2, 3.6), delay: Math.round(Math.abs(gx) / 6) });
+    }
     addPart({ k: 'flash', x: x, y: y, life: 4, max: 4, r: R * 1.15 });
     addPart({ k: 'fire', x: x, y: y, life: 18, max: 18, r: R });
     addPart({ k: 'ring', x: x, y: y, life: 14, max: 14, r: R });
@@ -846,9 +869,12 @@
       var bd = Math.sqrt((bb.x - x) * (bb.x - x) + (bb.y - 5 - y) * (bb.y - 5 - y));
       if (bd < R + 6 && !bb.fuse) { bb.fuse = 8; bb.by = src && src.by ? src.by : null; }
     });
-    game.shake = Math.max(game.shake, Math.min(6, dmg / 9));
-    if (maxDm >= 28) game.hitstop = Math.min(7, 3 + Math.round(maxDm / 15));
+    game.shake = Math.max(game.shake, Math.min(8, dmg / 7 + hits));
+    if (maxDm >= 10) game.hitstop = Math.min(9, 2 + Math.round(maxDm / 10));
     sfx('boom', dmg / 50);
+    if (hits >= 2) word(x, y - 2, 'DOUBLE!', '#b39cff', 2);
+    else if (maxDm >= 45) word(x, y - 2, 'KABOOM!', '#ffd27a', 2);
+    else if (maxDm >= 30) word(x, y - 2, 'WHAM!', '#ffd27a', 2);
     if (hits >= 2) say('double');
     else if (maxDm >= 40) say('big');
   }
@@ -1048,25 +1074,25 @@
     for (var k = 0; k < 10; k++) addPart({ k: 'spark', x: cr.x, y: cr.y - 5, vx: rand(-1.6, 1.6), vy: rand(-2.2, -0.5), life: 30 });
     if (cr.kind === 'skip') {
       s.team.bonus = true;
-      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, max: 90, s: 'BONUS GO!', col: '#b39cff' });
+      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, max: 90, s: 'BONUS GO!', col: '#b39cff', sc: 2 });
       banner('Bonus go!', null, '#7b5cff', 'hourglass'); sfx('portal');
     } else if (cr.kind === 'fest') {
       s.team.members.forEach(function (m) {
         if (!m.alive) return;
         var h = Math.min(15, 100 - m.hp); m.hp += h;
-        if (h > 0) addPart({ k: 'txt', x: m.x, y: m.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + h, col: '#9be36b' });
+        if (h > 0) addPart({ k: 'txt', x: m.x, y: m.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + h, col: '#9be36b', sc: 2 });
         for (var q = 0; q < 6; q++) addPart({ k: 'spark', x: m.x + rand(-6, 6), y: m.y - rand(4, 20), vx: rand(-0.4, 0.4), vy: rand(-1, -0.3), life: 30 });
       });
       banner('Snack fest!', null, '#7ec850', 'cup'); sfx('find');
     } else if (cr.kind === 'bark') {
       s.team.bark = (s.team.bark || 0) + 1;
-      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, s: 'BARK!', col: '#ffd27a' });
+      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, s: 'BARK!', col: '#ffd27a', sc: 2, max: 90 });
       banner("Bonnie's Bark!", null, '#e0b040', 'kit');
       sfx('find');
     } else {
       var heal = Math.min(25, 100 - s.hp);
       s.hp += heal;
-      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 80, s: '+' + heal, col: '#9be36b' });
+      addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + heal, col: '#9be36b', sc: 2 });
       sfx('twinkle');
     }
     voice(s.team.era, 'cheer'); s.cheerT = 30;
@@ -1184,6 +1210,7 @@
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
     banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
+    sfx('turn');
     voice(team.era, 'turn');
     musicEra(team.era);
     game.ai = team.ctrl === 'ai' ? { phase: 'wait', t: 0, walked: false } : null;
@@ -1219,9 +1246,9 @@
     for (i = 0; i < game.snags.length && !busy; i++) { var c = game.snags[i]; if (c.alive && c.st === 'air') busy = true; }
     game.settleAll = (game.settleAll || 0) + 1;
     if (busy && game.settleAll < 900) { game.settleT = 0; return; }
-    if (++game.settleT < 30) return;
+    if (++game.settleT < 16) return;
     var dying = game.snags.filter(function (s) { return s.alive && s.hp <= 0; });
-    if (dying.length) { dying.forEach(zapHome); game.state = 'portals'; game.portT = 75; return; }
+    if (dying.length) { dying.forEach(zapHome); game.state = 'portals'; game.portT = 52; return; }
     afterSettle();
   }
 
@@ -1276,8 +1303,12 @@
         if (w.impact || w.hit) explode(tip.x, tip.y, w.R, w.dmg, p);
         else { p.x = c.x; p.y = c.y - 10; p.vx *= 0.3; p.vy *= 0.3; game.projs.push(p); }
       } else game.projs.push(p);
-      sfx(wid === 'lob' || wid === 'disc' ? 'shoot' : 'throw');
+      sfx(wid === 'lob' || wid === 'disc' ? 'shoot' : 'throw', pw / 100);
       game.lastPower = Math.round(pw);
+      /* recoil: a squash, a puff at the tip and a little kick */
+      c.landT = 6; game.shake = Math.max(game.shake, 0.6 + pw / 80);
+      for (var mp = 0; mp < 5; mp++) addPart({ k: 'puff', x: tip.x, y: tip.y, vx: Math.cos(a) * c.face * rand(0.2, 0.9) + rand(-0.2, 0.2), vy: -Math.sin(a) * rand(0.2, 0.9) + rand(-0.2, 0.2), life: 18, max: 18, r: rand(1.5, 2.6) });
+      for (mp = 0; mp < 4; mp++) addPart({ k: 'spark', x: tip.x, y: tip.y, vx: Math.cos(a) * c.face * rand(1, 2.2), vy: -Math.sin(a) * rand(1, 2.2) + rand(-0.5, 0.5), life: 12 });
     } else if (w.kind === 'place') {
       p = { type: wid, era: c.team.era, x: c.x + c.face * 7, y: c.y - 4, vx: c.face * 0.3, vy: -0.4, age: 0, by: c, trail: [], rest: false, fuse: w.fuse, kmul: w.knock || 1 };
       game.projs.push(p); sfx('throw');
@@ -1297,7 +1328,7 @@
       c.cheerT = 40; sfx('portal'); say('bark', true);
     }
     if (!avail(c.team, wid).ok) c.team.lastWeapon = 'lob';
-    game.state = 'retreat'; game.retreat = 180; game.power = 0;
+    game.state = 'retreat'; game.retreat = c.team.ctrl === 'ai' ? 45 : 150; game.power = 0;
   }
 
   /* ---------- mobility tools ---------- */
@@ -1730,10 +1761,10 @@
     if (!A || game.fired || game.state !== 'play') return;
     A.t++;
     if (A.phase === 'wait') {
-      if (A.t > 40 && c.st === 'ground') { var P = aiPlan(c, A.walked); P.walked = A.walked; game.ai = P; }
+      if (A.t > 22 && c.st === 'ground') { var P = aiPlan(c, A.walked); P.walked = A.walked; game.ai = P; }
       return;
     }
-    if (A.type === 'pass') { if (A.t > 20) passTurn(); return; }
+    if (A.type === 'pass') { if (A.t > 12) passTurn(); return; }
     if (A.type === 'walk') {
       if (c.st === 'ground') {
         if (!safeAhead(c, A.dir)) A.t = A.walkT + 1;
@@ -1748,13 +1779,13 @@
       c.face = A.face; game.weapon = A.weapon;
       if (A.tx !== undefined) game.tx = A.tx;
       var d = A.aim - c.aim;
-      if (Math.abs(d) <= 1.5) { c.aim = A.aim; A.phase = 'charge'; A.t = 0; }
-      else c.aim += d > 0 ? 1.5 : -1.5;
+      if (Math.abs(d) <= 3) { c.aim = A.aim; A.phase = 'charge'; A.t = 0; }
+      else { c.aim += d > 0 ? 3 : -3; aimTick(c.aim - (d > 0 ? 3 : -3), c.aim); }
       return;
     }
     if (A.phase === 'charge') {
-      if (WEAP[game.weapon].kind !== 'proj') { if (A.t > 10) fire(); return; }
-      if (A.t < 12) return;
+      if (WEAP[game.weapon].kind !== 'proj') { if (A.t > 6) fire(); return; }
+      if (A.t < 6) return;
       game.charging = true;
       game.power = Math.min(100, game.power + 100 / 72);
       if (game.power >= A.power) { game.power = A.power; fire(); }
@@ -1763,6 +1794,8 @@
 
   /* ---------------- player input ---------------- */
   var inp = { left: false, right: false, up: false, down: false };
+  /* a soft click every 5 degrees, so aiming feels like turning a dial */
+  function aimTick(a0, a1) { if (Math.floor(a0 / 5) !== Math.floor(a1 / 5)) sfx('aim'); }
   function humanTurn() {
     return !!(game.active && game.active.alive && game.active.team.ctrl === 'human' &&
       (game.state === 'play' || game.state === 'retreat') && !game.overlay);
@@ -1824,28 +1857,63 @@
       else if (inp.right && !inp.left) { if (tryWalk(c, 1)) { c.walking = 6; learnDone('walk'); } }
     }
     if (game.state === 'play' && !busy && !c.jet && !c.swing && !c.sled) {
+      var a0 = c.aim;
       if (inp.up) { c.aim = Math.min(85, c.aim + 1.2); learnDone('aim'); }
       if (inp.down) { c.aim = Math.max(-80, c.aim - 1.2); learnDone('aim'); }
+      aimTick(a0, c.aim);
       if (game.charging) { game.power = Math.min(100, game.power + 100 / 72); if (game.power >= 100) fire(); }
     }
   }
 
   /* ---------------- sound: everything generated in code ---------------- */
-  var AC = null, master = null, sfxG = null, musG = null, jayG = null, noiseB = null, lastVoice = 0;
+  var AC = null, master = null, sfxG = null, musG = null, jayG = null, noiseB = null, lastVoice = 0, verb = null, crunch = null, leadBus = null;
   function vol(k, d) { var v = parseInt(store(k), 10); return isNaN(v) ? d : clamp(v, 0, 10); }
   var aud = { mv: vol('mv', store('music') === '0' ? 0 : 7), sv: vol('sv', store('sfx') === '0' ? 0 : 8), jv: vol('jv', 8) };
   var TITLE_MUSIC = { tempo: 112, root: 174.61, scale: [0, 2, 4, 7, 9], lead: 'square', drum: 'mix', seed: 21 };
   function audioInit() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; return; }
-    master = AC.createGain(); master.gain.value = 0.6; master.connect(AC.destination);
-    sfxG = AC.createGain(); sfxG.gain.value = aud.sv / 8; sfxG.connect(master);
-    musG = AC.createGain(); musG.gain.value = aud.mv * 0.045; musG.connect(master);
+    /* the mix: everything into a compressor so big moments hit hard without clipping, plus a little room reverb */
+    var comp = AC.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.25;
+    comp.connect(AC.destination);
+    master = AC.createGain(); master.gain.value = 0.8; master.connect(comp);
+    verb = AC.createConvolver(); verb.buffer = roomImpulse(1.6, 2.8);
+    var verbG = AC.createGain(); verbG.gain.value = 0.2; verb.connect(verbG); verbG.connect(master);
+    sfxG = AC.createGain(); sfxG.gain.value = aud.sv / 8; sfxG.connect(master); sfxG.connect(verb);
+    musG = AC.createGain(); musG.gain.value = aud.mv * 0.045; musG.connect(master); musG.connect(verb);
     jayG = AC.createGain(); jayG.gain.value = aud.jv / 8; jayG.connect(master);
+    crunch = AC.createWaveShaper(); crunch.curve = crunchCurve(18); crunch.connect(sfxG);
+    /* the tune's lead runs through a soft echo */
+    leadBus = AC.createGain(); leadBus.connect(musG);
+    var dly = AC.createDelay(1), fb = AC.createGain(), wet = AC.createGain();
+    dly.delayTime.value = 0.27; fb.gain.value = 0.3; wet.gain.value = 0.45;
+    leadBus.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(musG);
     noiseB = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
     var d = noiseB.getChannelData(0);
     for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     musicEra(game.state === 'demo' ? 'title' : (game.active ? game.active.team.era : 'pre'));
+  }
+  function roomImpulse(sec, decay) {
+    var n = Math.floor(AC.sampleRate * sec), b = AC.createBuffer(2, n, AC.sampleRate);
+    for (var ch = 0; ch < 2; ch++) { var d = b.getChannelData(ch); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); }
+    return b;
+  }
+  function crunchCurve(k) {
+    var n = 1024, c = new Float32Array(n);
+    for (var i = 0; i < n; i++) { var x = i * 2 / n - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); }
+    return c;
+  }
+  /* a warm pad note: two detuned saws through a soft filter */
+  function pad(f, t, dur, vol) {
+    [-7, 7].forEach(function (dt) {
+      var o = AC.createOscillator(), g = AC.createGain(), fl = AC.createBiquadFilter();
+      o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = dt;
+      fl.type = 'lowpass'; fl.frequency.value = 850; fl.Q.value = 0.5;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.35);
+      g.gain.setValueAtTime(vol, t + dur - 0.35); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+      o.connect(fl); fl.connect(g); g.connect(musG); o.start(t); o.stop(t + dur + 0.05);
+    });
   }
   function env(g, t0, a, peak, dur) {
     g.gain.setValueAtTime(0.0001, t0);
@@ -1872,9 +1940,26 @@
     if (!AC || !aud.sv) return;
     k = k || 1;
     switch (n) {
-      case 'boom': noise(0.5 * k + 0.25, 0.5, 'lowpass', 1400, 120); tone('sine', 110, 40, 0.5, 0.4); break;
-      case 'shoot': noise(0.18, 0.22, 'bandpass', 900, 2600); tone('square', 300, 520, 0.08, 0.05); break;
-      case 'throw': noise(0.15, 0.2, 'bandpass', 600, 1500); break;
+      case 'boom':
+        /* four layers: a sub thump, a crunchy body, a sharp crack, and bits of debris pattering down */
+        var t0 = AC.currentTime, kk = clamp(k, 0.4, 1.3);
+        tone('sine', 95, 26, 0.55 + kk * 0.4, 0.75);
+        tone('triangle', 60, 30, 0.4 + kk * 0.3, 0.35);
+        noise(0.45 + kk * 0.45, 0.55, 'lowpass', 2600, 120, crunch);
+        noise(0.07, 0.4, 'highpass', 2200, null);
+        for (var r = 0; r < 3 + Math.round(kk * 3); r++) noise(0.025, 0.07, 'bandpass', 1500 + Math.random() * 2500, null, null, t0 + 0.18 + Math.random() * 0.55);
+        break;
+      case 'shoot': noise(0.2, 0.26, 'bandpass', 700, 2800); tone('square', 220, 520 + k * 300, 0.09, 0.06); tone('sine', 140, 60, 0.12, 0.25); break;
+      case 'throw': noise(0.22, 0.24, 'bandpass', 500, 1700); tone('sine', 120, 70, 0.1, 0.18); break;
+      case 'hit': tone('square', 240, 80, 0.14, 0.1 + 0.06 * k); noise(0.12, 0.3 + 0.2 * k, 'bandpass', 1300, 500, crunch); tone('sine', 110, 50, 0.16, 0.35); break;
+      case 'ko':
+        [12, 7, 4, 0, -5].forEach(function (st, i) { tone('triangle', 660 * Math.pow(2, st / 12), null, 0.16, 0.12, null, AC.currentTime + i * 0.07); });
+        tone('sine', 1320, 1320, 0.9, 0.06, null, AC.currentTime + 0.4);
+        break;
+      case 'charge': tone('triangle', 170 + k * 560, null, 0.05, 0.035); break;
+      case 'step': noise(0.035, 0.06, 'lowpass', 700, 300); break;
+      case 'aim': tone('square', 1900, null, 0.012, 0.018); break;
+      case 'turn': tone('sine', 392, 784, 0.18, 0.08); tone('triangle', 988, null, 0.22, 0.05, null, AC.currentTime + 0.12); noise(0.25, 0.06, 'bandpass', 600, 3000); break;
       case 'bounce': tone('triangle', 420, 300, 0.06, 0.12); break;
       case 'jump': tone('square', 260, 520, 0.12, 0.05); break;
       case 'land': noise(0.08, 0.18 * k, 'lowpass', 500, 200); break;
@@ -1952,7 +2037,8 @@
       var s = mus.step % 32, t = mus.next;
       if (aud.mv > 0) {
         var ln = mus.pat.lead[s];
-        if (ln !== null) tone(M.lead, M.root * Math.pow(2, ln / 12) * 2, null, spb * 0.9, 0.08, musG, t);
+        if (ln !== null) tone(M.lead, M.root * Math.pow(2, ln / 12) * 2, null, spb * 0.9, 0.07, leadBus || musG, t);
+        if (s % 16 === 0) { var pr = M.root * Math.pow(2, mus.pat.bass[(s / 4) % 8] / 12); pad(pr, t, spb * 16, 0.028); pad(pr * 1.5, t, spb * 16, 0.02); }
         if (s % 4 === 0) tone('triangle', M.root * Math.pow(2, mus.pat.bass[(s / 4) % 8] / 12) / 2, null, spb * 3, 0.16, musG, t);
         if (M.drum === 'tom') {
           if (s % 4 === 0 || s % 8 === 6) tone('sine', 120, 55, 0.18, 0.3, musG, t);
@@ -2173,6 +2259,8 @@
   function update() {
     if (game.hitstop > 0) { game.hitstop--; return; }
     game.t++;
+    if (game.slow > 0) game.slow--;
+    if (game.charging && game.t % 4 === 0) sfx('charge', game.power / 100);
     var i;
     if (game.bannerT > 0 && --game.bannerT === 0) $('banner').classList.remove('show');
     if (passArmed > 0 && --passArmed === 0) setPassArm(false);
@@ -2212,14 +2300,17 @@
       if (p.k === 'deb' || p.k === 'drop') {
         if (!p.stuck) {
           p.vy += G; p.x += p.vx; p.y += p.vy;
-          if (p.k === 'deb' && solid(p.x, p.y)) { p.stuck = true; p.life = Math.min(p.life, 25); }
+          if (p.k === 'deb' && solid(p.x, p.y)) {
+            if (!p.b && p.vy > 1) { p.b = 1; p.y -= p.vy; p.vy *= -0.35; p.vx *= 0.5; }
+            else { p.stuck = true; p.life = Math.min(p.life, 40); }
+          }
           if (p.k === 'drop' && p.y > WATER + 2 && p.vy > 0) p.life = 0;
         }
       } else if (p.k === 'spark') { p.vy += 0.08; p.x += p.vx; p.y += p.vy; p.vx *= 0.97; }
       else if (p.k === 'ember') { p.vy += 0.1; p.x += p.vx; p.y += p.vy; p.vx *= 0.96; if (solid(p.x, p.y)) p.life = Math.min(p.life, 6); }
       else if (p.k === 'dust' || p.k === 'puff') { p.x += (p.vx || 0) + game.wind * 0.01; p.y += (p.vy || -0.15); p.r += 0.04; }
       else if (p.k === 'smoke') { p.x += p.vx + game.wind * 0.03; p.y += p.vy; p.vy *= 0.995; p.r += 0.06; }
-      else if (p.k === 'txt') { p.y += p.vy; }
+      else if (p.k === 'txt') { p.y += p.vy; p.x += p.vx || 0; p.vy *= 0.97; }
       if (p.life <= 0) game.parts.splice(i, 1);
     }
   }
@@ -2475,7 +2566,7 @@
     if (c.swing) return ['jump', 0, 0, o];
     if (c.jet) return ['jump', (t >> 2) % 2, 0, o];
     if (c.st === 'air') {
-      if (c.knock) return ['panic', (t >> 3) % 2, 0, o];
+      if (c.knock) { var spd = Math.abs(c.vx) + Math.abs(c.vy); return ['panic', (t >> 3) % 2, spd > 2.2 && !reduceMotion ? (Math.floor(c.airT / 4) % 4) * (c.vx < 0 ? -1 : 1) : 0, o]; }
       if (c.flip) return ['jump', 0, -c.face * (Math.floor(c.airT / 5) % 4), o];
       if (c.vy < 0) { if (c.vy < -1.5) o.sq = 1; return ['jump', 0, 0, o]; }
       return ['fall', (t >> 3) % 2, 0, o];
@@ -2497,8 +2588,9 @@
     var ps = poseOf(c, t), era = c.team.era;
     var bl = ps[0] !== 'cheer' && (t + c.blinkAt) % 200 < 7;
     if (c.sled) { SP.draw(ctx, c.x, c.y - 2, c.face, era, ps[0], ps[1], bl, 0, 1, ps[3]); SP.sled(ctx, c.x, c.y, c.face); return; }
-    SP.draw(ctx, c.x, c.y, c.face, era, ps[0], ps[1], bl, ps[2], 1, ps[3]);
-    if (ps[0] === 'aim' || ps[0] === 'charge') SP.weapon(ctx, c.x, c.y, c.face, c.aim, game.weapon, era, t);
+    var jx = ps[0] === 'charge' && game.power > 55 && (t % 4 < 2) ? (game.power > 85 ? 1 : 0) * ((t >> 1) % 2 ? 1 : -1) : 0;
+    SP.draw(ctx, c.x + jx, c.y, c.face, era, ps[0], ps[1], bl, ps[2], 1, ps[3]);
+    if (ps[0] === 'aim' || ps[0] === 'charge') SP.weapon(ctx, c.x + jx, c.y, c.face, c.aim, game.weapon, era, t);
   }
 
   function drawAim(t) {
@@ -2639,7 +2731,7 @@
     for (var i = 0; i < game.parts.length; i++) {
       var p = game.parts[i];
       if (p.delay > 0) continue;
-      if (p.k === 'deb') { ctx.fillStyle = p.col; var s = p.big ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
+      if (p.k === 'deb') { var s = p.big === 3 ? 3 : (p.big ? 2 : 1); if (s === 3) { ctx.fillStyle = '#1f2a30'; ctx.fillRect(Math.round(p.x), Math.round(p.y) + 1, 3, 3); } ctx.fillStyle = p.col; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
       else if (p.k === 'drop') { ctx.fillStyle = '#cfeefa'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
       else if (p.k === 'spark') { ctx.fillStyle = (p.life >> 2) % 2 ? '#fff3c8' : '#ffd27a'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
       else if (p.k === 'beam') { pixLine(p.x, p.y + 1, p.x2, p.y2 + 1, '#37c8dc'); if (p.life > 6) pixLine(p.x, p.y, p.x2, p.y2, '#e9fdff'); }
@@ -2685,12 +2777,27 @@
     }
   }
 
+  /* pixel text drawn at 2 or 3 times size, crisp */
+  var btCv = document.createElement('canvas'), btX = btCv.getContext('2d');
+  function bigText(str, x, y, col, k) {
+    str = String(str).toUpperCase();
+    var w = SP.textWidth(str) + 4, h = 9;
+    btCv.width = w; btCv.height = h;
+    SP.text(btX, str, 2, 2, col, '#1f2a30', false);
+    ctx.drawImage(btCv, Math.round(x - w * k / 2), Math.round(y - h * k / 2), w * k, h * k);
+  }
   function drawTags(t) {
     game.snags.forEach(function (c) {
       if (!c.alive || c.arrive) return;
       var col = ER[c.team.era].tag, y = Math.round(c.y - 40);
       SP.text(ctx, c.name, c.x, y, col, '#1f2a30', true);
-      if (game.state !== 'demo') SP.text(ctx, String(c.hp), c.x, y + 7, '#ffffff', '#1f2a30', true);
+      if (game.state !== 'demo') {
+        SP.text(ctx, String(c.hp), c.x, y + 7, '#ffffff', '#1f2a30', true);
+        var bx = Math.round(c.x) - 9, by = y + 14, gw = Math.round(Math.min(100, c.ghost || 0) / 100 * 18), hw = Math.round(Math.min(100, c.hp) / 100 * 18);
+        ctx.fillStyle = '#1f2a30'; ctx.fillRect(bx - 1, by - 1, 20, 4);
+        if (gw > hw) { ctx.fillStyle = '#fef8f4'; ctx.fillRect(bx, by, gw, 2); }
+        ctx.fillStyle = col; ctx.fillRect(bx, by, hw, 2);
+      }
       if (c === game.active && game.state === 'play') {
         var ay = y - 9 + Math.round(Math.sin(t * 0.12) * 1.5), ax = Math.round(c.x);
         ctx.fillStyle = '#1f2a30'; ctx.fillRect(ax - 4, ay - 1, 9, 4); ctx.fillRect(ax - 2, ay + 3, 5, 2); ctx.fillRect(ax - 1, ay + 5, 3, 1);
@@ -2700,8 +2807,11 @@
     for (var i = 0; i < game.parts.length; i++) {
       var p = game.parts[i];
       if (p.k === 'txt') {
-        var ag = (p.max || p.life + 1) - p.life, pop = ag < 8 ? Math.round(Math.sin(ag / 8 * Math.PI) * 3) : 0;
-        SP.text(ctx, p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), '#1f2a30', true);
+        var ag = (p.max || p.life + 1) - p.life, pop = ag < 8 ? Math.round(Math.sin(ag / 8 * Math.PI) * 3) : 0, sc = p.sc || 1;
+        if (p.life < 18) ctx.globalAlpha = p.life / 18;
+        if (sc > 1) bigText(p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), ag < 4 ? sc + 1 : sc);
+        else SP.text(ctx, p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), '#1f2a30', true);
+        ctx.globalAlpha = 1;
       }
     }
     game.projs.forEach(function (p) {
@@ -2807,7 +2917,7 @@
       if (!el) return;
       el.style.setProperty('--c', ER[tm.era].tag);
       el.innerHTML = '<span class="lamp"></span><b class="tn">' + (tm.ctrl === 'ai' ? gl('cpu', 'sm') + ' ' : '') + esc(tm.name) + '</b>' +
-        '<span class="pips">' + tm.members.map(function (m) { return '<i title="' + esc(m.name) + '"><u></u></i>'; }).join('') + '</span><span class="th"></span>';
+        '<span class="pips">' + tm.members.map(function (m) { return '<i title="' + esc(m.name) + '"><s></s><u></u></i>'; }).join('') + '</span><span class="th"></span>';
       SP.paintGlyphs(el);
     });
     hudCache = {};
@@ -2825,13 +2935,17 @@
         if (m.alive) tot += m.hp;
         var pp = pips[k];
         if (!pp) return;
-        var wd = (m.alive ? Math.min(100, m.hp) : 0) + '%';
-        if (pp.firstChild.style.width !== wd) pp.firstChild.style.width = wd;
+        var wd = (m.alive ? Math.min(100, m.hp) : 0) + '%', gd = (m.alive ? Math.min(100, Math.max(m.hp, m.ghost || 0)) : 0) + '%';
+        if (pp.lastChild.style.width !== wd) pp.lastChild.style.width = wd;
+        if (pp.firstChild.style.width !== gd) pp.firstChild.style.width = gd;
         pp.classList.toggle('dead', !m.alive);
         pp.classList.toggle('cur', m === game.active);
       });
       var th = el.querySelector('.th');
-      if (th && th.textContent !== String(tot)) th.textContent = tot;
+      if (th && th.textContent !== String(tot)) {
+        if (+th.textContent > tot && !reduceMotion) { el.classList.remove('jolt'); void el.offsetWidth; el.classList.add('jolt'); }
+        th.textContent = tot;
+      }
       el.classList.toggle('now', !!(game.active && game.active.team === tm));
     });
     /* wind: chevrons for strength and direction, the number for the maths */
@@ -4363,7 +4477,9 @@
     if (WEAP[game.weapon].kind === 'strike') { game.tx = clamp(w.x, 10, WW - 10); return; }
     var dx = w.x - c.x, dy = (c.y - 9) - w.y;
     if (Math.abs(dx) > 2) c.face = dx > 0 ? 1 : -1;
+    var a0 = c.aim;
     c.aim = clamp(Math.round(Math.atan2(dy, Math.abs(dx)) * 180 / Math.PI), -80, 85);
+    aimTick(a0, c.aim);
     learnDone('aim');
   }
   function canAim() { var c = game.active; return humanTurn() && game.state === 'play' && !game.charging && !c.swing && !c.jet && !c.sled; }
@@ -4500,7 +4616,7 @@
     var dt = Math.min(250, ts - last);
     last = ts;
     if (!paused()) {
-      acc += dt * FAST;
+      acc += dt * FAST * (game.slow > 0 ? 0.35 : 1);
       var guard = 0;
       while (acc >= STEP && guard < 40) { update(); acc -= STEP; guard++; }
       if (guard >= 40) acc = 0;
