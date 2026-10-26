@@ -19,7 +19,8 @@
   var TEST = Q.get('test') || '';
   var FAST = Math.max(1, Math.min(8, parseInt(Q.get('fast') || '1', 10) || 1));
 
-  var WW = 1100, WH = 460, WATER = 432, G = 0.16, STEP = 1000 / 60;
+  /* K: how much bigger the battlefields are than the first version. Landmarks are scaled by more than K */
+  var K = 1.6, WW = 1760, WH = 736, WATER0 = 691, WATER = WATER0, G = 0.16, STEP = 1000 / 60, EDGE = 240;
   /* Game speed: Steady runs the whole world a quarter slower so arcs hang and hits land; Brisk is full speed */
   var SPEED = (function () { try { return localStorage.getItem('b5.tantrum.v1.speed') === 'brisk' ? 1 : 0.75; } catch (e) { return 0.75; } })();
   var WEAP = {
@@ -257,31 +258,32 @@
   function genCity(seed) {
     var R = rng(seed), i, x0, w, h;
     mask.fill(0); burnt.fill(0); zone.fill(0);
-    x0 = 66;
-    while (x0 < WW - 66) {
-      w = Math.min(WW - 66 - x0, 40 + Math.floor(R() * 70)); h = 300 + Math.floor(R() * 75);
+    x0 = 100;
+    while (x0 < WW - 100) {
+      w = Math.min(WW - 100 - x0, 60 + Math.floor(R() * 110)); h = Math.round(K * 300) + Math.floor(R() * 120);
       fillZone(x0, h, w, WH - h, 0);
       x0 += w;
     }
     var towers = [];
-    for (i = 0; i < 5; i++) {
-      var tw = 26 + Math.floor(R() * 34), tx = 100 + Math.floor(R() * (WW - 200 - tw)), clash = false;
-      for (var j = 0; j < towers.length; j++) if (Math.abs(towers[j].x - tx) < 70) clash = true;
+    for (i = 0; i < 12 && towers.length < 7; i++) {
+      var tw = 34 + Math.floor(R() * 46), tx = 150 + Math.floor(R() * (WW - 300 - tw)), clash = false;
+      for (var j = 0; j < towers.length; j++) if (Math.abs(towers[j].x - tx) < 110) clash = true;
       if (clash) continue;
       var base = 4; while (base < WH && !mask[base * WW + tx + (tw >> 1)]) base++;
-      var th = 60 + Math.floor(R() * 110);
+      var th = 110 + Math.floor(R() * 200);
       fillZone(tx, base - th, tw, th + 6, 1);
       towers.push({ x: tx, w: tw, top: base - th });
-      if (R() < 0.75 && th > 50) fillZone(tx + 4, base - th + 14 + Math.floor(R() * (th - 40)), tw - 8, 14, 1, 0);
+      if (R() < 0.75 && th > 50) fillZone(tx + 5, base - th + 18 + Math.floor(R() * (th - 60)), tw - 10, 22, 1, 0);
+      if (R() < 0.5 && th > 160) fillZone(tx + 5, base - th + 70 + Math.floor(R() * (th - 140)), tw - 10, 22, 1, 0);
     }
-    for (i = 0; i < 4; i++) {
-      var pw = 40 + Math.floor(R() * 44), px2 = 120 + Math.floor(R() * (WW - 240 - pw)), py = 110 + Math.floor(R() * 110);
+    for (i = 0; i < 7; i++) {
+      var pw = 54 + Math.floor(R() * 60), px2 = 160 + Math.floor(R() * (WW - 320 - pw)), py = 170 + Math.floor(R() * 190);
       fillZone(px2, py, pw, 7, 2);
     }
     towers.sort(function (a, b) { return a.x - b.x; });
     for (i = 0; i + 1 < towers.length; i++) {
       var A = towers[i], B = towers[i + 1];
-      if (R() < 0.5 && B.x - (A.x + A.w) < 160) {
+      if (R() < 0.6 && B.x - (A.x + A.w) < 240) {
         var by = Math.max(A.top, B.top) + 10;
         fillZone(A.x + A.w, by, B.x - (A.x + A.w), 4, 2);
       }
@@ -298,9 +300,9 @@
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 300 - 20 * Math.sin(t * 6.283 * 1.4 + p1) - 10 * Math.sin(t * 6.283 * 3.3 + p2) - 3 * Math.sin(t * 6.283 * 8.1 + p3);
+      var h = K * (300 - 20 * Math.sin(t * 6.283 * 1.4 + p1) - 10 * Math.sin(t * 6.283 * 3.3 + p2) - 3 * Math.sin(t * 6.283 * 8.1 + p3));
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
@@ -314,8 +316,9 @@
     var nP = R() < 0.55 ? 2 : 1;
     for (i = 0; i < nP; i++) {
       for (tries = 0; tries < 40; tries++) {
-        var bw = i === 0 ? 196 + Math.floor(R() * 44) : 118 + Math.floor(R() * 40);
-        var pcx = Math.round(230 + R() * (WW - 460));
+        /* the Great Pyramid towers over everything; a smaller one keeps it company */
+        var bw = i === 0 ? 400 + Math.floor(R() * 60) : 200 + Math.floor(R() * 60);
+        var pcx = Math.round(300 + R() * (WW - 600));
         if (!free(pcx - bw / 2 - 24, pcx + bw / 2 + 24)) continue;
         used.push([pcx - bw / 2, pcx + bw / 2]);
         var gy = Math.max(gAt(pcx - bw / 2), gAt(pcx), gAt(pcx + bw / 2)) + 3;
@@ -341,8 +344,10 @@
         }
         /* the hidden room, big enough to hide a Snag, and the passage that leads to it */
         var cy = gy - Math.round(H * 0.38), dir = R() < 0.5 ? -1 : 1;
+        /* the Great Pyramid has a second chamber high up, like the King's Chamber */
+        if (i === 0) { var ky = gy - Math.round(H * 0.66); for (y = ky - 18; y < ky; y++) for (x = pcx - 16; x <= pcx + 16; x++) { var ki = y * WW + x; if (zone[ki] === 1) mask[ki] = 0; } }
         for (y = cy - 22; y < cy; y++) for (x = pcx - 18; x <= pcx + 18; x++) { var ci = y * WW + x; if (zone[ci] === 1) mask[ci] = 0; }
-        for (var d = 0; d < 160; d++) {
+        for (var d = 0; d < 260; d++) {
           var px2 = pcx + dir * (18 + d), fy = Math.round(cy + d * 0.4);
           if (px2 < 0 || px2 >= WW || fy >= tops[px2] - 1) break;
           var inside = zone[(fy - 10) * WW + px2] === 1 && mask[(fy - 10) * WW + px2];
@@ -358,25 +363,25 @@
       var ox = Math.round(170 + R() * (WW - 340));
       if (!free(ox - 22, ox + 22)) continue;
       used.push([ox - 10, ox + 10]);
-      var og = gAt(ox) + 3, oh = 70 + Math.floor(R() * 24);
+      var og = gAt(ox) + 3, oh = 120 + Math.floor(R() * 40);
       for (y = og - oh; y < og; y++) {
-        var half = 5 - Math.round((og - y) / oh * 1.5);
+        var half = 7 - Math.round((og - y) / oh * 2);
         for (x = ox - half; x <= ox + half; x++) if (y < tops[clamp(x, 0, WW - 1)] + 2) put(x, y, 3);
       }
-      for (k = 0; k < 4; k++) for (x = ox - 3 + k; x <= ox + 3 - k; x++) put(x, og - oh - 1 - k, 5);
+      for (k = 0; k < 6; k++) for (x = ox - 5 + k; x <= ox + 5 - k; x++) put(x, og - oh - 1 - k, 5);
       break;
     }
 
     /* temple ruins: columns holding up a stone beam, which makes a high ledge */
-    var nT = 1 + (R() < 0.6 ? 1 : 0);
+    var nT = 2 + (R() < 0.5 ? 1 : 0);
     for (i = 0; i < nT; i++) {
       for (tries = 0; tries < 30; tries++) {
-        var nc = 2 + Math.floor(R() * 2), gap = 30 + Math.floor(R() * 10), tx0 = Math.round(170 + R() * (WW - 340 - nc * gap));
+        var nc = 2 + Math.floor(R() * 3), gap = 40 + Math.floor(R() * 12), tx0 = Math.round(170 + R() * (WW - 340 - nc * gap));
         if (!free(tx0 - 16, tx0 + (nc - 1) * gap + 16)) continue;
         used.push([tx0 - 12, tx0 + (nc - 1) * gap + 12]);
         var base = 0;
         for (k = 0; k < nc; k++) base = Math.max(base, gAt(tx0 + k * gap));
-        var colH = 44 + Math.floor(R() * 10), lintel = base - colH, broken = R() < 0.5 ? nc - 1 : -1;
+        var colH = 70 + Math.floor(R() * 20), lintel = base - colH, broken = R() < 0.5 ? nc - 1 : -1;
         for (k = 0; k < nc; k++) {
           var colX = tx0 + k * gap, ctop = k === broken ? lintel + 18 + Math.floor(R() * 10) : lintel;
           for (y = ctop; y < base + 2; y++) for (x = colX - 4; x <= colX + 4; x++) if (y < tops[clamp(x, 0, WW - 1)] + 1) put(x, y, 2);
@@ -389,15 +394,15 @@
     }
 
     /* fallen blocks, half buried */
-    for (i = 0; i < 4; i++) {
-      var bx = Math.round(160 + R() * (WW - 320)), bwid = 12 + Math.floor(R() * 8), btop = gAt(bx) - 4 - Math.floor(R() * 4);
+    for (i = 0; i < 7; i++) {
+      var bx = Math.round(160 + R() * (WW - 320)), bwid = 14 + Math.floor(R() * 10), btop = gAt(bx) - 4 - Math.floor(R() * 4);
       if (!free(bx - 4, bx + bwid + 4)) continue;
       for (y = btop; y < btop + 9; y++) for (x = bx; x < bx + bwid; x++) put(x, y, 2);
     }
 
     /* Stone Age history: big boulders left lying about */
-    if (rough) for (i = 0; i < 6; i++) {
-      var bcx = 150 + R() * (WW - 300), br = 9 + R() * 6, bcy = gAt(bcx) - br * 0.55;
+    if (rough) for (i = 0; i < 10; i++) {
+      var bcx = 150 + R() * (WW - 300), br = 12 + R() * 9, bcy = gAt(bcx) - br * 0.55;
       for (y = Math.floor(bcy - br); y <= bcy + br; y++) for (x = Math.floor(bcx - br); x <= bcx + br; x++) {
         var ddx = x + 0.5 - bcx, ddy = y + 0.5 - bcy;
         if (ddx * ddx + ddy * ddy <= br * br && x >= 0 && x < WW && y >= 0 && (!mask[y * WW + x] || zone[y * WW + x] === 0) && y < tops[x] + 4) put(x, y, 6);
@@ -405,9 +410,9 @@
     }
 
     /* buried tomb rooms under the sand */
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < 4; i++) {
       var tcx = 220 + R() * (WW - 440);
-      blob(tcx, gAt(tcx) + 50 + R() * 26, 20 + R() * 12, 8 + R() * 4, 0);
+      blob(tcx, gAt(tcx) + 70 + R() * 50, 26 + R() * 16, 9 + R() * 5, 0);
     }
     paintDesert();
   }
@@ -415,10 +420,12 @@
     var P = MAP.pal, x, y, i, look = LOOK;
     img = tctx.createImageData(WW, WH); data = img.data;
     for (x = 0; x < WW; x++) {
-      var d = 0, pz = -1;
+      var d = 0, pz = -1, gap = 0, dPrev = 0;
       for (y = 0; y < WH; y++) {
         i = y * WW + x;
-        if (!mask[i]) { d = 0; pz = -1; continue; }
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; pz = -1; gap++; continue; }
+        if (gap > 0 && gap < 40 && dPrev > 12 && zone[i] === 0) d = dPrev + gap;
+        gap = 0;
         var z = zone[i], nz = hash(x, y), col;
         if (z === 0 && pz > 0) d = 6; /* sand under stone starts fresh, not as deep rock */
         pz = z;
@@ -485,62 +492,67 @@
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 292 - 24 * Math.sin(t * 6.283 * 1.1 + p1) - 12 * Math.sin(t * 6.283 * 2.7 + p2) - 4 * Math.sin(t * 6.283 * 7.9 + p3);
+      var h = K * (292 - 24 * Math.sin(t * 6.283 * 1.1 + p1) - 12 * Math.sin(t * 6.283 * 2.7 + p2) - 4 * Math.sin(t * 6.283 * 7.9 + p3));
       /* a crag: the ground steps up sharply where hard rock breaks through, as it does along the real Wall */
-      h -= 36 / (1 + Math.exp(-(t - cr) * 30 * flip));
+      h -= 80 / (1 + Math.exp(-(t - cr) * 30 * flip));
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
     function put(xx, yy, z) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; mask[ii] = 1; zone[ii] = z; }
     function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
-    var wx0 = Math.round(150 + R() * 60), wx1 = Math.round(WW - 150 - R() * 60);
+    var wx0 = Math.round(220 + R() * 80), wx1 = Math.round(WW - 220 - R() * 80);
     /* gaps where the Wall has tumbled down */
-    var gaps = [], ng = 1 + (R() < 0.6 ? 1 : 0);
-    for (k = 0; k < ng; k++) { var gx = Math.round(wx0 + 80 + R() * (wx1 - wx0 - 160)); gaps.push([gx, gx + 26 + Math.floor(R() * 16)]); }
+    var gaps = [], ng = 2 + (R() < 0.5 ? 1 : 0);
+    for (k = 0; k < ng; k++) { var gx = Math.round(wx0 + 100 + R() * (wx1 - wx0 - 200)); gaps.push([gx, gx + 30 + Math.floor(R() * 20)]); }
     function inGap(xx) { for (var q = 0; q < gaps.length; q++) if (xx >= gaps[q][0] && xx < gaps[q][1]) return true; return false; }
     for (x = wx0; x <= wx1; x++) {
       if (inGap(x)) { if (hash(x, 3) < 0.35) for (y = gAt(x) - 4; y < gAt(x) + 2; y++) put(x, y, 1); continue; }
-      var top = gAt(x) - 18 - (((x - wx0) % 10) < 4 ? 4 : 0);
+      var top = gAt(x) - 30 - (((x - wx0) % 12) < 5 ? 5 : 0);
       for (y = top; y < gAt(x) + 3; y++) put(x, y, 1);
     }
     /* a milecastle with a gate arch you can walk through */
-    var mc = Math.round(wx0 + (wx1 - wx0) * (0.35 + R() * 0.3)), mw = 56, mg = 0;
+    var mc = Math.round(wx0 + (wx1 - wx0) * (0.35 + R() * 0.3)), mw = 92, mg = 0;
     for (x = mc - mw / 2; x < mc + mw / 2; x++) mg = Math.max(mg, gAt(x));
     for (x = mc - mw / 2; x < mc + mw / 2; x++) {
-      var mtop = mg - 40 - ((((x - (mc - mw / 2)) % 10) < 4) ? 4 : 0);
+      var mtop = mg - 66 - ((((x - (mc - mw / 2)) % 12) < 5) ? 5 : 0);
       for (y = mtop; y < gAt(x) + 3; y++) put(x, y, 1);
     }
-    for (x = mc - 9; x <= mc + 9; x++) for (y = mg - 22; y < mg + 1; y++) {
-      var ax = (x - mc) / 9.5, ay = (mg - 13 - y) / 9;
-      if (y > mg - 13 || ax * ax + ay * ay <= 1) { var ii2 = y * WW + x; if (zone[ii2] === 1) mask[ii2] = 0; }
+    for (x = mc - 11; x <= mc + 11; x++) for (y = mg - 28; y < mg + 1; y++) {
+      var ax = (x - mc) / 11.5, ay = (mg - 17 - y) / 11;
+      if (y > mg - 17 || ax * ax + ay * ay <= 1) { var ii2 = y * WW + x; if (zone[ii2] === 1) mask[ii2] = 0; }
     }
+    /* a room inside the milecastle above the gate */
+    for (x = mc - 34; x <= mc + 34; x++) for (y = mg - 56; y < mg - 36; y++) { var ii3 = y * WW + x; if (zone[ii3] === 1) mask[ii3] = 0; }
     /* two turrets with a room inside and a tiled roof */
     var tx = [wx0 + Math.round((mc - wx0) * 0.5), mc + Math.round((wx1 - mc) * 0.5)];
     tx.forEach(function (cx) {
       if (inGap(cx) || inGap(cx - 12) || inGap(cx + 12)) return;
-      var tg = Math.max(gAt(cx - 11), gAt(cx + 11)), ttop = tg - 42;
-      for (x = cx - 11; x <= cx + 11; x++) for (y = ttop; y < gAt(x) + 3; y++) put(x, y, 1);
-      for (x = cx - 7; x <= cx + 7; x++) for (y = ttop + 8; y < ttop + 30; y++) { var ri = y * WW + x; mask[ri] = 0; }
-      for (y = ttop + 12; y < ttop + 30; y++) for (x = cx + 7; x <= cx + 11; x++) mask[y * WW + x] = 0;
-      for (k = 0; k < 9; k++) for (x = cx - 13 + k; x <= cx + 13 - k; x++) put(x, ttop - 1 - k, 3);
+      var tg = Math.max(gAt(cx - 16), gAt(cx + 16)), ttop = tg - 70;
+      for (x = cx - 16; x <= cx + 16; x++) for (y = ttop; y < gAt(x) + 3; y++) put(x, y, 1);
+      for (x = cx - 11; x <= cx + 11; x++) for (y = ttop + 10; y < ttop + 32; y++) { var ri = y * WW + x; mask[ri] = 0; }
+      for (y = ttop + 13; y < ttop + 32; y++) for (x = cx + 11; x <= cx + 16; x++) mask[y * WW + x] = 0;
+      for (x = cx - 11; x <= cx + 11; x++) for (y = ttop + 40; y < ttop + 60; y++) { var ri2 = y * WW + x; mask[ri2] = 0; }
+      for (k = 0; k < 14; k++) for (x = cx - 19 + k; x <= cx + 19 - k; x++) put(x, ttop - 1 - k, 3);
     });
     /* the ditch dug in front of the Wall */
-    var dx = R() < 0.5 ? wx0 + 30 + R() * 80 : wx1 - 30 - R() * 80;
-    blob(dx, gAt(dx) + 2, 22, 9, 0);
+    var dx = R() < 0.5 ? wx0 + 40 + R() * 120 : wx1 - 40 - R() * 120;
+    blob(dx, gAt(dx) + 3, 32, 13, 0);
     /* hollows underground */
-    for (i = 0; i < 2; i++) { var hx = 220 + R() * (WW - 440); blob(hx, gAt(hx) + 52 + R() * 26, 22 + R() * 12, 8 + R() * 4, 0); }
+    for (i = 0; i < 4; i++) { var hx = 220 + R() * (WW - 440); blob(hx, gAt(hx) + 70 + R() * 50, 26 + R() * 16, 9 + R() * 5, 0); }
     paintWall();
   }
   function paintWall() {
     var P = MAP.pal, x, y, i, look = LOOK;
     img = tctx.createImageData(WW, WH); data = img.data;
     for (x = 0; x < WW; x++) {
-      var d = 0, pz = -1;
+      var d = 0, pz = -1, gap = 0, dPrev = 0;
       for (y = 0; y < WH; y++) {
         i = y * WW + x;
-        if (!mask[i]) { d = 0; pz = -1; continue; }
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; pz = -1; gap++; continue; }
+        if (gap > 0 && gap < 40 && dPrev > 12 && zone[i] === 0) d = dPrev + gap;
+        gap = 0;
         var z = zone[i], nz = hash(x, y), col;
         if (z === 0 && pz > 0) d = 5;
         pz = z;
@@ -588,15 +600,15 @@
     var R = rng(seed), x, y, k;
     mask.fill(0); burnt.fill(0); zone.fill(0); castleFlags = []; castleWheels = [];
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
-    var mx = Math.round(WW * (0.42 + R() * 0.16)), mr = 175;
+    var mx = Math.round(WW * (0.42 + R() * 0.16)), mr = 330;
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 302 - 16 * Math.sin(t * 6.283 * 1.3 + p1) - 9 * Math.sin(t * 6.283 * 3.1 + p2) - 3 * Math.sin(t * 6.283 * 8.3 + p3);
+      var h = K * (302 - 16 * Math.sin(t * 6.283 * 1.3 + p1) - 9 * Math.sin(t * 6.283 * 3.1 + p2) - 3 * Math.sin(t * 6.283 * 8.3 + p3));
       var dm = Math.abs(x - mx);
-      if (dm < mr) { var cb = Math.cos(dm / mr * Math.PI / 2); h -= 44 * cb * cb; }
+      if (dm < mr) { var cb = Math.cos(dm / mr * Math.PI / 2); h -= 90 * cb * cb; }
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
@@ -609,54 +621,61 @@
         if (ay > g - ht + hw || ux * ux + uy * uy <= 1) hole(ax, ay);
       }
     }
-    var half = 108, wl = mx - half, wr = mx + half;
-    var wallTop = Math.min(gAt(wl), gAt(wr), gAt(mx), gAt(mx - 60), gAt(mx + 60)) - 30;
+    var half = 220, wl = mx - half, wr = mx + half;
+    var wallTop = Math.min(gAt(wl), gAt(wr), gAt(mx), gAt(mx - 110), gAt(mx + 110)) - 52;
     /* curtain walls between the towers and the keep, with battlements to stand on */
-    for (x = wl + 14; x <= wr - 14; x++) {
-      if (Math.abs(x - mx) <= 22) continue;
-      var cren = ((x - wl) % 10) < 4 ? 4 : 0;
+    for (x = wl + 20; x <= wr - 20; x++) {
+      if (Math.abs(x - mx) <= 36) continue;
+      var cren = ((x - wl) % 12) < 5 ? 5 : 0;
       for (y = wallTop - cren; y < gAt(x) + 3; y++) put(x, y, 1);
     }
     /* an arch through each wall, so you can walk from the courtyard to the outside */
-    [Math.round((wl + 14 + mx - 22) / 2), Math.round((mx + 22 + wr - 14) / 2)].forEach(function (ax) { arch(ax, gAt(ax), 8, 21); });
+    [Math.round((wl + 20 + mx - 36) / 2), Math.round((mx + 36 + wr - 20) / 2)].forEach(function (ax) {
+      arch(ax, gAt(ax), 10, 26);
+      /* a gallery room inside the thick wall, above the arch */
+      for (x = ax - 40; x <= ax + 40; x++) for (y = wallTop + 8; y < wallTop + 26; y++) hole(x, y);
+    });
     /* the keep: a gate passage at the bottom, a hall with doors onto the walls, a room above, battlements on top */
-    var kTop = wallTop - 46;
-    for (x = mx - 22; x <= mx + 22; x++) {
-      var kc = ((x - mx + 22) % 9) < 4 ? 4 : 0;
+    var kTop = wallTop - 96;
+    for (x = mx - 36; x <= mx + 36; x++) {
+      var kc = ((x - mx + 36) % 11) < 5 ? 5 : 0;
       for (y = kTop - kc; y < gAt(x) + 3; y++) put(x, y, 1);
     }
-    arch(mx, gAt(mx), 9, 23);
+    arch(mx, gAt(mx), 11, 28);
     var kd = R() < 0.5 ? -1 : 1;
-    for (x = mx - 15; x <= mx + 15; x++) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
-    for (x = mx + kd * 15; Math.abs(x - mx) <= 22; x += kd) for (y = wallTop - 18; y < wallTop; y++) hole(x, y);
-    for (x = mx - 13; x <= mx + 13; x++) for (y = wallTop - 40; y < wallTop - 27; y++) hole(x, y);
-    for (k = -1; k <= 1; k += 2) for (y = wallTop - 38; y < wallTop - 31; y++) { hole(mx + k * 18, y); hole(mx + k * 19, y); }
+    /* the keep: a hall level with the walls, a great chamber above, a lookout room near the top */
+    for (x = mx - 27; x <= mx + 27; x++) for (y = wallTop - 22; y < wallTop; y++) hole(x, y);
+    for (x = mx + kd * 27; Math.abs(x - mx) <= 36; x += kd) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
+    for (x = mx - 27; x <= mx + 27; x++) for (y = wallTop - 54; y < wallTop - 30; y++) hole(x, y);
+    for (x = mx - 20; x <= mx + 20; x++) for (y = wallTop - 84; y < wallTop - 64; y++) hole(x, y);
+    for (k = -1; k <= 1; k += 2) for (y = wallTop - 48; y < wallTop - 38; y++) for (x = 28; x <= 36; x++) hole(mx + k * x, y);
     castleFlags.push([mx, kTop - 5]);
     /* two round towers, two rooms each, with tall pointed roofs */
     [wl, wr].forEach(function (cx, side) {
-      var tTop = wallTop - 56, inner = side === 0 ? 1 : -1;
-      for (x = cx - 14; x <= cx + 14; x++) for (y = tTop; y < gAt(x) + 3; y++) put(x, y, 1);
-      for (x = cx - 9; x <= cx + 9; x++) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
-      for (x = cx + inner * 9; inner > 0 ? x <= cx + 14 : x >= cx - 14; x += inner) for (y = wallTop - 19; y < wallTop; y++) hole(x, y);
-      for (x = cx - 9; x <= cx + 9; x++) for (y = tTop + 8; y < tTop + 24; y++) hole(x, y);
-      for (y = tTop + 12; y < tTop + 19; y++) { hole(cx - inner * 12, y); hole(cx - inner * 13, y); }
-      for (k = 0; k <= 22; k++) { var hw = Math.round(16 * (1 - k / 22)); for (x = cx - hw; x <= cx + hw; x++) put(x, tTop - 1 - k, 3); }
-      castleFlags.push([cx, tTop - 24]);
+      var tTop = wallTop - 110, inner = side === 0 ? 1 : -1;
+      for (x = cx - 22; x <= cx + 22; x++) for (y = tTop; y < gAt(x) + 3; y++) put(x, y, 1);
+      for (x = cx - 15; x <= cx + 15; x++) for (y = wallTop - 22; y < wallTop; y++) hole(x, y);
+      for (x = cx + inner * 15; inner > 0 ? x <= cx + 22 : x >= cx - 22; x += inner) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
+      for (x = cx - 15; x <= cx + 15; x++) { for (y = tTop + 10; y < tTop + 30; y++) hole(x, y); for (y = tTop + 44; y < tTop + 66; y++) hole(x, y); }
+      for (y = tTop + 15; y < tTop + 24; y++) for (x = 16; x <= 22; x++) hole(cx - inner * x, y);
+      for (k = 0; k <= 36; k++) { var hw = Math.round(25 * (1 - k / 36)); for (x = cx - hw; x <= cx + hw; x++) put(x, tTop - 1 - k, 3); }
+      castleFlags.push([cx, tTop - 38]);
     });
     /* ditches outside the towers */
-    [wl - 52, wr + 52].forEach(function (dx) { blob(dx, gAt(dx) + 3, 22, 9, 0); });
-    /* a wooden siege tower rolled up to one side: three floors and a drawbridge */
-    var sd = R() < 0.5 ? -1 : 1, sx = clamp(mx + sd * (half + 120 + Math.round(R() * 40)), 170, WW - 170), sg = Math.max(gAt(sx - 13), gAt(sx + 13)) + 2;
-    for (y = sg - 62; y < sg + 3; y++) for (x = sx - 13 + (y < sg - 50 ? 1 : 0); x <= sx + 13 - (y < sg - 50 ? 1 : 0); x++) put(x, y, 4);
-    for (x = sx - 9; x <= sx + 9; x++) for (y = sg - 56; y < sg - 38; y++) hole(x, y);
+    [wl - 80, wr + 80].forEach(function (dx) { blob(dx, gAt(dx) + 4, 36, 14, 0); });
+    /* a wooden siege tower rolled up to one side: two rooms and a drawbridge */
+    var sd = R() < 0.5 ? -1 : 1, sx = clamp(mx + sd * (half + 190 + Math.round(R() * 60)), 200, WW - 200), sg = Math.max(gAt(sx - 20), gAt(sx + 20)) + 2;
+    for (y = sg - 104; y < sg + 3; y++) for (x = sx - 20 + (y < sg - 90 ? 1 : 0); x <= sx + 20 - (y < sg - 90 ? 1 : 0); x++) put(x, y, 4);
     var db = -sd;
-    for (x = sx + db * 9; Math.abs(x - sx) <= 13; x += db) for (y = sg - 56; y < sg - 38; y++) hole(x, y);
-    for (k = 0; k < 18; k++) { var bxx = sx + db * (14 + k); for (y = sg - 62; y < sg - 59; y++) put(bxx, y, 4); }
-    castleWheels = [[sx - 8, sg], [sx + 8, sg]];
+    for (x = sx - 14; x <= sx + 14; x++) { for (y = sg - 96; y < sg - 76; y++) hole(x, y); for (y = sg - 56; y < sg - 36; y++) hole(x, y); }
+    for (x = sx + db * 14; Math.abs(x - sx) <= 20; x += db) for (y = sg - 96; y < sg - 76; y++) hole(x, y);
+    for (x = sx - db * 14; Math.abs(x - sx) <= 20; x -= db) for (y = sg - 56; y < sg - 36; y++) hole(x, y);
+    for (k = 0; k < 30; k++) { var bxx = sx + db * (21 + k); for (y = sg - 104; y < sg - 100; y++) put(bxx, y, 4); }
+    castleWheels = [[sx - 12, sg], [sx + 12, sg]];
     /* a sapper's tunnel dug under one of the towers */
-    var tx0 = sd > 0 ? wl - 60 : wr - 10, tw = 70, tdep = gAt(tx0 + 35) + 34;
-    for (x = tx0; x < tx0 + tw; x++) for (y = tdep; y < tdep + 15; y++) if (x > 0 && x < WW && zone[y * WW + x] === 0) mask[y * WW + x] = 0;
-    for (k = 0; k < 2; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - mx) < 140) continue; blob(hx, gAt(hx) + 54 + R() * 24, 20 + R() * 10, 8 + R() * 4, 0); }
+    var tx0 = sd > 0 ? wl - 110 : wr - 20, tw = 130, tdep = gAt(tx0 + 65) + 50;
+    for (x = tx0; x < tx0 + tw; x++) for (y = tdep; y < tdep + 18; y++) if (x > 0 && x < WW && zone[y * WW + x] === 0) mask[y * WW + x] = 0;
+    for (k = 0; k < 4; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - mx) < 260) continue; blob(hx, gAt(hx) + 70 + R() * 50, 26 + R() * 14, 9 + R() * 5, 0); }
     paintCastle();
   }
   function paintCastle() {
@@ -709,8 +728,8 @@
       }
     }
     castleWheels.forEach(function (w) {
-      for (var a = 0; a < 20; a++) { var an = a / 20 * 6.283; deco(w[0] + Math.cos(an) * 5, w[1] - 4 + Math.sin(an) * 5, wood ? P.woodD : [72, 48, 28]); }
-      for (var b = -4; b <= 4; b++) { deco(w[0] + b, w[1] - 4, [72, 48, 28]); deco(w[0], w[1] - 4 + b, [72, 48, 28]); }
+      for (var a = 0; a < 30; a++) { var an = a / 30 * 6.283; deco(w[0] + Math.cos(an) * 7, w[1] - 6 + Math.sin(an) * 7, wood ? P.woodD : [72, 48, 28]); }
+      for (var b = -6; b <= 6; b++) { deco(w[0] + b, w[1] - 6, [72, 48, 28]); deco(w[0], w[1] - 6 + b, [72, 48, 28]); }
     });
     /* pennants on the tower tops: decoration only */
     castleFlags.forEach(function (f) {
@@ -731,15 +750,15 @@
     var R = rng(seed), x, y, k;
     mask.fill(0); burnt.fill(0); zone.fill(0); palmAt = [];
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
-    var chan = Math.round(WW * (0.44 + R() * 0.12)), cw = 130;
+    var chan = Math.round(WW * (0.44 + R() * 0.12)), cw = 250;
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 318 - 24 * Math.sin(t * 6.283 * 1.2 + p1) - 10 * Math.sin(t * 6.283 * 3.4 + p2) - 3 * Math.sin(t * 6.283 * 9.1 + p3);
+      var h = K * (318 - 24 * Math.sin(t * 6.283 * 1.2 + p1) - 10 * Math.sin(t * 6.283 * 3.4 + p2) - 3 * Math.sin(t * 6.283 * 9.1 + p3));
       var dc = Math.abs(x - chan);
-      if (dc < cw) { var cb = Math.cos(dc / cw * Math.PI / 2); h += 165 * cb * cb; }
+      if (dc < cw) { var cb = Math.cos(dc / cw * Math.PI / 2); h += 300 * cb * cb; }
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
@@ -747,40 +766,50 @@
     function hole(xx, yy) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; if (zone[ii] === 1 || zone[ii] === 4) mask[ii] = 0; }
     function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
     /* the fort on one island: thick walls, a room inside with doors, gun ports facing the sea */
-    var fs = R() < 0.5 ? -1 : 1, fx = clamp(chan + fs * (250 + Math.round(R() * 70)), 150, WW - 150), fb = 0;
-    for (x = fx - 48; x <= fx + 48; x++) fb = Math.max(fb, gAt(x));
-    var fTop = fb - 42;
-    for (x = fx - 48; x <= fx + 48; x++) {
-      var cr = ((x - fx + 48) % 10) < 4 ? 4 : 0;
+    var fs = R() < 0.5 ? -1 : 1, fx = clamp(chan + fs * (430 + Math.round(R() * 100)), 220, WW - 220), fb = 0;
+    for (x = fx - 80; x <= fx + 80; x++) fb = Math.max(fb, gAt(x));
+    var fTop = fb - 76;
+    for (x = fx - 80; x <= fx + 80; x++) {
+      var cr = ((x - fx + 80) % 12) < 5 ? 5 : 0;
       for (y = fTop - cr; y < gAt(x) + 3; y++) put(x, y, 1);
     }
-    for (x = fx - 36; x <= fx + 36; x++) for (y = fTop + 10; y < fb - 8; y++) hole(x, y);
-    for (x = fx + fs * 36; Math.abs(x - fx) <= 48; x += fs) for (y = fb - 27; y < fb - 8; y++) hole(x, y);
-    for (k = 0; k < 3; k++) { var gp = fx - fs * 48 + fs * 0; for (y = fTop + 4; y < fTop + 7; y++) { hole(fx - 30 + k * 30, y); hole(fx - 29 + k * 30, y); hole(fx - 28 + k * 30, y); } }
+    /* two floors inside the fort, a door on the land side and gun ports facing the sea */
+    for (x = fx - 66; x <= fx + 66; x++) { for (y = fTop + 10; y < fTop + 32; y++) hole(x, y); for (y = fb - 30; y < fb - 8; y++) hole(x, y); }
+    for (x = fx + fs * 66; Math.abs(x - fx) <= 80; x += fs) for (y = fb - 27; y < fb - 8; y++) hole(x, y);
+    for (x = fx + fs * 50; Math.abs(x - fx) <= 66 && Math.abs(x - fx) >= 44; x += fs) for (y = fTop + 32; y < fb - 30; y++) hole(x, y);
+    /* gun ports through the sea wall, one on each floor */
+    [fTop + 18, fb - 22].forEach(function (gy0) { for (y = gy0; y < gy0 + 5; y++) for (x = 66; x <= 80; x++) hole(fx - fs * x, y); });
     castleFlags = [[fx, fTop - 6]];
     /* the wreck in the channel: a tilted hull with a cabin, a broken mast and a yard to stand on */
-    var deck = WATER - 22, tilt = (R() < 0.5 ? -1 : 1) * 5;
-    for (x = chan - 62; x <= chan + 62; x++) {
-      var u = (x - chan) / 62, dy0 = Math.round(deck + u * tilt), bot = Math.round(dy0 + 6 + 30 * Math.sqrt(Math.max(0, 1 - u * u)));
+    /* a whole wrecked galleon: a tilted hull, a raised stern castle, two decks of cabins and two broken masts */
+    var deck = WATER - 34, tilt = (R() < 0.5 ? -1 : 1) * 8, sh = R() < 0.5 ? -1 : 1, HL = 118;
+    function dk(xx) { return Math.round(deck + (xx - chan) / HL * tilt); }
+    for (x = chan - HL; x <= chan + HL; x++) {
+      var u = (x - chan) / HL, dy0 = dk(x), bot = Math.round(dy0 + 8 + 52 * Math.sqrt(Math.max(0, 1 - u * u)));
       for (y = dy0; y <= bot; y++) put(x, y, 4);
-      if (Math.abs(u) > 0.86) for (y = dy0 - 6; y < dy0; y++) put(x, y, 4);
+      if (Math.abs(u) > 0.9) for (y = dy0 - 8; y < dy0; y++) put(x, y, 4);
+      if (u * sh > 0.45) for (y = dy0 - 30; y < dy0; y++) put(x, y, 4);
     }
-    for (x = chan - 30; x <= chan + 22; x++) for (y = Math.round(deck + (x - chan) / 62 * tilt) + 4; y < deck + 20 + Math.round((x - chan) / 62 * tilt); y++) hole(x, y);
-    for (x = chan - 38; x < chan - 30; x++) for (y = deck + 8; y < deck + 18; y++) hole(x, y);
-    var mstX = chan + 6;
-    for (y = deck - 58; y < deck + 2; y++) { put(mstX, y, 4); put(mstX + 1, y, 4); }
-    for (x = mstX - 14; x <= mstX + 20; x++) { put(x, deck - 40, 4); put(x, deck - 39, 4); }
+    for (x = chan - HL + 26; x <= chan + HL - 26; x++) { for (y = dk(x) + 5; y < dk(x) + 24; y++) hole(x, y); for (y = dk(x) + 30; y < dk(x) + 46; y++) hole(x, y); }
+    for (x = chan + sh * Math.round(HL * 0.55); Math.abs(x - chan) <= HL * 0.88; x += sh) for (y = dk(x) - 24; y < dk(x) - 4; y++) hole(x, y);
+    for (x = chan - sh * (HL - 26); Math.abs(x - chan) <= HL - 14 && Math.abs(x - chan) >= HL - 34; x -= sh) for (y = dk(x) + 9; y < dk(x) + 21; y++) hole(x, y);
+    [chan - sh * 40, chan + sh * 10].forEach(function (mstX, mi) {
+      var mh = mi ? 140 : 96;
+      for (y = dk(mstX) - mh; y < dk(mstX) + 2; y++) { put(mstX, y, 4); put(mstX + 1, y, 4); put(mstX + 2, y, 4); }
+      var yd = dk(mstX) - mh + 24;
+      for (x = mstX - 26; x <= mstX + 32; x++) { put(x, yd, 4); put(x, yd + 1, 4); }
+    });
     /* a wooden pier from the other island out over the water */
-    var ps = -fs, sx = chan, pierY = WATER - 28;
+    var ps = -fs, sx = chan, pierY = WATER - 36;
     for (k = 0; k < 500; k++) { sx = chan + ps * k; if (sx < 1 || sx > WW - 2) break; if (tops[sx] <= pierY + 3) break; }
-    for (k = -4; k < 66; k++) { var qx = sx - ps * k; if (qx < 0 || qx >= WW) continue; for (y = pierY; y < pierY + 3; y++) if (!mask[y * WW + qx]) put(qx, y, 4); }
-    for (k = 10; k < 66; k += 18) { var qx2 = sx - ps * k; if (qx2 < 0 || qx2 >= WW - 1) continue; for (y = pierY + 3; y < WH; y++) { if (mask[y * WW + qx2]) break; put(qx2, y, 4); put(qx2 + 1, y, 4); } }
+    for (k = -4; k < 110; k++) { var qx = sx - ps * k; if (qx < 0 || qx >= WW) continue; for (y = pierY; y < pierY + 3; y++) if (!mask[y * WW + qx]) put(qx, y, 4); }
+    for (k = 10; k < 110; k += 20) { var qx2 = sx - ps * k; if (qx2 < 0 || qx2 >= WW - 1) continue; for (y = pierY + 3; y < WH; y++) { if (mask[y * WW + qx2]) break; put(qx2, y, 4); put(qx2 + 1, y, 4); } }
     /* a smugglers' cave in the fort's island */
-    var cvx = clamp(fx - fs * 90, 160, WW - 160);
-    blob(cvx, gAt(cvx) + 44, 26, 10, 0);
-    for (k = 0; k < 2; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - chan) < 150) continue; blob(hx, gAt(hx) + 52 + R() * 20, 18 + R() * 10, 7 + R() * 3, 0); }
+    var cvx = clamp(fx - fs * 170, 200, WW - 200);
+    blob(cvx, gAt(cvx) + 60, 40, 14, 0);
+    for (k = 0; k < 4; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - chan) < 290) continue; blob(hx, gAt(hx) + 70 + R() * 40, 22 + R() * 14, 8 + R() * 4, 0); }
     /* palm trees, drawn later as decoration */
-    for (x = 80; x < WW - 80; x += 46 + Math.round(R() * 60)) if (Math.abs(x - fx) > 60 && Math.abs(x - chan) > 140 && gAt(x) < WATER - 26) palmAt.push(x);
+    for (x = 80; x < WW - 80; x += 46 + Math.round(R() * 60)) if (Math.abs(x - fx) > 100 && Math.abs(x - chan) > 260 && gAt(x) < WATER - 26) palmAt.push(x);
     paintHarbour();
   }
   function paintHarbour() {
@@ -860,15 +889,15 @@
     var R = rng(seed), x, y, k, j;
     mask.fill(0); burnt.fill(0); zone.fill(0); castleFlags = []; palmAt = [];
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283, rough = LOOK === 'rough';
-    var zx = Math.round(WW * (0.42 + R() * 0.16)), rs = R() < 0.5 ? -1 : 1, rv = clamp(zx + rs * (260 + Math.round(R() * 60)), 150, WW - 150), rw = 62;
+    var zx = Math.round(WW * (0.42 + R() * 0.16)), rs = R() < 0.5 ? -1 : 1, rv = clamp(zx + rs * (480 + Math.round(R() * 100)), 200, WW - 200), rw = 100;
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 314 - 9 * Math.sin(t * 6.283 * 1.1 + p1) - 4 * Math.sin(t * 6.283 * 3.3 + p2) - 2 * Math.sin(t * 6.283 * 8.7 + p3);
+      var h = K * (314 - 9 * Math.sin(t * 6.283 * 1.1 + p1) - 4 * Math.sin(t * 6.283 * 3.3 + p2) - 2 * Math.sin(t * 6.283 * 8.7 + p3));
       var dr = Math.abs(x - rv);
-      if (dr < rw) { var cb = Math.cos(dr / rw * Math.PI / 2); h += 150 * cb * cb; }
+      if (dr < rw) { var cb = Math.cos(dr / rw * Math.PI / 2); h += 260 * cb * cb; }
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
@@ -876,8 +905,8 @@
     function hole(xx, yy) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; if (zone[ii]) mask[ii] = 0; }
     function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
     /* the ziggurat: tiers of mud brick, staircases up one face, a storeroom inside */
-    var widths = [228, 158, 98], th = [24, 22, 20], tiers = rough ? 1 : 3, base = 0, sd = R() < 0.5 ? -1 : 1;
-    for (x = zx - 114; x <= zx + 114; x++) base = Math.max(base, gAt(x));
+    var widths = [480, 336, 208], th = [46, 42, 38], tiers = rough ? 1 : 3, base = 0, sd = R() < 0.5 ? -1 : 1;
+    for (x = zx - 240; x <= zx + 240; x++) base = Math.max(base, gAt(x));
     base += 2;
     var top = base, tierTop = [];
     for (k = 0; k < tiers; k++) {
@@ -893,26 +922,28 @@
         }
       }
     }
-    for (x = zx - 26; x <= zx + 26; x++) for (y = base - 18; y < base - 6; y++) hole(x, y);
+    /* storerooms inside the first and second tiers */
+    for (x = zx - 70; x <= zx + 70; x++) for (y = base - 32; y < base - 12; y++) hole(x, y);
+    if (tiers > 1) for (x = zx - 50; x <= zx + 50; x++) for (y = tierTop[0] - 30; y < tierTop[0] - 10; y++) hole(x, y);
     if (!rough) {
-      /* the White Temple on top, with a room and a doorway */
-      var tw = 30, tTop = top - 22;
+      /* the White Temple on top, with a hall and a doorway */
+      var tw = 54, tTop = top - 38;
       for (x = zx - tw; x <= zx + tw; x++) for (y = tTop; y < top; y++) put(x, y, 2);
-      for (x = zx - tw + 1; x <= zx + tw - 1; x += 6) for (y = tTop - 2; y < tTop; y++) { put(x, y, 2); put(x + 1, y, 2); put(x + 2, y, 2); }
-      for (x = zx - tw + 8; x <= zx + tw - 8; x++) for (y = tTop + 6; y < top - 1; y++) hole(x, y);
-      for (x = zx - sd * (tw - 8); Math.abs(x - zx) <= tw; x -= sd) for (y = top - 13; y < top - 1; y++) hole(x, y);
+      for (x = zx - tw + 1; x <= zx + tw - 1; x += 7) for (y = tTop - 3; y < tTop; y++) { put(x, y, 2); put(x + 1, y, 2); put(x + 2, y, 2); put(x + 3, y, 2); }
+      for (x = zx - tw + 10; x <= zx + tw - 10; x++) for (y = tTop + 8; y < top - 1; y++) hole(x, y);
+      for (x = zx - sd * (tw - 10); Math.abs(x - zx) <= tw; x -= sd) for (y = top - 16; y < top - 1; y++) hole(x, y);
       castleFlags.push([zx, tTop - 3]);
     }
     /* houses: mud brick boxes with a room and a door, or reed huts if history went wild */
     var spots = [];
-    for (k = 0; k < 14 && spots.length < 4; k++) {
-      var hx = Math.round(130 + R() * (WW - 260));
-      if (Math.abs(hx - zx) < 150 || Math.abs(hx - rv) < rw + 30) continue;
+    for (k = 0; k < 24 && spots.length < 7; k++) {
+      var hx = Math.round(150 + R() * (WW - 300));
+      if (Math.abs(hx - zx) < 300 || Math.abs(hx - rv) < rw + 40) continue;
       var clash = false;
-      for (j = 0; j < spots.length; j++) if (Math.abs(spots[j] - hx) < 70) clash = true;
+      for (j = 0; j < spots.length; j++) if (Math.abs(spots[j] - hx) < 80) clash = true;
       if (clash) continue;
       spots.push(hx);
-      var hwid = 15 + Math.round(R() * 6), hh = 20 + Math.round(R() * 5), hg = Math.max(gAt(hx - hwid), gAt(hx + hwid)) + 2, door = R() < 0.5 ? -1 : 1;
+      var hwid = 19 + Math.round(R() * 8), hh = 26 + Math.round(R() * 10), hg = Math.max(gAt(hx - hwid), gAt(hx + hwid)) + 2, door = R() < 0.5 ? -1 : 1;
       if (rough) {
         for (x = hx - hwid; x <= hx + hwid; x++) { var u = (x - hx) / hwid, ht = Math.round(hh * Math.sqrt(Math.max(0, 1 - u * u))); for (y = hg - ht; y < gAt(x) + 3; y++) put(x, y, 4); }
         for (x = hx - 4; x <= hx + 4; x++) for (y = hg - 13; y < hg; y++) hole(x, y);
@@ -926,14 +957,14 @@
     /* reed huts by the river */
     for (k = -1; k <= 1; k += 2) {
       var rx = clamp(rv + k * (rw + 30 + Math.round(R() * 20)), 40, WW - 40), rg = gAt(rx) + 2;
-      if (Math.abs(rx - zx) < 130 || rg > WATER - 20) continue;
+      if (Math.abs(rx - zx) < 260 || rg > WATER - 20) continue;
       for (x = rx - 12; x <= rx + 12; x++) { var u2 = (x - rx) / 12, ht2 = Math.round(18 * Math.sqrt(Math.max(0, 1 - u2 * u2))); for (y = rg - ht2; y < gAt(x) + 3; y++) put(x, y, 4); }
       for (x = rx - 4; x <= rx + 4; x++) for (y = rg - 12; y < rg; y++) hole(x, y);
     }
     /* irrigation ditches and a couple of buried hollows */
-    for (k = 0; k < 3; k++) { var ix = 120 + R() * (WW - 240); if (Math.abs(ix - zx) < 130 || Math.abs(ix - rv) < 100) continue; blob(ix, gAt(ix) + 2, 9, 4, 0); }
-    for (k = 0; k < 2; k++) { var bx = 200 + R() * (WW - 400); if (Math.abs(bx - zx) < 130) continue; blob(bx, gAt(bx) + 50 + R() * 22, 20 + R() * 10, 7 + R() * 3, 0); }
-    for (x = 70; x < WW - 70; x += 40 + Math.round(R() * 50)) if (Math.abs(x - zx) > 125 && Math.abs(x - rv) > rw && gAt(x) < WATER - 26) palmAt.push(x);
+    for (k = 0; k < 5; k++) { var ix = 120 + R() * (WW - 240); if (Math.abs(ix - zx) < 260 || Math.abs(ix - rv) < 140) continue; blob(ix, gAt(ix) + 2, 11, 5, 0); }
+    for (k = 0; k < 4; k++) { var bx = 200 + R() * (WW - 400); if (Math.abs(bx - zx) < 260) continue; blob(bx, gAt(bx) + 70 + R() * 40, 24 + R() * 14, 8 + R() * 4, 0); }
+    for (x = 70; x < WW - 70; x += 40 + Math.round(R() * 50)) if (Math.abs(x - zx) > 250 && Math.abs(x - rv) > rw && gAt(x) < WATER - 26) palmAt.push(x);
     paintUruk();
   }
   function paintUruk() {
@@ -1057,29 +1088,50 @@
     if (MAP.style === 'harbour') { genHarbour(seed); return; }
     var R = rng(seed), x, y, i;
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
-    var a1 = 28 + R() * 22, a2 = 14 + R() * 12, a3 = 5 + R() * 5;
+    var a1 = K * (28 + R() * 22), a2 = K * (14 + R() * 12), a3 = K * (5 + R() * 5);
     var tops = new Float32Array(WW);
     for (x = 0; x < WW; x++) {
       var t = x / WW;
-      var h = 262 - a1 * Math.sin(t * 6.283 * 1.2 + p1) - a2 * Math.sin(t * 6.283 * 3.1 + p2) - a3 * Math.sin(t * 6.283 * 7.3 + p3);
+      var h = K * 262 - a1 * Math.sin(t * 6.283 * 1.2 + p1) - a2 * Math.sin(t * 6.283 * 3.1 + p2) - a3 * Math.sin(t * 6.283 * 7.3 + p3);
       var edge = Math.min(x, WW - 1 - x);
-      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      if (edge < EDGE) h += (EDGE - edge) * (EDGE - edge) / (85 * K);
       tops[x] = h;
     }
     mask.fill(0); burnt.fill(0);
     for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
-    var n = 3 + Math.floor(R() * 2);
+    var n = 5 + Math.floor(R() * 2);
     for (i = 0; i < n; i++) {
       var cx = 220 + R() * (WW - 440);
-      blob(cx, tops[Math.floor(cx)] - 55 - R() * 45, 26 + R() * 26, 7 + R() * 5, 1);
+      blob(cx, tops[Math.floor(cx)] - 80 - R() * 100, 32 + R() * 36, 9 + R() * 6, 1);
     }
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 5; i++) {
       var cx2 = 200 + R() * (WW - 400);
-      blob(cx2, tops[Math.floor(cx2)] + 48 + R() * 30, 22 + R() * 18, 9 + R() * 6, 0);
+      blob(cx2, tops[Math.floor(cx2)] + 70 + R() * 60, 28 + R() * 22, 10 + R() * 7, 0);
+    }
+    /* a huge natural stone arch you can walk under and stand on top of */
+    var ax0 = Math.round(WW * (0.3 + R() * 0.4)), ag = tops[ax0], arR = 120 + R() * 30, arT = 26;
+    for (y = Math.floor(ag - arR - 4); y < ag + 10; y++) for (x = Math.floor(ax0 - arR - 4); x <= ax0 + arR + 4; x++) {
+      if (x < 0 || x >= WW || y < 0) continue;
+      var adx = (x - ax0) / arR, ady = (ag + 6 - y) / (arR * 0.85), dd = Math.sqrt(adx * adx + ady * ady), wob = 0.03 * Math.sin(x * 0.2) + 0.02 * Math.cos(y * 0.3);
+      if (ady > -0.05 && dd < 1 + wob && dd > 1 - arT / arR + wob) mask[y * WW + x] = 1;
     }
     var rocks = [];
-    for (i = 0; i < 30; i++) rocks.push([R() * WW, 260 + R() * 200, 4 + R() * 7]);
+    for (i = 0; i < 70; i++) rocks.push([R() * WW, 380 + R() * 330, 4 + R() * 9]);
+    /* the arch is solid rock all the way through */
+    for (i = 0; i < 26; i++) { var ra = Math.PI * (i / 25), rr2 = arR - arT / 2; rocks.push([ax0 + Math.cos(ra) * rr2, ag + 6 - Math.sin(ra) * rr2 * 0.85, arT * 0.62]); }
     paintTerrain(rocks);
+    /* a mammoth skeleton, half buried: decoration only */
+    var sk = R() < 0.5 ? ax0 - arR - 160 : ax0 + arR + 160;
+    sk = clamp(Math.round(sk), 160, WW - 160);
+    var sg = Math.floor(tops[sk]), bone = [236, 228, 206], boneD = [190, 180, 156];
+    if (sg > 0) {
+      for (var rb = -4; rb <= 4; rb++) { var rx = sk + rb * 7, rh = 22 - Math.abs(rb) * 2; for (var q = 0; q < rh; q++) { var bxq = rx + Math.round(Math.sin(q / rh * 2.2) * 6); deco(bxq, sg - q, q % 5 ? bone : boneD); deco(bxq + 1, sg - q, boneD); } }
+      for (q = -34; q <= 34; q++) deco(sk + q, sg - 22 + Math.round(Math.abs(q) * 0.18), bone);
+      var hdx = sk + 44;
+      for (q = 0; q < 10; q++) for (var q2 = 0; q2 < 12; q2++) if ((q - 5) * (q - 5) / 25 + (q2 - 6) * (q2 - 6) / 36 < 1) deco(hdx + q2, sg - 20 + q, (q + q2) % 4 ? bone : boneD);
+      for (q = 0; q < 26; q++) { var ta = q / 26 * 2.6; deco(hdx + 10 + Math.round(Math.sin(ta) * 14), sg - 8 + Math.round(-Math.cos(ta) * 10 + q * 0.3), bone); deco(hdx + 11 + Math.round(Math.sin(ta) * 14), sg - 8 + Math.round(-Math.cos(ta) * 10 + q * 0.3), boneD); }
+      putTerr();
+    }
   }
 
   function setPx(i, c) { var k = i * 4; data[k] = c[0]; data[k + 1] = c[1]; data[k + 2] = c[2]; data[k + 3] = 255; }
@@ -1088,10 +1140,12 @@
     var P = MAP.pal, x, y, i, j;
     img = tctx.createImageData(WW, WH); data = img.data;
     for (x = 0; x < WW; x++) {
-      var d = 0;
+      var d = 0, gap = 0, dPrev = 0;
       for (y = 0; y < WH; y++) {
         i = y * WW + x;
-        if (!mask[i]) { d = 0; continue; }
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; gap++; continue; }
+        if (gap > 0 && gap < 40 && dPrev > 12) d = dPrev + gap;
+        gap = 0;
         var nz = hash(x, y), col;
         if (d < 2) col = P.grass1;
         else if (d < 5) col = P.grass2;
@@ -1587,16 +1641,16 @@
   }
   function buryArts() {
     game.arts = [];
-    var picks = unfoundFirst(realOf(MAP.id)).slice(0, 3);
+    var picks = unfoundFirst(realOf(MAP.id)).slice(0, 4);
     picks.push(unfoundFirst(glitchOf(MAP.id))[0]);
     picks.forEach(function (a) {
       for (var tries = 0; tries < 80; tries++) {
         var x = 120 + Math.random() * (WW - 240), top = surfaceY(x);
         if (top < 0) continue;
-        var by = Math.floor(top + 16 + Math.random() * 38);
+        var by = Math.floor(top + 16 + Math.random() * 60);
         if (by > WATER - 14 || !solid(x, by) || !solid(x, by - 10)) continue;
         var clash = false;
-        for (var j = 0; j < game.arts.length; j++) if (Math.abs(game.arts[j].x - x) < 70) clash = true;
+        for (var j = 0; j < game.arts.length; j++) if (Math.abs(game.arts[j].x - x) < 120) clash = true;
         if (clash) continue;
         game.arts.push({ id: a.id, glitch: !!a.glitch, x: x, y: by, st: 'buried', vx: 0, vy: 0, rest: false, glint: Math.floor(Math.random() * 240) });
         break;
@@ -1662,7 +1716,7 @@
   var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil', med: 'tar', pirate: 'keg', sumer: 'tar' };
   function placeBarrels() {
     game.barrels = [];
-    var n = 2 + Math.floor(Math.random() * 3), kind = BARREL[MAP.era] || 'tar';
+    var n = 4 + Math.floor(Math.random() * 3), kind = BARREL[MAP.era] || 'tar';
     for (var tries = 0; tries < 120 && game.barrels.length < n; tries++) {
       var x = 100 + Math.random() * (WW - 200), y = surfaceY(x), ok = y > 40 && y < WATER - 30 && !solid(x, y - 12) && !solid(x - 4, y - 8) && !solid(x + 4, y - 8);
       for (var j = 0; ok && j < game.snags.length; j++) if (Math.abs(game.snags[j].x - x) < 40) ok = false;
@@ -1926,7 +1980,7 @@
     game.snags.forEach(function (c) { c.swing = null; c.jet = false; c.sled = false; c.sv = 0; });
     /* a charge that is still running carries on into the settle, and is waited for there */
     if (game.sudden) {
-      WATER = Math.max(300, WATER - 5); miniDirty = true;
+      WATER = Math.max(WATER0 - 210, WATER - 8); miniDirty = true;
       var n = 3 + Math.floor(Math.random() * 2);
       for (var i = 0; i < n; i++) game.warn.push({ x: 60 + Math.random() * (WW - 120), t: -i * 12 });
     }
@@ -1957,7 +2011,7 @@
     var st = MAP.style;
     if (st === 'desert' || st === 'harbour' || st === 'uruk') {
       if (game.flood) return false;
-      game.flood = { phase: 'warn', base: WATER, level: WATER - (st === 'harbour' ? 22 : 26), at: game.turnNo + 2 };
+      game.flood = { phase: 'warn', base: WATER, level: WATER - (st === 'harbour' ? 36 : 42), at: game.turnNo + 2 };
       if (st === 'harbour') { banner('High tide coming!', null, '#2a8ab0', 'pin'); say('tide', true); }
       else if (st === 'uruk') { banner('The river will flood!', null, '#3f8a9a', 'pin'); say('river', true); }
       else { banner('The Nile will flood!', null, '#3a8a9a', 'pin'); say('flood', true); }
@@ -2656,8 +2710,8 @@
   function openCanal(c) {
     for (var k = 0; k < 4; k++) { var cx = c.x + c.face * (14 + k * 8), cy = groundY(Math.round(cx), c.y - 16); if (cy > 0) carve(cx, cy + 2, 5, false); }
     var f = game.flood;
-    if (f && f.phase !== 'fall') { f.phase = 'rise'; f.level = Math.min(f.level, f.base - 20); f.until = Math.max(f.until || 0, game.turnNo + 3); }
-    else game.flood = { phase: 'rise', base: f ? f.base : WATER, level: (f ? f.base : WATER) - 20, until: game.turnNo + 3 };
+    if (f && f.phase !== 'fall') { f.phase = 'rise'; f.level = Math.min(f.level, f.base - 32); f.until = Math.max(f.until || 0, game.turnNo + 3); }
+    else game.flood = { phase: 'rise', base: f ? f.base : WATER, level: (f ? f.base : WATER) - 32, until: game.turnNo + 3 };
     splash(c.x + c.face * 30); sfx('splash');
     banner('The river rises!', null, '#3f8a9a', 'pin'); say('canal', true);
   }
@@ -2766,7 +2820,8 @@
     if (w.style === 'treb') {
       tx = clamp(tx, 10, WW - 10);
       var ty = surfaceY(Math.round(tx)); if (ty < 0) ty = WATER;
-      farShot('trebstone', c.team.era, c, tx > WW / 2 ? -60 : WW + 60, 70, tx, ty, 112);
+      var tsx = tx > WW / 2 ? -60 : WW + 60;
+      farShot('trebstone', c.team.era, c, tsx, 90, tx, ty, Math.round(80 + Math.abs(tx - tsx) * 0.06));
       sfx('clunk'); sfx('whoosh'); say('treb', true);
       return;
     }
@@ -3582,7 +3637,7 @@
   function saveMatch() {
     if (TEST) return;
     var s = {
-      v: 1, seed: game.seed, opts: game.opts, tIdx: game.tIdx, turnNo: game.turnNo, stats: game.stats, mask: rle(),
+      v: 2, seed: game.seed, opts: game.opts, tIdx: game.tIdx, turnNo: game.turnNo, stats: game.stats, mask: rle(),
       finds: game.finds, water: WATER, sudden: game.sudden,
       arts: game.arts.filter(function (a) { return a.st === 'buried' || a.st === 'loose'; }).map(function (a) { return { id: a.id, g: a.glitch, x: Math.round(a.x), y: Math.round(a.y), st: a.st }; }),
       crates: game.crates.map(function (c) { return { x: Math.round(c.x), y: Math.round(c.y), k: c.kind }; }),
@@ -3603,7 +3658,7 @@
     var raw = store('save'), s;
     if (!raw) return false;
     try { s = JSON.parse(raw); } catch (e) { return false; }
-    if (!s || s.v !== 1 || !s.teams) return false;
+    if (!s || s.v !== 2 || !s.teams) return false;
     resetWorld();
     game.opts = s.opts; game.seed = s.seed; game.turnLen = s.opts.turn;
     game.tour = s.opts.tour ? loadTourState() : null;
@@ -3625,7 +3680,7 @@
     });
     game.tIdx = s.tIdx; game.turnNo = s.turnNo - 1; game.stats = s.stats || game.stats;
     game.finds = s.finds || [];
-    WATER = s.water || 432; game.sudden = !!s.sudden; miniDirty = true;
+    WATER = s.water || WATER0; game.sudden = !!s.sudden; miniDirty = true;
     game.arts = (s.arts || []).map(function (a) { return { id: a.id, glitch: !!a.g, x: a.x, y: a.y, st: a.st, vx: 0, vy: 0, rest: false, glint: Math.floor(Math.random() * 240) }; });
     game.crates = (s.crates || []).map(function (c) { return { x: c.x, y: c.y, vx: 0, vy: 0, rest: false, kind: c.k }; });
     game.barrels = (s.barrels || []).map(function (b) { return { x: b.x, y: b.y, vx: 0, vy: 0, rest: false, kind: b.k, fuse: 0, by: null, armed: b.a || null }; });
@@ -3646,7 +3701,7 @@
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
     game.arts = []; game.crates = []; game.courier = null; game.barker = null; game.finds = [];
-    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = 432;
+    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = WATER0;
   }
 
   function surfaceAt(x) {
@@ -3932,7 +3987,7 @@
   }
   function buildCityBg() {
     bakedBg = null;
-    if (MAP.style !== 'city') { cityBg = null; return; }
+    cityBg = null; return;
     var wild = LOOK === 'overgrown', sandy = LOOK === 'sandy';
     cityBg = [
       makeLayer(0.15, 0.62, wild ? '#2f4a44' : (sandy ? MAP.farSandy : MAP.far), 1),
@@ -3973,6 +4028,8 @@
   }
   function buildBaked() {
     bakedBg = null;
+    bakedBg = paintedLayers();
+    if (bakedBg && bakedBg.length) return;
     var neon = LOOK === 'neon';
     if (MAP.style === 'desert') {
       bakedBg = [
@@ -4176,6 +4233,308 @@
       ];
     }
   }
+  /* ---------------- painted backdrops ----------------
+     Every place gets four or five soft painted layers that slide past at different speeds. They are painted
+     once with smooth shapes and gradients, faded towards the sky the further away they are, then drawn
+     smoothed so they read as painted scenery rather than blocks. */
+  function bgLayer(f, haze) {
+    var H = Math.round(VH * 1.8), W = Math.ceil(VW + WW * f * 1.02 + 80), c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    return { c: c, f: f, g: c.getContext('2d'), W: W, H: H, haze: haze, live: [] };
+  }
+  function vgrad(g, y0, y1, c0, c1) { var gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, c0); gr.addColorStop(1, c1); return gr; }
+  function wav(x, seed, a, b, c) { return a * Math.sin(x * 0.0061 + seed) + b * Math.sin(x * 0.017 + seed * 2.3) + c * Math.sin(x * 0.051 + seed * 4.1); }
+  /* a ridge of land: a gradient fill and a lit rim along the top */
+  function ridge(L, fn, top, bot, rim) {
+    var g = L.g, x, minY = 1e9;
+    g.beginPath(); g.moveTo(0, L.H);
+    for (x = 0; x <= L.W; x += 2) { var y = fn(x); minY = Math.min(minY, y); g.lineTo(x, y); }
+    g.lineTo(L.W, L.H); g.closePath();
+    g.fillStyle = vgrad(g, minY, L.H * 0.75, top, bot); g.fill();
+    if (rim) { g.beginPath(); for (x = 0; x <= L.W; x += 2) g.lineTo(x, fn(x) + 0.6); g.strokeStyle = rim; g.lineWidth = 1.2; g.stroke(); }
+  }
+  /* a mountain with a sunlit left face, a shaded right face and an optional snow or ash cap */
+  function peak(g, cx, base, w, h, lit, shade, cap, seed) {
+    var pts = [], k, n = 14;
+    for (k = 0; k <= n; k++) { var u = k / n, x = cx - w / 2 + u * w, yy = base - h * Math.pow(1 - Math.abs(u - 0.5) * 2, 0.8) + (k % 2 ? 3 : -2) * Math.sin(seed + k); pts.push([x, Math.min(base, yy)]); }
+    if (cap === 'crater') { pts[6][1] = pts[7][1] = pts[8][1] = base - h * 0.88; pts[7][1] += h * 0.04; cap = '#5a4e52'; }
+    g.beginPath(); g.moveTo(cx - w / 2, base); pts.forEach(function (p) { g.lineTo(p[0], p[1]); }); g.lineTo(cx + w / 2, base); g.closePath(); g.fillStyle = shade; g.fill();
+    g.beginPath(); g.moveTo(cx - w / 2, base); for (k = 0; k <= n / 2; k++) g.lineTo(pts[k][0], pts[k][1]);
+    g.lineTo(cx + w * 0.06, base); g.closePath(); g.fillStyle = lit; g.fill();
+    if (cap) { g.beginPath(); g.moveTo(cx - w * 0.14, base - h * 0.72); for (k = 5; k <= 9; k++) g.lineTo(pts[k][0], pts[k][1]); g.lineTo(cx + w * 0.14, base - h * 0.72); g.lineTo(cx + w * 0.05, base - h * 0.66); g.lineTo(cx - w * 0.04, base - h * 0.74); g.closePath(); g.fillStyle = cap; g.fill(); }
+  }
+  function blobTree(g, x, y, r, col, lite, trunk) {
+    if (trunk) { g.fillStyle = trunk; g.fillRect(x - r * 0.12, y - r * 0.9, r * 0.24, r * 0.9); }
+    g.fillStyle = col;
+    [[0, -1.5, 1], [-0.7, -1.1, 0.75], [0.7, -1.15, 0.78], [0, -2.1, 0.7]].forEach(function (b) { g.beginPath(); g.arc(x + b[0] * r, y + b[1] * r, b[2] * r, 0, 6.283); g.fill(); });
+    if (lite) { g.fillStyle = lite; g.beginPath(); g.arc(x - r * 0.35, y - r * 2.0, r * 0.38, 0, 6.283); g.fill(); g.beginPath(); g.arc(x - r * 0.9, y - r * 1.3, r * 0.3, 0, 6.283); g.fill(); }
+  }
+  function pine(g, x, y, h, col) {
+    g.fillStyle = col; g.beginPath(); g.moveTo(x, y - h);
+    for (var k = 0; k < 4; k++) { var yy = y - h + (k + 1) * h / 4.4, ww = h * (0.16 + k * 0.07); g.lineTo(x + ww, yy); g.lineTo(x + ww * 0.45, yy - h * 0.04); }
+    g.lineTo(x + h * 0.06, y); g.lineTo(x - h * 0.06, y);
+    for (k = 3; k >= 0; k--) { var yy2 = y - h + (k + 1) * h / 4.4, ww2 = h * (0.16 + k * 0.07); g.lineTo(x - ww2 * 0.45, yy2 - h * 0.04); g.lineTo(x - ww2, yy2); }
+    g.closePath(); g.fill();
+  }
+  function palmTree(g, x, y, h, lean, trunk, leaf) {
+    g.strokeStyle = trunk; g.lineWidth = Math.max(1.5, h * 0.07); g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * h * 0.15, y - h * 0.55, x + lean * h * 0.35, y - h); g.stroke();
+    var tx = x + lean * h * 0.35, ty = y - h;
+    g.strokeStyle = leaf; g.lineWidth = Math.max(1.2, h * 0.06);
+    [-2.9, -2.4, -1.9, -1.2, -0.7, -0.25].forEach(function (a) { g.beginPath(); g.moveTo(tx, ty); g.quadraticCurveTo(tx + Math.cos(a) * h * 0.3, ty + Math.sin(a) * h * 0.3 - h * 0.05, tx + Math.cos(a) * h * 0.48, ty + Math.sin(a) * h * 0.2 + h * 0.18); g.stroke(); });
+  }
+  function fern(g, x, y, h, col) {
+    g.strokeStyle = col; g.lineWidth = Math.max(1, h * 0.05); g.lineCap = 'round';
+    for (var k = -3; k <= 3; k++) { var a = -Math.PI / 2 + k * 0.32; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * h * 0.6, y + Math.sin(a) * h * 0.8, x + Math.cos(a) * h * 1.05, y + Math.sin(a) * h * 0.6 + h * 0.25); g.stroke(); }
+  }
+  function house(g, x, y, w, h, wall, roof, win) {
+    g.fillStyle = wall; g.fillRect(x, y - h, w, h);
+    g.fillStyle = roof; g.beginPath(); g.moveTo(x - w * 0.12, y - h); g.lineTo(x + w / 2, y - h - w * 0.45); g.lineTo(x + w * 1.12, y - h); g.closePath(); g.fill();
+    if (win) { g.fillStyle = win; g.fillRect(x + w * 0.2, y - h * 0.65, w * 0.18, h * 0.25); g.fillRect(x + w * 0.6, y - h * 0.65, w * 0.18, h * 0.25); }
+  }
+  function sailShip(g, x, y, s, hull, sail, face) {
+    g.fillStyle = hull; g.beginPath(); g.moveTo(x - 14 * s, y - 4 * s); g.lineTo(x + 14 * s, y - 4 * s); g.lineTo(x + 10 * s, y + 1 * s); g.lineTo(x - 11 * s, y + 1 * s); g.closePath(); g.fill();
+    g.fillRect(x - face * 14 * s - (face > 0 ? 0 : -1) * 0, y - 8 * s, 6 * s * face, 4 * s);
+    g.fillRect(x - 0.5 * s, y - 26 * s, 1 * s, 22 * s); g.fillRect(x + 7 * s, y - 20 * s, 1 * s, 16 * s);
+    g.fillStyle = sail;
+    [[x - 6 * s, y - 24 * s, 11 * s, 7 * s], [x - 7 * s, y - 15 * s, 13 * s, 9 * s], [x + 3 * s, y - 18 * s, 9 * s, 12 * s]].forEach(function (r2) { g.beginPath(); g.moveTo(r2[0], r2[1]); g.quadraticCurveTo(r2[0] + r2[2] / 2 + face * 2 * s, r2[1] + r2[3] / 2, r2[0], r2[1] + r2[3]); g.lineTo(r2[0] + r2[2], r2[1] + r2[3]); g.quadraticCurveTo(r2[0] + r2[2] / 2 + face * 2 * s + r2[2], r2[1] + r2[3] / 2, r2[0] + r2[2], r2[1]); g.closePath(); g.fill(); });
+  }
+  /* distance: blend a layer towards the sky colour, and give night maps their tint */
+  function finishLayer(L, amt) {
+    var g = L.g;
+    g.globalCompositeOperation = 'source-atop';
+    if (LOOK === 'neon' || MAP.style === 'city') { g.fillStyle = 'rgba(34,26,78,' + (0.5 + amt * 0.3) + ')'; g.fillRect(0, 0, L.W, L.H); }
+    else if (LOOK === 'overgrown') { g.fillStyle = 'rgba(40,90,60,0.3)'; g.fillRect(0, 0, L.W, L.H); }
+    if (amt > 0) { g.globalAlpha = amt; g.fillStyle = vgrad(g, 0, L.H * 0.7, skyCols()[2], skyCols()[4]); g.fillRect(0, 0, L.W, L.H); g.globalAlpha = 1; }
+    g.globalCompositeOperation = 'source-over';
+  }
+  function paintedLayers() {
+    var st = MAP.style, u = VH / 240, Ls = [], L, x, k, i, R = rng(game.seed % 100000 + 7);
+    function at(fr) { return VH * fr; }
+    if (st === 'hills') {
+      /* Prehistoric Jungle: misty volcanoes, a waterfall, giant ferns and a mammoth herd far off */
+      L = bgLayer(0.03, 0.5);
+      for (k = 0; k < L.W / (90 * u); k++) peak(L.g, (k + R() * 0.5) * 90 * u, at(0.56), (120 + R() * 80) * u, (40 + R() * 40) * u, '#b8c4d2', '#9eacbe', null, k);
+      finishLayer(L, 0.45); Ls.push(L);
+      L = bgLayer(0.07, 0.4);
+      for (k = 0; k < L.W / (340 * u); k++) { var vx = (k + 0.3 + R() * 0.4) * 340 * u, vh = (80 + R() * 40) * u; peak(L.g, vx, at(0.6), vh * 1.9, vh, '#8f8a92', '#6c6670', 'crater', k); var lg = L.g.createRadialGradient(vx, at(0.6) - vh * 0.88, 0, vx, at(0.6) - vh * 0.88, 14 * u); lg.addColorStop(0, 'rgba(255,150,60,0.8)'); lg.addColorStop(1, 'rgba(255,120,40,0)'); L.g.fillStyle = lg; L.g.fillRect(vx - 14 * u, at(0.6) - vh * 0.88 - 14 * u, 28 * u, 28 * u);
+        L.g.strokeStyle = 'rgba(239,119,36,0.75)'; L.g.lineWidth = 1.2 * u; L.g.beginPath(); L.g.moveTo(vx - 4 * u, at(0.6) - vh * 0.86); L.g.quadraticCurveTo(vx - 10 * u, at(0.6) - vh * 0.7, vx - 8 * u, at(0.6) - vh * 0.6); L.g.stroke(); L.live.push({ k: 'volcano', x: vx, y: at(0.6) - vh * 0.86 }); }
+      ridge(L, function (x) { return at(0.58) + wav(x, 1, 8 * u, 4 * u, 2 * u); }, '#8fa69a', '#7f9a8c');
+      finishLayer(L, 0.25); Ls.push(L);
+      L = bgLayer(0.18, 0.3);
+      ridge(L, function (x) { return at(0.64) + wav(x, 4, 14 * u, 6 * u, 3 * u); }, '#7fa48a', '#5f8a6c', '#a8c8a0');
+      for (x = 0; x < L.W; x += 22 * u + R() * 30 * u) blobTree(L.g, x, at(0.64) + wav(x, 4, 14 * u, 6 * u, 3 * u) + 6 * u, (6 + R() * 6) * u, '#5f8a6c', '#79a482');
+      for (k = 0; k < 6; k++) { var hx = R() * L.W, hy = at(0.66) + wav(hx, 4, 14 * u, 6 * u, 3 * u); for (var m = 0; m < 3; m++) { L.g.fillStyle = '#4e6656'; L.g.beginPath(); L.g.ellipse(hx + m * 9 * u, hy - 3 * u, 4 * u, 2.6 * u, 0, 0, 6.283); L.g.fill(); L.g.fillRect(hx + m * 9 * u - 3 * u, hy - 2 * u, 1 * u, 3 * u); L.g.fillRect(hx + m * 9 * u + 2 * u, hy - 2 * u, 1 * u, 3 * u); } }
+      /* a waterfall pouring off the hills */
+      var wfx = L.W * (0.3 + R() * 0.4), wfy = at(0.64) + wav(wfx, 4, 14 * u, 6 * u, 3 * u);
+      L.g.fillStyle = vgrad(L.g, wfy - 30 * u, wfy + 30 * u, '#d8f0f8', '#9fd0e8'); L.g.fillRect(wfx, wfy - 26 * u, 7 * u, 60 * u);
+      L.live.push({ k: 'fall', x: wfx, y: wfy - 26 * u, w: 7 * u, h: 60 * u });
+      finishLayer(L, 0.2); Ls.push(L);
+      L = bgLayer(0.36, 0.1);
+      ridge(L, function (x) { return at(0.76) + wav(x, 7, 12 * u, 7 * u, 3 * u); }, '#4f7d58', '#3e6347', '#6f9a6a');
+      for (x = 0; x < L.W; x += 40 * u + R() * 50 * u) { var gy = at(0.76) + wav(x, 7, 12 * u, 7 * u, 3 * u) + 4 * u; if (R() < 0.5) blobTree(L.g, x, gy, (10 + R() * 8) * u, '#3e6347', '#55805e', '#33402a'); else fern(L.g, x, gy, (16 + R() * 10) * u, '#3a6a3e'); }
+      finishLayer(L, 0.08); Ls.push(L);
+      L = bgLayer(0.58, 0);
+      ridge(L, function (x) { return at(0.9) + wav(x, 9, 8 * u, 5 * u, 2 * u); }, '#2f4a32', '#22361f');
+      for (x = 0; x < L.W; x += 26 * u + R() * 40 * u) fern(L.g, x, at(0.9) + wav(x, 9, 8 * u, 5 * u, 2 * u) + 3 * u, (20 + R() * 14) * u, R() < 0.5 ? '#2a4a2c' : '#35593a');
+      finishLayer(L, 0); Ls.push(L);
+    } else if (st === 'uruk') {
+      /* City of Uruk: the flat river plain, distant city walls and ziggurats, palm groves and reed boats */
+      L = bgLayer(0.06, 0.5);
+      ridge(L, function (x) { return at(0.58) + wav(x, 2, 2 * u, 1 * u, 0.5 * u); }, '#d6c49c', '#c8b48c');
+      for (k = 0; k < L.W / (260 * u); k++) {
+        var zx = (k + 0.2 + R() * 0.6) * 260 * u, zb = at(0.585), zw = (60 + R() * 30) * u;
+        for (i = 0; i < 3; i++) { L.g.fillStyle = '#c09a68'; L.g.fillRect(zx - zw / 2 + i * zw * 0.17, zb - (i + 1) * 9 * u, zw * (1 - i * 0.34), 9 * u + 1); L.g.fillStyle = '#d8b888'; L.g.fillRect(zx - zw / 2 + i * zw * 0.17, zb - (i + 1) * 9 * u, zw * (1 - i * 0.34) * 0.5, 2 * u); }
+        L.g.fillStyle = '#a07a50'; L.g.fillRect(zx - 3 * u, zb - 27 * u, 6 * u, 27 * u);
+        L.g.fillStyle = '#f4ecd8'; L.g.fillRect(zx - zw * 0.12, zb - 34 * u, zw * 0.24, 7 * u);
+        L.g.fillStyle = '#b89a6a'; L.g.fillRect(zx + zw * 0.1, zb - 21 * u, zw * 0.4, 14 * u);
+      }
+      L.g.fillStyle = '#bca27a'; for (x = 0; x < L.W; x += 3 * u) if (Math.floor(x / (90 * u)) % 3 !== 2) L.g.fillRect(x, at(0.585) - 6 * u - (Math.floor(x / (12 * u)) % 2) * 2 * u, 3 * u, 6 * u);
+      finishLayer(L, 0.22); Ls.push(L);
+      L = bgLayer(0.16, 0.3);
+      ridge(L, function (x) { return at(0.64) + wav(x, 3, 3 * u, 1.5 * u, 1 * u); }, '#a8b46e', '#8c9c5a', '#c8cc8a');
+      L.g.fillStyle = vgrad(L.g, at(0.665), at(0.7), '#7ab0c8', '#5a90a8'); L.g.fillRect(0, at(0.665), L.W, 7 * u);
+      for (x = 0; x < L.W; x += 120 * u + R() * 80 * u) { L.g.fillStyle = '#7a5a34'; L.g.beginPath(); L.g.ellipse(x, at(0.67), 9 * u, 2 * u, 0, 0, Math.PI); L.g.fill(); L.g.fillRect(x - 0.5 * u, at(0.67) - 10 * u, 1 * u, 10 * u); L.g.fillStyle = '#efe6cc'; L.g.beginPath(); L.g.moveTo(x, at(0.67) - 10 * u); L.g.lineTo(x + 7 * u, at(0.67) - 2 * u); L.g.lineTo(x, at(0.67) - 2 * u); L.g.fill(); }
+      for (x = 0; x < L.W; x += 10 * u + R() * 26 * u) palmTree(L.g, x, at(0.64) + 1 * u, (12 + R() * 8) * u, R() < 0.5 ? -1 : 1, '#8a7050', '#6f8a4a');
+      finishLayer(L, 0.22); Ls.push(L);
+      L = bgLayer(0.34, 0.1);
+      ridge(L, function (x) { return at(0.76) + wav(x, 5, 4 * u, 2 * u, 1 * u); }, '#8aa05a', '#6f8a46', '#b0c070');
+      for (x = 0; x < L.W; x += 30 * u + R() * 40 * u) palmTree(L.g, x, at(0.76) + wav(x, 5, 4 * u, 2 * u, 1 * u) + 2 * u, (22 + R() * 12) * u, R() < 0.5 ? -1 : 1, '#7a5a34', '#4f7a3a');
+      for (x = 0; x < L.W; x += 4 * u) { if (hash(x, 3) < 0.5) continue; L.g.strokeStyle = '#a89a50'; L.g.lineWidth = 1; L.g.beginPath(); var ry = at(0.78) + wav(x, 5, 4 * u, 2 * u, 1 * u); L.g.moveTo(x, ry); L.g.lineTo(x + 2 * u, ry - (6 + hash(x, 9) * 8) * u); L.g.stroke(); }
+      finishLayer(L, 0.06); Ls.push(L);
+      L = bgLayer(0.56, 0);
+      ridge(L, function (x) { return at(0.9) + wav(x, 8, 3 * u, 2 * u, 1 * u); }, '#5f7f3e', '#4a6a30');
+      for (x = 0; x < L.W; x += 60 * u + R() * 70 * u) palmTree(L.g, x, at(0.9) + 2 * u, (34 + R() * 16) * u, R() < 0.5 ? -1 : 1, '#5a4024', '#3a6030');
+      finishLayer(L, 0); Ls.push(L);
+    } else if (st === 'desert') {
+      /* Pyramid Desert: the three pyramids of Giza lit by a low sun, the Nile with sailing boats, palms */
+      L = bgLayer(0.06, 0.5);
+      ridge(L, function (x) { return at(0.56) + wav(x, 2, 6 * u, 3 * u, 1 * u); }, '#efd6a6', '#e2c08c');
+      for (k = 0; k < L.W / (520 * u); k++) {
+        var gx = (k + 0.25) * 520 * u, gb = at(0.585);
+        [[0, 1], [95, 0.94], [175, 0.62]].forEach(function (pp) {
+          var w = 150 * u * pp[1], h = w * 0.62, cx = gx + pp[0] * u, gold = LOOK === 'golden';
+          L.g.fillStyle = gold ? '#f2eadb' : '#e8c98e'; L.g.beginPath(); L.g.moveTo(cx - w / 2, gb); L.g.lineTo(cx, gb - h); L.g.lineTo(cx + w * 0.12, gb); L.g.closePath(); L.g.fill();
+          L.g.fillStyle = gold ? '#d8cfbc' : '#c49a62'; L.g.beginPath(); L.g.moveTo(cx + w * 0.12, gb); L.g.lineTo(cx, gb - h); L.g.lineTo(cx + w / 2, gb); L.g.closePath(); L.g.fill();
+          if (pp[1] === 0.94 || gold) { L.g.fillStyle = gold ? '#f0c446' : '#f4e6c8'; L.g.beginPath(); L.g.moveTo(cx - w * 0.07, gb - h * 0.87); L.g.lineTo(cx, gb - h); L.g.lineTo(cx + w * 0.07, gb - h * 0.87); L.g.closePath(); L.g.fill(); }
+          L.g.strokeStyle = 'rgba(160,110,60,0.25)'; L.g.lineWidth = 1;
+          for (var q = 1; q < 9; q++) { var yy = gb - h * q / 9, hw = (w / 2) * (1 - q / 9); L.g.beginPath(); L.g.moveTo(cx - hw, yy); L.g.lineTo(cx + hw, yy); L.g.stroke(); }
+        });
+      }
+      finishLayer(L, 0.3); Ls.push(L);
+      L = bgLayer(0.18, 0.3);
+      ridge(L, function (x) { return at(0.66) + wav(x, 4, 8 * u, 4 * u, 1 * u); }, '#dcb47c', '#c99d62', '#f2d49a');
+      L.g.fillStyle = '#6f8f45'; L.g.fillRect(0, at(0.7), L.W, 3 * u);
+      L.g.fillStyle = vgrad(L.g, at(0.71), at(0.74), '#5aa8b8', '#3a8a9a'); L.g.fillRect(0, at(0.71), L.W, 7 * u);
+      L.g.fillStyle = '#6f8f45'; L.g.fillRect(0, at(0.74), L.W, 3 * u);
+      for (x = 0; x < L.W; x += 90 * u + R() * 90 * u) { L.g.fillStyle = '#6a4a2a'; L.g.beginPath(); L.g.ellipse(x, at(0.72), 8 * u, 2 * u, 0, 0, Math.PI); L.g.fill(); L.g.fillRect(x - 0.5 * u, at(0.72) - 14 * u, 1 * u, 14 * u); L.g.fillStyle = '#f8f0dc'; L.g.beginPath(); L.g.moveTo(x - 7 * u, at(0.72) - 2 * u); L.g.lineTo(x + 1 * u, at(0.72) - 15 * u); L.g.lineTo(x + 7 * u, at(0.72) - 2 * u); L.g.closePath(); L.g.fill(); }
+      for (x = 0; x < L.W; x += 14 * u + R() * 30 * u) palmTree(L.g, x, at(0.705), (12 + R() * 8) * u, R() < 0.5 ? -1 : 1, '#8a6a40', '#5f8a3e');
+      finishLayer(L, 0.15); Ls.push(L);
+      L = bgLayer(0.36, 0.1);
+      ridge(L, function (x) { return at(0.8) + wav(x, 6, 10 * u, 5 * u, 1.5 * u); }, '#e8c28a', '#d6a868', '#fbe0a8');
+      finishLayer(L, 0.05); Ls.push(L);
+      L = bgLayer(0.58, 0);
+      ridge(L, function (x) { return at(0.92) + wav(x, 9, 6 * u, 3 * u, 1 * u); }, '#d8a660', '#c08a48');
+      for (x = 0; x < L.W; x += 70 * u + R() * 90 * u) palmTree(L.g, x, at(0.92) + 2 * u, (34 + R() * 14) * u, R() < 0.5 ? -1 : 1, '#6a4a2a', '#4f7a3a');
+      finishLayer(L, 0); Ls.push(L);
+    } else if (st === 'wall') {
+      /* Hadrian's Wall: moorland ridges, the Wall snaking over crags with a fort, sheep and a lough */
+      L = bgLayer(0.06, 0.5);
+      for (k = 0; k < L.W / (160 * u); k++) peak(L.g, (k + R() * 0.5) * 160 * u, at(0.56), (200 + R() * 120) * u, (30 + R() * 30) * u, '#a8b8c0', '#93a4b0', null, k);
+      finishLayer(L, 0.35); Ls.push(L);
+      L = bgLayer(0.16, 0.3);
+      var wf = function (x) { return at(0.58) + wav(x, 3, 22 * u, 10 * u, 3 * u); };
+      ridge(L, wf, '#8aa47c', '#6f8a64', '#b0c49c');
+      L.g.fillStyle = LOOK === 'golden' ? '#f2eadb' : (LOOK === 'turf' ? '#7a6a48' : '#c8c0ae');
+      for (x = 0; x < L.W; x += 1) { var wy = wf(x) - 5 * u; L.g.fillRect(x, wy - ((Math.floor(x / (3 * u)) % 2) ? 1.5 * u : 0), 1, 6 * u); }
+      L.g.fillStyle = 'rgba(90,80,70,0.35)'; for (x = 0; x < L.W; x += 1) L.g.fillRect(x, wf(x), 1, 1.2 * u);
+      for (x = 60 * u; x < L.W; x += 110 * u) { var tyy = wf(x); L.g.fillStyle = '#d4ccb8'; L.g.fillRect(x - 4 * u, tyy - 12 * u, 8 * u, 12 * u); L.g.fillStyle = '#9a9282'; L.g.fillRect(x + 1 * u, tyy - 12 * u, 3 * u, 12 * u); }
+      for (k = 0; k < L.W / (420 * u); k++) { var fx2 = (k + 0.5) * 420 * u, fy = wf(fx2) + 4 * u; L.g.fillStyle = '#c8c0ae'; L.g.fillRect(fx2 - 34 * u, fy - 14 * u, 68 * u, 14 * u); L.g.fillStyle = '#a8a090'; L.g.fillRect(fx2 + 10 * u, fy - 14 * u, 24 * u, 14 * u); for (i = 0; i < 4; i++) house(L.g, fx2 - 28 * u + i * 15 * u, fy - 14 * u, 10 * u, 6 * u, '#bcb4a2', '#a0503a', null); L.g.fillStyle = '#7a3a3a'; L.g.fillRect(fx2 - 2 * u, fy - 7 * u, 5 * u, 7 * u); }
+      for (k = 0; k < 30; k++) { var sx2 = R() * L.W, sy2 = wf(sx2) + (4 + R() * 12) * u; L.g.fillStyle = '#f4f0e6'; L.g.beginPath(); L.g.ellipse(sx2, sy2, 1.6 * u, 1 * u, 0, 0, 6.283); L.g.fill(); }
+      finishLayer(L, 0.18); Ls.push(L);
+      L = bgLayer(0.34, 0.1);
+      var lf = function (x) { return at(0.74) + wav(x, 6, 10 * u, 6 * u, 2 * u); };
+      ridge(L, lf, '#6f8a5a', '#58744a', '#8fa878');
+      L.g.fillStyle = vgrad(L.g, at(0.77), at(0.8), '#8fb0c8', '#6a8aa8'); L.g.beginPath(); L.g.ellipse(L.W * (0.3 + R() * 0.4), at(0.785), 60 * u, 5 * u, 0, 0, 6.283); L.g.fill();
+      for (x = 0; x < L.W; x += 4 * u) { if (hash(x, 4) < 0.6) continue; L.g.fillStyle = hash(x, 6) < 0.5 ? '#8a6a8a' : '#6a5a72'; L.g.fillRect(x, lf(x) + (2 + hash(x, 7) * 10) * u, 2 * u, 1.5 * u); }
+      for (x = 0; x < L.W; x += 120 * u + R() * 160 * u) blobTree(L.g, x, lf(x) + 3 * u, (9 + R() * 4) * u, '#3f5e3a', '#56784c', '#3a2c1c');
+      finishLayer(L, 0.06); Ls.push(L);
+      L = bgLayer(0.56, 0);
+      ridge(L, function (x) { return at(0.9) + wav(x, 8, 6 * u, 4 * u, 2 * u); }, '#4a6a40', '#3a5432');
+      for (x = 0; x < L.W; x += 20 * u + R() * 30 * u) { L.g.fillStyle = '#7a7466'; var ry2 = at(0.9) + wav(x, 8, 6 * u, 4 * u, 2 * u); L.g.beginPath(); L.g.ellipse(x, ry2 + 2 * u, (3 + R() * 4) * u, (2 + R() * 2) * u, 0, Math.PI, 0); L.g.fill(); }
+      finishLayer(L, 0); Ls.push(L);
+    } else if (st === 'castle') {
+      /* Castle Siege: blue hills with far castles, a patchwork of fields, a village with a church, oak woods */
+      L = bgLayer(0.06, 0.5);
+      var cf = function (x) { return at(0.54) + wav(x, 2, 14 * u, 6 * u, 2 * u); };
+      ridge(L, cf, '#8ea6b8', '#7f98ac');
+      for (k = 0; k < L.W / (380 * u); k++) {
+        var kx = (k + 0.4) * 380 * u, ky = cf(kx) + 2 * u, kc = '#6f8aa0', kl = '#88a2b8';
+        L.g.fillStyle = kc; L.g.fillRect(kx - 22 * u, ky - 18 * u, 44 * u, 18 * u);
+        [[-26, 30], [19, 30], [-6, 40]].forEach(function (tw) { L.g.fillStyle = kc; L.g.fillRect(kx + tw[0] * u, ky - tw[1] * u, 9 * u, tw[1] * u); L.g.fillStyle = kl; L.g.fillRect(kx + tw[0] * u, ky - tw[1] * u, 3 * u, tw[1] * u); L.g.fillStyle = '#5a6a8a'; L.g.beginPath(); L.g.moveTo(kx + (tw[0] - 1) * u, ky - tw[1] * u); L.g.lineTo(kx + (tw[0] + 4.5) * u, ky - (tw[1] + 10) * u); L.g.lineTo(kx + (tw[0] + 10) * u, ky - tw[1] * u); L.g.fill(); L.g.fillStyle = '#e0607a'; L.g.fillRect(kx + (tw[0] + 4) * u, ky - (tw[1] + 16) * u, 4 * u, 3 * u); L.g.fillStyle = kc; L.g.fillRect(kx + (tw[0] + 4) * u, ky - (tw[1] + 16) * u, 0.7 * u, 6 * u); });
+        for (i = 0; i < 11; i++) { L.g.fillStyle = kc; if (i % 2 === 0) L.g.fillRect(kx - 22 * u + i * 4 * u, ky - 21 * u, 4 * u, 3 * u); }
+      }
+      finishLayer(L, 0.22); Ls.push(L);
+      L = bgLayer(0.16, 0.3);
+      var pf = function (x) { return at(0.6) + wav(x, 4, 10 * u, 5 * u, 2 * u); };
+      ridge(L, pf, '#9cbc78', '#86a866', '#bcd498');
+      var fieldCols = ['#a8c47e', '#c8c070', '#8fb06a', '#b4c884', '#d4c27a'];
+      for (x = 0; x < L.W; x += 50 * u) { L.g.fillStyle = fieldCols[Math.floor(hash(x, 1) * 5)]; L.g.beginPath(); L.g.moveTo(x, pf(x) + 3 * u); L.g.lineTo(x + 50 * u, pf(x + 50 * u) + 3 * u); L.g.lineTo(x + 50 * u, L.H); L.g.lineTo(x, L.H); L.g.fill(); L.g.fillStyle = '#5f7f4a'; L.g.fillRect(x, pf(x), 2 * u, L.H); }
+      for (k = 0; k < L.W / (300 * u); k++) {
+        var vx2 = (k + 0.3 + R() * 0.4) * 300 * u, vy2 = pf(vx2) + 4 * u;
+        for (i = 0; i < 5; i++) house(L.g, vx2 + i * 11 * u - 25 * u, vy2 + (i % 2) * u, 8 * u, 6 * u, '#e8dcc4', '#9a6a4a', null);
+        L.g.fillStyle = '#d8ccb0'; L.g.fillRect(vx2 + 30 * u, vy2 - 16 * u, 7 * u, 16 * u); L.g.fillStyle = '#6a6a7a'; L.g.beginPath(); L.g.moveTo(vx2 + 29 * u, vy2 - 16 * u); L.g.lineTo(vx2 + 33.5 * u, vy2 - 28 * u); L.g.lineTo(vx2 + 38 * u, vy2 - 16 * u); L.g.fill();
+      }
+      finishLayer(L, 0.15); Ls.push(L);
+      L = bgLayer(0.34, 0.1);
+      ridge(L, function (x) { return at(0.76) + wav(x, 6, 9 * u, 5 * u, 2 * u); }, '#6f945a', '#5a7f4a', '#90b47a');
+      for (x = 0; x < L.W; x += 18 * u + R() * 26 * u) blobTree(L.g, x, at(0.76) + wav(x, 6, 9 * u, 5 * u, 2 * u) + 3 * u, (8 + R() * 6) * u, '#3f6236', '#57804a', '#3a2c1c');
+      finishLayer(L, 0.05); Ls.push(L);
+      L = bgLayer(0.56, 0);
+      ridge(L, function (x) { return at(0.9) + wav(x, 8, 6 * u, 4 * u, 2 * u); }, '#4a6e3e', '#3a5a30');
+      for (x = 0; x < L.W; x += 60 * u + R() * 80 * u) blobTree(L.g, x, at(0.9) + wav(x, 8, 6 * u, 4 * u, 2 * u) + 3 * u, (16 + R() * 8) * u, '#2f4f2a', '#426a38', '#2a2014');
+      finishLayer(L, 0); Ls.push(L);
+    } else if (st === 'harbour') {
+      /* Pirate Harbour: the open sea, far islands, a white town on a hill, ships at anchor */
+      L = bgLayer(0.05, 0.5);
+      L.g.fillStyle = vgrad(L.g, at(0.6), L.H, '#4aa8c8', '#2a7aa0'); L.g.fillRect(0, at(0.6), L.W, L.H);
+      for (k = 0; k < L.W / (280 * u); k++) { var ix = (k + 0.2 + R() * 0.6) * 280 * u, iw = (60 + R() * 60) * u, ih = (12 + R() * 22) * u; L.g.fillStyle = '#6f9a8a'; L.g.beginPath(); L.g.ellipse(ix, at(0.6), iw, ih, 0, Math.PI, 0); L.g.fill(); L.g.fillStyle = '#82aa96'; L.g.beginPath(); L.g.ellipse(ix - iw * 0.2, at(0.6), iw * 0.6, ih * 0.9, 0, Math.PI, 0); L.g.fill(); }
+      finishLayer(L, 0.35); Ls.push(L);
+      L = bgLayer(0.14, 0.25);
+      var tx3 = L.W * (0.25 + R() * 0.5);
+      L.g.fillStyle = '#5f9a6a'; L.g.beginPath(); L.g.ellipse(tx3, at(0.66), 120 * u, 36 * u, 0, Math.PI, 0); L.g.fill();
+      for (i = 0; i < 26; i++) { var hx3 = tx3 + (R() - 0.5) * 180 * u, hy3 = at(0.66) - Math.sqrt(Math.max(0, 1 - Math.pow((hx3 - tx3) / (120 * u), 2))) * 36 * u * (0.3 + R() * 0.6); house(L.g, hx3, hy3 + 4 * u, (6 + R() * 4) * u, (5 + R() * 3) * u, R() < 0.7 ? '#f4efe4' : '#e8c88a', R() < 0.5 ? '#c86a4a' : '#a85a3a', null); }
+      L.g.fillStyle = '#c8b898'; L.g.fillRect(tx3 + 70 * u, at(0.66) - 16 * u, 30 * u, 16 * u);
+      for (k = 0; k < L.W / (200 * u); k++) L.live.push({ k: 'ship', x: (k + 0.5) * 200 * u + R() * 60 * u, y: at(0.665) + R() * 6 * u, s: (0.5 + R() * 0.2) * u, face: R() < 0.5 ? -1 : 1, bob: R() * 6 });
+      finishLayer(L, 0.12); Ls.push(L);
+      L = bgLayer(0.3, 0.05);
+      L.g.fillStyle = 'rgba(255,255,255,0.35)';
+      for (x = 0; x < L.W; x += 6 * u) { if (hash(x, 2) < 0.6) continue; L.g.fillRect(x, at(0.72) + hash(x, 3) * L.H * 0.2, (3 + hash(x, 5) * 6) * u, 0.8 * u); }
+      for (k = 0; k < L.W / (360 * u); k++) L.live.push({ k: 'ship', x: (k + 0.3) * 360 * u + R() * 80 * u, y: at(0.74), s: (0.9 + R() * 0.3) * u, face: R() < 0.5 ? -1 : 1, bob: R() * 6 });
+      Ls.push(L);
+    } else if (st === 'city') {
+      /* Future City: three skylines with lit windows, a space elevator climbing out of sight, sky traffic */
+      L = bgLayer(0.06, 0.5);
+      L.g.fillStyle = '#4a4a80'; L.g.fillRect(L.W * 0.4, 0, 3 * u, at(0.6));
+      L.g.fillStyle = '#ffd27a'; for (var ly = 0; ly < at(0.6); ly += 14 * u) L.g.fillRect(L.W * 0.4 - u, ly, 5 * u, 1.5 * u);
+      [[0.06, 0.58, '#3a3e6e', 34], [0.18, 0.68, '#2c2f57', 50], [0.36, 0.8, '#1f2142', 66]].forEach(function (spec, li) {
+        var LL = li === 0 ? L : bgLayer(spec[0], 0.2);
+        for (x = -20; x < LL.W; x += spec[3] * u * (0.6 + R() * 0.5)) {
+          var bw = spec[3] * u * (0.5 + R() * 0.4), bh = (50 + R() * 110) * u * (1 - li * 0.15), by = at(spec[1]);
+          LL.g.fillStyle = spec[2]; LL.g.fillRect(x, by - bh, bw, LL.H);
+          LL.g.fillStyle = 'rgba(160,140,255,0.18)'; LL.g.fillRect(x, by - bh, 1.5 * u, LL.H);
+          if (R() < 0.35) { LL.g.fillStyle = spec[2]; LL.g.beginPath(); LL.g.moveTo(x, by - bh); LL.g.lineTo(x + bw / 2, by - bh - bw * 0.6); LL.g.lineTo(x + bw, by - bh); LL.g.fill(); }
+          if (R() < 0.3) { LL.g.fillStyle = R() < 0.5 ? '#ff78be' : '#7fe8ff'; LL.g.fillRect(x, by - bh + 6 * u, bw, 1.2 * u); }
+          if (R() < 0.4) { LL.g.fillRect(x + bw * 0.4, by - bh - 14 * u, 1.5 * u, 14 * u); }
+          for (var wy2 = by - bh + 4 * u; wy2 < by + 30 * u; wy2 += 5 * u) for (var wx2 = x + 2 * u; wx2 < x + bw - 2 * u; wx2 += 4 * u) if (hash(wx2, wy2) < (LOOK === 'gleaming' ? 0.7 : 0.4)) { LL.g.fillStyle = hash(wy2, wx2) < 0.7 ? (LOOK === 'sandy' ? '#e0b060' : '#ffd27a') : '#7fe8ff'; LL.g.fillRect(wx2, wy2, 1.5 * u, 2 * u); }
+        }
+        if (li > 0) { finishLayer(LL, 0.1 - li * 0.04); Ls.push(LL); }
+      });
+      finishLayer(L, 0.2); Ls.unshift(L);
+    }
+    return Ls;
+  }
+  function drawPainted(cx, cy, t) {
+    var rest = WH - VH, i, neon = LOOK === 'neon' || MAP.style === 'city';
+    if (neon) for (i = 0; i < 60; i++) { if ((i + (t >> 6)) % 9 === 0) continue; ctx.fillStyle = '#e9e4ff'; ctx.fillRect(Math.floor(hash(i, 3) * VW), Math.floor(hash(i, 5) * VH * 0.45), 0.5 + (i % 3) * 0.5, 0.5 + (i % 3) * 0.5); }
+    /* a soft sun with a glow around it */
+    var sunX = VW * 0.72 - cx * 0.02, sunY = VH * (MAP.style === 'desert' || MAP.style === 'uruk' ? 0.22 : 0.18) - (cy - rest) * 0.04, sr = VH / 14;
+    var sg = ctx.createRadialGradient(sunX, sunY, sr * 0.6, sunX, sunY, sr * 4);
+    sg.addColorStop(0, neon ? 'rgba(255,200,170,0.45)' : 'rgba(255,248,220,0.6)'); sg.addColorStop(1, 'rgba(255,248,220,0)');
+    ctx.fillStyle = sg; ctx.fillRect(sunX - sr * 4, sunY - sr * 4, sr * 8, sr * 8);
+    ctx.fillStyle = neon ? '#ffd9a8' : (MAP.sun || '#fff6dc'); ctx.beginPath(); ctx.arc(sunX, sunY, sr, 0, 6.283); ctx.fill();
+    /* soft painted clouds */
+    if (MAP.style !== 'city') for (i = 0; i < 6; i++) {
+      var span = VW + 300, wx = (((i * 257 + t * (0.03 + i * 0.008) - cx * 0.05) % span) + span) % span - 150, wy = VH * (0.08 + (i % 3) * 0.07) - (cy - rest) * 0.05, cs = VH / 30 * (1 + (i % 2) * 0.5);
+      var cc = neon ? 'rgba(70,60,120,0.7)' : 'rgba(255,255,255,0.85)', cs2 = neon ? 'rgba(50,40,96,0.6)' : 'rgba(214,226,236,0.8)';
+      ctx.fillStyle = cs2; ctx.beginPath(); ctx.ellipse(wx, wy + cs * 0.6, cs * 3.2, cs * 0.9, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = cc; [[-1.4, 0.1, 1], [0, -0.4, 1.4], [1.4, 0.1, 1.05], [0.6, 0.3, 0.9], [-0.7, 0.3, 0.9]].forEach(function (b) { ctx.beginPath(); ctx.arc(wx + b[0] * cs, wy + b[1] * cs, b[2] * cs, 0, 6.283); ctx.fill(); });
+    }
+    game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
+    if (MAP.style === 'city') game.cars.forEach(function (c) { var X = c.x, Y = c.y - (cy - rest) * 0.3; ctx.fillStyle = '#14162e'; ctx.fillRect(X - 2, Y, 5, 2); ctx.fillStyle = c.vx > 0 ? '#ffd27a' : '#ff6b9a'; ctx.fillRect(c.vx > 0 ? X + 3 : X - 3, Y, 1, 1); });
+    if (neon) { var hg = ctx.createLinearGradient(0, VH * 0.3 - (cy - rest) * 0.06, 0, VH * 0.75 - (cy - rest) * 0.06); hg.addColorStop(0, 'rgba(255,120,190,0)'); hg.addColorStop(1, 'rgba(255,120,190,0.35)'); ctx.fillStyle = hg; ctx.fillRect(0, 0, VW, VH); }
+    if (!bakedBg) buildBaked();
+    if (!bakedBg) return;
+    ctx.imageSmoothingEnabled = true;
+    bakedBg.forEach(function (L) {
+      var ox = -Math.round(cx * L.f), oy = -Math.round((cy - rest) * L.f * 0.6) - (L.H - VH) * 0.1;
+      ctx.drawImage(L.c, ox, oy);
+      L.live.forEach(function (o) {
+        var X = o.x + ox, Y = o.y + oy;
+        if (X < -60 || X > VW + 60) return;
+        if (o.k === 'volcano') {
+          for (var q = 0; q < 5; q++) { var ph = ((t * 0.2 + q * 30 + o.x) % 150) / 150, rr = (3 + ph * 9) * VH / 240; ctx.fillStyle = ph < 0.4 ? 'rgba(120,110,110,0.55)' : 'rgba(200,205,210,' + (0.5 - ph * 0.4) + ')'; ctx.beginPath(); ctx.arc(X + Math.sin(ph * 5 + o.x) * 4 + ph * 16, Y - ph * 50 * VH / 240, rr, 0, 6.283); ctx.fill(); }
+        } else if (o.k === 'fall') {
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          for (var q2 = 0; q2 < 6; q2++) { var fy = ((t * 1.2 + q2 * 11) % o.h); ctx.fillRect(X + (q2 % 3) * o.w / 3, Y + fy, 1, 3); }
+        } else if (o.k === 'ship') {
+          var bob = Math.sin(t * 0.03 + o.bob) * 0.6;
+          ctx.save(); ctx.translate(X, Y + bob); sailShip(ctx, 0, 0, o.s, LOOK === 'neon' ? '#14162e' : '#5a3a20', LOOK === 'neon' ? '#ff78be' : '#f4efe4', o.face); ctx.restore();
+        }
+      });
+    });
+    ctx.imageSmoothingEnabled = false;
+  }
   function haze() { var c3 = skyCols()[3]; ctx.globalAlpha = 0.2; ctx.fillStyle = c3; ctx.fillRect(0, 0, VW, VH); ctx.globalAlpha = 1; }
   function blit(L, cx, cy) { var rest = WH - VH; ctx.drawImage(L.c, -Math.round(cx * L.f), -Math.round((cy - rest) * L.f)); }
   function drawWallBackdrop(cx, cy, t) {
@@ -4237,6 +4596,7 @@
   }
 
   function drawBackdrop(cx, cy, t) {
+    drawPainted(cx, cy, t); return;
     if (MAP.style === 'city') { drawCityBackdrop(cx, cy, t); return; }
     if (MAP.style === 'desert' || MAP.style === 'uruk') { drawDesertBackdrop(cx, cy, t); return; }
     if (MAP.style === 'wall' || MAP.style === 'castle') { drawWallBackdrop(cx, cy, t); return; }
@@ -4870,7 +5230,7 @@
   /* ---------------- the stage: one fixed 1280 by 720 screen, scaled to fit the window ---------------- */
   var stage = $('stage'), SW = 1280, SH = 720, stageK = 1;
   /* three crisp zoom steps, each a whole number of screen pixels per game pixel */
-  var VIEWS = [[320, 180, 4], [427, 240, 3], [640, 360, 2]], ZOOM_NAMES = ['Close', 'Normal', 'Far'];
+  var VIEWS = [[320, 180, 4], [427, 240, 3], [640, 360, 2], [852, 480, 1280 / 852]], ZOOM_NAMES = ['Close', 'Normal', 'Far', 'Wide'];
   var zoom = parseInt(store('zoom'), 10);
   if (isNaN(zoom)) zoom = 1;
   var shakeOn = store('shake') !== '0';
