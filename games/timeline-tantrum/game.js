@@ -52,6 +52,21 @@
     road:     { kind: 'road', tool: true, ammo: 2 },
     testudo:  { kind: 'testudo', ammo: 2 },
     onager:   { kind: 'strike', style: 'onager', R: 24, dmg: 34, ammo: 1, unlock: 10, knock: 1.1 },
+    /* Crown Snags: medieval siege craft. Arrows, a charge, hot oil and a banner */
+    volley:  { kind: 'proj', wind: true, windK: 1.6, impact: true, R: 11, dmg: 13, vmax: 10.5, grav: 0.8, ammo: 3, spread: 5, aiR: 24, aiDmg: 34 },
+    lance:   { kind: 'lance', dmg: 30, range: 120, ammo: 2 },
+    oil:     { kind: 'oil', dmg: 24, range: 180, ammo: 2 },
+    banner:  { kind: 'banner', heal: 20, range: 90, ammo: 1 },
+    treb:    { kind: 'strike', style: 'treb', R: 46, dmg: 56, ammo: 1, unlock: 10, knock: 1.3 },
+    trebstone: { kind: 'proj', wind: false, impact: true, R: 46, dmg: 56, knock: 1.3 },
+    /* Anchor Snags: cannons, shot and gunpowder */
+    cannon:  { kind: 'proj', wind: false, impact: true, R: 26, dmg: 44, vmax: 12, grav: 0.55, ammo: 3, recoil: 2.4 },
+    blunder: { kind: 'blunder', dmg: 7, pellets: 7, range: 120, ammo: 2 },
+    launch:  { kind: 'launch', tool: true, ammo: 2, speed: 6.4 },
+    keg:     { kind: 'keg', ammo: 2 },
+    broadside: { kind: 'strike', style: 'broadside', R: 20, dmg: 26, ammo: 1, unlock: 10, knock: 1.1 },
+    bball:   { kind: 'proj', wind: false, impact: true, R: 20, dmg: 26, knock: 1.1 },
+    evarrow: { kind: 'proj', wind: true, impact: true, R: 8, dmg: 9 },
     /* Sudden Death */
     meteor:  { kind: 'proj', wind: false, impact: true, R: 18, dmg: 22 },
     /* map events */
@@ -61,7 +76,7 @@
   var WORDER = ['lob', 'bomb', 'shove', 'dig'];
   var MAP = MAPS.jungle, LOOK = 'normal';
   var ARTS = window.B5ARTEFACTS, JAY = window.B5JAY, TL = window.B5TIMELINE, RIPPLE = window.B5RIPPLE;
-  var MAP_IDS = ['jungle', 'desert', 'wall', 'city'];
+  var MAP_IDS = ['jungle', 'desert', 'wall', 'castle', 'harbour', 'city'];
   var READY = TL.filter(function (e) { return e.ready && ER[e.id]; }).map(function (e) { return e.id; });
   function realOf(mid) { return ARTS[mid] || ARTS.jungle; }
   function glitchOf(mid) { return ARTS[mid === 'jungle' ? 'glitches' : mid + 'Glitches'] || ARTS.glitches; }
@@ -78,7 +93,9 @@
     pre:   { fw: 1.0, lob: 1,    bomb: 1.15, shove: 1.4, kill: 25, water: 6 },
     fut:   { fw: 2.0, lob: 1.1,  bomb: 1,    shove: 1,   kill: 25, water: 6 },
     egypt: { fw: 2.5, lob: 1.05, bomb: 1.05, shove: 1.1, kill: 40, water: 16, weak: 0.6 },
-    rome:  { fw: 1.6, lob: 1, bomb: 1.05, shove: 1.25, kill: 36, water: 12 }
+    rome:  { fw: 1.6, lob: 1, bomb: 1.05, shove: 1.25, kill: 36, water: 12 },
+    med:   { fw: 1.5, lob: 1.05, bomb: 1.1, shove: 1.3, kill: 32, water: 10 },
+    pirate: { fw: 1.2, lob: 1.05, bomb: 1.05, shove: 1.3, kill: 30, water: 16 }
   };
   function allArts() { var a = []; MAP_IDS.forEach(function (m) { a = a.concat(realOf(m), glitchOf(m)); }); return a; }
   function setMap(id, look) { MAP = MAPS[id] || MAPS.jungle; LOOK = look || 'normal'; game.cars = []; buildSky(); buildCityBg(); }
@@ -492,6 +509,279 @@
     tctx.putImageData(img, 0, 0);
     miniDirty = true;
   }
+  /* ---------- Castle Siege: a castle on a raised mound. Round towers with rooms and pointed roofs, a keep with
+     a gate passage and a hall, curtain walls with arches and battlements, ditches, a wooden siege tower and a
+     sapper's tunnel. zones: 0 grass and earth, 1 castle stone, 3 roof, 4 timber ---------- */
+  var castleFlags = [], castleWheels = [];
+  function genCastle(seed) {
+    var R = rng(seed), x, y, k;
+    mask.fill(0); burnt.fill(0); zone.fill(0); castleFlags = []; castleWheels = [];
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
+    var mx = Math.round(WW * (0.42 + R() * 0.16)), mr = 175;
+    var tops = new Float32Array(WW);
+    for (x = 0; x < WW; x++) {
+      var t = x / WW;
+      var h = 302 - 16 * Math.sin(t * 6.283 * 1.3 + p1) - 9 * Math.sin(t * 6.283 * 3.1 + p2) - 3 * Math.sin(t * 6.283 * 8.3 + p3);
+      var dm = Math.abs(x - mx);
+      if (dm < mr) { var cb = Math.cos(dm / mr * Math.PI / 2); h -= 44 * cb * cb; }
+      var edge = Math.min(x, WW - 1 - x);
+      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      tops[x] = h;
+    }
+    for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
+    function put(xx, yy, z) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; mask[ii] = 1; zone[ii] = z; }
+    function hole(xx, yy) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; if (zone[ii] === 1 || zone[ii] === 4) mask[ii] = 0; }
+    function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
+    function arch(cx, g, hw, ht) {
+      for (var ax = cx - hw; ax <= cx + hw; ax++) for (var ay = g - ht; ay < g + 1; ay++) {
+        var ux = (ax - cx) / (hw + 0.5), uy = (g - ht + hw - ay) / hw;
+        if (ay > g - ht + hw || ux * ux + uy * uy <= 1) hole(ax, ay);
+      }
+    }
+    var half = 108, wl = mx - half, wr = mx + half;
+    var wallTop = Math.min(gAt(wl), gAt(wr), gAt(mx), gAt(mx - 60), gAt(mx + 60)) - 30;
+    /* curtain walls between the towers and the keep, with battlements to stand on */
+    for (x = wl + 14; x <= wr - 14; x++) {
+      if (Math.abs(x - mx) <= 22) continue;
+      var cren = ((x - wl) % 10) < 4 ? 4 : 0;
+      for (y = wallTop - cren; y < gAt(x) + 3; y++) put(x, y, 1);
+    }
+    /* an arch through each wall, so you can walk from the courtyard to the outside */
+    [Math.round((wl + 14 + mx - 22) / 2), Math.round((mx + 22 + wr - 14) / 2)].forEach(function (ax) { arch(ax, gAt(ax), 8, 21); });
+    /* the keep: a gate passage at the bottom, a hall with doors onto the walls, a room above, battlements on top */
+    var kTop = wallTop - 46;
+    for (x = mx - 22; x <= mx + 22; x++) {
+      var kc = ((x - mx + 22) % 9) < 4 ? 4 : 0;
+      for (y = kTop - kc; y < gAt(x) + 3; y++) put(x, y, 1);
+    }
+    arch(mx, gAt(mx), 9, 23);
+    var kd = R() < 0.5 ? -1 : 1;
+    for (x = mx - 15; x <= mx + 15; x++) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
+    for (x = mx + kd * 15; Math.abs(x - mx) <= 22; x += kd) for (y = wallTop - 18; y < wallTop; y++) hole(x, y);
+    for (x = mx - 13; x <= mx + 13; x++) for (y = wallTop - 40; y < wallTop - 27; y++) hole(x, y);
+    for (k = -1; k <= 1; k += 2) for (y = wallTop - 38; y < wallTop - 31; y++) { hole(mx + k * 18, y); hole(mx + k * 19, y); }
+    castleFlags.push([mx, kTop - 5]);
+    /* two round towers, two rooms each, with tall pointed roofs */
+    [wl, wr].forEach(function (cx, side) {
+      var tTop = wallTop - 56, inner = side === 0 ? 1 : -1;
+      for (x = cx - 14; x <= cx + 14; x++) for (y = tTop; y < gAt(x) + 3; y++) put(x, y, 1);
+      for (x = cx - 9; x <= cx + 9; x++) for (y = wallTop - 20; y < wallTop; y++) hole(x, y);
+      for (x = cx + inner * 9; inner > 0 ? x <= cx + 14 : x >= cx - 14; x += inner) for (y = wallTop - 19; y < wallTop; y++) hole(x, y);
+      for (x = cx - 9; x <= cx + 9; x++) for (y = tTop + 8; y < tTop + 24; y++) hole(x, y);
+      for (y = tTop + 12; y < tTop + 19; y++) { hole(cx - inner * 12, y); hole(cx - inner * 13, y); }
+      for (k = 0; k <= 22; k++) { var hw = Math.round(16 * (1 - k / 22)); for (x = cx - hw; x <= cx + hw; x++) put(x, tTop - 1 - k, 3); }
+      castleFlags.push([cx, tTop - 24]);
+    });
+    /* ditches outside the towers */
+    [wl - 52, wr + 52].forEach(function (dx) { blob(dx, gAt(dx) + 3, 22, 9, 0); });
+    /* a wooden siege tower rolled up to one side: three floors and a drawbridge */
+    var sd = R() < 0.5 ? -1 : 1, sx = clamp(mx + sd * (half + 120 + Math.round(R() * 40)), 170, WW - 170), sg = Math.max(gAt(sx - 13), gAt(sx + 13)) + 2;
+    for (y = sg - 62; y < sg + 3; y++) for (x = sx - 13 + (y < sg - 50 ? 1 : 0); x <= sx + 13 - (y < sg - 50 ? 1 : 0); x++) put(x, y, 4);
+    for (x = sx - 9; x <= sx + 9; x++) for (y = sg - 56; y < sg - 38; y++) hole(x, y);
+    var db = -sd;
+    for (x = sx + db * 9; Math.abs(x - sx) <= 13; x += db) for (y = sg - 56; y < sg - 38; y++) hole(x, y);
+    for (k = 0; k < 18; k++) { var bxx = sx + db * (14 + k); for (y = sg - 62; y < sg - 59; y++) put(bxx, y, 4); }
+    castleWheels = [[sx - 8, sg], [sx + 8, sg]];
+    /* a sapper's tunnel dug under one of the towers */
+    var tx0 = sd > 0 ? wl - 60 : wr - 10, tw = 70, tdep = gAt(tx0 + 35) + 34;
+    for (x = tx0; x < tx0 + tw; x++) for (y = tdep; y < tdep + 15; y++) if (x > 0 && x < WW && zone[y * WW + x] === 0) mask[y * WW + x] = 0;
+    for (k = 0; k < 2; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - mx) < 140) continue; blob(hx, gAt(hx) + 54 + R() * 24, 20 + R() * 10, 8 + R() * 4, 0); }
+    paintCastle();
+  }
+  function paintCastle() {
+    var P = MAP.pal, x, y, i, look = LOOK, gold = look === 'golden', neon = look === 'neon', wood = look === 'rough';
+    img = tctx.createImageData(WW, WH); data = img.data;
+    for (x = 0; x < WW; x++) {
+      var d = 0, pz = -1, gap = 0, dPrev = 0;
+      for (y = 0; y < WH; y++) {
+        i = y * WW + x;
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; pz = -1; gap++; continue; }
+        /* a cave underground carries on the deep colours below it instead of starting fresh topsoil */
+        if (gap > 0 && gap < 34 && dPrev > 12 && zone[i] === 0) d = dPrev + gap;
+        gap = 0;
+        var z = zone[i], nz = hash(x, y), col;
+        if (z === 0 && pz > 0) d = 5;
+        pz = z;
+        if (z === 1) {
+          var row = (y / 5) | 0, bx = (x + (row % 2) * 5) % 10, mort = bx === 0 || y % 5 === 0;
+          if (wood) col = d < 1 ? P.wood2 : ((x % 5) === 0 ? P.woodD : (hash(x / 5 | 0, y >> 3) < 0.3 ? P.wood2 : P.wood));
+          else if (gold) col = d < 1 ? P.gold : (mort ? [214, 206, 188] : P.white);
+          else if (neon) col = d < 1 || !mask[i - 1] || !mask[i + 1] ? (hash(x >> 3, 1) < 0.5 ? P.neon : P.neon2) : (mort ? P.nstone2 : P.nstone);
+          else col = d < 1 ? P.ston1 : (mort ? P.mortar : (hash(((x + (row % 2) * 5) / 10) | 0, row) < 0.25 ? P.stonD : (nz < 0.5 ? P.ston1 : P.ston2)));
+        } else if (z === 3) {
+          col = wood ? ((x % 3) === 0 ? P.woodD : P.wood2) : (gold ? (d < 2 ? [255, 236, 150] : P.gold) : (neon ? P.neon2 : ((y % 3) === 0 ? P.slate2 : P.slate)));
+        } else if (z === 4) {
+          col = neon ? ((y % 4) === 0 ? P.nstone2 : P.nstone) : ((y % 4) === 0 ? P.woodD : (hash(x >> 3, y >> 2) < 0.3 ? P.wood2 : P.wood));
+          if (!neon && (x % 11) === 0 && (y % 4)) col = P.woodD;
+        } else {
+          if (d < 2) col = neon ? [70, 96, 120] : P.grass1;
+          else if (d < 4) col = neon ? [52, 70, 92] : P.grass2;
+          else {
+            col = ((((y + (x >> 5) * 3) >> 2) % 7) === 0) ? P.earth2 : P.earth1;
+            if (neon) col = blend(col, [44, 40, 80], 0.5);
+            if (d > 60 + hash(y, x) * 12) col = P.deep;
+            if (nz < 0.04) col = P.speck;
+          }
+        }
+        setPx(i, col);
+        d++;
+      }
+    }
+    for (x = 1; x < WW - 1; x++) {
+      for (y = 3; y < WH; y++) {
+        i = y * WW + x;
+        if (mask[i] && !mask[i - WW] && zone[i] === 0 && !neon) {
+          var hv = hash(x * 3, y);
+          if (hv < 0.3) { setPx(i - WW, P.tuft); if (hv < 0.1) setPx(i - 2 * WW, P.tuft); }
+          else if (hv > 0.982) { setPx(i - WW, P.tuft); setPx(i - 2 * WW, hv > 0.991 ? P.flower2 : P.flower); }
+        }
+      }
+    }
+    castleWheels.forEach(function (w) {
+      for (var a = 0; a < 20; a++) { var an = a / 20 * 6.283; deco(w[0] + Math.cos(an) * 5, w[1] - 4 + Math.sin(an) * 5, wood ? P.woodD : [72, 48, 28]); }
+      for (var b = -4; b <= 4; b++) { deco(w[0] + b, w[1] - 4, [72, 48, 28]); deco(w[0], w[1] - 4 + b, [72, 48, 28]); }
+    });
+    /* pennants on the tower tops: decoration only */
+    castleFlags.forEach(function (f) {
+      for (var k = 0; k < 7; k++) deco(f[0], f[1] - k, wood ? P.woodD : [74, 60, 44]);
+      var pc = neon ? P.neon : (gold ? P.gold : [63, 122, 58]);
+      for (var a = 0; a < 5; a++) for (var b = 0; b < 3 - (a >> 1); b++) deco(f[0] + 1 + a, f[1] - 6 + b, a === 2 && b === 1 && !neon ? [240, 196, 70] : pc);
+    });
+    tctx.putImageData(img, 0, 0);
+    miniDirty = true;
+  }
+  /* paint a decoration pixel into the open air: drawn, but never solid */
+  function deco(xx, yy, c) { xx = Math.round(xx); yy = Math.round(yy); if (xx < 0 || xx >= WW || yy < 0 || yy >= WH || mask[yy * WW + xx]) return; setPx(yy * WW + xx, c); }
+
+  /* ---------- Pirate Harbour: two sandy islands split by a channel, a stone fort, a shipwreck you can stand on,
+     a wooden pier and a smugglers' cave. zones: 0 sand, 1 fort stone, 4 ship and pier timber ---------- */
+  var palmAt = [];
+  function genHarbour(seed) {
+    var R = rng(seed), x, y, k;
+    mask.fill(0); burnt.fill(0); zone.fill(0); palmAt = [];
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
+    var chan = Math.round(WW * (0.44 + R() * 0.12)), cw = 130;
+    var tops = new Float32Array(WW);
+    for (x = 0; x < WW; x++) {
+      var t = x / WW;
+      var h = 318 - 24 * Math.sin(t * 6.283 * 1.2 + p1) - 10 * Math.sin(t * 6.283 * 3.4 + p2) - 3 * Math.sin(t * 6.283 * 9.1 + p3);
+      var dc = Math.abs(x - chan);
+      if (dc < cw) { var cb = Math.cos(dc / cw * Math.PI / 2); h += 165 * cb * cb; }
+      var edge = Math.min(x, WW - 1 - x);
+      if (edge < 150) h += (150 - edge) * (150 - edge) / 85;
+      tops[x] = h;
+    }
+    for (x = 0; x < WW; x++) for (y = Math.max(0, Math.floor(tops[x])); y < WH; y++) mask[y * WW + x] = 1;
+    function put(xx, yy, z) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; mask[ii] = 1; zone[ii] = z; }
+    function hole(xx, yy) { if (xx < 0 || xx >= WW || yy < 0 || yy >= WH) return; var ii = yy * WW + xx; if (zone[ii] === 1 || zone[ii] === 4) mask[ii] = 0; }
+    function gAt(xx) { return Math.floor(tops[clamp(Math.round(xx), 0, WW - 1)]); }
+    /* the fort on one island: thick walls, a room inside with doors, gun ports facing the sea */
+    var fs = R() < 0.5 ? -1 : 1, fx = clamp(chan + fs * (250 + Math.round(R() * 70)), 150, WW - 150), fb = 0;
+    for (x = fx - 48; x <= fx + 48; x++) fb = Math.max(fb, gAt(x));
+    var fTop = fb - 42;
+    for (x = fx - 48; x <= fx + 48; x++) {
+      var cr = ((x - fx + 48) % 10) < 4 ? 4 : 0;
+      for (y = fTop - cr; y < gAt(x) + 3; y++) put(x, y, 1);
+    }
+    for (x = fx - 36; x <= fx + 36; x++) for (y = fTop + 10; y < fb - 8; y++) hole(x, y);
+    for (x = fx + fs * 36; Math.abs(x - fx) <= 48; x += fs) for (y = fb - 27; y < fb - 8; y++) hole(x, y);
+    for (k = 0; k < 3; k++) { var gp = fx - fs * 48 + fs * 0; for (y = fTop + 4; y < fTop + 7; y++) { hole(fx - 30 + k * 30, y); hole(fx - 29 + k * 30, y); hole(fx - 28 + k * 30, y); } }
+    castleFlags = [[fx, fTop - 6]];
+    /* the wreck in the channel: a tilted hull with a cabin, a broken mast and a yard to stand on */
+    var deck = WATER - 22, tilt = (R() < 0.5 ? -1 : 1) * 5;
+    for (x = chan - 62; x <= chan + 62; x++) {
+      var u = (x - chan) / 62, dy0 = Math.round(deck + u * tilt), bot = Math.round(dy0 + 6 + 30 * Math.sqrt(Math.max(0, 1 - u * u)));
+      for (y = dy0; y <= bot; y++) put(x, y, 4);
+      if (Math.abs(u) > 0.86) for (y = dy0 - 6; y < dy0; y++) put(x, y, 4);
+    }
+    for (x = chan - 30; x <= chan + 22; x++) for (y = Math.round(deck + (x - chan) / 62 * tilt) + 4; y < deck + 20 + Math.round((x - chan) / 62 * tilt); y++) hole(x, y);
+    for (x = chan - 38; x < chan - 30; x++) for (y = deck + 8; y < deck + 18; y++) hole(x, y);
+    var mstX = chan + 6;
+    for (y = deck - 58; y < deck + 2; y++) { put(mstX, y, 4); put(mstX + 1, y, 4); }
+    for (x = mstX - 14; x <= mstX + 20; x++) { put(x, deck - 40, 4); put(x, deck - 39, 4); }
+    /* a wooden pier from the other island out over the water */
+    var ps = -fs, sx = chan, pierY = WATER - 28;
+    for (k = 0; k < 500; k++) { sx = chan + ps * k; if (sx < 1 || sx > WW - 2) break; if (tops[sx] <= pierY + 3) break; }
+    for (k = -4; k < 66; k++) { var qx = sx - ps * k; if (qx < 0 || qx >= WW) continue; for (y = pierY; y < pierY + 3; y++) if (!mask[y * WW + qx]) put(qx, y, 4); }
+    for (k = 10; k < 66; k += 18) { var qx2 = sx - ps * k; if (qx2 < 0 || qx2 >= WW - 1) continue; for (y = pierY + 3; y < WH; y++) { if (mask[y * WW + qx2]) break; put(qx2, y, 4); put(qx2 + 1, y, 4); } }
+    /* a smugglers' cave in the fort's island */
+    var cvx = clamp(fx - fs * 90, 160, WW - 160);
+    blob(cvx, gAt(cvx) + 44, 26, 10, 0);
+    for (k = 0; k < 2; k++) { var hx = 200 + R() * (WW - 400); if (Math.abs(hx - chan) < 150) continue; blob(hx, gAt(hx) + 52 + R() * 20, 18 + R() * 10, 7 + R() * 3, 0); }
+    /* palm trees, drawn later as decoration */
+    for (x = 80; x < WW - 80; x += 46 + Math.round(R() * 60)) if (Math.abs(x - fx) > 60 && Math.abs(x - chan) > 140 && gAt(x) < WATER - 26) palmAt.push(x);
+    paintHarbour();
+  }
+  function paintHarbour() {
+    var P = MAP.pal, x, y, i, look = LOOK, wild = look === 'overgrown', neon = look === 'neon', gold = look === 'golden';
+    img = tctx.createImageData(WW, WH); data = img.data;
+    for (x = 0; x < WW; x++) {
+      var d = 0, pz = -1, gap = 0, dPrev = 0;
+      for (y = 0; y < WH; y++) {
+        i = y * WW + x;
+        if (!mask[i]) { if (d > 0) dPrev = d; d = 0; pz = -1; gap++; continue; }
+        /* a cave underground carries on the deep colours below it instead of starting fresh topsoil */
+        if (gap > 0 && gap < 34 && dPrev > 12 && zone[i] === 0) d = dPrev + gap;
+        gap = 0;
+        var z = zone[i], nz = hash(x, y), col;
+        if (z === 0 && pz > 0) d = 5;
+        pz = z;
+        if (z === 1) {
+          var row = (y / 5) | 0, bx = (x + (row % 2) * 5) % 10, mort = bx === 0 || y % 5 === 0;
+          if (gold) col = d < 1 ? P.gold : (mort ? [214, 206, 188] : P.white);
+          else if (neon) col = d < 1 || !mask[i - 1] || !mask[i + 1] ? (hash(x >> 3, 1) < 0.5 ? P.neon : P.neon2) : (mort ? P.nstone2 : P.nstone);
+          else {
+            col = d < 1 ? P.ston1 : (mort ? P.mortar : (hash(((x + (row % 2) * 5) / 10) | 0, row) < 0.25 ? P.stonD : (nz < 0.5 ? P.ston1 : P.ston2)));
+            if (wild && hash(x >> 1, y >> 2) < 0.3) col = nz < 0.5 ? P.vine : P.moss;
+          }
+        } else if (z === 4) {
+          col = neon ? ((y % 4) === 0 ? P.nstone2 : P.nstone) : ((y % 4) === 0 ? P.woodD : (hash(x >> 3, y >> 2) < 0.3 ? P.wood2 : P.wood));
+          if (!neon && (x % 13) === 0 && (y % 4)) col = P.woodD;
+          if (gold && d < 1) col = P.gold;
+          if (wild && hash(x >> 1, y >> 2) < 0.22) col = P.vine;
+        } else {
+          if (wild && d < 2) col = P.grass1;
+          else if (wild && d < 4) col = P.grass2;
+          else if (d < 2) col = neon ? [70, 96, 120] : P.sand1;
+          else if (d < 6) col = neon ? [52, 70, 92] : (((x + y * 3) >> 2) % 5 === 0 ? P.sand1 : P.sand2);
+          else {
+            col = ((((y + (x >> 5) * 3) >> 2) % 6) === 0) ? P.sand3 : P.sand2;
+            if (d > 58 + hash(y, x) * 12) col = P.deep;
+            if (nz < 0.04) col = P.speck;
+            if (neon) col = blend(col, [44, 40, 80], 0.55);
+          }
+        }
+        setPx(i, col);
+        d++;
+      }
+    }
+    for (x = 1; x < WW - 1; x++) {
+      for (y = 3; y < WH; y++) {
+        i = y * WW + x;
+        if (mask[i] && !mask[i - WW] && zone[i] === 0 && !neon) {
+          var hv = hash(x * 3, y);
+          if (hv < (wild ? 0.4 : 0.05)) { setPx(i - WW, P.tuft); if (hv < (wild ? 0.15 : 0.02)) setPx(i - 2 * WW, P.tuft); }
+          else if (hv > 0.993) { setPx(i - WW, P.tuft); setPx(i - 2 * WW, P.flower); }
+        }
+      }
+    }
+    /* palm trees and the fort flag: decoration only */
+    palmAt.forEach(function (px0) {
+      var gy = surfaceY(px0); if (gy < 0) return;
+      var lean = hash(px0, 3) < 0.5 ? -1 : 1, top = [px0, gy];
+      for (var k = 0; k < 24; k++) { var tx = px0 + lean * Math.round(k * k / 70); deco(tx, gy - k, neon ? [20, 22, 46] : [122, 90, 52]); deco(tx + 1, gy - k, neon ? [20, 22, 46] : (k % 3 ? [150, 112, 66] : [98, 70, 40])); top = [tx, gy - 24]; }
+      var fc = neon ? [255, 120, 190] : (wild ? [52, 120, 52] : [70, 150, 72]);
+      [-2.8, -2.3, -1.6, -0.9, -0.4].forEach(function (an) { for (var j = 0; j < 11; j++) deco(top[0] + Math.cos(an) * j, top[1] + Math.sin(an) * j * 0.6 + j * j * 0.05, fc); });
+      deco(top[0], top[1] + 1, [120, 80, 40]); deco(top[0] + 1, top[1] + 2, [120, 80, 40]);
+    });
+    castleFlags.forEach(function (f) {
+      for (var k = 0; k < 10; k++) deco(f[0], f[1] - k, [74, 60, 44]);
+      for (var a = 0; a < 6; a++) for (var b = 0; b < 4; b++) deco(f[0] + 1 + a, f[1] - 9 + b, neon ? P.neon2 : [29, 29, 36]);
+      if (!neon) { deco(f[0] + 3, f[1] - 8, [244, 239, 228]); deco(f[0] + 4, f[1] - 8, [244, 239, 228]); deco(f[0] + 3, f[1] - 6, [244, 239, 228]); deco(f[0] + 4, f[1] - 6, [244, 239, 228]); }
+    });
+    tctx.putImageData(img, 0, 0);
+    miniDirty = true;
+  }
   function paintCity() {
     var P = MAP.pal, x, y, i, wild = LOOK === 'overgrown', bright = LOOK === 'gleaming', sandy = LOOK === 'sandy', k2;
     if (sandy && MAP.sandy) { P = {}; for (k2 in MAP.pal) P[k2] = MAP.pal[k2]; for (k2 in MAP.sandy) P[k2] = MAP.sandy[k2]; }
@@ -546,6 +836,8 @@
     if (MAP.style === 'city') { genCity(seed); return; }
     if (MAP.style === 'desert') { genDesert(seed); return; }
     if (MAP.style === 'wall') { genWall(seed); return; }
+    if (MAP.style === 'castle') { genCastle(seed); return; }
+    if (MAP.style === 'harbour') { genHarbour(seed); return; }
     var R = rng(seed), x, y, i;
     var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
     var a1 = 28 + R() * 22, a2 = 14 + R() * 12, a3 = 5 + R() * 5;
@@ -655,7 +947,7 @@
     ai: null, winner: null, overlay: 'menu', look: null, lookT: 0, shake: 0, turnNo: 0,
     bannerT: 0, lastPower: 0, stats: { best: 0, bestBy: '', shots: 0 }, opts: null,
     arts: [], crates: [], courier: null, barker: null, finds: [], birds: [],
-    strikes: [], warn: [], fuel: 0, tx: null, sudden: false, cars: [], tour: null, barrels: [], later: []
+    strikes: [], warn: [], fuel: 0, tx: null, sudden: false, cars: [], tour: null, barrels: [], later: [], flows: [], flags: []
   };
   window.B5GAME = game;
   var cam = { x: 0, y: 0 };
@@ -807,14 +1099,15 @@
   }
 
   function land(c) {
-    var v = c.vy;
-    c.flip = false; c.airT = 0; c.jet = false; c.swing = null;
+    var v = c.vy, safe = !!c.ball;
+    c.flip = false; c.airT = 0; c.jet = false; c.swing = null; c.ball = false;
+    if (safe) { dust(c.x, c.y, 12, 8); sfx('land', 1); game.shake = Math.max(game.shake, 2); }
     if (c.knock && v > 2.2) {
       c.vy = -v * 0.3; c.vx *= 0.55;
       if (c.vy < -0.8 && bodyClear(c.x, c.y - 1)) { c.y -= 1; sfx('land', 0.5); return; }
     }
     c.st = 'ground'; c.vx = 0; c.vy = 0; c.knock = false;
-    if (v > 4.6) hurt(c, Math.round((v - 4.6) * 10) + 3, null);
+    if (v > 4.6 && !safe) hurt(c, Math.round((v - 4.6) * 10) + 3, null);
     if (v > 2) { sfx('land', 0.6); dust(c.x, c.y, Math.min(8, Math.round(v * 1.5)), 5); }
     if (v > 3 && game.state !== 'demo') {
       sfx('hit', 0.4); dust(c.x, c.y, 10, 9); game.shake = Math.max(game.shake, 1 + v * 0.4);
@@ -832,7 +1125,7 @@
     c.sqv = (c.sqv || 0) * 0.68 - (c.sq || 0) * 0.32; c.sq = (c.sq || 0) + c.sqv;
     if (c.alive && c.st === 'ground' && !c.walking && (game.t + c.blinkAt) % 96 === 0) kick(c, 0.035);
     /* tumbling: a smooth spin that follows the speed of the knock */
-    if (c.knock && c.st === 'air') c.spin = (c.spin || 0) + (c.vx < 0 ? -1 : 1) * Math.min(0.32, (Math.abs(c.vx) + Math.abs(c.vy)) * 0.05);
+    if ((c.knock || c.ball) && c.st === 'air') c.spin = (c.spin || 0) + (c.vx < 0 ? -1 : 1) * Math.min(0.32, (Math.abs(c.vx) + Math.abs(c.vy)) * 0.05);
     else c.spin = 0;
     /* knocked Snags leave a dust trail */
     if (c.alive && c.knock && c.st === 'air' && game.t % 3 === 0 && Math.abs(c.vx) + Math.abs(c.vy) > 2) addPart({ k: 'puff', x: c.x, y: c.y - 9, life: 20, max: 20, r: 2 });
@@ -843,8 +1136,9 @@
     if (c.sled && c.knock) c.sled = false;
     if (c.st === 'ground' && !onGround(c.x, c.y)) { c.st = 'air'; c.vx = c.sled ? c.sv : 0; c.vy = 0; }
     if (c.swing) { c.st = 'air'; swingStep(c); c.airT++; }
-    else if (c.st === 'air') { if (c.jet) jetStep(c); else airStep(c); c.airT++; }
+    else if (c.st === 'air') { if (c.jet) jetStep(c); else airStep(c); c.airT++; if (c.ball && c.st === 'air') { ballHits(c); if (game.t % 2 === 0) addPart({ k: 'puff', x: c.x, y: c.y - 9, life: 22, max: 22, r: 2.4, col: '#c8c8c8' }); } }
     else if (c.sled) sledStep(c);
+    else if (c.lance) lanceStep(c);
     if (c.alive && c.y > WATER + 4) drown(c);
   }
 
@@ -915,10 +1209,12 @@
       p.rest = false;
     }
     p.vy += G * (w.grav === undefined ? 1 : w.grav);
-    if (w.wind) p.vx += game.wind * 0.0016;
+    if (w.wind) p.vx += game.wind * 0.0016 * (w.windK || 1);
     var n = Math.max(1, Math.ceil(Math.max(Math.abs(p.vx), Math.abs(p.vy)) / 1.2));
     for (var s = 0; s < n; s++) {
       var nx = p.x + p.vx / n, ny = p.y + p.vy / n;
+      /* shots from far away (a trebuchet, a ship) sail over everything until they near their target */
+      if (p.passX !== undefined && Math.abs(nx - p.passX) > 46) { p.x = nx; p.y = ny; if (nx < -120 || nx > WW + 120) return 'gone'; continue; }
       if (nx < -60 || nx > WW + 60) return 'gone';
       if (ny > WATER + 2) { p.x = nx; p.y = ny; return 'water'; }
       if (solid(nx, ny)) {
@@ -1141,7 +1437,7 @@
   }
 
   /* ---------------- era barrels: tar pots, oil jars and fuel cells that set each other off ---------------- */
-  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil' };
+  var BARREL = { pre: 'tar', egypt: 'oil', fut: 'fuel', rome: 'oil', med: 'tar', pirate: 'keg' };
   function placeBarrels() {
     game.barrels = [];
     var n = 2 + Math.floor(Math.random() * 3), kind = BARREL[MAP.era] || 'tar';
@@ -1155,7 +1451,11 @@
   function updBarrels() {
     for (var i = game.barrels.length - 1; i >= 0; i--) {
       var b = game.barrels[i];
-      if (b.fuse > 0) { if (--b.fuse === 0) { game.barrels.splice(i, 1); explode(b.x, b.y - 5, 30, 36, { by: b.by, kmul: 1.1 }); say('big'); } continue; }
+      if (b.fuse > 0) { if (b.fuse % 10 === 0 && b.armed) sfx('tick'); if (--b.fuse === 0) { game.barrels.splice(i, 1); explode(b.x, b.y - 5, 30, 36, { by: b.by, kmul: 1.1 }); say('big'); } continue; }
+      if (b.armed) for (var bs = 0; bs < game.snags.length; bs++) {
+        var sn = game.snags[bs];
+        if (sn.alive && sn.team.era !== b.armed && Math.abs(sn.x - b.x) < 12 && sn.y > b.y - 20 && sn.y < b.y + 14) { b.fuse = 40; b.trip = true; game.look = { x: b.x, y: b.y - 20 }; game.lookT = 60; break; }
+      }
       settleThing(b);
       if (b.y > WATER + 4) { game.barrels.splice(i, 1); splash(b.x); }
     }
@@ -1306,7 +1606,8 @@
     $('jay').hidden = false;
     jayHide = 260; jayTalk = 50;
     jayMood = { big: 'wow', double: 'wow', glitch: 'wow', strike: 'wow', sudden: 'wow', reactor: 'wow', sandstorm: 'wow', sun: 'wow', scarab: 'wow',
-      birds: 'grin', find: 'grin', crate: 'grin', win: 'grin', swing: 'grin', jet: 'grin', sled: 'grin', spear: 'grin', dune: 'grin', bark: 'grin' }[kind] || null;
+      birds: 'grin', find: 'grin', crate: 'grin', win: 'grin', swing: 'grin', jet: 'grin', sled: 'grin', spear: 'grin', dune: 'grin', bark: 'grin',
+      lance: 'wow', cannon: 'wow', broadside: 'wow', treb: 'wow', arrows: 'wow', tide: 'wow', banner: 'grin', launch: 'grin', volley: 'grin', keg: 'grin' }[kind] || null;
     voice('jay', 'turn');
   }
   function jayTick() {
@@ -1370,12 +1671,12 @@
       say(sty === 'city' ? 'reactor' : (sty === 'desert' ? 'sandstorm' : 'sudden'), true);
     }
     if (game.gale > 0) { game.gale--; game.wind = (Math.random() < 0.5 ? -1 : 1) * (7 + Math.floor(Math.random() * 4)); }
-    if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner('The Nile floods!', null, '#3a8a9a', 'pin'); }
+    if (game.flood && game.flood.phase === 'warn' && game.turnNo >= game.flood.at) { game.flood.phase = 'rise'; game.flood.until = game.turnNo + 5; banner(MAP.style === 'harbour' ? 'High tide!' : 'The Nile floods!', null, MAP.style === 'harbour' ? '#2a8ab0' : '#3a8a9a', 'pin'); }
     else if (game.flood && game.flood.phase === 'rise' && game.turnNo >= game.flood.until) game.flood.phase = 'fall';
     if (game.sudden && MAP.style === 'desert' && Math.abs(game.wind) < 5) game.wind = (game.wind < 0 ? -1 : 1) * (5 + Math.floor(Math.random() * 4));
     maybeDeliver();
     if (!(game.opts && game.opts.training)) banner(c.name + "'s go", null, ER[team.era].tag, team.ctrl === 'ai' ? 'cpu' : null);
-    sfx('turn', { pre: 1, egypt: 2, fut: 3 }[team.era] || 0);
+    sfx('turn', { pre: 1, egypt: 2, fut: 3, med: 4, pirate: 5 }[team.era] || 0);
     voice(team.era, 'turn');
     musicEra(team.era);
     game.ai = team.ctrl === 'ai' ? { phase: 'wait', t: 0, walked: false } : null;
@@ -1400,6 +1701,7 @@
     game.state = 'settle'; game.settleT = 0; game.settleAll = 0; game.charging = false; game.ai = null;
     game.swingT = 0; game.digT = 0;
     game.snags.forEach(function (c) { c.swing = null; c.jet = false; c.sled = false; c.sv = 0; });
+    /* a charge that is still running carries on into the settle, and is waited for there */
     if (game.sudden) {
       WATER = Math.max(300, WATER - 5); miniDirty = true;
       var n = 3 + Math.floor(Math.random() * 2);
@@ -1408,8 +1710,8 @@
   }
 
   function settle() {
-    var busy = game.projs.length > 0 || !!game.barker || game.strikes.length > 0 || game.warn.length > 0 || game.barrels.some(function (b) { return b.fuse > 0; }), i;
-    for (i = 0; i < game.snags.length && !busy; i++) { var c = game.snags[i]; if (c.alive && c.st === 'air') busy = true; }
+    var busy = game.projs.length > 0 || !!game.barker || game.strikes.length > 0 || game.warn.length > 0 || game.flows.length > 0 || game.barrels.some(function (b) { return b.fuse > 0; }), i;
+    for (i = 0; i < game.snags.length && !busy; i++) { var c = game.snags[i]; if (c.alive && (c.st === 'air' || c.lance)) busy = true; }
     game.settleAll = (game.settleAll || 0) + 1;
     if (busy && game.settleAll < 900) { game.settleT = 0; return; }
     if (++game.settleT < 16) return;
@@ -1430,12 +1732,24 @@
   function startEvent() {
     game.evNext = game.turnNo + 7;
     var st = MAP.style;
-    if (st === 'desert') {
+    if (st === 'desert' || st === 'harbour') {
       if (game.flood) return false;
-      game.flood = { phase: 'warn', base: WATER, level: WATER - 26, at: game.turnNo + 2 };
-      banner('The Nile will flood!', null, '#3a8a9a', 'pin'); say('flood', true); sfx('splash');
+      game.flood = { phase: 'warn', base: WATER, level: WATER - (st === 'harbour' ? 22 : 26), at: game.turnNo + 2 };
+      if (st === 'harbour') { banner('High tide coming!', null, '#2a8ab0', 'pin'); say('tide', true); }
+      else { banner('The Nile will flood!', null, '#3a8a9a', 'pin'); say('flood', true); }
+      sfx('splash');
       game.look = { x: cam.x + VW / 2, y: WATER - 30 }; game.lookT = 120;
       return false;
+    }
+    if (st === 'castle') {
+      var alive2 = game.snags.filter(function (c) { return c.alive; }), ev2 = { kind: 'arrows', t: 0, fx: cam.x + VW / 2, fy: 200 };
+      ev2.list = [0, 1, 2, 3].map(function (k) {
+        var tg = alive2.length ? alive2[Math.floor(Math.random() * alive2.length)] : null;
+        return { tx: clamp((tg ? tg.x : 200 + Math.random() * (WW - 400)) + rand(-50, 50), 30, WW - 30), fired: false };
+      });
+      banner('Arrow storm!', null, '#8be05a', 'target'); say('arrows', true);
+      game.event = ev2; game.state = 'event';
+      return true;
     }
     if (st === 'wall') {
       game.gale = 4;
@@ -1462,6 +1776,23 @@
     var ev = game.event;
     if (!ev) { game.state = 'settle'; game.settleT = 0; game.settleAll = 0; return; }
     ev.t++;
+    if (ev.kind === 'arrows') {
+      /* the garrison's archers: red markers first, then arrows rain down on each one in turn */
+      var left = false;
+      ev.list.forEach(function (a, k) {
+        var at = 100 + k * 30;
+        if (!a.fired && ev.t >= at) {
+          a.fired = true;
+          for (var q = 0; q < 6; q++) game.projs.push({ type: 'evarrow', era: 'med', x: a.tx + rand(-22, 22) - game.wind * 3, y: -30 - q * 10, vx: rand(-0.3, 0.3) + game.wind * 0.04, vy: 2.6, age: 0, by: null, trail: [], rest: false });
+          sfx('whoosh'); noise(0.4, 0.12, 'bandpass', 2600, 900);
+        }
+        if (!a.fired) left = true;
+      });
+      var act2 = ev.list.filter(function (a) { return !a.fired; })[0] || ev.list[ev.list.length - 1];
+      ev.fx = clamp(act2.tx, VW / 2, WW - VW / 2); ev.fy = Math.max(120, surfaceY(clamp(Math.round(act2.tx), 1, WW - 1)) - 50);
+      if (!left && !game.projs.length) { game.event = null; game.state = 'settle'; game.settleT = 0; game.settleAll = 0; }
+      return;
+    }
     if (ev.kind === 'stampede') {
       if (ev.t < 100) {
         /* the warning: a rumble and dust at the edge the herd is coming from */
@@ -1524,6 +1855,16 @@
       for (var x = x0 - (x0 % 6); x < x0 + VW; x += 6) { ctx.fillStyle = (x / 6) % 2 ? '#9fe3f5' : '#3a8a9a'; ctx.fillRect(x, L, 4, 1); }
     }
     if (!ev) return;
+    if (ev.kind === 'arrows') {
+      ev.list.forEach(function (a) {
+        if (a.fired) return;
+        var gx = Math.round(a.tx), gy = surfaceY(gx); if (gy < 0) gy = Math.round(WATER);
+        ctx.fillStyle = '#ff6a5a';
+        for (var yy = gy - 8; yy > gy - 60; yy -= 6) ctx.fillRect(gx, yy, 1, 3);
+        ctx.fillRect(gx - 4, gy - 2, 9, 1); ctx.fillRect(gx, gy - 6, 1, 9);
+      });
+      return;
+    }
     if (ev.kind === 'stampede') {
       ev.herd.forEach(function (m, k) {
         if (ev.t < 100 || !m.y) return;
@@ -1602,6 +1943,7 @@
     if (w.kind === 'jet') { useJet(c); return; }
     if (w.kind === 'sled') { useSled(c); return; }
     if (w.kind === 'road') { buildRoad(c); return; }
+    if (w.kind === 'launch') { useLaunch(c); return; }
     if (game.fired) return;
     if (c.st !== 'ground') { game.charging = false; game.power = 0; return; }
     var av = avail(c.team, wid);
@@ -1617,13 +1959,26 @@
     var p;
     if (w.kind === 'proj') {
       var pw = Math.max(8, game.power), sp = w.vmax * pw / 100;
-      var a = c.aim * Math.PI / 180, tip = SP.tip(c.x, c.y, c.face, c.aim, wid);
-      p = { type: wid, era: c.team.era, x: tip.x, y: tip.y, vx: Math.cos(a) * c.face * sp, vy: -Math.sin(a) * sp, age: 0, by: c, trail: [], rest: false, kmul: w.knock || 1 };
-      if (w.fuse) p.fuse = w.fuse;
-      if (solid(tip.x, tip.y)) {
-        if (w.impact || w.hit) explode(tip.x, tip.y, w.R, w.dmg, p);
-        else { p.x = c.x; p.y = c.y - 10; p.vx *= 0.3; p.vy *= 0.3; game.projs.push(p); }
-      } else game.projs.push(p);
+      var a = c.aim * Math.PI / 180, tip = SP.tip(c.x, c.y, c.face, c.aim, wid), nShot = w.spread || 1;
+      for (var si = 0; si < nShot; si++) {
+        /* a volley fans out a little, each arrow at its own angle and strength */
+        var a2 = nShot > 1 ? (c.aim + (si - (nShot - 1) / 2) * 2.4 + rand(-0.5, 0.5)) * Math.PI / 180 : a, sp2 = nShot > 1 ? sp * rand(0.94, 1.05) : sp;
+        p = { type: wid, era: c.team.era, x: tip.x, y: tip.y, vx: Math.cos(a2) * c.face * sp2, vy: -Math.sin(a2) * sp2, age: 0, by: c, trail: [], rest: false, kmul: w.knock || 1 };
+        if (w.fuse) p.fuse = w.fuse;
+        if (solid(tip.x, tip.y)) {
+          if (w.impact || w.hit) { explode(tip.x, tip.y, w.R, w.dmg, p); if (nShot > 1) break; }
+          else { p.x = c.x; p.y = c.y - 10; p.vx *= 0.3; p.vy *= 0.3; game.projs.push(p); }
+        } else game.projs.push(p);
+      }
+      if (nShot > 1) say('volley');
+      if (w.recoil) {
+        /* the cannon kicks: the Snag is shoved backwards, so standing near an edge is risky */
+        c.vx = -c.face * w.recoil * (0.45 + pw / 200); c.vy = -1.5; c.st = 'air'; c.airT = 0; c.knock = false; c.flip = false;
+        if (bodyClear(c.x, c.y - 1)) c.y -= 1;
+        game.shake = Math.max(game.shake, 3); game.hitstop = Math.max(game.hitstop || 0, 3);
+        for (var cs = 0; cs < 8; cs++) addPart({ k: 'smoke', x: tip.x + rand(-3, 3), y: tip.y + rand(-3, 3), vx: Math.cos(a) * c.face * rand(0.3, 1), vy: -Math.sin(a) * rand(0.3, 1) - 0.2, life: 70, max: 70, r: rand(3, 6) });
+        say('cannon');
+      }
       weaponSound(wid, c.team.era, 'launch', pw / 100);
       game.lastPower = Math.round(pw);
       /* recoil: a squash, a puff at the tip and a little kick */
@@ -1638,6 +1993,11 @@
     else if (w.kind === 'beam') fireLaser(c);
     else if (w.kind === 'wall') buildWall(c);
     else if (w.kind === 'dune') buildDune(c);
+    else if (w.kind === 'lance') startLance(c);
+    else if (w.kind === 'oil') pourOil(c);
+    else if (w.kind === 'banner') plantBanner(c);
+    else if (w.kind === 'blunder') fireBlunder(c);
+    else if (w.kind === 'keg') dropKeg(c);
     else if (w.kind === 'shield') {
       c.shield = true; c.cheerT = 30; sfx('twinkle');
       for (var k = 0; k < 12; k++) addPart({ k: 'spark', x: c.x + rand(-8, 8), y: c.y - rand(2, 22), vx: rand(-0.4, 0.4), vy: rand(-0.8, -0.2), life: 30 });
@@ -1741,9 +2101,10 @@
   }
 
   /* ---------- Precision Laser ---------- */
-  function laserTrace(c, face, aim) {
-    var a = aim * Math.PI / 180, dx = Math.cos(a) * face, dy = -Math.sin(a), tip = SP.tip(c.x, c.y, face, aim, 'laser');
-    for (var d = 0; d < WEAP.laser.range; d++) {
+  function laserTrace(c, face, aim, range, wid) {
+    range = range || WEAP.laser.range;
+    var a = aim * Math.PI / 180, dx = Math.cos(a) * face, dy = -Math.sin(a), tip = SP.tip(c.x, c.y, face, aim, wid || 'laser');
+    for (var d = 0; d < range; d++) {
       var x = tip.x + dx * d, y = tip.y + dy * d;
       if (x < 0 || x >= WW || y < -200 || y > WATER) return { x: x, y: y, sx: tip.x, sy: tip.y, hit: null };
       for (var j = 0; j < game.snags.length; j++) {
@@ -1756,7 +2117,7 @@
       }
       if (solid(x, y)) return { x: x, y: y, sx: tip.x, sy: tip.y, hit: null, wall: true };
     }
-    return { x: tip.x + dx * WEAP.laser.range, y: tip.y + dy * WEAP.laser.range, sx: tip.x, sy: tip.y, hit: null };
+    return { x: tip.x + dx * range, y: tip.y + dy * range, sx: tip.x, sy: tip.y, hit: null };
   }
   function fireLaser(c) {
     var r = laserTrace(c, c.face, c.aim);
@@ -1770,6 +2131,207 @@
       say('zap');
     } else if (r.barrel) { if (!r.barrel.fuse) { r.barrel.fuse = 2; r.barrel.by = c; } }
     else if (r.wall) carve(r.x, r.y, 6, true);
+  }
+
+  /* ---------- Lance Charge: a run along the ground that sends the first Snag met flying ---------- */
+  function startLance(c) {
+    c.lance = { left: WEAP.lance.range };
+    sfx('whoosh'); voice(c.team.era, 'cheer');
+  }
+  function lanceStep(c) {
+    var L = c.lance, sp = 2.7, n = 3;
+    for (var k = 0; k < n; k++) {
+      if (L.left <= 0) { c.lance = null; return; }
+      for (var j = 0; j < game.snags.length; j++) {
+        var o = game.snags[j];
+        if (!o.alive || o === c) continue;
+        var dx = (o.x - c.x) * c.face;
+        if (dx > 0 && dx < 15 && Math.abs(o.y - c.y) < 16) {
+          hurt(o, WEAP.lance.dmg, { by: c, type: 'lance' });
+          var kk = o.shield ? 0.5 : 1;
+          o.vx = c.face * 4.6 * kk; o.vy = -3.3 * kk; o.st = 'air'; o.knock = true; o.swing = null; o.jet = false; o.sled = false; o.lance = null;
+          if (bodyClear(o.x, o.y - 1)) o.y -= 1;
+          game.shake = Math.max(game.shake, 3.5); game.hitstop = Math.max(game.hitstop || 0, 6);
+          for (var q = 0; q < 10; q++) addPart({ k: 'spark', x: o.x - c.face * 4, y: o.y - 12, vx: c.face * rand(0.5, 2.4), vy: rand(-2, 0.5), life: 22 });
+          sfx('bonk'); sfx('hit', 1.2); say('lance', true);
+          c.lance = null; c.cheerT = 30;
+          return;
+        }
+      }
+      var nx = c.x + c.face * (sp / n), moved = false;
+      for (var up = 0; up <= 5; up++) if (bodyClear(nx, c.y - up)) { c.x = nx; c.y -= up; moved = true; break; }
+      if (!moved) { c.lance = null; sfx('bonk'); dust(c.x + c.face * 6, c.y - 6, 6, 3); game.shake = Math.max(game.shake, 1.5); return; }
+      var down = 0;
+      while (!onGround(c.x, c.y) && down < 6 && bodyClear(c.x, c.y + 1)) { c.y++; down++; }
+      if (!onGround(c.x, c.y)) { c.st = 'air'; c.vx = c.face * 2.2; c.vy = -0.6; c.airT = 0; c.lance = null; return; }
+      L.left -= sp / n;
+      if (c.x < 6 || c.x > WW - 6) { c.lance = null; return; }
+    }
+    c.walkd += sp;
+    if (game.t % 3 === 0) dust(c.x - c.face * 5, c.y, 2, 2);
+    if (game.t % 6 === 0) sfx('step');
+  }
+  /* where a charge would end up: the Snag it would hit, if any */
+  function simLance(c, face) {
+    var x = c.x, y = c.y, left = WEAP.lance.range;
+    while (left > 0) {
+      for (var j = 0; j < game.snags.length; j++) {
+        var o = game.snags[j];
+        if (!o.alive || o === c) continue;
+        var dx = (o.x - x) * face;
+        if (dx > 0 && dx < 15 && Math.abs(o.y - y) < 16) return o;
+      }
+      var nx = x + face, ok = false;
+      for (var up = 0; up <= 5; up++) if (bodyClear(nx, y - up)) { x = nx; y -= up; ok = true; break; }
+      if (!ok) return null;
+      var down = 0;
+      while (!onGround(x, y) && down < 6 && bodyClear(x, y + 1)) { y++; down++; }
+      if (!onGround(x, y)) return null;
+      left--;
+    }
+    return null;
+  }
+
+  /* ---------- Boiling Oil: a stream that runs downhill along the ground and burns what it touches ---------- */
+  function pourOil(c) {
+    var x0 = Math.round(c.x + c.face * 9), gy = groundY(x0, c.y - 14);
+    if (gy < 0 || gy > c.y + 24) { x0 = Math.round(c.x); gy = Math.round(c.y); }
+    game.flows.push({ x: x0, y: gy, dir: c.face, left: WEAP.oil.range, hit: [], by: c, t: 0 });
+    c.fireT = 10; kick(c, -0.2);
+    for (var k = 0; k < 6; k++) addPart({ k: 'puff', x: x0 + rand(-3, 3), y: gy - rand(2, 8), vx: rand(-0.3, 0.3), vy: rand(-0.8, -0.2), life: 30, max: 30, r: rand(2, 3.4), col: '#f4efe4' });
+    sfx('splash'); sfx('whoosh'); say('oil', true);
+  }
+  /* one step of a flow; returns false when it stops */
+  function flowStep(f) {
+    var nx = f.x + f.dir, ny = groundY(nx, f.y - 5);
+    if (ny < 0 || ny > WATER) return 'water';
+    if (ny < f.y - 2) {
+      /* uphill: try the other way, or settle into a pool */
+      var bx = f.x - f.dir, by = groundY(bx, f.y - 5);
+      if (by >= 0 && by >= f.y - 1 && !f.turned) { f.dir = -f.dir; f.turned = true; return true; }
+      return false;
+    }
+    f.x = nx; f.y = ny; f.left--;
+    return f.left > 0;
+  }
+  function simOil(x, y, dir) {
+    var f = { x: x, y: y, dir: dir, left: WEAP.oil.range }, pts = [];
+    for (var k = 0; k < WEAP.oil.range; k++) { var r = flowStep(f); pts.push([f.x, f.y]); if (r !== true) break; }
+    return pts;
+  }
+  function updFlows() {
+    for (var i = game.flows.length - 1; i >= 0; i--) {
+      var f = game.flows[i], done = false;
+      f.t++;
+      for (var k = 0; k < 2 && !done; k++) {
+        var r = flowStep(f);
+        if (r === 'water') { splash(f.x); for (var q = 0; q < 6; q++) addPart({ k: 'puff', x: f.x + rand(-3, 3), y: WATER - 2, vx: rand(-0.3, 0.3), vy: rand(-0.9, -0.3), life: 40, max: 40, r: rand(2, 4), col: '#f4efe4' }); done = true; break; }
+        if (r !== true) done = true;
+        /* scorch the ground and leave it glowing */
+        var gi = (Math.round(f.y)) * WW + Math.round(f.x);
+        if (gi >= 0 && gi < mask.length && mask[gi]) { var kq = gi * 4; data[kq] = data[kq] * 0.45 | 0; data[kq + 1] = data[kq + 1] * 0.4 | 0; data[kq + 2] = data[kq + 2] * 0.38 | 0; burnt[gi] = 2; tctx.putImageData(img, 0, 0, Math.round(f.x), Math.round(f.y), 1, 1); }
+        if ((f.t + k) % 2 === 0) addPart({ k: 'glow', x: f.x, y: f.y - 1, life: 70 + Math.random() * 40, max: 110 });
+        game.snags.forEach(function (sn, si) {
+          if (!sn.alive || f.hit.indexOf(si) >= 0) return;
+          if (Math.abs(sn.x - f.x) < 6 && f.y > sn.y - 8 && f.y < sn.y + 5) {
+            f.hit.push(si); hurt(sn, WEAP.oil.dmg, { by: f.by, type: 'oil' });
+            sn.vx = f.dir * 1.3; sn.vy = -2.6; sn.st = 'air'; sn.knock = true; sn.swing = null; sn.jet = false; sn.sled = false; sn.lance = null;
+            if (bodyClear(sn.x, sn.y - 1)) sn.y -= 1;
+            sfx('hit', 0.8);
+          }
+        });
+        game.barrels.forEach(function (b) { if (!b.fuse && Math.abs(b.x - f.x) < 6 && Math.abs(b.y - f.y) < 8) { b.fuse = 20; b.by = f.by; } });
+      }
+      if (f.t % 3 === 0) addPart({ k: 'fire', x: f.x, y: f.y - 2, life: 16, max: 16, r: 3 });
+      if (f.t % 7 === 0) addPart({ k: 'smoke', x: f.x, y: f.y - 4, vx: rand(-0.15, 0.15), vy: rand(-0.4, -0.15), life: 70, max: 70, r: rand(2, 4) });
+      if (f.t % 10 === 0) sfx('dig');
+      if (done) game.flows.splice(i, 1);
+    }
+  }
+
+  /* ---------- Royal Banner: heals every Snag of yours nearby ---------- */
+  function plantBanner(c) {
+    var w = WEAP.banner, bx = Math.round(c.x + c.face * 9), by = groundY(bx, c.y - 16);
+    if (by < 0 || Math.abs(by - c.y) > 16) { bx = Math.round(c.x); by = Math.round(c.y); }
+    game.flags.push({ x: bx, y: by - 1, vx: 0, vy: 0, rest: false, t: 0 });
+    c.team.members.forEach(function (m) {
+      if (!m.alive || Math.abs(m.x - bx) > w.range || Math.abs(m.y - by) > 70) return;
+      var h = Math.min(w.heal, 100 - m.hp);
+      if (h > 0) { m.hp += h; addPart({ k: 'txt', x: m.x, y: m.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + h, col: '#9be36b', sc: 2 }); }
+      for (var q = 0; q < 8; q++) addPart({ k: 'spark', x: m.x + rand(-6, 6), y: m.y - rand(4, 22), vx: rand(-0.4, 0.4), vy: rand(-1, -0.3), life: 30 });
+      m.cheerT = 36;
+    });
+    sfx('find'); sfx('lock'); say('banner', true);
+  }
+  function updFlags() {
+    for (var i = game.flags.length - 1; i >= 0; i--) { var f = game.flags[i]; f.t++; settleThing(f); if (f.y > WATER + 4) { game.flags.splice(i, 1); splash(f.x); } }
+  }
+
+  /* ---------- Blunderbuss: a short spread of shot ---------- */
+  function fireBlunder(c) {
+    var w = WEAP.blunder, hits = [], k, tip = SP.tip(c.x, c.y, c.face, c.aim, 'blunder');
+    for (k = 0; k < w.pellets; k++) {
+      var r = laserTrace(c, c.face, c.aim + (k - (w.pellets - 1) / 2) * 3.4 + rand(-0.8, 0.8), w.range, 'blunder');
+      addPart({ k: 'shot', x: r.sx, y: r.sy, x2: r.x, y2: r.y, life: 9 });
+      if (r.hit) { var hi = hits.indexOf(r.hit); if (hi < 0) { hits.push(r.hit); r.hit.pellets = 1; } else r.hit.pellets++; }
+      else if (r.barrel) { if (!r.barrel.fuse) { r.barrel.fuse = 2; r.barrel.by = c; } }
+      else if (r.wall) carve(r.x, r.y, 3, true);
+    }
+    hits.forEach(function (h) {
+      hurt(h, w.dmg * h.pellets, { by: c, type: 'blunder' });
+      var kk = (h.shield ? 0.5 : 1) * (0.7 + h.pellets * 0.3);
+      h.vx = c.face * 1.4 * kk; h.vy = -1.9 * kk; h.st = 'air'; h.knock = true; h.swing = null; h.jet = false; h.sled = false; h.lance = null;
+      if (bodyClear(h.x, h.y - 1)) h.y -= 1;
+    });
+    for (k = 0; k < 9; k++) addPart({ k: 'smoke', x: tip.x + rand(-3, 3), y: tip.y + rand(-3, 3), vx: c.face * rand(0.2, 1.2), vy: rand(-0.6, 0), life: 60, max: 60, r: rand(2.5, 5) });
+    c.fireT = 10; kick(c, -0.3); game.shake = Math.max(game.shake, 2.5);
+    sfx('boom', 0.45); noise(0.2, 0.3, 'highpass', 1800); say('blunder', true);
+  }
+
+  /* ---------- Human Cannonball: a free move through the air, landing safely ---------- */
+  function useLaunch(c) {
+    var av = avail(c.team, 'launch');
+    if (!av.ok) { banner('x0', null, '#ffc24a', 'kit'); return; }
+    if (c.st !== 'ground' || c.ball || game.charging) return;
+    useAmmo(c.team, 'launch');
+    var a = c.aim * Math.PI / 180, sp = WEAP.launch.speed;
+    if (bodyClear(c.x, c.y - 2)) c.y -= 2;
+    c.st = 'air'; c.vx = Math.cos(a) * c.face * sp; c.vy = -Math.sin(a) * sp; c.ball = true; c.ballHit = []; c.knock = false; c.flip = false; c.airT = 0;
+    for (var k = 0; k < 10; k++) addPart({ k: 'smoke', x: c.x + rand(-4, 4), y: c.y - rand(0, 8), vx: -c.vx * rand(0.05, 0.2), vy: rand(-0.6, 0), life: 60, max: 60, r: rand(3, 6) });
+    game.shake = Math.max(game.shake, 3); sfx('boom', 0.6); say('launch', true);
+    if (!avail(c.team, 'launch').ok) c.team.lastWeapon = 'lob';
+  }
+  /* the cannonball Snag bonks anyone in its way */
+  function ballHits(c) {
+    game.snags.forEach(function (o) {
+      if (!o.alive || o === c || o.team === c.team || c.ballHit.indexOf(o) >= 0) return;
+      if (Math.abs(o.x - c.x) < 9 && Math.abs((o.y - 9) - (c.y - 9)) < 16) {
+        c.ballHit.push(o); hurt(o, 15, { by: c, type: 'launch' });
+        o.vx = (c.vx < 0 ? -1 : 1) * 2.6; o.vy = -2.6; o.st = 'air'; o.knock = true; o.swing = null; o.jet = false; o.sled = false; o.lance = null;
+        if (bodyClear(o.x, o.y - 1)) o.y -= 1;
+        c.vx *= 0.4; sfx('bonk'); game.shake = Math.max(game.shake, 2);
+      }
+    });
+  }
+  /* roughly where a Snag fired at this angle would come down */
+  function simLaunch(c, face, aim) {
+    var a = aim * Math.PI / 180, sp = WEAP.launch.speed, x = c.x, y = c.y - 4, vx = Math.cos(a) * face * sp, vy = -Math.sin(a) * sp;
+    for (var k = 0; k < 400; k++) {
+      vy = Math.min(9, vy + G); x += vx; y += vy;
+      if (x < 4 || x > WW - 4 || y > WATER - 4) return null;
+      if (vy > 0 && onGround(x, y)) return { x: x, y: y };
+      if (solid(x, y - 12)) { vx *= -0.3; }
+    }
+    return null;
+  }
+
+  /* ---------- Powder Keg: a barrel that goes off when an enemy comes near ---------- */
+  function dropKeg(c) {
+    var kx = Math.round(c.x - c.face * 9), ky = groundY(kx, c.y - 14);
+    if (ky < 0 || Math.abs(ky - c.y) > 14) { kx = Math.round(c.x + c.face * 9); ky = groundY(kx, c.y - 14); }
+    if (ky < 0 || Math.abs(ky - c.y) > 14) { kx = Math.round(c.x); ky = Math.round(c.y); }
+    game.barrels.push({ x: kx, y: ky - 1, vx: 0, vy: 0, rest: false, kind: 'keg', fuse: 0, by: c, armed: c.team.era });
+    sfx('clunk'); say('keg', true);
   }
 
   /* ---------- Stone Barricade: builds new solid ground ---------- */
@@ -1866,8 +2428,26 @@
   }
 
   /* ---------- superweapon strikes ---------- */
+  /* a shot fired from far off the map that lands at (tx, ty) after T ticks */
+  function farShot(type, era, by, x0, y0, tx, ty, T) {
+    var vx = (tx - x0) / T, vy = (ty - y0 - 0.5 * G * T * T) / T;
+    game.projs.push({ type: type, era: era, x: x0, y: y0, vx: vx, vy: vy, age: 0, by: by, trail: [], rest: false, kmul: WEAP[type].knock || 1, passX: tx });
+  }
   function startStrike(c, tx, wid) {
     var w = WEAP[wid];
+    if (w.style === 'treb') {
+      tx = clamp(tx, 10, WW - 10);
+      var ty = surfaceY(Math.round(tx)); if (ty < 0) ty = WATER;
+      farShot('trebstone', c.team.era, c, tx > WW / 2 ? -60 : WW + 60, 70, tx, ty, 112);
+      sfx('clunk'); sfx('whoosh'); say('treb', true);
+      return;
+    }
+    if (w.style === 'broadside') {
+      var side = tx > WW / 2 ? 1 : -1;
+      game.strikes.push({ style: 'broadside', x: clamp(tx, 10, WW - 10), side: side, t: 0, by: c, n: 0, R: w.R, dmg: w.dmg });
+      sfx('splash'); say('broadside', true);
+      return;
+    }
     if (w.style === 'onager') {
       for (var k = 0; k < 3; k++) game.strikes.push({ style: 'boulder', small: true, x: clamp(tx + (k - 1) * 26 + rand(-4, 4), 10, WW - 10), y: -60, vy: 1, t: -k * 16, by: c, R: w.R, dmg: w.dmg, kmul: w.knock || 1 });
       sfx('whoosh'); say('onager', true);
@@ -1880,6 +2460,20 @@
     for (var i = game.strikes.length - 1; i >= 0; i--) {
       var s = game.strikes[i], j, c;
       s.t++;
+      if (s.style === 'broadside') {
+        /* the ship sails in at the edge, fires five times, and sails off */
+        var shipX = s.side > 0 ? WW + 10 + Math.max(0, 60 - s.t) * 2 + Math.max(0, s.t - 120) * 2 : -10 - Math.max(0, 60 - s.t) * 2 - Math.max(0, s.t - 120) * 2;
+        s.shipX = shipX;
+        if (s.t >= 60 && s.t <= 108 && (s.t - 60) % 12 === 0) {
+          var ox = [-34, 34, -16, 16, 0][s.n], bx = clamp(s.x + ox, 6, WW - 6), by = surfaceY(Math.round(bx)); if (by < 0) by = WATER;
+          var mx0 = shipX - s.side * 26, my0 = WATER - 18;
+          farShot('bball', s.by ? s.by.team.era : 'pirate', s.by, mx0, my0, bx, by, 54 + s.n * 3);
+          for (var mq = 0; mq < 6; mq++) addPart({ k: 'smoke', x: mx0 + rand(-4, 4), y: my0 + rand(-4, 4), vx: -s.side * rand(0.2, 0.9), vy: rand(-0.5, 0), life: 80, max: 80, r: rand(3, 6) });
+          sfx('boom', 0.7); game.shake = Math.max(game.shake, 1.5); s.n++;
+        }
+        if (s.t > 160) game.strikes.splice(i, 1);
+        continue;
+      }
       if (s.style === 'boulder') {
         if (s.t < 30) continue;
         s.vy = Math.min(9, s.vy + 0.3); s.y += s.vy;
@@ -2026,7 +2620,7 @@
             var res = simShot(c, wid, face, a, pw);
             if (!res) continue;
             if (extra === 'nowater' && res.water) continue;
-            var sc = res.water ? -1 : scoreAt(res.x, res.y, WEAP[wid].R, WEAP[wid].dmg, team, fw, c);
+            var sc = res.water ? -1 : scoreAt(res.x, res.y, WEAP[wid].aiR || WEAP[wid].R, WEAP[wid].aiDmg || WEAP[wid].dmg, team, fw, c);
             if (extra === 'spear' && res.hit && res.hit !== c) { var dr = WEAP[wid].direct; sc += res.hit.team !== team ? dr + (res.hit.hp <= dr + 8 ? A.kill : 0) + (res.hit.y > WATER - 60 ? A.water : 0) : -dr * fw; }
             if (extra === 'nowater') { var tg = nearestFrom(res.x, res.y); if (tg && Math.abs(c.x - res.x) > 30) sc = Math.max(sc, scoreAt(tg.x, tg.y - 6, WEAP[wid].R, WEAP[wid].dmg, team, fw, c) * 0.75); }
             cands.push({ weapon: wid, face: face, aim: a, power: pw, score: sc * mult });
@@ -2044,6 +2638,48 @@
       if (kitHas(team, 'pilum') && avail(team, 'pilum').ok) sweep('pilum', face, -30, 60, 3, 50, 100, 10, 1.1, 'spear');
       if (kitHas(team, 'ballista') && avail(team, 'ballista').ok) sweep('ballista', face, -30, 40, 3, 60, 100, 10, 1.2);
       if (kitHas(team, 'scarab') && avail(team, 'scarab').ok) sweep('scarab', face, -10, 70, 10, 30, 100, 10, 1.05, 'nowater');
+      if (kitHas(team, 'volley') && avail(team, 'volley').ok) sweep('volley', face, -10, 80, 5, 30, 100, 10, 1.0);
+      if (kitHas(team, 'cannon') && avail(team, 'cannon').ok) (function (face) {
+        /* the kick would shove it backwards: only fire if there is solid ground behind */
+        var bx = c.x - face * 34, bg = groundY(clamp(bx, 1, WW - 2), c.y - 24);
+        if (bg > 0 && bg < WATER - 12 && bg < c.y + 30) sweep('cannon', face, -30, 50, 3, 50, 100, 10, 1.15);
+      })(face);
+      if (kitHas(team, 'blunder') && avail(team, 'blunder').ok) (function (face) {
+        jobs.push(function () {
+          for (var a = -30; a <= 45; a += 5) {
+            var hitN = {}, tot = 0;
+            for (var k = 0; k < WEAP.blunder.pellets; k++) {
+              var lt = laserTrace(c, face, a + (k - (WEAP.blunder.pellets - 1) / 2) * 3.4, WEAP.blunder.range, 'blunder');
+              if (lt.hit) { if (lt.hit.team === team) { tot -= 8 * fw; continue; } hitN[game.snags.indexOf(lt.hit)] = (hitN[game.snags.indexOf(lt.hit)] || 0) + 1; }
+            }
+            for (var hk in hitN) { var dmg = hitN[hk] * WEAP.blunder.dmg, hs = game.snags[hk]; tot += dmg + (hs.hp <= dmg ? A.kill : 0) + (hs.y > WATER - 60 ? A.water * 0.5 : 0); }
+            if (tot > 0) cands.push({ weapon: 'blunder', face: face, aim: a, power: 0, score: tot * 1.05 });
+          }
+        });
+      })(face);
+      if (kitHas(team, 'lance') && avail(team, 'lance').ok) (function (face) {
+        jobs.push(function () {
+          var tg = simLance(c, face);
+          if (tg && tg.team !== team) cands.push({ weapon: 'lance', face: face, aim: c.aim, power: 0, score: (WEAP.lance.dmg + (tg.hp <= WEAP.lance.dmg ? A.kill : 0) + (tg.y > WATER - 70 ? A.water + 6 : 0)) * 1.15 });
+        });
+      })(face);
+      if (kitHas(team, 'oil') && avail(team, 'oil').ok) (function (face) {
+        jobs.push(function () {
+          var x0 = Math.round(c.x + face * 9), gy = groundY(x0, c.y - 14);
+          if (gy < 0 || gy > c.y + 24) return;
+          var pts = simOil(x0, gy, face), sc = 0, seen = [];
+          pts.forEach(function (pt) {
+            game.snags.forEach(function (o) {
+              if (!o.alive || seen.indexOf(o) >= 0) return;
+              if (Math.abs(o.x - pt[0]) < 6 && pt[1] > o.y - 8 && pt[1] < o.y + 5) {
+                seen.push(o);
+                sc += o.team !== team ? WEAP.oil.dmg + (o.hp <= WEAP.oil.dmg ? A.kill : 0) : -WEAP.oil.dmg * fw * (o === c ? 1.6 : 1);
+              }
+            });
+          });
+          if (sc > 0) cands.push({ weapon: 'oil', face: face, aim: c.aim, power: 0, score: sc * 1.05 });
+        });
+      })(face);
       if (kitHas(team, 'laser') && avail(team, 'laser').ok) (function (face) {
         jobs.push(function () {
           for (var a = -40; a <= 60; a += 2) {
@@ -2062,6 +2698,13 @@
       },
       finish: function () {
         while (i < jobs.length) jobs[i++]();
+        /* support kit: a banner when the squad is hurt, a keg when an enemy is close */
+        if (kitHas(team, 'banner') && avail(team, 'banner').ok) {
+          var heal = 0, low = false;
+          team.members.forEach(function (m) { if (m.alive && Math.abs(m.x - c.x) < WEAP.banner.range && Math.abs(m.y - c.y) < 70) { heal += Math.min(WEAP.banner.heal, 100 - m.hp); if (m.hp < 45) low = true; } });
+          if (heal >= 25) cands.push({ weapon: 'banner', face: c.face, aim: c.aim, power: 0, score: heal * 0.6 + (low ? 10 : 0) });
+        }
+        if (kitHas(team, 'keg') && avail(team, 'keg').ok && enemies.some(function (en) { return Math.abs(en.x - c.x) < 90 && Math.abs(en.y - c.y) < 30; })) cands.push({ weapon: 'keg', face: c.face, aim: c.aim, power: 0, score: 9 });
         var kit = ER[team.era].kit || [], sup = kit[4], defW = kit[3];
         if (sup && avail(team, sup).ok) {
           enemies.forEach(function (en) {
@@ -2091,6 +2734,16 @@
           var landOk = land > 0 && land < WATER - 14;
           if (landOk && kitHas(team, 'jet') && game.fuel > 0 && Math.random() < 0.7) return { type: 'move', tool: 'jet', dir: dir, up: 26, dur: 50, t: 0 };
           if (landOk && kitHas(team, 'sled') && game.sledFuel > 0 && Math.random() < 0.6) return { type: 'move', tool: 'sled', dir: dir, dur: 70, t: 0 };
+          if (kitHas(team, 'launch') && avail(team, 'launch').ok && Math.random() < 0.6) {
+            var bestA = null, bestD = 1e9;
+            [30, 42, 55, 68].forEach(function (la) {
+              var lp = simLaunch(c, dir, la);
+              if (!lp) return;
+              var dd = Math.abs(lp.x - near.x);
+              if (dd > 24 && dd < bestD && Math.abs(lp.x - c.x) > 40) { bestD = dd; bestA = la; }
+            });
+            if (bestA !== null) return { type: 'move', tool: 'launch', dir: dir, aim: bestA, dur: 1, t: 0 };
+          }
           return { type: 'walk', dir: dir, walkT: 110, t: 0 };
         }
         if (!pick || pick.score < 0.5) return { type: 'pass', t: 0 };
@@ -2129,8 +2782,8 @@
     }
     if (A.type === 'move') {
       /* the computer pilots its own jetpack or sled to a better spot, then thinks again */
-      if (A.t === 1) { c.face = A.dir; game.weapon = A.tool; fire(); }
-      A.inp = { left: A.dir < 0 && A.t < A.dur, right: A.dir > 0 && A.t < A.dur, up: A.tool === 'jet' && A.t < A.up, down: false };
+      if (A.t === 1) { c.face = A.dir; game.weapon = A.tool; if (A.aim !== undefined) c.aim = A.aim; fire(); }
+      A.inp = A.tool === 'launch' ? {} : { left: A.dir < 0 && A.t < A.dur, right: A.dir > 0 && A.t < A.dur, up: A.tool === 'jet' && A.t < A.up, down: false };
       if (A.tool === 'sled' && A.t >= A.dur && c.sled) { c.sled = false; c.sv = 0; }
       if ((A.t > A.dur + 10 && c.st === 'ground' && !c.jet && !c.sled) || A.t > 400) { game.weapon = 'lob'; game.ai = { phase: 'wait', t: 10, walked: true }; }
       return;
@@ -2219,7 +2872,7 @@
     if (c.team.ctrl === 'ai') { aiTick(c); return; }
     if (c.team.ctrl === 'dummy') return;
     if (game.overlay) return;
-    var busy = game.swingT > 0 || game.digT > 0, kind = WEAP[game.weapon].kind;
+    var busy = game.swingT > 0 || game.digT > 0 || !!c.lance, kind = WEAP[game.weapon].kind;
     if (kind === 'strike' && game.state === 'play' && !game.fired) {
       if (game.tx === null) game.tx = clamp(c.x + c.face * 150, 10, WW - 10);
       if (inp.left) game.tx = Math.max(10, game.tx - 3);
@@ -2347,6 +3000,8 @@
         if (k === 1) { tone('sine', 110, 55, 0.25, 0.4); tone('sawtooth', 196, 220, 0.3, 0.05, null, AC.currentTime + 0.08); }
         else if (k === 2) { [0, 4, 7, 12].forEach(function (st, i) { tone('triangle', 523 * Math.pow(2, st / 12), null, 0.2, 0.06, null, AC.currentTime + i * 0.05); }); }
         else if (k === 3) { tone('square', 660, 1320, 0.1, 0.05); tone('square', 990, 1980, 0.1, 0.04, null, AC.currentTime + 0.1); }
+        else if (k === 4) { [0, 0, 7, 12].forEach(function (st, i) { tone('square', 330 * Math.pow(2, st / 12), null, i === 3 ? 0.3 : 0.08, 0.05, null, AC.currentTime + i * 0.09); }); }
+        else if (k === 5) { tone('triangle', 1175, 1175, 0.6, 0.08); tone('sine', 2350, 2350, 0.4, 0.03); tone('triangle', 1175, 1175, 0.5, 0.06, null, AC.currentTime + 0.32); }
         else { tone('sine', 392, 784, 0.18, 0.08); tone('triangle', 988, null, 0.22, 0.05, null, AC.currentTime + 0.12); }
         noise(0.25, 0.05, 'bandpass', 600, 3000);
         break;
@@ -2455,6 +3110,15 @@
           if (s % 8 === 0) tone('sine', 110, 50, 0.2, 0.32, musG, t);
           if (s % 4 === 2) noise(0.06, 0.09, 'bandpass', 2600, null, musG, t);
           if (s % 8 === 7) { noise(0.03, 0.05, 'bandpass', 3000, null, musG, t); noise(0.03, 0.06, 'bandpass', 3000, null, musG, t + spb * 0.5); }
+        } else if (M.drum === 'tabor') {
+          if (s % 8 === 0) tone('sine', 130, 60, 0.2, 0.3, musG, t);
+          if (s % 8 === 6) tone('sine', 170, 80, 0.12, 0.2, musG, t);
+          if (s % 4 === 2) noise(0.05, 0.07, 'bandpass', 2200, null, musG, t);
+        } else if (M.drum === 'jig') {
+          var j8 = s % 8;
+          if (j8 === 0 || j8 === 3 || j8 === 6) tone('sine', j8 ? 150 : 110, 55, 0.16, j8 ? 0.22 : 0.32, musG, t);
+          if (j8 === 2 || j8 === 5) noise(0.04, 0.06, 'bandpass', 3000, null, musG, t);
+          if (j8 === 7) noise(0.02, 0.04, 'highpass', 6000, null, musG, t);
         } else if (M.drum === 'doumbek') {
           var b8 = s % 8;
           if (b8 === 0 || b8 === 5) tone('sine', 150, 68, 0.2, 0.32, musG, t);
@@ -2493,6 +3157,9 @@
       else if (wid === 'pilum') { noise(0.24, 0.3, 'bandpass', 1800, 500); tone('sine', 160, 80, 0.16, 0.2); }
       else if (wid === 'ballista') { tone('triangle', 220, 70, 0.22, 0.25); noise(0.05, 0.3, 'highpass', 2000); noise(0.2, 0.12, 'bandpass', 2600, 900, null, now + 0.04); }
       else if (wid === 'scarab') { for (var i = 0; i < 4; i++) noise(0.02, 0.08, 'bandpass', 3000 + i * 300, null, null, now + i * 0.04); tone('sine', 300, 200, 0.12, 0.1); }
+      else if (wid === 'volley' || (wid === 'lob' && era === 'med')) { tone('triangle', 320, 140, 0.16, 0.18); noise(0.18, 0.18, 'bandpass', 2600, 900); for (var vq = 1; vq < 4; vq++) noise(0.08, 0.08, 'bandpass', 2400, 1000, null, now + vq * 0.05); }
+      else if (wid === 'cannon') { tone('sine', 90, 30, 0.6, 0.7); noise(0.5, 0.45, 'lowpass', 1800, 100, crunch); noise(0.06, 0.4, 'highpass', 2500); }
+      else if (wid === 'bomb' && era === 'med') { for (var bz = 0; bz < 6; bz++) tone('sawtooth', 220 + Math.random() * 40, null, 0.06, 0.02, null, now + bz * 0.05); }
       else { noise(0.18, 0.22, 'bandpass', 700, 2600); tone('sine', 140, 60, 0.12, 0.25); }
     } else {
       if (wid === 'boulder') { tone('sine', 70, 30, 0.6, 0.6); noise(0.5, 0.3, 'lowpass', 600, 100, crunch); }
@@ -2500,7 +3167,8 @@
       else if (wid === 'ballista') { noise(0.12, 0.35, 'highpass', 1500); tone('sine', 120, 50, 0.3, 0.3); }
       else if (wid === 'disc') { tone('sine', 2400, 1900, 0.35, 0.07); tone('triangle', 3600, null, 0.25, 0.03, null, now + 0.05); }
       else if (wid === 'scarab') { for (var j = 0; j < 6; j++) noise(0.02, 0.07, 'bandpass', 2500 + Math.random() * 2000, null, null, now + 0.05 + j * 0.035); }
-      else if (wid === 'gourd' || wid === 'mega') { tone('sine', 60, 22, 1.0, 0.7); noise(0.9, 0.3, 'lowpass', 800, 80, crunch); }
+      else if (wid === 'gourd' || wid === 'mega' || wid === 'trebstone') { tone('sine', 60, 22, 1.0, 0.7); noise(0.9, 0.3, 'lowpass', 800, 80, crunch); }
+      else if (wid === 'volley' || wid === 'evarrow') { tone('square', 200, 110, 0.06, 0.08); noise(0.04, 0.18, 'bandpass', 1200, 500); }
       else if (wid === 'meteor') { tone('sawtooth', 300, 80, 0.3, 0.06); }
     }
   }
@@ -2541,7 +3209,7 @@
       finds: game.finds, water: WATER, sudden: game.sudden,
       arts: game.arts.filter(function (a) { return a.st === 'buried' || a.st === 'loose'; }).map(function (a) { return { id: a.id, g: a.glitch, x: Math.round(a.x), y: Math.round(a.y), st: a.st }; }),
       crates: game.crates.map(function (c) { return { x: Math.round(c.x), y: Math.round(c.y), k: c.kind }; }),
-      barrels: game.barrels.map(function (b) { return { x: Math.round(b.x), y: Math.round(b.y), k: b.kind }; }),
+      barrels: game.barrels.map(function (b) { return { x: Math.round(b.x), y: Math.round(b.y), k: b.kind, a: b.armed || null }; }),
       teams: game.teams.map(function (t, ti) {
         return {
           era: t.era, name: t.name, ctrl: t.ctrl, mood: t.mood, label: t.label, lastWeapon: t.lastWeapon, bark: t.bark || 0, ammo: t.ammo || {}, bonus: !!t.bonus, skin: t.skin || null,
@@ -2583,7 +3251,7 @@
     WATER = s.water || 432; game.sudden = !!s.sudden; miniDirty = true;
     game.arts = (s.arts || []).map(function (a) { return { id: a.id, glitch: !!a.g, x: a.x, y: a.y, st: a.st, vx: 0, vy: 0, rest: false, glint: Math.floor(Math.random() * 240) }; });
     game.crates = (s.crates || []).map(function (c) { return { x: c.x, y: c.y, vx: 0, vy: 0, rest: false, kind: c.k }; });
-    game.barrels = (s.barrels || []).map(function (b) { return { x: b.x, y: b.y, vx: 0, vy: 0, rest: false, kind: b.k, fuse: 0, by: null }; });
+    game.barrels = (s.barrels || []).map(function (b) { return { x: b.x, y: b.y, vx: 0, vy: 0, rest: false, kind: b.k, fuse: 0, by: null, armed: b.a || null }; });
     hideOv(); inMatch(true);
     startTurn();
     return true;
@@ -2601,7 +3269,7 @@
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
     game.arts = []; game.crates = []; game.courier = null; game.barker = null; game.finds = [];
-    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; WATER = 432;
+    game.strikes = []; game.warn = []; game.sudden = false; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; WATER = 432;
   }
 
   function surfaceAt(x) {
@@ -2737,7 +3405,7 @@
         else if (ev === 'water') { splash(p.x); say('miss'); }
       } else if (WEAP[p.type].crawl) crawlScarab(p);
     }
-    updArts(); updCrates(); updBarrels(); updCourier(); updBarker(); updBirds(); updStrikes(); updWarn(); jayTick();
+    updArts(); updCrates(); updBarrels(); updFlows(); updFlags(); updCourier(); updBarker(); updBirds(); updStrikes(); updWarn(); jayTick();
     updParts();
     for (i = game.portals.length - 1; i >= 0; i--) {
       var pt = game.portals[i];
@@ -2752,7 +3420,7 @@
       }
       if (game.turnLen > 0 && --game.timer <= 0) { banner("Time's up", null, '#ffc24a', 'hourglass'); endTurn(); }
     } else if (game.state === 'retreat') {
-      if (game.swingT <= 0 && game.digT <= 0 && !game.barker && !game.strikes.length && --game.retreat <= 0) endTurn();
+      if (game.swingT <= 0 && game.digT <= 0 && !game.barker && !game.strikes.length && !(game.active && game.active.lance) && --game.retreat <= 0) endTurn();
     } else if (game.state === 'settle') settle();
     else if (game.state === 'portals') { if (--game.portT <= 0) afterSettle(); }
     else if (game.state === 'demo') demoTick();
@@ -2796,6 +3464,7 @@
     else if (game.event) { tx = game.event.fx; ty = game.event.fy; }
     else if (game.lookT > 0 && game.look) { tx = game.look.x; ty = game.look.y; game.lookT--; }
     else if (game.projs.length) { var pj = game.projs[0]; tx = pj.x + clamp(pj.vx * 14, -90, 90); ty = pj.y + clamp(pj.vy * 8, -40, 50); }
+    else if (game.flows.length) { tx = game.flows[0].x; ty = game.flows[0].y - 20; }
     else if (game.barker) { tx = game.barker.x; ty = game.barker.y - 20; }
     else if (game.strikes.length) {
       var sk = game.strikes[0], sfy = surfaceY(sk.x);
@@ -3001,6 +3670,74 @@
           }
         })
       ];
+    } else if (MAP.style === 'castle') {
+      bakedBg = [
+        bake(0.12, function (g2, W) {
+          var base = VH * 0.6;
+          for (var u = 0; u < W; u++) {
+            var top = Math.round(base - (28 + 12 * Math.sin(u * 0.007) + 7 * Math.sin(u * 0.019 + 2)));
+            g2.fillStyle = neon ? '#3a3e6e' : MAP.far; g2.fillRect(u, top, 1, VH - top);
+            /* a far off castle now and then on the hilltops */
+            var cc = Math.floor(u / 260), lx = u - cc * 260;
+            if (hash(cc, 11) < 0.55 && lx > 120 && lx < 150) {
+              var bh = (lx < 126 || lx > 143) ? 16 : 9;
+              if ((lx - 120) % 4 < 2 || bh === 16) { g2.fillStyle = neon ? '#2c2f57' : '#7a90a0'; g2.fillRect(u, top - bh, 1, bh); }
+            }
+          }
+        }),
+        bake(0.32, function (g2, W) {
+          var base = VH * 0.76;
+          for (var u = 0; u < W; u++) {
+            var hh = 18 + 8 * Math.sin(u * 0.012) + 5 * Math.sin(u * 0.031 + 1.1), top = Math.round(base - hh), strip = Math.floor(u / 34) % 2;
+            g2.fillStyle = neon ? '#2c2f57' : (strip ? MAP.mid : MAP.midShade); g2.fillRect(u, top, 1, VH - top);
+            /* hedgerows between the fields */
+            if (!neon && u % 34 === 0) { g2.fillStyle = '#4a6a3e'; g2.fillRect(u, top - 2, 2, VH - top + 2); }
+          }
+        }),
+        bake(0.55, function (g2, W) {
+          var base = VH * 0.92, u;
+          g2.fillStyle = neon ? '#1f2142' : MAP.near;
+          for (u = 0; u < W; u++) { var top = Math.round(base - 8 - 3 * Math.sin(u * 0.04)); g2.fillRect(u, top, 1, VH - top); }
+          for (var c = -1; c <= Math.ceil(W / 52) + 1; c++) {
+            var h1 = hash(c, 3), pu = c * 52 + 26 + Math.round((hash(c, 6) - 0.5) * 16), gr = Math.round(base - 8 - 3 * Math.sin(pu * 0.04));
+            if (h1 < 0.5) {
+              var rr = 7 + Math.round(hash(c, 4) * 6);
+              g2.fillStyle = neon ? '#14162e' : MAP.nearTrunk; g2.fillRect(pu, gr - rr - 4, 2, rr + 4);
+              g2.fillStyle = neon ? '#14162e' : '#3f6236';
+              for (var yy = -rr; yy <= rr; yy++) { var ww2 = Math.round(Math.sqrt(rr * rr - yy * yy) * 1.15); g2.fillRect(pu + 1 - ww2, gr - rr - 8 + yy, ww2 * 2, 1); }
+            } else if (h1 > 0.82 && !neon) {
+              /* a little post windmill */
+              g2.fillStyle = '#6a4a2e'; g2.fillRect(pu, gr - 14, 6, 14); g2.fillRect(pu + 2, gr - 18, 2, 4);
+              g2.fillStyle = '#e8e0cc';
+              for (var k = -9; k <= 9; k++) { g2.fillRect(pu + 3 + k, gr - 16 + Math.round(k * 0.5), 1, 1); g2.fillRect(pu + 3 + Math.round(k * 0.5), gr - 16 - k, 1, 1); }
+            } else if (h1 > 0.66 && !neon) {
+              g2.fillStyle = '#d8b858'; g2.fillRect(pu, gr - 6, 9, 6); g2.fillRect(pu + 2, gr - 8, 5, 2); g2.fillStyle = '#b8963a'; g2.fillRect(pu, gr - 3, 9, 1);
+            }
+          }
+        })
+      ];
+    } else if (MAP.style === 'harbour') {
+      var wildH = LOOK === 'overgrown';
+      bakedBg = [
+        bake(0.1, function (g2, W) {
+          var base = Math.round(VH * 0.62);
+          g2.fillStyle = neon ? '#232650' : MAP.sea; g2.fillRect(0, base, W, VH - base);
+          g2.fillStyle = neon ? '#5fe0f0' : MAP.seaTop; g2.fillRect(0, base, W, 1);
+          for (var u = 0; u < W; u++) {
+            var cc = Math.floor(u / 300), lx = u - cc * 300 - 150, isl = hash(cc, 5) < 0.6, rad = 40 + hash(cc, 7) * 50;
+            if (isl && Math.abs(lx) < rad) {
+              var hh = Math.round(Math.sqrt(1 - (lx * lx) / (rad * rad)) * (10 + hash(cc, 9) * 16));
+              g2.fillStyle = neon ? '#2c2f57' : (wildH ? '#3a6a4a' : MAP.far); g2.fillRect(u, base - hh, 1, hh);
+              if (!neon && Math.abs(lx - 10) < 1 && hh > 10) { g2.fillStyle = MAP.far; g2.fillRect(u, base - hh - 8, 1, 8); g2.fillRect(u - 4, base - hh - 9, 9, 1); }
+            }
+            if ((u * 7) % 23 === 0) { g2.fillStyle = neon ? '#3a3e6e' : '#7ac8e0'; g2.fillRect(u, base + 4 + (u % 5) * 6, 3, 1); }
+          }
+        }),
+        bake(0.3, function (g2, W) {
+          var base = Math.round(VH * 0.8);
+          for (var u = 0; u < W; u += 1) if ((u * 13) % 31 < 5) { g2.fillStyle = neon ? '#2c2f57' : '#bdeef6'; g2.fillRect(u, base + (u % 7) * 4, 2, 1); }
+        })
+      ];
     } else if (MAP.style !== 'city') {
       bakedBg = [
         bake(0.15, function (g2, W) {
@@ -3041,6 +3778,31 @@
     if (!bakedBg) buildBaked();
     if (bakedBg) bakedBg.forEach(function (L) { blit(L, cx, cy); });
   }
+  function drawHarbourBackdrop(cx, cy, t) {
+    var rest = WH - VH, i, neon = LOOK === 'neon';
+    if (neon) for (i = 0; i < 40; i++) { if ((i + (t >> 6)) % 9 === 0) continue; ctx.fillStyle = '#e9e4ff'; ctx.fillRect(Math.floor(hash(i, 3) * VW), Math.floor(hash(i, 5) * VH * 0.35), 1, 1); }
+    var sunX = Math.round(VW * 0.72 - cx * 0.03), sunY = Math.round(VH * (neon ? 0.42 : 0.3) - (cy - rest) * 0.05);
+    disc(sunX, sunY, 18, neon ? '#ffd9a8' : '#fff9e6'); disc(sunX, sunY, 15, MAP.sun);
+    for (i = 0; i < 4; i++) {
+      var span = VW + 240, wx = (((i * 233 + t * 0.05 - cx * 0.07) % span) + span) % span - 120, wy = 14 + (i % 2) * 18 - (cy - rest) * 0.08;
+      var cc = neon ? '#3a3468' : '#ffffff';
+      disc(wx, wy, 8, cc); disc(wx + 10, wy + 2, 7, cc); disc(wx - 10, wy + 3, 6, cc); ctx.fillStyle = cc; ctx.fillRect(Math.round(wx - 16), Math.round(wy + 4), 34, 4);
+    }
+    game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
+    if (!bakedBg) buildBaked();
+    if (!bakedBg) return;
+    blit(bakedBg[0], cx, cy);
+    /* sails on the horizon, drifting slowly */
+    var hz = Math.round(VH * 0.62 - (cy - rest) * 0.1);
+    for (i = 0; i < 3; i++) {
+      var sx = ((i * 397 + t * 0.04 * (i % 2 ? 1 : -1) - cx * 0.1) % (VW + 300) + VW + 300) % (VW + 300) - 150, sy = hz + 2 + i * 3;
+      ctx.fillStyle = neon ? '#14162e' : '#5a4430'; ctx.fillRect(Math.round(sx) - 6, sy - 2, 13, 2);
+      ctx.fillStyle = neon ? '#ff78be' : '#f4efe4'; ctx.fillRect(Math.round(sx) - 3, sy - 9, 3, 6); ctx.fillRect(Math.round(sx) + 1, sy - 8, 3, 5);
+    }
+    /* the sun's glitter on the water */
+    if (!neon) for (i = 0; i < 6; i++) { if ((i + (t >> 4)) % 3 === 0) continue; ctx.fillStyle = '#fff6dc'; ctx.fillRect(sunX - 8 + ((i * 7) % 17), hz + 4 + i * 3, 4 - (i % 3), 1); }
+    blit(bakedBg[1], cx, cy);
+  }
   function drawDesertBackdrop(cx, cy, t) {
     var rest = WH - VH, i, neon = LOOK === 'neon';
     if (neon) for (i = 0; i < 40; i++) {
@@ -3061,7 +3823,8 @@
   function drawBackdrop(cx, cy, t) {
     if (MAP.style === 'city') { drawCityBackdrop(cx, cy, t); return; }
     if (MAP.style === 'desert') { drawDesertBackdrop(cx, cy, t); return; }
-    if (MAP.style === 'wall') { drawWallBackdrop(cx, cy, t); return; }
+    if (MAP.style === 'wall' || MAP.style === 'castle') { drawWallBackdrop(cx, cy, t); return; }
+    if (MAP.style === 'harbour') { drawHarbourBackdrop(cx, cy, t); return; }
     var rest = WH - VH, i;
     var sunX = Math.round(VW * 0.78 - cx * 0.03), sunY = Math.round(VH * 0.18 - (cy - rest) * 0.05);
     disc(sunX, sunY, 15, '#fff9e6'); disc(sunX, sunY, 12, MAP.sun);
@@ -3108,6 +3871,8 @@
     if (c.hurtT > 41 && !reduceMotion) o.flash = true;
     if ((game.state === 'over' && game.winner === c.team) || c.cheerT > 0) return ['cheer', (t >> 4) % 2, 0, o];
     if (c.sled) return [c.st === 'air' ? 'jump' : 'charge', 0, 0, o];
+    if (c.lance) return ['walk', Math.floor(c.walkd / 2) % 6, 0, o];
+    if (c.ball && c.st === 'air') return ['jump', 0, reduceMotion ? 0 : (c.spin || 0), o];
     if (act && game.swingT > 0) return ['swing', game.swingT > 12 ? 0 : 1, 0, o];
     if (act && game.digT > 0) return ['dig', (t >> 3) % 2, 0, o];
     if (c.swing) return ['jump', 0, 0, o];
@@ -3123,7 +3888,7 @@
     if (c.hurtT > 0) return ['panic', (t >> 3) % 2, 0, o];
     if (c.walking > 0) return ['walk', Math.floor(c.walkd / 3) % 4, 0, o];
     var k2 = WEAP[game.weapon].kind;
-    if (act && game.state === 'play' && (k2 === 'proj' || k2 === 'beam' || k2 === 'vine')) {
+    if (act && game.state === 'play' && (k2 === 'proj' || k2 === 'beam' || k2 === 'vine' || k2 === 'blunder' || k2 === 'launch')) {
       o.look = c.aim > 30 ? -1 : (c.aim < -20 ? 1 : 0);
       return [game.charging ? 'charge' : 'aim', 0, 0, o];
     }
@@ -3151,6 +3916,7 @@
     }
     SP.draw(ctx, X, Y, c.face, era, ps[0], ps[1], bl, ps[2], 1, ps[3]);
     if (ps[0] === 'aim' || ps[0] === 'charge') SP.weapon(ctx, X, Y, c.face, c.aim, game.weapon, era, t);
+    if (c.lance) SP.weapon(ctx, X, Y, c.face, -4, 'lance', era, t);
   }
   function kick(c, v) { c.sqv = (c.sqv || 0) + v; }
 
@@ -3166,7 +3932,7 @@
       ctx.fillStyle = col0; ctx.fillRect(X - 5, sy - 2, 11, 1); ctx.fillRect(X, sy - 7, 1, 11);
       return;
     }
-    if (kind !== 'proj' && kind !== 'dig' && kind !== 'beam' && kind !== 'vine') return;
+    if (kind !== 'proj' && kind !== 'dig' && kind !== 'beam' && kind !== 'vine' && kind !== 'blunder' && kind !== 'launch') return;
     var aim = kind === 'dig' ? Math.min(c.aim, 35) : c.aim;
     var a = aim * Math.PI / 180, dx = Math.cos(a) * c.face, dy = -Math.sin(a);
     var tip = SP.tip(c.x, c.y, c.face, aim, game.weapon), i;
@@ -3204,6 +3970,13 @@
     });
     game.crates.forEach(function (cr) { SP.crate(ctx, cr.x, cr.y + 1, cr.kind, t); });
     game.barrels.forEach(function (b) { SP.barrel(ctx, b.x, b.y + 1, b.kind, t, b.fuse > 0); });
+    game.flags.forEach(function (f) { SP.flag(ctx, f.x, f.y + 1, t); });
+    game.flows.forEach(function (f) {
+      var X = Math.round(f.x), Y = Math.round(f.y);
+      ctx.fillStyle = '#c4572e'; ctx.fillRect(X - 2, Y - 2, 5, 3);
+      ctx.fillStyle = (t >> 2) % 2 ? '#ffd27a' : '#ef7724'; ctx.fillRect(X - 1, Y - 2, 3, 2);
+      ctx.fillStyle = '#fff3c8'; ctx.fillRect(X, Y - 2, 1, 1);
+    });
   }
 
   function pixLine(x0, y0, x1, y1, col, every) {
@@ -3252,6 +4025,11 @@
     game.strikes.forEach(function (s) {
       var X = Math.round(s.x), sy = surfaceY(X);
       if (sy < 0) sy = WATER;
+      if (s.style === 'broadside') {
+        SP.ship(ctx, s.shipX === undefined ? (s.side > 0 ? WW + 130 : -130) : s.shipX, WATER + 3, -s.side, t);
+        if (s.n < 5) { ctx.fillStyle = '#ff6a5a'; for (var bq = -34; bq <= 34; bq += 17) { ctx.fillRect(X + bq - 2, sy - 2, 5, 1); ctx.fillRect(X + bq, sy - 4, 1, 5); } }
+        return;
+      }
       if (s.style === 'boulder') {
         if (s.t < 30) {
           ctx.fillStyle = 'rgba(31,42,48,0.35)'; ctx.fillRect(X - 10, sy - 2, 21, 2);
@@ -3305,6 +4083,7 @@
       else if (p.k === 'spark') { ctx.fillStyle = (p.life >> 2) % 2 ? '#fff3c8' : '#ffd27a'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
       else if (p.k === 'beam') { pixLine(p.x, p.y + 1, p.x2, p.y2 + 1, '#37c8dc'); if (p.life > 6) pixLine(p.x, p.y, p.x2, p.y2, '#e9fdff'); }
       else if (p.k === 'vinemiss') pixLine(p.x, p.y, p.x2, p.y2, '#3f7a2e', 2);
+      else if (p.k === 'shot') pixLine(p.x, p.y, p.x2, p.y2, p.life > 5 ? '#fff3c8' : '#c8c8c8', p.life > 5 ? 2 : 4);
       else if (p.k === 'smoke') {
         ctx.globalAlpha = Math.min(1, p.life / ((p.max || 80) * 0.45));
         var young = p.life > (p.max || 80) * 0.6;
@@ -3333,6 +4112,7 @@
       }
       else if (p.k === 'fire') {
         var k = 1 - p.life / p.max, R = p.r * (0.45 + 0.6 * k);
+        if (k > 0.55) ctx.globalAlpha = Math.max(0.1, 1 - (k - 0.55) / 0.45);
         disc(p.x, p.y, R, k < 0.45 ? '#ef7724' : (k < 0.8 ? '#c4572e' : '#6a3a2a'));
         if (k < 0.8) disc(p.x + 1, p.y + 1, R * 0.7, k < 0.5 ? '#ffd27a' : '#ef7724');
         if (k < 0.45) disc(p.x - 1, p.y - 1, R * 0.38, '#fff3c8');
@@ -3343,6 +4123,7 @@
           ctx.fillStyle = k < 0.5 ? '#ffd27a' : '#ef7724';
           if (hash(fl, p.life) < 0.55) ctx.fillRect(Math.round(p.x + Math.cos(fa) * fr), Math.round(p.y + Math.sin(fa) * fr), 2, 2);
         }
+        ctx.globalAlpha = 1;
       }
     }
   }
@@ -3480,7 +4261,7 @@
       mcv.width = MW; mcv.height = MH;
       var m = mcv.getContext('2d'), id = m.createImageData(MW, MH), dd = id.data, st = MAP.style;
       var MC = {
-        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : (st === 'wall' ? [128, 118, 96] : [112, 84, 52])),
+        solid: st === 'city' ? [96, 106, 134] : (st === 'desert' ? [214, 172, 104] : (st === 'wall' ? [128, 118, 96] : (st === 'harbour' ? [222, 198, 140] : (st === 'castle' ? [120, 92, 60] : [112, 84, 52])))),
         water: [63, 143, 181],
         sd: st === 'city' ? [95, 211, 95] : (st === 'desert' ? [154, 106, 58] : [63, 143, 181]),
         sky: st === 'city' || LOOK === 'neon' ? [58, 56, 104] : (st === 'desert' ? [238, 222, 188] : (st === 'wall' ? [196, 206, 214] : [191, 224, 230]))
@@ -4218,7 +4999,7 @@
   function startBattle() {
     saveOpts(); store('save', null);
     if (opts.mode === 'tour') {
-      game.tour = { era: opts.era, mood: opts.mood, size: opts.size, turn: opts.turn, sd: opts.sd, names: opts.names, skin: skinOf(opts.skinA), ev: opts.ev, stop: 0, results: [] };
+      game.tour = { era: opts.era, mood: opts.mood, size: opts.size, turn: opts.turn, sd: opts.sd, names: opts.names, skin: skinOf(opts.skinA), ev: opts.ev, stop: 0, results: [], n: TOUR_STOPS.length };
       saveTour();
       openTour();
       return;
@@ -4628,7 +5409,15 @@
   /* ---------- Time Tour: a campaign map of history ---------- */
   var TOUR_STOPS = MAP_IDS.slice().sort(function (a, b) { return MAPS[a].year - MAPS[b].year; });
   function saveTour() { store('tour', game.tour ? JSON.stringify(game.tour) : null); }
-  function loadTourState() { try { return JSON.parse(store('tour') || 'null'); } catch (e) { return null; } }
+  function loadTourState() { try { var T = JSON.parse(store('tour') || 'null'); return T ? fitTour(T) : null; } catch (e) { return null; } }
+  /* a tour saved before new stops were added: keep the results in order, up to the first new stop */
+  function fitTour(T) {
+    if (T.n === TOUR_STOPS.length) return T;
+    var res = [], ok = true;
+    TOUR_STOPS.forEach(function (m, i) { var r = (T.results || []).filter(function (q) { return q && q.map === m; })[0]; if (ok && r) res[i] = r; else ok = false; });
+    T.results = res; T.stop = Math.min(res.length, TOUR_STOPS.length - 1); T.n = TOUR_STOPS.length;
+    return T;
+  }
   function tourFoe(stop, me) {
     var m = MAPS[TOUR_STOPS[stop]], home = m.era;
     return home !== me && READY.indexOf(home) >= 0 ? home : defaultFoe(me, m.year);
@@ -4796,11 +5585,11 @@
     x2.strokeStyle = '#1f2a30'; x2.lineWidth = 2; x2.strokeRect(16, 16, pw, ph);
     x2.fillStyle = '#ef7724'; x2.font = '800 22px Archivo, sans-serif';
     x2.fillText('Greetings from ' + yearLabel(last.year) + '!', 16, 222);
-    x2.fillStyle = '#4a5a62'; x2.font = '400 13px "Atkinson Hyperlegible", sans-serif';
+    x2.fillStyle = '#4a5a62'; x2.font = '400 11px "Atkinson Hyperlegible", sans-serif';
     var T2 = game.tour || { results: [] };
     TOUR_STOPS.forEach(function (m, i) {
       var r = T2.results[i];
-      x2.fillText(MAPS[m].name + ': ' + (!r ? 'not played' : (r.winner ? ER[r.winner].team + ' won' : 'a draw')), 16, 244 + i * 17);
+      x2.fillText(MAPS[m].name + ': ' + (!r ? 'not played' : (r.winner ? ER[r.winner].team + ' won' : 'a draw')), 16, 236 + i * 11);
     });
     x2.fillStyle = '#cbbcae'; x2.fillRect(298, 20, 2, H - 40);
     x2.fillStyle = '#fff'; x2.fillRect(W - 82, 16, 66, 74);
@@ -5462,5 +6251,5 @@
   window.B5TEST = { solid: solid, newMatch: newMatch, fire: fire, explode: explode, mask: mask, WEAP: WEAP, cam: cam, update: update, deliver: function () { maybeDeliver(true); },
     zone: zone, inp: inp, pickWeapon: pickWeapon, firePress: firePress, fireRelease: fireRelease, doJump: doJump, setWater: function (v) { WATER = v; },
     show: show, scr: function () { return scr; }, setZoom: setZoom, zoom: function () { return zoom; }, openKit: openKit, view: function () { return [VW, VH]; },
-    freeCam: function () { return freeCam; }, opts: opts, tour: function () { return game.tour; } };
+    freeCam: function () { return freeCam; }, opts: opts, tour: function () { return game.tour; }, terr: function () { return terr.toDataURL(); }, startDemo: startDemo };
 })();

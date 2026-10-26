@@ -11,7 +11,8 @@
       BN = '#f3ecd8', MT = '#59606a', CY = '#37c8dc', CYL = '#bff3fa', OR = '#ef7724',
       FU = '#8b5a2b', FD = '#5e3a17', PT = '#6b7480', GL = '#2b3038',
       LB = '#2c5ca8', AU = '#f0c446', AD = '#b8861e', LN = '#f4efe4', LN2 = '#d8cfbd', CU = '#c8874a', BZ = '#d9a441', TQ = '#3fb8a8',
-      RD = '#b8322a', RDL = '#e0574a', IR = '#8a929c', IRL = '#cfd5da', IRD = '#4f565e', BRS = '#c99a3a';
+      RD = '#b8322a', RDL = '#e0574a', IR = '#8a929c', IRL = '#cfd5da', IRD = '#4f565e', BRS = '#c99a3a',
+      GN = '#3f7a3a', GNL = '#5fa04a', GND = '#2a5426', NV = '#2a3f6a', BD = '#c8322a', BDL = '#e8574a', ST = '#f4efe4';
 
   function r(a, b, w, h, c) { g.fillStyle = c; g.fillRect(OX + a, OY + b, w, h); }
   function e(cx, cy, rx, ry, c) {
@@ -36,6 +37,8 @@
     egypt: ['#3d3314', '#b9a64c', '#ddcf80', '#8e7d34', '#cfc068', '#9a873a', '#4c4018'],
     fut:   ['#153a38', '#4fae9c', '#93dfcc', '#37857a', '#78cdb8', '#3f9584', '#1a4440'],
     rome:  ['#2b2a3a', '#9a8fb0', '#c6bdd6', '#766c8e', '#b2a8c8', '#857aa0', '#2f2a40'],
+    med:   ['#3a2a18', '#c4925e', '#e6bc8a', '#986c42', '#d8a876', '#aa7c4e', '#3e2c18'],
+    pirate: ['#1e2c3a', '#6f93ae', '#a8c8dc', '#4f6f8a', '#8fb0c8', '#5d7f9a', '#223040'],
     gold:  ['#4a3510', '#e0b040', '#ffe08a', '#b8861e', '#f0cc5e', '#c99a2a', '#5a4010'],
     night: ['#1a1636', '#5f54a8', '#958adc', '#463c8a', '#7a6ec4', '#4e4496', '#211a44'],
     ember: ['#3a1610', '#c95a30', '#f09c6c', '#9c4020', '#e27c4c', '#ac4c2a', '#4a1a10'],
@@ -116,6 +119,9 @@
     if (era === 'rome' && pose !== 'swing') {
       r(0, 13, 5, 11, IRD); r(1, 14, 3, 9, RD); r(1, 14, 1, 9, RDL); r(1, 17, 3, 2, BRS); r(2, 16, 1, 4, BRS);
     }
+    if (era === 'med' && pose !== 'swing') {
+      r(1, 12, 4, 10, WK); r(2, 13, 2, 8, WD); r(2, 9, 1, 3, ST); r(3, 8, 1, 4, '#d84a3a'); r(4, 10, 1, 2, ST);
+    }
     ear(-1, earL, hy); ear(1, earR, hy);
 
     /* body: outline, shadow, base, belly */
@@ -139,6 +145,14 @@
       e(12, 21, 4.7, 3.5, IRD); e(12, 20.6, 4, 2.9, IR);
       r(8, 19, 9, 1, IRL); r(8, 21, 9, 1, IRD); r(8, 23, 9, 1, RD); r(9, 23, 1, 1, RDL); r(13, 23, 1, 1, RDL);
       r(7, 17, 3, 2, IRL); r(15, 17, 3, 2, IR);
+    }
+    if (era === 'med') {
+      e(12, 21, 4.7, 3.5, GND); e(12, 20.6, 4, 2.9, GN); r(9, 18, 2, 5, GNL);
+      r(12, 18, 1, 6, AU); r(9, 20, 7, 1, AU); r(8, 23, 9, 1, WK); r(12, 23, 1, 1, BRS);
+    }
+    if (era === 'pirate') {
+      e(12, 21, 4.7, 3.5, NV); e(12, 20.6, 4, 2.9, ST);
+      r(8, 19, 9, 1, NV); r(8, 21, 9, 1, NV); r(8, 23, 9, 1, WK); r(11, 23, 3, 1, AU); r(12, 23, 1, 1, WK);
     }
     if (era === 'egypt') {
       e(12, 22.4, 4.7, 2.3, LN); r(12, 22, 1, 3, LN2); r(14, 23, 2, 1, LN2); r(8, 21, 9, 1, AU);
@@ -182,6 +196,10 @@
       if (era === 'egypt') { r(7, 9 + hy, 3, 1, P); r(14, 9 + hy, 3, 1, P); r(6, 10 + hy, 1, 1, P); r(17, 10 + hy, 1, 1, P); }
     }
 
+    if (era === 'pirate') {
+      r(7, 9 + hy, 3, 3, P); r(8, 12 + hy, 1, 1, P); r(7, 9 + hy, 1, 1, '#3a4a5a');
+      r(10, 8 + hy, 1, 1, P); r(11, 7 + hy, 2, 1, P); r(6, 8 + hy, 1, 1, P);
+    }
     /* mouth: a cheeky grin with one fang */
     var my = hy;
     if (wild) { r(10, 14 + my, 3, 3, M); r(11, 15 + my, 1, 2, TG); r(10, 14 + my, 1, 1, W); }
@@ -203,6 +221,18 @@
       r(7, 3 + hy, 11, 3, IRD); r(8, 3 + hy, 9, 2, IR); r(8, 3 + hy, 3, 1, IRL);
       r(6, 6 + hy, 13, 1, BRS); r(5, 6 + hy, 2, 3, IR); r(18, 6 + hy, 2, 3, IR);
       r(12, 2 + hy, 1, 1, BRS); r(9, 0 + hy, 7, 2, RD); r(10, 0 + hy, 4, 1, RDL); r(8, 1 + hy, 1, 1, RD); r(16, 1 + hy, 1, 1, RD);
+    }
+    if (era === 'med') {
+      /* a steel kettle hat with a wide brim */
+      r(9, 0 + hy, 7, 1, IRD); r(8, 1 + hy, 9, 3, IRD); r(9, 1 + hy, 7, 2, IR); r(9, 1 + hy, 3, 1, IRL);
+      r(4, 4 + hy, 17, 2, IRD); r(5, 4 + hy, 15, 1, IR); r(5, 4 + hy, 4, 1, IRL); r(12, 3 + hy, 1, 1, BRS);
+    }
+    if (era === 'pirate') {
+      /* a red spotted bandana, knotted at the back */
+      r(8, 3 + hy, 9, 1, BD); r(7, 4 + hy, 11, 2, BD); r(6, 6 + hy, 13, 1, BD); r(8, 3 + hy, 4, 1, BDL);
+      r(9, 4 + hy, 1, 1, ST); r(13, 4 + hy, 1, 1, ST); r(16, 5 + hy, 1, 1, ST); r(11, 6 + hy, 1, 1, ST);
+      r(4, 6 + hy, 3, 2, BD); r(3, 8 + hy, 2, 1, BD); r(2, 9 + hy, 1, 2, BD); r(5, 8 + hy, 1, 2, BD);
+      r(19, 13 + hy, 1, 2, AU);
     }
     if (era === 'egypt') {
       r(8, 3 + hy, 9, 1, LB); r(7, 4 + hy, 11, 2, LB);
@@ -230,6 +260,8 @@
       if (era === 'fut') { r(18, 9 + u, 4, 2, MT); r(22, 9 + u, 1, 2, CY); }
       if (era === 'egypt') { r(19, 6 + u, 1, 7, AU); r(17, 7 + u, 5, 1, AU); r(18, 2 + u, 1, 4, AU); r(20, 2 + u, 1, 4, AU); r(19, 1 + u, 1, 1, AU); r(19, 5 + u, 1, 1, AD); }
       if (era === 'rome') { r(19, 3 + u, 1, 8, IRL); r(19, 2 + u, 1, 1, '#ffffff'); r(18, 11 + u, 3, 1, BRS); }
+      if (era === 'med') { r(19, 1 + u, 1, 11, WD); r(20, 1 + u, 5, 4, GND); r(20, 2 + u, 4, 2, GN); r(21, 2 + u, 2, 1, AU); r(19, 0 + u, 1, 1, AU); }
+      if (era === 'pirate') { r(19, 4 + u, 1, 6, IRL); r(20, 2 + u, 1, 3, IRL); r(21, 1 + u, 1, 2, IRL); r(18, 10 + u, 3, 1, AU); r(19, 11 + u, 1, 1, WK); }
     } else if (pose === 'yawn') {
       var v = f % 2;
       r(4, 12 + v, 2, 6, D); hand(3, 10 + v); r(18, 12 + v, 2, 6, D); hand(19, 10 + v);
@@ -262,12 +294,16 @@
         if (era === 'pre') { r(17, 5, 2, 8, WD); r(16, 2, 4, 4, WK); r(16, 2, 1, 1, '#8c6034'); }
         else if (era === 'egypt') { r(17, 10, 2, 3, WK); r(18, 4, 2, 6, BZ); r(19, 2, 2, 3, BZ); r(21, 1, 2, 2, BZ); r(17, 5, 1, 4, AD); }
         else if (era === 'rome') { r(15, 12, 5, 11, IRD); r(16, 13, 3, 9, RD); r(16, 16, 3, 2, BRS); }
+        else if (era === 'med') { r(17, 6, 2, 8, WD); r(16, 2, 4, 4, IRD); r(17, 3, 2, 2, IR); r(15, 3, 1, 1, IRD); r(20, 3, 1, 1, IRD); r(17, 1, 1, 1, IRD); }
+        else if (era === 'pirate') { r(18, 4, 1, 8, IRL); r(19, 2, 1, 3, IRL); r(16, 12, 4, 1, AU); r(17, 13, 2, 1, WK); }
         else { r(16, 10, 4, 4, CY); r(17, 11, 2, 2, CYL); }
       } else {
         r(17, 18, 5, 2, D);
         if (era === 'pre') { r(21, 17, 7, 2, WD); r(27, 15, 3, 5, WK); }
         else if (era === 'egypt') { r(21, 18, 2, 2, WK); r(23, 17, 5, 2, BZ); r(27, 15, 2, 3, BZ); r(28, 13, 2, 2, BZ); r(24, 19, 3, 1, AD); }
         else if (era === 'rome') { r(21, 12, 5, 12, IRD); r(22, 13, 3, 10, RD); r(22, 13, 1, 10, RDL); r(22, 17, 3, 2, BRS); }
+        else if (era === 'med') { r(21, 18, 6, 2, WD); r(27, 16, 4, 5, IRD); r(28, 17, 2, 3, IR); r(31, 18, 1, 1, IRD); r(28, 15, 1, 1, IRD); }
+        else if (era === 'pirate') { r(21, 18, 2, 2, AU); r(23, 18, 7, 1, IRL); r(29, 17, 2, 1, IRL); r(24, 19, 4, 1, IR); }
         else { r(22, 16, 4, 4, CY); r(23, 17, 2, 2, CYL); r(26, 17, 2, 1, CYL); r(26, 19, 2, 1, CYL); }
         r(24, 13, 1, 1, '#ffffff'); r(26, 12, 1, 1, '#ffffff');
       }
@@ -276,7 +312,8 @@
       r(5, 19, 2, 3, D); hand(5, 21); r(17, 20 + dd, 4, 2, D);
       if (era === 'pre') { r(21, 21 + dd, 4, 1, BN); r(24, 19 + dd, 2, 4, BN); }
       else if (era === 'egypt') { r(21, 21 + dd, 5, 1, CU); r(26, 21 + dd, 1, 1, '#f0b07a'); r(18, 16 - dd, 3, 3, WD); }
-      else if (era === 'rome') { r(21, 21 + dd, 4, 1, WD); r(24, 18 + dd, 2, 5, IRD); r(25, 19 + dd, 1, 3, IRL); }
+      else if (era === 'rome' || era === 'med') { r(21, 21 + dd, 4, 1, WD); r(24, 18 + dd, 2, 5, IRD); r(25, 19 + dd, 1, 3, IRL); }
+      else if (era === 'pirate') { r(20, 21 + dd, 5, 1, WD); r(25, 19 + dd, 3, 4, IR); r(25, 19 + dd, 3, 1, IRL); }
       else { r(21, 20 + dd, 4, 2, MT); r(25, 20 + dd, 2, 2, CY); r(27, 20 + dd * 2, 1, 1, CYL); }
     } else {
       var sw = walk ? [1, 1, 0, -1, -1, 0][w6] : 0;
@@ -284,6 +321,8 @@
       if (era === 'pre') { r(18 + sw, 14, 1, 6, WD); r(17 + sw, 11, 3, 3, WK); r(17 + sw, 11, 1, 1, '#8c6034'); }
       if (era === 'egypt') { r(18 + sw, 9, 1, 12, WD); r(18 + sw, 6, 1, 3, CU); r(17 + sw, 8, 3, 1, CU); r(18 + sw, 6, 1, 1, '#f0b07a'); }
       if (era === 'rome') { r(18 + sw, 13, 1, 6, IRL); r(18 + sw, 12, 1, 1, '#ffffff'); r(17 + sw, 19, 3, 1, BRS); r(18 + sw, 20, 1, 1, WK); }
+      if (era === 'med') { r(19 + sw, 8, 1, 2, WK); r(20 + sw, 10, 1, 9, WK); r(19 + sw, 19, 1, 2, WK); r(19 + sw, 10, 1, 9, '#e8e2d2'); r(20 + sw, 14, 1, 2, WD); }
+      if (era === 'pirate') { r(18 + sw, 13, 1, 6, IRL); r(19 + sw, 11, 1, 2, IRL); r(17 + sw, 19, 3, 1, AU); r(18 + sw, 20, 1, 1, WK); }
     }
     OY -= bob; OX -= lean;
   }
@@ -337,7 +376,7 @@
   /* Where a shot leaves the weapon, so projectiles start at the business end. */
   S.tip = function (x, y, face, deg, wid) {
     var a = deg * Math.PI / 180;
-    var L = wid === 'bomb' || wid === 'scarab' ? 6 : (wid === 'spear' || wid === 'pilum' ? 15 : 11);
+    var L = wid === 'bomb' || wid === 'scarab' ? 6 : (wid === 'spear' || wid === 'pilum' ? 15 : (wid === 'cannon' || wid === 'launch' ? 13 : (wid === 'volley' ? 10 : 11)));
     return { x: x + face * 6 + Math.cos(a) * face * L, y: y - 8 - Math.sin(a) * L };
   };
 
@@ -362,6 +401,47 @@
       var bx2 = hx + dx * 7, by2 = hy + dy * 7;
       for (i = -4; i <= 4; i++) px(ctx, bx2 - dy * i - dx * Math.abs(i) * 0.4, by2 + dx * i - dy * Math.abs(i) * 0.4, 1, 1, IRD);
       px(ctx, hx + dx * 11, hy + dy * 11, 2, 1, IRL);
+      return;
+    }
+    if (wid === 'lance') {
+      for (i = -6; i < 26; i++) px(ctx, hx + dx * i, hy + dy * i + 2, 1, 2, i < -2 ? WK : (i > 22 ? IRL : (i % 6 < 3 ? '#e8e2d2' : AU)));
+      px(ctx, hx + dx * 3, hy + dy * 3, 2, 5, IRD);
+      px(ctx, hx + dx * 8, hy + dy * 8 - 2, 1, 3, GN); px(ctx, hx + dx * 9, hy + dy * 9 - 1, 1, 2, GN);
+      return;
+    }
+    if (wid === 'volley' || (era === 'med' && wid === 'lob')) {
+      /* a longbow held across the aim, with an arrow nocked */
+      var vx2 = hx + dx * 5, vy2 = hy + dy * 5;
+      for (i = -7; i <= 7; i++) px(ctx, vx2 - dy * i - dx * (Math.abs(i) * Math.abs(i)) * 0.06, vy2 + dx * i - dy * (Math.abs(i) * Math.abs(i)) * 0.06, 1, 1, WK);
+      for (i = -6; i <= 6; i += 2) px(ctx, vx2 - dy * i - dx * 3, vy2 + dx * i - dy * 3, 1, 1, '#e8e2d2');
+      for (i = -2; i < 10; i++) px(ctx, hx + dx * i, hy + dy * i, 1, 1, WD);
+      px(ctx, hx + dx * 10, hy + dy * 10, 2, 2, wid === 'lob' ? (((t >> 2) % 2) ? OR : '#ffd27a') : IRD);
+      px(ctx, hx - dx * 2, hy - dy * 2 - 1, 1, 1, '#d84a3a');
+      return;
+    }
+    if (era === 'med' && wid === 'bomb') {
+      var mx2 = hx + dx * 4, my2 = hy + dy * 4;
+      px(ctx, mx2 - 2, my2 - 3, 5, 6, '#8a6a2a'); px(ctx, mx2 - 1, my2 - 3, 3, 5, '#d0a04a'); px(ctx, mx2 - 2, my2 - 1, 5, 1, '#8a6a2a'); px(ctx, mx2 - 2, my2 + 1, 5, 1, '#8a6a2a');
+      px(ctx, mx2 + 3 + ((t >> 3) % 2), my2 - 4 - ((t >> 4) % 2), 1, 1, '#1d1d24');
+      return;
+    }
+    if (wid === 'cannon' || wid === 'launch') {
+      /* a short iron cannon on the shoulder, bigger when it is for you */
+      var big = wid === 'launch' ? 1 : 0;
+      for (i = -3; i < 12 + big * 2; i++) px(ctx, hx + dx * i - 1, hy + dy * i - 1, 3 + big, 3 + big, i < 0 ? WK : (i > 9 + big * 2 ? IRD : '#3a3e44'));
+      for (i = 0; i < 12; i += 4) px(ctx, hx + dx * i, hy + dy * i - 1, 1, 1, '#6a7078');
+      return;
+    }
+    if (wid === 'blunder') {
+      for (i = -3; i < 4; i++) px(ctx, hx + dx * i, hy + dy * i, 2, 2, WD);
+      for (i = 4; i < 11; i++) px(ctx, hx + dx * i, hy + dy * i, 2, 2, BRS);
+      px(ctx, hx + dx * 11 - 1, hy + dy * 11 - 1, 4, 4, '#a07a2a'); px(ctx, hx + dx * 11, hy + dy * 11, 2, 2, '#1d1d24');
+      return;
+    }
+    if (era === 'pirate' && (wid === 'lob' || wid === 'bomb')) {
+      var gx2 = hx + dx * 4, gy2 = hy + dy * 4;
+      if (wid === 'lob') { px(ctx, gx2 - 2, gy2 - 2, 5, 5, '#2a2a2a'); px(ctx, gx2 - 1, gy2 - 1, 2, 1, '#6a6a6a'); px(ctx, gx2, gy2 - 4, 1, 2, WK); px(ctx, gx2, gy2 - 5, 1, 1, ((t >> 3) % 2) ? OR : '#ffd27a'); }
+      else { px(ctx, gx2 - 2, gy2 - 2, 5, 5, '#8a5a32'); px(ctx, gx2 - 1, gy2 - 3, 3, 1, '#6a4220'); px(ctx, gx2 - 1, gy2 - 1, 2, 1, '#b07a46'); if ((t >> 3) % 3 === 0) px(ctx, gx2 + 1, gy2 - 5, 1, 1, '#9be36b'); }
       return;
     }
     if (era === 'rome' && (wid === 'lob' || wid === 'bomb')) {
@@ -459,6 +539,47 @@
       if (p.type === 'ballista') { ctx.fillStyle = RD; ctx.fillRect(Math.round(p.x - ux3 * 8 - uy3), Math.round(p.y - uy3 * 8 + ux3), 1, 1); ctx.fillRect(Math.round(p.x - ux3 * 8 + uy3), Math.round(p.y - uy3 * 8 - ux3), 1, 1); }
       ctx.fillStyle = IRD; ctx.fillRect(X - 1, Y - 1, 2, 2);
       ctx.fillStyle = IRL; ctx.fillRect(Math.round(p.x + ux3 * 2), Math.round(p.y + uy3 * 2), 1, 1);
+      return;
+    }
+    if (p.type === 'volley' || p.type === 'evarrow' || (era === 'med' && p.type === 'lob')) {
+      var sp4 = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1, ux4 = p.vx / sp4, uy4 = p.vy / sp4;
+      for (i = -8; i < 0; i++) { ctx.fillStyle = i < -6 ? (p.type === 'evarrow' ? '#1d1d24' : '#f4efe4') : WD; ctx.fillRect(Math.round(p.x + ux4 * i), Math.round(p.y + uy4 * i), 1, 1); }
+      ctx.fillStyle = '#d84a3a'; ctx.fillRect(Math.round(p.x - ux4 * 8 - uy4), Math.round(p.y - uy4 * 8 + ux4), 1, 1);
+      if (p.type === 'lob') { ctx.fillStyle = ((t >> 1) % 2) ? OR : '#ffd27a'; ctx.fillRect(X - 1, Y - 1, 3, 3); ctx.fillStyle = '#fff3c8'; ctx.fillRect(X, Y, 1, 1); }
+      else { ctx.fillStyle = IRD; ctx.fillRect(X - 1, Y - 1, 2, 2); ctx.fillStyle = IRL; ctx.fillRect(Math.round(p.x + ux4), Math.round(p.y + uy4), 1, 1); }
+      return;
+    }
+    if (era === 'med' && p.type === 'bomb') {
+      ctx.fillStyle = '#5a4018'; ctx.fillRect(X - 3, Y - 3, 7, 7);
+      ctx.fillStyle = '#d0a04a'; ctx.fillRect(X - 2, Y - 3, 5, 6);
+      ctx.fillStyle = '#8a6a2a'; ctx.fillRect(X - 2, Y - 1, 5, 1); ctx.fillRect(X - 2, Y + 1, 5, 1); ctx.fillRect(X, Y + 3, 1, 1);
+      ctx.fillStyle = '#1d1d24';
+      for (i = 0; i < 3; i++) { var ba = t * 0.2 + i * 2.1; ctx.fillRect(Math.round(X + Math.cos(ba) * 6), Math.round(Y - 2 + Math.sin(ba * 1.3) * 4), 1, 1); }
+      return;
+    }
+    if (p.type === 'cannon' || p.type === 'bball') {
+      for (i = 0; i < p.trail.length; i += 2) { ctx.fillStyle = i < p.trail.length / 2 ? '#8a8a8a' : '#c8c8c8'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 1, 1); }
+      ctx.fillStyle = '#1d1d24'; ctx.fillRect(X - 2, Y - 1, 5, 3); ctx.fillRect(X - 1, Y - 2, 3, 5);
+      ctx.fillStyle = '#5a5e64'; ctx.fillRect(X - 1, Y - 1, 1, 1);
+      return;
+    }
+    if (p.type === 'trebstone') {
+      ctx.fillStyle = '#3d3832'; ctx.fillRect(X - 5, Y - 4, 11, 9); ctx.fillRect(X - 4, Y - 5, 9, 11);
+      ctx.fillStyle = '#8c857b'; ctx.fillRect(X - 4, Y - 4, 9, 8);
+      ctx.fillStyle = '#b5ada2'; ctx.fillRect(X - 3, Y - 3, 3, 2);
+      ctx.fillStyle = '#5f5a52'; ctx.fillRect(X + 1, Y + 1, 3, 1); ctx.fillRect(X - 2, Y + 2, 2, 1);
+      return;
+    }
+    if (era === 'pirate' && (p.type === 'lob' || p.type === 'bomb')) {
+      if (p.type === 'lob') {
+        ctx.fillStyle = '#1a1a1a'; ctx.fillRect(X - 2, Y - 2, 5, 5);
+        ctx.fillStyle = '#5a5a5a'; ctx.fillRect(X - 1, Y - 1, 2, 1);
+        ctx.fillStyle = ((t >> 2) % 2) ? OR : '#ffd27a'; ctx.fillRect(X, Y - 4, 1, 2);
+      } else {
+        ctx.fillStyle = '#4a2a14'; ctx.fillRect(X - 2, Y - 2, 5, 5);
+        ctx.fillStyle = '#9a6a3a'; ctx.fillRect(X - 1, Y - 1, 3, 3);
+        ctx.fillStyle = '#9be36b'; ctx.fillRect(X + ((t >> 3) % 3) - 1, Y - 4 - ((t >> 2) % 2), 1, 1);
+      }
       return;
     }
     if (era === 'rome' && (p.type === 'lob' || p.type === 'bomb')) {
@@ -630,6 +751,7 @@
     var sky = (look === 'overgrown' && map.skyGreen) || (look === 'sandy' && map.skySandy) || (look === 'neon' && map.skyNeon) || map.sky;
     for (i = 0; i < sky.length; i++) { x2.fillStyle = sky[i]; x2.fillRect(0, Math.floor(i * H / sky.length), W, Math.ceil(H / sky.length) + 1); }
     var night = map.style === 'city' || look === 'neon';
+    if (map.style === 'harbour' && look !== 'neon') { x2.fillStyle = map.sea; x2.fillRect(0, Math.round(H * 0.6), W, H); x2.fillStyle = map.seaTop; x2.fillRect(0, Math.round(H * 0.6), W, 1); }
     x2.fillStyle = map.sun || '#fff3c8';
     x2.beginPath(); x2.arc(W * 0.78, H * (look === 'neon' ? 0.42 : 0.24), H * 0.11, 0, 7); x2.fill();
     if (night) for (i = 0; i < 14; i++) { x2.fillStyle = '#e9e4ff'; x2.fillRect(Math.floor((i * 37) % W), Math.floor((i * 17) % (H * 0.4)), 1, 1); }
@@ -651,6 +773,36 @@
       if (look === 'neon') { x2.fillStyle = '#5fe0f0'; x2.fillRect(Math.round(W * 0.08), gy - 7, Math.round(W * 0.84), 1); }
       x2.fillStyle = look === 'neon' ? '#2f3a4a' : '#6f9a4a'; x2.fillRect(0, gy, W, 2);
       x2.fillStyle = look === 'neon' ? '#22263e' : 'rgb(110,84,56)'; x2.fillRect(0, gy + 2, W, H - gy);
+    } else if (map.style === 'castle') {
+      var gold = look === 'golden', wood = look === 'rough', neo = look === 'neon';
+      x2.fillStyle = neo ? '#2c2f57' : '#86a874'; x2.beginPath(); x2.moveTo(0, gy); x2.quadraticCurveTo(W * 0.5, H * 0.42, W, gy); x2.fill();
+      var sc = gold ? '#f2eadb' : (wood ? '#8a5a32' : (neo ? '#46356f' : '#b6b2a6')), sd = gold ? '#d8cfbc' : (wood ? '#6a4220' : (neo ? '#3a2c5e' : '#94907f'));
+      var bx = Math.round(W * 0.3), bw = Math.round(W * 0.4), top = gy - 12;
+      x2.fillStyle = sc; x2.fillRect(bx, top, bw, 13);
+      for (i = 0; i < 8; i++) x2.fillRect(bx + i * Math.round(bw / 8), top - 2, 2, 2);
+      x2.fillRect(bx - 3, top - 8, 7, 21); x2.fillRect(bx + bw - 4, top - 8, 7, 21);
+      x2.fillRect(Math.round(W * 0.45), top - 14, 9, 14);
+      x2.fillStyle = sd; x2.fillRect(Math.round(W * 0.48), gy - 6, 4, 6);
+      x2.fillStyle = gold ? '#f0c446' : (neo ? '#ff78be' : (wood ? '#5a3a1a' : '#4a5268'));
+      [[bx - 3, 7], [bx + bw - 4, 7]].forEach(function (tw) { x2.beginPath(); x2.moveTo(tw[0] - 1, top - 8); x2.lineTo(tw[0] + tw[1] / 2, top - 15); x2.lineTo(tw[0] + tw[1] + 1, top - 8); x2.fill(); });
+      x2.fillStyle = neo ? '#5fe0f0' : '#d84a3a'; x2.fillRect(Math.round(W * 0.49), top - 20, 1, 6); x2.fillStyle = neo ? '#5fe0f0' : '#3f7a3a'; x2.fillRect(Math.round(W * 0.5), top - 20, 4, 3);
+      if (neo) { x2.fillStyle = '#5fe0f0'; x2.fillRect(bx, top, bw, 1); }
+      x2.fillStyle = neo ? '#2f3a4a' : '#6faa4e'; x2.fillRect(0, gy, W, 2);
+      x2.fillStyle = neo ? '#22263e' : 'rgb(118,86,56)'; x2.fillRect(0, gy + 2, W, H - gy);
+    } else if (map.style === 'harbour') {
+      var wild2 = look === 'overgrown', gold2 = look === 'golden', neo2 = look === 'neon';
+      var sand = neo2 ? '#3a3e6e' : (wild2 ? '#4e6a3a' : '#f0dea4');
+      x2.fillStyle = sand;
+      x2.beginPath(); x2.moveTo(0, H); x2.lineTo(0, gy - 6); x2.quadraticCurveTo(W * 0.2, gy - 10, W * 0.42, H - 4); x2.fill();
+      x2.beginPath(); x2.moveTo(W * 0.58, H - 4); x2.quadraticCurveTo(W * 0.78, gy - 12, W, gy - 4); x2.lineTo(W, H); x2.fill();
+      x2.fillStyle = gold2 ? '#f2eadb' : (neo2 ? '#46356f' : '#c8b898'); x2.fillRect(Math.round(W * 0.06), gy - 16, 12, 12);
+      for (i = 0; i < 4; i++) x2.fillRect(Math.round(W * 0.06) + i * 3, gy - 18, 2, 2);
+      if (gold2) { x2.fillStyle = '#f0c446'; x2.fillRect(Math.round(W * 0.06), gy - 16, 12, 1); }
+      x2.fillStyle = neo2 ? '#2c2f57' : '#6a4422'; x2.beginPath(); x2.moveTo(W * 0.4, H - 6); x2.lineTo(W * 0.6, H - 6); x2.lineTo(W * 0.56, H - 1); x2.lineTo(W * 0.44, H - 1); x2.fill();
+      x2.fillRect(Math.round(W * 0.49), H - 18, 1, 12);
+      x2.fillStyle = neo2 ? '#14162e' : '#7a5a34'; x2.fillRect(Math.round(W * 0.8), gy - 22, 2, 14);
+      x2.fillStyle = neo2 ? '#ff78be' : (wild2 ? '#3f7a2e' : '#3f8a4a'); x2.fillRect(Math.round(W * 0.8) - 5, gy - 24, 12, 2); x2.fillRect(Math.round(W * 0.8) - 3, gy - 26, 8, 2);
+      if (neo2) { x2.fillStyle = '#5fe0f0'; x2.fillRect(0, gy - 6, Math.round(W * 0.3), 1); }
     } else if (map.style === 'desert') {
       var pc = look === 'golden' ? '#f2eadb' : (look === 'neon' ? '#3a3e6e' : '#d6c69e');
       x2.fillStyle = pc; x2.beginPath(); x2.moveTo(W * 0.2, gy); x2.lineTo(W * 0.45, H * 0.2); x2.lineTo(W * 0.7, gy); x2.fill();
@@ -700,14 +852,47 @@
       case 'onager':
         P(1, 9, 10, 2, WK); P(2, 8, 8, 1, WD); P(3, 4, 1, 5, WD); P(4, 3, 1, 1, WD); P(5, 2, 1, 1, WD); P(6, 1, 1, 1, WD);
         dot(8.5, 2.5, 2, '#8c857b'); P(8, 1, 1, 1, '#b5ada2'); P(2, 11, 2, 1, '#3b2616'); P(8, 11, 2, 1, '#3b2616'); break;
+      case 'volley':
+        [0, 3, 6].forEach(function (o4) {
+          for (var q4 = 0; q4 < 7; q4++) P(o4 - 2 + q4, 9 - q4 + (o4 >> 1), 1, 1, WD);
+          P(o4 + 4, 2 + (o4 >> 1), 2, 2, IRD); P(o4 - 3, 9 + (o4 >> 1), 1, 2, '#f4efe4');
+        });
+        break;
+      case 'cannon':
+        P(0, 4, 9, 4, '#3a3e44'); P(1, 5, 7, 1, '#6a7078'); P(9, 3, 2, 6, '#2a2e34'); P(2, 8, 5, 2, WK); dot(3, 10, 1.6, '#5a3a1a'); dot(7, 10, 1.6, '#5a3a1a'); P(11, 5, 1, 1, '#c8c8c8'); break;
+      case 'lance':
+        for (i = 0; i < 11; i++) P(i, 8 - Math.floor(i / 2), 1, 2, i < 3 ? WK : (i > 8 ? IRL : '#e8e2d2'));
+        P(2, 6, 3, 5, GN); P(3, 7, 1, 3, AU); break;
+      case 'oil':
+        P(2, 2, 8, 5, '#2a2a2a'); P(3, 3, 6, 3, '#4a4a4a'); P(1, 2, 1, 1, '#2a2a2a'); P(10, 2, 1, 1, '#2a2a2a');
+        P(8, 7, 2, 2, '#ef7724'); P(9, 9, 2, 1, '#ffd27a'); P(5, 10, 6, 2, '#ef7724'); P(6, 10, 3, 1, '#ffd27a'); break;
+      case 'banner':
+        P(2, 0, 1, 12, WD); P(2, 0, 1, 1, AU); P(3, 1, 8, 6, GND); P(3, 1, 7, 5, GN); P(5, 2, 3, 3, AU); P(6, 3, 1, 1, GN); P(3, 7, 2, 1, GN); P(7, 7, 2, 1, GN); break;
+      case 'treb':
+        P(1, 10, 10, 2, WK); P(3, 5, 1, 5, WD); P(8, 5, 1, 5, WD); P(2, 4, 8, 1, WD); P(5, 1, 1, 4, WK); P(6, 0, 1, 2, WK);
+        dot(3, 2.5, 1.8, '#8c857b'); P(9, 5, 2, 2, '#3d3832'); break;
+      case 'blunder':
+        P(0, 7, 4, 2, WK); P(4, 6, 5, 2, BRS); P(9, 5, 3, 4, '#a07a2a'); P(10, 6, 2, 2, '#1d1d24'); P(2, 9, 2, 2, WK); break;
+      case 'launch':
+        P(1, 7, 8, 3, '#3a3e44'); P(8, 6, 3, 5, '#2a2e34'); P(2, 10, 3, 2, WK); P(1, 11, 5, 1, WK);
+        P(6, 1, 3, 3, '#6f93ae'); P(6, 1, 3, 1, BD); P(9, 2, 2, 1, '#ffffff'); break;
+      case 'keg':
+        P(2, 1, 8, 10, '#5a3a1a'); P(3, 2, 6, 8, '#9a6a3a'); P(3, 2, 2, 8, '#b8844e'); P(2, 3, 8, 1, '#3a3e44'); P(2, 8, 8, 1, '#3a3e44');
+        P(5, 5, 2, 1, '#1d1d24'); P(6, 0, 1, 1, '#ffd27a'); break;
+      case 'broadside':
+        P(0, 7, 12, 2, '#5a3a1a'); P(1, 9, 10, 1, '#3a2410'); P(3, 0, 1, 7, WD); P(8, 1, 1, 6, WD); P(4, 1, 3, 4, ST); P(9, 2, 2, 3, ST);
+        P(2, 8, 1, 1, '#1d1d24'); P(5, 8, 1, 1, '#1d1d24'); P(8, 8, 1, 1, '#1d1d24'); P(11, 6, 1, 1, '#c8c8c8'); break;
       case 'shove':
-        if (era === 'rome') { P(3, 1, 7, 10, '#4f565e'); P(4, 2, 5, 8, RD); P(4, 2, 1, 8, RDL); P(5, 5, 3, 2, BRS); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
+        if (era === 'med') { P(7, 0, 4, 4, IRD); P(8, 1, 2, 2, IR); P(6, 1, 1, 1, IRD); P(11, 2, 1, 1, IRD); P(6, 4, 2, 2, WD); P(4, 6, 2, 2, WD); P(2, 8, 2, 2, WD); }
+        else if (era === 'pirate') { P(9, 1, 1, 2, IRL); P(8, 3, 1, 2, IRL); P(7, 5, 1, 2, IRL); P(6, 7, 1, 1, IRL); P(4, 7, 4, 1, AU); P(4, 8, 2, 2, WK); P(0, 4, 2, 1, '#ffffff'); }
+        else if (era === 'rome') { P(3, 1, 7, 10, '#4f565e'); P(4, 2, 5, 8, RD); P(4, 2, 1, 8, RDL); P(5, 5, 3, 2, BRS); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         else if (era === 'pre') { P(7, 1, 4, 4, WK); P(7, 1, 1, 1, '#8c6034'); P(6, 5, 2, 2, WD); P(4, 7, 2, 2, WD); P(2, 9, 2, 2, WD); }
         else if (era === 'egypt') { P(2, 9, 2, 2, WK); P(4, 7, 2, 2, BZ); P(5, 5, 2, 2, BZ); P(6, 3, 2, 2, BZ); P(8, 2, 2, 2, BZ); P(10, 3, 1, 2, BZ); P(5, 8, 2, 1, AD); }
         else { P(3, 3, 6, 6, CY); P(3, 3, 6, 1, CYL); P(9, 4, 2, 4, '#1f7f8f'); P(4, 6, 4, 1, '#1f7f8f'); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         break;
       case 'dig':
-        if (era === 'rome') { P(1, 9, 7, 1, WD); P(1, 10, 6, 1, WK); P(7, 4, 2, 7, '#4f565e'); P(8, 5, 1, 4, '#cfd5da'); P(9, 4, 2, 1, '#4f565e'); }
+        if (era === 'pirate') { P(1, 2, 2, 2, '#d84a3a'); P(2, 1, 1, 1, '#d84a3a'); P(1, 1, 1, 1, '#d84a3a'); P(3, 4, 1, 4, WD); P(4, 7, 1, 1, WD); P(5, 8, 4, 3, IR); P(5, 8, 4, 1, IRL); }
+        else if (era === 'rome' || era === 'med') { P(1, 9, 7, 1, WD); P(1, 10, 6, 1, WK); P(7, 4, 2, 7, '#4f565e'); P(8, 5, 1, 4, '#cfd5da'); P(9, 4, 2, 1, '#4f565e'); }
         else if (era === 'pre') { P(6, 0, 1, 6, BN); P(4, 6, 5, 4, BN); P(5, 7, 3, 2, '#d8ceb4'); P(5, 10, 3, 1, BN); }
         else if (era === 'egypt') { P(1, 8, 6, 2, WD); P(7, 8, 3, 2, CU); P(10, 8, 1, 2, '#f0b07a'); P(2, 2, 4, 3, WK); P(3, 5, 1, 3, WD); }
         else { P(1, 4, 6, 5, MT); P(1, 4, 6, 1, '#9aa3ad'); P(7, 5, 2, 3, '#9aa3ad'); P(9, 6, 2, 1, CY); P(11, 6, 1, 1, CYL); }
@@ -825,6 +1010,54 @@
     return c;
   }
   var ART = {
+    chessman: { pal: { o: '#5a4a38', I: '#efe4c8', i: '#cdbf9e', k: '#3a2a1a' }, rows: [
+      '    oooo    ', '   oIIIIo   ', '   oIkIko   ', '   oIIIIo   ', '    oiio    ', '  ooIIIIoo  ', ' oIIiIIiIIo ', ' oIIIkkIIIo ', ' oIiIIIIiIo ', ' oIIIIIIIIo ', '  oiiiiiio  ', '  oooooooo  '] },
+    tapestry: { pal: { o: '#4a3a28', L: '#e8dcc0', G: '#4a7a3a', g: '#c8a040', B: '#3a5a9a', R: '#a83a2a', K: '#6a4a2a' }, rows: [
+      '            ', 'oooooooooooo', 'oGgGgGgGgGgo', 'oLLLLLLLLLLo', 'oLBLLRLLLBLo', 'oLBBLRRLBBLo', 'oLKKKKKKKKLo', 'oLLKLLLLKLLo', 'oLLLLLLLLLLo', 'oGgGgGgGgGgo', 'oooooooooooo', '            '] },
+    mappa: { pal: { o: '#5a4a30', V: '#e8d4a8', B: '#4a8ac8', R: '#c84a3a', k: '#3a2a1a' }, rows: [
+      '   oooooo   ', '  oVVVVVVo  ', ' oVVVRVVVVo ', 'oVVVVVVVkVVo', 'oVVkVVVVVVVo', 'oBBBBBRBBBBo', 'oVVVVVBVVVVo', 'oVVkVVBVVkVo', ' oVVVVBVVVo ', '  oVVBVVVo  ', '   oooooo   ', '            '] },
+    badge: { pal: { o: '#3a3e44', L: '#a8b0b8', l: '#7a828a', k: '#2a2e34' }, rows: [
+      '    oooo    ', '   oLLLLo   ', '  oLlLLlLo  ', '  oLLLLLLo  ', '  oLkLLkLo  ', '  oLLLLLLo  ', '  oLLkkLLo  ', '   oLLLLo   ', '  ooLLLLoo  ', ' oLLlLLlLLo ', ' oooooooooo ', '            '] },
+    psalter: { pal: { o: '#3a2a18', P: '#f4ead2', R: '#c84a3a', B: '#3a6ab8', G: '#3a8a4a', A: '#e0b040', k: '#5a4a38' }, rows: [
+      '            ', 'oooooooooooo', 'oPPPPooPPPPo', 'oPRRPooPkkPo', 'oPRRPooPPPPo', 'oPPPPooPkkPo', 'oPkkPooPPPPo', 'oPPPPooPBGPo', 'oPkkPooPBGPo', 'oPPPPooPPPPo', 'oAAAAooAAAAo', 'oooooooooooo'] },
+    magna: { pal: { o: '#7a5a2a', P: '#efd9a0', k: '#3a2a1a', R: '#b0302a' }, rows: [
+      '            ', ' oooooooooo ', ' oPPPPPPPPo ', ' oPkkkPkkPo ', ' oPPPPPPPPo ', ' oPkkPkkkPo ', ' oPPPPPPPPo ', ' oPkkkPkPPo ', ' oPPPPPPPPo ', ' oooooRoooo ', '      RR    ', '     RRR    '] },
+    skate: { pal: { o: '#6a5a40', B: '#efe6cc', b: '#c8bc9a', L: '#7a4a22' }, rows: [
+      '            ', '            ', '            ', '  L     L   ', '  L  L  L   ', ' ooooooooo  ', 'oBBBBBBBBBo ', 'obbBBBBBBBBo', ' oobbbbbbbo ', '   ooooooo  ', '            ', '            '] },
+    domesday: { pal: { o: '#3a2010', L: '#8a4a28', l: '#6a3418', P: '#efe6cc', A: '#e0b040' }, rows: [
+      '            ', '  oooooooo  ', ' oLLLLLLLLo ', ' oLAAAAAALo ', ' oLAllllALo ', ' oLAlLLlALo ', ' oLAllllALo ', ' oLAAAAAALo ', ' oLLLLLLLLo ', ' oPPPPPPPPo ', ' oooooooooo ', '            '] },
+    skateboard: { pal: { k: '#1d1d24', B: '#ff6b9a', b: '#d84a7a', G: '#7a7a7a' }, rows: [
+      '            ', '            ', '            ', '            ', '            ', ' kkkkkkkkkk ', 'kBBBBBBBBBBk', ' kbbbbbbbbk ', '  GG    GG  ', '  kk    kk  ', '            ', '            '] },
+    guitar: { pal: { k: '#1d1d24', R: '#d83a3a', r: '#a82a2a', W: '#f4efe4', G: '#8a8a8a' }, rows: [
+      '         kk ', '        kGk ', '       kGk  ', '      kGk   ', '     kGk    ', '  rrkGk     ', ' rRRRRr     ', 'rRRWWRRr    ', 'rRRWWRRr    ', ' rRRRRRr    ', '  rrrrr     ', '            '] },
+    beans: { pal: { o: '#3a3e44', S: '#c8ccd4', B: '#2f6fd8', O: '#ef7724', W: '#f4efe4' }, rows: [
+      '            ', '   oooooo   ', '  oSSSSSSo  ', '  oBBBBBBo  ', '  oBOOOOBo  ', '  oBOWOOBo  ', '  oBOOOOBo  ', '  oBBBBBBo  ', '  oSSSSSSo  ', '   oooooo   ', '            ', '            '] },
+    plasticsword: { pal: { k: '#1d1d24', Y: '#ffd23f', R: '#ff4a6a', B: '#4a8aff' }, rows: [
+      '         kk ', '        kYk ', '       kYk  ', '      kYk   ', '     kYk    ', '  k kYk     ', '   kRk      ', '  kRkRk     ', ' kBk  k     ', 'kBk         ', 'kk          ', '            '] },
+    eight: { pal: { o: '#4a4e54', S: '#c8ccd4', s: '#9aa0a8', k: '#6a6e74' }, rows: [
+      '            ', '   oooooo   ', '  oSSSSSSo  ', ' oSSkSSkSSo ', ' oSSkkkkSSo ', ' oSkkSSkkSo ', ' oSSkkkkSSo ', ' oSSkSSkSSo ', '  oSSSSSso  ', '   oooooo   ', '            ', '            '] },
+    qarcannon: { pal: { o: '#1d1d24', I: '#4a4e54', i: '#6a7078', W: '#7a5230', w: '#5a3a1a' }, rows: [
+      '            ', '            ', '            ', ' oooooooo   ', 'oIIiIIIIIoo ', 'oIIIIIIIIIIo', 'oIIiIIIIIoo ', ' ooWWWWoo   ', '  WwWWwW    ', ' WWwWWwWW   ', '  oo  oo    ', '            '] },
+    arabcoin: { pal: { o: '#5a5040', S: '#d8d4c8', k: '#8a8070' }, rows: [
+      '            ', '   oooooo   ', '  oSSSSSSo  ', ' oSkSkkSkSo ', ' oSSSSSSSSo ', ' oSkkSkSkSo ', ' oSSSSSSSSo ', ' oSkSkkkSSo ', '  oSSSSSSo  ', '   oooooo   ', '            ', '            '] },
+    articles: { pal: { o: '#6a5a3a', P: '#efe2c0', k: '#3a2a1a', R: '#a82a2a' }, rows: [
+      '  oooooooo  ', '  oPPPPPPo  ', '  oPkkkkPo  ', '  oPPPPPPo  ', '  oPkkPkPo  ', '  oPPPPPPo  ', '  oPkPkkPo  ', '  oPPPPPPo  ', '  oPkkkPPo  ', '  oPPPPRPo  ', '  oPPPRRRo  ', '  oooooooo  '] },
+    backstaff: { pal: { W: '#8a5a2a', w: '#c89a5a', k: '#3a2a1a' }, rows: [
+      'kk          ', 'kWW         ', ' wWW    ww  ', '  wWW  w  w ', '   wWW w    ', '    wWWw    ', '     wWW    ', '    w  WW   ', '   w    WW  ', '  w      WW ', ' wwwwww   Wk', '           k'] },
+    prwatch: { pal: { o: '#5a4010', G: '#e0b040', F: '#f4efe4', k: '#1d1d24' }, rows: [
+      '     oo     ', '    oGGo    ', '   oooooo   ', '  oGFFFFGo  ', ' oGFFkFFFGo ', ' oGFFkFFFGo ', ' oGFkkFFFGo ', ' oGFFFFFFGo ', '  oGFFFFGo  ', '   oooooo   ', '            ', '            '] },
+    biscuit: { pal: { o: '#6a4a20', B: '#d8b070', b: '#b88a48', k: '#7a5228' }, rows: [
+      '            ', '            ', '  oooooooo  ', ' oBBBBBBBBo ', 'oBBkBBBkBBBo', 'oBBBBbBBBBBo', 'oBkBBBBBkBBo', 'oBBBBBkBBBBo', ' oBBkBBBBBo ', '  oooooooo  ', '            ', '            '] },
+    flag: { pal: { k: '#1d1d24', W: '#f4efe4', P: '#8a5a2a' }, rows: [
+      'P           ', 'Pkkkkkkkkkk ', 'PkkkWWWkkkk ', 'PkkWkWkWkkk ', 'PkkWWWWWkkk ', 'PkkkWkWkkkk ', 'PkWkkkkkkWk ', 'PkkWkkkkWkk ', 'PkkkkWWkkkk ', 'PkkWkkkkWkk ', 'P           ', 'P           '] },
+    satnav: { pal: { k: '#1d1d24', G: '#3a3e44', S: '#5fe0f0', g: '#7ec850' }, rows: [
+      '            ', '            ', ' kkkkkkkkkk ', ' kGGGGGGGGk ', ' kGSSgSSSGk ', ' kGSggSSSGk ', ' kGSSgSSSGk ', ' kGGGGGGGGk ', ' kkkkkkkkkk ', '     kk     ', '    kkkk    ', '            '] },
+    ring: { pal: { R: '#ff4a4a', W: '#f4efe4', k: '#7a1a1a' }, rows: [
+      '            ', '   kkkkkk   ', '  kRRWWRRk  ', ' kRRWWWWRRk ', ' kWWk  kRRk ', ' kWk    kRk ', ' kRk    kWk ', ' kRRk  kWWk ', ' kRRWWWWRRk ', '  kRRWWRRk  ', '   kkkkkk   ', '            '] },
+    can: { pal: { o: '#3a3e44', R: '#d83a3a', S: '#c8ccd4', W: '#f4efe4' }, rows: [
+      '            ', '   oooooo   ', '   oSSSSo   ', '   oRRRRo   ', '   oRWWRo   ', '   oRRWRo   ', '   oRWRRo   ', '   oRRRRo   ', '   oSSSSo   ', '   oooooo   ', '            ', '            '] },
+    suncream: { pal: { o: '#3a3e44', Y: '#ffd23f', O: '#ef7724', W: '#f4efe4' }, rows: [
+      '    oooo    ', '    oWWo    ', '    oooo    ', '   oYYYYo   ', '   oYOOYo   ', '   oYOOYo   ', '   oYYYYo   ', '   oWWWWo   ', '   oYYYYo   ', '   oYYYYo   ', '   oooooo   ', '            '] },
     invite: { pal: { o: '#5a3a1a', W: '#c89a5a', w: '#a8783e', k: '#3a2a1a' }, rows: [
       '            ', ' oooooooooo ', ' oWWWWWWWWo ', ' oWkkWkkkWo ', ' oWWWWWWWWo ', ' oWkkkWkkWo ',
       ' owwwwwwwwo ', ' oWkWkkkWWo ', ' oWWWWWWWWo ', ' oWWWkkWkWo ', ' oooooooooo ', '            '] },
@@ -1001,6 +1234,10 @@
       P(-4, -9, 9, 9, '#2a1a10'); P(-3, -8, 7, 7, '#7a4a2a'); P(-3, -8, 2, 6, '#9c6438');
       P(-4, -10, 9, 2, '#1a1a1a'); P(-2 + ((t >> 4) % 3), -11, 2, 1, '#3a3a3a');
       P(-3, -5, 7, 1, '#ffc24a'); P(-3, -4, 7, 1, '#1a1a1a'); P(-3, -3, 7, 1, '#ffc24a');
+    } else if (kind === 'keg') {
+      P(-4, -10, 9, 10, '#3a2410'); P(-3, -9, 7, 8, '#9a6a3a'); P(-3, -9, 2, 8, '#b8844e');
+      P(-4, -8, 9, 1, '#3a3e44'); P(-4, -3, 9, 1, '#3a3e44'); P(-1, -6, 3, 1, '#1d1d24');
+      if (lit) P(-1, -12, 1, 1, '#ffd27a');
     } else if (kind === 'oil') {
       P(-3, -11, 7, 2, '#5a2a14'); P(-4, -9, 9, 8, '#5a2a14'); P(-3, -8, 7, 6, '#c8703a'); P(-3, -8, 2, 5, '#e09060');
       P(-2, -1, 5, 1, '#5a2a14'); P(-5, -8, 1, 3, '#5a2a14'); P(5, -8, 1, 3, '#5a2a14');
@@ -1011,6 +1248,29 @@
       P(-2, -4, 5, 2, lit || (t >> 5) % 2 ? '#bff3fa' : '#37c8dc'); P(-1, -12, 3, 1, '#2b3038');
     }
     if (lit) { P(-1, -14 - ((t >> 1) % 2), 2, 2, (t >> 1) % 2 ? '#ffd27a' : '#ef7724'); }
+  };
+
+  /* a Royal Banner planted in the ground */
+  S.flag = function (ctx, x, y, t, col) {
+    var X = Math.round(x), Y = Math.round(y), wv = (t >> 4) % 2;
+    ctx.fillStyle = WK; ctx.fillRect(X, Y - 26, 1, 26);
+    ctx.fillStyle = AU; ctx.fillRect(X - 1, Y - 27, 3, 1);
+    ctx.fillStyle = GND; ctx.fillRect(X + 1, Y - 25, 9, 9 - wv);
+    ctx.fillStyle = GN; ctx.fillRect(X + 1, Y - 25, 8, 8 - wv);
+    ctx.fillStyle = AU; ctx.fillRect(X + 3, Y - 23, 4, 3); ctx.fillStyle = GN; ctx.fillRect(X + 4, Y - 22, 2, 1);
+    ctx.fillStyle = GND; ctx.fillRect(X + 1, Y - 17 - wv, 2, 1); ctx.fillRect(X + 6, Y - 17 - wv, 2, 1);
+  };
+  /* the ship that fires a Broadside, sailing past the edge of the map */
+  S.ship = function (ctx, x, y, face, t) {
+    var X = Math.round(x), Y = Math.round(y);
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b, w, h); }
+    P(-30, -10, 60, 10, '#3a2410'); P(-28, -9, 56, 7, '#7a5230'); P(-28, -6, 56, 1, '#c99a3a');
+    P(22, -16, 10, 7, '#3a2410'); P(-34, -14, 8, 5, '#3a2410');
+    for (var k = 0; k < 5; k++) { P(-20 + k * 10, -5, 3, 2, '#1d1d24'); }
+    P(-14, -52, 2, 42, '#4a3018'); P(8, -46, 2, 36, '#4a3018');
+    var bil = (t >> 5) % 2;
+    P(-24, -48, 22, 14 + bil, '#efe6d0'); P(-22, -32, 18, 12, '#efe6d0'); P(-2, -42, 18, 12 + bil, '#efe6d0'); P(0, -28, 16, 10, '#efe6d0');
+    P(-13, -60, 1, 8, '#4a3018'); P(-12, -60, 7, 4, '#1d1d24'); P(-10, -59, 2, 2, '#f4efe4');
   };
 
   /* ---------- Bonnie: a brown toy poodle with no tail ---------- */

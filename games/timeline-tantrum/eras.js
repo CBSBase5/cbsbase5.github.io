@@ -113,10 +113,109 @@
       titles: ['Big', 'Old', 'Lil', 'Sir', 'Mega'],
       voice: { base: 165, wave: 'triangle', wobble: 4 },
       music: { tempo: 112, root: 196, scale: [0, 2, 4, 5, 7, 9], lead: 'square', drum: 'march', seed: 23 }
+    },
+    med: {
+      id: 'med',
+      name: 'Medieval',
+      team: 'Crown Snags',
+      when: 'about AD 1300',
+      tag: '#8be05a',
+      ui: '#3f8a2a',
+      names: ['Bertram', 'Matilda', 'Godric', 'Wilfred', 'Rowena', 'Edmund', 'Mabel', 'Osric',
+              'Hilda', 'Cuthbert', 'Agnes', 'Thistle', 'Gawain', 'Gwen', 'Alfric', 'Bodkin'],
+      weapons: {
+        lob:    { name: 'Fire Arrow',     blurb: 'Booms where it lands. The wind pushes it about.' },
+        bomb:   { name: 'Beehive',        blurb: 'A buzzing beehive. Bounces, then pops after 3 seconds. Wind leaves it alone.' },
+        shove:  { name: 'Mace Bonk',      blurb: 'Up close only. Sends them flying.' },
+        dig:    { name: "Sapper's Pick",  blurb: 'Dig a tunnel in the direction you aim, like sappers digging under castle walls.' },
+        volley: { name: 'Longbow Volley', blurb: 'Five arrows at once. One arrow stings, five really hurt. The wind pushes them a lot.' },
+        lance:  { name: 'Lance Charge',   blurb: 'Charge along the ground and send the first Snag you meet flying.' },
+        oil:    { name: 'Boiling Oil',    blurb: 'Tip out a pot of hot oil. It runs downhill and burns anyone in the way.' },
+        banner: { name: 'Royal Banner',   blurb: 'Plant a banner. Every Snag of yours nearby gets back 20 health.' },
+        treb:   { name: 'Trebuchet',      blurb: 'Superweapon. A giant stone flies in from far away and lands where you point.' }
+      },
+      kit: ['volley', 'lance', 'oil', 'banner', 'treb'],
+      stats: { power: 4, precision: 3, tricks: 5 },
+      bits: [['Ber', 'Mat', 'God', 'Wil', 'Ro', 'Ed', 'Ma', 'Os', 'Hil', 'Cuth', 'Ag', 'Gaw', 'Al', 'Bod'],
+             ['tram', 'ilda', 'ric', 'fred', 'wena', 'mund', 'bel', 'win', 'da', 'bert', 'nes', 'ain', 'fric', 'kin']],
+      titles: ['Sir', 'Dame', 'Lord', 'Lady', 'Little'],
+      voice: { base: 150, wave: 'triangle', wobble: 0 },
+      music: { tempo: 100, root: 220, scale: [0, 2, 3, 5, 7, 9, 10], lead: 'triangle', drum: 'tabor', seed: 31 }
+    },
+    pirate: {
+      id: 'pirate',
+      name: 'Pirates',
+      team: 'Anchor Snags',
+      when: 'about 1718',
+      tag: '#6f9bff',
+      ui: '#2f5fd0',
+      names: ['Barnacle', 'Bilge', 'Salty', 'Squall', 'Doubloon', 'Marlin', 'Cutlass', 'Scurvy',
+              'Polly', 'Reef', 'Plank', 'Anchor', 'Coral', 'Kipper', 'Shanty', 'Bosun'],
+      weapons: {
+        lob:       { name: 'Grenado',          blurb: 'A clay hand grenade, like the ones real pirates threw. Booms where it lands. The wind pushes it about.' },
+        bomb:      { name: 'Stinkpot',         blurb: 'A pot of smelly smoke. Bounces, then pops after 3 seconds. Wind leaves it alone.' },
+        shove:     { name: 'Cutlass Whack',    blurb: 'A whack with the flat of the cutlass. Up close only. Sends them flying.' },
+        dig:       { name: 'Treasure Shovel',  blurb: 'Dig a tunnel in the direction you aim. X marks the spot.' },
+        cannon:    { name: 'Cannon',           blurb: 'Fast and heavy. The kick shoves you backwards, so mind the edge. Wind leaves it alone.' },
+        blunder:   { name: 'Blunderbuss',      blurb: 'A short blast of shot that spreads out. Best up close.' },
+        launch:    { name: 'Human Cannonball', blurb: 'Fire yourself across the map in the direction you aim. A free move: you still get your go.' },
+        keg:       { name: 'Powder Keg',       blurb: 'Leave a keg behind you. It goes off when an enemy Snag comes close.' },
+        broadside: { name: 'Broadside',        blurb: 'Superweapon. A ship sails past the edge of the map and fires five cannonballs where you point.' }
+      },
+      kit: ['cannon', 'blunder', 'launch', 'keg', 'broadside'],
+      stats: { power: 5, precision: 3, tricks: 4 },
+      bits: [['Bar', 'Bil', 'Sal', 'Squ', 'Dou', 'Mar', 'Cut', 'Scu', 'Pol', 'Ree', 'Pla', 'Anc', 'Cor', 'Kip'],
+             ['nacle', 'ge', 'ty', 'all', 'bloon', 'lin', 'lass', 'vy', 'ly', 'f', 'nk', 'hor', 'al', 'per']],
+      titles: ['Capn', 'Old', 'Mad', 'Salty', 'Lil'],
+      voice: { base: 112, wave: 'sawtooth', wobble: 12 },
+      music: { tempo: 128, root: 196, scale: [0, 2, 3, 5, 7, 8, 10], lead: 'square', drum: 'jig', seed: 41 }
     }
   };
 
   window.B5MAPS = {
+    castle: {
+      id: 'castle',
+      name: 'Castle Siege',
+      style: 'castle',
+      era: 'med',
+      year: 1300,
+      pal: {
+        grass1: [110, 176, 78], grass2: [80, 140, 58], earth1: [128, 92, 60], earth2: [110, 78, 50], deep: [84, 60, 40], speck: [70, 50, 34],
+        ston1: [182, 178, 166], ston2: [156, 152, 142], mortar: [112, 108, 100], stonD: [134, 130, 122],
+        slate: [74, 82, 104], slate2: [58, 64, 84], wood: [138, 96, 56], wood2: [112, 76, 44], woodD: [72, 48, 28],
+        gold: [240, 196, 70], white: [242, 236, 222], neon: [95, 224, 240], neon2: [255, 120, 190], nstone: [70, 62, 112], nstone2: [58, 52, 96],
+        rock: [140, 134, 124], rockL: [176, 170, 160],
+        tuft: [96, 164, 70], flower: [236, 226, 120], flower2: [214, 70, 70]
+      },
+      sky: ['#86b4d8', '#9cc2e0', '#b2d0e4', '#c8dce4', '#dee6de', '#ece6d0'],
+      skyNeon: ['#1d2147', '#2b2c5e', '#46356f', '#71407a', '#a8507a', '#e88a6a'],
+      sun: '#fff6dc',
+      far: '#93aab8', mid: '#86a874', midShade: '#749664', near: '#58784c', nearTrunk: '#4a3c2a',
+      water: '#4a7a9a', waterTop: '#a8d0e0'
+    },
+    harbour: {
+      id: 'harbour',
+      name: 'Pirate Harbour',
+      style: 'harbour',
+      era: 'pirate',
+      year: 1718,
+      pal: {
+        sand1: [240, 222, 164], sand2: [226, 204, 142], sand3: [210, 186, 124], deep: [150, 122, 82], speck: [130, 106, 72],
+        grass1: [96, 184, 92], grass2: [70, 150, 72],
+        ston1: [204, 190, 164], ston2: [182, 168, 144], mortar: [128, 116, 98], stonD: [158, 144, 122],
+        wood: [142, 96, 58], wood2: [114, 76, 44], woodD: [72, 46, 26],
+        gold: [240, 196, 70], white: [242, 236, 222], neon: [95, 224, 240], neon2: [255, 120, 190], nstone: [70, 62, 112], nstone2: [58, 52, 96],
+        vine: [70, 140, 60], moss: [96, 168, 72],
+        rock: [150, 140, 120], rockL: [190, 180, 160],
+        tuft: [90, 170, 80], flower: [255, 120, 140], flower2: [255, 214, 110]
+      },
+      sky: ['#5fb8e0', '#7cc6e6', '#9ad4e8', '#bfe2e4', '#f0dcb0', '#f6c08a'],
+      skyNeon: ['#1d2147', '#2b2c5e', '#46356f', '#71407a', '#a8507a', '#e88a6a'],
+      skyGreen: ['#1d3a3a', '#24504a', '#2f6a52', '#4a8a5a', '#7aa860', '#c8c27a'],
+      sun: '#fff3c8',
+      sea: '#3a9ac0', seaTop: '#a6eef2', far: '#5f9a8a', mid: '#4a8a60', near: '#3a6e48', nearTrunk: '#7a5a34',
+      water: '#2a8ab0', waterTop: '#a6eef2'
+    },
     wall: {
       id: 'wall',
       name: "Hadrian's Wall",
@@ -208,8 +307,8 @@
     { id: 'egypt', name: 'Ancient Egypt', year: -2560, label: 'about 2560 BC, when the Great Pyramid was built', ready: true },
     { id: 'rome',  name: 'Roman Britain', year: 122,  label: 'about AD 122, when Hadrian\'s Wall was begun', ready: true },
     { id: 'viking', name: 'Vikings',     year: 900,   label: 'about AD 900', ready: false },
-    { id: 'med',   name: 'Medieval',     year: 1300,  label: 'about AD 1300', ready: false },
-    { id: 'pirate', name: 'Pirates',     year: 1700,  label: 'about AD 1700', ready: false },
+    { id: 'med',   name: 'Medieval',     year: 1300,  label: 'about AD 1300, the age of castles', ready: true },
+    { id: 'pirate', name: 'Pirates',     year: 1718,  label: 'about 1718, the Golden Age of Piracy', ready: true },
     { id: 'ww',    name: 'World Wars',   year: 1930,  label: '1914 to 1945', ready: false },
     { id: 'fut',   name: 'Far Future',   year: 3000,  label: 'about AD 3000', ready: true }
   ];
@@ -284,6 +383,69 @@
       { id: 'dolphin', name: 'Cupid on a dolphin mosaic', when: 'about AD 100 to 280', where: 'Fishbourne, West Sussex',
         fact: 'A floor picture made of tiny stones, in the biggest Roman house ever found this side of the Alps. Workmen digging a trench for a water pipe found it in 1960.',
         now: 'You can visit Fishbourne Roman Palace, near Chichester.' }
+    ],
+    castle: [
+      { id: 'chessman', name: 'Lewis chessman', when: 'about 1150 to 1200', where: 'Isle of Lewis, Scotland',
+        fact: 'Carved from walrus ivory, probably in Norway. More than 90 game pieces were found together in 1831. Four of the castle pieces are warriors biting the tops of their shields.',
+        now: 'Most are in the British Museum in London, and 11 are in the National Museum of Scotland in Edinburgh.' },
+      { id: 'tapestry', name: 'Bayeux Tapestry', when: 'made about 1070 to 1077', where: 'Bayeux, Normandy, France',
+        fact: 'Not really a tapestry: it is embroidered, and about 70 metres long. It tells the story of 1066 and the Battle of Hastings, with castles, ships and over 600 people. Only three of them are women.',
+        now: 'It is on loan to the British Museum in London until July 2027, its first visit to Britain in over 900 years.' },
+      { id: 'mappa', name: 'Hereford Mappa Mundi', when: 'about 1300', where: 'Hereford, England',
+        fact: 'The biggest map from the Middle Ages still around, drawn on a single sheet of calfskin. East is at the top, Jerusalem is in the middle, and it is full of monsters and strange creatures.',
+        now: 'You can see it at Hereford Cathedral.' },
+      { id: 'badge', name: 'Pilgrim badge', when: 'the 1300s', where: 'Canterbury, Kent',
+        fact: 'Pilgrims travelled to holy places and bought cheap tin and lead badges to pin on their clothes, like souvenirs. Canterbury badges often showed St Thomas Becket. About 200 were found together in a Canterbury river in 1987.' },
+      { id: 'psalter', name: 'Luttrell Psalter', when: 'about 1325 to 1340', where: 'Lincolnshire, England',
+        fact: 'A book of psalms made for Sir Geoffrey Luttrell. Its edges are packed with pictures of everyday life, like farm work, cooking and music, plus some very odd creatures.',
+        now: 'It is kept at the British Library in London.' },
+      { id: 'magna', name: 'Magna Carta', when: '1215', where: 'Runnymede, Surrey',
+        fact: 'King John agreed to this charter, which said that even the king had to follow the law. Four copies from 1215 still survive.',
+        now: 'Two are at the British Library in London, one is at Lincoln and one is at Salisbury Cathedral.' },
+      { id: 'skate', name: 'Bone ice skate', when: 'about the 1100s', where: 'London',
+        fact: 'Made from the shin bone of a horse or a cow, tied on with leather straps. A writer called William FitzStephen described young Londoners skating on the ice and pushing themselves along with poles.',
+        now: 'There are bone skates at the London Museum.' },
+      { id: 'domesday', name: 'Domesday Book', when: '1086', where: 'England',
+        fact: 'William the Conqueror sent people all over England to count who owned what, right down to the pigs and ploughs. The answers filled the Domesday Book.',
+        now: 'It is kept at The National Archives in Kew, London.' }
+    ],
+    castleGlitches: [
+      { id: 'skateboard', name: 'Skateboard', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Skateboards were first made in California, around the 1950s. Bone skates were the nearest thing around here.' },
+      { id: 'guitar', name: 'Electric guitar', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Electric guitars were invented in the 1930s. Nobody here has even heard of electricity.' },
+      { id: 'beans', name: 'Tin of baked beans', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'These beans only reached Europe from the Americas in the 1500s, and food in tins was not invented until the early 1800s.' },
+      { id: 'plasticsword', name: 'Plastic sword', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'The first fully man made plastic was invented in 1907. Every sword in this castle is real metal.' }
+    ],
+    harbour: [
+      { id: 'eight', name: 'Piece of eight', when: 'the 1500s to the 1800s', where: 'Spanish mints in the Americas',
+        fact: 'A big silver coin worth eight reales, used all around the world. People chopped them into pieces to make change. One eighth was called a bit.' },
+      { id: 'qarcannon', name: 'Cannon from Queen Anne\'s Revenge', when: '1718', where: 'Beaufort Inlet, North Carolina, USA',
+        fact: 'Blackbeard\'s ship ran aground in 1718. Divers found the wreck in 1996 and have raised more than 20 cannons, piles of lead shot and even a hand grenade.' },
+      { id: 'arabcoin', name: 'Henry Every\'s silver coin', when: 'made in 1693', where: 'Rhode Island, USA',
+        fact: 'In 1695 the pirate Henry Every robbed a huge treasure ship. Silver coins from Yemen, part of his loot, have turned up in fields in the USA. A metal detectorist found the first one in 2014.' },
+      { id: 'articles', name: 'Pirate rules', when: 'about 1720', where: 'from a book printed in 1724',
+        fact: 'Pirate crews wrote down rules called articles. Bartholomew Roberts\'s crew voted on big decisions, put the lights out at 8 at night, and paid extra to anyone badly hurt in a fight.' },
+      { id: 'backstaff', name: 'Backstaff', when: 'invented in 1594', where: 'ships at sea',
+        fact: 'Invented by the English sailor John Davis. You stood with your back to the sun and lined up its shadow to measure how high it was, then worked out how far north or south you were.' },
+      { id: 'prwatch', name: 'Port Royal pocket watch', when: 'stopped on 7 June 1692', where: 'Port Royal, Jamaica',
+        fact: 'Port Royal was a busy pirate town, nicknamed the wickedest city in the world. An earthquake sank two thirds of it into the sea. Divers in 1959 found a watch stopped at 11:43, the moment the earthquake struck.' },
+      { id: 'biscuit', name: 'Ship\'s biscuit', when: 'the 1600s and 1700s', where: 'ships everywhere',
+        fact: 'A rock hard biscuit made of flour and water that lasted for months at sea. Sailors often found little beetles called weevils living inside.' },
+      { id: 'flag', name: 'Pirate flag', when: 'the early 1700s', where: 'pirate ships',
+        fact: 'Pirates flew black flags to scare other ships into giving up without a fight. Each crew had its own design, with skulls, bones or swords.' }
+    ],
+    harbourGlitches: [
+      { id: 'satnav', name: 'Satnav', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Pirates found their way with the sun, the stars, a compass and charts. The first satellite did not go up until 1957.' },
+      { id: 'ring', name: 'Rubber ring', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Handy if you fall overboard, but blow up rubber rings like this were not made until long after the pirates.' },
+      { id: 'can', name: 'Fizzy drink can', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Drinks in metal cans only arrived in the 1900s. This one is still fizzing.' },
+      { id: 'suncream', name: 'Sun cream', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Very handy in the Caribbean sun, but nobody sold sun cream until the 1900s.' }
     ],
     wallGlitches: [
       { id: 'pizza', name: 'Slice of pizza', glitch: true, when: 'out of time', where: 'should not be here',
@@ -379,6 +541,22 @@
         postcard: 'Because the Eagle Snags won back in 10,000 BC, Rome rose thousands of years early.',
         short: 'Rome rising early',
         ammo: { rome: { pilum: 1 }, egypt: { spear: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won the Stone Age',
+        text: 'So knights turned up thousands of years early. Crown Snags carry an extra Longbow Volley. Sun Snags have one less spear.',
+        postcard: 'Because the Crown Snags won back in 10,000 BC, knights turned up thousands of years early.',
+        short: 'knights in the desert',
+        ammo: { med: { volley: 1 }, egypt: { spear: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won the Stone Age',
+        text: 'So pirates sailed the Nile thousands of years early. Anchor Snags carry an extra cannonball. Sun Snags have one less spear.',
+        postcard: 'Because the Anchor Snags won back in 10,000 BC, pirates sailed the Nile.',
+        short: 'pirates on the Nile',
+        ammo: { pirate: { cannon: 1 }, egypt: { spear: -1 } }
       }
     },
     wall: {
@@ -413,40 +591,172 @@
         postcard: 'Because the Eagle Snags won in 2560 BC, Rome grew stronger than ever.',
         short: 'a stronger Rome',
         ammo: { rome: { pilum: 1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won in Ancient Egypt',
+        text: 'So castles came early. Crown Snags arrive at the Wall with an extra Boiling Oil. Eagle Snags have one less pilum.',
+        postcard: 'Because the Crown Snags won in 2560 BC, castles came early.',
+        short: 'castles coming early',
+        ammo: { med: { oil: 1 }, rome: { pilum: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won in Ancient Egypt',
+        text: 'So pirates ruled the seas around Britain. Anchor Snags carry an extra Powder Keg. Eagle Snags have one less ballista bolt.',
+        postcard: 'Because the Anchor Snags won in 2560 BC, pirates ruled the seas around Britain.',
+        short: 'pirate seas around Britain',
+        ammo: { pirate: { keg: 1 }, rome: { ballista: -1 } }
+      }
+    },
+    castle: {
+      pre: {
+        look: 'rough',
+        title: 'The Stone Snags won at Hadrian\'s Wall',
+        text: 'So nobody kept building in stone. The castle is a wooden fort on a mound of earth, like the first castles the Normans built after 1066. Stone Snags carry an extra boulder. Crown Snags have one less volley.',
+        postcard: 'Because the Stone Snags won in AD 122, the castle is made of wood.',
+        short: 'a wooden castle',
+        ammo: { pre: { boulder: 1 }, med: { volley: -1 } }
+      },
+      egypt: {
+        look: 'golden',
+        title: 'The Sun Snags won at Hadrian\'s Wall',
+        text: 'So Egyptian builders taught the world. The castle is smooth white stone with gold on the towers. Sun Snags carry an extra Scarab Beetle.',
+        postcard: 'Because the Sun Snags won in AD 122, the castle shines white and gold.',
+        short: 'a white and gold castle',
+        ammo: { egypt: { scarab: 1 } }
+      },
+      fut: {
+        look: 'neon',
+        title: 'The Neon Snags won at Hadrian\'s Wall',
+        text: 'So the future came early. The castle glows with neon lights under a purple night sky. Neon Snags bring an extra disc. Crown Snags have one less volley.',
+        postcard: 'Because the Neon Snags won in AD 122, the castle glows with neon lights.',
+        short: 'a neon castle',
+        ammo: { fut: { disc: 1 }, med: { volley: -1 } }
+      },
+      rome: {
+        look: 'normal',
+        title: 'The Eagle Snags won at Hadrian\'s Wall',
+        text: 'So the Romans never left Britain. The real Romans left around AD 410. Eagle Snags march in with an extra pilum. Crown Snags have one less Boiling Oil.',
+        postcard: 'Because the Eagle Snags won in AD 122, the Romans never left Britain.',
+        short: 'Romans who never left',
+        ammo: { rome: { pilum: 1 }, med: { oil: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won at Hadrian\'s Wall',
+        text: 'So knights took over early. Crown Snags carry an extra Boiling Oil.',
+        postcard: 'Because the Crown Snags won in AD 122, knights took over early.',
+        short: 'knights taking over early',
+        ammo: { med: { oil: 1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won at Hadrian\'s Wall',
+        text: 'So pirates sailed up every river in Britain. Anchor Snags carry an extra Powder Keg. Crown Snags have one less volley.',
+        postcard: 'Because the Anchor Snags won in AD 122, pirates sailed up every river.',
+        short: 'pirates up every river',
+        ammo: { pirate: { keg: 1 }, med: { volley: -1 } }
+      }
+    },
+    harbour: {
+      pre: {
+        look: 'overgrown',
+        title: 'The Stone Snags won at the castle',
+        text: 'So the wild took over. The harbour is a jungle island, with vines over the fort and the wreck. Stone Snags carry an extra boulder. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Stone Snags won in AD 1300, the harbour is a jungle island.',
+        short: 'a jungle harbour',
+        ammo: { pre: { boulder: 1 }, pirate: { cannon: -1 } }
+      },
+      egypt: {
+        look: 'golden',
+        title: 'The Sun Snags won at the castle',
+        text: 'So Egypt never stopped building. The harbour fort is white stone with gold on top. Sun Snags carry an extra Scarab Beetle. Anchor Snags have one less Powder Keg.',
+        postcard: 'Because the Sun Snags won in AD 1300, the harbour fort shines white and gold.',
+        short: 'a golden harbour fort',
+        ammo: { egypt: { scarab: 1 }, pirate: { keg: -1 } }
+      },
+      fut: {
+        look: 'neon',
+        title: 'The Neon Snags won at the castle',
+        text: 'So the future arrived early. The harbour glows with neon lights. Neon Snags bring an extra disc. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Neon Snags won in AD 1300, the harbour glows with neon lights.',
+        short: 'a neon harbour',
+        ammo: { fut: { disc: 1 }, pirate: { cannon: -1 } }
+      },
+      rome: {
+        look: 'normal',
+        title: 'The Eagle Snags won at the castle',
+        text: 'So the Roman Empire spread across the oceans. Eagle Snags carry an extra ballista bolt. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Eagle Snags won in AD 1300, the Roman Empire spread across the oceans.',
+        short: 'a Roman ocean',
+        ammo: { rome: { ballista: 1 }, pirate: { cannon: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won at the castle',
+        text: 'So knights ruled the waves. Crown Snags carry an extra volley. Anchor Snags have one less Blunderbuss.',
+        postcard: 'Because the Crown Snags won in AD 1300, knights ruled the waves.',
+        short: 'knights ruling the waves',
+        ammo: { med: { volley: 1 }, pirate: { blunder: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won at the castle',
+        text: 'So the pirates got going early. Anchor Snags carry an extra Powder Keg.',
+        postcard: 'Because the Anchor Snags won in AD 1300, the pirates got going early.',
+        short: 'pirates starting early',
+        ammo: { pirate: { keg: 1 } }
       }
     },
     city: {
       pre: {
         look: 'overgrown',
-        title: 'The Stone Snags won at Hadrian\'s Wall',
+        title: 'The Stone Snags won at the Pirate Harbour',
         text: 'So history went wild. Vines cover the towers, the sky has gone green, and the factories never quite worked. Neon Snags start with one less disc and laser. Stone Snags carry an extra boulder.',
-        postcard: 'Because the Stone Snags won in AD 122, the Future City is covered in vines.',
+        postcard: 'Because the Stone Snags won in 1718, the Future City is covered in vines.',
         short: 'a Future City covered in vines',
         ammo: { fut: { disc: -1, laser: -1 }, pre: { boulder: 1 } }
       },
       fut: {
         look: 'gleaming',
-        title: 'The Neon Snags won at Hadrian\'s Wall',
+        title: 'The Neon Snags won at the Pirate Harbour',
         text: 'So the future arrived early. The Future City gleams brighter than ever. Neon Snags bring an extra Ricochet Disc, and everyone else has one less of their best kit.',
-        postcard: 'Because the Neon Snags won in AD 122, the Future City gleams brighter than ever.',
+        postcard: 'Because the Neon Snags won in 1718, the Future City gleams brighter than ever.',
         short: 'a gleaming Future City',
-        ammo: { fut: { disc: 1 }, pre: { boulder: -1 }, egypt: { spear: -1 } }
+        ammo: { fut: { disc: 1 }, pre: { boulder: -1 }, egypt: { spear: -1 }, rome: { pilum: -1 }, med: { volley: -1 }, pirate: { cannon: -1 } }
       },
       egypt: {
         look: 'sandy',
-        title: 'The Sun Snags won at Hadrian\'s Wall',
+        title: 'The Sun Snags won at the Pirate Harbour',
         text: 'So Ancient Egypt never ended. The Future City is built like a giant temple, with sandstone towers, gold edges and pyramids on the skyline. Sun Snags carry an extra Scarab Beetle. Neon Snags have one less disc.',
-        postcard: 'Because the Sun Snags won in AD 122, the Future City is built like a giant temple.',
+        postcard: 'Because the Sun Snags won in 1718, the Future City is built like a giant temple.',
         short: 'a Future City built like a temple',
         ammo: { egypt: { scarab: 1 }, fut: { disc: -1 } }
       },
       rome: {
         look: 'gleaming',
-        title: 'The Eagle Snags won at Hadrian\'s Wall',
+        title: 'The Eagle Snags won at the Pirate Harbour',
         text: 'So the Roman Empire never fell. The Future City gleams like polished marble. Eagle Snags carry an extra ballista bolt. Neon Snags have one less laser.',
-        postcard: 'Because the Eagle Snags won in AD 122, the Roman Empire never fell.',
+        postcard: 'Because the Eagle Snags won in 1718, the Roman Empire never fell.',
         short: 'an empire that never fell',
         ammo: { rome: { ballista: 1 }, fut: { laser: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won at the Pirate Harbour',
+        text: 'So kings and queens ruled the future. Crown Snags carry an extra volley. Neon Snags have one less disc.',
+        postcard: 'Because the Crown Snags won in 1718, knights guard the Future City.',
+        short: 'knights in the Future City',
+        ammo: { med: { volley: 1 }, fut: { disc: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won at the Pirate Harbour',
+        text: 'So pirates took over the future. Anchor Snags carry an extra cannonball. Neon Snags have one less laser.',
+        postcard: 'Because the Anchor Snags won in 1718, pirates run the Future City.',
+        short: 'a pirate Future City',
+        ammo: { pirate: { cannon: 1 }, fut: { laser: -1 } }
       }
     }
   };
@@ -487,6 +797,18 @@
     flood: ['The Nile is flooding! Get to high ground!', 'Water levels rising. Totally normal for the Nile.'],
     gale: ['It is blowing a gale up here.', 'Northumberland weather. Bring a coat.'],
     drones: ['Delivery drones! Those are not my parcels.', 'Drones overhead! Watch the red markers.'],
-    teach: ['Lovely. You are a natural.', 'Nailed it.', 'Outrageous. Do that again in a real match.']
+    teach: ['Lovely. You are a natural.', 'Nailed it.', 'Outrageous. Do that again in a real match.'],
+    volley: ['Arrows away!', 'Loose! Lovely archery.'],
+    lance: ['Charge!', 'Full tilt! Outrageous.'],
+    oil: ['Hot oil! Mind your toes.', 'That is not cooking oil.'],
+    banner: ['Rally to the banner!', 'A royal pick me up.'],
+    treb: ['Trebuchet! Here comes a big one.', 'Incoming stone. A very big stone.'],
+    cannon: ['FIRE!', 'Boom! Mind the kick.'],
+    blunder: ['Blunderbuss! Very loud, very rude.', 'Spread shot!'],
+    launch: ['Human cannonball! Look at them fly.', 'Wheee! Do not try this at home.'],
+    keg: ['Who left a keg there?', 'Careful where you step.'],
+    broadside: ['Broadside! Everybody duck!', 'Ship ahoy! Five cannonballs incoming.'],
+    arrows: ['Arrow storm! Find some cover!', 'The castle archers are awake.'],
+    tide: ['High tide coming! Head for high ground.', 'The sea is coming in. Totally normal for a harbour.']
   };
 })();
