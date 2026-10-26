@@ -157,11 +157,75 @@
 
   var cv = $('game'), ctx = cv.getContext('2d');
   var VW = 480, VH = 270, SCALE = 2;
+  /* RES: canvas pixels per world pixel. 2 draws everything with twice the detail (the 32 bit look) */
+  var RES = 2;
   var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* ---------------- terrain ---------------- */
   var terr = document.createElement('canvas'); terr.width = WW; terr.height = WH;
   var tctx = terr.getContext('2d');
+  /* the detailed terrain: every world pixel becomes 2 by 2, with smoothed slopes, lit edges, texture and grass */
+  var terrHi = document.createElement('canvas'); terrHi.width = WW * 2; terrHi.height = WH * 2;
+  var hctx = terrHi.getContext('2d'), hiImg = hctx.createImageData(WW * 2, WH * 2), hd = hiImg.data;
+  function putTerr(x0, y0, w, h) {
+    if (x0 === undefined) { x0 = 0; y0 = 0; w = WW; h = WH; }
+    tctx.putImageData(img, 0, 0, x0, y0, w, h);
+    hiUpdate(x0, y0, w, h);
+  }
+  function hiUpdate(x0, y0, w, h) {
+    if (!data) return;
+    var xa = Math.max(0, Math.floor(x0) - 2), ya = Math.max(0, Math.floor(y0) - 4), xb = Math.min(WW - 1, Math.ceil(x0 + w) + 2), yb = Math.min(WH - 1, Math.ceil(y0 + h) + 2), x, y, q;
+    var W2 = WW * 2;
+    function sol(xx, yy) { return xx >= 0 && xx < WW && yy >= 0 && yy < WH && data[(yy * WW + xx) * 4 + 3] > 0; }
+    /* pass 1: scale up, rounding off diagonal edges (Scale2x on solid and air) */
+    for (y = ya; y <= yb; y++) for (x = xa; x <= xb; x++) {
+      var k = (y * WW + x) * 4, P = data[k + 3] > 0;
+      var A = sol(x, y - 1), B = sol(x + 1, y), C = sol(x - 1, y), D = sol(x, y + 1);
+      var e = [P, P, P, P];
+      if (C === A && C !== D && A !== B) e[0] = A;
+      if (A === B && A !== C && B !== D) e[1] = B;
+      if (D === C && D !== B && C !== A) e[2] = C;
+      if (B === D && B !== A && D !== C) e[3] = D;
+      for (q = 0; q < 4; q++) {
+        var hx = x * 2 + (q & 1), hy = y * 2 + (q >> 1), o = (hy * W2 + hx) * 4;
+        if (!e[q]) { hd[o + 3] = 0; continue; }
+        /* a solid corner borrowed from a neighbour takes the colour of the nearest solid pixel */
+        var sk = k;
+        if (!P) { var nx = x + ((q & 1) ? 1 : -1), ny = y + ((q >> 1) ? 1 : -1); if (sol(nx, y)) sk = (y * WW + nx) * 4; else if (sol(x, ny)) sk = (ny * WW + x) * 4; }
+        /* blend a little towards the neighbours on this corner's side, so texture reads finer than the world grid */
+        var n = hash(hx * 3.1, hy * 1.7) * 0.1 - 0.05, sxn = (q & 1) ? 1 : -1, syn = (q >> 1) ? 1 : -1;
+        var hk = sol(x + sxn, y) ? ((y * WW + x + sxn) * 4) : sk, vk = sol(x, y + syn) ? (((y + syn) * WW + x) * 4) : sk;
+        hd[o] = clamp((data[sk] * 0.6 + data[hk] * 0.2 + data[vk] * 0.2) * (1 + n), 0, 255);
+        hd[o + 1] = clamp((data[sk + 1] * 0.6 + data[hk + 1] * 0.2 + data[vk + 1] * 0.2) * (1 + n), 0, 255);
+        hd[o + 2] = clamp((data[sk + 2] * 0.6 + data[hk + 2] * 0.2 + data[vk + 2] * 0.2) * (1 + n), 0, 255); hd[o + 3] = 255;
+      }
+    }
+    /* pass 2: light from the top left. A lit rim on top edges, shade under overhangs and on right edges */
+    var X0 = xa * 2, X1 = xb * 2 + 1, Y0 = ya * 2, Y1 = yb * 2 + 1, H2 = WH * 2;
+    function hs(xx, yy) { return xx >= 0 && xx < W2 && yy >= 0 && yy < H2 && hd[(yy * W2 + xx) * 4 + 3] > 0; }
+    for (y = Y0; y <= Y1; y++) for (x = X0; x <= X1; x++) {
+      var o2 = (y * W2 + x) * 4;
+      if (!hd[o2 + 3]) continue;
+      var f = 1;
+      if (!hs(x, y - 1)) f = 1.28; else if (!hs(x, y - 2)) f = 1.12; else if (!hs(x, y - 3)) f = 1.05;
+      if (!hs(x, y + 1)) f *= 0.7; else if (!hs(x, y + 2)) f *= 0.85;
+      if (!hs(x - 1, y)) f *= 1.08;
+      if (!hs(x + 1, y)) f *= 0.82;
+      if (f !== 1) { hd[o2] = clamp(hd[o2] * f, 0, 255); hd[o2 + 1] = clamp(hd[o2 + 1] * f, 0, 255); hd[o2 + 2] = clamp(hd[o2 + 2] * f, 0, 255); }
+    }
+    /* pass 3: blades of grass poking up from green tops */
+    for (y = Y0 + 4; y <= Y1; y++) for (x = X0; x <= X1; x++) {
+      var o3 = (y * W2 + x) * 4;
+      if (!hd[o3 + 3] || hs(x, y - 1)) continue;
+      var r0 = hd[o3], g0 = hd[o3 + 1], b0 = hd[o3 + 2];
+      if (!(g0 > r0 + 12 && g0 > b0 + 12)) continue;
+      var hv = hash(x * 0.37, y * 1.3);
+      if (hv > 0.42) continue;
+      var bl = 1 + Math.floor(hv * 7.2);
+      for (q = 1; q <= bl; q++) { var ob = ((y - q) * W2 + x) * 4; if (hd[ob + 3]) break; hd[ob] = r0 * (0.8 + q * 0.05); hd[ob + 1] = g0 * (0.85 + q * 0.06); hd[ob + 2] = b0 * 0.8; hd[ob + 3] = 255; }
+    }
+    hctx.putImageData(hiImg, 0, 0, X0, Y0, X1 - X0 + 1, Y1 - Y0 + 1);
+  }
   var img = null, data = null;
   var mask = new Uint8Array(WW * WH), burnt = new Uint8Array(WW * WH);
   var miniDirty = true;
@@ -408,7 +472,7 @@
         }
       }
     }
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   function blend(a, b, t) { return [a[0] + (b[0] - a[0]) * t | 0, a[1] + (b[1] - a[1]) * t | 0, a[2] + (b[2] - a[2]) * t | 0]; }
@@ -513,7 +577,7 @@
         }
       }
     }
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   /* ---------- Castle Siege: a castle on a raised mound. Round towers with rooms and pointed roofs, a keep with
@@ -654,7 +718,7 @@
       var pc = neon ? P.neon : (gold ? P.gold : [63, 122, 58]);
       for (var a = 0; a < 5; a++) for (var b = 0; b < 3 - (a >> 1); b++) deco(f[0] + 1 + a, f[1] - 6 + b, a === 2 && b === 1 && !neon ? [240, 196, 70] : pc);
     });
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   /* paint a decoration pixel into the open air: drawn, but never solid */
@@ -786,7 +850,7 @@
       for (var a = 0; a < 6; a++) for (var b = 0; b < 4; b++) deco(f[0] + 1 + a, f[1] - 9 + b, neon ? P.neon2 : [29, 29, 36]);
       if (!neon) { deco(f[0] + 3, f[1] - 8, [244, 239, 228]); deco(f[0] + 4, f[1] - 8, [244, 239, 228]); deco(f[0] + 3, f[1] - 6, [244, 239, 228]); deco(f[0] + 4, f[1] - 6, [244, 239, 228]); }
     });
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   /* ---------- City of Uruk: a flat river plain, a stepped ziggurat with a white temple on top and staircases
@@ -931,7 +995,7 @@
       for (var k = 0; k < 6; k++) deco(f[0], f[1] - k, [74, 60, 44]);
       for (var a = -2; a <= 2; a++) deco(f[0] + a, f[1] - 6, neon ? P.neon : (gold ? P.gold : [240, 196, 70]));
     });
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   function paintCity() {
@@ -980,7 +1044,7 @@
         if (wild && mask[i] && (!mask[i - 1] || !mask[i + 1]) && hash(x, y >> 2) < 0.3) setPx(i, P.moss2);
       }
     }
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
 
@@ -1056,7 +1120,7 @@
         }
       }
     }
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
 
@@ -1079,7 +1143,7 @@
         }
       }
     }
-    tctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+    putTerr(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
     miniDirty = true;
     exposeArts(cx, cy, r);
   }
@@ -2392,7 +2456,7 @@
         if (r !== true) done = true;
         /* scorch the ground and leave it glowing */
         var gi = (Math.round(f.y)) * WW + Math.round(f.x);
-        if (gi >= 0 && gi < mask.length && mask[gi]) { var kq = gi * 4; data[kq] = data[kq] * 0.45 | 0; data[kq + 1] = data[kq + 1] * 0.4 | 0; data[kq + 2] = data[kq + 2] * 0.38 | 0; burnt[gi] = 2; tctx.putImageData(img, 0, 0, Math.round(f.x), Math.round(f.y), 1, 1); }
+        if (gi >= 0 && gi < mask.length && mask[gi]) { var kq = gi * 4; data[kq] = data[kq] * 0.45 | 0; data[kq + 1] = data[kq + 1] * 0.4 | 0; data[kq + 2] = data[kq + 2] * 0.38 | 0; burnt[gi] = 2; putTerr(Math.round(f.x), Math.round(f.y), 1, 1); }
         if ((f.t + k) % 2 === 0) addPart({ k: 'glow', x: f.x, y: f.y - 1, life: 70 + Math.random() * 40, max: 110 });
         game.snags.forEach(function (sn, si) {
           if (!sn.alive || f.hit.indexOf(si) >= 0) return;
@@ -2582,7 +2646,7 @@
         }
       }
     }
-    if (hi >= lo) tctx.putImageData(img, 0, 0, lo, topY, hi - lo + 1, Math.min(WH - topY, 80));
+    if (hi >= lo) putTerr(lo, topY, hi - lo + 1, Math.min(WH - topY, 80));
     miniDirty = true;
     sfx('bonk'); sfx('dig'); game.shake = Math.max(game.shake, 1.2); say('steps', true);
     for (var k = 0; k < 12; k++) addPart({ k: 'dust', x: x0 + c.face * rand(0, 36), y: gy - rand(2, 20), vx: rand(-0.3, 0.3), vy: rand(-0.4, -0.1), life: 26, max: 26, r: rand(1, 2.2), col: '#e6c08e' });
@@ -2617,7 +2681,7 @@
         setPx(i, edge ? [74, 70, 64] : ((y - top) % 7 === 0 ? [104, 98, 90] : (hash(x, y) < 0.5 ? P.rock : P.rockL)));
       }
     }
-    tctx.putImageData(img, 0, 0, cx - 3, Math.max(0, top), 7, gy - Math.max(0, top) + 3);
+    putTerr(cx - 3, Math.max(0, top), 7, gy - Math.max(0, top) + 3);
     miniDirty = true;
     sfx('bonk'); game.shake = Math.max(game.shake, 1.5);
     for (var k = 0; k < 10; k++) addPart({ k: 'deb', x: cx + rand(-4, 4), y: gy - 2, vx: rand(-1, 1), vy: rand(-1.8, -0.4), life: 30, col: 'rgb(160,152,140)' });
@@ -2641,7 +2705,7 @@
       }
     }
     var lo = c.face > 0 ? x0 : x0 - 52;
-    tctx.putImageData(img, 0, 0, Math.max(0, lo - 1), y0, 55, 5);
+    putTerr(Math.max(0, lo - 1), y0, 55, 5);
     miniDirty = true;
     sfx('bonk'); game.shake = Math.max(game.shake, 1.2); say('road');
     for (var q = 0; q < 12; q++) addPart({ k: 'dust', x: x0 + c.face * rand(0, 50), y: y0 - 1, vx: rand(-0.3, 0.3), vy: rand(-0.4, -0.1), life: 24, max: 24, r: rand(1, 2.2), col: '#d8cfc0' });
@@ -2669,7 +2733,7 @@
         x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y);
       }
     }
-    if (x1 >= x0) tctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, Math.min(WH - y0, 90));
+    if (x1 >= x0) putTerr(x0, y0, x1 - x0 + 1, Math.min(WH - y0, 90));
     miniDirty = true;
     sfx('dig'); sfx('whoosh');
     for (var k = 0; k < 16; k++) addPart({ k: 'deb', x: cx + rand(-12, 12), y: gy - rand(2, 14), vx: rand(-1, 1), vy: rand(-2, -0.4), life: 34, col: 'rgb(236,204,136)' });
@@ -2688,7 +2752,7 @@
       data[k + 1] = sh ? 255 : (data[k + 1] * 0.4 + 214 * 0.6) | 0;
       data[k + 2] = sh ? 250 : (data[k + 2] * 0.4 + 204 * 0.6) | 0;
     }
-    tctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+    putTerr(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
   }
 
   /* ---------- superweapon strikes ---------- */
@@ -3512,7 +3576,7 @@
       }
       cur = 1 - cur;
     }
-    tctx.putImageData(img, 0, 0);
+    putTerr();
     miniDirty = true;
   }
   function saveMatch() {
@@ -3547,7 +3611,7 @@
     genTerrain(s.seed); unrle(s.mask);
     if (s.img && s.img.indexOf('data:image') === 0) {
       var im = new Image();
-      im.onload = function () { tctx.clearRect(0, 0, WW, WH); tctx.drawImage(im, 0, 0); img = tctx.getImageData(0, 0, WW, WH); data = img.data; miniDirty = true; };
+      im.onload = function () { tctx.clearRect(0, 0, WW, WH); tctx.drawImage(im, 0, 0); img = tctx.getImageData(0, 0, WW, WH); data = img.data; hiUpdate(0, 0, WW, WH); miniDirty = true; };
       im.src = s.img;
     }
     s.teams.forEach(function (st) {
@@ -3814,22 +3878,23 @@
     return MAP.sky;
   }
   function buildSky() {
-    skyCv.width = VW; skyCv.height = VH;
-    var s = skyCv.getContext('2d'), cols = skyCols(), n = cols.length, i, x;
-    for (i = 0; i < n; i++) { s.fillStyle = cols[i]; s.fillRect(0, Math.floor(i * VH / n), VW, Math.ceil(VH / n) + 1); }
-    for (i = 1; i < n; i++) {
-      var y = Math.floor(i * VH / n);
-      s.fillStyle = cols[i];
-      for (x = 0; x < VW; x += 2) s.fillRect(x + (i % 2), y - 1, 1, 1);
-      s.fillStyle = cols[i - 1];
-      for (x = 1; x < VW; x += 2) s.fillRect(x - (i % 2), y, 1, 1);
-    }
+    skyCv.width = VW * RES; skyCv.height = VH * RES;
+    var s = skyCv.getContext('2d'), cols = skyCols(), n = cols.length, H = VH * RES, W = VW * RES;
+    var gr = s.createLinearGradient(0, 0, 0, H);
+    for (var i = 0; i < n; i++) gr.addColorStop(i / (n - 1), cols[i]);
+    s.fillStyle = gr; s.fillRect(0, 0, W, H);
+    /* a fine ordered dither so the gradient keeps a little pixel texture */
+    var id = s.getImageData(0, 0, W, H), d = id.data, B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) { var k = (y * W + x) * 4, t = (B[(y & 3) * 4 + (x & 3)] - 7.5) * 0.45; d[k] = clamp(d[k] + t, 0, 255); d[k + 1] = clamp(d[k + 1] + t, 0, 255); d[k + 2] = clamp(d[k + 2] + t, 0, 255); }
+    s.putImageData(id, 0, 0);
   }
 
   function disc(cx, cy, r, col) {
     ctx.fillStyle = col;
-    cx = Math.round(cx); cy = Math.round(cy); r = Math.max(0, Math.round(r));
-    for (var dy = -r; dy <= r; dy++) { var w = Math.floor(Math.sqrt(r * r - dy * dy)); ctx.fillRect(cx - w, cy + dy, 2 * w + 1, 1); }
+    /* drawn in half pixel rows, so circles stay round at double detail */
+    var h = 1 / RES;
+    cx = Math.round(cx * RES) / RES; cy = Math.round(cy * RES) / RES; r = Math.max(0, Math.round(r * RES) / RES);
+    for (var dy = -r; dy <= r; dy += h) { var w = Math.floor(Math.sqrt(Math.max(0, r * r - dy * dy)) * RES) / RES; ctx.fillRect(cx - w, cy + dy, 2 * w + h, h); }
   }
 
   function farH(u) {
@@ -4111,6 +4176,7 @@
       ];
     }
   }
+  function haze() { var c3 = skyCols()[3]; ctx.globalAlpha = 0.2; ctx.fillStyle = c3; ctx.fillRect(0, 0, VW, VH); ctx.globalAlpha = 1; }
   function blit(L, cx, cy) { var rest = WH - VH; ctx.drawImage(L.c, -Math.round(cx * L.f), -Math.round((cy - rest) * L.f)); }
   function drawWallBackdrop(cx, cy, t) {
     var rest = WH - VH, i, neon = LOOK === 'neon';
@@ -4126,7 +4192,7 @@
     }
     game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
     if (!bakedBg) buildBaked();
-    if (bakedBg) bakedBg.forEach(function (L) { blit(L, cx, cy); });
+    if (bakedBg) bakedBg.forEach(function (L, li) { blit(L, cx, cy); if (li < bakedBg.length - 1) haze(); });
   }
   function drawHarbourBackdrop(cx, cy, t) {
     var rest = WH - VH, i, neon = LOOK === 'neon';
@@ -4141,7 +4207,7 @@
     game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
     if (!bakedBg) buildBaked();
     if (!bakedBg) return;
-    blit(bakedBg[0], cx, cy);
+    blit(bakedBg[0], cx, cy); haze();
     /* sails on the horizon, drifting slowly */
     var hz = Math.round(VH * 0.62 - (cy - rest) * 0.1);
     for (i = 0; i < 3; i++) {
@@ -4167,7 +4233,7 @@
     }
     game.birds.forEach(function (b) { SP.bird(ctx, b.x, b.y - (cy - rest) * 0.08, ((game.t + b.ph) >> 3) % 2); });
     if (!bakedBg) buildBaked();
-    if (bakedBg) bakedBg.forEach(function (L) { blit(L, cx, cy); });
+    if (bakedBg) bakedBg.forEach(function (L, li) { blit(L, cx, cy); if (li < bakedBg.length - 1) haze(); });
   }
 
   function drawBackdrop(cx, cy, t) {
@@ -4189,7 +4255,7 @@
     if (!bakedBg) buildBaked();
     if (!bakedBg) return;
     /* far volcanoes, with lava and lazy smoke drawn live on top of the painted layer */
-    blit(bakedBg[0], cx, cy);
+    blit(bakedBg[0], cx, cy); haze();
     var f = 0.15, off = (cy - rest) * f, base = VH * 0.62;
     var c0 = Math.floor((cx * f - 420) / 420);
     for (var c = c0; c <= c0 + Math.ceil(VW / 420) + 2; c++) {
@@ -4203,16 +4269,26 @@
         disc(px + Math.sin(ph2 * 6 + c) * 6 + ph2 * 20, py - 4 - ph2 * 50, 3 + ph2 * 6, ph2 < 0.5 ? MAP.smoke : '#d8dee2');
       }
     }
-    blit(bakedBg[1], cx, cy);
+    blit(bakedBg[1], cx, cy); haze();
     blit(bakedBg[2], cx, cy);
   }
 
   function drawWater(cx, t) {
     var x, wy, alt = game.sudden ? (MAP.goo ? [MAP.goo, MAP.gooTop] : (MAP.flood ? [MAP.flood, MAP.floodTop] : null)) : null;
-    ctx.globalAlpha = 0.86; ctx.fillStyle = alt ? alt[0] : MAP.water;
-    for (x = cx - 2; x < cx + VW + 2; x += 2) { wy = Math.round(WATER + Math.sin(x * 0.07 + t * 0.05) * 1.5); ctx.fillRect(x, wy, 2, WH + 300 - wy); }
-    ctx.globalAlpha = 1; ctx.fillStyle = alt ? alt[1] : MAP.waterTop;
-    for (x = cx - 2; x < cx + VW + 2; x += 2) { wy = Math.round(WATER + Math.sin(x * 0.07 + t * 0.05) * 1.5); ctx.fillRect(x, wy, 2, 1); }
+    var top = alt ? alt[1] : MAP.waterTop, body = alt ? alt[0] : MAP.water;
+    var gr = ctx.createLinearGradient(0, WATER - 2, 0, WATER + 70);
+    gr.addColorStop(0, body); gr.addColorStop(1, '#0e1a30');
+    ctx.globalAlpha = 0.88; ctx.fillStyle = gr;
+    function wave(xx) { return Math.round((WATER + Math.sin(xx * 0.07 + t * 0.05) * 1.5 + Math.sin(xx * 0.19 - t * 0.08) * 0.5) * 2) / 2; }
+    for (x = cx - 1; x < cx + VW + 1; x++) { wy = wave(x); ctx.fillRect(x, wy, 1, WH + 300 - wy); }
+    ctx.globalAlpha = 1; ctx.fillStyle = top;
+    for (x = cx - 1; x < cx + VW + 1; x++) { wy = wave(x); ctx.fillRect(x, wy, 1, 0.5); }
+    /* glints and a darker band of reflection under the surface */
+    ctx.globalAlpha = 0.35; ctx.fillStyle = '#ffffff';
+    for (x = Math.floor(cx / 9) * 9; x < cx + VW; x += 9) { var ph = hash(x, 5); if (((t >> 3) + Math.floor(ph * 8)) % 6 < 2) ctx.fillRect(x + Math.round(ph * 5), wave(x) + 2 + Math.round(ph * 6), 2 + Math.round(ph * 2), 0.5); }
+    ctx.globalAlpha = 0.18; ctx.fillStyle = '#0e1a30';
+    for (x = cx - 1; x < cx + VW + 1; x += 1) ctx.fillRect(x, wave(x) + 1, 1, 1.5);
+    ctx.globalAlpha = 1;
   }
 
   /* Which frame a Snag shows. Returns [pose, frame, quarter turns, extras] */
@@ -4488,10 +4564,47 @@
     }
   }
 
+  /* light: added on top, so explosions light up the ground and the Snags around them */
+  function glowAt(x, y, r, col, a) {
+    var g2 = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g2.addColorStop(0, 'rgba(' + col + ',' + a + ')'); g2.addColorStop(1, 'rgba(' + col + ',0)');
+    ctx.fillStyle = g2; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  function drawGlow(t) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < game.parts.length; i++) {
+      var p = game.parts[i];
+      if (p.delay > 0) continue;
+      if (p.k === 'fire') { var k = 1 - p.life / p.max; glowAt(p.x, p.y, p.r * (2.2 + k), '255,130,40', 0.42 * (1 - k)); }
+      else if (p.k === 'flash') glowAt(p.x, p.y, p.r * 3.2, '255,236,190', 0.6 * p.life / p.max);
+      else if (p.k === 'beam' || p.k === 'shot') { ctx.strokeStyle = p.k === 'beam' ? 'rgba(95,224,240,0.35)' : 'rgba(255,230,160,0.3)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x2, p.y2); ctx.stroke(); }
+    }
+    game.portals.forEach(function (pt) { glowAt(pt.x, pt.y, 26, '150,110,255', pt.ko && pt.t < 22 ? 0 : 0.35); });
+    game.flows.forEach(function (f) { glowAt(f.x, f.y - 2, 14, '255,120,30', 0.4); });
+    game.barrels.forEach(function (b) { if (b.fuse > 0) glowAt(b.x, b.y - 12, 10, '255,180,60', 0.45); });
+    game.projs.forEach(function (pj) { if ((pj.type === 'lob' && pj.era !== 'pre') || pj.type === 'meteor' || pj.type === 'disc') glowAt(pj.x, pj.y, 9, pj.type === 'disc' ? '95,224,240' : '255,150,60', 0.35); });
+    game.strikes.forEach(function (sk) { if (sk.style === 'beam' && sk.t >= 45) glowAt(sk.x, surfaceY(Math.round(sk.x)), 60, '95,224,240', 0.45); if (sk.style === 'sun' && sk.t >= 45) glowAt(sk.x, surfaceY(Math.round(sk.x)), 60, '255,220,120', 0.45); });
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  /* crisp in world text: names, numbers and the big impact words */
+  function tagText(str, x, y, col, size) {
+    ctx.font = '700 ' + (size || 5) + 'px "Atkinson Hyperlegible", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#1f2a30'; ctx.strokeText(str, x, y);
+    ctx.fillStyle = col; ctx.fillText(str, x, y);
+  }
   /* pixel text drawn at 2 or 3 times size, crisp */
   var btCache = {}, btN = 0;
   function bigText(str, x, y, col, k) {
     str = String(str).toUpperCase();
+    if (RES > 1) {
+      var fs = 5.2 * k;
+      ctx.font = '900 italic ' + fs + 'px Archivo, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.fillStyle = '#1f2a30'; ctx.fillText(str, x + 0.45 * k, y + 0.55 * k);
+      ctx.lineWidth = 0.75 * k; ctx.strokeStyle = '#1f2a30'; ctx.strokeText(str, x, y);
+      ctx.fillStyle = col; ctx.fillText(str, x, y);
+      return;
+    }
     var key = str + '|' + col, c2 = btCache[key];
     if (!c2) {
       if (++btN > 300) { btCache = {}; btN = 1; }
@@ -4507,9 +4620,9 @@
       if (hideTags) return;
       if (!c.alive || c.arrive) return;
       var col = ER[c.team.era].tag, y = Math.round(c.y - 40);
-      SP.text(ctx, c.name, c.x, y, col, '#1f2a30', true);
+      tagText(c.name, c.x, y - 1, col);
       if (game.state !== 'demo') {
-        SP.text(ctx, String(c.hp), c.x, y + 7, '#ffffff', '#1f2a30', true);
+        tagText(String(c.hp), c.x, y + 6, '#ffffff', 4.6);
         var bx = Math.round(c.x) - 9, by = y + 14, gw = Math.round(Math.min(100, c.ghost || 0) / 100 * 18), hw = Math.round(Math.min(100, c.hp) / 100 * 18);
         ctx.fillStyle = '#1f2a30'; ctx.fillRect(bx - 1, by - 1, 20, 4);
         if (gw > hw) { ctx.fillStyle = '#fef8f4'; ctx.fillRect(bx, by, gw, 2); }
@@ -4534,12 +4647,12 @@
         var ag = (p.max || p.life + 1) - p.life, pop = ag < 8 ? Math.round(Math.sin(ag / 8 * Math.PI) * 3) : 0, sc = p.sc || 1;
         if (p.life < 18) ctx.globalAlpha = p.life / 18;
         if (sc > 1) bigText(p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), ag < 4 ? sc + 1 : sc);
-        else SP.text(ctx, p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), '#1f2a30', true);
+        else tagText(p.s, p.x, p.y - pop, ag < 3 ? '#ffffff' : (p.col || '#ffd27a'), 5.5);
         ctx.globalAlpha = 1;
       }
     }
     game.projs.forEach(function (p) {
-      if (p.fuse !== undefined) SP.text(ctx, String(Math.ceil(p.fuse / 60)), p.x, p.y - 12, p.fuse < 60 ? '#ff8a6a' : '#ffffff', '#1f2a30', true);
+      if (p.fuse !== undefined) tagText(String(Math.ceil(p.fuse / 60)), p.x, p.y - 13, p.fuse < 60 ? '#ff8a6a' : '#ffffff', 5.5);
     });
   }
 
@@ -4548,13 +4661,24 @@
     if (game.shake > 0.3 && !reduceMotion && shakeOn) { sx = rand(-game.shake, game.shake); sy = rand(-game.shake, game.shake); }
     if (shakeOn && !reduceMotion) { sx += game.kx || 0; sy += game.ky || 0; }
     var cx = Math.round(cam.x + sx), cy = Math.round(cam.y + sy), i;
-    ctx.drawImage(skyCv, 0, 0);
+    ctx.setTransform(RES, 0, 0, RES, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(skyCv, 0, 0, VW, VH);
     drawBackdrop(cx, cy, t);
     ctx.save();
     ctx.translate(-cx, -cy);
-    ctx.drawImage(terr, 0, 0);
+    ctx.drawImage(terrHi, 0, 0, WW, WH);
     drawArtsAndCrates(t);
     drawVines();
+    ctx.fillStyle = 'rgba(16,12,36,0.3)';
+    for (i = 0; i < game.snags.length; i++) {
+      var sn = game.snags[i];
+      if (!sn.alive || sn.arrive) continue;
+      var gy3 = sn.st === 'ground' ? sn.y : groundY(Math.round(sn.x), sn.y), hgt = gy3 - sn.y;
+      if (gy3 < 0 || hgt > 60) continue;
+      var sw = 7 - hgt * 0.06;
+      ctx.beginPath(); ctx.ellipse(sn.x, gy3 + 0.5, Math.max(2, sw), 1.6, 0, 0, 6.283); ctx.fill();
+    }
     for (i = 0; i < game.snags.length; i++) if (game.snags[i].alive && !game.snags[i].arrive) drawSnag(game.snags[i], t);
     drawShields(t);
     drawDogs(t);
@@ -4588,6 +4712,7 @@
     });
     drawAim(t);
     drawParts();
+    drawGlow(t);
     drawWater(cx, t);
     drawTags(t);
     if (game.state !== 'demo') drawLearn(t);
@@ -4755,7 +4880,7 @@
     z = clamp(z, 0, VIEWS.length - 1);
     var ox = cam.x + VW / 2, oy = cam.y + VH / 2, v = VIEWS[z], changed = z !== zoom;
     zoom = z; VW = v[0]; VH = v[1]; SCALE = v[2];
-    cv.width = VW; cv.height = VH;
+    cv.width = VW * RES; cv.height = VH * RES;
     cv.style.width = VW * SCALE + 'px'; cv.style.height = VH * SCALE + 'px';
     ctx.imageSmoothingEnabled = false;
     buildSky(); buildCityBg();
@@ -4772,7 +4897,7 @@
   function stageXY(e) { var r = stage.getBoundingClientRect(); return { x: (e.clientX - r.left) / stageK, y: (e.clientY - r.top) / stageK }; }
   function toWorld(e) {
     var rc = cv.getBoundingClientRect();
-    return { x: (e.clientX - rc.left) / rc.width * cv.width + Math.round(cam.x), y: (e.clientY - rc.top) / rc.height * cv.height + Math.round(cam.y) };
+    return { x: (e.clientX - rc.left) / rc.width * VW + Math.round(cam.x), y: (e.clientY - rc.top) / rc.height * VH + Math.round(cam.y) };
   }
   function clampFree() {
     if (!freeCam) return;
@@ -4996,9 +5121,11 @@
   function yearLabel(y) { var n = Math.abs(y), t = n >= 10000 ? n.toLocaleString('en-GB') : String(n); return y < 0 ? t + ' BC' : 'AD ' + t; }
   function yearsApart(a, b) { var n = Math.abs(a - b) - (a < 0 && b > 0 ? 1 : 0); return n >= 10000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100; }
   function drawSnagCv(cv2, era, pose, f, face, bl, skin) {
-    var x2 = cv2.getContext('2d');
-    x2.clearRect(0, 0, cv2.width, cv2.height);
-    SP.draw(x2, cv2.width >> 1, cv2.height - 1, face || 1, era, pose || 'idle', f || 0, !!bl, 0, 1, { skin: skin });
+    var x2 = cv2.getContext('2d'), k = cv2.width >= 64 ? 2 : 1;
+    x2.setTransform(1, 0, 0, 1, 0, 0); x2.clearRect(0, 0, cv2.width, cv2.height);
+    x2.imageSmoothingEnabled = false; x2.setTransform(k, 0, 0, k, 0, 0);
+    SP.draw(x2, (cv2.width / k) >> 1, cv2.height / k - 1, face || 1, era, pose || 'idle', f || 0, !!bl, 0, 1, { skin: skin });
+    x2.setTransform(1, 0, 0, 1, 0, 0);
   }
   function skinOf(v) { return v && v !== 'classic' && unlocked().indexOf(v) >= 0 ? v : null; }
   var silCache = {};
@@ -5013,7 +5140,7 @@
   }
   function buildRoster() {
     $('roster').innerHTML = ROSTER.map(function (e, i) {
-      return '<button class="port" data-i="' + i + '" style="--c:' + ER[e].tag + '" aria-label="' + esc(ER[e].team) + '"><canvas width="36" height="32"></canvas><span class="nm">' + esc(ER[e].team) + '</span></button>';
+      return '<button class="port" data-i="' + i + '" style="--c:' + ER[e].tag + '" aria-label="' + esc(ER[e].team) + '"><canvas width="72" height="64"></canvas><span class="nm">' + esc(ER[e].team) + '</span></button>';
     }).join('');
   }
   CTL.squad = {
@@ -5108,7 +5235,7 @@
     }
     var E = ER[era], st = E.stats || {}, T = tlInfo(era);
     el.style.setProperty('--c', E.tag);
-    el.innerHTML = '<span class="who">' + who + '</span><canvas class="big" width="38" height="34" data-era="' + era + '"></canvas>' +
+    el.innerHTML = '<span class="who">' + who + '</span><canvas class="big" width="76" height="68" data-era="' + era + '"></canvas>' +
       '<h3>' + esc(E.team) + '</h3><div class="era">' + esc(T ? T.name : '') + ' \u00b7 ' + yearLabel(yearOf(era)) + '</div>' +
       '<div class="kitrow">' + (E.kit || []).map(function (wid) { return '<canvas width="12" height="12" data-icon="' + wid + '" title="' + esc(E.weapons[wid].name) + '"></canvas>'; }).join('') + '</div>' +
       '<div>' + statRow('Power', st.power || 0) + statRow('Precision', st.precision || 0) + statRow('Tricks', st.tricks || 0) + '</div>' +
@@ -6426,7 +6553,7 @@
     var p = stageXY(e);
     mouse.sx = p.x; mouse.sy = p.y; mouse.inside = true;
     if (panning) {
-      var k = cv.width / cv.getBoundingClientRect().width;
+      var k = VW / cv.getBoundingClientRect().width;
       freeCam = { x: panning.cx - (e.clientX - panning.x) * k, y: panning.cy - (e.clientY - panning.y) * k };
       clampFree();
       return;

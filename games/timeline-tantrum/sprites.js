@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var S = {};
-  var g = null, OX = 0, OY = 0;
+  var g = null, OX = 0, OY = 0, SS = 1;
 
   var D = '#2e3a17', K = '#8aa64a', BL = '#b5c96f', M = '#3a1414', W = '#ffffff',
       P = '#1d1d24', PL = '#f2d1a8', Y = '#f5e04a', WD = '#9b6a3a', WK = '#6e4622',
@@ -15,16 +15,19 @@
       CL = '#c89a6a', CLL = '#e6c08e', CLD = '#8a6440', BRD = '#2a1e2e', KN = '#efe6cc', KND = '#c8bc9a',
       GN = '#3f7a3a', GNL = '#5fa04a', GND = '#2a5426', NV = '#2a3f6a', BD = '#c8322a', BDL = '#e8574a', ST = '#f4efe4';
 
-  function r(a, b, w, h, c) { g.fillStyle = c; g.fillRect(OX + a, OY + b, w, h); }
+  /* drawing primitives in sprite units; SS is how many canvas pixels make one sprite unit,
+     so curves come out smooth when sprites are built at double detail */
+  function r(a, b, w, h, c) { g.fillStyle = c; g.fillRect((OX + a) * SS, (OY + b) * SS, w * SS, h * SS); }
   function e(cx, cy, rx, ry, c) {
     g.fillStyle = c;
-    for (var y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) {
+    var Y0 = Math.floor((cy - ry) * SS), Y1 = Math.ceil((cy + ry) * SS), X0 = Math.floor((cx - rx) * SS), X1 = Math.ceil((cx + rx) * SS);
+    for (var y = Y0; y <= Y1; y++) {
       var x0 = null, x1 = null;
-      for (var x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
-        var dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry;
+      for (var x = X0; x <= X1; x++) {
+        var dx = ((x + 0.5) / SS - cx) / rx, dy = ((y + 0.5) / SS - cy) / ry;
         if (dx * dx + dy * dy <= 1) { if (x0 === null) x0 = x; x1 = x; }
       }
-      if (x0 !== null) g.fillRect(OX + x0, OY + y, x1 - x0 + 1, 1);
+      if (x0 !== null) g.fillRect(OX * SS + x0, OY * SS + y, x1 - x0 + 1, 1);
     }
   }
 
@@ -51,17 +54,17 @@
 
   /* filled triangle, pixel centres inside the three edges */
   function tri(ax, ay, bx, by, cx, cy, c) {
-    var x0 = Math.floor(Math.min(ax, bx, cx)), x1 = Math.ceil(Math.max(ax, bx, cx));
-    var y0 = Math.floor(Math.min(ay, by, cy)), y1 = Math.ceil(Math.max(ay, by, cy));
+    var x0 = Math.floor(Math.min(ax, bx, cx) * SS), x1 = Math.ceil(Math.max(ax, bx, cx) * SS);
+    var y0 = Math.floor(Math.min(ay, by, cy) * SS), y1 = Math.ceil(Math.max(ay, by, cy) * SS);
     var area = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
     if (!area) return;
     g.fillStyle = c;
     for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) {
-      var px0 = x + 0.5, py0 = y + 0.5;
+      var px0 = (x + 0.5) / SS, py0 = (y + 0.5) / SS;
       var w0 = ((bx - px0) * (cy - py0) - (by - py0) * (cx - px0)) / area;
       var w1 = ((cx - px0) * (ay - py0) - (cy - py0) * (ax - px0)) / area;
       var w2 = 1 - w0 - w1;
-      if (w0 >= -0.02 && w1 >= -0.02 && w2 >= -0.02) g.fillRect(OX + x, OY + y, 1, 1);
+      if (w0 >= -0.02 && w1 >= -0.02 && w2 >= -0.02) g.fillRect(OX * SS + x, OY * SS + y, 1, 1);
     }
   }
   function shrink(p, k) {
@@ -349,6 +352,34 @@
     OY -= bob; OX -= lean;
   }
 
+  /* The 32 bit pass: light from the top left. Outlines take the colour of what they wrap (lighter on the lit
+     side), an inner bevel adds volume, and a soft top to bottom falloff rounds things off. */
+  function shade(c) {
+    var x2 = c.getContext('2d'), W = c.width, H = c.height, id = x2.getImageData(0, 0, W, H), d = id.data, out = new Uint8ClampedArray(d);
+    function A(x, y) { return x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] > 0; }
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+      var i = (y * W + x) * 4;
+      if (!d[i + 3]) continue;
+      var r0 = d[i], g0 = d[i + 1], b0 = d[i + 2], lum = r0 * 0.3 + g0 * 0.59 + b0 * 0.11, f;
+      var aL = !A(x - 1, y), aR = !A(x + 1, y), aU = !A(x, y - 1), aD = !A(x, y + 1);
+      if ((aL || aR || aU || aD) && lum < 80) {
+        var ax = (aL ? 1 : 0) - (aR ? 1 : 0), ay = (aU ? 1 : 0) - (aD ? 1 : 0), sx = x + ax * 3, sy = y + ay * 3;
+        if (A(sx, sy)) {
+          var j = (sy * W + sx) * 4, lit = aU || aL, k = lit ? 0.62 : 0.38;
+          if (d[j] * 0.3 + d[j + 1] * 0.59 + d[j + 2] * 0.11 > 70) { out[i] = d[j] * k; out[i + 1] = d[j + 1] * k; out[i + 2] = d[j + 2] * k; }
+        }
+        continue;
+      }
+      f = 1.07 - 0.14 * (y / H);
+      if (!A(x - 2, y - 2) || !A(x, y - 3)) f += 0.13;
+      else if (!A(x - 3, y - 3) || !A(x, y - 4)) f += 0.05;
+      if (!A(x + 2, y + 2) || !A(x, y + 3)) f -= 0.13;
+      out[i] = r0 * f; out[i + 1] = g0 * f; out[i + 2] = b0 * f;
+    }
+    id.data.set(out); x2.putImageData(id, 0, 0);
+    return c;
+  }
+  S.shade = shade;
   var cache = {};
   function flashOf(c) {
     var w = document.createElement('canvas'); w.width = c.width; w.height = c.height;
@@ -364,11 +395,14 @@
     if (flash) { c = flashOf(S.get(era, pose, f, bl, face, look, sq, false, skin)); cache[k] = c; return c; }
     useSkin(skin);
     c = document.createElement('canvas');
-    c.width = 36; c.height = 32;
+    SS = 2;
+    c.width = 36 * SS; c.height = 32 * SS;
     g = c.getContext('2d');
-    if (face < 0) { g.translate(36, 0); g.scale(-1, 1); }
+    if (face < 0) { g.translate(36 * SS, 0); g.scale(-1, 1); }
     OX = 6; OY = 4;
     body(pose, f, bl, era, look, sq);
+    shade(c);
+    SS = 1;
     useSkin('pre');
     cache[k] = c;
     return c;
@@ -385,10 +419,10 @@
       ctx.save();
       ctx.translate(X, Y - 12);
       ctx.rotate(rot * Math.PI / 2);
-      ctx.drawImage(c, -18, -17);
+      ctx.drawImage(c, -18, -17, 36, 32);
       ctx.restore();
     } else {
-      ctx.drawImage(c, X - 18, Y - 29);
+      ctx.drawImage(c, X - 18, Y - 29, 36, 32);
     }
     ctx.globalAlpha = 1;
   };
@@ -1453,21 +1487,23 @@
     var k = face + '|' + (f % 4) + '|' + (carry ? 1 : 0) + '|' + (woof ? 1 : 0);
     var c = bonCache[k];
     if (!c) {
-      c = document.createElement('canvas'); c.width = 34; c.height = 24;
+      SS = 2;
+      c = document.createElement('canvas'); c.width = 34 * SS; c.height = 24 * SS;
       g = c.getContext('2d');
-      if (face < 0) { g.translate(34, 0); g.scale(-1, 1); }
+      if (face < 0) { g.translate(34 * SS, 0); g.scale(-1, 1); }
       OX = 5; OY = 6;
       bonnieBody(f % 4, carry, woof);
+      shade(c); SS = 1;
       bonCache[k] = c;
     }
-    ctx.drawImage(c, Math.round(x) - 17, Math.round(y) - 20);
+    ctx.drawImage(c, Math.round(x) - 17, Math.round(y) - 20, 34, 24);
   };
 
   /* ---------- Jay, for the commentary box: messy brown hair, big eyebrows ----------
      mood: null, 'wow' (eyebrows up), 'grin' or 'blink' */
   S.jay = function (canvas, talk, mood) {
     canvas.width = 20; canvas.height = 20;
-    g = canvas.getContext('2d'); OX = 0; OY = 0;
+    g = canvas.getContext('2d'); OX = 0; OY = 0; SS = 1;
     g.clearRect(0, 0, 20, 20);
     var hair = '#5a3a22', hairL = '#7d5434', skin = '#f1c9a5', sk2 = '#dba582', out = '#7a4f36', brow = '#3a2414';
     /* shirt and neck */
