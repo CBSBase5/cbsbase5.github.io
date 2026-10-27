@@ -197,10 +197,58 @@
       titles: ['Capn', 'Old', 'Mad', 'Salty', 'Lil'],
       voice: { base: 112, wave: 'sawtooth', wobble: 12 },
       music: { tempo: 128, root: 196, scale: [0, 2, 3, 5, 7, 8, 10], lead: 'square', drum: 'jig', seed: 41 }
+    },
+    scrap: {
+      id: 'scrap',
+      name: 'Wasteland',
+      team: 'Scrap Snags',
+      when: 'about AD 2500',
+      tag: '#d0d8e2',
+      ui: '#6a7a88',
+      names: ['Junko', 'Rusty', 'Rivet', 'Grit', 'Spanner', 'Cog', 'Bucket', 'Ratchet',
+              'Tinny', 'Scrapper', 'Flotsam', 'Gasket', 'Fuse', 'Nettle', 'Hubcap', 'Wonky'],
+      weapons: {
+        lob:     { name: 'Can Sling',      blurb: 'A tin can flung from a slingshot. Booms where it lands. The wind pushes it about.' },
+        bomb:    { name: 'Battery Bomb',   blurb: 'An old fizzing battery. Bounces, then pops after 3 seconds. Wind leaves it alone.' },
+        shove:   { name: 'Sign Bonk',      blurb: 'A whack with a bent road sign. Up close only. Sends them flying.' },
+        dig:     { name: 'Hubcap Spade',   blurb: 'Dig a tunnel in the direction you aim with a hubcap on a stick.' },
+        trolley: { name: 'Trolley Charge', blurb: 'Push off a shopping trolley full of junk. It speeds up downhill and crashes into the first Snag it meets.', real: ['1937', 'Shopping trolley'] },
+        slug:    { name: 'Sticky Slug',    blurb: 'A mutant slug. It sticks to the first thing it touches, then pops after 3 seconds. Stick it on a Snag for a big boom.', real: ['1930', 'Sticky tape'] },
+        tyres:   { name: 'Tyre Wall',      blurb: 'Stack a wall of old tyres in front of you. Shots bounce off it.', real: ['1888', 'Air filled tyre'] },
+        springs: { name: 'Spring Boots',   blurb: 'Boing high into the air. A free move: you still get your go.', real: ['1919', 'Pogo stick'] },
+        stomp:   { name: 'Robot Stomp',    blurb: 'Superweapon. A giant rusty robot foot stomps down wherever you point.', real: ['1939', 'Elektro the robot'] }
+      },
+      kit: ['trolley', 'slug', 'springs', 'tyres', 'stomp'],
+      stats: { power: 4, precision: 3, tricks: 5 },
+      bits: [['Ju', 'Ru', 'Ri', 'Gri', 'Spa', 'Co', 'Bu', 'Ra', 'Ti', 'Scra', 'Flo', 'Ga', 'Ne', 'Hu'],
+             ['nko', 'sty', 'vet', 't', 'nner', 'g', 'cket', 'tchet', 'nny', 'pper', 'tsam', 'sket', 'ttle', 'bcap']],
+      titles: ['Big', 'Lil', 'Old', 'Chief', 'Boss'],
+      voice: { base: 135, wave: 'square', wobble: 14 },
+      music: { tempo: 108, root: 174.61, scale: [0, 3, 5, 6, 7, 10], lead: 'sawtooth', drum: 'junk', seed: 61 }
     }
   };
 
   window.B5MAPS = {
+    ruins: {
+      id: 'ruins',
+      name: 'Ruined City',
+      style: 'ruins',
+      era: 'scrap',
+      year: 2500,
+      pal: {
+        rub1: [150, 138, 122], rub2: [128, 116, 102], rub3: [108, 98, 86], deep: [76, 68, 60], brick: [168, 92, 70], brickD: [130, 70, 54],
+        con1: [176, 172, 160], con2: [154, 150, 140], conD: [120, 116, 108], win: [44, 46, 52], winG: [70, 120, 70],
+        rust: [184, 98, 52], rust2: [146, 72, 40], rustL: [214, 138, 80], panel: [52, 84, 140], panelL: [96, 140, 196], dish: [210, 212, 214],
+        moss: [104, 150, 70], moss2: [76, 118, 56], rebar: [96, 70, 56],
+        rock: [140, 132, 120], rockL: [170, 162, 150],
+        tuft: [110, 160, 72], flower: [236, 196, 70], flower2: [230, 120, 150]
+      },
+      sky: ['#7fa8a8', '#9cbaa8', '#bccaa4', '#d8cc9c', '#e6bc86', '#e09c74'],
+      skyGreen: ['#3a5a4a', '#4a6e52', '#5e845a', '#7a9a62', '#a0b06a', '#c8c27a'],
+      sun: '#ffe2b0',
+      far: '#8a9a98', mid: '#6f8070', near: '#4f5e4a',
+      water: '#4a6e5e', waterTop: '#9ac0a8'
+    },
     uruk: {
       id: 'uruk',
       name: 'City of Uruk',
@@ -360,6 +408,7 @@
     { id: 'med',   name: 'Medieval',     year: 1300,  label: 'about AD 1300, the age of castles', ready: true },
     { id: 'pirate', name: 'Pirates',     year: 1718,  label: 'about 1718, the Golden Age of Piracy', ready: true },
     { id: 'ww',    name: 'World Wars',   year: 1930,  label: '1914 to 1945', ready: false },
+    { id: 'scrap', name: 'Wasteland',    year: 2500,  label: 'about AD 2500, after the old cities fell', ready: true },
     { id: 'fut',   name: 'Far Future',   year: 3000,  label: 'about AD 3000', ready: true }
   ];
 
@@ -568,6 +617,34 @@
       { id: 'toybrick', name: 'Toy building brick', when: '1958', where: 'Denmark',
         fact: 'The clip together toy brick design was patented in 1958. Bricks made today still clip onto ones from back then.' }
     ],
+    ruins: [
+      { id: 'barcode', name: 'Barcode', when: 'from 1974', where: 'Shops everywhere',
+        fact: 'The first thing ever scanned with a barcode at a shop till was a packet of chewing gum, in 1974. Future Snags think the stripes are a secret code.' },
+      { id: 'solar', name: 'Solar panel', when: 'from 1954', where: 'Roofs everywhere',
+        fact: 'The first really useful solar cell was made in 1954. Sunlight goes in, electricity comes out. This one still works.' },
+      { id: 'trafficlight', name: 'Traffic light', when: '1868', where: 'London',
+        fact: 'The first one stood outside Parliament in 1868 and was lit by gas. A few weeks later it blew up.' },
+      { id: 'headphones', name: 'Headphones', when: 'from 1910', where: 'A kitchen table, then everywhere',
+        fact: 'Some of the first good headphones were made in 1910 by Nathaniel Baldwin, at his kitchen table.' },
+      { id: 'bottle', name: 'Plastic bottle', when: 'from the 1970s', where: 'Bins everywhere',
+        fact: 'Plastic drinks bottles became common in the 1970s. They take hundreds of years to break down, so the Scrap Snags keep finding them.' },
+      { id: 'shoptrolley', name: 'Shopping trolley', when: '1937', where: 'Oklahoma, USA',
+        fact: 'Sylvan Goldman invented it in 1937 by putting wheels and two baskets on a folding chair.' },
+      { id: 'bike', name: 'First bike', when: '1817', where: 'Germany',
+        fact: 'The first bike had no pedals. You pushed it along with your feet, like a scooter.' },
+      { id: 'skateboard', name: 'Skateboard', when: 'from the 1950s', where: 'California, USA',
+        fact: 'Surfers put wheels on planks so they could surf the streets when the sea was flat.' }
+    ],
+    ruinsGlitches: [
+      { id: 'fridgeart', name: 'Cave painting on a fridge', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Somebody painted a mammoth on this fridge door with ochre, the red earth paint from Ice Age caves. The fridge is not impressed.' },
+      { id: 'shipwheel', name: "Ship's wheel", glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Sailing ships started using wheels to steer in the early 1700s. This one is a long way from the sea.' },
+      { id: 'scroll', name: 'Papyrus scroll', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Ancient Egyptians made paper from papyrus reeds over 5,000 years ago. This one is a shopping list: bread, onions, more bread.' },
+      { id: 'laurel', name: 'Laurel wreath', glitch: true, when: 'out of time', where: 'should not be here',
+        fact: 'Romans crowned winners with laurel leaves. Somebody won something in the year 2500.' }
+    ],
     cityGlitches: [
       { id: 'dinoegg', name: 'Warm dinosaur egg', glitch: true, when: 'out of time', where: 'should not be here',
         fact: 'Dinosaurs died out 66 million years ago. This egg is still warm. Someone has been time travelling with snacks.' },
@@ -592,6 +669,72 @@
 
   /* Time Tour: winners change history. Keyed by the map being changed, then the squad that won the stop before. */
   window.B5RIPPLE = {
+    ruins: {
+      pre: {
+        look: 'overgrown',
+        title: 'The Stone Snags won at the Pirate Harbour',
+        text: 'So the Stone Age never ended. Plants have swallowed the Ruined City. Stone Snags carry an extra boulder. Scrap Snags have one less trolley.',
+        postcard: 'Because the Stone Snags won in 1718, plants swallowed the Ruined City.',
+        short: 'a city swallowed by plants',
+        ammo: { pre: { boulder: 1 }, scrap: { trolley: -1 } }
+      },
+      egypt: {
+        look: 'sandy',
+        title: 'The Sun Snags won at the Pirate Harbour',
+        text: 'So Egypt ruled the world. Sand has buried the Ruined City up to the windows. Sun Snags carry an extra scarab. Scrap Snags have one less slug.',
+        postcard: 'Because the Sun Snags won in 1718, sand buried the Ruined City.',
+        short: 'a city buried in sand',
+        ammo: { egypt: { scarab: 1 }, scrap: { slug: -1 } }
+      },
+      fut: {
+        look: 'gleaming',
+        title: 'The Neon Snags won at the Pirate Harbour',
+        text: 'So the future came early and somebody tidied up. The Ruined City is half rebuilt and shiny. Neon Snags carry an extra disc. Scrap Snags have one less trolley.',
+        postcard: 'Because the Neon Snags won in 1718, the Ruined City got tidied up.',
+        short: 'a half rebuilt, shiny city',
+        ammo: { fut: { disc: 1 }, scrap: { trolley: -1 } }
+      },
+      rome: {
+        look: 'gleaming',
+        title: 'The Eagle Snags won at the Pirate Harbour',
+        text: 'So Rome never fell. Roman builders patched the ruins with marble. Eagle Snags carry an extra pilum. Scrap Snags have one less tyre wall.',
+        postcard: 'Because the Eagle Snags won in 1718, Romans patched the ruins with marble.',
+        short: 'ruins patched with marble',
+        ammo: { rome: { pilum: 1 }, scrap: { tyres: -1 } }
+      },
+      med: {
+        look: 'normal',
+        title: 'The Crown Snags won at the Pirate Harbour',
+        text: 'So knights took over the wasteland. Crown Snags carry an extra volley. Scrap Snags have one less slug.',
+        postcard: 'Because the Crown Snags won in 1718, knights guard the Ruined City.',
+        short: 'knights in the ruins',
+        ammo: { med: { volley: 1 }, scrap: { slug: -1 } }
+      },
+      pirate: {
+        look: 'normal',
+        title: 'The Anchor Snags won at the Pirate Harbour',
+        text: 'So pirates sailed into the future. Anchor Snags carry an extra cannonball. Scrap Snags have one less trolley.',
+        postcard: 'Because the Anchor Snags won in 1718, pirates raid the Ruined City.',
+        short: 'pirates raiding the ruins',
+        ammo: { pirate: { cannon: 1 }, scrap: { trolley: -1 } }
+      },
+      sumer: {
+        look: 'normal',
+        title: 'The Wedge Snags won at the Pirate Harbour',
+        text: 'So clay tablets outlasted everything. Wedge Snags carry an extra war cart. Scrap Snags have one less tyre wall.',
+        postcard: 'Because the Wedge Snags won in 1718, clay tablets outlasted everything.',
+        short: 'ruins full of clay tablets',
+        ammo: { sumer: { cart: 1 }, scrap: { tyres: -1 } }
+      },
+      scrap: {
+        look: 'normal',
+        title: 'The Scrap Snags won at the Pirate Harbour',
+        text: 'So the Scrap Snags got here early and started collecting. Scrap Snags carry an extra trolley. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Scrap Snags won in 1718, the junk tribes rule the ruins.',
+        short: 'junk tribes ruling the ruins',
+        ammo: { scrap: { trolley: 1 }, pirate: { cannon: -1 } }
+      }
+    },
     uruk: {
       pre: {
         look: 'rough',
@@ -648,6 +791,14 @@
         postcard: 'Because the Wedge Snags won back in 10,000 BC, the first cities started even earlier.',
         short: 'cities starting early',
         ammo: { sumer: { cart: 1 } }
+      },
+      scrap: {
+        look: 'rough',
+        title: 'The Scrap Snags won in the Prehistoric Jungle',
+        text: 'So junk from the future fell into the first cities. Uruk is patched with tyres and tin. Scrap Snags carry an extra trolley. Wedge Snags have one less war cart.',
+        postcard: 'Because the Scrap Snags won in 10,000 BC, Uruk is patched with junk.',
+        short: 'an Uruk patched with junk',
+        ammo: { scrap: { trolley: 1 }, sumer: { cart: -1 } }
       }
     },
     desert: {
@@ -706,6 +857,14 @@
         postcard: 'Because the Wedge Snags won in 3500 BC, Sumer grew into an empire before the pyramids.',
         short: 'an early Sumerian empire',
         ammo: { sumer: { tablet: 1 }, egypt: { spear: -1 } }
+      },
+      scrap: {
+        look: 'rough',
+        title: 'The Scrap Snags won at Uruk',
+        text: 'So the pyramids were built with spare parts. Scrap Snags carry an extra slug. Sun Snags have one less spear.',
+        postcard: 'Because the Scrap Snags won in 3500 BC, the pyramids have hubcaps.',
+        short: 'pyramids with hubcaps',
+        ammo: { scrap: { slug: 1 }, egypt: { spear: -1 } }
       }
     },
     wall: {
@@ -764,6 +923,14 @@
         postcard: 'Because the Wedge Snags won in 2560 BC, the world learned to build in mud brick.',
         short: 'a world of mud brick',
         ammo: { sumer: { cart: 1 }, rome: { pilum: -1 } }
+      },
+      scrap: {
+        look: 'turf',
+        title: 'The Scrap Snags won in the Pyramid Desert',
+        text: 'So Hadrian\'s Wall was finished with old tyres. Scrap Snags carry an extra tyre wall. Eagle Snags have one less pilum.',
+        postcard: 'Because the Scrap Snags won in 2560 BC, Hadrian\'s Wall is made of tyres.',
+        short: 'a wall of tyres',
+        ammo: { scrap: { tyres: 1 }, rome: { pilum: -1 } }
       }
     },
     castle: {
@@ -822,6 +989,14 @@
         postcard: 'Because the Wedge Snags won in AD 122, mud brick builders reached Britain.',
         short: 'mud brick in Britain',
         ammo: { sumer: { steps: 1 }, med: { volley: -1 } }
+      },
+      scrap: {
+        look: 'rough',
+        title: 'The Scrap Snags won at Hadrian\'s Wall',
+        text: 'So the castle was held together with string. Scrap Snags carry an extra trolley. Crown Snags have one less volley.',
+        postcard: 'Because the Scrap Snags won in AD 122, the castle is held together with string.',
+        short: 'a castle held together with string',
+        ammo: { scrap: { trolley: 1 }, med: { volley: -1 } }
       }
     },
     harbour: {
@@ -880,64 +1055,80 @@
         postcard: 'Because the Wedge Snags won in AD 1300, reed boats crossed the oceans.',
         short: 'reed boats on every ocean',
         ammo: { sumer: { tablet: 1 }, pirate: { cannon: -1 } }
+      },
+      scrap: {
+        look: 'overgrown',
+        title: 'The Scrap Snags won the Castle Siege',
+        text: 'So the harbour filled up with junk boats. Scrap Snags carry an extra slug. Anchor Snags have one less cannonball.',
+        postcard: 'Because the Scrap Snags won in 1300, the harbour is full of junk boats.',
+        short: 'a harbour of junk boats',
+        ammo: { scrap: { slug: 1 }, pirate: { cannon: -1 } }
       }
     },
     city: {
       pre: {
         look: 'overgrown',
-        title: 'The Stone Snags won at the Pirate Harbour',
+        title: 'The Stone Snags won in the Ruined City',
         text: 'So history went wild. Vines cover the towers, the sky has gone green, and the factories never quite worked. Neon Snags start with one less disc and laser. Stone Snags carry an extra boulder.',
-        postcard: 'Because the Stone Snags won in 1718, the Future City is covered in vines.',
+        postcard: 'Because the Stone Snags won in 2500, the Future City is covered in vines.',
         short: 'a Future City covered in vines',
         ammo: { fut: { disc: -1, laser: -1 }, pre: { boulder: 1 } }
       },
       fut: {
         look: 'gleaming',
-        title: 'The Neon Snags won at the Pirate Harbour',
+        title: 'The Neon Snags won in the Ruined City',
         text: 'So the future arrived early. The Future City gleams brighter than ever. Neon Snags bring an extra Ricochet Disc, and everyone else has one less of their best kit.',
-        postcard: 'Because the Neon Snags won in 1718, the Future City gleams brighter than ever.',
+        postcard: 'Because the Neon Snags won in 2500, the Future City gleams brighter than ever.',
         short: 'a gleaming Future City',
-        ammo: { fut: { disc: 1 }, pre: { boulder: -1 }, egypt: { spear: -1 }, rome: { pilum: -1 }, med: { volley: -1 }, pirate: { cannon: -1 }, sumer: { cart: -1 } }
+        ammo: { fut: { disc: 1 }, pre: { boulder: -1 }, egypt: { spear: -1 }, rome: { pilum: -1 }, med: { volley: -1 }, pirate: { cannon: -1 }, sumer: { cart: -1 }, scrap: { trolley: -1 } }
       },
       egypt: {
         look: 'sandy',
-        title: 'The Sun Snags won at the Pirate Harbour',
+        title: 'The Sun Snags won in the Ruined City',
         text: 'So Ancient Egypt never ended. The Future City is built like a giant temple, with sandstone towers, gold edges and pyramids on the skyline. Sun Snags carry an extra Scarab Beetle. Neon Snags have one less disc.',
-        postcard: 'Because the Sun Snags won in 1718, the Future City is built like a giant temple.',
+        postcard: 'Because the Sun Snags won in 2500, the Future City is built like a giant temple.',
         short: 'a Future City built like a temple',
         ammo: { egypt: { scarab: 1 }, fut: { disc: -1 } }
       },
       rome: {
         look: 'gleaming',
-        title: 'The Eagle Snags won at the Pirate Harbour',
+        title: 'The Eagle Snags won in the Ruined City',
         text: 'So the Roman Empire never fell. The Future City gleams like polished marble. Eagle Snags carry an extra ballista bolt. Neon Snags have one less laser.',
-        postcard: 'Because the Eagle Snags won in 1718, the Roman Empire never fell.',
+        postcard: 'Because the Eagle Snags won in 2500, the Roman Empire never fell.',
         short: 'an empire that never fell',
         ammo: { rome: { ballista: 1 }, fut: { laser: -1 } }
       },
       med: {
         look: 'normal',
-        title: 'The Crown Snags won at the Pirate Harbour',
+        title: 'The Crown Snags won in the Ruined City',
         text: 'So kings and queens ruled the future. Crown Snags carry an extra volley. Neon Snags have one less disc.',
-        postcard: 'Because the Crown Snags won in 1718, knights guard the Future City.',
+        postcard: 'Because the Crown Snags won in 2500, knights guard the Future City.',
         short: 'knights in the Future City',
         ammo: { med: { volley: 1 }, fut: { disc: -1 } }
       },
       pirate: {
         look: 'normal',
-        title: 'The Anchor Snags won at the Pirate Harbour',
+        title: 'The Anchor Snags won in the Ruined City',
         text: 'So pirates took over the future. Anchor Snags carry an extra cannonball. Neon Snags have one less laser.',
-        postcard: 'Because the Anchor Snags won in 1718, pirates run the Future City.',
+        postcard: 'Because the Anchor Snags won in 2500, pirates run the Future City.',
         short: 'a pirate Future City',
         ammo: { pirate: { cannon: 1 }, fut: { laser: -1 } }
       },
       sumer: {
         look: 'normal',
-        title: 'The Wedge Snags won at the Pirate Harbour',
+        title: 'The Wedge Snags won in the Ruined City',
         text: 'So writing on clay never went away. Wedge Snags carry an extra war cart. Neon Snags have one less disc.',
-        postcard: 'Because the Wedge Snags won in 1718, the Future City still writes on clay.',
+        postcard: 'Because the Wedge Snags won in 2500, the Future City still writes on clay.',
         short: 'a Future City that writes on clay',
         ammo: { sumer: { cart: 1 }, fut: { disc: -1 } }
+      },
+      scrap: {
+        look: 'overgrown',
+        title: 'The Scrap Snags won in the Ruined City',
+        text: 'So nobody ever cleaned up. The Future City is held together with string and tyres. Scrap Snags carry an extra trolley. Neon Snags have one less laser.',
+        postcard: 'Because the Scrap Snags won in 2500, the Future City is held together with string.',
+        short: 'a Future City held together with string',
+        ammo: { scrap: { trolley: 1 }, fut: { laser: -1 } }
       }
     }
   };
@@ -948,6 +1139,14 @@
     double: ['My ears are not a toilet!', 'Two for the price of one!'],
     water: ['In the wise words of my late, great grandfather, stop.', 'Splash! Back to your own time.', 'Straight in for a swim.'],
     miss: ['Nearly!', 'Bold choice.', 'That patch of grass had it coming.', 'Somewhere, a bird is very surprised.', 'Practice shot. Obviously.', 'You meant to do that. I can tell.', 'The ground says ouch.'],
+    trolley: ['Clean up on aisle three!', 'Wonky wheel and all. Go on!'],
+    slug: ['Ew. It is sticky.', 'That slug has a plan.'],
+    tyres: ['Boing! Nothing gets through tyres.', 'Recycling, but make it battle.'],
+    springs: ['Boooiiing!', 'Spring boots! Mind your head.'],
+    stomp: ['THE FOOT. RUN.', 'A robot foot from the sky. Of course.'],
+    satellite: ['Something is falling out of the sky. Probably fine.', 'Old satellite incoming!'],
+    satrain: ['Satellite rain! Look up. Then run.', 'The sky is falling. Bits of it, anyway.'],
+    climb: ['Up we go!', 'Climbing like a champion.'],
     superfire: ['Ooooh, here it comes!', 'Oh my days.', 'Cover your ears!', 'This is the best bit.'],
     superready: ['Superweapon ready! Go on. You know you want to.', 'The big one is charged up!', 'Super ready. Everybody duck.'],
     trick: ['Did you SEE that?!', 'Trick shot! Somebody frame that.', 'Outrageous. I love it.', 'Put that one in the museum!', 'Shot of the century!'],
