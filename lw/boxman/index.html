@@ -1792,6 +1792,13 @@ var SPR = (function () {
     }
     var hair = s.hair, st = s.style;
     // hair layers behind the head
+    // V36: 'glam' is a long white glamour wig: past the shoulders, big waves at the ends
+    if (hair && !back && st === 'glam') {
+      if (front) { P.rrect(hx - 5, hy - 1, 8, 31, 3).rrect(hx + hw - 3, hy - 1, 8, 31, 3); P.ell(hx - 2, hy + 29, 4, 3).ell(hx + hw + 2, hy + 29, 4, 3); }
+      else if (diag) { P.rrect(hx - 6, hy - 1, 10, 31, 3); P.ell(hx - 3, hy + 29, 5, 3); }
+      else { P.rrect(hx - 6, hy - 2, 11, 32, 3); P.ell(hx - 3, hy + 30, 5, 3); }
+      P.part(hair, { noise: 0.06, seed: 13 });
+    }
     if (hair && !back && (st === 'long' || st === 'curly')) {
       var wide = st === 'curly' ? 2 : 0;
       if (front) { P.rect(hx - 2 - wide, hy + 1, 5 + wide, 22 + wide).rect(hx + hw - 3, hy + 1, 5 + wide, 22 + wide); }
@@ -1830,7 +1837,8 @@ var SPR = (function () {
     // hair on top
     if (hair) {
       if (back) {
-        if (st === 'long' || st === 'curly') P.rrect(hx - 2, hy - 1, hw + 4, 25, 4).part(hair, { noise: st === 'curly' ? 0.55 : 0.2, seed: 2 });
+        if (st === 'glam') { P.rrect(hx - 4, hy - 2, hw + 8, 32, 4).part(hair, { noise: 0.12, seed: 2 }); P.ell(hx - 1, hy + 30, 4, 3).ell(hx + hw + 1, hy + 30, 4, 3).part(hair); for (var gw = 0; gw < hw + 4; gw += 3) P.dec(hx - 2 + gw, hy + 6, 1, 20, ramp(hair)[1], true); }
+        else if (st === 'long' || st === 'curly') P.rrect(hx - 2, hy - 1, hw + 4, 25, 4).part(hair, { noise: st === 'curly' ? 0.55 : 0.2, seed: 2 });
         else if (st === 'tied') { P.rrect(hx, hy - 1, hw, 12, 4).part(hair, { noise: 0.15 }); P.rrect(cx - 2, hy + 10, 5, 10, 2).part(hair, { noise: 0.2 }); P.dec(cx - 2, hy + 10, 5, 1, '#d6457a'); }
         else if (st === 'beanie') { P.rrect(hx - 1, hy - 2, hw + 2, 10, 4).part(s.hat); P.rect(hx, hy + 8, hw, 4).part(hair); }
         else if (st === 'hoodup') { P.rrect(hx - 3, hy - 3, hw + 6, 23, 5).part(s.hat); }
@@ -1844,6 +1852,12 @@ var SPR = (function () {
         P.rrect(hx - 2, hy - 3, hw + 4, 6, 3).part(s.hat);
       } else if (st === 'tied') {
         P.rrect(hx, hy - 1, hw, 6, 3).part(hair, { noise: 0.15 }); if (front) P.rect(hx + 1, hy + 2, hw - 2, 2).part(hair);
+      } else if (st === 'glam') {
+        // a big side-swept wave across the forehead, and a shine
+        P.rrect(hx - 3, hy - 4, hw + 6, 9, 4);
+        if (side) P.rect(hx - 1, hy, 7, 12); else { P.ell(hx + 3, hy + 4, 5, 4); P.rect(hx + hw - 2, hy + 2, 3, 9); }
+        P.part(hair, { noise: 0.1, seed: 4 });
+        P.dec(hx + 2, hy - 2, 5, 1, '#ffffff', true); P.dot(hx + 9, hy - 1, '#ffffff', true);
       } else {
         P.rrect(hx - (st === 'curly' ? 2 : 0), hy - 2, hw + (st === 'curly' ? 4 : 0), 7, 3);
         if (side) P.rect(hx, hy, 6, 9); else { P.rect(hx, hy + 2, 2, 6); P.rect(hx + hw - 2, hy + 2, 2, 6); }
@@ -18625,7 +18639,7 @@ whatsNew = function () {
 /* ===================== V32: LW'S SIGNATURE SPECIALS ===================== */
 /* LW rewrote the specials. These replace the first versions from build 31. */
 Object.assign(SPECIALS, {
-  gingerbeard: { name: 'Order in court', icon: 'magnifier', cd: 12, tip: 'Puts on a white wig. Hits harder and faster for a few seconds.' },
+  gingerbeard: { name: 'Glamour wig', icon: 'magnifier', cd: 12, tip: 'Puts on a long white glamour wig. Hits harder and faster for a few seconds, and knows it.' },
   sweettooth: { name: 'Bag of Moam', icon: 'sugar', cd: 10, tip: 'Throws a bag of Moam. Nearby enemies cannot resist it. Then it pops.' },
   trainer: { name: 'Train dash', icon: 'rails', cd: 8, tip: '"I\'m actually a villain." Dashes forward like a train, flattening everything.' },
   friend: { name: 'You look like him', icon: 'corners', cd: 12, tip: 'Charms an enemy to fight for you until the room is clear. Elites and bosses take a critical hit instead.' },
@@ -18639,12 +18653,12 @@ Object.assign(SPECIALS, {
 /* ---------- Ginger-beard: the white wig ---------- */
 function wigKey(P) {
   var base = P.skin && P.skin.indexOf('_wig') < 0 ? P.skin : P.key, k = base + '_wig';
-  if (!SPR.SPECS[k] && SPR.SPECS[base]) SPR.SPECS[k] = Object.assign({}, SPR.SPECS[base], { style: 'greycurly', hair: '#f6f4ee', hat: null });
+  if (!SPR.SPECS[k] && SPR.SPECS[base]) SPR.SPECS[k] = Object.assign({}, SPR.SPECS[base], { style: 'glam', hair: '#ffffff', hat: null });
   return SPR.SPECS[k] ? k : null;
 }
 SPECIAL_FN.gingerbeard = function (P) {
   P.wigT = 7; P.wigPrev = P.skin || null; var k = wigKey(P); if (k) P.skin = k;
-  UI.say(P, 'Order! Order!', 1.6); UI.burst('ORDER IN COURT!', P, true); AUD.sfx('stamp'); AUD.sfx('cutin');
+  P.wigLine = 3.2; UI.say(P, pick(GLAM_LINES), 2.2); UI.burst('GORGEOUS!', P, true); AUD.sfx('twinkle'); AUD.sfx('cutin');
   fxRing(P.x, P.z, 0.4, 2.6, '#f6f4ee', 0.35); fxBits(P.x, 2.4, P.z, 10, '#f6f4ee', 3);
 };
 var _metaDmgMul32 = metaDmgMul;
@@ -18811,7 +18825,7 @@ SPECIAL_FN.cardboy = function (P) {
 /* ---------- ticks for all of the above ---------- */
 function spec32Tick(dt) {
   var P = G.P; if (!P || !G.run || G.doom) return;
-  if (P.wigT > 0) { P.wigT -= dt; if (Math.random() < dt * 4) fxBits(P.x, 2.6, P.z, 1, '#f6f4ee', 1); if (P.wigT <= 0) { P.skin = P.wigPrev || null; UI.burst('COURT ADJOURNED', P); } }
+  if (P.wigT > 0) { P.wigT -= dt; if (Math.random() < dt * 4) fxBits(P.x, 2.6, P.z, 1, '#f6f4ee', 1); if (P.wigT <= 0) { P.skin = P.wigPrev || null; UI.burst('WIG OFF', P); } else { P.wigLine -= dt; if (P.wigLine <= 0) { P.wigLine = 99; UI.say(P, pick(GLAM_LINES), 2); } } }
   if (P.flopT > 0) P.flopT -= dt;
   trainDashTick(P, dt); toddTick(P, dt); laserTick(P, dt); moamTick(dt);
 }
@@ -18829,6 +18843,7 @@ enterRoom = function (room, fromSide) {
 function spEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function specCardFront(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div class="stat"><b>Special</b> ' + esc(d.name) + ' <kbd>' + esc(keyName(keyMap().special[0])) + '</kbd></div>' : ''; }
 function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div class="abil spec"><b>Special: ' + esc(d.name) + '</b><p>' + esc(d.tip) + '</p></div>' : ''; }
+var GLAM_LINES = ["Don't I look gorgeous?", 'Happy birthday, Mister President.', 'Ready for my close up.', 'The camera loves me. Obviously.', 'No photos. Actually, yes, photos.', 'Darling, I was born for this.'];
 
 /* ===================== V33: DEAD GUY, PROPERLY HORIZONTAL ===================== */
 /* LW's note: Dead guy lies down. Always. He is a joke, and an intentionally pointless one.
