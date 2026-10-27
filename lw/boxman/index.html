@@ -18835,6 +18835,19 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
    So he gets his own set of pictures: lying on his back, drifting about like a ghost, ghost hands
    coming up out of his chest to hit things, and a character card to match. */
 (function () {
+  function hand(P, x, y, dir, skin, glow) {
+    if (dir === 'up') {
+      P.rrect(x - 4, y - 5, 9, 10, 2).part(glow, { flat: true });
+      P.rrect(x - 3, y, 7, 4, 1).part(skin);
+      for (var i = 0; i < 4; i++) P.rect(x - 3 + i * 2, y - 4 + (i === 0 || i === 3 ? 1 : 0), 1, 4).part(skin, { soft: false });
+      P.rect(x + 4, y, 2, 2).part(skin, { soft: false });
+    } else {
+      P.rrect(x - 5, y - 4, 10, 9, 2).part(glow, { flat: true });
+      P.rrect(x, y - 3, 4, 7, 1).part(skin);
+      for (var j = 0; j < 4; j++) P.rect(x - 4 + (j === 0 || j === 3 ? 1 : 0), y - 3 + j * 2, 4, 1).part(skin, { soft: false });
+      P.rect(x, y + 4, 2, 2).part(skin, { soft: false });
+    }
+  }
   function lie(spec) {
     return function (P, v, f) {
       var skin = spec.skin, top = spec.top, shorts = spec.legs, shoe = spec.shoes || '#e2e2e2', hair = spec.hair || '#5a4632', ghost = '#bfe6ff', ghostHi = '#e8f6ff', gold = '#f5c518';
@@ -18843,8 +18856,6 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
       var hb = f === 1 ? -1 : 0, hurt = f === 10, up = hurt ? -3 : 0;
       // he reads best flat across the screen from every angle, so every view is the lying down one
       var side = true, back = false;
-      // ghostly wisps underneath: he never quite touches the floor
-      for (var w = 0; w < 4; w++) { var wx = side ? 10 + w * 12 + (walk ? (f % 3) * 2 : 0) : 22 + w * 6 + (walk ? f % 2 : 0); P.ell(wx, 60, side ? 4 : 2.5, 1.2).part(ghost, { flat: true }); }
       if (side) {
         var by = 45 + fl + up;
         // legs, toes up
@@ -18854,7 +18865,7 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
         // arm on the far side, then the body, then the near arm lying along it
         P.limb(20, by + 2, 30, by + 1 - armOff, 2).part(skin, { dark: 1 });
         P.rrect(17, by, 18, 10, 2).part(top, { noise: 0.04, seed: 141 });
-        P.limb(21, by + 5, 31, by + 9 + armOff, 3).part(skin); P.ell(32, by + 9 + armOff, 2, 2).part(skin);
+        if (f !== 8 && f !== 9) { P.limb(20, by + 7, 27, by + 2 + (armOff > 0 ? 1 : 0), 3).part(skin); P.rrect(26, by, 4, 4, 1).part(skin); }
         // head, face up, eyes crossed out
         P.ell(11, by + 4, 7, 7).part(skin); P.ell(6, by + 4, 4, 6).part(hair);
         if (hurt) { P.dec(11, by - 1, 3, 3, '#1b1520'); P.dec(15, by, 2, 2, '#1b1520'); }
@@ -18864,8 +18875,8 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
         if (hurt) P.poly([[4, by - 9], [18, by - 12], [18, by - 10], [4, by - 7]]).part(gold);
         else { P.ell(11, by - 8 + hb, 7, 1.8).part(gold, { flat: true }); P.dec(8, by - 8 + hb, 6, 1, '#fff2a8', true); }
         // ghost hands for attacking
-        if (f === 8) { P.limb(25, by, 27, by - 15, 4).part(ghost); P.ell(27, by - 17, 4, 4).part(ghostHi); P.limb(29, by, 33, by - 12, 3).part(ghost); P.ell(33, by - 14, 3, 3).part(ghostHi); }
-        if (f === 9) { P.limb(26, by, 47, by - 8, 4).part(ghost); P.ell(50, by - 9, 5, 5).part(ghostHi); P.dec(54, by - 13, 6, 1, ghostHi, true); P.dec(55, by - 9, 7, 1, ghostHi, true); P.dec(54, by - 5, 6, 1, ghostHi, true); }
+        if (f === 8) { P.limb(20, by + 2, 18, by - 11, 3).part(skin); hand(P, 17, by - 14, 'up', skin, ghost); }
+        if (f === 9) { P.limb(20, by + 2, 9, by - 9, 3).part(skin); hand(P, 6, by - 11, 'left', skin, ghost); P.dec(0, by - 15, 3, 1, ghostHi, true); P.dec(0, by - 11, 2, 1, ghostHi, true); P.dec(1, by - 7, 3, 1, ghostHi, true); }
         if (f === 1) P.dot(22, by - 10, '#26262a');
         return;
       }
@@ -18881,8 +18892,8 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
         P.rect(25, 48 + y0, 5, 5).part(skin); P.rect(34, 48 + y0, 5, 5).part(skin);
         P.rrect(23, 51 + y0 + (legOff > 0 ? -1 : 0), 8, 9, 2).part(shoe); P.rrect(33, 51 + y0 + (legOff < 0 ? -1 : 0), 8, 9, 2).part(shoe);
         P.dec(24, 57 + y0, 6, 1, '#9aa3ad', true); P.dec(34, 57 + y0, 6, 1, '#9aa3ad', true);
-        if (f === 8) { P.limb(32, 40 + y0, 30, 22 + y0, 4).part(ghost); P.ell(30, 19 + y0, 4, 4).part(ghostHi); }
-        if (f === 9) { P.limb(32, 40 + y0, 32, 50 + y0, 5).part(ghost); P.ell(32, 54 + y0, 6, 5).part(ghostHi); }
+        
+        
         return;
       }
       // head towards you
@@ -18894,7 +18905,7 @@ function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div cl
       P.limb(22, 42 + y1, 18 - armOff, 48 + y1, 3).part(skin); P.limb(42, 42 + y1, 46 + armOff, 48 + y1, 3).part(skin);
       P.ell(32, 53 + y1, 8, 6).part(skin); P.ell(32, 56 + y1, 7, 4).part(hair);
       P.ell(32, 46 + hb + y1, 8, 1.8).part(gold, { flat: true });
-      if (f === 8 || f === 9) { P.limb(32, 42 + y1, 33, 26 + y1, 4).part(ghost); P.ell(33, 23 + y1, 4, 4).part(ghostHi); }
+      
     };
   }
   SPR.CUSTOM.deadlie = lie(SPR.SPECS.deadguy);
