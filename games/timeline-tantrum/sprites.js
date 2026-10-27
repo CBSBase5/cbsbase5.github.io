@@ -919,6 +919,20 @@
       ctx.fillStyle = '#f0d49a'; ctx.fillRect(X - 2, Y - 2, 2, 1);
       return;
     }
+    if (p.type === 'comet') {
+      /* a big comet: a long fiery tail and a white hot head */
+      for (i = 0; i < p.trail.length; i++) { var cf = i / Math.max(1, p.trail.length); ctx.fillStyle = cf < 0.4 ? '#c4572e' : (cf < 0.8 ? '#ef7724' : '#ffd27a'); var cw = 1 + Math.round(cf * 4); ctx.fillRect(Math.round(p.trail[i][0]) - (cw >> 1), Math.round(p.trail[i][1]) - (cw >> 1), cw, cw); }
+      ctx.fillStyle = '#5a2a14'; ctx.fillRect(X - 5, Y - 5, 11, 11);
+      ctx.fillStyle = '#ef7724'; ctx.fillRect(X - 4, Y - 4, 9, 9);
+      ctx.fillStyle = '#ffd27a'; ctx.fillRect(X - 3, Y - 3, 6, 6);
+      ctx.fillStyle = '#fff8e0'; ctx.fillRect(X - 2, Y - 2, 3, 3);
+      return;
+    }
+    if (p.type === 'dfire') {
+      for (i = 0; i < p.trail.length; i++) { ctx.fillStyle = i < p.trail.length / 2 ? '#c4572e' : '#ffd27a'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 2, 2); }
+      ctx.fillStyle = '#c4572e'; ctx.fillRect(X - 3, Y - 3, 7, 7); ctx.fillStyle = '#ffd27a'; ctx.fillRect(X - 2, Y - 2, 5, 5); ctx.fillStyle = '#fff3c8'; ctx.fillRect(X - 1, Y - 1, 2, 2);
+      return;
+    }
     if (p.type === 'meteor' && p.era === 'scrap') {
       /* a tumbling chunk of old satellite, solar wings and all */
       for (i = 0; i < p.trail.length; i++) { ctx.fillStyle = i < p.trail.length / 2 ? '#8a7a6a' : '#ffd27a'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 2, 2); }
@@ -1643,6 +1657,15 @@
   /* ---------- crates ---------- */
   S.crate = function (ctx, x, y, kind, t) {
     var X = Math.round(x) - 5, Y = Math.round(y) - 9;
+    if (kind === 'secret') {
+      /* a little treasure chest with gold bands and a twinkle */
+      ctx.fillStyle = '#2a1608'; ctx.fillRect(X - 1, Y - 1, 13, 11);
+      ctx.fillStyle = '#8a4e22'; ctx.fillRect(X, Y + 3, 11, 6); ctx.fillStyle = '#a8642e'; ctx.fillRect(X, Y, 11, 3);
+      ctx.fillStyle = '#f0c446'; ctx.fillRect(X, Y + 3, 11, 1); ctx.fillRect(X + 2, Y, 1, 9); ctx.fillRect(X + 8, Y, 1, 9);
+      ctx.fillStyle = '#ffe08a'; ctx.fillRect(X + 5, Y + 3, 1, 2);
+      if ((t >> 4) % 3 === 0) { ctx.fillStyle = '#fff3c8'; ctx.fillRect(X + 12, Y - 2, 1, 3); ctx.fillRect(X + 11, Y - 1, 3, 1); }
+      return;
+    }
     var gold = kind === 'bark', C = { bark: ['#e0b040', '#b8861e', '#5c3a10'], skip: ['#8f74ff', '#5a44c0', '#ffffff'], fest: ['#7ec850', '#4f8a3a', '#ffffff'] }[kind] || ['#b07a46', '#8a5a32', '#ffffff'];
     ctx.fillStyle = '#3b2616'; ctx.fillRect(X, Y, 11, 9);
     ctx.fillStyle = C[0]; ctx.fillRect(X + 1, Y + 1, 9, 7);
@@ -1773,6 +1796,28 @@
     OY -= bob;
   }
   var bonCache = {};
+  /* Bonnie having a nap: curled up, eyes shut, ear flopped over */
+  S.bonnieNap = function (ctx, x, y, breath) {
+    var k = 'nap' + (breath ? 1 : 0), c = bonCache[k];
+    if (!c) {
+      SS = 2;
+      c = document.createElement('canvas'); c.width = 34 * SS; c.height = 24 * SS;
+      g = c.getContext('2d');
+      OX = 5; OY = 6 + (breath ? 0 : 0);
+      var d = '#3e2416', B = '#9a6442', SN = '#c08a5c', S2 = '#74472c';
+      curls(10, 10 - (breath ? 0.5 : 0), 8.5 + (breath ? 0.4 : 0), 4.2 + (breath ? 0.4 : 0), 0.3, B);
+      curlDots(4, 8, 12, 4, 2);
+      e(15, 13.2, 2.4, 1.1, d); e(15, 13, 1.6, 0.7, B);
+      curls(18.5, 10.5, 3.6, 3, 1.1, B);
+      e(21.8, 11.8, 1.9, 1.3, d); e(21.8, 11.6, 1.3, 0.8, SN); r(23, 11, 1, 1, '#1d1d24');
+      r(18, 10, 2, 1, '#1d1d24');
+      e(16.6, 11.2, 1.8, 3, d); e(16.6, 11.2, 1.1, 2.3, S2);
+      r(13, 8, 1, 2, '#007291');
+      shade(c); SS = 1;
+      bonCache[k] = c;
+    }
+    ctx.drawImage(c, Math.round(x) - 17, Math.round(y) - 20, 34, 24);
+  };
   S.bonnie = function (ctx, x, y, face, f, carry, woof) {
     var k = face + '|' + (f % 4) + '|' + (carry ? 1 : 0) + '|' + (woof ? 1 : 0);
     var c = bonCache[k];
@@ -1862,8 +1907,13 @@
   /* time glitch visitors: big friendly things from other times, x, y = feet on the ground */
   var visCache = {};
   S.visitor = function (ctx, id, x, y, face, t, scared) {
-    var st = (t >> (scared ? 2 : 3)) % 2, fl = (t >> 2) % 2, blink = id === 'robot' ? (t >> 4) % 2 : 0;
-    var key = id + '|' + face + '|' + st + '|' + (id === 'parrot' ? fl : 0) + '|' + (scared ? 1 : 0) + '|' + blink, c = visCache[key];
+    if (id === 'goldsnag') {
+      S.draw(ctx, x, y, face, 'pre', scared ? 'panic' : 'swalk', scared ? (t >> 3) % 2 : (t >> 2) % 8, false, 0, 1, { skin: 'gold' });
+      if ((t >> 3) % 3 === 0) { ctx.fillStyle = '#fff3c8'; var sx = Math.round(x) + ((t >> 3) % 2 ? -9 : 8), sy = Math.round(y) - 18 - ((t >> 4) % 3) * 4; ctx.fillRect(sx, sy - 1, 1, 3); ctx.fillRect(sx - 1, sy, 3, 1); }
+      return;
+    }
+    var st = (t >> (scared ? 2 : 3)) % 2, fl = (t >> (id === 'dragon' ? 3 : 2)) % 2, blink = id === 'robot' ? (t >> 4) % 2 : 0;
+    var key = id + '|' + face + '|' + st + '|' + (id === 'parrot' || id === 'dragon' ? fl : 0) + '|' + (scared ? 1 : 0) + '|' + blink, c = visCache[key];
     if (!c) {
       c = document.createElement('canvas'); c.width = 72; c.height = 72;
       visDraw(c.getContext('2d'), id, 36, 64, face, st, fl, scared, blink ? 16 : 0);
@@ -1872,7 +1922,7 @@
     ctx.drawImage(c, Math.round(x) - 36, Math.round(y) - 64);
   };
   function visDraw(ctx, id, x, y, face, st, fl0, scared, t) {
-    var X = Math.round(x), Y = Math.round(y), bob = st && id !== 'parrot' ? -1 : 0;
+    var X = Math.round(x), Y = Math.round(y), bob = st && id !== 'parrot' && id !== 'dragon' ? -1 : 0;
     function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b + bob, w, h); }
     function L(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b, w, h); }
     if (id === 'mammoth') {
@@ -1910,7 +1960,31 @@
       if (fl) { P(-3, -18, 7, 8, '#1d1d24'); P(-2, -17, 5, 7, '#2c8ad8'); P(-2, -17, 5, 2, '#f0c446'); }
       else { P(-3, -3, 7, 7, '#1d1d24'); P(-2, -2, 5, 5, '#2c8ad8'); P(-2, 2, 5, 1, '#f0c446'); }
     }
-    if (scared && id !== 'parrot') { ctx.fillStyle = '#7fd0f0'; ctx.fillRect(X + (face > 0 ? 18 : -20), Y - 46, 2, 3); }
+    else if (id === 'trex') {
+      /* a big green T. rex: stompy legs, a long tail, a huge head and very small arms */
+      L(-6, -16, 6, 16 - st * 2, '#2f3c18'); L(-5, -15, 4, 14 - st * 2, '#6a8a3a'); L(4, -16, 6, 16 - (1 - st) * 2, '#2f3c18'); L(5, -15, 4, 14 - (1 - st) * 2, '#6a8a3a');
+      L(-7, -1, 8, 1, '#2a3418'); L(3, -1, 8, 1, '#2a3418');
+      P(-34, -31, 22, 8, '#2f3c18'); P(-33, -30, 21, 6, '#6a8a3a'); P(-36, -28, 4, 4, '#2f3c18');
+      P(-14, -38, 30, 24, '#2f3c18'); P(-13, -37, 28, 22, '#6a8a3a'); P(-11, -37, 24, 4, '#8aaa4a'); P(-8, -21, 20, 6, '#c8d08a');
+      for (var tk = 0; tk < 4; tk++) P(-10 + tk * 7, -35, 3, 8, '#557530');
+      P(10, -50, 10, 16, '#2f3c18'); P(11, -49, 8, 14, '#6a8a3a');
+      P(12, -58, 22, 12, '#2f3c18'); P(13, -57, 20, 10, '#6a8a3a'); P(13, -57, 20, 3, '#8aaa4a');
+      P(16, -46 + st, 17, 5, '#2f3c18'); P(17, -45 + st, 15, 3, '#6a8a3a');
+      for (tk = 0; tk < 5; tk++) P(18 + tk * 3, -47, 1, 2, '#f3ecd8');
+      P(22, -55, 3, 3, '#ffffff'); P(23, -54, 2, 2, '#1d1d24'); P(21, -57, 5, 1, '#2a3418'); P(31, -55, 1, 1, '#2a3418');
+      P(16, -33, 5, 2, '#2f3c18'); P(20, -33, 2, 3, '#2f3c18');
+    } else if (id === 'dragon') {
+      /* a small red dragon, flapping */
+      var fd = fl0;
+      P(-26, -12, 13, 4, '#5a1a1a'); P(-25, -11, 12, 2, '#c8322a'); P(-31, -14, 6, 7, '#5a1a1a'); P(-30, -13, 4, 5, '#f0c446');
+      P(-14, -15, 26, 11, '#5a1a1a'); P(-13, -14, 24, 9, '#c8322a'); P(-11, -8, 20, 3, '#f0a050');
+      P(10, -21, 6, 9, '#5a1a1a'); P(11, -20, 4, 8, '#c8322a');
+      P(14, -25, 14, 8, '#5a1a1a'); P(15, -24, 12, 6, '#c8322a'); P(21, -23, 2, 2, '#ffe066'); P(15, -28, 2, 3, '#f3ecd8'); P(19, -28, 2, 3, '#f3ecd8'); P(26, -22, 1, 1, '#2a0a0a');
+      P(-6, -5, 3, 4, '#5a1a1a'); P(5, -5, 3, 4, '#5a1a1a');
+      if (fd) { P(-8, -36, 18, 3, '#5a1a1a'); for (var wk = 0; wk < 4; wk++) { P(-8 + wk * 5, -34, 2, 20 - wk * 3, '#5a1a1a'); P(-6 + wk * 5, -33, 3, 18 - wk * 3, '#e0604a'); } }
+      else { for (var wk2 = 0; wk2 < 4; wk2++) { P(-8 + wk2 * 5, -6, 2, 14 - wk2 * 2, '#5a1a1a'); P(-6 + wk2 * 5, -6, 3, 12 - wk2 * 2, '#e0604a'); } P(-8, 7, 18, 2, '#5a1a1a'); }
+    }
+    if (scared && id !== 'parrot' && id !== 'dragon') { ctx.fillStyle = '#7fd0f0'; ctx.fillRect(X + (face > 0 ? 18 : -20), Y - 46, 2, 3); }
   };
   /* Kit icons at double detail: the 12 pixel icon is grown with Scale2x so diagonals stay smooth,
      wrapped in a dark outline, then given the same 32 bit shading as the Snags. */
