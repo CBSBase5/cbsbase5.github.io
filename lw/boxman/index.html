@@ -815,6 +815,23 @@ body.calm #feelvig { background: radial-gradient(ellipse at center, transparent 
 @keyframes ciCalm { 0% { opacity: 0; } 20%, 80% { opacity: 1; } 100% { opacity: 0; } }
 @media (max-width: 760px), (max-height: 520px) { #cutin { height: 104px; } #cutin canvas { width: 86px; height: 86px; } }
 @media (prefers-reduced-motion: reduce) { .heartpop, #portrait.ouch, #scraps.sctick { animation-duration: .01s; } body.lowhp #feelvig { animation: none; opacity: .3; } }
+/* ---------- V26: key card ---------- */
+#keycard { position: fixed; left: calc(16px + env(safe-area-inset-left, 0px)); top: 50%; transform: translate(-120%, -50%); z-index: 20; display: none; padding: 10px 14px 12px; background: linear-gradient(180deg, #dcb27a, #b98a55); border: 3px solid var(--ink); box-shadow: 5px 5px 0 rgba(0,0,0,.45); color: var(--ink); pointer-events: none; }
+#keycard.on { display: block; animation: kcIn .35s cubic-bezier(.2,1.2,.4,1) forwards; }
+#keycard.out { animation: kcOut .5s ease-in forwards; }
+@keyframes kcIn { to { transform: translate(0, -50%) rotate(-1.5deg); } }
+@keyframes kcOut { from { transform: translate(0, -50%) rotate(-1.5deg); } to { transform: translate(-130%, -50%); } }
+#keycard .kc-head { font: 700 12px var(--f-pix); letter-spacing: 2px; margin-bottom: 6px; }
+.kc-row { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+.kc-k { min-width: 150px; display: flex; align-items: center; gap: 2px; flex-wrap: nowrap; }
+.kc-k i { font: 11px var(--f-pix); font-style: normal; margin: 0 4px; opacity: .7; }
+.kc-l { font: 600 15px var(--f-pix); }
+.kc-auto { font: 400 15px var(--f-comic); letter-spacing: 1px; background: var(--green); color: var(--ink); border: 2px solid var(--ink); padding: 0 6px; }
+#keycard kbd, #pkeys kbd { background: #f4ead4; color: var(--ink); border-color: var(--ink); }
+#pkeys { margin: 4px 0 8px; }
+#pkeys .kc-row { margin: 2px 0; } #pkeys .kc-l { font-size: 13px; color: #3a2a1e; } #pkeys .kc-k { min-width: 140px; }
+#pkeys kbd { font-size: 11px; min-width: 16px; padding: 0 4px; }
+@media (max-height: 520px) { #keycard { transform-origin: left center; scale: .8; } }
 </style>
 <canvas id="game"></canvas>
 
@@ -892,10 +909,9 @@ body.calm #feelvig { background: radial-gradient(ellipse at center, transparent 
       <div><button class="btn small" id="sel-back" data-nav data-back>Back</button><button class="btn small" id="sel-set" data-nav>Settings</button><button class="btn small" id="sel-auto" data-nav>Auto attack: off</button><button class="btn small" id="sel-alt" data-nav style="display:none">Passive</button><button class="btn small" id="sel-outfit" data-nav style="display:none">Outfit</button><button class="btn main" id="go" data-nav>Let's go</button></div>
     </div>
     <div class="controls">
-      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</div>
-      <div>Mouse or <kbd>&larr;</kbd><kbd>&rarr;</kbd> turn the camera</div>
-      <div>Left click or <kbd>J</kbd> attack (hold it), <kbd>T</kbd> auto attack on/off</div>
-      <div>Right click, <kbd>Q</kbd> or <kbd>K</kbd> ultimate</div>
+      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrow keys move</div>
+      <div>Your hero attacks by itself. Hold <kbd>J</kbd> to attack too, <kbd>T</kbd> auto attack on/off</div>
+      <div><kbd>Q</kbd> or <kbd>K</kbd> ultimate</div>
       <div><kbd>Space</kbd>, <kbd>Shift</kbd> or <kbd>L</kbd> dodge roll</div>
       <div><kbd>F</kbd> use item, <kbd>E</kbd> interact</div>
       <div><kbd>Tab</kbd> or <kbd>M</kbd> map, <kbd>Esc</kbd> pause, <kbd>C</kbd> photo</div>
@@ -969,8 +985,8 @@ body.calm #feelvig { background: radial-gradient(ellipse at center, transparent 
     <div id="keylist"></div>
     <div class="row2"><button class="btn small" id="keyreset" data-nav>Reset keys</button></div>
     <h3>Camera</h3>
-    <p class="snote">A turning camera lets you look around. A fixed camera never turns, so up on the screen is always north, the same as the map.</p>
-    <div class="row2"><button class="btn small" data-set="camFixed" data-val="0" data-nav>Turns with mouse or keys</button><button class="btn small" data-set="camFixed" data-val="1" data-nav>Stays fixed</button></div>
+    <p class="snote">A fixed camera never turns, so up on the screen is always north, the same as the map. A turning camera follows the mouse (or the comma and full stop keys).</p>
+    <div class="row2"><button class="btn small" data-set="camFixed" data-val="0" data-nav>Turns with the mouse</button><button class="btn small" data-set="camFixed" data-val="1" data-nav>Stays fixed</button></div>
     <h3>Map</h3>
     <p class="snote">A turning map always matches the screen: up on the map is the way you are facing, and a red N shows north. Or keep north at the top.</p>
     <div class="row2"><button class="btn small" data-set="mapTurn" data-val="1" data-nav>Turns with the camera</button><button class="btn small" data-set="mapTurn" data-val="0" data-nav>North at the top</button></div>
@@ -1034,6 +1050,7 @@ body.calm #feelvig { background: radial-gradient(ellipse at center, transparent 
     <h2>Paused</h2>
     <p>Take as long as you like.</p>
     <p id="pstats"></p>
+    <div id="pkeys"></div>
     <div id="pitems"></div>
     </div>
     <div class="flap fr">
@@ -3017,7 +3034,7 @@ function initInput() {
   window.addEventListener('blur', function () { G.keys = {}; G.mouse = [false, false, false]; if (G.state === 'play') UI.pause(); });
   var cv = document.getElementById('game');
   cv.addEventListener('mousedown', function (e) {
-    AUD.init(); G.mouse[e.button] = true; G.usingPad = false;
+    AUD.init(); if (!mouseOn()) return; G.mouse[e.button] = true; G.usingPad = false;
     if (e.button === 2) G.pressed.Mouse2 = true;
     if (e.button === 3 || e.button === 4) { G.pressed['Mouse' + e.button] = true; e.preventDefault(); }
     if (G.state === 'play' && document.pointerLockElement !== cv && cv.requestPointerLock) { try { var pr = cv.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (er) { } }
@@ -3025,7 +3042,7 @@ function initInput() {
   window.addEventListener('mouseup', function (e) { G.mouse[e.button] = false; if ((e.button === 3 || e.button === 4) && G.state === 'play') e.preventDefault(); });
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   // some browsers send one huge jump just after the pointer locks, so very large or very early movements are ignored
-  window.addEventListener('mousemove', function (e) { var mx = e.movementX || 0; if (G.state === 'play' && Math.abs(mx) < 250 && performance.now() - (G.lockAt || 0) > 150) G.mdx += mx; });
+  window.addEventListener('mousemove', function (e) { var mx = e.movementX || 0; if (G.state === 'play' && mouseOn() && Math.abs(mx) < 250 && performance.now() - (G.lockAt || 0) > 150) G.mdx += mx; });
   document.addEventListener('pointerlockchange', function () { G.lockAt = performance.now(); if (!document.pointerLockElement && G.state === 'play' && G.wasLocked && !(G.doom && (G.doom.picking || G.doom.unlockExpected))) UI.pause(); if (G.doom && !document.pointerLockElement) G.doom.unlockExpected = false; G.wasLocked = !!document.pointerLockElement; });
 }
 function pad() {
@@ -3042,7 +3059,7 @@ function readInput(dt) {
   INP.attack = kHeld('attack') || G.mouse[0] || !!G.touchAtk;
   INP.ult = kPressed('ult') || pr.Mouse2;
   INP.dodge = kPressed('dodge') || pr.Mouse3 || pr.Mouse4;
-  if (kPressed('auto') && G.state === 'play') { var st = SAVE.get().set; st.autoAtk = st.autoAtk ? 0 : 1; SAVE.save(); UI.toast('Auto attack ' + (st.autoAtk ? 'ON: your hero attacks the nearest enemy' : 'OFF: hold click or J to attack'), 2); }
+  if (kPressed('auto') && G.state === 'play') { var st = SAVE.get().set; st.autoAtk = st.autoAtk ? 0 : 1; SAVE.save(); UI.toast('Auto attack ' + (st.autoAtk ? 'ON: your hero attacks the nearest enemy' : 'OFF: hold ' + keyName(keyMap().attack[0]) + ' to attack'), 2); }
   INP.item = kPressed('item');
   INP.interact = kPressed('interact');
   INP.map = kPressed('map');
@@ -3207,6 +3224,7 @@ function startRun(heroId, opts) {
   UI.showHUD(true); UI.refreshHUD();
   testJump(opts);
   if (!opts.resume && !opts.practice && !G.lwTry && typeof levelCard === 'function') setTimeout(function () { if (G.state === 'play' && !(G.run && G.run.challenge)) levelCard(lvl()); }, 400);
+  if (!opts.practice && typeof keyCardFirst === 'function') setTimeout(keyCardFirst, 2600);
   if (heroId === 'gingerbeard' && !opts.resume && !opts.practice) vline('gb_start', 900);
   if (!opts.resume && !opts.practice && !G.lwTry) parcelNote('Box-man', 'Your delivery of justice is out for delivery. Expected: today.', 6500);
 }
@@ -10495,7 +10513,7 @@ function showBugReport() {
 function hideBugReport() { document.getElementById('bugbox').classList.remove('on'); }
 
 /* ---------- comfort, tips, captions, story mode and the practice room ---------- */
-var SET_DEF = { ambience: 1, voices: 1, fps: 0, subs: 0, textSize: 'n', cb: 'off', hints: 1, story: 1, camFixed: 0, mapTurn: 1 };
+var SET_DEF = { ambience: 1, voices: 1, fps: 0, subs: 0, textSize: 'n', cb: 'off', hints: 1, story: 1, camFixed: 1, mapTurn: 1 };
 /* the minimap keeps up with the camera as it turns */
 function mapTick(dt) {
   if (G.state !== 'play' || !G.run || G.doom) return;
@@ -11918,7 +11936,7 @@ function tidyLook(room) {
 /* ===================== EXTRAS: key bindings, music switching, tutorial, outfits, director's notes ===================== */
 
 /* ---------- key bindings ---------- */
-var DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA'], right: ['KeyD'], turnL: ['ArrowLeft'], turnR: ['ArrowRight'], attack: ['KeyJ'], dodge: ['Space', 'ShiftLeft', 'ShiftRight', 'KeyL'], ult: ['KeyQ', 'KeyK'], item: ['KeyF'], interact: ['KeyE'], map: ['Tab', 'KeyM'], pause: ['Escape', 'KeyP'], auto: ['KeyT'], photo: ['KeyC'] };
+var DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], turnL: ['Comma'], turnR: ['Period'], attack: ['KeyJ'], dodge: ['Space', 'ShiftLeft', 'ShiftRight', 'KeyL'], ult: ['KeyQ', 'KeyK'], item: ['KeyF'], interact: ['KeyE'], map: ['Tab', 'KeyM'], pause: ['Escape', 'KeyP'], auto: ['KeyT'], photo: ['KeyC'] };
 var KEY_LABELS = { up: 'Move forward', down: 'Move back', left: 'Move left', right: 'Move right', turnL: 'Turn left', turnR: 'Turn right', attack: 'Attack', dodge: 'Dodge roll', ult: 'Ultimate', item: 'Use item', interact: 'Interact', map: 'Map', pause: 'Pause', auto: 'Auto attack on or off', photo: 'Take a photo' };
 function keyMap() { var s = SAVE.get().set; if (!s.keys) return DEFAULT_KEYS; var m = {}; for (var k in DEFAULT_KEYS) m[k] = s.keys[k] || DEFAULT_KEYS[k]; return m; }
 function kHeld(a) { var l = keyMap()[a], k = G.keys; for (var i = 0; i < l.length; i++) if (k[l[i]]) return true; return false; }
@@ -11969,10 +11987,10 @@ EXTRA_AI.dummy = function (e) { e.face = angTo(e, G.P); };
 function tutText(i) {
   var t = G.touch, pad = G.usingPad, km = keyMap(), kn = function (a) { return keyName(km[a][0]); };
   return [
-    'Have a wander. ' + (t ? 'Left thumb moves.' : pad ? 'Left stick moves.' : kn('up') + kn('left') + kn('down') + kn('right') + ' to move, mouse to turn.'),
-    'Give the dummy a whack. ' + (t ? 'Hold ATTACK.' : pad ? 'Press X.' : 'Click, or hold ' + kn('attack') + '.'),
+    'Have a wander. ' + (t ? 'Left thumb moves.' : pad ? 'Left stick moves.' : kn('up') + kn('left') + kn('down') + kn('right') + ' or the arrow keys to move.'),
+    SAVE.get().set.autoAtk ? 'Walk up to the dummy. Your hero attacks by itself.' : 'Give the dummy a whack. ' + (t ? 'Hold ATTACK.' : pad ? 'Press X.' : 'Hold ' + kn('attack') + '.'),
     'Try a dodge roll. ' + (t ? 'Tap ROLL.' : pad ? 'Press A.' : 'Press ' + kn('dodge') + '.'),
-    'Here is a full ultimate to try. ' + (t ? 'Tap the dial.' : pad ? 'Press Y.' : 'Press ' + kn('ult') + ', or right click.'),
+    'Here is a full ultimate to try. ' + (t ? 'Tap the dial.' : pad ? 'Press Y.' : 'Press ' + kn('ult') + '.'),
     'That is everything. Doors lead to new rooms.'
   ][i];
 }
@@ -12106,7 +12124,7 @@ var UI = (function () {
   function show(id) {
     screens.forEach(function (s) { var el = $(s); if (el) el.classList.toggle('on', s === id); });
     current = id;
-    if (id) { var pn = $('parcelnote'); if (pn) pn.classList.remove('on'); }
+    if (id) { var pn = $('parcelnote'); if (pn) pn.classList.remove('on'); var kc = $('keycard'); if (kc) kc.classList.remove('on', 'out'); }
     if (typeof screenTip === 'function') screenTip(id); if (!id && typeof hideScreenTip === 'function') hideScreenTip();
     var f = id && $(id) ? $(id).querySelector('[data-nav]') : null;
     if (f && !G.usingTouch) setTimeout(function () { try { f.focus({ preventScroll: true }); if (window.innerHeight < 600 && f.scrollIntoView) f.scrollIntoView({ block: 'nearest' }); } catch (e) { f.focus(); } }, 30);
@@ -12347,7 +12365,7 @@ var UI = (function () {
     if (!got) { t.globalCompositeOperation = 'source-in'; t.fillStyle = '#2a2235'; t.fillRect(0, 0, cv.width, cv.height); }
     x.drawImage(cv, 0, 0, 64, 64, 6, 4, 180, 180);
   }
-  function go() { if (!heroPlayable(selHero)) return; AUD.init(); hideAll(); showWorld(); G.snapCam = true; var ch = G.pendingChal || null, pr0 = !!G.pendingPractice, dl0 = !!G.pendingDaily; G.pendingChal = null; G.pendingPractice = false; G.pendingDaily = false; startRun(selHero, { outfit: outfitKey(selHero), challenge: ch, practice: pr0, daily: dl0 }); var c = $('game'); if (c.requestPointerLock) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } }
+  function go() { if (!heroPlayable(selHero)) return; AUD.init(); hideAll(); showWorld(); G.snapCam = true; var ch = G.pendingChal || null, pr0 = !!G.pendingPractice, dl0 = !!G.pendingDaily; G.pendingChal = null; G.pendingPractice = false; G.pendingDaily = false; startRun(selHero, { outfit: outfitKey(selHero), challenge: ch, practice: pr0, daily: dl0 }); var c = $('game'); if (c.requestPointerLock && mouseOn()) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } }
   function hideAll() { show(null); }
 
   /* ---------- settings ---------- */
@@ -12557,7 +12575,7 @@ var UI = (function () {
     G.state = 'paused'; show('pause'); G.keys = {}; G.mouse = [false, false, false];
     if (document.pointerLockElement) document.exitPointerLock();
     var r = G.run; $('pstats').textContent = 'Hero: ' + HEROES[r.hero].name + '  |  Scraps: ' + r.scraps + '  |  Defeated: ' + r.kills;
-    pauseItems();
+    pauseItems(); if (typeof keyCardFill === 'function') keyCardFill(document.getElementById('pkeys'), true);
   }
   function pauseItems() {
     var r = G.run, box = $('pitems'); box.innerHTML = ''; if (!r || G.doom) { box.style.display = 'none'; return; } box.style.display = '';
@@ -12578,7 +12596,7 @@ var UI = (function () {
       var tx = el('div', ''); tx.innerHTML = '<b>' + esc(q.def.name) + '</b><span class="ptag">' + esc(q.tag) + (rr !== 'common' ? ', ' + RARITY[rr].name : '') + '</span><span>' + esc(q.def.desc) + '</span>' + (cn ? '<span class="pcn">' + esc(cn) + '</span>' : ''); d.appendChild(tx); grid.appendChild(d);
     });
   }
-  function resume() { show(null); G.state = 'play'; G.mdx = 0; var c = $('game'); if (c.requestPointerLock) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } }
+  function resume() { show(null); G.state = 'play'; G.mdx = 0; var c = $('game'); if (c.requestPointerLock && mouseOn()) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } }
   function quitRun() { RUNSAVE.clear(); clearRoom(); if (G.P) { removeEnt(G.P); G.P = null; } G.run = null; title(); }
 
   /* ---------- soup prompt ---------- */
@@ -12832,7 +12850,7 @@ var UI = (function () {
       if (RUNSAVE.get() && b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Tap again for a new run (replaces your saved one)'; setTimeout(function () { b.dataset.armed = ''; b.textContent = RUNSAVE.label() ? 'New run' : 'Play'; }, 3500); return; }
       b.dataset.armed = ''; play();
     };
-    $('t-cont').onclick = function () { AUD.init(); hideAll(); showWorld(); G.snapCam = true; if (!RUNSAVE.resume()) title(); else { var c = $('game'); if (c.requestPointerLock && !G.touch) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } } };
+    $('t-cont').onclick = function () { AUD.init(); hideAll(); showWorld(); G.snapCam = true; if (!RUNSAVE.resume()) title(); else { var c = $('game'); if (c.requestPointerLock && !G.touch && mouseOn()) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } } };
     $('p-saveleave').onclick = function () { RUNSAVE.save(); clearRoom(); if (G.P) { removeEnt(G.P); G.P = null; } G.run = null; title(); };
     $('t-doom').onclick = function () { hideAll(); showWorld(); G.snapCam = true; startDoom(); };
     $('t-intro').onclick = intro;
@@ -12878,7 +12896,7 @@ var UI = (function () {
     $('p-resume').onclick = resume; $('p-settings').onclick = function () { settings('pause'); }; $('p-map').onclick = function () { show(null); G.state = 'play'; openMap(); }; $('p-quit').onclick = function () { var b = $('p-quit'); if (b.dataset.armed === '1') { b.dataset.armed = ''; b.textContent = 'Leave this run'; quitRun(); return; } b.dataset.armed = '1'; b.textContent = 'Tap again to leave the run'; setTimeout(function () { b.dataset.armed = ''; b.textContent = 'Leave this run'; }, 3000); };
     $('m-close').onclick = closeMap;
     $('d-soup').onclick = function () { soupPick('soup'); }; $('d-thief').onclick = function () { soupPick('thief'); };
-    $('lv-go').onclick = function () { if (G.run && G.run.challengeDone) { clearRoom(); if (G.P) removeEnt(G.P); G.P = null; G.run = null; chal(); return; } show(null); nextLevel(); var c = $('game'); if (c.requestPointerLock) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } };
+    $('lv-go').onclick = function () { if (G.run && G.run.challengeDone) { clearRoom(); if (G.P) removeEnt(G.P); G.P = null; G.run = null; chal(); return; } show(null); nextLevel(); var c = $('game'); if (c.requestPointerLock && mouseOn()) { try { var pr = c.requestPointerLock(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } } };
     $('x-again').onclick = function () { var wasDoom = !!G.doom; if (wasDoom) doomCleanup(); clearRoom(); if (G.P) removeEnt(G.P); G.P = null; G.run = null; if (wasDoom) { hideAll(); showWorld(); startDoom(); } else select(); };
     $('x-title').onclick = function () { clearRoom(); if (G.P) removeEnt(G.P); G.P = null; G.run = null; title(); };
     $('w-title').onclick = function () { clearRoom(); if (G.P) removeEnt(G.P); G.P = null; G.run = null; cases(); };
@@ -16476,6 +16494,46 @@ function feelUiTick(dt) {
   scrapTick(dt);
 }
 
+/* ---------- Version 26: keyboard first controls ----------
+   LW's choices: the camera stays fixed with north up, the hero attacks by itself
+   (J still attacks too), arrows and WASD both move, and the mouse does nothing in
+   the main game. Box-man mode still looks around with the mouse. */
+function mouseOn() { return !!G.doom || getSet('camFixed') !== 1; }
+/* everyone moves to the new controls once; Settings can change them back */
+function controlsMigrate() {
+  var s = SAVE.get(); if (!s || s.ctrl26) return;
+  s.ctrl26 = 1; s.set = s.set || {}; s.set.camFixed = 1; s.set.autoAtk = 1;
+  var OLD = { left: 'KeyA', right: 'KeyD', turnL: 'ArrowLeft', turnR: 'ArrowRight' };
+  if (s.keys) for (var k in OLD) { var v = s.keys[k]; if (v && v.length === 1 && v[0] === OLD[k]) delete s.keys[k]; }
+  SAVE.save();
+}
+/* the key card: a picture of the keys, not a paragraph */
+function keyCardFill(box) {
+  if (!box) return;
+  if (G.touch || G.usingPad) { box.innerHTML = ''; return; }
+  var km = keyMap(), auto = !!SAVE.get().set.autoAtk, k = function (a) { return '<kbd>' + keyName(km[a][0]) + '</kbd>'; };
+  var rows = [
+    [k('up') + k('left') + k('down') + k('right') + '<i>or</i><kbd>&uarr;</kbd><kbd>&larr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd>', 'Move'],
+    [auto ? '<b class="kc-auto">AUTO</b>' : k('attack'), auto ? 'Attacks by itself' : 'Attack (hold)'],
+    [k('dodge'), 'Dodge'],
+    [k('ult'), 'Ultimate'],
+    [k('interact'), 'Pick up, talk'],
+    [k('item'), 'Use item']
+  ];
+  box.innerHTML = rows.map(function (r) { return '<div class="kc-row"><span class="kc-k">' + r[0] + '</span><span class="kc-l">' + r[1] + '</span></div>'; }).join('');
+}
+function keyCardFirst() {
+  var s = SAVE.get(); if (s.keyCard26 || G.state !== 'play' || G.tut || G.touch || G.usingPad || G.doom) return;
+  s.keyCard26 = 1; SAVE.save();
+  var el = document.getElementById('keycard');
+  if (!el) { el = document.createElement('div'); el.id = 'keycard'; document.body.appendChild(el); }
+  el.innerHTML = '<div class="kc-head">CONTROLS</div><div class="kc-body"></div>';
+  keyCardFill(el.querySelector('.kc-body'));
+  el.classList.remove('on', 'out'); void el.offsetWidth; el.classList.add('on');
+  setTimeout(function () { el.classList.add('out'); }, 7000);
+  setTimeout(function () { el.classList.remove('on', 'out'); }, 7600);
+}
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
@@ -16485,7 +16543,7 @@ function fontsReady(done) {
 }
 window.addEventListener('load', function () { fontsReady(boot); });
 function boot() {
-  SAVE.load();
+  SAVE.load(); if (typeof controlsMigrate === 'function') controlsMigrate();
   if (typeof THREE === 'undefined') { document.body.innerHTML = '<p style="padding:20px">The 3D engine did not load. Check the internet connection and refresh.</p>'; return; }
   autoGfxInit(); worldTextures(); initThree(); fxInit(); initInput(); UI.init(); TOUCH.init(); applyComfort(); voicesInit(); directorToolsWire(); UI.title();
   G.warmQ = ['gingerbeard', 'sweettooth', 'trainer', 'friend', 'bean', 'fan1', 'fan2', 'fan3', 'robber', 'thief', 'cboy', 'cboyheadless', 'boxcar', 'frank', 'soup', 'surfer', 'assistant', 'jay', 'train', 'trex'];
