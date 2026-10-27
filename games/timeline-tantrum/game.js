@@ -84,7 +84,9 @@
     meteor:  { kind: 'proj', wind: false, impact: true, R: 18, dmg: 22 },
     hail:    { kind: 'proj', wind: true, windK: 0.5, impact: true, R: 8, dmg: 7 },
     /* map events */
-    dronebomb: { kind: 'proj', wind: false, impact: true, R: 16, dmg: 18 }
+    dronebomb: { kind: 'proj', wind: false, impact: true, R: 16, dmg: 18 },
+    comet:   { kind: 'proj', wind: false, impact: true, R: 34, dmg: 32, knock: 1.2 },
+    dfire:   { kind: 'proj', wind: false, impact: true, R: 15, dmg: 12 }
   };
   var SD_TURN = 24;
   /* the bigger battlefields need a longer throw: full power reaches about 1.4 times as far as it used to */
@@ -145,8 +147,12 @@
     }
     return { ok: true };
   }
+  function teamHp(t) { var h = 0; t.members.forEach(function (m) { if (m.alive) h += Math.max(0, m.hp); }); return h; }
+  function otherTeam(t) { for (var i = 0; i < game.teams.length; i++) if (game.teams[i] !== t) return game.teams[i]; return null; }
+  function behind(t, f) { var o = otherTeam(t); return !!o && teamHp(t) < teamHp(o) * (f || 0.7); }
   function meterAdd(team, n) {
     if (!team || !n) return;
+    if (n > 0 && game.state !== 'demo' && behind(team)) n *= 1.5;
     var was = team.meter || 0;
     team.meter = Math.min(100, was + n);
     if (was < 100 && team.meter >= 100 && game.state !== 'demo' && !(game.opts && game.opts.training)) superReady(team);
@@ -1775,6 +1781,13 @@
     sfx('hit', Math.min(1.4, dm / 35));
     if (before > 0 && c.hp <= 0 && game.state !== 'demo') koMoment(c);
     if (src && src.by && src.by.team !== c.team) {
+      if (game.state !== 'demo' && src.by === game.active) {
+        var foeT = c.team;
+        if (src.by.hitBy === c && dm >= 10 && !game.saidGrudge) { game.saidGrudge = true; later(40, function () { say('revenge', true, src.by.name); }); }
+        else if (dm >= 28 && !game.saidCB && teamHp(src.by.team) < (teamHp(foeT) + dm) * 0.6) { game.saidCB = true; later(40, function () { say('comeback', true); }); }
+        src.by.team.missN = 0;
+      }
+      c.hitBy = src.by;
       game.turnHit = (game.turnHit || 0) + dm;
       meterAdd(src.by.team, dm * 0.7);
       if (game.active && src.by.team === game.active.team) recHit(dm, src.by);
@@ -1795,6 +1808,7 @@
     if (game.active && c.team !== game.active.team) { recHit(30, game.active, 'K.O.!'); meterAdd(game.active.team, 12); }
     var dko = game.turnKO >= 2 && game.active && c.team !== game.active.team;
     word(c.x, c.y - 70, dko ? (game.turnKO >= 3 ? 'TRIPLE K.O.!' : 'DOUBLE K.O.!') : 'K.O.!', dko ? '#ff78be' : '#ff8a5c', 3); game.koFlag = true;
+    if (c === game.fav) later(50, function () { say('favko', true, c.name); voice('dog', 'cheer'); });
     if (dko) { say('trick', true); later(24, function () { if (game.active) cheerSquad(game.active.team); }); }
     for (var i = 0; i < 12; i++) { var a = i / 12 * 6.283; addPart({ k: 'spark', x: c.x, y: c.y - 12, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8 - 0.6, life: 34 }); }
     sfx('ko');
@@ -1805,7 +1819,22 @@
     if (game.state === 'demo' || game.missQ || !game.fired || (game.opts && game.opts.training)) return;
     game.missQ = true;
     var who = game.active;
-    later(50, function () { if (!game.turnHit && game.active === who && game.state !== 'over') missJoke(x, y, water); });
+    later(50, function () {
+      if (game.turnHit || game.active !== who || game.state === 'over') return;
+      missJoke(x, y, water);
+      /* two misses in a row: Jay pops in with a gentle tip */
+      if (who && who.team.ctrl === 'human') {
+        who.team.missN = (who.team.missN || 0) + 1;
+        if (who.team.missN >= 2) {
+          who.team.missN = 0;
+          var fx0 = game.fireX || who.x, tg = null;
+          game.snags.forEach(function (o) { if (o.alive && o.team !== who.team && (!tg || Math.abs(o.x - x) < Math.abs(tg.x - x))) tg = o; });
+          var tip = Math.abs(game.wind) >= 6 ? 'tipwind' : null;
+          if (!tip && tg && (x - fx0) * (tg.x - fx0) > 0) tip = Math.abs(x - fx0) > Math.abs(tg.x - fx0) + 20 ? 'tipless' : (Math.abs(x - fx0) < Math.abs(tg.x - fx0) - 20 ? 'tipmore' : null);
+          if (tip) later(110, function () { say(tip, true); });
+        }
+      }
+    });
   }
   function missJoke(x, y, water) {
     var i, w = water ? ['Plop!', 'Sploosh!', 'Glug!'] : ['Whiff!', 'Oops!', 'Nearly!', 'Boing?', 'Nice crater!'];
@@ -1941,6 +1970,7 @@
   function explode(x, y, R, dmg, src) {
     R = R * BLAST;
     blastLadders(x, y, R);
+    if (game.nap && Math.abs(game.nap.x - x) < R + 30 && Math.abs(game.nap.y - 6 - y) < R + 30) wakeNap();
     if (src && src.by && src.by === game.active) queueMiss(x, y, false);
     scareVisitor(x, y, R);
     var deb = [], i;
@@ -2213,8 +2243,9 @@
   function maybeDeliver(force) {
     if (game.courier) return;
     if (!force && (game.turnNo < 3 || game.crates.length >= 2 || Math.random() > 0.4)) return;
+    var fv = game.fav && game.fav.alive && Math.random() < 0.5 ? game.fav : null;
     for (var tries = 0; tries < 40; tries++) {
-      var x = 100 + Math.random() * (WW - 200), y = surfaceY(x);
+      var x = fv && tries < 20 ? clamp(fv.x + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60), 100, WW - 100) : 100 + Math.random() * (WW - 200), y = surfaceY(x);
       if (y < 40 || y > WATER - 30) continue;
       var near = false;
       for (var i = 0; i < game.snags.length; i++) { var s = game.snags[i]; if (s.alive && Math.abs(s.x - x) < 30) near = true; }
@@ -2281,7 +2312,14 @@
   }
   function openCrate(cr, s) {
     for (var k = 0; k < 10; k++) addPart({ k: 'spark', x: cr.x, y: cr.y - 5, vx: rand(-1.6, 1.6), vy: rand(-2.2, -0.5), life: 30 });
-    if (cr.kind === 'skip') {
+    if (cr.kind === 'secret') {
+      var sh = Math.min(20, 100 - s.hp); s.hp += sh;
+      meterAdd(s.team, 40);
+      if (sh > 0) addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + sh, col: '#9be36b', sc: 2 });
+      for (var q2 = 0; q2 < 16; q2++) addPart({ k: 'spark', x: cr.x + rand(-4, 4), y: cr.y - 6, vx: rand(-2, 2), vy: rand(-3, -0.8), life: 40, col: q2 % 2 ? '#ffd34d' : '#fff3c8' });
+      banner('Secret stash!', null, '#f0c446', 'trophy'); sfx('find'); say('secret', true);
+      game.secret = null;
+    } else if (cr.kind === 'skip') {
       s.team.bonus = true;
       addPart({ k: 'txt', x: s.x, y: s.y - 44, vy: -0.35, life: 90, max: 90, s: 'BONUS GO!', col: '#b39cff', sc: 2 });
       banner('Bonus go!', null, '#7b5cff', 'hourglass'); sfx('portal');
@@ -2344,20 +2382,22 @@
   /* ---------------- Jay on commentary ---------------- */
   var jayOn = store('jay') !== '0', jayLast = -9999, jayHide = 0, jayTalk = 0, jayMood = null;
   var jayCv = $('jayFace');
-  function say(kind, force) {
+  function say(kind, force, nm) {
     if (!jayOn || game.state === 'demo' || !JAY[kind]) return;
     if (game.t - jayLast < 90) return;
     if (!force && (game.t - jayLast < 480 || Math.random() > 0.6)) return;
     jayLast = game.t;
     var lines = JAY[kind];
-    $('jayLine').textContent = lines[Math.floor(Math.random() * lines.length)];
+    $('jayLine').textContent = lines[Math.floor(Math.random() * lines.length)].replace(/%N%/g, nm || 'this one');
     $('jay').hidden = false;
     jayHide = 260; jayTalk = 50;
     jayMood = { big: 'wow', double: 'wow', glitch: 'wow', strike: 'wow', sudden: 'wow', reactor: 'wow', sandstorm: 'wow', sun: 'wow', scarab: 'wow',
       birds: 'grin', find: 'grin', crate: 'grin', win: 'grin', swing: 'grin', jet: 'grin', sled: 'grin', spear: 'grin', dune: 'grin', bark: 'grin',
       trick: 'wow', miss: 'grin', bull: 'wow', canal: 'wow', river: 'wow', cart: 'grin', tablet: 'grin', steps: 'grin',
       lance: 'wow', cannon: 'wow', broadside: 'wow', treb: 'wow', arrows: 'wow', tide: 'wow', banner: 'grin', launch: 'grin', volley: 'grin', keg: 'grin',
-      trolley: 'grin', slug: 'grin', tyres: 'grin', springs: 'grin', stomp: 'wow', satellite: 'wow', satrain: 'wow', climb: 'grin' }[kind] || null;
+      trolley: 'grin', slug: 'grin', tyres: 'grin', springs: 'grin', stomp: 'wow', satellite: 'wow', satrain: 'wow', climb: 'grin',
+      comet: 'wow', quake: 'wow', foot: 'wow', secret: 'wow', glint: 'grin', v_goldsnag: 'wow', v_dragon: 'wow', v_trex: 'wow', gold: 'grin', fav: 'grin', favko: null, nap: 'grin', napwake: 'grin',
+      laststand: 'wow', comeback: 'wow', revenge: 'grin', name_jay: 'grin', name_bonnie: 'grin', name_any: 'grin', tipmore: null, tipless: null, tipwind: null, lose: 'grin' }[kind] || null;
     voice('jay', 'turn');
   }
   function jayTick() {
@@ -2373,18 +2413,29 @@
   /* ---------------- birds (Jay likes birds) ---------------- */
   /* ---------- time glitches: now and then a visitor from another time wanders across the battlefield ---------- */
   var VISITORS = [['mammoth', 'pre', 0.7], ['robot', 'fut', 0.9], ['knight', 'med', 1.3], ['camel', 'egypt', 0.8], ['parrot', 'pirate', 1.5]];
+  var RARE = [['goldsnag', null, 0.8], ['dragon', null, 1.3], ['trex', null, 1.0]];
+  function flyer(id) { return id === 'parrot' || id === 'dragon'; }
   function maybeVisitor() {
     if (game.visitor || game.sudden || !game.opts || game.opts.ev === 'off' || game.opts.training || (TEST === 'aivai' && Q.get('ev') !== 'on')) return;
     if ((game.visits || 0) >= 2 || game.turnNo < 4 || Math.random() > 0.14) return;
     var pool = VISITORS.filter(function (v) { return v[1] !== MAP.era; }), v = pool[Math.floor(Math.random() * pool.length)];
+    /* now and then something rare comes through instead */
+    if (Math.random() < 0.22) v = RARE[Math.floor(Math.random() * RARE.length)];
     var dir = Math.random() < 0.5 ? 1 : -1, x = dir > 0 ? 50 : WW - 50, sy = surfaceY(x);
     var y = sy > 0 && sy < WATER ? sy : WATER - 2;
-    game.visitor = { id: v[0], sp: v[2], x: x, y: v[0] === 'parrot' ? y - 70 : y, dir: dir, t: 0, scared: 0 };
+    game.visitor = { id: v[0], sp: v[2], x: x, y: flyer(v[0]) ? y - 80 : y, dir: dir, t: 0, scared: 0, hit: [], fireAt: WW * (0.3 + Math.random() * 0.4) };
     game.visits = (game.visits || 0) + 1;
-    game.portals.push({ x: x, y: (v[0] === 'parrot' ? y - 70 : y) - 20, t: 0, inn: true });
+    game.portals.push({ x: x, y: (flyer(v[0]) ? y - 80 : y) - 20, t: 0, inn: true });
     sfx('portal');
     if (game.state !== 'demo') { game.look = { x: clamp(x, VW / 2, WW - VW / 2), y: game.visitor.y - 20 }; game.lookT = 90; }
-    later(34, function () { if (game.visitor) word(game.visitor.x, game.visitor.y - 50, 'Time glitch!', '#b39cff', 2); say('v_' + v[0], true); });
+    later(34, function () {
+      if (!game.visitor) return;
+      var rare = { goldsnag: 'Golden Snag!', dragon: 'ROAR!', trex: 'ROAR!' }[v[0]];
+      word(game.visitor.x, game.visitor.y - 50, rare || 'Time glitch!', rare ? '#ffd34d' : '#b39cff', 2);
+      if (v[0] === 'trex' && !reduceMotion) game.shake = Math.max(game.shake, 5);
+      if (rare) sfx('roar');
+      say('v_' + v[0], true);
+    });
   }
   function updVisitor() {
     var v = game.visitor;
@@ -2395,10 +2446,29 @@
     if (v.scared > 0) v.scared--;
     v.x += v.dir * sp;
     var sy = surfaceY(Math.round(clamp(v.x, 0, WW - 1))), gy = sy > 0 && sy < WATER ? sy : WATER - 2;
-    if (v.id === 'parrot') { var top = gy - 70; v.y += (Math.min(top, v.y + 0.4) - v.y) * 0.08 + Math.sin(v.t * 0.08) * 0.3; }
+    if (flyer(v.id)) { var top = gy - (v.id === 'dragon' ? 80 : 70); v.y += (Math.min(top, v.y + 0.4) - v.y) * 0.08 + Math.sin(v.t * 0.08) * 0.3; }
     else v.y += (gy - v.y) * 0.35;
-    if (v.id !== 'parrot' && v.t % 24 === 0 && sy > 0 && sy < WATER) dust(v.x - v.dir * 8, v.y, 2, 3);
-    if (v.id !== 'parrot' && v.t % 30 === 0 && !(sy > 0 && sy < WATER)) splash(v.x);
+    if (!flyer(v.id) && v.t % 24 === 0 && sy > 0 && sy < WATER) dust(v.x - v.dir * 8, v.y, 2, 3);
+    if (!flyer(v.id) && v.t % 30 === 0 && !(sy > 0 && sy < WATER)) splash(v.x);
+    if (v.id === 'trex') {
+      if (v.t % 26 === 0) { sfx('land', 1.2); if (!reduceMotion) game.shake = Math.max(game.shake, 1.5); }
+      /* a T. rex does not walk round Snags */
+      game.snags.forEach(function (c, ci) {
+        if (!c.alive || v.hit.indexOf(ci) >= 0) return;
+        if (Math.abs(c.x - (v.x + v.dir * 10)) < 16 && Math.abs(c.y - v.y) < 30) {
+          v.hit.push(ci); hurt(c, 10, null);
+          c.vx = v.dir * 3; c.vy = -3.2; c.st = 'air'; c.knock = true; c.swing = null; c.jet = false; c.sled = false;
+          if (bodyClear(c.x, c.y - 1)) c.y -= 1;
+          word(c.x, c.y - 40, 'BOOF!', '#9be36b', 2); sfx('bonk');
+        }
+      });
+    }
+    if (v.id === 'dragon' && !v.fired && Math.abs(v.x - v.fireAt) < 4) {
+      /* one fireball, with a roar first so everyone can see it coming */
+      v.fired = true;
+      word(v.x, v.y - 40, 'ROAR!', '#ff8a5c', 2); sfx('roar');
+      later(30, function () { if (game.visitor === v) { game.projs.push({ type: 'dfire', era: 'med', x: v.x + v.dir * 22, y: v.y - 20, vx: v.dir * 1.1, vy: 0.6, age: 0, by: null, trail: [], rest: false }); sfx('whoosh'); } });
+    }
     if ((v.dir > 0 && v.x > WW - 40) || (v.dir < 0 && v.x < 40)) {
       game.portals.push({ x: v.x, y: v.y - 20, t: 0, inn: true }); sfx('portal');
       game.visitor = null;
@@ -2407,6 +2477,16 @@
   function scareVisitor(x, y, R) {
     var v = game.visitor;
     if (!v || v.t < 40) return;
+    if (v.id === 'goldsnag' && Math.abs(v.x - x) < R + 14 && Math.abs(v.y - 10 - y) < R + 18) {
+      /* bopped the golden Snag: a super meter boost for whoever did it */
+      var tm = game.active && game.fired ? game.active.team : null;
+      for (var q = 0; q < 18; q++) addPart({ k: 'spark', x: v.x + rand(-6, 6), y: v.y - rand(4, 20), vx: rand(-2, 2), vy: rand(-2.6, -0.4), life: 40 });
+      word(v.x, v.y - 44, 'GOLDEN!', '#ffd34d', 3); sfx('find'); sfx('portal');
+      if (tm) { meterAdd(tm, 40); later(30, function () { say('gold', true); }); }
+      game.portals.push({ x: v.x, y: v.y - 20, t: 0, inn: true });
+      game.visitor = null;
+      return;
+    }
     if (Math.abs(v.x - x) < R + 26 && Math.abs(v.y - 12 - y) < R + 30) {
       if (v.scared <= 0) word(v.x, v.y - 44, 'Eep!', '#b39cff', 2);
       v.scared = 150; v.dir = x < v.x ? 1 : -1;
@@ -2444,6 +2524,23 @@
     }
     if (!c) { if (!checkOver()) nextTurn(); return; }
     game.active = c; game.turnNo++; freeCam = null;
+    game.saidGrudge = false; game.saidCB = false;
+    if (game.state !== 'demo' && !(game.opts && game.opts.training)) {
+      /* last Snag standing: a little boost and a lot of drama */
+      var foeT = otherTeam(team), myLeft = m.filter(function (q) { return q.alive; }).length;
+      if (!team.lastStand && m.length > 1 && myLeft === 1 && foeT && foeT.members.filter(function (q) { return q.alive; }).length >= 2) {
+        team.lastStand = true;
+        var heal = Math.min(25, 100 - c.hp); c.hp += heal; meterAdd(team, 30);
+        later(60, function () {
+          word(c.x, c.y - 62, 'LAST STAND!', ER[team.era].tag, 3); sfx('find');
+          if (heal > 0) addPart({ k: 'txt', x: c.x, y: c.y - 44, vy: -0.35, life: 80, max: 80, s: '+' + heal, col: '#9be36b', sc: 2 });
+          for (var q = 0; q < 12; q++) addPart({ k: 'spark', x: c.x + rand(-8, 8), y: c.y - rand(4, 24), vx: rand(-0.6, 0.6), vy: rand(-1.4, -0.4), life: 30 });
+          say('laststand', true, c.name);
+        });
+      }
+      maybeNap();
+      if (game.turnNo === 1) introLines();
+    }
     game.state = 'play'; game.fired = false; game.charging = false; game.power = 0;
     game.swingT = 0; game.digT = 0; game.timer = Math.round(game.turnLen * 60 * SPEED); game.lookT = 0;
     game.weapon = team.lastWeapon || 'lob';
@@ -2451,7 +2548,7 @@
     team.members.forEach(function (m) { m.shield = false; m.testudo = false; });
     game.fuel = WEAP.jet.fuel; game.sledFuel = WEAP.sled.fuel; game.tx = null;
     game.wind = rollWind();
-    if (game.opts && game.opts.sd !== 'off' && !game.sudden && game.turnNo >= SD_TURN) {
+    if (game.opts && game.opts.sd !== 'off' && !game.sudden && sdDue()) {
       game.sudden = true;
       var sty = MAP.style;
       /* every place has its own big finish */
@@ -2475,6 +2572,27 @@
     hudStatic();
   }
 
+  /* the big finish comes after about 8 minutes of play (so a match is about 10), or after lots of goes */
+  function sdDue() { return (game.turnNo >= SD_TURN && (game.playT || 0) >= 8 * 3600) || game.turnNo >= SD_TURN * 2; }
+  function introLines() {
+    var o = game.opts || {}, line = null, nm = null;
+    game.teams.forEach(function (tm) {
+      if (tm.ctrl !== 'human' || line) return;
+      var custom = o.names && o.names[tm.era] ? o.names[tm.era] : [];
+      tm.members.forEach(function (mb) {
+        if (line || custom.indexOf(mb.name) < 0) return;
+        if (/jay/i.test(mb.name)) { line = 'name_jay'; nm = mb.name; }
+        else if (/bonn/i.test(mb.name)) { line = 'name_bonnie'; nm = mb.name; }
+      });
+      if (!line && custom.length && Math.random() < 0.6) { var pk = tm.members.filter(function (mb) { return custom.indexOf(mb.name) >= 0; }); if (pk.length) { line = 'name_any'; nm = pk[Math.floor(Math.random() * pk.length)].name; } }
+    });
+    if (line) later(170, function () { say(line, true, nm); });
+    if (game.fav) later(line ? 560 : 200, function () {
+      var f = game.fav; if (!f || !f.alive) return;
+      for (var q = 0; q < 8; q++) addPart({ k: 'heart', x: f.x + rand(-6, 6), y: f.y - rand(30, 40), vx: rand(-0.3, 0.3), vy: rand(-0.6, -0.3), life: 70, max: 70 });
+      say('fav', true, f.name);
+    });
+  }
   function nextTurn() {
     var cur = game.teams[game.tIdx];
     if (game.opts && game.opts.training) { game.tIdx = 0; startTurn(); return; }
@@ -2517,6 +2635,144 @@
 
   function afterSettle() { if (checkOver()) return; if (eventDue() && startEvent()) return; nextTurn(); }
 
+  /* ---------- secret spots: a treasure chest hidden in a little cave underground ---------- */
+  function placeSecret() {
+    game.secret = null;
+    if (game.opts && game.opts.training) return;
+    for (var tries = 0; tries < 80; tries++) {
+      var x = Math.round(150 + Math.random() * (WW - 300)), sy = surfaceY(x);
+      if (sy < 0 || sy > WATER - 100) continue;
+      var cy = Math.round(sy + 48 + Math.random() * 24);
+      if (cy > WATER - 24 || !solid(x, cy - 22) || !solid(x, cy + 18) || !solid(x - 26, cy) || !solid(x + 26, cy) || !solid(x, sy + 10)) continue;
+      if (game.snags.some(function (c) { return Math.abs(c.x - x) < 30; })) continue;
+      carve(x, cy, 12, false);
+      /* paint the inside of the cave dark so the chest glints out of the gloom */
+      for (var yy = cy - 13; yy <= cy + 13; yy++) for (var xx = x - 13; xx <= x + 13; xx++) {
+        if (xx < 0 || xx >= WW || yy < 0 || yy >= WH || mask[yy * WW + xx]) continue;
+        var dd = Math.sqrt((xx - x) * (xx - x) + (yy - cy) * (yy - cy)); if (dd > 13) continue;
+        setPx(yy * WW + xx, blend([40, 30, 24], [70, 54, 40], hash(xx >> 1, yy >> 1) * 0.5 + (yy - cy + 13) / 52));
+      }
+      putTerr(x - 14, cy - 14, 29, 29);
+      game.crates.push({ x: x, y: cy + 6, vx: 0, vy: 0, rest: false, kind: 'secret' });
+      game.secret = { x: x, y: sy, cy: cy };
+      return;
+    }
+  }
+  /* ---------- layouts: the same place, carved a different way each time ---------- */
+  /* the top of the main ground, ignoring floating ledges and arches */
+  function deepSurf(x) { x = Math.round(x); for (var y = 4; y < WATER; y++) if (solid(x, y) && solid(x, y + 14) && solid(x, y + 28)) return y; return -1; }
+  function applyLayout() {
+    var R = Math.random, L = (game.opts && game.opts.layout) || ['classic', 'classic', 'islands', 'caves', 'crater', 'holes'][Math.floor(R() * 6)], k, x, y;
+    if (L === 'islands' && (MAP.style === 'harbour' || MAP.style === 'uruk')) L = 'holes';
+    game.layout = L;
+    if (L === 'islands') {
+      [0.36, 0.64].forEach(function (f) {
+        var cx = WW * f + (R() - 0.5) * 80, sy = deepSurf(cx);
+        if (sy < 0) return;
+        for (y = sy - 8; y < WATER + 30; y += 7) carve(cx + Math.sin(y * 0.05) * 6, y, 19 + R() * 4, false);
+      });
+    } else if (L === 'caves') {
+      for (k = 0; k < 2; k++) {
+        var x0 = 140 + R() * 220 + k * WW / 2, len = 280 + R() * 200, ph = R() * 6;
+        for (var d = 0; d < len; d += 5) {
+          x = x0 + d; var sy2 = deepSurf(x);
+          if (sy2 < 0) continue;
+          y = sy2 + 42 + Math.sin(d * 0.02 + ph) * 14;
+          if (y < WATER - 16) carve(x, y, 12, false);
+        }
+      }
+    } else if (L === 'crater') {
+      var ccx = WW * (0.4 + R() * 0.2), cs = deepSurf(ccx);
+      if (cs > 0) carve(ccx, cs + 10, Math.min(90, Math.max(50, WATER - cs - 30)), false);
+    } else if (L === 'holes') {
+      for (k = 0; k < 16; k++) {
+        var hx = 80 + R() * (WW - 160), hs = deepSurf(hx);
+        if (hs < 0) continue;
+        var hy = hs + 24 + R() * 90;
+        if (hy < WATER - 20) carve(hx, hy, 9 + R() * 12, false);
+      }
+    }
+  }
+  /* ---------- Bonnie naps: she curls up somewhere for a few goes. A blast nearby wakes her ---------- */
+  function maybeNap(force) {
+    if (game.nap) {
+      if (game.turnNo >= game.nap.until) { game.portals.push({ x: game.nap.x, y: game.nap.y - 12, t: 0, inn: true }); sfx('portal'); game.nap = null; }
+      return;
+    }
+    if (!force && (game.sudden || (game.naps || 0) >= 1 || game.turnNo < 5 || Math.random() > 0.18 || !game.opts || game.opts.ev === 'off')) return;
+    for (var tries = 0; tries < 40; tries++) {
+      var x = Math.round(80 + Math.random() * (WW - 160)), y = surfaceY(x);
+      if (y < 30 || y > WATER - 20 || !onGround(x, y) || !bodyClear(x, y)) continue;
+      if (game.snags.some(function (c) { return c.alive && Math.abs(c.x - x) < 45; })) continue;
+      game.nap = { x: x, y: y, until: game.turnNo + 5, t: 0 };
+      game.naps = (game.naps || 0) + 1;
+      game.portals.push({ x: x, y: y - 12, t: 0, inn: true }); sfx('portal');
+      later(40, function () { say('nap', true); });
+      return;
+    }
+  }
+  function wakeNap(why) {
+    var n = game.nap; if (!n) return;
+    game.nap = null;
+    word(n.x, n.y - 30, 'WOOF?!', '#ffd27a', 2); voice('dog', 'woof');
+    addPart({ k: 'deb', x: n.x, y: n.y - 4, vx: 0, vy: -2, life: 20, col: '#c8874a' });
+    game.portals.push({ x: n.x, y: n.y - 16, t: 0, inn: true }); sfx('portal');
+    if (why !== 'quiet') later(30, function () { say('napwake', true); });
+  }
+  function updNap() {
+    var n = game.nap; if (!n) return;
+    n.t++;
+    if (!solid(n.x, n.y + 1) && !solid(n.x - 3, n.y + 1) && !solid(n.x + 3, n.y + 1)) { wakeNap(); return; }
+    if (n.t % 50 === 0) addPart({ k: 'zzz', x: n.x + 6, y: n.y - 14, vx: 0.15, vy: -0.25, life: 70, max: 70 });
+  }
+  function drawNap(t) {
+    var n = game.nap; if (!n) return;
+    SP.bonnieNap(ctx, n.x, n.y + 1, (t >> 5) % 2);
+  }
+  /* ---------- wild events: these can happen anywhere in time. Always announced first ---------- */
+  function startWild() {
+    var kinds = ['comet', 'quake', 'foot'], k = kinds[Math.floor(Math.random() * kinds.length)];
+    var alive = game.snags.filter(function (c) { return c.alive; }), tg = alive.length ? alive[Math.floor(Math.random() * alive.length)] : null;
+    var tx = clamp((tg ? tg.x : WW / 2) + rand(-50, 50), 40, WW - 40), sy = surfaceY(Math.round(tx));
+    var ev = { kind: k, t: 0, tx: tx, fx: clamp(tx, VW / 2, WW - VW / 2), fy: Math.max(120, (sy > 0 ? sy : WATER) - 50) };
+    if (k === 'quake') { ev.fx = cam.x + VW / 2; ev.fy = cam.y + VH / 2; }
+    banner({ comet: 'Comet!', quake: 'Earthquake!', foot: 'Giant foot!' }[k], null, { comet: '#ff8a5c', quake: '#c8a06a', foot: '#d0d8e2' }[k], k === 'quake' ? 'next' : 'target');
+    say(k, true);
+    game.event = ev; game.state = 'event';
+    return true;
+  }
+  function endEvent() { game.event = null; game.state = 'settle'; game.settleT = 0; game.settleAll = 0; }
+  function updWild(ev) {
+    if (ev.kind === 'comet') {
+      if (ev.t === 96) {
+        var ty = surfaceY(Math.round(ev.tx)); if (ty < 0) ty = WATER;
+        var dir = ev.tx > WW / 2 ? -1 : 1;
+        farShot('comet', MAP.era || 'pre', null, ev.tx - dir * 300, -140, ev.tx, ty, 84);
+        sfx('whoosh'); tone('sawtooth', 600, 120, 1.2, 0.05);
+      }
+      if (ev.t > 98 && !game.projs.length) endEvent();
+      return;
+    }
+    if (ev.kind === 'foot') {
+      if (ev.t === 60) game.strikes.push({ style: 'stomp', x: ev.tx, y: -60, vy: 1, t: 0, by: null, R: 36, dmg: 30, kmul: 1.2 });
+      if (ev.t > 62 && !game.strikes.length) endEvent();
+      return;
+    }
+    /* the earthquake: a rumble, then three big jolts that bounce everyone about */
+    if (!reduceMotion) game.shake = Math.max(game.shake, ev.t > 40 ? 3.5 : 1);
+    if (ev.t % 24 === 0 && ev.t < 140) sfx('rumble');
+    if (ev.t === 50 || ev.t === 85 || ev.t === 120) {
+      game.snags.forEach(function (c) {
+        if (!c.alive || c.st !== 'ground' || !bodyClear(c.x, c.y - 1)) return;
+        c.y -= 1; c.st = 'air'; c.airT = 0; c.knock = false; c.flip = false;
+        c.vx = rand(-0.8, 0.8); c.vy = -rand(1.8, 2.8);
+        dust(c.x, c.y, 3, 3);
+      });
+      game.crates.forEach(function (cr) { cr.rest = false; cr.vy = -1.5; });
+      sfx('land', 1.3);
+    }
+    if (ev.t > 160 && game.snags.every(function (c) { return !c.alive || c.st !== 'air'; })) endEvent();
+  }
   /* ---------------- map events: every place has its own surprise, always announced before it happens ---------------- */
   function eventDue() {
     if (!game.opts || game.opts.ev === 'off' || game.opts.training || game.sudden || TEST === 'aivai' && Q.get('ev') !== 'on') return false;
@@ -2525,6 +2781,8 @@
   /* returns true when the event takes over the screen for a moment */
   function startEvent() {
     game.evNext = game.turnNo + 7;
+    game.evCount = (game.evCount || 0) + 1;
+    if (game.evCount > 1 && Math.random() < 0.45) return startWild();
     var st = MAP.style;
     if (st === 'desert' || st === 'harbour' || st === 'uruk') {
       if (game.flood) return false;
@@ -2572,6 +2830,7 @@
     var ev = game.event;
     if (!ev) { game.state = 'settle'; game.settleT = 0; game.settleAll = 0; return; }
     ev.t++;
+    if (ev.kind === 'comet' || ev.kind === 'quake' || ev.kind === 'foot') { updWild(ev); return; }
     if (ev.kind === 'arrows') {
       /* the garrison's archers: red markers first, then arrows rain down on each one in turn */
       var left = false;
@@ -2652,6 +2911,17 @@
       for (var x = x0 - (x0 % 6); x < x0 + VW; x += 6) { ctx.fillStyle = (x / 6) % 2 ? '#9fe3f5' : '#3a8a9a'; ctx.fillRect(x, L, 4, 1); }
     }
     if (!ev) return;
+    if ((ev.kind === 'comet' && ev.t < 104) || (ev.kind === 'foot' && ev.t < 100)) {
+      /* a big target where it will land */
+      var gx = Math.round(ev.tx), gy = surfaceY(gx); if (gy < 0) gy = Math.round(WATER);
+      var rr = ev.kind === 'comet' ? 26 : 30, pul = (t >> 3) % 2;
+      ctx.fillStyle = ev.kind === 'comet' ? '#ff6a5a' : '#ffd27a';
+      for (var a = 0; a < 24; a++) { if ((a + pul) % 2) continue; var an = a / 24 * 6.283; ctx.fillRect(Math.round(gx + Math.cos(an) * rr), Math.round(gy - 2 + Math.sin(an) * rr * 0.3), 2, 1); }
+      for (var yy = gy - 8; yy > gy - 70; yy -= 6) ctx.fillRect(gx, yy, 1, 3);
+      ctx.fillRect(gx - 5, gy - 2, 11, 1); ctx.fillRect(gx, gy - 7, 1, 11);
+      return;
+    }
+    if (ev.kind === 'quake' || ev.kind === 'comet' || ev.kind === 'foot') return;
     if (ev.kind === 'arrows') {
       ev.list.forEach(function (a) {
         if (a.fired) return;
@@ -2719,7 +2989,8 @@
       if (game.winner && game.winner.ctrl === 'human' && foeT && foeT.ctrl === 'ai') { bumpStat('wins'); if (foeT.mood === 'legendary') bumpStat('legend'); }
     }
     if (game.winner) voice(game.winner.era, 'cheer');
-    say('win', true);
+    var lostIt = game.winner && game.winner.ctrl === 'ai' && game.opts && game.opts.mode === 'cpu' && TEST !== 'aivai';
+    say(lostIt ? 'lose' : 'win', true);
     later(108, showOver);
     return true;
   }
@@ -3608,7 +3879,7 @@
   function aiPlanner(c, noWalk) {
     var team = c.team, mood = team.mood || 'grumpy';
     var E = { sleepy: { a: 8, p: 10, r: 0.3 }, grumpy: { a: 4.5, p: 6, r: 0.1 }, legendary: { a: 1, p: 1.5, r: 0 } }[mood];
-    var A = AIP[team.era] || AIP.fut, fw = A.fw;
+    var A = AIP[team.era] || AIP.fut, fw = A.fw, smart = mood !== 'sleepy';
     var cands = [], jobs = [];
     var enemies = game.snags.filter(function (o) { return o.alive && o.team !== team; });
     enemies.forEach(function (en) {
@@ -3631,6 +3902,8 @@
             if (!res) continue;
             if (extra === 'nowater' && res.water) continue;
             var sc = res.water ? -1 : scoreAt(res.x, res.y, WEAP[wid].aiR || WEAP[wid].R, WEAP[wid].aiDmg || WEAP[wid].dmg, team, fw, c);
+            if (smart && game.nap && Math.abs(res.x - game.nap.x) < 50 && Math.abs(res.y - game.nap.y) < 50) sc -= 30;
+            if (smart && Math.abs(res.x - c.x) < (WEAP[wid].R || 20) * BLAST + 12 && Math.abs(res.y - c.y) < 40) sc -= 12;
             if (extra === 'spear' && res.hit && res.hit !== c) { var dr = WEAP[wid].direct; sc += res.hit.team !== team ? dr + (res.hit.hp <= dr + 8 ? A.kill : 0) + (res.hit.y > WATER - 60 ? A.water : 0) : -dr * fw; }
             if (extra === 'nowater') { var tg = nearestFrom(res.x, res.y); if (tg && Math.abs(c.x - res.x) > 30) sc = Math.max(sc, scoreAt(tg.x, tg.y - 6, WEAP[wid].R, WEAP[wid].dmg, team, fw, c) * 0.75); }
             cands.push({ weapon: wid, face: face, aim: a, power: pw, score: sc * mult });
@@ -3731,6 +4004,27 @@
         }
         if (kitHas(team, 'keg') && avail(team, 'keg').ok && enemies.some(function (en) { return Math.abs(en.x - c.x) < 90 && Math.abs(en.y - c.y) < 30; })) cands.push({ weapon: 'keg', face: c.face, aim: c.aim, power: 0, score: 9 });
         var kit = ER[team.era].kit || [], sup = kit[4], defW = kit[3];
+        if (smart) {
+          /* a hurt Snag with an enemy close by puts up its defence first */
+          var threat = enemies.filter(function (en) { return Math.abs(en.x - c.x) < 220; }).length;
+          if (c.hp < 45 && threat && defW && avail(team, defW).ok && !team.aiDef && (!cands.length || cands.reduce(function (b, q) { return Math.max(b, q.score); }, 0) < 34) && Math.random() < 0.7) {
+            team.aiDef = game.turnNo;
+            var nd0 = enemies.reduce(function (b, o) { return Math.abs(o.x - c.x) < Math.abs(b.x - c.x) ? o : b; });
+            return { type: 'fire', phase: 'aim', t: 0, weapon: defW, face: nd0.x > c.x ? 1 : -1, aim: Math.round(c.aim), power: 0 };
+          }
+          /* a snack or a stash within easy walking: go and get it */
+          if (!noWalk) {
+            var best0 = cands.reduce(function (b, q) { return Math.max(b, q.score); }, 0), want = null;
+            game.crates.forEach(function (cr) {
+              if (cr.kind === 'secret' || Math.abs(cr.x - c.x) > 150 || Math.abs(cr.y - c.y) > 22) return;
+              var gsy = surfaceY(Math.round(cr.x)); if (Math.abs(gsy - cr.y) > 8) return;
+              if (cr.kind === 'snack' && c.hp > 75) return;
+              for (var xx = Math.min(c.x, cr.x); xx < Math.max(c.x, cr.x); xx += 8) { var gy0 = surfaceY(Math.round(xx)); if (gy0 < 0 || gy0 > WATER - 10) return; }
+              if (!want || Math.abs(cr.x - c.x) < Math.abs(want.x - c.x)) want = cr;
+            });
+            if (want && best0 < (want.kind === 'snack' ? (c.hp < 50 ? 70 : 40) : 60)) return { type: 'walk', dir: want.x > c.x ? 1 : -1, walkT: Math.round(Math.abs(want.x - c.x) / 0.55) + 20, t: 0, to: want };
+          }
+        }
         if (sup && avail(team, sup).ok) {
           enemies.forEach(function (en) {
             cands.push({ weapon: sup, face: en.x > c.x ? 1 : -1, aim: Math.round(c.aim), power: 0, tx: en.x,
@@ -3797,6 +4091,17 @@
 
   function aiTick(c) {
     var A = game.ai;
+    if (A && game.fired && game.state === 'retreat' && A.type === 'fire' && c.team.mood !== 'sleepy' && c.st === 'ground' && !c.sled && !c.jet) {
+      if (A.back === undefined) {
+        var en = null;
+        game.snags.forEach(function (o) { if (o.alive && o.team !== c.team && (!en || Math.abs(o.x - c.x) < Math.abs(en.x - c.x))) en = o; });
+        A.back = en ? (en.x > c.x ? -1 : 1) : 0; A.bt = 0;
+        if (A.back && !safeAhead(c, A.back)) A.back = 0;
+        if (A.back) game.retreat = Math.max(game.retreat, 60);
+      }
+      if (A.back && A.bt++ < 50 && safeAhead(c, A.back)) { if (tryWalk(c, A.back)) c.walking = 6; }
+      return;
+    }
     if (!A || game.fired || game.state !== 'play') return;
     A.t++;
     if (A.phase === 'wait') {
@@ -3816,7 +4121,8 @@
     if (A.type === 'pass') { if (A.t > 12) passTurn(); return; }
     if (A.type === 'walk') {
       if (c.st === 'ground') {
-        if (!safeAhead(c, A.dir)) A.t = A.walkT + 1;
+        if (A.to && game.crates.indexOf(A.to) < 0) A.t = A.walkT + 1;
+        else if (!safeAhead(c, A.dir)) A.t = A.walkT + 1;
         else if (tryWalk(c, A.dir)) c.walking = 6;
         else if (A.t % 25 === 0) jump(c, false);
       }
@@ -4043,6 +4349,8 @@
       case 'jump': tone('square', 260, 520, 0.12, 0.05); break;
       case 'land': noise(0.08, 0.18 * k, 'lowpass', 500, 200); break;
       case 'bonk': tone('triangle', 200, 90, 0.15, 0.3); noise(0.06, 0.3, 'bandpass', 1500); break;
+      case 'roar': tone('sawtooth', 140, 60, 0.7, 0.18); tone('square', 90, 50, 0.6, 0.08); noise(0.6, 0.3, 'lowpass', 900, 200); break;
+      case 'rumble': tone('sine', 45, 30, 0.5, 0.4); noise(0.5, 0.25, 'lowpass', 300, 80); break;
       case 'whoosh': noise(0.2, 0.14, 'bandpass', 400, 2000); break;
       case 'splash': noise(0.5, 0.3, 'bandpass', 1800, 500); break;
       case 'portal': tone('sine', 300, 1200, 0.6, 0.1); tone('triangle', 450, 1800, 0.6, 0.05); break;
@@ -4280,7 +4588,7 @@
   function saveMatch() {
     if (TEST) return;
     var s = {
-      v: 2, seed: game.seed, opts: game.opts, tIdx: game.tIdx, turnNo: game.turnNo, stats: game.stats, mask: rle(),
+      v: 2, seed: game.seed, opts: game.opts, tIdx: game.tIdx, turnNo: game.turnNo, stats: game.stats, mask: rle(), pt: game.playT || 0,
       finds: game.finds, water: WATER, sudden: game.sudden,
       arts: game.arts.filter(function (a) { return a.st === 'buried' || a.st === 'loose'; }).map(function (a) { return { id: a.id, g: a.glitch, x: Math.round(a.x), y: Math.round(a.y), st: a.st }; }),
       crates: game.crates.map(function (c) { return { x: Math.round(c.x), y: Math.round(c.y), k: c.kind }; }),
@@ -4303,7 +4611,7 @@
     try { s = JSON.parse(raw); } catch (e) { return false; }
     if (!s || s.v !== 2 || !s.teams) return false;
     resetWorld();
-    game.opts = s.opts; game.seed = s.seed; game.turnLen = s.opts.turn;
+    game.opts = s.opts; game.seed = s.seed; game.playT = s.pt || 0; game.turnLen = s.opts.turn;
     game.tour = s.opts.tour ? loadTourState() : null;
     setMap(s.opts.map || 'jungle', s.opts.look);
     genTerrain(s.seed); unrle(s.mask); placeLadders();
@@ -4344,6 +4652,7 @@
     game.stats = { best: 0, bestBy: '', shots: 0 }; game.turnNo = 0; game.winner = null; game.active = null;
     game.ai = null; game.charging = false; game.power = 0; game.lastPower = 0;
     game.arts = []; game.crates = []; game.courier = null; game.barker = null; game.finds = [];
+    game.fav = null; game.nap = null; game.naps = 0; game.secret = null; game.playT = 0; game.evCount = 0; game.layout = 'classic';
     game.strikes = []; game.warn = []; game.sudden = false; game.visitor = null; game.visits = 0; game.tx = null; game.hitstop = 0; game.barrels = []; game.flows = []; game.flags = []; game.carts = []; WATER = WATER0;
   }
 
@@ -4391,7 +4700,9 @@
     o.map = o.map || 'jungle';
     setMap(o.map, o.look);
     game.seed = Math.floor(Math.random() * 1e9);
-    genTerrain(game.seed); placeLadders();
+    genTerrain(game.seed);
+    if (!o.training) applyLayout();
+    placeLadders();
     var eras = [o.era, foeOf(o)];
     for (var i = 0; i < 2; i++) {
       var E = ER[eras[i]], ai = (o.mode === 'cpu' && i === 1) || TEST === 'aivai';
@@ -4402,6 +4713,8 @@
     }
     spawnAll(o.size);
     placeBarrels();
+    placeSecret();
+    if (!o.training) game.fav = game.snags[Math.floor(Math.random() * game.snags.length)] || null;
     if (o.ammoMods) game.teams.forEach(function (t) {
       var mods = o.ammoMods[t.era] || {};
       for (var wid in mods) if (WEAP[wid] && WEAP[wid].ammo) t.ammo[wid] = Math.max(0, WEAP[wid].ammo + mods[wid]);
@@ -4462,6 +4775,7 @@
   function update() {
     if (game.hitstop > 0) { game.hitstop--; return; }
     game.t++;
+    if (game.state === 'play' || game.state === 'retreat' || game.state === 'settle' || game.state === 'event' || game.state === 'portals') game.playT = (game.playT || 0) + 1;
     if (game.slow > 0) game.slow--;
     if (game.later.length) runLater();
     if (game.train && (game.state === 'play' || game.state === 'retreat')) trainTick();
@@ -4470,6 +4784,12 @@
     if (game.bannerT > 0 && --game.bannerT === 0) $('banner').classList.remove('show');
     if (passArmed > 0 && --passArmed === 0) setPassArm(false);
     for (i = 0; i < game.snags.length; i++) updSnag(game.snags[i]);
+    updNap();
+    if (game.secret && game.t % 400 === 200 && game.state === 'play') {
+      /* a twinkle on the ground above the secret stash, now and then */
+      for (var gq = 0; gq < 5; gq++) addPart({ k: 'spark', x: game.secret.x + rand(-6, 6), y: game.secret.y - rand(1, 6), vx: rand(-0.3, 0.3), vy: rand(-0.8, -0.2), life: 34, col: gq % 2 ? '#ffd34d' : '#fff3c8' });
+      if (!game.glintSaid && game.turnNo > 3) { game.glintSaid = true; say('glint'); }
+    }
     if (game.state === 'play' || game.state === 'retreat') control();
     for (i = game.projs.length - 1; i >= 0; i--) {
       var p = game.projs[i];
@@ -4534,6 +4854,7 @@
       else if (p.k === 'bee') { p.ph += 0.3; p.vx += Math.cos(p.ph) * 0.15 + rand(-0.08, 0.08); p.vy += Math.sin(p.ph * 1.3) * 0.12 - 0.01; p.vx *= 0.92; p.vy *= 0.92; p.x += p.vx; p.y += p.vy; }
       else if (p.k === 'feather') { p.vy = Math.min(0.35, p.vy + 0.02); p.x += p.vx + Math.sin(p.ph + p.life * 0.08) * 0.3; p.y += p.vy; }
       else if (p.k === 'flyb') { p.x += p.vx; p.y += p.vy; p.vy = Math.max(-2.2, p.vy - 0.01); p.vx *= 1.004; }
+      else if (p.k === 'heart' || p.k === 'zzz') { p.x += p.vx + Math.sin(p.life * 0.1) * 0.15; p.y += p.vy; }
       else if (p.k === 'fish') { p.vy += G * 1.2; p.x += p.vx; p.y += p.vy; if (p.y > WATER + 2 && p.vy > 0) { splash(p.x); p.life = 0; } }
       else if (p.k === 'junk' && !p.stuck) {
         p.vy += G * 1.4; p.x += p.vx; p.y += p.vy; p.rot += p.spin;
@@ -5493,6 +5814,7 @@
     });
     game.crates.forEach(function (cr) { SP.crate(ctx, cr.x, cr.y + 1, cr.kind, t); });
     drawLadders(t);
+    drawNap(t);
     game.barrels.forEach(function (b) { SP.barrel(ctx, b.x, b.y + 1, b.kind, t, b.fuse > 0); });
     game.flags.forEach(function (f) { SP.flag(ctx, f.x, f.y + 1, t); });
     game.carts.forEach(function (k) { if (k.type === 'trolley') SP.trolley(ctx, k.x, k.y + 1, k.dir, k.roll); else SP.cart(ctx, k.x, k.y + 1, k.dir, k.roll); });
@@ -5624,6 +5946,8 @@
       else if (p.k === 'drop') { ctx.fillStyle = '#cfeefa'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
       else if (p.k === 'flyb') { if (p.life < 30) ctx.globalAlpha = p.life / 30; SP.bird(ctx, p.x, p.y, ((p.life + p.ph) >> 2) % 2); ctx.globalAlpha = 1; }
       else if (p.k === 'fish') SP.fish(ctx, p.x, p.y, p.vx, p.vy);
+      else if (p.k === 'heart') { var hX = Math.round(p.x), hY = Math.round(p.y); if (p.life < 20) ctx.globalAlpha = p.life / 20; ctx.fillStyle = '#ff6b9a'; ctx.fillRect(hX, hY, 2, 2); ctx.fillRect(hX + 3, hY, 2, 2); ctx.fillRect(hX, hY + 1, 5, 2); ctx.fillRect(hX + 1, hY + 3, 3, 1); ctx.fillRect(hX + 2, hY + 4, 1, 1); ctx.globalAlpha = 1; }
+      else if (p.k === 'zzz') { if (p.life < 20) ctx.globalAlpha = p.life / 20; tagText('z', p.x, p.y, '#f4f0ff', 6 + (p.max - p.life) / 18); ctx.globalAlpha = 1; }
       else if (p.k === 'junk') { if (p.life < 40) ctx.globalAlpha = p.life / 40; SP.junk(ctx, p.id, p.x, p.y, p.rot); ctx.globalAlpha = 1; }
       else if (p.k === 'spark') { ctx.fillStyle = p.col || ((p.life >> 2) % 2 ? '#fff3c8' : '#ffd27a'); ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); }
       else if (p.k === 'bee') { if (p.life < 30) ctx.globalAlpha = p.life / 30; ctx.fillStyle = '#1d1a1a'; ctx.fillRect(Math.round(p.x) - 1, Math.round(p.y), 3, 2); ctx.fillStyle = '#f0c446'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(Math.round(p.x), Math.round(p.y) - 1 - ((p.life >> 1) % 2), 1, 1); ctx.globalAlpha = 1; }
@@ -5732,6 +6056,11 @@
       if (!c.alive || c.arrive) return;
       var col = ER[c.team.era].tag, y = Math.round(c.y - 40);
       tagText(c.name, c.x, y - 1, col);
+      if (c === game.fav && game.state !== 'demo') {
+        var hx = Math.round(c.x + ctx.measureText(c.name).width / 2 + 2), hy = y, hb = (t >> 5) % 2;
+        ctx.fillStyle = '#1f2a30'; ctx.fillRect(hx - 1, hy - 1 + hb, 7, 6);
+        ctx.fillStyle = '#ff6b9a'; ctx.fillRect(hx, hy + hb, 2, 2); ctx.fillRect(hx + 3, hy + hb, 2, 2); ctx.fillRect(hx, hy + 1 + hb, 5, 2); ctx.fillRect(hx + 1, hy + 3 + hb, 3, 1); ctx.fillRect(hx + 2, hy + 4 + hb, 1, 1);
+      }
       if (game.state !== 'demo') {
         tagText(String(c.hp), c.x, y + 6, '#ffffff', 4.6);
         var bx = Math.round(c.x) - 9, by = y + 14, gw = Math.round(Math.min(100, c.ghost || 0) / 100 * 18), hw = Math.round(Math.min(100, c.hp) / 100 * 18);
@@ -6997,6 +7326,18 @@
       x2.fillStyle = 'rgba(0,0,0,.25)'; x2.fillRect(x - 10, H - 2, 21, 2);
       SP.draw(x2, x, H - h, i < n / 2 ? 1 : -1, era, w ? (m.alive ? 'cheer' : 'idle') : 'yawn', (f + i) % 2, false, 0);
     });
+    var o2 = game.opts || {}, me2 = game.teams[0];
+    if (w && o2.mode === 'cpu' && w.ctrl === 'ai' && me2 && me2.members.length) {
+      var tm2 = Date.now(), lx = 18, era2 = me2.era, ph2 = (tm2 / 3000) % 1;
+      SP.draw(x2, lx, H - 1, 1, era2, 'yawn', (tm2 / 900 | 0) % 2, false, 0);
+      if (me2.members[1]) SP.draw(x2, lx + 12, H - 1, -1, era2, 'hurt', 0, false, 0);
+      x2.fillStyle = '#8a92a8'; x2.fillRect(lx - 9, 6, 26, 6); x2.fillRect(lx - 5, 3, 16, 4); x2.fillStyle = '#a8b0c4'; x2.fillRect(lx - 7, 4, 10, 3);
+      x2.fillStyle = '#7fd0f0';
+      for (var dq = 0; dq < 6; dq++) { var dy = ((tm2 / 40 + dq * 7) % 26) | 0; x2.fillRect(lx - 7 + dq * 4, 13 + dy, 1, 2); }
+      var bxp = Math.round(W - 14 - Math.min(1, ph2 * 1.6) * (W - 14 - (lx + 30)));
+      SP.bonnie(x2, bxp, H - 1, -1, ph2 < 0.62 ? (tm2 / 120 | 0) % 4 : 0, ph2 < 0.62, false);
+      if (ph2 >= 0.62) { x2.fillStyle = '#c8874a'; x2.fillRect(lx + 20, H - 5, 5, 3); x2.fillStyle = '#e0a868'; x2.fillRect(lx + 21, H - 5, 3, 1); for (var hq = 0; hq < 2; hq++) { var hY = H - 30 - ((tm2 / 60 + hq * 9) % 14); x2.fillStyle = '#ff6b9a'; x2.fillRect(lx + 4 + hq * 8, hY, 2, 1); x2.fillRect(lx + 7 + hq * 8, hY, 2, 1); x2.fillRect(lx + 4 + hq * 8, hY + 1, 5, 1); x2.fillRect(lx + 5 + hq * 8, hY + 2, 3, 1); x2.fillRect(lx + 6 + hq * 8, hY + 3, 1, 1); } }
+    }
     if (podiumT) clearTimeout(podiumT);
     podiumT = setTimeout(function () { podiumT = null; if (scr === 'victory' && !reduceMotion) drawPodium(); }, 260);
   }
@@ -8228,5 +8569,5 @@
   window.B5TEST = { demo: drawKitDemo, solid: solid, newMatch: newMatch, fire: fire, explode: explode, mask: mask, WEAP: WEAP, cam: cam, update: update, deliver: function () { maybeDeliver(true); },
     zone: zone, inp: inp, pickWeapon: pickWeapon, firePress: firePress, fireRelease: fireRelease, doJump: doJump, setWater: function (v) { WATER = v; },
     show: show, scr: function () { return scr; }, setZoom: setZoom, zoom: function () { return zoom; }, openKit: openKit, view: function () { return [VW, VH]; },
-    freeCam: function () { return freeCam; }, opts: opts, lad: { ladderFor: ladderFor, tryClimb: tryClimb, bodyClear: bodyClear, onGround: onGround, tryWalk: tryWalk }, tour: function () { return game.tour; }, terr: function () { return terr.toDataURL(); }, startDemo: startDemo };
+    freeCam: function () { return freeCam; }, opts: opts, dev: { startWild: startWild, wakeNap: wakeNap, nap: function () { maybeNap(true); return game.nap; }, rare: function (id) { game.visits = 0; game.turnNo = Math.max(game.turnNo, 5); game.visitor = null; var o = Math.random; Math.random = function () { return 0; }; try { maybeVisitor(); } finally { Math.random = o; } if (game.visitor) { var R = RARE.filter(function (v) { return v[0] === id; })[0]; game.visitor.id = R[0]; game.visitor.sp = R[2]; if (id === 'dragon') game.visitor.y -= 80; } return game.visitor; } }, lad: { ladderFor: ladderFor, tryClimb: tryClimb, bodyClear: bodyClear, onGround: onGround, tryWalk: tryWalk }, tour: function () { return game.tour; }, terr: function () { return terr.toDataURL(); }, startDemo: startDemo };
 })();
