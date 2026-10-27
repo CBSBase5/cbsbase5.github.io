@@ -4864,6 +4864,7 @@ function damageEnemy(e, dmg, o) {
   var d = dmg * m;
   e.hp -= d; e.flash = 0.12; e.sleepT = 0; e.squashUntil = G.t + 0.09; itemOnHit(e, d, o);
   if (typeof feelHit === 'function') feelHit(e, d, o);
+  if (typeof meleeLanded === 'function') meleeLanded(e, o);
   else if (!G.doom && (d >= 25 || e.hp <= 0) && !e.prop) G.hitstop = Math.max(G.hitstop || 0, e.hp <= 0 ? 0.06 : 0.04);
   if (!G.doom && o.melee && !e.prop) G.shake = Math.max(G.shake || 0, 0.07);
   if (o.kx !== undefined && !e.heavy) { var km = knockMul() * 1.3 * (o.fin ? 2.2 : 1) * (o.crit ? 1.5 : 1); e.kx = o.kx * km; e.kz = o.kz * km; }
@@ -4925,7 +4926,9 @@ function hurtPlayer(n, src, o) {
   if (P.label && src && src.hp !== undefined && !src.dead) { P.label = false; P.inv = 0.6; damageEnemy(src, 60, { raw: true }); UI.burst('RETURN TO SENDER!', P); UI.refreshHUD(); return false; }
   if (heroHas('bin') && !P.binUsed) { P.binUsed = true; P.inv = 0.6; UI.burst('CLANG!', P); return false; }
   if (P.hero === 'bean' && !P.altP) n = Math.max(1, Math.round(n / 2));
-  n = hurtMod(n, src); if (G.run) G.run.lastSrc = describeSrc(src); if (G.room.type === 'mini') G.run.hitsInMini = (G.run.hitsInMini || 0) + 1;
+  n = hurtMod(n, src);
+  if (typeof meleeGuard === 'function') { n = meleeGuard(P, n); if (n <= 0) { P.inv = 0.4; AUD.sfx('hitL'); if (Math.random() < 0.5) UI.burst('SHRUGGED OFF!', P); return false; } }
+  if (G.run) G.run.lastSrc = describeSrc(src); if (G.room.type === 'mini') G.run.hitsInMini = (G.run.hitsInMini || 0) + 1;
   if (typeof feelHurt === 'function') feelHurt(P, n);
   P.hp -= n; P.inv = 1.0; P.flash = 0.2; G.shake = 0.25; G.hitstop = Math.max(G.hitstop || 0, 0.05); AUD.sfx('hurt'); hurtPose(P, src); logDamage(n); G.roomHits = (G.roomHits || 0) + 1;
   if (P.hero === 'trainer' && P.stacks) P.stacks = 0;
@@ -4973,6 +4976,7 @@ function updateDying(dt) {
 function heroAttack(P, h) {
   var a = upgradeAtk(heroAtk(P), P), t, n0 = G.projs.length;
   if (!a) return;
+  if (typeof meleeTune === 'function') a = meleeTune(a);
   P.atkCd = a.rate * itemRateMul() * (P.hero === 'cardboy' && heroHas('battery') && a.type === 'shoot' ? 0.75 : 1); heroAttackPose(P, a);
   var fin = typeof feelChain === 'function' ? feelChain(P, a) : false, fm = fin ? 1.35 : 1, sty = typeof shotStyle === 'function' ? shotStyle(P, a, fin) : {};
   if (a.type === 'shoot') {
@@ -4997,7 +5001,7 @@ function heroAttack(P, h) {
     G.enemies.slice().forEach(function (e) {
       if (e.dead) return;
       var d = dist(P, e) - (e.r || 0.5); if (d > a.range) return;
-      var da = Math.abs(((angTo(P, e) - P.face + PI * 3) % (PI * 2)) - PI); if (da > a.arc / 2 && d > 0.6) return;
+      var da = Math.abs(((angTo(P, e) - P.face + PI * 3) % (PI * 2)) - PI); if (!fin && da > a.arc / 2 && d > 0.6) return;
       damageEnemy(e, a.dmg * fm, { kx: Math.sin(P.face) * (a.knock || 6), kz: Math.cos(P.face) * (a.knock || 6), primary: first, hero: true, melee: true, fin: fin }); first = false; hit++;
       if (a.slip && !e.boss && !e.dead) { e.stunT = 1.3; if (Math.random() < 0.3) UI.say(e, 'Whoa!', 1); }
     });
@@ -5580,7 +5584,7 @@ function updateEnemy(e, dt) {
     if (e.hitWall) e.wander += PI;
     if (dist(e, P) < 1.1 && e.touchCd <= 0) { e.touchCd = 1; hurtPlayer(edmg(2), e); }
   } else if (e.ai === 'ranged') {
-    if (d < 6 && liveEnemies().length > 1 && inRoom(e.x, e.z, 3)) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd, dt);
+    if (d < 6 && liveEnemies().length > 1 && inRoom(e.x, e.z, 3)) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd * 0.5, dt);
     else if (d > 9.5) moveTo(e, tgt.x, tgt.z, e.spd, dt);
     else { e.face = angTo(e, tgt); }
     if (e.cd <= 0 && d < 14 && tgt === P) {
@@ -7604,7 +7608,7 @@ EDEF.tank = { key: 'boxtank', hp: 140, spd: 1.8, ai: 'tank', scraps: [3, 5], h: 
 EXTRA_SPAWN.tank = function (e) { e.heavy = true; e.dir8 = true; e.shellT = rnd(1.5, 2.5); e.onDeath = tankDeath; };
 EXTRA_AI.gunner = function (e, dt, tgt, d) {
   var P = G.P;
-  if (d < 5.5) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd, dt);
+  if (d < 5.5) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd * 0.5, dt);
   else if (d > 10) moveTo(e, tgt.x, tgt.z, e.spd, dt);
   else e.face = angTo(e, tgt);
   if (e.burst > 0) {
@@ -7614,7 +7618,7 @@ EXTRA_AI.gunner = function (e, dt, tgt, d) {
 };
 EXTRA_AI.tank = function (e, dt, tgt, d) {
   var P = G.P; e.shellT -= dt;
-  if (d > 9) moveTo(e, tgt.x, tgt.z, e.spd, dt); else if (d < 5) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd, dt); else e.face = angTo(e, tgt);
+  if (d > 9) moveTo(e, tgt.x, tgt.z, e.spd, dt); else if (d < 5) moveTo(e, e.x - (tgt.x - e.x), e.z - (tgt.z - e.z), e.spd * 0.5, dt); else e.face = angTo(e, tgt);
   if (e.shellT <= 0 && tgt === P && d < 18) {
     e.shellT = G.D.extra ? 2.4 : 3.1; e.face = angTo(e, P); e.atkAnim = 0.3;
     var tx = P.x + (P.moving ? Math.sin(P.face) * 1.2 : 0), tz = P.z + (P.moving ? Math.cos(P.face) * 1.2 : 0);
@@ -17139,6 +17143,33 @@ function mmWire() {
     mmDrawList();
   };
   devEl('mm-back').onclick = function () { mmStop(); devBackToDesk(); };
+}
+
+/* ---------- Version 26: melee balance ----------
+   LW found close combat heroes much weaker than the shooters. The bot agreed:
+   in the lair, melee heroes lost two to three times the hearts. So melee now
+   hits harder, shrugs off some damage straight after landing a hit, interrupts
+   the shooters it reaches, and its finisher hits all the way round. */
+var MELEE = { dmg: 1.4, arc: 1.15, guard: 1.2, guardMul: 0.75, stun: 0.6 };
+function isMelee(a) { return !!a && (a.type === 'swing' || a.type === 'slam'); }
+/* the attack a melee hero actually swings with */
+function meleeTune(a) { if (!isMelee(a) || G.doom) return a; return Object.assign({}, a, { dmg: a.dmg * MELEE.dmg, arc: (a.arc || 2) * MELEE.arc }); }
+/* after a melee hit: a moment of toughness, and a shooter that gets hit loses its shot */
+function meleeLanded(e, o) {
+  if (G.doom || !o || !o.melee || !o.hero || e.prop) return;
+  G.P.guardT = G.t + MELEE.guard;
+  if (e.boss || e.dead) return;
+  var shooter = e.ai === 'ranged' || e.ai === 'gunner' || e.ai === 'tank' || e.type === 'thrower';
+  if (!shooter) return;
+  e.burst = 0; e.wind = 0; e.cd = Math.max(e.cd || 0, 1.2); if (e.shellT !== undefined) e.shellT = Math.max(e.shellT, 1.5);
+  e.stunT = Math.max(e.stunT || 0, MELEE.stun);
+}
+/* toughness: a quarter off, kept as a running total so small hits sometimes come to nothing */
+function meleeGuard(P, n) {
+  if (G.doom || !(P.guardT > G.t)) return n;
+  P.guardBank = (P.guardBank || 0) + n * MELEE.guardMul;
+  var take = Math.floor(P.guardBank + 0.0001); P.guardBank -= take;
+  return take;
 }
 
 /* ===================== BOOT ===================== */
