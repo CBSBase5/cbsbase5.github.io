@@ -5649,7 +5649,7 @@
   }
 
   /* ---------------- screens ---------------- */
-  var SCREENS = ['title', 'main', 'squad', 'mapsel', 'ready', 'options', 'help', 'pause', 'replay', 'victory', 'results', 'tour', 'museum', 'find', 'label', 'postcard'];
+  var SCREENS = ['title', 'main', 'play', 'squad', 'mapsel', 'ready', 'options', 'help', 'pause', 'replay', 'victory', 'results', 'tour', 'museum', 'find', 'label', 'postcard'];
   var scr = null, CTL = {}, wiping = false, retOf = {};
   /* the time portal wipe: a portal swells to fill the screen, the screen swaps behind it, then it shrinks away */
   function wipe(fn) {
@@ -5777,11 +5777,11 @@
     items: function () { return [].slice.call(document.querySelectorAll('#mList .mi')); },
     enter: function () {
       var T = loadTourState(), n = allArts().length;
-      $('miContinue').hidden = !(store('save') || T);
-      $('miAgain').hidden = !lastSetup();
-      $('miTrain').innerHTML = 'Training with Jay' + (store('trained') ? '' : '<b>New</b>');
+      /* at most one way straight back in: carry on a saved game, or play the last setup again */
+      var canCont = !!(store('save') || T);
+      $('miContinue').hidden = !canCont;
+      $('miAgain').hidden = canCont || !lastSetup();
       $('musN').textContent = museumCount(allArts()) + '/' + n;
-      $('miTour').innerHTML = 'Time Tour' + (T ? '<b>' + Math.min(TOUR_STOPS.length, T.results.length) + '/' + TOUR_STOPS.length + '</b>' : '');
       /* keep the highlight on the same item, even when Continue appears or goes */
       var it = itemsOf(CTL.main), k = 0;
       it.forEach(function (el, i) { if (el.getAttribute('data-act') === CTL.main.act) k = i; });
@@ -5797,21 +5797,43 @@
     audioInit();
     if (a === 'exit') {
       if (!exitArm) {
-        e.preventDefault(); exitArm = true; b.textContent = 'Leave? Press again'; sfx('bonk');
-        setTimeout(function () { exitArm = false; b.textContent = 'Exit to Base 5'; }, 2500);
+        e.preventDefault(); exitArm = true; $('exitLbl').textContent = 'Sure?'; sfx('bonk');
+        setTimeout(function () { exitArm = false; $('exitLbl').textContent = 'Exit'; }, 2500);
       }
       return;
     }
     if (a === 'continue') doContinue();
-    else if (a === 'quick') startSetup('cpu');
     else if (a === 'again') playAgain();
+    else if (a === 'play') show('play');
+    else if (a === 'museum') openMuseum('main');
+    else if (a === 'help') openHelp('main');
+    else if (a === 'options') openOptions('main');
+  });
+  /* the ways to play, one press behind Play so the front menu stays short */
+  CTL.play = {
+    sel: 0, act: '', wrap: false,
+    items: function () { return [].slice.call(document.querySelectorAll('#plList .mi')); },
+    enter: function () {
+      var T = loadTourState();
+      $('miTrain').innerHTML = 'Training with Jay' + (store('trained') ? '' : '<b>New</b>');
+      $('miTour').innerHTML = 'Time Tour' + (T ? '<b>' + Math.min(TOUR_STOPS.length, T.results.length) + '/' + TOUR_STOPS.length + '</b>' : '');
+      var it = itemsOf(CTL.play), k = 0;
+      it.forEach(function (el, i) { if (el.getAttribute('data-act') === CTL.play.act) k = i; });
+      CTL.play.sel = k;
+    },
+    onSel: function (el) { CTL.play.act = el.getAttribute('data-act'); },
+    back: function () { show('main'); }
+  };
+  $('plList').addEventListener('click', function (e) {
+    var b = e.target.closest('.mi');
+    if (!b) return;
+    var a = b.getAttribute('data-act');
+    audioInit();
+    if (a === 'quick') startSetup('cpu');
     else if (a === 'surprise') surpriseMe();
     else if (a === 'train') startTraining();
     else if (a === 'two') startSetup('friend');
     else if (a === 'tour') { if (loadTourState()) openTour(); else startSetup('tour'); }
-    else if (a === 'museum') openMuseum('main');
-    else if (a === 'help') openHelp('main');
-    else if (a === 'options') openOptions('main');
   });
   var exitArm = false;
   function doContinue() {
@@ -5895,7 +5917,7 @@
     back: function () {
       if (pick.busy) return;
       if (pick.st === 1) { pick.st = 0; pick.a = null; setSel(ROSTER.indexOf(opts.era), true); drawSquad(); }
-      else show('main');
+      else show('play');
     }
   };
   $('roster').addEventListener('click', function (e) {
@@ -6770,7 +6792,7 @@
       }
       return true;
     },
-    back: function () { if (matchOn) toMenu(); else show('main'); }
+    back: function () { if (matchOn) toMenu(); else show('play'); }
   };
   $('track').addEventListener('click', function (e) { var b = e.target.closest('.stop'); if (b) { var it = CTL.tour.items(); setSel(it.indexOf(b), true); } });
   $('bTourGo').addEventListener('click', tourGo);
