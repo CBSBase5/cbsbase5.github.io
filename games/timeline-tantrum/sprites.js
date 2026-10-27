@@ -44,6 +44,7 @@
     sumer: ['#3a1e24', '#b8707a', '#e0a0a8', '#8c4e5a', '#d08890', '#a05e6a', '#40202a'],
     med:   ['#3a2a18', '#c4925e', '#e6bc8a', '#986c42', '#d8a876', '#aa7c4e', '#3e2c18'],
     pirate: ['#1e2c3a', '#6f93ae', '#a8c8dc', '#4f6f8a', '#8fb0c8', '#5d7f9a', '#223040'],
+    scrap: ['#2e241c', '#8c7a6a', '#b8a896', '#6a5a4c', '#a49482', '#c8662a', '#30261e'],
     gold:  ['#4a3510', '#e0b040', '#ffe08a', '#b8861e', '#f0cc5e', '#c99a2a', '#5a4010'],
     night: ['#1a1636', '#5f54a8', '#958adc', '#463c8a', '#7a6ec4', '#4e4496', '#211a44'],
     ember: ['#3a1610', '#c95a30', '#f09c6c', '#9c4020', '#e27c4c', '#ac4c2a', '#4a1a10'],
@@ -164,6 +165,11 @@
       e(12, 21, 4.7, 3.5, NV); e(12, 20.6, 4, 2.9, ST);
       r(8, 19, 9, 1, NV); r(8, 21, 9, 1, NV); r(8, 23, 9, 1, WK); r(11, 23, 3, 1, AU); r(12, 23, 1, 1, WK);
     }
+    if (era === 'scrap') {
+      /* a patched blue tarp poncho with a rope belt of bottle caps */
+      e(12, 21, 4.8, 3.5, '#1e3c74'); e(12, 20.6, 4.1, 2.9, '#2c5ca8'); r(9, 19, 3, 2, '#c8a040'); r(9, 19, 3, 1, '#e0c070'); r(14, 21, 2, 2, '#8a929c');
+      r(8, 22, 9, 1, '#c8a070'); r(10, 22, 1, 1, '#d84a3a'); r(13, 22, 1, 1, '#f0c446'); r(15, 22, 1, 1, '#d84a3a');
+    }
     if (era === 'egypt') {
       e(12, 22.4, 4.7, 2.3, LN); r(12, 22, 1, 3, LN2); r(14, 23, 2, 1, LN2); r(8, 21, 9, 1, AU);
       r(8, 17, 9, 1, AU); r(7, 18, 11, 1, LB); r(8, 19, 9, 1, AU); r(9, 18, 1, 1, TQ); r(12, 18, 1, 1, TQ); r(15, 18, 1, 1, TQ);
@@ -247,6 +253,12 @@
       r(9, 0 + hy, 7, 1, IRD); r(8, 1 + hy, 9, 3, IRD); r(9, 1 + hy, 7, 2, IR); r(9, 1 + hy, 3, 1, IRL);
       r(4, 4 + hy, 17, 2, IRD); r(5, 4 + hy, 15, 1, IR); r(5, 4 + hy, 4, 1, IRL); r(12, 3 + hy, 1, 1, BRS);
     }
+    if (era === 'scrap') {
+      /* a dented saucepan helmet, handle sticking out, welding goggles pushed up on top */
+      r(8, 1 + hy, 9, 1, '#4f565e'); r(7, 2 + hy, 11, 4, '#4f565e'); r(8, 2 + hy, 9, 3, '#9aa4ae'); r(8, 2 + hy, 3, 1, '#cfd5da'); r(13, 3 + hy, 1, 1, '#6a727c');
+      r(6, 6 + hy, 13, 1, '#3a3e44'); r(18, 3 + hy, 5, 2, '#2a2a30'); r(22, 3 + hy, 1, 2, '#4f565e');
+      r(8, 3 + hy, 3, 2, '#3a2a20'); r(14, 3 + hy, 3, 2, '#3a2a20'); r(9, 3 + hy, 1, 1, '#ffb030'); r(15, 3 + hy, 1, 1, '#ffb030');
+    }
     if (era === 'pirate') {
       /* a red spotted bandana, knotted at the back */
       r(8, 3 + hy, 9, 1, BD); r(7, 4 + hy, 11, 2, BD); r(6, 6 + hy, 13, 1, BD); r(8, 3 + hy, 4, 1, BDL);
@@ -283,6 +295,7 @@
       if (era === 'sumer') { r(18, 3 + u, 6, 7, CLD); r(19, 4 + u, 4, 5, CL); r(19, 5 + u, 3, 1, CLD); r(20, 7 + u, 2, 1, CLD); r(19, 4 + u, 1, 1, CLL); }
       if (era === 'med') { r(19, 1 + u, 1, 11, WD); r(20, 1 + u, 5, 4, GND); r(20, 2 + u, 4, 2, GN); r(21, 2 + u, 2, 1, AU); r(19, 0 + u, 1, 1, AU); }
       if (era === 'pirate') { r(19, 4 + u, 1, 6, IRL); r(20, 2 + u, 1, 3, IRL); r(21, 1 + u, 1, 2, IRL); r(18, 10 + u, 3, 1, AU); r(19, 11 + u, 1, 1, WK); }
+      if (era === 'scrap') { r(19, 5 + u, 1, 7, '#9aa4ae'); r(17, 0 + u, 5, 5, '#8a1a14'); r(18, 0 + u, 3, 5, '#d84a3a'); r(17, 1 + u, 5, 3, '#d84a3a'); r(18, 2 + u, 3, 1, '#f4efe4'); }
     } else if (pose === 'yawn') {
       var v = f % 2;
       r(4, 12 + v, 2, 6, D); hand(3, 10 + v); r(18, 12 + v, 2, 6, D); hand(19, 10 + v);
@@ -318,6 +331,7 @@
         else if (era === 'sumer') { r(17, 6, 2, 8, WD); r(15, 3, 5, 3, CU); r(15, 3, 2, 1, '#f0b07a'); r(19, 4, 1, 1, CU); }
         else if (era === 'med') { r(17, 6, 2, 8, WD); r(16, 2, 4, 4, IRD); r(17, 3, 2, 2, IR); r(15, 3, 1, 1, IRD); r(20, 3, 1, 1, IRD); r(17, 1, 1, 1, IRD); }
         else if (era === 'pirate') { r(18, 4, 1, 8, IRL); r(19, 2, 1, 3, IRL); r(16, 12, 4, 1, AU); r(17, 13, 2, 1, WK); }
+        else if (era === 'scrap') { r(18, 5, 1, 9, '#9aa4ae'); r(16, 0, 5, 5, '#d84a3a'); r(17, 2, 3, 1, '#f4efe4'); }
         else { r(16, 10, 4, 4, CY); r(17, 11, 2, 2, CYL); }
       } else {
         r(17, 18, 5, 2, D);
@@ -327,6 +341,7 @@
         else if (era === 'sumer') { r(21, 18, 6, 2, WD); r(26, 15, 3, 6, CU); r(26, 15, 1, 6, '#f0b07a'); }
         else if (era === 'med') { r(21, 18, 6, 2, WD); r(27, 16, 4, 5, IRD); r(28, 17, 2, 3, IR); r(31, 18, 1, 1, IRD); r(28, 15, 1, 1, IRD); }
         else if (era === 'pirate') { r(21, 18, 2, 2, AU); r(23, 18, 7, 1, IRL); r(29, 17, 2, 1, IRL); r(24, 19, 4, 1, IR); }
+        else if (era === 'scrap') { r(21, 18, 8, 1, '#9aa4ae'); r(28, 15, 5, 5, '#d84a3a'); r(29, 17, 3, 1, '#f4efe4'); }
         else { r(22, 16, 4, 4, CY); r(23, 17, 2, 2, CYL); r(26, 17, 2, 1, CYL); r(26, 19, 2, 1, CYL); }
         r(24, 13, 1, 1, '#ffffff'); r(26, 12, 1, 1, '#ffffff');
       }
@@ -338,6 +353,7 @@
       else if (era === 'rome' || era === 'med') { r(21, 21 + dd, 4, 1, WD); r(24, 18 + dd, 2, 5, IRD); r(25, 19 + dd, 1, 3, IRL); }
       else if (era === 'pirate') { r(20, 21 + dd, 5, 1, WD); r(25, 19 + dd, 3, 4, IR); r(25, 19 + dd, 3, 1, IRL); }
       else if (era === 'sumer') { r(20, 20 + dd, 5, 1, WD); r(25, 20 + dd, 1, 4, CU); r(26, 23 + dd, 2, 1, CU); }
+      else if (era === 'scrap') { r(20, 21 + dd, 5, 1, WD); r(24, 19 + dd, 4, 4, '#9aa4ae'); r(25, 20 + dd, 2, 2, '#cfd5da'); }
       else { r(21, 20 + dd, 4, 2, MT); r(25, 20 + dd, 2, 2, CY); r(27, 20 + dd * 2, 1, 1, CYL); }
     } else {
       var sw = walk ? [1, 1, 0, -1, -1, 0][w6] : 0;
@@ -348,6 +364,7 @@
       if (era === 'sumer') { r(17 + sw, 15, 5, 6, CLD); r(18 + sw, 16, 3, 4, CL); r(18 + sw, 17, 2, 1, CLD); r(19 + sw, 19, 2, 1, CLD); r(18 + sw, 16, 1, 1, CLL); }
       if (era === 'med') { r(19 + sw, 8, 1, 2, WK); r(20 + sw, 10, 1, 9, WK); r(19 + sw, 19, 1, 2, WK); r(19 + sw, 10, 1, 9, '#e8e2d2'); r(20 + sw, 14, 1, 2, WD); }
       if (era === 'pirate') { r(18 + sw, 13, 1, 6, IRL); r(19 + sw, 11, 1, 2, IRL); r(17 + sw, 19, 3, 1, AU); r(18 + sw, 20, 1, 1, WK); }
+      if (era === 'scrap') { r(18 + sw, 13, 1, 7, '#8a929c'); r(17 + sw, 11, 1, 2, '#8a929c'); r(19 + sw, 11, 1, 2, '#8a929c'); r(18 + sw, 13, 1, 1, '#cfd5da'); }
     }
     OY -= bob; OX -= lean;
   }
@@ -449,6 +466,7 @@
     if (era === 'sumer') { e(11.5, 20.6 + oy, 4.8, 3, KND); e(11.5, 20.4 + oy, 4.2, 2.4, KN); for (var tq = 0; tq < 4; tq++) { r(8 + tq * 2 + (tq % 2), 19.5 + oy, 1, 1, KND); r(9 + tq * 2, 21.5 + oy, 1, 1, KND); } r(7.5, 18 + oy, 8.5, 1, BRS); }
     if (era === 'med') { e(11.5, 20 + oy, 4.7, 3.4, GND); e(11.5, 19.6 + oy, 4, 2.8, GN); r(9, 17.5 + oy, 1.5, 5, GNL); r(12.5, 17.5 + oy, 1, 5.5, AU); r(10.5, 19.5 + oy, 5, 1, AU); r(7.5, 22.3 + oy, 8.5, 1, WK); }
     if (era === 'pirate') { e(11.5, 20 + oy, 4.7, 3.4, NV); e(11.5, 19.6 + oy, 4, 2.8, ST); r(7.5, 18.5 + oy, 8.5, 0.9, NV); r(7.5, 20.4 + oy, 8.5, 0.9, NV); r(7.5, 22.3 + oy, 8.5, 1, WK); r(12, 22.3 + oy, 2, 1, AU); }
+    if (era === 'scrap') { e(11.5, 20 + oy, 4.7, 3.4, '#1e3c74'); e(11.5, 19.6 + oy, 4, 2.8, '#2c5ca8'); r(12, 18 + oy, 3, 2, '#c8a040'); r(7.5, 22.3 + oy, 8.5, 1, '#c8a070'); r(10, 22.3 + oy, 1, 1, '#d84a3a'); r(13, 22.3 + oy, 1, 1, '#f0c446'); }
     if (era === 'egypt') { e(11.5, 21.4 + oy, 4.7, 2.3, LN); r(12.5, 21 + oy, 1, 3, LN2); r(7.5, 20 + oy, 8.5, 1, AU); r(9, 16.5 + oy, 7.5, 1, AU); r(8.5, 17.5 + oy, 8, 1, LB); r(9.5, 18.5 + oy, 6.5, 0.8, AU); r(11, 17.5 + oy, 1, 1, TQ); r(14, 17.5 + oy, 1, 1, TQ); }
 
     /* near leg and foot */
@@ -514,6 +532,11 @@
       r(3.5, 7 + hy, 3, 1.5, BD); r(2, 8.3 + hy + flap, 2.2, 1.5, BD); r(3.5, 9 + hy, 1.2, 2, BD);
       r(8, 7.8 + hy, 6, 0.7, P); r(13.5, 7.8 + hy, 0.7, 0.7, P);
       r(9.5, 12.6 + hy, 0.9, 1.6, AU);
+    }
+    if (era === 'scrap') {
+      e(11.8, 5.4 + hy, 5.8, 2.8, '#4f565e'); e(11.8, 5.2 + hy, 5, 2.2, '#9aa4ae'); e(10.4, 4.4 + hy, 2, 0.7, '#cfd5da');
+      r(5.6, 6.8 + hy, 12.4, 1, '#3a3e44'); r(1.5, 5.4 + hy, 5, 1.6, '#2a2a30');
+      r(13.5, 4.2 + hy, 3, 2, '#3a2a20'); r(14.2, 4.6 + hy, 1.6, 1.2, '#ffb030');
     }
     if (era === 'egypt') {
       e(11.8, 6.4 + hy, 6.4, 3.3, LB); r(5.4, 6.6 + hy, 12.5, 1.2, LB);
@@ -832,6 +855,24 @@
       ctx.fillStyle = '#5f5a52'; ctx.fillRect(X + 1, Y + 1, 3, 1); ctx.fillRect(X - 2, Y + 2, 2, 1);
       return;
     }
+    if (p.type === 'slug') {
+      var sf = p.face || (p.vx < 0 ? -1 : 1), wig = (t >> 3) % 2;
+      ctx.fillStyle = '#2a4a1a'; ctx.fillRect(X - 4, Y - 2, 9, 4); ctx.fillStyle = '#7ab84a'; ctx.fillRect(X - 3, Y - 2, 7, 3); ctx.fillStyle = '#a8e070'; ctx.fillRect(X - 2, Y - 2, 4, 1);
+      ctx.fillStyle = '#2a4a1a'; ctx.fillRect(X + sf * 3, Y - 4 - wig, 1, 2); ctx.fillRect(X + sf * 4, Y - 5 + wig, 1, 3);
+      ctx.fillStyle = '#c8f090'; ctx.fillRect(X + sf * 4, Y - 5 + wig, 1, 1);
+      return;
+    }
+    if (era === 'scrap' && (p.type === 'lob' || p.type === 'bomb')) {
+      if (p.type === 'lob') {
+        ctx.fillStyle = '#3a3e44'; ctx.fillRect(X - 2, Y - 3, 5, 6); ctx.fillStyle = '#cfd5da'; ctx.fillRect(X - 1, Y - 3, 3, 6);
+        ctx.fillStyle = '#d84a3a'; ctx.fillRect(X - 1, Y - 1, 3, 2); ctx.fillStyle = '#f4efe4'; ctx.fillRect(X, Y - 1, 1, 1);
+      } else {
+        ctx.fillStyle = '#1a1a1a'; ctx.fillRect(X - 2, Y - 3, 5, 7); ctx.fillStyle = '#ef7724'; ctx.fillRect(X - 1, Y - 3, 3, 3);
+        ctx.fillStyle = '#3a3a3a'; ctx.fillRect(X - 1, Y, 3, 3); ctx.fillStyle = '#cfd5da'; ctx.fillRect(X, Y - 4, 1, 1);
+        ctx.fillStyle = ((t >> 2) % 2) ? '#7fe8ff' : '#fff3c8'; ctx.fillRect(X + ((t >> 2) % 3) - 1, Y - 5 - ((t >> 1) % 2), 1, 1);
+      }
+      return;
+    }
     if (era === 'pirate' && (p.type === 'lob' || p.type === 'bomb')) {
       if (p.type === 'lob') {
         ctx.fillStyle = '#1a1a1a'; ctx.fillRect(X - 2, Y - 2, 5, 5);
@@ -876,6 +917,17 @@
       ctx.fillStyle = '#7a5434'; ctx.fillRect(X - 3, Y - 3, 7, 6);
       ctx.fillStyle = '#d0a064'; ctx.fillRect(X - 2, Y - 2, 5, 4);
       ctx.fillStyle = '#f0d49a'; ctx.fillRect(X - 2, Y - 2, 2, 1);
+      return;
+    }
+    if (p.type === 'meteor' && p.era === 'scrap') {
+      /* a tumbling chunk of old satellite, solar wings and all */
+      for (i = 0; i < p.trail.length; i++) { ctx.fillStyle = i < p.trail.length / 2 ? '#8a7a6a' : '#ffd27a'; ctx.fillRect(Math.round(p.trail[i][0]), Math.round(p.trail[i][1]), 2, 2); }
+      var tw2 = ((t >> 3) % 2) === 0;
+      ctx.fillStyle = '#2a4a8a'; if (tw2) { ctx.fillRect(X - 9, Y - 1, 5, 3); ctx.fillRect(X + 5, Y - 1, 5, 3); } else { ctx.fillRect(X - 1, Y - 9, 3, 5); ctx.fillRect(X - 1, Y + 5, 3, 5); }
+      ctx.fillStyle = '#5a6a7a'; ctx.fillRect(X - 3, Y - 3, 7, 7);
+      ctx.fillStyle = '#c8ccd4'; ctx.fillRect(X - 2, Y - 2, 5, 5);
+      ctx.fillStyle = '#c8662a'; ctx.fillRect(X - 2, Y + 1, 2, 1);
+      ctx.fillStyle = '#fff'; ctx.fillRect(X - 1, Y - 2, 1, 1);
       return;
     }
     if (p.type === 'meteor' && p.era === 'fut') {
@@ -1084,6 +1136,24 @@
       x2.fillStyle = neo2 ? '#14162e' : '#7a5a34'; x2.fillRect(Math.round(W * 0.8), gy - 22, 2, 14);
       x2.fillStyle = neo2 ? '#ff78be' : (wild2 ? '#3f7a2e' : '#3f8a4a'); x2.fillRect(Math.round(W * 0.8) - 5, gy - 24, 12, 2); x2.fillRect(Math.round(W * 0.8) - 3, gy - 26, 8, 2);
       if (neo2) { x2.fillStyle = '#5fe0f0'; x2.fillRect(0, gy - 6, Math.round(W * 0.3), 1); }
+    } else if (map.style === 'ruins') {
+      var gR = look === 'overgrown', sR = look === 'sandy', lR = look === 'gleaming';
+      [[0.08, 0.34, 0.1], [0.3, 0.2, -0.12], [0.62, 0.3, 0.06], [0.84, 0.44, -0.2]].forEach(function (t, k) {
+        var bx = Math.round(W * t[0]), top = Math.round(H * t[1]), bw = Math.round(W * 0.13);
+        x2.save(); x2.translate(bx + bw / 2, gy); x2.rotate(t[2]);
+        x2.fillStyle = sR ? '#b8a080' : '#8a9690'; x2.fillRect(-bw / 2, top - gy, bw, gy - top + 2);
+        x2.fillStyle = lR ? '#ffd27a' : '#4a5a58';
+        for (var yy = top - gy + 3; yy < -2; yy += 4) for (var xx = -bw / 2 + 2; xx < bw / 2 - 2; xx += 3) if (lR || ((xx * 7 + yy * 3 + k) % 5) < 3) x2.fillRect(xx, yy, 1, 2);
+        x2.fillStyle = sR ? '#b8a080' : '#8a9690'; x2.fillRect(-bw / 2 + 2, top - gy - 3, 3, 3);
+        if (!sR) { x2.fillStyle = gR ? '#5fae3e' : '#6a9a4a'; x2.fillRect(-bw / 2, top - gy - 2, Math.round(bw * 0.6), 3); }
+        x2.restore();
+      });
+      x2.fillStyle = '#e8e8ec'; x2.beginPath(); x2.arc(W * 0.48, gy + 2, 9, Math.PI, Math.PI * 1.8); x2.lineTo(W * 0.48, gy + 2); x2.fill();
+      x2.fillStyle = '#2a4a8a'; x2.fillRect(Math.round(W * 0.52), gy - 10, 8, 3);
+      x2.fillStyle = sR ? '#e0c088' : (gR ? '#5f9a3a' : '#8a8274'); x2.fillRect(0, gy, W, 2);
+      x2.fillStyle = sR ? 'rgb(214,180,112)' : 'rgb(118,108,96)'; x2.fillRect(0, gy + 2, W, H - gy);
+      x2.fillStyle = '#9a4a34'; x2.fillRect(Math.round(W * 0.2), gy + 4, 2, 2); x2.fillRect(Math.round(W * 0.7), gy + 6, 2, 2);
+      x2.fillStyle = map.water; x2.fillRect(0, H - 3, W, 3);
     } else if (map.style === 'desert') {
       var pc = look === 'golden' ? '#f2eadb' : (look === 'neon' ? '#3a3e6e' : '#d6c69e');
       x2.fillStyle = pc; x2.beginPath(); x2.moveTo(W * 0.2, gy); x2.lineTo(W * 0.45, H * 0.2); x2.lineTo(W * 0.7, gy); x2.fill();
@@ -1116,7 +1186,7 @@
     function P(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
     function dot(cx, cy, rad, c) { for (var y = 0; y < 12; y++) for (var x = 0; x < 12; x++) { var dx = x + 0.5 - cx, dy = y + 0.5 - cy; if (dx * dx + dy * dy <= rad * rad) P(x, y, 1, 1, c); } }
     var i;
-    if ({ lob: 1, bomb: 1, boulder: 1, gourd: 1, disc: 1, scarab: 1 }[wid]) {
+    if ({ lob: 1, bomb: 1, boulder: 1, gourd: 1, disc: 1, scarab: 1, slug: 1 }[wid]) {
       S.proj(ctx, { type: wid, x: 6, y: 7, vx: 1, vy: 0, trail: [], rest: false, era: era, face: 1 }, era, 8);
       return;
     }
@@ -1133,6 +1203,16 @@
       case 'onager':
         P(1, 9, 10, 2, WK); P(2, 8, 8, 1, WD); P(3, 4, 1, 5, WD); P(4, 3, 1, 1, WD); P(5, 2, 1, 1, WD); P(6, 1, 1, 1, WD);
         dot(8.5, 2.5, 2, '#8c857b'); P(8, 1, 1, 1, '#b5ada2'); P(2, 11, 2, 1, '#3b2616'); P(8, 11, 2, 1, '#3b2616'); break;
+      case 'trolley':
+        P(1, 2, 2, 1, '#4f565e'); P(2, 3, 9, 1, '#9aa4ae'); for (i = 0; i < 4; i++) P(3 + i * 2, 4, 1, 3, '#9aa4ae'); P(3, 7, 8, 1, '#9aa4ae'); P(4, 4, 2, 2, '#d84a3a'); P(7, 4, 2, 2, '#2c5ca8');
+        P(3, 9, 2, 2, '#1d1d24'); P(9, 9, 2, 2, '#1d1d24'); P(4, 8, 1, 1, '#4f565e'); P(10, 8, 1, 1, '#4f565e'); break;
+      case 'tyres':
+        for (i = 0; i < 3; i++) { P(2, 2 + i * 3, 8, 3, '#1d1d24'); P(3, 2 + i * 3, 6, 1, '#4a4a52'); P(5, 3 + i * 3, 2, 1, '#9aa4ae'); }
+        P(1, 11, 10, 1, '#5a4a3a'); break;
+      case 'springs':
+        P(3, 1, 5, 4, '#6a4a2a'); P(3, 1, 5, 1, '#8b5a2b'); P(7, 3, 3, 2, '#6a4a2a'); for (i = 0; i < 3; i++) { P(4, 5 + i * 2, 4, 1, '#cfd5da'); P(5, 6 + i * 2, 3, 1, '#7a828c'); } P(3, 11, 6, 1, '#4f565e'); break;
+      case 'stomp':
+        P(4, 0, 4, 6, '#8a5a3a'); P(5, 0, 1, 6, '#b8784a'); P(2, 6, 9, 3, '#7a4a2a'); P(1, 9, 11, 2, '#5a3a22'); P(3, 7, 1, 1, '#cfd5da'); P(7, 7, 1, 1, '#cfd5da'); P(10, 9, 1, 1, '#cfd5da'); break;
       case 'cart':
         P(1, 4, 10, 4, WK); P(2, 5, 8, 2, WD); P(1, 3, 2, 1, WK); P(9, 2, 2, 2, WK);
         dot(3.5, 9, 2.3, '#3a2410'); dot(3.5, 9, 1.4, WD); dot(8.5, 9, 2.3, '#3a2410'); dot(8.5, 9, 1.4, WD); break;
@@ -1183,6 +1263,7 @@
         else if (era === 'pirate') { P(9, 1, 1, 2, IRL); P(8, 3, 1, 2, IRL); P(7, 5, 1, 2, IRL); P(6, 7, 1, 1, IRL); P(4, 7, 4, 1, AU); P(4, 8, 2, 2, WK); P(0, 4, 2, 1, '#ffffff'); }
         else if (era === 'rome') { P(3, 1, 7, 10, '#4f565e'); P(4, 2, 5, 8, RD); P(4, 2, 1, 8, RDL); P(5, 5, 3, 2, BRS); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         else if (era === 'pre') { P(7, 1, 4, 4, WK); P(7, 1, 1, 1, '#8c6034'); P(6, 5, 2, 2, WD); P(4, 7, 2, 2, WD); P(2, 9, 2, 2, WD); }
+        else if (era === 'scrap') { P(7, 0, 4, 4, '#d84a3a'); P(8, 1, 2, 1, '#f4efe4'); P(6, 4, 1, 2, '#9aa4ae'); P(5, 6, 1, 2, '#9aa4ae'); P(4, 8, 1, 2, '#9aa4ae'); P(3, 10, 1, 2, '#9aa4ae'); }
         else if (era === 'egypt') { P(7, 0, 4, 4, '#cfc6b4'); P(7, 0, 2, 1, '#f4efe4'); P(10, 2, 1, 2, '#8c857b'); P(6, 4, 2, 2, WD); P(4, 6, 2, 2, WD); P(2, 8, 2, 2, WD); P(1, 10, 2, 1, AU); }
         else { P(3, 3, 6, 6, CY); P(3, 3, 6, 1, CYL); P(9, 4, 2, 4, '#1f7f8f'); P(4, 6, 4, 1, '#1f7f8f'); P(0, 4, 2, 1, '#ffffff'); P(0, 7, 2, 1, '#ffffff'); }
         break;
@@ -1190,6 +1271,7 @@
         if (era === 'sumer') { P(1, 2, 2, 2, WD); P(3, 4, 2, 2, WD); P(5, 6, 2, 2, WD); P(7, 8, 1, 3, CU); P(8, 10, 3, 1, CU); }
         else if (era === 'pirate') { P(1, 2, 2, 2, '#d84a3a'); P(2, 1, 1, 1, '#d84a3a'); P(1, 1, 1, 1, '#d84a3a'); P(3, 4, 1, 4, WD); P(4, 7, 1, 1, WD); P(5, 8, 4, 3, IR); P(5, 8, 4, 1, IRL); }
         else if (era === 'rome' || era === 'med') { P(1, 9, 7, 1, WD); P(1, 10, 6, 1, WK); P(7, 4, 2, 7, '#4f565e'); P(8, 5, 1, 4, '#cfd5da'); P(9, 4, 2, 1, '#4f565e'); }
+        else if (era === 'scrap') { P(2, 1, 1, 6, WD); P(3, 6, 1, 2, WD); P(3, 7, 6, 5, '#7a828c'); P(4, 8, 4, 3, '#cfd5da'); P(5, 9, 2, 1, '#9aa4ae'); }
         else if (era === 'pre') { P(6, 0, 1, 6, BN); P(4, 6, 5, 4, BN); P(5, 7, 3, 2, '#d8ceb4'); P(5, 10, 3, 1, BN); }
         else if (era === 'egypt') { P(1, 8, 6, 2, WD); P(7, 8, 3, 2, CU); P(10, 8, 1, 2, '#f0b07a'); P(2, 2, 4, 3, WK); P(3, 5, 1, 3, WD); }
         else { P(1, 4, 6, 5, MT); P(1, 4, 6, 1, '#9aa3ad'); P(7, 5, 2, 3, '#9aa3ad'); P(9, 6, 2, 1, CY); P(11, 6, 1, 1, CYL); }
@@ -1460,6 +1542,30 @@
     bulb: { pal: { o: '#7a6a2a', Y: '#fff1a0', y: '#f5d23a', f: '#c4572e', g: '#9aa3ad', d: '#59606a' }, rows: [
       '    oooo    ', '   oYYYYo   ', '  oYYyyYYo  ', '  oYyffyYo  ', '  oYYffYYo  ', '   oYffYo   ',
       '    oYYo    ', '    gggg    ', '    dddd    ', '    gggg    ', '     dd     ', '            '] },
+    barcode: { pal: { o: '#111418', W: '#f4efe4', k: '#1d1d24' }, rows: [
+      '            ', ' oooooooooo ', ' oWWWWWWWWo ', ' okWkkWkWko ', ' okWkkWkWko ', ' okWkkWkWko ', ' okWkkWkWko ', ' okWkkWkWko ', ' oWWWWWWWWo ', ' oWkWkWkWWo ', ' oooooooooo ', '            '] },
+    solar: { pal: { o: '#111418', B: '#2a4a8a', b: '#5a8ad0', S: '#9aa3ad' }, rows: [
+      '            ', 'oooooooooooo', 'oBbBbBbBbBbo', 'oooooooooooo', 'obBbBbBbBbBo', 'oooooooooooo', 'oBbBbBbBbBbo', 'oooooooooooo', '     oo     ', '     SS     ', '    oSSo    ', '   oooooo   '] },
+    trafficlight: { pal: { o: '#111418', G: '#3a3e44', R: '#d84a3a', Y: '#f5c23a', g: '#3aa84f', S: '#8a929c' }, rows: [
+      '    oooo    ', '    oGGo    ', '   ooRRoo   ', '    oRRo    ', '   ooYYoo   ', '    oYYo    ', '   ooggoo   ', '    oggo    ', '    oooo    ', '     SS     ', '     SS     ', '    oSSo    '] },
+    headphones: { pal: { o: '#111418', K: '#3b4048', R: '#d84a3a', S: '#9aa3ad' }, rows: [
+      '            ', '   oooooo   ', '  oKKKKKKo  ', ' oKo    oKo ', ' oKo    oKo ', ' oKo    oKo ', 'ooRoo  ooRoo', 'oRRRo  oRRRo', 'oRSRo  oRSRo', 'oRRRo  oRRRo', 'ooooo  ooooo', '            '] },
+    bottle: { pal: { o: '#2a5a6a', b: '#9ad8e8', B: '#5ab0c8', w: '#f4efe4', c: '#2f6fd8' }, rows: [
+      '    occo    ', '    occo    ', '    obbo    ', '   obbbbo   ', '  obbbbbbo  ', '  obwbbBbo  ', '  owwwwwwo  ', '  obbbbbBo  ', '  obwbbBbo  ', '  obbbbBBo  ', '  obbbbBBo  ', '   oooooo   '] },
+    shoptrolley: { pal: { o: '#3a3e44', S: '#cfd5da', s: '#9aa3ad', k: '#1d1d24' }, rows: [
+      'oo          ', ' o          ', ' ooooooooooo', '  oSsSsSsSo ', '  oSsSsSsSo ', '  osSsSsSso ', '   oooooooo ', '   o     o  ', '   ooooooo  ', '  kk    kk  ', '  kk    kk  ', '            '] },
+    bike: { pal: { o: '#3a2a1a', W: '#8b5a2b', w: '#c99a5a', k: '#1d1d24' }, rows: [
+      '            ', '   oo       ', '   ow       ', '  ooooooooo ', '  oWWWWWWWo ', '   o    o   ', ' kkko  okkk ', 'k   k  k   k', 'k   k  k   k', 'k   k  k   k', ' kkk    kkk ', '            '] },
+    skateboard: { pal: { o: '#111418', P: '#ff78be', p: '#c8508a', S: '#9aa3ad', k: '#1d1d24' }, rows: [
+      '            ', '            ', '            ', '            ', 'oo        oo', 'oPPPPPPPPPPo', 'opppppppppp ', ' oooooooooo ', '  SS    SS  ', ' kkkk  kkkk ', ' kkkk  kkkk ', '            '] },
+    fridgeart: { pal: { o: '#4a525a', W: '#f4efe4', w: '#d8dee2', R: '#b8442a', h: '#8a929c' }, rows: [
+      ' oooooooooo ', ' oWWWWWWWWo ', ' oWRRRWWWWo ', ' oRRRRRWWWo ', ' oWRWRWWWho ', ' oWWWWWWWho ', ' oooooooooo ', ' owwwwwwwwo ', ' owwwwwwwho ', ' owwwwwwwho ', ' owwwwwwwwo ', ' oooooooooo '] },
+    shipwheel: { pal: { o: '#3a2410', W: '#8b5a2b', w: '#c99a5a' }, rows: [
+      '     oo     ', ' o   ww   o ', '  o oooo o  ', '   oWWWWo   ', '  oWWwwWWo  ', 'owoWwooWWowo', 'owoWwooWWowo', '  oWWwwWWo  ', '   oWWWWo   ', '  o oooo o  ', ' o   ww   o ', '     oo     '] },
+    scroll: { pal: { o: '#6a4a1a', P: '#efe0b0', p: '#d8c088', k: '#4a3a2a' }, rows: [
+      '            ', ' oooooooooo ', 'oPPPPPPPPPPo', ' oPkPPkkPpo ', ' oPPPPPPPpo ', ' oPkkPkPPpo ', ' oPPPPPPPpo ', ' oPkPkkPPpo ', ' oPPPPPPPpo ', 'oPPPPPPPPPPo', ' oooooooooo ', '            '] },
+    laurel: { pal: { o: '#2a5426', G: '#5fa04a', g: '#3f7a3a', Y: '#f0c446' }, rows: [
+      '            ', '   oo  oo   ', '  oGo  oGo  ', ' oGgo  ogGo ', ' oGo    oGo ', 'oGgo    ogGo', 'oGo      oGo', 'oGgo    ogGo', ' oGo    oGo ', ' oGgo  ogGo ', '  ooYYYYoo  ', '            '] },
     floppy: { pal: { o: '#111418', B: '#2f4f8a', s: '#c7ccd3', L: '#f4efe4', d: '#1d2a44' }, rows: [
       '            ', ' oooooooooo ', ' oBBssssBBo ', ' oBBsdssBBo ', ' oBBssssBBo ', ' oBBBBBBBBo ',
       ' oBLLLLLLBo ', ' oBLLLLLLBo ', ' oBLLLLLLBo ', ' oBLLLLLLBo ', ' oooooooooo ', '            '] },
@@ -1729,6 +1835,30 @@
     else { ctx.fillRect(X - 3, Y + 1, 2, 1); ctx.fillRect(X - 1, Y, 3, 1); ctx.fillRect(X + 2, Y + 1, 2, 1); }
   };
 
+  /* the Trolley Charge: a wonky shopping trolley full of junk */
+  S.trolley = function (ctx, x, y, face, roll) {
+    var X = Math.round(x), Y = Math.round(y), w8 = Math.round(roll || 0) % 2;
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(face > 0 ? X + a : X - a - w, Y + b, w, h); }
+    P(-10, -16, 2, 2, '#3a3e44'); P(-9, -15, 3, 1, '#9aa4ae');
+    P(-7, -14, 16, 1, '#cfd5da'); P(-7, -6, 15, 1, '#9aa4ae'); P(-7, -14, 1, 9, '#9aa4ae'); P(8, -14, 1, 8, '#9aa4ae');
+    for (var k = 0; k < 4; k++) P(-4 + k * 3, -13, 1, 7, '#7a828c');
+    P(-5, -18, 5, 5, '#d84a3a'); P(0, -17, 4, 4, '#2c5ca8'); P(3, -19, 3, 6, '#f0c446'); P(-2, -20, 2, 3, '#7ab84a');
+    P(-6, -5, 1, 3, '#4f565e'); P(6, -5, 1, 3, '#4f565e');
+    P(-7, -2, 3, 2, '#1d1d24'); P(5, -2, 3, 2, '#1d1d24'); P(-6 + w8, -2, 1, 1, '#9aa4ae'); P(6 - w8, -2, 1, 1, '#9aa4ae');
+  };
+  /* the Robot Stomp: a giant rusty robot leg and foot. y = bottom of the sole, top = where the leg comes from */
+  S.foot = function (ctx, x, y, top, t) {
+    var X = Math.round(x), Y = Math.round(y);
+    function P(a, b, w, h, c) { ctx.fillStyle = c; ctx.fillRect(X + a, b, w, h); }
+    var legTop = Math.min(top, Y - 60);
+    P(-12, legTop, 24, Y - 44 - legTop, '#3a2a20'); P(-11, legTop, 22, Y - 44 - legTop, '#8a5a3a'); P(-11, legTop, 6, Y - 44 - legTop, '#b8784a');
+    for (var yy = legTop + 8; yy < Y - 48; yy += 16) { P(-12, yy, 24, 2, '#3a2a20'); P(-8, yy + 5, 2, 2, '#cfd5da'); P(6, yy + 5, 2, 2, '#cfd5da'); }
+    P(-16, Y - 46, 32, 8, '#3a2a20'); P(-15, Y - 45, 30, 6, '#6a727c'); P(-15, Y - 45, 30, 2, '#9aa4ae');
+    P(-30, Y - 38, 62, 30, '#3a2a20'); P(-29, Y - 37, 60, 28, '#9a6a3a'); P(-29, Y - 37, 60, 6, '#c8884a'); P(-29, Y - 37, 10, 28, '#b8784a');
+    for (var k = 0; k < 6; k++) P(-24 + k * 10, Y - 26, 3, 3, '#cfd5da');
+    P(-34, Y - 10, 70, 10, '#2a2a30'); P(-33, Y - 9, 68, 8, '#4f565e'); P(-33, Y - 9, 68, 2, '#7a828c');
+    P(14, Y - 32, 12, 6, '#7ab84a'); P(16, Y - 34, 4, 2, '#a8e070');
+  };
   /* time glitch visitors: big friendly things from other times, x, y = feet on the ground */
   var visCache = {};
   S.visitor = function (ctx, id, x, y, face, t, scared) {
@@ -1819,7 +1949,7 @@
     return c;
   };
   /* the real things the squad kit is based on, as little museum drawings */
-  var REAL = {"boulder":["................","......kkk.......",".....kgggk......","....kgwggGk.....","...kgwgggGGk....","...kggggggGk....","..kgwgggggGGk...","..kggggggggGk...","..kgggggggGGk...","...kgggggGGk....","...kggggGGGk....","....kggGGGk.....",".....kgGGk......","......kGk.......",".......k........","................"],"gourd":["......kk........",".....kBBk.......",".....kbbk.......","......kk........",".....knnk.......","....knNnNk......","....knnnNk......",".....kNNk.......","....knnnnnk.....","...knnNnnnNk....","..knnnnnnnnNk...","..knNnnnnnnNk...","..knnnnnnnNNk...","...knnnnnNNk....","....kkNNNkk.....","......kkk......."],"vine":["...........kk...","..........kbbk..",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbbk.......","....kbBk........","....kbk.........","...kbk..........","..kbbk..........","..kbk...........",".kbk............",".kbbk...........","..kk............","................"],"wall":["................","................","..kkkkkkkkkkkk..","..kgggkGGkgggk..","..kGGkgggkGGGk..","..kkkkkkkkkkkk..","..kgkgggGkgggk..","..kgkGGGgkGGgk..","..kkkkkkkkkkkk..","..kggGkgggGkgk..","..kGGGkGGGgkGk..","..kkkkkkkkkkkk..","mmmmmmmmmmmmmmmm","mmmmmmmmmmmmmmmm","................","................"],"mega":["................","................","................",".kkkkkkkkkkkkkk.",".kggggggggggggk.",".kGGGGGGGGGGGGk.",".kkk.kkk..kkk.kk",".kgk.kgk..kgk.kg",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG","nnnnnnnnnnnnnnnn","NNNNNNNNNNNNNNNN"],"cart":["................","....kkkkkkkk....","...kuuyuuyuuk...","...kuyuuyuuyk...","..kkkkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkkkkkkkkkkk..","..kkk.....kkk...",".kbbbk...kbbbk..","kbbkbbk.kbbkbbk.","kbkkkbk.kbkkkbk.","kbbkbbk.kbbkbbk.",".kbbbk...kbbbk..","..kkk.....kkk...","................"],"tablet":["................","...kkkkkkkkk....","..kcccccccccck..","..kcCcCCcCcCck..","..kcccccccccck..","..kcCCcCcCCcck..","..kcccccccccck..","..kcCcCCCcCcck..","..kcccccccccck..","..kcCCcCcCCcck..","..kcccccccccck..","..kcCcCcCCcCck..","..kcccccccccck..","...kkkkkkkkkk...","................","................"],"steps":["................","......kkkk......","......kttk......",".....kkkkkk.....",".....kTTTTk.....","....kkkkkkkk....","....kttttttk....","...kkkkkkkkkk...","...kTTTTTTTTk...","..kkkkkkkkkkkk..","..kttttttttttk..",".kkkkkkkkkkkkkk.",".kTTTTTTTTTTTTk.","kkkkkkkkkkkkkkkk","ttttttttttttttt.","................"],"canal":["................","................","nn..........nn..","nNn........nNn..","tttttt..tttttttt","tTTTTTk.kTTTTTTt","tTTTTk...kTTTTTt","tTTTk.....kTTTTt","TTTk.lllll.kTTTT","TTk.lLlllLl.kTTT","Tk.llllllLll.kTT","k.lLlllllllLl.kT",".llllLlllllllll.","lllllllllLllllll","llLlllllllllllLl","................"],"bull":["................","..y..........y..","..yy........yy..","...yYkkkkkkYy...","....kYYYYYYk....","...kyyyyyyyyk...","...kyuyyyyuyk...","...kyuuyyuuyk...","...kyyyyyyyyk...","....kyyyyyyk....","....kyyuuyyk....",".....kyyyyk.....","......kuuk......",".....kbbbbk.....","....kbBBBBbk....","................"],"spear":["..............kk",".............kcc","............kcck","...........kcck.","..........kbbk..",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kbk...........",".kbk............",".kk.............","................"],"scarab":["................","......kkkk......",".....kuUUuk.....","....kuuuuuuk....","...kuUuuuuUuk...","..kkuuuuuuuukk..",".kuuuuyyyyuuuuk.",".kuUuyuuuuyuUuk.",".kuuuuyyyyuuuuk.",".kuUuuuuuuuuUuk.","..kuuuuuuuuuuk..","...kuUuuuuUuk...","....kkuuuukk....","......kkkk......","................","................"],"sled":["................","................","................","................","................","..kkkkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkkkkkkkkkkk..","..kb.kb..kb.kb..","..kbkkbkkkbkkbkk","kkbbbbbbbbbbbbbk","kBBBBBBBBBBBBBk.",".kkkkkkkkkkkkk..","tttttttttttttttt","TTTTTTTTTTTTTTTT"],"sandwall":["................","....kkkkk.......","...ktttttk......","...kttktTk......","...ktttttk......","....kttTk.......","....kttttkkkkk..","...ktttttttttk..","..kttttttttttTk.","..ktTttttttttTk.","..ktttttttttTTk.","..kTTTTTTTTTTTk.","tttttttttttttttt","TtTtTtTtTtTtTtTt","................","................"],"sun":["......kkkk......",".....kyyyyk.....","....kyywwyyk....","...kyywwwwyyk...","...kyywyyyyyk...","...kyyyyyyyyk...","...kyyyyyyyYk...","....kyyyyyYk....",".....kkYYkk.....","......kbbk......","......kbbk......","......kBbk......","......kbbk......",".....kbbbbk.....","......kkkk......","................"],"pilum":["...............k","..............ks",".............ksk","............ksk.","...........kSk..","..........kSk...",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kbk...........","..kk............","................"],"ballista":["................","................",".kkk........kkk.",".kbbk......kbbk.","..kbbk....kbbk..","...kbbk..kbbk...","....kbbkkbbk....",".....kbsssk.....","kkkkkkbbbbkkkkkk","kssssbbbbbbbbbbk","kkkkkkbbbbkkkkkk",".....kBBBk......","....kB...Bk.....","...kB.....Bk....","..kk.......kk...","................"],"road":["................","................","................","................","................","kkkkkkkkkkkkkkkk","gggGgggGgggGgggG","kkkkkkkkkkkkkkkk","GggkgGgkggGkgggk","kkkkkkkkkkkkkkkk","gGgkggGkgGgkggGk","kkkkkkkkkkkkkkkk","mmmmmmmmmmmmmmmm","TTTTTTTTTTTTTTTT","................","................"],"testudo":["................","................","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","................"],"onager":["................","..........kkk...",".........kgggk..","........kkgGGk..",".......kb.kkk...","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kkbkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkk.....kkk...",".kbbbk...kbbbk..","..kkk.....kkk...","................"],"volley":["....kk..........","....kbk.........","....kb.k........","....kb..k.......","....kb...k......","....kb....k.....","....kb.....k....","....kbkkkkkkkks.","....kb.....k....","....kb....k.....","....kb...k......","....kb..k.......","....kb.k........","....kbk.........","....kk..........","................"],"lance":["...............k","..............ks",".............kSk","............kbk.","...........kbk..","..........kbk...",".........kbk....","........krk.....",".......kyrrk....","......kkrrk.....",".....kbkkk......","....kbk.........","...kbk..........","..kbk...........","..kk............","................"],"oil":["kkkkkkkkkkkkkkkk","kgggGkgggGkgggGk","kGGGGkGGGGkGGGGk","kkkkkkkkkkkkkkkk","kggkkgggkkgggggk","kGGk.kGGk.kGGGGk","kggk.kggk.kggggk","kkk...kk...kkkkk","....o....o......","....o.........o.","...........o....",".....o..........","................","..........o.....","................","................"],"banner":["..kk............","..kbkkkkkkkkkk..","..kbkrrrrrrrrrk.","..kbkryyrrryyrk.","..kbkrryrrrryrk.","..kbkrrrrrrrrrk.","..kbkryyrrryyrk.","..kbkrrryrrryrk.","..kbkrrrrrrrrrk.","..kbkkkkkkkkkk..","..kbk...........","..kbk...........","..kbk...........","..kbk...........",".kkbkk..........","................"],"treb":["........kk......",".......kbbk.....","......kb..kkk...",".....kb...kgk...","....kb....kk....","..kkbk..........",".kGGk...........","..kkbk..........",".....kbk........","...kkkkbkkkk....","...kbBBBBBBk....","...kbk...kbk....","..kbk.....kbk...",".kbbk.....kbbk..","kkkkkkkkkkkkkkkk","................"],"cannon":["................","................","................","................","..........kkkkk.",".....kkkkkkSSSSk","...kkSSSSSSSsSSk","..kSSsSSSSSSSSSk","..kSSSSSSSSSSSk.","...kkSSkkkkkkk..","...kbbbbbbbk....","..kbkkbbbkkbk...",".kbbbk...kbbbk..",".kbkbk...kbkbk..","..kkk.....kkk...","................"],"blunder":["................","................","................","..............kk",".............kss","..kkkkkkkkkkkSSs",".kbbbbbSSSSSSSSs",".kbBBkkkkkkkkkSS","kbbBk.........kk","kbBBk...........","kbbk............","kBBk............",".kk.............","................","................","................"],"launch":["................","......kkk.......",".....kfffk......",".....kfkfk......","......kfk.......",".....kuuuk......","....kfuuufk.....","....kkuuukk.....",".....kSSSk......","....kSSSSSk.....","...kSSsSSSSk....","...kSSSSSSSk....","...kkSSSSSkk....","....kbbbbbk.....","...kbk...kbk....","................"],"keg":["................","....kkkkkkkk....","...kbbbbbbbbk...","..kSSSSSSSSSSk..","..kbbBbbBbbBbk..","..kbbBbbBbbBbk..","..kSSSSSSSSSSk..","..kbbBbbBbbBbk..","..kbbBbbBbbBbk..","..kSSSSSSSSSSk..","...kbbbbbbbbk...","....kkkkkkkk....","......kk........",".....kook.......","......kk........","................"],"broadside":[".......k........",".......kk.......","......kwwk......",".....kwwwwk.....","....kwwwwwwk....","...kwwwwwwwwk...","....kkkkkkkk....","..kkkkbkkkkkkk..",".kbbbbbbbbbbbbk.",".kbkwkbkwkbkwbk.","..kbbbbbbbbbbk..","...kBBBBBBBBk...","llllkkkkkkkkllll","lLlllllllllllLll","llllLllllllLllll","................"],"disc":["................","................","................","................","....kkkkkkkk....","..kkoooooooookk.",".kooooyyyyooooo.","kooooooooooooook","kOoooooooooooOok",".kkOOOOOOOOOOkk.","...kkkkkkkkkk...","................","................","................","................","................"],"laser":["................","................","....kkkkk.......","...kSSSSSk......","..kSsSSSSSkkkkkk","..kSSSSSSSlllllr","..kSSSSSSSkkkkkk","...kSSSSSk......","....kkSkk.......",".....kSk........","....kSSSk.......","...kkkkkkk......","................","................","................","................"],"jet":["................","....kkkkkkk.....","...kSSSSSSSk....","..kSsSSSSSSSk...","..kSSSkkkSSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kkkk...kkkk...","..kook...kook...","...oo.....oo....","...yo.....oy....","....y.....y.....","................","................"],"shield":["................",".....kkkkkk.....","...kkwwwwwwkk...","..kwwwwwwwwwwk..","..kwwkkkkkkwwk..",".kwwkllllllkwwk.",".kwwkllLlllkwwk.",".kwwklllllLkwwk.",".kwwkllllllkwwk.","..kwwkkkkkkwwk..","..kwwwwwwwwwwk..","...kkwwwwwwkk...","...kSSSSSSSSk...","..kSSSSSSSSSSk..","..kkkkkkkkkkkk..","................"],"orbital":["k.............k.",".k...........k..","..k.........k...","...k.......k....","....k.kkk.k.....",".....kssssk.....","....ksSsSssk....","....kssssSsk....","....ksSssssk....",".....kssssk.....","....k.kkk.k.....","...k.......k....","..k.........k...",".k...........k..","k.............k.","................"]};
+  var REAL = {"boulder":["................","......kkk.......",".....kgggk......","....kgwggGk.....","...kgwgggGGk....","...kggggggGk....","..kgwgggggGGk...","..kggggggggGk...","..kgggggggGGk...","...kgggggGGk....","...kggggGGGk....","....kggGGGk.....",".....kgGGk......","......kGk.......",".......k........","................"],"gourd":["......kk........",".....kBBk.......",".....kbbk.......","......kk........",".....knnk.......","....knNnNk......","....knnnNk......",".....kNNk.......","....knnnnnk.....","...knnNnnnNk....","..knnnnnnnnNk...","..knNnnnnnnNk...","..knnnnnnnNNk...","...knnnnnNNk....","....kkNNNkk.....","......kkk......."],"vine":["...........kk...","..........kbbk..",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbbk.......","....kbBk........","....kbk.........","...kbk..........","..kbbk..........","..kbk...........",".kbk............",".kbbk...........","..kk............","................"],"wall":["................","................","..kkkkkkkkkkkk..","..kgggkGGkgggk..","..kGGkgggkGGGk..","..kkkkkkkkkkkk..","..kgkgggGkgggk..","..kgkGGGgkGGgk..","..kkkkkkkkkkkk..","..kggGkgggGkgk..","..kGGGkGGGgkGk..","..kkkkkkkkkkkk..","mmmmmmmmmmmmmmmm","mmmmmmmmmmmmmmmm","................","................"],"mega":["................","................","................",".kkkkkkkkkkkkkk.",".kggggggggggggk.",".kGGGGGGGGGGGGk.",".kkk.kkk..kkk.kk",".kgk.kgk..kgk.kg",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG",".kgk.kgk..kgk.kg",".kGk.kGk..kGk.kG","nnnnnnnnnnnnnnnn","NNNNNNNNNNNNNNNN"],"cart":["................","....kkkkkkkk....","...kuuyuuyuuk...","...kuyuuyuuyk...","..kkkkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkkkkkkkkkkk..","..kkk.....kkk...",".kbbbk...kbbbk..","kbbkbbk.kbbkbbk.","kbkkkbk.kbkkkbk.","kbbkbbk.kbbkbbk.",".kbbbk...kbbbk..","..kkk.....kkk...","................"],"tablet":["................","...kkkkkkkkk....","..kcccccccccck..","..kcCcCCcCcCck..","..kcccccccccck..","..kcCCcCcCCcck..","..kcccccccccck..","..kcCcCCCcCcck..","..kcccccccccck..","..kcCCcCcCCcck..","..kcccccccccck..","..kcCcCcCCcCck..","..kcccccccccck..","...kkkkkkkkkk...","................","................"],"steps":["................","......kkkk......","......kttk......",".....kkkkkk.....",".....kTTTTk.....","....kkkkkkkk....","....kttttttk....","...kkkkkkkkkk...","...kTTTTTTTTk...","..kkkkkkkkkkkk..","..kttttttttttk..",".kkkkkkkkkkkkkk.",".kTTTTTTTTTTTTk.","kkkkkkkkkkkkkkkk","ttttttttttttttt.","................"],"canal":["................","................","nn..........nn..","nNn........nNn..","tttttt..tttttttt","tTTTTTk.kTTTTTTt","tTTTTk...kTTTTTt","tTTTk.....kTTTTt","TTTk.lllll.kTTTT","TTk.lLlllLl.kTTT","Tk.llllllLll.kTT","k.lLlllllllLl.kT",".llllLlllllllll.","lllllllllLllllll","llLlllllllllllLl","................"],"bull":["................","..y..........y..","..yy........yy..","...yYkkkkkkYy...","....kYYYYYYk....","...kyyyyyyyyk...","...kyuyyyyuyk...","...kyuuyyuuyk...","...kyyyyyyyyk...","....kyyyyyyk....","....kyyuuyyk....",".....kyyyyk.....","......kuuk......",".....kbbbbk.....","....kbBBBBbk....","................"],"spear":["..............kk",".............kcc","............kcck","...........kcck.","..........kbbk..",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kbk...........",".kbk............",".kk.............","................"],"scarab":["................","......kkkk......",".....kuUUuk.....","....kuuuuuuk....","...kuUuuuuUuk...","..kkuuuuuuuukk..",".kuuuuyyyyuuuuk.",".kuUuyuuuuyuUuk.",".kuuuuyyyyuuuuk.",".kuUuuuuuuuuUuk.","..kuuuuuuuuuuk..","...kuUuuuuUuk...","....kkuuuukk....","......kkkk......","................","................"],"sled":["................","................","................","................","................","..kkkkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkkkkkkkkkkk..","..kb.kb..kb.kb..","..kbkkbkkkbkkbkk","kkbbbbbbbbbbbbbk","kBBBBBBBBBBBBBk.",".kkkkkkkkkkkkk..","tttttttttttttttt","TTTTTTTTTTTTTTTT"],"sandwall":["................","....kkkkk.......","...ktttttk......","...kttktTk......","...ktttttk......","....kttTk.......","....kttttkkkkk..","...ktttttttttk..","..kttttttttttTk.","..ktTttttttttTk.","..ktttttttttTTk.","..kTTTTTTTTTTTk.","tttttttttttttttt","TtTtTtTtTtTtTtTt","................","................"],"sun":["......kkkk......",".....kyyyyk.....","....kyywwyyk....","...kyywwwwyyk...","...kyywyyyyyk...","...kyyyyyyyyk...","...kyyyyyyyYk...","....kyyyyyYk....",".....kkYYkk.....","......kbbk......","......kbbk......","......kBbk......","......kbbk......",".....kbbbbk.....","......kkkk......","................"],"pilum":["...............k","..............ks",".............ksk","............ksk.","...........kSk..","..........kSk...",".........kbk....","........kbk.....",".......kbk......","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kbk...........","..kk............","................"],"ballista":["................","................",".kkk........kkk.",".kbbk......kbbk.","..kbbk....kbbk..","...kbbk..kbbk...","....kbbkkbbk....",".....kbsssk.....","kkkkkkbbbbkkkkkk","kssssbbbbbbbbbbk","kkkkkkbbbbkkkkkk",".....kBBBk......","....kB...Bk.....","...kB.....Bk....","..kk.......kk...","................"],"road":["................","................","................","................","................","kkkkkkkkkkkkkkkk","gggGgggGgggGgggG","kkkkkkkkkkkkkkkk","GggkgGgkggGkgggk","kkkkkkkkkkkkkkkk","gGgkggGkgGgkggGk","kkkkkkkkkkkkkkkk","mmmmmmmmmmmmmmmm","TTTTTTTTTTTTTTTT","................","................"],"testudo":["................","................","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","krrrkrrrkrrrkrrk","kryrkryrkryrkryk","krrrkrrrkrrrkrrk","kkkkkkkkkkkkkkkk","................"],"onager":["................","..........kkk...",".........kgggk..","........kkgGGk..",".......kb.kkk...","......kbk.......",".....kbk........","....kbk.........","...kbk..........","..kkbkkkkkkkkk..","..kbbbbbbbbbbk..","..kBBBBBBBBBBk..","..kkk.....kkk...",".kbbbk...kbbbk..","..kkk.....kkk...","................"],"volley":["....kk..........","....kbk.........","....kb.k........","....kb..k.......","....kb...k......","....kb....k.....","....kb.....k....","....kbkkkkkkkks.","....kb.....k....","....kb....k.....","....kb...k......","....kb..k.......","....kb.k........","....kbk.........","....kk..........","................"],"lance":["...............k","..............ks",".............kSk","............kbk.","...........kbk..","..........kbk...",".........kbk....","........krk.....",".......kyrrk....","......kkrrk.....",".....kbkkk......","....kbk.........","...kbk..........","..kbk...........","..kk............","................"],"oil":["kkkkkkkkkkkkkkkk","kgggGkgggGkgggGk","kGGGGkGGGGkGGGGk","kkkkkkkkkkkkkkkk","kggkkgggkkgggggk","kGGk.kGGk.kGGGGk","kggk.kggk.kggggk","kkk...kk...kkkkk","....o....o......","....o.........o.","...........o....",".....o..........","................","..........o.....","................","................"],"banner":["..kk............","..kbkkkkkkkkkk..","..kbkrrrrrrrrrk.","..kbkryyrrryyrk.","..kbkrryrrrryrk.","..kbkrrrrrrrrrk.","..kbkryyrrryyrk.","..kbkrrryrrryrk.","..kbkrrrrrrrrrk.","..kbkkkkkkkkkk..","..kbk...........","..kbk...........","..kbk...........","..kbk...........",".kkbkk..........","................"],"treb":["........kk......",".......kbbk.....","......kb..kkk...",".....kb...kgk...","....kb....kk....","..kkbk..........",".kGGk...........","..kkbk..........",".....kbk........","...kkkkbkkkk....","...kbBBBBBBk....","...kbk...kbk....","..kbk.....kbk...",".kbbk.....kbbk..","kkkkkkkkkkkkkkkk","................"],"cannon":["................","................","................","................","..........kkkkk.",".....kkkkkkSSSSk","...kkSSSSSSSsSSk","..kSSsSSSSSSSSSk","..kSSSSSSSSSSSk.","...kkSSkkkkkkk..","...kbbbbbbbk....","..kbkkbbbkkbk...",".kbbbk...kbbbk..",".kbkbk...kbkbk..","..kkk.....kkk...","................"],"blunder":["................","................","................","..............kk",".............kss","..kkkkkkkkkkkSSs",".kbbbbbSSSSSSSSs",".kbBBkkkkkkkkkSS","kbbBk.........kk","kbBBk...........","kbbk............","kBBk............",".kk.............","................","................","................"],"launch":["................","......kkk.......",".....kfffk......",".....kfkfk......","......kfk.......",".....kuuuk......","....kfuuufk.....","....kkuuukk.....",".....kSSSk......","....kSSSSSk.....","...kSSsSSSSk....","...kSSSSSSSk....","...kkSSSSSkk....","....kbbbbbk.....","...kbk...kbk....","................"],"keg":["................","....kkkkkkkk....","...kbbbbbbbbk...","..kSSSSSSSSSSk..","..kbbBbbBbbBbk..","..kbbBbbBbbBbk..","..kSSSSSSSSSSk..","..kbbBbbBbbBbk..","..kbbBbbBbbBbk..","..kSSSSSSSSSSk..","...kbbbbbbbbk...","....kkkkkkkk....","......kk........",".....kook.......","......kk........","................"],"broadside":[".......k........",".......kk.......","......kwwk......",".....kwwwwk.....","....kwwwwwwk....","...kwwwwwwwwk...","....kkkkkkkk....","..kkkkbkkkkkkk..",".kbbbbbbbbbbbbk.",".kbkwkbkwkbkwbk.","..kbbbbbbbbbbk..","...kBBBBBBBBk...","llllkkkkkkkkllll","lLlllllllllllLll","llllLllllllLllll","................"],"disc":["................","................","................","................","....kkkkkkkk....","..kkoooooooookk.",".kooooyyyyooooo.","kooooooooooooook","kOoooooooooooOok",".kkOOOOOOOOOOkk.","...kkkkkkkkkk...","................","................","................","................","................"],"laser":["................","................","....kkkkk.......","...kSSSSSk......","..kSsSSSSSkkkkkk","..kSSSSSSSlllllr","..kSSSSSSSkkkkkk","...kSSSSSk......","....kkSkk.......",".....kSk........","....kSSSk.......","...kkkkkkk......","................","................","................","................"],"jet":["................","....kkkkkkk.....","...kSSSSSSSk....","..kSsSSSSSSSk...","..kSSSkkkSSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kSSk...kSSk...","..kkkk...kkkk...","..kook...kook...","...oo.....oo....","...yo.....oy....","....y.....y.....","................","................"],"shield":["................",".....kkkkkk.....","...kkwwwwwwkk...","..kwwwwwwwwwwk..","..kwwkkkkkkwwk..",".kwwkllllllkwwk.",".kwwkllLlllkwwk.",".kwwklllllLkwwk.",".kwwkllllllkwwk.","..kwwkkkkkkwwk..","..kwwwwwwwwwwk..","...kkwwwwwwkk...","...kSSSSSSSSk...","..kSSSSSSSSSSk..","..kkkkkkkkkkkk..","................"],"orbital":["k.............k.",".k...........k..","..k.........k...","...k.......k....","....k.kkk.k.....",".....kssssk.....","....ksSsSssk....","....kssssSsk....","....ksSssssk....",".....kssssk.....","....k.kkk.k.....","...k.......k....","..k.........k...",".k...........k..","k.............k.","................"],"trolley":["................",".kk.............","kSSk............",".kkkkkkkkkkkkk..","..ksSsSsSsSsSk..","..kSsSsSsSsSsk..","..ksSsSsSsSsSk..","...kSsSsSsSsk...","...kkkkkkkkkk...","....kS....kS....","....kS....kS....","...kkkkkkkkkk...","...kSSSSSSSSk...","..kk.......kk...",".kGGk.....kGGk..","..kk.......kk..."],"slug":["................","................","................",".....kkkkkk.....","...kkyyyyyykk...","..kyyyyyyyyyyk..",".kyykkkkkkkyyyk.",".kyk......kyyyk.",".kyk......kyyyk.",".kyk......kyyyk.",".kyykkkkkkkyyyk.","..kyyyyyyyyyyk..","...kkyyyyyykk...",".....kkkkkk.....","................","................"],"springs":["................","........kk......","....kkkkbbkkkk..","....kbbbbbbbbk..","........kk......","........ks......","........ks......","........ks......","........ks......",".......kssk.....","......kSkkSk....","......kSkkSk....","......kSkkSk....","......kSkkSk....",".......kssk.....","........kk......"],"tyres":["................","................","....kkkkkkkk....","..kkGGGGGGGGkk..",".kGGkkkkkkkkGGk.",".kGk........kGk.","kGk...kkkk...kGk","kGk..kSSSSk..kGk","kGk..kSkkSk..kGk","kGk..kSSSSk..kGk","kGk...kkkk...kGk",".kGk........kGk.",".kGGkkkkkkkkGGk.","..kkGGGGGGGGkk..","....kkkkkkkk....","................"],"stomp":["......kkkk......",".....kssssk.....","....kskksksk....","....kssssssk....",".....kSSSSk.....","...kkkSSSSkkk...","..kSSSSSSSSSSk..","..kSkSSSSSSkSk..","..kSkSSllSSkSk..","..kSkSSSSSSkSk..","..kkkSSSSSSkkk..",".....kSkkSk.....",".....kSk.kSk....",".....kSk.kSk....","....kSSk.kSSk...","....kkkk.kkkk..."]};
   var RPAL = {"k":"#1d1a1a","w":"#fef8f4","g":"#9a938a","G":"#5a5248","b":"#8b5a2b","B":"#5a3a1a","y":"#f0c446","Y":"#b8861e","r":"#c8322a","c":"#c8874a","C":"#8a5a30","t":"#e6c890","T":"#b8955a","u":"#2c5ca8","U":"#1a3a7a","s":"#cfd5da","S":"#7a828c","n":"#5fa04a","N":"#2f6a2a","o":"#ef7724","O":"#a8481a","l":"#5fe0f0","L":"#1f7f8f","f":"#f2d1a8","m":"#6a4a2a"};
   S.real = function (ctx, wid) {
     ctx.clearRect(0, 0, 16, 16);
