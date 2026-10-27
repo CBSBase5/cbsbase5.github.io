@@ -12536,9 +12536,9 @@ var UI = (function () {
     if (typeof customDetail === 'function' && customDetail(selHero, d, tradingCard)) { }
     else if (h) {
       var hearts = ''; for (var i = 0; i < h.hearts; i++) hearts += '<span class="ph"></span>';
-      var back = masteryHTML(selHero) + filmFileHTML(selHero) + '<div class="abil"><b>Passive' + (altOn(selHero) ? ': ' + esc(ALT_PASSIVE[selHero].name) : '') + '</b><p>' + esc(altOn(selHero) ? ALT_PASSIVE[selHero].desc : h.passive) + '</p></div>' + (typeof DODGES !== 'undefined' && DODGES[selHero] ? '<div class="abil"><b>Dodge</b><p>' + esc(DODGES[selHero].name + '. ' + DODGES[selHero].desc) + '</p></div>' : '') + '<div class="abil ult"><b>Ultimate</b><p>' + esc(h.ult) + '</p></div>';
+      var back = masteryHTML(selHero) + filmFileHTML(selHero) + '<div class="abil"><b>Passive' + (altOn(selHero) ? ': ' + esc(ALT_PASSIVE[selHero].name) : '') + '</b><p>' + esc(altOn(selHero) ? ALT_PASSIVE[selHero].desc : h.passive) + '</p></div>' + (typeof DODGES !== 'undefined' && DODGES[selHero] ? '<div class="abil"><b>Dodge</b><p>' + esc(DODGES[selHero].name + '. ' + DODGES[selHero].desc) + '</p></div>' : '') + (typeof specCardBack === 'function' ? specCardBack(selHero) : '') + '<div class="abil ult"><b>Ultimate</b><p>' + esc(h.ult) + '</p></div>';
       var front = '<div class="tc-top"><span class="tc-no">' + cardNo(selHero) + '</span><span class="tc-cls">' + iconImg(CLASS_ICON[h.cls] || 'mystery', 1, 'cic') + esc(h.cls) + '</span></div><div class="tc-art"><canvas id="spin" width="192" height="192"></canvas></div><h2>' + esc(h.name) + '</h2>' +
-        '<div class="stat"><b>Hearts</b> ' + hearts + '</div><div class="stat"><b>Weapon</b> ' + esc(h.weapon) + '</div>' + heroStarsHTML(selHero);
+        '<div class="stat"><b>Hearts</b> ' + hearts + '</div><div class="stat"><b>Weapon</b> ' + esc(h.weapon) + '</div>' + (typeof specCardFront === 'function' ? specCardFront(selHero) : '') + heroStarsHTML(selHero);
       d.innerHTML = tradingCard(front, back);
       $('go').disabled = false; $('go').textContent = "Let's go";
     } else {
@@ -17071,8 +17071,8 @@ function customDetail(id, d, tradingCard) {
   var c = cdById(id); if (!c) return false;
   var h = HEROES[c.base] || HEROES.gingerbeard, hearts = ''; for (var i = 0; i < h.hearts; i++) hearts += '<span class="ph"></span>';
   var front = '<div class="tc-top"><span class="tc-no">LW ORIGINAL</span><span class="tc-cls">' + devEsc(h.cls) + '</span></div><div class="tc-art"><canvas id="spin" width="192" height="192"></canvas></div><h2>' + devEsc(c.name) + '</h2>' +
-    '<div class="stat"><b>Hearts</b> ' + hearts + '</div><div class="stat"><b>Plays like</b> ' + devEsc(h.name) + '</div>';
-  var back = '<div class="abil"><b>Designed by</b><p>LW, in the dev desk.</p></div><div class="abil"><b>Passive</b><p>' + devEsc(h.passive) + '</p></div><div class="abil ult"><b>Ultimate</b><p>' + devEsc(h.ult) + '</p></div>';
+    '<div class="stat"><b>Hearts</b> ' + hearts + '</div><div class="stat"><b>Plays like</b> ' + devEsc(h.name) + '</div>' + (typeof specCardFront === 'function' ? specCardFront(c.base) : '');
+  var back = '<div class="abil"><b>Designed by</b><p>LW, in the dev desk.</p></div><div class="abil"><b>Passive</b><p>' + devEsc(h.passive) + '</p></div>' + (typeof specCardBack === 'function' ? specCardBack(c.base) : '') + '<div class="abil ult"><b>Ultimate</b><p>' + devEsc(h.ult) + '</p></div>';
   d.innerHTML = tradingCard(front, back);
   var go = document.getElementById('go'); go.disabled = false; go.textContent = "Let's go";
   return true;
@@ -18619,6 +18619,214 @@ whatsNew = function () {
   el.onclick = close; window.addEventListener('keydown', key, true);
   setTimeout(function () { var b = document.getElementById('wn-ok'); if (b) b.focus(); }, 50);
 };
+
+/* ===================== V32: LW'S SIGNATURE SPECIALS ===================== */
+/* LW rewrote the specials. These replace the first versions from build 31. */
+Object.assign(SPECIALS, {
+  gingerbeard: { name: 'Order in court', icon: 'magnifier', cd: 12, tip: 'Puts on a white wig. Hits harder and faster for a few seconds.' },
+  sweettooth: { name: 'Bag of Moam', icon: 'sugar', cd: 10, tip: 'Throws a bag of Moam. Nearby enemies cannot resist it. Then it pops.' },
+  trainer: { name: 'Train dash', icon: 'rails', cd: 8, tip: '"I\'m actually a villain." Dashes forward like a train, flattening everything.' },
+  friend: { name: 'You look like him', icon: 'corners', cd: 12, tip: 'Charms an enemy to fight for you until the room is clear. Elites and bosses take a critical hit instead.' },
+  bean: { name: 'Belly bounce', icon: 'beans', cd: 8, tip: 'A big bounce forward and a bigger landing.' },
+  todd: { name: 'Todd sees you', icon: 'binoculars', cd: 11, tip: 'Vanishes, then slowly appears behind an enemy for a critical hit.' },
+  deadguy: { name: 'Lie down', icon: 'ectoplasm', cd: 3, tip: 'He is already lying down. He lies down a bit more. It does nothing. On purpose.' },
+  chairman: { name: 'Rage laser', icon: 'cupholder', cd: 10, tip: '"I wasn\'t even in the movie!!" Fires a rage laser from his mouth.' },
+  cardboy: { name: 'My turn', icon: 'battery', cd: 9, tip: '"Hah! Now it\'s my turn!" An uppercut that hits everything around him.' }
+});
+
+/* ---------- Ginger-beard: the white wig ---------- */
+function wigKey(P) {
+  var base = P.skin && P.skin.indexOf('_wig') < 0 ? P.skin : P.key, k = base + '_wig';
+  if (!SPR.SPECS[k] && SPR.SPECS[base]) SPR.SPECS[k] = Object.assign({}, SPR.SPECS[base], { style: 'greycurly', hair: '#f6f4ee', hat: null });
+  return SPR.SPECS[k] ? k : null;
+}
+SPECIAL_FN.gingerbeard = function (P) {
+  P.wigT = 7; P.wigPrev = P.skin || null; var k = wigKey(P); if (k) P.skin = k;
+  UI.say(P, 'Order! Order!', 1.6); UI.burst('ORDER IN COURT!', P, true); AUD.sfx('stamp'); AUD.sfx('cutin');
+  fxRing(P.x, P.z, 0.4, 2.6, '#f6f4ee', 0.35); fxBits(P.x, 2.4, P.z, 10, '#f6f4ee', 3);
+};
+var _metaDmgMul32 = metaDmgMul;
+metaDmgMul = function (e, o) { var m = _metaDmgMul32(e, o); if (o && o.hero && G.P && G.P.wigT > 0) m *= 1.5; return m; };
+var _itemRateMul32 = itemRateMul;
+itemRateMul = function () { return _itemRateMul32() * (G.P && G.P.wigT > 0 ? 0.72 : 1); };
+
+/* ---------- Sweet-tooth: a bag of Moam nobody can resist ---------- */
+function moamTex() { return ctex('p_moam32', 20, 22, function (x) { x.fillStyle = '#e2402f'; x.fillRect(2, 4, 16, 16); x.fillStyle = '#f5c518'; x.fillRect(2, 9, 16, 5); x.fillStyle = '#1b1520'; x.fillRect(4, 10, 12, 1); x.fillRect(4, 12, 9, 1); x.fillStyle = '#ff8a7a'; x.fillRect(3, 1, 14, 4); x.fillStyle = '#ffffff'; x.fillRect(4, 15, 3, 3); }); }
+SPECIAL_FN.sweettooth = function (P) {
+  var aim = specAim(P, 11), tx = clamp(aim.x, -RW / 2 + 1.5, RW / 2 - 1.5), tz = clamp(aim.z, -RH / 2 + 1.5, RH / 2 - 1.5); P.face = aim.a; P.specBusy = 0.2;
+  fxCircle(tx, tz, 6, '#ff8ac0', 0.6, 0.18);
+  lob({ x: P.x, z: P.z, tx: tx, tz: tz, T: 0.6, peak: 3.6, tex: moamTex(), size: 0.85, spin: true, onLand: function (x, z) {
+    var s = makeSprite(moamTex(), 1.1); s.position.set(x, 0, z); G.dyn.add(s);
+    var gl = glowSprite(G.dyn, x, 1, z, 3, 0xff8ac0, 0.4);
+    var bag = { x: x, z: z, t: 0, life: 5, r: 0.6, sprite: s, glow: gl, moam: true };
+    G.decoy = bag; SP.moam = bag;
+    liveEnemies().forEach(function (e) { if (!e.boss && dist(e, bag) < 9 && Math.random() < 0.5) UI.say(e, pick(['MOAM!', 'Is that a Moam?', 'Mine!', 'Ooh, sweets.']), 1.3); });
+    AUD.sfx('pop'); UI.burst('MOAM!', { x: x, z: z, y: 1.6 }, true);
+  } });
+  UI.say(P, 'Who wants a Moam?', 1.4);
+};
+function moamTick(dt) {
+  var b = SP.moam; if (!b) return;
+  b.t += dt; if (b.sprite) b.sprite.position.y = Math.abs(Math.sin(b.t * 6)) * 0.15;
+  if (G.decoy !== b && b.t < b.life) G.decoy = b;
+  if (Math.random() < dt * 6) fxBits(b.x, 0.8, b.z, 1, pick(['#ff5fa2', '#f5c518', '#3cc47a', '#3a8ad6']), 2);
+  if (b.t >= b.life) {
+    SP.moam = null; if (G.decoy === b) G.decoy = null;
+    if (b.sprite && b.sprite.parent) b.sprite.parent.remove(b.sprite); if (b.glow && b.glow.parent) b.glow.parent.remove(b.glow);
+    explode(b.x, b.z, 2.6, 24, 'player', null, { hero: true }); UI.burst('SUGAR RUSH!', { x: b.x, z: b.z, y: 2 }, true);
+  }
+}
+
+/* ---------- Trainer: the villain reveal and a train dash ---------- */
+SPECIAL_FN.trainer = function (P) {
+  var aim = specAim(P, 10); P.face = aim.a;
+  UI.say(P, "I'm actually a villain.", 1.8);
+  P.dash32 = { a: aim.a, t: 0, T: 0.55, wind: 0.3, hit: [], prev: P.skin || null };
+  P.specBusy = 0.95; P.inv = Math.max(P.inv, 1.0);
+  fxLine(P.x, P.z, aim.a, 13, 2.2, '#e74c3c', 0.3); AUD.sfx('choo');
+};
+function trainDashTick(P, dt) {
+  var D = P.dash32; if (!D) return;
+  if (D.wind > 0) { D.wind -= dt; if (D.wind <= 0) { P.skin = 'train'; AUD.sfx('choo'); UI.burst('CHOO CHOO!', P, true); } return; }
+  D.t += dt; P.inv = Math.max(P.inv, 0.2); P.face = D.a;
+  var sp = 26, nx = P.x + Math.sin(D.a) * sp * dt, nz = P.z + Math.cos(D.a) * sp * dt;
+  if (inRoom(nx, nz, 0.8) && !hitsCollider(nx, nz, 0.45) && !(typeof inFeature === 'function' && inFeature(nx, nz, 0.2))) { P.x = nx; P.z = nz; } else D.t = D.T;
+  if (Math.random() < dt * 30) fxBits(P.x, 0.5, P.z, 1, '#e8e2d2', 2);
+  G.enemies.slice().forEach(function (e) {
+    if (e.dead || e.prop || e.untargetable || D.hit.indexOf(e) >= 0) return;
+    if (dist(e, P) < 1.5 + (e.r || 0.5)) { D.hit.push(e); var side = ((angTo(P, e) - D.a + PI * 3) % (PI * 2)) - PI > 0 ? 1 : -1, ka = D.a + side * 1.2; specHit(e, 36, { kx: Math.sin(ka) * 16, kz: Math.cos(ka) * 16, melee: true }); if (!e.dead) e.stunT = Math.max(e.stunT || 0, e.boss ? 0.3 : 0.8); }
+  });
+  if (D.t >= D.T) { P.dash32 = null; P.skin = D.prev; G.shake = Math.max(G.shake, 0.3); AUD.sfx('crunch'); fxRing(P.x, P.z, 0.3, 2.4, '#ffffff', 0.25); }
+}
+
+/* ---------- Jay's friend: "you kind of look like him" ---------- */
+SPECIAL_FN.friend = function (P) {
+  var t = nearestTarget(P, 10);
+  UI.say(P, '....you know what, you kind of look like him!', 2.2);
+  if (!t || t.prop) { P.specCd = 2; return; }
+  P.face = angTo(P, t); fxLine(P.x, P.z, P.face, dist(P, t), 0.4, '#ff8ac0', 0.4);
+  if (t.elite || t.boss || t.heavy && t.mini) {
+    P.critNext = G.t + 0.5; specHit(t, 40, { melee: true }); UI.say(t, 'I look nothing like him.', 1.4);
+    return;
+  }
+  t.charmed = true; t.untargetable = true; t.tint = [1.25, 0.75, 1.05]; t.wind = 0; t.charmCd = 0.4; t.lostT = 0; t.stunT = 0;
+  if (t.badge) t.badge.visible = false;
+  after(0.6, function () { if (!t.dead) UI.say(t, pick(['I DO look like him.', 'Thank you so much.', 'Whose side am I on? Yours.']), 1.6); });
+  fxBits(t.x, 2, t.z, 10, '#ff8ac0', 3); UI.burst('CHARMED!', t, true); AUD.sfx('twinkle');
+};
+function charmTick(e, dt) {
+  e.flash -= dt; e.atkAnim -= dt; e.charmCd -= dt; e.moving = false;
+  e.x += (e.kx || 0) * dt; e.z += (e.kz || 0) * dt; e.kx *= Math.exp(-8 * dt); e.kz *= Math.exp(-8 * dt);
+  var best = null, bd = 99; G.enemies.forEach(function (o) { if (o === e || o.dead || o.prop || o.charmed || o.untargetable) return; var d = dist(o, e); if (d < bd) { bd = d; best = o; } });
+  var spd = Math.max(e.spd || 0, 3.4) * 1.1;
+  if (best) { if (bd > e.r + (best.r || 0.5) + 0.7) moveTo(e, best.x, best.z, spd, dt); else { e.face = angTo(e, best); if (e.charmCd <= 0) { e.charmCd = 0.8; e.atkAnim = 0.3; damageEnemy(best, 16, { noUlt: true, kx: Math.sin(e.face) * 5, kz: Math.cos(e.face) * 5 }); AUD.sfx('hitL'); } } }
+  else if (G.P && dist(e, G.P) > 2.5) moveTo(e, G.P.x, G.P.z, spd, dt);
+  if (Math.random() < dt * 2) fxBits(e.x, 2.2, e.z, 1, '#ff8ac0', 1);
+  if (typeof collideProps === 'function') collideProps(e); if (typeof clampRoom === 'function') clampRoom(e, false);
+  syncSprite(e);
+}
+var _updateEnemy32 = updateEnemy;
+updateEnemy = function (e, dt) { if (e && e.charmed && !e.dead) { charmTick(e, dt); return; } return _updateEnemy32(e, dt); };
+function charmedFall() {
+  G.enemies.slice().forEach(function (e) { if (!e.charmed || e.dead) return; UI.say(e, pick(['Worth it.', 'Tell him I said hi.', 'Was I in the film?']), 1.2); var x = e; after(0.5 + Math.random() * 0.4, function () { if (!x.dead) { x.untargetable = false; killEnemy(x, {}); } }); });
+}
+var _roomCleared32 = roomCleared;
+roomCleared = function (boss) { var was = G.room && G.room.cleared; _roomCleared32(boss); if (!was) charmedFall(); };
+
+/* ---------- Peeping Todd: vanish, creep in behind, crit ---------- */
+SPECIAL_FN.todd = function (P) {
+  var t = nearestTarget(P, 14); if (t && t.prop) t = null;
+  P.todd32 = { t: 0, tgt: t, moved: false }; P.specBusy = 1.8; P.inv = Math.max(P.inv, 1.9);
+  liveEnemies().forEach(function (e) { e.lostT = Math.max(e.lostT || 0, e.boss ? 1 : 1.9); if (e.wander === undefined) e.wander = rnd(0, PI * 2); });
+  fxBits(P.x, 1, P.z, 12, '#4f9a3a', 4); UI.burst('*rustle*', P); AUD.sfx('dg_rustle');
+};
+function toddTick(P, dt) {
+  var T = P.todd32; if (!T) return;
+  T.t += dt; var tg = T.tgt && !T.tgt.dead ? T.tgt : null; P.inv = Math.max(P.inv, 0.2);
+  var op = T.t < 0.25 ? 1 - T.t / 0.25 : (T.t < 0.6 ? 0 : Math.min(1, (T.t - 0.6) / 1.0));
+  if (P.sprite) { P.sprite.material.transparent = true; P.sprite.material.opacity = op * (P.ghost ? 0.74 : 1); }
+  if (T.t >= 0.6 && !T.moved) {
+    T.moved = true;
+    if (tg) { var back = (tg.face || 0) + PI, bx = clamp(tg.x + Math.sin(back) * 1.6, -RW / 2 + 1, RW / 2 - 1), bz = clamp(tg.z + Math.cos(back) * 1.6, -RH / 2 + 1, RH / 2 - 1); if (!hitsCollider(bx, bz, 0.4)) { P.x = bx; P.z = bz; } P.face = angTo(P, tg); tg.stunT = Math.max(tg.stunT || 0, 1.2); }
+    UI.say(P, 'Todd sees you.', 1.8);
+  }
+  if (T.moved && tg) { P.face = angTo(P, tg); P.x += 0; }
+  if (T.t >= 1.6) {
+    P.todd32 = null; if (P.sprite) P.sprite.material.opacity = P.ghost ? 0.74 : 1;
+    if (tg) { P.atkAnim = 0.3; P.critNext = G.t + 0.5; specHit(tg, 60, { melee: true, kx: Math.sin(P.face) * 10, kz: Math.cos(P.face) * 10 }); fxRing(tg.x, tg.z, 0.3, 1.8, '#ffffff', 0.25); AUD.sfx('crunch'); G.shake = Math.max(G.shake, 0.25); }
+  }
+}
+
+/* ---------- Dead guy: lies down. That is the joke ---------- */
+SPECIAL_FN.deadguy = function (P) {
+  var lines = ['Still dead.', '*lies down harder*', 'Is this my bit?', 'Not getting up.', '...', 'Ten more minutes.', 'I am resting my eyes.'];
+  UI.say(P, pick(lines), 1.5); UI.burst('NOTHING HAPPENS', P); AUD.sfx('fall');
+  P.flopT = 0.6; fxBits(P.x, 0.2, P.z, 4, '#cfd8dc', 1);
+};
+var _syncSprite32 = syncSprite;
+var DG_RIGHT = null;
+syncSprite = function (e) {
+  _syncSprite32(e);
+  if (e !== G.P || !e.sprite || e.hero !== 'deadguy' || e.possess || G.doom || e.state !== 'normal') return;
+  if (e.atkAnim > 0 || e.wind > 0 || e.dodgeT > 0 || e.leap || (e.hurtFaceT > G.t)) return;
+  var h = e.sprite.scale.y || e.h, flop = e.flopT > 0 ? Math.sin(e.flopT / 0.6 * PI) * 0.25 : 0;
+  e.sprite.material.rotation = PI / 2 - flop;
+  if (!DG_RIGHT) DG_RIGHT = new THREE.Vector3();
+  DG_RIGHT.setFromMatrixColumn(G.camera.matrixWorld, 0); DG_RIGHT.y = 0; DG_RIGHT.normalize();
+  e.sprite.position.set(e.x + DG_RIGHT.x * h * 0.42, (e.y || 0) + h * 0.2 + flop * 0.4, e.z + DG_RIGHT.z * h * 0.42);
+};
+
+/* ---------- Chair-man: the rage laser ---------- */
+SPECIAL_FN.chairman = function (P) {
+  var t = nearestTarget(P, 14);
+  P.laser32 = { t: 0, T: 1.5, a: t && !t.prop ? angTo(P, t) : P.face, k: 0, hit: {} };
+  P.specBusy = 1.5; UI.say(P, "I wasn't even in the movie!!", 2); UI.burst('RAGE!', P, true); AUD.sfx('roar');
+};
+function laserTick(P, dt) {
+  var L = P.laser32; if (!L) return;
+  L.t += dt; L.k -= dt;
+  var t = nearestTarget(P, 16); if (t && !t.prop) { var want = angTo(P, t), da = ((want - L.a + PI * 3) % (PI * 2)) - PI; L.a += clamp(da, -2.2 * dt, 2.2 * dt); }
+  P.face = L.a;
+  if (L.k <= 0) {
+    L.k = 0.1; var sa = Math.sin(L.a), ca = Math.cos(L.a), x0 = P.x + sa * 0.6, z0 = P.z + ca * 0.6;
+    fxLine(x0, z0, L.a, 14, 0.9, '#ff5a2a', 0.12); fxLine(x0, z0, L.a, 14, 0.35, '#fff0a0', 0.1);
+    liveEnemies().forEach(function (e) { var dx = e.x - x0, dz = e.z - z0, along = dx * sa + dz * ca, side = Math.abs(dx * ca - dz * sa); if (along > -0.5 && along < 14 && side < 0.7 + (e.r || 0.5)) specHit(e, 6, { noUlt: true }); });
+    G.shake = Math.max(G.shake, 0.08); if (Math.random() < 0.4) AUD.sfx('buzz');
+  }
+  if (L.t >= L.T) P.laser32 = null;
+}
+
+/* ---------- Card-boy: "now it's my turn" ---------- */
+SPECIAL_FN.cardboy = function (P) {
+  P.specBusy = 0.35; P.atkAnim = 0.35; UI.say(P, "Hah! Now it's my turn!", 1.8);
+  after(0.18, function () {
+    var Q = G.P; if (!Q) return;
+    G.enemies.slice().forEach(function (e) { if (e.dead || e.prop || e.untargetable) return; var d = dist(Q, e); if (d > 3.4 + (e.r || 0.5)) return; var a = angTo(Q, e); specHit(e, 46, { kx: Math.sin(a) * 15, kz: Math.cos(a) * 15, melee: true, fin: true }); if (!e.dead) e.stunT = Math.max(e.stunT || 0, e.boss ? 0.3 : 0.7); });
+    fxRing(Q.x, Q.z, 0.4, 3.6, '#ffffff', 0.3); fxRing(Q.x, Q.z, 0.3, 2.4, '#41e0d0', 0.25); UI.burst('UPPERCUT!', Q, true); AUD.sfx('crunch'); AUD.sfx('bass'); G.shake = Math.max(G.shake, 0.4);
+  });
+};
+
+/* ---------- ticks for all of the above ---------- */
+function spec32Tick(dt) {
+  var P = G.P; if (!P || !G.run || G.doom) return;
+  if (P.wigT > 0) { P.wigT -= dt; if (Math.random() < dt * 4) fxBits(P.x, 2.6, P.z, 1, '#f6f4ee', 1); if (P.wigT <= 0) { P.skin = P.wigPrev || null; UI.burst('COURT ADJOURNED', P); } }
+  if (P.flopT > 0) P.flopT -= dt;
+  trainDashTick(P, dt); toddTick(P, dt); laserTick(P, dt); moamTick(dt);
+}
+var _updateWorld32 = updateWorld;
+updateWorld = function (dt) { _updateWorld32(dt); if (G.state === 'play') spec32Tick(dt); };
+var _enterRoom32 = enterRoom;
+enterRoom = function (room, fromSide) {
+  var P = G.P;
+  if (P) { if (P.dash32) { P.skin = P.dash32.prev; P.dash32 = null; } if (P.todd32) { P.todd32 = null; if (P.sprite) P.sprite.material.opacity = P.ghost ? 0.74 : 1; } P.laser32 = null; }
+  SP.moam = null;
+  _enterRoom32(room, fromSide);
+};
+
+/* ---------- the special on the hero cards ---------- */
+function spEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function specCardFront(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div class="stat"><b>Special</b> ' + esc(d.name) + ' <kbd>' + esc(keyName(keyMap().special[0])) + '</kbd></div>' : ''; }
+function specCardBack(h) { var esc = spEsc, d = SPECIALS[h]; return d ? '<div class="abil spec"><b>Special: ' + esc(d.name) + '</b><p>' + esc(d.tip) + '</p></div>' : ''; }
 
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
