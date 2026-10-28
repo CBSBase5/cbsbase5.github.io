@@ -91,7 +91,7 @@ window.B5TERM = {
       sub:"Half an hour on a day worth marking.",
       body:"Half an hour each morning on whatever the calendar is marking this week, and why people bother to mark it at all.",
       options:[["Find","One thing about it you did not know yesterday."],["Talk","Tell someone else the bit that stuck."],["Then","What would someone a hundred years ago have made of it?"]],
-      links:[["Cultural calendar shelf","/practice/shelves.html#cc"]],
+      links:[["This week on the Cultural Calendar","/cc/"]],
       ways:["Listen and say nothing","Draw it instead","Work with Jay or HB","Sit this one out"]
     },
 
@@ -222,7 +222,7 @@ window.B5TERM = {
   weeks: [
     {
       n:1, start:"2026-11-03", end:"2026-11-06",
-      cc:"",
+      cc:"Festivals of Light",
       era:{ year:"2026", label:"Now" },
       theme:"Through the door",
       sub:"Four days. The first one starts with a trip.",
@@ -246,31 +246,31 @@ window.B5TERM = {
     },
     {
       n:2, start:"2026-11-09", end:"2026-11-13",
-      cc:"",
+      cc:"Remembrance",
       era:{ year:"1999", label:"Dial up and floppy disks" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:3, start:"2026-11-16", end:"2026-11-20",
-      cc:"",
+      cc:"Anti-Bullying Week",
       era:{ year:"1969", label:"One small step" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:4, start:"2026-11-23", end:"2026-11-27",
-      cc:"",
+      cc:"Giving Tuesday",
       era:{ year:"1851", label:"Steam and soot" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:5, start:"2026-11-30", end:"2026-12-04",
-      cc:"",
+      cc:"Christmas Around the World",
       era:{ year:"1066", label:"Arrows and castles" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
     {
       n:6, start:"2026-12-07", end:"2026-12-11",
-      cc:"",
+      cc:"STEAM for Good",
       era:{ year:"65,000,000 BC", label:"The dinosaurs again" },
       theme:"", sub:"", days:{}, sessions:{}, feature:[]
     },
