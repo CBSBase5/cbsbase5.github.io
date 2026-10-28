@@ -16,6 +16,8 @@
      q       the big question
      why     one line, kept short
      try     three to five ideas: [icon, a few words]
+     home    which idea (0 is the first) works best at home;
+             the parent portal shows it
      jobs    four keys from JOBS below
      game    { title, href, verb, blurb } or null for the
              mystery box and the pitch builder
@@ -312,7 +314,7 @@ window.B5CC = {
 
     /* ======================= AUTUMN 1 ======================= */
     {
-      id:"new-beginnings", half:"a1", start:"2026-09-03", end:"2026-09-11",
+      id:"new-beginnings", half:"a1", home:1, start:"2026-09-03", end:"2026-09-11",
       title:"New Beginnings", long:"New Beginnings: belonging and our school community",
       q:"What makes a place feel like yours?",
       why:"Everyone needs somewhere they feel safe, liked and ready.",
@@ -328,7 +330,7 @@ window.B5CC = {
       look:{ bg:"#0e7c86", bg2:"#13a3a0", ink:"#ffffff", pop:"#ffd23f", pop2:"#ef7724", motif:"door", pattern:"confetti", scene:"newbeginnings", effect:"confetti", fx:["#ffd23f","#ef7724","#ffffff","#ff4f81"] }
     },
     {
-      id:"fitness-day", half:"a1", start:"2026-09-14", end:"2026-09-18",
+      id:"fitness-day", half:"a1", home:1, start:"2026-09-14", end:"2026-09-18",
       title:"Fitness Day", long:"National Fitness Day",
       q:"What gets you moving without it feeling like a chore?",
       why:"Moving helps your head as much as your body.",
@@ -345,7 +347,7 @@ window.B5CC = {
       look:{ bg:"#ff5a36", bg2:"#ff8c42", ink:"#1a1a2e", pop:"#fff275", pop2:"#2ec4b6", motif:"shoe", pattern:"rays", scene:"fitness" }
     },
     {
-      id:"sign-languages", half:"a1", start:"2026-09-21", end:"2026-09-25",
+      id:"sign-languages", half:"a1", home:0, start:"2026-09-21", end:"2026-09-25",
       title:"Sign Languages", long:"International Day of Sign Languages",
       q:"How many ways can you talk without speaking?",
       why:"Words are only one way in. Hands, symbols and screens all count.",
@@ -362,7 +364,7 @@ window.B5CC = {
       look:{ bg:"#5b2a86", bg2:"#8e44ad", ink:"#ffffff", pop:"#ffd166", pop2:"#06d6a0", motif:"hand", pattern:"dots", scene:"sign" }
     },
     {
-      id:"older-persons", half:"a1", start:"2026-09-28", end:"2026-10-02",
+      id:"older-persons", half:"a1", home:0, start:"2026-09-28", end:"2026-10-02",
       title:"Generations", long:"International Day of Older Persons",
       q:"What could someone older teach you in ten minutes?",
       why:"Every age has something worth swapping.",
@@ -379,7 +381,7 @@ window.B5CC = {
       look:{ bg:"#e9a23b", bg2:"#f4c95d", ink:"#3b1f0e", pop:"#b5442c", pop2:"#fff3d6", motif:"cup", pattern:"stripes", scene:"generations" }
     },
     {
-      id:"black-history-month", half:"a1", start:"2026-10-05", end:"2026-10-09",
+      id:"black-history-month", half:"a1", home:2, start:"2026-10-05", end:"2026-10-09",
       title:"Black History Month", long:"Black History Month, with World Space Week",
       q:"Whose names should everyone know?",
       why:"Black scientists, engineers and astronauts helped build the future we live in.",
@@ -395,7 +397,7 @@ window.B5CC = {
       look:{ bg:"#1b1b3a", bg2:"#3a1c71", ink:"#ffffff", pop:"#f6bd2b", pop2:"#2ec27e", motif:"sankofa", pattern:"stars", scene:"bhmspace" }
     },
     {
-      id:"mental-health", half:"a1", start:"2026-10-12", end:"2026-10-16",
+      id:"mental-health", half:"a1", home:2, start:"2026-10-12", end:"2026-10-16",
       title:"Mental Health Week", long:"World Mental Health and Wellbeing Week",
       q:"What actually helps when your head gets loud?",
       why:"Knowing your own toolkit, and who to ask, makes hard days smaller.",
@@ -414,7 +416,7 @@ window.B5CC = {
 
     /* ======================= AUTUMN 2 ======================= */
     {
-      id:"festivals-of-light", half:"a2", start:"2026-11-02", end:"2026-11-06",
+      id:"festivals-of-light", half:"a2", home:3, start:"2026-11-02", end:"2026-11-06",
       title:"Festivals of Light", long:"Festivals of Light and Remembrance: Diwali, Day of the Dead and Bonfire Night",
       q:"Why do people light up the dark?",
       why:"Diwali, Day of the Dead and Bonfire Night all use light to celebrate, remember and get together.",
@@ -432,7 +434,7 @@ window.B5CC = {
       look:{ bg:"#140a2e", bg2:"#3a1460", ink:"#fff7e6", pop:"#ffb627", pop2:"#ff4f81", motif:"diya", pattern:"stars", scene:"festivals", effect:"fireworks", fx:["#ffb627","#ff4f81","#2ec4b6","#fff7e6","#a86bff"] }
     },
     {
-      id:"remembrance", half:"a2", start:"2026-11-09", end:"2026-11-13",
+      id:"remembrance", half:"a2", home:4, start:"2026-11-09", end:"2026-11-13",
       title:"Remembrance", long:"Remembrance, Service and Giving: Armistice Day and Children in Need",
       q:"How do you say thank you to people you never met?",
       why:"Remembering the people who served, and helping the people who need it now.",
@@ -449,7 +451,7 @@ window.B5CC = {
       look:{ bg:"#a4161a", bg2:"#d90429", ink:"#ffffff", pop:"#161a1d", pop2:"#f5ebe0", motif:"poppy", pattern:"dots", scene:"remembrance", effect:"petals", fx:["#d90429","#ef233c","#a4161a"] }
     },
     {
-      id:"anti-bullying", half:"a2", start:"2026-11-16", end:"2026-11-20",
+      id:"anti-bullying", half:"a2", home:0, start:"2026-11-16", end:"2026-11-20",
       title:"Anti-Bullying Week", long:"Anti-Bullying Week: Break the Silence",
       q:"What could you say when something is not OK?",
       why:"Speaking up, getting help and backing each other up stops bullying growing.",
@@ -466,7 +468,7 @@ window.B5CC = {
       look:{ bg:"#0077b6", bg2:"#00b4d8", ink:"#ffffff", pop:"#ffd60a", pop2:"#ff006e", motif:"megaphone", pattern:"stripes", scene:"antibullying" }
     },
     {
-      id:"giving-tuesday", half:"a2", start:"2026-11-23", end:"2026-11-27",
+      id:"giving-tuesday", half:"a2", home:0, start:"2026-11-23", end:"2026-11-27",
       title:"Giving Tuesday", long:"Giving Tuesday: giving, kindness and community",
       q:"What could you give that costs nothing?",
       why:"Time, skills and kindness all count as giving.",
@@ -482,7 +484,7 @@ window.B5CC = {
       look:{ bg:"#ffbe0b", bg2:"#ffd166", ink:"#2b0f6b", pop:"#fb5607", pop2:"#3a86ff", motif:"gift", pattern:"confetti", scene:"giving", effect:"confetti", fx:["#fb5607","#3a86ff","#ff006e","#8338ec"] }
     },
     {
-      id:"christmas-around-the-world", half:"a2", start:"2026-11-30", end:"2026-12-04",
+      id:"christmas-around-the-world", half:"a2", home:4, start:"2026-11-30", end:"2026-12-04",
       title:"Christmas Around the World", long:"Christmas Around the World: celebrations, traditions, beliefs",
       q:"How does the rest of the world do December?",
       why:"Same season. Very different music, food, stories and traditions.",
@@ -498,7 +500,7 @@ window.B5CC = {
       look:{ bg:"#0b6e4f", bg2:"#08a045", ink:"#ffffff", pop:"#e63946", pop2:"#ffd166", motif:"tree", pattern:"snow", scene:"christmas", effect:"snow", fx:["#ffffff"] }
     },
     {
-      id:"steam-for-good", half:"a2", start:"2026-12-07", end:"2026-12-11",
+      id:"steam-for-good", half:"a2", home:0, start:"2026-12-07", end:"2026-12-11",
       title:"STEAM for Good", long:"STEAM for Good: problem solving",
       q:"What is one problem round here you could actually fix?",
       why:"Science, tech, engineering, art and maths are all just ways of fixing things.",
@@ -516,7 +518,7 @@ window.B5CC = {
 
     /* ======================= SPRING 1 (draft dates) ======================= */
     {
-      id:"new-year", half:"sp1", start:"2027-01-04", end:"2027-01-08", draft:true,
+      id:"new-year", half:"sp1", home:3, start:"2027-01-04", end:"2027-01-08", draft:true,
       title:"New Year, New You?", long:"New Year: traditions, resolutions and dates",
       q:"Does anyone actually keep a New Year's resolution?",
       why:"People have made new year promises for thousands of years. Most give up by February.",
@@ -531,7 +533,7 @@ window.B5CC = {
       look:{ bg:"#1d3557", bg2:"#2b5d8a", ink:"#ffffff", pop:"#ffd166", pop2:"#ef476f", motif:"firework", pattern:"confetti" }
     },
     {
-      id:"democracy-day", half:"sp1", start:"2027-01-11", end:"2027-01-15", draft:true,
+      id:"democracy-day", half:"sp1", home:1, start:"2027-01-11", end:"2027-01-15", draft:true,
       title:"Democracy Day", long:"Democracy Day in Cape Verde",
       q:"Should everyone get a say?",
       why:"Cape Verde marks the day in 1991 it held its first election with more than one party.",
@@ -547,7 +549,7 @@ window.B5CC = {
       look:{ bg:"#003893", bg2:"#1f4fb2", ink:"#ffffff", pop:"#f7d116", pop2:"#cf2027", motif:"ballot", pattern:"stars" }
     },
     {
-      id:"lunar-new-year", half:"sp1", start:"2027-01-18", end:"2027-01-22", draft:true,
+      id:"lunar-new-year", half:"sp1", home:1, start:"2027-01-18", end:"2027-01-22", draft:true,
       title:"Chinese New Year", long:"Chinese New Year",
       q:"Which animal year were you born in?",
       why:"2027 is the Year of the Goat: lanterns, red envelopes and a lot of noise.",
@@ -563,7 +565,7 @@ window.B5CC = {
       look:{ bg:"#b5121b", bg2:"#e5383b", ink:"#fff8e7", pop:"#ffd60a", pop2:"#7b2cbf", motif:"lantern", pattern:"rays" }
     },
     {
-      id:"steam-january", half:"sp1", start:"2027-01-25", end:"2027-01-29", draft:true,
+      id:"steam-january", half:"sp1", home:1, start:"2027-01-25", end:"2027-01-29", draft:true,
       title:"STEAM Challenge", long:"STEAM activity",
       q:"Can you build it with what is on the table?",
       why:"Engineers usually start with not quite enough. That is the fun part.",
@@ -578,7 +580,7 @@ window.B5CC = {
       look:{ bg:"#06d6a0", bg2:"#1b9aaa", ink:"#073b4c", pop:"#ffd166", pop2:"#ef476f", motif:"bridge", pattern:"grid" }
     },
     {
-      id:"safer-internet", half:"sp1", start:"2027-02-01", end:"2027-02-05", draft:true,
+      id:"safer-internet", half:"sp1", home:2, start:"2027-02-01", end:"2027-02-05", draft:true,
       title:"Safer Internet Day", long:"Safer Internet Day",
       q:"How do you know if something online is real?",
       why:"Apps, AI and adverts all want something from you. Knowing that keeps you in charge.",
@@ -594,7 +596,7 @@ window.B5CC = {
       look:{ bg:"#0f172a", bg2:"#1e3a5f", ink:"#e2e8f0", pop:"#22d3ee", pop2:"#a3e635", motif:"padlock", pattern:"grid" }
     },
     {
-      id:"apprenticeships", half:"sp1", start:"2027-02-08", end:"2027-02-12", draft:true,
+      id:"apprenticeships", half:"sp1", home:2, start:"2027-02-08", end:"2027-02-12", draft:true,
       title:"Apprenticeship Week", long:"National Apprenticeship Week",
       q:"Could you get paid while you learn?",
       why:"Apprenticeships mean real work, real pay and a qualification at the end.",
@@ -612,7 +614,7 @@ window.B5CC = {
 
     /* ======================= SPRING 2 (draft dates) ======================= */
     {
-      id:"lgbt-history-month", half:"sp2", start:"2027-02-22", end:"2027-02-26", draft:true,
+      id:"lgbt-history-month", half:"sp2", home:3, start:"2027-02-22", end:"2027-02-26", draft:true,
       title:"LGBT+ History Month", long:"LGBT+ History Month",
       q:"Whose stories got left out of the history books?",
       why:"LGBT+ people have shaped science, art and history, even when they had to hide who they were.",
@@ -628,7 +630,7 @@ window.B5CC = {
       look:{ bg:"#3d348b", bg2:"#7678ed", ink:"#ffffff", pop:"#f7b801", pop2:"#f35b04", motif:"rainbow", pattern:"rays" }
     },
     {
-      id:"careers-week", half:"sp2", start:"2027-03-01", end:"2027-03-05", draft:true,
+      id:"careers-week", half:"sp2", home:2, start:"2027-03-01", end:"2027-03-05", draft:true,
       title:"Careers Week", long:"National Careers Week",
       q:"What job would you do for free?",
       why:"The things you are into now can point at jobs you have never heard of.",
@@ -643,7 +645,7 @@ window.B5CC = {
       look:{ bg:"#118ab2", bg2:"#06aed5", ink:"#ffffff", pop:"#ffd166", pop2:"#ef476f", motif:"compass", pattern:"dots" }
     },
     {
-      id:"pi-day", half:"sp2", start:"2027-03-08", end:"2027-03-12", draft:true,
+      id:"pi-day", half:"sp2", home:0, start:"2027-03-08", end:"2027-03-12", draft:true,
       title:"Pi Day", long:"Pi Day, 14 March",
       q:"Why does every circle hide the same number?",
       why:"Pi is about 3.14 and it never ends. People mark it on 14 March: 3/14.",
@@ -659,7 +661,7 @@ window.B5CC = {
       look:{ bg:"#2d00f7", bg2:"#6a00f4", ink:"#ffffff", pop:"#f20089", pop2:"#ffd60a", motif:"pi", pattern:"grid" }
     },
     {
-      id:"red-nose-day", half:"sp2", start:"2027-03-15", end:"2027-03-19", draft:true,
+      id:"red-nose-day", half:"sp2", home:1, start:"2027-03-15", end:"2027-03-19", draft:true,
       title:"Red Nose Day", long:"Red Nose Day",
       q:"Can being silly change something serious?",
       why:"Comic Relief turns jokes and red noses into money for people who need it.",
@@ -675,7 +677,7 @@ window.B5CC = {
       look:{ bg:"#e63946", bg2:"#ff595e", ink:"#ffffff", pop:"#ffca3a", pop2:"#1982c4", motif:"nose", pattern:"dots" }
     },
     {
-      id:"shakespeare-week", half:"sp2", start:"2027-03-22", end:"2027-03-26", draft:true,
+      id:"shakespeare-week", half:"sp2", home:0, start:"2027-03-22", end:"2027-03-26", draft:true,
       title:"Shakespeare Week", long:"National Reading Month and Shakespeare Week",
       q:"Why are we still reading a writer from 400 years ago?",
       why:"Shakespeare wrote down words you still use every day.",
@@ -690,7 +692,7 @@ window.B5CC = {
       look:{ bg:"#6a4c93", bg2:"#8b5fbf", ink:"#ffffff", pop:"#ffca3a", pop2:"#8ac926", motif:"mask", pattern:"stripes" }
     },
     {
-      id:"steam-march", half:"sp2", start:"2027-03-29", end:"2027-04-02", draft:true,
+      id:"steam-march", half:"sp2", home:0, start:"2027-03-29", end:"2027-04-02", draft:true,
       title:"STEAM Projects", long:"STEAM activity: space, deep sea, virtual world",
       q:"Space, the deep sea or inside a computer: where would you build a base?",
       why:"Three places people cannot easily live. Engineers are working on all three.",
@@ -707,7 +709,7 @@ window.B5CC = {
 
     /* ======================= SUMMER 1 (draft dates) ======================= */
     {
-      id:"st-georges-day", half:"su1", start:"2027-04-19", end:"2027-04-23", draft:true,
+      id:"st-georges-day", half:"su1", home:0, start:"2027-04-19", end:"2027-04-23", draft:true,
       title:"St George's Day", long:"St George's Day, 23 April",
       q:"Who was St George, and why the dragon?",
       why:"England's patron saint gets a day of feasting and a very old dragon story. He never visited England.",
@@ -722,7 +724,7 @@ window.B5CC = {
       look:{ bg:"#fdf0d5", bg2:"#f3dcae", ink:"#6b0f0f", pop:"#c1121f", pop2:"#386641", motif:"dragon", pattern:"stripes" }
     },
     {
-      id:"brain-brilliance", half:"su1", start:"2027-04-26", end:"2027-05-07", draft:true,
+      id:"brain-brilliance", half:"su1", home:1, start:"2027-04-26", end:"2027-05-07", draft:true,
       title:"Brain Brilliance", long:"Brain Brilliance: food, mood and health (two weeks)",
       q:"Does what you eat change how you feel?",
       why:"Food, mood and focus are all connected. Picky eaters included.",
@@ -737,7 +739,7 @@ window.B5CC = {
       look:{ bg:"#8ac926", bg2:"#52b788", ink:"#123524", pop:"#ff595e", pop2:"#ffca3a", motif:"apple", pattern:"dots" }
     },
     {
-      id:"women-in-maths", half:"su1", start:"2027-05-10", end:"2027-05-14", draft:true,
+      id:"women-in-maths", half:"su1", home:2, start:"2027-05-10", end:"2027-05-14", draft:true,
       title:"Women in Maths", long:"Women in mathematics: Katherine Johnson",
       q:"Could you do the maths that put people in space?",
       why:"Katherine Johnson's sums helped send astronauts into orbit and bring them home.",
@@ -752,7 +754,7 @@ window.B5CC = {
       look:{ bg:"#0d1b2a", bg2:"#1b3a5b", ink:"#e0e1dd", pop:"#ffb703", pop2:"#8ecae6", motif:"star", pattern:"grid" }
     },
     {
-      id:"astronomy-week", half:"su1", start:"2027-05-17", end:"2027-05-21", draft:true,
+      id:"astronomy-week", half:"su1", home:0, start:"2027-05-17", end:"2027-05-21", draft:true,
       title:"Astronomy Week", long:"Astronomy Week",
       q:"What is up there tonight?",
       why:"Look up this week. The Moon and the planets put on a show.",
@@ -769,7 +771,7 @@ window.B5CC = {
 
     /* ======================= SUMMER 2 (draft dates) ======================= */
     {
-      id:"environment-day", half:"su2", start:"2027-05-31", end:"2027-06-04", draft:true,
+      id:"environment-day", half:"su2", home:2, start:"2027-05-31", end:"2027-06-04", draft:true,
       title:"World Environment Day", long:"World Environment Day, 5 June",
       q:"What is one thing you would change to help the planet?",
       why:"World Environment Day asks everyone to do one thing, however small.",
@@ -784,7 +786,7 @@ window.B5CC = {
       look:{ bg:"#2d6a4f", bg2:"#40916c", ink:"#ffffff", pop:"#ffd166", pop2:"#b7e4c7", motif:"globe", pattern:"waves" }
     },
     {
-      id:"ocean-day", half:"su2", start:"2027-06-07", end:"2027-06-11", draft:true,
+      id:"ocean-day", half:"su2", home:2, start:"2027-06-07", end:"2027-06-11", draft:true,
       title:"World Ocean Day", long:"World Ocean Day, 8 June",
       q:"How much of the sea have we actually explored?",
       why:"Most of the ocean has never been seen by a person. And the UK is surrounded by it.",
@@ -800,7 +802,7 @@ window.B5CC = {
       look:{ bg:"#0077b6", bg2:"#00b4d8", ink:"#ffffff", pop:"#ffd166", pop2:"#90e0ef", motif:"fish", pattern:"waves" }
     },
     {
-      id:"refugee-week", half:"su2", start:"2027-06-14", end:"2027-06-18", draft:true,
+      id:"refugee-week", half:"su2", home:1, start:"2027-06-14", end:"2027-06-18", draft:true,
       title:"Refugee Week", long:"Refugee Week (or the Summer Solstice)",
       q:"What does courage look like on an ordinary day?",
       why:"Refugee Week celebrates people who rebuilt their lives here, and everything they brought with them.",
@@ -816,7 +818,7 @@ window.B5CC = {
       look:{ bg:"#f9c74f", bg2:"#f9844a", ink:"#1d3557", pop:"#43aa8b", pop2:"#577590", motif:"hands", pattern:"dots" }
     },
     {
-      id:"pride-month", half:"su2", start:"2027-06-21", end:"2027-06-25", draft:true,
+      id:"pride-month", half:"su2", home:2, start:"2027-06-21", end:"2027-06-25", draft:true,
       title:"Pride Month", long:"Pride Month, with the school Pride event",
       q:"What does it mean to be proud of who you are?",
       why:"Pride celebrates LGBTQ+ people, and the right of everyone to be themselves.",
@@ -831,7 +833,7 @@ window.B5CC = {
       look:{ bg:"#ff006e", bg2:"#8338ec", ink:"#ffffff", pop:"#ffbe0b", pop2:"#3a86ff", motif:"rainbow", pattern:"rays" }
     },
     {
-      id:"writing-day", half:"su2", start:"2027-06-28", end:"2027-07-02", draft:true,
+      id:"writing-day", half:"su2", home:0, start:"2027-06-28", end:"2027-07-02", draft:true,
       title:"National Writing Day", long:"National Writing Day",
       q:"Could you tell a whole story in 24 words?",
       why:"National Writing Day is about writing for fun, not for marks.",
@@ -846,7 +848,7 @@ window.B5CC = {
       look:{ bg:"#fefae0", bg2:"#f1dfb6", ink:"#283618", pop:"#bc6c25", pop2:"#606c38", motif:"pencil", pattern:"stripes" }
     },
     {
-      id:"plastic-free-july", half:"su2", start:"2027-07-05", end:"2027-07-09", draft:true,
+      id:"plastic-free-july", half:"su2", home:0, start:"2027-07-05", end:"2027-07-09", draft:true,
       title:"Plastic Free July", long:"Plastic Free July",
       q:"Could you go a whole day without plastic?",
       why:"Plastic lasts hundreds of years. Lots of it gets used once.",
@@ -862,7 +864,7 @@ window.B5CC = {
       look:{ bg:"#2ec4b6", bg2:"#3ddbd9", ink:"#011627", pop:"#ff9f1c", pop2:"#fdfffc", motif:"bottle", pattern:"waves" }
     },
     {
-      id:"dry-ice", half:"su2", start:"2027-07-19", end:"2027-07-23", draft:true,
+      id:"dry-ice", half:"su2", home:2, start:"2027-07-19", end:"2027-07-23", draft:true,
       title:"Dry Ice Science", long:"STEAM: the dry ice experiment",
       q:"What happens when something skips being a liquid?",
       why:"Dry ice goes straight from solid to gas, and it looks like magic.",

@@ -1058,5 +1058,44 @@ window.B5Shared = {
 })();
 </script>
 
+<script src="/cc/cc-card.js?v=2"></script>
+<script>
+/* ---------- CC takeover: during the 10:00 Cultural Calendar slot the CC card
+   turns into this week's colours and art from /cc/. Outside the slot it is the
+   plain card. ?ccnow=1 shows the takeover at any time, for checking. ---------- */
+(function(){
+  var T = window.B5TERM, K = window.B5CCCard;
+  if(!T || !K) return;
+  var force = /[?&]ccnow=1/.test(location.search), keep = [], on = false;
+  function mins(t){ var p = t.split(":"), h = +p[0]; if(h < 7) h += 12; return h * 60 + (+p[1]); }
+  function slot(){
+    var d = new Date(), k = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()], m = d.getHours() * 60 + d.getMinutes();
+    var s = ((T.timetable || {})[k] || []).filter(function(x){ return x[2] === "cc"; })[0];
+    if(!s) return null;
+    return m >= mins(s[0]) && m < mins(s[1]) ? s : null;
+  }
+  function apply(){
+    var s = force ? ["10:00", "10:30"] : slot(), cards = document.querySelectorAll(".cccard");
+    if(s && !on && cards.length){
+      K.load(function(){
+        var w = K.week(); if(!w || w.start > T.todayIso()) return;
+        [].forEach.call(document.querySelectorAll(".cccard"), function(c){
+          var box = document.createElement("div");
+          box.innerHTML = K.html(w, { kicker: "CC now, until " + s[1], go: "Go", cls: "card w12 live cccard-now" });
+          var n = box.firstChild;
+          keep.push([n, c]);
+          c.parentNode.replaceChild(n, c);
+        });
+        on = true;
+      });
+    } else if(!s && on){
+      keep.forEach(function(p){ if(p[0].parentNode) p[0].parentNode.replaceChild(p[1], p[0]); });
+      keep = []; on = false;
+    }
+  }
+  apply();
+  setInterval(apply, 30000);
+})();
+</script>
 </body>
 </html>

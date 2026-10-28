@@ -178,7 +178,7 @@
       <p>The week, the timetable and the rhythm of each day, how the website keeps students safe, and who to talk to. Nothing on this page is about any one child.</p>
     </div>
     <nav class="jump" aria-label="On this page">
-      <a href="#thisweek">This week</a><a href="#timetable">Timetable</a><a href="#rhythms">Daily rhythms</a><a href="#lunch">Lunch</a><a href="#how">How it works</a><a href="#safe">Keeping safe</a><a href="#worried">Worried about something?</a><a href="#contact">Questions</a><a href="#look">Look around</a>
+      <a href="#thisweek">This week</a><a href="#cultural">Cultural Calendar</a><a href="#timetable">Timetable</a><a href="#rhythms">Daily rhythms</a><a href="#lunch">Lunch</a><a href="#how">How it works</a><a href="#safe">Keeping safe</a><a href="#worried">Worried about something?</a><a href="#contact">Questions</a><a href="#look">Look around</a>
     </nav>
   </div>
 </header>
@@ -190,6 +190,12 @@
   <section class="sec" id="thisweek" aria-labelledby="tw-h">
     <div class="weektheme"><h2 id="tw-h">This week</h2><span id="twRange"></span></div>
     <div class="pp"><p class="lead" id="twLead"></p><div class="tw" id="twDays"></div><div class="tags" id="twTags"></div></div>
+  </section>
+
+  <section class="sec" id="cultural" aria-labelledby="cc-h">
+    <div class="weektheme"><h2 id="cc-h">The Cultural Calendar</h2><span>What the whole school is marking this week</span></div>
+    <div id="ccCard"></div>
+    <p class="muted" style="margin-top:12px">Every week the school marks a day or a festival, with ideas to try and sometimes a game. The idea above works at home too, if anyone fancies it. Nothing needs doing or sending in.</p>
   </section>
 
   <section class="sec" id="timetable" aria-labelledby="tt-h">
@@ -298,7 +304,11 @@
 </footer>
 
 <script src="/data/term.js?v=6"></script>
-<script src="/data/parents.js?v=4"></script>
+<script src="/data/parents.js?v=5"></script>
+<script src="/data/cc.js?v=4"></script>
+<script src="/cc/cc-art.js?v=3"></script>
+<script src="/cc/cc-scenes.js?v=5"></script>
+<script src="/cc/cc-card.js?v=2"></script>
 <script>
 /* ?draft=1: preview the staff room's unsaved changes, on that device only */
 (function(){
@@ -327,7 +337,7 @@ var CT = P.contact || {};
 if(CT.name) [].forEach.call(document.querySelectorAll(".cname"), function(e){ e.textContent = CT.name; });
 if(CT.email){ $("cmail").textContent = CT.email; $("cmail").href = "mailto:" + CT.email; }
 var SH = P.show || {};
-["thisweek", "timetable", "rhythms", "lunch", "how", "safe", "contact", "look"].forEach(function(id){
+["thisweek", "cultural", "timetable", "rhythms", "lunch", "how", "safe", "contact", "look"].forEach(function(id){
   if(SH[id] === false){
     var sec = $(id); if(sec) sec.hidden = true;
     var a = document.querySelector('.jump a[href="#' + id + '"]'); if(a) a.hidden = true;
@@ -405,6 +415,17 @@ var PDF = String(P.lunchPdf || "").trim();
 $("menuCta").innerHTML = PDF && /^(https:\/\/|\/)/.test(PDF) ?
   '<a class="btn btn-orange" href="' + esc(PDF) + '" target="_blank" rel="noopener">' + esc(P.lunchPdfLabel || "The school lunch menu (PDF)") + '</a>' :
   '<p class="muted" style="margin:0">For the school lunch menu, ask Jay or the school office.</p>';
+})();
+</script>
+<script>
+/* The Cultural Calendar card: this week's art, question and one idea to try at home (/cc/cc-card.js) */
+(function(){
+  var K = window.B5CCCard, box = document.getElementById("ccCard"), sec = document.getElementById("cultural");
+  if(!K || !box || !sec || sec.hidden) return;
+  var w = K.week(), d = new Date(), iso = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  if(!w){ sec.hidden = true; var a = document.querySelector('.jump a[href="#cultural"]'); if(a) a.hidden = true; return; }
+  var M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], p = w.start.split("-");
+  box.innerHTML = K.html(w, { kicker: w.start <= iso ? "This week" : "From " + (+p[2]) + " " + M[+p[1] - 1], go: "See this week", home: true });
 })();
 </script>
 </body>

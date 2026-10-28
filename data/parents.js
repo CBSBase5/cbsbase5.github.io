@@ -26,7 +26,7 @@ window.B5PARENTS = {
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
 
   /* Sections that can be switched off. "Worried about something?" is always shown. */
-  show: { thisweek: true, timetable: true, rhythms: true, lunch: true, how: true, safe: true, contact: true, look: true },
+  show: { thisweek: true, cultural: true, timetable: true, rhythms: true, lunch: true, how: true, safe: true, contact: true, look: true },
 
   /* Lunch: the school menu as a PDF (upload it to the parents folder on GitHub as
      lunch-menu.pdf, or link one the school publishes). Leave "" for none. */
