@@ -2872,7 +2872,12 @@ var AUD = (function () {
     beat: function (t) { tone(sfxBus, 'sine', 62, t, 0.12, 0.35, 40); tone(sfxBus, 'sine', 58, t + 0.2, 0.12, 0.25, 38); },
     drop: function (t) { tone(sfxBus, 'square', 392, t, 0.1, 0.05); tone(sfxBus, 'square', 523, t + 0.1, 0.14, 0.05); noise(sfxBus, t, 0.05, 0.06, 4000); },
     gate: function (t) { noise(sfxBus, t, 0.25, 0.26, 700); tone(sfxBus, 'sine', 90, t, 0.25, 0.4, 40); noise(sfxBus, t + 0.05, 0.15, 0.12, 3000); },
-    cutin: function (t) { noise(sfxBus, t, 0.3, 0.12, 2000); tone(sfxBus, 'sawtooth', 300, t, 0.3, 0.05, 1500); tone(sfxBus, 'sine', 70, t + 0.25, 0.3, 0.4, 35); }
+    cutin: function (t) { noise(sfxBus, t, 0.3, 0.12, 2000); tone(sfxBus, 'sawtooth', 300, t, 0.3, 0.05, 1500); tone(sfxBus, 'sine', 70, t + 0.25, 0.3, 0.4, 35); },
+    /* the opening: a low swell, thunder, a riser and the neon going out */
+    drone: function (t) { var f = ctx.createBiquadFilter(), g = ctx.createGain(); f.type = 'lowpass'; f.frequency.value = 320; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.16, t + 2.2); g.gain.linearRampToValueAtTime(0.12, t + 4.6); g.gain.linearRampToValueAtTime(0.0001, t + 6.4); f.connect(g); g.connect(sfxBus); [41.2, 41.9, 61.7].forEach(function (hz, i) { var o = ctx.createOscillator(); o.type = i < 2 ? 'sawtooth' : 'triangle'; o.frequency.value = hz; o.connect(f); o.start(t); o.stop(t + 6.5); }); },
+    thunder: function (t) { noise(sfxBus, t, 0.12, 0.3, 2500); var s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noiseBuf; s.loop = true; s.playbackRate.value = 0.5; f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(120, t + 2.6); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.5, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0008, t + 2.8); s.connect(f); f.connect(g); g.connect(sfxBus); s.start(t); s.stop(t + 2.9); tone(sfxBus, 'sine', 60, t + 0.05, 1.4, 0.35, 32); },
+    riser: function (t) { var o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(420, t + 2.6); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.06, t + 2.4); g.gain.linearRampToValueAtTime(0.0001, t + 2.7); o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 2.75); noise(sfxBus, t + 1.8, 0.9, 0.05, 3000); },
+    neonoff: function (t) { tone(sfxBus, 'sawtooth', 220, t, 0.12, 0.03, 200); tone(sfxBus, 'sawtooth', 210, t + 0.18, 0.08, 0.025, 120); tone(sfxBus, 'square', 1400, t + 0.3, 0.02, 0.04); noise(sfxBus, t + 0.3, 0.05, 0.08, 5000); }
   };
   /* ---------- voices: little syllable blips that follow the rhythm of the words ---------- */
   function voice(v, text) {
@@ -19601,6 +19606,280 @@ whatsNew = function () {
   el.onclick = close; window.addEventListener('keydown', key, true);
   setTimeout(function () { var b = document.getElementById('wn-ok'); if (b) b.focus(); }, 50);
 };
+
+/* ===================== V41: THE OPENING, 3.0 ===================== */
+/* About thirty seconds, all about Box-man. Every line fades in slowly, holds, and fades out.
+   The music waits: a low swell and a heartbeat while the city goes dark, glimpses of him in
+   shadow (boots, hammer, the bag) lit only by lightning, then the full reveal in a thunder
+   flash, his name in red neon, the neon dies, and the cardboard letters slam in as the song hits.
+   It plays every time the game opens, and any key skips it.
+   The title screen keeps only the logo, LW's credit and the menu; the controls line fades in
+   only if nobody has pressed anything for a few seconds. */
+CINE_LEN = 32700;
+(function () {
+  var css = [
+    /* lines of text: a slow fade in, a long hold, a slow fade out, with a gentle push */
+    '.cn3-t { position: absolute; left: 0; right: 0; padding: 0 6vw; text-align: center; opacity: 0; pointer-events: none; transition: opacity 1s ease, transform var(--td, 5s) linear, letter-spacing var(--td, 5s) linear; }',
+    '.cn3-t.mid { top: 50%; transform: translateY(-50%) scale(.96); } .cn3-t.mid.on { transform: translateY(-50%) scale(1.04); }',
+    '.cn3-t.low { bottom: calc(16vh + 3vh); transform: scale(.98); } .cn3-t.low.on { transform: scale(1.02); }',
+    '.cn3-t.on { opacity: 1; } .cn3-t.off { opacity: 0 !important; }',
+    '.cn3-t.lw b { display: inline-block; padding: 10px 28px; border: 6px solid #e2402f; color: #e2402f; font: 400 clamp(40px, 7vw, 84px) var(--f-comic); letter-spacing: 10px; transform: rotate(-4deg); background: rgba(244,234,212,.05); box-shadow: 0 0 40px rgba(226,64,47,.25); }',
+    '.cn3-t.film b { display: block; max-width: 18ch; margin: 0 auto; font: 400 clamp(30px, 5vw, 62px)/1.12 "Bungee Outline", Bangers, Impact, sans-serif; color: #ffb27a; letter-spacing: 3px; text-shadow: 0 0 14px rgba(255,140,60,.55), 0 0 2px #ffe0c0; }',
+    '.cn3-t.trail b { font: 400 clamp(26px, 4.2vw, 50px) var(--f-comic); letter-spacing: 7px; color: #f4ead4; text-shadow: 0 4px 0 #000, 0 0 24px rgba(0,0,0,.9); }',
+    '.cn3-t.trail.on { letter-spacing: 1px; }',
+    '.cn3-t.blood b { font: 400 clamp(30px, 5vw, 60px) "Bungee Outline", Bangers, Impact, sans-serif; letter-spacing: 4px; color: #ffd8b0; text-shadow: 0 0 6px #ff3a2a, 0 0 22px rgba(255,40,20,.85), 0 0 50px rgba(160,10,10,.6); }',
+    /* glimpses of Box-man in shadow */
+    '.cn3-g { position: absolute; left: 50%; top: 44%; opacity: 0; pointer-events: none; transition: opacity 1s ease, transform var(--td, 4.6s) linear; transform: translate(-50%, -50%) translate(var(--x0, 0), var(--y0, 0)) scale(var(--s0, 1)); }',
+    '.cn3-g.on { opacity: 1; transform: translate(-50%, -50%) translate(var(--x1, 0), var(--y1, 0)) scale(var(--s1, 1.08)); } .cn3-g.off { opacity: 0 !important; }',
+    '.cn3-g::before { content: ""; position: absolute; inset: -30%; background: radial-gradient(closest-side, rgba(140,20,20,.32), rgba(60,8,12,.12) 60%, transparent); }',
+    '.cn3-g canvas { position: relative; display: block; height: var(--h, 46vh); image-rendering: pixelated; }',
+    '.cn3-g canvas.lit { position: absolute; left: 0; top: 0; opacity: .14; }',
+    '.cn3-g.flash canvas.lit { opacity: 1; }',
+    '.cn3-g canvas.sil { filter: drop-shadow(0 0 14px rgba(255,50,30,.35)); }',
+    /* soft lightning for the glimpses; the full white one is the reveal */
+    '#cine-flash.soft { background: #cfe0ff; } #cine-flash.go.soft { animation: cflashSoft .45s ease-out both; }',
+    '@keyframes cflashSoft { 0% { opacity: .38; } 100% { opacity: 0; } }',
+    /* the spotlight that finds him */
+    '#cn3-spot { position: absolute; left: 50%; top: 47%; width: 300vmax; height: 300vmax; margin: -150vmax 0 0 -150vmax; pointer-events: none; opacity: 0; transform: scale(.9); background: radial-gradient(circle, transparent 0 7%, rgba(0,0,0,.5) 10%, rgba(0,0,0,.9) 15%); transition: opacity .2s ease, transform 3s cubic-bezier(.3,.7,.3,1); }',
+    '#cn3-spot.on { opacity: 1; } #cn3-spot.wide { transform: scale(3.2); } #cn3-spot.gone { opacity: 0; transform: scale(5); transition: opacity 1.4s ease, transform 1.8s ease; }',
+    /* the neon sign, then the neon dying */
+    '#cn3-neon { position: absolute; left: 0; right: 0; top: 19%; text-align: center; pointer-events: none; display: none; }',
+    '#cn3-neon.on { display: block; }',
+    '#cn3-neon b { display: block; font: 400 clamp(48px, 9vw, 112px) "Bungee Outline", Bangers, Impact, sans-serif; letter-spacing: 6px; color: #ff8a8a; text-shadow: 0 0 8px #ff3a3a, 0 0 24px #e2402f, 0 0 54px #a01818; }',
+    '#cn3-neon i { display: block; font: 400 clamp(22px, 3.4vw, 40px) "Kaushan Script", cursive; font-style: normal; color: #ff5a5a; text-shadow: 0 0 10px #e2402f; margin-top: 6px; }',
+    '#cn3-neon i s { text-decoration-thickness: 3px; text-decoration-color: #f4ead4; opacity: .75; } #cn3-neon i em { font-style: normal; color: #f4ead4; text-shadow: 0 0 10px #ff9a5a; margin-left: 10px; }',
+    '#cn3-neon.on b { animation: neonOn3 1.3s steps(1) both; } #cn3-neon.on i { animation: neonOn3 1.3s .5s steps(1) both; }',
+    '#cn3-neon.die b, #cn3-neon.die i { animation: neonDie3 .7s steps(1) both; }',
+    '@keyframes neonOn3 { 0% { opacity: 0; } 8% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 30% { opacity: .2; } 40% { opacity: 1; } 46% { opacity: 0; } 54%, 100% { opacity: 1; } }',
+    '@keyframes neonDie3 { 0% { opacity: 1; } 20% { opacity: .15; } 30% { opacity: 1; } 55% { opacity: .1; } 62% { opacity: .7; } 70%, 100% { opacity: 0; } }',
+    /* the title screen: logo, credit and menu only */
+    '#title .logo .lbl-up, #title .logo .lbl-frag, #title .cert, #title #tagline, #title .mobile-note { display: none !important; }',
+    'body:not(.foot-on) #title.ready .foot { opacity: 0 !important; transition: opacity 1.4s ease !important; }',
+    'body.foot-on #title.ready .foot { opacity: .8; transition: opacity 1.4s ease !important; transition-delay: 0s !important; }',
+    /* the logo: cut cardboard letters, like the end of LW\'s film */
+    '.logo .l1.cut { display: flex; justify-content: center; align-items: flex-end; gap: .02em; background: none; -webkit-text-stroke: 0; text-shadow: none; -webkit-text-fill-color: initial; line-height: 1; padding-top: .12em; filter: drop-shadow(0 0 26px rgba(255,180,100,.18)); }',
+    '.logo .l1.cut i { display: block; transform: rotate(var(--r)) translateY(var(--y)) scale(var(--s)); transform-origin: 50% 90%; }',
+    '.logo .l1.cut canvas { display: block; height: 1.02em; width: auto; image-rendering: auto; }',
+    '#title.slam .logo .l1.cut { animation: none; }',
+    '#title.slam .logo .l1.cut i { animation: cutIn .62s var(--d) cubic-bezier(.25,1,.4,1) both; }',
+    '@keyframes cutIn { 0% { transform: translateY(-70vh) rotate(calc(var(--r) * 8)) scale(var(--s)); opacity: 0; } 55% { opacity: 1; } 80% { transform: translateY(calc(var(--y) + .06em)) rotate(var(--r)) scale(calc(var(--s) * 1.04), calc(var(--s) * .94)); } 100% { transform: rotate(var(--r)) translateY(var(--y)) scale(var(--s)); opacity: 1; } }',
+    '@media (prefers-reduced-motion: reduce) { #title.slam .logo .l1.cut i { animation: none; } .cn3-t, .cn3-g { transition: opacity .3s; } }'
+  ].join('\n');
+  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+})();
+
+/* ---------- the cardboard letters ---------- */
+var CUT_GLYPHS = {
+  B: { w: 5, p: [[[0, 0], [4, 0], [5, 1], [5, 3], [4.3, 3.8], [5, 4.6], [5, 7], [4, 8], [0, 8]], [[1.6, 1.4], [3.4, 1.4], [3.4, 3.1], [1.6, 3.1]], [[1.6, 4.6], [3.4, 4.6], [3.4, 6.6], [1.6, 6.6]]] },
+  O: { w: 5, p: [[[1, 0], [4, 0], [5, 1], [5, 7], [4, 8], [1, 8], [0, 7], [0, 1]], [[1.6, 1.5], [3.4, 1.5], [3.4, 6.5], [1.6, 6.5]]] },
+  X: { w: 5.4, p: [[[0, 0], [1.8, 0], [2.7, 2.7], [3.6, 0], [5.4, 0], [3.7, 4], [5.4, 8], [3.6, 8], [2.7, 5.3], [1.8, 8], [0, 8], [1.7, 4]]] },
+  '-': { w: 3, p: [[[0.2, 3.3], [2.8, 3.1], [2.8, 4.6], [0.2, 4.8]]] },
+  M: { w: 6.4, p: [[[0, 8], [0, 0], [1.7, 0], [3.2, 3.3], [4.7, 0], [6.4, 0], [6.4, 8], [4.8, 8], [4.8, 3.6], [3.6, 6.1], [2.8, 6.1], [1.6, 3.6], [1.6, 8]]] },
+  A: { w: 5.4, p: [[[1.8, 0], [3.6, 0], [5.4, 8], [3.8, 8], [3.5, 6.3], [1.9, 6.3], [1.6, 8], [0, 8]], [[2.2, 4.8], [3.2, 4.8], [2.7, 2.2]]] },
+  N: { w: 5, p: [[[0, 8], [0, 0], [1.6, 0], [3.4, 4.6], [3.4, 0], [5, 0], [5, 8], [3.4, 8], [1.6, 3.4], [1.6, 8]]] }
+};
+function cutLetter(ch, seed) {
+  var G0 = CUT_GLYPHS[ch]; if (!G0) return null;
+  var U = 22, pad = 12, w = Math.ceil(G0.w * U + pad * 2), h = 8 * U + pad * 2;
+  var c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d');
+  var s = seed * 9301 + 49297, rr = function () { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  var polys = G0.p.map(function (poly) { return poly.map(function (pt) { return [pad + pt[0] * U + (rr() - 0.5) * 3.2, pad + pt[1] * U + (rr() - 0.5) * 3.2]; }); });
+  var path = function (dx, dy) { x.beginPath(); polys.forEach(function (poly) { poly.forEach(function (pt, i) { if (i) x.lineTo(pt[0] + dx, pt[1] + dy); else x.moveTo(pt[0] + dx, pt[1] + dy); }); x.closePath(); }); };
+  // a dark shadow, as if it is stuck down slightly off the page
+  path(5, 6); x.fillStyle = 'rgba(10,6,4,.55)'; x.fill('evenodd');
+  // the card itself
+  path(0, 0); var g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#dcb682'); g.addColorStop(0.55, '#c79c63'); g.addColorStop(1, '#ad8350'); x.fillStyle = g; x.fill('evenodd');
+  x.save(); path(0, 0); x.clip('evenodd');
+  // corrugation showing through, and a few scuffs
+  for (var i = 0; i < w; i += 5) { x.fillStyle = 'rgba(90,58,30,.09)'; x.fillRect(i, 0, 2, h); }
+  for (var k = 0; k < 70; k++) { x.fillStyle = rr() < 0.5 ? 'rgba(90,58,30,.18)' : 'rgba(255,236,200,.18)'; x.fillRect(rr() * w, rr() * h, 1 + rr() * 2, 1 + rr() * 2); }
+  if (rr() < 0.6) { x.fillStyle = 'rgba(232,210,150,.55)'; x.save(); x.translate(w * (0.3 + rr() * 0.4), h * (0.2 + rr() * 0.5)); x.rotate((rr() - 0.5) * 0.8); x.fillRect(-w * 0.35, -6, w * 0.7, 12); x.restore(); }
+  x.restore();
+  // a torn edge: dark outline, then a pale fibre line just inside
+  path(0, 0); x.lineJoin = 'round'; x.strokeStyle = '#3a2614'; x.lineWidth = 3; x.stroke();
+  path(-1, -1); x.strokeStyle = 'rgba(240,214,160,.65)'; x.lineWidth = 1.2; x.stroke();
+  return c;
+}
+function cutLogo() {
+  var l1 = document.querySelector('#title .logo .l1'); if (!l1 || l1.classList.contains('cut')) return;
+  var word = 'BOX-MAN', R = [-4, 3, -7, 2, 5, -3, 4], Y = [0.03, -0.02, 0.05, 0.02, -0.08, 0.02, -0.01], S = [1, 0.9, 1.02, 1, 1.15, 0.95, 1.04];
+  l1.setAttribute('aria-label', 'Box-man'); l1.classList.add('cut'); l1.innerHTML = '';
+  word.split('').forEach(function (ch, i) {
+    var cv = cutLetter(ch, i * 7 + 3); if (!cv) return;
+    var wrap = document.createElement('i'); wrap.setAttribute('aria-hidden', 'true');
+    wrap.style.setProperty('--r', R[i] + 'deg'); wrap.style.setProperty('--y', Y[i] + 'em'); wrap.style.setProperty('--s', S[i]); wrap.style.setProperty('--d', (i * 0.09) + 's');
+    wrap.appendChild(cv); l1.appendChild(wrap);
+  });
+}
+cutLogo();
+var _cineSlam41 = cineSlam;
+cineSlam = function () {
+  _cineSlam41();
+  if (!G.calmOn) for (var i = 0; i < 7; i++) (function (i) { setTimeout(function () { try { AUD.sfx(i % 2 ? 'crunch' : 'stamp'); } catch (e) { } }, 380 + i * 90); })(i);
+};
+
+/* ---------- pieces of the opening ---------- */
+var CN3 = { els: [], beatT: 0 };
+function cn3Root() { return document.getElementById('cine'); }
+function cn3Add(el) { var c = cn3Root(); if (!c) return null; c.appendChild(el); CN3.els.push(el); return el; }
+/* a line of text that fades in over a second, holds, and fades out over the last second */
+function cn3Text(html, cls, dur) {
+  var d = document.createElement('div'); d.className = 'cn3-t ' + cls; d.innerHTML = '<b>' + html + '</b>';
+  d.style.setProperty('--td', (dur / 1000) + 's');
+  if (!cn3Add(d)) return;
+  requestAnimationFrame(function () { requestAnimationFrame(function () { d.classList.add('on'); }); });
+  CINE.timers.push(setTimeout(function () { d.classList.add('off'); }, dur - 1000));
+  CINE.timers.push(setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, dur + 300));
+}
+function cn3Tint(src, sx, sy, w, h, col) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  x.drawImage(src, sx, sy, w, h, 0, 0, w, h);
+  if (col) { x.globalCompositeOperation = 'source-in'; x.fillStyle = col; x.fillRect(0, 0, w, h); }
+  return c;
+}
+/* a close look at part of Box-man, in shadow with a red rim, lit up only by lightning */
+function cn3Glimpse(crop, dur, move, eyes) {
+  var src; try { src = SPR.frameCanvas('boxman', 0, 0); } catch (e) { return null; }
+  var sx = crop[0], sy = crop[1], w = crop[2], h = crop[3];
+  var sil = document.createElement('canvas'); sil.width = w; sil.height = h; sil.className = 'sil';
+  var x = sil.getContext('2d'); x.imageSmoothingEnabled = false;
+  x.drawImage(cn3Tint(src, sx, sy, w, h, '#ff3a2a'), 0, 0);
+  x.drawImage(cn3Tint(src, sx, sy, w, h, '#07050b'), -1, 1);
+  if (eyes) eyes.forEach(function (e) { x.fillStyle = '#ff2a2a'; x.fillRect(e[0] - sx, e[1] - sy, e[2], e[3]); x.fillStyle = '#ffb0a0'; x.fillRect(e[0] - sx, e[1] - sy, 1, 1); });
+  var lit = cn3Tint(src, sx, sy, w, h, null); lit.className = 'lit';
+  var d = document.createElement('div'); d.className = 'cn3-g'; d.appendChild(sil); d.appendChild(lit);
+  d.style.setProperty('--td', (dur / 1000) + 's'); d.style.setProperty('--h', move.h);
+  ['x0', 'y0', 's0', 'x1', 'y1', 's1'].forEach(function (k) { if (move[k] !== undefined) d.style.setProperty('--' + k, move[k]); });
+  if (!cn3Add(d)) return null;
+  requestAnimationFrame(function () { requestAnimationFrame(function () { d.classList.add('on'); }); });
+  CINE.timers.push(setTimeout(function () { d.classList.add('off'); }, dur - 1000));
+  CINE.timers.push(setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, dur + 300));
+  return d;
+}
+/* lightning: a flash of light, the glimpse lit in full colour for a moment, then thunder */
+function cn3Lightning(g, soft) {
+  var f = document.getElementById('cine-flash');
+  if (f && !G.calmOn) { f.className = soft ? 'soft' : ''; void f.offsetWidth; f.className = 'go' + (soft ? ' soft' : ''); }
+  if (g) { g.classList.add('flash'); setTimeout(function () { g.classList.remove('flash'); }, 110); setTimeout(function () { g.classList.add('flash'); }, 190); setTimeout(function () { g.classList.remove('flash'); }, 250); }
+  CINE.timers.push(setTimeout(function () { cnSfx('thunder'); }, soft ? 260 : 40));
+}
+function cn3Heart(from, to, gap0, gap1) {
+  var t = from; while (t < to) { (function (t) { cineAt(t, function () { cnSfx('beat'); }); })(t); var k = (t - from) / Math.max(1, to - from); t += gap0 + (gap1 - gap0) * k; }
+}
+function cn3Spot(cls) { var s = document.getElementById('cn3-spot'); if (!s) { s = document.createElement('div'); s.id = 'cn3-spot'; var c = cn3Root(); if (!c) return; c.insertBefore(s, c.firstChild); } s.className = cls || ''; }
+function cn3Neon(state) {
+  var n = document.getElementById('cn3-neon');
+  if (!n) { n = document.createElement('div'); n.id = 'cn3-neon'; n.innerHTML = '<b>BOX-MAN</b><i>Delivery of justice</i>'; var c = cn3Root(); if (!c) return; c.appendChild(n); }
+  n.className = state || '';
+}
+function cn3Clear() {
+  CN3.els.forEach(function (e) { if (e.parentNode) e.parentNode.removeChild(e); }); CN3.els = [];
+  cn3Spot(''); cn3Neon('');
+}
+/* the film leader, a touch slower than before */
+cnLeader = function (on) {
+  var c = document.getElementById('cine-leader'); if (!c) return;
+  cancelAnimationFrame(CN.raf);
+  if (!on) { c.classList.remove('on'); return; }
+  c.classList.add('on'); CN.t0 = performance.now(); var last = -1, x = c.getContext('2d');
+  var draw = function () {
+    var t = (performance.now() - CN.t0) / 1000, n = 3 - Math.floor(t / 0.9), k = (t % 0.9) / 0.9;
+    if (n < 1) { c.classList.remove('on'); return; }
+    if (n !== last) { last = n; cnSfx('tick'); }
+    x.fillStyle = '#d9c39a'; x.fillRect(0, 0, 200, 200);
+    x.fillStyle = '#a8895e'; x.beginPath(); x.moveTo(100, 100); x.arc(100, 100, 140, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); x.closePath(); x.fill();
+    x.strokeStyle = '#1b1520'; x.lineWidth = 4; x.beginPath(); x.arc(100, 100, 78, 0, 7); x.stroke(); x.beginPath(); x.arc(100, 100, 62, 0, 7); x.stroke();
+    x.lineWidth = 2; x.beginPath(); x.moveTo(0, 100); x.lineTo(200, 100); x.moveTo(100, 0); x.lineTo(100, 200); x.stroke();
+    x.fillStyle = '#1b1520'; x.font = '400 120px Bangers, Impact, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(n), 100, 106);
+    x.fillStyle = 'rgba(27,21,32,.35)'; for (var i = 0; i < 6; i++) x.fillRect(Math.random() * 200, Math.random() * 200, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    if (Math.random() < 0.4) x.fillRect(Math.random() * 200, 0, 1, 200);
+    CN.raf = requestAnimationFrame(draw);
+  };
+  draw();
+};
+
+/* ---------- the running order ---------- */
+var CN3_EYES = [[26, 13, 3, 5], [35, 13, 3, 5]];
+cineGo = function () {
+  CINE.gate = false; CINE.on = true; CINE.start = performance.now();
+  document.body.classList.remove('cine-gate'); document.body.classList.add('cine-on');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { cineEnd(); return; }
+  cn2El(); cnBg('#000'); cn3Clear();
+  // the music waits for the logo
+  try { AUD.stop(); } catch (e) { }
+  cineAt(200, function () { cnLeader(true); });
+  cineAt(300, function () { cnSfx('drone'); });
+  // 1. LW PRESENTS
+  cineAt(3000, function () { cnLeader(false); cnBg('rgba(8,6,14,.92)'); cn3Text('LW PRESENTS', 'mid lw', 5000); cnSfx('stamp'); });
+  cineAt(6600, function () { cnSfx('drone'); });
+  // 2. the film's own opening card, over the city at night
+  cineAt(8200, function () { cnBg('rgba(8,6,14,.66)'); cn3Text("THE STORY YOU'VE ALL BEEN WAITING FOR", 'mid film', 5000); cnSfx('gate'); });
+  // 3. the city goes dark, and there he is, a piece at a time
+  cineAt(13200, function () { cnBg('rgba(4,3,8,.9)'); cnSfx('drone'); });
+  cineAt(13400, function () {
+    var g = cn3Glimpse([17, 45, 32, 19], 4600, { h: '32vh', x0: '5vw', x1: '-5vw', s0: 1, s1: 1.06 });
+    cn3Text('A CITY BUILT ON PARCELS.', 'low trail', 4600);
+    CINE.timers.push(setTimeout(function () { cn3Lightning(g, true); }, 1900));
+  });
+  cineAt(18200, function () {
+    cnBg('rgba(3,2,6,.94)');
+    var g = cn3Glimpse([40, 8, 16, 42], 4600, { h: '54vh', y0: '7vh', y1: '-5vh', s0: 1.02, s1: 1.1 });
+    cn3Text('ONE MAN DELIVERS JUSTICE.', 'low trail', 4600);
+    CINE.timers.push(setTimeout(function () { cn3Lightning(g, true); }, 2100));
+  });
+  cineAt(19600, function () { cnSfx('drone'); });
+  cineAt(23000, function () {
+    cnBg('rgba(2,1,4,.97)');
+    var g = cn3Glimpse([15, 0, 34, 30], 4000, { h: '42vh', s0: 1, s1: 1.16, y0: '-2vh', y1: '-5vh' }, CN3_EYES);
+    cn3Text('THE KING IN CARDBOARD', 'low blood', 4000);
+    CINE.timers.push(setTimeout(function () { cn3Lightning(g, true); }, 1500));
+  });
+  cn3Heart(13600, 26900, 1250, 520);
+  cineAt(24300, function () { cnSfx('riser'); });
+  // 4. thunder, and the full reveal
+  cineAt(27000, function () {
+    var cr = cn3Root(); if (cr) { cr.style.transition = 'none'; setTimeout(function () { cr.style.transition = ''; }, 200); }
+    document.body.classList.add('cine-reveal'); cnBg('rgba(0,0,0,0)'); cn3Spot('on');
+    cn3Lightning(null, false); cnShake(); cnSfx('boom'); cnSfx('roar');
+  });
+  cineAt(27260, function () { cn3Lightning(null, true); });
+  cineAt(28500, function () { cn3Lightning(null, true); cnSfx('bass'); });
+  // 5. his name in red neon, then the neon gives out
+  cineAt(30500, function () { cn3Spot('on wide'); });
+  cineAt(29400, function () { cn3Neon('on'); cnSfx('buzz'); setTimeout(function () { cnSfx('buzz'); }, 300); setTimeout(function () { cnSfx('buzz'); }, 560); });
+  cineAt(31900, function () { cn3Neon('on die'); cnSfx('neonoff'); });
+  cineAt(32300, function () { cn3Spot('gone'); });
+  // 6. the cardboard letters slam in and the song starts
+  cineAt(CINE_LEN, function () {
+    cn3Neon(''); cineSlam(); cnSfx('bass'); cnBits(); cnBg('');
+    try { if (G.state === 'title') AUD.play('title'); } catch (e) { }
+    setTimeout(function () { cn3Clear(); }, 1500);
+  });
+};
+var _cineEnd41 = cineEnd;
+cineEnd = function () {
+  var was = CINE.on;
+  cn3Clear(); _cineEnd41();
+  if (was) try { if (G.state === 'title') AUD.play('title'); } catch (e) { }
+};
+
+/* the camera: high over the city, a slow push in while it goes dark, a hard cut to Box-man
+   from below on the thunder, then a long crane up to where the menu sits */
+CN_KEYS = [
+  [0, 2.4, 34, 18, 1.5], [8.2, 2.0, 30, 15, 2.0], [13.2, 1.5, 21, 9, 3.0], [27.0, 0.9, 12, 5, 4.0],
+  [27.0, -0.18, 5.2, 0.6, 4.3], [29.4, 0.15, 4.7, 0.9, 4.5], [32.7, 0.05, 11, 3.4, 4.1],
+  [34.2, 0, 14, 4.3, 4.0]
+];
+
+/* ---------- the controls line waits until nobody has pressed anything for a while ---------- */
+var FOOT41 = { last: performance.now(), on: false };
+['keydown', 'pointerdown', 'touchstart', 'wheel'].forEach(function (ev) { window.addEventListener(ev, function () { FOOT41.last = performance.now(); }, { capture: true, passive: true }); });
+setInterval(function () {
+  var t = document.getElementById('title'), onTitle = G.state === 'title' && t && t.classList.contains('ready') && !CINE.on && !CINE.gate;
+  if (!onTitle) { if (FOOT41.on) { FOOT41.on = false; document.body.classList.remove('foot-on'); } FOOT41.last = Math.max(FOOT41.last, performance.now() - 1000); return; }
+  if (!FOOT41.on && performance.now() - FOOT41.last > 5000) { FOOT41.on = true; document.body.classList.add('foot-on'); }
+}, 250);
 
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
