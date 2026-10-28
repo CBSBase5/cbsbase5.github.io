@@ -19339,6 +19339,118 @@ function daWire() {
 var _v31Boot37 = v31Boot;
 v31Boot = function () { _v31Boot37(); try { daWire(); } catch (e) { } };
 
+/* ===================== V38: ART PASS, STAGE TWO: ROOMS, LIGHT, COLOUR, AIR ===================== */
+/* More to look at in every room (floor wear, clutter, small jokes on the floor and walls), neon and
+   window light that tints everyone who walks through it, stronger level colours, and a little
+   steam in the City. Low graphics gets fewer decals and no character tinting. */
+
+/* ---------- colour: each level pushed a step further ---------- */
+Object.assign(GRADES.city, { sh: [0.84, 0.88, 1.18], hi: [1.2, 1.0, 0.9], con: 1.13, sat: 1.38 });
+Object.assign(GRADES.mansion, { sh: [1.1, 0.86, 0.76], hi: [1.26, 1.06, 0.72], lift: 0.015, con: 1.12, sat: 1.24 });
+Object.assign(GRADES.dream, { sh: [1.08, 0.96, 1.2], hi: [1.1, 1.04, 1.14], lift: 0.12, con: 0.86, sat: 1.02 });
+Object.assign(GRADES.lair, { sh: [0.7, 0.9, 1.22], hi: [1.0, 1.0, 1.14], lift: 0, con: 1.26, sat: 1.06 });
+
+/* ---------- floor detail and little jokes, drawn per level ---------- */
+function w38Tex(kind) {
+  return polTex('w38_' + kind, 64, 64, function (x) {
+    var ink = '#1b1520';
+    var txt = function (t, y, s, c, r) { x.save(); x.translate(32, y); x.rotate(r || 0); x.font = '600 ' + s + 'px "Pixelify Sans", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = c; x.fillText(t, 0, 0); x.restore(); };
+    if (kind === 'crack') { x.strokeStyle = 'rgba(20,14,24,.55)'; x.lineWidth = 2; x.beginPath(); x.moveTo(6, 30); x.lineTo(20, 26); x.lineTo(28, 34); x.lineTo(42, 28); x.lineTo(58, 36); x.moveTo(28, 34); x.lineTo(30, 48); x.stroke(); }
+    else if (kind === 'gum') { [[14, 20], [40, 16], [30, 44], [50, 40], [20, 52]].forEach(function (p, i) { x.fillStyle = ['rgba(255,140,190,.7)', 'rgba(220,220,230,.6)', 'rgba(140,200,255,.6)'][i % 3]; x.beginPath(); x.arc(p[0], p[1], 3, 0, 7); x.fill(); }); }
+    else if (kind === 'hopscotch') { x.strokeStyle = 'rgba(244,240,230,.6)'; x.lineWidth = 2; [[24, 4], [24, 18], [16, 32], [32, 32], [24, 46]].forEach(function (p, i) { x.strokeRect(p[0], p[1], 14, 13); }); txt('BM', 58, 8, 'rgba(244,240,230,.6)'); }
+    else if (kind === 'boxchalk') { x.strokeStyle = 'rgba(244,240,230,.62)'; x.lineWidth = 2; x.strokeRect(16, 18, 32, 28); x.beginPath(); x.moveTo(16, 18); x.lineTo(24, 10); x.lineTo(56, 10); x.lineTo(48, 18); x.moveTo(56, 10); x.lineTo(56, 38); x.lineTo(48, 46); x.stroke(); txt('R.I.P.', 34, 8, 'rgba(244,240,230,.62)'); }
+    else if (kind === 'drain') { x.fillStyle = 'rgba(30,26,34,.8)'; x.fillRect(16, 22, 32, 20); x.fillStyle = 'rgba(80,80,90,.9)'; for (var i = 0; i < 6; i++) x.fillRect(18 + i * 5, 24, 2, 16); }
+    else if (kind === 'leaves') { [[16, 20, '#b8722a'], [40, 26, '#d0a040'], [26, 44, '#8a5a24'], [48, 46, '#c08030']].forEach(function (p) { x.fillStyle = p[2]; x.beginPath(); x.ellipse(p[0], p[1], 6, 3, p[0] * 0.1, 0, 7); x.fill(); }); }
+    else if (kind === 'crisps') { x.save(); x.translate(32, 32); x.rotate(0.4); x.fillStyle = '#3a8ad6'; x.fillRect(-12, -16, 24, 32); x.fillStyle = '#f5c518'; x.fillRect(-12, -6, 24, 10); x.fillStyle = ink; x.font = '600 7px "Pixelify Sans", monospace'; x.textAlign = 'center'; x.fillText('CRISPS', 0, 2); x.restore(); }
+    else if (kind === 'slow') { txt('SLOW', 32, 16, 'rgba(244,234,212,.55)'); }
+    else if (kind === 'worn') { var g = x.createRadialGradient(32, 32, 4, 32, 32, 28); g.addColorStop(0, 'rgba(255,230,190,.22)'); g.addColorStop(1, 'rgba(255,230,190,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); }
+    else if (kind === 'cards') { [[22, 30, -0.4, '#e2402f'], [38, 34, 0.3, '#1b1520']].forEach(function (c) { x.save(); x.translate(c[0], c[1]); x.rotate(c[2]); x.fillStyle = '#f4f1e6'; x.fillRect(-7, -10, 14, 20); x.fillStyle = c[3]; x.font = '600 9px "Pixelify Sans", monospace'; x.textAlign = 'center'; x.fillText(c[3] === '#e2402f' ? 'A' : 'K', 0, 3); x.restore(); }); }
+    else if (kind === 'sock') { x.save(); x.translate(32, 32); x.rotate(0.6); x.fillStyle = '#3cc47a'; x.fillRect(-5, -14, 10, 20); x.fillRect(-5, 2, 16, 8); x.fillStyle = '#f4f1e6'; x.fillRect(-5, -14, 10, 4); x.restore(); }
+    else if (kind === 'crumbs') { x.fillStyle = 'rgba(190,140,80,.8)'; for (var c2 = 0; c2 < 12; c2++) x.fillRect(16 + (c2 * 37) % 32, 20 + (c2 * 23) % 26, 2, 2); }
+    else if (kind === 'stars') { ['#ffe14d', '#ff8ac0', '#9ad8ff'].forEach(function (c, i) { x.fillStyle = c; var sx = 16 + i * 16, sy = 22 + (i % 2) * 18; x.beginPath(); for (var k = 0; k < 10; k++) { var a = k / 10 * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 3 : 7; x.lineTo(sx + Math.cos(a) * r, sy + Math.sin(a) * r); } x.fill(); }); }
+    else if (kind === 'scribble') { x.strokeStyle = 'rgba(160,90,220,.6)'; x.lineWidth = 3; x.beginPath(); for (var s = 0; s < 14; s++) x.lineTo(10 + s * 3.4, 32 + Math.sin(s * 1.3) * 12); x.stroke(); }
+    else if (kind === 'zzz') { txt('Zzz', 32, 18, 'rgba(255,255,255,.5)', -0.2); }
+    else if (kind === 'oil') { x.fillStyle = 'rgba(10,8,14,.55)'; x.beginPath(); x.ellipse(30, 32, 20, 12, 0.3, 0, 7); x.fill(); x.fillStyle = 'rgba(120,90,200,.25)'; x.beginPath(); x.ellipse(26, 30, 8, 4, 0.3, 0, 7); x.fill(); }
+    else if (kind === 'tyres') { x.strokeStyle = 'rgba(14,12,18,.45)'; x.lineWidth = 6; x.setLineDash([4, 3]); x.beginPath(); x.moveTo(0, 22); x.quadraticCurveTo(32, 30, 64, 18); x.moveTo(0, 42); x.quadraticCurveTo(32, 50, 64, 38); x.stroke(); }
+    else if (kind === 'noboxing') { x.strokeStyle = 'rgba(245,197,24,.7)'; x.lineWidth = 3; x.strokeRect(6, 18, 52, 28); txt('NO BOXING', 32, 9, 'rgba(245,197,24,.75)'); }
+    else if (kind === 'bolts') { x.fillStyle = 'rgba(160,168,180,.9)'; [[18, 24], [40, 20], [30, 42], [48, 44]].forEach(function (p) { x.fillRect(p[0], p[1], 4, 4); }); }
+    else { x.fillStyle = 'rgba(20,14,24,.3)'; x.fillRect(20, 28, 24, 8); }
+  });
+}
+var W38_FLOOR = {
+  city: ['crack', 'gum', 'hopscotch', 'boxchalk', 'drain', 'leaves', 'crisps', 'slow', 'crack', 'leaves'],
+  mansion: ['worn', 'cards', 'sock', 'crumbs', 'worn', 'crumbs'],
+  dream: ['stars', 'scribble', 'zzz', 'stars'],
+  lair: ['oil', 'tyres', 'noboxing', 'bolts', 'oil', 'bolts']
+};
+/* a few signs and scribbles on the back wall */
+var W38_WALL = {
+  city: [['BM 4 EVA', '#ff5fa2'], ['FRANK WAS HERE', '#9ad8ff'], ['THIS WAY UP', '#f5c518'], ['NO BALL GAMES. OR BOXES.', '#f4ead4']],
+  mansion: [['PLEASE DO NOT TOUCH THE BOXES', '#c9a24a'], ['PORTRAIT OF A BOX, 1872', '#c9a24a']],
+  lair: [['SAFETY FIRST. BOXES SECOND.', '#f5c518'], ['EMPLOYEE OF THE MONTH: BOX-MAN', '#f5c518'], ['DAYS SINCE LAST FOLD: 0', '#e2402f']]
+};
+function w38WallTex(text, col, plaque) {
+  return polTex('w38w_' + text, 256, 48, function (x) {
+    if (plaque) { x.fillStyle = 'rgba(40,30,20,.85)'; x.fillRect(0, 6, 256, 36); x.strokeStyle = col; x.lineWidth = 2; x.strokeRect(3, 9, 250, 30); }
+    x.font = (plaque ? '600 15px "Pixelify Sans", monospace' : '30px "Kaushan Script", cursive'); x.textAlign = 'center'; x.textBaseline = 'middle';
+    if (!plaque) { x.strokeStyle = 'rgba(0,0,0,.4)'; x.lineWidth = 4; x.strokeText(text, 128, 26); }
+    x.fillStyle = col; x.fillText(text, 128, 26);
+  });
+}
+function w38Neon(col) { return polTex('w38n_' + col, 64, 32, function (x) { x.strokeStyle = col; x.lineWidth = 3; x.shadowColor = col; x.shadowBlur = 8; x.strokeRect(6, 6, 52, 20); x.beginPath(); x.moveTo(14, 20); x.lineTo(22, 12); x.lineTo(30, 20); x.lineTo(38, 12); x.lineTo(46, 20); x.stroke(); }); }
+function w38Room(room) {
+  if (!G.run || G.doom || !room || !SPR.ART.on) return;
+  var L = lvl(), R = mulberry((room.seed || 1) * 13 + 5), q = typeof polQ === 'function' ? polQ() : 1;
+  // floor detail
+  var kinds = W38_FLOOR[L] || [], n = Math.round((room.type === 'boss' ? 3 : 7) * q) + (room.size === 'big' ? 3 : 0);
+  for (var i = 0; i < n && kinds.length; i++) {
+    var kd = kinds[Math.floor(R() * kinds.length)], s = kd === 'worn' ? 3 : (kd === 'tyres' || kd === 'noboxing' ? 2.2 : 1.4);
+    var dm = new THREE.Mesh(FXG.plane, new THREE.MeshLambertMaterial({ map: w38Tex(kd), transparent: true, depthWrite: false }));
+    dm.rotation.x = -PI / 2; dm.rotation.z = (kd === 'slow' || kd === 'noboxing' || kd === 'zzz') ? (R() - 0.5) * 0.4 : R() * PI * 2;
+    dm.position.set((R() - 0.5) * (RW - 3), 0.028 + i * 0.0006, (R() - 0.5) * (RH - 3)); dm.scale.set(s, s, 1); dm.renderOrder = 1; G.roomGroup.add(dm);
+  }
+  // one sign or scribble on the back wall
+  var walls = W38_WALL[L];
+  if (walls && room.type !== 'boss' && R() < 0.75) {
+    var w = walls[Math.floor(R() * walls.length)], plaque = L !== 'city', off = (R() < 0.5 ? -1 : 1) * (DOOR / 2 + 3 + R() * 4);
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(plaque ? 3.2 : 4, plaque ? 0.6 : 0.75), new THREE.MeshLambertMaterial({ map: w38WallTex(w[0], w[1], plaque), transparent: true }));
+    m.position.set(off, plaque ? 2.1 : 0.9 + R() * 0.6, -RH / 2 + (L === 'city' ? 0.06 : 0.1)); m.rotation.z = plaque ? 0 : (R() - 0.5) * 0.12; G.roomGroup.add(m);
+    if (G.sideMats && G.sideMats.n) G.sideMats.n.push(m.material);
+  }
+  // coloured light: neon in the City, a window glow in the mansion, warning lights in the lair
+  var pools = [];
+  if (L === 'city') { var nc = R() < 0.5 ? 0xff5fa2 : 0x5ad8ff, nx = (R() < 0.5 ? -1 : 1) * (RW / 2 - 3 - R() * 6); pools.push([nx, -RH / 2 + 2.2, 3.4, nc, 0.4]); var sg = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.8), new THREE.MeshBasicMaterial({ map: w38Neon('#' + ('000000' + nc.toString(16)).slice(-6)), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(nx, 2.1, -RH / 2 + 0.07); G.roomGroup.add(sg); if (G.flickers) G.flickers.push({ m: sg.material, base: 1 }); }
+  if (L === 'mansion') pools.push([(R() - 0.5) * (RW - 8), -RH / 2 + 2.6, 3.2, 0x8ab0ff, 0.3]);
+  if (L === 'lair' && R() < 0.7) pools.push([(R() < 0.5 ? -1 : 1) * (RW / 2 - 2.5), (R() - 0.5) * (RH - 6), 3, 0xff3a2a, 0.34]);
+  if (L === 'dream') pools.push([(R() - 0.5) * (RW - 8), (R() - 0.5) * (RH - 8), 3.4, 0xc58cff, 0.28]);
+  pools.forEach(function (p) { lightPool(G.roomGroup, p[0], p[1], p[2], p[3], p[4]); });
+  // a wisp of steam from the City's drains
+  if (L === 'city' && q >= 0.6 && R() < 0.7) {
+    var sx = (R() - 0.5) * (RW - 8), sz = (R() - 0.5) * (RH - 8), puffs = [];
+    for (var k = 0; k < 6; k++) { var pf = new THREE.Sprite(new THREE.SpriteMaterial({ map: TEX.glow, color: 0xdfe6f0, transparent: true, opacity: 0, depthWrite: false })); pf.position.set(sx, 0.2, sz); G.roomGroup.add(pf); puffs.push({ s: pf, t: k / 6 }); }
+    var dr = new THREE.Mesh(FXG.plane, new THREE.MeshLambertMaterial({ map: w38Tex('drain'), transparent: true, depthWrite: false })); dr.rotation.x = -PI / 2; dr.position.set(sx, 0.03, sz); dr.scale.set(1.2, 1.2, 1); G.roomGroup.add(dr);
+    POL.atm.push({ tick: function (dt) { puffs.forEach(function (p) { p.t += dt / 3.2; if (p.t > 1) p.t -= 1; var k2 = p.t; p.s.position.set(sx + Math.sin(k2 * 4 + G.t * 0.3) * 0.3, 0.2 + k2 * 3, sz); var sc = 0.6 + k2 * 1.8; p.s.scale.set(sc, sc, 1); p.s.material.opacity = 0.16 * Math.sin(k2 * PI); }); } });
+  }
+}
+var _polishRoom38 = polishRoom;
+polishRoom = function (room) { _polishRoom38(room); try { w38Room(room); } catch (e) { } };
+
+/* ---------- everyone, not just the hero, picks up the colour of the light they stand in ---------- */
+var W38C = null;
+function w38Glow(e, c) {
+  c.setRGB(0, 0, 0); var pools = POL.pools || [];
+  for (var i = 0; i < pools.length; i++) { var p = pools[i], dx = e.x - p.x, dz = e.z - p.z, d = Math.sqrt(dx * dx + dz * dz); if (d >= p.r) continue; var k = Math.pow(1 - d / p.r, 1.5) * Math.min(1, p.op * 2.4) * 0.38; c.r += p.c.r * k; c.g += p.c.g * k; c.b += p.c.b * k; }
+  c.r = Math.min(0.45, c.r); c.g = Math.min(0.45, c.g); c.b = Math.min(0.45, c.b); return c;
+}
+var _syncSprite38 = syncSprite;
+syncSprite = function (e) {
+  _syncSprite38(e);
+  if (!e || e === G.P || !e.sprite || !SPR.ART.on || G.doom || G.gfxLevel === 'low' || G.gfxLevel === 'tiny') return;
+  var mt = e.sprite.material; if (!mt.emissive || e.flash > 0 || e.wind > 0) return;
+  if (!W38C) W38C = new THREE.Color();
+  w38Glow(e, W38C); if (W38C.r + W38C.g + W38C.b > 0.01) mt.emissive.copy(W38C);
+};
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
