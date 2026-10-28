@@ -389,5 +389,7 @@ function mark(){
     '<path d="M13 31v-7M18 31v-11M24 31v-13M30 31v-11M35 31v-7" stroke="#fff" stroke-width="1.8"/><path d="M11 35h26" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>';
 }
 
-window.B5CCArt = { icon: icon, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
+function inner(name, f, d){ return paint(I[name] || I.star, f, d || f); }
+
+window.B5CCArt = { icon: icon, inner: inner, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
 })();

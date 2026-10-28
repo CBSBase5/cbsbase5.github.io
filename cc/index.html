@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <script src="/data/b5site.js?v=8"></script>
-<script src="/data/cc.js?v=1"></script>
-<script src="/cc/cc-art.js?v=1"></script>
+<script src="/data/cc.js?v=2"></script>
+<script src="/cc/cc-art.js?v=2"></script>
 <style>
 /* ==========================================================
    Chilton Bridge School - the Cultural Calendar page
@@ -151,12 +151,72 @@ h1.title{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 90
 .try .ic{width:76px;height:76px;border-radius:50%;background:var(--bg);display:grid;place-items:center;border:3px solid var(--cbs-ink)}
 .try .ic .ico{width:48px;height:48px}
 .try b{font-size:1.02rem;line-height:1.25}
+.try .mins{position:absolute;top:10px;right:10px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 800;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--cbs-ink);color:#fff;border-radius:999px;padding:3px 8px}
+.try .how{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.85rem;color:var(--cbs-teal)}
+.try .how svg{width:16px;height:16px}
 .try .done{font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 850;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
   border:2px dashed rgba(10,47,56,.35);border-radius:999px;padding:4px 10px;color:rgba(10,47,56,.7)}
 .try[aria-pressed="true"]{background:color-mix(in srgb,var(--pop) 30%,var(--card))}
 .try[aria-pressed="true"] .done{background:var(--cbs-ink);color:#fff;border-style:solid;border-color:var(--cbs-ink)}
 .try[aria-pressed="true"] .done::before{content:"\2713  "}
-.try:disabled{cursor:default;opacity:.9}
+.moreinfo{display:inline-flex;align-items:center;gap:10px;margin:-18px 0 30px;font-weight:700;color:var(--ink);text-decoration:none;
+  border:3px solid currentColor;border-radius:999px;padding:8px 16px}
+.moreinfo:hover{background:var(--pop);color:var(--popink);border-color:var(--cbs-ink)}
+.moreinfo svg{width:18px;height:18px}
+
+/* ---------- a job's card: pictures and dots, very few words ---------- */
+var WAYS = { c: ["pencil", "College course"], a: ["hardhat", "Apprenticeship"], u: ["book", "University"], j: ["toolbox", "Learn on the job"] };
+function jobCard(k){
+  var j = C.JOBS[k], x = (C.JOBX || {})[k], L = VIEW.look;
+  var h = '<div class="jc"><span class="jbig">' + A.icon(j[0], lum(L.pop) < 0.36 ? "#ffffff" : "#0a2f38", L.pop) + '</span>' +
+    '<h3>' + esc(j[1]) + '</h3><p class="jfun">' + esc(j[2]) + '</p>';
+  if(x){
+    var meters = [["tree", "Outdoors", x[0]], ["people", "People", x[1]], ["hand", "Hands on", x[2]], ["laptop", "Screens", x[3]]];
+    h += '<div class="jrest"><ul class="meters" aria-label="What the job is like, out of 5">' + meters.map(function(m){
+      var d = "", i; for(i = 1; i <= 5; i++) d += '<i class="' + (i <= m[2] ? "on" : "") + '"></i>';
+      return '<li>' + A.icon(m[0], "#0a2f38", "#fffdf8") + '<span>' + m[1] + '</span><span class="dots" aria-label="' + m[2] + ' out of 5">' + d + '</span></li>';
+    }).join("") + '</ul><div class="jtags"><p>Good at</p><ul>' + x[4].map(function(t){ return '<li class="sk">' + esc(t) + '</li>'; }).join("") + '</ul>' +
+      '<p>Ways in</p><ul>' + x[5].split("").map(function(c){ var w = WAYS[c]; return w ? '<li>' + A.icon(w[0], "#0a2f38", "#fffdf8") + esc(w[1]) + '</li>' : ''; }).join("") + '</ul></div></div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------- the guide for one idea ---------- */
+dialog#guide{width:min(820px,calc(100% - 20px));max-height:calc(100% - 20px);padding:0;border:4px solid var(--cbs-ink);border-radius:22px;background:var(--cbs-cream);color:var(--cbs-ink);overflow:auto}
+dialog#guide::backdrop{background:rgba(10,15,30,.65)}
+.gh{position:sticky;top:0;z-index:2;background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--ink);padding:16px 18px;display:flex;align-items:center;gap:14px;border-bottom:4px solid var(--cbs-ink)}
+.gh .gic{flex:none;width:68px;height:68px;border-radius:50%;background:var(--pop);border:3px solid var(--cbs-ink);display:grid;place-items:center}
+.gh .gic .ico{width:44px;height:44px}
+.gh h2{margin:0;flex:1;font-family:var(--display);font-variation-settings:"wdth" 115,"wght" 900;text-transform:uppercase;font-size:clamp(1.25rem,3vw,1.7rem);line-height:1.05}
+.gh h2 small{display:block;font-family:var(--body);font-variation-settings:normal;font-weight:700;text-transform:none;font-size:.88rem;margin-top:5px;opacity:.9}
+.gb{padding:18px 18px 20px}
+.gwhy{background:#fff;border:3px solid var(--cbs-ink);border-left-width:10px;border-left-color:var(--cbs-teal);border-radius:14px;padding:10px 14px;margin:0 0 16px;font-size:1rem}
+.gwhy b{display:block;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 850;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cbs-teal);margin-bottom:2px}
+.glab{font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 850;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;color:var(--cbs-teal);margin:0 0 8px}
+.need{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0;list-style:none}
+.need li{background:#fff;border:2px solid var(--cbs-ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.9rem}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px;padding:0;list-style:none;counter-reset:st}
+.steps li{position:relative;background:#fff;border:3px solid var(--cbs-ink);border-radius:var(--r-alt);padding:40px 14px 14px;font-size:1.04rem;font-weight:700;line-height:1.35;counter-increment:st;box-shadow:4px 5px 0 rgba(10,47,56,.15)}
+.steps li::before{content:counter(st);position:absolute;top:-14px;left:12px;width:44px;height:44px;border-radius:50%;background:var(--pop);color:var(--popink);border:3px solid var(--cbs-ink);
+  display:grid;place-items:center;font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.4rem}
+.steps li:nth-child(2){transform:rotate(.6deg)}
+.steps li:nth-child(3){transform:rotate(-.6deg)}
+.gnote{display:flex;gap:10px;align-items:flex-start;background:#fff4d6;border:3px solid var(--cbs-ink);border-radius:14px;padding:10px 14px;margin:0 0 16px;font-weight:700}
+.gnote svg{flex:none;width:24px;height:24px;margin-top:1px}
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px}
+.way{background:#fff;border:3px dashed var(--cbs-ink);border-radius:16px;padding:10px 14px}
+.way b{display:block;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 850;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.way.smaller b{color:var(--cbs-teal)}
+.way.bigger b{color:var(--cbs-orange)}
+.gfoot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:2px dashed rgba(10,47,56,.25);padding-top:16px}
+.gfoot .play{font-size:1.05rem;padding:11px 20px}
+.gfoot .play[aria-pressed="true"]{background:var(--cbs-ink);color:#fff}
+.gfoot .alt{font-weight:700;background:#fff;border:3px solid var(--cbs-ink);border-radius:14px;padding:9px 14px;cursor:pointer;text-decoration:none;color:var(--cbs-ink)}
+.gfoot .alt:hover{background:var(--pop);color:var(--popink)}
+.gfoot .sp{flex:1}
+@media (max-width:700px){.steps{grid-template-columns:1fr;gap:10px}.ways{grid-template-columns:1fr}.steps li{transform:none !important;padding:12px 14px 12px 66px;min-height:62px;display:flex;align-items:center}.steps li::before{top:50%;left:10px;transform:translateY(-50%)}}
+
 .jobs{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 10px}
 .job{display:inline-flex;align-items:center;gap:10px;cursor:pointer;background:var(--card);color:var(--cbs-ink);border:3px solid var(--cbs-ink);border-radius:999px;
   padding:6px 18px 6px 6px;font-weight:700;box-shadow:4px 5px 0 rgba(0,0,0,.25)}
@@ -164,8 +224,28 @@ h1.title{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 90
 .job .ji .ico{width:28px;height:28px}
 .job[aria-expanded="true"]{background:var(--pop);color:var(--popink)}
 .job[aria-expanded="true"] .ji{background:var(--card)}
-.jobline{min-height:1.6em;margin:6px 0 0;font-size:1.08rem;font-weight:700;color:var(--ink)}
-.jobline:not(:empty)::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--pop);margin-right:10px;vertical-align:1px}
+.jobcard{margin:14px 0 0;max-width:760px}
+.jobcard:empty{display:none}
+.jc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 18px;background:var(--card);color:var(--cbs-ink);border:4px solid var(--cbs-ink);border-radius:var(--r-alt);
+  padding:18px 20px;box-shadow:8px 10px 0 var(--pop2);animation:jcin .35s cubic-bezier(.2,1.5,.4,1)}
+@keyframes jcin{from{transform:translateY(14px) scale(.97);opacity:0}}
+.jc .jbig{grid-row:span 2;width:92px;height:92px;border-radius:50%;background:var(--pop);border:4px solid var(--cbs-ink);display:grid;place-items:center;transform:rotate(-6deg)}
+.jc .jbig .ico{width:58px;height:58px}
+.jc h3{margin:4px 0 0;font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 900;text-transform:uppercase;font-size:clamp(1.3rem,3vw,1.7rem);line-height:1}
+.jc .jfun{margin:0;font-size:1.02rem}
+.jc .jrest{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px 22px;margin-top:14px;padding-top:14px;border-top:2px dashed rgba(10,47,56,.25)}
+.meters{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.meters li{display:grid;grid-template-columns:28px 92px auto;align-items:center;gap:8px;font-weight:700;font-size:.92rem}
+.meters .ico{width:26px;height:26px}
+.dots{display:inline-flex;gap:5px}
+.dots i{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--cbs-ink);background:transparent}
+.dots i.on{background:var(--pop2)}
+.jtags p{margin:0 0 6px;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 850;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cbs-teal)}
+.jtags ul{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.jtags li{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--cbs-ink);border-radius:999px;padding:4px 11px 4px 6px;font-weight:700;font-size:.86rem}
+.jtags li.sk{padding-left:11px;background:color-mix(in srgb,var(--pop) 28%,#fff)}
+.jtags li .ico{width:20px;height:20px}
+@media (max-width:700px){.jc{grid-template-columns:1fr}.jc .jbig{grid-row:auto;width:72px;height:72px}.jc .jbig .ico{width:44px;height:44px}.jc .jrest{grid-template-columns:1fr}}
 
 /* ---------- the whole year: back to school colours ---------- */
 .year{background:var(--cbs-cream);color:var(--cbs-ink);border-top:6px solid var(--cbs-orange);position:relative}
@@ -294,11 +374,12 @@ dialog#pitch::backdrop{background:rgba(10,15,30,.65)}
   </section>
 
   <section class="extras" aria-label="Ideas and jobs for this week">
-    <h2 class="sh">Try this <small>Tap one when you have had a go.</small></h2>
+    <h2 class="sh">Try this <small>Tap one to see how.</small></h2>
     <div class="tries" id="tries"></div>
+    <div id="moreinfo"></div>
     <h2 class="sh">Jobs it links to <small>Tap one.</small></h2>
     <div class="jobs" id="jobs"></div>
-    <p class="jobline" id="jobline" aria-live="polite"></p>
+    <div class="jobcard" id="jobcard" aria-live="polite"></div>
   </section>
 
   <section class="year" aria-labelledby="yearh">
@@ -321,6 +402,15 @@ dialog#pitch::backdrop{background:rgba(10,15,30,.65)}
 
 <div class="wipe" id="wipe" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="guide" aria-labelledby="guideh">
+  <div class="gh">
+    <span class="gic" id="guideIc"></span>
+    <h2 id="guideh">Try this<small id="guideSub"></small></h2>
+    <button class="iconbtn" type="button" id="guideClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="gb" id="guideBody"></div>
+</dialog>
 
 <dialog id="pitch" aria-labelledby="pitchh">
   <div class="ph">
@@ -431,6 +521,10 @@ var SFX = {
 var toastT = 0;
 function toast(msg){ var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("show"); }, 2600); }
 
+/* Old style ideas ([icon, words]) still work. */
+function tr(t){ return Array.isArray(t) ? { i: t[0], t: t[1], steps: [] } : t; }
+function minsText(m){ return m === 0 ? "All day" : (m >= 60 ? (m % 60 ? Math.floor(m / 60) + " hr " + (m % 60) + " min" : (m / 60) + (m === 60 ? " hour" : " hours")) : m + " min"); }
+
 /* ---------- drawing a week onto the page ---------- */
 var VIEW = null, stopFw = null;
 function lum(hex){
@@ -500,17 +594,21 @@ function render(w){
   $("hstamp").classList.remove("slam");
   /* try this */
   var waiting = state(w) === "future", got = TRIED[w.id] || [];
-  $("tries").innerHTML = w.try.map(function(t, i){
-    var on = got.indexOf(i) > -1;
-    return '<button class="try" type="button" data-i="' + i + '" aria-pressed="' + on + '"' + (waiting ? ' disabled title="Opens ' + esc(nice(w.start, true)) + '"' : '') + '>' +
-      '<span class="ic">' + A.icon(t[0], w.look.pop, w.look.bg) + '</span><b>' + esc(t[1]) + '</b><span class="done">' + (on ? "Had a go" : (waiting ? "Soon" : "Had a go?")) + '</span></button>';
+  $("tries").innerHTML = w.try.map(function(raw, i){
+    var t = tr(raw), on = got.indexOf(i) > -1;
+    return '<button class="try" type="button" data-i="' + i + '" aria-pressed="' + on + '" aria-haspopup="dialog">' +
+      (t.mins != null ? '<span class="mins">' + esc(minsText(t.mins)) + '</span>' : '') +
+      '<span class="ic">' + A.icon(t.i, w.look.pop, w.look.bg) + '</span><b>' + esc(t.t) + '</b>' +
+      (on ? '<span class="done">Had a go</span>' : '<span class="how"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' + (waiting ? "Have a look" : "How to") + '</span>') +
+      '</button>';
   }).join("");
+  $("moreinfo").innerHTML = w.link ? '<a class="moreinfo" href="' + esc(w.link[1]) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Find out more: ' + esc(w.link[0]) + '</a>' : '';
   /* jobs */
   $("jobs").innerHTML = w.jobs.map(function(k, i){
     var j = C.JOBS[k]; if(!j) return "";
-    return '<button class="job" type="button" data-k="' + esc(k) + '" aria-expanded="false" aria-controls="jobline"><span class="ji">' + A.icon(j[0], lum(w.look.pop) < 0.36 ? "#ffffff" : "#0a2f38", w.look.pop) + '</span>' + esc(j[1]) + '</button>';
+    return '<button class="job" type="button" data-k="' + esc(k) + '" aria-expanded="false" aria-controls="jobcard"><span class="ji">' + A.icon(j[0], lum(w.look.pop) < 0.36 ? "#ffffff" : "#0a2f38", w.look.pop) + '</span>' + esc(j[1]) + '</button>';
   }).join("");
-  $("jobline").textContent = "";
+  $("jobcard").innerHTML = "";
   /* the year, and the button home */
   drawYear();
   $("nowBtn").hidden = w === FOCUS;
@@ -525,23 +623,84 @@ function wire(){
   if(mb) mb.addEventListener("click", openPitch);
   if(pt) pt.addEventListener("click", openPitch);
   Array.prototype.forEach.call(document.querySelectorAll(".try"), function(b){
-    b.addEventListener("click", function(){
-      var i = +b.getAttribute("data-i"), list = TRIED[VIEW.id] || [], at = list.indexOf(i);
-      if(at > -1){ list.splice(at, 1); b.setAttribute("aria-pressed", "false"); b.querySelector(".done").textContent = "Had a go?"; SFX.untick(); }
-      else { list.push(i); b.setAttribute("aria-pressed", "true"); b.querySelector(".done").textContent = "Had a go"; SFX.tick(); }
-      TRIED[VIEW.id] = list; save(TK, TRIED);
-      if(at < 0 && stampWeek(VIEW)) slamStamp();
-    });
+    b.addEventListener("click", function(){ SFX.pop(); guideOpen(+b.getAttribute("data-i")); });
   });
   Array.prototype.forEach.call(document.querySelectorAll(".job"), function(b){
     b.addEventListener("click", function(){
       var open = b.getAttribute("aria-expanded") === "true";
       Array.prototype.forEach.call(document.querySelectorAll(".job"), function(o){ o.setAttribute("aria-expanded", "false"); });
-      if(open){ $("jobline").textContent = ""; return; }
+      if(open){ $("jobcard").innerHTML = ""; return; }
       b.setAttribute("aria-expanded", "true");
-      $("jobline").textContent = C.JOBS[b.getAttribute("data-k")][2];
+      $("jobcard").innerHTML = jobCard(b.getAttribute("data-k"));
       SFX.pop();
     });
+  });
+}
+
+/* ---------- a job's card: pictures and dots, very few words ---------- */
+var WAYS = { c: ["pencil", "College course"], a: ["hardhat", "Apprenticeship"], u: ["book", "University"], j: ["toolbox", "Learn on the job"] };
+function jobCard(k){
+  var j = C.JOBS[k], x = (C.JOBX || {})[k], L = VIEW.look;
+  var h = '<div class="jc"><span class="jbig">' + A.icon(j[0], lum(L.pop) < 0.36 ? "#ffffff" : "#0a2f38", L.pop) + '</span>' +
+    '<h3>' + esc(j[1]) + '</h3><p class="jfun">' + esc(j[2]) + '</p>';
+  if(x){
+    var meters = [["tree", "Outdoors", x[0]], ["people", "People", x[1]], ["hand", "Hands on", x[2]], ["laptop", "Screens", x[3]]];
+    h += '<div class="jrest"><ul class="meters" aria-label="What the job is like, out of 5">' + meters.map(function(m){
+      var d = "", i; for(i = 1; i <= 5; i++) d += '<i class="' + (i <= m[2] ? "on" : "") + '"></i>';
+      return '<li>' + A.icon(m[0], "#0a2f38", "#fffdf8") + '<span>' + m[1] + '</span><span class="dots" aria-label="' + m[2] + ' out of 5">' + d + '</span></li>';
+    }).join("") + '</ul><div class="jtags"><p>Good at</p><ul>' + x[4].map(function(t){ return '<li class="sk">' + esc(t) + '</li>'; }).join("") + '</ul>' +
+      '<p>Ways in</p><ul>' + x[5].split("").map(function(c){ var w = WAYS[c]; return w ? '<li>' + A.icon(w[0], "#0a2f38", "#fffdf8") + esc(w[1]) + '</li>' : ''; }).join("") + '</ul></div></div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------- the guide for one idea ---------- */
+var GI = -1;
+var PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z" fill="#ffc247" stroke="#0a2f38" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5" stroke="#0a2f38" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="18" r="1.3" fill="#0a2f38"/></svg>';
+function guideOpen(i){
+  var w = VIEW, t = tr(w.try[i]), waiting = state(w) === "future";
+  GI = i;
+  $("guideIc").innerHTML = A.icon(t.i, w.look.bg, w.look.pop);
+  $("guideh").firstChild.nodeValue = t.t;
+  $("guideSub").textContent = (t.mins != null ? minsText(t.mins) + " \u00b7 " : "") + w.title;
+  var on = (TRIED[w.id] || []).indexOf(i) > -1, h = "";
+  if(t.why) h += '<p class="gwhy"><b>Why people do this</b>' + esc(t.why) + '</p>';
+  if(t.need && t.need.length) h += '<p class="glab">You will need</p><ul class="need">' + t.need.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join("") + '</ul>';
+  if(t.steps && t.steps.length) h += '<p class="glab">How</p><ol class="steps">' + t.steps.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join("") + '</ol>';
+  if(t.note) h += '<p class="gnote">' + PIN + '<span>' + esc(t.note) + '</span></p>';
+  if(t.easier || t.bigger) h += '<div class="ways">' +
+    (t.easier ? '<div class="way smaller"><b>Too much today?</b>' + esc(t.easier) + '</div>' : '') +
+    (t.bigger ? '<div class="way bigger"><b>Fancy more?</b>' + esc(t.bigger) + '</div>' : '') + '</div>';
+  h += '<div class="gfoot">' +
+    (waiting ? '<button class="play" type="button" disabled aria-disabled="true">Opens ' + esc(nice(w.start, true)) + '</button>'
+             : '<button class="play" type="button" id="guideDone" aria-pressed="' + on + '">' + (on ? "\u2713 Had a go" : "I had a go") + '</button>') +
+    (t.link ? '<a class="alt" href="' + esc(t.link[1]) + '"' + (/^https?:/.test(t.link[1]) ? ' target="_blank" rel="noopener"' : '') + '>' + esc(t.link[0]) + '</a>' : '') +
+    '<span class="sp"></span><button class="alt" type="button" id="guideLater">Not now</button></div>';
+  $("guideBody").innerHTML = h;
+  var d = $("guide");
+  if(d.showModal) d.showModal(); else d.setAttribute("open", "");
+  var done = $("guideDone");
+  if(done) done.addEventListener("click", function(){
+    var list = TRIED[w.id] || [], at = list.indexOf(GI);
+    if(at > -1){ list.splice(at, 1); done.setAttribute("aria-pressed", "false"); done.textContent = "I had a go"; SFX.untick(); }
+    else { list.push(GI); done.setAttribute("aria-pressed", "true"); done.textContent = "\u2713 Had a go"; SFX.tick(); }
+    TRIED[w.id] = list; save(TK, TRIED);
+    redrawTries();
+    if(at < 0){ setTimeout(function(){ closeGuide(); if(stampWeek(w)) slamStamp(); }, 450); }
+  });
+  $("guideLater").addEventListener("click", closeGuide);
+}
+function closeGuide(){ var d = $("guide"); if(d.close) d.close(); else d.removeAttribute("open"); }
+$("guideClose").addEventListener("click", closeGuide);
+$("guide").addEventListener("click", function(e){ if(e.target === this) closeGuide(); });
+function redrawTries(){
+  var w = VIEW, got = TRIED[w.id] || [];
+  Array.prototype.forEach.call(document.querySelectorAll(".try"), function(b){
+    var i = +b.getAttribute("data-i"), on = got.indexOf(i) > -1;
+    b.setAttribute("aria-pressed", String(on));
+    var tail = b.querySelector(".done, .how");
+    if(on && tail && tail.className !== "done"){ var s = document.createElement("span"); s.className = "done"; s.textContent = "Had a go"; tail.replaceWith(s); }
+    if(!on && tail && tail.className === "done"){ var x = document.createElement("span"); x.className = "how"; x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>How to'; tail.replaceWith(x); }
   });
 }
 
