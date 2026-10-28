@@ -455,6 +455,208 @@ S.wellbeing = function(L){
   return s + '</svg>';
 };
 
+/* ======================= SPRING 1 ======================= */
+
+/* ---------------- New Year, New You? ----------------
+   A city skyline at midnight, a big clock about to strike twelve,
+   a list of resolutions crossing themselves out, fireworks on top. */
+S.newyear = function(L){
+  var r = A.rng(9101), s = open(), i, ink = "#0b1a2e";
+  /* the clock tower */
+  s += '<g transform="translate(1000 0)"><rect x="-70" y="200" width="140" height="440" fill="' + ink + '"/><path d="M-80 200L0 110L80 200z" fill="' + ink + '"/>' +
+    '<circle cy="290" r="62" fill="#fff3c4" stroke="' + L.pop + '" stroke-width="8"/>';
+  for(i = 0; i < 12; i++){ var a = i * Math.PI / 6; s += '<path d="M' + f(Math.sin(a) * 48) + ' ' + f(290 - Math.cos(a) * 48) + 'L' + f(Math.sin(a) * 56) + ' ' + f(290 - Math.cos(a) * 56) + '" stroke="' + ink + '" stroke-width="' + (i % 3 ? 3 : 6) + '"/>'; }
+  s += '<path d="M0 290v-40" stroke="' + ink + '" stroke-width="7" stroke-linecap="round"/>' +
+    '<g transform="translate(0 290)"><g' + anim("s-tick", 4, 0) + '><path d="M0 0v-50" stroke="' + L.pop2 + '" stroke-width="4" stroke-linecap="round"/></g></g><circle cy="290" r="7" fill="' + ink + '"/>';
+  for(i = 0; i < 4; i++) s += '<rect x="' + (-48 + (i % 2) * 64) + '" y="' + (400 + Math.floor(i / 2) * 80) + '" width="32" height="44" rx="4" fill="#ffd166"/>';
+  s += '</g>';
+  /* skyline */
+  var x = 300;
+  while(x < W + 40){
+    var w = 50 + r() * 70, h = 120 + r() * 200;
+    if(x + w > 920 && x < 1080){ x = 1080; continue; }
+    s += '<rect x="' + f(x) + '" y="' + f(640 - h) + '" width="' + f(w) + '" height="' + f(h) + '" fill="#132c4a"/>';
+    var wy, wx;
+    for(wy = 640 - h + 14; wy < 610; wy += 26) for(wx = x + 8; wx < x + w - 14; wx += 18) if(r() < 0.45) s += '<rect class="win' + (r() < 0.2 ? " flick" : "") + '" x="' + f(wx) + '" y="' + f(wy) + '" width="9" height="13" fill="#ffd166" style="animation-delay:' + (-r() * 5).toFixed(1) + 's"/>';
+    x += w + 6;
+  }
+  /* the resolutions list */
+  s += '<g' + anim("s-bob", 3.4, 0) + '><g transform="translate(575 80) rotate(-6) scale(.88)"><rect width="220" height="250" rx="10" fill="#fffdf8" stroke="' + ink + '" stroke-width="5"/>' +
+    '<text x="22" y="44" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="24" fill="' + ink + '">THIS YEAR I WILL</text>';
+  var res = ["Go to bed early", "Eat more veg", "Tidy my room", "Learn to juggle"];
+  res.forEach(function(t, k){
+    var y = 92 + k * 42;
+    s += '<rect x="22" y="' + (y - 18) + '" width="22" height="22" rx="4" fill="none" stroke="' + ink + '" stroke-width="3"/>' +
+      '<text x="56" y="' + y + '" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-weight="700" font-size="19" fill="' + ink + '">' + t + '</text>';
+    if(k < 3) s += '<path d="M52 ' + (y - 7) + 'h' + (t.length * 9.4) + '" stroke="' + L.pop2 + '" stroke-width="4" stroke-linecap="round"' + anim("s-strike", 6, -k * 0.2, "stroke-dasharray:200;") + '/>';
+  });
+  s += '<path d="M24 ' + (92 + 3 * 42 - 8) + 'l6 8 12-14" fill="none" stroke="#06d6a0" stroke-width="4" stroke-linecap="round"/></g></g>';
+  return s + '</svg>';
+};
+
+/* ---------------- Democracy Day in Cape Verde ----------------
+   Ten little islands in a blue sea, a giant ballot box being fed
+   votes, and a sea of hands up. */
+S.democracy = function(L){
+  var r = A.rng(9202), s = open(), i, ink = "#0b1e44";
+  /* sea waves */
+  for(i = 0; i < 4; i++) s += '<g' + anim("s-wavex", 6 + i, -i * 1.4) + '><path d="M300 ' + (130 + i * 52) + 'q20-12 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0 40 0" fill="none" stroke="#fffdf8" stroke-width="3" opacity=".25"/></g>';
+  /* the islands, in a loose horseshoe like the real ones */
+  var isl = [[780, 70, 34], [840, 52, 18], [900, 60, 26], [960, 84, 30], [1010, 120, 14], [1060, 150, 28], [1090, 220, 30], [1040, 260, 22], [960, 250, 36], [880, 240, 26]];
+  isl.forEach(function(p, k){
+    s += '<g' + anim("s-bob", 3 + k * 0.2, -k * 0.3) + '><ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="' + p[2] + '" ry="' + f(p[2] * 0.62) + '" fill="#f4d58d" stroke="' + ink + '" stroke-width="3"/>' +
+      '<ellipse cx="' + (p[0] - p[2] * 0.2) + '" cy="' + f(p[1] - p[2] * 0.15) + '" rx="' + f(p[2] * 0.5) + '" ry="' + f(p[2] * 0.3) + '" fill="#6aa84f"/></g>';
+  });
+  /* the ballot box */
+  s += '<g transform="translate(560 270) scale(.85)"><rect width="260" height="190" rx="12" fill="#fffdf8" stroke="' + ink + '" stroke-width="6"/><rect x="0" y="0" width="260" height="46" rx="12" fill="' + L.pop2 + '" stroke="' + ink + '" stroke-width="6"/>' +
+    '<rect x="70" y="18" width="120" height="12" rx="6" fill="' + ink + '"/><text x="130" y="128" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="44" fill="' + ink + '">VOTE</text>' +
+    '<path d="' + star(130, 160, 14, 6) + '" fill="' + L.pop + '"/></g>';
+  /* votes dropping in */
+  for(i = 0; i < 3; i++) s += '<g' + anim("s-drop", 2.4, -i * 0.8) + '><g transform="translate(' + (600 + i * 44) + ' 150) scale(.85)"><rect width="56" height="70" rx="4" fill="#fffdf8" stroke="' + ink + '" stroke-width="4"/><path d="M14 36l10 10 20-24" fill="none" stroke="' + L.bg + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g></g>';
+  /* hands up along the bottom */
+  var cols = ["#f2c49b", "#c68b59", "#8d5524", "#e0ac69", "#ffdbac", "#a0673c"];
+  for(i = 0; i < 9; i++){
+    var hx = 340 + i * 100 + r() * 20, hy = 520 + r() * 40, c = cols[i % cols.length];
+    s += '<g' + anim("s-wave", 1.2 + r(), -r()) + '><g transform="translate(' + f(hx) + ' ' + f(hy) + ')">' +
+      '<rect x="-16" y="40" width="32" height="140" rx="14" fill="' + [L.pop, L.pop2, "#fffdf8"][i % 3] + '" stroke="' + ink + '" stroke-width="4"/>' +
+      '<g transform="translate(-30 -30) scale(1.25)">' + A.inner("hand", c, ink) + '</g></g></g>';
+  }
+  return s + '</svg>';
+};
+
+/* ---------------- Chinese New Year ----------------
+   Rows of red lanterns swinging, a long dragon weaving across, a
+   little goat for the Year of the Goat, and red envelopes. */
+S.lunar = function(L){
+  var r = A.rng(9303), s = open('<radialGradient id="lnGlow"><stop offset="0" stop-color="#ffd60a" stop-opacity=".6"/><stop offset="1" stop-color="#ffd60a" stop-opacity="0"/></radialGradient>'), i, ink = "#3d0a0f";
+  /* strings of lanterns */
+  [[360, 30, 1220, 60, 50, 9], [560, 160, 1220, 140, 40, 6]].forEach(function(row, k){
+    var x1 = row[0], y1 = row[1], x2 = row[2], y2 = row[3], sag = row[4], n = row[5], j;
+    s += '<path d="M' + x1 + ' ' + y1 + 'Q' + ((x1 + x2) / 2) + ' ' + (Math.max(y1, y2) + sag) + ' ' + x2 + ' ' + y2 + '" fill="none" stroke="' + ink + '" stroke-width="3"/>';
+    for(j = 1; j < n; j++){
+      var t = j / n, mx = (x1 + x2) / 2, my = Math.max(y1, y2) + sag;
+      var x = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * mx + t * t * x2, y = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * my + t * t * y2, sc = k ? 0.7 : 1;
+      s += '<g' + anim("s-swing", 2.6 + r(), -r() * 3) + '><g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + sc + ')">' +
+        '<path d="M0 0v12" stroke="' + ink + '" stroke-width="3"/><circle cy="44" r="46" fill="url(#lnGlow)"/>' +
+        '<rect x="-14" y="10" width="28" height="8" rx="2" fill="#ffd60a"/><ellipse cy="44" rx="30" ry="28" fill="#e5383b" stroke="' + ink + '" stroke-width="3"/>' +
+        '<path d="M0 16v56M-14 18q-10 26 0 52M14 18q10 26 0 52" fill="none" stroke="#ffd60a" stroke-width="2.5"/><rect x="-14" y="70" width="28" height="8" rx="2" fill="#ffd60a"/>' +
+        '<path d="M-6 78v22M0 78v26M6 78v22" stroke="#ffd60a" stroke-width="3"/></g></g>';
+    }
+  });
+  /* the dragon: a chain of body pieces that ripples */
+  var n = 9, base = 520;
+  for(i = n - 1; i >= 0; i--){
+    var bx = 640 + i * 62, c = i % 2 ? "#ffd60a" : "#e5383b";
+    s += '<g' + anim("s-ripple", 1.6, -i * 0.13) + '>';
+    if(i === 0){
+      s += '<g transform="translate(' + bx + ' ' + base + ')"><path d="M30 -40q-90 -10 -100 40q10 46 100 40z" fill="#e5383b" stroke="' + ink + '" stroke-width="5"/>' +
+        '<path d="M-40 -20q-30 -30 -10 -50M-20 -34q0 -40 30 -46" fill="none" stroke="#ffd60a" stroke-width="6" stroke-linecap="round"/>' +
+        '<circle cx="-30" cy="-6" r="10" fill="#fffdf8" stroke="' + ink + '" stroke-width="3"/><circle cx="-33" cy="-6" r="5" fill="' + ink + '"/>' +
+        '<path d="M-70 14q20 14 60 8" fill="none" stroke="' + ink + '" stroke-width="4"/><path d="M-66 18l6 10 8-8 6 10 8-8" fill="none" stroke="#fffdf8" stroke-width="3"/>' +
+        '<path d="M-70 -4q-30 -10 -40 10M-70 6q-30 4 -30 24" fill="none" stroke="#ffd60a" stroke-width="4" stroke-linecap="round"/></g>';
+    } else {
+      s += '<g transform="translate(' + bx + ' ' + base + ')"><ellipse rx="40" ry="36" fill="' + c + '" stroke="' + ink + '" stroke-width="5"/>' +
+        '<path d="M-26 -30l10 -20 10 18 10 -18 10 20" fill="#ffd60a" stroke="' + ink + '" stroke-width="3" stroke-linejoin="round"/>' +
+        '<path d="M-20 0q20 14 40 0" fill="none" stroke="' + ink + '" stroke-width="3" opacity=".5"/>' +
+        '<path d="M-10 34v40M10 34v40" stroke="' + ink + '" stroke-width="6" stroke-linecap="round"/></g>';
+    }
+    s += '</g>';
+  }
+  /* the goat */
+  s += '<g' + anim("s-bob", 0.6, 0) + '><g transform="translate(1110 520)"><ellipse rx="54" ry="34" fill="#fffdf8" stroke="' + ink + '" stroke-width="5"/>' +
+    '<circle cx="50" cy="-30" r="24" fill="#fffdf8" stroke="' + ink + '" stroke-width="5"/><path d="M40 -50q-14 -30 10 -36M60 -50q16 -28 -6 -36" fill="none" stroke="#c9a227" stroke-width="7" stroke-linecap="round"/>' +
+    '<circle cx="58" cy="-32" r="4" fill="' + ink + '"/><path d="M52 -6q2 14 -4 20" fill="none" stroke="' + ink + '" stroke-width="4"/>' +
+    '<path d="M-30 30v40M-10 30v40M20 30v40M40 30v40" stroke="' + ink + '" stroke-width="7" stroke-linecap="round"/></g></g>';
+  /* red envelopes */
+  for(i = 0; i < 5; i++) s += '<g' + anim("s-bob", 2 + r() * 2, -r() * 2) + '><g transform="translate(' + f(380 + r() * 700) + ' ' + f(250 + r() * 100) + ') rotate(' + f((r() - 0.5) * 30) + ')"><rect width="40" height="56" rx="4" fill="#d00000" stroke="' + ink + '" stroke-width="3"/><circle cx="20" cy="22" r="9" fill="#ffd60a"/></g></g>';
+  return s + '</svg>';
+};
+
+/* ---------------- STEAM Challenge ----------------
+   A spaghetti and marshmallow tower that wobbles, a paper bridge
+   holding books, a ruler and pencil, and a bright idea. */
+S.steambuild = function(L){
+  var s = open(), i, ink = "#073b4c";
+  s += '<rect x="300" y="590" width="' + (W - 300) + '" height="50" fill="#e9c46a"/><path d="M300 590h' + (W - 300) + '" stroke="' + ink + '" stroke-width="5"/>';
+  /* the wobbly tower */
+  var nodes = [[700, 590], [820, 590], [760, 470], [700, 470], [820, 470], [760, 350], [730, 250], [790, 250], [760, 140]];
+  var sticks = [[0, 1], [0, 3], [1, 4], [3, 4], [0, 2], [1, 2], [3, 2], [4, 2], [3, 5], [4, 5], [2, 5], [5, 6], [5, 7], [6, 7], [6, 8], [7, 8]];
+  s += '<g' + anim("s-wobble", 2.6, 0) + '>';
+  sticks.forEach(function(k){ var a = nodes[k[0]], b = nodes[k[1]]; s += '<path d="M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1] + '" stroke="#f4d58d" stroke-width="7" stroke-linecap="round"/><path d="M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1] + '" stroke="' + ink + '" stroke-width="1.5" opacity=".3"/>'; });
+  nodes.forEach(function(n, k){ s += '<rect x="' + (n[0] - 13) + '" y="' + (n[1] - 11) + '" width="26" height="22" rx="9" fill="' + (k % 3 ? "#fffdf8" : "#ffafcc") + '" stroke="' + ink + '" stroke-width="3"/>'; });
+  s += '<path d="M760 140v-36" stroke="' + ink + '" stroke-width="4"/><path d="M760 104h40l-8 12 8 12h-40z" fill="' + L.pop2 + '" stroke="' + ink + '" stroke-width="3"/></g>';
+  /* the paper bridge between two piles of books */
+  function pile(x, n){
+    var out = "", k;
+    for(k = 0; k < n; k++) out += '<rect x="' + (x + (k % 2) * 6) + '" y="' + (590 - (k + 1) * 26) + '" width="110" height="24" rx="3" fill="' + ["#ef476f", "#118ab2", "#ffd166", "#06d6a0"][k % 4] + '" stroke="' + ink + '" stroke-width="3"/>';
+    return out;
+  }
+  s += pile(890, 4) + pile(1080, 4);
+  s += '<path d="M940 486' + (function(){ var d = "", x; for(x = 0; x <= 200; x += 20) d += "L" + (950 + x) + " " + (x % 40 ? 474 : 486); return d; })() + '" fill="none" stroke="#fffdf8" stroke-width="5" stroke-linejoin="round"/>' +
+    '<path d="M940 488h230" stroke="#fffdf8" stroke-width="5"/>' +
+    '<g' + anim("s-bob", 2, 0) + '><rect x="1000" y="436" width="110" height="34" rx="4" fill="' + L.pop2 + '" stroke="' + ink + '" stroke-width="4"/><path d="M1010 446h90" stroke="#fffdf8" stroke-width="3"/></g>';
+  /* ruler and pencil */
+  s += '<g transform="translate(380 520) rotate(-8)"><rect width="240" height="40" rx="4" fill="' + L.pop + '" stroke="' + ink + '" stroke-width="4"/>';
+  for(i = 1; i < 24; i++) s += '<path d="M' + (i * 10) + ' 0v' + (i % 5 ? 10 : 18) + '" stroke="' + ink + '" stroke-width="2"/>';
+  s += '</g>' + ico("pencil", 470, 420, 90, "#ffd166", ink);
+  /* bright idea */
+  s += '<g transform="translate(1030 170)"><g' + anim("s-pulse", 2.6, 0) + '><circle r="70" fill="#ffd166" opacity=".5"/></g>' + ico("star", -52, -52, 104, "#ffd166", ink) + '</g>';
+  return s + '</svg>';
+};
+
+/* ---------------- Safer Internet Day ----------------
+   A giant phone with a shield, a padlock, a fake picture getting
+   spotted by a magnifying glass, and safe little message bubbles. */
+S.safer = function(L){
+  var r = A.rng(9505), s = open(), i, ink = "#020617";
+  /* data stream lines */
+  for(i = 0; i < 10; i++){ var y = 40 + i * 58; s += '<g' + anim("s-stream", 4 + r() * 4, -r() * 6) + '><path d="M300 ' + y + 'h' + f(80 + r() * 200) + '" stroke="' + L.pop + '" stroke-width="3" stroke-linecap="round" opacity=".35"/></g>'; }
+  /* the phone */
+  s += '<g transform="translate(860 70)"><rect width="250" height="470" rx="36" fill="' + ink + '" stroke="' + L.pop + '" stroke-width="5"/><rect x="16" y="40" width="218" height="390" rx="14" fill="#0b1e3a"/>' +
+    '<rect x="95" y="16" width="60" height="10" rx="5" fill="#1e293b"/>' +
+    '<g' + anim("s-pulse", 2.8, 0) + '><circle cx="125" cy="200" r="80" fill="none" stroke="' + L.pop2 + '" stroke-width="5"/></g>' +
+    '<g transform="translate(70 140) scale(2.3)">' + A.inner("shield", L.pop2, ink) + '</g>' +
+    '<rect x="36" y="330" width="140" height="34" rx="12" fill="' + L.pop + '"/><rect x="74" y="376" width="140" height="34" rx="12" fill="#e2e8f0"/></g>';
+  /* the padlock */
+  s += '<g' + anim("s-bob", 3, 0) + '><g transform="translate(700 40) scale(2.2)">' + A.inner("padlock", L.pop, ink) + '</g></g>';
+  /* fake picture with tell-tale signs */
+  s += '<g transform="translate(530 380) rotate(-5) scale(.85)"><rect width="230" height="170" rx="8" fill="#fffdf8" stroke="' + ink + '" stroke-width="5"/>' +
+    '<rect x="14" y="14" width="202" height="142" fill="#7dd3fc"/><circle cx="170" cy="50" r="20" fill="#fde047"/><path d="M14 156l70-70 50 50 30-24 52 44z" fill="#22c55e"/>' +
+    '<g transform="translate(70 70)"><path d="M0 40q0-30 20-40l4 20 6-24 6 24 6-22 4 26q14 10 10 36z" fill="#f2c49b" stroke="' + ink + '" stroke-width="3"/></g>' +
+    '<text x="115" y="146" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="16" fill="' + ink + '">HLELO WROLD</text></g>';
+  /* the magnifying glass sweeping over it */
+  s += '<g' + anim("s-search", 5, 0) + '><g transform="translate(590 400) scale(.85)"><circle r="50" fill="#fffdf8" fill-opacity=".25" stroke="' + ink + '" stroke-width="10"/><path d="M36 36l50 50" stroke="' + ink + '" stroke-width="16" stroke-linecap="round"/>' +
+    '<circle r="50" fill="none" stroke="' + L.pop2 + '" stroke-width="4"/></g></g>';
+  /* AI tag */
+  s += '<g' + anim("s-bob", 2, -1) + '><g transform="translate(620 545)"><rect width="110" height="44" rx="22" fill="#f43f5e" stroke="' + ink + '" stroke-width="4"/><text x="55" y="30" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="20" fill="#fffdf8">AI MADE</text></g></g>';
+  return s + '</svg>';
+};
+
+/* ---------------- National Apprenticeship Week ----------------
+   A workshop wall of tools, a conveyor belt carrying jobs past, hard
+   hats, and a big L plate that turns into a qualification. */
+S.apprentice = function(L){
+  var s = open(), i, ink = "#1b2021";
+  /* pegboard */
+  s += '<rect x="660" y="20" width="540" height="200" rx="16" fill="#e9c46a" stroke="' + ink + '" stroke-width="5"/>';
+  for(i = 0; i < 13 * 5; i++) s += '<circle cx="' + (684 + (i % 13) * 42) + '" cy="' + (42 + Math.floor(i / 13) * 40) + '" r="4" fill="' + ink + '" opacity=".35"/>';
+  var tools = [["wrench", 760], ["hardhat", 860], ["pencil", 960], ["gear", 1080]];
+  tools.forEach(function(t, k){ s += '<g' + anim("s-swing", 2.4 + k * 0.3, -k * 0.4) + '><g transform="translate(' + t[1] + ' 50)"><path d="M36 0v12" stroke="' + ink + '" stroke-width="4"/>' + ico(t[0], 0, 10, 72, k % 2 ? L.pop2 : "#fffdf8", ink) + '</g></g>'; });
+  /* the conveyor belt with job icons riding along */
+  s += '<g transform="translate(0 470)"><rect x="300" y="60" width="' + (W - 300) + '" height="34" rx="17" fill="' + ink + '"/>';
+  for(i = 0; i < 12; i++) s += '<g' + anim("s-spin", 1.2, 0) + '><circle cx="' + (330 + i * 78) + '" cy="77" r="13" fill="#6b7280" stroke="' + ink + '" stroke-width="3"/><path d="M' + (322 + i * 78) + ' 77h16" stroke="' + ink + '" stroke-width="3"/></g>';
+  var jobs = ["car", "chefhat", "scissors", "laptop", "hardhat", "paw", "wrench", "camera"];
+  s += '<g' + anim("s-belt", 16, 0) + '>';
+  jobs.concat(jobs).forEach(function(j, k){
+    s += '<g transform="translate(' + (300 + k * 150) + ' -36)"><rect width="96" height="96" rx="16" fill="' + (k % 2 ? L.pop2 : "#fffdf8") + '" stroke="' + ink + '" stroke-width="4"/>' + ico(j, 18, 18, 60, ink, k % 2 ? L.pop2 : "#fffdf8") + '</g>';
+  });
+  s += '</g></g>';
+  /* the L plate that flips to a tick */
+  s += '<g transform="translate(712 110)"><path d="M0 -50v12" stroke="' + ink + '" stroke-width="4"/><g' + anim("s-flip", 4, 0) + '><rect x="-36" y="-38" width="72" height="72" rx="8" fill="#fffdf8" stroke="' + ink + '" stroke-width="5"/>' +
+    '<text x="0" y="22" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="64" fill="#e63946">L</text></g></g>';
+  return s + '</svg>';
+};
+
 /* ---------------- live effects on the canvas ---------------- */
 function effect(canvas, kind, cols){
   if(kind === "fireworks") return A.fireworks(canvas, cols);

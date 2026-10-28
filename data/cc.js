@@ -530,7 +530,7 @@ window.B5CC = {
       ],
       jobs:["ptbusy","fireworks","historian","coachlife"],
       game:null,
-      look:{ bg:"#1d3557", bg2:"#2b5d8a", ink:"#ffffff", pop:"#ffd166", pop2:"#ef476f", motif:"firework", pattern:"confetti" }
+      look:{ bg:"#1d3557", bg2:"#2b5d8a", ink:"#ffffff", pop:"#ffd166", pop2:"#ef476f", motif:"firework", pattern:"confetti", scene:"newyear", effect:"fireworks", fx:["#ffd166","#ef476f","#fffdf8","#4cc9f0"] }
     },
     {
       id:"democracy-day", half:"sp1", home:1, start:"2027-01-11", end:"2027-01-15", draft:true,
@@ -546,7 +546,7 @@ window.B5CC = {
       link:["Democracy, BBC Bitesize","https://www.bbc.co.uk/bitesize/articles/zygmqfr"],
       jobs:["mp","lawyer","journalist","election"],
       game:null,
-      look:{ bg:"#003893", bg2:"#1f4fb2", ink:"#ffffff", pop:"#f7d116", pop2:"#cf2027", motif:"ballot", pattern:"stars" }
+      look:{ bg:"#003893", bg2:"#1f4fb2", ink:"#ffffff", pop:"#f7d116", pop2:"#cf2027", motif:"ballot", pattern:"stars", scene:"democracy" }
     },
     {
       id:"lunar-new-year", half:"sp1", home:1, start:"2027-01-18", end:"2027-01-22", draft:true,
@@ -562,7 +562,7 @@ window.B5CC = {
       link:["When is Chinese New Year?","https://www.chinahighlights.com/travelguide/festivals/when-chinese-new-year.htm"],
       jobs:["dumplings","performer","translator","calligrapher"],
       game:null,
-      look:{ bg:"#b5121b", bg2:"#e5383b", ink:"#fff8e7", pop:"#ffd60a", pop2:"#7b2cbf", motif:"lantern", pattern:"rays" }
+      look:{ bg:"#b5121b", bg2:"#e5383b", ink:"#fff8e7", pop:"#ffd60a", pop2:"#7b2cbf", motif:"lantern", pattern:"rays", scene:"lunar", effect:"confetti", fx:["#ffd60a","#e5383b","#fff8e7"] }
     },
     {
       id:"steam-january", half:"sp1", home:1, start:"2027-01-25", end:"2027-01-29", draft:true,
@@ -577,7 +577,7 @@ window.B5CC = {
       ],
       jobs:["engineer","architect","gamedev","labtech"],
       game:null,
-      look:{ bg:"#06d6a0", bg2:"#1b9aaa", ink:"#073b4c", pop:"#ffd166", pop2:"#ef476f", motif:"bridge", pattern:"grid" }
+      look:{ bg:"#06d6a0", bg2:"#1b9aaa", ink:"#073b4c", pop:"#ffd166", pop2:"#ef476f", motif:"bridge", pattern:"grid", scene:"steambuild" }
     },
     {
       id:"safer-internet", half:"sp1", home:2, start:"2027-02-01", end:"2027-02-05", draft:true,
@@ -593,7 +593,7 @@ window.B5CC = {
       link:["Safer Internet Day","https://saferinternet.org.uk/safer-internet-day"],
       jobs:["cyber","ai","moderator","webdev"],
       game:null,
-      look:{ bg:"#0f172a", bg2:"#1e3a5f", ink:"#e2e8f0", pop:"#22d3ee", pop2:"#a3e635", motif:"padlock", pattern:"grid" }
+      look:{ bg:"#0f172a", bg2:"#1e3a5f", ink:"#e2e8f0", pop:"#22d3ee", pop2:"#a3e635", motif:"padlock", pattern:"grid", scene:"safer" }
     },
     {
       id:"apprenticeships", half:"sp1", home:2, start:"2027-02-08", end:"2027-02-12", draft:true,
@@ -609,7 +609,7 @@ window.B5CC = {
       link:["Careerpilot","https://www.careerpilot.org.uk/"],
       jobs:["electrician","hair","mechanic","chefapp"],
       game:null,
-      look:{ bg:"#ff9f1c", bg2:"#ffbf69", ink:"#1b2021", pop:"#2ec4b6", pop2:"#cbf3f0", motif:"hardhat", pattern:"stripes" }
+      look:{ bg:"#ff9f1c", bg2:"#ffbf69", ink:"#1b2021", pop:"#2ec4b6", pop2:"#cbf3f0", motif:"hardhat", pattern:"stripes", scene:"apprentice" }
     },
 
     /* ======================= SPRING 2 (draft dates) ======================= */

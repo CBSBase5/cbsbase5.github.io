@@ -45,7 +45,7 @@ function addCss(){
   if(document.getElementById("ccxCss")) return;
   var st = document.createElement("style"); st.id = "ccxCss"; st.textContent = CSS; document.head.appendChild(st);
   if(!document.querySelector('link[href^="/cc/cc-motion.css"]')){
-    var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/cc/cc-motion.css?v=1"; document.head.appendChild(l);
+    var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/cc/cc-motion.css?v=2"; document.head.appendChild(l);
   }
 }
 function esc(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -88,7 +88,7 @@ function load(cb){
   if(window.B5CC && window.B5CCArt && window.B5CCScenes){ cb(); return; }
   if(!loading){
     loading = [];
-    var files = ["/data/cc.js?v=4", "/cc/cc-art.js?v=3", "/cc/cc-scenes.js?v=5"], i = 0;
+    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=3", "/cc/cc-scenes.js?v=8"], i = 0;
     (function next(){
       if(i >= files.length){ var q = loading; loading = null; q.forEach(function(f){ f(); }); return; }
       var s = document.createElement("script"); s.src = files[i++]; s.onload = next;
