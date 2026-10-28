@@ -231,20 +231,23 @@ function vignette(main, props, L, wide, seed){
     : [[20, 60, 36, -10], [150, 46, 30, 9], [148, 84, 26, -6], [14, 12, 22, 6]];
   (props || []).slice(0, spots.length).forEach(function(p, k){
     var sp = spots[k], col = k % 2 ? L.pop : "#fffdf8", det = k % 2 ? L.bg : L.bg;
-    /* each thing floats on its own beat; the outer group moves, the inner one places it */
-    s += '<g class="vg-float ' + (k % 3 === 1 ? "vg-wob" : "") + '" style="animation-duration:' + (2.2 + r() * 1.6).toFixed(2) + 's;animation-delay:' + (-r() * 3).toFixed(2) + 's;transform-origin:' + (sp[0] + sp[2] / 2) + 'px ' + (sp[1] + sp[2] / 2) + 'px">' +
+    /* everything floats on one shared slow beat, each a step behind the last,
+       so the picture breathes as one; the outer group moves, the inner one places it */
+    s += '<g class="vg-float" style="animation-delay:' + (-k * 0.9).toFixed(1) + 's">' +
       '<g transform="translate(' + sp[0] + ' ' + sp[1] + ') rotate(' + sp[3] + ' ' + (sp[2] / 2) + ' ' + (sp[2] / 2) + ') scale(' + (sp[2] / 48).toFixed(3) + ')">' +
       '<g transform="translate(2.5 3)" opacity=".28">' + paint(I[p] || I.star, "#000", "#000") + '</g>' + paint(I[p] || I.star, col, det) + '</g></g>';
   });
   /* the main picture */
   var ms = 74;
-  s += '<g class="vg-main" style="transform-origin:' + cx + 'px ' + (cy + ms / 2) + 'px"><g transform="translate(' + (cx - ms / 2) + ' ' + (cy - ms / 2 - 4) + ') scale(' + (ms / 48).toFixed(3) + ')">' +
-    '<g transform="translate(3 3.5)" opacity=".3">' + paint(I[main] || I.star, "#000", "#000") + '</g>' + paint(I[main] || I.star, L.pop, L.bg) + '</g></g>';
+  /* three layers: vg-main bobs, vg-hop lifts on hover, the inner group places it
+     (a CSS animation on the placing group would wipe out its position) */
+  s += '<g class="vg-main"><g class="vg-hop"><g transform="translate(' + (cx - ms / 2) + ' ' + (cy - ms / 2 - 4) + ') scale(' + (ms / 48).toFixed(3) + ')">' +
+    '<g transform="translate(3 3.5)" opacity=".3">' + paint(I[main] || I.star, "#000", "#000") + '</g>' + paint(I[main] || I.star, L.pop, L.bg) + '</g></g></g>';
   /* sparkles */
   for(i = 0; i < (wide ? 5 : 3); i++){
     var sx = 12 + r() * (w - 24), sy = 8 + r() * 50;
     if(Math.abs(sx - cx) < 46 && sy > 14) sx = (sx < cx ? sx - 50 : sx + 50);
-    s += '<path class="vg-sp" style="animation-delay:' + (-r() * 3).toFixed(1) + 's;transform-origin:' + sx.toFixed(0) + 'px ' + sy.toFixed(0) + 'px" d="M' + sx.toFixed(0) + ' ' + (sy - 6).toFixed(0) + 'l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z" fill="' + (i % 2 ? L.pop : "#fffdf8") + '"/>';
+    s += '<path class="vg-sp" style="animation-delay:' + (-i * 1.3).toFixed(1) + 's;transform-origin:' + sx.toFixed(0) + 'px ' + sy.toFixed(0) + 'px" d="M' + sx.toFixed(0) + ' ' + (sy - 6).toFixed(0) + 'l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z" fill="' + (i % 2 ? L.pop : "#fffdf8") + '"/>';
   }
   return s + '</svg>';
 }
