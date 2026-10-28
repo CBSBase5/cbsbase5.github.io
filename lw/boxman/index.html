@@ -19881,6 +19881,145 @@ setInterval(function () {
   if (!FOOT41.on && performance.now() - FOOT41.last > 5000) { FOOT41.on = true; document.body.classList.add('foot-on'); }
 }, 250);
 
+/* ===================== V42: FIXES FROM THE AUDIT ===================== */
+/* 1. The bug report can be typed in, and says who really sent it.
+   2. The dev desk's Testing button lands on the Testing tab.
+   3. The Testing tab (unlock everything, skip ahead) lives behind the dev desk now.
+   4. The defeat screen says "Sorry we missed you" instead of "Delivery failed".
+   5. 3D props are freed when a room is left, so long sessions stay light.
+   6. Every criminal and boss is painted while the menus are up, so nobody freezes the game on arrival.
+   7. Dead guy's upgrade line reads properly. */
+
+/* ---------- 1. the bug report ---------- */
+(function () {
+  var ta = document.getElementById('bugtext'); if (ta) { ta.readOnly = false; ta.removeAttribute('readonly'); ta.setAttribute('aria-label', 'Bug report. Add what happened at the end.'); }
+  var p = document.querySelector('#bugbox .panel > p'); if (p) p.textContent = 'This has everything needed to fix a problem. If you like, add a line at the end about what happened.';
+})();
+var _showBugReport42 = showBugReport;
+showBugReport = function () {
+  _showBugReport42();
+  var ta = document.getElementById('bugtext'); if (!ta) return;
+  setTimeout(function () { if (G.usingTouch) return; try { ta.focus(); var n = ta.value.length; ta.setSelectionRange(n, n); ta.scrollTop = ta.scrollHeight; } catch (e) { } }, 60);
+};
+/* who is sending: the dev desk already knows for LW and Jay; anyone else is asked through the sign in */
+function sendWho() {
+  if (DEV.ok) return Promise.resolve(DEV.who === 'LW' ? 'LW' : 'JAY');
+  return devBridge().call('whoami').then(function (o) { return o && o.staff ? 'JAY' : (o && o.who ? String(o.who) : 'GUEST'); }, function () { return 'GUEST'; });
+}
+function bugSend42() {
+  var msg = document.getElementById('bugmsg'), ta = document.getElementById('bugtext');
+  if (!(typeof devOnSite === 'function' && devOnSite())) { msg.textContent = 'Sending works on the Base 5 site. Copy it instead, and share it with Jay.'; return; }
+  msg.textContent = 'Sending...';
+  var text = String(ta.value || '').slice(0, 5000);
+  sendWho().then(function (who) {
+    return devBridge().call('send', { who: who, tool: 'Box-man bug report', page: '/lw/boxman/', text: text });
+  }).then(function (r) {
+    msg.textContent = r && r.ok ? 'Sent to Jay. Thank you.' : 'Could not send just now. Copy it instead.';
+  }, function () { msg.textContent = 'Could not reach the Base 5 sheet. Copy it instead.'; });
+}
+/* everything below is wired once the game has booted, after the older wiring */
+function fix42Wire() {
+  var bs = document.getElementById('bugsend'); if (bs) bs.onclick = bugSend42;
+  dnSendWire42(); devTestWire42(); settingsWire42();
+}
+var _v31Boot42 = v31Boot;
+v31Boot = function () { _v31Boot42(); fix42Wire(); };
+/* dev notes say who wrote them too */
+function dnSendWire42() {
+  var b = document.getElementById('dn-send'); if (!b) return;
+  var old = b.onclick;
+  b.onclick = function () {
+    if (!(devOnSite() && DEV.ok) || DEV.who === 'LW') return old && old.call(b);
+    // Jay sending: same as before, labelled as Jay
+    var fresh = dnList().filter(function (n) { return !n.sent; }), msg = devEl('dn-msg');
+    if (!fresh.length) { msg.textContent = 'Every note has already been sent.'; return; }
+    msg.textContent = 'Sending...';
+    devBridge().call('send', { who: 'JAY', tool: 'Box-man dev notes', page: '/lw/boxman/', text: dnText(fresh).replace('Box-man dev notes from LW', 'Box-man dev notes from Jay') }).then(function (r) {
+      if (r && r.ok) { fresh.forEach(function (n) { n.sent = true; }); SAVE.save(); dnDraw(); msg.textContent = 'Sent. ' + fresh.length + ' note' + (fresh.length === 1 ? '' : 's') + '.'; AUD.sfx('pickup'); }
+      else dnCopy(fresh, 'Could not send just now, so they are copied instead.', true);
+    }, function () { dnCopy(fresh, 'Could not send just now, so they are copied instead.', true); });
+  };
+}
+
+/* ---------- 2 and 3. the Testing tab, behind the dev desk ---------- */
+(function () {
+  var st = document.createElement('style');
+  st.textContent = 'body:not(.devok) [data-stab="test"], body:not(.devok) .spane[data-pane="test"] { display: none !important; }';
+  document.head.appendChild(st);
+})();
+function devOkMark() { document.body.classList.toggle('devok', !!DEV.ok); }
+var _devCheck42 = devCheck;
+devCheck = function () { var p = _devCheck42(); p.then(devOkMark, devOkMark); return p; };
+function devTestWire42() {
+  var b = document.getElementById('dv-test'); if (!b) return;
+  b.onclick = function () {
+    if (!DEV.ok) return;
+    devOkMark(); devEl('t-settings').onclick();
+    setTimeout(function () { var s = document.querySelector('[data-stab="test"]'); if (s) s.click(); }, 30);
+  };
+}
+/* the skip ahead settings only count while the dev desk has let you in */
+var _testJump42 = testJump;
+testJump = function (opts) { if (!DEV.ok) return; return _testJump42(opts); };
+var _testStartLabel42 = testStartLabel;
+testStartLabel = function () { return DEV.ok ? _testStartLabel42() : ''; };
+/* if Settings was left on the Testing tab, open it on Play instead */
+function settingsWire42() {
+  var sb = document.getElementById('t-settings'); if (!sb) return;
+  var old = sb.onclick;
+  var fix = function () { if (DEV.ok) return; var cur = document.querySelector('.stab.sel'); if (cur && cur.dataset.stab === 'test') { var p = document.querySelector('[data-stab="play"]'); if (p) p.click(); } };
+  if (old) sb.onclick = function () { var r = old.apply(this, arguments); setTimeout(fix, 0); return r; };
+}
+
+/* ---------- 4. the defeat screen: a missed delivery card ---------- */
+var _deadTrack42 = deadTrack;
+deadTrack = function () {
+  _deadTrack42();
+  var trk = document.getElementById('deadtrack'), st = document.getElementById('deadstamp');
+  if (trk) { var em = trk.querySelector('.vt-head em.fail'); if (em) { em.textContent = 'DELIVERY ATTEMPTED'; em.classList.remove('fail'); em.classList.add('missed'); } }
+  if (st && st.innerHTML) st.innerHTML = '<b>SORRY WE<br>MISSED YOU</b><small>WE WILL TRY AGAIN</small>';
+};
+(function () {
+  var st = document.createElement('style');
+  st.textContent = '.vt-head em.missed { background: #f5c518; color: var(--ink); }';
+  document.head.appendChild(st);
+})();
+
+/* ---------- 5. free 3D props when they leave the room ---------- */
+function disposeEntMesh(m) {
+  if (!m) return;
+  m.traverse(function (o) {
+    if (o.geometry && !o.geometry.shared) o.geometry.dispose();
+    var ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+    ms.forEach(function (q) { if (q && q.dispose && !(q.userData && q.userData.shared)) { if (q.map && !(q.map.userData && q.map.userData.shared)) q.map.dispose(); q.dispose(); } });
+  });
+}
+var _removeEnt42 = removeEnt;
+removeEnt = function (e) { var m = e && e.mesh; _removeEnt42(e); if (m && !m.parent) disposeEntMesh(m); };
+
+/* ---------- 6. paint every criminal and boss while the menus are up ---------- */
+function warmExtra42() {
+  var keys = [];
+  try { Object.keys(EDEF).forEach(function (t) { var k = EDEF[t] && EDEF[t].key; if (k && keys.indexOf(k) < 0) keys.push(k); }); } catch (e) { }
+  ['cardboy', 'cardboyfists', 'dreamman', 'boxmanboss', 'boxman', 'todd', 'deadlie', 'chairman', 'chair_school', 'chair_arm', 'chair_deck', 'chair_throne', 'piano', 'critic', 'puppet'].forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); });
+  // only keep pictures that paint cleanly, so the menu queue never trips
+  return keys.filter(function (k) { try { SPR.frameCanvas(k, 0, 0); return true; } catch (e) { return false; } });
+}
+/* one picture at a time, a few times a second, only on menus and never during the opening */
+var WARM42 = null;
+setInterval(function () {
+  if (!G || !G.warmQ || G.warmQ.length || G.state === 'play' || (typeof CINE !== 'undefined' && (CINE.on || CINE.gate)) || document.hidden) return;
+  if (!WARM42) WARM42 = warmExtra42();
+  var k = WARM42.shift(); if (k) try { SPR.atlas(k, false); } catch (e) { }
+}, 300);
+
+/* ---------- 7. Dead guy's upgrade line ---------- */
+var _weaponUp42 = weaponUp;
+weaponUp = function () {
+  var s = _weaponUp42(); if (!s) return s;
+  return s.replace('Ghost hands, from the floor is now', 'His ghost hands are now');
+};
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {

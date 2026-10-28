@@ -17,7 +17,7 @@ window.B5FOLDER = {
     "id": "a-boxman",
     "title": "Box-man: Unboxed!",
     "href": "/lw/boxman/",
-    "note": "Your game, made from your film. You are the creative director, so play it, break it, and if anything should be different, say the word. There is an intro comic, Box-man mode once you finish a run, and a room designer in Extras."
+    "note": "Your game, made from your film. You are the creative director, so play it, break it, and if anything should be different, say the word. Every hero has a special on R. Box-man mode opens once you finish a run, and your dev desk in Extras has your notes, the art gallery, characters, rooms and music."
    },
    {
     "id": "a-idealab",
