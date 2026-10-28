@@ -484,11 +484,57 @@ function stamp(w, size){
 }
 
 /* ---------- the Chilton Bridge mark: a bridge in an orange circle ---------- */
-function mark(){
-  return '<svg class="cbsmark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="23" fill="#ef7724"/>' +
-    '<path d="M6 31h36" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M8 31q16-22 32 0" fill="none" stroke="#fff" stroke-width="2.6"/>' +
-    '<path d="M13 31v-7M18 31v-11M24 31v-13M30 31v-11M35 31v-7" stroke="#fff" stroke-width="1.8"/><path d="M11 35h26" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>';
+/* ---------- the Chilton Bridge School logo ----------
+   Drawn to match the school's own logo: an orange disc with a white
+   suspension bridge in perspective (near tower, far tower, cable and
+   hangers, deck), and CHILTON BRIDGE over SCHOOL in teal.
+     mark()          the circle on its own
+     logo(o)         circle and words: o.stack puts the words under the
+                     circle (as on the school's logo), o.ink colours the
+                     words (teal on light, white on dark)
+   Each part has a class (cbs-disc, cbs-near, cbs-far, cbs-cable,
+   cbs-deck, cbs-back) so the circle can be animated. */
+var markN = 0;
+function mark(cls){
+  var W = "#ffffff", id = "cbsclip" + (++markN), s = "", x;
+  s += '<svg class="' + (cls || "cbsmark") + '" viewBox="92 -6 492 492" role="img" aria-label="Chilton Bridge School" focusable="false">';
+  s += '<defs><clipPath id="' + id + '"><circle cx="338" cy="240" r="246"/></clipPath></defs>';
+  s += '<circle class="cbs-disc" cx="338" cy="240" r="243" fill="#ef7724"/>';
+  s += '<g clip-path="url(#' + id + ')" fill="none" stroke="' + W + '" stroke-linecap="round" stroke-linejoin="round">';
+  s += '<g class="cbs-far"><path d="M498 118L500 345M530 112L531 335" stroke-width="13"/><path d="M498 140H530M499 200H531M500 262H531M500 322H531" stroke-width="9"/></g>';
+  s += '<g class="cbs-cable"><path d="M268 34Q330 180 432 204Q478 210 514 116" stroke-width="11"/><path d="M514 116Q548 150 590 168" stroke-width="9"/>';
+  for(x = 292; x <= 496; x += 17){
+    var t = (x - 268) / (514 - 268), cy = (t < 0.66) ? 34 + 170 * Math.pow(t / 0.66, 0.62) : 204 - 88 * Math.pow((t - 0.66) / 0.34, 1.6);
+    s += '<path d="M' + x + ' ' + cy.toFixed(0) + 'V' + (400 - (x - 190) * 0.42).toFixed(0) + '" stroke-width="5.5"/>';
+  }
+  s += '</g><path class="cbs-back" d="M190 58Q150 210 100 318" stroke-width="10"/></g>';
+  s += '<g clip-path="url(#' + id + ')"><path class="cbs-deck" d="M100 358L586 212L588 228L104 394z" fill="' + W + '"/></g>';
+  s += '<g class="cbs-near" clip-path="url(#' + id + ')" fill="none" stroke="' + W + '" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M190 58L186 420M266 26L266 470" stroke-width="20"/><path d="M188 78H266M187 182H266M186 290H266" stroke-width="12"/>' +
+    '<path d="M190 84L262 176M190 186L262 286M188 296L262 380" stroke-width="9"/></g>';
+  return s + '</svg>';
 }
+function logo(o){
+  o = o || {};
+  var ink = o.ink || "#007291";
+  return '<span class="cbslogo' + (o.stack ? " stack" : "") + (o.cls ? " " + o.cls : "") + '" style="color:' + ink + '">' + mark() +
+    '<span class="cbsword" aria-hidden="true"><b>CHILTON BRIDGE</b><i>SCHOOL</i></span></span>';
+}
+var LOGO_CSS = '.cbslogo{display:inline-flex;align-items:center;gap:.6em;line-height:1}' +
+  '.cbslogo .cbsmark{width:2.6em;height:2.6em;flex:none}' +
+  '.cbslogo .cbsword{display:flex;flex-direction:column;align-items:center;gap:.22em;font-family:Montserrat,"Archivo",system-ui,sans-serif}' +
+  '.cbslogo .cbsword b{font-weight:600;letter-spacing:.01em;font-size:1em;white-space:nowrap}' +
+  '.cbslogo .cbsword i{font-style:normal;font-weight:400;letter-spacing:.32em;font-size:.62em;margin-right:-.32em}' +
+  '.cbslogo.stack{flex-direction:column;gap:.35em}.cbslogo.stack .cbsmark{width:2.4em;height:2.4em}';
+(function(){
+  if(typeof document === "undefined" || document.getElementById("cbsLogoCss")) return;
+  var st = document.createElement("style"); st.id = "cbsLogoCss"; st.textContent = LOGO_CSS;
+  (document.head || document.documentElement).appendChild(st);
+  if(!document.querySelector('link[href*="family=Montserrat"]')){
+    var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap";
+    (document.head || document.documentElement).appendChild(l);
+  }
+})();
 
 /* ---------- readable colours ----------
    safe(look) gives back the week's colours nudged just enough that
@@ -517,5 +563,5 @@ function safe(L){
 
 function inner(name, f, d){ return paint(I[name] || I.star, f, d || f); }
 
-window.B5CCArt = { icon: icon, inner: inner, safe: safe, contrast: contrast, pick: pick, vignette: vignette, ideaArt: ideaArt, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
+window.B5CCArt = { logo: logo, icon: icon, inner: inner, safe: safe, contrast: contrast, pick: pick, vignette: vignette, ideaArt: ideaArt, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
 })();

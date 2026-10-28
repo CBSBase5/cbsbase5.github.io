@@ -98,7 +98,7 @@ function load(cb){
   if(window.B5CC && window.B5CCArt && window.B5CCScenes){ cb(); return; }
   if(!loading){
     loading = [];
-    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=6", "/cc/cc-scenes.js?v=8"], i = 0;
+    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=7", "/cc/cc-scenes.js?v=8"], i = 0;
     (function next(){
       if(i >= files.length){ var q = loading; loading = null; q.forEach(function(f){ f(); }); return; }
       var s = document.createElement("script"); s.src = files[i++]; s.onload = next;
