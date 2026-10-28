@@ -355,8 +355,15 @@ function fireworks(canvas, colours){
 }
 
 /* ---------- the mystery box ---------- */
+function lumOf(hex){
+  var h = String(hex).replace("#", ""); if(h.length !== 6) return 1;
+  var c = [0, 2, 4].map(function(i){ var v = parseInt(h.substr(i, 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
 function box(w){
-  var L = w.look;
+  /* the box needs a colour the dark question marks show up on */
+  var L0 = w.look, pick = [L0.pop, L0.pop2, "#ffd166"].filter(function(c){ return lumOf(c) > 0.18; });
+  var L = { pop: pick[0] || "#ffd166", pop2: pick[1] || "#ff4f81" };
   return '<svg class="mbox" viewBox="0 0 200 190" aria-hidden="true" focusable="false">' +
     '<ellipse cx="100" cy="178" rx="78" ry="9" fill="rgba(0,0,0,.28)"/>' +
     '<g class="mbody"><rect x="30" y="78" width="140" height="96" rx="8" fill="' + L.pop + '" stroke="#0a2f38" stroke-width="5"/>' +

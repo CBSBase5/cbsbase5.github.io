@@ -27,8 +27,9 @@
                motif     the big picture (an icon name)
                pattern   dots, rays, stripes, confetti,
                          stars, waves, grid, snow
-               scene     a hand drawn scene, if the week has one
-                         (only "festivals" so far)
+               scene     a hand drawn scene from /cc/cc-scenes.js
+               effect    a live layer: fireworks, snow, petals, confetti
+               fx        the colours for the effect
 
    Icons are the names drawn in /cc/cc-art.js.
    Plain ASCII only. Use ' for apostrophes.
@@ -428,7 +429,7 @@ window.B5CC = {
       /* Deep Diya goes here when it is ready:
          game:{ title:"Deep Diya", href:"/practice/deep-diya.html", verb:"Play", blurb:"..." }, */
       game:null,
-      look:{ bg:"#140a2e", bg2:"#3a1460", ink:"#fff7e6", pop:"#ffb627", pop2:"#ff4f81", motif:"diya", pattern:"stars", scene:"festivals" }
+      look:{ bg:"#140a2e", bg2:"#3a1460", ink:"#fff7e6", pop:"#ffb627", pop2:"#ff4f81", motif:"diya", pattern:"stars", scene:"festivals", effect:"fireworks", fx:["#ffb627","#ff4f81","#2ec4b6","#fff7e6","#a86bff"] }
     },
     {
       id:"remembrance", half:"a2", start:"2026-11-09", end:"2026-11-13",
@@ -445,7 +446,7 @@ window.B5CC = {
       link:["Armistice Day, Royal British Legion","https://www.britishlegion.org.uk/get-involved/remembrance/armistice-day"],
       jobs:["firefighter","paramedic","sailor","fundraiser"],
       game:null,
-      look:{ bg:"#a4161a", bg2:"#d90429", ink:"#ffffff", pop:"#161a1d", pop2:"#f5ebe0", motif:"poppy", pattern:"dots" }
+      look:{ bg:"#a4161a", bg2:"#d90429", ink:"#ffffff", pop:"#161a1d", pop2:"#f5ebe0", motif:"poppy", pattern:"dots", scene:"remembrance", effect:"petals", fx:["#d90429","#ef233c","#a4161a"] }
     },
     {
       id:"anti-bullying", half:"a2", start:"2026-11-16", end:"2026-11-20",
@@ -462,7 +463,7 @@ window.B5CC = {
       link:["Anti-Bullying Alliance","https://anti-bullyingalliance.org.uk/"],
       jobs:["advocate","onlinesafe","psych","safeguard"],
       game:null,
-      look:{ bg:"#0077b6", bg2:"#00b4d8", ink:"#ffffff", pop:"#ffd60a", pop2:"#ff006e", motif:"megaphone", pattern:"stripes" }
+      look:{ bg:"#0077b6", bg2:"#00b4d8", ink:"#ffffff", pop:"#ffd60a", pop2:"#ff006e", motif:"megaphone", pattern:"stripes", scene:"antibullying" }
     },
     {
       id:"giving-tuesday", half:"a2", start:"2026-11-23", end:"2026-11-27",
@@ -478,7 +479,7 @@ window.B5CC = {
       ],
       jobs:["fundraiser","volunteer","wildlife","community"],
       game:null,
-      look:{ bg:"#ffbe0b", bg2:"#ffd166", ink:"#2b0f6b", pop:"#fb5607", pop2:"#3a86ff", motif:"gift", pattern:"confetti" }
+      look:{ bg:"#ffbe0b", bg2:"#ffd166", ink:"#2b0f6b", pop:"#fb5607", pop2:"#3a86ff", motif:"gift", pattern:"confetti", scene:"giving", effect:"confetti", fx:["#fb5607","#3a86ff","#ff006e","#8338ec"] }
     },
     {
       id:"christmas-around-the-world", half:"a2", start:"2026-11-30", end:"2026-12-04",
@@ -494,7 +495,7 @@ window.B5CC = {
       ],
       jobs:["baker","musician","travel","photo2"],
       game:null,
-      look:{ bg:"#0b6e4f", bg2:"#08a045", ink:"#ffffff", pop:"#e63946", pop2:"#ffd166", motif:"tree", pattern:"snow" }
+      look:{ bg:"#0b6e4f", bg2:"#08a045", ink:"#ffffff", pop:"#e63946", pop2:"#ffd166", motif:"tree", pattern:"snow", scene:"christmas", effect:"snow", fx:["#ffffff"] }
     },
     {
       id:"steam-for-good", half:"a2", start:"2026-12-07", end:"2026-12-11",
@@ -510,7 +511,7 @@ window.B5CC = {
       ],
       jobs:["engineer","developer","designer","envsci"],
       game:null,
-      look:{ bg:"#3a0ca3", bg2:"#4361ee", ink:"#ffffff", pop:"#4cc9f0", pop2:"#f72585", motif:"gear", pattern:"grid" }
+      look:{ bg:"#3a0ca3", bg2:"#4361ee", ink:"#ffffff", pop:"#4cc9f0", pop2:"#f72585", motif:"gear", pattern:"grid", scene:"steam" }
     },
 
     /* ======================= SPRING 1 (draft dates) ======================= */
