@@ -536,6 +536,20 @@ body{font-family:'DDigits','Pixelify Sans',monospace;font-synthesis:none;font-va
 .xdots i.day{background:#6a4a26}.xdots i.night{background:#26406a}
 .xdots i.on{background:var(--gold)!important}
 .xgrid{grid-template-columns:repeat(4,150px)!important}
+.bzshelf .gcard{overflow:visible!important}
+.bzshelf .gcard::after{display:none!important}
+.bzshelf .gcard .pips{top:6px!important;right:8px!important}
+.bznew{top:-10px!important;right:auto!important;left:50%;margin-left:-22px;z-index:4}
+.bzpick{top:-11px!important;left:-9px!important;z-index:4}
+#gear.wd .gcard{height:60px!important;padding:2px 3px!important;box-sizing:border-box}
+#gear.wd .gcard img{width:22px!important;height:22px!important}
+#gear.wd canvas.pcv{width:24px!important;height:24px!important}
+#gear.wd .gcard .gn{font-size:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.15}
+#gear.wd .gcard .gp{font-size:12px!important;line-height:1.1}
+#gear.wd .gcard .gp img.gc{width:12px!important;height:12px!important}
+#tip.low{top:auto;bottom:10px;left:auto;right:14px;margin-left:0}
+@keyframes tipInLow{0%{opacity:0;transform:translateY(14px);filter:brightness(2)}100%{opacity:1;transform:none;filter:none}}
+#tip.low.in{animation-name:tipInLow}
 @keyframes stamp{0%{transform:translate(-50%,-50%) rotate(-12deg) scale(2.4);opacity:0}100%{transform:translate(-50%,-50%) rotate(-12deg) scale(1);opacity:1}}
 #extras .xbox.wide{padding-top:8px!important}
 #extras .xline{margin-top:6px!important;font-size:22px!important}
@@ -10307,7 +10321,7 @@ var TIPS = [
     pic: [['i', 'coin'], ['a'], ['i', 'g_flip'], ['i', 'g_bag'], ['i', 'g_brass'], ['a'], ['i', 'bob', 2]],
     say: 'Spend coins on things for the dive. Nani\'s pick is a good start.',
     why: ['g_brass', 'Dhanteras, two days before Diwali, is a day for buying something new, often metal pots or a lamp.'],
-    when: function (s) { return s.mode === 'gear' && !s.sub && !s.wardrobe; }, done: function (s) { return s.mode !== 'gear'; }, life: 12 },
+    when: function (s) { return s.mode === 'gear' && !s.sub && !s.wardrobe; }, done: function (s) { return s.mode !== 'gear' || !!s.sub || !!s.wardrobe; }, life: 12, low: true },
   /* ---------- night: the sea ---------- */
   { id: 'light', at: 'dive', name: 'Your light',
     pic: [['i', 'lamp', 0, 'glow'], ['t', 'full'], ['a'], ['i', 'lamp', 0, 'dim'], ['t', 'low'], ['a'], ['i', 'nani', 9]],
@@ -10384,7 +10398,7 @@ var TIPUI = {
     e.addEventListener('click', function () { TIPUI.close(true); });
     return (this.el = e);
   },
-  show: function (t) { var e = this.ensure(); this.cur = t; this.t = 0; e.innerHTML = '<span class="tpx">&times;</span>' + tipCardHTML(t); e.classList.remove('hide', 'out'); e.classList.toggle('warm', t.at === 'shop'); void e.offsetWidth; e.classList.add('in'); if (AU.ctx) { AU.tone(988, .12, 'triangle', .035); AU.tone(1319, .18, 'triangle', .03, .08); } logStat('tip', { id: t.id }); },
+  show: function (t) { var e = this.ensure(); this.cur = t; this.t = 0; e.innerHTML = '<span class="tpx">&times;</span>' + tipCardHTML(t); e.classList.remove('hide', 'out'); e.classList.toggle('warm', t.at === 'shop'); e.classList.toggle('low', !!t.low); void e.offsetWidth; e.classList.add('in'); if (AU.ctx) { AU.tone(988, .12, 'triangle', .035); AU.tone(1319, .18, 'triangle', .03, .08); } logStat('tip', { id: t.id }); },
   close: function (seen) {
     if (!this.cur) return; var e = this.ensure(), t = this.cur;
     if (seen) { G.tips = G.tips || {}; G.tips[t.id] = 1; writeSave(); }
