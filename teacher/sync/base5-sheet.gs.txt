@@ -1685,23 +1685,30 @@ function ccCounts_(r){
   try{ me = ccPerson_(); }catch(e){}
   var cache = CacheService.getScriptCache(), key = "cc.v1." + a.week, hit = cache.get(key), base = null;
   if(hit){ try{ base = JSON.parse(hit); }catch(e0){} }
-  var mine = [];
+  var mine = [], mineAll = {};
   if(!base || me){
     var v = rows_("CC counts"), counts = {}, people = {};
     for(var i = 1; i < v.length; i++){
-      if(String(v[i][0]) !== a.week || !ticked_(v[i][3])) continue;
+      if(!ticked_(v[i][3])) continue;
+      var wk = String(v[i][0]), mineRow = me && String(v[i][2]) === me;
+      /* everything this person has on, every week, so a new device can catch up */
+      if(mineRow && r.all){ (mineAll[wk] = mineAll[wk] || []).push(String(v[i][1])); }
+      if(wk !== a.week) continue;
       counts[v[i][1]] = (counts[v[i][1]] || 0) + 1;
       people[v[i][2]] = 1;
-      if(me && String(v[i][2]) === me) mine.push(String(v[i][1]));
+      if(mineRow) mine.push(String(v[i][1]));
     }
     if(!base){ base = { counts: counts, people: Object.keys(people).length }; try{ cache.put(key, JSON.stringify(base), 60); }catch(e1){} }
   }
-  return { ok: true, week: a.week, counts: base.counts, people: base.people, mine: mine, signedIn: !!me };
+  var out = { ok: true, week: a.week, counts: base.counts, people: base.people, mine: mine, signedIn: !!me };
+  if(r.all && me) out.mineAll = mineAll;
+  return out;
 }
 function ccTick_(r){
   var a = ccArgs_(r);
   if(!a.item) throw new Error("bad item");
-  var me = ccPerson_(), on = r.on !== false, sh = ccTab_(), v = sh.getDataRange().getValues(), now = new Date();
+  var me = ccPerson_(), on = r.on === true, sh = ccTab_(), v = sh.getDataRange().getValues(), now = new Date(), n = 0;
+  for(var j = 1; j < v.length; j++) if(String(v[j][2]) === me) n++;
   for(var i = 1; i < v.length; i++){
     if(String(v[i][0]) === a.week && String(v[i][1]) === a.item && String(v[i][2]) === me){
       sh.getRange(i + 1, 4, 1, 2).setValues([[on, now]]);
@@ -1709,6 +1716,8 @@ function ccTick_(r){
       return ccCounts_(r);
     }
   }
+  /* a year is about 35 weeks of up to 6 things each; anything past that is not a real person having goes */
+  if(on && n >= 260) throw new Error("too many");
   if(on) sh.appendRow([a.week, a.item, me, true, now]);
   try{ CacheService.getScriptCache().remove("cc.v1." + a.week); }catch(e2){}
   return ccCounts_(r);

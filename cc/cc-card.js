@@ -57,13 +57,22 @@ function lum(hex){
 function pad(n){ return (n < 10 ? "0" : "") + n; }
 function todayIso(){ var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
 
+/* The same rule as /cc/: the week we are in; in a listed holiday (or
+   before the first week) the next one; otherwise the most recent.
+   w.ccMode says which: "now", "next" or "last". */
 function week(iso){
   var C = window.B5CC; if(!C) return null;
   iso = iso || todayIso();
-  var now = C.weeks.filter(function(w){ return w.start <= iso && iso <= w.end; })[0];
-  if(now) return now;
-  return C.weeks.filter(function(w){ return w.start > iso; })[0] || null;
+  var W = C.weeks, i, prev = null;
+  var now = W.filter(function(w){ return w.start <= iso && iso <= w.end; })[0];
+  if(now) return tag(now, "now");
+  var hol = (C.holidays || []).filter(function(h){ return h.from <= iso && iso <= h.to; })[0];
+  var next = W.filter(function(w){ return w.start > iso; })[0];
+  for(i = 0; i < W.length; i++) if(W[i].end < iso) prev = W[i];
+  if(next && (hol || !prev)) return tag(next, "next");
+  return prev ? tag(prev, "last") : null;
 }
+function tag(w, mode){ var o = {}, k; for(k in w) o[k] = w[k]; o.ccMode = mode; return o; }
 
 function html(w, o){
   o = o || {};
@@ -89,7 +98,7 @@ function load(cb){
   if(window.B5CC && window.B5CCArt && window.B5CCScenes){ cb(); return; }
   if(!loading){
     loading = [];
-    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=4", "/cc/cc-scenes.js?v=8"], i = 0;
+    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=6", "/cc/cc-scenes.js?v=8"], i = 0;
     (function next(){
       if(i >= files.length){ var q = loading; loading = null; q.forEach(function(f){ f(); }); return; }
       var s = document.createElement("script"); s.src = files[i++]; s.onload = next;

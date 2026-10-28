@@ -162,6 +162,100 @@ I.firework = (function(){
   return s + '<circle cx="24" cy="22" r="3" fill="F"/>';
 })();
 
+/* ---------- more everyday things, for the pictures on ideas ---------- */
+I.paper = '<path d="M10 4h20l10 10v30H10z" fill="F"/><path d="M30 4v10h10" fill="D" opacity=".5"/><path d="M16 22h18M16 29h18M16 36h12" ' + sk("D",2.5) + '/>';
+I.tape = '<circle cx="20" cy="24" r="15" fill="F"/><circle cx="20" cy="24" r="6.5" fill="D"/><path d="M20 39h24v-8H30" fill="F"/><path d="M38 31l3 4 3-4" ' + sk("D",1.8) + '/>';
+I.timer = '<rect x="20" y="3" width="8" height="5" rx="1.5" fill="F"/><circle cx="24" cy="27" r="18" fill="F"/><circle cx="24" cy="27" r="13" fill="D"/><path d="M24 27V18M37 11l3-3" ' + sk("F",3.5) + '/><circle cx="24" cy="27" r="2.5" fill="F"/>';
+I.ruler = '<rect x="2" y="17" width="44" height="14" rx="2" fill="F"/><path d="M8 17v6M14 17v4M20 17v6M26 17v4M32 17v6M38 17v4" ' + sk("D",2) + '/>';
+I.seed = '<path d="M12 30h24l-4 15H16z" fill="F"/><rect x="10" y="27" width="28" height="6" rx="2" fill="F"/><path d="M24 27V15" ' + sk("D",3) + ' stroke="D"/><path d="M24 17q-12-2-12-12q12 0 12 12zM24 15q10-4 12-12q-12 0-12 12z" fill="D"/>';
+I.flag = '<path d="M10 44V4" ' + sk("F",4) + '/><path d="M12 6h26l-6 9 6 9H12z" fill="F"/>';
+I.bulb = '<path d="M13 21a11 11 0 1 1 22 0c0 6-5 8-5 14H18c0-6-5-8-5-14z" fill="F"/><rect x="17" y="37" width="14" height="4" rx="1.5" fill="F"/><rect x="19" y="42" width="10" height="3" rx="1.5" fill="F"/><path d="M20 26l2-6 2 4 2-4 2 6" ' + sk("D",2) + '/>';
+I.bowl = '<path d="M4 20h40a20 20 0 0 1-40 0z" fill="F"/><path d="M14 16q3-8 10-8t10 8" ' + sk("F",3) + '/><circle cx="18" cy="15" r="3" fill="F"/><circle cx="28" cy="13" r="3" fill="F"/>';
+I.calc = '<rect x="9" y="3" width="30" height="42" rx="4" fill="F"/><rect x="13" y="8" width="22" height="9" rx="1.5" fill="D"/><g fill="D"><rect x="13" y="21" width="6" height="5" rx="1"/><rect x="21" y="21" width="6" height="5" rx="1"/><rect x="29" y="21" width="6" height="5" rx="1"/><rect x="13" y="29" width="6" height="5" rx="1"/><rect x="21" y="29" width="6" height="5" rx="1"/><rect x="29" y="29" width="6" height="13" rx="1"/><rect x="13" y="37" width="14" height="5" rx="1"/></g>';
+I.thumb = '<path d="M14 22h-6v20h6zM17 22l7-15q5 0 5 6l-1 7h11q4 1 3 5l-3 13q-1 4-5 4H17z" fill="F"/>';
+I.sticker = '<path d="' + pts(6, 20, 13, 24, 24) + '" fill="F"/><circle cx="24" cy="24" r="7" fill="D"/>';
+I.bag = '<path d="M9 16h30l3 28H6z" fill="F"/><path d="M17 20v-7a7 7 0 0 1 14 0v7" ' + sk("F",3) + '/><circle cx="17" cy="21" r="2" fill="D"/><circle cx="31" cy="21" r="2" fill="D"/>';
+
+/* ---------- words to pictures ----------
+   pick(text) gives the pictures that match the words in some text,
+   best match first. Used for the ideas, their steps and what they need. */
+var WORDS = [
+  ["scissor|cut ", "scissors"], ["tape|glue|stick ", "tape"], ["timer|minute|second", "timer"], ["ruler|measure|length|string", "ruler"],
+  ["paper|sheet|card |cards|envelope", "paper"], ["pen |pens|pencil|draw|sketch|write|writing|poem|word", "pencil"],
+  ["paint|colour|chalk|crayon|artwork|art ", "palette"], ["sticker|badge", "sticker"], ["seed|soil|plant|grow|pot ", "seed"],
+  ["flag", "flag"], ["idea|predict|guess|invent", "bulb"], ["rice|bowl|tray", "bowl"], ["sum|digit|number|count|maths|divide|calculat", "calc"],
+  ["thumbs|rate |rating|vote |voting", "thumb"], ["bag|shopping|pack ", "bag"], ["lantern|tea light|led ", "lantern"],
+  ["torch|shadow|light", "torch"], ["rangoli|pattern|symmetr", "rangoli"], ["marigold|flower|rose|petal", "flower"], ["poppy|poppies", "poppy"],
+  ["song|music|playlist|dance|sing", "music"], ["phone|app |apps|screenshot|online|message", "phone"], ["photo|picture|camera|image", "camera"],
+  ["map|country|countries|island|coast|route", "map"], ["world|globe|tradition", "globe"], ["walk|lap |run |jump|shoe|trainer|course", "shoe"],
+  ["heart|feel|calm|kind|care", "heart"], ["interview|record|read it out|out loud|pitch", "mic"], ["talk|tell|say|ask|chat|question|listen|debate|explain|share", "speech"],
+  ["book|story|stories|read", "book"], ["film|watch|clip|video", "film"], ["food|taste|eat|snack|cook|dish|recipe|bake|crumble|scone|pie", "chefhat"],
+  ["water|drink|bottle", "glass"], ["leaf|garden|green|outside|nature", "leaf"], ["tree|forest|log", "tree"], ["litter|bin|rubbish|waste|recycl", "bin"],
+  ["plastic", "bottle"], ["money|pound|budget|donat|fundrais|raise|coin|sponsor", "coin"], ["ballot|vote", "ballot"],
+  ["test|experiment|dry ice|science|fog", "flask"], ["build|tower|model|junk|prototype", "toolbox"], ["chart|graph|table|results", "chart"],
+  ["search|find|spot|look|research|check", "search"], ["team|group|friend|everyone|partner|people|together", "people"], ["adult|teacher|someone", "people"],
+  ["hand|sign|gesture|fingerspell|mime", "hand"], ["star|constellation|sky", "star"], ["moon", "moon"], ["rocket|space|mission|astronaut", "rocket"],
+  ["sea|ocean|wave|shell|sand", "wave"], ["fish|creature", "fish"], ["dragon", "dragon"], ["gift|present|give", "gift"], ["smile|joke|funny|laugh|silly|groan", "smile"],
+  ["door|welcome|room|first day|new ", "door"], ["list|plan|pledge|resolution|tick", "list"], ["letter|thank|card for|post", "letter"],
+  ["password|lock|privacy|setting|secret", "padlock"], ["robot|ai ", "robot"], ["computer|laptop|game maker|level|virtual|website", "laptop"],
+  ["dice|random|board game|games", "dice"], ["balloon", "balloon"], ["rainbow", "rainbow"], ["mask|act |acting|scene|shakespeare|theatre|play a scene", "mask"],
+  ["clock|time|midnight|11am", "clock"], ["horse", "horse"], ["bridge", "bridge"], ["gear|engine|machine|fix|repair", "gear"], ["hard hat|job|work|apprentice", "hardhat"],
+  ["safe|shield|protect|report", "shield"], ["helmet|serve|soldier|fire", "helmet"], ["cup|tea ", "cup"], ["telescope", "telescope"], ["key ", "key"]
+].map(function(w){ return [new RegExp("(^|[^a-z])(" + w[0].split("|").map(function(x){ return x.replace(/ /g, "(?:[^a-z]|$)"); }).join("|") + ")", "i"), w[1]]; });
+function pick(text, not){
+  var out = [], t = " " + String(text || "").toLowerCase() + " ";
+  WORDS.forEach(function(w){
+    var m = w[0].exec(t);
+    if(m && out.indexOf(w[1]) < 0 && (!not || not.indexOf(w[1]) < 0)) out.push([m.index, w[1]]);
+  });
+  return out.sort(function(a, b){ return a[0] - b[0]; }).map(function(x){ return x[1]; }).filter(function(v, i, a){ return a.indexOf(v) === i; });
+}
+
+/* ---------- a small drawn scene for an idea ----------
+   vignette(main, props, look, wide): the idea's own picture big in
+   the middle, the things it uses around it, sparkles and a little
+   ground, all in the week's colours. */
+function vignette(main, props, L, wide, seed){
+  var w = wide ? 400 : 200, h = 120, r = rng(hashOf(main + (props || []).join() + (seed || ""))), s, i;
+  s = '<svg class="vg" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">';
+  s += '<rect width="' + w + '" height="' + h + '" fill="' + L.bg + '"/>';
+  /* soft rays behind the main picture */
+  var cx = w / 2, cy = 58, ray = "";
+  for(i = 0; i < 12; i++){ var a = i * Math.PI / 6 + r() * 0.2; ray += "M" + cx + " " + cy + "L" + (cx + Math.cos(a - 0.12) * 160).toFixed(0) + " " + (cy + Math.sin(a - 0.12) * 160).toFixed(0) + "L" + (cx + Math.cos(a + 0.12) * 160).toFixed(0) + " " + (cy + Math.sin(a + 0.12) * 160).toFixed(0) + "z"; }
+  s += '<g class="vg-rays" style="transform-origin:' + cx + 'px ' + cy + 'px"><path d="' + ray + '" fill="' + L.pop2 + '" opacity=".16"/></g>';
+  s += '<ellipse cx="' + cx + '" cy="' + (h + 18) + '" rx="' + (w * 0.62) + '" ry="40" fill="' + L.bg2 + '"/>';
+  s += '<circle class="vg-ring" style="transform-origin:' + cx + 'px ' + cy + 'px" cx="' + cx + '" cy="' + cy + '" r="40" fill="' + L.pop2 + '" opacity=".38"/>';
+  /* the things it uses */
+  var spots = wide
+    ? [[64, 60, 40, -10], [318, 46, 38, 8], [118, 18, 28, 12], [272, 84, 30, -8], [30, 16, 22, 0], [362, 92, 22, 0]]
+    : [[20, 60, 36, -10], [150, 46, 30, 9], [148, 84, 26, -6], [14, 12, 22, 6]];
+  (props || []).slice(0, spots.length).forEach(function(p, k){
+    var sp = spots[k], col = k % 2 ? L.pop : "#fffdf8", det = k % 2 ? L.bg : L.bg;
+    /* each thing floats on its own beat; the outer group moves, the inner one places it */
+    s += '<g class="vg-float ' + (k % 3 === 1 ? "vg-wob" : "") + '" style="animation-duration:' + (2.2 + r() * 1.6).toFixed(2) + 's;animation-delay:' + (-r() * 3).toFixed(2) + 's;transform-origin:' + (sp[0] + sp[2] / 2) + 'px ' + (sp[1] + sp[2] / 2) + 'px">' +
+      '<g transform="translate(' + sp[0] + ' ' + sp[1] + ') rotate(' + sp[3] + ' ' + (sp[2] / 2) + ' ' + (sp[2] / 2) + ') scale(' + (sp[2] / 48).toFixed(3) + ')">' +
+      '<g transform="translate(2.5 3)" opacity=".28">' + paint(I[p] || I.star, "#000", "#000") + '</g>' + paint(I[p] || I.star, col, det) + '</g></g>';
+  });
+  /* the main picture */
+  var ms = 74;
+  s += '<g class="vg-main" style="transform-origin:' + cx + 'px ' + (cy + ms / 2) + 'px"><g transform="translate(' + (cx - ms / 2) + ' ' + (cy - ms / 2 - 4) + ') scale(' + (ms / 48).toFixed(3) + ')">' +
+    '<g transform="translate(3 3.5)" opacity=".3">' + paint(I[main] || I.star, "#000", "#000") + '</g>' + paint(I[main] || I.star, L.pop, L.bg) + '</g></g>';
+  /* sparkles */
+  for(i = 0; i < (wide ? 5 : 3); i++){
+    var sx = 12 + r() * (w - 24), sy = 8 + r() * 50;
+    if(Math.abs(sx - cx) < 46 && sy > 14) sx = (sx < cx ? sx - 50 : sx + 50);
+    s += '<path class="vg-sp" style="animation-delay:' + (-r() * 3).toFixed(1) + 's;transform-origin:' + sx.toFixed(0) + 'px ' + sy.toFixed(0) + 'px" d="M' + sx.toFixed(0) + ' ' + (sy - 6).toFixed(0) + 'l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z" fill="' + (i % 2 ? L.pop : "#fffdf8") + '"/>';
+  }
+  return s + '</svg>';
+}
+/* the picture for one idea: its own icon, then whatever its words and kit suggest */
+function ideaArt(t, L, wide){
+  var words = [t.t].concat(t.need || [], t.steps || []).join(" . ");
+  var props = pick(words, [t.i]);
+  if(props.length < 3) ["sticker", "star", "heart"].forEach(function(x){ if(props.length < 3 && props.indexOf(x) < 0 && x !== t.i) props.push(x); });
+  return vignette(t.i, props, L, wide, t.t);
+}
+
 function paint(svgInner, f, d){
   return svgInner.replace(/"F"/g, '"' + f + '"').replace(/"D"/g, '"' + (d || f) + '"');
 }
@@ -423,5 +517,5 @@ function safe(L){
 
 function inner(name, f, d){ return paint(I[name] || I.star, f, d || f); }
 
-window.B5CCArt = { icon: icon, inner: inner, safe: safe, contrast: contrast, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
+window.B5CCArt = { icon: icon, inner: inner, safe: safe, contrast: contrast, pick: pick, vignette: vignette, ideaArt: ideaArt, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
 })();
