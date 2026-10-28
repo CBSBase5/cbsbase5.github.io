@@ -7,6 +7,18 @@ function ext(col, n, dark){
 function T(txt, style){ return '<span style="display:inline-block;'+style+'">'+txt+'</span>'; }
 
 var COVERS = {
+  "deep-diya": {
+    vars:{base:"#16123a",base2:"#0b0a24",accent:"#ffb627",sub:"#ffd27a",ribbon:"#ff4f81",ribbonInk:"#16123a",s1:"#ffb627",s2:"#3ff0d0",s3:"#ff4f81"},
+    chip:"PIXEL",
+    title:T("DEEP DIYA","font:700 104px/1 Silk;color:#ffd27a;"+ext("#c2551f",8,"#000")),
+    sub:"SHOP BY DAY, SEA BY NIGHT",
+    ribbon:"SERVE &middot; DIVE &middot; LIGHT",
+    burst:["7","NIGHTS!"],
+    tag:"A FESTIVALS OF LIGHT GAME",
+    small:"Help Nani's shop and bring the light back for Diwali.",
+    players:"1<br>PLAYER",
+    spine:T("DEEP DIYA","font:700 46px/1 Silk;color:#ffd27a;"+ext("#c2551f",4,"#000"))
+  },
   "its-time": {
     vars:{base:"#1d1a4a",base2:"#120f33",accent:"#ff9a3c",sub:"#ffd27a",ribbon:"#ff9a3c",ribbonInk:"#1a1238",s1:"#ff9a3c",s2:"#ffd27a",s3:"#7fd6ff"},
     chip:"ARCADE", shot:"its-time-alt-gatesmash", shotStyle:"object-position:12% 50%",

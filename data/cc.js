@@ -428,9 +428,7 @@ window.B5CC = {
         {"i":"scales","t":"Compare two festivals","mins":15,"need":[],"steps":["Pick two: Diwali, Day of the Dead or Bonfire Night.","Find out what each one is for.","Spot one thing that is the same and one that is different."],"easier":"Just find the thing that is the same.","bigger":"Make a Venn diagram poster.","why":"Diwali is celebrated by Hindus, Sikhs and Jains. Bonfire Night remembers the failed plot of 1605."}
       ],
       jobs:["chef","photo","events","museum2"],
-      /* Deep Diya goes here when it is ready:
-         game:{ title:"Deep Diya", href:"/practice/deep-diya.html", verb:"Play", blurb:"..." }, */
-      game:null,
+      game:{ title:"Deep Diya", href:"/practice/deep-diya.html", verb:"Play", blurb:"Run Nani's sweet shop by day, then dive the dark sea by night to bring the light back for Diwali." },
       look:{ bg:"#140a2e", bg2:"#3a1460", ink:"#fff7e6", pop:"#ffb627", pop2:"#ff4f81", motif:"diya", pattern:"stars", scene:"festivals", effect:"fireworks", fx:["#ffb627","#ff4f81","#2ec4b6","#fff7e6","#a86bff"] }
     },
     {

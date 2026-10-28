@@ -90,6 +90,12 @@ window.B5GAMES = {
       tags:["make","learning"], added:"2026-10-12", art:"/practice/jump-lab-art/box.webp", fill:"bright", motif:"blocks", year:"Whenever you make it"
     },
     {
+      id:"deep-diya", title:"Deep Diya", href:"/practice/deep-diya.html",
+      blurb:"Run Nani's mithai shop by day, then dive a dark sea by night with a lantern to find lost recipes, hidden secrets and the old story of Diwali.",
+      meta:"For Festivals of Light &middot; seven nights &middot; saves on this device",
+      tags:["cc","fun"], added:"2026-10-28", art:"/games/art/deep-diya/box.webp", fill:"plum", motif:"stars", year:"Seven nights to Diwali"
+    },
+    {
       id:"sankofa", title:"Sankofa", href:"/practice/sankofa.html",
       blurb:"Fly the Sankofa bird back through Black British history to the Windrush in 1948. Find the lost eggs and read the true story inside each one.",
       meta:"For Black History Month &middot; 30 true stories &middot; five eras",
