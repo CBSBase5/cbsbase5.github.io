@@ -1251,6 +1251,7 @@ body.calm #specwrap.ready canvas { animation: none; }
       <p class="devwho"><span id="dev-who"></span></p>
       <div class="moregrid devgrid">
         <button class="btn mcard" id="dv-notes" data-nav><span class="mc-t">Dev notes</span><small>Ideas, bugs and things to do.</small></button>
+        <button class="btn mcard" id="dv-art" data-nav><span class="mc-t">Art pass</span><small>Old look, new look. Leave notes.</small></button>
         <button class="btn mcard" id="dv-chars" data-nav><span class="mc-t">Character designer</span><small>Make a new hero or criminal.</small></button>
         <button class="btn mcard" id="dv-music" data-nav><span class="mc-t">Music maker</span><small>Make a tune. Put it in a level.</small></button>
         <button class="btn mcard" id="dv-rooms" data-nav><span class="mc-t">Room designer</span><small>Build a room. It turns up in runs.</small></button>
@@ -1263,6 +1264,16 @@ body.calm #specwrap.ready canvas { animation: none; }
   </div>
 </section>
 
+<section id="devart" class="screen">
+  <div class="panel wide devpanel">
+    <span class="tape">ART PASS</span><h2>Before and after</h2>
+    <p class="devwho">Every character, old look on the left, new look on the right. Leave a note on any of them.</p>
+    <div class="row2" id="da-tabs"><button class="btn small sel" data-dat="heroes" data-nav>Heroes</button><button class="btn small" data-dat="crims" data-nav>Criminals</button><button class="btn small" data-dat="bosses" data-nav>Bosses</button><button class="btn small" id="da-pose" data-nav>Pose: standing</button></div>
+    <div id="da-grid"></div>
+    <p id="da-msg" class="devwho"></p>
+    <button class="btn" id="da-back" data-nav data-back>Back to the desk</button>
+  </div>
+</section>
 <section id="devnotes" class="screen">
   <div class="panel wide">
     <span class="tape">DEV ONLY</span><h2>Dev notes</h2>
@@ -1410,6 +1421,7 @@ body.calm #specwrap.ready canvas { animation: none; }
    ramp (hue shifted shadows and highlights), lit from the top left, with contact
    shadows where parts overlap and a selective outline around the whole figure. */
 var SPR = (function () {
+  var ART = { on: true };
   function mk(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
   function hash(x, y) { var n = (x * 374761393 + y * 668265263) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967295; }
   function hexRGB(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -1427,16 +1439,17 @@ var SPR = (function () {
   function shiftHue(h, target, amt) { var d = target - h; if (d > 0.5) d -= 1; if (d < -0.5) d += 1; return (h + d * amt + 1) % 1; }
   var rampCache = {};
   function ramp(hex) {
-    if (rampCache[hex]) return rampCache[hex];
+    var ck = hex + (ART.on ? '|2' : '');
+    if (rampCache[ck]) return rampCache[ck];
     var c = hexRGB(hex), hsl = rgb2hsl(c[0], c[1], c[2]), h = hsl[0], s = hsl[1], l = hsl[2];
-    var lowSat = s < 0.12;
+    var lowSat = s < 0.12, a2 = ART.on;
     var r = [
-      hsl2rgb(lowSat ? 0.7 : shiftHue(h, 0.75, 0.1), lowSat ? 0.12 : Math.min(0.75, s * 0.8), l * 0.45),
-      hsl2rgb(lowSat ? 0.7 : shiftHue(h, 0.75, 0.05), lowSat ? 0.07 : Math.min(0.8, s * 0.88), l * 0.74),
+      hsl2rgb(lowSat ? 0.7 : shiftHue(h, 0.75, a2 ? 0.16 : 0.1), lowSat ? (a2 ? 0.16 : 0.12) : Math.min(0.8, s * (a2 ? 0.9 : 0.8)), l * (a2 ? 0.38 : 0.45)),
+      hsl2rgb(lowSat ? 0.7 : shiftHue(h, 0.75, a2 ? 0.08 : 0.05), lowSat ? 0.07 : Math.min(0.85, s * (a2 ? 0.95 : 0.88)), l * (a2 ? 0.7 : 0.74)),
       c,
-      hsl2rgb(lowSat ? 0.12 : shiftHue(h, 0.13, 0.08), lowSat ? 0.06 : s * 0.92, l + (1 - l) * 0.3)
+      hsl2rgb(lowSat ? 0.12 : shiftHue(h, 0.13, a2 ? 0.12 : 0.08), lowSat ? 0.06 : s * 0.92, l + (1 - l) * (a2 ? 0.36 : 0.3))
     ];
-    rampCache[hex] = r; return r;
+    rampCache[ck] = r; return r;
   }
 
   /* ---------- the painter: pixel buffer with masks, shaded parts, decals ---------- */
@@ -1567,8 +1580,16 @@ var SPR = (function () {
     for (var ry = 0; ry < h; ry++) for (var rx = 0; rx < w; rx++) {
       var ri = (ry * w + rx) * 4; if (!d[ri + 3]) continue;
       var up = ry > 0 ? d[ri - w * 4 + 3] : 0, lf = rx > 0 ? d[ri - 4 + 3] : 0, dn = ry < h - 1 ? d[ri + w * 4 + 3] : 0, rt = rx < w - 1 ? d[ri + 4 + 3] : 0;
-      if (!up || !lf) { for (var rn = 0; rn < 3; rn++) o[ri + rn] = d[ri + rn] + (255 - d[ri + rn]) * 0.2; }
-      else if (!dn || !rt) { for (var rm = 0; rm < 3; rm++) o[ri + rm] = d[ri + rm] * 0.86; }
+      if (ART.on) {
+        // V37: a warm key light top left, a cool moonlight rim on the right, and a deeper shade underneath
+        if (!up || !lf) { o[ri] = d[ri] + (255 - d[ri]) * 0.16; o[ri + 1] = d[ri + 1] + (246 - d[ri + 1]) * 0.15; o[ri + 2] = d[ri + 2] + (220 - d[ri + 2]) * 0.1; }
+        else if (!rt) { o[ri] = d[ri] + (170 - d[ri]) * 0.42; o[ri + 1] = d[ri + 1] + (198 - d[ri + 1]) * 0.42; o[ri + 2] = d[ri + 2] + (255 - d[ri + 2]) * 0.48; }
+        else if (!dn) { o[ri] = d[ri] * 0.8; o[ri + 1] = d[ri + 1] * 0.78; o[ri + 2] = d[ri + 2] * 0.86; }
+        else if (rx < w - 2 && !d[ri + 8 + 3]) { o[ri] = d[ri] + (150 - d[ri]) * 0.16; o[ri + 1] = d[ri + 1] + (180 - d[ri + 1]) * 0.16; o[ri + 2] = d[ri + 2] + (255 - d[ri + 2]) * 0.2; }
+      } else {
+        if (!up || !lf) { for (var rn = 0; rn < 3; rn++) o[ri + rn] = d[ri + rn] + (255 - d[ri + rn]) * 0.2; }
+        else if (!dn || !rt) { for (var rm = 0; rm < 3; rm++) o[ri + rm] = d[ri + rm] * 0.86; }
+      }
     }
     for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
       var i = (y * w + x) * 4; if (d[i + 3]) continue;
@@ -1576,9 +1597,12 @@ var SPR = (function () {
       if (y < h - 1 && d[i + w * 4 + 3]) nb = i + w * 4; else if (x > 0 && d[i - 4 + 3]) nb = i - 4; else if (x < w - 1 && d[i + 4 + 3]) nb = i + 4; else if (y > 0 && d[i - w * 4 + 3]) nb = i - w * 4;
       if (nb < 0) continue;
       if (gold) { o[i] = gold[0]; o[i + 1] = gold[1]; o[i + 2] = gold[2]; }
+      else if (ART.on) { var hl = rgb2hsl(d[nb], d[nb + 1], d[nb + 2]), oc = hsl2rgb(hl[0], Math.min(1, hl[1] * 1.2 + 0.12), Math.min(0.17, hl[2] * 0.3) + 0.03); o[i] = oc[0]; o[i + 1] = oc[1]; o[i + 2] = oc[2]; }
       else { o[i] = d[nb] * 0.3 + 10; o[i + 1] = d[nb + 1] * 0.26 + 6; o[i + 2] = d[nb + 2] * 0.3 + 16; }
       o[i + 3] = 255;
     }
+    // V37: a gentle fall off from head to feet, so figures feel lit from above and sit on the ground
+    if (ART.on) for (var fy = 0; fy < h; fy++) { var fm = 1.05 - 0.17 * (fy / h); for (var fx2 = 0; fx2 < w; fx2++) { var fi = (fy * w + fx2) * 4; if (!o[fi + 3]) continue; o[fi] *= fm; o[fi + 1] *= fm; o[fi + 2] *= fm * 1.02; } }
     var c = mk(w, h), x2 = c.getContext('2d'), id = x2.createImageData(w, h); id.data.set(o); x2.putImageData(id, 0, 0);
     return c;
   };
@@ -1619,7 +1643,7 @@ var SPR = (function () {
     var walk = w8 || (f >= 2 && f <= 7), ph = w8 ? k8 / 8 * Math.PI * 2 : (walk ? (f - 2) / 6 * Math.PI * 2 : 0), sw = walk ? Math.sin(ph) : 0, cw = walk ? Math.cos(ph) : 0;
     var bob = (f === 1) ? 1 : (w8 ? (Math.abs(sw) > 0.9 ? 1 : 0) : (walk ? (Math.abs(sw) > 0.6 ? 0 : 1) : 0));
     if (f === 10) bob = 1;
-    var S = { v: v, f: f, cx: 32, bob: bob, walk: walk, sw: sw, cw: cw, atk: f === 8 ? 'up' : (f === 9 || aim ? 'out' : null), hurt: f === 10, aim: aim };
+    var S = { v: v, f: f, cx: 32, bob: bob, walk: walk, sw: sw, cw: cw, atk: f === 8 ? 'up' : (f === 9 || aim ? 'out' : null), hurt: f === 10, aim: aim, blink: f === 1 && ART.on };
     // chunkier proportions: a bigger head (drawn scaled), a shorter body and a wider stance
     var cx = 32, hipY = 43 + bob, footY = 60;
     S.headY = 11 + bob - (w8 && Math.abs(sw) < 0.1 ? 1 : 0); S.torsoY = 28 + bob; S.hipY = hipY; S.headScale = 1.25;
@@ -1705,6 +1729,7 @@ var SPR = (function () {
       [[0, -4], [4, -1], [-4, -1]].forEach(function (o) { var sx = x + o[0], sy = y + o[1]; P.poly([[sx, sy - 4], [sx + 1, sy - 1], [sx + 4, sy], [sx + 1, sy + 1], [sx, sy + 4], [sx - 1, sy + 1], [sx - 4, sy], [sx - 1, sy - 1]]).part(card); P.dot(sx, sy, '#5a3a22'); });
     } else if (type === 'parcel') {
       P.rrect(x - 5, y - 5, 12, 9, 1).part(card); P.dec(x, y - 5, 2, 9, '#dcc68c'); P.dec(x - 5, y - 1, 12, 1, '#dcc68c');
+      if (ART.on) { P.dec(x + 3, y + 1, 3, 2, '#e2402f'); P.dot(x - 3, y - 4, '#e2402f'); }
     }
   }
 
@@ -1767,6 +1792,7 @@ var SPR = (function () {
       if (!back) { P.poly([[hx - 2, hy - 2], [hx + 3, hy - 6], [hx + 6, hy - 2]]).part('#d1aa77'); P.poly([[hx + hw - 4, hy - 2], [hx + hw + 1, hy - 6], [hx + hw + 2, hy - 2]]).part('#d1aa77'); }
       for (var c = 0; c < hw + 4; c += 3) P.dec(hx - 2 + c, hy - 1, 1, 18, '#b48c5d', true);
       if (back || !s.face) P.dec(hx - 2, hy + 6, hw + 4, 3, '#dcc68c', true);
+      if (back && ART.on) { var ax = cx - 1; P.dec(ax, hy + 10, 2, 4, '#1b1520', true); P.dec(ax - 2, hy + 12, 6, 1, '#1b1520', true); P.dec(ax - 1, hy + 13, 4, 1, '#1b1520', true); }
       if (front || v === 1) {
         var o = front ? 0 : 2;
         P.dec(hx + 2 + o, hy + 3, 1, 5, '#2a2a2a'); P.dec(hx + 3 + o, hy + 6, 2, 2, '#2a2a2a');
@@ -1819,13 +1845,15 @@ var SPR = (function () {
     if (!back) {
       var ey = hy + 7, eye = '#2a1b14', R = ramp(skin);
       if (front) {
-        P.dec(cx - 5, ey, 2, 3, eye); P.dec(cx + 3, ey, 2, 3, eye); P.dot(cx - 5, ey, '#ffffff'); P.dot(cx + 3, ey, '#ffffff');
+        if (S.blink) { P.dec(cx - 5, ey + 2, 2, 1, eye); P.dec(cx + 3, ey + 2, 2, 1, eye); }
+        else { P.dec(cx - 5, ey, 2, 3, eye); P.dec(cx + 3, ey, 2, 3, eye); P.dot(cx - 5, ey, '#ffffff'); P.dot(cx + 3, ey, '#ffffff'); }
         P.dot(cx, ey + 3, R[1]); P.dec(cx - 1, ey + 5, 3, 1, '#8c3c3c'); P.dot(cx - 2, ey + 4, '#8c3c3c'); P.dot(cx + 2, ey + 4, '#8c3c3c');
         P.tint(cx - 7, ey + 3, 2, 2, '#ff8f8f', 0.35); P.tint(cx + 5, ey + 3, 2, 2, '#ff8f8f', 0.35);
         if (s.brows) { P.dec(cx - 6, ey - 3, 4, 2, ramp(hair)[0]); P.dec(cx + 2, ey - 3, 4, 2, ramp(hair)[0]); }
         else if (hair) { P.dec(cx - 6, ey - 2, 3, 1, ramp(hair)[0]); P.dec(cx + 3, ey - 2, 3, 1, ramp(hair)[0]); }
       } else if (diag) {
         var dd = v === 1 ? 1 : 0;
+        if (S.blink) { P.dec(cx - 2 + dd, ey + 2, 2, 1, eye); P.dec(cx + 4, ey + 2, 2, 1, eye); } else
         P.dec(cx - 2 + dd, ey, 2, 3, eye); P.dec(cx + 4, ey, 2, 3, eye); P.dot(cx - 2 + dd, ey, '#ffffff'); P.dot(cx + 4, ey, '#ffffff');
         P.dot(cx + 3, ey + 3, R[1]); P.dec(cx + 1, ey + 5, 3, 1, '#8c3c3c'); P.tint(cx + 5, ey + 3, 2, 2, '#ff8f8f', 0.35);
         if (s.brows) { P.dec(cx - 3 + dd, ey - 3, 4, 2, ramp(hair)[0]); P.dec(cx + 3, ey - 3, 3, 2, ramp(hair)[0]); }
@@ -1943,7 +1971,7 @@ var SPR = (function () {
     if (back && s.weapon) { var A0 = S.arms[1]; weapon(P, s.weapon, A0.hx, A0.hy, A0.pose); }
     // pelvis and torso
     P.rrect(S.tx + 1, S.hipY - 4, S.tw - 2, 6, 2).part(s.legs);
-    if (s.bag && (back || side)) { P.rrect(side ? cx - 9 : cx - 6, S.torsoY + 4, side ? 7 : 12, 12, 2).part('#6d5a3a', { noise: 0.15 }); }
+    if (s.bag && (back || side)) { P.rrect(side ? cx - 9 : cx - 6, S.torsoY + 4, side ? 7 : 12, 12, 2).part('#6d5a3a', { noise: 0.15 }); if (back && ART.on) { P.dec(cx - 1, S.torsoY + 6, 3, 1, '#f5c518'); P.dec(cx - 1, S.torsoY + 7, 1, 1, '#f5c518'); P.dec(cx - 1, S.torsoY + 8, 3, 1, '#f5c518'); P.dec(cx + 1, S.torsoY + 9, 1, 1, '#f5c518'); P.dec(cx - 1, S.torsoY + 10, 3, 1, '#f5c518'); P.dec(cx, S.torsoY + 5, 1, 7, '#f5c518'); } }
     var tc = s.jacket || s.top;
     P.rrect(S.tx, S.torsoY, S.tw, S.hipY - S.torsoY + 1, 3).part(tc, { noise: s.jacket ? 0.08 : 0 });
     if (s.stripes) for (var sy = 2; sy < 16; sy += 3) P.dec(S.tx, S.torsoY + sy, S.tw, 1, s.stripes, true);
@@ -1995,6 +2023,7 @@ var SPR = (function () {
       if (eyesShow) { P.dec(cx - 6, ey - 1, 4, 4, skin); P.dec(cx + 2, ey - 1, 4, 4, skin); P.dot(cx - 6, ey, ink); P.dot(cx - 5, ey + 1, ink); P.dot(cx - 6, ey + 2, ink); P.dot(cx + 4, ey, ink); P.dot(cx + 3, ey + 1, ink); P.dot(cx + 4, ey + 2, ink); }
       P.dec(cx - 2, ey + 4, 4, 1, skin); P.dec(cx - 2, ey + 4, 4, 3, mouth); P.dot(cx, ey + 6, '#d0505a'); P.dot(cx - 1, ey + 6, '#d0505a');
       P.dec(cx + 7, ey - 4, 2, 3, '#9fd8ff'); P.dot(cx + 7, ey - 4, '#e8f6ff');
+      if (ART.on) { P.dec(cx - 8, ey + 3, 4, 1, '#efe4c4'); P.dec(cx - 7, ey + 2, 1, 3, '#efe4c4'); P.dot(cx - 6, ey + 3, '#d6c49a'); }
     } else if (!side) {
       var dd = v === 1 ? 1 : 0;
       if (eyesShow) { P.dec(cx - 3 + dd, ey - 1, 4, 4, skin); P.dec(cx + 3, ey - 1, 4, 4, skin); P.dot(cx - 2 + dd, ey, ink); P.dot(cx - 1 + dd, ey + 1, ink); P.dot(cx - 2 + dd, ey + 2, ink); P.dot(cx + 5, ey, ink); P.dot(cx + 4, ey + 1, ink); P.dot(cx + 5, ey + 2, ink); }
@@ -2523,6 +2552,7 @@ var SPR = (function () {
   };
   return {
     atlas: atlas, frameCanvas: frameCanvas, drawView: drawView, portrait: portrait, silhouette: silhouette, chessTex: chessTex,
+    ART: ART, paintPreview: function (key, v, f, on) { var was = ART.on; ART.on = !!on; try { return paint(key, v, f); } finally { ART.on = was; } },
     iconTex: iconTex, iconCanvas: iconCanvas, MISC: MISC, heartCanvas: heartCanvas, SPECS: SPECS, hash: hash, ICONS: ICONS,
     variant: function (base, weapon) { var k = base + '_' + (weapon || 'none'); if (!SPECS[k]) { SPECS[k] = Object.assign({}, SPECS[base], { weapon: weapon || null }); } return k; },
     Painter: Painter, ramp: ramp, FRAMES: FRAMES, frameSize: frameSize, mk: mk, hexRGB: hexRGB, CUSTOM: CUSTOM, SIZES: SIZES, simple: simple
@@ -4398,7 +4428,7 @@ function syncSprite(e) {
     else if (e.atkAnim > 0) f = 9;
     else if (e.flash > 0.04 || (e !== G.P && !e.boss && e.hurtT0 !== undefined && G.t - e.hurtT0 < 0.24 && G.t >= e.hurtT0)) f = 10;
     else if (e.moving) { var AW = e.sprite.userData.atlas; f = (AW && AW.w8 >= 0) ? AW.w8 + Math.floor(e.anim * 12) % 8 : 2 + Math.floor(e.anim * 9) % 6; }
-    else f = Math.floor((G.t + e.seedT) * 1.7) % 2;
+    else f = (SPR.ART && SPR.ART.on) ? (((G.t + (e.seedT || 0) * 7) % 3.4) < 0.13 ? 1 : 0) : Math.floor((G.t + e.seedT) * 1.7) % 2;
     if (e === G.P && typeof heroFrame === 'function') f = heroFrame(e, f);
     if (e.forceFrame !== undefined) f = e.forceFrame;
     var v = e.forceView !== undefined ? e.forceView : viewIndex(e), tk = v * 64 + f;
@@ -12339,7 +12369,7 @@ var RUNSAVE = (function () {
 /* ===================== UI: menus, HUD, bubbles, bursts, comic ===================== */
 var UI = (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var screens = ['title', 'intro', 'select', 'settings', 'cases', 'pause', 'mapview', 'dialog', 'dead', 'win', 'levelup', 'chal', 'workshop', 'director', 'more', 'voices', 'designer', 'dev', 'devnotes', 'chardes', 'music'];
+  var screens = ['title', 'intro', 'select', 'settings', 'cases', 'pause', 'mapview', 'dialog', 'dead', 'win', 'levelup', 'chal', 'workshop', 'director', 'more', 'voices', 'designer', 'dev', 'devnotes', 'chardes', 'music', 'devart'];
   var current = null, returnTo = null, bubbles = [], toasts = [], selHero = 'gingerbeard';
   function show(id) {
     screens.forEach(function (s) { var el = $(s); if (el) el.classList.toggle('on', s === id); });
@@ -19152,6 +19182,162 @@ titleScene = function (dt) {
   fadeSides(dt);
   renderFrame(dt);
 };
+
+/* ===================== V37: ART PASS, STAGE ONE: CHARACTERS AND BOSSES ===================== */
+/* The painter now gives everyone a warm key light, a cool moonlight rim and a tinted outline
+   (see sprites.js). Here: idle life, follow through on attacks, a different defeat for every
+   criminal, bigger bosses with an entrance, and a before and after gallery on LW's dev desk. */
+
+/* ---------- idle life and follow through ---------- */
+var _animPose37 = animPose;
+animPose = function (e) {
+  _animPose37(e);
+  if (!SPR.ART.on || !e || e === G.P || !canPose(e)) return;
+  var sp = e.sprite, t = G.t, dir = screenDir(e.face || 0);
+  // the hit carries on past the lunge, then settles back with a little wobble
+  if (e.atkAnim > 0) e._atkWas = true;
+  else if (e._atkWas) { e._atkWas = false; e.recoilT0 = t; }
+  if (e.recoilT0 !== undefined) {
+    var k = (t - e.recoilT0) / 0.32;
+    if (k < 1) { var w = Math.sin(k * PI * 2) * (1 - k); sp.material.rotation += 0.16 * dir * w; sp.scale.x *= 1 - 0.05 * w; sp.scale.y *= 1 + 0.05 * w; }
+    else e.recoilT0 = undefined;
+  }
+  // standing about: they glance round now and then
+  if (!e.moving && !(e.wind > 0) && !(e.atkAnim > 0) && !(e.flash > 0)) {
+    if (e.lookAt === undefined) e.lookAt = t + 2 + Math.random() * 5;
+    if (t > e.lookAt) {
+      var lk = t - e.lookAt;
+      if (lk < 0.7) { var lv = (viewIndex(e) + (lk < 0.35 ? 1 : 7)) % 8; setFrame(sp, lv, 0); e._tk = -1; }
+      else e.lookAt = t + 3 + Math.random() * 5;
+    }
+  } else if (e.lookAt !== undefined && t > e.lookAt) e.lookAt = t + 2 + Math.random() * 4;
+};
+
+/* ---------- a different defeat for every criminal ---------- */
+var DEATH2 = {
+  autograph: 'scribble', robber: 'swag', pthief: 'parcel', cboy: 'fold', scooter: 'skid', cutter: 'snap', tank: 'bigboom',
+  lbox: 'chomp', lboxbig: 'chomp', lambush: 'peek', wrapper: 'deflate', leaflet: 'leaflets', butler: 'bow', hoover: 'smoke',
+  sheep: 'sleep', alarm: 'springs', laser: 'sparks', forklift: 'reverse'
+};
+var _deathAnim37 = deathAnim;
+deathAnim = function (e, s, h0) {
+  var st = SPR.ART.on && DEATH2[e.type];
+  if (!st || G.doom || e.finKO || !s) return _deathAnim37(e, s, h0);
+  var x0 = e.x, z0 = e.z, dir = (e.kx || e.kz) ? Math.atan2(e.kx, e.kz) : (G.P ? angTo(G.P, e) : 0), sd = screenDir(dir);
+  var v0 = s.userData.atlas ? viewIndex(e) : 0; if (s.userData.atlas) setFrame(s, v0, 10);
+  var gone = function () { s.material.transparent = true; s.material.opacity = 0; };
+  var fadeOut = function (k, from) { if (k > from) { s.material.transparent = true; s.material.opacity = Math.max(0, 1 - (k - from) / (1 - from)); } };
+  if (st === 'scribble') { AUD.sfx('type'); addFx(s, 0.5, function (f, k) { s.material.rotation = Math.sin(k * 40) * 0.2 * (1 - k); s.scale.set(h0 * (1 - k * 0.2), h0 * (1 - k * 0.9), 1); }); for (var i = 0; i < 5; i++) after(i * 0.08, function () { fxBits(x0 + rnd(-0.5, 0.5), 1.4, z0, 2, '#2a2a6a', 3); }); after(0.5, function () { UI.burst('SIGNED OFF', { x: x0, z: z0, y: 1.6 }); fxFlat(x0, z0, 1.2, 0.9); }); return; }
+  if (st === 'swag') { AUD.sfx('coin'); fxBits(x0, 1.2, z0, 14, '#f5c518', 6); addFx(s, 0.45, function (f, k) { if (s.userData.atlas) setFrame(s, (v0 + Math.floor(k * 12)) % 8, 10); s.position.y = Math.sin(k * PI) * 0.8; fadeOut(k, 0.6); }); after(0.45, function () { fxRing(x0, z0, 0.3, 1.5, '#f5c518', 0.25); }); return; }
+  if (st === 'parcel') {
+    AUD.sfx('poof'); addFx(s, 0.3, function (f, k) { var q = h0 * (1 - k); s.scale.set(q * (1 + k), q, 1); });
+    var pc = makeSprite(SPR.iconTex('package'), 0.9); pc.position.set(x0, 0, z0); G.dyn.add(pc);
+    addFx(pc, 1.2, function (f, k) { pc.position.y = k < 0.3 ? Math.sin(k / 0.3 * PI) * 0.6 : 0; if (k > 0.8) { pc.material.transparent = true; pc.material.opacity = 1 - (k - 0.8) * 5; } if (k >= 1 && pc.parent) pc.parent.remove(pc); });
+    after(0.3, function () { UI.burst('RETURN TO SENDER', { x: x0, z: z0, y: 1.4 }); }); return;
+  }
+  if (st === 'fold') { AUD.sfx('flatten'); addFx(s, 0.45, function (f, k) { var a = Math.min(1, k * 2), b = Math.max(0, k * 2 - 1); s.scale.set(h0 * (1 - a * 0.45), h0 * (1 - a * 0.55 - b * 0.3), 1); s.material.rotation = b * 0.15 * sd; fadeOut(k, 0.75); }); after(0.45, function () { fxFlat(x0, z0, 1, 1); fxBits(x0, 0.4, z0, 6, '#c29b6b', 3); }); return; }
+  if (st === 'skid') { AUD.sfx('skid'); addFx(s, 0.6, function (f, k) { s.position.set(x0 + Math.sin(dir + PI / 2) * k * 2.4, 0, z0 + Math.cos(dir + PI / 2) * k * 2.4); s.material.rotation = sd * k * PI * 1.5; if (Math.random() < 0.5) fxBits(s.position.x, 0.2, s.position.z, 1, '#9aa3ad', 1); fadeOut(k, 0.7); }); after(0.6, function () { fxFlat(x0 + Math.sin(dir + PI / 2) * 2.4, z0 + Math.cos(dir + PI / 2) * 2.4, 1.2, 0.9); }); return; }
+  if (st === 'snap') { AUD.sfx('crunch'); fxBits(x0, 1.2, z0, 8, '#c9d0d8', 5); addFx(s, 0.5, function (f, k) { s.material.rotation = -sd * easeOut(Math.min(1, k * 1.6)) * 1.5; fadeOut(k, 0.7); }); return; }
+  if (st === 'bigboom') { gone(); explodeFx(x0, z0); fxBits(x0, 1.4, z0, 24, '#b98a55', 8); fxRing(x0, z0, 0.4, 3.2, '#ffb347', 0.35); G.shake = Math.max(G.shake, 0.4); after(0.15, function () { explodeFx(x0 + 1, z0 - 0.5); }); after(0.3, function () { fxFlat(x0, z0, 2.4, 1.8); }); return; }
+  if (st === 'chomp') { AUD.sfx('chomp'); addFx(s, 0.36, function (f, k) { var c = Math.abs(Math.sin(k * PI * 3)); s.scale.set(h0 * (1 + c * 0.15), h0 * (1 - c * 0.3 - k * 0.4), 1); }); after(0.36, function () { gone(); fxBits(x0, 0.8, z0, 14, '#b98a55', 5); fxFlat(x0, z0, 1.3, 1); AUD.sfx('smash'); }); return; }
+  if (st === 'peek') { AUD.sfx('squeak'); addFx(s, 0.55, function (f, k) { s.position.y = -k * h0 * 0.9; fadeOut(k, 0.5); }); after(0.1, function () { UI.burst('...bye', { x: x0, z: z0, y: 1.2 }); }); return; }
+  if (st === 'deflate') { var pops = 0; addFx(s, 0.7, function (f, k) { s.scale.set(h0 * (1 + Math.sin(k * 30) * 0.06 * (1 - k)), h0 * (1 - k * 0.8), 1); s.position.x = x0 + Math.sin(k * 60) * 0.05; if (k * 6 > pops) { pops++; AUD.sfx('pop'); fxBits(x0 + rnd(-0.5, 0.5), 1 - k * 0.6, z0, 2, '#f6fdff', 2); } fadeOut(k, 0.8); }); return; }
+  if (st === 'leaflets') {
+    gone(); AUD.sfx('swing');
+    for (var l = 0; l < 7; l++) { (function () { var p = makeSprite(typeof leafletTex === 'function' ? leafletTex() : SPR.iconTex('package'), 0.45), vx = rnd(-2.4, 2.4), vz = rnd(-2.4, 2.4), sp0 = rnd(4, 8); p.position.set(x0, 1.5, z0); G.dyn.add(p); addFx(p, 1.4, function (f, k) { p.position.set(x0 + vx * k, 1.5 + Math.sin(k * PI) * 1.4 - k * 1.3, z0 + vz * k); p.material.rotation = Math.sin(k * sp0) * 0.8; if (k > 0.75) { p.material.transparent = true; p.material.opacity = 1 - (k - 0.75) * 4; } if (k >= 1 && p.parent) p.parent.remove(p); }); })(); }
+    return;
+  }
+  if (st === 'bow') { AUD.sfx('swing'); addFx(s, 0.8, function (f, k) { var a = k < 0.4 ? Math.sin(k / 0.4 * PI) * 0.35 : 0, b = k < 0.4 ? 0 : easeOut(Math.min(1, (k - 0.4) / 0.4)); s.material.rotation = -a * sd + b * 1.5 * sd; fadeOut(k, 0.82); }); after(0.1, function () { UI.burst('DINNER IS OVER', { x: x0, z: z0, y: 1.8 }); }); after(0.6, function () { fxBits(x0, 0.4, z0, 6, '#f4f1e6', 3); AUD.sfx('smash'); }); return; }
+  if (st === 'smoke') { AUD.sfx('buzz'); addFx(s, 0.8, function (f, k) { s.material.rotation = k * PI * 6; if (Math.random() < 0.5) fxBits(x0, 0.6, z0, 1, '#6a6a72', 1.5); fadeOut(k, 0.6); }); after(0.8, function () { explodeFx(x0, z0); }); return; }
+  if (st === 'sleep') { AUD.sfx('whee'); addFx(s, 1.0, function (f, k) { s.position.y = k * 2.2; s.material.rotation = Math.sin(k * 6) * 0.2; fadeOut(k, 0.5); }); after(0.1, function () { UI.burst('Zzz', { x: x0, z: z0, y: 1.5 }); }); return; }
+  if (st === 'springs') { AUD.sfx('ring'); addFx(s, 0.5, function (f, k) { s.position.x = x0 + Math.sin(k * 80) * 0.1; s.scale.set(h0 * (1 + k * 0.1), h0 * (1 - k * 0.4), 1); }); after(0.5, function () { gone(); AUD.sfx('dg_boing'); fxBits(x0, 1, z0, 12, '#c9cdd2', 6); fxBits(x0, 1, z0, 6, '#e8c040', 5); fxRing(x0, z0, 0.3, 1.8, '#ffe14d', 0.3); }); return; }
+  if (st === 'sparks') { AUD.sfx('buzz'); addFx(s, 0.7, function (f, k) { if (Math.random() < 0.7) fxBits(x0, 1.6, z0, 1, pick(['#ffe14d', '#ff5a4a']), 4); s.material.rotation = k > 0.4 ? -sd * easeOut((k - 0.4) / 0.6) * 1.5 : Math.sin(k * 60) * 0.05; fadeOut(k, 0.8); }); return; }
+  if (st === 'reverse') { var bx = Math.sin(dir), bz = Math.cos(dir); addFx(s, 0.6, function (f, k) { s.position.set(x0 + bx * k * 1.2, 0, z0 + bz * k * 1.2); if (Math.floor(k * 6) !== Math.floor((k - 0.03) * 6)) AUD.sfx('tick'); }); after(0.1, function () { UI.burst('BEEP BEEP', { x: x0, z: z0, y: 2 }); }); after(0.6, function () { gone(); explodeFx(x0 + bx * 1.2, z0 + bz * 1.2); fxBits(x0 + bx * 1.2, 1, z0 + bz * 1.2, 14, '#f2a81d', 6); fxFlat(x0 + bx * 1.2, z0 + bz * 1.2, 1.8, 1.2); }); return; }
+  return _deathAnim37(e, s, h0);
+};
+
+/* ---------- bosses: a size up, and every one of them gets an entrance ---------- */
+Object.assign(BOSS_INTRO, {
+  puppet: { name: 'GIANT SOCK PUPPET', rank: 'Rank: one sock', line: 'Lost in the wash. Found again. Furious.', spr: 'puppet' },
+  critic: { name: 'THE CRITIC', rank: 'Rank: two stars', line: 'Has opinions. Has a clipboard. Has not seen the film.', spr: 'critic' },
+  cartoy: { name: 'CAR TOY', rank: 'Rank: definitely a car', line: 'It is a plane. Do not tell it.', icon: 'cartoy' },
+  mech: { name: 'BOX-MECH', rank: 'Rank: heavy', line: 'Box-man built it from his best boxes. Very cross.', spr: 'boxtank' }
+});
+var _bossEntrance37 = bossEntrance;
+bossEntrance = function (b, room) {
+  if (!b || !room) return 0;
+  var fake = room.type === 'mini' ? { type: 'boss' } : room;
+  if (room.type === 'mini' && (G.run && (G.run.practice || G.run.challenge))) return 0;
+  var wait = _bossEntrance37(b, fake);
+  if (!wait || !SPR.ART.on) return wait;
+  // a little bigger than before
+  if (!b._big37) { b._big37 = true; if (b.sprite) { b.h *= 1.12; b.sprite.scale.set(b.h, b.h, 1); } else if (b.group) b.group.scale.multiplyScalar(1.1); }
+  // dropping in from above, with a proper landing
+  if (!G.calmOn) {
+    var y0 = 9, grp = b.group, gy0 = grp ? grp.position.y : 0, by0 = b.y || 0;
+    if (grp) grp.position.y = gy0 + y0; else b.y = by0 + y0;
+    var landed = false;
+    addFx(new THREE.Object3D(), 0.75, function (f, k) {
+      var e = easeOut(Math.min(1, k)), off = y0 * (1 - k * k);
+      if (grp) grp.position.y = gy0 + off; else b.y = by0 + off;
+      if (k >= 1 && !landed) {
+        landed = true; if (grp) grp.position.y = gy0; else b.y = by0;
+        G.shake = Math.max(G.shake || 0, 0.55); AUD.sfx('boom'); AUD.sfx('crunch');
+        fxRing(b.x, b.z, 0.6, 4.2, '#d9c7a8', 0.4); fxBits(b.x, 0.4, b.z, 20, '#b98a55', 7); fxFlat(b.x, b.z, 2.6, 1.8);
+      }
+    });
+  }
+  return wait;
+};
+var _bossSplash37 = bossSplash;
+bossSplash = function (I) {
+  _bossSplash37(I);
+  if (!I || !I.icon) return;
+  try { var sc = polEl('bosssplash'), c = sc && sc.querySelector('canvas'), x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, 160, 160); x.drawImage(SPR.iconCanvas(I.icon, 4), 16, 16, 128, 128); } catch (e) { }
+};
+
+/* ---------- the before and after gallery on the dev desk ---------- */
+var DA = { tab: 'heroes', pose: 0 };
+function daList() {
+  if (DA.tab === 'heroes') return ['gingerbeard', 'sweettooth', 'trainer', 'friend', 'bean', 'todd', 'deadlie', 'chairman', 'cardboy'].map(function (k) { return [k, k === 'deadlie' ? 'Dead guy' : (HEROES[k] ? HEROES[k].name : k)]; });
+  if (DA.tab === 'bosses') return [['trex', 'Box-T-Rex'], ['cardboyfists', 'Card-boy (boss)'], ['dreamman', 'Dream man'], ['boxman', 'Box-man'], ['puppet', 'Sock puppet'], ['critic', 'The critic'], ['soup', 'Soup or Thief']];
+  var out = []; ['fan', 'thrower', 'autograph', 'robber', 'pthief', 'cboy', 'driver', 'scooter', 'armour', 'lbox', 'cutter', 'teeth', 'puppet', 'gunner', 'drone', 'tank', 'wrapper', 'leaflet', 'butler', 'hoover', 'sheep', 'alarm', 'laser', 'forklift'].forEach(function (t) { if (EDEF[t]) out.push([EDEF[t].key, (typeof LW_FOE_NAMES !== 'undefined' && LW_FOE_NAMES[t]) || t]); });
+  return out;
+}
+function daDraw() {
+  var g = document.getElementById('da-grid'); if (!g) return; g.innerHTML = '';
+  var f = [0, 9, 10][DA.pose];
+  daList().forEach(function (it) {
+    var card = document.createElement('div'); card.className = 'da-card';
+    var row = document.createElement('div'); row.className = 'da-row';
+    [false, true].forEach(function (on) {
+      var fig = document.createElement('figure'), c = document.createElement('canvas'); c.width = 96; c.height = 96; var x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+      try { var src = SPR.paintPreview(it[0], it[0] === 'deadlie' ? 2 : 0, f, on), sz = src.width; x.drawImage(src, 0, 0, sz, sz, 0, 0, 96, 96); } catch (e) { }
+      fig.appendChild(c); var cap = document.createElement('figcaption'); cap.textContent = on ? 'New' : 'Old'; fig.appendChild(cap); row.appendChild(fig);
+    });
+    var nm = document.createElement('b'); nm.textContent = it[1];
+    var inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 200; inp.placeholder = 'A note, if you like';
+    var add = document.createElement('button'); add.className = 'btn small'; add.textContent = 'Add note'; add.setAttribute('data-nav', '');
+    add.onclick = function () { var t = String(inp.value || '').trim(); if (!t) { inp.focus(); return; } dnList().push({ id: Date.now().toString(36), t: Date.now(), type: 'idea', text: ('Art pass, ' + it[1] + ': ' + t).slice(0, 600), done: false, sent: false }); SAVE.save(); inp.value = ''; AUD.sfx('pop'); var m = document.getElementById('da-msg'); if (m) m.textContent = 'Saved to your dev notes.'; };
+    card.appendChild(nm); card.appendChild(row); card.appendChild(inp); card.appendChild(add); g.appendChild(card);
+  });
+}
+function daOpen() { G.state = 'cases'; UI.show('devart'); var m = document.getElementById('da-msg'); if (m) m.textContent = ''; daDraw(); }
+function daWire() {
+  var b = document.getElementById('dv-art'); if (b) b.onclick = function () { if (DEV.ok) daOpen(); };
+  var bk = document.getElementById('da-back'); if (bk) bk.onclick = function () { devBackToDesk(); };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-dat]'), function (t) { t.onclick = function () { DA.tab = t.dataset.dat; Array.prototype.forEach.call(document.querySelectorAll('[data-dat]'), function (x) { x.classList.toggle('sel', x === t); }); daDraw(); }; });
+  var pz = document.getElementById('da-pose'); if (pz) pz.onclick = function () { DA.pose = (DA.pose + 1) % 3; pz.textContent = 'Pose: ' + ['standing', 'attacking', 'hurt'][DA.pose]; daDraw(); };
+  var st = document.createElement('style');
+  st.textContent = '#da-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; max-height: 58vh; overflow: auto; margin: 10px 0; }' +
+    '.da-card { background: rgba(0,0,0,.25); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }' +
+    '.da-card b { font: 600 15px var(--f-pix); color: var(--gold-hi); } .da-row { display: flex; gap: 8px; justify-content: center; }' +
+    '.da-row figure { margin: 0; text-align: center; } .da-row canvas { width: 96px; height: 96px; image-rendering: pixelated; background: radial-gradient(circle at 50% 60%, #4a4560, #241f3e); border: 2px solid #1b1520; }' +
+    '.da-row figcaption { font: 600 12px var(--f-pix); color: var(--muted); } .da-card input { font: 14px var(--f-body, sans-serif); padding: 6px; border-radius: 3px; border: 1px solid var(--gold-dim); background: #f4ead4; color: #1b1520; }';
+  document.head.appendChild(st);
+}
+var _v31Boot37 = v31Boot;
+v31Boot = function () { _v31Boot37(); try { daWire(); } catch (e) { } };
 
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
