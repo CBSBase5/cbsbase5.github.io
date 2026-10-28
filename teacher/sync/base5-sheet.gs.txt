@@ -1640,3 +1640,78 @@ READ3.today = today_;
 WRITE3.made = made_;
 WRITE3.evidencesend = evidence_send_;
 WRITE3.activity = activity_;
+
+/* ==========================================================
+   Version 5: the Cultural Calendar school count (/cc/).
+   Anyone signed in to a school Google account can add their go
+   to the count; the page shows totals only. The CC counts tab
+   stores a scrambled tag for each person, never a name or email,
+   so the same person on two devices still only counts once.
+   The tab is made the first time someone has a go: no need to
+   run setup again, just deploy a new version.
+   ========================================================== */
+var CCH = ["Week", "Item", "Person", "On", "Updated"];
+function ccTab_(){
+  var ss = SpreadsheetApp.getActive(), sh = ss.getSheetByName("CC counts");
+  if(sh) return sh;
+  sh = tab_(ss, "CC counts", CCH);
+  sh.getRange("A:C").setNumberFormat("@");
+  sh.getRange(1, CCH.length + 2).setValue("Written by the Cultural Calendar page. Person is a scrambled tag, not a name. Leave it alone.");
+  return sh;
+}
+function ccPerson_(){
+  var email = "";
+  try{ email = String(Session.getActiveUser().getEmail() || "").trim().toLowerCase(); }catch(e){}
+  if(!email) throw new Error("not signed in");
+  return ccHash_(email);
+}
+/* a salted one way tag: the salt lives in the script's own properties,
+   so nobody can work back from the tag to an email */
+function ccHash_(email){
+  var props = PropertiesService.getScriptProperties(), salt = props.getProperty("ccSalt");
+  if(!salt){ salt = randomKey_() + randomKey_(); props.setProperty("ccSalt", salt); }
+  var d = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + "|" + email, Utilities.Charset.UTF_8), h = "";
+  for(var i = 0; i < 8; i++){ var b = (d[i] + 256) % 256; h += (b < 16 ? "0" : "") + b.toString(16); }
+  return h;
+}
+function ccArgs_(r){
+  var week = String(r.week || ""), item = String(r.item || "");
+  if(!/^[a-z0-9-]{2,40}$/.test(week)) throw new Error("bad week");
+  if(item && !/^(t[0-9]|game)$/.test(item)) throw new Error("bad item");
+  return { week: week, item: item };
+}
+function ccCounts_(r){
+  var a = ccArgs_(r), me = "";
+  try{ me = ccPerson_(); }catch(e){}
+  var cache = CacheService.getScriptCache(), key = "cc.v1." + a.week, hit = cache.get(key), base = null;
+  if(hit){ try{ base = JSON.parse(hit); }catch(e0){} }
+  var mine = [];
+  if(!base || me){
+    var v = rows_("CC counts"), counts = {}, people = {};
+    for(var i = 1; i < v.length; i++){
+      if(String(v[i][0]) !== a.week || !ticked_(v[i][3])) continue;
+      counts[v[i][1]] = (counts[v[i][1]] || 0) + 1;
+      people[v[i][2]] = 1;
+      if(me && String(v[i][2]) === me) mine.push(String(v[i][1]));
+    }
+    if(!base){ base = { counts: counts, people: Object.keys(people).length }; try{ cache.put(key, JSON.stringify(base), 60); }catch(e1){} }
+  }
+  return { ok: true, week: a.week, counts: base.counts, people: base.people, mine: mine, signedIn: !!me };
+}
+function ccTick_(r){
+  var a = ccArgs_(r);
+  if(!a.item) throw new Error("bad item");
+  var me = ccPerson_(), on = r.on !== false, sh = ccTab_(), v = sh.getDataRange().getValues(), now = new Date();
+  for(var i = 1; i < v.length; i++){
+    if(String(v[i][0]) === a.week && String(v[i][1]) === a.item && String(v[i][2]) === me){
+      sh.getRange(i + 1, 4, 1, 2).setValues([[on, now]]);
+      try{ CacheService.getScriptCache().remove("cc.v1." + a.week); }catch(e){}
+      return ccCounts_(r);
+    }
+  }
+  if(on) sh.appendRow([a.week, a.item, me, true, now]);
+  try{ CacheService.getScriptCache().remove("cc.v1." + a.week); }catch(e2){}
+  return ccCounts_(r);
+}
+READ3.cccounts = ccCounts_;
+WRITE3.cctick = ccTick_;

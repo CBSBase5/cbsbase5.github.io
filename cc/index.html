@@ -199,6 +199,18 @@ h1.title{font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 90
 .try[aria-pressed="true"]{background:color-mix(in srgb,var(--pop) 30%,var(--card))}
 .try[aria-pressed="true"] .done{background:var(--cbs-ink);color:#fff;border-style:solid;border-color:var(--cbs-ink)}
 .try[aria-pressed="true"] .done::before{content:"\2713  "}
+/* the school count */
+.try .crowd{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:.8rem;color:#3d5b64;margin-top:-4px}
+.try .crowd svg{width:18px;height:18px}
+.try .crowd[hidden]{display:none}
+.schoolcount{display:inline-flex;align-items:center;gap:10px;margin:0 0 16px;background:var(--card);color:var(--cbs-ink);border:3px solid var(--cbs-ink);
+  border-radius:999px;padding:6px 16px 6px 6px;font-weight:700;box-shadow:4px 5px 0 rgba(0,0,0,.25)}
+.schoolcount b{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:1.35rem;line-height:1}
+.schoolcount .ci{width:38px;height:38px;border-radius:50%;background:var(--pop);display:grid;place-items:center;border:2px solid var(--cbs-ink)}
+.schoolcount .ci svg{width:24px;height:24px}
+.schoolcount.join{background:transparent;color:var(--ink);border-color:currentColor;border-style:dashed;box-shadow:none;text-decoration:none;font-size:.92rem;padding:6px 14px}
+.schoolcount.join:hover{background:var(--card);color:var(--cbs-ink)}
+.schoolcount[hidden]{display:none}
 .moreinfo{display:inline-flex;align-items:center;gap:10px;margin:-18px 0 30px;font-weight:700;color:var(--ink);text-decoration:none;
   border:3px solid currentColor;border-radius:999px;padding:8px 16px}
 .moreinfo:hover{background:var(--pop);color:var(--popink);border-color:var(--cbs-ink)}
@@ -414,6 +426,7 @@ dialog#pitch::backdrop{background:rgba(10,15,30,.65)}
 
   <section class="extras" aria-label="Ideas and jobs for this week">
     <h2 class="sh">Try this <small>Tap one to see how.</small></h2>
+    <div id="schoolcount"></div>
     <div class="tries" id="tries"></div>
     <div id="moreinfo"></div>
     <h2 class="sh">Jobs it links to <small>Tap one.</small></h2>
@@ -639,6 +652,7 @@ function render(w){
     return '<button class="try" type="button" data-i="' + i + '" aria-pressed="' + on + '" aria-haspopup="dialog">' +
       (t.mins != null ? '<span class="mins">' + esc(minsText(t.mins)) + '</span>' : '') +
       '<span class="ic">' + A.icon(t.i, w.look.pop, w.look.bg) + '</span><b>' + esc(t.t) + '</b>' +
+      '<span class="crowd" hidden>' + PPL + '<span></span></span>' +
       (on ? '<span class="done">Had a go</span>' : '<span class="how"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' + (waiting ? "Have a look" : "How to") + '</span>') +
       '</button>';
   }).join("");
@@ -653,11 +667,12 @@ function render(w){
   drawYear();
   $("nowBtn").hidden = w === FOCUS;
   wire();
+  countsFor(w);
 }
 
 function wire(){
   var pb = $("playBtn");
-  if(pb) pb.addEventListener("click", function(){ if(stampWeek(VIEW)) SFX.thunk(); });
+  if(pb) pb.addEventListener("click", function(){ if(stampWeek(VIEW)) SFX.thunk(); countTick(VIEW, "game", true); });
   var mb = $("mbtn"), pt = $("pitchBtn");
   function openPitch(){ var mc = $("mcard"); mc.classList.remove("pop"); void mc.offsetWidth; mc.classList.add("pop"); SFX.pop(); setTimeout(function(){ pitchOpen(VIEW); }, REDUCED ? 0 : 260); }
   if(mb) mb.addEventListener("click", openPitch);
@@ -726,6 +741,7 @@ function guideOpen(i){
     else { list.push(GI); done.setAttribute("aria-pressed", "true"); done.textContent = "\u2713 Had a go"; SFX.tick(); }
     TRIED[w.id] = list; save(TK, TRIED);
     redrawTries();
+    countTick(w, "t" + GI, at < 0);
     if(at < 0){ setTimeout(function(){ closeGuide(); if(stampWeek(w)) slamStamp(); }, 450); }
   });
   $("guideLater").addEventListener("click", closeGuide);
@@ -915,6 +931,63 @@ $("sendCopy").addEventListener("click", function(){
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
   function fallback(){ var t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try{ document.execCommand("copy"); done(); }catch(e){} t.remove(); }
 });
+
+/* ---------- the school count ----------
+   Through the Base 5 shared memory (/data/b5site.js). Only works for
+   someone signed in to a school Google account; everyone else sees a
+   small invite, and nothing breaks. Totals only, never names. */
+var PPL = '<svg viewBox="0 0 48 48" aria-hidden="true">' + A.inner("people", "currentColor") + '</svg>';
+var CNT = { on: null, data: {} }, SENT_K = "b5.cc.counted.v1", SENT = load(SENT_K);
+var SB = window.B5Site || null;
+function countsAvailable(){ return !!(SB && SB.call && SB.syncUrl && !SB.guest); }
+function countsFor(w){
+  var box = $("schoolcount");
+  box.innerHTML = "";
+  if(!countsAvailable() || CNT.on === "off") return;
+  if(CNT.on === "signin") return paintJoin();
+  if(CNT.data[w.id]) paintCounts(w);
+  SB.call("cccounts", { week: w.id }).then(function(r){
+    if(!r || !r.ok){ CNT.on = "off"; box.innerHTML = ""; return; } /* the sheet does not know about counts yet */
+    if(!r.signedIn){ CNT.on = "signin"; return paintJoin(); }
+    CNT.on = true; CNT.data[w.id] = r;
+    if(VIEW === w) paintCounts(w);
+    catchUp(w, r.mine || []);
+  }, function(){ CNT.on = "signin"; paintJoin(); });
+}
+/* ticks made on this device before signing in get added once */
+function catchUp(w, mine){
+  if(state(w) === "future") return;
+  var want = (TRIED[w.id] || []).map(function(i){ return "t" + i; });
+  if(STAMPS[w.id] && w.game && (SENT[w.id] || []).indexOf("game") < 0 && mine.indexOf("game") < 0 && want.length === 0) want.push("game");
+  want.forEach(function(it){ if(mine.indexOf(it) < 0 && (SENT[w.id] || []).indexOf(it) < 0) countTick(w, it, true); });
+}
+function countTick(w, item, on){
+  if(CNT.on !== true) return;
+  SB.call("cctick", { week: w.id, item: item, on: on }).then(function(r){
+    if(!r || !r.ok) return;
+    var l = SENT[w.id] || [], at = l.indexOf(item);
+    if(on && at < 0) l.push(item); if(!on && at > -1) l.splice(at, 1);
+    SENT[w.id] = l; save(SENT_K, SENT);
+    CNT.data[w.id] = r; if(VIEW === w) paintCounts(w);
+  }, function(){});
+}
+function paintCounts(w){
+  var r = CNT.data[w.id]; if(!r) return;
+  var c = r.counts || {}, people = r.people || 0;
+  $("schoolcount").innerHTML = people ? '<span class="schoolcount"><span class="ci">' + PPL + '</span><b>' + people + '</b>' +
+    (people === 1 ? "person has" : "people have") + ' had a go across school</span>' : "";
+  Array.prototype.forEach.call(document.querySelectorAll(".try"), function(b){
+    var n = c["t" + b.getAttribute("data-i")] || 0, el = b.querySelector(".crowd");
+    if(!el) return;
+    el.hidden = !n;
+    el.lastChild.textContent = n + (n === 1 ? " has" : " have") + " had a go";
+  });
+}
+function paintJoin(){
+  if(!SB || SB.guest || !SB.syncUrl) return;
+  $("schoolcount").innerHTML = '<a class="schoolcount join" href="https://accounts.google.com/ServiceLogin?continue=' + encodeURIComponent(location.href) + '" rel="noopener">' +
+    PPL.replace('<svg ', '<svg style="width:20px;height:20px" ') + 'Sign in with your school account to join the school count</a>';
+}
 
 /* ---------- start ---------- */
 $("markHere").innerHTML = A.mark();
