@@ -45,8 +45,7 @@ button{font:inherit;color:inherit}
 .cbstop .in{max-width:1240px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:16px}
 #markHere{display:flex;font-size:19px;text-decoration:none}
 #markHere .cbsmark{overflow:visible}
-#markHere .cbsmark.breeze .cbs-cable{transform-box:view-box;transform-origin:268px 34px;animation:lgsway 1.8s ease-in-out 4 alternate}
-@keyframes lgsway{from{transform:skewX(-1.8deg)}to{transform:skewX(1.8deg)}}
+
 .cclabel{display:flex;flex-direction:column;line-height:1.05;padding-left:16px;border-left:2px solid #d9e6ea}
 .cclabel b{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;letter-spacing:.06em;text-transform:uppercase;font-size:.95rem;color:var(--cbs-orange)}
 .cclabel span{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#3d5b64;font-weight:700}
@@ -1418,54 +1417,44 @@ ppCount();
 ppFaceBtn();
 
 /* ---------- the logo, idling ----------
-   Every 20 to 30 seconds one of three things happens, in turn:
-   this week's picture comes to sit on the tall tower and hops, a gull
-   glides in, rests on the tower and flies off, or a breeze sways the
-   cable. Never while the tab is hidden, never with reduced motion. */
+   One thing, done well and rarely: a soft sheen of light sweeps across
+   the circle and the bridge, while the circle lifts a touch. Once a few
+   seconds after the page opens, then about once a minute. Never while
+   the tab is hidden, while printing, or with reduced motion. */
 (function(){
   if(REDUCED || !Element.prototype.animate) return;
-  var NS = "http://www.w3.org/2000/svg", turns = ["visitor", "gull", "breeze"], k = 0;
+  var NS = "http://www.w3.org/2000/svg";
   function svg(){ return document.querySelector("#markHere svg.cbsmark"); }
-  function add(el, html){ var g = document.createElementNS(NS, "g"); g.innerHTML = html; el.appendChild(g); return g; }
-  var PLAY = {
-    breeze: function(m){ m.classList.remove("breeze"); void m.getBoundingClientRect(); m.classList.add("breeze"); setTimeout(function(){ m.classList.remove("breeze"); }, 7400); },
-    visitor: function(m){
-      var L = VIEW.look, g = add(m, '<g transform="translate(384 34) scale(2.3)"><circle cx="24" cy="24" r="25" fill="#fff"/>' + A.inner(L.motif, L.pop, L.bg) + '</g>');
-      g.style.transformBox = "fill-box"; g.style.transformOrigin = "50% 100%";
-      var a = g.animate([
-        { transform: "translateY(-140px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1, offset: .12 },
-        { transform: "translateY(0) scale(1.08,.9)", offset: .16 }, { transform: "translateY(0)", offset: .2 },
-        { transform: "translateY(-40px) rotate(-8deg)", offset: .32 }, { transform: "translateY(0)", offset: .42 },
-        { transform: "translateY(0)", offset: .62 }, { transform: "translateY(-34px) rotate(8deg)", offset: .72 }, { transform: "translateY(0)", offset: .8 },
-        { transform: "translateY(0)", opacity: 1, offset: .9 }, { transform: "translateY(-160px)", opacity: 0 }
-      ], { duration: 6200, easing: "ease-in-out" });
-      a.onfinish = function(){ g.remove(); };
-    },
-    gull: function(m){
-      var g = add(m, '<g class="lggull"><g transform="translate(-96 -66) scale(3.2)"><g class="lgwing"><path d="M0 18q14-22 30-4q16-18 30 4q-16-6-30 4q-14-10-30-4z" fill="#fff" stroke="#0a2f38" stroke-width="2.6"/><circle cx="30" cy="16" r="2.6" fill="#0a2f38"/></g></g></g>');
-      var wing = g.querySelector(".lgwing"); wing.style.transformBox = "fill-box"; wing.style.transformOrigin = "50% 100%";
-      var flap = wing.animate([{ transform: "scaleY(1)" }, { transform: "scaleY(.3)" }], { duration: 320, iterations: Infinity, direction: "alternate" });
-      var a = g.animate([
-        { transform: "translate(700px,60px) scale(.7)" }, { transform: "translate(470px,90px) scale(.95)", offset: .3 },
-        { transform: "translate(404px,178px) scale(.9)", offset: .45 }, { transform: "translate(404px,178px) scale(.9)", offset: .78 },
-        { transform: "translate(120px,40px) scale(.7)", opacity: 1, offset: .96 }, { transform: "translate(90px,30px) scale(.7)", opacity: 0 }
-      ], { duration: 8000, easing: "ease-in-out" });
-      /* wings fold while it sits */
-      setTimeout(function(){ flap.pause(); wing.style.transform = "scaleY(.55)"; }, 3500);
-      setTimeout(function(){ wing.style.transform = ""; flap.play(); }, 6200);
-      a.onfinish = function(){ flap.cancel(); g.remove(); };
+  function sheen(m){
+    if(!m || m.querySelector(".lg-sheen")) return;
+    var clip = m.querySelector("clipPath"), id = clip ? clip.id : "", gid = id + "sh";
+    if(!m.querySelector("#" + gid)){
+      var defs = m.querySelector("defs"), lg = document.createElementNS(NS, "linearGradient");
+      lg.setAttribute("id", gid); lg.setAttribute("x1", "0"); lg.setAttribute("x2", "1"); lg.setAttribute("y1", "0"); lg.setAttribute("y2", "0");
+      [[0, 0], [.3, 0], [.44, .28], [.5, .62], [.56, .28], [.7, 0], [1, 0]].forEach(function(st){
+        var e = document.createElementNS(NS, "stop"); e.setAttribute("offset", st[0]); e.setAttribute("stop-color", "#fff"); e.setAttribute("stop-opacity", st[1]); lg.appendChild(e);
+      });
+      defs.appendChild(lg);
     }
-  };
-  function next(){
+    var g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "lg-sheen"); g.setAttribute("clip-path", "url(#" + id + ")"); g.setAttribute("pointer-events", "none");
+    g.innerHTML = '<g><rect x="-260" y="-140" width="300" height="800" fill="url(#' + gid + ')" transform="rotate(20 0 240)"/></g>';
+    m.appendChild(g);
+    var band = g.firstChild;
+    var a = band.animate([{ transform: "translateX(0px)" }, { transform: "translateX(900px)" }], { duration: 1900, easing: "cubic-bezier(.35,.1,.35,1)" });
+    m.animate([{ transform: "scale(1)" }, { transform: "scale(1.03)", offset: .5 }, { transform: "scale(1)" }], { duration: 1900, easing: "ease-in-out" });
+    a.onfinish = function(){ g.remove(); };
+  }
+  function next(wait){
     setTimeout(function(){
       var m = svg();
-      if(m && !document.hidden && !document.body.classList.contains("printing")) PLAY[turns[k++ % turns.length]](m);
-      next();
-    }, 20000 + Math.random() * 10000);
+      if(m && !document.hidden && !document.body.classList.contains("printing")) sheen(m);
+      next(55000 + Math.random() * 35000);
+    }, wait);
   }
-  /* a first one soon after the page opens, so people see it is alive */
-  setTimeout(function(){ var m = svg(); if(m && !document.hidden) PLAY[turns[k++]](m); next(); }, 4000);
-  window.B5CCLogo = PLAY;
+  var m0 = svg(); if(m0){ m0.style.transformOrigin = "50% 50%"; m0.style.transformBox = "fill-box"; }
+  next(5000);
+  window.B5CCLogo = { sheen: function(){ sheen(svg()); } };
 })();
 })();
 </script>
