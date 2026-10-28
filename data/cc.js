@@ -325,7 +325,7 @@ window.B5CC = {
       ],
       jobs:["teacher","caretaker","pastoral","office"],
       game:{ title:"Personnel File", href:"/tools/profile.html", verb:"Open", blurb:"Fill in a very official file all about you. Fibs allowed." },
-      look:{ bg:"#0e7c86", bg2:"#13a3a0", ink:"#ffffff", pop:"#ffd23f", pop2:"#ef7724", motif:"door", pattern:"confetti" }
+      look:{ bg:"#0e7c86", bg2:"#13a3a0", ink:"#ffffff", pop:"#ffd23f", pop2:"#ef7724", motif:"door", pattern:"confetti", scene:"newbeginnings", effect:"confetti", fx:["#ffd23f","#ef7724","#ffffff","#ff4f81"] }
     },
     {
       id:"fitness-day", half:"a1", start:"2026-09-14", end:"2026-09-18",
@@ -342,7 +342,7 @@ window.B5CC = {
       link:["National Fitness Day","https://ukactive.com/national-fitness-day/get-involved/"],
       jobs:["coach","physio","outdoor","trainer"],
       game:{ title:"Training Plan", href:"/practice/training-plan.html", verb:"Open", blurb:"Build a routine of your own, then tick off the days you do it." },
-      look:{ bg:"#ff5a36", bg2:"#ff8c42", ink:"#1a1a2e", pop:"#fff275", pop2:"#2ec4b6", motif:"shoe", pattern:"rays" }
+      look:{ bg:"#ff5a36", bg2:"#ff8c42", ink:"#1a1a2e", pop:"#fff275", pop2:"#2ec4b6", motif:"shoe", pattern:"rays", scene:"fitness" }
     },
     {
       id:"sign-languages", half:"a1", start:"2026-09-21", end:"2026-09-25",
@@ -359,7 +359,7 @@ window.B5CC = {
       link:["International Day of Sign Languages","https://www.un.org/en/observances/sign-languages-day"],
       jobs:["interpreter","salt","deafteacher","access"],
       game:{ title:"Sign It: BSL", href:"/practice/bsl.html", verb:"Play", blurb:"A visual dictionary of BSL signs. Line them up into phrases of your own." },
-      look:{ bg:"#5b2a86", bg2:"#8e44ad", ink:"#ffffff", pop:"#ffd166", pop2:"#06d6a0", motif:"hand", pattern:"dots" }
+      look:{ bg:"#5b2a86", bg2:"#8e44ad", ink:"#ffffff", pop:"#ffd166", pop2:"#06d6a0", motif:"hand", pattern:"dots", scene:"sign" }
     },
     {
       id:"older-persons", half:"a1", start:"2026-09-28", end:"2026-10-02",
@@ -376,7 +376,7 @@ window.B5CC = {
       jobs:["carer","activities","nurse","museum"],
       game:{ title:"Tiny Legends", href:"/practice/tiny-legends.html", verb:"Play", blurb:"Pick an older legend and fight your way through the Memory House." },
       more:[["Tiny Legends: Last Stand","/practice/last-stand.html"],["Ask someone older","/practice/ask-someone-older.html"],["Letters Home","/practice/letters-home.html"]],
-      look:{ bg:"#e9a23b", bg2:"#f4c95d", ink:"#3b1f0e", pop:"#b5442c", pop2:"#fff3d6", motif:"cup", pattern:"stripes" }
+      look:{ bg:"#e9a23b", bg2:"#f4c95d", ink:"#3b1f0e", pop:"#b5442c", pop2:"#fff3d6", motif:"cup", pattern:"stripes", scene:"generations" }
     },
     {
       id:"black-history-month", half:"a1", start:"2026-10-05", end:"2026-10-09",
@@ -392,7 +392,7 @@ window.B5CC = {
       link:["World Space Week","https://www.worldspaceweek.org/p/what-is-wsw"],
       jobs:["aerospace","astronomer","robotics","scicomms"],
       game:{ title:"Sankofa", href:"/practice/sankofa.html", verb:"Play", blurb:"Fly back through Black British history and bring the colour back." },
-      look:{ bg:"#1b1b3a", bg2:"#3a1c71", ink:"#ffffff", pop:"#f6bd2b", pop2:"#2ec27e", motif:"sankofa", pattern:"stars" }
+      look:{ bg:"#1b1b3a", bg2:"#3a1c71", ink:"#ffffff", pop:"#f6bd2b", pop2:"#2ec27e", motif:"sankofa", pattern:"stars", scene:"bhmspace" }
     },
     {
       id:"mental-health", half:"a1", start:"2026-10-12", end:"2026-10-16",
@@ -409,7 +409,7 @@ window.B5CC = {
       link:["World Mental Health Day","https://www.who.int/campaigns/world-mental-health-day"],
       jobs:["counsellor","youth","psych","sportspro"],
       game:{ title:"Endorphin House", href:"/practice/endorphin-house.html", verb:"Play", blurb:"Do satisfying things around a house and collect endorphins." },
-      look:{ bg:"#7fd1c1", bg2:"#b8e6d9", ink:"#16324f", pop:"#ff7aa2", pop2:"#ffd166", motif:"heart", pattern:"waves" }
+      look:{ bg:"#7fd1c1", bg2:"#b8e6d9", ink:"#16324f", pop:"#ff7aa2", pop2:"#ffd166", motif:"heart", pattern:"waves", scene:"wellbeing" }
     },
 
     /* ======================= AUTUMN 2 ======================= */
