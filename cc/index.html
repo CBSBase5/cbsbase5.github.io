@@ -14,6 +14,7 @@
 <script src="/cc/cc-art.js?v=7"></script>
 <script src="/cc/cc-scenes.js?v=8"></script>
 <script src="/cc/qrcode.js?v=1"></script>
+<script src="/cc/cc-face.js?v=1"></script>
 <style>
 /* ==========================================================
    Chilton Bridge School - the Cultural Calendar page
@@ -43,6 +44,9 @@ button{font:inherit;color:inherit}
 .cbstop{background:#fff;color:var(--cbs-teal);position:relative;z-index:5;border-bottom:4px solid var(--cbs-orange)}
 .cbstop .in{max-width:1240px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:16px}
 #markHere{display:flex;font-size:19px;text-decoration:none}
+#markHere .cbsmark{overflow:visible}
+#markHere .cbsmark.breeze .cbs-cable{transform-box:view-box;transform-origin:268px 34px;animation:lgsway 1.8s ease-in-out 4 alternate}
+@keyframes lgsway{from{transform:skewX(-1.8deg)}to{transform:skewX(1.8deg)}}
 .cclabel{display:flex;flex-direction:column;line-height:1.05;padding-left:16px;border-left:2px solid #d9e6ea}
 .cclabel b{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 850;letter-spacing:.06em;text-transform:uppercase;font-size:.95rem;color:var(--cbs-orange)}
 .cclabel span{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#3d5b64;font-weight:700}
@@ -388,6 +392,16 @@ dialog#passport::backdrop{background:rgba(10,15,30,.72)}
 .ppbar{display:flex;align-items:center;gap:10px;background:#13294b;color:#f3d27a;padding:10px 12px}
 .ppbar b{flex:1;font-family:var(--display);font-variation-settings:"wdth" 115,"wght" 900;letter-spacing:.12em;text-transform:uppercase;font-size:.95rem}
 .ppbar .iconbtn{width:40px;height:40px;border-color:#f3d27a;background:#13294b;color:#f3d27a}
+/* pages turn like a real passport: the leaf lifts from the spine (left) and swings over */
+.ppleaves{flex:1;min-height:0;position:relative;display:flex;perspective:1900px;perspective-origin:0 50%}
+.ppleaf{position:absolute;inset:0;z-index:3;transform-style:preserve-3d;transform-origin:0 50%;pointer-events:none}
+.ppleaf .face{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.ppleaf .face.back{transform:rotateY(180deg);background:
+  repeating-radial-gradient(circle at 0 0,rgba(19,41,75,.06) 0 2px,transparent 2px 14px),#f6ecd2}
+.ppleaf .face::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 80%,rgba(0,0,0,.08));opacity:var(--shade,0)}
+.ppunder{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(19,41,75,.28),rgba(19,41,75,0) 70%);opacity:0}
+.ppbook .spine{position:absolute;left:0;top:0;bottom:0;width:10px;z-index:4;pointer-events:none;background:linear-gradient(90deg,rgba(19,41,75,.35),rgba(19,41,75,0))}
+dialog#passport{perspective:2200px}
 .pppage{flex:1;overflow:auto;padding:20px 22px;min-height:0;background:
   repeating-radial-gradient(circle at 100% 0,rgba(19,41,75,.05) 0 2px,transparent 2px 14px),
   repeating-radial-gradient(circle at 0 100%,rgba(239,119,36,.05) 0 2px,transparent 2px 14px),#fdf6e3}
@@ -402,8 +416,12 @@ dialog#passport::backdrop{background:rgba(10,15,30,.72)}
 .ppslot .stamp{width:80px !important}
 .ppslot.soon{opacity:.55}
 .ppid{display:grid;grid-template-columns:130px minmax(0,1fr);gap:18px;align-items:start}
-.ppphoto{width:130px;aspect-ratio:4/5;border:3px solid #13294b;border-radius:10px;background:#fff;display:grid;place-items:center}
+.ppphoto{width:130px;aspect-ratio:4/5;border:3px solid #13294b;border-radius:10px;background:#fff;display:grid;place-items:center;padding:0;cursor:pointer;overflow:hidden}
 .ppphoto svg{width:80%}
+.ppphoto svg.face{width:100%;height:100%;display:block}
+.ppphoto:hover{transform:rotate(-2deg)}
+.ppmake{display:block;width:130px;margin-top:8px;font:inherit;font-weight:700;font-size:.85rem;border:3px solid #13294b;border-radius:12px;padding:6px 8px;background:#f3d27a;color:#13294b;cursor:pointer;box-shadow:3px 4px 0 #13294b}
+.ppbtn .ppbtnface{width:26px;height:26px;border-radius:50%;border:2px solid #f3d27a;background:#fff}
 .ppfield{margin:0 0 12px}
 .ppfield label,.ppfield span{display:block;font-family:var(--display);font-variation-settings:"wdth" 108,"wght" 850;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cbs-teal);margin-bottom:3px}
 .ppfield input{font:inherit;font-weight:700;font-size:1.1rem;width:100%;max-width:280px;padding:6px 10px;border:0;border-bottom:3px dotted #13294b;background:transparent}
@@ -472,6 +490,9 @@ dialog#passport::backdrop{background:rgba(10,15,30,.72)}
 .ct-h{margin:2mm 0 0;font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 900;text-transform:uppercase;font-size:40pt;line-height:1;color:#13294b}
 .ct-to{margin:7mm 0 0;font-size:14pt}
 .ct-name{margin:1mm 0 0;min-width:120mm;font-family:var(--display);font-variation-settings:"wdth" 110,"wght" 850;font-size:32pt;border-bottom:0.6mm dotted #0a2f38;padding:0 4mm 1mm;min-height:16mm}
+.ct-namerow{display:flex;align-items:flex-end;gap:5mm;margin-top:1mm}
+.ct-face{display:block;width:17mm;height:21mm;border:0.6mm solid #13294b;border-radius:2mm;overflow:hidden;line-height:0}
+.ct-face svg{width:100%;height:100%}
 .ct-for{margin:6mm 0 0;font-size:14pt;line-height:1.45;max-width:220mm}
 .ct-for b{font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 900;font-size:22pt;color:#ef7724}
 .ct-stamps{display:flex;flex-wrap:wrap;justify-content:center;gap:4mm;margin:7mm 0 0;max-width:245mm}
@@ -557,7 +578,7 @@ dialog#passport::backdrop{background:rgba(10,15,30,.72)}
   <button class="ppcover" type="button" id="ppCover"></button>
   <div class="ppbook" id="ppBook" hidden>
     <div class="ppbar"><b id="ppTitle">Passport</b><button class="iconbtn" type="button" id="ppClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></button></div>
-    <div class="pppage" id="ppPage" aria-live="polite"></div>
+    <div class="ppleaves" id="ppLeaves"><div class="pppage" id="ppPage" aria-live="polite"></div><span class="spine" aria-hidden="true"></span></div>
     <div class="ppnav"><button type="button" id="ppPrev">Back</button><div class="dots" id="ppDots"></div><button type="button" id="ppNext">Next</button></div>
   </div>
 </dialog>
@@ -674,6 +695,14 @@ var SFX = {
   boing: function(){ blip(220, 520, 0.18, "square", 0.035); setTimeout(function(){ blip(520, 260, 0.2, "square", 0.03); }, 120); },
   thunk: function(){ blip(160, 60, 0.18, "sine", 0.16); },
   whoosh: whoosh,
+  page: function(){
+    var a = ac(); if(!a) return;
+    var len = a.sampleRate * 0.32, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0), i;
+    for(i = 0; i < len; i++){ var t = i / len; d[i] = (Math.random() * 2 - 1) * Math.pow(Math.sin(Math.PI * t), 2) * (0.6 + 0.4 * Math.sin(t * 40)); }
+    var src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t0 = a.currentTime;
+    src.buffer = buf; f.type = "highpass"; f.frequency.setValueAtTime(1800, t0); f.frequency.linearRampToValueAtTime(900, t0 + 0.3);
+    g.gain.setValueAtTime(0.06, t0); src.connect(f); f.connect(g); g.connect(a.destination); src.start(t0);
+  },
   dice: function(){ var i; for(i = 0; i < 5; i++) setTimeout(function(){ blip(300 + Math.random() * 500, 200, 0.05, "square", 0.025); }, i * 55); }
 };
 
@@ -1220,12 +1249,14 @@ function crest(){
 }
 function ppCount(){ var n = W.filter(function(w){ return STAMPS[w.id]; }).length; $("ppCount").textContent = n; return n; }
 function ppPages(){ return 1 + TERMS.length; }
-function ppDraw(){
-  var n = ppPages(), h = "";
+function ppHtml(){
+  var h = "";
   if(PPI === 0){
     var total = ppCount(), name = getName();
     h = '<h3>This passport belongs to</h3><p class="sub">Only on this device. Fill it in if you like.</p>' +
-      '<div class="ppid"><div class="ppphoto">' + A.icon("people", "#13294b", "#fdf6e3") + '</div><div>' +
+      '<div class="ppid"><div><button type="button" class="ppphoto" id="ppPhoto" aria-label="' + (FACE ? "Change my picture" : "Make my picture") + '">' +
+        (FACE && window.B5Face ? B5Face.svg(FACE, { cls: "face" }) : A.icon("people", "#13294b", "#fdf6e3")) + '</button>' +
+        '<button type="button" class="ppmake" id="ppMake">' + (FACE ? "Change my picture" : "Make my picture") + '</button></div><div>' +
       '<div class="ppfield"><label for="ppName">Name or initials</label><input id="ppName" maxlength="28" autocomplete="off" value="' + esc(name) + '"></div>' +
       '<div class="ppfield"><span>School</span><b>Chilton Bridge School</b></div>' +
       '<div class="ppfield"><span>Stamps so far</span><b class="ppbig">' + total + '</b></div></div></div>' +
@@ -1243,12 +1274,41 @@ function ppDraw(){
     if(certReady(term) && got.length) h += '<div class="certbox"><p>Your ' + esc(term.name.toLowerCase()) + ' certificate is ready.</p><button class="play" type="button" id="certBtn">Print my certificate</button></div>';
     else if(!certReady(term)){ var last = ws[ws.length - 1]; h += '<div class="certbox wait"><p>Your certificate unlocks ' + esc(nice(last.start, true)) + '. Every stamp goes on it.</p></div>'; }
   }
+  return h;
+}
+function ppChrome(){
+  var n = ppPages();
+  $("ppTitle").textContent = PPI === 0 ? "Passport" : TERMS[PPI - 1].name;
+  $("ppDots").innerHTML = Array.apply(null, Array(n)).map(function(_, i){ return '<i class="' + (i === PPI ? "on" : "") + '"></i>'; }).join("");
+  $("ppPrev").disabled = PPI === 0; $("ppNext").disabled = PPI === n - 1;
+}
+function ppDraw(){
+  var n = ppPages(), h = ppHtml();
   $("ppPage").innerHTML = h;
   $("ppTitle").textContent = PPI === 0 ? "Passport" : TERMS[PPI - 1].name;
   $("ppDots").innerHTML = Array.apply(null, Array(n)).map(function(_, i){ return '<i class="' + (i === PPI ? "on" : "") + '"></i>'; }).join("");
   $("ppPrev").disabled = PPI === 0; $("ppNext").disabled = PPI === n - 1;
   var nm = $("ppName"); if(nm) nm.addEventListener("input", function(){ try{ localStorage.setItem(NAME_K, nm.value.trim()); }catch(e){} });
+  ["ppPhoto", "ppMake"].forEach(function(id){ var b = $(id); if(b && window.B5Face) b.addEventListener("click", ppMaker); });
   var cb = $("certBtn"); if(cb) cb.addEventListener("click", function(){ SFX.tick(); var t = TERMS[PPI - 1]; $("passport").close(); printSheet(certificate(t), true); });
+}
+/* ---------- a profile picture, made in the passport (/cc/cc-face.js) ---------- */
+var FACE = window.B5Face ? B5Face.load() : null;
+function ppMaker(){
+  SFX.pop();
+  $("ppTitle").textContent = "My picture";
+  $("ppPrev").disabled = true; $("ppNext").disabled = true;
+  B5Face.maker($("ppPage"), FACE || B5Face.random(), function(f){
+    if(f){ FACE = f; ppFaceBtn(); toast("Lovely. That is your passport picture."); }
+    ppDraw();
+    var b = $("ppPhoto"); if(b) b.focus();
+  }, function(n){ if(SFX[n]) SFX[n](); });
+  var first = $("ppPage").querySelector(".fm-opts button"); if(first) first.focus();
+}
+/* the Passport button wears the picture once there is one */
+function ppFaceBtn(){
+  var b = $("ppBtn"); if(!b || !FACE || !window.B5Face) return;
+  var old = b.querySelector("svg"); if(old) old.outerHTML = B5Face.svg(FACE, { cls: "face ppbtnface", still: true, round: true });
 }
 function ppOpen(){
   ppCount();
@@ -1260,10 +1320,79 @@ function ppOpen(){
   var d = $("passport"); if(d.showModal) d.showModal(); else d.setAttribute("open", "");
 }
 $("ppBtn").addEventListener("click", function(){ SFX.pop(); ppOpen(); });
-$("ppCover").addEventListener("click", function(){ SFX.whoosh(); $("ppCover").hidden = true; $("ppBook").hidden = false; ppDraw(); $("ppClose").focus(); });
+$("ppCover").addEventListener("click", function(){
+  var cv = $("ppCover"), bk = $("ppBook");
+  function show(){ cv.hidden = true; cv.style.transform = ""; bk.hidden = false; ppDraw(); $("ppClose").focus(); }
+  if(REDUCED || !Element.prototype.animate){ SFX.whoosh(); show(); return; }
+  if(cv.dataset.opening) return;
+  cv.dataset.opening = "1"; SFX.page();
+  cv.style.transformOrigin = "0 50%";
+  var a = cv.animate([{ transform: "perspective(1400px) rotateY(0deg)" }, { transform: "perspective(1400px) rotateY(-22deg)", offset: .25 }, { transform: "perspective(1400px) rotateY(-110deg)", opacity: 1, offset: .85 }, { transform: "perspective(1400px) rotateY(-120deg)", opacity: 0 }],
+    { duration: 650, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" });
+  a.onfinish = function(){
+    delete cv.dataset.opening; show(); a.cancel();
+    bk.animate([{ transform: "perspective(1600px) rotateY(14deg) scale(.96)", opacity: 0 }, { transform: "perspective(1600px) rotateY(0) scale(1)", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.2,1.2,.4,1)" });
+  };
+});
 $("ppClose").addEventListener("click", function(){ $("passport").close(); });
-$("ppPrev").addEventListener("click", function(){ if(PPI > 0){ PPI--; SFX.pop(); ppDraw(); } });
-$("ppNext").addEventListener("click", function(){ if(PPI < ppPages() - 1){ PPI++; SFX.pop(); ppDraw(); } });
+/* ---------- turning a page ----------
+   Next: the page you are on lifts from the spine and swings away to
+   the left, showing its blank back, and the next page is underneath.
+   Back: the previous page swings back over from the left. */
+var TURNING = false;
+function leafFrom(html, scroll){
+  var leaf = document.createElement("div"), clean = html.replace(/ id="[^"]*"/g, "").replace(/ for="[^"]*"/g, "");
+  leaf.className = "ppleaf";
+  leaf.innerHTML = '<div class="face front pppage">' + clean + '</div><div class="face back"></div>';
+  leaf.firstChild.scrollTop = scroll || 0;
+  return leaf;
+}
+function turn(dir){
+  var to = PPI + dir;
+  if(to < 0 || to >= ppPages() || TURNING) return;
+  if(REDUCED || !Element.prototype.animate){ PPI = to; SFX.pop(); ppDraw(); return; }
+  TURNING = true; SFX.page();
+  var box = $("ppLeaves"), page = $("ppPage"), under = document.createElement("span"), leaf, ease = "cubic-bezier(.45,.05,.25,1)", dur = 760;
+  under.className = "ppunder"; box.appendChild(under);
+  if(dir > 0){
+    leaf = leafFrom(page.innerHTML, page.scrollTop);
+    box.appendChild(leaf);
+    PPI = to; ppDraw(); page.scrollTop = 0;
+    leaf.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(-38deg) translateZ(20px)", offset: .3 }, { transform: "rotateY(-180deg)" }], { duration: dur, easing: ease, fill: "forwards" });
+    leaf.firstChild.animate([{ "--shade": 0, opacity: 1 }, { opacity: 1, offset: .45 }, { opacity: .9 }], { duration: dur, fill: "forwards" });
+    under.animate([{ opacity: .9 }, { opacity: 0 }], { duration: dur, easing: "ease-out", fill: "forwards" });
+  } else {
+    var keep = PPI; PPI = to;
+    leaf = leafFrom(ppHtml(), 0);
+    PPI = keep; box.appendChild(leaf);
+    leaf.animate([{ transform: "rotateY(-180deg)" }, { transform: "rotateY(-142deg) translateZ(20px)", offset: .7 }, { transform: "rotateY(0deg)" }], { duration: dur, easing: ease, fill: "forwards" });
+    under.animate([{ opacity: 0 }, { opacity: .9 }], { duration: dur, easing: "ease-in", fill: "forwards" });
+    PPI = to; ppChrome();
+  }
+  setTimeout(function(){
+    if(dir < 0) ppDraw();
+    if(leaf.parentNode) leaf.parentNode.removeChild(leaf);
+    if(under.parentNode) under.parentNode.removeChild(under);
+    TURNING = false;
+  }, dur + 30);
+}
+$("ppPrev").addEventListener("click", function(){ turn(-1); });
+$("ppNext").addEventListener("click", function(){ turn(1); });
+/* arrow keys, and a swipe on a phone or tablet */
+$("passport").addEventListener("keydown", function(e){
+  if($("ppBook").hidden || (e.target && e.target.tagName === "INPUT")) return;
+  if(e.key === "ArrowRight"){ e.preventDefault(); turn(1); }
+  if(e.key === "ArrowLeft"){ e.preventDefault(); turn(-1); }
+});
+(function(){
+  var x0 = null, y0 = 0, box = $("ppLeaves");
+  box.addEventListener("touchstart", function(e){ var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive: true });
+  box.addEventListener("touchend", function(e){
+    if(x0 === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) turn(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
 $("passport").addEventListener("click", function(e){ if(e.target === this) this.close(); });
 
 /* ---------- a term certificate ---------- */
@@ -1272,7 +1401,7 @@ function certificate(term){
   return '<div class="sheet a4l"><div class="ct-frame"></div><div class="ct-in">' + A.logo({ stack: true }) +
     '<p class="ct-k">Cultural Calendar 2026/27</p>' +
     '<h1 class="ct-h">' + esc(term.name) + ' certificate</h1>' +
-    '<p class="ct-to">This is to say that</p><div class="ct-name">' + esc(name) + '</div>' +
+    '<p class="ct-to">This is to say that</p><div class="ct-namerow">' + (FACE && window.B5Face ? '<span class="ct-face">' + B5Face.svg(FACE, { still: true, cls: "face" }) + '</span>' : '') + '<div class="ct-name">' + esc(name) + '</div></div>' +
     '<p class="ct-for">had a go in <b>' + got.length + '</b> ' + (got.length === 1 ? "week" : "weeks") + ' of the Cultural Calendar this term, and found out about ' +
       esc(got.map(function(w){ return w.title; }).join(", ").replace(/, ([^,]*)$/, " and $1")) + '.</p>' +
     '<div class="ct-stamps' + (got.length > 8 ? " many" : "") + '">' + got.map(function(w){ return A.stamp(w, 76); }).join("") + '</div>' +
@@ -1286,6 +1415,58 @@ var start = byHash();
 if(start && !isOpen(start)){ toast(start.title + " opens " + nice(start.start, true) + "."); start = null; try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){} }
 render(start || FOCUS);
 ppCount();
+ppFaceBtn();
+
+/* ---------- the logo, idling ----------
+   Every 20 to 30 seconds one of three things happens, in turn:
+   this week's picture comes to sit on the tall tower and hops, a gull
+   glides in, rests on the tower and flies off, or a breeze sways the
+   cable. Never while the tab is hidden, never with reduced motion. */
+(function(){
+  if(REDUCED || !Element.prototype.animate) return;
+  var NS = "http://www.w3.org/2000/svg", turns = ["visitor", "gull", "breeze"], k = 0;
+  function svg(){ return document.querySelector("#markHere svg.cbsmark"); }
+  function add(el, html){ var g = document.createElementNS(NS, "g"); g.innerHTML = html; el.appendChild(g); return g; }
+  var PLAY = {
+    breeze: function(m){ m.classList.remove("breeze"); void m.getBoundingClientRect(); m.classList.add("breeze"); setTimeout(function(){ m.classList.remove("breeze"); }, 7400); },
+    visitor: function(m){
+      var L = VIEW.look, g = add(m, '<g transform="translate(384 34) scale(2.3)"><circle cx="24" cy="24" r="25" fill="#fff"/>' + A.inner(L.motif, L.pop, L.bg) + '</g>');
+      g.style.transformBox = "fill-box"; g.style.transformOrigin = "50% 100%";
+      var a = g.animate([
+        { transform: "translateY(-140px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1, offset: .12 },
+        { transform: "translateY(0) scale(1.08,.9)", offset: .16 }, { transform: "translateY(0)", offset: .2 },
+        { transform: "translateY(-40px) rotate(-8deg)", offset: .32 }, { transform: "translateY(0)", offset: .42 },
+        { transform: "translateY(0)", offset: .62 }, { transform: "translateY(-34px) rotate(8deg)", offset: .72 }, { transform: "translateY(0)", offset: .8 },
+        { transform: "translateY(0)", opacity: 1, offset: .9 }, { transform: "translateY(-160px)", opacity: 0 }
+      ], { duration: 6200, easing: "ease-in-out" });
+      a.onfinish = function(){ g.remove(); };
+    },
+    gull: function(m){
+      var g = add(m, '<g class="lggull"><g transform="translate(-96 -66) scale(3.2)"><g class="lgwing"><path d="M0 18q14-22 30-4q16-18 30 4q-16-6-30 4q-14-10-30-4z" fill="#fff" stroke="#0a2f38" stroke-width="2.6"/><circle cx="30" cy="16" r="2.6" fill="#0a2f38"/></g></g></g>');
+      var wing = g.querySelector(".lgwing"); wing.style.transformBox = "fill-box"; wing.style.transformOrigin = "50% 100%";
+      var flap = wing.animate([{ transform: "scaleY(1)" }, { transform: "scaleY(.3)" }], { duration: 320, iterations: Infinity, direction: "alternate" });
+      var a = g.animate([
+        { transform: "translate(700px,60px) scale(.7)" }, { transform: "translate(470px,90px) scale(.95)", offset: .3 },
+        { transform: "translate(404px,178px) scale(.9)", offset: .45 }, { transform: "translate(404px,178px) scale(.9)", offset: .78 },
+        { transform: "translate(120px,40px) scale(.7)", opacity: 1, offset: .96 }, { transform: "translate(90px,30px) scale(.7)", opacity: 0 }
+      ], { duration: 8000, easing: "ease-in-out" });
+      /* wings fold while it sits */
+      setTimeout(function(){ flap.pause(); wing.style.transform = "scaleY(.55)"; }, 3500);
+      setTimeout(function(){ wing.style.transform = ""; flap.play(); }, 6200);
+      a.onfinish = function(){ flap.cancel(); g.remove(); };
+    }
+  };
+  function next(){
+    setTimeout(function(){
+      var m = svg();
+      if(m && !document.hidden && !document.body.classList.contains("printing")) PLAY[turns[k++ % turns.length]](m);
+      next();
+    }, 20000 + Math.random() * 10000);
+  }
+  /* a first one soon after the page opens, so people see it is alive */
+  setTimeout(function(){ var m = svg(); if(m && !document.hidden) PLAY[turns[k++]](m); next(); }, 4000);
+  window.B5CCLogo = PLAY;
+})();
 })();
 </script>
 </body>
