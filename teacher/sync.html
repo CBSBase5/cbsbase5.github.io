@@ -179,7 +179,8 @@ kbd,code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86em;backg
       <li><b>Evidence into Buddy (October 2026):</b> paste the newest script, run setup once more and press Allow when Google asks (the script now saves the pictures students make to your Drive, and reads the site's activity list). Then redeploy a new version. Every Autumn 2 activity then writes a row to the Evidence tab and, with "Evidence to Buddy" set to TRUE, a Learning note in Buddy linked to the step it was built for. See <a href="/teacher/evidence.html">Evidence</a>.</li>
       <li><b>Targets from BridgeLink Buddy:</b> run setup once more, then paste the link to your BridgeLink Buddy sheet next to "BridgeLink Buddy sheet" in the Settings tab. My targets then shows each student's steps for the "Targets term" straight from Buddy.</li>
       <li><b>The Autumn 2 activities</b> arrive in folders day by day on their own. To control them from the sheet (hide one, move one), use the button on <a href="/teacher/a2-drops.html">Autumn 2 drops</a>.</li>
-      <li><b>Cultural Calendar school count (October 2026):</b> paste the newest script, Save, run <b>setup</b> once and press Allow if Google asks (the count keeps a secret in the script's own settings), then redeploy a new version. The <a href="/cc/">Cultural Calendar</a> page then counts each person who has a go once, using a scrambled tag rather than their email, in a new CC counts tab. Until then the page simply shows no count.</li>
+      <li><b>Cultural Calendar school count (October 2026):</b> press <b>Copy the script</b> above, then in the sheet open <b>Extensions</b>, <b>Apps Script</b>, click in <code>Code.gs</code>, select everything (Ctrl+A) and paste over it, then <b>Save</b>. Pick <b>setup</b> in the function list at the top, press <b>Run</b> and Allow if Google asks. Then <b>Deploy</b>, <b>Manage deployments</b>, the pencil, <b>Version: New version</b>, <b>Deploy</b>. The URL stays the same. The <a href="/cc/">Cultural Calendar</a> then counts each person who has a go once, using a scrambled tag rather than their email, in a new CC counts tab.
+        <div style="margin-top:10px"><button class="btn btn-quiet" type="button" id="ccCheck">Is the count on yet?</button> <span id="ccState" aria-live="polite"></span></div></li>
       <li><b>Changing the script</b> (if Claude sends a new version): paste it over the old one, Save, then <b>Deploy</b>, <b>Manage deployments</b>, the pencil, <b>Version: New version</b>, <b>Deploy</b>. The URL stays the same.</li>
       <li><b>If a device cannot reach the sheet</b> (the staff room says so at the top): check that browser is signed in to a school Google account. Some managed devices block signed-in Google pages inside other sites; on those, the site simply carries on saving on the device.</li>
       <li><b>If the sheet is ever unreachable</b>, nothing breaks: progress still saves on the device and catches up later, folders fall back to the files on the site, and sends offer Gmail as before.</li>
@@ -204,6 +205,19 @@ try{ here = localStorage.getItem("b5.sync.url") || ""; }catch(e){}
 $("state").textContent = site && !here ? "The shared memory is switched on for every device." :
   here ? "You are trying the shared memory on this device." : "The shared memory is not switched on yet.";
 if(here){ $("url").value = here; $("after").hidden = false; $("stopHere").hidden = false; }
+
+/* the Cultural Calendar count: asks the sheet once, using this device's school sign in */
+$("ccCheck").addEventListener("click", function(){
+  var out = $("ccState");
+  if(!window.B5Site || !B5Site.call || !B5Site.syncUrl){ out.textContent = "The shared memory is not switched on for this device."; return; }
+  out.textContent = "Asking the sheet...";
+  if(B5Site.retryBridge) B5Site.retryBridge();
+  B5Site.call("cccounts", { week: "festivals-of-light", all: true }).then(function(r){
+    if(!r || !r.ok) out.textContent = "Not yet: the sheet is still running the old script. Paste the new one and deploy a new version.";
+    else if(!r.signedIn) out.textContent = "The new script is live, but this browser is not signed in to a school account.";
+    else out.textContent = "Yes, the count is on. " + (r.people || 0) + " " + (r.people === 1 ? "person has" : "people have") + " had a go at Festivals of Light so far.";
+  }, function(){ out.textContent = "Could not reach the sheet from here. Check this browser is signed in to your school Google account, then try again."; });
+});
 
 fetch("/teacher/sync/base5-sheet.gs.txt").then(function(r){ return r.text(); }).then(function(t){ $("code").textContent = t; });
 $("copy").addEventListener("click", function(){
