@@ -19451,6 +19451,106 @@ syncSprite = function (e) {
   w38Glow(e, W38C); if (W38C.r + W38C.g + W38C.b > 0.01) mt.emissive.copy(W38C);
 };
 
+/* ===================== V39: ART PASS, STAGE THREE: EFFECTS, HUD, MENUS ===================== */
+/* Pixel sparks for ordinary hits; cardboard, confetti and packing peanuts for the big moments.
+   The HUD steps back when a fight gets busy, and every menu shares one cardboard and film look. */
+
+/* ---------- pixel sparks ---------- */
+var FX39 = { spark: null, bits: null };
+function fx39SparkTex(i) {
+  return ctex('fx39_spark' + i, 16, 16, function (x) {
+    x.fillStyle = '#fff6c8'; var c = 8;
+    if (i === 0) { x.fillRect(c - 1, c - 4, 2, 8); x.fillRect(c - 4, c - 1, 8, 2); x.fillStyle = '#ffffff'; x.fillRect(c - 1, c - 1, 2, 2); }
+    else if (i === 1) { x.fillRect(c - 1, 1, 2, 14); x.fillRect(1, c - 1, 14, 2); x.fillStyle = '#ffd04a'; [[3, 3], [11, 3], [3, 11], [11, 11]].forEach(function (p) { x.fillRect(p[0], p[1], 2, 2); }); x.fillStyle = '#ffffff'; x.fillRect(c - 2, c - 2, 4, 4); }
+    else if (i === 2) { x.fillStyle = '#ffd04a'; [[7, 0], [7, 14], [0, 7], [14, 7], [2, 2], [12, 2], [2, 12], [12, 12]].forEach(function (p) { x.fillRect(p[0], p[1], 2, 2); }); x.fillStyle = '#fff6c8'; x.fillRect(6, 6, 4, 4); }
+    else { x.fillStyle = '#ff9a3a'; [[7, 0], [0, 7], [14, 9], [9, 14], [1, 1], [13, 13]].forEach(function (p) { x.fillRect(p[0], p[1], 2, 2); }); }
+  });
+}
+var _hitSpark39 = hitSpark;
+hitSpark = function (e, big) {
+  if (!SPR.ART.on || !e || e.x === undefined || G.doom) return _hitSpark39(e, big);
+  var y = (e.y || 0) + (e.sprite ? e.sprite.scale.y * 0.5 : 1.2), sz = big ? 1.7 : 1.05;
+  var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fx39SparkTex(0), transparent: true, depthWrite: false, depthTest: false }));
+  s.position.set(e.x + rnd(-0.25, 0.25), y + rnd(-0.25, 0.25), e.z); s.scale.set(sz, sz, 1); s.renderOrder = 6; G.dyn.add(s);
+  var fr = -1;
+  addFx(s, big ? 0.2 : 0.14, function (f, k) { var i = Math.min(3, Math.floor(k * 4)); if (i !== fr) { fr = i; s.material.map = fx39SparkTex(i); } var q = sz * (1 + k * 0.4); s.scale.set(q, q, 1); if (k >= 1) s.material.dispose(); });
+  if (big) fx39Bits(e.x, y, e.z, 4, 'spark');
+};
+
+/* ---------- cardboard, confetti and packing peanuts ---------- */
+function fx39BitTex(kind, i) {
+  return ctex('fx39_bit_' + kind + i, 8, 8, function (x) {
+    if (kind === 'card') { x.fillStyle = ['#b98a55', '#d1aa77', '#8a6236'][i % 3]; x.fillRect(0, 1, 8, 6); x.fillStyle = 'rgba(0,0,0,.2)'; x.fillRect(0, 5, 8, 1); }
+    else if (kind === 'peanut') { x.fillStyle = '#f4f1e6'; x.fillRect(1, 2, 6, 4); x.fillRect(2, 1, 4, 6); x.fillStyle = '#d8d2c0'; x.fillRect(3, 3, 2, 2); }
+    else if (kind === 'spark') { x.fillStyle = '#ffd04a'; x.fillRect(2, 2, 4, 4); x.fillStyle = '#fff6c8'; x.fillRect(3, 3, 2, 2); }
+    else { x.fillStyle = ['#e2402f', '#f5c518', '#3cc47a', '#3a8ad6', '#ff5fa2'][i % 5]; x.fillRect(1, 2, 6, 3); }
+  });
+}
+function fx39Bits(x, y, z, n, kind) {
+  if (!SPR.ART.on || G.calmOn) return;
+  var q = typeof polQ === 'function' ? polQ() : 1; n = Math.max(1, Math.round(n * q));
+  for (var i = 0; i < n; i++) {
+    var kd = kind === 'mix' ? ['card', 'card', 'peanut', 'conf'][i % 4] : kind, s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fx39BitTex(kd, i), transparent: true, depthWrite: false }));
+    var sz = kd === 'spark' ? 0.18 : (kd === 'peanut' ? 0.26 : 0.22); s.scale.set(sz, sz, 1); s.position.set(x, y, z); G.dyn.add(s);
+    (function (s, vx, vy, vz, spin, life) {
+      var px = x, py = y, pz = z, bounced = false;
+      addFx(s, life, function (f, k, dt) {
+        dt = dt || 1 / 60; vy -= (kd === 'conf' ? 7 : 16) * dt; if (kd === 'conf') { vx *= 0.97; vz *= 0.97; }
+        px += vx * dt; py += vy * dt; pz += vz * dt; if (py < 0.08) { py = 0.08; if (!bounced) { bounced = true; vy = -vy * 0.35; vx *= 0.5; vz *= 0.5; } else { vy = 0; vx *= 0.8; vz *= 0.8; } }
+        s.position.set(px, py, pz); s.material.rotation += spin * dt;
+        if (k > 0.7) s.material.opacity = 1 - (k - 0.7) / 0.3; if (k >= 1) s.material.dispose();
+      });
+    })(s, rnd(-4, 4), rnd(4, 9), rnd(-4, 4), rnd(-14, 14), kd === 'spark' ? 0.35 : rnd(0.9, 1.4));
+  }
+}
+var _explode39 = explode;
+explode = function (x, z, r, dmg, team, src, o) { _explode39(x, z, r, dmg, team, src, o); if (team === 'player') fx39Bits(x, 1, z, 10 + Math.round(r * 2), 'mix'); };
+var _feelKill39 = feelKill;
+feelKill = function (e, o) { _feelKill39(e, o); if (e && !e.prop && ((o && (o.fin || o.crit)) || e.elite)) fx39Bits(e.x, 1.2, e.z, e.elite ? 14 : 8, 'mix'); };
+var _startUlt39 = startUlt;
+startUlt = function (P) { _startUlt39(P); if (P) fx39Bits(P.x, 1.6, P.z, 18, 'conf'); };
+if (typeof bossPhaseBreak === 'function') { var _phase39 = bossPhaseBreak; bossPhaseBreak = function (b, txt) { _phase39(b, txt); if (b) fx39Bits(b.x, 2.4, b.z, 22, 'mix'); }; }
+var _roomCleared39 = roomCleared;
+roomCleared = function (boss) { var was = G.room && G.room.cleared; _roomCleared39(boss); if (!was && G.P && !G.doom) fx39Bits(G.P.x, 2.2, G.P.z, boss ? 30 : 10, 'conf'); };
+
+/* ---------- the HUD steps back when a fight is busy ---------- */
+function hud39Tick() {
+  var busy = G.state === 'play' && G.P && !G.doom && G.room && !G.room.cleared && (liveEnemies().length >= 5 || G.room.type === 'boss' || G.room.type === 'mini');
+  if (busy !== hud39Tick.was) { hud39Tick.was = busy; document.body.classList.toggle('hudbusy', !!busy); }
+}
+var _p30UiTick39 = p30UiTick;
+p30UiTick = function (dt) { _p30UiTick39(dt); hud39Tick(); };
+
+/* ---------- one cardboard and film look for every menu ---------- */
+(function () {
+  var css = [
+    /* the HUD: same cardboard, same tape, quieter in a crowd */
+    'body.hudbusy #hud .hint, body.hudbusy #specwrap .hint { opacity: .18; transition: opacity .5s; }',
+    'body.hudbusy #passives { opacity: .4; transition: opacity .5s; } body.hudbusy #mapbox { opacity: .72; transition: opacity .5s; }',
+    '#hud .hint, #specwrap .hint { background: #2a2018; border-color: #8a6236; color: #f4ead4; border-radius: 2px; transition: opacity .5s; }',
+    '#hud kbd, #specwrap kbd { background: #f4ead4; color: #1b1520; border-color: #8a6236; }',
+    /* panels: a dark film frame with a cardboard edge and tape on two corners */
+    '.panel { background: linear-gradient(180deg, rgba(34,28,44,.97), rgba(20,16,30,.97)); border: 3px solid #b98a55; box-shadow: inset 0 0 0 2px rgba(12,10,22,.9), inset 0 0 0 3px #6d4c2a, 0 14px 36px rgba(0,0,0,.55); border-radius: 3px; }',
+    '.panel::before, .panel::after { width: 46px; height: 16px; background: rgba(230,207,142,.86); transform: rotate(-24deg); box-shadow: 0 1px 2px rgba(0,0,0,.3); border-radius: 1px; }',
+    '.panel::before { top: -6px; left: -14px; } .panel::after { bottom: -6px; right: -14px; transform: rotate(-24deg); }',
+    '.panel h2 { letter-spacing: 1px; text-shadow: 0 3px 0 rgba(0,0,0,.5); }',
+    /* buttons: cardboard; the main one is the tape yellow; the chosen one is pale card */
+    '.btn { background: linear-gradient(180deg, #5c4630, #3e2e20); border: 2px solid #b98a55; color: #f4ead4; border-radius: 3px; box-shadow: 0 3px 0 #2a1e14; }',
+    '.btn:hover, .btn:focus { border-color: #f6dc94; color: #fff6dc; box-shadow: 0 3px 0 #2a1e14, 0 0 14px rgba(246,220,148,.4); background: linear-gradient(180deg, #6e5539, #4a3726); }',
+    '.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2a1e14; }',
+    '.btn.sel { background: linear-gradient(180deg, #e8cfa0, #c9a878); color: #1b1520; border-color: #f6dc94; }',
+    '.btn.sel::before { color: #1b1520; }',
+    '.btn.main { box-shadow: 0 3px 0 #6d5a2a; }',
+    '.btn.red { border-color: #b0483a; }',
+    '.btn:disabled { box-shadow: none; }',
+    /* small cards in menus pick up the same edge */
+    '.mcard, .hcard, .chcard, .case { border-color: #b98a55 !important; }',
+    'kbd { background: #f4ead4; color: #1b1520; border-color: #8a6236; }',
+    '@media (prefers-reduced-motion: reduce) { body.hudbusy #hud .hint { transition: none; } }'
+  ].join('\n');
+  var st = document.createElement('style'); st.id = 'art39css'; st.textContent = css; document.head.appendChild(st);
+})();
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
