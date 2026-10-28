@@ -396,7 +396,32 @@ function mark(){
     '<path d="M13 31v-7M18 31v-11M24 31v-13M30 31v-11M35 31v-7" stroke="#fff" stroke-width="1.8"/><path d="M11 35h26" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>';
 }
 
+/* ---------- readable colours ----------
+   safe(look) gives back the week's colours nudged just enough that
+   words on them pass the 4.5 to 1 contrast guide: bg and bg2 for the
+   ink, and popink (white or dark) for words on the pop colour. */
+function hexRgb(h){ h = String(h).replace("#", ""); return [0, 2, 4].map(function(i){ return parseInt(h.substr(i, 2), 16); }); }
+function rgbHex(c){ return "#" + c.map(function(v){ v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); }
+function lumHex(h){ return hexRgb(h).map(function(v){ v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce(function(a, v, i){ return a + v * [0.2126, 0.7152, 0.0722][i]; }, 0); }
+function contrast(a, b){ var x = lumHex(a), y = lumHex(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function mix(a, b, t){ var x = hexRgb(a), y = hexRgb(b); return rgbHex(x.map(function(v, i){ return v + (y[i] - v) * t; })); }
+function readable(bg, ink){
+  if(contrast(ink, bg) >= 4.5) return bg;
+  var to = lumHex(ink) > 0.4 ? "#000000" : "#ffffff", t;
+  for(t = 0.05; t <= 1; t += 0.05){ var c = mix(bg, to, t); if(contrast(ink, c) >= 4.5) return c; }
+  return to;
+}
+function safe(L){
+  var o = {}, k;
+  for(k in L) o[k] = L[k];
+  o.bg = readable(L.bg, L.ink);
+  o.bg2 = readable(L.bg2, L.ink);
+  o.popink = contrast("#ffffff", L.pop) >= contrast("#0a2f38", L.pop) ? "#ffffff" : "#0a2f38";
+  o.popbg = readable(L.pop, o.popink);   /* pop, for things with words on them */
+  return o;
+}
+
 function inner(name, f, d){ return paint(I[name] || I.star, f, d || f); }
 
-window.B5CCArt = { icon: icon, inner: inner, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
+window.B5CCArt = { icon: icon, inner: inner, safe: safe, contrast: contrast, names: Object.keys(I), pattern: pattern, poster: poster, festivals: festivals, fireworks: fireworks, box: box, stamp: stamp, mark: mark, rng: rng, hash: hashOf };
 })();

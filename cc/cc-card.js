@@ -69,11 +69,12 @@ function html(w, o){
   o = o || {};
   var L = w.look, A = window.B5CCArt, SC = window.B5CCScenes;
   var art = SC && L.scene && SC.has(L.scene) ? SC.draw(L.scene, L) : (A ? '<span class="ccx-motif">' + A.icon(L.motif, L.pop, L.bg2) + '</span>' : "");
-  var popink = lum(L.pop) < 0.36 ? "#ffffff" : "#0a2f38";
+  var SF = A && A.safe ? A.safe(L) : { bg: L.bg, bg2: L.bg2, popink: lum(L.pop) < 0.36 ? "#ffffff" : "#0a2f38", popbg: L.pop };
+  var popink = SF.popink;
   var t = o.home && w.try ? w.try[w.home || 0] : null;
   if(t && Array.isArray(t)) t = { i: t[0], t: t[1] };
   addCss();
-  return '<a class="ccx ' + (o.cls || "") + '" href="/cc/#' + esc(w.id) + '" style="--ccx-bg:' + L.bg + ';--ccx-bg2:' + L.bg2 + ';--ccx-ink:' + L.ink + ';--ccx-pop:' + L.pop + ';--ccx-pop2:' + L.pop2 + ';--ccx-popink:' + popink + '">' +
+  return '<a class="ccx ' + (o.cls || "") + '" href="/cc/#' + esc(w.id) + '" style="--ccx-bg:' + SF.bg + ';--ccx-bg2:' + SF.bg2 + ';--ccx-ink:' + L.ink + ';--ccx-pop:' + SF.popbg + ';--ccx-pop2:' + L.pop2 + ';--ccx-popink:' + popink + '">' +
     '<span class="ccx-art" aria-hidden="true">' + art + '</span><span class="ccx-scrim" aria-hidden="true"></span>' +
     '<span class="ccx-words">' +
       (o.kicker ? '<span class="ccx-k">' + esc(o.kicker) + '</span>' : '') +
@@ -88,7 +89,7 @@ function load(cb){
   if(window.B5CC && window.B5CCArt && window.B5CCScenes){ cb(); return; }
   if(!loading){
     loading = [];
-    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=3", "/cc/cc-scenes.js?v=8"], i = 0;
+    var files = ["/data/cc.js?v=5", "/cc/cc-art.js?v=4", "/cc/cc-scenes.js?v=8"], i = 0;
     (function next(){
       if(i >= files.length){ var q = loading; loading = null; q.forEach(function(f){ f(); }); return; }
       var s = document.createElement("script"); s.src = files[i++]; s.onload = next;
