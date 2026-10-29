@@ -149,7 +149,7 @@ window.EGWDAILY = (window.EGWDAILY || []).concat([
     why: "3 whole symbols = 30 cars. Half a symbol is half of 10, which is 5. So 30 + 5 = <b>35 cars</b>.",
     link: ["data", 2] },
 
-  { s: "maths", type: "mc", q: "Minutes spent on homework (whole numbers from 0 to 59) are going to be grouped. Which set of groups works best?",
+  { s: "maths", type: "mc", q: "Minutes spent getting ready in the morning (whole numbers from 0 to 59) are going to be grouped. Which set of groups works best?",
     options: ["0 to 19, 20 to 39, 40 to 59", "0 to 20, 20 to 40, 40 to 60", "0 to 15, 20 to 35, 40 to 59", "0 to 29, 25 to 59"], answer: 0,
     hint: "Check two things: could any value fit in two groups, and could any value fit in none?",
     why: "<b>0 to 19, 20 to 39, 40 to 59</b> has no gaps and no overlaps. In 0 to 20, 20 to 40, the value 20 fits two groups. In 0 to 15, 20 to 35, the value 17 has nowhere to go.",

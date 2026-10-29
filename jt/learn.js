@@ -88,7 +88,7 @@ var CH = [
   why: "Claim, evidence, explanation, link. Evidence is what makes a claim hard to argue with." },
 { id: "ob2", slug: "objection", title: "Evidence or opinion", type: "sort", buckets: ["Evidence, can be checked", "Opinion"],
   intro: "Good arguments rely on things you can check. Sort these.",
-  items: [["The match finished 3 to 1.", 0], ["It was the best match ever.", 1], ["The survey asked 40 students.", 0], ["Everybody loves the new canteen.", 1], ["The library opens at 8.30.", 0], ["Homework is boring.", 1]],
+  items: [["The match finished 3 to 1.", 0], ["It was the best match ever.", 1], ["The survey asked 40 students.", 0], ["Everybody loves the new canteen.", 1], ["The library opens at 8.30.", 0], ["Mondays are boring.", 1]],
   hint: "Could you look it up or count it? If yes, it is evidence.",
   why: "Facts can be checked. Opinions say what someone feels, so they need evidence to back them up." },
 { id: "pe1", slug: "punctuation-escape", title: "Open the doors", type: "fix",
@@ -292,7 +292,7 @@ var CH2 = [
 /* English */
 { id: "ob3", slug: "objection", tier: 2, title: "Answer the other side", type: "order",
   intro: "A strong argument deals with the other view. Put this paragraph in order.",
-  items: ["Some people argue homework should be banned.", "They say students need time to rest.", "However, short homework helps memory.", "So a little homework, set sensibly, is still worth doing."],
+  items: ["Some people argue phones should be banned in schools.", "They say students need fewer distractions.", "However, a phone can help in an emergency.", "So a phone, kept in a bag, is still worth having."],
   hint: "Start with the other side. Use however to turn it around. Finish with your own point.",
   why: "Say what the other side thinks, show you understand it, then explain why you still disagree." },
 { id: "ob4", slug: "objection", tier: 2, title: "Strong or weak evidence", type: "sort", buckets: ["Strong evidence", "Weak evidence"],

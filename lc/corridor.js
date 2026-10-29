@@ -493,7 +493,7 @@ var ODD = [
   { id: "tile",    pl: ["corridor", "staff"], t: 2, name: "A missing tile", say: "One ceiling tile was missing.", note: "The dark up there goes back further than it should.", f: [0.25, 2.3, 2.4, 300] },
   /* the corridor (and the staff room has a clock too) */
   { id: "clock",   pl: ["corridor", "staff"], t: 2, name: "Thirteen o'clock", say: "The clock had thirteen on it.", note: "Lunch is at 13. Every day.", f: null },
-  { id: "clockback", pl: ["corridor", "staff"], t: 3, name: "A backwards clock", say: "The clock numbers went backwards round the face.", note: "Time is going backwards. Good news for homework.", f: null },
+  { id: "clockback", pl: ["corridor", "staff"], t: 3, name: "A backwards clock", say: "The clock numbers went backwards round the face.", note: "Time is going backwards. Good news for anyone running late.", f: null },
   { id: "clocknone", pl: ["corridor", "staff"], t: 2, name: "No hands", say: "The clock had no hands.", note: "It is no time at all. Restful.", f: null },
   { id: "door",    pl: ["corridor"], t: 2, name: "B12, open", say: "Door B12 was open a crack, with the light on.", note: "B12 is never open. B12 is a cupboard.", f: [-1, 1.0, 1.97, 260] },
   { id: "ext",     pl: ["corridor"], t: 2, name: "No extinguisher", say: "The fire extinguisher had gone.", note: "Someone needed it more. Worrying.", f: [-1, 0.9, 3.3, 200] },

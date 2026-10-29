@@ -263,7 +263,7 @@ window.B5FUN = {
 
   /* [question, choice A, twist A, choice B, twist B]. Tuesdays and Thursdays. */
   silly: [
-    ["Would you rather...", "have a pet that can talk", "It only talks about you. To everyone.", "have a pet that can do your homework", "There is no homework. The pet is very bored."],
+    ["Would you rather...", "have a pet that can talk", "It only talks about you. To everyone.", "have a pet that can tidy your room", "It tidies everything into one big pile. Very neatly."],
     ["Would you rather...", "only be able to whisper", "Everyone leans in closer. Very close.", "only be able to shout", "You are now in charge of all the announcements."],
     ["Would you rather...", "have spaghetti for hair", "Bonnie follows you everywhere.", "have fingers made of chips", "You get hungry every time you count to ten."],
     ["Would you rather...", "always have to hop instead of walk", "You become the fastest hopper in the country. There is a trophy.", "always have to walk backwards", "You always know exactly where you have been."],

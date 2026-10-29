@@ -35,7 +35,7 @@ window.EGWDAILY = (window.EGWDAILY || []).concat([
     link: ["stats-sampling", 4] },
 
   { s: "stats", type: "mc",
-    q: "A survey asks: \"How many hours did you spend on homework last week?\" with boxes <b>0 to 2</b>, <b>2 to 4</b>, <b>4 to 6</b>. What is wrong with the boxes?",
+    q: "A survey asks: \"How many hours did you spend reading last week?\" with boxes <b>0 to 2</b>, <b>2 to 4</b>, <b>4 to 6</b>. What is wrong with the boxes?",
     options: [
       "Some boxes overlap (2 and 4 each fit two boxes), and there is no box for more than 6 hours.",
       "There is no time frame.",

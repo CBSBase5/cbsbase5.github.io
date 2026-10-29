@@ -74,7 +74,7 @@ window.B5PARENTS = {
   helps: [
     ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
     ["Knowing the plan", "Every day has the same shape. If your child likes to know what is coming, the home page shows what is on now and next."],
-    ["Homework", "There is no set homework. The website works at home too, if your child wants to show you anything."],
+    ["At home", "The website works at home too, if your child would like to show you anything."],
     ["Tricky mornings", "If a morning has been hard, a quick word with us or the office helps us shape the day around it."]
   ],
 
