@@ -20121,6 +20121,81 @@ fadeSides = function (dt) {
   });
 };
 
+/* ===================== V46: PICKUPS YOU CAN SPOT AT A GLANCE ===================== */
+/* Every pickup except scraps gets a soft pool of light on the floor beneath it, coloured by what it is
+   (red for hearts and soup, warm white for everyday items, blue and gold for rare and legendary),
+   and a thin bright outline around the item itself that gently pulses. Calm mode keeps the light
+   but stops the pulse. Scraps stay as they were: there are lots of them, and they fly to you anyway. */
+var GLOW46 = { geo: null, pool: {}, line: {}, mats: [] };
+function glow46Colour(p) {
+  if (p.kind === 'heart' || p.kind === 'soup' || p.kind === 'help') return 0xff5a4a;
+  var r = typeof rarityOf === 'function' && p.id ? rarityOf(p.id) : 'common';
+  return r === 'common' ? 0xfff0d0 : RARITY[r].glow;
+}
+function glow46PoolMat(col) {
+  if (GLOW46.pool[col]) return GLOW46.pool[col];
+  var m = new THREE.MeshBasicMaterial({ map: TEX.glow, color: col, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false });
+  m.userData.shared = true; GLOW46.pool[col] = m; return m;
+}
+/* the outline: the item's own picture, grown by a pixel all round and painted bright */
+function glow46LineMat(tex, col) {
+  var k = tex.uuid + '|' + col; if (GLOW46.line[k]) return GLOW46.line[k];
+  var im = tex.image, w = im.width, h = im.height, c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d'), px = Math.max(1, Math.round(w / 32));
+  x.imageSmoothingEnabled = false;
+  // grow the picture's shape by n pixels and fill it with one colour
+  var grow = function (n, fill) {
+    var t = document.createElement('canvas'); t.width = w; t.height = h; var tx = t.getContext('2d'); tx.imageSmoothingEnabled = false;
+    for (var dx = -n; dx <= n; dx++) for (var dy = -n; dy <= n; dy++) if (dx * dx + dy * dy <= n * n + 1) tx.drawImage(im, dx, dy);
+    tx.globalCompositeOperation = 'source-in'; tx.fillStyle = fill; tx.fillRect(0, 0, w, h); return t;
+  };
+  // a dark edge outside a bright one, so it reads on pale paving and dark carpet alike
+  x.drawImage(grow(px * 2, '#1b1520'), 0, 0);
+  x.drawImage(grow(px, '#' + ('000000' + new THREE.Color(col).lerp(new THREE.Color(0xffffff), 0.35).getHexString()).slice(-6)), 0, 0);
+  var t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.userData = { shared: true };
+  var m = new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false, opacity: 0.9 });
+  m.userData.shared = true; GLOW46.line[k] = m; GLOW46.mats.push(m); return m;
+}
+/* a crisp ring on the floor: a coloured band with a thin dark rim */
+function glow46RingMat(col) {
+  var k = 'ring|' + col; if (GLOW46.pool[k]) return GLOW46.pool[k];
+  if (!GLOW46.ringTex) GLOW46.ringTex = ctex('g46ring', 64, 64, function (x) {
+    x.lineWidth = 7; x.strokeStyle = 'rgba(27,21,32,.75)'; x.beginPath(); x.arc(32, 32, 27, 0, 7); x.stroke();
+    x.lineWidth = 4; x.strokeStyle = '#ffffff'; x.beginPath(); x.arc(32, 32, 27, 0, 7); x.stroke();
+  });
+  var m = new THREE.MeshBasicMaterial({ map: GLOW46.ringTex, color: col, transparent: true, opacity: 0.85, depthWrite: false });
+  m.userData.shared = true; GLOW46.pool[k] = m; GLOW46.rings = GLOW46.rings || []; GLOW46.rings.push(m); return m;
+}
+function glow46Add(p) {
+  if (!p || p.kind === 'scrap' || !p.sprite || G.doom) return;
+  var col = glow46Colour(p);
+  if (!GLOW46.geo) { GLOW46.geo = new THREE.PlaneGeometry(1, 1); GLOW46.geo.shared = true; }
+  var pool = new THREE.Mesh(GLOW46.geo, glow46PoolMat(col)); pool.rotation.x = -Math.PI / 2; pool.renderOrder = 1;
+  var ps = p.kind === 'item' || p.kind === 'passive' ? 1.9 : 1.5; pool.scale.set(ps, ps, 1); pool.position.set(p.x, 0.04, p.z); G.dyn.add(pool);
+  var ring = new THREE.Mesh(GLOW46.geo, glow46RingMat(col)); ring.rotation.x = -Math.PI / 2; ring.renderOrder = 1; ring.scale.set(ps * 0.62, ps * 0.62, 1); ring.position.set(p.x, 0.05, p.z); G.dyn.add(ring); ring.userData.s = ps * 0.62;
+  var line = null, map = p.sprite.material && p.sprite.material.map;
+  if (map && map.image && map.image.width) {
+    line = new THREE.Sprite(glow46LineMat(map, col)); line.center.set(0.5, 0); line.scale.copy(p.sprite.scale); line.renderOrder = 2;
+    line.position.copy(p.sprite.position); G.dyn.add(line);
+    p.sprite.renderOrder = Math.max(p.sprite.renderOrder || 0, 3);
+  }
+  p.extra = (p.extra || []).concat(line ? [pool, ring, line] : [pool, ring]); p.g46 = { pool: pool, ring: ring, line: line };
+}
+var _dropPickup46 = dropPickup;
+dropPickup = function (kind, x, z, o) { var p = _dropPickup46(kind, x, z, o); try { glow46Add(p); } catch (e) { } return p; };
+var _updatePickups46 = updatePickups;
+updatePickups = function (dt) {
+  _updatePickups46(dt);
+  var calm = !!G.calmOn, pulse = calm ? 0.75 : 0.55 + 0.4 * (0.5 + 0.5 * Math.sin(G.t * 4.2));
+  GLOW46.mats.forEach(function (m) { m.opacity = pulse; });
+  G.pickups.forEach(function (p) {
+    var g = p.g46; if (!g) return;
+    g.pool.position.set(p.x, 0.04, p.z); g.ring.position.set(p.x, 0.05, p.z);
+    var rs = g.ring.userData.s * (calm ? 1 : 1 + 0.08 * Math.sin(G.t * 4.2)); g.ring.scale.set(rs, rs, 1);
+    if (g.line && p.sprite) { g.line.position.copy(p.sprite.position); g.line.scale.copy(p.sprite.scale); g.line.visible = p.sprite.visible !== false; }
+  });
+};
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
