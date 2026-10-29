@@ -507,7 +507,11 @@ body{font-family:'DDigits','Pixelify Sans',monospace;font-synthesis:none;font-va
 #tip.out{animation:tipOut .35s ease-in forwards}
 @keyframes tipIn{0%{opacity:0;transform:translateY(-14px);filter:brightness(2)}100%{opacity:1;transform:none;filter:none}}
 @keyframes tipOut{to{opacity:0;transform:translateY(-10px)}}
-.tpx{position:absolute;right:8px;top:2px;font-size:20px;opacity:.55}
+.tpx{display:none}
+#fuel.home{animation:fuelHome .6s steps(2) infinite}
+@keyframes fuelHome{50%{filter:brightness(1.8) saturate(1.4)}}
+.tpbar{position:absolute;left:12px;right:12px;bottom:4px;height:2px;border-radius:1px;background:#ffd27a;opacity:.55;transform-origin:left center;animation:tpbar 7s linear forwards}
+@keyframes tpbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .tpstrip,.hcard .tpstrip{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px}
 .tpi{width:34px;height:34px;image-rendering:pixelated;object-fit:contain;animation:tpBob 1.6s ease-in-out infinite}
 .tpi.dim{filter:grayscale(.6) brightness(.55)}
@@ -10272,7 +10276,7 @@ document.addEventListener('mousedown', function () { if (typeof AU !== 'undefine
 /* ===================== soft tips for the shop and the sea, each with a picture of why ===================== */
 /* A small card slides in at the top the first time something new comes up. It shows what to do as a picture strip
    (things, arrows and keys), and underneath, why we do it: the Diwali tradition or idea behind it. It never stops
-   the game, goes away by itself once you have done the thing, and can be turned off in Settings. */
+   the game, goes away by itself after a few seconds (a thin bar shows how long) or once you have done the thing, and can be turned off in Settings. */
 SETTINGS_DEFAULT.tips = true; if (SET.tips === undefined) SET.tips = true;
 var SHADE_SVG = '<svg viewBox="0 0 16 16" width="34" height="34" shape-rendering="crispEdges"><path d="M3 13 Q1 6 6 3 Q11 1 13 6 Q15 11 12 14 Q10 12 8 15 Q6 12 3 13Z" fill="#05060f"/><rect x="5" y="7" width="2" height="1" fill="#f4f2e6"/><rect x="9" y="7" width="2" height="1" fill="#f4f2e6"/></svg>';
 var TIPS = [
@@ -10340,10 +10344,10 @@ var TIPS = [
     why: ['sw_ladoo', 'Every sweet in Nani\'s shop starts with ingredients like these.'],
     when: function (d) { return d.mode === 'swim' && d.bag.length === 0 && d.depthM && d.depthM() > 2; }, done: function (d) { return d.bag.length > 0; } },
   { id: 'surface', at: 'dive', name: 'Going home',
-    pic: [['i', 'bob', 2], ['k', 'ArrowUp'], ['a'], ['i', 'arrow'], ['a'], ['i', 'mbox']],
-    say: 'Swim back up to the jetty to keep everything you found.',
+    pic: [['i', 'lamp', 0, 'dim'], ['a'], ['k', 'ArrowUp'], ['k', 'ArrowUp'], ['a'], ['i', 'mbox']],
+    say: 'Arrow over Bobby? Just enough light left to get home. Swim up!',
     why: ['nani', 'Getting home safe means Nani gets the whole haul.', 3],
-    when: function (d) { return d.mode === 'swim' && (d.bag.length >= 4 || (d.fuel < .45 && d.bag.length > 0)); }, done: function (d) { return d.mode !== 'swim'; } },
+    when: function (d) { return d.mode === 'swim' && (d.turnBack || d.bag.length >= 4 || (d.fuel < .45 && d.bag.length > 0)); }, done: function (d) { return d.mode !== 'swim'; } },
   { id: 'mural', at: 'dive', name: 'Murals',
     pic: [['i', 'bob', 2], ['a'], ['i', 'mural'], ['t', 'wait'], ['a'], ['i', 'mural', 1]],
     say: 'Stay near an old picture in the rock and it wakes up.',
@@ -10399,11 +10403,12 @@ var TIPUI = {
     e.addEventListener('click', function () { TIPUI.close(true); });
     return (this.el = e);
   },
-  show: function (t) { var e = this.ensure(); this.cur = t; this.t = 0; e.innerHTML = '<span class="tpx">&times;</span>' + tipCardHTML(t); e.classList.remove('hide', 'out'); e.classList.toggle('warm', t.at === 'shop'); e.classList.toggle('low', !!t.low); void e.offsetWidth; e.classList.add('in'); if (AU.ctx) { AU.tone(988, .12, 'triangle', .035); AU.tone(1319, .18, 'triangle', .03, .08); } logStat('tip', { id: t.id }); },
+  life: function (t) { var def = t.at === 'dive' ? 7 : 10; return t.at === 'dive' ? Math.min(t.life || def, def) : (t.life || def); },
+  show: function (t) { var e = this.ensure(); this.cur = t; this.t = 0; e.innerHTML = tipCardHTML(t) + '<i class="tpbar" style="animation-duration:' + this.life(t) + 's"></i>'; e.classList.remove('hide', 'out'); e.classList.toggle('warm', t.at === 'shop'); e.classList.toggle('low', !!t.low); void e.offsetWidth; e.classList.add('in'); if (AU.ctx) { AU.tone(988, .12, 'triangle', .035); AU.tone(1319, .18, 'triangle', .03, .08); } logStat('tip', { id: t.id }); },
   close: function (seen) {
     if (!this.cur) return; var e = this.ensure(), t = this.cur;
     if (seen) { G.tips = G.tips || {}; G.tips[t.id] = 1; writeSave(); }
-    this.cur = null; this.gap = 4; e.classList.remove('in'); e.classList.add('out'); setTimeout(function () { if (!TIPUI.cur) e.classList.add('hide'); }, 400);
+    this.cur = null; this.gap = t.at === 'dive' ? 6 : 4; e.classList.remove('in'); e.classList.add('out'); setTimeout(function () { if (!TIPUI.cur) e.classList.add('hide'); }, 400);
   },
   hideNow: function () { if (this.el) this.el.classList.add('hide'); this.cur = null; },
   tick: function (scene, at, dt) {
@@ -10412,8 +10417,8 @@ var TIPUI = {
     if (this.cur) {
       if (this.cur.at !== at) { this.hideNow(); return; }
       if (this.el) this.el.style.visibility = blocked ? 'hidden' : '';
-      this.t += dt; var t = this.cur, min = 3;
-      if ((this.t > min && t.done(scene)) || this.t > (t.life || 22)) this.close(true);
+      this.t += dt; var t = this.cur, min = 2;
+      if ((this.t > min && t.done(scene)) || this.t > this.life(t)) this.close(true);
       return;
     }
     if (blocked || (at === 'dive' && scene.guide)) return;
@@ -10448,6 +10453,108 @@ var TIPUI = {
   };
   var xc = MENU.xcount; MENU.xcount = function () { return this.view === 'howto' ? TIPS.length : xc.apply(this, arguments); };
   var xh = MENU.xchoose; MENU.xchoose = function () { if (this.view === 'howto') { this.xmove(1); return; } return xh.apply(this, arguments); };
+})();
+
+/* ---- 79j_clarity.js ---- */
+/* ===================== the sea, clearer and tighter ===================== */
+/* 1. Everything Bobby can use wears the same little gold diamond, and things to swim into twinkle, so it is
+      easy to tell what is scenery and what is not.
+   2. The lantern really is the clock: it burns faster, faster still the deeper Bobby goes, and when the light
+      left is only just enough to get home, an arrow above Bobby says so. */
+
+/* ---------- the light is the clock ---------- */
+var LANTERN_BURN = [1, 1.3, 1.6, 1.9, 2.2], LANTERN_BURN_OLD = [1, 1.35, 1.7, 2, 2.5];
+CONFIG_DEFAULT.burn = 130;
+if (!(lsGet('deepdiya-tune') || {}).burn) CFG.burn = 130;
+function zoneBurn(y) { var z = zoneAt(y).n; return 1 + .1 * (Math.min(5, z) - 1); }
+(function () {
+  var ds = diveStats;
+  diveStats = function () {
+    var s = ds(), L = gearState().lantern || 0;
+    s.burn = s.burn / LANTERN_BURN_OLD[L] * LANTERN_BURN[L];
+    if (G && G.day === 1 && !G.ng) s.burn *= 1.4;   // the first night stays gentle
+    if (SET.calm) s.burn *= 1.3;
+    return s;
+  };
+  var ls = Dive.prototype.lightShrine;
+  Dive.prototype.lightShrine = function (s) {
+    var was = s.used, f0 = this.fuel; ls.apply(this, arguments);
+    if (!was) this.fuel = Math.min(1, f0 + .3 + (this.S.shrine || 0));
+  };
+  var up = Dive.prototype.update;
+  Dive.prototype.update = function (time, delta) {
+    var b = this.bob, dt = Math.min(.05, delta / 1000), live = this.mode === 'swim' && b && !(this.hitStop > 0);
+    up.call(this, time, delta);
+    if (!live || this.mode !== 'swim' || !this.S) { this.turnBack = false; return; }
+    var under = b.y > SURF + 8, zb = zoneBurn(b.y);
+    // deeper water burns the lantern faster
+    if (under && !this.finale && zb > 1) this.fuel = Math.max(0, this.fuel - dt / this.S.burn * (zb - 1));
+    // is the light left only just enough to swim home?
+    var dm = this.depthM ? this.depthM() : 0, need = 0;
+    if (under && !this.finale) need = (b.y - SURF) * 1.5 / (this.S.maxv * .8) * zb / this.S.burn;
+    var tb = under && !this.finale && dm > 6 && (this.fuel < need * 1.2 + .05 || this.fuel < .2);
+    if (tb && !this.turnBack && !this.turnBackRung) {
+      this.turnBackRung = true;
+      if (AU.ctx) { AU.tone(880, .16, 'triangle', .06); AU.tone(659, .22, 'triangle', .06, .14); AU.tone(523, .34, 'triangle', .05, .3); }
+    }
+    if (!tb && this.fuel > need * 1.6 + .12) this.turnBackRung = false;
+    this.turnBack = tb;
+    var fe = document.getElementById('fuel'); if (fe) fe.classList.toggle('home', tb);
+  };
+})();
+
+/* ---------- marks on things you can use ---------- */
+function clarityDiamond(g, x, y, a, col) {
+  g.fillStyle(0x1a0c06, a * .85);
+  g.fillRect(x - 1, y - 4, 3, 1); g.fillRect(x - 2, y - 3, 5, 1); g.fillRect(x - 3, y - 2, 7, 3); g.fillRect(x - 2, y + 1, 5, 1); g.fillRect(x - 1, y + 2, 3, 1);
+  g.fillStyle(col, a); g.fillRect(x, y - 3, 1, 1); g.fillRect(x - 1, y - 2, 3, 1); g.fillRect(x - 2, y - 1, 5, 1); g.fillRect(x - 1, y, 3, 1); g.fillRect(x, y + 1, 1, 1);
+  g.fillStyle(0xffffff, a * .9); g.fillRect(x, y - 2, 1, 1);
+}
+function clarityTwinkle(g, x, y, a, k) {
+  var n = k > .66 ? 2 : 1;
+  g.fillStyle(0xfff2b8, a); g.fillRect(x - n, y, n * 2 + 1, 1); g.fillRect(x, y - n, 1, n * 2 + 1);
+  g.fillStyle(0xffffff, a); g.fillRect(x, y, 1, 1);
+}
+Dive.prototype.clarityDraw = function () {
+  if (!this.clG) this.clG = this.add.graphics().setDepth(22.1);
+  var g = this.clG; g.clear();
+  if (this.mode !== 'swim' || !this.bob || this.bob.surf) return;
+  var sc = this, b = this.bob, t = this.t, lc = this.lampC || b, R = this.lightRadius(), far = R * 1.35 + 30;
+  var fade = function (x, y) { var d = Math.hypot(x - lc.x, y - lc.y); return clamp((far - d) / (R * .45 + 20), 0, 1); };
+  var top = function (spr, y, pad) { return Math.round((spr ? spr.y - spr.displayHeight * (spr.originY || .5) : y - 8) - (pad || 5)); };
+  var mark = function (x, yTop, near) {
+    var a = fade(x, yTop); if (a <= 0) return;
+    var bob = Math.round(Math.sin(t * 4 + x * .07) * 1.5), pulse = .75 + .25 * Math.sin(t * 5 + x);
+    if (near) { g.lineStyle(1, 0xffd27a, .35 + .3 * pulse); g.strokeCircle(x, yTop + 10, 11 + pulse * 2); }
+    clarityDiamond(g, Math.round(x), yTop + bob, a * pulse, near ? 0xfff2b8 : 0xffd27a);
+  };
+  var nearB = function (x, y, r) { return Math.hypot(x - b.x, y - b.y) < r; };
+  (this.items || []).forEach(function (it) {
+    if (it.taken || Math.abs(it.y - b.y) > 260) return;
+    if (it.kind === 'grab') { var a = fade(it.x, it.y); if (a > 0) { var k = (t * .8 + it.x * .013 + it.y * .007) % 1; clarityTwinkle(g, Math.round(it.x + 5), Math.round(it.y - 6), a * (.35 + .65 * Math.abs(Math.sin(k * Math.PI))), k); } return; }
+    if (it.kind === 'shell' && it.state !== 'closed') return;
+    if (it.kind === 'page' && it.guarded && !G.jatayuDone) return;
+    if (it.kind === 'shell' || it.kind === 'page' || it.kind === 'coax') mark(it.x, top(it.spr, it.y), it === sc.focus);
+  });
+  (this.shrines || []).forEach(function (s) { if (!s.used && Math.abs(s.y - b.y) < 260) mark(s.x, top(s.spr, s.y, 0) + 11, nearB(s.x, s.y - 10, 26)); });
+  (this.caves || []).forEach(function (o) {
+    if (Math.abs(o.y - b.y) > 260) return;
+    if (!o.broken && o.plugSpr) mark(o.plugSpr.x, top(o.plugSpr, o.plugSpr.y), false);
+    else if (o.broken && !o.opened && o.chest) mark(o.chest.x, top(o.chest, o.chest.y), nearB(o.chest.x, o.chest.y, 22));
+  });
+  (this.murals || []).forEach(function (m) { if (!m.awake && Math.abs(m.y - b.y) < 300) mark(m.x, top(m.spr, m.y, 3), nearB(m.x, m.y, 66)); });
+  (this.caches || []).forEach(function (o) { if (!o.got && o.seen > .6) clarityTwinkle(g, Math.round(o.c.x + 6), Math.round(o.c.y - 8), o.seen, (t * 1.3) % 1); });
+  // the way home
+  if (this.turnBack) {
+    var p = .5 + .5 * Math.sin(t * 7), x = Math.round(b.x), y = Math.round(b.y) - 40 + Math.round(Math.sin(t * 5) * 2), col = p > .5 ? 0xff6f91 : 0xffd27a;
+    g.fillStyle(0x1a0c06, .85); g.fillRect(x - 1, y - 6, 3, 1); g.fillRect(x - 2, y - 5, 5, 1); g.fillRect(x - 3, y - 4, 7, 1); g.fillRect(x - 4, y - 3, 9, 1); g.fillRect(x - 5, y - 2, 11, 2); g.fillRect(x - 2, y, 5, 6);
+    g.fillStyle(col, 1); g.fillRect(x, y - 5, 1, 1); g.fillRect(x - 1, y - 4, 3, 1); g.fillRect(x - 2, y - 3, 5, 1); g.fillRect(x - 3, y - 2, 7, 1); g.fillRect(x - 4, y - 1, 9, 1); g.fillRect(x - 1, y, 3, 5);
+    g.fillStyle(0xffffff, .8); g.fillRect(x, y - 4, 1, 1);
+  }
+};
+(function () {
+  var r0 = Dive.prototype.render;
+  Dive.prototype.render = function (dt) { r0.call(this, dt); this.clarityDraw(); };
 })();
 
 /* ---- 80_story_art.js ---- */
@@ -10991,7 +11098,7 @@ BOOK.push(
 /* Phaser reuses the Shop and Dive objects every day, so anything cached on them is cleared here before create runs. */
 (function () {
   var SHOP_KEYS = ['regDone', 'tLights', 'duskT', 'duskAt', 'streetDone', 'signGlow', 'mot', 'birdSfx', 'smoke', 'smokeT', 'shot', 'parents', 'activity', 'cook', 'delivery', 'climb'];
-  var DIVE_KEYS = ['huntsDone', 'huntBeat', 'guardG', 'whG', 'whA', 'whLast', 'whShow', 'waterFX', 'guide', 'gLampDone', 'autoCD', 'autoFlare', 'lensT', 'autoLens', 'lampC'];
+  var DIVE_KEYS = ['huntsDone', 'huntBeat', 'guardG', 'whG', 'whA', 'whLast', 'whShow', 'waterFX', 'guide', 'gLampDone', 'autoCD', 'autoFlare', 'lensT', 'autoLens', 'lampC', 'clG', 'turnBack', 'turnBackRung'];
   var sc0 = Shop.prototype.create;
   Shop.prototype.create = function () { var s = this; SHOP_KEYS.forEach(function (k) { s[k] = undefined; }); return sc0.apply(this, arguments); };
   var dc0 = Dive.prototype.create;
