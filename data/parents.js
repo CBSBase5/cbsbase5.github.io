@@ -42,11 +42,11 @@ window.B5PARENTS = {
 
   safeguarding: {
     /* [name, role], e.g. ["A Name", "Designated Safeguarding Lead"] */
-    team: [],
+    team: [["Helen", "Designated Safeguarding Lead"]],
     office: "",     /* the school office phone number, as published */
     email: "",      /* a safeguarding email address, if the school publishes one */
     policy: "",     /* link to the safeguarding policy on the school website */
-    checked: ""     /* the date these were last checked, e.g. "October 2026" */
+    checked: "October 2026"     /* the date these were last checked, e.g. "October 2026" */
   },
 
   /* The shape of every day, in order. [title, when, what it is like] */
