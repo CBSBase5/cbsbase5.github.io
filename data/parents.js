@@ -36,7 +36,7 @@ window.B5PARENTS = {
   /* How lunch works for Base 5. [title, text] */
   lunch: [
     ["Ordered for them", "We order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],
-    ["Trip days", "The kitchen makes packed lunches, eaten while the group is out."],
+    ["Trip days", "The kitchen makes packed lunches."],
     ["Allergies and diets", "Chilton Bridge is a nut free school. We keep a note of each student's allergies and diet, so please let us or the office know if anything changes."]
   ],
 
