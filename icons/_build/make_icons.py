@@ -8,6 +8,7 @@ them all, in code, as tiny SVG files:
 
   /icons/<name>.svg       the site, each section and each game in the vault
   /<hq>/favicon.svg       one per student HQ: its initials in its own colour
+                          under the orange bridge arch
   /favicon.ico            back up for old browsers (the Base 5 bridge)
   /apple-touch-icon.png   used if someone saves the site to a home screen
 
@@ -15,8 +16,7 @@ All icons are one family with BridgeLink Buddy (/buddy/) and the lunch
 ordering page (/lunch/): a light paper tile, teal for the main shape,
 orange for the warm accent, ink for small details, cyan now and then, and
 Buddy's two dark dot eyes on anything that is a character. Buddy and Lunch
-keep their own icons; the Base 5 bridge and the HQ initials keep the design
-they already had.
+keep their own icons; the Base 5 bridge keeps the design it already had.
 
 Which page wears which icon is decided by its address. The list lives in two
 places that must match: ICON_MAP below (used when adding links to pages) and
@@ -33,7 +33,8 @@ To add an icon for a new game or section:
        <link rel="icon" href="/favicon.ico" sizes="32x32">
        <link rel="icon" href="/icons/<name>.svg" type="image/svg+xml">
 
-Needs cairosvg for the .ico and .png (pip install cairosvg).
+Needs cairosvg for the .ico and .png, and fonttools with brotli for the
+HQ initials (pip install cairosvg fonttools brotli).
 Jekyll does not publish folders starting with _ so this stays private.
 Plain ASCII only.
 """
@@ -187,8 +188,8 @@ ICONS = {
         '<circle cx="32" cy="32" r="4.5" fill="%s"/>' % P),
 
     # ---------- student HQs ----------
-    # Their icons keep the existing design (initials in the HQ's own colour,
-    # the same values as section 18 HQ COLOURS of /style.css): see EXISTING.
+    # Initials in the HQ's own colour (the same values as section 18 HQ
+    # COLOURS of /style.css) under the orange bridge arch: see hq_icon.
 
     # ---------- games in the vault ----------
     "icons/its-time": (P,
@@ -283,8 +284,9 @@ ICONS = {
 }
 
 
-# The site and the HQs already had tab icons (drawn by /data/b5site.js)
-# before this set was made; they keep exactly that design, now as files.
+# The site already had its bridge icon (drawn by /data/b5site.js) and keeps
+# exactly that design, now as a file. The HQ icons were redrawn on the paper
+# tile (29 Oct 2026) so they match the family.
 BRIDGE = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#fffdf8"/>'
           '<path d="M6 44 Q32 8 58 44" fill="none" stroke="#007291" stroke-width="6" stroke-linecap="round"/>'
           '<path d="M20 28v22M32 22v28M44 28v22" stroke="#7fb8c6" stroke-width="3"/>'
@@ -300,11 +302,38 @@ HQ_COLOURS = [  # folder, initials, tile, letters (keep in step with /style.css 
 ]
 
 
+ARCHIVO = os.path.join(ROOT, "games", "timeline-tantrum", "fonts", "archivo-latin-900-normal.woff2")
+
+
+def text_path(text, size, cx, baseline, max_width):
+    """Initials as drawn shapes in Archivo Black (the site's heading font),
+    so they look the same on every device whatever fonts it has.
+    Needs fontTools and brotli (pip install fonttools brotli)."""
+    from fontTools.ttLib import TTFont
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    font = TTFont(ARCHIVO)
+    gs, cmap, upm = font.getGlyphSet(), font.getBestCmap(), font["head"].unitsPerEm
+    names = [cmap[ord(ch)] for ch in text]
+    width = sum(gs[n].width for n in names)
+    scale = min(size / upm, max_width / width)
+    x = cx - width * scale / 2
+    pen = SVGPathPen(gs, ntos=lambda v: ("%.1f" % v).rstrip("0").rstrip("."))
+    for n in names:
+        gs[n].draw(TransformPen(pen, (scale, 0, 0, -scale, x, baseline)))
+        x += gs[n].width * scale
+    return pen.getCommands()
+
+
 def hq_icon(who, bg, ink):
-    fs = 26 if len(who) > 2 else 34
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%s"/>'
-            '<text x="32" y="%d" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="%d" fill="%s">%s</text></svg>\n'
-            % (bg, 44 if fs > 30 else 41, fs, ink, who))
+    # Paper tile like the rest of the family: the orange bridge arch on top,
+    # the HQ's initials in its own colour, and a deck line in that colour.
+    d = text_path(who, 39, 32, 50, 52)
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#fffdf8"/>'
+            '<path d="M9 21Q32 1 55 21" fill="none" stroke="#ef7724" stroke-width="5" stroke-linecap="round"/>'
+            '<path d="%s" fill="%s"/>'
+            '<path d="M13 57H51" stroke="%s" stroke-width="4" stroke-linecap="round"/></svg>\n'
+            % (d, bg, bg))
 
 
 EXISTING = {"icons/base5": BRIDGE}
