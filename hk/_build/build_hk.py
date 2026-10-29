@@ -24,7 +24,7 @@ HK = os.path.join(ROOT, "hk")
 OWN = {"conf.js", "hk.css", "crossy.js"}
 HK_CSS = "/hk/hk.css?v=2"
 FONTS = "&family=Black+Ops+One&family=Rubik:wght@400;500;600;700"
-CROSSY = '<script src="/data/hqgame.js?v=1"></script>\n<script src="/hk/crossy.js?v=6"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/hk/break.js?v=2"></script>'
+CROSSY = '<script src="/data/hqgame.js?v=1"></script>\n<script src="/hk/crossy.js?v=7"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/hk/break.js?v=3"></script>'
 
 
 def must(s, a, b, count=None, where=""):

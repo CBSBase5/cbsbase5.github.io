@@ -18,9 +18,8 @@
      while the float bobs; tap Strike any time, never against a clock.
    - Kit: bucket hat, woolly hat, camo jacket, waders and a glowing
      rod, earned by distance or catches. Looks only.
-   - A checkpoint buoy where each zone starts. One question from
-     HK's core targets ties off there, so a run that ends can carry
-     on from that buoy. Always optional.
+   - A checkpoint buoy where each zone starts. Hopping on it ties
+     off there, so a run that ends can carry on from that buoy.
    - A Lakeside map: zones reached and landmarks found, linked to
      the catch log.
 
@@ -30,14 +29,16 @@
      fishing minigame, gadgets, a life ring, a boat, and two new zones
      (Night lake, Mountain tarn). Kit HK already earned stays earned.
    - Gadgets, one charge a run and a top up at each zone: a decoy duck,
-     a scout drone and a smoke bomb. Geese now patrol some banks.
+     a scout drone and a smoke bomb.
    - Weights for every catch, golden (rare) variants, a trophy wall of
      personal bests, a daily fish of the day, and six more real fish.
    - A weekly era twist: the lake changes each week of Autumn 2, with
      one silly era fish to catch that week only.
    - Secrets: Bonnie, Jay fishing badly, a heron, a lost wellie and a
      robin. Never required, never scored.
-   The checkpoint buoy works exactly as in v2.0.
+   The checkpoint buoy ties off by itself when he hops on it (the
+   buoy questions and the question gate were taken out 29 Oct 2026:
+   the sparks system earns the break).
 
    No timers, no nagging, standing still is always fine.
    Instant restart, calm messages, sound can be turned off.
@@ -93,50 +94,13 @@ function saveStore() {
 }
 loadStore();
 
-/* ---------- runs are earned with questions ----------
-   Jay asked for this: HK answers questions before he can play.
-   GATE_N right answers at the gate earn GATE_RUNS runs.
-   Every PER_RIGHT right answers in his activities or the daily drop earn one more run.
-   Show me never counts. Change the numbers here. */
-var GATE_N = 3, GATE_RUNS = 2, PER_RIGHT = 5;
-var SKIPKEYS = /^b5\.hk\.(hq|crossy|review|daily|swipe|bonnie|sent|skin|scare)/;
-function rightAnswers() {
-  var n = 0, i, k, o, a;
-  try {
-    for (i = 0; i < localStorage.length; i++) {
-      k = localStorage.key(i);
-      if (!k || k.indexOf('b5.hk.') !== 0 || SKIPKEYS.test(k)) continue;
-      try { o = JSON.parse(localStorage.getItem(k)); } catch (e) { continue; }
-      if (!o || typeof o !== 'object' || !o.answers || typeof o.answers !== 'object') continue;
-      for (a in o.answers) {
-        var st = o.answers[a] && o.answers[a].status;
-        if (st === 'right1' || st === 'right2') n++;
-      }
-    }
-    o = JSON.parse(localStorage.getItem('b5.hk.daily.v1') || 'null');
-    if (o && o.days) for (a in o.days) { var r = o.days[a] && o.days[a].r; if (r === 'right1' || r === 'right2') n++; }
-  } catch (e) {}
-  return n;
-}
-function syncCredit() {
-  loadStore();
-  var total = rightAnswers();
-  if (total < store.credited) store.credited = total;   /* an activity was started again */
-  var earn = Math.floor((total - store.credited) / PER_RIGHT);
-  if (earn > 0) { store.runs += earn; store.credited += earn * PER_RIGHT; }
-  saveStore();
-  return total;
-}
-/* When the HQ break gate is on (/hk/break.js), goes are earned with
-   sparks there instead, so runs are free during a break. */
+var GEESE = false;
+
+/* Runs used to be earned with questions. Jay took the questions out
+   (29 Oct 2026): sparks from HQ activities earn the break (/hk/break.js),
+   so every run inside a break is free. */
 function gated() { return !!window.HKGate; }
-function takeRun() {
-  if (gated()) return true;
-  syncCredit();
-  if (store.runs < 1) return false;
-  store.runs--; saveStore();
-  return true;
-}
+function takeRun() { return true; }
 function runsWord(n) { return n === 1 ? '1 run' : n + ' runs'; }
 
 /* ---------- small helpers ---------- */
@@ -333,12 +297,12 @@ var LADDER = [
   { id: 'boots', slot: 'legs', name: 'Boots', at: 0 },
   { id: 'wood', slot: 'rod', name: 'Wooden rod', at: 0 },
   { id: 'float', slot: 'lure', name: 'Classic float', at: 0 },
-  { id: 'duck', slot: 'gadget', name: 'Decoy duck', at: 0, fx: 'Traffic stops for it. Geese adore it.' },
+  { id: 'duck', slot: 'gadget', name: 'Decoy duck', at: 0, fx: 'Traffic stops for it.' },
   { id: 'bucket', slot: 'hat', name: 'Bucket hat', at: 100 },
   { id: 'drone', slot: 'gadget', name: 'Scout drone', at: 200, fx: 'Flies ahead and grabs fish.' },
   { id: 'spinner', slot: 'lure', name: 'Spinner', at: 300, fx: 'Two green zones.' },
   { id: 'camo', slot: 'body', name: 'Camo jacket', at: 400 },
-  { id: 'smoke', slot: 'gadget', name: 'Smoke bomb', at: 500, fx: 'Geese and drones lose track.' },
+  { id: 'smoke', slot: 'gadget', name: 'Smoke bomb', at: 500, fx: 'Patrol drones lose track of you.' },
   { id: 'glow', slot: 'rod', name: 'Glowing rod', at: 650, fx: 'Wider green zone.' },
   { id: 'otter', slot: 'char', name: 'Otter operator', at: 800 },
   { id: 'boat', slot: 'extra', name: 'Dinghy', at: 950, fx: 'Boat trips to any zone. Bigger fish at pegs.' },
@@ -431,45 +395,6 @@ var SECRETS = [
 function secretsFound() { var n = 0; SECRETS.forEach(function (s) { if (store.sec[s.id]) n++; }); return n; }
 var SAYINGS = ['My ears are not a toilet.', 'Unhand me, goblin.', 'When I was in China....', 'Outrageous.', 'In the wise words of my late, great grandfather, stop.'];
 
-/* Checkpoint buoy questions, from HK's core targets (English, Foundation 2):
-   facts in a text, formats, summing up, linking sentences, punctuation.
-   o[0] is right; options are shuffled when shown. */
-var BUOY = [
-  { t: 'Facts', q: '<div class="extract">Lakeside Bait Hut. Open Saturday and Sunday, 8am to 4pm. Maggots &#163;2 a tub.</div>When is the bait hut open?', o: ['Saturday and Sunday', 'Every day', 'Monday to Friday'], why: 'The notice says Saturday and Sunday.' },
-  { t: 'Facts', q: '<div class="extract">Lakeside Bait Hut. Open Saturday and Sunday, 8am to 4pm. Maggots &#163;2 a tub.</div>How much is one tub of maggots?', o: ['&#163;2', '&#163;4', '&#163;8'], why: 'Maggots are &#163;2 a tub.' },
-  { t: 'Facts', q: '<div class="extract">Kai caught a perch at the reed beds. It weighed one pound. He put it back in the water.</div>Where did Kai catch the perch?', o: ['At the reed beds', 'At the weir', 'At the jetty'], why: 'The first sentence says the reed beds.' },
-  { t: 'Facts', q: '<div class="extract">The ferry leaves the jetty at 10:15. It takes 20 minutes to cross the lake.</div>How long does the crossing take?', o: ['20 minutes', '15 minutes', '10 minutes'], why: 'It takes 20 minutes to cross. 10:15 is when it leaves.' },
-  { t: 'Facts', q: '<div class="extract">Club rules: use barbless hooks. Take all litter home. No fishing from the bridge.</div>Where is fishing not allowed?', o: ['From the bridge', 'From the jetty', 'From the reeds'], why: 'The last rule says no fishing from the bridge.' },
-  { t: 'Facts', q: '<div class="extract">Mia and her dad went to the frozen lake on Tuesday. They saw three swans on the ice.</div>How many swans did they see?', o: ['Three', 'Two', 'Four'], why: 'They saw three swans.' },
-  { t: 'Facts', q: '<div class="extract">The Lakeside Fishing Match is on 12 May. There are prizes for the biggest fish. Entry is free.</div>How much does it cost to enter?', o: ['Nothing, it is free', '&#163;12', '&#163;5'], why: 'Entry is free.' },
-  { t: 'Formats', q: 'You are writing a letter. Where does <b>Dear Sam,</b> go?', o: ['At the start', 'In the middle', 'At the very end'], why: 'The greeting opens a letter.' },
-  { t: 'Formats', q: 'Which is the best way to end a letter to a friend?', o: ['See you soon, Alex', 'Dear Alex,', 'Once upon a time'], why: 'A letter ends with a sign off and your name.' },
-  { t: 'Formats', q: 'What does a poster for a fishing match need most?', o: ['A big clear title, the date and the place', 'Lots of tiny writing and no title', 'A greeting like Dear Sir'], why: 'A poster needs to be read quickly, so the key facts go big.' },
-  { t: 'Formats', q: 'You are writing instructions for setting up a rod. What helps the reader most?', o: ['Numbered steps in order', 'One long paragraph', 'A sign off at the end'], why: 'Instructions work best as steps in order.' },
-  { t: 'Formats', q: 'What goes in the subject line of an email?', o: ['A few words saying what the email is about', 'The whole message', 'Your home address'], why: 'The subject line is a short title for the email.' },
-  { t: 'Formats', q: 'Which would make the best heading for a leaflet about the weir?', o: ['Staying Safe at the Weir', 'the water was cold and i', 'Thanks, see you later'], why: 'A heading is short and tells you what the leaflet is about.' },
-  { t: 'Formats', q: 'In a diary entry, what usually goes at the top?', o: ['The day or the date', 'A list of prices', 'A sign off'], why: 'A diary entry starts with the day or date.' },
-  { t: 'Summing up', q: '<div class="extract">Pike hide among the reeds and keep very still.</div><div class="extract">When a small fish swims past, the pike darts out at speed to catch it.</div>Which sentence sums up both parts?', o: ['Pike hide and wait, then dart out to catch fish.', 'Pike are green.', 'Reeds grow in lakes.'], why: 'It covers the hiding and the catching.' },
-  { t: 'Summing up', q: '<div class="extract">In winter the lake can freeze. The ice may be thick near the edge but thin in the middle.</div><div class="extract">Never walk on the ice. Fish from the bank instead.</div>What is the main idea?', o: ['Frozen lakes are risky, so stay off the ice.', 'Ice is cold.', 'Fish swim in the middle.'], why: 'Both parts are about the ice being unsafe.' },
-  { t: 'Summing up', q: '<div class="extract">The old boathouse was built over a hundred years ago. Boats were kept inside.</div><div class="extract">Today it is a cafe where anglers stop for tea.</div>Which sums it up best?', o: ['The old boathouse once stored boats and is now a cafe.', 'Anglers like tea.', 'Boats are made of wood.'], why: 'It covers the past and the present.' },
-  { t: 'Summing up', q: '<div class="extract">Litter at the lake can hurt birds. Old fishing line can wrap around their legs.</div><div class="extract">That is why the club asks everyone to take their litter home.</div>What is the main idea?', o: ['Litter harms wildlife, so take it home.', 'Birds have legs.', 'The club has lots of members.'], why: 'Both parts are about litter and wildlife.' },
-  { t: 'Summing up', q: '<div class="extract">Carp feed on the bottom of the lake. They suck up food from the mud.</div><div class="extract">Many anglers use sweetcorn as bait.</div>Which detail shows that carp feed on the bottom?', o: ['They suck up food from the mud.', 'Anglers use sweetcorn.', 'Carp live in lakes.'], why: 'The mud is at the bottom of the lake.' },
-  { t: 'Summing up', q: '<div class="extract">The ferry runs every hour in summer.</div><div class="extract">In winter it only runs at weekends, because fewer people visit.</div>What is this mainly about?', o: ['When the ferry runs at different times of year', 'How to drive a ferry', 'Why people like summer'], why: 'Both parts tell you when it runs.' },
-  { t: 'Linking', q: 'Pick the best word for the gap.<div class="extract">It started to rain. ___ we packed up the rods.</div>', o: ['So', 'But', 'Because'], why: 'So shows what happened because of the rain.' },
-  { t: 'Linking', q: 'Pick the best word for the gap.<div class="extract">The water was calm. ___ a huge carp jumped out!</div>', o: ['Suddenly,', 'Firstly,', 'Because'], why: 'Suddenly shows something surprising happened.' },
-  { t: 'Linking', q: 'Pick the best word for the gap.<div class="extract">I set up my rod. ___ I put the bait on the hook.</div>', o: ['Next,', 'However,', 'Although'], why: 'Next shows the order things happened in.' },
-  { t: 'Linking', q: 'Pick the best word for the gap.<div class="extract">I wanted to fish at the weir, ___ it was closed.</div>', o: ['but', 'so', 'because'], why: 'But shows something did not go to plan.' },
-  { t: 'Linking', q: 'Which sentence would come first in a paragraph about a fishing trip?', o: ['On Saturday, we went fishing at the lake.', 'Finally, we packed up and went home.', 'After that, I caught a roach.'], why: 'It sets the scene: when and where.' },
-  { t: 'Linking', q: 'Pick the best word for the gap.<div class="extract">Perch have stripes. ___ they have a spiky fin on their back.</div>', o: ['Also,', 'Instead,', 'Finally,'], why: 'Also adds another fact.' },
-  { t: 'Linking', q: 'Which word would start the last sentence of a paragraph about your day?', o: ['Finally', 'Firstly', 'Suddenly'], why: 'Finally shows the end.' },
-  { t: 'Punctuation', q: 'Which sentence is punctuated correctly?', o: ['We went to the lake on Monday.', 'we went to the lake on Monday.', 'We went to the lake on monday'], why: 'A capital letter to start, a capital for Monday, and a full stop.' },
-  { t: 'Punctuation', q: 'What goes at the end?<div class="extract">Did you catch anything</div>', o: ['A question mark ?', 'A full stop .', 'A comma ,'], why: 'It is a question.' },
-  { t: 'Punctuation', q: 'What goes at the end?<div class="extract">Wow, that is a massive pike</div>', o: ['An exclamation mark !', 'A question mark ?', 'A comma ,'], why: 'It shows surprise.' },
-  { t: 'Punctuation', q: 'Which sentence has capital letters in the right places?', o: ['Sam and I fished at Lake Windermere.', 'sam and I fished at lake windermere.', 'Sam and i fished at Lake windermere.'], why: 'Names, places and I always take a capital letter.' },
-  { t: 'Punctuation', q: 'Which sentence is a question?', o: ['Where is the bait box?', 'The bait box is here.', 'Pass me the bait box.'], why: 'It asks something and ends with a question mark.' },
-  { t: 'Punctuation', q: 'Where should the full stop go?<div class="extract">I caught a roach it was silver</div>', o: ['I caught a roach. It was silver.', 'I caught. A roach it was silver.', 'I caught a roach it. Was silver.'], why: 'Each full idea gets its own sentence.' },
-  { t: 'Punctuation', q: 'Which word needs a capital letter?', o: ['london', 'fish', 'lake'], why: 'Names of places start with a capital letter.' }
-];
 
 /* ---------- sprites ---------- */
 var DINO = [
@@ -923,8 +848,8 @@ function grassRow(r, safe) {
       }
     }
   }
-  /* v3.0: a goose patrols some banks (never the first few rows) */
-  if (r > 12 && Math.random() < 0.08 + 0.08 * d) {
+  /* v3.0 geese taken out (Jay, 29 Oct 2026): set GEESE to true to bring them back */
+  if (GEESE && r > 12 && Math.random() < 0.08 + 0.08 * d) {
     var free = [];
     for (c = 0; c < COLS; c++) if (!row.block[c]) free.push(c);
     if (free.length >= 4) row.goose = { x: pick(free), dir: Math.random() < 0.5 ? 1 : -1, honk: 0, ph: Math.random() * 6 };
@@ -1190,7 +1115,7 @@ function useGadget(id) {
   syncGadgets();
 }
 /* the decoy duck: lands on the nearest road ahead and all traffic there
-   stops politely; nearby geese go and admire it */
+   stops politely */
 function dropDuck() {
   var r, row, best = null;
   for (r = P.row + 1; r <= P.row + 4; r++) { row = G.rows[r]; if (row && row.type === 'road') { best = row; break; } }
@@ -1200,7 +1125,7 @@ function dropDuck() {
   G.duck = { row: best.r, x: dx, t: 6, y0: P.row };
   if (best.type === 'road') { best.duckT = 6; }
   sfx('quack');
-  toast(best.type === 'road' ? 'Traffic stops for the duck' : 'The geese love the duck');
+  toast(best.type === 'road' ? 'Traffic stops for the duck' : 'Quack. The duck says hello');
 }
 /* the scout drone: zooms ahead and brings back any fish on the way */
 function launchDrone() {
@@ -1230,7 +1155,7 @@ function updateDrone(dt) {
     if (d.row <= visRow()) { G.drone = null; toast(d.got ? 'Drone back with ' + (d.got === 1 ? '1 fish' : d.got + ' fish') : 'Drone back. Nothing out there'); }
   }
 }
-/* the smoke bomb: geese and patrol drones nearby lose track of you */
+/* the smoke bomb: patrol drones nearby lose track of you */
 function popSmoke() {
   G.smokeT = 7;
   sfx('smoke');
@@ -1438,7 +1363,7 @@ function landHop() {
     }
   }
   updateHud();
-  if (row.buoy === P.x && !row.buoyDone && state === 'play') { P.queued = null; openBuoy(row); return; }
+  if (row.buoy === P.x && !row.buoyDone && state === 'play') tieOff(row);
   if (P.queued && state === 'play') { var q = P.queued; P.queued = null; tryMove(q[0], q[1]); }
   syncCast();
 }
@@ -2421,15 +2346,8 @@ function build() {
     else if (act === 'wear') { store.kit[b.getAttribute('data-slot')] = b.getAttribute('data-id'); saveStore(); syncIcon(); kitCard(); }
     else if (act === 'strike') strike();
     else if (act === 'pegoff' || act === 'pegdone') pegLeave();
-    else if (act === 'bopt') buoyPick(+b.getAttribute('data-i'));
-    else if (act === 'bnext') { BQ.q = nextBuoyQ(); BQ.tries = 0; BQ.settled = false; buoyCard(false); }
-    else if (act === 'bdone' || act === 'bskip') buoyLeave();
     else if (act === 'close') close();
     else if (act === 'resume') resume();
-    else if (act === 'quiz') startQuiz();
-    else if (act === 'qcheck') quizCheck();
-    else if (act === 'qnext') quizNext();
-    else if (act === 'qopt') quizPick(+b.getAttribute('data-i'));
     else if (act === 'acts') { close(); var t = document.getElementById('subjects') || document.getElementById('secSubjects'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth' }); }
   });
   /* tap and swipe on the canvas */
@@ -2538,7 +2456,6 @@ function fishNames(ids) {
 function overCard() {
   state = 'over';
   var m = G.msg || (G.msg = { k: MSG[G.dead] || MSG.squash, line: Math.random() < 0.3 && ERAMSG[ERA.id] && G.dead === 'squash' ? ERAMSG[ERA.id] : pick((MSG[G.dead] || MSG.squash).m) }), s = score(), sv = G.save;
-  var canRun = gated() || store.runs > 0;
   var html = (G.newBest && s > 0 ? '<div class="hkg-badge hkg-pop">New best!</div>' : '') +
     '<h2 style="color:' + m.k.col + '">' + m.k.t + '</h2>' +
     '<p>' + m.line + '</p>' +
@@ -2546,16 +2463,13 @@ function overCard() {
     '<p class="hkg-tip">Reached: ' + ZONES[G.zone].name + (G.runFish.length ? '. Fish: ' + fishNames(G.runFish) : '') + '.</p>';
   if (sv) {
     html += '<button type="button" class="hkg-go" data-act="cont">Carry on from the buoy</button>' +
-      (canRun ? '<button type="button" class="hkg-c2" data-act="again">Start a new run</button>' : '') +
+      '<button type="button" class="hkg-c2" data-act="again">Start a new run</button>' +
       '<p class="hkg-tip">Your place at the ' + ZONES[zoneOf(sv.row)].name + ' buoy is saved. Enter or Space carries on.</p>';
-  } else if (canRun) {
-    html += '<button type="button" class="hkg-go" data-act="again">Again</button>' +
-      '<p class="hkg-tip">' + (gated() ? '' : runsWord(store.runs) + ' left. ') + 'Enter or Space also starts again.</p>';
   } else {
-    html += '<button type="button" class="hkg-go" data-act="again">Earn more runs</button>' +
-      '<p class="hkg-tip">That was your last run for now. A few questions earn more.</p>';
+    html += '<button type="button" class="hkg-go" data-act="again">Again</button>' +
+      '<p class="hkg-tip">Enter or Space also starts again.</p>';
   }
-  if (has('boat') && canRun && boatZones().length) html += '<button type="button" class="hkg-c2" data-act="boat">Take the dinghy out</button>';
+  if (has('boat') && boatZones().length) html += '<button type="button" class="hkg-c2" data-act="boat">Take the dinghy out</button>';
   html += row3() + '<button type="button" class="hkg-c2" data-act="close">Close</button>';
   ui.card.className = 'hkg-card';
   ui.card.innerHTML = html;
@@ -2608,7 +2522,6 @@ function resume() {
 function restart() {
   readLadder();
   newGame();
-  if (!takeRun()) { showGate(); return; }
   state = 'play';
   ui.card.hidden = true; ui.card.innerHTML = ''; ui.card.className = 'hkg-card';
   ui.pause.disabled = false; ui.pause.textContent = 'Pause';
@@ -2617,7 +2530,6 @@ function restart() {
   clearToasts(); syncCast(); syncGadgets();
   updateHud();
   focusStage();
-  runToast();
 }
 /* carry on from the checkpoint buoy: no run used, fish points kept */
 function carryOn() {
@@ -2659,7 +2571,6 @@ function boatCard() {
 function boatTrip(z) {
   if (!ZONES[z] || ZLOCK[z]) return;
   readLadder();
-  if (!takeRun()) { showGate(); return; }
   menuFrom = null;
   newGame({ row: ZONES[z].at, bones: 0, bonePts: 0, runFish: [], startBest: store.best, toastDone: true, trip: true, tripBase: ZONES[z].at });
   G.boat = { t: 1.4 };
@@ -2682,7 +2593,6 @@ function menuBack() {
   var f = menuFrom; menuFrom = null;
   if (f === 'over') overCard();
   else if (f === 'paused') { state = 'paused'; pauseCard(); }
-  else if (f === 'gate') showGate();
   else { state = 'paused'; pauseCard(); }
 }
 function card(html) {
@@ -3177,71 +3087,18 @@ function heronCard(f) {
 function heronDone() { pegLeave(); }
 function pegLeave() { CAST = null; backToPlay(); }
 
-/* ---------- v2.0 checkpoint buoy ---------- */
-var BQ = null, BORDER = [], BI = 0;
-function nextBuoyQ() {
-  if (BI >= BORDER.length) {
-    BORDER = BUOY.map(function (q, i) { return i; });
-    for (var i = BORDER.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = BORDER[i]; BORDER[i] = BORDER[j]; BORDER[j] = t; }
-    BI = 0;
-  }
-  return BUOY[BORDER[BI++]];
-}
-function openBuoy(row) {
-  state = 'buoy';
-  if (ui.cast) ui.cast.hidden = true;
+/* ---------- the checkpoint buoy ----------
+   Hop on it and the run is tied off there: if the run ends, he can
+   carry on from this buoy. No questions (taken out 29 Oct 2026). */
+function tieOff(row) {
+  row.buoyDone = true;
+  G.save = { row: row.r };
   sfx('buoy');
-  BQ = { row: row, q: nextBuoyQ(), tries: 0, settled: false, opts: null };
-  buoyCard(true);
+  toast('Tied off. If this run ends, carry on from here');
 }
-function buoyCard(first) {
-  var q = BQ.q, idx = q.o.map(function (o, i) { return i; });
-  for (var i = idx.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
-  BQ.opts = idx;
-  cardIn((first ? '<h2 style="color:#e2541f">Checkpoint buoy</h2><p>One question ties off here. If this run ends, you can carry on from this buoy.</p>' : '<h2 style="color:#e2541f">Another one</h2>') +
-    '<p class="hkg-tip">' + q.t + '</p><div class="hkg-q">' + q.q + '</div><div class="hkg-opts">' +
-    idx.map(function (oi, n) { return '<button type="button" class="hkg-opt" data-act="bopt" data-i="' + n + '">' + q.o[oi] + '</button>'; }).join('') +
-    '</div><p class="hkg-fb" aria-live="polite"></p>' +
-    '<button type="button" class="hkg-c2" data-act="bskip">Not now, keep going</button>', true);
-}
-function buoyPick(n) {
-  if (!BQ || BQ.settled) return;
-  var btns = ui.card.querySelectorAll('.hkg-opt'), b = btns[n];
-  if (!b || b.disabled) return;
-  if (BQ.opts[n] === 0) { b.className = 'hkg-opt ok'; buoyResult(true); return; }
-  b.className = 'hkg-opt no'; b.disabled = true;
-  BQ.tries++;
-  if (BQ.tries >= 2) {
-    for (var i = 0; i < btns.length; i++) if (BQ.opts[i] === 0) btns[i].className = 'hkg-opt ok';
-    buoyResult(false);
-  } else feedback('Not that one. Have another go.');
-}
-function buoyResult(ok) {
-  BQ.settled = true;
-  var opts = ui.card.querySelectorAll('.hkg-opt');
-  for (var i = 0; i < opts.length; i++) opts[i].disabled = true;
-  var skip = ui.card.querySelector('[data-act="bskip"]'); if (skip) skip.parentNode.removeChild(skip);
-  var fb = ui.card.querySelector('.hkg-fb'), add = '';
-  if (ok) {
-    BQ.row.buoyDone = true;
-    G.save = { row: BQ.row.r };
-    sfx('best');
-    feedback('<b>Tied off!</b> ' + BQ.q.why + ' If this run ends, you can carry on from here.');
-    add = '<button type="button" class="hkg-go" data-act="bdone">Carry on</button>';
-  } else {
-    feedback('That one does not tie off. ' + BQ.q.why);
-    add = '<button type="button" class="hkg-go" data-act="bnext">Try another question</button>' +
-      '<button type="button" class="hkg-c2" data-act="bdone">Keep going without saving</button>';
-  }
-  var box = document.createElement('div'); box.innerHTML = add;
-  while (box.firstChild) fb.parentNode.insertBefore(box.lastChild, fb.nextSibling);
-  var g = ui.card.querySelector('.hkg-go');
-  if (g) { try { g.focus({ preventScroll: true }); } catch (e) {} }
-}
-function buoyLeave() { BQ = null; backToPlay(); }
 function focusStage() { try { ui.canvas.setAttribute('tabindex', '-1'); ui.canvas.focus({ preventScroll: true }); } catch (e) {} }
 
-/* ---------- the gate: answer questions to earn runs ---------- */
+/* ---------- cards ---------- */
 function cardIn(html, wide) {
   ui.card.className = 'hkg-card' + (wide ? ' hkg-wide' : '');
   ui.card.innerHTML = html;
@@ -3250,152 +3107,17 @@ function cardIn(html, wide) {
   var f = ui.card.querySelector('input, .hkg-go, .hkg-opt');
   if (f) { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }
 }
-function showGate() {
-  state = 'gate';
-  if (ui.hint) ui.hint.className = 'hkg-hint gone';
-  cardIn('<h2 style="color:#1f6f99">Gear up first</h2>' +
-    '<p>The squad needs bait. Get ' + GATE_N + ' questions right and you earn ' + runsWord(GATE_RUNS) + '.</p>' +
-    '<p class="hkg-tip">Every ' + PER_RIGHT + ' right answers in your activities or the daily drop earn another run too.</p>' +
-    '<button type="button" class="hkg-go" data-act="quiz">Answer questions</button>' +
-    '<button type="button" class="hkg-c2" data-act="acts">Go to my activities</button>' + row3() +
-    '<button type="button" class="hkg-c2" data-act="close">Close</button>');
-  ui.card.insertBefore(cardIcon(), ui.card.firstChild);
-}
-var Q = null;
-function loadBank(cb) {
-  if (window.EGWDAILY && window.EGWDAILY.length) { cb(); return; }
-  var srcs = ['/lc/daily-bank-maths.js?v=1', '/lc/daily-bank-english.js?v=1'], left = srcs.length;
-  srcs.forEach(function (u) {
-    var sc = document.createElement('script'); sc.src = u;
-    sc.onload = sc.onerror = function () { if (--left === 0) cb(); };
-    document.head.appendChild(sc);
-  });
-}
-function startQuiz() {
-  ui.card.innerHTML = '<p>Getting questions...</p>';
-  loadBank(function () {
-    if (state !== 'gate') return;
-    var bank = (window.EGWDAILY || []).filter(function (q) { return q && (q.type === 'mc' || q.type === 'num'); });
-    if (!bank.length) {   /* no questions could load: do not lock him out */
-      store.runs += 1; saveStore(); quizDone(true); return;
-    }
-    var order = bank.slice();
-    for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
-    Q = { order: order, at: -1, right: 0, cur: null, tries: 0, opts: null, settled: false };
-    quizNext();
-  });
-}
-function dots() {
-  var h = '<div class="hkg-qn" aria-label="' + Q.right + ' of ' + GATE_N + ' right">';
-  for (var i = 0; i < GATE_N; i++) h += '<i' + (i < Q.right ? ' class="on"' : '') + '></i>';
-  return h + '</div>';
-}
-function quizNext() {
-  if (!Q) return;
-  if (Q.right >= GATE_N) { quizDone(false); return; }
-  Q.at = (Q.at + 1) % Q.order.length;
-  var q = Q.cur = Q.order[Q.at];
-  Q.tries = 0; Q.settled = false;
-  var h = dots() + '<div class="hkg-q">' + q.q + '</div>';
-  if (q.type === 'mc') {
-    var idx = q.options.map(function (o, i) { return i; });
-    for (var i = idx.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
-    Q.opts = idx;
-    h += '<div class="hkg-opts">' + idx.map(function (oi, n) {
-      return '<button type="button" class="hkg-opt" data-act="qopt" data-i="' + n + '">' + q.options[oi] + '</button>';
-    }).join('') + '</div>';
-  } else {
-    h += q.boxes.map(function (b, n) {
-      return '<label class="hkg-box">' + (b.label || 'Answer') + ' ' + (b.pre || '') +
-        '<input type="text" inputmode="decimal" autocomplete="off" data-n="' + n + '">' + (b.post || '') + '</label>';
-    }).join('') + '<button type="button" class="hkg-go" data-act="qcheck">Check</button>';
-  }
-  h += '<p class="hkg-fb" aria-live="polite"></p>' +
-    '<button type="button" class="hkg-c2" data-act="close">Close</button>';
-  cardIn(h, true);
-}
-function numOf(v) {
-  v = String(v || '').replace(new RegExp(String.fromCharCode(163), 'g'), '').replace(/,/g, '').replace(/\s+/g, '').replace(/[a-z%]+$/i, '');
-  var m = /^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(v);
-  if (m) return +m[2] ? +m[1] / +m[2] : NaN;
-  return v === '' ? NaN : Number(v);
-}
-function quizPick(n) {
-  if (!Q || Q.settled || !Q.cur) return;
-  var q = Q.cur, btns = ui.card.querySelectorAll('.hkg-opt'), b = btns[n];
-  if (!b || b.disabled) return;
-  if (Q.opts[n] === q.answer) { b.className = 'hkg-opt ok'; quizResult(true); return; }
-  b.className = 'hkg-opt no'; b.disabled = true;
-  Q.tries++;
-  if (Q.tries >= 2) {
-    for (var i = 0; i < btns.length; i++) if (Q.opts[i] === q.answer) btns[i].className = 'hkg-opt ok';
-    quizResult(false);
-  } else feedback('Not that one. ' + (q.hint || 'Have another go.'));
-}
-function quizCheck() {
-  if (!Q || Q.settled || !Q.cur || Q.cur.type !== 'num') return;
-  var q = Q.cur, ins = ui.card.querySelectorAll('.hkg-box input'), ok = true, empty = false;
-  for (var i = 0; i < ins.length; i++) {
-    var b = q.boxes[i], v = numOf(ins[i].value);
-    if (ins[i].value.trim() === '') { empty = true; continue; }
-    var good = isFinite(v) && Math.abs(v - b.a) <= (b.tol || 0.001);
-    ins[i].className = good ? 'ok' : 'no';
-    if (!good) ok = false;
-  }
-  if (empty) { feedback('Pop a number in the box first.'); return; }
-  if (ok) { quizResult(true); return; }
-  Q.tries++;
-  if (Q.tries >= 2) {
-    for (i = 0; i < ins.length; i++) { ins[i].value = String(q.boxes[i].a); ins[i].className = 'ok'; ins[i].disabled = true; }
-    quizResult(false);
-  } else feedback('Not quite. ' + (q.hint || 'Have another go.'));
-}
 function feedback(t) { var f = ui.card.querySelector('.hkg-fb'); if (f) f.innerHTML = t; }
-function quizResult(ok) {
-  Q.settled = true;
-  if (ok) { Q.right++; sfx('bone'); }
-  var q = Q.cur;
-  var opts = ui.card.querySelectorAll('.hkg-opt, .hkg-box input');
-  for (var i = 0; i < opts.length; i++) opts[i].disabled = true;
-  var chk = ui.card.querySelector('[data-act="qcheck"]'); if (chk) chk.parentNode.removeChild(chk);
-  var dd = ui.card.querySelector('.hkg-qn'); if (dd) dd.outerHTML = dots();
-  feedback((ok ? '<b>Yes!</b> ' : 'This one does not count. ') + (q.why || ''));
-  var nx = document.createElement('button');
-  nx.type = 'button'; nx.className = 'hkg-go'; nx.setAttribute('data-act', 'qnext');
-  nx.textContent = Q.right >= GATE_N ? 'Get my runs' : 'Next question';
-  var fb = ui.card.querySelector('.hkg-fb');
-  fb.parentNode.insertBefore(nx, fb.nextSibling);
-  try { nx.focus({ preventScroll: true }); } catch (e) { nx.focus(); }
-}
-function quizDone(fallback) {
-  if (!fallback) { store.runs += GATE_RUNS; saveStore(); sfx('best'); }
-  Q = null;
-  cardIn('<div class="hkg-badge hkg-pop">Fuelled up!</div>' +
-    '<h2 style="color:#1f6f99">' + runsWord(store.runs) + ' ready</h2>' +
-    '<p>Nice work. Off you go.</p><div style="height:12px"></div>' +
-    '<button type="button" class="hkg-go" data-act="again">Play</button>' +
-    '<button type="button" class="hkg-c2" data-act="close">Save them for later</button>');
-  ui.card.insertBefore(cardIcon(), ui.card.firstChild);
-}
-function runToast() {
-  if (!ui.toast || gated()) return;
-  toast(store.runs > 0 ? runsWord(store.runs) + ' left after this' : 'Last run for now');
-}
-
 function onKey(e) {
   if (state === 'closed') return;
   var k = e.key, tgt = e.target, onBtn = tgt && tgt.tagName === 'BUTTON';
   if (k === 'Escape' || k === 'Esc') {
     e.preventDefault();
-    if (state === 'menu') menuBack(); else if (state === 'peg') pegLeave(); else if (state === 'buoy') buoyLeave(); else close();
+    if (state === 'menu') menuBack(); else if (state === 'peg') pegLeave(); else close();
     return;
   }
   if (k === 'Tab') { trapTab(e); return; }
-  if (state === 'gate') {
-    if (k === 'Enter' && tgt && tgt.tagName === 'INPUT') { e.preventDefault(); quizCheck(); }
-    return;
-  }
-  if (state === 'menu' || state === 'buoy') return;
+  if (state === 'menu') return;
   if (state === 'peg') {
     if ((k === ' ' || k === 'Spacebar' || k === 'Enter') && !onBtn) { e.preventDefault(); strike(); }
     return;
@@ -3471,8 +3193,7 @@ function open() {
   document.addEventListener('visibilitychange', onVis);
   lastTs = 0;
   raf = requestAnimationFrame(frame);
-  if (!takeRun()) showGate();
-  else { focusStage(); runToast(); }
+  focusStage();
   syncGadgets();
   /* the era banner, then any unlocks to celebrate */
   var fresh = freshUnlocks();
@@ -3502,7 +3223,7 @@ function close() {
   state = 'closed';
   cancelAnimationFrame(raf); raf = 0;
   clearToasts();
-  CAST = null; BQ = null; menuFrom = null; clearTimeout(eraT);
+  CAST = null; menuFrom = null; clearTimeout(eraT);
   window.removeEventListener('keydown', onKey, true);
   window.removeEventListener('resize', onResize);
   document.removeEventListener('visibilitychange', onVis);
@@ -3518,8 +3239,7 @@ function close() {
 var note = null;
 function updateNote() {
   loadStore(); readLadder();
-  syncCredit();
-  if (note) note.textContent = (store.runs > 0 ? runsWord(store.runs) + ' ready. ' : 'Answer a few questions to earn runs. ') + (store.best > 0 ? 'Best: ' + store.best + '.' : 'No best yet.') +
+  if (note) note.textContent = (store.best > 0 ? 'Best: ' + store.best + '.' : 'No best yet.') +
     (kinds() ? ' Fish found: ' + kinds() + ' of ' + FISH.length + '.' : '');
 }
 function addButton() {
@@ -3548,7 +3268,7 @@ if (TEST) {
     info: function () {
       if (!G) return { state: state, best: store.best, games: store.games, runs: store.runs, credited: store.credited };
       return { state: state, row: P.row, x: P.x, hopping: !!P.hop, onLog: !!P.log, score: score(), maxRow: G.maxRow,
-        bones: G.bones, best: store.best, games: store.games, runs: store.runs, credited: store.credited, rights: rightAnswers(), dead: G.dead, LH: LH, rowType: G.rows[P.row] && G.rows[P.row].type,
+        bones: G.bones, best: store.best, games: store.games, runs: store.runs, credited: store.credited, dead: G.dead, LH: LH, rowType: G.rows[P.row] && G.rows[P.row].type,
         zone: G.zone, far: store.far, kinds: kinds(), log: store.log, marks: store.marks, save: G.save ? G.save.row : null, onPeg: !!onPeg(), cast: ui.cast ? !ui.cast.hidden : false,
         castP: CAST ? CAST.p : null, kit: curKit(), base: G.base, runFish: G.runFish.slice(), gad: G.gad, trip: G.trip };
     },
@@ -3578,12 +3298,6 @@ if (TEST) {
     state: function () { return state; },
     tree: function () { var row = G.rows[P.row]; if (!row || !row.block) return false; var c = Math.round(P.x); row.block[c + (c < COLS - 1 ? 1 : -1)] = 'tree'; return true; },
     eraCatch: function () { if (!CAST) return false; var ef = eraFish(); if (ef) CAST.f = ef; CAST.wellie = false; return !!ef; },
-    buoyAnswer: function (right) {
-      if (!BQ) return false;
-      var bs = ui.card.querySelectorAll('.hkg-opt');
-      for (var i = 0; i < BQ.opts.length; i++) if ((BQ.opts[i] === 0) === !!right && !bs[i].disabled) { buoyPick(i); return true; }
-      return false;
-    },
     fishCanvas: function (id, sil) { return fishCanvas(FISHBY[id], sil); },
     rows: function () { var o = {}; for (var k in G.rows) o[k] = { type: G.rows[k].type, z: G.rows[k].z, ice: !!G.rows[k].ice, ferry: !!G.rows[k].ferry, peg: G.rows[k].peg, buoy: G.rows[k].buoy, mark: G.rows[k].mark, dir: G.rows[k].dir, dock: !!G.rows[k].dock, stone: G.rows[k].stone }; return o; },
     /* replace the row just ahead of the player with a known lane */

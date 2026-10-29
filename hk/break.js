@@ -2,7 +2,7 @@
    HK's Tackle Ops HQ - Lakeside Breach is earned
    Puts Lakeside Breach behind the same earning, break and cooldown
    as the other HQ games (numbers in /data/hqbreak.js). While this
-   is on the page, crossy.js skips its own runs and question gate.
+   is on the page, crossy.js leaves runs to the break (it has no questions now).
    Home page only, after /hk/crossy.js and /data/hqbreak.js.
    ASCII only in this file.
    ========================================================== */
