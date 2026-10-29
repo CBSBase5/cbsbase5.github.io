@@ -83,7 +83,7 @@ def hub_patches(name, s):
                      '      <a href="/practice/day-at-school.html"><b>Story builder</b><span>English, make something</span></a>') + s[b:]
         # LC's own home: the building after hours, Night Corridor, and the jumpscare button,
         # all behind one earned break (HK and JT builds take these out again)
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/night.js?v=2"></script>\n<script src="/data/a2/art.js?v=1"></script>\n<script src="/data/hqgame.js?v=1"></script>\n<script src="/lc/corridor.js?v=3"></script>\n<script src="/lc/jumpscare.js?v=5" data-button="1"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/lc/break.js?v=2"></script>', 1, name)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lc/night.js?v=2"></script>\n<script src="/data/a2/art.js?v=1"></script>\n<script src="/data/hqgame.js?v=1"></script>\n<script src="/lc/corridor.js?v=4"></script>\n<script src="/lc/jumpscare.js?v=5" data-button="1"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/lc/break.js?v=2"></script>', 1, name)
         # no exam for LC, HK or JT: no exam dates, no revision talk
         s = must(s, '<p>Your revision corner. Small chunks, any order, your pace. Nothing here is timed, and it all saves on this device.</p>',
                  '<p>Your own space. Small chunks, any order, your pace. Nothing here is timed, and it all saves and follows you.</p>', 1, name)
