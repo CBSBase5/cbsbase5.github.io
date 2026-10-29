@@ -26,7 +26,7 @@ JT = os.path.join(ROOT, "jt-hq")
 OWN = {"conf.js", "jt.css", "penalty.js", "escape-english.html", "escape-maths.html"}
 JT_CSS = "/jt-hq/jt.css?v=1"
 FONTS = "&family=Oswald:wght@500;600;700"
-CROSSY = '<script src="/data/hqgame.js?v=1"></script>\n<script src="/jt-hq/penalty.js?v=1"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/jt-hq/break.js?v=1"></script>'
+CROSSY = '<script src="/data/hqgame.js?v=1"></script>\n<script src="/jt-hq/penalty.js?v=2"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/jt-hq/break.js?v=1"></script>'
 
 
 def must(s, a, b, count=None, where=""):
