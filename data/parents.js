@@ -20,7 +20,7 @@ window.B5PARENTS = {
 
   /* A short notice at the top of the portal, e.g. a change to the week.
      Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
-  notice: { text: "Monday 2 November is an INSET day, and I look forward to seeing everyone on Tuesday 3 November.", until: "2026-11-03" },
+  notice: { text: "Monday 2 November is an INSET day, and we look forward to seeing everyone on Tuesday 3 November.", until: "2026-11-03" },
 
   /* Who parents get in touch with about Base 5 */
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
@@ -35,9 +35,9 @@ window.B5PARENTS = {
 
   /* How lunch works for Base 5. [title, text] */
   lunch: [
-    ["Ordered for them", "I order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],
+    ["Ordered for them", "We order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],
     ["Trip days", "The kitchen makes packed lunches, eaten while the group is out."],
-    ["Allergies and diets", "Chilton Bridge is a nut free school. I keep a note of each student's allergies and diet, so please let me or the office know if anything changes."]
+    ["Allergies and diets", "Chilton Bridge is a nut free school. We keep a note of each student's allergies and diet, so please let us or the office know if anything changes."]
   ],
 
   safeguarding: {
@@ -51,11 +51,11 @@ window.B5PARENTS = {
 
   /* The shape of every day, in order. [title, when, what it is like] */
   day: [
-    ["Breathe in", "9:30", "A calm arrival. I give everyone time to settle in before anything is asked."],
+    ["Breathe in", "9:30", "A calm arrival. We give everyone time to settle in before anything is asked."],
     ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games to warm up. Nothing is marked."],
     ["Cultural calendar", "10:00", "Half an hour on whatever the school is marking that week, and why people mark it."],
     ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing."],
-    ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, each student at their own level. Most days also have forest school, digital media or horticulture."],
+    ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, which I pitch at each student's level. Most days also have forest school, digital media or horticulture."],
     ["Lunch", "Around midday", "A proper break. On trip days, lunch happens while the group is out."],
     ["The afternoon", "12:30 to 2:00", "Projects on the half term's big question, or GCSE work for those taking exams. Depending on the day, there is also something creative, physical world, PE or preparation for adulthood."],
     ["Breathe out", "2:00", "Winding down together before home time at 2:30."]
@@ -75,7 +75,7 @@ window.B5PARENTS = {
     ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
     ["Knowing the plan", "Every day has the same shape. If your child likes to know what is coming, the home page shows what is on now and next."],
     ["Homework", "There is no set homework. The website works at home too, if your child wants to show you anything."],
-    ["Tricky mornings", "If a morning has been hard, a quick word with me or the office helps me shape the day around it."]
+    ["Tricky mornings", "If a morning has been hard, a quick word with us or the office helps us shape the day around it."]
   ],
 
   /* How the site keeps students safe. Each line is how it actually works. */
