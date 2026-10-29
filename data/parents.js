@@ -20,7 +20,7 @@ window.B5PARENTS = {
 
   /* A short notice at the top of the portal, e.g. a change to the week.
      Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
-  notice: { text: "Welcome back on Tuesday 3 November. Monday 2 November is an INSET day.", until: "2026-11-03" },
+  notice: { text: "Monday 2 November is an INSET day, and I look forward to seeing everyone on Tuesday 3 November.", until: "2026-11-03" },
 
   /* Who parents get in touch with about Base 5 */
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
@@ -35,9 +35,9 @@ window.B5PARENTS = {
 
   /* How lunch works for Base 5. [title, text] */
   lunch: [
-    ["Ordered for them", "Staff order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],
+    ["Ordered for them", "I order each student's lunch from the school kitchen ahead of time, so there is nothing to sort out from home."],
     ["Trip days", "The kitchen makes packed lunches, eaten while the group is out."],
-    ["Allergies and diets", "Chilton Bridge is a nut free school. We keep a note of each student's allergies and diet, so please let Jay or the office know if anything changes."]
+    ["Allergies and diets", "Chilton Bridge is a nut free school. I keep a note of each student's allergies and diet, so please let me or the office know if anything changes."]
   ],
 
   safeguarding: {
@@ -51,7 +51,7 @@ window.B5PARENTS = {
 
   /* The shape of every day, in order. [title, when, what it is like] */
   day: [
-    ["Breathe in", "9:30", "A calm arrival, with time to settle in before anything is asked."],
+    ["Breathe in", "9:30", "A calm arrival. I give everyone time to settle in before anything is asked."],
     ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games to warm up. Nothing is marked."],
     ["Cultural calendar", "10:00", "Half an hour on whatever the school is marking that week, and why people mark it."],
     ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing."],
@@ -75,7 +75,7 @@ window.B5PARENTS = {
     ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
     ["Knowing the plan", "Every day has the same shape. If your child likes to know what is coming, the home page shows what is on now and next."],
     ["Homework", "There is no set homework. The website works at home too, if your child wants to show you anything."],
-    ["Tricky mornings", "If a morning has been hard, a quick word with Jay or the office helps us shape the day."]
+    ["Tricky mornings", "If a morning has been hard, a quick word with me or the office helps me shape the day around it."]
   ],
 
   /* How the site keeps students safe. Each line is how it actually works. */
@@ -83,7 +83,7 @@ window.B5PARENTS = {
     ["No names, photos or work in public", "Students appear on the website by their initials only. No photos of students are shown, and no one's work is public."],
     ["Their own pages are private", "Each student's own space opens only on their school account, a staff account or their own four digit code."],
     ["Trips stay offline", "Where trips go, and when, is never published here. Details come to you directly from school."],
-    ["No chatting between students", "Students cannot message each other. Anything a student sends goes only to Jay, and anything others can see, like the question wall, is checked by Jay first and never shows a name."],
+    ["No chatting between students", "Students cannot message each other. Anything a student sends comes only to me, and anything others can see, like the question wall, is checked by me first and never shows a name."],
     ["Kept by the school", "Progress is saved in the school's own Google account, not by an outside company. Staff pages open only for approved staff accounts."],
     ["Guest mode keeps nothing", "If you look around as a guest, nothing is saved or sent, and no student work is shown."]
   ]
