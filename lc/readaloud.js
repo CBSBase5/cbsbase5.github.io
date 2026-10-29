@@ -5,13 +5,18 @@
    it out loud in the device's own voice. Tap again to stop. It
    never gets in the way of buttons, links or typing boxes.
    Loaded by /lc/jumpscare.js, so it is on LC's pages only.
-   Saves { on } in b5.lc.read.v1 on this device. ASCII only.
+   Saves { on } in b5.lc.read.v1 on this device. The speaking is
+   done by /data/b5speak.js. ASCII only.
    ========================================================== */
 (function(){
 "use strict";
 if(window.LCRead) return;
 var synth = window.speechSynthesis;
 if(!synth || !window.SpeechSynthesisUtterance) return;
+/* the speaking itself is done by /data/b5speak.js (sturdier on school Chromebooks) */
+if(!window.B5Speak && !document.querySelector('script[src^="/data/b5speak.js"]')){
+  var sp = document.createElement("script"); sp.src = "/data/b5speak.js?v=1"; (document.head || document.documentElement).appendChild(sp);
+}
 var KEY = "b5.lc.read.v1";
 var on = false;
 try{ on = !!(JSON.parse(localStorage.getItem(KEY) || "{}").on); }catch(e){}
@@ -32,24 +37,21 @@ document.head.appendChild(css);
 var SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 var btn, tip, current = null;
 
-function voice(){
-  var vs = synth.getVoices() || [];
-  return vs.filter(function(v){ return /en-GB/i.test(v.lang); })[0] || vs.filter(function(v){ return /^en/i.test(v.lang); })[0] || null;
-}
 function stop(){
-  synth.cancel();
+  if(window.B5Speak) window.B5Speak.stop(); else try{ synth.cancel(); }catch(e){}
   if(current){ current.classList.remove("lcr-speaking"); current = null; }
 }
 function say(text, elm){
   stop();
   text = String(text || "").replace(/\s+/g, " ").trim();
   if(!text) return;
-  var u = new SpeechSynthesisUtterance(text.slice(0, 1200));
-  var v = voice(); if(v) u.voice = v;
-  u.lang = "en-GB"; u.rate = .95;
   if(elm){ current = elm; elm.classList.add("lcr-speaking"); }
-  u.onend = u.onerror = function(){ if(current === elm && elm){ elm.classList.remove("lcr-speaking"); current = null; } };
-  synth.speak(u);
+  var done = function(){ if(elm && current === elm){ elm.classList.remove("lcr-speaking"); current = null; } };
+  if(window.B5Speak){ window.B5Speak.say(text, { onend: done }); return; }
+  /* b5speak.js not loaded yet: plain speech */
+  var u = new SpeechSynthesisUtterance(text.slice(0, 1200));
+  u.lang = "en-GB"; u.rate = .95; u.onend = u.onerror = done;
+  say.last = u; synth.speak(u);
 }
 
 var TEXTY = "p,h1,h2,h3,h4,li,label,td,th,blockquote,figcaption,legend,.lcr-text";
@@ -91,7 +93,6 @@ function mount(){
   document.body.appendChild(btn);
   document.addEventListener("click", onTap, true);
   document.addEventListener("keydown", function(e){ if(e.key === "Escape") stop(); });
-  if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = function(){};
   setOn(on);
   if(tip){ tip.remove(); tip = null; }
 }

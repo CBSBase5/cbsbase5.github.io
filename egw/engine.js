@@ -887,21 +887,31 @@ function a2Explain(s, i){
 /* ---------- read it to me (only in an HQ that asks for it) ----------
    A small button at the top of a card that reads out what is showing:
    the question and options, or the part of a learn card revealed so far. */
-function speakStop(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
+/* the speaking is done by /data/b5speak.js (prefers a voice on the device, so it works on school Chromebooks) */
+function speakLoad(){
+  if(window.B5Speak || document.querySelector('script[src^="/data/b5speak.js"]')) return;
+  var sc = document.createElement("script"); sc.src = "/data/b5speak.js?v=1"; document.head.appendChild(sc);
+}
+var speakBtn = null;
+function speakStop(){
+  if(speakBtn){ speakBtn.classList.remove("on"); speakBtn = null; }
+  if(window.B5Speak) window.B5Speak.stop(); else try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+}
 function addReader(where, what){
   if(!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+  speakLoad();
   var b = h("button", "readme", '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Read it to me</span>');
   b.type = "button";
   b.onclick = function(){
-    if(speechSynthesis.speaking){ speakStop(); b.classList.remove("on"); return; }
+    if(speakBtn === b){ speakStop(); return; }
     var txt = textOf(what).replace(/_{2,}/g, " blank ").replace(/\s+/g, " ").trim();
     if(!txt) return;
+    speakStop(); speakBtn = b; b.classList.add("on");
+    var done = function(){ if(speakBtn === b){ b.classList.remove("on"); speakBtn = null; } };
+    if(window.B5Speak){ window.B5Speak.say(txt, { onend: done }); return; }
     var u = new SpeechSynthesisUtterance(txt);
-    u.lang = "en-GB"; u.rate = 0.92;
-    var vs = speechSynthesis.getVoices().filter(function(v){ return /en-GB/i.test(v.lang); });
-    if(vs.length) u.voice = vs[0];
-    u.onend = u.onerror = function(){ b.classList.remove("on"); };
-    speakStop(); b.classList.add("on"); speechSynthesis.speak(u);
+    u.lang = "en-GB"; u.rate = 0.92; u.onend = u.onerror = done;
+    addReader.last = u; speechSynthesis.speak(u);
   };
   where.insertBefore(b, where.firstChild);
 }
