@@ -52,7 +52,7 @@ window.B5PARENTS = {
   /* The shape of every day, in order. [title, when, what it is like] */
   day: [
     ["Breathe in", "9:30", "A quiet arrival, with time to settle before anything is asked."],
-    ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games. Nothing is marked, which is rather the appeal."],
+    ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games to start the day. Nothing is marked."],
     ["Cultural calendar", "10:00", "Half an hour on the day or festival the school is marking that week."],
     ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays, based on discussion rather than writing."],
     ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, with each student working at their own level. Most days also include forest school, digital media or horticulture."],
