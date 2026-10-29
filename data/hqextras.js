@@ -21,7 +21,7 @@ var HQ = window.HQ || { who: "EGW", prefix: "b5.egw.", base: "/egw/" };
 var CAT = window.EGWCAT;
 if(!CAT || !CAT.acts) return;
 var P = HQ.prefix;
-var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|scare|postcard|read)\b/;
+var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|monster|scare|postcard|read)\b/;
 
 function read(k){ try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(e){ return null; } }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }

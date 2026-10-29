@@ -1,6 +1,6 @@
 /* ==========================================================
    Base 5 - HQ games, the shared extras (29 Oct 2026)
-   Every HQ break game (Dunk, Neon Stack, Showstopper, Night
+   Every HQ break game (Dunk, Neon Stack, Monster Movie, Night
    Corridor, Lakeside Breach, Penalty Shootout) uses this for
    the two things Jay asked to be the same in all of them:
 
@@ -80,7 +80,7 @@ function get(k){ try{ return JSON.parse(localStorage.getItem(k) || "null"); }cat
 function put(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
 /* lifetime sparks, counted the same way as /data/hqbreak.js */
-var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|scare|corridor|game)\b/;
+var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|monster|scare|corridor|game)\b/;
 function lifetime(prefix){
   var n = 0, i, k, o;
   try{

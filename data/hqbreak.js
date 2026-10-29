@@ -23,7 +23,7 @@
    1. A game built for this (Dunk, Neon Stack) calls HQBreak({...})
       and this file draws the whole overlay around it.
    2. A game that already has its own screen (HK's Lakeside Breach,
-      JT's Penalty Shootout, LW's Showstopper, LC's jumpscares)
+      JT's Penalty Shootout, LW's Monster Movie, LC's jumpscares)
       is wrapped with HQBreak.wrap({...}): this file only adds the
       launcher, the earning, a break clock pinned on top of the
       game, and a card that ends the break. See wrap() below.
@@ -49,7 +49,7 @@ var SPARKS_PER_GO = 45;
 var BREAK_SECONDS = 300;
 var COOLDOWN_MINUTES = 15;
 
-var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|scare)\b/;
+var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|monster|scare)\b/;
 var TEST = /[?&]hqtest(=|&|$)/.test(location.search);
 var RM = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 
