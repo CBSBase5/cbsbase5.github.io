@@ -20,7 +20,7 @@ window.B5PARENTS = {
 
   /* A short notice at the top of the portal, e.g. a change to the week.
      Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
-  notice: { text: "Welcome back on Tuesday 3 November. Monday 2 November is an INSET day, so there is no school for students that day.", until: "2026-11-03" },
+  notice: { text: "Base 5 returns on Tuesday 3 November. Monday 2 November is an INSET day.", until: "2026-11-03" },
 
   /* Who parents get in touch with about Base 5 */
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
@@ -35,9 +35,9 @@ window.B5PARENTS = {
 
   /* How lunch works for Base 5. [title, text] */
   lunch: [
-    ["Ordered for them", "Base 5 staff order each student's lunch from the school kitchen ahead of time, so there is nothing to order from home."],
-    ["Trip days", "On trip days the kitchen makes packed lunches, and lunch happens while the group is out."],
-    ["Allergies and diets", "Chilton Bridge is a nut free school. Base 5 keeps a note of each student's allergies and diet for ordering. If anything changes, please tell Jay or the school office."]
+    ["Ordered by staff", "Staff order each student's lunch from the school kitchen in advance, so there is nothing to arrange from home."],
+    ["Trip days", "The kitchen provides packed lunches, eaten while the group is out."],
+    ["Allergies and diets", "Chilton Bridge is a nut free school. We keep a record of each student's allergies and dietary needs, so please let Jay or the school office know of any changes."]
   ],
 
   safeguarding: {
@@ -51,40 +51,40 @@ window.B5PARENTS = {
 
   /* The shape of every day, in order. [title, when, what it is like] */
   day: [
-    ["Breathe in", "9:30", "A calm arrival. Nobody is asked anything straight away: time to come in, settle and land."],
-    ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games to warm up. Nothing is marked or written up."],
-    ["Cultural calendar", "10:00", "Half an hour on whatever the calendar is marking that week, and why people mark it at all."],
-    ["PHSE with Willow", "10:30, three days", "A quarter of an hour on Mondays, Thursdays and Fridays. Talking rather than writing, and nothing to hand in."],
-    ["The main sessions", "Late morning", "Maths and English in short chunks, each student in their own space on the site, pitched at where they are. Most days also have a practical session: forest school, digital media or horticulture."],
-    ["Lunch", "Around midday", "A proper break. On trip days, lunch happens while the group is out."],
-    ["The afternoon", "12:30 to 2:00", "Each student's own project on the half term's big question, or GCSE work for those taking exams. Depending on the day there is also something creative, exploring the physical world, PE, or preparation for adulthood."],
-    ["Breathe out", "2:00", "Winding down before home time at 2:30. Students can say what was alright about the day, or say nothing at all."]
+    ["Breathe in", "9:30", "A quiet arrival, with time to settle before anything is asked."],
+    ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games. Nothing is marked, which is rather the appeal."],
+    ["Cultural calendar", "10:00", "Half an hour on the day or festival the school is marking that week."],
+    ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays, based on discussion rather than writing."],
+    ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, with each student working at their own level. Most days also include forest school, digital media or horticulture."],
+    ["Lunch", "Around midday", "On trip days, lunch is eaten while out."],
+    ["The afternoon", "12:30 to 2:00", "Project work on the half term's question, or GCSE work for students taking exams. Depending on the day, there is also a creative session, physical world, PE or preparation for adulthood."],
+    ["Breathe out", "2:00", "A calm end to the day before home time at 2:30."]
   ],
 
   /* What each day of the week is like. */
   week: {
-    mon: "Forest school with Vernon before lunch, outside whatever the weather is doing. Then project time and something creative to finish the day.",
-    tue: "Trip day. The group is out of school for most of the day, with lunch while out. Details of each trip come to you directly from school, never on this website.",
-    wed: "Digital media with Andy, hands on with the kit. Then project time, and exploring the physical world after lunch.",
-    thu: "Horticulture with Kara, outside in the beds. Then a long slot for projects or GCSE work.",
-    fri: "The longest maths and English slot of the week, then PE, and preparation for adulthood to close the week."
+    mon: "Forest school with Vernon in the morning, then project work and a creative session.",
+    tue: "Trip day. The group is out of school for most of the day. Trip details are sent to families directly and are not published online.",
+    wed: "Digital media with Andy, then project work, and physical world in the afternoon.",
+    thu: "Horticulture with Kara in the morning, then an extended project or GCSE session.",
+    fri: "The longest maths and English session of the week, followed by PE and preparation for adulthood."
   },
 
-  /* Small things that can help, from home. Gentle, never rules. */
+  /* Small things that can help, from home. */
   helps: [
-    ["Outdoor clothes", "Mondays and Thursdays are partly outside, and Tuesdays are trip days. A coat helps on all three."],
-    ["Knowing the shape", "Every day starts and ends the same way. If your child likes to know what is coming, the home page and the day pages show what is on now and next."],
-    ["Nothing to chase", "There is no homework to chase. If your child wants to show you something, the site works at home too, and anything they try counts."],
-    ["Any day can change", "If something is hard on a given morning, telling Jay or the office helps us make the day work."]
+    ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
+    ["Knowing the plan", "Each day follows the same structure. The home page and day pages show what is on now and next."],
+    ["Homework", "There is no set homework. The website works at home if your child would like to show you anything."],
+    ["Difficult mornings", "If a morning has been hard, letting Jay or the office know helps us plan the day."]
   ],
 
   /* How the site keeps students safe. Each line is how it actually works. */
   safety: [
-    ["No names, photos or work in public", "Students appear on this website only by their initials. No photos of students are shown, and nobody's work is visible to the public."],
-    ["Their own pages are private", "Each student's own space opens only on their school account, a staff account, or a four digit code of their own."],
-    ["Trips stay off the internet", "Where trips go, and when, is never published here. Trip details come to you directly from school."],
-    ["No chatting between students", "Students cannot message each other on the site. Anything a student sends goes only to Jay. Anything other students could see, like the question wall or the ideas board, is checked by Jay first and never shows a name."],
-    ["Saved by the school", "Progress is saved in the school's own Google account, not by an outside company. Staff pages open only for approved school staff accounts."],
-    ["Guest mode keeps nothing", "If you look around as a guest, nothing you do is saved or sent, and no student's work is shown."]
+    ["No names, photos or work in public", "Students appear on the website by initials only. No photos of students are published and no student work is publicly visible."],
+    ["Private pages", "Each student's own area opens only with their school account, a staff account or a personal four digit code."],
+    ["Trips", "Trip locations and times are never published online. Details come to families directly from school."],
+    ["No messaging between students", "Students cannot message each other. Anything a student sends goes only to Jay, and anything other students can see, such as the question wall, is checked by Jay first and never shows a name."],
+    ["Data held by the school", "Progress is stored in the school's own Google account, not by an outside company. Staff pages open only for approved staff accounts."],
+    ["Guest mode", "When looking around as a guest, nothing is saved or sent and no student work is shown."]
   ]
 };
