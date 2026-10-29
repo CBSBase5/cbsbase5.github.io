@@ -166,11 +166,6 @@ ICONS = {
         '<rect x="9" y="24" width="46" height="29" rx="6" fill="%s"/>' % T +
         '<path d="M9 36H55" stroke="%s" stroke-width="2.5"/>' % C +
         '<rect x="27" y="31" width="10" height="9" rx="2.5" fill="%s"/>' % O),
-    "icons/board": (P,
-        '<rect x="7" y="11" width="50" height="34" rx="5" fill="%s"/>' % T +
-        '<path d="M14 36Q32 16 50 36" fill="none" stroke="%s" stroke-width="4" stroke-linecap="round"/>' % O +
-        '<path d="M13 38H51" stroke="%s" stroke-width="3.5" stroke-linecap="round"/>' % P +
-        '<path d="M32 45V52M22 55H42" stroke="%s" stroke-width="4.5" stroke-linecap="round"/>' % K),
     "icons/wall": (P,
         '<rect x="9" y="11" width="46" height="34" rx="12" fill="%s"/>' % T +
         '<path d="M19 42L16 55L31 44Z" fill="%s"/>' % T +
