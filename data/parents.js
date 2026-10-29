@@ -20,7 +20,7 @@ window.B5PARENTS = {
 
   /* A short notice at the top of the portal, e.g. a change to the week.
      Leave text "" for none. until: "YYYY-MM-DD", the last day it shows (or ""). */
-  notice: { text: "", until: "" },
+  notice: { text: "Welcome back on Tuesday 3 November. Monday 2 November is an INSET day, so there is no school for students that day.", until: "2026-11-03" },
 
   /* Who parents get in touch with about Base 5 */
   contact: { name: "Jay", email: "jay.raine@chiltonbridgeschool.co.uk" },
@@ -54,9 +54,10 @@ window.B5PARENTS = {
     ["Breathe in", "9:30", "A calm arrival. Nobody is asked anything straight away: time to come in, settle and land."],
     ["Brain games", "9:45", "Fifteen minutes of puzzles and quick games to warm up. Nothing is marked or written up."],
     ["Cultural calendar", "10:00", "Half an hour on whatever the calendar is marking that week, and why people mark it at all."],
-    ["The main sessions", "Late morning", "Maths and English in short chunks, each student in their own space on the site, pitched at where they are. Plus the day's practical session: forest school, digital media, horticulture or PE."],
+    ["PHSE with Willow", "10:30, three days", "A quarter of an hour on Mondays, Thursdays and Fridays. Talking rather than writing, and nothing to hand in."],
+    ["The main sessions", "Late morning", "Maths and English in short chunks, each student in their own space on the site, pitched at where they are. Most days also have a practical session: forest school, digital media or horticulture."],
     ["Lunch", "Around midday", "A proper break. On trip days, lunch happens while the group is out."],
-    ["Project time", "Afternoon", "Each student's own project on the half term's big question, or GCSE work for those taking exams."],
+    ["The afternoon", "12:30 to 2:00", "Each student's own project on the half term's big question, or GCSE work for those taking exams. Depending on the day there is also something creative, exploring the physical world, PE, or preparation for adulthood."],
     ["Breathe out", "2:00", "Winding down before home time at 2:30. Students can say what was alright about the day, or say nothing at all."]
   ],
 
