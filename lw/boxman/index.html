@@ -20095,6 +20095,30 @@ hurtPlayer = function (n, src, o) {
   return r;
 };
 
+/* ===================== V44: NO WALL BETWEEN YOU AND THE ROOM ===================== */
+/* Jay's note: the row of buildings on the side nearest the camera is visual clutter.
+   That side used to fade to a ghost (or shrink to a low slab). Now, once it has faded, it is
+   simply not drawn at all, so the room is clear to see. It comes back if the camera swings round. */
+var _fadeSides44 = fadeSides;
+fadeSides = function (dt) {
+  _fadeSides44(dt);
+  if (!G.sideMats || !G.roomGroup) return;
+  var groups = {};
+  G.roomGroup.children.forEach(function (g) { if (g.userData && g.userData.side) groups[g.userData.side] = g; });
+  // which way the camera looks from: any side whose face points back towards the camera is the near side
+  var c = G.camera.position, f = G.P && !G.doom ? G.P : null, vx = 0, vz = 0;
+  if (f) { vx = c.x - f.x; vz = c.z - f.z; var l = Math.sqrt(vx * vx + vz * vz); if (l > 1) { vx /= l; vz /= l; } else vx = vz = 0; }
+  var N = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+  ['n', 's', 'e', 'w'].forEach(function (side) {
+    var grp = groups[side]; if (!grp) return;
+    var list = G.sideMats[side] || [];
+    var v = grp.userData.cut ? (grp.userData.o === undefined ? 1 : grp.userData.o) : (list[0] ? list[0].opacity : 1);
+    var near = (N[side][0] * vx + N[side][1] * vz) > 0.35;
+    var show = v > 0.3 && !near;
+    if (grp.visible !== show) grp.visible = show;
+  });
+};
+
 /* ===================== BOOT ===================== */
 /* the fonts ride inside the file; wait a moment for them so canvas labels are drawn in the right type */
 function fontsReady(done) {
