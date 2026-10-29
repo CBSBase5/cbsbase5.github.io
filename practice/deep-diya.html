@@ -508,6 +508,45 @@ body{font-family:'DDigits','Pixelify Sans',monospace;font-synthesis:none;font-va
 @keyframes tipIn{0%{opacity:0;transform:translateY(-14px);filter:brightness(2)}100%{opacity:1;transform:none;filter:none}}
 @keyframes tipOut{to{opacity:0;transform:translateY(-10px)}}
 .tpx{display:none}
+.skwrap{display:flex;gap:22px;align-items:flex-start;justify-content:center;margin-top:4px}
+.skwrap .skilltree{margin:0;gap:18px}
+.schead{display:flex;align-items:center;gap:4px;font-size:13px;color:#ffd27a;margin-bottom:4px;height:18px}
+.schead img{width:16px;height:16px;image-rendering:pixelated}
+.skside{width:300px}
+#gear.wd .gcard.gdive{height:34px!important}
+.subcol+.lampbig canvas{width:120px;height:152px}
+.subcol{display:flex;flex-direction:column;gap:6px}
+.upinfo{padding:6px 12px!important;box-sizing:border-box;text-align:left}
+.subcol .upinfo{width:290px;min-width:0!important;max-width:290px;align-self:center}
+#gear.wd .grow+.upinfo{width:420px;margin:6px auto 2px}
+.upempty .ups{opacity:.7}
+.uphead{display:flex;gap:10px;align-items:center}
+.upic{width:40px!important;height:40px!important;image-rendering:pixelated;flex:none}
+.uphead>div{text-align:left;flex:1}
+#gear.wd .upinfo canvas.pcv{width:40px!important;height:40px!important}
+.upn{font-size:17px;color:#ffd27a;line-height:1.1}
+.ups{font-size:13px;line-height:1.2;color:#f4ead2}
+.upfx{margin:5px 0 2px}
+.uprow{display:flex;align-items:center;gap:6px;height:13px}
+.upk{width:46px;font-size:11px;opacity:.7;text-align:right;flex:none}
+.upbar{flex:1;height:7px;background:rgba(0,0,0,.35);border-radius:2px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,210,122,.2)}
+.upbar i{display:block;height:100%;background:#8a7a5a}
+.upbar i.on{background:linear-gradient(90deg,#ff9f40,#ffd27a);animation:upgrow .6s cubic-bezier(.2,1.2,.4,1) backwards}
+.upbar i.on.less{background:linear-gradient(90deg,#3ff0d0,#9fe3ff)}
+@keyframes upgrow{from{width:0}}
+.upv{width:44px;font-size:13px;color:#9be36a;flex:none}
+.upv.dim{color:#c8b890}
+.upw{font-size:11px;opacity:.65;text-align:center;margin-top:1px}
+.upsw{display:flex;gap:2px}
+.upsw img{width:14px;height:14px;image-rendering:pixelated}
+.upsw img.upnew{filter:drop-shadow(0 0 3px #ffd27a);animation:upgrow2 .9s ease-in-out infinite alternate}
+@keyframes upgrow2{to{transform:translateY(-2px)}}
+.upst{font-size:13px;margin-top:3px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;color:#f4ead2}
+.upst .key{font-size:12px;padding:0 6px}
+.upst .gc{width:12px;height:12px;image-rendering:pixelated}
+.upok{color:#9be36a}
+.upmini{width:16px;height:16px;image-rendering:pixelated;vertical-align:middle}
+.upmini.big{width:26px;height:24px}
 #fuel.home{animation:fuelHome .6s steps(2) infinite}
 @keyframes fuelHome{50%{filter:brightness(1.8) saturate(1.4)}}
 .tpbar{position:absolute;left:12px;right:12px;bottom:4px;height:2px;border-radius:1px;background:#ffd27a;opacity:.55;transform-origin:left center;animation:tpbar 7s linear forwards}
@@ -10555,6 +10594,96 @@ Dive.prototype.clarityDraw = function () {
 (function () {
   var r0 = Dive.prototype.render;
   Dive.prototype.render = function (dt) { r0.call(this, dt); this.clarityDraw(); };
+})();
+
+/* ---- 79k_upinfo.js ---- */
+/* ===================== what each upgrade does: skills, lantern parts and the token stall ===================== */
+/* Whatever is picked gets a card beside it: a big picture, its name, one short line, and a before and after bar
+   so the change can be seen, not just read. Underneath, what to press, or how to get it. */
+var UP_INFO = {
+  // skills
+  kick: { n: 'Strong kicks', s: 'Bobby swims faster.', b: 100, a: 110, w: 'swim speed' },
+  breath: { n: 'Slow breaths', s: 'Your lantern burns for longer.', b: 100, a: 110, w: 'light time' },
+  nose: { n: 'Axolotl nose', s: 'Your axolotl friend grabs things from further away.', b: 100, a: 215, w: 'grab reach' },
+  bright: { n: 'Big flash', s: 'Your flash lights up much further.', b: 100, a: 140, w: 'flash size' },
+  quick: { n: 'Quick flash', s: 'Less waiting between flashes.', b: 100, a: 65, w: 'wait', less: true },
+  bless: { n: 'Shrine blessing', s: 'Each shrine you light fills your lantern more.', b: 30, a: 45, w: 'light back', pts: true },
+  feet: { n: 'Quick feet', s: 'Bobby walks faster in the shop.', b: 100, a: 130, w: 'walk speed' },
+  smile: { n: 'Big smile', s: 'Customers wait longer before they give up.', b: 100, a: 120, w: 'waiting time' },
+  batch: { n: 'Big batch', s: 'Every tray you cook makes one more sweet.', sweets: true },
+  // lantern parts
+  brass: { n: 'Brass shade', s: 'The shade you started with.' },
+  stone: { n: 'Stone shade', s: 'Your light reaches further.', b: 100, a: 110, w: 'light size' },
+  lotus: { n: 'Lotus shade', s: 'Light reaches a bit further, and your axolotl grabs from further away.', b: 100, a: 106, w: 'light size' },
+  cotton: { n: 'Cotton wick', s: 'The wick you started with.' },
+  puffer: { n: 'Puffer wick', s: 'Your lantern burns for longer.', b: 100, a: 112, w: 'light time' },
+  moon: { n: 'Moon wick', s: 'Burns a bit longer, and shrines fill your lantern more.', b: 100, a: 108, w: 'light time' },
+  plain: { n: 'Plain frame', s: 'The frame you started with.' },
+  squid: { n: 'Squid frame', s: 'Less waiting between flashes.', b: 100, a: 70, w: 'wait', less: true },
+  peacock: { n: 'Peacock frame', s: 'Sparklers light up a bigger space.', b: 100, a: 125, w: 'sparkler size' },
+  // the stall's other things
+  peacockKurta: { n: 'Peacock kurta', s: 'A smart kurta for Bobby to wear.' },
+  bell: { n: 'Shop bell', s: 'A bell for the shop door. Ding!' },
+  lotusLamp: { n: 'Lotus lamp', s: 'A glowing lotus for the shop.' }
+};
+var SKILL_COLS = [['g_flip', 'Sea'], ['g_spark', 'Light'], ['mbox', 'Shop']];
+function upBars(u, ic) {
+  if (u.sweets) {
+    var per = CFG.perIngredient + (gearState().trays || 0), row = function (n, on) { var h = ''; for (var i = 0; i < n; i++) h += '<img alt="" class="' + (on && i === n - 1 ? 'upnew' : '') + '" src="' + iconURL('sw_ladoo', 0) + '">'; return h; };
+    return '<div class="upfx"><div class="uprow"><span class="upk">now</span><span class="upsw">' + row(per, false) + '</span></div><div class="uprow"><span class="upk">with it</span><span class="upsw">' + row(per + 1, true) + '</span></div></div>';
+  }
+  if (!u.b) return '';
+  var max = Math.max(u.a, u.b), wb = Math.round(u.b / max * 100), wa = Math.round(u.a / max * 100);
+  var lab = u.pts ? u.a + '%' : (u.a > u.b ? '+' : '') + Math.round((u.a - u.b) / u.b * 100) + '%';
+  var bar = function (w, on) { return '<span class="upbar"><i class="' + (on ? 'on' + (u.less ? ' less' : '') : '') + '" style="width:' + w + '%"></i></span>'; };
+  return '<div class="upfx"><div class="uprow"><span class="upk">now</span>' + bar(wb, false) + '<b class="upv dim">' + (u.pts ? u.b + '%' : '') + '</b></div>' +
+    '<div class="uprow"><span class="upk">with it</span>' + bar(wa, true) + '<b class="upv">' + lab + '</b></div><div class="upw">' + u.w + '</div></div>';
+}
+function upCard(ic, frame, id, status) {
+  var u = UP_INFO[id] || { n: id, s: '' };
+  return '<div class="upinfo pnl warm"><div class="uphead">' + (ic.charAt(0) !== '<' ? '<img class="upic" alt="" src="' + iconURL(ic, frame || 0) + '">' : ic) + '<div><div class="upn">' + u.n + '</div><div class="ups">' + u.s + '</div></div></div>' + upBars(u) + '<div class="upst">' + status + '</div></div>';
+}
+var STAR_IMG = function () { return '<img class="gc" alt="" src="' + iconURL('g_skills', 0) + '">'; };
+(function () {
+  var rs = Shop.prototype.renderSub;
+  Shop.prototype.renderSub = function () {
+    rs.apply(this, arguments);
+    var sb = this.sub, items = this.subItems(), el = document.getElementById('gear'), it = items[sb.sel], card = '';
+    if (sb.kind === 'skills') {
+      var tree = el.querySelector('.skilltree'); if (!tree) return;
+      el.querySelectorAll('.skilltree .scol').forEach(function (c, i) { c.insertAdjacentHTML('afterbegin', '<div class="schead"><img alt="" src="' + iconURL(SKILL_COLS[i][0], 0) + '">' + SKILL_COLS[i][1] + '</div>'); });
+      if (it) {
+        var own = G.skills && G.skills[it.id], left = starsEarned() - starsSpent(), st;
+        if (own) st = '<span class="upok">&#10003; Learnt</span>';
+        else if (!skillOK(it)) { var pre = SKILLS.filter(function (q) { return q.col === it.col && q.row === it.row - 1; })[0]; st = 'Learn <img class="upmini" alt="" src="' + iconURL(pre.icon, 0) + '"> ' + UP_INFO[pre.id].n + ' first'; }
+        else if (left < it.cost) st = 'Need ' + STAR_IMG() + it.cost + '. Earn stars: <img class="upmini" alt="" src="' + iconURL('star3', 1) + '"><img class="upmini" alt="" src="' + iconURL('muralIcon', 0) + '"><img class="upmini" alt="" src="' + iconURL('page', 2) + '"><img class="upmini" alt="" src="' + iconURL('aunty0', 1) + '">';
+        else st = '<span class="key">Space</span> learn for ' + STAR_IMG() + it.cost;
+        card = upCard(it.icon, 0, it.id, st);
+      } else card = '<div class="upinfo pnl warm upempty"><div class="ups">Pick a skill to see what it does.</div></div>';
+      tree.insertAdjacentHTML('afterend', '<div class="skside">' + card + '</div>');
+      var wrap = document.createElement('div'); wrap.className = 'skwrap'; tree.parentNode.insertBefore(wrap, tree); wrap.appendChild(tree); wrap.appendChild(el.querySelector('.skside'));
+    } else if (sb.kind === 'bench') {
+      var grid = el.querySelector('.subgrid'); if (!grid) return;
+      if (it) {
+        var own2 = partOwned(it.slot, it.p), on = lampSet()[it.slot] === it.p.id, st2;
+        if (on) st2 = '<span class="upok">&#10003; In your lantern</span>';
+        else if (own2) st2 = '<span class="key">Space</span> put it in';
+        else if (it.p.from) { var gk = { stone: 'g_stone', puffer: 'g_puff', squid: 'g_squid' }[it.p.id]; st2 = 'Win it from a sea guardian' + (gk && SHEETS[gk] ? ' <img class="upmini big" alt="" src="' + iconURL(gk, 0) + '">' : ''); }
+        else st2 = 'Get it at the token stall <img class="upmini" alt="" src="' + iconURL('g_token', 0) + '">';
+        card = upCard('<canvas class="pcv upic" data-s="' + it.slot + '" data-p="' + it.p.id + '" width="60" height="60"></canvas>', 0, it.p.id, st2);
+      } else card = '<div class="upinfo pnl warm upempty"><div class="ups">Mix and match the parts of your lantern.</div></div>';
+      grid.insertAdjacentHTML('afterend', card);
+      var col = document.createElement('div'); col.className = 'subcol'; grid.parentNode.insertBefore(col, grid); col.appendChild(grid); col.appendChild(el.querySelector('.upinfo'));
+    } else if (sb.kind === 'stall') {
+      var row = el.querySelector('.grow'); if (!row) return;
+      if (it) {
+        var got = this.stallOwned(it), st3 = got ? '<span class="upok">&#10003; Yours</span>' : (G.tokens || 0) < it.cost ? 'Need <img class="gc" alt="" src="' + iconURL('g_token', 0) + '">' + it.cost + '. Find tokens: <img class="upmini" alt="" src="' + iconURL('glyph', 0) + '"><img class="upmini" alt="" src="' + iconURL('schest', 0) + '">' : '<span class="key">Space</span> buy for <img class="gc" alt="" src="' + iconURL('g_token', 0) + '">' + it.cost;
+        card = upCard(it.kind === 'part' ? '<canvas class="pcv upic" data-s="' + it.slot + '" data-p="' + it.id + '" width="60" height="60"></canvas>' : it.icon, 0, it.id, st3);
+      } else card = '';
+      if (card) row.insertAdjacentHTML('afterend', card);
+    }
+    document.querySelectorAll('#gear .upinfo canvas.pcv').forEach(function (cv) { drawLampPart(cv, cv.dataset.s, cv.dataset.p); });
+  };
 })();
 
 /* ---- 80_story_art.js ---- */
