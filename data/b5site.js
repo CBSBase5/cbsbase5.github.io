@@ -3,8 +3,8 @@
    Loaded in the <head> of every page:
      <script src="/data/b5site.js?v=1"></script>
    Straight away (before the page draws):
-     - a tab icon: the bridge for the main site, the HQ's
-       initials in its own colours inside an HQ
+     - a tab icon, only if the page forgot its own (see the
+       tab icon section below)
      - soft fades between pages (off for reduced motion)
    Once the page is ready:
      - a Home button in the bottom left corner (HQ home inside
@@ -53,8 +53,9 @@ try{ SYNC_URL = localStorage.getItem("b5.sync.url") || SYNC_URL; }catch(e){}
 if(GUEST) SYNC_URL = "";
 
 var path = location.pathname;
-/* HQ tab icon colours: the same values as section 18 (HQ COLOURS)
-   of /style.css. Change the two together. */
+/* Each HQ's folder and storage prefix. (bg and ink are the HQ's
+   colours, as section 18 HQ COLOURS of /style.css; the tab icons
+   themselves are now files drawn by /icons/_build/make_icons.py.) */
 var HQS = {
   "/egw/":   { who: "EGW", prefix: "b5.egw.", bg: "#2d2466", ink: "#ffe28a" },
   "/lp/":    { who: "LP", prefix: "b5.lp.",  bg: "#e2557a", ink: "#ffffff" },
@@ -82,26 +83,45 @@ var PROJECTS = {
 var base = null, hq = null;
 Object.keys(HQS).forEach(function(b){ if(path.indexOf(b) === 0){ base = b; hq = HQS[b]; } });
 
-/* ---------- tab icon ---------- */
-function svgIcon(){
-  if(hq){
-    var fs = hq.who.length > 2 ? 26 : 34;
-    return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='" + hq.bg + "'/>" +
-      "<text x='32' y='" + (fs > 30 ? 44 : 41) + "' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='" + fs + "' fill='" + hq.ink + "'>" + hq.who + "</text></svg>";
-  }
-  return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#fffdf8'/>" +
-    "<path d='M6 44 Q32 8 58 44' fill='none' stroke='#007291' stroke-width='6' stroke-linecap='round'/>" +
-    "<path d='M20 28v22M32 22v28M44 28v22' stroke='#7fb8c6' stroke-width='3'/>" +
-    "<path d='M4 50h56' stroke='#0a2f38' stroke-width='6' stroke-linecap='round'/>" +
-    "<circle cx='52' cy='14' r='7' fill='#ef7724'/></svg>";
+/* ---------- tab icon ----------
+   Every page carries its own icon as two lines straight after <title>:
+     <link rel="icon" href="/favicon.ico" sizes="32x32">
+     <link rel="icon" href="/icons/<name>.svg" type="image/svg+xml">
+   The icons are files in /icons/ (and /<hq>/favicon.svg for each HQ),
+   drawn by /icons/_build/make_icons.py. This is only the safety net: a
+   page that forgot its icon gets the right one from its address. Keep
+   B5ICON_MAP in step with ICON_MAP in /icons/_build/add_icon_links.py. */
+var B5ICON_MAP = [
+  ["/projects/its-time.html", "its-time"], ["/games/timeline-tantrum/", "timeline-tantrum"],
+  ["/practice/build-a-life.html", "build-a-life"], ["/practice/hooked.html", "hooked"],
+  ["/practice/endorphin-house.html", "endorphin-house"], ["/practice/jump-lab.html", "jump-lab"],
+  ["/practice/deep-diya.html", "deep-diya"], ["/practice/sankofa.html", "sankofa"], ["/sankofa.html", "sankofa"],
+  ["/practice/last-stand.html", "last-stand"], ["/practice/tiny-legends.html", "tiny-legends"],
+  ["/practice/cue-the-sequence.html", "cue-the-sequence"], ["/practice/paragraphs.html", "paragraph-dash"],
+  ["/practice/chip-run.html", "chip-run"], ["/practice/chess.html", "chess"],
+  ["/jt/", "dugout"], ["/lw/boxman/", "boxman"],
+  ["/games/", "vault"], ["/practice/", "practice"], ["/projects/", "projects"], ["/teacher/", "staff"],
+  ["/cc/", "cc"], ["/parents/", "parents"], ["/guest/", "parents"], ["/baselines/", "baselines"],
+  ["/trips/", "trips"], ["/tools/", "tools"], ["/board/", "board"], ["/wall/", "wall"], ["/ideas/", "ideas"],
+  ["/my-targets.html", "targets"]
+];
+function iconFor(p){
+  if(p.indexOf("/lw/boxman/") !== 0 && base) return base + "favicon.svg";
+  for(var i = 0; i < B5ICON_MAP.length; i++) if(p.indexOf(B5ICON_MAP[i][0]) === 0) return "/icons/" + B5ICON_MAP[i][1] + ".svg";
+  return "/icons/base5.svg";
 }
-try{
-  [].forEach.call(document.querySelectorAll("link[rel~='icon']"), function(l){ l.parentNode.removeChild(l); });
-  var link = document.createElement("link");
-  link.rel = "icon"; link.type = "image/svg+xml";
-  link.href = "data:image/svg+xml," + encodeURIComponent(svgIcon());
-  document.head.appendChild(link);
-}catch(e){}
+function iconCheck(){
+  try{
+    if(document.querySelector("link[rel~='icon']")) return;
+    var ico = document.createElement("link");
+    ico.rel = "icon"; ico.href = "/favicon.ico"; ico.setAttribute("sizes", "32x32");
+    document.head.appendChild(ico);
+    var link = document.createElement("link");
+    link.rel = "icon"; link.type = "image/svg+xml"; link.href = iconFor(path);
+    document.head.appendChild(link);
+  }catch(e){}
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", iconCheck); else iconCheck();
 
 /* ---------- soft fades between pages ---------- */
 var fade = document.createElement("style");
