@@ -13,7 +13,8 @@
         fit; the round you are in always gets to finish.
      3. After a break there is a cooldown of COOLDOWN_MINUTES
         before the next one can start, even with goes banked.
-   Change the three numbers here.
+   Change the three numbers here (29 Oct 2026: 45 sparks a go,
+   a 5 minute break, 15 minute cooldown).
 
    Testing: add ?hqtest to the page address and every go is
    free, with no cooldown.
@@ -44,8 +45,8 @@
 (function(){
 "use strict";
 
-var SPARKS_PER_GO = 30;
-var BREAK_SECONDS = 180;
+var SPARKS_PER_GO = 45;
+var BREAK_SECONDS = 300;
 var COOLDOWN_MINUTES = 15;
 
 var SKIP = /^(hq|review|daily|swipe|bonnie|sent|skin|biscuits|look|mood|checkin|dunk|stack|break|crossy|penalty|showstopper|scare)\b/;

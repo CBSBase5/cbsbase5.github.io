@@ -24,7 +24,7 @@ HK = os.path.join(ROOT, "hk")
 OWN = {"conf.js", "hk.css", "crossy.js"}
 HK_CSS = "/hk/hk.css?v=2"
 FONTS = "&family=Black+Ops+One&family=Rubik:wght@400;500;600;700"
-CROSSY = '<script src="/hk/crossy.js?v=5"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/hk/break.js?v=2"></script>'
+CROSSY = '<script src="/data/hqgame.js?v=1"></script>\n<script src="/hk/crossy.js?v=5"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/hk/break.js?v=2"></script>'
 
 
 def must(s, a, b, count=None, where=""):
@@ -45,6 +45,7 @@ def convert(s, name):
     s = re.sub(r'<script src="/data/a2/art\.js[^"]*"></script>\n?', "", s)
     # and LC's earned-scares gate; this HQ adds its own game and gate
     s = re.sub(r'<script src="/data/hqbreak\.js[^"]*"></script>\n?', "", s)
+    s = re.sub(r'<script src="/data/hqgame\.js[^"]*"></script>\n?', "", s)
     s = re.sub(r'<script src="/lc/break\.js[^"]*"></script>\n?', "", s)
     # links: everything in /lc/ becomes /hk/, except the shared question banks
     s = re.sub(r"/lc/(?!(daily|swipe)-bank-)", "/hk/", s)

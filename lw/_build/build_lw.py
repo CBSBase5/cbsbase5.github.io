@@ -42,6 +42,7 @@ def common(s, name):
     s = re.sub(r'<script src="/egw/biscuits\.js[^"]*"></script>\n?', "", s)
     # EGW's break game (Dunk) and its shared engine stay out; this HQ adds its own below
     s = re.sub(r'<script src="/data/hqbreak\.js[^"]*"></script>\n?', "", s)
+    s = re.sub(r'<script src="/data/hqgame\.js[^"]*"></script>\n?', "", s)
     s = re.sub(r'<script src="/egw/dunk\.js[^"]*"></script>\n?', "", s)
     s = must(s, '<link rel="stylesheet" href="/egw/egw.css', '<script src="%s"></script>\n<link rel="stylesheet" href="/egw/egw.css' % CONF, 1, name)
     s = re.sub(r'(<link rel="stylesheet" href="/egw/egw\.css\?v=\d+">)', r'\1\n<link rel="stylesheet" href="%s">' % LW_CSS, s, count=1)
@@ -65,7 +66,7 @@ def hub_patches(name, s):
     if name == "index.html":
         s = re.sub(r"\n\s*ideas\.push\('<a href=\"/lw/mark-jay\.html\">.*?\);", "", s, count=1)
         # Showstopper, LW's pop up rhythm game (/lw/showstopper.js, LW's own file)
-        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/lw/showstopper.js?v=1"></script>\n<script src="/data/hqbreak.js?v=3"></script>\n<script src="/lw/break.js?v=1"></script>', 1, name)
+        s = must(s, '<script src="/data/send.js"></script>', '<script src="/data/send.js"></script>\n<script src="/data/hqgame.js?v=1"></script>\n<script src="/lw/showstopper.js?v=1"></script>\n<script src="/data/hqbreak.js?v=4"></script>\n<script src="/lw/break.js?v=1"></script>', 1, name)
         if "mark-jay" in s:
             sys.exit("build_lw: mark-jay link still in index")
         s = must(s, 'english: "Reading closely, writing to describe, and writing to win an argument."',
