@@ -13,7 +13,8 @@
 <link rel="stylesheet" href="/style.css?v=12">
 <script src="/data/b5site.js?v=8"></script>
 <script src="/data/b5staff.js?v=1"></script>
-<script src="/data/dailyfun.js?v=2"></script>
+<script src="/data/term.js?v=6"></script>
+<script src="/data/dailyfun.js?v=3"></script>
 <style>
 /* Staff picks for the home page's Would you rather. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -89,9 +90,10 @@ function msg(t, bad){ $("msg").textContent = t; $("msg").className = "msg" + (ba
 function key(){ try{ return localStorage.getItem(KEY) || ""; }catch(e){ return ""; } }
 try{ me = localStorage.getItem(NAME) || ""; }catch(e){}
 var list = [];
-for(var i = 0; i < DAYS; i++){ var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i); list.push(F.forDay(d)); }
+/* school days only: a weekend shows the Friday before, so each pair is listed once */
+for(var i = 0, seenK = {}; i < DAYS; i++){ var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i); var Dd = F.forDay(d); if(!seenK[Dd.key]){ seenK[Dd.key] = 1; list.push(Dd); } }
 var WD = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-function nice(k, i){ var p = k.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return (i === 0 ? "Today, " : i === 1 ? "Tomorrow, " : "") + WD[d.getDay()] + " " + d.getDate() + " " + MO[d.getMonth()]; }
+function nice(k, i){ var p = k.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]), t = new Date(); t.setHours(0, 0, 0, 0); var gap = Math.round((d - t) / 864e5); return (gap === 0 ? "Today, " : gap === 1 ? "Tomorrow, " : "") + WD[d.getDay()] + " " + d.getDate() + " " + MO[d.getMonth()]; }
 function mine(k){ var a = got[k] || []; for(var j = 0; j < a.length; j++) if(me && a[j].name.toLowerCase() === me.toLowerCase()) return a[j]; return null; }
 function syncNames(){
   [].forEach.call($("names").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.n === me ? "true" : "false"); });
@@ -100,7 +102,7 @@ function syncNames(){
 function draw(){
   $("days").innerHTML = list.map(function(D, i){
     var w = D.wyr, p = mine(D.key), others = (got[D.key] || []).filter(function(x){ return !me || x.name.toLowerCase() !== me.toLowerCase(); });
-    return '<div class="d' + (i === 0 ? " today" : "") + '" data-k="' + D.key + '"><div class="k">' + nice(D.key, i) + (D.event ? '<span class="ev">' + esc(D.event.name) + '</span>' : "") + '</div>' +
+    return '<div class="d' + (nice(D.key, i).indexOf("Today") === 0 ? " today" : "") + '" data-k="' + D.key + '"><div class="k">' + nice(D.key, i) + (D.event ? '<span class="ev">' + esc(D.event.name) + '</span>' : "") + '</div>' +
       '<h3>' + esc(w[0]) + '</h3><div class="ab">' +
       '<button type="button" data-c="a" aria-pressed="' + (p && p.choice === "a") + '">' + esc(w[1]) + '</button>' +
       '<button type="button" data-c="b" aria-pressed="' + (p && p.choice === "b") + '">' + esc(w[3]) + '</button></div>' +

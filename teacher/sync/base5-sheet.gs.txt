@@ -377,7 +377,7 @@ function overview_(key){
   WHO.forEach(function(w){ try{ folders[w] = folder_(w).data; }catch(e4){} });
   var coreAll = []; try{ coreAll = coreRows_(); }catch(ec){ coreAll = []; }
   return { ok: true, students: students, sends: sends, folders: folders, targets: targetsAll_(), core: coreAll,
-    wall: pending_("Wall", 2, 1), questions: pending_("Questions", 4, 1), ideas: ideasList_(true),
+    wall: pending_("Wall", 2, 1), questions: pending_("Questions", 4, 1), ideas: ideasList_(true), reasons: wyrPending_(),
     parents: parentsSet_(), now: Date.now() };
 }
 
@@ -397,7 +397,7 @@ var HQGAMES = { "b5.egw.dunk.v1": "Dunk", "b5.lp.stack.v1": "Neon Stack", "b5.hk
 function setup3_(ss){
   tab_(ss, "Events", ["Time", "Who", "Kind", "Detail"]);
   tab_(ss, "Shoutouts", ["Time", "Who", "Sticker", "Text", "Shown"]);
-  tab_(ss, "Votes", ["Updated", "Kind", "Voter", "Choice", "Reason", "Hide"]);
+  votesHead_(tab_(ss, "Votes", ["Updated", "Kind", "Voter", "Choice", "Reason", "Hide", "Approved"]));
   tab_(ss, "Fuel", ["Week", "Who", "Baseline"]);
   tab_(ss, "Fuel weeks", ["Week", "Sparks", "Target", "Helpers", "Updated"]);
   var pk = tab_(ss, "Picks", ["Day", "Name", "Choice", "Reason", "Updated"]);
@@ -568,27 +568,45 @@ function tag_(r){
   return { ok: true };
 }
 
-/* ---------- votes: the big question and Would you rather ---------- */
+/* ---------- votes: the big question and Would you rather ----------
+   Votes columns: Updated, Kind, Voter, Choice, Reason, Hide, Approved.
+   Big question reasons show unless Hide is ticked. Would you rather
+   reasons only show once Jay approves them (live view, Waiting for you). */
+function votesHead_(sh){ if(String(sh.getRange(1, 7).getValue()) !== "Approved") sh.getRange(1, 7).setValue("Approved").setFontWeight("bold"); }
 function vote_(r){
   var kind = String(r.kind || ""), voter = String(r.voter || ""), choice = String(r.choice || "");
   if(!/^(bigq|wyr:\d{4}-\d{2}-\d{2})$/.test(kind) || !voterOk_(voter) || !/^[a-z0-9]{1,12}$/.test(choice)) throw new Error("bad vote");
   var sh = sheet_("Votes"), v = sh.getDataRange().getValues(), reason = clean_(String(r.reason || "").trim(), 140);
+  votesHead_(sh);
   for(var i = 1; i < v.length; i++){
-    if(v[i][1] === kind && v[i][2] === voter){ sh.getRange(i + 1, 1, 1, 5).setValues([[new Date(), kind, voter, choice, reason || v[i][4]]]); return votes_({ kind: kind }); }
+    if(v[i][1] === kind && v[i][2] === voter){
+      sh.getRange(i + 1, 1, 1, 5).setValues([[new Date(), kind, voter, choice, reason || v[i][4]]]);
+      if(reason && reason !== v[i][4]) sh.getRange(i + 1, 6, 1, 2).setValues([[false, false]]);
+      return votes_({ kind: kind });
+    }
   }
-  sh.appendRow([new Date(), kind, voter, choice, reason, false]);
+  sh.appendRow([new Date(), kind, voter, choice, reason, false, false]);
   return votes_({ kind: kind });
 }
 function votes_(r){
-  var kind = String(r.kind || ""), v = rows_("Votes"), counts = {}, reasons = [];
+  var kind = String(r.kind || ""), v = rows_("Votes"), counts = {}, reasons = [], wyr = kind.indexOf("wyr:") === 0;
   for(var i = 1; i < v.length; i++){
     if(v[i][1] !== kind) continue;
     counts[v[i][3]] = (counts[v[i][3]] || 0) + 1;
-    if(v[i][4] && !ticked_(v[i][5])) reasons.push({ choice: String(v[i][3]), text: String(v[i][4]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
+    if(v[i][4] && !ticked_(v[i][5]) && (!wyr || ticked_(v[i][6]))) reasons.push({ choice: String(v[i][3]), text: String(v[i][4]), t: v[i][0] instanceof Date ? v[i][0].getTime() : 0 });
   }
   reasons.sort(function(a, b){ return b.t - a.t; });
-  var out = { ok: true, kind: kind, counts: counts, reasons: reasons.slice(0, 12) };
-  if(kind.indexOf("wyr:") === 0){ try{ out.picks = picksFor_(kind.slice(4)); }catch(e){ out.picks = []; } }
+  var out = { ok: true, kind: kind, counts: counts, reasons: reasons.slice(0, 12), approval: true };
+  if(wyr){ try{ out.picks = picksFor_(kind.slice(4)); }catch(e){ out.picks = []; } }
+  return out;
+}
+/* Would you rather reasons waiting for Jay */
+function wyrPending_(){
+  var v = rows_("Votes"), out = [];
+  for(var i = 1; i < v.length; i++){
+    if(String(v[i][1]).indexOf("wyr:") !== 0 || !v[i][4] || ticked_(v[i][5]) || ticked_(v[i][6])) continue;
+    out.push({ row: i + 1, day: String(v[i][1]).slice(4), choice: String(v[i][3]), text: String(v[i][4]) });
+  }
   return out;
 }
 
@@ -742,6 +760,13 @@ function pending_(name, textCol, whoCol){
 }
 function approve_(r){
   staff_(r.key);
+  if(r.tab === "Votes"){
+    var vs = sheet_("Votes"), vr = +r.row;
+    if(vr < 2 || vr > vs.getLastRow() || String(vs.getRange(vr, 2).getValue()).indexOf("wyr:") !== 0) throw new Error("no such row");
+    votesHead_(vs);
+    vs.getRange(vr, r.on === false ? 6 : 7).setValue(true);
+    return { ok: true };
+  }
   var name = r.tab === "Questions" ? "Questions" : "Wall", sh = sheet_(name), row = +r.row;
   if(row < 2 || row > sh.getLastRow()) throw new Error("no such row");
   if(r.on === false){ sh.getRange(row, name === "Wall" ? 5 : 7).setValue(name === "Wall"); if(name === "Questions") sh.deleteRow(row); return { ok: true }; }
@@ -1632,7 +1657,7 @@ function today_(r){
   var sv = rows_("Sends"), unseen = 0;
   for(var j = 1; j < sv.length; j++) if(sv[j][0] && String(sv[j][5]) !== "yes") unseen++;
   var waiting = 0;
-  try{ waiting = pending_("Wall", 2, 1).length + pending_("Questions", 4, 1).length; }catch(e1){}
+  try{ waiting = pending_("Wall", 2, 1).length + pending_("Questions", 4, 1).length + wyrPending_().length; }catch(e1){}
   return { ok: true, students: Object.keys(worked).length, notes: notes, notBuddy: notBuddy, unseen: unseen, waiting: waiting, quiet: quiet_(3).length, toBuddy: ticked_(setting_("Evidence to Buddy")) };
 }
 READ3.today = today_;

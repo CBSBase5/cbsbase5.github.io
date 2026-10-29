@@ -49,6 +49,9 @@ function jay(o, f, dx){
   else if(f.eyes === "happy"){ r(6, 9, 1, 1, "K"); r(7, 8, 1, 1, "K"); r(8, 9, 1, 1, "K"); r(12, 9, 1, 1, "K"); r(13, 8, 1, 1, "K"); r(14, 9, 1, 1, "K"); }
   else if(f.eyes === "wide"){ r(6, 8, 2, 3, "W"); r(12, 8, 2, 3, "W"); r(7, 9, 1, 1, "K"); r(13, 9, 1, 1, "K"); }
   else if(f.eyes === "side"){ r(6, 8, 2, 2, "W"); r(12, 8, 2, 2, "W"); r(7, 8, 1, 2, "K"); r(13, 8, 1, 2, "K"); }
+  else if(f.eyes === "shades"){ r(4, 8, 12, 1, "K"); r(5, 9, 4, 2, "K"); r(11, 9, 4, 2, "K"); r(6, 9, 1, 1, "W"); r(12, 9, 1, 1, "W"); }
+  else if(f.eyes === "x"){ r(6, 8, 1, 1, "K"); r(8, 8, 1, 1, "K"); r(7, 9, 1, 1, "K"); r(6, 10, 1, 1, "K"); r(8, 10, 1, 1, "K");
+    r(12, 8, 1, 1, "K"); r(14, 8, 1, 1, "K"); r(13, 9, 1, 1, "K"); r(12, 10, 1, 1, "K"); r(14, 10, 1, 1, "K"); }
   else if(f.eyes !== "none"){ r(6, 8, 2, 2, "W"); r(12, 8, 2, 2, "W"); r(7, 9, 1, 1, "K"); r(12, 9, 1, 1, "K"); }
   if(f.blush){ r(5, 11, 2, 1, "P"); r(13, 11, 2, 1, "P"); }
   /* mouth */
@@ -67,7 +70,13 @@ var FACES = {
   oops:   { brow: "up", eyes: "wide", mouth: "none" },
   scratch: { brow: "worry", eyes: "open", mouth: "smirk" },
   blush:  { brow: "worry", eyes: "happy", mouth: "smile", blush: 1 },
-  bonnie: { brow: "worry", eyes: "side", mouth: "grin", blush: 1 }
+  bonnie: { brow: "worry", eyes: "side", mouth: "grin", blush: 1 },
+  cool:   { brow: "up", eyes: "shades", mouth: "smirk" },
+  cry:    { brow: "worry", eyes: "shut", mouth: "wobble" },
+  salute: { brow: "up", eyes: "open", mouth: "smile" },
+  think:  { brow: "one", eyes: "side", mouth: "flat" },
+  dizzy:  { brow: "up", eyes: "x", mouth: "o" },
+  thumbs: { brow: "up", eyes: "happy", mouth: "grin" }
 };
 function extras(o, name){
   if(name === "facepalm"){
@@ -85,6 +94,21 @@ function extras(o, name){
     R(o, 16, 6, 2, 10, "T"); R(o, 14, 2, 3, 3, "s"); R(o, 14, 2, 3, 1, "S"); R(o, 16, 5, 1, 1, "s");
     /* a question mark */
     R(o, 17, 0, 3, 1, "Q"); R(o, 19, 1, 1, 2, "Q"); R(o, 18, 3, 1, 1, "Q"); R(o, 18, 5, 1, 1, "Q");
+  } else if(name === "cool"){
+    /* pretending he meant it */
+    R(o, 17, 1, 1, 1, "L"); R(o, 18, 0, 1, 1, "L"); R(o, 19, 1, 1, 1, "L"); R(o, 18, 2, 1, 1, "L");
+  } else if(name === "cry"){
+    R(o, 6, 10, 1, 3, "D"); R(o, 13, 10, 1, 3, "D"); R(o, 5, 13, 1, 1, "D"); R(o, 14, 13, 1, 1, "D");
+  } else if(name === "salute"){
+    R(o, 16, 7, 2, 9, "T"); R(o, 12, 4, 5, 2, "s"); R(o, 12, 4, 5, 1, "S");
+  } else if(name === "think"){
+    R(o, 6, 15, 3, 2, "T"); R(o, 7, 12, 4, 3, "s"); R(o, 7, 12, 4, 1, "S");
+    R(o, 17, 4, 1, 1, "Q"); R(o, 18, 2, 1, 1, "Q"); R(o, 18, 0, 2, 1, "Q");
+  } else if(name === "dizzy"){
+    R(o, 1, 2, 1, 1, "L"); R(o, 0, 3, 3, 1, "L"); R(o, 1, 4, 1, 1, "L");
+    R(o, 18, 0, 1, 1, "D"); R(o, 17, 1, 3, 1, "D"); R(o, 18, 2, 1, 1, "D"); R(o, 2, 7, 1, 1, "D"); R(o, 18, 6, 1, 1, "L");
+  } else if(name === "thumbs"){
+    R(o, 16, 14, 3, 3, "T"); R(o, 16, 11, 3, 3, "s"); R(o, 16, 11, 3, 1, "S"); R(o, 17, 8, 1, 3, "s"); R(o, 17, 8, 1, 1, "S");
   } else if(name === "blush"){
     R(o, 1, 4, 1, 1, "L"); R(o, 0, 6, 1, 1, "L"); R(o, 18, 3, 1, 1, "L"); R(o, 19, 5, 1, 1, "L");
   }
@@ -119,7 +143,7 @@ function bonnie(o){
 }
 
 window.B5JayPix = {
-  reactions: ["facepalm", "shrug", "sweat", "oops", "scratch", "blush", "bonnie"],
+  reactions: ["facepalm", "cool", "shrug", "cry", "sweat", "salute", "oops", "think", "scratch", "dizzy", "blush", "thumbs", "bonnie"],
   pick: function(n){ var a = this.reactions; return a[((n % a.length) + a.length) % a.length]; },
   svg: function(name, label){
     var f = FACES[name] || FACES.smug, wide = name === "bonnie", o = [];

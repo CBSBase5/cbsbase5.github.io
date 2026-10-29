@@ -1,21 +1,28 @@
 /* ==========================================================
    Base 5 - Today's two, on the home page
    1. Jay's mistake of the day: Jay says something with one thing
-      wrong in it. Tap the bit you think is wrong, or ask to see it,
-      then read why people slip there.
-      Each weekday has a subject:
-        Monday maths, Tuesday words (spelling and punctuation),
-        Wednesday time travel (history), Thursday science,
-        Friday Jay's own real life slip. Weekends mix them all.
-   2. Would you rather: a time travel choice, with what happens
-      next for whichever one you pick. Jay and HB can add their own
-      picks from /teacher/picks.html (they show after you choose).
+      wrong in it. Tap the bit that is wrong, then pick what it
+      should say, then read why people slip there. Spotting it
+      earns 1 spark for the HQ last opened on that device.
+      The slips follow the Autumn 2 targets by name only (never a
+      student's own milestone wording: this page is public). On
+      the day a shared pillar activity lands, the slip leads into
+      it (pins, below); other days rotate through the targets.
+   2. Would you rather: Mondays, Wednesdays and Fridays are set in
+      that week's time machine year (era, below); Tuesdays and
+      Thursdays are silly everyday ones. Picking one reveals a
+      twist. Jay and Holly add their own picks from
+      /teacher/picks.html (they show after you choose).
 
-   On Cultural Calendar days (cal, below) both items match the
-   day, with a link to that day's game when there is one.
+   School days only: weekends and holidays keep the last school
+   day's pair (before term starts, the first day's pair shows).
+   On Cultural Calendar days the would you rather matches the day.
 
-   B5FUN.forDay(date) -> { key, kind, kindName, slip, wyr, event, n }
-   B5FUN.today(list)  -> the old one a day picker (still works)
+   B5FUN.forDay(date) -> { key, n, target, kindName, slip, wyr,
+                           wyrKind, era, event }
+     slip: { s: what Jay says, w: the wrong bit, c: [right, other,
+             other], f: the fix, y: why people slip here }
+     wyr:  [question, choice A, twist A, choice B, twist B]
    Preview any day on the home page with ?funday=2026-11-05
 
    Add more in the same shapes; the order does not matter.
@@ -23,131 +30,253 @@
    ========================================================== */
 window.B5FUN = {
 
-  /* [what Jay says, the bit that is wrong, the fix, why people slip here] */
+  /* the Autumn 2 targets, by name only, with a short label for the card */
+  targets: {
+    "eng-infer":     "Reading between the lines",
+    "eng-factop":    "Fact or opinion",
+    "eng-cohesion":  "Linking ideas",
+    "eng-organise":  "Organising writing",
+    "eng-punct":     "Punctuation",
+    "maths-number":  "Number",
+    "maths-shape":   "Shape and measure",
+    "ac-arch":       "Architecture",
+    "hs-myths":      "Myths and legends",
+    "pw-adventure":  "Adventure",
+    "pw-balance":    "Balance and control",
+    "pfa-careers":   "Careers",
+    "pfa-transport": "Getting around",
+    "se-earth":      "Earth and sky",
+    "rel-assert":    "Speaking up"
+  },
+
+  /* the days a shared pillar activity lands (data/a2/_build/plan.py),
+     so that day's slip leads into it */
+  pins: {
+    "2026-11-06": "pfa-transport", "2026-11-09": "ac-arch",      "2026-11-11": "pw-adventure",
+    "2026-11-12": "hs-myths",      "2026-11-13": "pfa-careers",  "2026-11-18": "pw-balance",
+    "2026-11-20": "pfa-transport", "2026-11-23": "ac-arch",      "2026-11-25": "pw-adventure",
+    "2026-11-27": "pfa-careers",   "2026-12-02": "pw-balance",   "2026-12-03": "hs-myths",
+    "2026-12-10": "se-earth"
+  },
+
+  /* every other school day takes the next target from this list */
+  rot: ["eng-punct", "maths-number", "eng-infer", "maths-shape", "se-earth", "eng-factop", "maths-number",
+        "rel-assert", "eng-cohesion", "maths-shape", "eng-organise", "pw-balance", "maths-number", "eng-punct",
+        "pfa-careers", "maths-shape", "eng-infer", "ac-arch", "eng-factop", "pw-adventure", "hs-myths", "pfa-transport"],
+
+  /* the slips, by target. c[0] is the right one; the page shuffles them. */
   slips: {
-    maths: [
-      ["There are 60 seconds in a minute and 60 minutes in an hour, so there are 360 seconds in an hour.", "360 seconds", "60 x 60 is 3,600, so an hour has 3,600 seconds.", "It is easy to do 60 x 6 instead of 60 x 60. Times by 60, then times by 60 again."],
-      ["A week has 7 days, so a fortnight has 15 days.", "15 days", "A fortnight is two weeks: 14 days.", "The word comes from fourteen nights. That is the clue hiding in it."],
-      ["Half of 50 is 20.", "20", "Half of 50 is 25.", "Halving numbers that end in 5 tens catches people out. Half of 40 is 20, and half of the last 10 is 5 more."],
-      ["A triangle has four sides.", "four sides", "A triangle has three sides. Four sides is a quadrilateral.", "Tri means three, like a tricycle has three wheels."],
-      ["10% of 80 is 10.", "is 10", "10% of 80 is 8. Divide by 10.", "10% sounds like 10, but it means one tenth. Split 80 into 10 equal parts and take one."],
-      ["A metre is 10 centimetres.", "10 centimetres", "A metre is 100 centimetres.", "10 is how many millimetres are in a centimetre, so the two get swapped. Centi means hundredth."],
-      ["7 x 8 is 54.", "54", "7 x 8 is 56.", "54 is 6 x 9, a close neighbour. A trick: 5, 6, 7, 8 reads as 56 = 7 x 8."],
-      ["Quarter past three is 3:25.", "3:25", "Quarter past three is 3:15.", "A quarter of an hour is 15 minutes, because four quarters make 60."],
-      ["A dozen eggs is ten eggs.", "ten eggs", "A dozen is twelve.", "We count in tens almost everywhere, so ten feels right. A dozen is an old way of counting in twelves."],
-      ["A square number is any number that ends in a zero.", "ends in a zero", "A square number is a number times itself, like 4, 9, 16 and 25.", "Square numbers really do make squares: 3 rows of 3 dots is 9."],
-      ["There are 100 years in a millennium.", "100 years", "A millennium is 1,000 years. 100 years is a century.", "Century and millennium are both long times. Mill comes from the Latin for a thousand."],
-      ["Half past four is 4:50.", "4:50", "Half past four is 4:30.", "Half of 100 is 50, but there are 60 minutes in an hour, not 100. Half of 60 is 30."],
-      ["The opposite of a mirror image is a translation.", "a translation", "A mirror image is a reflection. A translation is a slide.", "Lots of maths words sound alike. Reflection flips, rotation turns, translation slides."],
-      ["A right angle is 180 degrees.", "180 degrees", "A right angle is 90 degrees. 180 degrees is a straight line.", "Both are special angles, so they get swapped. A right angle is a square corner, like the corner of a book."],
-      ["0.5 is smaller than 0.25, because 5 is smaller than 25.", "0.5 is smaller than 0.25", "0.5 is bigger. It is the same as 0.50, which is more than 0.25.", "Decimals do not work like whole numbers. Give them the same number of digits, then compare."],
-      ["There are 1,000 grams in a pound.", "in a pound", "There are 1,000 grams in a kilogram. A pound is about 454 grams.", "Pounds and kilograms both measure weight, so they get mixed up. Kilo means a thousand."],
-      ["An hour and a half is 90 seconds.", "90 seconds", "An hour and a half is 90 minutes.", "The number is right and the unit is wrong. Always check the word after the number."],
-      ["A pizza is cut into 8 slices. I ate 2, so I ate half of it.", "half of it", "2 out of 8 is a quarter. Half would be 4 slices.", "Two feels like a half because there are two halves. Look at how many slices there are in total."],
-      ["The number 3,070 is three thousand and seven.", "three thousand and seven", "It is three thousand and seventy. The 7 is in the tens column.", "Zeros hold places. Read it column by column: thousands, hundreds, tens, ones."]
+    "eng-punct": [
+      { s: "On saturday I took Bonnie to the park.", w: "saturday", c: ["Saturday", "SATURDAY", "saturday,"],
+        f: "Days of the week start with a capital letter: Saturday.", y: "Days of the week are names, and names get capitals. Months do too." },
+      { s: "Bonnies lead is bright orange.", w: "Bonnies", c: ["Bonnie's", "Bonnies'", "Bonnie,s"],
+        f: "It is Bonnie's lead. The apostrophe shows the lead belongs to her.", y: "Bonnies with no apostrophe would mean more than one Bonnie, which is a frightening thought." },
+      { s: "Where is the remote.", w: "remote.", c: ["remote?", "remote!", "remote,"],
+        f: "It is a question, so it needs a question mark: Where is the remote?", y: "Questions often start with where, what, why, who or how. That is the clue." },
+      { s: "I bought eggs milk bread and a cake.", w: "eggs milk bread", c: ["eggs, milk, bread", "eggs. Milk. Bread", "eggs! milk! bread"],
+        f: "Items in a list are split up with commas: eggs, milk, bread and a cake.", y: "Without commas the list runs together. You usually do not need one before the and." }
     ],
-    words: [
-      ["The word 'their' means over in that place.", "over in that place", "That is 'there'. 'Their' means belonging to them.", "They sound the same. Spot the word here inside there: there is about places."],
-      ["The dog wagged it's tail.", "it's", "The dog wagged its tail. It's means it is.", "Apostrophes often show belonging, but its is the odd one out. Try saying it is: if that does not fit, no apostrophe."],
-      ["I went to london on saturday.", "london on saturday", "London and Saturday both need capital letters.", "Names of places, days and months always start with a capital letter."],
-      ["Your the best.", "Your", "You're the best. You're means you are.", "Say it out loud as you are. If that works, it needs the apostrophe."],
-      ["Do you want to come fishing.", "fishing.", "It is a question, so it ends with a question mark: Do you want to come fishing?", "Questions often start with do, can, are or what. Check how the sentence starts."],
-      ["I have two dog's.", "dog's", "I have two dogs. No apostrophe for more than one.", "An apostrophe does not make a plural. It is for belonging (the dog's lead) or missing letters."],
-      ["Tomorow is Friday.", "Tomorow", "Tomorrow has one M and two Rs.", "Say it slowly in three parts, to mor row, and you can hear where the double R goes."],
-      ["I would of come, but I was busy.", "would of", "It is would have, or would've.", "Would've sounds like would of when you say it fast. Of never comes straight after would, could or should."],
-      ["We was late for the bus.", "We was", "In Standard English it is we were.", "Lots of people say we was out loud. In writing, was goes with I, he, she and it, and were goes with we, you and they."],
-      ["That was definately the best day.", "definately", "Definitely. There is a finite hiding in the middle.", "People say it fast, so it sounds like ate. Spot the word finite inside: de finite ly."],
-      ["There are lots of fishs in the lake.", "fishs", "The plural is fish (or fishes, for lots of different kinds).", "Some words do not add an s: one sheep, two sheep, one fish, lots of fish."],
-      ["The childrens coats were everywhere.", "childrens", "It is children's. Children is already plural, so it just needs 's.", "The apostrophe goes straight after the word for the owners. The owners are the children."],
-      ["I bought apples pears and bananas.", "apples pears", "Commas separate the items in a list: apples, pears and bananas.", "In a list, a comma goes between each item. Usually not before the last and."],
-      ["My birthday is in febuary.", "febuary", "February: a capital F, and an R after the B.", "Lots of people skip the first R when they say it, so they skip it when they spell it too."],
-      ["Wich one do you want?", "Wich", "Which, with an H after the W.", "Which and witch sound the same. Which asks a question. A witch has a broomstick."]
+    "eng-infer": [
+      { s: "Bonnie hid under the table, shaking, when the fireworks started. She was clearly bored.", w: "bored", c: ["scared", "sleepy", "hungry"],
+        f: "Hiding and shaking are clues she was scared, not bored.", y: "Inference means using clues. The words never say scared, but hiding and shaking tell you." },
+      { s: "He came in soaking wet, shook out his umbrella and said it was a lovely sunny day.", w: "a lovely sunny day", c: ["pouring with rain", "very windy", "freezing cold"],
+        f: "Soaking wet plus an umbrella means it was raining.", y: "Look for clues in what people do and carry, not only in what they say." },
+      { s: "Her hands were covered in flour and the kitchen smelled sweet, so she must have been fixing a car.", w: "fixing a car", c: ["baking", "painting", "gardening"],
+        f: "Flour and a sweet smell point to baking.", y: "Each clue narrows it down. Flour on its own could be a few things. Flour plus a sweet smell is baking." },
+      { s: "The whole crowd groaned and put their heads in their hands, so their team must have scored.", w: "scored", c: ["missed", "won the cup", "bought a pie"],
+        f: "Groaning with heads in hands means something went badly. Their team probably missed.", y: "How people react is a strong clue. Cheering would mean a goal." }
     ],
-    history: [
-      ["The Great Fire of London was in 1066.", "1066", "It was 1666. 1066 is the Battle of Hastings.", "Both dates end in 66, exactly 600 years apart."],
-      ["The first person to walk on the Moon was Buzz Lightyear.", "Buzz Lightyear", "It was Neil Armstrong, in 1969. Buzz Aldrin went second.", "Buzz Lightyear was named after Buzz Aldrin, so the names get tangled."],
-      ["Doctor Who first appeared on TV in 2005.", "2005", "It started in 1963. 2005 was when it came back.", "The show had a long break after 1989, so lots of people think the 2005 one was the start."],
-      ["Dinosaurs and people lived at the same time.", "lived at the same time", "The last big dinosaurs died out about 66 million years before the first people.", "Films and cartoons put them together all the time. The real gap is enormous."],
-      ["The Titanic sank on its tenth trip.", "tenth trip", "It sank on its very first voyage, in April 1912.", "It is so famous that people assume it had sailed for years. It sank five days after leaving Southampton."],
-      ["The Wright brothers' first flight lasted 12 hours.", "12 hours", "It lasted about 12 seconds.", "Twelve is right but the unit is wrong. Planes got better very fast after 1903."],
-      ["The Romans built Hadrian's Wall to keep out the Vikings.", "the Vikings", "It was built around AD 122, hundreds of years before the Vikings, at the northern edge of Roman Britain.", "Invaders get mixed up. Romans came first, then the Anglo Saxons, then the Vikings."],
-      ["Queen Victoria was queen during the Second World War.", "Queen Victoria", "Victoria died in 1901. King George VI was king during the Second World War.", "Victoria reigned for so long that she feels like she was there for everything."],
-      ["The Second World War ended in 1918.", "1918", "1918 is when the First World War ended. The Second ended in 1945.", "Two world wars, two end dates. The First is 1914 to 1918, the Second is 1939 to 1945."],
-      ["The pyramids at Giza were built by the Romans.", "the Romans", "They were built by the ancient Egyptians. The Great Pyramid is about 4,500 years old, far older than Rome.", "Anything really old gets called Roman. The pyramids were already ancient when the Romans saw them."],
-      ["Henry VIII had three wives.", "three wives", "He had six.", "A rhyme helps: divorced, beheaded, died, divorced, beheaded, survived."],
-      ["People in the Middle Ages thought the Earth was flat.", "thought the Earth was flat", "Most educated people knew it was round. Greek thinkers had worked that out over 2,000 years earlier.", "It is a myth from much later stories, and it stuck."],
-      ["The first iPhone came out in 1997.", "1997", "It came out in 2007.", "Ten years out. Phones changed so fast that 2007 already feels like ancient history."],
-      ["Mary Seacole and Florence Nightingale were nurses in the Second World War.", "the Second World War", "They cared for soldiers in the Crimean War, in the 1850s.", "Wars blur together. The Crimean War was nearly a hundred years before the Second World War."]
+    "eng-factop": [
+      { s: "Pizza is the best food in the world, and that is a fact.", w: "that is a fact", c: ["that is my opinion", "that is the law", "that is science"],
+        f: "Best is a matter of taste, so it is an opinion.", y: "Words like best, worst, nicest and boring usually signal an opinion. A fact can be checked." },
+      { s: "Here is a fact: Bonnie is the cutest dog ever.", w: "a fact", c: ["an opinion", "a measurement", "a law"],
+        f: "Cutest is Jay's opinion. A very strong opinion, but an opinion.", y: "If people could fairly disagree, it is an opinion. Somebody out there prefers cats." },
+      { s: "London is the capital of England. That is just my opinion.", w: "my opinion", c: ["a fact", "a guess", "a feeling"],
+        f: "London being the capital can be checked, so it is a fact.", y: "If you can check it somewhere reliable, like a map or an atlas, it is a fact." },
+      { s: "In my opinion, water boils at 100 degrees Celsius.", w: "In my opinion,", c: ["It is a fact that", "Some days,", "On Tuesdays,"],
+        f: "It can be tested with a thermometer, so it is a fact, not an opinion.", y: "Saying in my opinion does not turn a fact into an opinion. It can still be checked." }
     ],
-    science: [
-      ["Water boils at 50 degrees Celsius.", "50 degrees", "Water boils at 100 degrees Celsius (at sea level).", "Water is very hot long before it boils. Up a high mountain it really does boil at a bit less than 100."],
-      ["The Sun goes round the Earth once a day.", "The Sun goes round the Earth", "The Earth spins once a day, and goes round the Sun once a year.", "It looks like the Sun moves across the sky. It is really us spinning."],
-      ["A spider has six legs.", "six legs", "Spiders have eight legs. Insects have six.", "Spiders get called insects, but they are arachnids. Count the legs to tell them apart."],
-      ["Light from the Sun reaches Earth in about 8 hours.", "8 hours", "It takes about 8 minutes.", "Light is the fastest thing there is, about 300,000 km every second, so even 150 million km is quick."],
-      ["An octopus has six arms.", "six arms", "An octopus has eight arms.", "Octo means eight, like an octagon has eight sides."],
-      ["Penguins live at the North Pole.", "the North Pole", "Wild penguins live in the southern half of the world, including Antarctica.", "Polar bears live in the far north and penguins in the south, so they never meet in the wild."],
-      ["Plants get their food from the soil.", "from the soil", "Plants make their own food from light, air and water. That is photosynthesis.", "Plants do take water and minerals from the soil, so it looks like that is their food."],
-      ["Bats are blind.", "blind", "No bat is blind. Many see well, and some also use echoes to find their way in the dark.", "The saying blind as a bat has been around for centuries. It is just not true."],
-      ["Sound travels faster than light.", "Sound travels faster than light", "Light is far faster. That is why you see lightning before you hear the thunder.", "You hear and see things at almost the same time nearby, so the difference is hard to notice."],
-      ["Ice is heavier than water, so it sinks.", "heavier than water, so it sinks", "Ice is less dense than water, so it floats. That is why ponds freeze on top.", "Solids are usually denser than liquids. Water is the odd one out."],
-      ["Babies have 206 bones and adults have about 300.", "Babies have 206 bones and adults have about 300", "It is the other way round. Babies have about 300, some join together, and adults have 206.", "You would expect bigger people to have more bones. Growing joins some of them up."],
-      ["Goldfish can only remember things for 3 seconds.", "3 seconds", "Goldfish can remember things for months, and they can be trained.", "It is a popular joke that turned into a myth."],
-      ["Mars is the closest planet to the Sun.", "Mars", "Mercury is the closest. Mars is fourth.", "Mars is the planet people talk about most, so it gets put first."],
-      ["Wires are wrapped in plastic because electricity flows through plastic really well.", "flows through plastic really well", "Plastic is an insulator: electricity does not flow through it easily. It keeps the metal inside safe to touch.", "The plastic is there for a reason, so it is easy to guess the wrong reason."],
-      ["A whale is a type of fish.", "a type of fish", "Whales are mammals. They breathe air and feed their babies milk.", "Whales live in the sea and have fins, so they look like fish."]
+    "eng-cohesion": [
+      { s: "I wanted to go outside. However, it was sunny, so I went.", w: "However", c: ["Luckily", "Instead", "Although"],
+        f: "However means but, and sunshine is not a reason to stay in. Luckily fits.", y: "Linking words carry meaning. However needs something going the other way." },
+      { s: "Finally, I boiled the kettle. Then I made a cup of tea.", w: "Finally", c: ["First", "Lastly", "Meanwhile"],
+        f: "The kettle comes before the tea, so it needs First.", y: "Order words like first, then and finally have to match what actually happened." },
+      { s: "The film was really long. Because of this, it felt very short.", w: "felt very short", c: ["was hard to sit through", "was free", "was in French"],
+        f: "Because of this means the next part follows from the last. A long film is hard to sit through.", y: "Linking phrases promise a connection, so the ideas either side have to fit together." },
+      { s: "I love birds. For example, I hate them.", w: "I hate them", c: ["robins and blackbirds", "Bonnie", "on Fridays"],
+        f: "For example has to be followed by an example of what came before: robins and blackbirds.", y: "For example promises an example, so whatever comes next has to be one." }
     ],
-    jay: [
-      ["Bonnie is a poodle, so she is a type of cat.", "a type of cat", "Poodles are dogs. Bonnie would like a word.", "She is small and fluffy, which fools some people. She is definitely a dog."],
-      ["I put some salted crisps out for the birds in my garden.", "salted crisps", "Salty food is bad for birds. Seeds, oats or a bit of fruit are much better.", "If people like it, it feels like birds will too. Their bodies cannot cope with much salt."],
-      ["Bonnie wagged her tail when I got home.", "wagged her tail", "Bonnie has no tail. Whatever she wagged, it was not that.", "Dogs and tails go together in our heads. Not every dog has one."],
-      ["A robin is a big black bird.", "a big black bird", "A robin is small, with a red orange breast. Big and black sounds more like a crow.", "Jay likes birds, so honestly he should know this one."],
-      ["As I always say: my ears are a toilet.", "are a toilet", "It is: my ears are NOT a toilet. One small word changes everything.", "Leave out not and the whole meaning flips."],
-      ["I set my alarm for 7pm so I would be up in time for school.", "7pm", "7am is the morning. 7pm is the evening, so Jay would be very late.", "am is before midday and pm is after. It is easy to tap the wrong one."],
-      ["I walked Bonnie 2 kilometres, which is 200 metres.", "200 metres", "2 km is 2,000 metres. Kilo means a thousand.", "Moving between units means times or divide by 1,000, and it is easy to drop a zero."],
-      ["In the wise words of my late, great grandfather: go.", "go", "The wise words were: stop.", "A classic, said a thousand times. Still got it wrong."],
-      ["I paid 50p for a 1 pound coffee and got 50p change.", "got 50p change", "50p is not enough for a 1 pound coffee. Jay still owes 50p.", "You only get change when you pay more than the price."],
-      ["Owls can turn their heads all the way round, 360 degrees.", "all the way round, 360 degrees", "Owls can turn their heads about 270 degrees: three quarters of the way round.", "Owls look like they can do a full circle. 270 is still very impressive."],
-      ["When I was in China, I climbed the Eiffel Tower.", "the Eiffel Tower", "The Eiffel Tower is in Paris, in France. In China it might have been the Great Wall.", "Famous landmarks get muddled. Paris for the Eiffel Tower."],
-      ["I left at 3:45 and got home at 4:15, so the journey took 70 minutes.", "70 minutes", "From 3:45 to 4:15 is 30 minutes.", "Time does not work in hundreds. Count up to the hour first (15 minutes), then 15 more."],
-      ["Flamingos are born pink.", "born pink", "Flamingo chicks are grey or white. They turn pink from the food they eat.", "We only ever see the grown up ones, so we picture them pink from the start."],
-      ["Bonnie is a toy poodle, so she runs on batteries.", "runs on batteries", "Toy just means the smallest size of poodle. She runs on biscuits.", "Toy has two meanings, and Jay picked the wrong one."],
-      ["I ran a marathon before breakfast: all 26 metres of it. Outrageous.", "26 metres", "A marathon is about 26 miles, or 42 km. 26 metres is about one length of a swimming pool.", "Miles and metres both start with m. Very different distances."]
+    "eng-organise": [
+      { s: "My postcard from China starts: Dear Sir or Madam, I am writing to complain about the Great Wall.", w: "Dear Sir or Madam, I am writing to complain about", c: ["Hi everyone, greetings from", "Chapter One:", "Ingredients:"],
+        f: "A postcard to friends is chatty: Hi everyone, greetings from the Great Wall.", y: "Who it is for decides the format. A complaint letter is a whole different shape." },
+      { s: "In my travel diary, the whole week goes in one giant paragraph.", w: "one giant paragraph", c: ["a new paragraph for each day", "one bullet point", "a footnote"],
+        f: "Start a new paragraph for each day, or each new place.", y: "A new paragraph tells the reader something has changed: time, place, person or topic." },
+      { s: "A recipe should start with the method and end with the ingredients.", w: "start with the method and end with the ingredients", c: ["list the ingredients first, then the method", "have no ingredients", "be written as a poem"],
+        f: "Ingredients come first, so you can get everything ready, then the method.", y: "Writing is organised around what the reader needs first." },
+      { s: "To start a new part of my travel blog, I use a heading in tiny grey letters.", w: "tiny grey letters", c: ["a clear, bold subheading", "no gap at all", "the same font as everything else"],
+        f: "A clear subheading signposts the new part.", y: "Signposts help readers find their way, so they need to stand out." }
     ],
-    /* weekends also use these */
-    mix: [
-      ["There are 12 months in a year and December is the eleventh.", "the eleventh", "December is the twelfth month. November is the eleventh.", "Dec means ten (like a decade), from an old calendar, so December's name does not help here."],
-      ["England's capital is Manchester.", "Manchester", "It is London.", "Manchester is one of England's biggest cities, but the capital is London."],
-      ["Christmas Day is the 26th of December.", "the 26th", "Christmas Day is the 25th. The 26th is Boxing Day.", "The two days sit side by side, so they swap easily."]
+    "maths-number": [
+      { s: "7 x 8 is 54.", w: "54", c: ["56", "48", "63"],
+        f: "7 x 8 is 56.", y: "54 is 6 x 9, a close neighbour. A trick: 5, 6, 7, 8 reads as 56 = 7 x 8." },
+      { s: "Any number ending in 5 can be divided by 2 exactly.", w: "by 2", c: ["by 5", "by 3", "by 10"],
+        f: "Numbers ending in 5 or 0 divide by 5 exactly. Only even numbers divide exactly by 2.", y: "Even numbers end in 0, 2, 4, 6 or 8. Anything ending in 5 is odd." },
+      { s: "5 is a factor of 12.", w: "5", c: ["6", "7", "8"],
+        f: "6 is a factor of 12, because 2 x 6 = 12. 12 divided by 5 leaves a remainder.", y: "A factor divides in exactly, with nothing left over." },
+      { s: "Rounded to the nearest ten, 47 is 40.", w: "40", c: ["50", "45", "47"],
+        f: "47 rounds up to 50, because the 7 is 5 or more.", y: "Look at the ones digit: 5 or more rounds up, 4 or less rounds down." },
+      { s: "I estimated 49 x 21 as about 100.", w: "about 100", c: ["about 1,000", "about 70", "about 10,000"],
+        f: "Round to 50 x 20, which is 1,000.", y: "Round each number first, then multiply. It is easy to drop a zero." }
+    ],
+    "maths-shape": [
+      { s: "The thermometer says minus 3, so it is warmer than 2 degrees.", w: "warmer", c: ["colder", "exactly as warm", "twice as warm"],
+        f: "Minus 3 is colder than 2 degrees: 5 degrees colder.", y: "Below zero, a bigger number means colder. Minus 3 is further down the scale." },
+      { s: "A metre is 10 centimetres.", w: "10 centimetres", c: ["100 centimetres", "1,000 centimetres", "12 inches"],
+        f: "A metre is 100 centimetres.", y: "10 is how many millimetres are in a centimetre, so the two get swapped. Centi means hundredth." },
+      { s: "A room 4 metres by 3 metres has an area of 7 square metres.", w: "7 square metres", c: ["12 square metres", "14 square metres", "7 metres"],
+        f: "Area is length times width: 4 x 3 = 12 square metres.", y: "Adding the sides is the start of perimeter. Area is how much floor, so multiply." },
+      { s: "On a map where 1 cm stands for 1 km, my 5 cm walk is 50 km.", w: "50 km", c: ["5 km", "500 km", "half a km"],
+        f: "Each centimetre is 1 km, so 5 cm is 5 km.", y: "Read the scale carefully: it tells you what one unit on the map is worth." },
+      { s: "The jug holds 1.5 litres, which is 150 millilitres.", w: "150 millilitres", c: ["1,500 millilitres", "15 millilitres", "15,000 millilitres"],
+        f: "1 litre is 1,000 ml, so 1.5 litres is 1,500 ml.", y: "Milli means thousandth, so times by 1,000." }
+    ],
+    "ac-arch": [
+      { s: "Triangles are the weakest shape you can put in a bridge.", w: "the weakest", c: ["the strongest", "the roundest", "the bendiest"],
+        f: "Triangles are one of the strongest shapes: they do not squash out of shape when pushed. Bridges and roofs are full of them.", y: "A square can lean over into a diamond. A triangle cannot change shape without a side breaking." },
+      { s: "An arch is strong because all the weight pushes straight down into the middle.", w: "straight down into the middle", c: ["round the curve and down the sides", "up into the sky", "nowhere at all"],
+        f: "An arch carries the weight round the curve and down the sides into the ground.", y: "The keystone at the top locks it, but the weight travels round the curve." },
+      { s: "Builders put the foundations on the roof.", w: "on the roof", c: ["under the ground", "on the walls", "in the windows"],
+        f: "Foundations go under the ground, spreading the building's weight.", y: "Foundations are found at the bottom. That is the clue." },
+      { s: "An architect's plan shows the building from the side.", w: "from the side", c: ["from directly above", "from inside a cupboard", "from the future"],
+        f: "A plan is drawn from directly above. A drawing from the side is called an elevation.", y: "Architects use different views. Plan means looking straight down." }
+    ],
+    "hs-myths": [
+      { s: "The Minotaur was half man and half horse.", w: "half horse", c: ["half bull", "half eagle", "half fish"],
+        f: "The Minotaur was half man, half bull. Half man, half horse is a centaur.", y: "Greek myths are full of mixed up creatures, so they get swapped." },
+      { s: "Medusa could turn people to stone just by sneezing at them.", w: "sneezing at them", c: ["looking at them", "singing to them", "poking them"],
+        f: "In the myth, anyone who looked at Medusa turned to stone.", y: "Her power is in her eyes, which is why the hero in the story used a shiny shield as a mirror." },
+      { s: "King Arthur pulled the sword out of a loaf of bread.", w: "a loaf of bread", c: ["a stone", "a tree", "a horse"],
+        f: "In the legend, Arthur pulled the sword from a stone, which proved he should be king.", y: "Legends have lots of famous objects, and they are easy to muddle." },
+      { s: "A legend is a story that is completely true, every word of it.", w: "completely true, every word of it", c: ["often based on something real, but stretched", "always about dragons", "written last week"],
+        f: "A legend may be based on real people or events, but the story has been stretched over time.", y: "Legends get retold for hundreds of years, and each teller adds a bit." }
+    ],
+    "pw-adventure": [
+      { s: "For a long walk on the moors, flip flops are the best thing to wear.", w: "flip flops", c: ["walking boots", "slippers", "wellies with holes in"],
+        f: "Walking boots grip and support your ankles.", y: "Kit has to suit the ground. Rocks and mud need grip." },
+      { s: "Before an adventure, nobody needs to know where you are going.", w: "nobody needs to know", c: ["someone at home should know", "only Bonnie should know", "you should keep it a secret"],
+        f: "Always tell someone where you are going and when you will be back.", y: "If anything goes wrong, someone knows where to look. It is the first rule of adventures." },
+      { s: "On a compass, the needle always points south.", w: "south", c: ["north", "east", "at Jay"],
+        f: "The compass needle points north.", y: "Remember the order clockwise: Never Eat Shredded Wheat. North, East, South, West." },
+      { s: "Climbers wear a helmet to keep their hair tidy.", w: "to keep their hair tidy", c: ["to protect their head", "to keep warm", "to look taller"],
+        f: "Helmets protect against bumps and falling stones.", y: "Safety kit always has a job. Jay's hair is beyond help anyway." }
+    ],
+    "pw-balance": [
+      { s: "It is easier to balance on one leg with your eyes shut.", w: "easier", c: ["harder", "exactly the same", "only easier on Tuesdays"],
+        f: "It is harder with your eyes shut. Your eyes help your brain work out which way is up.", y: "Balance uses your eyes, your ears and your muscles together. Take one away and it gets wobbly." },
+      { s: "Your sense of balance mostly comes from your elbows.", w: "your elbows", c: ["inside your ears", "your eyebrows", "your knees"],
+        f: "Tiny parts deep inside your ears, filled with fluid, help you balance.", y: "That is why spinning round makes you dizzy: the fluid keeps moving after you stop." },
+      { s: "Bending your knees makes you less steady when you land a jump.", w: "less steady", c: ["more steady", "taller", "louder"],
+        f: "Bending your knees soaks up the landing and keeps you steady.", y: "Stiff legs pass the bump straight up your body." },
+      { s: "Standing with your feet close together is the steadiest way to stand.", w: "close together", c: ["about shoulder width apart", "crossed over", "on tiptoe"],
+        f: "Feet about shoulder width apart give you a wider, steadier base.", y: "A wider base is harder to tip over, like a table with its legs at the corners." }
+    ],
+    "pfa-careers": [
+      { s: "A vet looks after people's teeth.", w: "people's teeth", c: ["animals", "cars", "computers"],
+        f: "A vet looks after animals. A dentist looks after teeth.", y: "Lots of jobs have short names that are easy to mix up." },
+      { s: "An electrician mostly fixes leaking pipes.", w: "leaking pipes", c: ["wiring and lights", "shoes", "teeth"],
+        f: "Electricians work on wiring, sockets and lights. Plumbers fix pipes.", y: "Both work in houses and both get called out in emergencies, so they get confused." },
+      { s: "A CV is a list of your favourite snacks.", w: "your favourite snacks", c: ["your skills and experience", "your passwords", "your enemies"],
+        f: "A CV sums up your skills, experience and qualifications for an employer.", y: "CV is short for curriculum vitae: Latin for the story of your life. Snacks optional." },
+      { s: "On an apprenticeship, you never get paid while you learn.", w: "never get paid", c: ["get paid", "pay the boss", "get paid in biscuits"],
+        f: "Apprentices are paid while they learn on the job.", y: "It is real work with training built in, so it comes with a wage." }
+    ],
+    "pfa-transport": [
+      { s: "A red traffic light means go.", w: "go", c: ["stop", "go faster", "turn left"],
+        f: "Red means stop. Green means go.", y: "Red is used for danger and stopping almost everywhere." },
+      { s: "The 14:30 train leaves at half past two in the morning.", w: "in the morning", c: ["in the afternoon", "at midnight", "next week"],
+        f: "14:30 is the 24 hour clock: half past two in the afternoon.", y: "After 12:00, take away 12 to get the afternoon time. 14 take away 12 is 2." },
+      { s: "A return ticket only gets you there, not back.", w: "only gets you there, not back", c: ["gets you there and back", "gets you nowhere", "is always free"],
+        f: "A return covers there and back. A single only goes one way.", y: "Return means coming back. That is the clue." },
+      { s: "Bus timetables list the times in alphabetical order.", w: "alphabetical order", c: ["time order", "random order", "size order"],
+        f: "Timetables go in time order, earliest first.", y: "Find your stop, then read along to the next time after now." }
+    ],
+    "se-earth": [
+      { s: "The air we breathe is mostly oxygen.", w: "mostly oxygen", c: ["mostly nitrogen", "mostly carbon dioxide", "mostly helium"],
+        f: "Air is about 78% nitrogen and about 21% oxygen.", y: "We need oxygen, so it feels like it should be the main part. It is only about a fifth." },
+      { s: "Granite is a soft rock that crumbles in your hand.", w: "a soft rock that crumbles in your hand", c: ["a very hard rock", "a type of metal", "a liquid"],
+        f: "Granite is a very hard rock, used for worktops and old buildings.", y: "Some rocks, like chalk, really do crumble. Granite is not one of them." },
+      { s: "Clouds are made of smoke.", w: "smoke", c: ["tiny drops of water or ice", "dust and glitter", "cotton wool"],
+        f: "Clouds are billions of tiny water droplets or ice crystals.", y: "They look soft and fluffy, but they are water." },
+      { s: "The Earth's core is the coldest part of the planet.", w: "the coldest", c: ["the hottest", "the wettest", "the windiest"],
+        f: "The core is the hottest part: roughly as hot as the surface of the Sun.", y: "The deeper you go under our feet, the hotter it gets." }
+    ],
+    "rel-assert": [
+      { s: "Being assertive means getting your own way by shouting.", w: "by shouting", c: ["by saying what you need, calmly and clearly", "by staying silent", "by sulking"],
+        f: "Assertive means saying what you think or need, calmly and clearly, while respecting other people.", y: "Shouting is aggressive. Saying nothing is passive. Assertive sits in the middle." },
+      { s: "If a friend asks you to do something you do not want to do, you have to say yes.", w: "you have to say yes", c: ["you can say no", "you have to say maybe", "you have to move house"],
+        f: "You can say no. A good friend will respect it.", y: "Saying no can feel awkward, but it is allowed, and it is often kinder for both of you." },
+      { s: "Saying I feel annoyed when you take my pen without asking is a rude thing to say.", w: "a rude thing to say", c: ["an assertive thing to say", "a secret", "a lie"],
+        f: "That is an I statement: it says how you feel and why, without blaming.", y: "I statements talk about your own feelings, so they are less likely to start an argument." },
+      { s: "Good eye contact means staring without blinking for a whole minute.", w: "staring without blinking for a whole minute", c: ["looking now and then, as much as feels OK", "never looking at anyone", "winking a lot"],
+        f: "Looking now and then, as much as feels OK, is plenty. Looking near someone's face works too.", y: "Eye contact feels different for everyone. Staring is a lot for anybody." }
     ]
   },
 
-  /* [question, choice A, what happens if A, choice B, what happens if B] */
-  wyr: [
-    ["Would you rather...", "visit the dinosaurs for one hour", "Lovely. Hide behind a fern and do not sneeze.", "visit the year 3026 for one hour", "Lovely. Try not to get run over by something that floats."],
-    ["Would you rather...", "meet yourself at age seven", "Seven year old you thinks you are very old and very cool.", "meet yourself at age seventy", "Seventy year old you laughs and will not say why."],
-    ["Would you rather...", "time travel with Bonnie", "She is no help at all, but very good company.", "time travel with a T. rex", "Excellent bodyguard. Terrible at fitting in the time machine."],
-    ["Would you rather...", "only go backwards in time", "You will never know how anything ends. Bring snacks.", "only go forwards in time", "No going back for anything you forgot. Pack carefully."],
-    ["Would you rather...", "watch the first ever football match in 1872", "It finishes 0 0. Still, you were there.", "watch a football match in 2126", "The ball hovers. Nobody is sure if that is allowed."],
-    ["Would you rather...", "bring a Victorian kid to 2026", "They are amazed by everything, especially the toaster.", "go to school in Victorian times", "Slates instead of laptops. No PE, just marching."],
-    ["Would you rather...", "know your own future", "No surprises, good or bad. Hmm.", "never find out what happens", "Everything stays a surprise. Even Tuesdays."],
-    ["Would you rather...", "fix one tiny mistake from your past", "Done. You will never know what else changed.", "leave the past exactly as it is", "Probably wise. Time travel is messy."],
-    ["Would you rather...", "live in a castle in 1066", "Draughty, smoky, but you have a moat.", "live in a space station in 2100", "Great view. Showers are tricky."],
-    ["Would you rather...", "bring back one extinct animal", "Your pick wanders in. Somebody fetch a bigger fence.", "send one modern invention back 500 years", "People are very confused by your phone. No signal, either."],
-    ["Would you rather...", "have a time machine that only goes back one minute", "Perfect for redoing a bad joke.", "have one that only goes forward to Friday", "Every week becomes very short."],
-    ["Would you rather...", "see the pyramids being built", "Very hot and very loud. Nobody asks you to help.", "see the Moon landing from Mission Control", "Everybody is holding their breath. You too."],
-    ["Would you rather...", "talk to animals in the past", "The dodos have a lot to say.", "talk to robots in the future", "They are very polite and a bit smug."],
-    ["Would you rather...", "swap lives with someone from 100 years ago for a day", "No phone, but you get to ride a horse to school.", "swap with someone from 100 years in the future", "You have no idea how anything works. Neither do they, here."],
-    ["Would you rather...", "your time machine looked like a phone box", "Classic. Someone keeps trying to make a call.", "your time machine looked like a shopping trolley", "Nobody suspects a thing. The wheels squeak through history."],
-    ["Would you rather...", "be famous in the past", "A statue of you, somewhere, with a slightly wrong nose.", "be famous in the future", "Your name is on a spaceship. Spelled wrong."],
-    ["Would you rather...", "eat food from 1500", "Lots of bread, some mystery meat, no crisps.", "eat food from 2500", "It comes as a cube. It tastes like toast, apparently."],
-    ["Would you rather...", "go back and see your favourite band's first gig", "Twelve people there. One of them is you.", "go forward to their last ever gig", "Bring tissues."],
-    ["Would you rather...", "lose your time machine in the past", "You become a very confusing legend.", "lose it in the future", "Someone puts it in a museum and charges you to see it."],
-    ["Would you rather...", "have a time machine that is very fast but very loud", "Everyone in history hears you coming.", "one that is very slow but silent", "You arrive just after everything finished."],
-    ["Would you rather...", "meet the person who invented school", "You have some questions.", "meet the person who invents the last homework ever", "You shake their hand. Firmly."],
-    ["Would you rather...", "visit Chilton Bridge 100 years ago", "Fields everywhere. Someone is ploughing where Base 5 will be.", "visit Chilton Bridge 100 years from now", "There is a statue of Bonnie. Of course there is."],
-    ["Would you rather...", "be able to pause time", "Great for lie ins. Terrible for queues, oddly.", "be able to rewind time by ten seconds", "Never drop a sandwich again."],
-    ["Would you rather...", "travel back to see a volcano erupt, from far away", "Very loud, very orange, very glad you are far away.", "travel forward to see a new island appear", "It is small, steaming and has no name yet. Name it."],
-    ["Would you rather...", "have a robot from the future as a friend", "Helpful, but it corrects your grammar.", "have a knight from the past as a friend", "Loyal, but they challenge the bus driver to a duel."]
+  /* [question, choice A, twist A, choice B, twist B]. Set in that week's time machine year. */
+  era: {
+    "2026": [
+      ["Would you rather...", "have a phone that never needs charging", "It only plays one song. Forever.", "have a laptop that never crashes", "It reads everything you type out loud, in Jay's voice."],
+      ["Would you rather...", "be invisible for a day", "Only to Bonnie. She keeps walking into you.", "be able to fly for a day", "Only one metre off the ground. Brilliant for puddles."],
+      ["Would you rather...", "have every bus turn up the moment you reach the stop", "It always goes to the seaside.", "have every door open by itself for you", "Including the fridge. At 3am. Loudly."]
+    ],
+    "1999": [
+      ["Would you rather...", "go back to 1999 with a smartphone", "No signal, no apps, no wifi. It is a very shiny calculator.", "bring a 1999 computer back to 2026", "It takes four minutes to switch on and sounds like a robot gargling."],
+      ["Would you rather...", "use 1999 internet for a week", "Every time someone picks up the house phone, you get kicked off.", "have a 1999 mobile for a week", "The only game on it is a snake. You get very, very good at it."],
+      ["Would you rather...", "keep all your photos on a floppy disk", "It cannot even hold one photo from your phone.", "keep all your music on cassettes", "To find a song, you rewind it with a pencil."]
+    ],
+    "1969": [
+      ["Would you rather...", "be an astronaut on the Moon in 1969", "The computer flying your spaceship is less powerful than a calculator.", "watch it live on TV at home", "The TV is black and white and the picture is very fuzzy. Everyone cries anyway."],
+      ["Would you rather...", "fly on Concorde's very first flight in 1969", "It is a test flight. There are no snacks.", "ride on the first ever jumbo jet in 1969", "It is so big you lose Bonnie somewhere on board."],
+      ["Would you rather...", "go to a giant music festival in 1969", "It rains for three days. Your tent is now a pond.", "stay at home with the radio", "There are only a handful of stations, and one is reading the shipping forecast."]
+    ],
+    "1851": [
+      ["Would you rather...", "visit the Great Exhibition in 1851", "It is in a giant glass building and it is boiling. Someone faints next to the steam engines.", "ride a steam train in 1851", "Open carriage. You arrive covered head to toe in soot."],
+      ["Would you rather...", "be a Victorian inventor", "Your invention is a toaster. Nobody has electricity yet.", "be a Victorian photographer", "Everyone has to sit perfectly still for ages. Bonnie refuses."],
+      ["Would you rather...", "send a message by telegraph in 1851", "You pay for every word, so you send: BONNIE FINE STOP SEND BISCUITS STOP", "send a letter by horse and cart", "It arrives four days later, smelling slightly of horse."]
+    ],
+    "1066": [
+      ["Would you rather...", "be in Harold's army in 1066", "You have just marched all the way down from Yorkshire. Your feet are not happy.", "be in William's army in 1066", "You crossed the Channel in a wooden boat with your horse. The horse was not impressed."],
+      ["Would you rather...", "live in a brand new castle in 1066", "It is made of wood. The stone ones come later.", "live in the village next to it", "You share your house with the pigs. They are warm, at least."],
+      ["Would you rather...", "help stitch a giant tapestry about 1066", "It is about 70 metres long and you are on the bit with all the horses.", "be the one who tells the story out loud", "There are no books. You have to remember every word, every night."]
+    ],
+    "65,000,000 BC": [
+      ["Would you rather...", "ride a Triceratops", "Very bumpy, and it stops for leaves every ten seconds.", "ride a giant flying reptile", "No saddle, and it does not really do landings."],
+      ["Would you rather...", "be the size of a T. rex", "Your arms are still tiny. You cannot reach your own nose.", "be the size of a tiny dinosaur", "You are very fast, and everything thinks you are a snack."],
+      ["Would you rather...", "bring a dinosaur egg back to 2026", "It hatches in Base 5. Bonnie is furious.", "bring back a fossil instead", "It is fossilised dinosaur poo. Scientists call it a coprolite, and it is genuinely rare."]
+    ],
+    "3026": [
+      ["Would you rather...", "have a robot do all your chores in 3026", "It does them perfectly, then asks for a pay rise.", "have a house that cleans itself", "It also cleans you. Every morning. Without asking."],
+      ["Would you rather...", "go on holiday to Mars", "The journey takes months. Bring a very long book.", "go on holiday under the sea", "Lovely hotel, but the fish keep staring in through the window."],
+      ["Would you rather...", "eat a meal from 3026", "It is a pill that tastes of a roast dinner. Gravy included, somehow.", "cook your own food in 3026", "The oven talks, and it has opinions about your cooking."]
+    ]
+  },
+
+  /* [question, choice A, twist A, choice B, twist B]. Tuesdays and Thursdays. */
+  silly: [
+    ["Would you rather...", "have a pet that can talk", "It only talks about you. To everyone.", "have a pet that can do your homework", "There is no homework. The pet is very bored."],
+    ["Would you rather...", "only be able to whisper", "Everyone leans in closer. Very close.", "only be able to shout", "You are now in charge of all the announcements."],
+    ["Would you rather...", "have spaghetti for hair", "Bonnie follows you everywhere.", "have fingers made of chips", "You get hungry every time you count to ten."],
+    ["Would you rather...", "always have to hop instead of walk", "You become the fastest hopper in the country. There is a trophy.", "always have to walk backwards", "You always know exactly where you have been."],
+    ["Would you rather...", "have a theme tune that plays when you walk in", "It is played on a kazoo.", "have a laugh track after everything you say", "It laughs at the serious bits too."],
+    ["Would you rather...", "be able to talk to birds", "They only want to talk about crisps.", "be able to talk to fish", "They forget what they were saying halfway through."],
+    ["Would you rather...", "never have to queue again", "You always arrive just after it closes.", "never have to wait for toast", "It is always slightly burnt."],
+    ["Would you rather...", "swap voices with Bonnie for a day", "You can only bark, and she gives a long speech about biscuits.", "swap places with Jay for a day", "You have to write tomorrow's would you rather. It is harder than it looks."],
+    ["Would you rather...", "have a sandwich that refills itself", "It is always egg.", "have a drink that never goes warm", "It is always slightly too cold. Your teeth hurt."],
+    ["Would you rather...", "sneeze glitter", "It is everywhere. Forever.", "hiccup bubbles", "Everyone stops to pop them. Lovely, but slow."],
+    ["Would you rather...", "live in a house made of cheese", "You get a lot of visitors. Mice, mainly.", "live in a house made of jelly", "Every time someone shuts the door, the whole house wobbles."],
+    ["Would you rather...", "have a remote that pauses real life", "The batteries run out on the good bit.", "have a remote that fast forwards", "You skip lunch by accident."],
+    ["Would you rather...", "be followed everywhere by a friendly pigeon", "It brings you one chip every morning. You never ask where from.", "be followed everywhere by a very polite duck", "It quacks once every time you say something clever."],
+    ["Would you rather...", "have socks that are always warm", "They are always slightly damp too.", "have shoes that never come undone", "They also never come off."]
   ],
 
   /* Cultural Calendar days. on: "MM-DD" every year, "YYYY-MM-DD" one year only,
@@ -226,20 +355,14 @@ window.B5FUN = {
     { id: "stgeorge", name: "St George's Day", on: ["04-23"],
       slip: ["St George is famous for fighting a giant.", "a giant", "The legend says he fought a dragon.", "Old legends are full of giants and dragons, so they get swapped."],
       wyr: ["Would you rather...", "meet a friendly dragon", "It is very warm to stand next to.", "be a knight for a day", "The armour is heavy. Nobody warned you about the stairs."] }
-  ],
-
-  kinds: {
-    maths: "Maths Monday", words: "Word Tuesday", history: "Time travel Wednesday", science: "Science Thursday",
-    jay: "Jay's own Friday slip", mix: "Weekend mix"
-  }
+  ]
 };
 
 (function(F){
   function pad(n){ return (n < 10 ? "0" : "") + n; }
   function key(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parse(iso){ var p = iso.split("-"); return new Date(+p[0], +p[1] - 1, +p[2], 12); }
   function dayNo(d){ return Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(d.getFullYear(), 0, 0)) / 86400000); }
-  /* a count of weeks (Monday to Sunday) since 1970, so each subject moves on once a week */
-  function weekNo(d){ return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000 + 3) / 7); }
   function eventOn(d){
     var k = key(d), md = k.slice(5);
     for(var i = 0; i < F.cal.length; i++){
@@ -251,24 +374,64 @@ window.B5FUN = {
     }
     return null;
   }
-  var ORDER = [null, "maths", "words", "history", "science", "jay", null];
+
+  /* every school day this term, in order, from /data/term.js */
+  var SD = null;
+  function schoolDays(){
+    if(SD) return SD;
+    SD = [];
+    var T = window.B5TERM;
+    if(!T || !T.weeks || !T.schoolDays) return SD;
+    T.weeks.forEach(function(w){
+      T.schoolDays(w).forEach(function(k){ SD.push({ iso: T.iso(T.dateOf(w, k)), week: w }); });
+    });
+    return SD;
+  }
+  /* the school day a date belongs to: itself, or the last one before it */
+  function resolve(d){
+    var t = key(d), L = schoolDays(), best = -1;
+    if(!L.length){
+      var back = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
+      while(back.getDay() === 0 || back.getDay() === 6) back.setDate(back.getDate() - 1);
+      return { iso: key(back), date: back, i: -1, week: null };
+    }
+    for(var i = 0; i < L.length; i++){ if(L[i].iso <= t) best = i; else break; }
+    if(best < 0) best = 0;
+    return { iso: L[best].iso, date: parse(L[best].iso), i: best, week: L[best].week };
+  }
+  function eraDay(dow){ return dow === 1 || dow === 3 || dow === 5; }
+
   F.forDay = function(d){
     d = d || new Date();
-    var n = dayNo(d), ev = eventOn(d), kind = ORDER[d.getDay()] || "mix", slip, wyr;
-    if(ev){
-      var one = ev.pool ? ev.pool[Math.floor((d.getDate() - 1) / 7) % ev.pool.length] : ev;
-      slip = one.slip; wyr = one.wyr;
-    } else {
-      var list = F.slips[kind];
-      if(kind === "mix"){ list = []; for(var s in F.slips) list = list.concat(F.slips[s]); }
-      slip = list[(kind === "mix" ? n : weekNo(d)) % list.length];
-      wyr = F.wyr[n % F.wyr.length];
+    var R = resolve(d), day = R.date, n = dayNo(day), dow = day.getDay(), L = schoolDays();
+    /* the slip: a pinned target, or the next one round */
+    var tgt, occ;
+    if(R.i < 0){ tgt = F.rot[n % F.rot.length]; occ = Math.floor(n / F.rot.length); }
+    else {
+      var r = 0, seen = {};
+      for(var i = 0; i <= R.i; i++){
+        tgt = F.pins[L[i].iso] || F.rot[r++ % F.rot.length];
+        seen[tgt] = (seen[tgt] || 0) + 1;
+      }
+      occ = seen[tgt] - 1;
     }
-    return { key: key(d), n: n, kind: ev ? "event" : kind, kindName: ev ? ev.name : F.kinds[kind], slip: slip, wyr: wyr, event: ev };
+    var pool = F.slips[tgt] || F.slips["maths-number"], slip = pool[occ % pool.length];
+    /* the would you rather: the day's event, the week's era, or a silly one */
+    var ev = eventOn(day), wyr, kind, era = R.week && R.week.era ? R.week.era : null;
+    if(ev){
+      var one = ev.pool ? ev.pool[Math.floor((day.getDate() - 1) / 7) % ev.pool.length] : ev;
+      wyr = one.wyr; kind = "event";
+    } else if(eraDay(dow) && era && F.era[era.year]){
+      var pos = 0;
+      for(var j = 0; j < R.i; j++) if(L[j].week === R.week && eraDay(parse(L[j].iso).getDay())) pos++;
+      wyr = F.era[era.year][pos % F.era[era.year].length]; kind = "era";
+    } else {
+      var c = 0;
+      if(R.i < 0) c = n;
+      else for(var k = 0; k < R.i; k++) if(!eraDay(parse(L[k].iso).getDay())) c++;
+      wyr = F.silly[c % F.silly.length]; kind = "silly";
+    }
+    return { key: R.iso, n: n, target: tgt, kindName: F.targets[tgt] || "", slip: slip,
+      wyr: wyr, wyrKind: kind, era: kind === "era" ? era : null, event: ev };
   };
-  /* the old picker: the day of the year, so it is the same for everyone */
-  F.today = function(list){ return list[dayNo(new Date()) % list.length]; };
-  /* every slip still in the old shape, for anything that used F.mistakes */
-  F.mistakes = [];
-  for(var s in F.slips) F.mistakes = F.mistakes.concat(F.slips[s]);
 })(window.B5FUN);

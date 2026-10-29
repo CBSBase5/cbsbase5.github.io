@@ -18,6 +18,8 @@
 <script src="/data/a2/core.js"></script>
 <script src="/data/a2/library.js"></script>
 <script src="/data/b5core.js?v=1"></script>
+<script src="/data/term.js?v=6"></script>
+<script src="/data/dailyfun.js?v=3"></script>
 <style>
 /* Jay's live view: every HQ's progress and every send, from the shared sheet. Staff only. */
 .box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
@@ -124,7 +126,7 @@
   <div id="view" hidden>
     <div class="weektheme"><h2>The HQs</h2><span id="stamp"></span></div>
     <div class="kids" id="kids"></div>
-    <div class="box" id="waitBox" hidden><h2>Waiting for you</h2><p class="help">Wall posts, student-made questions and new ideas only go out once you approve them. Ideas on the board show the status you pick.</p><div id="wait"></div></div>
+    <div class="box" id="waitBox" hidden><h2>Waiting for you</h2><p class="help">Wall posts, would you rather reasons, student-made questions and new ideas only go out once you approve them. Ideas on the board show the status you pick.</p><div id="wait"></div></div>
     <div class="box" id="tlBox">
       <h2>Timeline</h2>
       <p class="help">Everything one student did on the site, from the sheet: check-ins, chunks, finishes, new bests, sends and target ticks. Copy it into a note, or download it as a Word document.</p>
@@ -385,6 +387,11 @@ function draw(o){
 var IDEA = ["Thinking about it", "Building it", "Done", "Not this time"];
 function drawWait(o){
   var w = o.wall || [], q = o.questions || [], ideas = (o.ideas || []).filter(function(i){ return !i.hidden; }), h = "";
+  (o.reasons || []).forEach(function(x){
+    var D = window.B5FUN && B5FUN.forDay ? B5FUN.forDay(new Date(+x.day.slice(0, 4), +x.day.slice(5, 7) - 1, +x.day.slice(8, 10), 12)) : null, W = D && D.key === x.day ? D.wyr : null;
+    h += '<div class="wait"><p><b>A would you rather reason</b> <small>' + esc(x.day) + (W ? ', picked ' + esc((x.choice === "a" ? W[1] : W[3]).replace(/[.?!]$/, "")) : "") + ' (never shown with a name)</small></p><p>' + esc(x.text) + '</p>' +
+      '<div class="row2"><button class="mini go" data-ap="Votes" data-r="' + x.row + '">Show it to Base 5</button><button class="mini" data-no="Votes" data-r="' + x.row + '">Leave it off</button></div></div>';
+  });
   w.forEach(function(x){
     h += '<div class="wait"><p><b>Question Wall post</b> <small>from ' + esc(x.who || "someone") + ' (never shown with a name)</small></p><p>' + esc(x.text) + '</p>' +
       '<div class="row2"><button class="mini go" data-ap="Wall" data-r="' + x.row + '">Put it on the wall</button><button class="mini" data-no="Wall" data-r="' + x.row + '">Leave it off</button></div></div>';
