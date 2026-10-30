@@ -86,11 +86,11 @@ return { list: LIST, current: current, set: set, sparks: sparks, fresh: fresh, m
   (document.head || document.documentElement).appendChild(st);
 })();
 
-/* Every HQ page (not Jay's view) also gets the corner: Park it and
+/* Every HQ page (not Jay's view) also gets the corner Menu: Park it and
    Done for now, plus the fidget shelf. See /data/hqcorner.js */
 (function(){
   if(/teacher\.html$/.test(location.pathname)) return;
   var s = document.createElement("script");
-  s.src = "/data/hqcorner.js?v=4"; s.async = true;
+  s.src = "/data/hqcorner.js?v=5"; s.async = true;
   (document.head || document.documentElement).appendChild(s);
 })();

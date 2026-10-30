@@ -231,7 +231,7 @@ function catchCard(){
   if(!window.B5Catch) return null;
   var bank = window.B5Catch.bank(HQ.who), d = cjLoad();
   var caught = bank.filter(function(it){ return d.done[it.id]; }).length;
-  var c = el("div", "hqx-card");
+  var c = el("div", "hqx-card hqx-cj");
   c.innerHTML =
     '<span class="hqx-k">Catch Jay out</span>' +
     '<span class="hqx-t">Jay had a go. Somewhere he slipped.</span>' +
@@ -296,11 +296,19 @@ function mount(){
   var hero = document.querySelector(".hero");
   if(!hero || document.querySelector(".hqx")) return;
   var box = el("div", "hqx");
-  if(window.B5Folder) box.appendChild(window.B5Folder.card());
-  var r = resumeCard(); if(r) box.appendChild(r);
-  box.appendChild(weekCard());
+  /* news only when there is news (30 Oct 2026): the folder card only when something in it is
+     new, the week card on Fridays only, and no "pick up where you left off" (Start does that) */
+  if(window.B5Folder && window.B5Folder.count){
+    window.B5Folder.count().then(function(n){
+      if(!n) return;
+      var f = window.B5Folder.card(); box.insertBefore(f, box.firstChild);
+    }).catch(function(){});
+  } else if(window.B5Folder) box.appendChild(window.B5Folder.card());
+  weekBase();   /* the week still starts counting on the first visit of the week */
+  if(new Date().getDay() === 5) box.appendChild(weekCard());
   var cj = catchCard(); if(cj) box.appendChild(cj);
   hero.parentNode.insertBefore(box, hero.nextSibling);
 }
+window.HQExtras = { postcard: function(){ openPostcard(weekStats()); } };
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 })();

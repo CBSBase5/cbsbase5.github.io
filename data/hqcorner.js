@@ -1,7 +1,9 @@
 /* ==========================================================
    Base 5 - the HQ corner
    On every page of every student HQ (not Jay's view), loaded by
-   /egw/skin.js. Two small buttons in the bottom right corner:
+   /egw/skin.js. One small Menu button in the bottom right corner
+   (30 Oct 2026; it used to be a row of buttons) holding Home, Text
+   size, Read it to me (LC), and:
      Park it        a notepad for the thought that will not go
                     away. Notes stay on this device until ticked
                     off, and can be sent to Jay if the student likes.
@@ -236,37 +238,103 @@ function openFidget(){
   tabs.querySelector("button").focus();
 }
 
-/* ---------- the dock ---------- */
+/* ---------- the dock: one Menu button (30 Oct 2026) ----------
+   Home, text size, Park it, Done for now (and LC's Read it to me)
+   used to be separate buttons along the bottom, and on a phone they
+   sat on top of Start. Now they live behind one small Menu button. */
+var MENU = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+var HOUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v10h4.5v-6h3v6H18V10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+var SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+var AAI = '<svg viewBox="0 0 24 24" aria-hidden="true"><text x="1" y="18" font-family="Arial" font-weight="700" font-size="11" fill="currentColor">A</text><text x="9" y="19" font-family="Arial" font-weight="700" font-size="16" fill="currentColor">A</text></svg>';
+var menuBox = null, menuBtn = null;
+var mcss = el("style");
+mcss.textContent =
+  "html body>.b5home{display:none !important}" +
+  ".hqc-menu{position:relative}" +
+  ".hqc-mbtn{gap:7px;padding:9px 14px 9px 11px}" +
+  ".hqc-mbtn .rd{display:none;width:9px;height:9px;border-radius:50%;background:var(--sun,#ffd23f)}" +
+  ".hqc-mbtn.reading .rd{display:inline-block}" +
+  "@media (max-width:560px){.hqc-mbtn{padding:0;width:46px;height:46px;justify-content:center;font-size:0;gap:0}.hqc-mbtn svg{width:22px;height:22px}.hqc-mbtn .rd{position:absolute;top:4px;right:4px}}" +
+  ".hqc-mbtn{position:relative}" +
+  "html body>.hqc-mbox{position:fixed !important;z-index:2147482460 !important;right:12px;bottom:64px}" +
+  ".hqc-mbox{width:min(270px,calc(100vw - 24px));padding:8px;border-radius:16px;background:#fffdf8;color:#141a33;border:3px solid #141a33;box-shadow:0 10px 30px rgba(0,0,0,.4);font-family:var(--body,'Atkinson Hyperlegible',Verdana,sans-serif)}" +
+  ".hqc-mbox a,.hqc-mbox button{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;padding:10px 10px;border:0;border-radius:10px;background:transparent;color:#141a33;font:inherit;font-weight:700;font-size:.98rem;text-decoration:none;text-align:left;cursor:pointer}" +
+  ".hqc-mbox a:hover,.hqc-mbox button:hover,.hqc-mbox a:focus-visible,.hqc-mbox button:focus-visible{background:#f0ece0}" +
+  ".hqc-mbox svg{width:20px;height:20px;flex:none}" +
+  ".hqc-mbox small{margin-left:auto;font-weight:400;font-size:.82rem;color:#4b5275}" +
+  ".hqc-mbox b{display:inline-block;min-width:18px;padding:0 5px;border-radius:99px;background:var(--sun,#ffd23f);color:#141a33;font-size:.75rem;text-align:center;margin-left:auto}";
+document.head.appendChild(mcss);
+
+var SIZES = ["Normal", "Bigger", "Biggest"];
+function textSize(){ try{ return Math.max(0, Math.min(2, +localStorage.getItem("b5.hqtext.v1") || 0)); }catch(e){ return 0; } }
+function homeLink(){
+  var base = HQ.base || "/", p = location.pathname;
+  var atHome = p === base || p === base + "index.html";
+  return atHome ? { href: "/", label: "Base 5 home" } : { href: base, label: "Back to my HQ" };
+}
+function readBtn(){ return document.querySelector(".lcr-btn"); }
+function syncReading(){
+  var r = readBtn();
+  if(r) r.style.setProperty("display", "none", "important");
+  if(menuBtn) menuBtn.classList.toggle("reading", !!(r && r.getAttribute("aria-pressed") === "true"));
+}
+function closeMenu(){
+  if(!menuBox) return;
+  menuBox.remove(); menuBox = null;
+  menuBtn.setAttribute("aria-expanded", "false");
+  document.removeEventListener("click", outside, true);
+}
+function outside(e){ if(menuBox && !menuBox.contains(e.target) && !menuBtn.contains(e.target)) closeMenu(); }
+function openMenu(){
+  if(menuBox){ closeMenu(); return; }
+  closePark();
+  menuBox = el("div", "hqc-mbox"); menuBox.setAttribute("role", "menu"); menuBox.setAttribute("aria-label", "Menu");
+  var h = homeLink(), n = load().notes.length, sz = textSize(), r = readBtn();
+  var on = r && r.getAttribute("aria-pressed") === "true";
+  menuBox.innerHTML =
+    (r ? '<button type="button" role="menuitem" data-m="read">' + SPEAK + 'Read it to me<small>' + (on ? "On" : "Off") + '</small></button>' : '') +
+    '<a role="menuitem" href="' + esc(h.href) + '">' + HOUSE + esc(h.label) + '</a>' +
+    '<button type="button" role="menuitem" data-m="aa">' + AAI + 'Text size<small>' + SIZES[sz] + '</small></button>' +
+    '<button type="button" role="menuitem" data-m="park">' + PIN + 'Park it' + (n ? '<b>' + n + '</b>' : '') + '</button>' +
+    '<button type="button" role="menuitem" data-m="calm">' + MOON + 'Done for now</button>';
+  document.body.appendChild(menuBox);
+  menuBtn.setAttribute("aria-expanded", "true");
+  [].forEach.call(menuBox.querySelectorAll("button"), function(b){
+    b.onclick = function(){
+      var m = b.getAttribute("data-m");
+      if(m === "aa"){
+        var s = (textSize() + 1) % 3;
+        try{ localStorage.setItem("b5.hqtext.v1", String(s)); }catch(e){}
+        if(s) document.documentElement.setAttribute("data-b5text", String(s)); else document.documentElement.removeAttribute("data-b5text");
+        b.querySelector("small").textContent = SIZES[s];
+        return;
+      }
+      if(m === "read"){
+        var rb = readBtn(); if(rb) rb.click();
+        b.querySelector("small").textContent = rb && rb.getAttribute("aria-pressed") === "true" ? "On" : "Off";
+        syncReading();
+        return;
+      }
+      closeMenu();
+      if(m === "park") openPark();
+      else if(m === "calm") openCalm();
+    };
+  });
+  menuBox.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeMenu(); menuBtn.focus(); } });
+  setTimeout(function(){ document.addEventListener("click", outside, true); }, 0);
+  var f = menuBox.querySelector("a,button"); if(f) f.focus();
+}
 function mount(){
   if(document.querySelector(".hqc-dock")) return;
   dock = el("div", "hqc-dock");
-  parkBtn = el("button", "hqc-btn", PIN + "Park it <b></b>"); parkBtn.type = "button";
-  parkBtn.setAttribute("aria-label", "Park a thought for later");
-  parkBtn.onclick = openPark;
-  var done = el("button", "hqc-btn", MOON + "Done for now"); done.type = "button";
-  done.onclick = openCalm;
-  /* text size: normal, bigger, biggest, for every HQ on this device (applied early by /egw/skin.js) */
-  var SIZES = ["Normal text", "Bigger text", "Biggest text"];
-  var size = 0;
-  try{ size = Math.max(0, Math.min(2, +localStorage.getItem("b5.hqtext.v1") || 0)); }catch(e){}
-  var aa = el("button", "hqc-btn hqc-aa", ""); aa.type = "button";
-  function drawAa(){
-    aa.innerHTML = '<span aria-hidden="true" style="font-size:.8em">A</span><span aria-hidden="true" style="font-size:1.15em;margin-left:-2px">A</span>' +
-      '<i aria-hidden="true">' + [0, 1, 2].map(function(i){ return '<u class="' + (i <= size ? "on" : "") + '"></u>'; }).join("") + '</i>';
-    aa.setAttribute("aria-label", SIZES[size] + ". Tap to change the text size.");
-    aa.title = SIZES[size];
-  }
-  aa.onclick = function(){
-    size = (size + 1) % 3;
-    try{ localStorage.setItem("b5.hqtext.v1", String(size)); }catch(e){}
-    if(size) document.documentElement.setAttribute("data-b5text", String(size)); else document.documentElement.removeAttribute("data-b5text");
-    drawAa();
-  };
-  drawAa();
-  dock.appendChild(aa);
-  dock.appendChild(parkBtn); dock.appendChild(done);
+  menuBtn = el("button", "hqc-btn hqc-mbtn", MENU + "Menu" + '<span class="rd" aria-hidden="true"></span>'); menuBtn.type = "button";
+  menuBtn.setAttribute("aria-label", "Menu"); menuBtn.setAttribute("aria-haspopup", "menu"); menuBtn.setAttribute("aria-expanded", "false");
+  menuBtn.onclick = openMenu;
+  parkBtn = menuBtn;   /* Park it hands focus back here when it closes */
+  dock.appendChild(menuBtn);
   document.body.appendChild(dock);
-  count();
+  syncReading(); setTimeout(syncReading, 800); setTimeout(syncReading, 2500);
+  if(window.MutationObserver) new MutationObserver(syncReading).observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ["class"] });
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 

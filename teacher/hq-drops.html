@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HQ drops - Base 5</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icons/staff.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<script src="/data/b5site.js?v=8"></script>
+<script src="/data/b5staff.js?v=1"></script>
+<script src="/data/b5lock.js?v=1"></script>
+<script src="/data/hqrooms.js?v=1"></script>
+<style>
+/* HQ drops: which rooms are open in each student's HQ, and when the
+   rest open. Jay can open a room early or hold one back for one
+   student; that reaches their devices through the shared memory.
+   Staff only. Never red on a staff page. ASCII only. */
+.box{background:var(--white);border:var(--border) solid var(--ink);border-radius:var(--r-alt);padding:20px 22px;margin:0 0 20px;box-shadow:var(--lift)}
+.box h2{font-variation-settings:"wdth" 120,"wght" 800;font-size:1.3rem;margin:0 0 6px}
+.help{margin:0 0 10px;font-size:.93rem;color:var(--body-tint);max-width:76ch}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.row label{font-weight:700;font-size:.93rem}
+.row input[type=date]{font:inherit;border:2px solid var(--ink);border-radius:12px;padding:7px 10px;background:var(--paper);color:var(--ink)}
+.msg{margin:10px 0 0;min-height:1.2em;font-size:.93rem;color:var(--teal);font-weight:700}
+.msg.warn{color:#9a6b00}
+.gridwrap{overflow-x:auto;margin:0 0 24px}
+table.rooms{border-collapse:separate;border-spacing:6px;min-width:760px;width:100%}
+.rooms th{text-align:left;font-size:.85rem;vertical-align:bottom;padding:4px 6px;border:0 !important;background:none !important;box-shadow:none !important;border-radius:0 !important}
+.rooms th.who{text-align:center;min-width:104px}
+.rooms th.who b{display:block;font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 900;font-size:1.15rem;color:var(--ink)}
+.rooms th.who .mini{display:flex;gap:4px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+.rooms th.who .mini button,.rooms th.who .mini a{font:inherit;font-size:.74rem;font-weight:700;padding:3px 8px;border-radius:99px;border:2px solid var(--ink);background:var(--white);color:var(--ink);cursor:pointer;text-decoration:none}
+.rooms td.name{font-weight:700;padding:4px 6px;white-space:nowrap}
+.rooms td.name small{display:block;font-weight:400;color:var(--body-tint);font-size:.8rem}
+.cell{display:block;width:100%;font:inherit;font-size:.82rem;line-height:1.2;padding:9px 6px;border-radius:12px;border:2px solid var(--ink);cursor:pointer;text-align:center;background:var(--white);color:var(--ink)}
+.cell small{display:block;font-size:.72rem;opacity:.8;margin-top:2px}
+.cell.open{background:#d9f2ec;border-color:var(--teal)}
+.cell.soon{background:var(--paper);border-style:dashed}
+.cell.held{background:#fbe9c8;border-color:#b07a1a}
+.cell.mine{box-shadow:inset 0 0 0 2px var(--white),0 0 0 2px var(--ink)}
+.cell:disabled{cursor:default;opacity:.55}
+.cell.na{border:0;background:transparent;cursor:default;color:var(--body-tint)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin:0 0 10px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:2px solid var(--ink);vertical-align:-2px;margin-right:5px}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<header class="hero hero-sm">
+  <div class="wrap">
+    <div class="toprow">
+      <h1 class="echo" data-echo="HQ DROPS">HQ <span class="accent">DROPS</span></h1>
+      <span class="badge" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fffdf8" stroke="#0a2f38" stroke-width="6"/><rect x="28" y="28" width="18" height="18" rx="4" fill="#007291"/><rect x="54" y="28" width="18" height="18" rx="4" fill="#007291"/><rect x="28" y="54" width="18" height="18" rx="4" fill="#007291"/><rect x="54" y="54" width="18" height="18" rx="4" fill="#fffdf8" stroke="#ef7724" stroke-width="4" stroke-dasharray="5 4"/></svg></span>
+    </div>
+    <div class="line">
+      <span class="chip">Staff only</span>
+      <p>Each HQ opens with a few rooms, and the rest open a little at a time through the term.</p>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="box">
+    <h2>How it works</h2>
+    <p class="help">Every HQ now opens on a front door: the greeting, Start, their game, a line for anything new, and one button to everything else. Behind that button, Core practice, the check in, Choose a subject and Study with Bonnie are there from the first day. Everything else opens one school day at a time from Wednesday 4 November (never on a Tuesday), and the student sees "New in your HQ" on their front door the day it opens.</p>
+    <p class="help">Tap a square to change it for one student: on the schedule, then open now, then held back, then back to the schedule. Their HQ picks it up the next time it loads on any device. Open all is for a student who copes well with everything at once.</p>
+    <div class="row"><label for="day">Show the HQs as they are on</label><input type="date" id="day"><button class="btn btn-quiet" type="button" id="todayBtn">Today</button></div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </div>
+  <div class="legend"><span><i style="background:#d9f2ec;border-color:#007291"></i>Open</span><span><i style="background:#fef8f4;border-style:dashed"></i>Opens on that day</span><span><i style="background:#fbe9c8;border-color:#b07a1a"></i>Held back</span><span><i style="box-shadow:0 0 0 2px #0a2f38;border-color:#fff"></i>Changed by you</span></div>
+  <div class="gridwrap"><table class="rooms" id="grid"></table></div>
+</div>
+<footer>
+  <div class="wrap">
+    <span>Base 5 &middot; Chilton Bridge School</span>
+    <a href="/teacher/">Staff room</a>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+var R = window.HQRooms, WHO = ["EGW", "LP", "LW", "LC", "HK", "JT"];
+var BASE = { EGW: "/egw/", LP: "/lp/", LW: "/lw/", LC: "/lc/", HK: "/hk/", JT: "/jt-hq/" };
+var OV = {}, loaded = false, KEY = "b5.staffkey.v1";
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function msg(t, warn){ $("msg").textContent = t; $("msg").className = "msg" + (warn ? " warn" : ""); }
+function pad(n){ return (n < 10 ? "0" : "") + n; }
+function iso(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function nice(s){ var p = s.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return DAYS[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()]; }
+if(!R){ msg("The rooms file did not load.", true); return; }
+$("day").value = iso(new Date());
+$("todayBtn").onclick = function(){ $("day").value = iso(new Date()); draw(); };
+$("day").onchange = draw;
+
+function draw(){
+  var t = $("day").value || iso(new Date());
+  var h = '<tr><th>Room</th>' + WHO.map(function(w){
+    var o = OV[w] || {};
+    return '<th class="who"><b>' + w + '</b><span class="mini">' +
+      '<button type="button" data-all="' + w + '">' + (o.all ? "Back to plan" : "Open all") + '</button>' +
+      '<a href="' + BASE[w] + '?hqtest&amp;rdate=' + esc(t) + '" target="_blank" rel="noopener" title="Opens their HQ with games free, for checking">Preview</a></span></th>';
+  }).join("") + '</tr>';
+  R.rooms.forEach(function(room){
+    h += '<tr><td class="name">' + esc(room.name) + '<small>' + (room.from ? "Opens " + nice(room.from) : "Open from the start") + '</small></td>';
+    WHO.forEach(function(w){
+      if(room.only && room.only.indexOf(w) < 0){ h += '<td><span class="cell na">-</span></td>'; return; }
+      var o = OV[w] || {}, mine = !!(o.set && o.set[room.id]) || (o.all && room.from), st = R.state(w, room.id, o, t);
+      var label = st === "open" ? "Open" : st === "held" ? "Held back" : nice(room.from);
+      var sub = o.set && o.set[room.id] === "open" ? "opened by you" : o.set && o.set[room.id] === "hold" ? "by you" : o.all && room.from ? "open all" : (st === "open" && room.from ? "since " + nice(room.from) : "");
+      var title = R.name(room, w);
+      h += '<td><button type="button" class="cell ' + st + (mine ? " mine" : "") + '" data-w="' + w + '" data-r="' + room.id + '"' + (loaded ? "" : " disabled") +
+        ' aria-label="' + esc(w + ", " + title + ": " + label + (sub ? ", " + sub : "")) + '">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</button></td>';
+    });
+    h += '</tr>';
+  });
+  $("grid").innerHTML = h;
+  [].forEach.call(document.querySelectorAll(".cell[data-w]"), function(b){ b.onclick = function(){ cycle(b.dataset.w, b.dataset.r); }; });
+  [].forEach.call(document.querySelectorAll("[data-all]"), function(b){ b.onclick = function(){ toggleAll(b.dataset.all); }; });
+}
+
+function save(w){
+  var o = OV[w] || {}, items = {};
+  o.at = new Date().toISOString(); o.by = "staff";
+  items[R.prefix[w] + "rooms.v1"] = { v: JSON.stringify(o), t: Date.now() };
+  msg("Saving for " + w + "...");
+  return B5Site.call("save", { who: w, items: items }).then(function(r){
+    if(r && r.ok) msg("Saved for " + w + ". Their HQ picks it up next time it loads.");
+    else msg("That did not save. Try again in a moment.", true);
+  }).catch(function(){ msg("Could not reach the Base 5 sheet, so that did not save.", true); });
+}
+function cycle(w, id){
+  var o = OV[w] = OV[w] || {}; o.set = o.set || {};
+  var cur = o.set[id];
+  if(!cur) o.set[id] = "open";
+  else if(cur === "open") o.set[id] = "hold";
+  else delete o.set[id];
+  draw(); save(w);
+}
+function toggleAll(w){
+  var o = OV[w] = OV[w] || {};
+  if(o.all){ o.all = false; o.set = {}; } else o.all = true;
+  draw(); save(w);
+}
+
+/* what is set already, from the shared memory */
+function load(key){
+  if(!window.B5Site || !B5Site.syncUrl){ msg("The Base 5 sheet is not set up, so this is the plan only.", true); return; }
+  msg("Checking the Base 5 sheet...");
+  B5Site.call("overview", { key: key || "" }).then(function(o){
+    if(!o || !o.ok){ msg("The sheet did not let this account in, so this is the plan only.", true); return; }
+    WHO.forEach(function(w){
+      var it = ((o.students || {})[w] || {}).items || {}, x = it[R.prefix[w] + "rooms.v1"];
+      if(x) try{ OV[w] = JSON.parse(x.v) || {}; }catch(e){}
+    });
+    loaded = true; msg(""); draw();
+  }).catch(function(){ msg("Could not reach the Base 5 sheet, so this is the plan only.", true); });
+}
+draw();
+var stored = ""; try{ stored = localStorage.getItem(KEY) || ""; }catch(e){}
+(window.B5Staff ? B5Staff.ready : Promise.resolve()).then(function(){
+  if(window.B5Lock) B5Lock.whoami().then(function(m){ load((m && m.pass) || stored); }).catch(function(){ load(stored); });
+  else load(stored);
+});
+})();
+</script>
+</body>
+</html>

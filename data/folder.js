@@ -405,5 +405,16 @@ function card(){
   return c;
 }
 
-window.B5Folder = { page: page, card: card };
+/* how many things in the folder are new, for the HQ front door (/data/hqfront.js) */
+function count(){
+  if(window.B5Site && window.B5Site.guest) return Promise.resolve(0);
+  var st = load();
+  return fetchFolder().then(function(blob){
+    if(!blob) return 0;
+    var o = contents(blob);
+    return o.messages.concat(o.activities, o.files).filter(function(x){ return !st.seen[x.id]; }).length;
+  });
+}
+
+window.B5Folder = { page: page, card: card, count: count };
 })();
