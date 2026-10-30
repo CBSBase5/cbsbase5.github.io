@@ -56,7 +56,7 @@ window.B5PARENTS = {
     ["Cultural calendar", "10:00", "Half an hour on whatever the school is marking that week, and why people mark it."],
     ["PHSE with Willow", "10:30, three days", "Fifteen minutes on Mondays, Thursdays and Fridays. Talking rather than writing."],
     ["Morning sessions", "10:30 to lunch", "Maths and English in short sections, which I pitch at each student's level. Most days also have forest school, digital media or horticulture."],
-    ["Lunch", "Around midday", "A proper break. On trip days, lunch happens while the group is out."],
+    ["Lunch", "11:45", "A proper break. On trip days, lunch happens while the group is out."],
     ["The afternoon", "12:30 to 2:00", "Projects on the half term's big question, or GCSE work for those taking exams. Depending on the day, there is also something creative, physical world, PE or preparation for adulthood."],
     ["Breathe out", "2:00", "Winding down together before home time at 2:30."]
   ],
@@ -64,7 +64,7 @@ window.B5PARENTS = {
   /* What each day of the week is like. */
   week: {
     mon: "Forest school with Vernon in the morning, then project time and something creative to finish.",
-    tue: "Trip day, out of school for most of the day. Trip details come to you directly from school, never on this website.",
+    tue: "Trip day. Details come to you directly from school.",
     wed: "Digital media with Andy, then project time, and the physical world after lunch.",
     thu: "Horticulture with Kara in the morning, then a long slot for projects or GCSE work.",
     fri: "The longest maths and English slot of the week, then PE, and preparation for adulthood to round off the week."
@@ -72,7 +72,7 @@ window.B5PARENTS = {
 
   /* Small things that can help, from home. */
   helps: [
-    ["Outdoor clothes", "Forest school and horticulture run in most weathers, so a coat on Mondays and Thursdays is rarely a mistake. Tuesdays are trip days."],
+    ["Outdoor clothes", "Forest school and horticulture run in most weathers, on Mondays and Thursdays."],
     ["Knowing the plan", "Every day has the same shape. If your young person likes to know what is coming, the home page shows what is on now and next."],
     ["At home", "The website works at home too, if your young person would like to show you anything."],
     ["Tricky mornings", "If a morning has been hard, a quick word with us or the office helps us shape the day around it."]
