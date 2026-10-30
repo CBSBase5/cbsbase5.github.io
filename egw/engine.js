@@ -1951,7 +1951,7 @@ function run(c){
     document.documentElement.classList.add("ez");
     var ezc = document.createElement("style"); ezc.id = "ezcss";
     ezc.textContent =
-      "html.ez #startCard>h3,html.ez #startCard>.lead,html.ez #startCard .howlist,html.ez #startCard .chiplabel,html.ez #startStats,html.ez #a2LvLine," +
+      "html.ez #startCard>h3,html.ez #startCard>.lead:not(.escapeintro),html.ez #startCard .howlist,html.ez #startCard .chiplabel,html.ez #startStats,html.ez #a2LvLine," +
       "html.ez .chunksend,html.ez #chunkCard>p.tiny,html.ez #makeQ,html.ez .a2was{display:none !important}" +
       "html.ez .readme{font-size:1rem;padding:9px 14px;gap:8px;display:inline-flex;margin:0 0 12px 0;vertical-align:top}html.ez .readme svg{width:22px;height:22px}" +
       "html.ez .chunkmap small{display:none}html.ez .fb .readme{margin:8px 0 0}" +
