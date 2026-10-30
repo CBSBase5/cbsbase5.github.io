@@ -24,12 +24,16 @@ var PL = ["", "first", "second", "third"];
 function dpw(dp){ return dp === 0 ? "the nearest whole number" : dp + " decimal place" + (dp > 1 ? "s" : ""); }
 
 function clean(o){
-  if(o.boxes && Array.isArray(o.slips)) o.slips = o.slips.filter(function(r){ var b = r.length === 3 ? r[0] : 0; return !(o.boxes[b] && Math.abs(r[r.length - 2] - o.boxes[b].a) < 1e-9); });
+  function keep(r){ var b = r.length === 3 ? r[0] : 0; return !(o.boxes[b] && Math.abs(r[r.length - 2] - o.boxes[b].a) < 1e-9); }
+  if(o.boxes && Array.isArray(o.slips)) o.slips = o.slips.filter(keep);
+  if(o.boxes && o.ez && Array.isArray(o.ez.slips)) o.ez.slips = o.ez.slips.filter(keep);
   return o;
 }
+/* easy read (LC): the first level's ez sits on the step itself; no other level carries one */
+function noEz(v){ if(!v || !v.ez) return v; var o = {}; Object.keys(v).forEach(function(k){ if(k !== "ez") o[k] = v[k]; }); return o; }
 function G(type, topic, sets, extra){
   sets.forEach(function(v){ v.forEach(clean); });
-  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ o[k] = v[0][k]; }); o.lv = { mild: v[1], spicy: v[2] }; return o; }
+  function one(v){ var o = {}; Object.keys(v[0]).forEach(function(k){ if(k !== "ez") o[k] = v[0][k]; }); if(v[1].ez) o.ez = v[1].ez; o.lv = { mild: noEz(v[1]), spicy: noEz(v[2]) }; return o; }
   var s = { type: type, topic: topic }, b = one(sets[0]);
   Object.keys(b).forEach(function(k){ s[k] = b[k]; });
   if(sets.length > 1) s.vary = sets.slice(1).map(one);
@@ -87,7 +91,8 @@ function mcLine(lo, hi, x, dp, egg){
   var near = rnd(x, dp), other = near === rnd(lo, dp) ? rnd(hi, dp) : rnd(lo, dp);
   return { q: "Which is <b>" + fm(x) + "</b> nearer to?", fig: lineFig(lo, hi, x, dp, egg), options: [fx(near, dp), fx(other, dp)], answer: 0, fixed: false,
     slips: { 1: "Look at the halfway mark (" + fm((lo + hi) / 2) + "). " + fm(x) + " is on the " + (near > other ? "upper" : "lower") + " side of it." },
-    hint: "Is it past halfway?", why: fm(x) + " is " + (near > other ? "past" : "before") + " halfway, so it is nearer to <b>" + fx(near, dp) + "</b>." };
+    hint: "Is it past halfway?", why: fm(x) + " is " + (near > other ? "past" : "before") + " halfway, so it is nearer to <b>" + fx(near, dp) + "</b>.",
+    ez: { slips: { 1: "Look at halfway: " + fm((lo + hi) / 2) + "." }, why: fm(x) + " is " + (near > other ? "past" : "before") + " halfway. So <b>" + fx(near, dp) + "</b>." } };
 }
 function wholeQ(x, unit, ctx){
   var ans = rnd(x, 0), oth = ans > x ? Math.floor(x) : Math.ceil(x), d = dig(x, 1);
@@ -95,10 +100,14 @@ function wholeQ(x, unit, ctx){
     boxes: [{ label: "Nearest whole " + unit, a: ans }],
     slips: [[oth, "Look at the first digit after the point: it is " + d + ", so " + (d >= 5 ? "round up." : "keep the whole number as it is.")], [rnd(x, 1), "That still has a decimal. The nearest whole number has no decimal part."]],
     hint: "Look at the digit straight after the point. 5 or more rounds up.",
-    why: "The digit after the point is " + d + (d >= 5 ? ", so round up" : ", so it stays") + ": <b>" + ans + " " + unit + "</b>." };
+    why: "The digit after the point is " + d + (d >= 5 ? ", so round up" : ", so it stays") + ": <b>" + ans + " " + unit + "</b>.",
+    ez: { q: ctx + " Round to the nearest whole " + unit + ".",
+      slips: [[oth, "The digit after the point is " + d + ". " + (d >= 5 ? "Round up." : "Keep it.")], [rnd(x, 1), "Whole numbers have no decimal."]],
+      hint: "After the point: 5 or more rounds up.", why: "After the point is " + d + ". So <b>" + ans + " " + unit + "</b>." } };
 }
 function sortQ(cards){ return { q: "Rounding each to the nearest whole number: does it go <b>up</b> or stay <b>down</b>?", cards: cards,
-  hint: "Only the first digit after the point decides.", why: "First digit after the point 5 or more: up. 4 or less: down. Digits further along do not matter." }; }
+  hint: "Only the first digit after the point decides.", why: "First digit after the point 5 or more: up. 4 or less: down. Digits further along do not matter.",
+  ez: { q: "Nearest whole number: <b>up</b> or <b>down</b>?", why: "5 or more after the point: up. 4 or less: down." } }; }
 function sc(xs){ return xs.map(function(x){ return [fm(x), rnd(x, 0) > x ? 0 : 1]; }); }
 function dpFade(xs, dp){
   var x = +xs, keep = dp ? dig(xs, dp) : +xs.charAt(xs.indexOf(".") - 1), dec = dig(xs, dp + 1), ans = rnd(x, dp), lab = PL[dp];
@@ -108,7 +117,11 @@ function dpFade(xs, dp){
     slips: [[0, dig(xs, dp + 1), dp ? "That is the next digit along. Count " + dp + " place" + (dp > 1 ? "s" : "") + " after the point." : "That is the decider. The digit you keep is the one just before the point."], [1, xs.length > xs.indexOf(".") + dp + 2 ? dig(xs, dp + 2) : -1, "That is one too far along. The decider is straight after the digit you keep."],
             dec >= 5 ? [2, cut(x, dp), "The decider is " + dec + ", which is 5 or more, so the kept digit goes up one."] : [2, r6(cut(x, dp) + Math.pow(10, -dp)), "The decider is " + dec + ", which is 4 or less, so the kept digit stays as it is."], [2, rnd(x, dp === 1 ? 2 : 1), "That is rounded to " + dpw(dp === 1 ? 2 : 1) + ". Count again."], [2, rnd(x, 0), "That is the nearest whole number. Keep " + dp + " digit" + (dp > 1 ? "s" : "") + " after the point."]],
     hint: "Decider 5 or more: the kept digit goes up. 4 or less: it stays.",
-    why: "Keep the " + keep + ", the decider is " + dec + (dec >= 5 ? ", so round up" : ", so it stays") + ": <b>" + fx(x, dp) + "</b>." };
+    why: "Keep the " + keep + ", the decider is " + dec + (dec >= 5 ? ", so round up" : ", so it stays") + ": <b>" + fx(x, dp) + "</b>.",
+    ez: { q: "Round <b>" + xs + "</b> to " + dpw(dp) + ". Fill each box.",
+      slips: [[0, dig(xs, dp + 1), dp ? "Count " + dp + " place" + (dp > 1 ? "s" : "") + " after the point." : "That is the decider. Keep the digit before the point."], [1, xs.length > xs.indexOf(".") + dp + 2 ? dig(xs, dp + 2) : -1, "One too far. The decider is next along."],
+        dec >= 5 ? [2, cut(x, dp), "The decider is 5 or more. Go up one."] : [2, r6(cut(x, dp) + Math.pow(10, -dp)), "The decider is 4 or less. It stays."], [2, rnd(x, dp === 1 ? 2 : 1), "Count the places again."], [2, rnd(x, 0), "Keep " + dp + " digit" + (dp > 1 ? "s" : "") + " after the point."]],
+      hint: "Decider 5 or more: go up." } };
 }
 function dpQ(x, dp, ctx, unit, pre){
   var ans = rnd(x, dp), wrongDir = rnd(x, dp) > x ? cut(x, dp) : r6(cut(x, dp) + Math.pow(10, -dp)), sl = [[wrongDir, "Check the decider (the digit straight after): " + dig(x, dp + 1) + (dig(x, dp + 1) >= 5 ? " rounds up." : " stays.")]];
@@ -119,24 +132,27 @@ function dpQ(x, dp, ctx, unit, pre){
     why: fm(x) + " to " + dpw(dp) + " is <b>" + (pre || "") + fx(x, dp) + (unit ? " " + unit : "") + "</b>. The decider was " + dig(x, dp + 1) + "." };
 }
 function mcRound(x, dp, lead){
-  var c = fx(x, dp), opts = [c], sl = {};
-  function add(v, why){ if(opts.indexOf(v) < 0 && opts.length < 4){ sl[opts.length] = why; opts.push(v); } }
+  var c = fx(x, dp), opts = [c], sl = {}, esl = {};
+  function add(v, why, sh){ if(opts.indexOf(v) < 0 && opts.length < 4){ sl[opts.length] = why; esl[opts.length] = sh; opts.push(v); } }
   var s = String(x), i = s.indexOf("."), d = +s.charAt(i + dp), dec = dig(x, dp + 1);
-  if(d === 9 && dec >= 5) add(s.slice(0, i + dp) + "10", "A 9 that rounds up becomes 10, so it carries into the next digit along, just like adding.");
-  add(cut(x, dp).toFixed(dp), dec >= 5 ? "The decider is " + dec + ", so this one rounds up." : "Check the decider again: this one stays.");
-  add(fx(x, dp + 1), "That has too many decimal places. Stop at " + dp + ".");
-  if(dp > 0) add(fx(x, dp - 1), "That has too few decimal places. Keep " + dp + ".");
-  add(r6(cut(x, dp) + Math.pow(10, -dp)).toFixed(dp), "That rounded up when the decider says keep it.");
+  if(d === 9 && dec >= 5) add(s.slice(0, i + dp) + "10", "A 9 that rounds up becomes 10, so it carries into the next digit along, just like adding.", "A 9 that goes up carries, like adding.");
+  add(cut(x, dp).toFixed(dp), dec >= 5 ? "The decider is " + dec + ", so this one rounds up." : "Check the decider again: this one stays.", dec >= 5 ? "The decider is " + dec + ". Round up." : "Check the decider. It stays.");
+  add(fx(x, dp + 1), "That has too many decimal places. Stop at " + dp + ".", "Too many decimal places.");
+  if(dp > 0) add(fx(x, dp - 1), "That has too few decimal places. Keep " + dp + ".", "Too few decimal places.");
+  add(r6(cut(x, dp) + Math.pow(10, -dp)).toFixed(dp), "That rounded up when the decider says keep it.", "The decider says keep it.");
   return { q: (lead || "") + "What is <b>" + fm(x) + "</b> to " + dpw(dp) + "?", options: opts, answer: 0, slips: sl,
     hint: "Find the decider. If you round up a 9, it carries.",
-    why: "Decider " + dec + (dec >= 5 ? ", round up" : ", keep it") + ": <b>" + c + "</b>." + (d === 9 && dec >= 5 ? " The 9 becomes 10 and carries, and we still write " + dp + " decimal place" + (dp > 1 ? "s" : "") + "." : "") };
+    why: "Decider " + dec + (dec >= 5 ? ", round up" : ", keep it") + ": <b>" + c + "</b>." + (d === 9 && dec >= 5 ? " The 9 becomes 10 and carries, and we still write " + dp + " decimal place" + (dp > 1 ? "s" : "") + "." : ""),
+    ez: { slips: esl, hint: "Find the decider. A 9 carries." } };
 }
 function calcQ(sum, val, dp, ctx, pre, unit){
   val = nz(val); var shows = String(+val.toPrecision(10)), ans = rnd(val, dp), sl = [[cut(val, dp), "Look at the decider: " + dig(val, dp + 1) + ". " + (dig(val, dp + 1) >= 5 ? "That rounds up." : "That stays.")]];
   [0, 1, 2].forEach(function(o){ if(o !== dp) sl.push([rnd(val, o), "That is to " + dpw(o) + ". Here you want " + dpw(dp) + "."]); });
   return { q: ctx + " The calculator shows " + shows + ". Round it to <b>" + dpw(dp) + "</b>.", fig: calcFig(sum, shows),
     boxes: [{ label: "Rounded", a: ans, pre: pre, post: unit ? " " + unit : "", show: fx(val, dp) }], slips: sl,
-    hint: "Ignore everything after the decider.", why: shows + " to " + dpw(dp) + " is <b>" + (pre || "") + fx(val, dp) + (unit ? " " + unit : "") + "</b>." };
+    hint: "Ignore everything after the decider.", why: shows + " to " + dpw(dp) + " is <b>" + (pre || "") + fx(val, dp) + (unit ? " " + unit : "") + "</b>.",
+    ez: { q: "The calculator shows " + shows + ". Round to <b>" + dpw(dp) + "</b>.",
+      slips: [[cut(val, dp), "The decider is " + dig(val, dp + 1) + ". " + (dig(val, dp + 1) >= 5 ? "Round up." : "It stays.")]].concat([0, 1, 2].filter(function(o){ return o !== dp; }).map(function(o){ return [rnd(val, o), "That is " + dpw(o) + ". Try " + dpw(dp) + "."]; })) } };
 }
 function split(total, n){
   var v = nz(total / n), ans = rnd(v, 2), shows = String(+v.toPrecision(10));
@@ -146,14 +162,18 @@ function split(total, n){
     hint: "Pennies means 2 decimal places.", why: shows + " rounds to <b>&pound;" + fx(v, 2) + "</b> each." };
 }
 function matchQ(pairs){ return { q: "Match each thing to a sensible way to round it.", pairs: pairs,
-  hint: "How precise would anyone actually need it?", why: "Pick the rounding that is useful: money to the penny, people to whole ones, and measurements to whatever your ruler or timer can show." }; }
+  hint: "How precise would anyone actually need it?", why: "Pick the rounding that is useful: money to the penny, people to whole ones, and measurements to whatever your ruler or timer can show.",
+  ez: { q: "Match each thing to its rounding.", hint: "How exact does it need to be?", why: "Money to the penny. People in whole ones." } }; }
 function avgQ(vals, dp, unit){
   var tot = r6(vals.reduce(function(a, b){ return a + b; }, 0)), mean = nz(tot / vals.length), ans = rnd(mean, dp);
   return { q: "[[Who]] timed [[event]] " + vals.length + " times: " + vals.map(fm).join(", ") + " " + unit + ". Add them up, divide by " + vals.length + " for the mean, then round to " + dpw(dp) + ".",
     boxes: [{ label: "Total", a: tot, post: " " + unit }, { label: "Mean, rounded", a: ans, post: " " + unit, show: fx(mean, dp) }],
     slips: [[1, cut(mean, dp), "Check the decider: the digit straight after place " + dp + "."], [1, r6(tot / (vals.length - 1)), "Divide by how many there are: " + vals.length + "."], [1, rnd(mean, dp + 1), "Round to " + dpw(dp) + ", one fewer digit."]],
     hint: "Total &divide; " + vals.length + ", then round.",
-    why: "Total " + fm(tot) + ". " + fm(tot) + " &divide; " + vals.length + " = " + String(+mean.toPrecision(7)) + ", which rounds to <b>" + fx(mean, dp) + " " + unit + "</b>." };
+    why: "Total " + fm(tot) + ". " + fm(tot) + " &divide; " + vals.length + " = " + String(+mean.toPrecision(7)) + ", which rounds to <b>" + fx(mean, dp) + " " + unit + "</b>.",
+    ez: { q: "[[Who]] timed [[event]] " + vals.length + " times: " + vals.map(fm).join(", ") + " " + unit + ". Add them. Divide by " + vals.length + ". Then round.",
+      slips: [[1, cut(mean, dp), "Check the decider."], [1, r6(tot / (vals.length - 1)), "Divide by " + vals.length + "."], [1, rnd(mean, dp + 1), "Round to " + dpw(dp) + "."]],
+      why: "Total " + fm(tot) + ". Divide by " + vals.length + " and round: <b>" + fx(mean, dp) + " " + unit + "</b>." } };
 }
 function jayQ(x, dp){
   var right = fx(x, dp), wrong = fx(rnd(x, dp + 1), dp), mid = fx(x, dp + 1);
@@ -162,7 +182,10 @@ function jayQ(x, dp){
     options: ["No: round in one go, so it is " + right, "Yes, " + wrong + " is right", "No, it should be " + mid], answer: 0,
     slips: { 1: "Rounding twice can push a number up when it should stay. Only the one digit straight after the kept digit decides.", 2: "That still has too many decimal places for " + dpw(dp) + "." },
     hint: "Go back to the start. Which digit is straight after the one you keep?",
-    why: "In one go: the decider in " + fm(x) + " is " + dig(x, dp + 1) + ", so it is <b>" + right + "</b>. Rounding in two steps sneaks the wrong digit up." };
+    why: "In one go: the decider in " + fm(x) + " is " + dig(x, dp + 1) + ", so it is <b>" + right + "</b>. Rounding in two steps sneaks the wrong digit up.",
+    ez: { q: "Jay rounded <b>" + fm(x) + "</b> in two steps: " + mid + ", then " + wrong + ". Is that right?",
+      slips: { 1: "Round once. Only the next digit decides.", 2: "Too many decimal places." },
+      hint: "Which digit is right after the one you keep?", why: "In one go, the decider is " + dig(x, dp + 1) + ". So <b>" + right + "</b>." } };
 }
 function twoWays(x, a, b){
   function lb(d){ return d === -1 ? "Nearest 10" : d === 0 ? "Nearest whole number" : "To " + dpw(d); }
@@ -170,7 +193,8 @@ function twoWays(x, a, b){
   return { q: "Round <b>" + fm(x) + "</b> two ways.",
     boxes: [{ label: lb(a), a: rr(x, a), show: a > 0 ? fx(x, a) : String(rr(x, a)) }, { label: lb(b), a: rr(x, b), show: b > 0 ? fx(x, b) : String(rr(x, b)) }],
     slips: [[0, rr(x, b), "That one is the other rounding. Check which box is which."], [1, rr(x, a), "That one is the other rounding. Check which box is which."]],
-    hint: "Each one has its own decider.", why: fm(x) + ": " + lb(a).toLowerCase() + " is <b>" + (a > 0 ? fx(x, a) : rr(x, a)) + "</b>, " + lb(b).toLowerCase() + " is <b>" + (b > 0 ? fx(x, b) : rr(x, b)) + "</b>." };
+    hint: "Each one has its own decider.", why: fm(x) + ": " + lb(a).toLowerCase() + " is <b>" + (a > 0 ? fx(x, a) : rr(x, a)) + "</b>, " + lb(b).toLowerCase() + " is <b>" + (b > 0 ? fx(x, b) : rr(x, b)) + "</b>.",
+    ez: { slips: [[0, rr(x, b), "That goes in the other box."], [1, rr(x, a), "That goes in the other box."]] } };
 }
 function bounds(x, dp, unit){
   var h = 0.5 * Math.pow(10, -dp), lo = r6(x - h), hi = r6(x + h);
@@ -211,6 +235,7 @@ function bounds(x, dp, unit){
     /* ---------- chunk 1: nearest whole number ---------- */
     { type: "learn", topic: "Nearest whole number", title: "Which whole number is it nearer?",
       fig: lineFig(3, 4, 3.7, 0, true),
+      ez: { title: "Nearest whole number", html: "<p>Look at the <b>first digit after the point</b>.</p><p>5 or more: round up. 4 or less: it stays.</p>" },
       html: "<p>3.7 sits between 3 and 4. It is past halfway (3.5), so it is nearer <b>4</b>.</p>" +
         "<p>You do not need to draw a line every time. Just look at the <b>first digit after the point</b>: <b>5 or more, round up</b>. 4 or less, the whole number stays.</p>" +
         "<p>3.7 goes to 4. 3.2 stays as 3. 3.5 is exactly halfway, and halfway always rounds <b>up</b>, to 4.</p>",
@@ -244,6 +269,7 @@ function bounds(x, dp, unit){
     /* ---------- chunk 2: one decimal place ---------- */
     { type: "learn", topic: "One decimal place", title: "Keep one digit after the point",
       fig: digitFig("2.36", 1, "Keep the 3. The decider is 6, so the 3 goes up: 2.4"),
+      ez: { title: "Keep, then decide", html: "<p>Keep the whole number. The next digit is the <b>decider</b>.</p><p>6.8: the 8 says go up. So <b>7</b>.</p>" },
       html: "<p>To round to <b>1 decimal place</b>, keep one digit after the point. The digit after that is the <b>decider</b>.</p>" +
         "<p>2.36: keep the 3, the decider is 6. 6 is 5 or more, so the 3 goes up to 4: <b>2.4</b>.</p>" +
         "<p>2.32 would be <b>2.3</b>. And watch the 9s: 4.96 rounds to <b>5.0</b>, because the 9 goes up to 10 and carries. Keep the 0 to show it is 1 decimal place.</p>",
@@ -278,6 +304,7 @@ function bounds(x, dp, unit){
     /* ---------- chunk 3: two decimal places ---------- */
     { type: "learn", topic: "Two decimal places", title: "Two digits after the point: pounds and pence",
       fig: calcFig("10 / 3 =", "3.333333333", true),
+      ez: { title: "Pounds and pence", html: "<p>Calculators show too many digits.</p><p>3.333333333 to the nearest pound is <b>&pound;3</b>.</p>" },
       html: "<p>Money uses <b>2 decimal places</b>: the pence. Calculators do not care about pence, so they show far too many digits.</p>" +
         "<p>&pound;10 split between 3: the calculator shows 3.333333333. Keep two digits after the point (3.33), the decider is the third one (3), so it stays: <b>&pound;3.33</b> each.</p>" +
         "<p>&pound;20 split between 3 shows 6.666666667. Keep 6.66, decider 6, round up: <b>&pound;6.67</b>.</p>",
@@ -316,6 +343,7 @@ function bounds(x, dp, unit){
           return '<rect x="' + x + '" y="20" width="144" height="130" rx="14" fill="' + c[1] + '" fill-opacity=".35" stroke="' + INK + '" stroke-width="2"/>' +
             T(x + 72, 50, c[0], 16, { b: 1, a: "middle" }) + T(x + 72, 100, c[2], 28, { b: 1, a: "middle" }) + T(x + 72, 134, c[3], 13, { a: "middle" });
         }).join("") + T(260, 176, "Nobody pays 3.333333 pounds, and nobody brings 26.7 people.", 13, { a: "middle" })),
+      ez: { title: "The job decides", html: "<p>Money: to the penny. People: whole numbers.</p><p>Always round in <b>one go</b>.</p>" },
       html: "<p>How you round depends on what the number is <b>for</b>.</p>" +
         "<p><b>Money:</b> to the penny (2 decimal places). <b>People and things you count:</b> whole numbers. <b>Measurements:</b> as precise as the tool, like a ruler to the nearest mm or a race clock to 0.01 s.</p>" +
         "<p>And always round in <b>one go</b>, from the original number. Rounding in steps can sneak a digit up that should have stayed.</p>" },
@@ -358,6 +386,11 @@ function bounds(x, dp, unit){
     fig: pic(420, 150, "Jay at a time portal holding a stopwatch", A.portal(80, 75, 56) + A.jay(240, 50, 0.85, "wow") +
       '<circle cx="180" cy="116" r="20" fill="#ffffff" stroke="' + INK + '" stroke-width="3"/><path d="M180 116v-12M180 116l8 5" stroke="' + INK + '" stroke-width="2.5"/><rect x="175" y="90" width="10" height="7" fill="' + INK + '"/>' +
       A.bubble(290, 8, 124, 52, "9.95 or 9.9?\nOutrageous.", 296))
+  },
+
+  ez: {
+    realWorld: { title: "Near enough changed with time", html: "<p>In 1968 Jim Hines ran 100 m in <b>9.95 seconds</b>.</p><p>Old stopwatches only showed tenths.</p>" },
+    make: { intro: "A number from your life. Exact, then rounded." }
   },
 
   make: {

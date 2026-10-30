@@ -185,6 +185,7 @@ function checkWidget(el, api){
       html: "<p>An adventure activity is something active with <b>a bit of challenge</b>, often outdoors or up high, done with an <b>instructor</b> who keeps it safe.</p>" +
         "<p>Climbing walls, high ropes, kayaking and hill walks are all adventure activities. Today, picture a trip to [[centre]] with [[crew]].</p>" +
         "<p>The adventure is the challenge. The safety is the instructor's job, and the kit's job.</p>",
+      ez: { html: "<p>An adventure is active, with <b>a bit of challenge</b>.</p><p>An <b>instructor</b> keeps it safe. Picture a trip to [[centre]]!</p>" },
       lv: { spicy: { html: "<p>An adventure activity has <b>real challenge</b> and some <b>risk</b>, but the risk is <b>managed</b>: trained instructors, checked kit and clear rules.</p>" +
         "<p>That is the deal. You get the buzz of doing something hard, and the people running it work hard so the chance of getting hurt stays tiny.</p>" +
         "<p>Today, picture a trip to [[centre]] with [[crew]]: climbing wall, high ropes, kayaks and a hill walk.</p>" } } },
@@ -196,6 +197,7 @@ function checkWidget(el, api){
       slips: { 1: "Films are great, but you sit still. An adventure activity is active, with a bit of challenge.", 2: "A jigsaw is a challenge for your brain, but not an active one." },
       hint: "Which one gets you moving, with a bit of challenge?",
       why: "A climbing wall is active, challenging, and an instructor keeps it safe.",
+      ez: { slips: { 1: "Films are great. But you sit still.", 2: "A jigsaw does not get you moving." }, hint: "Which one gets you moving?", why: "It is active, a challenge, and safe." },
       lv: { spicy: { q: "What makes something an adventure activity, rather than just exercise?",
         options: ["Challenge and some managed risk, with trained people and kit", "It has to be dangerous", "It has to be a race", "It has to be done alone"],
         slips: { 1: "Not dangerous: the risk is managed so it stays small.", 2: "Lots of adventure activities are not races at all.", 3: "Most are done with a group and an instructor." },
@@ -207,7 +209,8 @@ function checkWidget(el, api){
       buckets: ["Up high", "On water", "On the ground"],
       cards: [["Climbing wall", 0], ["High ropes", 0], ["Kayaking", 1], ["Paddle boarding", 1], ["Hill walk", 2], ["Orienteering", 2]],
       hint: "Ropes and walls go up. Boats and boards go on water. Walks stay on the ground.",
-      why: "Up high: climbing and ropes. On water: kayaks and boards. On the ground: walking and orienteering (finding your way with a map)." },
+      why: "Up high: climbing and ropes. On water: kayaks and boards. On the ground: walking and orienteering (finding your way with a map).",
+      ez: { hint: "Up high, on water, or on the ground?", why: "Up high: climbing and ropes. Water: kayaks and boards. Ground: walks and map finding." } },
 
     { type: "mc", topic: "What is an adventure activity?",
       q: "At [[centre]], who is in charge of keeping everyone safe?",
@@ -215,13 +218,16 @@ function checkWidget(el, api){
       answer: 0,
       slips: { 1: "Speed has nothing to do with it. Someone trained runs the safety.", 2: "Adventure centres always have trained instructors in charge." },
       hint: "Who has been trained to run the activity?",
-      why: "Instructors are trained and checked. Listening to them is the biggest safety tip of all." },
+      why: "Instructors are trained and checked. Listening to them is the biggest safety tip of all.",
+      ez: { q: "At [[centre]], who keeps everyone safe?", slips: { 1: "Speed does not matter here.", 2: "There is always a trained instructor." },
+        hint: "Who has been trained?", why: "The <b>instructor</b>. Listen to them." } },
 
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Kit and the safety talk", title: "Every bit of kit has a job",
       fig: KIT,
       html: "<p>A <b>helmet</b> protects your head. A <b>harness</b> holds you on the rope. A <b>clip</b> (called a carabiner) joins you to the rope or the safety line. <b>Grippy shoes</b> stop your feet slipping.</p>" +
         "<p>Before anything starts there is a <b>safety talk</b>. Then the instructor <b>checks your kit</b>. Only then do you clip on.</p>",
+      ez: { html: "<p>A <b>helmet</b> for your head. A <b>harness</b> joins you to the rope.</p><p>Listen to the talk. Kit gets checked. Then have a go.</p>" },
       lv: { mild: { html: "<p>You might wear a <b>helmet</b> for your head, and a <b>harness</b> that joins you to the rope.</p><p>First you listen to the safety talk. Then the instructor checks your kit. Then you have a go.</p>" },
         spicy: { html: "<p><b>Helmet</b>: protects your head from bumps and falling bits. <b>Harness</b>: spreads your weight safely when the rope holds you. <b>Clip</b> (carabiner): links you to the rope or line; it has a gate that locks. <b>Grippy shoes</b>: friction on the holds.</p>" +
           "<p>On high ropes, the golden rule is <b>always at least one clip on</b> the safety line. You move one clip at a time.</p>" +
@@ -231,13 +237,15 @@ function checkWidget(el, api){
       q: "Match each bit of kit to its job.",
       pairs: [["Helmet", "Protects your head"], ["Harness", "Holds you on the rope"], ["Clip", "Joins you to the safety line"], ["Grippy shoes", "Stop your feet slipping"]],
       hint: "Think about where each one goes on your body.",
-      why: "Head, middle, link, feet. Every bit of kit has one job." },
+      why: "Head, middle, link, feet. Every bit of kit has one job.",
+      ez: { hint: "Where does each one go?", why: "Head, middle, link, feet." } },
 
     { type: "order", topic: "Kit and the safety talk",
       q: "Put the start of the session in order.",
       items: ["Listen to the safety talk", "Put on the helmet and harness", "The instructor checks your kit", "Clip on to the rope", "Have a go"],
       hint: "You cannot check kit that is not on yet.",
-      why: "Talk, kit on, kit checked, clip on, go. Checking before clipping on is the bit that keeps you safe." },
+      why: "Talk, kit on, kit checked, clip on, go. Checking before clipping on is the bit that keeps you safe.",
+      ez: { hint: "Kit goes on before it is checked.", why: "Talk, kit on, check, clip on, go." } },
 
     { type: "mc", topic: "Kit and the safety talk",
       q: "On the high ropes, how many of your clips should be on the safety line?",
@@ -270,6 +278,7 @@ function checkWidget(el, api){
       html: "<p>The middle is your <b>comfort zone</b>: easy and safe. Around it is the <b>stretch zone</b>: a bit wobbly, and that is where you learn. On the outside is <b>too much</b>: your body says stop.</p>" +
         "<p>Adventure days work on <b>challenge by choice</b>. You choose how far to go. Climbing to the third hold is a win if that was your stretch.</p>" +
         "<p>If it starts to feel like too much, you can come down, have a breather, and try again later. Or not.</p>",
+      ez: { html: "<p><b>Comfort</b>: easy. <b>Stretch</b>: a bit wobbly, where you learn. <b>Too much</b>: stop.</p><p>You choose how far to go.</p>" },
       lv: { spicy: { html: "<p>The middle is your <b>comfort zone</b>. Around it is the <b>stretch zone</b>, where learning happens. On the outside is <b>too much</b>, where your body goes into alarm and learning stops.</p>" +
         "<p>Everyone's zones are different, and they move. Something that was a stretch last time can be comfort next time.</p>" +
         "<p><b>Challenge by choice</b> means you pick your own stretch. A good instructor, or a good friend, helps you find it without pushing you into too much.</p>" } } },
@@ -280,7 +289,9 @@ function checkWidget(el, api){
       answer: 0,
       slips: { 1: "Rushing can tip you into too much. Small steps keep it in the stretch zone.", 2: "Telling the instructor how you feel helps them help you." },
       hint: "Small steps, and a calm body.",
-      why: "Slow breaths calm your body, and a small first goal keeps it in your stretch zone. That counts as a win." },
+      why: "Slow breaths calm your body, and a small first goal keeps it in your stretch zone. That counts as a win.",
+      ez: { q: "Your heart is thumping at the wall. What could help?", slips: { 1: "Rushing can tip you into too much.", 2: "Telling the instructor helps them help you." },
+        why: "Slow breaths and a small goal. That is a win." } },
 
     { type: "sort", topic: "Having a go, your way",
       q: "For someone who has never climbed before, which zone is each one likely to be?",
@@ -288,6 +299,8 @@ function checkWidget(el, api){
       cards: [["Watching from the bench", 0], ["Climbing to the first coloured hold", 1], ["Racing to [[top]] with no practice", 2], ["Putting the helmet on", 0], ["Climbing halfway, then coming down", 1]],
       hint: "Comfort is easy. Stretch is a bit wobbly. Too much is a big leap.",
       why: "A first go a little way up is a perfect stretch. Racing to the top with no practice is a big leap for most people.",
+      ez: { q: "A first time climber. Which zone is each one?", hint: "Comfort is easy. Stretch is wobbly. Too much is a big leap.",
+        why: "A little way up is a stretch. Racing to the top is too much." },
       lv: { mild: { cards: [["Watching from the bench", 0], ["Climbing to the first coloured hold", 1], ["Racing to [[top]] with no practice", 2]] } } },
 
     { type: "num", topic: "Having a go, your way", explain: true,
@@ -297,6 +310,8 @@ function checkWidget(el, api){
       slips: [[4, "That is one side. There are four sides, each 4 counts."], [12, "Close. Go round all four sides: in, hold, out, hold."], [8, "That is two sides. Keep going round."]],
       hint: "Four sides, four counts on each side.",
       why: "4 + 4 + 4 + 4 = <b>16</b> counts. Three boxes is about a minute, and your heart slows down.",
+      ez: { q: "In 4, hold 4, out 4, hold 4. How many counts in 1 box?", slips: [[4, "That is 1 side. There are 4 sides."], [12, "Close. Go round all 4 sides."], [8, "That is 2 sides. Keep going."]],
+        hint: "4 sides, 4 counts each.", why: "4 + 4 + 4 + 4 = <b>16</b>. Your heart slows down." },
       lv: { spicy: { q: "Box breathing: in 4, hold 4, out 4, hold 4. One count is about one second. How many whole boxes fit in one minute?",
         boxes: [{ label: "Boxes", a: 3 }],
         slips: [[16, "That is the counts in one box. How many lots of 16 fit into 60?"], [4, "4 boxes would be 64 seconds, just over a minute."], [15, "60 divided by 4 is 15. But one box is 16 counts, not 4."]],
@@ -308,6 +323,7 @@ function checkWidget(el, api){
       fig: REFLECT,
       html: "<p>After the activity, have a think, if you like: <b>what went well</b>, <b>what was tricky</b>, and <b>what could I try next</b>.</p>" +
         "<p>Looking back is about noticing, not marking. \"I got to the second hold and then needed a rest\" is a brilliant thing to notice.</p>",
+      ez: { html: "<p>After, think: what went <b>well</b>? What was <b>tricky</b>? What <b>next</b>?</p><p>It is noticing, not marking.</p>" },
       lv: { spicy: { html: "<p>After the activity, look back: <b>what went well</b>, <b>what was tricky</b>, <b>what could I try next</b>.</p>" +
         "<p>Good reflections are <b>specific</b>. \"It was fine\" tells you nothing next time. \"My legs did the work when I stood up on the holds, my arms got tired when I pulled\" tells you exactly what to try.</p>" +
         "<p>You can also notice how you helped others: cheering, holding a ladder, waiting your turn.</p>" } } },
@@ -319,6 +335,8 @@ function checkWidget(el, api){
       slips: { 1: "That is a harsh one, and it does not tell you what to try next. What actually happened?", 2: "Fine is OK, but it does not say what happened. What would help next time?" },
       hint: "Which one says exactly what happened?",
       why: "It says how far you got and what worked. Next time you know to use your legs more.",
+      ez: { q: "After a climb, which is most helpful to notice?", slips: { 1: "That is harsh. What actually happened?", 2: "Fine does not say what happened." },
+        hint: "Which says exactly what happened?", why: "It says how far, and what worked." },
       lv: { spicy: { q: "Which reflection would help most next time?",
         options: ["My arms got tired when I pulled. Next time I will push up with my legs.", "It was the best day ever.", "I did not like it.", "Everyone else was better than me."],
         slips: { 1: "Lovely to hear, but it does not say what to do next time.", 2: "That is real and fair, but what made it hard? That bit helps.", 3: "Comparing does not help you. What happened for you?" },
@@ -327,6 +345,7 @@ function checkWidget(el, api){
     { type: "widget", topic: "Looking back", unscored: true,
       title: "Where were you?",
       html: "<p>Tap where you think you will be before you try, and where you ended up after, if you like.</p>",
+      ez: { html: "<p>Tap your zone before you try. Then after, if you like.</p>" },
       mount: zoneWidget,
       report: function(d){ return d && (d.before || d.after) ? "Zones: before " + (d.before || "-") + ", after " + (d.after || "-") + "." : ""; } },
 
@@ -334,14 +353,21 @@ function checkWidget(el, api){
       q: "After your adventure day, have a go at writing about it, if you like. What did you do, what went well, what was tricky, and what could you try next? Jay would love to read it.",
       starters: ["I tried", "Something that went well was", "Something tricky was", "Next time I could"],
       checklist: ["What I did", "Something that went well", "Something tricky", "What I could try next"],
-      minWords: 30 },
+      minWords: 30,
+      ez: { q: "After the day, write about it if you like. What went well? What was tricky? Jay would love to read it." } },
 
     { type: "widget", topic: "Looking back", unscored: true,
       title: "Take it with you",
       html: "<p>A checklist for the day itself. Use it on a phone or print the page, whatever suits.</p>",
+      ez: { html: "<p>A checklist for the day. Use a phone, or print it.</p>" },
       mount: checkWidget,
       report: function(d){ var n = d && d.ticks ? d.ticks.filter(Boolean).length : 0; return n ? "Adventure day challenge: " + n + " of " + CHALLENGE.length + " ticked." : ""; } }
   ],
+
+  ez: {
+    realWorld: { html: "<p>Instructors and lifeguards check kit and give safety talks. It is a real job.</p><p>Time travel would be the biggest adventure. What would your safety talk say?</p>" },
+    make: { intro: "A badge for what you tried. Send it to Jay if you like." }
+  },
 
   realWorld: {
     title: "Outdoor instructors do this every day",

@@ -110,6 +110,7 @@ var SEG = {
 
     /* ---------- chunk 1 ---------- */
     { type: "learn", topic: "Commas in lists", title: "Commas in a list",
+      ez: { title: "Commas in a list", html: "<p>Put a <b>comma</b> between things in a list.</p><p>Use <b>and</b> before the last one.</p>" },
       fig: LIST,
       html: "<p>When you list three or more things, put a <b>comma</b> between them. Before the last thing, use <b>and</b> (or <b>or</b>).</p>" +
         "<p class=\"a2task\">For [[event]], I packed [[l1]], [[l2]], [[l3]] and [[l4]].</p>" +
@@ -125,6 +126,7 @@ var SEG = {
       slips: { 0: "A has no commas at all, so the items run into each other.", 2: "C has commas everywhere, even after \"packed\" and \"and\". They only go between the items." },
       hint: "Commas go between the items, nowhere else.",
       why: "B has a comma between each item and \"and\" before the last. No extras.",
+      ez: { why: "B: commas between items, and \"and\" before the last.", slips: { 0: "A has no commas.", 2: "C has too many. Commas go between items only." } },
       lv: { spicy: {
         q: vers(["We set off early, got lost twice and arrived just in time.", "We set off, early got lost, twice and arrived just in time.", "We set off early got lost twice, and arrived, just in time."]) + "<p>The items in this list are actions. Which version uses commas well?</p>",
         options: ["A", "B", "C"], answer: 0,
@@ -138,6 +140,8 @@ var SEG = {
       slips: [[4, "Four would put one before \"and\" too. The \"and\" already joins the last two items."], [5, "That is one for every item. Commas only go <b>between</b> items, and \"and\" does the last join."], [2, "Close. Count the gaps between the items, then take away the one that \"and\" fills."]],
       hint: "Five items means four gaps. \"And\" fills one of them.",
       why: "Five items, four gaps. \"And\" fills the last gap, so <b>3</b> commas: [[l1]], [[l2]], [[l3]], [[l4]] and [[l5]].",
+      ez: { hint: "4 items, 3 gaps. \"And\" fills 1.", why: "<b>2</b> commas: [[l1]], [[l2]], [[l3]] and [[l4]].",
+        slips: [[3, "No comma before \"and\"."], [4, "Commas only go between items."], [1, "Close. Count the gaps before \"and\"."]] },
       lv: { mild: { q: "<p class=\"a2task\">I packed [[l1]] [[l2]] [[l3]] and [[l4]]</p><p>How many commas does this list need?</p>",
         boxes: [{ label: "Commas", a: 2 }],
         slips: [[3, "Three would put one before \"and\". The \"and\" does that join."], [4, "That is one for every item. Commas only go between them."], [1, "Close. There are two gaps before the \"and\"."]],
@@ -147,6 +151,7 @@ var SEG = {
     { type: "widget", topic: "Commas in lists", unscored: true,
       title: "Comma dropper",
       html: "<p>Tap a gap to drop a comma in. Tap it again to take it out. When it looks right to you, check it. No score, so have a play.</p>",
+      ez: { html: "<p>Tap a gap to add a comma. Then check it.</p>" },
       mount: function(el, api){
         var d = api.data, tk = api.tok || function(t){ return t; };
         var key = api.level === "mild" ? "mild" : "full", cfg = SEG[key];
@@ -198,6 +203,8 @@ var SEG = {
       slips: { 1: "Read A aloud. It sounds like one strange food called \"pizza chips\". The comma splits them up." },
       hint: "Is \"pizza chips\" one thing or two?",
       why: "Without the comma, \"pizza chips\" looks like one food. The comma tells the reader they are two separate things.",
+      ez: { q: vers(["My favourite things are pizza chips and bubble tea.", "My favourite things are pizza, chips and bubble tea."]) + "<p>Which is clearer?</p>",
+        why: "The comma shows pizza and chips are 2 things.", slips: { 1: "A sounds like one food: pizza chips!" } },
       lv: { spicy: {
         q: vers(["I would like to thank my teachers, Jay and Bonnie.", "I would like to thank my teachers, Jay, and Bonnie."]) + "<p>Which version makes it clear that Jay and Bonnie are <b>not</b> your teachers?</p>",
         options: ["B", "A"], answer: 0, fixed: true,
@@ -208,6 +215,7 @@ var SEG = {
     /* ---------- chunk 2 ---------- */
     { type: "learn", topic: "Commas after openers", title: "A comma after an opener",
       fig: OPENER,
+      ez: { title: "Comma after an opener", html: "<p>An <b>opener</b> says when or how. Put a comma after it.</p><p><b>Slowly,</b> the door opened.</p>" },
       html: "<p>Lots of sentences start with an <b>opener</b>: a few words that say <b>when</b>, <b>where</b> or <b>how</b>. After the opener, put a comma.</p>" +
         "<p class=\"a2task\">[[Opener]], everyone went quiet.<br>Slowly, the door creaked open.<br>At [[place]], the lights were still on.</p>" +
         "<p>A handy check: cover the opener with your thumb. What is left should still make sense as a sentence.</p>",
@@ -224,6 +232,8 @@ var SEG = {
       slips: { 0: "A puts the comma inside the main sentence. Find where the opener ends.", 2: "C puts a comma at the end. A sentence ends with a full stop." },
       hint: "Where does the opener end and the main sentence begin?",
       why: "\"[[Opener]]\" is the opener. The comma goes straight after it, then the main sentence: \"everything went quiet.\"",
+      ez: { hint: "Where does the opener end?", why: "Comma after the opener: \"Later that night,\"",
+        slips: { 0: "That comma splits \"the lights went out\".", 2: "\"Later that night\" is one opener." } },
       lv: { mild: {
         q: vers(["Later that night the lights, went out.", "Later that night, the lights went out.", "Later, that night the lights went out."]) + "<p>Which version puts the comma in the right place?</p>",
         slips: { 0: "A puts the comma in the middle of \"the lights went out\".", 2: "C splits the opener in half. \"Later that night\" is all one opener." },
@@ -235,6 +245,7 @@ var SEG = {
       answers: [0, 2, 4],
       hint: "Look for words at the start that say when, where or how.",
       why: "\"Later that night\", \"Slowly\" and \"At [[place]]\" are openers, so each needs a comma after it. The other two start straight with the main sentence.",
+      ez: { q: "Pick <b>every</b> sentence that needs a comma after an opener.", hint: "Look for when, where or how words first.", why: "\"Later that night\", \"Slowly\" and \"At [[place]]\" are openers." },
       lv: { spicy: {
         options: ["As soon as the bell rang we grabbed our bags.", "We grabbed our bags as soon as the bell rang.", "Without a word [[who]] walked out.", "Bonnie barked.", "If you are cold there are blankets in the cupboard."],
         answers: [0, 2, 4],
@@ -248,7 +259,10 @@ var SEG = {
       answer: 0,
       slips: { 1: "Commas are not about length. Read it aloud without a pause: who got eaten?", 2: "Plenty of sentences have no commas. This one needs it for the meaning.", 3: "Names get capital letters, not commas. Read it without a pause." },
       hint: "Read it aloud with no pause at all. What does it sound like?",
-      why: "\"After eating Bonnie\" sounds like a meal. \"After eating, Bonnie went to sleep\" makes it clear that Bonnie did the eating. A comma can change the meaning." },
+      why: "\"After eating Bonnie\" sounds like a meal. \"After eating, Bonnie went to sleep\" makes it clear that Bonnie did the eating. A comma can change the meaning.",
+      ez: { q: "<p class=\"a2task\">After eating Bonnie went to sleep.</p><p>Why does this need a comma after \"After eating\"?</p>", hint: "Read it aloud with no pause.",
+        why: "Without it, Bonnie sounds like dinner! The comma fixes it.",
+        slips: { 1: "Read it with no pause. Who got eaten?", 2: "Not every sentence needs one. This one does.", 3: "Names get capitals, not commas." } } },
 
     { type: "mc", topic: "Commas after openers",
       q: vers(["As soon as the [[who]] heard the noise, everyone ran.", "As soon as, the [[who]] heard the noise everyone ran.", "As soon as the [[who]] heard, the noise everyone ran."]) + "<p>The opener here is long. Which version gets the comma right?</p>",
@@ -256,6 +270,7 @@ var SEG = {
       slips: { 1: "B puts the comma after \"As soon as\", but the opener carries on until \"noise\".", 2: "C cuts the opener too early: \"the noise everyone ran\" makes no sense." },
       hint: "Cover the opener with your thumb. \"Everyone ran.\" should be left.",
       why: "The whole opener is \"As soon as the [[who]] heard the noise\". The comma goes after it, leaving \"everyone ran.\"",
+      ez: { hint: "Cover the opener. What is left?", slips: { 1: "\"After lunch\" is one opener.", 2: "That comma is inside the main sentence." } },
       lv: { mild: {
         q: vers(["After lunch, we went to [[place]].", "After, lunch we went to [[place]].", "After lunch we, went to [[place]]."]) + "<p>Which version gets the comma right?</p>",
         slips: { 1: "B splits \"After lunch\" in half. It is all one opener.", 2: "C puts the comma inside the main sentence." },
@@ -265,6 +280,7 @@ var SEG = {
     /* ---------- chunk 3 ---------- */
     { type: "learn", topic: "Apostrophes that squash", title: "Apostrophes for missing letters",
       fig: SQUASH,
+      ez: { title: "Missing letters", html: "<p>Squash 2 words. An <b>apostrophe</b> goes where letters drop out.</p><p><b>do not</b> becomes <b>don't</b>.</p>" },
       html: "<p>When two words squash into one, some letters drop out. An <b>apostrophe</b> goes where they were.</p>" +
         "<p class=\"a2task\">do not = don't &middot; I am = I'm &middot; they are = they're &middot; could not = couldn't &middot; we will = we'll</p>" +
         "<p>The apostrophe marks the <b>gap</b>, not the join. So it is couldn't (the o is gone), not could'nt.</p>",
@@ -276,6 +292,7 @@ var SEG = {
       q: "Match each pair of words to its short form.",
       pairs: [["do not", "don't"], ["I am", "I'm"], ["they are", "they're"], ["could not", "couldn't"], ["we will", "we'll"]],
       hint: "Say the short form out loud. Which two words does it come from?",
+      ez: { hint: "Say it out loud. Which 2 words?", why: "The apostrophe sits where letters were." },
       why: "In each one, the apostrophe sits where the missing letters were.",
       lv: { spicy: { pairs: [["it is", "it's"], ["would have", "would've"], ["will not", "won't"], ["they had", "they'd"], ["shall not", "shan't"]],
         why: "The apostrophe sits where letters dropped out. Won't and shan't change a little more than most, but the apostrophe still marks the gap." } } },
@@ -287,6 +304,7 @@ var SEG = {
       slips: [[["could'nt"], "Nearly. The apostrophe goes where the o was taken out: couldn't."], [["couldnt"], "The letters are right. Pop an apostrophe in where the o was."]],
       hint: "Which letter drops out of \"not\"?",
       why: "The o in \"not\" drops out, so the apostrophe goes there: <b>couldn't</b>.",
+      ez: { slips: [[["do'nt"], "Nearly. It goes where the o was."], [["dont"], "Add an apostrophe where the o was."]] },
       lv: { mild: { q: "Write \"do not\" as one shortened word.",
           need: [["don't"]], model: "don't",
           slips: [[["do'nt"], "Nearly. The apostrophe goes where the o was taken out: don't."], [["dont"], "The letters are right. Pop an apostrophe in where the o was."]],
@@ -303,6 +321,7 @@ var SEG = {
       slips: { 1: "Try saying \"it is\" in the gap: \"It is going to rain later.\" That works, so it needs the apostrophe." },
       hint: "Does \"it is\" fit in the gap?",
       why: "\"It is going to rain\" makes sense, so the short form is <b>it's</b>.",
+      ez: { slips: { 1: "Try \"it is\" in the gap. It works, so it's." } },
       lv: { spicy: {
         q: "<p class=\"a2task\">The dog next door wagged ___ tail at us. (Bonnie could not join in. No tail.)</p><p>Which word fills the gap?</p>",
         options: ["its", "it's", "its'"], answer: 0, fixed: true,
@@ -313,6 +332,7 @@ var SEG = {
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Apostrophes that own", title: "Apostrophes for owning",
       fig: OWN,
+      ez: { title: "Apostrophes for owning", html: "<p>Add <b>'s</b> to show who owns it: <b>Bonnie's lead</b>.</p><p>Just more than one? No apostrophe: two dogs.</p>" },
       html: "<p>An apostrophe also shows that something <b>belongs</b> to someone.</p>" +
         "<p><b>One owner:</b> add <b>'s</b>. The [[who]]'s [[thing]]. Bonnie's lead. Jay's eyebrows.</p>" +
         "<p>Plurals that just mean \"more than one\" do <b>not</b> need an apostrophe: two [[whos]], three dogs, lots of birds.</p>",
@@ -330,6 +350,7 @@ var SEG = {
       slips: { 1: "Without an apostrophe it looks like more than one [[who]], with nobody owning anything.", 2: "s' is for more than one owner. There is only one [[who]] here." },
       hint: "One owner: add 's.",
       why: "One [[who]] owns them, so add 's: <b>the [[who]]'s [[thing]]</b>.",
+      ez: { slips: { 1: "No apostrophe means nobody owns anything.", 2: "s' is for lots of owners. There is 1 [[who]]." } },
       lv: { spicy: { q: "How do you write \"the [[thing]] belonging to all the [[whos]]\"?",
         options: ["the [[whos]]' [[thing]]", "the [[whos]]'s [[thing]]", "the [[who]]'s [[thing]]", "the [[whos]] [[thing]]"],
         slips: { 1: "Close. With a plural that already ends in s, just add the apostrophe: one s is enough.", 2: "That would be one [[who]]. Here there are lots.", 3: "It needs an apostrophe to show they own them." },
@@ -342,6 +363,7 @@ var SEG = {
       cards: [["the [[who]]'s [[thing]]", 0], ["the [[whos]]' [[thing]]", 1], ["Bonnie's lead", 0], ["the birds' nests", 1], ["Jay's eyebrows", 0], ["the dogs' bowls", 1]],
       hint: "Look at where the apostrophe sits: before the s, or after it?",
       why: "'s on a singular word means one owner. s' means more than one owner.",
+      ez: { q: "Sort them. Owning, or just more than one?", why: "Owning gets an apostrophe. More than one does not." },
       lv: { mild: { q: "Sort them. Does it need an apostrophe, or is it just more than one?",
           buckets: ["Needs an apostrophe (owning)", "No apostrophe (just more than one)"],
           cards: [["Bonnie's lead", 0], ["Jay's bird book", 0], ["three dogs", 1], ["two [[whos]]", 1], ["the [[who]]'s [[thing]]", 0], ["lots of birds", 1]],
@@ -357,6 +379,8 @@ var SEG = {
       slips: [[[W("who") + "s'"], "That is the form for more than one [[who]]. There is just one here, so 's."], [[W("who") + "s [[thing]]"], "The words are right. Add an apostrophe to show the [[who]] owns them."]],
       hint: "One owner: [[who]] + 's.",
       why: "<b>the [[who]]'s [[thing]]</b>. One owner, so 's.",
+      ez: { q: "Write \"the lead belonging to Bonnie\" with an apostrophe.",
+        slips: [[["bonnies lead"], "Add an apostrophe to show it is hers."], [["bonnies'"], "There is only 1 Bonnie, thankfully. So 's."]] },
       lv: { mild: { q: "Write \"the lead belonging to Bonnie\" the short way, with an apostrophe.",
           need: [["Bonnie's lead"]], model: "Bonnie's lead",
           slips: [[["bonnies lead"], "The words are right. Add an apostrophe to show the lead is hers."], [["bonnies'"], "There is only one Bonnie (thankfully), so it is 's."]],
@@ -375,6 +399,8 @@ var SEG = {
       slips: { 1: "That one is right: one [[who]] owns them.", 2: "That one is right: the hair belongs to Jay. (It is very messy.)", 3: "That one is right: we're is short for we are." },
       hint: "Which one is just \"more than one\", with nothing being owned?",
       why: "\"Two [[whos]]\" just means more than one. Nothing belongs to them in that sentence, so no apostrophe.",
+      ez: { q: "Which one has an apostrophe it does not need?", hint: "Which one owns nothing?", why: "\"Two [[whos]]\" owns nothing. So no apostrophe.",
+        slips: { 2: "That one is right: it is Jay's hair. Very messy." } },
       lv: { spicy: {
         options: ["The childrens' coats were soaking.", "The [[whos]]' [[thing]] were ready.", "Its name was on the label.", "They're late again."],
         slips: { 1: "That one is right: [[whos]] ends in s, so just the apostrophe.", 2: "That one is right: its, the owning word, has no apostrophe.", 3: "That one is right: they're is short for they are." },
@@ -388,6 +414,11 @@ var SEG = {
       "<p>For our big question, <b>if we could time travel, should we?</b>, imagine leaving a note for someone in the future. You will not be there to explain what you meant, so the commas and apostrophes have to do the explaining for you.</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay next to a time portal, looking at a sign">' + A.portal(80, 75, 56) + A.jay(250, 52, 0.85, "wow") +
       A.bubble(296, 6, 118, 52, "Chip's? Who\nis Chip?", 306) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Signs, menus and messages", html: "<p>Shop signs and menus are full of commas and apostrophes.</p><p>And mistakes, like \"Chip's\"!</p>" },
+    make: { intro: "Design a sign for a shop or club. Get the apostrophe right.", fields: [{ label: "Name, with an apostrophe" }, { label: "What it sells, as a list" }] }
   },
 
   make: {

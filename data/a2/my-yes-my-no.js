@@ -113,6 +113,7 @@ function phraseWidget(el, api){
     /* ---------- chunk 1: step 1, what a no feels like in my body ---------- */
     { type: "learn", topic: "Body signals", title: "Your body often knows first",
       fig: BODY,
+      ez: { html: "<p>Your body often says <b>no</b> first.</p><p>A tight tummy. A hot face. Wanting to step away.</p>" },
       html: "<p>Imagine [[ask]]. Maybe you are fine with it. Maybe you are not.</p>" +
         "<p>When you do not want to do something, your body often notices first. You might get a <b>tight or fluttery tummy</b>, a <b>hot face</b>, a <b>faster heartbeat</b>, <b>tense shoulders</b> or <b>clenched hands</b>, or just want to <b>step away</b> or go quiet.</p>" +
         "<p>These are your body's no signals. They are useful information, not something wrong with you. Everyone's are a bit different.</p>",
@@ -126,6 +127,7 @@ function phraseWidget(el, api){
 
     { type: "multi", topic: "Body signals",
       q: "Pick <b>all</b> the things that can be a body's no signal.",
+      ez: { q: "Pick <b>all</b> the no signals.", slips: { any: "4 can be no signals. Relaxed means OK." }, why: "Relaxed and comfy is a yes feeling. The rest can be no." },
       fig: BODY,
       options: ["A tight or fluttery tummy", "A hot face", "Wanting to step away", "A heart beating faster", "Feeling relaxed and comfy"],
       answers: [0, 1, 2, 3],
@@ -138,6 +140,7 @@ function phraseWidget(el, api){
 
     { type: "match", topic: "Body signals",
       q: "Match each signal to where you might feel it.",
+      ez: { q: "Match each signal to where you feel it.", slips: { any: "Where would you notice it?" }, why: "Noticing where is the first step." },
       pairs: [["Butterflies", "Tummy"], ["Hot cheeks", "Face"], ["Thumping", "Heart"], ["Clenched", "Hands"]],
       slips: { any: "Think about where in your body you would notice each one." },
       hint: "Hot cheeks are on your face.",
@@ -145,6 +148,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Body signals",
       q: "Say [[ask]], and you notice a tight tummy. What is a good first step?",
+      ez: { q: "Say [[ask]]. Your tummy feels tight. A good first step?", slips: { 1: "Stop and check what you want first.", 2: "The feeling is not silly. It helps you." }, hint: "What does the feeling give you time for?", why: "Pause and check in. Then you decide." },
       options: ["Pause and check in with yourself: do I want to?", "Ignore it and say yes straight away", "Decide the feeling is silly"],
       answer: 0,
       slips: { 1: "Saying yes straight away skips the useful bit: checking what you actually want.", 2: "The feeling is not silly. It is information." },
@@ -156,6 +160,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Body signals", explain: true,
       q: "Is this true? \"If I get a no feeling, something is wrong with me.\"",
+      ez: { slips: { 1: "Everyone gets no feelings. They help you." }, why: "Not true. Everyone has no signals. They help you." },
       options: ["Not true: it is my body giving me useful information", "True: I should not feel like that"],
       answer: 0, fixed: true,
       slips: { 1: "Everyone gets no feelings. They are there to help you." },
@@ -165,6 +170,7 @@ function phraseWidget(el, api){
     /* ---------- chunk 2: step 2, how to say no ---------- */
     { type: "learn", topic: "Saying no", title: "Ways of saying no",
       fig: WAYS,
+      ez: { html: "<p>Words: \"No thanks.\" Body: shake your head. Not yet: \"Not right now.\"</p><p>You do not need a reason.</p>" },
       html: "<p>There are lots of ways of saying no. Pick the ones that feel OK for you.</p>" +
         "<p><b>Words:</b> \"No thanks.\" \"I'd rather not.\"<br><b>Your body:</b> a shake of the head, a hand up, stepping away.<br><b>Not yet:</b> \"Not right now.\" \"Maybe another time.\"</p>" +
         "<p>Calm and clear works best. And you do not have to give a reason: a no is enough on its own.</p>",
@@ -178,6 +184,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Saying no",
       q: "Which no is clearest?",
+      ez: { slips: { 1: "Maybe can sound like a yes.", 2: "Shouting can start an argument." }, why: "Calm and clear. Nobody has to guess." },
       options: ["\"No thanks, I don't want to.\"", "\"Erm, maybe, I don't know...\"", "Shouting \"GO AWAY!\""],
       answer: 0,
       slips: { 1: "Maybe and I don't know can sound like a yes is coming. If you mean no, a clear no helps.", 2: "It is clear, but shouting can turn it into an argument. Calm and clear works better." },
@@ -190,6 +197,7 @@ function phraseWidget(el, api){
 
     { type: "match", topic: "Saying no",
       q: "Match each way of saying no to an example.",
+      ez: { q: "Match each way to an example.", slips: { any: "Find the one with no words first." }, hint: "Which one has no words?", why: "All of these are ways of saying no." },
       pairs: [["Using words", "\"No thanks.\""], ["Using your body", "A shake of the head"], ["Not yet", "\"Not right now, maybe later.\""], ["Offering something else", "\"No, but we could do this instead.\""]],
       slips: { any: "Look for the one with no words at all first." },
       hint: "Which example has no words in it?",
@@ -197,6 +205,7 @@ function phraseWidget(el, api){
 
     { type: "order", topic: "Saying no",
       q: "Put this plan for saying no in order.",
+      ez: { q: "Put the plan in order.", slips: { any: "What comes first?" }, why: "Notice first. Then say it. Then move on." },
       items: ["Notice the feeling", "Take a breath", "Say no, calmly and clearly", "Do something else"],
       slips: { any: "What has to happen before you know you want to say no?" },
       hint: "It starts in your body.",
@@ -205,6 +214,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Saying no",
       q: "Do you have to give a reason when you say no?",
+      ez: { q: "Do you need a reason to say no?", slips: { 1: "A reason is your choice. A no counts anyway." }, why: "A no counts on its own." },
       options: ["No: a no is enough on its own", "Yes, always, or it does not count"],
       answer: 0, fixed: true,
       slips: { 1: "You can give a reason if you want to, but a no counts without one." },
@@ -223,6 +233,7 @@ function phraseWidget(el, api){
 
     { type: "text", topic: "Saying no",
       q: "Write one way of saying no that would feel OK for you.",
+      ez: { q: "Write one way of saying no that feels OK.", hint: "\"No thanks\" counts.", why: "Any calm, clear no is a good one." },
       need: [["no", "not", "rather", "nah", "pass", "don't", "dont", "nope", "later", "another time"]],
       model: "No thanks, not right now.",
       hint: "Short is fine: \"No thanks\" counts.",
@@ -231,6 +242,7 @@ function phraseWidget(el, api){
     /* ---------- chunk 3: step 3, really listening to someone else's no ---------- */
     { type: "learn", topic: "Hearing no", title: "When someone else says no",
       fig: HEAR,
+      ez: { html: "<p>When someone says no, it means <b>stop</b>.</p><p>Say \"no worries\". Find something else to do.</p>" },
       html: "<p>Other people get to say no too. When someone says no, it means <b>stop</b>.</p>" +
         "<p>Really listening looks like this: you stop asking, you say something like \"no worries\", and you find something else to do.</p>" +
         "<p>Sometimes people mean no without the word: they look away, go quiet, step back, or say \"maybe later\" or \"I'm not sure\". If you cannot tell, you can ask: \"Is that a no?\"</p>",
@@ -244,6 +256,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Hearing no",
       q: "You ask [[mate]] if you can borrow [[item]], and they say no. What shows you are really listening?",
+      ez: { q: "You ask to borrow [[item]]. [[Mate]] says no. What shows you listened?", slips: { 1: "Asking again is not hearing the no.", 2: "Sulking puts pressure on them." }, why: "\"No worries\", and leave it." },
       fig: HEAR,
       options: ["Say \"no worries\" and leave it", "Ask again five more times", "Go quiet and sulk until they change their mind"],
       answer: 0,
@@ -253,6 +266,7 @@ function phraseWidget(el, api){
 
     { type: "multi", topic: "Hearing no",
       q: "Pick <b>all</b> the signs that someone might mean no, even without the word.",
+      ez: { q: "Pick <b>all</b> the signs of a no, even without the word.", slips: { any: "4 can mean no. A smile and \"yes please\" is a yes." }, why: "These can all mean no. If unsure, ask." },
       options: ["They look away and go quiet", "They step back", "They say \"maybe later\"", "They say \"I'm not sure...\"", "They smile and say \"yes please!\""],
       answers: [0, 1, 2, 3],
       slips: { any: "Four of them can mean no. \"Yes please\" with a smile is a clear yes." },
@@ -261,6 +275,7 @@ function phraseWidget(el, api){
 
     { type: "sort", topic: "Hearing no",
       q: "Someone has said no. Sort these into listening to the no, and not listening.",
+      ez: { q: "Someone said no. Listening, or not listening?", slips: { any: "Does it let the no be OK?" }, why: "Begging and guilt trips are not listening." },
       buckets: ["Listening to the no", "Not listening"],
       cards: [["\"No worries.\"", 0], ["\"OK, I'll ask someone else.\"", 0], ["\"Please please please please.\"", 1], ["\"I thought you were my friend.\"", 1], ["Taking it anyway", 1]],
       slips: { any: "Ask: does this let the no be OK, or push to change it?" },
@@ -273,6 +288,7 @@ function phraseWidget(el, api){
 
     { type: "mc", topic: "Hearing no", explain: true,
       q: "You have said no, but someone keeps pushing. What could you do?",
+      ez: { q: "You said no. They keep pushing. What could you do?", slips: { 1: "Telling someone you trust is always OK.", 2: "Your no counts." }, why: "Say no again. Tell Jay or an adult you trust." },
       options: ["Say no again, and tell Jay or an adult you trust", "Keep it a secret", "Give in so it stops"],
       answer: 0,
       slips: { 1: "You do not have to keep it to yourself. Telling someone you trust is always OK.", 2: "Giving in is not your job. Your no counts." },
@@ -286,12 +302,14 @@ function phraseWidget(el, api){
 
     /* ---------- chunk 4: my list and my card ---------- */
     { type: "learn", topic: "My yes and no", title: "Your list",
+      ez: { html: "<p>Choose the ways that feel OK for <b>you</b>.</p><p>You can change your mind any time.</p>" },
       html: "<p>Last bit. Everyone's yes and no looks different, so here is a space to choose the ways that feel OK for you.</p>" +
         "<p>There are no right answers here, and you can change your mind any time.</p>" },
 
     { type: "widget", topic: "My yes and no", unscored: true,
       title: "My ways of saying no",
       html: "<p>Just for you. Your list can go to Jay with the rest, only if you choose to send it.</p>",
+      ez: { html: "<p>Just for you. Send it to Jay only if you want.</p>" },
       mount: phraseWidget,
       report: function(d){
         var on = (d && d.on || []).map(function(v, k){ return v ? PHRASES[k] : ""; }).filter(Boolean);
@@ -301,6 +319,7 @@ function phraseWidget(el, api){
 
     { type: "write", topic: "My yes and no",
       q: "Only if you like: tell Jay about a time saying no, or hearing a no, went well.",
+      ez: { q: "Only if you like: tell Jay about a no that went well." },
       starters: ["A time I said no was", "My body told me by", "Something that helped was", "A time someone said no to me and I", "Next time I might"],
       checklist: ["I said what happened", "I said what helped, or what I might try"],
       minWords: 20,
@@ -313,6 +332,11 @@ function phraseWidget(el, api){
       "<p>For our big question: if we could time travel, should we? Imagine a time traveller turns up and offers you a trip. Exciting! But you would still get to say yes, no or not right now, and a good time traveller would listen to your answer.</p>",
     fig: '<svg viewBox="0 0 420 150" role="img" aria-label="Jay next to the time portal saying not right now">' + A.portal(76, 75, 56) + A.jay(240, 60, 0.85, "wink") +
       A.bubble(286, 8, 124, 52, "Not right now,\nthanks!", 290) + '</svg>'
+  },
+
+  ez: {
+    realWorld: { title: "Yes and no, everywhere", html: "<p>Games, group chats, lending things. Yes, no or not right now.</p><p>It is <b>your</b> choice.</p>" },
+    make: { intro: "Your body signal, your no, and how you hear a no." }
   },
 
   make: {
