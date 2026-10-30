@@ -121,8 +121,10 @@ def hub_patches(name, s):
         s = must(s, 'maths: "#ffd23f", english: "#ff5d5d"', 'maths: "#ff5c5c", english: "#39d98a"', 1, name)
     if name == "sky.html":
         s = must(s, 'english: "#ff7a7a", maths: "#ffd23f"', 'english: "#39d98a", maths: "#ff5c5c"', 1, name)
+    if name == "index.html":
+        s = s.replace("It shapes the page to her energy", "It shapes the page to his energy")
     if name == "teacher.html":
-        # Jay's view talks about LC as "he"
+        # Jay's view talks about LC as "he" (LC uses he/him), comments included
         for a, b in [
             ("Her progress is saved on her own device. When she taps", "LC's progress is saved on his own device. When he taps"),
             ("on her HQ page", "on his HQ page"),
@@ -137,7 +139,8 @@ def hub_patches(name, s):
             ("Things she noted to remember", "Things he noted to remember"),
         ]:
             s = must(s, a, b, None, name)
-        left = re.findall(r"[^/*\n]{0,30}\b(?:she|her|herself)\b", re.sub(r"/\*.*?\*/", "", s, flags=re.S), flags=re.I)
+        s = must(s, "topic coverage and her ratings", "topic coverage and his ratings", None, name)
+        left = re.findall(r"[^\n]{0,30}\b(?:she|her|herself)\b", s, flags=re.I)
         if left:
             sys.exit("build_lc: pronouns left in teacher.html: %r" % left[:5])
     return s
