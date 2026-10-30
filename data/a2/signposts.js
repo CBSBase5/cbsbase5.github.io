@@ -91,6 +91,10 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
     music: { name: "Music", w: { place: "the theatre tour", bus: "the number 22 bus", park: "the car park by the stage door", cafe: "the theatre cafe", snack: "an ice cream stall", see1: "the costume room", see2: "the backstage tour", open: "10am to 6pm", price: "7 pounds" } }
   },
   themeFor: { JT: "football", LC: "horror", HK: "fishing", LW: "music" },
+  ez: {
+    realWorld: { html: "<p>Menus, websites and game guides all use headings.</p><p>A time travel guide needs one most: <b>Getting home</b>.</p>" },
+    make: { intro: "A title and three headings, with a line under each." }
+  },
   startFig: POST,
   steps: [
 
@@ -98,12 +102,14 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
     { type: "learn", topic: "What a heading does", title: "A heading is a signpost",
       fig: POST_EGG,
       html: "<p>A <b>heading</b> is a short title at the top of a part of a page. It tells the reader what that part is about.</p>" +
-        "<p>Like a signpost on a path, it points the way. Want to know about food? Look for the <b>Food</b> heading. No need to read everything else first.</p>" },
+        "<p>Like a signpost on a path, it points the way. Want to know about food? Look for the <b>Food</b> heading. No need to read everything else first.</p>",
+      ez: { html: "<p>A <b>heading</b> is a short title. It says what that part is about.</p><p>Like a <b>signpost</b>, it points the way.</p>" } },
 
     { type: "learn", topic: "What a heading does", title: "Same words, easier to find",
       fig: BEFORE_AFTER,
       html: "<p>On the left, everything is in one big lump. Finding the bit about food means reading it all.</p>" +
         "<p>On the right, the same words are split into <b>sections</b>, each with a heading. Your eyes jump straight to the part you need.</p>",
+      ez: { html: "<p>Left: one big lump. Right: <b>sections</b> with headings.</p><p>Your eyes jump to what you need.</p>" },
       lv: { spicy: { html: "<p>On the left, everything is in one big lump. On the right, the same words are split into <b>sections</b>, each with a heading.</p>" +
         "<p>Readers <b>scan</b> before they read. Headings let them skip straight to what they need, and they show how the whole text is organised at a glance. That is why guides, websites and leaflets use them.</p>" } } },
 
@@ -114,6 +120,8 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { 1: "This part is not about how to get there. Look for what you can do there.", 2: "Nothing here is about things to look at. What can you get?" },
       hint: "What is every sentence about?",
       why: "Both sentences are about eating, so <b>Food</b> is the signpost that fits.",
+      ez: { q: "Which heading fits?" + '<p class="a2task">You can get a hot dinner at [[cafe]]. There is also [[snack]].</p>', slips: { 1: "It is not about getting there.", 2: "Nothing here is to look at." },
+        why: "Both are about eating: <b>Food</b>." },
       lv: { medium: { q: "Read this part of a guide. Which heading fits it best?" + '<p class="a2task">Take [[bus]] from the town centre. If you drive, use [[park]]. It takes about 20 minutes either way.</p>',
           options: ["Getting there", "Food", "Opening times"],
           slips: { 1: "Nothing here is about eating.", 2: "There is a time in it, but it is how long the trip takes, not when it opens." },
@@ -132,6 +140,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { 1: "That is a full sentence with all the details. A heading is short.", 2: "That is part of a sentence from a story, not a signpost." },
       hint: "Headings are short and tell you what the section is about.",
       why: "<b>Opening times</b> is short and names what the section is about. That is a heading.",
+      ez: { slips: { 1: "That is a full sentence. Headings are short.", 2: "That is part of a story." }, hint: "Headings are short.", why: "<b>Opening times</b> is short and clear." },
       lv: { spicy: { q: "Which is the most useful heading for a section about tickets and what they cost?",
         options: ["Prices", "Some information you might find interesting", "Read this"],
         slips: { 1: "It is long and vague. A reader could not tell what the section is about.", 2: "It does not say what the section is about at all." },
@@ -143,6 +152,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { any: "Read each line and ask: is it about travel, eating or looking?" },
       hint: "Take a bus: travel. Try a cafe: eating. Visit a room: looking.",
       why: "Each line sits under the signpost that matches what it is about.",
+      ez: { q: "Match each heading to its line.", slips: { any: "Is it travel, eating or looking?" }, hint: "Bus: travel. Cafe: eating. Visit: looking.", why: "Each line goes under the heading that fits." },
       lv: { medium: { pairs: [["Getting there", "Take [[bus]]."], ["Food", "Try [[cafe]]."], ["Things to see", "Visit [[see1]]."], ["Opening times", "We are open [[open]]."]] },
         spicy: { pairs: [["Getting there", "Take [[bus]]."], ["Food", "Try [[cafe]]."], ["Things to see", "Visit [[see1]]."], ["Opening times", "We are open [[open]]."], ["Prices", "Entry costs [[price]]."]] } } },
 
@@ -150,7 +160,8 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
     { type: "learn", topic: "Group it", title: "Things that go together, stay together",
       fig: GROUPS,
       html: "<p>Before you write headings, <b>group</b> your information. Put everything about getting there in one pile, everything about food in another.</p>" +
-        "<p>Each pile becomes a <b>section</b>, and each section gets a heading.</p>" },
+        "<p>Each pile becomes a <b>section</b>, and each section gets a heading.</p>",
+      ez: { html: "<p><b>Group</b> the things that go together.</p><p>Each group gets a heading.</p>" } },
 
     { type: "sort", topic: "Group it",
       q: "Sort these into the right section.",
@@ -159,6 +170,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { any: "Ask of each card: is it about travelling, or about eating?" },
       hint: "Travelling or eating?",
       why: "Buses and parking help you get there. Lunch and snacks are food.",
+      ez: { slips: { any: "Is it travelling, or eating?" }, why: "Bus and parking: getting there. Lunch and snacks: food." },
       lv: { medium: { buckets: ["Getting there", "Food", "Things to see"],
           cards: [["Take [[bus]].", 0], ["Park in [[park]].", 0], ["Have lunch at [[cafe]].", 1], ["There is [[snack]].", 1], ["Do not miss [[see1]].", 2], ["Then head to [[see2]].", 2]] },
         spicy: { buckets: ["Getting there", "Food", "Things to see", "Prices"],
@@ -172,6 +184,8 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { 0: "Lunch is food, so that one is in the right place.", 2: "A snack is food too. Look for the one about travel." },
       hint: "Which one is not about eating?",
       why: "Taking the bus is about getting there. It belongs in a different section.",
+      ez: { q: "Which line is in the wrong section?" + leaflet("[[Place]]", [["Food", ["Have lunch at [[cafe]].", "Take [[bus]].", "There is [[snack]]."]]]), slips: { 0: "Lunch is food.", 2: "A snack is food too." },
+        why: "The bus is about <b>getting there</b>." },
       lv: { spicy: { q: "Odd one out. Which line is in the wrong section?" + leaflet("[[Place]]", [["Things to see", ["Start at [[see1]].", "Then try [[see2]].", "Entry costs [[price]]."]]]),
         options: ["Start at [[see1]].", "Then try [[see2]].", "Entry costs [[price]]."],
         answer: 2,
@@ -184,6 +198,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       answers: [0, 1],
       hint: "Which two are about looking at something?",
       why: "[[See1]] and [[see2]] are both things to see. The bus is getting there, and lunch is food.",
+      ez: { q: "Pick <b>two</b> lines for <b>Things to see</b>.", hint: "Which two are things to look at?", why: "[[See1]] and [[see2]]. Things to look at." },
       lv: { spicy: { q: "Pick <b>all</b> the lines that belong under <b>Things to see</b>.",
         options: ["Visit [[see1]].", "Do not miss [[see2]].", "Look out for the giant clock in the hall.", "Take [[bus]].", "Have lunch at [[cafe]].", "We are open [[open]]."],
         answers: [0, 1, 2],
@@ -201,6 +216,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
         '<text x="300" y="141" ' + F + ' font-size="15" fill="#141a33">Long. Says nothing.</text></svg>',
       html: "<p>A good heading is <b>short</b> (often one to four words) and <b>clear</b>: it names exactly what the section is about.</p>" +
         "<p>It usually starts with a capital letter and has no full stop.</p>",
+      ez: { html: "<p>A good heading is <b>short</b> and <b>clear</b>.</p><p>It says what the part is about.</p>" },
       lv: { spicy: { html: "<p>A good heading is <b>short</b> and <b>clear</b>: it names exactly what the section is about.</p>" +
         "<p>Good guides also keep headings <b>matching</b> in style. All short names (Food, Prices, Getting there), or all questions (Where can I eat? How much is it?). Mixing styles looks messy.</p>" +
         "<p>A big section can have <b>subheadings</b> inside it, like smaller signs off the main road: under Food, you might have Cafe and Picnics.</p>" } } },
@@ -212,6 +228,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { 1: "Some times of what? A reader would not know.", 2: "Far too long. A heading should be quick to read." },
       hint: "Short, and says exactly what it is.",
       why: "<b>Opening times</b> is short and tells you exactly what is there.",
+      ez: { q: "Which heading is best for when it opens?", slips: { 1: "Some times of what?", 2: "Far too long." }, why: "<b>Opening times</b>. Short and clear." },
       lv: { spicy: { q: "These headings are on one page: <b>Where is it? How do I get there?</b> and one more. Which one matches best?",
         options: ["What can I eat?", "Food", "food stuff and snacks."],
         slips: { 1: "Food is a fine heading on its own, but the others are questions. Keep the style matching.", 2: "Lower case, a full stop, and a different style. Not a match." },
@@ -225,6 +242,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: [[["food", "eat", "lunch"], "That would be a food section. This one is about things you look at."], [["bus", "getting there", "travel"], "That is how you get there. This section is about what you find once you arrive."]],
       hint: "What are both sentences about? Places to look at.",
       why: "<b>Things to see</b> or <b>What to visit</b> both work. They say what the section is about in a few words.",
+      ez: { slips: [[null, "That is a food heading. This is about looking."], [null, "That is getting there. This is what you find."]], hint: "Both are places to look at.", why: "<b>Things to see</b> works. Short and clear." },
       lv: { spicy: {
         q: "Write a subheading for this part of the Food section. Match the style of the other subheading, which is <b>Where can I get a hot meal?</b>" + '<p class="a2task">You are welcome to bring your own lunch. There are benches near [[see2]], and bins on every path.</p>',
         need: [["?"], ["picnic", "own", "lunch", "bring", "packed", "eat", "food", "bench"]],
@@ -239,6 +257,7 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       slips: { any: "Think about a visit from start to end: travel, can I get in, what is there, then lunch." },
       hint: "What does a visitor need to know first?",
       why: "First get there, check it is open, see things, then eat. Lots of orders could work; this one follows the visit.",
+      ez: { q: "Put them in order for a visitor.", slips: { any: "Think of a visit, start to end." }, why: "Getting there first. Going home last." },
       lv: { mild: { items: ["Getting there", "Things to see", "Going home"], why: "Getting there first, going home last, the visit in the middle." },
         spicy: { items: ["Getting there", "Opening times and prices", "Things to see", "Food", "Going home"],
           why: "It follows the visit: plan the trip, check it is open and what it costs, then the day itself, then home." } } },
@@ -246,11 +265,13 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
     /* ---------- chunk 4 ---------- */
     { type: "learn", topic: "Signpost a page", title: "Your turn to be the guide",
       fig: leaflet("[[Place]]", [["Getting there", ["Take [[bus]]."]], ["Food", ["Try [[cafe]]."]], ["Things to see", ["Visit [[see1]]."]]]),
-      html: "<p>Last chunk. You are making a guide page for [[place]]. Pick a heading for each section and watch the page sort itself out.</p>" },
+      html: "<p>Last chunk. You are making a guide page for [[place]]. Pick a heading for each section and watch the page sort itself out.</p>",
+      ez: { html: "<p>Now make a guide page for [[place]].</p>" } },
 
     { type: "widget", topic: "Signpost a page", unscored: true,
       title: "Pick the signposts",
       html: "<p>Pick a heading for each section. If you like, change your mind and see what happens to the page.</p>",
+      ez: { html: "<p>Pick a heading for each part.</p>" },
       mount: function(el, api){
         var d = api.data;
         d.pick = d.pick || {};
@@ -304,13 +325,16 @@ var GROUPS = '<svg viewBox="0 0 540 200" role="img" aria-label="Three boxes, eac
       answer: 0,
       slips: { 1: "That heading is already used, and the second section is not about sticks.", 2: "Nothing in that section is about how to get to the park." },
       hint: "What are the water bowl and the biscuits for?",
-      why: "Water and biscuits: <b>Snacks and drinks</b>. Bonnie would read that section first." },
+      why: "Water and biscuits: <b>Snacks and drinks</b>. Bonnie would read that section first.",
+      ez: { q: "Jay made Bonnie a park guide. Which heading is missing?" + leaflet("Bonnie's park guide", [["Best sticks", ["By the big oak tree."]], [null, ["The water bowl is by the gate.", "Biscuits are in Jay's pocket."]]]),
+        slips: { 1: "That one is used already.", 2: "Nothing here is about getting there." }, hint: "What are the water and biscuits for?", why: "<b>Snacks and drinks</b>. Bonnie would read it first!" } },
 
     { type: "write", topic: "Signpost a page", stretch: true,
       q: "If you like, have a go at a mini guide to a place you know: your room, Base 5, a park. Give it a title and two or three headings, with a line or two under each.",
       starters: ["Getting there", "Things to see", "Food", "Top tip", "Opening times"],
       checklist: ["I have a title", "Each section has a heading", "Each line is under the right heading"],
-      minWords: 25 }
+      minWords: 25,
+      ez: { q: "Only if you like: make a mini guide. A title, and 2 or 3 headings." } }
   ],
 
   realWorld: {
